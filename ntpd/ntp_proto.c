@@ -159,12 +159,12 @@ transmit(
 			 */
 			if (peer->unreach < NTP_UNREACH) {
 				peer->unreach++;
-			} else if (!(peer->flags & FLAG_CONFIG)) {
-				unpeer(peer);
-				return;
-			} else {
+			} else if (peer->flags & FLAG_CONFIG) {
 				peer_clear(peer);
 				hpoll++;
+			} else {
+				unpeer(peer);
+				return;
 			}
 		}
 		oreach = peer->reach;
@@ -179,11 +179,11 @@ transmit(
 			if (oreach != 0) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
-				if (!(peer->flags & FLAG_CONFIG)) {
+				if (peer->flags & FLAG_CONFIG) {
+					peer_clear(peer);
+				} else {
 					unpeer(peer);
 					return;
-				} else {
-					peer_clear(peer);
 				}
 			}
 			if (peer->flags & FLAG_IBURST)
@@ -205,7 +205,7 @@ transmit(
 			}
 			if ((peer->stratum > 1 && peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
-			    peer->stratum >= STRATUM_UNSPEC)
+			    peer->stratum == STRATUM_UNSPEC)
 				hpoll++;
 			else
 				hpoll = sys_poll;
@@ -262,9 +262,12 @@ transmit(
 		return;
 
 	/*
-	 * Do not transmit in broadcast mode unless we are synchronized.
+	 * Do not transmit in broadcast or manycast client modes unless
+	 * we are synchronized.
 	 */
-	} else if (peer->hmode == MODE_BROADCAST && sys_peer == NULL) {
+	} else if ((peer->hmode == MODE_BROADCAST || (peer->hmode ==
+	    MODE_CLIENT && peer->cast_flags & MDF_ACAST)) && sys_peer ==
+	    NULL) {
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -283,7 +286,6 @@ receive(
 	register struct peer *peer;	/* peer structure pointer */
 	register struct pkt *pkt;	/* receive packet pointer */
 	int	hismode;		/* packet mode */
-	int	oflags;			/* temp flags */
 	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
@@ -567,11 +569,13 @@ receive(
 	 * association is processed by that association. If not and
 	 * certain conditions prevail, then an ephemeral association is
 	 * mobilized: a broadcast packet mobilizes a broadcast client
-	 * aassociation; a server packet mobilizes a client association;
-	 * a symmetric active packet mobilizes a symmetric passive
-	 * association. And, the adventure continues...
+	 * aassociation; a manycast server packet mobilizes a manycast
+	 * client association; a symmetric active packet mobilizes a
+	 * symmetric passive association. And, the adventure
+	 * continues...
 	 */
 	switch (retcode) {
+
 	case AM_FXMIT:
 
 		/*
@@ -604,11 +608,11 @@ receive(
 		 * here, since we can't set the system clock; but, we do
 		 * send a crypto-NAK to tell the caller about this.
 		 */
-		if (has_mac && sys_authenticate && !is_authentic)
-			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
-		else
+		if (is_authentic)
 			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
+		else
+			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
 		return;
 
 #ifdef OPENSSL
@@ -622,33 +626,28 @@ receive(
 		 * there is no match, that's curious and could be an
 		 * intruder attempting to clog, so we just ignore it.
 		 *
-		 * First, make sure the packet is authentic. If so and
-		 * the manycast association is found, we mobilize a
-		 * client mode association, copy pertinent variables
-		 * from the manycast to the client mode association and
-		 * wind up the spring. We should figure out how to avoid
-		 * mobilizing an association when the identity schemes
-		 * are incompatible.
+		 * First, make sure the packet is authentic and not
+		 * restricted. If so and the manycast association is
+		 * found, we mobilize a client association and copy
+		 * pertinent variables from the manycast association to
+		 * the new client association.
 		 *
 		 * There is an implosion hazard at the manycast client,
 		 * since the manycast servers send the server packet
 		 * immediately.
 		 */
-		if (crypto_flags && ((restrict_mask & (RES_DONTSERVE |
-		    RES_LIMITED | RES_NOPEER | RES_DEMOBILIZE)) ||
-		    (sys_authenticate && !is_authentic)))
+		if (restrict_mask & (RES_DONTSERVE | RES_DONTTRUST |
+		    RES_LIMITED | RES_NOPEER) || (sys_authenticate &&
+		    !is_authentic))
 			return;
 
-		peer2 = findmanycastpeer(rbufp);
-		if (peer2 == 0)
+		if ((peer2 = findmanycastpeer(rbufp)) == NULL)
 			return;
 
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST |
-		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
-		    MDF_UCAST, 0, skeyid);
-		if (peer == NULL)
+		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST,
+		    0, skeyid)) == NULL)
 			return;
 
 		/*
@@ -656,69 +655,63 @@ receive(
 		 */
 		peer->ttl = peer2->ttl;
 		break;
-#endif /* OPENSSL */
 
+#endif /* OPENSSL */
 	case AM_NEWPASS:
 
 		/*
 		 * This is the first packet received from a symmetric
-		 * active peer. First, make sure the packet is
-		 * authentic. Send a kiss-of-death packet if we have
-		 * been kissed by a frog. Drop the packet if other
-		 * restrictions or bum authentic. Otherwise, crank up a
-		 * passive association.
+		 * active peer. First, make sure it is authentic and not
+		 * restricted. If so, mobilize a passive association.
+		 * If authentication fails send a crypto-NAK; otherwise,
+		 * kiss the frog.
 		 */
-		if (restrict_mask & RES_DEMOBILIZE) {
-			if (has_mac && sys_authenticate &&
-			    !is_authentic)
-				fast_xmit(rbufp, MODE_PASSIVE, 0,
-				    restrict_mask);
-			else
+		if (restrict_mask & (RES_DONTSERVE | RES_DONTTRUST |
+		    RES_LIMITED | RES_NOPEER)) {
+			if (restrict_mask & RES_DEMOBILIZE)
 				fast_xmit(rbufp, MODE_PASSIVE, skeyid,
 				    restrict_mask);
 			return;
-
-		} else if ((restrict_mask & (RES_DONTSERVE |
-		    RES_LIMITED | RES_NOPEER)) || (has_mac &&
-		    sys_authenticate && !is_authentic)) {
+		}
+		if (sys_authenticate && !is_authentic) {
+			fast_xmit(rbufp, MODE_PASSIVE, 0,
+			    restrict_mask);
 			return;
 		}
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    sys_minpoll, NTP_MAXDPOLL, sys_authenticate ?
-		    FLAG_AUTHENABLE : 0, MDF_UCAST, 0, skeyid);
-		if (peer == NULL)
+		    sys_minpoll, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
+		    skeyid)) == NULL)
 			return;
+
 		break;
 
 	case AM_NEWBCL:
 
 		/*
 		 * This is the first packet received from a broadcast
-		 * server. First, make sure the packet is authentic, not
-		 * restricted and that we are a broadcast or multicast
-		 * client. If so, mobilize a broadcast client
-		 * association.
+		 * server. First, make sure it is authentic and not
+		 * restricted and that we are a broadcast client. If so,
+		 * mobilize a broadcast client association. We don't
+		 * kiss any frogs here.
 		 */
-		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
-		    RES_NOPEER | RES_DEMOBILIZE)) ||
-		    (sys_authenticate && !is_authentic) || !sys_bclient)
+		if ((restrict_mask & (RES_DONTSERVE | RES_DONTTRUST |
+		    RES_LIMITED | RES_NOPEER)) || (sys_authenticate &&
+		    !is_authentic) || !sys_bclient)
 			return;
 
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
-		    FLAG_IBURST | (sys_authenticate ?
-		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
-		if (peer == NULL)
+		    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
 			return;
 #ifdef OPENSSL
 		/*
 		 * Danger looms. If this is autokey, go process the
 		 * extension fields. If something goes wrong, abandon
-		 * ship. We know this must be an ephemeral association.
+		 * ship and restrict further packets.
 		 */
-		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
+		if (crypto_flags) {
 			crypto_recv(peer, rbufp);
 			if (peer->flash) {
 				unpeer(peer);
@@ -736,9 +729,26 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * Here be active, passive, server and broadcast packets
-		 * and nothing broke. Earn some revenue.
+		 * This packet is received from a broadcast server or
+		 * symmetric peer. First, make sure it is authentic and
+		 * not restricted. If restricted, kiss the frog. If not
+		 * authentic, leave a light on and continue.
 		 */
+		peer->flash = 0;
+		if (restrict_mask & (RES_DONTSERVE | RES_DONTTRUST |
+		    RES_LIMITED | RES_NOPEER)) {
+			peer->flash |= TEST4;		/* denied */
+			if (hismode == MODE_ACTIVE)
+				fast_xmit(rbufp, MODE_PASSIVE, 0,
+				    restrict_mask);
+			else if (hismode == MODE_PASSIVE)
+				fast_xmit(rbufp, MODE_ACTIVE, 0,
+				    restrict_mask);
+
+			return;
+		}
+		if (has_mac && !is_authentic)
+			peer->flash |= TEST5;		/* auth fails */
 		break;
 
 	default:
@@ -763,194 +773,117 @@ receive(
 	}
 
 	/*
-	 * If the peer isn't configured, set his authenable and autokey
-	 * status based on the packet. Once the status is set, it can't
-	 * be unset. It seems like a silly idea to do this here, rather
-	 * in the configuration routine, but in some goofy cases the
-	 * first packet sent cannot be authenticated and we need a way
-	 * for the dude to change his mind.
+	 * We do a little homework. Note we can get here with an
+	 * authentication error. We Need to do this in order to validate
+	 * a crypto-NAK later. Note the order of processing; it is very
+	 * important to avoid livelocks, deadlocks and lockpicks.
 	 */
-	peer->flash = 0;
-	oflags = peer->flags;
 	peer->timereceived = current_time;
 	peer->received++;
-	if (is_authentic)
+	if (peer->flash & TEST5)
 		peer->flags |= FLAG_AUTHENTIC;
 	else
 		peer->flags &= ~FLAG_AUTHENTIC;
+	NTOHL_FP(&pkt->org, &p_org);
+	NTOHL_FP(&pkt->xmt, &p_xmt);
 
 	/*
-	 * The packet is dropped if it has an autokey key ID and the
-	 * status word has not been stored, if a nontrusted broadcast,
-	 * or if a duplicate of a previous packet.
+	 * If the packet is an old duplicate, we let it through so the
+	 * extension fields will be processed.
 	 */
-	if (!(peer->flags & FLAG_CONFIG) && has_mac) {
-		peer->flags |= FLAG_AUTHENABLE;
-#ifdef OPENSSL
-		if (skeyid > NTP_MAXKEY) {	/* test 5 */
-			if (crypto_flags)
-				peer->flags |= FLAG_SKEY;
-			else
-				peer->flash |= TEST5; /* no crypto */
-		}
-#endif /* OPENSSL */
-	}
-	if (hismode == MODE_BROADCAST && (restrict_mask &
-	    RES_DONTTRUST))			/* test 4 */
-		peer->flash |= TEST4;		/* access denied */
-	NTOHL_FP(&pkt->xmt, &p_xmt);		/* test 1 */
-	if (L_ISEQU(&peer->org, &p_xmt))
+	if (L_ISEQU(&peer->org, &p_xmt)) {	/* test 1 */
 		peer->flash |= TEST1;		/* dupe */
-	if (peer->flash) {
-#ifdef DEBUG
-		if (debug)
-			printf("receive: denied %03x\n",
-			    peer->flash);
-#endif
-		return;
-	}
+		/* fall through */
 
 	/*
-	 * Except for broadcast mode, every packet received must match
-	 * one previously sent. If the packet is authenticated, it must
-	 * have correct MAC. However, if authentication fails, the
-	 * legitimate sender may have just changed keys, or it could be
-	 * an intruder attempting to disrupt legitimate activities. We
-	 * have to be careful here.
+	 * For broadcast server mode, loopback checking is disabled. An
+	 * authentication error probably means the server restarted or
+	 * rolled a new private value. If so, dump the association
+	 * and wait for the next message.
 	 */
-	NTOHL_FP(&pkt->org, &p_org);		/* test 2 */
-	if (hismode != MODE_BROADCAST && !L_ISEQU(&peer->xmt, &p_org))
-		peer->flash |= TEST2;		/* bogus */
-	if (peer->flags & FLAG_AUTHENABLE) {
-		if (!(peer->flags & FLAG_AUTHENTIC)) /* test 5 */
-			peer->flash |= TEST5;	/* auth failed */
-		else if (!(oflags & FLAG_AUTHENABLE))
-			report_event(EVNT_PEERAUTH, peer);
-	}
-	if (peer->flash) {
-
-		/*
-		 * The only flashers here are loopback and
-		 * authentication failure. Loopback can't happen with a
-		 * broadcast server. The following modes are with
-		 * respect to the server mode.
-		 */
-#ifdef DEBUG
-		if (debug)
-			printf(
-			    "receive: bad auth or loopback %03x xmt %d org %d\n",
-			    peer->flash, L_ISZERO(&peer->xmt),
-			    L_ISZERO(&p_org));
-#endif
-		switch (hismode) {
-
-		/*
-		 * An authentication error in broadcast mode probably
-		 * means the server restarted or rolled a new private
-		 * value. Dump the ephemeral association and wait for
-		 * the next message.
-		 */
-		case MODE_BROADCAST:
+	} else if (hismode == MODE_BROADCAST) {
+		if (peer->flash & TEST5) {
 			unpeer(peer);
 			return;
-
-		/*
-		 * A loopback error in server mode probably means a
-		 * packet was dropped or an intruder launched a replay.
-		 * Ignore the error and let the packet processor refresh
-		 * the timestamps. If the packet was a crypto-NAK, the
-		 * server has refreshed the private value, so clear the
-		 * persistent association and start over.
-		 */
-		case MODE_SERVER:
-			if (peer->flash & TEST5 && has_mac == 4 &&
-			    pkt->exten[0] == 0)
-				peer_clear(peer);
-			break;
-
-		/*
-		 * An authentication or loopback error in symmetric
-		 * modes is much more complicatied. If not done
-		 * carefully, the peers spiral into a tacking duel
-		 * similar to the January 1990 AT&T meltdown that lasted
-		 * ten hours. The trouble then and now is that a peer
-		 * restarting after a crash kills the other, which then
-		 * restarts... you get the idea.
-		 */
-		case MODE_ACTIVE:
-
-			/*
-			 * Case 1: After a long season of happiness, the
-			 * active peer dies and restarts, which
-			 * eventually results in an ASSOC request to the
-			 * passive peer. That sucker notices the
-			 * packet originate timestamp is zero, which
-			 * means the passive peer transmit timestamp
-			 * must be nonzero. Since the active peer has
-			 * not initialized timestamps, the best action
-			 * is to get out of Dodge City, demobilize the
-			 * association and wait for the next message.
-			 */
-			if (L_ISZERO(&p_org)) {
-				unpeer(peer);
-				return;
-			}
-
-			/*
-			 * Case 2: After seasonal happiness, the passive
-			 * peer dies and demobilizes. Unaware of this,
-			 * the active peer launches a presumably
-			 * legitimate message. The pasive peer
-			 * mobilizes, but finds something other than the
-			 * expected ASSOC request. Since the extension
-			 * fields have not been processed yet, the
-			 * evidence is that the passive peer transmit
-			 * timestamp is zero, which means the packet
-			 * originate timestamp must be nonzero. We need
-			 * to send something to the active peer that
-			 * will cause it to restart. If this happens or
-			 * we light or dim authentication, send a
-			 * crypto_NAK, which is tha analog of the TCP
-			 * RESET and get out of Dodge City.
-			 */ 
-			if (L_ISZERO(&peer->xmt) || peer->flash &
-			    TEST5) {
-				if (has_mac)
-					fast_xmit(rbufp, MODE_PASSIVE,
-					    0, restrict_mask);
-				unpeer(peer);
-				return;
-			}
-
-			/*
-			 * Case 3: The only thing left is a lonely
-			 * loopback. We lost a packet. Life goes on.
-			 */
-			break;
-
-		case MODE_PASSIVE:
-
-			/*
-			 * Case 4: An authentication error probably
-			 * means the passive peer sent a crypto_NAK. If
-			 * it didn't and the bit is still lit, spooky.
-			 * In any case, the active peer clears the
-			 * association and starts over.
-			 */ 
-			if (peer->flash & TEST5) {
-				peer_clear(peer);
-				return;
-			}
-
-			/*
-			 * Case 5: The only thing left is a lonely
-			 * loopback. We lost a packet. Life goes on.
-			 */
-			break;
-
-		default:
-			break;
 		}
+		/* fall through */
+
+	/*
+	 * For server and symmetric modes, if the associatino transmit
+	 * timestamp matches the packet originate timestamp, loopback is
+	 * confirmed. Note in symmetric modes this also happens when the
+	 * first packet from the active peer arrives at the newly
+	 * mobilized passive peer.  An authentication error probably
+	 * means the server or peer restarted or rolled a new private
+	 * value, but could be an intruder trying to stir up trouble.
+	 * However, if this is a crypto-NAK, we know it is authentic, so
+	 * dump the association and wait for the next message.
+	 */
+	} else if (L_ISEQU(&peer->xmt, &p_org)) {
+		if (peer->flash & TEST5) {
+			if (has_mac == 4 && pkt->exten[0] == 0) {
+				if (peer->flags & FLAG_CONFIG)
+					peer_clear(peer);
+				else
+					unpeer(peer);
+			}
+		}
+		/* fall through */
+
+	/*
+	 * If the client or passive peer has never transmitted anything,
+	 * this is either the first message from a symmetric peer or
+	 * possibly a duplicate received before the transmit timeout.
+	 * Pass it on.
+	 */
+	} else if (L_ISZERO(&peer->xmt)) {
+		/* fall through */
+
+	/*
+	 * Now it gets interesting. We have transmitted at least one
+	 * message. If the packet originate timestamp is nonzero, it
+	 * does not match the association transmit timestamp, which is a
+	 * loopback error. Let the packet through so the extension
+	 * fields are processed and the the timestamps are updated. A
+	 * loopback error probably means a packet was dropped or an
+	 * intruder launched a replay. 
+	 */
+	} else if (!L_ISZERO(&p_org)) {
+		peer->flash |= TEST2;
+		/* fall through */
+
+	/*
+ 	 * The packet originate timestamp is zero, meaning the other guy
+	 * either didn't receive the first packet or died and restarted.
+	 * If the association originate timestamp is zero, this is the
+	 * first packet received, so we pass it on.
+	 */
+	} else if (L_ISZERO(&peer->org)) {
+		/* fall through */
+
+	/*
+	 * The other guy has restarted and we are still on the wire. We
+	 * should demobilize/clear and get out of Dodge. If this is
+	 * symmetric mode, we should also send a crypto-NAK.
+	 */
+	} else {
+		if (hismode == MODE_ACTIVE)
+			fast_xmit(rbufp, MODE_PASSIVE, 0,
+			    restrict_mask);
+		else if (hismode == MODE_PASSIVE)
+			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
+		if (peer->flags & FLAG_CONFIG)
+			peer_clear(peer);
+		else
+			unpeer(peer);
+		return;
+	}
+	if (peer->flash & ~TEST2) {
+#if DEBUG
+		if (debug)
+			printf("receive: dropped %3x\n", peer->flash);
+#endif
+		return;
 	}
 
 #ifdef OPENSSL
@@ -1036,12 +969,14 @@ receive(
 				int resflag = RES_DONTSERVE |
 				    RES_TIMEOUT;
 
-				if (!(peer->flags & FLAG_CONFIG))
-					unpeer(peer);
-				else
+				if (peer->flags & FLAG_CONFIG) {
 					peer_clear(peer);
+				} else {
+					unpeer(peer);
+					return;
+				}
 				peer->flash |= TEST4;
-				memcpy(&peer->refid, KOD_CRYP, 4);
+				memcpy(&peer->refid, "CRYP", 4);
 				mskadr_sin.sin_addr.s_addr =
 				    ~(u_int32)0;
 				if (hismode != MODE_BROADCAST &&
@@ -1067,10 +1002,10 @@ receive(
 			 */
 			if (peer->flash & TEST10 && peer->crypto &
 			    CRYPTO_FLAG_AUTO) {
-				if (!(peer->flags & FLAG_CONFIG))
-					unpeer(peer);
-				else
+				if (peer->flags & FLAG_CONFIG)
 					peer_clear(peer);
+				else
+					unpeer(peer);
 #ifdef DEBUG
 				if (debug)
 					printf(
@@ -1153,16 +1088,16 @@ process_packet(
 
 		memcpy(code, &pkt->refid, 4);
 		code[4] = '\0';
-		if (strcmp(code, KOD_CRYP) != 0 && strcmp(code,
-		    KOD_DENY) != 0 && strcmp(code, KOD_RATE) != 0)
+		if (strcmp(code, "CRYP") == 0 || strcmp(code,
+		    "DENY") == 0 || strcmp(code, "RATE") == 0) {
+			peer->stratum = STRATUM_UNSPEC;
+			peer->refid = pkt->refid;
+			if (strcmp(code, "RATE") != 0)
+				peer->flash |= TEST4;	/* denied */
+			msyslog(LOG_INFO, "kiss-of-death received %s",
+			    code);
 			return;
-
-		peer->stratum = STRATUM_UNSPEC;
-		peer->refid = pkt->refid;
-		if (strcmp(code, KOD_RATE) != 0)
-			peer->flash |= TEST4;		/* denied */
-		msyslog(LOG_INFO, "kiss-of-death received %s", code);
-		return;
+		}
 	}
 
 	/*
@@ -1385,9 +1320,7 @@ clock_update(void)
 		sys_stratum = sys_peer->stratum + 1;
 		if (sys_stratum == 1)
 			sys_refid = sys_peer->refid;
-		if (sys_stratum == 1)
-			sys_refid = sys_peer->refid;;
-		if (sys_stratum == STRATUM_UNSPEC)
+		else if (sys_stratum == STRATUM_UNSPEC)
 			memcpy(&sys_refid, "UNSP", 4);
 		else
 			sys_refid = sys_peer->srcadr.sin_addr.s_addr;
@@ -1453,11 +1386,13 @@ poll_update(
 	 * up to 1024 s, the beacon interval settles up to 2.3 hours.
 	 */
 #ifdef OPENSSL
-	if (peer->cmmd != NULL) {
+	if (peer->cmmd != NULL && (sys_leap != LEAP_NOTINSYNC ||
+	    peer->crypto)) {
 		peer->nextdate = current_time + RESP_DELAY;
-	} else
+	} else if (peer->burst > 0) {
+#else /* OPENSSL */
+	if (peer->burst > 0) {
 #endif /* OPENSSL */
-		if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
 #ifdef REFCLOCK
@@ -2698,7 +2633,8 @@ fast_xmit(
 	 * If the caller is restricted, return a kiss-of-death packet;
 	 * otherwise, just drop it.
 	 */
-	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+	if (mask & (RES_DONTSERVE | RES_DONTTRUST | RES_LIMITED |
+	    RES_NOPEER)) {
 		char	*code;
 
 		if (!(mask & RES_DEMOBILIZE))
@@ -2708,9 +2644,9 @@ fast_xmit(
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
 		if (mask & RES_DONTSERVE)
-			code = KOD_DENY;
+			code = "DENY";
 		else
-			code = KOD_RATE;
+			code = "RATE";
 		memcpy(&xpkt.refid, code, 4);
 		msyslog(LOG_INFO, "kiss-of-death sent %s", code);
 	} else {
@@ -3128,7 +3064,6 @@ proto_config(
 		msyslog(LOG_ERR,
 		    "proto_config: illegal item %d, value %ld",
 			item, value);
-		break;
 	}
 }
 

@@ -561,7 +561,11 @@ newpeer(
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
 	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
-	peer->flags = flags | (key > NTP_MAXKEY ? FLAG_SKEY : 0);
+	peer->flags = flags;
+	if (key != 0)
+		peer->flags |= FLAG_AUTHENABLE;
+	if (key > NTP_MAXKEY)
+		peer->flags |= FLAG_SKEY;
 	peer->cast_flags = cast_flags;
 	peer->ttl = ttl;
 	peer->keyid = key;

@@ -120,7 +120,6 @@ static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parmeters */
 static EVP_PKEY	*gq_pkey = NULL; /* GQ parmeters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
-static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
 static char *rand_file = NTP_RANDFILE; /* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
@@ -439,9 +438,9 @@ crypto_recv(
 
 			/*
 			 * Discard the message if it has already been
-			 * stored.
+			 * stored or the server is not synchronized.
 			 */
-			if (peer->crypto)
+			if (peer->crypto || !fstamp)
 				break;
 
 			if (len < VALUE_LEN + vallen) {
@@ -486,10 +485,9 @@ crypto_recv(
 			}
 
 			/*
-			 * Discard the message if identity error or from
-			 * unsynchronized host.
+			 * Discard the message if identity error.
 			 */
-			if (rval != XEVNT_OK || !fstamp)
+			if (rval != XEVNT_OK)
 				break;
 
 			/*
@@ -510,7 +508,8 @@ crypto_recv(
 
 			/*
 			 * Save status word, host name and message
-			 * digest/signature type.
+			 * digest/signature type. If PC identity, be
+			 * sure not to sign the certificate.
 			 */
 			if (crypto_flags & CRYPTO_FLAG_PRIV)
 				fstamp |= CRYPTO_FLAG_SIGN;
