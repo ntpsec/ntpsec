@@ -169,20 +169,21 @@ typedef char s_char;
  */
 struct interface {
 	SOCKET fd;			/* socket this is opened on */
-	SOCKET bfd;		/* socket for receiving broadcasts */
+	SOCKET bfd;			/* socket for receiving broadcasts */
 	struct sockaddr_storage sin;	/* interface address */
-	struct sockaddr_storage bcast; /* broadcast address */
-	struct sockaddr_storage mask; /* interface mask */
-	char name[32];		/* name of interface */
-	int flags;		/* interface flags */
-	int last_ttl;		/* last TTL specified */
-	u_int32 addr_refid;	/* IPv4 addr or IPv6 hash */
-	int num_mcast;		/* No. of IP addresses in multicast socket */
-	volatile long received;	/* number of incoming packets */
-	long sent;		/* number of outgoing packets */
-	long notsent;		/* number of send failures */
-	u_int ifindex;		/* Interface index */
-	u_int scopeid;		/* Scope used for Multicasting */
+	struct sockaddr_storage bcast;	/* broadcast address */
+	struct sockaddr_storage mask;	/* interface mask */
+	char name[32];			/* name of interface */
+	short  family;			/* Address family */
+	int flags;			/* interface flags */
+	int last_ttl;			/* last TTL specified */
+	u_int32 addr_refid;		/* IPv4 addr or IPv6 hash */
+	int num_mcast;			/* No. of IP addresses in multicast socket */
+	volatile long received;		/* number of incoming packets */
+	long sent;			/* number of outgoing packets */
+	long notsent;			/* number of send failures */
+	u_int ifindex;			/* Interface index */
+	u_int scopeid;			/* Scope used for Multicasting */
 };
 
 /*
