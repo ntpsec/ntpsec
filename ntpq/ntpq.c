@@ -1176,13 +1176,13 @@ sendrequest(
 		 * Get the keyid and the password if we don't have one.
 		 */
 		if (info_auth_keyid == 0) {
-			int keyid = getkeyid("Keyid: ");
-			if (keyid == 0 || keyid > NTP_MAXKEY) {
+			int u_keyid = getkeyid("Keyid: ");
+			if (u_keyid == 0 || u_keyid > NTP_MAXKEY) {
 				(void) fprintf(stderr,
 				   "Invalid key identifier\n");
 				return 1;
 			}
-			info_auth_keyid = keyid;
+			info_auth_keyid = u_keyid;
 		}
 		if (!authistrusted(info_auth_keyid)) {
 			pass = getpass("MD5 Password: ");
@@ -2277,12 +2277,12 @@ passwd(
 	char *pass;
 
 	if (info_auth_keyid == 0) {
-		int keyid = getkeyid("Keyid: ");
-		if (keyid == 0 || keyid > NTP_MAXKEY) {
+		int u_keyid = getkeyid("Keyid: ");
+		if (u_keyid == 0 || u_keyid > NTP_MAXKEY) {
 			(void)fprintf(fp, "Invalid key identifier\n");
 			return;
 		}
-		info_auth_keyid = keyid;
+		info_auth_keyid = u_keyid;
 	}
 	pass = getpass("MD5 Password: ");
 	if (*pass == '\0')
