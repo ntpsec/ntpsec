@@ -47,6 +47,36 @@ case "$host" in
     ;;
 esac
 
+AMU_OS_CFLAGS
+
+AC_ARG_WITH(rpath,
+	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
+[ans=$withval], [ans=x])
+case "$ans" in
+ no)
+    need_dash_r=
+    ;;
+ yes)
+    need_dash_r=1
+    ;;
+esac
+case "$host" in
+ *-*-netbsd*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+ *-*-solaris*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+esac
+
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
    AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root clock control]),
@@ -136,25 +166,6 @@ case "$host" in
     ;;
  *-*-irix6*)	# 6.2 (and later?)
     ac_busted_vpath_in_make=yes
-    # don't pass -n32 to gcc, it cannot handle and doesn't need it
-    if test "$GCC" != yes; then
-      case "$CFLAGS" in
-       *-n32*) ;;
-       *-n64*) ;;
-       *-64*) ;;
-       *) case "$iCFLAGS" in
-	   '') CFLAGS="-O2 -g3 -n32" ;;
-	   *)  CFLAGS="$CFLAGS -n32" ;;
-	  esac
-	  ;;
-      esac
-      case "$LDFLAGS" in
-       *-n32*) ;;
-       *-n64*) ;;
-       *-64*) ;;
-       *) LDFLAGS="$LDFLAGS -n32" ;;
-      esac
-    fi
     ;;
  *-*-solaris2.5.1)
     ac_busted_vpath_in_make=yes
@@ -348,7 +359,7 @@ AC_EGREP_CPP(yes,
 yes
 #endif
 ], [AC_CHECK_HEADERS(sys/timepps.h)])
-AC_CHECK_HEADERS(sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h)
+AC_CHECK_HEADERS(sys/timers.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$host" in
 *-convex-*)
@@ -400,6 +411,12 @@ AC_CHECK_HEADERS(sys/shm.h, [], [],
 #endif
 #if HAVE_SYS_IPC_H
 # include <sys/ipc.h>
+#endif
+])
+
+AC_CHECK_HEADERS(sys/timex.h, [], [],
+[#if HAVE_SYS_TIME_H
+# include <sys/time.h>
 #endif
 ])
 
@@ -2729,6 +2746,10 @@ case "$ans" in
 	ans=openssl
 	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+	case "$need_dash_r" in
+	 1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
+	    ;;
+	esac
 	AC_SUBST(LCRYPTO, [-lcrypto])
 	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	AC_CHECK_FUNCS(EVP_md2 EVP_mdc2)
@@ -3655,7 +3676,7 @@ AC_TRY_COMPILE([
 #
 AC_MSG_CHECKING(for Kame IPv6 support)
 AC_ARG_WITH(kame,
-	[  --with-kame[=PATH]	use Kame IPv6 [default path /usr/local/v6]],
+	AC_HELP_STRING([--with-kame], [- =/usr/local/v6]),
 	use_kame="$withval", use_kame="no")
 
 case "$use_kame" in
@@ -3792,17 +3813,6 @@ found_rt_iflist
         [AC_MSG_RESULT(no)])
 
 ###
-
-case "$build" in
- $host)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-        LDFLAGS="$LDFLAGS -r"
-        ;;
-    esac
-    ;;
-esac
 
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 

@@ -1,5 +1,6 @@
 #AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
+ACLOCAL_AMFLAGS= -I m4
 
 SUBDIRS = \
 	scripts \
@@ -61,16 +62,18 @@ EXTRA_DIST = \
 	install-sh \
 	readme.y2kfixes \
 	results.y2kfixes \
+	\
 	conf \
 	html \
 	libisc \
 	ports \
+	\
 	version
 
 DISTCLEANFILES = .warning
 
-#ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.in
-ETAGS_ARGS = Makefile.am configure.in
+#ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.ac
+ETAGS_ARGS = Makefile.am configure.ac
 
 # HMS: make ports be the last directory...
 # DIST_HOOK_DIRS = conf html scripts ports
