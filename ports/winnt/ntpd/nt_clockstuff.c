@@ -49,8 +49,12 @@
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntp_timer.h"
+# include "../libntp/log.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
+
+char szMsgPath[255];
+BOOL init_randfile();
 
 static long last_Adj = 0;
 
@@ -155,6 +159,17 @@ void init_winnt_time(void) {
 	 * before we do anything else
 	 */
 	ntservice_init();
+
+	/* Set the Event-ID message-file name. */
+	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) {
+		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
+		exit(1);
+	}
+	addSourceToRegistry("NTP", szMsgPath);
+
+	/* Initialize random file before OpenSSL checks */
+	if(!init_randfile())
+		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
 
 	/*
 	 * Get privileges needed for fiddling with the clock
