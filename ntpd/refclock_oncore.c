@@ -297,7 +297,6 @@ struct instance {
 #define rcvptr	instance->Rcvptr
 
 static	int	oncore_start	      P((int, struct peer *));
-static	void	oncore_control	      P((int, struct refclockstat *, struct refclockstat *, struct peer *));
 static	void	oncore_poll	      P((int, struct peer *));
 static	void	oncore_shutdown       P((int, struct peer *));
 static	void	oncore_consume	      P((struct instance *));
@@ -344,7 +343,6 @@ static	void	oncore_msg_Cj_id   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Cj_init P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Ga	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Gb	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Gd	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Gj	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Sz	   P((struct instance *, u_char *, size_t));
 
@@ -352,7 +350,7 @@ struct	refclock refclock_oncore = {
 	oncore_start,		/* start up driver */
 	oncore_shutdown,	/* shut down driver */
 	oncore_poll,		/* transmit poll message */
-	oncore_control, 	/* fudge (flag) control messages */
+	noentry,		/* not used */
 	noentry,		/* not used */
 	noentry,		/* not used */
 	NOFLAGS 		/* not used */
@@ -405,7 +403,7 @@ static struct msg_desc {
 	{ "Ga",  20,    oncore_msg_Ga,     "" },
 	{ "Gb",  17,    oncore_msg_Gb,     "" },
 	{ "Gc",   8,    0,                 "" },
-	{ "Gd",   8,    oncore_msg_Gd,     "" },
+	{ "Gd",   8,    0,                 "" },
 	{ "Ge",   8,    0,                 "" },
 	{ "Gj",  21,    oncore_msg_Gj,     "" },
 	{ "Ia",  10,    oncore_msg_CaFaIa, "" },
@@ -489,9 +487,8 @@ static u_char oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
 static char *Month[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jly",
 	"Aug", "Sep", "Oct", "Nov", "Dec" };
 
-#define DEVICE1 	"/dev/oncore.serial.%d"   /* name of serial device */
-#define DEVICE2 	"/dev/oncore.pps.%d"   /* name of pps device */
-#define INIT_FILE	"/etc/ntp.oncore" /* optional init file */
+#define DEVICE1 	"/dev/oncore.serial.%d" /* name of serial device */
+#define DEVICE2 	"/dev/oncore.pps.%d"    /* name of pps device */
 
 #define SPEED		B9600		/* Oncore Binary speed (9600 bps) */
 
@@ -631,7 +628,8 @@ oncore_start(
 
 #ifdef HAVE_PPSAPI
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
-		perror("time_pps_create");
+		perror("time_pps_create: PPSAPI probably not in kernel");
+		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");
 		return(0);
 	}
 
@@ -687,44 +685,6 @@ oncore_start(
 	instance->pollcnt = 2;
 	return (1);
 }
-
-
-/*
- * Fudge control (get Flag2 and Flag3, not available at oncore_start time.
- */
-
-static void
-oncore_control(
-	int unit,		  /* unit (not used) */
-	struct refclockstat *in,  /* input parameters  (not used) */
-	struct refclockstat *out, /* output parameters (not used) */
-	struct peer *peer	  /* peer structure pointer */
-	)
-{
-	char *cp;
-	struct refclockproc *pp;
-	struct instance *instance;
-
-	pp = peer->procptr;
-	instance = (struct instance *) pp->unitptr;
-
-	instance->assert  = !(pp->sloppyclockflag & CLK_FLAG2);
-	instance->hardpps =   pp->sloppyclockflag & CLK_FLAG3;
-
-	if (instance->assert)
-		cp = "Resetting timing to Assert.";
-	else
-		cp = "Resetting timing to Clear.";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-
-	if (instance->hardpps) {
-		cp = "HARDPPS Set.";
-		record_clock_stats(&(instance->peer->srcadr), cp);
-	}
-
-	(void) oncore_ppsapi(instance);
-}
-
 
 
 /*
@@ -806,12 +766,12 @@ oncore_ppsapi(
 	int mode;
 
 	if (time_pps_getcap(instance->pps_h, &mode) < 0) {
-		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getcap failed: %m");
+		msyslog(LOG_ERR, "time_pps_getcap failed: %m");
 		return (0);
 	}
 
 	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
-		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getparams failed: %m");
+		msyslog(LOG_ERR, "time_pps_getparams failed: %m");
 		return (0);
 	}
 
@@ -849,7 +809,7 @@ oncore_ppsapi(
 		if (i&mode) {
 			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
 			    PPS_TSFMT_TSPEC) < 0) {
-				msyslog(LOG_ERR, "refclock_ioctl: time_pps_kcbind failed: %m");
+				msyslog(LOG_ERR, "time_pps_kcbind failed: %m");
 				return (0);
 			}
 			pps_enable = 1;
@@ -929,7 +889,7 @@ oncore_init_shmem(
 		n += (mp->len + 3);
 	}
 	shmem_length = n + 2;
-	fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", (int) shmem_length);
+	fprintf(stderr, "ONCORE: SHMEM length: %ld bytes\n", (long) shmem_length);
 
 	buf = malloc(shmem_length);
 	if (buf == NULL) {
@@ -1009,7 +969,8 @@ oncore_init_shmem(
 		return;
 	}
 
-	sprintf(Msg, "SHMEM (size = %d) is CONFIGURED and available as %s", shmem_length, instance->shmem_fname);
+	sprintf(Msg, "SHMEM (size = %ld) is CONFIGURED and available as %s",
+		(long) shmem_length, instance->shmem_fname);
 	record_clock_stats(&(instance->peer->srcadr), Msg);
 }
 #endif /* ONCORE_SHMEM_STATUS */
@@ -1140,19 +1101,28 @@ oncore_read_config(
  */
 
 	FILE	*fd;
-	char	*cp, *cc, *ca, line[100], units[2], device[20], Msg[160];
+	char	*cp, *cc, *ca, line[100], units[2], device[20], Msg[160], **cpp;
+	char	*dirs[] = { "/etc/ntp", "/etc", 0 };
 	int	i, sign, lat_flg, long_flg, ht_flg, mode, mask;
 	double	f1, f2, f3;
 
-	sprintf(device, "%s%d", INIT_FILE, instance->unit);             /* try "ntp.oncore0" first */
-	if ((fd=fopen(device, "r")) == NULL) {                          /*   it was in the original documentation */
-		sprintf(device, "%s.%d", INIT_FILE, instance->unit);    /* then try "ntp.oncore.0 */
-		if ((fd=fopen(device, "r")) == NULL) {
-			if ((fd=fopen(INIT_FILE, "r")) == NULL) {       /* and finally "ntp.oncore" */
-				instance->init_type = 4;
-				return;
-			}
-		}
+	fd = NULL;	/* just to shutup gcc complaint */
+	for (cpp=dirs; *cpp; cpp++) {
+		cp = *cpp;
+		sprintf(device, "%s/ntp.oncore.%d", cp, instance->unit); /* try "ntp.oncore.0 */
+		if ((fd=fopen(device, "r")))
+			break;
+		sprintf(device, "%s/ntp.oncore%d", cp, instance->unit);  /* try "ntp.oncore0" */
+		if ((fd=fopen(device, "r")))
+			break;
+		sprintf(device, "%s/ntp.oncore", cp);   /* and finally "ntp.oncore" */
+		if ((fd=fopen(device, "r")))
+			break;
+	}
+
+	if (!fd) {	/* no inputfile, default to the works ... */
+		instance->init_type = 4;
+		return;
 	}
 
 	mode = mask = 0;
@@ -1306,7 +1276,7 @@ oncore_read_config(
 
 	instance->posn_set = 1;
 	if (!( lat_flg && long_flg && ht_flg )) {
-		printf("ONCORE: incomplete data on %s\n", INIT_FILE);
+		printf("ONCORE: incomplete data on %s\n", device);
 		instance->posn_set = 0;
 		if (mode == 1 || mode == 3) {
 			sprintf(Msg, "Input Mode = %d, but no/incomplete position, mode set to %d", mode, mode+1);
@@ -1643,12 +1613,12 @@ oncore_get_timestamp(
 	 */
 
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
-		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getcap failed: %m");
+		msyslog(LOG_ERR, "time_pps_getcap failed: %m");
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
-		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getparams failed: %m");
+		msyslog(LOG_ERR, "time_pps_getparams failed: %m");
 		return;
 	}
 
@@ -1733,7 +1703,7 @@ oncore_get_timestamp(
 		printf("ONCORE[%d]: len = %d %s\n", instance->unit, n, instance->pp->a_lastcode);
 	}
 
-	/* and some things I dont understnd (magic ntp things) */
+	/* and some things I dont understand (magic ntp things) */
 
 	if (!refclock_process(instance->pp)) {
 		refclock_report(instance->peer, CEVNT_BADTIME);
@@ -1745,9 +1715,7 @@ oncore_get_timestamp(
 
 	if (instance->polled) {
 		instance->polled = 0;
-/*
-		instance->pp->dispersion = instance->pp->skew = 0;
-*/
+	     /* instance->pp->dispersion = instance->pp->skew = 0;	*/
 		instance->pp->lastref = instance->pp->lastrec;
 		refclock_receive(instance->peer);
 	}
@@ -2010,22 +1978,22 @@ oncore_msg_BaEaHa(
 	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN)
 		return;
 
-	/* PAUSE 5sec */
+	/* PAUSE 5sec - make sure results are stable, before using position */
 
 	if (instance->count) {
-		if (instance->count++ < 5)	/* make sure results are stable, using position */
+		if (instance->count++ < 5)
 			return;
 		instance->count = 0;
 	}
 
 	memcpy(instance->BEHa, buf, (size_t) (len+3));	/* Ba, Ea or Ha */
 
-	/* check the antenna and almanac for changes (did it get unplugged, is it ready?) */
+	/* check the antenna (did it get unplugged) and almanac (is it ready) for changes. */
 
 	oncore_check_almanac(instance);
 	oncore_check_antenna(instance);
 
-	/* Almanac mode, waiting for Almanac, we can't do anything till we have it */
+	/* If we are in Almanac mode, waiting for Almanac, we can't do anything till we have it */
 	/* When we have an almanac, we will start the Bn/En/@@Hn messages */
 
 	if (instance->o_state == ONCORE_ALMANAC)
@@ -2089,41 +2057,67 @@ oncore_msg_BaEaHa(
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Agx,  sizeof(oncore_cmd_Agx));
 	}
 
-	if (instance->count1) {
-		if (instance->count1++ > 5 || instance->site_survey == ONCORE_SS_HW) {
-			instance->count1 = 0;
-			if (instance->site_survey == ONCORE_SS_TESTING) {
-				/*
-				 * For instance->site_survey to still be ONCORE_SS_TESTING, then after a 5sec
-				 * wait after the @@At2/@@Gd3 command we have not changed the state to
-				 * ONCORE_SS_HW.  If the Hardware is capable of doing a Site Survey, then
-				 * the variable would have been changed by now.
-				 * There are three possibilities:
-				 * 6/8chan
-				 *   (a) We did not get a response to the @@At0 or @@At2 commands,
-				 *	   and it must be a GT/GT+/SL with no position hold mode.
-				 *	   We will have to do it ourselves.
-				 *   (b) We saw the @@At0, @@At2 commands, but @@At2 failed,
-				 *	   must be a VP or older UT which doesn't have Site Survey mode.
-				 *	   We will have to do it ourselves.
-				 * 12chan
-				 *   (c) We saw the @@Gd command, but @@Gd3 failed,
-				 *	   We will have to do it ourselves.
-				 */
 
-				sprintf(Msg, "Initiating software 3D site survey (%d samples)",
-					POS_HOLD_AVERAGE);
-				record_clock_stats(&(instance->peer->srcadr), Msg);
+	/* Unfortunately, the Gd3 command returns '3' for the M12 v1.3 firmware where it is
+	 * out-of-range and it should return 0-2. (v1.3 can't do a HW Site Survey)
+	 * We must do the Gd3, and then wait a cycle or two for things to settle,
+	 * then check Ha[130]&0x10 to see if a SS is in progress.
+	 * We will set SW if HW has not been set after an appropriate delay.
+	 */
 
-				record_clock_stats(&(instance->peer->srcadr), "SSstate = ONCORE_SS_SW");
-				instance->site_survey = ONCORE_SS_SW;
+	if (instance->site_survey == ONCORE_SS_TESTING) {
+		if (instance->chan == 12) {
+			if (instance->count1) {
+				if (instance->count1++ > 5 || instance->BEHa[130]&0x10) {
+					instance->count1 = 0;
+					if (instance->BEHa[130]&0x10) {
+						record_clock_stats(&(instance->peer->srcadr),
+								"Initiating hardware 3D site survey");
 
-				instance->ss_lat = instance->ss_long = instance->ss_ht = 0;
-				if (instance->chan == 12)
-					oncore_sendmsg(instance->ttyfd, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0)); /* disable */
-				else {
-					oncore_sendmsg(instance->ttyfd, oncore_cmd_At0, sizeof(oncore_cmd_At0)); /* disable */
-					oncore_sendmsg(instance->ttyfd, oncore_cmd_Av0, sizeof(oncore_cmd_Av0)); /* disable */
+						record_clock_stats(&(instance->peer->srcadr), "SSstate = ONCORE_SS_HW");
+						instance->site_survey = ONCORE_SS_HW;
+					} else {
+						record_clock_stats(&(instance->peer->srcadr), "SSstate = ONCORE_SS_SW");
+						instance->site_survey = ONCORE_SS_SW;
+					}
+				}
+			}
+		} else {
+			if (instance->count1) {
+				if (instance->count1++ > 5) {
+					instance->count1 = 0;
+					/*
+					 * For instance->site_survey to still be ONCORE_SS_TESTING, then after a 5sec
+					 * wait after the @@At2/@@Gd3 command we have not changed the state to
+					 * ONCORE_SS_HW.  If the Hardware is capable of doing a Site Survey, then
+					 * the variable would have been changed by now.
+					 * There are three possibilities:
+					 * 6/8chan
+					 *   (a) We did not get a response to the @@At0 or @@At2 commands,
+					 *	   and it must be a GT/GT+/SL with no position hold mode.
+					 *	   We will have to do it ourselves.
+					 *   (b) We saw the @@At0, @@At2 commands, but @@At2 failed,
+					 *	   must be a VP or older UT which doesn't have Site Survey mode.
+					 *	   We will have to do it ourselves.
+					 * 12chan
+					 *   (c) We saw the @@Gd command, and saw H[13]*0x10
+					 *	   We will have to do it ourselves (done above)
+					 */
+
+					sprintf(Msg, "Initiating software 3D site survey (%d samples)",
+						POS_HOLD_AVERAGE);
+					record_clock_stats(&(instance->peer->srcadr), Msg);
+
+					record_clock_stats(&(instance->peer->srcadr), "SSstate = ONCORE_SS_SW");
+					instance->site_survey = ONCORE_SS_SW;
+
+					instance->ss_lat = instance->ss_long = instance->ss_ht = 0;
+					if (instance->chan == 12)
+						oncore_sendmsg(instance->ttyfd, oncore_cmd_Gd0, sizeof(oncore_cmd_Gd0)); /* disable */
+					else {
+						oncore_sendmsg(instance->ttyfd, oncore_cmd_At0, sizeof(oncore_cmd_At0)); /* disable */
+						oncore_sendmsg(instance->ttyfd, oncore_cmd_Av0, sizeof(oncore_cmd_Av0)); /* disable */
+					}
 				}
 			}
 		}
@@ -2185,7 +2179,7 @@ oncore_msg_BaEaHa(
 	}
 
 	/*
-	 * check if timer active
+	 * check if traim timer active
 	 * if it hasn't been cleared, then @@Bn/@@En/@@Hn did not respond
 	 */
 
@@ -2860,36 +2854,8 @@ oncore_msg_Gb(
 	gmtm = buf[13];
 
 	sprintf(Msg, "Date/Time set to: %d%s%d %2d:%02d:%02d GMT (GMT offset is %s%02d:%02d)",
-		d, Month[mo+1], y, h, m, s, gmts, gmth, gmtm);
+		d, Month[mo-1], y, h, m, s, gmts, gmth, gmtm);
 	record_clock_stats(&(instance->peer->srcadr), Msg);
-}
-
-
-
-/*
- * Try to use Oncore M12+Timing Auto Survey Feature
- *	If its not there (M12), set flag to do it ourselves.
- */
-
-static void
-oncore_msg_Gd(
-	struct instance *instance,
-	u_char *buf,
-	size_t len
-	)
-{
-	char	*cp;
-
-	if (instance->site_survey == ONCORE_SS_TESTING) {
-		if (buf[4] == 3) {
-			record_clock_stats(&(instance->peer->srcadr),
-					"Initiating hardware 3D site survey");
-
-			cp = "SSstate = ONCORE_SS_HW";
-			record_clock_stats(&(instance->peer->srcadr), cp);
-			instance->site_survey = ONCORE_SS_HW;
-			}
-	}
 }
 
 
@@ -3258,11 +3224,13 @@ oncore_load_almanac(
 				ii = buf_w32(cp + 15);
 				jj = buf_w32(cp + 19);
 				kk = buf_w32(cp + 23);
+#if 0
 {
 char Msg[160];
-sprintf(Msg, "SHMEM posn = %d (%d, %d, %d)", cp-instance->shmem, ii, jj, kk);
+sprintf(Msg, "SHMEM posn = %ld (%d, %d, %d)", (long) (cp-instance->shmem), ii, jj, kk);
 record_clock_stats(&(instance->peer->srcadr), Msg);
 }
+#endif
 				if (ii != 0 || jj != 0 || kk != 0) { /* phk asked for this test */
 					instance->ss_lat  = ii;
 					instance->ss_long = jj;
@@ -3611,7 +3579,6 @@ oncore_ss(
 
 
 	if (instance->site_survey == ONCORE_SS_HW) {
-
 		/*
 		 * Check to see if Hardware SiteSurvey has Finished.
 		 */
