@@ -56,6 +56,18 @@ extern int listen_to_virtual_ips;
 
 #if defined(SYS_WINNT)
 #include <transmitbuff.h>
+#include <isc/win32os.h>
+/*
+ * Define this macro to control the behavior of connection
+ * resets on UDP sockets.  See Microsoft KnowledgeBase Article Q263823
+ * for details.
+ * NOTE: This requires that Windows 2000 systems install Service Pack 2
+ * or later.
+ */
+#ifndef SIO_UDP_CONNRESET 
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
+#endif
+
 #endif
 
 /*
@@ -138,6 +150,36 @@ int	create_wildcards	P((u_short));
 isc_boolean_t address_okay	P((isc_interface_t *));
 void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
 
+#ifdef SYS_WINNT
+/*
+ * Windows 2000 systems incorrectly cause UDP sockets using WASRecvFrom
+ * to not work correctly, returning a WSACONNRESET error when a WSASendTo
+ * fails with an "ICMP port unreachable" response and preventing the
+ * socket from using the WSARecvFrom in subsequent operations.
+ * The function below fixes this, but requires that Windows 2000
+ * Service Pack 2 or later be installed on the system.  NT 4.0
+ * systems are not affected by this and work correctly.
+ * See Microsoft Knowledge Base Article Q263823 for details of this.
+ */
+isc_result_t
+connection_reset_fix(SOCKET fd) {
+	DWORD dwBytesReturned = 0;
+	BOOL  bNewBehavior = FALSE;
+	DWORD status;
+
+	if(isc_win32os_majorversion() < 5)
+		return (ISC_R_SUCCESS); /*  NT 4.0 has no problem */
+
+	/* disable bad behavior using IOCTL: SIO_UDP_CONNRESET */
+	status = WSAIoctl(fd, SIO_UDP_CONNRESET, &bNewBehavior,
+			  sizeof(bNewBehavior), NULL, 0,
+			  &dwBytesReturned, NULL, NULL);
+	if (status != SOCKET_ERROR)
+		return (ISC_R_SUCCESS);
+	else
+		return (ISC_R_UNEXPECTED);
+}
+#endif
 /*
  * init_io - initialize I/O data structures and call socket creation routine
  */
@@ -970,6 +1012,11 @@ open_socket(
 		exit(1);
 		/*NOTREACHED*/
 	}
+	if (connection_reset_fix(fd) != ISC_R_SUCCESS) {
+		netsyslog(LOG_ERR, "connection_reset_fix(fd) failed on address %s: %m",
+			stoa(addr));
+	}
+
 #endif /* SYS_WINNT */
 
 	/* set SO_REUSEADDR since we will be binding the same port
