@@ -496,7 +496,7 @@ receive(
 				 * mobilized.
 				 */
 				pkeyid = 0;
-				if (!SOCKNUL(rbufp->dstadr->bcast))
+				if (!SOCKNUL(&rbufp->dstadr->bcast))
 					dstadr_sin =
 					    &rbufp->dstadr->bcast;
 			} else if (peer == NULL) {
@@ -586,8 +586,10 @@ receive(
 			if (sys_peer == NULL ||
 			    PKT_TO_STRATUM(pkt->stratum) <
 			    sys_stratum ||
-			    rbufp->dstadr->sin.sin_addr.s_addr ==
-			    pkt->refid)
+			    /* XXX How do I check IPv6 addresses ? */
+			    (rbufp->dstadr->sin.ss_family == AF_INET &&
+			    ((struct sockaddr_in*)&rbufp->dstadr->sin)->sin_addr.s_addr ==
+			    pkt->refid))
 				return;
 		}
 
