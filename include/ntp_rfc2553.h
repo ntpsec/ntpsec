@@ -208,6 +208,20 @@ struct sockaddr_in6 {
 #ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	((a)->s6_addr[0] == 0xff)
 #endif
+/*
+ * Unicast link / site local.
+ */
+#ifndef IN6_IS_ADDR_LINKLOCAL
+#define IN6_IS_ADDR_LINKLOCAL(a)	(\
+(*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
+((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0x80))
+#endif
+
+#ifndef IN6_IS_ADDR_SITELOCAL
+#define IN6_IS_ADDR_SITELOCAL(a)	(\
+(*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
+((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0xc0))
+#endif
 
 struct addrinfo {
 	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */

@@ -2019,6 +2019,11 @@ findinterface(
 	for (i= nwilds; i < ninterfaces; i++)
 	{
 		/*
+		 * Skip the loopback. It can't act as an outgoing interface
+		 */
+		if (inter_list[i].flags & INT_LOOPBACK)
+			continue;
+		/*
 		 * For IPv4 we can check the network mask to see if
 		 * we have a match on the outgoing interface
 		 */
@@ -2030,6 +2035,19 @@ findinterface(
 
 			if (amask == imask)
 			     return (&inter_list[i]);
+		}
+
+		/*
+		 * See if the IPv6 address is Link-Local or Site Local
+		 */
+		if (addr->ss_family == AF_INET6) {
+			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				return (&inter_list[i]);
+
+			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				return (&inter_list[i]);
 		}
 	}
 
