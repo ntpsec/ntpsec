@@ -79,6 +79,37 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 }
 
 /*
+ * Get the scope id here for multicasting purposes
+ * For the KAME stack we need to play games to get the scope.
+ */
+static unsigned int
+get_scopeid(unsigned int family, struct sockaddr *src) {
+
+	unsigned int scopeid;
+
+	switch (family) {
+	case AF_INET:
+		return (0);
+		break;
+	case AF_INET6:
+#ifdef __KAME__
+	if (IN6_IS_ADDR_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)) {
+		u_int8_t *p;
+		p = &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[0];
+		scopeid = ((u_int16_t)p[2] << 8) | p[3];
+	} else
+		scopeid = 0;
+#else
+		scopeid = ((struct sockaddr_in6 *)src)->sin6_scope_id;
+#endif
+	       return (scopeid);
+	default:
+		INSIST(0);
+		break;
+	}
+	return (0);
+}
+/*
  * Include system-dependent code.
  */
 

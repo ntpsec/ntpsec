@@ -181,6 +181,8 @@ struct interface {
 	volatile long received;	/* number of incoming packets */
 	long sent;		/* number of outgoing packets */
 	long notsent;		/* number of send failures */
+	u_int ifindex;		/* Interface index */
+	u_int scopeid;		/* Scope used for Multicasting */
 };
 
 /*

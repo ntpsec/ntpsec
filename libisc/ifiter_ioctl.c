@@ -401,6 +401,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	INSIST(sizeof(ifreq.ifr_name) <= sizeof(iter->current.name));
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, ifreq.ifr_name, sizeof(ifreq.ifr_name));
+	iter->current.ifindex = ifreq.ifr_index;	/* Save the if index */
 
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&ifrp->ifr_addr);
@@ -601,9 +602,12 @@ internal_current6(isc_interfaceiter_t *iter) {
 	INSIST(sizeof(lifreq.lifr_name) <= sizeof(iter->current.name));
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, lifreq.lifr_name, sizeof(lifreq.lifr_name));
+	iter->current.ifindex = lifreq.lifr_index;	/* Save the if index */
 
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&lifreq.lifr_addr);
+
+	iter->current.scopeid = get_scopeid(family, (struct sockaddr *)&lifreq.lifr_addr);
 
 	/*
 	 * If the interface does not have a address ignore it.

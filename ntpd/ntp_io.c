@@ -403,6 +403,10 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		itf->flags |= INT_LOOPBACK;
 	if((isc_if->flags & INTERFACE_F_POINTTOPOINT) != 0)
 		itf->flags |= INT_PPP;
+
+	/* Copy the scopeid and the interface index */
+	itf->ifindex = isc_if->ifindex;
+	itf->scopeid = isc_if->scopeid;
 }
 /*
  * create_sockets - create a socket for each interface plus a default
@@ -770,6 +774,7 @@ io_multicast_add(
 		memset((char *)&mreq6, 0, sizeof(mreq6));
 		memset((char *)&inter_list[i], 0, sizeof(struct interface));
 		sin6p->sin6_family = AF_INET6;
+		sin6p->sin6_scope_id = inter_list[i].scopeid;
 		sin6p->sin6_addr = iaddr6;
 		sin6p->sin6_port = htons(NTP_PORT);
 
@@ -810,7 +815,7 @@ io_multicast_add(
 		 * enable reception of multicast packets
 		 */
 		mreq6.ipv6mr_multiaddr = iaddr6;
-		mreq6.ipv6mr_interface = 0;
+		mreq6.ipv6mr_interface = inter_list[i].ifindex;
 		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		   (char *)&mreq6, sizeof(mreq6)) == -1)
 			netsyslog(LOG_ERR,
