@@ -1,5 +1,12 @@
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (receive): Keep track of packet versions.
+	Implement RES_LIMITED.
+	* include/ntp_config.h (CONF_RES_LIMITED): 
+	* include/ntp.h (RES_LIMITED): Leave the bits in the original
+	order.
+	From Dave Mills.
+
 	* util/timetrim.c:
 	* util/Makefile.am:
 	* ntpdc/ntpdc_ops.c:

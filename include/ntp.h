@@ -747,12 +747,12 @@ struct restrictlist {
 #define	RES_NOPEER		0x020	/* don't allocate memory resources */
 #define	RES_NOTRAP		0x040	/* don't allow him to set traps */
 #define	RES_LPTRAP		0x080	/* traps set by him are low priority */
-#define RES_VERSION		0x100	/* serve only current version */
-#define RES_LIMITED		0x200   /* limit per net number of clients */
+#define RES_LIMITED		0x100   /* limit per net number of clients */
+#define	RES_VERSION		0x200	/* serve only current version */
 
 #define	RES_ALLFLAGS \
     (RES_IGNORE|RES_DONTSERVE|RES_DONTTRUST|RES_NOQUERY\
-    |RES_NOMODIFY|RES_NOPEER|RES_NOTRAP|RES_LPTRAP|RES_LIMITED)
+    |RES_NOMODIFY|RES_NOPEER|RES_NOTRAP|RES_LPTRAP|RES_LIMITED|RES_VERSION)
 
 /*
  * Match flags

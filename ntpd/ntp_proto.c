@@ -306,24 +306,27 @@ receive(
 	if (restrict_mask & RES_IGNORE)
 		return;				/* no amything */
 	pkt = &rbufp->recv_pkt;
-	if (PKT_VERSION(pkt->li_vn_mode) >= NTP_VERSION)
+	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
 		sys_newversionpkt++;
-	else if (PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION)
+	} else if (restrict_mask & RES_VERSION) {
+		sys_unknownversion++;		/* unknown version */
+		return;
+	} else if (PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
 		sys_oldversionpkt++;
-	else {
+	} else {
 		sys_unknownversion++;		/* unknown version */
 		return;
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY)
-		    return;			/* no query private */
+			return;			/* no query private */
 		process_private(rbufp, ((restrict_mask &
 		    RES_NOMODIFY) == 0));
 		return;
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_CONTROL) {
 		if (restrict_mask & RES_NOQUERY)
-		    return;			/* no query control */
+			return;			/* no query control */
 		process_control(rbufp, restrict_mask);
 		return;
 	}

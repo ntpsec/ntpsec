@@ -118,7 +118,7 @@ install_sh = @install_sh@
 
 
 AUTOMAKE_OPTIONS = ansi2knr
-bin_PROGRAMS = ntp-genkeys @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@
+bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-genkeys
 EXTRA_PROGRAMS = byteorder hist jitter kern longsize ntptime \
 precision sht testrs6000 tickadj timetrim
 
@@ -141,8 +141,8 @@ CONFIG_CLEAN_FILES =
 EXTRA_PROGRAMS = byteorder$(EXEEXT) hist$(EXEEXT) jitter$(EXEEXT) \
 kern$(EXEEXT) longsize$(EXEEXT) ntptime$(EXEEXT) precision$(EXEEXT) \
 sht$(EXEEXT) testrs6000$(EXEEXT) tickadj$(EXEEXT) timetrim$(EXEEXT)
-bin_PROGRAMS = ntp-genkeys$(EXEEXT) @MAKE_NTPTIME@ @MAKE_TICKADJ@ \
-@MAKE_TIMETRIM@
+bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
+ntp-genkeys$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 
