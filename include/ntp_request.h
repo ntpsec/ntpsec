@@ -111,7 +111,9 @@
 /*
  * A request packet.  These are almost a fixed length.
  */
+
 #define MAXFILENAME	128		/* max key file name length */
+					/* NOTE: also in ntp.h */
 
 struct req_pkt {
 	u_char rm_vn_mode;		/* response, more, version, mode */
@@ -120,7 +122,7 @@ struct req_pkt {
 	u_char request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
-	char data[32];			/* data area (144 byte max) */
+	char data[MAXFILENAME + 16];	/* data area [32 prev](144 byte max) */
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* encryption key */
 	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */

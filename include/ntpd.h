@@ -76,7 +76,6 @@ extern	void	ntp_res_recv	P((void));
 extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
-extern	struct interface *findbcastinter P((struct sockaddr_in *));
 extern	struct interface *findinterface P((struct sockaddr_in *));
 
 extern	void	init_io 	P((void));
@@ -124,7 +123,7 @@ extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_in *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_in *, struct interface *, int, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
-extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, int, keyid_t));
+extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_int, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
@@ -133,7 +132,7 @@ extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
 extern	void	expire_all	P((void));
-extern	struct	peer *findmanycastpeer	P((l_fp *));
+extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
 
 /* ntp_proto.c */
 extern	void	transmit	P((struct peer *));
@@ -252,7 +251,6 @@ extern u_long	io_timereset;		/* time counters were reset */
  */
 extern struct interface *any_interface;	/* default interface */
 extern struct interface *loopback_interface; /* loopback interface */
-extern struct interface *mcast_interface; /* multicast interface */
 
 /*
  * File descriptor masks etc. for call to select

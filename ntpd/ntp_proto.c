@@ -177,7 +177,7 @@ transmit(
 			 * keylist, since no further transmissions will
 			 * be made.
 			 */
-			peer->flags &= ~FLAG_IBURST;
+			peer->flags &= ~FLAG_BURST;
 			if (peer->flags & FLAG_MCAST2) {
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
@@ -192,20 +192,20 @@ transmit(
 
 	/*
 	 * We need to be very careful about honking uncivilized time. If
-	 * not in broadcast mode transmit except when in broadcast
-	 * client mode. Furthermore, don't transmit if in anycast client
-	 * mode and there are at least 3 surviving sources. If in
-	 * broadcast mode transmit only if synchronized to a valid,
-	 * synchronized source. However, do not transmit if this is the
-	 * local clock driver and the driver is not the prefer peer.
+	 * in broadcast mode, transmit only if synchronized to a valid
+	 * source and this is not the local clock driver configured as
+	 * the prefer peer. If not in broadcast mode. transmit only if
+	 * not broadcast client mode and not in anycast mode with more
+	 * than 3 surviving sources.
 	 */
-	if (peer->hmode != MODE_BROADCAST) {
+	if (peer->hmode == MODE_BROADCAST) {
+		if (!(sys_leap == LEAP_NOTINSYNC ||
+		    (sys_peer->refclktype == REFCLK_LOCALCLOCK &&
+		    sys_peer->flags & FLAG_PREFER)))
+			peer_xmit(peer);
+	} else {
 		if (peer->hmode != MODE_BCLIENT && !((peer->cast_flags &
 		    MDF_ACAST) && sys_survivors >= NTP_MINCLOCK))
-			peer_xmit(peer);
-	} else if (sys_peer != NULL && sys_leap != LEAP_NOTINSYNC) {
-		if (!(sys_peer->refclktype == REFCLK_LOCALCLOCK &&
-		    !(sys_peer->flags & FLAG_PREFER)))
 			peer_xmit(peer);
 	}
 	peer->outdate = current_time;
@@ -248,9 +248,9 @@ receive(
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
 	if (debug > 2)
-		printf("receive: at %ld %s restrict %02x\n",
-		    current_time, ntoa(&rbufp->recv_srcadr),
-		    restrict_mask);
+		printf("receive: at %ld %s<-%s restrict %02x\n",
+		    current_time, ntoa(&rbufp->dstadr->sin),
+		    ntoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
 	if (restrict_mask & RES_IGNORE)
 		return;				/* no amything */
@@ -311,8 +311,7 @@ receive(
 			return;			/* invalid mode */
 		}
 	}
-	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
-	    !sys_bclient) || rbufp->dstadr == any_interface)
+	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST && !sys_bclient))
 		return;
 
 	/*
@@ -378,9 +377,9 @@ receive(
 	if (has_mac == 0) {
 #ifdef DEBUG
 		if (debug)
-			printf("receive: at %ld %s mode %d code %d\n",
-			    current_time, ntoa(&rbufp->recv_srcadr),
-			    hismode, retcode);
+			printf("receive: at %ld %s<-%s mode %d code %d\n",
+			    current_time, ntoa(&rbufp->dstadr->sin),
+			    ntoa(&rbufp->recv_srcadr), hismode, retcode);
 #endif
 	} else {
 #ifdef AUTOKEY
@@ -472,9 +471,10 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "receive: at %ld %s mode %d code %d keyid %08x len %d mac %d auth %d\n",
-			    current_time, ntoa(&rbufp->recv_srcadr),
-			    hismode, retcode, skeyid, authlen, has_mac,
+			    "receive: at %ld %s<-%s mode %d code %d keyid %08x len %d mac %d auth %d\n",
+			    current_time, ntoa(&rbufp->dstadr->sin),
+			    ntoa(&rbufp->recv_srcadr), hismode, retcode,
+			    skeyid, authlen, has_mac,
 			    is_authentic);
 #endif
 	}
@@ -503,9 +503,6 @@ receive(
 		 * zero to tell the caller about this.
 		 */
 		if (!sys_bclient || sys_manycastserver) {
-			if (IN_CLASSD(
-			    ntohl(dstadr_sin->sin_addr.s_addr)))
-				rbufp->dstadr = mcast_interface;
 			if (is_authentic)
 				fast_xmit(rbufp, MODE_SERVER, skeyid);
 			else
@@ -517,45 +514,41 @@ receive(
 
 		/*
 		 * This could be in response to a multicast packet sent
-		 * by the "manycast" mode association. Find peer based
-		 * on the originate timestamp in the packet. Note that
-		 * we don't mobilize a new association, unless the
-		 * packet is properly authenticated. The response must
-		 * be properly authenticated and it's darn funny of the
-		 * manycaster isn't around now. 
+		 * by the "manycast" mode association. Note that we
+		 * don't require cryptographic authentication at this
+		 * point, since the server used the wildcard interface
+		 * and can't construct the correct cryptosum. Not to
+		 * worry; the originate timestamp is a good nonce to
+		 * reliably associate the reply with what was sent. If
+		 * there is no match, that's curious but nonfatal. Just
+		 * ignore it. Bad manners to respond if we are not
+		 * synchronized to something.
 		 */
-		if (sys_authenticate && !is_authentic) {
-			is_error = 1;
-			break;
-		}
-		peer2 = (struct peer *)findmanycastpeer(&pkt->org);
-		if (peer2 == 0) {
-			is_error = 1;
-			break;
-		}
+		if (sys_leap == LEAP_NOTINSYNC)
+			return;
+		peer2 = findmanycastpeer(rbufp);
+		if (peer2 == 0)
+			return;
 
 		/*
 		 * Create a new association and copy the peer variables
-		 * to it. If something goes wrong, carefully pry the new
-		 * association away and return its marbles to the candy
-		 * store.
+		 * to it. If something goes wrong, just ignore it. We
+		 * know the packet failed authentication, anyway, so
+		 * just toss it.
 		 */
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		peer = newpeer(&rbufp->recv_srcadr, any_interface,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST |
-		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)), 0,
-		    skeyid);
-		if (peer == 0) {
-			is_error = 1;
-			break;
-		}
-		peer->cast_flags |= peer2->flags & MDF_ACAST;
+		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
+		    MDF_UCAST, 0, skeyid);
+		if (peer == 0)
+			return;
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
 			    peer->associd);
 #endif /* PUBKEY */
-		break;
+		return;
 
 	case AM_ERR:
 
@@ -579,7 +572,8 @@ receive(
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, 0, skeyid);
+	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
+		    skeyid);
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
@@ -598,12 +592,12 @@ receive(
 			is_error = 1;
 			break;
 		}
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		peer = newpeer(&rbufp->recv_srcadr, any_interface,
 		    MODE_MCLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, 0, skeyid);
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST1 | FLAG_MCAST2 |
+		    FLAG_BURST, MDF_UCAST, 0, skeyid);
 		if (peer == 0)
 			break;
-		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_IBURST;
 		peer->hmode = MODE_CLIENT;
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
@@ -885,8 +879,8 @@ process_packet(
 	 * The header is valid. Capture the remaining header values and
 	 * mark as reachable.
 	 */
-	record_raw_stats(&peer->srcadr, &peer->dstadr->sin,
-	    &p_org, &p_rec, &p_xmt, &peer->rec);
+	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
+	    &p_rec, &p_xmt, &peer->rec);
 	peer->leap = PKT_LEAP(pkt->li_vn_mode);
 	peer->pmode = pmode;		/* unspec */
 	peer->stratum = PKT_TO_STRATUM(pkt->stratum);
@@ -1837,22 +1831,9 @@ peer_xmit(
 	)
 {
 	struct pkt xpkt;	/* transmit packet */
-	int find_rtt;
-	struct interface *dstadr;
 	int sendlen, pktlen;
 	keyid_t xkeyid;		/* transmit key ID */
 	l_fp xmt_tx;
-
-	/*
-	 * Nonsense time. If multicast or if the interface is not bound,
-	 * use the multicast interface. Mommy swat me for this is ugly.
-	 */
-	find_rtt = (peer->cast_flags & MDF_MCAST) && peer->hmode !=
-	    MODE_BROADCAST;
-	if (find_rtt || peer->dstadr == any_interface)
-		dstadr = mcast_interface;
-	else
-		dstadr = peer->dstadr;
 
 	/*
 	 * Initialize transmit packet header fields.
@@ -1884,15 +1865,14 @@ peer_xmit(
 	if (!(peer->flags & FLAG_AUTHENABLE)) {
 		get_systime(&peer->xmt);
 		HTONL_FP(&peer->xmt, &xpkt.xmt);
-		sendpkt(&peer->srcadr, dstadr, ((peer->cast_flags &
-		    MDF_MCAST) && !find_rtt) ? ((peer->cast_flags &
-		    MDF_ACAST) ? -7 : peer->ttl) : -8, &xpkt, sendlen);
+		sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt,
+		    sendlen);
 		peer->sent++;
 #ifdef DEBUG
 		if (debug)
-			printf("transmit: at %ld %s mode %d\n",
-			    current_time, ntoa(&peer->srcadr),
-			    peer->hmode);
+			printf("transmit: at %ld %s->%s mode %d\n",
+			    current_time, ntoa(&peer->dstadr->sin),
+			    ntoa(&peer->srcadr), peer->hmode);
 #endif
 		return;
 	}
@@ -1951,7 +1931,7 @@ peer_xmit(
 			 * it.
 			 */
 			if (peer->keynumber == 0)
-				make_keylist(peer, dstadr);
+				make_keylist(peer, peer->dstadr);
 			else
 				peer->keynumber--;
 			xkeyid = peer->keylist[peer->keynumber];
@@ -2116,8 +2096,8 @@ peer_xmit(
 		 * private value of zero. Most intricate.
 		 */
 		if (sendlen > LEN_PKT_NOMAC)
-			session_key(&dstadr->sin, &peer->srcadr, xkeyid,
-			    0, 2);
+			session_key(&peer->dstadr->sin, &peer->srcadr,
+			    xkeyid, 0, 2);
 	} 
 #endif /* AUTOKEY */
 	xkeyid = peer->keyid;
@@ -2135,9 +2115,7 @@ peer_xmit(
 		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
 		exit(-1);
 	}
-	sendpkt(&peer->srcadr, dstadr, ((peer->cast_flags &
-	    MDF_MCAST) && !find_rtt) ? ((peer->cast_flags & MDF_ACAST) ?
-	    -7 : peer->ttl) : -7, &xpkt, pktlen);
+	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, pktlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2156,17 +2134,19 @@ peer_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d index %d\n",
-		    current_time, ntoa(&peer->srcadr), peer->hmode,
-		    xkeyid, sendlen, pktlen - sendlen, peer->keynumber);
+		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d index %d\n",
+		    current_time, ntoa(&peer->dstadr->sin),
+		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
+		    pktlen - sendlen, peer->keynumber);
 #endif
 #else
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d\n",
-		    current_time, ntoa(&peer->srcadr), peer->hmode,
-		    xkeyid, sendlen, pktlen - sendlen);
+		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
+		    current_time, ntoa(&peer->dstadr->sin),
+		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
+		    pktlen - sendlen);
 #endif
 #endif /* AUTOKEY */
 }
@@ -2210,19 +2190,23 @@ fast_xmit(
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
 	 * is authenticated and contains a MAC. If not, the transmitted
-	 * packet is not authenticated.
+	 * packet is not authenticated. If the packet came in a
+	 * multicast interface, make sure it goes out the wildcard
+	 * interface.
 	 */
+	if (rbufp->dstadr->flags & INT_MULTICAST)
+		rbufp->dstadr = any_interface;
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
 		get_systime(&xmt_ts);
 		HTONL_FP(&xmt_ts, &xpkt.xmt);
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -10, &xpkt,
+		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
 #ifdef DEBUG
 		if (debug)
-			printf("transmit: at %ld %s mode %d\n",
-			    current_time, ntoa(&rbufp->recv_srcadr),
-			    xmode);
+			printf("transmit: at %ld %s->%s mode %d\n",
+			    current_time, ntoa(&rbufp->dstadr->sin),
+			    ntoa(&rbufp->recv_srcadr), xmode);
 #endif
 		return;
 	}
@@ -2280,7 +2264,7 @@ fast_xmit(
 		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
 		exit(-1);
 	}
-	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -9, &xpkt, pktlen);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, pktlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over the
@@ -2297,9 +2281,10 @@ fast_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d\n",
-		    current_time, ntoa(&rbufp->recv_srcadr),
-		    xmode, xkeyid, sendlen, pktlen - sendlen);
+		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
+		    current_time, ntoa(&rbufp->dstadr->sin),
+		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen,
+		    pktlen - sendlen);
 #endif
 }
 

@@ -1,5 +1,19 @@
 2000-11-26  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k11
+
+	* ntpd/ntp_proto.c (transmit): 
+	* ntpd/ntp_peer.c: 
+	* ntpd/ntp_io.c: 
+	* ntpd/ntp_control.c (ctl_putpeer): 
+	* ntpd/ntp_config.c (getconfig): 
+	* include/ntpd.h: mcast/ucast interface cleanup.
+	From: Dave Mills
+
+	* include/ntp_request.h: Put data[] as MAXFILENAME+16.  This will
+	fix the conf_peer requests again, but re-break compatibility with
+	old versions of the daemon.  Sigh.
+
 	* util/ntp-genkeys.c (cleanlinks): Don't do it if nosymlinks.
 
 2000-11-19  Harlan Stenn  <stenn@whimsy.udel.edu>

@@ -1394,13 +1394,8 @@ ctl_putpeer(
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[CP_DSTADR].text, peer->processed ?
-		    peer->cast_flags & MDF_BCAST ?
-		    peer->dstadr->bcast.sin_addr.s_addr:
-		    peer->cast_flags ?
-		    peer->dstadr->sin.sin_addr.s_addr ?
-		    peer->dstadr->sin.sin_addr.s_addr:
-		    peer->dstadr->bcast.sin_addr.s_addr: 8 : 12);
+		ctl_putadr(peer_var[CP_DSTADR].text,
+		    peer->dstadr->sin.sin_addr.s_addr);
 		break;
 
 	case CP_DSTPORT:

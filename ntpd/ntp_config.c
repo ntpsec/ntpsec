@@ -765,8 +765,7 @@ getconfig(
 				errflg = 1;
 			}
 			if (errflg == 0) {
-			    if (peer_config(&peeraddr,
-				    (struct interface *)0, hmode,
+			    if (peer_config(&peeraddr, any_interface, hmode,
 				    peerversion, minpoll, maxpoll, peerflags,
 				    ttl, peerkey, peerkeystr) == 0) {
 					msyslog(LOG_ERR,

@@ -118,9 +118,8 @@ u_long io_timereset;		/* time counters were reset */
  */
 struct interface *any_interface;	/* default interface */
 struct interface *loopback_interface;	/* loopback interface */
-struct interface *mcast_interface;	/* multicast interface */
-static	struct interface inter_list[MAXINTERFACES];
-static	int ninterfaces;
+struct interface inter_list[MAXINTERFACES];
+int ninterfaces;
 
 #ifdef REFCLOCK
 /*
@@ -601,16 +600,9 @@ create_sockets(
 	ninterfaces = i;
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
-
-	/*
-	 * There is a crock here. We set mcast_interface to the first
-	 * non-loopback interface.
-	 */
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
 		    inter_list[i].flags & INT_BROADCAST, 0);
-		if (!(inter_list[i].flags & INT_LOOPBACK))
-			mcast_interface = &inter_list[i];
 	}
 
 	/*
@@ -652,8 +644,6 @@ create_sockets(
 #ifdef DEBUG
 	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);
-		printf("multicast %s\n",
-		    inet_ntoa(mcast_interface->sin.sin_addr));
 		for (i = 0; i < ninterfaces; i++) {
 			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x\n",
 			       i,
@@ -1125,7 +1115,7 @@ findbcastinter(
 		    return &inter_list[i];
 	}
 #endif /* SIOCGIFCONF */
-	return mcast_interface;
+	return (0);
 }
 
 
@@ -1175,18 +1165,20 @@ sendpkt(
 #endif
 
 #ifdef MCAST
-	/* for the moment we use the bcast option to set multicast ttl */
-	if (ttl >= 0 && ttl != inter->last_ttl)
-	{
+	/*
+	 * for the moment we use the bcast option to set multicast ttl
+	 */
+	if (inter->flags & INT_MULTICAST && ttl != inter->last_ttl) {
 		char mttl = ttl;
 
-		/* set the multicast ttl for outgoing packets */
+		/*
+		 * set the multicast ttl for outgoing packets
+		 */
 		if (setsockopt(inter->fd, IPPROTO_IP, IP_MULTICAST_TTL,
-			       &mttl, sizeof(mttl)) == -1)
-		{
+		    &mttl, sizeof(mttl)) == -1)
 			msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: %m");
-		}
-		else inter->last_ttl = ttl;
+		else
+			inter->last_ttl = ttl;
 	}
 #endif /* MCAST */
 
@@ -1478,8 +1470,8 @@ input_handler(
 	}
 #ifdef DEBUG
 	if (debug > 2)
-	    printf("input_handler: fd=%d length %d from %08lx %s\n",
-		   fd, rb->recv_length,
+	    printf("input_handler: if=%d fd=%d length %d from %08lx %s\n",
+		   i, fd, rb->recv_length,
 		   (u_long)ntohl(rb->recv_srcadr.sin_addr.s_addr) &
 		   0x00000000ffffffff,
 		   inet_ntoa(rb->recv_srcadr.sin_addr));

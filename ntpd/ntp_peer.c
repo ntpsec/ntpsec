@@ -72,9 +72,14 @@ int AM[AM_MODES][AM_MODES] = {
  * and the maintenance of the peer hash table.  The two main entry
  * points are findpeer(), which looks for corresponding peer data
  * in the peer list, newpeer(), which allocates a new peer structure
- * and adds it to the list, and unpeer(), which demobilizes the association
- * and deallocates the structure.
+ * and adds it to the list, and unpeer(), which demobilizes the
+ * association and deallocates the structure.
  */
+/*
+ * Interface list for broadcast
+ */
+extern struct interface inter_list[];
+extern int ninterfaces;
 
 /*
  * The peer hash table (imported by the protocol module).
@@ -230,14 +235,14 @@ findexistingpeer(
 		if (NSRCADR(addr) == NSRCADR(&peer->srcadr)
 		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)) {
 			if (mode == -1)
-				return peer;
+				return (peer);
 			else if (peer->hmode == mode)
 				break;
 		}
 		peer = peer->next;
 	}
 
-	return peer;
+	return (peer);
 }
 
 
@@ -261,26 +266,32 @@ findpeer(
 	for (peer = peer_hash[hash]; peer != 0; peer = peer->next) {
 		if (NSRCADR(srcadr) == NSRCADR(&peer->srcadr)
 		    && NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+
 			/* 
-			 * if the association matching rules determine that
-			 * this is not a valid combination, then look for
-			 * the next valid peer association.
+			 * if the association matching rules determine
+			 * that this is not a valid combination, then
+			 * look for the next valid peer association.
 			 */
 			*action = MATCH_ASSOC(peer->hmode, pkt_mode);
 
 			/*
 			 * Sigh!  Check if BCLIENT peer in client
-			 * server mode, else return error
+			 * server mode, else return error.
 			 */
 			if ((*action == AM_POSSBCL) && !(peer->flags &
 			    FLAG_MCAST1))
 				*action = AM_ERR;
 
-			/* if an error was returned, exit back right here */
+			/*
+			 * if an error was returned, exit back right
+			 * here.
+			 */
 			if (*action == AM_ERR)
-				return (struct peer *)0;
+				return ((struct peer *)0);
 
-			/* if a match is found, we stop our search */
+			/*
+			 * if a match is found, we stop our search.
+			 */
 			if (*action != AM_NOMATCH)
 				break;
 		}
@@ -291,15 +302,10 @@ findpeer(
 	 */
 	if (peer == 0) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-		return (struct peer *)0;
+		return ((struct peer *)0);
 	}
-
-	/*
-	 * Reset the default interface to something more meaningful
-	 */
-	if ((peer->dstadr == any_interface))
-		peer->dstadr = dstadr;
-	return peer;
+	peer->dstadr = dstadr;
+	return (peer);
 }
 
 /*
@@ -318,51 +324,51 @@ findpeerbyassoc(
 	hash = assoc & HASH_MASK;
 	for (peer = assoc_hash[hash]; peer != 0; peer = peer->ass_next) {
 		if (assoc == peer->associd)
-		    return peer;	/* got it! */
+		    return (peer);	/* got it! */
 	}
 
 	/*
 	 * Out of luck.  Return 0.
 	 */
-	return (struct peer *)0;
+	return ((struct peer *)0);
 }
 
 /*
- * findmanycastpeer - find and return an manycast peer if it exists
+ * findmanycastpeer - find and return a manycast peer
  *
- *
- *   the current implementation loops across all hash-buckets
- *
- *        *** THERE IS AN URGENT NEED TO CHANGE THIS ***
+ * We search the peer list for unique associations that match the
+ * originate timestamp, but avoid duplicate source addresses.
  */
 struct peer *
 findmanycastpeer(
-	l_fp *p_org
+	struct recvbuf *rbufp
 	)
 {
 	register struct peer *peer;
 	register struct peer *manycast_peer = 0;
-	int i = 0;
+	struct pkt *pkt;
+	l_fp p_org;
+	int i;
 
+	pkt = &rbufp->recv_pkt;
 	for (i = 0; i < HASH_SIZE; i++) {
 		if (peer_hash_count[i] == 0)
 			continue;
 
-		for (peer = peer_hash[i]; peer != 0; peer = peer->next) {
+		for (peer = peer_hash[i]; peer != 0; peer =
+		    peer->next) {
+			if (NSRCADR(&rbufp->srcadr) ==
+			    NSRCADR(&peer->srcadr))
+				return (0);
 			if (peer->cast_flags & MDF_ACAST &&
 			    peer->flags & FLAG_CONFIG) {
-				if (L_ISEQU(&peer->xmt, p_org))
-					return peer; /* got it */
-				else
+				NTOHL_FP(&pkt->org, &p_org);
+				if (L_ISEQU(&peer->xmt, &p_org))
 					manycast_peer = peer;
 			}
 		}
 	}
-
-	/*
-	 * Out of luck.  Return the manycastpeer for what it is worth.
-	 */
-	return manycast_peer;
+	return (manycast_peer);
 }
 
 
@@ -501,6 +507,10 @@ unpeer(
 
 /*
  * peer_config - configure a new peer
+ *
+ * This routine mobilizes and configures an association. In case of
+ * broadcast, mulitcast or anycast, an association is mobilized for each
+ * interface. In case of virtual interfaces, this thing could go nuts.
  */
 struct peer *
 peer_config(
@@ -517,10 +527,14 @@ peer_config(
 	)
 {
 	register struct peer *peer;
+	int i;
+	u_int cast_flags;
 
 	/*
-	 * See if we have this guy in the tables already.  If
-	 * so just mark him configured.
+	 * We first search from the beginning for an association with
+	 * given remote address and mode. If an interface given, search
+	 * from there to find the association which matches that
+	 * destination.
 	 */
 	peer = findexistingpeer(srcadr, (struct peer *)0, hmode);
 	if (dstadr != 0) {
@@ -532,7 +546,34 @@ peer_config(
 	}
 
 	/*
-	 * If we found one, just change his mode and mark him configured.
+	 * We do a dirty little jig to figure the cast flags. This is
+	 * probably not the best place to do this, at least until the
+	 * configure code is rebuilt.
+	 */
+	switch (hmode) {
+
+	case MODE_BROADCAST:
+		if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)))
+			cast_flags = MDF_MCAST;
+		else
+			cast_flags = MDF_BCAST;
+		break;
+
+	case MODE_CLIENT:
+		if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)))
+			cast_flags = MDF_ACAST;
+		else
+			cast_flags = MDF_UCAST;
+		break;
+
+	default:
+		cast_flags = MDF_UCAST;
+		break;
+	}
+
+	/*
+	 * If the peer is already configured, some dope has a duplicate
+	 * configureation entry or another dope is wiggling from afar.
 	 */
 	if (peer != 0) {
 		peer->hmode = (u_char)hmode;
@@ -543,30 +584,33 @@ peer_config(
 		peer->ppoll = peer->minpoll;
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
-		peer->cast_flags = (hmode == MODE_BROADCAST) ?
-		    IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)) ?
-		    MDF_MCAST : MDF_BCAST : MDF_UCAST;
+		peer->cast_flags = cast_flags;
 		peer->ttl = (u_char)ttl;
 		peer->keyid = key;
-	} else {
-
-		/*
-		 * If we're here this guy is unknown to us.  Make a new peer
-		 * structure for him.
-		 */
-		peer = newpeer(srcadr, dstadr, hmode, version, minpoll,
-		    maxpoll, flags | FLAG_CONFIG, ttl, key);
-		if (peer == 0)
-			return (peer);
-	}
-#ifdef PUBKEY
-	if (!(peer->flags & FLAG_SKEY) || peer->hmode == MODE_BROADCAST)
 		return (peer);
-/* following line commented out until resolver is fixed
-	crypto_public(peer, keystr, 0);
-*/
-#endif /* PUBKEY */
-	return (peer);
+	}
+
+	/*
+	 * If we're here this guy is unknown to us. Make a new
+	 * persistent association and initialize its variables. If
+	 * multicast or anycast mode, mobilize associations for all
+	 * interfaces except the wildcard and loopback.
+	 */
+	if (cast_flags & (MDF_MCAST | MDF_ACAST)) {
+		for (i = 1; i <= ninterfaces; i++) {
+			if (SRCADR(&inter_list[i].sin) == 0x7f000001)
+				continue;
+			if (SRCADR(&inter_list[i].sin) == 0x00000000)
+				continue;
+			peer = newpeer(srcadr, &inter_list[i], hmode,
+			    version, minpoll, maxpoll, flags |
+			    FLAG_CONFIG, cast_flags, ttl, key);
+		}
+	} else {
+		peer = newpeer(srcadr, dstadr, hmode, version, minpoll,
+		    maxpoll, flags | FLAG_CONFIG, cast_flags, ttl, key);
+	}
+	return(peer);
 }
 
 
@@ -582,6 +626,7 @@ newpeer(
 	int minpoll,
 	int maxpoll,
 	u_int flags,
+	u_int cast_flags,
 	int ttl,
 	keyid_t key
 	)
@@ -610,20 +655,8 @@ newpeer(
 	 */
 	memset((char *)peer, 0, sizeof(struct peer));
 	peer->srcadr = *srcadr;
-	if (dstadr != 0)
-		peer->dstadr = dstadr;
-	else if (hmode == MODE_BROADCAST)
-		peer->dstadr = findbcastinter(srcadr);
-	else
-		peer->dstadr = any_interface;
-	peer->cast_flags = (hmode == MODE_BROADCAST) ?
-	    (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr))) ? MDF_MCAST :
-	    MDF_BCAST : (hmode == MODE_BCLIENT || hmode == MODE_MCLIENT) ?
-	    (peer->dstadr->flags & INT_MULTICAST) ? MDF_MCAST : MDF_BCAST :
-	    MDF_UCAST;
-	/* Set manycast flags if appropriate */
-	if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)) && hmode == MODE_CLIENT)
-		peer->cast_flags = MDF_ACAST;
+	peer->dstadr = dstadr;
+	peer->cast_flags = cast_flags;
 	peer->hmode = (u_char)hmode;
 	peer->keyid = key;
 	peer->version = (u_char)version;
@@ -640,10 +673,12 @@ newpeer(
 	peer->stratum = STRATUM_UNSPEC;
 	peer_clear(peer);
 	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) - 1));
+	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) -
+	    1));
 
 	/*
-	 * Assign him an association ID and increment the system variable
+	 * Assign him an association ID and increment the system
+	 * variable.
 	 */
 	peer->associd = current_association_ID;
 	if (++current_association_ID == 0)
@@ -655,7 +690,6 @@ newpeer(
 	peer->timereset = current_time;
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
-
 #ifdef REFCLOCK
 	if (ISREFCLOCKADR(&peer->srcadr)) {
 		/*
@@ -671,7 +705,7 @@ newpeer(
 			peer->next = peer_free;
 			peer_free = peer;
 			peer_free_count++;
-			return 0;
+			return (0);
 		}
 	}
 #endif
@@ -683,7 +717,6 @@ newpeer(
 	peer->next = peer_hash[i];
 	peer_hash[i] = peer;
 	peer_hash_count[i]++;
-
 	i = peer->associd & HASH_MASK;
 	peer->ass_next = assoc_hash[i];
 	assoc_hash[i] = peer;
@@ -691,12 +724,13 @@ newpeer(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "newpeer: %s mode %d vers %d min %d max %d flags 0x%04x ttl %d key %08x\n",
-		    ntoa(&peer->srcadr), peer->hmode, peer->version,
-		    peer->minpoll, peer->maxpoll, peer->flags, peer->ttl,
-		    peer->keyid);
+		    "newpeer: %s->%s mode %d vers %d poll %d %d flags %x %x ttl %d key %08x\n",
+		    ntoa(&peer->dstadr->sin), ntoa(&peer->srcadr),
+		    peer->hmode, peer->version, peer->minpoll,
+		    peer->maxpoll, peer->flags, peer->cast_flags,
+		    peer->ttl, peer->keyid);
 #endif
-	return peer;
+	return (peer);
 }
 
 
@@ -719,14 +753,15 @@ peer_unconfig(
 		if (peer->flags & FLAG_CONFIG
 		    && (dstadr == 0 || peer->dstadr == dstadr)) {
 			num_found++;
+
 			/*
-			 * Tricky stuff here.  If the peer is polling us
-			 * in active mode, turn off the configuration bit
-			 * and make the mode passive.  This allows us to
-			 * avoid dumping a lot of history for peers we
-			 * might choose to keep track of in passive mode.
-			 * The protocol will eventually terminate undesirables
-			 * on its own.
+			 * Tricky stuff here. If the peer is polling us
+			 * in active mode, turn off the configuration
+			 * bit and make the mode passive. This allows us
+			 * to avoid dumping a lot of history for peers
+			 * we might choose to keep track of in passive
+			 * mode. The protocol will eventually terminate
+			 * undesirables on its own.
 			 */
 			if (peer->hmode == MODE_ACTIVE
 			    && peer->pmode == MODE_ACTIVE) {
@@ -739,7 +774,7 @@ peer_unconfig(
 		}
 		peer = findexistingpeer(srcadr, peer, mode);
 	}
-	return num_found;
+	return (num_found);
 }
 
 /*
