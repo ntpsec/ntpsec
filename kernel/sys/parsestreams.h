@@ -13,7 +13,7 @@
  */
 
 #if	!(defined(lint) || defined(__GNUC__))
-  static char sysparsehrcsid[] = "parsestreams.h,v 4.4 1998/06/14 21:09:32 kardel RELEASE_19990228_A";
+  static char sysparsehrcsid[] = "parsestreams.h,v 1.2 2004/11/14 16:11:05 kardel RELEASE_20041114_B";
 #endif
 
 #undef PARSEKERNEL

@@ -1,16 +1,36 @@
 /*
- * /src/NTP/ntp-4/libparse/clk_rawdcf.c,v 4.9 1999/12/06 13:42:23 kardel Exp
+ * /src/NTP/ntp4-dev/libparse/clk_rawdcf.c,v 4.12 2004/11/14 15:29:41 kardel RELEASE_20041114_B
  *  
- * clk_rawdcf.c,v 4.9 1999/12/06 13:42:23 kardel Exp
+ * clk_rawdcf.c,v 4.12 2004/11/14 15:29:41 kardel RELEASE_20041114_B
  *
  * Raw DCF77 pulse clock support
  *
- * Copyright (C) 1992-1998 by Frank Kardel
- * Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
- *                                    
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the author nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
  */
 
@@ -580,6 +600,9 @@ int clk_rawdcf_bs;
  * History:
  *
  * clk_rawdcf.c,v
+ * Revision 4.12  2004/11/14 15:29:41  kardel
+ * support PPSAPI, upgrade Copyright to Berkeley style
+ *
  * Revision 4.9  1999/12/06 13:42:23  kardel
  * transfer correctly converted time codes always into tcode
  *

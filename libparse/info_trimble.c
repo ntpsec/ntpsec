@@ -50,7 +50,6 @@ cmd_info_t trimble_scmds[] = {
 { 0xFF, "", "" }
 };
 
-
 cmd_info_t trimble_rcmds[] = {
 	{ CMD_RDATAA, "CMD_RDATAA", "data channel A configuration (0x3D)", "trimble_channelA", RO },
 	{ CMD_RALMANAC, "CMD_RALMANAC", "almanac data for sat (0x40)", "gps_almanac", RO },
@@ -91,4 +90,3 @@ cmd_info_t trimble_rcmds[] = {
 	{ CMD_RSUPER, "CMD_RSUPER", "super paket (0x8F)", "", 0 },
 { 0xFF, "", "" }
 };
-
