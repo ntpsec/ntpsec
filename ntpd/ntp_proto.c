@@ -404,22 +404,16 @@ receive(
 
 	/*
 	 * Discard broadcast if not enabled as broadcast client. If
-	 * Autokey, the wildcard interface cannot be used, so dump
-	 * packets gettiing off the bus at that stop as well. This means
+	 * autokey, the wildcard interface cannot be used, so dump
+	 * packets getting off the bus at that stop as well. This means
 	 * that some systems with broken interface code, specifically
-	 * Linux, will not work with Autokey.
+	 * Linux, will not work with autokey.
 	 */
 	if (hismode == MODE_BROADCAST) {
 		if (!sys_bclient || restrict_mask & RES_NOPEER) {
 			sys_restricted++;
 			return;			/* no client */
 		}
-#ifdef OPENSSL
-		if (crypto_flags && rbufp->dstadr == any_interface) {
-			sys_restricted++;
-			return;			/* no client */
-		}
-#endif /* OPENSSL */
 	}
 
 	/*
@@ -538,8 +532,14 @@ receive(
 				 * broadcast address when available;
 				 * otherwise, use the unicast address
 				 * found when the association was
-				 * mobilized.
+				 * mobilized. However, if this is from
+				 * the wildcard interface, game over.
 				 */
+				if (crypto_flags && rbufp->dstadr ==
+				    any_interface) {
+					sys_restricted++;
+					return;	     /* no wildcard */
+				}
 				pkeyid = 0;
 				if (!SOCKNUL(&rbufp->dstadr->bcast))
 					dstadr_sin =
@@ -2364,7 +2364,7 @@ peer_xmit(
 {
 	struct pkt xpkt;	/* transmit packet */
 	int	sendlen, authlen;
-	keyid_t	xkeyid = 0;		/* transmit key ID */
+	keyid_t	xkeyid = 0;	/* transmit key ID */
 	l_fp	xmt_tx;
 
 	/*
@@ -2387,10 +2387,12 @@ peer_xmit(
 	 * is authenticated and contains a MAC. If not, the transmitted
 	 * packet is not authenticated.
 	 *
-	 * In the current I/O semantics the default interface is set
-	 * until after receiving a packet and setting the right
-	 * interface. So, the first packet goes out unauthenticated.
-	 * That's why the really icky test next is here.
+	 * It is most important when autokey is in use that the local
+	 * interface IP address be known before the first packet is
+	 * sent. Otherwise, it is not possible to compute a correct MAC
+	 * the recipient will accept. Thus, the I/O semantics have to do
+	 * a little more work. In particular, the wildcard interface
+	 * might not be usable.
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (!(peer->flags & FLAG_AUTHENABLE)) {
