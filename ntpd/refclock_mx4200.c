@@ -97,7 +97,7 @@ struct ppsclockev {
 /*
  * Check this every time you edit the code!
  */
-#define YEAR_RIGHT_NOW 1998
+#define YEAR_LAST_MODIFIED 2000
 
 /*
  * GPS Definitions
@@ -117,13 +117,6 @@ struct ppsclockev {
 
 /*
  * Position Averaging.
- * Reference: Dr. Thomas A. Clark's Totally Accurate Clock (TAC) files at
- * ftp://aleph.gsfc.nasa.gov/GPS/totally.accurate.clock/
- * For a 6-channel Motorola Oncore, he indicates that good nominal
- * HDOP and VDOP are 1.50 and 2.00 respectively.  Given the relationship
- * HDOP^2 = NDOP^2 + EDOP^2 and assuming EDOP and NDOP are equal, we
- * have a nominal NDOP = EDOP = sqrt((HDOP*HDOP)/2).  An 8-channel
- * Oncore does well with HDOP=1.20 and VDOP=1.70.
  */
 #define INTERVAL	1	/* Interval between position measurements (s) */
 #define AVGING_TIME	24	/* Number of hours to average */
@@ -141,12 +134,7 @@ struct mx4200unit {
 	double avg_lon;			/* average longitude */
 	double avg_alt;			/* average height */
 	double central_meridian;	/* central meridian */
-	double filt_lat;		/* latitude filter length */
-	double filt_lon;		/* longitude filter length */
-	double filt_alt;		/* height filter length */
-	double edop;			/* EDOP (east DOP) */
-	double ndop;			/* NDOP (north DOP) */
-	double vdop;			/* VDOP (vertical DOP) */
+	double N_fixes;			/* Number of position measurements */
 	int    last_leap;		/* leap second warning */
 	u_int  moving;			/* mobile platform? */
 	u_long sloppyclockflag;		/* fudge flags */
@@ -181,7 +169,6 @@ static	void	mx4200_poll	P((int, struct peer *));
 
 static	char *	mx4200_parse_t	P((struct peer *));
 static	char *	mx4200_parse_p	P((struct peer *));
-static	char *	mx4200_parse_d	P((struct peer *));
 static	char *	mx4200_parse_s	P((struct peer *));
 #ifdef QSORT_USES_VOID_P
 int	mx4200_cmpl_fp	P((const void *, const void *));
@@ -324,12 +311,7 @@ mx4200_config(
 	up->avg_lon     	= 0.0;
 	up->avg_alt     	= 0.0;
 	up->central_meridian	= NOT_INITIALIZED;
-	up->filt_lat    	= 0.0;
-	up->filt_lon    	= 0.0;
-	up->filt_alt    	= 0.0;
-	up->edop        	= 1;
-	up->ndop        	= 1;
-	up->vdop        	= 1;
+	up->N_fixes    		= 0.0;
 	up->last_leap   	= 0;	/* LEAP_NOWARNING */
 	up->clamp_time  	= current_time + (AVGING_TIME * 60 * 60);
 	up->log_time    	= current_time + SLEEPTIME;
@@ -419,7 +401,7 @@ mx4200_config(
 	    500,	/* max time error in ns */
 	    0,		/* user bias in ns */
 	    1);		/* output "830" sentences to control port */
-	/* Multi-satellite mode */
+			/* Multi-satellite mode */
 
 	/*
 	 * Output position information (to calculate fixed installation
@@ -431,21 +413,6 @@ mx4200_config(
 		add_mode = 1;	/* add to list */
 	}
 
-	/*
-	 * "007" Control Port Configuration
-	 * Output "022" DOPs
-	 */
-	mx4200_send(peer, "%s,%03d,%03d,%d,%d,,%d,,,", pmvxg,
-	    PMVXG_S_PORTCONF,
-	    PMVXG_D_DOPS, /* control port output block Label */
-	    0,		/* clear current output control list (0=no) */
-	    add_mode,	/* add/delete sentences from list (1=add, 2=del) */
-	    /* must be null */
-	    INTERVAL);	/* sentence output rate (sec) */
-	/* precision for position output */
-	/* nmea version for cga & gll output */
-	/* pass-through control */
-
 
 	/*
 	 * "007" Control Port Configuration
@@ -456,11 +423,11 @@ mx4200_config(
 	    PMVXG_D_PHV, /* control port output block Label */
 	    0,		/* clear current output control list (0=no) */
 	    add_mode,	/* add/delete sentences from list (1=add, 2=del) */
-	    /* must be null */
+	    		/* must be null */
 	    INTERVAL);	/* sentence output rate (sec) */
-	/* precision for position output */
-	/* nmea version for cga & gll output */
-	/* pass-through control */
+			/* precision for position output */
+			/* nmea version for cga & gll output */
+			/* pass-through control */
 }
 
 /*
@@ -487,21 +454,6 @@ mx4200_ref(
 	 * Set up to output status information in the near future
 	 */
 	up->log_time    = current_time + SLEEPTIME;
-
-	/*
-	 * "007" Control Port Configuration
-	 * Stop outputting "022" DOPs
-	 */
-	mx4200_send(peer, "%s,%03d,%03d,%d,%d,,,,,", pmvxg,
-	    PMVXG_S_PORTCONF,
-	    PMVXG_D_DOPS, /* control port output block Label */
-	    0,		/* clear current output control list (0=no) */
-	    2);		/* add/delete sentences from list (2=delete) */
-			/* must be null */
-	    		/* sentence output rate (sec) */
-			/* precision for position output */
-			/* nmea version for cga & gll output */
-			/* pass-through control */
 
 	/*
 	 * "007" Control Port Configuration
@@ -801,14 +753,8 @@ mx4200_receive(
 			return;
 		}
 		mx4200_debug(peer,
-		    "mx4200_receive: position avg %.9f %.9f %.4f\n",
-		    up->avg_lat, up->avg_lon, up->avg_alt);
-		mx4200_debug(peer,
-		    "mx4200_receive: position len %.4f %.4f %.4f\n",
-		    up->filt_lat, up->filt_lon, up->filt_alt);
-		mx4200_debug(peer,
-		    "mx4200_receive: position dop %.1f  %.1f  %.1f\n",
-		    up->ndop, up->edop, up->vdop);
+		    "mx4200_receive: position avg %f %.9f %.9f %.4f\n",
+		    up->N_fixes, up->avg_lat, up->avg_lon, up->avg_alt);
 		/*
 		 * Reinitialize as a reference station
 		 * if position is well known.
@@ -817,17 +763,6 @@ mx4200_receive(
 			up->known++;
 			mx4200_debug(peer, "mx4200_receive: reconfiguring!\n");
 			mx4200_ref(peer);
-		}
-		return;
-	}
-
-	/*
-	 * "022" DOPs, if we are still averaging our position
-	 */
-	if (sentence_type == PMVXG_D_DOPS && !up->known) {
-		if ((cp = mx4200_parse_d(peer)) != NULL) {
-			mx4200_debug(peer, "mx4200_receive: dop: %s\n", cp);
-			return;
 		}
 		return;
 	}
@@ -1029,7 +964,7 @@ mx4200_parse_t(
 	 * (Certainly can't be any year before this code was last altered!)
 	 */
 	if (day_of_month > 31 || month > 12 ||
-	    day_of_month <  1 || month <  1 || year < YEAR_RIGHT_NOW) {
+	    day_of_month <  1 || month <  1 || year < YEAR_LAST_MODIFIED) {
 		mx4200_debug(peer,
 		    "mx4200_parse_t: bad date (%4d-%02d-%02d)\n",
 		    year, month, day_of_month);
@@ -1250,7 +1185,7 @@ mx4200_parse_p(
 	struct refclockproc *pp;
 	struct mx4200unit *up;
 	int sentence_type, mode;
-	double mtime, lat, lon, alt, geoid, vele, veln, weight;
+	double mtime, lat, lon, alt, geoid, vele, veln;
 	char   north_south, east_west;
 
 	pp = peer->procptr;
@@ -1324,92 +1259,22 @@ mx4200_parse_p(
 	if (lon >  180.0) lon -= 360.0;
 
 	/*
-	 * Calculate running weighted averages
+	 * Calculate running averages
 	 */
-	weight = 1. / up->edop;
-	weight *= weight;
-	up->avg_lon = (up->filt_lon * up->avg_lon) + (weight * lon);
-	up->filt_lon += weight;
-	up->avg_lon = up->avg_lon / up->filt_lon;
 
-	weight = 1. / up->ndop;
-	weight *= weight;
-	up->avg_lat = (up->filt_lat * up->avg_lat) + (weight * lat);
-	up->filt_lat += weight;
-	up->avg_lat = up->avg_lat / up->filt_lat;
+	up->avg_lon = (up->N_fixes * up->avg_lon) + lon;
+	up->avg_lat = (up->N_fixes * up->avg_lat) + lat;
+	up->avg_alt = (up->N_fixes * up->avg_alt) + alt;
 
-	weight = 1. / up->vdop;
-	weight *= weight;
-	up->avg_alt = (up->filt_alt * up->avg_alt) + (weight * alt);
-	up->filt_alt += weight;
-	up->avg_alt = up->avg_alt / up->filt_alt;
+	up->N_fixes += 1.0;
+
+	up->avg_lon /= up->N_fixes;
+	up->avg_lat /= up->N_fixes;
+	up->avg_alt /= up->N_fixes;
 
 	mx4200_debug(peer,
-	    "mx4200_receive: position rdg %.9f %.9f %.4f (CM=%.9f)\n",
-	    lat, lon, alt, up->central_meridian);
-
-	return (NULL);
-}
-
-/*
- * Parse a mx4200 DOP sentence.
- *
- * A typical message looks like this.  Checksum has already been stripped.
- *
- * $PMVXG,022,SSSSSS.SSEE.E,NN.N,VV.V,XX,XX,XX,XX,XX,XX
- *
- *	Field	Field Contents
- *	-----	--------------
- *		Block Label: $PMVXG
- *		Sentence Type: 022=DOPs.  The DOP values in this sentence
- *			correspond to the satellites listed.  The PRNs in
- *			the message are listed in receiver channel number order
- *	1	UTC measurement time (seconds into week)
- *	2	EDOP (east DOP)
- *	3	NDOP (north DOP)
- *	4	VDOP (vertical DOP)
- *	5	PRN on channel 1
- *	6	PRN on channel 2
- *	7	PRN on channel 3
- *	8	PRN on channel 4
- *	9	PRN on channel 5
- *	10	PRN on channel 6
- *	11	PRN on channel 7  (12-channel receivers only)
- *	12	PRN on channel 8  (12-channel receivers only)
- *	13	PRN on channel 9  (12-channel receivers only)
- *	14	PRN on channel 10 (12-channel receivers only)
- *	15	PRN on channel 11 (12-channel receivers only)
- *	16	PRN on channel 12 (12-channel receivers only)
- */
-static char *
-mx4200_parse_d(
-	struct peer *peer
-	)
-{
-	struct refclockproc *pp;
-	struct mx4200unit *up;
-	int sentence_type;
-	double mtime, edop, ndop, vdop;
-
-	pp = peer->procptr;
-	up = (struct mx4200unit *)pp->unitptr;
-
-	/* Should never happen! */
-	if (up->moving) return ("mobile platform - no dop!");
-
-	sscanf ( pp->a_lastcode, "$PMVXG,%d,%lf,%lf,%lf,%lf",
-		&sentence_type, &mtime, &edop, &ndop, &vdop);
-
-	/* Sentence type */
-	if (sentence_type != PMVXG_D_DOPS)
-		return ("wrong rec-type");
-
-	/* Update values */
-	if (edop <= 0.0 || ndop <= 0.0 || vdop <= 0.0)
-		return ("nonpositive dop");
-	up->edop = edop;
-	up->ndop = ndop;
-	up->vdop = vdop;
+	    "mx4200_receive: position rdg %.0f: %.9f %.9f %.4f (CM=%.9f)\n",
+	    up->N_fixes, lat, lon, alt, up->central_meridian);
 
 	return (NULL);
 }

@@ -1,5 +1,13 @@
 2000-02-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_mx4200.c: Remove the DOP-weighted position
+	averaging code and revert to a simple mean average.  The weighted
+	average consistently produced a *worse* result.  Go figure. 
+	* html/mx4200data.htm: Cleanup, reflect current reality.
+	* html/driver9.htm: Cleanup, reflect current reality.
+	* html/copyright.htm: Cleanup, and credit where credit is due.
+	From: Marc.Brett@westgeo.com
+	
 	* ntpd/refclock_oncore.c: Cleanup/fixes
 	* html/driver30.htm: Cleanup
 	* html/Oncore-SHMEM.htm: Cleanup
