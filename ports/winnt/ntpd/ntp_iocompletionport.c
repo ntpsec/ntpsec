@@ -410,7 +410,6 @@ io_completion_port_sendto(
 #endif
 		return ERROR_INSUFFICIENT_BUFFER;
 	}
-	return Result;
 }
 
 
