@@ -243,6 +243,7 @@ create_sockets(
 	u_int port
 	)
 {
+	int ifstidx;				/* interface start index */
 #if _BSDI_VERSION >= 199510
 	int i, j;
 	struct ifaddrs *ifaddrs, *ifap;
@@ -268,6 +269,7 @@ create_sockets(
 	    printf("create_sockets(%d)\n", ntohs( (u_short) port));
 #endif
 
+	ifstidx = 0;
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
@@ -282,6 +284,7 @@ create_sockets(
 	inter_list[0].notsent = 0;
 	inter_list[0].flags = INT_BROADCAST;
 	any_interface = &inter_list[0];
+	ifstidx++;
 
 #ifdef HAVE_IPV6
 	/*
@@ -298,20 +301,18 @@ create_sockets(
 	inter_list[1].notsent = 0;
 	inter_list[1].flags = 0;
 	any6_interface = &inter_list[1];
+	ifstidx++;
 #endif
 
 #if _BSDI_VERSION >= 199510
+	i = ifstidx;
 #if 	_BSDI_VERSION >= 199701
 	if (getifaddrs(&ifaddrs) < 0)
 	{
 		msyslog(LOG_ERR, "getifaddrs: %m");
 		exit(1);
 	}
-#ifdef HAVE_IPV6
-	i = 2;
-#else
-	i = 1;
-#endif
+
 	for (ifap = ifaddrs; ifap != NULL; ifap = ifap->ifa_next)
 #else
 	    if (getifaddrs(&ifaddrs, &num_if) < 0)
@@ -319,12 +320,6 @@ create_sockets(
 		    msyslog(LOG_ERR, "create_sockets: getifaddrs() failed: %m");
 		    exit(1);
 	    }
-
-#ifdef HAVE_IPV6
-	i = 2;
-#else
-	i = 1;
-#endif
 
 	for (ifap = ifaddrs, lp = ifap + num_if; ifap < lp; ifap++)
 #endif
@@ -461,11 +456,7 @@ create_sockets(
 		exit(1);
 	}
 
-#ifdef HAVE_IPV6
-	i = 2;
-#else
-	i = 1;
-#endif
+	i = ifstidx;
 # if !defined(SYS_WINNT)
 	lifc.lifc_len = sizeof(buf);
 # endif
@@ -618,7 +609,13 @@ create_sockets(
 #  ifndef SYS_WINNT
 				inter_list[i].flags |= INT_LOOPBACK;
 #  endif /* not SYS_WINNT */
-				if (loopback_interface == 0)
+				/*
+				 * Prefer an IPv4 loopback address to make
+				 * the billboard look nice.
+				 */
+				if (loopback_interface == 0 ||
+				    loopback_interface->sin.ss_family ==
+				    AF_INET6)
 				{
 					loopback_interface = &inter_list[i];
 				}
@@ -777,7 +774,7 @@ create_sockets(
 	/*
 	 * Blacklist all bound interface addresses
 	 */
-	for (i = 2; i < ninterfaces; i++) {
+	for (i = ifstidx; i < ninterfaces; i++) {
 		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
