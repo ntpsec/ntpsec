@@ -12,7 +12,7 @@
         <h3><tt>ntpd</tt> System Log Messages</h3>
         <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The mushroom knows all the error codes, which is more than most of us do.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">21:21</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="230">Sunday, January 26, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">04:48</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="269">Wednesday, January 29, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <p>
@@ -59,7 +59,8 @@
         </dl>
         <p><tt><b>LOG_NOTICE</b></tt></p>
         <dl>
-            <dt><tt>time slew ? s </tt>
+            <dt><tt>frequency error ? exceeds tolerance 500 PPM</tt>
+            <dd>The hardware clock frequency error exceeds the rate the kernel can correct. This could be a hardware or a kernel problem.            <dt><tt>time slew ? s </tt>
             <dd>The time error exceeds the step threshold and is being slewed to the correct time. You may have to wait a very long time.
             <dt><tt>time reset ? s </tt>
             <dd>The time error exceeds the step threshold and has been reset to the correct time. Computer scientists don't like this, but they can set the <tt>ntpd -x</tt> option and wait forever.
