@@ -474,7 +474,7 @@ record_peer_stats(
 		return;
 	get_systime(&now);
 	filegen_setup(&peerstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1970;
+	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
@@ -510,7 +510,7 @@ record_loop_stats(
 		return;
 	get_systime(&now);
 	filegen_setup(&loopstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1970;
+	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %s %.9f %.6f %.9f %.6f %d\n",
@@ -542,7 +542,7 @@ record_clock_stats(
 		return;
 	get_systime(&now);
 	filegen_setup(&clockstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1970;
+	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n",
@@ -578,7 +578,7 @@ record_raw_stats(
 		return;
 	get_systime(&now);
 	filegen_setup(&rawstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1970;
+	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
                 fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n",
@@ -612,7 +612,7 @@ record_crypto_stats(
 		return;
 	get_systime(&now);
 	filegen_setup(&cryptostats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1970;
+	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (cryptostats.fp != NULL) {
 		if (addr == NULL)

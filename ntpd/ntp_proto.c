@@ -262,13 +262,9 @@ transmit(
 					if (peer_ntpdate > 0)
 						return;
 
-					NLOG(NLOG_SYNCEVENT |
-					    NLOG_SYSEVENT)
-					    msyslog(LOG_NOTICE,
+					msyslog(LOG_NOTICE,
 				 	    "no reply; clock not set");
-					printf(
-					    "ntpd: no reply; clock not set\n");
-					exit(0);
+					exit (0);
 				}
 				return;
 			}
@@ -337,7 +333,7 @@ receive(
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("receive: at %ld %s<-%s restrict %02x\n",
+		printf("receive: at %ld %s<-%s restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
@@ -364,10 +360,15 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
+	if (restrict_mask & RES_DONTSERVE) {
+		sys_restricted++;
+		return;				/* no time */
+	}
 	if (rbufp->recv_length < LEN_PKT_NOMAC) {
 		sys_badlength++;
 		return;				/* runt packet */
 	}
+	
 
 	/*
 	 * Version check must be after the query packets, since they
@@ -579,10 +580,12 @@ receive(
 		 * again.
 		 */
 		if (authdecrypt(skeyid, (u_int32 *)pkt, authlen,
-		    has_mac))
+		    has_mac)) {
 			is_authentic = 1;
-		else
+			restrict_mask &= ~RES_DONTTRUST;
+		} else {
 			sys_badauth++;
+		}
 #ifdef OPENSSL
 		if (skeyid > NTP_MAXKEY)
 			authtrust(skeyid, 0);
@@ -669,7 +672,7 @@ receive(
 		 * immediately. If the guy is already here, don't fire
 		 * up a duplicate.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -701,7 +704,7 @@ receive(
 		 * If authentication fails send a crypto-NAK; otherwise,
 		 * kiss the frog.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -727,7 +730,7 @@ receive(
 		 * mobilize a broadcast client association. We don't
 		 * kiss any frogs here.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -775,13 +778,13 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * This packet is received from a server broadcast
-		 * server or symmetric peer. If it is restricted, flash
-		 * the bit and skedaddle to Seattle. If not authentic,
-		 * leave a light on and continue.
+		 * This packet is received from a broadcast server or
+		 * symmetric peer. If it is restricted, flash the bit
+		 * and skedaddle to Seattle. If not authentic, leave a
+		 * light on and continue.
 		 */
 		peer->flash = 0;
-		if (restrict_mask & RES_DONTTRUST) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			if (peer->flags & FLAG_CONFIG)
 				peer_clear(peer, "RSTR");
@@ -1283,8 +1286,8 @@ clock_update(void)
 	 * Clock is too screwed up. Just exit for now.
 	 */
 	case -1:
-		report_event(EVNT_SYSFAULT, (struct peer *)0);
-		exit(1);
+		report_event(EVNT_SYSFAULT, NULL);
+		exit (-1);
 		/*NOTREACHED*/
 
 	/*
@@ -1296,9 +1299,7 @@ clock_update(void)
 		sys_stratum = STRATUM_UNSPEC;
 			memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
-		NLOG(NLOG_SYNCSTATUS)
-		    msyslog(LOG_INFO, "synchronisation lost");
-		report_event(EVNT_CLOCKRESET, (struct peer *)0);
+		report_event(EVNT_CLOCKRESET, NULL);
 #ifdef OPENSSL
 		if (oleap != LEAP_NOTINSYNC)
 			expire_all();
@@ -1321,14 +1322,14 @@ clock_update(void)
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
 		if (oleap == LEAP_NOTINSYNC) {
-			report_event(EVNT_SYNCCHG, (struct peer *)0);
+			report_event(EVNT_SYNCCHG, NULL);
 #ifdef OPENSSL
 			expire_all();
 #endif /* OPENSSL */
 		}
 	}
 	if (ostratum != sys_stratum)
-		report_event(EVNT_PEERSTCHG, (struct peer *)0);
+		report_event(EVNT_PEERSTCHG, NULL);
 }
 
 
@@ -1758,9 +1759,9 @@ clock_select(void)
 			indx_size += 5 * 3 * sizeof(*indx);
 			peer_list_size += 5 * sizeof(*peer_list);
 		}
-		endpoint = (struct endpoint *)emalloc(endpoint_size);
-		indx = (int *)emalloc(indx_size);
-		peer_list = (struct peer **)emalloc(peer_list_size);
+		endpoint = emalloc(endpoint_size);
+		indx = emalloc(indx_size);
+		peer_list = emalloc(peer_list_size);
 	}
 
 	/*
@@ -1950,9 +1951,8 @@ clock_select(void)
 				sys_poll = NTP_MINPOLL;
 				NLOG(NLOG_SYNCSTATUS)
 				    msyslog(LOG_INFO,
-				    "synchronisation lost");
-				report_event(EVNT_PEERSTCHG,
-				    (struct peer *)0);
+				    "no servers reachable");
+				report_event(EVNT_PEERSTCHG, NULL);
 			}
 			if (osurv > 0)
 				resetmanycast();
@@ -2171,8 +2171,7 @@ clock_select(void)
 		sys_syserr = sys_peer->jitter;
 		if (!pps_control)
 			NLOG(NLOG_SYSEVENT)
-			    msyslog(LOG_INFO,
-			    "pps sync enabled");
+			    msyslog(LOG_INFO, "pps sync enabled");
 		pps_control = current_time;
 #ifdef DEBUG
 		if (debug > 1)
@@ -2198,7 +2197,7 @@ clock_select(void)
 			sys_peer_refid = 0;
 		else
 			sys_peer_refid = addr2refid(&sys_peer->srcadr);
-		report_event(EVNT_PEERSTCHG, (struct peer *)0);
+		report_event(EVNT_PEERSTCHG, NULL);
 	}
 	clock_update();
 }
@@ -2552,7 +2551,7 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
-		msyslog(LOG_NOTICE,
+		msyslog(LOG_INFO,
 		    "transmit: encryption key %d not found", xkeyid);
 		if (peer->flags & FLAG_CONFIG)
 			peer_clear(peer, "NKEY");
@@ -2568,7 +2567,7 @@ peer_xmit(
 	get_systime(&xmt_tx);
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
-		exit(-1);
+		exit (-1);
 	}
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
@@ -2643,13 +2642,13 @@ fast_xmit(
 	 * If the caller has picked up a restriction, decide what to do
 	 * with it and light up a kiss-of-death.
 	 */
-	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+	if (mask & RES_FLAGS) {
 		char	*code = "????";
 
 		if (mask & RES_LIMITED) {
 			sys_limitrejected++;
 			code = "RATE";
-		} else if (mask & RES_DONTSERVE){
+		} else if (mask & (RES_DONTSERVE | RES_DONTTRUST)) {
 			sys_restricted++;
 			code = "DENY";
 		}
@@ -2754,7 +2753,7 @@ fast_xmit(
 	get_systime(&xmt_tx);
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
-		exit(-1);
+		exit (-1);
 	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 
@@ -2884,7 +2883,7 @@ default_get_precision(void)
 	/*
 	 * Find the nearest power of two.
 	 */
-	NLOG(NLOG_SYSINFO)
+	NLOG(NLOG_SYSEVENT)
 	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
 		tick *= 2;
@@ -2966,7 +2965,8 @@ init_proto(void)
 		systime_10ms_ticks = 1;
 #endif
 	if (systime_10ms_ticks)
-		msyslog(LOG_INFO, "using 10ms tick adjustments");
+		NLOG(NLOG_SYSEVENT)
+		    msyslog(LOG_INFO, "using 10ms tick adjustments");
 }
 
 
@@ -3118,7 +3118,7 @@ proto_config(
 		/*
 		 * Log this error.
 		 */
-		msyslog(LOG_ERR,
+		msyslog(LOG_INFO,
 		    "proto_config: illegal item %d, value %ld",
 			item, value);
 	}

@@ -270,6 +270,7 @@ struct peer {
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
 	EVP_PKEY *ident_pkey;	/* identity key */
+	tstamp_t fstamp;	/* identity filestamp */
 	BIGNUM	*iffval;	/* IFF/GQ challenge */
 	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cookval;	/* cookie values */
@@ -730,7 +731,7 @@ struct pkt {
 #define STATS_STATSDIR		2	/* directory prefix for stats files */
 #define	STATS_PID_FILE		3	/* configure ntpd PID file */
 
-#define MJD_1970		40587	/* MJD for 1 Jan 1970 */
+#define MJD_1900		15020	/* MJD for 1 Jan 1900 */
 
 /*
  * Default parameters.  We use these in the absence of something better.
@@ -801,23 +802,29 @@ struct restrictlist6 {
 /*
  * Access flags
  */
-#define	RES_IGNORE		0x001	/* ignore if matched */
-#define	RES_DONTSERVE		0x002	/* don't give him any time */
-#define	RES_DONTTRUST		0x004	/* don't trust if matched */
-#define	RES_NOQUERY		0x008	/* don't allow queries if matched */
-#define	RES_NOMODIFY		0x010	/* don't allow him to modify server */
-#define	RES_NOPEER		0x020	/* don't allocate memory resources */
-#define	RES_NOTRAP		0x040	/* don't allow him to set traps */
-#define	RES_LPTRAP		0x080	/* traps set by him are low priority */
-#define RES_LIMITED		0x100	/* limit per net number of clients */
-#define	RES_VERSION		0x200	/* serve only current version */
-#define RES_DEMOBILIZE		0x400	/* demobilize association */
+#define	RES_IGNORE		0x001	/* ignore packet */
+#define	RES_DONTSERVE		0x002	/* access denied */
+#define	RES_DONTTRUST		0x004	/* authentication required */
+#define	RES_VERSION		0x008	/* version mismatch */
+#define	RES_NOPEER		0x010	/* new association denied */
+#define RES_LIMITED		0x020	/* packet rate exceeded */
+
+#define RES_FLAGS		(RES_IGNORE | RES_DONTSERVE |\
+				    RES_DONTTRUST | RES_VERSION |\
+				    RES_NOPEER | RES_LIMITED)
+
+#define	RES_NOQUERY		0x040	/* mode 6/7 packet denied */
+#define	RES_NOMODIFY		0x080	/* mode 6/7 modify denied */
+#define	RES_NOTRAP		0x100	/* mode 6/7 set trap denied */
+#define	RES_LPTRAP		0x200	/* mode 6/7 low priority trap */
+
+#define RES_DEMOBILIZE		0x400	/* send kiss of death packet */
 #define RES_TIMEOUT		0x800	/* timeout this entry */
 
-#define	RES_ALLFLAGS \
-    (RES_IGNORE | RES_DONTSERVE | RES_DONTTRUST | RES_NOQUERY | \
-     RES_NOMODIFY | RES_NOPEER | RES_NOTRAP | RES_LPTRAP | \
-     RES_LIMITED | RES_VERSION | RES_DEMOBILIZE | RES_TIMEOUT)
+#define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |\
+				    RES_NOMODIFY | RES_NOTRAP |\
+				    RES_LPTRAP | RES_DEMOBILIZE |\
+				    RES_TIMEOUT)
 
 /*
  * Match flags

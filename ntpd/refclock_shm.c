@@ -272,8 +272,7 @@ shm_poll(
 			pp->hour=t->tm_hour;
 			pp->minute=t->tm_min;
 			pp->second=t->tm_sec;
-			pp->msec=0;
-			pp->usec=tvt.tv_usec;
+			pp->nsec=tvt.tv_usec * 1000;
 			peer->precision=up->precision;
 			pp->leap=up->leap;
 		} 
