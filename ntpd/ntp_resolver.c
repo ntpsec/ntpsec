@@ -1,8 +1,40 @@
 /*
- * ripped off from ../ntpres/ntpres.c by Greg Troxel 4/2/92
- * routine callable from ntpd, rather than separate program
- * also, key info passed in via a global, so no key file needed.
- */
+** Ancestor was ripped off from ../ntpres/ntpres.c by Greg Troxel 4/2/92
+**
+** The previous resolver only needed to do forward lookups, and all names
+** were know before we started the resolver process.
+**
+** The new code must be able to handle reverse lookups, and the requests can
+** show up at any time.
+**
+** Here's the drill for the new logic.
+**
+** We want to be able to do forward or reverse lookups.  Forward lookups
+** require one set of information to be sent back to the daemon, reverse
+** lookups require a different set of information.  The caller knows this.
+**
+** The daemon must not block.  This includes communicating with the resolver
+** process (if the resolver process is a separate task).
+**
+** Current resolver code blocks waiting for the response, so the
+** alternatives are:
+**
+** - Find a nonblocking resolver libbrary
+** - Do each (initial) lookup in a separate process
+** - - subsequent lookups *could* be handled by a different process that has
+**     a queue of pending requests
+**
+** We could use nonblocking lookups in a separate process (just to help out
+** with timers).
+**
+** If we don't have nonblocking resolver calls we have more opportunities
+** for denial-of-service problems.
+**
+** - too many fork()s
+** - communications path
+**
+**
+*/
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -31,6 +63,14 @@
  * structures defined for it.
  */
 struct dns_entry {
+	int de_done;
+#define DE_NAME		001
+#define DE_ADDR		002
+#define DE_NA		(DE_NAME | DE_ADDR)
+#define DE_PENDING	000
+#define DE_GOT		010
+#define DE_FAIL		020
+#define DE_RESULT	(DE_PENDING | DE_GOT | DE_FAIL)
 	struct dns_entry *de_next;
 	struct info_dns_assoc de_info; /* DNS info for peer */
 };
@@ -79,7 +119,6 @@ static	int resolve_value;	/* next value of resolve timer */
 #define	TIMEOUT_SEC	2
 #define	TIMEOUT_USEC	0
 
-
 /*
  * File descriptor for ntp request code.
  */
@@ -101,9 +140,9 @@ static	RETSIGTYPE bong		P((int));
 static	void	checkparent	P((void));
 static	void	removeentry	P((struct dns_entry *));
 static	void	addentry	P((char *, u_int32, u_short));
-static	int	findhostaddr	P((struct dns_entry *));
+static	void	findhostaddr	P((struct dns_entry *));
 static	void	openntp		P((void));
-static	int	host_assoc	P((struct info_dns_assoc *));
+static	int	tell_ntpd	P((struct info_dns_assoc *));
 static	void	doconfigure	P((int));
 
 struct ntp_res_t_pkt {		/* Tagged packet: */
@@ -124,17 +163,16 @@ struct ntp_res_c_pkt {		/* Control packet: */
 	keyid_t keyid;
 	u_char keystr[MAXFILENAME];
 };
+
 /*
- * ntp_res_send
+ * ntp_res_name
  *
  */
 
 void
-ntp_res_send(
-	void *tag,		/* Return this with the answer */
-	char *name,		/* Name to resolve (or NIL) */
-	u_int32 paddr,		/* Address to resolve (or 0) */
-	u_short associd		/* Association ID (if available) */
+ntp_res_name(
+	u_int32 paddr,		/* Address to resolve */
+	u_short associd		/* Association ID */
 	)
 {
 	pid_t pid;
@@ -152,13 +190,13 @@ ntp_res_send(
 		pid = fork();
 #endif
 		if (pid == -1) {
-			msyslog(LOG_ERR, "ntp_res_send: fork() failed: %m");
+			msyslog(LOG_ERR, "ntp_res_name: fork() failed: %m");
 			sleep(2);
 		}
 	}
 	switch (pid) {
 	    case -1:	/* Error */
-		msyslog(LOG_DEBUG, "ntp_res_send: error...");
+		msyslog(LOG_DEBUG, "ntp_res_name: error...");
 		/* Can't happen */
 		break;
 
@@ -172,10 +210,10 @@ ntp_res_send(
 #  ifndef LOG_NTP
 #   define	LOG_NTP LOG_DAEMON
 #  endif
-		openlog("ntp_res_send", LOG_PID | LOG_NDELAY, LOG_NTP);
+		openlog("ntp_res_name", LOG_PID | LOG_NDELAY, LOG_NTP);
 #endif
 
-		addentry(name, paddr, associd);
+		addentry(NULL, paddr, associd);
 		ntp_res();
 		break;
 
@@ -375,7 +413,7 @@ addentry(
 
 		si.s_addr = paddr;
 		msyslog(LOG_INFO, 
-			"ntp_res_send: <%s> %s associd %d\n",
+			"ntp_res_name: <%s> %s associd %d\n",
 			(name) ? name : "", inet_ntoa(si), associd);
 	}
 #endif
@@ -383,8 +421,10 @@ addentry(
 	de = (struct dns_entry *)emalloc(sizeof(struct dns_entry));
 	if (name) {
 		strncpy(de->de_hostname, name, sizeof de->de_hostname);
+		de->de_done = DE_PENDING | DE_ADDR;
 	} else {
 		de->de_hostname[0] = 0;
+		de->de_done = DE_PENDING | DE_NAME;
 	}
 	de->de_peeraddr = paddr;
 	de->de_associd = associd;
@@ -406,12 +446,12 @@ addentry(
 /*
  * findhostaddr - resolve a host name into an address (Or vice-versa)
  *
- * Given one of {de_peeraddr,de_hostname}, find the other one.
- * It returns 1 for "success" and 0 for an uncorrectable failure.
- * Note that "success" includes try again errors.  You can tell that you
- *  got a "try again" since {de_peeraddr,de_hostname} will still be zero.
+ * sets entry->de_done appropriately when we're finished.  We're finished if
+ * we either successfully look up the missing name or address, or if we get a
+ * "permanent" failure on the lookup.
+ *
  */
-static int
+static void
 findhostaddr(
 	struct dns_entry *entry
 	)
@@ -420,18 +460,26 @@ findhostaddr(
 
 	checkparent();		/* make sure our guy is still running */
 
+	/*
+	 * The following should never trip - this subroutine isn't
+	 * called if hostname and peeraddr are "filled".
+	 */
 	if (entry->de_hostname[0] && entry->de_peeraddr) {
 		struct in_addr si;
 
 		si.s_addr = entry->de_peeraddr;
-		/* HMS: Squawk? */
-		msyslog(LOG_ERR, "findhostaddr: both de_hostname and de_peeraddr are defined: <%s>/%s", &entry->de_hostname[0], inet_ntoa(si));
-		return 1;
+		msyslog(LOG_ERR, "findhostaddr: both de_hostname and de_peeraddr are defined: <%s>/%s: state %#x",
+			&entry->de_hostname[0], inet_ntoa(si), entry->de_done);
+		return;
 	}
 
+	/*
+	 * The following should never trip.
+	 */
 	if (!entry->de_hostname[0] && !entry->de_peeraddr) {
 		msyslog(LOG_ERR, "findhostaddr: both de_hostname and de_peeraddr are undefined!");
-		return 0;
+		entry->de_done |= DE_FAIL;
+		return;
 	}
 
 	if (entry->de_hostname[0]) {
@@ -458,36 +506,61 @@ findhostaddr(
 
 	if (hp == NULL) {
 		/*
-		 * If the resolver is in use, see if the failure is
-		 * temporary.  If so, return success.
+		 * Bail if we should TRY_AGAIN.
+		 * Otherwise, we have a permanent failure.
 		 */
 		if (h_errno == TRY_AGAIN)
-		    return (1);
-		return (0);
+			return;
+		entry->de_done |= DE_FAIL;
+	} else {
+		entry->de_done |= DE_GOT;
 	}
 
-	if (entry->de_hostname[0]) {
+	if (entry->de_done & DE_GOT) {
+		switch (entry->de_done & DE_NA) {
+		    case DE_NAME:
 #ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: name resolved.");
+			if (debug > 2)
+				msyslog(LOG_DEBUG,
+					"findhostaddr: name resolved.");
 #endif
-		/*
-		 * Use the first address.  We don't have any way to tell
-		 * preferences and older gethostbyname() implementations
-		 * only return one.
-		 */
-		memmove((char *)&(entry->de_peeraddr),
-			(char *)hp->h_addr,
-			sizeof(struct in_addr));
+			/*
+			 * Use the first address.  We don't have any way to
+			 * tell preferences and older gethostbyname()
+			 * implementations only return one.
+			 */
+			memmove((char *)&(entry->de_peeraddr),
+				(char *)hp->h_addr,
+				sizeof(struct in_addr));
+			break;
+		    case DE_ADDR:
+#ifdef DEBUG
+			if (debug > 2)
+				msyslog(LOG_DEBUG,
+					"findhostaddr: address resolved.");
+#endif
+			strncpy(&entry->de_hostname[0], hp->h_name,
+				sizeof entry->de_hostname);
+			break;
+		    default:
+			msyslog(LOG_ERR, "findhostaddr: Bogus de_done: %#x",
+				entry->de_done);
+			break;
+		}
 	} else {
 #ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: address resolved.");
+		if (debug > 2) {
+			struct in_addr si;
+
+			si.s_addr = de->de_peeraddr;
+			msyslog(LOG_DEBUG,
+				"findhostaddr: Failed resolution on <%s>/%s: %s",
+				de->de_hostname, inet_ntoa(si),
+				hstrerror(h_errno));
+		}
 #endif
-		strncpy(&entry->de_hostname[0], hp->h_name, sizeof entry->de_hostname);
 	}
-		   
-	return (1);
+	return;
 }
 
 
@@ -543,7 +616,6 @@ openntp(void)
 	}
 #endif /* SYS_WINNT */
 
-
 	if (connect(sockfd, (struct sockaddr *)&saddr, sizeof(saddr)) == -1) {
 		msyslog(LOG_ERR, "openntp: connect() failed: %m");
 		exit(1);
@@ -552,10 +624,10 @@ openntp(void)
 
 
 /*
- * host_assoc: Send the resolved hostname for the associd
+ * tell_ntpd: Tell ntpd what we discovered.
  */
 static int
-host_assoc(
+tell_ntpd(
 	struct info_dns_assoc *conf
 	)
 {
@@ -828,7 +900,7 @@ host_assoc(
 
 
 /*
- * doconfigure - attempt to resolve names and configure the server
+ * doconfigure - attempt to resolve names/addresses
  */
 static void
 doconfigure(
@@ -837,6 +909,7 @@ doconfigure(
 {
 	register struct dns_entry *de;
 	register struct dns_entry *deremove;
+	char *done_msg = "";
 
 	de = dns_entries;
 	while (de != NULL) {
@@ -851,44 +924,43 @@ doconfigure(
 		}
 #endif
 		if (dores && (de->de_hostname[0] == 0 || de->de_peeraddr == 0)) {
-			if (!findhostaddr(de)) {
-				struct in_addr si;
-
-				si.s_addr = de->de_peeraddr;
-				msyslog(LOG_ERR,
-					"couldn't resolve <%s>/%s, giving up on it",
-					de->de_hostname, inet_ntoa(si));
-				deremove = de;
-				de = deremove->de_next;
-				removeentry(deremove);
-				continue;
-			}
+			findhostaddr(de);
 		}
 
-		if (de->de_hostname[0] && de->de_peeraddr != 0) {
+		switch (de->de_done & DE_RESULT) {
+		    case DE_PENDING:
+			done_msg = "";
+			break;
+		    case DE_GOT:
+			done_msg = "succeeded";
+			break;
+		    case DE_FAIL:
+			done_msg = "failed";
+			break;
+		    default:
+			done_msg = "(error - shouldn't happen)";
+			break;
+		}
+		if (done_msg[0]) {
 			/* Send the answer */
-			if (host_assoc(&de->de_info)) {
+			if (tell_ntpd(&de->de_info)) {
 				struct in_addr si;
 
 				si.s_addr = de->de_peeraddr;
-#if 0
-				msyslog(LOG_INFO,
-					"resolved <%s>/%s, done with it",
-					de->de_hostname, inet_ntoa(si));
-#endif 0
-
+#ifdef DEBUG
+				if (debug > 1) {
+					msyslog(LOG_INFO,
+						"DNS resolution on <%s>/%s %s",
+						de->de_hostname, inet_ntoa(si),
+						done_msg);
+				}
+#endif
 				deremove = de;
 				de = deremove->de_next;
 				removeentry(deremove);
-				continue;
 			}
-#ifdef DEBUG
-			if (debug > 1) {
-				msyslog(LOG_INFO,
-				    "doconfigure: host_assoc() FAILED, maybe next time.");
-			}
-#endif
+		} else {
+			de = de->de_next;
 		}
-		de = de->de_next;
 	}
 }

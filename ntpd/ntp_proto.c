@@ -535,9 +535,8 @@ receive(
 		peer_config_manycast(peer2, peer);
 #ifdef PUBKEY
 		if (crypto_enable)
-			ntp_res_send(NULL, NULL,
-			    peer->srcadr.sin_addr.s_addr,
-			    peer->associd);
+			ntp_res_name(peer->srcadr.sin_addr.s_addr,
+				     peer->associd);
 #endif /* PUBKEY */
 		break;
 
@@ -566,9 +565,8 @@ receive(
 	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
 #ifdef PUBKEY
 		if (crypto_enable)
-			ntp_res_send(NULL, NULL,
-			    peer->srcadr.sin_addr.s_addr,
-			    peer->associd);
+			ntp_res_name(peer->srcadr.sin_addr.s_addr,
+				     peer->associd);
 #endif /* PUBKEY */
 		break;
 
@@ -592,9 +590,8 @@ receive(
 		peer->hmode = MODE_CLIENT;
 #ifdef PUBKEY
 		if (crypto_enable)
-			ntp_res_send(NULL, NULL,
-			    peer->srcadr.sin_addr.s_addr,
-			    peer->associd);
+			ntp_res_name(peer->srcadr.sin_addr.s_addr,
+				     peer->associd);
 #endif /* PUBKEY */
 		break;
 

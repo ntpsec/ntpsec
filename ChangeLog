@@ -1,3 +1,12 @@
+2000-03-19  Harlan Stenn  <harlan@pfcs.com>
+
+	* ntpd/ntp_proto.c (receive): Rename ntp_res_send() to
+	  ntp_res_name() and adjust the number of arguments.
+	* ntpd/ntp_resolver.c (ntp_res_name): Ditto
+	* include/ntpd.h: Ditto
+
+	* ntpd/ntp_resolver.c: Add de_done to the dns_entry structure.
+
 2000-03-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99h2

@@ -72,7 +72,7 @@ extern  void    set_var P((struct ctl_var **, const char *, unsigned long, int))
 extern  void    set_sys_var P((char *, unsigned long, int));
 
 /* ntp_intres.c */
-extern	void	ntp_res_send	P((void *, char *, u_int32, u_short));
+extern	void	ntp_res_name	P((u_int32, u_short));
 extern	void	ntp_res_recv	P((void));
 extern	void	ntp_intres	P((void));
 
