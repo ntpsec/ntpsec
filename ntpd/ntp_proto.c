@@ -1079,7 +1079,7 @@ poll_update(
 	int hpoll
 	)
 {
-	long update, oldpoll;
+	long oldpoll;
 
 	/*
 	 * The wiggle-the-poll-interval dance. Broadcasters dance only
@@ -1349,7 +1349,7 @@ clock_select(void)
 {
 	register struct peer *peer;
 	int i;
-	int nlist, nl3;
+	int nreach, nlist, nl3;
 	double d, e, f;
 	int j;
 	int n;
@@ -1376,7 +1376,7 @@ clock_select(void)
 	 * the pps_update switch will remain zero.
 	 */
 	pps_update = 0;
-	nlist = 0;
+	nreach = nlist = 0;
 	low = 1e9;
 	high = -1e9;
 	for (n = 0; n < HASH_SIZE; n++)
@@ -1416,6 +1416,7 @@ clock_select(void)
 			if (peer->stratum > 1 && peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr)
 				continue;	/* sync loop */
+			nreach++;
 			if (root_distance(peer) >= MAXDISTANCE + 2 *
 			    CLOCK_PHI * ULOGTOD(sys_poll)) {
 				peer->seldisptoolarge++;
@@ -1665,7 +1666,15 @@ clock_select(void)
 	 * him. We note that the head of the list is at the lowest
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
+	 *
+	 * Note that we go no further, unless the number of survivors is
+	 * a majority of the suckers that have been found reachable and
+	 * no prior source is available. This avoids the transient when
+	 * one of a flock of sources is out to lunch and just happens
+	 * to be the first survivor.
 	 */
+	if (sys_peer == 0 && 2 * nlist < min(nreach, NTP_MINCLOCK))
+		return;
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
 		peer_list[i]->status = CTL_PST_SEL_SYNCCAND;

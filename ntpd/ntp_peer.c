@@ -650,7 +650,7 @@ newpeer(
 	peer->stratum = STRATUM_UNSPEC;
 	peer_clear(peer);
 	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + RANDPOLL(NTP_MINPOLL);
+	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINDPOLL) - 1));
 
 	/*
 	 * Assign him an association ID and increment the system variable

@@ -1328,7 +1328,7 @@ ctl_putsys(
 	case CS_HOSTNAM:
 		if (sys_hostname != NULL)
 			ctl_putstr(sys_var[CS_HOSTNAM].text,
-			    sys_hostname, sys_hostnamelen);
+			    sys_hostname, strlen(sys_hostname));
 		break;
 
 	case CS_REVTIME:

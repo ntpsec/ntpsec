@@ -114,6 +114,14 @@ struct ctl_var sys_var[] = {
 	{ CS_PROCESSOR,	ST,	"processor" },	/* 15 */
 	{ CS_SYSTEM,	ST,	"system" },	/* 16 */
 	{ CS_STABIL,	FS,	"stability" },	/* 17 */
+	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 18 */
+#ifdef PUBKEY
+	{ CS_PRIVATE,	ST,	"privatekey" },	/* 19 */
+	{ CS_PUBLIC,	ST,	"publickey" },	/* 20 */
+	{ CS_DHPARAMS,	ST,	"dhparams" },	/* 21 */
+	{ CS_HOSTNAM,	ST,	"hostname" },	/* 22 */
+	{ CS_REVTIME,	TS,	"revoketime" },	/* 23 */
+#endif /* PUBKEY */
 	{ 0,		EOV,	""	}
 };
 
