@@ -712,7 +712,8 @@ request(
 
 		if (n < 0)
 		{
-			msyslog(LOG_ERR, "select() fails: %m");
+			if (errno != EINTR)
+			    msyslog(LOG_ERR, "select() fails: %m");
 			return 0;
 		}
 		else if (n == 0)
