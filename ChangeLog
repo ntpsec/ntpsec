@@ -1,5 +1,8 @@
 2000-01-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* build: Just overwrite the log file each time; sometimes NFS goes
+	a little goofy.
+
 	* ntpd/refclock_fg.c: Syntax/punctuation cleanup
 
 2000-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
