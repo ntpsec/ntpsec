@@ -239,6 +239,7 @@ static struct keyword tos_keywords[] = {
 	{ "floor",		CONF_TOS_FLOOR },
 	{ "ceiling",		CONF_TOS_CEILING },
 	{ "cohort",		CONF_TOS_COHORT },
+	{ "maxdist",		CONF_TOS_MAXDIST },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1074,6 +1075,10 @@ getconfig(
 
 			    case CONF_TOS_COHORT:
 				proto_config(PROTO_COHORT, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MAXDIST:
+				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
 				break;
 			    }
 			}
