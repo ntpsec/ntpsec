@@ -1,3 +1,15 @@
+2000-06-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/driver34.htm: 
+	* ntpd/refclock_ulink.c:
+	* ntpd/refclock_ulink331.c: (removed)
+	Updated for 320/330 series refclocks
+	From: joseph lang <tcnojl1@earthlink.net>
+
+	* ntpd/refclock_oncore.c: Patches/improvements
+	* html/driver30.htm: New release
+	From: Reg Clemens <reg@orion.dwf.com>
+
 2000-06-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99j1
