@@ -60,7 +60,7 @@ Command Line Options</H4>
 
 <DD>
 Enable the authentication function and specify the key identifier to be
-used for authentication as the argument <I>key</I>. The
+used for authentication as the argument <I>key</I><TT>ntpdate</TT>. The
 keys and key identifiers must match in both the client and server key files.
 The default is to disable the authentication function.</DD>
 
@@ -69,11 +69,11 @@ The default is to disable the authentication function.</DD>
 
 <DD>
 Force the time to always be slewed using the adjtime() system call, even
-if the measured offset is greater than +-500 ms. The default is to step
-the time using settimeofday() if the offset is greater than +-500 ms. Note
-that, if the offset is much greater than +-500 ms in this case, that it
+if the measured offset is greater than +-128 ms. The default is to step
+the time using settimeofday() if the offset is greater than +-128 ms. Note
+that, if the offset is much greater than +-128 ms in this case, that it
 can take a long time (hours) to slew the clock to the correct value. During
-this time, the host should not be used to synchronize clients.</DD>
+this time. the host should not be used to synchronize clients.</DD>
 
 <DT>
 <TT>-b</TT></DT>
@@ -114,7 +114,7 @@ described in <TT>ntpd</TT>.</DD>
 
 <DD>
 Specify the NTP version for outgoint packets as the integer <I>version</I>,
-which can be 1, 2, 3 or 4. The default is 4. This allows <TT>ntpdate</TT> to
+which can be 1 or 2. The default is 3. This allows <TT>ntpdate</TT> to
 be used with older NTP versions.</DD>
 
 <DT>
@@ -171,8 +171,10 @@ Bugs</H4>
 The slew adjustment is actually 50% larger than the measured offset, since
 this (it is argued) will tend to keep a badly drifting clock more accurate.
 This is probably not a good idea and may cause a troubling hunt for some
-values of the kernel variables <TT>tick</TT> and <TT>tickadj</TT>. 
+values of the kernel variables <TT>tick</TT> and <TT>tickadj</TT>.&nbsp;
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+</BODY>
+</HTML>

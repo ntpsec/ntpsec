@@ -33,7 +33,7 @@ set dosynctodr = 0
 <P>
 Instead of the <I>tick</I> kernel variable, which many operating
 systems use to control microseconds added to the system time every
-clock tick (cf. <A HREF="../notes.htm#frequency_tolerance">Dealing
+clock tick (c.f. <A HREF="../notes.htm#frequency_tolerance">Dealing
 with Frequency Tolerance Violations</A>), Solaris has the variables
 <I>nsec_per_tick</I> and <I>usec_per_tick</I>.
 <P>
@@ -61,8 +61,8 @@ HREF="solaris.xtra.S99ntpd">this one</A>, installed in
 <H3>Solaris 2.6</H3>
 <P>
 Solaris 2.6 adds support for kernel PLL timekeeping, but breaks this
-support in such a fashion that using it is worse than not. This is <A
-HREF="solaris.xtra.4095849"> Sun Bug ID 4095849</A>, and it is not yet
+support in such a fashion that using it worse than not. This is <A
+HREF="solaris.xtra.4095849"> SUN Bug ID 4095849</A>, and it is not yet
 fixed as of June 1998.
 <P>
 <H3>Solaris 2.5 and 2.5.1</H3>
@@ -70,7 +70,7 @@ fixed as of June 1998.
 On UltraSPARC systems, calculation of <I>cpu_tick_freq</I> is broken
 such that values that are off by significant amounts may be used
 instead. This unfortunately means that ntpd may have severe problems
-keeping synchronization. This is <A HREF="solaris.xtra.4023118"> Sun Bug ID
+keeping synchronization. This is <A HREF="solaris.xtra.4023118"> SUN Bug ID
 4023118</A>. Bryan Cantrill <! -- &lt;bmc@eng.sun.com&gt; --> of Sun
 posted <A HREF="solaris.xtra.patchfreq">patchfreq</A>, a workaround script,
 to comp.protocols.time.ntp in March of 1997.
@@ -122,12 +122,12 @@ The first sleep insures the adjtime has completed for the first ntpdate.
 The second ntpdate will use adjtime to set the time of day since the
 clock should be within 2 seconds of the correct time.
 <P>
-The second tickadj sets the tick adjust system value to 200 microseconds.
+The second tickadj set the tick adjust system value to 5 microseconds.
 <P>
 The second sleeps insure that adjtime will complete before starting 
-xntpd.
+the next xntpd.
 <P>
-I tried running with a tickadj of 5 microseconds without much success.
+I tried running with a tickadj of 5 microseconds with out much success.
 200 microseconds seems to work well.  
 <P>
 <HR>

@@ -22,12 +22,11 @@ Description</H4>
 server gets its time from, and follows the chain of NTP servers back to
 their master time source. If given no arguments, it starts with <TT>localhost</TT>.
 Here is an example of the output from <TT>ntptrace</TT>:
-<PRE>
-% ntptrace
+<PRE>% ntptrace
 localhost: stratum 4, offset 0.0019529, synch distance 0.144135
 server2ozo.com: stratum 2, offset 0.0124263, synch distance 0.115784
-usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid 'WWVB'
-</PRE>
+usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid
+'WWVB'</PRE>
 On each line, the fields are (left to right): the host name, the host stratum,
 the time offset between that host and the local host (as measured by <TT>ntptrace</TT>;
 this is why it is not always zero for "<TT>localhost</TT>"), the host synchronization
@@ -74,8 +73,10 @@ Prints verbose information about the NTP servers.</DD>
 
 <H4>
 Bugs</H4>
-This program makes no attempt to improve accuracy by doing multiple samples.
+This program makes no attempt to improve accuracy by doing multiple samples.&nbsp;
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+</BODY>
+</HTML>

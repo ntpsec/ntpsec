@@ -31,23 +31,21 @@ actual accuracy is limited by the precision of the timecode and the latencies
 of the serial interface and operating system.
 
 <P>The $GPRMC message that the GPS transmits look like this:
-<PRE>
-$GPRMC,POS_UTC,POS_STAT,LAT,LAT_REF,LON,LON_REF,SPD,HDG,DATE,MAG_VAR,MAG_REF*CC&lt;cr>&lt;lf>
+<PRE>$GPRMC,POS_UTC,POS_STAT,LAT,LAT_REF,LON,LON_REF,SPD,HDG,DATE,MAG_VAR,MAG_REF*CC&lt;cr>&lt;lf>
 
-  POS_UTC  - UTC of position. Hours, minutes and seconds. (hhmmss)
-  POS_STAT - Position status. (A = Data valid, V = Data invalid)
-  LAT      - Latitude (llll.ll)
-  LAT_REF  - Latitude direction. (N = North, S = South)
-  LON      - Longitude (yyyyy.yy)
-  LON_REF  - Longitude direction (E = East, W = West)
-  SPD      - Speed over ground. (knots) (x.x)
-  HDG      - Heading/track made good (degrees True) (x.x)
-  DATE     - Date (ddmmyy)
-  MAG_VAR  - Magnetic variation (degrees) (x.x)
-  MAG_REF  - Magnetic variation (E = East, W = West)
-  CC       - Checksum (optional)
-  &lt;cr>&lt;lf> - Sentence terminator.
-</PRE>
+&nbsp; POS_UTC&nbsp; - UTC of position. Hours, minutes and seconds. (hhmmss)
+&nbsp; POS_STAT - Position status. (A = Data valid, V = Data invalid)
+&nbsp; LAT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Latitude (llll.ll)
+&nbsp; LAT_REF&nbsp; - Latitude direction. (N = North, S = South)
+&nbsp; LON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Longitude (yyyyy.yy)
+&nbsp; LON_REF&nbsp; - Longitude direction (E = East, W = West)
+&nbsp; SPD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Speed over ground. (knots) (x.x)
+&nbsp; HDG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Heading/track made good (degrees True) (x.x)
+&nbsp; DATE&nbsp;&nbsp;&nbsp;&nbsp; - Date (ddmmyy)
+&nbsp; MAG_VAR&nbsp; - Magnetic variation (degrees) (x.x)
+&nbsp; MAG_REF&nbsp; - Magnetic variation (E = East, W = West)
+&nbsp; CC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Checksum (optional)
+&nbsp; &lt;cr>&lt;lf> - Sentence terminator.</PRE>
 The driver will send a <TT>$PMOTG,RMC,0000*1D&lt;cr>&lt;lf></TT> message
 each time a <TT>$GPRMC</TT> string is needed. This is not needed on most
 GPS receivers because they automatically send the <TT>$GPRMC</TT> string
@@ -118,7 +116,8 @@ Not used by this driver.</DD>
 <TT>flag4 0 | 1</TT></DT>
 
 <DD>
-Not used by this driver.
+Not used by this driver.</DD>
+
 
 <P>Additional Information
 

@@ -145,8 +145,9 @@ The commands and their responses are:
 
 <DD>
 Request for signal quality. Answer only valid during (late part of) resync
-to MSF signal. The response consists of two characters as follows:
+to MSF signal. The response consists of two characters as follows:</DD>
 
+<OL>
 <DL compact>
 <DT>
 bit 7</DT>
@@ -238,6 +239,7 @@ in the range 0--2 no successful reception is to be expected. The reported
 value drops to zero when not resyncing, ie when first returned byte is
 not `3'.</DD>
 </DL>
+</OL>
 
 <DT>
 <TT>h</TT> CR</DT>
@@ -258,7 +260,7 @@ once per hour to minimise clock wander.</DD>
 Request timestamp. Start bit of first byte of response is on-time, so may
 be delayed up to 1 second. Note that when the BST mode is in effect the
 time is GMT/UTC +0100, ie an hour ahead of UTC to reflect local time in
-the UK. The response data is as follows:
+the UK. The response data is as follows:</DD>
 
 <OL>
 <LI>
@@ -302,7 +304,7 @@ year tens (years range from 00 to 99)</LI>
 year units</LI>
 
 <LI>
-BST/UTC status
+BST/UTC status</LI>
 
 <DL compact>
 <DT>
@@ -355,9 +357,9 @@ bit 0</DT>
 </DL>
 
 <LI>
-clock status
+clock status</LI>
 
-<DL compact>
+<DL compact>&nbsp;
 <DT>
 bit 7</DT>
 
@@ -417,8 +419,7 @@ decides to move us to +0100/+0200 time as opposed to the current +0000/+0100
 time, it is not clear what effect that will have on the time broadcast
 by MSF, and therefore on this driver's usefulness.</DL>
 A typical <TT>ntp.conf</TT> configuration file for this driver might be:
-<PRE>
-# hostname(n) means we expect (n) to be the stratum at which hostname runs.
+<PRE># hostname(n) means we expect (n) to be the stratum at which hostname runs.
 
 #------------------------------------------------------------------------------
 # SYNCHRONISATION PARTNERS
@@ -440,20 +441,19 @@ driftfile /var/tmp/ntp.drift
 # RESTRICTIONS
 # ============
 
-# By default, don't trust and don't allow modifications.  Ignore in fact.
+# By default, don't trust and don't allow modifications.&nbsp; Ignore in fact.
 restrict default ignore notrust nomodify
 
 # Allow others in our subnet to check us out...
 restrict 11.22.33.0 mask 255.255.255.0 nomodify notrust
 
-# Trust our peers for time.  Don't trust others in case they are insane.
+# Trust our peers for time.&nbsp; Don't trust others in case they are insane.
 restrict 127.127.27.0 nomodify
 restrict 11.22.33.4 nomodify
 restrict 11.22.33.9 nomodify
 
 # Allow anything from the local host.
-restrict 127.0.0.1
-</PRE>
+restrict 127.0.0.1</PRE>
 There are a few <TT>#define</TT>s in the code that you might wish to play
 with:
 <DL>
@@ -477,16 +477,17 @@ When defined, the code uses its own median-filter code rather than that
 available in <TT>ntp_refclock.c</TT> since the latter seems to have a minor
 bug, at least in version 3-5.90. If this bug goes away this flag should
 be turned off to avoid duplication of code. (The bug, if that's what it
-is, causes the last raw offset to be used rather than the median offset.)
+is, causes the last raw offset to be used rather than the median offset.)</DD>
+
 
 <P>Without this defined (and without <TT>ARCRON_MULTIPLE_SAMPLES</TT> below)
 a typical set of offsets reported and used to drive the clock-filter algorithm
 is (oldest last):
-<PRE>filtoffset=  -4.32  -34.82   -0.78    0.89    2.76    4.58   -3.92   -2.17</PRE>
+<PRE>filtoffset=&nbsp; -4.32&nbsp; -34.82&nbsp;&nbsp; -0.78&nbsp;&nbsp;&nbsp; 0.89&nbsp;&nbsp;&nbsp; 2.76&nbsp;&nbsp;&nbsp; 4.58&nbsp;&nbsp; -3.92&nbsp;&nbsp; -2.17</PRE>
 Look at that spike!
 
 <P>With this defined a typical set of offsets is:
-<PRE>filtoffset=  -7.06   -7.06   -2.91   -2.91   -2.91   -1.27   -9.54   -6.70</PRE>
+<PRE>filtoffset=&nbsp; -7.06&nbsp;&nbsp; -7.06&nbsp;&nbsp; -2.91&nbsp;&nbsp; -2.91&nbsp;&nbsp; -2.91&nbsp;&nbsp; -1.27&nbsp;&nbsp; -9.54&nbsp;&nbsp; -6.70</PRE>
 with the repeated values being some evidence of outlyers being discarded.
 <DT>
 <TT>ARCRON_MULTIPLE_SAMPLES</TT></DT>
@@ -546,16 +547,14 @@ the system log at level <TT>LOG_NOTICE</TT>; note that each resync drains
 the unit's batteries, so the syslog entry seems justified.
 
 <P>Syslog entries are of the form:
-<PRE>
-May 10 10:15:24 oolong ntpd[615]: ARCRON: unit 0: sending resync command
+<PRE>May 10 10:15:24 oolong ntpd[615]: ARCRON: unit 0: sending resync command
 May 10 10:17:32 oolong ntpd[615]: ARCRON: sync finished, signal quality 5: OK, will use clock
 May 10 11:13:01 oolong ntpd[615]: ARCRON: unit 0: sending resync command
 May 10 11:14:06 oolong ntpd[615]: ARCRON: sync finished, signal quality -1: UNKNOWN, will use clock anyway
 May 10 11:41:49 oolong ntpd[615]: ARCRON: unit 0: sending resync command
 May 10 11:43:57 oolong ntpd[615]: ARCRON: sync finished, signal quality 5: OK, will use clock
 May 10 12:39:26 oolong ntpd[615]: ARCRON: unit 0: sending resync command
-May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, will use clock
-</PRE>
+May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, will use clock</PRE>
 
 <H4>
 Fudge Factors</H4>
@@ -626,7 +625,7 @@ Additional Information</H4>
 <A HREF="refclock.htm">Reference Clock Drivers</A>
 
 <P><A HREF="http://www2.exnet.com/NTP/ARC/ARC.htm">ARC Rugby MSF Receiver</A>
-page
+page&nbsp;
 <HR>
 <ADDRESS>
 Damon Hart-Davis (d@hd.org)</ADDRESS>

@@ -29,8 +29,7 @@ others in the same model family that use the same timecode formats.
 
 <P>Most of this code is originally from refclock_wwvb.c with thanks. It
 has been so mangled that wwvb is not a recognizable ancestor.
-<PRE>
-Timcode format: ADDD:HH:MM:SSQCL
+<PRE>Timcode format: ADDD:HH:MM:SSQCL
 
 A - control A (this is stripped before we see it)
 Q - Quality indication (see below)
@@ -39,26 +38,25 @@ L - Line feed
 
 Quality codes indicate possible error of
 
-        468-DC GOES Receiver:
-        GPS-TM/TMD Receiver:
-                ? +/- 500 milliseconds  # +/- 50 milliseconds
-                * +/- 5 milliseconds    . +/- 1 millisecond
-                space less than 1 millisecond
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 468-DC GOES Receiver:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GPS-TM/TMD Receiver:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ? +/- 500 milliseconds&nbsp; # +/- 50 milliseconds
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * +/- 5 milliseconds&nbsp;&nbsp;&nbsp; . +/- 1 millisecond
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; space less than 1 millisecond
 
-        OM-DC OMEGA Receiver:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; OM-DC OMEGA Receiver:
 
-                > +/- 5 seconds
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; > +/- 5 seconds
 
-                ? +/- 500 milliseconds  # +/- 50 milliseconds
-                * +/- 5 milliseconds    . +/- 1 millisecond
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ? +/- 500 milliseconds&nbsp; # +/- 50 milliseconds
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * +/- 5 milliseconds&nbsp;&nbsp;&nbsp; . +/- 1 millisecond
 
-                A-H less than 1 millisecond. Character indicates which
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A-H less than 1 millisecond. Character indicates which
 station
-                is being received as follows: A = Norway, B = Liberia,
-                C = Hawaii, D = North Dakota, E = La Reunion, F =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; is being received as follows: A = Norway, B = Liberia,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C = Hawaii, D = North Dakota, E = La Reunion, F =
 Argentina,
-                G = Australia, H = Japan.
-</PRE>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G = Australia, H = Japan.</PRE>
 The carriage return start bit begins on 0 seconds and extends to 1 bit
 time.
 
@@ -152,7 +150,7 @@ Not used by this driver.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

@@ -11,26 +11,38 @@ Building and Installing the Distribution
 
 <H4>Building and Installing the Distribution</H4>
 
-Note that the automatic build process inspects the machine environment
-and tests for the presence of system header files and the contents of
-these files to determine if certain features are available. When one or
-more of these features are present, the code is compiled to use them; if
-not, no special code is compiled. However, even if the code is compiled
-to use these features, the code does a special test at run time to see
-if one or more are actually present and avoids using them if not
-present. In such cases a warning message is sent to the system log, but
-the daemon should still work properly.
+As a practical matter, every computer architecture and operating system
+version seems to be different than any other. The device drivers may be
+different, the input/output system may bew idiosyncratic and the
+libraries may have different semantics. It is not possible in a software
+distribution such as this one to support every individual sysdtem with a
+common set of binaries, even with the same system but different
+versions. Therefore, it is necessary to configure each system
+individually for each system and version, both at compile time and at
+run time. In almost all cases, these procedures are completely automatic
+and all the newbie user need do is type "make" and the autoconfigure
+system does the rest. There are some exceptions, as noted below.
 
-<H4>Support for Cryptographic Authentication</H4>
+<p>The autoconfigure system inspects the hardware and software
+environment and tests for the presence of system header files and the
+contents of these files to determine if certain features are available.
+When one or more of these features are present, the code is compiled to
+use them; if not, no special code is compiled. However, even if the code
+is compiled to use these features, the code does a special test at run
+time to see if one or more are actually present and avoids using them if
+not present. In such cases a warning message is sent to the system log,
+but the daemon should still work properly.
 
-As required by the International Trade in Arms Regulations (ITAR), now
-called the Defense Trade Regulations (DTR), certain cryptographic
-products and media, including the Data Encryption Standard (DES), cannot
-be exported without per-instance license. For this reason, the DES
-encryption routine has been removed from the the current version, even
-though it is used only to compute a message digest. Current DTR
-regulations allow export of the the MD5 message digest routine, which is
-in fact the preferred algorithm, and this is included in the current
+Some programs included in this distribution use cryptographic algorithms
+to verify server authenticity and credentials. As required by the
+International Trade in Arms Regulations (ITAR), now called the Defense
+Trade Regulations (DTR), certain cryptographic products and media,
+including the Data Encryption Standard (DES), cannot be exported without
+per-instance license. For this reason, the DES encryption routine has
+been removed from the the current version, even though it is used only
+to compute a message digest. Current DTR regulations allow export of the
+the MD5 message digest routine, which is in fact the preferred
+algorithm, and this is included in the current
 version.
 
 <P>The NTP authentication routines conform to the interface used by RSA
@@ -118,8 +130,10 @@ useful to debug kernel time functions) is installed.
 to create a NTP configuration file <TT>ntp.conf</TT> and possibly a
 cryptographic key file <TT>ntp.keys</TT>. Directions for doing that are
 in the <A HREF="notes.htm">Notes on Configuring NTP and Setting up a NTP
-Subnet</A>. A tutorial on debugging technique is in <A
-HREF="debug.htm">NTP Debugging Technique</A>.
+Subnet</A>. The behavior when the daemon starts for the first time can
+be counterintuitive. To reduce the level of angst, see the <a
+href=quick.htm>Quick Start</a> page. A tutorial on debugging technique
+is in <A HREF="debug.htm">NTP Debugging Technique</A>.
 
 <P>If problems peculiar to the particular hardware and software
 environment (e.g. operating system -specific issues) are suspected,

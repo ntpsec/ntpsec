@@ -12,7 +12,7 @@ machine elsewhere in the network. The server is compiled, installed and
 started using the command-line switches described in the <a href =
 "ntpd.htm"> <code>ntpd</code> </a> page. The first thing to look for
 are error messages on the system log. If none occur, the daemon has
-started, opened the devices specified and is waiting for peers and radios
+started, opened the devices specified and waiting for peers and radios
 to come up.
 
 <p>The next step is to be sure the RS232 messages, if used, are getting
@@ -54,8 +54,8 @@ implementation bug shows up.
 
 <p>Most drivers write a message to the <code>clockstats</code> file as
 each timecode or surrogate is received from the radio clock. By
-convention, this is the last ASCII timecode (or ASCII gloss of a
-binary-coded one) received from the radio clock. This file is managed by the
+convention, this is the last ASCII timecode (or ASCII gloss of a binary-
+coded one) received from the radio clock. This file is managed by the
 <code>filegen</code> facility described in the <code>ntpd</code> page
 and requires specific commands in the configuration file. This forms a
 highly useful record to discover anomalies during regular operation of
@@ -64,6 +64,4 @@ directory can be run from a <code>cron</code> job to collect and
 summarize these data on a daily or weekly basis. The summary files have
 proven invaluable to detect infrequent misbehavior due to clock
 implementation bugs in some radios.
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+<hr><address>David L. Mills (mills@udel.edu)</address></body></html>

@@ -90,8 +90,7 @@ tt = DST indicator (see driver listing)
 l = leap-second warning (see driver listing)
 uuu = DUT1 correction (see driver listing)
 mmmmm = modem calibration (see driver listing)
-on-time = '*'
-</PRE>
+on-time = '*'</PRE>
 The timecode message is transmitted continuously after a signon banner,
 which this driver ignores. The driver also ignores all but the yy-mm-dd,
 hh:mm:ss and on-time character '*' fields, although it checks the format
@@ -153,20 +152,17 @@ disables automatic call attempts.
 <P>Manual call attempts can be made at any time by setting fudge flag1
 using ntpdc. For example, the ntpdc command
 <PRE>
-fudge 127.127.18.1 flags 1
-</PRE>
+fudge 127.127.18.1 flags 1</PRE>
 will ask for a key identifier and password and, if authenticated by the
 server, will set flag1. There may be a short delay until the expiration
 of the current poll timeout.
 
 <P>The flag1 can be set from a cron job in the following way. Construct
 a file with contents
-<PRE>
-keyid 11
+<PRE>keyid 11
 passwd dialup
 fudge 127.127.18.1 flags 1
-quit
-</PRE>
+quit</PRE>
 Then, run the following program at specified times as required.
 <PRE>/usr/local/bin/ntpdc &lt;file</PRE>
 
@@ -230,7 +226,7 @@ Not used by this driver.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

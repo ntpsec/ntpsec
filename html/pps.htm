@@ -4,8 +4,8 @@ Pulse-per-second (PPS) Signal Interfacing
 Pulse-per-second (PPS) Signal Interfacing
 </H3><HR>
 
-<P>Some radio clocks and related timekeeping gear have a 
-pulse-per-second (PPS) signal that can be used to discipline the local clock
+<P>Some radio clocks and related timekeeping gear have a pulse-per-
+second (PPS) signal that can be used to discipline the local clock
 oscillator to a high degree of precision, typically to the order less
 than 20 <FONT FACE=Symbol>m</FONT>s in time and 0.01 PPM in frequency.
 The PPS signal can be connected in either of two ways: via the data
@@ -35,7 +35,7 @@ driver without using the PPS driver.
 
 <P>The <TT>tty_clk</TT> module is included in the NTP software
 distribution, while the <A
-HREF="http://www.eecis.udel.edu/~mills/ntp/ntp/ppsclock.tar.Z"><TT>
+HREF=http://www.eecis.udel.edu/~mills/ntp/ntp/ppsclock.tar.Z><TT>
 ppsclock</TT></A> module can be obtained via the web at that link or by
 anonymous FTP from ftp.udel.edu in the <TT>pub/ntp</TT> directory. Both
 the <TT>tty_clk</TT> and <TT>ppsclock</TT> modules are described in the
@@ -45,7 +45,7 @@ Directions for building the modules themselves are in the
 <TT>ntpd</TT> to operate with these modules is described in <A
 HREF=build.htm>Building and Installing the Distribution </A>page.
 
-<P>The PPS driver operates in conjunction with another reference
+<P>The PPS driver is operates in conjunction with another reference
 clock driver that produces the PPS pulse, as described in the <A
 HREF=prefer.htm>Mitigation Rules and the <TT>prefer</TT> Keyword
 </A>page. One of the drivers described in the <A
@@ -66,8 +66,8 @@ call described in that page and the <TT>/usr/include/sys/timex.h</TT>
 header file. The presence of these kernel provisions is automatically
 detected and supporting code compiled.
 
-<P>Some configurations may have multiple radio clocks, each with PPS
-outputs, as well as kernel provisions for the PPS signal. In order to
+<P>In some configurations may have multiple radio clocks, each with PPS
+outputs, as well as a kernel provisions for the PPS signal. In order to
 provide the highest degree of redundancy and survivability, the kernel
 PPS discipline, <TT>tty_clk</TT> module, <TT>ppsclock</TT> module and
 kernel modifications may all be in use at the same time, each backing up
@@ -75,5 +75,5 @@ the other. The sometimes complicated mitigation rules are described in
 the Mitigation Rules and the <TT>prefer</TT> Keyword page.
 
 <hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href="mailto:mills@udel.edu"> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
+</address></a></body></html>

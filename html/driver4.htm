@@ -38,28 +38,24 @@ is available with both the Netclock/2 and 8170, and format 2, which is
 available only with the Netclock/2 and specially modified 8170.
 
 <P>Format 0 (22 ASCII printing characters):
-<PRE>
-&lt;cr>&lt;lf>i  ddd hh:mm:ss  TZ=zz&lt;cr>&lt;lf>
+<PRE>&lt;cr>&lt;lf>i&nbsp; ddd hh:mm:ss&nbsp; TZ=zz&lt;cr>&lt;lf>
 
 on-time = first &lt;cr>
 i = synchronization flag (' ' = in synch, '?' = out synch)
-hh:mm:ss = hours, minutes, seconds
-</PRE>
+hh:mm:ss = hours, minutes, seconds</PRE>
 The alarm condition is indicated by other than ' ' at <TT>i</TT>, which
 occurs during initial synchronization and when received signal is lost
 for about ten hours.
 
 <P>Format 2 (24 ASCII printing characters):
-<PRE>
-&lt;cr>&lt;lf>iqyy ddd hh:mm:ss.fff ld
+<PRE>&lt;cr>&lt;lf>iqyy ddd hh:mm:ss.fff ld
 
 on-time = &lt;cr>
 i = synchronization flag (' ' = in synch, '?' = out synch)
 q = quality indicator (' ' = locked, 'A'...'D' = unlocked)
 yy = year (as broadcast)
 ddd = day of year
-hh:mm:ss.fff = hours, minutes, seconds, milliseconds
-</PRE>
+hh:mm:ss.fff = hours, minutes, seconds, milliseconds</PRE>
 The alarm condition is indicated by other than ' ' at <TT>i</TT>, which
 occurs during initial synchronization and when received signal is lost
 for about ten hours. The unlock condition is indicated by other than '
@@ -143,7 +139,7 @@ Enable verbose <TT>clockstats</TT> recording if set.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

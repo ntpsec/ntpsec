@@ -48,13 +48,11 @@ interface, although other interfaces may work as well.
 
 <P>The clock message consists of 23 ASCII printing characters in the following
 format:
-<PRE>
-hh:mm:ss.f     dd/mm/yr&lt;cr>
+<PRE>hh:mm:ss.f&nbsp;&nbsp;&nbsp;&nbsp; dd/mm/yr&lt;cr>
 
 hh:mm:ss.f = hours, minutes, seconds
 f = deciseconds ('?' when out of spec)
-dd/mm/yr = day, month, year
-</PRE>
+dd/mm/yr = day, month, year</PRE>
 The alarm condition is indicated by '?', rather than a digit, at A. Note
 that 0?:??:??.? is displayed before synchronization is first established
 and hh:mm:ss.? once synchronization is established and then lost again
@@ -117,7 +115,7 @@ Not used by this driver</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

@@ -23,7 +23,7 @@ microseconds added to the system time during a clock interrupt, <TT>tickadj</TT>
 which sets the slew rate and resolution used by the <TT>adjtime</TT> system
 call, and <TT>dosynctodr</TT>, which indicates to the kernels on some machines
 whether they should internally adjust the system clock to keep it in line
-with the time-of-day clock or not.
+with time-of-day clock or not.
 
 <P>By default, with no arguments, <TT>tickadj</TT> reads the variables
 of interest in the kernel and displays them. At the same time, it determines
@@ -68,7 +68,7 @@ specified.</DD>
 <DD>
 Set the kernel variable <TT>dosynctodr</TT> to zero, which disables the
 hardware time-of-year clock, a prerequisite for running the <TT>ntpd</TT>
-daemon under SunOS 4.</DD>
+daemon under SunOS4.</DD>
 
 <DT>
 <TT>-q</TT></DT>
@@ -83,9 +83,10 @@ Files</H4>
 
 <PRE>
 /vmunix
+
 /unix
-/dev/kmem
-</PRE>
+
+/dev/kmem</PRE>
 
 <H4>
 Bugs</H4>
@@ -93,8 +94,10 @@ Fiddling with kernel variables at run time as a part of ordinary operations
 is a hideous practice which is only necessary to make up for deficiencies
 in the implementation of <TT>adjtime</TT> in many kernels and/or brokenness
 of the system clock in some vendors' kernels. It would be much better if
-the kernels were fixed and the <TT>tickadj</TT> program went away.
+the kernels were fixed and the <TT>tickadj</TT> program went away.&nbsp;
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+</BODY>
+</HTML>

@@ -36,8 +36,7 @@ fudge time1 parameter can be used for vernier corrections.
 <P>Using the poll sequence <TT>QTQDQM</TT>, the response timecode is in
 three sections totalling 50 ASCII printing characters, as concatenated
 by the driver, in the following format:
-<PRE>
-ahh:mm:ss.fffs&lt;cr> yy/dd/mm/ddd&lt;cr>
+<PRE>ahh:mm:ss.fffs&lt;cr> yy/dd/mm/ddd&lt;cr>
 frdzycchhSSFTttttuuxx&lt;cr>
 
 on-time = first &lt;cr>
@@ -58,8 +57,7 @@ F = current receive frequency (4 = 15 MHz)
 T = transmitter (C = WWV, H = WWVH)
 tttt = time since last update (0000 = minutes)
 uu = flush character (03 = ^c)
-xx = 94 (unknown)
-</PRE>
+xx = 94 (unknown)</PRE>
 The alarm condition is indicated by other than <TT>8</TT> at <TT>a</TT>,
 which occurs during initial synchronization and when received signal is
 lost for an extended period; unlock condition is indicated by other than
@@ -124,7 +122,7 @@ Not used by this driver.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

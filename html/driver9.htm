@@ -20,30 +20,15 @@ Address: 127.127.9.<I>u</I>
 <BR>Features: <TT>ppsclock</TT> (required)
 <H4>
 Description</H4>
-This driver supports the Magnavox MX4200 Navigation Receiver adapted to
-precision timing applications. It requires the <TT>ppsclock</TT> line
-discipline or streams module described in the <A HREF="ldisc.htm">Line
-Disciplines and Streams Modules</A> page. It also requires a <A
-HREF="gadget.htm">gadget box</A> and 1-PPS level converter, such as
-described in the <A HREF="pps.htm">Pulse-per-second (PPS) Signal
-Interfacing</A> page.
+This driver supports the Magnavox MX 4200 Navigation Receiver adapted to
+precision timing applications. It requires the <TT>ppsclock</TT> line discipline
+or streams module described in the <A HREF="ldisc.htm">Line Disciplines
+and Streams Modules</A> page. It also requires a gadget box and 1-PPS level
+converter, such as described in the <A HREF="pps.htm">Pulse-per-second
+(PPS) Signal Interfacing</A> page.
 
 <P>This driver supports all compatible receivers such as the 6-channel
-MX4200, MX4200D, and the 12-channel MX9212, MX9012R, MX9112.
-
-<P>
-<A HREF="http://www.leica-gps.com/">
-<IMG SRC="pic/9400n.jpg" ALT="Leica MX9400N Navigator" ALIGN=LEFT></A>
-<A HREF="http://www.leica-gps.com/">Leica Geosystems</A> acquired
-the Magnavox commercial GPS technology business in February of 1994.
-They now market and support former Magnavox GPS products such as the
-MX4200 and its successors.</P>
-
-<BR CLEAR=LEFT>
-Leica MX9400N Navigator.
-
-<P>
-
+MX 4200, MX 4200D, and the 12-channel MX 9212, MX 9012R, MX 9112.
 <H4>
 Operating Modes</H4>
 This driver supports two modes of operation, static and mobile, controlled
@@ -55,7 +40,9 @@ is in a fixed location. The receiver is initially placed in a "Static,
 for a fixed station. A DOP-weighted running average position is calculated
 from this data. After 24 hours, the receiver is placed into a "Known Position"
 mode, initialized with the calculated position, and then solves only for
-time.
+time. The position averaging algorithm does not take into account boundary
+conditions, so this mode of operation very near the international date
+line or the poles is not recommended.
 
 <P>In mobile mode, the driver assumes the GPS antenna is mounted on a moving
 platform such as a car, ship, or aircraft. The receiver is placed in "Dynamic,
@@ -64,10 +51,7 @@ position averaging is performed.
 <H4>
 Monitor Data</H4>
 The driver writes each timecode as received to the <TT>clockstats</TT>
-file.  Documentation for the <CITE>NMEA-0183</CITE> proprietary
-sentences produced by the MX4200 can be found in
-<A HREF="mx4200data.htm">MX4200 Receiver Data Format</A>.
-
+file.
 <H4>
 Fudge Factors</H4>
 
@@ -124,7 +108,7 @@ Not used by this driver.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

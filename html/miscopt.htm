@@ -26,7 +26,7 @@ Ethernet), a number between 0.003 and 0.007 seconds is appropriate. The
 default when this command is not used is 0.004 seconds.</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DT>
 <TT>trap <I>host_address</I> [port <I>port_number</I>] [interface <I>interface_address</I>]</TT></DT>
@@ -46,7 +46,7 @@ their own trap dynamically, configuring a trap receiver will ensure that
 no messages are lost when the server is started.</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DT>
 <TT>setvar <I>variable</I> [default]</TT></DT>
@@ -67,7 +67,7 @@ and the <TT>clock_var_list</TT> holds the names of the reference clock
 variables.</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DT>
 <TT>logfile <I>logfile</I></TT></DT>
@@ -77,7 +77,7 @@ This command specifies the location of an alternate log file to be used
 instead of the default system <TT>syslog</TT> facility.</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DT>
 <TT>logconfig <I>configkeyword</I></TT></DT>
@@ -88,7 +88,7 @@ This command controls the amount and type of output written to the system
 default, all output is turned on. All <I><TT>configkeyword</TT></I> keywords
 can be prefixed with <TT>=</TT>, <TT>+</TT> and <TT>-</TT>, where <TT>=</TT>
 sets the <TT>syslogmask</TT>, <TT>+</TT> adds and <TT>-</TT> removes messages.
-<TT>syslog</TT> messages can be controlled in four classes (<tt>clock</tt>, <TT>peer</TT>,
+<TT>syslog messages</TT> can be controlled in four classes (, <TT>peer</TT>,
 <TT>sys</TT> and <TT>sync</TT>). Within these classes four types of messages
 can be controlled.</DD>
 
@@ -96,10 +96,10 @@ can be controlled.</DD>
 Informational messages (<TT>info</TT>) control configuration information.
 Event messages (<TT>events</TT>) control logging of events (reachability,
 synchronization, alarm conditions). Statistical output is controlled with
-the <TT>statistics</TT> keyword. The final message group is the <TT>status</TT>
+the <TT>statistics</TT> keyword. The final message group is the status
 messages. This describes mainly the synchronizations status. Configuration
 keywords are formed by concatenating the message class with the event class.
-The <TT>all</TT> prefix can be used instead of a message class. A message
+The <TT>allprefix</TT> can be used instead of a message class. A message
 class may also be followed by the <TT>all</TT> keyword to enable/disable
 all messages of the respective message class.</DD>
 
@@ -107,7 +107,7 @@ all messages of the respective message class.</DD>
 Thus, a minimal log configuration could look like this:</DD>
 
 <DD>
-<TT>logconfig =syncstatus +sysevents</TT></DD>
+<TT>logconfig = syncstatus +sysevents</TT></DD>
 
 <DD>
 This would just list the synchronizations state of <TT>ntpd</TT> and the
@@ -115,7 +115,7 @@ major system events. For a simple reference server, the following minimum
 message configuration could be useful:</DD>
 
 <DD>
-<TT>logconfig =syncall +clockall</TT></DD>
+<TT>logconfig = syncall +clockall</TT></DD>
 
 <DD>
 This configuration will list all clock information and synchronization
@@ -126,7 +126,7 @@ so on is suppressed.</DD>
 <H4>
 Variables</H4>
 Most variables used by the NTP protocol can be examined with the <TT>ntpdc</TT>
-(mode 7 messages) and the <TT>ntpq</TT> (mode 6 messages) programs. Currently, very
+(mode 7 messages) and the <TT>ntpq</TT> (mode 6 messages). Currently, very
 few variables can be modified via mode 6 messages. These variables are
 either created with the <TT>setvar</TT> directive or the leap warning bits.
 The leap warning bits can be set in the <TT>leapwarning</TT> variable up
@@ -154,6 +154,9 @@ Leap information from the synchronizations source is ignored (thus <TT>LEAP_NOWA
 is passed on).</DD>
 </DL>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
+
+</BODY>
+</HTML>

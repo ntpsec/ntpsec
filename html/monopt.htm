@@ -17,7 +17,7 @@ Monitoring Support</H4>
 continuous, long term recording of server and client timekeeping performance.
 See the <TT>statistics</TT> command below for a listing and example of
 each type of statistics currently supported. Statistic files are managed
-using file generation sets and scripts in the <TT>./scripts</TT> directory of this
+using file generation sets and scripts in the ./scripts directory of this
 distribution. Using these facilities and Unix <TT>cron</TT> jobs, the data
 can be automatically summarized and archived for retrospective analysis.
 <H4>
@@ -31,13 +31,17 @@ Monitoring Commands</H4>
 Enables writing of statistics records. Currently, three kinds of <I><TT>name</TT></I>
 statistics are supported.</DD>
 
+<DD>
+&nbsp;</DD>
+
+<DL>
 <DT>
 <TT>loopstats</TT></DT>
 
 <DD>
 Enables recording of loop filter statistics information. Each update of
 the local clock outputs a line of the following form to the file generation
-set named <TT>loopstats</TT>:
+set named <TT>loopstats</TT>:</DD>
 
 <PRE>50935 75440.031 0.000006019 13.778190 0.000351733 0.013380 6</PRE>
 
@@ -47,6 +51,9 @@ and fraction past UTC midnight). The next five fields show time offset
 (seconds), frequency offset (parts per million - PPM), RMS jitter (seconds),
 Allan deviation (PPM) and clock discipline time constant.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>peerstats</TT></DT>
 
@@ -54,7 +61,7 @@ Allan deviation (PPM) and clock discipline time constant.</DD>
 Enables recording of peer statistics information. This includes statistics
 records of all peers of a NTP server and of special signals, where present
 and configured. Each valid update appends a line of the following form
-to the current element of a file generation set named <TT>peerstats</TT>:
+to the current element of a file generation set named <TT>peerstats</TT>:</DD>
 
 <PRE>48773 10847.650 127.127.4.1 9714 -0.001605 0.00000 0.00142</PRE>
 
@@ -66,13 +73,16 @@ in hex in the format described in Appendix A of the NTP specification RFC
 1305. The final three fields show the offset, delay and RMS jitter, all
 in seconds.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>clockstats</TT></DT>
 
 <DD>
 Enables recording of clock driver statistics information. Each update received
 from a clock driver appends a line of the following form to the file generation
-set named <TT>clockstats</TT>:
+set named <TT>clockstats</TT>:</DD>
 
 <PRE>49213 525.624 127.127.4.1 93 226 00:08:29.606 D</PRE>
 
@@ -83,6 +93,9 @@ in dotted-quad notation, The final field shows the last timecode received
 from the clock in decoded ASCII format, where meaningful. In some clock
 drivers a good deal of additional information can be gathered and displayed
 as well. See information specific to each clock for further details.</DD>
+
+<DD>
+&nbsp;</DD>
 
 <DT>
 <TT>rawstats</TT></DT>
@@ -95,11 +108,14 @@ clock driver appends a line of the following form to the file generation
 set named <TT>rawstats</TT>:</DD>
 
 <DD>
+&nbsp;</DD>
+
+<DD>
 <TT>50928 2132.543 128.4.1.1 128.4.1.20 3102453281.584327000 3102453281.58622800031
 02453332.540806000 3102453332.541458000</TT></DD>
 
 <DD>
-<TT> </TT></DD>
+<TT>&nbsp;</TT></DD>
 
 <DD>
 The first two fields show the date (Modified Julian Day) and time (seconds
@@ -108,6 +124,10 @@ address in dotted-quad notation, The final four fields show the originate,
 receive, transmit and final NTP timestamps in order. The timestamp values
 are as received and before processing by the various data smoothing and
 mitigation algorithms.</DD>
+</DL>
+
+<DD>
+&nbsp;</DD>
 
 <DT>
 <TT>statsdir <I>directory_path</I></TT></DT>
@@ -119,14 +139,14 @@ filename prefix to be modified for file generation sets, which is useful
 for handling statistics logs.</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DT>
 <TT>filegen <I>name</I> [file <I>filename</I>] [type <I>typename</I>] [link
 | nolink] [enable | disable]</TT></DT>
 
 <DT>
-<TT> </TT></DT>
+<TT>&nbsp;</TT></DT>
 
 <DD>
 Configures setting of generation file set <I>name</I>. Generation file
@@ -141,12 +161,16 @@ without the risk of disturbing the operation of <TT>ntpd</TT>. (Most important:
 they can be removed to free space for new data produced.)</DD>
 
 <DD>
- </DD>
+&nbsp;</DD>
 
 <DD>
 Note that this command can be sent from the <TT>ntpdc</TT> program running
 at a remote location.</DD>
 
+<DD>
+&nbsp;</DD>
+
+<DL>
 <DT>
 <I><TT>name</TT></I></DT>
 
@@ -155,11 +179,21 @@ This is the type of the statistics records, as shown in the <TT>statististics</T
 command.</DD>
 
 <DD>
-<TT>file <I>filename</I></TT>
+&nbsp;</DD>
+</DL>
 
-<DD>This is the file name for the statistics records. Filenames of set members
+<DD>
+<TT>file <I>filename</I></TT></DD>
+
+<DL>
+<DD>
+This is the file name for the statistics records. Filenames of set members
 are built from three elements:</DD>
 
+<DD>
+&nbsp;</DD>
+
+<DL>
 <DT>
 prefix</DT>
 
@@ -171,6 +205,9 @@ file generation sets via other commands. For example, the prefix used with
 <TT>loopstats</TT> and <TT>peerstats</TT> generation can be configured
 using the <TT>statsdir</TT> option explained above.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <I><TT>filename</TT></I></DT>
 
@@ -181,24 +218,41 @@ argument to the <TT>filegen</TT> statement. No <TT>..</TT> elements are
 allowed in this component to prevent filenames referring to parts outside
 the filesystem hierarchy denoted by <TT>prefix</TT>.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 suffix</DT>
 
 <DD>
 This part is reflects individual elements of a file set. It is generated
 according to the type of a file set.</DD>
+</DL>
 
-<DT><TT>type <I>typename</I></TT></DT>
+<DD>
+&nbsp;</DD>
+</DL>
 
+<DD>
+<TT>type <I>typename</I></TT></DD>
+
+<DL>
 <DD>
 A file generation set is characterized by its type. The following types
 are supported:</DD>
 
+<DD>
+&nbsp;</DD>
+
+<DL>
 <DT>
 <TT>none</TT></DT>
 
 <DD>
 The file set is actually a single plain file.</DD>
+
+<DD>
+&nbsp;</DD>
 
 <DT>
 <TT>pid</TT></DT>
@@ -212,6 +266,9 @@ appending a <TT>.</TT> (dot) to concatenated <I>prefix</I> and <I>filename</I>
 strings, and appending the decimal representation of the process ID of
 the <TT>ntpd</TT> server process.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>day</TT></DT>
 
@@ -224,6 +281,9 @@ month number. <TT>DD</TT> is a two digit day number. Thus, all information
 written at 10 December 1992 would end up in a file named <TT><I>prefix
 filename</I>.19921210</TT>.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>week</TT></DT>
 
@@ -235,6 +295,9 @@ suffix to the file set filename base: A dot, a 4-digit year number, the
 letter <TT>W</TT>, and a 2-digit week number. For example, information
 from January, 10th 1992 would end up in a file with suffix <TT>.1992W1</TT>.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>month</TT></DT>
 
@@ -242,12 +305,18 @@ from January, 10th 1992 would end up in a file with suffix <TT>.1992W1</TT>.</DD
 One generation file set element is generated per month. The file name suffix
 consists of a dot, a 4-digit year number, and a 2-digit month.</DD>
 
+<DD>
+&nbsp;</DD>
+
 <DT>
 <TT>year</TT></DT>
 
 <DD>
 One generation file element is generated per year. The filename suffix
 consists of a dot and a 4 digit year number.</DD>
+
+<DD>
+&nbsp;</DD>
 
 <DT>
 <TT>age</TT></DT>
@@ -258,11 +327,17 @@ set every 24 hours of server operation. The filename suffix consists of
 a dot, the letter <TT>a</TT>, and an 8-digit number. This number is taken
 to be the number of seconds the server is running at the start of the corresponding
 24-hour period. Information is only written to a file generation by specifying
-<TT>enable</TT>; output is prevented by specifying <TT>disable</TT>.</DD>
+<TT>enabl</TT>; output is prevented by specifying <TT>disable</TT>.</DD>
 
 <DD>
-<TT>link | nolink</TT>
+&nbsp;</DD>
+</DL>
+</DL>
 
+<DD>
+<TT>link | nolink</TT></DD>
+
+<DL>
 <DD>
 It is convenient to be able to access the current element of a file generation
 set by a fixed name. This feature is enabled by specifying <TT>link</TT>
@@ -275,12 +350,21 @@ is greater than one, the file is unlinked. This allows the current file
 to be accessed by a constant name.</DD>
 
 <DD>
-<TT>enable | disable</TT>
+&nbsp;</DD>
+</DL>
 
+<DD>
+<TT>enable | disable</TT></DD>
+
+<DL>
 <DD>
 Enables or disables the recording function.</DD>
 </DL>
+</DL>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
+
+</BODY>
+</HTML>

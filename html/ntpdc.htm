@@ -24,7 +24,7 @@ interface. In addition, nearly all the configuration options which can
 be specified at start up using ntpd's configuration file may also be specified
 at run time using <TT>ntpdc</TT>.
 
-<P>If one or more request options are included on the command line when
+<P>If one or more request options is included on the command line when
 <TT>ntpdc</TT> is executed, each of the requests will be sent to the NTP
 servers running on each of the hosts given as command line arguments, or
 on localhost by default. If no request options are given, <TT>ntpdc</TT>
@@ -34,14 +34,14 @@ again defaulting to localhost when no other host is specified. <TT>ntpdc</TT>
 will prompt for commands if the standard input is a terminal device.
 
 <P><TT>ntpdc</TT> uses NTP mode 7 packets to communicate with the NTP server,
-and hence can be used to query any compatible server on the network which
+and hence can be used to query any compatable server on the network which
 permits it. Note that since NTP is a UDP protocol this communication will
 be somewhat unreliable, especially over large distances in terms of network
 topology. <TT>ntpdc</TT> makes no attempt to retransmit requests, and will
 time requests out if the remote host is not heard from within a suitable
 timeout time.
 
-<P>The operation of <TT>ntpdc</TT> is specific to the particular implementation
+<P>The operation of <TT>ntpdc</TT> are specific to the particular implementation
 of the <TT>ntpd</TT> daemon and can be expected to work only with this
 and maybe some previous versions of the daemon. Requests from a remote
 <TT>ntpdc</TT> program which affect the state of the local server must
@@ -60,7 +60,7 @@ format commands from the standard input.
 <DD>
 The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified host(s).
-Multiple <tt>-c</tt> options may be given.</DD>
+Multiple -c options may be given.</DD>
 
 <DT>
 <TT>-i</TT></DT>
@@ -95,7 +95,7 @@ state. This is equivalent to <TT>-c peers</TT>.</DD>
 
 <DD>
 Print a list of the peers known to the server as well as a summary of their
-state, but in a slightly different format than the <tt>-p</tt> switch. This is equivalent
+state, but in a slightly different format than the -p switch. This is equivalent
 to <TT>-c dmpeers</TT>.</DD>
 </DL>
 
@@ -105,7 +105,7 @@ Interactive format commands consist of a keyword followed by zero to four
 arguments. Only enough characters of the full keyword to uniquely identify
 the command need be typed. The output of a command is normally sent to
 the standard output, but optionally the output of individual commands may
-be sent to a file by appending a <TT>&gt;</TT>, followed by a file name,
+be sent to a file by appending a <TT>&lt;</TT>, followed by a file name,
 to the command line.
 
 <P>A number of interactive format commands are executed entirely within
@@ -115,12 +115,12 @@ being sent to a server. These are described following.
 <DT>
 <TT>? [ <I>command_keyword</I> ]</TT></DT>
 
-<DT><TT>help [ <I>command_keyword</I> ]</TT></DT>
+<BR><TT>helpl [ <I>command_keyword</I> ]</TT>
 <DD>
 A <TT>?</TT> by itself will print a list of all the command keywords known
-to this incarnation of <TT>ntpdc</TT>. A <TT>?</TT> followed by a command
-keyword will print function and usage information about the command. This
-command is probably a better source of information about <TT>ntpdc</TT>
+to this incarnation of <TT>ntpq</TT>. A <TT>?</TT> followed by a command
+keyword will print funcation and usage information about the command. This
+command is probably a better source of information about <TT>ntpq</TT>
 than this manual page.</DD>
 
 <DT>
@@ -213,7 +213,8 @@ operating in. A <TT>+</TT> denotes symmetric active, a <TT>-</TT> indicates
 symmetric passive, a <TT>=</TT> means the remote server is being polled
 in client mode, a <TT>^</TT> indicates that the server is broadcasting
 to this address, a <TT>~</TT> denotes that the remote peer is sending broadcasts
-and a <TT>*</TT> marks the peer the server is currently synchronizing to.
+and a <TT>*</TT> marks the peer the server is currently synchonizing to.</DD>
+
 
 <P>The contents of the host field may be one of four forms. It may be a
 host name, an IP address, a reference clock implementation name with its
@@ -236,7 +237,7 @@ is currently synchronizing with.</DD>
 
 <DD>
 Shows a detailed display of the current peer variables for one or more
-peers. Most of these values are described in the NTP Version 3 specification.</DD>
+peers. Most of these values are described in the NTP Version 2 specification.</DD>
 
 <DT>
 <TT>pstats <I>peer_address</I> [...]</TT></DT>
@@ -282,8 +283,9 @@ as the default.</DD>
 <DD>
 Print a variety of system state variables, i.e., state related to the local
 server. All except the last four lines are described in the NTP Version
-3 specification, RFC-1305.
+3 specification, RFC-1305.</DD>
 
+<DL>
 <DD>
 The <TT>system flags</TT> show various system flags, some of which can
 be set and cleared by the <TT>enable</TT> and <TT>disable</TT> configuration
@@ -312,6 +314,7 @@ the <TT>broadcastdelay</TT> configuration command.</DD>
 <DD>
 The <TT>authdelay</TT> shows the default authentication delay, as set by
 the <TT>authdelay</TT> configuration command.</DD>
+</DL>
 
 <DT>
 <TT>sysstats</TT></DT>
@@ -366,7 +369,7 @@ Runtime Configuration Requests</H4>
 All requests which cause state changes in the server are authenticated
 by the server using a configured NTP key (the facility can also be disabled
 by the server by not configuring a key). The key number and the corresponding
-key must also be made known to <tt>ntpdc</tt>. This can be done using the keyid
+key must also be made known to xtnpdc. This can be done using the keyid
 and passwd commands, the latter of which will prompt at the terminal for
 a password to use as the encryption key. You will also be prompted automatically
 for both the key number and password the first time a command which would
@@ -404,7 +407,7 @@ to conform to the new configuration, as appropriate. If the optional <TT>keyid</
 is a nonzero integer, all outgoing packets to the remote server will have
 an authentication field attached encrypted with this key. If the value
 is 0 (or not given) no authentication will be done. The <TT>version#</TT>
-can be 1, 2, 3 or 4 and defaults to 3. The <TT>prefer</TT> keyword indicates
+can be 1, 2 or 3 and defaults to 3. The <TT>prefer</TT> keyword indicates
 a preferred peer (and thus will be used primarily for clock synchronisation
 if possible). The preferred peer also determines the validity of the PPS
 signal - if the preferred peer is suitable for synchronisation so is the
@@ -445,15 +448,18 @@ mode if the remote peer is willing to continue on in this fashion.</DD>
 This command provides a way to set certain data for a reference clock.
 See the source listing for further information.</DD>
 
-<DT><TT>enable [ <I>flag</I> ] [ ... ]</TT></DT>
-<DT><TT>disable [ <I>flag</I> ] [ ... ]</TT></DT>
+<DT>
+<TT>enable [ <I>flag</I> ] [ ... ]</TT></DT>
+
+<BR><TT>disable [ <I>flag</I> ] [ ... ]</TT>
 <DD>
 These commands operate in the same way as the <TT>enable</TT> and <TT>disable</TT>
 configuration file commands of <TT>ntpd</TT>. Following is a description
 of the flags. Note that only the <TT>auth</TT>, <TT>bclient</TT>, <TT>monitor</TT>,
 <TT>pll</TT>, <TT>pps</TT> and <TT>stats</TT> flags can be set by <TT>ntpdc</TT>;
-the <TT>kernel_sync</TT> and <TT>pps_sync</TT> flags are read-only.</DD>
+the <TT>pll_kernel</TT> and <TT>pps_kernel</TT> flags are read-only.</DD>
 
+<DL>
 <DT>
 <TT>auth</TT></DT>
 
@@ -474,8 +480,8 @@ The default for this flag is disable.</DD>
 <TT>monitor</TT></DT>
 
 <DD>
-Enables the monitoring facility. See the
-<TT>monlist</TT> command for further information. The default for this flag
+Enables the monitoring facility. See the <TT>ntpdc</TT> program and the
+<TT>monlist</TT> command or further information. The default for this flag
 is enable.</DD>
 
 <DT>
@@ -523,6 +529,7 @@ When the precision time kernel modifications are installed and a pulse-per-secon
 (PPS) signal is available, this indicates the PPS signal controls the clock
 discipline; otherwise, the daemon or kernel controls the clock discipline,
 as indicated by the <TT>pll_kernel</TT> flag.</DD>
+</DL>
 
 <DT>
 <TT>restrict <I>address mask flag</I> [ <I>flag</I> ]</TT></DT>
@@ -604,8 +611,10 @@ Bugs</H4>
 boring and could only be loved by its implementer. The program was designed
 so that new (and temporary) features were easy to hack in, at great expense
 to the program's ease of use. Despite this, the program is occasionally
-useful.
+useful.&nbsp;
+<HR>
+<ADDRESS>
+David L. Mills (mills@udel.edu)</ADDRESS>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+</BODY>
+</HTML>

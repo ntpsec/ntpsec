@@ -24,29 +24,27 @@ and 1, and world access for unit 2 and 3
 <H4>
 Structure of shared memory-segment</H4>
 
-<PRE>
-struct shmTime {
-  int    mode; /* 0 - if valid set
-                *       use values, 
-                *       clear valid
-                * 1 - if valid set 
-                *       if count before and after read of 
-                *       values is equal,
-                *         use values 
-                *       clear valid
-                */
-  int    count;
-  time_t clockTimeStampSec;      /* external clock */
-  int    clockTimeStampUSec;     /* external clock */
-  time_t receiveTimeStampSec;    /* internal clock, when external value was received */
-  int    receiveTimeStampUSec;   /* internal clock, when external value was received */
-  int    leap;
-  int    precision;
-  int    nsamples;
-  int    valid;
-  int    dummy[10]; 
-};
-</PRE>
+<PRE>struct shmTime {
+&nbsp; int&nbsp;&nbsp;&nbsp; mode; /* 0 - if valid set
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; use values,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clear valid
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * 1 - if valid set&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if count before and after read of&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; values is equal,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; use values&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clear valid
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp; int&nbsp;&nbsp;&nbsp; count;
+&nbsp; time_t clockTimeStampSec;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* external clock */
+&nbsp; int&nbsp;&nbsp;&nbsp; clockTimeStampUSec;&nbsp;&nbsp;&nbsp;&nbsp; /* external clock */
+&nbsp; time_t receiveTimeStampSec;&nbsp;&nbsp;&nbsp; /* internal clock, when external value was received */
+&nbsp; int&nbsp;&nbsp;&nbsp; receiveTimeStampUSec;&nbsp;&nbsp; /* internal clock, when external value was received */
+&nbsp; int&nbsp;&nbsp;&nbsp; leap;
+&nbsp; int&nbsp;&nbsp;&nbsp; precision;
+&nbsp; int&nbsp;&nbsp;&nbsp; nsamples;
+&nbsp; int&nbsp;&nbsp;&nbsp; valid;
+&nbsp; int&nbsp;&nbsp;&nbsp; dummy[10];&nbsp;
+};</PRE>
 
 <H4>
 Operation mode=0</H4>
@@ -124,7 +122,8 @@ Not used by this driver.</DD>
 <TT>flag4 0 | 1</TT></DT>
 
 <DD>
-Not used by this driver.
+Not used by this driver.</DD>
+
 
 <P>Additional Information
 

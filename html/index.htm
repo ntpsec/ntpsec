@@ -34,7 +34,7 @@ HREF=biblio.htm>Protocol Conformance Statement</A> page. Discussion on
 year-2000 issues can be found in the <A HREF=y2k.htm>Year 2000
 Conformance Statement page</A>. Background information, bibliography and
 briefing slides suitable for presentations can be found in the <A
-HREF="http://www.eecis.udel.edu/~mills/ntp.htm"> Network Time
+HREF=http://www.eecis.udel.edu/~mills/ntp.htm> Network Time
 Synchronization Project</A> page.
 
 <H4>Building and Installing NTP</H4>
@@ -91,15 +91,15 @@ at stratum one and provide synchronization to secondary servers
 operating at stratum two and so on to higher strata. In this hierarchy,
 clients are simply servers that have no dependents.
 
-<P>The NTP subnet in early 1999 includes 79 public primary (stratum 1)
+<P>The NTP subnet in early 1998 includes 70 public primary (stratum 1)
 servers synchronized directly to UTC by radio, satellite or modem and
-located in every continent of the globe except Antarctica (soon).
+located in every continent of the globe, except Antarctica (soon).
 Normally, client workstations and servers with a relatively small number
-of clients do not synchronize to primary servers. There are over 100
-public secondary (stratum 2) servers synchronized to the primary servers
-and providing synchronization to a total in excess of 100,000 clients
-and servers in the Internet. The current lists are maintained in the <A
-HREF="http://www.eecis.udel.edu/~mills/ntp/index.htm">Information on Time
+of clients do not synchronize to primary servers. There are 106 public
+secondary (stratum 2) servers synchronized to the primary servers and
+providing synchronization to a total in excess of 100,000 clients and
+servers in the Internet. The current lists are maintained in the <A
+HREF=http://www.eecis.udel.edu/~mills/ntp/index.htm>Information on Time
 and Frequency Services</A> page, which is updated frequently. There are
 numerous private primary and secondary servers not normally available to
 the public as well. You are strongly discouraged from using these
@@ -107,81 +107,9 @@ servers, since they sometimes hide in little ghettos behind dinky links
 to the outside world and your traffic can bring up expensive ISDN lines,
 causing much grief and frustration.
 
-<p>In some cases where a network is isolated from the Internet and no
-external synchronization source is available, one of the network hosts
-can be designated as the primary server and the others operate as
-clients. In these cases the network hosts will be synchronized, but not
-necessarily to standard civil time. Even if an external synchronization
-source is available, a host can be designated as backup server in the
-event the external source becomes unreachable or inoperable. A host
-operating as the primary or backup server is configured with the <a
-href=driver1.htm>Undisciplined Local Clock</a> driver. The configuration
-options provide for a stratum number to be assigned to the server,
-usually one for a primary server and three or more for a backup server.
-
-<h4>Performance Expectations</h4>
-
-<p>In the majority of cases, the NTP subnet can keep the clock within a
-few milliseconds on LANs and a few tens of milliseconds on WANs.
-However, in some cases with network jitter of several hundred
-milliseconds or more, the clock discipline loop may not be able to
-converge to a stable frequency. In such cases, a large fraction of the
-time sample corrections are greater than the 128-ms step threshold and
-valid updates which can discipline the clock frequency are sparse. In
-these cases, the <tt>burst</tt> keyword should be used with the
-corresponding <tt>server</tt> line in the configuration file. This
-causes eight volleys in each measurement round, following which the best
-candidate is determined and used to discipline the clock. See the <a
-href=confopt.htm>Configuration Options</a> page for further information.
-
-<p>When multiple servers are configured, the NTP algorithms operate to
-determine the best combination providing the highest accuracy.
-However, there may be small systematic differences in the apparent time
-of each server due to the different network paths involved. In practice,
-this can lead to occasional <i>clockhopping</i> between servers and
-result in increased jitter as seen by the clock discipline algorithm.
-Usually, a favored server can be selected so that, under most
-circumstances, only that server is used and the others disregarded. The
-favored server is identified by the <tt>prefer</tt> keyword in the
-corresponding <tt>server</tt> or <tt>peer</tt> line in the configuration
-file. See the <a href=prefer.htm>Mitigation Rules and the
-<TT>prefer</TT> Keyword</a> page for further information.
-
-<p>In general, as the poll interval increases, so does the expected
-error. When the highest accuracy is required, the poll interval should
-be clamped at a low value using the <tt>maxpoll</tt> keyword in the
-corresponding <tt>server</tt> or <tt>peer</tt> line in the configuration
-file. A typical argument value is 6, which results in a poll interval of
-64 seconds. This should be done only sparingly, since it results in an
-increased load on the network. Where means are available, steps should
-be taken to minimize the ambient temperature variations, since the clock
-frequency is temperature dependent.
-
-<p>For the best accuracy, latencies in the hardware and software should
-by minimized wherever possible. Consider using the <tt>tty_clk</tt> line
-discipline, if available. Where available, interrupt-driven I/O is
-preferred over polled I/O. When means are available, the scheduling
-priority can be raised to avoid preempting the NTP daemon by other
-processes. This can be done using the <tt>-P</tt> option on the
-<tt>ntpd</tt> command line. However, this can lead to trouble should the
-daemon stumble on an endless program loop. While this is a "cannot
-happen" event, the possibility of this kind of bug should be considered
-in the overall robustness model for the client or server. See the <a
-href=ntpd.htm><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</a>
-page for further information.
-
-<p>The very best accuracy can be achieved only by using an external
-discipline signal, such as a pulse-per-second (PPS) or Inter-Range
-Instrumentation Group (IRIG) signal. This requires external connection
-via a serial port or audio codec. See the <a href=refclock.htm>Reference
-Clock Drivers</a> page for further information and links to device
-drivers. Using the PPS signal and kernel support, for example,
-accuracies of a few microseconds can be achieved with modern workstation
-hardware.
-
 <H4>Resolving Problems</H4>
 
-Like other things on the Internet, the NTP synchronization subnets tend to be
+Like other things Internet, the NTP synchronization subnets tend to be
 large and devilishly intricate, with many opportunities for
 misconfiguration and network problems. The NTP engineering model is
 specifically designed to help isolate and repair such problems using an
@@ -202,7 +130,8 @@ operating systems easier. Additional information on reference clock
 driver construction and debugging can be found in the <A
 HREF=refclock.htm>Reference Clock Drivers </A>page. Further
 information on NTP in the Internet can be found in the <A
-HREF="http://www.eecis.udel.edu/~ntp">NTP web page</A>.
+HREF=http://www.eecis.udel.edu/~ntp>NTP
+web page</A>.
 
 <H4>Program Manual Pages</H4>
 
@@ -229,7 +158,7 @@ variables</A></LI>
 
 <ul>
 
-<LI><A HREF=http://www.eecis.udel.edu/~mills/ntp.htm>NTP Reference Library</A></LI>
+<LI<A HREF=ntp.htm>NTP Reference Library</A></LI>
 <LI><A HREF=copyright.htm>Copyright Notice</A></LI>
 <LI><A HREF=exec.htm>Executive Summary - Computer Network Time
 Synchronization</A></LI>
@@ -268,5 +197,5 @@ Time Signals</A></LI>
 </ul>
 
 <hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href="mailto:mills@udel.edu"> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></body></html>
+href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
+</address></a></body></html>

@@ -35,8 +35,7 @@ sequence <TT>B5</TT>, which initiates a line in the following format to
 be repeated once per second until turned off by the <TT>B0</TT> command.
 
 <P>Format <TT>B5</TT> (24 ASCII printing characters):
-<PRE>
-&lt;cr>&lt;lf>i yy ddd hh:mm:ss.000bbb
+<PRE>&lt;cr>&lt;lf>i yy ddd hh:mm:ss.000bbb
 
 on-time = &lt;cr>
 i = synchronization flag (' ' = locked, '?' = unlocked)
@@ -44,8 +43,7 @@ yy = year of century
 ddd = day of year
 hh:mm:ss = hours, minutes, seconds
 .000 = fraction of second (not used)
-bbb = tailing spaces for fill
-</PRE>
+bbb = tailing spaces for fill</PRE>
 The alarm condition is indicated by a '?' at i, which indicates the receiver
 is not synchronized. In normal operation, a line consisting of the timecode
 followed by the time quality character (TQ) followed by the receiver status
@@ -54,30 +52,26 @@ string (SR) is written to the clockstats file.
 <P>The time quality character is encoded in IEEE P1344 standard:
 
 <P>Format <TT>TQ</TT> (IEEE P1344 estimated worst-case time quality)
-<PRE>
-0       clock locked, maximum accuracy
-F       clock failure, time not reliable
-4       clock unlocked, accuracy &lt; 1 us
-5       clock unlocked, accuracy &lt; 10 us
-6       clock unlocked, accuracy &lt; 100 us
-7       clock unlocked, accuracy &lt; 1 ms
-8       clock unlocked, accuracy &lt; 10 ms
-9       clock unlocked, accuracy &lt; 100 ms
-A       clock unlocked, accuracy &lt; 1 s
-B       clock unlocked, accuracy &lt; 10 s
-</PRE>
+<PRE>0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock locked, maximum accuracy
+F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock failure, time not reliable
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 1 us
+5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 10 us
+6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 100 us
+7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 1 ms
+8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 10 ms
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 100 ms
+A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 1 s
+B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clock unlocked, accuracy &lt; 10 s</PRE>
 The status string is encoded as follows:
 
 <P>Format <TT>SR</TT> (25 ASCII printing characters)
-<PRE>
-V=vv S=ss T=t P=pdop E=ee
+<PRE>V=vv S=ss T=t P=pdop E=ee
 
 vv = satellites visible
 ss = relative signal strength
 t = satellites tracked
 pdop = position dilution of precision (meters)
-ee = hardware errors
-</PRE>
+ee = hardware errors</PRE>
 A three-stage median filter is used to reduce jitter and provide a dispersion
 measure. The driver makes no attempt to correct for the intrinsic jitter
 of the radio itself.
@@ -147,7 +141,7 @@ Enable verbose <TT>clockstats</TT> recording if set.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>

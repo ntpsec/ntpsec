@@ -61,7 +61,7 @@ polarity.
 <P>Format A bursts are sent at seconds 32 through 39 of the minute in hex
 digits
 
-<P><TT>    6dddhhmmss6dddhhmmss</TT>
+<P><TT>&nbsp;&nbsp;&nbsp; 6dddhhmmss6dddhhmmss</TT>
 
 <P>The first ten digits encode a frame marker (<TT>6</TT>) followed by
 the day (<TT>ddd</TT>), hour (<TT>hh </TT>in UTC), minute (<TT>mm</TT>)
@@ -72,7 +72,7 @@ are then repeated with the same polarity.
 
 <P>Format B bursts are sent at second 31 of the minute in hex digits
 
-<P><TT>    xdyyyyttaaxdyyyyttaa</TT>
+<P><TT>&nbsp;&nbsp;&nbsp; xdyyyyttaaxdyyyyttaa</TT>
 
 <P>The first ten digits encode a code (<TT>x </TT>described below) followed
 by the DUT1 (<TT>d </TT>in deciseconds), Gregorian year (<TT>yyyy</TT>),
@@ -81,11 +81,11 @@ peculiar to Canada. These digits are then repeated with inverted polarity.
 
 <P>The <TT>x </TT>is coded
 
-<P>1    Sign of DUT (0 = +)
-<BR>2    Leap second warning. One second will be added.
-<BR>4    Leap second warning. One second will be subtracted.
+<P>1&nbsp;&nbsp;&nbsp; Sign of DUT (0 = +)
+<BR>2&nbsp;&nbsp;&nbsp; Leap second warning. One second will be added.
+<BR>4&nbsp;&nbsp;&nbsp; Leap second warning. One second will be subtracted.
 This is not likely to happen in our universe.
-<BR>8    Even parity bit for this nibble.
+<BR>8&nbsp;&nbsp;&nbsp; Even parity bit for this nibble.
 
 <P>By design, the last stop bit of the last character in the burst coincides
 with 0.5 second. Since characters have 11 bits and are transmitted at 300
@@ -102,7 +102,7 @@ With debugging enabled (<TT>-d -d -d</TT> on the <TT>ntpd </TT>command
 line), the driver produces one line for each burst in two formats corresponding
 to format A and B. Following is format A:
 
-<P><TT>    n b f s m code</TT>
+<P><TT>&nbsp;&nbsp;&nbsp; n b f s m code</TT>
 
 <P>where <TT>n </TT>is the number of characters in the burst (0-11), <TT>b
 </TT>the burst distance (0-40), <TT>f </TT>the field alignment (-1, 0,
@@ -110,7 +110,7 @@ to format A and B. Following is format A:
 number (2-9) and <TT>code </TT>the burst characters as received. Note that
 the hex digits in each character are reversed, so the burst
 
-<P><TT>    10 38 0 16 9 06851292930685129293</TT>
+<P><TT>&nbsp;&nbsp;&nbsp; 10 38 0 16 9 06851292930685129293</TT>
 
 <P>is interpreted as containing 11 characters with burst distance 38, field
 alignment 0, synchronization distance 16 and burst number 9. The nibble-swapped
@@ -123,7 +123,7 @@ results in a signal level near 1000.
 
 <P>Following is format B:
 
-<P><TT>    n b s code</TT>
+<P><TT>&nbsp;&nbsp;&nbsp; n b s code</TT>
 
 <P>where <TT>n </TT>is the number of characters in the burst (0-11), <TT>b
 </TT>the burst distance (0-40), <TT>s </TT>the synchronization distance
@@ -131,7 +131,7 @@ results in a signal level near 1000.
 hex digits in each character are reversed and the last ten digits inverted,
 so the burst
 
-<P>    <TT>11 40 1091891300ef6e76ecff</TT>
+<P>&nbsp;&nbsp;&nbsp; <TT>11 40 1091891300ef6e76ecff</TT>
 
 <P>is interpreted as containing 11 characters with burst distance 40. The
 nibble-swapped timecode shows DUT1 +0.1 second, year 1998 and TAI - UTC
@@ -141,7 +141,7 @@ nibble-swapped timecode shows DUT1 +0.1 second, year 1998 and TAI - UTC
 to the clockstats file and debug score after the last burst received in
 the minute. The format is
 
-<P>   <TT> qq yyyy ddd hh:mm:ss nn dd tt</TT>
+<P>&nbsp;&nbsp;&nbsp;<TT> qq yyyy ddd hh:mm:ss nn dd tt</TT>
 
 <P>where <TT>qq </TT>are the error flags, as described below, <TT>yyyy
 </TT>is the year, <TT>ddd </TT>the day, <TT>hh:mm:ss </TT>the time of day,
@@ -218,7 +218,7 @@ Enable verbose <TT>clockstats</TT> recording if set.</DD>
 </DL>
 Additional Information
 
-<P><A HREF="file:///J|/ntp4/html/refclock.htm">Reference Clock Drivers</A>
+<P><A HREF="file:///J|/ntp4/html/refclock.htm">Reference Clock Drivers</A>&nbsp;
 <HR>
 <ADDRESS>
 David L. Mills (mills@udel.edu)</ADDRESS>
