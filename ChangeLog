@@ -1,3 +1,7 @@
+2000-09-09  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntpd.c (set_process_priority): Clean up debug messages.
+
 2000-09-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: ac_cv_atom_ok, depends on HAVE_PPSAPI.

@@ -128,7 +128,10 @@ static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
  */
 #define NTPD_PRIO	(-12)
 
-int priority_done = 2;
+int priority_done = 2;		/* 0 - Set priority */
+				/* 1 - priority is OK where it is */
+				/* 2 - Don't set priority */
+				/* 1 and 2 are pretty much the same */
 
 /*
  * Debugging flag
@@ -230,8 +233,15 @@ static void
 set_process_priority(void)
 {
 
-	msyslog(LOG_DEBUG, "set_process_priority: priority_done is <%d>",
-		priority_done);
+#ifdef DEBUG
+	if (debug > 1)
+		msyslog(LOG_DEBUG, "set_process_priority: %s: priority_done is <%d>",
+			((priority_done)
+			 ? "Leave priority alone"
+			 : "Attempt to set priority"
+				),
+			priority_done);
+#endif /* DEBUG */
 
 #ifdef SYS_WINNT
 	priority_done += NT_set_process_priority();
