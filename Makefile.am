@@ -28,6 +28,7 @@ EXTRA_DIST = \
 	NOTES.y2kfixes \
 	README.bk \
 	README.hackers \
+	README.refclocks \
 	README.versions \
 	TODO \
 	WHERE-TO-START \
