@@ -1,5 +1,7 @@
 2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ElectricFence/Makefile.am (check-local): use test instead of [
+
 	* configure.in: AC_REPLACE_FUNCS(strdup)
 	* libntp/strdup.c (strdup): Added.
 	* libntp/Makefile.am (EXTRA_libntp_a_SOURCES): Added strdup.c
