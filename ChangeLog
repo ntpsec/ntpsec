@@ -1,3 +1,7 @@
+2000-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99b
+
 2000-01-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_chu.c: NCHAN is used with generic ICOM.
