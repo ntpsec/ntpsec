@@ -2,6 +2,7 @@
 
 	* ntpd/refclock_wwv.c (timecode): Make definition == declaration
 	(wwv_newchan): Ditto
+	(wwv_corr4): Dave fixed the declaration.
 
 	* flock-build: Add rackety to the flock - it runs SunOS 4.1.3/cc
 
