@@ -241,6 +241,13 @@ esac
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(LDFLAGS)dnl
 
+# HMS: From bunnylou/cowbird
+case "$host" in
+ alpha-dec-osf4.0)
+    AC_DISABLE_SHARED
+    ;;
+esac
+
 AC_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_GCC_TRADITIONAL

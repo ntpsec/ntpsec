@@ -342,11 +342,8 @@ AC_CHECK_LIB(gen, pathfind)
   AC_CACHE_VAL([lo_cv_test_autoopts],[
     aoconfig=${lo_cv_with_autoopts_config}
     lo_cv_test_autoopts=`${aoconfig} --libs` 2> /dev/null
-    if test $? -ne 0
-    then lo_cv_test_autoopts=no
-    else if test -z "$lo_cv_test_autoopts"
-         then lo_cv_test_autoopts=yes
-    fi ; fi
+    if test $? -ne 0 -o -z "$lo_cv_test_autoopts"
+    then lo_cv_test_autoopts=no; fi
   ]) # end of CACHE_VAL
   AC_MSG_RESULT([${lo_cv_test_autoopts}])
 
