@@ -258,6 +258,7 @@ typedef unsigned long u_long;
 # include <ws2tcpip.h>
 # undef interface
  typedef char *caddr_t;
+# define vsnprintf _vsnprintf
 #endif /* SYS_WINNT */
 
 int ntp_set_tod P((struct timeval *tvp, void *tzp));
