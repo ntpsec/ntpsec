@@ -76,10 +76,18 @@ point in clearing the lock under Unix, but do so anyway. */
 
 
 
-void log_message (const char *message) {
+/*
+ * Log a message, crudely.
+ * This is used in only one place, but could be used more widely.
+ */
 
-/* Log a message, crudely.  This is used in only one place, but could
-be used more widely. */
+void
+log_message (const char *message)
+{
 
-    syslog(LOG_DAEMON|LOG_WARNING,"%s",message);
+    syslog(
+#ifdef LOG_DAEMON
+	LOG_DAEMON |
+#endif
+	LOG_WARNING, "%s", message);
 }
