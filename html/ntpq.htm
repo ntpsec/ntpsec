@@ -263,7 +263,7 @@ referencing the appropriate peer association ID will show the
 variables of a particular clock. Omitting the variable list will
 cause the server to return a default variable display.</dd>
 
-<dt><tt>lassocations</tt></dt>
+<dt><tt>lassociations</tt></dt>
 
 <dd>Obtains and prints a list of association identifiers and peer
 statuses for all associations for which the server is maintaining
@@ -364,7 +364,7 @@ algorithm.</dd>
 <dt><tt>#&nbsp;&nbsp;selected</tt></dt>
 
 <dd>The peer is a survivor, but not among the first six peers
-sorted by synchronization distance. If the assocation is ephemeral,
+sorted by synchronization distance. If the association is ephemeral,
 it may be demobilized to conserve resources.</dd>
 
 <dt><tt>*&nbsp;&nbsp;sys.peer</tt></dt>
@@ -600,7 +600,7 @@ generated and signed.</dd>
 <dd>Sends a read status request to the server for the given
 association. The names and values of the peer variables returned
 will be printed. Note that the status word from the header is
-displayed preceding the variables, both in hexidecimal and in
+displayed preceding the variables, both in hexadecimal and in
 pidgeon English.</dd>
 
 <dt><tt>readlist [ <i>assocID</i> ]</tt><br>

@@ -327,7 +327,7 @@ fg_receive(
         if (peer->stratum <= 1)
                 peer->refid = pp->refid;
         pp->disp =  (10e-6);
-	pp->lastrec = rbufp->recv_time; /* Is it better then get_systime()? */
+	pp->lastrec = rbufp->recv_time; /* Is it better than get_systime()? */
 	/* pp->leap = LEAP_NOWARNING; */
 
         /*
