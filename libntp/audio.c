@@ -368,8 +368,15 @@ audio_gain(
 	if (debug > 1)
 		printf("audio_gain: gain %d/%d\n", gain, l);
 # endif
+	/* figure out what channel(s) to use. just nuke right for now. */
+	r = 0 ; /* setting to zero nicely mutes the channel */
+
 	l |= r << 8;
-	rval = ioctl(ctl_fd, agc, &l);
+	if (port == 2) {
+	  rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_LINE, &l);
+	} else {
+	  	rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_MIC, &l);
+	}
 	if (rval == -1) {
 		printf("audio_gain: agc write: %s\n", strerror(errno));
 		return (rval);
@@ -382,7 +389,7 @@ audio_gain(
 			printf("audio_gain: mongain %d/%d\n", mongain, l);
 # endif
 		l |= r << 8;
-		rval = ioctl(ctl_fd, monitor, &l);
+		rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_VOLUME, &l);
 		if (rval == -1) {
 			printf("audio_gain: mongain write: %s\n",
 			       strerror(errno));
