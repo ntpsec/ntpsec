@@ -63,7 +63,7 @@ void msyslog(int level, const char *fmt, ...)
 #if defined(SYS_WINNT)
 	char xerr[50];
 #endif
-	register int c;
+	register char c;
 	register char *n, *prog;
 	register const char *f;
 	int olderrno;

@@ -40,6 +40,7 @@
 # include <process.h>
 # include <io.h>
 # include "../libntp/log.h"
+# include <clockstuff.h>
 # include <crtdbg.h>
 #endif /* SYS_WINNT */
 #if defined(HAVE_RTPRIO)
@@ -783,7 +784,7 @@ service_main(
 #if defined(HAVE_IO_COMPLETION_PORT)
 		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
 		WaitHandles[1] = get_timer_handle();
-	    WaitHandles[2] = get_io_event();
+		WaitHandles[2] = get_io_event();
 
 		for (;;) {
 			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, MWMO_ALERTABLE);

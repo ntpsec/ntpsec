@@ -731,8 +731,8 @@ ctlclkstatus(
 	struct refclockstat *this_clock
 	)
 {
-	return ((u_short)(this_clock->currentstatus) << 8) |
-	    (u_short)(this_clock->lastevent);
+	return ((u_short)(((this_clock->currentstatus) << 8) |
+	    (this_clock->lastevent)));
 }
 
 
@@ -2132,7 +2132,7 @@ write_variables(
 	register struct ctl_var *v;
 	register int ext_var;
 	char *valuep;
-	long val;
+	long val = 0;
 
 	/*
 	 * If he's trying to write into a peer tell him no way
@@ -2814,7 +2814,7 @@ char *
 add_var(
 	struct ctl_var **kv,
 	u_long size,
-	int def
+	u_short def
 	)
 {
 	register u_long c;
@@ -2843,7 +2843,7 @@ set_var(
 	struct ctl_var **kv,
 	const char *data,
 	u_long size,
-	int def
+	u_short def
 	)
 {
 	register struct ctl_var *k;
@@ -2889,7 +2889,7 @@ void
 set_sys_var(
 	char *data,
 	u_long size,
-	int def
+	u_short def
 	)
 {
 	set_var(&ext_sys_var, data, size, def);

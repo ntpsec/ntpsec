@@ -4,6 +4,13 @@
 #define __config
 
 #if defined(_MSC_VER)
+/*
+ * An attempt to cut down the number of warnings generated during compilation.
+ * All of these should be benign to disable.
+ */
+
+#pragma warning(disable: 4100) /* unreferenced formal parameter */
+#pragma warning(disable: 4101) /* unreferenced local variable */
 #pragma warning(disable : 4127)
 #endif
 
@@ -16,6 +23,18 @@
 #if !defined _WIN32_WINNT || _WIN32_WINNT < 0x0400
 # error Please define _WIN32_WINNT in the project settings/makefile
 #endif
+/*
+ * ANSI C compliance enabled
+ */
+#define __STDC__ 1
+
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
+#endif
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__	/* Skip asynch rpc inclusion */
+#endif
+
 # undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 													
 # undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
 # define HAVE_RANDOM 
@@ -25,6 +44,7 @@
 #define finite _finite
 # define random      rand
 # define srandom     srand
+int NT_set_process_priority(void);	/* Define this function */
 
 # define MCAST				/* Enable Multicast Support */												
 # define REFCLOCK				/* from ntpd.mak */
@@ -60,6 +80,7 @@
 # define HAVE_ERRNO_H
 # define HAVE_STDARG_H
 # define HAVE_NO_NICE
+# define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 //# define volatile
 # define STDC_HEADERS
@@ -68,12 +89,13 @@
 
 # define USE_PROTOTYPES 		/* for ntp_types.h */														
 
+#define ULONG_CONST(a) a ## UL
+
 # define NOKMEM
 # define RETSIGTYPE void
 # ifndef STR_SYSTEM
 #  define STR_SYSTEM "WINDOWS/NT"
 # endif
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
-struct _RPC_ASYNC_STATE; /* forward declare to stop compiler warning */
 
 #endif /* __config */

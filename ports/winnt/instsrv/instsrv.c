@@ -3,12 +3,12 @@
  *  Purpose: To install a new service and to insert registry entries.
  *
  */
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__	/* Skip asynch rpc inclusion */
+#endif
 
 #include <windows.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 
 #define PERR(api) printf("\n%s: Error %d from %s on line %d",  \
     __FILE__, GetLastError(), api, __LINE__);
@@ -219,7 +219,9 @@ int addSourceToRegistry(LPSTR pszAppname, LPSTR pszMsgDLL)
   HKEY hk;                      /* registry key handle */
   DWORD dwData;
   BOOL bSuccess;
-  
+  char   regarray[200];
+  char *lpregarray = regarray;
+
   /* When an application uses the RegisterEventSource or OpenEventLog
      function to get a handle of an event log, the event loggging service
      searches for the specified source name in the registry. You can add a
@@ -227,9 +229,10 @@ int addSourceToRegistry(LPSTR pszAppname, LPSTR pszMsgDLL)
      under the Application key and adding registry values to the new
      subkey. */
 
+  strcpy(lpregarray, "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\");
+  strcat(lpregarray, pszAppname);
   /* Create a new key for our application */
-  bSuccess = RegCreateKey(HKEY_LOCAL_MACHINE,
-      "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\NTP", &hk);
+  bSuccess = RegCreateKey(HKEY_LOCAL_MACHINE, lpregarray, &hk);
    if(bSuccess != ERROR_SUCCESS)
     {
       PERR("RegCreateKey");
@@ -274,7 +277,7 @@ int addKeysToRegistry()
 {
   HKEY hk;                      /* registry key handle */
   BOOL bSuccess;
-  UCHAR   myarray[200];
+  char   myarray[200];
   char *lpmyarray = myarray;
   int arsize = 0;
 
@@ -332,9 +335,6 @@ int main(int argc, char *argv[])
   BOOL    bRemovingService = FALSE;
   char *p;
 
-  DWORD last_error = 0;
-  int timeout = 0;
-  DWORD rv = 0;
   int ok = 0;  
   
   // check if Win32s, if so, display notice and terminate
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
   if (argc != 2)
   {
     DisplayHelp();
-    exit(1);
+    return(1);
   }
 
   p=argv[1];
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
        || ('-' == *p) )
   {
     DisplayHelp();
-    exit(1);
+    return(1);
   }
         
   
@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
   if (strlen(argv[1]) > 256)
     {
       printf("\nThe service name cannot be longer than 256 characters\n");
-      exit(1);
+      return(1);
     }
 
 
@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
    }
   else return ok;
   }
- else return 0;
+ return 0;
 }
 
 /* --------------------------------------------------------------------------------------- */

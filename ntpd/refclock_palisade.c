@@ -56,6 +56,11 @@
 #include "config.h"
 #endif
 
+#if defined(SYS_WINNT)
+#undef close
+#define close closesocket
+#endif
+
 #if defined(REFCLOCK) && (defined(PALISADE) || defined(CLOCK_PALISADE))
 
 #include "refclock_palisade.h"

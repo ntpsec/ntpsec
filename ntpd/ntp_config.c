@@ -528,6 +528,7 @@ getconfig(
 	struct interface *localaddr;
 	struct refclockstat clock_stat;
 	FILEGEN *filegen;
+	u_char asterisk = '*';
 
 	/*
 	 * Initialize, initialize
@@ -686,7 +687,7 @@ getconfig(
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
-			peerkeystr = "*";
+			peerkeystr = &asterisk;
 			peerflags = 0;
 			ttl = 0;
 			for (i = 2; i < ntokens; i++)
@@ -1751,7 +1752,7 @@ getconfig(
 
 		for (i = 0; i < 8; i++)
 			for (j = 1; j < 100; ++j) {
-				rankey[i] = RANDOM & 0xff;
+				rankey[i] = (char) (RANDOM & 0xff);
 				if (rankey[i] != 0) break;
 			}
 		rankey[8] = 0;
@@ -2146,7 +2147,7 @@ save_resolve(
 		/* no /tmp directory under NT */
 		{
 			DWORD len;
-			if(!(len = GetTempPath((DWORD)MAX_PATH, (LPTSTR)res_file))) {
+			if(!(GetTempPath((DWORD)MAX_PATH, (LPTSTR)res_file))) {
 				msyslog(LOG_ERR, "cannot get pathname for temporary directory: %m");
 				return;
 			}
