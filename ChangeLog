@@ -1,3 +1,10 @@
+2001-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* build: Run "config.status" before the "make" because it probably
+	saves time and trouble.  Probably...
+
+	* flock-build: Try building sequentially.
+
 2001-04-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_cv_make_tickadj): Fix it right...

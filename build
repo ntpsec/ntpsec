@@ -74,7 +74,7 @@ cd $BDIR
 (
 [ -f config.status ] || ../configure $CONFIG_ARGS
 
-# ./config.status
+./config.status
 
 case "$MAKE" in
  '') make && make check
