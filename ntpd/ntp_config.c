@@ -719,7 +719,7 @@ getconfig(
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
-			peerkeystr = &asterisk;
+			peerkeystr = (u_char *)"*";
 			peerflags = 0;
 			ttl = 0;
 			istart++;

@@ -418,6 +418,14 @@ stats_config(
 				rawstats.fp = NULL;
 				filegen_setup(&rawstats, now.l_ui);
 			}
+#ifdef OPENSSL
+			if(cryptostats.prefix == &statsdir[0] &&
+			    cryptostats.fp != NULL) {
+				fclose(cryptostats.fp);
+				cryptostats.fp = NULL;
+				filegen_setup(&cryptostats, now.l_ui);
+			}
+#endif /* OPENSSL */
 		}
 		break;
 

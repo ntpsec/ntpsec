@@ -10,9 +10,9 @@
 
     <body>
         <h3>NTP Version 4 Release Notes</h3>
-        <img src="pic/hornraba.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
+        <img src="pic/hornraba.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The rabbit toots to make sure you read this</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:25</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="269">Wednesday, January 01, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">14:50</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="235">Monday, January 20, 2003</csobj></p>
         .<br clear="left">
         <hr>
         <h4>NTP Version 4 Release Notes</h4>
@@ -46,7 +46,7 @@
             <li>As the result of the above, the <tt>./authstuff</tt> directory, intended as a development and testing aid for porting cryptographic routines to exotic architectures, has been removed. Testing and conformance validation tools are in the OpenSSL software distrbution.
             <li>The NTPv4 enable and disable commands have a few changes in the arguments. See the <tt>ntpd</tt> <a href="miscopt.html">Miscellaneous Options</a> page for details. Note that the <tt>authenticate</tt> command has been removed.
             <li>To help reduce the level of spurious network traffic due to obsolete configuration files, a special control message called the <i>kiss-of-death</i> packet has been implemented. If enabled and a packet is denied service or exceeds the client limits, a compliant server will send this message to the client. A compliant client will cease further transmission and send a message to the system log. See the <a href="accopt.html">Authentication Options</a> page for further information.
-            <li>The <tt>tty_clk</tt> and <tt>ppsclock</tt> pulse-per-second (PPS) line discipline/streams modules are no longer supported. The PPS function is now handled by the <a href="driver22.html">PPS Clock Discipline</a> driver, which uses the new PPSAPI application program interface proposed by the IETF. Note that the <tt>pps</tt> configuration file command has been obsoleted by the driver. See the <a href="pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page for further information.
+            <li>The <tt>tty_clk</tt> and <tt>ppsclock</tt> pulse-per-second (PPS) line discipline/streams modules are no longer supported. The PPS function is now handled by the <a href="drivers/driver22.html">PPS Clock Discipline</a> driver, which uses the new PPSAPI application program interface proposed by the IETF. Note that the <tt>pps</tt> configuration file command has been obsoleted by the driver. See the <a href="pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page for further information.
             <li>Support for the NTPv1 symmetric mode has been discontinued, since it hasn't worked for years. Support continues for the NTPv1 client mode, which is used in some SNTP clients.
             <li>The precision time support in stock Solaris 2.6 has bugs that were fixed in 2.7. A patch is available that fixes the 2.6 bugs. The 2.6 PPS kernel discipline has been disabled by default. For testing, the kernel can be enabled using the <tt>enable kernel</tt> command either in the configuration file or via <tt>ntpdc</tt>.
             <li>The HTML documentation has been partially updated. However, most of the NTPv3 documentation continues to apply to NTPv4. Until a comprehensive update happens, what you see is what you get. We are always happy to accept comments, corrections and bug reports. However, we are most thrilled upon receipt of patches to fix the dang bugs. <b>Please send bug reports to <a href="mailto:bugs@ntp.org">bugs@ntp.org</a>, not the individual members on the team</b>.        </ol>
