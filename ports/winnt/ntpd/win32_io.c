@@ -57,8 +57,8 @@ int NT_set_process_priority(void)
 int
 refclock_open(
 	char *dev,		/* device name pointer */
-	int speed,		/* serial port speed (code) */
-	int flags		/* line discipline flags */
+	u_int speed,		/* serial port speed (code) */
+	u_int flags		/* line discipline flags */
 	)
 {
 	HANDLE Handle = INVALID_HANDLE_VALUE;
