@@ -137,7 +137,7 @@
  * Calling program modes
  */
 #define MODE_AUTO	0	/* automatic mode */
-#define MODE_PREFER	1	/* prefer mode */
+#define MODE_BACKUP	1	/* backup mode */
 #define MODE_MANUAL	2	/* manual mode */
 
 /*
@@ -159,7 +159,7 @@
  *
  * AT	command prefix
  * B1	US answer tone
- * &C1	enable carrier detect
+ * &C0	disable carrier detect
  * &D2	hang up and return to command mode on DTR transition
  * E0	modem command echo disabled
  * l1	set modem speaker volume to low level
@@ -173,8 +173,7 @@
 /*
  * Timeouts (all in seconds)
  */
-#define WAIT		2	/* DTR timeout */
-#define MODEM		3	/* modem timeout */
+#define SETUP		3	/* setup timeout */
 #define ANSWER		60	/* answer timeout */
 #define CONNECT		20	/* first valid message timeout */
 #define TIMECODE	30	/* all valid messages timeout */
@@ -183,11 +182,10 @@
  * State machine codes
  */
 #define S_IDLE		0	/* wait for poll */
-#define S_DTR		1	/* wait for DTR */
-#define S_OK		2	/* wait for modem */
-#define S_CONNECT	3	/* wait for answer*/
-#define S_FIRST		4	/* wait for first valid message */
-#define S_MSG		5	/* wait for all messages */
+#define S_OK		1	/* wait for modem */
+#define S_CONNECT	2	/* wait for answer*/
+#define S_FIRST		3	/* wait for first valid message */
+#define S_MSG		4	/* wait for all messages */
 
 /*
  * Unit control structure
@@ -661,14 +659,12 @@ acts_poll (
 		break;
 
 	/*
-	 * In prefer mode the calling program runs continuously as long
-	 * as the prefer peer is unreachable.
+	 * In backup mode the calling program runs continuously as long
+	 * as either no peers are available or this peer is selected.
 	 */
-	case MODE_PREFER:
-		if (sys_prefer != NULL) {
-			if (peer->unreach >= NTP_UNREACH)
-				pp->sloppyclockflag |= CLK_FLAG1;
-		}
+	case MODE_BACKUP:
+		if (sys_peer == NULL || sys_peer == peer)
+			pp->sloppyclockflag |= CLK_FLAG1;
 		break;
 	}
 }
@@ -718,7 +714,6 @@ acts_timeout(
 {
 	struct actsunit *up;
 	struct refclockproc *pp;
-	int	dtr = TIOCM_DTR;
 	int	fd;
 	char	device[20];
 	char	lockfile[128], pidbuf[8];
@@ -787,19 +782,6 @@ acts_timeout(
 			up->timer = CONNECT;
 			return;
 		}
-
-		if (ioctl(pp->io.fd, TIOCMBIS, (char *)&dtr) < 0) {
-			msyslog(LOG_ERR, "acts: ioctl %m");
-			break;
-		}
-		up->state = S_DTR;
-		up->timer = WAIT;
-		return;
-
-	/*
-	 * DTR timeout. Send modem setup string.
-	 */
-	case S_DTR:
 #ifdef DEBUG
 		if (debug)
 			printf("acts: setup %s\n", MODEM_SETUP);
@@ -810,7 +792,7 @@ acts_timeout(
 			break;
 		}
 		up->state = S_OK;
-		up->timer = MODEM;
+		up->timer = SETUP;
 		return;
 	}
 	acts_disc(peer);
@@ -917,7 +899,7 @@ acts_disc (
 	up->timer = 0;
 	up->bufptr = pp->a_lastcode;
 	if (up->retry > 0 || up->state == S_OK)
-		up->timer = MODEM;
+		up->timer = SETUP;
 	up->state = S_IDLE;
 }
 
