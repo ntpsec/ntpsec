@@ -1709,7 +1709,7 @@ clock_filter(
 	 * consider the update a popcorn spike and ignore it.
 	 */
 	if (m > 1 && etemp > CLOCK_SGATE * dtemp &&
-	    peer->filter_epoch[k] - peer->epoch < (1 << (sys_poll +
+	    (long)(peer->filter_epoch[k] - peer->epoch) < (1 << (sys_poll +
 	    1))) {
 #ifdef DEBUG
 		if (debug)
@@ -2303,7 +2303,7 @@ peer_xmit(
 {
 	struct pkt xpkt;	/* transmit packet */
 	int	sendlen, authlen;
-	keyid_t	xkeyid;		/* transmit key ID */
+	keyid_t	xkeyid = 0;		/* transmit key ID */
 	l_fp	xmt_tx;
 
 	/*
@@ -2778,8 +2778,8 @@ fast_xmit(
 		 */
 		cookie = session_key(&rbufp->recv_srcadr,
 		    &rbufp->dstadr->sin, 0, sys_private, 0);
-		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
-		    sizeof(u_int32)) {
+		if (rbufp->recv_length >= (int)(sendlen + MAX_MAC_LEN + 2 *
+		    sizeof(u_int32))) {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;
