@@ -1,5 +1,8 @@
 2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/Makefile.am (ntp_genkeys_DEPENDENCIES): Use $U on .o files
+	(ntp_genkeys_LDADD): ditto.
+
 	* ntpd/ntp_crypto.c: Use NTP_KEYSDIR 
 
 	* util/ntp-genkeys.c (snifflink): Ignore ENOENT, too.
