@@ -988,7 +988,7 @@ ripencc_receive(struct recvbuf *rbufp)
 				 */
 				if (ripencc_get_pps_ts(up, &rd_tmp) == 1) {
 					pp->lastrec = up->tstamp = rd_tmp;
-					pp->msec = 0;
+					pp->nsec = 0;
 				}
 				else
 					msyslog(LOG_INFO, "%s(): ripencc_get_pps_ts returns failure\n",__FUNCTION__);
@@ -1479,7 +1479,7 @@ parse0x8FAD(rpt, peer)
 	pp->hour = hour;
 	pp->minute = minute;
 	pp-> second = second;
-	pp->msec = 0;
+	pp->nsec = 0;
 
 	if ((utcflags&UTCF_LEAP_PNDG) && up->leapdelta != 0) 
 		pp-> leap = (up->leapdelta > 0 ? LEAP_ADDSECOND : LEAP_DELSECOND); 
