@@ -195,6 +195,7 @@ group address(es) (type m) specified. At least one address is required,
 but The NTP multicast address 224.0.1.1 assigned by the IANA should NOT
 be used, unless specific means are taken to limit the span of the reply
 and avoid a possibly massive implosion at the original sender.</dd>
+
 <dt><tt>multicastclient [<i>address</i>] [...]</tt>
 <dd>This command directs the local server to listen for multicast
 messages at the group address(es) of the global network. The default
@@ -202,6 +203,12 @@ address is that assigned by the Numbers Czar to NTP (224.0.1.1). This
 command operates in the same way as the <tt>broadcastclient</tt>
 command, but uses IP multicasting. Support for this command requires
 multicast kernel support.</dd>
+
+<dt><tt>priority <i>mode</i></tt>
+<dd>This directive controls the CPU priority of the local server.  At
+present, choices for <i>mode</i> are either <tt>high</tt> or
+<tt>normal</tt> (the default).  
+</dd>
 
 </dl>
 

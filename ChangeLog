@@ -1,5 +1,6 @@
 2000-07-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/confopt.htm (href): Document it.
 	* ntpd/ntp_config.c (getconfig): CONFIG_PRIORITY support
 	* ntpd/ntpd.c (set_process_priority): Use it.
 
