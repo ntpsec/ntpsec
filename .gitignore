@@ -13,6 +13,7 @@
 .#*
 # Simulated bk default ignores end here
 .buildkey
+*~
 A.*
 COPYRIGHT
 ElectricFence/Makefile.in
