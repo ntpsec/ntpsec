@@ -1791,7 +1791,7 @@ clock_select(void)
 	memcpy(&sys_refid, "DOWN", 4);
 #endif /* LOCKCLOCK */
 	nlist = 0;
-	for (n = 0; n < HASH_SIZE; n++)
+	for (n = 0; n < NTP_HASH_SIZE; n++)
 		nlist += peer_hash_count[n];
 	if (nlist > list_alloc) {
 		if (list_alloc > 0) {
@@ -1821,7 +1821,7 @@ clock_select(void)
 	 * bucks and collectively crank the chimes.
 	 */
 	nlist = nl3 = 0;	/* none yet */
-	for (n = 0; n < HASH_SIZE; n++) {
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != NULL; peer =
 		    peer->next) {
 			peer->flags &= ~FLAG_SYSPEER;
