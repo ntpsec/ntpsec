@@ -139,7 +139,6 @@ init_restrict(void)
 	resinit[0].addr = htonl(INADDR_ANY);
 	resinit[0].mask = 0;
 	memset(&resinit6[0].addr6, 0, sizeof(struct in6_addr));
-	memset(&resinit6[0].mask6, 0, sizeof(struct in6_addr));
 	restrictlist = &resinit[0];
 	restrictlist6 = &resinit6[0];
 	restrictcount = 1;
