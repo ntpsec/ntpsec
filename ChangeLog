@@ -1,5 +1,8 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c: Declare check_netinfo, don't define it.
+	From: Jack Bryans <jbryans@csulb.edu>
+
 	* configure.in (RSASRCS): rsaref2 needs digit.h (I thought I fixed
 	this already).
 	

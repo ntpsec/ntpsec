@@ -121,7 +121,7 @@ extern char *config_file;
 
 #ifdef HAVE_NETINFO
 struct netinfo_config_state *config_netinfo = NULL;
-int check_netinfo = 1;
+extern int check_netinfo;
 #endif /* HAVE_NETINFO */
 
 #ifdef SYS_WINNT
