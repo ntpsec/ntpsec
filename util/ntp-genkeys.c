@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <limits.h>		/* PATH_MAX */
-#include <sys/stat.h>		/* for umask() */
+#include <sys/stat.h>		/* for umask() and stat() */
 #include <sys/time.h>
 
 #ifdef HAVE_NETINFO
@@ -140,20 +140,24 @@ int nosymlinks = 0;		/* Just create the (timestamped) files? */
 int trash = 0;			/* Trash old files? */
 int errflag = 0;
 
-char *f1_keys;
-char *f2_keys;
-
 char *f1_keysdir = NTP_KEYSDIR;
 char *f2_keysdir;
 
+char *f1_keys;			/* Visible MD5 key file name */
+char *f2_keys;			/* timestamped */
+char *f3_keys;			/* previous filename */
+
 char *f1_publickey;
 char *f2_publickey;
+char *f3_publickey;
 
 char *f1_privatekey;
 char *f2_privatekey;
+char *f3_privatekey;
 
 char *f1_dhparms;
 char *f2_dhparms;
+char *f3_dhparms;
 
 
 /* Stubs and hacks so we can link with ntp_config.o */
@@ -472,6 +476,25 @@ snifflink(
 	return;
 }
 
+
+int
+filep(
+	const char *fn
+	)
+{
+	struct stat sb;
+
+	if (-1 == stat(fn, &sb)) {
+		if (ENOENT == errno)
+			return 0;
+		fprintf(stderr, "stat(%s) failed: %s\n",
+			fn, strerror(errno));
+		exit(1);
+	}
+	return 1;
+}
+
+
 int
 main(
 	int argc,
@@ -630,140 +653,149 @@ main(
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
 
-	/*
-	 * Generate 16 random MD5 keys.
-	 */
-	printf("Generating MD5 key file...\n");
-	sprintf(filename, "ntp.keys.%lu", ntptime);
-	str = fopen(filename, "w");
-	if (str == NULL) {
-		perror("MD5 key file");
-		return (-1);
-	}
-	srandom((u_int)tv.tv_usec);
-	fprintf(str, "# MD5 key file %s\n# %s", filename,
-	   ctime(&tv.tv_sec));
-	for (i = 1; i <= 16; i++) {
-		for (j = 0; j < 16; j++) {
-			while (1) {
-				temp = random() & 0xff;
-				if (temp > 0x20 && temp < 0x7f)
-					break;
-			}
-			md5key[j] = (u_char)temp;
+	if (make_md5 || !filep(f1_keys)) {
+		/*
+		 * Generate 16 random MD5 keys.
+		 */
+		printf("Generating MD5 key file...\n");
+		sprintf(filename, "ntp.keys.%lu", ntptime);
+		str = fopen(filename, "w");
+		if (str == NULL) {
+			perror("MD5 key file");
+			return (-1);
 		}
-		md5key[16] = 0;
-		fprintf(str, "%2d M %16s	# MD5 key\n", i,
-		    md5key);
+		srandom((u_int)tv.tv_usec);
+		fprintf(str, "# MD5 key file %s\n# %s", filename,
+			ctime(&tv.tv_sec));
+		for (i = 1; i <= 16; i++) {
+			for (j = 0; j < 16; j++) {
+				while (1) {
+					temp = random() & 0xff;
+					if (temp > 0x20 && temp < 0x7f)
+						break;
+				}
+				md5key[j] = (u_char)temp;
+			}
+			md5key[16] = 0;
+			fprintf(str, "%2d M %16s	# MD5 key\n", i,
+				md5key);
+		}
+		fclose(str);
 	}
-	fclose(str);
 
 #ifdef PUBKEY
-	/*
-	 * Roll the RSA public/private key pair.
-	 */
-	printf("Generating RSA public/private key pair (%d bits)...\n",
-	    MODULUSLEN);
-	protokey.bits = MODULUSLEN;
-	protokey.useFermat4 = 1;
-	R_RandomInit(&randomstr);
-	R_GetRandomBytesNeeded(&len, &randomstr);
-	for (i = 0; i < len; i++) {
-		temp = random();
-		R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
-	}
-	rval = R_GeneratePEMKeys(&rsaref_public, &rsaref_private,
-	    &protokey, &randomstr);
-	if (rval) {
-		printf("R_GeneratePEMKeys error %x\n", rval);
-		return (-1);
-	}
+	if (make_rsa || !filep(f1_publickey) || !filep(f1_privatekey)) {
+		/*
+		 * Roll the RSA public/private key pair.
+		 */
+		printf("Generating RSA public/private key pair (%d bits)...\n",
+		       MODULUSLEN);
+		protokey.bits = MODULUSLEN;
+		protokey.useFermat4 = 1;
+		R_RandomInit(&randomstr);
+		R_GetRandomBytesNeeded(&len, &randomstr);
+		for (i = 0; i < len; i++) {
+			temp = random();
+			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
+		}
+		rval = R_GeneratePEMKeys(&rsaref_public, &rsaref_private,
+					 &protokey, &randomstr);
+		if (rval) {
+			printf("R_GeneratePEMKeys error %x\n", rval);
+			return (-1);
+		}
 
-	/*
-	 * Generate the file "ntpkey.*" containing the RSA private key in
-	 * printable ASCII format.
-	 */
-	sprintf(filename, "ntpkey.%lu", ntptime);
-	str = fopen(filename, "w");
-	if (str == NULL) { 
-		perror("RSA private key file");
-		return (-1);
-	}
-	len = sizeof(rsaref_private) - sizeof(rsaref_private.bits);
-	modulus = (u_int32)rsaref_private.bits;
-	fprintf(str, "# RSA private key file %s\n# %s", filename,
-	    ctime(&tv.tv_sec));
-	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)rsaref_private.modulus, len);
-	encoded_key[temp] = '\0';
-	fprintf(str, "%d %s\n", modulus, encoded_key);
-	fclose(str);
+		/*
+		 * Generate the file "ntpkey.*" containing the RSA
+		 * private key in printable ASCII format.
+		 */
+		sprintf(filename, "ntpkey.%lu", ntptime);
+		str = fopen(filename, "w");
+		if (str == NULL) { 
+			perror("RSA private key file");
+			return (-1);
+		}
+		len = sizeof(rsaref_private) - sizeof(rsaref_private.bits);
+		modulus = (u_int32)rsaref_private.bits;
+		fprintf(str, "# RSA private key file %s\n# %s", filename,
+			ctime(&tv.tv_sec));
+		R_EncodePEMBlock(encoded_key, &temp,
+				 (u_char *)rsaref_private.modulus, len);
+		encoded_key[temp] = '\0';
+		fprintf(str, "%d %s\n", modulus, encoded_key);
+		fclose(str);
 
-	/*
-	 * Generate the file "ntpkey_host.*" containing the RSA public key
-	 * in printable ASCII format.
-	 */
-	sprintf(filename, "ntpkey_%s.%lu", hostname, ntptime);
-	str = fopen(filename, "w");
-	if (str == NULL) { 
-		perror("RSA public key file");
-		return (-1);
+		/*
+		 * Generate the file "ntpkey_host.*" containing the RSA
+		 * public key in printable ASCII format.
+		 */
+		sprintf(filename, "ntpkey_%s.%lu", hostname, ntptime);
+		str = fopen(filename, "w");
+		if (str == NULL) { 
+			perror("RSA public key file");
+			return (-1);
+		}
+		len = sizeof(rsaref_public) - sizeof(rsaref_public.bits);
+		modulus = (u_int32)rsaref_public.bits;
+		fprintf(str, "# RSA public key file %s\n# %s", filename,
+			ctime(&tv.tv_sec));
+		R_EncodePEMBlock(encoded_key, &temp,
+				 (u_char *)rsaref_public.modulus, len);
+		encoded_key[temp] = '\0';
+		fprintf(str, "%d %s\n", modulus, encoded_key);
+		fclose(str);
 	}
-	len = sizeof(rsaref_public) - sizeof(rsaref_public.bits);
-	modulus = (u_int32)rsaref_public.bits;
-	fprintf(str, "# RSA public key file %s\n# %s", filename,
-	    ctime(&tv.tv_sec));
-	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)rsaref_public.modulus, len);
-	encoded_key[temp] = '\0';
-	fprintf(str, "%d %s\n", modulus, encoded_key);
-	fclose(str);
 #endif /* PUBKEY */
 
 #ifdef PUBKEY
-	/*
-	 * Roll the prime and generator for the Diffie-Hellman key
-	 * agreement algorithm.
-	 */
-	printf("Generating Diffie-Hellman parameters (%d bits)...\n",
-	    PRIMELEN);
-	R_RandomInit(&randomstr);
-	R_GetRandomBytesNeeded(&len, &randomstr);
-	for (i = 0; i < len; i++) {
-		temp = random();
-		R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
-	}
+	if (make_dh || !filep(f1_dhparms)) {
+		/*
+		 * Roll the prime and generator for the Diffie-Hellman key
+		 * agreement algorithm.
+		 */
+		printf("Generating Diffie-Hellman parameters (%d bits)...\n",
+		       PRIMELEN);
+		R_RandomInit(&randomstr);
+		R_GetRandomBytesNeeded(&len, &randomstr);
+		for (i = 0; i < len; i++) {
+			temp = random();
+			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
+		}
 
-	/*
-	 * Generate the file "ntpkey_dh.*" containing the Diffie-Hellman
-	 * prime and generator in printable ASCII format.
-	 */
-	len = DH_PRIME_LEN(PRIMELEN);
-	dh_params.prime = (u_char *)malloc(len);
-	dh_params.generator = (u_char *)malloc(len);
-	rval = R_GenerateDHParams(&dh_params, PRIMELEN, PRIMELEN / 2,
-	    &randomstr);
-	if (rval) {
-		printf("R_GenerateDHParams error %x\n", rval);
-		return (-1);
+		/*
+		 * Generate the file "ntpkey_dh.*" containing the
+		 * Diffie-Hellman prime and generator in printable ASCII
+		 * format.
+		 */
+		len = DH_PRIME_LEN(PRIMELEN);
+		dh_params.prime = (u_char *)malloc(len);
+		dh_params.generator = (u_char *)malloc(len);
+		rval = R_GenerateDHParams(&dh_params, PRIMELEN, PRIMELEN / 2,
+					  &randomstr);
+		if (rval) {
+			printf("R_GenerateDHParams error %x\n", rval);
+			return (-1);
+		}
+		sprintf(filename, "ntpkey_dh.%lu", ntptime);
+		str = fopen(filename, "w");
+		if (str == NULL) { 
+			perror("Diffie-Hellman parameters file");
+			return (-1);
+		}
+		fprintf(str, "# Diffie-Hellman parameter file %s\n# %s",
+			filename, ctime(&tv.tv_sec));
+		R_EncodePEMBlock(encoded_key, &temp,
+				 (u_char *)dh_params.prime,
+				 dh_params.primeLen);
+		encoded_key[temp] = '\0';
+		fprintf(str, "%d %s\n", dh_params.primeLen, encoded_key);
+		R_EncodePEMBlock(encoded_key, &temp,
+				 (u_char *)dh_params.generator,
+				 dh_params.generatorLen);
+		encoded_key[temp] = '\0';
+		fprintf(str, "%d %s\n", dh_params.generatorLen, encoded_key);
+		fclose(str);
 	}
-	sprintf(filename, "ntpkey_dh.%lu", ntptime);
-	str = fopen(filename, "w");
-	if (str == NULL) { 
-		perror("Diffie-Hellman parameters file");
-		return (-1);
-	}
-	fprintf(str, "# Diffie-Hellman parameter file %s\n# %s", filename,
-	    ctime(&tv.tv_sec));
-	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)dh_params.prime, dh_params.primeLen);
-	encoded_key[temp] = '\0';
-	fprintf(str, "%d %s\n", dh_params.primeLen, encoded_key);
-	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)dh_params.generator, dh_params.generatorLen);
-	encoded_key[temp] = '\0';
-	fprintf(str, "%d %s\n", dh_params.generatorLen, encoded_key);
-	fclose(str);
 #endif /* PUBKEY */
 
 	return (0);
