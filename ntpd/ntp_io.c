@@ -1006,7 +1006,7 @@ io_multicast_add(
 
 #ifdef DEBUG
 	if (debug)
-		printf("io_multicast_add %s\n", inet_ntoa(iaddr));
+		printf("io_multicast_add %s\n", stoa(&addr));
 #endif
 #else /* MCAST */
 	msyslog(LOG_ERR,

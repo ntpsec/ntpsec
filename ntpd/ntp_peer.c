@@ -664,7 +664,8 @@ newpeer(
 	if (debug)
 		printf(
 		    "newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
-		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
+		    peer->dstadr == NULL ? "null" : stoa(&peer->dstadr->sin),
+		    stoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
 		    peer->ttl, peer->keyid);

@@ -1394,9 +1394,13 @@ doprintpeers(
 				} else if (decodenetnum(value, &dstadr)) {
 					if (SOCKNUL(&dstadr))
 						dstadr_refid = "0.0.0.0";
+					else if ((dstadr.ss_family == AF_INET)
+					    && ISREFCLOCKADR(&dstadr))
+    						dstadr_refid =
+						    refnumtoa(&dstadr);
 					else
 						dstadr_refid =
-						    nntohost(&dstadr);
+						    stoa(&dstadr);
 				} else if ((int)strlen(value) <= 4) {
 					refid_string[0] = '.';
 					(void) strcpy(&refid_string[1], value);

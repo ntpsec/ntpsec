@@ -132,7 +132,7 @@ static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (s/s) */
 double	clock_stability;	/* clock stability (s/s) */
 u_long	pps_control;		/* last pps sample time */
-static void rstclock P((int, double, double)); /* transition function */
+static void rstclock P((int, u_long, double)); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -208,7 +208,7 @@ local_clock(
 	double epsil		/* jittter (square s*s) */
 	)
 {
-	double mu;		/* interval since last update (s) */
+	u_long mu;		/* interval since last update (s) */
 	double oerror;		/* previous error estimate */
 	double flladj;		/* FLL frequency adjustment (ppm) */
 	double plladj;		/* PLL frequency adjustment (ppm) */
@@ -224,7 +224,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assocID %d off %.6f jit %.6f sta %d\n",
+		    "local_clock: assocID %d offset %.6f jitter %.6f state %d\n",
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 	if (!ntp_enable) {
@@ -694,8 +694,8 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %.0f noi %.3f stb %.3f pol %d cnt %d\n",
-		    mu, sys_jitter * 1e6, clock_stability * 1e6, sys_poll,
+		    "local_clock: mu %lu sysjit %.6f stab %.3f poll %d count %d\n",
+		    mu, sys_jitter, clock_stability * 1e6, sys_poll,
 		    tc_counter);
 #endif /* DEBUG */
 	return (retval);
@@ -781,7 +781,7 @@ adj_host_clock(
 static void
 rstclock(
 	int trans,		/* new state */
-	double epoch,		/* last time */
+	u_long epoch,		/* last time */
 	double offset		/* last offset */
 	)
 {
@@ -790,6 +790,11 @@ rstclock(
 	state = trans;
 	last_time = epoch;
 	last_offset = clock_offset = offset;
+#ifdef DEBUG
+	if (debug)
+		printf("clock_filter: at %lu state %d\n", last_time,
+		    trans);
+#endif
 }
 
 

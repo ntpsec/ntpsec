@@ -411,15 +411,6 @@ openhost(
 	char name[LENHOSTNAME];
 	char service[5];
 
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
-	hints.ai_flags = AI_CANONNAME;
-#ifdef AI_ADDRCONFIG
-	hints.ai_flags |= AI_ADDRCONFIG;
-#endif
-	hints.ai_family = ai_fam_templ;
-	hints.ai_protocol = IPPROTO_UDP;
-	hints.ai_socktype = SOCK_DGRAM;
-
 	/*
 	 * We need to get by the [] if they were entered 
 	 */
@@ -434,16 +425,36 @@ openhost(
 		hname = name;
 	}	
 
+	/*
+	 * First try to resolve it as an ip address and if that fails,
+	 * do a fullblown (dns) lookup. That way we only use the dns
+	 * when it is needed and work around some implementations that
+	 * will return an "IPv4-mapped IPv6 address" address if you
+	 * give it an IPv4 address to lookup.
+	 */
 	sprintf(service, "%u", NTP_PORT);
-	a_info = getaddrinfo(hname, service, &hints, &ai);	
+	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = ai_fam_templ;
+	hints.ai_protocol = IPPROTO_UDP;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_NUMERICHOST;
+
+	a_info = getaddrinfo(hname, service, &hints, &ai);
+	if (a_info == EAI_NONAME) {
+		hints.ai_flags = AI_CANONNAME;
+#ifdef AI_ADDRCONFIG
+		hints.ai_flags |= AI_ADDRCONFIG;
+#endif
+		a_info = getaddrinfo(hname, service, &hints, &ai);	
+	}
 	/* Some older implementations don't like AI_ADDRCONFIG. */
 	if (a_info == EAI_BADFLAGS) {
 		hints.ai_flags = AI_CANONNAME;
 		a_info = getaddrinfo(hname, service, &hints, &ai);	
 	}
 	if (a_info != 0) {
-		printf("%s\n", gai_strerror(a_info));
-		exit(-1);
+		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
+		return 0;
 	}
 
 	if (ai->ai_canonname == NULL) {

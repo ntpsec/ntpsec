@@ -137,7 +137,8 @@
  * (default) and 1 is the line-in port. It does not seem useful to
  * select the compact disc player port. Fudge flag3 enables audio
  * monitoring of the input signal. For this purpose, the monitor gain is
- * set to a default value.
+ * set to a default value. Fudgetime2 is used as a frequency vernier for
+ * broken codec sample frequency.
  */
 /*
  * Interface definitions
@@ -160,7 +161,7 @@
 #define	MAXCLP		100	/* max clips above reference per s */
 #define DRPOUT		100.	/* dropout signal level */
 #define MODMIN		0.5	/* minimum modulation index */
-#define MAXFREQ		(500e-6 * SECOND) /* freq tolerance (.025%) */
+#define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
 #define PI		3.1415926535 /* the real thing */
 
 /*
@@ -250,8 +251,10 @@ struct irigunit {
 	int	fieldcnt;	/* subfield count in field */
 	int	bits;		/* demodulated bits */
 	int	bitcnt;		/* bit count in subfield */
+#ifdef IRIG_SUCKS
 	l_fp	waggle;		/* sawtooth accumulator (s) */
 	l_fp	wiggle;		/* sawtooth correction (s) */
+#endif /* IRIG_SUCKS */
 	l_fp	wuggle;		/* sawtooth monitor (s) */
 };
 
@@ -455,6 +458,7 @@ irig_receive(
 		 * 125 PPM.
 		 */
 		up->phase += up->freq / SECOND;
+		up->phase += pp->fudgetime2 / 1e6;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
@@ -829,6 +833,7 @@ irig_decode(
 		up->fieldcnt = 0;
 		up->lastbit = 0;
 		if (up->errflg == 0) {
+#ifdef IRIG_SUCKS
 			l_fp	ltemp, mtemp;
 
 			/*
@@ -864,30 +869,22 @@ irig_decode(
 				ltemp.l_i = -1;
 			else
 				ltemp.l_i = 0;
-			L_SUB(&pp->lastrec, &up->waggle);
-			if (!L_ISNEG(&ltemp)) {
-				L_ADD(&ltemp, &up->waggle);
-				up->waggle = ltemp;
+			L_ADD(&up->waggle, &ltemp);
+			if (L_ISNEG(&ltemp) ^ L_ISNEG(&up->wiggle)) {
+				L_CLR(&up->waggle);
 			} else {
-				L_SUB(&ltemp, &up->wiggle);
-				if (L_ISNEG(&ltemp)) {
-					L_NEG(&ltemp);
-					L_RSHIFT(&ltemp);
-					L_RSHIFT(&ltemp);
-					L_RSHIFT(&ltemp);
-					L_NEG(&ltemp);
-				} else {
-					L_RSHIFT(&ltemp);
-					L_RSHIFT(&ltemp);
-					L_RSHIFT(&ltemp);
-				}
-				L_ADD(&up->wiggle, &ltemp);
-				L_ADD(&up->waggle, &up->wiggle);
-				refclock_process(pp);
+				L_SUB(&pp->lastrec, &up->waggle);
 				up->wuggle = pp->lastrec;
+				refclock_process(pp);
+				up->wiggle = ltemp;
 			}
 			pp->lastrec = mtemp;
 			pp->lastref = pp->lastrec;
+#else /* IRIG_SUCKS */
+			up->wuggle = pp->lastrec;
+			refclock_process(pp);
+			pp->lastref = pp->lastrec;
+#endif /* IRIG_SUCKS */
 		}
 		up->errflg = 0;
 	}

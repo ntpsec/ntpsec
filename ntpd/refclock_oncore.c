@@ -154,6 +154,14 @@ enum site_survey_state {
 	ONCORE_SS_DONE
 };
 
+enum antenna_state {
+      ONCORE_ANTENNA_UNKNOWN = -1,
+      ONCORE_ANTENNA_OK      =	0,
+      ONCORE_ANTENNA_OC      =	1,
+      ONCORE_ANTENNA_UC      =	2,
+      ONCORE_ANTENNA_NV      =	3
+};
+
 /* Model Name, derived from the @@Cj message.
  * Used to initialize some variables.
  */
@@ -212,6 +220,7 @@ struct instance {
 	enum receive_state o_state;		/* Receive state */
 	enum posn_mode mode;			/* 0D, 2D, 3D */
 	enum site_survey_state site_survey;	/* Site Survey state */
+	enum antenna_state ant_state;		/* antenna state */
 
 	int	Bj_day;
 
@@ -253,6 +262,7 @@ struct instance {
 	u_char	Ea[160];	/* Ba, Ea or Ha */
 	u_char	En[70]; 	/* Bn or En */
 	u_char	Cj[300];
+	u_char	Ag;		/* Satellite mask angle */
 	u_char	As;
 	u_char	Ay;
 	u_char	Az;
@@ -263,7 +273,6 @@ struct instance {
 	u_char	count;		/* cycles thru Ea before starting */
 	s_char	assert;
 	u_char	hardpps;
-	u_char	same_file;
 	u_int	saw_At;
 };
 
@@ -282,8 +291,10 @@ static	int	oncore_ppsapi	     P((struct instance *));
 static	void	oncore_get_timestamp P((struct instance *, long, long));
 static	void	oncore_init_shmem    P((struct instance *));
 static	void	oncore_print_As      P((struct instance *));
+static	void	oncore_check_antenna P((struct instance *, enum antenna_state));
 
 static	void	oncore_msg_any	   P((struct instance *, u_char *, size_t, int));
+static	void	oncore_msg_Ag	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_As	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_At	   P((struct instance *, u_char *, size_t));
 static	void	oncore_msg_Ay	   P((struct instance *, u_char *, size_t));
@@ -333,6 +344,7 @@ static struct msg_desc {
 	{ "Ad",  11,    0,                 "" },
 	{ "Ae",  11,    0,                 "" },
 	{ "Af",  15,    0,                 "" },
+	{ "Ag",   8,    oncore_msg_Ag,     "" }, /* Satellite mask angle */
 	{ "As",  20,    oncore_msg_As,     "" },
 	{ "At",   8,    oncore_msg_At,     "" },
 	{ "Au",  12,    0,                 "" },
@@ -389,6 +401,12 @@ u_char oncore_cmd_Av1[] = { 'A', 'v', 1 };
 u_char oncore_cmd_Gd0[] = { 'G', 'd', 0 };	/* 3D */
 u_char oncore_cmd_Gd1[] = { 'G', 'd', 1 };	/* 0D */
 u_char oncore_cmd_Gd2[] = { 'G', 'd', 2 };	/* 2D */
+
+/*
+ * Satellite mask angle.
+ */
+u_char oncore_cmd_Ag[] = { 'A', 'g', 0 };
+u_char oncore_cmd_Agx[] = { 'A', 'g', 0xff };
 
 /*
  * Set to UTC time (not GPS).
@@ -556,10 +574,8 @@ oncore_start(
 	}
 	memset((char *) instance, 0, sizeof *instance);
 
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))
-		instance->same_file = 1;
-
-	if (instance->same_file) {	/* same device here */
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {
+		/* same device here */
 		if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW
 #if !defined(HAVE_PPSAPI) && !defined(TIOCDCDTIMESTAMP)
 		      | LDISC_PPS
@@ -601,6 +617,7 @@ oncore_start(
 	instance->model = ONCORE_UNKNOWN;
 	instance->mode = MODE_UNKNOWN;
 	instance->site_survey = ONCORE_SS_UNKNOWN;
+	instance->Ag = 0xff;		/* Satellite mask angle, unset by user */
 
 	peer->precision = -26;
 	peer->minpoll = 4;
@@ -608,7 +625,7 @@ oncore_start(
 	pp->clockdesc = "Motorola Oncore GPS Receiver";
 	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
 
-	/* go read any input data in /etc/ntp.oncoreX */
+	/* go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X */
 
 	oncore_read_config(instance);
 
@@ -709,14 +726,12 @@ oncore_ppsapi(
 	int mode;
 
 	if (time_pps_getcap(instance->pps_h, &mode) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_ioctl: time_pps_getcap failed: %m");
+		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getcap failed: %m");
 		return (0);
 	}
 
 	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_ioctl: time_pps_getparams failed: %m");
+		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getparams failed: %m");
 		return (0);
 	}
 
@@ -743,7 +758,7 @@ oncore_ppsapi(
 
 	/* must have hardpps ON */
 
-	if (instance->hardpps && instance->same_file) {
+	if (instance->hardpps) {
 		int	i;
 
 		if (instance->assert)
@@ -754,8 +769,7 @@ oncore_ppsapi(
 		if (i&mode) {
 			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
 			    PPS_TSFMT_TSPEC) < 0) {
-				msyslog(LOG_ERR,
-				    "refclock_ioctl: time_pps_kcbind failed: %m");
+				msyslog(LOG_ERR, "refclock_ioctl: time_pps_kcbind failed: %m");
 				return (0);
 			}
 			pps_enable = 1;
@@ -860,21 +874,26 @@ oncore_read_config(
  *	   For Flag3, 0 is disabled, and the default.
  *
  *	There are three options that have to do with using the shared memory opition.
- *	   First, to enable the option there must be an ASSERT line with a file name.
+ *	   First, to enable the option there must be a SHMEM line with a file name.
  *	   The file name is the file associated with the shared memory.
  *
- *	In the shared memory there are three 'records' containing the @@Ea (or equivalent)
- *	   data, and this contains the position data.  There will always be data in the
- *	   record cooresponding to the '0D' @@Ea record, and the user has a choice of
- *	   filling the '3D' @@Ea record by specifying POSN3D, or the '2D' record by
- *	   specifying POSN2D.  In either case the '2D' or '3D' record is filled once
- *	   every 15s.
+ *	In shared memory, there is one 'record' for each returned variable.
+ *	For the @@Ea data there are three 'records' containing position data.
+ *	   There will always be data in the record cooresponding to the '0D' @@Ea record,
+ *	   and the user has a choice of filling the '3D' record by specifying POSN3D,
+ *	   or the '2D' record by specifying POSN2D.  In either case the '2D' or '3D'
+ *	   record is filled once every 15s.
  *
  *	Two additional variables that can be set are CHAN and TRAIM.  These should be
  *	   set correctly by the code examining the @@Cj record, but we bring them out here
  *	   to allow the user to override either the # of channels, or the existance of TRAIM.
  *	   CHAN expects to be followed by in integer: 6, 8, or 12. TRAIM expects to be
  *	   followed by YES or NO.
+ *
+ *	There is an optional line with MASK on it followed by one integer field in the
+ *	   range 0 to 89. This sets the satellite mask angle and will determine the minimum
+ *	   elevation angle for sattelites to be tracked by the receiver. The default value
+ *	   is 10 deg for the VP and 0 deg for all other receivers.
  *
  * So acceptable input would be
  *	# these are my coordinates (RWC)
@@ -886,7 +905,7 @@ oncore_read_config(
 
 	FILE	*fd;
 	char	*cp, *cc, *ca, line[100], units[2], device[20], Msg[160];
-	int	i, sign, lat_flg, long_flg, ht_flg, mode;
+	int	i, sign, lat_flg, long_flg, ht_flg, mode, mask;
 	double	f1, f2, f3;
 
 	sprintf(device, "%s%d", INIT_FILE, instance->unit);             /* try "ntp.oncore0" first */
@@ -900,7 +919,7 @@ oncore_read_config(
 		}
 	}
 
-	mode = 0;
+	mode = mask = 0;
 	lat_flg = long_flg = ht_flg = 0;
 	while (fgets(line, 100, fd)) {
 
@@ -1042,6 +1061,10 @@ oncore_read_config(
 			instance->traim = 1;				/* so TRAIM alone is YES */
 			if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    /* Yes/No, On/Off */
 				instance->traim = 0;
+		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
+			sscanf(ca, "%d", &mask);
+			if (mask > -1 && mask < 90)
+				instance->Ag = mask;			/* Satellite mask angle */
 		}
 	}
 	fclose(fd);
@@ -1557,7 +1580,7 @@ oncore_msg_Cj_id(
 	} else if (Model[0] == 'P') {
 		cp = "M12";
 		instance->model = ONCORE_M12;
-	} else if (Model[0] == 'R') {
+	} else if (Model[0] == 'R' || Model[0] == 'D' || Model[0] == 'S') {
 		if (Model[5] == 'N') {
 			cp = "GT";
 			instance->model = ONCORE_GT;
@@ -1792,6 +1815,14 @@ oncore_msg_Cj_init(
 				instance->offset = 0;
 			}
 		}
+
+		/* Satellite mask angle */
+
+		if (instance->Ag != 0xff) {	/* will have 0xff in it if not set by user */
+			memcpy(Cmd, oncore_cmd_Ag, sizeof(oncore_cmd_Ag));
+			Cmd[2] = instance->Ag;
+			oncore_sendmsg(instance->ttyfd, Cmd,  sizeof(oncore_cmd_Ag));
+		}
 	}
 
 	/* 6, 8 12 chan - Position/Status/Data Output Message, 1/s */
@@ -1871,7 +1902,7 @@ oncore_msg_CaFaIa(
 	char *cp;
 
 	if (instance->o_state == ONCORE_TEST_SENT) {
-		int	antenna;
+		enum antenna_state antenna;
 
 		instance->timeout = 0;
 
@@ -1882,27 +1913,30 @@ oncore_msg_CaFaIa(
 				printf("ONCORE[%d]: >>@@%ca %x %x\n", instance->unit, buf[2], buf[4], buf[5]);
 		}
 
-		antenna = buf[4] & 0xc0;
-		antenna >>= 6;
+		antenna = (buf[4] & 0xc0) >> 6;
 		buf[4] &= ~0xc0;
 
 		if (buf[4] || buf[5] || ((buf[2] == 'I') && buf[6])) {
-			cp = "ONCORE: Self Test Failed, shutting down driver";
-			record_clock_stats(&(instance->peer->srcadr), cp);
+			if (buf[2] == 'I') {
+				msyslog(LOG_ERR, "ONCORE[%d]: self test failed: result %02x %02x %02x",
+					instance->unit, buf[4], buf[5], buf[6]);
+			} else {
+				msyslog(LOG_ERR, "ONCORE[%d]: self test failed: result %02x %02x",
+					instance->unit, buf[4], buf[5]);
+			}
+			cp = "ONCORE: self test failed, shutting down driver";
+			record_clock_stats(&instance->peer->srcadr, cp);
+
+			refclock_report(instance->peer, CEVNT_FAULT);
+
+
 			oncore_shutdown(instance->unit, instance->peer);
 			return;
 		}
-		if (antenna) {
-			char *cp1, Msg[160];
 
-			cp1 = (antenna == 0x1) ? "(Over Current)" :
-				((antenna == 0x2) ? "(Under Current)" : "(No Voltage)");
+		/* report the current antenna state */
 
-			cp = "ONCORE: Self Test, NonFatal Antenna Problems ";
-			strcpy(Msg, cp);
-			strcat(Msg, cp1);
-			record_clock_stats(&(instance->peer->srcadr), Msg);
-		}
+		oncore_check_antenna(instance, antenna);
 
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
 		instance->o_state = ONCORE_INIT;
@@ -1926,6 +1960,7 @@ oncore_msg_BaEaHa(
 	char		Msg[160], Cmd[20];
 	u_char		*vp;	/* pointer to start of shared mem for Ba/Ea/Ha */
 	size_t		Len;
+	enum antenna_state antenna;
 
 	/* At the beginning of Ea here there are various 'timers'.
 	 * We enter Ea 1/sec, and since the upper levels of NTP have usurped
@@ -1942,7 +1977,7 @@ oncore_msg_BaEaHa(
 	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN)
 		return;
 
-	Len = len+3;		/* message length @@ -> CR,LF */
+	Len = len+3;		/* message length @@ -> checksum, CR, LF */
 	memcpy(instance->Ea, buf, Len); 	/* Ba, Ea or Ha */
 
 	if (buf[2] == 'B') {			/* 6chan */
@@ -1972,14 +2007,17 @@ oncore_msg_BaEaHa(
 	}
 
 	vp = (u_char) 0;	/* just to keep compiler happy */
+	antenna = instance->ant_state;
 	if (instance->chan == 6) {
 		instance->rsm.bad_almanac = instance->Ea[64]&0x1;
 		instance->rsm.bad_fix	  = instance->Ea[64]&0x52;
 		vp = &instance->shmem[instance->shmem_Ba];
+		antenna = (instance->Ea[37] & 0xc0) >> 6;  /* prob unset */
 	} else if (instance->chan == 8) {
 		instance->rsm.bad_almanac = instance->Ea[72]&0x1;
 		instance->rsm.bad_fix	  = instance->Ea[72]&0x52;
 		vp = &instance->shmem[instance->shmem_Ea];
+		antenna = (instance->Ea[37] & 0xc0) >> 6;  /* set GT, UT, unset VP */
 	} else if (instance->chan == 12) {
 		int bits1, bits2;
 
@@ -1989,6 +2027,7 @@ oncore_msg_BaEaHa(
 		instance->rsm.bad_fix	  = (bits2 & 0x8) || (bits1 == 0x2);
 					  /* too few sat     Bad Geom	  */
 		vp = &instance->shmem[instance->shmem_Ha];
+		antenna = (bits2 & 0x6 ) >> 1;
 #if 0
 fprintf(stderr, "ONCORE: DEBUG BITS: (%x %x), (%x %x),  %x %x %x %x %x\n",
 		instance->Ea[129], instance->Ea[130], bits1, bits2, instance->mode == MODE_0D, instance->mode == MODE_2D,
@@ -2140,6 +2179,9 @@ fprintf(stderr, "ONCORE: DEBUG BITS: (%x %x), (%x %x),  %x %x %x %x %x\n",
 
 			/* Read back Cable Delay for Output */
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Azx,  sizeof(oncore_cmd_Azx));
+
+			/* Read back Satellite Mask Angle for Output */
+		oncore_sendmsg(instance->ttyfd, oncore_cmd_Agx,  sizeof(oncore_cmd_Agx));
 	}
 
 	/*
@@ -2490,14 +2532,12 @@ oncore_get_timestamp(
 	 */
 
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_ioctl: time_pps_getcap failed: %m");
+		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getcap failed: %m");
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_ioctl: time_pps_getparams failed: %m");
+		msyslog(LOG_ERR, "refclock_ioctl: time_pps_getparams failed: %m");
 		return;
 	}
 
@@ -2618,6 +2658,24 @@ oncore_msg_At(
 			instance->site_survey = ONCORE_SS_HW;
 		}
 	}
+}
+
+
+static void
+oncore_msg_Ag(
+	struct instance *instance,
+	u_char *buf,
+	size_t len
+	)
+{		char  Msg[160], *cp;
+
+		cp = "set to";
+		if (instance->o_state == ONCORE_RUN)
+			cp = "is";
+
+		instance->Ag = buf[4];
+		sprintf(Msg, "Satellite mask angle %s %d degrees", cp, (int) instance->Ag);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
 }
 
 
@@ -2860,6 +2918,26 @@ oncore_msg_Sz(
 		record_clock_stats(&(instance->peer->srcadr), cp);
 		oncore_shutdown(instance->unit, instance->peer);
 	}
+}
+
+
+static void
+oncore_check_antenna(
+	struct instance *instance,
+	enum antenna_state new_state)
+{
+	char *cp;
+
+	switch (new_state) {
+	case ONCORE_ANTENNA_OK: cp = "GPS antenna: OK";                   break;
+	case ONCORE_ANTENNA_OC: cp = "GPS antenna: short (overcurrent)";  break;
+	case ONCORE_ANTENNA_UC: cp = "GPS antenna: open (not connected)"; break;
+	case ONCORE_ANTENNA_NV: cp = "GPS antenna: short (no voltage)";   break;
+	default:		cp = "GPS antenna: ?";                    break;
+	}
+
+	instance->ant_state = new_state;
+	record_clock_stats(&instance->peer->srcadr, cp);
 }
 
 #else

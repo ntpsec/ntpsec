@@ -48,6 +48,27 @@ case "$host" in
     ;;
 esac
 
+AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
+[AC_ARG_ENABLE(clockctl,
+   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root time control]),
+    [ans=$enableval],
+    [case "$target" in
+      *-*-netbsd*)
+	 ans=yes
+	 ;;
+      *) ans=no
+	 ;;
+     esac
+     ])
+ac_clockctl=$ans])
+# End of AC_CACHE_CHECK for clockctl
+AC_CHECK_HEADERS(sys/clockctl.h)
+case "$ac_clockctl$ac_cv_header_sys_clockctl_h" in
+ yesyes)
+    AC_DEFINE(HAVE_CLOCKCTL, ,[[Use /dev/clockctl?]])
+    ;;
+esac
+
 case "$build" in
  $host)
     ;;
@@ -230,10 +251,16 @@ AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
-AC_CHECK_HEADERS(poll.h resolv.h sched.h sgtty.h stdlib.h string.h termio.h)
+AC_CHECK_HEADERS(poll.h)
+AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
-AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_system.h)
-AC_CHECK_HEADERS(netinet/in_systm.h netinet/in.h netinet/ip.h)
+AC_CHECK_HEADERS(arpa/nameser.h)
+#HMS
+AC_CHECK_HEADERS(net/if.h)
+AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
+AC_CHECK_HEADERS(netinet/in.h)
+#HMS
+AC_CHECK_HEADERS(netinet/ip.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO, 1, [NetInfo support?])])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)
@@ -282,6 +309,18 @@ if test $ac_cv_struct_nlist_n_un = yes; then
   AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
 fi
 ])dnl
+
+AC_CHECK_HEADERS(resolv.h, [], [],
+[#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_NAMESER_H>
+#include <arpa/nameser.h>
+#endif
+])
 
 AC_CACHE_CHECK(for basic volatile support, ac_cv_c_volatile,
 [AC_TRY_COMPILE([],[
@@ -3344,6 +3383,23 @@ AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
 ac_cv_var_kernel_fll_bug=$ans])
 case "$ac_cv_var_kernel_fll_bug" in
  yes) AC_DEFINE(KERNEL_FLL_BUG, 1, [Does the kernel have an FLL bug?]) ;;
+esac
+
+AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
+[AC_ARG_ENABLE(irig-sawtooth, 
+	AC_HELP_STRING([--enable-irig-sawtooth], [s if we should enable the IRIG sawtooth filter]),
+    [ans=$enableval],
+    [case "$host" in
+     *-*-solaris2.[[89]])
+	ans=yes
+	;;
+     *) ans=no
+	;;
+    esac
+    ])
+ac_cv_var_irig_sucks=$ans])
+case "$ac_cv_var_irig_sucks" in
+ yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
 esac
 
 case "$build" in
