@@ -1,5 +1,8 @@
 2000-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (receive): dstadr_sin needs  higher visibility
+	From: Dave Mills
+
 	* flock-build: Added baldwin
 
 	* ntpd/ntp_request.c: 

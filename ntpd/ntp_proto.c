@@ -227,9 +227,9 @@ receive(
 	int is_authentic;		/* cryptosum ok */
 	int is_error;			/* parse error */
 	keyid_t skeyid;			/* cryptographic keys */
+	struct sockaddr_in *dstadr_sin;	/* active runway */
 #ifdef AUTOKEY
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
-	struct sockaddr_in *dstadr_sin;	/* active runway */
 #endif /* AUTOKEY */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
