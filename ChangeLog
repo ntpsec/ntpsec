@@ -1,3 +1,40 @@
+1999-12-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_refclock.c: 
+	* ntpd/refclock_atom.c: Header cleanup
+	* html/driver30.htm: Cleanup and improvements.
+	From: Reg Clemens <reg@dwf.com>
+
+	* ntpd/ntp_refclock.c:
+	* ntpd/refclock_jupiter.c:
+	* ntpd/refclock_msfees.c:
+	* ntpd/refclock_mx4200.c:
+	Portability (Solaris) patches
+	* ntpd/refclock_mx4200.c:
+	Self-survey improvements, cleanup for, PPS re-activation
+	* libntp/syssignal.c:
+ 	Fix for "interrupted system call" (EINTR) failure of the PPS
+	ioctl(TIOCGPPSEV) call in Solaris.  Not sure why it was
+	interrupted, but this works around the failure.  Not sure if
+	the (now silent) interrupt affects the timing accuracy.
+		THERE IS A CHANCE THIS PART OF THE PATCH MAY ADVERSELY
+		AFFECT OTHER SYSTEMS!
+	* scripts/ntp-status: Added.
+	From: Marc.Brett@westgeo.com
+	
+	* ntpdate/ntpdate.c: Deal with multiple addresses.
+	From: Jeffrey C Honig <jch@bsdi.com>
+
+	* ntpd/refclock_conf.c: Replaced macro SHM with CLOCK_SHM.
+	* ntpd/refclock_shm.c (shm_poll): Take clock time in UTC.
+		pp->day starts at 1, t->tm_yday starts at 0.
+	From: Jakob Stoklund Olesen <stoklund@taxidriver.dk>
+
+1999-12-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* NEWS: Updated ONCORE instructions
+	From: Kamal A Mostafa <kamal@whence.com>
+
 1999-12-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98g

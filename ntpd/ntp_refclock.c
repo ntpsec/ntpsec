@@ -33,7 +33,13 @@
 #endif /* HAVE_PPSCLOCK_H */
 
 #ifdef HAVE_PPSAPI
-#include <sys/timepps.h>
+# ifdef HAVE_TIMEPPS_H
+#  include <timepps.h>
+# else
+#  ifdef HAVE_SYS_TIMEPPS_H
+#   include <sys/timepps.h>
+#  endif
+# endif
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -956,7 +962,7 @@ refclock_open(
  * their many other variants. The routine returns 1 if success and 0 if
  * failure.
  */
-static int
+int
 refclock_ioctl(
 	int fd, 		/* file descriptor */
 	int flags		/* line discipline flags */

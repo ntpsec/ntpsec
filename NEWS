@@ -2,7 +2,8 @@
 * Solaris dosynctodr info update
 * html/pic/* is *lots* smaller
 * Driver updates: CHU, DCF, Oncore, PCF, Ulink, WWVB, burst
-  If you use the ONCORE driver, you *must* have a properly specified:
+  If you use the ONCORE driver with a HARDPPS kernel module,
+  you *must* have a properly specified:
 	pps <filename> [assert/clear] [hardpps]
   line in the /etc/ntp.conf file.
 * PARSE cleanup

@@ -174,7 +174,7 @@ extern	struct refclock refclock_arc;
 #define refclock_arc refclock_none
 #endif
 
-#ifdef SHM
+#ifdef CLOCK_SHM
 extern	struct refclock refclock_shm;
 #else
 #define refclock_shm refclock_none

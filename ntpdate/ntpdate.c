@@ -1287,9 +1287,8 @@ addserver(
 		struct server *sp;
 
 		for (sp = sys_servers; sp->next_server != NULL;
-		     sp = sp->next_server) {
-			sp->next_server = server;
-		}
+		     sp = sp->next_server) ;
+		sp->next_server = server;
 	}
 }
 
