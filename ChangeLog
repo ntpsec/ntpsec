@@ -1,5 +1,8 @@
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_config.c (getconfig): Squawk if provided minpoll or
+	maxpoll values are out of range.
+
 	* ntpd/ntp_proto.c (poll_update): Some operations can only be done
 	if we're compiling with some REFCLOCKs.
 	From Dave Mills.

@@ -694,8 +694,12 @@ getconfig(
 					    break;
 				    }
 				    minpoll = atoi(tokens[++i]);
-				    if (minpoll < sys_minpoll)
+				    if (minpoll < sys_minpoll) {
+					    msyslog(LOG_INFO,
+						    "minpoll: provided value (%d) is below minimum (%d)",
+						    minpoll, sys_minpoll);
 					minpoll = sys_minpoll;
+				    }
 				    break;
 
 				case CONF_MOD_MAXPOLL:
@@ -707,8 +711,12 @@ getconfig(
 					    break;
 				    }
 				    maxpoll = atoi(tokens[++i]);
-				    if (maxpoll > NTP_MAXPOLL)
+				    if (maxpoll > NTP_MAXPOLL) {
+					    msyslog(LOG_INFO,
+						    "maxpoll: provided value (%d) is above maximum (%d)",
+						    maxpoll, NTP_MAXPOLL);
 					maxpoll = NTP_MAXPOLL;
+				    }
 				    break;
 
 				case CONF_MOD_PREFER:
