@@ -375,7 +375,8 @@ struct peer {
 #define REFCLK_ULINK            34      /* Ultralink M320 WWVB receiver */
 #define REFCLK_PCF		35	/* Conrad parallel port radio clock */
 #define REFCLK_WWV_AUDIO	36	/* WWV/H audio demodulator/decoder */
-#define REFCLK_MAX		36	/* Grow as needed... */
+#define REFCLK_FG		37	/* Forum Graphic GPS */
+#define REFCLK_MAX		37	/* Grow as needed... */
 
 /*
  * We tell reference clocks from real peers by giving the reference

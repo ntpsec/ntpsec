@@ -222,6 +222,12 @@ extern	struct refclock	refclock_pcf;
 #define	refclock_pcf	refclock_none
 #endif
 
+#ifdef CLOCK_FG
+extern	struct refclock	refclock_fg;
+#else
+#define	refclock_fg	refclock_none
+#endif
+
 
 /*
  * Order is clock_start(), clock_shutdown(), clock_poll(),
@@ -266,7 +272,8 @@ struct refclock *refclock_conf[] = {
 	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
 	&refclock_ulink,        /* 34 REFCLOCK_ULINK */
 	&refclock_pcf,          /* 35 REFCLOCK_PCF */
-	&refclock_wwv		/* 36 REFCLOCK_WWV_AUDIO */
+	&refclock_wwv,		/* 36 REFCLOCK_WWV_AUDIO */
+	&refclock_fg		/* 37 REFCLOCK_FG */
 };
 
 u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);

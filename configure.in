@@ -1629,6 +1629,15 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Forum Graphic GPS)
+AC_ARG_ENABLE(FG,		[  --enable-FG             + Forum Graphic GPS],
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_FG)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 # Requires modem control
 AC_MSG_CHECKING(Heath GC-1000 WWV/WWVH receiver)
 AC_ARG_ENABLE(HEATH,		[  --enable-HEATH          s Heath GC-1000 WWV/WWVH receiver],

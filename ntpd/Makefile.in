@@ -120,7 +120,7 @@ ntpd_SOURCES = jupiter.h map_vme.c ntp_config.c ntp_control.c ntp_filegen.c \
 	ntp_util.c ntpd.c refclock_acts.c refclock_arbiter.c refclock_arc.c \
 	refclock_as2201.c refclock_atom.c refclock_bancomm.c \
 	refclock_chronolog.c refclock_chu.c refclock_conf.c refclock_datum.c \
-	refclock_dumbclock.c refclock_gpsvme.c refclock_heath.c \
+	refclock_dumbclock.c refclock_fg.c refclock_gpsvme.c refclock_heath.c \
 	refclock_hpgps.c refclock_irig.c refclock_jupiter.c refclock_leitch.c \
 	refclock_local.c refclock_msfees.c refclock_mx4200.c refclock_nmea.c \
 	refclock_oncore.c refclock_palisade.c refclock_palisade.h \
@@ -151,14 +151,15 @@ ntp_request$U.o ntp_restrict$U.o ntp_timer$U.o ntp_util$U.o ntpd$U.o \
 refclock_acts$U.o refclock_arbiter$U.o refclock_arc$U.o \
 refclock_as2201$U.o refclock_atom$U.o refclock_bancomm$U.o \
 refclock_chronolog$U.o refclock_chu$U.o refclock_conf$U.o \
-refclock_datum$U.o refclock_dumbclock$U.o refclock_gpsvme$U.o \
-refclock_heath$U.o refclock_hpgps$U.o refclock_irig$U.o \
-refclock_jupiter$U.o refclock_leitch$U.o refclock_local$U.o \
-refclock_msfees$U.o refclock_mx4200$U.o refclock_nmea$U.o \
-refclock_oncore$U.o refclock_palisade$U.o refclock_parse$U.o \
-refclock_pcf$U.o refclock_pst$U.o refclock_ptbacts$U.o refclock_shm$U.o \
-refclock_tpro$U.o refclock_trak$U.o refclock_true$U.o \
-refclock_ulink$U.o refclock_usno$U.o refclock_wwv$U.o refclock_wwvb$U.o
+refclock_datum$U.o refclock_dumbclock$U.o refclock_fg$U.o \
+refclock_gpsvme$U.o refclock_heath$U.o refclock_hpgps$U.o \
+refclock_irig$U.o refclock_jupiter$U.o refclock_leitch$U.o \
+refclock_local$U.o refclock_msfees$U.o refclock_mx4200$U.o \
+refclock_nmea$U.o refclock_oncore$U.o refclock_palisade$U.o \
+refclock_parse$U.o refclock_pcf$U.o refclock_pst$U.o \
+refclock_ptbacts$U.o refclock_shm$U.o refclock_tpro$U.o \
+refclock_trak$U.o refclock_true$U.o refclock_ulink$U.o \
+refclock_usno$U.o refclock_wwv$U.o refclock_wwvb$U.o
 ntpd_OBJECTS =  $(am_ntpd_OBJECTS)
 ntpd_DEPENDENCIES =  version.o ../libntp/libntp.a
 ntpd_LDFLAGS = 
@@ -186,19 +187,19 @@ $(DEPDIR)/refclock_arc$U.Po $(DEPDIR)/refclock_as2201$U.Po \
 $(DEPDIR)/refclock_atom$U.Po $(DEPDIR)/refclock_bancomm$U.Po \
 $(DEPDIR)/refclock_chronolog$U.Po $(DEPDIR)/refclock_chu$U.Po \
 $(DEPDIR)/refclock_conf$U.Po $(DEPDIR)/refclock_datum$U.Po \
-$(DEPDIR)/refclock_dumbclock$U.Po $(DEPDIR)/refclock_gpsvme$U.Po \
-$(DEPDIR)/refclock_heath$U.Po $(DEPDIR)/refclock_hpgps$U.Po \
-$(DEPDIR)/refclock_irig$U.Po $(DEPDIR)/refclock_jupiter$U.Po \
-$(DEPDIR)/refclock_leitch$U.Po $(DEPDIR)/refclock_local$U.Po \
-$(DEPDIR)/refclock_msfees$U.Po $(DEPDIR)/refclock_mx4200$U.Po \
-$(DEPDIR)/refclock_nmea$U.Po $(DEPDIR)/refclock_oncore$U.Po \
-$(DEPDIR)/refclock_palisade$U.Po $(DEPDIR)/refclock_parse$U.Po \
-$(DEPDIR)/refclock_pcf$U.Po $(DEPDIR)/refclock_pst$U.Po \
-$(DEPDIR)/refclock_ptbacts$U.Po $(DEPDIR)/refclock_shm$U.Po \
-$(DEPDIR)/refclock_tpro$U.Po $(DEPDIR)/refclock_trak$U.Po \
-$(DEPDIR)/refclock_true$U.Po $(DEPDIR)/refclock_ulink$U.Po \
-$(DEPDIR)/refclock_usno$U.Po $(DEPDIR)/refclock_wwv$U.Po \
-$(DEPDIR)/refclock_wwvb$U.Po
+$(DEPDIR)/refclock_dumbclock$U.Po $(DEPDIR)/refclock_fg$U.Po \
+$(DEPDIR)/refclock_gpsvme$U.Po $(DEPDIR)/refclock_heath$U.Po \
+$(DEPDIR)/refclock_hpgps$U.Po $(DEPDIR)/refclock_irig$U.Po \
+$(DEPDIR)/refclock_jupiter$U.Po $(DEPDIR)/refclock_leitch$U.Po \
+$(DEPDIR)/refclock_local$U.Po $(DEPDIR)/refclock_msfees$U.Po \
+$(DEPDIR)/refclock_mx4200$U.Po $(DEPDIR)/refclock_nmea$U.Po \
+$(DEPDIR)/refclock_oncore$U.Po $(DEPDIR)/refclock_palisade$U.Po \
+$(DEPDIR)/refclock_parse$U.Po $(DEPDIR)/refclock_pcf$U.Po \
+$(DEPDIR)/refclock_pst$U.Po $(DEPDIR)/refclock_ptbacts$U.Po \
+$(DEPDIR)/refclock_shm$U.Po $(DEPDIR)/refclock_tpro$U.Po \
+$(DEPDIR)/refclock_trak$U.Po $(DEPDIR)/refclock_true$U.Po \
+$(DEPDIR)/refclock_ulink$U.Po $(DEPDIR)/refclock_usno$U.Po \
+$(DEPDIR)/refclock_wwv$U.Po $(DEPDIR)/refclock_wwvb$U.Po
 SOURCES = check_y2k.c $(ntpd_SOURCES)
 OBJECTS = check_y2k$U.o $(am_ntpd_OBJECTS)
 
@@ -338,6 +339,8 @@ refclock_datum_.c: refclock_datum.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_datum.c; then echo $(srcdir)/refclock_datum.c; else echo refclock_datum.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_datum_.c
 refclock_dumbclock_.c: refclock_dumbclock.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_dumbclock.c; then echo $(srcdir)/refclock_dumbclock.c; else echo refclock_dumbclock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_dumbclock_.c
+refclock_fg_.c: refclock_fg.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_fg.c; then echo $(srcdir)/refclock_fg.c; else echo refclock_fg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_fg_.c
 refclock_gpsvme_.c: refclock_gpsvme.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_gpsvme.c; then echo $(srcdir)/refclock_gpsvme.c; else echo refclock_gpsvme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_gpsvme_.c
 refclock_heath_.c: refclock_heath.c $(ANSI2KNR)
@@ -392,8 +395,8 @@ ntp_proto_.o ntp_refclock_.o ntp_request_.o ntp_restrict_.o \
 ntp_timer_.o ntp_util_.o ntpd_.o refclock_acts_.o refclock_arbiter_.o \
 refclock_arc_.o refclock_as2201_.o refclock_atom_.o refclock_bancomm_.o \
 refclock_chronolog_.o refclock_chu_.o refclock_conf_.o \
-refclock_datum_.o refclock_dumbclock_.o refclock_gpsvme_.o \
-refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
+refclock_datum_.o refclock_dumbclock_.o refclock_fg_.o \
+refclock_gpsvme_.o refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
 refclock_jupiter_.o refclock_leitch_.o refclock_local_.o \
 refclock_msfees_.o refclock_mx4200_.o refclock_nmea_.o \
 refclock_oncore_.o refclock_palisade_.o refclock_parse_.o \
@@ -476,6 +479,7 @@ distdir: $(DISTFILES)
 @AMDEP@include $(DEPDIR)/refclock_conf$U.Po
 @AMDEP@include $(DEPDIR)/refclock_datum$U.Po
 @AMDEP@include $(DEPDIR)/refclock_dumbclock$U.Po
+@AMDEP@include $(DEPDIR)/refclock_fg$U.Po
 @AMDEP@include $(DEPDIR)/refclock_gpsvme$U.Po
 @AMDEP@include $(DEPDIR)/refclock_heath$U.Po
 @AMDEP@include $(DEPDIR)/refclock_hpgps$U.Po

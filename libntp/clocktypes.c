@@ -84,6 +84,8 @@ struct clktype clktypes[] = {
 	  "PCF"},
 	{ REFCLK_WWV_AUDIO,	"WWV/H Audio Demodulator/Decoder (36)",
 	  "WWV_AUDIO"},
+	{ REFCLK_FG,	"Forum Graphic GPS Dating Station (37)",
+	  "GPS_FG"},
 	{ -1,			"", "" }
 };
 

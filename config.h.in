@@ -212,6 +212,9 @@
 /* WWV audio driver */
 #undef CLOCK_WWV
 
+/* Forum Graphic GPS datating station driver */
+#undef CLOCK_FG
+
 /* Ultralink M320 WWVB receiver */
 #undef CLOCK_ULINK
 
