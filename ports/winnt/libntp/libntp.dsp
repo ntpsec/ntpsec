@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7c\inc32" /FI"windows.h" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR /YX"windows.h" /FD /GZ /c
+# ADD CPP /nologo /MTd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7c\inc32" /FI"windows.h" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR /YX"" /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -209,7 +209,15 @@ SOURCE=..\..\..\libntp\ieee754io.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libisc\inet_aton.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libisc\inet_ntop.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libisc\inet_pton.c
 # End Source File
 # Begin Source File
 
@@ -454,6 +462,10 @@ SOURCE=..\include\sys\ioctl.h
 # Begin Source File
 
 SOURCE=..\..\..\include\iosignal.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\isc\ipv6.h
 # End Source File
 # Begin Source File
 
