@@ -137,9 +137,9 @@ transmit(
 		 * This is to catch and clamp the ttl to the lowest
 		 * practical value and avoid knocking on spurious doors.
 		 */
+		peer->outdate = current_time;
 		if (sys_survivors < sys_minclock && peer->ttl <
 		    sys_ttlmax)
-			peer->outdate = current_time;
 			peer->ttl++;
 	} else {
 		if (peer->burst == 0) {
