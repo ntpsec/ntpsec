@@ -20,6 +20,8 @@
 # include <config.h>
 #endif
 
+#include <netdb.h>
+
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -29,7 +31,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <netdb.h>
 #include <signal.h>
 
 /**/

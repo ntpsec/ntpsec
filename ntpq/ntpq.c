@@ -4,6 +4,13 @@
 
 #include <stdio.h>
 
+#include <ctype.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <netdb.h>
+
 #include "ntpq.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -15,12 +22,6 @@
 #include "isc/net.h"
 #include "isc/result.h"
 
-#include <ctype.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netdb.h>
 #ifdef SYS_WINNT
 # include <io.h>
 #else

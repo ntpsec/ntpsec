@@ -42,13 +42,6 @@
 # include <config.h>
 #endif
 
-#include "ntp_machine.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_request.h"
-#include "ntp_stdlib.h"
-#include "ntp_syslog.h"
-
 #include <stdio.h>
 #include <ctype.h>
 #include <netdb.h>
@@ -56,6 +49,13 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "ntp_machine.h"
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_request.h"
+#include "ntp_stdlib.h"
+#include "ntp_syslog.h"
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
