@@ -1458,13 +1458,13 @@ clock_filter(
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		if (i != 0) {
 			peer->filter_disp[j] += dtemp;
-			if (peer->filter_disp[j] > MAXDISPERSE)
+			if (peer->filter_disp[j] >= MAXDISPERSE)
 				peer->filter_disp[j] = MAXDISPERSE;
 		}
 		if (peer->filter_disp[j] >= MAXDISPERSE)
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
-		    allan_xpt)
+		    ULOGTOD(allan_xpt))
 			dst[i] = MAXDISTANCE + peer->filter_disp[j];
 		else
  			dst[i] = peer->filter_delay[j];
@@ -1509,8 +1509,7 @@ clock_filter(
 	 * normalized close to 1.0. The jitter is the mean of the square
 	 * differences relative to the lowest delay sample. If no
 	 * acceptable samples remain in the shift register, quietly
-	 * tiptoe home leaving only the
-	 * dispersion.
+	 * tiptoe home leaving only the dispersion.
 	 */
 	jit = 0;
 	peer->disp = 0;

@@ -32,20 +32,18 @@
  * included to protect against timewarps, timespikes and general mayhem.
  * All units are in s and s/s, unless noted otherwise.
  */
-#define CLOCK_MAX	.128	/* default max offset (s) */
+#define CLOCK_MAX	.128	/* default step offset (s) */
 #define CLOCK_PANIC	1000.	/* default panic offset (s) */
-#define CLOCK_MAXSTAB	2e-6	/* max frequency stability (s/s) */
-#define CLOCK_MAXERR	1e-2	/* max phase jitter (s) */
 #define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
 #define SHIFT_PLL	4	/* PLL loop gain (shift) */
-#define CLOCK_AVG	4.	/* FLL loop gain */
+#define CLOCK_FLL	8.	/* FLL loop gain */
+#define CLOCK_AVG	4.	/* parameter averaging constant */
 #define CLOCK_MINSEC	256.	/* min FLL update interval (s) */
 #define CLOCK_MINSTEP	900.	/* step-change timeout (s) */
-#define CLOCK_DAY	86400.	/* one day of seconds */
+#define CLOCK_DAY	86400.	/* one day of seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
-#define CLOCK_ALLAN	1024.	/* min Allan intercept (s) */
-#define CLOCK_ADF	1e11	/* Allan deviation factor */
+#define CLOCK_ALLAN	10	/* min Allan intercept (log2 s) */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
 
 /*
@@ -114,7 +112,18 @@ double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
 double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
-double	allan_xpt = CLOCK_ALLAN; /* minimum Allan intercept (s) */
+u_char	allan_xpt = CLOCK_ALLAN; /* minimum Allan intercept (log2 s) */
+
+/*
+ * Hybrid PLL/FLL parameters. These were chosen by experiment using a
+ * MatLab program. The parameters were fudged to match a pure PLL at
+ * poll intervals of 64 s and lower and a pure FLL at poll intervals of
+ * 4096 s and higher. Between these extremes the parameters were chosen
+ * as a geometric series of intervals while holding the overshoot to
+ * less than 5 percent.
+ */
+static double fll[] = {0., 1./64, 1./32, 1./16, 1./8, 1./4, 1.};
+static double pll[] = {1., 1.4,   2.,    2.8,   4.1,  7.,  12.};
 
 /*
  * Program variables
@@ -206,6 +215,7 @@ local_clock(
 	double clock_frequency;	/* clock frequency adjustment (ppm) */
 	double dtemp, etemp;	/* double temps */
 	int retval;		/* return value */
+	int i;
 
 	/*
 	 * If the loop is opened, monitor and record the offsets
@@ -480,18 +490,16 @@ local_clock(
 			 * not undersampling and insure stability even
 			 * when the rules of fair engagement are broken.
 			 */
-			dtemp = ULOGTOD(sys_poll);
-			if (dtemp >= 2 * allan_xpt)
-				etemp = 1.;
-			else if (dtemp >= allan_xpt)
-				etemp = .5;
-			else if (dtemp > allan_xpt / 2)
-				etemp = .125;
-			else
-				etemp = 0;
-			dtemp = max(mu, allan_xpt);
-			flladj = fp_offset * etemp / (dtemp *
-			    CLOCK_AVG);
+			i = sys_poll - allan_xpt + 4;
+			if (i < 0)
+				i = 0;
+			else if (i > 6)
+				i = 6;
+			etemp = fll[i];
+			dtemp = max(mu, ULOGTOD(allan_xpt));
+			flladj = ((fp_offset - last_offset) +
+			    (fp_offset - clock_offset)) * etemp /
+			    (dtemp * CLOCK_FLL);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
 			etemp = min(mu, ULOGTOD(sys_poll));
 			plladj = fp_offset * etemp / (dtemp * dtemp);
@@ -704,7 +712,7 @@ adj_host_clock(
 	)
 {
 	double adjustment;
-	double dtemp, etemp;
+	int i;
 
 	/*
 	 * Update the dispersion since the last update. In contrast to
@@ -753,19 +761,15 @@ adj_host_clock(
 
 	/*
 	 * This ugly bit of business is necessary in order to move the
-	 * poll higher during and after the transition between PLL and
-	 * FLL modes.
+	 * pole frequency higher in FLL mode. This is necessary for loop
+	 * stability.
 	 */
-	dtemp = ULOGTOD(sys_poll);
-	if (dtemp >= 2 * allan_xpt)
-		etemp = 32.;
-	else if (dtemp >= allan_xpt)
-		etemp = 16.;
-	else if (dtemp > allan_xpt / 2)
-		etemp = 8;
-	else
-		etemp = 1;
-	adjustment = clock_offset / (etemp * ULOGTOD(SHIFT_PLL +
+	i = sys_poll - allan_xpt + 4;
+	if (i < 0)
+		i = 0;
+	else if (i > 6)
+		i = 6;
+	adjustment = clock_offset / (pll[i] * ULOGTOD(SHIFT_PLL +
 	    sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
@@ -948,7 +952,7 @@ loop_config(
 	case LOOP_ALLAN:		/* minimum Allan intercept */
 		if (freq < CLOCK_ALLAN)
 			freq = CLOCK_ALLAN;
-		allan_xpt = freq;
+		allan_xpt = (u_char)freq;
 		break;
 	
 	case LOOP_HUFFPUFF:		/* huff-n'-puff filter length */
