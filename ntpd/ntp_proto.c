@@ -534,18 +534,14 @@ receive(
 		 * there is no match, that's curious but nonfatal. Just
 		 * ignore it. Bad manners to respond if we are not
 		 * synchronized to something.
+		 *
+		 * There is an implosion hazard at the sender.
 		 */
 		peer2 = findmanycastpeer(rbufp);
 		if (peer2 == 0)
 			return;
 
-		/*
-		 * Create a new association and copy the peer variables
-		 * to it. If something goes wrong, just ignore it. We
-		 * know the packet failed authentication, anyway, so
-		 * just toss it.
-		 */
-		peer = newpeer(&rbufp->recv_srcadr, any_interface,
+		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST |
 		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
@@ -593,15 +589,24 @@ receive(
 	case AM_NEWBCL:
 
 		/*
-		 * Broadcast client being set up now. Do this only if
-		 * the packet is properly authenticated.
+		 * We have received a broadcast and are about to set
+		 * up a broadcast client association. But, we don't
+		 * know if the broadcaster knows its own interface
+		 * address and can properly construct the cryptosum.
+		 * Therefore, there could be an authentication
+		 * failure from a legitimate 'caster. Being as devlishly
+		 * clever as we are, we just toss back a client mode
+		 * packet to cause the 'caster to bind its own interface.
+		 * I did not admit this. I was never there.
+		 *
+		 * There is a sender implosion hazard here.
 		 */
 		if ((restrict_mask & RES_NOPEER) || !sys_bclient ||
 		    (sys_authenticate && !is_authentic)) {
-			is_error = 1;
-			break;
+			fast_xmit(rbufp, MODE_CLIENT, 0);
+			return;
 		}
-		peer = newpeer(&rbufp->recv_srcadr, any_interface,
+		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_MCLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST1 | FLAG_MCAST2 |
 		    FLAG_BURST, MDF_UCAST, 0, skeyid);
@@ -633,15 +638,8 @@ receive(
 	if (is_error) {
 
 		/*
-		 * Error stub. If we get here, something broke. We
-		 * scuttle the autokey if necessary and sink the ship.
-		 * This can occur only upon mobilization, so we can
-		 * throw the structure away without fear of breaking
-		 * anything.
+		 * Error stub. If we get here, something broke.
 		 */
-		if (peer != 0)
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
 #ifdef DEBUG
 		if (debug)
 			printf("receive: bad protocol %d\n", retcode);
@@ -1082,8 +1080,8 @@ poll_update(
 #endif /* AUTOKEY */
 
 	/*
-	 * The wiggle-the-poll-interval dance. Broadcasters dance only
-	 * the minpoll beat. Reference clock partners sit this one out.
+	 * The wiggle-the-poll-interval dance. Broadcasters and anycasters
+	 * dance the band. Reference clock partners sit this one out.
 	 * Dancers surviving the clustering algorithm beat to the system
 	 * poll. Broadcast clients are usually lead by their broadcast
 	 * partner, but faster in the initial mating dance.
@@ -1097,6 +1095,8 @@ poll_update(
 		peer->hpoll = sys_poll;
 	else
 		peer->hpoll = hpoll;
+	if (peer->cast_flags & (MDF_BCAST | MDF_ACAST))
+		peer->ppoll = peer->hpoll;
 	if (peer->hpoll > peer->maxpoll)
 		peer->hpoll = peer->maxpoll;
 	else if (peer->hpoll < peer->minpoll)
@@ -1375,7 +1375,6 @@ clock_select(void)
 	 * Initialize. If a prefer peer does not survive this thing,
 	 * the pps stratum will remain unspec.
 	 */
-	sys_survivors = 0;
 	sys_prefer = 0;
 	nreach = nlist = 0;
 	low = 1e9;
@@ -1561,6 +1560,8 @@ clock_select(void)
 				msyslog(LOG_INFO,
 				    "synchronisation lost");
 			}
+			sys_survivors = 0;
+			resetmanycast();
 			return;
 		}
 	}
@@ -2184,8 +2185,6 @@ fast_xmit(
 	 * Initialize transmit packet header fields from the receive
 	 * buffer provided. We leave some fields intact as received.
 	 */
-	if (rbufp->dstadr == any_interface)
-		rbufp->dstadr = findinterface(&rbufp->srcadr);
 	rpkt = &rbufp->recv_pkt;
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 	    PKT_VERSION(rpkt->li_vn_mode), xmode);

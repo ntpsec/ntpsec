@@ -356,8 +356,7 @@ findmanycastpeer(
 
 		for (peer = peer_hash[i]; peer != 0; peer =
 		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST &&
-			    peer->flags & FLAG_CONFIG) {
+			if (peer->cast_flags & MDF_ACAST) {
 				NTOHL_FP(&pkt->org, &p_org);
 				if (L_ISEQU(&peer->xmt, &p_org))
 					return(peer);
@@ -383,9 +382,9 @@ resetmanycast(void)
 
 		for (peer = peer_hash[i]; peer != 0; peer =
 		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST &&
-			    peer->flags & FLAG_CONFIG)
+			if (peer->cast_flags & MDF_ACAST)
 				poll_update(peer, peer->minpoll);
+
 		}
 	}
 }
@@ -659,9 +658,11 @@ newpeer(
 	 */
 	memset((char *)peer, 0, sizeof(struct peer));
 	peer->srcadr = *srcadr;
+/*
 	if (dstadr == any_interface)
 		peer->dstadr = findinterface(srcadr);
 	else
+*/
 		peer->dstadr = dstadr;
 	peer->cast_flags = cast_flags;
 	peer->hmode = (u_char)hmode;
