@@ -582,6 +582,10 @@ cleanlinks(
 	const char *f3		/* Previous symlink target */
 	)
 {
+#ifdef HAVE_READLINK
+	char *cp;
+	char fb[PATH_MAX];
+
 	/*
 	  Just return if nosymlinks.
 	  unlink f1
@@ -591,6 +595,57 @@ cleanlinks(
 	  - if f3 begins with a /, unlink it
 	  - else, unlink dirname(f1) / f3
 	*/
+#endif /* HAVE_READLINK */
+	if (unlink(f1)) {
+		fprintf(stderr, "unlink(%s) failed: %s\n", f1,
+			strerror(errno));
+		return;
+	}
+	/* file = dirname(f3) / f2 */
+	snprintf(fb, sizeof fb, "%s", f3);
+	cp = strrchr(fb, '/');
+	if (cp) {
+		*cp = 0;
+	}
+	snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+	if (debug > 1) printf("cleanlinks 1: file is <%s>\n", fb);
+
+	if (symlink(fb, f1)) {
+		fprintf(stderr, "symlink(%s,%s) failed: %s\n", fb, f1,
+			strerror(errno));
+		return;
+	}
+
+	/*
+	  If trash:
+	  - if f3 begins with a /, unlink it
+	  - else, unlink dirname(f1) / f3
+	*/
+	if (trash) {
+		if ('/' == *f3) {
+			if (unlink(f3)) {
+				fprintf(stderr, "unlink(%s) failed: %s\n", f3,
+					strerror(errno));
+				return;
+			}
+		} else {
+			snprintf(fb, sizeof fb, "%s", f1);
+			cp = strrchr(fb, '/');
+			if (cp) {
+				*cp = 0;
+			}
+			snprintf(fb, sizeof fb, "%s/%s", fb, f3);
+			if (debug > 1)
+				printf("cleanlinks 2: file is <%s>\n", fb);
+			if (unlink(fb)) {
+				fprintf(stderr, "unlink(%s) failed: %s\n", fb,
+					strerror(errno));
+				return;
+			}
+		}
+	}
+
+	return;
 }
 
 
