@@ -257,7 +257,7 @@ struct ntp_control {
  * ntp_request.c wants to see this.
  */
 struct ctl_trap {
-	struct sockaddr_in tr_addr;	/* address of trap recipient */
+	struct sockaddr_storage tr_addr;/* address of trap recipient */
 	struct interface *tr_localaddr;	/* interface to send this through */
 	u_long tr_settime;		/* time trap was set */
 	u_long tr_count;		/* async messages sent to this guy */

@@ -152,6 +152,7 @@ getCmdOpts(
 	)
 {
 	extern char *config_file;
+	struct sockaddr_in inaddrntp;
 	int errflg;
 	int c;
 
@@ -171,15 +172,15 @@ getCmdOpts(
 	while ((c = ntp_getopt(argc, argv, ntp_options)) != EOF) {
 		switch (c) {
 		    case 'a':
-			proto_config(PROTO_AUTHENTICATE, 1, 0.);
+			proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
 			break;
 
 		    case 'A':
-			proto_config(PROTO_AUTHENTICATE, 0, 0.);
+			proto_config(PROTO_AUTHENTICATE, 0, 0., NULL);
 			break;
 
 		    case 'b':
-			proto_config(PROTO_BROADCLIENT, 1, 0.);
+			proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
 			break;
 
 		    case 'c':
@@ -223,7 +224,10 @@ getCmdOpts(
 			break;
 
 		    case 'm':
-			proto_config(PROTO_MULTICAST_ADD, htonl(INADDR_NTP), 0.);
+			inaddrntp.sin_family = AF_INET;
+			inaddrntp.sin_port = htons(NTP_PORT);
+			inaddrntp.sin_addr.s_addr = htonl(INADDR_NTP);
+			proto_config(PROTO_MULTICAST_ADD, 0, 0., (struct sockaddr_storage*)&inaddrntp);
 			sys_bclient = 1;
 			break;
 
@@ -259,7 +263,7 @@ getCmdOpts(
 						"command line broadcast delay value %s undecodable",
 						ntp_optarg);
 				} else {
-					proto_config(PROTO_BROADDELAY, 0, tmp);
+					proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
 				}
 			} while (0);
 			break;

@@ -462,7 +462,7 @@ stats_config(
 */
 void
 record_peer_stats(
-	struct sockaddr_in *addr,
+	struct sockaddr_storage *addr,
 	int status,
 	double offset,
 	double delay,
@@ -493,7 +493,7 @@ record_peer_stats(
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %lu.%03lu %s %x %.9f %.9f %.9f %.9f\n",
-		    day, sec, msec, ntoa(addr), status, offset,
+		    day, sec, msec, stoa(addr), status, offset,
 		    delay, dispersion, skew);
 		fflush(peerstats.fp);
 	}
@@ -556,7 +556,7 @@ record_loop_stats(
  */
 void
 record_clock_stats(
-	struct sockaddr_in *addr,
+	struct sockaddr_storage *addr,
 	const char *text
 	)
 {
@@ -582,7 +582,7 @@ record_clock_stats(
 	filegen_setup(&clockstats, (u_long)(tv.tv_sec + JAN_1970));
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %lu.%03lu %s %s\n",
-		    day, sec, msec, ntoa(addr), text);
+		    day, sec, msec, stoa(addr), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -599,8 +599,8 @@ record_clock_stats(
  */
 void
 record_raw_stats(
-        struct sockaddr_in *srcadr,
-        struct sockaddr_in *dstadr,
+        struct sockaddr_storage *srcadr,
+        struct sockaddr_storage *dstadr,
 	l_fp *t1,
 	l_fp *t2,
 	l_fp *t3,
@@ -629,7 +629,7 @@ record_raw_stats(
 	filegen_setup(&rawstats, (u_long)(tv.tv_sec + JAN_1970));
 	if (rawstats.fp != NULL) {
                 fprintf(rawstats.fp, "%lu %lu.%03lu %s %s %s %s %s %s\n",
-		    day, sec, msec, ntoa(srcadr), ntoa(dstadr),
+		    day, sec, msec, stoa(srcadr), stoa(dstadr),
 		    ulfptoa(t1, 9), ulfptoa(t2, 9), ulfptoa(t3, 9),
 		    ulfptoa(t4, 9));
 		fflush(rawstats.fp);
@@ -735,4 +735,31 @@ rereadkeys(void)
 {
 	if (key_file_name != 0)
 	    authreadkeys(key_file_name);
+}
+
+/*
+ * sock_hash - hash an sockaddr_storage structure
+ */
+int
+sock_hash(
+     struct sockaddr_storage *addr
+     )
+{
+        int hashVal = 0;
+        int i;
+	int len;
+        char* ch;
+
+	ch = (char*)addr;
+	len = SOCKLEN(addr);
+
+         for(i = 0; i < len ; i++)
+                 hashVal = 37 * hashVal + (int)*(ch + i);
+
+         hashVal = hashVal % 128;  /* % MON_HASH_SIZE hardcoded */
+
+         if (hashVal < 0)
+                 hashVal += 128;
+
+         return hashVal;
 }

@@ -62,7 +62,7 @@
  */
 #define	MON_HASH_SIZE	128
 #define	MON_HASH_MASK	(MON_HASH_SIZE-1)
-#define	MON_HASH(addr)	((int)(ntohl((addr)) & MON_HASH_MASK))
+#define	MON_HASH(addr)	sock_hash(addr)
 
 /*
  * Pointers to the hash table, the MRU list and the count table.  Memory
@@ -198,7 +198,7 @@ ntp_monitor(
 {
 	register struct pkt *pkt;
 	register struct mon_data *md;
-	register u_long netnum;
+        struct sockaddr_storage addr;
 	register int hash;
 	register int mode;
 
@@ -206,14 +206,14 @@ ntp_monitor(
 	    return;
 
 	pkt = &rbufp->recv_pkt;
-	netnum = NSRCADR(&rbufp->recv_srcadr);
-	hash = MON_HASH(netnum);
+	memset(&addr, 0, sizeof(addr));
+	memcpy(&addr, &(rbufp->recv_srcadr), sizeof(rbufp->recv_srcadr));
+	hash = MON_HASH(&addr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 
 	md = mon_hash[hash];
 	while (md != NULL) {
-		if (md->rmtadr == netnum && 
-		    /* ?? md->interface == rbufp->dstadr && ?? */
+		if(SOCKCMP(&md->rmtadr, &addr) &&
 		    md->mode == (u_char)mode) {
 			md->lasttime = current_time;
 			md->count++;
@@ -270,7 +270,8 @@ ntp_monitor(
 	md->lasttime = md->firsttime = current_time;
 	md->lastdrop = 0;
 	md->count = 1;
-	md->rmtadr = netnum;
+	memset(&md->rmtadr, 0, sizeof(md->rmtadr));
+	memcpy(&md->rmtadr, &addr, sizeof(addr));
 	md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 	md->mode = (u_char) mode;
 	md->version = PKT_VERSION(pkt->li_vn_mode);
@@ -336,7 +337,7 @@ remove_from_hash(
 	register int hash;
 	register struct mon_data *md_prev;
 
-	hash = MON_HASH(md->rmtadr);
+	hash = MON_HASH(&md->rmtadr);
 	if (mon_hash[hash] == md) {
 		mon_hash[hash] = md->hash_next;
 	} else {

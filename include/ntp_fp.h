@@ -361,8 +361,11 @@ extern	int	adj_systime	P((double));
 #define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 #define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 
-#define	ntoa(_sin)		numtoa((_sin)->sin_addr.s_addr)
-#define	ntohost(_sin)		numtohost((_sin)->sin_addr.s_addr)
+#define stoa(_sin)	socktoa((_sin))
+#define stohost(_sin)	socktohost((_sin))
+
+#define	ntoa(_sin)	stoa(_sin)
+#define	ntohost(_sin)	stohost(_sin)
 
 #define	ufptoa(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 0)
 #define	ufptoms(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 1)

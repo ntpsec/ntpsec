@@ -17,6 +17,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
+#include "ntp_fp.h"
 
 #ifdef OPENSSL
 # include "ntp_crypto.h"
@@ -39,6 +40,8 @@
 # include <io.h>
 extern HANDLE ResolverThreadHandle;
 #endif /* SYS_WINNT */
+
+#include <netdb.h>
 
 extern int priority_done;
 
@@ -402,7 +405,7 @@ static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
 #endif
 static	int gettokens P((FILE *, char *, char **, int *));
 static	int matchkey P((char *, struct keyword *));
-static	int getnetnum P((const char *, struct sockaddr_in *, int));
+static	int getnetnum P((const char *, struct sockaddr_storage *, int));
 static	void save_resolve P((char *, int, int, int, int, u_int, int,
     keyid_t, u_char *));
 static	void do_resolve_internal P((void));
@@ -499,8 +502,8 @@ getconfig(
 	u_long fudgeflag;
 	u_int peerflags;
 	int hmode;
-	struct sockaddr_in peeraddr;
-	struct sockaddr_in maskaddr;
+	struct sockaddr_storage peeraddr;
+	struct sockaddr_storage maskaddr;
 	FILE *fp[MAXINCLUDELEVEL+1];
 	FILE *includefile;
 	int includelevel = 0;
@@ -637,7 +640,7 @@ getconfig(
 					ISBADADR(&peeraddr)) {
 					msyslog(LOG_ERR,
 						"attempt to configure invalid address %s",
-						ntoa(&peeraddr));
+						stoa(&peeraddr));
 					break;
 				}
 				/*
@@ -645,23 +648,45 @@ getconfig(
 				 * address for server/peer!
 				 * and unicast address for manycastclient!
 				 */
-				if (((tok == CONFIG_SERVER) ||
-				     (tok == CONFIG_PEER)) &&
+				if (peeraddr.ss_family == AF_INET) {
+					if (((tok == CONFIG_SERVER) ||
+				     	(tok == CONFIG_PEER)) &&
 #ifdef REFCLOCK
-				    !ISREFCLOCKADR(&peeraddr) &&
+				    	!ISREFCLOCKADR(&peeraddr) &&
 #endif
-				    IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
-					msyslog(LOG_ERR,
-						"attempt to configure invalid address %s",
-						ntoa(&peeraddr));
-					break;
+				    	IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
+						msyslog(LOG_ERR,
+							"attempt to configure invalid address %s",
+							stoa(&peeraddr));
+						break;
+					}
+					if ((tok == CONFIG_MANYCASTCLIENT) &&
+				    	!IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
+						msyslog(LOG_ERR,
+							"attempt to configure invalid address %s",
+							stoa(&peeraddr));
+						break;
+					}
 				}
-				if ((tok == CONFIG_MANYCASTCLIENT) &&
-				    !IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
-					msyslog(LOG_ERR,
-						"attempt to configure invalid address %s",
-						ntoa(&peeraddr));
-					break;
+				else if(peeraddr.ss_family == AF_INET6) {
+                                if (((tok == CONFIG_SERVER) ||
+                                     (tok == CONFIG_PEER)) &&
+#ifdef REFCLOCK
+                                    !ISREFCLOCKADR(&peeraddr) &&
+#endif
+                                        IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
+                                                msyslog(LOG_ERR,
+                                                        "attempt to configure in valid address %s",
+                                                        stoa(&peeraddr));
+                                                break;
+                                        }
+                                        if ((tok == CONFIG_MANYCASTCLIENT) &&
+                                            !IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
+                                                        msyslog(LOG_ERR,
+                                                        "attempt to configure in valid address %s",
+                                                        stoa(&peeraddr));
+                                                break;
+					}
 				}
 			}
 			
@@ -909,20 +934,20 @@ getconfig(
 			break;
 
 		    case CONFIG_BROADCASTCLIENT:
-			proto_config(PROTO_BROADCLIENT, 1, 0.);
+			proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
 			break;
-			
+
 		    case CONFIG_MULTICASTCLIENT:
 		    case CONFIG_MANYCASTSERVER:
 			if (ntokens > 1) {
 				for (i = 1; i < ntokens; i++) {
 					if (getnetnum(tokens[i], &peeraddr, 1))
 					    proto_config(PROTO_MULTICAST_ADD,
-							 peeraddr.sin_addr.s_addr, 0.);
+							 0, 0., &peeraddr);
 				}
 			} else
 			    proto_config(PROTO_MULTICAST_ADD,
-					 htonl(INADDR_NTP), 0.);
+					 0, 0., NULL);
 			if (tok == CONFIG_MULTICASTCLIENT)
 				sys_bclient = 1;
 			else if (tok == CONFIG_MANYCASTSERVER)
@@ -933,9 +958,9 @@ getconfig(
 			errflg = 0;
 			if (ntokens >= 2) {
 				if (STREQ(tokens[1], "yes"))
-				    proto_config(PROTO_AUTHENTICATE, 1, 0.);
+				    proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
 				else if (STREQ(tokens[1], "no"))
-				    proto_config(PROTO_AUTHENTICATE, 0, 0.);
+				    proto_config(PROTO_AUTHENTICATE, 0, 0., NULL);
 				else
 				    errflg++;
 			} else {
@@ -1069,7 +1094,7 @@ getconfig(
 				break;
 			}
 			if (STREQ(tokens[1], "default"))
-			    peeraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+			    ANYSOCK(&peeraddr);
 			else if (!getnetnum(tokens[1], &peeraddr, 1))
 			    break;
 
@@ -1079,7 +1104,7 @@ getconfig(
 			peerversion = 0;
 			peerkey = 0;
 			errflg = 0;
-			maskaddr.sin_addr.s_addr = ~(u_int32)0;
+			ANYSOCK(&maskaddr);
 			for (i = 2; i < ntokens; i++) {
 				switch (matchkey(tokens[i], res_keywords)) {
 				    case CONF_RES_MASK:
@@ -1147,8 +1172,8 @@ getconfig(
 					break;
 				}
 			}
-			if (SRCADR(&peeraddr) == htonl(INADDR_ANY))
-			    maskaddr.sin_addr.s_addr = 0;
+			if (SOCKNUL(&peeraddr))
+			    ANYSOCK(&maskaddr);
 			if (!errflg)
 			    hack_restrict(RESTRICT_FLAGS, &peeraddr, &maskaddr,
 					  (int)peerkey, peerversion);
@@ -1163,7 +1188,7 @@ getconfig(
 						"broadcastdelay value %s undecodable",
 						tokens[1]);
 				} else {
-					proto_config(PROTO_BROADDELAY, 0, tmp);
+					proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
 				}
 			}
 			break;
@@ -1271,7 +1296,7 @@ getconfig(
 				    if (localaddr == NULL) {
 					    msyslog(LOG_ERR,
 						    "can't find interface with address %s",
-						    ntoa(&maskaddr));
+						    stoa(&maskaddr));
 					    errflg = 1;
 				    }
 				    break;
@@ -1283,16 +1308,16 @@ getconfig(
 
 			if (!errflg) {
 				if (peerversion != 0)
-				    peeraddr.sin_port = htons( (u_short) peerversion);
+				    ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons( (u_short) peerversion);
 				else
-				    peeraddr.sin_port = htons(TRAPPORT);
+				    ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons(TRAPPORT);
 				if (localaddr == NULL)
-				    localaddr = any_interface;
+				    localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
 				if (!ctlsettrap(&peeraddr, localaddr, 0,
 						NTP_VERSION))
 				    msyslog(LOG_ERR,
 					    "can't set trap for %s, no resources",
-					    ntoa(&peeraddr));
+					    stoa(&peeraddr));
 			}
 			break;
 
@@ -1308,7 +1333,7 @@ getconfig(
 			if (!ISREFCLOCKADR(&peeraddr)) {
 				msyslog(LOG_ERR,
 					"%s is inappropriate address for the fudge command, line ignored",
-					ntoa(&peeraddr));
+					stoa(&peeraddr));
 				break;
 			}
 
@@ -1323,7 +1348,7 @@ getconfig(
 						   &clock_stat.fudgetime1) != 1) {
 						msyslog(LOG_ERR,
 							"fudge %s time1 value in error",
-							ntoa(&peeraddr));
+							stoa(&peeraddr));
 						errflg = i;
 						break;
 					}
@@ -1335,7 +1360,7 @@ getconfig(
 						   &clock_stat.fudgetime2) != 1) {
 						msyslog(LOG_ERR,
 							"fudge %s time2 value in error",
-							ntoa(&peeraddr));
+							stoa(&peeraddr));
 						errflg = i;
 						break;
 					}
@@ -1348,7 +1373,7 @@ getconfig(
 					{
 						msyslog(LOG_ERR,
 							"fudge %s stratum value in error",
-							ntoa(&peeraddr));
+							stoa(&peeraddr));
 						errflg = i;
 						break;
 					}
@@ -1372,7 +1397,7 @@ getconfig(
 					    || fudgeflag > 1) {
 						msyslog(LOG_ERR,
 							"fudge %s flag value in error",
-							ntoa(&peeraddr));
+							stoa(&peeraddr));
 						errflg = i;
 						break;
 					}
@@ -1589,7 +1614,7 @@ getconfig(
 					errflg = 1;
 					break;
 				}
-				proto_config(flag, 1, 0.);
+				proto_config(flag, 1, 0., NULL);
 			}
 			break;
 
@@ -1605,7 +1630,7 @@ getconfig(
 					errflg = 1;
 					break;
 				}
-				proto_config(flag, 0, 0.);
+				proto_config(flag, 0, 0., NULL);
 			}
 			break;
 
@@ -1951,71 +1976,40 @@ matchkey(
 static int
 getnetnum(
 	const char *num,
-	struct sockaddr_in *addr,
+	struct sockaddr_storage *addr,
 	int complain
 	)
 {
-	register const char *cp;
-	register char *bp;
-	register int i;
-	register int temp;
-	char buf[80];		/* will core dump on really stupid stuff */
-	u_int32 netnum;
+	struct addrinfo hints;
+	struct addrinfo *ptr;
 
-	/* XXX ELIMINATE replace with decodenetnum */
-	cp = num;
-	netnum = 0;
-	for (i = 0; i < 4; i++) {
-		bp = buf;
-		while (isdigit((int)*cp))
-			*bp++ = *cp++;
-		if (bp == buf)
-			break;
+	/* Get host address. Looking for UDP datagram connection */
+ 	memset(&hints, 0, sizeof (hints));
+ 	hints.ai_socktype = SOCK_DGRAM;
 
-		if (i < 3) {
-			if (*cp++ != '.')
-				break;
-		} else if (*cp != '\0')
-			break;
-
-		*bp = '\0';
-		temp = atoi(buf);
-		if (temp > 255)
-			break;
-		netnum <<= 8;
-		netnum += temp;
 #ifdef DEBUG
 		if (debug > 3)
-			printf("getnetnum %s step %d buf %s temp %d netnum %lu\n",
-			   num, i, buf, temp, (u_long)netnum);
+			printf("getaddrinfo %s\n", num);
 #endif
-	}
-
-	if (i < 4) {
+	if (getaddrinfo(num, "123", &hints, &ptr)!=0) {
 		if (complain)
 			msyslog(LOG_ERR,
-				"getnetnum: \"%s\" invalid host number, line ignored",
+				"getaddrinfo: \"%s\" invalid host address, line ignored",
 				num);
 #ifdef DEBUG
 		if (debug > 3)
 			printf(
-				"getnetnum: \"%s\" invalid host number, line ignored\n",
+				"getaddrinfo: \"%s\" invalid host address, line ignored\n",
 				num);
 #endif
 		return 0;
 	}
 
-	/*
-	 * make up socket address.	Clear it out for neatness.
-	 */
-	memset((void *)addr, 0, sizeof(struct sockaddr_in));
-	addr->sin_family = AF_INET;
-	addr->sin_port = htons(NTP_PORT);
-	addr->sin_addr.s_addr = htonl(netnum);
+	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("getnetnum given %s, got %s (%lx)\n",
-		   num, ntoa(addr), (u_long)netnum);
+		printf("getnetnum given %s, got %s \n",
+		   num, stoa(addr));
 #endif
 	return 1;
 }

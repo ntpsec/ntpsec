@@ -408,7 +408,7 @@ addentry(
 
 	ce = (struct conf_entry *)emalloc(sizeof(struct conf_entry));
 	ce->ce_name = cp;
-	ce->ce_peeraddr = 0;
+	ANYSOCK(&ce->ce_peeraddr);
 	ce->ce_hmode = (u_char)mode;
 	ce->ce_version = (u_char)version;
 	ce->ce_minpoll = (u_char)minpoll;
@@ -445,18 +445,18 @@ findhostaddr(
 	struct conf_entry *entry
 	)
 {
-	struct hostent *hp;
-	struct in_addr in;
+	struct addrinfo *addr;
+	int error;
 
 	checkparent();		/* make sure our guy is still running */
 
-	if (entry->ce_name && entry->ce_peeraddr) {
+	if (entry->ce_name!=NULL && SOCKNUL(&entry->ce_peeraddr)) {
 		/* HMS: Squawk? */
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
 		return 1;
 	}
 
-	if (!entry->ce_name && !entry->ce_peeraddr) {
+        if (entry->ce_name==NULL && !SOCKNUL(&entry->ce_peeraddr)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
@@ -467,20 +467,20 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
 				entry->ce_name);
 #endif /* DEBUG */
-		hp = gethostbyname(entry->ce_name);
+		error = getaddrinfo(entry->ce_name, NULL, NULL, &addr);
+		if (error==0) entry->ce_peeraddr = *((struct sockaddr_storage*)(addr->ai_addr));
 	} else {
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_INFO, "findhostaddr: Resolving %x>",
-				entry->ce_peeraddr);
+			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
+				stoa(&entry->ce_peeraddr));
 #endif
-		in.s_addr = entry->ce_peeraddr;
-		hp = gethostbyaddr((const char *)&in,
-				   sizeof entry->ce_peeraddr,
-				   AF_INET);
+		error = getnameinfo((const struct sockaddr *)&entry->ce_peeraddr,
+				   SOCKLEN(&entry->ce_peeraddr),
+				   (char*)&entry->ce_name, sizeof(entry->ce_name), NULL, 0, 0);
 	}
 
-	if (hp == NULL) {
+	if (error != 0) {
 		/*
 		 * If the resolver is in use, see if the failure is
 		 * temporary.  If so, return success.
@@ -495,29 +495,11 @@ findhostaddr(
 		if (debug > 2)
 			msyslog(LOG_INFO, "findhostaddr: name resolved.");
 #endif
-		/*
-		 * Use the first address.  We don't have any way to tell
-		 * preferences and older gethostbyname() implementations
-		 * only return one.
-		 */
-		memmove((char *)&(entry->ce_peeraddr),
-			(char *)hp->h_addr,
-			sizeof(struct in_addr));
-		if (entry->ce_keystr[0] == '*')
-			strncpy((char *)&(entry->ce_keystr), hp->h_name,
-				MAXFILENAME);
-	} else {
-		char *cp;
-		size_t s;
 
 #ifdef DEBUG
 		if (debug > 2)
 			msyslog(LOG_INFO, "findhostaddr: address resolved.");
 #endif
-		s = strlen(hp->h_name) + 1;
-		cp = emalloc(s);
-		strcpy(cp, hp->h_name);
-		entry->ce_name = cp;
 	}
 		   
 	return (1);
@@ -530,21 +512,23 @@ findhostaddr(
 static void
 openntp(void)
 {
-	struct sockaddr_in saddr;
+	struct addrinfo hints;
+	struct addrinfo *addrResult;
 
 	if (sockfd >= 0)
 	    return;
-	
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	hints.ai_socktype = SOCK_DGRAM;
+	if (getaddrinfo(NULL, "123", &hints, &addrResult)!=0) {
+		msyslog(LOG_ERR, "getaddrinfo failed: %m");
+		exit(1);
+	}
+	sockfd = socket(addrResult->ai_family, addrResult->ai_socktype, 0);
+
 	if (sockfd == -1) {
 		msyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 	}
-
-	memset((char *)&saddr, 0, sizeof(saddr));
-	saddr.sin_family = AF_INET;
-	saddr.sin_port = htons(NTP_PORT);		/* trash */
-	saddr.sin_addr.s_addr = htonl(LOCALHOST);	/* garbage */
 
 	/*
 	 * Make the socket non-blocking.  We'll wait with select()
@@ -574,12 +558,11 @@ openntp(void)
 		}
 	}
 #endif /* SYS_WINNT */
-
-
-	if (connect(sockfd, (struct sockaddr *)&saddr, sizeof(saddr)) == -1) {
+	if (connect(sockfd, addrResult->ai_addr, addrResult->ai_addrlen) == -1) {
 		msyslog(LOG_ERR, "openntp: connect() failed: %m");
 		exit(1);
 	}
+	freeaddrinfo(addrResult);
 }
 
 
@@ -1028,10 +1011,10 @@ doconfigure(
 #ifdef DEBUG
 		if (debug > 1)
 			msyslog(LOG_INFO,
-			    "doconfigure: <%s> has peeraddr %#x",
-			    ce->ce_name, ce->ce_peeraddr);
+			    "doconfigure: <%s> has peeraddr %s",
+			    ce->ce_name, stoa(&ce->ce_peeraddr));
 #endif
-		if (dores && ce->ce_peeraddr == 0) {
+		if (dores && SOCKNUL(&(ce->ce_peeraddr))) {
 			if (!findhostaddr(ce)) {
 				msyslog(LOG_ERR,
 					"couldn't resolve `%s', giving up on it",
@@ -1043,7 +1026,7 @@ doconfigure(
 			}
 		}
 
-		if (ce->ce_peeraddr != 0) {
+		if (!SOCKNUL(&ce->ce_peeraddr)) {
 			if (request(&ce->ce_config)) {
 				ceremove = ce;
 				ce = ceremove->ce_next;

@@ -56,7 +56,7 @@ static	void	ctl_putuint	P((const char *, u_long));
 static	void	ctl_puthex	P((const char *, u_long));
 static	void	ctl_putint	P((const char *, long));
 static	void	ctl_putts	P((const char *, l_fp *));
-static	void	ctl_putadr	P((const char *, u_int32));
+static	void	ctl_putadr	P((const char *, u_int32, struct sockaddr_storage*));
 static	void	ctl_putid	P((const char *, char *));
 static	void	ctl_putarray	P((const char *, double *, int));
 static	void	ctl_putsys	P((int));
@@ -74,7 +74,7 @@ static	void	read_clock_status P((struct recvbuf *, int));
 static	void	write_clock_status P((struct recvbuf *, int));
 static	void	set_trap	P((struct recvbuf *, int));
 static	void	unset_trap	P((struct recvbuf *, int));
-static	struct ctl_trap *ctlfindtrap P((struct sockaddr_in *,
+static	struct ctl_trap *ctlfindtrap P((struct sockaddr_storage *,
 				    struct interface *));
 
 static	struct ctl_proc control_codes[] = {
@@ -446,7 +446,7 @@ static u_char * datapt;
 static u_char * dataend;
 static int	datalinelen;
 static int	datanotbinflag;
-static struct sockaddr_in *rmt_addr;
+static struct sockaddr_storage *rmt_addr;
 static struct interface *lcl_inter;
 
 static u_char	res_authenticate;
@@ -1070,12 +1070,13 @@ ctl_putts(
 
 
 /*
- * ctl_putadr - write a dotted quad IP address into the response
+ * ctl_putadr - write an IP address into the response
  */
 static void
 ctl_putadr(
 	const char *tag,
-	u_int32 addr
+	u_int32 addr32,
+	struct sockaddr_storage* addr
 	)
 {
 	register char *cp;
@@ -1088,7 +1089,9 @@ ctl_putadr(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	cq = numtoa(addr);
+	if (addr==NULL) cq = numtoa(addr32);
+	else cq = stoa(addr);
+	cq = stoa(addr);
 	while (*cq != '\0')
 		*cp++ = *cq++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
@@ -1190,7 +1193,7 @@ ctl_putsys(
 
 	case CS_REFID:
 		if (sys_stratum > 1)
-			ctl_putadr(sys_var[CS_REFID].text, sys_refid);
+			ctl_putadr(sys_var[CS_REFID].text, sys_refid, NULL);
 		else
 			ctl_putid(sys_var[CS_REFID].text,
 			    (char *)&sys_refid);
@@ -1410,24 +1413,24 @@ ctl_putpeer(
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[CP_SRCADR].text,
-		    peer->srcadr.sin_addr.s_addr);
+		ctl_putadr(peer_var[CP_SRCADR].text, 0,
+		    &peer->srcadr);
 		break;
 
 	case CP_SRCPORT:
 		ctl_putuint(peer_var[CP_SRCPORT].text,
-		    ntohs(peer->srcadr.sin_port));
+		    ntohs(((struct sockaddr_in*)&peer->srcadr)->sin_port));
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[CP_DSTADR].text,
-		    peer->dstadr->sin.sin_addr.s_addr);
+		ctl_putadr(peer_var[CP_DSTADR].text, 0,
+		    &(peer->dstadr->sin));
 		break;
 
 	case CP_DSTPORT:
 		ctl_putuint(peer_var[CP_DSTPORT].text,
 		    (u_long)(peer->dstadr ?
-		    ntohs(peer->dstadr->sin.sin_port) : 0));
+		    ntohs(((struct sockaddr_in*)&peer->dstadr->sin)->sin_port) : 0));
 		break;
 
 	case CP_LEAP:
@@ -1469,10 +1472,10 @@ ctl_putpeer(
 		if (peer->stratum > 1) {
 			if (peer->flags & FLAG_REFCLOCK)
 			    ctl_putadr(peer_var[CP_REFID].text,
-			        peer->srcadr.sin_addr.s_addr);
+			        0, &peer->srcadr);
 			else
 			    ctl_putadr(peer_var[CP_REFID].text,
-			        peer->refid);
+			        peer->refid, NULL);
 		} else {
 			ctl_putid(peer_var[CP_REFID].text,
 			    (char *)&peer->refid);
@@ -1725,7 +1728,7 @@ ctl_putclock(
 		if (mustput || (clock_stat->haveflags & CLK_HAVEVAL2)) {
 			if (clock_stat->fudgeval1 > 1)
 				ctl_putadr(clock_var[CC_FUDGEVAL2].text,
-				    (u_int32)clock_stat->fudgeval2);
+				    (u_int32)clock_stat->fudgeval2, NULL);
 			else
 				ctl_putid(clock_var[CC_FUDGEVAL2].text,
 				    (char *)&clock_stat->fudgeval2);
@@ -1884,7 +1887,7 @@ ctl_getitem(
 							numctlbadpkts++;
 							msyslog(LOG_WARNING,
 		"Possible 'ntpdx' exploit from %s:%d (possibly spoofed)\n",
-		inet_ntoa(rmt_addr->sin_addr), ntohs(rmt_addr->sin_port)
+		stoa(rmt_addr), SRCPORT(rmt_addr)
 								);
 							return (0);
 						}
@@ -2442,7 +2445,7 @@ unset_trap(
  */
 int
 ctlsettrap(
-	struct sockaddr_in *raddr,
+	struct sockaddr_storage *raddr,
 	struct interface *linter,
 	int traptype,
 	int version
@@ -2563,7 +2566,7 @@ ctlsettrap(
  */
 int
 ctlclrtrap(
-	struct sockaddr_in *raddr,
+	struct sockaddr_storage *raddr,
 	struct interface *linter,
 	int traptype
 	)
@@ -2588,18 +2591,18 @@ ctlclrtrap(
  */
 static struct ctl_trap *
 ctlfindtrap(
-	struct sockaddr_in *raddr,
+	struct sockaddr_storage *raddr,
 	struct interface *linter
 	)
 {
 	register struct ctl_trap *tp;
 
 	for (tp = ctl_trap; tp < &ctl_trap[CTL_MAXTRAPS]; tp++) {
-		if (tp->tr_flags & TRAP_INUSE && NSRCADR(raddr) ==
-		    NSRCADR(&tp->tr_addr) && NSRCPORT(raddr) ==
-		    NSRCPORT(&tp->tr_addr) && linter ==
-		    tp->tr_localaddr)
-			return (tp);
+		if ((tp->tr_flags & TRAP_INUSE)
+		    && (NSRCPORT(raddr) == NSRCPORT(&tp->tr_addr))
+		    && SOCKCMP(raddr, &tp->tr_addr)
+	 	    && (linter == tp->tr_localaddr) )
+		return (tp);
 	}
 	return (struct ctl_trap *)NULL;
 }
@@ -2642,10 +2645,10 @@ report_event(
 
 #ifdef REFCLOCK
 		if (ISREFCLOCKADR(&peer->srcadr))
-			src = refnumtoa(peer->srcadr.sin_addr.s_addr);
+			src = refnumtoa(&peer->srcadr);
 		else
 #endif
-			src = ntoa(&peer->srcadr);
+			src = stoa(&peer->srcadr);
 
 		peer->last_event = (u_char)(err & ~PEER_EVENT);
 		if (peer->num_events < CTL_PEER_MAXEVENTS)

@@ -2,6 +2,7 @@
  * ntp_stdlib.h - Prototypes for NTP lib.
  */
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include "ntp_types.h"
 #include "ntp_string.h"
@@ -79,12 +80,14 @@ extern	char *	statustoa	P((int, int));
 extern  const char * sysstatstr P((int));
 extern  const char * peerstatstr P((int));
 extern  const char * clockstatstr P((int));
-extern	u_int32	netof		P((u_int32));
+extern	struct sockaddr_storage* netof P((struct sockaddr_storage*));
 extern	char *	numtoa		P((u_int32));
 extern	char *	numtohost	P((u_int32));
+extern char * socktoa           P((struct sockaddr_storage *));
+extern char * socktohost        P((struct sockaddr_storage *));
 extern	int	octtoint	P((const char *, u_long *));
 extern	u_long	ranp2		P((int));
-extern	char *	refnumtoa	P((u_int32));
+extern	char *	refnumtoa	P((struct sockaddr_storage* ));
 extern	int	tsftomsu	P((u_long, int));
 extern	char *	uinttoa		P((u_long));
 

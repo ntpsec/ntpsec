@@ -294,8 +294,7 @@ struct resp_pkt {
  * Well, it *would* have gone without saying, but somebody said it.
  */
 struct info_peer_list {
-	u_int32 address;	/* address of peer */
-	u_short port;		/* port number of peer */
+        struct sockaddr_storage address; /* address structure of peer */
 	u_char hmode;		/* mode for this peer */
 	u_char flags;		/* flags (from above) */
 };
@@ -305,8 +304,8 @@ struct info_peer_list {
  * Peer summary structure.  Sort of the info that ntpdc returns by default.
  */
 struct info_peer_summary {
-	u_int32 dstadr;		/* local address (zero for undetermined) */
-	u_int32 srcadr;		/* source address */
+	struct sockaddr_storage dstadr; /* local address (zero for undetermined) */
+	struct sockaddr_storage srcadr; /* source address */
 	u_short srcport;	/* source port */
 	u_char stratum;		/* stratum of peer */
 	s_char hpoll;		/* host polling interval */
@@ -324,9 +323,8 @@ struct info_peer_summary {
  * Peer information structure.
  */
 struct info_peer {
-	u_int32 dstadr;		/* local address */
-	u_int32 srcadr;		/* remote address */
-	u_short srcport;	/* remote port */
+	struct sockaddr_storage dstadr; /* local address (zero for undetermined) */
+	struct sockaddr_storage srcadr; /* source address */
 	u_char flags;		/* peer flags */
 	u_char leap;		/* peer.leap */
 	u_char hmode;		/* peer.hmode */
@@ -375,9 +373,8 @@ struct info_peer {
  * Peer statistics structure
  */
 struct info_peer_stats {
-	u_int32 dstadr;		/* local address */
-	u_int32 srcadr;		/* remote address */
-	u_short srcport;	/* remote port */
+	struct sockaddr_storage dstadr; /* local address (zero for undetermined) */
+	struct sockaddr_storage srcadr; /* source address */
 	u_short flags;		/* peer flags */
 	u_int32 timereset;	/* time counters were reset */
 	u_int32 timereceived;	/* time since a packet received */
@@ -418,7 +415,7 @@ struct info_loop {
  * the implementation.
  */
 struct info_sys {
-	u_int32 peer;		/* system peer address */
+	struct sockaddr_storage peer; /* system peer address */
 	u_char peer_mode;	/* mode we are syncing to peer in */
 	u_char leap;		/* system leap bits */
 	u_char stratum;		/* our stratum */
@@ -522,7 +519,7 @@ struct info_timer_stats {
  * Structure for passing peer configuration information
  */
 struct conf_peer {
-	u_int32 peeraddr;	/* address to poll */
+	struct sockaddr_storage peeraddr; /* address to poll */
 	u_char hmode;		/* mode, either broadcast, active or client */
 	u_char version;		/* version number to poll with */
 	u_char minpoll;		/* min host poll interval */
@@ -547,7 +544,7 @@ struct conf_peer {
  * this addess.
  */
 struct conf_unpeer {
-	u_int32 peeraddr;	/* address of peer */
+	struct sockaddr_storage peeraddr;	/* address of peer */
 };
 
 /*
@@ -571,8 +568,8 @@ struct conf_sys_flags {
  * Structure used for returning restrict entries
  */
 struct info_restrict {
-	u_int32 addr;		/* match address */
-	u_int32 mask;		/* match mask */
+	struct sockaddr_storage addr; /* match address */
+	struct sockaddr_storage mask; /* match mask */
 	u_int32 count;		/* number of packets matched */
 	u_short flags;		/* restrict flags */
 	u_short mflags;		/* match flags */
@@ -583,8 +580,8 @@ struct info_restrict {
  * Structure used for specifying restrict entries
  */
 struct conf_restrict {
-	u_int32 addr;		/* match address */
-	u_int32 mask;		/* match mask */
+	struct sockaddr_storage addr; /* match address */
+	struct sockaddr_storage mask; /* match mask */
 	u_short flags;		/* restrict flags */
 	u_short mflags;		/* match flags */
 };
@@ -598,10 +595,9 @@ struct info_monitor_1 {
 	u_int32 firsttime;	/* first time we received a packet */
 	u_int32 lastdrop;        /* last time we rejected a packet due to client limitation policy */
 	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address */
-	u_int32 daddr;		/* destination host address */
+	struct sockaddr_storage addr; /* host address */
+	struct sockaddr_storage daddr; /* host address */
 	u_int32 flags;		/* flags about destination */
-	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
 };
@@ -615,8 +611,7 @@ struct info_monitor {
 	u_int32 firsttime;	/* first time we received a packet */
 	u_int32 lastdrop;       /* last time we rejected a packet due to client limitation policy */
 	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address */
-	u_short port;		/* port number of last reception */
+	struct sockaddr_storage addr; /* host address */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
 };
@@ -628,8 +623,7 @@ struct old_info_monitor {
 	u_int32 lasttime;	/* last packet from this host */
 	u_int32 firsttime;	/* first time we received a packet */
 	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address */
-	u_short port;		/* port number of last reception */
+	struct sockaddr_storage addr; /* host address */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
 };
@@ -674,9 +668,8 @@ struct info_auth {
  * Structure used to pass trap information to the client
  */
 struct info_trap {
-	u_int32 local_address;	/* local interface address */
-	u_int32 trap_address;	/* remote client's address */
-	u_short trap_port;	/* remote port number */
+	struct sockaddr_storage local_address; /* local interface address */
+	struct sockaddr_storage trap_address; /* remote client's address */
 	u_short sequence;	/* sequence number */
 	u_int32 settime;	/* time trap last set */
 	u_int32 origtime;	/* time trap originally set */
@@ -688,9 +681,8 @@ struct info_trap {
  * Structure used to pass add/clear trap information to the client
  */
 struct conf_trap {
-	u_int32 local_address;	/* local interface address */
-	u_int32 trap_address;	/* remote client's address */
-	u_short trap_port;	/* remote client's port */
+	struct sockaddr_storage local_address;  /* local interface address */
+	struct sockaddr_storage trap_address;  /* remote client's address */
 	u_short unused;		/* (unused) */
 };
 
@@ -721,7 +713,7 @@ struct info_control {
  * Structure used to return clock information
  */
 struct info_clock {
-	u_int32 clockadr;
+	struct sockaddr_storage clockadr;
 	u_char type;
 	u_char flags;
 	u_char lastevent;
@@ -742,7 +734,7 @@ struct info_clock {
  * Structure used for setting clock fudge factors
  */
 struct conf_fudge {
-	u_int32 clockadr;
+	struct sockaddr_storage clockadr;
 	u_int32 which;
 	l_fp fudgetime;
 	int32 fudgeval_flags;
@@ -762,7 +754,7 @@ struct conf_fudge {
 #define	NUMCBUGTIMES	32
 
 struct info_clkbug {
-	u_int32 clockadr;
+	struct sockaddr_storage clockadr;
 	u_char nvalues;
 	u_char ntimes;
 	u_short svalues;
@@ -803,7 +795,7 @@ struct info_kernel {
 /* 144 might need to become 32, matching data[] member of req_pkt */
 #define NTP_MAXHOSTNAME (32 - sizeof(u_int32) - sizeof(u_short))
 struct info_dns_assoc {
-	u_int32 peeraddr;	/* peer address (HMS: being careful...) */
+	struct sockaddr_storage peeraddr; /* peer address (HMS: being careful...) */
 	associd_t associd;	/* association ID */
 	char hostname[NTP_MAXHOSTNAME];	/* hostname */
 };

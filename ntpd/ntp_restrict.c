@@ -38,6 +38,12 @@
  */
 
 /*
+  * We will use two lists, one for IPv4 addresses and one for IPv6
+  * addresses. This is not protocol-independant but for now I can't
+  * find way to respect this. We'll check this later... JFB 07/2001
+ */
+
+/*
  * Memory allocation parameters.  We allocate INITRESLIST entries
  * initially, and add INCRESLIST entries to the free list whenever
  * we run out.
@@ -49,14 +55,18 @@
  * The restriction list
  */
 struct restrictlist *restrictlist;
+struct restrictlist6 *restrictlist6;
 static	int restrictcount;	/* count of entries in the restriction list */
+static	int restrictcount6;	/* count of entries in the restriction list 2*/
 
 /*
  * The free list and associated counters.  Also some uninteresting
  * stat counters.
  */
 static	struct restrictlist *resfree;
+static	struct restrictlist6 *resfree6;
 static	int numresfree;		/* number of structures on free list */
+static	int numresfree6;	/* number of structures on free list 2 */
 
 static	u_long res_calls;
 static	u_long res_found;
@@ -77,11 +87,13 @@ u_long client_limit_period;
  * (with respect to RES_LIMITED control)
  */
 static	u_long res_limited_refcnt;
+static	u_long res_limited_refcnt6;
 
 /*
- * Our initial allocation of list entries.
+ * Our initial allocation of lists entries.
  */
 static	struct restrictlist resinit[INITRESLIST];
+static	struct restrictlist6 resinit6[INITRESLIST];
 
 /*
  * init_restrict - initialize the restriction data structures
@@ -97,13 +109,18 @@ init_restrict(void)
 	 */
 	resfree = 0;
 	memset((char *)resinit, 0, sizeof resinit);
+	resfree6 = 0;
+	memset((char *)resinit6, 0, sizeof resinit6);
 
 	for (i = 1; i < INITRESLIST; i++) {
 		resinit[i].next = resfree;
+                resinit6[i].next = resfree6;
 		resfree = &resinit[i];
+                resfree6 = &resinit6[i];
 	}
 
 	numresfree = INITRESLIST-1;
+        numresfree6 = INITRESLIST-1;
 
 	/*
 	 * Put the remaining item at the head of the
@@ -112,9 +129,11 @@ init_restrict(void)
 	 */
 	resinit[0].addr = htonl(INADDR_ANY);
 	resinit[0].mask = 0;
+       memset(&resinit6[0].addr6, 0, sizeof(resinit6[0].addr6));
 	restrictlist = &resinit[0];
+	restrictlist6 = &resinit6[0];
 	restrictcount = 1;
-
+        restrictcount = 2;
 
 	/*
 	 * fix up stat counters
@@ -130,6 +149,7 @@ init_restrict(void)
 	client_limit = 3;
 	client_limit_period = 3600;
 	res_limited_refcnt = 0;
+	res_limited_refcnt6 = 0;
 
 	sprintf(bp, "client_limit=%ld", client_limit);
 	set_sys_var(bp, strlen(bp)+1, RO);
@@ -143,27 +163,40 @@ init_restrict(void)
  */
 int
 restrictions(
-	struct sockaddr_in *srcadr
+	struct sockaddr_storage *srcadr
 	)
 {
-	register struct restrictlist *rl;
-	register struct restrictlist *match;
-	register u_int32 hostaddr;
-	register int isntpport;
+	struct restrictlist *rl;
+	struct restrictlist *match = NULL;
+	struct restrictlist6 *rl6;
+	struct restrictlist6 *match6 = NULL;
+	int flags = 0;
+	u_int32 hostaddr;
+      	struct in6_addr hostaddr6;
+       struct in6_addr hostservaddr6;
+
+	 int isntpport;
+        struct sockaddr_storage *netsrcaddr;
+        struct sockaddr_storage *mdnet;
 
 	res_calls++;
+
+        netsrcaddr = netof(srcadr);
+
+       /* IPv4 source address */
+       if(srcadr->ss_family == AF_INET) {
 	/*
 	 * We need the host address in host order.  Also need to know
 	 * whether this is from the ntp port or not.
 	 */
-	hostaddr = SRCADR(srcadr);
-	isntpport = (SRCPORT(srcadr) == NTP_PORT);
+        	hostaddr = SRCADR((struct sockaddr_in*)srcadr);
+        	isntpport = (SRCPORT((struct sockaddr_in*)srcadr) == NTP_PORT);
 
 	/*
 	 * Ignore any packets with a multicast source address
 	 * (this should be done early in the receive process, later!)
 	 */
-	if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)))
+	        if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
 	    return (int)RES_IGNORE;
 
 	/*
@@ -184,6 +217,50 @@ restrictions(
 	    res_not_found++;
 	else
 	    res_found++;
+		flags = match->flags;
+
+        }
+
+        /* IPv6 source address */
+       if(srcadr->ss_family == AF_INET6) {
+                /*
+	        * We need the host address in host order.  Also need to know
+	        * whether this is from the ntp port or not.
+	        */
+               hostaddr6 = ((struct sockaddr_in6*)srcadr)->sin6_addr;
+        	 isntpport = ((((struct sockaddr_in6*)srcadr)->sin6_port) == NTP_PORT);
+
+	        /*
+	        * Ignore any packets with a multicast source address
+	        * (this should be done early in the receive process, later!)
+	        */
+	        if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
+	        return (int)RES_IGNORE;
+
+	        /*
+	        * Set match to first entry, which is default entry.  Work our
+	        * way down from there.
+	        */
+	        match6 = restrictlist6;
+	        for (rl6 = match6->next; rl6 != 0 && memcmp(&(rl6->addr6), &hostaddr6, sizeof(hostaddr6)); rl6 = rl6->next) {
+                    /*
+                     * We get the host server address by applying manually a mask to the address.
+                     * See RFC xxxx for explaination on the Aggregatable Global Unicast Address Format.
+                     */
+		      hostservaddr6 = hostaddr6;
+	      	     memset(&hostservaddr6 + 12*sizeof(u_char), 0, 4*sizeof(u_char));
+                   if (memcmp(&hostservaddr6, &(rl6->addr6), sizeof(hostservaddr6))) 
+        		    if ((rl6->mflags & RESM_NTPONLY) && !isntpport)
+                                continue;
+		      match6 = rl6;
+	        }
+		      	match6->count++;
+			if (match6 == restrictlist6)
+			    res_not_found++;
+			else
+			    res_found++;
+		flags = match6->flags;
+      }
 	
 	/*
 	 * The following implements limiting the number of clients
@@ -204,15 +281,15 @@ restrictions(
 	 *        if yes: access allowed
 	 *        else:   eccess denied
 	 */
-	if (match->flags & RES_LIMITED) {
+	if (flags & RES_LIMITED) {
 		int lcnt;
 		struct mon_data *md, *this_client;
 
 #ifdef DEBUG
 		if (debug > 2)
-		    printf("limited clients check: %ld clients, period %ld seconds, net is 0x%lX\n",
+		    printf("limited clients check: %ld clients, period %ld seconds, net is %s\n",
 			   client_limit, client_limit_period,
-			   (u_long)netof(hostaddr));
+			   stoa(netsrcaddr));
 #endif /*DEBUG*/
 		if (mon_enabled == MON_OFF) {
 #ifdef DEBUG
@@ -234,12 +311,13 @@ restrictions(
 		for (md = mon_fifo_list.fifo_next,lcnt = 0;
 		     md != &mon_fifo_list;
 		     md = md->fifo_next) {
+			    mdnet = netof(&(md->rmtadr));
 			if ((current_time - md->lasttime)
 			    > client_limit_period) {
 #ifdef DEBUG
 				if (debug > 5)
 				    printf("checking: %s: ignore: too old: %ld\n",
-					   numtoa(md->rmtadr),
+					   stoa(&(md->rmtadr)),
 					   current_time - md->lasttime);
 #endif
 				continue;
@@ -250,28 +328,28 @@ restrictions(
 #ifdef DEBUG
 				if (debug > 5)
 				    printf("checking: %s: ignore mode %d\n",
-					   numtoa(md->rmtadr),
+					   stoa(&(md->rmtadr)),
 					   md->mode);
 #endif
 				continue;
 			}
-			if (netof(md->rmtadr) !=
-			    netof(hostaddr)) {
+			if (!SOCKCMP(mdnet, &netsrcaddr)) {
 #ifdef DEBUG
-				if (debug > 5)
-				    printf("checking: %s: different net 0x%lX\n",
-					   numtoa(md->rmtadr),
-					   (u_long)netof(md->rmtadr));
+				if (debug > 5) {
+					printf("checking: %s: different net %s\n",
+				   stoa(&(md->rmtadr)),
+	  			 stoa(mdnet));
+				}
 #endif
 				continue;
 			}
 			lcnt++;
 			if (lcnt >  (int) client_limit ||
-			    md->rmtadr == hostaddr) {
+			       SOCKCMP(&(md->rmtadr), srcadr)) {
 #ifdef DEBUG
 				if (debug > 5)
 				    printf("considering %s: found host\n",
-					   numtoa(md->rmtadr));
+					   stoa(&(md->rmtadr)));
 #endif
 				break;
 			}
@@ -279,11 +357,10 @@ restrictions(
 			else {
 				if (debug > 5)
 				    printf("considering %s: same net\n",
-					   numtoa(md->rmtadr));
+					   stoa(&(md->rmtadr)));
 			}
 #endif
-
-		}
+		} /* for */
 #ifdef DEBUG
 		if (debug > 4)
 		    printf("this one is rank %d in list, limit is %lu: %s\n",
@@ -292,12 +369,16 @@ restrictions(
 #endif
 		if (lcnt <= (int) client_limit) {
 			this_client->lastdrop = 0;
+		       if(srcadr->ss_family == AF_INET) 
 			return (int)(match->flags & ~RES_LIMITED);
+			else
+				return (int)(match6->flags & ~RES_LIMITED);
+				
 		} else {
 			this_client->lastdrop = current_time;
 		}
 	}
-	return (int)match->flags;
+	return flags;
 }
 
 
@@ -307,30 +388,41 @@ restrictions(
 void
 hack_restrict(
 	int op,
-	struct sockaddr_in *resaddr,
-	struct sockaddr_in *resmask,
+	struct sockaddr_storage *resaddr,
+	struct sockaddr_storage *resmask,
 	int mflags,
 	int flags
 	)
 {
-	register u_int32 addr;
-	register u_int32 mask;
-	register struct restrictlist *rl;
-	register struct restrictlist *rlprev;
+	register u_int32 addr = 0;
+	register u_int32 mask = 0;
+       uint8_t addr6[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	register struct restrictlist *rl = NULL;
+	register struct restrictlist *rlprev = NULL;
+       register struct restrictlist6 *rl6 = NULL;
+	register struct restrictlist6 *rlprev6 = NULL;
 	int i;
 
 	/*
 	 * Get address and mask in host byte order
 	 */
+        if(resaddr->ss_family == AF_INET) {
 	addr = SRCADR(resaddr);
 	mask = SRCADR(resmask);
 	addr &= mask;		/* make sure low bits are zero */
+         }
+         else if(resaddr->ss_family == AF_INET6) {
+                memcpy(&addr6, (&((struct sockaddr_in6*)resaddr)->sin6_addr), sizeof(addr6));
+	        memset(&addr6 + 8*sizeof(uint8_t), 0, 8*sizeof(uint8_t)); /* make sure low bits are zero */
+         }
 
 	/*
 	 * If this is the default address, point at first on list.  Else
 	 * go searching for it.
 	 */
-	if (addr == htonl(INADDR_ANY)) {
+        if(resaddr->ss_family == AF_INET)
+        {
+                if (addr == 0) {
 		rlprev = 0;
 		rl = restrictlist;
 	} else {
@@ -362,6 +454,39 @@ hack_restrict(
 			rl = rl->next;
 		}
 	}
+        }
+
+        if(resaddr->ss_family == AF_INET6)
+        {
+                if (IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)&addr6)) {
+        		rlprev6 = 0;
+		       rl6 = restrictlist6;
+	        } else {
+        		rlprev6 = restrictlist6;
+	        	rl6 = rlprev6->next;
+        		while (rl6 != 0) {
+			        if (memcmp(&(rl6->addr6), &addr6, sizeof(addr6)) > 0) {
+        				rl6 = 0;
+	        			break;
+		        	} else if (memcmp(&(rl6->addr6), &addr6, sizeof(addr6)) == 0) {
+			        	        if ((mflags & RESM_NTPONLY)
+                				    == (rl6->mflags & RESM_NTPONLY))
+		        			    break;	/* exact match */
+					        if (!(mflags & RESM_NTPONLY)) {
+        						/*
+	        					 * No flag fits before flag
+		        				 */
+			        			rl6 = 0;
+				        		break;
+					        }
+					        /* continue on */
+				        }
+			        rlprev6 = rl6;
+			        rl6 = rl6->next;
+		        }
+	        }
+        }
+
 	/*
 	 * In case the above wasn't clear :-), either rl now points
 	 * at the entry this call refers to, or rl is zero and rlprev
@@ -372,6 +497,8 @@ hack_restrict(
 	/*
 	 * Switch based on operation
 	 */
+        if(resaddr->ss_family == AF_INET)
+        {
 	switch (op) {
 	    case RESTRICT_FLAGS:
 		/*
@@ -455,6 +582,94 @@ hack_restrict(
 		/* Oh, well */
 		break;
 	}
+       }
+
+       else if(resaddr->ss_family == AF_INET6)
+        {
+                switch (op) {
+                case RESTRICT_FLAGS:
+		/*
+		 * Here we add bits to the flags.  If this is a new
+		 * restriction add it.
+		 */
+                        if (rl6 == 0) {
+			        if (numresfree6 == 0) {
+        				rl6 = (struct restrictlist6 *) emalloc(
+	        				INCRESLIST*sizeof(struct restrictlist6));
+		        		memset((char *)rl6, 0,
+			        	       INCRESLIST*sizeof(struct restrictlist6));
+
+        				for (i = 0; i < INCRESLIST; i++) {
+	        				rl6->next = resfree6;
+		        			resfree6 = rl6;
+			        		rl6++;
+				        }
+				        numresfree6 = INCRESLIST;
+			        }
+
+			        rl6 = resfree6;
+			        resfree6 = rl6->next;
+			        numresfree6--;
+
+        			memcpy(&(rl6->addr6), &addr6, sizeof(addr6));
+	        		rl6->mflags = (u_short)mflags;
+
+        			rl6->next = rlprev6->next;
+	        		rlprev6->next = rl6;
+		        	restrictcount6++;
+		        }
+		        if ((rl6->flags ^ (u_short)flags) & RES_LIMITED) {
+        			res_limited_refcnt6++;
+			        mon_start(MON_RES); /* ensure data gets collected */
+		        }
+		        rl6->flags |= (u_short)flags;
+		        break;
+
+	        case RESTRICT_UNFLAG:
+        		/*
+		        * Remove some bits from the flags.  If we didn't
+		        * find this one, just return.
+		        */
+		        if (rl6 != 0) {
+        			if ((rl6->flags ^ (u_short)flags) & RES_LIMITED) {
+				        res_limited_refcnt6--;
+				        if (res_limited_refcnt6 == 0)
+				        mon_stop(MON_RES);
+			        }
+			        rl6->flags &= (u_short)~flags;
+		        }
+		        break;
+
+	        case RESTRICT_REMOVE:
+        		/*
+	        	 * Remove an entry from the table entirely if we found one.
+		         * Don't remove the default entry and don't remove an
+		         * interface entry.
+		         */
+		        if (rl6 != 0
+		        && !IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)&rl6->addr6)
+		        && !(rl6->mflags & RESM_INTERFACE)) {
+        			rlprev6->next = rl6->next;
+			        restrictcount6--;
+			        if (rl6->flags & RES_LIMITED) {
+        				res_limited_refcnt6--;
+				        if (res_limited_refcnt6 == 0)
+				        mon_stop(MON_RES);
+			        }
+			        memset((char *)rl6, 0, sizeof(struct restrictlist6));
+
+			        rl6->next = resfree6;
+			        resfree6 = rl6;
+			        numresfree6++;
+		        }
+		        break;
+
+	        default:
+        		/* Oh, well */
+		        break;
+                }
+       }
+
 
 	/* done! */
 }
