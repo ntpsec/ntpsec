@@ -8,6 +8,7 @@
 #if defined(HAVE_SYS_AUDIOIO_H) || defined(HAVE_SUN_AUDIOIO_H)
 
 #include "audio.h"
+#include "ntp_stdlib.h"
 #include "ntp_syslog.h"
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -111,11 +112,10 @@ audio_gain(
 	info.record.error = 0;
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
-		msyslog("audio_gain: %m");
+		msyslog(LOG_ERR, "audio_gain: %m");
 		return (rval);
 	}
 	return (info.record.error);
-	return (0);
 }
 
 
@@ -145,4 +145,6 @@ audio_show(void)
 	    info.record.pause, info.record.error,
 	    info.record.waiting, info.record.balance);
 }
+#else
+int audio_bs;
 #endif /* HAVE_SYS_AUDIOIO_H HAVE_SUN_AUDIOIO_H */

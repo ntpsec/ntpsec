@@ -136,6 +136,11 @@ struct sigvec;
 extern	int	sigvec		P((int, struct sigvec *, struct sigvec *));
 #endif
 
+#ifndef HAVE_SNPRINTF
+/* PRINTFLIKE3 */
+extern	int	snprintf	P((char *, size_t, const char *, ...));
+#endif
+
 #ifdef DECL_SRAND48_0
 extern	void	srand48		P((long));
 #endif

@@ -563,6 +563,7 @@ chu_receive(
 	struct recvbuf *rbufp	/* receive buffer structure pointer */
 	)
 {
+#ifdef HAVE_AUDIO
 	struct chuunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
@@ -579,7 +580,6 @@ chu_receive(
 	 * UART is bypassed. In this case the CPU will probably run a
 	 * few degrees cooler.
 	 */
-#ifdef HAVE_AUDIO
 	if (up->fd_audio > 0)
 		chu_audio_receive(rbufp);
 	else

@@ -73,6 +73,7 @@
 
 #include "ntp_stdlib.h"
 #include "recvbuff.h"  
+#include "ntp_cmdargs.h"  
 
 #if 0				/* HMS: I don't think we need this. 961223 */
 #ifdef LOCK_PROCESS

@@ -1,3 +1,18 @@
+2001-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c:
+	* ntpd/refclock_chu.c:
+	* ntpd/refclock_atom.c:
+	* ntpd/ntpd.c:
+	* ntpd/ntp_loopfilter.c:
+	* ntpd/ntp_io.c:
+	* ntpd/cmd_args.c:
+	* libntp/audio.c:
+	* include/l_stdlib.h:
+	* html/copyright.htm:
+	Lint fixes (Thanks bunches!)
+	From: Marc.Brett@westerngeco.com
+
 2001-01-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k15

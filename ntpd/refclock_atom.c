@@ -103,11 +103,11 @@ struct ppsunit {
  * Function prototypes
  */
 static	int	atom_start	P((int, struct peer *));
-static	void	atom_shutdown	P((int, struct peer *));
 static	void	atom_poll	P((int, struct peer *));
+#ifdef HAVE_PPSAPI
+static	void	atom_shutdown	P((int, struct peer *));
 static	void	atom_control	P((int, struct refclockstat *, struct
 				    refclockstat *, struct peer *));
-#ifdef HAVE_PPSAPI
 static	int	atom_pps	P((struct peer *));
 static	int	atom_ppsapi	P((struct peer *, int, int));
 #endif /* HAVE_PPSAPI */

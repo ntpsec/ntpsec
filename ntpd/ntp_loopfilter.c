@@ -134,8 +134,8 @@ double	sys_jitter;		/* system RMS jitter (s) */
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
-static void pll_trap P((int));	/* configuration trap */
 #ifdef SIGSYS
+static void pll_trap P((int));	/* configuration trap */
 static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
 static sigjmp_buf env;		/* environment var. for pll_trap() */

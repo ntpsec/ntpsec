@@ -871,8 +871,11 @@ open_socket(
 	int turn_off_reuse
 	)
 {
-	int fd, tos;
+	int fd;
 	int on = 1, off = 0;
+#if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
+	int tos;
+#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 	/* create a datagram (UDP) socket */
 	if (  (fd = socket(AF_INET, SOCK_DGRAM, 0))

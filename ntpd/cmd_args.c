@@ -12,7 +12,7 @@
 /*
  * Definitions of things either imported from or exported to outside
  */
-char const *progname;
+extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
 static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:r:s:t:v:V:x";
