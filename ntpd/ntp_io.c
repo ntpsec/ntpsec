@@ -560,7 +560,7 @@ io_multicast_add(
 				inet_ntoa(iaddr));
 			return;
 		}
-		for (i = 0; i < ninterfaces; i++) {
+		for (i = nwilds; i < ninterfaces; i++) {
 			 /* Be sure it's the correct family */
                         if (inter_list[i].sin.ss_family != AF_INET)
                                 continue;
@@ -637,7 +637,7 @@ io_multicast_add(
 				stoa(&addr));
 			return;
 		}
-		for (i = 0; i < ninterfaces; i++) {
+		for (i = nwilds; i < ninterfaces; i++) {
 			/* Be sure it's the correct family */
 			if(inter_list[i].sin.ss_family != AF_INET6)
 				continue;
@@ -774,7 +774,7 @@ io_multicast_del(
 		*/
 		mreq.imr_multiaddr = ((struct sockaddr_in*)&addr)->sin_addr;
 		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-		for (i = 0; i < ninterfaces; i++)
+		for (i = nwilds; i < ninterfaces; i++)
 		{
 			/* Be sure it's the correct family */
 			if (inter_list[i].sin.ss_family != AF_INET)
@@ -824,7 +824,7 @@ io_multicast_del(
 		*/
 		mreq6.ipv6mr_multiaddr = ((struct sockaddr_in6*)&addr)->sin6_addr;
 		mreq6.ipv6mr_interface = 0;
-		for (i = 0; i < ninterfaces; i++)
+		for (i = nwilds; i < ninterfaces; i++)
 		{
 			/* Be sure it's the correct family */
 			if (inter_list[i].sin.ss_family != AF_INET6)
