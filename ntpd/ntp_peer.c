@@ -331,7 +331,18 @@ unpeer(
 	)
 {
 	int hash;
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 
+#ifdef OPENSSL
+	if (peer_to_remove->flags & FLAG_SKEY) {
+		sprintf(statstr, "unpeer %d", peer_to_remove->associd);
+		record_crypto_stats(&peer_to_remove->srcadr, statstr);
+#ifdef DEBUG
+		if (debug)
+			printf("peer: %s\n", statstr);
+#endif
+	}
+#endif /* OPENSSL */
 	peer_associations--;
 #ifdef DEBUG
 	if (debug)
@@ -467,13 +478,13 @@ peer_config(
 		peer->version = (u_char)version;
 		peer->minpoll = (u_char)minpoll;
 		peer->maxpoll = (u_char)maxpoll;
-		peer->hpoll = peer->kpoll = peer->minpoll;
-		peer->ppoll = peer->maxpoll;
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;
 		peer->ttlmax = ttl;
 		peer->keyid = key;
+		peer->precision = sys_precision;
+		peer_clear(peer);
 		return (peer);
 	}
 
@@ -507,6 +518,7 @@ newpeer(
 {
 	register struct peer *peer;
 	register int i;
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 
 	/*
 	 * Allocate a new peer structure. Some dirt here, since some of
@@ -594,6 +606,16 @@ newpeer(
 	peer->ass_next = assoc_hash[i];
 	assoc_hash[i] = peer;
 	assoc_hash_count[i]++;
+#ifdef OPENSSL
+	if (peer->flags & FLAG_SKEY) {
+		sprintf(statstr, "newpeer %d", peer->associd);
+		record_crypto_stats(&peer->srcadr, statstr);
+#ifdef DEBUG
+		if (debug)
+			printf("peer: %s\n", statstr);
+#endif
+#endif /* OPENSSL */
+	}
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -725,19 +747,18 @@ expire_all(void)
 			next_peer = peer->next;
 			if (peer->cast_flags & MDF_ACAST) {
 				peer_clear(peer);
-			} else {
+			} else if (peer->hmode == MODE_ACTIVE ||
+			    peer->hmode == MODE_PASSIVE) {
 				key_expire(peer);
 				peer->cookval.tstamp = 0;
+				peer->crypto &= ~(CRYPTO_FLAG_AUTO |
+				    CRYPTO_FLAG_AGREE);
 			}
 				
 		}
 	}
 	sys_private = (u_int32)RANDOM & 0xffffffff;
 	crypto_sign();
-#ifdef DEBUG
-	if (debug)
-		printf("expire_all: at %lu\n", current_time);
-#endif
 }
 #endif /* OPENSSL */
 
@@ -802,7 +823,7 @@ resetmanycast(void)
 		    peer->next) {
 			if (peer->cast_flags & MDF_ACAST) {
 				peer->ttl = 0;
-				poll_update(peer, peer->hpoll);
+				poll_update(peer, 0);
 			}
 		}
 	}

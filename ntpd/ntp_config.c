@@ -1002,7 +1002,7 @@ getconfig(
 #ifdef OPENSSL
 		    case CONFIG_REVOKE:
 			if (ntokens >= 2)
-			    sys_revoke = 1 << max(atoi(tokens[1]), 10);
+			    sys_revoke = max(atoi(tokens[1]), KEY_REVOKE);
 			break;
 
 		    case CONFIG_AUTOMAX:

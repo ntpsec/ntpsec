@@ -104,6 +104,7 @@ typedef char s_char;
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define NTP_MAXSTRLEN	256	/* maximum string length */
 #define NTP_AUTOMAX	13	/* log2 default max session key lifetime */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
@@ -112,7 +113,7 @@ typedef char s_char;
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
-#define HYST_TC		.5	/* anti-clockhop hysteresis decay factor */
+#define HYST_TC		.875	/* anti-clockhop hysteresis decay factor */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -266,7 +267,6 @@ struct peer {
 	u_char	*digest;	/* message digest (EVP_MD) */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
-	keyid_t	hcookie;	/* host cookie */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct value tai_leap;	/* leapseconds values */

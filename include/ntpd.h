@@ -398,7 +398,7 @@ extern u_long	client_limit_period;
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */
-extern u_long	sys_revoke;		/* keys revoke timeout */
+extern u_char	sys_revoke;		/* keys revoke timeout (log2 s) */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* current time (s) */
 extern u_long	timer_timereset;

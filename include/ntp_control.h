@@ -224,11 +224,10 @@ struct ntp_control {
 #define CP_HOST		40
 #define	CP_CERTIF	41
 #define	CP_SESKEY	42
-#define	CP_SASKEY	43
-#define	CP_INITSEQ	44
-#define	CP_INITKEY	45
-#define	CP_INITTSP	46
-#define	CP_DIGEST	47
+#define	CP_INITSEQ	43
+#define	CP_INITKEY	44
+#define	CP_INITTSP	45
+#define	CP_DIGEST	46
 #define	CP_MAXCODE	CP_DIGEST
 #else
 #define	CP_MAXCODE	CP_VARLIST

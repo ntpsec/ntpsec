@@ -50,7 +50,7 @@ static	u_long hourly_timer;		/* hour timer */
 static	u_long huffpuff_timer;		/* huff-n'-puff timer */
 #ifdef OPENSSL
 static	u_long revoke_timer;		/* keys revoke timer */
-u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
+u_char	sys_revoke = KEY_REVOKE;	/* keys revoke timeout (log2 s) */
 #endif /* OPENSSL */
 
 /*
@@ -216,6 +216,9 @@ void
 timer(void)
 {
 	register struct peer *peer, *next_peer;
+#ifdef OPENSSL
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+#endif /* OPENSSL */
 	u_int n;
 
 	current_time += (1<<EVENT_TIMEOUT);
@@ -272,12 +275,13 @@ timer(void)
 	 * Garbage collect old keys and generate new private value
 	 */
 	if (revoke_timer <= current_time) {
-		revoke_timer += sys_revoke;
+		revoke_timer += RANDPOLL(sys_revoke);
 		expire_all();
+		sprintf(statstr, "refresh ts %u", ntohl(host.tstamp));
+		record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 		if (debug)
-			printf("key expire: at %lu next %lu\n",
-			    current_time, revoke_timer);
+			printf("timer: %s\n", statstr);
 #endif
 	}
 #endif /* OPENSSL */

@@ -46,6 +46,7 @@
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define CLOCK_ALLAN	1024.	/* min Allan intercept (s) */
 #define CLOCK_ADF	1e11	/* Allan deviation factor */
+#define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
 
 /*
  * Clock discipline state machine. This is used to control the
@@ -106,8 +107,6 @@
  * also a signal for the external clock driver to discipline the system
  * clock.
  */
-#define PPS_MAXAGE 120		/* kernel pps signal timeout (s) */
-
 /*
  * Program variables that can be tinkered.
  */
@@ -466,21 +465,31 @@ local_clock(
 			/*
 			 * Compute the FLL and PLL frequency adjustments
 			 * conditioned on intricate weighting factors.
-			 * For the FLL, the averaging interval is
-			 * clamped to a minimum of 1024 s and the gain
-			 * is decreased from unity for mu above 1024 s
-			 * to zero below 256 s. For the PLL, the
-			 * averaging interval is clamped not to exceed
-			 * the sustem poll interval. No gain factor is
-			 * necessary, since the frequency steering above
-			 * 1024 s is negligible. Particularly for the
+			 * The gain factors depend on the poll interval
+			 * and Allan intercept. For the FLL, the
+			 * averaging interval is clamped to a minimum of
+			 * 1024 s and the gain increased in stages from
+			 * zero for poll intervals below half the Allan
+			 * intercept to unity above twice the Allan
+			 * intercept. For the PLL, the averaging
+			 * interval is clamped not to exceed the poll
+			 * interval. No gain factor is necessary, since
+			 * the frequency steering above the Allan
+			 * intercept is negligible. Particularly for the
 			 * PLL, these measures allow oversampling, but
 			 * not undersampling and insure stability even
 			 * when the rules of fair engagement are broken.
 			 */
+			dtemp = ULOGTOD(sys_poll);
+			if (dtemp >= 2 * allan_xpt)
+				etemp = 1.;
+			else if (dtemp >= allan_xpt)
+				etemp = .5;
+			else if (dtemp > allan_xpt / 2)
+				etemp = .125;
+			else
+				etemp = 0;
 			dtemp = max(mu, allan_xpt);
-			etemp = min(max(0, mu - CLOCK_MINSEC) /
-			    allan_xpt, 1.);
 			flladj = fp_offset * etemp / (dtemp *
 			    CLOCK_AVG);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
@@ -695,6 +704,7 @@ adj_host_clock(
 	)
 {
 	double adjustment;
+	double dtemp, etemp;
 
 	/*
 	 * Update the dispersion since the last update. In contrast to
@@ -740,7 +750,23 @@ adj_host_clock(
 		    sys_peer->flags & FLAG_PREFER)
 			return;
 	}
-	adjustment = clock_offset / ULOGTOD(SHIFT_PLL + sys_poll);
+
+	/*
+	 * This ugly bit of business is necessary in order to move the
+	 * poll higher during and after the transition between PLL and
+	 * FLL modes.
+	 */
+	dtemp = ULOGTOD(sys_poll);
+	if (dtemp >= 2 * allan_xpt)
+		etemp = 32.;
+	else if (dtemp >= allan_xpt)
+		etemp = 16.;
+	else if (dtemp > allan_xpt / 2)
+		etemp = 8;
+	else
+		etemp = 1;
+	adjustment = clock_offset / (etemp * ULOGTOD(SHIFT_PLL +
+	    sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 }

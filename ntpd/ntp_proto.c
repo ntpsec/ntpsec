@@ -1,7 +1,7 @@
 /*
  * ntp_proto.c - NTP version 4 protocol machinery
  */
-#ifdef HAVEy_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
@@ -151,9 +151,7 @@ transmit(
 				peer->unreach++;
 			} else if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
-				clock_select();
 				return;
-
 			} else {
 				peer_clear(peer);
 				hpoll++;
@@ -175,11 +173,9 @@ transmit(
 				peer->timereachable = current_time;
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
-					clock_select();
 					return;
 				} else {
 					peer_clear(peer);
-					hpoll = peer->minpoll;
 				}
 			}
 			if (peer->flags & FLAG_IBURST)
@@ -798,12 +794,17 @@ receive(
 		 * sent and is a crypto-NAK, the server has either
 		 * restarted or refreshed the private value, so we
 		 * start over.
-		 * off.
 		 */
 		case MODE_SERVER:
 			if (is_org && has_mac == 4 && pkt->exten[0] ==
-			    0)
-				peer_clear(peer);
+			    0) {
+				if (!(peer->flags & FLAG_CONFIG)) {
+					unpeer(peer);
+					return;
+				} else {
+					peer_clear(peer);
+				}
+			}
 			break;
 
 		/*
@@ -814,10 +815,12 @@ receive(
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
 			if (is_org) {
-				if (!(peer->flags & FLAG_CONFIG))
+				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
-				else
+					return;
+				} else {
 					peer_clear(peer);
+				}
 			}
 			break;
 		}
@@ -854,6 +857,10 @@ receive(
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp, is_org);
+		if (peer->cmmd != 0) {
+			peer->ppoll = pkt->ppoll;
+			poll_update(peer, 0);
+		}
 		if (peer->flash & TEST12) {
 			/* fall through */
 
@@ -893,16 +900,20 @@ receive(
 		if (peer->flash && is_org) {
 			poll_update(peer, peer->minpoll);
 			if (peer->crypto & CRYPTO_FLAG_PROV) {
-				if (peer->flags & FLAG_CONFIG)
-					peer_clear(peer);
-				else
-					unpeer(peer);
 #ifdef DEBUG
 				if (debug)
 					printf("packet: bad crypto %03x\n",
 					    peer->flash);
 #endif
+				if (!(peer->flags & FLAG_CONFIG)) {
+					unpeer(peer);
+					return;
+				} else {
+					peer_clear(peer);
+				}
 				return;
+			} else {
+				poll_update(peer, peer->minpoll);
 			}
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV))
@@ -1074,7 +1085,7 @@ process_packet(
 	}
 	peer->reach |= 1;
 	peer->unreach = 0;
-	poll_update(peer, peer->hpoll);
+	poll_update(peer, 0);
 
 	/*
 	 * If running in a client/server association, calculate the
@@ -1249,12 +1260,14 @@ poll_update(
 #ifdef OPENSSL
 	oldpoll = peer->kpoll;
 #endif /* OPENSSL */
-	if (hpoll > peer->maxpoll)
-		peer->hpoll = peer->maxpoll;
-	else if (hpoll < peer->minpoll)
-		peer->hpoll = peer->minpoll;
-	else
-		peer->hpoll = hpoll;
+	if (hpoll != 0) {
+		if (hpoll > peer->maxpoll)
+			peer->hpoll = peer->maxpoll;
+		else if (hpoll < peer->minpoll)
+			peer->hpoll = peer->minpoll;
+		else
+			peer->hpoll = hpoll;
+	}
 
 	/*
 	 * Bit of adventure here. If during a burst and not timeout,
@@ -1324,7 +1337,6 @@ peer_clear(
 	)
 {
 	register int i;
-	u_long u_rand;
 
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1362,14 +1374,10 @@ peer_clear(
 	/*
 	 * If he dies as a broadcast client, he comes back to life as
 	 * a broadcast client in client mode in order to recover the
-	 * initial autokey values. Note that there is no need to call
-	 * clock_select(), since the perp has already been voted off
-	 * the island at this point.
+	 * initial autokey values.
 	 */
-	if (peer->cast_flags & MDF_BCLNT) {
-		peer->flags |= FLAG_MCAST;
-		peer->hmode = MODE_CLIENT;
-	}
+	if (peer == sys_peer)
+		sys_peer = NULL;
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->kpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
@@ -1389,12 +1397,16 @@ peer_clear(
 	}
 
 	/*
-	 * Randomize the first poll over 1-16s to avoid bunching.
+	 * Randomize the first poll to avoid bunching.
 	 */
-	peer->update = peer->outdate = current_time;
-	u_rand = RANDOM;
-	peer->nextdate = current_time + (u_rand & ((1 <<
-	    BURST_INTERVAL1) - 1)) + 1;
+	peer->nextdate = peer->update = peer->outdate = current_time;
+	if (peer->cast_flags & MDF_BCLNT) {
+		peer->flags |= FLAG_MCAST;
+		peer->hmode = MODE_CLIENT;
+		peer->nextdate += RANDOM & ((1 << BURST_INTERVAL1) - 1);
+	} else {
+		peer->nextdate += RANDPOLL(BURST_INTERVAL2);
+	}
 }
 
 
@@ -1826,8 +1838,8 @@ clock_select(void)
 			continue;
 		}
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
-		d = (1. - peer->hyst) * root_distance(peer) +
-		    peer->stratum * MAXDISPERSE;
+		d = (1. - peer->hyst) * (root_distance(peer) +
+		    peer->stratum * MAXDISTANCE);
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
 				continue;
@@ -1852,8 +1864,9 @@ clock_select(void)
 
 #ifdef DEBUG
 		if (debug > 2)
-			printf("select: %s distance %.6f\n",
-			    ntoa(&peer_list[i]->srcadr), synch[i]);
+			printf("select: %s stratum %d weight %.6f error %.6f\n",
+			    ntoa(&peer_list[i]->srcadr), peer->stratum,
+			    synch[i], SQRT(error[i]));
 #endif
 	}
 
@@ -1888,15 +1901,16 @@ clock_select(void)
 			}
 		}
 
-#ifdef DEBUG
-		if (debug > 2)
-			printf(
-			    "select: survivors %d select %.6f peer %.6f\n",
-			    k, SQRT(sys_selerr), SQRT(d));
-#endif
 		if (nlist <= NTP_MINCLOCK || sys_selerr <= d ||
 		    peer_list[k]->flags & FLAG_PREFER)
 			break;
+#ifdef DEBUG
+		if (debug > 2)
+			printf(
+			    "select: %s select %.6f error %.6f\n",
+			    ntoa(&peer_list[k]->srcadr),
+			    SQRT(sys_selerr), SQRT(d));
+#endif
 		if (!(peer_list[k]->flags & FLAG_CONFIG))
 			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
@@ -1922,10 +1936,10 @@ clock_select(void)
 	sys_survivors = nlist;
 
 #ifdef DEBUG
-	if (debug > 2) {
+	if (debug > 1) {
 		for (i = 0; i < nlist; i++)
 			printf(
-			    "select: %s offset %.6f, distance %.6f poll %d\n",
+			    "select: %s offset %.6f, weight %.6f poll %d\n",
 			    ntoa(&peer_list[i]->srcadr),
 			    peer_list[i]->offset, synch[i],
 			    peer_list[i]->pollsw);
@@ -1962,7 +1976,6 @@ clock_select(void)
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
 		peer->hyst = HYST;
-		poll_update(peer, peer->hpoll);
 		if (peer->stratum == peer_list[0]->stratum) {
 			leap_consensus |= peer->leap;
 			if (peer->refclktype == REFCLK_ATOM_PPS &&
@@ -2226,8 +2239,7 @@ peer_xmit(
 			cmmd = 0;
 			if (peer->cmmd != NULL) {
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, peer->hcookie,
-				    peer->associd);
+				    peer->cmmd, 0, peer->associd);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
@@ -2250,14 +2262,13 @@ peer_xmit(
 				if (cmmd & CRYPTO_RESP) {
 					cmmd = htonl(cmmd);
 					sendlen += crypto_xmit(&xpkt,
-					    sendlen, &cmmd,
-					    peer->hcookie,
+					    sendlen, &cmmd, 0,
 					    peer->associd);
 				} else {
 					cmmd = htonl(cmmd);
 					sendlen += crypto_xmit(&xpkt,
-					    sendlen, &cmmd,
-					    peer->hcookie, peer->assoc);
+					    sendlen, &cmmd, 0,
+					    peer->assoc);
 				}
 			}
 			break;
@@ -2284,8 +2295,7 @@ peer_xmit(
 			cmmd = 0;
 			if (peer->cmmd != NULL) {
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, peer->hcookie,
-				    peer->associd);
+				    peer->cmmd, 0, peer->associd);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
@@ -2303,7 +2313,7 @@ peer_xmit(
 				cmmd = CRYPTO_TAI;
 			if ((cmmd = htonl(cmmd)) != 0)
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    &cmmd, peer->hcookie, peer->assoc);
+				    &cmmd, 0, peer->assoc);
 			break;
 		}
 

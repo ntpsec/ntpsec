@@ -297,7 +297,6 @@ refclock_transmit(
 {
 	u_char clktype;
 	int unit;
-	int hpoll;
 	u_long next;
 
 	clktype = peer->refclktype;
@@ -309,7 +308,6 @@ refclock_transmit(
 	 * specialized for reference clocks. We do a little less
 	 * protocol here and call the driver-specific transmit routine.
 	 */
-	hpoll = peer->hpoll;
 	next = peer->outdate;
 	if (peer->burst == 0) {
 		u_char oreach;
@@ -336,10 +334,6 @@ refclock_transmit(
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (!(oreach & 0x0f)) {
-				hpoll--;
-			} else if ((oreach & 0x0f) == 0x0f)
-				hpoll++;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NSTAGE;
 		}
@@ -351,7 +345,7 @@ refclock_transmit(
 	peer->outdate = next;
 	if (peer->burst > 0)
 		peer->burst--;
-	poll_update(peer, hpoll);
+	poll_update(peer, 0);
 }
 
 

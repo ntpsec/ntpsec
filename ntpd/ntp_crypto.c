@@ -86,10 +86,8 @@
  */
 #define TAI_1972	10	/* initial TAI offset (s) */
 #define MAX_LEAP	100	/* max UTC leapseconds (s) */
-#define MAX_LINLEN	1024	/* max line length */
 #define MIN_HOSTLEN	4	/* min host name length */
 #define MAX_HOSTLEN	256	/* max host name length */
-#define MAX_STATLEN	256	/* max statistics string length */
 #define	DIGESTNAME	"MD5"	/* message digest algorithm name */
 #define VALUE_LEN	(6 * 4) /* min response field length */
 
@@ -243,8 +241,6 @@ make_keylist(
 	 */
 	lifetime = min(sys_automax, NTP_MAXSESSION * (1 <<
 	    (peer->kpoll)));
-	peer->hcookie = session_key(&dstadr->sin, &peer->srcadr, 0,
-	    sys_private, 0);
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -328,7 +324,7 @@ crypto_recv(
 	u_int	code;		/* extension field opcode */
 	u_int	vallen;		/* value length */
 	u_int	siglen;		/* signature length */
-	u_char	statstr[MAX_STATLEN]; /* statistics for filegen */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	keyid_t	cookie;		/* crumbles */
 	int	j, rval;
 	u_int32 temp32;
@@ -745,7 +741,7 @@ crypto_recv(
 
 			/*
 			 * Install the new table if there is no stored
-			 * table or the new table is more recent that
+			 * table or the new table is more recent than
 			 * the stored table. Since a filestamp may have
 			 * changed, recompute the signatures.
 			 */
@@ -1029,7 +1025,7 @@ crypto_verify(
 	tstamp_t fstamp;	/* filestamp */
 	u_int	vallen;		/* value length */
 	u_int	siglen;		/* signature length */
-	u_char	statstr[MAX_STATLEN];
+	u_char	statstr[NTP_MAXSTRLEN];
 	u_int	code, len;
 	int	rval;
 	int	i;
@@ -1155,7 +1151,7 @@ void
 crypto_sign(void)
 {
 	EVP_MD_CTX ctx;		/* signature context */
-	u_char	statstr[MAX_STATLEN]; /* statistics for filegen */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	l_fp	tstamp;		/* NTP timestamp */
 	u_int	len;
 
@@ -1251,7 +1247,7 @@ crypto_key(
 	EVP_PKEY *pkey;		/* public/private key */
 	char	filename[MAXFILENAME]; /* name of rsa key file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[MAX_STATLEN]; /* statistics for filegen */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;		/* filestamp */
 	int	rval;
 	u_char	*ptr;
@@ -1324,7 +1320,7 @@ crypto_cert(
 	FILE	*str;		/* file handle */
 	char	filename[MAXFILENAME]; /* name of certificate file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[MAX_STATLEN]; /* statistics for filegen */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
 	int	rval;
 	u_int	len;
@@ -1410,12 +1406,12 @@ crypto_tai(
 	)
 {
 	FILE	*str;		/* file handle */
-	u_char	buf[MAX_LINLEN];	/* file line buffer */
+	u_char	buf[NTP_MAXSTRLEN];	/* file line buffer */
 	u_int	leapsec[MAX_LEAP]; /* NTP time at leaps */
 	u_int	offset;		/* offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[MAX_STATLEN]; /* statistics for filegen */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
 	u_char	*ptr;
@@ -1453,7 +1449,7 @@ crypto_tai(
 	i = 0;
 	rval = XEVNT_OK;
 	while (i < MAX_LEAP) {
-		ptr = fgets(buf, MAX_LINLEN - 1, str);
+		ptr = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (ptr == NULL)
 			break;
 		if (strlen(buf) < 1)
