@@ -423,7 +423,7 @@ ntpdatemain (
 	
 	if (errflg) {
 		(void) fprintf(stderr,
-				   "usage: %s [-bBdqsv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
+				   "usage: %s [-bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
 				   progname);
 		exit(2);
 	}
