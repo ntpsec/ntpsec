@@ -1,3 +1,7 @@
+#include <config.h>
+
+#if !HAVE_STRSTR
+
 /*
  * Amanda, The Advanced Maryland Automatic Network Disk Archiver
  * Copyright (c) 1991-1998 University of Maryland at College Park
@@ -29,7 +33,6 @@
  *
  * replacement for missing ANSI-C strstr function
  */
-#include "amanda.h"
 
 char *strstr(a, b)
 char *a, *b;
@@ -44,3 +47,6 @@ char *a, *b;
 
         return NULL;
 }
+#else
+int strstr_bs;
+#endif
