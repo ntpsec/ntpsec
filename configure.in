@@ -426,6 +426,27 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR)
 fi
 
+case "$ac_cv_header_machine_soundcard_h$ac_cv_header_sys_soundcard_h" in
+  *yes*)
+    AC_CACHE_CHECK([for struct snd_size], ac_cv_struct_snd_size,
+[AC_TRY_COMPILE([
+#ifdef HAVE_MACHINE_SOUNDCARD_H
+# include <machine/soundcard.h>
+#endif
+#ifdef HAVE_SYS_SOUNDCARD_H
+# include <sys/soundcard.h>
+#endif],[
+extern struct snd_size *ss;
+return ss->rec_size;],
+    ac_cv_struct_snd_size=yes,
+    ac_cv_struct_snd_size=no)
+])
+    case "$ac_cv_struct_snd_size" in
+     yes) AC_DEFINE(HAVE_STRUCT_SND_SIZE, 1,[Do we have struct snd_size?]) ;;
+    esac
+    ;;
+esac
+
 AC_CACHE_CHECK(struct clockinfo for hz, ac_cv_struct_clockinfo_has_hz,
 [AC_TRY_COMPILE([
 #include <sys/time.h>],[

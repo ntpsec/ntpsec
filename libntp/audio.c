@@ -215,7 +215,9 @@ audio_init(
 #ifdef PCM_STYLE_SOUND
 # define ACTL_DEV	"/dev/mixer%d"
 	char actl_dev[30];
+# ifdef HAVE_STRUCT_SND_SIZE
 	struct snd_size s_size;
+# endif
 	snd_chan_param s_c_p;
 #endif
 	int fd;
@@ -263,6 +265,7 @@ audio_init(
 	printf("audio_init: <%s> bufsiz %d\n", dname, bufsiz);
 	rval = fd;
 
+# ifdef HAVE_STRUCT_SND_SIZE
 	if (ioctl(fd, AIOGSIZE, &s_size) == -1)
 	    printf("audio_init: AIOGSIZE: %s\n", strerror(errno));
 	else
@@ -278,6 +281,7 @@ audio_init(
 	else
 	    printf("audio_init: set:  play_size %d, rec_size %d\n",
 		s_size.play_size, s_size.rec_size);
+# endif /* HAVE_STRUCT_SND_SIZE */
 
 	if (ioctl(fd, AIOGFMT, &s_c_p) == -1)
 	    printf("audio_init: AIOGFMT: %s\n", strerror(errno));
