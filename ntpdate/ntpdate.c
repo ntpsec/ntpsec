@@ -1676,6 +1676,9 @@ init_io(void)
         for(nbsock = 0; (nbsock < MAX_AF) && res ; res = res->ai_next) {
 	/* create a datagram (UDP) socket */
            if ((fd[nbsock] = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0) {
+		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
+		    errno == EPFNOSUPPORT)
+			continue;
 		msyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 		/*NOTREACHED*/
