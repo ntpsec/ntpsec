@@ -397,7 +397,6 @@ time_pps_fetch(
 		u_int serial;
 	} ev;
 
-	struct ppsclockev ev;
 	pps_info_t infobuf;
 
 	/*
