@@ -1,5 +1,10 @@
 1999-12-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpq/ntpq.c:
+	* ntpq/ntpq_ops.c:
+	Make `ntpq -pn' independent of DNS, ad advertised.
+	From: Kamal A Mostafa <kamal@whence.com>
+	
 	* ntpd/refclock_mx4200.c (mx4200_start): make missing 3rd
 	parameter a 0.
 

@@ -1535,13 +1535,15 @@ dopeers(
 	if (!dogetassoc(fp))
 		return;
 
-	for (i = 0; i < numhosts; ++i)
-	{ if(getnetnum(chosts[i],&netnum,fullname))
-		if ((int)strlen(fullname) > maxhostlen)
-		maxhostlen = strlen(fullname);
-	}
-	if (numhosts > 1)
+	maxhostlen = 0;
+	if (numhosts > 1) {
+		for (i = 0; i < numhosts; ++i)
+		{ if(getnetnum(chosts[i],&netnum,fullname))
+			if ((int)strlen(fullname) > maxhostlen)
+			maxhostlen = strlen(fullname);
+		}
 		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "host");
+	}
 	(void) fprintf(fp,
 			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
