@@ -10,6 +10,7 @@
 * GOES refclock fix
 * JJY driver
 * bsdi port fixes
+* Cray unicos port upgrade
 * HP MPE/iX port
 * Win/NT port upgrade
 * Dynix PTX port fixes
