@@ -64,10 +64,13 @@ extern	void	crypto_agree	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
 extern	int	crypto_public	P((struct peer *, u_char *, u_int));
+#endif /* PUBKEY */
 
 /*
  * Cryptographic values
  */
+extern	u_int	crypto_flags;	/* status word */
+#ifdef PUBKEY
 extern	R_DH_PARAMS dh_params;
 extern	struct value host;	/* host name/public key */
 extern	struct value dhparam;	/* agreement parameters */

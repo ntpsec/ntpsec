@@ -1,3 +1,18 @@
+2000-12-27  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/release.htm:
+	* html/patches.htm:
+	* html/measure.htm:
+	* html/confopt.htm:
+	* html/clockopt.htm:
+	* html/biblio.htm:
+	* html/authopt.htm:
+	* html/assoc.htm:
+	Updates from Dave Mills.
+
+	* include/ntp_crypto.h: Make sure crypto_flags is visible.
+	From Dave Mills.
+
 2000-12-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (process_packet): pleap/pstratum.
