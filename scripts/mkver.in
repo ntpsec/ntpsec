@@ -20,7 +20,7 @@ case "@LIBRSAREF@" in
  *)  ConfStr="${ConfStr}-r" ;;
 esac
 
-ConfStr="$ConfStr `LC_TIME=C date`"
+ConfStr="$ConfStr `LC_TIME=C TZ= date`"
 
 if [ ! -f .version ]; then
   echo 0 > .version
