@@ -98,7 +98,7 @@ getbuf4(isc_interfaceiter_t *iter) {
 		iter->ifc.ifc_len = iter->bufsize;
 		iter->ifc.ifc_buf = iter->buf;
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion".  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
@@ -182,7 +182,7 @@ getbuf6(isc_interfaceiter_t *iter) {
 		iter->lifc.lifc_len = iter->bufsize;
 		iter->lifc.lifc_buf = iter->buf;
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion".  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
@@ -195,15 +195,13 @@ getbuf6(isc_interfaceiter_t *iter) {
 			 */
 			if (errno == ENOENT) {
 				isc__strerror(errno, strbuf, sizeof(strbuf));
-				isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-					      ISC_LOGMODULE_INTERFACE,
-					      ISC_LOG_DEBUG(1),
-					      isc_msgcat_get(isc_msgcat,
+				UNEXPECTED_ERROR(__FILE__, __LINE__,
+						 isc_msgcat_get(isc_msgcat,
 							ISC_MSGSET_IFITERIOCTL,
 							ISC_MSG_GETIFCONFIG,
 							"get interface "
 							"configuration: %s"),
-					       strbuf);
+						 strbuf);
 				result = ISC_R_FAILURE;
 				goto cleanup;
 			}
@@ -429,7 +427,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	iter->current.flags = 0;
 
 	/*
-	 * Ignore the HP/UX warning about "interger overflow during
+	 * Ignore the HP/UX warning about "integer overflow during
 	 * conversion.  It comes from its own macro definition,
 	 * and is really hard to shut up.
 	 */
@@ -503,7 +501,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	 */
 	if ((iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0) {
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
@@ -525,7 +523,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 
 	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
@@ -550,7 +548,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	memset(&ifreq, 0, sizeof(ifreq));
 	memcpy(&ifreq, ifrp, sizeof(ifreq));
 	/*
-	 * Ignore the HP/UX warning about "interger overflow during
+	 * Ignore the HP/UX warning about "integer overflow during
 	 * conversion.  It comes from its own macro definition,
 	 * and is really hard to shut up.
 	 */
@@ -629,7 +627,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	iter->current.flags = 0;
 
 	/*
-	 * Ignore the HP/UX warning about "interger overflow during
+	 * Ignore the HP/UX warning about "integer overflow during
 	 * conversion.  It comes from its own macro definition,
 	 * and is really hard to shut up.
 	 */
@@ -637,7 +635,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 
 		/*
 		 * XXX This should be looked at further since it looks strange.
-		 * If we get an ENXIO then we ignore the error and not worrk
+		 * If we get an ENXIO then we ignore the error and not worry
 		 * about the flags.
 		 */
 		if (errno != ENXIO) {
@@ -658,9 +656,10 @@ internal_current6(isc_interfaceiter_t *iter) {
 	if ((lifreq.lifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
-		iter->current.flags |= INTERFACE_F_BROADCAST;
-	}
+	/* 
+	 * Note that IPv6 broadcast does not exist
+	 * so don't check for IPv6 broadcast flag
+	 */
 
 #ifdef IFF_MULTICAST
 	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
@@ -693,27 +692,6 @@ internal_current6(isc_interfaceiter_t *iter) {
 			 (struct sockaddr *)&lifreq.lifr_dstaddr);
 	}
 
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		/*
-		 * Ignore the HP/UX warning about "interger overflow during
-		 * conversion.  It comes from its own macro definition,
-		 * and is really hard to shut up.
-		 */
-		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
-		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETDESTADDR,
-					       "%s: getting "
-					       "broadcast address: %s"),
-					 lifreq.lifr_name, strbuf);
-			return (ISC_R_IGNORE);
-		}
-		get_addr(family, &iter->current.broadcast,
-			 (struct sockaddr *)&lifreq.lifr_broadaddr);
-	}
 
 	/*
 	 * Get the network mask.
@@ -723,7 +701,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	switch (family) {
 	case AF_INET:
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */

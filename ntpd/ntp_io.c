@@ -346,16 +346,6 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
 
-		/* Broadcast does not exist on IPv6 so ignore any data
-		if((isc_if->flags & INTERFACE_F_BROADCAST) != 0) {
-			itf->flags |= INT_BROADCAST;
-			itf->bcast.ss_family = itf->sin.ss_family;
-			memcpy(&(((struct sockaddr_in6 *)&itf->bcast)->sin6_addr),
-			       &(isc_if->broadcast.type.in6),
-				 sizeof(struct in6_addr));
-			((struct sockaddr_in6 *)&itf->bcast)->sin6_port = port;
-		}
-*/
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
 		       &(isc_if->netmask.type.in6),
