@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
-# $Id: .del-plot_summary.pl~3aed0663 1.2 1999/12/02 01:59:05-00:00 stenn@whimsy.udel.edu $
+#! @PATH_PERL@ -w
+# $Id: plot_summary.in 1.1 2000/02/10 08:13:40-00:00 stenn@whimsy.udel.edu $
 #
 # Use Gnuplot to display data in summary files produced by summary.pl.
 # This script requires GNUPLOT 3.7!

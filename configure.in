@@ -2993,7 +2993,9 @@ AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/Makefile scripts/mkver scripts/ntp-wait scripts/ntpver util/Makefile)
-AC_CONFIG_COMMANDS(default, [[chmod +x scripts/ntp-wait scripts/ntpver scripts/mkver]], [])
+scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj \
+scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver \
+scripts/plot_summary scripts/summary util/Makefile)
+AC_CONFIG_COMMANDS(default, [[chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver scripts/plot_summary scripts/summary]], [])
 AC_OUTPUT
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

@@ -1,5 +1,5 @@
-#!/usr/local/bin/perl 
-#!/usr/local/bin/perl -d
+#! @PATH_PERL@
+#! @PATH_PERL@ -d
 # 
 # This script compares the time of several machines with the
 # time on the local host.

@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
-# $Id: .del-summary.pl~3aed0663 1.2 1999/12/02 01:59:07-00:00 stenn@whimsy.udel.edu $
+#! @PATH_PERL@ -w
+# $Id: summary.in 1.1 2000/02/10 08:13:40-00:00 stenn@whimsy.udel.edu $
 # Perl version of (summary.sh, loop.awk, peer.awk):
 # Create summaries from xntpd's loop and peer statistics.
 #

@@ -100,16 +100,18 @@ VERSION = @VERSION@
 install_sh = @install_sh@
 
 
-noinst_SCRIPTS = mkver ntp-wait ntpver
+noinst_SCRIPTS = calc_tickadj checktime freq_adj mkver ntp-wait ntpsweep ntpver plot_summary summary
 subdir = scripts
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
-CONFIG_CLEAN_FILES =  mkver ntp-wait ntpver
+CONFIG_CLEAN_FILES =  calc_tickadj checktime freq_adj mkver ntp-wait \
+ntpsweep ntpver plot_summary summary
 SCRIPTS =  $(noinst_SCRIPTS)
 
 DIST_SOURCES = 
-DIST_COMMON =  README Makefile.am Makefile.in mkver.in ntp-wait.in \
-ntpver.in
+DIST_COMMON =  README Makefile.am Makefile.in calc_tickadj.in \
+checktime.in freq_adj.in mkver.in ntp-wait.in ntpsweep.in ntpver.in \
+plot_summary.in summary.in
 
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -124,11 +126,23 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
+calc_tickadj: $(top_builddir)/config.status calc_tickadj.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+checktime: $(top_builddir)/config.status checktime.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+freq_adj: $(top_builddir)/config.status freq_adj.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 mkver: $(top_builddir)/config.status mkver.in
 	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 ntp-wait: $(top_builddir)/config.status ntp-wait.in
 	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+ntpsweep: $(top_builddir)/config.status ntpsweep.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 ntpver: $(top_builddir)/config.status ntpver.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+plot_summary: $(top_builddir)/config.status plot_summary.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+summary: $(top_builddir)/config.status summary.in
 	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 tags: TAGS
 TAGS:

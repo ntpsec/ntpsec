@@ -10879,7 +10879,9 @@ config_files="\\
   kernel/Makefile kernel/sys/Makefile libntp/Makefile libparse/Makefile
   librsaref/Makefile ntpd/Makefile ntpdc/Makefile ntpdate/Makefile
   ntpq/Makefile ntptrace/Makefile parseutil/Makefile scripts/Makefile
-  scripts/mkver scripts/ntp-wait scripts/ntpver util/Makefile"
+  scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver
+  scripts/ntp-wait scripts/ntpsweep scripts/ntpver scripts/plot_summary
+  scripts/summary util/Makefile"
 config_headers="\\
   config.h"
 config_commands="\\
@@ -10978,9 +10980,15 @@ do
   'ntptrace/Makefile' ) CONFIG_FILES="\$CONFIG_FILES ntptrace/Makefile" ;;
   'parseutil/Makefile' ) CONFIG_FILES="\$CONFIG_FILES parseutil/Makefile" ;;
   'scripts/Makefile' ) CONFIG_FILES="\$CONFIG_FILES scripts/Makefile" ;;
+  'scripts/calc_tickadj' ) CONFIG_FILES="\$CONFIG_FILES scripts/calc_tickadj" ;;
+  'scripts/checktime' ) CONFIG_FILES="\$CONFIG_FILES scripts/checktime" ;;
+  'scripts/freq_adj' ) CONFIG_FILES="\$CONFIG_FILES scripts/freq_adj" ;;
   'scripts/mkver' ) CONFIG_FILES="\$CONFIG_FILES scripts/mkver" ;;
   'scripts/ntp-wait' ) CONFIG_FILES="\$CONFIG_FILES scripts/ntp-wait" ;;
+  'scripts/ntpsweep' ) CONFIG_FILES="\$CONFIG_FILES scripts/ntpsweep" ;;
   'scripts/ntpver' ) CONFIG_FILES="\$CONFIG_FILES scripts/ntpver" ;;
+  'scripts/plot_summary' ) CONFIG_FILES="\$CONFIG_FILES scripts/plot_summary" ;;
+  'scripts/summary' ) CONFIG_FILES="\$CONFIG_FILES scripts/summary" ;;
   'util/Makefile' ) CONFIG_FILES="\$CONFIG_FILES util/Makefile" ;;
   'default-1' ) CONFIG_COMMANDS="\$CONFIG_COMMANDS default-1" ;;
   'default-2' ) CONFIG_COMMANDS="\$CONFIG_COMMANDS default-2" ;;
@@ -11429,7 +11437,7 @@ for mf in $CONFIG_FILES; do
   done
 done
  ;;
-    default ) chmod +x scripts/ntp-wait scripts/ntpver scripts/mkver ;;
+    default ) chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver scripts/plot_summary scripts/summary ;;
   esac
 fi;done
 EOF

@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! @PATH_PERL@ -w
 
 die "perl5 needed\n" unless ($] > 5);
 
