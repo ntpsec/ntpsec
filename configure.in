@@ -1366,7 +1366,7 @@ if test "$ac_cv_header_termios_h" = "yes"; then
 #endif
 	 ], ntp_ok=yes, ntp_ok=no)
 else
-ntp_ok = no
+    ntp_ok=no
 fi
 
 if test "$ntp_ok" = "yes"; then

@@ -7701,7 +7701,7 @@ fi
 rm -f conftest*
 
 else
-ntp_ok = no
+    ntp_ok=no
 fi
 
 if test "$ntp_ok" = "yes"; then

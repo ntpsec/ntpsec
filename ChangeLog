@@ -1,3 +1,7 @@
+1999-10-31  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: TIOCSPPS cleanup
+
 1999-10-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98b
