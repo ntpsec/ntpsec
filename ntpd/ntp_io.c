@@ -7,11 +7,6 @@
 # include <config.h>
 #endif
 
-/*
- * Don't allow wildcard delivery
- */
-#undef UDP_WILDCARD_DELIVERY
-
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -56,6 +51,11 @@
 # include <sys/sockio.h>
 #endif
 #include <arpa/inet.h>
+
+/*
+ * Don't allow wildcard delivery
+ */
+#undef UDP_WILDCARD_DELIVERY
 
 extern int listen_to_virtual_ips;
 
