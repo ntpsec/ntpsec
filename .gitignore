@@ -20,9 +20,12 @@ ChangeLog
 ChangeLog.new
 ElectricFence/Makefile.in
 Makefile.in
+acinclude.m4
 aclocal.m4
 adjtimed/Makefile.in
 am.log
+ansi2knr.1
+ansi2knr.c
 arlib/depcomp
 arlib/install-sh
 arlib/missing
@@ -36,11 +39,11 @@ config.h.in
 config.sub
 configure
 depcomp
-install-sh
 html/man/*
 html/pic/thumbs.db
 html/thumbs.db
 include/Makefile.in
+install-sh
 kernel/Makefile.in
 kernel/sys/Makefile.in
 libntp/Makefile.in
