@@ -190,7 +190,7 @@ struct cert_info {
 	EVP_PKEY *pkey;		/* generic key */
 	long	version;	/* X509 version */
 	int	nid;		/* signature/digest ID */
-	EVP_MD	*digest;	/* message digest algorithm */
+	const EVP_MD *digest;	/* message digest algorithm */
 	u_long	serial;		/* serial number */
 	tstamp_t first;		/* valid not before */
 	tstamp_t last;		/* valid not after */
@@ -298,7 +298,7 @@ struct peer {
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
-	EVP_MD	*digest;	/* message digest algorithm */
+	const EVP_MD *digest;	/* message digest algorithm */
 	u_char	*subject;	/* certificate subject name */
 	u_char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */

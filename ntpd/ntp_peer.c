@@ -771,19 +771,20 @@ expire_all(void)
 	for (n = 0; n < HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (peer->cast_flags & MDF_ACAST) {
+			if (!(peer->flags & FLAG_SKEY)) {
+				continue;
+			} else if (peer->cast_flags & MDF_ACAST) {
 				peer_clear(peer);
 			} else if (peer->hmode == MODE_ACTIVE ||
 			    peer->hmode == MODE_PASSIVE) {
 				key_expire(peer);
-				peer->cookval.tstamp = 0;
 				peer->crypto &= ~(CRYPTO_FLAG_AUTO |
 				    CRYPTO_FLAG_AGREE);
 			}
 				
 		}
 	}
-	sys_private = (u_int32)RANDOM & 0xffffffff;
+	RAND_bytes((u_char *)&sys_private, 4);
 	crypto_update();
 	resetmanycast();
 }

@@ -3098,6 +3098,20 @@ case "$ac_cv_make_timetrim" in
     ;;
 esac
 
+AC_SUBST(MAKE_LIBNTPSIM)
+AC_SUBST(MAKE_NTPDSIM)
+AC_CACHE_CHECK([if we want to build the NTPD simulator], ac_cv_var_ntpd_sim,
+[AC_ARG_ENABLE(simulator,
+    AC_HELP_STRING([--enable-simulator], [- build/install the NTPD simulator?]),
+    [ans=$enableval], [ans=no])
+ac_cv_var_ntpd_sim=$ans])
+case "$ac_cv_var_ntpd_sim" in
+ yes)
+    MAKE_NTPDSIM=ntpdsim
+    MAKE_LIBNTPSIM=libntpsim.a
+    ;;
+esac
+
 AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery,
 [AC_ARG_ENABLE(udp-wildcard,	[  --enable-udp-wildcard   s use UDP wildcard delivery],
     [ans=$enableval],

@@ -16,6 +16,10 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
+#ifdef SIM
+#include "ntpsim.h"
+#endif
+
 #include <stdio.h>
 #include <signal.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -1539,8 +1543,12 @@ sendpkt(
         err = io_completion_port_sendto(inter, pkt, len, dest);
 	if (err != ERROR_SUCCESS)
 #else
+#ifdef SIM
+        cc = srvr_rply(&ntp_node,  dest, inter, pkt);
+#else /* SIM */
 	cc = sendto(inter->fd, (char *)pkt, (unsigned int)len, 0, (struct sockaddr *)dest,
 		    SOCKLEN(dest));
+#endif /* SIM */
 	if (cc == -1)
 #endif
 	{
