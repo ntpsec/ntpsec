@@ -1884,7 +1884,7 @@ clock_select(void)
  	 */
 	low = 1e9;
 	high = -1e9;
-	for (allow = 0; allow < nlist / 2; allow++) {
+	for (allow = 0; 2 * allow < nlist; allow++) {
 		int	found;
 
 		/*

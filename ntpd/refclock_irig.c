@@ -97,9 +97,9 @@
  *
  * The timecode format used for debugging and data recording includes
  * data helpful in diagnosing problems with the IRIG signal and codec
- * connections. With debugging enabled (-d -d -d on the ntpd command
- * line), the driver produces one line for each timecode in the
- * following format:
+ * connections. With debugging enabled (-d on the ntpd command line),
+ * the driver produces one line for each timecode in the following
+ * format:
  *
  * 00 1 98 23 19:26:52 721 143 0.694 20 0.1 66.5 3094572411.00027
  *
@@ -116,9 +116,13 @@
  * timestamp in NTP format.
  *
  * The fraction part of the on-time timestamp is a good indicator of how
- * well the driver is doing. With an UltrSPARC 30, this thing can keep
- * the clock within a few tens of microseconds relative to the IRIG-B
- * signal. Accuracy with IRIG-E is about ten times worse.
+ * well the driver is doing. With an UltrSPARC 30 and Solaris 2.7, this
+ * thing can keep the clock within a few tens of microseconds relative
+ * to the IRIG-B signal. Accuracy with IRIG-E is about ten times worse.
+ * Unfortunately, Sun broke the 2.7 audio driver in 2.8, which has a
+ * 10-ms sawtooth modulation. The driver attempts to remove the
+ * modulation by some clever estimation techniques which mostly work.
+ * Your experience may vary.
  *
  * Unlike other drivers, which can have multiple instantiations, this
  * one supports only one. It does not seem likely that more than one
@@ -246,6 +250,9 @@ struct irigunit {
 	int	fieldcnt;	/* subfield count in field */
 	int	bits;		/* demodulated bits */
 	int	bitcnt;		/* bit count in subfield */
+	l_fp	waggle;		/* sawtooth accumulator (s) */
+	l_fp	wiggle;		/* sawtooth correction (s) */
+	l_fp	wuggle;		/* sawtooth monitor (s) */
 };
 
 /*
@@ -822,7 +829,64 @@ irig_decode(
 		up->fieldcnt = 0;
 		up->lastbit = 0;
 		if (up->errflg == 0) {
-			refclock_process(pp);
+			l_fp	ltemp, mtemp;
+
+			/*
+			 * You didn't see this; I wasn't here.
+			 *
+			 * Recent Sun kernels have developed an evil
+			 * 10-ms sawtooth modulation that ruined what
+			 * once was an excellent, low-jitter time
+			 * reference. This code tries to unmodulate the
+			 * sawtooth by using each measured time
+			 * difference to estimate the next one as the
+			 * sawtooth amplitude increases with time. Upon
+			 * retrace, the accumulated difference relative
+			 * to the current offset is uset to interpolate
+			 * and produce an unbiased result.
+			 *
+			 * It's important to remember these samples are
+			 * processed by the median filter, which tosses
+			 * out noisy samples and averages the rest. This
+			 * just helps reduce the jitter and leave at
+			 * least some good samples for the middle of the
+			 * filter. 
+			 */
+			mtemp = pp->lastrec;
+			if (L_ISZERO(&pp->lastrec) ||
+			    L_ISZERO(&pp->lastref)) {
+				L_CLR(&ltemp);
+			} else {
+				ltemp = pp->lastrec;
+				L_SUB(&ltemp, &pp->lastref);
+			}
+			if (ltemp.l_f < 0)
+				ltemp.l_i = -1;
+			else
+				ltemp.l_i = 0;
+			L_SUB(&pp->lastrec, &up->waggle);
+			if (!L_ISNEG(&ltemp)) {
+				L_ADD(&ltemp, &up->waggle);
+				up->waggle = ltemp;
+			} else {
+				L_SUB(&ltemp, &up->wiggle);
+				if (L_ISNEG(&ltemp)) {
+					L_NEG(&ltemp);
+					L_RSHIFT(&ltemp);
+					L_RSHIFT(&ltemp);
+					L_RSHIFT(&ltemp);
+					L_NEG(&ltemp);
+				} else {
+					L_RSHIFT(&ltemp);
+					L_RSHIFT(&ltemp);
+					L_RSHIFT(&ltemp);
+				}
+				L_ADD(&up->wiggle, &ltemp);
+				L_ADD(&up->waggle, &up->wiggle);
+				refclock_process(pp);
+				up->wuggle = pp->lastrec;
+			}
+			pp->lastrec = mtemp;
 			pp->lastref = pp->lastrec;
 		}
 		up->errflg = 0;
@@ -880,7 +944,7 @@ irig_decode(
 			    pp->hour, pp->minute, pp->second,
 			    up->maxsignal, up->gain, up->modndx,
 			    up->tc, up->exing * 1e6 / SECOND, up->freq *
-			    1e6 / SECOND, ulfptoa(&pp->lastrec, 6));
+			    1e6 / SECOND, ulfptoa(&up->wuggle, 6));
 			pp->lencode = strlen(pp->a_lastcode);
 			if (pp->sloppyclockflag & CLK_FLAG4) {
 				record_clock_stats(&peer->srcadr,
