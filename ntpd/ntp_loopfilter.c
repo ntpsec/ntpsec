@@ -211,7 +211,8 @@ local_clock(
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 	if (!ntp_enable) {
-		record_loop_stats();
+		record_loop_stats(fp_offset, drift_comp, SQRT(epsil),
+		    clock_stability, sys_poll);
 		return (0);
 	}
 
@@ -254,7 +255,8 @@ local_clock(
 			    fp_offset);
 			printf("ntpd: time slew %.6fs\n", fp_offset);
 		}
-		record_loop_stats();
+		record_loop_stats(fp_offset, drift_comp, SQRT(epsil),
+		    clock_stability, sys_poll);
 		exit (0);
 	}
 
@@ -636,7 +638,8 @@ local_clock(
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
-	record_loop_stats();
+		record_loop_stats(last_offset, drift_comp, sys_jitter,
+		    clock_stability, sys_poll);
 #ifdef DEBUG
 	if (debug > 1)
 		printf(

@@ -191,7 +191,7 @@ extern	void	init_util	P((void));
 extern	void	hourly_stats	P((void));
 extern	void	stats_config	P((int, char *));
 extern	void	record_peer_stats P((struct sockaddr_in *, int, double, double, double, double));
-extern	void	record_loop_stats P((void));
+extern	void	record_loop_stats P((double, double, double, double, int));
 extern	void	record_clock_stats P((struct sockaddr_in *, const char *));
 extern	void	record_raw_stats P((struct sockaddr_in *, struct sockaddr_in *, l_fp *, l_fp *, l_fp *, l_fp *));
 

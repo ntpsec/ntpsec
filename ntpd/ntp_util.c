@@ -489,7 +489,13 @@ record_peer_stats(
  * time constant (log base 2)
  */
 void
-record_loop_stats(void)
+record_loop_stats(
+	double offset,
+	double freq,
+	double jitter,
+	double stability,
+	int poll
+	)
 {
 	struct timeval tv;
 #ifdef HAVE_GETCLOCK
@@ -513,8 +519,8 @@ record_loop_stats(void)
 	filegen_setup(&loopstats, (u_long)(tv.tv_sec + JAN_1970));
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %lu.%03lu %.9f %.6f %.9f %.6f %d\n",
-		    day, sec, msec, last_offset, drift_comp * 1e6,
-		    sys_jitter, clock_stability * 1e6, sys_poll);
+		    day, sec, msec, offset, freq * 1e6, jitter,
+		    stability * 1e6, poll);
 		fflush(loopstats.fp);
 	}
 }
