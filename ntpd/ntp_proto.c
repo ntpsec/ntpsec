@@ -159,8 +159,8 @@ transmit(
 
 				/*
 				 * If nothing is likely to change in
-				 * future, flash a restrict bit so we
-				 * won't bother the dude again.
+				 * future, flash the access denied bit
+				 * so we won't bother the dude again.
 				 */
 				if (memcmp((char *)&peer->refid,
 				    "DENY", 4) == 0 ||
@@ -226,7 +226,7 @@ transmit(
 
 			/*
 			 * Source rate control. If we are restrained,
-			 * each burst is one packet.
+			 * each burst consists of only one packet.
 			 */
 			if (memcmp((char *)&peer->refid, "RSTR", 4) ==
 			    0)
@@ -417,13 +417,13 @@ receive(
 	 * Linux, will not work with Autokey.
 	 */
 	if (hismode == MODE_BROADCAST) {
-		if (!sys_bclient) {
-			sys_badlength++;
+		if (!sys_bclient || restrict_mask & RES_NOPEER) {
+			sys_restricted++;
 			return;			/* no client */
 		}
 #ifdef OPENSSL
 		if (crypto_flags && rbufp->dstadr == any_interface) {
-			sys_badlength++;
+			sys_restricted++;
 			return;			/* no client */
 		}
 #endif /* OPENSSL */
@@ -585,7 +585,8 @@ receive(
 		 * Compute the cryptosum. Note a clogging attack may
 		 * succeed in bloating the key cache. If an autokey,
 		 * purge it immediately, since we won't be needing it
-		 * again.
+		 * again. If the packet is authentic, it may mobilize an
+		 * association.
 		 */
 		if (authdecrypt(skeyid, (u_int32 *)pkt, authlen,
 		    has_mac)) {
@@ -680,7 +681,7 @@ receive(
 		 * immediately. If the guy is already here, don't fire
 		 * up a duplicate.
 		 */
-		if (restrict_mask & RES_FLAGS) {
+		if (restrict_mask & RES_DONTTRUST) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -712,7 +713,7 @@ receive(
 		 * If authentication fails send a crypto-NAK; otherwise,
 		 * kiss the frog.
 		 */
-		if (restrict_mask & RES_FLAGS) {
+		if (restrict_mask & RES_DONTTRUST) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -738,7 +739,7 @@ receive(
 		 * mobilize a broadcast client association. We don't
 		 * kiss any frogs here.
 		 */
-		if (restrict_mask & RES_FLAGS) {
+		if (restrict_mask & RES_DONTTRUST) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -783,16 +784,27 @@ receive(
 		return;
 
 	case AM_POSSBCL:
+
+		/*
+		 * This is a broadcast packet received in client mode.
+		 * It could happen if the initial client/server volley
+		 * is not complete before the next broadcast packet is
+		 * received. Be liberal in what we accept.
+		 */ 
 	case AM_PROCPKT:
 
 		/*
-		 * This packet is received from a broadcast server or
-		 * symmetric peer. If it is restricted, flash the bit
-		 * and skedaddle to Seattle. If not authentic, leave a
-		 * light on and continue.
+		 * This is a symmetric mode packet received in symmetric
+		 * mode, a server packet received in client mode or a
+		 * broadcast packet received in broadcast client mode.
+		 * If it is restricted, this is very strange because it
+		 * is rude to send a packet to a restricted address. If
+		 * anyway, flash a restrain kiss and skedaddle to
+		 * Seattle. If not authentic, leave a light on and
+		 * continue.
 		 */
 		peer->flash = 0;
-		if (restrict_mask & RES_FLAGS) {
+		if (restrict_mask & RES_DONTTRUST) {
 			sys_restricted++;
 			if (peer->flags & FLAG_CONFIG)
 				peer_clear(peer, "RSTR");
@@ -2673,16 +2685,16 @@ fast_xmit(
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
-	 * If the caller has picked up a restriction, decide what to do
-	 * with it and light up a kiss-of-death.
+	 * If the packet has picked up a restriction due to either
+	 * access denied or rate exceeded, decide what to do with it.
 	 */
-	if (mask & RES_FLAGS) {
+	if (mask & (RES_DONTTRUST | RES_LIMITED)) {
 		char	*code = "????";
 
 		if (mask & RES_LIMITED) {
 			sys_limitrejected++;
 			code = "RATE";
-		} else if (mask & (RES_DONTSERVE | RES_DONTTRUST)) {
+		} else if (mask & RES_DONTTRUST) {
 			sys_restricted++;
 			code = "DENY";
 		}
