@@ -831,6 +831,9 @@ case "$host" in
  *-*-irix[[45]]*)
     # Just a stub in "old" Irix.  Idiots.
     ;;
+ *-*-linux*)
+    # Apparently there but not working.  Idiots?
+    ;;
  *-*-qnx*)
     # Apparently there but not working in QNX.  Idiots?
     ;;

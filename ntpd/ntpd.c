@@ -1052,7 +1052,7 @@ getgroup:
 			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
 #  ifdef DEBUG
-			else if (debug > 2)
+			else if (debug > 5)
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #  endif /* DEBUG */
 # else /* HAVE_SIGNALED_IO */
