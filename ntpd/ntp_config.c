@@ -77,7 +77,7 @@
  * enable auth|bclient|pll|kernel|monitor|stats
  * disable auth|bclient|pll|kernel|monitor|stats
  * phone ...
- * pps device
+ * pps device [assert|clear] [hardpps]
  */
 
 /*
@@ -159,6 +159,10 @@
 #define CONF_FGEN_FLAG_NOLINK	4
 #define CONF_FGEN_FLAG_ENABLE	5
 #define CONF_FGEN_FLAG_DISABLE	6
+
+#define CONF_PPS_ASSERT		1
+#define CONF_PPS_CLEAR		2
+#define CONF_PPS_HARDPPS	3
 
 /*
  * Translation table - keywords to function index
@@ -308,6 +312,16 @@ static struct keyword flags_keywords[] = {
 };
 
 /*
+ * pps modifier keywords
+ */
+static struct keyword pps_keywords[] = {
+	{ "assert",	CONF_PPS_ASSERT },
+	{ "clear",	CONF_PPS_CLEAR },
+	{ "hardpps",	CONF_PPS_HARDPPS },
+	{ "",		CONFIG_UNKNOWN }
+};
+
+/*
  * "logconfig" building blocks
  */
 struct masks {
@@ -376,6 +390,8 @@ static char res_file[MAX_PATH];
 char	*progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
+int	pps_assert = 1;
+int	pps_hardpps;
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
@@ -1688,6 +1704,30 @@ getconfig(
 				break;
 			}
 			(void)strncpy(pps_device, tokens[1], MAXPPS);
+			for (i = 2; i < ntokens; i++) {
+				int flag;
+
+				flag = matchkey(tokens[i], pps_keywords);
+				switch(flag) {
+				case CONF_PPS_ASSERT:
+					pps_assert = 1;
+					break;
+				case CONF_PPS_CLEAR:
+					pps_assert = 0;
+					break;
+				case CONF_PPS_HARDPPS:
+					pps_hardpps = 1;
+					break;
+				default:
+					msyslog(LOG_ERR,
+						"pps unknown flag %s",
+						tokens[i]);
+					errflg = 1;
+					break;
+				}
+				if(errflg)
+					break;
+			}
 			break;
 		}
 	}

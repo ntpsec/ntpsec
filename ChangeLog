@@ -1,5 +1,11 @@
 1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_config.c: Support for PPS assert/clear/hardpps
+	* ntpd/ntp_refclock.c (refclock_ioctl): Ditto
+	(refclock_gtlin): Ditto
+	* html/clockopt.htm: Document.
+	From: John Hay <jhay@mikom.csir.co.za>
+
         * html/monopt.htm: We have four types of files now
         * ntpd/refclock_oncore.c: If debug is on, tell when
         we are waiting for a valid almanac

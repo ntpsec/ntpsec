@@ -94,6 +94,11 @@ static int refclock_cmpl_fp P((const void *, const void *));
 static int refclock_cmpl_fp P((const double *, const double *));
 #endif
 
+#ifdef HAVE_PPSAPI
+extern int pps_assert;
+extern int pps_hardpps;
+#endif
+
 /*
  * refclock_report - note the occurance of an event
  *
@@ -625,7 +630,10 @@ refclock_gtlin(
 
 #ifdef HAVE_PPSAPI
 	if ((rbufp->fd == fdpps) && (time_pps_fetch(fdpps, &pi) >= 0)) {
-		tsp = &pi.assert_timestamp;
+		if(pps_assert)
+			tsp = &pi.assert_timestamp;
+		else
+			tsp = &pi.clear_timestamp;
 		a = tsp->tv_nsec;
 		a /= 1e9;
 		tstmp.l_uf =  a * 4294967296.0;
@@ -1110,7 +1118,16 @@ refclock_ioctl(
 			fdpps = 0;
 			return (0);
 		}
-		pp.mode = PPS_CAPTUREASSERT /* | PPS_HARDPPSONASSERT */;
+		if(pps_assert)
+			pp.mode = PPS_CAPTUREASSERT;
+		else
+			pp.mode = PPS_CAPTURECLEAR;
+		if(pps_hardpps) {
+			if(pps_assert)
+				pp.mode |= PPS_HARDPPSONASSERT;
+			else
+				pp.mode |= PPS_HARDPPSONCLEAR;
+		}
 		if (time_pps_setparams(fdpps, &pp) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_setparams failed");

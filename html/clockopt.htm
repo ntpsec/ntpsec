@@ -219,13 +219,25 @@ Options </A>page.</DD>
 </DL>
 
 <DT>
-<TT>pps <I>device</I></TT></DT>
+<TT>pps <I>device</I> [assert|clear] [hardpps]</TT></DT>
 
 <DD>
 Specifies the name of the serial port device to which the PPS signal is
 connected. Note, this command replaces use of <TT>fudge flag3</TT>, which
 was used for the same purpose in NTPv3. Note also that this command should
 preceed the <TT>server</TT> and <TT>fudge</TT> command for the same device.</DD>
+
+<DT><TT>assert</TT> <TT>clear</TT></DT>
+<DD>Using <TT>assert</TT> or <TT>clear</TT> specifies if the high going or
+low going edge of the signal must be used. The default is <TT>assert</TT>.</DD>
+
+<DT><TT>hardpps</TT></DT>
+<DD>This flag is used to tell the kernel that the signal from
+this device must be used to drive hardpps().</DD>
+
+<DD>The <TT>assert</TT>, <TT>clear</TT> and <TT>hardpps</TT> options
+are only available if the PPSAPI is used.</DD>
+
 </DL>
 
 <HR>
