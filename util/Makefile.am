@@ -2,9 +2,9 @@
 AUTOMAKE_OPTIONS=	ansi2knr
 
 bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
-		@MAKE_NTP_KEYGEN@
+		ntp-keygen
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
-	ntp-keygen ntptime pps-api precision sht testrs6000 tickadj timetrim
+	ntptime pps-api precision sht testrs6000 tickadj timetrim
 
 INCLUDES=	-I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB

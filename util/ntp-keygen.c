@@ -159,7 +159,9 @@ u_long	asn2ntp		P((ASN1_TIME *));
 extern char *optarg;		/* command line argument */
 int	debug = 0;		/* debug, not de bug */
 int	rval;			/* return status */
+#ifdef OPENSSL
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
+#endif
 int	nkeys = 0;		/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 char	*hostname;		/* host name (subject name) */
@@ -221,7 +223,9 @@ main(
 	EVP_PKEY *pkey_iff = NULL; /* IFF parameters */
 	EVP_PKEY *pkey_gq = NULL; /* GQ parameters */
 	EVP_PKEY *pkey_mv = NULL; /* MV parameters */
+#endif
 	int	md5key = 0;	/* generate MD5 keys */
+#ifdef OPENSSL
 	int	hostkey = 0;	/* generate RSA keys */
 	int	iffkey = 0;	/* generate IFF parameters */
 	int	gqpar = 0;	/* generate GQ parameters */
@@ -265,10 +269,12 @@ main(
 	/*
 	 * Process options, initialize host name and timestamp.
 	 */
+#ifdef OPENSSL
 	gethostname(hostbuf, MAXHOSTNAME);
 	hostname = hostbuf;
 	trustname = hostbuf;
 	passwd1 = hostbuf;
+#endif
 #ifndef SYS_WINNT
 	gettimeofday(&tv, 0);
 #else
@@ -277,15 +283,22 @@ main(
 	epoch = tv.tv_sec;
 	rval = 0;
 	while ((temp = getopt(argc, argv,
-	    "c:deGgHIi:Mm:nPp:q:S:s:TV:v:")) != -1) {
+#ifdef OPENSSL
+	    "c:deGgHIi:Mm:nPp:q:S:s:TV:v:"
+#else
+	    "dM"
+#endif
+	    )) != -1) {
 		switch(temp) {
 
+#ifdef OPENSSL
 		/*
 		 * -c select public certificate type
 		 */
 		case 'c':
 			scheme = optarg;
 			continue;
+#endif
 
 		/*
 		 * -d debug
@@ -294,47 +307,59 @@ main(
 			debug++;
 			continue;
 
+#ifdef OPENSSL
 		/*
 		 * -e write identity keys
 		 */
 		case 'e':
 			iffsw++;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -G generate GQ parameters and keys
 		 */
 		case 'G':
 			gqpar++;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -g update GQ keys
 		 */
 		case 'g':
 			gqkey++;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -H generate host key (RSA)
 		 */
 		case 'H':
 			hostkey++;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -I generate IFF parameters
 		 */
 		case 'I':
 			iffkey++;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -i set issuer name
 		 */
 		case 'i':
 			trustname = optarg;
 			continue;
+#endif
 
 		/*
 		 * -M generate MD5 keys
@@ -343,7 +368,7 @@ main(
 			md5key++;
 			continue;
 
-
+#ifdef OPENSSL
 		/*
 		 * -m select modulus (256-2048)
 		 */
@@ -352,49 +377,63 @@ main(
 				fprintf(stderr,
 				    "invalid option -m %s\n", optarg);	
 			continue;
-		
+#endif
+
+#ifdef OPENSSL
 		/*
 		 * -P generate PC private certificate
 		 */
 		case 'P':
 			exten = EXT_KEY_PRIVATE;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -p output private key password
 		 */
 		case 'p':
 			passwd2 = optarg;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -q input private key password
 		 */
 		case 'q':
 			passwd1 = optarg;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -S generate sign key (RSA or DSA)
 		 */
 		case 'S':
 			sign = optarg;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -s set subject name
 		 */
 		case 's':
 			hostname = optarg;
 			continue;
-		
+#endif
+
+#ifdef OPENSSL
 		/*
 		 * -T trusted certificate (TC scheme)
 		 */
 		case 'T':
 			exten = EXT_KEY_TRUST;
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -V <keys> generate MV parameters
 		 */
@@ -404,7 +443,9 @@ main(
 				fprintf(stderr,
 				    "invalid option -V %s\n", optarg);
 			continue;
+#endif
 
+#ifdef OPENSSL
 		/*
 		 * -v <key> update MV keys
 		 */
@@ -414,6 +455,7 @@ main(
 				fprintf(stderr,
 				    "invalid option -v %s\n", optarg);
 			continue;
+#endif
 
 		/*
 		 * None of the above.
@@ -446,6 +488,7 @@ main(
 	fprintf(stderr,
 	    "Random seed file %s %u bytes\n", pathbuf, temp);
 	RAND_add(&epoch, sizeof(epoch), 4.0);
+#endif
 
 	/*
 	 * Generate new parameters and keys as requested. These replace
@@ -453,6 +496,7 @@ main(
 	 */
 	if (md5key)
 		gen_md5("MD5");
+#ifdef OPENSSL
 	if (hostkey)
 		pkey_host = genkey("RSA", "host");
 	if (sign != NULL)
@@ -1884,7 +1928,6 @@ cb	(
 		break;
 	}
 }
-#endif /* OPENSSL */
 
 
 /*
@@ -1908,6 +1951,7 @@ genkey(
 	rval = -1;
 	return (NULL);
 }
+#endif /* OPENSSL */
 
 
 /*
