@@ -790,12 +790,12 @@ receive(
 		 * If the inbound packet is correctly authenticated and
 		 * enabled, a symmetric passive association is
 		 * mobilized. If not but correctly authenticated, a
-		 * symmetric active response is sent. A crypto-NAK is
-		 * returned if authentication fails. 
+		 * symmetric active response is sent. If authentication
+		 * fails, send a crypto-NAK packet. 
 		 */
 		if (!AUTH(restrict_mask & RES_DONTTRUST, is_authentic))
 		    {
-			if (skeyid)
+			if (is_authentic == AUTH_ERROR)
 				fast_xmit(rbufp, MODE_ACTIVE, 0,
 				    restrict_mask);
 			return;			/* bad auth */
