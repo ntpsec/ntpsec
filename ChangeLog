@@ -1,5 +1,7 @@
 2000-03-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_resolver.c (ntp_res): Authenticate the keyid.
+
 	* ntpd/ntp_crypto.c (crypto_line): Fix definition
 	(crypto_read): Ditto.
 

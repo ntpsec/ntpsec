@@ -217,6 +217,15 @@ ntp_res(void)
 	}
 #endif
 
+	/* check out auth stuff */
+	if (sys_authenticate) {
+		if (!authistrusted(req_keyid)) {
+			msyslog(LOG_ERR, "invalid request keyid %08x",
+			    req_keyid );
+			exit(1);
+		}
+	}
+
 	/*
 	 * Make a first cut at resolving the bunch
 	 */

@@ -524,7 +524,7 @@ receive(
 		 * to it. If something goes wrong, carefully pry the new
 		 * association away and return its marbles to the candy
 		 * store.
-		*/
+		 */
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
@@ -578,6 +578,17 @@ receive(
 			break;
 		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_BURST;
 		peer->hmode = MODE_CLIENT;
+
+		/*
+		 * Crank up the resolver to fetch the canonical name and
+		 * hope it lands before the protocol gets wound up.
+		 */
+
+printf("bcst resolve %08x, %d\n", peer->srcadr.sin_addr.s_addr,
+    peer->associd);
+
+		ntp_res_send(NULL, NULL, peer->srcadr.sin_addr.s_addr,
+		    peer->associd);
 		break;
 
 	case AM_POSSBCL:
@@ -1243,7 +1254,8 @@ clock_filter(
 	 * Compute the offset, delay, variance (squares) and error
 	 * bound. The offset, delay and variance are weighted by the
 	 * reciprocal of distance and normalized. The error bound is
-	 * weighted exponentially.
+	 * weighted exponentially. When no acceptable samples remain in
+	 * the shift register, quietly tiptoe home.
 	 */
 	off = dly = var = dsp = dtemp = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
@@ -1259,6 +1271,8 @@ clock_filter(
 			    SQUARE(distance[i]);
 		}
 	}
+	if (dtemp == 0)
+		return;
 	peer->delay = dly / dtemp;
 	peer->variance = min(var / SQUARE(dtemp), MAXDISPERSE);
 	peer->disp = min(dsp, MAXDISPERSE);
