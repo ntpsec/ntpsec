@@ -11,8 +11,6 @@
 #include "recvbuff.h"
 #include "iosignal.h"
 
-extern int debug;
-
 /*
  * Memory allocation
  */

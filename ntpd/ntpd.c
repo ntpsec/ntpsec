@@ -146,11 +146,6 @@ int initializing;
  */
 extern const char *Version;
 
-/*
- * Alarm flag.	Imported from timer module
- */
-extern int alarm_flag;
-
 int was_alarmed;
 
 #ifdef DECL_SYSCALL

@@ -20,8 +20,6 @@
 # include "ntp_timer.h"
 #endif
 
-extern int debug;
-
 /*
  * These routines provide support for the event timer.	The timer is
  * implemented by an interrupt routine which sets a flag once every

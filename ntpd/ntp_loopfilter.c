@@ -134,36 +134,6 @@ double	last_offset;		/* last clock offset (s) */
 double	allan_xpt;		/* Allan intercept (s) */
 double	sys_error;		/* system standard error (s) */
 
-/*
- * Imported from ntp_proto.c module
- */
-extern double sys_rootdelay;	/* root delay */
-extern double sys_rootdispersion; /* root dispersion */
-extern s_char sys_precision;	/* local clock precision */
-extern struct peer *sys_peer;	/* system peer pointer */
-extern u_char sys_leap;		/* system leap bits */
-extern l_fp sys_reftime;	/* time at last update */
-
-/*
- * Imported from the library
- */
-extern double sys_maxfreq;	/* max frequency correction */
-
-/*
- * Imported from ntp_io.c module
- */
-extern struct interface *loopback_interface;
-
-/*
- * Imported from ntpd.c module
- */
-extern int debug;		/* global debug flag */
-
-/*
- * Imported from ntp_io.c module
- */
-extern u_long current_time;	/* like it says, in seconds */
-
 #if defined(KERNEL_PLL)
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \

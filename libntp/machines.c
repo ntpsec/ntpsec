@@ -235,7 +235,6 @@ static ULONGLONG LastTimerTime = 0;
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
 
 
-extern int debug;
 int
 gettimeofday(
 	struct timeval *tv

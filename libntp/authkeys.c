@@ -42,9 +42,6 @@ struct savekey {
 #define	KEY_DES		0x100	/* this is a DES type key */
 #define	KEY_MD5		0x200	/* this is a MD5 type key */
 
-extern int debug;		/* Volkswagen after life */
-extern u_long current_time;	/* time since restart */
-
 /*
  * The hash table. This is indexed by the low order bits of the
  * keyid. We make this fairly big for potentially busy servers.

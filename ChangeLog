@@ -1,3 +1,18 @@
+1999-07-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/authkeys.c:
+	* libntp/ieee754io.c:
+	* libntp/iosignal.c:
+	* libntp/machines.c:
+	* libntp/mexit.c:
+	* libntp/recvbuff.c:
+	* ntpd/ntp_filegen.c:
+	* ntpd/ntp_loopfilter.c:
+	* ntpd/ntp_request.c:
+	* ntpd/ntp_timer.c:
+	* ntpd/ntpd.c: Compile/lint cleanup
+	From: Allen Smith <easmith@beatrice.rutgers.edu>
+	
 1999-07-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_cv_make_ntptime): Add tv_nsec check.

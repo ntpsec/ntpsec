@@ -50,10 +50,6 @@
  */
 #define FGEN_AGE_SECS   (24*60*60) /* life time of FILEGEN_AGE in seconds */
 
-#ifdef DEBUG
-extern int debug;
-#endif
-
 static	void	filegen_open	P((FILEGEN *, u_long));
 static	int	valid_fileref	P((char *, char *));
 #ifdef	UNUSED

@@ -39,7 +39,6 @@
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "iosignal.h"
-extern int debug;
 
 #if defined(HAVE_SIGNALED_IO)
 static int sigio_block_count = 0;

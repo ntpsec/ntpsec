@@ -22,7 +22,6 @@ static void put_byte P((unsigned char *, offsets_t, int *, unsigned char));
 #endif
 
 #ifdef LIBDEBUG
-extern int debug;
 
 #include "lib_strbuf.h"
 

@@ -14,7 +14,6 @@ service_exit(
 	int status
 	)
 {
-	extern int debug;
 
 	if (debug) /* did not become a service, simply exit */
 	    ExitThread((DWORD)status);

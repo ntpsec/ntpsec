@@ -163,47 +163,6 @@ u_long errorcounter[INFO_ERR_AUTH+1];	/* lazy way to count errors, indexed */
 /* by the error code */
 
 /*
- * Imported from ntp_proto
- */
-extern int sys_authenticate;
-
-/*
- * Imported from the I/O module
- */
-extern struct interface *any_interface;
-
-/*
- * Imported from the main routines
- */
-extern int debug;
-
-/*
- * Imported from the timer module
- */
-extern u_long current_time;
-
-/*
- * Imported from ntp_loopfilter.c
- */
-extern int pll_control;
-extern int kern_enable;
-extern int ntp_enable;
-extern u_long pps_control;
-
-/*
- * Imported from ntp_monitor.c
- */
-extern int mon_enabled;
-
-/*
- * Imported from ntp_util.c
- */
-extern int stats_control;
-
-extern struct peer *peer_hash[];
-extern struct peer *sys_peer;
-
-/*
  * A hack.  To keep the authentication module clear of ntp-ism's, we
  * include a time reset variable for its stats here.
  */
@@ -1057,14 +1016,6 @@ io_stats(
 	 */
 	extern u_long io_timereset;
 	
-	extern u_long packets_dropped;
-	extern u_long packets_ignored;
-	extern u_long packets_received;
-	extern u_long packets_sent;
-	extern u_long packets_notsent;
-	extern u_long handler_calls;
-	extern u_long handler_pkts;
-
 	io = (struct info_io_stats *)prepare_pkt(srcadr, inter, inpkt,
 						 sizeof(struct info_io_stats));
 
@@ -1101,7 +1052,6 @@ timer_stats(
 	/*
 	 * Importations from the timer module
 	 */
-	extern u_long alarm_overflow;
 	extern u_long timer_timereset;
 	extern u_long timer_overflows;
 	extern u_long timer_xmtcalls;
