@@ -29,6 +29,7 @@ arlib/missing
 arlib/mkinstalldirs
 br-flock
 clockstuff/Makefile.in
+compile
 config.h.in
 configure
 html/man/*

@@ -723,11 +723,11 @@ receive(
 			crypto_recv(peer, rbufp);
 			if (peer->flash) {
 				unpeer(peer);
-				mskadr_sin.sin_addr.s_addr =
-				    ~(u_int32)0;
+				mskadr_sin.sin_addr.s_addr =~(u_int32)0;
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin,
-				    RESM_NTPONLY, RES_DONTSERVE);
+				    RESM_NTPONLY, RES_DONTSERVE |
+				    RES_TIMEOUT);
 			}
 		}
 #endif /* OPENSSL */
@@ -796,8 +796,8 @@ receive(
 		}
 #endif /* OPENSSL */
 	}
-	if (peer->hmode == MODE_BROADCAST &&
-	    (restrict_mask & RES_DONTTRUST))	/* test 4 */
+	if (hismode == MODE_BROADCAST && (restrict_mask &
+	    RES_DONTTRUST))			/* test 4 */
 		peer->flash |= TEST4;		/* access denied */
 	NTOHL_FP(&pkt->xmt, &p_xmt);		/* test 1 */
 	if (L_ISEQU(&peer->org, &p_xmt))
@@ -1034,20 +1034,20 @@ receive(
 			 * server, we add KOD restrict as well.
 			 */
 			if (peer->flash & TEST12) {
-				int resflag;
+				int resflag = RES_DONTSERVE |
+				    RES_TIMEOUT;
 
 				if (!(peer->flags & FLAG_CONFIG))
 					unpeer(peer);
 				else
 					peer_clear(peer);
+				peer->flash |= TEST4;
+				memcpy(&peer->refid, KOD_CRYP, 4);
 				mskadr_sin.sin_addr.s_addr =
 				    ~(u_int32)0;
-				if (hismode == MODE_BROADCAST ||
-				    hismode == MODE_SERVER)
-					resflag = RES_DONTSERVE;
-				else
-					resflag = RES_DONTSERVE |
-					    RES_DEMOBILIZE;
+				if (hismode != MODE_BROADCAST &&
+				    hismode != MODE_SERVER)
+					resflag |= RES_DEMOBILIZE;
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin,
 				    RESM_NTPONLY, resflag);
@@ -1141,28 +1141,28 @@ process_packet(
 	 * A kiss-of-death (kod) packet is returned by a server in case
 	 * the client is denied access. It consists of the client
 	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field the ASCII
-	 * string "DENY". If the packet originate timestamp matches the
-	 * association transmit timestamp the kod is legitimate. If the
-	 * peer leap bits indicate never synchronized, this must be
-	 * access deny and the association is disabled; otherwise this
-	 * must be a limit reject. In either case a naughty message is
-	 * forced to the system log.
+	 * synchronized, stratum zero and reference ID field an ASCII
+	 * string. If the packet originate timestamp matches the
+	 * association transmit timestamp the kod is legitimate and
+	 * should contain the ASCII code CRYP, DENY or LIMT. If DENY or
+	 * CRYP, the TEST4 bit is set and no further messages will be
+	 * sent to the server. In any case a naughty message is semt to
+	 * the system log.
 	 */
-	if (pleap == LEAP_NOTINSYNC && pstratum >= STRATUM_UNSPEC &&
-	    memcmp(&pkt->refid, "DENY", 4) == 0) {
-		if (peer->leap == LEAP_NOTINSYNC) {	/* test 4 */
-			peer->stratum = STRATUM_UNSPEC;
+	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
+		char code[5];
+
+		memcpy(code, &pkt->refid, 4);
+		code[4] = '\0';
+		if (strcmp(code, KOD_CRYP) != 0 && strcmp(code,
+		    KOD_DENY) != 0 && strcmp(code, KOD_RATE) != 0)
+			return;
+
+		peer->stratum = STRATUM_UNSPEC;
+		peer->refid = pkt->refid;
+		if (strcmp(code, KOD_RATE) != 0)
 			peer->flash |= TEST4;		/* denied */
-			memcpy(&peer->refid, &pkt->refid, 4);
-			msyslog(LOG_INFO, "access denied");
-		} else {
-			msyslog(LOG_INFO, "limit reject");
-		}
-#if DEBUG
-		if (debug)
-			printf("packet: kissed by a frog\n");
-#endif
+		msyslog(LOG_INFO, "kiss-of-death received %s", code);
 		return;
 	}
 
@@ -1365,6 +1365,7 @@ clock_update(void)
 		clear_all();
 		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
+		memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronisation lost");
@@ -1385,6 +1386,10 @@ clock_update(void)
 		sys_stratum = sys_peer->stratum + 1;
 		if (sys_stratum == 1)
 			sys_refid = sys_peer->refid;
+		if (sys_stratum == 1)
+			sys_refid = sys_peer->refid;;
+		if (sys_stratum == STRATUM_UNSPEC)
+			memcpy(&sys_refid, "UNSP", 4);
 		else
 			sys_refid = 0;  /* <**** REFID case to solve *****> */
 		sys_reftime = sys_peer->rec;
@@ -1518,11 +1523,6 @@ peer_clear(
 	 * purged, too. This makes it much harder to sneak in some
 	 * unauthenticated data in the clock filter.
 	 */
-#ifdef DEBUG
-	if (debug)
-		printf("peer_clear: at %ld assoc ID %d\n", current_time,
-		    peer->associd);
-#endif
 #ifdef OPENSSL
 	key_expire(peer);
 	if (peer->pkey != NULL)
@@ -1558,11 +1558,29 @@ peer_clear(
 	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
+	peer->stratum = STRATUM_UNSPEC;
 #ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
 		peer->leap = LEAP_NOTINSYNC;
-		peer->stratum = STRATUM_UNSPEC;
+		if (peer->cast_flags & MDF_ACAST)
+			memcpy(&peer->refid, "ACST", 4);
+		else if (peer->cast_flags & MDF_MCAST)
+			memcpy(&peer->refid, "MCST", 4);
+		else if (peer->cast_flags & MDF_BCAST)
+			memcpy(&peer->refid, "BCST", 4);
+		else
+			memcpy(&peer->refid, "INIT", 4);
 	}
+#else
+	peer->leap = LEAP_NOTINSYNC;
+	if (peer->cast_flags & MDF_ACAST)
+		memcpy(&peer->refid, "ACST", 4);
+	else if (peer->cast_flags & MDF_MCAST)
+		memcpy(&peer->refid, "MCST", 4);
+	else if (peer->cast_flags & MDF_BCAST)
+		memcpy(&peer->refid, "BCST", 4);
+	else
+		memcpy(&peer->refid, "INIT", 4);
 #endif
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -1579,6 +1597,11 @@ peer_clear(
 		peer->hmode = MODE_CLIENT;
 	}
 	peer->nextdate += (u_int)RANDOM % START_DELAY;
+#ifdef DEBUG
+	if (debug)
+		printf("peer_clear: at %ld assoc ID %d\n",
+		    current_time, peer->associd);
+#endif
 }
 
 
@@ -2677,18 +2700,20 @@ fast_xmit(
 	 * otherwise, just drop it.
 	 */
 	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+		char	*code;
+
 		if (!(mask & RES_DEMOBILIZE))
 			return;
 
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
-		memcpy(&xpkt.refid, "DENY", 4);
-#if DEBUG
-		if (debug)
-			printf(
-			    "fast_xmit: kiss-of-death packet sent\n");
-#endif
+		if (mask & RES_DONTSERVE)
+			code = KOD_DENY;
+		else
+			code = KOD_RATE;
+		memcpy(&xpkt.refid, code, 4);
+		msyslog(LOG_INFO, "kiss-of-death sent %s", code);
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
@@ -2905,11 +2930,11 @@ init_proto(void)
 	 */
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
+	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
 	sys_jitter = LOGTOD(sys_precision);
 	sys_rootdelay = 0;
 	sys_rootdispersion = 0;
-	sys_refid = 0;
 	L_CLR(&sys_reftime);
 	sys_peer = NULL;
 	sys_survivors = 0;

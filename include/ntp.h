@@ -825,11 +825,12 @@ struct restrictlist6 {
 #define RES_LIMITED		0x100   /* limit per net number of clients */
 #define	RES_VERSION		0x200	/* serve only current version */
 #define RES_DEMOBILIZE		0x400	/* demobilize association */
+#define RES_TIMEOUT		0x800	/* timeout this entry */
 
 #define	RES_ALLFLAGS \
     (RES_IGNORE | RES_DONTSERVE | RES_DONTTRUST | RES_NOQUERY | \
      RES_NOMODIFY | RES_NOPEER | RES_NOTRAP | RES_LPTRAP | \
-     RES_LIMITED | RES_VERSION | RES_DEMOBILIZE)
+     RES_LIMITED | RES_VERSION | RES_DEMOBILIZE | RES_TIMEOUT)
 
 /*
  * Match flags
@@ -844,6 +845,12 @@ struct restrictlist6 {
 #define	RESTRICT_UNFLAG		2	/* remove flags from restrict entry */
 #define	RESTRICT_REMOVE		3	/* remove a restrict entry */
 
+/*
+ * Kiss-of-death codes
+ */
+#define KOD_DENY		"DENY"	/* access denied */
+#define KOD_CRYP		"CRYP"	/* crypto failure */
+#define KOD_RATE		"RATE"	/* rate limit */
 
 /*
  * Experimental alternate selection algorithm identifiers

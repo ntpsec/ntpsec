@@ -1566,6 +1566,7 @@ static struct resflags resflags[] = {
 	{ "limited",	RES_LIMITED },
 	{ "version",	RES_VERSION },
 	{ "kod",	RES_DEMOBILIZE },
+	{ "timeout",	RES_TIMEOUT },
 
 	{ "",		0 }
 };
