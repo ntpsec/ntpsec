@@ -140,20 +140,20 @@ int nosymlinks = 0;		/* Just create the (timestamped) files? */
 int trash = 0;			/* Trash old files? */
 int errflag = 0;
 
-char *path_keys;
-char *link_keys;
+char *f1_keys;
+char *f2_keys;
 
-char *path_keysdir = NTP_KEYSDIR;
-char *link_keysdir;
+char *f1_keysdir = NTP_KEYSDIR;
+char *f2_keysdir;
 
-char *path_publickey;
-char *link_publickey;
+char *f1_publickey;
+char *f2_publickey;
 
-char *path_privatekey;
-char *link_privatekey;
+char *f1_privatekey;
+char *f2_privatekey;
 
-char *path_dhparms;
-char *link_dhparms;
+char *f1_dhparms;
+char *f2_dhparms;
 
 
 /* Stubs and hacks so we can link with ntp_config.o */
@@ -236,15 +236,15 @@ crypto_config(
 	switch (item) {
 	    case CRYPTO_CONF_DH:
 		if (debug) printf("crypto_config: DH/<%d> <%s>\n", item, cp);
-		path_dhparms = strdup(cp);
+		f1_dhparms = strdup(cp);
 		break;
 	    case CRYPTO_CONF_PRIV:
 		if (debug) printf("crypto_config: PRIVATEKEY/<%d> <%s>\n", item, cp);
-		path_privatekey = strdup(cp);
+		f1_privatekey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_PUBL:
 		if (debug) printf("crypto_config: PUBLICKEY/<%d> <%s>\n", item, cp);
-		path_publickey = strdup(cp);
+		f1_publickey = strdup(cp);
 		break;
 	    default:
 		if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
@@ -351,7 +351,7 @@ getauthkeys(
 	)
 {
 	if (debug) printf("getauthkeys: got <%s>\n", keyfile);
-	path_keys = strdup(keyfile);
+	f1_keys = strdup(keyfile);
 	return;
 }
 
@@ -508,110 +508,110 @@ main(
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
-	if (!path_keysdir) {
+	if (!f1_keysdir) {
 		/* Shouldn't happen... */
-		path_keysdir = "PATH_KEYSDIR";
+		f1_keysdir = "PATH_KEYSDIR";
 	}
-	if (*path_keysdir != '/') {
+	if (*f1_keysdir != '/') {
 		fprintf(stderr,
 			"%s: keysdir path <%s> doesn't begin with a /\n",
-			progname, path_keysdir);
+			progname, f1_keysdir);
 		exit(1);
 	}
-	snifflink(path_keysdir, &link_keysdir);
+	snifflink(f1_keysdir, &f2_keysdir);
 
-	if (!link_keys) {
+	if (!f2_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "ntp.keys.%lu",
 			 ntptime);
-		link_keys = strdup(pathbuf);
+		f2_keys = strdup(pathbuf);
 	}
-	if (!path_keys) {
+	if (!f1_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntp.keys",
 			 NTP_KEYSDIR);
-		path_keys = strdup(pathbuf);
+		f1_keys = strdup(pathbuf);
 	}
-	if (*path_keys != '/') {
+	if (*f1_keys != '/') {
 		fprintf(stderr,
 			"%s: keys path <%s> doesn't begin with a /\n",
-			progname, path_keys);
+			progname, f1_keys);
 		exit(1);
 	}
-	snifflink(path_keys, &link_keys);
+	snifflink(f1_keys, &f2_keys);
 
-	if (!link_publickey) {
+	if (!f2_publickey) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey_%s.%lu",
 			 hostname, ntptime);
-		link_publickey = strdup(pathbuf);
+		f2_publickey = strdup(pathbuf);
 	}
-	if (!path_publickey) {
+	if (!f1_publickey) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_%s",
-			 path_keysdir, hostname);
-		path_publickey = strdup(pathbuf);
+			 f1_keysdir, hostname);
+		f1_publickey = strdup(pathbuf);
 	}
-	if (*path_publickey != '/') {
+	if (*f1_publickey != '/') {
 		fprintf(stderr,
 			"%s: publickey path <%s> doesn't begin with a /\n",
-			progname, path_publickey);
+			progname, f1_publickey);
 		exit(1);
 	}
-	snifflink(path_publickey, &link_publickey);
+	snifflink(f1_publickey, &f2_publickey);
 
-	if (!link_privatekey) {
+	if (!f2_privatekey) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey.%lu",
 			 ntptime);
-		link_privatekey = strdup(pathbuf);
+		f2_privatekey = strdup(pathbuf);
 	}
-	if (!path_privatekey) {
+	if (!f1_privatekey) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey",
-			 path_keysdir);
-		path_privatekey = strdup(pathbuf);
+			 f1_keysdir);
+		f1_privatekey = strdup(pathbuf);
 	}
-	if (*path_privatekey != '/') {
+	if (*f1_privatekey != '/') {
 		fprintf(stderr,
 			"%s: privatekey path <%s> doesn't begin with a /\n",
-			progname, path_privatekey);
+			progname, f1_privatekey);
 		exit(1);
 	}
-	snifflink(path_privatekey, &link_privatekey);
+	snifflink(f1_privatekey, &f2_privatekey);
 
-	if (!link_dhparms) {
+	if (!f2_dhparms) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey_dh.%lu",
 			 ntptime);
-		link_dhparms = strdup(pathbuf);
+		f2_dhparms = strdup(pathbuf);
 	}
-	if (!path_dhparms) {
+	if (!f1_dhparms) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_dh",
-			 path_keysdir);
-		path_dhparms = strdup(pathbuf);
+			 f1_keysdir);
+		f1_dhparms = strdup(pathbuf);
 	}
-	if (*path_dhparms != '/') {
+	if (*f1_dhparms != '/') {
 		fprintf(stderr,
 			"%s: dhparms path <%s> doesn't begin with a /\n",
-			progname, path_dhparms);
+			progname, f1_dhparms);
 		exit(1);
 	}
-	snifflink(path_dhparms, &link_dhparms);
+	snifflink(f1_dhparms, &f2_dhparms);
 
 	printf("After config:\n");
-	printf("path_keysdir    = <%s> -> <%s>\n"
-	       , path_keysdir? path_keysdir: ""
-	       , link_keysdir? link_keysdir: ""
+	printf("keysdir    = <%s> -> <%s>\n"
+	       , f1_keysdir? f1_keysdir: ""
+	       , f2_keysdir? f2_keysdir: ""
 		);
-	printf("path_keys       = <%s> -> <%s>\n"
-	       , path_keys? path_keys: ""
-	       , link_keys? link_keys: ""
+	printf("keys       = <%s> -> <%s>\n"
+	       , f1_keys? f1_keys: ""
+	       , f2_keys? f2_keys: ""
 		);
-	printf("path_publickey  = <%s> -> <%s>\n"
-	       , path_publickey? path_publickey: ""
-	       , link_publickey? link_publickey: ""
+	printf("publickey  = <%s> -> <%s>\n"
+	       , f1_publickey? f1_publickey: ""
+	       , f2_publickey? f2_publickey: ""
 		);
-	printf("path_privatekey = <%s> -> <%s>\n"
-	       , path_privatekey? path_privatekey: ""
-	       , link_privatekey? link_privatekey: ""
+	printf("privatekey = <%s> -> <%s>\n"
+	       , f1_privatekey? f1_privatekey: ""
+	       , f2_privatekey? f2_privatekey: ""
 		);
-	printf("path_dhparms    = <%s> -> <%s>\n"
-	       , path_dhparms? path_dhparms: ""
-	       , link_dhparms? link_dhparms: ""
+	printf("dhparms    = <%s> -> <%s>\n"
+	       , f1_dhparms? f1_dhparms: ""
+	       , f2_dhparms? f2_dhparms: ""
 		);
 
 	/*
@@ -626,10 +626,6 @@ main(
 	  - - - make any needed directories?
 	  - - - make the link
 	  - - - remove the old file (if (trash))
-
-	  We'll probably learn about how the link should be installed.
-	  We will start by using fully-rooted paths, but we should use
-	  whatever information we have from the old link.
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
