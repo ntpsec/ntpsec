@@ -8,6 +8,6 @@ DISTCLEANFILES = $(EXTRA_PROGRAMS)
 #EXTRA_DIST= TAGS
 
 check-local: @DCFD@
-	case "$noinst_PROGRAMS" in	\
+	case "$(noinst_PROGRAMS)" in	\
 	 *dcfd*) ./dcfd -Y ;;		\
 	esac
