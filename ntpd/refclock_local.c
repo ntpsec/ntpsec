@@ -160,7 +160,7 @@ local_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = sys_precision;
-	peer->stratum = STRATUM;
+	pp->stratum = STRATUM;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 #if defined(VMS) && defined(VMS_LOCALUNIT)
