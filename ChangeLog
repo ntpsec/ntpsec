@@ -1,3 +1,9 @@
+2001-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c (local_clock): Just use sys_jitter in the
+	calculation for rootdispersion.
+	From Dave Mills.
+
 2001-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): Fix documentation. Set

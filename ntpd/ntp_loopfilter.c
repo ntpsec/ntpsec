@@ -576,7 +576,7 @@ local_clock(
 	 */
 	last_time = current_time;
 	last_offset = clock_offset;
-	dtemp = peer->disp + SQRT(peer->jitter + SQUARE(sys_jitter));
+	dtemp = peer->disp + sys_jitter;
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
