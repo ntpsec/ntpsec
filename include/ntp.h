@@ -483,7 +483,7 @@ struct peer {
  	(sizeof(struct sockaddr_in)) : (sizeof(struct sockaddr_in6)))
 
 #define ANYSOCK(sock) \
-	memset(((struct sockaddr_in *)sock), 0, \
+	memset(((struct sockaddr_storage *)sock), 0, \
 	    sizeof(struct sockaddr_storage))
 
 #define ANY_INTERFACE_CHOOSE(sock) \
