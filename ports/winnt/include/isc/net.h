@@ -265,6 +265,11 @@ isc_net_aton(const char *cp, struct in_addr *addr);
 #define inet_aton isc_net_aton
 #endif
 
+/* Socket Initialization Code */
+
+BOOL
+Win32InitSockets();
+
 ISC_LANG_ENDDECLS
 
 #endif /* ISC_NET_H */

@@ -117,3 +117,21 @@ isc_net_probeipv6(void) {
 	initialize();
 	return (ipv6_result);
 }
+/*
+ * Initialize socket services
+ */
+BOOL Win32InitSockets() {
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+
+	/* Need Winsock 2.0 or better */
+	wVersionRequested = MAKEWORD(2, 0);
+ 
+	err = WSAStartup(wVersionRequested, &wsaData);
+	if ( err != 0 ) {
+		/* Tell the user that we could not find a usable Winsock DLL */
+		return(FALSE);
+	}
+	return(TRUE);
+}
