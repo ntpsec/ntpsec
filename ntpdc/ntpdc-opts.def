@@ -170,9 +170,6 @@ flag = {
 
 detail = <<-  _END_DETAIL
 	The ntpq utility program is used to monitor NTP daemon ntpd operations
-	and determine performance. It uses the standard NTP mode 6 control
-	message formats defined in Appendix B of the NTPv3 specification
-	RFC1305. The same formats are used in NTPv4, although some of the
-	variables have changed and new ones added. The description on this
-	page is for the NTPv4 variables.
+	and determine performance. It uses NTP mode 7 control message formats
+	described in the source code.
 	_END_DETAIL;
