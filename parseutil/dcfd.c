@@ -36,6 +36,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <syslog.h>
+#include <time.h>
 
 /*
  * NTP compilation environment
@@ -200,9 +201,9 @@ typedef struct clocktime clocktime_t;
 #define TIMES24(_X_) (((_X_) << 4) + ((_X_) << 3))      /* *16 + *8 */
 #define TIMES60(_X_) ((((_X_) << 4)  - (_X_)) << 2)     /* *(16 - 1) *4 */
 /*
- * generic abs() function
+ * generic l_abs() function
  */
-#define abs(_x_)     (((_x_) < 0) ? -(_x_) : (_x_))
+#define l_abs(_x_)     (((_x_) < 0) ? -(_x_) : (_x_))
 
 /*
  * conversion related return/error codes
@@ -881,9 +882,9 @@ pr_timeval(
 	static char buf[20];
 
 	if (val->tv_sec == 0)
-	    sprintf(buf, "%c0.%06ld", (val->tv_usec < 0) ? '-' : '+', (long int)abs(val->tv_usec));
+	    sprintf(buf, "%c0.%06ld", (val->tv_usec < 0) ? '-' : '+', (long int)l_abs(val->tv_usec));
 	else
-	    sprintf(buf, "%ld.%06ld", (long int)val->tv_sec, (long int)abs(val->tv_usec));
+	    sprintf(buf, "%ld.%06ld", (long int)val->tv_sec, (long int)l_abs(val->tv_usec));
 	return buf;
 }
 
@@ -985,8 +986,8 @@ update_drift(
 		LPRINTF("update_drift: drift_comp %ld ", (long int)accum_drift);
 		fdrift = (fdrift * 1000) / (1<<USECSCALE);
 		fprintf(df, "%4d.%03d %c%ld.%06ld %.24s\n", idrift, fdrift,
-			(offset < 0) ? '-' : '+', (long int)(abs(offset) / 1000000),
-			(long int)(abs(offset) % 1000000), asctime(localtime(&reftime)));
+			(offset < 0) ? '-' : '+', (long int)(l_abs(offset) / 1000000),
+			(long int)(l_abs(offset) % 1000000), asctime(localtime(&reftime)));
 		fclose(df);
 		LPRINTF("update_drift: %d.%03d ppm ", idrift, fdrift);
 	}
@@ -1017,8 +1018,8 @@ adjust_clock(
 	}
 
 	toffset = *offset;
-	toffset.tv_sec  = abs(toffset.tv_sec);
-	toffset.tv_usec = abs(toffset.tv_usec);
+	toffset.tv_sec  = l_abs(toffset.tv_sec);
+	toffset.tv_usec = l_abs(toffset.tv_usec);
 	if (timercmp(&toffset, &max_adj_offset, >))
 	{
 		/*
@@ -1806,7 +1807,7 @@ main(
 					       (clock_time.flags & DCFB_ANNOUNCE) ? "A" : "_",
 					       (clock_time.flags & DCFB_DST) ? "D" : "_",
 					       (clock_time.flags & DCFB_LEAP) ? "L" : "_",
-					       (lasterror < 0) ? '-' : '+', abs(lasterror) / 1000000, abs(lasterror) % 1000000
+					       (lasterror < 0) ? '-' : '+', l_abs(lasterror) / 1000000, l_abs(lasterror) % 1000000
 					       );
 
 					if (trace && (i == 0))

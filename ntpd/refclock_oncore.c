@@ -456,13 +456,15 @@ oncore_start(
 		instance->pps_p.clear_offset.tv_sec = 0;
 		instance->pps_p.clear_offset.tv_nsec = 0;
 	}
-/*
-	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) 
-		instance->pps_p.mode &= ~(PPS_HARDPPSONCLEAR|PPS_HARDPPSONASSERT);
-*/
+	instance->pps_p.mode |= PPS_TSFMT_TSPEC;
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
 		exit(1);
+	}
+	if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS,
+	    instance->pps_p.mode & (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR),
+	    PPS_TSFMT_TSPEC) < 0) {
+		perror("time_pps_kcbind");
 	}
 #endif
 	instance->pp = pp;
@@ -1227,6 +1229,7 @@ oncore_msg_En(
 	struct timeval	*tsp = 0;
 #endif
 #ifdef HAVE_PPSAPI
+	struct timespec timeout;
 	pps_info_t pps_i;
 #else  /* ! HAVE_PPSAPI */
 #ifdef HAVE_CIOGETEV
@@ -1256,7 +1259,10 @@ oncore_msg_En(
 
 #ifdef HAVE_PPSAPI
 	j = instance->ev_serial;
-	if (time_pps_fetch(instance->pps_h, 0, &pps_i, 0) < 0) {
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = 0;
+	if (time_pps_fetch(instance->pps_h, PPS_TSFMT_TSPEC, &pps_i,
+	    &timeout) < 0) {
 		printf("ONCORE: time_pps_fetch failed\n");
 		return;
 	}

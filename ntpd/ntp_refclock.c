@@ -621,7 +621,7 @@ refclock_gtlin(
 #endif
 #ifdef HAVE_PPSAPI
 	pps_info_t pi;
-	struct timespec *tsp;
+	struct timespec timeout, *tsp;
 	double a;
 #endif
 
@@ -637,7 +637,10 @@ refclock_gtlin(
 	trtmp = rbufp->recv_time;
 
 #ifdef HAVE_PPSAPI
-	if (rbufp->fd == fdpps && time_pps_fetch(fdpps, 0, &pi, 0) >= 0) {
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = 0;
+	if ((rbufp->fd == fdpps) &&
+	    (time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &pi, &timeout) >= 0)) {
 		if(pps_assert)
 			tsp = &pi.assert_timestamp;
 		else
@@ -1145,15 +1148,16 @@ refclock_ioctl(
 		}
 		if (pps_hardpps) {
 			if (pps_assert)
-				mode |= PPS_CAPTUREASSERT;
+				mode = PPS_CAPTUREASSERT;
 			else
-				mode |= PPS_CAPTURECLEAR;
-		}
-		if (time_pps_kcbind(fdpps, 0, mode, 0) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_kpcbind failed");
-			fdpps = 0;
-			return (0);
+				mode = PPS_CAPTURECLEAR;
+			if (time_pps_kcbind(fdpps, PPS_KC_HARDPPS, mode,
+			    PPS_TSFMT_TSPEC) < 0) {
+				msyslog(LOG_ERR,
+				    "refclock_ioctl: time_pps_kcbind failed");
+				fdpps = 0;
+				return (0);
+			}
 		}
 	}
 #endif /* HAVE_PPSAPI */

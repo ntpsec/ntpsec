@@ -1,5 +1,14 @@
 1999-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* parseutil/dcfd.c:  abs() -> l_abs(), time.h (AIX 4.3.2 patches)
+	From: Dana Kaempen <decay@flash.net>
+
+	* ntpd/refclock_oncore.c: 
+	* ntpd/refclock_atom.c: 
+	* ntpd/ntp_refclock.c: 
+	PPS cleanup
+	From: John.Hay@mikom.csir.co.za
+	
 	* util/ntptime.c: 
 	* ntpdate/ntptimeset.c: 
 	* ntpdate/ntpdate.c: 

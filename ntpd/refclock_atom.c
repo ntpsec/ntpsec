@@ -258,6 +258,7 @@ atom_pps(
 	register struct atomunit *up;
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
+	struct timespec timeout;
 # ifdef HAVE_TIMESPEC
 	struct timespec ts;
 # else
@@ -296,7 +297,9 @@ atom_pps(
 	i = up->pps_info.assert_sequence;
 	if (fdpps <= 0)
 		return (1);
-	if (time_pps_fetch(fdpps, 0, &up->pps_info, 0) < 0)
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = 0;
+	if (time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &up->pps_info, &timeout) < 0)
 		return (1);
 	if (i == up->pps_info.assert_sequence)
 		return (2);
