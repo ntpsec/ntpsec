@@ -199,8 +199,6 @@ struct irigunit {
 	double	irig_b;		/* IRIG-B signal amplitude */
 	double	irig_e;		/* IRIG-E signal amplitude */
 	int	errflg;		/* error flags */
-	int	bufcnt;		/* samples in buffer */
-	int	bufptr;		/* buffer index pointer */
 	int	pollcnt;	/* poll counter */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
@@ -410,6 +408,7 @@ irig_receive(
 	 */
 	double	sample;		/* codec sample */
 	u_char	*dpt;		/* buffer pointer */
+	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
 	peer = (struct peer *)rbufp->recv_srcclock;
@@ -420,20 +419,17 @@ irig_receive(
 	 * Main loop - read until there ain't no more. Note codec
 	 * samples are bit-inverted.
 	 */
+	DTOLFP((double)rbufp->recv_length / SECOND, &ltemp);
+	L_SUB(&rbufp->recv_time, &ltemp);
 	up->timestamp = rbufp->recv_time;
-	up->bufcnt = rbufp->recv_length;
-	DTOLFP((double)up->bufcnt / SECOND, &ltemp);
-	L_SUB(&up->timestamp, &ltemp);
 	dpt = rbufp->recv_buffer;
-	for (up->bufptr = 0; up->bufptr < up->bufcnt; up->bufptr++) {
+	for (bufcnt = 0; bufcnt < rbufp->recv_length; bufcnt++) {
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
 		 * Clip noise spikes greater than MAXSIG. If no clips,
 		 * increase the gain a tad; if the clips are too high, 
-		 * decrease a tad. Choose either IRIG-B or IRIG-E
-		 * according to the energy at the respective filter
-		 * output.
+		 * decrease a tad.
 		 */
 		if (sample > MAXSIG) {
 			sample = MAXSIG;

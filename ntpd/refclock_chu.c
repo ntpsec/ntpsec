@@ -286,7 +286,6 @@ struct chuunit {
 	l_fp	charstamp;	/* character time as a l_fp */
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
-	int	bufptr;		/* buffer index pointer */
 	char	ident[10];	/* transmitter frequency */
 #ifdef ICOM
 	int	fd_icom;	/* ICOM file descriptor */
@@ -323,7 +322,6 @@ struct chuunit {
 	int	port;		/* codec port */
 	int	gain;		/* codec input gain */
 	int	mongain;	/* codec monitor gain */
-	int	bufcnt;		/* samples in buffer */
 	int	clipcnt;	/* sample clip count */
 	int	seccnt;		/* second interval counter */
 
@@ -607,6 +605,7 @@ chu_audio_receive(
 
 	double	sample;		/* codec sample */
 	u_char	*dpt;		/* buffer pointer */
+	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
 	peer = (struct peer *)rbufp->recv_srcclock;
@@ -617,12 +616,11 @@ chu_audio_receive(
 	 * Main loop - read until there ain't no more. Note codec
 	 * samples are bit-inverted.
 	 */
+	DTOLFP((double)rbufp->recv_length / SECOND, &ltemp);
+	L_SUB(&rbufp->recv_time, &ltemp);
 	up->timestamp = rbufp->recv_time;
-	up->bufcnt = rbufp->recv_length;
-	DTOLFP(up->bufcnt * 1. / SECOND, &ltemp);
-	L_SUB(&up->timestamp, &ltemp);
 	dpt = rbufp->recv_buffer;
-	for (up->bufptr = 0; up->bufptr < up->bufcnt; up->bufptr++) {
+	for (bufcnt = 0; bufcnt < rbufp->recv_length; bufcnt++) {
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
