@@ -1084,7 +1084,7 @@ crypto_recv(
 int
 crypto_xmit(
 	struct pkt *xpkt,	/* transmit packet pointer */
-	struct sockaddr_in *srcadr_sin,	/* active runway */
+	struct sockaddr_storage *srcadr_sin,	/* active runway */
 	int	start,		/* offset to extension field */
 	struct exten *ep,	/* extension pointer */
 	keyid_t cookie		/* session cookie */
@@ -1313,14 +1313,20 @@ crypto_xmit(
 	 * persistent rascals we toss back a kiss-of-death grenade.
 	 */
 	if (rval > XEVNT_TSP) {
-		struct sockaddr_in mskadr_sin;
+		struct sockaddr_storage mskadr_sin;
 		int	hismode;
 		int	resflag = RES_DONTSERVE | RES_TIMEOUT;
 
 		opcode |= CRYPTO_ERROR;
 		sprintf(statstr, "error %x opcode %x", rval, opcode);
 		record_crypto_stats(srcadr_sin, statstr);
-		mskadr_sin.sin_addr.s_addr = ~(u_int32)0;
+		memset((char *)&mskadr_sin, 0, sizeof(struct sockaddr_storage));
+		mskadr_sin.ss_family = srcadr_sin->ss_family;
+		if (mskadr_sin.ss_family == AF_INET)
+			GET_INADDR(mskadr_sin) =~(u_int32)0;
+		else
+			memset(&GET_INADDR6(mskadr_sin), 0xff,
+			    sizeof(struct in6_addr));
 		hismode = PKT_MODE(xpkt->li_vn_mode);
 		if (hismode != MODE_BROADCAST && hismode != MODE_SERVER)
 			resflag |= RES_DEMOBILIZE;

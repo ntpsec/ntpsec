@@ -716,7 +716,15 @@ receive(
 			crypto_recv(peer, rbufp);
 			if (peer->flash) {
 				unpeer(peer);
-				mskadr_sin.sin_addr.s_addr =~(u_int32)0;
+				memset((char *)&mskadr_sin, 0,
+				    sizeof(struct sockaddr_storage));
+				mskadr_sin.ss_family =
+				    rbufp->recv_srcadr.ss_family;
+				if (mskadr_sin.ss_family == AF_INET)
+					GET_INADDR(mskadr_sin) =~(u_int32)0;
+				else
+					memset(&GET_INADDR6(mskadr_sin), 0xff,
+					    sizeof(struct in6_addr));
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin,
 				    RESM_NTPONLY, RES_DONTSERVE |
@@ -978,8 +986,15 @@ receive(
 				}
 				peer->flash |= TEST4;
 				memcpy(&peer->refid, "CRYP", 4);
-				mskadr_sin.sin_addr.s_addr =
-				    ~(u_int32)0;
+				memset((char *)&mskadr_sin, 0,
+				    sizeof(struct sockaddr_storage));
+				mskadr_sin.ss_family =
+				    rbufp->recv_srcadr.ss_family;
+				if (mskadr_sin.ss_family == AF_INET)
+					GET_INADDR(mskadr_sin) =~(u_int32)0;
+				else
+					memset(&GET_INADDR6(mskadr_sin), 0xff,
+					    sizeof(struct in6_addr));
 				if (hismode != MODE_BROADCAST &&
 				    hismode != MODE_SERVER)
 					resflag |= RES_DEMOBILIZE;
