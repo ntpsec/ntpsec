@@ -109,12 +109,14 @@ struct ctl_var sys_var[] = {
 	{ CS_STATE,	UI,	"state" },	/* 10 */
 	{ CS_OFFSET,	FL,	"phase" },	/* 11 */
 	{ CS_DRIFT,	FS,	"frequency" },	/* 12 */
-	{ CS_COMPLIANCE, FU,	"jitter" },	/* 13 */
-	{ CS_CLOCK,	TS,	"clock" },	/* 14 */
-	{ CS_PROCESSOR,	ST,	"processor" },	/* 15 */
-	{ CS_SYSTEM,	ST,	"system" },	/* 16 */
-	{ CS_STABIL,	FS,	"stability" },	/* 17 */
-	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 18 */
+	{ CS_COMPLIANCE, FU,	"error" },	/* 13 */
+	{ CS_JITTER,	FU,	"jitter" },	/* 14 */
+	{ CS_CLOCK,	TS,	"clock" },	/* 15 */
+	{ CS_PROCESSOR,	ST,	"processor" },	/* 16 */
+	{ CS_SYSTEM,	ST,	"system" },	/* 17 */
+	{ CS_VERSION,	ST,	"version" },	/* 18 */
+	{ CS_STABIL,	FS,	"stability" },	/* 19 */
+	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 20 */
 	{ 0,		EOV,	""	}
 };
 

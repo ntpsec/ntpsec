@@ -15,6 +15,10 @@
 #include "ntp_string.h"
 #include "ntp_crypto.h"
 
+#ifdef KERNEL_PLL
+#include "ntp_syscall.h"
+#endif /* KERNEL_PLL */
+
 /*
  * Extension field message formats
  *
@@ -312,6 +316,11 @@ crypto_recv(
 	u_int rsalen = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
 	u_int bits;
 	int j;
+#ifdef KERNEL_PLL
+#if NTP_API > 3
+	struct timex ntv;	/* kernel interface structure */
+#endif /* NTP_API */
+#endif /* KERNEL_PLL */
 #endif /* PUBKEY */
 
 	/*
@@ -788,6 +797,15 @@ crypto_recv(
 			peer->flash &= ~TEST10;
 			crypto_flags |= CRYPTO_FLAG_TAI;
 			sys_tai = temp / 4 + TAI_1972 - 1;
+#ifdef KERNEL_PLL
+#if NTP_API > 3
+			ntv.modes = MOD_TAI;
+			ntv.constant = sys_tai;
+			if (ntp_adjtime(&ntv) == TIME_ERROR)
+				msyslog(LOG_ERR,
+				    "kernel TAI update failed");
+#endif /* NTP_API */
+#endif /* KERNEL_PLL */
 
 			/*
 			 * Initialize leapseconds table and extension
@@ -1553,6 +1571,11 @@ crypto_tai(
 	u_int len;
 	char *rptr;
 	int rval, i;
+#ifdef KERNEL_PLL
+#if NTP_API > 3
+	struct timex ntv;	/* kernel interface structure */
+#endif /* NTP_API */
+#endif /* KERNEL_PLL */
 
 	/*
 	 * Open the key file and discard comment lines. If the first
@@ -1624,6 +1647,14 @@ crypto_tai(
 	tai_leap.sig = emalloc(private_key.bits / 8);
 	crypto_flags |= CRYPTO_FLAG_TAI;
 	sys_tai = len / 4 + TAI_1972 - 1;
+#ifdef KERNEL_PLL
+#if NTP_API > 3
+	ntv.modes = MOD_TAI;
+	ntv.constant = sys_tai;
+	if (ntp_adjtime(&ntv) == TIME_ERROR)
+		msyslog(LOG_ERR, "kernel TAI update failed");
+#endif /* NTP_API */
+#endif /* KERNEL_PLL */
 
 
 	/*

@@ -1,5 +1,17 @@
 2000-08-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntptime.c (main): Report TAI stuff
+	* ntpq/ntpq.c: CS_COMPLIANCE/CS_JITTER cleanup
+	* ntpd/ntp_loopfilter.c (local_clock): sys_error/sys_jitter cleanup.
+	kernel PPL cleanup.
+	* ntpd/ntp_crypto.c: Check NTP_API if we're doing KERNEL_PLL so we
+	can get the TAI stuff.
+	* ntpd/ntp_control.c: CS_COMPLIANCE now reports "error" instead of
+	"jitter".  CS_JITTER now reports jitter.
+	* include/ntpd.h: Added sys_jitter
+	* include/ntp_control.h (CS_JITTER): Added
+	From: Dave Mills
+
 	* ntpd/cmd_args.c (getCmdOpts): Crack -N at pre-scan, as we do the
 	priority wiggle before the final scan.
 	From: Tom Smith <smith@cag.lkg.dec.com>

@@ -97,7 +97,7 @@ static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (ppm) */
 double	clock_stability;	/* clock stability (ppm) */
 double	clock_max = CLOCK_MAX;	/* max offset allowed before step (s) */
-static double clock_panic = CLOCK_PANIC; /* max offset allowed before panic */
+static double clock_panic = CLOCK_PANIC; /* max offset before panic */
 u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
@@ -129,7 +129,8 @@ int	tc_counter;		/* poll-adjust counter */
 u_long	last_time;		/* time of last clock update (s) */
 double	last_offset;		/* last clock offset (s) */
 double	allan_xpt;		/* Allan intercept (s) */
-double	sys_error;		/* system standard error (s) */
+double	sys_error;		/* system RMS error (s) */
+double	sys_jitter;		/* system RMS jitter (s) */
 
 #if defined(KERNEL_PLL)
 /* Emacs cc-mode goes nuts if we split the next line... */
@@ -218,9 +219,9 @@ local_clock(
 	/*
 	 * Update the jitter estimate.
 	 */
-	oerror = sys_error;
-	dtemp = SQUARE(sys_error);
-	sys_error = SQRT(dtemp + (epsil - dtemp) / CLOCK_AVG);
+	oerror = sys_jitter;
+	dtemp = SQUARE(sys_jitter);
+	sys_jitter = SQRT(dtemp + (epsil - dtemp) / CLOCK_AVG);
 
 	/*
 	 * Clock state machine transition function. This is where the
@@ -507,23 +508,19 @@ local_clock(
 		 * If the kernel pps discipline is working, monitor its
 		 * performance.
 		 */
-		if (ntv.status & STA_PPSTIME) {
+		if (ntv.status & STA_PPSTIME && ntv.status &
+		    STA_PPSSIGNAL) {
 			if (!pps_control)
 				NLOG(NLOG_SYSEVENT)msyslog(LOG_INFO,
 				    "pps sync enabled");
 			pps_control = current_time;
 #ifdef STA_NANO
 			if (pll_nano)
-				record_peer_stats(
-				    &loopback_interface->sin,
-				    ctlsysstatus(), ntv.offset / 1e9,
-				    0, ntv.jitter / 1e9, 0);
+				sys_jitter = ntv.jitter / 1e9;
 			else
 #endif /* STA_NANO */
-				record_peer_stats(
-				    &loopback_interface->sin,
-				    ctlsysstatus(), ntv.offset / 1e6,
-				    0, ntv.jitter / 1e6, 0);
+				sys_jitter = ntv.jitter / 1e6;
+			sys_poll = ntv.shift;
 		}
 	}
 #endif /* KERNEL_PLL */
@@ -551,7 +548,7 @@ local_clock(
 	 */
 	if (state == S_SYNC) {
 		if (clock_stability < CLOCK_MAXSTAB &&
-		    fabs(clock_offset) < CLOCK_PGATE * sys_error) {
+		    fabs(clock_offset) < CLOCK_PGATE * sys_jitter) {
 			tc_counter += sys_poll;
 			if (tc_counter > CLOCK_LIMIT) {
 				tc_counter = CLOCK_LIMIT;
@@ -577,11 +574,14 @@ local_clock(
 	 */
 	last_time = current_time;
 	last_offset = clock_offset;
-	dtemp = peer->disp + SQRT(peer->variance + SQUARE(sys_error));
+	dtemp = SQUARE(sys_error);
+	sys_error = SQRT(dtemp + (SQUARE(last_offset) - dtemp) /
+	    CLOCK_AVG);
+	dtemp = peer->disp + SQRT(peer->variance + SQUARE(sys_jitter));
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
-	(void)record_loop_stats();
+	record_loop_stats();
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
@@ -592,9 +592,9 @@ local_clock(
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
-	"local_clock: jitter %.6f freq %.3f stab %.3f poll %d count %d\n",
-		    sys_error, drift_comp * 1e6, clock_stability * 1e6,
-		    sys_poll, tc_counter);
+	"local_clock: err %.6f jit %.6f freq %.3f stab %.3f poll %d cnt %d\n",
+		    sys_error, sys_jitter, drift_comp * 1e6,
+		    clock_stability * 1e6, sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (retval);
 }

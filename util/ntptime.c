@@ -258,12 +258,18 @@ main(
 		ts.l_uf &= ts_mask;
 		printf("  time %s, (.%0*d),\n",
 		       prettydate(&ts), fdigits, (int) time_frac);
-		printf("  maximum error %lu us, estimated error %lu us.\n",
+		printf("  maximum error %lu us, estimated error %lu us",
 		       (u_long)ntv.maxerror, (u_long)ntv.esterror);
-		if (rawtime) printf("  ntptime=%x.%x unixtime=%x.%0*d %s",
+		if (rawtime)
+		    printf("  ntptime=%x.%x unixtime=%x.%0*d %s",
 		    (unsigned int) ts.l_ui, (unsigned int) ts.l_uf,
 		    (int) ntv.time.tv_sec, fdigits, (int) time_frac,
 		    ctime((const time_t *) &ntv.time.tv_sec));
+#if NTP_API > 3
+		printf(", TAI offset %d\n", ntv.tai);
+#else
+		printf("\n");
+#endif /* NTP_API */
 	}
 	status = ntp_adjtime(&ntx);
 	if (status < 0)
