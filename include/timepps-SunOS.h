@@ -202,7 +202,7 @@ typedef pps_unit_t* pps_handle_t; /* pps handlebars */
  * create PPS handle from file descriptor
  */
 
-static __inline int
+static inline int
 time_pps_create(
 	int filedes,		/* file descriptor */
 	pps_handle_t *handle	/* returned handle */
@@ -243,7 +243,7 @@ time_pps_create(
  * release PPS handle
  */
 
-static __inline int
+static inline int
 time_pps_destroy(
 	pps_handle_t handle
 	)
@@ -264,7 +264,7 @@ time_pps_destroy(
  * set parameters for handle
  */
 
-static __inline int
+static inline int
 time_pps_setparams(
 	pps_handle_t handle,
 	const pps_params_t *params
@@ -327,7 +327,7 @@ time_pps_setparams(
  * get parameters for handle
  */
 
-static __inline int
+static inline int
 time_pps_getparams(
 	pps_handle_t handle,
 	pps_params_t *params
@@ -355,7 +355,7 @@ time_pps_getparams(
  * get capabilities for handle
  */
 
-static __inline int
+static inline int
 time_pps_getcap(
 	pps_handle_t handle,
 	int *mode
@@ -382,7 +382,7 @@ time_pps_getcap(
  * Fetch timestamps
  */
 
-static __inline int
+static inline int
 time_pps_fetch(
 	pps_handle_t handle,
 	const int tsformat,
@@ -482,7 +482,7 @@ time_pps_fetch(
  * specify kernel consumer
  */
 
-static __inline int
+static inline int
 time_pps_kcbind(
 	pps_handle_t handle,
 	const int kernel_consumer,
