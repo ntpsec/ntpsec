@@ -2652,7 +2652,7 @@ init_proto(void)
 #ifndef KERNEL_FLL_BUG
 	kern_enable = 1;
 #endif
-	pps_enable = 1;
+	pps_enable = 0;
 	stats_control = 1;
 
 	/*

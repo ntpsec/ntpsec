@@ -109,6 +109,7 @@ typedef char s_char;
 #define CLOCK_SGATE	4.	/* popcorn spike gate */
 #define BURST_INTERVAL1	4	/* first interburst interval (log2) */
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
+#define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -672,6 +673,7 @@ struct pkt {
 #define LOOP_MINSTEP		6	/* set step timeout */
 #define LOOP_MINPOLL		7	/* set min poll interval (log2 s) */
 #define LOOP_ALLAN		8	/* set minimum Allan intercept */
+#define LOOP_HUFFPUFF		9	/* set huff-n'-puff filter length */
 
 /*
  * Configuration items for the stats printer
@@ -687,6 +689,7 @@ struct pkt {
  */
 #define	DEFBROADDELAY	4e-3		/* default broadcast offset */
 #define INADDR_NTP	0xe0000101	/* NTP multicast address 224.0.1.1 */
+
 /*
  * Structure used optionally for monitoring when this is turned on.
  */

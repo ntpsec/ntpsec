@@ -46,6 +46,7 @@
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define CLOCK_ALLAN	1024.	/* min Allan intercept (s) */
 #define CLOCK_ADF	1e11	/* Allan deviation factor */
+#define CLOCK_HUFFPUFF	120	/* min huff-n'-puff time (s) */
 
 /*
  * Clock discipline state machine. This is used to control the
@@ -155,6 +156,14 @@ int	tc_counter;		/* poll-adjust counter */
 u_long	last_time;		/* time of last clock update (s) */
 double	last_offset;		/* last clock offset (s) */
 double	sys_jitter;		/* system RMS jitter (s) */
+
+/*
+ * Huff-n'-puff filter variables
+ */
+static double *sys_huffpuff;	/* huff-n'-puff filter */
+static int sys_hufflen;		/* huff-n'-puff filter stages */
+static int sys_huffptr;		/* huff-n'-puff filter pointer */
+static double sys_mindly;	/* huff-n'-puff filter min delay */
 
 #if defined(KERNEL_PLL)
 /* Emacs cc-mode goes nuts if we split the next line... */
@@ -570,9 +579,6 @@ local_clock(
 		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
-			if (!pps_control)
-				NLOG(NLOG_SYSEVENT)msyslog(LOG_INFO,
-				    "pps sync enabled");
 			pps_control = current_time;
 			if (pll_nano)
 				sys_jitter = ntv.jitter / 1e9;
@@ -737,6 +743,19 @@ rstclock(
 
 
 /*
+ * huff-n'-puff filter
+ */
+void
+huffpuff()
+{
+	if (sys_huffpuff == NULL)
+		return;
+	sys_huffptr = (sys_huffptr + 1) % sys_hufflen;
+	*(sys_huffpuff + sys_huffptr) = sys_mindly;
+}
+
+
+/*
  * loop_config - configure the loop filter
  */
 void
@@ -868,11 +887,20 @@ loop_config(
 		if (freq < NTP_MINPOLL)
 			freq = NTP_MINPOLL;
 		sys_minpoll = (u_char)freq;
+		break;
 
 	case LOOP_ALLAN:		/* minimum Allan intercept */
 		if (freq < CLOCK_ALLAN)
 			freq = CLOCK_ALLAN;
 		allan_xpt = freq;
+		break;
+	
+	case LOOP_HUFFPUFF:		/* huff-n'-puff filter length */
+		if (freq < CLOCK_HUFFPUFF)
+			freq = CLOCK_HUFFPUFF;
+		sys_hufflen = (int)(freq / HUFFPUFF);
+		sys_huffpuff = emalloc(sizeof(double) * sys_hufflen);
+		break;
 	}
 }
 

@@ -1,3 +1,27 @@
+2001-05-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k35
+
+	* ntpd/refclock_atom.c (atom_ppsapi): set pps_enable=1 if
+	enb_hardpps.
+	* ntpd/ntp_timer.c: huffpuff support.
+	(init_timer): huffpuff support.
+	(timer): huffpuff support.
+	* ntpd/ntp_proto.c (init_proto): Initialize pps_enable to 0, not 1.
+	* ntpd/ntp_loopfilter.c (CLOCK_HUFFPUFF): Added.
+	Add huff-n-puff filter variables.
+	(local_clock): Lose "pps sync enabled" log noise.
+	(huffpuff): Added.
+	(loop_config): LOOP_MINPOLL and LOOP_ALLAN were missing the
+	trailing break; add LOOP_HUFFPUFF.
+	* ntpd/ntp_config.c: tinker huffpuff added.
+	(getconfig): CONF_CLOCK_HUFFPUFF support.
+	* include/ntpd.h: huffpuff() declaration.
+	* include/ntp_config.h (CONF_CLOCK_HUFFPUFF): Added.
+	* include/ntp.h (HUFFPUFF): Added.
+	(LOOP_HUFFPUFF): Added.
+	From: Dave Mills.
+
 2001-05-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver20.htm: Reality check.

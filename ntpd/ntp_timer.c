@@ -47,6 +47,7 @@ volatile int alarm_flag;
 static	u_long adjust_timer;		/* second timer */
 static	u_long keys_timer;		/* minute timer */
 static	u_long hourly_timer;		/* hour timer */
+static	u_long huffpuff_timer;		/* huff-n'-puff timer */
 #ifdef AUTOKEY
 static	u_long revoke_timer;		/* keys revoke timer */
 u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
@@ -109,6 +110,7 @@ init_timer(void)
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	hourly_timer = HOUR;
+	huffpuff_timer = 0;
 	current_time = 0;
 	timer_overflows = 0;
 	timer_xmtcalls = 0;
@@ -255,6 +257,14 @@ timer(void)
 	if (keys_timer <= current_time) {
 		keys_timer += MINUTE;
 		auth_agekeys();
+	}
+
+	/*
+	 * Huff-n'-puff filter
+	 */
+	if (huffpuff_timer <= current_time) {
+		huffpuff_timer += HUFFPUFF;
+		huffpuff();
 	}
 
 #ifdef AUTOKEY

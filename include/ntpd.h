@@ -112,6 +112,7 @@ extern	void	init_loopfilter P((void));
 extern	int 	local_clock P((struct peer *, double, double));
 extern	void	adj_host_clock	P((void));
 extern	void	loop_config P((int, double));
+extern	void	huffpuff	P((void));
 
 /* ntp_monitor.c */
 extern	void	init_mon	P((void));
