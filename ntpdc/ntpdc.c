@@ -755,7 +755,7 @@ getresponse(
 		goto again;
 	}
 	/*
-	 * If we've received this before, toss it
+	 * If we've received this before, +toss it
 	 */
 	seq = INFO_SEQ(rpkt.auth_seq);
 	if (haveseq[seq]) {
