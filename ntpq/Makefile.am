@@ -21,7 +21,7 @@ ntpq-opts.c: ntpq-opts.def
 ntpq.1: ntpq-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bntpq ntpq-opts.def
 
-ntpq.texi ntpq.menu: ntpq-opts.def
+ntpq-opts.texi ntpq-opts.menu: ntpq-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section ntpq-opts.def
 

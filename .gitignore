@@ -125,3 +125,8 @@ ntpq/ntpq-opts.h
 ntpq/ntpq-opts.menu
 ntpq/ntpq-opts.texi
 ntpq/ntpq.1
+ntpdc-opts.c
+ntpdc-opts.h
+ntpdc-opts.menu
+ntpdc-opts.texi
+ntpdc.1

@@ -17,6 +17,8 @@
 #include "isc/net.h"
 #include "isc/result.h"
 
+#include "ntpdc-opts.h"
+
 #ifdef SYS_WINNT
 #include <Mswsock.h>
 # include <io.h>
@@ -314,6 +316,57 @@ ntpdcmain(
 	}
 
 	progname = argv[0];
+
+	{
+		int optct = optionProcess(&ntpdcOptions, argc, argv);
+		argc -= optct;
+		argv += optct;
+	}
+
+	switch (WHICH_IDX_IPV4) {
+	    case INDEX_OPT_IPV4:
+		ai_fam_templ = AF_INET;
+		break;
+	    case INDEX_OPT_IPV6:
+		ai_fam_templ = AF_INET6;
+		break;
+	    default:
+		ai_fam_templ = ai_fam_default;
+		break;
+	}
+
+	if (HAVE_OPT(COMMAND)) {
+		int	cmdct = STACKCT_OPT( COMMAND );
+		char**	cmds  = STACKLST_OPT( COMMAND );
+
+		while (cmdct-- > 0) {
+			ADDCMD(*cmds++);
+		}
+	}
+
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+
+	if (HAVE_OPT(INTERACTIVE)) {
+		interactive = 1;
+	}
+
+	if (HAVE_OPT(NUMERIC)) {
+		showhostnames = 0;
+	}
+
+	if (HAVE_OPT(LISTPEERS)) {
+		ADDCMD("listpeers");
+	}
+
+	if (HAVE_OPT(PEERS)) {
+		ADDCMD("peers");
+	}
+
+	if (HAVE_OPT(SHOWPEERS)) {
+		ADDCMD("dmpeers");
+	}
+
+#if 0
 	ai_fam_templ = ai_fam_default;
 	while ((c = ntp_getopt(argc, argv, "46c:dilnps")) != EOF)
 	    switch (c) {
@@ -365,6 +418,7 @@ ntpdcmain(
 	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
 		interactive = 1;
 	}
+#endif
 
 #ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
 	if (interactive)
