@@ -199,6 +199,7 @@ extern int	config_priority;
 #endif
 
 /* ntp_control.c */
+struct ctl_trap;
 extern struct ctl_trap ctl_trap[];
 extern int	num_ctl_traps;
 extern u_long	ctl_auth_keyid;		/* keyid used for authenticating write requests */

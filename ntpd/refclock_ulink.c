@@ -197,8 +197,6 @@ ulink_receive(
 	char	qualchar;	/* quality indicator */
 	char    modechar;       /* Modes: 'R'=rx, 'N'=noise, ' '=standby */
 	char	leapchar;	/* leap indicator */
-	char	dstchar;	/* daylight/standard indicator */
-	int	tz;		/* time zone */
 	int	temp;		/* int temp */
 
 	/*
@@ -244,8 +242,7 @@ ulink_receive(
 	 * length or is not in proper format, we declare bad format and
 	 * exit.
 	 */
-	syncchar = qualchar = leapchar = dstchar = ' ';
-	tz = 0;
+	syncchar = qualchar = leapchar = ' ';
 	pp->msec = 0;
 	
 	/*
@@ -305,12 +302,10 @@ ulink_poll(
 	struct peer *peer
 	)
 {
-	register struct ulinkunit *up;
 	struct refclockproc *pp;
 	char pollchar;
 
 	pp = peer->procptr;
-	up = (struct ulinkunit *)pp->unitptr;
 	pollchar = 'T';
 	write(pp->io.fd, &pollchar, 1);
 	pp->polls++;

@@ -1,5 +1,22 @@
 1999-10-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver16.htm: New version
+	* ntpd/refclock_bancomm.c: New version
+	From: "Cliff, Gary" <gary.cliff@cdott.com> 
+	"Ramasivan, Ganesh" <ganesh.ramasivan@cdott.com>
+
+	* ntpd/refclock_ulink.c (ulink_receive): Cleanup
+	(ulink_poll): Cleanup
+	* ntpd/refclock_atom.c (atom_pps): SunOS timespec/timeval cleanup
+	From: Marc.Brett@westgeo.com
+
+	* INSTALL: Point NT folks at ports/winnt
+	Reported by: Stephen Gildea <gildea@intouchsys.com>
+
+	* include/ntp_stdlib.h: Noise abatement
+	* include/ntpd.h: Noise abatement
+	Reported by: "W. David Higgins" <wdh@grouper.ccur.com>
+
 	* configure.in: DECL_STDIO_0 with gcc under solaris.
 
 	* include/l_stdlib.h: DECL_TOUPPER_0

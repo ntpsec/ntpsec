@@ -268,7 +268,11 @@ atom_pps(
 {
 	register struct atomunit *up;
 	struct refclockproc *pp;
+#ifdef HAVE_TIMESPEC
 	struct timespec ts;
+#else
+	struct timeval ts;
+#endif
 	l_fp lftmp;
 	double doffset;
 	int i;

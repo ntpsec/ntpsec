@@ -1,20 +1,30 @@
-/*
- * refclock_bancomm.c - clock driver for the  Datum/Bancomm
- * bc635VME Time and Frequency Processor. 
- * R. Schmidt, Time Service, US Naval Obs. May 94 
- * modelled after the TPRO NTP driver. 
+/* refclock_bancomm.c - clock driver for the  Datum/Bancomm bc635VME 
+ * Time and Frequency Processor. It requires the BANCOMM bc635VME/
+ * bc350VXI Time and Frequency Processor Module Driver for SunOS4.x 
+ * and SunOS5.x UNIX Systems. It has been tested on a UltraSparc 
+ * IIi-cEngine running Solaris 2.6.
  * 
- * This requires the Datum HP-UX V9.01 kernel driver and the HP-UX vme2
- * driver subsystem. It has been tested on an HP9000/747i at HP-UX 9.03. 
- * There are no restrictions on release and use of the following code.  
- * The refclock type has been defined as  16. 
- * Installation of the Datum/Bancomm HPUX driver creates  the device file
- * /dev/btfp0 
+ * Author(s): 	Ganesh Ramasivan & Gary Cliff, Computing Devices Canada,
+ *		Ottawa, Canada
  *
- * These DEFS are included in the Makefile:
- *      DEFS= -DHAVE_TERMIOS -DSYS_HPUX=9
- *      DEFS_LOCAL=  -DREFCLOCK
- *      CLOCKDEFS=   -DBANC
+ * Date: 	July 1999
+ *
+ * Note(s):	The refclock type has been defined as 16.
+ *
+ *		This program has been modelled after the Bancomm driver
+ *		originally written by R. Schmidt of Time Service, U.S. 
+ *		Naval Observatory for a HP-UX machine. Since the original
+ *		authors no longer plan to maintain this code, all 
+ *		references to the HP-UX vme2 driver subsystem bave been
+ *		removed. Functions vme_report_event(), vme_receive(), 
+ *		vme_control() and vme_buginfo() have been deleted because
+ *		they are no longer being used.
+ *
+ *		The time on the bc635 TFP must be set to GMT due to the 
+ *		fact that NTP makes use of GMT for all its calculations.
+ *
+ *		Installation of the Datum/Bancomm driver creates the 
+ *		device file /dev/btfp0 
  */
 
 #ifdef HAVE_CONFIG_H
@@ -34,8 +44,6 @@
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
-#include "/etc/conf/machine/vme2.h"
-#include "/etc/conf/h/io.h"
 
 /*  STUFF BY RES */
 struct btfp_time                /* Structure for reading 5 time words   */
@@ -44,21 +52,27 @@ struct btfp_time                /* Structure for reading 5 time words   */
 	unsigned short btfp_time[5];  /* Time words 0,1,2,3, and 4. (16bit)*/
 };
 
-/***** Simple ioctl commands *****/
+/* SunOS5 ioctl commands definitions.*/
+#define BTFPIOC            ( 'b'<< 8 )
+#define IOCIO( l, n )      ( BTFPIOC | n )
+#define IOCIOR( l, n, s )  ( BTFPIOC | n )
+#define IOCIORN( l, n, s ) ( BTFPIOC | n )
+#define IOCIOWN( l, n, s ) ( BTFPIOC | n )
 
-#define RUNLOCK   _IO('X',19)                   /* Release Capture Lockout */
-#define RCR0      _IOR('X',22,unsigned int)     /* Read control register */
-#define WCR0      _IOW('X',23,unsigned int)     /* Write control register */
+/***** Simple ioctl commands *****/
+#define RUNLOCK     	IOCIOR(b, 19, int )  /* Release Capture Lockout */
+#define RCR0      	IOCIOR(b, 22, int )  /* Read control register zero.*/
+#define	WCR0		IOCIOWN(b, 23, int)	     /* Write control register zero*/
 
 /***** Compound ioctl commands *****/
 
 /* Read all 5 time words in one call.   */
-#define READTIME        _IOR('X',32,struct btfp_time)
+#define READTIME	IOCIORN(b, 32, sizeof( struct btfp_time ))
 #define VMEFD "/dev/btfp0"
 
 struct vmedate {               /* structure returned by get_vmetime.c */
 	unsigned short year;
-	unsigned short doy;
+	unsigned short day;
 	unsigned short hr;
 	unsigned short mn;
 	unsigned short sec;
@@ -72,65 +86,43 @@ struct vmedate {               /* structure returned by get_vmetime.c */
  * Definitions
  */
 #define MAXUNITS 2              /* max number of VME units */
-#define BMAX  50        /* timecode buffer length */
 
 /*
  * VME interface parameters. 
  */
 #define VMEPRECISION    (-21)   /* precision assumed (1 us) */
-#define USNOREFID       "USNO"  /* or whatever */
-#define VMEREFID        "USNO"  /* reference id */
-#define VMEDESCRIPTION  "USNO Master Clock 2" /* who we are */
+#define USNOREFID       "BTFP"  /* or whatever */
+#define VMEREFID        "BTFP"  /* reference id */
+#define VMEDESCRIPTION  "Bancomm bc635 TFP" /* who we are */
 #define VMEHSREFID      0x7f7f1000 /* 127.127.16.00 refid hi strata */
 /* clock type 16 is used here  */
-#define GMT             0       /* hour offset from Greenwich */
+#define GMT           	0       /* hour offset from Greenwich */
+
+/*
+ * Imported from ntp_timer module
+ */
+extern u_long current_time;     /* current time(s) */
+
+/*
+ * Imported from ntpd module
+ */
+extern int debug;               /* global debug flag */
 
 /*
  * VME unit control structure.
+ * Changes made to vmeunit structure. Most members are now available in the 
+ * new refclockproc structure in ntp_refclock.h - 07/99 - Ganesh Ramasivan
  */
 struct vmeunit {
-	struct peer *peer;      /* associated peer structure */
-	struct refclockio io;   /* given to the I/O handler */
 	struct vmedate vmedata; /* data returned from vme read */
-	l_fp lastrec;           /* last local time */
-	l_fp lastref;           /* last timecode time */
-	char lastcode[BMAX];    /* last timecode received */
-	u_short lencode;        /* length of last timecode */
 	u_long lasttime;        /* last time clock heard from */
-	u_short unit;           /* unit number for this guy */
-	u_short status;         /* clock status */
-	u_short lastevent;      /* last clock event */
-	u_short year;           /* year of eternity */
-	u_short day;            /* day of year */
-	u_short hour;           /* hour of day */
-	u_short minute;         /* minute of hour */
-	u_short second;         /* seconds of minute */
-	u_long usec;            /* microsecond of second */
-	u_long yearstart;       /* start of current year */
-	u_short leap;           /* leap indicators */
-	/*
-	 * Status tallies
-	 */
-	u_long polls;           /* polls sent */
-	u_long noreply;         /* no replies to polls */
-	u_long coderecv;        /* timecodes received */
-	u_long badformat;       /* bad format */
-	u_long baddata;         /* bad data */
-	u_long timestarted;     /* time we started this */
 };
-
-/*
- * Data space for the unit structures.  Note that we allocate these on
- * the fly, but never give them back.
- */
-static struct vmeunit *vmeunits[MAXUNITS];
-static u_char unitinuse[MAXUNITS];
 
 /*
  * Keep the fudge factors separately so they can be set even
  * when no clock is configured.
  */
-static l_fp fudgefactor[MAXUNITS];
+static double fudgefactor[MAXUNITS];
 static u_char stratumtouse[MAXUNITS];
 static u_char sloppyclockflag[MAXUNITS];
 
@@ -138,21 +130,23 @@ static u_char sloppyclockflag[MAXUNITS];
  * Function prototypes
  */
 static  void    vme_init        (void);
-static  int     vme_start       (u_int, struct peer *);
-static  void    vme_shutdown    (int);
-static  void    vme_report_event        (struct vmeunit *, int);
+static  int     vme_start       (int, struct peer *);
+static  void    vme_shutdown    (int, struct peer *);
 static  void    vme_receive     (struct recvbuf *);
 static  void    vme_poll        (int unit, struct peer *);
-static  void    vme_control     (u_int, struct refclockstat *, struct refclockstat *);
-static  void    vme_buginfo     (int, struct refclockbug *);
-struct vmedate *get_datumtime();
+struct vmedate *get_datumtime(struct vmedate *);
 
 /*
  * Transfer vector
  */
 struct  refclock refclock_bancomm = {
-	vme_start, vme_shutdown, vme_poll,
-	vme_control, vme_init, vme_buginfo, NOFLAGS
+	vme_start, 
+	vme_shutdown, 
+	vme_poll,
+	noentry,       /* not used (old vme_control) */   
+	vme_init, 
+	noentry,       /* not used (old vme_buginfo) */ 
+	NOFLAGS
 };
 
 int fd_vme;  /* file descriptor for ioctls */
@@ -167,19 +161,10 @@ vme_init(void)
 	register int i;
 
 	/*
-	 * Just zero the data arrays
-	 */
-	/*
-	  bzero((char *)vmeunits, sizeof vmeunits);
-	  bzero((char *)unitinuse, sizeof unitinuse);
-	*/
-
-	/*
 	 * Initialize fudge factors to default.
 	 */
 	for (i = 0; i < MAXUNITS; i++) {
-		fudgefactor[i].l_ui = 0;
-		fudgefactor[i].l_uf = 0;
+		fudgefactor[i]  = 0.0;
 		stratumtouse[i] = 0;
 		sloppyclockflag[i] = 0;
 	}
@@ -190,12 +175,12 @@ vme_init(void)
  */
 static int
 vme_start(
-	u_int unit,
+	int unit,
 	struct peer *peer
 	)
 {
 	register struct vmeunit *vme;
-	register int i;
+	struct refclockproc *pp;
 	int dummy;
 	char vmedev[20];
 
@@ -204,10 +189,6 @@ vme_start(
 	 */
 	if (unit >= MAXUNITS) {
 		msyslog(LOG_ERR, "vme_start: unit %d invalid", unit);
-		return (0);
-	}
-	if (unitinuse[unit]) {
-		msyslog(LOG_ERR, "vme_start: unit %d in use", unit);
 		return (0);
 	}
 
@@ -234,51 +215,34 @@ vme_start(
 	/*
 	 * Allocate unit structure
 	 */
-	if (vmeunits[unit] != 0) {
-		vme = vmeunits[unit];   /* The one we want is okay */
-	} else {
-		for (i = 0; i < MAXUNITS; i++) {
-			if (!unitinuse[i] && vmeunits[i] != 0)
-			    break;
-		}
-		if (i < MAXUNITS) {
-			/*
-			 * Reclaim this one
-			 */
-			vme = vmeunits[i];
-			vmeunits[i] = 0;
-		} else {
-			vme = (struct vmeunit *)
-				emalloc(sizeof(struct vmeunit));
-		}
-	}
+	vme = (struct vmeunit *)emalloc(sizeof(struct vmeunit));
 	bzero((char *)vme, sizeof(struct vmeunit));
-	vmeunits[unit] = vme;
+
 
 	/*
 	 * Set up the structures
 	 */
-	vme->peer = peer;
-	vme->unit = (u_short)unit;
-	vme->timestarted = current_time;
+	pp = peer->procptr;
+	pp->unitptr = (caddr_t) vme;
+	pp->timestarted = current_time;
 
-	vme->io.clock_recv = vme_receive;
-	vme->io.srcclock = (caddr_t)vme;
-	vme->io.datalen = 0;
-	vme->io.fd = fd_vme;
+	pp->io.clock_recv = vme_receive;
+	pp->io.srcclock = (caddr_t)peer;
+	pp->io.datalen = 0;
+	pp->io.fd = fd_vme;
 
 	/*
 	 * All done.  Initialize a few random peer variables, then
-	 * return success. Note that root delay and root dispersion are
+ 	 * return success. Note that root delay and root dispersion are
 	 * always zero for this clock.
 	 */
+	pp->leap = LEAP_NOWARNING;
 	peer->precision = VMEPRECISION;
 	peer->stratum = stratumtouse[unit];
 	memcpy( (char *)&peer->refid, USNOREFID,4);
 
-	/* peer->refid = htonl(VMEHSREFID); */
+	peer->refid = htonl(VMEHSREFID);
 
-	unitinuse[unit] = 1;
 	return (1);
 }
 
@@ -288,50 +252,27 @@ vme_start(
  */
 static void
 vme_shutdown(
-	int unit
+	int unit, 
+	struct peer *peer
 	)
 {
 	register struct vmeunit *vme;
+	struct refclockproc *pp;
+	
+	pp = peer->procptr;
 
 	if (unit >= MAXUNITS) {
 		msyslog(LOG_ERR, "vme_shutdown: unit %d invalid", unit);
-		return;
-	}
-	if (!unitinuse[unit]) {
-		msyslog(LOG_ERR, "vme_shutdown: unit %d not in use", unit);
 		return;
 	}
 
 	/*
 	 * Tell the I/O module to turn us off.  We're history.
 	 */
-	vme = vmeunits[unit];
-	io_closeclock(&vme->io);
-	unitinuse[unit] = 0;
-}
-
-/*
- * vme_report_event - note the occurance of an event
- *
- * This routine presently just remembers the report and logs it, but
- * does nothing heroic for the trap handler.
- */
-static void
-vme_report_event(
-	struct vmeunit *vme,
-	int code
-	)
-{
-	struct peer *peer;
-        
-	peer = vme->peer;
-	if (vme->status != (u_short)code) {
-		vme->status = (u_short)code;
-		if (code != CEVNT_NOMINAL)
-		    vme->lastevent = (u_short)code;
-		msyslog(LOG_INFO,
-			"clock %s event %x", ntoa(&peer->srcadr), code);
-	}
+	vme = (struct vmeunit *)pp->unitptr;
+	io_closeclock(&pp->io);
+	pp->unitptr = NULL;
+	free(vme);
 }
 
 
@@ -348,6 +289,7 @@ vme_receive(
 {
 }
 
+
 /*
  * vme_poll - called by the transmit procedure
  */
@@ -359,65 +301,58 @@ vme_poll(
 {
 	struct vmedate *tptr; 
 	struct vmeunit *vme;
-	l_fp tstmp;
+	struct refclockproc *pp;
 	time_t tloc;
 	struct tm *tadr;
         
-	vme = (struct vmeunit *)emalloc(sizeof(struct vmeunit *));
-	tptr = (struct vmedate *)emalloc(sizeof(struct vmedate *));
- 
-	if (unit >= MAXUNITS) {
-		msyslog(LOG_ERR, "vme_poll: unit %d invalid", unit);
-		return;
-	}
-	if (!unitinuse[unit]) {
-		msyslog(LOG_ERR, "vme_poll: unit %d not in use", unit);
-		return;
-	}
-	vme = vmeunits[unit];        /* Here is the structure */
-	vme->polls++;
+	pp = peer->procptr;	 
+	vme = (struct vmeunit *)pp->unitptr;        /* Here is the structure */
 
 	tptr = &vme->vmedata; 
-	if ((tptr = get_datumtime()) == NULL ) {
-		vme_report_event(vme, CEVNT_BADREPLY);
+	if ((tptr = get_datumtime(tptr)) == NULL ) {
+		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
 
-	get_systime(&vme->lastrec);
+	get_systime(&pp->lastrec);
+	pp->polls++;
 	vme->lasttime = current_time;
 
 	/*
 	 * Get VME time and convert to timestamp format. 
 	 * The year must come from the system clock.
 	 */
-	/*
+	
 	  time(&tloc);
 	  tadr = gmtime(&tloc);
 	  tptr->year = (unsigned short)(tadr->tm_year + 1900);
-	*/
+	
 
-	sprintf(vme->lastcode, 
-		"%3.3d %2.2d:%2.2d:%2.2d.%.6d %1d\0",
-		tptr->doy, tptr->hr, tptr->mn,
-		tptr->sec, tptr->frac, tptr->status);
+	sprintf(pp->a_lastcode, 
+		"%3.3d %2.2d:%2.2d:%2.2d.%.6ld %1d",
+		tptr->day, 
+		tptr->hr, 
+		tptr->mn,
+		tptr->sec, 
+		tptr->frac, 
+		tptr->status);
 
-	record_clock_stats(&(vme->peer->srcadr), vme->lastcode);
-	vme->lencode = (u_short) strlen(vme->lastcode);
+	pp->lencode = (u_short) strlen(pp->a_lastcode);
 
-	vme->day =  tptr->doy;
-	vme->hour =   tptr->hr;
-	vme->minute =  tptr->mn;
-	vme->second =  tptr->sec;
-	vme->usec =   tptr->frac;
+	pp->day =  tptr->day;
+	pp->hour =   tptr->hr;
+	pp->minute =  tptr->mn;
+	pp->second =  tptr->sec;
+	pp->usec =   tptr->frac;	
 
 #ifdef DEBUG
 	if (debug)
-	    printf("vme: %3d %02d:%02d:%02d.%06ld %1x\n",
-		   vme->day, vme->hour, vme->minute, vme->second,
-		   vme->usec, tptr->status);
+	    printf("pp: %3d %02d:%02d:%02d.%06ld %1x\n",
+		   pp->day, pp->hour, pp->minute, pp->second,
+		   pp->usec, tptr->status);
 #endif
 	if (tptr->status ) {       /*  Status 0 is locked to ref., 1 is not */
-		vme_report_event(vme, CEVNT_BADREPLY);
+		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
 
@@ -429,148 +364,27 @@ vme_poll(
 	 * Note that this code does not yet know how to do the years and
 	 * relies on the clock-calendar chip for sanity.
 	 */
-	if (!clocktime(vme->day, vme->hour, vme->minute,
-		       vme->second, GMT, vme->lastrec.l_ui,
-		       &vme->yearstart, &vme->lastref.l_ui)) {
-		vme->baddata++;
-		vme_report_event(vme, CEVNT_BADTIME);
-		msyslog(LOG_ERR, "refclock_datum: bad data!!");
+	if (!refclock_process(pp)) {
+		refclock_report(peer, CEVNT_BADTIME);
+		peer->burst = 0;
 		return;
 	}
-	TVUTOTSF(vme->usec, vme->lastref.l_uf);
-	tstmp = vme->lastref;
-
-	L_SUB(&tstmp, &vme->lastrec);
-	vme->coderecv++;
-
-	L_ADD(&tstmp, &(fudgefactor[vme->unit]));
-
-	refclock_receive(vme->peer);
-}
-
-/*
- * vme_control - set fudge factors, return statistics
- */
-static void
-vme_control(
-	u_int unit,
-	struct refclockstat *in,
-	struct refclockstat *out
-	)
-{
-	register struct vmeunit *vme;
-
-	if (unit >= MAXUNITS) {
-		msyslog(LOG_ERR, "vme_control: unit %d invalid)", unit);
+	if (peer->burst > 0)
 		return;
-	}
-
-	if (in != 0) {
-		if (in->haveflags & CLK_HAVETIME1)
-		    fudgefactor[unit] = in->fudgetime1;
-		if (in->haveflags & CLK_HAVEVAL1) {
-			stratumtouse[unit] = (u_char)(in->fudgeval1 & 0xf);
-			if (unitinuse[unit]) {
-				struct peer *peer;
-
-                                /*
-                                 * Should actually reselect clock, but
-                                 * will wait for the next timecode
-                                 */
-				vme = vmeunits[unit];
-				peer = vme->peer;
-				peer->stratum = stratumtouse[unit];
-				if (stratumtouse[unit] <= 1)
-				    memcpy( (char *)&peer->refid, USNOREFID,4);
-				else
-				    peer->refid = htonl(VMEHSREFID);
-			}
-		}
-		if (in->haveflags & CLK_HAVEFLAG1) {
-			sloppyclockflag[unit] = in->flags & CLK_FLAG1;
-		}
-	}
-
-	if (out != 0) {
-		/*              out->type = REFCLK_IRIG_VME; */
-		out->type = 15;  /* made up by RES */
-		out->haveflags
-			= CLK_HAVETIME1|CLK_HAVEVAL1|CLK_HAVEVAL2|CLK_HAVEFLAG1;
-		out->clockdesc = VMEDESCRIPTION;
-		out->fudgetime1 = fudgefactor[unit];
-		out->fudgetime2.l_ui = 0;
-		out->fudgetime2.l_uf = 0;
-		out->fudgeval1 = (long)stratumtouse[unit];
-		out->fudgeval2 = 0;
-		out->flags = sloppyclockflag[unit];
-		if (unitinuse[unit]) {
-			vme = vmeunits[unit];
-			out->lencode = vme->lencode;
-			out->lastcode = vme->lastcode;
-			out->timereset = current_time - vme->timestarted;
-			out->polls = vme->polls;
-			out->noresponse = vme->noreply;
-			out->badformat = vme->badformat;
-			out->baddata = vme->baddata;
-			out->lastevent = vme->lastevent;
-			out->currentstatus = vme->status;
-		} else {
-			out->lencode = 0;
-			out->lastcode = "";
-			out->polls = out->noresponse = 0;
-			out->badformat = out->baddata = 0;
-			out->timereset = 0;
-			out->currentstatus = out->lastevent = CEVNT_NOMINAL;
-		}
-	}
-}
-
-/*
- * vme_buginfo - return clock dependent debugging info
- */
-static void
-vme_buginfo(
-	int unit,
-	register struct refclockbug *bug
-	)
-{
-	register struct vmeunit *vme;
-
-	if (unit >= MAXUNITS) {
-		msyslog(LOG_ERR, "vme_buginfo: unit %d invalid)", unit);
-		return;
-	}
-
-	if (!unitinuse[unit])
-	    return;
-	vme = vmeunits[unit];
-
-	bug->nvalues = 11;
-	bug->ntimes = 5;
-	if (vme->lasttime != 0)
-	    bug->values[0] = current_time - vme->lasttime;
-	else
-	    bug->values[0] = 0;
-	bug->values[2] = (u_long)vme->year;
-	bug->values[3] = (u_long)vme->day;
-	bug->values[4] = (u_long)vme->hour;
-	bug->values[5] = (u_long)vme->minute;
-	bug->values[6] = (u_long)vme->second;
-	bug->values[7] = (u_long)vme->usec;
-	bug->values[9] = vme->yearstart;
-	bug->stimes = 0x1c;
-	bug->times[0] = vme->lastref;
-	bug->times[1] = vme->lastrec;
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	refclock_receive(peer);
 }
 
 struct vmedate *
-get_datumtime(void)
+get_datumtime(struct vmedate *time_vme)
 {
 	unsigned short  status;
 	char cbuf[7];
-	struct vmedate  *time_vme;
 	struct btfp_time vts;
-	time_vme = (struct vmedate *)malloc(sizeof(struct vmedate ));
+	
+	if ( time_vme == (struct vmedate *)NULL) {
+  	  time_vme = (struct vmedate *)malloc(sizeof(struct vmedate ));
+	}
 
 	if( ioctl(fd_vme, READTIME, &vts))
 	    msyslog(LOG_ERR, "get_datumtime error: %m");
@@ -581,17 +395,17 @@ get_datumtime(void)
 
 #ifdef CHECK            
 
-	/* Get doy */
-	sprintf(cbuf,"%3.3x\0", ((vts.btfp_time[ 0 ] & 0x000f) <<8) +
+	/* Get day */
+	sprintf(cbuf,"%3.3x", ((vts.btfp_time[ 0 ] & 0x000f) <<8) +
 		((vts.btfp_time[ 1 ] & 0xff00) >> 8));  
 
 	if (isdigit(cbuf[0]) && isdigit(cbuf[1]) && isdigit(cbuf[2]) )
-	    time_vme->doy = (unsigned short)atoi(cbuf);
+	    time_vme->day = (unsigned short)atoi(cbuf);
 	else
-	    time_vme->doy = (unsigned short) 0;
+	    time_vme->day = (unsigned short) 0;
 
 	/* Get hour */
-	sprintf(cbuf,"%2.2x\0", vts.btfp_time[ 1 ] & 0x00ff);
+	sprintf(cbuf,"%2.2x", vts.btfp_time[ 1 ] & 0x00ff);
 
 	if (isdigit(cbuf[0]) && isdigit(cbuf[1]))
 	    time_vme->hr = (unsigned short)atoi(cbuf);
@@ -599,14 +413,14 @@ get_datumtime(void)
 	    time_vme->hr = (unsigned short) 0;
 
 	/* Get minutes */
-	sprintf(cbuf,"%2.2x\0", (vts.btfp_time[ 2 ] & 0xff00) >>8);
+	sprintf(cbuf,"%2.2x", (vts.btfp_time[ 2 ] & 0xff00) >>8);
 	if (isdigit(cbuf[0]) && isdigit(cbuf[1]))
 	    time_vme->mn = (unsigned short)atoi(cbuf);
 	else
 	    time_vme->mn = (unsigned short) 0;
 
 	/* Get seconds */
-	sprintf(cbuf,"%2.2x\0", vts.btfp_time[ 2 ] & 0x00ff);
+	sprintf(cbuf,"%2.2x", vts.btfp_time[ 2 ] & 0x00ff);
 
 	if (isdigit(cbuf[0]) && isdigit(cbuf[1]))
 	    time_vme->sec = (unsigned short)atoi(cbuf);
@@ -616,7 +430,7 @@ get_datumtime(void)
 	/* Get microseconds.  Yes, we ignore the 0.1 microsecond digit so we can
 	   use the TVTOTSF function  later on...*/
 
-	sprintf(cbuf,"%4.4x%2.2x\0", vts.btfp_time[ 3 ],
+	sprintf(cbuf,"%4.4x%2.2x", vts.btfp_time[ 3 ],
 		vts.btfp_time[ 4 ]>>8);
 
 	if (isdigit(cbuf[0]) && isdigit(cbuf[1]) && isdigit(cbuf[2])
@@ -628,28 +442,28 @@ get_datumtime(void)
 
 	/* DONT CHECK  just trust the card */
 
-	/* Get doy */
-	sprintf(cbuf,"%3.3x\0", ((vts.btfp_time[ 0 ] & 0x000f) <<8) +
+	/* Get day */
+	sprintf(cbuf,"%3.3x", ((vts.btfp_time[ 0 ] & 0x000f) <<8) +
 		((vts.btfp_time[ 1 ] & 0xff00) >> 8));  
-	time_vme->doy = (unsigned short)atoi(cbuf);
+	time_vme->day = (unsigned short)atoi(cbuf);
 
 	/* Get hour */
-	sprintf(cbuf,"%2.2x\0", vts.btfp_time[ 1 ] & 0x00ff);
+	sprintf(cbuf,"%2.2x", vts.btfp_time[ 1 ] & 0x00ff);
 
 	time_vme->hr = (unsigned short)atoi(cbuf);
 
 	/* Get minutes */
-	sprintf(cbuf,"%2.2x\0", (vts.btfp_time[ 2 ] & 0xff00) >>8);
+	sprintf(cbuf,"%2.2x", (vts.btfp_time[ 2 ] & 0xff00) >>8);
 	time_vme->mn = (unsigned short)atoi(cbuf);
 
 	/* Get seconds */
-	sprintf(cbuf,"%2.2x\0", vts.btfp_time[ 2 ] & 0x00ff);
+	sprintf(cbuf,"%2.2x", vts.btfp_time[ 2 ] & 0x00ff);
 	time_vme->sec = (unsigned short)atoi(cbuf);
 
 	/* Get microseconds.  Yes, we ignore the 0.1 microsecond digit so we can
 	   use the TVTOTSF function  later on...*/
 
-	sprintf(cbuf,"%4.4x%2.2x\0", vts.btfp_time[ 3 ],
+	sprintf(cbuf,"%4.4x%2.2x", vts.btfp_time[ 3 ],
 		vts.btfp_time[ 4 ]>>8);
 
 	time_vme->frac = (u_long) atoi(cbuf);
