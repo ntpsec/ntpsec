@@ -111,6 +111,7 @@ noinst_HEADERS = \
 	binio.h \
 	global.h \
 	gps.h \
+	icom.h \
 	ieee754io.h \
 	iosignal.h \
 	l_stdlib.h \

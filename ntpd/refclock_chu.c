@@ -495,7 +495,7 @@ chu_start(
 		temp = P_TRACE;
 #endif
 	if (peer->ttl > 0) {
-		if (icom_init("/dev/icom", temp) >= 0)
+		if (icom_init("/dev/icom", B9600, temp) >= 0)
 			up->status |= AUTOT;
 	}
 	if (up->status & AUTOT) {

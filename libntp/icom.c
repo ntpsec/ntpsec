@@ -128,8 +128,9 @@ doublefreq(			/* returns void */
  */
 int
 icom_init(
-	char *device,			/* device name/link */
-	int trace			/* trace flags */	)
+	char *device,		/* device name/link */
+	int speed,		/* line speed */
+	int trace		/* trace flags */	)
 {
 	struct termios ttyb, *ttyp;
 
@@ -144,6 +145,8 @@ icom_init(
 	ttyp->c_lflag = 0;	/* local modes */
 	ttyp->c_cc[VMIN] = 0;	/* min chars */
 	ttyp->c_cc[VTIME] = 5;	/* receive timeout */
+	cfsetispeed(ttyp, (u_int)speed);
+	cfsetospeed(ttyp, (u_int)speed);
 	tcsetattr(fd_icom, TCSANOW, ttyp);
 	return (0);
 }

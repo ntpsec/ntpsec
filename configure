@@ -994,7 +994,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.98j
+VERSION=4.0.98k
 
 if test "`CDPATH=: && cd $srcdir && pwd`" != "`pwd`" &&
    test -f $srcdir/config.status; then
