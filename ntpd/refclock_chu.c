@@ -161,22 +161,22 @@
  *
  * For accuracies better than the low millisceconds, fudge time1 can be
  * set to the radio propagation delay from CHU to the receiver. This can
- * be done conviently using the minimuf program. When the modem driver
- * is compiled, fudge flag3 enables the ppsclock line discipline. Fudge
- * flag4 causes the dubugging output described above to be recorded in
- * the clockstats file.
+ * be done conviently using the minimuf program.
  *
- * When the audio driver is compiled, fudge flag2 selects the audio
- * input port, where 0 is the mike port (default) and 1 is the line-in
- * port. It does not seem useful to select the compact disc player port.
- * Fudge flag3 enables audio monitoring of the input signal. For this
- * purpose, the speaker volume must be set before the driver is started.
+ * Fudge flag4 causes the dubugging output described above to be
+ * recorded in the clockstats file. When the audio driver is compiled,
+ * fudge flag2 selects the audio input port, where 0 is the mike port
+ * (default) and 1 is the line-in port. It does not seem useful to
+ * select the compact disc player port. Fudge flag3 enables audio
+ * monitoring of the input signal. For this purpose, the monitor gain is
+ * set to a default value.
  *
  * The audio codec code is normally compiled in the driver if the
- * architecture supports it (HAVE_AUDIO defined), but is used only if the
- * link /dev/chu_audio is defined and valid. The serial port
- * code is alwasy compiled in the driver, but is used only if the autdio
- * codec is not available and the link /dev/chu%d is defined and valid.
+ * architecture supports it (HAVE_AUDIO defined), but is used only if
+ * the link /dev/chu_audio is defined and valid. The serial port code is
+ * always compiled in the driver, but is used only if the autdio codec
+ * is not available and the link /dev/chu%d is defined and valid.
+ *
  * The ICOM code is normally compiled in the driver if selected (ICOM
  * defined), but is used only if the link /dev/icom%d is defined and
  * valid and the mode keyword on the server configuration command
@@ -197,8 +197,8 @@
 #define DWELL		5	/* minutes before qsy */
 #define NCHAN		3	/* number of channels */
 #endif /* ICOM */
-#ifdef HAVE_AUDIO
 
+#ifdef HAVE_AUDIO
 /*
  * Audio demodulator definitions
  */
@@ -207,11 +207,13 @@
 #define OFFSET		128	/* companded sample offset */
 #define SIZE		256	/* decompanding table size */
 #define	MAXSIG		6000.	/* maximum signal level */
+#define	MAXCLP		100	/* max clips above reference per s */
 #define LIMIT		1000.	/* soft limiter threshold */
 #define AGAIN		6.	/* baseband gain */
 #define LAG		10	/* discriminator lag */
 #define	DEVICE_AUDIO	"/dev/chu_audio" /* device name */
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
+#define	AUDIO_BUFSIZ	240	/* audio buffer size (30 ms) */
 #else
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 #endif /* HAVE_AUDIO */
@@ -319,7 +321,8 @@ struct chuunit {
 	int	fd_audio;	/* audio port file descriptor */
 	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
-	int	gain;		/* codec gain */
+	int	gain;		/* codec input gain */
+	int	mongain;	/* codec monitor gain */
 	int	bufcnt;		/* samples in buffer */
 	int	clipcnt;	/* sample clip count */
 	int	seccnt;		/* second interval counter */
@@ -418,7 +421,7 @@ chu_start(
 	/*
 	 * Open audio device.
 	 */
-	fd_audio = audio_init(DEVICE_AUDIO);
+	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ);
 #ifdef DEBUG
 	if (fd_audio > 0 && debug)
 		audio_show();
@@ -605,9 +608,6 @@ chu_audio_receive(
 	double	sample;		/* codec sample */
 	u_char	*dpt;		/* buffer pointer */
 	l_fp	ltemp;		/* l_fp temp */
-	int	isneg;		/* parity flag */
-	double	dtemp;
-	int	i, j;
 
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
@@ -621,9 +621,9 @@ chu_audio_receive(
 	up->bufcnt = rbufp->recv_length;
 	DTOLFP(up->bufcnt * 1. / SECOND, &ltemp);
 	L_SUB(&up->timestamp, &ltemp);
-	dpt = (u_char *)&rbufp->recv_space;
+	dpt = rbufp->recv_buffer;
 	for (up->bufptr = 0; up->bufptr < up->bufcnt; up->bufptr++) {
-		sample = up->comp[~*dpt & 0xff];
+		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
 		 * Clip noise spikes greater than MAXSIG. If no clips,
@@ -637,56 +637,27 @@ chu_audio_receive(
 			sample = -MAXSIG;
 			up->clipcnt++;
 		}
-		up->seccnt = (up->seccnt + 1) % SECOND;
-		if (up->seccnt == 0) {
-			if (pp->sloppyclockflag & CLK_FLAG2)
-				up->port = 2;
-			else
-				up->port = 1;
-			chu_gain(peer);
-		}
 		chu_rf(peer, sample);
 
 		/*
-		 * During development, it is handy to have an audio
-		 * monitor that can be switched to various signals. This
-		 * code converts the linear signal left in up->monitor
-		 * to codec format. If we can get the grass out of this
-		 * thing and improve modem performance, this expensive
-		 * code will be permanently nixed.
+		 * Once each second ride gain.
 		 */
-		isneg = 0;
-		dtemp = up->monitor;
-		if (sample < 0) {
-			isneg = 1;
-			dtemp-= dtemp;
-		}
-		i = 0;
-		j = OFFSET >> 1;
-		while (j != 0) {
-			if (dtemp > up->comp[i])
-				i += j;
-			else if (dtemp < up->comp[i])
-				i -= j;
-			else
-				break;
-			j >>= 1;
-		}
-		if (isneg)
-			*dpt = ~(i + OFFSET);
-		else
-			*dpt = ~i;
-		dpt++;
-		L_ADD(&up->timestamp, &up->tick);
+		up->seccnt = (up->seccnt + 1) % SECOND;
+		if (up->seccnt == 0)
+			chu_gain(peer);
 	}
-	
+
 	/*
-	 * Squawk to the monitor speaker if enabled.
+	 * Set the input port and monitor gain for the next buffer.
 	 */
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		up->port = 2;
+	else
+		up->port = 1;
 	if (pp->sloppyclockflag & CLK_FLAG3)
-		if (write(pp->io.fd, (u_char *)&rbufp->recv_space,
-		    (u_int)up->bufcnt) < 0)
-			perror("chu:");
+		up->mongain = MONGAIN;
+	else
+		up->mongain = 0;
 }
 
 
@@ -1284,7 +1255,8 @@ chu_poll(
 	} else if (up->fd_icom > 0) {
 		up->dwell = 0;
 		up->chan = (up->chan + 1) % NCHAN;
-		icom_freq(up->fd_icom, peer->ttlmax & 0x7f, qsy[up->chan]);
+		icom_freq(up->fd_icom, peer->ttlmax & 0x7f,
+		    qsy[up->chan]);
 		sprintf(up->ident, "%.3f", qsy[up->chan]); 
 		sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
 		record_clock_stats(&peer->srcadr, tbuf);
@@ -1321,14 +1293,14 @@ chu_poll(
 #ifdef HAVE_AUDIO
 	if (up->fd_audio)
 		sprintf(pp->a_lastcode,
-		    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d %d",
+		    "%c%1X %4d %3d %02d:%02d:%02d %c%x %+d %d %d %s %d %d %d %d",
 		    synchar, qual, pp->year, pp->day, pp->hour,
 		    pp->minute, pp->second, leapchar, up->dst, up->dut,
 		    minset, up->gain, up->ident, up->tai, up->burstcnt,
 		    up->mindist, up->ntstamp);
 	else
 		sprintf(pp->a_lastcode,
-		    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %s %d %d %d %d",
+		    "%c%1X %4d %3d %02d:%02d:%02d %c%x %+d %d %s %d %d %d %d",
 		    synchar, qual, pp->year, pp->day, pp->hour,
 		    pp->minute, pp->second, leapchar, up->dst, up->dut,
 		    minset, up->ident, up->tai, up->burstcnt,
@@ -1556,14 +1528,14 @@ chu_gain(
 	 */
 	if (up->clipcnt == 0) {
 		up->gain += 4;
-		if (up->gain > 255)
-			up->gain = 255;
-	} else if (up->clipcnt > SECOND / 100) {
+		if (up->gain > MAXGAIN)
+			up->gain = MAXGAIN;
+	} else if (up->clipcnt > MAXCLP) {
 		up->gain -= 4;
 		if (up->gain < 0)
 			up->gain = 0;
 	}
-	audio_gain(up->gain, up->port);
+	audio_gain(up->gain, up->mongain, up->port);
 	up->clipcnt = 0;
 }
 #endif /* HAVE_AUDIO */
