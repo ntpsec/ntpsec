@@ -1308,27 +1308,39 @@ getconfig(
 
 		    case CONFIG_CRYPTO:
 			crypto_enable = 1;
-			for (i = 2; i < ntokens; i++) {
-			    switch (matchkey(tokens[i],
-				crypto_keywords)) {
+			for (i = 1; i < ntokens; i++) {
+			    int temp;
 
+			    temp = matchkey(tokens[i++], crypto_keywords);
+			    if (i > ntokens - 1) {
+				msyslog(LOG_ERR,
+				    "crypto: missing file name");
+				errflg++;
+				break;
+			    }
+			    switch(temp) {
 			    case CONF_CRYPTO_FLAGS:
 				    crypto_config(CRYPTO_CONF_FLAGS,
-					tokens[i++]);
+					tokens[i]);
+				    break;
 
 			    case CONF_CRYPTO_DH:
 				    crypto_config(CRYPTO_CONF_DH,
-					tokens[i++]);
+					tokens[i]);
 				    break;
 
 			    case CONF_CRYPTO_PRIVATEKEY:
 				    crypto_config(CRYPTO_CONF_PRIV,
-					tokens[i++]);
+					tokens[i]);
 				    break;
 
 			    case CONF_CRYPTO_PUBLICKEY:
 				    crypto_config(CRYPTO_CONF_PUBL,
-					tokens[i++]);
+					tokens[i]);
+				    break;
+			    default:
+				    msyslog(LOG_ERR,
+					"crypto: unknown keyword");
 				    break;
 			    }
 			}

@@ -940,7 +940,7 @@ printassoc(
 			conf = "yes";
 		else
 			conf = "no";
-		if (statval & CTL_PST_REACH) {
+		if (statval & CTL_PST_REACH || 1) {
 			reach = "yes";
 			if (statval & CTL_PST_AUTHENABLE) {
 				if (statval & CTL_PST_AUTHENTIC)

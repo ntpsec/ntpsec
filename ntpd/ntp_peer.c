@@ -547,7 +547,7 @@ peer_config(
 		    peer->keyid);
 #endif
 #ifdef PUBKEY
-	if (!(peer->flags & FLAG_SKEY))
+	if (!(peer->flags & FLAG_SKEY) || peer->hmode == MODE_BROADCAST)
 		return (peer);
 	crypto_public(peer, keystr);
 #endif /* PUBKEY */
