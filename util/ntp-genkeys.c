@@ -505,6 +505,7 @@ newfile(
 	char fb[PATH_MAX];
 	char *cp;
 
+	printf("newfile(%s,%s,%s)\n", f1?f1:"NULL", f2?f2:"NULL", f3?f3:"NULL");
 	/*
 	   If:
 	   - no symlink support, or
@@ -840,6 +841,8 @@ main(
 		 */
 		printf("Generating Diffie-Hellman parameters (%d bits)...\n",
 		       PRIMELEN);
+		str = newfile(f1_dhparms, f2_dhparms, f3_dhparms);
+
 		R_RandomInit(&randomstr);
 		R_GetRandomBytesNeeded(&len, &randomstr);
 		for (i = 0; i < len; i++) {
@@ -861,7 +864,6 @@ main(
 			printf("R_GenerateDHParams error %x\n", rval);
 			return (-1);
 		}
-		str = newfile(f1_dhparms, f2_dhparms, f3_dhparms);
 
 		sprintf(filename, "ntpkey_dh.%lu", ntptime);
 		str = fopen(filename, "w");
