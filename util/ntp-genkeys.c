@@ -155,7 +155,6 @@ ctlsettrap(
 }
 
 
-#ifdef PUBKEY
 void
 crypto_config(
 	int item,		/* configuration item */
@@ -185,7 +184,6 @@ crypto_config(
 	}
 	return;
 }
-#endif
 
 
 struct interface *
@@ -337,14 +335,47 @@ filegen_get(
 
 #define GEN_DSA		1
 #define GEN_RSA		2
-#define GEN_LINK	4
-#define GEN_CERT	8
+#define GEN_CERT	4
+#define GEN_LINK	8
 #define GEN_DSA_L	(GEN_DSA | GEN_LINK)
 #define GEN_RSA_L	(GEN_RSA | GEN_LINK)
+#define GEN_CERT_L	(GEN_CERT | GEN_LINK)
 
-char *certname = "RSA_MD5";	/* What cert do we use for links? */
+struct certlist {
+	char *cert_name;
+	unsigned int cert_bit;
+};
+
+struct certlist certlist[] = {
+#define CERT_DSA_SHA1	0x01
+	{ "DSA_SHA1",	CERT_DSA_SHA1 },
+#define CERT_DSA_SHA	0x02
+	{ "DSA_SHA",	CERT_DSA_SHA },
+#ifdef HAVE_EVP_MD2
+#define CERT_RSA_MD2	0x04
+	{ "RSA_MD2",	CERT_RSA_MD2 },
+#endif
+#define CERT_RSA_MD5	0x08
+	{ "RSA_MD5",	CERT_RSA_MD5 },
+#ifdef HAVE_EVP_MDC2
+#define CERT_RSA_MDC2	0x10
+	{ "RSA_MDC2",	CERT_RSA_MDC2 },
+#endif
+#define CERT_RSA_RIPEMD160	0x20
+	{ "RSA_RIPEMD160",	CERT_RSA_RIPEMD160 },
+#define CERT_RSA_SHA	0x40
+	{ "RSA_SHA",	CERT_RSA_SHA },
+#define CERT_RSA_SHA1	0x80
+	{ "RSA_SHA1",	CERT_RSA_SHA1 },
+	{ 0,		0 }
+};
+
+int certlist_n = (sizeof certlist / sizeof *certlist) - 1;
+
+char *certname;			/* What cert do we use for links? */
 char *config_file = CONFIG_FILE; /* Default location for ntp.conf */
 int gen_cert;			/* Generate a cert? */
+unsigned int gen_certs = CERT_RSA_MD5; /* bitmap of certs to build */
 int gen_dh;			/* Generate DH files? */
 int gen_rsa;			/* Generate an RSA key? */
 int gen_sign;			/* Generate a sign key? */
@@ -352,23 +383,6 @@ int gen_skf;			/* Generate symmetric key file? */
 char *stampfile;		/* Stampfile name */
 int verbose;			/* Be verbose? */
 
-char *certlist[] = {
-	"DSA_SHA1",
-	"DSA_SHA",
-#ifdef HAVE_EVP_MD2
-	"RSA_MD2",
-#endif
-	"RSA_MD5",
-#ifdef HAVE_EVP_MDC2
-	"RSA_MDC2",
-#endif
-	"RSA_RIPEMD160",
-	"RSA_SHA",
-	"RSA_SHA1",
-	0
-};
-
-int certlist_n = (sizeof certlist / sizeof *certlist) - 1;
 char const *progname;
 
 
@@ -381,7 +395,7 @@ usage (
 
 	printf("Usage:%s [ -[cC] {", progname);
 	for (i = 0; i < certlist_n; ++i)
-		printf("%s%s", (i) ? "," : "", certlist[i]);
+		printf("%s%s", (i) ? "," : "", certlist[i].cert_name);
 	printf("} ]\n");
 	printf("\t[ -d ] [ -f config.file ] [ -m ] [ -[rR] RSA ] [ -[sS] {DSA,RSA} ]\n");
 	printf("\t[ -t stampfile ] [ -v ] [ hostname ... ]\n");
@@ -399,7 +413,6 @@ getCmdOpts (
 
 	progname = argv[0];
 
-	certname = certlist[0];
 	while ((i = ntp_getopt(argc, argv, "c:C:df:mr:R:s:S:t:v")) != EOF)
 		switch (i) {
 
@@ -407,13 +420,22 @@ getCmdOpts (
 			gen_cert = GEN_LINK;
 			/* FALL THROUGH */
 		    case 'c':	/* Generate a cert */
-			for (j = 0; j < certlist_n; ++j)
-				if (!strcmp(certlist[j], ntp_optarg)) {
-					certname = ntp_optarg;
-					break;
+			gen_certs = 0;
+			/* process each item in the list */
+			{
+				for (j = 0; j < certlist_n; ++j)
+					if (!strcmp(certlist[j].cert_name,
+						    ntp_optarg)) {
+						if (0 == certname)
+							certname = ntp_optarg;
+						gen_certs |= certlist[j].cert_bit;
+						break;
+					}
+				if (j == certlist_n) {
+					/* Show the offender? */
+					++errflag;
 				}
-			if ( j == certlist_n)
-				++errflag;
+			}
 			gen_cert |= GEN_CERT;
 			break;
 		    case 'd':	/* Create the DH files */
@@ -458,6 +480,13 @@ getCmdOpts (
 			++errflag;
 			break;
 		}
+
+	/*
+	 * If we're generating:
+	 * - a cert and a link AND an rsakey and no link
+	 * maybe we should squawk.
+	 */
+
 	if (errflag)
 		usage();
 }
@@ -626,15 +655,21 @@ genkeys(
 	 * RIPEMD160.
 	 */
 #ifdef HAVE_EVP_MD2
-	x509("RSA_MD2", pkey, EVP_md2());
+	if (gen_certs & CERT_RSA_MD2)
+		x509("RSA_MD2", pkey, EVP_md2());
 #endif
-	x509("RSA_MD5", pkey, EVP_md5());
-	x509("RSA_SHA", pkey, EVP_sha());
-	x509("RSA_SHA1", pkey, EVP_sha1());
+	if (gen_certs & CERT_RSA_MD5)
+		x509("RSA_MD5", pkey, EVP_md5());
+	if (gen_certs & CERT_RSA_SHA)
+		x509("RSA_SHA", pkey, EVP_sha());
+	if (gen_certs & CERT_RSA_SHA1)
+		x509("RSA_SHA1", pkey, EVP_sha1());
 #ifdef HAVE_EVP_MDC2
-	x509("RSA_MDC2", pkey, EVP_mdc2());
+	if (gen_certs & CERT_RSA_MDC2)
+		x509("RSA_MDC2", pkey, EVP_mdc2());
 #endif
-	x509("RSA_RIPEMD160", pkey, EVP_ripemd160());
+	if (gen_certs & CERT_RSA_RIPEMD160)
+		x509("RSA_RIPEMD160", pkey, EVP_ripemd160());
 	free(pkey);
 
 	/*
@@ -676,8 +711,10 @@ genkeys(
 	 * Generate the X509 certificate request. The digest algorithms
 	 * that work with DSS (DSA) are DSS and DSS1.
 	 */
-	x509("DSA_SHA", pkey, EVP_dss());
-	x509("DSA_SHA1", pkey, EVP_dss1());
+	if (gen_certs & CERT_DSA_SHA)
+		x509("DSA_SHA", pkey, EVP_dss());
+	if (gen_certs & CERT_DSA_SHA1)
+		x509("DSA_SHA1", pkey, EVP_dss1());
 	free(pkey);
 
 	if (gen_dh) {
