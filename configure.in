@@ -264,7 +264,8 @@ AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h)
 #HMS
-AC_CHECK_HEADERS(net/if.h net/if6.h)
+AC_CHECK_HEADERS(net/if.h)
+AC_CHECK_HEADERS(net/if6.h)
 AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
 AC_CHECK_HEADERS(netinet/in.h)
 #HMS
@@ -318,6 +319,15 @@ if test $ac_cv_struct_nlist_n_un = yes; then
 fi
 ])dnl
 
+dnl AC_CHECK_HEADERS(net/if.h, [], [],
+dnl [#if HAVE_SYS_TYPES_H
+dnl # include <sys/types.h>
+dnl #endif
+dnl #if HAVE_SYS_SOCKET_H
+dnl # include <sys/socket.h>
+dnl #endif
+dnl ])
+
 AC_CHECK_HEADERS(resolv.h, [], [],
 [#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -325,7 +335,7 @@ AC_CHECK_HEADERS(resolv.h, [], [],
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_ARPA_NAMESER_H>
+#if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
 ])
