@@ -74,6 +74,7 @@ extern	void	ntp_intres	P((void));
 extern	struct interface *findinterface P((struct sockaddr_storage *));
 extern  struct interface *findbcastinter P((struct sockaddr_storage *));
 extern  void	enable_broadcast P((struct interface *, struct sockaddr_storage *));
+extern	void	interface_dump	 P((struct interface *));
 
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));

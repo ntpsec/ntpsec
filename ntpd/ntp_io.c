@@ -277,6 +277,63 @@ init_io(void)
 #endif
 }
 
+/*
+ * Function to dump the contents of the interface structure
+ * For debugging use only.
+ */
+#ifdef DEBUG
+void
+interface_dump(struct interface *itf)
+{
+	u_char* cp;
+	int i;
+	/* Limit the size of the sockaddr_storage hex dump */
+	int maxsize = min(32, sizeof(struct sockaddr_storage));
+
+	printf("Dumping interface: %p\n", itf);
+	printf("fd = %d\n", itf->fd);
+	printf("bfd = %d\n", itf->bfd);
+	printf("sin = %s,\n", stoa(&(itf->sin)));
+	cp = (u_char*) &(itf->sin);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("bcast = %s,\n", stoa(&(itf->bcast)));
+	cp = (u_char*) &(itf->bcast);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("mask = %s,\n", stoa(&(itf->mask)));
+	cp = (u_char*) &(itf->mask);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("name = %s\n", itf->name);
+	printf("flags = 0x%08x\n", itf->flags);
+	printf("last_ttl = %d\n", itf->last_ttl);
+	printf("addr_refid = %08x\n", itf->addr_refid);
+	printf("num_mcast = %d\n", itf->num_mcast);
+	printf("received = %ld\n", itf->received);
+	printf("sent = %ld\n", itf->sent);
+	printf("notsent = %ld\n", itf->notsent);
+	printf("ifindex = %u\n", itf->ifindex);
+	printf("scopeid = %u\n", itf->scopeid);
+
+}
+#endif
+
 #ifdef UDP_WILDCARD_DELIVERY
 int
 create_wildcards(u_short port) {
@@ -584,6 +641,7 @@ create_sockets(
 				   stoa((&inter_list[i].bcast)));
 			printf("  mask=%s\n",
 			       stoa((&inter_list[i].mask)));
+			interface_dump(&inter_list[i]);
 		}
 	}
 #endif
