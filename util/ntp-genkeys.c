@@ -588,13 +588,13 @@ main(
 	snifflink(path_dhparms, &link_dhparms);
 
 	printf("After config:\n");
-	printf("path_keys       = <%s> -> <%s>\n"
-	       , path_keys? path_keys: ""
-	       , link_keys? link_keys: ""
-		);
 	printf("path_keysdir    = <%s> -> <%s>\n"
 	       , path_keysdir? path_keysdir: ""
 	       , link_keysdir? link_keysdir: ""
+		);
+	printf("path_keys       = <%s> -> <%s>\n"
+	       , path_keys? path_keys: ""
+	       , link_keys? link_keys: ""
 		);
 	printf("path_publickey  = <%s> -> <%s>\n"
 	       , path_publickey? path_publickey: ""
@@ -604,7 +604,7 @@ main(
 	       , path_privatekey? path_privatekey: ""
 	       , link_privatekey? link_privatekey: ""
 		);
-	printf("path_dhparms = <%s> -> <%s>\n"
+	printf("path_dhparms    = <%s> -> <%s>\n"
 	       , path_dhparms? path_dhparms: ""
 	       , link_dhparms? link_dhparms: ""
 		);
