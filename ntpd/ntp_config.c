@@ -917,17 +917,6 @@ getconfig(
 			}
 			break;
 
-#ifdef AUTOKEY
-		    case CONFIG_REVOKE:
-			if (ntokens >= 2)
-			    sys_revoke = 1 << max(atoi(tokens[1]), 10);
-			break;
-
-		    case CONFIG_AUTOMAX:
-			if (ntokens >= 2)
-			    sys_automax = 1 << max(atoi(tokens[1]), 10);
-			break;
-
 		    case CONFIG_TINKER:
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
@@ -964,6 +953,17 @@ getconfig(
 				break;
 			    }
 			}
+			break;
+
+#ifdef AUTOKEY
+		    case CONFIG_REVOKE:
+			if (ntokens >= 2)
+			    sys_revoke = 1 << max(atoi(tokens[1]), 10);
+			break;
+
+		    case CONFIG_AUTOMAX:
+			if (ntokens >= 2)
+			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
 
 #ifdef PUBKEY

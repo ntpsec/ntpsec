@@ -1,3 +1,8 @@
+2001-04-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c (getconfig): move "tinker" so it's generally
+	available.
+
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Look for getclock().
