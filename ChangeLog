@@ -1,5 +1,9 @@
 2000-02-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (ac_cv_func_ctty_for_f_setown): Yes for OpenBSD
+	(ac_cv_var_ntp_syscalls): Fix quoting of description
+	From: Jonathan Rozes <jrozes@vinton.com>
+
 	* librsaref/Makefile.am: Fix stamp-rsaref dependency order.
 
 	* configure.in: 4.0.99f

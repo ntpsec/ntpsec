@@ -934,6 +934,9 @@ AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
  *-*-netbsd*)
     ans=yes
     ;;
+ *-*-openbsd*)
+    ans=yes
+    ;;
  *-*-osf*)
     ans=yes
     ;;
@@ -1270,7 +1273,7 @@ case "$ac_cv_var_mcast" in
  yes) AC_DEFINE(MCAST) ;;
 esac
 
-AC_CACHE_CHECK([availability of ntp_{adj,get}time()], ac_cv_var_ntp_syscalls,
+AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,
  [ac_cv_var_ntp_syscalls=no
  case "$ac_cv_func___adjtimex" in
   yes)
