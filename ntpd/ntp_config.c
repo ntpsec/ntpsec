@@ -2070,13 +2070,14 @@ getnetnum(
 
 	/* Get host address. Looking for UDP datagram connection */
  	memset(&hints, 0, sizeof (hints));
+ 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_family = AF_UNSPEC;
 
 #ifdef DEBUG
 		if (debug > 3)
 			printf("getaddrinfo %s\n", num);
 #endif
-	if (getaddrinfo(num, NULL, &hints, &ptr)!=0) {
+	if (getaddrinfo(num, "ntp", &hints, &ptr)!=0) {
 		if (complain)
 			msyslog(LOG_ERR,
 				"getaddrinfo: \"%s\" invalid host address, line ignored",
@@ -2094,7 +2095,7 @@ getnetnum(
 	}
 
 	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
-	addr->ss_family = ptr->ai_family;
+	addr->ss_family = (short) ptr->ai_family;
 #ifdef DEBUG
 	if (debug > 1)
 		printf("getnetnum given %s, got %s \n",
