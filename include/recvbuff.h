@@ -39,11 +39,11 @@ extern HANDLE	get_recv_buff_event P((void));
  */
 
 /*
- *  the maximum length NTP packet is a full length NTP control message with
- *  the maximum length message authenticator.  I hate to hard-code 468 and 12,
- *  but only a few modules include ntp_control.h...
+ *  the maximum length NTP packet contains the NTP header, one Autokey
+ *  request, one Autokey response and the MAC. Assuming certificates don't
+ *  get too big, the maximum packet length is set arbitrarily at 1000.
  */   
-#define	RX_BUFF_SIZE	(468+12+MAX_MAC_LEN)
+#define	RX_BUFF_SIZE	1000		/* hail Mary */
 
 struct recvbuf {
 	struct recvbuf *next;		/* next buffer in chain */

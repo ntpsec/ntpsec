@@ -252,21 +252,24 @@ transmit(
 		}
 	}
 	peer->outdate = current_time;
-	poll_update(peer, hpoll);
 
 	/*
-	 * We need to be very careful about honking uncivilized time.
-	 * Never transmit if in broadcast client mode or access denied.
-	 * If in broadcast mode, transmit only if synchronized to a
-	 * valid source. 
+	 * Do not transmit if in broadcast cclient mode or access has
+	 * been denied. 
 	 */
 	if (peer->hmode == MODE_BCLIENT || peer->flash & TEST4) {
+		poll_update(peer, hpoll);
 		return;
-	} else if (peer->hmode == MODE_BROADCAST) {
-		if (sys_peer == NULL)
-			return;
+
+	/*
+	 * Do not transmit in broadcast mode unless we are synchronized.
+	 */
+	} else if (peer->hmode == MODE_BROADCAST && sys_peer == NULL) {
+		poll_update(peer, hpoll);
+		return;
 	}
 	peer_xmit(peer);
+	poll_update(peer, hpoll);
 }
 
 /*
@@ -327,14 +330,15 @@ receive(
 		sys_unknownversion++;
 		return;				/* invalid version */
 	}
-	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
+	hismode = (int)PKT_MODE(pkt->li_vn_mode);
+	if (hismode == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY)
 			return;			/* no query private */
 		process_private(rbufp, ((restrict_mask &
 		    RES_NOMODIFY) == 0));
 		return;
 	}
-	if (PKT_MODE(pkt->li_vn_mode) == MODE_CONTROL) {
+	if (hismode == MODE_CONTROL) {
 		if (restrict_mask & RES_NOQUERY)
 			return;			/* no query control */
 		process_control(rbufp, restrict_mask);
@@ -353,7 +357,6 @@ receive(
 	 * association, which is not supported in NTPv4. Otherwise, it
 	 * is from a client association and we fake it.
 	 */
-	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	if (hismode == MODE_UNSPEC) {
 		if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION) {
 			hismode = MODE_CLIENT;
@@ -370,7 +373,7 @@ receive(
 	 * that some systems with broken interface code, specifically
 	 * Linux, will not work with Autokey.
 	 */
-	if (PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST) {
+	if (hismode == MODE_BROADCAST) {
 		if (!sys_bclient)
 			return;			/* no client */
 #ifdef OPENSSL
@@ -450,7 +453,8 @@ receive(
 		if (debug)
 			printf("receive: at %ld %s<-%s mode %d code %d\n",
 			    current_time, ntoa(&rbufp->dstadr->sin),
-			    ntoa(&rbufp->recv_srcadr), hismode, retcode);
+			    ntoa(&rbufp->recv_srcadr), hismode,
+			    retcode);
 #endif
 	} else {
 #ifdef OPENSSL
@@ -621,7 +625,9 @@ receive(
 		 * the manycast association is found, we mobilize a
 		 * client mode association, copy pertinent variables
 		 * from the manycast to the client mode association and
-		 * wind up the spring.
+		 * wind up the spring. We should figure out how to avoid
+		 * mobilizing an association when the identity schemes
+		 * are incompatible.
 		 *
 		 * There is an implosion hazard at the manycast client,
 		 * since the manycast servers send the server packet
@@ -634,6 +640,13 @@ receive(
 
 		peer2 = findmanycastpeer(rbufp);
 		if (peer2 == 0)
+			return;
+
+		/*
+		 * Check for compatible identity scheme before
+		 * mobilizing an association.
+		 */
+		if (!crypto_check(rbufp))
 			return;
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -657,7 +670,9 @@ receive(
 		 * This is the first packet received from a symmetric
 		 * active peer. First, make sure the packet is
 		 * authentic. If so, mobilize a symmetric passive
-		 * association.
+		 * association. We should figure out how to avoid
+		 * mobilizing associations when the identity schemes are
+		 * incompatible.
 		 */
 		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
 		    RES_NOPEER)) || (sys_authenticate &&
@@ -666,6 +681,14 @@ receive(
 			    restrict_mask);
 			return;
 		}
+
+		/*
+		 * Check for compatible identity scheme before
+		 * mobilizing an association.
+		 */
+		if (!crypto_check(rbufp))
+			return;
+
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 	 	    sys_minpoll, NTP_MAXDPOLL, sys_authenticate ?
@@ -688,6 +711,13 @@ receive(
 		    !is_authentic) || !sys_bclient)
 			return;
 
+		/*
+		 * Check for compatible identity scheme before
+		 * mobilizing an association.
+		 */
+		if (!crypto_check(rbufp))
+			return;
+
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
@@ -696,6 +726,11 @@ receive(
 		if (peer == NULL)
 			return;
 #ifdef OPENSSL
+		/*
+		 * Danger looms. If this is autokey, go process the
+		 * extension fields. If something goes wrong, abandon
+		 8 ship.
+		 */
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 			crypto_recv(peer, rbufp);
 			if (peer->flash)
@@ -791,51 +826,128 @@ receive(
 			report_event(EVNT_PEERAUTH, peer);
 	}
 	if (peer->flash) {
-#ifdef OPENSSL
+
+		/*
+		 * The only flashers here are loopback and
+		 * authentication failure. Loopback can't happen with a
+		 * broadcast server. The following modes are with
+		 * respect to the server mode.
+		 */
+#ifdef DEBUG
+		if (debug)
+			printf(
+			    "receive: bad auth or loopback %03x xmt %d org %d\n",
+			    peer->flash, L_ISZERO(&peer->xmt),
+			    L_ISZERO(&p_org));
+#endif
 		switch (hismode) {
 
 		/*
-		 * In client mode if the packet matches the last one
-		 * sent and is a crypto-NAK, the server has either
-		 * restarted or refreshed the private value, so we
-		 * start over.
+		 * An authentication error in broadcast mode probably
+		 * means the server restarted or rolled a new private
+		 * value. Dump the ephemeral association and wait for
+		 * the next message.
+		 */
+		case MODE_BROADCAST:
+			unpeer(peer);
+			return;
+
+		/*
+		 * A loopback error in server mode probably means a
+		 * packet was dropped or an intruder launched a replay.
+		 * Ignore the error and let the packet processor refresh
+		 * the timestamps. If the packet was a crypto-NAK, the
+		 * server has refreshed the private value, so clear the
+		 * persistent association and start over.
 		 */
 		case MODE_SERVER:
-			if (!(peer->flash & TEST2) && has_mac == 4 &&
-			    pkt->exten[0] == 0) {
-				if (!(peer->flags & FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
-				} else {
-					peer_clear(peer);
-				}
-			}
+			if (peer->flash & TEST5 && has_mac == 4 &&
+			    pkt->exten[0] == 0)
+				peer_clear(peer);
 			break;
 
 		/*
-		 * In symmetric mode if the packet matches the last one
-		 * sent, the server has either restarted or refreshed
-		 * the private value, so we start over.
+		 * An authentication or loopback error in symmetric
+		 * modes is much more complicatied. If not done
+		 * carefully, the peers spiral into a tacking duel
+		 * similar to the January 1990 AT&T meltdown that lasted
+		 * ten hours. The trouble then and now is that a peer
+		 * restarting after a crash kills the other, which then
+		 * restarts... you get the idea.
 		 */
 		case MODE_ACTIVE:
-		case MODE_PASSIVE:
-			if (!(peer->flash & TEST2)) {
-				if (!(peer->flags & FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
-				} else {
-					peer_clear(peer);
-				}
+
+			/*
+			 * Case 1: After a long season of happiness, the
+			 * active peer dies and restarts, which
+			 * eventually results in an ASSOC request to the
+			 * passive peer. That sucker notices the
+			 * packet originate timestamp is zero, which
+			 * means the passive peer transmit timestamp
+			 * must be nonzero. Since the active peer has
+			 * not initialized timestamps, the best action
+			 * is to get out of Dodge City, demobilize the
+			 * association and wait for the next message.
+			 */
+			if (L_ISZERO(&p_org)) {
+				unpeer(peer);
+				return;
 			}
+
+			/*
+			 * Case 2: After seasonal happiness, the passive
+			 * peer dies and demobilizes. Unaware of this,
+			 * the active peer launches a presumably
+			 * legitimate message. The pasive peer
+			 * mobilizes, but finds something other than the
+			 * expected ASSOC request. Since the extension
+			 * fields have not been processed yet, the
+			 * evidence is that the passive peer transmit
+			 * timestamp is zero, which means the packet
+			 * originate timestamp must be nonzero. We need
+			 * to send something to the active peer that
+			 * will cause it to restart. If this happens or
+			 * we light or fail authentication, send a
+			 * crypto_NAK, which is tha analog of the TCP
+			 * RESET and get out of Dodge City.
+			 */ 
+			if (L_ISZERO(&peer->xmt) || peer->flash &
+			    TEST5) {
+				fast_xmit(rbufp, MODE_PASSIVE, 0,
+				    restrict_mask);
+				unpeer(peer);
+				return;
+			}
+
+			/*
+			 * Case 3: The only thing left is a lonely
+			 * loopback. We lost a packet. Life goes on.
+			 */
+			break;
+
+		case MODE_PASSIVE:
+
+			/*
+			 * Case 4: An authentication error probably
+			 * means the passive peer sent a crypto_NAK. If
+			 * it didn't and the bit is still lit, spooky.
+			 * In any case, the active peer clears the
+			 * association and starts over.
+			 */ 
+			if (peer->flash & TEST5) {
+				peer_clear(peer);
+				return;
+			}
+
+			/*
+			 * Case 5: The only thing left is a lonely
+			 * loopback. We lost a packet. Life goes on.
+			 */
+			break;
+
+		default:
 			break;
 		}
-#endif /* OPENSSL */
-#ifdef DEBUG
-		if (debug)
-			printf("receive: bad auth or loopback %03x\n",
-			    peer->flash);
-#endif
-		return;
 	}
 
 #ifdef OPENSSL
@@ -907,7 +1019,8 @@ receive(
 			if (peer->crypto & CRYPTO_FLAG_PROV) {
 #ifdef DEBUG
 				if (debug)
-					printf("packet: bad crypto %03x\n",
+					printf(
+					    "packet: bad crypto %03x\n",
 					    peer->flash);
 #endif
 				if (!(peer->flags & FLAG_CONFIG)) {
@@ -920,7 +1033,7 @@ receive(
 			}
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 11 */
-			peer->flash |= TEST11;		/* autokey failed */
+			peer->flash |= TEST11;	/* autokey failed */
 		if (peer->flash && peer->reach) {
 #ifdef DEBUG
 			if (debug)
@@ -936,7 +1049,9 @@ receive(
 	 * We have survived the gaunt. Forward to the packet routine. If
 	 * a symmetric passive association has been mobilized and the
 	 * association doesn't deserve to live, it will die in the
-	 * transmit routine if not reachable after timeout.
+	 * transmit routine if not reachable after timeout. However, if
+	 * either symmetric mode and the crypto code has something
+	 * urgent to say, we expedite the response.
 	 */
 	process_packet(peer, pkt, &rbufp->recv_time);
 }
@@ -975,17 +1090,17 @@ process_packet(
 	NTOHL_FP(&pkt->reftime, &p_reftime);
 	NTOHL_FP(&pkt->rec, &p_rec);
 	NTOHL_FP(&pkt->xmt, &p_xmt);
-	if (PKT_MODE(pkt->li_vn_mode) != MODE_BROADCAST)
+	pmode = PKT_MODE(pkt->li_vn_mode);
+	pleap = PKT_LEAP(pkt->li_vn_mode);
+	if (pmode != MODE_BROADCAST)
 		NTOHL_FP(&pkt->org, &p_org);
 	else
 		p_org = peer->rec;
+	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
 	 * Test for unsynchronized server.
 	 */
-	pmode = PKT_MODE(pkt->li_vn_mode);
-	pleap = PKT_LEAP(pkt->li_vn_mode);
-	pstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
 		peer->oldpkt++;
 	if (pmode != MODE_BROADCAST && (L_ISZERO(&p_rec) ||
@@ -998,14 +1113,11 @@ process_packet(
 	 * If any tests fail, the packet is discarded leaving only the
 	 * timestamps, which are enough to get the protocol started. The
 	 * originate timestamp is copied from the packet transmit
-	 * timestamp and the transmit timestamp is copied from the
-	 * packet receive timestamp so that replays of either the server
-	 * or client packets can be detected. The transmit timestamp
-	 * will later be overwritten when the next packet is sent. The
-	 * receive timestamp is set to the time the packet was received.
+	 * timestamp and the receive timestamp is copied from the
+	 * packet receive timestamp.
 	 */
+	peer->leap = pleap;
 	peer->org = p_xmt;
-	peer->xmt = p_rec;
 	peer->rec = *recv_ts;
 	if (peer->flash) {
 #ifdef DEBUG
@@ -1078,7 +1190,6 @@ process_packet(
 	 */
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
 	    &p_rec, &p_xmt, &peer->rec);
-	peer->leap = pleap;
 	peer->pmode = pmode;
 	peer->stratum = pstratum;
 	peer->ppoll = pkt->ppoll;
@@ -1236,12 +1347,12 @@ clock_update(void)
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
-	}
-	if (oleap == LEAP_NOTINSYNC) {
-		report_event(EVNT_SYNCCHG, (struct peer *)0);
+		if (oleap == LEAP_NOTINSYNC) {
+			report_event(EVNT_SYNCCHG, (struct peer *)0);
 #ifdef OPENSSL
-		expire_all();
+			expire_all();
 #endif /* OPENSSL */
+		}
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
@@ -1272,7 +1383,7 @@ poll_update(
 #ifdef OPENSSL
 	oldpoll = peer->kpoll;
 #endif /* OPENSSL */
-	if (hpoll != 0) {
+	if (hpoll > 0) {
 		if (hpoll > peer->maxpoll)
 			peer->hpoll = peer->maxpoll;
 		else if (hpoll < peer->minpoll)
@@ -1282,31 +1393,35 @@ poll_update(
 	}
 
 	/*
-	 * Bit of adventure here. If during a burst and not timeout,
-	 * just slink away. If timeout, figure what the next timeout
-	 * should be. If IBURST or a reference clock, use one second. If
-	 * not and the dude was reachable during the previous poll
-	 * interval, randomize over 1-4 seconds; otherwise, randomize
-	 * over 15-18 seconds. This is to give time for a modem to
-	 * complete the call, for example. If not during a burst,
-	 * randomize over the poll interval -1 to +2 seconds.
+	 * Bit of adventure here. If during a burst and not a poll, just
+	 * slink away. If a poll, figure what the next poll should be.
+	 * If a burst is pending and a reference clock or a pending
+	 * crypto response, delay for one second. If the first sent in a
+	 * burst, delay ten seconds for the modem to come up. For others
+	 * in the burst, delay two seconds.
 	 *
 	 * In case of manycast server, make the poll interval, which is
 	 * axtually the manycast beacon interval, eight times the system
 	 * poll interval. Normally when the host poll interval settles
 	 * up to 1024 s, the beacon interval settles up to 2.3 hours.
 	 */
-	if (peer->burst > 0) {
+#ifdef OPENSSL
+	if (peer->cmmd != NULL) {
+		peer->nextdate = current_time + RESP_DELAY;
+	} else
+#endif /* OPENSSL */
+		if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
 #ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
-			peer->nextdate++;
+			peer->nextdate += RESP_DELAY;
 #endif
-		else if (peer->reach & 0x1)
-			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
+		else if (peer->flags & (FLAG_IBURST | FLAG_BURST) &&
+		    peer->burst == NTP_BURST)
+			peer->nextdate += CALL_DELAY;
 		else
-			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
+			peer->nextdate += BURST_DELAY;
 	} else if (peer->cast_flags & MDF_ACAST) {
 		if (sys_survivors >= sys_minclock || peer->ttl >=
 		    sys_ttlmax)
@@ -1373,6 +1488,10 @@ peer_clear(
 		free(peer->subject);
 	if (peer->issuer != NULL)
 		free(peer->issuer);
+	if (peer->iffval != NULL)
+		BN_free(peer->iffval);
+	if (peer->grpkey != NULL)
+		BN_free(peer->grpkey);
 	if (peer->cmmd != NULL)
 		free(peer->cmmd);
 	value_free(&peer->cookval);
@@ -1415,10 +1534,8 @@ peer_clear(
 	if (peer->cast_flags & MDF_BCLNT) {
 		peer->flags |= FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
-		peer->nextdate += RANDOM & ((1 << BURST_INTERVAL1) - 1);
-	} else {
-		peer->nextdate += RANDPOLL(BURST_INTERVAL2);
 	}
+	peer->nextdate += (u_int)RANDOM % START_DELAY;
 }
 
 
@@ -2236,11 +2353,11 @@ peer_xmit(
 		 */
 		case MODE_BROADCAST:
 			if (peer->flags & FLAG_ASSOC)
-				exten = crypto_args(CRYPTO_AUTO |
-				    CRYPTO_RESP, peer->associd, NULL);
+				exten = crypto_args(peer, CRYPTO_AUTO |
+				    CRYPTO_RESP, NULL);
 			else
-				exten = crypto_args(CRYPTO_ASSOC |
-				    CRYPTO_RESP, peer->associd, NULL);
+				exten = crypto_args(peer, CRYPTO_ASSOC |
+				    CRYPTO_RESP, NULL);
 			sendlen += crypto_xmit(&xpkt, sendlen, exten,
 			    0);
 			free(exten);
@@ -2266,34 +2383,61 @@ peer_xmit(
 				peer->cmmd = NULL;
 			}
 			exten = NULL;
-			if (!peer->crypto)
-				exten = crypto_args(CRYPTO_ASSOC,
-				    peer->assoc, NULL);
-			else if (peer->pkey == NULL)
-				exten = crypto_args(CRYPTO_CERT,
-				    peer->assoc, peer->subject);
-			else if (!(peer->crypto & CRYPTO_FLAG_PROV))
-				exten = crypto_args(CRYPTO_CERT,
-				    peer->assoc, peer->issuer);
+			if (peer->leap == LEAP_NOTINSYNC ||
+			    !peer->crypto)
+				exten = crypto_args(peer, CRYPTO_ASSOC,
+				    sys_hostname);
+			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
+				exten = crypto_args(peer, CRYPTO_CERT,
+ 				    peer->subject);
+
+			/*
+			 * Identity. Note we have to sign the
+			 * certificate before the cookie to avoid a
+			 * deadlock when the passive peer is walking the
+			 * certificate trail. Awesome.
+			 */
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    crypto_flags & peer->crypto &
+			    CRYPTO_FLAG_GQ)
+				exten = crypto_args(peer, CRYPTO_GQ,
+				    NULL);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    crypto_flags & peer->crypto &
+			    CRYPTO_FLAG_IFF)
+				exten = crypto_args(peer, CRYPTO_IFF,
+				    NULL);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
+				exten = crypto_args(peer, CRYPTO_CERT,
+				    peer->issuer);
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			    !(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(CRYPTO_SIGN,
-				    peer->assoc, sys_hostname);
-			else if (!(peer->crypto & CRYPTO_FLAG_AGREE) &&
-			    sys_leap != LEAP_NOTINSYNC)
-				exten = crypto_args(CRYPTO_COOK,
-				    peer->assoc, NULL);
+			   !(peer->crypto & CRYPTO_FLAG_SIGN))
+				exten = crypto_args(peer, CRYPTO_SIGN,
+				    sys_hostname);
+
+			/*
+			 * Autokey
+			 */
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			    peer->leap != LEAP_NOTINSYNC &&
+			    !(peer->crypto & CRYPTO_FLAG_AGREE))
+				exten = crypto_args(peer, CRYPTO_COOK,
+				    NULL);
 			else if (peer->flags & FLAG_ASSOC)
-				exten = crypto_args(CRYPTO_AUTO |
-				    CRYPTO_RESP, peer->associd, NULL);
+				exten = crypto_args(peer, CRYPTO_AUTO |
+				    CRYPTO_RESP, NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
-				exten = crypto_args(CRYPTO_AUTO,
-				    peer->assoc, NULL);
+				exten = crypto_args(peer, CRYPTO_AUTO,
+				    NULL);
+
+			/*
+			 * Postamble
+			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			    peer->crypto & CRYPTO_FLAG_TAI &&
 			    !(peer->crypto & CRYPTO_FLAG_LEAP))
-				exten = crypto_args(CRYPTO_TAI,
-				    peer->assoc, NULL);
+				exten = crypto_args(peer, CRYPTO_TAI,
+				    NULL);
 			if (exten != NULL) {
 				sendlen += crypto_xmit(&xpkt, sendlen,
 				    exten, 0);
@@ -2329,31 +2473,55 @@ peer_xmit(
 				peer->cmmd = NULL;
 			}
 			exten = NULL;
-			if (!peer->crypto)
-				exten = crypto_args(CRYPTO_ASSOC,
-				    peer->assoc, NULL);
-			else if (peer->pkey == NULL)
-				exten = crypto_args(CRYPTO_CERT,
-				    peer->assoc, peer->subject);
-			else if (!(peer->crypto & CRYPTO_FLAG_PROV))
-				exten = crypto_args(CRYPTO_CERT,
-				    peer->assoc, peer->issuer);
-			else if (sys_leap != LEAP_NOTINSYNC &&
-			    !(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(CRYPTO_SIGN,
-				    peer->assoc, sys_hostname);
+			if (peer->leap == LEAP_NOTINSYNC ||
+			    !peer->crypto)
+				exten = crypto_args(peer, CRYPTO_ASSOC,
+				    sys_hostname);
+			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
+				exten = crypto_args(peer, CRYPTO_CERT,
+				    peer->subject);
+
+			/*
+			 * Identity
+			 */
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    crypto_flags & peer->crypto &
+			    CRYPTO_FLAG_GQ)
+				exten = crypto_args(peer, CRYPTO_GQ,
+				    NULL);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    crypto_flags & peer->crypto &
+			    CRYPTO_FLAG_IFF)
+				exten = crypto_args(peer, CRYPTO_IFF,
+				    NULL);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
+				exten = crypto_args(peer, CRYPTO_CERT,
+				    peer->issuer);
+
+			/*
+			 * Autokey
+			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_AGREE))
-				exten = crypto_args(CRYPTO_COOK,
-				    peer->assoc, NULL);
+				exten = crypto_args(peer, CRYPTO_COOK,
+				    NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO) &&
 			    (peer->cast_flags & MDF_BCLNT))
-				exten = crypto_args(CRYPTO_AUTO,
-				    peer->assoc, NULL);
+				exten = crypto_args(peer, CRYPTO_AUTO,
+				    NULL);
+
+			/*
+			 * Postamble. We can sign the certificate here,
+			 * since there is no chance of deadlock.
+			 */
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			   !(peer->crypto & CRYPTO_FLAG_SIGN))
+				exten = crypto_args(peer, CRYPTO_SIGN,
+				    sys_hostname);
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			    peer->crypto & CRYPTO_FLAG_TAI &&
 			    !(peer->crypto & CRYPTO_FLAG_LEAP))
-				exten = crypto_args(CRYPTO_TAI,
-				    peer->assoc, NULL);
+				exten = crypto_args(peer, CRYPTO_TAI,
+				    NULL);
 			if (exten != NULL) {
 				sendlen += crypto_xmit(&xpkt, sendlen,
 				    exten, 0);

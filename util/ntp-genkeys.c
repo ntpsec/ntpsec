@@ -70,11 +70,10 @@ int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *, int)); /* generate req/cert */
 struct timeval tv;		/* initialization vector */
 u_long	ntptime;		/* NTP epoch */
 char	hostname[PATH_MAX];	/* host name */
+extern	char *keysdir;
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
-
-char *keysdir = NTP_KEYSDIR;
 
 char *f1_keys;			/* Visible MD5 key file name */
 char f2_keys[PATH_MAX];		/* timestamped */

@@ -54,9 +54,9 @@
 #define CONFIG_TOS		34
 #define CONFIG_TTL		35
 #define CONFIG_INCLUDEFILE      36
+#define CONFIG_KEYSDIR		37
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		37
-#define CONFIG_KEYSDIR		38
+#define CONFIG_CRYPTO		38
 #endif /* OPENSSL */
 
 /*
@@ -73,9 +73,6 @@
 #define CONF_MOD_TTL		9
 #define CONF_MOD_MODE		10
 #define CONF_MOD_NOSELECT 	11
-#ifdef OPENSSL
-#define CONF_MOD_CERT		12
-#endif /* OPENSSL */
 
 /*
  * "restrict" modifier keywords
@@ -158,6 +155,8 @@
 #define CONF_CRYPTO_LEAP	3
 #define CONF_CRYPTO_CERT	4
 #define CONF_CRYPTO_RAND	5
-#define CONF_CRYPTO_TRUST	6
-#define CONF_CRYPTO_KEYS	7
+#define CONF_CRYPTO_KEYS	6
+#define	CONF_CRYPTO_IFF		7
+#define CONF_CRYPTO_GQPAR	8
+#define CONF_CRYPTO_GQ		9
 #endif /* OPENSSL */

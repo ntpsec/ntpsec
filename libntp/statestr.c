@@ -137,7 +137,8 @@ struct codestring crypto_codes[] = {
 	{ XEVNT_PER & ~CRPT_EVENT,	"certificate_expired" },
 	{ XEVNT_CKY & ~CRPT_EVENT,	"bad_or_missing_cookie" },
 	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_or_missing_leapsecond_table" },
-	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_or_missing_certificate" },
+	{ XEVNT_CRT & ~CRPT_EVENT,	"bad_or_missing_certificate" },	
+	{ XEVNT_ID & ~CRPT_EVENT,	"bad or missing identification" },
 	{ -1,				"crypto" }
 };
 #endif /* OPENSSL */

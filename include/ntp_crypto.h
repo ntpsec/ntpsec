@@ -9,28 +9,31 @@
  * the server and are not modified by the client.
  */
 #define CRYPTO_FLAG_ENAB  0x0001 /* crypto enable */
-#define CRYPTO_FLAG_KEY	  0x0002 /* host keys */
-#define CRYPTO_FLAG_SIGN  0x0004 /* signature keys */
-#define CRYPTO_FLAG_TAI	  0x0008 /* leapseconds table */
-#define CRYPTO_FLAG_HOST  (CRYPTO_FLAG_ENAB | CRYPTO_FLAG_KEY |\
-			  CRYPTO_FLAG_SIGN | CRYPTO_FLAG_TAI)
+#define CRYPTO_FLAG_TAI   0x0002 /* leapseconds table */
+
+#define CRYPTO_FLAG_PRIV  0x0010 /* PC identity scheme */
+#define CRYPTO_FLAG_IFF   0x0020 /* IFF identity scheme */
+#define CRYPTO_FLAG_GQ	  0x0040 /* GQ identity scheme */
 
 /*
  * The following bits are used by the client during the protocol
  * exchange.
  */
-#define CRYPTO_FLAG_PROV  0x0100 /* certificate verified */
-#define CRYPTO_FLAG_AGREE 0x0200 /* cookie verifed */
-#define CRYPTO_FLAG_AUTO  0x0400 /* autokey verified */
-#define CRYPTO_FLAG_LEAP  0x0800 /* leapseconds table verified */
-#define	CRYPTO_FLAG_VRFY  0x1000 /* signed certificate verified */
-#define CRYPTO_FLAG_TRUST 0x2000 /* someone set the trust bit */
+#define CRYPTO_FLAG_VALID 0x0100 /* public key verified */
+#define CRYPTO_FLAG_VRFY  0x0200 /* identity verified */
+#define CRYPTO_FLAG_PROV  0x0400 /* signature verified */
+#define CRYPTO_FLAG_AGREE 0x0800 /* cookie verifed */
+#define CRYPTO_FLAG_AUTO  0x1000 /* autokey verified */
+#define CRYPTO_FLAG_SIGN  0x2000 /* certificate signed */
+#define CRYPTO_FLAG_LEAP  0x4000 /* leapseconds table verified */
 
 /*
  * The following flags are used for certificate management.
  */
-#define CERT_SIGN       0x0001  /* certificate is signed */
-#define CERT_VALID      0x0002  /* certificate is valid */
+#define CERT_SIGN       0x01	/* certificate is signed */
+#define CERT_TRUST      0x02	/* certificate is trusted */
+#define CERT_PRIV	0x04	/* certificate is private */
+#define CERT_ERROR	0x80	/* certificate has identity values */
 
 /*
  * Extension field definitions
@@ -45,6 +48,8 @@
 #define CRYPTO_AUTO	CRYPTO_CMD(4) /* autokey values */
 #define CRYPTO_TAI	CRYPTO_CMD(5) /* leapseconds table */
 #define	CRYPTO_SIGN	CRYPTO_CMD(6) /* certificate sign */
+#define CRYPTO_IFF	CRYPTO_CMD(7) /* IFF identity scheme */
+#define CRYPTO_GQ	CRYPTO_CMD(8) /* GQ identity scheme */
 #define CRYPTO_RESP	0x80000000 /* response */
 #define CRYPTO_ERROR	0x40000000 /* error */
 
@@ -66,6 +71,8 @@
 #define XEVNT_CKY	XEVNT_CMD(11) /* bad or missing cookie */
 #define XEVNT_DAT	XEVNT_CMD(12) /* bad or missing leapseconds table */
 #define XEVNT_CRT	XEVNT_CMD(13) /* bad or missing certificate */
+#define XEVNT_ID	XEVNT_CMD(14) /* bad or missing identification */
+
 /*
  * Configuration codes
  */
@@ -77,6 +84,9 @@
 #define CRYPTO_CONF_CERT  5	/* certificate file name */
 #define CRYPTO_CONF_RAND  6	/* random seed file name */
 #define	CRYPTO_CONF_TRST  7	/* specify trust */
+#define CRYPTO_CONF_IFF   8	/* IFF parameters file name */
+#define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
+#define CRYPTO_CONF_GQ	 10	/* GQ keys file name */
 
 /*
  * Cryptographic values

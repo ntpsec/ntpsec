@@ -101,7 +101,7 @@
  * line), the driver produces one line for each timecode in the
  * following format:
  *
- * 00 1 98 23 19:26:52 721 143 0.694 47 20 0.083 66.5 3094572411.00027
+ * 00 1 98 23 19:26:52 721 143 0.694 20 0.1 66.5 3094572411.00027
  *
  * The most recent line is also written to the clockstats file at 64-s
  * intervals.
@@ -111,9 +111,9 @@
  * indicator, year of century, day of year and time of day. The status
  * indicator and year are not produced by some IRIG devices. Following
  * these fields are the signal amplitude (0-8100), codec gain (0-255),
- * field phase (0-79), time constant (2-20), modulation index (0-1),
- * carrier phase error (0+-0.5) and carrier frequency error (PPM). The
- * last field is the on-time timestamp in NTP format.
+ * modulation index (0-1), time constant (2-20), carrier phase error
+ * (us) and carrier frequency error (PPM). The last field is the on-time
+ * timestamp in NTP format.
  *
  * The fraction part of the on-time timestamp is a good indicator of how
  * well the driver is doing. With an UltrSPARC 30, this thing can keep
@@ -142,7 +142,7 @@
 #define	PRECISION	(-17)	/* precision assumed (about 10 us) */
 #define	REFID		"IRIG"	/* reference ID */
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
-#define	AUDIO_BUFSIZ	160	/* audio buffer size (20 ms) */
+#define	AUDIO_BUFSIZ	320	/* audio buffer size (40 ms) */
 #define SECOND		8000	/* nominal sample rate (Hz) */
 #define BAUD		80	/* samples per baud interval */
 #define OFFSET		128	/* companded sample offset */
@@ -194,7 +194,8 @@ struct irigunit {
 	double	integ[BAUD];	/* baud integrator */
 	double	phase, freq;	/* logical clock phase and frequency */
 	double	zxing;		/* phase detector integrator */
-	double	yxing;		/* phase detector display */
+	double	yxing;		/* cycle phase */
+	double	exing;		/* envelope phase */
 	double	modndx;		/* modulation index */
 	double	irig_b;		/* IRIG-B signal amplitude */
 	double	irig_e;		/* IRIG-E signal amplitude */
@@ -222,7 +223,6 @@ struct irigunit {
 	double	lastenv[CYCLE];	/* last cycle amplitudes */
 	double	lastint[CYCLE];	/* last integrated cycle amplitudes */
 	double	lastsig;	/* last carrier sample */
-	double	xxing;		/* phase detector interpolated output */
 	double	fdelay;		/* filter delay */
 	int	decim;		/* sample decimation factor */
 	int	envphase;	/* envelope phase */
@@ -581,10 +581,10 @@ irig_base(
 	/*
 	 * Local variables
 	 */
+	double	xxing;		/* phase detector interpolated output */
 	double	lope;		/* integrator output */
 	double	env;		/* envelope detector output */
 	double	dtemp;		/* double temp */
-	int	i;		/* index temp */
 
 	pp = peer->procptr;
 	up = (struct irigunit *)pp->unitptr;
@@ -610,8 +610,8 @@ irig_base(
 	 * change of 360 degrees produces an output change of one unit.
 	 */ 
 	if (up->lastsig > 0 && lope <= 0) {
-		up->xxing = lope / (up->lastsig - lope);
-		up->zxing += (up->carphase - 4 + up->xxing) / 8.;
+		xxing = lope / (up->lastsig - lope);
+		up->zxing += (up->carphase - 4 + xxing) / CYCLE;
 	}
 	up->lastsig = lope;
 
@@ -628,7 +628,7 @@ irig_base(
 		up->noise = up->intmin;
 		if (up->maxsignal < DRPOUT)
 			up->errflg |= IRIG_ERR_AMP;
-		if (up->intmax > 0)
+		if (up->maxsignal > 0)
 			up->modndx = (up->intmax - up->intmin) /
 			    up->intmax;
  		else
@@ -712,11 +712,8 @@ irig_base(
 		if (up->pulse != 9)
 			up->errflg |= IRIG_ERR_SYNCH;
 		up->pulse = 9;
-		dtemp = BAUD - up->zxing;
-		i = up->envxing - up->envphase;
-		if (i < 0)
-			i -= i;
-		if (i <= 1) {
+		up->exing = -up->yxing;
+		if (fabs(up->envxing - up->envphase) <= 1) {
 			up->tcount++;
 			if (up->tcount > 50 * up->tc) {
 				up->tc++;
@@ -725,7 +722,7 @@ irig_base(
 				up->tcount = 0;
 				up->envxing = up->envphase;
 			} else {
-				dtemp -= up->envxing - up->envphase;
+				up->exing -= up->envxing - up->envphase;
 			}
 		} else {
 			up->tcount = 0;
@@ -739,8 +736,9 @@ irig_base(
 		 * this plus the delay since the last carrier positive
 		 * zero crossing.
 		 */
-		DTOLFP(up->decim * (dtemp / SECOND + 1.) + up->fdelay,
-		    &ltemp);
+		dtemp = up->decim * ((up->exing + BAUD) / SECOND + 1.) +
+		    up->fdelay;
+		DTOLFP(dtemp, &ltemp);
 		pp->lastrec = up->timestamp;
 		L_SUB(&pp->lastrec, &ltemp);
 
@@ -825,7 +823,7 @@ irig_decode(
 		up->lastbit = 0;
 		if (up->errflg == 0) {
 			refclock_process(pp);
-			pp->lastref = up->timestamp;
+			pp->lastref = pp->lastrec;
 		}
 		up->errflg = 0;
 	}
@@ -877,12 +875,12 @@ irig_decode(
 				up->errflg |= IRIG_ERR_CHECK;
 			up->second = pp->second;
 			sprintf(pp->a_lastcode,
-			    "%02x %c %2d %3d %02d:%02d:%02d %4.0f %3d %6.3f %2d %2d %6.3f %6.1f",
+			    "%02x %c %2d %3d %02d:%02d:%02d %4.0f %3d %6.3f %2d %6.1f %6.1f %s",
 			    up->errflg, syncchar, pp->year, pp->day,
 			    pp->hour, pp->minute, pp->second,
 			    up->maxsignal, up->gain, up->modndx,
-			    up->envxing, up->tc, up->yxing, up->freq *
-			    1e6 / SECOND);
+			    up->tc, up->exing * 1e6 / SECOND, up->freq *
+			    1e6 / SECOND, ulfptoa(&pp->lastrec, 6));
 			pp->lencode = strlen(pp->a_lastcode);
 			if (pp->sloppyclockflag & CLK_FLAG4) {
 				record_clock_stats(&peer->srcadr,
