@@ -428,7 +428,9 @@ refclock_cmpl_fp(
 /*
  * refclock_process_offset - update median filter
  *
- * This routine uses the given offset and timestamps to construct a new entry in the median filter circular buffer. Samples that overflow the filter are quietly discarded.
+ * This routine uses the given offset and timestamps to construct a new
+ * entry in the median filter circular buffer. Samples that overflow the
+ * filter are quietly discarded.
  */
 void
 refclock_process_offset(
@@ -442,7 +444,6 @@ refclock_process_offset(
 
 	pp->lastref = offset;
 	pp->lastrec = lastrec;
-	pp->variance = 0;
 	L_SUB(&offset, &lastrec);
 	LFPTOD(&offset, doffset);
 	SAMPLE(doffset + fudge);
@@ -540,7 +541,7 @@ refclock_sample(
 	}
 	offset /= k;
 	pp->offset = offset;
-	pp->variance += disp / k - SQUARE(offset);
+	pp->variance = disp / k - SQUARE(offset);
 #ifdef DEBUG
 	if (debug)
 		printf(

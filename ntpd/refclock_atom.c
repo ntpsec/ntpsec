@@ -64,12 +64,22 @@ extern int pps_hardpps;		/* enables the kernel PPS interface */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"PPS\0"	/* reference ID */
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
+#define NANOSECOND	1000000000 /* one second (ns) */
+#define RANGEGATE	(NANOSECOND - 500000) /* range gate (ns) */
 
 static struct peer *pps_peer;	/* atom driver for PPS sources */
+
+/*
+ * PPS unit control structure
+ */
+struct ppsunit {
+	struct timespec ts;	/* last timestamp */
 #ifdef HAVE_PPSAPI
-static int fddev;		/* pps device descriptor */
-static pps_info_t pps_info;	/* pps_info control */
+	int fddev;		/* pps device descriptor */
+	pps_info_t pps_info;	/* pps_info control */
+	pps_handle_t handle;	/* PPSAPI handlebars */
 #endif /* HAVE_PPSAPI */
+};
 
 /*
  * Function prototypes
@@ -100,21 +110,29 @@ struct	refclock refclock_atom = {
  */
 static int
 atom_start(
-	int unit,
-	struct peer *peer
+	int unit,		/* unit number (not used) */
+	struct peer *peer	/* peer structure pointer */
 	)
 {
+	register struct ppsunit *up;
 	struct refclockproc *pp;
-	int flags;
 #ifdef HAVE_PPSAPI
 	pps_params_t pps;
 	int mode, temp;
 	pps_handle_t handle;
 #endif /* HAVE_PPSAPI */
 
+	/*
+	 * Allocate and initialize unit structure
+	 */
 	pps_peer = peer;
-	flags = 0;
-
+	up = emalloc(sizeof(struct ppsunit));
+	memset(up, 0, sizeof(struct ppsunit));
+	pp = peer->procptr;
+	pp->unitptr = (caddr_t)up;
+	peer->precision = PRECISION;
+	pp->clockdesc = DESCRIPTION;
+	memcpy((char *)&pp->refid, REFID, 4);
 #ifdef HAVE_PPSAPI
 	/*
 	 * Open PPS device, if not done already. If some driver has
@@ -131,8 +149,8 @@ atom_start(
 	} else {
 		if (strlen(pps_device) == 0)
 			sprintf(pps_device, DEVICE, unit);
-		fddev = open(pps_device, O_RDWR, 0777);
-		if (fddev <= 0) {
+		up->fddev = open(pps_device, O_RDWR, 0777);
+		if (up->fddev <= 0) {
 			msyslog(LOG_ERR,
 			    "refclock_atom: %s: %m", pps_device);
 			return (0);
@@ -143,7 +161,7 @@ atom_start(
 	 * Light up the PPSAPI interface, select edge, enable kernel.
 	 */
 	memset(&pps, 0, sizeof(pps));
-	if (time_pps_create(fddev, &handle) < 0) {
+	if (time_pps_create(up->fddev, &handle) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_create failed: %m");
 		return (0);
@@ -172,22 +190,15 @@ atom_start(
 		return (0);
 	}
 	(void)time_pps_getparams(handle, &pps);
-	fdpps = (int)handle;
+	up->handle = handle;
 #if DEBUG
 	if (debug)
 		printf(
-		    "refclock_atom: %s fdpps %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-		    pps_device, fdpps, pps.api_version, pps.mode, mode);
+		    "refclock_atom: %s handle %d ppsapi vers %d mode 0x%x cap 0x%x\n",
+		    pps_device, up->handle, pps.api_version, pps.mode,
+		    mode);
 #endif
 #endif /* HAVE_PPSAPI */
-
-	/*
-	 * Initialize miscellaneous variables
-	 */
-	pp = peer->procptr;
-	peer->precision = PRECISION;
-	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
 	return (1);
 }
 
@@ -197,19 +208,24 @@ atom_start(
  */
 static void
 atom_shutdown(
-	int unit,
-	struct peer *peer
+	int unit,		/* unit number (not used) */
+	struct peer *peer	/* peer structure pointer */
 	)
 {
+	register struct ppsunit *up;
+	struct refclockproc *pp;
+
+	pp = peer->procptr;
+	up = (struct ppsunit *)pp->unitptr;
 #ifdef HAVE_PPSAPI
-	if (fddev > 0)
-		close(fddev);
-	if (fdpps > 0)
-		time_pps_destroy(fdpps);
-	fdpps = 0;
+	if (up->fddev > 0)
+		close(up->fddev);
+	if (up->handle > 0)
+		time_pps_destroy(up->handle);
 #endif /* HAVE_PPSAPI */
 	if (pps_peer == peer)
 		pps_peer = 0;
+	free(up);
 }
 
 
@@ -224,13 +240,12 @@ atom_shutdown(
  */
 static int
 atom_pps(
-	struct peer *peer
+	struct peer *peer	/* peer structure pointer */
 	)
 {
+	register struct ppsunit *up;
 	struct refclockproc *pp;
-	struct timespec timeout;
-	struct timespec ts;
-	l_fp lftmp;
+	struct timespec timeout, ts;
 	double doffset;
 	int i, rval;
 
@@ -238,34 +253,33 @@ atom_pps(
 	 * Convert the timeval to l_fp and save for billboards. Sign-
 	 * extend the fraction and stash in the buffer. No harm is done
 	 * if previous data are overwritten. If the discipline comes bum
-	 * or the data grow stale, just forget it. Round the nanoseconds
-	 * to microseconds with great care.
+	 * or the data grow stale, just forget it. A range gate rejects
+	 * new samples if less than a jiggle time from the next second.
 	 */ 
 	pp = peer->procptr;
-	if (fdpps <= 0)
+	up = (struct ppsunit *)pp->unitptr;
+	if (up->handle <= 0)
 		return (1);
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
-	i = pps_info.assert_sequence;
-	rval = time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &pps_info,
-	    &timeout);
-	if (rval < 0 || i == pps_info.assert_sequence)
+	i = up->pps_info.assert_sequence;
+	rval = time_pps_fetch(up->handle, PPS_TSFMT_TSPEC,
+	    &up->pps_info, &timeout);
+	if (rval < 0 || i == up->pps_info.assert_sequence)
 		return (1);
 	if (pps_assert)
-		ts = pps_info.assert_timestamp;
+		ts = up->pps_info.assert_timestamp;
 	else
-		ts = pps_info.clear_timestamp;
+		ts = up->pps_info.clear_timestamp;
+	if (ts.tv_sec == up->ts.tv_sec && ts.tv_nsec < up->ts.tv_nsec +
+	    RANGEGATE)
+		return (1);
+	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
-	ts.tv_nsec = (ts.tv_nsec + 500) / 1000;
-	if (ts.tv_nsec >= 1000000) {
-		ts.tv_nsec -= 1000000;
-		ts.tv_sec++;
-	}
-	TVUTOTSF(ts.tv_nsec, pp->lastrec.l_uf);
-	L_CLR(&lftmp);
-	L_ADDF(&lftmp, pp->lastrec.l_f);
-	LFPTOD(&lftmp, doffset);
-	SAMPLE(-doffset + pp->fudgetime1);
+	if (ts.tv_nsec > NANOSECOND / 2)
+		ts.tv_nsec -= NANOSECOND;
+	doffset = -ts.tv_nsec;
+	SAMPLE(doffset / NANOSECOND + pp->fudgetime1);
 	return (0);
 }
 #endif /* HAVE_PPSAPI */
@@ -276,11 +290,11 @@ atom_pps(
  * This routine is called once per second when the external clock driver
  * processes PPS information. It processes the PPS timestamp and saves
  * the sign-extended fraction in a circular buffer for processing at the
- * next poll event.
+ * next poll event. This works only for a single PPS device.
  */
 int
 pps_sample(
-	   l_fp *offset
+	   l_fp *offset		/* PPS offset */
 	   )
 {
 	register struct peer *peer;
@@ -316,8 +330,8 @@ pps_sample(
  */
 static void
 atom_poll(
-	int unit,
-	struct peer *peer
+	int unit,		/* unit number (not used) */
+	struct peer *peer	/* peer structure pointer */
 	)
 {
 	struct refclockproc *pp;
@@ -333,7 +347,7 @@ atom_poll(
 	pp = peer->procptr;
 #ifdef HAVE_PPSAPI
 	err = atom_pps(peer);
-	if (err > 0) {
+	if (err != 0) {
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
@@ -359,8 +373,6 @@ atom_poll(
 		pp->leap = LEAP_NOTINSYNC;
 		return;
 	}
-	pp->variance = 0;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
 	peer->burst = MAXSTAGE;
 }

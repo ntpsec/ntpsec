@@ -1,3 +1,11 @@
+2000-09-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c: Use the new ppsunit.  Cleanup and improve
+	documentation.
+	* ntpd/ntp_refclock.c (refclock_sample): Don't accumulate
+	variance.
+	From Dave Mills
+
 2000-08-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver22.htm: Update the docs.
