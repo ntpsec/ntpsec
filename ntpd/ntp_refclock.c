@@ -470,13 +470,14 @@ refclock_sample(
 	 * Copy the raw offsets and sort into ascending order. Don't do
 	 * anything if the buffer is empty.
 	 */
-	if (pp->codeproc == pp->coderecv)
-		return (0);
 	n = 0;
 	while (pp->codeproc != pp->coderecv) {
-		off[n++] = pp->filter[pp->codeproc];
 		pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
+		off[n] = pp->filter[pp->codeproc];
+		n++;
 	}
+	if (n == 0)
+		return (0);
 	if (n > 1)
 		qsort((char *)off, (size_t)n, sizeof(double), refclock_cmpl_fp);
 
