@@ -42,7 +42,7 @@ Once you have obtained the sources, do the following:
 
 and you should be ready to go.
 
-You can keep update your repository by incanting:
+You can update your repository by incanting:
 
 	cd REPO
 	bk pull
