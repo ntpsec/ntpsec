@@ -2017,15 +2017,13 @@ help(
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
 		    cmdsort[n++] = xcp->keyword;
 
+		qsort(
 #ifdef QSORT_USES_VOID_P
-#ifndef SYS_WINNT
-		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
+		    (void *)
 #else
-		qsort((void *)cmdsort, (size_t)n, sizeof(char *), helpsort);
+		    (char *)
 #endif
-#else
-		qsort((char *)cmdsort, (size_t)n, sizeof(char *), helpsort);
-#endif
+		    cmdsort, (size_t)n, sizeof(char *), helpsort);
 		maxlength = 0;
 		for (i = 0; i < n; i++) {
 			length[i] = strlen(cmdsort[i]);
