@@ -100,10 +100,23 @@ transmit(
 		 * Determine reachability and diddle things if we
 		 * haven't heard from the host for a while. If the peer
 		 * is not configured and not likely to stay around,
-		 * we exhaust it.
+		 * we exhaust it. If an anycast client and at least 3
+		 * clocks are around, bump the poll to the max.
+		 * Otherwise, it will ramp up just like in the
+		 * unreachable case.
 		 */
-		if (peer->hmode != MODE_BROADCAST)
-			peer->unreach++;
+		if (peer->hmode == MODE_BROADCAST) {
+			hpoll = peer->minpoll;
+			peer->unreach = 0;
+		} else {
+			if (peer->cast_flags & MDF_ACAST &&
+			    sys_survivors >= NTP_MINCLOCK) {
+				hpoll = peer->maxpoll;
+				peer->unreach = 0;
+			} else {
+				peer->unreach++;
+			}
+		}
 		if (peer->unreach > NTP_UNREACH) {
 			peer_clear(peer);
 			if (!(peer->flags & FLAG_CONFIG)) {
@@ -134,8 +147,8 @@ transmit(
 					unpeer(peer);
 					return;
 				}
+				hpoll = peer->minpoll;
 			}
-			hpoll = peer->minpoll;
 			if (peer->flags & FLAG_IBURST)
 				peer->burst = NTP_SHIFT;
 			else if (peer->flags & FLAG_BURST)
@@ -195,8 +208,7 @@ transmit(
 	 * in broadcast mode, transmit only if synchronized to a valid
 	 * source and this is not the local clock driver configured as
 	 * the prefer peer. If not in broadcast mode. transmit only if
-	 * not broadcast client mode and not in anycast mode with more
-	 * than 3 surviving sources.
+	 * not broadcast client mode.
 	 */
 	if (peer->hmode == MODE_BROADCAST) {
 		if (!(sys_leap == LEAP_NOTINSYNC ||
@@ -204,8 +216,7 @@ transmit(
 		    sys_peer->flags & FLAG_PREFER)))
 			peer_xmit(peer);
 	} else {
-		if (peer->hmode != MODE_BCLIENT && !((peer->cast_flags &
-		    MDF_ACAST) && sys_survivors >= NTP_MINCLOCK))
+		if (peer->hmode != MODE_BCLIENT)
 			peer_xmit(peer);
 	}
 	peer->outdate = current_time;
@@ -494,20 +505,20 @@ receive(
 	case AM_FXMIT:
 
 		/*
-		 * If the client is configured purely as a broadcast
-		 * client and not as an manycast server, it has no
-		 * business being a server. Simply go home. Otherwise,
-		 * send a MODE_SERVER response and go home. Note that we
-		 * don't do a authentication check here, since we can't
-		 * set the system clock; but, we do set the key ID to
-		 * zero to tell the caller about this.
+		 * If from a manycast client and we are not
+		 * synchronized, poof the packet. Otherwise, send a
+		 * MODE_SERVER response and go home. Note that we don't
+		 * require authentication check here, since we can't set
+		 * the system clock; but, we do set the key ID to zero
+		 * to tell the caller about this.
 		 */
-		if (!sys_bclient || sys_manycastserver) {
-			if (is_authentic)
-				fast_xmit(rbufp, MODE_SERVER, skeyid);
-			else
-				fast_xmit(rbufp, MODE_SERVER, 0);
-		}
+		if (sys_manycastserver && (rbufp->dstadr->flags &
+		    INT_MULTICAST) && sys_peer == NULL)
+			return;
+		if (is_authentic)
+			fast_xmit(rbufp, MODE_SERVER, skeyid);
+		else
+			fast_xmit(rbufp, MODE_SERVER, 0);
 		return;
 
 	case AM_MANYCAST:
@@ -524,8 +535,6 @@ receive(
 		 * ignore it. Bad manners to respond if we are not
 		 * synchronized to something.
 		 */
-		if (sys_leap == LEAP_NOTINSYNC)
-			return;
 		peer2 = findmanycastpeer(rbufp);
 		if (peer2 == 0)
 			return;
@@ -1084,9 +1093,7 @@ poll_update(
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
 
-	if (peer->hmode == MODE_BROADCAST) 
-		peer->hpoll = peer->minpoll;
-	else if (peer->flags & FLAG_SYSPEER)
+	if (peer->flags & FLAG_SYSPEER)
 		peer->hpoll = sys_poll;
 	else
 		peer->hpoll = hpoll;
@@ -1159,7 +1166,9 @@ peer_clear(
 	/*
 	 * If he dies as a multicast client, he comes back to life as
 	 * a multicast client in client mode in order to recover the
-	 * initial autokey values.
+	 * initial autokey values. Note that there is no need to call
+	 * clock_select(), since the perp has already been voted off
+	 * the island at this point.
 	 */
 	peer->flags &= ~FLAG_AUTOKEY;
 	if (peer->flags & FLAG_MCAST2) {
@@ -1666,6 +1675,8 @@ clock_select(void)
 	 * chance. If they didn't pass the sanity and intersection
 	 * tests, they have already been voted off the island.
 	 */
+	if (nlist < NTP_CANCLOCK && nlist < sys_survivors)
+		resetmanycast();
 	sys_survivors = nlist;
 
 #ifdef DEBUG
@@ -2173,6 +2184,8 @@ fast_xmit(
 	 * Initialize transmit packet header fields from the receive
 	 * buffer provided. We leave some fields intact as received.
 	 */
+	if (rbufp->dstadr == any_interface)
+		rbufp->dstadr = findinterface(&rbufp->srcadr);
 	rpkt = &rbufp->recv_pkt;
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 	    PKT_VERSION(rpkt->li_vn_mode), xmode);

@@ -165,44 +165,44 @@ static	u_char def_sys_var[] = {
  * Peer variable list
  */
 static struct ctl_var peer_var[] = {
-	{ 0,		PADDING, "" },      /* 0 */
-	{ CP_CONFIG,	RO, "config" }, /* 1 */
-	{ CP_AUTHENABLE, RO,	"authenable" }, /* 2 */
-	{ CP_AUTHENTIC, RO, "authentic" },  /* 3 */
-	{ CP_SRCADR,	RO, "srcadr" }, /* 4 */
-	{ CP_SRCPORT,	RO, "srcport" },    /* 5 */
-	{ CP_DSTADR,	RO, "dstadr" }, /* 6 */
-	{ CP_DSTPORT,	RO, "dstport" },    /* 7 */
-	{ CP_LEAP,	RO, "leap" },   /* 8 */
-	{ CP_HMODE, RO, "hmode" },  /* 9 */
-	{ CP_STRATUM,	RO, "stratum" },    /* 10 */
-	{ CP_PPOLL, RO, "ppoll" },  /* 11 */
-	{ CP_HPOLL, RO, "hpoll" },  /* 12 */
-	{ CP_PRECISION, RO, "precision" },  /* 13 */
-	{ CP_ROOTDELAY, RO, "rootdelay" },  /* 14 */
+	{ 0,		PADDING, "" },		/* 0 */
+	{ CP_CONFIG,	RO, "config" },		/* 1 */
+	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
+	{ CP_AUTHENTIC, RO, "authentic" }, 	/* 3 */
+	{ CP_SRCADR,	RO, "srcadr" },		/* 4 */
+	{ CP_SRCPORT,	RO, "srcport" },	/* 5 */
+	{ CP_DSTADR,	RO, "dstadr" },		/* 6 */
+	{ CP_DSTPORT,	RO, "dstport" },	/* 7 */
+	{ CP_LEAP,	RO, "leap" },		/* 8 */
+	{ CP_HMODE,	RO, "hmode" },		/* 9 */
+	{ CP_STRATUM,	RO, "stratum" },	/* 10 */
+	{ CP_PPOLL,	RO, "ppoll" },		/* 11 */
+	{ CP_HPOLL,	RO, "hpoll" },		/* 12 */
+	{ CP_PRECISION,	RO, "precision" },	/* 13 */
+	{ CP_ROOTDELAY,	RO, "rootdelay" },	/* 14 */
 	{ CP_ROOTDISPERSION, RO, "rootdispersion" }, /* 15 */
-	{ CP_REFID, RO, "refid" },  /* 16 */
-	{ CP_REFTIME,	RO, "reftime" },    /* 17 */
-	{ CP_ORG,	RO, "org" },    /* 18 */
-	{ CP_REC,	RO, "rec" },    /* 19 */
-	{ CP_XMT,	RO, "xmt" },    /* 20 */
-	{ CP_REACH, RO, "reach" },  /* 21 */
-	{ CP_VALID, RO, "valid" },  /* 22 */
-	{ CP_TIMER, RO, "timer" },  /* 23 */
-	{ CP_DELAY, RO, "delay" },  /* 24 */
-	{ CP_OFFSET,	RO, "offset" }, /* 25 */
-	{ CP_JITTER,	RO, "jitter" }, /* 26 */
-	{ CP_DISPERSION,RO, "dispersion" }, /* 27 */
-	{ CP_KEYID, RO, "keyid" },  /* 28 */
-	{ CP_FILTDELAY, RO, "filtdelay=" }, /* 29 */
-	{ CP_FILTOFFSET, RO,	"filtoffset=" }, /* 30 */
-	{ CP_PMODE, RO, "pmode" },  /* 31 */
-	{ CP_RECEIVED,	RO, "received"},    /* 32 */
-	{ CP_SENT,	RO, "sent" },   /* 33 */
-	{ CP_FILTERROR, RO, "filtdisp=" },  /* 34 */
-	{ CP_FLASH, RO, "flash" },  /* 35 */
-	{ CP_DISP,	PADDING,"" },       /* 36 */
-	{ CP_VARLIST,	RO, "peer_var_list" }, /* 37 */
+	{ CP_REFID,	RO, "refid" },		/* 16 */
+	{ CP_REFTIME,	RO, "reftime" },	/* 17 */
+	{ CP_ORG,	RO, "org" },		/* 18 */
+	{ CP_REC,	RO, "rec" },		/* 19 */
+	{ CP_XMT,	RO, "xmt" },		/* 20 */
+	{ CP_REACH,	RO, "reach" },		/* 21 */
+	{ CP_VALID,	RO, "valid" },		/* 22 */
+	{ CP_TIMER,	RO, "timer" },		/* 23 */
+	{ CP_DELAY,	RO, "delay" },		/* 24 */
+	{ CP_OFFSET,	RO, "offset" },		/* 25 */
+	{ CP_JITTER,	RO, "jitter" },		/* 26 */
+	{ CP_DISPERSION, RO, "dispersion" },	/* 27 */
+	{ CP_KEYID,	RO, "keyid" },		/* 28 */
+	{ CP_FILTDELAY,	RO, "filtdelay=" },	/* 29 */
+	{ CP_FILTOFFSET, RO, "filtoffset=" },	/* 30 */
+	{ CP_PMODE,	RO, "pmode" },		/* 31 */
+	{ CP_RECEIVED,	RO, "received"},	/* 32 */
+	{ CP_SENT,	RO, "sent" },		/* 33 */
+	{ CP_FILTERROR,	RO, "filtdisp=" },	/* 34 */
+	{ CP_FLASH,	RO, "flash" },		/* 35 */
+	{ CP_TTL,	RO, "ttl" },		/* 36 */
+	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
 #ifdef PUBKEY
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
@@ -213,7 +213,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
 #endif /* PUBKEY */
-	{ 0,		EOV,	""  }
+	{ 0,		EOV, ""  }		/* 46 */
 };
 
 
@@ -225,25 +225,26 @@ static u_char def_peer_var[] = {
 	CP_SRCPORT,
 	CP_DSTADR,
 	CP_DSTPORT,
-	CP_KEYID,
+	CP_LEAP,
 	CP_STRATUM,
 	CP_PRECISION,
 	CP_ROOTDELAY,
 	CP_ROOTDISPERSION,
 	CP_REFID,
-	CP_REFTIME,
-	CP_OFFSET,
-	CP_DELAY,
-	CP_DISPERSION,
-	CP_JITTER,
 	CP_REACH,
 	CP_VALID,
 	CP_HMODE,
 	CP_PMODE,
 	CP_HPOLL,
 	CP_PPOLL,
-	CP_LEAP,
 	CP_FLASH,
+	CP_KEYID,
+	CP_TTL,
+	CP_OFFSET,
+	CP_DELAY,
+	CP_DISPERSION,
+	CP_JITTER,
+	CP_REFTIME,
 	CP_ORG,
 	CP_REC,
 	CP_XMT,
@@ -265,21 +266,21 @@ static u_char def_peer_var[] = {
  * Clock variable list
  */
 static struct ctl_var clock_var[] = {
-	{ 0,		PADDING, "" },      /* 0 */
-	{ CC_TYPE,	RO, "type" },   /* 1 */
-	{ CC_TIMECODE,	RO, "timecode" },   /* 2 */
-	{ CC_POLL,	RO, "poll" },   /* 3 */
-	{ CC_NOREPLY,	RO, "noreply" },    /* 4 */
-	{ CC_BADFORMAT, RO, "badformat" },  /* 5 */
-	{ CC_BADDATA,	RO, "baddata" },    /* 6 */
-	{ CC_FUDGETIME1, RO,	"fudgetime1" }, /* 7 */
-	{ CC_FUDGETIME2, RO,	"fudgetime2" }, /* 8 */
-	{ CC_FUDGEVAL1, RO, "stratum" },    /* 9 */
-	{ CC_FUDGEVAL2, RO, "refid" },  /* 10 */
-	{ CC_FLAGS,	RO, "flags" },  /* 11 */
-	{ CC_DEVICE,	RO, "device" }, /* 12 */
-	{ CC_VARLIST,	RO, "clock_var_list" },/* 13 */
-	{ 0,		EOV,	""  }
+	{ 0,		PADDING, "" },		/* 0 */
+	{ CC_TYPE,	RO, "type" },		/* 1 */
+	{ CC_TIMECODE,	RO, "timecode" },	/* 2 */
+	{ CC_POLL,	RO, "poll" },		/* 3 */
+	{ CC_NOREPLY,	RO, "noreply" },	/* 4 */
+	{ CC_BADFORMAT, RO, "badformat" },	/* 5 */
+	{ CC_BADDATA,	RO, "baddata" },	/* 6 */
+	{ CC_FUDGETIME1, RO, "fudgetime1" },	/* 7 */
+	{ CC_FUDGETIME2, RO, "fudgetime2" },	/* 8 */
+	{ CC_FUDGEVAL1, RO, "stratum" },	/* 9 */
+	{ CC_FUDGEVAL2, RO, "refid" },		/* 10 */
+	{ CC_FLAGS,	RO, "flags" },		/* 11 */
+	{ CC_DEVICE,	RO, "device" },		/* 12 */
+	{ CC_VARLIST,	RO, "clock_var_list" },	/* 13 */
+	{ 0,		EOV, ""  }		/* 14 */
 };
 
 
@@ -1475,6 +1476,10 @@ ctl_putpeer(
 
 	case CP_FLASH:
 		ctl_puthex(peer_var[CP_FLASH].text, peer->flash);
+		break;
+
+	case CP_TTL:
+		ctl_putint(peer_var[CP_TTL].text, peer->ttl);
 		break;
 
 	case CP_VALID:

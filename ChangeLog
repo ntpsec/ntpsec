@@ -1,3 +1,17 @@
+2000-12-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_request.c (do_conf): call peer_config with
+	any_interface, not 0.
+	* ntpd/ntp_proto.c (transmit): Manycast cleanup
+	* ntpd/ntp_peer.c (findmanycastpeer): manycast cleanup
+	* ntpd/ntp_io.c (sendpkt): Only check ttl if we have a ttl
+	(findinterface): Cleanup
+	* ntpd/ntp_control.c: cleanup
+	* include/ntpd.h: Added resetmanycast.
+	* include/ntp_control.h (CP_TTL): disp -> ttl
+	* ntpq/ntpq.c: disp -> ttl
+	From Dave Mills
+
 2000-11-26  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k11

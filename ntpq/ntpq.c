@@ -160,7 +160,7 @@ struct ctl_var peer_var[] = {
 	{ CP_SENT,	UI,	"sent" },	/* 33 */
 	{ CP_FILTERROR,	AR,	"filtdisp" },	/* 34 */
 	{ CP_FLASH,     FX,	"flash" },	/* 35 */ 
-	{ CP_DISP,      FU,	"disp" },	/* 36 */
+	{ CP_TTL,	UI,	"ttl" },	/* 36 */
 	/*
 	 * These are duplicate entries so that we can
 	 * process deviant version of the ntp protocol.

@@ -1168,7 +1168,7 @@ sendpkt(
 	/*
 	 * for the moment we use the bcast option to set multicast ttl
 	 */
-	if (inter->flags & INT_MULTICAST && ttl != inter->last_ttl) {
+	if (ttl > 0 && ttl != inter->last_ttl) {
 		char mttl = ttl;
 
 		/*
@@ -1570,17 +1570,38 @@ findinterface(
 {
 	register int i;
 	register u_int32 saddr;
+	struct sockaddr_in xaddr;
+	struct interface *inter;
+	int udp;
+	u_int addrlen = 20;
 
 	/*
 	 * Just match the address portion.
 	 */
+	inter = any_interface;
 	saddr = addr->sin_addr.s_addr;
-	for (i = 0; i < ninterfaces; i++)
-	{
+
+	xaddr.sin_addr.s_addr = addr->sin_addr.s_addr;
+	xaddr.sin_port = htons(2000);
+/*
+	for (i = 0; i < ninterfaces; i++) {
 		if (inter_list[i].sin.sin_addr.s_addr == saddr)
-		    return &inter_list[i];
+			inter = &inter_list[i];
 	}
-	return (struct interface *)0;
+*/
+	udp = socket(AF_INET, SOCK_DGRAM, 0);
+	if (udp < 0)
+		perror("socket() fails");
+	connect(udp, (struct sockaddr *)&xaddr, sizeof(xaddr));
+	if (udp < 0)
+		perror("connect fails\n");
+	getsockname(udp, (struct sockaddr *)&xaddr, &addrlen);
+	close(udp);
+
+printf("xxx %s %s %d %s\n", ntoa(addr), ntoa(&xaddr),
+addrlen, ntoa(&inter->sin));
+
+	return (inter);
 }
 
 

@@ -337,7 +337,7 @@ findpeerbyassoc(
  * findmanycastpeer - find and return a manycast peer
  *
  * We search the peer list for unique associations that match the
- * originate timestamp, but avoid duplicate source addresses.
+ * originate timestamp.
  */
 struct peer *
 findmanycastpeer(
@@ -345,7 +345,6 @@ findmanycastpeer(
 	)
 {
 	register struct peer *peer;
-	register struct peer *manycast_peer = 0;
 	struct pkt *pkt;
 	l_fp p_org;
 	int i;
@@ -357,18 +356,38 @@ findmanycastpeer(
 
 		for (peer = peer_hash[i]; peer != 0; peer =
 		    peer->next) {
-			if (NSRCADR(&rbufp->srcadr) ==
-			    NSRCADR(&peer->srcadr))
-				return (0);
 			if (peer->cast_flags & MDF_ACAST &&
 			    peer->flags & FLAG_CONFIG) {
 				NTOHL_FP(&pkt->org, &p_org);
 				if (L_ISEQU(&peer->xmt, &p_org))
-					manycast_peer = peer;
+					return(peer);
 			}
 		}
 	}
-	return (manycast_peer);
+	return (0);
+}
+
+
+/*
+ * resetmanycast - reset manycast client poll interval
+ */
+void
+resetmanycast(void)
+{
+	register struct peer *peer;
+	int i;
+
+	for (i = 0; i < HASH_SIZE; i++) {
+		if (peer_hash_count[i] == 0)
+			continue;
+
+		for (peer = peer_hash[i]; peer != 0; peer =
+		    peer->next) {
+			if (peer->cast_flags & MDF_ACAST &&
+			    peer->flags & FLAG_CONFIG)
+				poll_update(peer, peer->minpoll);
+		}
+	}
 }
 
 
@@ -527,7 +546,6 @@ peer_config(
 	)
 {
 	register struct peer *peer;
-	int i;
 	u_int cast_flags;
 
 	/*
@@ -592,24 +610,10 @@ peer_config(
 
 	/*
 	 * If we're here this guy is unknown to us. Make a new
-	 * persistent association and initialize its variables. If
-	 * multicast or anycast mode, mobilize associations for all
-	 * interfaces except the wildcard and loopback.
+	 * persistent association and initialize its variables.
 	 */
-	if (cast_flags & (MDF_MCAST | MDF_ACAST)) {
-		for (i = 1; i <= ninterfaces; i++) {
-			if (SRCADR(&inter_list[i].sin) == 0x7f000001)
-				continue;
-			if (SRCADR(&inter_list[i].sin) == 0x00000000)
-				continue;
-			peer = newpeer(srcadr, &inter_list[i], hmode,
-			    version, minpoll, maxpoll, flags |
-			    FLAG_CONFIG, cast_flags, ttl, key);
-		}
-	} else {
-		peer = newpeer(srcadr, dstadr, hmode, version, minpoll,
-		    maxpoll, flags | FLAG_CONFIG, cast_flags, ttl, key);
-	}
+	peer = newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
+	    flags | FLAG_CONFIG, cast_flags, ttl, key);
 	return(peer);
 }
 
@@ -655,7 +659,10 @@ newpeer(
 	 */
 	memset((char *)peer, 0, sizeof(struct peer));
 	peer->srcadr = *srcadr;
-	peer->dstadr = dstadr;
+	if (dstadr == any_interface)
+		peer->dstadr = findinterface(srcadr);
+	else
+		peer->dstadr = dstadr;
 	peer->cast_flags = cast_flags;
 	peer->hmode = (u_char)hmode;
 	peer->keyid = key;

@@ -215,7 +215,7 @@ struct ntp_control {
 #define	CP_SENT		33
 #define	CP_FILTERROR	34
 #define	CP_FLASH	35
-#define CP_DISP		36
+#define CP_TTL		36
 #define CP_VARLIST	37
 #ifdef PUBKEY
 #define CP_FLAGS	38
