@@ -1,3 +1,8 @@
+2001-03-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* README.rsa: Note that RSAEURO will not work.
+	Reported by: pieter.delacourt@banksys.be
+
 2001-03-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_if.h: 
