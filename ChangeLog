@@ -1,5 +1,8 @@
 1999-09-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: ReliantUNIX patches
+	From: Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru> 
+
 	* ntpd/refclock_atom.c: PPS cleanup
 	* ntpd/ntp_refclock.c (refclock_ioctl): PPS cleanup
 	From: Dave Mills <mills@udel.edu>

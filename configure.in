@@ -111,14 +111,19 @@ case "$target" in
  *-*-solaris2.5.1)
     ac_busted_vpath_in_make=yes
     ;;
- mips-sni-sysv4* )
-    #
-    # Add flags for 64 bit file access to enable tickadj to access /dev/kmem
-    #
-    if getconf _LFS_CFLAGS > /dev/null 2>&1 ; then
-      CFLAGS="$CFLAGS `getconf _LFS_CFLAGS`"
-    fi
-    ;;
+dnl This is currently commented out by bor. 
+dnl The new versions of ReliantUNIX round adjtime() interval down
+dnl to 1/100s (system tick). This makes tickadj actually useless.
+dnl So, I'd better not use additional flags.
+dnl I leave it here just in case anybody has better idea
+dnl  mips-sni-sysv4* )
+dnl     #
+dnl     # Add flags for 64 bit file access to enable tickadj to access /dev/kmem
+dnl     #
+dnl     if getconf _LFS_CFLAGS > /dev/null 2>&1 ; then
+dnl       CFLAGS="$CFLAGS `getconf _LFS_CFLAGS`"
+dnl     fi
+dnl     ;;
 esac
 
 case "$ac_busted_vpath_in_make$srcdir" in
@@ -2557,8 +2562,12 @@ case "$ac_cv_var_tickadj" in
  *) AC_DEFINE_UNQUOTED(PRESET_TICKADJ, $ac_cv_var_tickadj) ;;
 esac
 
+# Newer versions of ReliantUNIX round adjtime() values down to
+# 1/100s (system tick). Sigh ...
+# Unfortunately, there is no easy way to know if particular release
+# has this "feature" or any obvious way to test for it.
 case "$target" in
- *-*-sco3.2v5*) AC_DEFINE(SCO5_CLOCK) ;;
+ *-*-sco3.2v5*|mips-sni-sysv4*) AC_DEFINE(SCO5_CLOCK) ;;
 esac
 
 ac_cv_make_tickadj=yes
@@ -2589,6 +2598,14 @@ case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
  *)		# Generally bogus.
     AC_MSG_ERROR(This shouldn't happen.)
     ;;
+esac
+
+# tickadj is pretty useless on newer versions of ReliantUNIX
+# Do not bother
+case "$target" in
+ mips-sni-sysv4*)
+    ac_cv_make_tickadj=no
+ ;;
 esac
 
 AC_SUBST(MAKE_TICKADJ)
