@@ -447,7 +447,8 @@ struct peer {
 #define REFCLK_FG		37	/* Forum Graphic GPS */
 #define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial line receiver  */
 #define REFCLK_HOPF_PCI		39	/* hopf DCF77/GPS PCI receiver  */
-#define REFCLK_MAX		39	/* Grow as needed... */
+#define REFCLK_JJY		40	/* JJY receiver  */
+#define REFCLK_MAX		40	/* Grow as needed... */
 
  /*
  * Macro for sockaddr_storage structures operations
