@@ -8,21 +8,19 @@
  * www.rsa.com.
  */
 
-#include "ntp_machine.h"
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-/* Disable the openssl md5 includes, because they'd clash with ours. */
-#undef OPENSSL
-
-#include "ntp_machine.h"
-#include <stdio.h>
-#include "ntpd.h"
-#include "ntp_types.h"
+#include "ntp_fp.h"
 #include "ntp_string.h"
 #include "ntp_stdlib.h"
+
+/* Disable the openssl md5 includes, because they'd clash with ours. */
+/* #define NO_MD5 */
+/* #define OPENSSL_NO_MD5 */
+#undef OPENSSL
+
 #include "ntp.h"
 #include "global.h"
 #include "ntp_md5.h"
