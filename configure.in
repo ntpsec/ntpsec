@@ -264,7 +264,7 @@ AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h)
 #HMS
-AC_CHECK_HEADERS(net/if.h)
+AC_CHECK_HEADERS(net/if.h net/if6.h)
 AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
 AC_CHECK_HEADERS(netinet/in.h)
 #HMS
@@ -3445,7 +3445,7 @@ esac
 #
 
 if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    ISC_PLATFORM_HAVESALEN="#define ISC_PLATFORM_HAVESALEN 1"
+    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[[ISC: struct sockaddr as sa_len?]])
 fi
 
 AC_MSG_CHECKING(for IPv6 structures)
@@ -3465,9 +3465,9 @@ AC_TRY_LINK([
 #include <net/if6.h>
 ],[ struct if_laddrconf a; ],
 	[AC_MSG_RESULT(yes)
-	ISC_PLATFORM_HAVEIF_LADDRCONF="#define ISC_PLATFORM_HAVEIF_LADDRCONF 1"],
-	[AC_MSG_RESULT(no)
-	ISC_PLATFORM_HAVEIF_LADDRCONF="#undef ISC_PLATFORM_HAVEIF_LADDRCONF"])
+	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, ,
+		[[ISC: have struct if_laddrconf?]])],
+	[AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([for struct if_laddrreq])
 AC_TRY_LINK([
@@ -3475,13 +3475,13 @@ AC_TRY_LINK([
 #include <net/if6.h>
 ],[ struct if_laddrreq a; ],
 	[AC_MSG_RESULT(yes)
-	ISC_PLATFORM_HAVEIF_LADDRREQ="#define ISC_PLATFORM_HAVEIF_LADDRREQ 1"],
-	[AC_MSG_RESULT(no)
-	ISC_PLATFORM_HAVEIF_LADDRREQ="#undef ISC_PLATFORM_HAVEIF_LADDRREQ"])
+	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, ,
+		[[ISC: have struct if_laddrreq?]])],
+	[AC_MSG_RESULT(no)])
 
 case "$found_ipv6" in
  yes)
-    ISC_PLATFORM_HAVEIPV6="#define ISC_PLATFORM_HAVEIPV6 1"
+    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[[ISC: Have IPv6?]])
 
     AC_MSG_CHECKING(for in6_pktinfo)
     AC_TRY_COMPILE([
@@ -3492,14 +3492,13 @@ $isc_netinetin6_hack
 $isc_netinet6in6_hack
 ],
 	[struct in6_pktinfo xyzzy; return (0);],
-		[AC_MSG_RESULT(yes)
-		 ISC_PLATFORM_HAVEIN6PKTINFO="#define ISC_PLATFORM_HAVEIN6PKTINFO 1"],
-		[AC_MSG_RESULT(no -- disabling runtime ipv6 support)
-		 ISC_PLATFORM_HAVEIN6PKTINFO="#undef ISC_PLATFORM_HAVEIN6PKTINFO"])
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
+		[[ISC: Have struct in6_pktinfo?]])],
+	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
 
-
-	AC_MSG_CHECKING(for in6addr_any)
-	AC_TRY_LINK([
+    AC_MSG_CHECKING(for in6addr_any)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -3508,40 +3507,19 @@ $isc_netinet6in6_hack
 $isc_in_addr6_hack
 ],
 	[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);],
-		[AC_MSG_RESULT(yes)
-		 ISC_PLATFORM_NEEDIN6ADDRANY="#undef ISC_PLATFORM_NEEDIN6ADDRANY"
-		[AC_MSG_RESULT(no)
-		 ISC_PLATFORM_NEEDIN6ADDRANY="#define ISC_PLATFORM_NEEDIN6ADDRANY 1"
-
+	[AC_MSG_RESULT(yes)],
+	[AC_MSG_RESULT(no)
+	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
+		[[ISC: Need in6addr_any?]])]
+	)
     ;;
 esac
 
-AC_SUBST(ISC_PLATFORM_BRACEPTHREADONCEINIT)
-AC_SUBST(ISC_PLATFORM_FIXIN6ISADDR)
-AC_SUBST(ISC_PLATFORM_HAVEIF_LADDRCONF)
-AC_SUBST(ISC_PLATFORM_HAVEIF_LADDRREQ)
-AC_SUBST(ISC_PLATFORM_HAVEIN6PKTINFO)
-AC_SUBST(ISC_PLATFORM_HAVEINADDR6)
-AC_SUBST(ISC_PLATFORM_HAVEIPV6)
-AC_SUBST(ISC_PLATFORM_HAVELIFCONF)
-AC_SUBST(ISC_PLATFORM_HAVELONGLONG)
-AC_SUBST(ISC_PLATFORM_HAVESALEN)
-AC_SUBST(ISC_PLATFORM_MSGHDRFLAVOR)
-AC_SUBST(ISC_PLATFORM_NEEDATON)
-AC_SUBST(ISC_PLATFORM_NEEDIN6ADDRANY)
-AC_SUBST(ISC_PLATFORM_NEEDIN6ADDRLOOPBACK)
-AC_SUBST(ISC_PLATFORM_NEEDNETINET6IN6H)
-AC_SUBST(ISC_PLATFORM_NEEDNETINETIN6H)
-AC_SUBST(ISC_PLATFORM_NEEDNTOP)
-AC_SUBST(ISC_PLATFORM_NEEDPORTT)
-AC_SUBST(ISC_PLATFORM_NEEDPTON)
-AC_SUBST(ISC_PLATFORM_NEEDSTRSEP)
-AC_SUBST(ISC_PLATFORM_NEEDSYSSELECTH)
-AC_SUBST(ISC_PLATFORM_NEEDVSNPRINTF)
-AC_SUBST(ISC_PLATFORM_QUADFORMAT)
-AC_SUBST(ISC_PLATFORM_RLIMITTYPE)
-AC_SUBST(ISC_PLATFORM_USEDECLSPEC)
-AC_SUBST(ISC_PLATFORM_USETHREADS)
+case "$ac_cv_header_sys_sysctl_h" in
+ yes)
+    AC_DEFINE(HAVE_IFLIST_SYSCTL, ,[[ISC: sys/sysctl.h implies iflist_sysctl]])
+    ;;
+esac
 
 case "$build" in
  $host)
@@ -3582,7 +3560,6 @@ AC_CONFIG_FILES(adjtimed/Makefile)
 AC_CONFIG_FILES(clockstuff/Makefile)
 AC_CONFIG_FILES(include/Makefile)
 AC_CONFIG_FILES(include/isc/Makefile)
-AC_CONFIG_FILES(include/isc/platform.h)
 AC_CONFIG_FILES(kernel/Makefile)
 AC_CONFIG_FILES(kernel/sys/Makefile)
 AC_CONFIG_FILES(libntp/Makefile)
