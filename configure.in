@@ -2491,7 +2491,6 @@ case "$ans" in
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(for the level of crypto support)
 AC_ARG_WITH(crypto,
 	AC_HELP_STRING([--with-crypto], [+ =openssl]),
 [ans=$withval], [ans=yes])
@@ -2512,6 +2511,7 @@ case "$ans" in
     fi
     ;;
 esac
+AC_MSG_CHECKING(for the level of crypto support)
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(if we want to compile with ElectricFence)
