@@ -163,8 +163,7 @@ static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
 static	int showhostnames = 1;				/* show host names by default */
 
-static	int ai_fam_templ;				/* address family */
-static	int sockfd;					/* fd socket is opened on */
+#ifndef SYS_WINNT
 static	int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
 
@@ -1052,6 +1051,7 @@ getcmds(void)
 }
 
 
+#ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
 /*
  * abortcmd - catch interrupts and abort the current command
  */
@@ -1067,7 +1067,7 @@ abortcmd(
 	(void) fflush(stderr);
 	if (jump) longjmp(interrupt_buf, 1);
 }
-
+#endif /* SYS_WINNT */
 
 /*
  * docmd - decode the command line and execute a command
@@ -1430,7 +1430,7 @@ help(
 	int n;
 	struct xcmd *xcp;
 	char *cmd;
-	const char *cmdsort[100];
+	char *cmdsort[100];
 	int length[100];
 	int maxlength;
 	int numperline;

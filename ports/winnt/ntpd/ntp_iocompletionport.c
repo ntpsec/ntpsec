@@ -223,7 +223,7 @@ static unsigned long QueueSocketRecv(SOCKET s) {
 
 		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &buff->wsabuff, 1, 
 						&BytesReceived, &Flags, 
-						(struct sockaddr *) &buff->recv_srcadr, &buff->AddressLength, 
+						(struct sockaddr *) &buff->recv_srcadr, (LPINT) &buff->AddressLength, 
 						&buff->iocompletioninfo.overlapped, NULL)) {
 			DWORD Result = WSAGetLastError();
 			switch (Result) {
@@ -378,14 +378,14 @@ io_completion_port_sendto(
 			if (debug)
 			printf("No more transmit buffers left - data discarded\n");
 #endif
-		return ~ERROR_SUCCESS;
+		return ERROR_OUTOFMEMORY;
 		}
 	}
 	else {
 #ifdef DEBUG
 		if (debug) printf("Packet too large\n");
 #endif
-		return ~ERROR_SUCCESS;
+		return ERROR_INSUFFICIENT_BUFFER;
 	}
 	return Result;
 }
@@ -402,13 +402,11 @@ io_completion_port_write(
 {
 	transmitbuf *buff = NULL;
 	DWORD lpNumberOfBytesWritten;
-	DWORD Result = -1;
+	DWORD Result = ERROR_INSUFFICIENT_BUFFER;
 
 	if (len <= sizeof(buff->pkt)) {
 		buff = get_free_transmit_buffer();
 		if (buff != NULL) {
-			DWORD BytesSent = 0;
-			DWORD Flags = 0;
 
 			memcpy(&buff->pkt, pkt, len);
 			buff->iocompletioninfo.iofunction = OnWriteComplete;

@@ -8,6 +8,7 @@
  * 
  */
 
+#include <config.h>
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,10 +47,6 @@ BOOL OpenHopfDevice()
 		OSVERSIONINFO			VersionInfo;
 		ULONG					deviceNumber;
 		CHAR					deviceName[255];
-
-	    typedef DWORD(WINAPI *OPENVXDHANDLE)(HANDLE);
-		OPENVXDHANDLE  OpenVxDHandle = (OPENVXDHANDLE) GetProcAddress(GetModuleHandle("KERNEL32"),"OpenVxDHandle");
-
 				
 		VersionInfo.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
 		GetVersionEx(&VersionInfo);

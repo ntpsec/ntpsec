@@ -19,6 +19,8 @@ void	service_ctrl	(DWORD);
 void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 #else
+#define SOCKET	int
+#define INVALID_SOCKET	-1
 #define closesocket close
 #endif /* SYS_WINNT */
 
@@ -62,10 +64,10 @@ struct ctl_var {
 #define	WO	(CAN_WRITE)
 #define	RW	(CAN_READ|CAN_WRITE)
 
-extern  char *  add_var P((struct ctl_var **, unsigned long, int));
+extern  char *  add_var P((struct ctl_var **, u_long, u_short));
 extern  void    free_varlist P((struct ctl_var *));
-extern  void    set_var P((struct ctl_var **, const char *, unsigned long, int));
-extern  void    set_sys_var P((char *, unsigned long, int));
+extern  void    set_var P((struct ctl_var **, const char *, u_long, u_short));
+extern  void    set_sys_var P((char *, u_long, u_short));
 
 /* ntp_intres.c */
 extern	void	ntp_res_name	P((struct sockaddr_storage, u_short));
@@ -122,7 +124,7 @@ extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_storage *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_storage *, struct interface *, int, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
-extern	struct peer *newpeer	P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_int, int, keyid_t));
+extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
@@ -277,7 +279,7 @@ extern struct interface *loopback_interface; /* loopback interface */
  * File descriptor masks etc. for call to select
  */
 extern fd_set	activefds;
-extern int	maxactivefd;
+extern SOCKET	maxactivefd;
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */

@@ -13,7 +13,7 @@ dolfptoa(
 	u_long fpi,
 	u_long fpv,
 	int neg,
-	int ndec,
+	short ndec,
 	int msec
 	)
 {
@@ -59,7 +59,7 @@ dolfptoa(
 
 		do {
 			stmp = swork;
-			swork /= sten;
+			swork = (u_short) (swork/sten);
 			stmp -= (swork<<3) + (swork<<1);
 			*--cp = (u_char)stmp;
 		} while (swork != 0);

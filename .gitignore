@@ -72,6 +72,17 @@ ntpdc/Makefile.in
 ntpq/Makefile.in
 ntptrace/Makefile.in
 parseutil/Makefile.in
+ports/winnt/*.ncb
+ports/winnt/*.opt
+ports/winnt/*/*.plg
+ports/winnt/*/.version
+ports/winnt/*/Debug/*
+ports/winnt/*/Release/*
+ports/winnt/*/version.c
+ports/winnt/bin/*/*
+ports/winnt/libntp/*.bin
+ports/winnt/libntp/messages.h
+ports/winnt/libntp/messages.rc
 rsaref2
 scripts/Makefile.in
 stamp-h.in

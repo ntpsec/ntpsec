@@ -6,6 +6,8 @@
 #ifndef SYS_TIME_H
 #define SYS_TIME_H
 
+#include <config.h>
+#include <windows.h>
 #include "ntp_types.h"
 #include <time.h>
 #include <sys/timeb.h>

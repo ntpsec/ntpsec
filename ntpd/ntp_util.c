@@ -258,7 +258,7 @@ hourly_stats(void)
 		(void)fclose(fp);
 		/* atomic */
 #ifdef SYS_WINNT
-		(void) unlink(stats_drift_file); /* rename semantics differ under NT */
+		(void) _unlink(stats_drift_file); /* rename semantics differ under NT */
 #endif /* SYS_WINNT */
 
 #ifndef NO_RENAME

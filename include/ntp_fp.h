@@ -339,14 +339,13 @@ typedef u_int32 u_fp;
 /*
  * Prototypes
  */
-extern	char *	dofptoa		P((u_fp, int, int, int));
-extern	char *	dolfptoa	P((u_long, u_long, int, int, int));
+extern	char *	dofptoa		P((u_fp, int, short, int));
+extern	char *	dolfptoa	P((u_long, u_long, int, short, int));
 
 extern	int	atolfp		P((const char *, l_fp *));
 extern	int	buftvtots	P((const char *, l_fp *));
-extern	char *	fptoa		P((s_fp, int));
-extern	char *	fptoms		P((s_fp, int));
-extern	char *	fptoms		P((s_fp, int));
+extern	char *	fptoa		P((s_fp, short));
+extern	char *	fptoms		P((s_fp, short));
 extern	int	hextolfp	P((const char *, l_fp *));
 extern  void    gpstolfp        P((int, int, unsigned long, l_fp *));
 extern	int	mstolfp		P((const char *, l_fp *));

@@ -169,11 +169,13 @@ typedef char s_char;
  * numbers of each of the interfaces we are using.
  */
 struct interface {
+#ifndef SYS_WINNT
 	int fd;			/* socket this is opened on */
 	int bfd;		/* socket for receiving broadcasts */
- 	struct sockaddr_storage sin;	/* interface address */
- 	struct sockaddr_storage bcast; /* broadcast address */
- 	struct sockaddr_storage mask; /* interface mask */
+#else
+	SOCKET fd;			/* socket this is opened on */
+	SOCKET bfd;		/* socket for receiving broadcasts */
+#endif
 	char name[8];		/* name of interface */
 	int flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */

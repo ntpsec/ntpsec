@@ -108,10 +108,8 @@ volatile int debug = 0;
 /*
  * File descriptor masks etc. for call to select
  */
-int ai_fam_templ;
-int nbsock;
-int fd[MAX_AF];  /* support up to 2 sockets */
-int fd_family[MAX_AF];  /* to remember the socket family */
+
+#ifndef SYS_WINNT
 #ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
 #else

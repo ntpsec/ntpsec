@@ -125,8 +125,11 @@ static	int resolve_value;	/* next value of resolve timer */
 /*
  * File descriptor for ntp request code.
  */
+#ifndef SYS_WINNT
 static	int sockfd = -1;
-
+#else
+static	SOCKET sockfd = INVALID_SOCKET;	/* NT uses SOCKET */
+#endif
 
 /* stuff to be filled in by caller */
 

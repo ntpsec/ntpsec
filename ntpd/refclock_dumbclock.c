@@ -12,6 +12,11 @@
 #include <config.h>
 #endif
 
+#if defined(SYS_WINNT)
+#undef close
+#define close closesocket
+#endif
+
 #if defined(REFCLOCK) && defined(CLOCK_DUMBCLOCK)
 
 #include "ntpd.h"

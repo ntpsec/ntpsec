@@ -2706,7 +2706,7 @@ set_clock_fudge(
 			clock_stat.haveflags = CLK_HAVEVAL2;
 			break;
 		    case FUDGE_FLAGS:
-			clock_stat.flags = (u_char) ntohl(cf->fudgeval_flags) & 0xf;
+			clock_stat.flags = (u_char) (ntohl(cf->fudgeval_flags) & 0xf);
 			clock_stat.haveflags =
 				(CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4);
 			break;

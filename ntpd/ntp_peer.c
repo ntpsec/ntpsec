@@ -434,7 +434,7 @@ peer_config(
 	)
 {
 	register struct peer *peer;
-	u_int cast_flags;
+	u_char cast_flags;
 
 	/*
 	 * First search from the beginning for an association with given
@@ -536,7 +536,7 @@ newpeer(
 	int minpoll,
 	int maxpoll,
 	u_int flags,
-	u_int cast_flags,
+	u_char cast_flags,
 	int ttl,
 	keyid_t key
 	)
