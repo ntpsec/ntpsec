@@ -82,6 +82,9 @@ configure.in	Master configuration template. Edit only if you have the
 
 dot.emacs	C-mode indentation rules for code "Just the way Dave likes it".
 
+flock_build	(UDel only) Build the distribution on a number of
+		different platforms.
+
 html            Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The
 		documentation is in the form of HTML files suitable for
@@ -102,6 +105,8 @@ libntp		Directory containing library source code used by most
 		programs in the distribution.
 
 librsaref	Staging directory for RSAREF.
+
+ntp_update	Update an NTP CVS tree.
 
 ntpdate		Directory containing sources for a program to set the
 		local machine time from one or more remote machines
