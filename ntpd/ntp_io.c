@@ -1878,7 +1878,7 @@ input_handler(
 	{
 		register struct refclockio *rp;
 
-		for (rp = refio; rp != 0 && n > 0; rp = rp->next)
+		for (rp = refio; rp != 0; rp = rp->next)
 		{
 			fd = rp->fd;
 			if (FD_ISSET(fd, &fds))
@@ -1969,9 +1969,9 @@ input_handler(
 	 * Loop through the interfaces looking for data
 	 * to read.
 	 */
-	for (i = ninterfaces - 1; (i >= 0) && (n > 0); i--)
+	for (i = ninterfaces - 1; (i >= 0) ; i--)
 	{
-		for (doing = 0; (doing < 2) && (n > 0); doing++)
+		for (doing = 0; (doing < 2); doing++)
 		{
 			if (doing == 0)
 			{
