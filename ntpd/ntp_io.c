@@ -1191,7 +1191,7 @@ open_socket(
 
 #if defined(IPV6_V6ONLY)
         if (addr->ss_family == AF_INET6)
-                if (setsockopt(listenfds[n], IPPROTO_IPV6, IPV6_V6ONLY,
+                if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
                 	(char*)&on, sizeof(on)))
                 {
                 	msyslog(LOG_ERR, "setsockopt IPV6_V6ONLY on fails: %m");

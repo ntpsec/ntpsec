@@ -832,7 +832,7 @@ getconfig(
 			    }
 			    if (tok == CONFIG_MANYCASTCLIENT)
 				proto_config(PROTO_MULTICAST_ADD,
-				    peeraddr.sin_addr.s_addr, 0.);
+				    0, 0., &peeraddr);
 	
 			} else if (errflg == -1) {
 				save_resolve(tokens[1], hmode, peerversion,
