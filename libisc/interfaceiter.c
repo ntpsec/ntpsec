@@ -48,7 +48,6 @@
 #ifdef HAVE_NET_IF6_H
 #include <net/if6.h>
 #endif
-#include <net/if.h>
 
 /* Common utility functions */
 
