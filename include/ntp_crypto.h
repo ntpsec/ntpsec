@@ -13,6 +13,7 @@
 #define CRYPTO_FLAG_PRIV  0x0010 /* PC identity scheme */
 #define CRYPTO_FLAG_IFF   0x0020 /* IFF identity scheme */
 #define CRYPTO_FLAG_GQ	  0x0040 /* GQ identity scheme */
+#define	CRYPTO_FLAG_MV	  0x0080 /* MV identity scheme */
 #define CRYPTO_FLAG_MASK  0x00f0 /* identity scheme mask */
 	
 /*
@@ -50,6 +51,7 @@
 #define	CRYPTO_SIGN	CRYPTO_CMD(6) /* certificate sign */
 #define CRYPTO_IFF	CRYPTO_CMD(7) /* IFF identity scheme */
 #define CRYPTO_GQ	CRYPTO_CMD(8) /* GQ identity scheme */
+#define	CRYPTO_MV	CRYPTO_CMD(9) /* MV identity scheme */
 #define CRYPTO_RESP	0x80000000 /* response */
 #define CRYPTO_ERROR	0x40000000 /* error */
 
@@ -84,10 +86,10 @@
 #define CRYPTO_CONF_CERT  5	/* certificate file name */
 #define CRYPTO_CONF_RAND  6	/* random seed file name */
 #define	CRYPTO_CONF_TRST  7	/* specify trust */
-#define CRYPTO_CONF_IFF   8	/* IFF parameters file name */
+#define CRYPTO_CONF_IFFPAR 8	/* IFF parameters file name */
 #define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
-#define CRYPTO_CONF_GQ	 10	/* GQ keys file name */
-#define CRYPTO_CONF_PW	 11	/* private key password */
+#define	CRYPTO_CONF_MVPAR 10	/* GQ parameters file name */
+#define CRYPTO_CONF_PW	  11	/* private key password */
 
 /*
  * Miscellaneous crypto stuff

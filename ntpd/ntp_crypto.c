@@ -94,8 +94,6 @@
 #define VALUE_LEN	(6 * 4) /* min response field length */
 #define YEAR		(60 * 60 * 24 * 365) /* seconds in year */
 #define NTP_RANDFILE	"/.rnd"	/* OpenSSL random seed file */
-#define TYPE_PRIVATE	1	/* PEM private key */
-#define TYPE_PUBLIC	2	/* PEM public key */
 
 /*
  * Global cryptodata in host byte order
@@ -117,17 +115,17 @@ struct value tai_leap;		/* leapseconds table */
 static char *passwd = NULL;	/* private key password */
 static EVP_PKEY *host_pkey = NULL; /* host key */
 static EVP_PKEY *sign_pkey = NULL; /* sign key */
-static EVP_PKEY *iff_pkey = NULL; /* IFF key */
-static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parmeters */
-static EVP_PKEY	*gq_pkey = NULL; /* GQ parmeters */
+static EVP_PKEY *iffpar_pkey = NULL; /* IFF parameters */
+static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parameters */
+static EVP_PKEY	*mvpar_pkey = NULL; /* MV parameters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
 static char *rand_file = NTP_RANDFILE; /* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
-static char *iff_file = NULL;	/* IFF key file */
+static char *iffpar_file = NULL; /* IFF parameters file */
 static char *gqpar_file = NULL;	/* GQ parameters file */
-static char *gq_file = NULL;	/* GQ key file */
+static char *mvpar_file = NULL;	/* MV parameters file */
 static char *cert_file = NULL;	/* certificate file */
 static char *leap_file = NULL;	/* leapseconds file */
 
@@ -140,10 +138,13 @@ static	int	crypto_encrypt	P((struct exten *, struct value *,
 				    keyid_t *));
 static	int	crypto_alice	P((struct peer *, struct value *));
 static	int	crypto_alice2	P((struct peer *, struct value *));
+static	int	crypto_alice3	P((struct peer *, struct value *));
 static	int	crypto_bob	P((struct exten *, struct value *));
 static	int	crypto_bob2	P((struct exten *, struct value *));
+static	int	crypto_bob3	P((struct exten *, struct value *));
 static	int	crypto_iff	P((struct exten *, struct peer *));
 static	int	crypto_gq	P((struct exten *, struct peer *));
+static	int	crypto_mv	P((struct exten *, struct peer *));
 static	u_int	crypto_send	P((struct exten *, struct value *));
 static	tstamp_t crypto_time	P((void));
 static	u_long	asn2ntp		P((ASN1_TIME *));
@@ -152,7 +153,7 @@ static	int	cert_sign	P((struct exten *, struct value *));
 static	int	cert_valid	P((struct cert_info *, EVP_PKEY *));
 static	int	cert_install	P((struct exten *, struct peer *));
 static	void	cert_free	P((struct cert_info *));
-static	EVP_PKEY *crypto_key	P((char *, tstamp_t *, int));
+static	EVP_PKEY *crypto_key	P((char *, tstamp_t *));
 static	int	bighash		P((BIGNUM *, BIGNUM *));
 static	struct cert_info *crypto_cert P((char *));
 static	void	crypto_tai	P((char *));
@@ -699,6 +700,46 @@ crypto_recv(
 				printf("crypto_recv: %s\n", statstr);
 #endif
 			break;
+
+		/*
+		 * MV
+		 */
+		case CRYPTO_MV | CRYPTO_RESP:
+
+			/*
+			 * Discard the message if invalid or identity
+			 * already confirmed.
+			 */
+			if (peer->crypto & CRYPTO_FLAG_VRFY)
+				break;
+
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
+				break;
+
+			/*
+			 * If the the challenge matches the response,
+			 * the certificate public key, as well as the
+			 * server public key, signatyre and identity are
+			 * all verified at the same time. The server is
+			 * declared trusted, so we skip further
+			 * certificate stages and move immediately to
+			 * the cookie stage.
+			 */
+			if ((rval = crypto_mv(ep, peer)) != XEVNT_OK)
+				break;
+
+			peer->crypto |= CRYPTO_FLAG_VRFY |
+			    CRYPTO_FLAG_PROV;
+			peer->flash &= ~TEST10;
+			sprintf(statstr, "mv fs %u",
+			    ntohl(ep->fstamp));
+			record_crypto_stats(&peer->srcadr, statstr);
+#ifdef DEBUG
+			if (debug)
+				printf("crypto_recv: %s\n", statstr);
+#endif
+			break;
 	
 		/*
 		 * X509 certificate sign response. Validate the
@@ -1022,6 +1063,7 @@ crypto_recv(
 		 */
 		case CRYPTO_IFF:
 		case CRYPTO_GQ:
+		case CRYPTO_MV:
 		case CRYPTO_SIGN:
 			if (len < VALUE_LEN) {
 				rval = XEVNT_LEN;
@@ -1225,6 +1267,28 @@ crypto_xmit(
 	 */
 	case CRYPTO_GQ | CRYPTO_RESP:
 		if ((rval = crypto_bob2(ep, &vtemp)) == XEVNT_OK)
+			len += crypto_send(fp, &vtemp);
+		value_free(&vtemp);
+		break;
+
+	/*
+	 * Send challenge in MV identity scheme.
+	 */
+	case CRYPTO_MV:
+		if ((peer = findpeerbyassoc(ep->pkt[0])) == NULL) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
+		if ((rval = crypto_alice3(peer, &vtemp)) == XEVNT_OK)
+			len += crypto_send(fp, &vtemp);
+		value_free(&vtemp);
+		break;
+
+	/*
+	 * Send response in MV identity scheme.
+	 */
+	case CRYPTO_MV | CRYPTO_RESP:
+		if ((rval = crypto_bob3(ep, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
 		value_free(&vtemp);
 		break;
@@ -1897,7 +1961,7 @@ crypto_alice(
 	struct value *vp	/* value pointer */
 	)
 {
-	DSA	*dsa;		/* IFF key */
+	DSA	*dsa;		/* IFF parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
 	char	filename[MAXFILENAME + 1];
@@ -1917,7 +1981,7 @@ crypto_alice(
 	if (peer->ident_pkey != NULL)
 		EVP_PKEY_free(peer->ident_pkey);
 	snprintf(filename, MAXFILENAME, "ntpkey_iff_%s", peer->issuer);
-	peer->ident_pkey = crypto_key(filename, &fstamp, TYPE_PRIVATE);
+	peer->ident_pkey = crypto_key(filename, &fstamp);
 	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_ERR,
 		    "crypto_alice: file %s not found or corrupt",
@@ -1978,12 +2042,13 @@ crypto_bob(
 	struct value *vp	/* value pointer */
 	)
 {
-	DSA	*dsa;		/* IFF key */
+	DSA	*dsa;		/* IFF parameters */
 	DSA_SIG	*sdsa;		/* DSA signature context fake */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*bn, *bk, *r;
+	u_char	*ptr;
 	u_int	len;
 
 	/*
@@ -1994,7 +2059,7 @@ crypto_bob(
 		msyslog(LOG_ERR, "crypto_bob: IFF unavailable");
 		return (XEVNT_PUB);
 	}
-	dsa = iff_pkey->pkey.dsa;
+	dsa = iffpar_pkey->pkey.dsa;
 
 	/*
 	 * Extract r from the challenge.
@@ -2038,8 +2103,9 @@ crypto_bob(
 		return (XEVNT_PUB);
 	}
 	vp->vallen = htonl(len);
-	vp->ptr = emalloc(len);
-	i2d_DSA_SIG(sdsa, (u_char **)&vp->ptr);
+	ptr = emalloc(len);
+	vp->ptr = ptr;
+	i2d_DSA_SIG(sdsa, &ptr);
 	DSA_SIG_free(sdsa);
 	vp->siglen = 0;
 	if (tstamp == 0)
@@ -2068,9 +2134,9 @@ crypto_iff(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	DSA	*dsa;		/* IFF key */
+	DSA	*dsa;		/* IFF parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
-	DSA_SIG	*sdsa;		/* DSA signature context fake */
+	DSA_SIG	*sdsa;		/* DSA parameters */
 	BIGNUM	*bn, *bk;
 	u_int	len;
 	u_char	*ptr;
@@ -2215,9 +2281,9 @@ crypto_alice2(
 	}
 	if (peer->ident_pkey != NULL)
 		EVP_PKEY_free(peer->ident_pkey);
-	snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
+	snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
 	    peer->issuer);
-	peer->ident_pkey = crypto_key(filename, &fstamp, TYPE_PRIVATE);
+	peer->ident_pkey = crypto_key(filename, &fstamp);
 	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_ERR,
 		    "crypto_alice: file %s not found or corrupt",
@@ -2278,13 +2344,13 @@ crypto_bob2(
 	struct value *vp	/* value pointer */
 	)
 {
-	RSA	*rsapar;	/* GQ parameters */
-	RSA	*rsa;		/* GQ keys */
-	DSA_SIG	*sdsa;		/* RSA signature context fake */
+	RSA	*rsa;		/* GQ parameters */
+	DSA_SIG	*sdsa;		/* DSA parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*r, *k, *g, *y;
+	u_char	*ptr;
 	u_int	len;
 
 	/*
@@ -2295,8 +2361,7 @@ crypto_bob2(
 		msyslog(LOG_ERR, "crypto_bob2: GQ unavailable");
 		return (XEVNT_PUB);
 	}
-	rsapar = gqpar_pkey->pkey.rsa;
-	rsa = gq_pkey->pkey.rsa;
+	rsa = gqpar_pkey->pkey.rsa;
 
 	/*
 	 * Extract r from the challenge.
@@ -2315,11 +2380,11 @@ crypto_bob2(
 	bctx = BN_CTX_new(); k = BN_new(); g = BN_new(); y = BN_new();
 	sdsa = DSA_SIG_new();
 	BN_rand(k, len * 8, -1, 1);		/* k */
-	BN_mod(k, k, rsapar->n, bctx);
-	BN_mod_exp(y, rsa->n, r, rsapar->n, bctx); /* u^r mod n */
-	BN_mod_mul(y, k, y, rsapar->n, bctx);	/* k u^r mod n */
+	BN_mod(k, k, rsa->n, bctx);
+	BN_mod_exp(y, rsa->p, r, rsa->n, bctx); /* u^r mod n */
+	BN_mod_mul(y, k, y, rsa->n, bctx);	/* k u^r mod n */
 	sdsa->r = BN_dup(y);
-	BN_mod_exp(g, k, rsapar->e, rsapar->n, bctx); /* k^b mod n */
+	BN_mod_exp(g, k, rsa->e, rsa->n, bctx); /* k^b mod n */
 	bighash(g, g);
 	sdsa->s = BN_dup(g);
 	BN_CTX_free(bctx);
@@ -2340,8 +2405,9 @@ crypto_bob2(
 		return (XEVNT_PUB);
 	}
 	vp->vallen = htonl(len);
-	vp->ptr = emalloc(len);
-	i2d_DSA_SIG(sdsa, (u_char **)&vp->ptr);
+	ptr = emalloc(len);
+	vp->ptr = ptr;
+	i2d_DSA_SIG(sdsa, &ptr);
 	DSA_SIG_free(sdsa);
 	vp->siglen = 0;
 	if (tstamp == 0)
@@ -2370,12 +2436,12 @@ crypto_gq(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	RSA	*rsapar;	/* GQ parameters */
+	RSA	*rsa;		/* GQ parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	DSA_SIG	*sdsa;		/* RSA signature context fake */
 	BIGNUM	*y, *v;
-	u_int	len;
 	u_char	*ptr;
+	u_int	len;
 	int	temp;
 
 	/*
@@ -2387,7 +2453,7 @@ crypto_gq(
 		msyslog(LOG_ERR, "crypto_gq: GQ unavailable");
 		return (XEVNT_PUB);
 	}
-	if ((rsapar = peer->ident_pkey->pkey.rsa) == NULL) {
+	if ((rsa = peer->ident_pkey->pkey.rsa) == NULL) {
 		msyslog(LOG_ERR, "crypto_alice: GQ defective key");
 		return (XEVNT_PUB);
 	}
@@ -2411,11 +2477,10 @@ crypto_gq(
 	/*
 	 * Alice computes v^r y^b mod n.
 	 */
-	BN_mod_exp(v, peer->grpkey, peer->iffval, rsapar->n, bctx);
+	BN_mod_exp(v, peer->grpkey, peer->iffval, rsa->n, bctx);
 						/* v^r mod n */
-	BN_mod_exp(y, sdsa->r, rsapar->e, rsapar->n, bctx);
-						/* y^b mod n */
-	BN_mod_mul(y, v, y, rsapar->n, bctx);	/* v^r y^b mod n */
+	BN_mod_exp(y, sdsa->r, rsa->e, rsa->n, bctx); /* y^b mod n */
+	BN_mod_mul(y, v, y, rsa->n, bctx);	/* v^r y^b mod n */
 
 	/*
 	 * The result should match the hash of g^k mod n.
@@ -2426,6 +2491,334 @@ crypto_gq(
 	BN_free(peer->iffval);
 	peer->iffval = NULL;
 	DSA_SIG_free(sdsa);
+	if (temp == 0)
+		return (XEVNT_OK);
+	else
+		return (XEVNT_ID);
+}
+
+
+/*
+ ***********************************************************************
+ *								       *
+ * The following routines implement the Mu-Varadharajan (MV) identity  *
+ * scheme                                                              *
+ *								       *
+ ***********************************************************************
+ */
+/*
+ * The Mu-Varadharajan (MV) cryptosystem was originally intended when
+ * servers broadcast messages to clients, but clients never send
+ * messages to servers. There is one encryption key for the server and a
+ * separate decryption key for each client. It operated something like a
+ * pay-per-view satellite broadcasting system where the session key is
+ * encrypted by the broadcaster and the decryption keys are held in a
+ * tamperproof set-top box.
+ *
+ * The MV parameters and private encryption key hide in a DSA cuckoo
+ * structure which uses the same parameters, but generated in a
+ * different way. The values are used in an encryption scheme similar to
+ * El Gamal cryptography and a polynomial formed from the expansion of
+ * product terms (x - x[j]), as described in Mu, Y., and V.
+ * Varadharajan: Robust and Secure Broadcasting, Proc. Indocrypt 2001,
+ * 223-231. The paper has significant errors and serious omissions.
+ *
+ * Let q be the product of n distinct primes s'[j] (j = 1...n), where
+ * each s'[j] has m significant bits. Let p be a prime p = 2 * q + 1, so
+ * that q and each s'[j] divide p - 1 and p has M = n * m + 1
+ * significant bits. The elements x mod q of Zq with the elements 2 and
+ * the primes removed form a field Zq* valid for polynomial arithetic.
+ * Let g be a generator of Zp; that is, gcd(g, p - 1) = 1 and g^q = 1
+ * mod p. We expect M to be in the 500-bit range and n relatively small,
+ * like 25, so the likelihood of a randomly generated element of x mod q
+ * of Zq colliding with a factor of p - 1 is very small and can be
+ * avoided. Associated with each s'[j] is an element s[j] such that s[j]
+ * s'[j] = s'[j] mod q. We find s[j] as the quotient (q + s'[j]) /
+ * s'[j]. These are the parameters of the scheme and they are expensive
+ * to compute.
+ *
+ * We set up an instance of the scheme as follows. A set of random
+ * values x[j] mod q (j = 1...n), are generated as the zeros of a
+ * polynomial of order n. The product terms (x - x[j]) are expanded to
+ * form coefficients a[i] mod q (i = 0...n) in powers of x. These are
+ * used as exponents of the generator g mod p to generate the private
+ * encryption key A. The pair (gbar, ghat) of public server keys and the
+ * pairs (xbar[j], xhat[j]) (j = 1...n) of private client keys are used
+ * to construct the decryption keys. The devil is in the details.
+ *
+ * The distinguishing characteristic of this scheme is the capability to
+ * revoke keys. Included in the calculation of E, gbar and ghat is the
+ * product s = prod(s'[j]) (j = 1...n) above. If the factor s'[j] is
+ * subsequently removed from the product and E, gbar and ghat
+ * recomputed, the jth client will no longer be able to compute E^-1 and
+ * thus unable to decrypt the block.
+ *
+ * How it works
+ *
+ * The scheme goes like this. Bob has the server values (p, A, q, gbar,
+ * ghat) and Alice the client values (p, xbar, xhat).
+ *
+ * Alice rolls new random challenge r (0 < r < p) and sends to Bob in
+ * the MV request message. Bob rolls new random k (0 < k < q), encrypts
+ * y = A^k mod p (a permutation) and sends (hash(y), gbar^k, ghat^k) to
+ * Alice.
+ * 
+ * Alice receives the response and computes the decryption key (the
+ * inverse permutation) from previously obtained (xbar, xhat) and
+ * (gbar^k, ghat^k) in the message. She computes the inverse, which is
+ * unique by reasons explained in the ntp-keygen.c program sources. If
+ * the hash of this result matches hash(y), Alice knows that Bob has the
+ * group key b. The signed response binds this knowledge to Bob's
+ * private key and the public key previously received in his
+ * certificate.
+ *
+ * crypto_alice3 - construct Alice's challenge in MV scheme
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
+ */
+static int
+crypto_alice3(
+	struct peer *peer,	/* peer pointer */
+	struct value *vp	/* value pointer */
+	)
+{
+	DSA	*dsa;		/* MV parameters */
+	BN_CTX	*bctx;		/* BIGNUM context */
+	EVP_MD_CTX ctx;		/* signature context */
+	char	filename[MAXFILENAME + 1];
+	tstamp_t tstamp;
+	tstamp_t fstamp;
+	u_int	len;
+
+	/*
+	 * If there is no trusted host, something awful happened.
+	 * Otherwise, try to load the identity file containing the
+	 * scheme parameters. If the file does not exist, not to worry;
+	 * the client does not need identity confirmation. If it does
+	 * exist, it must have correct format and content.
+	 */
+	if (peer->issuer == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: MV unavailable");
+		return (XEVNT_PUB);
+	}
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
+	    peer->issuer);
+	peer->ident_pkey = crypto_key(filename, &fstamp);
+	if (peer->ident_pkey == NULL) {
+		peer->crypto |= CRYPTO_FLAG_VRFY;
+		return (XEVNT_OK);
+	}
+	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: MV defective key");
+		return (XEVNT_PUB);
+	}
+
+	/*
+	 * Roll new random r (0 < r < q). The OpenSSL library has a bug
+	 * omitting BN_rand_range, so we have to do it the hard way.
+	 */
+	bctx = BN_CTX_new();
+	len = BN_num_bytes(dsa->p);
+	if (peer->iffval != NULL)
+		BN_free(peer->iffval);
+	peer->iffval = BN_new();
+	BN_rand(peer->iffval, len * 8, -1, 1);	/* r */
+	BN_mod(peer->iffval, peer->iffval, dsa->p, bctx);
+	BN_CTX_free(bctx);
+
+	/*
+	 * Sign and send to Bob.
+	 */
+	tstamp = crypto_time();
+	memset(vp, 0, sizeof(struct value));
+	vp->tstamp = htonl(tstamp);
+	vp->fstamp = hostval.tstamp;
+	vp->vallen = htonl(len);
+	vp->ptr = emalloc(len);
+	BN_bn2bin(peer->iffval, vp->ptr);
+	vp->siglen = 0;
+	if (tstamp == 0)
+		return (XEVNT_OK);
+	vp->sig = emalloc(sign_siglen);
+	EVP_SignInit(&ctx, sign_digest);
+	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, vp->ptr, len);
+	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+		vp->siglen = htonl(len);
+	return (XEVNT_OK);
+}
+
+
+/*
+ * crypto_bob3 - construct Bob's response to Alice's challenge
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
+ */
+static int
+crypto_bob3(
+	struct exten *ep,	/* extension pointer */
+	struct value *vp	/* value pointer */
+	)
+{
+	DSA	*dsa;		/* MV parameters */
+	DSA	*sdsa;		/* DSA signature context fake */
+	BN_CTX	*bctx;		/* BIGNUM context */
+	EVP_MD_CTX ctx;		/* signature context */
+	tstamp_t tstamp;	/* NTP timestamp */
+	BIGNUM	*r, *k, *u;
+	u_char	*ptr;
+	u_int	len;
+
+	/*
+	 * If the MV parameters are not valid, something awful
+	 * happened or we are being tormented.
+	 */
+	if (!(crypto_flags & CRYPTO_FLAG_MV)) {
+		msyslog(LOG_ERR, "crypto_bob: MV unavailable");
+		return (XEVNT_PUB);
+	}
+	dsa = mvpar_pkey->pkey.dsa;
+
+	/*
+	 * Extract r from the challenge.
+	 */
+	len = ntohl(ep->vallen);
+	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
+		msyslog(LOG_ERR, "crypto_bob %s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		return (XEVNT_PUB);
+	}
+
+	/*
+	 * Bob rolls random k (0 < k < q), making sure it is not a
+	 * factor of q. He then computes y = A^k r and sends (hash(y),
+	 * gbar^k, ghat^k) to Alice.
+	 */
+	bctx = BN_CTX_new(); k = BN_new(); u = BN_new();
+	sdsa = DSA_new();
+	sdsa->p = BN_new(); sdsa->q = BN_new(); sdsa->g = BN_new();
+	while (1) {
+		BN_rand(k, BN_num_bits(dsa->q), 0, 0);
+		BN_mod(k, k, dsa->q, bctx);
+		BN_gcd(u, k, dsa->q, bctx);
+		if (BN_is_one(u))
+			break;
+	}
+	BN_mod_exp(u, dsa->g, k, dsa->p, bctx); /* A r */
+	BN_mod_mul(u, u, r, dsa->p, bctx);
+	bighash(u, sdsa->p);
+	BN_mod_exp(sdsa->q, dsa->priv_key, k, dsa->p, bctx); /* gbar */
+	BN_mod_exp(sdsa->g, dsa->pub_key, k, dsa->p, bctx); /* ghat */
+	BN_CTX_free(bctx); BN_free(k); BN_free(r); BN_free(u);
+
+	/*
+	 * Encode the values in ASN.1 and sign.
+	 */
+	tstamp = crypto_time();
+	memset(vp, 0, sizeof(struct value));
+	vp->tstamp = htonl(tstamp);
+	vp->fstamp = hostval.tstamp;
+	len = i2d_DSAparams(sdsa, NULL);
+	if (len <= 0) {
+		msyslog(LOG_ERR, "crypto_bob %s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		DSA_free(sdsa);
+		return (XEVNT_PUB);
+	}
+	vp->vallen = htonl(len);
+	ptr = emalloc(len);
+	vp->ptr = ptr;
+	i2d_DSAparams(sdsa, &ptr);
+	DSA_free(sdsa);
+	vp->siglen = 0;
+	if (tstamp == 0)
+		return (XEVNT_OK);
+	vp->sig = emalloc(sign_siglen);
+	EVP_SignInit(&ctx, sign_digest);
+	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, vp->ptr, len);
+	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+		vp->siglen = htonl(len);
+	return (XEVNT_OK);
+}
+
+
+/*
+ * crypto_mv - verify Bob's response to Alice's challenge
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_PUB	bad or missint public key
+ * XEVNT_ID	bad or missing identification
+ */
+int
+crypto_mv(
+	struct exten *ep,	/* extension pointer */
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	DSA	*dsa;		/* MV parameters */
+	DSA	*sdsa;		/* DSA parameters */
+	BN_CTX	*bctx;		/* BIGNUM context */
+	BIGNUM	*k, *u, *v;
+	u_int	len;
+	u_char	*ptr;
+	int	temp;
+
+	/*
+	 * If the MV parameters are not valid or no challenge was sent,
+	 * something awful happened or we are being tormented.
+	 */
+	if (!(peer->crypto & CRYPTO_FLAG_MV) || peer->ident_pkey ==
+	    NULL) {
+		msyslog(LOG_ERR, "crypto_mv: MV unavailable");
+		return (XEVNT_PUB);
+	}
+	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: MV defective key");
+		return (XEVNT_PUB);
+	}
+	if (peer->iffval == NULL) {
+		msyslog(LOG_ERR, "crypto_mv: missing MV challenge");
+		return (XEVNT_PUB);
+	}
+
+	/*
+	 * Extract the (hash(y), gbar, ghat) values from the response.
+	 */
+	bctx = BN_CTX_new(); k = BN_new(); u = BN_new(); v = BN_new();
+	len = ntohl(ep->vallen);
+	ptr = (u_char *)ep->pkt;
+	if ((sdsa = d2i_DSAparams(NULL, &ptr, len)) == NULL) {
+		msyslog(LOG_ERR, "crypto_mv %s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		return (XEVNT_PUB);
+	}
+
+	/*
+	 * Compute (gbar^xhat ghat^xbar)^-1 mod p.
+	 */
+	BN_mod_exp(u, sdsa->q, dsa->pub_key, dsa->p, bctx);
+	BN_mod_exp(v, sdsa->g, dsa->priv_key, dsa->p, bctx);
+	BN_mod_mul(u, u, v, dsa->p, bctx);
+	BN_mod_inverse(u, u, dsa->p, bctx);
+	BN_mod_mul(v, u, peer->iffval, dsa->p, bctx);
+
+	/*
+	 * The result should match the hash of r mod p.
+	 */
+	bighash(v, v);
+	temp = BN_cmp(v, sdsa->p);
+	BN_CTX_free(bctx); BN_free(k); BN_free(u); BN_free(v);
+	BN_free(peer->iffval);
+	peer->iffval = NULL;
+	DSA_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
 	else
@@ -2908,8 +3301,9 @@ cert_install(
 			 * this is an identity scheme, fetch the
 			 * identity credentials.
 			 */
-			if (peer->crypto & crypto_flags &
-			    (CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ))
+			if ((peer->crypto & crypto_flags &
+			    (CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ)) |
+			    (peer->crypto & CRYPTO_FLAG_MV))
 				continue;
 
 			peer->crypto |= CRYPTO_FLAG_VRFY;
@@ -2964,13 +3358,11 @@ cert_free(
 static EVP_PKEY *
 crypto_key(
 	char	*cp,		/* file name */
-	tstamp_t *fstamp,	/* filestamp */
-	int	type		/* file type */
+	tstamp_t *fstamp	/* filestamp */
 	)
 {
 	FILE	*str;		/* file handle */
 	EVP_PKEY *pkey = NULL;	/* public/private key */
-	RSA	*rsa;		/* RSA public key */
 	char	filename[MAXFILENAME]; /* name of key file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
@@ -2991,23 +3383,9 @@ crypto_key(
 		return (NULL);
 
 	/*
-	 * Read and decrypt PEM-encoded key.
+	 * Read and decrypt PEM-encoded private key.
 	 */
-	switch (type) {
-	case TYPE_PRIVATE:
-		pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd);
-		break;
-
-	case TYPE_PUBLIC:
-		rsa = PEM_read_RSAPublicKey(str, NULL, NULL, NULL);
-		if (rsa != NULL) {
-			pkey = EVP_PKEY_new();
-			EVP_PKEY_assign_RSA(pkey, rsa);
-		} else {
-			pkey = NULL;
-		}
-		break;
-	}
+	pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd);
 	fclose(str);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_key %s\n",
@@ -3279,15 +3657,11 @@ void
 crypto_setup(void)
 {
 	EVP_PKEY *pkey;		/* private/public key pair */
-	RSA	*rsapar;	/* RSA parameters cuckoo */
-	RSA	*rsa;		/* RSA keys cuckoo */
 	char	filename[MAXFILENAME]; /* name of host file */
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	tstamp_t fstamp;	/* filestamp */
 	tstamp_t sstamp;	/* sign filestamp */
-	BN_CTX	*bctx;
-	BIGNUM	*bn;
-	u_int	len, bytes, temp;
+	u_int	len, bytes;
 	u_char	*ptr;
 
 	/*
@@ -3352,7 +3726,7 @@ crypto_setup(void)
 		host_file = emalloc(strlen(filename) + 1);
 		strcpy(host_file, filename);
 	}
-	pkey = crypto_key(host_file, &fstamp, TYPE_PRIVATE);
+	pkey = crypto_key(host_file, &fstamp);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR,
 		    "host key file %s not found or corrupt",
@@ -3389,7 +3763,7 @@ crypto_setup(void)
 		sign_file = emalloc(strlen(filename) + 1);
 		strcpy(sign_file, filename);
 	}
-	pkey = crypto_key(sign_file, &fstamp, TYPE_PRIVATE);
+	pkey = crypto_key(sign_file, &fstamp);
 	if (pkey != NULL) {
 		sign_pkey = pkey;
 		sstamp = fstamp;
@@ -3397,65 +3771,44 @@ crypto_setup(void)
 	sign_siglen = EVP_PKEY_size(sign_pkey);
 
 	/*
-	 * Load optional IFF key from file "ntpkey_iff_<hostname>".
+	 * Load optional IFF parameters from file
+	 * "ntpkey_iff_<hostname>".
 	 */
-	if (iff_file == NULL) {
+	if (iffpar_file == NULL) {
 		snprintf(filename, MAXFILENAME, "ntpkey_iff_%s",
 		    sys_hostname);
-		iff_file = emalloc(strlen(filename) + 1);
-		strcpy(iff_file, filename);
+		iffpar_file = emalloc(strlen(filename) + 1);
+		strcpy(iffpar_file, filename);
 	}
-	pkey = crypto_key(iff_file, &fstamp, TYPE_PRIVATE);
-	if (pkey != NULL) {
-		iff_pkey = pkey;
+	iffpar_pkey = crypto_key(iffpar_file, &fstamp);
+	if (iffpar_pkey != NULL)
 		crypto_flags |= CRYPTO_FLAG_IFF;
-	}
 
 	/*
-	 * Load optional GQ parameters from file
-	 * "ntpkey_gqpar_<hostname>".
+	 * Load optional GQ parameters from file "ntpkey_gq_<hostname>".
 	 */
 	if (gqpar_file == NULL) {
-		snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
+		snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
 		    sys_hostname);
 		gqpar_file = emalloc(strlen(filename) + 1);
 		strcpy(gqpar_file, filename);
 	}
-	gqpar_pkey = crypto_key(gqpar_file, &fstamp, TYPE_PRIVATE);
+	gqpar_pkey = crypto_key(gqpar_file, &fstamp);
+	if (gqpar_pkey != NULL)
+		crypto_flags |= CRYPTO_FLAG_GQ;
 
 	/*
-	 * Load optional GQ key from file "ntpkey_gq_<hostname>".
+	 * Load optional MV parameters from file "ntpkey_mv_<hostname>".
 	 */
-	if (gq_file == NULL) {
-		snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
+	if (mvpar_file == NULL) {
+		snprintf(filename, MAXFILENAME, "ntpkey_mv_%s",
 		    sys_hostname);
-		gq_file = emalloc(strlen(filename) + 1);
-		strcpy(gq_file, filename);
+		mvpar_file = emalloc(strlen(filename) + 1);
+		strcpy(mvpar_file, filename);
 	}
-	gq_pkey = crypto_key(gq_file, &fstamp, TYPE_PUBLIC);
-
-	/*
-	 * If both GQ parameter and keys are present, verify the product
-	 * u^b (u^-1)^b = 1 mod n.
-	 */
-	if (gqpar_pkey != NULL && gq_pkey != NULL) {
-		bctx = BN_CTX_new();
-		bn = BN_new();
-		rsapar = gqpar_pkey->pkey.rsa;
-		rsa = gq_pkey->pkey.rsa;
-		BN_mod_exp(bn, rsa->n, rsapar->e, rsapar->n, bctx);
-		BN_mod_mul(bn, bn, rsa->e, rsapar->n, bctx);
-		temp = BN_is_one(bn);
-		BN_free(bn);
-		BN_CTX_free(bctx);
-		if (temp) {
-			crypto_flags |= CRYPTO_FLAG_GQ;
-		} else {
-			msyslog(LOG_ERR,
-			    "Mismatched GQ parameters and keys");
-			exit (-1);
-		}
-	}
+	mvpar_pkey = crypto_key(mvpar_file, &fstamp);
+	if (mvpar_pkey != NULL)
+		crypto_flags |= CRYPTO_FLAG_MV;
 
 	/*
 	 * Load required certificate from file "ntpkey_cert_<hostname>".
@@ -3567,19 +3920,27 @@ crypto_config(
 		break;
 
 	/*
-	 * Set iff key file name.
+	 * Set iff parameters file name.
 	 */
-	case CRYPTO_CONF_IFF:
-		iff_file = emalloc(strlen(cp) + 1);
-		strcpy(iff_file, cp);
+	case CRYPTO_CONF_IFFPAR:
+		iffpar_file = emalloc(strlen(cp) + 1);
+		strcpy(iffpar_file, cp);
 		break;
 
 	/*
-	 * Set gq key file name.
+	 * Set gq parameters file name.
 	 */
-	case CRYPTO_CONF_GQ:
-		gq_file = emalloc(strlen(cp) + 1);
-		strcpy(gq_file, cp);
+	case CRYPTO_CONF_GQPAR:
+		gqpar_file = emalloc(strlen(cp) + 1);
+		strcpy(gqpar_file, cp);
+		break;
+
+	/*
+	 * Set mv parameters file name.
+	 */
+	case CRYPTO_CONF_MVPAR:
+		mvpar_file = emalloc(strlen(cp) + 1);
+		strcpy(mvpar_file, cp);
 		break;
 
 	/*

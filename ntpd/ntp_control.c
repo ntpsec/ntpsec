@@ -210,6 +210,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 41 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 42 */
 	{ CP_DIGEST,	RO, "signature" },	/* 43 */
+	{ CP_IDENT,	RO, "identity" },	/* 44 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 38/43 */
 };
@@ -253,6 +254,7 @@ static u_char def_peer_var[] = {
 	CP_HOST,
 	CP_DIGEST,
 	CP_FLAGS,
+	CP_IDENT,
 	CP_INITSEQ,
 #endif /* OPENSSL */
 	0
@@ -1638,6 +1640,12 @@ ctl_putpeer(
 		if (peer->subject != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->subject,
 			    strlen(peer->subject));
+		break;
+
+	case CP_IDENT:
+		if (peer->issuer != NULL)
+			ctl_putstr(peer_var[CP_IDENT].text, peer->issuer,
+			    strlen(peer->issuer));
 		break;
 
 	case CP_INITSEQ:

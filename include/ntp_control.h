@@ -225,7 +225,8 @@ struct ntp_control {
 #define	CP_INITKEY	41
 #define	CP_INITTSP	42
 #define	CP_DIGEST	43
-#define	CP_MAXCODE	CP_DIGEST
+#define CP_IDENT	44
+#define	CP_MAXCODE	CP_IDENT
 #else
 #define	CP_MAXCODE	CP_VARLIST
 #endif /* OPENSSL */
