@@ -563,8 +563,8 @@ Optional Features:
   --enable-ACTS           + ACTS modem service
   --enable-ARBITER        + Arbiter 1088A/B GPS receiver
   --enable-ARCRON-MSF     + Arcron MSF receiver
-  --enable-AS2201         + Austron 2200A/2201A GPS receiver
   --enable-ATOM           s PPSAPI interface
+  --enable-AS2201         + Austron 2200A/2201A GPS receiver
   --enable-CHU            - CHU modem/decoder
   --enable-AUDIO-CHU      s CHU audio/decoder
   --enable-DATUM          s Datum Programmable Time System
@@ -10263,26 +10263,7 @@ fi
 echo "configure:10263: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10266: checking Austron 2200A/2201A GPS receiver" >&5
-echo $ECHO_N "checking Austron 2200A/2201A GPS receiver... $ECHO_C" >&6
-# Check whether --enable-AS2201 or --disable-AS2201 was given.
-if test "${enable_AS2201+set}" = set; then
-  enableval="$enable_AS2201"
-  ntp_ok=$enableval
-else
-  ntp_ok=$ntp_eac
-fi
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    cat >>confdefs.h <<\EOF
-#define CLOCK_AS2201 1
-EOF
-
-fi
-echo "configure:10282: result: $ntp_ok" >&5
-echo "${ECHO_T}$ntp_ok" >&6
-
-echo "configure:10285: checking ATOM PPSAPI interface" >&5
+echo "configure:10266: checking ATOM PPSAPI interface" >&5
 echo $ECHO_N "checking ATOM PPSAPI interface... $ECHO_C" >&6
 # Check whether --enable-ATOM or --disable-ATOM was given.
 if test "${enable_ATOM+set}" = set; then
@@ -10298,6 +10279,25 @@ if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     cat >>confdefs.h <<\EOF
 #define CLOCK_ATOM 1
+EOF
+
+fi
+echo "configure:10285: result: $ntp_ok" >&5
+echo "${ECHO_T}$ntp_ok" >&6
+
+echo "configure:10288: checking Austron 2200A/2201A GPS receiver" >&5
+echo $ECHO_N "checking Austron 2200A/2201A GPS receiver... $ECHO_C" >&6
+# Check whether --enable-AS2201 or --disable-AS2201 was given.
+if test "${enable_AS2201+set}" = set; then
+  enableval="$enable_AS2201"
+  ntp_ok=$enableval
+else
+  ntp_ok=$ntp_eac
+fi
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    cat >>confdefs.h <<\EOF
+#define CLOCK_AS2201 1
 EOF
 
 fi

@@ -1618,15 +1618,6 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Austron 2200A/2201A GPS receiver)
-AC_ARG_ENABLE(AS2201,		[  --enable-AS2201         + Austron 2200A/2201A GPS receiver],
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_AS2201)
-fi
-AC_MSG_RESULT($ntp_ok)
-
 AC_MSG_CHECKING(ATOM PPSAPI interface)
 AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s PPSAPI interface],
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -1636,6 +1627,15 @@ esac
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_ATOM)
+fi
+AC_MSG_RESULT($ntp_ok)
+
+AC_MSG_CHECKING(Austron 2200A/2201A GPS receiver)
+AC_ARG_ENABLE(AS2201,		[  --enable-AS2201         + Austron 2200A/2201A GPS receiver],
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_AS2201)
 fi
 AC_MSG_RESULT($ntp_ok)
 
