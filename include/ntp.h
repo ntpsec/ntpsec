@@ -119,8 +119,8 @@ typedef char s_char;
 /*
  * Selection algorithm tuning parameters
  */
-#define	NTP_MINCLOCK	3	/* minimum survivors */
-#define	NTP_MAXCLOCK	10	/* maximum candidates */
+#define	NTP_MINCLOCK	4	/* minimum survivors */
+#define	NTP_MAXCLOCK	50	/* maximum candidates */
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */

@@ -212,7 +212,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assocID %d offset %.6f jitter %.6f state %d\n",
+		    "local_clock: assocID %d offset %.9f jitter %.9f state %d\n",
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 #ifdef LOCKCLOCK
@@ -281,8 +281,7 @@ local_clock(
 	if (state == S_NSET) {
 		if (fabs(fp_offset) > clock_max && clock_max > 0) {
 			step_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE, "time reset %+.6f s",
+			msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
 		}
 		rstclock(S_FREQ, peer->epoch, 0);
@@ -390,8 +389,7 @@ local_clock(
 		 */
 		default:
 			step_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE, "time reset %+.6f s",
+			msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
 			rstclock(S_TSET, peer->epoch, 0);
 			retval = 1;
@@ -443,6 +441,7 @@ local_clock(
 		default:
 			allow_panic = FALSE;
 			dtemp = fabs(fp_offset - last_offset);
+/*
 			if (dtemp > CLOCK_SGATE * oerror && mu <
 			    (u_long) ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
@@ -454,26 +453,30 @@ local_clock(
 				last_offset = fp_offset;
 				return (0);
 			}
+*/
 
 			/*
-			 * Compute the FLL and PLL frequency gains,
-			 * which depend on the poll interval, update
-			 * interval and Allan intercept. For the FLL,
-			 * the averaging interval is clamped not less
-			 * than the Allan intercept and the weight
-			 * proportional to the poll interval from zero
-			 * to unity at the Allan intercept. For the PLL,
-			 * the averaging interval is clamped not greater
-			 * than the poll interval. Particularly for the
-			 * PLL, these measures allow oversampling, but
-			 * not undersampling and insure stability even
-			 * when the rules of fair engagement are broken.
+			 * The FLL and PLL frequency gain constants
+			 * depend on the poll interval and Allan
+			 * intercept. The PLL constant is calculated
+			 * throughout the poll interval range, but the
+			 * update interval is clamped so as not to
+			 * exceed the poll interval. The FLL gain is
+			 * zero below one-half the Allan intercept and
+			 * unity at MAXPOLL. It decreases as 1 /
+			 * (MAXPOLL + 1 - poll interval) in a feeble
+			 * effort to match the loop stiffness to the
+			 * Allan wobble. Particularly for the PLL, these
+			 * measures allow oversampling, but not
+			 * undersampling and insure stability even when
+			 * the rules of fair engagement are broken.
 			 */
-			etemp = min(1, sqrt(mu) / allan_xpt);
-			dtemp = max(mu, allan_xpt);
-			flladj = (fp_offset - clock_offset) * etemp /
-			    (CLOCK_FLL * dtemp);
-			etemp = min(mu, (u_long) ULOGTOD(sys_poll));
+			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
+				dtemp = NTP_MAXPOLL + 1 - sys_poll;
+				flladj = (fp_offset - clock_offset) /
+				    (max(mu, allan_xpt) * dtemp);
+			}
+			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			last_time = peer->epoch;
@@ -586,12 +589,6 @@ local_clock(
 				    "kernel time sync disabled %04x",
 				    ntv.status);
 			ntv.status &= ~(STA_PPSFREQ | STA_PPSTIME);
-		} else {
-			if (ntv.status != pll_status)
-				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-				    msyslog(LOG_NOTICE,
-				    "kernel time sync enabled %04x",
-				    ntv.status);
 		}
 		pll_status = ntv.status;
 		if (pll_nano)
@@ -621,20 +618,23 @@ local_clock(
 	 * drift_comp is a sham and used only for updating the drift
 	 * file and for billboard eye candy.
 	 */
-	etemp = clock_frequency + flladj + plladj;
-	drift_comp += etemp;
-	if (drift_comp > NTP_MAXFREQ)
+	dtemp = clock_frequency + flladj + plladj;
+	etemp = drift_comp + dtemp;
+	if (etemp > NTP_MAXFREQ)
 		drift_comp = NTP_MAXFREQ;
-	else if (drift_comp <= -NTP_MAXFREQ)
+	else if (etemp <= -NTP_MAXFREQ)
 		drift_comp = -NTP_MAXFREQ;
+	else
+		drift_comp = etemp;
 	if (fabs(etemp) > NTP_MAXFREQ)
-		msyslog(LOG_NOTICE,
+		NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+		    msyslog(LOG_NOTICE,
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
 		    etemp * 1e6, NTP_MAXFREQ * 1e6);
 
-	dtemp = SQUARE(clock_stability);
-	etemp = SQUARE(etemp) - dtemp;
-	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
+	etemp = SQUARE(clock_stability);
+	dtemp = SQUARE(dtemp);
+	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
 	 * In SYNC state, adjust the poll interval. The trick here is to
@@ -703,7 +703,6 @@ adj_host_clock(
 	)
 {
 	double	adjustment;
-	double	dtemp;
 
 	/*
 	 * Update the dispersion since the last update. In contrast to
@@ -750,16 +749,10 @@ adj_host_clock(
 	}
 
 	/*
-	 * This ugly bit of business is necessary in order to move the
-	 * pole frequency higher as the frequency gain in FLL mode is
-	 * increased. This is necessary to keep the overshoot to less
-	 * than a few percent. Don't look too closely here; this is
-	 * somewhat of a black art.
+	 * Implement the phase and frequency adjustments. Note the
+	 * black art formerly practiced here has been whitewashed.
 	 */
-	dtemp = sys_poll;
-	if (sys_poll > NTP_MINDPOLL)
-		dtemp *= 1.2;
-	adjustment = clock_offset / (CLOCK_PLL * pow(2, dtemp));
+	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 #endif /* LOCKCLOCK */
@@ -783,7 +776,7 @@ rstclock(
 	last_offset = clock_offset = offset;
 #ifdef DEBUG
 	if (debug)
-		printf("clock_filter: at %lu state %d\n", last_time,
+		printf("local_clock: at %lu state %d\n", last_time,
 		    trans);
 #endif
 }

@@ -445,8 +445,8 @@ node_clock(
 	dtemp = t - n->ntp_time;
 	n->time = t;
 	n->ntp_time += dtemp;
-	n->ferr += gauss(0, dtemp * n->fnse * 1e-6);
-	n->clk_time += dtemp * (1 + n->ferr * 1e-6);
+	n->ferr += gauss(0, dtemp * n->fnse);
+	n->clk_time += dtemp * (1 + n->ferr);
 
 	/*
 	 * Perform the adjtime() function. If the adjustment completed
