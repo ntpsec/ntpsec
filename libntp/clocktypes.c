@@ -92,6 +92,8 @@ struct clktype clktypes[] = {
 	  "HOPF_P"},
 	{ REFCLK_JJY,	"JJY receiver (40)",
 	  "JJY" },
+	{ REFCLK_ZYFER,	"Zyfer GPStarplus receiver (41)",
+	  "GPS_ZYFER" },
 	{ -1,			"", "" }
 };
 
