@@ -670,10 +670,9 @@ internal_current6(isc_interfaceiter_t *iter) {
 	if ((lifreq.lifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	/* 
-	 * Note that IPv6 broadcast does not exist
-	 * so don't check for IPv6 broadcast flag
-	 */
+	if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
+		iter->current.flags |= INTERFACE_F_BROADCAST;
+	}
 
 #ifdef IFF_MULTICAST
 	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
