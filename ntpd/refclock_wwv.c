@@ -1587,8 +1587,6 @@ corr4(
 	int diff = 0;		/* decoding difference */
 	int tthr;
 
-return;
-
 	/*
 	 * Correlate coefficient vector with each valid symbol and save
 	 * in decoding matrix. We step through the decoding matrix
@@ -1611,6 +1609,8 @@ return;
 			nxtmax = acc;
 		}
 	}
+
+return;
 
 	/*
 	 * At this point we have identified the maximum likelihood

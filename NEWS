@@ -1,4 +1,12 @@
+* algorithmic improvements, bugfixes
+* Solaris dosynctodr info update
 * html/pic/* is *lots* smaller
+* Driver updates: CHU, DCF, Oncore, PCF, Ulink, WWVB, burst
+* PARSE cleanup
+* PPS cleanup
+* ntpd, ntpq, ntpdate cleanup and fixes
+* NT port improvements
+* AIX, BSDI, DEC OSF, FreeBSD, NetBSD, Reliant, SCO, Solaris port improvements
 (4.0.98)
 * Solaris kernel FLL bug is fixed in 106541-07
 * Bug/lint cleanup
