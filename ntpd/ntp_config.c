@@ -2093,14 +2093,14 @@ getnetnum(
 	if (getaddrinfo(num, "ntp", &hints, &ptr)!=0) {
 		if (complain)
 			msyslog(LOG_ERR,
-				"getaddrinfo: \"%s\" invalid host address, line ignored",
+				"getaddrinfo: \"%s\" invalid host address, ignored",
 				num);
 #ifdef DEBUG
 		if (debug > 3)
 			printf(
 				"getaddrinfo: \"%s\" invalid host address%s.\n",
 				num, (complain)
-				? ", line ignored"
+				? ", ignored"
 				: "");
 #endif
 		return 0;
