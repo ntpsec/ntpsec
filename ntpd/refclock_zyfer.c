@@ -208,6 +208,16 @@ zyfer_receive(
 	int tfom;		/* Time Figure Of Merit */
 	int omode;		/* Operation mode */
 	u_char *p;
+#ifdef PPS
+	struct ppsclockev ppsev;
+	int request;
+#ifdef HAVE_CIOGETEV
+        request = CIOGETEV;
+#endif
+#ifdef HAVE_TIOCGPPSEV
+        request = TIOCGPPSEV;
+#endif
+#endif /* PPS */
 
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
