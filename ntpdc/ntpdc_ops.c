@@ -1019,30 +1019,31 @@ again:
 		checkitemsize(itemsize, sizeof(struct info_sys_stats));
 		return;
 	}
-
-	(void) fprintf(fp, "system uptime:          %ld\n",
-		       (u_long)ntohl(ss->timeup));
-	(void) fprintf(fp, "time since reset:       %ld\n",
-		       (u_long)ntohl(ss->timereset));
-	(void) fprintf(fp, "packets restricted:     %ld\n",
-		       (u_long)ntohl(ss->badstratum));
-	(void) fprintf(fp, "old version packets:    %ld\n",
-		       (u_long)ntohl(ss->oldversionpkt));
-	(void) fprintf(fp, "new version packets:    %ld\n",
-		       (u_long)ntohl(ss->newversionpkt));
-	(void) fprintf(fp, "unknown version number: %ld\n",
-		       (u_long)ntohl(ss->unknownversion));
-	(void) fprintf(fp, "bad packet format:      %ld\n",
-		       (u_long)ntohl(ss->badlength));
-	(void) fprintf(fp, "packets processed:      %ld\n",
-		       (u_long)ntohl(ss->processed));
-	(void) fprintf(fp, "bad authentication:     %ld\n",
-		       (u_long)ntohl(ss->badauth));
+	fprintf(fp, "system uptime:          %ld\n",
+	       (u_long)ntohl(ss->timeup));
+	fprintf(fp, "time since reset:       %ld\n",
+		(u_long)ntohl(ss->timereset));
+        fprintf(fp, "packets received:       %ld\n",
+		(u_long)ntohl(ss->received));
+	fprintf(fp, "packets restricted:     %ld\n",
+	       (u_long)ntohl(ss->badstratum));
+	fprintf(fp, "old version packets:    %ld\n",
+	       (u_long)ntohl(ss->oldversionpkt));
+	fprintf(fp, "new version packets:    %ld\n",
+	       (u_long)ntohl(ss->newversionpkt));
+	fprintf(fp, "unknown version number: %ld\n",
+	       (u_long)ntohl(ss->unknownversion));
+	fprintf(fp, "bad packet format:      %ld\n",
+	       (u_long)ntohl(ss->badlength));
+	fprintf(fp, "packets processed:      %ld\n",
+	       (u_long)ntohl(ss->processed));
+	fprintf(fp, "bad authentication:     %ld\n",
+	       (u_long)ntohl(ss->badauth));
 	if (itemsize != sizeof(struct info_sys_stats))
 	    return;
 	
-	(void) fprintf(fp, "packets limited:        %ld\n",
-		       (u_long)ntohl(ss->limitrejected));
+	fprintf(fp, "packets limited:        %ld\n",
+	       (u_long)ntohl(ss->limitrejected));
 }
 
 
@@ -1911,7 +1912,7 @@ again:
 		struct info_monitor_1 *ml = (struct info_monitor_1 *) struct_star;
 
 		(void) fprintf(fp,
-			       "remote address          port local address      count m ver drop   last   first\n");
+			       "remote address          port local address      count m ver code avglen   first\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
@@ -1936,7 +1937,7 @@ again:
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
 				(void) fprintf(fp, 
-				    "%-22.22s %5d %-15s %8ld %1d %1d %6lu %6lu %7lu\n",
+				    "%-22.22s %5d %-15s %8ld %1d %1d %6lx %6lu %7lu\n",
 				    nntohost(&addr), 
 				    ntohs(ml->port),
 				    stoa(&dstadr),
@@ -1954,7 +1955,7 @@ again:
 		struct info_monitor *ml = (struct info_monitor *) struct_star;
 
 		(void) fprintf(fp,
-			       "     address               port     count mode ver lastdrop  lasttime firsttime\n");
+			       "     address               port     count mode ver code avglen   first\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
@@ -1973,7 +1974,7 @@ again:
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
 				(void) fprintf(fp,
-				    "%-25.25s %5d %9ld %4d %2d %9lu %9lu %9lu\n",
+				    "%-25.25s %5d %9ld %4d %2d %9lx %9lu %9lu\n",
 				    nntohost(&dstadr),
 				    ntohs(ml->port),
 				    (u_long)ntohl(ml->count),

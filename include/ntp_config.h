@@ -42,8 +42,8 @@
 #define CONFIG_STATISTICS	21
 #define CONFIG_PIDFILE		22
 #define CONFIG_SETVAR		23
-#define CONFIG_CLIENTLIMIT	24
-#define CONFIG_CLIENTPERIOD	25
+#define CONFIG_DISCARD		24
+#define CONFIG_ADJ		25
 #define CONFIG_MULTICASTCLIENT	26
 #define CONFIG_ENABLE		27
 #define CONFIG_DISABLE		28
@@ -57,9 +57,8 @@
 #define CONFIG_INCLUDEFILE      36
 #define CONFIG_KEYSDIR		37
 #define CONFIG_CDELAY		38
-#define CONFIG_ADJ		39
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		40
+#define CONFIG_CRYPTO		39
 #endif /* OPENSSL */
 
 /*
@@ -128,6 +127,12 @@
 #define CONF_PPS_ASSERT		1
 #define CONF_PPS_CLEAR		2
 #define CONF_PPS_HARDPPS	3
+
+/*
+ * "discard" modifier keywords
+ */
+#define CONF_DISCARD_AVERAGE	1
+#define CONF_DISCARD_MINIMUM	2
 
 /*
  * "tinker" modifier keywords

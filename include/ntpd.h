@@ -384,6 +384,7 @@ extern u_long	sys_badlength;		/* bad length or format */
 extern u_long	sys_processed;		/* packets processed */
 extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_limitrejected;	/* rate limit exceeded */
+extern u_long	sys_received;		/* packets received */
 
 /* ntp_refclock.c */
 #ifdef REFCLOCK
@@ -398,8 +399,8 @@ extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 /* ntp_restrict.c */
 extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
 extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
-extern u_long	client_limit;
-extern u_long	client_limit_period;
+extern u_long	res_min_interval;
+extern u_long	res_avg_interval;
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */

@@ -1,5 +1,5 @@
 /*
- * ntp_restrict.c - find out what restrictions this host is running under
+ * ntp_restrict.c - determine host restrictions
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -39,7 +39,7 @@
 /*
  * We will use two lists, one for IPv4 addresses and one for IPv6
  * addresses. This is not protocol-independant but for now I can't
- * find way to respect this. We'll check this later... JFB 07/2001
+ * find a way to respect this. We'll check this later... JFB 07/2001
  */
 #define SET_IPV6_ADDR_MASK(dst, src, msk) \
 	do { \
@@ -78,16 +78,13 @@ static	int numresfree6;	/* number of structures on free list 2 */
 static	u_long res_calls;
 static	u_long res_found;
 static	u_long res_not_found;
-/* static	u_long res_timereset; */
 
 /*
  * Parameters of the RES_LIMITED restriction option.
- * client_limit is the number of hosts allowed per source net
- * client_limit_period is the number of seconds after which an entry
- * is no longer considered for client limit determination
  */
-u_long client_limit;
-u_long client_limit_period;
+u_long res_avg_interval = 6;	/* min average interpacket interval */
+u_long res_min_interval = 1;	/* min interpacket interval */
+
 /*
  * Count number of restriction entries referring to RES_LIMITED controls
  * activation/deactivation of monitoring (with respect to RES_LIMITED
@@ -109,7 +106,6 @@ void
 init_restrict(void)
 {
 	register int i;
-	char bp[80];
 
 	/*
 	 * Zero the list and put all but one on the free list
@@ -118,21 +114,18 @@ init_restrict(void)
 	memset((char *)resinit, 0, sizeof resinit);
 	resfree6 = 0;
 	memset((char *)resinit6, 0, sizeof resinit6);
-
 	for (i = 1; i < INITRESLIST; i++) {
 		resinit[i].next = resfree;
 		resinit6[i].next = resfree6;
 		resfree = &resinit[i];
 		resfree6 = &resinit6[i];
 	}
-
 	numresfree = INITRESLIST-1;
 	numresfree6 = INITRESLIST-1;
 
 	/*
-	 * Put the remaining item at the head of the
-	 * list as our default entry.  Everything in here
-	 * should be zero for now.
+	 * Put the remaining item at the head of the list as our default
+	 * entry. Everything in here should be zero for now.
 	 */
 	resinit[0].addr = htonl(INADDR_ANY);
 	resinit[0].mask = 0;
@@ -149,20 +142,12 @@ init_restrict(void)
 	res_calls = 0;
 	res_found = 0;
 	res_not_found = 0;
-	/* res_timereset = 0; */
 
 	/*
 	 * set default values for RES_LIMIT functionality
 	 */
-	client_limit = 10;
-	client_limit_period = 60;
 	res_limited_refcnt = 0;
 	res_limited_refcnt6 = 0;
-
-	sprintf(bp, "client_limit=%ld", client_limit);
-	set_sys_var(bp, strlen(bp) + 1, RO);
-	sprintf(bp, "client_limit_period=%ld", client_limit_period);
-	set_sys_var(bp, strlen(bp) + 1, RO);
 }
 
 
@@ -178,20 +163,13 @@ restrictions(
 	struct restrictlist *match = NULL;
 	struct restrictlist6 *rl6;
 	struct restrictlist6 *match6 = NULL;
-	int flags = 0;
-	u_int32 hostaddr;
 	struct in6_addr hostaddr6;
 	struct in6_addr hostservaddr6;
-
-	int isntpport;
-	struct sockaddr_storage *netsrcaddr;
-	struct sockaddr_storage *mdnet;
+	u_int32	hostaddr;
+	int	flags = 0;
+	int	isntpport;
 
 	res_calls++;
-
-	netsrcaddr = netof(srcadr);
-
-	/* IPv4 source address */
 	if (srcadr->ss_family == AF_INET) {
 		/*
 		 * We need the host address in host order.  Also need to
@@ -213,7 +191,6 @@ restrictions(
 		 * Work our way down from there.
 		 */
 		match = restrictlist;
-
 		for (rl = match->next; rl != 0 && rl->addr <= hostaddr;
 		    rl = rl->next)
 			if ((hostaddr & rl->mask) == rl->addr) {
@@ -222,7 +199,6 @@ restrictions(
 					continue;
 				match = rl;
 			}
-
 		match->count++;
 		if (match == restrictlist)
 			res_not_found++;
@@ -277,122 +253,29 @@ restrictions(
 	}
 
 	/*
-	 * The following implements limiting the number of clients
-	 * accepted from a given network. The notion of "same network"
-	 * is determined by the mask and addr fields of the restrict
-	 * list entry. The monitor mechanism has to be enabled for
-	 * collecting info on current clients.
-	 *
-	 * The policy is as follows:
-	 *	- take the list of clients recorded
-	 *        from the given "network" seen within the last
-	 *        client_limit_period seconds
-	 *      - if there are at most client_limit entries: 
-	 *        --> access allowed
-	 *      - otherwise sort by time first seen
-	 *      - current client among the first client_limit seen
-	 *        hosts?
-	 *        if yes: access allowed
-	 *        else:   eccess denied
+	 * The following implements a generalized call gap facility.
+	 * Douse the RES_LIMITED bit only if the interval since the last
+	 * packet is greater than res_min_interval and the average is
+	 * greater thatn res_avg_interval.
 	 */
-	if (flags & RES_LIMITED) {
-		int lcnt;
-		struct mon_data *md, *this_client;
-
-#ifdef DEBUG
-		if (debug > 2)
-		    printf("limited clients check: %ld clients, period %ld seconds, net is %s\n",
-			   client_limit, client_limit_period,
-			   stoa(netsrcaddr));
-#endif /*DEBUG*/
-		if (mon_enabled == MON_OFF) {
-#ifdef DEBUG
-			if (debug > 4)
-			    printf("no limit - monitoring is off\n");
-#endif
-			return (int)(match->flags & ~RES_LIMITED);
-		}
+	if (mon_enabled == MON_OFF) {
+		flags &= ~RES_LIMITED;
+	} else {
+		struct mon_data *md;
 
 		/*
-		 * How nice, MRU list provides our current client as the
-		 * first entry in the list. Monitoring was verified to
-		 * be active above, thus we know an entry for our client
-		 * must exist, or some brain dead set the memory limit
-		 * for mon entries to ZERO!!!
+		 * At this poin the most recent arrival is first in the
+		 * MRU list. Let the first 10 packets in for free until
+		 * the average stabilizes.
 		 */
-		this_client = mon_mru_list.mru_next;
-
-		for (md = mon_fifo_list.fifo_next,lcnt = 0;
-		     md != &mon_fifo_list;
-		     md = md->fifo_next) {
-			    mdnet = netof(&(md->rmtadr));
-			if ((current_time - md->lasttime)
-			    > client_limit_period) {
-#ifdef DEBUG
-				if (debug > 5)
-				    printf("checking: %s: ignore: too old: %ld\n",
-					   stoa(&(md->rmtadr)),
-					   current_time - md->lasttime);
-#endif
-				continue;
-			}
-			if (md->mode == MODE_BROADCAST ||
-			    md->mode == MODE_CONTROL ||
-			    md->mode == MODE_PRIVATE) {
-#ifdef DEBUG
-				if (debug > 5)
-				    printf("checking: %s: ignore mode %d\n",
-					   stoa(&(md->rmtadr)),
-					   md->mode);
-#endif
-				continue;
-			}
-			if (!SOCKCMP(mdnet, &netsrcaddr)) {
-#ifdef DEBUG
-				if (debug > 5) {
-					printf("checking: %s: different net %s\n",
-				   stoa(&(md->rmtadr)),
-	  			 stoa(mdnet));
-				}
-#endif
-				continue;
-			}
-			lcnt++;
-			if (lcnt >  (int) client_limit ||
-			    SOCKCMP(&(md->rmtadr), srcadr)) {
-#ifdef DEBUG
-				if (debug > 5)
-				    printf("considering %s: found host\n",
-					   stoa(&(md->rmtadr)));
-#endif
-				break;
-			}
-#ifdef DEBUG
-			else {
-				if (debug > 5)
-				    printf("considering %s: same net\n",
-					   stoa(&(md->rmtadr)));
-			}
-#endif
-		} /* for */
-#ifdef DEBUG
-		if (debug > 4)
-		    printf("this one is rank %d in list, limit is %lu: %s\n",
-			   lcnt, client_limit,
-			   (lcnt <= (int) client_limit) ? "ALLOW" : "REJECT");
-#endif
-		if (lcnt <= (int) client_limit) {
-			this_client->lastdrop = 0;
-			if (srcadr->ss_family == AF_INET) 
-				return (int)(match->flags & ~RES_LIMITED);
-			else
-				return (int)(match6->flags & ~RES_LIMITED);
-				
-		} else {
-			this_client->lastdrop = current_time;
-		}
+		md = mon_mru_list.mru_next;
+		if (md->count < 10  && current_time - md->lasttime >	
+		    res_min_interval && md->avg_interval >
+		    res_avg_interval)
+			flags &= ~RES_LIMITED;
+		md->drop_count = flags;
 	}
-	return flags;
+	return (flags);
 }
 
 
