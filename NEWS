@@ -1,7 +1,9 @@
 * algorithmic improvements, bugfixes
 * Solaris dosynctodr info update
 * html/pic/* is *lots* smaller
-* Driver updates: CHU, DCF, Oncore, PCF, Ulink, WWVB, burst
+* New drivers: Forum Graphic GPS, WWV/H
+* Rewrite of the audio drivers
+* Driver updates: CHU, DCF, GPS/VME, Oncore, PCF, Ulink, WWVB, burst
   If you use the ONCORE driver with a HARDPPS kernel module,
   you *must* have a properly specified:
 	pps <filename> [assert/clear] [hardpps]

@@ -1,5 +1,7 @@
 1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98i
+
 	* ntpd/refclock_gpsvme.c: Fixes
 	From: Michael Barone <michael.barone@lmco.com>
 	Patch severely hacked by HMS to "make it conform".  I hope I
