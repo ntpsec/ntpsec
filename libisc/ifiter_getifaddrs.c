@@ -43,7 +43,6 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_result_t result;
 	char strbuf[ISC_STRERRORSIZE];
 
-	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
 	REQUIRE(*iterp == NULL);
 
@@ -120,6 +119,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, ifa->ifa_name, namelen);
+	iter->current.ifindex = ifa.ifa_index;	/* Save the if index */
 
 	iter->current.flags = 0;
 
@@ -132,6 +132,15 @@ internal_current(isc_interfaceiter_t *iter) {
 	if ((ifa->ifa_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
+	if ((ifa->ifa_flags & IFF_BROADCAST) != 0) {
+		iter->current.flags |= INTERFACE_F_BROADCAST;
+	}
+
+#ifdef IFF_MULTICAST
+	if ((ifa->ifa_flags & IFF_MULTICAST) != 0) {
+		iter->current.flags |= INTERFACE_F_MULTICAST;
+	}
+#endif
 	iter->current.af = family;
 
 	get_addr(family, &iter->current.address, ifa->ifa_addr, ifa->ifa_name);
@@ -143,6 +152,11 @@ internal_current(isc_interfaceiter_t *iter) {
 	if (ifa->ifa_dstaddr != NULL &&
 	    (iter->current.flags & IFF_POINTOPOINT) != 0)
 		get_addr(family, &iter->current.dstaddress, ifa->ifa_dstaddr,
+			 ifa->ifa_name);
+
+	if (ifa->ifa_broadaddr != NULL &&
+	    (iter->current.flags & IFF_BROADCAST) != 0)
+		get_addr(family, &iter->current.broadcast, ifa->ifa_broadaddr,
 			 ifa->ifa_name);
 
 	return (ISC_R_SUCCESS);
