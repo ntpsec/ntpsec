@@ -1,3 +1,5 @@
+* NT patches
+* AIX,SunOS,IRIX portability
 * NeXT portability
 * ntptimeset utility added
 * cygwin portability patches

@@ -1,5 +1,11 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/systime.c:
+	* ntpd/ntp_loopfilter.c:
+	* ntpd/ntpd.c:
+	* ports/winnt/libntp/nt_clockstuff.c:
+	From: Sven Dietrich <Sven_Dietrich@trimble.com>
+	
 	* README.cvs: Updated.
 
 	* configure.in: 

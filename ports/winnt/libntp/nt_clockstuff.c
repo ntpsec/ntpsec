@@ -1,5 +1,3 @@
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -13,6 +11,8 @@
 
 char *	set_tod_using = "SetSystemTime";
 extern double drift_comp;
+DWORD units_per_tick;
+static DWORD initial_units_per_tick;
 
 /* Windows NT versions of gettimeofday and settimeofday
  *
@@ -77,7 +77,7 @@ gettimeofday(
 	}
 	else {
 	  TicksElapsed = NowCount + 1 + ~Count; /* tick counter has wrapped around - I don't think this will ever happen*/
-		msyslog(LOG_INFO, "Wraparound %m");
+		msyslog(LOG_INFO, "Wraparound %d -> %d%m", Count, NowCount);
 
 	}
 
@@ -120,12 +120,11 @@ TimerApcFunction(
 
 DWORD WINAPI ClockThread(void *arg)
 {
+
 	LARGE_INTEGER DueTime;
 	HANDLE WaitableTimerHandle = CreateWaitableTimer(NULL, FALSE, NULL);
 
 	(void) arg; /* not used */
-	/* Reset the Clock to a reasonable increment */
-	SetSystemTimeAdjustment(PRESET_TICK, FALSE);
 
 	if (WaitableTimerHandle != NULL) {
 		DueTime.QuadPart = 0i64;
@@ -147,11 +146,26 @@ static void StartClockThread(void)
 	DWORD tid;
 	FILETIME StartTime;
 	LARGE_INTEGER Freq = { 0, 0 };
+	DWORD every;
+	BOOL noslew;
+	/* Reset the Clock to a reasonable increment */
+	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every, &noslew))	{
+		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
+		exit (-1);
+	}
+
+    units_per_tick = initial_units_per_tick;
+
+	msyslog(LOG_INFO, "Initial Clock increment %d\n",
+			units_per_tick);
 	
 	/* get the performance counter freq*/
-    if (QueryPerformanceFrequency(&Freq)) { 
-		PerfFrequency = Freq.QuadPart;
+    if (!QueryPerformanceFrequency(&Freq)) { 
+		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
+		exit (-1);
 	}
+
+	PerfFrequency = Freq.QuadPart;
 
 	/* init variables with the time now */
 	GetSystemTimeAsFileTime(&StartTime);
@@ -181,6 +195,11 @@ static void StopClockThread(void)
 
 		DeleteCriticalSection(&TimerCritialSection);
 	} 
+	
+	/* restore the clock frequency back to its original value */
+	if (!SetSystemTimeAdjustment(initial_units_per_tick, TRUE)) {
+		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
+	}
 }
 
 typedef void (__cdecl *CRuntimeFunction)(void);

@@ -1061,11 +1061,6 @@ service_exit(
 	int status
 	)
 {
-	/* restore the clock frequency back to its original value */
-	if (!SetSystemTimeAdjustment((DWORD)0, TRUE)) {
-		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
-	}
-
 	if (!debug) { /* did not become a service, simply exit */
 		/* service mode, need to have the service_main routine
 		 * register with the service control manager that the 

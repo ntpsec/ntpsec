@@ -194,13 +194,14 @@ local_clock(
 	/*
 	 * If the clock is way off, don't tempt fate by correcting it.
 	 */
+#ifndef SYS_WINNT
 	if (fabs(fp_offset) >= clock_panic && !correct_any) {
-		msyslog(LOG_ERR,
+			msyslog(LOG_ERR,
 		    "time error %.0f over %d seconds; set clock manually)",
 		    fp_offset, (int)clock_panic);
 		return (-1);
 	}
-
+#endif
 	/*
 	 * If the clock has never been set, set it and initialize the
 	 * discipline parameters. We then switch to frequency mode to

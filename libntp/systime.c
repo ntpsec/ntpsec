@@ -45,6 +45,7 @@ double sys_maxfreq = MAXFREQ;	/* max frequency correction */
 
 #if defined SYS_WINNT || defined SYS_CYGWIN32
 static long last_Adj = 0;
+extern DWORD units_per_tick;
 /*long	adj_precision = (long)(HZ * 0.1); */ /* adj precision in usec (tickadj) */
 #endif /* SYS_WINNT */
 
@@ -183,7 +184,7 @@ adj_systime(
 	 * and leave the remainder in dtemp */
 	dwTimeAdjustment = dtemp / 10;
 	dtemp +=  (double) -dwTimeAdjustment * 10.0;	
-	dwTimeAdjustment += PRESET_TICK;
+	dwTimeAdjustment += units_per_tick;
 
 	/* only adjust the clock if adjustment changes */
 	if (last_Adj != dwTimeAdjustment) { 	
