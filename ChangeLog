@@ -1,5 +1,7 @@
 2000-01-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_wwv.c: Undo that declaration cleanup for now...
+
 	* ntpd/ntp_io.c (open_socket): TOS support
 	From: Marc.Brett@westgeo.com
 
