@@ -1,5 +1,7 @@
 2000-01-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98j
+
 	* ntpd/refclock_wwv.c (timecode): Make definition == declaration
 	(wwv_newchan): Ditto
 	(wwv_corr4): Dave fixed the declaration.
