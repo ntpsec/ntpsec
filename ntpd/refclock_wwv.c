@@ -482,7 +482,7 @@ struct sync {
 	double	amp;		/* amplitude (square) */
 	double	synamp;		/* sync amplitude at 800 ms */
 	double	noise;		/* max amplitude off pulse */
-	double	max;		/* max amplitude on pulse */
+	double	p_max;		/* max amplitude on pulse */
 	double	lastmax;	/* last max amplitude on pulse */
 	long	pos;		/* position at maximum amplitude */
 	long	lastpos;	/* last position at maximum amplitude */
@@ -970,7 +970,7 @@ wwv_poll(
  * the same time as the in-phase signal. The phase tracking loop uses
  * phase adjustments of plus-minus one sample (125 us).
  */
-void
+static void
 wwv_epoch(
 	struct peer *peer,	/* peer structure pointer */
 	double sig		/* decompanded rf signal sample */
@@ -1602,8 +1602,8 @@ wwv_qrz(
 			epoch = sp->mepoch;
 		else
 			epoch = sp->lastpos;
-		if (syncx > sp->max) {
-			sp->max = syncx;
+		if (syncx > sp->p_max) {
+			sp->p_max = syncx;
 			sp->pos = up->mphase;
 		}
 		if (abs(MOD(up->mphase - epoch, MINUTE)) > SYNSIZ &&
@@ -1622,7 +1622,7 @@ wwv_qrz(
 		sp->select &= ~JITRNG;
 		if (abs(sp->jitter) > AWND * MS)
 			sp->select |= JITRNG;
-		sp->max = sqrt(sp->max);
+		sp->p_max = sqrt(sp->p_max);
 		sp->noise = sqrt(sp->noise);
 		if (up->status & MSYNC) {
 
@@ -1644,8 +1644,8 @@ wwv_qrz(
 			 * little dance to find a valid minute sync
 			 * pulse, emphasis valid.
 			 */
-			snr = wwv_snr(sp->max, sp->noise);
-			isgood = sp->max > ATHR && snr > ASNR &&
+			snr = wwv_snr(sp->p_max, sp->noise);
+			isgood = sp->p_max > ATHR && snr > ASNR &&
 			    !(sp->select & JITRNG);
 			switch (sp->count) {
 
@@ -1657,7 +1657,7 @@ wwv_qrz(
 			 * If found, bump to state 1.
 			 */
 			case 0:
-				if (sp->max >= ATHR)
+				if (sp->p_max >= ATHR)
 					sp->count++;
 				break;
 
@@ -1673,7 +1673,7 @@ wwv_qrz(
 			 * state 2.
 			 */
 			case 1:
-			if (sp->max < ATHR) {
+			if (sp->p_max < ATHR) {
 					sp->count--;
 					break;
 				} else if (!isgood) {
@@ -1701,7 +1701,7 @@ wwv_qrz(
 			sprintf(tbuf,
 	    "wwv8 %2d %04x %5.0f %s %d %5.0f %5.1f %7ld %7ld %7ld",
 			    up->rsec, up->status, up->epomax, sp->ident,
-			    sp->count, sp->max, snr, sp->pos,
+			    sp->count, sp->p_max, snr, sp->pos,
 			    sp->jitter, MOD(sp->pos - up->nepoch -
 			    SYNSIZ, MINUTE));
 			if (pp->sloppyclockflag & CLK_FLAG4)
@@ -1711,9 +1711,9 @@ wwv_qrz(
 				printf("%s\n", tbuf);
 #endif
 		}
-		sp->lastmax = sp->max;
+		sp->lastmax = sp->p_max;
 		sp->lastpos = sp->pos;
-		sp->max = sp->noise = 0;
+		sp->p_max = sp->noise = 0;
 	}
 }
 
@@ -1914,7 +1914,7 @@ wwv_endpoc(
  * transmitter carrier for a few seconds around the leap to avoid icky
  * details of transmission format during the leap.
  */
-double
+static double
 wwv_rsec(
 	struct peer *peer,	/* peer structure pointer */
 	double bit		/* bit probability */
@@ -2260,7 +2260,7 @@ wwv_corr4(
 	struct refclockproc *pp;
 	struct wwvunit *up;
 
-	double max, nxtmax;	/* metrics */
+	double s_max, nxtmax;	/* metrics */
 	double acc;		/* accumulator */
 	char tbuf[80];		/* monitor buffer */
 	int mldigit;		/* max likelihood digit */
@@ -2275,7 +2275,7 @@ wwv_corr4(
 	 * any BCD digit bit is bad, consider all bits a miss.
 	 */
 	mldigit = 0;
-	max = nxtmax = -MAXSIG;
+	s_max = nxtmax = -MAXSIG;
 	for (i = 0; tab[i][0] != 0; i++) {
 		acc = 0;
 		for (j = 0; j < 4; j++) {
@@ -2283,17 +2283,17 @@ wwv_corr4(
 				acc += data[j] * tab[i][j];
 		}
 		acc = (vp->like[i] += (acc - vp->like[i]) / TCONST);
-		if (acc > max) {
-			nxtmax = max;
-			max = acc;
+		if (acc > s_max) {
+			nxtmax = s_max;
+			s_max = acc;
 			mldigit = i;
 		} else if (acc > nxtmax) {
 			nxtmax = acc;
 		}
 	}
 	vp->mldigit = mldigit;
-	vp->digprb = max;
-	vp->digsnr = wwv_snr(max, nxtmax);
+	vp->digprb = s_max;
+	vp->digsnr = wwv_snr(s_max, nxtmax);
 
 	/*
 	 * The maximum likelihood digit is compared with the current
@@ -2506,7 +2506,7 @@ wwv_snr(
  * rotation, this routine mitigates over all channels and chooses the
  * best frequency and station.
  */
-void
+static void
 wwv_newchan(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -2573,7 +2573,7 @@ wwv_newchan(
  * to a new channel and restores the AGC for that channel. If a tunable
  * receiver is not available, just fake it.
  */
-void
+static void
 wwv_qsy(
 	struct peer *peer,	/* peer structure pointer */
 	int	chan		/* channel */
@@ -2619,7 +2619,7 @@ wwv_qsy(
  * stn	station identifier (station and frequency)
  * comp	minute sync compare counter
  * errs	bit errors in last minute * freq	frequency offset (PPM) * avgt	averaging time (s) */
-int
+static int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */
 	char *ptr		/* target string */

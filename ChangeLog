@@ -1,5 +1,13 @@
 2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_wwv.c: Rename max to p_max or s_max as appropriate
+	to avoid native SunOS compiler collision.
+	(wwv_epoch): Make declaration == definition
+	(wwv_rsec): Ditto
+	(wwv_newchan): Ditto
+	(wwv_qsy): Ditto
+	(timecode): Ditto
+
 	* ntpd/refclock_oncore.c (oncore_init_shmem): Use a cast to widen
 	mmap's NIL offset.
 
