@@ -119,137 +119,139 @@ transmit(
 	 * server modes) and those that do (all other modes). The dance
 	 * is intricate...
 	 */
+	/*
+	 * In broadcast mode the poll interval is never changed from
+	 * minpoll.
+	 */
 	hpoll = peer->hpoll;
 	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
-
-		/*
-		 * In broadcast mode the poll interval is never changed
-		 * from minpoll.
-		 */
 		peer->outdate = current_time;
-	} else if (peer->cast_flags & MDF_ACAST) {
+		if (sys_peer != NULL)
+			peer_xmit(peer);
+		poll_update(peer, hpoll);
+		return;
+	}
 
-		/*
-		 * In manycast mode we start with the minpoll interval
-		 * and unity ttl. The ttl is increased by one for each
-		 * poll until either enough servers have been found or
-		 * the maximum ttl is reached. About once per day when
-		 * the agreement parameters are refreshed, the manycast
-		 * clients are reset and we start from the beginning.
-		 * This is to catch and clamp the ttl to the lowest
-		 * practical value and avoid knocking on spurious doors.
-		 */
+	/*
+	 * In manycast mode we start with the minpoll interval and unity
+	 * ttl. The ttl is increased by one for each poll until either
+	 * enough servers have been found or the maximum ttl is reached.
+	 * About once per day when the agreement parameters are
+	 * refreshed, the manycast clients are reset and we start from
+	 * the beginning. This is to catch and clamp the ttl to the
+	 * lowest practical value and avoid knocking on spurious doors.
+	 */
+	if (peer->cast_flags & MDF_ACAST) {
 		peer->outdate = current_time;
 		if (sys_survivors < sys_minclock && peer->ttl <
 		    sys_ttlmax)
 			peer->ttl++;
-	} else {
-		if (peer->burst == 0) {
-			u_char oreach;
+		peer_xmit(peer);
+		poll_update(peer, hpoll);
+		return;
+	}
 
-			oreach = peer->reach;
-			peer->outdate = current_time;
-			peer->reach <<= 1;
-			peer->hyst *= HYST_TC;
-			if (!peer->reach) {
+	/*
+	 * In unicast modes the dance is much more intricate. It is
+	 * desigmed to back off whenever possible to minimize network
+	 * traffic.
+	 */
+	if (peer->burst == 0) {
+		u_char oreach;
 
-				/*
-				 * If this association was reachable but
-				 * now unreachable, raise a trap. If
-				 * ephemeral, dump it right away.
-				 */
-				if (oreach != 0) {
-					report_event(EVNT_UNREACH,
-					    peer);
-					if (!(peer->flags &
-					    FLAG_CONFIG)) {
-						unpeer(peer);
-						return;
-					}
-					peer->timereachable =
-					    current_time;
-				}
-
-				/*
-				 * We send an initial burst only once
-				 * after a server becomes unreachable.
-				 * After the unreach counter trips, we
-				 * send a single packet and double the
-				 * poll interval if persistent or dump
-				 * the association if ephemeral. Here it
-				 * can be ephemeral only if the server
-				 * has never been reachable.
-				 */
-				if (peer->unreach == 0 && peer->flags &
-				    FLAG_IBURST) {
-					peer->burst = NTP_BURST;
-				} else if (peer->unreach > NTP_UNREACH)
-				    {
-					if (!(peer->flags &
-					    FLAG_CONFIG)) {
-						unpeer(peer);
-						return;
-					} 
-					hpoll++;
-				}
-				peer->unreach++;
-			} else {
-
-				/*
-				 * Here the peer is reachable. If it has
-				 * not been heard for three consecutive
-				 * polls, stuff infinity in the clock
-				 * filter. Next, determine the poll
-				 * interval. If the peer is unfit for
-				 * synchronization, double the interval;
-				 * else, use the system poll interval.
-				 * Send a burst only if enabled and
-				 * nothing is wrong.
-				 */
-				peer->unreach = 0;
-				if (!(peer->reach & 0x07))
-					clock_filter(peer, 0., 0.,
-					    MAXDISPERSE);
-					hpoll = sys_poll;
-				if (peer->flags & FLAG_BURST &&
-				    !peer->flash)
-					peer->burst = NTP_BURST;
-			}
-		} else {
-			peer->burst--;
+		oreach = peer->reach;
+		peer->outdate = current_time;
+		peer->reach <<= 1;
+		peer->hyst *= HYST_TC;
+		if (!peer->reach) {
 
 			/*
-			 * If a broadcast client at this point, the
-			 * burst has concluded, so we switch to client
-			 * mode and purge the keylist, since no further
-			 * transmissions will be made.
+			 * If this association was reachable but now
+			 * unreachable, raise a trap. If ephemeral, dump
+			 * it right away.
 			 */
-			if (peer->burst == 0) {
-				if (peer->cast_flags & MDF_BCLNT) {
-					peer->hmode = MODE_BCLIENT;
-#ifdef OPENSSL
-					key_expire(peer);
-#endif /* OPENSSL */
+			if (oreach != 0) {
+				report_event(EVNT_UNREACH, peer);
+				if (!(peer->flags & FLAG_CONFIG)) {
+					unpeer(peer);
+					return;
 				}
-
-				/*
-				 * If ntpdate mode and the clock has not
-				 * been set and all peers have completed
-				 * the burst, we declare a successful
-				 * failure.
-				 */
-				if (mode_ntpdate) {
-					peer_ntpdate--;
-					if (peer_ntpdate == 0) {
-						msyslog(LOG_NOTICE,
-						    "no reply; clock not set");
-						exit (0);
-					}
-				}
-				clock_select();
-				poll_update(peer, hpoll);
-				return;
+				peer->timereachable = current_time;
 			}
+
+			/*
+			 * We send an initial burst only once after a
+			 * server becomes unreachable. After the unreach
+			 * counter trips, we send a single packet and
+			 * double the poll interval if persistent or
+			 * dump the association if ephemeral. Here it
+			 * can be ephemeral only if the server has never
+			 * been reachable.
+			 */
+			if (peer->flags & FLAG_IBURST &&
+			    peer->unreach == 0) {
+				peer->burst = NTP_BURST;
+			} else if (peer->unreach > NTP_UNREACH) {
+				if (!(peer->flags & FLAG_CONFIG)) {
+					unpeer(peer);
+					return;
+				} 
+				hpoll++;
+			}
+			peer->unreach++;
+		} else {
+
+			/*
+			 * Here the peer is reachable. If it has
+			 * not been heard for three consecutive
+			 * polls, stuff infinity in the clock
+			 * filter. Next, determine the poll
+			 * interval. If the peer is unfit for
+			 * synchronization, double the interval;
+			 * else, use the system poll interval.
+			 * Send a burst only if enabled and
+			 * nothing is wrong.
+			 */
+			peer->unreach = 0;
+			if (!(peer->reach & 0x07))
+				clock_filter(peer, 0., 0., MAXDISPERSE);
+				hpoll = sys_poll;
+			if (peer->flags & FLAG_BURST &&
+			    !peer_unfit(peer))
+				peer->burst = NTP_BURST;
+		}
+	} else {
+		peer->burst--;
+
+		/*
+		 * If a broadcast client at this point, the burst has
+		 * concluded, so we switch to client mode and purge the
+		 * keylist, since no further transmissions will be made.
+		 */
+		if (peer->burst == 0) {
+			if (peer->cast_flags & MDF_BCLNT) {
+				peer->hmode = MODE_BCLIENT;
+#ifdef OPENSSL
+				key_expire(peer);
+#endif /* OPENSSL */
+			}
+
+			/*
+			 * If ntpdate mode and the clock has not been
+			 * set and all peers have completed the burst,
+			 * we declare a successful failure.
+			 */
+			if (mode_ntpdate) {
+				peer_ntpdate--;
+				if (peer_ntpdate == 0) {
+					msyslog(LOG_NOTICE,
+					    "no reply; clock not set");
+					exit (0);
+				}
+			}
+			clock_select();
+			poll_update(peer, hpoll);
+			return;
 		}
 	}
 
@@ -257,13 +259,6 @@ transmit(
 	 * Do not transmit if in broadcast client mode. 
 	 */
 	if (peer->hmode == MODE_BCLIENT) {
-		poll_update(peer, hpoll);
-		return;
-
-	/*
-	 * Do not transmit in broadcast mode unless we are synchronized.
-	 */
-	} else if (peer->hmode == MODE_BROADCAST && sys_peer == NULL) {
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -2878,7 +2873,7 @@ peer_unfit(
 	    FLAG_NOSELECT)
 		return (TEST13);	/* unfit */
 
- 	if (peer->stratum > sys_stratum && !(peer->hmode ==
+ 	if (peer->stratum >= sys_stratum && !(peer->hmode ==
 	    MODE_ACTIVE || peer->hmode == MODE_PASSIVE))
 		return (TEST10);	/* stratum exceeded */
 
