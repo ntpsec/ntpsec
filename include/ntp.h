@@ -205,7 +205,7 @@ struct interface {
 #define TEST1		0x0001	/* duplicate packet received */
 #define TEST2		0x0002	/* bogus packet received */
 #define TEST3		0x0004	/* protocol unsynchronized */
-#define TEST4		0x0008	/* access denied */
+#define TEST4		0x0008	/* access denied or crypto failure */
 #define TEST5		0x0010	/* MAC error */
 #define TEST6		0x0020	/* peer clock unsynchronized */
 #define TEST7		0x0040	/* peer stratum out of bounds */
