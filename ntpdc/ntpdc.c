@@ -1463,8 +1463,8 @@ help(
 			if (*(xcp->keyword) != '?')
 			    list[words++] = xcp->keyword;
 		}
-		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
+                for (xcp = opcmds; xcp->keyword != 0; xcp++)
+		    list[words++] = xcp->keyword;
 
 		qsort(
 #ifdef QSORT_USES_VOID_P

@@ -1998,8 +1998,6 @@ help(
 	FILE *fp
 	)
 {
-	int i;
-	int n;
 	struct xcmd *xcp;
 	char *cmd;
 	const char *list[100];
@@ -2014,7 +2012,7 @@ help(
 			    list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
+		    list[words++] = xcp->keyword;
 
 		qsort(
 #ifdef QSORT_USES_VOID_P
@@ -2049,7 +2047,7 @@ help(
 			(void) fprintf(stderr,
 				       "Command `%s' is unknown\n", cmd);
 			return;
-		} else if (n >= 2) {
+		} else if (words >= 2) {
 			(void) fprintf(stderr,
 				       "Command `%s' is ambiguous\n", cmd);
 			return;
