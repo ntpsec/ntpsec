@@ -257,7 +257,6 @@ make_keylist(
 	ap->seq = htonl(peer->keynumber);
 	ap->key = htonl(keyid);
 	ap->siglen = 0;
-	crypto_flags |= CRYPTO_FLAG_AUTO;
 #if DEBUG
 	if (debug)
 		printf("make_keys: %d %08x %08x ts %u\n",
@@ -277,6 +276,7 @@ make_keylist(
 		    rval);
 	else
 		ap->siglen = htonl(len);
+	crypto_flags |= CRYPTO_FLAG_AUTO;
 #endif /* PUBKEY */
 }
 
@@ -305,7 +305,8 @@ crypto_recv(
 	int authlen;		/* offset of MAC field */
 	int len;		/* extension field length */
 	u_int code;		/* extension field opcode */
-	tstamp_t tstamp;	/* extension field timestamp */
+	tstamp_t tstamp;	/* timestamp */
+	tstamp_t fstamp;	/* filestamp */
 	int i, rval;
 	u_int temp;
 #ifdef PUBKEY
@@ -433,6 +434,7 @@ crypto_recv(
 		 * been installed.
 		 */
 		case CRYPTO_PRIV:
+			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			/* fall through */
 
@@ -517,6 +519,7 @@ crypto_recv(
 			if (!crypto_flags)
 				break;
 			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
@@ -524,13 +527,12 @@ crypto_recv(
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
-			} else if (tstamp < ntohl(dhparam.tstamp) ||
-			    (tstamp == ntohl(dhparam.tstamp) &&
-			    (peer->flags & FLAG_AUTOKEY))) {
-				rval = RV_TSP;
-			} else if (tstamp <= ntohl(dhparam.fstamp) ||
-			    ntohl(vp->fstamp) < ntohl(dhparam.fstamp))
-			    {
+			} else if (tstamp < ntohl(dhparam.fstamp) ||
+			    fstamp < ntohl(dhparam.fstamp)) {
+				rval = RV_FSP;
+			} else if (fstamp == ntohl(dhparam.fstamp) &&
+			    (peer->flags & FLAG_AUTOKEY)) {
+				peer->crypto &= ~CRYPTO_FLAG_DH;
 				rval = RV_FSP;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
@@ -544,19 +546,24 @@ crypto_recv(
 			if (debug)
 				printf(
 				    "crypto_recv: verify %x parameters %u ts %u fs %u\n",
-				    rval, temp, tstamp,
-				    ntohl(vp->fstamp));
+				    rval, temp, tstamp, fstamp);
 #endif
+
+			/*
+			 * If the peer data are newer than the host
+			 * data, replace the host data. Otherwise,
+			 * wait for the peer to fetch the host data.
+			 */
 			if (rval != RV_OK || temp == 0) {
 				if (rval != RV_TSP)
 					msyslog(LOG_ERR,
 					    "crypto: %x parameters %u ts %u fs %u\n",
-					    rval, temp, tstamp,
-					    ntohl(vp->fstamp));
+					    rval, temp, tstamp, fstamp);
 				break;
 			}
 			peer->flash &= ~TEST10;
 			crypto_flags |= CRYPTO_FLAG_DH;
+			peer->crypto &= ~CRYPTO_FLAG_DH;
 
 			/*
 			 * Initialize agreement parameters and extension
@@ -607,6 +614,7 @@ crypto_recv(
 		 * parameters.
 		 */
 		case CRYPTO_DH:
+			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			if (!crypto_flags)
 				peer->cmmd |= CRYPTO_ERROR;
@@ -616,6 +624,7 @@ crypto_recv(
 			if (!crypto_flags)
 				break;
 			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
@@ -648,9 +657,9 @@ crypto_recv(
 			 */
 			if (rval != RV_OK) {
 				temp = 0;
-			} else if (ntohl(vp->fstamp) > dhparam.fstamp) {
-				rval = RV_FSP;
+			} else if (fstamp > dhparam.fstamp) {
 				crypto_flags &= ~CRYPTO_FLAG_DH;
+				rval = RV_FSP;
 			} else {
 				rval = R_ComputeDHAgreedKey(dh_key,
 				    (u_char *)&pkt[i + 5], dh_private,
@@ -662,8 +671,7 @@ crypto_recv(
 				printf(
 				    "crypto_recv: verify %x agreement %08x ts %u (%u) fs %u\n",
 				    rval, temp, tstamp,
-				    peer->pcookie.tstamp,
-				    ntohl(vp->fstamp));
+				    peer->pcookie.tstamp, fstamp);
 #endif
 			if (rval != RV_OK) {
 				if (rval != RV_TSP)
@@ -671,7 +679,7 @@ crypto_recv(
 					    "crypto: %x agreement %08x ts %u (%u) fs %u\n",
 					    rval, temp, tstamp,
 					    peer->pcookie.tstamp,
-					    ntohl(vp->fstamp));
+					    fstamp);
 					peer->cmmd |= CRYPTO_ERROR;
 				break;
 			}
@@ -691,6 +699,7 @@ crypto_recv(
 			if (!crypto_flags)
 				break;
 			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
 			temp = ntohl(vp->vallen);
 			j = i + 5 + ntohl(vp->vallen) / 4;
 			bits = ntohl(pkt[i + 5]);
@@ -704,8 +713,11 @@ crypto_recv(
 			    (tstamp == peer->pubkey.tstamp &&
 			    (peer->flags & FLAG_AUTOKEY))) {
 				rval = RV_TSP;
-			} else if (tstamp <= peer->pubkey.fstamp ||
-			    ntohl(vp->fstamp) < peer->pubkey.fstamp) {
+			} else if (tstamp < peer->pubkey.fstamp ||
+			    fstamp < peer->pubkey.fstamp) {
+				rval = RV_FSP;
+			} else if (fstamp == peer->pubkey.fstamp &&
+			    (peer->flags & FLAG_AUTOKEY)) {
 				rval = RV_FSP;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
@@ -723,13 +735,12 @@ crypto_recv(
 				} else {
 					j = i + 5 + rsalen / 4;
 					peer->pubkey.ptr = (u_char *)kp;
-					temp = strlen((char *)&pkt[j]);
+					temp = 1+ strlen((char *)&pkt[j]);
 					peer->keystr = emalloc(temp);
 					strcpy(peer->keystr,
 					    (char *)&pkt[j]);
 					peer->pubkey.tstamp = tstamp;
-					peer->pubkey.fstamp =
-					    ntohl(vp->fstamp);
+					peer->pubkey.fstamp = fstamp;
 					peer->flash &= ~TEST10;
 				}
 			}
@@ -739,7 +750,7 @@ crypto_recv(
 				printf(
 				    "crypto_recv: verify %x host %s ts %u fs %u\n",
 				    rval, (char *)&pkt[i + 5 + rsalen /
-				    4], tstamp, ntohl(vp->fstamp));
+				    4], tstamp, fstamp);
 #endif
 			if (rval != RV_OK) {
 				if (rval != RV_TSP)
@@ -747,7 +758,7 @@ crypto_recv(
 					    "crypto: %x host %s ts %u fs %u\n",
 					    rval, (char *)&pkt[i + 5 +
 					    rsalen / 4], tstamp,
-					    ntohl(vp->fstamp));
+					    fstamp);
 			}
 			break;
 		/*
@@ -757,6 +768,7 @@ crypto_recv(
 			if (!crypto_flags)
 				break;
 			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
@@ -764,13 +776,12 @@ crypto_recv(
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
-			} else if (tstamp < ntohl(tai_leap.tstamp) ||
-			    (tstamp == ntohl(tai_leap.tstamp) &&
-			    (peer->flags & FLAG_AUTOKEY))) {
-				rval = RV_TSP;
-			} else if (tstamp <= ntohl(tai_leap.fstamp) ||
-			    ntohl(vp->fstamp) < ntohl(tai_leap.fstamp))
-			    {
+			} else if (tstamp < ntohl(tai_leap.fstamp) ||
+			    fstamp < ntohl(tai_leap.fstamp)) {
+				rval = RV_FSP;
+			} else if (fstamp == ntohl(tai_leap.fstamp) &&
+			    (peer->flags & FLAG_AUTOKEY)) {
+				peer->crypto &= ~CRYPTO_FLAG_TAI;
 				rval = RV_FSP;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
@@ -784,19 +795,24 @@ crypto_recv(
 			if (debug)
 				printf(
 				    "crypto_recv: verify %x leapseconds %u ts %u fs %u\n",
-				    rval, temp, tstamp,
-				    ntohl(vp->fstamp));
+				    rval, temp, tstamp, fstamp);
 #endif
+
+			/*
+			 * If the peer data are newer than the host
+			 * data, replace the host data. Otherwise,
+			 * wait for the peer to fetch the host data.
+			 */
 			if (rval != RV_OK || temp == 0) {
 				if (rval != RV_TSP)
 					msyslog(LOG_ERR,
 					    "crypto: %x leapseconds %u ts %u fs %u\n",
-					    rval, temp, tstamp,
-					    ntohl(vp->fstamp));
+					    rval, temp, tstamp, fstamp);
 				break;
 			}
 			peer->flash &= ~TEST10;
 			crypto_flags |= CRYPTO_FLAG_TAI;
+			peer->crypto &= ~CRYPTO_FLAG_TAI;
 			sys_tai = temp / 4 + TAI_1972 - 1;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
@@ -833,6 +849,7 @@ crypto_recv(
 		default:
 			if (code & (CRYPTO_RESP | CRYPTO_ERROR))
 				break;
+			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			break;
 

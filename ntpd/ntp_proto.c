@@ -1700,6 +1700,7 @@ clock_select(void)
 	while (1) {
 		d = 1e9;
 		e = -1e9;
+		k = 0;
 		for (i = 0; i < nlist; i++) {
 
 			if (error[i] < d)
@@ -2087,8 +2088,9 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			else if (crypto_flags && !(crypto_flags &
-			    CRYPTO_FLAG_DH))
+			else if (crypto_flags && peer->crypto &
+			    CRYPTO_FLAG_DH && sys_leap !=
+			    LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DHPAR,
 				    peer->hcookie, peer->assoc);
@@ -2119,8 +2121,7 @@ peer_xmit(
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
 #ifdef PUBKEY
-			else if (peer->crypto & CRYPTO_FLAG_TAI &&
-			    sys_tai == 0)
+			else if (peer->crypto & CRYPTO_FLAG_TAI)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,
 				    peer->assoc);
@@ -2165,8 +2166,7 @@ peer_xmit(
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
 #ifdef PUBKEY
-			else if (peer->crypto & CRYPTO_FLAG_TAI &&
-			    sys_tai == 0)
+			else if (peer->crypto & CRYPTO_FLAG_TAI)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,
 				    peer->assoc);
@@ -2177,11 +2177,14 @@ peer_xmit(
 
 		/*
 		 * If extension fields are present, we must use a
-		 * private value of zero. Most intricate.
+		 * private value of zero and force min poll interval.
+		 * Most intricate.
 		 */
-		if (sendlen > LEN_PKT_NOMAC)
+		if (sendlen > LEN_PKT_NOMAC) {
 			session_key(&peer->dstadr->sin, &peer->srcadr,
 			    xkeyid, 0, 2);
+			poll_update(peer, peer->minpoll);
+		}
 	} 
 #endif /* AUTOKEY */
 	xkeyid = peer->keyid;

@@ -1,3 +1,11 @@
+2001-02-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (peer_xmit): Crypto-related fixes
+	From Dave Mills.
+
+	* ntpd/ntp_crypto.c (crypto_recv): Allocate space for the trailing
+	NUL on the keystr.
+
 2001-01-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k17
