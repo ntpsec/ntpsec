@@ -1,5 +1,7 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.97
+
 	* libntp/systime.c:
 	* ntpd/ntp_loopfilter.c:
 	* ntpd/ntpd.c:

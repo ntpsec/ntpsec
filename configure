@@ -966,7 +966,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.96p1
+VERSION=4.0.97
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -2601,7 +2601,7 @@ EOF
 
 fi
 
-for ac_hdr in bstring.h errno.h fcntl.h memory.h netdb.h poll.h sched.h
+for ac_hdr in bstring.h errno.h fcntl.h memory.h netdb.h poll.h resolv.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -2641,7 +2641,7 @@ else
 fi
 done
 
-for ac_hdr in sgtty.h stdlib.h string.h sys/wait.h termio.h termios.h
+for ac_hdr in sched.h sgtty.h stdlib.h string.h termio.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -2681,7 +2681,7 @@ else
 fi
 done
 
-for ac_hdr in timepps.h timex.h unistd.h utmp.h utmpx.h
+for ac_hdr in termios.h timepps.h timex.h unistd.h utmp.h utmpx.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -2721,7 +2721,7 @@ else
 fi
 done
 
-for ac_hdr in arpa/nameser.h net/if.h netinet/in.h netinet/ip.h resolv.h
+for ac_hdr in arpa/nameser.h net/if.h netinet/in.h netinet/ip.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -3133,7 +3133,7 @@ else
 fi
 done
 
-for ac_hdr in sys/timers.h sys/timex.h sys/tpro.h sys/types.h
+for ac_hdr in sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
