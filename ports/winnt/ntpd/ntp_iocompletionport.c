@@ -278,7 +278,7 @@ OnSocketRecv(DWORD i, struct IoCompletionInfo *Info, DWORD Bytes)
 	buff = (struct recvbuf *) ( ((char *) Info) - offsetof(struct recvbuf, iocompletioninfo));
 	get_systime(&buff->recv_time);	
 	
-	if (Bytes > 0) {	
+	if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {	
 		buff->recv_length = (int) Bytes;
 		buff->receiver = receive; 
 		buff->dstadr = inter;
