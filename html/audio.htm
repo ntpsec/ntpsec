@@ -66,7 +66,7 @@ utility program.
 <H4>Shortwave Radio Drivers</H4>
 
 <p>The WWV/H and CHU audio drivers require an external shortwave radio
-with the audio output - speaker or headphone jack - connected to either
+with the radio output - speaker or headphone jack - connected to either
 the microphone or line-in port on the computer. There is some degree of
 art in setting up the radio and antenna and getting the setup to work.
 While the drivers are highly sophisticated and efficient in extracting
@@ -85,15 +85,13 @@ generally works better if the radio is outside the near field of
 computers and other electromagnetic noisemakers. It can be in the
 elevator penthouse connected by house wiring, which can also be used to
 power the radio. A couple of center-tapped audio transformers will
-minimize noise pickup and allow phantom power to the radio with return
+minimize noise pickup and provide phantom power to the radio with return
 via the AC neutral wire.
 
 <p>The WWV/H and CHU transmitters operate on several frequencies
 simultaneously, so that in most parts of North America at least one
 frequency supports propagation to the receiver location at any given
-hour. Currently, computer-tunable radios are expensive and probably not
-cost effective compared to a GPS receiver. So, the radio frequency must
-be fixed and chosen by compromise.
+hour. While both drivers support the ICOM CI-V radio interface and can tune the radio automatically, computer-tunable radios are expensive and probably not cost effective compared to a GPS receiver. So, the radio frequency must usually be fixed and chosen by compromise.
 
 <p>Shortwave (3-30 MHz) radio propagation phenomena are well known to
 shortwave enthusiasts. The phenomena generally obey the following rules:
@@ -134,20 +132,14 @@ and the best WWV frequency is probably 15 MHz.
 <p>The audio drivers include extensive debugging support to help hook up
 the audio signals and monitor the driver operations. The documentation
 page for each driver describes the various messages that can be produced
-either in real-time or written to the <Thu>clockstats</Thu> file for
+either in real-time or written to the <tt>clockstats</tt> file for
 later analysis. Of particular help in verifying signal connections and
 compatibility is a provision to monitor the signal via headphones or
 speaker.
 
-<H4>Monitor Data</H4>
 
-<p>The drivers write a synthesized timecode to the <THU>clockstats</THU>
-file each time the clock is set and at other times if verbose monitoring
-is enabled. The format includes several fixed-length fields defining the
-Gregorian time to the millisecond, together with additional variable-
-length fields specific to each driver. The data include the interval
-since the clock was last set, the audio gain and various state variables
-and counters specific to each driver.
+<p>The drivers write a synthesized timecode to the <tt>clockstats</tt>
+file each time the clock is set or verified and at other times if verbose monitoring is enabled. The format includes several fixed-length fields defining the Gregorian time to the millisecond, together with additional variable-length fields specific to each driver. The data include the intervals since the clock was last set or verified, the audio gain and various state variables and counters specific to each driver.
 
 <H4>Additional Information</H4>
 
