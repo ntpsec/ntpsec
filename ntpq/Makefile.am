@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS=	../util/ansi2knr
 
 bin_PROGRAMS=	ntpq
-AM_CPPFLAGS=	-I$(top_srcdir)/include
+AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 
 # LDADD might need RESLIB and ADJLIB
 ntpq_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@ $(LIBOPTS_LDADD)

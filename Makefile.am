@@ -4,11 +4,11 @@ ACLOCAL_AMFLAGS= -I m4
 
 include $(srcdir)/libopts/MakeDefs.inc
 
-SUBDIR=
+SUBDIRS=
 if NEED_LIBOPTS
-SUBDIR+= libopts
+SUBDIRS+= libopts
 endif
-SUBDIR+= \
+SUBDIRS+= \
 	scripts \
 	include \
 	ElectricFence	\
