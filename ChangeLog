@@ -1,3 +1,8 @@
+2000-02-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* scripts/mkver.in (ConfStr): Make RSAREF appear as part of the
+	version.
+
 2000-02-21  Sven Dietrich <sven_dietrich@trimble.com>
 
 	* ports/winnt/include/config.h: Enable MD5 and RANDOM by default

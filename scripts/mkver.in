@@ -3,12 +3,14 @@ PROG=${1-UNKNOWN}
 
 ConfStr="$PROG"
 
+ConfStr="$ConfStr @VERSION@"
+
 case "@LIBRSAREF@" in
  '') ;;
- *)  ConfStr="$ConfStr RSAREF" ;;
+ *)  ConfStr="${ConfStr}-RSAREF" ;;
 esac
 
-ConfStr="$ConfStr @VERSION@ `date`"
+ConfStr="$ConfStr `date`"
 
 if [ ! -f .version ]; then
   echo 0 > .version
