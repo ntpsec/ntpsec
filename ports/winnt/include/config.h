@@ -4,6 +4,12 @@
 #define __config
 
 #if defined(_MSC_VER)
+/* VS V7 (aka .NET) has the IPv6 structures */
+#if _MSC_VER >= 1300
+#define HAVE_STRUCT_SOCKADDR_STORAGE
+#define ISC_PLATFORM_HAVEIN6PKTINFO
+#define ISC_PLATFORM_HAVEIPV6
+#endif
 /*
  * An attempt to cut down the number of warnings generated during compilation.
  * All of these should be benign to disable.
@@ -30,11 +36,6 @@
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
-/* Skip asynch rpc inclusion */
-#ifndef __RPCASYNC_H__
-#define __RPCASYNC_H__
-#endif
-
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
 #define _WINSOCKAPI_  
@@ -49,6 +50,7 @@
 /* Enable OpenSSL */
 #define OPENSSL 1
 
+#define isascii __isascii
 #define finite _finite
 # define random      rand
 # define srandom     srand
@@ -95,6 +97,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_IO_COMPLETION_PORT
 # define HAVE_SOCKADDR_IN6
 # define ISC_PLATFORM_NEEDNTOP
+# define ISC_PLATFORM_NEEDPTON
 
 #define ISC_PLATFORM_NEEDIN6ADDRANY
 
@@ -112,6 +115,6 @@ int NT_set_process_priority(void);	/* Define this function */
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
 
 /* Include Windows headers */
-#include <windows.h>
+#include <winsock2.h>
 
 #endif /* __config */
