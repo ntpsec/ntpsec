@@ -5,8 +5,8 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99b1)
-AC_PREREQ(2.13)
+AM_INIT_AUTOMAKE(ntp, 4.0.99b3)
+AC_PREREQ(2.14)
 
 ac_cv_var_oncore_ok=no
 
@@ -2983,10 +2983,11 @@ esac
 # the ANSI2KNR-filtering rules.
 LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 
-AC_OUTPUT(Makefile adjtimed/Makefile clockstuff/Makefile \
+AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/Makefile scripts/mkver scripts/ntpver util/Makefile,
-[chmod +x scripts/ntpver scripts/mkver])
+scripts/Makefile scripts/mkver scripts/ntpver util/Makefile)
+AC_CONFIG_COMMANDS(default, [[chmod +x scripts/ntpver scripts/mkver]], [])
+AC_OUTPUT
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

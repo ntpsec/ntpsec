@@ -1088,7 +1088,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.99b1
+VERSION=4.0.99b3
 
 if test "`CDPATH=: && cd $srcdir && pwd`" != "`pwd`" &&
    test -f $srcdir/config.status; then
@@ -10961,9 +10961,9 @@ cat >>$CONFIG_STATUS <<EOF
 # If the user did not use the arguments to specify the items to instantiate,
 # then the envvar interface is used.  Set only those that are not.
 if \$ac_need_defaults; then
-  : \${CONFIG_FILES="\$config_files"}
-  : \${CONFIG_HEADERS="\$config_headers"}
-  : \${CONFIG_COMMANDS="\$config_commands"}
+  : \${CONFIG_FILES=\$config_files}
+  : \${CONFIG_HEADERS=\$config_headers}
+  : \${CONFIG_COMMANDS=\$config_commands}
 fi
 
 # Remove all the CONFIG_FILES, and trap to remove the temp files.
@@ -10979,7 +10979,6 @@ cat >>$CONFIG_STATUS <<EOF
 
 AMDEP="$AMDEP"
 ac_aux_dir="$ac_aux_dir"
-
 EOF
 
 cat >>$CONFIG_STATUS <<EOF

@@ -1,5 +1,7 @@
 2000-01-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Autoconf update...
+
 	* ntpdate/ntpdate.c (ntpdatemain): Typo
 	From: Jack Bryans <jbryans@csulb.edu>
 
