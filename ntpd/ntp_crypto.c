@@ -178,27 +178,34 @@ session_key(
 	EVP_MD_CTX ctx;		/* message digest context */
 	u_char dgst[EVP_MAX_MD_SIZE]; /* message digest */
 	keyid_t	keyid;		/* key identifer */
-	u_int32	header[4];	/* data in network byte order */
-	u_int	len;
+	u_int32	header[10];	/* data in network byte order */
+	u_int	hdlen, len;
 
 	/*
 	 * Generate the session key and key ID. If the lifetime is
 	 * greater than zero, install the key and call it trusted.
 	 */
+	hdlen = 0;
 	switch(srcadr->ss_family) {
 	case AF_INET:
 		header[0] = ((struct sockaddr_in *)srcadr)->sin_addr.s_addr;
 		header[1] = ((struct sockaddr_in *)dstadr)->sin_addr.s_addr;
+		header[2] = htonl(keyno);
+		header[3] = htonl(private);
+		hdlen = 4 * sizeof(u_int32);
 		break;
 	case AF_INET6:
-		/* XXX we need some IPv6 code here! */
-		msyslog(LOG_ERR, "IPv6 crypto code missing");
+		memcpy(&header[0], &GET_INADDR6(*srcadr),
+		    sizeof(struct in6_addr));
+		memcpy(&header[4], &GET_INADDR6(*dstadr),
+		    sizeof(struct in6_addr));
+		header[8] = htonl(keyno);
+		header[9] = htonl(private);
+		hdlen = 10 * sizeof(u_int32);
 		break;
 	}
-	header[2] = htonl(keyno);
-	header[3] = htonl(private);
 	EVP_DigestInit(&ctx, EVP_md5());
-	EVP_DigestUpdate(&ctx, (u_char *)header, sizeof(header));
+	EVP_DigestUpdate(&ctx, (u_char *)header, hdlen);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	memcpy(&keyid, dgst, 4);
 	keyid = ntohl(keyid);
@@ -210,7 +217,7 @@ session_key(
 	if (debug > 1)
 		printf(
 		    "session_key: %s > %s %08x %08x hash %08x life %lu\n",
-		    numtoa(header[0]), numtoa(header[1]), keyno,
+		    stoa(srcadr), stoa(dstadr), keyno,
 		    private, keyid, lifetime);
 #endif
 	return (keyid);
