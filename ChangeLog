@@ -1,5 +1,7 @@
 1999-12-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/syssignal.c: Small cleanup to Marc's patch.
+
 	* ntpd/ntp_refclock.c: 
 	* ntpd/refclock_atom.c: Header cleanup
 	* html/driver30.htm: Cleanup and improvements.
