@@ -1,3 +1,13 @@
+2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c: Add "version" support.
+	(getconfig): version support.
+	* include/ntp_config.h (CONF_RES_VERSION): Added.
+	* include/ntp.h (RES_VERSION): Added.
+	From: Dave Mills.
+
+	* include/ntp_machine.h (ifreq): WinNT cleanup
+
 2001-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k29

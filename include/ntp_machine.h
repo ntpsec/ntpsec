@@ -242,18 +242,18 @@ typedef unsigned long u_long;
     error "NT requires config.h to be included"
 # endif /* HAVE_CONFIG_H) */
 
-#if defined SYS_WINNT
 # define ifreq _INTERFACE_INFO
 # define ifr_flags iiFlags
 # define ifr_addr iiAddress.AddressIn
 # define ifr_broadaddr iiBroadcastAddress.AddressIn
 # define ifr_mask iiNetmask.AddressIn
-#endif /* SYS_WINNT */
 
 # define isascii __isascii
 # define isatty _isatty
 # define mktemp _mktemp
-# define getpid GetCurrentProcessId
+# if 0
+#  define getpid GetCurrentProcessId
+# endif
 # include <windows.h>
 # include <ws2tcpip.h>
 # undef interface

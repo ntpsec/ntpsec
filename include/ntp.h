@@ -739,15 +739,16 @@ struct restrictlist {
 /*
  * Access flags
  */
-#define	RES_IGNORE		0x1	/* ignore if matched */
-#define	RES_DONTSERVE		0x2	/* don't give him any time */
-#define	RES_DONTTRUST		0x4	/* don't trust if matched */
-#define	RES_NOQUERY		0x8	/* don't allow queries if matched */
-#define	RES_NOMODIFY		0x10	/* don't allow him to modify server */
-#define	RES_NOPEER		0x20	/* don't allocate memory resources */
-#define	RES_NOTRAP		0x40	/* don't allow him to set traps */
-#define	RES_LPTRAP		0x80	/* traps set by him are low priority */
-#define RES_LIMITED		0x100   /* limit per net number of clients */
+#define	RES_IGNORE		0x001	/* ignore if matched */
+#define	RES_DONTSERVE		0x002	/* don't give him any time */
+#define	RES_DONTTRUST		0x004	/* don't trust if matched */
+#define	RES_NOQUERY		0x008	/* don't allow queries if matched */
+#define	RES_NOMODIFY		0x010	/* don't allow him to modify server */
+#define	RES_NOPEER		0x020	/* don't allocate memory resources */
+#define	RES_NOTRAP		0x040	/* don't allow him to set traps */
+#define	RES_LPTRAP		0x080	/* traps set by him are low priority */
+#define RES_VERSION		0x100	/* serve only current version */
+#define RES_LIMITED		0x200   /* limit per net number of clients */
 
 #define	RES_ALLFLAGS \
     (RES_IGNORE|RES_DONTSERVE|RES_DONTTRUST|RES_NOQUERY\

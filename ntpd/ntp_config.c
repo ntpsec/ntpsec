@@ -176,6 +176,7 @@ static	struct keyword res_keywords[] = {
 	{ "notrap",		CONF_RES_NOTRAP },
 	{ "notrust",		CONF_RES_NOTRUST },
 	{ "ntpport",		CONF_RES_NTPPORT },
+	{ "version",		CONF_RES_VERSION },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1091,6 +1092,10 @@ getconfig(
 
 				    case CONF_RES_NTPPORT:
 					peerkey |= RESM_NTPONLY;
+					break;
+
+				    case CONF_RES_VERSION:
+					peerversion |= RES_VERSION;
 					break;
 
 				    case CONF_RES_LIMITED:

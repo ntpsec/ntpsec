@@ -87,7 +87,8 @@
 #define CONF_RES_NOTRAP		8
 #define CONF_RES_LPTRAP		9
 #define CONF_RES_NTPPORT	10
-#define CONF_RES_LIMITED	11
+#define CONF_RES_VERSION	11
+#define CONF_RES_LIMITED	12
 
 /*
  * "trap" modifier keywords
