@@ -41,8 +41,8 @@
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
 
-#include <isc/boolean.h>
 #include <isc/net.h>
+#include <isc/result.h>
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
@@ -482,7 +482,7 @@ findhostaddr(
 		/*
 		 * If the IPv6 stack is not available look only for IPv4 addresses
 		 */
-		if (isc_net_probeipv6() == ISC_FALSE)
+		if (isc_net_probeipv6() == ISC_R_SUCCESS)
 			hints.ai_family = AF_INET;
 
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
@@ -504,7 +504,7 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
 				stoa(&entry->peer_store));
 #endif
-		entry->ce_name = (char *)emalloc(MAXHOSTNAMELEN);
+		entry->ce_name = emalloc(MAXHOSTNAMELEN);
 		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
 				   SOCKLEN(&entry->peer_store),
 				   (char *)&entry->ce_name, MAXHOSTNAMELEN,
@@ -555,7 +555,7 @@ openntp(void)
 	/*
 	 * If the IPv6 stack is not available look only for IPv4 addresses
 	 */
-	if (isc_net_probeipv6() == ISC_FALSE)
+	if (isc_net_probeipv6() == ISC_R_SUCCESS)
 		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
