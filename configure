@@ -6691,7 +6691,7 @@ EOF
 esac
 
 case "$target" in
- *-*-osf4*)
+ *-*-osf45*)
     cat >> confdefs.h <<\EOF
 #define DECL_PLOCK_0 1
 EOF

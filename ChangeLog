@@ -1,8 +1,7 @@
 1999-11-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* configure.in:
-	* ntpd/ntpd.c:
-	DEC OSF cleanup (editorial comments by HMS)
+	* configure.in: DECL_PLOCK_0 and DECL_STIME_0 are for dec-osf5*, too
+	* ntpd/ntpd.c: 	DEC OSF cleanup (editorial comments by HMS)
 	From: Tom Smith <smith@cag.lkg.dec.com> 
 	
 	* ntpd/ntp_refclock.c: MAXUNIT bugfix

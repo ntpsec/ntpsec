@@ -760,7 +760,7 @@ case "$ac_cv_decl_syscall" in
 esac
 
 case "$target" in
- *-*-osf4*)
+ *-*-osf[45]*)
     AC_DEFINE(DECL_PLOCK_0)
     AC_DEFINE(DECL_STIME_0)
     ;;
