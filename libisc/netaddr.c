@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#define ISC_ONLY_IPV6
+
 #include <stdio.h>
 
 #include <isc/buffer.h>
