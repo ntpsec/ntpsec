@@ -2066,7 +2066,7 @@ local_input(
 							if (debug > 3)
 							{
 								printf(
-								       "parse: local_receive: fd %d PPSAPI seq %d - PPS %s\n",
+								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
 								       rbufp->fd,
 								       pps_info.assert_sequence + pps_info.clear_sequence ,
 								       lfptoa(&parse->parseio.parse_dtime.parse_ptime.fp, 6));
@@ -2079,7 +2079,7 @@ local_input(
 							if (debug > 3)
 							{
 								printf(
-								       "parse: local_receive: fd %d PPSAPI seq assert %d, seq clear %d - NO PPS event\n",
+								       "parse: local_receive: fd %d PPSAPI seq assert %ld, seq clear %ld - NO PPS event\n",
 								       rbufp->fd,
 								       pps_info.assert_sequence, pps_info.clear_sequence);
 							}
