@@ -1,5 +1,7 @@
 2000-05-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_intres.c: Compiler noise cleanup
+
 	* html/ntptime.htm: Document reality check
 	From: Kazu TAKAMUNE <takamune@avrl.mei.co.jp>
 

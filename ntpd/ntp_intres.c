@@ -467,7 +467,7 @@ findhostaddr(
 		if (debug > 2)
 			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
 				entry->ce_name);
-#endif DEBUG
+#endif /* DEBUG */
 		hp = gethostbyname(entry->ce_name);
 	} else {
 #ifdef DEBUG
