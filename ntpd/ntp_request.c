@@ -928,8 +928,10 @@ sys_info(
 		is->flags |= INFO_FLAG_AUTHENTICATE;
 	if (sys_bclient)
 		is->flags |= INFO_FLAG_BCLIENT;
+#ifdef REFCLOCK
 	if (cal_enable)
 		is->flags |= INFO_FLAG_CAL;
+#endif /* REFCLOCK */
 	if (kern_enable)
 		is->flags |= INFO_FLAG_KERNEL;
 	if (mon_enabled != MON_OFF)
