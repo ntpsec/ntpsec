@@ -2064,6 +2064,13 @@ clock_select(void)
 		j++;
 	}
 	nlist = j;
+	if (nlist == 0) {
+#ifdef DEBUG
+		if (debug)
+			printf("clock_select: empty intersection interval\n");
+#endif
+		return;
+	}
 	for (i = 0; i < nlist; i++) {
 		peer_list[i]->status = CTL_PST_SEL_SELCAND;
 
@@ -2222,8 +2229,7 @@ clock_select(void)
 			printf("select: pps offset %.6f\n",
 			    sys_offset);
 #endif
-	}
-		else {
+	} else {
 		if (typesystem)
 			sys_peer = osys_peer;
 		else

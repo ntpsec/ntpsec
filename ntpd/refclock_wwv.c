@@ -21,7 +21,7 @@
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
-#define ICOM 	1		/* undefine to suppress ICOM code */
+#define ICOM 1
 
 #ifdef ICOM
 #include "icom.h"
@@ -583,7 +583,9 @@ static	double	wwv_snr		P((double, double));
 static	int	carry		P((struct decvec *));
 static	int	wwv_newchan	P((struct peer *));
 static	void	wwv_newgame	P((struct wwvunit *));
+#ifdef ICOM
 static	int	wwv_qsy		P((struct peer *, int));
+#endif /* ICOM */
 static double qsy[NCHAN] = {2.5, 5, 10, 15, 20}; /* frequencies (MHz) */
 
 /*
@@ -691,6 +693,7 @@ wwv_start(
 	up->decvec[YR].radix = 10;	/* years */
 	up->decvec[YR + 1].radix = 10;
 	wwv_newgame(up);
+	up->schan = up->achan = 3;
 
 	/*
 	 * Initialize autotune if available. Start out at 15 MHz. Note
@@ -712,14 +715,15 @@ wwv_start(
 			    temp);
 	}
 	if (up->fd_icom > 0) {
-		up->schan = 3;
-		if ((temp = wwv_qsy(peer, up->schan)) < 0) {
+		if ((temp = wwv_qsy(peer, up->schan)) != 0) {
 			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_ERR,
-			    "ICOM bus error; autotune disabled");
+			    msyslog(LOG_ERR, "icom: radio not found");
 			up->errflg = CEVNT_FAULT;
 			close(up->fd_icom);
 			up->fd_icom = 0;
+		} else {
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_ERR, "icom: autotune enabled");
 		}
 	}
 #endif /* ICOM */
@@ -1053,8 +1057,8 @@ wwv_rf(
 	dtemp = ciamp * ciamp + cqamp * cqamp;
 	sp->amp = dtemp;
 	if (!(up->status & MSYNC))
-		wwv_qrz(peer, sp, dtemp,
-		    (int)(pp->fudgetime1 * SECOND));
+		wwv_qrz(peer, sp, dtemp, (int)(pp->fudgetime1 *
+		    SECOND));
 	i = hsinptr;
 	hsinptr = (hsinptr + IN1200) % 80;
 	dtemp = sintab[i] * syncx / SYNSIZ * SGAIN;
@@ -1068,8 +1072,8 @@ wwv_rf(
 	dtemp = hiamp * hiamp + hqamp * hqamp;
 	sp->amp = dtemp;
 	if (!(up->status & MSYNC))
-		wwv_qrz(peer, sp, dtemp,
-		    (int)(pp->fudgetime2 * SECOND));
+		wwv_qrz(peer, sp, dtemp, (int)(pp->fudgetime2 *
+		    SECOND));
 	jptr = (jptr + 1) % SYNSIZ;
 
 	/*
@@ -1100,8 +1104,13 @@ wwv_rf(
 			if (wwv_newchan(peer) == 0 || up->watch >=
 			    ACQSN) {
 				wwv_newgame(up);
-				up->schan = (up->schan + 1) % NCHAN;
-				wwv_qsy(peer, up->schan);
+#ifdef ICOM
+				if (up->fd_icom > 0) {
+					up->schan = (up->schan + 1) %
+					    NCHAN;
+					wwv_qsy(peer, up->schan);
+				}
+#endif /* ICOM */
 			}
 		} else {
 
@@ -1878,7 +1887,10 @@ wwv_rsec(
 		up->status &= ~SFLAG;
 		up->errcnt = 0;
 		wwv_newchan(peer);
-		wwv_qsy(peer, up->dchan);
+#ifdef ICOM
+		if (up->fd_icom > 0)
+			wwv_qsy(peer, up->dchan);
+#endif /* ICOM */
 		break;
 
 	/*
@@ -1953,8 +1965,12 @@ wwv_rsec(
 			up->misc &= ~arg;
 		else
 			up->alarm |= 1 << SYMERR;
-		up->schan = (up->schan + 1) % NCHAN;
-		wwv_qsy(peer, up->schan);
+#ifdef ICOM
+		if (up->fd_icom > 0) {
+			up->schan = (up->schan + 1) % NCHAN;
+			wwv_qsy(peer, up->schan);
+		}
+#endif /* ICOM */
 		up->status |= SFLAG;
 		up->errbit = up->errcnt;
 		up->errcnt = 0;
@@ -2393,16 +2409,16 @@ wwv_snr(
 /*
  * wwv_newchan - change to new data channel
  *
- * Assuming the radio can be tuned by this program, it actually appears
- * as a 10-channel receiver, one channel for each of WWV and WWVH on
- * each of five frequencies. While the radio is tuned to the working
- * data channel (frequency and station) for most of the minute, during
- * seconds 59, 0 and 1 the radio is tuned to a probe channel, in order
- * to pick up minute sync and data pulses. The search for WWV and WWVH
- * stations operates simultaneously, with WWV on 1000 Hz and WWVH on
- * 1200 Hz. The probe channel rotates for each minute over the five
- * frequencies. At the end of each rotation, this routine mitigates over
- * all channels and chooses the best frequency and station.
+ * The radio actually appears to have 10-channels, one channel for each
+ * of WWV and WWVH on each of five frequencies, although if not tunable
+ * only the 15 MHz channels qre live. While the radio is tuned to the
+ * working data channel (frequency and station) for most of the minute,
+ * during seconds 59, 0 and 1 the radio is tuned to a probe channel, in
+ * order to pick up minute sync and data pulses. The search for WWV and
+ * WWVH stations operates simultaneously, with WWV on 1000 Hz and WWVH
+ * on * 1200 Hz. The probe channel rotates each minute to the next of
+ * five frequencies. At the end of each rotation, this routine mitigates
+ * over all channels and chooses the best frequency and station.
  */
 static int
 wwv_newchan(
@@ -2507,6 +2523,7 @@ wwv_newgame(
 }
 
 
+#ifdef ICOM
 /*
  * wwv_qsy - Tune ICOM receiver
  *
@@ -2520,22 +2537,22 @@ wwv_qsy(
 	int	chan		/* channel */
 	)
 {
+	int rval = 0;
 	struct refclockproc *pp;
 	struct wwvunit *up;
-	int rval = 0;
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
-	up->mitig[up->achan].gain = up->gain;
-#ifdef ICOM
-	if (up->fd_icom > 0)
+	if (up->fd_icom > 0) {
+		up->mitig[up->achan].gain = up->gain;
 		rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
 		    qsy[chan]);
-#endif /* ICOM */
-	up->achan = chan;
-	up->gain = up->mitig[up->achan].gain;
+		up->achan = chan;
+		up->gain = up->mitig[up->achan].gain;
+	}
 	return (rval);
 }
+#endif /* ICOM */
 
 
 /*
@@ -2598,7 +2615,7 @@ timecode(
 	    up->decvec[DA + 2].digit * 100;
 	hour = up->decvec[HR].digit + up->decvec[HR + 1].digit * 10;
 	minute = up->decvec[MN].digit + up->decvec[MN + 1].digit * 10;
-	second = up->rsec;
+	second = 0;
 	leapchar = (up->misc & SECWAR) ? 'L' : ' ';
 	dst = dstcod[(up->misc >> 4) & 0x3];
 	dut = up->misc & 0x7;
