@@ -53,7 +53,8 @@ static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_maxd; 	/* select error (squares) */
 static	double sys_epsil;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
-int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
+int	sys_manycastserver;	/* respond to manycast client pkts */
+u_int sys_survivors;		/* truest of the truechimers */
 #ifdef AUTOKEY
 char	*sys_hostname;		/* gethostname() name */
 #endif /* AUTOKEY */
@@ -149,7 +150,7 @@ transmit(
 			 * reduce the interval; if more than six samples
 			 * are in the register, increase the interval.
 			 */
-			if (sys_peer == 0)
+			if (sys_peer == NULL)
 				hpoll = peer->minpoll;
 			else if (sys_peer->stratum > peer->stratum)
 				hpoll = peer->minpoll;
@@ -190,17 +191,18 @@ transmit(
 
 	/*
 	 * We need to be very careful about honking uncivilized time. If
-	 * not operating in broadcast mode, honk in all except broadcast
-	 * client mode. If operating in broadcast mode and synchronized
-	 * to a real source, honk except when the peer is the local-
-	 * clock driver and the prefer flag is not set. In other words,
-	 * in broadcast mode we never honk unless known to be
-	 * synchronized to real time.
+	 * not in broadcast mode transmit except when in broadcast
+	 * client mode. Furthermore, don't transmit if in anycast client
+	 * mode and there are at least 3 surviving sources. If in
+	 * broadcast mode transmit only if synchronized to a valid,
+	 * synchronized source. However, do not transmit if this is the
+	 * local clock driver and the driver is not the prefer peer.
 	 */
 	if (peer->hmode != MODE_BROADCAST) {
-		if (peer->hmode != MODE_BCLIENT)
+		if (peer->hmode != MODE_BCLIENT && !(peer->cast_flags &
+		    MDF_ACAST && sys_survivors >= NTP_MINCLOCK))
 			peer_xmit(peer);
-	} else if (sys_peer != 0 && sys_leap != LEAP_NOTINSYNC) {
+	} else if (sys_peer != NULL && sys_leap != LEAP_NOTINSYNC) {
 		if (!(sys_peer->refclktype == REFCLK_LOCALCLOCK &&
 		    !(sys_peer->flags & FLAG_PREFER)))
 			peer_xmit(peer);
@@ -861,7 +863,7 @@ process_packet(
 	    PKT_TO_STRATUM(pkt->stratum) >= NTP_MAXSTRATUM ||
 	    dtemp < 0)
 		peer->flash |= TEST6;		/* bad synch */
-	if (!(peer->flags & FLAG_CONFIG) && sys_peer != 0) { /* 7 */
+	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* 7 */
 		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
 			peer->flash |= TEST7; /* bad stratum */
 			sys_badstratum++;
@@ -999,7 +1001,7 @@ clock_update(void)
 	 * system peer and we haven't seen that peer lately. Watch for
 	 * timewarps here.
 	 */
-	if (sys_peer == 0)
+	if (sys_peer == NULL)
 		return;
 	if (sys_peer->pollsw == FALSE || sys_peer->burst > 0)
 		return;
@@ -1028,7 +1030,7 @@ clock_update(void)
 		clear_all();
 		NLOG(NLOG_SYNCSTATUS)
 			msyslog(LOG_INFO, "synchronisation lost");
-		sys_peer = 0;
+		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
 		break;
@@ -1375,6 +1377,7 @@ clock_select(void)
 	 */
 	pps_update = 0;
 	nreach = nlist = 0;
+	sys_survivors = 0;
 	low = 1e9;
 	high = -1e9;
 	for (n = 0; n < HASH_SIZE; n++)
@@ -1401,31 +1404,41 @@ clock_select(void)
 	 * peers we know about to find the peers which are most likely
 	 * to succeed. We run through the list doing the sanity checks
 	 * and trying to insert anyone who looks okay.
+	 *
+	 * Initially, we populate the island with all the rifraff peers
+	 * that happen to be lying around. Those with seriously
+	 * defective clocks are immediately booted off the island. Then,
+	 * the falsetickers are culled and put to sea. The truechimers
+	 * remaining are subject to repeated rounds where the most
+	 * unpopular at each round is kicked off. When the population
+	 * has dwindled to NTP_MINCLOCK (3), the survivors split a
+	 * million bucks and collectively crank the chimes.
 	 */
 	nlist = nl3 = 0;	/* none yet */
 	for (n = 0; n < HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != 0; peer = peer->next) {
+		for (peer = peer_hash[n]; peer != 0; peer =
+		    peer->next) {
 			peer->flags &= ~FLAG_SYSPEER;
 			peer->status = CTL_PST_SEL_REJECT;
-			if (peer->flags & FLAG_NOSELECT)
-				continue;	/* noselect (survey) */
-			if (peer->reach == 0)
-				continue;	/* unreachable */
-			if (peer->stratum > 1 && peer->refid ==
-			    peer->dstadr->sin.sin_addr.s_addr)
-				continue;	/* sync loop */
-			nreach++;
-			if (root_distance(peer) >= MAXDISTANCE + 2 *
-			    CLOCK_PHI * ULOGTOD(sys_poll)) {
-				peer->seldisptoolarge++;
-				continue;	/* noisy or broken */
-			}
 
 			/*
-			 * Don't allow the local-clock or acts drivers
+			 * A peer leaves the island immediately if
+			 * unreachable, synchronized to us or suffers
+			 * excessive root distance.
+			 */ 
+			if (peer->reach == 0 || (peer->stratum > 1 &&
+			    peer->refid ==
+			    peer->dstadr->sin.sin_addr.s_addr) ||
+			    (root_distance(peer) >= MAXDISTANCE + 2 *
+			    CLOCK_PHI * ULOGTOD(sys_poll)))
+				continue;
+
+			/*
+			 * Don't allow the local clock or modem drivers
 			 * in the kitchen at this point, unless the
 			 * prefer peer. Do that later, but only if
-			 * nobody else is around.
+			 * nobody else is around. These guys are all
+			 * configured, so we never throw them away.
 			 */
 			if (peer->refclktype == REFCLK_LOCALCLOCK
 #if defined(VMS) && defined(VMS_LOCALUNIT)
@@ -1444,9 +1457,11 @@ clock_select(void)
 			}
 
 			/*
-			 * If we get this far, we assume the peer is
-			 * acceptable.
+			 * If we get this far, the peer can stay on the
+			 * island, but does not yet have the immunity
+			 * idol.
 			 */
+			nreach++;
 			peer->status = CTL_PST_SEL_SANE;
 			peer_list[nlist++] = peer;
 
@@ -1521,10 +1536,10 @@ clock_select(void)
 	}
 
 	/*
-	 * If no survivors remain at this point, check if the acts or
-	 * local clock drivers have been found. If so, nominate one of
-	 * them as the only survivor. Otherwise, give up and declare us
-	 * unsynchronized.
+	 * If no survivors remain at this point, check if the local
+	 * clock or modem drivers have been found. If so, nominate one
+	 * of them as the only survivor. Otherwise, give up and declare
+	 * us unsynchronized.
 	 */
 	if ((allow << 1) >= nlist) {
 		if (typeacts != 0) {
@@ -1536,14 +1551,14 @@ clock_select(void)
 			peer_list[0] = typelocal;
 			nlist = 1;
 		} else {
-			if (sys_peer != 0) {
+			if (sys_peer != NULL) {
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
 				NLOG(NLOG_SYNCSTATUS)
 				msyslog(LOG_INFO,
 				    "synchronisation lost");
 			}
-			sys_peer = 0;
+			sys_peer = NULL;
 			return;
 		}
 	}
@@ -1553,17 +1568,23 @@ clock_select(void)
 #endif
 
 	/*
-	 * Clustering algorithm. Process intersection list to discard
-	 * outlyers. Construct candidate list in cluster order
-	 * determined by the sum of peer synchronization distance plus
-	 * scaled stratum. We must find at least one peer.
+	 * Clustering algorithm. Construct candidate list in cluster
+	 * order determined by the sum of peer synchronization distance
+	 * plus scaled stratum. Process the list to discard
+	 * falsetickers, who leave the island immediately. If a
+	 * falseticker is not configured, his association is drowned as
+	 * well. We must leave at least one peer to collect the million
+	 * bucks. 
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		if (nlist > 1 && (low >= peer->offset ||
-			peer->offset >= high))
+			peer->offset >= high)) {
+			if (!(peer->flags & FLAG_CONFIG))
+				unpeer(peer);
 			continue;
+		}
 		peer->status = CTL_PST_SEL_CORRECT;
 		d = root_distance(peer) + peer->stratum * MAXDISPERSE;
 		if (j >= NTP_MAXCLOCK) {
@@ -1592,10 +1613,11 @@ clock_select(void)
 #endif
 
 	/*
-	 * Now, prune outlyers by root dispersion. Continue as long as
-	 * there are more than NTP_MINCLOCK survivors and the minimum
-	 * select dispersion is greater than the maximum peer
-	 * dispersion. Stop if we are about to discard a prefer peer.
+	 * Now, vote outlyers off the island by root dispersion.
+	 * Continue voting as long as there are more than NTP_MINCLOCK
+	 * survivors and the minimum select dispersion is greater than
+	 * the maximum peer dispersion. Stop if we are about to discard
+	 * a prefer peer, who of course has the immunity idol.
 	 */
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
@@ -1633,19 +1655,34 @@ clock_select(void)
 		if (nlist <= NTP_MINCLOCK || sys_maxd <= d ||
 			peer_list[k]->flags & FLAG_PREFER)
 			break;
+		if (!(peer_list[k]->flags & FLAG_CONFIG))
+			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];
 			error[j - 1] = error[j];
 		}
 		nlist--;
 	}
+
+	/*
+	 * In anycast client mode we may have spooked a sizeable number
+	 * of servers that we don't need. If there are at least
+	 * NTP_MINCLOCK of them, the anycast message will be turned off.
+	 * By the time we get here we nay be ready to prune some of them
+	 * back, but we want to make sure all the candicates have had a
+	 * chance. If they didn't pass the sanity and intersection
+	 * tests, they have already been voted off the island.
+	 */
+	sys_survivors = nlist;
+
 #ifdef DEBUG
 	if (debug > 2) {
 		for (i = 0; i < nlist; i++)
 			printf(
 			    "select: %s offset %.6f, distance %.6f poll %d\n",
-			    ntoa(&peer_list[i]->srcadr), peer_list[i]->offset,
-			    synch[i], peer_list[i]->pollsw);
+			    ntoa(&peer_list[i]->srcadr),
+			    peer_list[i]->offset, synch[i],
+			    peer_list[i]->pollsw);
 	}
 #endif
 
@@ -1671,7 +1708,7 @@ clock_select(void)
 	 * one of a flock of sources is out to lunch and just happens
 	 * to be the first survivor.
 	 */
-	if (sys_peer == 0 && 2 * nlist < min(nreach, NTP_MINCLOCK))
+	if (sys_peer == NULL && 2 * nlist < min(nreach, NTP_MINCLOCK))
 		return;
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
@@ -1692,7 +1729,7 @@ clock_select(void)
 			}
 		} else {
 			if (peer_list[i] == sys_peer)
-				sys_peer = 0;
+				sys_peer = NULL;
 		}
 	}
 
@@ -2393,7 +2430,8 @@ init_proto(void)
 	sys_rootdispersion = 0;
 	sys_refid = 0;
 	L_CLR(&sys_reftime);
-	sys_peer = 0;
+	sys_peer = NULL;
+	sys_survivors = 0;
 	get_systime(&dummy);
 	sys_bclient = 0;
 	sys_bdelay = DEFBROADDELAY;

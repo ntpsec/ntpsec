@@ -1,3 +1,9 @@
+2000-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c: Specifically track manycastserver and
+	survivors
+	From: Dave Mills
+
 2000-07-26  Sven Dietrich  <sven_dietrich@trimble.com>
 
 	* ntpd/ntpd.c: remove WINNT priority adjustment to the ports/winnt area
