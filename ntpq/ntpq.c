@@ -23,6 +23,7 @@
 #include "isc/result.h"
 
 #ifdef SYS_WINNT
+#include <Mswsock.h>
 # include <io.h>
 #else
 #define closesocket close
@@ -285,31 +286,31 @@ static	int	assoccmp	P((struct association *, struct association *));
  * Built-in commands we understand
  */
 struct xcmd builtins[] = {
-	{ "?",		help,		{  OPT|STR, NO, NO, NO },
+	{ "?",		help,		{  OPT|NTP_STR, NO, NO, NO },
 	  { "command", "", "", "" },
 	  "tell the use and syntax of commands" },
-	{ "help",	help,		{  OPT|STR, NO, NO, NO },
+	{ "help",	help,		{  OPT|NTP_STR, NO, NO, NO },
 	  { "command", "", "", "" },
 	  "tell the use and syntax of commands" },
-	{ "timeout",	timeout,	{ OPT|UINT, NO, NO, NO },
+	{ "timeout",	timeout,	{ OPT|NTP_UINT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the primary receive time out" },
-	{ "delay",	auth_delay,	{ OPT|INT, NO, NO, NO },
+	{ "delay",	auth_delay,	{ OPT|NTP_INT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the delay added to encryption time stamps" },
-	{ "host",	host,		{ OPT|STR, OPT|STR, NO, NO },
+	{ "host",	host,		{ OPT|NTP_STR, OPT|NTP_STR, NO, NO },
 	  { "-4|-6", "hostname", "", "" },
 	  "specify the host whose NTP server we talk to" },
-	{ "poll",	ntp_poll,	{ OPT|UINT, OPT|STR, NO, NO },
+	{ "poll",	ntp_poll,	{ OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
 	  { "n", "verbose", "", "" },
 	  "poll an NTP server in client mode `n' times" },
 	{ "passwd",	passwd,		{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "specify a password to use for authenticated requests"},
-	{ "hostnames",	hostnames,	{ OPT|STR, NO, NO, NO },
+	{ "hostnames",	hostnames,	{ OPT|NTP_STR, NO, NO, NO },
 	  { "yes|no", "", "", "" },
 	  "specify whether hostnames or net numbers are printed"},
-	{ "debug",	setdebug,	{ OPT|STR, NO, NO, NO },
+	{ "debug",	setdebug,	{ OPT|NTP_STR, NO, NO, NO },
 	  { "no|more|less", "", "", "" },
 	  "set/change debugging level" },
 	{ "quit",	quit,		{ NO, NO, NO, NO },
@@ -318,7 +319,7 @@ struct xcmd builtins[] = {
 	{ "exit",	quit,		{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "exit ntpq" },
-	{ "keyid",	keyid,		{ OPT|UINT, NO, NO, NO },
+	{ "keyid",	keyid,		{ OPT|NTP_UINT, NO, NO, NO },
 	  { "key#", "", "", "" },
 	  "set keyid to use for authenticated requests" },
 	{ "version",	version,	{ NO, NO, NO, NO },
@@ -330,13 +331,13 @@ struct xcmd builtins[] = {
 	{ "cooked",	cooked,		{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "do cooked mode variable output" },
-	{ "authenticate", authenticate,	{ OPT|STR, NO, NO, NO },
+	{ "authenticate", authenticate,	{ OPT|NTP_STR, NO, NO, NO },
 	  { "yes|no", "", "", "" },
 	  "always authenticate requests to this server" },
-	{ "ntpversion",	ntpversion,	{ OPT|UINT, NO, NO, NO },
+	{ "ntpversion",	ntpversion,	{ OPT|NTP_UINT, NO, NO, NO },
 	  { "version number", "", "", "" },
 	  "set the NTP version number to use for requests" },
-	{ "keytype",	keytype,	{ OPT|STR, NO, NO, NO },
+	{ "keytype",	keytype,	{ OPT|NTP_STR, NO, NO, NO },
 	  { "key type (md5|des)", "", "", "" },
 	  "set key type to use for authenticated requests (des|md5)" },
 	{ 0,		0,		{ NO, NO, NO, NO },
@@ -1585,16 +1586,16 @@ getarg(
 	static const char *digits = "0123456789";
 
 	switch (code & ~OPT) {
-	    case STR:
+	    case NTP_STR:
 		argp->string = str;
 		break;
-	    case ADD:
+	    case NTP_ADD:
 		if (!getnetnum(str, &(argp->netnum), (char *)0, 0)) {
 			return 0;
 		}
 		break;
-	    case INT:
-	    case UINT:
+	    case NTP_INT:
+	    case NTP_UINT:
 		isneg = 0;
 		np = str;
 		if (*np == '&') {
@@ -1637,7 +1638,7 @@ getarg(
 		} while (*(++np) != '\0');
 
 		if (isneg) {
-			if ((code & ~OPT) == UINT) {
+			if ((code & ~OPT) == NTP_UINT) {
 				(void) fprintf(stderr,
 					       "***Value %s should be unsigned\n", str);
 				return 0;

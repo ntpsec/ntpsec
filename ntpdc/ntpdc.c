@@ -19,6 +19,7 @@
 #include "isc/result.h"
 
 #ifdef SYS_WINNT
+#include <Mswsock.h>
 # include <io.h>
 #else
 # define closesocket close
@@ -105,10 +106,10 @@ static	struct xcmd builtins[] = {
 	{ "help",	help,		{  OPT|NTP_STR, NO, NO, NO },
 	  { "command", "", "", "" },
 	  "tell the use and syntax of commands" },
-	{ "timeout",	timeout,	{ OPT|UINT, NO, NO, NO },
+	{ "timeout",	timeout,	{ OPT|NTP_UINT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the primary receive time out" },
-	{ "delay",	my_delay,	{ OPT|INT, NO, NO, NO },
+	{ "delay",	my_delay,	{ OPT|NTP_INT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the delay added to encryption time stamps" },
 	{ "host",	host,		{ OPT|NTP_STR, OPT|NTP_STR, NO, NO },
@@ -129,7 +130,7 @@ static	struct xcmd builtins[] = {
 	{ "exit",	quit,		{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "exit ntpdc" },
-	{ "keyid",	keyid,		{ OPT|UINT, NO, NO, NO },
+	{ "keyid",	keyid,		{ OPT|NTP_UINT, NO, NO, NO },
 	  { "key#", "", "", "" },
 	  "set/show keyid to use for authenticated requests" },
 	{ "keytype",	keytype,	{ OPT|NTP_STR, NO, NO, NO },
@@ -1317,7 +1318,7 @@ getarg(
 	    case NTP_STR:
 		argp->string = str;
 		break;
-	    case ADD:
+	    case NTP_ADD:
 		if (!strcmp("-6", str)) {
 			ai_fam_templ = AF_INET6;
 			return -1;
@@ -1329,8 +1330,8 @@ getarg(
 			return 0;
 		}
 		break;
-	    case INT:
-	    case UINT:
+	    case NTP_INT:
+	    case NTP_UINT:
 		isneg = 0;
 		np = str;
 		if (*np == '-') {
@@ -1351,7 +1352,7 @@ getarg(
 		} while (*(++np) != '\0');
 
 		if (isneg) {
-			if ((code & ~OPT) == UINT) {
+			if ((code & ~OPT) == NTP_UINT) {
 				(void) fprintf(stderr,
 					       "***Value %s should be unsigned\n", str);
 				return 0;
@@ -1553,7 +1554,7 @@ printusage(
 	opt46 = 0;
 	(void) fprintf(fp, "usage: %s", xcp->keyword);
 	for (i = 0; i < MAXARGS && xcp->arg[i] != NO; i++) {
-		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == ADD) {
+		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == NTP_ADD) {
 			(void) fprintf(fp, " [ -4|-6 ]");
 			opt46 = 1;
 		}
