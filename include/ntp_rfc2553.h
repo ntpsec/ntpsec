@@ -145,16 +145,19 @@ struct sockaddr_in6 {
 /*
  * Unspecified
  */
+#ifndef IN6_IS_ADDR_UNSPECIFIED
 #define IN6_IS_ADDR_UNSPECIFIED(a)	\
 	((*(const u_int32_t *)(const void *)(&(a)->s6_addr[0]) == 0) &&	\
 	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[4]) == 0) &&	\
 	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[8]) == 0) &&	\
 	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[12]) == 0))
-
+#endif
 /*
  * Multicast
  */
+#ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	((a)->s6_addr[0] == 0xff)
+#endif
 
 /*
  * RFC 2553: protocol-independent placeholder for socket addresses
