@@ -67,7 +67,7 @@ extern int listen_to_virtual_ips;
 #if defined(VMS) || defined(SYS_WINNT)
 /* structure used in SIOCGIFCONF request (after [KSR] OSF/1) */
 struct ifconf {
-	int ifc_len;			/* size of buffer */
+	unsigned long ifc_len;			/* size of buffer */
 	union {
 		caddr_t ifcu_buf;
 		struct ifreq *ifcu_req;
@@ -234,7 +234,7 @@ create_sockets(
 	 * create pseudo-interface with wildcard address
 	 */
 	inter_list[0].sin.sin_family = AF_INET;
-	inter_list[0].sin.sin_port = port;
+	inter_list[0].sin.sin_port = (u_short) port;
 	inter_list[0].sin.sin_addr.s_addr = htonl(INADDR_ANY);
 	(void) strncpy(inter_list[0].name, "wildcard",
 		       sizeof(inter_list[0].name));
@@ -519,7 +519,7 @@ create_sockets(
 # endif
 		inter_list[i].sin = *(struct sockaddr_in *)&ifr->ifr_addr;
 		inter_list[i].sin.sin_family = AF_INET;
-		inter_list[i].sin.sin_port = port;
+		inter_list[i].sin.sin_port = (u_short) port;
 
 # if defined(SUN_3_3_STINKS)
 		/*
@@ -581,7 +581,7 @@ create_sockets(
 		/* winnt here */
 		inter_list[i].bcast                = ifreq.ifr_broadaddr;
 		inter_list[i].bcast.sin_family	   = AF_INET;
-		inter_list[i].bcast.sin_port	   = port;
+		inter_list[i].bcast.sin_port	   = (u_short) port;
 		inter_list[i].mask                 = ifreq.ifr_mask;
 # endif /* not SYS_WINNT */
 
@@ -637,7 +637,7 @@ create_sockets(
 	 */
 	inter_list[0].bcast.sin_addr.s_addr = htonl(INADDR_ANY);
 	inter_list[0].bcast.sin_family = AF_INET;
-	inter_list[0].bcast.sin_port = port;
+	inter_list[0].bcast.sin_port = (u_short) port;
 #endif /* MCAST */
 
 	/*
@@ -1573,7 +1573,7 @@ findinterface(
 	if (rtn < 0)
 		return (any_interface);
 
-	close(s);
+	close_socket(s);
 	xaddr = NSRCADR(&saddr);
 	for (i = 1; i < ninterfaces; i++) {
 

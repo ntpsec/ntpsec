@@ -13,7 +13,7 @@ dolfptoa(
 	u_long fpi,
 	u_long fpv,
 	int neg,
-	int ndec,
+	short ndec,
 	int msec
 	)
 {

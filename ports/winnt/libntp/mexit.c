@@ -3,8 +3,8 @@
  * 
  */
 
-#include <stdio.h>
 #include <windows.h>
+#include <stdio.h>
 
 HANDLE hServDoneEvent = NULL;
 

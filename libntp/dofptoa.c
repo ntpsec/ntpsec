@@ -12,7 +12,7 @@ char *
 dofptoa(
 	u_fp fpv,
 	int neg,
-	int ndec,
+	short ndec,
 	int msec
 	)
 {
@@ -53,7 +53,7 @@ dofptoa(
 
 		do {
 			tmp = sv;
-			sv /= ten;
+			sv = sv/ten;
 			*(--cp) = tmp - ((sv<<3) + (sv<<1));
 		} while (sv != 0);
 	}

@@ -65,10 +65,10 @@ struct ctl_var {
 #define	WO	(CAN_WRITE)
 #define	RW	(CAN_READ|CAN_WRITE)
 
-extern  char *  add_var P((struct ctl_var **, unsigned long, int));
+extern  char *  add_var P((struct ctl_var **, u_long, u_short));
 extern  void    free_varlist P((struct ctl_var *));
-extern  void    set_var P((struct ctl_var **, const char *, unsigned long, int));
-extern  void    set_sys_var P((char *, unsigned long, int));
+extern  void    set_var P((struct ctl_var **, const char *, u_long, u_short));
+extern  void    set_sys_var P((char *, u_long, u_short));
 
 /* ntp_intres.c */
 extern	void	ntp_res_name	P((u_int32, u_short));
@@ -125,7 +125,7 @@ extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_in *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_in *, struct interface *, int, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
-extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_int, int, keyid_t));
+extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));

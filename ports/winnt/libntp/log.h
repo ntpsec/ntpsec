@@ -6,6 +6,7 @@
 #define WINNT_LOG_H
 
 #include <windows.h>
+#include <process.h>
 
 /* function declarations */
 

@@ -8,11 +8,11 @@
  * www.rsa.com.
  */
 
-#include "ntp_machine.h"
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#include "ntp_machine.h"
 
 #include <stdio.h>
 
