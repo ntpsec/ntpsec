@@ -481,9 +481,14 @@ process_private(
 #ifdef DEBUG
 			if (debug > 4)
 			    printf("failed auth %d info_auth_keyid %lu pkt keyid %lu\n",
-				    INFO_IS_AUTH(inpkt->auth_seq),
-				    (u_long)info_auth_keyid,
-				    (u_long)ntohl(tailinpkt->keyid));
+				   INFO_IS_AUTH(inpkt->auth_seq),
+				   (u_long)info_auth_keyid,
+				   (u_long)ntohl(tailinpkt->keyid));
+			msyslog(LOG_DEBUG,
+				"process_private: failed auth %d info_auth_keyid %lu pkt keyid %lu\n",
+				INFO_IS_AUTH(inpkt->auth_seq),
+				(u_long)info_auth_keyid,
+				(u_long)ntohl(tailinpkt->keyid));
 #endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
@@ -503,6 +508,9 @@ process_private(
 #ifdef DEBUG
 			if (debug > 4)
 			    printf("failed auth mod_okay %d\n", mod_okay);
+			msyslog(LOG_DEBUG,
+				"process_private: failed auth mod_okay %d\n",
+				mod_okay);
 #endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
