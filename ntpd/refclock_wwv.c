@@ -601,7 +601,7 @@ static	int	timecode	P((struct wwvunit *, char *));
 static	double	wwv_snr		P((double, double));
 static	int	carry		P((struct decvec *));
 static	void	wwv_newchan	P((struct peer *));
-static	void	wwv_newgame	P((struct wwvunit *));
+static	void	wwv_newgame	P((struct peer *));
 static	double	wwv_metric	P((struct sync *));
 #ifdef ICOM
 static	int	wwv_qsy		P((struct peer *, int));
@@ -712,7 +712,7 @@ wwv_start(
 	up->decvec[DA + 2].radix = 4;
 	up->decvec[YR].radix = 10;	/* years */
 	up->decvec[YR + 1].radix = 10;
-	wwv_newgame(up);
+	wwv_newgame(peer);
 	up->schan = up->achan = 3;
 
 	/*
@@ -1125,7 +1125,7 @@ wwv_rf(
 			wwv_newchan(peer);
 			if (!(up->status & (SELV | SELH)) || up->watch >
 			    ACQSN) {
-				wwv_newgame(up);
+				wwv_newgame(peer);
 #ifdef ICOM
 				if (up->fd_icom > 0) {
 					up->schan = (up->schan + 1) %
@@ -1147,7 +1147,7 @@ wwv_rf(
 			if (!(up->status & SSYNC))
 				up->alarm |= 1 << SYNERR;
 			if (up->watch > DIGIT && !(up->status & DSYNC))
-				wwv_newgame(up);
+				wwv_newgame(peer);
 		}
 	}
 
@@ -2016,6 +2016,9 @@ wwv_rsec(
 			up->alarm |= 1 << SYMERR;
 		break;
 
+	/*
+	 * Save the data channel gain, then QSY to the probe channel.
+	 */
 	case MSC21:			/* 58 */
 		if (bitvec[up->rsec] > BTHR)
 			up->misc |= arg;
@@ -2023,6 +2026,7 @@ wwv_rsec(
 			up->misc &= ~arg;
 		else
 			up->alarm |= 1 << SYMERR;
+		up->mitig[up->dchan].gain = up->gain;
 #ifdef ICOM
 		if (up->fd_icom > 0) {
 			up->schan = (up->schan + 1) % NCHAN;
@@ -2073,7 +2077,7 @@ wwv_rsec(
 		 * panic, game over and restart from scratch.
 		 */
 		if (up->watch > PANIC) {
-			wwv_newgame(up);
+			wwv_newgame(peer);
 			return;
 		}
 #ifdef DEBUG
@@ -2617,11 +2621,16 @@ wwv_newchan(
  */
 static void
 wwv_newgame(
-	struct wwvunit *up	/* driver unit pointer */
+	struct peer *peer	/* peer structure pointer */
 	)
 {
+	struct refclockproc *pp;
+	struct wwvunit *up;
 	struct chan *cp;
 	int i;
+
+	pp = peer->procptr;
+	up = (struct wwvunit *)pp->unitptr;
 
 	/*
 	 * Initialize strategic values.
@@ -2645,7 +2654,7 @@ wwv_newgame(
 		cp->wwvh.select = SELH;
 		sprintf(cp->wwvh.refid, "WH%.0f", floor(qsy[i])); 
 	}
-	wwv_newgame();
+	wwv_newchan(peer);
 }
 
 /*
