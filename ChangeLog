@@ -1,3 +1,7 @@
+2000-02-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/Makefile.am (noinst_HEADERS): No, we don't want des.h
+
 2000-02-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/Makefile.am (noinst_HEADERS): Add des.h
