@@ -123,7 +123,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_TAI,	RO, "tai" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 28 */
+	{ 0,		EOV, "" }		/* 29 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
