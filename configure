@@ -6033,7 +6033,7 @@ rm -f conftest*
 fi
 
 echo "$ac_t""$ac_cv_decl_h_errno" 1>&6
-case "$ac_cv_decl_errno" in
+case "$ac_cv_decl_h_errno" in
  yes) cat >> confdefs.h <<\EOF
 #define DECL_H_ERRNO 1
 EOF

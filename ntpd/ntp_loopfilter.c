@@ -168,11 +168,6 @@ extern u_long current_time;	/* like it says, in seconds */
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
-#ifdef NTP_SYSCALLS_STD
-#ifdef DECL_SYSCALL
-extern int syscall	P((int, void *, ...));
-#endif /* DECL_SYSCALL */
-#endif /* NTP_SYSCALLS_STD */
 void pll_trap		P((int));
 #ifdef SIGSYS
 static struct sigaction sigsys;	/* current sigaction status */
