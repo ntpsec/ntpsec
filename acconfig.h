@@ -325,6 +325,10 @@
 /* Might nlist() values require an extra level of indirection (AIX)? */
 #undef NLIST_EXTRA_INDIRECTION
 
+/* Other needed NLIST stuff */
+#undef NLIST_STRUCT
+#undef NLIST_NAME_UNION
+
 /* Should we recommend a minimum value for tickadj? */
 #undef MIN_REC_TICKADJ
 

@@ -63,15 +63,18 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+AMDEP = @AMDEP@
 AMTAR = @AMTAR@
-AMTARFLAGS = @AMTARFLAGS@
 AWK = @AWK@
 CC = @CC@
 CFLAGS = @CFLAGS@
 CHUTEST = @CHUTEST@
 CLKTEST = @CLKTEST@
 CPP = @CPP@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DCFD = @DCFD@
+DEPDIR = @DEPDIR@
 LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
@@ -93,6 +96,7 @@ RSAREF = @RSAREF@
 TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
+install_sh = @install_sh@
 
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 
@@ -153,6 +157,7 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 ANSI2KNR = ../util/ansi2knr
+libparse_a_AR = $(AR) cru
 libparse_a_LIBADD = 
 am_libparse_a_OBJECTS =  parse$U.o parse_conf$U.o clk_meinberg$U.o \
 clk_schmid$U.o clk_rawdcf$U.o clk_trimtsip$U.o clk_dcf7000$U.o \
@@ -160,11 +165,12 @@ clk_trimtaip$U.o clk_rcc8000$U.o clk_hopf6021$U.o clk_computime$U.o \
 clk_wharton$U.o clk_varitext$U.o data_mbg$U.o info_trimble$U.o \
 trim_info$U.o
 libparse_a_OBJECTS =  $(am_libparse_a_OBJECTS)
+libparse_kernel_a_AR = $(AR) cru
 libparse_kernel_a_DEPENDENCIES =  kparse$U.o kparse_conf$U.o \
 kclk_computime$U.o kclk_dcf7000$U.o kclk_hopf6021$U.o kclk_meinberg$U.o \
 kclk_rawdcf$U.o kclk_rcc8000$U.o kclk_schmid$U.o kclk_trimtaip$U.o \
 kclk_trimtsip$U.o kclk_varitext$U.o kclk_wharton$U.o
-libparse_kernel_a_OBJECTS =  libparse_kernel.a$U.o
+libparse_kernel_a_OBJECTS =  $(am_libparse_kernel_a_OBJECTS)
 AR = ar
 PROGRAMS =  $(noinst_PROGRAMS)
 
@@ -189,15 +195,19 @@ DIST_COMMON =  README Makefile.am Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 GZIP_ENV = --best
-DEP_FILES =  .deps/clk_computime.P .deps/clk_dcf7000.P \
-.deps/clk_hopf6021.P .deps/clk_meinberg.P .deps/clk_rawdcf.P \
-.deps/clk_rcc8000.P .deps/clk_schmid.P .deps/clk_trimtaip.P \
-.deps/clk_trimtsip.P .deps/clk_varitext.P .deps/clk_wharton.P \
-.deps/data_mbg.P .deps/info_trimble.P \
-.deps/parse.P .deps/parse_conf.P .deps/parsesolaris.P \
-.deps/parsestreams.P .deps/trim_info.P
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+DEP_FILES =  @AMDEP@ $(DEPDIR)/clk_computime$U.Po \
+$(DEPDIR)/clk_dcf7000$U.Po $(DEPDIR)/clk_hopf6021$U.Po \
+$(DEPDIR)/clk_meinberg$U.Po $(DEPDIR)/clk_rawdcf$U.Po \
+$(DEPDIR)/clk_rcc8000$U.Po $(DEPDIR)/clk_schmid$U.Po \
+$(DEPDIR)/clk_trimtaip$U.Po $(DEPDIR)/clk_trimtsip$U.Po \
+$(DEPDIR)/clk_varitext$U.Po $(DEPDIR)/clk_wharton$U.Po \
+$(DEPDIR)/data_mbg$U.Po $(DEPDIR)/info_trimble$U.Po \
+$(DEPDIR)/parse$U.Po $(DEPDIR)/parse_conf$U.Po \
+$(DEPDIR)/parsesolaris$U.Po $(DEPDIR)/parsestreams$U.Po \
+$(DEPDIR)/trim_info$U.Po
 SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) parsesolaris.c parsestreams.c
-OBJECTS = $(am_libparse_a_OBJECTS) $(am_libparse_kernel_a_OBJECTS) libparse_kernel.a$U.o parsesolaris$U.o parsestreams$U.o
+OBJECTS = $(am_libparse_a_OBJECTS) $(am_libparse_kernel_a_OBJECTS) parsesolaris$U.o parsestreams$U.o
 
 all: all-redirect
 .SUFFIXES:
@@ -243,32 +253,15 @@ clean-kr:
 distclean-kr:
 
 maintainer-clean-kr:
-parse$U.o:
-parse_conf$U.o:
-clk_meinberg$U.o:
-clk_schmid$U.o:
-clk_rawdcf$U.o:
-clk_trimtsip$U.o:
-clk_dcf7000$U.o:
-clk_trimtaip$U.o:
-clk_rcc8000$U.o:
-clk_hopf6021$U.o:
-clk_computime$U.o:
-clk_wharton$U.o:
-clk_varitext$U.o:
-data_mbg$U.o:
-info_trimble$U.o:
-trim_info$U.o:
 
 libparse.a: $(libparse_a_OBJECTS) $(libparse_a_DEPENDENCIES)
 	-rm -f libparse.a
-	$(AR) cru libparse.a $(libparse_a_OBJECTS) $(libparse_a_LIBADD)
+	$(libparse_a_AR) libparse.a $(libparse_a_OBJECTS) $(libparse_a_LIBADD)
 	$(RANLIB) libparse.a
-libparse_kernel.a$U.o:
 
 libparse_kernel.a: $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_DEPENDENCIES)
 	-rm -f libparse_kernel.a
-	$(AR) cru libparse_kernel.a $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_LIBADD)
+	$(libparse_kernel_a_AR) libparse_kernel.a $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_LIBADD)
 	$(RANLIB) libparse_kernel.a
 
 mostlyclean-noinstPROGRAMS:
@@ -279,12 +272,10 @@ clean-noinstPROGRAMS:
 distclean-noinstPROGRAMS:
 
 maintainer-clean-noinstPROGRAMS:
-parsesolaris$U.o:
 
 parsesolaris: $(parsesolaris_OBJECTS) $(parsesolaris_DEPENDENCIES)
 	@rm -f parsesolaris
 	$(LINK) $(parsesolaris_LDFLAGS) $(parsesolaris_OBJECTS) $(parsesolaris_LDADD) $(LIBS)
-parsestreams$U.o:
 
 parsestreams: $(parsestreams_OBJECTS) $(parsestreams_DEPENDENCIES)
 	@rm -f parsestreams
@@ -328,28 +319,32 @@ trim_info_.c: trim_info.c $(ANSI2KNR)
 clk_computime_.o clk_dcf7000_.o clk_hopf6021_.o clk_meinberg_.o \
 clk_rawdcf_.o clk_rcc8000_.o clk_schmid_.o clk_trimtaip_.o \
 clk_trimtsip_.o clk_varitext_.o clk_wharton_.o data_mbg_.o \
-info_trimble_.o libparse_kernel.a_.o parse_.o parse_conf_.o \
-parsesolaris_.o parsestreams_.o trim_info_.o : $(ANSI2KNR)
+info_trimble_.o parse_.o parse_conf_.o parsesolaris_.o parsestreams_.o \
+trim_info_.o : $(ANSI2KNR)
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES) $(LISP)
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  ${AWK:-awk} '    { files[$$0] = 1; } \
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
-	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $$unique $(LISP)
+	mkid -f$$here/ID $$unique $(LISP)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  ${AWK:-awk} '    { files[$$0] = 1; } \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
 
 mostlyclean-tags:
 
@@ -363,15 +358,10 @@ maintainer-clean-tags:
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
 distdir: $(DISTFILES)
-	here=`cd $(top_builddir) && pwd`; \
-	top_distdir=`cd $(top_distdir) && pwd`; \
-	distdir=`cd $(distdir) && pwd`; \
-	cd $(top_srcdir) \
-	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu libparse/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pR $$d/$$file $(distdir); \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -379,37 +369,42 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 
-DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
-
--include $(DEP_FILES)
+@AMDEP@include $(DEPDIR)/clk_computime$U.Po
+@AMDEP@include $(DEPDIR)/clk_dcf7000$U.Po
+@AMDEP@include $(DEPDIR)/clk_hopf6021$U.Po
+@AMDEP@include $(DEPDIR)/clk_meinberg$U.Po
+@AMDEP@include $(DEPDIR)/clk_rawdcf$U.Po
+@AMDEP@include $(DEPDIR)/clk_rcc8000$U.Po
+@AMDEP@include $(DEPDIR)/clk_schmid$U.Po
+@AMDEP@include $(DEPDIR)/clk_trimtaip$U.Po
+@AMDEP@include $(DEPDIR)/clk_trimtsip$U.Po
+@AMDEP@include $(DEPDIR)/clk_varitext$U.Po
+@AMDEP@include $(DEPDIR)/clk_wharton$U.Po
+@AMDEP@include $(DEPDIR)/data_mbg$U.Po
+@AMDEP@include $(DEPDIR)/info_trimble$U.Po
+@AMDEP@include $(DEPDIR)/parse$U.Po
+@AMDEP@include $(DEPDIR)/parse_conf$U.Po
+@AMDEP@include $(DEPDIR)/parsesolaris$U.Po
+@AMDEP@include $(DEPDIR)/parsestreams$U.Po
+@AMDEP@include $(DEPDIR)/trim_info$U.Po
 
 mostlyclean-depend:
 
 clean-depend:
 
 distclean-depend:
-	-rm -rf .deps
+	-rm -rf $(DEPDIR)
 
 maintainer-clean-depend:
 
-%.o: %.c
-	@echo '$(COMPILE) -c $<'; \
-	$(COMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
-	@-cp .deps/$(*D)/$(*F).pp .deps/$(*D)/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*D)/$(*F).P; \
-	rm .deps/$(*D)/$(*F).pp
+@AMDEP@CCDEPMODE = @CCDEPMODE@
 
-%.lo: %.c
-	@echo '$(LTCOMPILE) -c $<'; \
-	$(LTCOMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
-	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
-	  < .deps/$(*D)/$(*F).pp > .deps/$(*D)/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*D)/$(*F).P; \
-	rm -f .deps/$(*D)/$(*F).pp
+.c.o:
+@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c -o $@ $<
+
 info-am:
 info: info-am
 dvi-am:
@@ -446,6 +441,7 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
+	-rm -f Makefile.in
 mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
 		mostlyclean-kr mostlyclean-noinstPROGRAMS \
 		mostlyclean-tags mostlyclean-depend mostlyclean-generic
