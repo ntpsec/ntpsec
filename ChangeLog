@@ -1,5 +1,7 @@
 2000-06-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99j1
+
 	* ntpdc/ntpdc.c (getcmds): 
 	* configure.in:
 	Readline support.
