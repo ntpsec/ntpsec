@@ -197,6 +197,8 @@ case "$target" in
  *-*-sco*)
     AC_CHECK_HEADERS(sys/sio.h)
     ;;
+esac
+case "$target" in
  *sgi*)
     AC_CHECK_HEADERS(sys/syssgi.h)
     ;;

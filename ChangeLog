@@ -1,3 +1,12 @@
+1999-11-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c: Let -g do a "correct any" for the first
+	time adjustment.
+	From: Dave Mills <mills@udel.edu>
+
+	* configure.in: sys/sio.h needs to be checked independently.
+	Reported by: Kamal A Mostafa <kamal@whence.com>	
+
 1999-11-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98f
