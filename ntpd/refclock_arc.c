@@ -1027,7 +1027,7 @@ arc_receive(
 		if(r == '3') { /* Only use quality value whilst sync in progress. */
 			if (up->quality_stamp < current_time) {
 				struct calendar cal;
-				ulong new_stamp;
+				u_long new_stamp;
 			
 				get_systime (&new_stamp);
 				caljulian (new_stamp, &cal);
