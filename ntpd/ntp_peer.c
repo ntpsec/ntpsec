@@ -499,7 +499,7 @@ peer_config(
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;
-		peer->ttlmax = ttl;
+		peer->ttl = ttl;
 		peer->keyid = key;
 		peer->precision = sys_precision;
 		peer_clear(peer);
@@ -579,7 +579,7 @@ newpeer(
 	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags | (key > NTP_MAXKEY ? FLAG_SKEY : 0);
 	peer->cast_flags = cast_flags;
-	peer->ttlmax = ttl;
+	peer->ttl = ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
 	peer_clear(peer);
@@ -647,7 +647,7 @@ newpeer(
 		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
-		    peer->ttlmax, peer->keyid);
+		    peer->ttl, peer->keyid);
 #endif
 	return (peer);
 }

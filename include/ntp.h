@@ -114,6 +114,7 @@ typedef char s_char;
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
 #define HYST_TC		.875	/* anti-clockhop hysteresis decay factor */
+#define MAX_TTL		8	/* max ttl mapping vector size */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -233,7 +234,7 @@ struct peer {
 	u_int	flash;		/* protocol error test tally bits */
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
-	u_char	ttlmax;		/* max ttl/refclock mode */
+	u_char	ttl;		/* ttl/refclock mode */
 
 	/*
 	 * Variables used by reference clock support
@@ -288,7 +289,6 @@ struct peer {
 	 */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
-	u_char	ttl;            /* ttl for manycast mode */
 	u_char	reach;		/* reachability register */
 	u_char	unreach;	/* unreachable count */
 	u_long	epoch;		/* reference epoch */
@@ -677,6 +677,11 @@ struct pkt {
 #define PROTO_FILEGEN		11
 #define	PROTO_PPS		12
 #define PROTO_CAL		13
+#define PROTO_MINCLOCK		14
+#define PROTO_MINSANE		15
+#define PROTO_FLOOR		16
+#define PROTO_CEILING		17
+#define PROTO_COHORT		18
 
 /*
  * Configuration items for the loop filter

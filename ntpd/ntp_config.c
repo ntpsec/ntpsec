@@ -89,6 +89,8 @@ extern int priority_done;
  * phone ...
  * pps device [assert|clear] [hardpps]
  * priority high|normal
+ * tinker [keyword value] ...
+ * tos [keyword value] ...
  */
 
 /*
@@ -141,8 +143,10 @@ static	struct keyword keywords[] = {
 	{ "statistics",		CONFIG_STATISTICS },
 	{ "statsdir",		CONFIG_STATSDIR },
 	{ "tinker",		CONFIG_TINKER },
+	{ "tos",		CONFIG_TOS },
 	{ "trap",		CONFIG_TRAP },
 	{ "trustedkey",		CONFIG_TRUSTEDKEY },
+	{ "ttl",		CONFIG_TTL },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -275,6 +279,18 @@ static struct keyword tinker_keywords[] = {
 	{ "minpoll",		CONF_CLOCK_MINPOLL },
 	{ "allan",		CONF_CLOCK_ALLAN },
 	{ "huffpuff",		CONF_CLOCK_HUFFPUFF },
+	{ "",			CONFIG_UNKNOWN }
+};
+
+/*
+ * "tos" modifier keywords
+ */
+static struct keyword tos_keywords[] = {
+	{ "minclock",		CONF_TOS_MINCLOCK },
+	{ "minsane",		CONF_TOS_MINSANE },
+	{ "floor",		CONF_TOS_FLOOR },
+	{ "ceiling",		CONF_TOS_CEILING },
+	{ "cohort",		CONF_TOS_COHORT },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -798,20 +814,25 @@ getconfig(
 
 				case CONF_MOD_TTL:
 				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "ttl: argument required");
-					    errflg = 1;
-					    break;
+					msyslog(LOG_ERR,
+					    "ttl: argument required");
+				        errflg = 1;
+				        break;
 				    }
 				    ttl = atoi(tokens[++i]);
+				    if (ttl >= MAX_TTL) {
+					msyslog(LOG_ERR,
+					    "ttl: invalid argument");
+					errflg = 1;
+				    }
 				    break;
 
 				case CONF_MOD_MODE:
 				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "mode: argument required");
-					    errflg = 1;
-					    break;
+					msyslog(LOG_ERR,
+					    "mode: argument required");
+					errflg = 1;
+					break;
 				    }
 				    ttl = atoi(tokens[++i]);
 				    break;
@@ -821,7 +842,8 @@ getconfig(
 				    break;
 			    }
 			if (minpoll > maxpoll) {
-				msyslog(LOG_ERR, "config error: minpoll > maxpoll");
+				msyslog(LOG_ERR,
+				    "config error: minpoll > maxpoll");
 				errflg = 1;
 			}
 			if (errflg == 0) {
@@ -996,6 +1018,7 @@ getconfig(
 			    }
 			    sscanf(tokens[i], "%lf", &ftemp);
 			    switch(temp) {
+
 			    case CONF_CLOCK_MAX:
                                 loop_config(LOOP_MAX, ftemp);
 				break;
@@ -1024,6 +1047,52 @@ getconfig(
 				loop_config(LOOP_HUFFPUFF, ftemp);
 				break;
 			    }
+			}
+			break;
+
+		    case CONFIG_TOS:
+			for (i = 1; i < ntokens; i++) {
+			    int temp;
+			    double ftemp;
+
+			    temp = matchkey(tokens[i++],
+				tos_keywords);
+			    if (i > ntokens - 1) {
+				msyslog(LOG_ERR,
+				    "tinker: missing argument");
+				errflg++;
+				break;
+			    }
+			    sscanf(tokens[i], "%lf", &ftemp);
+			    switch(temp) {
+
+			    case CONF_TOS_MINCLOCK:
+				proto_config(PROTO_MINCLOCK, 0, ftemp);
+				break;
+
+			    case CONF_TOS_MINSANE:
+				proto_config(PROTO_MINSANE, 0, ftemp);
+				break;
+
+			    case CONF_TOS_FLOOR:
+				proto_config(PROTO_FLOOR, 0, ftemp);
+				break;
+
+			    case CONF_TOS_CEILING:
+				proto_config(PROTO_CEILING, 0, ftemp);
+				break;
+
+			    case CONF_TOS_COHORT:
+				proto_config(PROTO_COHORT, 0, ftemp);
+				break;
+			    }
+			}
+			break;
+
+		    case CONFIG_TTL:
+			for (i = 1; i < ntokens && i < MAX_TTL; i++) {
+			    sys_ttl[i - 1] = atoi(tokens[i]);
+			    sys_ttlmax = i - 1;
 			}
 			break;
 

@@ -1240,10 +1240,10 @@ static struct parse_clockinfo
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
-#define CLK_REALTYPE(x) ((int)(((x)->ttlmax) & 0x7F))
+#define CLK_REALTYPE(x) ((int)(((x)->ttl) & 0x7F))
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
 #define CLK_UNIT(x)	((int)REFCLOCKUNIT(&(x)->srcadr))
-#define CLK_PPS(x)	(((x)->ttlmax) & 0x80)
+#define CLK_PPS(x)	(((x)->ttl) & 0x80)
 
 /*
  * Other constant stuff

@@ -51,11 +51,13 @@
 #define CONFIG_LOGCONFIG	31
 #define CONFIG_MANYCASTCLIENT	32
 #define CONFIG_MANYCASTSERVER	33
+#define CONFIG_TOS		34
+#define CONFIG_TTL		35
+#define CONFIG_INCLUDEFILE      36
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		34
-#define CONFIG_KEYSDIR		35
+#define CONFIG_CRYPTO		37
+#define CONFIG_KEYSDIR		38
 #endif /* OPENSSL */
-#define CONFIG_INCLUDEFILE	36
 
 /*
  * "peer", "server", "broadcast" modifier keywords
@@ -138,11 +140,19 @@
 #define CONF_CLOCK_ALLAN	6
 #define CONF_CLOCK_HUFFPUFF	7
 
+/*
+ * "tos" modifier keywords
+ */
+#define CONF_TOS_MINCLOCK	1
+#define CONF_TOS_MINSANE	2
+#define CONF_TOS_FLOOR		3
+#define CONF_TOS_CEILING	4
+#define CONF_TOS_COHORT		5
+
 #ifdef OPENSSL
 /*
  * "crypto" modifier keywords
  */
-#define CONF_CRYPTO_NONE	0
 #define	CONF_CRYPTO_RSA		1	
 #define	CONF_CRYPTO_SIGN	2
 #define CONF_CRYPTO_LEAP	3

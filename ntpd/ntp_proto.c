@@ -54,11 +54,22 @@ static	double sys_selerr; 	/* select error (squares) */
 static	double sys_syserr;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
-u_int sys_survivors;		/* truest of the truechimers */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
+int	sys_survivors;		/* truest of the truechimers */
 #ifdef OPENSSL
 char	*sys_hostname;		/* gethostname() name */
 #endif /* OPENSSL */
+
+/*
+ * TOS and multicast mapping stuff
+ */
+int	sys_floor = 1;		/* cluster stratum floor */
+int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling*/
+int	sys_minsane = 1;	/* minimum candidates */
+int	sys_minclock = NTP_MINCLOCK; /* minimum survivors */
+int	sys_cohort = 0;		/* cohort switch */
+int	sys_ttlmax;		/* max ttl mapping vector index */
+u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 
 /*
  * Statistics counters
@@ -106,10 +117,9 @@ transmit(
 
 			/*
 			 * In broadcast mode the poll interval is fixed
-			 * at minpoll and the ttl at ttlmax.
+			 * at minpoll.
 			 */
 			hpoll = peer->minpoll;
-			peer->ttl = peer->ttlmax;
 #ifdef OPENSSL
 		} else if (peer->cast_flags & MDF_ACAST) {
 
@@ -117,23 +127,23 @@ transmit(
 			 * In manycast mode we start with the minpoll
 			 * interval and ttl. However, the actual poll
 			 * interval is eight times the nominal poll
-			 * interval shown here. If fewer than three
-			 * servers are found, the ttl is increased by
-			 * one and we try again. If this continues to
-			 * the max ttl, the poll interval is bumped by
-			 * one and we try again. If at least three
-			 * servers are found, the poll interval
-			 * increases with the system poll interval to
-			 * the max and we continue indefinately.
-			 * However, about once per day when the
-			 * agreement parameters are refreshed, the
-			 * manycast clients are reset and we start from
-			 * the beginning. This is to catch and clamp the
-			 * ttl to the lowest practical value and avoid
-			 * knocking on spurious doors.
+			 * interval shown here. If fewer than
+			 * sys_minclock servers are found, the ttl is
+			 * increased by one and we try again. If this
+			 * continues to the max ttl, the poll interval
+			 * is bumped by one and we try again. If at
+			 * least sys_minclock servers are found, the
+			 * poll interval increases with the system poll
+			 * interval to the max and we continue
+			 * indefinately. However, about once per day
+			 * when the agreement parameters are refreshed,
+			 * the manycast clients are reset and we start
+			 * from the beginning. This is to catch and
+			 * clamp the ttl to the lowest practical value
+			 * and avoid knocking on spurious doors.
 			 */
-			if (sys_survivors < NTP_MINCLOCK && peer->ttl <
-			    peer->ttlmax)
+			if (sys_survivors < sys_minclock && peer->ttl <
+			    sys_ttlmax)
 				peer->ttl++;
 			hpoll = sys_poll;
 #endif /* OPENSSL */
@@ -585,7 +595,9 @@ receive(
 			 */
 			if (sys_peer == NULL ||
 			    PKT_TO_STRATUM(pkt->stratum) <
-			    sys_stratum ||
+			    sys_stratum || (sys_cohort &&
+			    PKT_TO_STRATUM(pkt->stratum) ==
+			    sys_stratum) ||
 			    /* XXX How do I check IPv6 addresses ? */
 			    (rbufp->dstadr->sin.ss_family == AF_INET &&
 			    ((struct sockaddr_in*)&rbufp->dstadr->sin)->sin_addr.s_addr ==
@@ -642,6 +654,11 @@ receive(
 		    MDF_UCAST, 0, skeyid);
 		if (peer == NULL)
 			return;
+
+		/*
+		 * We don't need these, but it warms the billboards.
+		 */
+		peer->ttl = peer2->ttl;
 		break;
 #endif /* OPENSSL */
 
@@ -1284,7 +1301,7 @@ poll_update(
 	 * In case of manycast server, make the poll interval, which is
 	 * axtually the manycast beacon interval, eight times the system
 	 * poll interval. Normally when the host poll interval settles
-	 * up to 17.1 s, the beacon interval settles up to 2.3 hours.
+	 * up to 1024 s, the beacon interval settles up to 2.3 hours.
 	 */
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
@@ -1298,10 +1315,11 @@ poll_update(
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
 	} else if (peer->cast_flags & MDF_ACAST) {
-		if (sys_survivors < NTP_MINCLOCK)
-			peer->kpoll = peer->hpoll;
-		else
+		if (sys_survivors >= sys_minclock || peer->ttl >=
+		    sys_ttlmax)
 			peer->kpoll = peer->hpoll + 3;
+		else
+			peer->kpoll = peer->hpoll;
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	} else {
 		peer->kpoll = max(min(peer->ppoll, peer->hpoll),
@@ -1596,9 +1614,10 @@ clock_select(void)
 {
 	register struct peer *peer;
 	int i, j, k, n;
-	int nreach, nlist, nl3;
+	int nlist, nl3;
+
 	double d, e, f;
-	int allow, found, sw;
+	int allow, found, sw, osurv;
 	double high, low;
 	double synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
@@ -1621,8 +1640,10 @@ clock_select(void)
 	 */
 	osys_peer = sys_peer;
 	sys_peer = NULL;
+	osurv = sys_survivors;
+	sys_survivors = 0;
 	sys_prefer = NULL;
-	nreach = nlist = 0;
+	nlist = 0;
 	low = 1e9;
 	high = -1e9;
 	for (n = 0; n < HASH_SIZE; n++)
@@ -1651,8 +1672,8 @@ clock_select(void)
 	 * the falsetickers are culled and put to sea. The truechimers
 	 * remaining are subject to repeated rounds where the most
 	 * unpopular at each round is kicked off. When the population
-	 * has dwindled to NTP_MINCLOCK (3), the survivors split a
-	 * million bucks and collectively crank the chimes.
+	 * has dwindled to sys_minclock, the survivors split a million
+	 * bucks and collectively crank the chimes.
 	 */
 	nlist = nl3 = 0;	/* none yet */
 	for (n = 0; n < HASH_SIZE; n++) {
@@ -1705,7 +1726,6 @@ clock_select(void)
 			 * island, but does not yet have the immunity
 			 * idol.
 			 */
-			nreach++;
 			peer->status = CTL_PST_SEL_SANE;
 			peer_list[nlist++] = peer;
 
@@ -1753,6 +1773,12 @@ clock_select(void)
 			   endpoint[indx[i]].type,
 			   endpoint[indx[i]].val);
 #endif
+	/*
+	 * This is the actual algorithm that cleaves the truechimers
+	 * from the falsetickers. The original algorithm was described
+	 * in Keith Marzullo's dissertation, but has been modified for
+	 * better accuracy.
+ 	 */
 	i = 0;
 	j = nl3 - 1;
 	allow = nlist;		/* falsetickers assumed */
@@ -1803,22 +1829,30 @@ clock_select(void)
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
 			}
-			sys_survivors = 0;
 #ifdef OPENSSL
-			resetmanycast();
+			if (osurv > 0)
+				resetmanycast();
 #endif /* OPENSSL */
 			return;
 		}
 	}
-#ifdef DEBUG
-	if (debug > 2)
-		printf("select: low %.6f high %.6f\n", low, high);
-#endif
+
+	/*
+	 * We can only trust the survivors if the number of candidates
+	 * sys_minsane is at least the number required to detect and
+	 * cast out one falsticker. For the Byzantine agreement
+	 * algorithm used here, that number is 4; however, the default
+	 * sys_minsane is 1 to speed initial synchronization. Careful
+	 * operators will tinker the value to 4 and use at least that
+	 * number of synchronization sources.
+	 */
+	if (nlist < sys_minsane)
+		return;
 
 	/*
 	 * Clustering algorithm. Construct candidate list in order first
 	 * by stratum then by root distance, but keep only the best
-	 * MAXCLOCK of them. Scan the list to find falsetickers, who
+	 * NTP_MAXCLOCK of them. Scan the list to find falsetickers, who
 	 * leave the island immediately. If a falseticker is not
 	 * configured, his association raft is drowned as well, but only
 	 * if at at least eight poll intervals have gone. We must leave
@@ -1826,7 +1860,8 @@ clock_select(void)
 	 *
 	 * Note the hysteresis gimmick that increases the effective
 	 * distance for those rascals that have not made the final cut.
-	 * This is to discourage clockhopping.
+	 * This is to discourage clockhopping. Note also the prejudice
+	 * agains lower stratum peers if the floor is elevated.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1839,8 +1874,13 @@ clock_select(void)
 			continue;
 		}
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
-		d = (1. - peer->hyst) * (root_distance(peer) +
-		    peer->stratum * MAXDISTANCE);
+		d = peer->stratum;
+		if (d < sys_floor)
+			d += sys_floor;
+		if (d > sys_ceiling)
+			d = STRATUM_UNSPEC;
+		d = root_distance(peer) + d * MAXDISTANCE;
+		d *= 1. - peer->hyst;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
 				continue;
@@ -1865,16 +1905,16 @@ clock_select(void)
 
 #ifdef DEBUG
 		if (debug > 2)
-			printf("select: %s stratum %d weight %.6f error %.6f\n",
-			    ntoa(&peer_list[i]->srcadr), peer->stratum,
-			    synch[i], SQRT(error[i]));
+			printf("select: %s distance %.6f jitter %.6f\n",
+			    ntoa(&peer_list[i]->srcadr), synch[i],
+			    SQRT(error[i]));
 #endif
 	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
 	 * by root dispersion. Continue voting as long as there are more
-	 * than NTP_MINCLOCK survivors and the minimum select jitter
+	 * than sys_minclock survivors and the minimum select jitter
 	 * squared is greater than the maximum peer jitter squared. Stop
 	 * if we are about to discard a prefer peer, who of course has
 	 * the immunity idol.
@@ -1884,7 +1924,6 @@ clock_select(void)
 		e = -1e9;
 		k = 0;
 		for (i = 0; i < nlist; i++) {
-
 			if (error[i] < d)
 				d = error[i];
 			f = 0;
@@ -1901,13 +1940,13 @@ clock_select(void)
 			}
 		}
 		f = max(sys_selerr, SQUARE(LOGTOD(sys_precision))); 
-		if (nlist <= NTP_MINCLOCK || f <= d ||
+		if (nlist <= sys_minclock || f <= d ||
 		    peer_list[k]->flags & FLAG_PREFER)
 			break;
 #ifdef DEBUG
 		if (debug > 2)
 			printf(
-			    "select: %s select %.6f error %.6f\n",
+			    "select: drop %s select %.6f jitter %.6f\n",
 			    ntoa(&peer_list[k]->srcadr),
 			    SQRT(sys_selerr), SQRT(d));
 #endif
@@ -1920,34 +1959,8 @@ clock_select(void)
 		nlist--;
 	}
 
-#ifdef OPENSSL
 	/*
-	 * In manycast client mode we may have spooked a sizeable number
-	 * of peers that we don't need. If there are at least
-	 * NTP_MINCLOCK of them, the manycast message will be turned
-	 * off. By the time we get here we nay be ready to prune some of
-	 * them back, but we want to make sure all the candicates have
-	 * had a chance. If they didn't pass the sanity and intersection
-	 * tests, they have already been voted off the island.
-	 */
-	if (sys_survivors >= NTP_MINCLOCK && nlist < NTP_MINCLOCK)
-		resetmanycast();
-#endif /* OPENSSL */
-	sys_survivors = nlist;
-
-#ifdef DEBUG
-	if (debug > 1) {
-		for (i = 0; i < nlist; i++)
-			printf(
-			    "select: %s offset %.6f, weight %.6f poll %d\n",
-			    stoa(&peer_list[i]->srcadr),
-			    peer_list[i]->offset, synch[i],
-			    peer_list[i]->pollsw);
-	}
-#endif
-
-	/*
-	 * What remains is a list of not greater than NTP_MINCLOCK
+	 * What remains is a list usually not greater than sys_minclock
 	 * peers. We want only a peer at the lowest stratum to become
 	 * the system peer, although all survivors are eligible for the
 	 * combining algorithm. First record their order, diddle the
@@ -1960,21 +1973,24 @@ clock_select(void)
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
 	 *
-	 * Note that we go no further, unless the number of survivors is
-	 * a majority of the suckers that have been found reachable and
-	 * no prior source is available. This avoids the transient when
-	 * one of a flock of sources is out to lunch and just happens
-	 * to be the first survivor found.
+	 * Fiddle for hysteresis. Pump it up for a peer only if the peer
+	 * stratum is at least the floor and there are enough survivors.
+	 * This minimizes the pain when tossing out rascals beneath the
+	 * floorboard. Don't count peers with stratum above the ceiling.
+	 * Manycast is is sooo complicated.
 	 */
-	if (osys_peer == NULL && 2 * nlist < min(nreach, NTP_MINCLOCK))
-		return;
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
+		leap_consensus |= peer->leap;
 		peer = peer_list[i];
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
-		peer->hyst = HYST;
-		leap_consensus |= peer->leap;
+		if (peer->stratum >= sys_floor && osurv >= sys_minclock)
+			peer->hyst = HYST;
+		else
+			peer->hyst = 0;
+		if (peer->stratum <= sys_ceiling)
+			sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
 		if (peer->refclktype == REFCLK_ATOM_PPS &&
@@ -1982,8 +1998,22 @@ clock_select(void)
 			typepps = peer;
 		if (peer->stratum == peer_list[0]->stratum && peer ==
 		    osys_peer)
-				typesystem = peer;
+			typesystem = peer;
 	}
+
+#ifdef OPENSSL
+	/*
+	 * In manycast client mode we may have spooked a sizeable number
+	 * of peers that we don't need. If there are at least
+	 * sys_minclock of them, the manycast message will be turned
+	 * off. By the time we get here we nay be ready to prune some of
+	 * them back, but we want to make sure all the candicates have
+	 * had a chance. If they didn't pass the sanity and intersection
+	 * tests, they have already been voted off the island.
+	 */
+	if (sys_survivors < sys_minclock && osurv >= sys_minclock)
+		resetmanycast();
+#endif /* OPENSSL */
 
 	/*
 	 * Mitigation rules of the game. There are several types of
@@ -2127,8 +2157,8 @@ peer_xmit(
 	if (!(peer->flags & FLAG_AUTHENABLE)) {
 		get_systime(&peer->xmt);
 		HTONL_FP(&peer->xmt, &xpkt.xmt);
-		sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt,
-		    sendlen);
+		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
+		    &xpkt, sendlen);
 		peer->sent++;
 #ifdef DEBUG
 		if (debug)
@@ -2346,7 +2376,8 @@ peer_xmit(
 		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
 		exit(-1);
 	}
-	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, sendlen);
+	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
+	    sendlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2632,7 +2663,8 @@ default_get_precision(void)
 void
 init_proto(void)
 {
-	l_fp dummy;
+	l_fp	dummy;
+	int	i;
 
 	/*
 	 * Fill in the sys_* stuff.  Default is don't listen to
@@ -2663,6 +2695,10 @@ init_proto(void)
 	sys_processed = 0;
 	sys_badauth = 0;
 	sys_manycastserver = 0;
+	for (i = 0; i < MAX_TTL; i++) {
+		sys_ttl[i] = (i + 1) * 256 / MAX_TTL - 1;
+		sys_ttlmax = i;
+	}
 #ifdef OPENSSL
 	sys_automax = 1 << NTP_AUTOMAX;
 #endif /* OPENSSL */
@@ -2707,46 +2743,42 @@ proto_config(
 	 * Figure out what he wants to change, then do it
 	 */
 	switch (item) {
-	case PROTO_KERNEL:
 
-		/*
-		 * Turn on/off kernel discipline
-		 */
+	/*
+	 * Turn on/off kernel discipline.
+	 */
+	case PROTO_KERNEL:
 		kern_enable = (int)value;
 		break;
 
+	/*
+	 * Turn on/off clock discipline.
+	 */
 	case PROTO_NTP:
-
-		/*
-		 * Turn on/off clock discipline
-		 */
 		ntp_enable = (int)value;
 		break;
 
+	/*
+	 * Turn on/off monitoring.
+	 */
 	case PROTO_MONITOR:
-
-		/*
-		 * Turn on/off monitoring
-		 */
 		if (value)
 			mon_start(MON_ON);
 		else
 			mon_stop(MON_ON);
 		break;
 
+	/*
+	 * Turn on/off statistics.
+	 */
 	case PROTO_FILEGEN:
-
-		/*
-		 * Turn on/off statistics
-		 */
 		stats_control = (int)value;
 		break;
 
+	/*
+	 * Turn on/off facility to listen to broadcasts.
+	 */
 	case PROTO_BROADCLIENT:
-
-		/*
-		 * Turn on/off facility to listen to broadcasts
-		 */
 		sys_bclient = (int)value;
 		if (value)
 			io_setbclient();
@@ -2754,60 +2786,88 @@ proto_config(
 			io_unsetbclient();
 		break;
 
+	/*
+	 * Add muliticast group address.
+	 */
 	case PROTO_MULTICAST_ADD:
-
-		/*
-		 * Add muliticast group address
-		 */
 		io_multicast_add(*svalue);
 		break;
 
+	/*
+	 * Delete multicast group address.
+	 */
 	case PROTO_MULTICAST_DEL:
-
-		/*
-		 * Delete multicast group address
-		 */
 		io_multicast_del(*svalue);
 		break;
 
+	/*
+	 * Set default broadcast delay.
+	 */
 	case PROTO_BROADDELAY:
-
-		/*
-		 * Set default broadcast delay
-		 */
 		sys_bdelay = dvalue;
 		break;
 
+	/*
+	 * Require authentication to mobilize ephemeral associations.
+	 */
 	case PROTO_AUTHENTICATE:
-
-		/*
-		 * Specify the use of authenticated data
-		 */
 		sys_authenticate = (int)value;
 		break;
 
+	/*
+	 * Turn on/off PPS discipline.
+	 */
 	case PROTO_PPS:
-
-		/*
-		 * Turn on/off PPS discipline
-		 */
 		pps_enable = (int)value;
 		break;
 
-#ifdef REFCLOCK
-	case PROTO_CAL:
+	/*
+	 * Set the minimum number of survivors.
+	 */
+	case PROTO_MINCLOCK:
+		sys_minclock = (int)dvalue;
+		break;
 
-		/*
-		 * Turn on/off refclock calibrate
-		 */
+	/*
+	 * Set the minimum number of candidates.
+	 */
+	case PROTO_MINSANE:
+		sys_minsane = (int)dvalue;
+		break;
+
+	/*
+	 * Set the stratum floor.
+	 */
+	case PROTO_FLOOR:
+		sys_floor = (int)dvalue;
+		break;
+
+	/*
+	 * Set the stratum ceiling.
+	 */
+	case PROTO_CEILING:
+		sys_ceiling = (int)dvalue;
+		break;
+
+	/*
+	 * Set the cohort switch.
+	 */
+	case PROTO_COHORT:
+		sys_cohort= (int)dvalue;
+		break;
+
+#ifdef REFCLOCK
+	/*
+	 * Turn on/off refclock calibrate
+	 */
+	case PROTO_CAL:
 		cal_enable = (int)value;
 		break;
 #endif
-
 	default:
 
 		/*
-		 * Log this error
+		 * Log this error.
 		 */
 		msyslog(LOG_ERR,
 		    "proto_config: illegal item %d, value %ld",

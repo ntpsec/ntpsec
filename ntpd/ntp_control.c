@@ -206,8 +206,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_FILTERROR,	RO, "filtdisp=" },	/* 34 */
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
-	{ CP_TTLMAX,	RO, "ttlmax" },		/* 37 */
-	{ CP_VARLIST,	RO, "peer_var_list" },	/* 38 */
+	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
@@ -217,8 +216,10 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
 	{ CP_DIGEST,	RO, "signature" },	/* 45 */
+#else
+	( 0,		EOV, "" }		/* 38 */
 #endif /* OPENSSL */
-	{ 0,		EOV, ""  }		/* 46 */
+	{ 0,		EOV, "" }		/* 46 */
 };
 
 
@@ -245,7 +246,6 @@ static u_char def_peer_var[] = {
 	CP_FLASH,
 	CP_KEYID,
 	CP_TTL,
-	CP_TTLMAX,
 	CP_OFFSET,
 	CP_DELAY,
 	CP_DISPERSION,
@@ -1513,15 +1513,7 @@ ctl_putpeer(
 		break;
 
 	case CP_TTL:
-		if (!(peer->cast_flags & MDF_ACAST))
-			break;
-		ctl_putint(peer_var[CP_TTL].text, peer->ttl);
-		break;
-
-	case CP_TTLMAX:
-		if (!(peer->cast_flags & (MDF_MCAST | MDF_ACAST)))
-			break;
-		ctl_putint(peer_var[CP_TTLMAX].text, peer->ttlmax);
+		ctl_putint(peer_var[CP_TTL].text, sys_ttl[peer->ttl]);
 		break;
 
 	case CP_VALID:

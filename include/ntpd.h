@@ -369,7 +369,13 @@ extern double	sys_bdelay; 		/* broadcast client default delay */
 extern int	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
 extern keyid_t	sys_private;		/* private value for session seed */
-extern int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
+extern int	sys_manycastserver;	/* respond to manycast client pkts */
+extern int	sys_minclock;		/* minimum survivors */
+extern int	sys_minsane;		/* minimum candidates */
+extern int	sys_floor;		/* cluster stratum floor */
+extern int	sys_ceiling;		/* cluster stratum ceiling */
+extern u_char	sys_ttl[];		/* ttl mapping vector */
+extern int	sys_ttlmax;		/* max ttl mapping vector index */
 
 /*
  * Statistics counters
