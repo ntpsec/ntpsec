@@ -2407,13 +2407,16 @@ peer_xmit(
 				    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
 				exten = crypto_args(peer, CRYPTO_CERT,
- 				    peer->subject);
+ 				    peer->issuer);
 
 			/*
-			 * Identity. Note we have to sign the
-			 * certificate before the cookie to avoid a
-			 * deadlock when the passive peer is walking the
-			 * certificate trail. Awesome.
+			 * Identity.  We look first for GQ, then IFF. If
+			 * the server has MV, then we look for that. If
+			 * not found, we skip identity confirmation.
+			 * Note we have to sign the certificate before
+			 * the cookie to avoid a deadlock when the
+			 * passive peer is walking the certificate
+			 * trail. Awesome.
 			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
 			    crypto_flags & peer->crypto &
@@ -2425,9 +2428,10 @@ peer_xmit(
 			    CRYPTO_FLAG_IFF)
 				exten = crypto_args(peer, CRYPTO_IFF,
 				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->issuer);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    peer->crypto & CRYPTO_FLAG_MV)
+				exten = crypto_args(peer, CRYPTO_MV,
+				    NULL);
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			   !(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
@@ -2509,7 +2513,9 @@ peer_xmit(
 				    peer->issuer);
 
 			/*
-			 * Identity
+			 * Identity. We look first for GQ, then IFF. If
+			 * the server has MV, then we look for that. If
+			 * not found, we skip identity confirmation.
 			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
 			    crypto_flags & peer->crypto &
@@ -2520,6 +2526,10 @@ peer_xmit(
 			    crypto_flags & peer->crypto &
 			    CRYPTO_FLAG_IFF)
 				exten = crypto_args(peer, CRYPTO_IFF,
+				    NULL);
+			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
+			    peer->crypto & CRYPTO_FLAG_MV)
+				exten = crypto_args(peer, CRYPTO_MV,
 				    NULL);
 
 			/*

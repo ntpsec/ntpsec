@@ -279,11 +279,11 @@ static struct keyword tos_keywords[] = {
  */
 static struct keyword crypto_keywords[] = {
 	{ "cert",		CONF_CRYPTO_CERT },
-	{ "gq",			CONF_CRYPTO_GQ },
 	{ "gqpar",		CONF_CRYPTO_GQPAR },
 	{ "host",		CONF_CRYPTO_RSA },
-	{ "iff",		CONF_CRYPTO_IFF },
+	{ "iffpar",		CONF_CRYPTO_IFFPAR },
 	{ "leap",		CONF_CRYPTO_LEAP },
+	{ "mvpar",		CONF_CRYPTO_MVPAR },
 	{ "pw",			CONF_CRYPTO_PW },
 	{ "randfile",		CONF_CRYPTO_RAND },
 	{ "sign",		CONF_CRYPTO_SIGN },
@@ -1142,16 +1142,16 @@ getconfig(
 				crypto_config(CRYPTO_CONF_PRIV, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_IFF:
-				crypto_config(CRYPTO_CONF_IFF, tokens[i]);
+			    case CONF_CRYPTO_IFFPAR:
+				crypto_config(CRYPTO_CONF_IFFPAR, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_GQPAR:
 				crypto_config(CRYPTO_CONF_GQPAR, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_GQ:
-				crypto_config(CRYPTO_CONF_GQ, tokens[i]);
+			    case CONF_CRYPTO_MVPAR:
+				crypto_config(CRYPTO_CONF_MVPAR, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_LEAP:

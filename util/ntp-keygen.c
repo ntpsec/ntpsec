@@ -10,7 +10,7 @@
  * Files are prefixed with a header giving the name and date of creation
  * followed by a type-specific descriptive label and PEM-encoded data
  * string compatible with programs of the OpenSSL library.
- *
+ *_assign
  * Note that private keys can be password encrypted as per OpenSSL
  * conventions.
  *
@@ -32,14 +32,12 @@
  *	Schnorr (IFF) parameters used to verify trusted group membership
  *
  * ntpkey_GQpar_<hostname>.<filestamp>,
- * ntpkey_GQkey_<hostname>.<filestamp>
- *	Guillou-Quisquater (GQ) parameters and keys used to verify
- *	trusted group membership
+ *	Guillou-Quisquater (GQ) parameters used to verify trusted group
+ *	membership
  *
- * ntpkey_MVkey_<hostname>.<filestamp>,
- * ntpkey_MPkey<n>_<hostname>.<filestamp>
- *	Mu-Varadharajan (MV) parameters and keys used to verify	trusted
- *	 group membership
+ * ntpkey_MVpar_<hostname>.<filestamp>,
+ *	Mu-Varadharajan (MV) parameters used to verify	trusted	group
+ *	membership
  *
  * ntpkey_XXXcert_<hostname>.<filestamp>
  *	X509v3 certificate using RSA or DSA public keys and signatures.
@@ -54,24 +52,24 @@
  * The links produced include
  *
  * ntpkey_key_<hostname> (RSA)
- *	Public host key used for cookie encryption and digital
- *	signatures if a sign key is not present. The public key value of
- *	the key is disclosed in certificates only if signed by this key.
+ *	Host public/private key pair used for cookie encryption and
+ *	digital signatures if a sign key is not present. 
  *
  * ntpkey_sign_<hostname> (RSA or DSA)
- *	Public sign key used for digital signatures. The public key
- *	value of the key is disclosed in certificates signed by this
- *	key unless declared otherwise.
+ *	Sign public/private key pair used for digital signatures.
  *
- * ntpkey_iff_<hostname> (IFF)
- *	Private IFF key used to securely confirm identity to other
- *	members of the group. No value of this key is disclosed except
- *	to other members of the same group.
+ * ntpkey_iffpar_<hostname> (IFF)
+ *	Private IFF parameters used to securely confirm identity to
+ *	other members of the group.
  *
- * ntpkey_gq_<hostname> (GQ)
- *	Public GQ key used to securely confirm identity. The public key
- *	value of the key is disclosed in certificates signed by this
- *	key unless declared otherwise.
+ * ntpkey_gqpar_<hostname> (GQ)
+ *	Private GQ parameters used to securely confirm identity to other
+ *	members of the group. The public key value is disclosed in
+ *	certificates.
+ *
+ * ntpkey_mvpar_<hostname> (MV)
+ *	Private MV parameters used to securely confirm identity. to
+ *	other members of the group.
  *
  * Note: Once in a while because of some statistical fluke this program
  * fails to generate and verify some cryptographic data, as indicated by
@@ -149,10 +147,10 @@ int	gen_md5		P((char *));
 #ifdef OPENSSL
 EVP_PKEY *gen_rsa	P((char *));
 EVP_PKEY *gen_dsa	P((char *));
-EVP_PKEY *gen_iff	P((char *));
-RSA	*gen_gqpar	P((char *));
-RSA	*gen_gqkey	P((char *, RSA *));
-void	gen_mv		P((char *));
+EVP_PKEY *gen_iffpar	P((char *));
+EVP_PKEY *gen_gqpar	P((char *));
+EVP_PKEY *gen_gqkey	P((char *, EVP_PKEY *));
+EVP_PKEY *gen_mvpar	P((char *));
 int	x509		P((EVP_PKEY *, const EVP_MD *, char *, char *));
 void	cb		P((int, int, void *));
 EVP_PKEY *genkey	P((char *, char *));
@@ -190,20 +188,22 @@ main(
 	X509	*cert = NULL;	/* X509 certificate */
 	EVP_PKEY *pkey_host = NULL; /* host key */
 	EVP_PKEY *pkey_sign = NULL; /* sign key */
-	EVP_PKEY *pkey_iff = NULL; /* iff group key */
-	EVP_PKEY *pkey = NULL;	/* temp sign key */
-	RSA	*rsa_gqpar = NULL; /* GQ parameters */
-	RSA	*rsa_gqkey = NULL; /* GQ key */
+	EVP_PKEY *pkey_iff = NULL; /* IFF parameters */
+	EVP_PKEY *pkey_gq = NULL; /* GQ parameters */
+	EVP_PKEY *pkey_mv = NULL; /* MV parameters */
+	int	md5key = 0;	/* generate MD5 keys */
+	int	hostkey = 0;	/* generate RSA keys */
+	int	iffkey = 0;	/* generate IFF parameters */
+	int	gqpar = 0;	/* generate GQ parameters */
+	int	gqkey = 0;	/* update GQ keys */
+	int	mvpar = 0;	/* generate MV parameters */
+	int	mvkey = 0;	/* update MV keys */
+	char	*sign = NULL;	/* sign key */
+	EVP_PKEY *pkey = NULL;	/* temp key */
 	const EVP_MD *ectx;	/* EVP digest */
 	char	hostbuf[MAXHOSTNAME + 1];
 	char	pathbuf[MAXFILENAME + 1];
 	FILE	*str;		/* file handle */
-	int	md5key = 0;	/* MD5 keys */
-	int	hostkey = 0;	/* RSA keys */
-	int	iffkey = 0;	/* IFF keys */
-	int	gqpar = 0;	/* GQ parameters */
-	int	gqkey = 0;	/* GQ keys */
-	char	*sign = NULL;	/* sign key */
 	const char *scheme = NULL; /* digest/signature scheme */
 	char	*exten = NULL;	/* private extension */
 	char	*grpkey = NULL;	/* identity extension */
@@ -217,7 +217,7 @@ main(
 			OPENSSL_VERSION_NUMBER, SSLeay());
 		return (-1);
 	} else {
-		printf("OpenSSL version %lx\n", SSLeay());
+		printf("Using OpenSSL version %lx\n", SSLeay());
 	}
 #endif /* OPENSSL */
 
@@ -232,7 +232,7 @@ main(
 	epoch = tv.tv_sec;
 	rval = 0;
 	while ((temp = getopt(argc, argv,
-	    "c:de:GgHIi:Mm:Pp:S:s:TV:")) != -1) {
+	    "c:de:GgHIi:Mm:Pp:S:s:TV:v:")) != -1) {
 		switch(temp) {
 
 		/*
@@ -257,14 +257,14 @@ main(
 			continue;
 
 		/*
-		 * -G generate GQ parameters (GQ scheme)
+		 * -G generate GQ parameters and keys
 		 */
 		case 'G':
 			gqpar++;
 			continue;
 
 		/*
-		 * -g generate GQ keys (GQ scheme)
+		 * -g update GQ keys
 		 */
 		case 'g':
 			gqkey++;
@@ -278,7 +278,7 @@ main(
 			continue;
 
 		/*
-		 * -I generate IFF parameters (IFF scheme)
+		 * -I generate IFF parameters
 		 */
 		case 'I':
 			iffkey++;
@@ -289,6 +289,7 @@ main(
 		 */
 		case 'i':
 			trustname = optarg;
+			continue;
 
 		/*
 		 * -M generate MD5 keys
@@ -308,7 +309,7 @@ main(
 			continue;
 		
 		/*
-		 * -P generate private certificate (PC scheme)
+		 * -P generate PC private certificate
 		 */
 		case 'P':
 			exten = EXT_KEY_PRIVATE;
@@ -333,6 +334,7 @@ main(
 		 */
 		case 's':
 			hostname = optarg;
+			continue;
 		
 		/*
 		 * -T trusted certificate (TC scheme)
@@ -342,11 +344,22 @@ main(
 			continue;
 
 		/*
-		 * -V <keys> Mu-Varadharajan (MV scheme)
+		 * -V <keys> generate MV parameters
 		 */
 		case 'V':
+			mvpar++;
 			if (sscanf(optarg, "%d", &nkeys) != 1)
 				printf("invalid option -V %s\n",
+				    optarg);
+			continue;
+
+		/*
+		 * -v <key> update MV keys
+		 */
+		case 'v':
+			mvkey++;
+			if (sscanf(optarg, "%d", &nkeys) != 1)
+				printf("invalid option -v %s\n",
 				    optarg);
 			continue;
 
@@ -354,7 +367,7 @@ main(
 		 * None of the above.
 		 */
 		default:
-			printf("unknown option %c\n", temp);
+			printf("Option ignored\n");
 			continue;
 		}
 	}
@@ -390,11 +403,11 @@ main(
 	if (sign != NULL)
 		pkey_sign = genkey(sign, "sign");
 	if (iffkey)
-		pkey_iff = gen_iff("iff");
+		pkey_iff = gen_iffpar("iff");
 	if (gqpar)
-		rsa_gqpar = gen_gqpar("gqpar");
-	if (nkeys > 0)
-		gen_mv("mvkey");
+		pkey_gq = gen_gqpar("gq");
+	if (mvpar)
+		pkey_mv = gen_mvpar("mv");
 
 	/*
 	 * If there is no new host key, look for an existing one. If not
@@ -405,16 +418,14 @@ main(
 		if ((str = fopen(filename, "r")) != NULL) {
 			pkey_host = PEM_read_PrivateKey(str, NULL, NULL,
 			    passwd);
-
 			fclose(str);
-			readlink(filename, filename, sizeof(filename));
+			readlink(filename, filename,  sizeof(filename));
 			if (pkey_host == NULL) {
 				printf("Host key\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
 			} else {
-				printf("Using host key %s\n",
-				    filename);
+				printf("Using host key %s\n", filename);
 				break;
 			}
 		}
@@ -439,9 +450,7 @@ main(
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
 			} else {
-				pkey = pkey_sign;
-				printf("Using sign key %s\n",
-				    filename);
+				printf("Using sign key %s\n", filename);
 				break;
 			}
 		}
@@ -451,53 +460,54 @@ main(
 	}
 
 	/*
-	 * If there is no IFF group key, look for an existing one.
+	 * If there is no new IFF file, look for an existing one.
 	 */
 	if (pkey_iff == NULL) {
-		sprintf(filename, "ntpkey_iffpar_%s", hostname);
+		sprintf(filename, "ntpkey_iff_%s", hostname);
 		if ((str = fopen(filename, "r")) != NULL) {
-			pkey_iff = PEM_read_PrivateKey(str, NULL, NULL,
-			    passwd);
-			fclose(str);
-			readlink(filename, filename, sizeof(filename));
-			if (pkey_iff == NULL) {
-				printf("IFFpar\n%s\n",
-				    ERR_error_string(ERR_get_error(),
-				    NULL));
-			} else {
-				printf("Using IFF group key %s\n",
-				    filename);
-			}
-		}
-	}
-
-	/*
-	 * If there is no GQ group key, look for an existing one.
-	 */
-	if (rsa_gqpar == NULL) {
-		sprintf(filename, "ntpkey_gqpar_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			rsa_gqpar = PEM_read_RSAPrivateKey(str, NULL,
+			pkey_iff = PEM_read_PrivateKey(str, NULL,
 			    NULL, passwd);
 			fclose(str);
 			readlink(filename, filename, sizeof(filename));
-			if (rsa_gqpar == NULL) {
-				printf("GQpar\n%s\n",
+			if (pkey_iff == NULL) {
+				printf("IFF parameters\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
 			} else {
-				printf("Using GQ group key %s\n",
+				printf("Using IFF parameters %s\n",
 				    filename);
 			}
 		}
 	}
 
 	/*
-	 * If there is a GQ group key, create GQ private/public keys.
+	 * If there is no new GQ file, look for an existing one.
 	 */
-	if (rsa_gqpar != NULL) {
-		rsa_gqkey = gen_gqkey("gq", rsa_gqpar);
-		grpkey = BN_bn2hex(rsa_gqkey->e);
+	if (pkey_gq == NULL) {
+		sprintf(filename, "ntpkey_gq_%s", hostname);
+		if ((str = fopen(filename, "r")) != NULL) {
+			pkey_gq = PEM_read_PrivateKey(str, NULL, NULL,
+			    passwd);
+			fclose(str);
+			readlink(filename, filename, sizeof(filename));
+			if (pkey_gq == NULL) {
+				printf("GQ parameters\n%s\n",
+				    ERR_error_string(ERR_get_error(),
+				    NULL));
+			} else {
+				printf("Using GQ parameters %s\n",
+				    filename);
+			}
+		}
+	}
+
+	/*
+	 * If there is a GQ parameter file, create GQ private/public
+	 * keys and extract the public key for the certificate.
+	 */
+	if (pkey_gq != NULL) {
+		gen_gqkey("gq", pkey_gq);
+		grpkey = BN_bn2hex(pkey_gq->pkey.rsa->q);
 		}
 
 	/*
@@ -547,11 +557,10 @@ main(
 		EVP_PKEY_free(pkey_sign);
 	if (pkey_iff != NULL)
 		EVP_PKEY_free(pkey_iff);
-	if (rsa_gqpar != NULL)
-		RSA_free(rsa_gqpar);
-	if (rsa_gqkey != NULL)
-		RSA_free(rsa_gqkey);
-
+	if (pkey_gq != NULL)
+		EVP_PKEY_free(pkey_gq);
+	if (pkey_mv != NULL)
+		EVP_PKEY_free(pkey_mv);
 #endif /* OPENSSL */
 	return (rval);
 }
@@ -625,14 +634,14 @@ gen_md5(
 
 #ifdef OPENSSL
 /*
- * Generate RSA public/private keys
+ * Generate RSA public/private key pair
  */
 EVP_PKEY *			/* public/private key pair */
 gen_rsa(
 	char	*id		/* file name id */
 	)
 {
-	EVP_PKEY *pkey;		/* public/private key pair */
+	EVP_PKEY *pkey;		/* private key */
 	RSA	*rsa;		/* RSA parameters and key pair */
 	FILE	*str;
 
@@ -642,6 +651,7 @@ gen_rsa(
 	if (rsa == NULL) {
 		printf("RSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
+		rval = -1;
 		return (NULL);
 	}
 
@@ -664,27 +674,27 @@ gen_rsa(
 	 * encoded in PEM.
 	 */
 	str = fheader("RSAkey", hostname);
-	PEM_write_RSAPrivateKey(str, rsa, passwd ? EVP_des_cbc() : NULL,
+	pkey = EVP_PKEY_new();
+	EVP_PKEY_assign_RSA(pkey, rsa);
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
 	fslink(id, hostname);
-	pkey = EVP_PKEY_new();
-	EVP_PKEY_assign_RSA(pkey, rsa);
 	return (pkey);
 }
 
  
 /*
- * Generate DSA public/private keys
+ * Generate DSA public/private key pair
  */
 EVP_PKEY *			/* public/private key pair */
 gen_dsa(
 	char	*id		/* file name id */
 	)
 {
-	EVP_PKEY *pkey;		/* public/private key pair */
+	EVP_PKEY *pkey;		/* private key */
 	DSA	*dsa;		/* DSA parameters */
 	u_char	seed[20];	/* seed for parameters */
 	FILE	*str;
@@ -721,24 +731,24 @@ gen_dsa(
 	 * encoded in PEM.
 	 */
 	str = fheader("DSAkey", hostname);
-	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
+	pkey = EVP_PKEY_new();
+	EVP_PKEY_assign_DSA(pkey, dsa);
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
 	fslink(id, hostname);
-	pkey = EVP_PKEY_new();
-	EVP_PKEY_assign_DSA(pkey, dsa);
 	return (pkey);
 }
 
 
 /*
- * Generate Schnorr (IFF) parameters and public/private keys
+ * Generate Schnorr (IFF) parameters and keys
  *
  * The Schnorr (IFF)identity scheme is intended for use when
  * certificates are generated by some other trusted certificate
- * authority and the group key cannot be conveyed in the certificate
+ * authority and the parameters cannot be conveyed in the certificate
  * itself. For this purpose, new generations of IFF values must be
  * securely transmitted to all members of the group before use.
  *
@@ -752,12 +762,12 @@ gen_dsa(
  * certificate or message data. Alice challenges Bob to confirm identity
  * using the protocol described below.
  */
-EVP_PKEY *			/* IFF parameters and keys */
-gen_iff(
+EVP_PKEY *			/* DSA cuckoo nest */
+gen_iffpar(
 	char	*id		/* file name id */
 	)
 {
-	EVP_PKEY *pkey;		/* for PEM structure */
+	EVP_PKEY *pkey;		/* private key */
 	DSA	*dsa;		/* DSA parameters */
 	u_char	seed[20];	/* seed for parameters */
 	BN_CTX	*ctx;		/* BN working space */
@@ -795,7 +805,6 @@ gen_iff(
 	BN_mod_exp(bk, dsa->g, a, dsa->p, ctx);	/* g^a mod p */
 	BN_mod_mul(bk, bk, bn, dsa->p, ctx);
 	temp = BN_is_one(bk);
-
 	printf("Confirm g^(q - a) g^a = 1 mod p: %s\n", temp == 1 ?
 	    "yes" : "no");
 	if (!temp) {
@@ -804,19 +813,21 @@ gen_iff(
 		rval = -1;
 		return (NULL);
 	}
-	dsa->priv_key = BN_dup(a);
-	dsa->pub_key = BN_dup(bn);
+	dsa->priv_key = BN_dup(a);		/* private key */
+	dsa->pub_key = BN_dup(bn);		/* public key */
 
 	/*
 	 * Here is a trial round of the protocol. First, Alice rolls
-	 * random r ( 0 < r < q) and sends it to Bob.
+	 * random r ( 0 < r < q) and sends it to Bob. She needs only
+	 * modulus q.
 	 */
 	BN_rand(r, BN_num_bits(dsa->q), -1, 0);	/* r, 0 < r < q */
 	BN_mod(r, r, dsa->q, ctx);
 
 	/*
 	 * Bob rolls random k (0 < k < q), computes k + a r mod q and
-	 * g^k, then sends (k, g) to Alice.
+	 * g^k, then sends (k, g) to Alice. He needs only modulus q and
+	 * the private key.
 	 */
 	BN_rand(k, BN_num_bits(dsa->q), -1, 0);	/* k, 0 < k < q  */
 	BN_mod(k, k, dsa->q, ctx);
@@ -826,7 +837,8 @@ gen_iff(
 
 	/*
 	 * Alice computes g^(k + a r) g^(q - a) r and verifies the
-	 * result is equal to g.
+	 * result is equal to g. She needs modulus p, generator g, and
+	 * the public key, as well as her original r.
 	 */
 	BN_mod_exp(bn, dsa->g, bn, dsa->p, ctx); /* g^(k + a r) mod p */
 	BN_mod_exp(bk, dsa->pub_key, r, dsa->p, ctx); /* g^(q - a) r */
@@ -844,13 +856,19 @@ gen_iff(
 	}
 
 	/*
-	 * Write the IFF parameters as a DSA private key encoded in PEM.
-	 * Note, this is not encrypted.
+	 * Write the IFF parameters and keys as a DSA private key
+	 * encoded in PEM.
+	 *
+	 * p	modulus p
+	 * q	modulus q
+	 * g	generator g
+	 * priv_key a
+	 * public_key g^(q - a) mod p
 	 */
+	str = fheader("IFFpar", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	str = fheader("IFFpar", trustname);
-	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
@@ -885,15 +903,13 @@ gen_iff(
  * scheme. Alice challenges Bob to confirm identity using the protocol
  * described below.
  */
-/*
- * Generate Guillou-Quisquater (GQ) parameters
- */
-RSA *				/* RSA cuckoo nest */
+EVP_PKEY *			/* RSA cuckoo nest */
 gen_gqpar(
 	char	*id		/* file name id */
 	)
 {
-	RSA	*rsapar;	/* GQ parameters */
+	EVP_PKEY *pkey;		/* private key */
+	RSA	*rsa;		/* GQ parameters */
 	BN_CTX	*ctx;		/* BN working space */
 	FILE	*str;
 
@@ -901,9 +917,9 @@ gen_gqpar(
 	 * Generate RSA parameters for use as GQ parameters.
 	 */
 	printf("Generating GQ parameters (%d bits)...\n", modulus);
-	rsapar = RSA_generate_key(modulus, 3, cb, "GQ");
+	rsa = RSA_generate_key(modulus, 3, cb, "GQ");
 	printf("\n");
-	if (rsapar == NULL) {
+	if (rsa == NULL) {
 		printf("RSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
@@ -913,68 +929,84 @@ gen_gqpar(
 	/*
 	 * Generate the group key b, which is saved in the e member of
 	 * the RSA structure. These values are distributed to all
-	 * members of the group, but shielded from all other groups.
+	 * members of the group, but shielded from all other groups. We
+	 * don't use all the parameters, but set the unused ones to a
+	 * small number to minimize the file size.
 	 */
 	ctx = BN_CTX_new();
-	BN_rand(rsapar->e, BN_num_bits(rsapar->n), -1, 0); /* b */
-	BN_mod(rsapar->e, rsapar->e, rsapar->n, ctx);
+	BN_rand(rsa->e, BN_num_bits(rsa->n), -1, 0); /* b */
+	BN_mod(rsa->e, rsa->e, rsa->n, ctx);
+	BN_copy(rsa->d, BN_value_one());
+	BN_copy(rsa->p, BN_value_one());
+	BN_copy(rsa->q, BN_value_one());
+	BN_copy(rsa->dmp1, BN_value_one());
+	BN_copy(rsa->dmq1, BN_value_one());
+	BN_copy(rsa->iqmp, BN_value_one());
 
 	/*
-	 * Write the GQ parameters and group key as a RSA private key
-	 * encoded in PEM.
+	 * Write the GQ parameters as a RSA private key encoded in PEM.
+	 * The public and private keys are filled in later.
+	 *
+	 * n	modulus n
+	 * e	group key b
+	 * (remaining values are not used)
 	 */
 	str = fheader("GQpar", trustname);
-	PEM_write_RSAPrivateKey(str, rsapar, passwd ? EVP_des_cbc() :
-	    NULL, NULL, 0, NULL, passwd);
+	pkey = EVP_PKEY_new();
+	EVP_PKEY_assign_RSA(pkey, rsa);
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
-		RSA_print_fp(stdout, rsapar, 0);
+		RSA_print_fp(stdout, rsa, 0);
 	fslink(id, trustname);
-	return (rsapar);
+	return (pkey);
 }
 
 
 /*
- * Generate Guillou-Quisquater (GQ) public/private keys
+ * Update Guillou-Quisquater (GQ) parameters
  */
-RSA *				/* GQ public/private key pair */
+EVP_PKEY *			/* RSA cuckoo nest */
 gen_gqkey(
 	char	*id,		/* file name id */
-	RSA	*rsapar		/* GQ parameters */
+	EVP_PKEY *gqpar		/* GQ parameters */
 	)
 {
-	RSA	*rsa;		/* GQ public/private key pair */
+	EVP_PKEY *pkey;		/* private key */
+	RSA	*rsa;		/* RSA parameters */
 	BN_CTX	*ctx;		/* BN working space */
 	BIGNUM	*u, *v, *g, *k, *r, *y; /* BN temps */
 	FILE	*str;
 	u_int	temp;
 
 	/*
-	 * Generate GQ key. Note that the group key b is the e member of
+	 * Generate GQ keys. Note that the group key b is the e member
+	 * of
 	 * the GQ parameters.
 	 */
-	printf("Generating GQ keys (%d bits)...\n", modulus);
+	printf("Updating GQ keys (%d bits)...\n", modulus);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
 	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
-	rsa = RSA_new();
 
 	/*
 	 * When generating his certificate, Bob rolls random private key
-	 * u and inverse u^-1.
+	 * u. 
 	 */
-	BN_rand(u, BN_num_bits(rsapar->n), -1, 0); /* u */
-	BN_mod(u, u, rsapar->n, ctx);
-	BN_mod_inverse(v, u, rsapar->n, ctx);	/* u^-1 mod n */
-	BN_mod_mul(k, v, u, rsapar->n, ctx);
+	rsa = gqpar->pkey.rsa;
+	BN_rand(u, BN_num_bits(rsa->n), -1, 0); /* u */
+	BN_mod(u, u, rsa->n, ctx);
+	BN_mod_inverse(v, u, rsa->n, ctx);	/* u^-1 mod n */
+	BN_mod_mul(k, v, u, rsa->n, ctx);
 
 	/*
-	 * Bob computes the public key v = (u^-1)^b, which is saved in
-	 * an extension field on his certificate. We check that u^b v =
+	 * Bob computes public key v = (u^-1)^b, which is saved in an
+	 * extension field on his certificate. We check that u^b v =
 	 * 1 mod n.
 	 */
-	BN_mod_exp(v, v, rsapar->e, rsapar->n, ctx);
-	BN_mod_exp(g, u, rsapar->e, rsapar->n, ctx); /* u^b */
-	BN_mod_mul(g, g, v, rsapar->n, ctx); /* u^b (u^-1)^b */
+	BN_mod_exp(v, v, rsa->e, rsa->n, ctx);
+	BN_mod_exp(g, u, rsa->e, rsa->n, ctx); /* u^b */
+	BN_mod_mul(g, g, v, rsa->n, ctx); /* u^b (u^-1)^b */
 	temp = BN_is_one(g);
 	printf("Confirm u^b (u^-1)^b = 1 mod n: %s\n", temp ? "yes" :
 	    "no");
@@ -986,34 +1018,37 @@ gen_gqkey(
 		rval = -1;
 		return (NULL);
 	}
-	rsa->n = BN_dup(u);			/* private key */
-	rsa->e = BN_dup(v);			/* public key */
+	BN_copy(rsa->p, u);			/* private key */
+	BN_copy(rsa->q, v);			/* public key */
 
 	/*
-	 * Here is a trial run of the protocol. First, Alice fetches
-	 * Bob's certificate, then rolls random r (0 < r < n) and sends
-	 * it to him.
+	 * Here is a trial run of the protocol. First, Alice rolls
+	 * random r (0 < r < n) and sends it to Bob. She needs only
+	 * modulus n from the parameters.
 	 */
-	BN_rand(r, BN_num_bits(rsapar->n), -1, 0);	/* r */
-	BN_mod(r, r, rsapar->n, ctx);
+	BN_rand(r, BN_num_bits(rsa->n), -1, 0);	/* r */
+	BN_mod(r, r, rsa->n, ctx);
 
 	/*
 	 * Bob rolls random k (0 < k < n), computes y = k u^r mod n and
-	 * g = k^b mod n, then sends (y, g) to Alice. 
+	 * g = k^b mod n, then sends (y, g) to Alice. He needs modulus n
+	 * from the parameters and his private key u. 
 	 */
-	BN_rand(k, BN_num_bits(rsapar->n), -1, 0);	/* k */
-	BN_mod(k, k, rsapar->n, ctx);
-	BN_mod_exp(y, u, r, rsapar->n, ctx);	/* u^r mod n */
-	BN_mod_mul(y, k, y, rsapar->n, ctx);	/* y = k u^r mod n */
-	BN_mod_exp(g, k, rsapar->e, rsapar->n, ctx); /* g = k^b mod n */
+	BN_rand(k, BN_num_bits(rsa->n), -1, 0);	/* k */
+	BN_mod(k, k, rsa->n, ctx);
+	BN_mod_exp(y, rsa->p, r, rsa->n, ctx);	/* u^r mod n */
+	BN_mod_mul(y, k, y, rsa->n, ctx);	/* y = k u^r mod n */
+	BN_mod_exp(g, k, rsa->e, rsa->n, ctx); /* g = k^b mod n */
 
 	/*
 	 * Alice computes v^r y^b mod n and verifies the result is equal
-	 * to g.
+	 * to g. She needs modulus n, generator g and group key b from
+	 * the parameters and Bob's public key v = (u^-1)^b from his
+	 * certificate.
 	 */
-	BN_mod_exp(v, v, r, rsapar->n, ctx);	/* v^r mod n */
-	BN_mod_exp(y, y, rsapar->e, rsapar->n, ctx); /* y^b mod n */
-	BN_mod_mul(y, v, y, rsapar->n, ctx);	/* v^r y^b mod n */
+	BN_mod_exp(v, rsa->q, r, rsa->n, ctx);	/* v^r mod n */
+	BN_mod_exp(y, y, rsa->e, rsa->n, ctx); /* y^b mod n */
+	BN_mod_mul(y, v, y, rsa->n, ctx);	/* v^r y^b mod n */
 	temp = BN_cmp(y, g);
 	printf("Confirm g^k = v^r y^b mod n: %s\n", temp == 0 ?
 	    "yes" : "no");
@@ -1026,116 +1061,245 @@ gen_gqkey(
 	}
 
 	/*
-	 * Write the GQ public/private keys as a RSA public key encoded
+	 * Write the GQ parameters and keys as a RSA private key encoded
 	 * in PEM.
+	 *
+	 * n	modulus n
+	 * e	group key b
+	 * p	private key u
+	 * q	public key (u^-1)^b
+	 * (remaining values are not used)
 	 */
-	str = fheader("GQkey", trustname);
-	PEM_write_RSAPublicKey(str, rsa);
+	str = fheader("GQpar", trustname);
+	pkey = EVP_PKEY_new();
+	EVP_PKEY_assign_RSA(pkey, rsa);
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
 	fslink(id, trustname);
-	return (rsa);
+	return (pkey);
 }
 
 
 /*
  * Generate Mu-Varadharajan (MV) parameters and keys
  *
- * The Generate Mu-Varadharajan (MV) cryptosystem is intended for use
- * where there is one encryption key for the server and a separate
+ * The Mu-Varadharajan (MV) cryptosystem is intended when servers
+ * broadcast messages to clients, but clients never send messages to
+ * servers. There is one encryption key for the server and a separate
  * decryption key for each client. It operates something like a
- * pay-per-view satellite broadcasting system where the view session key
- * is encrypted by the broadcaster and the decryption keys are held in a
+ * pay-per-view satellite broadcasting system where the session key is
+ * encrypted by the broadcaster and the decryption keys are held in a
  * tamperproof set-top box.
  *
  * The MV parameters and private encryption key hide in a DSA cuckoo
- * structure which uses the same parameters. The values are used in an
- * encryption scheme based on DSA cryptography and a polynomial formed
- * from the expansion of product terms (x - x[j]), as described in: Mu,
- * Y., and V. Varadharajan: Robust and Secure Broadcasting, Proc.
- * Indocrypt 2001, 223-231. The paper has significant errors.
+ * structure which uses the same parameters, but generated in a
+ * different way. The values are used in an encryption scheme similar to
+ * El Gamal cryptography and a polynomial formed from the expansion of
+ * product terms (x - x[j]), as described in Mu, Y., and V.
+ * Varadharajan: Robust and Secure Broadcasting, Proc. Indocrypt 2001,
+ * 223-231. The paper has significant errors and serious omissions.
  *
- * The p is a 512-bit prime, g a generator of Zp and q a 160-bit prime
- * that divides p - 1 and is a qth root of 1 mod p; that is, g^q = 1 mod
- * p. A set of 160-bit values x[j], j = 1...n, are generated as the
- * zeros of a polynomial of order n. The product terms (x - x[j]) are
- * expanded to form coefficients in powers of x[i] mod q, i = 0...n.
- * These are used as exponents of the generator g mod p to generate the
- * private encryption key A. The pair (gbar, ghat) of public values and
- * the pairs (xbar[j], xhat[j]) of private values are used to construct
- * the decryption keys. The devil is in the details.
+ * Let q be the product of n distinct primes s'[j] (j = 1...n), where
+ * each s'[j] has m significant bits. Let p be a prime p = 2 * q + 1, so
+ * that q and each s'[j] divide p - 1 and p has M = n * m + 1
+ * significant bits. The elements x mod q of Zq with the elements 2 and
+ * the primes removed form a field Zq* valid for polynomial arithetic.
+ * Let g be a generator of Zp; that is, gcd(g, p - 1) = 1 and g^q = 1
+ * mod p. We expect M to be in the 500-bit range and n relatively small,
+ * like 25, so the likelihood of a randomly generated element of x mod q
+ * of Zq colliding with a factor of p - 1 is very small and can be
+ * avoided. Associated with each s'[j] is an element s[j] such that s[j]
+ * s'[j] = s'[j] mod q. We find s[j] as the quotient (q + s'[j]) /
+ * s'[j]. These are the parameters of the scheme and they are expensive
+ * to compute.
  *
- * This routine generates an encryption file including the prime modulus
- * p, encryption key A and public key (gbar, ghat). It then generates 
- * decryption files including the prime modulus, public key and private
- * key (xbar[j], xhat[j]) for each client. The server encrypts a block
- * y = A^x; the jth client decrypts x = (gbar^xhat[j] ghat^xbar[j])^y.
+ * We set up an instance of the scheme as follows. A set of random
+ * values x[j] mod q (j = 1...n), are generated as the zeros of a
+ * polynomial of order n. The product terms (x - x[j]) are expanded to
+ * form coefficients a[i] mod q (i = 0...n) in powers of x. These are
+ * used as exponents of the generator g mod p to generate the private
+ * encryption key A. The pair (gbar, ghat) of public server keys and the
+ * pairs (xbar[j], xhat[j]) (j = 1...n) of private client keys are used
+ * to construct the decryption keys. The devil is in the details.
+ *
+ * This routine generates a private encryption file including the
+ * private encryption key E and public key (gbar, ghat). It then
+ * generates decryption files including the private key (xbar[j],
+ * xhat[j]) for each client. E is a permutation that encrypts a block
+ * y = E x. The jth client computes the inverse permutation E^-1 =
+ * gbar^xhat[j] ghat^xbar[j] and decrypts the block x = E^-1 y.
+ *
+ * The distinguishing characteristic of this scheme is the capability to
+ * revoke keys. Included in the calculation of E, gbar and ghat is the
+ * product s = prod(s'[j]) (j = 1...n) above. If the factor s'[j] is
+ * subsequently removed from the product and E, gbar and ghat
+ * recomputed, the jth client will no longer be able to compute E^-1 and
+ * thus unable to decrypt the block.
  */
-void
-gen_mv(
+EVP_PKEY *			/* DSA cuckoo nest */
+gen_mvpar(
 	char	*id		/* file name id */
 	)
 {
+	EVP_PKEY *pkey;		/* private key */
 	DSA	*dsa;		/* DSA parameters */
+	DSA	*sdsa;		/* DSA parameters */
 	BN_CTX	*ctx;		/* BN working space */
-	BIGNUM	**x;		/* private key vector */
-	BIGNUM	**a;		/* coefficient vector */
+	BIGNUM	**x;		/* polynomial zeros vector */
+	BIGNUM	**a;		/* polynomial coefficient vector */
 	BIGNUM	**g;		/* public key vector */
-	BIGNUM	**s;		/* private enabling keys */
-	BIGNUM	**xbar;		/* private key vector 1 */
-	BIGNUM	**xhat;		/* private key vector 2 */
+	BIGNUM	**s, **s1;	/* private enabling keys */
+	BIGNUM	**xbar, **xhat;	/* private keys vector */
 	BIGNUM	*b;		/* group key */
-	BIGNUM	*binverse;	/* inverse group key */
+	BIGNUM	*b1;		/* inverse group key */
+	BIGNUM	*ss;		/* enabling key */
 	BIGNUM	*biga;		/* master encryption key */
 	BIGNUM	*bige;		/* session encryption key */
-	BIGNUM	*k;		/* random roll */
-	BIGNUM	*ss;		/* enabling key */
-	BIGNUM	*gbar;		/* public key 1 */
-	BIGNUM	*ghat;		/* public key 2 */
+	BIGNUM	*gbar, *ghat;	/* public key */
 	BIGNUM	*u, *v, *w;	/* BN scratch */
-	u_char	seed[20];	/* seed for parameters */
 	int	i, j, n;
 	FILE	*str;
 	u_int	temp;
 	char	ident[20];
 
 	/*
-	 * Generate DSA parameters for use as MV parameters.
+	 * Generate MV parameters.
+	 *
+	 * The object is to generate a multiplicative group Zp mod p and
+	 * a subset Zq mod q, where q is the product of n distinct
+	 * primes s'[j] (j = 1...n) and q divides p - 1. We first
+	 * generate n distinct primes, which may have to be regenerated
+	 * later. As a practical matter, it is tough to find more than
+	 * 31 distinct primes for modulus 512 or 61 primes for modulus
+	 * 1024. The latter can take several hundred iterations and
+	 * several minutes on a Blade 1000.
 	 */
-	printf("Generating MV parameters (%d bits)...\n", modulus);
 	n = nkeys;
-	RAND_bytes(seed, sizeof(seed));
-	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed),
-	    NULL, NULL, cb, "MV");
-	printf("\n");
-	if (dsa == NULL) {
-		printf("MV generate parameters fails\n%s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
-		rval = -1;
-		return;
+	printf("Generating MV parameters for %d keys (%d bits)...\n", n,
+	    modulus / n);
+	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
+	b = BN_new(); b1 = BN_new();
+	dsa = malloc(sizeof(DSA));
+	dsa->p = BN_new();
+	dsa->q = BN_new();
+	dsa->g = BN_new();
+	s = malloc((n + 1) * sizeof(BIGNUM));
+	s1 = malloc((n + 1) * sizeof(BIGNUM));
+	for (j = 1; j <= n; j++)
+		s1[j] = BN_new();
+	temp = 0;
+	for (j = 1; j <= n; j++) {
+		while (1) {
+			printf("Birthdays %d\r", temp);
+			BN_generate_prime(s1[j], modulus / n, 0, NULL,
+			    NULL, NULL, NULL);
+			for (i = 1; i < j; i++) {
+				if (BN_cmp(s1[i], s1[j]) == 0)
+					break;
+			}
+			if (i == j)
+				break;
+			temp++;
+		}
+	}
+	printf("Birthday keys rejected %d\n", temp);
+
+	/*
+	 * Compute the modulus q as the product of the primes. Compute
+	 * the modulus p as 2 * q + 1 and test p for primality. If p
+	 * is composite, replace one of the primes with a new distinct
+	 * one and try again. Note that q will hardly be a secret since
+	 * we have to reveal p to servers and clients. However,
+	 * factoring q to find the primes should be adequately hard, as
+	 * this is the same problem considered hard in RSA.
+	 */
+	temp = 0;
+	while (1) {
+		printf("Duplicate keys rejected %d\r", ++temp);
+		BN_one(dsa->q);
+		for (j = 1; j <= n; j++)
+			BN_mul(dsa->q, dsa->q, s1[j], ctx);
+		BN_copy(dsa->p, dsa->q);
+		BN_add(dsa->p, dsa->p, dsa->p);
+		BN_add_word(dsa->p, 1);
+		if (BN_is_prime(dsa->p, BN_prime_checks, NULL, ctx,
+		    NULL))
+			break;
+
+		j = temp % n + 1;
+		while (1) {
+			BN_generate_prime(u, modulus / n, 0, 0, NULL,
+			    NULL, NULL);
+			for (i = 1; i <= n; i++) {
+				if (BN_cmp(u, s1[i]) == 0)
+					break;
+			}
+			if (i > n)
+				break;
+		}
+		BN_copy(s1[j], u);
+	}
+	printf("Duplicate keys rejected %d\n", temp);
+
+	/*
+	 * Compute the generator g using a random roll such that
+	 * gcd(g, p - 1) = 1 and g^q = 1.
+	 */
+	BN_copy(v, dsa->p);
+	BN_sub_word(v, 1);
+	while (1) {
+		BN_rand(dsa->g, BN_num_bits(dsa->p) - 1, 0, 0);
+		BN_mod(dsa->g, dsa->g, dsa->p, ctx);
+		BN_gcd(u, dsa->g, v, ctx);
+		if (!BN_is_one(u))
+			continue;
+
+		BN_mod_exp(u, dsa->g, dsa->q, dsa->p, ctx);
+		if (BN_is_one(u))
+			break;
 	}
 
 	/*
-	 * Generate random polynomial roots mod q.
+	 * Compute s[j] such that s[j] * s'[j] = s'[j] for all j. The
+	 * easy way to do this is to compute q + s'[j] and divide the
+	 * result by s'[j]. Exercise for the student: prove the
+	 * remainder is always zero.
 	 */
-	printf("Generating polynomial roots (%d bits)...\n",
-	    BN_num_bits(dsa->q));
-	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
-	n = nkeys;
+	for (j = 1; j <= n; j++) {
+		s[j] = BN_new();
+		BN_add(s[j], dsa->q, s1[j]);
+		BN_div(s[j], u, s[j], s1[j], ctx);
+	}
+
+	/*
+	 * Setup is now complete. Roll random polynomial roots x[j]
+	 * (0 < x[j] < q) for all j. While it may not be strictly
+	 * necessary, Make sure each root has no factors in common with
+	 * q.
+	 */
+	printf(
+	    "Generating polynomial coefficients for %d roots (%d bits)\n",
+	    n, BN_num_bits(dsa->q)); 
 	x = malloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		x[j] = BN_new();
-		BN_rand(x[j], BN_num_bits(dsa->q), -1, 0);
-		BN_mod(x[j], x[j], dsa->q, ctx);
+		while (1) {
+			BN_rand(x[j], BN_num_bits(dsa->q), 0, 0);
+			BN_mod(x[j], x[j], dsa->q, ctx);
+			BN_gcd(u, x[j], dsa->q, ctx);
+			if (BN_is_one(u))
+				break;
+		}
 	}
 
 	/*
-	 * Generate polynomial coefficients a[i], i = 0...n, from the
-	 * expansion of root products (x - x[j]), j = 1...n. The method
-	 * is a present from Charlie Boncelet.
+	 * Generate polynomial coefficients a[i] (i = 0...n) from the
+	 * expansion of root products (x - x[j]) mod q for all j. The
+	 * method is a present from Charlie Boncelet.
 	 */
-	printf("Generating polynomial coefficients for %d keys\n", n); 
 	a = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
@@ -1144,49 +1308,30 @@ gen_mv(
 	for (j = 1; j <= n; j++) {
 		BN_zero(w);
 		for (i = 0; i < j; i++) {
-			u = BN_dup(dsa->q);
+			BN_copy(u, dsa->q);
 			BN_mod_mul(v, a[i], x[j], dsa->q, ctx);
 			BN_sub(u, u, v);
 			BN_add(u, u, w);
-			w = BN_dup(a[i]);
+			BN_copy(w, a[i]);
 			BN_mod(a[i], u, dsa->q, ctx);
 		}
 	}
 
 	/*
-	 * Verify sum(a[i] x^i) = 0 for all j. By design, the polynomial
-	 * has n zeros at x = x[j].
-	 */
-	temp = 1;
-	for (j = 1; j <= n; j++) {
-		BN_zero(u);
-		for (i = 0; i <= n; i++) {
-			BN_set_word(v, i);
-			BN_mod_exp(v, x[j], v, dsa->q, ctx);
-			BN_mod_mul(v, v, a[i], dsa->q, ctx);
-			BN_add(u, u, v);
-		}
-		BN_mod(u, u, dsa->q, ctx);
-		if (!BN_is_zero(u))
-			temp = 0;
-	}
-	printf("Confirm sum(a[i] x[j]^i) = 0 for all i, j: %s\n", temp ?
-	    "yes" : "no");
-
-	/*
-	 * Generate g[i] = g^a[i] for all i and the generator g.
+	 * Generate g[i] = g^a[i] mod p for all i and the generator g.
 	 */
 	printf("Generating g[i] parameters\n");
 	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
-		BN_mod_exp(g[i], dsa->g, a[i], dsa->p,
-		    ctx);
+		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
 	}
 
 	/*
-	 * Verify prod(g[i]^(x[j]^i)) = 1 for all i, j. Note the
-	 * expression given in the paper is incorrect.
+	 * Verify prod(g[i]^(a[i] x[j]^i)) = 1 for all i, j; otherwise,
+	 * exit. Note the a[i] x[j]^i exponent is computed mod q, but
+	 * the g[i] is computed mod p. also note the expression given in
+	 * the paper is incorrect.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
@@ -1194,7 +1339,8 @@ gen_mv(
 		for (i = 0; i <= n; i++) {
 			BN_set_word(v, i);
 			BN_mod_exp(v, x[j], v, dsa->q, ctx);
-			BN_mod_exp(v, g[i], v, dsa->p, ctx);
+			BN_mod_mul(v, v, a[i], dsa->q, ctx);
+			BN_mod_exp(v, dsa->g, v, dsa->p, ctx);
 			BN_mod_mul(u, u, v, dsa->p, ctx);
 		}
 		if (!BN_is_one(u))
@@ -1202,11 +1348,14 @@ gen_mv(
 	}
 	printf("Confirm prod(g[i]^(x[j]^i)) = 1 for all i, j: %s\n",
 	    temp ? "yes" : "no");
+	if (!temp) {
+		rval = -1;
+		return (NULL);
+	}
 
 	/*
-	 * Make 512-bit encryption key A and 160-bit nonce pair b and
-	 * b^-1. Keep A around for awhile, since it is expensive to
-	 * compute.
+	 * Make private encryption key A. Keep it around for awhile,
+	 * since it is expensive to compute.
 	 */
 	biga = BN_new();
 	BN_one(biga);
@@ -1218,30 +1367,32 @@ gen_mv(
 			BN_mod_mul(biga, biga, v, dsa->p, ctx);
 		}
 	}
-	b = BN_new(); binverse = BN_new();
-	BN_rand(b, BN_num_bits(dsa->q), -1, 0);
-	BN_mod(b, b, dsa->q, ctx);
-	BN_mod_inverse(binverse, b, dsa->q, ctx);
-	BN_mod_mul(v, b, binverse, dsa->q, ctx);
-	printf("Confirm b b^-1 = 1: %s\n", BN_is_one(v) ?
-	    "yes" : "no");
 
 	/*
-	 * Make 160-bit decryption keys (xbar[j], xhat[j]) for all j.
-	 * Also make 512-bit s[j] = r q for some r and prod(s[j]), both
-	 * mod p.
+	 * Roll private random group key b mod q (0 < b < q), where
+	 * gcd(b, q) = 1 to guarantee the b^1 exists, then compute
+	 * b^-1 mod q. If b is changed, the client keys must be
+	 * recomputed.
+	 */
+	while (1) {
+		BN_rand(b, BN_num_bits(dsa->q), 0, 0);
+		BN_mod(b, b, dsa->q, ctx);
+		BN_gcd(u, b, dsa->q, ctx);
+		if (BN_is_one(u))
+			break;
+	}
+	BN_mod_inverse(b1, b, dsa->q, ctx);
+
+	/*
+	 * Make private client keys (xbar[j], xhat[j]) for all j. Note
+	 * that the keys for the jth client involve s[j], but not s'[j]
+	 * or the product s = prod(s'[j]) mod q, which is the enabling
+	 * key.
 	 */
 	xbar = malloc((n + 1) * sizeof(BIGNUM));
 	xhat = malloc((n + 1) * sizeof(BIGNUM));
-	s = malloc((n + 1) * sizeof(BIGNUM));
-	ss = BN_new();
-	BN_set_word(ss, 1);
 	for (j = 1; j <= n; j++) {
-		xbar[j] = BN_new(); xhat[j] = BN_new(); s[j] = BN_new();
-		BN_set_word(u, j);
-		BN_mod_mul(s[j], u, dsa->q, dsa->p, ctx);
-		BN_add_word(s[j], 1);
-		BN_mod_mul(ss, ss, s[j], dsa->p, ctx);
+		xbar[j] = BN_new(); xhat[j] = BN_new();
 		BN_zero(xbar[j]);
 		BN_set_word(v, n);
 		for (i = 1; i <= n; i++) {
@@ -1250,88 +1401,82 @@ gen_mv(
 			BN_mod_exp(u, x[i], v, dsa->q, ctx);
 			BN_add(xbar[j], xbar[j], u);
 		}
-		BN_mod_mul(xbar[j], xbar[j], binverse, dsa->q, ctx);
+		BN_mod_mul(xbar[j], xbar[j], b1, dsa->q, ctx);
 		BN_mod_exp(xhat[j], x[j], v, dsa->q, ctx);
-		BN_mod_mul(xhat[j], xhat[j], s[j], dsa->p, ctx);
+		BN_mod_mul(xhat[j], xhat[j], s[j], dsa->q, ctx);
 	}
 
 	/*
-	 * Verify A^s g^(s b xbar[j]) g^(s xhat[j]) = 1 for all j.
+	 * The enabling key is initially q by construction. We can
+	 * revoke client j by dividing q by s'[j]. The quotient becomes
+	 * the enabling key s. Note we always have to revoke one key;
+	 * otherwise, the plaintext and cryptotext would be identical.
 	 */
-	temp = 1;
-	for (j = 1; j <= n; j++) {
-		BN_mod_mul(u, ss, b, dsa->q, ctx);
-		BN_mod_mul(u, u, xbar[j], dsa->q, ctx);
-		BN_mod_exp(u, dsa->g, u, dsa->p, ctx);
-		BN_mod_mul(v, ss, xhat[j], dsa->q, ctx);
-		BN_mod_exp(v, dsa->g, v, dsa->p, ctx);
-		BN_mod_mul(u, u, v, dsa->p, ctx);
-		BN_mod_exp(v, biga, ss, dsa->p, ctx);
-		BN_mod_mul(u, u, v, dsa->p, ctx);
-		if (!BN_is_one(u))
-			temp = 0;
-	}
-	printf("Confirm A^s g^(s b xbar[j]) g^(s xhat[j]) = 1 for all j: %s\n",
-	    temp ? "yes" : "no");
+	ss = BN_new();
+	BN_copy(ss, dsa->q);
+	BN_div(ss, u, dsa->q, s1[n], ctx);
 
 	/*
-	 * Make 512-bit values E = A^(s k), gbar = g^(s k) and
-	 * ghat = g^(s k b).
+	 * Make private server encryption key E = A^s and public server
+	 * keys gbar = g^s mod p and ghat = g^(s b) mod p. The (gbar,
+	 * ghat) is the public key provided to the server, which uses it
+	 * to compute the session encryption key and public key included
+	 * in its messages. These values must be regenerated if the
+	 * enabling key is changed.
 	 */
-	bige = BN_new(); k = BN_new();
-	BN_rand(k, BN_num_bits(dsa->q), -1, 0);
-	BN_mod(k, k, dsa->q, ctx);
-	BN_mod_mul(v, ss, k, dsa->q, ctx);
-	BN_mod_exp(bige, biga, v, dsa->p, ctx);
-	gbar = BN_new(); ghat = BN_new();
-	BN_mod_exp(gbar, dsa->g, v, dsa->p, ctx);
-	BN_mod_mul(v, v, b, dsa->q, ctx);
+	bige = BN_new(); gbar = BN_new(); ghat = BN_new();
+	BN_mod_exp(bige, biga, ss, dsa->p, ctx);
+	BN_mod_exp(gbar, dsa->g, ss, dsa->p, ctx);
+	BN_mod_mul(v, ss, b, dsa->q, ctx);
 	BN_mod_exp(ghat, dsa->g, v, dsa->p, ctx);
 
 	/*
-	 * Verify E gbar^xbar[j] ghat^xhat[j] = 1 for all j.
-	 */
-	temp = 1;
-	for (j = 1; j <= n; j++) {
-		BN_mod_exp(v, gbar, xhat[j], dsa->p, ctx);
-		BN_mod_exp(u, ghat, xbar[j], dsa->p, ctx);
-		BN_mod_mul(u, u, v, dsa->p, ctx);
-		BN_mod_mul(u, bige, u, dsa->p, ctx);
-
-		BN_mod_inverse(v, u, dsa->p, ctx);
-		if (!BN_is_one(u)) {
-			printf("revoke %i\n", j);
-			temp = 0;
-		}
-	}
-	printf(
-	    "Confirm A^(s k) gbar^xbar[j] ghat^xhat[j] = 1 for all j: %s\n",
-	    temp ? "yes" : "no");
-
-	/*
-	 * We now have the modulus p, encryption key A, public key
-	 * (gbar^k, ghat^bk) and a set of decryption keys (xbar[j],
-	 * xhat[j]) for all j. The broadcaster parameters and keys are
-	 * contained in a DSA cuckoo structure:
+	 * We produce the key media in three steps. The first step is to
+	 * generate the private values that do not depend on the
+	 * enabling key. These include the server values p, q, g, b, A
+	 * and the client values s'[j], xbar[j] and xhat[j] for each j.
+	 * The p, xbar[j] and xhat[j] values are encoded in private
+	 * files which are distributed to respective clients. The p, q,
+	 * g, A and s'[j] values (will be) written to a secret file to
+	 * be read back later.
 	 *
-	 * p		modulus p
-	 * q		private encryption key A
-	 * g		enabling key ss
-	 * priv_key	public key 1 gbar
-	 * pub_key	public key 2 ghat
+	 * The secret file (will be) read back at some later time to
+	 * enable/disable individual keys and generate/regenerate the
+	 * enabling key s. The p, q, E, gbar and ghat values are written
+	 * to a secret file to be read back later by the server.
+	 *
+	 * The server reads the private file and rolls the session key
+	 * k, then computes E^k, gbar^k and ghat^k. The E^k is the new
+	 * symmetric key which is installed in the key cache. The gbar^k
+	 * and ghat^k values are transmtted to clients in an extension
+	 * field.
+	 *
+	 * The client receives the message and computes x =
+	 * (gbar^k)^xbar[j] (ghat^k)^xhat[j], finds the encryption key
+	 * E^k as the inverse x^-1 of x and installs in the key cache.
+	 * Once installed, the crypto computations don't have to be done
+	 * again until the session key is refreshed, expected to be done
+	 * once per day.
 	 */
-	BN_copy(dsa->q, bige);
-	BN_copy(dsa->g, ss);
+	BN_copy(dsa->g, bige);
 	dsa->priv_key = BN_dup(gbar);
 	dsa->pub_key = BN_dup(ghat);
 
 	/*
-	 * Write the parameters and public key as a DSA private key
-	 * encoded in PEM. This is used only by the broadcaster(s).
+	 * Write the MV server parameters and keys as a DSA private key
+	 * encoded in PEM.
+	 *
+	 * p	modulus p
+	 * q	modulus q (used only to generate k)
+	 * g	E mod p
+	 * priv_key gbar mod p
+	 * pub_key ghat mod p
 	 */
-	str = fheader("MVkey", trustname);
-	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() :
-	    NULL, NULL, 0, NULL, passwd);
+	str = fheader("MVpar", trustname);
+	pkey = EVP_PKEY_new();
+	EVP_PKEY_assign_DSA(pkey, dsa);
+	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
@@ -1341,57 +1486,66 @@ gen_mv(
 	 * Write the parameters and private key (xbar[j], xhat[j]) for
 	 * all j as a DSA private key encoded in PEM. It is used only by
 	 * the designated recipient(s) who pay a suitably outrageous fee
-	 * for the service.
-	 *
-	 * The receiver parameters and keys are contained in the DSA
-	 * cuckoo structure:
-	 *
-	 * p		modulus p
-	 * q		private key 1 xbar[j]
-	 * g		private key 2 xhat[j]
-	 * priv_key	public key 1 gbar
-	 * pub_key	public key 2 ghat
+	 * for its use.
 	 */
+	sdsa = malloc(sizeof(DSA));
+	sdsa->p = BN_dup(dsa->p);
+	sdsa->q = BN_dup(BN_value_one());
+	sdsa->g = BN_dup(BN_value_one());
+	sdsa->priv_key = BN_new();
+	sdsa->pub_key = BN_new();
 	for (j = 1; j <= n; j++) {
-		BN_copy(dsa->q, xbar[j]);
-		BN_copy(dsa->g, xhat[j]);
+		BN_copy(sdsa->priv_key, xbar[j]);
+		BN_copy(sdsa->pub_key, xhat[j]);
+		BN_mod_exp(v, dsa->priv_key, sdsa->pub_key, dsa->p,
+		    ctx);
+		BN_mod_exp(u, dsa->pub_key, sdsa->priv_key, dsa->p,
+		    ctx);
+		BN_mod_mul(u, u, v, dsa->p, ctx);
+		BN_mod_mul(u, u, dsa->g, dsa->p, ctx);
+		if (!BN_is_one(u))
+			printf("Revoke key %d\n", j);
 		BN_free(xbar[j]); BN_free(xhat[j]);
-		BN_free(x[j]); BN_free(s[j]);
+		BN_free(x[j]); BN_free(s[j]); BN_free(s1[j]);
 
 		/*
-		 * Write the MV public key as a DSA private key encoded
-		 * in PEM. In this context the public key is really
-		 * public only to the designated recipients and denied
-		 * to all others.
+		 * Write the client parameters as a DSA private key
+		 * encoded in PEM. We don't make links for these.
+		 *
+		 * p	modulus p
+		 * priv_key xbar[j] mod q
+		 * pub_key xhat[j] mod q
+		 * (remaining values are not used)
 		 */
-#if 0
 		sprintf(ident, "MVkey%d", j);
 		str = fheader(ident, trustname);
-		PEM_write_DSAPrivateKey(str, dsa, passwd ?
-		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd);
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_DSA(pkey, sdsa);
+		PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() :
+		    NULL, NULL, 0, NULL, passwd);
 		fclose(str);
 		if (debug)
-			DSA_print_fp(stdout, dsa, 0);
-#endif
+			DSA_print_fp(stdout, sdsa, 0);
 	}
 
 	/*
-	 * Free the coutries.
+	 * Free the countries.
 	 */
 	for (i = 0; i <= n; i++) {
 		BN_free(a[i]);
 		BN_free(g[i]);
 	}
 	BN_free(u); BN_free(v); BN_free(w); BN_CTX_free(ctx);
-	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(bige);
-	BN_free(k); BN_free(ss); BN_free(gbar); BN_free(ghat);
+	BN_free(b); BN_free(b1); BN_free(biga); BN_free(bige);
+	BN_free(ss); BN_free(gbar); BN_free(ghat);
+	DSA_free(dsa); DSA_free(sdsa);
 
 	/*
 	 * Free the world.
 	 */
-	free(x); free(a); free(g); free(s); free(xbar); free(xhat);
-	DSA_free(dsa);
-	return;
+	free(x); free(a); free(g); free(s); free(s1);
+	free(xbar); free(xhat);
+	return (pkey);
 }
 
 
@@ -1488,7 +1642,7 @@ x509	(
 	}
 	X509_EXTENSION_free(ex);
 	/*
-	 * The subject_key_identifier is used for the GQ group key.
+	 * The subject_key_identifier is used for the GQ public key.
 	 * This should not be controversial.
 	 */
 	if (gqpub != NULL) {

@@ -1,8 +1,7 @@
 #! /bin/sh
 
-# howland seems to have a hw problem
 case "$LIST" in
- '') LIST="whimsy grundoon beauregard mort deacon" ;;
+ '') LIST="whimsy grundoon howland beauregard mort deacon" ;;
 esac
 
 export LIST
