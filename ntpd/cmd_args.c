@@ -113,7 +113,7 @@ getstartup(
 		case 'q':
 		    ++nofork;
 		    break;
-
+ 
 		case 'N':
 		    priority_done = 0;
 		    break;
