@@ -24,6 +24,8 @@ extern	void	io_completion_port_add_socket (struct interface *);
 
 extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, struct sockaddr_in*);
 
+extern	HANDLE get_io_event (void);
+
 static int OnSocketRecv(DWORD, struct IoCompletionInfo *, DWORD);
 
 static int QueueIORead( struct refclockio * );
