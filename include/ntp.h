@@ -453,19 +453,19 @@ struct peer {
  /*
  * Macro for sockaddr_storage structures operations
  */
-#define SOCKCMP(sock1, sock2)    ((struct sockaddr_storage*)sock1)->ss_family == ((struct sockaddr_storage*)sock2)->ss_family ? \
+#define SOCKCMP(sock1, sock2)    (((struct sockaddr_storage*)sock1)->ss_family == ((struct sockaddr_storage*)sock2)->ss_family ? \
  				      ((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
  				      		memcmp(&((struct sockaddr_in*)sock1)->sin_addr, &((struct sockaddr_in*)sock2)->sin_addr, sizeof(struct in_addr))==0  :  \
  				      		memcmp(&((struct sockaddr_in6*)sock1)->sin6_addr, &((struct sockaddr_in6*)sock2)->sin6_addr, sizeof(struct in6_addr))==0 : \
- 				      0
+ 				      0)
 
-#define SOCKNUL(sock1)	    ((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
+#define SOCKNUL(sock1)	    (((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
  				       (((struct sockaddr_in*)sock1)->sin_addr.s_addr == 0) : \
- 				       (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6*)sock1)->sin6_addr))
+ 				       (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6*)sock1)->sin6_addr)))
 
-#define SOCKLEN(sock)	  ((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
+#define SOCKLEN(sock)	  (((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
  					(sizeof(struct sockaddr_in)) : \
- 					(sizeof(struct sockaddr_in6))
+ 					(sizeof(struct sockaddr_in6)))
 
 #define ANYSOCK(sock)           memset(((struct sockaddr_in*)sock), 0, sizeof(struct sockaddr_storage)-sizeof(struct sockaddr_in))
 
