@@ -1,3 +1,14 @@
+2000-01-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99
+
+	* html/driver36.htm: Cleanup
+	* html/monopt.htm: Ditto
+	From: Dave Mills <mills@udel.edu>
+	
+	* ntpd/ntp_intres.c (ntp_intres): Put "NTP_INTRES running" at a
+	higher debug level
+
 2000-01-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwv.c: More improvements

@@ -381,11 +381,12 @@ algorithm, as well as radio propagation conditions in general. The
 message is produced once each minute for each frequency in turn after
 minute sync has been acquired.
 
-<p><tt>wwv5 agc wwv wwvh</tt>
+<p><tt>wwv5 port agc wwv wwvh</tt>
 
-<p>where <tt>agc</tt> is the audio gain for this frequency and
-<tt>wwv</tt> and <tt>wwvh</tt> are two sets of fields, one each for WWV
-and WWVH. Each of the two fields has the format
+<p>where <tt>port</tt> and <tt>agc</tt> are the audio port and gain,
+respectively, for this frequency and <tt>wwv</tt> and <tt>wwvh</tt> are
+two sets of fields, one each for WWV and WWVH. Each of the two fields
+has the format
 
 <p><tt>ident score comp sync/snr/jitr</tt>
 
@@ -396,34 +397,35 @@ is the scoreboard described above, <tt>comp</tt> is the compare counter,
 of the pulse and <tt>jitr</tt> is the sample difference between the
 current epoch and the last epoch. An example is:
 
-<p><tt>wwv5 111 C20 0100 6 8348/30.0/-3 H20 0203 0 22/-12.4/8846</tt>
+<p><tt>wwv5 2 111 C20 0100 6 8348/30.0/-3 H20 0203 0 22/-12.4/8846</tt>
 
-<p>Here the radio is tuned to 20 MHz and the AGC is currently 111 at
-that frequency. The message contains a report for WWV (<tt>C20</tt>) and
-WWVH (<tt>H20</tt>). The WWV report scoreboard is 0100 and the compare
-count is 6, which suggests very good reception conditions, and the
-minute sync amplitude and SNR are well above thresholds (2000 and 20 dB,
-respectively). Probably the most sensitive indicator of reception
-quality is the jitter, -3 samples, which is well below threshold (50 ms
-or 400 samples). While the message shows solid reception conditions from
-WWV, this is not the case for WWVH. Both the minute sync amplitude and
-SNR are below thresholds and the jitter is above threshold.
+<p>Here the radio is tuned to 20 MHz and the line-in port AGC is
+currently 111 at that frequency. The message contains a report for WWV
+(<tt>C20</tt>) and WWVH (<tt>H20</tt>). The WWV report scoreboard is
+0100 and the compare count is 6, which suggests very good reception
+conditions, and the minute sync amplitude and SNR are well above
+thresholds (2000 and 20 dB, respectively). Probably the most sensitive
+indicator of reception quality is the jitter, -3 samples, which is well
+below threshold (50 ms or 400 samples). While the message shows solid
+reception conditions from WWV, this is not the case for WWVH. Both the
+minute sync amplitude and SNR are below thresholds and the jitter is
+above threshold.
 
 <p>A sequence of five messages, one for each minute, might appear as
 follows:
 
-<p><pre>agc 95 sync  C2 0107 0 164/7.2/8100  H2 0207 0 80/-5.5/7754
-agc 99 sync  C5 0104 0 3995/21.8/395  H5 0207 0 27/-9.3/18826
-agc 239 sync C10 0105 0 9994/30.0/2663 H10 0207 0 54/-16.1/-529
-agc 155 sync C15 0103 3 3300/17.8/-1962 H15 0203 0 236/17.0/4873
-agc 111 sync C20 0100 6 8348/30.0/-3 H20 0203 0 22/-12.4/8846</pre>
+<p><pre>wwv5 2  95 C2 0107 0 164/7.2/8100  H2 0207 0 80/-5.5/7754
+wwv5 2  99 C5 0104 0 3995/21.8/395  H5 0207 0 27/-9.3/18826
+wwv5 2 239 C10 0105 0 9994/30.0/2663 H10 0207 0 54/-16.1/-529
+wwv5 2 155 C15 0103 3 3300/17.8/-1962 H15 0203 0 236/17.0/4873
+wwv5 2 111 C20 0100 6 8348/30.0/-3 H20 0203 0 22/-12.4/8846</pre>
 
 <p>Clearly, the only frequencies that are available are 15 MHz and 20
 MHz and propagation may be failing for 15 MHz. However, minute sync
 pulses are being heard on 5 and 10 MHz, even though the data pulses are
 not. This is typical of late afternoon when the maximum usable frequency
 (MUF) is falling and the ionospheric loss at the lower frequencies is
-decreasing.
+beginning to decrease.
 
 <h4>Debugging Aids</h4>
 
@@ -457,7 +459,6 @@ most useful for debugging.
 <p><dt><tt>0x0001</tt>
 <dd>Minute sync. Set when the decoder has identified a station and
 acquired the minute sync pulse.</dd>
-
 <p><dt><tt>0x0002</tt>
 <dd>Second sync. Set when the decoder has acquired the second sync pulse
 and within 125 <font face=Symbol>m</font>s of the correct phase.</dd>
@@ -481,24 +482,28 @@ and WWVH station processes before minute sync has been acquired. They
 show the progress of identifying and tracking the minute pulse of each
 station.
 
-<p><tt>wwv8 call comp ampl snr epoch jitr offs</tt>
+<p><tt>wwv8 port agc ident comp ampl snr epoch jitr offs</tt>
 
-<p>where <tt>call</tt> is the station callsign, <tt>comp</tt> the
-compare counter, <tt>ampl</tt> the pulse amplitude, <tt>snr</tt> the
-SNR, <tt>epoch</tt> the sample number of the minute pulse in the minute,
-<tt>jitr</tt> the change since the last <tt>epoch</tt> and <tt>offs</tt>
-the minute pulse offset relative to the second pulse. An example is:
+<p>where <tt>port</tt> and <tt>agc</tt> are the audio port and gain,
+respectively. The <tt>ident</tt>encodes the station (<tt>C</tt> for WWV,
+<tt>H</tt> for WWVH) and frequency (2, 5, 10, 15 and 20). For the
+encoded frequency, <tt>comp</tt> is the compare counter, <tt>ampl</tt>
+the pulse amplitude, <tt>snr</tt> the SNR, <tt>epoch</tt> the sample
+number of the minute pulse in the minute, <tt>jitr</tt> the change since
+the last <tt>epoch</tt> and <tt>offs</tt> the minute pulse offset
+relative to the second pulse. An example is:
 
-<p><tt>wwv8 WWV  2  9247  30.0   18843    -1       1</tt>
-<br><tt>wwv8 WWVH 0   134  -2.9   19016    193    174</tt>
+<p><tt> wwv8 2 127 C15  2  9247  30.0   18843     -1      1</tt>
+<br><tt>wwv8 2 127 H15  0   134  -2.9   19016    193    174</tt>
 
-<p>Here the driver has not yet acquired minute sync, WWV has been heard
-for at least two minutes, and WWVH is in the noise. The WWV minute pulse
-amplitude and SNR are well above the threshold (2000 and 6 dB,
-respectively) and the minute epoch has been determined -1 sample
-relative to the last one and 1 sample relative to the second
-sync pulse. The compare counter has incrmented to two; when it gets to
-three, minute sync has been acquired.
+<p>Here the radio is tuned to 15 MHz and the line-in port AGC is
+currently 127 at that frequency. The driver has not yet acquired minute
+sync, WWV has been heard for at least two minutes, and WWVH is in the
+noise. The WWV minute pulse amplitude and SNR are well above the
+threshold (2000 and 6 dB, respectively) and the minute epoch has been
+determined -1 sample relative to the last one and 1 sample relative to
+the second sync pulse. The compare counter has incrmented to two; when
+it gets to three, minute sync has been acquired.
 
 <p>Format <tt>wwv3</tt> messages are produced after minute sync has been
 acquired and until the seconds unit digit is determined. They show the
@@ -520,7 +525,6 @@ over the threshold (500), subcarrier amplitude well above the threshold
 (1000), good subcarrier tracking phase and SNR well above the threshold
 (10 dB). The bit is almost certainly a zero and the likelihood of a zero
 in this second is very high.
-
 <p>Format <tt>wwv4</tt> messages are produced for each of the nine BCD
 timecode digits until the clock has been set or verified. They show the
 results of decoding each digit of the transmitted timecode.
@@ -652,7 +656,6 @@ December.</dd>
 daylight time is in effect, respectively. The state is <tt>I</tt> or
 <tt>O</tt> when daylight time is about to go into effect or out of
 effect, respectively.</dd>
-
 <dt><tt>dut</tt>
 <dd>The DUT sign and magnitude shows the current UT1 offset relative to
 the displayed UTC time, in deciseconds.</dd>
@@ -718,7 +721,6 @@ precision available.
 command specifies the ICOM ID select code. A missing or zero argument
 disables the CI-V interface. Following are the ID select codes for the
 known radios.
-
 <p><table cols=6 width=100%>
 
 <tr>
