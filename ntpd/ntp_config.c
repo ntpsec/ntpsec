@@ -2103,11 +2103,11 @@ save_resolve(
 	}
 #endif
 
-	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %d %s\n", name,
+	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %u %s\n", name,
 	    mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("config: %s %d %d %d %d %x %d %08x %s\n", name, mode,
+		printf("config: %s %d %d %d %d %x %d %u %s\n", name, mode,
 		    version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #endif
 
