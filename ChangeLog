@@ -1,3 +1,17 @@
+1999-11-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntp_update: Ignore stuff in any A.* directory.
+
+1999-11-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Clean up header checks for sys/syssgi.h and
+	sys/select.h .  Originally, we did not check for sys/select.h
+	under some versions of SCO (see xntp3-5).  Somewhere in ntp4 we
+	dropped the SCO check and added the check for sys/syssgi.h,
+	exclusive of checking for sys/select.h.  Marc Brett can't think of
+	a reason why we should not be checking for sys/select.h, so let's
+	look for it now.
+
 1999-11-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpdate/ntpdate.c: Add the ability for ntpdate to query a

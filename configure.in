@@ -198,16 +198,9 @@ case "$target" in
     AC_CHECK_HEADERS(sys/sio.h)
     ;;
 esac
-case "$target" in
- *sgi*)
-    AC_CHECK_HEADERS(sys/syssgi.h)
-    ;;
- *)
-    AC_CHECK_HEADERS(sys/select.h)
-    ;;
-esac
-AC_CHECK_HEADERS(sys/sockio.h sys/stat.h sys/stream.h sys/stropts.h)
-AC_CHECK_HEADERS(sys/sysctl.h sys/termios.h sys/time.h)
+AC_CHECK_HEADERS(sys/select.h sys/sockio.h sys/stat.h sys/stream.h)
+AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/termios.h)
+AC_CHECK_HEADERS(sys/time.h)
 AC_EGREP_CPP(yes,
 [#include <sys/timepps.h>
 #ifdef PPS_API_VERS_1
