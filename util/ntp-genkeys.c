@@ -42,7 +42,8 @@
 /*
  * Prototypes
  */
-FILE	*fheader P((u_char *));	/* construct file header */
+void	crypto_config P((int, char *));
+FILE	*fheader P((char *, char *, char *, u_long, char *));	/* construct file header */
 void	getCmdOpts P((int, char**));
 int	genkeys  P((void));
 int	genrest  P((void));
@@ -50,7 +51,9 @@ int	genthings  P((void));
 #ifdef OPENSSL
 u_long	asn2ntp	 P((ASN1_TIME *));	/* ASN.1 time format to NTP seconds */
 void	cb	 P((int, int, void *));	/* callback routine */
-int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *)); /* generate req/cert */
+void	genkey_dsa P((char *, char *, char *, u_long));
+void	genkey_rsa P((char *, char *, char *, u_long));
+int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *, int)); /* generate req/cert */
 #endif /* OPENSSL */
 void	usage	 P((void));
 
@@ -67,21 +70,18 @@ long	d0, d1, d2, d3;		/* callback counters */
 char *keysdir = NTP_KEYSDIR;
 
 char *f1_keys;			/* Visible MD5 key file name */
-char *f2_keys;			/* timestamped */
-char *f3_keys;			/* previous filename */
+char f2_keys[PATH_MAX];		/* timestamped */
 
 char *f1_privatekey;
-char *f2_privatekey;
-char *f3_privatekey;
+char f2_privatekey[PATH_MAX];
 
 char *f1_signkey;
-char *f2_signkey;
-char *f3_signkey;
+char f2_signkey[PATH_MAX];
 
 char *f1_cert;
-char *f2_cert;
-char *f3_cert;
+char f2_cert[PATH_MAX];
 
+char tmp_name[PATH_MAX];
 
 /* Stubs and hacks so we can link with ntp_config.o */
 
@@ -383,7 +383,8 @@ struct certlist certlist[] = {
 
 int certlist_n = (sizeof certlist / sizeof *certlist) - 1;
 
-char *certname;			/* What cert do we use for links? */
+char *cl_name;			/* What cert do we use for links? */
+unsigned int cl_bit;		/* config bit for cert link */
 char *config_file = CONFIG_FILE; /* Default location for ntp.conf */
 int gen_cert;			/* Generate a cert? */
 unsigned int gen_certs = CERT_RSA_MD5; /* bitmap of certs to build */
@@ -437,8 +438,10 @@ getCmdOpts (
 				for (j = 0; j < certlist_n; ++j)
 					if (!strcmp(certlist[j].cert_name,
 						    ntp_optarg)) {
-						if (0 == certname)
-							certname = ntp_optarg;
+						if (0 == cl_name) {
+							cl_name = ntp_optarg;
+							cl_bit = certlist[j].cert_bit;
+						}
 						gen_certs |= certlist[j].cert_bit;
 						break;
 					}
@@ -473,7 +476,8 @@ getCmdOpts (
 			gen_sign = GEN_LINK;
 			/* FALL THROUGH */
 		    case 's':	/* Generate a sign key */
-			/* DSA and RSA are the only two things allowed here */
+			gen_sign &= ~GEN_LINK;
+			/* DSA or RSA are the only two things allowed here */
 			if (!strcmp(ntp_optarg, "DSA"))
 				gen_sign |= GEN_DSA;
 			else if (!strcmp(ntp_optarg, "RSA"))
@@ -553,7 +557,7 @@ main(
 				progname, stampfile, strerror(errno));
 			exit(1);
 		}
-		fprintf(fp, "%ul\n", ntptime);
+		fprintf(fp, "%lu\n", ntptime);
 		fclose(fp);
 	}
 	return(0);
@@ -584,6 +588,10 @@ genthings(
 
 	rc |= genrest();
 
+	/*
+	 * make the (sym)links.
+	 */
+
 	return rc;
 }
 
@@ -594,18 +602,8 @@ genkeys(
 	)
 {
 #ifdef OPENSSL
-	EVP_PKEY *pkey;		/* public/private keys */
-	RSA	*rsa;		/* RSA keys */
-	DSA	*dsa_params;	/* DSA parameters */
-	DH	*dh_params;	/* Diffie-Hellman parameters */
-	u_char	seed[20];	/* seed for DSA parameters */
-	int	codes;		/* DH check codes */
 	char	pathbuf[PATH_MAX];
-#endif /* OPENSSL */
-	u_char	md5key[16];
-	FILE	*str;
 	u_int	temp;
-	int	i, j;
 
 	/*
 	 * Here's the rub: The sign key defaults to the rsakey.  The rsakey
@@ -615,7 +613,6 @@ genkeys(
 	 * collisions.
 	 */
 
-#ifdef OPENSSL
 	/*
 	 * Seed random number generator and grow weeds.
 	 */
@@ -639,9 +636,51 @@ genkeys(
 	OpenSSL_add_all_algorithms();
 
 	/*
+	 * If we're making an RSA sign key and an RSA encrypt key we
+	 * must wiggle the timestamp to avoid a collision.  Wiggle the
+	 * encrypt key in this case.
+	 */
+	if (gen_rsa) {
+		if (gen_sign & GEN_RSA)
+			genkey_rsa("rsakey", f1_privatekey, f2_privatekey,
+				   ntptime - 1);
+		else
+			genkey_rsa("rsakey", f1_privatekey, f2_privatekey,
+				   ntptime);
+	}
+	if (gen_sign) {
+		if (gen_sign & GEN_RSA)
+			genkey_rsa("signkey", f1_signkey, f2_signkey, ntptime);
+		else
+			genkey_dsa("signkey", f1_signkey, f2_signkey, ntptime);
+	}
+
+	/*
+	 * Make sure f1_signkey is pointing to the right file.
+	 */
+#endif /* OPENSSL */
+
+	return (0);
+}
+
+
+#ifdef OPENSSL
+void
+genkey_rsa (
+	char *what,		/* What type of RSA key? */
+	char *f1_key,		/* file path */
+	char *f2_key,		/* target */
+	u_long tstamp		/* timestamp */
+	)
+{
+	EVP_PKEY *pkey;		/* public/private keys */
+	FILE	*str;
+	RSA	*rsa;		/* RSA keys */
+
+	/*
 	 * Generate random RSA keys.
 	 */
-	printf("Generating RSA keys (%d bits)...\n", MODULUSLEN);
+	printf("Generating RSA %s (%d bits)...\n", what, MODULUSLEN);
 	rsa = RSA_generate_key(MODULUSLEN, 3, cb, "RSA_keys");
 	printf("\n");
 	if (rsa == NULL) {
@@ -663,18 +702,35 @@ genkeys(
 	}
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	str = fheader("RSAkey");
+	str = fheader("RSAkey", keysdir, f1_privatekey, tstamp, f2_privatekey);
 	PEM_write_RSAPrivateKey(str, rsa, NULL, NULL, 0, NULL, NULL);
 	fclose(str);
 /*
 	RSA_print_fp(stdout, pkey->pkey.rsa, 0);
 */
 	free(pkey);
+	return;
+}
+
+
+void
+genkey_dsa(
+	char *what,		/* What type of RSA key? */
+	char *f1_key,		/* file path */
+	char *f2_key,		/* target */
+	u_long tstamp		/* timestamp */
+	)
+{
+	EVP_PKEY *pkey;		/* public/private keys */
+	FILE	*str;
+	DSA	*dsa_params;	/* DSA parameters */
+	u_char	seed[20];	/* seed for DSA parameters */
 
 	/*
 	 * Generate DSA parameters.
 	 */
-	printf("Generating DSA parameters (%d bits)...\n", MODULUSLEN);
+	printf("Generating DSA %s parameters (%d bits)...\n", what,
+	       MODULUSLEN);
 	dsa_params = DSA_generate_parameters(MODULUSLEN, seed,
 	    sizeof(seed), NULL, NULL, cb, "DSA_params");
 	printf("\n");
@@ -683,7 +739,7 @@ genkeys(
 		    ERR_error_string(ERR_get_error(), NULL));
 		 exit (-1);
 	}
-	str = fheader("DSApar");
+	str = fheader("DSApar", keysdir, f1_signkey, tstamp, tmp_name);
 	PEM_write_DSAparams(str, dsa_params);
 	fclose(str);
 
@@ -691,7 +747,7 @@ genkeys(
 	 * Generate DSA keys. Note, the digest algorithms that work with
 	 * DSS (DSA) are DSS and DSS1.
 	 */
-	printf("Generating DSA keys (%d bits)...\n", MODULUSLEN);
+	printf("Generating DSA %s (%d bits)...\n", what, MODULUSLEN);
 	if (!DSA_generate_key(dsa_params)) {
 		printf("DSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -699,7 +755,7 @@ genkeys(
 	}
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa_params);
-	str = fheader("DSAkey");
+	str = fheader("DSAkey", keysdir, f1_signkey, ntptime, f2_signkey);
 	PEM_write_DSAPrivateKey(str, dsa_params, NULL, NULL, 0, NULL,
 	    NULL);
 	fclose(str);
@@ -707,18 +763,9 @@ genkeys(
 	DSA_print_fp(stdout, pkey->pkey.dsa, 0);
 */
 	free(pkey);
-#endif /* OPENSSL */
-
-	/*
-	 * Make the links?
-	 */
-
-	/*
-	 * Make sure f1_signkey is pointing to the right file.
-	 */
-
-	return (0);
+	return;
 }
+#endif /* OPENSSL */
 
 
 int
@@ -728,12 +775,8 @@ genrest(
 {
 #ifdef OPENSSL
 	EVP_PKEY *pkey;		/* public/private keys */
-	RSA	*rsa;		/* RSA keys */
-	DSA	*dsa_params;	/* DSA parameters */
 	DH	*dh_params;	/* Diffie-Hellman parameters */
-	u_char	seed[20];	/* seed for DSA parameters */
 	int	codes;		/* DH check codes */
-	char	pathbuf[PATH_MAX];
 	/* Vars from crypto_key(): */
 	char	*cp = f1_signkey;
 	char	filename[MAXFILENAME]; /* name of rsa key file */
@@ -748,82 +791,13 @@ genrest(
 	u_int	temp;
 	int	i, j;
 
-	/*
-	 * This routine must do a file-read to get the key that will be used
-	 * to generate the certs.  We can check this key to make sure it's
-	 * the right type, and squawk if the sign key type does not match
-	 * the requested cert types.
-	 */
-
-#ifdef OPENSSL
-	/* Swiped from ntp_crypto.c:crypto_key() */
-
-	/*
-	 * Open the key file. If the first character of the file
-	 * name is not '/', prepend the keys directory string. If
-	 * something goes wrong, abandon ship.
-	 */
-	if (*cp == '/')
-		strcpy(filename, cp);
-	else
-		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
-	str = fopen(filename, "r");
-	if (str == NULL)
-		return (NULL);
-
-	/*
-	 * Read PEM-encoded key.
-	 */
-	pkey = PEM_read_PrivateKey(str, NULL, NULL, NULL);
-	fclose(str);
-	if (pkey == NULL) {
-		msyslog(LOG_ERR, "crypto_key %s",
-		    ERR_error_string(ERR_get_error(), NULL));
-		return (NULL);
-	}
-
-	/*
-	 * Extract filestamp if present.
-	 */
-	rval = readlink(filename, linkname, MAXFILENAME - 1);
-	if (rval > 0) {
-		linkname[rval] = '\0';
-		ptr = strrchr(linkname, '.');
-	} else {
-		ptr = strrchr(filename, '.');
-	}
-	if (ptr != NULL)
-		sscanf(++ptr, "%u", &fstamp);
-	else
-		fstamp = 0;
-# if 0
-	vp->fstamp = htonl(fstamp);
-# endif
-	sprintf(statstr, "%s link %d fs %u mod %d", cp, rval, fstamp,
-	    EVP_PKEY_size(pkey) * 8);
-# if 0
-	record_crypto_stats(NULL, statstr);
-# endif
-# ifdef DEBUG
-	if (debug)
-		printf("crypto_key: %s\n", statstr);
-	if (debug > 1) {
-		if (EVP_MD_type(pkey) == EVP_PKEY_DSA)
-			DSA_print_fp(stdout, pkey->pkey.dsa, 0);
-		else
-			RSA_print_fp(stdout, pkey->pkey.rsa, 0);
-	}
-# endif
-#endif /* OPENSSL */
-
-
 	if (gen_skf) {
 		/*
 		 * Generate semi-random MD5 keys.
 		 */
 		printf("Generating MD5 keys...\n");
 		srandom((u_int)tv.tv_usec);
-		str = fheader("MD5key");
+		str = fheader("MD5key", keysdir, f1_keys, ntptime, f2_keys);
 		for (i = 1; i <= MD5KEYS; i++) {
 			for (j = 0; j < 16; j++) {
 				while (1) {
@@ -843,82 +817,160 @@ genrest(
 	}
 
 #ifdef OPENSSL
-	if (EVP_MD_type(pkey) == EVP_PKEY_RSA) {
-		/*
-		 * For signature encryption it is not necessary that the RSA
-		 * parameters be strictly groomed and once in a while the
-		 * modulus turns out to be non-prime. Just for grins, we
-		 * check the primality. If this fails, disregard or run the
-		 * program again.
-		 */
-		if (!RSA_check_key(rsa)) {
-			printf("Invalid RSA key\n%s\n",
-			       ERR_error_string(ERR_get_error(), NULL));
-		}
-/*
-		RSA_print_fp(stdout, pkey->pkey.rsa, 0);
-*/
-		/*
-		 * Generate the X509 certificate request. The digest
-		 * algorithms that work with RSA are MD2, MD5, SHA, SHA1,
-		 * MDC2 and RIPEMD160.
-		 */
-#ifdef HAVE_EVP_MD2
-		if (gen_certs & CERT_RSA_MD2) {
-			x509("RSA_MD2", pkey, EVP_md2());
-			gen_certs &= ~CERT_RSA_MD2;
-		}
-#endif
-		if (gen_certs & CERT_RSA_MD5) {
-			x509("RSA_MD5", pkey, EVP_md5());
-			gen_certs &= ~CERT_RSA_MD5;
-		}
-		if (gen_certs & CERT_RSA_SHA) {
-			x509("RSA_SHA", pkey, EVP_sha());
-			gen_certs &= ~CERT_RSA_SHA;
-		}
-		if (gen_certs & CERT_RSA_SHA1) {
-			x509("RSA_SHA1", pkey, EVP_sha1());
-			gen_certs &= ~CERT_RSA_SHA1;
-		}
-#ifdef HAVE_EVP_MDC2
-		if (gen_certs & CERT_RSA_MDC2) {
-			x509("RSA_MDC2", pkey, EVP_mdc2());
-			gen_certs &= ~CERT_RSA_MDC2;
-		}
-#endif
-		if (gen_certs & CERT_RSA_RIPEMD160) {
-			x509("RSA_RIPEMD160", pkey, EVP_ripemd160());
-			gen_certs &= ~CERT_RSA_RIPEMD160;
-		}
-	}
-
-	if (EVP_MD_type(pkey) == EVP_PKEY_DSA) {
-/*
-
-		DSA_print_fp(stdout, pkey->pkey.dsa, 0);
-*/
-		/*
-		 * Generate the X509 certificate request. The digest
-		 * algorithms that work with DSS (DSA) are DSS and DSS1.
-		 */
-		if (gen_certs & CERT_DSA_SHA) {
-			x509("DSA_SHA", pkey, EVP_dss());
-			gen_certs &= ~CERT_DSA_SHA;
-		}
-		if (gen_certs & CERT_DSA_SHA1) {
-			x509("DSA_SHA1", pkey, EVP_dss1());
-			gen_certs &= ~CERT_DSA_SHA1;
-		}
-	}
-
-	free(pkey);
-
 	if (gen_certs) {
-		printf("Some requested certs were not made:\n");
-		for (i = 0; i < certlist_n; ++i) {
-			if (gen_certs & certlist[i].cert_bit)
-				printf("%s\n", certlist[i].cert_name);
+		/*
+		 * This routine must do a file-read to get the key that will
+		 * be used * to generate the certs.  We can check this key
+		 * to make sure it's * the right type, and squawk if the
+		 * sign key type does not match * the requested cert types.
+		 */
+
+		/* Swiped from ntp_crypto.c:crypto_key() */
+
+		/*
+		 * Open the key file. If the first character of the file
+		 * name is not * '/', prepend the keys directory string. If
+		 * something goes wrong, * abandon ship.
+		 */
+		if (*cp == '/')
+			strcpy(filename, cp);
+		else
+			snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
+		str = fopen(filename, "r");
+		if (str == NULL)
+			return (NULL);
+
+		/*
+		 * Read PEM-encoded key.
+		 */
+		pkey = PEM_read_PrivateKey(str, NULL, NULL, NULL);
+		fclose(str);
+		if (pkey == NULL) {
+			msyslog(LOG_ERR, "crypto_key %s",
+				ERR_error_string(ERR_get_error(), NULL));
+			return (NULL);
+		}
+
+		/*
+		 * Extract filestamp if present.
+		 */
+		rval = readlink(filename, linkname, MAXFILENAME - 1);
+		if (rval > 0) {
+			linkname[rval] = '\0';
+			ptr = strrchr(linkname, '.');
+		} else {
+			ptr = strrchr(filename, '.');
+		}
+		if (ptr != NULL)
+			sscanf(++ptr, "%u", &fstamp);
+		else
+			fstamp = 0;
+# if 0
+		vp->fstamp = htonl(fstamp);
+# endif
+		sprintf(statstr, "%s link %d fs %u mod %d", cp, rval, fstamp,
+			EVP_PKEY_size(pkey) * 8);
+# if 0
+		record_crypto_stats(NULL, statstr);
+# endif
+# ifdef DEBUG
+		if (debug)
+			printf("crypto_key: %s\n", statstr);
+		if (debug > 1) {
+			if (EVP_MD_type(pkey) == EVP_PKEY_DSA)
+				DSA_print_fp(stdout, pkey->pkey.dsa, 0);
+			else
+				RSA_print_fp(stdout, pkey->pkey.rsa, 0);
+		}
+# endif
+
+		if (EVP_MD_type(pkey) == EVP_PKEY_RSA) {
+			/*
+			 * For signature encryption it is not necessary that
+			 * the RSA parameters be strictly groomed and once
+			 * in a while the modulus turns out to be
+			 * non-prime. Just for grins, we check the
+			 * primality. If this fails, disregard or run the
+			 * program again.
+			 */
+			if (!RSA_check_key(pkey->pkey.rsa)) {
+				printf("Invalid RSA key\n%s\n",
+				       ERR_error_string(ERR_get_error(),
+							NULL));
+			}
+# if 0
+			RSA_print_fp(stdout, pkey->pkey.rsa, 0);
+# endif
+			/*
+			 * Generate the X509 certificate request. The digest
+			 * algorithms that work with RSA are MD2, MD5, SHA,
+			 * SHA1, MDC2 and RIPEMD160.
+			 */
+#ifdef HAVE_EVP_MD2
+			if (gen_certs & CERT_RSA_MD2) {
+				x509("RSA_MD2", pkey, EVP_md2(),
+				     cl_bit & CERT_RSA_MD2);
+				gen_certs &= ~CERT_RSA_MD2;
+			}
+#endif
+			if (gen_certs & CERT_RSA_MD5) {
+				x509("RSA_MD5", pkey, EVP_md5(),
+				     cl_bit & CERT_RSA_MD5);
+				gen_certs &= ~CERT_RSA_MD5;
+			}
+			if (gen_certs & CERT_RSA_SHA) {
+				x509("RSA_SHA", pkey, EVP_sha(),
+				     cl_bit & CERT_RSA_SHA);
+				gen_certs &= ~CERT_RSA_SHA;
+			}
+			if (gen_certs & CERT_RSA_SHA1) {
+				x509("RSA_SHA1", pkey, EVP_sha1(),
+				     cl_bit & CERT_RSA_SHA1);
+				gen_certs &= ~CERT_RSA_SHA1;
+			}
+#ifdef HAVE_EVP_MDC2
+			if (gen_certs & CERT_RSA_MDC2) {
+				x509("RSA_MDC2", pkey, EVP_mdc2(),
+				     cl_bit & CERT_RSA_MDC2);
+				gen_certs &= ~CERT_RSA_MDC2;
+			}
+#endif
+			if (gen_certs & CERT_RSA_RIPEMD160) {
+				x509("RSA_RIPEMD160", pkey, EVP_ripemd160(),
+				     cl_bit & CERT_RSA_RIPEMD160);
+				gen_certs &= ~CERT_RSA_RIPEMD160;
+			}
+		}
+
+		if (EVP_MD_type(pkey) == EVP_PKEY_DSA) {
+# if 0
+			DSA_print_fp(stdout, pkey->pkey.dsa, 0);
+# endif
+			/*
+			 * Generate the X509 certificate request. The digest
+			 * algorithms that work with DSS (DSA) are DSS and
+			 * DSS1.
+			 */
+			if (gen_certs & CERT_DSA_SHA) {
+				x509("DSA_SHA", pkey, EVP_dss(),
+				     cl_bit & CERT_DSA_SHA);
+				gen_certs &= ~CERT_DSA_SHA;
+			}
+			if (gen_certs & CERT_DSA_SHA1) {
+				x509("DSA_SHA1", pkey, EVP_dss1(),
+				     cl_bit & CERT_DSA_SHA1);
+				gen_certs &= ~CERT_DSA_SHA1;
+			}
+		}
+
+		free(pkey);
+
+		if (gen_certs) {
+			printf("Some requested certs were not made:\n");
+			for (i = 0; i < certlist_n; ++i) {
+				if (gen_certs & certlist[i].cert_bit)
+					printf("%s\n", certlist[i].cert_name);
+			}
 		}
 	}
 
@@ -941,16 +993,12 @@ genrest(
 		}
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DH(pkey, dh_params);
-		str = fheader("DHpar");
+		str = fheader("DHpar", keysdir, f1_signkey, ntptime, tmp_name);
 		PEM_write_DHparams(str, dh_params);
 		fclose(str);
 		free(pkey);
 	}
 #endif /* OPENSSL */
-
-	/*
-	 * Make the links?
-	 */
 
 	return (0);
 }
@@ -983,7 +1031,8 @@ int
 x509	(
 	u_char	*id,		/* host name */
 	EVP_PKEY *pkey,		/* generic key algorithm */
-	EVP_MD *md		/* generic digest algorithm */
+	EVP_MD *md,		/* generic digest algorithm */
+	int certlink		/* Is this cert a link target? */
 	)
 {
 	X509_REQ *req;		/* X509 certificate request */
@@ -991,7 +1040,7 @@ x509	(
 	X509_NAME *subj;	/* distinguished (common) name */
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
-	u_char	pathbuf[PATH_MAX];
+	char	pathbuf[PATH_MAX];
 
 	/*
 	 * Generate, sign and verify X509 certificate request.
@@ -1015,7 +1064,7 @@ x509	(
 	 * Write request for offline processing.
 	 */
 	sprintf(pathbuf, "%sreq", id);
-	str = fheader(pathbuf);
+	str = fheader(pathbuf, keysdir, f1_cert, ntptime, tmp_name);
 	PEM_write_X509_REQ(str, req);
 	fclose(str);
 
@@ -1058,7 +1107,10 @@ x509	(
 	 * Write certificate for offline processing.
 	 */
 	sprintf(pathbuf, "%scert", id);
-	str = fheader(pathbuf);
+	str = fheader(pathbuf, keysdir, f1_cert, ntptime, (certlink)
+		      ? f2_cert
+		      : tmp_name);
+
 	PEM_write_X509(str, cert);
 /*
 	X509_print_fp(stdout, cert);
@@ -1144,18 +1196,52 @@ cb	(
 
 
 /*
- * Generate file header
+ * Generate file header.
+ *
+ * We need to write this to the correct place:
+ * - If the old filename starts with a /, use it as-is.
+ * - else prepend the keysdir/
+ * save this - it's the location of the (sym)link "source".
+ * save the name of the "target".
+ * write to dirname(source)/target
  */
 FILE *
 fheader	(
-	u_char	*id		/* ident string */
+	char	*id,		/* ident string */
+	char	*kdir,		/* key directory */
+	char	*fpath,		/* file path */
+	u_long	tstamp,		/* timestamp */
+	char	*tgt		/* target */
 	)
 {
 	FILE	*str;		/* file handle */
 	char	filename[PATH_MAX]; /* file name */
+	char	*cp;
 
-	sprintf(filename, "ntpkey_%s_%s.%lu", id, hostname, ntptime);
+printf("fheader: id <%s> kdir <%s> fpath <%s> t %lu\n", id, kdir, fpath, tstamp);
+
+	if (*fpath == '/')
+		strcpy(filename, fpath);
+	else
+		snprintf(filename, sizeof filename, "%s/%s", kdir, fpath);
+	cp = strrchr(filename, '/');
+	if (cp)
+		++cp, *cp = '\0';
+	else {
+		fprintf(stderr, "%s: fheader: no / in <%s>!\n", progname,
+			filename);
+		return NULL;
+	}
+	sprintf(tgt, "ntpkey_%s_%s.%lu", id, hostname, tstamp);
+	strcat(filename, tgt);
+printf("fheader: tgt <%s> filename <%s>\n", tgt, filename);
 	str = fopen(filename, "w");
-	fprintf(str, "# %s\n# %s", filename, ctime(&tv.tv_sec));
+	if (str)
+		fprintf(str, "# %s\n# %s", tgt, ctime(&tv.tv_sec));
+	else {
+		fprintf(stderr, "%s: fheader: fopen(%s) failed: %s\n",
+			progname, filename, strerror(errno));
+		exit(1);
+	}
 	return(str);
 }
