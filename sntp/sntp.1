@@ -16,12 +16,6 @@ sntp \- a SNTP utility (command and daemon)
 |
 .B \-W
 ] [
-.B \-B
-[
-.I period
-] |
-.B \-S
-|
 .B \-q
 [
 .BI \-f " savefile"
@@ -93,23 +87,6 @@ requests very verbose debugging output, and will interfere with the timing
 when writing to the terminal (because of line buffered output from C).  Note
 that the times produced by this are the corrections needed, and not the error
 in the local clock.  This option should be set only when debugging the source.
-.TP
-.BI \-B " period"
-indicates that it should behave as a server, broadcasting time packets at
-intervals of
-.I period
-minutes (sic).  Acceptable values of
-.I period
-are from 1 to 1440 (a day), and the default (i.e. if
-.B \-B
-is specified but
-.I period
-is omitted) is 60.  Naturally, this will work only if the user has enough
-privilege.
-.TP
-.B \-S
-indicates that it should behave as a server, responding to time requests from
-clients.  Naturally, this will work only if the user has enough privilege.
 .TP
 .B \-q
 indicates that it should query a daemon save file being maintained by it.
