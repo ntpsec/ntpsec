@@ -1,5 +1,7 @@
 2000-03-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* Makefile.am: General cleanup
+
 	* configure.in: 4.0.99h1
 
 	* ntpd/ntp_resolver.c: Lose unneeded header.
