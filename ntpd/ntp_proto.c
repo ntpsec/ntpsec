@@ -646,7 +646,7 @@ receive(
 		 * server response. Otherwise, it must be a client
 		 * request, so send a server response and go home.
 		 */
-		if (rbufp->dstadr->flags & INT_MULTICAST) {
+		if (rbufp->dstadr->flags & INT_MCASTOPEN) {
 
 			/*
 			 * Do not respond to multicast if not configured
@@ -2759,7 +2759,7 @@ fast_xmit(
 	 * go out another way.
 	 */
 	rpkt = &rbufp->recv_pkt;
-	if (rbufp->dstadr->flags & INT_MULTICAST)
+	if (rbufp->dstadr->flags & INT_MCASTOPEN)
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
