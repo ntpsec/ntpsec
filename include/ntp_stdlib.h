@@ -29,9 +29,12 @@
 # include <stdarg.h>
 extern	void	msyslog		P((int, const char *, ...))
 				__attribute__((__format__(__printf__, 2, 3)));
+extern	void	netsyslog	P((int, const char *, ...))
+				__attribute__((__format__(__printf__, 2, 3)));
 #else
 # include <varargs.h>
 extern	void msyslog		P(());
+extern	void netsyslog		P(());
 #endif
 
 extern	void	auth_delkeys	P((void));
