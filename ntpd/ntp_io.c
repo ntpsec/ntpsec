@@ -163,16 +163,17 @@ ISC_LIST(vsock_t)	sockets_list;
 typedef struct remaddr remaddr_t;
 
 struct remaddr {
-      struct sockaddr_storage        addr;
-      int                            if_index;
-      ISC_LINK(remaddr_t)              link;
+      struct sockaddr_storage	addr;
+      int			if_index;
+      int			flags;
+      ISC_LINK(remaddr_t)	link;
 };
 
 ISC_LIST(remaddr_t)       remoteaddr_list;
 
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
-void	add_addr_to_list	P((struct sockaddr_storage *, int));
+void	add_addr_to_list	P((struct sockaddr_storage *, int, int));
 void	delete_addr_from_list	P((struct sockaddr_storage *));
 int     find_addr_in_list P((struct sockaddr_storage *));
 int	create_wildcards	P((u_short));
@@ -692,8 +693,10 @@ io_multicast_add(
 			return;
 		}
 		for (i = nwilds; i < ninterfaces; i++) {
-			 /* Be sure it's the correct family */
-                        if (inter_list[i].sin.ss_family != AF_INET)
+			 /* Be sure it's the correct family and can multicast */
+                        if ((inter_list[i].sin.ss_family != AF_INET) ||
+			    (inter_list[i].flags & INT_LOOPBACK) ||
+			    !(inter_list[i].flags & INT_MULTICAST))
                                 continue;
 			/* Already have this address */
 			if (SOCKCMP(&inter_list[i].sin, &addr))
@@ -757,7 +760,7 @@ io_multicast_add(
 		if (i >= ninterfaces)
 			ninterfaces = i+1;
 
-                add_addr_to_list(&addr, i);
+                add_addr_to_list(&addr, i, INT_MULTICAST);
 		break;
 
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
@@ -772,7 +775,9 @@ io_multicast_add(
 		}
 		for (i = nwilds; i < ninterfaces; i++) {
 			/* Be sure it's the correct family */
-			if(inter_list[i].sin.ss_family != AF_INET6)
+			if ((inter_list[i].sin.ss_family != AF_INET6) ||
+			    (inter_list[i].flags & INT_LOOPBACK) ||
+			    !(inter_list[i].flags & INT_MULTICAST))
 				continue;
 			/* Already have this address */
 			if (SOCKCMP(&inter_list[i].sin, &addr))
@@ -847,7 +852,7 @@ io_multicast_add(
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
 
-                add_addr_to_list(&addr, i);
+                add_addr_to_list(&addr, i, INT_MULTICAST);
 		break;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 	}
@@ -2237,10 +2242,11 @@ delete_socket_from_list(SOCKET fd) {
 	}
 }
 void
-add_addr_to_list(struct sockaddr_storage *addr, int if_index){
+add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 	remaddr_t *laddr = (remaddr_t *)malloc(sizeof(remaddr_t));
 	memcpy(&laddr->addr, addr, sizeof(addr));
 	laddr->if_index = if_index;
+	laddr->flags = flags;
 
 	ISC_LIST_APPEND(remoteaddr_list, laddr, link);
 #ifdef DEBUG
