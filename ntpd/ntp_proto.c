@@ -75,7 +75,7 @@ u_long	sys_limitrejected;	/* pkts rejected due to client count per net */
 static	double	root_distance	P((struct peer *));
 static	double	clock_combine	P((struct peer **, int));
 static	void	peer_xmit	P((struct peer *));
-static	void	fast_xmit	P((struct recvbuf *, int, keyid_t));
+static	void	fast_xmit	P((struct recvbuf *, int, keyid_t, int));
 static	void	clock_update	P((void));
 int	default_get_precision	P((void));
 
@@ -236,7 +236,7 @@ transmit(
 				peer_ntpdate--;
 				if (peer_ntpdate > 0)
 					return;
-				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE,
 				    "no reply; clock not set");
 				printf(
@@ -255,7 +255,7 @@ transmit(
 	 * Never transmit if in broadcast client mode. If in broadcast
 	 * mode, transmit only if synchronized to a valid source. 
 	 */
-	if (peer->hmode == MODE_BCLIENT) {
+	if (peer->hmode == MODE_BCLIENT || peer->flash & TEST4) {
 		return;
 	} else if (peer->hmode == MODE_BROADCAST) {
 		if (sys_peer == NULL)
@@ -287,15 +287,17 @@ receive(
 #endif /* AUTOKEY */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
+	l_fp p_org;
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
 	 * length for control and private mode packets must be checked
 	 * by the service routines. Note that no statistics counters are
 	 * recorded for restrict violations, since these counters are in
-	 * the restriction routine. In case of invalid version,
-	 * restricted service or too many clients, return a kiss-of-
-	 * death packet. 
+	 * the restriction routine. Note the careful distinctions here
+	 * between a packet with a format error and a packet that is
+	 * simply discarded without prejudice. Some restrictions have to
+	 * be handled later in order to generate a Kiss-of-Death packet.
 	 */
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
@@ -315,8 +317,6 @@ receive(
 	    PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
 		sys_oldversionpkt++;		/* old version */
 	} else {
-		if (restrict_mask & RES_DEMOBILIZE)
-			fast_xmit(rbufp, 0, 0);	/* unknown version */
 		sys_unknownversion++;
 		return;
 	}
@@ -333,17 +333,6 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
-	if (restrict_mask & RES_DONTSERVE) {
-		if (restrict_mask & RES_DEMOBILIZE)
-			fast_xmit(rbufp, 0, 0);	/* no time service */
-		return;
-	}
-	if (restrict_mask & RES_LIMITED) {
-		if (restrict_mask & RES_DEMOBILIZE)
-			fast_xmit(rbufp, 0, 0);	/* too many clients */
-		sys_limitrejected++;
-                return;
-        }
 	if (rbufp->recv_length < LEN_PKT_NOMAC) {
 		sys_badlength++;
 		return;				/* no runt packets */
@@ -357,8 +346,6 @@ receive(
 	 * association; otherwise, it is from a client association. From
 	 * NTPv2 on, all we do is toss out mode zero packets, since
 	 * control and private mode packets have already been handled.
-	 * In either case, toss out broadcast packets if we are not a
-	 * broadcast client. 
 	 */
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION && hismode ==
@@ -447,14 +434,36 @@ receive(
 	    hismode, &retcode);
 
 	/*
-	 * Kiss-of-death packet
+	 * A Kiss-of-Death (KoD) packet is returned by a server in case
+	 * the client is denied access. It consists of the client
+	 * request packet with the leap bits indicating never
+	 * synchronized, stratum zero and reference ID field the ASCII
+	 * string "DENY". If the KoD packet matches an association and
+	 * the packet originate timestamp matches the association
+	 * transmit timestamp the KoD is legitimate and the association
+	 * disabled.
 	 */
 	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
 	    pkt->stratum == 0 && memcmp(&pkt->refid, "DENY", 4) == 0) {
+		if (peer != NULL) {
+			NTOHL_FP(&pkt->org, &p_org);
+			if (peer->leap == LEAP_NOTINSYNC &&
+			    L_ISEQU(&peer->xmt, &p_org)) {
+				peer->stratum = 0;
+				peer->flash = TEST4;
+				memcpy(&peer->refid, &pkt->refid, 4);
+				msyslog(LOG_INFO, "access denied %s\n",
+				    ntoa(&rbufp->recv_srcadr));
+#ifdef DEBUG
+				if (debug)
+					printf(
+					  "receive: access denied %s\n",
+				    	    ntoa(&rbufp->recv_srcadr));
+#endif
 
-printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
-	pkt->stratum, &pkt->refid);
-
+			}
+		}
+		return;
 	}
 	is_authentic = 0;
 	dstadr_sin = &rbufp->dstadr->sin;
@@ -616,9 +625,10 @@ printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
 		 * set the key ID to zero to tell the caller about this.
 		 */
 		if (is_authentic)
-			fast_xmit(rbufp, MODE_SERVER, skeyid);
+			fast_xmit(rbufp, MODE_SERVER, skeyid,
+			    restrict_mask);
 		else
-			fast_xmit(rbufp, MODE_SERVER, 0);
+			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
 		return;
 
 	case AM_MANYCAST:
@@ -641,7 +651,9 @@ printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
 		 * since the manycast servers send the server packet
 		 * immediately.
 		 */
-		if (sys_authenticate && !is_authentic)
+		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
+		    RES_NOPEER)) || (sys_authenticate &&
+		    !is_authentic))
 			return;
 
 		peer2 = findmanycastpeer(rbufp);
@@ -665,8 +677,11 @@ printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
 		 * authentic. If so, mobilize a symmetric passive
 		 * association.
 		 */
-		if (sys_authenticate && !is_authentic) {
-			fast_xmit(rbufp, MODE_PASSIVE, 0);
+		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
+		    RES_NOPEER)) || (sys_authenticate &&
+		    !is_authentic)) {
+			fast_xmit(rbufp, MODE_PASSIVE, 0,
+			    restrict_mask);
 			return;
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -686,8 +701,9 @@ printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
 		 * client. If so, mobilize a broadcast client
 		 * association.
 		 */
-		if ((restrict_mask & RES_NOPEER) || !sys_bclient ||
-		    (sys_authenticate && !is_authentic))
+		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
+		    RES_NOPEER)) || (sys_authenticate &&
+		    !is_authentic) || !sys_bclient)
 			return;
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -701,8 +717,11 @@ printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
 	case AM_PROCPKT:
 
 		/*
-		 * Happiness and nothing broke. Earn some revenue.
+		 * Happiness and nothing broke. Earn some revenue, but
+		 * only if unrestricted.
 		 */
+		if (restrict_mask & (RES_DONTSERVE | RES_LIMITED))
+			return;
 		break;
 
 	default:
@@ -1266,10 +1285,8 @@ peer_clear(
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 #ifdef REFCLOCK
-	if (!(peer->flags & FLAG_REFCLOCK)) {
+	if (!(peer->flags & FLAG_REFCLOCK))
 		peer->leap = LEAP_NOTINSYNC;
-		peer->stratum = STRATUM_UNSPEC;
-	}
 #endif
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -2320,7 +2337,8 @@ static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
 	int xmode,		/* transmit mode */
-	keyid_t xkeyid		/* transmit key ID */
+	keyid_t xkeyid,		/* transmit key ID */
+	int mask		/* restrict mask */
 	)
 {
 	struct pkt xpkt;	/* transmit packet structure */
@@ -2338,26 +2356,35 @@ fast_xmit(
 	rpkt = &rbufp->recv_pkt;
 	if (rbufp->dstadr->flags & INT_MULTICAST)
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
-	if (xmode == 0) {
-		xpkt.li_vn_mode = PKT_LI_VN_MODE((LEAP_NOTINSYNC),
-		    PKT_VERSION(rpkt->li_vn_mode),
-		    PKT_MODE(rpkt->li_vn_mode));
-		xpkt.stratum = 0;
-		memcpy(&xpkt.refid, "DENY", 4);
+
+	/*
+	 * If the caller is restricted, return a Kiss-of-Death packet;
+	 * otherwise, smooch politely.
+	 */
+	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+		if (!(mask & RES_DEMOBILIZE)) {
+			return;
+		} else {
+			xpkt.li_vn_mode =
+			    PKT_LI_VN_MODE(LEAP_NOTINSYNC,
+			    PKT_VERSION(rpkt->li_vn_mode), xmode);
+			xpkt.stratum = 0;
+			memcpy(&xpkt.refid, "DENY", 4);
+		}
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-		xpkt.ppoll = rpkt->ppoll;
-		xpkt.precision = sys_precision;
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-		xpkt.rootdispersion =
-		    HTONS_FP(DTOUFP(sys_rootdispersion));
 		xpkt.refid = sys_refid;
-		HTONL_FP(&sys_reftime, &xpkt.reftime);
-		xpkt.org = rpkt->xmt;
-		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 	}
+	xpkt.ppoll = rpkt->ppoll;
+	xpkt.precision = sys_precision;
+	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	xpkt.rootdispersion =
+	    HTONS_FP(DTOUFP(sys_rootdispersion));
+	HTONL_FP(&sys_reftime, &xpkt.reftime);
+	xpkt.org = rpkt->xmt;
+	HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet

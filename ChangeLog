@@ -1,3 +1,19 @@
+2001-04-27  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpq/ntpq.c: Reorder and add some TEST flag bits.
+	* ntpd/ntp_proto.c (transmit): Also bail if access denied.
+	(receive): Lose RES_DEMOBILIZE and (some?) RES_DONTSERVE and
+	RES_LIMITIED stuff.  Update Kiss-Of-Death (KoD) docs.
+	Call fast_xmit with new 3rd parameter (restrict_mask).
+	Before checking for an authentic packet, check the restrict_mask
+	for RES_{DONTSERVE,LIMITED,NOPEER}.
+	Check restrictions in AM_PROCPKT case.
+	(peer_clear): Don't lose the stratum if the peer->flags don't
+	indicate FLAG_REFCLOCK.
+	(fast_xmit): Take restrict mask as a new argument, and handle
+	KoD.  Reorder some code.
+	From: Dave Mills.
+
 2001-04-26  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpdc/ntpdc_ops.c: restrict/unrestrict support for version and
