@@ -126,7 +126,7 @@ struct	refclock refclock_atom = {
 #else /* HAVE_PPSAPI */
 struct	refclock refclock_atom = {
 	atom_start,		/* start up driver */
-	noentry,		/* shut down driver */
+	atom_shutdown,		/* shut down driver */
 	atom_poll,		/* transmit poll message */
 	noentry,		/* fudge control (not used) */
 	noentry,		/* initialize driver (not used) */
@@ -202,6 +202,32 @@ atom_start(
 }
 
 
+/*
+ * atom_shutdown - shut down the clock
+ */
+static void
+atom_shutdown(
+	int unit,		/* unit number (not used) */
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	struct refclockproc *pp;
+	register struct ppsunit *up;
+
+	pp = peer->procptr;
+	up = (struct ppsunit *)pp->unitptr;
+#ifdef HAVE_PPSAPI
+	if (up->fddev > 0)
+		close(up->fddev);
+	if (up->handle != 0)
+		time_pps_destroy(up->handle);
+#endif /* HAVE_PPSAPI */
+	if (pps_peer == peer)
+		pps_peer = NULL;
+	free(up);
+}
+
+
 #ifdef HAVE_PPSAPI
 /*
  * atom_control - fudge control
@@ -217,6 +243,7 @@ atom_control(
 	struct refclockproc *pp;
 	int	mode;
 
+	pp = peer->procptr;
 	if (pp->sloppyclockflag & CLK_FLAG2)
 		mode = PPS_CAPTURECLEAR;
 	else
@@ -277,30 +304,6 @@ atom_ppsapi(
 	}
 #endif
 	return (1);
-}
-
-
-/*
- * atom_shutdown - shut down the clock
- */
-static void
-atom_shutdown(
-	int unit,		/* unit number (not used) */
-	struct peer *peer	/* peer structure pointer */
-	)
-{
-	struct refclockproc *pp;
-	register struct ppsunit *up;
-
-	pp = peer->procptr;
-	up = (struct ppsunit *)pp->unitptr;
-	if (up->fddev > 0)
-		close(up->fddev);
-	if (up->handle != 0)
-		time_pps_destroy(up->handle);
-	if (pps_peer == peer)
-		pps_peer = NULL;
-	free(up);
 }
 
 
