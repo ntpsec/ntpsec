@@ -491,9 +491,11 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
 				stoa(&entry->peer_store));
 #endif
+		entry->ce_name = emalloc(MAXHOSTNAMELEN);
 		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
 				   SOCKLEN(&entry->peer_store),
-				   (char*)&entry->ce_name, sizeof(entry->ce_name), NULL, 0, 0);
+				   (char *)&entry->ce_name, MAXHOSTNAMELEN,
+				   NULL, 0, 0);
 	}
 
 	if (error != 0) {
@@ -516,10 +518,6 @@ findhostaddr(
 		if (debug > 2)
 			msyslog(LOG_INFO, "findhostaddr: address resolved.");
 #endif
-		s = strlen(hp->h_name) + 1;
-		cp = (char *)emalloc(s);
-		strcpy(cp, hp->h_name);
-		entry->ce_name = cp;
 	}
 		   
 	return (1);
