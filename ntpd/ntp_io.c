@@ -963,7 +963,7 @@ io_multicast_add(
 		memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 		sin6p->sin6_family = AF_INET6;
 		sin6p->sin6_addr = iaddr6;
-		sin6p->sin6_port = htons(123)
+		sin6p->sin6_port = htons(123);
 
 		/*
 		 * Try opening a socket for the specified class D address. This
@@ -980,7 +980,7 @@ io_multicast_add(
 			 stoa(&addr));
 		} else {
 			interlist[i].fd = s;
-			interlist[i].bfd = -1
+			interlist[i].bfd = INVALID_SOCKET;
 			(void)strncpy(inter_list[i].name, "multicast",
 			   sizeof(inter_list[i].name));
 			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
@@ -1000,7 +1000,7 @@ io_multicast_add(
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
 
-		break
+		break;
 #endif /* HAVE_IPV6 */
 	}
 
