@@ -359,7 +359,8 @@ true_receive(
 	/*
 	 * Clock misunderstood our last command?
 	 */
-	if (pp->a_lastcode[0] == '?') {
+	if (pp->a_lastcode[0] == '?' ||
+	    strcmp(pp->a_lastcode, "ERROR 05 NO SUCH FUNCTION") == 0) {
 		true_doevent(peer, e_Huh);
 		return;
 	}
@@ -427,13 +428,14 @@ true_receive(
 	}
 
 	/*
-	 * Timecode: " TRUETIME Mk III"
-	 * (from a TM/TMD clock during initialization.)
+	 * Timecode: " TRUETIME Mk III" or " TRUETIME XL"
+	 * (from a TM/TMD/XL clock during initialization.)
 	 */
-	if (strcmp(pp->a_lastcode, " TRUETIME Mk III") == 0) {
+	if (strcmp(pp->a_lastcode, " TRUETIME Mk III") == 0 ||
+	    strncmp(pp->a_lastcode, " TRUETIME XL", 12) == 0) {
 		true_doevent(peer, e_F18);
 		NLOG(NLOG_CLOCKSTATUS) {
-			msyslog(LOG_INFO, "TM/TMD: %s", pp->a_lastcode);
+			msyslog(LOG_INFO, "TM/TMD/XL: %s", pp->a_lastcode);
 		}
 		return;
 	}
