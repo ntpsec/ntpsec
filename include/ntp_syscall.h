@@ -33,6 +33,7 @@ ntp_gettime(
 
 	tntx.modes = 0;
 	result = __adjtimex (&tntx);
+	ntv->tai = tntx.tai;
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
