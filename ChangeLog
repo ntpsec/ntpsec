@@ -1,5 +1,6 @@
 2000-07-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_crypto.c: Cleanup
 	* ntpd/ntp_proto.c (transmit): Add some parens.
 	(peer_xmit): Add ntohl when grabbing sndauto.seq for broadcast.
 	* ntpd/ntp_peer.c (findpeer): Cleanup

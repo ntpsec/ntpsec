@@ -50,7 +50,7 @@
  *   CRYPTO_DHPAR 5  220  agreement parameters
  *   CRYPTO_DH    6  152  public value
  *   CRYPTO_NAME  7  460  host name/public key
- *   CRYPTO_TAI   8  144  leapsecond table
+ *   CRYPTO_TAI   8  144  leapseconds table
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
@@ -279,10 +279,12 @@ make_keylist(
  * crypto_recv - parse extension fields
  *
  * This routine is called when the packet has been matched to an
- * association and passed sanity, format and authentication checks. We
- * believe the extension field values only if the field has proper
- * format and length, the timestamp and filestamp are valid and the
- * signature has valid length and is verified.
+ * association and passed sanity, format and MAC checks. We believe the
+ * extension field values only if the field has proper format and
+ * length, the timestamp and filestamp are valid and the signature has
+ * valid length and is verified. There are a few cases where some values
+ * are believed even if the signature fails, but only if the authentic
+ * bit is not set.
  */
 void
 crypto_recv(
@@ -336,12 +338,12 @@ crypto_recv(
 		switch (code) {
 
 		/*
-		 * Install association ID. This is used in multicast
+		 * Install association ID. This is used in broadcast
 		 * client mode only.
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
-			if (ntohl(pkt[i + 1]) != 0 && peer->flags &
-			    FLAG_MCAST2)
+			if (!(peer->flags & FLAG_AUTOKEY) &&
+			    ntohl(pkt[i + 1]) != 0)
 				peer->assoc = ntohl(pkt[i + 1]);
 			break;
 
@@ -350,6 +352,9 @@ crypto_recv(
 		 * symmetric modes. 
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
+			if (!(peer->flags & FLAG_AUTOKEY) &&
+			    ntohl(pkt[i + 1]) != 0)
+				peer->assoc = ntohl(pkt[i + 1]);
 			ap = (struct autokey *)&pkt[i + 2];
 #ifdef PUBKEY
 			temp = ntohl(ap->siglen);
@@ -406,8 +411,8 @@ crypto_recv(
 
 		/*
 		 * Install session cookie in client mode. Use this also
-		 * in symmetric modes when rsaref20 has not been
-		 * installed for test.
+		 * in symmetric modes for test when rsaref20 has not
+		 * been installed.
 		 */
 		case CRYPTO_PRIV:
 			peer->cmmd = ntohl(pkt[i]);
@@ -769,7 +774,7 @@ crypto_recv(
 			peer->flash &= ~TEST10;
 
 			/*
-			 * Initialize leapsecond table and extension
+			 * Initialize leapseconds table and extension
 			 * field in network byte order.
 			 */
 			tai_leap.tstamp = vp->tstamp;
@@ -848,7 +853,7 @@ crypto_xmit(
 	switch (opcode) {
 
 	/*
-	 * Exchange association IDs. This is used in multicast server
+	 * Exchange association IDs. This is used in broadcast server
 	 * mode and is a no-op here.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
@@ -996,7 +1001,7 @@ crypto_xmit(
 		len += temp + 4;
 		break;
 	/*
-	 * Send leapsecond table, timestamp and signature.
+	 * Send leapseconds table, timestamp and signature.
 	 */
 	case CRYPTO_TAI | CRYPTO_RESP:
 		if (!crypto_flags) {
@@ -1033,7 +1038,7 @@ crypto_xmit(
 	}
 
 	/*
-	 * Round up the field length to a multiple of 8 bytes and save
+	 * Round up the field length to a multiple of 8 octets and save
 	 * the request code and length.
 	 */
 	len = ((len + 7) / 8) * 8;
@@ -1234,7 +1239,7 @@ crypto_agree(void)
 	}
 
 	/*
-	 * Sign leapsecond table and timestamps.
+	 * Sign leapseconds table and timestamps.
 	 */
 	if (tai_leap.vallen != 0) {
 		tai_leap.tstamp = htonl(tstamp);
@@ -1512,7 +1517,7 @@ crypto_dh(
 
 
 /*
- * crypto_tai - read leapsecond table and check for errors.
+ * crypto_tai - read leapseconds table and check for errors.
  */
 static void
 crypto_tai(
@@ -1733,9 +1738,9 @@ crypto_config(
 		break;
 	}
 }
-#else
+# else
 int ntp_crypto_bs_pubkey;
-#endif /* PUBKEY */
+# endif /* PUBKEY */
 #else
 int ntp_crypto_bs_autokey;
 #endif /* AUTOKEY */
