@@ -917,9 +917,9 @@ io_multicast_add(
 
 		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
 		memcpy(&haddr6, &(((struct sockaddr_in6*)&addr)->sin6_addr.s6_addr), sizeof(struct in6_addr));
-		if (IN6_IS_ADDR_MULTICAST(&iaddr6)) {
+		if (!IN6_IS_ADDR_MULTICAST(&iaddr6)) {
 			msyslog(LOG_ERR,
-			    "multicast address %s not class D",
+			    "address %s not IPv6 multicast address",
 				stoa(&addr));
 			return;
 		}
@@ -947,7 +947,7 @@ io_multicast_add(
 		 * Try opening a socket for the specified class D address. This
 		 * works under SunOS 4.x, but not OSF1 .. :-(
 		 */
-		s = open_socket((struct sockaddr_storage*)&sin6p, 0, 1);
+		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
 		if (s < 0) {
 			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 			i = 0;
