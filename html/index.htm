@@ -60,23 +60,46 @@ that environment. While these procedures work with most computers
 and operating systems marketed today, exceptions requiring manual
 intervention do exist, as documented in the <a href="config.htm">
 Configuration Options</a> and <a href="release.htm">Release
-Notes</a> pages. Note that support for strong cryptography requires
-cryptographic libraries not included in this distribution. 
+Notes</a> pages. 
 
 <p>Bringing up a NTP primary server requires a radio or satellite
-receiver or modem. It is also possible to configure a machine on an
-isolated network with the local clock driver and have other
-machines synchronize to it. The distribution includes hardware
-drivers for the local clock and over three dozen radio clocks and
-modem services. A list of supported drivers is given in the <a
-href="refclock.htm">Reference Clock Drivers</a> page. For most
-popular workstations marketed by Digital/Compaq, Sun and Hewlett
-Packard, as well as widely available Unix clones such as FreeBSD
-and Linux, the automatic build procedures select all drivers that
-run on the target machine. While this increases the size of the
-executable binary somewhat, individual drivers can be included or
-excluded using the configure utility documented in the
+receiver or modem. The distribution includes hardware drivers for
+some forty radio and satellite clocks and modem services. A list of
+supported drivers is given in the <a href="refclock.htm">Reference
+Clock Drivers</a> page. It is also possible to use an otherwise
+undisciplined machine as a primary or backup server, as described
+on the <a href="driver1.htm">Undisciplined Local Clock</a> page.
+For most popular workstations marketed by Digital/Compaq, Sun and
+Hewlett Packard, as well as widely available Unix clones such as
+FreeBSD and Linux, the automatic build procedures select all
+drivers that run on the target machine. While this increases the
+size of the executable binary somewhat, individual drivers can be
+included or excluded using the configure utility documented in the
 Configuration Options page.</p>
+
+<p>Some programs included in this distribution use cryptographic
+algorithms to verify authenticity and credentials. Where local
+security policy permits relatively weak symmetric key cryptography,
+the required software is included in this distribution. However,
+where local policy requires stronger public key cryptography,
+additional software not in this distribution is required. This
+distribution uses the OpenSSL library available from <a href=
+"http://www.openssl.org">http://www.openssl.org</a>. This library
+is also used by the Secure Shell facility, so is often already
+installed on Unix workstations and servers. It includes support for
+most message digest and digital signature algorithms used in the
+industry, as well as X.509 certificate generation, signing and
+verification.</p>
+
+<p>While public key cryptography is optional but highly recommended
+for all NTP operations, it is required for the NTPv4 Autokey
+protocol described on the <a href=
+"http://www.eecis.udel.edu/~mills/autokey.htm">Autonomous
+Authentication</a> page and is an integral component of the generic
+automatic configuration scheme described on the <a href=
+"http://www.eecis.udel.edu/~mills/autocfg.htm">Autonomous
+Configuration</a> page. Manycast mode, which is an adaptation of
+this scheme to NTPv4, is described below.</p>
 
 <h4>Configuring Clients and Servers</h4>
 
@@ -115,7 +138,19 @@ to secondary servers operating at stratum two and so on to higher
 strata. In this hierarchy, clients are simply servers that have no
 dependents.</p>
 
-<p>The NTP subnet in late 2000 includes over a hundred public
+<p>Configuring a corporate or campus NTP subnet can be an
+engineering challenge. NTP contains many features designed to
+survive system and network failures, software bugs, clock errors
+and hacker attacks. Surviving these hazards requires intricate
+design of the timekeeping network using good principles of server
+redundancy and path diversity. The Manycast mode, new to NTPv4, is
+designed to track the current server and network states and adjust
+the client/server configuration for the best available accuracy and
+reliability. More information on the Manycast mode is on the <a
+href="authopt.htm">Athentication Options</a> and <a href=
+"manyopt.htm">Automatic NTP Configuration Options</a> pages.</p>
+
+<p>The NTP subnet in late 2001 includes over a hundred public
 primary (stratum 1) servers synchronized directly to UTC by radio,
 satellite or modem and located in every continent of the globe,
 including Antarctica. Normally, client workstations and servers

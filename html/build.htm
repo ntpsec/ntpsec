@@ -31,27 +31,15 @@ need do is type "configure", "make" and "install" in that order and
 the autoconfigure system does the rest. There are some exceptions,
 as noted below.</p>
 
-<p>Some programs included in this distribution use cryptographic
-algorithms to verify server authenticity and credentials. As
-required by the International Trade in Arms Regulations (ITAR), now
-called the Defense Trade Regulations (DTR), certain cryptographic
-products and media, including the Data Encryption Standard (DES),
-cannot be exported without per-instance license. In order to
-simplify software distribution and export without requiring a
-license, the cryptographic routines used by NTPv4 use a
-cryptographic library obtainable from other sources. Formerly, the
-library was based on the rsaref2.0 library available from RSA
-Laboratories, but has been replaced by the OpenSSL library
-available from <a href="http://www.openssl.org">
-http://www.openssl.org</a>. This library is faster, has more
-functionality and is available in most countries of the world.</p>
-
-<p>The OpenSSL library must be built and installed prior to
-building NTPv4. The procedures for doing that are included in the
-OpenSSL documentation. The library is found during the normal NTPv4
+<p>This distribution currently uses the OpenSSL library available
+from <a href="http://www.openssl.org">http://www.openssl.org</a>.
+The library must be built and installed prior to building NTPv4.
+The procedures for doing that are included in the OpenSSL
+documentation. The library is found during the normal NTPv4
 configure phase and the interface routines compiled automatically.
 Only the <tt>libcrypto.a</tt> library and associated header files
-are used.</p>
+are used. Again, if public key cryptography is not needed, this
+this step is not required.</p>
 
 <h4>Building and Installing under Unix</h4>
 
@@ -80,26 +68,26 @@ but the daemon should still work properly.</p>
 can be useful in diagnosing problems found in initial test, and all
 reference clock drivers known to work with each machine and
 operating system. Unless memory space is at a premium, this is a
-sensible strategy and saves lots of messy fiddling. If you need to
-delete either the debugging code or one or more or all reference
-clock drivers to save space, see the <a href="config.htm">
-Configuration Options</a> page.</p>
+sensible strategy and greatly simplifies debugging and support. If
+you need to delete either the debugging code or one or more or all
+reference clock drivers to save space, see the <a href=
+"config.htm">Configuration Options</a> page.</p>
 
 <p>If your site supports multiple architectures and uses NFS to
 share files, you can use a single source tree to compile
 executables for all architectures. While running on a target
-architecture machine and with the distribution base directory
-active, create a subdirectory using a command like <tt>mkdir
+architecture machine and from the distribution base directory
+create a subdirectory using a command like <tt>mkdir
 A.`config.guess`</tt>, which will create an architecture-specific
 directory with name peculiar to the architecture and operating
-system. Then change to this directory and configure with the <tt>
+system. Then change to this directory and emit a <tt>
 ../configure</tt> command. The remaining steps are the same whether
 building in the base directory or in the subdirectory.</p>
 
 <h4>Compilation</h4>
 
-Peruse the operating-system-specific information for your
-architecture under <a href="hints.htm">Hints and Kinks</a>. 
+<p>Peruse the operating-system-specific information for your
+architecture under <a href="hints.htm">Hints and Kinks</a>.</p>
 
 <p>Use the <tt>make</tt> command to compile all source modules,
 construct the libraries and link the distribution. Expect few or no
@@ -117,8 +105,10 @@ still remain idiosyncratic.</p>
 <h4>Installation</h4>
 
 As root, use the <tt>make install</tt> command to install the
-binaries in the destination directory. You must of course have
-write permission on the install in the destination directory. This
+binaries in the destination directory. Most commonly, these
+programs are installed in <tt>/usr/local/bin</tt>, but this can be
+overridden during configuration. You must of course have write
+permission on the install in the destination directory. This
 includes the following programs: 
 
 <ul>
@@ -162,18 +152,34 @@ variables, the following program is installed:</p>
 kernel variables</a></li>
 </ul>
 
+<p>Cryptographic support, both symmetric and public key, requires
+one or more key files, commonly installed in <tt>
+/usr/local/etc</tt>. Public key cryptography requires a random seed
+file, usually called <tt>.rnd</tt>, installed in a dark place such
+as the root directory or <tt>/etc</tt>. Directions for generating
+keys is on the <a href="authopt.htm">Authentication Options</a>
+page.</p>
+
 <h4>Configuration</h4>
 
 <p>You are now ready to configure the daemon and start it. You will
 need to create a NTP configuration file <tt>ntp.conf</tt> and
-possibly a cryptographic key file <tt>ntp.keys</tt>. Newbies should
-see the <a href="quick.htm">Quick Start</a> page for orientation.
-Seasoned veterans can start with the <a href="ntpd.htm"><tt>
-ntpd</tt> - Network Time Protocol (NTP) daemon</a> page and move on
-to the specific configuration option pages from there. A tutorial
-on NTP subnet design and configuration options is in the <a href=
+possibly a cryptographic key file <tt>ntp.keys</tt>. The latter
+file is necessary for symmetric key cryptography, which is used if
+remote configuration support is required. Newbies should see the <a
+href="quick.htm">Quick Start</a> page for orientation. Seasoned
+veterans can start with the <a href="ntpd.htm"><tt>ntpd</tt> -
+Network Time Protocol (NTP) daemon</a> page and move on to the
+specific configuration option pages from there. A tutorial on NTP
+subnet design and configuration options is in the <a href=
 "notes.htm">Notes on Configuring NTP and Setting up a NTP
 Subnet</a> page.</p>
+
+<p>Alternatively, if IP multicast is supported on your network and
+public key cryptography is avaialable, consider using manycast
+mode. In most cases, servers and clients can use a common
+configuration file and NTP maintains the network topology
+automatically to match prevailing path quality and reliability.</p>
 
 <h4>If You Have Problems</h4>
 

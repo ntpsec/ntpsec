@@ -135,7 +135,7 @@ broadcast server and client. Once the offset is computed, the
 server continues as before and the client sends no further
 messages.</p>
 
-<h4>IP Multicast Support</h4>
+<h4>IP Broadcast Mode</h4>
 
 <p>Broadcast mode in both NTPv3 and NTPv4 is limited to directly
 connected subnets such as Ethernets which support broadcast
@@ -146,6 +146,8 @@ operating system and the routers support the Internet Group
 Management Protocol (IGMP). Most current kernels and available
 routers do support IP multicast technology, although service
 providers are sometimes reluctant to deploy it.</p>
+
+<h4>IP Multicast Support</h4>
 
 <p>A general discussion of IP multicast technology is beyond the
 scope here. In simple terms a host or router sending to a IP
@@ -161,7 +163,7 @@ group addresses, as described in RFC-2770.</p>
 
 <h4>Multicasting</h4>
 
-<p>IP multicasting can be used to extend the scope of a timekeeping
+<p>Multicasting can be used to extend the scope of a timekeeping
 subnet in two ways: multicasting and manycasting. A multicast
 client is configured using the <tt>broadcast</tt> command, but with
 a multicast group (class D) address instead of a local subnet
@@ -195,101 +197,11 @@ troll the nearby network neighborhood to find cooperating manycast
 servers, validate them using cryptographic means and evaluate their
 time values with respect to other servers that might be lurking in
 the vicinity. The intended result is that each manycast client
-mobilizes client associations with the "best" three of the
-available manycast servers, yet automatically reconfigures to
-sustain this number of servers should one or another fail.</p>
-
-<p>Note that the manycasting paradigm does not coincide with the
-anycasting paradigm described in RFC-1546, which is designed to
-find a single server from a clique of servers providing the same
-service. The manycasting paradigm is designed to find a plurality
-of redundant servers, in this case willing NTP servers.</p>
-
-<p>A persistent manycast client association is configured using the
-<tt>server</tt> command, but with a multicast (class D) group
-address instead of an ordinary IP (class A, B, C) address. It sends
-client mode messages to this address at the maximum feasible poll
-interval and minimum feasible time-to-live hops, depending on how
-many servers have already been found. There can be as many manycast
-client associations as different group addresss, each one serving
-as a template for a future ephemeral client/server mode
-association.</p>
-
-<p>Manycast servers configured with the <tt>manycastserver</tt>
-command listen on the specified group address for manycast client
-messages. Note the distinction between manycast client, which is
-configured with a <tt>server</tt> command, and manycast server,
-which is configured with a <tt>manycastserver</tt> command. If a
-manycast server is in range of the current time-to-live and is
-itself synchronized to a valid source and operating at a stratum
-level equal to or lower than the manycast client, it replies to the
-manycast client message with an ordinary server mode message.</p>
-
-<p>The manycast client receiving this message mobilizes an
-ephemeral client association as in ordinary client/server mode
-according to the matching manycast client template. Then, the
-client polls the server at its unicast address in burst mode in
-order to reliably set the host clock and validate the source. This
-normally results in a volley of eight client/server cycles over a
-30-s interval during which both the synchronization and
-cryptographic protocols run concurrently. Following the volley, the
-client runs the NTP intersection and clustering algorithms, which
-act to discard all but the best three associations. The surviving
-associations then continue in ordinary client/server mode.</p>
-
-<p>The manycast client polling program is designed to reduce as
-much as possible the volume of messages and the effects of
-implosion due to near-simultaneous arrival of manycast server
-messages. The program uses a poll interval eight times the system
-poll interval, which starts out at the <tt>minpoll</tt> value and
-under normal circumstances increases gradually to the <tt>
-maxpolll</tt> value. Initially, the time-to-live is set at one hop.
-At each retransmission the time-to-live is incremented by one until
-at least three manycast servers are found. Further retransmissions
-use the same time-to-live value.</p>
-
-<p>If less than three servers are found when the time-to-live has
-reached the maximum specified by the <tt>ttl</tt> keyword, the poll
-interval is doubled. For each transmission after that, the poll
-interval is doubled again until reaching the maximum of eight times
-the value specified by the <tt>maxpoll</tt> keyword. Further
-transmissions use the same poll interval and time-to-live
-values.</p>
-
-<p>The above scenario happens for each manycast client message,
-which repeats at the designated poll interval. However, once the
-ephemeral client association is mobilized, subsequent manycast
-server replies are discarded, since they will fail the message
-digest test. If during a poll interval the number of client
-associations falls below three, all manycast client prototype
-associations are reset to the initial poll interval and
-time-to-live values and operation resumes from the beginning. It is
-important in manycast mode to avoid frequent manycast client
-messages, since each one requires all manycast servers in range to
-respond. The result could well be an implosion, either minor or
-major, depending on the number of servers in range. The recommended
-value for <tt>maxpoll</tt> is 12 (4,096 s) and for <tt>ttl</tt> is
-7.</p>
-
-<p>It is possible and frequently useful to configure a host as both
-a manycast client and manycast server. A number of hosts configured
-this way and sharing a common group address will automatically
-organize themselves in an optimum configuration based on the
-smallest synchronization distance computed by the NTP mitigation
-algorithms. For example, consider an NTP subnet of two primary
-servers and maybe a dozen dependent clients. All servers and
-clients are configured as both multicast client and multicast
-server with multicast group address 239.1.1.1. In addition, the
-primary servers are configured for a primary reference source such
-as a GPS receiver. Once operations have stabilized in this
-scenario, the primary servers will affiliate with the primary
-reference source and each other, since they both operate at the
-same stratum (1), but not with any client, since clients operate at
-a higher stratum. The clients will find both primary servers and in
-addition, one of their own at the minimum synchronization distance.
-If one of the primary servers loses its GPS receiver, it will
-continue to operate as a client and other clients will time out the
-corresponding association and re-associate accordingly.</p>
+mobilizes client associations with some number of the "best" of the
+nearby manycast servers, yet automatically reconfigures to sustain
+this number of servers should one or another fail. Additional
+information is on the <a href="manyopt.htm">Automatic NTP
+Configuration Options</a> page.</p>
 
 <h4>Burst Modes</h4>
 

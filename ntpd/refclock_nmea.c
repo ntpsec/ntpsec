@@ -433,8 +433,8 @@ nmea_receive(
 
 
 	/* See if I want to process this message type */
-	if ( ((peer->ttlmax == 0) && (cmdtype != GPRMC))
-           || ((peer->ttlmax != 0) && !(cmdtype & peer->ttlmax)) )
+	if ( ((peer->ttl == 0) && (cmdtype != GPRMC))
+           || ((peer->ttl != 0) && !(cmdtype & peer->ttl)) )
 		return;
 
 	pp->lencode = rd_lencode;
