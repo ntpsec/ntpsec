@@ -254,7 +254,7 @@ make_keylist(
 	tstamp_t tstamp;	/* NTP timestamp */
 	struct autokey *ap;	/* autokey pointer */
 	struct value *vp;	/* value pointer */
-	keyid_t	keyid;		/* next key ID */
+	keyid_t	keyid = 0;	/* next key ID */
 	keyid_t	cookie;		/* private value */
 	u_long	lifetime;
 	u_int	len;
@@ -288,8 +288,7 @@ make_keylist(
 	 * included in the hash is zero if broadcast mode, the peer
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
-	lifetime = min(sys_automax, NTP_MAXSESSION * (1 <<
-	    (peer->kpoll)));
+	lifetime = min(sys_automax, (unsigned long) NTP_MAXSESSION * (1 <<(peer->kpoll)));
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -301,7 +300,7 @@ make_keylist(
 		    cookie, lifetime);
 		lifetime -= 1 << peer->kpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    lifetime <= (1 << (peer->kpoll)))
+		    lifetime <= (unsigned long)(1 << (peer->kpoll)))
 			break;
 	}
 
@@ -400,7 +399,7 @@ crypto_recv(
 		ep = (struct exten *)pkt;
 		code = ntohl(ep->opcode) & 0xffff0000;
 		len = ntohl(ep->opcode) & 0x0000ffff;
-		associd = ntohl(pkt[1]);
+		associd = (associd_t) ntohl(pkt[1]);
 		rval = XEVNT_OK;
 #ifdef DEBUG
 		if (debug)
@@ -867,7 +866,7 @@ crypto_recv(
 			 * Decrypt the cookie, hunting all the time for
 			 * errors.
 			 */
-			if (vallen == EVP_PKEY_size(host_pkey)) {
+			if (vallen == (u_int) EVP_PKEY_size(host_pkey)) {
 				RSA_private_decrypt(vallen,
 				    (u_char *)ep->pkt,
 				    (u_char *)&temp32,
@@ -1167,7 +1166,7 @@ crypto_xmit(
 	pkt = (u_int32 *)xpkt + start / 4;
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
-	associd = ntohl(ep->associd);
+	associd = (associd_t) ntohl(ep->associd);
 	fp->associd = htonl(associd);
 	len = 8;
 	rval = XEVNT_OK;
@@ -1530,7 +1529,7 @@ crypto_verify(
 	 */
 	} else if (pkey == NULL || peer->digest == NULL) {
 		/* fall through */
-	} else if (siglen != EVP_PKEY_size(pkey)) {
+	} else if (siglen != (u_int) EVP_PKEY_size(pkey)) {
 		rval = XEVNT_SGL;
 	} else {
 		EVP_VerifyInit(&ctx, peer->digest);
@@ -3598,7 +3597,8 @@ crypto_tai(
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
 	char	*ptr;
-	int	rval, i;
+	int	rval;
+	u_int	i;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
 	struct timex ntv;	/* kernel interface structure */
@@ -3679,7 +3679,7 @@ crypto_tai(
 	ptr = emalloc(len);
 	tai_leap.ptr = (unsigned char *) ptr;
 	for (; i >= 0; i--) {
-		*ptr++ = htonl(leapsec[i]);
+		*ptr++ = (char) htonl(leapsec[i]);
 	}
 	crypto_flags |= CRYPTO_FLAG_TAI;
 	sys_tai = len / 4 + TAI_1972 - 1;

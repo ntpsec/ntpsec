@@ -489,7 +489,7 @@ getconfig(
 	int includelevel = 0;
 	char line[MAXLINE];
 	char *(tokens[MAXTOKENS]);
-	int ntokens;
+	int ntokens = 0;
 	int tok = CONFIG_UNKNOWN;
 	struct interface *localaddr;
 	struct refclockstat clock_stat;
@@ -1072,7 +1072,7 @@ getconfig(
 #ifdef OPENSSL
 		    case CONFIG_REVOKE:
 			if (ntokens >= 2)
-			    sys_revoke = max(atoi(tokens[1]), KEY_REVOKE);
+			    sys_revoke = (u_char) max(atoi(tokens[1]), KEY_REVOKE);
 			break;
 
 		    case CONFIG_AUTOMAX:

@@ -54,7 +54,7 @@ dofptoa(
 		do {
 			tmp = sv;
 			sv = (u_short) (sv/ten);
-			*(--cp) = tmp - ((sv<<3) + (sv<<1));
+			*(--cp) = (u_char)(tmp - ((sv<<3) + (sv<<1)));
 		} while (sv != 0);
 	}
 
