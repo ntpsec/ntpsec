@@ -33,7 +33,13 @@
 #endif /* HAVE_PPSCLOCK_H */
 
 #ifdef HAVE_PPSAPI
-#include <sys/timepps.h>
+# ifdef HAVE_TIMEPPS_H
+#  include <timepps.h>
+# else
+#  ifdef HAVE_SYS_TIMEPPS_H
+#   include <sys/timepps.h>
+#  endif
+# endif
 #endif /* HAVE_PPSAPI */
 
 /*
