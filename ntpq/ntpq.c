@@ -606,6 +606,11 @@ openhost(
 
 	sprintf(service, "%u", NTP_PORT);
 	a_info = getaddrinfo(hname, service, &hints, &ai);
+	/* Some older implementations don't like AI_ADDRCONFIG. */
+	if (a_info == EAI_BADFLAGS) {
+		hints.ai_flags = AI_CANONNAME;
+		a_info = getaddrinfo(hname, service, &hints, &ai);	
+	}
 	if (a_info != 0) {
 		printf("%s\n", gai_strerror(a_info));
 		exit(-1);
