@@ -241,7 +241,7 @@ AC_EGREP_CPP(yes,
 #ifdef PPS_API_VERS_1
 yes
 #endif
-], AC_CHECK_HEADERS(sys/timepps.h))
+], [AC_CHECK_HEADERS(sys/timepps.h)])
 AC_CHECK_HEADERS(sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$target" in
@@ -2441,6 +2441,8 @@ case "$ans" in
     esac
     ;;
 esac
+AM_CONDITIONAL(isRSAREF, test x$RSADIR = xrsaref2)
+AM_CONDITIONAL(isRSAEURO, test x$RSADIR = xrsaeuro1)
 AC_SUBST(AUTOKEY)
 case "$ans" in
  no) ;;
@@ -3243,10 +3245,10 @@ esac
 
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 
-# This *was* necessary so that .o files in LIBOBJS are also built via
-# the ANSI2KNR-filtering rules.
-# Autoconf 2.52 doesn't need it, and 2.53 hates it.
-#LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
+# HMS: I think we avoid this problem now...
+## This is necessary so that .o files in LIBOBJS are also built via
+## the ANSI2KNR-filtering rules.
+#LIB@&t@OBJS=`echo "$LIB@&t@OBJS" | sed 's,\.[[^.]]* ,$U&,g;s,\.[[^.]]*$,$U&,'`
 
 AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
 ElectricFence/Makefile
