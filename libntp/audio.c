@@ -82,7 +82,9 @@ audio_init(
 	 * Set audio device parameters.
 	 */
 	AUDIO_INITINFO(&info);
+#ifdef HAVE_SYS_AUDIOIO_H
 	info.record.buffer_size = bufsiz;
+#endif /* HAVE_SYS_AUDIOIO_H */
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio: invalid control device parameters\n");
@@ -138,11 +140,10 @@ audio_show(void)
 #endif /* HAVE_SYS_AUDIOIO_H */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
 	printf(
-	    "audio: rate %d, size %d, chan %d, prec %d, code %d, gain %d, mon %d, port %d\n",
-	    info.record.sample_rate, info.record.buffer_size,
-	    info.record.channels, info.record.precision,
-	    info.record.encoding, info.record.gain,
-	    info.monitor_gain, info.record.port);
+	    "audio: rate %d, chan %d, prec %d, code %d, gain %d, mon %d, port %d\n",
+	    info.record.sample_rate, info.record.channels,
+	    info.record.precision, info.record.encoding,
+	    info.record.gain, info.monitor_gain, info.record.port);
 	printf(
 	    "audio: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d\n",
 	    info.record.samples, info.record.eof,
