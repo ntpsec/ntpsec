@@ -186,6 +186,7 @@ int     find_flagged_addr_in_list P((struct sockaddr_storage *, int));
 int	create_wildcards	P((u_short));
 isc_boolean_t address_okay	P((isc_interface_t *));
 void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
+int	findlocalinterface	P((struct sockaddr_storage *));
 
 #ifdef SYS_WINNT
 /*
@@ -625,7 +626,7 @@ create_sockets(
 	 */
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
-		    inter_list[i].flags & INT_BROADCAST, 0, &inter_list[i], i);
+		    inter_list[i].flags, 0, &inter_list[i], i);
 		if (inter_list[i].fd != INVALID_SOCKET)
 			msyslog(LOG_INFO, "Listening on interface %s, %s#%d",
 				inter_list[i].name,
@@ -862,8 +863,8 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	{
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;*/
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
+/*		mreq.imr_interface.s_addr = htonl(INADDR_ANY); */
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -1172,18 +1173,13 @@ io_multicast_add(
 	else
 	{
 		memset((char *)&inter_list[ind], 0, sizeof(struct interface));
-		ind = -1;
-		if (addr.ss_family == AF_INET)
-			ind = wildipv4;
-		else if (addr.ss_family == AF_INET6)
-			ind = wildipv6;
-
+		ind = findlocalinterface(&addr);
 		if (ind >= 0) {
 			/* HACK ! -- stuff in an address */
 			inter_list[ind].bcast = addr;
 			netsyslog(LOG_ERR,
-			 "...multicast address %s using wildcard socket",
-			 stoa(&addr));
+			 "...multicast address %s using socket %d",
+			 stoa(&addr), ind);
 		} else {
 			netsyslog(LOG_ERR,
 			"No multicast socket available to use for address %s",
@@ -1200,7 +1196,7 @@ io_multicast_add(
 #endif
 #else /* MCAST */
 	netsyslog(LOG_ERR,
-	    "Cannot add multicast address %s: no Multicast support",
+	    "Cannot add multicast address %s: no multicast support",
 	    stoa(&addr));
 #endif /* MCAST */
 }
@@ -1405,7 +1401,12 @@ open_socket(
                                 IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
 		else return INVALID_SOCKET;
 
-		netsyslog(LOG_ERR, buff);
+		/*
+		 * Don't log this under all conditions
+		 */
+		if (turn_off_reuse == 0 || debug > 1)
+			netsyslog(LOG_ERR, buff);
+
 		closesocket(fd);
 
 		/*
@@ -2144,7 +2145,7 @@ input_handler(
 		/* Check more interfaces */
 		}
 	}
-select_again:;
+
 	/*
 	 * Done everything from that select.
 	 */
@@ -2205,10 +2206,35 @@ select_again:;
 
 #endif
 /*
- * findinterface - find interface corresponding to address
+ * findinterface - find local interface corresponding to address
  */
 struct interface *
 findinterface(
+	struct sockaddr_storage *addr
+	)
+{
+	int retind;
+	
+	retind = findlocalinterface(addr);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("Found interface index %d for address %s\n",
+			retind, stoa(addr));
+#endif
+	if (retind < 0)
+	{
+		return (ANY_INTERFACE_CHOOSE(addr));
+	}
+	else
+	{
+		return (&inter_list[retind]);
+	}
+}
+/*
+ * findinterface - find local interface index corresponding to address
+ */
+int
+findlocalinterface(
 	struct sockaddr_storage *addr
 	)
 {
@@ -2238,7 +2264,7 @@ findinterface(
 	((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
 	if (s == INVALID_SOCKET)
-		return ANY_INTERFACE_CHOOSE(addr);
+		return (-1);
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
 #ifndef SYS_WINNT
@@ -2248,7 +2274,7 @@ findinterface(
 #endif
 	{
 		closesocket(s);
-		return ANY_INTERFACE_CHOOSE(addr);
+		return (-1);
 	}
 
 	rtn = getsockname(s, (struct sockaddr *)&saddr, &saddrlen);
@@ -2258,7 +2284,7 @@ findinterface(
 #else
 	if (rtn == SOCKET_ERROR)
 #endif
-		return ANY_INTERFACE_CHOOSE(addr);
+		return (-1);
 
 	idx = -1;
 	for (i = nwilds; i < ninterfaces; i++) {
@@ -2281,15 +2307,10 @@ findinterface(
 	}
 	if (idx != -1)
 	{
-#ifdef DEBUG
-		if (debug > 1)
-			printf("Found interface index %d for address %s\n",
-				idx, stoa(addr));
-#endif
-		return (&inter_list[idx]);
+		return (idx);
 	}
 
-	return ANY_INTERFACE_CHOOSE(addr);
+	return (-1);
 }
 
 /*
