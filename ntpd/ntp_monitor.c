@@ -266,7 +266,7 @@ ntp_monitor(
 	md->mode = (u_char) mode;
 	md->version = PKT_VERSION(pkt->li_vn_mode);
 	md->interface = rbufp->dstadr;
-	md->cast_flags = (u_char)(((rbufp->dstadr->flags & INT_MULTICAST) &&
+	md->cast_flags = (u_char)(((rbufp->dstadr->flags & INT_MCASTOPEN) &&
 	    rbufp->fd == md->interface->fd) ? MDF_MCAST: rbufp->fd ==
 		md->interface->bfd ? MDF_BCAST : MDF_UCAST);
 
