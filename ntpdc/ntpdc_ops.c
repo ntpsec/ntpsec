@@ -1554,7 +1554,22 @@ struct resflags {
 	int bit;
 };
 
-static struct resflags resflags[] = {
+/* XXX: HMS: we apparently don't report set bits we do not recognize. */
+
+static struct resflags resflagsV2[] = {
+	{ "ignore",	0x001 },
+	{ "noserve",	0x002 },
+	{ "notrust",	0x004 },
+	{ "noquery",	0x008 },
+	{ "nomodify",	0x010 },
+	{ "nopeer",	0x020 },
+	{ "notrap",	0x040 },
+	{ "lptrap",	0x080 },
+	{ "limited",	0x100 },
+	{ "",		0 }
+};
+
+static struct resflags resflagsV3[] = {
 	{ "ignore",	RES_IGNORE },
 	{ "noserve",	RES_DONTSERVE },
 	{ "notrust",	RES_DONTTRUST },
@@ -1677,7 +1692,10 @@ again:
 			rf++;
 		}
 
-		rf = &resflags[0];
+		rf = (impl_ver == IMPL_XNTPD_OLD)
+		     ? &resflagsV2[0]
+		     : &resflagsV3[0]
+		     ;
 		while (rf->bit != 0) {
 			if (flags & rf->bit) {
 				if (!res)
@@ -1795,17 +1813,17 @@ again:
 		if (STREQ(pcmd->argval[res].string, "ntpport")) {
 			cres.mflags |= RESM_NTPONLY;
 		} else {
-			for (i = 0; resflags[i].bit != 0; i++) {
+			for (i = 0; resflagsV3[i].bit != 0; i++) {
 				if (STREQ(pcmd->argval[res].string,
-					  resflags[i].str))
+					  resflagsV3[i].str))
 				    break;
 			}
-			if (resflags[i].bit != 0) {
-				cres.flags |= resflags[i].bit;
+			if (resflagsV3[i].bit != 0) {
+				cres.flags |= resflagsV3[i].bit;
 				if (req_code == REQ_UNRESTRICT) {
 					(void) fprintf(fp,
 						       "Flag %s inappropriate\n",
-						       resflags[i].str);
+						       resflagsV3[i].str);
 					err++;
 				}
 			} else {
