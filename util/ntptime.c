@@ -89,9 +89,9 @@ main(
 	double ftemp, gtemp, htemp;
 	long time_frac;				/* ntv.time.tv_frac_sec (us/ns) */
 	l_fp ts;
-	unsigned ts_mask = TS_MASK;		/* defaults to 20 bits (us) */
-	unsigned ts_roundbit = TS_ROUNDBIT;	/* defaults to 20 bits (us) */
-	int fdigits = 6;			/* fractional digits for us */
+	volatile unsigned ts_mask = TS_MASK;		/* defaults to 20 bits (us) */
+	volatile unsigned ts_roundbit = TS_ROUNDBIT;	/* defaults to 20 bits (us) */
+	volatile int fdigits = 6;			/* fractional digits for us */
 	int c;
 	int errflg	= 0;
 	int cost	= 0;
@@ -305,7 +305,7 @@ main(
 		    (int) ntv.time.tv_sec, fdigits, (int) time_frac,
 		    ctime((const time_t *) &ntv.time.tv_sec));
 #if NTP_API > 3
-		printf(", TAI offset %d\n", ntv.tai);
+		printf(", TAI offset %ld\n", (long)ntv.tai);
 #else
 		printf("\n");
 #endif /* NTP_API */
