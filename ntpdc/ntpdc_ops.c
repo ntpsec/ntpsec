@@ -142,12 +142,12 @@ struct xcmd opcmds[] = {
 	  "display the server's restrict list" },
 	{ "restrict",	new_restrict,	{ ADD, ADD, NTP_STR, OPT|NTP_STR },
 	  { "address", "mask",
-	    "ntpport|ignore|noserve|notrust|noquery|nomodify|nopeer|version|demobilize",
+	    "ntpport|ignore|noserve|notrust|noquery|nomodify|nopeer|version|kod",
 	    "..." },
 	  "create restrict entry/add flags to entry" },
 	{ "unrestrict", unrestrict,	{ ADD, ADD, NTP_STR, OPT|NTP_STR },
 	  { "address", "mask",
-	    "ntpport|ignore|noserve|notrust|noquery|nomodify|nopeer|version|demobilize",
+	    "ntpport|ignore|noserve|notrust|noquery|nomodify|nopeer|version|kod",
 	    "..." },
 	  "remove flags from a restrict entry" },
 	{ "delrestrict", delrestrict,	{ ADD, ADD, OPT|NTP_STR, NO },
@@ -1306,7 +1306,7 @@ static struct resflags resflags[] = {
 	{ "lptrap",	RES_LPTRAP },
 	{ "limited",	RES_LIMITED },
 	{ "version",	RES_VERSION },
-	{ "demobilize",	RES_DEMOBILIZE },
+	{ "kod",	RES_DEMOBILIZE },
 
 	{ "",		0 }
 };

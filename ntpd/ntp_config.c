@@ -167,6 +167,7 @@ static	struct keyword mod_keywords[] = {
 static	struct keyword res_keywords[] = {
 	{ "ignore",		CONF_RES_IGNORE },
 	{ "limited",		CONF_RES_LIMITED },
+	{ "kod",		CONF_RES_DEMOBILIZE },
 	{ "lowpriotrap",	CONF_RES_LPTRAP },
 	{ "mask",		CONF_RES_MASK },
 	{ "nomodify",		CONF_RES_NOMODIFY },
@@ -177,7 +178,6 @@ static	struct keyword res_keywords[] = {
 	{ "notrust",		CONF_RES_NOTRUST },
 	{ "ntpport",		CONF_RES_NTPPORT },
 	{ "version",		CONF_RES_VERSION },
-	{ "demobilize",		CONF_RES_DEMOBILIZE },
 	{ "",			CONFIG_UNKNOWN }
 };
 

@@ -204,8 +204,9 @@ Options</a> page for details.</p>
 longer supported. This function is now handled by the <a href=
 "driver22.htm">PPS Clock Discipline</a> driver, which uses the new
 PPSAPI application program interface proposed by the IETF. Note
-that the <tt>pps</tt> configuration file command has been obsoleted by  the driver. See the <a href="pps.htm">Pulse-per-second (PPS) Signal
-Interfacing</a> page for further information.</p>
+that the <tt>pps</tt> configuration file command has been obsoleted
+by the driver. See the <a href="pps.htm">Pulse-per-second (PPS)
+Signal Interfacing</a> page for further information.</p>
 </li>
 
 <li>
@@ -217,6 +218,16 @@ in a one-time mode similar to <tt>ntpdate</tt>, which program is
 headed for retirement. See the <a href="ntpd.htm"><tt>ntpd</tt> -
 Network Time Protocol (NTP) daemon</a> page for the new
 features.</p>
+</li>
+
+<li>
+<p>To help reduce the level of spurious network traffic due to
+obsolete configuration files, a special control message called the
+kiss-of-death packet has been implemented. If enabled and a packet
+is denied service, a compliant server will send this message to the
+client. A compliant client will cease further transmission and send
+a message to the system log. See the <a href="accopt.htm">
+Authentication Options</a> page for further information.</p>
 </li>
 </ol>
 

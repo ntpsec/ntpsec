@@ -1,5 +1,11 @@
 2001-04-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpdc/ntpdc_ops.c: Added "kod", lost "demobilize".
+	* ntpd/ntp_config.c: Added "kod" keyword.  Lose "demobilize" keyword.
+	* html/release.htm: Updated.
+	* html/accopt.htm: Updated.
+	From: Dave Mills.
+
 	* ntpq/ntpq.c: Reorder and add some TEST flag bits.
 	* ntpd/ntp_proto.c (transmit): Also bail if access denied.
 	(receive): Lose RES_DEMOBILIZE and (some?) RES_DONTSERVE and
