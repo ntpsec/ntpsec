@@ -1801,7 +1801,7 @@ gettokens_netinfo (
 				for (index = 0; index < namelist.ni_namelist_len; index++) {
 					char *value = namelist.ni_namelist_val[index];
 
-					if (! (val_list[index] = (char*)malloc(strlen(value+1))))
+					if (! (val_list[index] = (char*)malloc(strlen(value)+1)))
 						{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
 
 					strcpy(val_list[index], value);
