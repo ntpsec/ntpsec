@@ -1279,7 +1279,7 @@ ctl_putsys(
 
 	case CS_STABIL:
 		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
-		    1e3);
+		    1e6);
 		break;
 
 	case CS_VARLIST:
