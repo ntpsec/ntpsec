@@ -1,5 +1,17 @@
 1999-11-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/syssignal.c: Don't warn about SA_RESTART
+	* libntp/recvbuff.c: Fix free buffer count
+	From: Jeffrey C Honig <jch@bsdi.com>
+
+	* html/pps.htm: 
+	* html/howto.htm: 
+	* html/confopt.htm: 
+	* html/clockopt.htm: 
+	* html/uthopt.htm:
+	Updates.
+	From: Dave Mills <mills@udel.edu>
+
 	* ntpd/refclock_wwvb.c: burst fixes
 	* ntpd/refclock_ulink.c: burst fixes
 	* ntpd/refclock_tpro.c: burst and NSTAGE fixes

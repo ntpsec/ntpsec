@@ -47,7 +47,11 @@ signal_no_reset(
 
 		n = sigaction(sig, &vec, &ovec);
 		if (n == -1 && errno == EINTR) continue;
-		if (ovec.sa_flags)
+		if (ovec.sa_flags
+#ifdef	SA_RESTART
+		    && ovec.sa_flags != SA_RESTART
+#endif
+		    )
 			msyslog(LOG_DEBUG, "signal_no_reset: signal %d had flags %x",
 				sig, ovec.sa_flags);
 		break;

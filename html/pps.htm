@@ -25,13 +25,17 @@ error due to operating system queues and service times.
 
 <P>The modem control leads interface requires converting to RS232 levels
 and connecting to the data carrier detect (DCD) lead of a serial port.
-The <TT>ppsclock</TT> streams module captures a timestamp upon
-transition of the DCD signal. The PPS Clock Discipline driver reads the
-latest timestamp with a designated <TT>ioctl()</TT> system call to
-determine the time of arrival of the PPS pulse to within a few
-microseconds. Alternatively, if provisions have been made in the kernel
-for PPS signals, the signal is captured directly by the kernel serial
-driver without using the PPS driver.
+The <TT>ppsclock</TT> and <TT>ppsapi</TT> streams modules capture a
+timestamp upon transition of the DCD signal. Note that the
+<TT>ppsclock</TT> module functionality has been subsumed by the new
+<TT>ppsapi</TT> interface specification, which is supported by the NTP
+daemon. As the latter is expected to become an IETF cross-platform
+standard, it should be used in new configurations. The PPS Clock
+Discipline driver reads the latest timestamp with a designated system
+call or interface routine to determine the time of arrival of the PPS
+pulse to within a few microseconds. Alternatively, if provisions have
+been made in the kernel for PPS signals, the signal is captured directly
+by the kernel serial driver without using the PPS driver.
 
 <P>The <TT>tty_clk</TT> module is included in the NTP software
 distribution, while the <A

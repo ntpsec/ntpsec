@@ -111,7 +111,7 @@ init_recvbuff(int nbufs)
 	}
 
 	fulllist = 0;
-	free_recvbufs = total_recvbufs = RECV_INIT;
+	free_recvbufs = total_recvbufs = nbufs;
 	full_recvbufs = lowater_adds = 0;
 
 #if defined(HAVE_IO_COMPLETION_PORT)
