@@ -1230,9 +1230,9 @@ do_conf(
 			fl |= FLAG_SKEY;
 		peeraddr = cp->peeraddr;
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
-		if (peer_config(&peeraddr, any_interface, cp->hmode,
-		    cp->version, cp->minpoll, cp->maxpoll, fl, cp->ttl,
-		    cp->keyid, cp->keystr) == 0) {
+		if (peer_config(&peeraddr, ANY_INTERFACE_CHOOSE(&peeraddr),
+		    cp->hmode, cp->version, cp->minpoll, cp->maxpoll, fl,
+		    cp->ttl, cp->keyid, cp->keystr) == 0) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}

@@ -611,7 +611,7 @@ create_sockets(
   		(void)strncpy(inter_list[i].name, ifreq.ifr_name,
   			      sizeof(inter_list[i].name));
 # endif
-		memcpy(&inter_list[i].sin, &ifr->ifr_addr, sizeof(ifr->ifr_addr));
+		memcpy(&inter_list[i].sin, &ifr->ifr_addr, SOCKLEN(&ifr->ifr_addr));
 		((struct sockaddr_in*)&inter_list[i].sin)->sin_port = port;
 # if defined(SUN_3_3_STINKS)
 		/*
@@ -680,7 +680,10 @@ create_sockets(
 #  else /* not STREAMS_TLI */
 		if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
 			msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFNETMASK) failed: %m");
+			continue;
+#if 0
 			exit(1);
+#endif
 		}
 #  endif /* not STREAMS_TLI */
 		inter_list[i].mask                 = *(struct sockaddr_storage *)&ifreq.ifr_addr;

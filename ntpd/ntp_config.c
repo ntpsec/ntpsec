@@ -825,12 +825,13 @@ getconfig(
 				errflg = 1;
 			}
 			if (errflg == 0) {
-			    if (peer_config(&peeraddr, any_interface, hmode,
-				    peerversion, minpoll, maxpoll, peerflags,
-				    ttl, peerkey, peerkeystr) == 0) {
+			    if (peer_config(&peeraddr,
+				ANY_INTERFACE_CHOOSE(&peeraddr), hmode,
+				peerversion, minpoll, maxpoll, peerflags,
+				ttl, peerkey, peerkeystr) == 0) {
 					msyslog(LOG_ERR,
 						"configuration of %s failed",
-						ntoa(&peeraddr));
+						stoa(&peeraddr));
 			    }
 			    if (tok == CONFIG_MANYCASTCLIENT)
 				proto_config(PROTO_MULTICAST_ADD,

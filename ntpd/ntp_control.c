@@ -1090,9 +1090,10 @@ ctl_putadr(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	if (addr==NULL) cq = numtoa(addr32);
-	else cq = stoa(addr);
-	cq = stoa(addr);
+	if (addr == NULL)
+		cq = numtoa(addr32);
+	else
+		cq = stoa(addr);
 	while (*cq != '\0')
 		*cp++ = *cq++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
