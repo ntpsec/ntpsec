@@ -8,6 +8,7 @@ noinst_HEADERS = \
 	ascii.h \
 	audio.h \
 	binio.h \
+	des.h \
 	global.h \
 	gps.h \
 	icom.h \

@@ -1,3 +1,7 @@
+2000-02-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/Makefile.am (noinst_HEADERS): Add des.h
+
 2000-02-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_config.c (do_resolve_internal): Try Real Hard to
