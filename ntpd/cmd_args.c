@@ -20,7 +20,11 @@ extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
 
+#ifndef HAVE_CLOCKCTL 
 static const char *ntp_options = "aAbB:c:C:dD:f:gH:I:J:k:K:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:";
+#else
+static const char *ntp_options = "aAbB:c:C:dD:f:gH:i:I:J:k:K:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:";
+#endif
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -131,6 +135,9 @@ getstartup(
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif
+#ifdef HAVE_CLOCKCTL
+		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
+#endif
 		exit(2);
 	}
 	ntp_optind = 0;	/* reset ntp_optind to restart ntp_getopt */
@@ -220,6 +227,14 @@ getCmdOpts(
 			allow_panic = TRUE;
 			break;
 
+#ifdef HAVE_CLOCKCTL
+		    case 'i':
+			if (!ntp_optarg)
+				errflg++;
+			else
+				chrootdir = ntp_optarg;
+			break;
+#endif
 		    case 'k':
 			getauthkeys(ntp_optarg);
 			break;
@@ -273,6 +288,17 @@ getCmdOpts(
 			} while (0);
 			break;
 			
+#ifdef HAVE_CLOCKCTL
+		    case 'u':
+			user = malloc(strlen(ntp_optarg) + 1);
+			if ((user == NULL) || (ntp_optarg == NULL))
+				errflg++;
+			(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
+			group = rindex(user, ':');
+			if (group)
+				*group++ = '\0'; /* get rid of the ':' */
+			break;
+#endif
 		    case 's':
 			stats_config(STATS_STATSDIR, ntp_optarg);
 			break;
@@ -359,6 +385,9 @@ getCmdOpts(
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
+#endif
+#ifdef HAVE_CLOCKCTL
+		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
 #endif
 		exit(2);
 	}

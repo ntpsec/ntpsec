@@ -98,7 +98,7 @@ static unsigned char PADDING[64] = {
  */
 void
 MD5Init(
-	MD5_CTX *context                             /* context */
+	ntp_MD5_CTX *context                             /* context */
 	)
 {
   context->count[0] = context->count[1] = 0;
@@ -117,7 +117,7 @@ MD5Init(
  */
 void
 MD5Update (
-	MD5_CTX *context,                               /* context */
+	ntp_MD5_CTX *context,                               /* context */
 	unsigned char *input,                       /* input block */
 	unsigned int inputLen             /* length of input block */
 	)
@@ -162,7 +162,7 @@ MD5Update (
 void
 MD5Final (
 	unsigned char digest[16],                /* message digest */
-	MD5_CTX *context                                /* context */
+	ntp_MD5_CTX *context                                /* context */
 	)
 {
   unsigned char bits[8];

@@ -38,7 +38,7 @@ MD5authencrypt(
 	int length		/* packet length */
 	)
 {
-	MD5_CTX md5;
+	ntp_MD5_CTX md5;
 	u_char digest[16];
 
 	/*
@@ -66,7 +66,7 @@ MD5authdecrypt(
 	int size		/* MAC size */
 	)
 {
-	MD5_CTX md5;
+	ntp_MD5_CTX md5;
 	u_char digest[16];
 
 	/*
@@ -89,7 +89,7 @@ MD5authdecrypt(
 u_int32
 addr2refid(struct sockaddr_storage *addr)
 {
-	MD5_CTX md5;
+	ntp_MD5_CTX md5;
 	u_char digest[16];
 	u_int32 addr_refid;
 
