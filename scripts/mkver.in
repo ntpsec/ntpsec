@@ -7,7 +7,7 @@ ConfStr="$ConfStr @VERSION@"
 
 case "@LIBRSAREF@" in
  '') ;;
- *)  ConfStr="${ConfStr}-RSAREF" ;;
+ *)  ConfStr="${ConfStr}-r" ;;
 esac
 
 ConfStr="$ConfStr `date`"
