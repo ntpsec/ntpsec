@@ -134,9 +134,11 @@ TimerApcFunction(
 		  OS frequency */ 
 		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS - 
 			(ULONGLONG) LargeIntNowCount.QuadPart;
+#ifdef DEBUG
 		msyslog(LOG_INFO, 
 			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
 				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
+#endif
 	}
 
 	/* Now we can hang out and wait for the critical section to free up;
