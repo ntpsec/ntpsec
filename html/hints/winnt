@@ -1,6 +1,29 @@
 -------------
 INTRODUCTION:
 -------------
+Last revision 27 July 1999 	Version 4.0.95.
+
+This version compiles under WINNT with Visual C 6.0.
+
+Greg Brackley and Sven Dietrich 
+
+Significant changes:
+-Visual Studio v6.0 support
+-Winsock 2.0 support
+-Use of I/O completion ports for sockets and comm port I/O
+-Removed the use of multimedia timers (from ntpd, others need removing)
+-Use of waitable timers (with user mode APC) and performance counters to fake getting a better time
+-Trimble Palisade NTP Reference Clock support
+-General cleanup, prototyping of functions
+-Moved receiver buffer code to a separate module (removed unused members from the recvbuff struct)
+-Moved io signal code to a separate module
+
+Compiling Instructions:
+1. Requires Perl to be installed, and the Perl environment variable to be set correctly
+2. Open the .\ports\winnt\ntp.dsw
+3. Batch build of all debug projects compile
+
+
 Last revision:  20-Oct-1996
 
 This version corrects problems with building the XNTP 

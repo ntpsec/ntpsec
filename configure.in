@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.94b)
+AM_INIT_AUTOMAKE(ntp, 4.0.95)
 AC_PREREQ(2.13)
 
 ac_cv_var_oncore_ok=no
@@ -418,6 +418,16 @@ if test $ac_cv_struct_clockinfo_has_tickadj = yes; then
     AC_DEFINE(HAVE_TICKADJ_IN_STRUCT_CLOCKINFO)
 fi
 
+AC_CACHE_CHECK([for struct ntptimeval], ac_cv_struct_ntptimeval,
+[AC_TRY_COMPILE([
+#include <sys/time.h>
+#include <sys/timex.h>],
+[struct ntptimeval n;],
+ac_cv_struct_ntptimeval=yes, ac_cv_struct_ntptimeval=no)])
+if test $ac_cv_struct_ntptimeval = yes; then
+  AC_DEFINE(HAVE_STRUCT_NTPTIMEVAL, 1, [Do we have struct ntptimeval?])
+fi
+
 AC_CACHE_CHECK(struct ntptimeval for time.tv_nsec, ac_cv_struct_ntptimeval_tv_nsec,
 [AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TIME_H
@@ -441,6 +451,15 @@ return ntv->time.tv_nsec;],
 ])
 if test "$ac_cv_struct_ntptimeval_tv_nsec" = "yes"; then
 	AC_DEFINE(HAVE_TV_NSEC_IN_NTPTIMEVAL)
+fi
+
+AC_CACHE_CHECK([for struct timespec in struct ntptimeval], ac_cv_struct_ntptimeval_timespec,
+[AC_TRY_COMPILE([#include <sys/time.h>
+#include <sys/timex.h>],
+[struct ntptimeval n; n.time.tv_nsec = 0;],
+ac_cv_struct_ntptimeval_timespec=yes, ac_cv_struct_ntptimeval_timespec=no)])
+if test $ac_cv_struct_ntptimeval_timespec = yes; then
+  AC_DEFINE(TIMESPEC_IN_NTPTIMEVAL, 1, [Does ntptimeval use struct timespec?])
 fi
 
 AC_C_INLINE
@@ -1248,18 +1267,9 @@ AC_CACHE_CHECK(if sys/timex.h has STA_FLL, ac_cv_var_sta_fll,
 #endif
     ], ac_cv_var_sta_fll=yes, ac_cv_var_sta_fll=no)])
 
-AC_CACHE_CHECK([for struct timespec in struct ntptimeval], ac_cv_struct_ntptimeval_timespec,
-[AC_TRY_COMPILE([#include <sys/time.h>
-#include <sys/timex.h>],
-[struct ntptimeval n; n.time.tv_nsec = 0;],
-ac_cv_struct_ntptimeval_timespec=yes, ac_cv_struct_ntptimeval_timespec=no)])
-if test $ac_cv_struct_ntptimeval_timespec = yes; then
-  AC_DEFINE(TIMESPEC_IN_NTPTIMEVAL, 1, [Does ntptimeval use struct timespec?])
-fi
-
 AC_CACHE_CHECK(if we have kernel PLL support, ac_cv_var_kernel_pll,
 [dnl ac_cv_var_ntp_syscalls is {no,libc,kernel}
-case "$ac_cv_header_sys_timex_h$ac_cv_var_sta_fll$ac_cv_var_ntp_syscalls" in
+case "$ac_cv_header_sys_timex_h$ac_cv_struct_ntptimeval$ac_cv_var_sta_fll$ac_cv_var_ntp_syscalls" in
  *no*)
     ac_cv_var_kernel_pll=no
     ;;

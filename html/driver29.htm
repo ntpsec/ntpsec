@@ -2,1252 +2,1253 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Generator" content="Microsoft Word 97">
-   <meta name="Template" content="C:\Program Files\Microsoft Office\Office\html.dot">
-   <meta name="GENERATOR" content="Mozilla/4.5 [en] (WinNT; I) [Netscape]">
    <title>Trimble Palisade Receiver</title>
 </head>
 <body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#800080" alink="#FF0000">
 
-<h3>
-Trimble Palisade Receiver</h3>
+<h1>
+<font size=+2>Trimble Palisade Receiver</font>
+<hr></h1>
 
-<hr>
-<h4>
-<font size=+1>Synopsis</font></h4>
-Address: <b><font face="Courier">127.127.29.<i>u</i></font></b>
-<br>Reference ID: <b><font face="Courier">GPS</font></b>
-<br>Driver ID: <b><font face="Courier">GPS_PALISADE</font></b>
-<br>Serial Port: <tt>/dev/palisade<b><i>u</i></b></tt>
-<br><font size=+1>Serial I/O: 9600 baud, 8-bits, 1-stop, odd parity</font>
-<h4>
-<font size=+1>Description</font></h4>
-<font size=+1>The <b>refclock_palisade</b> driver interfaces NTP with Trimble
-Navigation's Palisade Smart Antenna GPS receiver. The driver reports its
-ID as "GPS_PALISADE'' to indicate the Trimble Palisade GPS as precision
-time source.</font>
-<p><font size=+1>This documentation describes version V2.43 (May 11, 1999)
-of the source.</font>
-<p><font size=+1>Driver code for the Palisade receiver is being maintained
-by:</font>
-<br><font size=+1><a href="mailto:sven_dietrich@trimble.com">Sven Dietrich</a></font>
-<br><font size=+1><a href="http://www.trimble.com/">Trimble Navigation
-Ltd.</a></font>
-<br><font size=+1>645 North Mary Ave.</font>
-<br><font size=+1>Sunnyvale, CA 94088-3642</font>
-<br>&nbsp;
-<p><b><font size=+1>Introduction</font></b>
-<p><font size=+1>The following information should answer most questions
-regarding driver installation, deployment and debugging.</font>
-<h4>
-<font size=+1>Receiver</font></h4>
-<font size=+1>The Palisade GPS receiver is an 8-channel smart antenna based
-on Sierra<sup>TM</sup> GPS technology. It is designed for static timing
-applications.</font>
-<p><font size=+1>Palisade generates a PPS synchronized to UTC within +/-
-100 ns.&nbsp; This level of precision is achieved using an over-determined
-time solution, a 40 ns pulse steering resolution and a T-RAIM (Time-Receiver
-Autonomous Integrity Monitor) algorithm. An external event input with 40
-nanosecond resolution, is available for asynchronous time transfer applications.</font>
-<p><font size=+1>Palisade self-surveys at power-up using TRAIM. No initialization
-of the receiver is required by the driver. It is recommended that Palisade
-be allowed to complete self-survey before starting NTP.</font>
-<br>&nbsp;
-<h4>
-<font size=+1>Compatibility</font></h4>
-<font size=+1>The driver has been tested on the following platforms:</font>
-<br>&nbsp;
-<table BORDER WIDTH="758" >
+<h2>
+<img SRC="pic/driver29.gif" NOSAVE height=100 width=420></h2>
+
+<h2>
+<font size=+1>Synopsis</font></h2>
+
+<table>
 <tr>
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>Platform</font></td>
+<td>
+<div align=right><tt>Address:&nbsp;</tt></div>
+</td>
 
-<td VALIGN=CENTER><font size=+1>Operating System</font></td>
+<td><b>127.127.29.<i>u</i></b></td>
+</tr>
+
+<tr>
+<td>
+<div align=right><tt>Reference ID:</tt></div>
+</td>
+
+<td><a NAME="REFID"></a><b>GPS</b></td>
+</tr>
+
+<tr>
+<td>
+<div align=right><tt>Driver ID:</tt></div>
+</td>
+
+<td><b>GPS_PALISADE</b></td>
+</tr>
+
+<tr>
+<td>
+<div align=right><tt>Serial Port:</tt></div>
+</td>
+
+<td><b>/dev/palisade<i>u</i></b></td>
+</tr>
+
+<tr>
+<td>
+<div align=right><tt><font size=+1>Serial I/O:</font></tt></div>
+</td>
+
+<td><b>9600 baud, 8-bits, 1-stop, odd parity</b></td>
+</tr>
+</table>
+
+<h2>
+<font size=+1>Description</font></h2>
+The <b>refclock_palisade</b> driver supports <a href="http://www.trimble.com/products/ntp">Trimble
+Navigation's Palisade Smart Antenna GPS receiver</a>.
+<br>Additional software and information about the Palisade GPS is available
+from: <a href="http://www.trimble.com/oem/ntp">http://www.trimble.com/oem/ntp</a>.
+<br>Latest NTP driver source, executables and documentation is maintained
+at:
+<a href="ftp://ftp.trimble.com/pub/ntp">ftp://ftp.trimble.com/pub/ntp</a>
+<p>This documentation describes version 7.12 of the GPS Firmware and version
+2.46 (July 15, 1999) and later, of the driver source.
+<br>&nbsp;
+<h2>
+<font size=+1>Operating System Compatibility</font></h2>
+The Palisade driver has been tested on the following software and hardware
+platforms:
+<br>&nbsp;
+<center><table>
+<tr>
+<td VALIGN=CENTER WIDTH="23%">Platform</td>
+
+<td VALIGN=CENTER>Operating System</td>
 
 <td>NTP Sources</td>
+
+<td>Accuracy</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>i386 (PC)&nbsp;</font></td>
+<td VALIGN=CENTER WIDTH="23%">i386 (PC)&nbsp;</td>
 
-<td VALIGN=CENTER><font size=+1>Linux 2.x</font></td>
+<td VALIGN=CENTER>Linux</td>
 
 <td>NTP Distribution</td>
+
+<td>10 us</td>
 </tr>
 
 <tr>
-<td><font size=+1>i386 (PC)&nbsp;</font></td>
+<td>i386 (PC)&nbsp;</td>
 
-<td><font size=+1>Windows NT</font></td>
+<td>Windows NT</td>
 
 <td><a href="ftp://ftp.trimble.com/pub/ntp">ftp://ftp.trimble.com/pub/ntp</a></td>
+
+<td>1 ms</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>SUN</font></td>
+<td VALIGN=CENTER WIDTH="23%">SUN</td>
 
-<td VALIGN=CENTER><font size=+1>Solaris 2.5x, 2.6, 7.0</font></td>
+<td VALIGN=CENTER>Solaris 2.x</td>
 
 <td>NTP Distribution</td>
+
+<td>50 us</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>Hewlett-Packard</font></td>
+<td VALIGN=CENTER WIDTH="23%">Hewlett-Packard</td>
 
-<td VALIGN=CENTER><font size=+1>HPUX 9, 10, 11</font></td>
+<td VALIGN=CENTER>HPUX 9, 10, 11</td>
 
 <td><a href="http://us-support.external.hp.com">http://us-support.external.hp.com</a></td>
-</tr>
-</table>
 
-<p><font size=+1>If you are compiling NTP from a software distribution,
-you can obtain latest software source, documentation, and compatibility
-information from:</font>
-<p><font size=+1>&nbsp;&nbsp;&nbsp; <a href="ftp://ftp.trimble.com/pub/ntp">ftp://ftp.trimble.com/pub/ntp</a></font>
-<p><font size=+1>A proprietary port of NTP for Windows NT is also posted
-on the above ftp site.</font>
-<br><font size=+1>Windows NT support is available from Trimble on a no-support,
-beta-evaluation basis only.</font>
-<p><font size=+1>This driver is compatible with the following versions
-of Palisade:</font>
+<td>50 us</td>
+</tr>
+
+<tr>
+<td>Various</td>
+
+<td>Free BSD</td>
+
+<td>NTP Distribution</td>
+
+<td>20 us</td>
+</tr>
+</table></center>
+
+<h2>
+<font size=+1>GPS Receiver</font></h2>
+The Palisade GPS receiver is an 8-channel smart antenna, housing the GPS
+receiver, antenna and interface in a single unit, and is designed for rooftop
+deployment in static timing applications.
+<p>Palisade generates a PPS synchronized to UTC within +/- 100 ns.&nbsp;
+The Palisade's external event input with 40 nanosecond resolution is utilized
+by the Palisade NTP driver for asynchronous precision time transfer.
+<p>No user initialization of the receiver is required. This driver is compatible
+with the following versions of Palisade:
 <br>&nbsp;
-<table BORDER WIDTH="645" >
+<center><table>
 <tr>
-<td VALIGN=CENTER WIDTH="22%">
-<center><font size=+1>Version</font></center>
+<td VALIGN=CENTER>
+<center>Version</center>
 </td>
 
-<td VALIGN=TOP WIDTH="18%">
-<center><font size=+1>External Event</font></center>
+<td VALIGN=TOP>
+<center>Event Input</center>
 </td>
 
-<td VALIGN=CENTER WIDTH="60%">
-<center><font size=+1>Trimble Part Number</font></center>
+<td VALIGN=CENTER>
+<center>Trimble Part Number</center>
 </td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="22%">
-<center><font size=+1>7.02</font></center>
+<td VALIGN=CENTER>
+<center>7.02</center>
 </td>
 
-<td VALIGN=TOP WIDTH="18%">
-<center><font size=+1>No</font></center>
+<td VALIGN=TOP>
+<center>No</center>
 </td>
 
-<td VALIGN=CENTER WIDTH="60%">
-<center><font size=+1>26664-00</font></center>
-</td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="22%">
-<center><font size=+1>7.02E</font></center>
-</td>
-
-<td VALIGN=TOP WIDTH="18%">
-<center><font size=+1>Yes</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="60%">
-<center><font size=+1>26664-10</font></center>
+<td VALIGN=CENTER>
+<center>26664-00</center>
 </td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="22%">
-<center><font size=+1>7.12</font></center>
+<td ALIGN=CENTER VALIGN=CENTER>
+<center>7.02E</center>
 </td>
 
-<td VALIGN=TOP WIDTH="18%">
-<center><font size=+1>Yes</font></center>
+<td VALIGN=TOP>
+<center>Yes</center>
 </td>
 
-<td VALIGN=CENTER WIDTH="60%">
-<center><font size=+1>38158-00</font></center>
+<td VALIGN=CENTER>
+<center>26664-10</center>
 </td>
 </tr>
-</table>
-
-<p><font size=+1>Note: If you are using Palisade 26664-00, you must set
-fudge flag2 to 1 in your ntp.conf file. See the configuration section below.</font>
-<br>&nbsp;
-<h4>
-<font size=+1>Installation</font></h4>
-<font size=+1>The Palisade receiver is delivered in a smart antenna form
-factor, housing the GPS receiver, antenna and interface in a single unit,
-and is designed for rooftop deployment.</font>
-<p><font size=+1>A location with unobstructed view of the horizon is recommended.
-Palisade is designed to be securely mounted atop standard 3/4 inch threaded
-pipe.</font>
-<p><font size=+1>The 12 conductor (dia. 10 mm)&nbsp; power and I/O cable
-must be routed from the rooftop site to the NTP server.</font>
-<h4>
-<font size=+1>Connection</font></h4>
-<font size=+1>The Palisade is equipped with dual (A &amp; B) RS-422 serial
-interfaces and a differential TTL PPS output. Port A must be connected
-to the NTP time server. An RS-232 / RS-422 signal converter is supplied
-with the Palisade NTP Synchronization Kit, to allow cable lengths up to
-500 meters.</font>
-<p><font size=+1>The following connections are required when connecting
-Palisade with a host:</font>
-<br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="847" >
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><u><font size=+1>Description</font></u></td>
-
-<td VALIGN=CENTER WIDTH="8%"><b><font size=+1>Host</font></b></td>
-
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><b><font size=+1>Palisade</font></b></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>&nbsp;</font></td>
-</tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="19%"><b><font size=+1>Port A</font></b></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><u><font size=+1>DB-9</font></u></center>
+<td VALIGN=CENTER>
+<center>7.12</center>
 </td>
 
-<td VALIGN=CENTER WIDTH="9%">
-<center><u><font size=+1>DB-25</font></u></center>
+<td VALIGN=TOP>
+<center>Yes</center>
 </td>
 
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><u><font size=+1>RS-232</font></u></td>
-
-<td VALIGN=CENTER WIDTH="19%"><u><font size=+1>RS-422</font></u></td>
-
-<td VALIGN=CENTER WIDTH="29%"><u><font size=+1>Palisade Pinout</font></u></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Receive Data&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>2</font></center>
+<td VALIGN=CENTER>
+<center>38158-00</center>
 </td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>3</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Green</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Green / Blue</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>8 (T-) &amp; 10 (T+)</font></td>
 </tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Transmit Data&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>3</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>2</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>N/C</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>N/C</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>&nbsp;</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Request to Send</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>7</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>4</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Gray</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Gray / White</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>6 (R-) &amp; 7 (R+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Signal Ground</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>5</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>7</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Black</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Black</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>9 (GND)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="8%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>&nbsp;</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><b><font size=+1>Port B</font></b></td>
-
-<td VALIGN=CENTER WIDTH="8%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>&nbsp;</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Receive Data&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>2</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>3</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Brown</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Brown / Yellow</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>4 (T-) &amp; 5 (T+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Transmit Data</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>3</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>2</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Violet</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Orange/ Violet</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>2 (R-) &amp; 3 (R+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Request to Send</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>7</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>4</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>N/C</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>N/C</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>&nbsp;</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Signal Ground</font></td>
-
-<td VALIGN=CENTER WIDTH="8%">
-<center><font size=+1>5</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="9%">
-<center><font size=+1>7</font></center>
-</td>
-
-<td VALIGN=CENTER WIDTH="4%"><font size=+1>&lt;--</font></td>
-
-<td VALIGN=CENTER WIDTH="11%"><font size=+1>Black</font></td>
-
-<td VALIGN=CENTER WIDTH="19%"><font size=+1>Black</font></td>
-
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>9 (GND)</font></td>
-</tr>
-</table>
-
-<p><font size=+1>Note: Driving the RS-422 inputs on the Palisade single
-ended, i.e. using the Green and Gray connections,</font>
-<br><font size=+1>does not work on all serial ports, and is deprecated.
-Use of the Palisade NTP host adapter is recommended.</font>
-<p><font size=+1>Pinouts for the Palisade NTP host adapter (Trimble PN
-37070) DB-25 M connector are as follows:</font>
-<br>&nbsp;
-<br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="682" >
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>DB-25M</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Conductor&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>Palisade</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Description</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>1&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Red</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>1</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Power</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>7&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Black</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>9</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Ground</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>9</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Black/White</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>12</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>PPS -</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>10&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Green</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>8</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Transmit Port A (T-)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>11&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Brown</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>4</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Transmit Port B (T-)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>12&nbsp;</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Gray</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>7</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Receive Port A (R+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>13</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Orange</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>3</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Receive Port B (R+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>21</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Orange/White</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>11</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>PPS +</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>22</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Blue</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>10</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Transmit Port A (T+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>23</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Yellow</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>5</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Transmit Port B (T+)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>24</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>White</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>6</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Receive Port A (R-)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="12%"><font size=+1>25</font></td>
-
-<td VALIGN=CENTER WIDTH="31%"><font size=+1>Violet</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>2</font></td>
-
-<td VALIGN=CENTER WIDTH="41%"><font size=+1>Receive Port B (R-)</font></td>
-</tr>
-</table>
-
-<p><font size=+1>The Palisade's secondary port, Port B, provides a TSIP
-(Trimble Standard Interface Protocol), control and command interface for
-diagnostics, configuration, and monitoring.</font>
-<br><font size=+1>Port B and the PPS output are not currently used by the
-Palisade NTP reference clock driver.</font>
-<br>&nbsp;
-<h4>
-<font size=+1>O/S Serial Port Configuration</font></h4>
-<font size=+1>The driver attempts to open the device <tt>/dev/palisade</tt><b><i>u</i></b>where
-<b><i>u</i></b>
-is the NTP refclock unit number as defined by the LSB of the refclock address.&nbsp;
-Valid refclock unit numbers are 0 - 3.</font>
-<p><font size=+1>The user is expected to provide a symbolic link to an
-available serial port device.&nbsp; This is typically performed by a command
-such as:</font>
+</table></center>
+
+<dl>
+<dl>Note: When using Palisade 26664-00, you must set fudge flag2 to 1 in
+<b>ntp.conf</b>.
+See <a href="#Configuration">configuration</a>.</dl>
+
+<dl>
+<h3>
+<font size=+1>GPS&nbsp;<a NAME="Installation"></a>Installation</font></h3>
+A location with unobstructed view of the horizon is recommended. Palisade
+is designed to be securely mounted atop standard 3/4 inch threaded pipe.
+<p>The 12 conductor (dia. 10 mm)&nbsp; power and I/O cable must be routed
+from the rooftop site to the NTP server and properly strain relieved.
+<h3>
+<font size=+1>GPS&nbsp;<a NAME="Connection"></a>Connection</font></h3>
+The Palisade is equipped with dual (A &amp; B) RS-422 serial interfaces
+and a differential TTL PPS output. An RS-232 / RS-422 Interface Module
+is supplied with the Palisade NTP Synchronization Kit. Palisade <a href="#PortA">port
+A</a> must be connected to the NTP host server. Maximum antenna cable length
+is 500 meters. See the <a href="#Pinouts">pinouts</a> table for detailed
+connection Information.
+<p>Palisade's <a href="#PortB">port B</a> provides a TSIP (Trimble Standard
+Interface Protocol) interface for diagnostics, configuration, and monitoring.
+Port B and the PPS output are not currently used by the Palisade NTP reference
+clock driver.
+<br>&nbsp;</dl>
+</dl>
+
+<h2>
+<font size=+1>O/S Serial Port Configuration</font></h2>
+The driver attempts to open the device <b><tt><a href="#REFID">/dev/palisade<i>u</i></a></tt></b>
+where
+<b><i>u</i></b> is the NTP refclock unit number as defined by the
+LSB of the refclock address.&nbsp; Valid refclock unit numbers are 0 -
+3.
+<p>The user is expected to provide a symbolic link to an available serial
+port device.&nbsp; This is typically performed by a command such as:
 <blockquote><tt>ln -s /dev/ttyS0 /dev/palisade0</tt></blockquote>
-<font size=+1>Windows NT does not support symbolic links to device files.
-COM<b>x</b>: is used by the driver, derived from the refclock unit number,
-where unit 1 corresponds to COM<b>1</b>: and unit 3 corresponds to COM3:</font>
-<h4>
-<font size=+1>Time Transfer and Polling</font></h4>
-<font size=+1>Time transfer to the NTP host is performed via the Palisade's
-comprehensive time packet output. This packet is output once per second,
-and whenever an event timestamp is requested.</font>
-<p><font size=+1>The driver requests an event time stamp at the end of
-each polling interval, by pulsing the RTS (request to send) line on the
-serial port. The Palisade receiver responds with a time stamped event packet.</font>
-<p><font size=+1>Time stamps are reported by the Palisade with respect
-to UTC time.</font>
-<h4>
-<font size=+1>Data Format</font></h4>
-
-<p><br><font size=+1>Palisade port A can output two synchronous time packets.
-The NTP driver can use either packet for synchronization. Packets are formatted
-as follows:</font>
+Windows NT does not support symbolic links to device files. COM<b>x</b>:
+is used by the driver, based on the refclock unit number, where unit 1
+corresponds to COM<b>1</b>: and unit 3 corresponds to COM3:
 <br>&nbsp;
-<p><b><font size=+1>Packet 8F-AD (Primary NTP Packet)</font></b>
-<br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="817" >
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>Byte</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Item</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>Type</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Meaning</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>0</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Sub-Packet ID</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Subcode 0xAD</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>1 - 2</font></td>
-
-<td VALIGN=TOP WIDTH="30%"><font size=+1>Event Count</font></td>
-
-<td VALIGN=TOP WIDTH="13%"><font size=+1>INTEGER</font></td>
-
-<td VALIGN=TOP WIDTH="49%"><font size=+1>External event count recorded
-(0 = PPS)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>3 - 10</font></td>
-
-<td VALIGN=TOP WIDTH="30%"><font size=+1>Fractional Second</font></td>
-
-<td VALIGN=TOP WIDTH="13%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=TOP WIDTH="49%"><font size=+1>Time elapsed in current second</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>11</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Hour</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Hour</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>12</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Minute</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Minute</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>13</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Second</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Second (0 - 59; 60 = leap)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>14</font></td>
-
-<td VALIGN=TOP WIDTH="30%"><font size=+1>Day</font></td>
-
-<td VALIGN=TOP WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=TOP WIDTH="49%"><font size=+1>Date (1 - 31)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>15</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Month</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Month (1 - 12)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>15 - 17</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Year</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>INTEGER</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Year (4 digit)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>18</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Receiver Status</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Tracking Status</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>19</font></td>
-
-<td VALIGN=TOP WIDTH="30%"><font size=+1>UTC Flags</font></td>
-
-<td VALIGN=TOP WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=TOP WIDTH="49%"><font size=+1>Leap Second Flags</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>20</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Reserved</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Contains 0xFF</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>21</font></td>
-
-<td VALIGN=CENTER WIDTH="30%"><font size=+1>Reserved</font></td>
-
-<td VALIGN=CENTER WIDTH="13%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Contains 0xFF</font></td>
-</tr>
-</table>
-
-<br>&nbsp;
-<p><font size=+1>Leap Second Flag Definition:</font>
-<br><font size=+1>Bit 0:&nbsp; (1) UTC Time is available</font>
-<br><font size=+1>Bits 1 - 3: Undefined</font>
-<br><font size=+1>Bit 4:&nbsp; (1) Leap Scheduled: Leap second pending
-asserted by GPS control segment.</font>
-<br><font size=+1>Bit 5:&nbsp; (1) Leap Pending: set 24 hours before, until
-beginning of leap second.</font>
-<br><font size=+1>Bit 6:&nbsp; (1) GPS Leap Warning: 6 hours before until
-6 hours after leap event</font>
-<br><font size=+1>Bit 7: (1) Leap In Progress. Only set during the leap
-second.</font>
-<br>&nbsp;
-<p><font size=+1>Tracking Status Flag Definitions:</font>
-<br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="712" >
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>0</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Receiver is Navigating</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>1</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>1 Sat. Timing Mode</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>2</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Approximate Time (20 - 50 ms)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>3</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Startup</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>4</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Startup (N/A)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>5</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Dilution of Position too High
-(only applies during survey)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>6</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>1 Sat. Timing Mode: SV is not
-usable</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>7</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>No Satellites Usable</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>8</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Only 1 Satellite Usable</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>9</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Only 2 Satellite Usable</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>10</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Only 3 Satellites Usable</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>11</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Invalid Solution (Serious Error
-Cond.)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>12</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Differential Corrections (N/A)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="5%"><font size=+1>13</font></td>
-
-<td VALIGN=CENTER WIDTH="59%"><font size=+1>Overdetermined Fixes</font></td>
-</tr>
-</table>
-
-<br>&nbsp;
-<p><b><font size=+1>Packet 8F-0B (Comprehensive Timing Packet)</font></b>
-<br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="810" >
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>Byte</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Item</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>Type</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Meaning</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>0</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Sub-Packet ID</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Subcode 0x0B</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>1 - 2</font></td>
-
-<td VALIGN=TOP WIDTH="27%"><font size=+1>Event Count</font></td>
-
-<td VALIGN=TOP WIDTH="16%"><font size=+1>INTEGER</font></td>
-
-<td VALIGN=TOP WIDTH="48%"><font size=+1>External event count recorded
-(0 = PPS)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>3 - 10</font></td>
-
-<td VALIGN=TOP WIDTH="27%"><font size=+1>UTC / GPS TOW</font></td>
-
-<td VALIGN=TOP WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=TOP WIDTH="48%"><font size=+1>UTC / GPS time of week (seconds)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>11</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Date</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Day of Month</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>12</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Month</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Month of Event</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>13 - 14</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Year</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>INT</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Year of event</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>15</font></td>
-
-<td VALIGN=TOP WIDTH="27%"><font size=+1>Receiver Mode</font></td>
-
-<td VALIGN=TOP WIDTH="16%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=TOP WIDTH="48%"><font size=+1>Receiver operating dimensions:&nbsp;</font>
-<br><font size=+1>0: Horizontal (2D)&nbsp;</font>
-<br><font size=+1>1: Full Position (3D)&nbsp;</font>
-<br><font size=+1>2: Single Satellite (0D)&nbsp;</font>
-<br><font size=+1>3: Automatic (2D / 3D)&nbsp;</font>
-<br><font size=+1>4: DGPS reference&nbsp;</font>
-<br><font size=+1>5: Clock hold (2D)&nbsp;</font>
-<br><font size=+1>6: Over determined Clock</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>15 - 17</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>UTC Offset</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>INTEGER</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>UTC Offset value (seconds)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>18 - 25</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Oscillator Bias</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Oscillator BIAS (meters)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=TOP WIDTH="9%"><font size=+1>26 - 33</font></td>
-
-<td VALIGN=TOP WIDTH="27%"><font size=+1>Oscillator Drift Rate</font></td>
-
-<td VALIGN=TOP WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=TOP WIDTH="48%"><font size=+1>Oscillator Drift (meters / second)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>34 - 37</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Bias Uncertainty</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>SINGLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Oscillator bias uncertainty
-(meters)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>38 - 41</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Drift Uncertainty</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>SINGLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Oscillator bias rate uncertainty
-(m / sec)</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>42 - 49</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Latitude</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Latitude in radians</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>50 - 57</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Longitude</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Longitude in radians</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>58 - 65</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Altitude</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>DOUBLE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>Altitude above mean sea level,
-in meters</font></td>
-</tr>
-
-<tr>
-<td VALIGN=CENTER WIDTH="9%"><font size=+1>66 - 73</font></td>
-
-<td VALIGN=CENTER WIDTH="27%"><font size=+1>Satellite ID</font></td>
-
-<td VALIGN=CENTER WIDTH="16%"><font size=+1>BYTE</font></td>
-
-<td VALIGN=CENTER WIDTH="48%"><font size=+1>SV Id No. of tracked satellites</font></td>
-</tr>
-</table>
-
-<h4>
-&nbsp;</h4>
-
-<h4>
-<font size=+1>Configuration</font></h4>
-<font size=+1>A typical </font><tt>ntp.conf</tt><font size=+1> configuration
-file for this driver and a Palisade with event polling:</font>
+<h2>
+<a NAME="Configuration"></a><font size=+1>NTP Configuration</font></h2>
+Palisade NTP configuration file <b><tt>"ntp.conf"</tt></b> with event polling:
 <br><tt>#------------------------------------------------------------------------------</tt>
 <br><tt># The Primary reference</tt>
-<br><tt>server 127.127.29.0 # Trimble Palisade GPS (Stratum 1).</tt>
-<p><tt>peer terrapin.csc.ncsu.edu # internet server</tt>
-<p><tt># Drift file for expedient re-synchronization after downtime or
+<br><tt>server 127.127.29.0 # Trimble Palisade GPS Refclock Unit #0</tt>
+<br><tt>peer terrapin.csc.ncsu.edu # internet server</tt>
+<br><tt># Drift file for expedient re-synchronization after downtime or
 reboot.</tt>
 <br><tt>driftfile /etc/ntp.drift</tt>
 <br><tt>#------------------------------------------------------------------------------</tt>
-<p><font size=+1>A typical </font><tt>ntp.conf</tt><font size=+1> configuration
-file for this driver and a Palisade without event polling:</font>
-<p><tt>#------------------------------------------------------------------------------</tt>
+<p>Configuration without event polling:
+<br><tt>#------------------------------------------------------------------------------</tt>
 <br><tt># The Primary reference</tt>
 <br><tt>server 127.127.29.0 # Trimble Palisade GPS (Stratum 1).</tt>
-<p><tt># Set packet delay</tt>
-<br><tt>fudge 127.127.29.0 time1 0.020</tt>
-<p><tt># and set flag2 to turn off event polling.</tt>
-<br><tt>fudge 127.127.29.0 flag2 1</tt>
-<p><tt># Drift file for expedient re-synchronization after downtime or
-reboot.</tt>
-<br><tt>driftfile /etc/ntp.drift</tt>
+<br><tt># Set packet delay</tt>
+<br><tt><a href="#time1">fudge 127.127.29.0 time1 0.020</a></tt>
+<br><tt># and set flag2 to turn off event polling.</tt>
+<br><tt><a href="#flag2">fudge 127.127.29.0 flag2 1</a></tt>
 <br><tt>#------------------------------------------------------------------------------</tt>
-<h4>
-<font size=+1>Logging</font></h4>
-<font size=+1>Syslog entries generated by the palisade reference clock
-will be of the form:</font>
-<pre>Nov 14 16:16:21 terrapin ntpd[1127]: Palisade #0: <i>message</i></pre>
-
-<h4>
-<font size=+1>Debugging</font></h4>
-<font size=+1>The following procedure is recommended for installing and
-testing a Palisade NTP driver:</font>
+<br>&nbsp;
+<h2>
+<a NAME="TimeTransfer"></a><font size=+1>Time Transfer and Polling</font></h2>
+Time transfer to the NTP host is performed via the Palisade's comprehensive
+time packet output. The time packets are output once per second, and whenever
+an event timestamp is requested.
+<p>The driver requests an event time stamp at the end of each polling interval,
+by pulsing the RTS (request to send) line on the serial port. The Palisade
+GPS responds with a time stamped event packet.
+<p>Time stamps are reported by the Palisade with respect to UTC time. The
+GPS receiver must download UTC offset information from GPS satellites.
+After an initial UTC download, the receiver will always start with correct
+UTC offset information.
+<br>&nbsp;
+<h2>
+<font size=+1>Run NTP in Debugging Mode</font></h2>
+The following procedure is recommended for installing and testing a Palisade
+NTP driver:
 <ol>
 <li>
-<font size=+1>Place the Palisade GPS receiver outdoors; with clear view
-of the sky.</font></li>
+Perform initial checkout procedures. Place the GPS receiver outdoors; with
+clear view of the sky. Allow the receiver to obtain an UTC almanac.</li>
 
 <li>
-<font size=+1>Allow the receiver 5 minutes to acquire satellite lock and
-position.</font></li>
+Verify presence of timing packets by observing the 1 Hz (PPS) led on the
+interface module. It should flash once per second.</li>
 
 <li>
-<font size=+1>Verify presence of timing packets by observing the 1 Hz (PPS)
-led on the NTP interface. It should flash once per second.</font></li>
+Connect Palisade's port A to the NTP host.</li>
 
 <li>
-<font size=+1>Connect Palisade port A to the NTP host.</font></li>
+Configure NTP and the serial I/O port on the host system.</li>
 
 <li>
-<font size=+1>Configure NTP and the serial I/O port on the host system.</font></li>
+Initially use <tt><a href="#flag2">fudge flag2</a></tt> in <b><a href="#Configuration">ntp.conf</a>,</b>
+to disable event polling (see configuration).</li>
 
 <li>
-<font size=+1>Initially use fudge flag2 in <b>ntp.conf,</b> to disable
-event polling (see configuration).</font></li>
+Run NTP in debug mode (-d -d), to observe Palisade_receive events.</li>
 
 <li>
-<font size=+1>Run NTP in debug mode (-d -d), to observe Palisade_receive
-events.</font></li>
+The driver reports the <a href="#TrackingStatus">tracking status of the
+receiver</a>. Make sure it is tracking several satellites.</li>
 
 <li>
-<font size=+1>The driver reports the tracking status of the receiver. A
-minumum of 4 sats. are required for self-survey to complete.</font></li>
+Remove fudge flag2 and restart <b>ntpd</b> in debug mode to observe palisade_receive
+events.</li>
 
 <li>
-<font size=+1>Remove fudge flag2 and restart <b>ntpd</b> in debug mode
-to observe event polling receive events.</font></li>
+If event polling fails, verify the <a href="#Pinouts">connections</a> and
+that the host hardware supports RTS control.</li>
 </ol>
 
-<h4>
-&nbsp;#DEFINEs</h4>
-<font size=+1>The following constants are defined and used by the driver.
-These defines may be modified to improve performance or adapt to new operating
-systems.</font>
+<h2>
+<font size=+1>Event Logging</font></h2>
+System and Event log entries are generated by NTP to report significant
+system events. Administrators should monitor the system log to observe
+NTP error messages. Log entries generated by the Palisade NTP reference
+clock driver will be of the form:
+<blockquote>
+<pre>Nov 14 16:16:21 terrapin ntpd[1127]: Palisade #0: <i>message</i></pre>
+</blockquote>
+
+<h2>
+<font size=+1>Fudge Factors</font></h2>
+
+<dl>
+<dt>
+<a NAME="time1"></a><tt><font size=+1><a href="#Configuration">time1 <i>time</i></a></font></tt></dt>
+
+<dd>
+Specifies the time offset calibration factor, in seconds and fraction,
+with default 0.0. If event capture is not used, time1 should be set to
+20 milliseconds to correct serial line and operating system delays incurred
+in capturing time stamps from the synchronous packets.</dd>
+
+<dt>
+<tt><font size=+1>stratum <i>number</i></font></tt></dt>
+
+<dd>
+Specifies the driver stratum, in decimal from 0 to 15, with default 0.</dd>
+
+<dt>
+<tt><font size=+1><a href="#REFID">refid <i>string</i></a></font></tt></dt>
+
+<dd>
+Specifies the driver reference identifier, <b>GPS</b>.</dd>
+
+<dt>
+<a NAME="flag2"></a><tt><font size=+1><a href="#Configuration">flag2 0
+| 1</a></font></tt></dt>
+
+<dd>
+When set to 1, driver does not use hardware event capture. The synchronous
+packet output by the receiver at the beginning of each second is time stamped
+by the driver. If triggering the event pulse fails, the driver falls back
+to this mode automatically.</dd>
+</dl>
+
+<h2>
+<font size=+1>DEFINEs</font></h2>
+The following constants are defined in the driver source code. These defines
+may be modified to improve performance or adapt to new operating systems.
 <br>&nbsp;
-<table BORDER=0 CELLSPACING=0 WIDTH="757" >
+<center><table BORDER >
 <tr>
-<td VALIGN=TOP WIDTH="29%"><b><font size=+1>Label</font></b></td>
+<td><b>Label</b></td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Definition</font></td>
+<td>Definition</td>
 
-<td VALIGN=TOP WIDTH="23%"><font size=+1>Default Value</font></td>
+<td>Default Value</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>DEVICE</font></td>
+<td>DEVICE</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>The serial port device to be
-used by the driver.</font></td>
+<td>The serial port device to be used by the driver</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>/dev/palisade<b><i>u</i></b></font></td>
+<td>/dev/palisade<b><i>u</i></b></td>
 </tr>
 
 <tr>
-<td VALIGN=TOP WIDTH="29%"><font size=+1>PRECISION</font></td>
+<td>PRECISION</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Estimate of the accuracy of
-timestamps when using event poll.</font></td>
+<td>Accuracy of time transfer</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>10 microseconds</font></td>
+<td>1 microsecond</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>CURRENT_UTC</font></td>
+<td>CURRENT_UTC</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Valid GPS - UTC offset</font></td>
+<td>Valid GPS - UTC offset</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>13</font></td>
+<td>13</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>SPEED232</font></td>
+<td>SPEED232</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Host RS-232 baud rate</font></td>
+<td>Host RS-232 baud rate</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>B9600</font></td>
+<td>B9600</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>TRMB_MINPOLL&nbsp;</font></td>
+<td>TRMB_MINPOLL&nbsp;</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Minimum polling interval</font></td>
+<td>Minimum polling interval</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>5 (32 seconds)</font></td>
+<td>5 (32 seconds)</td>
 </tr>
 
 <tr>
-<td VALIGN=CENTER WIDTH="29%"><font size=+1>TRMB_MAXPOLL</font></td>
+<td>TRMB_MAXPOLL</td>
 
-<td VALIGN=CENTER WIDTH="49%"><font size=+1>Maximum interval between polls</font></td>
+<td>Maximum interval between polls</td>
 
-<td VALIGN=CENTER WIDTH="23%"><font size=+1>7 (128 seconds)</font></td>
+<td>7 (128 seconds)</td>
 </tr>
-</table>
+</table></center>
 
+<h2>
+<a NAME="DataFormat"></a><font size=+1>Data Format</font></h2>
+Palisade port A can output two synchronous time packets. The NTP driver
+can use either packet for synchronization. Packets are formatted as follows:
+<h3>
+<b><font size=+0>Packet 8F-AD (Primary NTP Packet)</font></b></h3>
+
+<center><table>
+<tr>
+<td>Byte</td>
+
+<td>Item</td>
+
+<td>Type</td>
+
+<td>Meaning</td>
+</tr>
+
+<tr>
+<td>0</td>
+
+<td>Sub-Packet ID</td>
+
+<td>BYTE</td>
+
+<td>Subcode 0xAD</td>
+</tr>
+
+<tr>
+<td>1 - 2</td>
+
+<td>Event Count</td>
+
+<td>INTEGER</td>
+
+<td>External event count recorded (0 = PPS)</td>
+</tr>
+
+<tr>
+<td>3 - 10</td>
+
+<td>Fractional Second</td>
+
+<td>DOUBLE</td>
+
+<td>Time elapsed in current second (s)</td>
+</tr>
+
+<tr>
+<td>11</td>
+
+<td>Hour</td>
+
+<td>BYTE</td>
+
+<td>Hour (0 - 23)</td>
+</tr>
+
+<tr>
+<td>12</td>
+
+<td>Minute</td>
+
+<td>BYTE</td>
+
+<td>Minute (0 - 59)</td>
+</tr>
+
+<tr>
+<td>13</td>
+
+<td>Second</td>
+
+<td>BYTE</td>
+
+<td>Second (0 - 59; 60 = leap)</td>
+</tr>
+
+<tr>
+<td>14</td>
+
+<td>Day</td>
+
+<td>BYTE</td>
+
+<td>Date (1 - 31)</td>
+</tr>
+
+<tr>
+<td>15</td>
+
+<td>Month</td>
+
+<td>BYTE</td>
+
+<td>Month (1 - 12)</td>
+</tr>
+
+<tr>
+<td>16 - 17</td>
+
+<td>Year</td>
+
+<td>INTEGER</td>
+
+<td>Year (4 digit)</td>
+</tr>
+
+<tr>
+<td>18</td>
+
+<td>Receiver Status</td>
+
+<td>BYTE</td>
+
+<td>Tracking Status</td>
+</tr>
+
+<tr>
+<td>19</td>
+
+<td>UTC Flags</td>
+
+<td>BYTE</td>
+
+<td>Leap Second Flags</td>
+</tr>
+
+<tr>
+<td>20</td>
+
+<td>Reserved</td>
+
+<td>BYTE</td>
+
+<td>Contains 0xFF</td>
+</tr>
+
+<tr>
+<td>21</td>
+
+<td>Reserved</td>
+
+<td>BYTE</td>
+
+<td>Contains 0xFF</td>
+</tr>
+</table></center>
+
+<blockquote>
 <h4>
-Fudge Factors</h4>
-
-<dl>
-<dt>
-<tt>time1 <i>time</i></tt></dt>
-
-<dd>
-<font size=+1>Specifies the time offset calibration factor, in seconds
-and fraction, with default 0.0.</font></dd>
-</dl>
-
-<dir><font size=+1>When event capture is not being used, time1 should be
-set to 20 milliseconds to correct serial line and operating system delays
-incurred in capturing time stamps from the synchronous packets.</font></dir>
-
-<dl>
-<dt>
-<font size=+1>&nbsp;</font><tt>time2 <i>time</i></tt></dt>
-
-<dd>
-<font size=+1>Not currently used by this driver.</font></dd>
-
-<dt>
-<tt>stratum <i>number</i></tt></dt>
-
-<dd>
-<font size=+1>Specifies the driver stratum, in decimal from 0 to 15, with
-default 0.</font></dd>
-
-<dt>
-<tt>refid <i>string</i></tt></dt>
-
-<dd>
-<font size=+1>Specifies the driver reference identifier, </font><b><tt>GPS</tt></b><font size=+1>.</font></dd>
-
-<dt>
-<tt>flag1 0 | 1</tt></dt>
-
-<dd>
-<font size=+1>Not currently used by this driver.</font></dd>
-
-<dt>
-<tt>flag2 0 | 1</tt></dt>
-
-<dd>
-<font size=+1>When set to 1, driver does not use hardware event polling.
-Instead, the synchronous packets output at the start of each second by
-the Palisade receiver are used. If the ioctl() call triggering the event
-capture fails, the driver falls back to this mode automatically.</font></dd>
-
-<dt>
-<tt>flag3 0 | 1</tt></dt>
-
-<dd>
-<font size=+1>Not currently used by this driver.</font></dd>
-
-<dt>
-<font size=+1>&nbsp;</font><tt>flag4 0 | 1</tt></dt>
-
-<dd>
-<font size=+1>Not currently used by this driver.</font></dd>
-</dl>
-
+Leap Second Flag Definition:</h4>
+Bit 0:&nbsp; (1) UTC Time is available
+<br>Bits 1 - 3: Undefined
+<br>Bit 4:&nbsp; (1) Leap Scheduled: Leap second pending asserted by GPS
+control segment.
+<br>Bit 5:&nbsp; (1) Leap Pending: set 24 hours before, until beginning
+of leap second.
+<br>Bit 6:&nbsp; (1) GPS Leap Warning: 6 hours before until 6 hours after
+leap event
+<br>Bit 7:&nbsp; (1) Leap In Progress. Only set during the leap second.
 <h4>
-<font size=+1>Additional Information</font></h4>
-<font size=+1><a href="refclock.html">Reference Clock Drivers</a></font>
-<br><font size=+1><a href="http://www.trimble.com/">Trimble Navigation
-Ltd.</a></font>
+<a NAME="TrackingStatus"></a>Tracking Status Flag Definitions:</h4>
+</blockquote>
+
+<center><table BORDER=0 CELLSPACING=0 WIDTH="712" >
+<tr>
+<td VALIGN=CENTER WIDTH="5%">Code</td>
+
+<td VALIGN=CENTER WIDTH="59%">Meaning</td>
+
+<td>Accuracy</td>
+
+<td>Receiver Mode</td>
+</tr>
+
+<tr>
+<td>0</td>
+
+<td>Receiver is Navigating</td>
+
+<td>+/- 1 us</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">1</td>
+
+<td VALIGN=CENTER WIDTH="59%">Static 1 Sat. Timing Mode&nbsp;</td>
+
+<td>+/- 1 us</td>
+
+<td>1-D Timing</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">2</td>
+
+<td VALIGN=CENTER WIDTH="59%">Approximate Time</td>
+
+<td>20 - 50 ms</td>
+
+<td>Acquisition</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">3</td>
+
+<td VALIGN=CENTER WIDTH="59%">Startup</td>
+
+<td>N/A</td>
+
+<td>Initialization</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">4</td>
+
+<td VALIGN=CENTER WIDTH="59%">Startup</td>
+
+<td>N/A</td>
+
+<td>Initialization</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">5</td>
+
+<td VALIGN=CENTER WIDTH="59%">Dilution of Position too High&nbsp;</td>
+
+<td>5 ppm</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">6</td>
+
+<td VALIGN=CENTER WIDTH="59%">Static 1 Sat. Timing: Sat. not usable</td>
+
+<td>5 ppm</td>
+
+<td>1-D Timing</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">7</td>
+
+<td VALIGN=CENTER WIDTH="59%">No Satellites Usable</td>
+
+<td>N/A</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">8</td>
+
+<td VALIGN=CENTER WIDTH="59%">Only 1 Satellite Usable</td>
+
+<td>20 - 50 ms</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">9</td>
+
+<td VALIGN=CENTER WIDTH="59%">Only 2 Satellite Usable</td>
+
+<td>20 - 50 ms</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">10</td>
+
+<td VALIGN=CENTER WIDTH="59%">Only 3 Satellites Usable</td>
+
+<td>20 - 50 ms</td>
+
+<td>Self Survey</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">11</td>
+
+<td VALIGN=CENTER WIDTH="59%">Invalid Solution</td>
+
+<td>N/A</td>
+
+<td>Error</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">12</td>
+
+<td VALIGN=CENTER WIDTH="59%">Differential Corrections&nbsp;</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="5%">13</td>
+
+<td VALIGN=CENTER WIDTH="59%">Overdetermined Fixes</td>
+
+<td>+/- 100 ns</td>
+
+<td>Timing Steady State</td>
+</tr>
+</table></center>
+
+<h3>
+<b><font size=+0>Packet 8F-0B (Comprehensive Timing Packet)</font></b></h3>
+
+<center><table BORDER=0 CELLSPACING=0 >
+<tr>
+<td VALIGN=CENTER WIDTH="9%">Byte</td>
+
+<td VALIGN=CENTER WIDTH="27%">Item</td>
+
+<td VALIGN=CENTER WIDTH="16%">Type</td>
+
+<td VALIGN=CENTER WIDTH="48%">Meaning</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">0</td>
+
+<td VALIGN=CENTER WIDTH="27%">Sub-Packet ID</td>
+
+<td VALIGN=CENTER WIDTH="16%">BYTE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Subcode 0x0B</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="9%">1 - 2</td>
+
+<td VALIGN=TOP WIDTH="27%">Event Count</td>
+
+<td VALIGN=TOP WIDTH="16%">INTEGER</td>
+
+<td VALIGN=TOP WIDTH="48%">External event count recorded (0 = PPS)</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="9%">3 - 10</td>
+
+<td VALIGN=TOP WIDTH="27%">UTC / GPS TOW</td>
+
+<td VALIGN=TOP WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=TOP WIDTH="48%">UTC / GPS time of week (seconds)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">11</td>
+
+<td VALIGN=CENTER WIDTH="27%">Date</td>
+
+<td VALIGN=CENTER WIDTH="16%">BYTE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Day of Month</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">12</td>
+
+<td VALIGN=CENTER WIDTH="27%">Month</td>
+
+<td VALIGN=CENTER WIDTH="16%">BYTE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Month of Event</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">13 - 14</td>
+
+<td VALIGN=CENTER WIDTH="27%">Year</td>
+
+<td VALIGN=CENTER WIDTH="16%">INT</td>
+
+<td VALIGN=CENTER WIDTH="48%">Year of event</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="9%">15</td>
+
+<td VALIGN=TOP WIDTH="27%">Receiver Mode</td>
+
+<td VALIGN=TOP WIDTH="16%">BYTE</td>
+
+<td VALIGN=TOP WIDTH="48%">Receiver operating dimensions:&nbsp;
+<br>0: Horizontal (2D)&nbsp;
+<br>1: Full Position (3D)&nbsp;
+<br>2: Single Satellite (0D)&nbsp;
+<br>3: Automatic (2D / 3D)&nbsp;
+<br>4: DGPS reference&nbsp;
+<br>5: Clock hold (2D)&nbsp;
+<br>6: Over determined Clock</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">15 - 17</td>
+
+<td VALIGN=CENTER WIDTH="27%">UTC Offset</td>
+
+<td VALIGN=CENTER WIDTH="16%">INTEGER</td>
+
+<td VALIGN=CENTER WIDTH="48%">UTC Offset value (seconds)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">18 - 25</td>
+
+<td VALIGN=CENTER WIDTH="27%">Oscillator Bias</td>
+
+<td VALIGN=CENTER WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Oscillator BIAS (meters)</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="9%">26 - 33</td>
+
+<td VALIGN=TOP WIDTH="27%">Oscillator Drift Rate</td>
+
+<td VALIGN=TOP WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=TOP WIDTH="48%">Oscillator Drift (meters / second)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">34 - 37</td>
+
+<td VALIGN=CENTER WIDTH="27%">Bias Uncertainty</td>
+
+<td VALIGN=CENTER WIDTH="16%">SINGLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Oscillator bias uncertainty (meters)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">38 - 41</td>
+
+<td VALIGN=CENTER WIDTH="27%">Drift Uncertainty</td>
+
+<td VALIGN=CENTER WIDTH="16%">SINGLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Oscillator bias rate uncertainty (m / sec)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">42 - 49</td>
+
+<td VALIGN=CENTER WIDTH="27%">Latitude</td>
+
+<td VALIGN=CENTER WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Latitude in radians</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">50 - 57</td>
+
+<td VALIGN=CENTER WIDTH="27%">Longitude</td>
+
+<td VALIGN=CENTER WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Longitude in radians</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">58 - 65</td>
+
+<td VALIGN=CENTER WIDTH="27%">Altitude</td>
+
+<td VALIGN=CENTER WIDTH="16%">DOUBLE</td>
+
+<td VALIGN=CENTER WIDTH="48%">Altitude above mean sea level, in meters</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="9%">66 - 73</td>
+
+<td VALIGN=CENTER WIDTH="27%">Satellite ID</td>
+
+<td VALIGN=CENTER WIDTH="16%">BYTE</td>
+
+<td VALIGN=CENTER WIDTH="48%">SV Id No. of tracked satellites</td>
+</tr>
+</table></center>
+
+<h2>
+<a NAME="Pinouts"></a><font size=+1>Pinouts</font></h2>
+<a href="#Connection">The following connections are required when connecting
+Palisade with a host:</a>
+<br>&nbsp;
+<br>&nbsp;
+<center><table>
+<tr>
+<td><u>Description</u></td>
+
+<td><b>Host</b></td>
+
+<td></td>
+
+<td></td>
+
+<td><b>Palisade&nbsp;</b></td>
+
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td><a NAME="PortA"></a><b>Port A</b></td>
+
+<td><u>DB-9</u></td>
+
+<td><u>DB-25</u></td>
+
+<td></td>
+
+<td><u>RS-232</u></td>
+
+<td><u>RS-422</u></td>
+
+<td><u>Palisade Pin</u></td>
+</tr>
+
+<tr>
+<td>Receive Data&nbsp;</td>
+
+<td>2</td>
+
+<td>3</td>
+
+<td>&lt;--></td>
+
+<td>Green</td>
+
+<td>Green / Blue</td>
+
+<td>8 (T-) &amp; 10 (T+)</td>
+</tr>
+
+<tr>
+<td>Request to Send</td>
+
+<td>7</td>
+
+<td>4</td>
+
+<td>&lt;--></td>
+
+<td>Gray</td>
+
+<td>Gray / White</td>
+
+<td>6 (R-) &amp; 7 (R+)</td>
+</tr>
+
+<tr>
+<td>Signal Ground</td>
+
+<td>5</td>
+
+<td>7</td>
+
+<td>&lt;--></td>
+
+<td>Black</td>
+
+<td>Black</td>
+
+<td>9 (GND)</td>
+</tr>
+
+<tr>
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td><a NAME="PortB"></a><b>Port B</b></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td>Receive Data&nbsp;</td>
+
+<td>2</td>
+
+<td>3</td>
+
+<td>&lt;--></td>
+
+<td>Brown</td>
+
+<td>Brown / Yellow</td>
+
+<td>4 (T-) &amp; 5 (T+)</td>
+</tr>
+
+<tr>
+<td>Transmit Data</td>
+
+<td>3</td>
+
+<td>2</td>
+
+<td>&lt;--></td>
+
+<td>Violet</td>
+
+<td>Orange/ Violet</td>
+
+<td>2 (R-) &amp; 3 (R+)</td>
+</tr>
+
+<tr>
+<td>Signal Ground</td>
+
+<td>5</td>
+
+<td>7</td>
+
+<td>&lt;--></td>
+
+<td>Black</td>
+
+<td>Black</td>
+
+<td>9 (GND)</td>
+</tr>
+</table></center>
+
+<blockquote>Note: If driving the RS-422 inputs on the Palisade single ended,
+i.e. using the Green and Gray connections only, does not work on all serial
+ports. Use of the Palisade NTP Synchronization Interface Module is recommended.</blockquote>
+
+<blockquote>The 12 pin connector pinout definition:
+<br>Face the round 12 pin connector at the end of the cable, with the notch
+turned upwards.
+<br>Pin 1 is to the left of the notch. Pins 2 - 8 wrap around the bottom,
+counterclockwise to pin 9 on the right of the notch. Pin 10 is just below
+the notch. Pins 10 (top), 11 (bottom left) and 12 (bottom right) form a
+triangle in the center of the connector.</blockquote>
+
+<blockquote><a NAME="SIM"></a>Pinouts for the Palisade NTP host adapter
+(Trimble PN 37070) DB-25 M connector are as follows:</blockquote>
+
+<center><table BORDER=0 CELLSPACING=0 WIDTH="682" >
+<tr>
+<td VALIGN=CENTER WIDTH="12%">DB-25M</td>
+
+<td VALIGN=CENTER WIDTH="31%">Conductor&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="16%">Palisade</td>
+
+<td VALIGN=CENTER WIDTH="41%">Description</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">1&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="31%">Red</td>
+
+<td VALIGN=CENTER WIDTH="16%">1</td>
+
+<td VALIGN=CENTER WIDTH="41%">Power</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">7&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="31%">Black</td>
+
+<td VALIGN=CENTER WIDTH="16%">9</td>
+
+<td VALIGN=CENTER WIDTH="41%">Ground</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">9</td>
+
+<td VALIGN=CENTER WIDTH="31%">Black/White</td>
+
+<td VALIGN=CENTER WIDTH="16%">12</td>
+
+<td VALIGN=CENTER WIDTH="41%">PPS -</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">10&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="31%">Green</td>
+
+<td VALIGN=CENTER WIDTH="16%">8</td>
+
+<td VALIGN=CENTER WIDTH="41%">Transmit Port A (T-)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">11&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="31%">Brown</td>
+
+<td VALIGN=CENTER WIDTH="16%">4</td>
+
+<td VALIGN=CENTER WIDTH="41%">Transmit Port B (T-)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">12&nbsp;</td>
+
+<td VALIGN=CENTER WIDTH="31%">Gray</td>
+
+<td VALIGN=CENTER WIDTH="16%">7</td>
+
+<td VALIGN=CENTER WIDTH="41%">Receive Port A (R+)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">13</td>
+
+<td VALIGN=CENTER WIDTH="31%">Orange</td>
+
+<td VALIGN=CENTER WIDTH="16%">3</td>
+
+<td VALIGN=CENTER WIDTH="41%">Receive Port B (R+)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">21</td>
+
+<td VALIGN=CENTER WIDTH="31%">Orange/White</td>
+
+<td VALIGN=CENTER WIDTH="16%">11</td>
+
+<td VALIGN=CENTER WIDTH="41%">PPS +</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">22</td>
+
+<td VALIGN=CENTER WIDTH="31%">Blue</td>
+
+<td VALIGN=CENTER WIDTH="16%">10</td>
+
+<td VALIGN=CENTER WIDTH="41%">Transmit Port A (T+)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">23</td>
+
+<td VALIGN=CENTER WIDTH="31%">Yellow</td>
+
+<td VALIGN=CENTER WIDTH="16%">5</td>
+
+<td VALIGN=CENTER WIDTH="41%">Transmit Port B (T+)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">24</td>
+
+<td VALIGN=CENTER WIDTH="31%">White</td>
+
+<td VALIGN=CENTER WIDTH="16%">6</td>
+
+<td VALIGN=CENTER WIDTH="41%">Receive Port A (R-)</td>
+</tr>
+
+<tr>
+<td VALIGN=CENTER WIDTH="12%">25</td>
+
+<td VALIGN=CENTER WIDTH="31%">Violet</td>
+
+<td VALIGN=CENTER WIDTH="16%">2</td>
+
+<td VALIGN=CENTER WIDTH="41%">Receive Port B (R-)</td>
+</tr>
+</table></center>
+
 <p>
 <hr>
-<address>
-<font size=+1><a href="mailto:sven_dietrich@trimble.com">Sven-Thorsten
-Dietrich</a></font></address>
-
-<p><br><font size=+1>(last updated May 13, 1999)</font>
+<p>Questions or Comments:
+<br><a href="mailto:sven_dietrich@trimble.com">Sven Dietrich</a>
+<br><a href="http://www.trimble.com/">Trimble Navigation Ltd.</a>
+<p>(last updated July 29, 1999)
 <br>&nbsp;
 </body>
 </html>

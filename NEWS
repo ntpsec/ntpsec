@@ -1,4 +1,6 @@
-* NT port cleanup
+(4.0.95)
+* NT port cleanup/replacement
+* a few portability fixes
 * VARITEXT Parse clock added
 (4.0.94)
 * PPS updates (including ntp.config options)

@@ -270,7 +270,7 @@ create_sockets(
 		if ((ifap->ifa_flags & IFF_UP) == 0)
 		    continue;
 
-		if (ifa->ifa_flags & IFF_LOOPBACK)
+		if (ifap->ifa_flags & IFF_LOOPBACK)
 		{
 			sin = (struct sockaddr_in *)ifap->ifa_addr;
 			if (ntohl(sin->sin_addr.s_addr) != 0x7f000001)

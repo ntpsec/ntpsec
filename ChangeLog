@@ -1,3 +1,23 @@
+1999-07-31  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_io.c (create_sockets): Typo.
+	From: Doug Wells <dmw@contek.com>
+
+1999-07-29  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (ac_cv_struct_ntptimeval): Explicitly look for
+	struct ntptimeval.
+	(ac_cv_var_kernel_pll): Require struct ntptimeval.
+	Linux.  Grrr.
+	Reported by: Ronald Kuetemeier <ronaldk@smginc.com>
+
+1999-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.95
+	
+	* ports/winnt: New release
+	From: Sven Dietrich <Sven_Dietrich@trimble.com> 
+
 1999-07-26  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/machines.c (ntp_set_tod): Bugfix

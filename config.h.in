@@ -849,6 +849,9 @@
 /* Define if compiler has function prototypes */
 #undef PROTOTYPES
 
+/* Do we have struct ntptimeval? */
+#undef HAVE_STRUCT_NTPTIMEVAL
+
 /* Does ntptimeval use struct timespec? */
 #undef TIMESPEC_IN_NTPTIMEVAL
 
