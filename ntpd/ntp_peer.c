@@ -312,7 +312,10 @@ clear_all(void)
 	for (n = 0; n < HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			peer_clear(peer);
+			if (peer->flags & FLAG_CONFIG)
+				peer_clear(peer);
+			else
+				unpeer(peer);
 		}
 	}
 #ifdef DEBUG

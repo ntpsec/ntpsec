@@ -643,9 +643,10 @@ receive(
 		 * immediately. If the guy is already here, don't fire
 		 * up a duplicate.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER))
+		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
 			return;
+		}
 
 		if (sys_authenticate && !is_authentic)
 			return;
@@ -675,9 +676,10 @@ receive(
 		 * If authentication fails send a crypto-NAK; otherwise,
 		 * kiss the frog.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER))
+		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
 			return;
+		}
 
 		if (sys_authenticate && !is_authentic)
 			return;
@@ -699,9 +701,10 @@ receive(
 		 * mobilize a broadcast client association. We don't
 		 * kiss any frogs here.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER))
+		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
 			return;
+		}
 
 		if ((sys_authenticate && !is_authentic) || !sys_bclient)
 			return;
