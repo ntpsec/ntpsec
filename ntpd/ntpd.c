@@ -674,16 +674,18 @@ service_main(
 	 * Set the stack limit to something smaller, so that we don't lock a lot
 	 * of unused stack memory.
 	 */
-	struct rlimit rl;
-
-	if (getrlimit(RLIMIT_STACK, &rl) != -1
-	    && (rl.rlim_cur = 20 * 4096) < rl.rlim_max)
 	{
-		if (setrlimit(RLIMIT_STACK, &rl) == -1)
-		{
-			msyslog(LOG_ERR,
-			    "Cannot adjust stack limit for mlockall: %m");
-		}
+	    struct rlimit rl;
+
+	    if (getrlimit(RLIMIT_STACK, &rl) != -1
+		&& (rl.rlim_cur = 20 * 4096) < rl.rlim_max)
+	    {
+		    if (setrlimit(RLIMIT_STACK, &rl) == -1)
+		    {
+			    msyslog(LOG_ERR,
+				"Cannot adjust stack limit for mlockall: %m");
+		    }
+	    }
 	}
 # endif /* HAVE_SETRLIMIT */
 	/*
