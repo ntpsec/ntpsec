@@ -1442,7 +1442,7 @@ help(
 	int n;
 	struct xcmd *xcp;
 	char *cmd;
-	char *cmdsort[100];
+	const char *cmdsort[100];
 	int length[100];
 	int maxlength;
 	int numperline;
@@ -1452,10 +1452,10 @@ help(
 		n = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = (char *)xcp->keyword;
+			    cmdsort[n++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = (char *)xcp->keyword;
+		    cmdsort[n++] = xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
 		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
