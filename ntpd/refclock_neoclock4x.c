@@ -418,6 +418,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   int day;
   int month;	/* ddd conversion */
   int c;
+  int dsec;
   unsigned char calc_chksum;
   int recv_chksum;
   
@@ -521,8 +522,8 @@ neoclock4x_receive(struct recvbuf *rbufp)
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HOUR], &pp->hour, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_MINUTE], &pp->minute, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_SECOND], &pp->second, 2);
-  neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &pp->nsec, 2);
-  pp->nsec *= 10000; /* convert 1/100s from neoclock to real nanoseconds */
+  neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &dsec, 2);
+  pp->nsec = dsec * 10000; /* convert 1/100s from neoclock to nanoseconds */
   
   memcpy(up->radiosignal, &pp->a_lastcode[NEOCLOCK4X_OFFSET_RADIOSIGNAL], 3);
   up->radiosignal[3] = 0;
@@ -578,7 +579,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   
   if(pp->sloppyclockflag & CLK_FLAG4)
     {
-      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
+      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03ld",
 	      up->unit,
 	      pp->year, month, day,
 	      pp->hour, pp->minute, pp->second, pp->nsec/1000);
