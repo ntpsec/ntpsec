@@ -465,6 +465,10 @@ SOURCE=..\..\..\include\iosignal.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\isc\ipv6.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\include\l_stdlib.h
 # End Source File
 # Begin Source File
