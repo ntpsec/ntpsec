@@ -543,8 +543,12 @@ crypto_recv(
 		case CRYPTO_CERT | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if invalid.
+			 * Discard the message if invalid or identity
+			 * already confirmed.
 			 */
+			if (peer->crypto & CRYPTO_FLAG_VRFY)
+				break;
+
 			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
 				break;
@@ -617,8 +621,12 @@ crypto_recv(
 		case CRYPTO_IFF | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if invalid.
+			 * Discard the message if invalid or identity
+			 * already confirmed.
 			 */
+			if (peer->crypto & CRYPTO_FLAG_VRFY)
+				break;
+
 			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
 				break;
@@ -660,8 +668,12 @@ crypto_recv(
 		case CRYPTO_GQ | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if invalid.
+			 * Discard the message if invalid or identity
+			 * already confirmed.
 			 */
+			if (peer->crypto & CRYPTO_FLAG_VRFY)
+				break;
+
 			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
 				break;

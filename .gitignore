@@ -27,6 +27,7 @@ arlib/depcomp
 arlib/install-sh
 arlib/missing
 arlib/mkinstalldirs
+autom4te.cache
 br-flock
 clockstuff/Makefile.in
 compile

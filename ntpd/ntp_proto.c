@@ -316,13 +316,13 @@ receive(
 	int	is_authentic;		/* cryptosum ok */
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_storage *dstadr_sin;	/* active runway */
+	struct peer *peer2;		/* aux peer structure pointer */
 	l_fp	p_org;			/* originate timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
-	int	rval;			/* cookie snatcher */
 #ifdef OPENSSL
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
 	struct autokey *ap;		/* autokey structure pointer */
-	struct peer *peer2;		/* aux peer structure pointer */
+	int	rval;			/* cookie snatcher */
 #endif /* OPENSSL */
 	int retcode = AM_NOMATCH;
 
@@ -2390,7 +2390,14 @@ peer_xmit(
 				    sys_hostname);
 
 			/*
-			 * Autokey
+			 * Autokey. We request the cookie only when the
+			 * server and client are synchronized and
+			 * signatures work both ways. On the other hand,
+			 * the active peer needs the autokey values
+			 * before then and when the passive peer is
+			 * waiting for the active peer to synchronize.
+			 * Any time we regenerate the key list, we offer
+			 * the autokey values without being asked.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			    peer->leap != LEAP_NOTINSYNC &&
@@ -2405,9 +2412,11 @@ peer_xmit(
 				    NULL);
 
 			/*
-			 * Postamble
+			 * Postamble. We trade leapseconds only when the
+			 * server and client are synchronized.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
+			    peer->leap != LEAP_NOTINSYNC &&
 			    peer->crypto & CRYPTO_FLAG_TAI &&
 			    !(peer->crypto & CRYPTO_FLAG_LEAP))
 				exten = crypto_args(peer, CRYPTO_TAI,
