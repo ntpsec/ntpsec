@@ -37,6 +37,7 @@ u_int32 sys_refid;		/* reference source for local clock */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
+struct	peer *sys_prefer;	/* our cherished peer */
 #ifdef AUTOKEY
 u_long	sys_automax;		/* maximum session key lifetime */
 #endif /* AUTOKEY */
@@ -860,8 +861,7 @@ process_packet(
 	L_SUB(&ci, &p_reftime);
 	LFPTOD(&ci, dtemp);
 	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC || /* 6 */
-	    PKT_TO_STRATUM(pkt->stratum) >= NTP_MAXSTRATUM ||
-	    dtemp < 0)
+	    PKT_TO_STRATUM(pkt->stratum) >= STRATUM_UNSPEC || dtemp < 0)
 		peer->flash |= TEST6;		/* bad synch */
 	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* 7 */
 		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
@@ -1348,19 +1348,16 @@ void
 clock_select(void)
 {
 	register struct peer *peer;
-	int i;
+	int i, j, k, n;
 	int nreach, nlist, nl3;
 	double d, e, f;
-	int j;
-	int n;
-	int allow, found, k;
+	int allow, found, sw;
 	double high, low;
 	double synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
 	struct peer *typeacts = 0;
 	struct peer *typelocal = 0;
 	struct peer *typepps = 0;
-	struct peer *typeprefer = 0;
 	struct peer *typesystem = 0;
 
 	static int list_alloc = 0;
@@ -1373,11 +1370,11 @@ clock_select(void)
 
 	/*
 	 * Initialize. If a prefer peer does not survive this thing,
-	 * the pps_update switch will remain zero.
+	 * the pps stratum will remain unspec.
 	 */
-	pps_update = 0;
-	nreach = nlist = 0;
 	sys_survivors = 0;
+	sys_prefer = 0;
+	nreach = nlist = 0;
 	low = 1e9;
 	high = -1e9;
 	for (n = 0; n < HASH_SIZE; n++)
@@ -1429,6 +1426,7 @@ clock_select(void)
 			if (peer->reach == 0 || (peer->stratum > 1 &&
 			    peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
+			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
 			    CLOCK_PHI * ULOGTOD(sys_poll)))
 				continue;
@@ -1717,15 +1715,14 @@ clock_select(void)
 		poll_update(peer_list[i], peer_list[i]->hpoll);
 		if (peer_list[i]->stratum == peer_list[0]->stratum) {
 			leap_consensus |= peer_list[i]->leap;
-			if (peer_list[i]->refclktype == REFCLK_ATOM_PPS)
+			if (peer_list[i]->refclktype ==
+			    REFCLK_ATOM_PPS && peer_list[i]->stratum <
+			    STRATUM_UNSPEC)
 				typepps = peer_list[i];
 			if (peer_list[i] == sys_peer)
 				typesystem = peer_list[i];
 			if (peer_list[i]->flags & FLAG_PREFER) {
-				typeprefer = peer_list[i];
-				if (fabs(typeprefer->offset) <
-				    clock_max)
-					pps_update = 1;
+				sys_prefer = peer_list[i];
 			}
 		} else {
 			if (peer_list[i] == sys_peer)
@@ -1746,10 +1743,14 @@ clock_select(void)
 	 * i.e., the stratum of the head of the survivor list.
 	 */
 	osys_peer = sys_peer;
-	if (typeprefer && (typeprefer->refclktype == REFCLK_LOCALCLOCK
-	    || typeprefer->sstclktype == CTL_SST_TS_TELEPHONE ||
-		!typepps)) {
-		sys_peer = typeprefer;
+	if (sys_prefer)
+		sw = sys_prefer->refclktype == REFCLK_LOCALCLOCK ||
+		    sys_prefer->sstclktype == CTL_SST_TS_TELEPHONE ||
+		    !typepps;
+	else
+		sw = 0;
+	if (sw) {
+		sys_peer = sys_prefer;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = sys_peer->offset;
 		sys_epsil = sys_peer->jitter;
@@ -1758,18 +1759,20 @@ clock_select(void)
 			printf("select: prefer offset %.6f\n",
 			    sys_offset);
 #endif
-	} else if (typepps && pps_update) {
+	} else if (typepps) {
 		sys_peer = typepps;
 		sys_peer->status = CTL_PST_SEL_PPS;
 		sys_offset = sys_peer->offset;
 		sys_epsil = sys_peer->jitter;
 		if (!pps_control)
-			NLOG(NLOG_SYSEVENT) /* conditional syslog */
-				msyslog(LOG_INFO, "pps sync enabled");
+			NLOG(NLOG_SYSEVENT)
+			    msyslog(LOG_INFO,
+			    "pps sync enabled");
 		pps_control = current_time;
 #ifdef DEBUG
 		if (debug > 2)
-			printf("select: pps offset %.6f\n", sys_offset);
+			printf("select: pps offset %.6f\n",
+			    sys_offset);
 #endif
 	} else {
 		if (!typesystem)

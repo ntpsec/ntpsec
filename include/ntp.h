@@ -93,7 +93,6 @@ typedef char s_char;
 #define	NTP_VERSION	((u_char)4) /* current version number */
 #define	NTP_OLDVERSION	((u_char)1) /* oldest credible version */
 #define	NTP_PORT	123	/* included for sake of non-unix machines */
-#define	NTP_MAXSTRATUM	((u_char)15) /* max stratum, infinity a la Bellman-Ford */
 #define	NTP_MAXAGE	86400	/* one day in seconds */
 #define NTP_UNREACH	16	/* poll interval backoff count */
 #define NTP_TAILMAX	4	/* tailgate poll counter max */
@@ -389,11 +388,9 @@ struct peer {
  * Values for peer.stratum, sys_stratum
  */
 #define	STRATUM_REFCLOCK ((u_char)0) /* stratum claimed by primary clock */
-#define	STRATUM_PRIMARY	((u_char)1) /* host has a primary clock */
-#define	STRATUM_INFIN ((u_char)NTP_MAXSTRATUM) /* infinity a la Bellman-Ford */
 /* A stratum of 0 in the packet is mapped to 16 internally */
 #define	STRATUM_PKT_UNSPEC ((u_char)0) /* unspecified in packet */
-#define	STRATUM_UNSPEC	((u_char)(NTP_MAXSTRATUM+(u_char)1)) /* unspecified */
+#define	STRATUM_UNSPEC	((u_char)16) /* unspecified */
 
 /*
  * Values for peer.flags

@@ -66,7 +66,7 @@ int sys_retries = 5;			/* # of retry attempts per server */
 int sys_timeout = 2;			/* timeout time, in seconds */
 struct server **sys_servers;		/* the server list */
 int sys_numservers = 0;			/* number of servers to poll */
-int sys_maxservers = NTP_MAXSTRATUM+1;	/* max number of servers to deal with */
+int sys_maxservers = STRATUM_UNSPEC;	/* max number of servers to deal with */
 int sys_version = NTP_OLDVERSION;	/* version to poll with */
 
 
@@ -442,7 +442,7 @@ ReceiveBuf(
 
 	if ((PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
 	     && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE)
-	    || rpkt->stratum > NTP_MAXSTRATUM) {
+	    || rpkt->stratum >= STRATUM_UNSPEC) {
 		if (debug)
 		    printf("receive: mode %d stratum %d\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);

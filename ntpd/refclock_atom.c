@@ -128,6 +128,7 @@ atom_start(
 	pps_peer = peer;
 	pp = peer->procptr;
 	peer->precision = PRECISION;
+	peer->stratum = STRATUM_UNSPEC; 
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 #ifdef HAVE_PPSAPI
@@ -193,7 +194,7 @@ atom_start(
 	if (debug)
 		printf(
 		    "refclock_atom: %s handle %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-		    pps_device, up->handle, up->pps_params.api_version,
+		    pps_device, (int)up->handle, up->pps_params.api_version,
 		    up->pps_params.mode, mode);
 #endif
 #endif /* HAVE_PPSAPI */
@@ -245,7 +246,7 @@ atom_pps(
 	struct refclockproc *pp;
 	struct timespec timeout, ts;
 	double doffset;
-	int i, rval;
+	int i;
 
 	/*
 	 * Convert the timeval to l_fp and save for billboards. Sign-
@@ -261,16 +262,17 @@ atom_pps(
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	i = up->pps_info.assert_sequence;
-	rval = time_pps_fetch(up->handle, PPS_TSFMT_TSPEC,
-	    &up->pps_info, &timeout);
-	if (rval < 0 || i == up->pps_info.assert_sequence)
+	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC,
+	    &up->pps_info, &timeout) < 0)
+		return (-1);
+	if (i == up->pps_info.assert_sequence)
 		return (1);
 	if (up->pps_info.current_mode & PPS_CAPTUREASSERT)
 		ts = up->pps_info.assert_timestamp;
 	else if (up->pps_info.current_mode & PPS_CAPTURECLEAR)
 		ts = up->pps_info.clear_timestamp;
 	else
-		return (1);
+		return (-1);
 	if (ts.tv_sec == up->ts.tv_sec && ts.tv_nsec < up->ts.tv_nsec +
 	    RANGEGATE)
 		return (1);
@@ -340,37 +342,46 @@ atom_poll(
 #endif /* HAVE_PPSAPI */
 
 	/*
-	 * Accumulate samples in the median filter. At the end of each
-	 * poll interval, do a little bookeeping and process the
-	 * samples.
+	 * Accumulate samples in the median filter. If a noise sample,
+	 * return with no prejudice; if a protocol error, get mean;
+	 * otherwise, cool. At the end of each poll interval, do a
+	 * little bookeeping and process the surviving samples.
 	 */
 	pp = peer->procptr;
 #ifdef HAVE_PPSAPI
 	err = atom_pps(peer);
-	if (err != 0) {
+	if (err > 0) {
+		return;
+	} else if (err < 0) {
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
 #endif /* HAVE_PPSAPI */
+	/*
+	 * Valid time is returned only if the prefer peer has survived
+	 * the intersection algorithm and within clock_max of local time
+	 * and not too long ago. This ensures the PPS time is within
+	 * +-0.5 s of the local time and the seconds numbering is
+	 * unambiguous. Note that the leap bits are set no-warning on
+	 * the first valid update and the stratum is set at the prefer
+	 * peer.
+	 */
+	peer->stratum = STRATUM_UNSPEC;
+	if (!sys_prefer)
+		return;
+	if (fabs(sys_prefer->offset) > clock_max)
+		return;
+	peer->stratum = sys_prefer->stratum;
+	if (peer->stratum <= 1)
+		peer->refid = pp->refid;
+	else
+		peer->refid = peer->srcadr.sin_addr.s_addr;
+	pp->leap = LEAP_NOWARNING;
 	pp->polls++;
 	if (peer->burst > 0)
 		return;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-		return;
-	}
-
-	/*
-	 * Valid time (leap bits zero) is returned only if the prefer
-	 * peer has survived the intersection algorithm and within
-	 * clock_max of local time and not too long ago.  This ensures
-	 * the PPS time is within +-0.5 s of the local time and the
-	 * seconds numbering is unambiguous.
-	 */
-	if (pps_update) {
-		pp->leap = LEAP_NOWARNING;
-	} else {
-		pp->leap = LEAP_NOTINSYNC;
 		return;
 	}
 	refclock_receive(peer);

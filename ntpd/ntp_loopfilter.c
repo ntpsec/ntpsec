@@ -72,10 +72,10 @@
  * support is used as described above; if false, the kernel is bypassed
  * entirely and the daemon PLL used instead.
  *
- * Each update to a prefer peer sets pps_update if it survives the
+ * Each update to a prefer peer sets pps_stratum if it survives the
  * intersection algorithm and its time is within range. The PPS time
  * discipline is enabled (STA_PPSTIME bit set in the status word) when
- * pps_update is true and the PPS frequency discipline is enabled. If
+ * pps_stratum is true and the PPS frequency discipline is enabled. If
  * the PPS time discipline is enabled and the kernel reports a PPS
  * signal is present, the pps_control variable is set to the current
  * time. If the current time is later than pps_control by PPS_MAXAGE
@@ -114,7 +114,7 @@ int	ntp_enable;		/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
 int	kern_enable;		/* kernel support enabled */
 int	ext_enable;		/* external clock enabled */
-int	pps_update;		/* pps update valid */
+int	pps_stratum;		/* pps stratum */
 int	allow_set_backward = TRUE; /* step corrections allowed */
 int	correct_any = FALSE;	/* corrections > 1000 s allowed */
 
@@ -466,7 +466,7 @@ local_clock(
 		 */
 		if (pll_status & STA_PPSSIGNAL)
 			ntv.status |= STA_PPSFREQ;
-		if (pll_status & STA_PPSFREQ && pps_update)
+		if (pll_status & STA_PPSFREQ && pps_stratum < STRATUM_UNSPEC)
 			ntv.status |= STA_PPSTIME;
 
 		/*

@@ -273,7 +273,6 @@ extern int	ntp_enable;		/* clock discipline enabled */
 extern int	pll_control;		/* kernel support available */
 extern int	kern_enable;		/* kernel support enabled */
 extern int	ext_enable;		/* external clock enabled */
-extern int	pps_update;		/* pps update valid */
 extern int	allow_set_backward;	/* step corrections allowed */
 extern int	correct_any;		/* corrections > 1000 s allowed */
 
@@ -325,6 +324,7 @@ extern double	sys_rootdispersion;	/* dispersion of system clock */
 extern u_int32	sys_refid;		/* reference source for local clock */
 extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */
+extern struct peer *sys_prefer;		/* our cherished peer */
 extern u_long	sys_automax;		/* maximum session key lifetime */
 
 /*

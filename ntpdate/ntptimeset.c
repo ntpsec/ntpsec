@@ -1012,7 +1012,7 @@ receive(
 
 	if ((PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
 	    && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE)
-	    || rpkt->stratum > NTP_MAXSTRATUM) {
+	    || rpkt->stratum >=STRATUM_UNSPEC) {
 		if (debug > 1)
 			printf("receive: mode %d stratum %d\n",
 			    PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);

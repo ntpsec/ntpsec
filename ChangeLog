@@ -1,3 +1,18 @@
+2000-09-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntptrace/ntptrace.c: 
+	* ntpdate/ntptimeset.c (receive): 
+	* ntpdate/ntpdate.c (receive):
+	STRATUM cleanup
+	* ntpd/refclock_atom.c (atom_poll): Autostratum.  Lose the leap.
+	* ntpd/ntp_proto.c: sys_prefer
+	(process_packet): stratum cleanup
+	(clock_select): Autostratum the ATOM
+	* ntpd/ntp_loopfilter.c: pps_update/pps_stratum wiggle.
+	* include/ntpd.h: Lose pps_update, gain sys_prefer
+	* include/ntp.h: STRATUM variable cleanup
+	From Dave Mills
+
 2000-09-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_oncore.c (oncore_get_timestamp): Prind debug
