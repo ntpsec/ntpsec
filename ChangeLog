@@ -1,5 +1,7 @@
 2000-05-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* flock-build: If we don't use autokey, don't use rsaref either.
+
 	* configure.in: 4.0.99i7
 
 	* build (KEYSUF): 

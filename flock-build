@@ -29,5 +29,5 @@ do
     echo $i
     ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks $BUILD_ARGS" &
     ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-rsaref $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --disable-autokey $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-rsaref --disable-autokey $BUILD_ARGS" &
 done
