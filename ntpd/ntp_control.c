@@ -1472,18 +1472,19 @@ ctl_putpeer(
 	case CP_REFID:
 		if (peer->flags & FLAG_REFCLOCK) {
 			if (peer->stratum > 0)
-			    ctl_putadr(peer_var[CP_REFID].text,
-			        peer->refid);
+				ctl_putadr(peer_var[CP_REFID].text,
+				    peer->refid);
 			else
-			    ctl_putid(peer_var[CP_REFID].text,
-			        (char *)&peer->refid);
+				ctl_putid(peer_var[CP_REFID].text,
+				   (char *)&peer->refid);
 		} else {
-			if (peer->stratum > 1)
-			    ctl_putadr(peer_var[CP_REFID].text,
-				peer->refid);
+			if (peer->stratum > 1 && peer->stratum <
+			    STRATUM_UNSPEC)
+				ctl_putadr(peer_var[CP_REFID].text,
+				    peer->refid);
 			else
-			    ctl_putid(peer_var[CP_REFID].text,
-				(char *)&peer->refid);
+				ctl_putid(peer_var[CP_REFID].text,
+				    (char *)&peer->refid);
 		}
 		break;
 

@@ -1091,11 +1091,10 @@ crypto_xmit(
 	char	certname[MAX_HOSTLEN + 1]; /* subject name buffer */
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int	vallen;
+	u_int	len;
 	struct value vtemp;
 	associd_t associd;
 	int	rval;
-	u_int	len;
-	u_int32	temp32;
 	keyid_t tcookie;
 
 	/*
@@ -1119,17 +1118,6 @@ crypto_xmit(
 	 * the identity schemes are compatible to save tears later on.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
-		temp32 = ntohl(fp->fstamp);
-
-printf("xxx %x %x\n", temp32, crypto_flags);
-
-		if (!((crypto_flags & temp32 & CRYPTO_FLAG_PRIV) ||
-		    (crypto_flags & temp32 & CRYPTO_FLAG_IFF) ||
-		    (crypto_flags & temp32 & CRYPTO_FLAG_GQ) ||
-		    !(crypto_flags & (CRYPTO_FLAG_PRIV |
-		    CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ))))
-			rval = XEVNT_ID;
-
 	case CRYPTO_ASSOC:
 		len += crypto_send(fp, &hostval);
 		if (crypto_time() == 0)
