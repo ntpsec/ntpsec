@@ -31,8 +31,8 @@
 u_char	sys_leap;		/* system leap indicator */
 u_char	sys_stratum;		/* stratum of system */
 s_char	sys_precision;		/* local clock precision */
-double	sys_rootdelay;		/* distance to current sync source */
-double	sys_rootdispersion;	/* dispersion of system clock */
+double	sys_rootdelay;		/* roundtrip delay to primary source */
+double	sys_rootdispersion;	/* dispersion to primary source */
 u_int32 sys_refid;		/* reference source for local clock */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
@@ -929,9 +929,8 @@ process_packet(
 			sys_badstratum++;
 		}
 	}
-	if (fabs(p_del) >= MAXDISPERSE		/* 8 */
-	    || p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;		/* bad root data */
+	if (p_del < 0 || p_del / 2 + p_disp >= MAXDISPERSE) /* 8 */
+		peer->flash |= TEST8;		/* bad distance */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
@@ -1010,12 +1009,14 @@ process_packet(
 		L_SUB(&t23, &t10);
 		LFPTOD(&t23, p_del);
 	}
+	p_del = max(p_del, LOGTOD(sys_precision));
 	LFPTOD(&ci, p_offset);
-	if (fabs(p_del) >= MAXDISPERSE || p_disp >= MAXDISPERSE) /* 9 */
-		peer->flash |= TEST9;	/* bad delay/dispersion */
+	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
+	    p_disp >= MAXDISPERSE)		/* 9 */
+		peer->flash |= TEST9;		/* bad synch distance */
 
 	/*
-	 * If the peer delay or dispersion is too high, abandon ship.
+	 * If any flasher bits remain set at this point, abandon ship.
 	 * Otherwise, forward to the clock filter.
 	 */
 	if (peer->flash) {
@@ -1026,7 +1027,7 @@ process_packet(
 #endif
 		return;
 	}
-	clock_filter(peer, p_offset, p_del, fabs(p_disp));
+	clock_filter(peer, p_offset, p_del, p_disp);
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp,
@@ -1096,8 +1097,7 @@ clock_update(void)
 		else
 			sys_refid = sys_peer->srcadr.sin_addr.s_addr;
 		sys_reftime = sys_peer->rec;
-		sys_rootdelay = sys_peer->rootdelay +
-		    fabs(sys_peer->delay);
+		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
 	}
 	if (oleap == LEAP_NOTINSYNC) {
@@ -1263,7 +1263,7 @@ clock_filter(
 	double off, dly, dsp, jit, dtemp, etemp;
 
 	/*
-	 * Update error bounds and calculate distances. The distance for
+	 * Update dispersions and calculate distances. The distance for
 	 * each sample is equal to the sample dispersion plus one-half
 	 * the sample delay. Also initialize the sort index vector.
 	 */
@@ -1324,13 +1324,14 @@ clock_filter(
 	} 
 	
 	/*
-	 * Compute the offset, delay, jitter (squares) and error
-	 * bound. The offset, delay and jitter are weighted by the
-	 * reciprocal of distance and normalized. The error bound is
-	 * weighted exponentially. When no acceptable samples remain in
-	 * the shift register, quietly tiptoe home.
+	 * Compute the offset, delay, dispersion and jitter squares
+	 * weighted by the reciprocal of distance and normalized. The
+	 * dispersion is weighted exponentially by NTP_FWEIGHT (0.5) so
+	 * to normalize close to 1.0. . When no acceptable samples
+	 * remain in the shift register, quietly tiptoe home.
 	 */
-	off = dly = dsp = jit = dtemp = 0;
+	off = dly = dsp = dtemp = 0;
+	jit = SQUARE(LOGTOD(sys_precision));
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		dsp = NTP_FWEIGHT * (dsp + peer->filter_disp[ord[i]]);
 		if (i < n && distance[i] < MAXDISTANCE) {
@@ -1341,14 +1342,14 @@ clock_filter(
 			    distance[i];
 			jit += DIFF(peer->filter_offset[ord[i]],
 			    peer->filter_offset[ord[0]]) /
-			    SQUARE(distance[i]);
+			    distance[i];
 		}
 	}
 	if (dtemp == 0)
 		return;
 	peer->delay = dly / dtemp;
 	peer->disp = min(dsp, MAXDISPERSE);
-	peer->jitter = min(jit / SQUARE(dtemp), MAXDISPERSE);
+	peer->jitter = min(jit / dtemp, MAXDISPERSE);
 	peer->epoch = current_time;
 	etemp = peer->offset;
 	peer->offset = off / dtemp;
@@ -1367,18 +1368,18 @@ clock_filter(
 	}
 
 	/*
-	 * If the offset exceeds the dispersion by CLOCK_SGATE and the
-	 * interval since the last update is less than twice the system
-	 * poll interval, consider the update a popcorn spike and ignore
-	 * it.
+	 * If the difference between the last offset and the current one
+	 * exceeds the jitter by CLOCK_SGATE (4) and the interval since
+	 * the last update is less than twice the system poll interval,
+	 * consider the update a popcorn spike and ignore it.
 	 */
-	if (fabs(etemp - peer->offset) > CLOCK_SGATE &&
-	    peer->filter_epoch[ord[0]] - peer->epoch < (1 <<
-	    (sys_poll + 1))) {
+	if (fabs(peer->offset - etemp) > SQRT(peer->jitter) *
+	    CLOCK_SGATE && peer->filter_epoch[ord[0]] - peer->epoch <
+	    (1 << (sys_poll + 1))) {
 #ifdef DEBUG
 		if (debug)
-			printf("clock_filter: popcorn spike %.6f\n",
-			    off);
+			printf("clock_filter: popcorn spike %.6f jitter %.6f\n",
+			    peer->offset, SQRT(peer->jitter));
 #endif
 		return;
 	}
@@ -1472,7 +1473,7 @@ clock_select(void)
 	 */
 	nlist = nl3 = 0;	/* none yet */
 	for (n = 0; n < HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != 0; peer =
+		for (peer = peer_hash[n]; peer != NULL; peer =
 		    peer->next) {
 			peer->flags &= ~FLAG_SYSPEER;
 			peer->status = CTL_PST_SEL_REJECT;
@@ -1480,7 +1481,9 @@ clock_select(void)
 			/*
 			 * A peer leaves the island immediately if
 			 * unreachable, synchronized to us or suffers
-			 * excessive root distance.
+			 * excessive root distance. Careful with the
+			 * root distance, since the poll interval can
+			 * increase to a day and a half.
 			 */ 
 			if (peer->reach == 0 || (peer->stratum > 1 &&
 			    peer->refid ==
@@ -1629,14 +1632,13 @@ clock_select(void)
 #endif
 
 	/*
-	 * Clustering algorithm. Construct candidate list in cluster
-	 * order determined by the sum of peer synchronization distance
-	 * plus scaled stratum. Process the list to discard
-	 * falsetickers, who leave the island immediately. If a
-	 * falseticker is not configured, his association is drowned as
-	 * well. We must leave at least one peer to collect the million
-	 * bucks. If about to discard an ephemeral association, do it
-	 * only if not the system peer.
+	 * Clustering algorithm. Construct candidate list in order first
+	 * by stratum then by root distance. If we have more than
+	 * MAXCLOCK peers, keep only the best MAXCLOCK of them. Scan the
+	 * list to find falsetickers, who leave the island immediately.
+	 * If a falseticker is not configured, his association raft is
+	 * drowned as well. We must leave at least one peer to collect
+	 * the million bucks.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1675,11 +1677,12 @@ clock_select(void)
 #endif
 
 	/*
-	 * Now, vote outlyers off the island by root dispersion.
-	 * Continue voting as long as there are more than NTP_MINCLOCK
-	 * survivors and the minimum select dispersion is greater than
-	 * the maximum peer dispersion. Stop if we are about to discard
-	 * a prefer peer, who of course has the immunity idol.
+	 * Now, vote outlyers off the island by select jitter weighted
+	 * by root dispersion. Continue voting as long as there are more
+	 * than NTP_MINCLOCK survivors and the minimum select jitter
+	 * squared is greater than the maximum peer jitter squared. Stop
+	 * if we are about to discard a prefer peer, who of course has
+	 * the immunity idol.
 	 */
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
@@ -1694,12 +1697,15 @@ clock_select(void)
 		d = error[0];
 		for (k = i = nlist - 1; i >= 0; i--) {
 			double sdisp = 0;
+			double dtemp = 0;
 
 			for (j = nlist - 1; j > 0; j--) {
-				sdisp = NTP_SWEIGHT * (sdisp +
-					DIFF(peer_list[i]->offset,
-					peer_list[j]->offset));
+				dtemp += 1. / synch[i];
+				sdisp += DIFF(peer_list[i]->offset,
+				    peer_list[j]->offset) /
+				    synch[i];
 			}
+			sdisp /= dtemp;
 			if (sdisp > sys_maxd) {
 				sys_maxd = sdisp;
 				k = i;
@@ -1730,10 +1736,10 @@ clock_select(void)
 	/*
 	 * In manycast client mode we may have spooked a sizeable number
 	 * of servers that we don't need. If there are at least
-	 * NTP_MINCLOCK of them, the manycast message will be turned off.
-	 * By the time we get here we nay be ready to prune some of them
-	 * back, but we want to make sure all the candicates have had a
-	 * chance. If they didn't pass the sanity and intersection
+	 * NTP_MINCLOCK of them, the manycast message will be turned
+	 * off. By the time we get here we nay be ready to prune some of
+	 * them back, but we want to make sure all the candicates have
+	 * had a chance. If they didn't pass the sanity and intersection
 	 * tests, they have already been voted off the island.
 	 */
 	if (sys_survivors >= NTP_MINCLOCK && nlist < NTP_MINCLOCK)
@@ -1887,10 +1893,14 @@ root_distance(
 	struct peer *peer
 	)
 {
-	return ((fabs(peer->delay) + peer->rootdelay) / 2 +
-		peer->rootdispersion + peer->disp +
-		    SQRT(peer->jitter) + CLOCK_PHI * (current_time -
-		    peer->update));
+	/*
+	 * Careful squeak here. The value returned must be greater than
+	 * zero blamed on the peer jitter, which must be at least the
+	 * square of sys_precision.
+	 */
+	return ((peer->rootdelay + peer->delay) / 2 +
+	    peer->rootdispersion + peer->disp + CLOCK_PHI *
+	    (current_time - peer->update) + SQRT(peer->jitter));
 }
 
 /*
@@ -1915,8 +1925,7 @@ peer_xmit(
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion +
-	    LOGTOD(sys_precision)));
+	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	HTONL_FP(&peer->org, &xpkt.org);
@@ -2254,8 +2263,7 @@ fast_xmit(
 	xpkt.ppoll = rpkt->ppoll;
 	xpkt.precision = sys_precision;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion +
-	    LOGTOD(sys_precision)));
+	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	xpkt.org = rpkt->xmt;

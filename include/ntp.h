@@ -111,7 +111,7 @@ typedef char s_char;
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
 #define NTP_SWEIGHT	.75	/* select weight */
-#define CLOCK_SGATE	10.	/* popcorn spike gate */
+#define CLOCK_SGATE	4.	/* popcorn spike gate */
 #define BURST_INTERVAL1	4	/* first interburst interval (log2) */
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
 

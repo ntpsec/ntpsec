@@ -1,3 +1,22 @@
+2001-01-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c: Change description of sys_rootdelay and
+	sys_rootdispersion. 
+	(process_packet): Fix p_del test (bad distance).
+	(process_packet): Fix bad synch distance test.
+	(process_packet): Fix call to clock_filter (p_disp)
+	(clock_update): Fix sys_rootdelay calculation.
+	(clock_filter): Initialize jit to f(sys_precision)
+	(clock_filter): Update jit using distance[i] instead of
+	SQUARE().  peer->jitter uses dtemp instead of SQUARE().
+	(clock_filter): Updated CLOCK_SGATE checks.  When printing debug
+	info, show jitter along with popcorn spike.
+	(clock_select): New sdisp calc.
+	(root_distance): New return value calc.
+	(peer_xmit): xpkt.rootdispersion value change.
+	* include/ntp.h (CLOCK_SGATE): Popcorn spike gate (Whoa, Molly!)
+	From Dave Mills.
+
 2001-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* config.sub (Repository): Updated.
