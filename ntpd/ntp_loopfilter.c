@@ -295,7 +295,8 @@ local_clock(
 
 		/*
 		 * In S_SYNC state we ignore outlyers. At the first
-		 * outlyer after CLOCK_MINSTEP (900 s), switch to S_SPIK		 * state.
+		 * outlyer after CLOCK_MINSTEP (900 s), switch to S_SPIK
+		 * state.
 		 */
 		case S_SYNC:
 			if (mu >= CLOCK_MINSTEP)
