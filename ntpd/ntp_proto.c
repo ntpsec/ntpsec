@@ -337,7 +337,7 @@ receive(
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("receive: at %ld %s<-%s restrict %02x\n",
+		printf("receive: at %ld %s<-%s restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
@@ -364,10 +364,15 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
+	if (restrict_mask & RES_DONTSERVE) {
+		sys_restricted++;
+		return;				/* no time */
+	}
 	if (rbufp->recv_length < LEN_PKT_NOMAC) {
 		sys_badlength++;
 		return;				/* runt packet */
 	}
+	
 
 	/*
 	 * Version check must be after the query packets, since they
@@ -579,10 +584,12 @@ receive(
 		 * again.
 		 */
 		if (authdecrypt(skeyid, (u_int32 *)pkt, authlen,
-		    has_mac))
+		    has_mac)) {
 			is_authentic = 1;
-		else
+			restrict_mask &= ~RES_DONTTRUST;
+		} else {
 			sys_badauth++;
+		}
 #ifdef OPENSSL
 		if (skeyid > NTP_MAXKEY)
 			authtrust(skeyid, 0);
@@ -669,7 +676,7 @@ receive(
 		 * immediately. If the guy is already here, don't fire
 		 * up a duplicate.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -701,7 +708,7 @@ receive(
 		 * If authentication fails send a crypto-NAK; otherwise,
 		 * kiss the frog.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -727,7 +734,7 @@ receive(
 		 * mobilize a broadcast client association. We don't
 		 * kiss any frogs here.
 		 */
-		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			return;			/* no trust */
 		}
@@ -775,13 +782,13 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * This packet is received from a server broadcast
-		 * server or symmetric peer. If it is restricted, flash
-		 * the bit and skedaddle to Seattle. If not authentic,
-		 * leave a light on and continue.
+		 * This packet is received from a broadcast server or
+		 * symmetric peer. If it is restricted, flash the bit
+		 * and skedaddle to Seattle. If not authentic, leave a
+		 * light on and continue.
 		 */
 		peer->flash = 0;
-		if (restrict_mask & RES_DONTTRUST) {
+		if (restrict_mask & RES_FLAGS) {
 			sys_restricted++;
 			if (peer->flags & FLAG_CONFIG)
 				peer_clear(peer, "RSTR");
@@ -2643,13 +2650,13 @@ fast_xmit(
 	 * If the caller has picked up a restriction, decide what to do
 	 * with it and light up a kiss-of-death.
 	 */
-	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+	if (mask & RES_FLAGS) {
 		char	*code = "????";
 
 		if (mask & RES_LIMITED) {
 			sys_limitrejected++;
 			code = "RATE";
-		} else if (mask & RES_DONTSERVE){
+		} else if (mask & (RES_DONTSERVE | RES_DONTTRUST)) {
 			sys_restricted++;
 			code = "DENY";
 		}
