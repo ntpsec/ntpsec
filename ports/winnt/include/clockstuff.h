@@ -14,6 +14,7 @@
  */
 
 void init_winnt_time(void);
+void shutdown_winnt_time(void);
 void reset_winnt_time(void);
 
 /* 100ns intervals between 1/1/1601 and 1/1/1970 as reported by

@@ -22,14 +22,20 @@
 
 #include "syslog.h"
 #include "ntservice.h"
-
+#include "clockstuff.h"
+#ifdef DEBUG
+#include <crtdbg.h>
+#endif
 /* Handle to SCM for updating service status */
 static SERVICE_STATUS_HANDLE hServiceStatus = 0;
 static BOOL foreground = FALSE;
 static char ConsoleTitle[128];
 extern char *Version;
 HANDLE hServDoneEvent = NULL;
+extern HANDLE WaitHandles[3];
+extern volatile int debug;
 
+void uninit_io_completion_port();
 /*
  * Forward declarations
  */
@@ -128,22 +134,30 @@ BOOL
 ntservice_isservice() {
 	return(!foreground);
 }
+/* service_ctrl - control handler for NTP service
+ * signals the service_main routine of start/stop requests
+ * from the control panel or other applications making
+ * win32API calls
+ */
 void
 ntservice_exit(int status)
 {
-	extern int debug;
 
-	if (debug) /* did not become a service, simply exit */
-	    ExitThread((DWORD)status);
-	else {
+	if (!foreground) { /* did not become a service, simply exit */
 		/* service mode, need to have the service_main routine
 		 * register with the service control manager that the 
 		 * service has stopped running, before exiting
 		 */
-		if ((status > 0) && (hServDoneEvent != NULL))
-		    SetEvent(hServDoneEvent);
-		ExitThread((DWORD)status);
+		UpdateSCM(SERVICE_STOPPED);
 	}
+	uninit_io_completion_port();
+	reset_winnt_time();
+
+# ifdef DEBUG
+	_CrtDumpMemoryLeaks();
+# endif 
+#undef exit	
+	exit(status);
 }
 
 /* 
@@ -154,18 +168,22 @@ void
 ServiceControl(DWORD dwCtrlCode) {
 	/* Handle the requested control code */
 	switch(dwCtrlCode) {
-        case SERVICE_CONTROL_INTERROGATE:
-		UpdateSCM(0);
-		break;
 
-        case SERVICE_CONTROL_SHUTDOWN:
-        case SERVICE_CONTROL_STOP:
-		ntservice_exit(0);
-		UpdateSCM(SERVICE_STOPPED);
-		break;
+	case SERVICE_CONTROL_SHUTDOWN:
+	case SERVICE_CONTROL_STOP:
+		UpdateSCM(SERVICE_STOP_PENDING);
+		if (WaitHandles[0] != NULL) {
+			SetEvent(WaitHandles[0]);
+		}
+		return;
+ 
+	case SERVICE_CONTROL_PAUSE:
+	case SERVICE_CONTROL_CONTINUE:
+	case SERVICE_CONTROL_INTERROGATE:
         default:
 		break;
 	}
+	UpdateSCM(SERVICE_RUNNING);
 }
 
 /*
@@ -187,13 +205,48 @@ void UpdateSCM(DWORD state) {
 		ss.dwCheckPoint = 0;
 		ss.dwServiceSpecificExitCode = 0;
 		ss.dwWin32ExitCode = NO_ERROR;
-		ss.dwWaitHint = dwState == SERVICE_STOP_PENDING ? 10000 : 1000;
+		ss.dwWaitHint = dwState == SERVICE_STOP_PENDING ? 5000 : 1000;
 
 		if (!SetServiceStatus(hServiceStatus, &ss)) {
 			ss.dwCurrentState = SERVICE_STOPPED;
 			SetServiceStatus(hServiceStatus, &ss);
 		}
 	}
+}
+
+BOOL WINAPI 
+OnConsoleEvent(  
+	DWORD dwCtrlType
+	)
+{
+	switch (dwCtrlType) {
+		case CTRL_BREAK_EVENT :
+			if (debug > 0) {
+				debug <<= 1;
+			}
+			else {
+				debug = 1;
+			}
+			if (debug > 8) {
+				debug = 0;
+			}
+			printf("debug level %d\n", debug);
+		break ;
+
+		case CTRL_C_EVENT  :
+		case CTRL_CLOSE_EVENT :
+		case CTRL_SHUTDOWN_EVENT :
+			if (WaitHandles[0] != NULL) {
+				SetEvent(WaitHandles[0]);
+			}
+		break;
+
+		default :
+			return FALSE;
+
+
+	}
+	return TRUE;;
 }
 
 /*
