@@ -1,3 +1,13 @@
+1999-11-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_parse.c (parse_start): ASYNC_PPS_CD_NEG cleanup
+	* configure.in (ac_cv_make_ntptime): OK on Linux
+	From: <Ulrich.Windl@rz.uni-regensburg.de>
+
+	* configure.in: NetBSD has PPSAPI now
+	F_SETOWN is needed for NetBSD
+	From: Jonathan Stone <jonathan@dsg.stanford.edu>
+
 1999-11-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98d

@@ -919,6 +919,9 @@ AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
  *-*-freebsd*)
     ans=yes
     ;;
+ *-*-netbsd*)
+    ans=yes
+    ;;
  *-*-osf*)
     ans=yes
     ;;
@@ -1399,13 +1402,8 @@ AC_MSG_RESULT($ntp_ok)
 
 case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
  *yes*)
-    case "$target" in
-      *-*-netbsd*)
-         ;;
-      *) AC_DEFINE(HAVE_PPSAPI)
-         ac_cv_var_oncore_ok=yes
-         ;;
-    esac
+    AC_DEFINE(HAVE_PPSAPI)
+    ac_cv_var_oncore_ok=yes
     AC_DEFINE(HAVE_TIMESPEC)
     ;;
 esac
@@ -2661,9 +2659,6 @@ esac
 AC_SUBST(MAKE_NTPTIME)
 AC_CACHE_CHECK(if we want and can make the ntptime utility, ac_cv_make_ntptime,
 [case "$target" in
- *linux*)
-    ans=no
-    ;;
  *) case "$ac_cv_struct_ntptimeval$ac_cv_var_kernel_pll" in
      yesyes)
 	ans=yes

@@ -2615,8 +2615,9 @@ parse_start(
 		  if (ioctl(fd232, TIOCGSERIAL, &ss) < 0 ||
 		      (
 #ifdef ASYNC_LOW_LATENCY
-		       ss.flags |= ASYNC_PPS_CD_NEG|ASYNC_LOW_LATENCY,
-#else
+		       ss.flags |= ASYNC_LOW_LATENCY,
+#endif
+#ifdef ASYNC_PPS_CD_NEG
 		       ss.flags |= ASYNC_PPS_CD_NEG,
 #endif
 		       ioctl(fd232, TIOCSSERIAL, &ss)) < 0) {
