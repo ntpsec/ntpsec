@@ -92,6 +92,11 @@
  * explanation of return values, if necessary.
  */
 
+static void
+usage(
+	void
+	)
+{
 /*
  -c     Location of ntp.conf file 
         (to get the expected locations of the keys) 
@@ -107,6 +112,10 @@
  -l	Don't make the symlinks
  -t	Trash the (old) files at the end of symlink
 */
+
+	exit(1);
+}
+
 
 int
 main(

@@ -1,5 +1,7 @@
 2000-07-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c (usage): Added.
+
 	* ntpd/ntp_crypto.c: Cleanup
 	* ntpd/ntp_proto.c (transmit): Add some parens.
 	(peer_xmit): Add ntohl when grabbing sndauto.seq for broadcast.
