@@ -45,8 +45,8 @@ stamp-rsaref:
 	for i in $(nodist_librsaref_a_SOURCES); do \
 	    case "@MAKE_LIBRSAREF@" in \
 	     '') touch $$i ;; \
-	     *) cmp -s $(srcdir)/$$i $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
-		|| cp $(srcdir)/../rsaref2/source/$$i $(srcdir)/$$i ;; \
+	     *) cmp -s $$i $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
+		|| cp $(srcdir)/../rsaref2/$$i $(srcdir)/$$i ;; \
 	    esac ; \
 	done
 	@mv stamp-rsarefT stamp-rsaref

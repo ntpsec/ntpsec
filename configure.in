@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99h1)
+AM_INIT_AUTOMAKE(ntp, 4.0.99h2)
 AC_PREREQ(2.14)
 
 ac_cv_var_oncore_ok=no
@@ -93,9 +93,7 @@ ac_busted_vpath_in_make=no
 
 case "$target" in
  *-next-nextstep3)
-    CFLAGS="$CFLAGS -posix" ;;
- *-*-freebsd*)	# I bet any pmake system needs this check
-    ac_busted_vpath_in_make=yes
+    CFLAGS="$CFLAGS -posix"
     ;;
  *-*-irix6.1*)	# 64 bit only
     # busted vpath?
