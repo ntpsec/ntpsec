@@ -827,7 +827,7 @@ crypto_xmit(
 	struct value *vp;	/* transmit packet value pointer */
 	struct value *ep, *pp;	/* value structure pointer */
 	u_int	len;
-	struct value encrypt;
+	struct value encryptval;
 	keyid_t tcookie;
 
 	/*
@@ -874,7 +874,7 @@ crypto_xmit(
 			break;
 		}
 		if (PKT_MODE(xpkt->li_vn_mode) == MODE_SERVER) {
-			pp = &encrypt;
+			pp = &encryptval;
 			memset(pp, 0, sizeof(struct value));
 			tcookie = cookie;
 			if (crypto_encrypt(pp, ep, &tcookie)) {
