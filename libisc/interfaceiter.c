@@ -31,7 +31,6 @@
 #include <errno.h>
 
 #include <isc/interfaceiter.h>
-#include <isc/log.h>
 #include <isc/magic.h>
 #include <isc/mem.h>
 #include <isc/msgs.h>
