@@ -105,4 +105,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # endif
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
 
+/* Include Windows headers */
+#include <windows.h>
+
 #endif /* __config */

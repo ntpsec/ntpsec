@@ -62,7 +62,7 @@ dofptoa(
 	 * Figure out how much of the fraction to do
 	 */
 	if (msec) {
-		dec = ndec + 3;
+		dec = (short)(ndec + 3);
 		if (dec < 3)
 		    dec = 3;
 		cpdec = &cbuf[8];
