@@ -252,6 +252,12 @@ extern	struct refclock	refclock_tt560;
 #define	refclock_tt560 refclock_none
 #endif
 
+#ifdef CLOCK_ZYFER
+extern	struct refclock	refclock_zyfer;
+#else
+#define	refclock_zyfer refclock_none
+#endif
+
 /*
  * Order is clock_start(), clock_shutdown(), clock_poll(),
  * clock_control(), clock_init(), clock_buginfo, clock_flags;
@@ -300,7 +306,8 @@ struct refclock *refclock_conf[] = {
 	&refclock_hopfser,	/* 38 REFCLK_HOPF_SERIAL */
 	&refclock_hopfpci,	/* 39 REFCLK_HOPF_PCI */
 	&refclock_jjy,		/* 40 REFCLK_JJY */
-	&refclock_tt560		/* 41 REFCLK_TT560 */
+	&refclock_tt560,	/* 41 REFCLK_TT560 */
+	&refclock_zyfer		/* 42 REFCLK_ZYFER */
 };
 
 u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);
