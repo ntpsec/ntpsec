@@ -1,9 +1,10 @@
 The ntp Distribution Base Directory
 
 This directory and its subdirectories contain the Network Time Protocol
-Version 4 (NTP) distribution for Unix systems. The contents of the base
-directory are given in this file. The contents of subdirectories are
-given in the README files in each subdirectory.
+Version 4 (NTP) distribution for Unix and Windows/NT systems.
+
+The contents of the base directory are given in this file. The contents of
+subdirectories are given in the README files in each subdirectory.
 
 A complete explanation of the configure, compile and install process, as
 well as setting up an NTP subnet, is in the HTML pages in the ./html
@@ -65,7 +66,7 @@ clockstuff	Directory containing sources for miscellaneous programs
 		WWVB and CHU.
 
 conf            Directory containing a motley collection of
-		configuration files for various systems. For example only. 
+		configuration files for various systems. For example only.
 
 config.guess	Script used to identify the machine architecture and
 		operating system.
