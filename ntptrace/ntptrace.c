@@ -1,4 +1,4 @@
-*
+/*
  * ntptrace - show the chain from an NTP host leading back to
  *	its source of time
  *
