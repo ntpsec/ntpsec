@@ -12,7 +12,7 @@
         <h3>Miscellaneous Options</h3>
         <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>We have three, now looking for more.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">15:30</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="235">Monday, January 20, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">16:07</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="230">Friday, February 07, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -23,10 +23,12 @@
             <dt><tt>calldelay <i>delay</i></tt>
             <dd>This option controls the delay in seconds between the first and second packets sent in burst or iburst mode to allow additional time for a modem or ISDN call to complete.
             <dt><tt>driftfile <i>driftfile</i></tt>
-            <dd>This command specifies the name of the file used to record the frequency offset of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency offset and then updated once per hour with the current frequency offset computed by the daemon. If the file does not exist or this command is not given, the initial frequency offset is assumed zero. In this case, it may take some hours for the frequency to stabilize and the residual timing errors to subside.            <p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
+            <dd>This command specifies the name of the file used to record the frequency offset of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency offset and then updated once per hour with the current frequency offset computed by the daemon. If the file does not exist or this command is not given, the initial frequency offset is assumed zero. In this case, it may take some hours for the frequency to stabilize and the residual timing errors to subside.
+            <p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
             <dt><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
                 <tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt>
             <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
+
             <dl>
                 <dt><tt>auth</tt>
                 <dd>Enables the server to synchronize with unconfigured peers only if the peer has been correctly authenticated using either public key or private key cryptography. The default for this flag is enable.
@@ -69,8 +71,10 @@
                 <dt><tt>huffpuff <i>huffpuff</i></tt>
                 <dd>The argument becomes the new value for the experimental huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours). There is no default, since the filter is not enabled unless this command is given.
                 <dt><tt>panic <i>panic</i></tt>
-                <dd>The argument is the panic threshold, normally 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.                  <dt><tt>step <i>step</i></tt>
-                <dd>The argument is the step threshold, which by default is 0.128 s. It can be set to any positive number in seconds. If set to zero, step adjustments will never occur.  Note:&nbsp;The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.                <dt><tt>stepout <i>stepout</i></tt>
+                <dd>The argument is the panic threshold, normally 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.
+                <dt><tt>step <i>step</i></tt>
+                <dd>The argument is the step threshold, which by default is 0.128 s. It can be set to any positive number in seconds. If set to zero, step adjustments will never occur. Note:&nbsp;The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.
+                <dt><tt>stepout <i>stepout</i></tt>
                 <dd>The argument is the stepout timeout, which by default is 900 s. It can be set to any positive number in seconds. If set to zero, the stepout pulses will not be suppressed.
             </dl>
             <dt><tt>trap <i>host_address</i> [port <i>port_number</i>] [interface <i>interface_address</i>]</tt>

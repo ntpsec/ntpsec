@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.1.73)
+AM_INIT_AUTOMAKE(ntp, 4.1.73a)
 AC_PREREQ(2.52)		# We need the cross-compile-aware SIZEOF stuff.
 
 ac_cv_var_atom_ok=no
@@ -3438,6 +3438,15 @@ AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
 ac_cv_var_irig_sucks=$ans])
 case "$ac_cv_var_irig_sucks" in
  yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
+esac
+
+AC_CACHE_CHECK(if we should enable NIST lockclock scheme, ac_cv_var_nist_lockclock,
+[AC_ARG_ENABLE(nist, 
+	AC_HELP_STRING([--enable-nist], [- if we should enable the NIST lockclock scheme]),
+    [ans=$enableval],[ans=no])
+ac_cv_var_nist_lockclock=$ans])
+case "$ac_cv_var_nist_lockclock" in
+ yes) AC_DEFINE(LOCKCLOCK, 1, [Should we align with the NIST lockclock scheme?]) ;;
 esac
 
 #

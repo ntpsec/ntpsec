@@ -1717,6 +1717,11 @@ clock_filter(
 
 /*
  * clock_select - find the pick-of-the-litter clock
+ *
+ * LOCKCLOCK: If the local clock is the prefer peer, it will always be
+ * enabled, even if declared falseticker, (2) only the prefer peer can
+ * be selected as the system peer, (3) if the external source is down,
+ * the system leap bits are set to 11 and the stratum set to infinity.
  */
 void
 clock_select(void)
@@ -1752,6 +1757,11 @@ clock_select(void)
 	osurv = sys_survivors;
 	sys_survivors = 0;
 	sys_prefer = NULL;
+#ifdef LOCKCLOCK
+	sys_leap = LEAP_NOTINSYNC;
+	sys_stratum = STRATUM_UNSPEC;
+	memcpy(&sys_refid, "DOWN", 4);
+#endif /* LOCKCLOCK */
 	nlist = 0;
 	for (n = 0; n < HASH_SIZE; n++)
 		nlist += peer_hash_count[n];
@@ -1805,13 +1815,18 @@ clock_select(void)
 			 */
 			if (peer->refclktype == REFCLK_LOCALCLOCK
 #if defined(VMS) && defined(VMS_LOCALUNIT)
-				/* wjm: local unit VMS_LOCALUNIT taken seriously */
-				&& REFCLOCKUNIT(&peer->srcadr) != VMS_LOCALUNIT
+			/* wjm: VMS_LOCALUNIT taken seriously */
+			    && REFCLOCKUNIT(&peer->srcadr) !=
+			    VMS_LOCALUNIT
 #endif	/* VMS && VMS_LOCALUNIT */
 				) {
 				typelocal = peer;
 				if (!(peer->flags & FLAG_PREFER))
 					continue; /* no local clock */
+#ifdef LOCKCLOCK
+				else
+					sys_prefer = peer;
+#endif /* LOCKCLOCK */
 			}
 			if (peer->sstclktype == CTL_SST_TS_TELEPHONE) {
 				typeacts = peer;
@@ -1886,7 +1901,7 @@ clock_select(void)
 	 * falsetickers and try again. If the number of falsetickers
 	 * becomes equal to or greater than half the number of
 	 * candidates, the Albanians have won the Byzantine wars and
-	 * correct syncrhonization is not possible.
+	 * correct synchronization is not possible.
 	 *
 	 * Here, nlist is the number of candidates and allow is the
 	 * number of falsetickers.
@@ -2108,7 +2123,7 @@ clock_select(void)
 	 * stratum is at least the floor and there are enough survivors.
 	 * This minimizes the pain when tossing out rascals beneath the
 	 * floorboard. Don't count peers with stratum above the ceiling.
-	 * Manycast is is sooo complicated.
+	 * Manycast is sooo complicated.
 	 */
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
@@ -2172,7 +2187,9 @@ clock_select(void)
 			printf("select: prefer offset %.6f\n",
 			    sys_offset);
 #endif
-	} else if (typepps) {
+	}
+#ifndef LOCKCLOCK
+	  else if (typepps) {
 		sys_peer = typepps;
 		sys_peer->status = CTL_PST_SEL_PPS;
 		sys_offset = sys_peer->offset;
@@ -2186,7 +2203,8 @@ clock_select(void)
 			printf("select: pps offset %.6f\n",
 			    sys_offset);
 #endif
-	} else {
+	}
+		else {
 		if (typesystem)
 			sys_peer = osys_peer;
 		else
@@ -2200,6 +2218,7 @@ clock_select(void)
 			   sys_offset);
 #endif
 	}
+#endif /* LOCKCLOCK */
 	if (osys_peer != sys_peer) {
 		if (sys_peer == NULL)
 			sys_peer_refid = 0;
