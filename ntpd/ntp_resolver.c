@@ -2,7 +2,7 @@
 ** Ancestor was ripped off from ../ntpres/ntpres.c by Greg Troxel 4/2/92
 **
 ** The previous resolver only needed to do forward lookups, and all names
-** were know before we started the resolver process.
+** were known before we started the resolver process.
 **
 ** The new code must be able to handle reverse lookups, and the requests can
 ** show up at any time.
@@ -19,7 +19,7 @@
 ** Current resolver code blocks waiting for the response, so the
 ** alternatives are:
 **
-** - Find a nonblocking resolver libbrary
+** - Find a nonblocking resolver library
 ** - Do each (initial) lookup in a separate process
 ** - - subsequent lookups *could* be handled by a different process that has
 **     a queue of pending requests
@@ -32,7 +32,6 @@
 **
 ** - too many fork()s
 ** - communications path
-**
 **
 */
 
@@ -166,7 +165,6 @@ struct ntp_res_c_pkt {		/* Control packet: */
 
 /*
  * ntp_res_name
- *
  */
 
 void
@@ -180,7 +178,7 @@ ntp_res_name(
 	/*
 	 * fork.
 	 * - parent returns
-	 * - child stuffs data and calls ntp_res(NTP_RES_V2)
+	 * - child stuffs data and calls ntp_res()
 	 */
 
 	for (pid = -1; pid == -1;) {
@@ -583,6 +581,7 @@ findhostaddr(
 				entry->de_hostname, inet_ntoa(si), hes);
 		}
 #endif
+		/* Send a NAK message back to the daemon */
 	}
 	return;
 }

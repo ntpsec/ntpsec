@@ -1,3 +1,7 @@
+2000-03-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_resolver.c: Typos.
+
 2000-03-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99h3
