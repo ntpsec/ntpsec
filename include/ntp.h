@@ -364,7 +364,7 @@ struct peer {
 /*
  * Values for peer.stratum, sys_stratum
  */
-#define	STRATUM_REFCLOCK ((u_char)0) /* stratum claimed by primary clock */
+#define	STRATUM_REFCLOCK ((u_char)0) /* default stratum */
 /* A stratum of 0 in the packet is mapped to 16 internally */
 #define	STRATUM_PKT_UNSPEC ((u_char)0) /* unspecified in packet */
 #define	STRATUM_UNSPEC	((u_char)16) /* unspecified */

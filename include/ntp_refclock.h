@@ -204,6 +204,7 @@ struct refclockproc {
 	 */
 	double	fudgetime1;	/* fudge time1 */
 	double	fudgetime2;	/* fudge time2 */
+	u_char	stratum;	/* server stratum */
 	u_int32	refid;		/* reference identifier */
 	u_char	sloppyclockflag; /* fudge flags */
 

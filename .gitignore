@@ -55,3 +55,6 @@ rsaref2
 scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
+ntpd/atom.bak
+ntpd/atom.c
+ntpd/ntp_proto.c.2

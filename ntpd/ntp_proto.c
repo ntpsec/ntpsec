@@ -1779,8 +1779,8 @@ clock_select(void)
 	/*
 	 * If no survivors remain at this point, check if the local
 	 * clock or modem drivers have been found. If so, nominate one
-	 * of them as the only survivor. Otherwise, give up and declare
-	 * us unsynchronized.
+	 * of them as the only survivor. Otherwise, give up and leave
+	 * the island to the rats.
 	 */
 	if ((allow << 1) >= nlist) {
 		if (typeacts != 0) {
@@ -1814,17 +1814,16 @@ clock_select(void)
 
 	/*
 	 * Clustering algorithm. Construct candidate list in order first
-	 * by stratum then by root distance. If we have more than
-	 * MAXCLOCK peers, keep only the best MAXCLOCK of them. Scan the
-	 * list to find falsetickers, who leave the island immediately.
-	 * If a falseticker is not configured, his association raft is
-	 * drowned as well, but only if at at least eight poll intervals
-	 * have gone by. We must leave at least one peer to collect the
-	 * million bucks.
+	 * by stratum then by root distance, but keep only the best
+	 * MAXCLOCK of them. Scan the list to find falsetickers, who
+	 * leave the island immediately. If a falseticker is not
+	 * configured, his association raft is drowned as well, but only
+	 * if at at least eight poll intervals have gone. We must leave
+	 * at least one peer to collect the million bucks.
 	 *
-	 * Note the hysteresis gimmick that decreases the effective
-	 * distance for those rascals that previously have made the
-	 * final cut. This to discourage clockhopping.
+	 * Note the hysteresis gimmick that increases the effective
+	 * distance for those rascals that have not made the final cut.
+	 * This is to discourage clockhopping.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1892,15 +1891,14 @@ clock_select(void)
 					    peer_list[i]->offset);
 				f /= nlist - 1;
 			}
-			f = max(f, SQUARE(LOGTOD(sys_precision))); 
 			if (f * synch[i] > e) {
 				sys_selerr = f;
 				e = f * synch[i];
 				k = i;
 			}
 		}
-
-		if (nlist <= NTP_MINCLOCK || sys_selerr <= d ||
+		f = max(sys_selerr, SQUARE(LOGTOD(sys_precision))); 
+		if (nlist <= NTP_MINCLOCK || f <= d ||
 		    peer_list[k]->flags & FLAG_PREFER)
 			break;
 #ifdef DEBUG
@@ -1922,7 +1920,7 @@ clock_select(void)
 #ifdef OPENSSL
 	/*
 	 * In manycast client mode we may have spooked a sizeable number
-	 * of servers that we don't need. If there are at least
+	 * of peers that we don't need. If there are at least
 	 * NTP_MINCLOCK of them, the manycast message will be turned
 	 * off. By the time we get here we nay be ready to prune some of
 	 * them back, but we want to make sure all the candicates have
@@ -1950,14 +1948,12 @@ clock_select(void)
 	 * peers. We want only a peer at the lowest stratum to become
 	 * the system peer, although all survivors are eligible for the
 	 * combining algorithm. First record their order, diddle the
-	 * flags and clamp the poll intervals. Then, consider the peers
-	 * at the lowest stratum. Of these, OR the leap bits on the
-	 * assumption that, if some of them honk nonzero bits, they must
-	 * know what they are doing. Also, check for prefer and pps
-	 * peers. If a prefer peer is found within clock_max, update the
-	 * pps switch. Of the other peers not at the lowest stratum,
-	 * check if the system peer is among them and, if found, zap
-	 * him. We note that the head of the list is at the lowest
+	 * flags and clamp the poll intervals. Then, consider each peer
+	 * in turn and OR the leap bits on the assumption that, if some
+	 * of them honk nonzero bits, they must know what they are
+	 * doing. Check for prefer and pps peers at any stratum. Check
+	 * if the old system peer is among the peers at the lowest
+	 * stratum. Note that the head of the list is at the lowest
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
 	 *
@@ -1965,7 +1961,7 @@ clock_select(void)
 	 * a majority of the suckers that have been found reachable and
 	 * no prior source is available. This avoids the transient when
 	 * one of a flock of sources is out to lunch and just happens
-	 * to be the first survivor.
+	 * to be the first survivor found.
 	 */
 	if (osys_peer == NULL && 2 * nlist < min(nreach, NTP_MINCLOCK))
 		return;
@@ -1975,16 +1971,15 @@ clock_select(void)
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
 		peer->hyst = HYST;
-		if (peer->stratum == peer_list[0]->stratum) {
-			leap_consensus |= peer->leap;
-			if (peer->refclktype == REFCLK_ATOM_PPS &&
-			    peer->stratum < STRATUM_UNSPEC)
-				typepps = peer;
-			if (peer == osys_peer)
+		leap_consensus |= peer->leap;
+		if (peer->flags & FLAG_PREFER)
+			sys_prefer = peer;
+		if (peer->refclktype == REFCLK_ATOM_PPS &&
+		    peer->stratum < STRATUM_UNSPEC)
+			typepps = peer;
+		if (peer->stratum == peer_list[0]->stratum && peer ==
+		    osys_peer)
 				typesystem = peer;
-			if (peer->flags & FLAG_PREFER)
-				sys_prefer = peer;
-		}
 	}
 
 	/*
@@ -2568,105 +2563,64 @@ key_expire(
 /*
  * Find the precision of this particular machine
  */
-#define DUSECS	1000000 /* us in a s */
-#define HUSECS	(1 << 20) /* approx DUSECS for shifting etc */
-#define MINSTEP 5	/* minimum clock increment (us) */
-#define MAXSTEP 20000	/* maximum clock increment (us) */
-#define MINLOOPS 5	/* minimum number of step samples */
+#define MINSTEP 100e-9		/* minimum clock increment (s) */
+#define MAXSTEP 20e-3		/* maximum clock increment (s) */
+#define MINLOOPS 5		/* minimum number of step samples */
 
 /*
- * This routine calculates the differences between successive calls to
- * gettimeofday(). If a difference is less than zero, the us field
- * has rolled over to the next second, so we add a second in us. If
- * the difference is greater than zero and less than MINSTEP, the
- * clock has been advanced by a small amount to avoid standing still.
- * If the clock has advanced by a greater amount, then a timer interrupt
- * has occurred and this amount represents the precision of the clock.
- * In order to guard against spurious values, which could occur if we
- * happen to hit a fat interrupt, we do this for MINLOOPS times and
- * keep the minimum value obtained.
+ * This routine calculates the system precision, defined as the minimum
+ * of a sequency of differences between successive readings of the
+ * system clock. However, if the system clock can be read more than once
+ * during a tick interval, the difference can be zero or one LSB unit,
+ * where the LSB corresponds to one nanosecond or one microsecond.
+ * Conceivably, if some other process preempts this one and reads the
+ * clock, the difference can be more than one LSB unit.
+ *
+ * For hardware clock frequencies of 10 MHz or less, we assume the
+ * logical clock advances only at the hardware clock tick. For higher
+ * frequencies, we assume the logical clock can advance no more than 100
+ * nanoseconds between ticks.
  */
 int
 default_get_precision(void)
 {
-	struct timeval tp;
-#if !defined(SYS_WINNT) && !defined(VMS) && !defined(_SEQUENT_) && \
-    !defined(MPE)
-	struct timezone tzp;
-#elif defined(VMS) || defined(_SEQUENT_)
-	struct timezone {
-		int tz_minuteswest;
-		int tz_dsttime;
-	} tzp;
-#endif /* defined(VMS) || defined(_SEQUENT_) */
-	long last;
-	int i;
-	long diff;
-	long val;
-	long usec;
-#ifdef HAVE_GETCLOCK
-	struct timespec ts;
-#endif
-#if defined(__FreeBSD__) && __FreeBSD__ >= 3
-	u_long freq;
-	size_t j;
+	l_fp val;		/* current seconds fraction */
+	l_fp last;		/* last seconds fraction */
+	l_fp diff;		/* difference */
+	double tick;		/* computed tick value */
+	double dtemp;		/* scratch */
+	int i;			/* log2 precision */
 
-	/* Try to see if we can find the frequency of of the counter
-	 * which drives our timekeeping
+	/*
+	 * Loop to find tick value in nanoseconds. Toss out outlyer
+	 * values less than the minimun tick value. In wacky cases, use
+	 * the default maximum value.
 	 */
-	j = sizeof freq;
-	i = sysctlbyname("kern.timecounter.frequency", &freq, &j , 0,
-	    0);
-	if (i)
-		i = sysctlbyname("machdep.tsc_freq", &freq, &j , 0, 0);
-	if (i)
-		i = sysctlbyname("machdep.i586_freq", &freq, &j , 0, 0);
-	if (i)
-		i = sysctlbyname("machdep.i8254_freq", &freq, &j , 0,
-		    0);
-	if (!i) {
-		for (i = 1; freq ; i--)
-			freq >>= 1;
-		return (i);
+	get_systime(&last);
+	tick = MAXSTEP;
+	for (i = 0; i < MINLOOPS;) {
+		get_systime(&val);
+		diff = val;
+		L_SUB(&diff, &last);
+		last = val;
+		LFPTOD(&diff, dtemp);
+		if (dtemp < MINSTEP)
+			continue;
+		i++;
+		if (dtemp < tick)
+			tick = dtemp;
 	}
-#endif
-	usec = 0;
-	val = MAXSTEP;
-#ifdef HAVE_GETCLOCK
-	(void) getclock(TIMEOFDAY, &ts);
-	tp.tv_sec = ts.tv_sec;
-	tp.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tp, &tzp);
-#endif /* not HAVE_GETCLOCK */
-	last = tp.tv_usec;
-	for (i = 0; i < MINLOOPS && usec < HUSECS;) {
-#ifdef HAVE_GETCLOCK
-		(void) getclock(TIMEOFDAY, &ts);
-		tp.tv_sec = ts.tv_sec;
-		tp.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-		GETTIMEOFDAY(&tp, &tzp);
-#endif /* not HAVE_GETCLOCK */
-		diff = tp.tv_usec - last;
-		last = tp.tv_usec;
-		if (diff < 0)
-			diff += DUSECS;
-		usec += diff;
-		if (diff > MINSTEP) {
-			i++;
-			if (diff < val)
-				val = diff;
-		}
-	}
+
+	/*
+	 * Find the nearest power of two.
+	 */
 	NLOG(NLOG_SYSINFO)
-		msyslog(LOG_INFO, "precision = %ld usec", val);
-	if (usec >= HUSECS)
-		val = MINSTEP;	/* val <= MINSTEP; fast machine */
-	diff = HUSECS;
-	for (i = 0; diff > val; i--)
-		diff >>= 1;
-	return (i);
+	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
+	for (i = 0; tick <= 1; i++)
+		tick *= 2;;
+	if (tick - 1. > 1. - tick / 2)
+		i--;
+	return (-i);
 }
 
 /*
