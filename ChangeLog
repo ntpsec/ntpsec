@@ -1,3 +1,7 @@
+2000-01-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_fg.c: Syntax/punctuation cleanup
+
 2000-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/ntpsweep: New version

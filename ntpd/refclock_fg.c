@@ -54,9 +54,9 @@ struct fgunit {
 /* 
  * Queries definition
  */
-static char fginit[] = { 0x10, 0x48, 0x10, 0x0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
+static char fginit[] = { 0x10, 0x48, 0x10, 0x0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-static char fgdate[] = { 0x10, 0x44, 0x10, 0x0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
+static char fgdate[] = { 0x10, 0x44, 0x10, 0x0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /*
