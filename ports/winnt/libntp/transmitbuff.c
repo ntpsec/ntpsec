@@ -10,7 +10,6 @@
 
 #include "transmitbuff.h"
 
-extern int debug;
 /*
  * transmitbuf memory management
  */
