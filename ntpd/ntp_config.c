@@ -385,7 +385,13 @@ static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
 #endif
 static	int gettokens P((FILE *, char *, char **, int *));
 static	int matchkey P((char *, struct keyword *, int));
-static	int getnetnum P((const char *, struct sockaddr_storage *, int));
+enum gnn_type {
+	t_UNK,		/* Unknown */
+	t_REF,		/* Refclock */
+	t_MSK,		/* Network Mask */
+	};
+static	int getnetnum P((const char *, struct sockaddr_storage *, int,
+			 enum gnn_type));
 static	void save_resolve P((char *, int, int, int, int, u_int, int,
     keyid_t, u_char *));
 static	void do_resolve_internal P((void));
@@ -622,7 +628,7 @@ getconfig(
 				break;
 			}
 
-			if (!getnetnum(tokens[istart], &peeraddr, 0)) {
+			if (!getnetnum(tokens[istart], &peeraddr, 0, t_UNK)) {
 				errflg = -1;
 			} else {
 				errflg = 0;
@@ -954,7 +960,8 @@ getconfig(
 					memset((char *)&peeraddr, 0,
 					    sizeof(peeraddr));
 					peeraddr.ss_family = maskaddr.ss_family;
-					if (getnetnum(tokens[i], &peeraddr, 1))
+					if (getnetnum(tokens[i], &peeraddr, 1,
+						      t_UNK))
 					    proto_config(PROTO_MULTICAST_ADD,
 							 0, 0., &peeraddr);
 				}
@@ -1215,7 +1222,8 @@ getconfig(
 			if (STREQ(tokens[istart], "default")) {
 				if (peeraddr.ss_family == 0)
 					peeraddr.ss_family = AF_INET;
-			} else if (!getnetnum(tokens[istart], &peeraddr, 1))
+			} else if (!getnetnum(tokens[istart], &peeraddr, 1,
+					      t_UNK))
 				break;
 
 			/*
@@ -1236,7 +1244,8 @@ getconfig(
 						break;
 					}
 					i++;
-					if (!getnetnum(tokens[i], &maskaddr, 1))
+					if (!getnetnum(tokens[i], &maskaddr, 1,
+						       t_MSK))
 					    errflg++;
 					break;
 
@@ -1396,7 +1405,7 @@ getconfig(
 				break;
 			}
 
-			if (!getnetnum(tokens[istart], &peeraddr, 1))
+			if (!getnetnum(tokens[istart], &peeraddr, 1, t_UNK))
 			    break;
 
 			/*
@@ -1437,7 +1446,7 @@ getconfig(
 					sizeof(maskaddr));
 				    maskaddr.ss_family = peeraddr.ss_family;
 				    if (!getnetnum(tokens[++i],
-						   &maskaddr, 1)) {
+						   &maskaddr, 1, t_UNK)) {
 					    errflg = 1;
 					    break;
 				    }
@@ -1478,7 +1487,7 @@ getconfig(
 				break;
 			}
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			if (!getnetnum(tokens[1], &peeraddr, 1))
+			if (!getnetnum(tokens[1], &peeraddr, 1, t_REF))
 			    break;
 
 			if (!ISREFCLOCKADR(&peeraddr)) {
@@ -2084,7 +2093,8 @@ static int
 getnetnum(
 	const char *num,
 	struct sockaddr_storage *addr,
-	int complain
+	int complain,
+	enum gnn_type a_type
 	)
 {
 	struct addrinfo hints;
