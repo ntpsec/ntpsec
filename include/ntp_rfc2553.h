@@ -81,6 +81,21 @@
  * If various macros are not defined we need to define them
  */
 
+#ifndef AF_INET6
+#define AF_INET6	AF_MAX
+#define PF_INET6	AF_INET6
+#endif
+
+#ifndef HAVE_TYPE_U_INT8_T
+typedef u_char		u_int8_t;
+typedef u_short		u_int16_t;
+typedef u_int32		u_int32_t;
+#endif /* HAVE_TYPE_U_INT8_T */
+
+#ifndef HAVE_TYPE_U_INT64_T
+typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
+#endif /* HAVE_TYPE_U_INT64_T */
+
 #if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
 
 #define	_SS_MAXSIZE	128
@@ -121,21 +136,6 @@ struct sockaddr_storage {
  */
 
 #ifndef ISC_PLATFORM_HAVEIPV6
-
-#ifndef AF_INET6
-#define AF_INET6	AF_MAX
-#define PF_INET6	AF_INET6
-#endif
-
-#ifndef HAVE_TYPE_U_INT8_T
-typedef u_char		u_int8_t;
-typedef u_short		u_int16_t;
-typedef u_int32		u_int32_t;
-#endif /* HAVE_TYPE_U_INT8_T */
-
-#ifndef HAVE_TYPE_U_INT64_T
-typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
-#endif /* HAVE_TYPE_U_INT64_T */
 
 /*
  * IPv6 address
