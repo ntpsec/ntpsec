@@ -808,11 +808,11 @@ loop_config(
 		 * microseconds.
 		 *
 		 * Call out the safety patrol. If ntpdate mode or if the
-		 * step threshold has been changed by the -x option or
+		 * step threshold has been increased by the -x option or
 		 * tinker command, kernel discipline is unsafe, so don't
 		 * do any of this stuff.
 		 */
-		if (mode_ntpdate || clock_max != CLOCK_MAX)
+		if (mode_ntpdate || clock_max > CLOCK_MAX)
 			break;
 
 		pll_control = 1;
@@ -885,22 +885,16 @@ loop_config(
 
 #ifdef KERNEL_PLL
 		/*
-		 * Sanity check. If the kernel is enabled, load the
-		 * frequency and light up the loop. If not, set the
-		 * kernel frequency to zero and leave the loop dark. In
-		 * either case set the time to zero to cancel any
-		 * previous nonsense.
+		 * Sanity check. If the kernel is available, load the
+		 * frequency and light up the loop. Make sure the offset
+		 * is zero to cancel any previous nonsense. If you don't
+		 * want this initialization, remove the ntp.drift file.
 		 */
 		if (pll_control) {
 			memset((char *)&ntv, 0, sizeof(ntv));
-			ntv.modes = MOD_OFFSET | MOD_FREQUENCY;
-			if (kern_enable) {
-				ntv.modes |= MOD_STATUS;
-				ntv.status = STA_PLL;
-				ntv.freq = (int32)(drift_comp *
-				    65536e6);
-			}
-			(void)ntp_adjtime(&ntv);
+			ntv.modes = MOD_FREQUENCY;
+			ntv.freq = (int32)(drift_comp * 65536e6);
+			ntp_adjtime(&ntv);
 		}
 #endif /* KERNEL_PLL */
 #endif /* LOCKCLOCK */

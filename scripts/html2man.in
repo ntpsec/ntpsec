@@ -1,11 +1,9 @@
-#! /usr/bin/perl -w
+#! @PATH_PERL@ -w
 #
-# html2man.pl: Converts the NTP HTML documentation to man page format
+# html2man: Converts the NTP HTML documentation to man page format
 #
-# This file require the Perl HTML::Parser module, which in turn
-# requires HTML::Tagset, which has no dependencies.  Get them here:
-# http://search.cpan.org/search?module=HTML::Parser
-# http://search.cpan.org/search?module=HTML::Tagset
+# This file require the Perl HTML::TokeParser module:
+# http://search.cpan.org/search?module=HTML::TokeParser
 #
 # Depending on where this is run from, you might need to modify $MANDIR below.
 #
@@ -27,7 +25,7 @@ $MANDIR = "./man";
 	     'ntpdc' => ['ntpdc', 8, 'ntpd(8)'],
 	     'ntptime' => ['ntpdtime', 8, 'ntpd(8), ntpdate(8)'],
 	     'ntptrace' => ['ntptrace', 8, 'ntpd(8)'],
-	     'genkeys' => ['ntp-genkeys', 8, 'ntpd(8), ntp_auth(5)'],
+	     'keygen' => ['ntp-keygen', 8, 'ntpd(8), ntp_auth(5)'],
 	     'confopt' => ['ntp.conf', 5, 'ntpd(8)'],
 	     'authopt' => ['ntp_auth', 5, 'ntp.conf(5), ntpd(8)'],
 	     'monopt' => ['ntp_mon', 5, 'ntp.conf(5)'],
@@ -65,7 +63,7 @@ sub process {
     my($filename) = @_;
     $fileinfo = $manfiles{$filename};
 
-    $p = HTML::TokeParser->new("$filename.htm") || die "Can't open $filename.htm: $!";
+    $p = HTML::TokeParser->new("$filename.html") || die "Can't open $filename.html: $!";
     open(MANOUT, ">$MANDIR/man$fileinfo->[1]/$fileinfo->[0].$fileinfo->[1]")
 	|| die "Can't open: $!";
 

@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign
 
 NULL=
 
-bin_PROGRAMS = sntp
+sbin_PROGRAMS = sntp
 
 sntp_SOURCES = \
 	header.h \

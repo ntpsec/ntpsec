@@ -12,7 +12,7 @@
         <h3><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</h3>
         <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The mushroom knows all the command line options.</p>
-        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">03:15 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 13, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=99>01:46 AM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=285>Thursday, October 28, 2004</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -64,13 +64,10 @@
         <p>When <tt>ntpd</tt> starts it looks at the value of <tt>umask</tt>, and if zero <tt>ntpd</tt> will set the <tt>umask</tt> to <tt>022</tt>.</p>
         <h4 id="cmd">Command Line Options</h4>
         <dl>
-            <dt><tt>-4</tt>
-            <dd>Force DNS resolution of following host names to the IPv4 namespace.
-            <dt><tt>-6</tt>
-            <dd>Force DNS resolution of following host names to the IPv6 namespace.
-            <dt><tt>-a</tt>
-            <dd>Require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is the default.
-            <dt><tt>-A</tt>
+			<dt><tt>-a</tt>
+			<dd>Require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is the default.
+            
+			<dt><tt>-A</tt>
             <dd>Do not require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is almost never a good idea.
             <dt><tt>-b</tt>
             <dd>Enable the client to synchronize to broadcast servers.
@@ -131,7 +128,7 @@
             <a href="clockopt.html">Reference Clock Options</a><br>
             <a href="miscopt.html">Miscellaneous Options</a></p>
         <h4 id="files">Files</h4>
-        <table width="100%" border="1" cellspacing="2" cellpadding="0">
+        <table width="100%" border="1">
             <tr>
                 <td width="30%">File</td>
                 <td width="30%">Default</td>

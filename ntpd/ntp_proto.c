@@ -1268,7 +1268,7 @@ process_packet(
 			if (peer->hmode == MODE_CLIENT)
 				return;
 
-			peer->flags &= ~FLAG_MCAST;
+			peer->flags &= ~(FLAG_MCAST | FLAG_BURST);
 		}
 		p_offset += peer->estbdelay;
 		p_del = peer->delay;

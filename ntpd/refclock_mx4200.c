@@ -1524,14 +1524,14 @@ mx4200_pps(
 	if (time_pps_fetch(up->pps_h, PPS_TSFMT_TSPEC, &(up->pps_i),
 			&timeout) < 0) {
 		mx4200_debug(peer,
-		  "mx4200_pps: time_pps_fetch: serial=%d, %s\n",
+		  "mx4200_pps: time_pps_fetch: serial=%ul, %s\n",
 		     up->pps_i.assert_sequence, strerror(errno));
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}
 	if (temp_serial == up->pps_i.assert_sequence) {
 		mx4200_debug(peer,
-		   "mx4200_pps: assert_sequence serial not incrementing: %d\n",
+		   "mx4200_pps: assert_sequence serial not incrementing: %ul\n",
 			up->pps_i.assert_sequence);
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
@@ -1544,7 +1544,7 @@ mx4200_pps(
 		if (up->pps_i.assert_sequence == up->lastserial) {
 			mx4200_debug(peer, "mx4200_pps: no new pps event\n");
 		} else {
-			mx4200_debug(peer, "mx4200_pps: missed %d pps events\n",
+			mx4200_debug(peer, "mx4200_pps: missed %ul pps events\n",
 			    up->pps_i.assert_sequence - up->lastserial - 1);
 		}
 		refclock_report(peer, CEVNT_FAULT);
