@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 #
-# $Id: .del-ntpsweep~dff61aa1 1.1 1999/12/29 23:42:41-00:00 stenn@whimsy.udel.edu $
+# $Id: .del-ntpsweep~dff61aa1 1.2 2000/01/13 23:20:48-00:00 stenn@whimsy.udel.edu $
 #
 # DISCLAIMER
 # 
@@ -29,21 +29,23 @@ my $ntpq = "ntpq";
 # no STDOUT buffering
 $| = 1;
 
-my ($help, $single_host, $showpeers, $strip);
-my $res = GetOptions("help!"   => \$help,
-		     "host=s"  => \$single_host,
-		     "peers!"  => \$showpeers,
-		     "strip=s" => \$strip);
+my ($help, $single_host, $showpeers, $maxlevel, $strip);
+my $res = GetOptions("help!"      => \$help,
+		     "host=s"     => \$single_host,
+		     "peers!"     => \$showpeers,
+		     "maxlevel=s" => \$maxlevel,
+		     "strip=s"    => \$strip);
 
 if ($help || ((@ARGV != 1) && !$single_host)) {
     warn <<EOF;
 Usage:
-  $program [--help|--peers|--strip <string>] <file>|[--host <hostname>]
+  $program [--help|--peers|--strip <string>|--maxlevel <level>] \\
+    <file>|[--host <hostname>]
 
 Description:
   $program prints per host given in <file> the NTP stratum level, the
   clock offset in seconds, the daemon version, the operating system and
-  the processor.
+  the processor. Optionally recursing through all peers.
 
 Options:
 --help
@@ -54,14 +56,16 @@ Options:
 --host <hostname>
     Speficy a single host, bypassing the need for a hosts file.
 --peers
-    List all peers a host synchronizes to.
+    Recursively list all peers a host synchronizes to. An '=' before a
+    peer means a loop. Recursion stops here.
+--maxlevel <level>
+    Traverse peers up to this level (4 is a reasonable number).
 --strip <string>
     Strip <string> from hostnames.
 
-Example:
-    $program myhosts.txt
-    $program --host some.host --strip foo.com
-    $program --help
+Examples:
+    $program myhosts.txt --strip .foo.com
+    $program --host some.host --peers --maxlevel 5
 EOF
     exit 1;
 }
@@ -83,23 +87,17 @@ sub read_hosts()
     close(HOSTS);
 }
 
-# translate IP to hostname
+# translate IP to hostname if possible
 sub ip2name {
     my($ip) = @_;
     my($addr, $name, $aliases, $addrtype, $length, @addrs);
     $addr = pack('C4', split(/\./, $ip));
     ($name, $aliases, $addrtype, $length, @addrs) = gethostbyaddr($addr, 2);
-    # return lower case name
-    return("\L$name");
-}
-
-sub myip2name {
-    my($ip) = @_;
-    my $name = ip2name($ip);
     if ($name) {
-	return $name;
+        # return lower case name
+	return("\L$name");
     } else {
-	return $ip;
+	return($ip);
     }
 }
 
@@ -113,8 +111,8 @@ sub item_in_list {
     return 0;
 }
 
-sub scan_host($;$) {
-    my($host, $level) = @_;
+sub scan_host($;$;$) {
+    my($host, $level, @trace) = @_;
     my $stratum = 0;
     my $offset = 0;
     my $daemonversion = "";
@@ -173,11 +171,6 @@ sub scan_host($;$) {
 
 	    # Shorten processor string
 	    $processor =~ s/unknown//;
-
-	    # Shorten host string
-	    if ($strip) {
-		$host =~ s/$strip//;
-	    }
 	}
     
 	# got answers ? If so, go on.
@@ -198,7 +191,7 @@ sub scan_host($;$) {
 			next;
 		    };
 		    /^( |x|\.|-|\+|#|\*|o)([^ ]+)/ && do {
-			push(@peers, $2);
+			push(@peers, ip2name($2));
 			next;
 		    };
 		    print "ERROR: $_";
@@ -209,24 +202,57 @@ sub scan_host($;$) {
     
 	# Add scanned host to known_hosts array
 	push(@known_hosts, $host);
-	$known_host_info{$host} = sprintf("%2d %9.3f %-11s %-12s %s",
-	    $stratum, $offset, substr($daemonversion,0,11),
-	    substr($system,0,12), substr($processor,0,9));
+	if ($stratum) {
+	    $known_host_info{$host} = sprintf("%2d %9.3f %-11s %-12s %s",
+		$stratum, $offset, substr($daemonversion,0,11),
+		substr($system,0,12), substr($processor,0,9));
+	} else {
+	    # Stratum level 0 is consider invalid
+	    $known_host_info{$host} = sprintf(" ?");
+	}
 	$known_host_peers{$host} = [@peers];
     }
 
-    if ($stratum || $known_host) {
+    if ($stratum || $known_host) { # Valid or known host
 	my $printhost = ' ' x $level . $host;
+	# Shorten host string
+	if ($strip) {
+	    $printhost =~ s/$strip//;
+	}
+	# append number of peers in brackets if requested and valid
+	if ($showpeers && ($known_host_info{$host} ne " ?")) {
+	    $printhost .= " (" . @{$known_host_peers{$host}} . ")";
+	}
+	# Finally print complete host line
 	printf("%-32s %s\n",
 	    substr($printhost,0,32), $known_host_info{$host});
-	if ($showpeers) {
+	if ($showpeers && (eval($maxlevel ? $level < $maxlevel : 1))) {
 	    my $peer;
+	    push(@trace, $host);
+	    # Loop through peers
 	    foreach $peer (@{$known_host_peers{$host}}) {
-		&scan_host(myip2name($peer), $level + 1);
+		if (&item_in_list($peer, @trace)) {
+		    # we've detected a loop !
+		    $printhost = ' ' x ($level + 1) . "= " . $peer;
+		    # Shorten host string
+		    if ($strip) {
+			$printhost =~ s/$strip//;
+		    }
+		    printf("%-32s %s\n",
+			substr($printhost,0,32));
+		} else {
+		    if (substr($peer,0,3) ne "127") {
+			&scan_host($peer, $level + 1, @trace);
+		    }
+		}
 	    }
 	}
-    } else {
+    } else { # We did not get answers from this host
 	my $printhost = ' ' x $level . $host;
+	# Shorten host string
+	if ($strip) {
+	    $printhost =~ s/$strip//;
+	}
 	printf("%-32s  ?\n", substr($printhost,0,32));
     }
 }
@@ -235,7 +261,9 @@ sub scan_hosts()
 {
     my $host;
     for $host (@hosts) {
-	scan_host($host, 0);
+	my @trace;
+	push(@trace, $host);
+	scan_host($host, 0, @trace);
     }
 }
 
