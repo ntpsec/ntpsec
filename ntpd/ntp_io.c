@@ -623,7 +623,7 @@ void
 enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
 {
 #ifdef SO_BROADCAST
-	socket_broadcast_enable(iface, baddr);
+	socket_broadcast_enable(iface, 0, baddr);
 #endif
 }
 
