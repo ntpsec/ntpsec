@@ -1,5 +1,7 @@
 2001-04-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c: extern config_netinfo, too.
+
 	* util/hist.c:
 	* ntptrace/ntptrace.c:
 	* ntpq/ntpq.c:

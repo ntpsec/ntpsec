@@ -120,7 +120,7 @@
 extern char *config_file;
 
 #ifdef HAVE_NETINFO
-struct netinfo_config_state *config_netinfo = NULL;
+extern struct netinfo_config_state *config_netinfo;
 extern int check_netinfo;
 #endif /* HAVE_NETINFO */
 
