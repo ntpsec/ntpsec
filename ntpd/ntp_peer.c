@@ -542,9 +542,15 @@ newpeer(
 	 */
 	if (ISREFCLOCKADR(srcadr))
 		peer->dstadr = loopback_interface;
-	else if (cast_flags & MDF_BCLNT)
+	else if (cast_flags & MDF_BCLNT) {
 		peer->dstadr = findbcastinter(srcadr);
-	else if (dstadr != any_interface)
+		/*
+		 * If it was a multicast packet, findbcastinter() may not
+		 * find it, so try a little harder.
+		 */
+		if (peer->dstadr == any_interface)
+			peer->dstadr = findinterface(srcadr);
+	} else if (dstadr != any_interface)
 		peer->dstadr = dstadr;
 	else
 		peer->dstadr = findinterface(srcadr);
