@@ -278,12 +278,13 @@ with each occurrence indicating greater detail of display.</dd>
 
 <dt><tt>-g</tt></dt>
 
-<dd>Normally, the <tt>ntpd</tt> exits if the offset exceeds a
-1000-s sanity limit. This option overrides this limit and allows
-the time to be set to any value without restriction; however, this
-can happen only once. After that, the <tt>ntpd</tt> will exit if
-the limit is exceeded. This option can be used with the <tt>-q</tt>
-option.</dd>
+<dd>Normally, <tt>ntpd</tt> exits if the offset exceeds the sanity
+limit, which is 1000 s by default. If the sanity limit is set to
+zero, no sanity checking is performed and any offset is acceptable.
+This option overrides the limit and allows the time to be set to
+any value without restriction; however, this can happen only once.
+After that, <tt>ntpd</tt> will exit if the limit is exceeded. This
+option can be used with the <tt>-q</tt> option.</dd>
 
 <dt><tt>-k <i>keyfile</i></tt></dt>
 
@@ -354,13 +355,17 @@ facility.</dd>
 
 <dt><tt>-x</tt></dt>
 
-<dd>Ordinarily, if the time is to be adjusted more than 128 ms, it
-is stepped, not gradually slewed. This option forces the time to be
-slewed in all cases. Note: Since the slew rate is limited to 0.5
-ms/s, each second of adjustment requires an amortization interval
-of 2000 s. Thus, an adjustment of many seconds can take hours or
-days to amortize. This option can be used with the <tt>-q</tt>
-option.</dd>
+<dd>Normally, the time is slewed if the offset is less than the
+step threshold, which is 128 ms by default, and stepped if above
+the threshold. This option forces the time to be slewed in all
+cases. If the step threshold is set to zero, all offsets are
+stepped, regardless of value and regardless of the <tt>-x</tt>
+option. In general, this is not a good idea, as it bypasses the
+clock state machine which is designed to cope with large time and
+frequency errors Note: Since the slew rate is limited to 0.5 ms/s,
+each second of adjustment requires an amortization interval of 2000
+s. Thus, an adjustment of many seconds can take hours or days to
+amortize. This option can be used with the <tt>-q</tt> option.</dd>
 </dl>
 
 <h4>The Configuration File</h4>

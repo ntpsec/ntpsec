@@ -212,9 +212,15 @@ local_clock(
 	}
 
 	/*
-	 * If the clock is way off, don't tempt fate by correcting it.
+	 * If the clock is way off, panic is declared. The clock_panic
+	 * defaults to 1000 s; if set to zero, the panic will never
+	 * occur. The allow_panic defaults to FALSE, so the first panic
+	 * will exit. It can be set TRUE by a command line option, but
+	 * it will be set it FALSE when the update is within the step
+	 * range; so, subsequent panics will exit.
 	 */
-	if (fabs(fp_offset) > clock_panic && !allow_panic) {
+	if (fabs(fp_offset) > clock_panic && clock_panic > 0 &&
+	    !allow_panic) {
 		msyslog(LOG_ERR,
 		    "time error %.0f over %.0f seconds; set clock manually",
 		    fp_offset, clock_panic);
@@ -222,10 +228,16 @@ local_clock(
 	}
 
 	/*
-	 * If simulating ntpdate, set the clock according to the rules.
+	 * If simulating ntpdate, set the clock directly, rather than
+	 * using the discipline. The clock_max defines the step
+	 * threshold, above which the clock will be stepped instead of
+	 * slewed. The value defaults to 128 ms, but can be set to even
+	 * unreasonable values. If set to zero, the clock will never be
+	 * stepped.
 	 */
 	if (mode_ntpdate) {
-		if (allow_step && fabs(fp_offset) > clock_max) {
+		if (allow_step && fabs(fp_offset) > clock_max &&
+		    clock_max > 0) {
 			step_systime(fp_offset);
 			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 			    msyslog(LOG_NOTICE, "time reset %.6f s",
@@ -269,13 +281,15 @@ local_clock(
 	 * Clock state machine transition function. This is where the
 	 * action is and defines how the system reacts to large phase
 	 * and frequency errors. There are two main regimes: when the
-	 * phase error exceeds the maximum allowed for ordinary tracking
-	 * and otherwise when it does not.
+	 * offset exceeds the step threshold and when it does not.
+	 * However, if the step threshold is set to zero, a step will
+	 * never occur. See your instruction manual for the details how
+	 * these actions interact with the command line options.
 	 */
 	retval = 0;
 	clock_frequency = flladj = plladj = 0;
 	mu = current_time - last_time;
-	if (fabs(fp_offset) > clock_max) {
+	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
 
 		/*

@@ -186,31 +186,37 @@ holds the names of the reference clock variables.</dd>
 ]</tt></dt>
 
 <dd>This command can be used to alter several system variables in
-very exceptional circumstances. It should occur in the configuration file before any other configuration options. The default values of these
-variables have been carefully optimized for a wide range of network
-speeds and reliability expectations. In general, they interact in
-intricate ways that are hard to predict and some combinations can
-result in some very nasty behavior. Very rarely is it necessary to
-change the default values; but, some folks can't resist twisting
-the knobs anyway and this command is for them. Emphasis added:
-twisters are on their own and can expect no help from the support
-group. 
+very exceptional circumstances. It should occur in the
+configuration file before any other configuration options. The
+default values of these variables have been carefully optimized for
+a wide range of network speeds and reliability expectations. In
+general, they interact in intricate ways that are hard to predict
+and some combinations can result in some very nasty behavior. Very
+rarely is it necessary to change the default values; but, some
+folks can't resist twisting the knobs anyway and this command is
+for them. Emphasis added: twisters are on their own and can expect
+no help from the support group. 
 
 <p>All arguments are in floating point seconds or seconds per
-second. The <tt>minpoll</tt> argument is an integer in seconds to the power of two. The variables operate as follows:</p>
+second. The <tt>minpoll</tt> argument is an integer in seconds to
+the power of two. The variables operate as follows:</p>
 </dd>
 
 <dd>
 <dl>
 <dt><tt>step <i>step</i></tt></dt>
 
-<dd>The argument becomes the new value for the step-adjustment
-threshold, normally 0.128 s.</dd>
+<dd>The argument becomes the new value for the step threshold,
+normally 0.128 s. If set to zero, step adjustments will never
+occur. In general, if the intent is only to avoid step adjustments,
+the step threshold should be left alone and the <tt>-x</tt> command
+line option be used instead.</dd>
 
 <dt><tt>panic <i>panic</i></tt></dt>
 
-<dd>The argument becomes the new value for the panic-stop
-threshold, normally 1000 s.</dd>
+<dd>The argument becomes the new value for the panic threshold,
+normally 1000 s. If set to zero, the panic sanity check is disabled
+and a clock offset of any value will be accepted.</dd>
 
 <dt><tt>dispersion <i>dispersion</i></tt></dt>
 
@@ -224,9 +230,10 @@ normally 900 s.</dd>
 
 <dt><tt>minpoll <i>minpoll</i></tt></dt>
 
-<dd>The argument becomes the new value for the default minimum poll
-interval, normally 6 (64 s). The value may not be less than 4 (16
-s).</dd>
+<dd>The argument becomes the new value for the minimum poll
+interval used when configuring multicast client, manycast client
+and , symmetric passive mode association. The value defaults to 6
+(64 s) and has a lower limit of 4 (16 s).</dd>
 </dl>
 </dd>
 

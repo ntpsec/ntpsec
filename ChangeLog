@@ -1,3 +1,12 @@
+2001-04-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c (local_clock): Check clock_panic > 0.
+	Check clock_max > 0.
+	* html/ntpd.htm: Cleanup.
+	* html/miscopt.htm: Cleanup.
+	* html/confopt.htm: Cleanup minpoll documentation.
+	From: Dave Mills.
+
 2001-04-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/cmd_args.c (getstartup): check_netinfo needs an extern
