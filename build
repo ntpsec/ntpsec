@@ -13,6 +13,9 @@ case "$1" in
      $KEY) ;;
      *)
 	echo "Wrong directory for build on host $IAM"
+	echo "This is <`pwd`>"
+	echo "SIG is <$SIG>"
+	echo "KEY is <$KEY>"
         exit 1
         ;;
     esac

@@ -45,6 +45,7 @@ noinst_HEADERS = \
 	ntp_types.h \
 	ntp_unixtime.h \
 	ntpd.h \
+	ntpsim.h \
 	parse.h \
 	parse_conf.h \
 	recvbuff.h \
