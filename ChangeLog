@@ -2,6 +2,11 @@
 
 	* configure.in: 4.0.99j3
 
+	* html/release.htm: 
+	* html/ntpq.htm: 
+	* html/authopt.htm: 
+	Updates from Dave Mills
+
 	* ntpd/ntp_request.c (dns_a): Don't call crypto_public for now...
 	* ntpd/ntp_proto.c (receive): Follow the TEST wiggles
 	(peer_xmit): TAI support

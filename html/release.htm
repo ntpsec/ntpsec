@@ -15,11 +15,12 @@ new features and refinements to the NTP Version 3 (NTPv3) algorithms.
 However, it continues the tradition of retaining backwards compatibility
 with older versions. The NTPv4 version has been under development for
 quite a while and isn't finished yet. In fact, quite a number of NTPv4
-features have already been implemented in the current NTPv3. The primary
-purpose of this release is to verify the remaining new code compiles and
-runs in the various architectures, operating systems and hardware
-complement that can't be verified here. Of particular interest are
-Windows NT, VMS and various reference clock drivers. As always,
+features have already been retrofitted in the current NTPv3, although
+this version is not actively maintained by the NTPv4 developer's group.
+The primary purpose of this release is to verify the remaining new code
+compiles and runs in the various architectures, operating systems and
+hardware complement that can't be verified here. Of particular interest
+are Windows 2000, VMS and various reference clock drivers. As always,
 corrections and bugfixes are warmly received, especially in the form of
 context diffs.
 
@@ -139,7 +140,7 @@ Options</A> page for details.</LI>
 
 <P><LI>The scheme for enabling the <TT>ppsclock</TT> line
 discipline/streams module has changed. Formerly, it was enabled by
-setting f<TT>fudge flag3</TT> for the serial port connected to the PPS
+setting <TT>fudge flag3</TT> for the serial port connected to the PPS
 signal. Now, there is an explicit command <TT>pps</TT> used to designate
 the device name. See the <A HREF=clockopt.htm>Reference Clock
 Options</A> page for details.</LI>
@@ -154,35 +155,62 @@ should precede these commands.</LI>
 <H4>Caveats</H4>
 
 This release has been compiled and tested on several systems, including
-SunOS 4.1.3, Solaris 2.5.1 and 2.7, Alpha 4.0, Ultrix 4.4, Linux,
-FreeBSD 3.4 and HP-UX 10.02. It has not been compiled for Windows NT or
-VMS. We are relying on the NTP volunteer brigade to do that. Known
-problems are summarized below:
+SunOS 4.1.3, Solaris 2.5.1-2.8, Alpha 4.0, Ultrix 4.4, Linux, FreeBSD
+3.4 and HP-UX 10.02. It has been compiled and tested on Windows NT, but
+not yet on any other Windows version or for VMS. We are relying on the
+NTP volunteer corps to do that. Known problems are summarized below:
 
 <OL>
 
-<p><li>The latest NTPv4 <tt>ntpdc</tt> does not work with previous versions of <tt>ntpd</tt> and previous versions of <tt>ntpdc</tt> do not work with latest <tt>ntpd</tt>. This situation is regrettable and may be fixed in future; however, it is necessary in order for the autokey function to retrieve canonical names and certificates from directory services such as Secure DNS.
+<p><li>The latest NTPv4 <tt>ntpdc</tt> does not work with previous
+versions of <tt>ntpd</tt> and previous versions of <tt>ntpdc</tt> do not
+work with latest <tt>ntpd</tt>. This situation is regrettable and may be
+fixed in future; however, it is necessary in order for the autokey
+function to retrieve canonical names and certificates from directory
+services such as Secure DNS.
 
 <P><LI>To work properly in all cases, the <TT>enable</TT> and
 <TT>pps</TT> commands, if used, should appear before the <TT>server</TT>
 and <TT>fudge</TT> commands in the configuration file.</LI>
 
-<P><LI>The precision time kernel modifications formerly in stock Solaris
-2.6 have bugs that were fixed in 2.7. A patch is available that fixes
-the 2.6 bugs. The 2.6 kernel discipline has been disabled by default.
-For testing, the kernel can be enabled using the <TT>enable kernel</TT>
-command either in the configuration file or via <TT>ntpdc</TT>.</LI>
+<P><LI>The latest release of NTP4 includes support for tne <a href=
+http://www.eecis.udel.edu/~mills/resource.htm><i>nanokernel</i></a>
+precision time kernel support, which is now in stock Linux and FreeBSD
+kernels. If a precision time source such as a GPS timing receiver or
+cesium clock is available, kernel timekeeping can be improved to the
+order less than one microsecond. The older precision time kernel for the
+Alpha continues to be supported. The precision time support in stock
+Solaris 2.6 has bugs that were fixed in 2.7. A patch is available that
+fixes the 2.6 bugs. The 2.6 kernel discipline has been disabled by
+default. For testing, the kernel can be enabled using the <TT>enable
+kernel</TT> command either in the configuration file or via
+<TT>ntpdc</TT>.</LI>
+
+<p><li>A new pulse-per-second (PPS) generic interface described in <a
+href=http://www.eecis.udel.edu/~mills/reports.htm>Mogul, J., D. Mills, J.
+Brittenson, J. Stone and U. Windl. Pulse-per-second API for Unix-like
+operating systems, version 1. Request for Comments RFC-2783, Internet
+Engineering Task Force, March 2000, 31 pp</a> is supported. Older
+interfaces and line disciplines continue to be supported, but may be
+withdrawen in future versions.
 
 <P><LI>On Alpha 4.0 with reference clocks configured, debugging with the
 <TT>-d</TT> options doesn't work.</LI>
 
-<P><LI>The autokey function uses NTP header extensions fields,
-which is documented in an Internet Draft and implemented in this
-release. At present the keys and related cryptographic data are stored
-in the form of files generated by the <a
-href=genkeys.htm>ntp_genkeys</a> program. It is expected that in future
-these values will be obtained automatically from the Secure DNS
-following deployment.</LI>
+<P><LI>The latest release of NTPv4 includes support for <i>autokey</i>
+public-key cryptography, which is the preferred scheme for
+authenticating servers to clients. It uses NTP header extensions fields
+documented in <a
+href=http://www.eecis.udel.edu/~mills/reports.htm>Mills, D.L. Public key
+cryptography for the Network Time Protocol. Electrical Engineering
+Report 00-5-1, University of Delaware, May 2000. 23 pp</a> and
+implemented in this release. However, the protocol is still evolving and
+some fields may not conform to that document. The design provides for
+orderly key refreshment and does not require public keys and related
+media to be copied from one machine to another. Specific information
+about autokey cryptography is contained in the <a
+href=authopt.htm>Authentication Options</a> page and links from
+thnere.</li>
 
 <P><LI>The manycast function still needs some work. Ideally, the
 existing I/O routines would be enhanced to include the capability to
