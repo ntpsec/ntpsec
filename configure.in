@@ -431,7 +431,15 @@ fi
 
 AC_CACHE_CHECK([for struct timespec], ac_cv_struct_timespec,
 [AC_TRY_COMPILE([
-#include <sys/time.h>],
+#include <sys/time.h>
+/* Under SunOS, timespec is in sys/timepps.h, which needs errno.h and FRAC */
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
+#ifdef HAVE_SYS_TIMEPPS_H
+# define FRAC 4294967296
+# include <sys/timepps.h>
+#endif],
 [struct timespec n;],
 ac_cv_struct_timespec=yes, ac_cv_struct_timespec=no)])
 if test $ac_cv_struct_timespec = yes; then
@@ -2270,6 +2278,7 @@ case "$ans" in
     done
     case "$i" in
      no)
+	ans=no
 	OPENSSL_LIB=
 	;;
      *) ans=$i
@@ -2301,6 +2310,7 @@ case "$ans" in
     done
     case "$i" in
      no)
+	ans=no
 	OPENSSL_INC=
 	;;
      *) ans=$i

@@ -1,3 +1,8 @@
+2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: timespec can be found by looking in goofy places
+	under SunOS.
+
 2001-04-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_nmea.c:  PPSAPI cleanup, default to RMC sentences,
