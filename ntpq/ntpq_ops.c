@@ -140,19 +140,19 @@ struct xcmd opcmds[] = {
 	  { "assocID", "", "", "" },
 	  "print status information returned for a peer" },
 	{ "peers",  peers,      { OPT|IP_VERSION, NO, NO, NO },
-	  { "6|4", "", "", "" },
+	  { "-4|-6", "", "", "" },
 	  "obtain and print a list of the server's peers [IP version]" },
 	{ "lpeers", lpeers,     { OPT|IP_VERSION, NO, NO, NO },
-	  { "6|4", "", "", "" },
+	  { "-4|-6", "", "", "" },
 	  "obtain and print a list of all peers and clients [IP version]" },
 	{ "opeers", opeers,     { OPT|IP_VERSION, NO, NO, NO },
-	  { "6|4", "", "", "" },
+	  { "-4|-6", "", "", "" },
 	  "print peer list the old way, with dstadr shown rather than refid [IP version]" },
-	{ "lopeers",    lopeers,    { OPT|IP_VERSION, NO, NO, NO },
-	  { "6|4", "", "", "" },
+	{ "lopeers", lopeers,   { OPT|IP_VERSION, NO, NO, NO },
+	  { "-4|-6", "", "", "" },
 	  "obtain and print a list of all peers and clients showing dstadr [IP version]" },
 	{ 0,		0,		{ NO, NO, NO, NO },
-	  { "6|4", "", "", "" }, "" }
+	  { "-4|-6", "", "", "" }, "" }
 };
 
 

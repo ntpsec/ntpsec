@@ -107,8 +107,8 @@ static	struct xcmd builtins[] = {
 	{ "delay",	my_delay,	{ OPT|INT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the delay added to encryption time stamps" },
-	{ "host",	host,		{ OPT|NTP_STR, NO, NO, NO },
-	  { "hostname", "", "", "" },
+	{ "host",	host,		{ OPT|NTP_STR, OPT|NTP_STR, NO, NO },
+	  { "-4|-6", "hostname", "", "" },
 	  "specify the host whose NTP server we talk to" },
 	{ "passwd",	passwd,		{ OPT|NTP_STR, NO, NO, NO },
 	  { "", "", "", "" },
@@ -150,7 +150,9 @@ static	struct xcmd builtins[] = {
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
 #define	MAXLINE		512		/* maximum line length */
-#define	MAXTOKENS	(1+MAXARGS+2)	/* maximum number of usable tokens */
+#define	MAXTOKENS	(1+1+MAXARGS+2)	/* maximum number of usable tokens */
+					/* command + -4|-6 + MAXARGS + */
+					/* redirection */
 
 /*
  * Some variables used and manipulated locally
@@ -161,6 +163,7 @@ static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
 static	int showhostnames = 1;				/* show host names by default */
 
+static	int ai_fam_templ;				/* address family */
 static	int sockfd;					/* fd socket is opened on */
 static	int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
@@ -296,8 +299,14 @@ ntpdcmain(
 #endif
 
 	progname = argv[0];
-	while ((c = ntp_getopt(argc, argv, "c:dilnps")) != EOF)
+	while ((c = ntp_getopt(argc, argv, "46c:dilnps")) != EOF)
 	    switch (c) {
+		case '4':
+		    ai_fam_templ = AF_INET;
+		    break;
+		case '6':
+		    ai_fam_templ = AF_INET6;
+		    break;
 		case 'c':
 		    ADDCMD(ntp_optarg);
 		    break;
@@ -325,7 +334,7 @@ ntpdcmain(
 	    }
 	if (errflg) {
 		(void) fprintf(stderr,
-			       "usage: %s [-dilnps] [-c cmd] host ...\n",
+			       "usage: %s [-46dilnps] [-c cmd] host ...\n",
 			       progname);
 		exit(2);
 	}
@@ -404,6 +413,7 @@ openhost(
 
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -1067,9 +1077,11 @@ docmd(
 	char *tokens[1+MAXARGS+2];
 	struct parse pcmd;
 	int ntok;
-	static int i;
+	int i, ti;
+	int rval;
 	struct xcmd *xcmd;
 
+	ai_fam_templ = 0;
 	/*
 	 * Tokenize the command line.  If nothing on it, return.
 	 */
@@ -1097,22 +1109,29 @@ docmd(
 	 */
 	pcmd.keyword = tokens[0];
 	pcmd.nargs = 0;
-	for (i = 0; i < MAXARGS && xcmd->arg[i] != NO; i++) {
-		if ((i+1) >= ntok) {
+	ti = 1;
+	for (i = 0; i < MAXARGS && xcmd->arg[i] != NO;) {
+		if ((i+ti) >= ntok) {
 			if (!(xcmd->arg[i] & OPT)) {
 				printusage(xcmd, stderr);
 				return;
 			}
 			break;
 		}
-		if ((xcmd->arg[i] & OPT) && (*tokens[i+1] == '>'))
-		    break;
-		if (!getarg(tokens[i+1], (int)xcmd->arg[i], &pcmd.argval[i]))
-		    return;
+		if ((xcmd->arg[i] & OPT) && (*tokens[i+ti] == '>'))
+			break;
+		rval = getarg(tokens[i+ti], (int)xcmd->arg[i], &pcmd.argval[i]);
+		if (rval == -1) {
+			ti++;
+			continue;
+		}
+		if (rval == 0)
+			return;
 		pcmd.nargs++;
+		i++;
 	}
 
-	i++;
+	i += ti;
 	if (i < ntok && *tokens[i] == '>') {
 		char *fname;
 
@@ -1247,8 +1266,12 @@ findcmd(
 }
 
 
-				/*
+/*
  * getarg - interpret an argument token
+ *
+ * return:	 0 - failure
+ *		 1 - success
+ *		-1 - skip to next token
  */
 static int
 getarg(
@@ -1266,6 +1289,13 @@ getarg(
 		argp->string = str;
 		break;
 	    case ADD:
+		if (!strcmp("-6", str)) {
+			ai_fam_templ = AF_INET6;
+			return -1;
+		} else if (!strcmp("-4", str)) {
+			ai_fam_templ = AF_INET;
+			return -1;
+		}
 		if (!getnetnum(str, &(argp->netnum), (char *)0, 0)) {
 			return 0;
 		}
@@ -1300,16 +1330,15 @@ getarg(
 			argp->ival = -argp->ival;
 		}
 		break;
-	     case IP_VERSION:
-		if (*str) {
-			if (*str == '6') /* we want the v6 version*/
-				argp->ival = 6 ;
-			else if (*str == '4')
-				argp->ival = 4 ;
-			else{
-				(void) fprintf(stderr, "***Version must be either 4 or 6\n");
-				return 0;
-			}
+	    case IP_VERSION:
+		if (!strcmp("-6", str))
+			argp->ival = 6 ;
+		else if (!strcmp("-4", str))
+			argp->ival = 4 ;
+		else {
+			(void) fprintf(stderr,
+			    "***Version must be either 4 or 6\n");
+			return 0;
 		}
 		break;
 	}
@@ -1488,10 +1517,15 @@ printusage(
 	FILE *fp
 	)
 {
-	register int i;
+	int i, opt46;
 
+	opt46 = 0;
 	(void) fprintf(fp, "usage: %s", xcp->keyword);
 	for (i = 0; i < MAXARGS && xcp->arg[i] != NO; i++) {
+		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == ADD) {
+			(void) fprintf(fp, " [ -4|-6 ]");
+			opt46 = 1;
+		}
 		if (xcp->arg[i] & OPT)
 		    (void) fprintf(fp, " [ %s ]", xcp->desc[i]);
 		else
@@ -1566,12 +1600,33 @@ host(
 	FILE *fp
 	)
 {
+	int i;
+
 	if (pcmd->nargs == 0) {
 		if (havehost)
 		    (void) fprintf(fp, "current host is %s\n", currenthost);
 		else
 		    (void) fprintf(fp, "no current host\n");
-	} else if (openhost(pcmd->argval[0].string)) {
+		return;
+	}
+
+	i = 0;
+	if (pcmd->nargs == 2) {
+		if (!strcmp("-4", pcmd->argval[i].string))
+			ai_fam_templ = AF_INET;
+		else if (!strcmp("-6", pcmd->argval[i].string))
+			ai_fam_templ = AF_INET6;
+		else {
+			if (havehost)
+				(void) fprintf(fp,
+				    "current host remains %s\n", currenthost);
+			else
+				(void) fprintf(fp, "still no current host\n");
+			return;
+		}
+		i = 1;
+	}
+	if (openhost(pcmd->argval[i].string)) {
 		(void) fprintf(fp, "current host set to %s\n", currenthost);
 	} else {
 		if (havehost)

@@ -292,8 +292,8 @@ struct xcmd builtins[] = {
 	{ "delay",	auth_delay,	{ OPT|INT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the delay added to encryption time stamps" },
-	{ "host",	host,		{ OPT|STR, NO, NO, NO },
-	  { "hostname", "", "", "" },
+	{ "host",	host,		{ OPT|STR, OPT|STR, NO, NO },
+	  { "-4|-6", "hostname", "", "" },
 	  "specify the host whose NTP server we talk to" },
 	{ "poll",	ntp_poll,	{ OPT|UINT, OPT|STR, NO, NO },
 	  { "n", "verbose", "", "" },
@@ -365,6 +365,7 @@ char currenthost[LENHOSTNAME];			/* current host name */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
+int ai_fam_templ;				/* address family */
 int sockfd;					/* fd socket is opened on */
 int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
@@ -498,8 +499,14 @@ ntpqmain(
 	delay_time.l_uf = DEFDELAY;
 
 	progname = argv[0];
-	while ((c = ntp_getopt(argc, argv, "c:dinp")) != EOF)
+	while ((c = ntp_getopt(argc, argv, "46c:dinp")) != EOF)
 	    switch (c) {
+		case '4':
+		    ai_fam_templ = AF_INET;
+		    break;
+		case '6':
+		    ai_fam_templ = AF_INET6;
+		    break;
 		case 'c':
 		    ADDCMD(ntp_optarg);
 		    break;
@@ -521,7 +528,7 @@ ntpqmain(
 	    }
 	if (errflg) {
 		(void) fprintf(stderr,
-			       "usage: %s [-dinp] [-c cmd] host ...\n",
+			       "usage: %s [-46dinp] [-c cmd] host ...\n",
 			       progname);
 		exit(2);
 	}
@@ -587,6 +594,7 @@ openhost(
 
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -1609,15 +1617,14 @@ getarg(
 		}
 		break;
 	     case IP_VERSION:
-		if (*str) {
-			if (*str == '6') /* We want the v6 version */
-				argp->ival = 6;
-			else if (*str == '4')  /* Gimme the IPV4 */
-				argp->ival = 4;
-			else {
-				(void) fprintf(stderr, "***Version must be either 4 or 6\n");
-				return 0;
-			}
+		if (!strcmp("-6", str))
+			argp->ival = 6 ;
+		else if (!strcmp("-4", str))
+			argp->ival = 4 ;
+		else {
+			(void) fprintf(stderr,
+			    "***Version must be either 4 or 6\n");
+			return 0;
 		}
 		break;
 	}
@@ -2135,12 +2142,34 @@ host(
 	FILE *fp
 	)
 {
+	int i;
+
 	if (pcmd->nargs == 0) {
 		if (havehost)
 		    (void) fprintf(fp, "current host is %s\n", currenthost);
 		else
 		    (void) fprintf(fp, "no current host\n");
-	} else if (openhost(pcmd->argval[0].string)) {
+		return;
+	}
+
+	i = 0;
+	ai_fam_templ = 0;
+	if (pcmd->nargs == 2) {
+		if (!strcmp("-4", pcmd->argval[i].string))
+			ai_fam_templ = AF_INET;
+		else if (!strcmp("-6", pcmd->argval[i].string))
+			ai_fam_templ = AF_INET6;
+		else {
+			if (havehost)
+				(void) fprintf(fp,
+				    "current host remains %s\n", currenthost);
+			else
+				(void) fprintf(fp, "still no current host\n");
+			return;
+		}
+		i = 1;
+	}
+	if (openhost(pcmd->argval[i].string)) {
 		(void) fprintf(fp, "current host set to %s\n", currenthost);
 		numassoc = 0;
 	} else {
