@@ -82,7 +82,8 @@ void ndbeep(Node *, Event);
 void ndeclk(Node *, Event);
 void ntptmr(Node *, Event);
 void netpkt(Node *, Event);
-int srvr_rply(Node *, struct sockaddr_in *, struct interface *, struct pkt *);
+int srvr_rply(Node *, struct sockaddr_storage *, struct interface *,
+    struct pkt *);
 double guassian(double, double);
 int node_clock(Node *, double);
 int node_gettime(Node *, struct timeval *);

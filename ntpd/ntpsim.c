@@ -195,7 +195,7 @@ void netpkt(Node *n, Event e)
 }
 
 /* simulates a reply from server - called from sendpkt in ntp_io.c*/
-int srvr_rply(Node *n, struct sockaddr_in *dest,
+int srvr_rply(Node *n, struct sockaddr_storage *dest,
 		struct interface *inter, struct pkt *rpkt)
 {
 	double  srvr_time = (guassian(n->time*1e6, n->snse))/1e6;
@@ -246,10 +246,10 @@ int srvr_rply(Node *n, struct sockaddr_in *dest,
         get_systime(&(rbuf.recv_time));
         rbuf.recv_length = LEN_PKT_NOMAC;
         rbuf.recv_pkt = xpkt;
-        memcpy(&rbuf.srcadr, dest, sizeof(struct sockaddr_in));
-        memcpy(&rbuf.recv_srcadr, dest, sizeof(struct sockaddr_in));
+        memcpy(&rbuf.srcadr, dest, sizeof(struct sockaddr_storage));
+        memcpy(&rbuf.recv_srcadr, dest, sizeof(struct sockaddr_storage));
         if((rbuf.dstadr =
-                (struct interface *)malloc(sizeof(struct interface)))==NULL)
+            (struct interface *)malloc(sizeof(struct interface))) == NULL)
                 abortsim("server-malloc");
         memcpy(rbuf.dstadr, inter, sizeof(struct interface));
         rbuf.next = (struct recvbuf *)0;
