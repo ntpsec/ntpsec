@@ -44,16 +44,7 @@ double sys_residual = 0;	/* residual from previous adjustment */
 double sys_maxfreq = MAXFREQ;	/* max frequency correction */
 
 #if defined SYS_WINNT || defined SYS_CYGWIN32
-long tvu_maxslew;			  /* maximum adjust doable in 1 second */
-u_long tsf_maxslew; 		  /* same as above, as long format */
-l_fp sys_clock_offset;				  /* correction for current system time */
-/*
- * units_per_tick = number of 100 nanosecond units added to the clock at each tick
- * adj_precision  = converts microsecond/second to .1us/N*.1us
- * determined by GetSystemTimeAdjustment() in default_get_precision()
- */
-DWORD units_per_tick;
-long	adj_precision;
+static long last_Adj = 0;
 /*long	adj_precision = (long)(HZ * 0.1); */ /* adj precision in usec (tickadj) */
 #endif /* SYS_WINNT */
 
@@ -120,6 +111,7 @@ get_systime(
 
 }
 
+
 /*
  * adj_systime - called once every second to make system time adjustments.
  * Returns 1 if okay, 0 if trouble.
@@ -135,7 +127,8 @@ adj_systime(
 #if !defined SYS_WINNT && !defined SYS_CYGWIN32
 	struct timeval oadjtv;
 #else
-   DWORD dwTimeAdjustment;
+	int rc;
+   long dwTimeAdjustment;
 #endif
 
 	/*
@@ -172,29 +165,46 @@ adj_systime(
   		dtemp = sys_maxfreq;
 #endif /* SCO5_CLOCK */
 
+#ifdef SYS_WINNT
+	dtemp = dtemp * 1000000.0;
+#else
 	dtemp = dtemp * 1e6 + .5;
+#endif
 	if (isneg)
 		dtemp = -dtemp;
 	adjtv.tv_sec = 0;
 	adjtv.tv_usec = (int32)dtemp;
-#if defined SYS_WINNT || defined SYS_CYGWIN32
-	dwTimeAdjustment = units_per_tick + adjtv.tv_usec / adj_precision;
-#endif /* SYS_WINNT */
 
+#if defined SYS_WINNT || defined SYS_CYGWIN32	
+	/* dtemp is in micro seconds. NT uses 100 ns units,
+	 * so a unit change in dwTimeAdjustment corresponds
+	 * to slewing 10 ppm. 
+	 * Calculate the number of 100ns units to add, 
+	 * and leave the remainder in dtemp */
+	dwTimeAdjustment = dtemp / 10;
+	dtemp +=  (double) -dwTimeAdjustment * 10.0;	
+	dwTimeAdjustment += PRESET_TICK;
+
+	/* only adjust the clock if adjustment changes */
+	if (last_Adj != dwTimeAdjustment) { 	
+			last_Adj = dwTimeAdjustment;  
+# ifdef DEBUG
+		if (debug > 1) 
+			printf("SetSystemTimeAdjustment( %ld)\n", dwTimeAdjustment);			
+# endif
+			rc = !SetSystemTimeAdjustment(dwTimeAdjustment, FALSE);
+	}
+	else rc = 0;
+	if (rc)
+#else
 	/*
 	 * Here we do the actual adjustment. If for some reason the adjtime()
 	 * call fails, like it is not implemented or something like that,
 	 * we honk to the log. If the previous adjustment did not complete,
 	 * we correct the residual offset.
 	 */
-#if !defined (SYS_WINNT) && !defined (SYS_CYGWIN32)
 	/* casey - we need a posix type thang here */
 	if (adjtime(&adjtv, &oadjtv) < 0)
-#else
-	if (debug) {
-		printf("SetSystemTimeAdjustment( %ld)\n", dwTimeAdjustment);
-	}
-	if (!SetSystemTimeAdjustment(dwTimeAdjustment, FALSE))
 #endif /* SYS_WINNT */
 	{
 		msyslog(LOG_ERR, "Can't adjust time: %m");
@@ -203,11 +213,13 @@ adj_systime(
 	else {
 #if !defined (SYS_WINNT) && !defined (SYS_CYGWIN32)
 	sys_residual += oadjtv.tv_usec / 1e6;
+#else
+	sys_residual = dtemp / 1000000.0;
 #endif /* SYS_WINNT */
 	}
 #ifdef DEBUG
 	if (debug > 6)
-		printf("adj_systime: adj %.6f -> remaining residual %.6f\n", now, sys_residual);
+		printf("adj_systime: adj %.9lf -> remaining residual %.9lf\n", now, sys_residual);
 #endif
 	return 1;
 }

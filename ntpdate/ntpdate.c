@@ -1614,15 +1614,13 @@ sendpkt(
 #ifndef SYS_WINNT
 	if (cc == -1) {
 		if (errno != EWOULDBLOCK && errno != ENOBUFS)
-			msyslog(LOG_ERR, "sendto(%s): %m", ntoa(dest));
-	}
 #else
 	if (cc == SOCKET_ERROR) {
 		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS)
+#endif /* SYS_WINNT */
 			msyslog(LOG_ERR, "sendto(%s): %m", ntoa(dest));
 	}
-#endif /* SYS_WINNT */
 }
 
 

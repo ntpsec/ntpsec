@@ -1,3 +1,16 @@
+1999-07-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntpd.h:
+	* libntp/machines.c:
+	* libntp/systime.c:
+	* ntpd/ntp_config.c:
+	* ntpd/ntp_filegen.c:
+	* ntpd/ntp_io.c:
+	* ntpd/ntp_proto.c:
+	* ntpd/ntp_timer.c:
+	* ntpdate/ntpdate.c: Windows NT port cleanup
+	From: Sven Dietrich <Sven_Dietrich@trimble.com>
+
 1999-07-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/authkeys.c:

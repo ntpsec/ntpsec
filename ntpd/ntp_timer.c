@@ -83,7 +83,7 @@ void
 init_timer(void)
 {
 #if !defined(VMS)
-# ifndef SYS_WINNT
+# if !defined SYS_WINNT || defined(SYS_CYGWIN32)
 #  ifndef HAVE_TIMER_SETTIME
 	struct itimerval itimer;
 #  else
@@ -91,15 +91,10 @@ init_timer(void)
 					/* to kill timer without rebooting ... */
 	struct itimerspec itimer;
 #  endif /* HAVE_TIMER_SETTIME */
-# endif /* !SYS_WINNT */
-# if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
-	TIMECAPS tc;
-	UINT wTimerRes, wTimerID;
-# endif /* SYS_WINNT */
-# if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
+# else /* SYS_WINNT */
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
-# endif
+# endif /* SYS_WINNT */
 #endif /* !VMS */
 
 	/*

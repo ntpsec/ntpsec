@@ -25,6 +25,7 @@
 
 #ifdef SYS_WINNT
 #include <io.h>
+extern HANDLE ResolverThreadHandle;
 #endif /* SYS_WINNT */
 
 /*

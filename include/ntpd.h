@@ -19,13 +19,6 @@ void	service_main	(DWORD, LPTSTR *);
 void	service_ctrl	(DWORD);
 void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
-#define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy.
-							  * used in ntp_timer.c
-							  */
-extern DWORD	units_per_tick;
-extern long	adj_precision;
-extern HANDLE	ResolverThreadHandle;
-extern HANDLE	hMutex;
 #else
 #define closesocket close
 #endif /* SYS_WINNT */
@@ -232,14 +225,6 @@ extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 /* ntp_intres.c */
 extern u_long	req_keyid;		/* request keyid */
 extern char *	req_file;		/* name of the file with configuration info */
-
-/* ntp_io.c */
-/*
- * Memory allocation
- */
-extern volatile u_long full_recvbufs;	/* number of recvbufs on fulllist */
-extern volatile u_long free_recvbufs;	/* number of recvbufs on freelist */
-extern u_long	total_recvbufs;		/* total recvbufs currently in use */
 
 /*
  * Other statistics of possible interest

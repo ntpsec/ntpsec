@@ -242,18 +242,16 @@ filegen_open(
 			 */
 
 			/* Windows NT does not support file links -Greg Schueman 1/18/97 */
-			
-#if defined(VMS) || defined(SYS_WINNT) || defined(SYS_VXWORKS)
-# ifdef VMS
-			errno = 0; /* On VMS, don't support FGEN_FLAG_LINK */
-# else /* SYS_WINNT */
+
+#if defined SYS_WINNT || defined SYS_VXWORKS
 			SetLastError(0); /* On WinNT, don't support FGEN_FLAG_LINK */
-# endif /* SYS_WINNT */
-#else  /* not (VMS || SYS_WINNT) */
+#elif defined(VMS)
+			errno = 0; /* On VMS, don't support FGEN_FLAG_LINK */
+#else  /* not (VMS) / VXWORKS / WINNT ; DO THE LINK) */
 			if (link(filename, basename) != 0)
 			    if (errno != EEXIST)
-#endif /* not (VMS || SYS_WINNT) */
 				msyslog(LOG_ERR, "can't link(%s, %s): %m", filename, basename);
+#endif /* SYS_WINNT || VXWORKS */
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */
 	

@@ -7,8 +7,6 @@
 # include <config.h>
 #endif
 
-/* Modified by Sven 7/14/99 322pm */
-
 #include <stdio.h>
 #include <signal.h>
 #include <errno.h>

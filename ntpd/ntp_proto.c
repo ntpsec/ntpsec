@@ -1916,29 +1916,7 @@ default_get_precision(void)
 #if defined(__FreeBSD__) && __FreeBSD__ >= 3
 	u_long freq;
 	int j;
-#endif
 
-#if defined SYS_WINNT || defined SYS_CYGWIN32
-	DWORD every;
-	BOOL noslew;
-	LARGE_INTEGER freq;
-
-	if (GetSystemTimeAdjustment(&units_per_tick, &every, &noslew))	{
-		adj_precision = 1000000L / (long)every;
-	}
-
-
-	if (QueryPerformanceFrequency(&freq)) {
-		int i;
-		for (i = 1; freq.QuadPart ; i--) {
-			freq.QuadPart >>= 1;
-		}
-		return (i);
-	}
-
-#endif
-
-#if defined(__FreeBSD__) && __FreeBSD__ >= 3
 	/* Try to see if we can find the frequency of of the counter
 	 * which drives our timekeeping
 	 */
