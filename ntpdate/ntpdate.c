@@ -1248,8 +1248,7 @@ clock_adjust(void)
 		absoffset = server->soffset;
 		if (absoffset < 0)
 			absoffset = -absoffset;
-		dostep = (absoffset >= NTPDATE_THRESHOLD
-			  || absoffset == -absoffset);
+		dostep = (absoffset >= NTPDATE_THRESHOLD || absoffset < 0);
 	}
 
 	if (dostep) {
