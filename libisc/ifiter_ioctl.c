@@ -617,8 +617,9 @@ internal_current6(isc_interfaceiter_t *iter) {
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&lifreq.lifr_addr);
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 	iter->current.scopeid = get_scopeid(family, (struct sockaddr *)&lifreq.lifr_addr);
-
+#endif
 	/*
 	 * If the interface does not have a address ignore it.
 	 */
@@ -704,6 +705,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		get_addr(family, &iter->current.dstaddress,
 			 (struct sockaddr *)&lifreq.lifr_dstaddr);
 	}
+#ifdef SIOCGLIFBRDADDR
 	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
 		/*
 		 * Ignore the HP/UX warning about "integer overflow during
@@ -725,7 +727,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		get_addr(family, &iter->current.broadcast,
 			 (struct sockaddr *)&lifreq.lifr_broadaddr);
 	}
-
+#endif	/* SIOCGLIFBRDADDR */
 
 	/*
 	 * Get the network mask.

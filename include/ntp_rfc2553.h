@@ -178,6 +178,7 @@ struct sockaddr_in6 {
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
 #endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
 
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
 struct sockaddr_storage {
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	u_int8_t	ss_len;		/* address length */
@@ -189,6 +190,7 @@ struct sockaddr_storage {
 	u_int64_t	__ss_align;	/* force desired structure storage alignment */
 	char		__ss_pad2[_SS_PAD2SIZE];
 };
+#endif /* not HAVE_STRUCT_SOCKADDR_STORAGE */
 
 struct addrinfo {
 	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
