@@ -20,6 +20,9 @@ AC_PROG_CC_STDC
 AC_PROG_CPP
 
 case "$host" in
+ *-*-amigaos)
+    CFLAGS="$CFLAGS -Dfork=vfork -DSYS_AMIGA"
+    ;;
  *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
     ;;
@@ -193,7 +196,15 @@ AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
 AC_CHECK_FUNC(openlog, , 
   AC_CHECK_LIB(gen, openlog, , 
   AC_CHECK_LIB(syslog, openlog, , , -lsocket)))
-AC_CHECK_LIB(readline, readline)
+dnl HMS: What a hack...
+AC_CHECK_LIB(readline, readline, ,
+ AC_MSG_NOTICE([Trying again with -lcurses])
+ unset ac_cv_lib_readline_readline
+ AC_CHECK_LIB(readline, readline,
+  LIBS="-lreadline -lcurses $LIBS"
+  AC_DEFINE(HAVE_LIBREADLINE)
+  AC_DEFINE(HAVE_LIBCURSES)
+  , , -lcurses))
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
