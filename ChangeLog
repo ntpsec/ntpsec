@@ -1,3 +1,9 @@
+2000-02-21  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* ports/winnt/include/config.h: Enable MD5 and RANDOM by default
+	* ports/winnt/libntp/SetSystemTime.c: Fix warning and const declaration
+	From: Carl Byington <carl@five-ten-sg.com>
+
 2000-02-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* Makefile.am (SUBDIRS): Make librsaref right after includes so we
