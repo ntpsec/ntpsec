@@ -59,6 +59,12 @@
 
 /* select wants a zero structure ... */
 struct timeval timeout = {0,0};
+#elif defined(SYS_WINNT)
+/*
+ * Windows does not abort a select select call if SIGALRM goes off
+ * so a 200 ms timeout is needed
+ */
+struct timeval timeout = {0,1000000/TIMER_HZ};
 #else
 struct timeval timeout = {60,0};
 #endif
@@ -463,7 +469,12 @@ ntpdatemain (
 	if (debug || simple_query) {
 #ifdef HAVE_SETVBUF
 		static char buf[BUFSIZ];
+#ifdef SYS_WINNT
+		/* Win32 does not implement line bufferibg */
+		setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+#else
 		setvbuf(stdout, buf, _IOLBF, BUFSIZ);
+#endif	/* SYS_WINNT */
 #else
 		setlinebuf(stdout);
 #endif
@@ -1682,8 +1693,14 @@ init_io(void)
 	for(nbsock = 0; (nbsock < MAX_AF) && res ; res = res->ai_next) {
 	/* create a datagram (UDP) socket */
 	   if ((fd[nbsock] = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0) {
+#ifndef SYS_WINNT
 		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
 		    errno == EPFNOSUPPORT)
+#else
+		int err = WSAGetLastError();
+		if (err == WSAEPROTONOSUPPORT || err == WSAEAFNOSUPPORT ||
+		    err == WSAEPFNOSUPPORT)
+#endif
 			continue;
 		netsyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
