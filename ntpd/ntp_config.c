@@ -821,10 +821,11 @@ getconfig(
 						"configuration of %s failed",
 						stoa(&peeraddr));
 			    }
+#ifdef BUG_241
 			    if (tok == CONFIG_MANYCASTCLIENT)
 				proto_config(PROTO_MULTICAST_ADD,
 				    0, 0., &peeraddr);
-	
+#endif /* BUG_241 */
 			} else if (errflg == -1) {
 				save_resolve(tokens[1], hmode, peerversion,
 				    minpoll, maxpoll, peerflags, ttl,
