@@ -30,7 +30,7 @@
 static HANDLE hAppLog = NULL;
 static FILE *log_stream;
 static int debug_level = 0;
-static char *progname = "NTP";
+static char progname[51] = "NTP";
 static int logmask = 0;
 
 static struct dsn_c_pvt_sfnt {
@@ -131,6 +131,7 @@ void
 openlog(const char *name, int flags, ...) {
 	/* Get a handle to the Application event log */
 	hAppLog = RegisterEventSource(NULL, progname);
+	strcpy(progname, name);
 }
 
 /*

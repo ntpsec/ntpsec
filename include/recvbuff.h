@@ -64,6 +64,7 @@ struct recvbuf {
 #endif
 	struct interface *dstadr;	/* interface datagram arrived thru */
 	SOCKET	fd;			/* fd on which it was received */
+	int msg_flags;			/* Flags received about the packet */
 	l_fp recv_time;			/* time of arrival */
 	void (*receiver) P((struct recvbuf *)); /* routine to receive buffer */
 	int recv_length;		/* number of octets received */
