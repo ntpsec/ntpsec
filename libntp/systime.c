@@ -21,149 +21,122 @@
 # include <utmpx.h>
 #endif /* HAVE_UTMPX_H */
 
-int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
-
 /*
- * These routines (init_systime, get_systime, step_systime, adj_systime)
- * implement an interface between the (more or less) system independent
- * bits of NTP and the peculiarities of dealing with the Unix system
- * clock.
+ * These routines (get_systime, step_systime, adj_systime) implement an
+ * interface between the system independent NTP clock and the Unix
+ * system clock in various architectures and operating systems.
+ *
+ * Time is a precious quantity in these routines and every effort is
+ * made to minimize errors by always rounding toward zero and amortizing
+ * adjustment residues. By default the adjustment quantum is 1 us for
+ * the usual Unix tickadj() system call, but this can be increased if
+ * necessary by a configuration command. For instance, when the
+ * adjtime() quantum is a clock tick for a 100-Hz clock, the quantum
+ * should be 10 ms.
  */
-double sys_residual = 0;	/* residual from previous adjustment */
+double	sys_tick = 1e-6;	/* tickadj() quantum (s) */
+double	sys_residual = 0;	/* adjustment residue (s) */
 
 #ifndef SIM
+
 /*
- * get_systime - return the system time in timestamp format biased by
- * the current time offset.
+ * get_systime - return system time in NTP timestamp format.
  */
 void
 get_systime(
-	l_fp *now
+	l_fp *now		/* system time */
 	)
 {
-#if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
-	struct timespec ts;
-#else
-	struct timeval tv;
-#endif
 	double dtemp;
 
-	/*
-	 * We use nanosecond time if we can get it. Watch out for
-	 * rounding wiggles, which may overflow the fraction.
-	 */
 #if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
+	struct timespec ts;	/* seconds and nanoseconds */
+
+	/*
+	 * Convert Unix clock from seconds and nanoseconds to seconds.
+	 */
 # ifdef HAVE_CLOCK_GETTIME
-	(void) clock_gettime(CLOCK_REALTIME, &ts);
+	clock_gettime(CLOCK_REALTIME, &ts);
 # else
-	(void) getclock(TIMEOFDAY, &ts);
+	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = ts.tv_sec + JAN_1970;
-	dtemp = ts.tv_nsec * FRAC / 1e9;
-	if (dtemp >= FRAC)
-		now->l_i++;
-	now->l_uf = (u_int32)dtemp;
-#else /* HAVE_CLOCK_GETTIME */
-	(void) GETTIMEOFDAY(&tv, (struct timezone *)0);
+	dtemp = ts.tv_nsec / 1e9;
+
+#else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
+	struct timeval tv;	/* seconds and microseconds */
+
+	/*
+	 * Convert Unix clock from seconds and microseconds to seconds.
+	 */
+	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
+	dtemp = tv.tv_usec / 1e6;
 
-#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
-	if (systime_10ms_ticks) {
-		/* fake better than 10ms resolution by interpolating 
-	   	accumulated residual (in adj_systime(), see below) */
-		dtemp = tv.tv_usec / 1e6;
-		if (sys_residual < 5000e-6 && sys_residual > -5000e-6) {
-			dtemp += sys_residual;
-			if (dtemp < 0) {
-				now->l_i--;
-				dtemp++;
-			}
-		}
-		dtemp *= FRAC;
-	} else
-#endif
+#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
-	dtemp = tv.tv_usec * FRAC / 1e6;
-
-	if (dtemp >= FRAC)
+	/*
+	 * Renormalize to seconds past 1900 and fraction.
+	 */
+	dtemp += sys_residual;
+	if (dtemp >= 1) {
+		dtemp -= 1;
 		now->l_i++;
+	} else if (dtemp < -1) {
+		dtemp += 1;
+		now->l_i--;
+	}
+	dtemp *= FRAC;
 	now->l_uf = (u_int32)dtemp;
-#endif /* HAVE_CLOCK_GETTIME */
-
 }
 
 
 /*
- * adj_systime - called once every second to make system time
- * adjustments. Returns 1 if okay, 0 if trouble.
+ * adj_systime - adjust system time by the argument.
  */
 #if !defined SYS_WINNT
-int
+int				/* 0 okay, 1 error */
 adj_systime(
-	double now
+	double now		/* adjustment (s) */
 	)
 {
-	double dtemp;
-	struct timeval adjtv;
-	u_char isneg = 0;
-	struct timeval oadjtv;
+	struct timeval adjtv;	/* new adjustment */
+	struct timeval oadjtv;	/* residual adjustment */
+	double	dtemp;
+	long	ticks;
+	int	isneg = 0;
 
 	/*
-	 * Add the residual from the previous adjustment to the new
-	 * adjustment, bound and round.
+	 * Most Unix adjtime() implementations adjust the system clock
+	 * in microsecond quanta, but some adjust in 10-ms quanta. We
+	 * carefully round the adjustment to the nearest quantum, then
+	 * adjust in quanta and keep the residue for later.
 	 */
-	dtemp = sys_residual + now;
-	sys_residual = 0;
+	dtemp = now + sys_residual;
 	if (dtemp < 0) {
 		isneg = 1;
 		dtemp = -dtemp;
 	}
-
-#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
-	if (systime_10ms_ticks) {
-		/*
-		 * accumulate changes until we have enough to adjust a
-		 * tick
-		 */
-		if (dtemp < 5000e-6) {
-			if (isneg) sys_residual = -dtemp;
-			else sys_residual = dtemp;
-			dtemp = 0;
-		} else {
-			if (isneg) sys_residual = 10000e-6 - dtemp;
-			else sys_residual = dtemp - 10000e-6;
-			dtemp = 10000e-6;
-		}
-	}
-#endif
 	adjtv.tv_sec = (long)dtemp;
-	adjtv.tv_usec = (long)((dtemp - adjtv.tv_sec) * 1e6 + .5);
+	dtemp -= adjtv.tv_sec;
+	ticks = (long)(dtemp / sys_tick + .5);
+	adjtv.tv_usec = (long)(ticks * sys_tick * 1e6);
+	dtemp -= adjtv.tv_usec / 1e6;
+	sys_residual = dtemp;
+
+	/*
+	 * Convert to signed seconds and microseconds for the Unix
+	 * adjtime() system call. Note we purposely lose the adjtime()
+	 * leftover.
+	 */
 	if (isneg) {
 		adjtv.tv_sec = -adjtv.tv_sec;
 		adjtv.tv_usec = -adjtv.tv_usec;
 	}
-
-	/*
-	 * Here we do the actual adjustment. If for some reason the
-	 * adjtime() call fails, like it is not implemented or something
-	 * like that, we honk to the log. If the previous adjustment did
-	 * not complete, we correct the residual offset.
-	 */
-	/* casey - we need a posix type thang here */
-	if (adjtime(&adjtv, &oadjtv) < 0)
-	{
-		msyslog(LOG_ERR,
-		    "Can't adjust time (%ld sec, %ld usec): %m",
-		    (long)adjtv.tv_sec, (long)adjtv.tv_usec);
+	if (adjtime(&adjtv, &oadjtv) < 0) {
+		msyslog(LOG_ERR, "adj_systime: error %m");
 		return (0);
-	} 
-	else {
-	sys_residual += oadjtv.tv_usec / 1e6;
 	}
-#ifdef DEBUG
-	if (debug && sys_residual != 0)
-		printf("adj_systime: adj %.9f -> remaining residual %.9f\n", now, sys_residual);
-#endif
 	return (1);
 }
 #endif
@@ -389,39 +362,68 @@ get_systime(
  
  
 /*
- * adj_systime - advance or retard the system clock
+ * adj_systime - advance or retard the system clock exactly like the
+ * real thng.
  */
 int				/* always succeeds */
 adj_systime(
         double now		/* time adjustment (s) */
         )
 {
+	struct timeval adjtv;	/* new adjustment */
+	struct timeval oadjtv;	/* residual adjustment */
+	double	dtemp;
+	long	ticks;
+	int	isneg = 0;
+
 	/*
-	 * Just like the tickadj() function, this code replaces the
-	 * current adjustment amount. It's important that the code not
-	 * restrict the adjustment range, since with ntpdate emulation
-	 * the range can be much larger than 500 PPM. 
+	 * Most Unix adjtime() implementations adjust the system clock
+	 * in microsecond quanta, but some adjust in 10-ms quanta. We
+	 * carefully round the adjustment to the nearest quantum, then
+	 * adjust in quanta and keep the residue for later.
 	 */
-	ntp_node.adj = now;
+	dtemp = now + sys_residual;
+	if (dtemp < 0) {
+		isneg = 1;
+		dtemp = -dtemp;
+	}
+	adjtv.tv_sec = (long)dtemp;
+	dtemp -= adjtv.tv_sec;
+	ticks = (long)(dtemp / sys_tick + .5);
+	adjtv.tv_usec = (long)(ticks * sys_tick * 1e6);
+	dtemp -= adjtv.tv_usec / 1e6;
+	sys_residual = dtemp;
+
+	/*
+	 * Convert to signed seconds and microseconds for the Unix
+	 * adjtime() system call. Note we purposely lose the adjtime()
+	 * leftover.
+	 */
+	if (isneg) {
+		adjtv.tv_sec = -adjtv.tv_sec;
+		adjtv.tv_usec = -adjtv.tv_usec;
+		sys_residual = -sys_residual;
+	}
+
+	/*
+	 * We went to all the trouble just to be sure the emulation is
+	 * precise. We now return to our regularly scheduled concert.
+	 */
+	ntp_node.clk_time -= adjtv.tv_sec + adjtv.tv_usec / 1e6;
         return (1);
 }
  
  
 /*
- * step_systime - step the system clock
+ * step_systime - step the system clock. We are religious here.
  */
 int				/* always succeeds */
 step_systime(
         double now		/* step adjustment (s) */
         )
 {
-	/*
-	 * This is pretty brutal and assumes the system clock code was
-	 * written by other than amateurs. Good clock code is a black
-	 * art anyway.
-	 */
-	ntp_node.clk_time -= now;
-        return (1);
+	ntp_node.adj = now;
+	return (1);
 }
 
 /*
@@ -444,9 +446,7 @@ node_clock(
 	dtemp = t - n->ntp_time;
 	n->time = t;
 	n->ntp_time += dtemp;
-/*
 	n->ferr += gauss(0, dtemp * n->fnse * 1e-6);
-*/
 	n->clk_time += dtemp * (1 + n->ferr * 1e-6);
 
 	/*

@@ -12,7 +12,7 @@
         <h3><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</h3>
         <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The mushroom knows all the command line options.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">17:07</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="235">Monday, January 20, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:18</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="230">Sunday, January 26, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -69,33 +69,51 @@
             <dt><tt>-6</tt>
             <dd>Force DNS resolution of following host names to the IPv6 namespace.
             <dt><tt>-a</tt>
-            <dd>Require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is the default.            <dt><tt>-A</tt>
-            <dd>Do not require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is almost never a good idea.            <dt><tt>-b</tt>
-            <dd>Enable the client to synchronize to broadcast servers.            <dt><tt>-c <i>conffile</i></tt>
-            <dd>Specify the name and path of the configuration file, default <tt>/etc/ntp.conf</tt>.            <dt><tt>-d</tt>
-            <dd>Specify debugging mode. This option may occur more than once, with each occurrence indicating greater detail of display.            <dt><tt>-D <i>level</i></tt>
+            <dd>Require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is the default.
+            <dt><tt>-A</tt>
+            <dd>Do not require cryptographic authentication for broadcast client, multicast client and symmetric passive associations. This is almost never a good idea.
+            <dt><tt>-b</tt>
+            <dd>Enable the client to synchronize to broadcast servers.
+            <dt><tt>-c <i>conffile</i></tt>
+            <dd>Specify the name and path of the configuration file, default <tt>/etc/ntp.conf</tt>.
+            <dt><tt>-d</tt>
+            <dd>Specify debugging mode. This option may occur more than once, with each occurrence indicating greater detail of display.
+            <dt><tt>-D <i>level</i></tt>
             <dd>Specify debugging level directly.
             <dt><tt>-f <i>driftfile</i></tt>
-            <dd>Specify the name and path of the frequency file, default <tt>/etc/ntp.drift</tt>. This is the same operation as the <tt>driftfile <i>driftfile</i></tt> configurarion command.           <dt><tt>-g</tt>
-            <dd>Normally, <tt>ntpd</tt> exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that, <tt>ntpd</tt> will exit with a message to the system log. This option can be used with the <tt>-q</tt> and <tt>-x</tt> options. See the <tt>tinker</tt> command for other options.            <dt><tt>-k <i>keyfile</i></tt>
-            <dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt> configurarion command.           <dt><tt>-l <i>logfile</i></tt>
-            <dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt> configurarion command.           <dt><tt>-L</tt>
-            <dd>Do not listen to virtual IPs. The default is to listen.           <dt><tt>-m</tt>
-            <dd>Enable the client to synchronize to multicast servers at the IPv4 multicast group address 224.0.1.1.            <dt><tt>-n</tt>
+            <dd>Specify the name and path of the frequency file, default <tt>/etc/ntp.drift</tt>. This is the same operation as the <tt>driftfile <i>driftfile</i></tt> configurarion command.
+            <dt><tt>-g</tt>
+            <dd>Normally, <tt>ntpd</tt> exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that, <tt>ntpd</tt> will exit with a message to the system log. This option can be used with the <tt>-q</tt> and <tt>-x</tt> options. See the <tt>tinker</tt> command for other options.
+            <dt><tt>-k <i>keyfile</i></tt>
+            <dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt> configurarion command.
+            <dt><tt>-l <i>logfile</i></tt>
+            <dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt> configurarion command.
+            <dt><tt>-L</tt>
+            <dd>Do not listen to virtual IPs. The default is to listen.
+            <dt><tt>-m</tt>
+            <dd>Enable the client to synchronize to multicast servers at the IPv4 multicast group address 224.0.1.1.
+            <dt><tt>-n</tt>
             <dd>Don't fork.
             <dt><tt>-N</tt>
             <dd>To the extent permitted by the operating system, run the <tt>ntpd</tt> at the highest priority.
             <dt><tt>-p <i>pidfile</i></tt>
-            <dd>Specify the name and path of the file used to record the <tt>ntpd</tt> process ID. This is the same operation as the <tt>pidfile <i>pidfile</i></tt> configurarion command.           <dt><tt>-P <i>priority</i></tt>
-            <dd>To the extent permitted by the operating system, run the <tt>ntpd</tt> at the specified priority.            <dt><tt>-q</tt>
-            <dd>Exit the <tt>ntpd</tt> just after the first time the clock is set. This behavior mimics that of the <tt>ntpdate</tt> program, which is to be retired. The <tt>-g</tt> and <tt>-x</tt> options can be used with this option. Note:&nbsp;The kernel time discipline is disabled with this option.            <dt><tt>-r <i>broadcastdelay</i></tt>
-            <dd>Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.            <dt><tt>-s <i>statsdir</i></tt>
-            <dd>Specify the directory path for files created by the statistics facility. This is the same operation as the <tt>statsdir <i>statsdir</i></tt> configurarion command.           <dt><tt>-t <i>key</i></tt>
-            <dd>Add a key number to the trusted key list. This option can occur more than once.            <dt><tt>-v <i>variable</i></tt>
+            <dd>Specify the name and path of the file used to record the <tt>ntpd</tt> process ID. This is the same operation as the <tt>pidfile <i>pidfile</i></tt> configurarion command.
+            <dt><tt>-P <i>priority</i></tt>
+            <dd>To the extent permitted by the operating system, run the <tt>ntpd</tt> at the specified priority.
+            <dt><tt>-q</tt>
+            <dd>Exit the <tt>ntpd</tt> just after the first time the clock is set. This behavior mimics that of the <tt>ntpdate</tt> program, which is to be retired. The <tt>-g</tt> and <tt>-x</tt> options can be used with this option. Note:&nbsp;The kernel time discipline is disabled with this option.
+            <dt><tt>-r <i>broadcastdelay</i></tt>
+            <dd>Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
+            <dt><tt>-s <i>statsdir</i></tt>
+            <dd>Specify the directory path for files created by the statistics facility. This is the same operation as the <tt>statsdir <i>statsdir</i></tt> configurarion command.
+            <dt><tt>-t <i>key</i></tt>
+            <dd>Add a key number to the trusted key list. This option can occur more than once.
+            <dt><tt>-v <i>variable</i></tt>
             <dt><tt>-V <i>variable</i></tt>
             <dd>Add a system variable listed by default.
             <dt><tt>-x</tt>
-            <dd>Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold. This option sets the threshold to 600 s, which is well within the accuracy window to set the clock manually. Note: Since the slew rate of typical Unix kernels is limited to 0.5 ms/s, each second of adjustment requires an amortization interval of 2000 s. Thus, an adjustment as much as 600 s will take almost 14 days to complete. This option can be used with the <tt>-g</tt> and <tt>-q</tt> options. See the <tt>tinker</tt> command for other options.  Note:&nbsp;The kernel time discipline is disabled with this option.       </dl>
+            <dd>Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold. This option sets the threshold to 600 s, which is well within the accuracy window to set the clock manually. Note: Since the slew rate of typical Unix kernels is limited to 0.5 ms/s, each second of adjustment requires an amortization interval of 2000 s. Thus, an adjustment as much as 600 s will take almost 14 days to complete. This option can be used with the <tt>-g</tt> and <tt>-q</tt> options. See the <tt>tinker</tt> command for other options. Note:&nbsp;The kernel time discipline is disabled with this option.
+        </dl>
         <h4 id="#cfg">The Configuration File</h4>
         <p>Ordinarily, <tt>ntpd</tt> reads the <tt>ntp.conf</tt> configuration file at startup time in order to determine the synchronization sources and operating modes. It is also possible to specify a working, although limited, configuration entirely on the command line, obviating the need for a configuration file. This may be particularly useful when the local host is to be configured as a broadcast/multicast client, with all peers being determined by listening to broadcasts at run time.</p>
         <p>Usually, the configuration file is installed in the <tt>/etc</tt> directory, but could be installed elsewhere (see the <tt>-c <i>conffile</i></tt> command line option). The file format is similar to other Unix configuration files - comments begin with a <tt>#</tt> character and extend to the end of the line; blank lines are ignored.</p>

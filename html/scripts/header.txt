@@ -1,1 +1,0 @@
-document.write("<div class='footer'><a href='index.html'><img src='pic/alautun4b.gif' alt='gif' align='right'><h2>Network Time Protocol Version 4</h2></a></div>")

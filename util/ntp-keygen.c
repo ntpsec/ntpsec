@@ -159,7 +159,8 @@ time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 char	*hostname;		/* host name (subject name) */
 char	*trustname;		/* trusted host name (issuer name) */
 char	filename[MAXFILENAME + 1]; /* file name */
-char	*passwd = NULL;		/* private key password */
+char	*passwd1 = NULL;	/* input private key password */
+char	*passwd2 = NULL;	/* output private key password */
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
@@ -193,21 +194,25 @@ main(
 	const EVP_MD *ectx;	/* EVP digest */
 	char	hostbuf[MAXHOSTNAME + 1];
 	char	pathbuf[MAXFILENAME + 1];
-	FILE	*str;		/* file handle */
 	const char *scheme = NULL; /* digest/signature scheme */
 	char	*exten = NULL;	/* private extension */
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
+	FILE	*fstr = NULL;	/* file handle */
+	int	iffsw = 0;	/* IFF key switch */
 #endif /* OPENSSL */
 	u_int	temp;
 
 #ifdef OPENSSL
 	if (SSLeay() != OPENSSL_VERSION_NUMBER) {
-		printf("OpenSSL version mismatch. Built against %lx, you have %lx\n",
-			OPENSSL_VERSION_NUMBER, SSLeay());
+		fprintf(stderr,
+		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
+		    OPENSSL_VERSION_NUMBER, SSLeay());
 		return (-1);
+
 	} else {
-		printf("Using OpenSSL version %lx\n", SSLeay());
+		fprintf(stderr,
+		    "Using OpenSSL version %lx\n", SSLeay());
 	}
 #endif /* OPENSSL */
 
@@ -218,11 +223,12 @@ main(
 	gethostname(hostbuf, MAXHOSTNAME);
 	hostname = hostbuf;
 	trustname = hostbuf;
+	passwd1 = hostbuf;
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
 	rval = 0;
 	while ((temp = getopt(argc, argv,
-	    "c:de:GgHIi:Mm:Pp:S:s:TV:v:")) != -1) {
+	    "c:deGgHIi:Mm:nPp:q:S:s:TV:v:")) != -1) {
 		switch(temp) {
 
 		/*
@@ -240,10 +246,10 @@ main(
 			continue;
 
 		/*
-		 * -e X509v3 key usage extension (!danger!)
+		 * -e write identity keys
 		 */
 		case 'e':
-			exten = optarg;
+			iffsw++;
 			continue;
 
 		/*
@@ -294,8 +300,8 @@ main(
 		 */
 		case 'm':
 			if (sscanf(optarg, "%d", &modulus) != 1)
-				printf("invalid option -m %s\n",
-				    optarg);	
+				fprintf(stderr,
+				    "invalid option -m %s\n", optarg);	
 			continue;
 		
 		/*
@@ -306,10 +312,17 @@ main(
 			continue;
 
 		/*
-		 * -p private key password
+		 * -p output private key password
 		 */
 		case 'p':
-			passwd = optarg;
+			passwd2 = optarg;
+			continue;
+
+		/*
+		 * -q input private key password
+		 */
+		case 'q':
+			passwd1 = optarg;
 			continue;
 
 		/*
@@ -339,8 +352,8 @@ main(
 		case 'V':
 			mvpar++;
 			if (sscanf(optarg, "%d", &nkeys) != 1)
-				printf("invalid option -V %s\n",
-				    optarg);
+				fprintf(stderr,
+				    "invalid option -V %s\n", optarg);
 			continue;
 
 		/*
@@ -349,15 +362,15 @@ main(
 		case 'v':
 			mvkey++;
 			if (sscanf(optarg, "%d", &nkeys) != 1)
-				printf("invalid option -v %s\n",
-				    optarg);
+				fprintf(stderr,
+				    "invalid option -v %s\n", optarg);
 			continue;
 
 		/*
 		 * None of the above.
 		 */
 		default:
-			printf("Option ignored\n");
+			fprintf(stderr, "Option ignored\n");
 			continue;
 		}
 	}
@@ -369,17 +382,18 @@ main(
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
 	if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
-		printf("RAND_file_name %s\n",
+		fprintf(stderr, "RAND_file_name %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (-1);
 	}
 	temp = RAND_load_file(pathbuf, -1);
 	if (temp == 0) {
-		printf("RAND_load_file %s not found or empty\n",
-		    pathbuf);
+		fprintf(stderr,
+		    "RAND_load_file %s not found or empty\n", pathbuf);
 		return (-1);
 	}
-	printf("Random seed file %s %u bytes\n", pathbuf, temp);
+	fprintf(stderr,
+	    "Random seed file %s %u bytes\n", pathbuf, temp);
 	RAND_add(&epoch, sizeof(epoch), 4.0);
 
 	/*
@@ -401,26 +415,31 @@ main(
 
 	/*
 	 * If there is no new host key, look for an existing one. If not
-	 ( found, create it.
+	 * found, create it.
 	 */
-	while (pkey_host == NULL) {
+	while (pkey_host == NULL && rval == 0 && !iffsw) {
 		sprintf(filename, "ntpkey_host_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			pkey_host = PEM_read_PrivateKey(str, NULL, NULL,
-			    passwd);
-			fclose(str);
+		if ((fstr = fopen(filename, "r")) != NULL) {
+			pkey_host = PEM_read_PrivateKey(fstr, NULL,
+			    NULL, passwd1);
+			fclose(fstr);
 			readlink(filename, filename,  sizeof(filename));
 			if (pkey_host == NULL) {
-				printf("Host key\n%s\n",
+				fprintf(stderr, "Host key\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
+				rval = -1;
 			} else {
-				printf("Using host key %s\n", filename);
-				break;
+				fprintf(stderr,
+				    "Using host key %s\n", filename);
 			}
-		}
-		if ((pkey_host = genkey("RSA", "host")) == NULL)
 			break;
+
+		} else if ((pkey_host = genkey("RSA", "host")) ==
+		    NULL) {
+			rval = -1;
+			break;
+		}
 	}
 
 	/*
@@ -428,43 +447,48 @@ main(
 	 * found, use the host key instead.
 	 */
 	pkey = pkey_sign;
-	while (pkey_sign == NULL) {
+	while (pkey_sign == NULL && rval == 0 && !iffsw) {
 		sprintf(filename, "ntpkey_sign_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			pkey_sign = PEM_read_PrivateKey(str, NULL, NULL,
-			    passwd);
-			fclose(str);
+		if ((fstr = fopen(filename, "r")) != NULL) {
+			pkey_sign = PEM_read_PrivateKey(fstr, NULL,
+			    NULL, passwd1);
+			fclose(fstr);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_sign == NULL) {
-				printf("Sign key\n%s\n",
+				fprintf(stderr, "Sign key\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
+				rval = -1;
 			} else {
-				printf("Using sign key %s\n", filename);
-				break;
+				fprintf(stderr, "Using sign key %s\n",
+				    filename);
 			}
+			break;
+		} else {
+			pkey = pkey_host;
+			fprintf(stderr, "Using host key as sign key\n");
+			break;
 		}
-		pkey = pkey_host;
-		printf("Using host key as sign key\n");
-		break;
 	}
 
 	/*
 	 * If there is no new IFF file, look for an existing one.
 	 */
-	if (pkey_iff == NULL) {
+	if (pkey_iff == NULL && rval == 0) {
 		sprintf(filename, "ntpkey_iff_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			pkey_iff = PEM_read_PrivateKey(str, NULL,
-			    NULL, passwd);
-			fclose(str);
+		if ((fstr = fopen(filename, "r")) != NULL) {
+			pkey_iff = PEM_read_PrivateKey(fstr, NULL,
+			    NULL, passwd1);
+			fclose(fstr);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_iff == NULL) {
-				printf("IFF parameters\n%s\n",
+				fprintf(stderr, "IFF parameters\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
+				rval = -1;
 			} else {
-				printf("Using IFF parameters %s\n",
+				fprintf(stderr,
+				    "Using IFF parameters %s\n",
 				    filename);
 			}
 		}
@@ -473,19 +497,21 @@ main(
 	/*
 	 * If there is no new GQ file, look for an existing one.
 	 */
-	if (pkey_gq == NULL) {
+	if (pkey_gq == NULL && rval == 0 && !iffsw) {
 		sprintf(filename, "ntpkey_gq_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			pkey_gq = PEM_read_PrivateKey(str, NULL, NULL,
-			    passwd);
-			fclose(str);
+		if ((fstr = fopen(filename, "r")) != NULL) {
+			pkey_gq = PEM_read_PrivateKey(fstr, NULL, NULL,
+			    passwd1);
+			fclose(fstr);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_gq == NULL) {
-				printf("GQ parameters\n%s\n",
+				fprintf(stderr, "GQ parameters\n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
+				rval = -1;
 			} else {
-				printf("Using GQ parameters %s\n",
+				fprintf(stderr,
+				    "Using GQ parameters %s\n",
 				    filename);
 			}
 		}
@@ -495,45 +521,71 @@ main(
 	 * If there is a GQ parameter file, create GQ private/public
 	 * keys and extract the public key for the certificate.
 	 */
-	if (pkey_gq != NULL) {
+	if (pkey_gq != NULL && rval == 0) {
 		gen_gqkey("gq", pkey_gq);
 		grpkey = BN_bn2hex(pkey_gq->pkey.rsa->q);
-		}
+	}
 
 	/*
 	 * Generate a X509v3 certificate.
 	 */
-	while (scheme == NULL) {
+	while (scheme == NULL && rval == 0 && !iffsw) {
 		sprintf(filename, "ntpkey_cert_%s", hostname);
-		if ((str = fopen(filename, "r")) != NULL) {
-			cert = PEM_read_X509(str, NULL, NULL, NULL);
-			fclose(str);
+		if ((fstr = fopen(filename, "r")) != NULL) {
+			cert = PEM_read_X509(fstr, NULL, NULL, NULL);
+			fclose(fstr);
 			readlink(filename, filename, sizeof(filename));
 			if (cert == NULL) {
-				printf("Cert \n%s\n",
+				fprintf(stderr, "Cert \n%s\n",
 				    ERR_error_string(ERR_get_error(),
 				    NULL));
+				rval = -1;
 			} else {
 				nid = OBJ_obj2nid(
 				 cert->cert_info->signature->algorithm);
 				scheme = OBJ_nid2sn(nid);
-				printf("Using scheme %s from %s\n",
-				    scheme, filename);
+				fprintf(stderr,
+				    "Using scheme %s from %s\n", scheme,
+				     filename);
 				break;
 			}
 		}
 		scheme = "RSA-MD5";
 	}
-	if (pkey != NULL) {
+	if (pkey != NULL && rval == 0 && !iffsw) {
 		ectx = EVP_get_digestbyname(scheme);
 		if (ectx == NULL) {
-			printf(
+			fprintf(stderr,
 			    "Invalid digest/signature combination %s\n",
 			    scheme);
 			rval = -1;
 		} else {
 			x509(pkey, ectx, grpkey, exten);
 		}
+	}
+
+	/*
+	 * Write the IFF client parameters and keys as a DSA private key
+	 * encoded in PEM. Note the private key is obscured.
+	 */
+	if (pkey_iff != NULL && rval == 0 && iffsw) {
+		DSA	*dsa;
+		char	*sptr;
+
+		sptr = strrchr(filename, '.');
+		sprintf(filename, "ntpkey_IFFkey_%s.%s", trustname,
+		    ++sptr);
+		fprintf(stderr, "Writing new IFF key %s\n", filename);
+		fprintf(stdout, "# %s\n# %s", filename, ctime(&epoch));
+		dsa = pkey_iff->pkey.dsa;
+		BN_copy(dsa->priv_key, BN_value_one());
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_DSA(pkey, dsa);
+		PEM_write_PrivateKey(stdout, pkey, passwd2 ?
+		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd2);
+		fclose(stdout);
+		if (debug)
+			DSA_print_fp(stdout, dsa, 0);
 	}
 
 	/*
@@ -570,7 +622,7 @@ gen_md5(
 	FILE	*str;
 	u_char	bin[16];
 
-	printf("Generating MD5 keys...\n");
+	fprintf(stderr, "Generating MD5 keys...\n");
 	str = fheader("MD5key", hostname);
 	keyid = BN_new(); key = BN_new();
 	BN_rand(keyid, 16, -1, 0);
@@ -597,7 +649,7 @@ gen_md5(
 	u_int	temp;
 	int	i, j;
 
-	printf("Generating MD5 keys...\n");
+	fprintf(stderr, "Generating MD5 keys...\n");
 	str = fheader("MD5key", hostname);
 	srandom(epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
@@ -635,11 +687,11 @@ gen_rsa(
 	RSA	*rsa;		/* RSA parameters and key pair */
 	FILE	*str;
 
-	printf("Generating RSA keys (%d bits)...\n", modulus);
+	fprintf(stderr, "Generating RSA keys (%d bits)...\n", modulus);
 	rsa = RSA_generate_key(modulus, 3, cb, "RSA");
-	printf("\n");
+	fprintf(stderr, "\n");
 	if (rsa == NULL) {
-		printf("RSA generate keys fails\n%s\n",
+		fprintf(stderr, "RSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (NULL);
@@ -652,7 +704,7 @@ gen_rsa(
 	 * the primality.
 	 */
 	if (!RSA_check_key(rsa)) {
-		printf("Invalid RSA key\n%s\n",
+		fprintf(stderr, "Invalid RSA key\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		RSA_free(rsa);
 		rval = -1;
@@ -666,8 +718,8 @@ gen_rsa(
 	str = fheader("RSAkey", hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
@@ -692,13 +744,14 @@ gen_dsa(
 	/*
 	 * Generate DSA parameters.
 	 */
-	printf("Generating DSA parameters (%d bits)...\n", modulus);
+	fprintf(stderr,
+	    "Generating DSA parameters (%d bits)...\n", modulus);
 	RAND_bytes(seed, sizeof(seed));
 	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
 	    NULL, cb, "DSA");
-	printf("\n");
+	fprintf(stderr, "\n");
 	if (dsa == NULL) {
-		printf("DSA generate parameters fails\n%s\n",
+		fprintf(stderr, "DSA generate parameters fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (NULL);
@@ -707,9 +760,9 @@ gen_dsa(
 	/*
 	 * Generate DSA keys.
 	 */
-	printf("Generating DSA keys (%d bits)...\n", modulus);
+	fprintf(stderr, "Generating DSA keys (%d bits)...\n", modulus);
 	if (!DSA_generate_key(dsa)) {
-		printf("DSA generate keys fails\n%s\n",
+		fprintf(stderr, "DSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_free(dsa);
 		rval = -1;
@@ -723,8 +776,8 @@ gen_dsa(
 	str = fheader("DSAkey", hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
@@ -773,14 +826,14 @@ gen_iff(
 	/*
 	 * Generate DSA parameters for use as IFF parameters.
 	 */
-	printf("Generating IFF parameters (%d bits)...\n",
+	fprintf(stderr, "Generating IFF parameters (%d bits)...\n",
 	    modulus);
 	RAND_bytes(seed, sizeof(seed));
 	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
 	    NULL, cb, "IFF");
-	printf("\n");
+	fprintf(stderr, "\n");
 	if (dsa == NULL) {
-		printf("DSA generate parameters fails\n%s\n",
+		fprintf(stderr, "DSA generate parameters fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (NULL);;
@@ -790,7 +843,7 @@ gen_iff(
 	 * Generate the private and public keys. The DSA parameters and
 	 * these keys are distributed to all members of the group.
 	 */
-	printf("Generating IFF keys (%d bits)...\n", modulus);
+	fprintf(stderr, "Generating IFF keys (%d bits)...\n", modulus);
 	b = BN_new(); r = BN_new(); k = BN_new();
 	u = BN_new(); v = BN_new(); w = BN_new(); ctx = BN_CTX_new();
 	BN_rand(b, BN_num_bits(dsa->q), -1, 0);	/* a */
@@ -800,7 +853,8 @@ gen_iff(
 	BN_mod_exp(u, dsa->g, b, dsa->p, ctx);	/* g^b mod p */
 	BN_mod_mul(u, u, v, dsa->p, ctx);
 	temp = BN_is_one(u);
-	printf("Confirm g^(q - b) g^b = 1 mod p: %s\n", temp == 1 ?
+	fprintf(stderr,
+	    "Confirm g^(q - b) g^b = 1 mod p: %s\n", temp == 1 ?
 	    "yes" : "no");
 	if (!temp) {
 		BN_free(b); BN_free(r); BN_free(k);
@@ -840,7 +894,8 @@ gen_iff(
 	BN_mod_exp(w, dsa->pub_key, r, dsa->p, ctx); /* v^r */
 	BN_mod_mul(v, w, v, dsa->p, ctx);	/* product mod p */
 	temp = BN_cmp(u, v);
-	printf("Confirm g^k = g^(k + b r) g^(q - b) r: %s\n", temp ==
+	fprintf(stderr,
+	    "Confirm g^k = g^(k + b r) g^(q - b) r: %s\n", temp ==
 	    0 ? "yes" : "no");
 	BN_free(b); BN_free(r);	BN_free(k);
 	BN_free(u); BN_free(v); BN_free(w); BN_CTX_free(ctx);
@@ -863,32 +918,12 @@ gen_iff(
 	str = fheader("IFFpar", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
 	fslink(id, trustname);
-
-	/*
-	 * Write the IFF client parameters and keys as a DSA private key
-	 * encoded in PEM. Note the private key is obscured.
-	 *
-	 * p	modulus p
-	 * q	modulus q
-	 * g	generator g
-	 * priv_key 1
-	 * public_key v
-	 */
-	BN_copy(dsa->priv_key, BN_value_one());
-	str = fheader("IFFkey", trustname);
-	pkey = EVP_PKEY_new();
-	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
-	fclose(str);
-	if (debug)
-		DSA_print_fp(stdout, dsa, 0);
 	return (pkey);
 }
 
@@ -930,11 +965,12 @@ gen_gqpar(
 	/*
 	 * Generate RSA parameters for use as GQ parameters.
 	 */
-	printf("Generating GQ parameters (%d bits)...\n", modulus);
+	fprintf(stderr,
+	    "Generating GQ parameters (%d bits)...\n", modulus);
 	rsa = RSA_generate_key(modulus, 3, cb, "GQ");
-	printf("\n");
+	fprintf(stderr, "\n");
 	if (rsa == NULL) {
-		printf("RSA generate keys fails\n%s\n",
+		fprintf(stderr, "RSA generate keys fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (NULL);
@@ -968,8 +1004,8 @@ gen_gqpar(
 	str = fheader("GQpar", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
@@ -999,7 +1035,7 @@ gen_gqkey(
 	 * of
 	 * the GQ parameters.
 	 */
-	printf("Updating GQ keys (%d bits)...\n", modulus);
+	fprintf(stderr, "Updating GQ keys (%d bits)...\n", modulus);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
 	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
 
@@ -1022,7 +1058,8 @@ gen_gqkey(
 	BN_mod_exp(g, u, rsa->e, rsa->n, ctx); /* u^b */
 	BN_mod_mul(g, g, v, rsa->n, ctx); /* u^b (u^-1)^b */
 	temp = BN_is_one(g);
-	printf("Confirm u^b (u^-1)^b = 1 mod n: %s\n", temp ? "yes" :
+	fprintf(stderr,
+	    "Confirm u^b (u^-1)^b = 1 mod n: %s\n", temp ? "yes" :
 	    "no");
 	if (!temp) {
 		BN_free(u); BN_free(v);
@@ -1064,7 +1101,7 @@ gen_gqkey(
 	BN_mod_exp(y, y, rsa->e, rsa->n, ctx); /* y^b mod n */
 	BN_mod_mul(y, v, y, rsa->n, ctx);	/* v^r y^b mod n */
 	temp = BN_cmp(y, g);
-	printf("Confirm g^k = v^r y^b mod n: %s\n", temp == 0 ?
+	fprintf(stderr, "Confirm g^k = v^r y^b mod n: %s\n", temp == 0 ?
 	    "yes" : "no");
 	BN_CTX_free(ctx); BN_free(u); BN_free(v);
 	BN_free(g); BN_free(k); BN_free(r); BN_free(y);
@@ -1087,8 +1124,8 @@ gen_gqkey(
 	str = fheader("GQpar", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
@@ -1191,7 +1228,8 @@ gen_mv(
 	 * and several minutes on a Sun Blade 1000.
 	 */
 	n = nkeys;
-	printf("Generating MV parameters for %d keys (%d bits)...\n", n,
+	fprintf(stderr,
+	    "Generating MV parameters for %d keys (%d bits)...\n", n,
 	    modulus / n);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
 	b = BN_new(); b1 = BN_new();
@@ -1206,7 +1244,7 @@ gen_mv(
 	temp = 0;
 	for (j = 1; j <= n; j++) {
 		while (1) {
-			printf("Birthdays %d\r", temp);
+			fprintf(stderr, "Birthdays %d\r", temp);
 			BN_generate_prime(s1[j], modulus / n, 0, NULL,
 			    NULL, NULL, NULL);
 			for (i = 1; i < j; i++) {
@@ -1218,7 +1256,7 @@ gen_mv(
 			temp++;
 		}
 	}
-	printf("Birthday keys rejected %d\n", temp);
+	fprintf(stderr, "Birthday keys rejected %d\n", temp);
 
 	/*
 	 * Compute the modulus q as the product of the primes. Compute
@@ -1234,7 +1272,7 @@ gen_mv(
 	 */
 	temp = 0;
 	while (1) {
-		printf("Duplicate keys rejected %d\r", ++temp);
+		fprintf(stderr, "Duplicate keys rejected %d\r", ++temp);
 		BN_one(dsa->q);
 		for (j = 1; j <= n; j++)
 			BN_mul(dsa->q, dsa->q, s1[j], ctx);
@@ -1258,7 +1296,7 @@ gen_mv(
 		}
 		BN_copy(s1[j], u);
 	}
-	printf("Duplicate keys rejected %d\n", temp);
+	fprintf(stderr, "Duplicate keys rejected %d\n", temp);
 
 	/*
 	 * Compute the generator g using a random roll such that
@@ -1297,7 +1335,7 @@ gen_mv(
 	 * necessary, Make sure each root has no factors in common with
 	 * q.
 	 */
-	printf(
+	fprintf(stderr,
 	    "Generating polynomial coefficients for %d roots (%d bits)\n",
 	    n, BN_num_bits(dsa->q)); 
 	x = malloc((n + 1) * sizeof(BIGNUM));
@@ -1337,7 +1375,7 @@ gen_mv(
 	/*
 	 * Generate g[i] = g^a[i] mod p for all i and the generator g.
 	 */
-	printf("Generating g[i] parameters\n");
+	fprintf(stderr, "Generating g[i] parameters\n");
 	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
@@ -1363,8 +1401,9 @@ gen_mv(
 		if (!BN_is_one(u))
 			temp = 0;
 	}
-	printf("Confirm prod(g[i]^(x[j]^i)) = 1 for all i, j: %s\n",
-	    temp ? "yes" : "no");
+	fprintf(stderr,
+	    "Confirm prod(g[i]^(x[j]^i)) = 1 for all i, j: %s\n", temp ?
+	    "yes" : "no");
 	if (!temp) {
 		rval = -1;
 		return (NULL);
@@ -1486,8 +1525,8 @@ gen_mv(
 	str = fheader("MVpar", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd);
+	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd2);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
@@ -1517,7 +1556,7 @@ gen_mv(
 		BN_free(xbar[j]); BN_free(xhat[j]);
 		BN_free(x[j]); BN_free(s[j]); BN_free(s1[j]);
 		if (!BN_is_one(u)) {
-			printf("Revoke key %d\n", j);
+			fprintf(stderr, "Revoke key %d\n", j);
 			continue;
 		}
 
@@ -1534,11 +1573,11 @@ gen_mv(
 		str = fheader(ident, trustname);
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(pkey, sdsa);
-		PEM_write_PrivateKey(str, pkey, passwd ? EVP_des_cbc() :
-		    NULL, NULL, 0, NULL, passwd);
+		PEM_write_PrivateKey(str, pkey, passwd2 ?
+		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd2);
 		fclose(str);
-		printf("ntpkey_%s_%s.%lu\n", ident, trustname, epoch +
-		    JAN_1970);
+		fprintf(stderr, "ntpkey_%s_%s.%lu\n", ident, trustname,
+		    epoch + JAN_1970);
 		if (debug)
 			DSA_print_fp(stdout, sdsa, 0);
 	}
@@ -1565,7 +1604,7 @@ gen_mv(
 
 
 /*
- * Generate X509v3 self-signed certificate.
+ * Generate X509v3 scertificate.
  *
  * The certificate consists of the version number, serial number,
  * validity interval, issuer name, subject name and public key. For a
@@ -1600,7 +1639,7 @@ x509	(
 	 * current time and the final validity one year hence. 
 	 */
 	id = OBJ_nid2sn(md->pkey_type);
-	printf("Generating certificate %s\n", id);
+	fprintf(stderr, "Generating certificate %s\n", id);
 	cert = X509_new();
 	X509_set_version(cert, 2L);
 	serial = ASN1_INTEGER_new();
@@ -1616,8 +1655,8 @@ x509	(
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
 	    trustname, strlen(trustname), -1, 0);
 	if (!X509_set_pubkey(cert, pkey)) {
-		printf("Assign key fails\n%s\n",
-		ERR_error_string(ERR_get_error(), NULL));
+		fprintf(stderr, "Assign key fails\n%s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
 		rval = -1;
 		return (0);
@@ -1632,11 +1671,12 @@ x509	(
 	 * The basic_constraints extension CA:TRUE allows servers to
 	 * sign client certficitates.
 	 */
-	printf("%s: %s\n", LN_basic_constraints, BASIC_CONSTRAINTS);
+	fprintf(stderr, "%s: %s\n", LN_basic_constraints,
+	    BASIC_CONSTRAINTS);
 	ex = X509V3_EXT_conf_nid(NULL, NULL, NID_basic_constraints,
 	    BASIC_CONSTRAINTS);
 	if (!X509_add_ext(cert, ex, -1)) {
-		printf("Add extension field fails\n%s\n",
+		fprintf(stderr, "Add extension field fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (0);
@@ -1647,10 +1687,10 @@ x509	(
 	 * The key_usage extension designates the purposes the key can
 	 * be used for.
 	 */
-	printf("%s: %s\n", LN_key_usage, KEY_USAGE);
+	fprintf(stderr, "%s: %s\n", LN_key_usage, KEY_USAGE);
 	ex = X509V3_EXT_conf_nid(NULL, NULL, NID_key_usage, KEY_USAGE);
 	if (!X509_add_ext(cert, ex, -1)) {
-		printf("Add extension field fails\n%s\n",
+		fprintf(stderr, "Add extension field fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
 		return (0);
@@ -1661,11 +1701,12 @@ x509	(
 	 * This should not be controversial.
 	 */
 	if (gqpub != NULL) {
-		printf("%s\n", LN_subject_key_identifier);
+		fprintf(stderr, "%s\n", LN_subject_key_identifier);
 		ex = X509V3_EXT_conf_nid(NULL, NULL,
 		    NID_subject_key_identifier, gqpub);
 		if (!X509_add_ext(cert, ex, -1)) {
-			printf("Add extension field fails\n%s\n",
+			fprintf(stderr,
+			    "Add extension field fails\n%s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
 			rval = -1;
 			return (0);
@@ -1682,11 +1723,12 @@ x509	(
 	 * "private" designates a private certificate
 	 */
 	if (exten != NULL) {
-		printf("%s: %s\n", LN_ext_key_usage, exten);
+		fprintf(stderr, "%s: %s\n", LN_ext_key_usage, exten);
 		ex = X509V3_EXT_conf_nid(NULL, NULL,
 		    NID_ext_key_usage, exten);
 		if (!X509_add_ext(cert, ex, -1)) {
-			printf("Add extension field fails\n%s\n",
+			fprintf(stderr,
+			    "Add extension field fails\n%s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
 			rval = -1;
 			return (0);
@@ -1699,7 +1741,7 @@ x509	(
 	 */
 	X509_sign(cert, pkey, md);
 	if (!X509_verify(cert, pkey)) {
-		printf("Verify %s certificate fails\n%s\n", id,
+		fprintf(stderr, "Verify %s certificate fails\n%s\n", id,
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
 		rval = -1;
@@ -1770,21 +1812,23 @@ cb	(
 	switch (n1) {
 	case 0:
 		d0++;
-		printf("%s %d %d %lu\r", (char *)chr, n1, n2, d0);
+		fprintf(stderr, "%s %d %d %lu\r", (char *)chr, n1, n2,
+		    d0);
 		break;
 	case 1:
 		d1++;
-		printf("%s\t\t%d %d %lu\r", (char *)chr, n1, n2, d1);
+		fprintf(stderr, "%s\t\t%d %d %lu\r", (char *)chr, n1,
+		    n2, d1);
 		break;
 	case 2:
 		d2++;
-		printf("%s\t\t\t\t%d %d %lu\r", (char *)chr, n1, n2,
-		    d2);
+		fprintf(stderr, "%s\t\t\t\t%d %d %lu\r", (char *)chr,
+		    n1, n2, d2);
 		break;
 	case 3:
 		d3++;
-		printf("%s\t\t\t\t\t\t%d %d %lu\r", (char *)chr, n1, n2,
-		    d3);
+		fprintf(stderr, "%s\t\t\t\t\t\t%d %d %lu\r",
+		    (char *)chr, n1, n2, d3);
 		break;
 	}
 }
@@ -1808,7 +1852,7 @@ genkey(
 	else if (strcmp(type, "DSA") == 0)
 		return (gen_dsa(id));
 
-	printf("Invalid %s key type %s\n", id, type);
+	fprintf(stderr, "Invalid %s key type %s\n", id, type);
 	rval = -1;
 	return (NULL);
 }
@@ -1853,6 +1897,6 @@ fslink(
 	temp = symlink(filename, linkname);
 	if (temp < 0)
 		perror(id);
-	printf("Generating new %s file and link\n", id);
-	printf("%s->%s\n", linkname, filename);
+	fprintf(stderr, "Generating new %s file and link\n", id);
+	fprintf(stderr, "%s->%s\n", linkname, filename);
 }
