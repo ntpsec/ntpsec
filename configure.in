@@ -306,6 +306,7 @@ case "$host" in
  *) AC_CHECK_HEADERS(sys/ioctl.h)
     ;;
 esac
+AC_CHECK_HEADERS(sys/ipc.h)
 AC_CHECK_HEADERS(sys/lock.h sys/mman.h sys/modem.h sys/param.h sys/ppsclock.h)
 AC_CHECK_HEADERS(sys/ppstime.h sys/proc.h sys/resource.h sys/sched.h)
 case "$host" in
@@ -313,7 +314,7 @@ case "$host" in
     AC_CHECK_HEADERS(sys/sio.h)
     ;;
 esac
-AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
+AC_CHECK_HEADERS(sys/select.h sys/shm.h sys/signal.h sys/sockio.h)
 AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
 AC_CHECK_HEADERS(sys/stat.h sys/stream.h)
 AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/systune.h)
@@ -1754,16 +1755,6 @@ case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(for SHM clock attached thru shared memory)
-AC_ARG_ENABLE(SHM,
-    AC_HELP_STRING([--enable-SHM], [- SHM clock attached thru shared memory]),
-    [ntp_ok=$enableval], [ntp_ok=no])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_SHM, 1, [clock thru shared memory])
-fi
-AC_MSG_RESULT($ntp_ok)
-
 AC_MSG_CHECKING(for default inclusion of all suitable non-PARSE clocks)
 AC_ARG_ENABLE(all-clocks,
     AC_HELP_STRING([--enable-all-clocks], [+ include all suitable non-PARSE clocks:]),
@@ -1790,10 +1781,19 @@ case "$ac_cv_header_sun_audioio_h$ac_cv_header_sys_audioio_h$ac_cv_header_machin
 esac
 AC_MSG_RESULT($ntp_canaudio)
 
+AC_MSG_CHECKING([if we have support for the SHM refclock interface])
+case "$ac_cv_header_sys_ipc_h$ac_cv_header_sys_shm_h" in
+ yesyes)
+    ntp_canshm=yes
+    ;;
+ *) ntp_canshm=no ;;
+esac
+AC_MSG_RESULT($ntp_canshm)
+
 # Requires modem control
 AC_MSG_CHECKING(ACTS modem service)
 AC_ARG_ENABLE(ACTS,
-    AC_HELP_STRING([--enable-ACTS], [+ ACTS modem service]),
+    AC_HELP_STRING([--enable-ACTS], [s ACTS modem service]),
     [ntp_ok=$enableval],
     [AC_EGREP_CPP(yes,
         [#include <termios.h>
@@ -1865,7 +1865,7 @@ AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(CHU modem/decoder)
 AC_ARG_ENABLE(CHU,
-    AC_HELP_STRING([--enable-CHU], [- CHU modem/decoder]),
+    AC_HELP_STRING([--enable-CHU], [+ CHU modem/decoder]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -2071,7 +2071,7 @@ esac
 
 AC_MSG_CHECKING(for NeoClock4X receiver)
 AC_ARG_ENABLE(NEOCLOCK4X,
-    AC_HELP_STRING([--enable-NEOCLOCK4X], [- NeoClock4X DCF77 / TDF receiver]),
+    AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -2104,7 +2104,7 @@ AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for Palisade clock)
 AC_ARG_ENABLE(PALISADE,
-    AC_HELP_STRING([--enable-PALISADE], [+ Palisade clock]),
+    AC_HELP_STRING([--enable-PALISADE], [s Palisade clock]),
     [ntp_ok=$enableval],
     [case "$ac_cv_header_termios_h" in
     yes)
@@ -2171,6 +2171,22 @@ esac
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_RIPENCC, ,[RIPE NCC Trimble clock])
+fi
+AC_MSG_RESULT($ntp_ok)
+
+# Danny Meyer says SHM compiles (with a few warnings) under Win32.
+# For *IX, we need sys/ipc.h and sys/shm.h.
+AC_MSG_CHECKING(for SHM clock attached thru shared memory)
+AC_ARG_ENABLE(SHM,
+    AC_HELP_STRING([--enable-SHM], [s SHM clock attached thru shared memory]),
+    [ntp_ok=$enableval],
+    [case "$ntp_eac$ntp_canshm" in
+ *no*)	ntp_ok=no  ;;
+ *)	ntp_ok=yes ;;
+esac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_SHM, 1, [clock thru shared memory])
 fi
 AC_MSG_RESULT($ntp_ok)
 
@@ -2278,7 +2294,7 @@ AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(WWV receiver)
 AC_ARG_ENABLE(WWV,
-    AC_HELP_STRING([--enable-WWV], [+ WWV Audio receiver]),
+    AC_HELP_STRING([--enable-WWV], [s WWV Audio receiver]),
     [ntp_ok=$enableval],
     [case "$ntp_eac$ntp_canaudio" in
      *no*)	ntp_ok=no  ;;
