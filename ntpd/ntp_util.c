@@ -492,6 +492,7 @@ record_peer_stats(
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&peerstats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
@@ -528,6 +529,7 @@ record_loop_stats(
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&loopstats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
@@ -560,6 +562,7 @@ record_clock_stats(
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&clockstats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
@@ -596,6 +599,7 @@ record_raw_stats(
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&rawstats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
@@ -611,12 +615,20 @@ record_raw_stats(
 
 
 /*
- * record_sys_stats - write system statistics to file *
+ * record_sys_stats - write system statistics to file
+ *
  * file format
  * time (s past midnight)
- * peer ip address
- * local ip address
- * sysstats...
+ * time since startup (hr)
+ * packets recieved
+ * packets processed
+ * current version
+ * previous version
+ * bad version
+ * access denied
+ * bad length or format
+ * bad authentication
+ * rate exceeded
  */
 void
 record_sys_stats(void)
@@ -626,6 +638,7 @@ record_sys_stats(void)
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&sysstats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
@@ -665,6 +678,7 @@ record_crypto_stats(
 
 	if (!stats_control)
 		return;
+
 	get_systime(&now);
 	filegen_setup(&cryptostats, now.l_ui);
 	day = now.l_ui / 86400 + MJD_1900;
