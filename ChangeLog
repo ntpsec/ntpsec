@@ -1,3 +1,19 @@
+1999-09-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* acconfig.h:
+	* config.h.in:
+	* configure.in:
+	* html/driver34.htm:
+	* html/refclock.htm:
+	* include/ntp.h:
+	* libntp/clocktypes.c:
+	* ntpd/Makefile.am:
+	* ntpd/ntp_control.c:
+	* ntpd/refclock_conf.c:
+	* ntpd/refclock_ulink.c:
+	Ultralink driver
+	From: Dave Strout <dstrout@linuxfoundary.com> 
+
 1999-09-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: ReliantUNIX patches

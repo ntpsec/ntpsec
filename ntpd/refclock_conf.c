@@ -204,6 +204,13 @@ extern struct refclock refclock_dumbclock;
 #define refclock_dumbclock refclock_none
 #endif
 
+#ifdef CLOCK_ULINK
+extern	struct refclock	refclock_ulink;
+#else
+#define	refclock_ulink	refclock_none
+#endif
+
+
 /*
  * Order is clock_start(), clock_shutdown(), clock_poll(),
  * clock_control(), clock_init(), clock_buginfo, clock_flags;
@@ -245,6 +252,7 @@ struct refclock *refclock_conf[] = {
 	&refclock_jupiter,	/* 31 REFCLK_GPS_JUPITER */
 	&refclock_chronolog,	/* 32 REFCLK_CHRONOLOG */
 	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
+	&refclock_ulink,        /* 34 REFCLOCK_ULINK */
 };
 
 u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);

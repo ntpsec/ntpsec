@@ -30,7 +30,7 @@ ntpd_SOURCES = map_vme.c ntp_config.c ntp_control.c ntp_io.c \
 	refclock_shm.c refclock_gpsvme.c refclock_arbiter.c \
 	refclock_arc.c refclock_palisade.c refclock_palisade.h \
 	refclock_oncore.c refclock_chronolog.c refclock_dumbclock.c \
-	jupiter.h
+	refclock_ulink.c jupiter.h
 
 $(PROGRAMS): $(LDADD)
 

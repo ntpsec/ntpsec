@@ -78,6 +78,8 @@ struct clktype clktypes[] = {
 	  "CHRONOLOG" },
 	{ REFCLK_DUMBCLOCK,	"Dumb generic hh:mm:ss local clock",
 	  "DUMBCLOCK" },
+	{ REFCLK_ULINK,         "Ultralink M320 WWVB receiver",
+	  "ULINK_M320"},
 	{ -1,			"", "" }
 };
 

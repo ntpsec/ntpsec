@@ -151,6 +151,9 @@
 /* Spectracom 8170/Netclock/2 WWVB receiver */
 #undef CLOCK_WWVB
 
+/* Ultralink M320 WWVB receiver */
+#undef CLOCK_ULINK
+
 /* Chronolog K-series WWVB receiver */
 #undef CLOCK_CHRONOLOG
 
