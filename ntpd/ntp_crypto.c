@@ -2878,12 +2878,10 @@ cert_parse(
 	X509	*cert;		/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
 	struct cert_info *ret;	/* certificate info/value */
+	BIO	*bp;
 	X509V3_EXT_METHOD *method;
-	STACK_OF(CONF_VALUE) *nval;
-	CONF_VALUE *val;
 	u_char	pathbuf[MAXFILENAME];
 	u_char	*ptr;
-	char	*ext_str;
 	int	temp, cnt, i;
 
 	/*
@@ -2962,25 +2960,22 @@ cert_parse(
 		 * If a key_usage field is present, we decode whether
 		 * this is a trusted or private certificate. This is
 		 * dorky; all we want is to compare NIDs, but OpenSSL
-		 * insists on text strings.
+		 * insists on BIO text strings.
 		 */
 		case NID_ext_key_usage:
-			ptr = ext->value->data;
-			ext_str = method->d2i(NULL, &ptr,
-			    ext->value->length);
-			nval = method->i2v(method, ext_str, NULL);
-			val = sk_CONF_VALUE_value(nval, 0);
+			bp = BIO_new(BIO_s_mem());
+			X509V3_EXT_print(bp, ext, 0, 0);
+			BIO_gets(bp, pathbuf, MAXFILENAME);
+			BIO_free(bp);
 #if DEBUG
 			if (debug)
 				printf("cert_parse: %s: %s\n",
-				    OBJ_nid2ln(temp), val->value);
+				    OBJ_nid2ln(temp), pathbuf);
 #endif
-			if (strcmp(val->value, "Trust Root") == 0)
+			if (strcmp(pathbuf, "Trust Root") == 0)
 				ret->flags |= CERT_TRUST;
-			else if (strcmp(val->value, "Private") == 0)
+			else if (strcmp(pathbuf, "Private") == 0)
 				ret->flags |= CERT_PRIV;
-			sk_CONF_VALUE_pop_free(nval, X509V3_conf_free);
-			method->ext_free(ext_str);
 			break;
 
 		/*
