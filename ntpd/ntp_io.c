@@ -2068,7 +2068,7 @@ input_handler(
 					(void) recvfrom(fd, buf, sizeof(buf), 0,
 							(struct sockaddr*)&from, &fromlen);
 #ifdef DEBUG
-					if (debug)
+					if (debug > 3)
 					    printf("%s on %d(%lu) fd=%d from %s\n",
 					    (inter_list[i].ignore_packets == ISC_TRUE) ? "ignore" : "drop",
 					     i, free_recvbuffs(), fd,
