@@ -12,7 +12,6 @@ SUBDIRS = \
 	ntpdate	\
 	ntpdc	\
 	ntpq	\
-	ntptrace	\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\
