@@ -10167,8 +10167,8 @@ echo "${ECHO_T}$ntp_eac" >&6
 
 echo "configure:10168: checking if we have support for PARSE clocks" >&5
 echo $ECHO_N "checking if we have support for PARSE clocks... $ECHO_C" >&6
-case "$ac_cv_header_termio_h$ac_cv_header_termios_h" in
- *yes*)
+case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
+ yes*yes*)
     ntp_canparse=yes
     ;;
  *) ntp_canparse=no

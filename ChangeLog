@@ -1,6 +1,7 @@
 2000-09-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_cv_var_atom_ok): Improve ATOM configure message
+	PARSE requires ATOM.
 
 	* ntpd/ntpd.c (set_process_priority): Clean up debug messages.
 
