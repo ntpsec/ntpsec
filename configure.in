@@ -666,7 +666,7 @@ case "$host" in
 esac])
 AC_CHECK_FUNCS(setvbuf sigaction)
 AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
-AC_REPLACE_FUNCS(snprintf strdup strerror strstr)
+AC_CHECK_FUNCS(snprintf strdup strerror strstr)
 AC_CHECK_FUNCS(timegm)
 case "$host" in
  *-*-aix4*)
