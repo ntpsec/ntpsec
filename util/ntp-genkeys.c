@@ -1,5 +1,8 @@
 /*
  * Program to generate cryptographic keys for NTP clients and servers
+ *
+ * TODO:
+ * - do we need to make a symlink to the private key file?
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,11 +26,11 @@
 #endif
 
 #ifdef OPENSSL
-#include "openssl/evp.h"
-#include "openssl/err.h"
-#include "openssl/rand.h"
-#include "openssl/pem.h"
-#include "openssl/x509.h"
+# include "openssl/evp.h"
+# include "openssl/err.h"
+# include "openssl/rand.h"
+# include "openssl/pem.h"
+# include "openssl/x509.h"
 #endif /* OPENSSL */
 
 /*
@@ -49,6 +52,10 @@ int	genkeys  P((void));
 int	genrest  P((void));
 int	genthings  P((void));
 char	*getpath P((char *, char *, char *));
+void	set_filenames P((void));
+void	sub_token P((char *, char *, char *, char *));
+void	usage	 P((void));
+
 #ifdef OPENSSL
 u_long	asn2ntp	 P((ASN1_TIME *));	/* ASN.1 time format to NTP seconds */
 void	cb	 P((int, int, void *));	/* callback routine */
@@ -56,14 +63,13 @@ void	genkey_dsa P((char *, char *, char *, u_long));
 void	genkey_rsa P((char *, char *, char *, u_long));
 int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *, int)); /* generate req/cert */
 #endif /* OPENSSL */
-void	usage	 P((void));
 
 /*
  * Program variables
  */
 struct timeval tv;		/* initialization vector */
 u_long	ntptime;		/* NTP epoch */
-u_char	hostname[PATH_MAX];	/* host name */
+char	hostname[PATH_MAX];	/* host name */
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
@@ -73,14 +79,17 @@ char *keysdir = NTP_KEYSDIR;
 char *f1_keys;			/* Visible MD5 key file name */
 char f2_keys[PATH_MAX];		/* timestamped */
 
-char *f1_privatekey;
+char *f0_privatekey = "ntpkey_key_HOSTNAME";
+char f1_privatekey[PATH_MAX];
 char f2_privatekey[PATH_MAX];
 
-char *f1_signkey;		/* from ntp.conf */
+char *f0_signkey = "ntpkey_sign_HOSTNAME";
+char f1_signkey[PATH_MAX];	/* from ntp.conf */
 char f2_signkey[PATH_MAX];	/* generated filename */
 char f3_signkey[PATH_MAX];	/* generate new certs using this key */
 
-char *f1_cert;
+char *f0_cert = "ntpkey_cert_HOSTNAME";
+char f1_cert[PATH_MAX];
 char f2_cert[PATH_MAX];
 
 char tmp_name[PATH_MAX];
@@ -92,7 +101,7 @@ u_long  client_limit;
 u_long  client_limit_period;
 keyid_t ctl_auth_keyid;		/* keyid used to authenticate write requests */
 u_long  current_time;		/* current time (s) */
-volatile int debug = 1;		/* debugging flag */
+volatile int debug = 0;		/* debugging flag */
 keyid_t info_auth_keyid;	/* keyid used to authenticate requests */
 char *  req_file;		/* name of the file with configuration info */
 keyid_t req_keyid;		/* request keyid */
@@ -171,13 +180,13 @@ crypto_config(
 		if (debug > 1)
 			printf("crypto_config: PRIVATEKEY/<%d> <%s>\n",
 			       item, cp);
-		f1_privatekey = strdup(cp);
+		f0_privatekey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_SIGN:
 		if (debug > 1)
 			printf("crypto_config: SIGNKEY/<%d> <%s>\n",
 			       item, cp);
-		f1_signkey = strdup(cp);
+		f0_signkey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_KEYS:
 		if (debug > 1)
@@ -187,7 +196,7 @@ crypto_config(
 	    case CRYPTO_CONF_CERT:
 		if (debug > 1)
 			printf("crypto_config: CERT/<%d> <%s>\n", item, cp);
-		f1_cert = strdup(cp);
+		f0_cert = strdup(cp);
 		break;
 #endif /* OPENSSL */
 	    default:
@@ -421,6 +430,38 @@ usage (
 
 
 void
+sub_token (
+	char *src,
+	char *token,
+	char *rep,
+	char *dst
+	)
+{
+	char *bot = strstr(src, token);
+	size_t t_len = strlen(token);
+
+	if (bot) {
+		*dst = '\0';
+		strncat(dst, src, (bot - src));
+		strcat(dst, rep);
+		strcat(dst, src + (bot - src) + t_len);
+	} else {
+		strcpy(dst, src);
+	}
+	return;
+}
+
+
+void
+set_filenames ( void )
+{
+	sub_token(f0_cert,	 "HOSTNAME", hostname, f1_cert);
+	sub_token(f0_privatekey, "HOSTNAME", hostname, f1_privatekey);
+	sub_token(f0_signkey,	 "HOSTNAME", hostname, f1_signkey);
+}
+
+
+void
 getCmdOpts (
 	int argc,
 	char *argv[]
@@ -533,8 +574,6 @@ main(
 {
 	int i;
 
-	getconfig(argc, argv);	/* ntpd/ntp_config.c */
-
 #ifdef OPENSSL
 	if (SSLeay() != OPENSSL_VERSION_NUMBER) {
 		printf("OpenSSL version mismatch. Built against %lx, you have %lx\n",
@@ -545,6 +584,8 @@ main(
 	}
 #endif
 
+	getconfig(argc, argv);	/* ntpd/ntp_config.c */
+
 	/*
 	 * Initialize the timestamp.
 	 */
@@ -553,11 +594,18 @@ main(
 
 	i = 0;
 	if (ntp_optind == argc) { /* No more args - generate key for us */
-		gethostname(hostname, sizeof(hostname));
+		if (-1 == gethostname(hostname, sizeof(hostname))) {
+			perror("gethostname()");
+			exit(1);
+		}
+
+		set_filenames();
 
 		i |= genthings();
 	} else while (ntp_optind < argc) {
 		strncpy(hostname, argv[ntp_optind], sizeof hostname);
+
+		set_filenames();
 
 		i |= genthings();
 
@@ -725,77 +773,54 @@ genkeys(
 	 * Make sure f3_signkey is pointing to the right file.
 	 *
 	 * - If we built a sign key, use it.
-	 * - If ntp.conf specifies a sign key, use it.
-	 * - If there is a default sign key in f1_keys/, use it. (stat)
+	 * - If ntp.conf specifies or defaults an existing sign key, use it.
 	 * - If we built an rsakey, use it.
-	 * - If ntp.conf specifies an rsakey, use it.
-	 * - If there is a default rsakey in f1_keys/, use it.  (stat)
+	 * - If ntp.conf specifies or defaults an existing rsakey, use it.
 	 */
 	gotsignkey = 0;
 	if (!gotsignkey && *f2_signkey) { /* We built a sign key - use it. */
-		if (f1_signkey) { /* Use the explicit signkey in ntp.conf */
-			cp = getpath(keysdir, f1_signkey, f2_signkey);
-			if (!cp)
-				exit(-1);
-			strcpy(f3_signkey, cp);
-			if (debug > 1)
-				printf("f3: GS1: <%s>\n", f3_signkey);
-			++gotsignkey;
-		} else {	/* Use new signkey in default location */
-			cp = getpath(keysdir, f2_signkey, NULL);
-			if (!cp)
-				exit(-1);
-			strcpy(f3_signkey, cp);
-			if (debug > 1)
-				printf("f3: GS0: <%s>\n", f3_signkey);
-			++gotsignkey;
-		}
+		cp = getpath(keysdir, f1_signkey, f2_signkey);
+		if (!cp)
+			exit(-1);
+		strcpy(f3_signkey, cp);
+		if (debug > 1)
+			printf("f3: GS1: <%s>\n", f3_signkey);
+		++gotsignkey;
 	}
 	if (!gotsignkey && *f1_signkey)	{ /* Use sign key from ntp.conf */
+		struct stat sb;
+
 		cp = getpath(keysdir, f1_signkey, NULL);
 		if (!cp)
 			exit(-1);
-		strcpy(f3_signkey, cp);
-		if (debug > 1)
-			printf("f3: ES: <%s>\n", f3_signkey);
-		++gotsignkey;
-	}
-	if (!gotsignkey) {	/* Iff a default sign key exists, use it. */
-		/* build the name, stat() it, and if it exists, use it. */
-		if (debug > 1)
-			printf("f3: DS: <%s>\n", f3_signkey);
-	}
-	if (!gotsignkey && *f2_privatekey) { /* We built an rsakey - use it. */
-		if (f1_privatekey) { /* Use the explicit rsakey in ntp.conf */
-			cp = getpath(keysdir, f1_privatekey, f2_privatekey);
-			if (!cp)
-				exit(-1);
+		if (stat(cp, &sb) == 0) {
 			strcpy(f3_signkey, cp);
 			if (debug > 1)
-				printf("f3: GR1: <%s>\n", f3_signkey);
-			++gotsignkey;
-		} else {	/* Use new rsakey in default location */
-			cp = getpath(keysdir, f2_privatekey, NULL);
-			if (!cp)
-				exit(-1);
-			strcpy(f3_signkey, cp);
-			if (debug > 1)
-				printf("f3: GR0: <%s>\n", f3_signkey);
+				printf("f3: ES: <%s>\n", f3_signkey);
 			++gotsignkey;
 		}
 	}
-	if (!gotsignkey && *f1_privatekey) { /* Use rsakey from ntp.conf */
-		cp = getpath(keysdir, f1_privatekey, NULL);
+	if (!gotsignkey && *f2_privatekey) { /* We built an rsakey - use it. */
+		cp = getpath(keysdir, f1_privatekey, f2_privatekey);
 		if (!cp)
 			exit(-1);
 		strcpy(f3_signkey, cp);
 		if (debug > 1)
-			printf("f3: ER: <%s>\n", f3_signkey);
+			printf("f3: GR1: <%s>\n", f3_signkey);
 		++gotsignkey;
 	}
-	if (!gotsignkey) {	/* Iff a default rsakey exists, use it. */
-		if (debug > 1)
-			printf("f3: DR: <%s>\n", f3_signkey);
+	if (!gotsignkey && *f1_privatekey) { /* Use rsakey from ntp.conf */
+		struct stat sb;
+
+		cp = getpath(keysdir, f1_privatekey, NULL);
+		if (!cp)
+			exit(-1);
+		if (stat(cp, &sb) == 0) {
+			strcpy(f3_signkey, cp);
+			if (debug > 1)
+				printf("f3: ER: <%s>\n", f3_signkey);
+			++gotsignkey;
+		}
 	}
 
 	if (!gotsignkey)
@@ -1379,7 +1404,7 @@ getpath (
 
 	if (debug > 1)
 		printf("getpath: gp_dir <%s> gp_path <%s> gp_file <%s>\n",
-		       gp_dir, gp_path, gp_file);
+		       gp_dir, gp_path, (gp_file) ? gp_file : "(null)");
 
 	if (*gp_path == '/')
 		strcpy(filename, gp_path);
