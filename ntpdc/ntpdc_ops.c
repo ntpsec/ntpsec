@@ -862,11 +862,11 @@ again:
 		NTOHL_FP(&il->drift_comp, &temp2ts);
 
 		(void) fprintf(fp,
-			       "offset %s, frequency %s, time_const %ld, watchdog %ld\n",
+			       "offset %s, frequency %s, time_const %d, watchdog %ld\n",
 			       lfptoa(&tempts, 6),
 			       lfptoa(&temp2ts, 3),
 			       (u_long)ntohl(il->compliance),
-			       (u_long)ntohl(il->watchdog_timer));
+			       (int)ntohl(il->watchdog_timer));
 	} else {
 		NTOHL_FP(&il->last_offset, &tempts);
 		(void) fprintf(fp, "offset:               %s s\n",
@@ -874,8 +874,8 @@ again:
 		NTOHL_FP(&il->drift_comp, &tempts);
 		(void) fprintf(fp, "frequency:            %s ppm\n",
 			       lfptoa(&tempts, 3));
-		(void) fprintf(fp, "poll adjust:          %ld\n",
-			       (u_long)ntohl(il->compliance));
+		(void) fprintf(fp, "poll adjust:          %d\n",
+			       (int)ntohl(il->compliance));
 		(void) fprintf(fp, "watchdog timer:       %ld s\n",
 			       (u_long)ntohl(il->watchdog_timer));
 	}
@@ -2919,7 +2919,7 @@ again:
 		tscale = 1e-9;
 #endif
 	(void)fprintf(fp, "pll offset:           %g s\n",
-	    (long)ntohl(ik->offset) * tscale);
+	    (int)ntohl(ik->offset) * tscale);
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",
