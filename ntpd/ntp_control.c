@@ -447,7 +447,7 @@ ctl_error(
 	 * fill in the fields.	We assume rpkt.sequence and rpkt.associd
 	 * have already been filled in.
 	 */
-	rpkt.r_m_e_op = CTL_RESPONSE|CTL_ERROR|(res_opcode & CTL_OP_MASK);
+	rpkt.r_m_e_op = (u_char) (CTL_RESPONSE|CTL_ERROR|(res_opcode & CTL_OP_MASK));
 	rpkt.status = htons((u_short) ((errcode<<8) & 0xff00));
 	rpkt.count = 0;
 
@@ -740,7 +740,7 @@ ctl_flushpkt(
 	/*
 	 * Fill in the packet with the current info
 	 */
-	rpkt.r_m_e_op = CTL_RESPONSE|more|(res_opcode & CTL_OP_MASK);
+	rpkt.r_m_e_op = (u_char)(CTL_RESPONSE|more|(res_opcode & CTL_OP_MASK));
 	rpkt.count = htons((u_short) dlen);
 	rpkt.offset = htons( (u_short) res_offset);
 	if (res_async) {

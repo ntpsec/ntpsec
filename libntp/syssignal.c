@@ -12,14 +12,14 @@ extern int errno;
 
 void
 signal_no_reset(
-#ifdef __STDC__
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
 	int sig,
 	void (*func) (int)
 #else
 	sig, func
 #endif
 	)
-#ifdef __STDC__
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
 #else
 	 int sig;
 	 void (*func) P((int));

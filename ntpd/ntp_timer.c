@@ -2,7 +2,7 @@
  * ntp_timer.c - event timer support routines
  */
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
 #include <stdio.h>
@@ -15,6 +15,12 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#if defined(HAVE_IO_COMPLETION_PORT)
+# include "ntp_iocompletionport.h"
+# include "ntp_timer.h"
+#endif
+
+extern int debug;
 
 /*
  * These routines provide support for the event timer.	The timer is
@@ -67,6 +73,11 @@ static int vmstimer[2]; 	/* time for next timer AST */
 static int vmsinc[2];		/* timer increment */
 #endif /* VMS */
 
+#if defined SYS_WINNT
+static HANDLE WaitableTimerHandle = NULL;
+#endif /* SYS_WINNT */
+
+
 /*
  * init_timer - initialize the timer data structures
  */
@@ -81,16 +92,17 @@ init_timer(void)
 	static timer_t ntpd_timerid;	/* should be global if we ever want */
 					/* to kill timer without rebooting ... */
 	struct itimerspec itimer;
-#  endif
-# else /* SYS_WINNT */
+#  endif /* HAVE_TIMER_SETTIME */
+# endif /* !SYS_WINNT */
+# if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
 	TIMECAPS tc;
 	UINT wTimerRes, wTimerID;
 # endif /* SYS_WINNT */
-#if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
+# if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
-#endif
-#endif /* VMS */
+# endif
+#endif /* !VMS */
 
 	/*
 	 * Initialize...
@@ -104,7 +116,7 @@ init_timer(void)
 	timer_xmtcalls = 0;
 	timer_timereset = 0;
 
-#ifndef SYS_WINNT
+#if !defined(SYS_WINNT)
 	/*
 	 * Set up the alarm interrupt.	The first comes 2**EVENT_TIMEOUT
 	 * seconds from now and they continue on every 2**EVENT_TIMEOUT
@@ -143,7 +155,7 @@ init_timer(void)
 	lib$addx(&vmsinc, &vmstimer, &vmstimer);
 	sys$setimr(0, &vmstimer, alarming, alarming, 0);
 # endif /* VMS */
-#ifdef SYS_CYGWIN32
+# ifdef SYS_CYGWIN32
 	/*
 	 * Get privileges needed for fiddling with the clock
 	 */
@@ -162,7 +174,7 @@ init_timer(void)
 	/* cannot test return value of AdjustTokenPrivileges. */
 	if (GetLastError() != ERROR_SUCCESS)
 		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
-#endif
+# endif /* SYS_CYGWIN32 */
 #else /* SYS_WINNT */
 	_tzset();
 
@@ -182,48 +194,40 @@ init_timer(void)
 	/* get set-time privilege for this process. */
 	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, (PTOKEN_PRIVILEGES) NULL, 0);
 	/* cannot test return value of AdjustTokenPrivileges. */
-	if (GetLastError() != ERROR_SUCCESS)
+	if (GetLastError() != ERROR_SUCCESS) {
 		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
+	}
 
 	/*
 	 * Set up timer interrupts for every 2**EVENT_TIMEOUT seconds
-	 * Under Windows/NT, expiry of timer interval leads to invocation
-	 * of a callback function (on a different thread) rather than
-	 * generating an alarm signal
+	 * Under Windows/NT, 
 	 */
 
-	/* determine max and min resolution supported */
-	if(timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-		msyslog(LOG_ERR, "timeGetDevCaps failed: %m");
+	WaitableTimerHandle = CreateWaitableTimer(NULL, FALSE, NULL);
+	if (WaitableTimerHandle == NULL) {
+		msyslog(LOG_ERR, "CreateWaitableTimer failed: %m");
 		exit(1);
 	}
-	wTimerRes = min(max(tc.wPeriodMin, TARGET_RESOLUTION), tc.wPeriodMax);
-	/* establish the minimum timer resolution that we'll use */
-	timeBeginPeriod(wTimerRes);
-
-	hMutex = CreateMutex(
-		NULL,				/* no security attributes */
-		FALSE,				/* initially not owned */
-		"MutexForNTP");     /* name of mutex */
-	if (hMutex == NULL) {
-		msyslog(LOG_ERR, "cannot create a mutex: %m\n");
-		exit(1);
+	else {
+		DWORD Period = (1<<EVENT_TIMEOUT) * 1000;
+		LARGE_INTEGER DueTime;
+		DueTime.QuadPart = Period * 10000i64;
+		if (!SetWaitableTimer(WaitableTimerHandle, &DueTime, Period, NULL, NULL, FALSE) != NO_ERROR) {
+			msyslog(LOG_ERR, "SetWaitableTimer failed: %m");
+			exit(1);
+		}
 	}
 
-	/* start the timer event */
-	wTimerID = timeSetEvent(
-		(1<<EVENT_TIMEOUT) * 1000,	 /* Delay in ms */
-		wTimerRes,					 /* Resolution */
-		(LPTIMECALLBACK) alarming,	 /* Callback function */
-		(DWORD) 0,					 /* User data */
-		TIME_PERIODIC); 		  /* Event type (periodic) */
-	if (wTimerID == 0) {
-		msyslog(LOG_ERR, "timeSetEvent failed: %m");
-		exit(1);
-	}
 #endif /* SYS_WINNT */
 }
 
+#if defined(SYS_WINNT)
+extern HANDLE 
+get_timer_handle(void)
+{
+	return WaitableTimerHandle;
+}
+#endif
 
 /*
  * timer - dispatch anyone who needs to be
@@ -233,23 +237,6 @@ timer(void)
 {
 	register struct peer *peer, *next_peer;
 	int n;
-#ifdef SYS_WINNT
-	DWORD dwWaitResult;
-
-	dwWaitResult = WaitForSingleObject(
-		hMutex, 	/* handle of mutex */
-		5000L); /* five-second time-out interval */
-
-	switch (dwWaitResult) {
-		case WAIT_OBJECT_0:
-			/* The thread got mutex ownership. */
-			break;
-		default:
-			/* Cannot get mutex ownership due to time-out. */
-			msyslog(LOG_ERR, "timer() cannot obtain mutex: %m\n");
-			exit(1);
-	}
-#endif
 
 	current_time += (1<<EVENT_TIMEOUT);
 
@@ -260,13 +247,6 @@ timer(void)
 		adjust_timer += 1;
 		adj_host_clock();
 	}
-
-#ifdef SYS_WINNT
-	if (!ReleaseMutex(hMutex)) {
-		msyslog(LOG_ERR, "timer() cannot release mutex: %m\n");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
 
 	/*
 	 * Now dispatch any peers whose event timer has expired. Be careful
@@ -355,3 +335,4 @@ timer_clr_stats(void)
 	timer_xmtcalls = 0;
 	timer_timereset = current_time;
 }
+

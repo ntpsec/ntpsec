@@ -32,7 +32,7 @@
 #include "ntp_syslog.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
-
+#include "recvbuff.h"
 /*
  * only 16 stratums, so this is more than enough.
  */
@@ -63,14 +63,6 @@ int sys_numservers = 0;			/* number of servers to poll */
 int sys_maxservers = NTP_MAXSTRATUM+1;	/* max number of servers to deal with */
 int sys_version = NTP_OLDVERSION;	/* version to poll with */
 
-/*
- * recvbuf lists
- */
-struct recvbuf *freelist;	/* free buffers */
-struct recvbuf *fulllist;	/* buffers with data */
-
-int full_recvbufs;		/* number of full ones */
-int free_recvbufs;
 
 /*
  * File descriptor masks etc. for call to select
@@ -87,15 +79,14 @@ int always_step = 0;
 int		ntptracemain	P((int,	char **));
 static	void	DoTrace		P((struct server *));
 static	void	DoTransmit	P((struct server *));
-static	int	DoReceive	P((struct server *));
-static	int	ReceiveBuf	P((struct server *, struct recvbuf *));
-static	struct server *addserver	P((struct in_addr *));
-static	struct server *addservbyname	P((const char *));
+static	int		DoReceive	P((struct server *));
+static	int		ReceiveBuf	P((struct server *, struct recvbuf *));
+static	struct	server *addserver	P((struct in_addr *));
+static	struct	server *addservbyname	P((const char *));
 static	void	setup_io	P((void));
-static	void	freerecvbuf	P((struct recvbuf *));
 static	void	sendpkt	P((struct sockaddr_in *, struct pkt *, int));
-static	int	getipaddr	P((const char *, u_int32 *));
-static	int	decodeipaddr	P((const char *, u_int32 *));
+static	int		getipaddr	P((const char *, u_int32 *));
+static	int		decodeipaddr	P((const char *, u_int32 *));
 static	void	printserver	P((struct server *, FILE *));
 static	void	printrefid	P((FILE *, struct server *));
 
@@ -106,9 +97,9 @@ WSADATA wsaData;
 
 HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
 void timer(void)	{  ; };	/* 1998/06/03 - Used in ntplib/machines.c */
-
 #endif /* SYS_WINNT */
 
+extern void input_handler(l_fp * x) { ; };
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntptrace,"ntptrace",ntptracemain);
@@ -345,23 +336,19 @@ DoReceive(
 		}
 		get_systime(&ts);
 	    
-		if (free_recvbufs == 0) {
+		if (free_recvbuffs() == 0) {
 			msyslog(LOG_ERR, "no buffers");
 			exit(1);
 		}
 
-		rb = freelist;
-		freelist = rb->next;
-		free_recvbufs--;
+		rb = get_free_recv_buffer();
 
 		fromlen = sizeof(struct sockaddr_in);
 		rb->recv_length = recvfrom(fd, (char *)&rb->recv_pkt,
 					   sizeof(rb->recv_pkt), 0,
-					   (struct sockaddr *)&rb->srcadr, &fromlen);
+					   (struct sockaddr *)&rb->recv_srcadr, &fromlen);
 		if (rb->recv_length == -1) {
-			rb->next = freelist;
-			freelist = rb;
-			free_recvbufs++;
+			freerecvbuf(rb);
 			continue;
 		}
 
@@ -370,9 +357,7 @@ DoReceive(
 		 * put it on the full list.
 		 */
 		rb->recv_time = ts;
-		rb->next = fulllist;
-		fulllist = rb;
-		full_recvbufs++;
+		add_full_recv_buffer(rb);
 
 		status = ReceiveBuf(server, rb);
 
@@ -404,7 +389,7 @@ ReceiveBuf(
 
 	if (debug) {
 		printf("ReceiveBuf(%s, ", ntoa(&server->srcadr));
-		printf("%s)\n", ntoa(&rbufp->srcadr));
+		printf("%s)\n", ntoa(&rbufp->recv_srcadr));
 	}
 
 	/*
@@ -417,7 +402,7 @@ ReceiveBuf(
 			   rbufp->recv_length);
 		return(0);		/* funny length packet */
 	}
-	if (rbufp->srcadr.sin_addr.s_addr != server->srcadr.sin_addr.s_addr) {
+	if (rbufp->recv_srcadr.sin_addr.s_addr != server->srcadr.sin_addr.s_addr) {
 		if (debug)
 		    printf("receive: wrong server\n");
 		return(0);		/* funny length packet */
@@ -578,31 +563,13 @@ addservbyname(
 }
 
 
-/* XXX ELIMINATE getrecvbufs (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * setup_io - initialize I/O data and open socket
- */
 static void
 setup_io(void)
 {
-	register int i;
-	register struct recvbuf *rb;
-
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	rb = (struct recvbuf *)
-		emalloc((sys_maxservers + 2) * sizeof(struct recvbuf));
-	freelist = 0;
-	for (i = sys_maxservers + 2; i > 0; i--) {
-		rb->next = freelist;
-		freelist = rb;
-		rb++;
-	}
-
-	fulllist = 0;
-	full_recvbufs = 0;
-	free_recvbufs = sys_maxservers + 2;
+	init_recvbuff(sys_maxservers + 2);
 
 	/* create a datagram (UDP) socket */
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0))
@@ -621,19 +588,6 @@ setup_io(void)
 	FD_SET(fd, &fdmask);
 }
 
-/* XXX ELIMINATE freerecvbuf (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * freerecvbuf - make a single recvbuf available for reuse
- */
-static void
-freerecvbuf(
-	struct recvbuf *rb
-	)
-{
-	rb->next = freelist;
-	freelist = rb;
-	free_recvbufs++;
-}
 
 
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */

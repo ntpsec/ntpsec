@@ -45,7 +45,7 @@ static char rcsid[] = "parse.c,v 4.13 1999/02/28 11:50:20 kardel RELEASE_1999022
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"

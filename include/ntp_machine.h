@@ -231,58 +231,26 @@ typedef unsigned long u_long;
  * Windows NT
  */
 #if defined(SYS_WINNT)
-#if !defined(HAVE_CONFIG_H)
-# define MCAST					/* Enable Multicast Support */
-# undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */
-# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */
-# define REFCLOCK				/* from ntpd.mak */
-# define CLOCK_LOCAL			/* from ntpd.mak */
-# define CLOCK_SHM				/* from ntpd.mak */
-# define CLOCK_PALISADE				/* from ntpd.mak */
-# undef  DES					/* from libntp.mak */
-# undef  MD5					/* from libntp.mak */
-# define NTP_LITTLE_ENDIAN		/* from libntp.mak */
-# define SYSLOG_FILE			/* from libntp.mak */
-# define HAVE_PROTOTYPES		/* from ntpq.mak */
-
-# define SIZEOF_INT 4			/* for ntp_types.h */
-# define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
-# define HAVE_NET_IF_H
-# define QSORT_USES_VOID_P
-# define HAVE_MEMMOVE
-# define volatile
-# define STDC_HEADERS
-# define NEED_S_CHAR_TYPEDEF
-# define SIZEOF_SIGNED_CHAR 1
-# define HAVE_NO_NICE
-# define NOKMEM
-# define PRESET_TICK (every / 10)
-# define PRESET_TICKADJ 50
-# define RETSIGTYPE void
-# define NTP_POSIX_SOURCE
-# define HAVE_SETVBUF
-# define HAVE_VSPRINTF
-# ifndef STR_SYSTEM
-#  define STR_SYSTEM "WINDOWS/NT"
-# endif
+# if !defined(HAVE_CONFIG_H)  || !defined(__config)
+#   error "NT requires config.h to be included"
 # endif /* HAVE_CONFIG_H) */
-/* winsock.h contains macros for class A,B,C only */
-# define IN_CLASSD(i)		(((long)(i) & 0xf0000000) == 0xe0000000)
-# define IN_CLASSD_NET		0xf0000000
-# define IN_CLASSD_NSHIFT	28
-# define IN_CLASSD_HOST 	0xfffffff
-# define IN_MULTICAST(i)	IN_CLASSD(i)
+
+#if defined SYS_WINNT
+# define ifreq _INTERFACE_INFO
+# define ifr_flags iiFlags
+# define ifr_addr iiAddress.AddressIn
+# define ifr_broadaddr iiBroadcastAddress.AddressIn
+# define ifr_mask iiNetmask.AddressIn
+#endif /* SYS_WINNT */
+
 # define isascii __isascii
 # define isatty _isatty
-# define fileno _fileno
 # define mktemp _mktemp
 # define getpid GetCurrentProcessId
-# include <winsock.h>
 # include <windows.h>
-# include <winbase.h>
+# include <ws2tcpip.h>
 # undef interface
-typedef char *caddr_t;
-void PASCAL alarming P((UINT,UINT,DWORD,DWORD,DWORD));
+ typedef char *caddr_t;
 #endif /* SYS_WINNT */
 
 int ntp_set_tod P((struct timeval *tvp, void *tzp));

@@ -45,15 +45,16 @@ static WORD event_type[] = {
 #endif /* SYS_WINNT */
 extern	char *progname;
 
-#if defined(__STDC__)
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
 void msyslog(int level, const char *fmt, ...)
-#else
+#else /* defined(__STDC__) || defined(HAVE_STDARG_H) */
      /*VARARGS*/
      void msyslog(va_alist)
      va_dcl
-#endif
+#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
 {
-#ifndef __STDC__
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
+#else
 	int level;
 	const char *fmt;
 #endif
@@ -72,7 +73,7 @@ void msyslog(int level, const char *fmt, ...)
 	int olderrno;
 	char *err;
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);
 #else
 	va_start(ap);

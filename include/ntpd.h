@@ -7,6 +7,7 @@
 #include "ntp.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
+#include "recvbuff.h"
 
 #define MAXINTERFACES	512
 
@@ -81,8 +82,7 @@ extern	void	ntp_intres	P((void));
 /* ntp_io.c */
 extern	struct interface *findbcastinter P((struct sockaddr_in *));
 extern	struct interface *findinterface P((struct sockaddr_in *));
-extern	void	freerecvbuf P((struct recvbuf *));
-extern	struct recvbuf *getrecvbufs P((void));
+
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));
 extern	void	io_clr_stats	P((void));
@@ -240,7 +240,6 @@ extern char *	req_file;		/* name of the file with configuration info */
 extern volatile u_long full_recvbufs;	/* number of recvbufs on fulllist */
 extern volatile u_long free_recvbufs;	/* number of recvbufs on freelist */
 extern u_long	total_recvbufs;		/* total recvbufs currently in use */
-extern u_long	lowater_additions;	/* number of times we have added memory */
 
 /*
  * Other statistics of possible interest

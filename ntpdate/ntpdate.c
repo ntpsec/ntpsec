@@ -56,10 +56,12 @@ struct timeval timeout = {60,0};
 #include "ntp_syslog.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+#include "recvbuff.h"
 
 #ifdef SYS_WINNT
 # define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy
 				on Windows NT timers. */
+#pragma comment(lib, "winmm")
 #endif /* SYS_WINNT */
 
 /*
@@ -196,10 +198,8 @@ static	void	init_alarm	P((void));
 static	RETSIGTYPE alarming P((int));
 #endif /* SYS_WINNT */
 static	void	init_io 	P((void));
-static	struct recvbuf *getrecvbufs P((void));
-static	void	freerecvbuf P((struct recvbuf *));
 static	void	sendpkt 	P((struct sockaddr_in *, struct pkt *, int));
-static	void	input_handler	P((void));
+void	input_handler	P((void));
 
 static	int l_adj_systime	P((l_fp *));
 static	int l_step_systime	P((l_fp *));
@@ -724,7 +724,7 @@ receive(
 	int is_authentic;
 
 	if (debug)
-		printf("receive(%s)\n", ntoa(&rbufp->srcadr));
+		printf("receive(%s)\n", ntoa(&rbufp->recv_srcadr));
 	/*
 	 * Check to see if the packet basically looks like something
 	 * intended for us.
@@ -758,7 +758,7 @@ receive(
 	/*
 	 * So far, so good.  See if this is from a server we know.
 	 */
-	server = findserver(&(rbufp->srcadr));
+	server = findserver(&(rbufp->recv_srcadr));
 	if (server == NULL) {
 		if (debug)
 			printf("receive: server not found\n");
@@ -1327,6 +1327,22 @@ timer(void)
 }
 
 
+#ifndef SYS_WINNT
+/*
+ * alarming - record the occurance of an alarm interrupt
+ */
+static RETSIGTYPE
+alarming(
+	int sig
+	)
+#else
+void CALLBACK 
+alarming(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
+#endif /* SYS_WINNT */
+{
+	alarm_flag++;
+}
+
 
 /*
  * init_alarm - set up the timer interrupt
@@ -1464,18 +1480,6 @@ init_alarm(void)
 }
 
 
-#ifndef SYS_WINNT
-/*
- * alarming - record the occurance of an alarm interrupt
- */
-static RETSIGTYPE
-alarming(
-	int sig
-	)
-{
-	alarm_flag++;
-}
-#endif /* SYS_WINNT */
 
 
 /*
@@ -1491,15 +1495,6 @@ alarming(
  * plus 2.	This should be plenty.
  */
 
-/*
- * recvbuf lists
- */
-struct recvbuf *freelist;	/* free buffers */
-struct recvbuf *fulllist;	/* buffers with data */
-
-int full_recvbufs;		/* number of full ones */
-int free_recvbufs;
-
 
 /*
  * init_io - initialize I/O data and open socket
@@ -1513,19 +1508,7 @@ init_io(void)
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	rb = (struct recvbuf *)
-		emalloc((sys_numservers + 2) * sizeof(struct recvbuf));
-	freelist = 0;
-	for (i = sys_numservers + 2; i > 0; i--) {
-		rb->next = freelist;
-		freelist = rb;
-		rb++;
-	}
-
-	fulllist = 0;
-	full_recvbufs = 0;
-	free_recvbufs = sys_numservers + 2;
-
+	init_recvbuff(sys_numservers + 2);
 	/*
 	 * Open the socket
 	 */
@@ -1610,51 +1593,6 @@ init_io(void)
 }
 
 
-/* XXX ELIMINATE getrecvbufs (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * getrecvbufs - get receive buffers which have data in them
- *
- * ***N.B. must be called with SIGIO blocked***
- */
-static struct recvbuf *
-getrecvbufs(void)
-{
-	struct recvbuf *rb;
-
-	if (full_recvbufs == 0) {
-		return (struct recvbuf *)0; /* nothing has arrived */
-	}
-
-	/*
-	 * Get the fulllist chain and mark it empty
-	 */
-	rb = fulllist;
-	fulllist = 0;
-	full_recvbufs = 0;
-
-	/*
-	 * Return the chain
-	 */
-	return rb;
-}
-
-
-/* XXX ELIMINATE freerecvbuf (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * freerecvbuf - make a single recvbuf available for reuse
- */
-static void
-freerecvbuf(
-	struct recvbuf *rb
-	)
-{
-
-	rb->next = freelist;
-	freelist = rb;
-	free_recvbufs++;
-}
-
-
 /*
  * sendpkt - send a packet to the specified destination
  */
@@ -1691,7 +1629,7 @@ sendpkt(
 /*
  * input_handler - receive packets asynchronously
  */
-static void
+void
 input_handler(void)
 {
 	register int n;
@@ -1742,7 +1680,7 @@ input_handler(void)
 		 * haven't got a buffer, or this is received
 		 * on the wild card socket, just dump the packet.
 		 */
-		if (initializing || free_recvbufs == 0) {
+		if (initializing || free_recvbuffs() == 0) {
 			char buf[100];
 
 #ifndef SYS_WINNT
@@ -1758,18 +1696,14 @@ input_handler(void)
 			continue;
 		}
 
-		rb = freelist;
-		freelist = rb->next;
-		free_recvbufs--;
+		rb = get_free_recv_buffer();
 
 		fromlen = sizeof(struct sockaddr_in);
 		rb->recv_length = recvfrom(fd, (char *)&rb->recv_pkt,
 		   sizeof(rb->recv_pkt), 0,
-		   (struct sockaddr *)&rb->srcadr, &fromlen);
+		   (struct sockaddr *)&rb->recv_srcadr, &fromlen);
 		if (rb->recv_length == -1) {
-			rb->next = freelist;
-			freelist = rb;
-			free_recvbufs++;
+			freerecvbuf(rb);
 			continue;
 		}
 
@@ -1778,9 +1712,7 @@ input_handler(void)
 		 * put it on the full list.
 		 */
 		rb->recv_time = ts;
-		rb->next = fulllist;
-		fulllist = rb;
-		full_recvbufs++;
+		add_full_recv_buffer(rb);
 	}
 }
 

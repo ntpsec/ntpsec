@@ -91,17 +91,14 @@
 #define	DESCRIPTION	"Trimble Palisade GPS" /* Long name */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference ID */
-#define TRMB_MINPOLL    5	/* 32 seconds */
-#define TRMB_MAXPOLL	10	/* 1024 seconds */
-#define PALISADE_SAMPLES	3
+#define TRMB_MINPOLL    5	/* 16 seconds */
+#define TRMB_MAXPOLL	7	/* 64 seconds */
 
 /*
  * I/O Definitions
  */
 #define	DEVICE		"/dev/palisade%d" 	/* device name and unit */
 #define	SPEED232	B9600		  	/* uart speed (9600 baud) */
-
-#define TSIP_MAXLEN	128  /* maximum length TSIP packet */
 
 /*
  * TSIP Report Definitions
@@ -126,7 +123,6 @@
 /* 
  * Leap-Insert and Leap-Delete are encoded as follows:
  * 	PALISADE_UTC_TIME set   and PALISADE_LEAP_PENDING set: INSERT leap
- * 	PALISADE_UTC_TIME clear and PALISADE_LEAP_PENDING set: DELETE leap
  */
 
 #define PALISADE_LEAP_INPROGRESS 0x08 /* This is the leap flag			*/
@@ -149,7 +145,7 @@ struct palisade_unit {
 	char		leap_status;	/* leap second flag */
 	char		rpt_status;	/* TSIP Parser State */
 	short 		rpt_cnt;	/* TSIP packet length so far */
-	char 		rpt_buf[TSIP_MAXLEN]; 	 /* packet assembly buffer */
+	char 		rpt_buf[BMAX]; 	 /* packet assembly buffer */
 };
 
 /*

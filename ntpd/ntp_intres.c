@@ -195,7 +195,11 @@ ntp_intres(void)
 	 */
 	doconfigure(1);
 	if (confentries == NULL)
+#if defined SYS_WINNT
+		ExitThread(0); /* Don't want to kill whole NT process */
+#else
 	    exit(0);		/* done that quick */
+#endif
 	
 	/*
 	 * Here we've got some problem children.  Set up the timer

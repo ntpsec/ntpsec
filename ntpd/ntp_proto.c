@@ -686,9 +686,6 @@ process_packet(
 	l_fp p_rec, p_xmt, p_org, p_reftime;
 	l_fp ci;
 	int pmode;
-#ifdef SYS_WINNT
-	DWORD dwWaitResult;
-#endif /* SYS_WINNT */
 
 	/*
 	 * Swap header fields and keep the books.
@@ -856,27 +853,6 @@ process_packet(
 		return(1);
 	}
 
-#ifdef SYS_WINNT
-	/* prevent timer() from fiddling with the clock at the same time
-	 * as us by grabbing the mutex the mutex should be held for as
-	 * small a time as possible (in order that the timer() routine
-	 * is not blocked unneccessarily) and should probably be grabbed
-	 * much later (in local_clock() maybe), but this works
-	 * reasonably well too
-	 */
-	dwWaitResult = WaitForSingleObject(
-		hMutex, 	/* handle of mutex */
-		5000L); 	/* five-second time-out interval */
-	switch (dwWaitResult) {
-		case WAIT_OBJECT_0:
-		/* The thread got mutex ownership. */
-		break;
-		default:
-		/* Cannot get mutex ownership due to time-out. */
-		msyslog(LOG_ERR, "receive error with mutex: %m\n");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
 
 	/*
 	 * This one is valid. Mark it so, give it to clock_filter().
@@ -885,12 +861,6 @@ process_packet(
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp, SQRT(peer->variance));
-#ifdef SYS_WINNT
-	if (!ReleaseMutex(hMutex)) {
-		msyslog(LOG_ERR, "receive cannot release mutex: %m\n");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
 	return(1);
 }
 
@@ -1072,7 +1042,7 @@ clock_filter(
 	double sample_disp
 	)
 {
-	register int i, j, k, n;
+	register int i, j, k, n = 0;
 	register u_char *ord;
 	double distance[NTP_SHIFT];
 	double x, y, z, off;
@@ -1951,13 +1921,21 @@ default_get_precision(void)
 #if defined SYS_WINNT || defined SYS_CYGWIN32
 	DWORD every;
 	BOOL noslew;
+	LARGE_INTEGER freq;
 
-	if (!GetSystemTimeAdjustment(&units_per_tick, &every, &noslew))
-	{
-		printf("GetSystemTimeAdjustment\n");
-		return 10000;
+	if (GetSystemTimeAdjustment(&units_per_tick, &every, &noslew))	{
+		adj_precision = 1000000L / (long)every;
 	}
-	adj_precision = 1000000L / (long)every;
+
+
+	if (QueryPerformanceFrequency(&freq)) {
+		int i;
+		for (i = 1; freq.QuadPart ; i--) {
+			freq.QuadPart >>= 1;
+		}
+		return (i);
+	}
+
 #endif
 
 #if defined(__FreeBSD__) && __FreeBSD__ >= 3

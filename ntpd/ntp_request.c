@@ -18,6 +18,7 @@
 #include "ntp_refclock.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
+#include "recvbuff.h"
 
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
@@ -1055,10 +1056,7 @@ io_stats(
 	 * Importations from the io module
 	 */
 	extern u_long io_timereset;
-	extern u_long full_recvbufs;
-	extern u_long free_recvbufs;
-	extern u_long total_recvbufs;
-	extern u_long lowater_additions;
+	
 	extern u_long packets_dropped;
 	extern u_long packets_ignored;
 	extern u_long packets_received;
@@ -1071,10 +1069,10 @@ io_stats(
 						 sizeof(struct info_io_stats));
 
 	io->timereset = htonl((u_int32)(current_time - io_timereset));
-	io->totalrecvbufs = htons((u_short) total_recvbufs);
-	io->freerecvbufs = htons((u_short) free_recvbufs);
-	io->fullrecvbufs = htons((u_short) full_recvbufs);
-	io->lowwater = htons((u_short) lowater_additions);
+	io->totalrecvbufs = htons((u_short) total_recvbuffs());
+	io->freerecvbufs = htons((u_short) free_recvbuffs());
+	io->fullrecvbufs = htons((u_short) full_recvbuffs());
+	io->lowwater = htons((u_short) lowater_additions());
 	io->dropped = htonl((u_int32)packets_dropped);
 	io->ignored = htonl((u_int32)packets_ignored);
 	io->received = htonl((u_int32)packets_received);

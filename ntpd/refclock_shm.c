@@ -99,10 +99,10 @@ struct shmTime *getShmTime (int unit) {
 	extern int errno;
 	int shmid=0;
 
-	assert (unit<10); // MAXUNIT is 4, so should never happen
+	assert (unit<10); /* MAXUNIT is 4, so should never happen */
 	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
 		      IPC_CREAT|(unit<2?0700:0777));
-	if (shmid==-1) { //error
+	if (shmid==-1) { /*error */
 		char buf[20];
 		char *pe=buf;
 		if (errno<sys_nerr)
@@ -113,9 +113,9 @@ struct shmTime *getShmTime (int unit) {
 		msyslog(LOG_ERR,"SHM shmget (unit %d): %s",unit,pe);
 		return 0;
 	}
-	else { // no error 
+	else { /* no error  */
 		struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
-		if ((int)(long)p==-1) { //error
+		if ((int)(long)p==-1) { /* error */
 			char buf[20];
 			char *pe=buf;
 			if (errno<sys_nerr)
@@ -135,7 +135,7 @@ struct shmTime *getShmTime (int unit) {
 	SECURITY_DESCRIPTOR sd;
 	SECURITY_ATTRIBUTES sa;
 	sprintf (buf,"NTP%d",unit);
-	if (unit>=2) { // world access
+	if (unit>=2) { /* world access */
 		if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
 			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m",unit);
 			return 0;
@@ -151,7 +151,7 @@ struct shmTime *getShmTime (int unit) {
 	}
 	shmid=CreateFileMapping ((HANDLE)0xffffffff, psec, PAGE_READWRITE,
 				 0, sizeof (struct shmTime),buf);
-	if (!shmid) { //error
+	if (!shmid) { /*error*/
 		char buf[1000];
 		FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
 			       0, GetLastError (), 0, buf, sizeof (buf), 0);
@@ -161,7 +161,7 @@ struct shmTime *getShmTime (int unit) {
 	else {
 		struct shmTime *p=(struct shmTime *) MapViewOfFile (shmid, 
 								    FILE_MAP_WRITE, 0, 0, sizeof (struct shmTime));
-		if (p==0) { //error
+		if (p==0) { /*error*/
 			char buf[1000];
 			FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
 				       0, GetLastError (), 0, buf, sizeof (buf), 0);
@@ -290,7 +290,7 @@ shm_poll(
 			pp->lasttime = current_time;
 			pp->polls++;
 			t=gmtime (&tvt.tv_sec);
-			pp->day=t->tm_yday;//+2;
+			pp->day=t->tm_yday;/*+2; */
 			pp->hour=t->tm_hour;
 			pp->minute=t->tm_min;
 			pp->second=t->tm_sec;

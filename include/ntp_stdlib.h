@@ -23,7 +23,7 @@
 # endif
 #endif
 
-#if defined(__STDC__)
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
 # include <stdarg.h>
 extern	void	msyslog		P((int, const char *, ...))
 				__attribute__((__format__(__printf__, 2, 3)));
@@ -56,7 +56,12 @@ extern	u_long	calleapwhen	P((u_long));
 extern	u_long	calyearstart	P((u_long));
 extern	const char *clockname	P((int));
 extern	int	clocktime	P((int, int, int, int, int, u_long, u_long *, u_int32 *));
+#if defined SYS_WINNT && defined DEBUG
+# define emalloc(_c) debug_emalloc(_c, __FILE__, __LINE__)
+extern	void *	debug_emalloc		P((u_int, char *, int));
+#else
 extern	void *	emalloc		P((u_int));
+#endif
 extern	int	ntp_getopt	P((int, char **, const char *));
 extern	void	init_auth	P((void));
 extern	void	init_lib	P((void));

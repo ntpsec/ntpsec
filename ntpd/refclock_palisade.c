@@ -48,7 +48,7 @@
  * Post Office Box 3642
  * Sunnyvale, CA 94088-3642
  *
- * Version 2.43; May 11, 1999
+ * Version 2.45; July 14, 1999
  *
  */
 
@@ -200,9 +200,9 @@ palisade_start (
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
-	pp->nstages = PALISADE_SAMPLES;
+	pp->nstages = 1;
 #ifndef PALISADE
-	pp->nskeep = PALISADE_SAMPLES * 3 / 5;
+	pp->nskeep = 1;
 #endif
 
 	if (!io_addclock(&pp->io)) {
@@ -326,9 +326,19 @@ TSIP_decode (
 	 * proper format, declare bad format and exit.
 	 */
 
-	if (up->rpt_buf[0] == (char) 0x41) 
+	if ((up->rpt_buf[0] == (char) 0x41) ||
+		(up->rpt_buf[0] == (char) 0x46) ||
+		(up->rpt_buf[0] == (char) 0x54) ||
+		(up->rpt_buf[0] == (char) 0x4B) ||
+		(up->rpt_buf[0] == (char) 0x6D)) {
+
 	/* standard time packet - GPS time and GPS week number */
+#ifdef DEBUG
+			printf("Palisade Port B packets detected. Connect to Port A\n");
+#endif
+
 		return 0;	
+	}
 
 	if (up->rpt_buf[0] == (char) 0x8f) {
 	/* 
@@ -712,7 +722,7 @@ palisade_io (
 		else if (up->rpt_status == TSIP_PARSED_EMPTY)
 		    	up->rpt_cnt = 0;
 
-		else if (up->rpt_cnt > TSIP_MAXLEN) 
+		else if (up->rpt_cnt > BMAX) 
 			up->rpt_status =TSIP_PARSED_EMPTY;
 
 		if (up->rpt_status == TSIP_PARSED_FULL) 
@@ -720,36 +730,6 @@ palisade_io (
 
 	} /* while chars in buffer */
 }
-
-#if defined SYS_WINNT 
-static int 
-nt_poll(
-	struct refclockproc *pp,
-	l_fp *postpoll
-	)
-{
-	struct palisade_unit *up;
-
-	up = (struct palisade_unit *)pp->unitptr;
-
-
-	get_systime(&pp->lastrec);
-	if (!EscapeCommFunction((HANDLE) pp->io.fd, SETRTS)) {
-
-		msyslog (LOG_ERR, "NT_COM: Unit %d: Error set RTS %m", up->unit);
-		return -1;
-	}
-	get_systime(postpoll);
-
-	if (!EscapeCommFunction((HANDLE) pp->io.fd, CLRRTS)) {
-		
-		msyslog (LOG_ERR, "NT_COM: Unit %d: Error clear RTS %m", up->unit);
-		return -1;
-	}
-
-	return 0;
-}
-#endif
 
 
 /*
@@ -774,15 +754,8 @@ HW_poll (
 
 	up = (struct palisade_unit *) pp->unitptr;
 
-#if defined SYS_WINNT 
-	if (nt_poll(pp, &pp->lastrec)) {
-		msyslog(LOG_ERR, "Palisade(%d) NT_poll: ioctl(fd,GET): %m", 
-			up->unit);	
-		return -1;
-	}
-#else 	/* !NT handler */
 	/* read the current status, so we put things back right */
-	if (ioctl(pp->io.fd, TIOCMGET, &x) == -1) {
+	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
 #ifdef DEBUG
 	if (debug)
 	    printf("Palisade HW_poll: unit %d: GET %s\n", up->unit, strerror(errno));
@@ -797,7 +770,7 @@ HW_poll (
 	get_systime(&pp->lastrec);
 
 	/* Leading edge trigger */
-	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) { 
+	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
 #ifdef DEBUG
 	if (debug)
 	    printf("Palisade HW_poll: unit %d: SET \n", up->unit);
@@ -819,7 +792,6 @@ HW_poll (
 			up->unit);
 		return -1;
 	}
-#endif /* ! SYS_WINNT */
 
 	return 0;
 }

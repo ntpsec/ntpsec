@@ -31,6 +31,7 @@
 # include <process.h>
 # include <io.h>
 # include "../libntp/log.h"
+# include <crtdbg.h>
 #endif /* SYS_WINNT */
 #if defined(HAVE_RTPRIO)
 # ifdef HAVE_SYS_RESOURCE_H
@@ -71,7 +72,9 @@
 #include "ntpd.h"
 #include "ntp_select.h"
 #include "ntp_io.h"
+
 #include "ntp_stdlib.h"
+#include "recvbuff.h"  
 
 #if 0				/* HMS: I don't think we need this. 961223 */
 #ifdef LOCK_PROCESS
@@ -98,26 +101,29 @@
 #ifndef SYS_WINNT
 #define SIGDIE1 	SIGHUP
 #define SIGDIE3 	SIGQUIT
-#endif /* SYS_WINNT */
 #define SIGDIE2 	SIGINT
 #define SIGDIE4 	SIGTERM
+#endif /* SYS_WINNT */
 
 #if defined SYS_WINNT || defined SYS_CYGWIN32
 /* handles for various threads, process, and objects */
-HANDLE	process_handle = NULL, WorkerThreadHandle = NULL,
-	ResolverThreadHandle = NULL, TimerThreadHandle = NULL,
-	hMutex = NULL;
+HANDLE ResolverThreadHandle = NULL;
 /* variables used to inform the Service Control Manager of our current state */
 SERVICE_STATUS ssStatus;
 SERVICE_STATUS_HANDLE	sshStatusHandle;
-int was_stopped = 0;
+HANDLE WaitHandles[3] = { NULL, NULL, NULL };
 char szMsgPath[255];
+static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 #endif /* SYS_WINNT */
 
 /*
  * Scheduling priority we run at
  */
-#define NTPD_PRIO	(-12)
+#if !defined SYS_WINNT
+# define NTPD_PRIO	(-12)
+#else
+# define NTPD_PRIO	REALTIME_PRIORITY_CLASS
+#endif
 
 /*
  * Debugging flag
@@ -154,9 +160,6 @@ int was_alarmed;
 extern int syscall	P((int, ...));
 #endif /* DECL_SYSCALL */
 
-#ifdef SYS_WINNT
-extern void worker_thread P((void *));
-#endif /* SYS_WINNT */
 
 #ifdef	SIGDIE2
 static	RETSIGTYPE	finish		P((int));
@@ -227,8 +230,7 @@ static void
 set_process_priority(void)
 {
 #ifdef SYS_WINNT
-	process_handle = GetCurrentProcess();
-	if (!SetPriorityClass(process_handle, (DWORD) REALTIME_PRIORITY_CLASS))
+	if (!SetPriorityClass(GetCurrentProcess(), (DWORD) REALTIME_PRIORITY_CLASS))
 	{
 		msyslog(LOG_ERR, "SetPriorityClass: %m");
 		return;
@@ -302,11 +304,9 @@ ntpdmain(
 	)
 {
 	l_fp now;
-#ifndef SYS_WINNT
 	char *cp;
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
-#endif
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
 	struct sigaction sa;
 #endif
@@ -453,17 +453,8 @@ ntpdmain(
 			/* daemonize */
 			if (!StartServiceCtrlDispatcher(dispatchTable))
 			{
-				if (!was_stopped)
-				{
-					msyslog(LOG_ERR, "StartServiceCtrlDispatcher: %m");
-					ExitProcess(2);
-				}
-				else
-				{
-					NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-						msyslog(LOG_INFO, "StartServiceCtrlDispatcher: service stopped");
-					ExitProcess(0);
-				}
+				msyslog(LOG_ERR, "StartServiceCtrlDispatcher: %m");
+				ExitProcess(2);
 			}
 		}
 #endif /* SYS_WINNT */
@@ -488,7 +479,8 @@ service_main(
 	)
 {
 	char *cp;
-	DWORD dwWait;
+	struct recvbuf *rbuflist;
+	struct recvbuf *rbuf;
 
 	if(!debug)
 	{
@@ -516,21 +508,6 @@ service_main(
 			return;
 		}
 
-		/*
-		 * create an event object that the control handler function
-		 * will signal when it receives the "stop" control code
-		 */
-		if (!(hServDoneEvent = CreateEvent(
-			NULL,	 /* no security attributes */
-			TRUE,	 /* manual reset event */
-			FALSE,	 /* not-signalled */
-			NULL)))  /* no name */
-		{
-			msyslog(LOG_ERR, "CreateEvent failed: %m");
-			ssStatus.dwCurrentState = SERVICE_STOPPED;
-			SetServiceStatus(sshStatusHandle, &ssStatus);
-			return;
-		}
 	}  /* debug */
 #endif /* defined(SYS_WINNT) && !defined(NODETACH) */
 #endif /* VMS */
@@ -662,9 +639,18 @@ service_main(
 	(void) signal_no_reset(SIGPIPE, SIG_IGN);
 #endif	/* SIGPIPE */
 
+#if defined SYS_WINNT
+	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE)) {
+		msyslog(LOG_ERR, "Can't set console control handler: %m");
+	}
+#endif
+
 	/*
 	 * Call the init_ routines to initialize the data structures.
 	 */
+#if defined (HAVE_IO_COMPLETION_PORT)
+	init_io_completion_port();
+#endif
 	init_auth();
 	init_util();
 	init_restrict();
@@ -700,80 +686,23 @@ service_main(
 # if defined(DEBUG)
 	if(!debug)
 	{
-# endif
-
-		/*
-		 * the service_main() thread will have to wait for requests to
-		 * start/stop/pause/continue from the services icon in the Control
-		 * Panel or from any WIN32 application start a new thread to perform
-		 * all the work of the NTP service
-		 */
-		if (!(WorkerThreadHandle = (HANDLE)_beginthread(
-			worker_thread,
-			0,		/* stack size		*/
-			NULL))) /* argument to thread	*/
-		{
-			msyslog(LOG_ERR, "_beginthread: %m");
-			if (hServDoneEvent != NULL)
-				CloseHandle(hServDoneEvent);
-			if (ResolverThreadHandle != NULL)
-				CloseHandle(ResolverThreadHandle);
-			ssStatus.dwCurrentState = SERVICE_STOPPED;
-			SetServiceStatus(sshStatusHandle, &ssStatus);
-			return;
-		}
-
+#endif
 		/* report to the service control manager that the service is running */
 		ssStatus.dwCurrentState = SERVICE_RUNNING;
 		ssStatus.dwWin32ExitCode = NO_ERROR;
 		if (!SetServiceStatus(sshStatusHandle, &ssStatus))
 		{
 			msyslog(LOG_ERR, "SetServiceStatus: %m");
-			if (hServDoneEvent != NULL)
-				CloseHandle(hServDoneEvent);
 			if (ResolverThreadHandle != NULL)
 				CloseHandle(ResolverThreadHandle);
 			ssStatus.dwCurrentState = SERVICE_STOPPED;
 			SetServiceStatus(sshStatusHandle, &ssStatus);
 			return;
 		}
-
-		/* wait indefinitely until hServDoneEvent is signaled */
-		dwWait = WaitForSingleObject(hServDoneEvent,INFINITE);
-		if (hServDoneEvent != NULL)
-			CloseHandle(hServDoneEvent);
-		if (ResolverThreadHandle != NULL)
-			CloseHandle(ResolverThreadHandle);
-		if (WorkerThreadHandle != NULL)
-			CloseHandle(WorkerThreadHandle);
-		if (TimerThreadHandle != NULL)
-			CloseHandle(TimerThreadHandle);
-		/* restore the clock frequency back to its original value */
-		if (!SetSystemTimeAdjustment((DWORD)0, TRUE))
-			msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
-		ssStatus.dwCurrentState = SERVICE_STOPPED;
-		SetServiceStatus(sshStatusHandle, &ssStatus);
-		return;
 # if defined(DEBUG)
 	}
-	else
-		worker_thread( (void *) 0 );
-# endif
-} /* end service_main() */
-
-
-/*
- * worker_thread - perform all remaining functions after initialization and and becoming a service
- */
-void
-worker_thread(
-	void *notUsed
-	)
-{
-	struct recvbuf *rbuflist;
-	struct recvbuf *rbuf;
-
-#endif /* defined(SYS_WINNT) && !defined(NODETACH) */
+#endif  
+#endif
 
 	/*
 	 * Report that we're up to any trappers
@@ -788,20 +717,6 @@ worker_thread(
 	 * between checking for alarms and doing the select().
 	 * Mostly harmless, I think.
 	 */
-	/*
-	 * Under NT, a timer periodically invokes a callback function
-	 * on a different thread. This callback function has no way
-	 * of interrupting a winsock "select" call on a different
-	 * thread. A mutex is used to synchronize access to clock
-	 * related variables between the two threads (one blocking
-	 * on a select or processing the received packets and the
-	 * other that calls the timer callback function, timer(),
-	 * every second). Due to this change, timer() routine can
-	 * be invoked between  processing two or more received
-	 * packets, or even during processing a single received
-	 * packet before entering the clock_update routine (if
-	 * needed). The potential race condition is also avoided.
-	 */
 	/* On VMS, I suspect that select() can't be interrupted
 	 * by a "signal" either, so I take the easy way out and
 	 * have select() time out after one second.
@@ -809,19 +724,67 @@ worker_thread(
 	 * and - lacking a hardware reference clock - I have
 	 * yet to learn about anything else that is.
 	 */
+# if defined(HAVE_IO_COMPLETION_PORT)
+	{
+		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
+		WaitHandles[1] = get_recv_buff_event();
+		WaitHandles[2] = get_timer_handle();
+
+		for (;;) {
+			DWORD Index = MsgWaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, INFINITE, QS_ALLEVENTS, MWMO_ALERTABLE);
+			switch (Index) {
+				case WAIT_OBJECT_0 + 0 : /* exit request */
+					exit(0);
+				break;
+
+				case WAIT_OBJECT_0 + 1 : {/* recv buffer */
+					if (NULL != (rbuf = get_full_recv_buffer())) {
+						if (rbuf->receiver != NULL) {
+							rbuf->receiver(rbuf);
+						}
+						freerecvbuf(rbuf);
+					}
+				}
+				break;
+
+				case WAIT_OBJECT_0 + 2 : /* 1 second timer */
+					timer();
+				break;
+
+				case WAIT_OBJECT_0 + 3 : { /* Windows message */
+					MSG msg;
+					while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+						if (msg.message == WM_QUIT) {
+							exit(0);
+						}
+						DispatchMessage(&msg);
+					}
+				}
+				break;
+
+				case WAIT_IO_COMPLETION : /* loop */
+				case WAIT_TIMEOUT :
+				break;
+				
+			}
+
+		}
+	}
+# else /* normal I/O */
+
 	was_alarmed = 0;
 	rbuflist = (struct recvbuf *)0;
 	for (;;)
 	{
-#ifndef HAVE_SIGNALED_IO
+#  if !defined(HAVE_SIGNALED_IO) 
 		extern fd_set activefds;
 		extern int maxactivefd;
 
 		fd_set rdfdes;
 		int nfound;
-#else
+#  elif defined(HAVE_SIGNALED_IO)
 		block_io_and_alarm();
-#endif
+#  endif
 
 		rbuflist = getrecvbufs();	/* get received buffers */
 		if (alarm_flag) 	/* alarmed? */
@@ -858,22 +821,17 @@ worker_thread(
 
 				(void)input_handler(&ts);
 			}
-			else if (
-#ifndef SYS_WINNT
-				(nfound == -1 && errno != EINTR)
-#else /* SYS_WINNT */
-				(nfound == SOCKET_ERROR && WSAGetLastError() != WSAEINTR)
-#endif /* SYS_WINNT */
-				)
+			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
 			else if (debug) {
-#if !defined SYS_VXWORKS && !defined SYS_CYGWIN32 /* to unclutter log */
+#   if !defined SYS_VXWORKS && !defined SYS_CYGWIN32 /* to unclutter log */
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
-#endif
+#   endif
 			}
-#else
+#  else /* HAVE_SIGNALED_IO */
+                        
 			wait_for_signal();
-#endif
+#  endif /* HAVE_SIGNALED_IO */
 			if (alarm_flag) 	/* alarmed? */
 			{
 				was_alarmed = 1;
@@ -881,27 +839,19 @@ worker_thread(
 			}
 			rbuflist = getrecvbufs();  /* get received buffers */
 		}
-#ifdef HAVE_SIGNALED_IO
+# ifdef HAVE_SIGNALED_IO
 		unblock_io_and_alarm();
-#endif /* HAVE_SIGNALED_IO */
+# endif /* HAVE_SIGNALED_IO */
 
 		/*
 		 * Out here, signals are unblocked.  Call timer routine
 		 * to process expiry.
-		 */
-#ifndef SYS_WINNT
-		/*
-		 * under WinNT, the timer() routine is directly called
-		 * by the timer callback function (alarming)
-		 * was_alarmed should have never been set, but don't
-		 * want to risk timer() being accidently called here
 		 */
 		if (was_alarmed)
 		{
 			timer();
 			was_alarmed = 0;
 		}
-#endif /* SYS_WINNT */
 
 		/*
 		 * Call the data procedure to handle each received
@@ -914,10 +864,18 @@ worker_thread(
 			(rbuf->receiver)(rbuf);
 			freerecvbuf(rbuf);
 		}
+#  if defined DEBUG && defined SYS_WINNT
+		if (debug > 4)
+		    printf("getrecvbufs: %ld handler interrupts, %ld frames\n",
+			   handler_calls, handler_pkts);
+#  endif
+
 		/*
 		 * Go around again
 		 */
 	}
+# endif /* HAVE_IO_COMPLETION_PORT */
+	exit(0);
 }
 
 
@@ -932,14 +890,6 @@ finish(
 {
 
 	msyslog(LOG_NOTICE, "ntpd exiting on signal %d", sig);
-
-#ifdef SYS_WINNT
-	/*
-	 * with any exit(0)'s in the worker_thread, the service_main()
-	 * thread needs to be informed to quit also
-	 */
-	SetEvent(hServDoneEvent);
-#endif /* SYS_WINNT */
 
 	switch (sig)
 	{
@@ -1034,20 +984,21 @@ service_ctrl(
 		break;
 
 		case SERVICE_CONTROL_STOP:
-		dwState = SERVICE_STOP_PENDING;
-		/*
-		 * Report the status, specifying the checkpoint and waithint,
-		 *	before setting the termination event.
-		 */
-		ssStatus.dwCurrentState = dwState;
-		ssStatus.dwWin32ExitCode = NO_ERROR;
-		ssStatus.dwWaitHint = 3000;
-		if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-		{
-			msyslog(LOG_ERR, "SetServiceStatus: %m");
-		}
-		was_stopped = 1;
-		SetEvent(hServDoneEvent);
+			dwState = SERVICE_STOP_PENDING;
+			/*
+			 * Report the status, specifying the checkpoint and waithint,
+			 *	before setting the termination event.
+			 */
+			ssStatus.dwCurrentState = dwState;
+			ssStatus.dwWin32ExitCode = NO_ERROR;
+			ssStatus.dwWaitHint = 3000;
+			if (!SetServiceStatus(sshStatusHandle, &ssStatus))
+			{
+				msyslog(LOG_ERR, "SetServiceStatus: %m");
+			}
+			if (WaitHandles[0] != NULL) {
+				SetEvent(WaitHandles[0]);
+			}
 		return;
 
 		case SERVICE_CONTROL_INTERROGATE:
@@ -1067,4 +1018,73 @@ service_ctrl(
 		msyslog(LOG_ERR, "SetServiceStatus: %m");
 	}
 }
+
+static BOOL WINAPI 
+OnConsoleEvent(  
+	DWORD dwCtrlType
+	)
+{
+	switch (dwCtrlType) {
+		case CTRL_BREAK_EVENT :
+			if (debug > 0) {
+				debug <<= 1;
+			}
+			else {
+				debug = 1;
+			}
+			if (debug > 8) {
+				debug = 0;
+			}
+			printf("debug level %d\n", debug);
+		break ;
+
+		case CTRL_C_EVENT  :
+		case CTRL_CLOSE_EVENT :
+		case CTRL_SHUTDOWN_EVENT :
+			if (WaitHandles[0] != NULL) {
+				SetEvent(WaitHandles[0]);
+			}
+		break;
+
+		default :
+			return FALSE;
+
+
+	}
+	return TRUE;;
+}
+
+
+/*
+ *  NT version of exit() - all calls to exit() should be routed to
+ *  this function.
+ */
+void
+service_exit(
+	int status
+	)
+{
+	/* restore the clock frequency back to its original value */
+	if (!SetSystemTimeAdjustment((DWORD)0, TRUE)) {
+		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
+	}
+
+	if (!debug) { /* did not become a service, simply exit */
+		/* service mode, need to have the service_main routine
+		 * register with the service control manager that the 
+		 * service has stopped running, before exiting
+		 */
+		ssStatus.dwCurrentState = SERVICE_STOPPED;
+		SetServiceStatus(sshStatusHandle, &ssStatus);
+
+	}
+	uninit_io_completion_port();
+
+# if defined _MSC_VER
+	_CrtDumpMemoryLeaks();
+# endif 
+#undef exit	
+	exit(status);
+}
+
 #endif /* SYS_WINNT */

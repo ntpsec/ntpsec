@@ -610,13 +610,11 @@ getauthkeys(
 	}
 
 	if (key_file_name == 0) {
-		key_file_name = (char*)emalloc((u_int)
 #ifndef SYS_WINNT
-		    (len + 1)
+		key_file_name = (char*)emalloc((u_int) (len + 1));
 #else
-		    (MAXPATHLEN)
+		key_file_name = (char*)emalloc((u_int)  (MAXPATHLEN));
 #endif
-		    );
 	}
 #ifndef SYS_WINNT
  	memmove(key_file_name, keyfile, (unsigned)(len+1));

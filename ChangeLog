@@ -1,5 +1,43 @@
 1999-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp.h:
+	include/ntp_fp.h:
+	include/ntp_io.h:
+	include/ntp_machine.h:
+	include/ntp_refclock.h:
+	include/ntp_stdlib.h:
+	include/ntpd.h:
+	libntp/Makefile.am:
+	libntp/emalloc.c:
+	libntp/machines.c:
+	libntp/mexit.c:
+	libntp/msyslog.c:
+	libntp/statestr.c:
+	libntp/syssignal.c:
+	libntp/systime.c:
+	libparse/parse.c:
+	libparse/parse_conf.c:
+	ntpd/ntp_control.c:
+	ntpd/ntp_intres.c:
+	ntpd/ntp_io.c:
+	ntpd/ntp_proto.c:
+	ntpd/ntp_refclock.c:
+	ntpd/ntp_request.c:
+	ntpd/ntp_timer.c:
+	ntpd/ntp_util.c:
+	ntpd/ntpd.c:
+	ntpd/refclock_nmea.c:
+	ntpd/refclock_palisade.c:
+	ntpd/refclock_palisade.h:
+	ntpd/refclock_shm.c:
+	ntpdate/ntpdate.c:
+	ntptrace/ntptrace.c: Cleanup
+	* libntp/recvbuff.c:
+	libntp/iosignal.c:
+	include/iosignal.h:
+	include/recvbuff.h: Added
+	From: Sven_Dietrich@Trimble.COM
+
 	* README: Add README.cvs
 
 	* configure.in (ac_cv_var_struct_ntptime_val_timespec): Typo.

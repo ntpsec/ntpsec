@@ -440,7 +440,7 @@ refclock_process_offset(
 /*
  * refclock_process - process a pile of samples from the clock
  *
- * This routine converts the timecode in the form days, hours, miinutes,
+ * This routine converts the timecode in the form days, hours, minutes,
  * seconds, milliseconds/microseconds to internal timestamp format.
  * Further processing is then delegated to refclock sample
  */

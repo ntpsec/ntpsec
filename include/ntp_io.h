@@ -1,3 +1,5 @@
+#if !defined _NTP_IO_H
+#define _NTP_IO_H
 /*
  * POSIX says use <fnct.h> to get O_* symbols and 
  * SEEK_SET symbol form <unistd.h>.
@@ -22,6 +24,10 @@
 #if !defined(SEEK_SET) && defined(L_SET)
 # define SEEK_SET L_SET
 #endif
+
 #ifdef SYS_WINNT
 # include <io.h>
+# include "win32_io.h"
+#endif
+
 #endif

@@ -9,8 +9,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_NMEA)
 
-#define	DEBUG	1
-
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>

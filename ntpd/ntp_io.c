@@ -7,6 +7,7 @@
 # include <config.h>
 #endif
 
+/* Modified by Sven 7/14/99 322pm */
 
 #include <stdio.h>
 #include <signal.h>
@@ -37,6 +38,7 @@
 #include "ntpd.h"
 #include "ntp_select.h"
 #include "ntp_io.h"
+#include "iosignal.h"
 #include "ntp_refclock.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
@@ -55,6 +57,10 @@
 #define IFF_BROADCAST	IFR$M_IFF_BROADCAST
 #define IFF_LOOPBACK	IFR$M_IFF_LOOPBACK
 
+#endif /* VMS */
+
+
+#if defined(VMS) || defined(SYS_WINNT)
 /* structure used in SIOCGIFCONF request (after [KSR] OSF/1) */
 struct ifconf {
 	int ifc_len;			/* size of buffer */
@@ -90,41 +96,6 @@ struct ifconf {
  * interim it will drop incoming frames, the idea being that it is
  * better to drop a packet than to be inaccurate.
  */
-
-/*
- * Block the interrupt, for critical sections.
- */
-#if defined(HAVE_SIGNALED_IO)
-static int sigio_block_count = 0;
-# define BLOCKIO()	 ((void) block_sigio())
-# define UNBLOCKIO() ((void) unblock_sigio())
-#else
-# define BLOCKIO()
-# define UNBLOCKIO()
-#endif
-
-/*
- * recvbuf memory management
- */
-#define RECV_INIT	10	/* 10 buffers initially */
-#define RECV_LOWAT	3	/* when we're down to three buffers get more */
-#define RECV_INC	5	/* get 5 more at a time */
-#define RECV_TOOMANY	40	/* this is way too many buffers */
-
-/*
- * Memory allocation
- */
-volatile u_long full_recvbufs;		/* number of recvbufs on fulllist */
-volatile u_long free_recvbufs;		/* number of recvbufs on freelist */
-
-static	struct recvbuf *volatile freelist;  /* free buffers */
-static	struct recvbuf *volatile fulllist;  /* lifo buffers with data */
-static	struct recvbuf *volatile beginlist; /* fifo buffers with data */
-
-u_long total_recvbufs;		/* total recvbufs currently in use */
-u_long lowater_additions;	/* number of times we have added memory */
-
-static	struct recvbuf initial_bufs[RECV_INIT]; /* initial allocation */
 
 
 /*
@@ -167,14 +138,6 @@ static	int open_socket		P((struct sockaddr_in *, int, int));
 static	void	close_socket	P((int));
 static	void	close_file	P((int));
 static	char *	fdbits		P((int, fd_set *));
-#ifdef HAVE_SIGNALED_IO
-static	int init_clock_sig	P((struct refclockio *));
-static	void	init_socket_sig P((int));
-static	RETSIGTYPE sigio_handler P((int));
-static	void	block_sigio	P((void));
-static	void	unblock_sigio	P((void));
-static	void	set_signal	P((void));
-#endif /* HAVE_SIGNALED_IO */
 
 /*
  * init_io - initialize I/O data structures and call socket creation routine
@@ -182,26 +145,17 @@ static	void	set_signal	P((void));
 void
 init_io(void)
 {
-	register int i;
-
 #ifdef SYS_WINNT
 	WORD wVersionRequested;
 	WSADATA wsaData;
+	init_transmitbuff();
 #endif /* SYS_WINNT */
 
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	freelist = 0;
-	for (i = 0; i < RECV_INIT; i++)
-	{
-		initial_bufs[i].next = (struct recvbuf *) freelist;
-		freelist = &initial_bufs[i];
-	}
+	init_recvbuff(RECV_INIT);
 
-	fulllist = 0;
-	free_recvbufs = total_recvbufs = RECV_INIT;
-	full_recvbufs = lowater_additions = 0;
 	packets_dropped = packets_received = 0;
 	packets_ignored = 0;
 	packets_sent = packets_notsent = 0;
@@ -412,8 +366,9 @@ create_sockets(
 # endif /* not USE_STREAMS_DEVICE_FOR_IF_CONFIG */
 
 	i = 1;
-
+# if !defined(SYS_WINNT)
 	ifc.ifc_len = sizeof(buf);
+# endif
 # ifdef STREAMS_TLI
 	ioc.ic_cmd = SIOCGIFCONF;
 	ioc.ic_timout = 0;
@@ -438,17 +393,13 @@ create_sockets(
 	ifc.ifc_buf = buf;
 #  ifndef SYS_WINNT
 	if (ioctl(vs, SIOCGIFCONF, (char *)&ifc) < 0)
-	{
+#  else
+ 	if (WSAIoctl(vs, SIO_GET_INTERFACE_LIST, 0, 0, ifc.ifc_buf, ifc.ifc_len, &ifc.ifc_len, 0, 0) == SOCKET_ERROR) 
+#  endif /* SYS_WINNT */
+{
 		msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFCONF) failed: %m - exiting");
 		exit(1);
-	}
-#  else
-	if (get_winnt_interfaces(&ifc) < 0)
-	{
-		msyslog(LOG_ERR, "create_sockets: get_winnt_interfaces() failed: %m - exiting");
-		exit(1);
-	}
-#  endif /* SYS_WINNT */
+}
 
 # endif /* not STREAMS_TLI */
 
@@ -463,19 +414,20 @@ create_sockets(
 # endif
 		n -= size;
 
-
+# if !defined(SYS_WINNT)
 		/* Exclude logical interfaces (indicated by ':' in the interface name)	*/
 		if (strchr(ifr->ifr_name, (int)':') != NULL) {
 			continue;
 		}
 
 		if
-# ifdef VMS /* VMS+UCX */
+#  ifdef VMS /* VMS+UCX */
 	    (((struct sockaddr *)&(ifr->ifr_addr))->sa_family != AF_INET)
-# else
+#  else
 	    (ifr->ifr_addr.sa_family != AF_INET)
-# endif /* VMS+UCX */
+#  endif /* VMS+UCX */
 	    continue;
+# endif /* SYS_WINNT */
 		ifreq = *ifr;
 		inter_list[i].flags = 0;
 		/* is it broadcast capable? */
@@ -548,9 +500,12 @@ create_sockets(
 #  endif /* not STREAMS_TLI */
 # endif /* not SYS_WINNT */
 #endif /* 0 */
-
-		(void)strncpy(inter_list[i].name, ifreq.ifr_name,
-			      sizeof(inter_list[i].name));
+# if defined(SYS_WINNT)
+   {int TODO_FillInTheNameWithSomeThingReasonble;}
+# else
+  		(void)strncpy(inter_list[i].name, ifreq.ifr_name,
+  			      sizeof(inter_list[i].name));
+# endif
 		inter_list[i].sin = *(struct sockaddr_in *)&ifr->ifr_addr;
 		inter_list[i].sin.sin_family = AF_INET;
 		inter_list[i].sin.sin_port = port;
@@ -616,12 +571,12 @@ create_sockets(
 		}
 #  endif /* not STREAMS_TLI */
 		inter_list[i].mask                 = *(struct sockaddr_in *)&ifreq.ifr_addr;
-#else
+# else
 		/* winnt here */
-		inter_list[i].bcast                = *(struct sockaddr_in *)&ifreq.ifr_broadaddr;
+		inter_list[i].bcast                = ifreq.ifr_broadaddr;
 		inter_list[i].bcast.sin_family	   = AF_INET;
 		inter_list[i].bcast.sin_port	   = port;
-		inter_list[i].mask.sin_addr.s_addr = inet_addr(ifreq.ifr_mask);
+		inter_list[i].mask                 = ifreq.ifr_mask;
 # endif /* not SYS_WINNT */
 
 		/*
@@ -717,9 +672,15 @@ create_sockets(
 		}
 	}
 #endif
+#if defined (HAVE_IO_COMPLETION_PORT)
+
+	for (i = 0; i < ninterfaces; i++)
+	{
+		io_completion_port_add_socket(&inter_list[i]);
+	}
+#endif
 	return ninterfaces;
 }
-
 
 /*
  * io_setbclient - open the broadcast client sockets
@@ -1162,95 +1123,6 @@ findbcastinter(
 }
 
 
-/* XXX ELIMINATE getrecvbufs (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * getrecvbufs - get receive buffers which have data in them
- *
- * ***N.B. must be called with SIGIO blocked***
- */
-struct recvbuf *
-getrecvbufs(void)
-{
-	struct recvbuf *rb;
-
-#ifdef DEBUG
-	if (debug > 4)
-	    printf("getrecvbufs: %ld handler interrupts, %ld frames\n",
-		   handler_calls, handler_pkts);
-#endif
-
-	if (full_recvbufs == 0)
-	{
-#ifdef DEBUG
-		if (debug > 4)
-		    printf("getrecvbufs called, no action here\n");
-#endif
-		return (struct recvbuf *)0; /* nothing has arrived */
-	}
-
-	/*
-	 * Get the fulllist chain and mark it empty
-	 */
-#ifdef DEBUG
-	if (debug > 4)
-	    printf("getrecvbufs returning %ld buffers\n", full_recvbufs);
-#endif
-	rb = (struct recvbuf *) beginlist;
-	fulllist = 0;
-	full_recvbufs = 0;
-
-	/*
-	 * Check to see if we're below the low water mark.
-	 */
-	if (free_recvbufs <= RECV_LOWAT)
-	{
-		register struct recvbuf *buf;
-		register int i;
-
-		if (total_recvbufs >= RECV_TOOMANY)
-		    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
-			    total_recvbufs);
-		else
-		{
-			buf = (struct recvbuf *)
-			    emalloc(RECV_INC*sizeof(struct recvbuf));
-			for (i = 0; i < RECV_INC; i++)
-			{
-				buf->next = (struct recvbuf *) freelist;
-				freelist = buf;
-				buf++;
-			}
-
-			free_recvbufs += RECV_INC;
-			total_recvbufs += RECV_INC;
-			lowater_additions++;
-		}
-	}
-
-	/*
-	 * Return the chain
-	 */
-	return rb;
-}
-
-
-/* XXX ELIMINATE freerecvbuf (almost) identical to ntpdate.c, ntptrace.c, ntp_io.c */
-/*
- * freerecvbuf - make a single recvbuf available for reuse
- */
-void
-freerecvbuf(
-	struct recvbuf *rb
-	)
-{
-	BLOCKIO();
-	rb->next = (struct recvbuf *) freelist;
-	freelist = rb;
-	free_recvbufs++;
-	UNBLOCKIO();
-}
-
-
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the specified destination. Maintain a
@@ -1324,18 +1196,22 @@ sendpkt(
 		badaddrs[slot].addr.s_addr == dest->sin_addr.s_addr)
 		break;
 
+#if defined(HAVE_IO_COMPLETION_PORT)
+        err = io_completion_port_sendto(inter, pkt, len, dest);
+	if (err != ERROR_SUCCESS)
+#else
 	cc = sendto(inter->fd, (char *)pkt, len, 0, (struct sockaddr *)dest,
 		    sizeof(struct sockaddr_in));
 	if (cc == -1)
+#endif
 	{
 		inter->notsent++;
 		packets_notsent++;
-#ifndef SYS_WINNT
-		if (errno != EWOULDBLOCK && errno != ENOBUFS && slot < 0)
-#else
-		    err = WSAGetLastError();
+#if defined(HAVE_IO_COMPLETION_PORT)
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS && slot < 0)
-#endif /* SYS_WINNT */
+#else
+		if (errno != EWOULDBLOCK && errno != ENOBUFS && slot < 0)
+#endif
 		{
 			/*
 			 * Remember this, if there's an empty slot
@@ -1365,6 +1241,7 @@ sendpkt(
 	}
 }
 
+#if !defined(HAVE_IO_COMPLETION_PORT)
 /*
  * fdbits - generate ascii representation of fd_set (FAU debug support)
  * HFDF format - highest fd first.
@@ -1390,11 +1267,10 @@ fdbits(
 	return buffer;
 }
 
-
 /*
  * input_handler - receive packets asynchronously
  */
-void
+extern void
 input_handler(
 	l_fp *cts
 	)
@@ -1449,7 +1325,7 @@ input_handler(
 					if (FD_ISSET(fd, &fds))
 					{
 						n--;
-						if (free_recvbufs == 0)
+						if (free_recvbuffs() == 0)
 						{
 							char buf[RX_BUFF_SIZE];
 
@@ -1462,9 +1338,7 @@ input_handler(
 							goto select_again;
 						}
 
-						rb = (struct recvbuf *) freelist;
-						freelist = rb->next;
-						free_recvbufs--;
+						rb = get_free_recv_buffer();
 
 						i = (rp->datalen == 0
 						     || rp->datalen > sizeof(rb->recv_space))
@@ -1481,9 +1355,7 @@ input_handler(
 						if (rb->recv_length == -1)
 						{
 							msyslog(LOG_ERR, "clock read fd %d: %m", fd);
-							rb->next = (struct recvbuf *) freelist;
-							freelist = rb;
-							free_recvbufs++;
+							freerecvbuf(rb);
 							goto select_again;
 						}
 
@@ -1508,9 +1380,7 @@ input_handler(
 								 * data was consumed - nothing to pass up
 								 * into block input machine
 								 */
-								rb->next = (struct recvbuf *) freelist;
-								freelist = rb;
-								free_recvbufs++;
+								freerecvbuf(rb);
 #if 1
 								goto select_again;
 #else
@@ -1519,18 +1389,7 @@ input_handler(
 							}
 						}
 
-						if (fulllist == 0)
-						{
-							beginlist = rb;
-							rb->next = 0;
-						}
-						else
-						{
-							rb->next = fulllist->next;
-							fulllist->next = rb;
-						}
-						fulllist = rb;
-						full_recvbufs++;
+						add_full_recv_buffer(rb);
 
 						rp->recvcount++;
 						packets_received++;
@@ -1573,9 +1432,9 @@ input_handler(
 				 * these guys manage to put properly addressed
 				 * packets into the wildcard queue
 				 */
-							(free_recvbufs == 0)
+							(free_recvbuffs() == 0)
 #else
-							((i == 0) || (free_recvbufs == 0))
+							((i == 0) || (free_recvbuffs() == 0))
 #endif
 							)
 	{
@@ -1588,7 +1447,7 @@ input_handler(
 		if (debug)
 		    printf("%s on %d(%lu) fd=%d from %s\n",
 			   (i) ? "drop" : "ignore",
-			   i, free_recvbufs, fd,
+			   i, free_recvbuffs(), fd,
 			   inet_ntoa(((struct sockaddr_in *) &from)->sin_addr));
 #endif
 		if (i == 0)
@@ -1598,7 +1457,7 @@ input_handler(
 		goto select_again;
 	}
 
-	rb = (struct recvbuf *) freelist;
+	rb = get_free_recv_buffer();
 
 	fromlen = sizeof(struct sockaddr_in);
 	rb->recv_length = recvfrom(fd,
@@ -1606,27 +1465,25 @@ input_handler(
 				   sizeof(rb->recv_space), 0,
 				   (struct sockaddr *)&rb->recv_srcadr,
 				   &fromlen);
-	if (rb->recv_length > 0)
-	{
-		freelist = rb->next;
-		free_recvbufs--;
-	}
-	else if (rb->recv_length == 0
+	if (rb->recv_length == 0
 #ifdef EWOULDBLOCK
 		 || errno==EWOULDBLOCK
 #endif
 #ifdef EAGAIN
 		 || errno==EAGAIN
 #endif
-		 )
+		 ) {
+		freerecvbuf(rb);
 	    continue;
-	else
+	}
+	else if (rb->recv_length < 0)
 	{
 		msyslog(LOG_ERR, "recvfrom() fd=%d: %m", fd);
 #ifdef DEBUG
 		if (debug)
 		    printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);
 #endif
+		freerecvbuf(rb);
 		continue;
 	}
 #ifdef DEBUG
@@ -1647,19 +1504,8 @@ input_handler(
 	rb->recv_time = ts;
 	rb->receiver = receive;
 
-	if (fulllist == 0)
-	{
-		beginlist = rb;
-		rb->next = 0;
-	}
-	else
-	{
-		rb->next = fulllist->next;
-		fulllist->next = rb;
-	}
-	fulllist = rb;
-	full_recvbufs++;
-
+	add_full_recv_buffer(rb);
+	
 	inter_list[i].received++;
 	packets_received++;
 	goto select_again;
@@ -1743,6 +1589,8 @@ input_handler(
 	--handler_count;
 	return;
 }
+
+#endif
 
 /*
  * findinterface - utility used by other modules to find an interface
@@ -1837,6 +1685,13 @@ io_addclock(
 		UNBLOCKIO();
 		return 0;
 	}
+# elif defined(HAVE_IO_COMPLETION_PORT)
+	if (io_completion_port_add_clock_io(rio))
+	{
+		refio = rio->next;
+		UNBLOCKIO();
+		return 0;
+	}
 # endif
 
 	if (rio->fd > maxactivefd)
@@ -1891,480 +1746,6 @@ io_closeclock(
 }
 #endif	/* REFCLOCK */
 
-/*
- * SIGPOLL and SIGIO ROUTINES.
- */
-#ifdef HAVE_SIGNALED_IO
-/*
- * Some systems (MOST) define SIGPOLL == SIGIO, others SIGIO == SIGPOLL, and
- * a few have separate SIGIO and SIGPOLL signals.  This code checks for the
- * SIGIO == SIGPOLL case at compile time.
- * Do not defined USE_SIGPOLL or USE_SIGIO.
- * these are interal only to ntp_io.c!
- */
-# if defined(USE_SIGPOLL)
-#  undef USE_SIGPOLL
-# endif
-# if defined(USE_SIGIO)
-#  undef USE_SIGIO
-# endif
-
-# if defined(USE_TTY_SIGPOLL) || defined(USE_UDP_SIGPOLL)
-#  define USE_SIGPOLL
-# endif
-
-# if !defined(USE_TTY_SIGPOLL) || !defined(USE_UDP_SIGPOLL)
-#  define USE_SIGIO
-# endif
-
-# if defined(USE_SIGIO) && defined(USE_SIGPOLL)
-#  if SIGIO == SIGPOLL
-#	define USE_SIGIO
-#	undef USE_SIGPOLL
-#  endif /* SIGIO == SIGPOLL */
-# endif /* USE_SIGIO && USE_SIGIO */
-
-
-/*
- * TTY initialization routines.
- */
-static int
-init_clock_sig(
-	struct refclockio *rio
-	)
-{
-# ifdef USE_TTY_SIGPOLL
-	{
-		/* DO NOT ATTEMPT TO MAKE CLOCK-FD A CTTY: not portable, unreliable */
-		if (ioctl(rio->fd, I_SETSIG, S_INPUT) < 0)
-		{
-			msyslog(LOG_ERR,
-				"init_clock_sig: ioctl(I_SETSIG, S_INPUT) failed: %m");
-			return 1;
-		}
-		return 0;
-	}
-# else
-	/*
-	 * Special cases first!
-	 */
-	/* Was: defined(SYS_HPUX) */
-#  if defined(FIOSSAIOOWN) && defined(FIOSNBIO) && defined(FIOSSAIOSTAT)
-#define CLOCK_DONE
-	{
-		int pgrp, on = 1;
-
-		/* DO NOT ATTEMPT TO MAKE CLOCK-FD A CTTY: not portable, unreliable */
-		pgrp = getpid();
-		if (ioctl(rio->fd, FIOSSAIOOWN, (char *)&pgrp) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOSSAIOOWN) fails for clock I/O: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-
-		/*
-		 * set non-blocking, async I/O on the descriptor
-		 */
-		if (ioctl(rio->fd, FIOSNBIO, (char *)&on) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOSNBIO) fails for clock I/O: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-
-		if (ioctl(rio->fd, FIOSSAIOSTAT, (char *)&on) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOSSAIOSTAT) fails for clock I/O: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-		return 0;
-	}
-#  endif /* SYS_HPUX: FIOSSAIOOWN && FIOSNBIO && FIOSSAIOSTAT */
-	/* Was: defined(SYS_AIX) && !defined(_BSD) */
-#  if !defined(_BSD) && defined(_AIX) && defined(FIOASYNC) && defined(FIOSETOWN)
-	/*
-	 * SYSV compatibility mode under AIX.
-	 */
-#define CLOCK_DONE
-	{
-		int pgrp, on = 1;
-
-		/* DO NOT ATTEMPT TO MAKE CLOCK-FD A CTTY: not portable, unreliable */
-		if (ioctl(rio->fd, FIOASYNC, (char *)&on) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOASYNC) fails for clock I/O: %m");
-			return 1;
-		}
-		pgrp = -getpid();
-		if (ioctl(rio->fd, FIOSETOWN, (char*)&pgrp) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOSETOWN) fails for clock I/O: %m");
-			return 1;
-		}
-
-		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
-		{
-			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
-			return 1;
-		}
-		return 0;
-	}
-#  endif /* AIX && !BSD: !_BSD && FIOASYNC && FIOSETOWN */
-#  ifndef  CLOCK_DONE
-	{
-		/* DO NOT ATTEMPT TO MAKE CLOCK-FD A CTTY: not portable, unreliable */
-#	if defined(TIOCSCTTY) && defined(USE_FSETOWNCTTY)
-		/*
-		 * there are, however, always exceptions to the rules
-		 * one is, that OSF accepts SETOWN on TTY fd's only, iff they are
-		 * CTTYs. SunOS and HPUX do not semm to have this restriction.
-		 * another question is: how can you do multiple SIGIO from several
-		 * ttys (as they all should be CTTYs), wondering...
-		 *
-		 * kd 95-07-16
-		 */
-		if (ioctl(rio->fd, TIOCSCTTY, 0) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(TIOCSCTTY, 0) fails for clock I/O: %m");
-			return 1;
-		}
-#	endif /* TIOCSCTTY && USE_FSETOWNCTTY */
-
-		if (fcntl(rio->fd, F_SETOWN, getpid()) == -1)
-		{
-			msyslog(LOG_ERR, "fcntl(F_SETOWN) fails for clock I/O: %m");
-			return 1;
-		}
-
-		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
-		{
-			msyslog(LOG_ERR,
-				"fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
-			return 1;
-		}
-		return 0;
-	}
-#  endif /* CLOCK_DONE */
-# endif /* !USE_TTY_SIGPOLL  */
-}
-
-
-
-static void
-init_socket_sig(
-	int fd
-	)
-{
-# ifdef USE_UDP_SIGPOLL
-	{
-		if (ioctl(fd, I_SETSIG, S_INPUT) < 0)
-		{
-			msyslog(LOG_ERR,
-				"init_socket_sig: ioctl(I_SETSIG, S_INPUT) failed: %m");
-			exit(1);
-		}
-	}
-# else /* USE_UDP_SIGPOLL */
-	{
-		int pgrp;
-# ifdef FIOASYNC
-		int on = 1;
-# endif
-
-#  if defined(FIOASYNC)
-		if (ioctl(fd, FIOASYNC, (char *)&on) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOASYNC) fails: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-#  elif defined(FASYNC)
-		{
-			int flags;
-
-			if ((flags = fcntl(fd, F_GETFL, 0)) == -1)
-			{
-				msyslog(LOG_ERR, "fcntl(F_GETFL) fails: %m");
-				exit(1);
-				/*NOTREACHED*/
-			}
-			if (fcntl(fd, F_SETFL, flags|FASYNC) < 0)
-			{
-				msyslog(LOG_ERR, "fcntl(...|FASYNC) fails: %m");
-				exit(1);
-				/*NOTREACHED*/
-			}
-		}
-#  else
-#	include "Bletch: Need asynchronous I/O!"
-#  endif
-
-#  ifdef UDP_BACKWARDS_SETOWN
-		pgrp = -getpid();
-#  else
-		pgrp = getpid();
-#  endif
-
-#  if defined(SIOCSPGRP)
-		if (ioctl(fd, SIOCSPGRP, (char *)&pgrp) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(SIOCSPGRP) fails: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-#  elif defined(FIOSETOWN)
-		if (ioctl(fd, FIOSETOWN, (char*)&pgrp) == -1)
-		{
-			msyslog(LOG_ERR, "ioctl(FIOSETOWN) fails: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-#  elif defined(F_SETOWN)
-		if (fcntl(fd, F_SETOWN, pgrp) == -1)
-		{
-			msyslog(LOG_ERR, "fcntl(F_SETOWN) fails: %m");
-			exit(1);
-			/*NOTREACHED*/
-		}
-#  else
-#	include "Bletch: Need to set process(group) to receive SIG(IO|POLL)"
-#  endif
-	}
-# endif /* USE_UDP_SIGPOLL */
-}
-
-
-static RETSIGTYPE
-sigio_handler(
-	int sig
-	)
-{
-	int saved_errno = errno;
-	l_fp ts;
-
-	get_systime(&ts);
-	(void)input_handler(&ts);
-	errno = saved_errno;
-}
-
-/*
- * Signal support routines.
- */
-# ifdef HAVE_SIGACTION
-static void
-set_signal(void)
-{
-#  ifdef USE_SIGIO
-	(void) signal_no_reset(SIGIO, sigio_handler);
-# endif
-#  ifdef USE_SIGPOLL
-	(void) signal_no_reset(SIGPOLL, sigio_handler);
-# endif
-}
-
-void
-block_io_and_alarm(void)
-{
-	sigset_t set;
-
-	if (sigemptyset(&set))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigemptyset() failed: %m");
-#  if defined(USE_SIGIO)
-	if (sigaddset(&set, SIGIO))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigaddset(SIGIO) failed: %m");
-#  endif
-#  if defined(USE_SIGPOLL)
-	if (sigaddset(&set, SIGPOLL))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigaddset(SIGPOLL) failed: %m");
-#  endif
-	if (sigaddset(&set, SIGALRM))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigaddset(SIGALRM) failed: %m");
-
-	if (sigprocmask(SIG_BLOCK, &set, NULL))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigprocmask() failed: %m");
-}
-
-static void
-block_sigio(void)
-{
-	sigset_t set;
-
-	++sigio_block_count;
-	if (sigio_block_count > 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count > 1");
-	if (sigio_block_count < 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count < 1");
-
-	if (sigemptyset(&set))
-	    msyslog(LOG_ERR, "block_sigio: sigemptyset() failed: %m");
-#  if defined(USE_SIGIO)
-	if (sigaddset(&set, SIGIO))
-	    msyslog(LOG_ERR, "block_sigio: sigaddset(SIGIO) failed: %m");
-#  endif
-#  if defined(USE_SIGPOLL)
-	if (sigaddset(&set, SIGPOLL))
-	    msyslog(LOG_ERR, "block_sigio: sigaddset(SIGPOLL) failed: %m");
-#  endif
-
-	if (sigprocmask(SIG_BLOCK, &set, NULL))
-	    msyslog(LOG_ERR, "block_sigio: sigprocmask() failed: %m");
-}
-
-void
-unblock_io_and_alarm(void)
-{
-	sigset_t unset;
-
-	if (sigemptyset(&unset))
-	    msyslog(LOG_ERR, "unblock_io_and_alarm: sigemptyset() failed: %m");
-
-#  if defined(USE_SIGIO)
-	if (sigaddset(&unset, SIGIO))
-	    msyslog(LOG_ERR, "unblock_io_and_alarm: sigaddset(SIGIO) failed: %m");
-#  endif
-#  if defined(USE_SIGPOLL)
-	if (sigaddset(&unset, SIGPOLL))
-	    msyslog(LOG_ERR, "unblock_io_and_alarm: sigaddset(SIGPOLL) failed: %m");
-#  endif
-	if (sigaddset(&unset, SIGALRM))
-	    msyslog(LOG_ERR, "unblock_io_and_alarm: sigaddset(SIGALRM) failed: %m");
-
-	if (sigprocmask(SIG_UNBLOCK, &unset, NULL))
-	    msyslog(LOG_ERR, "unblock_io_and_alarm: sigprocmask() failed: %m");
-}
-
-static
-void
-unblock_sigio(void)
-{
-	sigset_t unset;
-
-	--sigio_block_count;
-	if (sigio_block_count > 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count > 0");
-	if (sigio_block_count < 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count < 0");
-
-	if (sigemptyset(&unset))
-	    msyslog(LOG_ERR, "unblock_sigio: sigemptyset() failed: %m");
-
-#  if defined(USE_SIGIO)
-	if (sigaddset(&unset, SIGIO))
-	    msyslog(LOG_ERR, "unblock_sigio: sigaddset(SIGIO) failed: %m");
-#  endif
-#  if defined(USE_SIGPOLL)
-	if (sigaddset(&unset, SIGPOLL))
-	    msyslog(LOG_ERR, "unblock_sigio: sigaddset(SIGPOLL) failed: %m");
-#  endif
-
-	if (sigprocmask(SIG_UNBLOCK, &unset, NULL))
-	    msyslog(LOG_ERR, "unblock_sigio: sigprocmask() failed: %m");
-}
-
-void
-wait_for_signal(void)
-{
-	sigset_t old;
-
-	if (sigprocmask(SIG_UNBLOCK, NULL, &old))
-	    msyslog(LOG_ERR, "wait_for_signal: sigprocmask() failed: %m");
-
-#  if defined(USE_SIGIO)
-	if (sigdelset(&old, SIGIO))
-	    msyslog(LOG_ERR, "wait_for_signal: sigdelset(SIGIO) failed: %m");
-#  endif
-#  if defined(USE_SIGPOLL)
-	if (sigdelset(&old, SIGPOLL))
-	    msyslog(LOG_ERR, "wait_for_signal: sigdelset(SIGPOLL) failed: %m");
-#  endif
-	if (sigdelset(&old, SIGALRM))
-	    msyslog(LOG_ERR, "wait_for_signal: sigdelset(SIGALRM) failed: %m");
-
-	if (sigsuspend(&old) && (errno != EINTR))
-	    msyslog(LOG_ERR, "wait_for_signal: sigsuspend() failed: %m");
-}
-
-# else /* !HAVE_SIGACTION */
-/*
- * Must be an old bsd system.
- * We assume there is no SIGPOLL.
- */
-
-void
-block_io_and_alarm(void)
-{
-	int mask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	if (sigblock(mask))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigblock() failed: %m");
-}
-
-static void
-block_sigio(void)
-{
-	int mask;
-
-	++sigio_block_count;
-	if (sigio_block_count > 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count > 1");
-	if (sigio_block_count < 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count < 1");
-
-	mask = sigmask(SIGIO);
-	if (sigblock(mask))
-	    msyslog(LOG_ERR, "block_sigio: sigblock() failed: %m");
-}
-
-static void
-set_signal(void)
-{
-	(void) signal_no_reset(SIGIO, sigio_handler);
-}
-
-void
-unblock_io_and_alarm(void)
-{
-	int mask, omask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	omask = sigblock(0);
-	omask &= ~mask;
-	(void) sigsetmask(omask);
-}
-
-static void
-unblock_sigio(void)
-{
-	int mask, omask;
-
-	--sigio_block_count;
-	if (sigio_block_count > 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count > 0");
-	if (sigio_block_count < 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count < 0");
-	mask = sigmask(SIGIO);
-	omask = sigblock(0);
-	omask &= ~mask;
-	(void) sigsetmask(omask);
-}
-
-void
-wait_for_signal(void)
-{
-	int mask, omask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	omask = sigblock(0);
-	omask &= ~mask;
-	if (sigpause(omask) && (errno != EINTR))
-	    msyslog(LOG_ERR, "wait_for_signal: sigspause() failed: %m");
-}
-# endif /* HAVE_SIGACTION */
-#endif /* HAVE_SIGNALED_IO */
-
 void
 kill_asyncio(void)
 {
@@ -2374,254 +1755,3 @@ kill_asyncio(void)
 	for (i = 0; i <= maxactivefd; i++)
 	    (void)close_socket(i);
 }
-
-#ifdef SYS_WINNT
-/* ------------------------------------------------------------------------------------------------------------------ */
-/* modified with suggestions from Kevin Dunlap so we only pick out netcards bound to tcpip */
-
-int
-get_winnt_interfaces(
-	struct ifconf *ifc
-	)
-{
-	char *ifc_buffer = ifc->ifc_buf;
-
-	struct ifreq *ifr;
-	int maxsize = sizeof(ifc_buffer);
-	HKEY hk, hksub; 					 /* registry key handle */
-	BOOL bSuccess;
-	char newkey[200];
-
-	char servicename[50];
-	DWORD sizeofservicename = 50;
-	int Done = 0;
-
-	/*
-	 * these need to be big as they are multi_sz in type and hold all
-	 * ip addresses and subnet mask for a given interface
-	 */
-	char IpAddresses[10000];
-	char *ipptr = IpAddresses;
-	DWORD sizeofipaddresses = 10000;
-	char SubNetMasks[10000];
-	char *subptr = SubNetMasks;
-	DWORD sizeofsubnetmasks = 10000;
-	char bindservicenames[1000];
-	DWORD sizeofbindnames = 1000;
-	DWORD enableDhcp;
-	DWORD sizeofenable = sizeof(DWORD);
-	char *ipkeyname;
-	char *maskkeyname;
-	long ip, broad;
-
-	char oneIpAddress[16];
-	char oneSubNetMask[16];
-	int count = 0;
-	char *onenetcard;
-
-	/* now get all the netcard values which are bound to tcpip */
-
-	strcpy(newkey,"SYSTEM\\Currentcontrolset\\Services\\");
-	strcat(newkey,"tcpip\\linkage");
-
-	bSuccess = RegOpenKey(HKEY_LOCAL_MACHINE,newkey,&hk);
-	if(bSuccess != ERROR_SUCCESS)
-	{
-		msyslog(LOG_ERR, "failed to Open TCP/IP Linkage Registry key: %m");
-#ifdef DEBUG
-		if (debug)
-		    printf("Cannot get TCP/IP Linkage from registery.\n");
-#endif
-		return -1;
-	}
-
-	/* now get the bind value */
-	sizeofbindnames = 1000;
-	bSuccess = RegQueryValueEx(hk,	   /* subkey handle 		*/
-				   "Bind", /* value name            */
-				   NULL,   /* must be zero			*/
-				   NULL,   /* value type		  not required	*/
-				   (LPBYTE) &bindservicenames,		  /* address of value data */
-				   &sizeofbindnames);				  /* length of value data  */
-	if(bSuccess != ERROR_SUCCESS)
-	{
-		msyslog(LOG_ERR, "Error in RegQueryValueEx fetching Bind Service names parameter: %m");
-		RegCloseKey(hk);
-		return -1;
-	}
-
-	/* now loop through and get all the values which are bound to tcpip */
-	/* we can also close the key here as we have the values now */
-	RegCloseKey(hk);
-	onenetcard = bindservicenames;
-	while(1)
-	{
-		onenetcard = onenetcard + 8;	/* skip /Device/ prefix on the service name */
-		if	((onenetcard < (bindservicenames + sizeofbindnames)) &&
-			 (sscanf(onenetcard,"%s",servicename) != EOF))
-		{
-			onenetcard+= strlen(servicename) + 1;
-		}
-		else { /* no more */
-			break;
-		}
-
-		/*
-		 * skip services that are NDISWAN... since these are temporary
-		 * interfaces like ras and if we bind to these we would have to
-		 * check if the socket is still ok everytime before using it as
-		 * when the link goes down and comes back up the socket is no
-		 * longer any good... and the server eventually crashes if we
-		 * don't check this.. and to check it entails a lot of overhead...
-		 * shouldn't be a problem with machines with only a RAS
-		 * interface anyway as we can bind to the loopback or 0.0.0.0
-		 */
-
-		if ((strlen(servicename) >= 7) && (strncmp(strupr(servicename),"NDISWAN",7) == 0))
-		{
-			/* skip it */
-#ifdef DEBUG
-			if (debug)
-			    printf("Skipping temporary interface [%s]\n",servicename);
-#endif
-		}
-		else {
-			/* if opening this key fails we can assume it is not a network card ie digiboard and go on.. */
-			/* ok now that we have the service name parameter close the key and go get the ipaddress and subnet mask */
-
-			strcpy(newkey,"SYSTEM\\Currentcontrolset\\Services\\");
-			strcat(newkey,servicename);
-			strcat(newkey,"\\parameters\\tcpip");
-
-			bSuccess = RegOpenKey(HKEY_LOCAL_MACHINE,newkey,&hksub);
-			if(bSuccess != ERROR_SUCCESS)
-			{
-#ifdef DEBUG
-				if (debug)
-				    printf("Skipping interface [%s] ... It is not a network card.\n",servicename);
-#endif
-			}
-			else
-			{ /* ok it is a network card */
-				/* check for DHCP */
-				sizeofenable = sizeof(DWORD);
-				bSuccess =
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */
-						    "EnableDHCP",         /* value name               */
-						    NULL,				  /* must be zero			  */
-						    NULL,				  /* value type not required  */
-						    (LPBYTE)&enableDhcp,  /* address of value data	  */
-						    &sizeofenable); 	  /* length of value data	  */
-				if(bSuccess != ERROR_SUCCESS)
-				{
-					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching EnableDHCP parameter: %m");
-					RegCloseKey(hksub);
-					return -1;
-				}
-
-				if (enableDhcp) {
-					ipkeyname	= "DhcpIpAddress";
-					maskkeyname = "DhcpSubNetMask";
-				}
-				else {
-					ipkeyname	= "IpAddress";
-					maskkeyname = "SubNetMask";
-				}
-				/* ok now get the ipaddress */
-				sizeofipaddresses = 10000;
-				bSuccess =
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */
-						    ipkeyname,			  /* value name 			  */
-						    NULL,				  /* must be zero			  */
-						    NULL,				  /* value type not required  */
-						    (LPBYTE)&IpAddresses, /* address of value data	  */
-						    &sizeofipaddresses);  /* length of value data	  */
-				if(bSuccess != ERROR_SUCCESS)
-				{
-					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching IpAddress parameter: %m");
-					RegCloseKey(hksub);
-					return -1;
-				}
-
-				/* ok now get the subnetmask */
-				sizeofsubnetmasks = 10000;
-				bSuccess =
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */
-						    maskkeyname,		  /* value name 			  */
-						    NULL,				  /* must be zero			  */
-						    NULL,				  /* value type not required  */
-						    (LPBYTE)&SubNetMasks, /* address of value data	  */
-						    &sizeofsubnetmasks);  /* length of value data	  */
-				if(bSuccess != ERROR_SUCCESS)
-				{
-					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching SubNetMask parameter: %m");
-					RegCloseKey(hksub);
-					return -1;
-				}
-
-				RegCloseKey(hksub);
-				/* ok now that we have some addresses and subnet masks go through each one and add to our structure... */
-				/* multi_sz strings are terminated by two \0 in a row */
-				/* however, the dhcp strings are not multi_sz, they are just plain strings */
-
-				ipptr = IpAddresses;
-				subptr = SubNetMasks;
-				Done = 0;
-				while (!Done)
-				{
-					if (sscanf(ipptr,"%s",oneIpAddress) != EOF)
-					    ipptr+= strlen(oneIpAddress) + 1; /* add one for terminator \0 */
-					else Done = 1;
-
-					if (sscanf(subptr,"%s",oneSubNetMask) != EOF)
-					    subptr += strlen(oneSubNetMask) + 1;
-					else Done = 1;
-
-					/* now add to interface structure */
-					if (!Done)
-					{
-						ifr   = (struct ifreq *)ifc_buffer;
-						ip	  = inet_addr(oneIpAddress);
-						broad = ~inet_addr(oneSubNetMask) | ip;
-						ifr->ifr_addr.sa_family = AF_INET;
-						((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;
-						ifr->ifr_broadaddr.sa_family = AF_INET;
-						((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;
-						strcpy(ifr->ifr_mask,oneSubNetMask);
-
-						if (strlen(servicename) > 15)
-						    strncpy(ifr->ifr_name,servicename,15);
-						else strcpy(ifr->ifr_name,servicename);
-
-						/* now increment pointer */
-						ifc_buffer += sizeof(struct ifreq);
-						++count;
-						if (((char *)ipptr == '\0') || ((char *)subptr == '\0') || (enableDhcp))
-						    Done = 1;
-					}
-				}
-			} /* it is a network card */
-		} /* it is/not a temporary ndiswan name */
-	} /* end of loop  */
-
-	/* add the loopback interface */
-	ifr   = (struct ifreq *)ifc_buffer;
-	ip	  = inet_addr("127.0.0.1");
-	broad = ~inet_addr("255.0.0.0") | ip;
-	ifr->ifr_addr.sa_family = AF_INET;
-	((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;
-	ifr->ifr_broadaddr.sa_family = AF_INET;
-	((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;
-	strcpy(ifr->ifr_mask,"255.0.0.0");
-	strcpy(ifr->ifr_name,"loopback");
-
-	/* now increment pointer */
-	ifc_buffer += sizeof(struct ifreq);
-	++count;
-
-	/* now reset the length */
-	ifc->ifc_len = count * (sizeof(struct ifreq));
-	return 0;
-}
-
-#endif /* SYS_WINNT */

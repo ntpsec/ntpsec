@@ -428,40 +428,6 @@ struct pkt {
 #define	STRATUM_TO_PKT(s)	((u_char)(((s) == (STRATUM_UNSPEC)) ?\
 				(STRATUM_PKT_UNSPEC) : (s)))
 
-/*
- * Format of a recvbuf.  These are used by the asynchronous receive
- * routine to store incoming packets and related information.
- */
-
-/*
- *  the maximum length NTP packet is a full length NTP control message with
- *  the maximum length message authenticator.  I hate to hard-code 468 and 12,
- *  but only a few modules include ntp_control.h...
- */   
-#define	RX_BUFF_SIZE	(468+12+MAX_MAC_LEN)
-
-struct recvbuf {
-	struct recvbuf *next;		/* next buffer in chain */
-	union {
-		struct sockaddr_in X_recv_srcadr;
-		caddr_t X_recv_srcclock;
-	} X_from_where;
-#define recv_srcadr	X_from_where.X_recv_srcadr
-#define	recv_srcclock	X_from_where.X_recv_srcclock
-	struct sockaddr_in srcadr;	/* where packet came from */
-	struct interface *dstadr;	/* interface datagram arrived thru */
-	int fd;				/* fd on which it was received */
-	l_fp recv_time;			/* time of arrival */
-	void (*receiver) P((struct recvbuf *)); /* routine to receive buffer */
-	int recv_length;		/* number of octets received */
-	union {
-		struct pkt X_recv_pkt;
-		u_char X_recv_buffer[RX_BUFF_SIZE];
-	} recv_space;
-#define	recv_pkt	recv_space.X_recv_pkt
-#define	recv_buffer	recv_space.X_recv_buffer
-};
-
 
 /*
  * Event codes.  Used for reporting errors/events to the control module

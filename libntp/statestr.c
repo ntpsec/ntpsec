@@ -189,7 +189,7 @@ statustoa(
 		/*
 		 * Handcraft the bits
 		 */
-		pst = CTL_PEER_STATVAL(st);
+		pst = (u_char) CTL_PEER_STATVAL(st);
 		if (!(pst & CTL_PST_REACH)) {
 			(void)strcpy(cb, "unreach");
 		} else {

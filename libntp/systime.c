@@ -24,6 +24,9 @@
 #include "ntp_syslog.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+#if defined SYS_WINNT
+#include "ntp_timer.h"
+#endif
 
 #if defined SCO5_CLOCK
 int sco5_oldclock;	/* runtime detection of new clock */
@@ -76,11 +79,11 @@ get_systime(
 	 * rounding wiggles, which may overflow the fraction.
 	 */
 #if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
-#ifdef HAVE_CLOCK_GETTIME
+# ifdef HAVE_CLOCK_GETTIME
 	(void) clock_gettime(CLOCK_REALTIME, &ts);
-#else
+# else
 	(void) getclock(TIMEOFDAY, &ts);
-#endif
+# endif
 	now->l_i = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	if (dtemp >= FRAC)
@@ -114,6 +117,7 @@ get_systime(
 		now->l_i++;
 	now->l_uf = (u_int32)dtemp;
 #endif /* HAVE_CLOCK_GETTIME */
+
 }
 
 /*
@@ -183,17 +187,20 @@ adj_systime(
 	 * we honk to the log. If the previous adjustment did not complete,
 	 * we correct the residual offset.
 	 */
-	if (
 #if !defined (SYS_WINNT) && !defined (SYS_CYGWIN32)
 	/* casey - we need a posix type thang here */
-	(adjtime(&adjtv, &oadjtv) < 0)
+	if (adjtime(&adjtv, &oadjtv) < 0)
 #else
-	(!SetSystemTimeAdjustment(dwTimeAdjustment, FALSE))
+	if (debug) {
+		printf("SetSystemTimeAdjustment( %ld)\n", dwTimeAdjustment);
+	}
+	if (!SetSystemTimeAdjustment(dwTimeAdjustment, FALSE))
 #endif /* SYS_WINNT */
-		) {
+	{
 		msyslog(LOG_ERR, "Can't adjust time: %m");
 		return 0;
-	} else {
+	} 
+	else {
 #if !defined (SYS_WINNT) && !defined (SYS_CYGWIN32)
 	sys_residual += oadjtv.tv_usec / 1e6;
 #endif /* SYS_WINNT */

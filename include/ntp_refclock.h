@@ -36,6 +36,8 @@
 #endif /* CLK */
 #endif /* STREAM */
 
+#include "recvbuff.h"
+
 #if !defined(SYSV_TTYS) && !defined(STREAM) & !defined(BSD_TTYS)
 #define BSD_TTYS
 #endif /* SYSV_TTYS STREAM BSD_TTYS */
