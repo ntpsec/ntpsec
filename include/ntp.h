@@ -1,12 +1,14 @@
 /*
  * ntp.h - NTP definitions for the masses
  */
-
 #ifndef NTP_H
 #define NTP_H
 
 #include "ntp_types.h"
 #include <math.h>
+#ifdef OPENSSL
+#include "ntp_crypto.h"
+#endif /* OPENSSL */
 
 /*
  * Calendar arithmetic - contributed by G. Healton
@@ -154,15 +156,46 @@ struct autokey {		/* network byte order */
 /*
  * The value structure holds variable length data such as public
  * key, agreement parameters, public valule and leapsecond table.
+ * They are in network byte order.
  */
 struct value {			/* network byte order */
 	tstamp_t tstamp;	/* timestamp */
 	tstamp_t fstamp;	/* filestamp */
 	u_int32	vallen;		/* value length */
-	u_int32	pkt[1];		/* start of value field */
 	u_char	*ptr;		/* data pointer (various) */
 	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
+};
+
+/*
+ * The packet extension field structures are used to hold values
+ * and signatures in network byte order.
+ */
+struct exten {
+	u_int32	opcode;		/* opcode */
+	u_int32	associd;	/* association ID */
+	u_int32	tstamp;		/* timestamp */
+	u_int32	fstamp;		/* filestamp */
+	u_int32	vallen;		/* value length */
+	u_int32	pkt[1];		/* start of value field */
+};
+
+/*
+ * The certificate info/value structure
+ */
+struct cert_info {
+	struct cert_info *link;	/* forward link */
+	u_int	flags;		/* flags that wave */
+	EVP_PKEY *pkey;		/* generic key */
+	long	cert_version;	/* X509 version */
+	int	nid;		/* signature/digest ID */
+	EVP_MD	*digest;	/* message digest algorithm */
+	u_long	serial;		/* serial number */
+	tstamp_t first;		/* valid not before */
+	tstamp_t last;		/* valid not after */
+	u_char	*subject;	/* subject common name */
+	u_char	*issuer;	/* issuer common name */
+	struct value cert;	/* certificate/value */
 };
 #endif /* OPENSSL */
 
@@ -263,15 +296,16 @@ struct peer {
 #define clear_to_zero assoc
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
-	struct	value cinfo;	/* certificate information */
-	u_char	*keystr;	/* host name */
-	u_char	*digest;	/* message digest (EVP_MD) */
+	EVP_PKEY *pkey;		/* public key */
+	EVP_MD	*digest;	/* message digest algorithm */
+	u_char	*subject;	/* certificate subject name */
+	u_char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct value tai_leap;	/* leapseconds values */
-	u_int32	*cmmd;		/* extension field pointer */
+	struct exten *cmmd;	/* extension pointer */
 
 	/*
 	 * Variables used by authenticated server

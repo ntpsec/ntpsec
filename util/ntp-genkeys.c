@@ -130,8 +130,10 @@ peer_config(
 	u_char *keystr
 	)
 {
+	static struct peer foo;
+
 	if (debug > 1) printf("peer_config...\n");
-	return 0;
+	return &foo;
 }
 
 
@@ -411,6 +413,8 @@ int verbose;			/* Be verbose? */
 
 char const *progname;
 
+extern int call_resolver;
+
 
 void
 usage (
@@ -584,6 +588,7 @@ main(
 	}
 #endif
 
+	call_resolver = 0;	/* Skip the resolver when cracking ntp.conf */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
 	/*
@@ -686,6 +691,7 @@ genthings(
 		if (verbose)
 			printf("signkey symlink(%s, %s)\n",
 			       f2_signkey, cp);
+		(void)unlink(cp);
 		if (symlink(f2_signkey, cp)) {
 			fprintf(stderr, "signkey symlink(%s, %s): %s\n",
 				f2_signkey, cp, strerror(errno));
@@ -696,6 +702,7 @@ genthings(
 		if (verbose)
 			printf("cert symlink(%s, %s)\n",
 			       f2_cert, cp);
+		(void)unlink(cp);
 		if (symlink(f2_cert, cp)) {
 			fprintf(stderr, "cert symlink(%s, %s): %s\n",
 				f2_cert, cp, strerror(errno));
@@ -1186,13 +1193,16 @@ x509	(
 	int certlink		/* Is this cert a link target? */
 	)
 {
+#ifdef GEN_REQ
 	X509_REQ *req;		/* X509 certificate request */
+#endif
 	X509	*cert;		/* X509 certificate */
 	X509_NAME *subj;	/* distinguished (common) name */
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
 	char	pathbuf[PATH_MAX];
 
+#ifdef GEN_REQ
 	/*
 	 * Generate, sign and verify X509 certificate request.
 	 */
@@ -1218,6 +1228,7 @@ x509	(
 	str = fheader(pathbuf, keysdir, f1_cert, ntptime, tmp_name);
 	PEM_write_X509_REQ(str, req);
 	fclose(str);
+#endif
 
 	/*
 	 * Generate X509 self-signed certificate.
@@ -1271,7 +1282,9 @@ x509	(
 	 */
 	ASN1_INTEGER_free(serial);
 	X509_free(cert);
+#ifdef GEN_REQ
 	X509_REQ_free(req);
+#endif
 	fclose(str);
 	return (0);
 }

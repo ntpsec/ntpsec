@@ -296,7 +296,6 @@ receive(
 #ifdef OPENSSL
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
 	l_fp	p_org;			/* originate timestamp */
-	int	is_org;			/* loopback ok */
 	struct autokey *ap;		/* autokey structure pointer */
 	struct peer *peer2;		/* aux peer structure pointer */
 #endif /* OPENSSL */
@@ -704,7 +703,7 @@ receive(
 			return;
 #ifdef OPENSSL
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
-			crypto_recv(peer, rbufp, 1);
+			crypto_recv(peer, rbufp);
 			if (peer->flash)
 				unpeer(peer);
 		}
@@ -796,11 +795,10 @@ receive(
 	 * is very likely a valid response to one sent earlier. See
 	 * below for more jitterbug in other error cases.
 	 */
-#ifdef OPENSSL
 	NTOHL_FP(&pkt->org, &p_org);
-	is_org = L_ISEQU(&peer->xmt, &p_org);
-#endif /* OPENSSL */
-	if (peer->flash) {
+	if (hismode != MODE_BROADCAST && !L_ISEQU(&peer->xmt, &p_org))
+		peer->flash |= TEST2;
+	if (peer->flash & ~TEST2) {
 #ifdef OPENSSL
 		switch (hismode) {
 
@@ -811,8 +809,8 @@ receive(
 		 * start over.
 		 */
 		case MODE_SERVER:
-			if (is_org && has_mac == 4 && pkt->exten[0] ==
-			    0) {
+			if (!(peer->flash & TEST2) && has_mac == 4 &&
+			    pkt->exten[0] == 0) {
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
@@ -829,7 +827,7 @@ receive(
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
-			if (is_org) {
+			if (!(peer->flash & TEST2)) {
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
@@ -871,7 +869,7 @@ receive(
 	 */
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST10;
-		crypto_recv(peer, rbufp, is_org);
+		crypto_recv(peer, rbufp);
 		if (peer->cmmd != 0) {
 			peer->ppoll = pkt->ppoll;
 			poll_update(peer, 0);
@@ -912,7 +910,7 @@ receive(
 		 * It will die later after leaving the originate and
 		 * receive timestamp in the dust for the reply.
 		 */
-		if (peer->flash && is_org) {
+		if (peer->flash) {
 			poll_update(peer, peer->minpoll);
 			if (peer->crypto & CRYPTO_FLAG_PROV) {
 #ifdef DEBUG
@@ -1003,12 +1001,9 @@ process_packet(
 		peer->oldpkt++;
 	if (L_ISEQU(&peer->org, &p_xmt))	/* 1 */
 		peer->flash |= TEST1;		/* dupe */
-	if (pmode != MODE_BROADCAST) {
-		if (!L_ISEQU(&peer->xmt, &p_org)) /* 2 */
-			peer->flash |= TEST2;	/* bogus */
-		if (L_ISZERO(&p_rec) || L_ISZERO(&p_org)) /* test 3 */
-			peer->flash |= TEST3;	/* unsynch */
-	}
+	if (pmode != MODE_BROADCAST && (L_ISZERO(&p_rec) ||
+	    L_ISZERO(&p_org)))			/* 3 */
+		peer->flash |= TEST3;		/* unsynch */
 	if (L_ISZERO(&p_xmt))			/* 3 */
 		peer->flash |= TEST3;		/* unsynch */
 	peer->org = p_xmt;
@@ -1370,15 +1365,14 @@ peer_clear(
 #endif
 #ifdef OPENSSL
 	key_expire(peer);
-	if (peer->keystr != NULL)
-		free(peer->keystr);
+	if (peer->pkey != NULL)
+		EVP_PKEY_free(peer->pkey);
+	if (peer->subject != NULL)
+		free(peer->subject);
+	if (peer->issuer != NULL)
+		free(peer->issuer);
 	if (peer->cmmd != NULL)
 		free(peer->cmmd);
-	if (peer->cinfo.ptr != NULL) {
-		cert_free((struct cert_info *)peer->cinfo.ptr);
-		peer->cinfo.ptr = NULL;
-	}
-	value_free(&peer->cinfo);
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
 	value_free(&peer->tai_leap);
@@ -2172,7 +2166,7 @@ peer_xmit(
 	 */
 #ifdef OPENSSL
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
-		u_int32	cmmd;
+		struct exten *exten;	/* extension field */
 
 		/*
 		 * The Public Key Dance (PKD): Cryptographic credentials
@@ -2240,12 +2234,14 @@ peer_xmit(
 		 */
 		case MODE_BROADCAST:
 			if (peer->flags & FLAG_ASSOC)
-				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
+				exten = crypto_args(CRYPTO_AUTO |
+				    CRYPTO_RESP, peer->associd, NULL);
 			else
-				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
-			cmmd = htonl(cmmd);
-			sendlen += crypto_xmit(&xpkt, sendlen, &cmmd, 0,
-			    peer->associd);
+				exten = crypto_args(CRYPTO_ASSOC |
+				    CRYPTO_RESP, peer->associd, NULL);
+			sendlen += crypto_xmit(&xpkt, sendlen, exten,
+			    0);
+			free(exten);
 			break;
 
 		/*
@@ -2259,40 +2255,47 @@ peer_xmit(
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
-			cmmd = 0;
 			if (peer->cmmd != NULL) {
+				peer->cmmd->associd =
+				    htonl(peer->associd);
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, 0, peer->associd);
+				    peer->cmmd, 0);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
+			exten = NULL;
 			if (!peer->crypto)
-				cmmd = CRYPTO_ASSOC;
+				exten = crypto_args(CRYPTO_ASSOC,
+				    peer->assoc, NULL);
+			else if (peer->pkey == NULL)
+				exten = crypto_args(CRYPTO_CERT,
+				    peer->assoc, peer->subject);
 			else if (!(peer->crypto & CRYPTO_FLAG_PROV))
-				cmmd = CRYPTO_CERT;
+				exten = crypto_args(CRYPTO_CERT,
+				    peer->assoc, peer->issuer);
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			    !(peer->crypto & CRYPTO_FLAG_VRFY))
+				exten = crypto_args(CRYPTO_SIGN,
+				    peer->assoc, sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_AGREE) &&
 			    sys_leap != LEAP_NOTINSYNC)
-				cmmd = CRYPTO_COOK;
+				exten = crypto_args(CRYPTO_COOK,
+				    peer->assoc, NULL);
 			else if (peer->flags & FLAG_ASSOC)
-				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
+				exten = crypto_args(CRYPTO_AUTO |
+				    CRYPTO_RESP, peer->associd, NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
-				cmmd = CRYPTO_AUTO;
-			else if (peer->crypto & CRYPTO_FLAG_TAI &&
-			    !(peer->crypto & CRYPTO_FLAG_LEAP) &&
-			    sys_leap != LEAP_NOTINSYNC)
-				cmmd = CRYPTO_TAI;
-			if (cmmd != 0) {
-				if (cmmd & CRYPTO_RESP) {
-					cmmd = htonl(cmmd);
-					sendlen += crypto_xmit(&xpkt,
-					    sendlen, &cmmd, 0,
-					    peer->associd);
-				} else {
-					cmmd = htonl(cmmd);
-					sendlen += crypto_xmit(&xpkt,
-					    sendlen, &cmmd, 0,
-					    peer->assoc);
-				}
+				exten = crypto_args(CRYPTO_AUTO,
+				    peer->assoc, NULL);
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			    peer->crypto & CRYPTO_FLAG_TAI &&
+			    !(peer->crypto & CRYPTO_FLAG_LEAP))
+				exten = crypto_args(CRYPTO_TAI,
+				    peer->assoc, NULL);
+			if (exten != NULL) {
+				sendlen += crypto_xmit(&xpkt, sendlen,
+				    exten, 0);
+				free(exten);
 			}
 			break;
 
@@ -2315,28 +2318,45 @@ peer_xmit(
 		 * the parameters but the server does not.
  		 */
 		case MODE_CLIENT:
-			cmmd = 0;
 			if (peer->cmmd != NULL) {
+				peer->cmmd->associd =
+				    htonl(peer->associd);
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, 0, peer->associd);
+				    peer->cmmd, 0);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
+			exten = NULL;
 			if (!peer->crypto)
-				cmmd = CRYPTO_ASSOC;
+				exten = crypto_args(CRYPTO_ASSOC,
+				    peer->assoc, NULL);
+			else if (peer->pkey == NULL)
+				exten = crypto_args(CRYPTO_CERT,
+				    peer->assoc, peer->subject);
 			else if (!(peer->crypto & CRYPTO_FLAG_PROV))
-				cmmd = CRYPTO_CERT;
+				exten = crypto_args(CRYPTO_CERT,
+				    peer->assoc, peer->issuer);
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			    !(peer->crypto & CRYPTO_FLAG_VRFY))
+				exten = crypto_args(CRYPTO_SIGN,
+				    peer->assoc, sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_AGREE))
-				cmmd = CRYPTO_COOK;
+				exten = crypto_args(CRYPTO_COOK,
+				    peer->assoc, NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO) &&
 			    (peer->cast_flags & MDF_BCLNT))
-				cmmd = CRYPTO_AUTO;
-			else if (peer->crypto & CRYPTO_FLAG_TAI &&
+				exten = crypto_args(CRYPTO_AUTO,
+				    peer->assoc, NULL);
+			else if (sys_leap != LEAP_NOTINSYNC &&
+			    peer->crypto & CRYPTO_FLAG_TAI &&
 			    !(peer->crypto & CRYPTO_FLAG_LEAP))
-				cmmd = CRYPTO_TAI;
-			if ((cmmd = htonl(cmmd)) != 0)
+				exten = crypto_args(CRYPTO_TAI,
+				    peer->assoc, NULL);
+			if (exten != NULL) {
 				sendlen += crypto_xmit(&xpkt, sendlen,
-				    &cmmd, 0, peer->assoc);
+				    exten, 0);
+				free(exten);
+			}
 			break;
 		}
 
@@ -2427,6 +2447,7 @@ fast_xmit(
 	l_fp xmt_ts;		/* transmit timestamp */
 	l_fp xmt_tx;		/* transmit timestamp after authent */
 	int sendlen, authlen;
+	u_int32	temp32;
 
 	/*
 	 * Initialize transmit packet header fields from the receive
@@ -2498,7 +2519,6 @@ fast_xmit(
 #ifdef OPENSSL
 	if (xkeyid > NTP_MAXKEY) {
 		keyid_t cookie;
-		u_int associd;
 
 		/*
 		 * The only way to get here is a reply to a legitimate
@@ -2511,14 +2531,14 @@ fast_xmit(
 		 */
 		cookie = session_key(&rbufp->recv_srcadr,
 		    &rbufp->dstadr->sin, 0, sys_private, 0);
-		associd = htonl(rpkt->exten[1]);
 		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
 		    sizeof(u_int32)) {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
-			*rpkt->exten |= htonl(CRYPTO_RESP);
+			temp32 = CRYPTO_RESP;
+			rpkt->exten[0] |= htonl(temp32);
 			sendlen += crypto_xmit(&xpkt, sendlen,
-			    rpkt->exten, cookie, associd);
+			    (struct exten *)rpkt->exten, cookie);
 		} else {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);

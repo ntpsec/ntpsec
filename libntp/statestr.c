@@ -12,9 +12,6 @@
 #include "ntp_refclock.h"
 #include "ntp_control.h"
 #include "ntp_string.h"
-#ifdef OPENSSL
-#include "ntp_crypto.h"
-#endif /* OPENSSL */
 
 /*
  * Structure for turning various constants into a readable string.
@@ -128,18 +125,19 @@ struct codestring peer_codes[] = {
 static
 struct codestring crypto_codes[] = {
 	{ XEVNT_OK & ~CRPT_EVENT,	"success" },
-	{ XEVNT_LEN & ~CRPT_EVENT,	"bad_field_length" },
+	{ XEVNT_LEN & ~CRPT_EVENT,	"bad_field_format_or_length" },
 	{ XEVNT_TSP & ~CRPT_EVENT,	"bad_timestamp" },
 	{ XEVNT_FSP & ~CRPT_EVENT,	"bad_filestamp" },
-	{ XEVNT_PUB & ~CRPT_EVENT,	"bad_public_key" },
+	{ XEVNT_PUB & ~CRPT_EVENT,	"bad_or_missing_public_key" },
 	{ XEVNT_MD & ~CRPT_EVENT,	"unsupported_digest_type" },
 	{ XEVNT_KEY & ~CRPT_EVENT,	"mismatched_digest_types" },
 	{ XEVNT_SGL & ~CRPT_EVENT,	"bad_signature_length" },
 	{ XEVNT_SIG & ~CRPT_EVENT,	"signature_not_verified" },
-	{ XEVNT_SBJ & ~CRPT_EVENT,	"subject_hostname_mismatch" },
-	{ XEVNT_PER & ~CRPT_EVENT,	"time_not_verified" },
-	{ XEVNT_CRYPT & ~CRPT_EVENT,	"bad_cookie_encrypt" },
-	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_TAI_data" },
+	{ XEVNT_VFY & ~CRPT_EVENT,	"certificate not verified" },
+	{ XEVNT_PER & ~CRPT_EVENT,	"certificate_expired" },
+	{ XEVNT_CKY & ~CRPT_EVENT,	"bad_or_missing_cookie" },
+	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_or_missing_leapsecond_table" },
+	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_or_missing_certificate" },
 	{ -1,				"crypto" }
 };
 #endif /* OPENSSL */

@@ -17,6 +17,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
+
 #include "ntp_fp.h"
 
 #ifdef OPENSSL
@@ -304,6 +305,7 @@ static struct keyword crypto_keywords[] = {
 	{ "rsakey",		CONF_CRYPTO_RSA },
 	{ "certificate",	CONF_CRYPTO_CERT },
 	{ "randfile",		CONF_CRYPTO_RAND },
+	{ "trusted",		CONF_CRYPTO_TRUST },
 	{ "",			CONFIG_UNKNOWN }
 };
 #endif /* OPENSSL */
@@ -364,6 +366,7 @@ static struct masks logcfg_item[] = {
  * File descriptor used by the resolver save routines, and temporary file
  * name.
  */
+int call_resolver = 1;		/* ntp-genkeys sets this to 0, for example */
 static FILE *res_fp;
 #ifndef SYS_WINNT
 static char res_file[20];	/* enough for /tmp/ntpXXXXXX\0 */
@@ -1152,6 +1155,10 @@ getconfig(
 				crypto_config(CRYPTO_CONF_RAND, tokens[i]);
 				break;
 
+			    case CONF_CRYPTO_TRUST:
+				crypto_config(CRYPTO_CONF_TRST, tokens[i]);
+				break;
+
 			    default:
 				msyslog(LOG_ERR, "crypto: unknown keyword");
 				break;
@@ -1787,10 +1794,12 @@ getconfig(
 #endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
 
 	if (res_fp != NULL) {
-		/*
-		 * Need name resolution
-		 */
-		do_resolve_internal();
+		if (call_resolver) {
+			/*
+			 * Need name resolution
+			 */
+			do_resolve_internal();
+		}
 	}
 }
 

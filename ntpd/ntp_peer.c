@@ -782,7 +782,7 @@ expire_all(void)
 		}
 	}
 	sys_private = (u_int32)RANDOM & 0xffffffff;
-	crypto_sign();
+	crypto_update();
 }
 #endif /* OPENSSL */
 
