@@ -34,7 +34,7 @@ case "$host" in
  *-*-linux*)
     CFLAGS="$CFLAGS -DADJTIME_MISSING"
     ;;
- *-*-solaris*)
+ *-*-sunos*)
     CFLAGS="$CFLAGS -DNONBLOCK_BROKEN"
     ;;
 esac
