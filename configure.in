@@ -194,7 +194,8 @@ esac
 AC_CHECK_HEADERS(sys/lock.h sys/mman.h sys/modem.h sys/param.h sys/ppsclock.h)
 AC_CHECK_HEADERS(sys/ppstime.h sys/proc.h sys/resource.h sys/sched.h)
 case "$target" in
- *-*-sco3.2v4.2)
+ *-*-sco*)
+    AC_CHECK_HEADERS(sys/sio.h)
     ;;
  *sgi*)
     AC_CHECK_HEADERS(sys/syssgi.h)
@@ -290,7 +291,7 @@ AC_STRUCT_TM
 AC_CACHE_CHECK(for a fallback value for HZ, ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
 case "$target" in
- alpha-dec-osf4*)
+ alpha*-dec-osf4*|alpha*-dec-osf5*)
     ac_cv_var_default_hz=1024
     ;;
  mips-dec-ultrix4*)
@@ -302,7 +303,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_HZ, $ac_cv_var_default_hz)
 AC_CACHE_CHECK(if we need to override the system's value for HZ, ac_cv_var_override_hz,
 [ac_cv_var_override_hz=no
 case "$target" in
- alpha-dec-osf4*)
+ alpha*-dec-osf4*|alpha*-dec-osf5*)
     ac_cv_var_override_hz=yes
     ;;
  mips-dec-ultrix4*)
@@ -572,7 +573,7 @@ case "$target" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
     ;;
- alpha*-dec-osf5*)
+ alpha*-dec-osf4*|alpha*-dec-osf5*)
     # mlockall is there, as a #define calling memlk via <sys/mman.h>
     # Not easy to test for - cheat.
     AC_CHECK_FUNCS(memlk, [ac_cv_func_mlockall='yes'])
@@ -1015,7 +1016,7 @@ case "$ac_cv_hdr_def_sigio" in
  yes)
     ans=yes
     case "$target" in
-     alpha-dec-osf4*)
+     alpha*-dec-osf4*|alpha*-dec-osf5*)
         ans=no
         ;;
      *-convex-*)
@@ -1158,6 +1159,16 @@ case "$ac_cv_var_use_tty_sigpoll" in
  yes) AC_DEFINE(USE_TTY_SIGPOLL) ;;
 esac
 
+case "$ac_cv_header_sys_sio_h" in
+ yes)
+    AC_CACHE_CHECK(sys/sio.h for TIOCDCDTIMESTAMP, ac_cv_hdr_def_tiocdcdtimestamp,
+     AC_EGREP_CPP(yes,
+[#include <sys/sio.h>
+#ifdef TIOCDCDTIMESTAMP
+  yes
+#endif
+     ], ac_cv_hdr_def_tiocdcdtimestamp=yes, ac_cv_hdr_def_tiocdcdtimestamp=no))
+
 AC_CACHE_CHECK(if nlist() values might require extra indirection,
 ac_cv_var_nlist_extra_indirection,
 [ans=no
@@ -1217,7 +1228,9 @@ AC_MSG_RESULT($ans)
 
 AC_CACHE_CHECK(if we have the tty_clk line discipline/streams module,
  ac_cv_var_tty_clk,
- ac_cv_var_tty_clk=$ac_cv_header_sys_clkdefs_h)
+ case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
+  *yes*) ac_cv_var_tty_clk=yes ;;
+ esac)
 case "$ac_cv_var_tty_clk" in
  yes) AC_DEFINE(TTYCLK) ;;
 esac

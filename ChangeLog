@@ -1,3 +1,13 @@
+1999-11-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: alpha-dec-osf4* -> alpha*-dec-osf4*|alpha*-dec-osf5*
+	From: Tom Smith <smith@cag.lkg.dec.com>
+
+	* configure.in: Look for <sys/sio.h>.  If TIOCDCDTIMESTAMP is
+	there, we have TTYCLK.
+	* acconfig.h: Lose old AIOCTIMESTAMP stuff
+	Reported by: Kamal A Mostafa <kamal@whence.com>
+
 1999-11-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntpd.c (set_process_priority): Clean up nice() and setpriority()
