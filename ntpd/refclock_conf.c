@@ -186,7 +186,7 @@ extern  struct refclock refclock_palisade;
 #define refclock_palisade refclock_none
 #endif
 
-#ifdef CLOCK_ONCORE
+#if defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
 extern	struct refclock refclock_oncore;
 #else
 #define refclock_oncore refclock_none

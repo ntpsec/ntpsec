@@ -374,9 +374,6 @@
 /* Define if you have the TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, and ASYNC_PPS_CD_NEG ioctls (linux) */
 #undef HAVE_TIO_SERIAL_STUFF
 
-/* Define if you use struct timespec rather than struct timeval (time in ns rather than us) */
-#undef HAVE_TIMESPEC
-
 /* Define if you have the interface in the Draft RFC */
 #undef HAVE_PPSAPI
 

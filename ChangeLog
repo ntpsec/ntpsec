@@ -1,3 +1,18 @@
+2000-09-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c:
+	(atom_start): 
+	* ntpd/ntp_refclock.c: Comment cleanup.  PPS/PPSAPI cleanup
+	(refclock_open): PPS/PPSAPI cleanup
+	From: Dave Mills
+
+	* ntpd/refclock_oncore.c: 
+	* ntpd/refclock_mx4200.c:
+	HAVE_TIMESPEC -> HAVE_STRUCT_TIMESPEC
+
+	* configure.in: ATOM requires struct timespec, not PPSAPI.  Clean
+	up dependencies accordingly.
+
 2000-09-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_cv_var_atom_ok): Improve ATOM configure message

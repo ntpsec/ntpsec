@@ -73,7 +73,7 @@
 
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
-# ifdef HAVE_TIMESPEC
+# ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec tv;
 # else
 	struct timeval tv;

@@ -429,6 +429,15 @@ if test $ac_cv_struct_clockinfo_has_tickadj = yes; then
     AC_DEFINE(HAVE_TICKADJ_IN_STRUCT_CLOCKINFO)
 fi
 
+AC_CACHE_CHECK([for struct timespec], ac_cv_struct_timespec,
+[AC_TRY_COMPILE([
+#include <sys/time.h>],
+[struct timespec n;],
+ac_cv_struct_timespec=yes, ac_cv_struct_timespec=no)])
+if test $ac_cv_struct_timespec = yes; then
+  AC_DEFINE(HAVE_STRUCT_TIMESPEC, 1, [Do we have struct timespec?])
+fi
+
 AC_CACHE_CHECK([for struct ntptimeval], ac_cv_struct_ntptimeval,
 [AC_TRY_COMPILE([
 #include <sys/time.h>
@@ -439,8 +448,8 @@ if test $ac_cv_struct_ntptimeval = yes; then
   AC_DEFINE(HAVE_STRUCT_NTPTIMEVAL, 1, [Do we have struct ntptimeval?])
 fi
 
-AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,[
-#ifdef HAVE_SYS_TIME_H
+AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,
+[#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
 # ifdef HAVE_TIME_H
@@ -1414,20 +1423,24 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 # Check for header timepps.h, if found then we have PPS API (Draft RFC) stuff.
-# there is NO way that I can tell to tell if a given OS is using timespec or
-# timeval so just set it here for the one case that is KNOWN to use timespec.
 
 # The PPSAPI headers use "inline", so we must have a STDC compiler to use
 # the PPSAPI.
 
+# The PPSAPI needs ATOM, which needs struct timespec.
+
+case "$ac_cv_struct_timespec" in
+ 'yes')
+    ac_cv_var_atom_ok=yes
+    ;;
+esac
+
 case "$ANSI2KNR" in
  '')
-    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
-     *yes*)
+    case "$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
+     yes*yes*)
 	AC_DEFINE(HAVE_PPSAPI)
 	ac_cv_var_oncore_ok=yes
-	ac_cv_var_atom_ok=yes
-	AC_DEFINE(HAVE_TIMESPEC)
 	;;
     esac
     ;;
@@ -1618,8 +1631,8 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(ATOM PPSAPI interface)
-AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s PPSAPI interface],
+AC_MSG_CHECKING(ATOM PPS interface)
+AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s ATOM PPS interface],
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 case "$ac_cv_var_atom_ok" in
  no) ntp_ok=no ;;

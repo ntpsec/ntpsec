@@ -69,17 +69,17 @@ extern int pps_hardpps;		/* enables the kernel PPS interface */
 
 static struct peer *pps_peer;	/* atom driver for PPS sources */
 
+#ifdef HAVE_PPSAPI
 /*
  * PPS unit control structure
  */
 struct ppsunit {
 	struct timespec ts;	/* last timestamp */
-#ifdef HAVE_PPSAPI
 	int fddev;		/* pps device descriptor */
 	pps_info_t pps_info;	/* pps_info control */
 	pps_handle_t handle;	/* PPSAPI handlebars */
-#endif /* HAVE_PPSAPI */
 };
+#endif /* HAVE_PPSAPI */
 
 /*
  * Function prototypes
@@ -114,9 +114,9 @@ atom_start(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	register struct ppsunit *up;
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
+	register struct ppsunit *up;
 	pps_params_t pps;
 	int mode, temp;
 	pps_handle_t handle;
@@ -126,14 +126,15 @@ atom_start(
 	 * Allocate and initialize unit structure
 	 */
 	pps_peer = peer;
-	up = emalloc(sizeof(struct ppsunit));
-	memset(up, 0, sizeof(struct ppsunit));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 #ifdef HAVE_PPSAPI
+	up = emalloc(sizeof(struct ppsunit));
+	memset(up, 0, sizeof(struct ppsunit));
+	pp->unitptr = (caddr_t)up;
+
 	/*
 	 * Open PPS device, if not done already. If some driver has
 	 * already opened the PPS device, the fdpps has the file
@@ -143,9 +144,7 @@ atom_start(
 	 * link points.
 	 */
 	if (fdpps > 0) {
-		msyslog(LOG_ERR,
-		    "refclock_atom: ppsapi already configured");
-		return (0);
+		up->fddev = fdpps;
 	} else {
 		if (strlen(pps_device) == 0)
 			sprintf(pps_device, DEVICE, unit);
@@ -212,20 +211,20 @@ atom_shutdown(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	register struct ppsunit *up;
+#ifdef HAVE_PPSAPI
 	struct refclockproc *pp;
+	register struct ppsunit *up;
 
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
-#ifdef HAVE_PPSAPI
 	if (up->fddev > 0)
 		close(up->fddev);
 	if (up->handle > 0)
 		time_pps_destroy(up->handle);
-#endif /* HAVE_PPSAPI */
 	if (pps_peer == peer)
 		pps_peer = 0;
 	free(up);
+#endif /* HAVE_PPSAPI */
 }
 
 

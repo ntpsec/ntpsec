@@ -72,24 +72,11 @@
  * refclockproc structure pointer from the table typeunit[type][unit].
  * This interface is strongly discouraged and may be abandoned in
  * future.
- *
- * The routines include support for the 1-pps signal provided by some
- * radios and connected via a level converted described in the gadget
- * directory. The signal is captured using a serial port and one of
- * three STREAMS modules described in the refclock_atom.c file. For the
- * highest precision, the signal is captured using the carrier-detect
- * line of a serial port and either the ppsclock or ppsapi streams
- * module or some devilish ioctl() folks keep slipping in as a patch. Be
- * advised ALL support for other than the duly standardized ppsapi
- * interface will eventually be withdrawn.
  */
 #define MAXUNIT 	4	/* max units */
-
-#if defined(PPS) || defined(HAVE_PPSAPI)
-int fdpps;			/* pps file descriptor */
-#endif /* PPS HAVE_PPSAPI */
-
 #define FUDGEFAC	.1	/* fudge correction factor */
+
+int fdpps;			/* pps file descriptor */
 
 /*
  * Type/unit peer index. Used to find the peer structure for control and
@@ -785,8 +772,6 @@ refclock_open(
 	 * Open serial port and set default options
 	 */
 	flags = lflags;
-	if (strcmp(dev, pps_device) == 0)
-		flags |= LDISC_PPS;
 #ifdef O_NONBLOCK
 	fd = open(dev, O_RDWR | O_NONBLOCK, 0777);
 #else
@@ -796,6 +781,15 @@ refclock_open(
 		msyslog(LOG_ERR, "refclock_open: %s: %m", dev);
 		return (0);
 	}
+
+	/*
+	 * This little jewel lights up the PPS file descriptor if the
+	 * device name matches the name in the pps line in the
+	 * configuration file. This is so the atom driver can glom onto
+	 * the right device. Very silly.
+	 */
+	if (strcmp(dev, pps_device) == 0)
+		fdpps = fd;
 
 	/*
 	 * The following sections initialize the serial line port in
@@ -959,9 +953,8 @@ refclock_open(
  * This routine attempts to hide the internal, system-specific details
  * of serial ports. It can handle POSIX (termios), SYSV (termio) and BSD
  * (sgtty) interfaces with varying degrees of success. The routine sets
- * up optional features such as tty_clk, ppsclock and ppsapi, as well as
- * their many other variants. The routine returns 1 if success and 0 if
- * failure.
+ * up optional features such as tty_clk. The routine returns 1 if
+ * success and 0 if failure.
  */
 int
 refclock_ioctl(
@@ -989,30 +982,6 @@ refclock_ioctl(
 	if (debug)
 		printf("refclock_ioctl: fd %d flags 0x%x\n", fd, flags);
 #endif
-
-	/*
-	 * The following sections select optional features, such as
-	 * modem control, PPS capture and so forth. Some require
-	 * specific operating system support in the form of STREAMS
-	 * modules, which can be loaded and unloaded at run time without
-	 * rebooting the kernel. The STREAMS modules require System
-	 * V STREAMS support. The checking frenzy is attenuated here,
-	 * since the device is already open.
-	 *
-	 * Note that the tty_clk and ppsclock modules are optional; if
-	 * configured and unavailable, the dang thing still works, but
-	 * the accuracy improvement using them will not be available.
-	 * The only known implmentations of these moldules are specific
-	 * to SunOS 4.x. Use the ppsclock module ONLY with Sun baseboard
-	 * ttya or ttyb. Using it with the SPIF multipexor crashes the
-	 * kernel.
-	 *
-	 * The preferred way to capture PPS timestamps is using the
-	 * ppsapi interface, which is machine independent. The SunOS 4.x
-	 * and Digital Unix 4.x interfaces use STREAMS modules and
-	 * support both the ppsapi specification and ppsclock
-	 * functionality, but other systems may vary widely.
-	 */
 	if (flags == 0)
 		return (1);
 #if !(defined(HAVE_TERMIOS) || defined(HAVE_BSD_TTYS))
@@ -1062,104 +1031,6 @@ refclock_ioctl(
 		}
 	}
 #endif /* TTYCLK */
-
-#if defined(PPS) && !defined(HAVE_PPSAPI)
-	/*
-	 * The PPS option provides timestamping at the driver level.
-	 * It uses a 1-pps signal and level converter (gadget box) and
-	 * requires the ppsclock streams module and System V STREAMS
-	 * support. This option has been superseded by the ppsapi
-	 * option and may be withdrawn in future.
-	 */
-	if (flags & LDISC_PPS) {
-		int rval = 0;
-#ifdef HAVE_TIOCSPPS		/* Solaris */
-		int one = 1;
-#endif /* HAVE_TIOCSPPS */
-
-		if (fdpps > 0) {
-			msyslog(LOG_ERR,
-				"refclock_ioctl: PPS already configured");
-			return (0);
-		}
-#ifdef HAVE_TIOCSPPS		/* Solaris */
-		if (ioctl(fd, TIOCSPPS, &one) < 0) {
-			msyslog(LOG_NOTICE,
-				"refclock_ioctl: TIOCSPPS failed: %m");
-			return (0);
-		}
-		if (debug)
-			printf("refclock_ioctl: fd %d TIOCSPPS %d\n",
-			    fd, rval);
-#else
-		if (ioctl(fd, I_PUSH, "ppsclock") < 0) {
-			msyslog(LOG_NOTICE,
-				"refclock_ioctl: I_PUSH ppsclock failed: %m");
-			return (0);
-		}
-		if (debug)
-			printf("refclock_ioctl: fd %d ppsclock %d\n",
-			    fd, rval);
-#endif /* not HAVE_TIOCSPPS */
-		fdpps = fd;
-	}
-#endif /* PPS HAVE_PPSAPI */
-
-#ifdef HAVE_PPSAPI
-	/*
-	 * The PPSAPI option provides timestamping at the driver level.
-	 * It uses a 1-pps signal and level converter (gadget box) and
-	 * requires ppsapi compiled into the kernel on non STREAMS
-	 * systems. This is the preferred way to capture PPS timestamps
-	 * and is expected to become an IETF cross-platform standard.
-	 */
-	if (flags & (LDISC_PPS | LDISC_CLKPPS)) {
-		pps_params_t pp;
-		int mode, temp;
-		pps_handle_t handle;
-
-		memset((char *)&pp, 0, sizeof(pp));
-		if (fdpps > 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: ppsapi already configured");
-			return (0);
-		}
-		if (time_pps_create(fd, &handle) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_create failed: %m");
-			return (0);
-		}
-		if (time_pps_getcap(handle, &mode) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_getcap failed: %m");
-			return (0);
-		}
-		pp.mode = mode & PPS_CAPTUREBOTH;
-		if (time_pps_setparams(handle, &pp) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_setparams failed: %m");
-			return (0);
-		}
-		if (!pps_hardpps)
-			temp = 0;
-		else if (pps_assert)
-			temp = mode & PPS_CAPTUREASSERT;
-		else
-			temp = mode & PPS_CAPTURECLEAR;
-		if (time_pps_kcbind(handle, PPS_KC_HARDPPS, temp,
-		    PPS_TSFMT_TSPEC) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_kcbind failed: %m");
-			return (0);
-		}
-		(void)time_pps_getparams(handle, &pp);
-		fdpps = (int)handle;
-		if (debug)
-			printf(
-			    "refclock_ioctl: fd %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-			    fdpps, pp.api_version, pp.mode, mode);
-	}
-#endif /* HAVE_PPSAPI */
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
 #endif /* SYS_VXWORKS SYS_WINNT */
 	return (1);

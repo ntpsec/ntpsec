@@ -83,7 +83,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE)
+#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
 
 #include <stdio.h>
 #include <ctype.h>
@@ -129,7 +129,7 @@
 
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
-# ifdef HAVE_TIMESPEC
+# ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec tv;
 # else
 	struct timeval tv;
@@ -1325,7 +1325,11 @@ oncore_msg_any(
 
 	if (debug > 3) {
 		GETTIMEOFDAY(&tv, 0);
+#ifdef HAVE_STRUCT_TIMESPEC
+		printf("ONCORE[%d]: %ld.%09ld\n", instance->unit, (long) tv.tv_sec, (long) tv.tv_nsec);
+#else
 		printf("ONCORE[%d]: %ld.%06ld\n", instance->unit, (long) tv.tv_sec, (long) tv.tv_usec);
+#endif
 
 		if (!*fmt) {
 			printf(">>@@%c%c ", buf[2], buf[3]);
@@ -2231,7 +2235,7 @@ oncore_get_timestamp(
 	int	j, Rsm;
 	l_fp ts, ts_tmp;
 	double dmy;
-#ifdef HAVE_TIMESPEC
+#ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec *tsp = 0;
 #else
 	struct timeval	*tsp = 0;
@@ -2329,8 +2333,13 @@ oncore_get_timestamp(
 	tsp = &ev.tv;
 
 	if (debug > 2)
+#ifdef HAVE_STRUCT_TIMESPEC
+		printf("ONCORE: serial/j (%d, %d) %ld.%09ld\n",
+			ev.serial, j, tsp->tv_sec, tsp->tv_nsec);
+#else
 		printf("ONCORE: serial/j (%d, %d) %ld.%06ld\n",
 			ev.serial, j, tsp->tv_sec, tsp->tv_usec);
+#endif
 
 	if (ev.serial == j) {
 		printf("ONCORE: oncore_get_timestamp, error serial pps\n");

@@ -563,7 +563,7 @@ Optional Features:
   --enable-ACTS           + ACTS modem service
   --enable-ARBITER        + Arbiter 1088A/B GPS receiver
   --enable-ARCRON-MSF     + Arcron MSF receiver
-  --enable-ATOM           s PPSAPI interface
+  --enable-ATOM           s ATOM PPS interface
   --enable-AS2201         + Austron 2200A/2201A GPS receiver
   --enable-CHU            - CHU modem/decoder
   --enable-AUDIO-CHU      s CHU audio/decoder
@@ -5318,13 +5318,50 @@ EOF
 
 fi
 
-echo "configure:5321: checking for struct ntptimeval" >&5
+echo "configure:5321: checking for struct timespec" >&5
+echo $ECHO_N "checking for struct timespec... $ECHO_C" >&6
+if test "${ac_cv_struct_timespec+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line 5327 "configure"
+#include "confdefs.h"
+
+#include <sys/time.h>
+int
+main ()
+{
+struct timespec n;
+  ;
+  return 0;
+}
+_ACEOF
+if { (eval echo configure:5339: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+  ac_cv_struct_timespec=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  ac_cv_struct_timespec=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+fi
+echo "configure:5348: result: $ac_cv_struct_timespec" >&5
+echo "${ECHO_T}$ac_cv_struct_timespec" >&6
+if test $ac_cv_struct_timespec = yes; then
+
+cat >>confdefs.h <<\EOF
+#define HAVE_STRUCT_TIMESPEC 1
+EOF
+
+fi
+
+echo "configure:5358: checking for struct ntptimeval" >&5
 echo $ECHO_N "checking for struct ntptimeval... $ECHO_C" >&6
 if test "${ac_cv_struct_ntptimeval+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5327 "configure"
+#line 5364 "configure"
 #include "confdefs.h"
 
 #include <sys/time.h>
@@ -5337,7 +5374,7 @@ struct ntptimeval n;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5340: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5377: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_struct_ntptimeval=yes
 else
   echo "configure: failed program was:" >&5
@@ -5346,7 +5383,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5349: result: $ac_cv_struct_ntptimeval" >&5
+echo "configure:5386: result: $ac_cv_struct_ntptimeval" >&5
 echo "${ECHO_T}$ac_cv_struct_ntptimeval" >&6
 if test $ac_cv_struct_ntptimeval = yes; then
 
@@ -5356,15 +5393,14 @@ EOF
 
 fi
 
-echo "configure:5359: checking for struct ntptimeval.time.tv_nsec" >&5
+echo "configure:5396: checking for struct ntptimeval.time.tv_nsec" >&5
 echo $ECHO_N "checking for struct ntptimeval.time.tv_nsec... $ECHO_C" >&6
 if test "${ac_cv_member_struct_ntptimeval_time_tv_nsec+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5365 "configure"
+#line 5402 "configure"
 #include "confdefs.h"
-
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
@@ -5389,7 +5425,7 @@ foo.time.tv_nsec;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5392: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5428: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_ntptimeval_time_tv_nsec=yes
 else
   echo "configure: failed program was:" >&5
@@ -5398,7 +5434,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5401: result: $ac_cv_member_struct_ntptimeval_time_tv_nsec" >&5
+echo "configure:5437: result: $ac_cv_member_struct_ntptimeval_time_tv_nsec" >&5
 echo "${ECHO_T}$ac_cv_member_struct_ntptimeval_time_tv_nsec" >&6
 if test $ac_cv_member_struct_ntptimeval_time_tv_nsec = yes; then
 
@@ -5408,13 +5444,13 @@ EOF
 
 fi
 
-echo "configure:5411: checking for struct audio_info.monitor_gain" >&5
+echo "configure:5447: checking for struct audio_info.monitor_gain" >&5
 echo $ECHO_N "checking for struct audio_info.monitor_gain... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_monitor_gain+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5417 "configure"
+#line 5453 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5432,7 +5468,7 @@ foo.monitor_gain;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5435: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5471: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_monitor_gain=yes
 else
   echo "configure: failed program was:" >&5
@@ -5441,7 +5477,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5444: result: $ac_cv_member_struct_audio_info_monitor_gain" >&5
+echo "configure:5480: result: $ac_cv_member_struct_audio_info_monitor_gain" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_monitor_gain" >&6
 if test $ac_cv_member_struct_audio_info_monitor_gain = yes; then
 
@@ -5450,13 +5486,13 @@ cat >>confdefs.h <<EOF
 EOF
 
 fi
-echo "configure:5453: checking for struct audio_info.output_muted" >&5
+echo "configure:5489: checking for struct audio_info.output_muted" >&5
 echo $ECHO_N "checking for struct audio_info.output_muted... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_output_muted+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5459 "configure"
+#line 5495 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5474,7 +5510,7 @@ foo.output_muted;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5477: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5513: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_output_muted=yes
 else
   echo "configure: failed program was:" >&5
@@ -5483,7 +5519,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5486: result: $ac_cv_member_struct_audio_info_output_muted" >&5
+echo "configure:5522: result: $ac_cv_member_struct_audio_info_output_muted" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_output_muted" >&6
 if test $ac_cv_member_struct_audio_info_output_muted = yes; then
 
@@ -5492,13 +5528,13 @@ cat >>confdefs.h <<EOF
 EOF
 
 fi
-echo "configure:5495: checking for struct audio_info.blocksize" >&5
+echo "configure:5531: checking for struct audio_info.blocksize" >&5
 echo $ECHO_N "checking for struct audio_info.blocksize... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_blocksize+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5501 "configure"
+#line 5537 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5516,7 +5552,7 @@ foo.blocksize;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5519: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5555: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_blocksize=yes
 else
   echo "configure: failed program was:" >&5
@@ -5525,7 +5561,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5528: result: $ac_cv_member_struct_audio_info_blocksize" >&5
+echo "configure:5564: result: $ac_cv_member_struct_audio_info_blocksize" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_blocksize" >&6
 if test $ac_cv_member_struct_audio_info_blocksize = yes; then
 
@@ -5534,13 +5570,13 @@ cat >>confdefs.h <<EOF
 EOF
 
 fi
-echo "configure:5537: checking for struct audio_info.hiwat" >&5
+echo "configure:5573: checking for struct audio_info.hiwat" >&5
 echo $ECHO_N "checking for struct audio_info.hiwat... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_hiwat+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5543 "configure"
+#line 5579 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5558,7 +5594,7 @@ foo.hiwat;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5561: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5597: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_hiwat=yes
 else
   echo "configure: failed program was:" >&5
@@ -5567,7 +5603,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5570: result: $ac_cv_member_struct_audio_info_hiwat" >&5
+echo "configure:5606: result: $ac_cv_member_struct_audio_info_hiwat" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_hiwat" >&6
 if test $ac_cv_member_struct_audio_info_hiwat = yes; then
 
@@ -5576,13 +5612,13 @@ cat >>confdefs.h <<EOF
 EOF
 
 fi
-echo "configure:5579: checking for struct audio_info.lowat" >&5
+echo "configure:5615: checking for struct audio_info.lowat" >&5
 echo $ECHO_N "checking for struct audio_info.lowat... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_lowat+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5585 "configure"
+#line 5621 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5600,7 +5636,7 @@ foo.lowat;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5603: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5639: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_lowat=yes
 else
   echo "configure: failed program was:" >&5
@@ -5609,7 +5645,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5612: result: $ac_cv_member_struct_audio_info_lowat" >&5
+echo "configure:5648: result: $ac_cv_member_struct_audio_info_lowat" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_lowat" >&6
 if test $ac_cv_member_struct_audio_info_lowat = yes; then
 
@@ -5618,13 +5654,13 @@ cat >>confdefs.h <<EOF
 EOF
 
 fi
-echo "configure:5621: checking for struct audio_info.mode" >&5
+echo "configure:5657: checking for struct audio_info.mode" >&5
 echo $ECHO_N "checking for struct audio_info.mode... $ECHO_C" >&6
 if test "${ac_cv_member_struct_audio_info_mode+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5627 "configure"
+#line 5663 "configure"
 #include "confdefs.h"
 #ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
@@ -5642,7 +5678,7 @@ foo.mode;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5645: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5681: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_member_struct_audio_info_mode=yes
 else
   echo "configure: failed program was:" >&5
@@ -5651,7 +5687,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5654: result: $ac_cv_member_struct_audio_info_mode" >&5
+echo "configure:5690: result: $ac_cv_member_struct_audio_info_mode" >&5
 echo "${ECHO_T}$ac_cv_member_struct_audio_info_mode" >&6
 if test $ac_cv_member_struct_audio_info_mode = yes; then
 
@@ -5661,7 +5697,7 @@ EOF
 
 fi
 
-echo "configure:5664: checking for inline" >&5
+echo "configure:5700: checking for inline" >&5
 echo $ECHO_N "checking for inline... $ECHO_C" >&6
 if test "${ac_cv_c_inline+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -5669,14 +5705,14 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat >conftest.$ac_ext <<_ACEOF
-#line 5672 "configure"
+#line 5708 "configure"
 #include "confdefs.h"
 #ifndef __cplusplus
 $ac_kw int foo () {return 0; }
 #endif
 
 _ACEOF
-if { (eval echo configure:5679: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5715: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_c_inline=$ac_kw; break
 else
   echo "configure: failed program was:" >&5
@@ -5687,7 +5723,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 done
 
 fi
-echo "configure:5690: result: $ac_cv_c_inline" >&5
+echo "configure:5726: result: $ac_cv_c_inline" >&5
 echo "${ECHO_T}$ac_cv_c_inline" >&6
 case $ac_cv_c_inline in
   inline | yes) ;;
@@ -5702,13 +5738,13 @@ EOF
  ;;
 esac
 
-echo "configure:5705: checking whether char is unsigned" >&5
+echo "configure:5741: checking whether char is unsigned" >&5
 echo $ECHO_N "checking whether char is unsigned... $ECHO_C" >&6
 if test "${ac_cv_c_char_unsigned+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5711 "configure"
+#line 5747 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5719,7 +5755,7 @@ int _array_ [1 - 2 * !(((char) -1) < 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5722: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5758: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_c_char_unsigned=no
 else
   echo "configure: failed program was:" >&5
@@ -5728,7 +5764,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5731: result: $ac_cv_c_char_unsigned" >&5
+echo "configure:5767: result: $ac_cv_c_char_unsigned" >&5
 echo "${ECHO_T}$ac_cv_c_char_unsigned" >&6
 if test $ac_cv_c_char_unsigned = yes && test "$GCC" != yes; then
   cat >>confdefs.h <<\EOF
@@ -5738,13 +5774,13 @@ EOF
 fi
 		case "$host" in
  $target)
-    echo "configure:5741: checking for signed char" >&5
+    echo "configure:5777: checking for signed char" >&5
 echo $ECHO_N "checking for signed char... $ECHO_C" >&6
 if test "${ac_cv_type_signed_char+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5747 "configure"
+#line 5783 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5758,7 +5794,7 @@ if (sizeof (signed char))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5761: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5797: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_signed_char=yes
 else
   echo "configure: failed program was:" >&5
@@ -5767,10 +5803,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5770: result: $ac_cv_type_signed_char" >&5
+echo "configure:5806: result: $ac_cv_type_signed_char" >&5
 echo "${ECHO_T}$ac_cv_type_signed_char" >&6
 
-echo "configure:5773: checking size of signed char" >&5
+echo "configure:5809: checking size of signed char" >&5
 echo $ECHO_N "checking size of signed char... $ECHO_C" >&6
 if test "${ac_cv_sizeof_signed_char+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -5779,7 +5815,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 5782 "configure"
+#line 5818 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5790,11 +5826,11 @@ int _array_ [1 - 2 * !((sizeof (signed char)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5793: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5829: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 5797 "configure"
+#line 5833 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5805,7 +5841,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5808: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5844: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -5820,7 +5856,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 5823 "configure"
+#line 5859 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5831,7 +5867,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5834: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5870: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -5846,7 +5882,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 5849 "configure"
+#line 5885 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5857,7 +5893,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5860: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5896: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -5869,7 +5905,7 @@ done
 ac_cv_sizeof_signed_char=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 5872 "configure"
+#line 5908 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5883,7 +5919,7 @@ fprintf (f, "%d\n", (sizeof (signed char)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5886: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:5922: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_signed_char=`cat conftestval`
 else
@@ -5897,7 +5933,7 @@ else
   ac_cv_sizeof_signed_char=0
 fi
 fi
-echo "configure:5900: result: $ac_cv_sizeof_signed_char" >&5
+echo "configure:5936: result: $ac_cv_sizeof_signed_char" >&5
 echo "${ECHO_T}$ac_cv_sizeof_signed_char" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_SIGNED_CHAR $ac_cv_sizeof_signed_char
@@ -5906,13 +5942,13 @@ EOF
     ;;
  *) case "$target" in
      *-*-vxworks*)
-	echo "configure:5909: checking for signed char" >&5
+	echo "configure:5945: checking for signed char" >&5
 echo $ECHO_N "checking for signed char... $ECHO_C" >&6
 if test "${ac_cv_type_signed_char+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 5915 "configure"
+#line 5951 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5926,7 +5962,7 @@ if (sizeof (signed char))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5929: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5965: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_signed_char=yes
 else
   echo "configure: failed program was:" >&5
@@ -5935,10 +5971,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:5938: result: $ac_cv_type_signed_char" >&5
+echo "configure:5974: result: $ac_cv_type_signed_char" >&5
 echo "${ECHO_T}$ac_cv_type_signed_char" >&6
 
-echo "configure:5941: checking size of signed char" >&5
+echo "configure:5977: checking size of signed char" >&5
 echo $ECHO_N "checking size of signed char... $ECHO_C" >&6
 if test "${ac_cv_sizeof_signed_char+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -5947,7 +5983,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 5950 "configure"
+#line 5986 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5958,11 +5994,11 @@ int _array_ [1 - 2 * !((sizeof (signed char)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5961: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:5997: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 5965 "configure"
+#line 6001 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5973,7 +6009,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:5976: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6012: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -5988,7 +6024,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 5991 "configure"
+#line 6027 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -5999,7 +6035,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6002: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6038: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6014,7 +6050,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 6017 "configure"
+#line 6053 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6025,7 +6061,7 @@ int _array_ [1 - 2 * !((sizeof (signed char)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6028: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6064: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -6037,7 +6073,7 @@ done
 ac_cv_sizeof_signed_char=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 6040 "configure"
+#line 6076 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6051,7 +6087,7 @@ fprintf (f, "%d\n", (sizeof (signed char)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6054: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:6090: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_signed_char=`cat conftestval`
 else
@@ -6065,7 +6101,7 @@ else
   ac_cv_sizeof_signed_char=0
 fi
 fi
-echo "configure:6068: result: $ac_cv_sizeof_signed_char" >&5
+echo "configure:6104: result: $ac_cv_sizeof_signed_char" >&5
 echo "${ECHO_T}$ac_cv_sizeof_signed_char" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_SIGNED_CHAR $ac_cv_sizeof_signed_char
@@ -6080,13 +6116,13 @@ esac
 
 case "$host" in
  $target)
-    echo "configure:6083: checking for int" >&5
+    echo "configure:6119: checking for int" >&5
 echo $ECHO_N "checking for int... $ECHO_C" >&6
 if test "${ac_cv_type_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6089 "configure"
+#line 6125 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6100,7 +6136,7 @@ if (sizeof (int))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6103: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6139: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_int=yes
 else
   echo "configure: failed program was:" >&5
@@ -6109,10 +6145,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:6112: result: $ac_cv_type_int" >&5
+echo "configure:6148: result: $ac_cv_type_int" >&5
 echo "${ECHO_T}$ac_cv_type_int" >&6
 
-echo "configure:6115: checking size of int" >&5
+echo "configure:6151: checking size of int" >&5
 echo $ECHO_N "checking size of int... $ECHO_C" >&6
 if test "${ac_cv_sizeof_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6121,7 +6157,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 6124 "configure"
+#line 6160 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6132,11 +6168,11 @@ int _array_ [1 - 2 * !((sizeof (int)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6135: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6171: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6139 "configure"
+#line 6175 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6147,7 +6183,7 @@ int _array_ [1 - 2 * !((sizeof (int)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6150: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6186: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6162,7 +6198,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6165 "configure"
+#line 6201 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6173,7 +6209,7 @@ int _array_ [1 - 2 * !((sizeof (int)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6176: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6212: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6188,7 +6224,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 6191 "configure"
+#line 6227 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6199,7 +6235,7 @@ int _array_ [1 - 2 * !((sizeof (int)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6202: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6238: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -6211,7 +6247,7 @@ done
 ac_cv_sizeof_int=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 6214 "configure"
+#line 6250 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6225,7 +6261,7 @@ fprintf (f, "%d\n", (sizeof (int)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6228: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:6264: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_int=`cat conftestval`
 else
@@ -6239,7 +6275,7 @@ else
   ac_cv_sizeof_int=0
 fi
 fi
-echo "configure:6242: result: $ac_cv_sizeof_int" >&5
+echo "configure:6278: result: $ac_cv_sizeof_int" >&5
 echo "${ECHO_T}$ac_cv_sizeof_int" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_INT $ac_cv_sizeof_int
@@ -6248,13 +6284,13 @@ EOF
     ;;
  *) case "$target" in
      *-*-vxworks*)
-	echo "configure:6251: checking for int" >&5
+	echo "configure:6287: checking for int" >&5
 echo $ECHO_N "checking for int... $ECHO_C" >&6
 if test "${ac_cv_type_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6257 "configure"
+#line 6293 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6268,7 +6304,7 @@ if (sizeof (int))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6271: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6307: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_int=yes
 else
   echo "configure: failed program was:" >&5
@@ -6277,10 +6313,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:6280: result: $ac_cv_type_int" >&5
+echo "configure:6316: result: $ac_cv_type_int" >&5
 echo "${ECHO_T}$ac_cv_type_int" >&6
 
-echo "configure:6283: checking size of int" >&5
+echo "configure:6319: checking size of int" >&5
 echo $ECHO_N "checking size of int... $ECHO_C" >&6
 if test "${ac_cv_sizeof_int+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6289,7 +6325,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 6292 "configure"
+#line 6328 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6300,11 +6336,11 @@ int _array_ [1 - 2 * !((sizeof (int)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6303: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6339: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6307 "configure"
+#line 6343 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6315,7 +6351,7 @@ int _array_ [1 - 2 * !((sizeof (int)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6318: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6354: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6330,7 +6366,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6333 "configure"
+#line 6369 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6341,7 +6377,7 @@ int _array_ [1 - 2 * !((sizeof (int)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6344: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6380: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6356,7 +6392,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 6359 "configure"
+#line 6395 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6367,7 +6403,7 @@ int _array_ [1 - 2 * !((sizeof (int)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6370: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6406: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -6379,7 +6415,7 @@ done
 ac_cv_sizeof_int=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 6382 "configure"
+#line 6418 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6393,7 +6429,7 @@ fprintf (f, "%d\n", (sizeof (int)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6396: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:6432: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_int=`cat conftestval`
 else
@@ -6407,7 +6443,7 @@ else
   ac_cv_sizeof_int=0
 fi
 fi
-echo "configure:6410: result: $ac_cv_sizeof_int" >&5
+echo "configure:6446: result: $ac_cv_sizeof_int" >&5
 echo "${ECHO_T}$ac_cv_sizeof_int" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_INT $ac_cv_sizeof_int
@@ -6422,13 +6458,13 @@ esac
 
 case "$host" in
  $target)
-    echo "configure:6425: checking for long" >&5
+    echo "configure:6461: checking for long" >&5
 echo $ECHO_N "checking for long... $ECHO_C" >&6
 if test "${ac_cv_type_long+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6431 "configure"
+#line 6467 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6442,7 +6478,7 @@ if (sizeof (long))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6445: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6481: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_long=yes
 else
   echo "configure: failed program was:" >&5
@@ -6451,10 +6487,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:6454: result: $ac_cv_type_long" >&5
+echo "configure:6490: result: $ac_cv_type_long" >&5
 echo "${ECHO_T}$ac_cv_type_long" >&6
 
-echo "configure:6457: checking size of long" >&5
+echo "configure:6493: checking size of long" >&5
 echo $ECHO_N "checking size of long... $ECHO_C" >&6
 if test "${ac_cv_sizeof_long+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6463,7 +6499,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 6466 "configure"
+#line 6502 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6474,11 +6510,11 @@ int _array_ [1 - 2 * !((sizeof (long)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6477: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6513: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6481 "configure"
+#line 6517 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6489,7 +6525,7 @@ int _array_ [1 - 2 * !((sizeof (long)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6492: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6528: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6504,7 +6540,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6507 "configure"
+#line 6543 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6515,7 +6551,7 @@ int _array_ [1 - 2 * !((sizeof (long)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6518: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6554: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6530,7 +6566,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 6533 "configure"
+#line 6569 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6541,7 +6577,7 @@ int _array_ [1 - 2 * !((sizeof (long)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6544: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6580: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -6553,7 +6589,7 @@ done
 ac_cv_sizeof_long=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 6556 "configure"
+#line 6592 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6567,7 +6603,7 @@ fprintf (f, "%d\n", (sizeof (long)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6570: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:6606: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_long=`cat conftestval`
 else
@@ -6581,7 +6617,7 @@ else
   ac_cv_sizeof_long=0
 fi
 fi
-echo "configure:6584: result: $ac_cv_sizeof_long" >&5
+echo "configure:6620: result: $ac_cv_sizeof_long" >&5
 echo "${ECHO_T}$ac_cv_sizeof_long" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_LONG $ac_cv_sizeof_long
@@ -6590,13 +6626,13 @@ EOF
     ;;
  *) case "$target" in
      *-*-vxworks*)
-	echo "configure:6593: checking for long" >&5
+	echo "configure:6629: checking for long" >&5
 echo $ECHO_N "checking for long... $ECHO_C" >&6
 if test "${ac_cv_type_long+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6599 "configure"
+#line 6635 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6610,7 +6646,7 @@ if (sizeof (long))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6613: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6649: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_long=yes
 else
   echo "configure: failed program was:" >&5
@@ -6619,10 +6655,10 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:6622: result: $ac_cv_type_long" >&5
+echo "configure:6658: result: $ac_cv_type_long" >&5
 echo "${ECHO_T}$ac_cv_type_long" >&6
 
-echo "configure:6625: checking size of long" >&5
+echo "configure:6661: checking size of long" >&5
 echo $ECHO_N "checking size of long... $ECHO_C" >&6
 if test "${ac_cv_sizeof_long+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -6631,7 +6667,7 @@ else
   if test "$cross_compiling" = yes; then
   # Depending upon the size, compute the lo and hi bounds.
 cat >conftest.$ac_ext <<_ACEOF
-#line 6634 "configure"
+#line 6670 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6642,11 +6678,11 @@ int _array_ [1 - 2 * !((sizeof (long)) >= 0)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6645: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6681: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=0 ac_try=0
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6649 "configure"
+#line 6685 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6657,7 +6693,7 @@ int _array_ [1 - 2 * !((sizeof (long)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6660: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6696: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6672,7 +6708,7 @@ else
   ac_hi=-1 ac_try=-1
   while true; do
     cat >conftest.$ac_ext <<_ACEOF
-#line 6675 "configure"
+#line 6711 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6683,7 +6719,7 @@ int _array_ [1 - 2 * !((sizeof (long)) >= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6686: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6722: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_lo=$ac_try; break
 else
   echo "configure: failed program was:" >&5
@@ -6698,7 +6734,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 while test "x$ac_lo" != "x$ac_hi"; do
   ac_try=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
   cat >conftest.$ac_ext <<_ACEOF
-#line 6701 "configure"
+#line 6737 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6709,7 +6745,7 @@ int _array_ [1 - 2 * !((sizeof (long)) <= $ac_try)]
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6712: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6748: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_hi=$ac_try
 else
   echo "configure: failed program was:" >&5
@@ -6721,7 +6757,7 @@ done
 ac_cv_sizeof_long=$ac_lo
 else
  cat >conftest.$ac_ext <<_ACEOF
-#line 6724 "configure"
+#line 6760 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6735,7 +6771,7 @@ fprintf (f, "%d\n", (sizeof (long)));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6738: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
+if { (eval echo configure:6774: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } &&
    test -s conftest$ac_exeext && (./conftest; exit) 2>/dev/null; then
   ac_cv_sizeof_long=`cat conftestval`
 else
@@ -6749,7 +6785,7 @@ else
   ac_cv_sizeof_long=0
 fi
 fi
-echo "configure:6752: result: $ac_cv_sizeof_long" >&5
+echo "configure:6788: result: $ac_cv_sizeof_long" >&5
 echo "${ECHO_T}$ac_cv_sizeof_long" >&6
 cat >>confdefs.h <<EOF
 #define SIZEOF_LONG $ac_cv_sizeof_long
@@ -6762,13 +6798,13 @@ EOF
     ;;
 esac
 
-echo "configure:6765: checking for s_char" >&5
+echo "configure:6801: checking for s_char" >&5
 echo $ECHO_N "checking for s_char... $ECHO_C" >&6
 if test "${ac_cv_type_s_char+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6771 "configure"
+#line 6807 "configure"
 #include "confdefs.h"
 $ac_includes_default
 int
@@ -6782,7 +6818,7 @@ if (sizeof (s_char))
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6785: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:6821: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_type_s_char=yes
 else
   echo "configure: failed program was:" >&5
@@ -6791,7 +6827,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:6794: result: $ac_cv_type_s_char" >&5
+echo "configure:6830: result: $ac_cv_type_s_char" >&5
 echo "${ECHO_T}$ac_cv_type_s_char" >&6
 if test $ac_cv_type_s_char = yes; then
 
@@ -6831,13 +6867,13 @@ EOF
 
     ;;
 esac
-echo "configure:6834: checking for uid_t in sys/types.h" >&5
+echo "configure:6870: checking for uid_t in sys/types.h" >&5
 echo $ECHO_N "checking for uid_t in sys/types.h... $ECHO_C" >&6
 if test "${ac_cv_type_uid_t+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6840 "configure"
+#line 6876 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 
@@ -6851,7 +6887,7 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:6854: result: $ac_cv_type_uid_t" >&5
+echo "configure:6890: result: $ac_cv_type_uid_t" >&5
 echo "${ECHO_T}$ac_cv_type_uid_t" >&6
 if test $ac_cv_type_uid_t = no; then
 
@@ -6871,13 +6907,13 @@ case "$target" in
 for ac_func in __adjtimex __ntp_gettime
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:6874: checking for $ac_func" >&5
+echo "configure:6910: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6880 "configure"
+#line 6916 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -6907,7 +6943,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6910: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:6946: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -6916,7 +6952,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:6919: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:6955: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -6940,13 +6976,13 @@ case "$target" in
 for ac_func in clock_settime
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:6943: checking for $ac_func" >&5
+echo "configure:6979: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 6949 "configure"
+#line 6985 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -6976,7 +7012,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:6979: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7015: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -6985,7 +7021,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:6988: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7024: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7001,13 +7037,13 @@ esac
 for ac_func in daemon
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7004: checking for $ac_func" >&5
+echo "configure:7040: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7010 "configure"
+#line 7046 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7037,7 +7073,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7040: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7076: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7046,7 +7082,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7049: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7085: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7059,13 +7095,13 @@ done
 for ac_func in finite
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7062: checking for $ac_func" >&5
+echo "configure:7098: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7068 "configure"
+#line 7104 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7095,7 +7131,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7098: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7134: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7104,7 +7140,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7107: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7143: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7116,13 +7152,13 @@ else
 for ac_func in isfinite
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7119: checking for $ac_func" >&5
+echo "configure:7155: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7125 "configure"
+#line 7161 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7152,7 +7188,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7155: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7191: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7161,7 +7197,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7164: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7200: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7169,12 +7205,12 @@ if test `eval echo '${'$ac_ac_var'}'` = yes; then
 EOF
 
 else
-  echo "configure:7172: checking for isfinite with <math.h>" >&5
+  echo "configure:7208: checking for isfinite with <math.h>" >&5
 echo $ECHO_N "checking for isfinite with <math.h>... $ECHO_C" >&6
     _libs=$LIBS
     LIBS="$LIBS -lm"
     cat >conftest.$ac_ext <<_ACEOF
-#line 7177 "configure"
+#line 7213 "configure"
 #include "confdefs.h"
 #include <math.h>
 int
@@ -7185,8 +7221,8 @@ float f = 0.0; isfinite(f)
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7188: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
-  echo "configure:7189: result: yes" >&5
+if { (eval echo configure:7224: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+  echo "configure:7225: result: yes" >&5
 echo "${ECHO_T}yes" >&6
       cat >>confdefs.h <<\EOF
 #define HAVE_ISFINITE 1
@@ -7195,7 +7231,7 @@ EOF
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
-  echo "configure:7198: result: no" >&5
+  echo "configure:7234: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
@@ -7209,13 +7245,13 @@ done
 for ac_func in getbootfile getdtablesize getrusage gettimeofday
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7212: checking for $ac_func" >&5
+echo "configure:7248: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7218 "configure"
+#line 7254 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7245,7 +7281,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7248: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7284: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7254,7 +7290,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7257: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7293: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7271,13 +7307,13 @@ case "$target" in
 for ac_func in getuid
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7274: checking for $ac_func" >&5
+echo "configure:7310: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7280 "configure"
+#line 7316 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7307,7 +7343,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7310: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7346: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7316,7 +7352,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7319: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7355: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7332,13 +7368,13 @@ esac
 for ac_func in hstrerror K_open kvm_open memcpy memmove memset
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7335: checking for $ac_func" >&5
+echo "configure:7371: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7341 "configure"
+#line 7377 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7368,7 +7404,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7371: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7407: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7377,7 +7413,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7380: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7416: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7395,13 +7431,13 @@ case "$target" in
 for ac_func in mkstemp
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7398: checking for $ac_func" >&5
+echo "configure:7434: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7404 "configure"
+#line 7440 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7431,7 +7467,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7434: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7470: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7440,7 +7476,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7443: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7479: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7456,13 +7492,13 @@ esac
 for ac_func in mktime
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7459: checking for $ac_func" >&5
+echo "configure:7495: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7465 "configure"
+#line 7501 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7492,7 +7528,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7495: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7531: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7501,7 +7537,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7504: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7540: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7531,13 +7567,13 @@ case "$target" in
 for ac_func in memlk
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7534: checking for $ac_func" >&5
+echo "configure:7570: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7540 "configure"
+#line 7576 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7567,7 +7603,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7570: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7606: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7576,7 +7612,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7579: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7615: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7590,13 +7626,13 @@ done
 for ac_func in mlockall
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7593: checking for $ac_func" >&5
+echo "configure:7629: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7599 "configure"
+#line 7635 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7626,7 +7662,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7629: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7665: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7635,7 +7671,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7638: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7674: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7650,13 +7686,13 @@ done
 for ac_func in mlockall
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7653: checking for $ac_func" >&5
+echo "configure:7689: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7659 "configure"
+#line 7695 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7686,7 +7722,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7689: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7725: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7695,7 +7731,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7698: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7734: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7711,13 +7747,13 @@ esac
 for ac_func in mrand48 srand48 nice nlist
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7714: checking for $ac_func" >&5
+echo "configure:7750: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7720 "configure"
+#line 7756 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7747,7 +7783,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7750: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7786: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7756,7 +7792,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7759: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7795: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7775,13 +7811,13 @@ case "$target" in
 for ac_func in ntp_adjtime ntp_gettime
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7778: checking for $ac_func" >&5
+echo "configure:7814: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7784 "configure"
+#line 7820 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7811,7 +7847,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7814: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7850: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7820,7 +7856,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7823: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7859: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7836,13 +7872,13 @@ esac
 for ac_func in plock pututline pututxline readlink rtprio
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7839: checking for $ac_func" >&5
+echo "configure:7875: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7845 "configure"
+#line 7881 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7872,7 +7908,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7875: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7911: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7881,7 +7917,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7884: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7920: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7897,13 +7933,13 @@ case "$ac_cv_func_mrand48" in
 for ac_func in random
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7900: checking for $ac_func" >&5
+echo "configure:7936: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7906 "configure"
+#line 7942 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -7933,7 +7969,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:7936: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:7972: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -7942,7 +7978,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:7945: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:7981: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -7968,13 +8004,13 @@ case "$target" in
 for ac_func in sched_setscheduler
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:7971: checking for $ac_func" >&5
+echo "configure:8007: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 7977 "configure"
+#line 8013 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8004,7 +8040,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8007: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8043: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8013,7 +8049,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8016: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8052: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8029,13 +8065,13 @@ esac
 for ac_func in setlinebuf
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8032: checking for $ac_func" >&5
+echo "configure:8068: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8038 "configure"
+#line 8074 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8065,7 +8101,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8068: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8104: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8074,7 +8110,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8077: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8113: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8087,13 +8123,13 @@ done
 for ac_func in setpgid setpriority setsid settimeofday setvbuf sigaction
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8090: checking for $ac_func" >&5
+echo "configure:8126: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8096 "configure"
+#line 8132 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8123,7 +8159,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8126: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8162: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8132,7 +8168,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8135: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8171: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8145,13 +8181,13 @@ done
 for ac_func in sigvec sigset sigsuspend stime strchr sysconf sysctl
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8148: checking for $ac_func" >&5
+echo "configure:8184: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8154 "configure"
+#line 8190 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8181,7 +8217,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8184: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8220: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8190,7 +8226,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8193: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8229: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8203,13 +8239,13 @@ done
 for ac_func in snprintf strdup strerror
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8206: checking for $ac_func" >&5
+echo "configure:8242: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8212 "configure"
+#line 8248 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8239,7 +8275,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8242: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8278: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8248,7 +8284,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8251: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8287: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8276,13 +8312,13 @@ case "$target" in
 for ac_func in timer_create timer_settime
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8279: checking for $ac_func" >&5
+echo "configure:8315: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8285 "configure"
+#line 8321 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8312,7 +8348,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8315: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8351: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8321,7 +8357,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8324: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8360: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8341,13 +8377,13 @@ case "$target" in
 for ac_func in umask
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8344: checking for $ac_func" >&5
+echo "configure:8380: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8350 "configure"
+#line 8386 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8377,7 +8413,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8380: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8416: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8386,7 +8422,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8389: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8425: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8402,13 +8438,13 @@ esac
 for ac_func in uname updwtmp updwtmpx vsprintf
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
-echo "configure:8405: checking for $ac_func" >&5
+echo "configure:8441: checking for $ac_func" >&5
 echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
 if eval "test \"\${$ac_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8411 "configure"
+#line 8447 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func (); below.  */
@@ -8438,7 +8474,7 @@ f = $ac_func;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8441: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
+if { (eval echo configure:8477: \"$ac_link\") >&5; (eval $ac_link) 2>&5; } && test -s conftest$ac_exeext; then
   eval "$ac_ac_var=yes"
 else
   echo "configure: failed program was:" >&5
@@ -8447,7 +8483,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-echo "configure:8450: result: `eval echo '${'$ac_ac_var'}'`" >&5
+echo "configure:8486: result: `eval echo '${'$ac_ac_var'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$ac_ac_var'}'`" >&6
 if test `eval echo '${'$ac_ac_var'}'` = yes; then
   cat >>confdefs.h <<EOF
@@ -8457,13 +8493,13 @@ EOF
 fi
 done
 
-echo "configure:8460: checking number of arguments to gettimeofday()" >&5
+echo "configure:8496: checking number of arguments to gettimeofday()" >&5
 echo $ECHO_N "checking number of arguments to gettimeofday()... $ECHO_C" >&6
 if test "${ac_cv_func_Xettimeofday_nargs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8466 "configure"
+#line 8502 "configure"
 #include "confdefs.h"
 #include <sys/time.h>
 int
@@ -8477,7 +8513,7 @@ settimeofday((struct timeval*)0,(struct timezone*)0);
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8480: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8516: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_func_Xettimeofday_nargs=2
 else
   echo "configure: failed program was:" >&5
@@ -8487,7 +8523,7 @@ fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 
 fi
-echo "configure:8490: result: $ac_cv_func_Xettimeofday_nargs" >&5
+echo "configure:8526: result: $ac_cv_func_Xettimeofday_nargs" >&5
 echo "${ECHO_T}$ac_cv_func_Xettimeofday_nargs" >&6
 if test $ac_cv_func_Xettimeofday_nargs = 1; then
 	cat >>confdefs.h <<\EOF
@@ -8496,13 +8532,13 @@ EOF
 
 fi
 
-echo "configure:8499: checking number of arguments taken by setpgrp()" >&5
+echo "configure:8535: checking number of arguments taken by setpgrp()" >&5
 echo $ECHO_N "checking number of arguments taken by setpgrp()... $ECHO_C" >&6
 if test "${ac_cv_func_setpgrp_nargs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8505 "configure"
+#line 8541 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_SYS_TYPES_H
@@ -8520,7 +8556,7 @@ setpgrp(0,0);
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8523: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8559: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_func_setpgrp_nargs=2
 else
   echo "configure: failed program was:" >&5
@@ -8530,7 +8566,7 @@ fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 
 fi
-echo "configure:8533: result: $ac_cv_func_setpgrp_nargs" >&5
+echo "configure:8569: result: $ac_cv_func_setpgrp_nargs" >&5
 echo "${ECHO_T}$ac_cv_func_setpgrp_nargs" >&6
 if test $ac_cv_func_setpgrp_nargs = 0; then
         cat >>confdefs.h <<\EOF
@@ -8542,13 +8578,13 @@ fi
 save_CFLAGS=$CFLAGS
 CFLAGS="$CFLAGS -I$srcdir/include"
 
-echo "configure:8545: checking argument pointer type of qsort()'s compare function and base" >&5
+echo "configure:8581: checking argument pointer type of qsort()'s compare function and base" >&5
 echo $ECHO_N "checking argument pointer type of qsort()'s compare function and base... $ECHO_C" >&6
 if test "${ac_cv_func_qsort_argtype+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8551 "configure"
+#line 8587 "configure"
 #include "confdefs.h"
 
 #include "l_stdlib.h"
@@ -8575,7 +8611,7 @@ qsort(base, 2, sizeof(char *), sortfunc);
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8578: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8614: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_func_qsort_argtype=void
 else
   echo "configure: failed program was:" >&5
@@ -8585,7 +8621,7 @@ fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 
 fi
-echo "configure:8588: result: $ac_cv_func_qsort_argtype" >&5
+echo "configure:8624: result: $ac_cv_func_qsort_argtype" >&5
 echo "${ECHO_T}$ac_cv_func_qsort_argtype" >&6
 case "$ac_cv_func_qsort_argtype" in
  void)
@@ -8598,13 +8634,13 @@ esac
 
 CFLAGS=$save_CFLAGS
 
-echo "configure:8601: checking if we need to declare 'errno'" >&5
+echo "configure:8637: checking if we need to declare 'errno'" >&5
 echo $ECHO_N "checking if we need to declare 'errno'... $ECHO_C" >&6
 if test "${ac_cv_decl_errno+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8607 "configure"
+#line 8643 "configure"
 #include "confdefs.h"
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -8617,7 +8653,7 @@ errno = 0;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8620: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8656: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_decl_errno=no
 else
   echo "configure: failed program was:" >&5
@@ -8626,7 +8662,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:8629: result: $ac_cv_decl_errno" >&5
+echo "configure:8665: result: $ac_cv_decl_errno" >&5
 echo "${ECHO_T}$ac_cv_decl_errno" >&6
 case "$ac_cv_decl_errno" in
  yes) cat >>confdefs.h <<\EOF
@@ -8635,13 +8671,13 @@ EOF
  ;;
 esac
 
-echo "configure:8638: checking if we may declare 'h_errno'" >&5
+echo "configure:8674: checking if we may declare 'h_errno'" >&5
 echo $ECHO_N "checking if we may declare 'h_errno'... $ECHO_C" >&6
 if test "${ac_cv_decl_h_errno+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8644 "configure"
+#line 8680 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #ifdef HAVE_NETINET_IN_H
@@ -8664,7 +8700,7 @@ extern int h_errno;
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8667: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8703: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_decl_h_errno=yes
 else
   echo "configure: failed program was:" >&5
@@ -8673,7 +8709,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:8676: result: $ac_cv_decl_h_errno" >&5
+echo "configure:8712: result: $ac_cv_decl_h_errno" >&5
 echo "${ECHO_T}$ac_cv_decl_h_errno" >&6
 case "$ac_cv_decl_h_errno" in
  yes) cat >>confdefs.h <<\EOF
@@ -8682,13 +8718,13 @@ EOF
  ;;
 esac
 
-echo "configure:8685: checking if declaring 'char *sys_errlist[]' is ok" >&5
+echo "configure:8721: checking if declaring 'char *sys_errlist[]' is ok" >&5
 echo $ECHO_N "checking if declaring 'char *sys_errlist[]' is ok... $ECHO_C" >&6
 if test "${ac_cv_decl_sys_errlist+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8691 "configure"
+#line 8727 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 #ifdef HAVE_ERRNO_H
@@ -8703,7 +8739,7 @@ extern char *sys_errlist[];
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8706: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8742: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_decl_sys_errlist=yes
 else
   echo "configure: failed program was:" >&5
@@ -8712,7 +8748,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:8715: result: $ac_cv_decl_sys_errlist" >&5
+echo "configure:8751: result: $ac_cv_decl_sys_errlist" >&5
 echo "${ECHO_T}$ac_cv_decl_sys_errlist" >&6
 case "$ac_cv_decl_sys_errlist" in
  yes) cat >>confdefs.h <<\EOF
@@ -8721,13 +8757,13 @@ EOF
  ;;
 esac
 
-echo "configure:8724: checking if declaring 'syscall()' is ok" >&5
+echo "configure:8760: checking if declaring 'syscall()' is ok" >&5
 echo $ECHO_N "checking if declaring 'syscall()' is ok... $ECHO_C" >&6
 if test "${ac_cv_decl_syscall+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8730 "configure"
+#line 8766 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_SYS_TYPES_H
@@ -8750,7 +8786,7 @@ extern int syscall P((int, ...));
   return 0;
 }
 _ACEOF
-if { (eval echo configure:8753: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
+if { (eval echo configure:8789: \"$ac_compile\") >&5; (eval $ac_compile) 2>&5; } && test -s conftest.$ac_objext; then
   ac_cv_decl_syscall=yes
 else
   echo "configure: failed program was:" >&5
@@ -8759,7 +8795,7 @@ else
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "configure:8762: result: $ac_cv_decl_syscall" >&5
+echo "configure:8798: result: $ac_cv_decl_syscall" >&5
 echo "${ECHO_T}$ac_cv_decl_syscall" >&6
 case "$ac_cv_decl_syscall" in
  yes) cat >>confdefs.h <<\EOF
@@ -9034,17 +9070,17 @@ EOF
     ;;
 esac
 
-echo "configure:9037: checking if we should use a streams device for ifconfig" >&5
+echo "configure:9073: checking if we should use a streams device for ifconfig" >&5
 echo $ECHO_N "checking if we should use a streams device for ifconfig... $ECHO_C" >&6
 if test "${ac_cv_var_use_streams_device_for_ifconfig+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_cv_var_use_streams_device_for_ifconfig=no
 fi
-echo "configure:9044: result: $ac_cv_var_use_streams_device_for_ifconfig" >&5
+echo "configure:9080: result: $ac_cv_var_use_streams_device_for_ifconfig" >&5
 echo "${ECHO_T}$ac_cv_var_use_streams_device_for_ifconfig" >&6
 
-echo "configure:9047: checking if we need extra room for SO_RCVBUF" >&5
+echo "configure:9083: checking if we need extra room for SO_RCVBUF" >&5
 echo $ECHO_N "checking if we need extra room for SO_RCVBUF... $ECHO_C" >&6
 if test "${ac_cv_var_rcvbuf_slop+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9057,7 +9093,7 @@ case "$target" in
 esac
 ac_cv_var_rcvbuf_slop=$ans
 fi
-echo "configure:9060: result: $ac_cv_var_rcvbuf_slop" >&5
+echo "configure:9096: result: $ac_cv_var_rcvbuf_slop" >&5
 echo "${ECHO_T}$ac_cv_var_rcvbuf_slop" >&6
 case "$ac_cv_var_rcvbuf_slop" in
  yes) cat >>confdefs.h <<\EOF
@@ -9066,7 +9102,7 @@ EOF
  ;;
 esac
 
-echo "configure:9069: checking if we will open the broadcast socket" >&5
+echo "configure:9105: checking if we will open the broadcast socket" >&5
 echo $ECHO_N "checking if we will open the broadcast socket... $ECHO_C" >&6
 if test "${ac_cv_var_open_bcast_socket+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9082,7 +9118,7 @@ case "$target" in
 esac
 ac_cv_var_open_bcast_socket=$ans
 fi
-echo "configure:9085: result: $ac_cv_var_open_bcast_socket" >&5
+echo "configure:9121: result: $ac_cv_var_open_bcast_socket" >&5
 echo "${ECHO_T}$ac_cv_var_open_bcast_socket" >&6
 case "$ac_cv_var_open_bcast_socket" in
  yes) cat >>confdefs.h <<\EOF
@@ -9091,7 +9127,7 @@ EOF
  ;;
 esac
 
-echo "configure:9094: checking if we want the HPUX version of FindConfig()" >&5
+echo "configure:9130: checking if we want the HPUX version of FindConfig()" >&5
 echo $ECHO_N "checking if we want the HPUX version of FindConfig()... $ECHO_C" >&6
 if test "${ac_cv_var_hpux_findconfig+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9104,7 +9140,7 @@ case "$target" in
 esac
 ac_cv_var_hpux_findconfig=$ans
 fi
-echo "configure:9107: result: $ac_cv_var_hpux_findconfig" >&5
+echo "configure:9143: result: $ac_cv_var_hpux_findconfig" >&5
 echo "${ECHO_T}$ac_cv_var_hpux_findconfig" >&6
 case "$ac_cv_var_hpux_findconfig" in
  yes) cat >>confdefs.h <<\EOF
@@ -9113,7 +9149,7 @@ EOF
  ;;
 esac
 
-echo "configure:9116: checking if process groups are set with -pid" >&5
+echo "configure:9152: checking if process groups are set with -pid" >&5
 echo $ECHO_N "checking if process groups are set with -pid... $ECHO_C" >&6
 if test "${ac_cv_arg_setpgrp_negpid+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9140,7 +9176,7 @@ else
 esac
 ac_cv_arg_setpgrp_negpid=$ans
 fi
-echo "configure:9143: result: $ac_cv_arg_setpgrp_negpid" >&5
+echo "configure:9179: result: $ac_cv_arg_setpgrp_negpid" >&5
 echo "${ECHO_T}$ac_cv_arg_setpgrp_negpid" >&6
 case "$ac_cv_arg_setpgrp_negpid" in
  yes) cat >>confdefs.h <<\EOF
@@ -9149,7 +9185,7 @@ EOF
  ;;
 esac
 
-echo "configure:9152: checking if we need a ctty for F_SETOWN" >&5
+echo "configure:9188: checking if we need a ctty for F_SETOWN" >&5
 echo $ECHO_N "checking if we need a ctty for F_SETOWN... $ECHO_C" >&6
 if test "${ac_cv_func_ctty_for_f_setown+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9175,7 +9211,7 @@ else
 esac
 ac_cv_func_ctty_for_f_setown=$ans
 fi
-echo "configure:9178: result: $ac_cv_func_ctty_for_f_setown" >&5
+echo "configure:9214: result: $ac_cv_func_ctty_for_f_setown" >&5
 echo "${ECHO_T}$ac_cv_func_ctty_for_f_setown" >&6
 case "$ac_cv_func_ctty_for_f_setown" in
  yes) cat >>confdefs.h <<\EOF
@@ -9185,7 +9221,7 @@ EOF
 esac
 
 ntp_warning='GRONK'
-echo "configure:9188: checking if we'll use clock_settime or settimeofday or stime" >&5
+echo "configure:9224: checking if we'll use clock_settime or settimeofday or stime" >&5
 echo $ECHO_N "checking if we'll use clock_settime or settimeofday or stime... $ECHO_C" >&6
 case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
  yes*)
@@ -9207,7 +9243,7 @@ case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
     ;;
 esac
 esac
-echo "configure:9210: result: $ans" >&5
+echo "configure:9246: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 case "$ntp_warning" in
  '') ;;
@@ -9215,7 +9251,7 @@ case "$ntp_warning" in
     ;;
 esac
 
-echo "configure:9218: checking if we have a losing syscall()" >&5
+echo "configure:9254: checking if we have a losing syscall()" >&5
 echo $ECHO_N "checking if we have a losing syscall()... $ECHO_C" >&6
 if test "${ac_cv_var_syscall_bug+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9229,7 +9265,7 @@ else
 esac
 ac_cv_var_syscall_bug=$ans
 fi
-echo "configure:9232: result: $ac_cv_var_syscall_bug" >&5
+echo "configure:9268: result: $ac_cv_var_syscall_bug" >&5
 echo "${ECHO_T}$ac_cv_var_syscall_bug" >&6
 case "$ac_cv_var_syscall_bug" in
  yes) cat >>confdefs.h <<\EOF
@@ -9238,7 +9274,7 @@ EOF
  ;;
 esac
 
-echo "configure:9241: checking for Streams/TLI" >&5
+echo "configure:9277: checking for Streams/TLI" >&5
 echo $ECHO_N "checking for Streams/TLI... $ECHO_C" >&6
 if test "${ac_cv_var_streams_tli+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9256,7 +9292,7 @@ else
  esac
  ac_cv_var_streams_tli=$ans
 fi
-echo "configure:9259: result: $ac_cv_var_streams_tli" >&5
+echo "configure:9295: result: $ac_cv_var_streams_tli" >&5
 echo "${ECHO_T}$ac_cv_var_streams_tli" >&6
 case "$ac_cv_var_streams_tli" in
  yes)
@@ -9267,13 +9303,13 @@ EOF
     ;;
 esac
 
-echo "configure:9270: checking for SIGIO" >&5
+echo "configure:9306: checking for SIGIO" >&5
 echo $ECHO_N "checking for SIGIO... $ECHO_C" >&6
 if test "${ac_cv_hdr_def_sigio+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9276 "configure"
+#line 9312 "configure"
 #include "confdefs.h"
 #include <signal.h>
 #ifdef SIGIO
@@ -9290,10 +9326,10 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:9293: result: $ac_cv_hdr_def_sigio" >&5
+echo "configure:9329: result: $ac_cv_hdr_def_sigio" >&5
 echo "${ECHO_T}$ac_cv_hdr_def_sigio" >&6
 
-echo "configure:9296: checking if we want to use signalled IO" >&5
+echo "configure:9332: checking if we want to use signalled IO" >&5
 echo $ECHO_N "checking if we want to use signalled IO... $ECHO_C" >&6
 if test "${ac_cv_var_signalled_io+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9335,7 +9371,7 @@ case "$ac_cv_hdr_def_sigio" in
 esac
 ac_cv_var_signalled_io=$ans
 fi
-echo "configure:9338: result: $ac_cv_var_signalled_io" >&5
+echo "configure:9374: result: $ac_cv_var_signalled_io" >&5
 echo "${ECHO_T}$ac_cv_var_signalled_io" >&6
 case "$ac_cv_var_signalled_io" in
  yes) cat >>confdefs.h <<\EOF
@@ -9344,13 +9380,13 @@ EOF
  ;;
 esac
 
-echo "configure:9347: checking for SIGPOLL" >&5
+echo "configure:9383: checking for SIGPOLL" >&5
 echo $ECHO_N "checking for SIGPOLL... $ECHO_C" >&6
 if test "${ac_cv_hdr_def_sigpoll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9353 "configure"
+#line 9389 "configure"
 #include "confdefs.h"
 #include <signal.h>
 #ifdef SIGPOLL
@@ -9367,16 +9403,16 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:9370: result: $ac_cv_hdr_def_sigpoll" >&5
+echo "configure:9406: result: $ac_cv_hdr_def_sigpoll" >&5
 echo "${ECHO_T}$ac_cv_hdr_def_sigpoll" >&6
 
-echo "configure:9373: checking for SIGSYS" >&5
+echo "configure:9409: checking for SIGSYS" >&5
 echo $ECHO_N "checking for SIGSYS... $ECHO_C" >&6
 if test "${ac_cv_hdr_def_sigsys+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9379 "configure"
+#line 9415 "configure"
 #include "confdefs.h"
 #include <signal.h>
 #ifdef SIGSYS
@@ -9393,10 +9429,10 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:9396: result: $ac_cv_hdr_def_sigsys" >&5
+echo "configure:9432: result: $ac_cv_hdr_def_sigsys" >&5
 echo "${ECHO_T}$ac_cv_hdr_def_sigsys" >&6
 
-echo "configure:9399: checking if we can use SIGPOLL for UDP I/O" >&5
+echo "configure:9435: checking if we can use SIGPOLL for UDP I/O" >&5
 echo $ECHO_N "checking if we can use SIGPOLL for UDP I/O... $ECHO_C" >&6
 if test "${ac_cv_var_use_udp_sigpoll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9442,7 +9478,7 @@ case "$ac_cv_hdr_def_sigpoll" in
 esac
 ac_cv_var_use_udp_sigpoll=$ans
 fi
-echo "configure:9445: result: $ac_cv_var_use_udp_sigpoll" >&5
+echo "configure:9481: result: $ac_cv_var_use_udp_sigpoll" >&5
 echo "${ECHO_T}$ac_cv_var_use_udp_sigpoll" >&6
 case "$ac_cv_var_use_udp_sigpoll" in
  yes) cat >>confdefs.h <<\EOF
@@ -9451,7 +9487,7 @@ EOF
  ;;
 esac
 
-echo "configure:9454: checking if we can use SIGPOLL for TTY I/O" >&5
+echo "configure:9490: checking if we can use SIGPOLL for TTY I/O" >&5
 echo $ECHO_N "checking if we can use SIGPOLL for TTY I/O... $ECHO_C" >&6
 if test "${ac_cv_var_use_tty_sigpoll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9497,7 +9533,7 @@ case "$ac_cv_hdr_def_sigpoll" in
 esac
 ac_cv_var_use_tty_sigpoll=$ans
 fi
-echo "configure:9500: result: $ac_cv_var_use_tty_sigpoll" >&5
+echo "configure:9536: result: $ac_cv_var_use_tty_sigpoll" >&5
 echo "${ECHO_T}$ac_cv_var_use_tty_sigpoll" >&6
 case "$ac_cv_var_use_tty_sigpoll" in
  yes) cat >>confdefs.h <<\EOF
@@ -9508,13 +9544,13 @@ esac
 
 case "$ac_cv_header_sys_sio_h" in
  yes)
-    echo "configure:9511: checking sys/sio.h for TIOCDCDTIMESTAMP" >&5
+    echo "configure:9547: checking sys/sio.h for TIOCDCDTIMESTAMP" >&5
 echo $ECHO_N "checking sys/sio.h for TIOCDCDTIMESTAMP... $ECHO_C" >&6
 if test "${ac_cv_hdr_def_tiocdcdtimestamp+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9517 "configure"
+#line 9553 "configure"
 #include "confdefs.h"
 #include <sys/sio.h>
 #ifdef TIOCDCDTIMESTAMP
@@ -9531,7 +9567,7 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:9534: result: $ac_cv_hdr_def_tiocdcdtimestamp" >&5
+echo "configure:9570: result: $ac_cv_hdr_def_tiocdcdtimestamp" >&5
 echo "${ECHO_T}$ac_cv_hdr_def_tiocdcdtimestamp" >&6
     ;;
 esac
@@ -9542,7 +9578,7 @@ case "$ac_cv_hdr_def_tiocdcdtimestamp" in
     ;;
 esac
 
-echo "configure:9545: checking if nlist() values might require extra indirection" >&5
+echo "configure:9581: checking if nlist() values might require extra indirection" >&5
 echo $ECHO_N "checking if nlist() values might require extra indirection... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_extra_indirection+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9555,7 +9591,7 @@ case "$target" in
 esac
 ac_cv_var_nlist_extra_indirection=$ans
 fi
-echo "configure:9558: result: $ac_cv_var_nlist_extra_indirection" >&5
+echo "configure:9594: result: $ac_cv_var_nlist_extra_indirection" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_extra_indirection" >&6
 case "$ac_cv_var_nlist_extra_indirection" in
  yes) cat >>confdefs.h <<\EOF
@@ -9564,7 +9600,7 @@ EOF
  ;;
 esac
 
-echo "configure:9567: checking for a minimum recommended value of tickadj" >&5
+echo "configure:9603: checking for a minimum recommended value of tickadj" >&5
 echo $ECHO_N "checking for a minimum recommended value of tickadj... $ECHO_C" >&6
 if test "${ac_cv_var_min_rec_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9577,7 +9613,7 @@ case "$target" in
 esac
 ac_cv_var_min_rec_tickadj=$ans
 fi
-echo "configure:9580: result: $ac_cv_var_min_rec_tickadj" >&5
+echo "configure:9616: result: $ac_cv_var_min_rec_tickadj" >&5
 echo "${ECHO_T}$ac_cv_var_min_rec_tickadj" >&6
 case "$ac_cv_var_min_rec_tickadj" in
  ''|no) ;;
@@ -9587,7 +9623,7 @@ EOF
  ;;
 esac
 
-echo "configure:9590: checking if the TTY code permits PARENB and IGNPAR" >&5
+echo "configure:9626: checking if the TTY code permits PARENB and IGNPAR" >&5
 echo $ECHO_N "checking if the TTY code permits PARENB and IGNPAR... $ECHO_C" >&6
 if test "${ac_cv_var_no_parenb_ignpar+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9603,7 +9639,7 @@ case "$target" in
 esac
 ac_cv_var_no_parenb_ignpar=$ans
 fi
-echo "configure:9606: result: $ac_cv_var_no_parenb_ignpar" >&5
+echo "configure:9642: result: $ac_cv_var_no_parenb_ignpar" >&5
 echo "${ECHO_T}$ac_cv_var_no_parenb_ignpar" >&6
 case "$ac_cv_var_no_parenb_ignpar" in
  yes) cat >>confdefs.h <<\EOF
@@ -9612,7 +9648,7 @@ EOF
  ;;
 esac
 
-echo "configure:9615: checking if we're including debugging code" >&5
+echo "configure:9651: checking if we're including debugging code" >&5
 echo $ECHO_N "checking if we're including debugging code... $ECHO_C" >&6
 # Check whether --enable-debugging or --disable-debugging was given.
 if test "${enable_debugging+set}" = set; then
@@ -9627,10 +9663,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:9630: result: $ntp_ok" >&5
+echo "configure:9666: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:9633: checking for a the number of minutes in a DST adjustment" >&5
+echo "configure:9669: checking for a the number of minutes in a DST adjustment" >&5
 echo $ECHO_N "checking for a the number of minutes in a DST adjustment... $ECHO_C" >&6
 # Check whether --enable-dst_minutes or --disable-dst_minutes was given.
 if test "${enable_dst_minutes+set}" = set; then
@@ -9643,10 +9679,10 @@ cat >>confdefs.h <<EOF
 #define DSTMINUTES $ans
 EOF
 
-echo "configure:9646: result: $ans" >&5
+echo "configure:9682: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:9649: checking if we have the tty_clk line discipline/streams module" >&5
+echo "configure:9685: checking if we have the tty_clk line discipline/streams module" >&5
 echo $ECHO_N "checking if we have the tty_clk line discipline/streams module... $ECHO_C" >&6
 if test "${ac_cv_var_tty_clk+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9655,7 +9691,7 @@ else
   *yes*) ac_cv_var_tty_clk=yes ;;
  esac
 fi
-echo "configure:9658: result: $ac_cv_var_tty_clk" >&5
+echo "configure:9694: result: $ac_cv_var_tty_clk" >&5
 echo "${ECHO_T}$ac_cv_var_tty_clk" >&6
 case "$ac_cv_var_tty_clk" in
  yes) cat >>confdefs.h <<\EOF
@@ -9664,14 +9700,14 @@ EOF
  ;;
 esac
 
-echo "configure:9667: checking for the ppsclock streams module" >&5
+echo "configure:9703: checking for the ppsclock streams module" >&5
 echo $ECHO_N "checking for the ppsclock streams module... $ECHO_C" >&6
 if test "${ac_cv_var_ppsclock+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev
 fi
-echo "configure:9674: result: $ac_cv_var_ppsclock" >&5
+echo "configure:9710: result: $ac_cv_var_ppsclock" >&5
 echo "${ECHO_T}$ac_cv_var_ppsclock" >&6
 case "$ac_cv_var_ppsclock" in
  yes) cat >>confdefs.h <<\EOF
@@ -9680,7 +9716,7 @@ EOF
  ;;
 esac
 
-echo "configure:9683: checking for kernel multicast support" >&5
+echo "configure:9719: checking for kernel multicast support" >&5
 echo $ECHO_N "checking for kernel multicast support... $ECHO_C" >&6
 if test "${ac_cv_var_mcast+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9689,7 +9725,7 @@ else
   case "$target" in
    i386-sequent-sysv4) ;;
    *) cat >conftest.$ac_ext <<_ACEOF
-#line 9692 "configure"
+#line 9728 "configure"
 #include "confdefs.h"
 #include <netinet/in.h>
 #ifdef IP_ADD_MEMBERSHIP
@@ -9706,7 +9742,7 @@ rm -f conftest*
  ;;
   esac
 fi
-echo "configure:9709: result: $ac_cv_var_mcast" >&5
+echo "configure:9745: result: $ac_cv_var_mcast" >&5
 echo "${ECHO_T}$ac_cv_var_mcast" >&6
 case "$ac_cv_var_mcast" in
  yes) cat >>confdefs.h <<\EOF
@@ -9715,7 +9751,7 @@ EOF
  ;;
 esac
 
-echo "configure:9718: checking availability of ntp_{adj,get}time()" >&5
+echo "configure:9754: checking availability of ntp_{adj,get}time()" >&5
 echo $ECHO_N "checking availability of ntp_{adj,get}time()... $ECHO_C" >&6
 if test "${ac_cv_var_ntp_syscalls+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9730,7 +9766,7 @@ else
         ac_cv_var_ntp_syscalls=libc
         ;;
       *) cat >conftest.$ac_ext <<_ACEOF
-#line 9733 "configure"
+#line 9769 "configure"
 #include "confdefs.h"
 #include <sys/syscall.h>
 #if defined(SYS_ntp_gettime) && defined(SYS_ntp_adjtime)
@@ -9750,7 +9786,7 @@ rm -f conftest*
      ;;
  esac
 fi
-echo "configure:9753: result: $ac_cv_var_ntp_syscalls" >&5
+echo "configure:9789: result: $ac_cv_var_ntp_syscalls" >&5
 echo "${ECHO_T}$ac_cv_var_ntp_syscalls" >&6
 case "$ac_cv_var_ntp_syscalls" in
  libc)
@@ -9769,13 +9805,13 @@ EOF
     ;;
 esac
 
-echo "configure:9772: checking if sys/timex.h has STA_FLL" >&5
+echo "configure:9808: checking if sys/timex.h has STA_FLL" >&5
 echo $ECHO_N "checking if sys/timex.h has STA_FLL... $ECHO_C" >&6
 if test "${ac_cv_var_sta_fll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9778 "configure"
+#line 9814 "configure"
 #include "confdefs.h"
 #include <sys/timex.h>
 #ifdef STA_FLL
@@ -9792,10 +9828,10 @@ fi
 rm -f conftest*
 
 fi
-echo "configure:9795: result: $ac_cv_var_sta_fll" >&5
+echo "configure:9831: result: $ac_cv_var_sta_fll" >&5
 echo "${ECHO_T}$ac_cv_var_sta_fll" >&6
 
-echo "configure:9798: checking if we have kernel PLL support" >&5
+echo "configure:9834: checking if we have kernel PLL support" >&5
 echo $ECHO_N "checking if we have kernel PLL support... $ECHO_C" >&6
 if test "${ac_cv_var_kernel_pll+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9808,7 +9844,7 @@ else
     ;;
 esac
 fi
-echo "configure:9811: result: $ac_cv_var_kernel_pll" >&5
+echo "configure:9847: result: $ac_cv_var_kernel_pll" >&5
 echo "${ECHO_T}$ac_cv_var_kernel_pll" >&6
 case "$ac_cv_var_kernel_pll" in
  yes)
@@ -9819,7 +9855,7 @@ EOF
     ;;
 esac
 
-echo "configure:9822: checking if SIOCGIFCONF returns buffer size in the buffer" >&5
+echo "configure:9858: checking if SIOCGIFCONF returns buffer size in the buffer" >&5
 echo $ECHO_N "checking if SIOCGIFCONF returns buffer size in the buffer... $ECHO_C" >&6
 if test "${ac_cv_var_size_returned_in_buffer+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -9838,7 +9874,7 @@ else
   esac
   ac_cv_var_size_returned_in_buffer=$ans
 fi
-echo "configure:9841: result: $ac_cv_var_size_returned_in_buffer" >&5
+echo "configure:9877: result: $ac_cv_var_size_returned_in_buffer" >&5
 echo "${ECHO_T}$ac_cv_var_size_returned_in_buffer" >&6
 case "$ac_cv_var_size_returned_in_buffer" in
  yes) cat >>confdefs.h <<\EOF
@@ -9848,11 +9884,11 @@ EOF
 esac
 
 # Check for ioctls TIOCGPPSEV
-echo "configure:9851: checking ioctl TIOCGPPSEV" >&5
+echo "configure:9887: checking ioctl TIOCGPPSEV" >&5
 echo $ECHO_N "checking ioctl TIOCGPPSEV... $ECHO_C" >&6
 if test "$ac_cv_header_termios_h" = "yes"; then
     cat >conftest.$ac_ext <<_ACEOF
-#line 9855 "configure"
+#line 9891 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef TIOCGPPSEV
@@ -9878,15 +9914,15 @@ EOF
 
     ac_cv_var_oncore_ok=yes
 fi
-echo "configure:9881: result: $ntp_ok" >&5
+echo "configure:9917: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Check for ioctls TIOCSPPS
-echo "configure:9885: checking ioctl TIOCSPPS" >&5
+echo "configure:9921: checking ioctl TIOCSPPS" >&5
 echo $ECHO_N "checking ioctl TIOCSPPS... $ECHO_C" >&6
 if test "$ac_cv_header_termios_h" = "yes"; then
     cat >conftest.$ac_ext <<_ACEOF
-#line 9889 "configure"
+#line 9925 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef TIOCSPPS
@@ -9912,15 +9948,15 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:9915: result: $ntp_ok" >&5
+echo "configure:9951: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Check for ioctls CIOGETEV
-echo "configure:9919: checking ioctl CIOGETEV" >&5
+echo "configure:9955: checking ioctl CIOGETEV" >&5
 echo $ECHO_N "checking ioctl CIOGETEV... $ECHO_C" >&6
 if test "$ac_cv_header_sys_ppsclock_h" = "yes"; then
     cat >conftest.$ac_ext <<_ACEOF
-#line 9923 "configure"
+#line 9959 "configure"
 #include "confdefs.h"
 #include <sys/ppsclock.h>
 #ifdef CIOGETEV
@@ -9946,30 +9982,31 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:9949: result: $ntp_ok" >&5
+echo "configure:9985: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Check for header timepps.h, if found then we have PPS API (Draft RFC) stuff.
-# there is NO way that I can tell to tell if a given OS is using timespec or
-# timeval so just set it here for the one case that is KNOWN to use timespec.
 
 # The PPSAPI headers use "inline", so we must have a STDC compiler to use
 # the PPSAPI.
 
+# The PPSAPI needs ATOM, which needs struct timespec.
+
+case "$ac_cv_struct_timespec" in
+ 'yes')
+    ac_cv_var_atom_ok=yes
+    ;;
+esac
+
 case "$ANSI2KNR" in
  '')
-    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
-     *yes*)
+    case "$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
+     yes*yes*)
 	cat >>confdefs.h <<\EOF
 #define HAVE_PPSAPI 1
 EOF
 
 	ac_cv_var_oncore_ok=yes
-	ac_cv_var_atom_ok=yes
-	cat >>confdefs.h <<\EOF
-#define HAVE_TIMESPEC 1
-EOF
-
 	;;
     esac
     ;;
@@ -9977,19 +10014,19 @@ esac
 
 # Check for ioctls TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, ASYNC_PPS_CD_NEG
 
-echo "configure:9980: checking for linux/serial.h" >&5
+echo "configure:10017: checking for linux/serial.h" >&5
 echo $ECHO_N "checking for linux/serial.h... $ECHO_C" >&6
 if test "${ac_cv_header_linux_serial_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 9986 "configure"
+#line 10023 "configure"
 #include "confdefs.h"
 #include <linux/serial.h>
 
 _ACEOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:9992: \"$ac_try\") >&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:10029: \"$ac_try\") >&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.$ac_ext\$"`
 if test -z "$ac_err"; then
   ac_cv_header_linux_serial_h=yes
@@ -10001,15 +10038,15 @@ else
 fi
 rm -f conftest*
 fi
-echo "configure:10004: result: $ac_cv_header_linux_serial_h" >&5
+echo "configure:10041: result: $ac_cv_header_linux_serial_h" >&5
 echo "${ECHO_T}$ac_cv_header_linux_serial_h" >&6
 
-echo "configure:10007: checking ioctl TIOCGSERIAL" >&5
+echo "configure:10044: checking ioctl TIOCGSERIAL" >&5
 echo $ECHO_N "checking ioctl TIOCGSERIAL... $ECHO_C" >&6
 case "$ac_cv_header_sys_ppsclock_h$ac_cv_header_linux_serial_h" in
   yesyes)
     cat >conftest.$ac_ext <<_ACEOF
-#line 10012 "configure"
+#line 10049 "configure"
 #include "confdefs.h"
 #include <sys/time.h>
 typedef int u_int;
@@ -10048,11 +10085,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10051: result: $ntp_ok" >&5
+echo "configure:10088: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Check for SHMEM_STATUS support
-echo "configure:10055: checking SHMEM_STATUS support" >&5
+echo "configure:10092: checking SHMEM_STATUS support" >&5
 echo $ECHO_N "checking SHMEM_STATUS support... $ECHO_C" >&6
 case "$ac_cv_header_sys_mman_h" in
  yes) ntp_ok=yes ;;
@@ -10064,13 +10101,13 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10067: result: $ntp_ok" >&5
+echo "configure:10104: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 ntp_refclock=no
 
 # HPUX only, and by explicit request
-echo "configure:10073: checking Datum/Bancomm bc635/VME interface" >&5
+echo "configure:10110: checking Datum/Bancomm bc635/VME interface" >&5
 echo $ECHO_N "checking Datum/Bancomm bc635/VME interface... $ECHO_C" >&6
 # Check whether --enable-BANCOMM or --disable-BANCOMM was given.
 if test "${enable_BANCOMM+set}" = set; then
@@ -10086,7 +10123,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10089: result: $ntp_ok" >&5
+echo "configure:10126: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$target" in
  yes*-*-hpux*) ;;
@@ -10094,7 +10131,7 @@ case "$ntp_ok$target" in
 esac
 
 #HPUX only, and only by explicit request
-echo "configure:10097: checking TrueTime GPS receiver/VME interface" >&5
+echo "configure:10134: checking TrueTime GPS receiver/VME interface" >&5
 echo $ECHO_N "checking TrueTime GPS receiver/VME interface... $ECHO_C" >&6
 # Check whether --enable-GPSVME or --disable-GPSVME was given.
 if test "${enable_GPSVME+set}" = set; then
@@ -10110,14 +10147,14 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10113: result: $ntp_ok" >&5
+echo "configure:10150: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$target" in
  yes*-*-hpux*) ;;
  yes*) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
-echo "configure:10120: checking for PCL720 clock support" >&5
+echo "configure:10157: checking for PCL720 clock support" >&5
 echo $ECHO_N "checking for PCL720 clock support... $ECHO_C" >&6
 case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_i8253_h" in
  yesyesyes)
@@ -10131,10 +10168,10 @@ EOF
     ans=no
     ;;
 esac
-echo "configure:10134: result: $ans" >&5
+echo "configure:10171: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:10137: checking for SHM clock attached thru shared memory" >&5
+echo "configure:10174: checking for SHM clock attached thru shared memory" >&5
 echo $ECHO_N "checking for SHM clock attached thru shared memory... $ECHO_C" >&6
 # Check whether --enable-SHM or --disable-SHM was given.
 if test "${enable_SHM+set}" = set; then
@@ -10150,10 +10187,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10153: result: $ntp_ok" >&5
+echo "configure:10190: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10156: checking for default inclusion of all suitable non-PARSE clocks" >&5
+echo "configure:10193: checking for default inclusion of all suitable non-PARSE clocks" >&5
 echo $ECHO_N "checking for default inclusion of all suitable non-PARSE clocks... $ECHO_C" >&6
 # Check whether --enable-all-clocks or --disable-all-clocks was given.
 if test "${enable_all_clocks+set}" = set; then
@@ -10162,10 +10199,10 @@ if test "${enable_all_clocks+set}" = set; then
 else
   ntp_eac=yes
 fi
-echo "configure:10165: result: $ntp_eac" >&5
+echo "configure:10202: result: $ntp_eac" >&5
 echo "${ECHO_T}$ntp_eac" >&6
 
-echo "configure:10168: checking if we have support for PARSE clocks" >&5
+echo "configure:10205: checking if we have support for PARSE clocks" >&5
 echo $ECHO_N "checking if we have support for PARSE clocks... $ECHO_C" >&6
 case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  yes*yes*)
@@ -10174,20 +10211,20 @@ case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  *) ntp_canparse=no
     ;;
 esac
-echo "configure:10177: result: $ntp_canparse" >&5
+echo "configure:10214: result: $ntp_canparse" >&5
 echo "${ECHO_T}$ntp_canparse" >&6
 
-echo "configure:10180: checking if we have support for audio clocks" >&5
+echo "configure:10217: checking if we have support for audio clocks" >&5
 echo $ECHO_N "checking if we have support for audio clocks... $ECHO_C" >&6
 case "$ac_cv_header_sun_audioio_h$ac_cv_header_sys_audioio_h" in
  *yes*)	ntp_canaudio=yes ;;
  *)	ntp_canaudio=no  ;;
 esac
-echo "configure:10186: result: $ntp_canaudio" >&5
+echo "configure:10223: result: $ntp_canaudio" >&5
 echo "${ECHO_T}$ntp_canaudio" >&6
 
 # Requires modem control
-echo "configure:10190: checking ACTS modem service" >&5
+echo "configure:10227: checking ACTS modem service" >&5
 echo $ECHO_N "checking ACTS modem service... $ECHO_C" >&6
 # Check whether --enable-ACTS or --disable-ACTS was given.
 if test "${enable_ACTS+set}" = set; then
@@ -10195,7 +10232,7 @@ if test "${enable_ACTS+set}" = set; then
   ntp_ok=$enableval
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 10198 "configure"
+#line 10235 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -10222,10 +10259,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10225: result: $ntp_ok" >&5
+echo "configure:10262: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10228: checking Arbiter 1088A/B GPS receiver" >&5
+echo "configure:10265: checking Arbiter 1088A/B GPS receiver" >&5
 echo $ECHO_N "checking Arbiter 1088A/B GPS receiver... $ECHO_C" >&6
 # Check whether --enable-ARBITER or --disable-ARBITER was given.
 if test "${enable_ARBITER+set}" = set; then
@@ -10241,10 +10278,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10244: result: $ntp_ok" >&5
+echo "configure:10281: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10247: checking Arcron MSF receiver" >&5
+echo "configure:10284: checking Arcron MSF receiver" >&5
 echo $ECHO_N "checking Arcron MSF receiver... $ECHO_C" >&6
 # Check whether --enable-ARCRON_MSF or --disable-ARCRON_MSF was given.
 if test "${enable_ARCRON_MSF+set}" = set; then
@@ -10260,11 +10297,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10263: result: $ntp_ok" >&5
+echo "configure:10300: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10266: checking ATOM PPSAPI interface" >&5
-echo $ECHO_N "checking ATOM PPSAPI interface... $ECHO_C" >&6
+echo "configure:10303: checking ATOM PPS interface" >&5
+echo $ECHO_N "checking ATOM PPS interface... $ECHO_C" >&6
 # Check whether --enable-ATOM or --disable-ATOM was given.
 if test "${enable_ATOM+set}" = set; then
   enableval="$enable_ATOM"
@@ -10282,10 +10319,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10285: result: $ntp_ok" >&5
+echo "configure:10322: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10288: checking Austron 2200A/2201A GPS receiver" >&5
+echo "configure:10325: checking Austron 2200A/2201A GPS receiver" >&5
 echo $ECHO_N "checking Austron 2200A/2201A GPS receiver... $ECHO_C" >&6
 # Check whether --enable-AS2201 or --disable-AS2201 was given.
 if test "${enable_AS2201+set}" = set; then
@@ -10301,10 +10338,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10304: result: $ntp_ok" >&5
+echo "configure:10341: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10307: checking CHU modem/decoder" >&5
+echo "configure:10344: checking CHU modem/decoder" >&5
 echo $ECHO_N "checking CHU modem/decoder... $ECHO_C" >&6
 # Check whether --enable-CHU or --disable-CHU was given.
 if test "${enable_CHU+set}" = set; then
@@ -10320,11 +10357,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10323: result: $ntp_ok" >&5
+echo "configure:10360: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 ac_refclock_chu=$ntp_ok
 
-echo "configure:10327: checking CHU audio/decoder" >&5
+echo "configure:10364: checking CHU audio/decoder" >&5
 echo $ECHO_N "checking CHU audio/decoder... $ECHO_C" >&6
 # Check whether --enable-AUDIO-CHU or --disable-AUDIO-CHU was given.
 if test "${enable_AUDIO_CHU+set}" = set; then
@@ -10342,7 +10379,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10345: result: $ntp_ok" >&5
+echo "configure:10382: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 # We used to check for sunos/solaris target...
 case "$ntp_ok$ac_refclock_chu$ntp_canaudio" in
@@ -10350,7 +10387,7 @@ case "$ntp_ok$ac_refclock_chu$ntp_canaudio" in
 esac
 
 # Not under HP-UX
-echo "configure:10353: checking Datum Programmable Time System" >&5
+echo "configure:10390: checking Datum Programmable Time System" >&5
 echo $ECHO_N "checking Datum Programmable Time System... $ECHO_C" >&6
 # Check whether --enable-DATUM or --disable-DATUM was given.
 if test "${enable_DATUM+set}" = set; then
@@ -10372,10 +10409,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10375: result: $ntp_ok" >&5
+echo "configure:10412: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10378: checking Forum Graphic GPS" >&5
+echo "configure:10415: checking Forum Graphic GPS" >&5
 echo $ECHO_N "checking Forum Graphic GPS... $ECHO_C" >&6
 # Check whether --enable-FG or --disable-FG was given.
 if test "${enable_FG+set}" = set; then
@@ -10391,11 +10428,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10394: result: $ntp_ok" >&5
+echo "configure:10431: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Requires modem control
-echo "configure:10398: checking Heath GC-1000 WWV/WWVH receiver" >&5
+echo "configure:10435: checking Heath GC-1000 WWV/WWVH receiver" >&5
 echo $ECHO_N "checking Heath GC-1000 WWV/WWVH receiver... $ECHO_C" >&6
 # Check whether --enable-HEATH or --disable-HEATH was given.
 if test "${enable_HEATH+set}" = set; then
@@ -10403,7 +10440,7 @@ if test "${enable_HEATH+set}" = set; then
   ntp_ok=$enableval
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 10406 "configure"
+#line 10443 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -10430,10 +10467,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10433: result: $ntp_ok" >&5
+echo "configure:10470: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10436: checking HP 58503A GPS receiver" >&5
+echo "configure:10473: checking HP 58503A GPS receiver" >&5
 echo $ECHO_N "checking HP 58503A GPS receiver... $ECHO_C" >&6
 # Check whether --enable-HPGPS or --disable-HPGPS was given.
 if test "${enable_HPGPS+set}" = set; then
@@ -10449,10 +10486,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10452: result: $ntp_ok" >&5
+echo "configure:10489: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10455: checking Sun IRIG audio decoder" >&5
+echo "configure:10492: checking Sun IRIG audio decoder" >&5
 echo $ECHO_N "checking Sun IRIG audio decoder... $ECHO_C" >&6
 # Check whether --enable-IRIG or --disable-IRIG was given.
 if test "${enable_IRIG+set}" = set; then
@@ -10471,13 +10508,13 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10474: result: $ntp_ok" >&5
+echo "configure:10511: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canaudio" in
  yesno) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
-echo "configure:10480: checking Leitch CSD 5300 Master Clock System Driver" >&5
+echo "configure:10517: checking Leitch CSD 5300 Master Clock System Driver" >&5
 echo $ECHO_N "checking Leitch CSD 5300 Master Clock System Driver... $ECHO_C" >&6
 # Check whether --enable-LEITCH or --disable-LEITCH was given.
 if test "${enable_LEITCH+set}" = set; then
@@ -10493,10 +10530,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10496: result: $ntp_ok" >&5
+echo "configure:10533: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10499: checking local clock reference" >&5
+echo "configure:10536: checking local clock reference" >&5
 echo $ECHO_N "checking local clock reference... $ECHO_C" >&6
 # Check whether --enable-LOCAL-CLOCK or --disable-LOCAL-CLOCK was given.
 if test "${enable_LOCAL_CLOCK+set}" = set; then
@@ -10512,10 +10549,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10515: result: $ntp_ok" >&5
+echo "configure:10552: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10518: checking EES M201 MSF receiver" >&5
+echo "configure:10555: checking EES M201 MSF receiver" >&5
 echo $ECHO_N "checking EES M201 MSF receiver... $ECHO_C" >&6
 # Check whether --enable-MSFEES or --disable-MSFEES was given.
 if test "${enable_MSFEES+set}" = set; then
@@ -10531,11 +10568,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10534: result: $ntp_ok" >&5
+echo "configure:10571: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Not Ultrix
-echo "configure:10538: checking Magnavox MX4200 GPS receiver" >&5
+echo "configure:10575: checking Magnavox MX4200 GPS receiver" >&5
 echo $ECHO_N "checking Magnavox MX4200 GPS receiver... $ECHO_C" >&6
 # Check whether --enable-MX4200 or --disable-MX4200 was given.
 if test "${enable_MX4200+set}" = set; then
@@ -10556,13 +10593,13 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10559: result: $ntp_ok" >&5
+echo "configure:10596: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$target" in
  yes*-*-ultrix*) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
-echo "configure:10565: checking NMEA GPS receiver" >&5
+echo "configure:10602: checking NMEA GPS receiver" >&5
 echo $ECHO_N "checking NMEA GPS receiver... $ECHO_C" >&6
 # Check whether --enable-NMEA or --disable-NMEA was given.
 if test "${enable_NMEA+set}" = set; then
@@ -10578,10 +10615,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10581: result: $ntp_ok" >&5
+echo "configure:10618: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10584: checking for ONCORE Motorola VP/UT Oncore GPS" >&5
+echo "configure:10621: checking for ONCORE Motorola VP/UT Oncore GPS" >&5
 echo $ECHO_N "checking for ONCORE Motorola VP/UT Oncore GPS... $ECHO_C" >&6
 # Check whether --enable-ONCORE or --disable-ONCORE was given.
 if test "${enable_ONCORE+set}" = set; then
@@ -10600,10 +10637,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10603: result: $ntp_ok" >&5
+echo "configure:10640: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10606: checking for Palisade clock" >&5
+echo "configure:10643: checking for Palisade clock" >&5
 echo $ECHO_N "checking for Palisade clock... $ECHO_C" >&6
 # Check whether --enable-PALISADE or --disable-PALISADE was given.
 if test "${enable_PALISADE+set}" = set; then
@@ -10626,10 +10663,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10629: result: $ntp_ok" >&5
+echo "configure:10666: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10632: checking PST/Traconex 1020 WWV/WWVH receiver" >&5
+echo "configure:10669: checking PST/Traconex 1020 WWV/WWVH receiver" >&5
 echo $ECHO_N "checking PST/Traconex 1020 WWV/WWVH receiver... $ECHO_C" >&6
 # Check whether --enable-PST or --disable-PST was given.
 if test "${enable_PST+set}" = set; then
@@ -10645,11 +10682,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10648: result: $ntp_ok" >&5
+echo "configure:10685: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Not Ultrix
-echo "configure:10652: checking Rockwell Jupiter GPS receiver" >&5
+echo "configure:10689: checking Rockwell Jupiter GPS receiver" >&5
 echo $ECHO_N "checking Rockwell Jupiter GPS receiver... $ECHO_C" >&6
 # Check whether --enable-JUPITER or --disable-JUPITER was given.
 if test "${enable_JUPITER+set}" = set; then
@@ -10670,14 +10707,14 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10673: result: $ntp_ok" >&5
+echo "configure:10710: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$target" in
  yes*-*-ultrix*) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
 # Requires modem control
-echo "configure:10680: checking PTB modem service" >&5
+echo "configure:10717: checking PTB modem service" >&5
 echo $ECHO_N "checking PTB modem service... $ECHO_C" >&6
 # Check whether --enable-PTBACTS or --disable-PTBACTS was given.
 if test "${enable_PTBACTS+set}" = set; then
@@ -10685,7 +10722,7 @@ if test "${enable_PTBACTS+set}" = set; then
   ntp_ok=$enableval
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 10688 "configure"
+#line 10725 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -10712,10 +10749,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10715: result: $ntp_ok" >&5
+echo "configure:10752: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10718: checking KSI/Odetics TPRO/S GPS receiver/IRIG interface" >&5
+echo "configure:10755: checking KSI/Odetics TPRO/S GPS receiver/IRIG interface" >&5
 echo $ECHO_N "checking KSI/Odetics TPRO/S GPS receiver/IRIG interface... $ECHO_C" >&6
 # Check whether --enable-TPRO or --disable-TPRO was given.
 if test "${enable_TPRO+set}" = set; then
@@ -10737,13 +10774,13 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10740: result: $ntp_ok" >&5
+echo "configure:10777: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ac_cv_header_sys_tpro" in
  yesno) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
-echo "configure:10746: checking TRAK 8810 GPS receiver" >&5
+echo "configure:10783: checking TRAK 8810 GPS receiver" >&5
 echo $ECHO_N "checking TRAK 8810 GPS receiver... $ECHO_C" >&6
 # Check whether --enable-TRAK or --disable-TRAK was given.
 if test "${enable_TRAK+set}" = set; then
@@ -10759,10 +10796,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10762: result: $ntp_ok" >&5
+echo "configure:10799: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10765: checking Chrono-log K-series WWVB receiver" >&5
+echo "configure:10802: checking Chrono-log K-series WWVB receiver" >&5
 echo $ECHO_N "checking Chrono-log K-series WWVB receiver... $ECHO_C" >&6
 # Check whether --enable-CHRONOLOG or --disable-CHRONOLOG was given.
 if test "${enable_CHRONOLOG+set}" = set; then
@@ -10778,10 +10815,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10781: result: $ntp_ok" >&5
+echo "configure:10818: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10784: checking Dumb generic hh:mm:ss local clock" >&5
+echo "configure:10821: checking Dumb generic hh:mm:ss local clock" >&5
 echo $ECHO_N "checking Dumb generic hh:mm:ss local clock... $ECHO_C" >&6
 # Check whether --enable-DUMBCLOCK or --disable-DUMBCLOCK was given.
 if test "${enable_DUMBCLOCK+set}" = set; then
@@ -10797,10 +10834,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10800: result: $ntp_ok" >&5
+echo "configure:10837: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10803: checking Conrad parallel port radio clock" >&5
+echo "configure:10840: checking Conrad parallel port radio clock" >&5
 echo $ECHO_N "checking Conrad parallel port radio clock... $ECHO_C" >&6
 # Check whether --enable-PCF or --disable-PCF was given.
 if test "${enable_PCF+set}" = set; then
@@ -10816,10 +10853,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10819: result: $ntp_ok" >&5
+echo "configure:10856: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10822: checking Spectracom 8170/Netclock/2 WWVB receiver" >&5
+echo "configure:10859: checking Spectracom 8170/Netclock/2 WWVB receiver" >&5
 echo $ECHO_N "checking Spectracom 8170/Netclock/2 WWVB receiver... $ECHO_C" >&6
 # Check whether --enable-SPECTRACOM or --disable-SPECTRACOM was given.
 if test "${enable_SPECTRACOM+set}" = set; then
@@ -10835,11 +10872,11 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10838: result: $ntp_ok" >&5
+echo "configure:10875: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
 # Not on a vax-dec-bsd
-echo "configure:10842: checking Kinemetrics/TrueTime receivers" >&5
+echo "configure:10879: checking Kinemetrics/TrueTime receivers" >&5
 echo $ECHO_N "checking Kinemetrics/TrueTime receivers... $ECHO_C" >&6
 # Check whether --enable-TRUETIME or --disable-TRUETIME was given.
 if test "${enable_TRUETIME+set}" = set; then
@@ -10862,13 +10899,13 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10865: result: $ntp_ok" >&5
+echo "configure:10902: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$target" in
  yesvax-dec-bsd) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
-echo "configure:10871: checking Ultralink M320 WWVB receiver" >&5
+echo "configure:10908: checking Ultralink M320 WWVB receiver" >&5
 echo $ECHO_N "checking Ultralink M320 WWVB receiver... $ECHO_C" >&6
 # Check whether --enable-ULINK or --disable-ULINK was given.
 if test "${enable_ULINK+set}" = set; then
@@ -10884,10 +10921,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10887: result: $ntp_ok" >&5
+echo "configure:10924: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10890: checking WWV receiver" >&5
+echo "configure:10927: checking WWV receiver" >&5
 echo $ECHO_N "checking WWV receiver... $ECHO_C" >&6
 # Check whether --enable-WWV or --disable-WWV was given.
 if test "${enable_WWV+set}" = set; then
@@ -10906,14 +10943,14 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10909: result: $ntp_ok" >&5
+echo "configure:10946: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canaudio" in
  yesno) echo "configure: WARNING: *** But the expected answer is... no ***" >&2 ;;
 esac
 
 # Requires modem control
-echo "configure:10916: checking USNO modem service" >&5
+echo "configure:10953: checking USNO modem service" >&5
 echo $ECHO_N "checking USNO modem service... $ECHO_C" >&6
 # Check whether --enable-USNO or --disable-USNO was given.
 if test "${enable_USNO+set}" = set; then
@@ -10921,7 +10958,7 @@ if test "${enable_USNO+set}" = set; then
   ntp_ok=$enableval
 else
   cat >conftest.$ac_ext <<_ACEOF
-#line 10924 "configure"
+#line 10961 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -10948,10 +10985,10 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:10951: result: $ntp_ok" >&5
+echo "configure:10988: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10954: checking for default inclusion of all suitable PARSE clocks" >&5
+echo "configure:10991: checking for default inclusion of all suitable PARSE clocks" >&5
 echo $ECHO_N "checking for default inclusion of all suitable PARSE clocks... $ECHO_C" >&6
 # Check whether --enable-parse-clocks or --disable-parse-clocks was given.
 if test "${enable_parse_clocks+set}" = set; then
@@ -10964,7 +11001,7 @@ else
     esac
     ntp_eapc=no
 fi
-echo "configure:10967: result: $ntp_eapc" >&5
+echo "configure:11004: result: $ntp_eapc" >&5
 echo "${ECHO_T}$ntp_eapc" >&6
 
 case "$ntp_eac$ntp_eapc$ntp_canparse" in
@@ -10981,7 +11018,7 @@ ntp_libparse=no
 ntp_parseutil=no
 ntp_rawdcf=no
 
-echo "configure:10984: checking Diem Computime Radio Clock" >&5
+echo "configure:11021: checking Diem Computime Radio Clock" >&5
 echo $ECHO_N "checking Diem Computime Radio Clock... $ECHO_C" >&6
 # Check whether --enable-COMPUTIME or --disable-COMPUTIME was given.
 if test "${enable_COMPUTIME+set}" = set; then
@@ -10998,7 +11035,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11001: result: $ntp_ok" >&5
+echo "configure:11038: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11006,7 +11043,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11009: checking ELV/DCF7000 clock" >&5
+echo "configure:11046: checking ELV/DCF7000 clock" >&5
 echo $ECHO_N "checking ELV/DCF7000 clock... $ECHO_C" >&6
 # Check whether --enable-DCF7000 or --disable-DCF7000 was given.
 if test "${enable_DCF7000+set}" = set; then
@@ -11023,7 +11060,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11026: result: $ntp_ok" >&5
+echo "configure:11063: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11031,7 +11068,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11034: checking HOPF 6021 clock" >&5
+echo "configure:11071: checking HOPF 6021 clock" >&5
 echo $ECHO_N "checking HOPF 6021 clock... $ECHO_C" >&6
 # Check whether --enable-HOPF6021 or --disable-HOPF6021 was given.
 if test "${enable_HOPF6021+set}" = set; then
@@ -11048,7 +11085,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11051: result: $ntp_ok" >&5
+echo "configure:11088: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11056,7 +11093,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11059: checking Meinberg clocks" >&5
+echo "configure:11096: checking Meinberg clocks" >&5
 echo $ECHO_N "checking Meinberg clocks... $ECHO_C" >&6
 # Check whether --enable-MEINBERG or --disable-MEINBERG was given.
 if test "${enable_MEINBERG+set}" = set; then
@@ -11073,7 +11110,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11076: result: $ntp_ok" >&5
+echo "configure:11113: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11081,7 +11118,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11084: checking DCF77 raw time code" >&5
+echo "configure:11121: checking DCF77 raw time code" >&5
 echo $ECHO_N "checking DCF77 raw time code... $ECHO_C" >&6
 # Check whether --enable-RAWDCF or --disable-RAWDCF was given.
 if test "${enable_RAWDCF+set}" = set; then
@@ -11100,7 +11137,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11103: result: $ntp_ok" >&5
+echo "configure:11140: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11110,7 +11147,7 @@ esac
 
 case "$ntp_rawdcf" in
  yes)
-    echo "configure:11113: checking if we must enable parity for RAWDCF" >&5
+    echo "configure:11150: checking if we must enable parity for RAWDCF" >&5
 echo $ECHO_N "checking if we must enable parity for RAWDCF... $ECHO_C" >&6
 if test "${ac_cv_var_rawdcf_parity+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11123,7 +11160,7 @@ else
     esac
     ac_cv_var_rawdcf_parity=$ans
 fi
-echo "configure:11126: result: $ac_cv_var_rawdcf_parity" >&5
+echo "configure:11163: result: $ac_cv_var_rawdcf_parity" >&5
 echo "${ECHO_T}$ac_cv_var_rawdcf_parity" >&6
     case "$ac_cv_var_rawdcf_parity" in
      yes) cat >>confdefs.h <<\EOF
@@ -11138,7 +11175,7 @@ EOF
     ;;
 esac
 
-echo "configure:11141: checking RCC 8000 clock" >&5
+echo "configure:11178: checking RCC 8000 clock" >&5
 echo $ECHO_N "checking RCC 8000 clock... $ECHO_C" >&6
 # Check whether --enable-RCC8000 or --disable-RCC8000 was given.
 if test "${enable_RCC8000+set}" = set; then
@@ -11155,7 +11192,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11158: result: $ntp_ok" >&5
+echo "configure:11195: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11163,7 +11200,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11166: checking Schmid DCF77 clock" >&5
+echo "configure:11203: checking Schmid DCF77 clock" >&5
 echo $ECHO_N "checking Schmid DCF77 clock... $ECHO_C" >&6
 # Check whether --enable-SCHMID or --disable-SCHMID was given.
 if test "${enable_SCHMID+set}" = set; then
@@ -11180,7 +11217,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11183: result: $ntp_ok" >&5
+echo "configure:11220: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11188,7 +11225,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11191: checking Trimble GPS receiver/TAIP protocol" >&5
+echo "configure:11228: checking Trimble GPS receiver/TAIP protocol" >&5
 echo $ECHO_N "checking Trimble GPS receiver/TAIP protocol... $ECHO_C" >&6
 # Check whether --enable-TRIMTAIP or --disable-TRIMTAIP was given.
 if test "${enable_TRIMTAIP+set}" = set; then
@@ -11205,7 +11242,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11208: result: $ntp_ok" >&5
+echo "configure:11245: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11213,7 +11250,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11216: checking Trimble GPS receiver/TSIP protocol" >&5
+echo "configure:11253: checking Trimble GPS receiver/TSIP protocol" >&5
 echo $ECHO_N "checking Trimble GPS receiver/TSIP protocol... $ECHO_C" >&6
 # Check whether --enable-TRIMTSIP or --disable-TRIMTSIP was given.
 if test "${enable_TRIMTSIP+set}" = set; then
@@ -11230,7 +11267,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11233: result: $ntp_ok" >&5
+echo "configure:11270: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11238,7 +11275,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11241: checking WHARTON 400A Series clock" >&5
+echo "configure:11278: checking WHARTON 400A Series clock" >&5
 echo $ECHO_N "checking WHARTON 400A Series clock... $ECHO_C" >&6
 # Check whether --enable-WHARTON or --disable-WHARTON was given.
 if test "${enable_WHARTON+set}" = set; then
@@ -11255,7 +11292,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11258: result: $ntp_ok" >&5
+echo "configure:11295: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11263,7 +11300,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11266: checking VARITEXT clock" >&5
+echo "configure:11303: checking VARITEXT clock" >&5
 echo $ECHO_N "checking VARITEXT clock... $ECHO_C" >&6
 # Check whether --enable-VARITEXT or --disable-VARITEXT was given.
 if test "${enable_VARITEXT+set}" = set; then
@@ -11280,7 +11317,7 @@ if test "$ntp_ok" = "yes"; then
 EOF
 
 fi
-echo "configure:11283: result: $ntp_ok" >&5
+echo "configure:11320: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 case "$ntp_ok$ntp_canparse" in
  yesno)
@@ -11288,7 +11325,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-echo "configure:11291: checking if we need to make and use the parse libraries" >&5
+echo "configure:11328: checking if we need to make and use the parse libraries" >&5
 echo $ECHO_N "checking if we need to make and use the parse libraries... $ECHO_C" >&6
 ans=no
 case "$ntp_libparse" in
@@ -11311,10 +11348,10 @@ EOF
 
     ;;
 esac
-echo "configure:11314: result: $ans" >&5
+echo "configure:11351: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11317: checking for the level of crypto support" >&5
+echo "configure:11354: checking for the level of crypto support" >&5
 echo $ECHO_N "checking for the level of crypto support... $ECHO_C" >&6
 
 # Check whether --with-crypto or --without-crypto was given.
@@ -11357,10 +11394,10 @@ EOF
     AUTOKEY=1
     ;;
 esac
-echo "configure:11360: result: $ans" >&5
+echo "configure:11397: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11363: checking if we want to compile with ElectricFence" >&5
+echo "configure:11400: checking if we want to compile with ElectricFence" >&5
 echo $ECHO_N "checking if we want to compile with ElectricFence... $ECHO_C" >&6
 
 # Check whether --with-electricfence or --without-electricfence was given.
@@ -11381,10 +11418,10 @@ case "$ans" in
     ans=yes
     ;;
 esac
-echo "configure:11384: result: $ans" >&5
+echo "configure:11421: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11387: checking if we can make dcf parse utilities" >&5
+echo "configure:11424: checking if we can make dcf parse utilities" >&5
 echo $ECHO_N "checking if we can make dcf parse utilities... $ECHO_C" >&6
 ans=no
 if test "$ntp_parseutil" = "yes"; then
@@ -11396,10 +11433,10 @@ if test "$ntp_parseutil" = "yes"; then
 	;;
     esac
 fi
-echo "configure:11399: result: $ans" >&5
+echo "configure:11436: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11402: checking if we can build kernel streams modules for parse" >&5
+echo "configure:11439: checking if we can build kernel streams modules for parse" >&5
 echo $ECHO_N "checking if we can build kernel streams modules for parse... $ECHO_C" >&6
 ans=no
 case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
@@ -11424,10 +11461,10 @@ EOF
     esac
     ;;
 esac
-echo "configure:11427: result: $ans" >&5
+echo "configure:11464: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11430: checking if we need basic refclock support" >&5
+echo "configure:11467: checking if we need basic refclock support" >&5
 echo $ECHO_N "checking if we need basic refclock support... $ECHO_C" >&6
 if test "$ntp_refclock" = "yes"; then
     cat >>confdefs.h <<\EOF
@@ -11435,14 +11472,14 @@ if test "$ntp_refclock" = "yes"; then
 EOF
 
 fi
-echo "configure:11438: result: $ntp_refclock" >&5
+echo "configure:11475: result: $ntp_refclock" >&5
 echo "${ECHO_T}$ntp_refclock" >&6
 
 	
 	
 	
 
-echo "configure:11445: checking if we want HP-UX adjtimed support" >&5
+echo "configure:11482: checking if we want HP-UX adjtimed support" >&5
 echo $ECHO_N "checking if we want HP-UX adjtimed support... $ECHO_C" >&6
 case "$target" in
  *-*-hpux[56789]*)
@@ -11458,10 +11495,10 @@ if test "$ans" = "yes"; then
 EOF
 
 fi
-echo "configure:11461: result: $ans" >&5
+echo "configure:11498: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "configure:11464: checking if we can read kmem" >&5
+echo "configure:11501: checking if we can read kmem" >&5
 echo $ECHO_N "checking if we can read kmem... $ECHO_C" >&6
 if test "${ac_cv_var_can_kmem+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11502,7 +11539,7 @@ else
 fi
 ac_cv_var_can_kmem=$ans
 fi
-echo "configure:11505: result: $ac_cv_var_can_kmem" >&5
+echo "configure:11542: result: $ac_cv_var_can_kmem" >&5
 echo "${ECHO_T}$ac_cv_var_can_kmem" >&6
 
 case "$ac_cv_var_can_kmem" in
@@ -11513,7 +11550,7 @@ EOF
  ;;
 esac
 
-echo "configure:11516: checking if adjtime is accurate" >&5
+echo "configure:11553: checking if adjtime is accurate" >&5
 echo $ECHO_N "checking if adjtime is accurate... $ECHO_C" >&6
 if test "${ac_cv_var_adjtime_is_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11555,7 +11592,7 @@ else
 fi
 ac_cv_var_adjtime_is_accurate=$ans
 fi
-echo "configure:11558: result: $ac_cv_var_adjtime_is_accurate" >&5
+echo "configure:11595: result: $ac_cv_var_adjtime_is_accurate" >&5
 echo "${ECHO_T}$ac_cv_var_adjtime_is_accurate" >&6
 case "$ac_cv_var_adjtime_is_accurate" in
  yes) cat >>confdefs.h <<\EOF
@@ -11564,7 +11601,7 @@ EOF
  ;;
 esac
 
-echo "configure:11567: checking the name of 'tick' in the kernel" >&5
+echo "configure:11604: checking the name of 'tick' in the kernel" >&5
 echo $ECHO_N "checking the name of 'tick' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_tick+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11598,7 +11635,7 @@ case "$target" in
 esac
 ac_cv_var_nlist_tick=$ans
 fi
-echo "configure:11601: result: $ac_cv_var_nlist_tick" >&5
+echo "configure:11638: result: $ac_cv_var_nlist_tick" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_tick" >&6
 case "$ac_cv_var_nlist_tick" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -11608,7 +11645,7 @@ EOF
  ;;
 esac
 #
-echo "configure:11611: checking for the units of 'tick'" >&5
+echo "configure:11648: checking for the units of 'tick'" >&5
 echo $ECHO_N "checking for the units of 'tick'... $ECHO_C" >&6
 if test "${ac_cv_var_tick_nano+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11621,7 +11658,7 @@ case "$target" in
 esac
 ac_cv_var_tick_nano=$ans
 fi
-echo "configure:11624: result: $ac_cv_var_tick_nano" >&5
+echo "configure:11661: result: $ac_cv_var_tick_nano" >&5
 echo "${ECHO_T}$ac_cv_var_tick_nano" >&6
 case "$ac_cv_var_tick_nano" in
  nsec)
@@ -11632,7 +11669,7 @@ EOF
     ;;
 esac
 #
-echo "configure:11635: checking the name of 'tickadj' in the kernel" >&5
+echo "configure:11672: checking the name of 'tickadj' in the kernel" >&5
 echo $ECHO_N "checking the name of 'tickadj' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11675,7 +11712,7 @@ case "$target" in
 esac
 ac_cv_var_nlist_tickadj=$ans
 fi
-echo "configure:11678: result: $ac_cv_var_nlist_tickadj" >&5
+echo "configure:11715: result: $ac_cv_var_nlist_tickadj" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_tickadj" >&6
 case "$ac_cv_var_nlist_tickadj" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -11685,7 +11722,7 @@ EOF
  ;;
 esac
 #
-echo "configure:11688: checking for the units of 'tickadj'" >&5
+echo "configure:11725: checking for the units of 'tickadj'" >&5
 echo $ECHO_N "checking for the units of 'tickadj'... $ECHO_C" >&6
 if test "${ac_cv_var_tickadj_nano+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11698,7 +11735,7 @@ case "$target" in
 esac
 ac_cv_var_tickadj_nano=$ans
 fi
-echo "configure:11701: result: $ac_cv_var_tickadj_nano" >&5
+echo "configure:11738: result: $ac_cv_var_tickadj_nano" >&5
 echo "${ECHO_T}$ac_cv_var_tickadj_nano" >&6
 case "$ac_cv_var_tickadj_nano" in
  nsec)
@@ -11709,7 +11746,7 @@ EOF
     ;;
 esac
 #
-echo "configure:11712: checking half-heartedly for 'dosynctodr' in the kernel" >&5
+echo "configure:11749: checking half-heartedly for 'dosynctodr' in the kernel" >&5
 echo $ECHO_N "checking half-heartedly for 'dosynctodr' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_dosynctodr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11751,7 +11788,7 @@ else
 esac
 ac_cv_var_nlist_dosynctodr=$ans
 fi
-echo "configure:11754: result: $ac_cv_var_nlist_dosynctodr" >&5
+echo "configure:11791: result: $ac_cv_var_nlist_dosynctodr" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_dosynctodr" >&6
 case "$ac_cv_var_nlist_dosynctodr" in
  no) ;;
@@ -11762,7 +11799,7 @@ EOF
      ;;
 esac
 #
-echo "configure:11765: checking half-heartedly for 'noprintf' in the kernel" >&5
+echo "configure:11802: checking half-heartedly for 'noprintf' in the kernel" >&5
 echo $ECHO_N "checking half-heartedly for 'noprintf' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_noprintf+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11798,7 +11835,7 @@ else
 esac
 ac_cv_var_nlist_noprintf=$ans
 fi
-echo "configure:11801: result: $ac_cv_var_nlist_noprintf" >&5
+echo "configure:11838: result: $ac_cv_var_nlist_noprintf" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_noprintf" >&6
 case "$ac_cv_var_nlist_noprintf" in
  no) ;;
@@ -11809,7 +11846,7 @@ EOF
      ;;
 esac
 
-echo "configure:11812: checking for a default value for 'tick'" >&5
+echo "configure:11849: checking for a default value for 'tick'" >&5
 echo $ECHO_N "checking for a default value for 'tick'... $ECHO_C" >&6
 if test "${ac_cv_var_tick+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11842,7 +11879,7 @@ else
 fi
 ac_cv_var_tick=$ans
 fi
-echo "configure:11845: result: $ac_cv_var_tick" >&5
+echo "configure:11882: result: $ac_cv_var_tick" >&5
 echo "${ECHO_T}$ac_cv_var_tick" >&6
 case "$ac_cv_var_tick" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -11852,7 +11889,7 @@ EOF
  ;;
 esac
 
-echo "configure:11855: checking for a default value for 'tickadj'" >&5
+echo "configure:11892: checking for a default value for 'tickadj'" >&5
 echo $ECHO_N "checking for a default value for 'tickadj'... $ECHO_C" >&6
 if test "${ac_cv_var_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11910,7 +11947,7 @@ else
 fi
 ac_cv_var_tickadj=$ans
 fi
-echo "configure:11913: result: $ac_cv_var_tickadj" >&5
+echo "configure:11950: result: $ac_cv_var_tickadj" >&5
 echo "${ECHO_T}$ac_cv_var_tickadj" >&6
 case "$ac_cv_var_tickadj" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -11983,14 +12020,14 @@ case "$target" in
  ;;
 esac
 
-echo "configure:11986: checking if we want and can make the tickadj utility" >&5
+echo "configure:12023: checking if we want and can make the tickadj utility" >&5
 echo $ECHO_N "checking if we want and can make the tickadj utility... $ECHO_C" >&6
 if test "${ac_cv_make_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_cv_make_tickadj=yes
 fi
-echo "configure:11993: result: $ac_cv_make_tickadj" >&5
+echo "configure:12030: result: $ac_cv_make_tickadj" >&5
 echo "${ECHO_T}$ac_cv_make_tickadj" >&6
 case "$ac_cv_make_tickadj" in
  yes)
@@ -11998,7 +12035,7 @@ case "$ac_cv_make_tickadj" in
     ;;
 esac
 
-echo "configure:12001: checking if we want and can make the ntptime utility" >&5
+echo "configure:12038: checking if we want and can make the ntptime utility" >&5
 echo $ECHO_N "checking if we want and can make the ntptime utility... $ECHO_C" >&6
 if test "${ac_cv_make_ntptime+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12016,7 +12053,7 @@ else
 esac
 ac_cv_make_ntptime=$ans
 fi
-echo "configure:12019: result: $ac_cv_make_ntptime" >&5
+echo "configure:12056: result: $ac_cv_make_ntptime" >&5
 echo "${ECHO_T}$ac_cv_make_ntptime" >&6
 case "$ac_cv_make_ntptime" in
  yes)
@@ -12024,7 +12061,7 @@ case "$ac_cv_make_ntptime" in
     ;;
 esac
 
-echo "configure:12027: checking if we want UDP wildcard delivery" >&5
+echo "configure:12064: checking if we want UDP wildcard delivery" >&5
 echo $ECHO_N "checking if we want UDP wildcard delivery... $ECHO_C" >&6
 if test "${ac_cv_var_udp_wildcard_delivery+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12082,7 +12119,7 @@ else
 fi
 ac_cv_var_udp_wildcard_delivery=$ans
 fi
-echo "configure:12085: result: $ac_cv_var_udp_wildcard_delivery" >&5
+echo "configure:12122: result: $ac_cv_var_udp_wildcard_delivery" >&5
 echo "${ECHO_T}$ac_cv_var_udp_wildcard_delivery" >&6
 case "$ac_cv_var_udp_wildcard_delivery" in
  yes) cat >>confdefs.h <<\EOF
@@ -12102,7 +12139,7 @@ case "$host" in
     ;;
 esac
 
-echo "configure:12105: checking if we should always slew the time" >&5
+echo "configure:12142: checking if we should always slew the time" >&5
 echo $ECHO_N "checking if we should always slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_slew_always+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12132,7 +12169,7 @@ else
 fi
 ac_cv_var_slew_always=$ans
 fi
-echo "configure:12135: result: $ac_cv_var_slew_always" >&5
+echo "configure:12172: result: $ac_cv_var_slew_always" >&5
 echo "${ECHO_T}$ac_cv_var_slew_always" >&6
 case "$ac_cv_var_slew_always" in
  yes) cat >>confdefs.h <<\EOF
@@ -12141,7 +12178,7 @@ EOF
  ;;
 esac
 
-echo "configure:12144: checking if we should step and slew the time" >&5
+echo "configure:12181: checking if we should step and slew the time" >&5
 echo $ECHO_N "checking if we should step and slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_step_slew+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12174,7 +12211,7 @@ else
 fi
 ac_cv_var_step_slew=$ans
 fi
-echo "configure:12177: result: $ac_cv_var_step_slew" >&5
+echo "configure:12214: result: $ac_cv_var_step_slew" >&5
 echo "${ECHO_T}$ac_cv_var_step_slew" >&6
 case "$ac_cv_var_step_slew" in
  yes) cat >>confdefs.h <<\EOF
@@ -12183,7 +12220,7 @@ EOF
  ;;
 esac
 
-echo "configure:12186: checking if ntpdate should step the time" >&5
+echo "configure:12223: checking if ntpdate should step the time" >&5
 echo $ECHO_N "checking if ntpdate should step the time... $ECHO_C" >&6
 if test "${ac_cv_var_ntpdate_step+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12204,7 +12241,7 @@ else
 fi
 ac_cv_var_ntpdate_step=$ans
 fi
-echo "configure:12207: result: $ac_cv_var_ntpdate_step" >&5
+echo "configure:12244: result: $ac_cv_var_ntpdate_step" >&5
 echo "${ECHO_T}$ac_cv_var_ntpdate_step" >&6
 case "$ac_cv_var_ntpdate_step" in
  yes) cat >>confdefs.h <<\EOF
@@ -12213,7 +12250,7 @@ EOF
  ;;
 esac
 
-echo "configure:12216: checking if we should sync TODR clock every hour" >&5
+echo "configure:12253: checking if we should sync TODR clock every hour" >&5
 echo $ECHO_N "checking if we should sync TODR clock every hour... $ECHO_C" >&6
 if test "${ac_cv_var_sync_todr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12236,7 +12273,7 @@ else
 fi
 ac_cv_var_sync_todr=$ans
 fi
-echo "configure:12239: result: $ac_cv_var_sync_todr" >&5
+echo "configure:12276: result: $ac_cv_var_sync_todr" >&5
 echo "${ECHO_T}$ac_cv_var_sync_todr" >&6
 case "$ac_cv_var_sync_todr" in
  yes) cat >>confdefs.h <<\EOF
@@ -12245,7 +12282,7 @@ EOF
  ;;
 esac
 
-echo "configure:12248: checking if we should avoid kernel FLL bug" >&5
+echo "configure:12285: checking if we should avoid kernel FLL bug" >&5
 echo $ECHO_N "checking if we should avoid kernel FLL bug... $ECHO_C" >&6
 if test "${ac_cv_var_kernel_fll_bug+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -12284,7 +12321,7 @@ else
 fi
 ac_cv_var_kernel_fll_bug=$ans
 fi
-echo "configure:12287: result: $ac_cv_var_kernel_fll_bug" >&5
+echo "configure:12324: result: $ac_cv_var_kernel_fll_bug" >&5
 echo "${ECHO_T}$ac_cv_var_kernel_fll_bug" >&6
 case "$ac_cv_var_kernel_fll_bug" in
  yes) cat >>confdefs.h <<\EOF
