@@ -63,7 +63,7 @@ initialise_buffer(struct recvbuf *buff)
 	memset((char *) buff, 0, sizeof(struct recvbuf));
 
 #if defined HAVE_IO_COMPLETION_PORT
-	buff->iocompletioninfo.overlapped.hEvent = CreateEvent(NULL, FALSE,FALSE, NULL);
+	/*buff->iocompletioninfo.overlapped.hEvent = CreateEvent(NULL, FALSE,FALSE, NULL); */
 	buff->wsabuff.len = RX_BUFF_SIZE;
 	buff->wsabuff.buf = (char *) buff->recv_buffer;
 #endif
