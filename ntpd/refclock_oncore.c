@@ -69,7 +69,7 @@
 
 #ifdef HAVE_PPSAPI
 #  ifdef HAVE_TIMEPPS_H
-#    include <timepps.h> /* Once FreeBSD 3.1 dies, <timepps.h> should be dead */
+#    include <timepps.h>
 # else
 #  ifdef HAVE_SYS_TIMEPPS_H
 #    include <sys/timepps.h>

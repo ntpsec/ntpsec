@@ -1,3 +1,16 @@
+1999-10-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* refclock_oncore.c: 
+	* refclock_mx4200.c: 
+	* refclock_chu.c: 
+	* refclock_atom.c: 
+	* ntp_refclock.c: 
+	* ntp_peer.c: 
+	* ntp_loopfilter.c: 
+	* include/ntp_refclock.h: 
+	Various cleanup and fixes
+	From: Dave Mills <mills@udel.edu>
+
 1999-10-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_config.c (CONFIG_FILE): NT changes

@@ -106,14 +106,6 @@ struct ppsclockev {
 #define	SPEED232	B4800		/* baud */
 
 /*
- * The number of raw samples which we acquire to derive a single estimate.
- * NSAMPLES ideally should not exceed the default poll interval 64.
- * NKEEP must be a power of 2 to simplify the averaging process.
- */
-#define MNSAMPLES	MAXSTAGE
-#define MNKEEP		MAXSTAGE * 3 / 5
-
-/*
  * Radio interface parameters
  */
 #define	PRECISION	(-18)	/* precision assumed (about 4 us) */

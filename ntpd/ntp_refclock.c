@@ -79,6 +79,8 @@
 int fdpps;			/* pps file descriptor */
 #endif /* PPS */
 
+#define FUDGEFAC	.1	/* fudge correction factor */
+
 /*
  * Type/unit peer index. Used to find the peer structure for control and
  * debugging. When all clock drivers have been converted to new style,
@@ -429,14 +431,12 @@ refclock_process_offset(
 {
 	double doffset;
 
-	if ((pp->coderecv + 1) % MAXSTAGE == pp->codeproc % MAXSTAGE)
-		return;
 	pp->lastref = offset;
 	pp->lastrec = lastrec;
 	pp->variance = 0;
 	L_SUB(&offset, &lastrec);
 	LFPTOD(&offset, doffset);
-	pp->filter[pp->coderecv++ % MAXSTAGE] = doffset + fudge;
+	SAMPLE(doffset + fudge);
 }
 
 /*
@@ -592,6 +592,8 @@ refclock_receive(
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, CLOCK_PHI * (current_time -
 	    peer->epoch), SQRT(peer->variance));
+	if (pps_control && pp->sloppyclockflag & CLK_FLAG1)
+		pp->fudgetime1 -= pp->offset * FUDGEFAC;
 }
 
 /*
@@ -798,7 +800,7 @@ refclock_open(
 	 */
 	if (tcgetattr(fd, ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d tcgetattr %m", fd);
+			"refclock_open: fd %d tcgetattr: %m", fd);
 		return (0);
 	}
 
@@ -837,20 +839,20 @@ refclock_open(
 			"refclock_open: fd %d TIOCMGET failed: %m", fd);
 #ifdef DEBUG
 	if (debug)
-		printf("refclock_open: fd %d modem status %lx\n",
-			fd, ltemp);
+		printf("refclock_open: fd %d modem status 0x%lx\n",
+		    fd, ltemp);
 #endif
 	if (ltemp & TIOCM_DSR)
 		ttyp->c_cflag &= ~CLOCAL;
 #endif /* TIOCMGET */
 	if (tcsetattr(fd, TCSANOW, ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TCSANOW failed: %m", fd);
+		    "refclock_open: fd %d TCSANOW failed: %m", fd);
 		return (0);
 	}
 	if (tcflush(fd, TCIOFLUSH) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TCIOFLUSH failed: %m", fd);
+		    "refclock_open: fd %d TCIOFLUSH failed: %m", fd);
 		return (0);
 	}
 #endif /* HAVE_TERMIOS */
@@ -863,7 +865,7 @@ refclock_open(
 	 */
 	if (ioctl(fd, TCGETA, ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TCGETA failed: %m", fd);
+		    "refclock_open: fd %d TCGETA failed: %m", fd);
 		return (0);
 	}
 
@@ -893,18 +895,18 @@ refclock_open(
 	ltemp = 0;
 	if (ioctl(fd, TIOCMGET, (char *)&ltemp) < 0)
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TIOCMGET failed: %m", fd);
+		    "refclock_open: fd %d TIOCMGET failed: %m", fd);
 #ifdef DEBUG
 	if (debug)
 		printf("refclock_open: fd %d modem status %lx\n",
-			fd, ltemp);
+		    fd, ltemp);
 #endif
 	if (ltemp & TIOCM_DSR)
 		ttyp->c_cflag &= ~CLOCAL;
 #endif /* TIOCMGET */
 	if (ioctl(fd, TCSETA, ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TCSETA failed: %m", fd);
+		    "refclock_open: fd %d TCSETA failed: %m", fd);
 		return (0);
 	}
 #endif /* HAVE_SYSV_TTYS */
@@ -916,21 +918,21 @@ refclock_open(
 	 */
 	if (ioctl(fd, TIOCGETP, (char *)ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d TIOCGETP %m", fd);
+		    "refclock_open: fd %d TIOCGETP %m", fd);
 		return (0);
 	}
 	ttyp->sg_ispeed = ttyp->sg_ospeed = speed;
 	ttyp->sg_flags = EVENP | ODDP | CRMOD;
 	if (ioctl(fd, TIOCSETP, (char *)ttyp) < 0) {
 		msyslog(LOG_ERR,
-			"refclock_open: TIOCSETP failed: %m");
+		    "refclock_open: TIOCSETP failed: %m");
 		return (0);
 	}
 #endif /* HAVE_BSD_TTYS */
 	if (!refclock_ioctl(fd, flags)) {
 		(void)close(fd);
 		msyslog(LOG_ERR,
-			"refclock_open: fd %d ioctl fails", fd);
+		    "refclock_open: fd %d ioctl failed: %m", fd);
 		return (0);
 	}
 	if (strcmp(dev, pps_device) == 0)
@@ -974,7 +976,7 @@ refclock_ioctl(
 
 #ifdef DEBUG
 	if (debug)
-		printf("refclock_ioctl: fd %d flags %x\n", fd, flags);
+		printf("refclock_ioctl: fd %d flags 0x%x\n", fd, flags);
 #endif
 
 	/*
@@ -1008,6 +1010,7 @@ refclock_ioctl(
 #ifdef TTYCLK
 	ttyp = &ttyb;
 #endif /* TTYCLK */
+
 #ifdef STREAM
 #ifdef TTYCLK
 	/*
@@ -1016,9 +1019,11 @@ refclock_ioctl(
 	 * support. If not available, don't complain.
 	 */
 	if (flags & (LDISC_CLK | LDISC_CLKPPS | LDISC_ACTS)) {
+		int rval;
+
 		if (ioctl(fd, I_PUSH, "clk") < 0) {
 			msyslog(LOG_NOTICE,
-				"refclock_ioctl: I_PUSH clk failed: %m");
+			    "refclock_ioctl: I_PUSH clk failed: %m");
 		} else {
 			char *str;
 
@@ -1027,21 +1032,14 @@ refclock_ioctl(
 			else if (flags & LDISC_ACTS)
 				str = "*";
 			else
-				 str = "\n";
-			if (ioctl(fd, CLK_SETSTR, str) < 0)
+				str = "\n";
+			if ((rval = ioctl(fd, CLK_SETSTR, str)) < 0)
 				msyslog(LOG_ERR,
 				    "refclock_ioctl: CLK_SETSTR failed: %m");
+			if (debug)
+				printf("refclock_open: fd %d CLK_SETSTR %d str %s\n",
+				    fd, rval, str);
 		}
-	}
-
-	/*
-	 * The ACTS line discipline requires additional line-ending
-	 * character '*'.
-	 */
-	if (flags & LDISC_ACTS) {
-		(void)tcgetattr(fd, ttyp);
-		ttyp->c_cc[VEOL] = '*';
-		(void)tcsetattr(fd, TCSANOW, ttyp);
 	}
 #endif /* TTYCLK */
 
@@ -1054,24 +1052,31 @@ refclock_ioctl(
 	 */
 	if (flags & LDISC_PPS) {
 #ifdef HAVE_TIOCSPPS		/* Solaris */
+		int rval;
 		int one = 1;
 #endif
 
 		if (fdpps > 0) {
 			msyslog(LOG_ERR,
-				"refclock_ioctl: ppsclock already configured");
+				"refclock_ioctl: PPS already configured");
 			return (0);
 		}
 #ifdef HAVE_TIOCSPPS		/* Solaris */
-		if ((ioctl(fd, TIOCSPPS, &one) < 0)) {
+		if ((rval = ioctl(fd, TIOCSPPS, &one)) < 0) {
 			msyslog(LOG_NOTICE,
 				"refclock_ioctl: TIOCSPPS failed: %m");
 		}
+		if (debug)
+			printf("refclock_ioctl: fd %d TIOCSPPS %d\n",
+			    fd, rval);
 #else /* not HAVE_TIOCSPPS */
-		if ((ioctl(fd, I_PUSH, "ppsclock") < 0)) {
+		if ((rval = ioctl(fd, I_PUSH, "ppsclock")) < 0) {
 			msyslog(LOG_NOTICE,
 				"refclock_ioctl: I_PUSH ppsclock failed: %m");
 		}
+		if (debug)
+			printf("refclock_ioctl: fd %d ppsclock %d\n",
+			    fd, rval);
 #endif /* not HAVE_TIOCSPPS */
 		else {
 			fdpps = fd;
@@ -1080,7 +1085,7 @@ refclock_ioctl(
 #else
 	if (flags & LDISC_PPS)
 		msyslog(LOG_NOTICE,
-			"refclock_ioctl: ppsclock line discipline requested but unavailable");
+			"refclock_ioctl: PPS requested but unavailable");
 #endif /* PPS */
 
 #else /* not STREAM */
@@ -1111,12 +1116,12 @@ refclock_ioctl(
 	/*
 	 * The PPS option provides timestamping at the driver level.
 	 * It uses a 1-pps signal and level converter (gadget box) and
-	 * requires ppsclock compiled into the kernel on non STREAMS
+	 * requires ppsapi compiled into the kernel on non STREAMS
 	 * systems.
 	 */
 	if (flags & (LDISC_PPS | LDISC_CLKPPS)) {
-		pps_params_t	pp;
-		int mode;
+		pps_params_t pp;
+		int mode, temp;
 
 		memset((char *)&pp, 0, sizeof(pp));
 		if (fdpps > 0) {
@@ -1126,39 +1131,41 @@ refclock_ioctl(
 		}
 		if (time_pps_create(fd, &fdpps) < 0) {
 			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_create failed");
+			    "refclock_ioctl: time_pps_create failed: %m");
 			fdpps = 0;
 			return (0);
 		}
 		if (time_pps_getcap(fdpps, &mode) < 0) {
 			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_getcap failed");
+			    "refclock_ioctl: time_pps_getcap failed: %m");
 			fdpps = 0;
 			return (0);
 		}
-		if (pps_assert)
-			pp.mode = PPS_CAPTUREASSERT;
-		else
-			pp.mode = PPS_CAPTURECLEAR;
+		pp.mode = mode & PPS_CAPTUREBOTH;
 		if (time_pps_setparams(fdpps, &pp) < 0) {
 			msyslog(LOG_ERR,
-			    "refclock_ioctl: time_pps_setparams failed");
+			    "refclock_ioctl: time_pps_setparams failed: %m");
 			fdpps = 0;
 			return (0);
 		}
-		if (pps_hardpps) {
-			if (pps_assert)
-				mode = PPS_CAPTUREASSERT;
-			else
-				mode = PPS_CAPTURECLEAR;
-			if (time_pps_kcbind(fdpps, PPS_KC_HARDPPS, mode,
-			    PPS_TSFMT_TSPEC) < 0) {
-				msyslog(LOG_ERR,
-				    "refclock_ioctl: time_pps_kcbind failed");
-				fdpps = 0;
-				return (0);
-			}
+		if (!pps_hardpps)
+			temp = 0;
+		else if (pps_assert)
+			temp = mode & PPS_CAPTUREASSERT;
+		else
+			temp = mode & PPS_CAPTURECLEAR;
+		if (time_pps_kcbind(fdpps, PPS_KC_HARDPPS, temp,
+		    PPS_TSFMT_TSPEC) < 0) {
+			msyslog(LOG_ERR,
+			    "refclock_ioctl: time_pps_kcbind failed: %m");
+			fdpps = 0;
+			return (0);
 		}
+		(void)time_pps_getparams(fdpps, &pp);
+		if (debug)
+			printf(
+			    "refclock_ioctl: fd %d ppsapi vers %d mode 0x%x cap 0x%x\n",
+			    fdpps, pp.api_version, pp.mode, mode);
 	}
 #endif /* HAVE_PPSAPI */
 #endif /* HAVE_TERMIOS */
@@ -1183,7 +1190,7 @@ refclock_ioctl(
 			ttyp->sg_erase = ttyp->sg_kill = '\r';
 		ttyp->sg_flags = RAW;
 		(void)ioctl(fd, TIOCSETP, ttyp);
-		ioctl(fd, TIOCSETD, (char *)&ldisc);
+		(void)ioctl(fd, TIOCSETD, (char *)&ldisc);
 	}
 #endif /* TTYCLK */
 #endif /* HAVE_BSD_TTYS */

@@ -89,7 +89,7 @@
 /*
  * Interface definitions
  */
-#ifdef HAVE_PPSAPI	/* avoid others if api available */
+#ifdef HAVE_PPSAPI
 extern int pps_assert;
 #endif /* HAVE_PPSAPI */
 #ifdef TTYCLK
@@ -165,7 +165,7 @@ atom_start(
 	struct refclockproc *pp;
 	int flags;
 #ifdef TTYCLK
-	int fd;
+	int fd = 0;
 	char device[20];
 #endif /* TTYCLK */
 
@@ -268,16 +268,14 @@ atom_pps(
 	l_fp lftmp;
 	double doffset;
 	int i;
-#if defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV)
-	int request = 
+#if !defined(HAVE_PPSAPI)
 #ifdef HAVE_CIOGETEV
-		CIOGETEV
+	int request = CIOGETEV;
 #endif
 #ifdef HAVE_TIOCGPPSEV
-		TIOCGPPSEV
+	int request = TIOCGPPSEV;
 #endif
-		;
-#endif
+#endif /* HAVE_PPSAPI */
 
 	/*
 	 * This routine is called once per second when the LDISC_PPS
@@ -295,16 +293,17 @@ atom_pps(
 	 * or the data grow stale, just forget it. Round the nanoseconds
 	 * to microseconds with great care.
 	 */ 
-#ifdef HAVE_PPSAPI
-	i = up->pps_info.assert_sequence;
 	if (fdpps <= 0)
 		return (1);
+#ifdef HAVE_PPSAPI
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
-	if (time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &up->pps_info, &timeout) < 0)
-		return (1);
-	if (i == up->pps_info.assert_sequence)
+	i = up->pps_info.assert_sequence;
+	if (time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &up->pps_info, &timeout)
+	    < 0)
 		return (2);
+	if (i == up->pps_info.assert_sequence)
+		return (3);
 	if (pps_assert)
 		ts = up->pps_info.assert_timestamp;
 	else
@@ -317,13 +316,11 @@ atom_pps(
 	}
 	TVUTOTSF(ts.tv_nsec, pp->lastrec.l_uf);
 #else
- 	i = up->ev.serial;
-	if (fdpps <= 0)
-		return (1);
+	i = up->ev.serial;
 	if (ioctl(fdpps, request, (caddr_t)&up->ev) < 0)
-		return (1);
-	if (i == up->ev.serial)
 		return (2);
+	if (i == up->ev.serial)
+		return (3);
 	pp->lastrec.l_ui = up->ev.tv.tv_sec + JAN_1970;
 	TVUTOTSF(up->ev.tv.tv_usec, pp->lastrec.l_uf);
 #endif /* HAVE_PPSAPI */ 
@@ -331,8 +328,7 @@ atom_pps(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset +
-	    pp->fudgetime1;
+	SAMPLE(-doffset + pp->fudgetime1);
 	return (0);
 }
 #endif /* PPS || HAVE_PPSAPI */
@@ -375,7 +371,7 @@ atom_receive(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset + pp->fudgetime1;
+	SAMPLE(-doffset + pp->fudgetime1);
 }
 #endif /* TTYCLK */
 
@@ -390,7 +386,6 @@ pps_sample(
 	register struct peer *peer;
 	register struct atomunit *up;
 	struct refclockproc *pp;
-
 	l_fp lftmp;
 	double doffset;
 
@@ -417,8 +412,7 @@ pps_sample(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset +
-	    pp->fudgetime1;
+	SAMPLE(-doffset + pp->fudgetime1);
 	return (0);
 }
 
@@ -443,18 +437,23 @@ atom_poll(
 	up = (struct atomunit *)pp->unitptr;
 #if defined(PPS) || defined(HAVE_PPSAPI)
 	if (!(up->flags & !(FLAG_AUX | FLAG_TTY))) {
-		if (atom_pps(peer))
+		int err;
+
+		err = atom_pps(peer);
+		if (err > 0) {
+			refclock_report(peer, CEVNT_FAULT);
 			return;
+		}
 	}
 #endif /* PPS || HAVE_PPSAPI */
+	pp->polls++;
 	if (peer->burst > 0)
 		return;
+	peer->burst = MAXSTAGE;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
-	peer->burst = NSTAGE;
-	pp->polls++;
 
 	/*
 	 * Valid time (leap bits zero) is returned only if the prefer

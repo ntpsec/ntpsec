@@ -1254,8 +1254,7 @@ chu_poll(
 		toffset = offset;
 		L_SUB(&toffset, &up->tstamp[i]);
 		LFPTOD(&toffset, dtemp);
-		pp->filter[pp->coderecv++ % MAXSTAGE] = dtemp + FUDGE +
-		    pp->fudgetime1;
+		SAMPLE(dtemp + FUDGE + pp->fudgetime1);
 	}
 	if (i > 0)
 		refclock_receive(peer);

@@ -42,6 +42,11 @@
 #define BSD_TTYS
 #endif /* SYSV_TTYS STREAM BSD_TTYS */
 
+#define SAMPLE(x)	if ((pp->coderecv + 1) % MAXSTAGE !=		\
+			    pp->codeproc % MAXSTAGE)			\
+				pp->filter[pp->coderecv++ % MAXSTAGE] =	\
+				    (x);
+
 /*
  * Macros to determine the clock type and unit numbers from a
  * 127.127.t.u address

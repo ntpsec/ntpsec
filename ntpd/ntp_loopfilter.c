@@ -102,7 +102,7 @@ u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
 #ifdef KERNEL_PLL
-static int pll_status;		/* status bits for kernel pll */
+int pll_status;			/* status bits for kernel pll */
 #endif /* KERNEL_PLL */
 
 /*
@@ -111,9 +111,6 @@ static int pll_status;		/* status bits for kernel pll */
 int	ntp_enable;		/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
 int	kern_enable;		/* kernel support enabled */
-#ifdef STA_NANO
-int	pll_nano;		/* nanosecond kernel */
-#endif /* STA_NANO */
 int	ext_enable;		/* external clock enabled */
 int	pps_update;		/* pps update valid */
 int	allow_set_backward = TRUE; /* step corrections allowed */
