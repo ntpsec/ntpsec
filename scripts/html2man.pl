@@ -27,7 +27,7 @@ $MANDIR = "./man";
 	     'ntpdc' => ['ntpdc', 8, 'ntpd(8)'],
 	     'ntptime' => ['ntpdtime', 8, 'ntpd(8), ntpdate(8)'],
 	     'ntptrace' => ['ntptrace', 8, 'ntpd(8)'],
-	     'genkeys' => ['ntp-genkeys', 8, 'ntpd(8), ntp_auth(5)'],
+	     'keygen' => ['ntp-keygen', 8, 'ntpd(8), ntp_auth(5)'],
 	     'confopt' => ['ntp.conf', 5, 'ntpd(8)'],
 	     'authopt' => ['ntp_auth', 5, 'ntp.conf(5), ntpd(8)'],
 	     'monopt' => ['ntp_mon', 5, 'ntp.conf(5)'],
@@ -65,7 +65,7 @@ sub process {
     my($filename) = @_;
     $fileinfo = $manfiles{$filename};
 
-    $p = HTML::TokeParser->new("$filename.htm") || die "Can't open $filename.htm: $!";
+    $p = HTML::TokeParser->new("$filename.html") || die "Can't open $filename.html: $!";
     open(MANOUT, ">$MANDIR/man$fileinfo->[1]/$fileinfo->[0].$fileinfo->[1]")
 	|| die "Can't open: $!";
 
