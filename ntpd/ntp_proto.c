@@ -324,7 +324,7 @@ receive(
 	 * authenticate. If 3, the packet is authenticated with DES; if
 	 * 5, the packet is authenticated with MD5. If greater than 5,
 	 * an extension field is present. If 2 or 4, the packet is a
-	 * runt and thus discarded.
+	 * runt and goes poof! with a brilliant flash.
 	 */
 	skeyid = 0;
 #ifdef AUTOKEY
@@ -399,6 +399,24 @@ receive(
 			 * agreement protocol; however, should PKI be
 			 * unavailable, we construct a fake agreement as
 			 * the EXOR of the peer and host cookies.
+			 *
+			 * hismode	ephemeral	persistent
+			 * =======================================
+			 * active	0		cookie#
+			 * passive	0%		cookie#
+			 * client	sys cookie	0%
+			 * server	0%		sys cookie
+			 * broadcast	0		0
+			 *
+			 * # if unsync, 0
+			 * % can't happen
+			 *
+			 * You won't believe this. If in passive mode
+			 * and peer->assoc is nonzero, the active peer
+			 * has previously synchronized and will be using
+			 * nonzero cookie. If peer->assoc is zero, that
+			 * never happened and his cookie is zero. What
+			 * tangled cookies we weave.
 			 */
 			if (hismode == MODE_BROADCAST) {
 				pkeyid = 0;
@@ -716,9 +734,6 @@ receive(
 			peer->pkeyid = skeyid;
 		} else {
 			int i;
-
-printf("xxx %08x %08x\n", tkeyid, peer->pkeyid);
-
 			for (i = 0; ; i++) {
 				if (tkeyid == peer->pkeyid ||
 				    tkeyid == peer->recauto.key) {
@@ -746,8 +761,10 @@ printf("xxx %08x %08x\n", tkeyid, peer->pkeyid);
 		 * If the autokey boogie fails, the server may be bogus
 		 * or worse. Raise an alarm and rekey this thing.
 		 */
-		if (peer->flash & TEST10)
+		if (peer->flash & TEST10) {
 			peer->flags &= ~FLAG_AUTOKEY;
+			peer->recauto.tstamp = 0;
+		}
 		if (!(peer->flags & FLAG_AUTOKEY))
 			peer->flash |= TEST11;
 #endif /* PUBKEY */
@@ -1137,10 +1154,6 @@ peer_clear(
 #endif
 #ifdef AUTOKEY
 	key_expire(peer);
-#ifdef PUBKEY
-	if (peer->pubkey != NULL)
-		free(peer->pubkey);
-#endif /* PUBKEY */
 #endif /* AUTOKEY */
 
 	/*
@@ -1907,8 +1920,7 @@ peer_xmit(
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
 			sendlen += crypto_xmit((u_int32 *)&xpkt,
-			    sendlen, cmmd, peer->hcookie,
-			    peer->associd);
+			    sendlen, cmmd, 0, peer->associd);
 			break;
 
 		/*
@@ -1943,37 +1955,46 @@ peer_xmit(
 			if (crypto_flags && peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->hcookie,
+				    CRYPTO_RESP, peer->pcookie.key,
 				    peer->associd);
-			if (crypto_flags && !(crypto_flags &
-			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0)
+			if (crypto_flags  && peer->pubkey == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_NAME, peer->hcookie,
-				    peer->assoc);
-			else if (peer->pcookie.tstamp == 0)
+				    sendlen, CRYPTO_NAME,
+				    peer->pcookie.key, peer->assoc);
+			else if (crypto_flags && dh_params.prime ==
+			    NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_DH, peer->hcookie,
-				    peer->assoc);
+				    sendlen, CRYPTO_DHPAR,
+				    peer->pcookie.key, peer->assoc);
+			else if (peer->pcookie.tstamp == 0 &&
+			    peer->assoc != 0)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_DH,
+				    peer->pcookie.key, peer->assoc);
+			else if (!(peer->flags & FLAG_AUTOKEY))
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_AUTO,
+				    peer->pcookie.key, peer->assoc);
 #else
 			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->hcookie,
+				    CRYPTO_RESP, peer->pcookie.key,
 				    peer->associd);
 			if (peer->pcookie.tstamp == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-#endif /* PUBKEY */
 			else if (!(peer->flags & FLAG_AUTOKEY))
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_AUTO, peer->hcookie,
-				    peer->assoc);
+				    sendlen, CRYPTO_AUTO,
+				    peer->pcookie.key, peer->assoc);
+#endif /* PUBKEY */
 			else if (peer->keynumber == peer->sndauto.seq &&
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
-				    peer->hcookie, peer->associd);
+				    peer->pcookie.key, peer->associd);
 			peer->cmmd = 0;
 			break;
 
@@ -1991,14 +2012,13 @@ peer_xmit(
 			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->hcookie,
+				    CRYPTO_RESP, peer->pcookie.key,
 				    peer->associd);
 #ifdef PUBKEY
-			if (crypto_flags && !(crypto_flags &
-			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0)
+			if (crypto_flags && peer->pubkey == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_NAME, peer->hcookie,
-				    peer->assoc);
+				    sendlen, CRYPTO_NAME,
+				    peer->pcookie.key, peer->assoc);
 			else
 #endif /* PUBKEY */
 			if (peer->pcookie.tstamp == 0)
@@ -2008,8 +2028,8 @@ peer_xmit(
 			else if (!(peer->flags & FLAG_AUTOKEY) &&
 			    peer->flags & FLAG_MCAST2)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_AUTO, peer->hcookie,
-				    peer->assoc);
+				    sendlen, CRYPTO_AUTO,
+				    peer->pcookie.key, peer->assoc);
 			peer->cmmd = 0;
 			break;
 		}
@@ -2133,26 +2153,26 @@ fast_xmit(
 	 * The received packet contains a MAC, so the transmitted packet
 	 * must be authenticated. For private-key cryptography, use the
 	 * predefined private keys to generate the cryptosum. For
-	 * autokeys in client/server mode, use the server private value
-	 * values to generate the cookie, which is unique for every
-	 * source-destination-key ID combination. For symmetric passive
-	 * mode, which is the only other mode to get here, flip the
-	 * addresses and do the same. If an extension field is present,
-	 * do what needs, but with private value of zero so the poor
-	 * jerk can decode it. If no extension field is present, use the
-	 * cookie to generate the session key.
+	 * autokey cryptography, use the server private value to
+	 * generate the cookie, which is unique for every source-
+	 * destination-key ID combination.
 	 */
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY) {
 		keyid_t cookie;
 		u_int code;
 
-		if (xmode == MODE_SERVER)
-			cookie = session_key(&rbufp->recv_srcadr,
-			    &rbufp->dstadr->sin, 0, sys_private, 0);
-		else
-			cookie = session_key(&rbufp->dstadr->sin,
-			    &rbufp->recv_srcadr, 0, sys_private, 0);
+		/*
+		 * The only way to get here is a reply to a legitimate
+		 * client request message, so the mode must be
+		 * MODE_SERVER. If an extension field is present, there
+		 * can be only one and that must be a command. Do what
+		 * needs, but with private value of zero so the poor
+		 * jerk can decode it. If no extension field is present,
+		 * use the cookie to generate the session key.
+		 */
+		cookie = session_key(&rbufp->recv_srcadr,
+		    &rbufp->dstadr->sin, 0, sys_private, 0);
 		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
 		    sizeof(u_int32)) {
 			session_key(&rbufp->dstadr->sin,

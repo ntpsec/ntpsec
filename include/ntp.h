@@ -282,16 +282,16 @@ struct peer {
 	 */
 #ifdef AUTOKEY
 	u_short	assoc;		/* association ID of peer */
-#endif /* AUTOKEY */
-	keyid_t	keyid;		/* current key ID */
+#ifdef PUBKEY
+	u_char	*pubkey;	/* public key */
 	u_char	*keystr;	/* public key file name */
 	u_int	fstamp;		/* public key filestamp */
+#endif /* PUBKEY */
+#endif /* AUTOKEY */
+	keyid_t	keyid;		/* current key ID */
 	keyid_t	pkeyid;		/* previous key ID */
 #define clear_to_zero pkeyid
 #ifdef AUTOKEY
-#ifdef PUBKEY
-	u_char	*pubkey;	/* public key */
-#endif /* PUBKEY */
 	keyid_t	hcookie;	/* host cookie */
 	struct cookie pcookie;	/* peer cookie */
 	struct autokey recauto;	/* autokey */

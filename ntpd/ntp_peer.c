@@ -440,10 +440,10 @@ unpeer(
 		    peer_associations);
 #endif
 	peer_clear(peer_to_remove);
-	if (peer_to_remove->keystr != 0)
+	if (peer_to_remove->keystr != NULL)
 		free(peer_to_remove->keystr);
 #ifdef PUBKEY
-	if (peer_to_remove->pubkey != 0)
+	if (peer_to_remove->pubkey != NULL)
 		free(peer_to_remove->pubkey);
 #endif /* PUBKEY */
 	hash = HASH_ADDR(&peer_to_remove->srcadr);
