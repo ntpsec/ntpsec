@@ -36,6 +36,7 @@ noinst_HEADERS = \
 	ntp_proto.h \
 	ntp_refclock.h \
 	ntp_request.h \
+	ntp_rfc2553.h \
 	ntp_select.h \
 	ntp_stdlib.h \
 	ntp_string.h \
