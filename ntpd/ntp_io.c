@@ -813,11 +813,11 @@ create_sockets(
 	/*
 	 * Blacklist all bound interface addresses
 	 */
-	memset(&resmask, 1, sizeof(resmask));
-	for (i = 2; i < ninterfaces; i++) 
-		resmask.ss_family = inter_list[i].sin.ss_family;
+	for (i = 2; i < ninterfaces; i++) {
+		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
+	}
 #ifdef DEBUG
 	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);

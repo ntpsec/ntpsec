@@ -1143,9 +1143,11 @@ getconfig(
 				msyslog(LOG_ERR, "restrict requires an address");
 				break;
 			}
-			if (STREQ(tokens[1], "default"))
+			if (STREQ(tokens[1], "default")) {
+			    /* Assume default means an IPv4 address. */
 			    ANYSOCK(&peeraddr);
-			else if (!getnetnum(tokens[1], &peeraddr, 1))
+			    peeraddr.ss_family = AF_INET;
+			} else if (!getnetnum(tokens[1], &peeraddr, 1))
 			    break;
 
 			/*
@@ -1154,7 +1156,7 @@ getconfig(
 			peerversion = 0;
 			peerkey = 0;
 			errflg = 0;
-			ANYSOCK(&maskaddr);
+			SET_HOSTMASK(&maskaddr, peeraddr.ss_family);
 			for (i = 2; i < ntokens; i++) {
 				switch (matchkey(tokens[i], res_keywords)) {
 				    case CONF_RES_MASK:

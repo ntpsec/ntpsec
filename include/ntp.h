@@ -457,24 +457,34 @@ struct peer {
  /*
  * Macro for sockaddr_storage structures operations
  */
-#define SOCKCMP(sock1, sock2)    (((struct sockaddr_storage*)sock1)->ss_family == ((struct sockaddr_storage*)sock2)->ss_family ? \
- 				      ((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
- 				      		memcmp(&((struct sockaddr_in*)sock1)->sin_addr, &((struct sockaddr_in*)sock2)->sin_addr, sizeof(struct in_addr))==0  :  \
- 				      		memcmp(&((struct sockaddr_in6*)sock1)->sin6_addr, &((struct sockaddr_in6*)sock2)->sin6_addr, sizeof(struct in6_addr))==0 : \
- 				      0)
+#define SOCKCMP(sock1, sock2) \
+	(((struct sockaddr_storage *)sock1)->ss_family \
+	    == ((struct sockaddr_storage *)sock2)->ss_family ? \
+ 	((struct sockaddr_storage *)sock1)->ss_family == AF_INET ? \
+ 	memcmp(&((struct sockaddr_in *)sock1)->sin_addr, \
+	    &((struct sockaddr_in *)sock2)->sin_addr, \
+	    sizeof(struct in_addr)) == 0 : \
+	memcmp(&((struct sockaddr_in6 *)sock1)->sin6_addr, \
+	    &((struct sockaddr_in6 *)sock2)->sin6_addr, \
+	    sizeof(struct in6_addr)) == 0 : \
+	0)
 
-#define SOCKNUL(sock1)	    (((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
- 				       (((struct sockaddr_in*)sock1)->sin_addr.s_addr == 0) : \
- 				       (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6*)sock1)->sin6_addr)))
+#define SOCKNUL(sock1) \
+	(((struct sockaddr_storage *)sock1)->ss_family == AF_INET ? \
+ 	(((struct sockaddr_in *)sock1)->sin_addr.s_addr == 0) : \
+ 	(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)sock1)->sin6_addr)))
 
-#define SOCKLEN(sock)	  (((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
- 					(sizeof(struct sockaddr_in)) : \
- 					(sizeof(struct sockaddr_in6)))
+#define SOCKLEN(sock) \
+	(((struct sockaddr_storage *)sock)->ss_family == AF_INET ? \
+ 	(sizeof(struct sockaddr_in)) : (sizeof(struct sockaddr_in6)))
 
-#define ANYSOCK(sock)           memset(((struct sockaddr_in*)sock), 0, sizeof(struct sockaddr_storage)-sizeof(struct sockaddr_in))
+#define ANYSOCK(sock) \
+	memset(((struct sockaddr_in *)sock), 0, \
+	    sizeof(struct sockaddr_storage))
 
-#define ANY_INTERFACE_CHOOSE(sock)	(((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
- 					any_interface : any6_interface)
+#define ANY_INTERFACE_CHOOSE(sock) \
+	(((struct sockaddr_storage *)sock)->ss_family == AF_INET ? \
+ 	any_interface : any6_interface)
 
 /*
  * We tell reference clocks from real peers by giving the reference
@@ -504,8 +514,8 @@ struct peer {
 /*
  * Utilities for manipulating addresses and port numbers
  */
-#define	NSRCADR(src)	(((struct sockaddr_in*)src)->sin_addr.s_addr) /* address in net byte order */
-#define	NSRCPORT(src)	(((struct sockaddr_in*)src)->sin_port)	/* port in net byte order */
+#define	NSRCADR(src)	(((struct sockaddr_in *)src)->sin_addr.s_addr) /* address in net byte order */
+#define	NSRCPORT(src)	(((struct sockaddr_in *)src)->sin_port)	/* port in net byte order */
 #define	SRCADR(src)	(ntohl(NSRCADR((src))))	/* address in host byte order */
 #define	SRCPORT(src)	(ntohs(NSRCPORT((src))))	/* host port */
 
@@ -776,8 +786,9 @@ struct restrictlist {
 };
 
 struct restrictlist6 {
-	struct restrictlist6 *next;      /* link to next entry */
-	uint8_t addr6[16];              /* Ipv6 host address (host byte order) */
+	struct restrictlist6 *next;	/* link to next entry */
+	struct in6_addr addr6;		/* Ipv6 host address */
+	struct in6_addr mask6;		/* Ipv6 mask address */
 	u_long count;			/* number of packets matched */
 	u_short flags;			/* accesslist flags */
 	u_short mflags;			/* match flags */

@@ -1709,9 +1709,9 @@ list_restrict(
 	}
 	if (client_v6_capable)
 		for (rl6 = restrictlist6; rl6 != 0 && ir != 0; rl6 = rl6->next) {
-			ir->addr6 = *(struct in6_addr *)rl6->addr6;
+			ir->addr6 = rl6->addr6;
+			ir->mask6 = rl6->mask6;
 			ir->v6_flag = 1;
-/* XXX			ir->mask6 = rl6->mask6; */
 			ir->count = htonl((u_int32)rl6->count);
 			ir->flags = htons(rl6->flags);
 			ir->mflags = htons(rl6->mflags);
