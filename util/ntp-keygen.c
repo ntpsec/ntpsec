@@ -138,26 +138,6 @@
 #define BASIC_CONSTRAINTS	"critical,CA:TRUE"
 #define EXT_KEY_PRIVATE		"private"
 #define EXT_KEY_TRUST		"trustRoot"
-
-struct mv {
-	DSA	*dsa;		/* DSA parameters */
-	BIGNUM	**x;		/* private key vector */
-	int	n;		/* number of keys */
-	BIGNUM	*u, *v;		/* BN scratch */
-	BN_CTX	*ctx;		/* context scratch */
-};
-
-struct coef {
-	struct term *link;	/* link to next term */
-	int	coef;		/* number of products */
-	BIGNUM	*bn;		/* sum of products */
-};
-
-struct	term {
-	struct term *link;	/* link to next term */
-	int	size;		/* number of indices */
-	int	*ptr;		/* index vector */
-};
 #endif /* OPENSSL */
 
 /*
@@ -177,7 +157,6 @@ int	x509		P((EVP_PKEY *, const EVP_MD *, char *, char *));
 void	cb		P((int, int, void *));
 EVP_PKEY *genkey	P((char *, char *));
 u_long	asn2ntp		P((ASN1_TIME *));
-void	makea		P((struct coef *, int, int *, struct mv *));
 #endif /* OPENSSL */
 
 /*
@@ -809,7 +788,7 @@ gen_iff(
 	printf("Generating IFF keys (%d bits)...\n", modulus);
 	a = BN_new(); k = BN_new(); r = BN_new();
 	bn = BN_new(); bk = BN_new(); ctx = BN_CTX_new();
-	BN_rand(a, BN_num_bits(dsa->q), -1, 1);	/* a */
+	BN_rand(a, BN_num_bits(dsa->q), -1, 0);	/* a */
 	BN_mod(a, a, dsa->q, ctx);
 	BN_sub(bn, dsa->q, a);
 	BN_mod_exp(bn, dsa->g, bn, dsa->p, ctx); /* g^(q - a) mod p */
@@ -832,14 +811,14 @@ gen_iff(
 	 * Here is a trial round of the protocol. First, Alice rolls
 	 * random r ( 0 < r < q) and sends it to Bob.
 	 */
-	BN_rand(r, BN_num_bits(dsa->q), -1, 1);	/* r, 0 < r < q */
+	BN_rand(r, BN_num_bits(dsa->q), -1, 0);	/* r, 0 < r < q */
 	BN_mod(r, r, dsa->q, ctx);
 
 	/*
 	 * Bob rolls random k (0 < k < q), computes k + a r mod q and
 	 * g^k, then sends (k, g) to Alice.
 	 */
-	BN_rand(k, BN_num_bits(dsa->q), -1, 1);	/* k, 0 < k < q  */
+	BN_rand(k, BN_num_bits(dsa->q), -1, 0);	/* k, 0 < k < q  */
 	BN_mod(k, k, dsa->q, ctx);
 	BN_mod_mul(bn, a, r, dsa->q, ctx);	/* a r mod q */
 	BN_add(bn, bn, k);
@@ -937,7 +916,7 @@ gen_gqpar(
 	 * members of the group, but shielded from all other groups.
 	 */
 	ctx = BN_CTX_new();
-	BN_rand(rsapar->e, BN_num_bits(rsapar->n), -1, 1); /* b */
+	BN_rand(rsapar->e, BN_num_bits(rsapar->n), -1, 0); /* b */
 	BN_mod(rsapar->e, rsapar->e, rsapar->n, ctx);
 
 	/*
@@ -983,7 +962,7 @@ gen_gqkey(
 	 * When generating his certificate, Bob rolls random private key
 	 * u and inverse u^-1.
 	 */
-	BN_rand(u, BN_num_bits(rsapar->n), -1, 1); /* u */
+	BN_rand(u, BN_num_bits(rsapar->n), -1, 0); /* u */
 	BN_mod(u, u, rsapar->n, ctx);
 	BN_mod_inverse(v, u, rsapar->n, ctx);	/* u^-1 mod n */
 	BN_mod_mul(k, v, u, rsapar->n, ctx);
@@ -1015,14 +994,14 @@ gen_gqkey(
 	 * Bob's certificate, then rolls random r (0 < r < n) and sends
 	 * it to him.
 	 */
-	BN_rand(r, BN_num_bits(rsapar->n), -1, 1);	/* r */
+	BN_rand(r, BN_num_bits(rsapar->n), -1, 0);	/* r */
 	BN_mod(r, r, rsapar->n, ctx);
 
 	/*
 	 * Bob rolls random k (0 < k < n), computes y = k u^r mod n and
 	 * g = k^b mod n, then sends (y, g) to Alice. 
 	 */
-	BN_rand(k, BN_num_bits(rsapar->n), -1, 1);	/* k */
+	BN_rand(k, BN_num_bits(rsapar->n), -1, 0);	/* k */
 	BN_mod(k, k, rsapar->n, ctx);
 	BN_mod_exp(y, u, r, rsapar->n, ctx);	/* u^r mod n */
 	BN_mod_mul(y, k, y, rsapar->n, ctx);	/* y = k u^r mod n */
@@ -1073,9 +1052,9 @@ gen_gqkey(
  * The MV parameters and private encryption key hide in a DSA cuckoo
  * structure which uses the same parameters. The values are used in an
  * encryption scheme based on DSA cryptography and a polynomial formed
- * from the binomial expansion of product terms (x - x[j]), as described
- * in: Mu, Y., and V. Varadharajan: Robust and Secure Broadcasting,
- * Proc. Indocrypt 2001, 223-231.
+ * from the expansion of product terms (x - x[j]), as described in: Mu,
+ * Y., and V. Varadharajan: Robust and Secure Broadcasting, Proc.
+ * Indocrypt 2001, 223-231.
  *
  * The p is a 512-bit prime, g a generator of Zp and q a 160-bit prime
  * that divides p - 1 and is a qth root of 1 mod p; that is, g^q = 1 mod
@@ -1092,34 +1071,29 @@ gen_gqkey(
  * decryption files including the prime modulus, public key and private
  * key (xbar[j], xhat[j]) for each client. The server encrypts a block
  * y = A^x; the jth client decrypts x = (gbar^xhat[j] ghat^xbar[j])^y.
- *
- * The recursive scheme used to generate the polynomial coefficients,
- * while simple and elegant, is computationally explosive and probably
- * impractical for more than 20 coefficients. Ingenious remedies are
- * welcome and will probably be the nucleus of a class project.
  */
 void
 gen_mv(
 	char	*id		/* file name id */
 	)
 {
-	struct mv *mp;		/* MV parameters */
-	struct term *cp;	/* coefficient pointer */
-	struct coef *a;		/* coefficient vector */
+	DSA	*dsa;		/* DSA parameters */
+	BN_CTX	*ctx;		/* BN working space */
+	BIGNUM	**x;		/* private key vector */
+	BIGNUM	**a;		/* coefficient vector */
 	BIGNUM	**g;		/* public key vector */
+	BIGNUM	**xbar;		/* private key vector 1 */
+	BIGNUM	**xhat;		/* private key vector 2 */
 	BIGNUM	*b;		/* group key */
 	BIGNUM	*binverse;	/* inverse group key */
 	BIGNUM	*biga;		/* mysterious capital letter */
 	BIGNUM	*k;		/* random roll */
 	BIGNUM	*gbar;		/* public key 1 */
 	BIGNUM	*ghat;		/* public key 2 */
-	BIGNUM	**xbar;		/* private key vector 1 */
-	BIGNUM	**xhat;		/* private key vector 2 */
+	BIGNUM	*u, *v, *w;	/* BN scratch */
 	u_char	seed[20];	/* seed for parameters */
-	int	*y;		/* initial index vector */
 	int	i, j, n;
 	FILE	*str;
-	char	*s;
 	u_int	temp;
 	char	ident[20];
 
@@ -1127,14 +1101,12 @@ gen_mv(
 	 * Generate DSA parameters for use as MV parameters.
 	 */
 	printf("Generating MV parameters (%d bits)...\n", modulus);
-	mp = malloc(sizeof(struct mv));
 	n = nkeys;
-	mp->n = nkeys;
 	RAND_bytes(seed, sizeof(seed));
-	mp->dsa = DSA_generate_parameters(modulus, seed, sizeof(seed),
+	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed),
 	    NULL, NULL, cb, "MV");
 	printf("\n");
-	if (mp->dsa == NULL) {
+	if (dsa == NULL) {
 		printf("MV generate parameters fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
@@ -1145,48 +1117,36 @@ gen_mv(
 	 * Generate random polynomial roots mod q.
 	 */
 	printf("Generating polynomial roots (%d bits)...\n",
-	    BN_num_bits(mp->dsa->q));
-	mp->ctx = BN_CTX_new(); mp->u = BN_new(); mp->v = BN_new();
+	    BN_num_bits(dsa->q));
+	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
 	n = nkeys;
-	mp->x = malloc((n + 1) * sizeof(BIGNUM));
-	for (i = 1; i <= n; i++) {
-		mp->x[i] = BN_new();
-		BN_rand(mp->x[i], BN_num_bits(mp->dsa->q), -1, 0);
-		BN_mod(mp->x[i], mp->x[i], mp->dsa->q, mp->ctx);
+	x = malloc((n + 1) * sizeof(BIGNUM));
+	for (j = 1; j <= n; j++) {
+		x[j] = BN_new();
+		BN_rand(x[j], BN_num_bits(dsa->q), -1, 0);
+		BN_mod(x[j], x[j], dsa->q, ctx);
 	}
 
 	/*
 	 * Generate polynomial coefficients a[i], i = 0...n, from the
-	 * binomial expansion of root products (x - x[j]), j = 1...n.
-	 * This is done by recursion starting from an index string
-	 * 1...n. The complexity grows very quickly and is probably not
-	 * appropriate for n much greater than 15. Send patches.
+	 * expansion of root products (x - x[j]), j = 1...n. The method
+	 * is a present from Charlie Boncelet.
 	 */
 	printf("Generating polynomial coefficients for %d keys\n", n); 
-	a = malloc((n + 1) * sizeof(struct coef));
+	a = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
-		a[i].link = NULL;
-		a[i].coef = 0;
-		a[i].bn = BN_new();
-		BN_zero(a[i].bn);
+		a[i] = BN_new();
+		BN_one(a[i]);
 	}
-	y = malloc(n * sizeof(int));
-	for (i = 0; i < n; i++)
-		y[i] = i + 1;
-	makea(a, n, y, mp);
-	BN_one(a[n].bn);
-	if (debug) {
-		for (i = 0; i <= n; i++) {
-			s = BN_bn2dec(a[i].bn);
-			printf("%2d %4d %s\n", i, a[i].coef, s);
-			free(s);
-			for (cp = a[i].link; cp != NULL; cp =
-			    cp->link) {
-				for (j = 0; j < cp->size; j++)
-					printf(" %d", cp->ptr[j]);
-				printf(" :");
-			}
-			printf("\n");
+	for (j = 1; j <= n; j++) {
+		BN_zero(w);
+		for (i = 0; i < j; i++) {
+			u = BN_dup(dsa->q);
+			BN_mod_mul(v, a[i], x[j], dsa->q, ctx);
+			BN_sub(u, u, v);
+			BN_add(u, u, w);
+			w = BN_dup(a[i]);
+			BN_mod(a[i], u, dsa->q, ctx);
 		}
 	}
 
@@ -1196,17 +1156,15 @@ gen_mv(
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_zero(mp->u);
+		BN_zero(u);
 		for (i = 0; i <= n; i++) {
-			BN_set_word(mp->v, i);
-			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
-			    mp->ctx);
-			BN_mod_mul(mp->v, mp->v, a[i].bn, mp->dsa->q,
-			    mp->ctx);
-			BN_add(mp->u, mp->u, mp->v);
+			BN_set_word(v, i);
+			BN_mod_exp(v, x[j], v, dsa->q, ctx);
+			BN_mod_mul(v, v, a[i], dsa->q, ctx);
+			BN_add(u, u, v);
 		}
-		BN_mod(mp->u, mp->u, mp->dsa->q, mp->ctx);
-		if (!BN_is_zero(mp->u))
+		BN_mod(u, u, dsa->q, ctx);
+		if (!BN_is_zero(u))
 			temp = 0;
 	}
 	printf("Confirm sum(a[i] x[j]^i) = 0 for all i, j: %s\n", temp ?
@@ -1219,8 +1177,8 @@ gen_mv(
 	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
-		BN_mod_exp(g[i], mp->dsa->g, a[i].bn, mp->dsa->p,
-		    mp->ctx);
+		BN_mod_exp(g[i], dsa->g, a[i], dsa->p,
+		    ctx);
 	}
 
 	/*
@@ -1228,22 +1186,15 @@ gen_mv(
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_one(mp->u);
+		BN_one(u);
 		for (i = 0; i <= n; i++) {
-			BN_set_word(mp->v, i);
-			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
-			    mp->ctx);
-			BN_mod_exp(mp->v, g[i], mp->v, mp->dsa->p,
-			    mp->ctx);
-			BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p,
-			    mp->ctx);
+			BN_set_word(v, i);
+			BN_mod_exp(v, x[j], v, dsa->q, ctx);
+			BN_mod_exp(v, g[i], v, dsa->p, ctx);
+			BN_mod_mul(u, u, v, dsa->p, ctx);
 		}
-		if (!BN_is_one(mp->u)) {
-			s = BN_bn2dec(mp->u);
-			printf("error %d %s\n", j, s);
-			free(s);
+		if (!BN_is_one(u))
 			temp = 0;
-		}
 	}
 	printf("Confirm prod(g[i]^(x[j]^i)) = 1 for all i, j: %s\n",
 	    temp ? "yes" : "no");
@@ -1256,21 +1207,18 @@ gen_mv(
 	BN_one(biga);
 	for (j = 1; j <= n; j++) {
 		for (i = 0; i < n; i++) {
-			BN_set_word(mp->v, i);
-			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
-			    mp->ctx);
-			BN_mod_exp(mp->v, g[i], mp->v, mp->dsa->p,
-			    mp->ctx);
-			BN_mod_mul(biga, biga, mp->v,
-			    mp->dsa->p, mp->ctx);
+			BN_set_word(v, i);
+			BN_mod_exp(v, x[j], v, dsa->q, ctx);
+			BN_mod_exp(v, g[i], v, dsa->p, ctx);
+			BN_mod_mul(biga, biga, v, dsa->p, ctx);
 		}
 	}
 	b = BN_new(); binverse = BN_new();
-	BN_rand(b, BN_num_bits(mp->dsa->q), -1, 0);
-	BN_mod(b, b, mp->dsa->q, mp->ctx);
-	BN_mod_inverse(binverse, b, mp->dsa->q, mp->ctx);
-	BN_mod_mul(mp->v, b, binverse, mp->dsa->q, mp->ctx);
-	printf("Confirm b b^-1 = 1: %s\n", BN_is_one(mp->v) ?
+	BN_rand(b, BN_num_bits(dsa->q), -1, 0);
+	BN_mod(b, b, dsa->q, ctx);
+	BN_mod_inverse(binverse, b, dsa->q, ctx);
+	BN_mod_mul(v, b, binverse, dsa->q, ctx);
+	printf("Confirm b b^-1 = 1: %s\n", BN_is_one(v) ?
 	    "yes" : "no");
 
 	/*
@@ -1284,16 +1232,13 @@ gen_mv(
 		for (i = 1; i <= n; i++) {
 			if (i == j)
 				continue;
-			BN_set_word(mp->v, n);
-			BN_mod_exp(mp->u, mp->x[i], mp->v, mp->dsa->q,
-			    mp->ctx);
-			BN_add(xbar[j], xbar[j], mp->u);
+			BN_set_word(v, n);
+			BN_mod_exp(u, x[i], v, dsa->q, ctx);
+			BN_add(xbar[j], xbar[j], u);
 		}
-		BN_mod_mul(xbar[j], xbar[j], binverse,
-		    mp->dsa->q, mp->ctx);
-		BN_set_word(mp->v, n);
-		BN_mod_exp(xhat[j], mp->x[j], mp->v, mp->dsa->q,
-		    mp->ctx);
+		BN_mod_mul(xbar[j], xbar[j], binverse, dsa->q, ctx);
+		BN_set_word(v, n);
+		BN_mod_exp(xhat[j], x[j], v, dsa->q, ctx);
 	}
 
 	/*
@@ -1301,20 +1246,13 @@ gen_mv(
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_mul(mp->u, b, xbar[j], mp->dsa->q,
-		    mp->ctx);
-		BN_mod_exp(mp->u, mp->dsa->g, mp->u, mp->dsa->p,
-		    mp->ctx);
-		BN_mod_exp(mp->v, mp->dsa->g, xhat[j], mp->dsa->p,
-		    mp->ctx);
-		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
-		BN_mod_mul(mp->u, mp->u, biga, mp->dsa->p, mp->ctx);
-		if (!BN_is_one(mp->u)) {
-			s = BN_bn2dec(mp->u);
-			printf("error %d %s\n", j, s);
-			free(s);
+		BN_mod_mul(u, b, xbar[j], dsa->q, ctx);
+		BN_mod_exp(u, dsa->g, u, dsa->p, ctx);
+		BN_mod_exp(v, dsa->g, xhat[j], dsa->p, ctx);
+		BN_mod_mul(u, u, v, dsa->p, ctx);
+		BN_mod_mul(u, u, biga, dsa->p, ctx);
+		if (!BN_is_one(u))
 			temp = 0;
-		}
 	}
 	printf("Confirm A g^b xbar[j] g^xhat[j] = 1 for all j: %s\n",
 	    temp ? "yes" : "no");
@@ -1323,31 +1261,25 @@ gen_mv(
 	 * Make 512-bit values A = A^k, gbar = g^k and ghat = g^bk.
 	 */
 	k = BN_new();
-	BN_rand(k, BN_num_bits(mp->dsa->q), -1, 0);
-	BN_mod(k, k, mp->dsa->q, mp->ctx);
-	BN_mod_exp(biga, biga, k, mp->dsa->p, mp->ctx);
+	BN_rand(k, BN_num_bits(dsa->q), -1, 0);
+	BN_mod(k, k, dsa->q, ctx);
+	BN_mod_exp(biga, biga, k, dsa->p, ctx);
 	gbar = BN_new(); ghat = BN_new();
-	BN_mod_exp(gbar, mp->dsa->g, k, mp->dsa->p, mp->ctx);
-	BN_mod_mul(mp->u, k, b, mp->dsa->q, mp->ctx);
-	BN_mod_exp(ghat, mp->dsa->g, mp->u, mp->dsa->p, mp->ctx);
+	BN_mod_exp(gbar, dsa->g, k, dsa->p, ctx);
+	BN_mod_mul(u, k, b, dsa->q, ctx);
+	BN_mod_exp(ghat, dsa->g, u, dsa->p, ctx);
 
 	/*
 	 * Verify A gbar^xbar[j] ghat^xhat[j] = 1 for all j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_exp(mp->v, gbar, xhat[j], mp->dsa->p,
-		    mp->ctx);
-		BN_mod_exp(mp->u, ghat, xbar[j], mp->dsa->p,
-		    mp->ctx);
-		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
-		BN_mod_mul(mp->u, biga, mp->u, mp->dsa->p, mp->ctx);
-		if (!BN_is_one(mp->u)) {
-			s = BN_bn2dec(mp->u);
-			printf("error %d %s\n", j, s);
-			free(s);
+		BN_mod_exp(v, gbar, xhat[j], dsa->p, ctx);
+		BN_mod_exp(u, ghat, xbar[j], dsa->p, ctx);
+		BN_mod_mul(u, u, v, dsa->p, ctx);
+		BN_mod_mul(u, biga, u, dsa->p, ctx);
+		if (!BN_is_one(u))
 			temp = 0;
-		}
 	}
 	printf(
 	    "Confirm A gbar^xbar[j] ghat^xhat[j] = 1 for all j: %s\n",
@@ -1365,21 +1297,21 @@ gen_mv(
 	 * priv_key	public key 1 gbar
 	 * pub_key	public key 2 ghat
 	 */
-	BN_copy(mp->dsa->q, biga);
-	BN_copy(mp->dsa->g, k);
-	mp->dsa->priv_key = BN_dup(gbar);
-	mp->dsa->pub_key = BN_dup(ghat);
+	BN_copy(dsa->q, biga);
+	BN_copy(dsa->g, k);
+	dsa->priv_key = BN_dup(gbar);
+	dsa->pub_key = BN_dup(ghat);
 
 	/*
 	 * Write the parameters and public key as a DSA private key
 	 * encoded in PEM. This is used only by the broadcaster(s).
 	 */
 	str = fheader("MVkey", trustname);
-	PEM_write_DSAPrivateKey(str, mp->dsa, passwd ? EVP_des_cbc() :
+	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() :
 	    NULL, NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
-		DSA_print_fp(stdout, mp->dsa, 0);
+		DSA_print_fp(stdout, dsa, 0);
 	fslink(id, trustname);
 
 	/*
@@ -1397,10 +1329,10 @@ gen_mv(
 	 * priv_key	public key 1 gbar
 	 * pub_key	public key 2 ghat
 	 */
-	for (j = 1; j <= mp->n; j++) {
-		BN_copy(mp->dsa->q, xbar[j]);
-		BN_copy(mp->dsa->g, xhat[j]);
-		BN_free(xbar[j]); BN_free(xhat[j]);
+	for (j = 1; j <= n; j++) {
+		BN_copy(dsa->q, xbar[j]);
+		BN_copy(dsa->g, xhat[j]);
+		BN_free(xbar[j]); BN_free(xhat[j]); BN_free(x[j]);
 
 		/*
 		 * Write the MV public key as a DSA private key encoded
@@ -1408,120 +1340,33 @@ gen_mv(
 		 * public only to the designated recipients and denied
 		 * to all others.
 		 */
+#if 0
 		sprintf(ident, "MVkey%d", j);
 		str = fheader(ident, trustname);
-		PEM_write_DSAPrivateKey(str, mp->dsa, passwd ?
+		PEM_write_DSAPrivateKey(str, dsa, passwd ?
 		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd);
 		fclose(str);
 		if (debug)
-			DSA_print_fp(stdout, mp->dsa, 0);
+			DSA_print_fp(stdout, dsa, 0);
+#endif
 	}
 
 	/*
-	 * Free the western hemisphere.
+	 * Free the coutries.
 	 */
 	for (i = 0; i <= n; i++) {
-		for (cp = a[i].link; cp != NULL; cp = cp->link)
-			free(cp->ptr);
-		BN_free(a[i].bn);
+		BN_free(a[i]);
 		BN_free(g[i]);
 	}
-	free(a); free(g);
+	BN_free(u); BN_free(v); BN_free(w); BN_CTX_free(ctx);
 	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(k);
+	BN_free(gbar); BN_free(ghat);
 
 	/*
 	 * Free the world.
 	 */
-	BN_free(gbar); BN_free(ghat); DSA_free(mp->dsa);
-	free(mp);
-	return;
-}
-
-
-/*
- * makea() - compute coefficient terms
- *
- * This little darling generates all coefficient terms for the binomial
- * expansion of prod(x - x[i]). It works for any reasonable n, but watch
- * out for overheated CPU if n gets much larger than fifteen.
- */
-void
-makea(
-	struct coef *ap,	/* coefficient pointer */
-	int	n,		/* index vector size */
-	int	*dp,		/* index vector */
-	struct mv *mp		/* parameters */
-	)
-{
-	struct term *cp;
-	int	*z, *y;
-	int	i, j;
-
-	/*
-	 * Discard index vector if duplicate.
-	 */
-	if (n == 0)
-		return;
-
-	for (cp = ap->link; cp != NULL; cp = cp->link) {
-		for (i = 0; i < n; i++) {
- 
-			if (dp[i] != cp->ptr[i])
-				break;
-		}
-		if (i == n)
-			break;
-	}
-	if (cp != NULL)
-		return;
-
-	/*
-	 * Make a new index vector.
-	 */
-	cp = malloc(sizeof(struct term));
-	cp->link = ap->link;
-	ap->link = cp;
-	ap->coef++;
-	cp->size = n;
-	cp->ptr = malloc(n * sizeof(int));
-	BN_one(mp->u);
-	for (i = 0; i < n; i++) {
-
-		/*
-		 * Compute the product terms.
-		 */
-		BN_copy(mp->v, mp->dsa->q);
-		BN_sub(mp->v, mp->v, mp->x[dp[i]]);
-		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->q, mp->ctx);
-		cp->ptr[i] = dp[i];
-	}
-
-	/*
-	 * Sum the product terms.
-	 */
-	BN_add(ap->bn, ap->bn, mp->u);
-	BN_mod(ap->bn, ap->bn, mp->dsa->q, mp->ctx);
-
-	/*
-	 * Assemble all next shorter index combinations by removing from
-	 * the given index vector each index in turn starting from the
-	 * beginning.
-	 */
-	z = malloc((n - 1) * sizeof(int));
-	for (i = 0; i < n; i++) {
-
-		/*
-		 * Assemble indices [i, j], but delete [i, i]. Recurse
-		 * to generate the vector.
-		 */
-		y = z;
-		for (j = 0; j < n; j++) {
-			if (i != j)
-				*y++ = cp->ptr[j];
-		}
-		makea(ap + 1, n - 1, z, mp);
-	}
-	free(z);
+	free(x); free(a); free(g); free(xbar); free(xhat);
+	DSA_free(dsa);
 	return;
 }
 
