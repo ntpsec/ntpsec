@@ -48,6 +48,7 @@ void	getCmdOpts P((int, char**));
 int	genkeys  P((void));
 int	genrest  P((void));
 int	genthings  P((void));
+char	*getpath P((char *, char *, char *));
 #ifdef OPENSSL
 u_long	asn2ntp	 P((ASN1_TIME *));	/* ASN.1 time format to NTP seconds */
 void	cb	 P((int, int, void *));	/* callback routine */
@@ -75,8 +76,9 @@ char f2_keys[PATH_MAX];		/* timestamped */
 char *f1_privatekey;
 char f2_privatekey[PATH_MAX];
 
-char *f1_signkey;
-char f2_signkey[PATH_MAX];
+char *f1_signkey;		/* from ntp.conf */
+char f2_signkey[PATH_MAX];	/* generated filename */
+char f3_signkey[PATH_MAX];	/* generate new certs using this key */
 
 char *f1_cert;
 char f2_cert[PATH_MAX];
@@ -390,7 +392,7 @@ char *cl_name;			/* What cert do we use for links? */
 unsigned int cl_bit;		/* config bit for cert link */
 char *config_file = CONFIG_FILE; /* Default location for ntp.conf */
 int gen_cert;			/* Generate a cert? */
-unsigned int gen_certs = CERT_RSA_MD5; /* bitmap of certs to build */
+unsigned int gen_certs;		/* bitmap of certs to build */
 int gen_dh;			/* Generate DH files? */
 int gen_rsa;			/* Generate an RSA key? */
 int gen_sign;			/* Generate a sign key? */
@@ -425,6 +427,7 @@ getCmdOpts (
 	)
 {
 	int i, j, errflag = 0;
+	int gotone = 0;
 
 	progname = argv[0];
 
@@ -436,6 +439,7 @@ getCmdOpts (
 			/* FALL THROUGH */
 		    case 'c':	/* Generate a cert */
 			gen_certs = 0;
+			++gotone;
 			/* process each item in the list */
 			{
 				for (j = 0; j < certlist_n; ++j)
@@ -457,17 +461,20 @@ getCmdOpts (
 			break;
 		    case 'd':	/* Create the DH files */
 			++gen_dh;
+			++gotone;
 			break;
 		    case 'f':	/* Where is the config file? */
 			config_file = ntp_optarg;
 			break;
 		    case 'm':	/* Generate MD5 symmetric key file */
 			++gen_skf;
+			++gotone;
 			break;
 
 		    case 'R':	/* Generate a symlink and */
 			gen_rsa = GEN_LINK;
 		    case 'r':	/* Generate an RSA key */
+			++gotone;
 			/* "RSA" is the only allowed/required arg */
 			if (!strcmp(ntp_optarg, "RSA"))
 				gen_rsa |= GEN_RSA;
@@ -479,7 +486,8 @@ getCmdOpts (
 			gen_sign = GEN_LINK;
 			/* FALL THROUGH */
 		    case 's':	/* Generate a sign key */
-			gen_sign &= ~GEN_LINK;
+			gen_sign &= GEN_LINK;
+			++gotone;
 			/* DSA or RSA are the only two things allowed here */
 			if (!strcmp(ntp_optarg, "DSA"))
 				gen_sign |= GEN_DSA;
@@ -505,8 +513,16 @@ getCmdOpts (
 	 * maybe we should squawk.
 	 */
 
+	/*
+	 * If we're generating a signkey and a cert, make sure they are of
+	 * compatible types.
+	 */
+
 	if (errflag)
 		usage();
+
+	if (!gotone)
+		gen_certs = CERT_RSA_MD5;
 }
 
 int
@@ -604,6 +620,23 @@ genthings(
 	 * make the (sym)links.
 	 */
 
+	/* keysdir if f1_ doesn't begin with '/' */
+
+	if (gen_rsa & GEN_LINK) {
+		printf("rsakey symlink(%s, %s)\n",
+		       f2_privatekey, getpath(keysdir, f1_privatekey, NULL));
+	}
+	if (gen_sign & GEN_LINK) {
+		printf("signkey symlink(%s, %s)\n",
+		       f2_signkey, getpath(keysdir, f1_signkey, NULL));
+	}
+	if (gen_cert & GEN_LINK) {
+		printf("cert symlink(%s, %s)\n",
+		       f2_cert, getpath(keysdir, f1_cert, NULL));
+	}
+
+	/* Might we need a link to the MD5 keyfile? */
+
 	return rc;
 }
 
@@ -616,6 +649,8 @@ genkeys(
 #ifdef OPENSSL
 	char	pathbuf[PATH_MAX];
 	u_int	temp;
+	char	*cp;
+	int	gotsignkey;
 
 	/*
 	 * Here's the rub: The sign key defaults to the rsakey.  The rsakey
@@ -668,8 +703,73 @@ genkeys(
 	}
 
 	/*
-	 * Make sure f1_signkey is pointing to the right file.
+	 * Make sure f3_signkey is pointing to the right file.
+	 *
+	 * - If we built a sign key, use it.
+	 * - If ntp.conf specifies a sign key, use it.
+	 * - If there is a default sign key in f1_keys/, use it. (stat)
+	 * - If we built an rsakey, use it.
+	 * - If ntp.conf specifies an rsakey, use it.
+	 * - If there is a default rsakey in f1_keys/, use it.  (stat)
 	 */
+	gotsignkey = 0;
+	if (!gotsignkey && *f2_signkey) { /* We built a sign key - use it. */
+		if (f1_signkey) { /* Use the explicit signkey in ntp.conf */
+			cp = getpath(keysdir, f1_signkey, f2_signkey);
+			if (!cp)
+				exit(-1);
+			strcpy(f3_signkey, cp);
+ printf("f3: GS1: <%s>\n", f3_signkey);
+			++gotsignkey;
+		} else {	/* Use new signkey in default location */
+			cp = getpath(keysdir, f2_signkey, NULL);
+			if (!cp)
+				exit(-1);
+			strcpy(f3_signkey, cp);
+ printf("f3: GS0: <%s>\n", f3_signkey);
+			++gotsignkey;
+		}
+	}
+	if (!gotsignkey && *f1_signkey)	{ /* Use sign key from ntp.conf */
+		cp = getpath(keysdir, f1_signkey, f2_signkey);
+		if (!cp)
+			exit(-1);
+		strcpy(f3_signkey, cp);
+ printf("f3: ES: <%s>\n", f3_signkey);
+		++gotsignkey;
+	}
+	if (!gotsignkey) {	/* Iff a default sign key exists, use it. */
+		/* build the name, stat() it, and if it exists, use it. */
+ printf("f3: DS: <%s>\n", f3_signkey);
+	}
+	if (!gotsignkey && *f2_privatekey) { /* We built an rsakey - use it. */
+		if (f1_privatekey) { /* Use the explicit rsakey in ntp.conf */
+			cp = getpath(keysdir, f1_privatekey, f2_privatekey);
+			if (!cp)
+				exit(-1);
+			strcpy(f3_signkey, cp);
+ printf("f3: GR1: <%s>\n", f3_signkey);
+			++gotsignkey;
+		} else {	/* Use new rsakey in default location */
+			cp = getpath(keysdir, f2_privatekey, NULL);
+			if (!cp)
+				exit(-1);
+			strcpy(f3_signkey, cp);
+ printf("f3: GR0: <%s>\n", f3_signkey);
+			++gotsignkey;
+		}
+	}
+	if (!gotsignkey && *f1_privatekey) { /* Use rsakey from ntp.conf */
+		cp = getpath(keysdir, f1_privatekey, f2_privatekey);
+		if (!cp)
+			exit(-1);
+		strcpy(f3_signkey, cp);
+ printf("f3: ER: <%s>\n", f3_signkey);
+		++gotsignkey;
+	}
+	if (!gotsignkey) {	/* Iff a default rsakey exists, use it. */
+ printf("f3: DR: <%s>\n", f3_signkey);
+	}
 #endif /* OPENSSL */
 
 	return (0);
@@ -714,7 +814,7 @@ genkey_rsa (
 	}
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	str = fheader("RSAkey", keysdir, f1_privatekey, tstamp, f2_privatekey);
+	str = fheader("RSAkey", keysdir, f1_key, tstamp, f2_key);
 	PEM_write_RSAPrivateKey(str, rsa, NULL, NULL, 0, NULL, NULL);
 	fclose(str);
 /*
@@ -751,7 +851,7 @@ genkey_dsa(
 		    ERR_error_string(ERR_get_error(), NULL));
 		 exit (-1);
 	}
-	str = fheader("DSApar", keysdir, f1_signkey, tstamp, tmp_name);
+	str = fheader("DSApar", keysdir, f1_key, tstamp, tmp_name);
 	PEM_write_DSAparams(str, dsa_params);
 	fclose(str);
 
@@ -767,7 +867,7 @@ genkey_dsa(
 	}
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa_params);
-	str = fheader("DSAkey", keysdir, f1_signkey, ntptime, f2_signkey);
+	str = fheader("DSAkey", keysdir, f1_key, ntptime, f2_key);
 	PEM_write_DSAPrivateKey(str, dsa_params, NULL, NULL, 0, NULL,
 	    NULL);
 	fclose(str);
@@ -832,25 +932,14 @@ genrest(
 	if (gen_certs) {
 		/*
 		 * This routine must do a file-read to get the key that will
-		 * be used * to generate the certs.  We can check this key
-		 * to make sure it's * the right type, and squawk if the
-		 * sign key type does not match * the requested cert types.
+		 * be used to generate the certs.  We can check this key to
+		 * make sure it's the right type, and squawk if the sign key
+		 * type does not match the requested cert types.
 		 */
 
-		/* Swiped from ntp_crypto.c:crypto_key() */
-
-		/*
-		 * Open the key file. If the first character of the file
-		 * name is not * '/', prepend the keys directory string. If
-		 * something goes wrong, * abandon ship.
-		 */
-		if (*cp == '/')
-			strcpy(filename, cp);
-		else
-			snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
-		str = fopen(filename, "r");
+		str = fopen(f3_signkey, "r");
 		if (str == NULL) {
-			fprintf(stderr, "fopen(%s) failed: %s\n", filename,
+			fprintf(stderr, "fopen(%s) failed: %s\n", f3_signkey,
 				strerror(errno));
 			return (NULL);
 		}
@@ -1222,26 +1311,20 @@ fheader	(
 	)
 {
 	FILE	*str;		/* file handle */
-	char	filename[PATH_MAX]; /* file name */
-	char	*cp;
+	char	*filename;	/* file name */
 
-printf("fheader: id <%s> kdir <%s> fpath <%s> t %lu\n", id, kdir, fpath, tstamp);
+	if (debug > 1)
+		printf("fheader: id <%s> kdir <%s> fpath <%s> t %lu\n",
+		       id, kdir, fpath, tstamp);
 
-	if (*fpath == '/')
-		strcpy(filename, fpath);
-	else
-		snprintf(filename, sizeof filename, "%s/%s", kdir, fpath);
-	cp = strrchr(filename, '/');
-	if (cp)
-		++cp, *cp = '\0';
-	else {
-		fprintf(stderr, "%s: fheader: no / in <%s>!\n", progname,
-			filename);
-		return NULL;
-	}
 	sprintf(tgt, "ntpkey_%s_%s.%lu", id, hostname, tstamp);
-	strcat(filename, tgt);
-printf("fheader: tgt <%s> filename <%s>\n", tgt, filename);
+	filename = getpath(kdir, fpath, tgt);
+	if (!filename)
+		return NULL;
+
+	if (debug > 1)
+		printf("fheader: tgt <%s> filename <%s>\n", tgt, filename);
+
 	str = fopen(filename, "w");
 	if (str)
 		fprintf(str, "# %s\n# %s", tgt, ctime(&tv.tv_sec));
@@ -1251,4 +1334,37 @@ printf("fheader: tgt <%s> filename <%s>\n", tgt, filename);
 		exit(1);
 	}
 	return(str);
+}
+
+
+char *
+getpath (
+	char *gp_dir,
+	char *gp_path,
+	char *gp_file
+	)
+{
+	static char filename[PATH_MAX]; /* file name */
+	char	*cp;
+
+	if (debug > 1)
+		printf("getpath: gp_dir <%s> gp_path <%s> gp_file <%s>\n",
+		       gp_dir, gp_path, gp_file);
+
+	if (*gp_path == '/')
+		strcpy(filename, gp_path);
+	else
+		snprintf(filename, sizeof filename, "%s/%s", gp_dir, gp_path);
+	if (gp_file) {
+		cp = strrchr(filename, '/');
+		if (cp)
+			++cp, *cp = '\0';
+		else {
+			fprintf(stderr, "%s: getpath: no / in <%s>!\n",
+				progname, filename);
+			return NULL;
+		}
+		strcat(cp, gp_file);
+	}
+	return filename;
 }
