@@ -482,7 +482,7 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(1);
 #endif
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
 
@@ -1333,6 +1333,7 @@ sendpkt(
 		inter->notsent++;
 		packets_notsent++;
 #if defined(HAVE_IO_COMPLETION_PORT)
+		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS && slot < 0)
 #else
 		if (errno != EWOULDBLOCK && errno != ENOBUFS && slot < 0)
@@ -1803,7 +1804,7 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
 		*/
@@ -1830,7 +1831,7 @@ findbcastinter(
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the correct family
 		*/
