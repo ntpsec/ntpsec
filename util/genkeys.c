@@ -174,7 +174,9 @@ main(
 	 * that work with RSA are MD2, MD5, SHA, SHA1, MDC2 and
 	 * RIPEMD160.
 	 */
+#ifdef HAVE_EVP_MD2
 	x509("RSA_MD2", pkey, EVP_md2());
+#endif
 	x509("RSA_MD5", pkey, EVP_md5());
 	x509("RSA_SHA", pkey, EVP_sha());
 	x509("RSA_SHA1", pkey, EVP_sha1());
