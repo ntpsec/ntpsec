@@ -81,7 +81,7 @@ static R_RSA_PUBLIC_KEY public_key; /* public key */
 static R_DH_PARAMS dh_params;	/* agreement parameters */
 static u_char *dh_private;	/* private value */
 static u_int dh_keyLen;		/* private value length */
-static char *keysdir = "/usr/local/etc/"; /* crypto keys directory */
+static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
 static char *private_key_file = NULL; /* private key file */
 static char *public_key_file = NULL; /* public key file */
 static char *dh_params_file = NULL; /* agreement parameters file */
