@@ -102,6 +102,8 @@ PATH_PERL = @PATH_PERL@
 PATH_SH = @PATH_SH@
 PROPDELAY = @PROPDELAY@
 RANLIB = @RANLIB@
+RSADIR = @RSADIR@
+RSAOBJS = @RSAOBJS@
 RSAREF = @RSAREF@
 STRIP = @STRIP@
 TESTDCF = @TESTDCF@
@@ -161,6 +163,8 @@ EXTRA_DIST = \
 	html \
 	ports
 
+
+DISTCLEANFILES = .warning
 
 #ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.in
 ETAGS_ARGS = Makefile.am configure.in acconfig.h
@@ -427,6 +431,7 @@ clean-generic:
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
