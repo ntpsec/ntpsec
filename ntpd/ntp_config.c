@@ -361,6 +361,7 @@ static struct masks logcfg_item[] = {
  * File descriptor used by the resolver save routines, and temporary file
  * name.
  */
+int call_resolver = 1;		/* ntp-genkeys sets this to 0, for example */
 static FILE *res_fp;
 #ifndef SYS_WINNT
 static char res_file[20];	/* enough for /tmp/ntpXXXXXX\0 */
@@ -1761,10 +1762,12 @@ getconfig(
 #endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
 
 	if (res_fp != NULL) {
-		/*
-		 * Need name resolution
-		 */
-		do_resolve_internal();
+		if (call_resolver) {
+			/*
+			 * Need name resolution
+			 */
+			do_resolve_internal();
+		}
 	}
 }
 
