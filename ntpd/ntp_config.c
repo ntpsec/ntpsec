@@ -104,6 +104,7 @@ static	struct keyword keywords[] = {
 	{ "broadcast",		CONFIG_BROADCAST },
 	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
 	{ "broadcastdelay",	CONFIG_BDELAY },
+	{ "calldelay",		CONFIG_CDELAY},
 	{ "clientlimit",	CONFIG_CLIENTLIMIT },
 	{ "clientperiod",	CONFIG_CLIENTPERIOD },
 #ifdef OPENSSL
@@ -1305,6 +1306,18 @@ getconfig(
 				} else {
 					proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
 				}
+			}
+			break;
+
+		    case CONFIG_CDELAY:
+                        if (ntokens >= 2) {
+                                u_long ui;
+
+				if (sscanf(tokens[1], "%d", &ui) != 1)
+					msyslog(LOG_ERR,
+					    "illegal value - line ignored");
+				else
+					proto_config(PROTO_CALLDELAY, ui, 0, NULL);
 			}
 			break;
 

@@ -105,8 +105,6 @@ typedef char s_char;
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
 #define NTP_BURST	8	/* packets in burst */
-#define CALL_DELAY	10	/* modem callup delay (s) */
-#define	START_DELAY	10	/* association startup delay (s) */
 #define BURST_DELAY	2	/* interburst delay (s) */
 #define	RESP_DELAY	1	/* crypto response delay (s) */
 
@@ -114,7 +112,7 @@ typedef char s_char;
  * Clock filter algorithm tuning parameters
  */
 #define MINDISPERSE	.01	/* min dispersion */
-#define MAXDISPERSE	16.	/* max dispersion (square) */
+#define MAXDISPERSE	16.	/* max dispersion */
 #define	NTP_SHIFT	8	/* clock filter stages */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
 
@@ -708,6 +706,7 @@ struct pkt {
 #define PROTO_FLOOR		16
 #define PROTO_CEILING		17
 #define PROTO_COHORT		18
+#define PROTO_CALLDELAY		19
 
 /*
  * Configuration items for the loop filter

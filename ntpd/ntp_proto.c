@@ -45,9 +45,9 @@ u_long	sys_automax;		/* maximum session key lifetime */
 /*
  * Nonspecified system state variables.
  */
-int	sys_bclient;		/* we set oukiss
-r time to broadcasts */
+int	sys_bclient;		/* broadcast client enable */
 double	sys_bdelay; 		/* broadcast client default delay */
+int	sys_calldelay;		/* modem callup delay (s) */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2]; 	/* authentication delay shift reg */
@@ -1386,7 +1386,7 @@ poll_update(
 #endif
 		else if (peer->flags & (FLAG_IBURST | FLAG_BURST) &&
 		    peer->burst == NTP_BURST)
-			peer->nextdate += CALL_DELAY;
+			peer->nextdate += sys_calldelay;
 		else
 			peer->nextdate += BURST_DELAY;
 	} else if (peer->cast_flags & MDF_ACAST) {
@@ -1463,13 +1463,11 @@ peer_clear(
 	value_free(&peer->encrypt);
 	value_free(&peer->sndval);
 #endif /* OPENSSL */
-	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 
 	/*
-	 * If he dies as a broadcast client, he comes back to life as
-	 * a broadcast client in client mode in order to recover the
-	 * initial autokey values.
+	 * Wipe the association clean and initialize the nonzero values.
 	 */
+	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 	if (peer == sys_peer)
 		sys_peer = NULL;
 	peer->estbdelay = sys_bdelay;
@@ -1496,14 +1494,25 @@ peer_clear(
 	}
 
 	/*
-	 * Randomize the first poll to avoid bunching.
+	 * If he dies as a broadcast client, he comes back to life as
+	 * a broadcast client in client mode in order to recover the
+	 * initial autokey values.
 	 */
-	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (peer->cast_flags & MDF_BCLNT) {
 		peer->flags |= FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
 	}
-	peer->nextdate += (u_int)RANDOM % START_DELAY;
+
+	/*
+	 * Randomize the first poll to avoid bunching. During
+	 * initialization use the association count to spread out the
+	 * polls at one-second intervals.
+	 */
+	peer->nextdate = peer->update = peer->outdate = current_time;
+	if (initializing)
+		peer->nextdate += peer_associations;
+	else
+		peer->nextdate += (u_int)RANDOM % peer_associations;
 #ifdef DEBUG
 	if (debug)
 		printf("peer_clear: at %ld assoc ID %d refid %s\n",
@@ -2884,6 +2893,7 @@ init_proto(void)
 	sys_manycastserver = 0;
 	sys_bclient = 0;
 	sys_bdelay = DEFBROADDELAY;
+	sys_calldelay = BURST_DELAY;
 	sys_authenticate = 1;
 	L_CLR(&sys_authdelay);
 	sys_authdly[0] = sys_authdly[1] = 0;
@@ -2999,6 +3009,13 @@ proto_config(
 	 */
 	case PROTO_BROADDELAY:
 		sys_bdelay = dvalue;
+		break;
+
+	/*
+	 * Set modem call delay.
+	 */
+	case PROTO_CALLDELAY:
+		sys_calldelay = (int)value;
 		break;
 
 	/*
