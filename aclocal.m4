@@ -34,7 +34,7 @@ dnl
 dnl    AC_DEFINE_DIR(DATADIR, datadir)
 dnl    AC_DEFINE_DIR(PROG_PATH, bindir, [Location of installed binaries])
 dnl
-dnl @version $Id: .del-aclocal.m4~3aed0663 1.78 2001/05/28 01:49:11-00:00 stenn@whimsy.udel.edu $
+dnl @version $Id: .del-aclocal.m4~3aed0663 1.79 2001/05/31 03:48:55-00:00 stenn@whimsy.udel.edu $
 dnl @author Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 
 AC_DEFUN(AC_DEFINE_DIR, [
@@ -243,7 +243,7 @@ AC_DEFUN([AM_MISSING_HAS_RUN],
 [test x"${MISSING+set}" = xset ||
   MISSING="\${SHELL} `CDPATH=:; cd $ac_aux_dir && pwd`/missing"
 # Use eval to expand $SHELL
-if eval "$MISSING --run true"; then
+if eval "$MISSING --run :"; then
   am_missing_run="$MISSING --run "
 else
   am_missing_run=
