@@ -376,7 +376,7 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 # CFLAGS= -g -Bstatic -DPAGE_PROTECTION_VIOLATED_SIGNAL=SIGBUS
 
 check-local:
-	[ -f eftest] && ./eftest
+	[ -f eftest ] && ./eftest
 	[ -f tstheap ] && ./tstheap 3072
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
