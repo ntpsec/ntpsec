@@ -863,7 +863,6 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			 "setsockopt IPV6_JOIN_GROUP failure: %m on socket %d, addr %s for interface %d(%s)",
 			iface->fd, stoa(&iface->sin),
 			mreq6.ipv6mr_interface, stoa(maddr));
-			iface->fd, stoa(&iface->sin),
 			return ISC_FALSE;
 		}
 		break;
