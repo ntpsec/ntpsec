@@ -285,6 +285,15 @@ audio_init(
 		s_size.play_size, s_size.rec_size);
 # endif /* HAVE_STRUCT_SND_SIZE */
 
+# ifdef SNDCTL_DSP_SETFRAGMENT
+	{
+		int tmp = (16 << 16) + 6; /* 16 fragments, each 2^6 bytes */
+		if (ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &tmp) == -1)
+		    printf("audio_init: SNDCTL_DSP_SETFRAGMENT: %s\n",
+			   strerror(errno));
+	}
+# endif /* SNDCTL_DSP_SETFRAGMENT */
+
 # ifdef AIOGFMT
 	if (ioctl(fd, AIOGFMT, &s_c_p) == -1)
 	    printf("audio_init: AIOGFMT: %s\n", strerror(errno));

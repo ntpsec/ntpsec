@@ -124,7 +124,6 @@ transmit(
 		 * from minpoll.
 		 */
 		peer->outdate = current_time;
-
 	} else if (peer->cast_flags & MDF_ACAST) {
 
 		/*
@@ -152,52 +151,43 @@ transmit(
 			if (!peer->reach) {
 
 				/*
-				 * If this association has become
-				 * unreachable, clear it and raise a
-				 * trap.
+				 * If this association was reachable but
+				 * now unreachable, clear it and raise a
+				 * trap. If ephemeral, dump it.
 				 */
 				if (oreach != 0) {
 					report_event(EVNT_UNREACH,
 					    peer);
 					peer->timereachable =
 					    current_time;
-					if (peer->flags & FLAG_CONFIG) {
-						peer_clear(peer,
-						    "INIT");
-					} else {
+					peer_clear(peer, "INIT");
+					if (!(peer->flags &
+					    FLAG_CONFIG)) {
 						unpeer(peer);
 						return;
 					}
 				}
 
 				/*
-				 * If a configured association has been
-				 * unreachable for a long time, double
-				 * it at each poll and send a single
-				 * packet instead of a burst. If not
-				 * configured, off it. If it flashes
-				 * authentic error, mark it
-				 * cryptographically dead.
+				 * Until the unreach counter trips, we
+				 * send a burst if enabled and nothing
+				 * is wrong. Otherwise, we send a single
+				 * packet. After the counter trips, we
+				 * double the poll interval at each
+				 * poll.
 				 */
 				if (peer->unreach < NTP_UNREACH) {
 					peer->unreach++;
 					if (peer->flags & FLAG_IBURST &&
-					    !(peer->flash & TEST5) &&
-					    !memcmp(&peer->refid, "INIT",
-					    4))
+					    !peer->flash)
 						peer->burst = NTP_BURST;
 				} else if (!(peer->flags &
 				    FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
 
-				} else if (peer->flash & TEST5) {
-					peer_clear(peer, "CRYPTO");
-					peer->flash += TEST4;
-				} else {
-					if (hpoll < peer->maxpoll)
+				} else if (hpoll < peer->maxpoll)
 						hpoll++;
-				}
 			} else {
 				/*
 				 * Here the peer is reachable. If it has
@@ -208,7 +198,8 @@ transmit(
 				 * synchronization, increase it by one;
 				 * else, use the system poll interval,
 				 * but clamp it within bounds for this
-				 * peer. 
+				 * peer. Send a burst only if enabled
+				 * and nothing is wrong.
 				 */
 				peer->unreach = 0;
 				if (!(peer->reach & 0x07))
@@ -224,8 +215,7 @@ transmit(
 					else if (hpoll < peer->minpoll)
 						hpoll = peer->minpoll;
 					if (peer->flags & FLAG_BURST &&
-					    !memcmp(&peer->refid, "INIT",
-					    4))
+					    !peer->flash)
 						peer->burst = NTP_BURST;
 				}
 			}
@@ -233,9 +223,9 @@ transmit(
 			peer->burst--;
 
 			/*
-			 * If a broadcast client at this point, the burst
-			 * has concluded, so we switch to client mode and
-			 * purge the keylist, since no further
+			 * If a broadcast client at this point, the
+			 * burst has concluded, so we switch to client
+			 * mode and purge the keylist, since no further
 			 * transmissions will be made.
 			 */
 			if (peer->burst == 0) {
@@ -283,15 +273,12 @@ transmit(
 	}
 
 	/*
-	 * Do not transmit if in access-deny or crypto jail. Clamp the
-	 * poll to minimum if a get out of jail free card shows up.
+	 * If in jail, do not transmit unless a get out of jail free
+	 * card shows up. Such cards are in short supply.
 	 */
 	if (peer->flash & TEST4) {
-		if (!(peer->flags & FLAG_CONFIG)) {
+		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
-			return;
-		}
-		poll_update(peer, peer->minpoll);
 	} else {
 		peer_xmit(peer);
 		poll_update(peer, hpoll);
@@ -349,9 +336,10 @@ receive(
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("receive: at %ld %s<-%s restrict %03x\n",
+		printf("receive: at %ld %s<-%s flags %x restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
-		    stoa(&rbufp->recv_srcadr), restrict_mask);
+		    stoa(&rbufp->recv_srcadr),
+		    rbufp->dstadr->flags, restrict_mask);
 #endif
 	if (restrict_mask & RES_IGNORE) {
 		sys_restricted++;
@@ -671,9 +659,10 @@ receive(
 		}
 
 		/*
-		 * Note that we don't require an authentication check
-		 * here, since we can't set the system clock; but, we do
-		 * send a crypto-NAK to tell the caller about this.
+		 * Note that we don't require authentication here, since
+		 * we can't set the system clock; but, we do send a
+		 * crypto-NAK (kiss the frog) if the packet had a MAC
+		 * and authentication failed.
 		 */
 		if (has_mac && !is_authentic)
 			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
@@ -692,11 +681,11 @@ receive(
 		 * there is no match, that's curious and could be an
 		 * intruder attempting to clog, so we just ignore it.
 		 *
-		 * First, make sure the packet is authentic and not
-		 * restricted. If so and the manycast association is
-		 * found, we mobilize a client association and copy
-		 * pertinent variables from the manycast association to
-		 * the new client association.
+		 * If the packet is authentic and the manycast
+		 * association is found, we mobilize a client
+		 * association and copy pertinent variables from the
+		 * manycast association to the new client association.
+		 * If not, just ignore the packet..
 		 *
 		 * There is an implosion hazard at the manycast client,
 		 * since the manycast servers send the server packet
@@ -725,10 +714,8 @@ receive(
 
 		/*
 		 * This is the first packet received from a symmetric
-		 * active peer. First, make sure it is authentic and not
-		 * restricted. If so, mobilize a passive association.
-		 * If authentication fails send a crypto-NAK; otherwise,
-		 * kiss the frog.
+		 * active peer. If the packet is authentic, mobilize a
+		 * passive association. If not, kiss the frog.
 		 */
 		if (sys_authenticate && !is_authentic) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0,
@@ -747,27 +734,28 @@ receive(
 
 		/*
 		 * This is the first packet received from a broadcast
-		 * server. First, make sure it is authentic and not
-		 * restricted and that we are a broadcast client. If so,
-		 * mobilize a broadcast client association. We don't
-		 * kiss any frogs here.
+		 * server. If the packet is authentic and we are enabled
+		 * as broadcast client, mobilize a broadcast client
+		 * association. We don't kiss any frogs here.
 		 */
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
-		if (sys_bclient == 0)
-			return;			/* not a client */
-
+		/*
+		 * If the sys_bclient switch is 1, execute the inital
+		 * volley; if 2, go directly to broadcast client mode.
+		 */
 		if (sys_bclient == 1)
-			peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-			    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-			    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
-			    FLAG_IBURST, MDF_BCLNT, 0, skeyid);
+			peer = newpeer(&rbufp->recv_srcadr,
+			    rbufp->dstadr, MODE_CLIENT,
+			    PKT_VERSION(pkt->li_vn_mode), NTP_MINDPOLL,
+			    NTP_MAXDPOLL, FLAG_MCAST | FLAG_BURST,
+			    MDF_BCLNT, 0, skeyid);
 		else
-			peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-			    MODE_BCLIENT, PKT_VERSION(pkt->li_vn_mode),
-			    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_BCLNT, 0,
-			    skeyid);
+			peer = newpeer(&rbufp->recv_srcadr,
+			    rbufp->dstadr, MODE_BCLIENT,
+			    PKT_VERSION(pkt->li_vn_mode), NTP_MINDPOLL,
+			    NTP_MAXDPOLL, 0, MDF_BCLNT, 0, skeyid);
 		if (peer == NULL)
 			return;			/* system error */
 #ifdef OPENSSL
@@ -797,7 +785,7 @@ receive(
 			}
 		}
 #endif /* OPENSSL */
-		return;
+		break;
 
 	case AM_POSSBCL:
 
@@ -813,16 +801,15 @@ receive(
 		 * This is a symmetric mode packet received in symmetric
 		 * mode, a server packet received in client mode or a
 		 * broadcast packet received in broadcast client mode.
-		 * If it is restricted, this is very strange because it
-		 * is rude to send a packet to a restricted address. If
-		 * anyway, flash a restrain kiss and skedaddle to
-		 * Seattle. If not authentic, leave a light on and
-		 * continue.
+		 * If the packet has a MAC but authentication fails,
+		 * turn off the lights and skedaddle to Seattle. As this
+		 * happens normally when the server has restarted or
+		 * refreshed private values, it is considered a
+		 * temporary condition.
 		 */
  		if (has_mac && !is_authentic) {
-			if (peer->flags & FLAG_CONFIG)
-				peer_clear(peer, "RSTR");
-			else
+			peer_clear(peer, "AUTH");
+			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
 			return;			/* no trust */
 		}
@@ -837,8 +824,8 @@ receive(
 		 * server mode packet arrives and matches a broadcast
 		 * client association. This is usually the result of
 		 * reconfiguring a client on-fly. If authenticated
-		 * passive mode packet, send a crypto-NAK; otherwise,
-		 * ignore it.
+		 * passive mode packet, kiss the frog; otherwise, ignore
+		 * it.
 		 */
 		if (has_mac && hismode == MODE_PASSIVE)
 			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
@@ -878,8 +865,8 @@ receive(
 	/*
 	 * For broadcast server mode, loopback checking is disabled. An
 	 * authentication error probably means the server restarted or
-	 * rolled a new private value. If so, dump the association
-	 * and wait for the next message.
+	 * rolled a new private value. If so, dump the (ephemeral)
+	 * association and wait for the next message.
 	 */
 	} else if (hismode == MODE_BROADCAST) {
 		if (peer->flash & TEST5) {
@@ -903,12 +890,10 @@ receive(
 	} else if (L_ISEQU(&peer->xmt, &p_org)) {
 		if (peer->flash & TEST5) {
 			if (has_mac == 4 && pkt->exten[0] == 0 &&
-				peer->reach) {
-				if (peer->flags & FLAG_CONFIG) {
-					peer_clear(peer, "AUTH");
-				} else {
+			    peer->reach) {
+				peer_clear(peer, "AUTH");
+				if (!(peer->flags & FLAG_CONFIG))
 					unpeer(peer);
-				}
 			}
 			return;
 		}
@@ -966,9 +951,8 @@ receive(
 		if (debug)
 			printf("receive: dropped %03x\n", peer->flash);
 #endif
-		if (peer->flags & FLAG_CONFIG)
-			peer_clear(peer, "DROP");
-		else
+		peer_clear(peer, "DROP");
+		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
 		return;
 	}
@@ -998,6 +982,7 @@ receive(
 	 *    match, sit the dance and wait for timeout.
 	 *
 	 * In case of crypto error, fire the orchestra and stop dancing.
+	 * This is considered a permanant error, go directly to jail.
 	 */
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST10;
@@ -1005,6 +990,10 @@ receive(
 		if (rval != XEVNT_OK) {
 			peer_clear(peer, "CRYP");
 			peer->flash |= TEST4;	/* crypto error */
+			if (!(peer->flags & FLAG_CONFIG)) {
+				unpeer(peer);
+				return;
+			}
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
@@ -1074,9 +1063,8 @@ receive(
 			printf(
 			    "receive: bad auto %03x\n", peer->flash);
 #endif
-		if (peer->flags & FLAG_CONFIG)
-			peer_clear(peer, "AUTO");
-		else
+		peer_clear(peer, "AUTO");
+		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
 	}
 #endif /* OPENSSL */
@@ -1131,9 +1119,17 @@ process_packet(
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
 			peer_clear(peer, "DENY");
 			peer->flash |= TEST4;	/* access deny */
+			if (!(peer->flags & FLAG_CONFIG)) {
+				unpeer(peer);
+				return;
+			}
 		} else if (memcmp(&pkt->refid, "CRYP", 4) == 0) {
 			peer_clear(peer, "CRYP");
 			peer->flash |= TEST4;	/* crypto error */
+			if (!(peer->flags & FLAG_CONFIG)) {
+				unpeer(peer);
+				return;
+			}
 		}
 	}
 
@@ -1424,7 +1420,7 @@ poll_update(
 	 * that turns out to be wickedly complicated. The big problem is
 	 * that sometimes the time for the next poll is in the past.
 	 * Watch out for races here between the receive process and the
-	 * poll process. The key assertion is that, if nextdate ==
+	 * poll process. The key assertion is that, if nextdate equals
 	 * current_time, the call is from the poll process; otherwise,
 	 * it is from the receive process.
 	 */
@@ -1591,19 +1587,16 @@ peer_clear(
 	}
 
 	/*
-	 * Randomize the first poll to avoid bunching, but only if the
-	 * rascal has never been heard. During initialization use the
-	 * association count to spread out the polls at one-second
-	 * intervals.
+	 * During initialization use the association count to spread out
+	 * the polls at one-second intervals. Othersie, randomize over
+	 * the minimum poll interval in order to avoid broadcast
+	 * implosion.
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
-	if (strcmp(ident, "INIT"))
-		poll_update(peer, peer->minpoll);
-	else if (initializing)
+	if (initializing)
 		peer->nextdate = current_time + peer_associations;
 	else
-		peer->nextdate = current_time + max((u_int)RANDOM %
-		    peer_associations, BURST_DELAY);
+		poll_update(peer, peer->minpoll);
 #ifdef DEBUG
 	if (debug)
 		printf("peer_clear: at %ld assoc ID %d refid %s\n",

@@ -144,18 +144,6 @@ extern	struct refclock	refclock_atom;
 #define refclock_atom	refclock_none
 #endif
 
-#ifdef CLOCK_PTBACTS
-extern	struct refclock	refclock_ptb;
-#else
-#define refclock_ptb	refclock_none
-#endif
-
-#ifdef CLOCK_USNO
-extern	struct refclock	refclock_usno;
-#else
-#define refclock_usno	refclock_none
-#endif
-
 #ifdef CLOCK_HPGPS
 extern	struct refclock	refclock_hpgps;
 #else
@@ -295,13 +283,13 @@ struct refclock *refclock_conf[] = {
 	&refclock_true,		/* 15 alias for REFCLK_TRUETIME */
 	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
 	&refclock_datum,	/* 17 REFCLK_GPS_DATUM */
-	&refclock_acts,		/* 18 REFCLK_NIST_ACTS */
+	&refclock_acts,		/* 18 REFCLK_ACTS */
 	&refclock_heath,	/* 19 REFCLK_WWV_HEATH */
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
 	&refclock_gpsvme,	/* 21 REFCLK_GPS_VME */
 	&refclock_atom,		/* 22 REFCLK_ATOM_PPS */
-	&refclock_ptb,		/* 23 REFCLK_PTB_ACTS */
-	&refclock_usno,		/* 24 REFCLK_USNO */
+	&refclock_acts,		/* 23 alias for REFCLK_ACTS */
+	&refclock_acts,		/* 24 alias for REFCLK_ACTS */
 	&refclock_true,		/* 25 alias for REFCLK_TRUETIME */
 	&refclock_hpgps,	/* 26 REFCLK_GPS_HP */
 	&refclock_arc, 		/* 27 REFCLK_ARCRON_MSF */

@@ -1756,7 +1756,8 @@ getconfig(
 		    case CONFIG_PHONE:
 			for (i = 1; i < ntokens && i < MAXPHONE; i++) {
 				(void)strncpy(sys_phone[i - 1],
-					      tokens[i], MAXDIAL);
+				    tokens[i], MAXDIAL);
+				strcat(sys_phone[i - 1], "\r");
 			}
 			sys_phone[i - 1][0] = '\0';
 			break;

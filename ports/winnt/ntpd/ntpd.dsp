@@ -477,11 +477,6 @@ SOURCE=..\..\..\ntpd\refclock_pst.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\refclock_ptbacts.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\ntpd\refclock_shm.c
 # PROP Exclude_From_Build 1
 # End Source File
@@ -498,11 +493,6 @@ SOURCE=..\..\..\ntpd\refclock_trak.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_true.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\ntpd\refclock_usno.c
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
