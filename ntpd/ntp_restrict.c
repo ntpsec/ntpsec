@@ -38,9 +38,9 @@
  */
 
 /*
-  * We will use two lists, one for IPv4 addresses and one for IPv6
-  * addresses. This is not protocol-independant but for now I can't
-  * find way to respect this. We'll check this later... JFB 07/2001
+ * We will use two lists, one for IPv4 addresses and one for IPv6
+ * addresses. This is not protocol-independant but for now I can't
+ * find way to respect this. We'll check this later... JFB 07/2001
  */
 
 #define SET_IPV6_ADDR_MASK(dst, src, msk) \
@@ -138,7 +138,8 @@ init_restrict(void)
 	 */
 	resinit[0].addr = htonl(INADDR_ANY);
 	resinit[0].mask = 0;
-	memset(&resinit6[0].addr6, 0, sizeof(struct in6_addr));
+	memset(&resinit6[0].addr6, 0, sizeof(struct in6_addr)); 
+	memset(&resinit6[0].mask6, 0, sizeof(struct in6_addr)); 
 	restrictlist = &resinit[0];
 	restrictlist6 = &resinit6[0];
 	restrictcount = 1;
