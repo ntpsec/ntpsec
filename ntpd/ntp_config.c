@@ -2070,7 +2070,10 @@ getnetnum(
 
 	/* Get host address. Looking for UDP datagram connection */
  	memset(&hints, 0, sizeof (hints));
-	hints.ai_family = AF_UNSPEC;
+ 	if (addr->ss_family == AF_INET || addr->ss_family == AF_INET6)
+	    hints.ai_family = addr->ss_family;
+	else
+	    hints.ai_family = AF_UNSPEC;
 
 #ifdef DEBUG
 		if (debug > 3)
@@ -2094,7 +2097,6 @@ getnetnum(
 	}
 
 	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
-	addr->ss_family = ptr->ai_family;
 #ifdef DEBUG
 	if (debug > 1)
 		printf("getnetnum given %s, got %s \n",
