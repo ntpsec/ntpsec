@@ -639,7 +639,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * It's a live one!  Remember this time.
 			 */
 
-			instance->lastref = instance->lastrec;
+			pp->lastref = pp->lastrec;
 			refclock_receive(peer);
 
 			/*
