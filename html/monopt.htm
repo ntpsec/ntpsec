@@ -92,16 +92,16 @@ signals, where present and configured. Each valid update appends a
 line of the following form to the current element of a file
 generation set named <tt>peerstats</tt>:</dd>
 
-<dd><tt>48773 10847.650 127.127.4.1 9714 -0.001605 0.00000
-0.00142</tt></dd>
+<dd><tt>48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000
+0.001424877 0.000958674</tt></dd>
 
 <dd>The first two fields show the date (Modified Julian Day) and
 time (seconds and fraction past UTC midnight). The next two fields
 show the peer address in dotted-quad notation and status,
 respectively. The status field is encoded in hex in the format
 described in Appendix A of the NTP specification RFC 1305. The
-final three fields show the offset, delay and RMS jitter, all in
-seconds.</dd>
+final four fields show the offset, delay, dispersion and RMS
+jitter, all in seconds.</dd>
 
 <dt><tt>rawstats</tt></dt>
 

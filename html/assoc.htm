@@ -104,7 +104,17 @@ should always be cryptographically validated. The original NTPv3
 authentication scheme is applicable in this mode, as well as the
 new NTPv4 Autokey proventication scheme.</p>
 
-<h4>Broadcast Mode</h4>
+<h4>Broadcast/Multicast Modes</h4>
+
+<p>Broadcast mode in both NTPv3 and NTPv4 is limited to directly
+connected subnets such as Ethernets which support broadcast
+technology. Ordinarily, this technology does not operate beyond the
+first hop router or gateway. Where service is intended beyond the
+local subnet, IP multicasting can be used where supported by the
+operating system and the routers support the Internet Group
+Management Protocol (IGMP). Most current kernels and available
+routers do support IP multicast technology, although service
+providers are sometimes reluctant to deploy it.</p>
 
 <p>Broadcast mode is intended for configurations involving one or a
 few servers and a possibly very large client population. A
@@ -135,44 +145,30 @@ broadcast server and client. Once the offset is computed, the
 server continues as before and the client sends no further
 messages.</p>
 
-<h4>IP Broadcast Mode</h4>
-
-<p>Broadcast mode in both NTPv3 and NTPv4 is limited to directly
-connected subnets such as Ethernets which support broadcast
-technology. Ordinarily, this technology does not operate beyond the
-first hop router or gateway. Where service is intended beyond the
-local subnet, IP multicasting can be used where supported by the
-operating system and the routers support the Internet Group
-Management Protocol (IGMP). Most current kernels and available
-routers do support IP multicast technology, although service
-providers are sometimes reluctant to deploy it.</p>
-
-<h4>IP Multicast Support</h4>
-
-<p>A general discussion of IP multicast technology is beyond the
-scope here. In simple terms a host or router sending to a IP
-multicast group (class D) address expects all hosts or routers
-listening on this address to receive the message. There is no
-intrinsic limit on the number of senders or receivers and senders
-can be receivers and vice versa. The IANA has assigned multicast
-group address 224.0.1.1 to NTP, but this address should be used
-only where the multicast span can be reliably constrained to
-protect neighbor networks. In general, administratively scoped
-group addresses should be used, as described in RFC-2365, or GLOP
-group addresses, as described in RFC-2770.</p>
-
 <h4>Multicasting</h4>
 
 <p>Multicasting can be used to extend the scope of a timekeeping
-subnet in two ways: multicasting and manycasting. A multicast
-client is configured using the <tt>broadcast</tt> command, but with
-a multicast group (class D) address instead of a local subnet
-broadcast address. However, there is a subtle difference between
-broadcasting and multicasting. Broadcasting is specific to each
-interface and local subnet address. If more than one interface is
-attached to a machine, a separate <tt>broadcast</tt> command
-applies to each one separately. This provides a way to limit
-exposure in a firewall, for example.</p>
+subnet in two ways: multicasting and manycasting. A general
+discussion of IP multicast technology is beyond the scope of this
+page. In simple terms a host or router sending to a IP multicast
+group (class D) address expects all hosts or routers listening on
+this address to receive the message. There is no intrinsic limit on
+the number of senders or receivers and senders can be receivers and
+vice versa. The IANA has assigned multicast group address 224.0.1.1
+to NTP, but this address should be used only where the multicast
+span can be reliably constrained to protect neighbor networks. In
+general, administratively scoped group addresses should be used, as
+described in RFC-2365, or GLOP group addresses, as described in
+RFC-2770.</p>
+
+<p>A multicast client is configured using the <tt>broadcast</tt>
+command, but with a multicast group (class D) address instead of a
+local subnet broadcast address. However, there is a subtle
+difference between broadcasting and multicasting. Broadcasting is
+specific to each interface and local subnet address. If more than
+one interface is attached to a machine, a separate <tt>
+broadcast</tt> command applies to each one separately. This
+provides a way to limit exposure in a firewall, for example.</p>
 
 <p>IP multicasting is a different paradigm. A multicast message has
 the same format as a broadcast message and is configured with the
@@ -205,9 +201,9 @@ Configuration Options</a> page.</p>
 
 <h4>Burst Modes</h4>
 
-<p>There are two burst modes where a single poll triggers a burst
-of eight packets instead of the usual one. The <tt>burst</tt> mode
-sends a burst when the server is reachable, while the <tt>
+<p>There are two burst modes where a single poll event triggers a
+burst of eight packets instead of the usual one. The <tt>burst</tt>
+mode sends a burst when the server is reachable, while the <tt>
 iburst</tt> mode sends a burst when the server is unreachable. Each
 mode is independently of the other and both can be used if
 necessary. When the server is reachable, the packet spacing is a

@@ -33,21 +33,25 @@ single server from a clique of servers providing the same service.
 The manycast paradigm is designed to find a plurality of redundant
 servers satisfying defined optimality criteria.</p>
 
-<p>Manycasting requires public key cryptography, which in NTPv4 is
-provided by the OpenSSL cryptographic library available from <a
-href="http://www.openssl.org">http://www.openssl.org</a>. The
-library can also be used with other NTPv4 modes as well and this is
-highly recommended, especially for broadcast modes.</p>
+<p>Manycasting can be used with either symmetric key or public key
+cryptography. The public key infrastructure (PKI) offers the best
+protection against compromised keys and is generally considered
+stronger, at least with relatively large key sizes. It is
+implemented using the Autokey protocol and the OpenSSL
+cryptographic library available from <a href=
+"http://www.openssl.org">http://www.openssl.org</a>. The library
+can also be used with other NTPv4 modes as well and is highly
+recommended, especially for broadcast modes.</p>
 
-<p>A persistent manycast client association is configured using a
-<tt>manycastclient</tt> command, which is similar to a <tt>
+<p>A persistent manycast client association is configured using the
+<tt>manycastclient</tt> command, which is similar to the <tt>
 server</tt> command but with a multicast (class D) group address
 instead of an ordinary IP (class A, B, C) address. When more
 servers are needed, it broadcasts manycast client messages to this
 address at the minimum feasible rate and minimum feasible
 time-to-live (TTL) hops, depending on how many servers have already
 been found. There can be as many manycast client associations as
-different group addresss, each one serving as a template for a
+different group address, each one serving as a template for a
 future ephemeral unicast client/server association.</p>
 
 <p>Manycast servers configured with the <tt>manycastserver</tt>
@@ -64,16 +68,17 @@ unicast server message.</p>
 ephemeral client/server association according to the matching
 manycast client template, but only if cryptographically
 authenticated and the server stratum is less than or equal to the
-client stratum. Then, the client polls the server at its unicast
-address in burst mode in order to reliably set the host clock and
-validate the source. This normally results in a volley of eight
-client/server cycles over a 30-s interval during which both the
-synchronization and cryptographic protocols run concurrently.
-Following the volley, the client runs the NTP intersection and
-clustering algorithms, which act to discard all but the "best"
-associations according to stratum and synchronization distance. The
-surviving associations then continue in ordinary client/server
-mode.</p>
+client stratum. Authentication is explicitly required and either
+symmetric key or public key (Autokey) can be used. Then, the client
+polls the server at its unicast address in burst mode in order to
+reliably set the host clock and validate the source. This normally
+results in a volley of eight client/server cycles over a 30-s
+interval during which both the synchronization and cryptographic
+protocols run concurrently. Following the volley, the client runs
+the NTP intersection and clustering algorithms, which act to
+discard all but the "best" associations according to stratum and
+synchronization distance. The surviving associations then continue
+in ordinary client/server mode.</p>
 
 <p>The manycast client polling strategy is designed to reduce as
 much as possible the volume of manycast client messages and the
@@ -187,12 +192,36 @@ accordingly.</p>
 continuously and run either <tt>ntpdate</tt> or <tt>ntpd -q</tt> as
 a cron job. In either case the servers must be configured in
 advance and the program fails if none are available when the cron
-job runs. A really slick application of Manycast is with <tt>ntp
+job runs. A really slick application of manycast is with <tt>ntp
 -q</tt>. The program wakes up, scans the local landscape looking
 for the usual suspects, selects the best from among the rascals,
 sets the clock and then departs. Servers do not have to be
 configured in advance and all clients throughout the network can
 have the same configuration file.</p>
+
+<h3>Manycast Interactions with Autokey</h3>
+
+<p>Each time a manycast client sends a client mode packet to a
+multicast group address, all manycast servers in scope generate a
+reply including the host name and status word. The manycast clients
+then run the Autokey protocol, which collects and verifies all
+certificates involved. Following the burst interval all but three
+survivors are cast off, but the certificates remain in the local
+cache. It often happens that several complete signing trails from
+the client to the primary servers are collected in this way.</p>
+
+<p>About once an hour or less often if the poll interval exceeds
+this, the client regenerates the Autokey key list. This is in
+general transparent in client/server mode. However, about once per
+day the server private value used to generate cookies is refreshed
+along with all manycast client associations. In this case all
+cryptographic values including certificates is refreshed. If a new
+certificate has been generated since the last refresh epoch, it
+will automatically revoke all prior certificates that happen to be
+in the certificate cache. At the same time, the manycast scheme
+starts all over from the beginning and the expanding ring shrinks
+to the minimum and increments from there while collecting all
+servers in scope.</p>
 
 <h3>Manycast Options</h3>
 
