@@ -307,9 +307,9 @@ clear_all(void)
 			    MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
+				if (peer->flags & FLAG_CONFIG)
+					unpeer(peer);
 			}
-			if (peer->flags & FLAG_CONFIG)
-				unpeer(peer);
 		}
 	}
 #ifdef DEBUG
@@ -347,7 +347,6 @@ unpeer(
 		printf("demobilize %u %d\n", peer_to_remove->associd,
 		    peer_associations);
 #endif
-	peer_clear(peer_to_remove, "NULL");
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;

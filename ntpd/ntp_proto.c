@@ -750,8 +750,10 @@ receive(
 			if (crypto_recv(peer, rbufp) == XEVNT_OK)
 				return;
 
+			peer->flash |= TEST9;	/* crypto error */
 			peer_clear(peer, "CRYP");
-			unpeer(peer);
+			if (!(peer->flags & FLAG_CONFIG))
+				unpeer(peer);
 #endif /* OPENSSL */
 			return;
 
@@ -941,12 +943,12 @@ receive(
 		peer->flash |= TEST8;
 		rval = crypto_recv(peer, rbufp);
 		if (rval != XEVNT_OK) {
-			peer_clear(peer, "CRYP");
 			peer->flash |= TEST9;	/* crypto error */
-			if (!(peer->flags & FLAG_CONFIG)) {
+			peer_clear(peer, "CRYP");
+			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
-				return;
-			}
+			return;
+
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST8;
@@ -1062,12 +1064,11 @@ process_packet(
 	 */
 	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
-			peer_clear(peer, "DENY");
 			peer->flash |= TEST4;	/* access deny */
-			if (!(peer->flags & FLAG_CONFIG)) {
+			peer_clear(peer, "DENY");
+			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
-				return;
-			}
+			return;
 		}
 	}
 
@@ -1352,6 +1353,17 @@ poll_update(
 	} else {
 		hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 	}
+#ifdef OPENSSL
+	/*
+	 * Bit of crass arrogance at this point. If the poll interval
+	 * has changed and we have a keylist, the lifetimes in the
+	 * keylist are probably bogus. In this case purge the keylist
+	 * and regenerate it later.
+	 */
+	if (hpoll != peer->hpoll)
+		key_expire(peer);
+#endif /* OPENSSL */
+	peer->hpoll = hpoll;
 
 	/*
 	 * Now we figure out if there is an override. If during the
@@ -1403,17 +1415,6 @@ poll_update(
 	 */
 	if (peer->nextdate <= current_time)
 		peer->nextdate = current_time + 1;
-#ifdef OPENSSL
-	/*
-	 * Bit of crass arrogance at this point. If the poll interval
-	 * has changed and we have a keylist, the lifetimes in the
-	 * keylist are probably bogus. In this case purge the keylist
-	 * and regenerate it later.
-	 */
-	if (hpoll != peer->hpoll)
-		key_expire(peer);
-	peer->hpoll = hpoll;
-#endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
@@ -2562,12 +2563,12 @@ peer_xmit(
 				    &peer->srcadr, sendlen, exten, 0);
 				free(exten);
 			} else {
-				peer_clear(peer, "CRYP");
-				peer->flash |= TEST9; /* crypto error */
 				msyslog(LOG_INFO,
 				    "transmit: crypto error for %s",
 				    stoa(&peer->srcadr));
 				free(exten);
+				peer->flash |= TEST9; /* crypto error */
+				peer_clear(peer, "CRYP");
 				return;
 			}
 		}
@@ -2587,10 +2588,10 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
-		peer_clear(peer, "NKEY");
-		peer->flash |= TEST9;		/* no key found */
 		msyslog(LOG_INFO, "transmit: key %u not found for %s",
 		    xkeyid, stoa(&peer->srcadr));
+		peer->flash |= TEST9;		/* no key found */
+		peer_clear(peer, "NKEY");
 		return;
 	}
 	sendlen += authlen;
