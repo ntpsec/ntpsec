@@ -1,6 +1,12 @@
 2001-05-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_true.c:
+	   a. Don't cream pp->a_lastcode when we get a <cr><lf> pair 
+	   b. Fix up pp->leap handling to work correctly 
+	   c. clear CEVNT_BADTIME etc warnings when we get good clock 
+	CEVNT_NOMINAL. 
+	From: John Woolner <vk1et@tpg.com.au>
+
 	* kernel/sys/pcl720.h:
 	Add support for the XL clock to refclock_true.c 
 	From: Paul A Vixie <vixie@mfnx.net> 

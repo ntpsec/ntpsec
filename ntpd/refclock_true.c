@@ -61,11 +61,12 @@
  *
  * Quality codes indicate possible error of
  *   468-DC GOES Receiver:
- *   GPS-TM/TMD Receiver:
- *       ?     +/- 500 milliseconds	#     +/- 50 milliseconds
- *       *     +/- 5 milliseconds	.     +/- 1 millisecond
- *     space   less than 1 millisecond
- *   OM-DC OMEGA Receiver:
+ *   GPS-TM/TMD Receiver: (default quality codes for XL-DC)
+ *       ?     +/- 1  milliseconds	#     +/- 100 microseconds
+ *       *     +/- 10 microseconds	.     +/- 1   microsecond
+ *     space   less than 1 microsecond
+ *   OM-DC OMEGA Receiver: (default quality codes for OMEGA)
+ *   WARNING OMEGA navigation system is no longer existent
  *       >     >+- 5 seconds
  *       ?     >+/- 500 milliseconds    #     >+/- 50 milliseconds
  *       *     >+/- 5 milliseconds      .     >+/- 1 millisecond
@@ -107,6 +108,7 @@
  * flag3 - enable ppsclock streams module
  * flag4 - use the PCL-720 (BSD/OS only)
  */
+
 
 /*
  * Definitions
@@ -324,6 +326,10 @@ true_receive(
 	char synced;
 	int i;
 	int lat, lon, off;	/* GOES Satellite position */
+        /* Use these variable to hold data until we decide its worth keeping */
+        char    rd_lastcode[BMAX];
+        l_fp    rd_tmp;
+        u_short rd_lencode;
 
 	/*
 	 * Get the clock this applies to and pointers to the data.
@@ -335,14 +341,17 @@ true_receive(
 	/*
 	 * Read clock output.  Automatically handles STREAMS, CLKLDISC.
 	 */
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
+        rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+        rd_lastcode[rd_lencode] = '\0';
 
 	/*
 	 * There is a case where <cr><lf> generates 2 timestamps.
 	 */
-	if (pp->lencode == 0)
-	    return;
-	pp->a_lastcode[pp->lencode] = '\0';
+        if (rd_lencode == 0)
+            return;
+        pp->lencode = rd_lencode;
+        strcpy(pp->a_lastcode, rd_lastcode);
+        pp->lastrec = rd_tmp;
 	true_debug(peer, "receive(%s) [%d]\n", pp->a_lastcode, pp->lencode);
 
 	up->pollcnt = 2;
@@ -468,9 +477,12 @@ true_receive(
 
 		/*
 		 * Adjust the synchronize indicator according to timecode
+		 * say were OK, and then say not if we really are not OK
 		 */
-		if (synced != ' ' && synced != '.' && synced != '*')
+		if (synced == '>' || synced == '#' || synced == '?')
 		    pp->leap = LEAP_NOTINSYNC;
+		else
+                    pp->leap = LEAP_NOWARNING;
 
 		true_doevent(peer, e_TS);
 
@@ -528,6 +540,11 @@ true_receive(
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
 		}
+		/*
+		 * If clock is good we send a NOMINAL message so that
+		 * any previous BAD messages are nullified
+		 */
+                refclock_report(peer, CEVNT_NOMINAL);
 		refclock_receive(peer);
 
 		/*
