@@ -32,14 +32,13 @@
  * included to protect against timewarps, timespikes and general mayhem.
  * All units are in s and s/s, unless noted otherwise.
  */
-#define CLOCK_MAX	.128	/* default step offset (s) */
-#define CLOCK_PANIC	1000.	/* default panic offset (s) */
+#define CLOCK_MAX	.128	/* default step threshold (s) */
+#define CLOCK_MINSTEP	900.	/* default stepout threshold (s) */
+#define CLOCK_PANIC	1000.	/* default panic threshold (s) */
 #define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
 #define CLOCK_PLL	16.	/* PLL loop gain */
 #define CLOCK_FLL	8.	/* FLL loop gain */
 #define CLOCK_AVG	4.	/* parameter averaging constant */
-#define CLOCK_MINSEC	256.	/* min FLL update interval (s) */
-#define CLOCK_MINSTEP	900.	/* step-change timeout (s) */
 #define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
@@ -108,10 +107,10 @@
 /*
  * Program variables that can be tinkered.
  */
-double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
-double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
+double	clock_max = CLOCK_MAX;	/* step threshold (s) */
+double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold (s) */
+double	clock_panic = CLOCK_PANIC; /* panic threshold (s) */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
-double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
 double	allan_xpt = CLOCK_ALLAN; /* Allan intercept (s) */
 
 /*
@@ -431,9 +430,9 @@ local_clock(
 		 * We come here in the normal case for linear phase and
 		 * frequency adjustments. If the difference between the
 		 * last offset and the current one exceeds the jitter by
-		 * CLOCK_SGATE (4) and the interval since the last
-		 * update is less than twice the system poll interval,
-		 * consider the update a popcorn spike and ignore it..
+		 * CLOCK_SGATE and the interval since the last update is
+		 * less than twice the system poll interval, consider
+		 * the update a popcorn spike and ignore it..
 		 */
 		default:
 			allow_panic = FALSE;

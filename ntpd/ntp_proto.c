@@ -1674,8 +1674,8 @@ clock_filter(
 
 	/*
 	 * If the difference between the last offset and the current one
-	 * exceeds the jitter by CLOCK_SGATE (4) and the interval since
-	 * the last update is less than twice the system poll interval,
+	 * exceeds the jitter by CLOCK_SGATE and the interval since the
+	 * last update is less than twice the system poll interval,
 	 * consider the update a popcorn spike and ignore it.
 	 */
 	if (m > 1 && etemp > CLOCK_SGATE * dtemp &&
