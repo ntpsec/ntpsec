@@ -33,7 +33,6 @@
 /*	98/06/01  */
 #include "ntp_machine.h"	/*  98/06/01  */
 #include "ntpd.h"
-#include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"

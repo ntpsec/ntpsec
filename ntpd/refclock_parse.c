@@ -125,7 +125,6 @@
 #endif
 
 #include "ntp_io.h"
-#include "ntp_select.h"
 #include "ntp_stdlib.h"
 
 #include "parse.h"

@@ -1,3 +1,13 @@
+1999-11-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_parse.c: Lose #include "ntp_select.h"
+	* ntpd/ntpd.c: Lose #include "ntp_select.h"
+	* ntpd/ntp_io.c: Lose #include "ntp_select.h"
+	* ntpd/ntp_intres.c: Lose #include "ntp_select.h"
+	* libntp/iosignal.c: Lose #include "ntp_select.h"
+	* include/ntpd.h: #include "ntp_select.h" for declaration of activefds
+	Reported by: Christian Krackowizer <kra1@technodat.co.at> 
+	
 1999-11-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98c

@@ -33,7 +33,6 @@
 
 #include "ntp_machine.h"
 #include "ntpd.h"
-#include "ntp_select.h"
 #include "ntp_io.h"
 #include "iosignal.h"
 #include "ntp_refclock.h"
