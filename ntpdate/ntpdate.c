@@ -115,7 +115,7 @@ volatile int debug = 0;
 int ai_fam_templ;
 int nbsock;
 SOCKET fd[MAX_AF];	/* support up to 2 sockets */
-SOCKET fd_family[MAX_AF];	/* to remember the socket family */
+int fd_family[MAX_AF];	/* to remember the socket family */
 #ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
 #else
@@ -334,7 +334,7 @@ ntpdatemain (
 
 	wVersionRequested = MAKEWORD(1,1);
 	if (WSAStartup(wVersionRequested, &wsaData)) {
-		msyslog(LOG_ERR, "No useable winsock.dll: %m");
+		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
 		exit(1);
 	}
 
@@ -609,7 +609,7 @@ ntpdatemain (
 #ifndef SYS_WINNT
 				if (errno != EINTR)
 #endif
-					msyslog(LOG_ERR,
+					netsyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 						"poll() error: %m"
 #else
@@ -618,7 +618,7 @@ ntpdatemain (
 						);
 			} else {
 #ifndef SYS_VXWORKS
-				msyslog(LOG_DEBUG,
+				netsyslog(LOG_DEBUG,
 #ifdef HAVE_POLL_H
 					"poll(): nfound = %d, error: %m",
 #else
@@ -1683,13 +1683,13 @@ init_io(void)
 		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
 		    errno == EPFNOSUPPORT)
 			continue;
-		msyslog(LOG_ERR, "socket() failed: %m");
+		netsyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 		/*NOTREACHED*/
 	}
            /* set socket to reuse address */
            if (setsockopt(fd[nbsock], SOL_SOCKET, SO_REUSEADDR, (void*) &optval, sizeof(optval)) < 0) {
-   		   msyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
+   		   netsyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
    		   exit(1);
 		   /*NOTREACHED*/
     	   }
@@ -1697,7 +1697,7 @@ init_io(void)
            /* Restricts AF_INET6 socket to IPv6 communications (see RFC 2553bis-03) */
            if (res->ai_family == AF_INET6)
                 if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
-   		           msyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
+   		           netsyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
    		           exit(1);
 		           /*NOTREACHED*/
     	        }
@@ -1716,10 +1716,10 @@ init_io(void)
 #else
 				if (WSAGetLastError() == WSAEADDRINUSE)
 #endif /* SYS_WINNT */
-				msyslog(LOG_ERR,
+				netsyslog(LOG_ERR,
 					"the NTP socket is in use, exiting");
 				else
-				msyslog(LOG_ERR, "bind() fails: %m");
+				netsyslog(LOG_ERR, "bind() fails: %m");
 			exit(1);
 		}
 	}
@@ -1729,7 +1729,7 @@ init_io(void)
 	    fdmask[nbsock].events = POLLIN;
 #else
 	    FD_SET(fd[nbsock], &fdmask);
-            if (maxfd < fd[nbsock]+1) {
+            if ((SOCKET) maxfd < fd[nbsock]+1) {
                 maxfd = fd[nbsock]+1;
             }
 #endif
@@ -1743,21 +1743,21 @@ init_io(void)
 	int on = TRUE;
 
 	   if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
-	  msyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
+	  netsyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
 	  exit(1);
 	}
   }
 # else /* not SYS_VXWORKS */
 #  if defined(O_NONBLOCK)
 	   if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
-		msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+		netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 		exit(1);
 		/*NOTREACHED*/
 	}
 #  else /* not O_NONBLOCK */
 #	if defined(FNDELAY)
 	   if (fcntl(fd[nbsock], F_SETFL, FNDELAY) < 0) {
-		msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+		netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 		exit(1);
 		/*NOTREACHED*/
 	}
@@ -1768,7 +1768,7 @@ init_io(void)
 # endif /* SYS_VXWORKS */
 #else /* SYS_WINNT */
 	if (ioctlsocket(fd[nbsock], FIONBIO, (u_long *) &on) == SOCKET_ERROR) {
-		msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
+		netsyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
 		exit(1);
 	}
 #endif /* SYS_WINNT */
@@ -1804,7 +1804,7 @@ sendpkt(
         }
 
         if ( sock == 0 ) {
-                msyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
+                netsyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
                 exit(1);
                 /*NOTREACHED*/
         }
@@ -1820,7 +1820,7 @@ sendpkt(
 		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS)
 #endif /* SYS_WINNT */
-                        msyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
+                        netsyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
 	}
 }
 
@@ -1890,7 +1890,7 @@ input_handler(void)
 			return;
 		else if (n == -1) {
 			if (errno != EINTR)
-				msyslog(LOG_ERR,
+				netsyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 					"poll() error: %m"
 #else

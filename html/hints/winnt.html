@@ -11,17 +11,24 @@
 
     <body>
         <h1>NTP 4.x for Windows NT</h1>
-        <h2>Do not try to compile NTP-4.0.99i under WINNT, it will not work. Fixed NTP-4.0.99i; look for next release to be functional. Sven - May 11 2000</h2>
-        <h2>Download NTP-4.0.99g for the last stable WINNT port. I am working on adapting the major changes starting with 99i and getting things running again. Sven - April 25 2000</h2>
+
         <h2>Introduction</h2>
-        The NTP 4 distribution runs as service on (i386) Windows NT 4.0 and Windows 2000. The binaries work on dual processor systems. This port has not been tested on the Alpha platform.
+        The NTP 4 distribution runs as service on Windows NT 4.0, Windows 2000, Windows XP,
+        Windows .NET Server 2003. It will NOT run on Windows 95, 98, ME, etc.
+        The binaries work on dual processor systems. This port has not been tested
+        on the Alpha platform. This release now uses OpenSSL for authentication.
         <p>Refer to System Requirements and Instructions for how to compile the program.</p>
         <h2>Reference Clocks</h2>
-        Refernce clock support under Windows NT is tricky because the IO functions are so much different. The following reference clocks are supported by Windows NT:
+        Reference clock support under Windows NT is tricky because the IO functions are
+        so much different. Most of the clock types have been built into the ntpd executable
+        and should work but have not been tested by the ntp project. The following reference
+        clocks are known to work and are supported by Windows NT:
         <p><a href="../driver1.html">Type 1</a> Undisciplined Local Clock (LOCAL)<br>
             <a href="../driver29.html">Type 29</a> Trimble Navigation Palisade GPS (GPS_PALISADE)</p>
         <h2>Functions Supported</h2>
         All NTP functions are supported with some constraints. See the TODO list below.
+        Note that the ntptrace executable is not supported and you should use the PERL script
+        version instead.
         <h2>Accuracy</h2>
         Greg Brackley has implemented a fantastic interpolation scheme that improves the precision of the NTP clock using a realtime thread (is that poetic or what!) which captures a tick count from the 8253 counter after each OS tick. The count is used to interpolate the time between operating system ticks.
         <p>On a typical 200+ MHz system NTP achieves a precision of about 5 microseconds and synchronizes the clock to +/-500 microseconds using the <a href="http://www.trimble.com/products/ntp">Trimble Palisade</a> as UTC reference. This allows distributed applications to use the 10 milliseconds ticks available to them with high confidence.</p>
@@ -30,22 +37,27 @@
         <a href="http://www.trimble.com/oem/ntp">http://www.trimble.com/oem/ntp</a> and <a href="http://www.five-ten-sg.com/">http://www.five-ten-sg.com/</a>
         <h2>ToDo</h2>
         <ul>
-            <li>MD5 authentication causes problems with DNS. If you use encryption/authentication, you have to use IP numbers in <tt>ntp.conf.</tt>
-            <li>NMEA refclock support is in development.
             <li>See if precision can be improved by using CPU cycle counter for tick interpolation.
             <li>Make precision time available to applications using NTP_GETTIME API
         </ul>
         <h2>Compiling Requirements</h2>
         <ul>
-            <li><tt>Windows NT 4.0 or 5.0 (2000)</tt>
-            <li><tt>Microsoft Visual C++ 6.0</tt>
-            <li>Some version of the archiving program <tt>ZIP</tt>.
+            <li>Windows NT 4.0 Windows 2000, Windows XP, or Windows.NET Server 2003
+            <li>Microsoft Visual C++ 6.0
+            <li>Some way of uncompressing and untarring the gzipped tar file.
+            <li>OpenSSL must be built on the box before building NTP. Additional steps would
+            be required to not use OpenSSL.
         </ul>
         <h2>Compiling Instructions</h2>
         <ol>
+            <li>Unpack and build OpenSSL according to the OpenSSL instructions for building on
+            Windows. Currently the NTP build requires OpenSSL 0.9.6g as it looks for the path
+            to that build for the include and libeay32.lib files.
             <li>Unpack the NTP-4.x.tar.gz
             <li>Open the .\ports\winnt\ntp.dsw Visual C workspace
             <li>Batch build all projects
+            <li>The built binaries can be found in the port\winnt\bin\Release subdirectory
+            <li>In addition you will need to install the OpenSSL libeay32.dll
         </ol>
         <h2>Configuration File</h2>
         The default NTP configuration file path is %SystemRoot%<tt>\system32\drivers\etc\. </tt>(%SystemRoot% is an environmental variable that can be determined by typing &quot;set&quot; at the &quot;Command Prompt&quot; or from the &quot;System&quot; icon in the &quot;Control Panel&quot;).<br>
@@ -67,8 +79,18 @@
         <p>Use the registry editor to edit the value for the ntpd executable under LocalMachine\System\CurrentControlSet\Services\NTP.</p>
         <p>Add the -g option to the ImagePath key, behind &quot;%INSTALLDIR&gt;\ntpd.exe&quot;. This will force NTP to accept large time errors (including 1.1.1980 00:00)</p>
         <h2>Bug Reports</h2>
-        Send bug reports to <a href="news://comp.protocols.time.ntp">news://comp.protocols.time.ntp</a> and Sven_Dietrich@Trimble.COM
+        Send questions to <a href="news://comp.protocols.time.ntp">news://comp.protocols.time.ntp</a>
+        and bug reports should be entered in <a href="http://bugzilla.ntp.org/">Bugzilla</a> on the
+        NTP Web site.
         <h2>Change Log</h2>
+        <h3>Last revision 22 May 2003&nbsp; Version 4.2.0</h3>
+        <b>by Danny Mayer (mayer@ntp.org>)</b>
+        <h3>Significant Changes:</h3>
+        This latest release of NTP constitutes a major upgrade to its ability to build and
+        run on Windows platforms and should now build and run cleanly. More importantly it
+        is now able to support all authentication in the same way as Unix boxes. This does
+        require the usage of OpenSSL which is now a prerequisite for build on Windows.
+
         <h3>Last revision 16 February 1999&nbsp; Version 4.0.99e.</h3>
         <b>by Sven Dietrich (sven_dietrich@trimble.com)</b>
         <p><b>Significant Changes:</b></p>
