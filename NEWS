@@ -1,8 +1,13 @@
 * wwv and chu refclock improvements
 * OpenSSL integration
 --
+* (x)ntpdc compatibility patch
+* Virtual IP improvements
+* ntp_loopfilter fixes and improvements
 * ntpdc improvements
+* GOES refclock fix
 * JJY driver
+* bsdi port fixes
 * HP MPE/iX port
 * Win/NT port upgrade
 * Dynix PTX port fixes
