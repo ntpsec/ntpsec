@@ -144,8 +144,21 @@ struct vsock {
 
 ISC_LIST(vsock_t)	sockets_list;
 
+typedef struct vaddr vaddr_t;
+
+struct vaddr {
+      struct sockaddr_storage        addr;
+      int                            if_index;
+      ISC_LINK(vaddr_t)              link;
+};
+
+ISC_LIST(vaddr_t)       remoteaddr_list;
+
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
+void	add_addr_to_list	P((struct sockaddr_storage *, int));
+void	delete_addr_from_list	P((struct sockaddr_storage *));
+int     find_addr_in_list P((struct sockaddr_storage *));
 int	create_wildcards	P((u_short));
 isc_boolean_t address_okay	P((isc_interface_t *));
 void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
@@ -220,6 +233,9 @@ init_io(void)
 #endif /* SYS_WINNT */
 
 	ISC_LIST_INIT(sockets_list);
+
+        ISC_LIST_INIT(remoteaddr_list);
+
 	/*
 	 * Create the sockets
 	 */
@@ -701,6 +717,7 @@ io_multicast_add(
 		if (i >= ninterfaces)
 			ninterfaces = i+1;
 
+                add_addr_to_list(&addr, i);
 		break;
 
 #ifdef HAVE_IPV6
@@ -781,6 +798,7 @@ io_multicast_add(
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
 
+                add_addr_to_list(addr, i);
 		break;
 #endif /* HAVE_IPV6 */
 	}
@@ -935,6 +953,8 @@ io_multicast_del(
 		break;
 #endif /* HAVE_IPV6 */
 	}/* switch */
+        delete_addr_from_list(&addr);
+
 #else /* not MCAST */
 	netsyslog(LOG_ERR, "this function requires multicast kernel");
 #endif /* not MCAST */
@@ -1908,6 +1928,10 @@ findbcastinter(
 {
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
+	
+	i = find_addr_in_list(addr);
+	if(i >= 0)
+	     return (&inter_list[i]);
 
 	for (i = 0; i < ninterfaces; i++) {
 		/*
@@ -2146,4 +2170,63 @@ delete_socket_from_list(SOCKET fd) {
 		else
 			lsock = next;
 	}
+}
+void
+add_addr_to_list(struct sockaddr_storage *addr, int if_index){
+	vaddr_t *laddr = malloc(sizeof(vaddr_t));
+	memcpy(&laddr->addr, addr, sizeof(addr));
+	laddr->if_index = if_index;
+
+	ISC_LIST_APPEND(remoteaddr_list, laddr, link);
+#ifdef DEBUG
+	if (debug)
+	    printf("Added addr %s to list of addresses\n",
+		   stoa(addr));
+#endif
+
+
+}
+void
+delete_addr_from_list(struct sockaddr_storage *addr) {
+
+	vaddr_t *next;
+	vaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
+
+	while(laddr != NULL) {
+		next = ISC_LIST_NEXT(laddr, link);
+		if(SOCKCMP(&laddr->addr, addr)) {
+			ISC_LIST_DEQUEUE(remoteaddr_list, laddr, link);
+			free(laddr);
+			break;
+		}
+		else
+			laddr = next;
+	}
+#ifdef DEBUG
+	if (debug)
+	    printf("Deleted addr %s from list of addresses\n",
+		   stoa(addr));
+#endif
+}
+int
+find_addr_in_list(struct sockaddr_storage *addr) {
+
+	vaddr_t *next;
+	vaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
+#ifdef DEBUG
+	if (debug)
+	    printf("Finding addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+	while(laddr != NULL) {
+		next = ISC_LIST_NEXT(laddr, link);
+		if(SOCKCMP(&laddr->addr, addr)) {
+			return (laddr->if_index);
+			break;
+		}
+		else
+			laddr = next;
+	}
+	return (-1); /* Not found */
 }
