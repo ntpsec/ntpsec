@@ -200,7 +200,9 @@ local_clock(
 	)
 {
 	u_long mu;		/* interval since last update (s) */
+#if 0 /* OERROR */
 	double oerror;		/* previous error estimate */
+#endif
 	double flladj;		/* FLL frequency adjustment (ppm) */
 	double plladj;		/* PLL frequency adjustment (ppm) */
 	double clock_frequency;	/* clock frequency adjustment (ppm) */
@@ -276,7 +278,9 @@ local_clock(
 	/*
 	 * Update the jitter estimate.
 	 */
+/* OERROR
 	oerror = sys_jitter;
+*/
 	dtemp = SQUARE(sys_jitter);
 	sys_jitter = SQRT(dtemp + (epsil - dtemp) / CLOCK_AVG);
 
@@ -439,7 +443,7 @@ local_clock(
 		default:
 			allow_panic = FALSE;
 			dtemp = fabs(fp_offset - last_offset);
-/*
+/* OERROR
 			if (dtemp > CLOCK_SGATE * oerror && mu <
 			    (u_long) ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
