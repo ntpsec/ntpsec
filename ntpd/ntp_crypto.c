@@ -93,7 +93,6 @@
 #define MAX_LEAP	100	/* max UTC leapseconds (s) */
 #define VALUE_LEN	(6 * 4) /* min response field length */
 #define YEAR		(60 * 60 * 24 * 365) /* seconds in year */
-#define NTP_RANDFILE	"/.rnd"	/* OpenSSL random seed file */
 
 /*
  * Global cryptodata in host byte order
@@ -120,7 +119,7 @@ static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parameters */
 static EVP_PKEY	*mvpar_pkey = NULL; /* MV parameters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
-static char *rand_file = NTP_RANDFILE; /* random seed file */
+static char *rand_file = NULL;	/* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
 static char *iffpar_file = NULL; /* IFF parameters file */
@@ -3685,7 +3684,7 @@ void
 crypto_setup(void)
 {
 	EVP_PKEY *pkey;		/* private/public key pair */
-	char	filename[MAXFILENAME]; /* name of host file */
+	char	filename[MAXFILENAME]; /* file name buffer */
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	tstamp_t fstamp;	/* filestamp */
 	tstamp_t sstamp;	/* sign filestamp */
@@ -3709,8 +3708,10 @@ crypto_setup(void)
 
 	/*
 	 * Load required random seed file and seed the random number
-	 * generator. Wiggle it a bit and write it back so the sequence
-	 * does not repeat when we next restart.
+	 * generator. Be default, it is found in the user home
+	 * directory. The root home directory may be / or /root,
+	 * depending on the system. Wiggle the contents a bit and write
+	 * it back so the sequence does not repeat when we next restart.
 	 */
 	ERR_load_crypto_strings();
 	if (rand_file == NULL) {
@@ -3731,8 +3732,9 @@ crypto_setup(void)
 		exit (-1);
 	}
 	if ((bytes = RAND_load_file(rand_file, -1)) == 0) {
-		msyslog(LOG_ERR, "crypto_setup %s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
+		msyslog(LOG_ERR,
+		    "crypto_setup: random seed file %s not found\n",
+		    rand_file);
 		exit (-1);
 	}
 	get_systime(&seed);
@@ -3742,8 +3744,8 @@ crypto_setup(void)
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_setup: %d bytes read from seed file %s\n",
-		    bytes, rand_file);
+		    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
+		    SSLeay(), rand_file, bytes);
 #endif
 
 	/*
