@@ -465,6 +465,7 @@ snifflink(
 			progname, file, errno, strerror(errno));
 		exit(1);
 	}
+	buf[rc] = '\0';
 	*linkdata = strdup(buf);
 	/* XXX: make sure linkdata is not 0... */
 #endif /* not HAVE_READLINK */
