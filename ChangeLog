@@ -1,6 +1,6 @@
 2000-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* util/ntp-genkeys.c (main): Progress...
+	* util/ntp-genkeys.c (main): Minimal progress...
 
 2000-08-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 

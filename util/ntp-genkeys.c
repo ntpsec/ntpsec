@@ -550,6 +550,18 @@ main(
 	}
 	snifflink(path_privatekey, &link_privatekey);
 
+	if (path_dhparms) {
+		if (*path_dhparms != '/') {
+			fprintf(stderr,
+				"%s: dhparms path <%s> doesn't begin with a /\n",
+				progname, path_dhparms);
+			exit(1);
+		}
+	} else {
+		path_dhparms = "PATH_DHPARMS";
+	}
+	snifflink(path_dhparms, &link_dhparms);
+
 	printf("After config:\n");
 	printf("path_keys       = <%s> -> <%s>\n"
 	       , path_keys? path_keys: ""
@@ -566,6 +578,10 @@ main(
 	printf("path_privatekey = <%s> -> <%s>\n"
 	       , path_privatekey? path_privatekey: ""
 	       , link_privatekey? link_privatekey: ""
+		);
+	printf("path_dhparms = <%s> -> <%s>\n"
+	       , path_dhparms? path_dhparms: ""
+	       , link_dhparms? link_dhparms: ""
 		);
 
 	/*
