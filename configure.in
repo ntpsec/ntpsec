@@ -563,6 +563,7 @@ AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
 [/* Handle ss_family */
 #if !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE___SS_FAMILY_IN_SS)
 # define ss_family __ss_family
+# define ss_len __ss_len
 #endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
 
 case "$ac_cv_header_machine_soundcard_h$ac_cv_header_sys_soundcard_h" in
