@@ -40,10 +40,10 @@
  * night.
  *
  * The driver receives, demodulates and decodes the radio signals when
- * connected to the audio codec of a Sun workstation running SunOS or
- * Solaris, and with a little help, other workstations with similar
- * codecs or sound cards. In this implementation, only one audio driver
- * and codec can be supported on a single machine.
+ * connected to the audio codec of a workstation running Solaris, SunOS
+ * FreeBSD or Linux, and with a little help, other workstations with
+ * similar codecs or sound cards. In this implementation, only one audio
+ * driver and codec can be supported on a single machine.
  *
  * The demodulation and decoding algorithms used in this driver are
  * based on those developed for the TAPR DSP93 development board and the
@@ -163,8 +163,8 @@
 #define ACQSN		5	/* station acquisition timeout */
 #define HSPEC		15	/* second sync timeout */
 #define DIGIT		30	/* minute unit digit timeout */
-#define PANIC		(2 * 1440) /* panic timeout (two days) */
-
+#define PANIC		(2 * 1440) /* panic timeout */
+#define HOLD		30	/* reach hold */
 /*
  * Thresholds. These establish the minimum signal level, minimum SNR and
  * maximum jitter thresholds which establish the error and false alarm
@@ -192,12 +192,13 @@
 #define BCMP		5	/* digit compare threshold */
 
 /*
- * Tone frequency definitions.
+ * Tone frequency definitions. The increments are for 4.5-deg sine
+ * table.
  */
-#define MS		8	/* samples per millisecond */
-#define IN100		1	/* 100 Hz 4.5-deg sin table */
-#define IN1000		10	/* 1000 Hz 4.5-deg sin table */
-#define IN1200		12	/* 1200 Hz 4.5-deg sin table */
+#define MS		(SECOND / 1000) /* samples per millisecond */
+#define IN100		((100 * 80) / SECOND) /* 100 Hz increment */
+#define IN1000		((1000 * 80) / SECOND) /* 1000 Hz increment */
+#define IN1200		((1200 * 80) / SECOND) /* 1200 Hz increment */
 
 /*
  * Acquisition and tracking time constants. Usually powers of 2.
@@ -2068,23 +2069,27 @@ wwv_rsec(
 			nsec = up->digcnt = 0;
 		}
 		pp->lencode = timecode(up, pp->a_lastcode);
-		refclock_receive(peer);
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
-		up->alarm = (up->alarm & ~0x8888) << 1;
-
-		/*
-		 * If the time since the last second sync dimmed exceeds
-		 * panic, game over and restart from scratch.
-		 */
-		if (up->watch > PANIC) {
-			wwv_newgame(peer);
-			return;
-		}
 #ifdef DEBUG
 		if (debug)
 			printf("wwv: timecode %d %s\n", pp->lencode,
 			    pp->a_lastcode);
 #endif /* DEBUG */
+
+		/*
+		 * If the time since the last second sync dimmed exceeds
+		 * panic, game over and restart from scratch. If in sync
+		 * and the time since the last timestamp is less than 30
+		 * m, update the clock and light the reach bit.
+		 */
+		if (up->watch > PANIC) {
+			wwv_newgame(peer);
+			return;
+
+		} else if (up->status & INSYNC && up->watch < HOLD) {
+			refclock_receive(peer);
+		}
+		up->alarm = (up->alarm & ~0x8888) << 1;
 		break;
 
 	/*
@@ -2100,19 +2105,14 @@ wwv_rsec(
 		nsec = up->digcnt = 0;
 		break;
 	}
-	pp->disp += AUDIO_PHI;
 
 	/*
 	 * If all nine digits have been found and compared correctly,
-	 * determine the current offset from the time of century and the
-	 * sample timestamp. If in second sync for a couple of minutes,
 	 * declare victory.
 	 */
-	if (up->digcnt >= 9 && (up->alarm & (3 << SYNERR)) == 0) {
+	if (up->digcnt >= 9)
 		up->status |= INSYNC;
-		up->watch = 0;
-		pp->disp = 0;
-	}
+	pp->disp += AUDIO_PHI;
 	up->rsec = nsec;
 #ifdef IRIG_SUCKS
 
@@ -2161,13 +2161,13 @@ wwv_rsec(
 #endif /* IRIG_SUCKS */
 
 	/*
-	 * If victory has been declared and at least one station is
-	 * above the noise, crank the system clock. It should not be a
-	 * surprise, especially if the radio is not tunable, that
+	 * If victory has been declared and seconds sync has been lit
+	 * for a couple of minutes, wind the system clock. It should not
+	 * be a surprise, especially if the radio is not tunable, that
 	 * sometimes no stations are above the noise and the reference
 	 * ID set to NONE.
 	 */
-	if (up->status & INSYNC && up->status & (SELV | SELH)) {
+	if (up->status & INSYNC && (up->alarm & (3 << SYNERR)) == 0) {
 		pp->second = up->rsec;
 		pp->minute = up->decvec[MN].digit + up->decvec[MN +
 		    1].digit * 10;
@@ -2181,11 +2181,14 @@ wwv_rsec(
 		L_CLR(&offset);
 		if (!clocktime(pp->day, pp->hour, pp->minute,
 		    pp->second, GMT, up->timestamp.l_ui,
-		    &pp->yearstart, &offset.l_ui))
+		    &pp->yearstart, &offset.l_ui)) {
 			up->errflg = CEVNT_BADTIME;
-		else
+		} else {
+			up->watch = 0;
+			pp->disp = 0;
 			refclock_process_offset(pp, offset,
 			    up->timestamp, PDELAY);
+		}
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
 	    DSYNC)) {
