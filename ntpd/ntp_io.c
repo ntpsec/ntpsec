@@ -781,7 +781,9 @@ io_multicast_add(
 		memset((char *)&mreq6, 0, sizeof(mreq6));
 		memset((char *)&inter_list[i], 0, sizeof(struct interface));
 		sin6p->sin6_family = AF_INET6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		sin6p->sin6_scope_id = inter_list[i].scopeid;
+#endif
 		sin6p->sin6_addr = iaddr6;
 		sin6p->sin6_port = htons(NTP_PORT);
 
@@ -822,9 +824,11 @@ io_multicast_add(
 		 * addresses. For now let the kernel figure it out.
 		 */
 		mreq6.ipv6mr_multiaddr = iaddr6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
 			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
 		else
+#endif
 			mreq6.ipv6mr_interface = 0;
 
 		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,

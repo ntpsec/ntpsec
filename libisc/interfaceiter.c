@@ -113,7 +113,11 @@ get_scopeid(unsigned int family, struct sockaddr *src) {
 	} else
 		scopeid = 0;
 #else
-		scopeid = ((struct sockaddr_in6 *)src)->sin6_scope_id;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+	scopeid = ((struct sockaddr_in6 *)src)->sin6_scope_id;
+#else
+	scopeid = 0;
+#endif
 #endif
 	       return (scopeid);
 	default:
