@@ -1478,6 +1478,7 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->ppoll = peer->maxpoll;
 	peer->disp = MAXDISPERSE;
+	peer->jitter = LOGTOD(sys_precision);
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;

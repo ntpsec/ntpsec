@@ -280,8 +280,11 @@ local_clock(
          * Update the jitter estimate.
          */
 	etemp = SQUARE(clock_jitter);
+	dtemp = max(abs(fp_offset - last_offset),
+	    LOGTOD(sys_precision));
 	dtemp = SQUARE(fp_offset - last_offset);
-	clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
+	clock_jitter = SQRT(etemp + (SQUARE(dtemp) - etemp) /
+	    CLOCK_AVG);
 
 	/*
 	 * The huff-n'-puff filter finds the lowest delay in the recent

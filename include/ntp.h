@@ -274,8 +274,10 @@ struct peer {
 	u_char	leap;		/* local leap indicator */
 	u_char	pmode;		/* remote association mode */
 	u_char	stratum;	/* remote stratum */
-	s_char	precision;	/* remote clock precision */
 	u_char	ppoll;		/* remote poll interval */
+	s_char	precision;	/* remote clock precision */
+	double	rootdelay;	/* roundtrip delay to primary clock */
+	double	rootdispersion;	/* dispersion to primary clock */
 	u_int32	refid;		/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
@@ -339,12 +341,6 @@ struct peer {
 	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
-	 * Variables set by received packet
-	 */
-	double	rootdelay;	/* roundtrip delay to primary clock */
-	double	rootdispersion;	/* dispersion to primary clock */
-
-	/*
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
@@ -354,6 +350,7 @@ struct peer {
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
 	void (*action) P((struct peer *)); /* action timeout function */
+
 	/*
 	 * Statistic counters
 	 */
