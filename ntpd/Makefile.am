@@ -1,7 +1,7 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
 # LDADD might need RESLIB and ADJLIB
 LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
 ntpd_LDADD = $(LDADD) -lm

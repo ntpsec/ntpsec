@@ -4,7 +4,7 @@ bin_PROGRAMS = @MAKE_TICKADJ@ @MAKE_NTPTIME@
 EXTRA_PROGRAMS = byteorder hist jitter kern longsize ntptime \
 precision tickadj testrs6000 timetrim sht
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
 # LDADD might need RESLIB and ADJLIB
 LDADD =	../libntp/libntp.a
 #EXTRA_DIST = README TAGS

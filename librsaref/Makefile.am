@@ -6,9 +6,9 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 
 # NOTES:
 # don't use RSAREF's global.h - we use ours.
-# We already have a copy of des.h
 
 librsaref_a_SOURCES = \
+	des.h \
 	desc.c \
 	digit.c \
 	digit.h \

@@ -15,7 +15,7 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	icom.c audio.c
 libntp_a_LIBADD = @LIBOBJS@
 libntp_a_DEPENDENCIES = @LIBOBJS@
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
 ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h log.h

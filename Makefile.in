@@ -108,9 +108,9 @@ AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ
 SUBDIRS = \
 	scripts \
 	include \
+	librsaref	\
 	libntp	\
 	libparse	\
-	librsaref	\
 	ntpd	\
 	ntpdate	\
 	ntpdc	\
