@@ -1277,30 +1277,10 @@ clock_filter(
 	double sample_disp
 	)
 {
-	register int i, j, k, n;
+	register int i, j, k, n, imin;
 	register u_char *ord;
 	double distance[NTP_SHIFT];
-	double off, dly, dsp, jit, dtemp, etemp;
-
-	/*
-	 * Update dispersions and calculate distances. The distance for
-	 * each sample is equal to the sample dispersion plus one-half
-	 * the sample delay. Also initialize the sort index vector.
-	 */
-	dtemp = clock_phi * (current_time - peer->update);
-	peer->update = current_time;
-	ord = peer->filter_order;
-	j = peer->filter_nextpt;
-	for (i = 0; i < NTP_SHIFT; i++) {
-		peer->filter_disp[j] += dtemp;
-		if (peer->filter_disp[j] > MAXDISPERSE)
-			peer->filter_disp[j] = MAXDISPERSE;
-		distance[i] = fabs(peer->filter_delay[j]) / 2 +
-		    peer->filter_disp[j];
-		ord[i] = j;
-		if (--j < 0)
-			j += NTP_SHIFT;
-	}
+	double off, dly, dsp, jit, dmin, dtemp, etemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
@@ -1309,16 +1289,41 @@ clock_filter(
 	 * precision in the the packet header and the precision of this
 	 * machine.
 	 */
-	peer->filter_offset[peer->filter_nextpt] = sample_offset;
-	peer->filter_delay[peer->filter_nextpt] = sample_delay;
 	dsp = LOGTOD(peer->precision) + LOGTOD(sys_precision) +
 	    sample_disp;
-	peer->filter_disp[peer->filter_nextpt] = min(dsp, MAXDISPERSE);
-	peer->filter_epoch[peer->filter_nextpt] = current_time;
-	distance[0] = min(dsp + fabs(sample_delay) / 2, MAXDISTANCE);
-	peer->filter_nextpt++;
-	if (peer->filter_nextpt >= NTP_SHIFT)
-		peer->filter_nextpt = 0;
+	j = peer->filter_nextpt;
+	peer->filter_offset[j] = sample_offset;
+	peer->filter_delay[j] = max(0, sample_delay);
+	peer->filter_disp[j] = min(dsp, MAXDISPERSE);
+	peer->filter_epoch[j] = current_time;
+	j++; j %=NTP_SHIFT;
+	peer->filter_nextpt = j;
+
+	/*
+	 * Update dispersions and calculate distances. The distance for
+	 * each sample is equal to the sample dispersion plus one-half
+	 * the sample delay. Also initialize the sort index vector.
+	 */
+	dtemp = clock_phi * (current_time - peer->update);
+	dmin = 1e9;
+	imin = 0;
+	peer->update = current_time;
+	ord = peer->filter_order;
+	for (i = 0; i < NTP_SHIFT; i++) {
+		if (j != peer->filter_nextpt) {
+			peer->filter_disp[j] += dtemp;
+			if (peer->filter_disp[j] > MAXDISPERSE)
+				peer->filter_disp[j] = MAXDISPERSE;
+		}
+		if (peer->filter_delay[j] < dmin) {
+			dmin = peer->filter_delay[j];
+			imin = j;
+		}
+		distance[i] = peer->filter_delay[j] / 2 +
+		    peer->filter_disp[j];
+		ord[i] = j;
+		j++; j %= NTP_SHIFT;
+	}
 
 	/*
 	 * Sort the samples in the register by distance. The winning
@@ -1353,16 +1358,25 @@ clock_filter(
 	 * the shift register, quietly tiptoe home leaving only the
 	 * dispersion.
 	 */
-	off = dly = dsp = jit = dtemp = 0;
+	off = dly = jit = dtemp = 0;
+	peer->disp = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
-		dsp = NTP_FWEIGHT * (dsp + peer->filter_disp[ord[i]]);
+		j = ord[i];
+		peer->disp = NTP_FWEIGHT * (peer->disp +
+		    peer->filter_disp[j]);
 		if (i >= n)
 			continue;
-		dtemp += 1. / distance[i];
-		off += peer->filter_offset[ord[i]] / distance[i];
-		dly += peer->filter_delay[ord[i]] / distance[i];
-		jit += DIFF(peer->filter_offset[ord[i]],
-		    peer->filter_offset[ord[0]]) / distance[i];
+		etemp = 2 * fabs(peer->filter_offset[j] -
+		    peer->filter_offset[imin]);
+		etemp /= max(peer->filter_delay[j] - dmin, dsp);
+		etemp = max(0, 1. - etemp);
+		dtemp += etemp;
+		off += peer->filter_offset[j] * etemp;
+		dly += peer->filter_delay[j] * etemp;
+		jit += DIFF(peer->filter_offset[j],
+		    peer->filter_offset[ord[0]]) * etemp;
+printf("xxx %.6f %.6f %.6f\n", peer->filter_offset[j],
+    peer->filter_delay[j], etemp);
 	}
 
 	/*
@@ -1371,7 +1385,6 @@ clock_filter(
 	 * normalize the offset, delay and jitter averages. Note the
 	 * jitter must be at least the clock precision.
 	 */
-	peer->disp = dsp;
 	if (n == 0)
 		return;
 	peer->epoch = current_time;

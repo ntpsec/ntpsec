@@ -1,5 +1,8 @@
 2001-04-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (clock_filter): Swell stuff.
+	From: Mark Martinec <Mark.Martinec@ijs.si>
+
 	* ports/winnt/ntpd/ntpd.dsp:
 	* ports/winnt/ntpd/hopf_PCI_io.c:
 	* ports/winnt/include/hopf_PCI_io.h:

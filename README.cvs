@@ -9,6 +9,25 @@ the password is: anoncvs
 after which the "ntp_update" script in the top-level of the tree should
 keep things in synch and properly timestamped.
 
+PLEASE NOTE:
+
+	When obtaining the NTP distribution directly via CVS instead of
+	using "ntp_update", the files are installed in an arbitrary
+	order.
+
+	When you run "make", this may cause some of the generated files
+	to be reconstructed.
+
+	If you do not have the right verison of automake and autoconf,
+	these files will be regenerated incorrectly.
+
+	In this case, you can "fix" your distribution by running:
+
+			     ntp_update -C
+
+	which will force any local changes to your NTP files to be
+	discarded and replaced with the versions in the repository.
+
 There are some mailing lists for the NTP CVS distribution.  For more
 information, send a message to <majordomo@ntp.org> with the word "lists"
 in the body of the message.
