@@ -24,10 +24,7 @@ EXTRA_DIST = \
 	NEWS \
 	NOTES.y2kfixes \
 	README.bk \
-	README.cvs \
-	README.des \
 	README.hackers \
-	README.rsa \
 	TODO \
 	WHERE-TO-START \
 	acconfig.h \
@@ -39,7 +36,6 @@ EXTRA_DIST = \
 	excludes \
 	flock-build \
 	install-sh \
-	ntp_update \
 	readme.y2kfixes \
 	results.y2kfixes \
 	conf \
