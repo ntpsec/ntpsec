@@ -678,25 +678,24 @@ create_sockets(
 			((struct sockaddr_in*)&inter_list[i].bcast)->sin_port = port;
 		}
 
+		if (inter_list[i].sin.ss_family == AF_INET) {
 #  ifdef STREAMS_TLI
-		ioc.ic_cmd = SIOCGIFNETMASK;
-		ioc.ic_timout = 0;
-		ioc.ic_dp = (caddr_t)&ifreq;
-		ioc.ic_len = sizeof(struct ifreq);
-		if(ioctl(vs, I_STR, &ioc)) {
-			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFNETMASK) failed: %m");
-			exit(1);
-		}
+			ioc.ic_cmd = SIOCGIFNETMASK;
+			ioc.ic_timout = 0;
+			ioc.ic_dp = (caddr_t)&ifreq;
+			ioc.ic_len = sizeof(struct ifreq);
+			if(ioctl(vs, I_STR, &ioc)) {
+				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFNETMASK) failed: %m");
+				exit(1);
+			}
 #  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
-			msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFNETMASK) failed: %m");
-			continue;
-#if 0
-			exit(1);
-#endif
-		}
+			if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
+				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFNETMASK) failed: %m");
+				exit(1);
+			}
 #  endif /* not STREAMS_TLI */
-		inter_list[i].mask                 = *(struct sockaddr_storage *)&ifreq.ifr_addr;
+			inter_list[i].mask = *(struct sockaddr_storage *)&ifreq.ifr_addr;
+		}
 		inter_list[i].mask.ss_family = inter_list[i].sin.ss_family;
 # else
 		/* winnt here */
