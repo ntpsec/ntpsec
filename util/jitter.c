@@ -9,8 +9,12 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include "jitter.h"
 
 #define NBUF 20002
+
+int debug;
+char progname[10];
 
 int
 main(
@@ -18,11 +22,9 @@ main(
 	char *argv[]
 	)
 {
-	struct timeval ts, tr;
-	struct timezone tzp;
-	long temp, j, i, gtod[NBUF];
-
-	gettimeofday(&ts, &tzp);
+	l_fp tr;
+	int i, j;
+	double dtemp, gtod[NBUF];
 
 	/*
 	 * Force pages into memory
@@ -34,19 +36,16 @@ main(
 	 * Construct gtod array
 	 */
 	for (i = 0; i < NBUF; i ++) {
-		gettimeofday(&tr, &tzp);
-		gtod[i] = (tr.tv_sec - ts.tv_sec) * 1000000 + tr.tv_usec;
+		get_systime(&tr);
+		LFPTOD(&tr, gtod[i]);
 	}
 
 	/*
-	 * Write out gtod array for later processing with S
+	 * Write out gtod array for later processing with Matlab
 	 */
 	for (i = 0; i < NBUF - 2; i++) {
-		/*
-		  printf("%lu\n", gtod[i]);
-		*/
 		gtod[i] = gtod[i + 1] - gtod[i];
-		printf("%lu\n", gtod[i]);
+		printf("%13.9lf\n", gtod[i]);
 	}
 
 	/*
@@ -55,17 +54,17 @@ main(
 	for (i = 0; i < NBUF - 2; i++) {
 		for (j = 0; j <= i; j++) {
 			if (gtod[j] > gtod[i]) {
-				temp = gtod[j];
+				dtemp = gtod[j];
 				gtod[j] = gtod[i];
-				gtod[i] = temp;
+				gtod[i] = dtemp;
 			}
 		}
 	}
 	fprintf(stderr, "First rank\n");
 	for (i = 0; i < 10; i++)
-	    fprintf(stderr, "%10ld%10ld\n", i, gtod[i]);
+		fprintf(stderr, "%2d %13.9lf\n", i, gtod[i]);
 	fprintf(stderr, "Last rank\n");
 	for (i = NBUF - 12; i < NBUF - 2; i++)
-	    fprintf(stderr, "%10ld%10ld\n", i, gtod[i]);
+		fprintf(stderr, "%2d %13.9lf\n", i, gtod[i]);
 	exit(0);
 }
