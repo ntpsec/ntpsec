@@ -1,3 +1,9 @@
+2000-02-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/Oncore-SHMEM.htm: New document
+	* html/driver30.htm: Cleanup and improvements
+	From: Reg Clemens <reg@dwf.com>
+
 2000-01-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_oncore.c: Patches/improvements

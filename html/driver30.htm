@@ -35,8 +35,7 @@ Protocol</I>.
 the "UT+",&nbsp;
 and the "Remote" which is a prepackaged "UT+".&nbsp;
 The "VP" is no longer available.
-
-<P>The evaluation kit
+The evaluation kit
 can also be recommended, it interfaces to a PC straightaway, using the
 serial (DCD) or parallel port for PPS input and packs the
 receiver in a nice and sturdy box.
@@ -78,13 +77,18 @@ for the VP/UT models.
 <P>The driver will use the "position hold" mode with
 user provided coordinates,
 the receivers built-in site-survey,
-or a similar algorithm implemented in this driver.
+or a similar algorithm implemented in this driver to determine the antenna position.
 <H4>
 Monitor Data</H4>
-The driver is quite chatty on stdout if ntpd is run with
-debugging.&nbsp;
-A manual will be required though.
-Additional information is written to the clockstats file, if configured.
+The driver is quite chatty on stdout if ntpd is run with debugging.
+<P>
+In addition, on platforms supporting Shared Memory, all of the messages
+received from the Oncore receiver are made available in shared memory for
+use by other programs.
+See the <A HREF=Oncore-SHMEM.htm> Oncore-SHMEM </A> manual page for
+information on how to use this option.
+For either debugging or using the SHMEM option, an Oncore Reference Manual
+for the specific receiver in use will be required.
 <H4>
 Fudge Factors</H4>
 
@@ -141,7 +145,7 @@ Not used by this driver.</DD>
 Not used by this driver.</DD>
 </DL>
 <B>Additional Information</B>
-<P>The driver has been tested on FreeBSD, Linux and SunOS.
+<P>The driver was initially developed on FreeBSD, and has since been tested on Linux SunOS and Solaris.
 
 <P>There is a driver specific configuration file <TT>/etc/ntp.oncore</TT>
 that contains information on the startup mode, the location of the GPS
