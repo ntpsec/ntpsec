@@ -1,8 +1,8 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ansi2knr
-bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-keygen
-EXTRA_PROGRAMS = audio-pcm byteorder hist jitter kern longsize ntptime \
-pps-api precision sht testrs6000 tickadj timetrim ntp-genkeys
+bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ @MAKE_NTP_KEYGEN@
+EXTRA_PROGRAMS = audio-pcm byteorder hist jitter kern longsize ntp-genkeys \
+ntp-keygen ntptime pps-api precision sht testrs6000 tickadj timetrim
 
 ntp_genkeys_LDADD =	../ntpd/ntp_config$U.o ../libntp/libntp.a
 #ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a
