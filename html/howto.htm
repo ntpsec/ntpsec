@@ -238,20 +238,6 @@ refclock_conf</tt> array is a set of pointers to transfer vectors
 in the individual drivers. The external name of the transfer vector
 should be initialized in correspondence with the type number.</dd>
 
-<dt><tt>./acconfig.h</tt></dt>
-
-<dd>This is a configuration file used by the autoconfigure scheme.
-Add two lines in the form: 
-
-<pre>
-  /* Define if we have a FOO clock */
-  #undef FOO
-</pre>
-
-<p>where FOO is the define used to cause the driver to be included
-in the distribution.</p>
-</dd>
-
 <dt><tt>./configure.in</tt></dt>
 
 <dd>This is a configuration file used by the autoconfigure scheme.
@@ -259,11 +245,12 @@ Add lines similar to the following:
 
 <pre>
   AC_MSG_CHECKING(FOO clock_description)
-  AC_ARG_ENABLE(FOO, [  --enable-FOO        clock_description],
+  AC_ARG_ENABLE(FOO,
+      AC_HELP_STRING([--enable-FOO], [x clock_description]),
       [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
   if test "$ntp_ok" = "yes"; then
       ntp_refclock=yes
-      AC_DEFINE(FOO)
+      AC_DEFINE(CLOCK_FOO, 1, [Foo clock?])
   fi
   AC_MSG_RESULT($ntp_ok)
 </pre>
@@ -282,19 +269,10 @@ and automake tools from the GNU distributions.)</p>
 Add the driver file name to the entries already in the <tt>
 ntpd_SOURCES</tt> list.</p>
 
-<p>Patches to <tt>automake-1.0</tt> are required for the
-autoconfigure scripts to work properly. The file <tt>automake-
-1.0.patches</tt> can be used for this purpose.</p>
-</dd>
-
-<dt><tt>./ntpd/Makefile.am</tt></dt>
-
 <dd>Do the following sequence of commands: 
 
 <pre>
-  automake
-  autoconf
-  autoheader
+  autoreconf
   configure
 </pre>
 
