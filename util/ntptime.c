@@ -30,6 +30,17 @@
 # endif /* SYS_DECOSF1 */
 #endif
 
+/* FIXME? On FreeBSD 3.2(+), the 'time' element of a struct ntptimeval
+   is a struct timespec (s/ns), not a struct timeval (s/us) - which
+   seems intimately related to the fact that <sys/timex.h> also #defines
+   STA_NANO - which doesn't mean that this is the right thing to do... */
+#ifdef STA_NANO
+#define tv_frac_sec tv_nsec
+#else
+#define tv_frac_sec tv_usec
+#endif
+
+
 #define TIMEX_MOD_BITS \
 "\20\1OFFSET\2FREQUENCY\3MAXERROR\4ESTERROR\5STATUS\6TIMECONST\
 \13PLL\14FLL\15MICRO\16NANO\17CLKB\20CLKA"
@@ -76,10 +87,11 @@ main(
 #else
 	struct ntptimeval ntv;
 #endif
+	struct timeval tv;
 	struct timex ntx, _ntx;
 	int	times[20];
 	double ftemp, gtemp, htemp;
-	long time_frac;				/* ntv.time.tv_usec (us/ns) */
+	long time_frac;				/* ntv.time.tv_frac_sec (us/ns) */
 	l_fp ts;
 	unsigned ts_mask = TS_MASK;		/* defaults to 20 bits (us) */
 	unsigned ts_roundbit = TS_ROUNDBIT;	/* defaults to 20 bits (us) */
@@ -187,7 +199,7 @@ main(
 					--pll_control;
 				if (pll_control < 0)
 					break;
-				times[c] = ntv.time.tv_usec;
+				times[c] = ntv.time.tv_frac_sec;
 			}
 #ifdef SIGSYS
 		}
@@ -233,16 +245,18 @@ main(
 	else {
 		printf("ntp_gettime() returns code %d (%s)\n",
 		    status, timex_state(status));
-		time_frac = ntv.time.tv_usec;
+		time_frac = ntv.time.tv_frac_sec;
 #ifdef STA_NANO
 		if (flash & STA_NANO) {
-			ntv.time.tv_usec /= 1000;
+			ntv.time.tv_frac_sec /= 1000;
 			ts_mask = 0xfffffffc;	/* 1/2^30 */
 			ts_roundbit = 0x00000002;
 			fdigits = 9;
 		}
 #endif
-		TVTOTS(&ntv.time, &ts);
+		tv.tv_sec = ntv.time.tv_sec;
+		tv.tv_usec = ntv.time.tv_frac_sec;
+		TVTOTS(&tv, &ts);
 		ts.l_ui += JAN_1970;
 		ts.l_uf += ts_roundbit;
 		ts.l_uf &= ts_mask;
