@@ -282,9 +282,9 @@ make_keylist(
 		return;
 	if (ap->sig == NULL)
 		ap->sig = emalloc(private_key.bits / 8);
-	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (u_char *)ap, 12);
-	rval = R_SignFinal(&ctx, ap->sig, &len, &private_key);
+	EVP_SignInit(&ctx, DA_MD5);
+	EVP_SignUpdate(&ctx, (u_char *)ap, 12);
+	rval = EVP_SignFinal(&ctx, ap->sig, &len, &private_key);
 	if (rval != RV_OK)
 		msyslog(LOG_ERR, "crypto: keylist signature fails %x",
 		    rval);
@@ -426,9 +426,10 @@ crypto_recv(
 			} else if (temp != kp->bits / 8) {
 				rval = RV_SIG;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)ap, 12);
-				rval = R_VerifyFinal(&ctx,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)ap,
+				    12);
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)ap->pkt, temp, kp);
 			}
 #else /* PUBKEY */
@@ -493,9 +494,9 @@ crypto_recv(
 			} else if (temp != kp->bits / 8) {
 				rval = RV_SIG;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)cp, 8);
-				rval = R_VerifyFinal(&ctx,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)cp, 8);
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)cp->pkt, temp, kp);
 			}
 #else /* PUBKEY */
@@ -582,14 +583,14 @@ crypto_recv(
 			    (peer->flags & FLAG_AUTOKEY)) {
 				rval = RV_FSP;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)vp,
 				    temp + 12);
 				kp = emalloc(sizeof(R_RSA_PUBLIC_KEY));
 				kp->bits = bits;
 				memcpy(kp->modulus, &pkt[i + 6],
 				    rsalen - 4);
-				rval = R_VerifyFinal(&ctx,
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
 				    ntohl(pkt[j]), kp);
 				if (rval != 0) {
@@ -658,10 +659,10 @@ crypto_recv(
 				peer->crypto &= ~CRYPTO_FLAG_CERT;
 				rval = RV_FSP;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)vp,
 				    temp + 12);
-				rval = R_VerifyFinal(&ctx,
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
 				    ntohl(pkt[j]), kp);
 			}
@@ -731,10 +732,10 @@ crypto_recv(
 				peer->crypto &= ~CRYPTO_FLAG_DH;
 				rval = RV_FSP;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)vp,
 				    temp + 12);
-				rval = R_VerifyFinal(&ctx,
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
 				    ntohl(pkt[j]), kp);
 			}
@@ -835,10 +836,10 @@ crypto_recv(
 			    FLAG_AUTOKEY))) {
 				rval = RV_TSP;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)vp,
 				    temp + 12);
-				rval = R_VerifyFinal(&ctx,
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
 				    ntohl(pkt[j]), kp);
 			}
@@ -915,10 +916,10 @@ crypto_recv(
 				peer->crypto &= ~CRYPTO_FLAG_TAI;
 				rval = RV_FSP;
 			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
+				EVP_VerifyInit(&ctx, DA_MD5);
+				EVP_VerifyUpdate(&ctx, (u_char *)vp,
 				    temp + 12);
-				rval = R_VerifyFinal(&ctx,
+				rval = EVP_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
 				    ntohl(pkt[j]), kp);
 			}
@@ -1090,9 +1091,9 @@ crypto_xmit(
 		cp->tstamp = host.tstamp;
 		if (!crypto_flags)
 			break;
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)cp, 8);
-		rval = R_SignFinal(&ctx, (u_char *)cp->pkt, &temp,
+		EVP_SignInit(&ctx, DA_MD5);
+		EVP_SignUpdate(&ctx, (u_char *)cp, 8);
+		rval = EVP_SignFinal(&ctx, (u_char *)cp->pkt, &temp,
 		    &private_key);
 		if (rval != RV_OK) {
 			msyslog(LOG_ERR,
@@ -1403,10 +1404,10 @@ crypto_agree(void)
 	host.tstamp = htonl(tstamp);
 	if (!crypto_flags)
 		return;
-	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (u_char *)&host, 12);
-	R_SignUpdate(&ctx, host.ptr, ntohl(host.vallen));
-	rval = R_SignFinal(&ctx, host.sig, &len, &private_key);
+	EVP_SignInit(&ctx, DA_MD5);
+	EVP_SignUpdate(&ctx, (u_char *)&host, 12);
+	EVP_SignUpdate(&ctx, host.ptr, ntohl(host.vallen));
+	rval = EVP_SignFinal(&ctx, host.sig, &len, &private_key);
 	if (rval != RV_OK || len != private_key.bits / 8) {
 		msyslog(LOG_ERR, "crypto: host signature fails %x",
 		    rval);
@@ -1419,11 +1420,11 @@ crypto_agree(void)
 	 */
 	if (certif.vallen != 0) {
 		certif.tstamp = htonl(tstamp);
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)&certif, 12);
-		R_SignUpdate(&ctx, certif.ptr,
+		EVP_SignInit(&ctx, DA_MD5);
+		EVP_SignUpdate(&ctx, (u_char *)&certif, 12);
+		EVP_SignUpdate(&ctx, certif.ptr,
 		    ntohl(certif.vallen));
-		rval = R_SignFinal(&ctx, certif.sig, &len,
+		rval = EVP_SignFinal(&ctx, certif.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
@@ -1439,10 +1440,11 @@ crypto_agree(void)
 	 */
 	if (dhparam.vallen != 0) {
 		dhparam.tstamp = htonl(tstamp);
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
-		R_SignUpdate(&ctx, dhparam.ptr, ntohl(dhparam.vallen));
-		rval = R_SignFinal(&ctx, dhparam.sig, &len,
+		EVP_SignInit(&ctx, DA_MD5);
+		EVP_SignUpdate(&ctx, (u_char *)&dhparam, 12);
+		EVP_SignUpdate(&ctx, dhparam.ptr,
+		    ntohl(dhparam.vallen));
+		rval = EVP_SignFinal(&ctx, dhparam.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
@@ -1473,10 +1475,10 @@ crypto_agree(void)
 		 * Sign public value and timestamps.
 		 */
 		dhpub.tstamp = htonl(tstamp);
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
-		R_SignUpdate(&ctx, dhpub.ptr, ntohl(dhpub.vallen));
-		rval = R_SignFinal(&ctx, dhpub.sig, &len,
+		EVP_SignInit(&ctx, DA_MD5);
+		EVP_SignUpdate(&ctx, (u_char *)&dhpub, 12);
+		EVP_SignUpdate(&ctx, dhpub.ptr, ntohl(dhpub.vallen));
+		rval = EVP_SignFinal(&ctx, dhpub.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
@@ -1492,11 +1494,11 @@ crypto_agree(void)
 	 */
 	if (tai_leap.vallen != 0) {
 		tai_leap.tstamp = htonl(tstamp);
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
-		R_SignUpdate(&ctx, tai_leap.ptr,
+		EVP_SignInit(&ctx, DA_MD5);
+		EVP_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
+		EVP_SignUpdate(&ctx, tai_leap.ptr,
 		    ntohl(tai_leap.vallen));
-		rval = R_SignFinal(&ctx, tai_leap.sig, &len,
+		rval = EVP_SignFinal(&ctx, tai_leap.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,

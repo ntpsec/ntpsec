@@ -198,11 +198,12 @@ transmit(
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if ((peer->stratum > 1 && peer->refid ==
+			if (peer->unreach == NTP_UNREACH &&
+			    ((peer->stratum > 1 && peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
-			    clock_phi * ULOGTOD(sys_poll)))
+			    clock_phi * ULOGTOD(sys_poll))))
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
@@ -225,6 +226,14 @@ transmit(
 			}
 			poll_update(peer, hpoll);
 			clock_select();
+			if (mode_ntpdate) {
+				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+				    msyslog(LOG_NOTICE,
+				    "no reply; clock not set");
+				printf(
+				    "ntpd: no reply; clock not set\n");
+				exit(0);
+			}
 			return;
 
 		}
@@ -1145,7 +1154,7 @@ poll_update(
 	 * axtually the manycast beacon interval, eight times the system
 	 * poll interval. Normally when the host poll interval settles
 	 * up to 17.1 s, the beacon interval settles up to 2.3 hours.
-	 */ 
+	 */
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
@@ -1251,8 +1260,8 @@ peer_clear(
 		peer->filter_epoch[i] = current_time;
 	}
 	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) -
-	    1));
+	peer->nextdate = peer->outdate + (RANDOM & (1 <<
+	    BURST_INTERVAL1));
 }
 
 

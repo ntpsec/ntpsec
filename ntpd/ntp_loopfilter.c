@@ -202,6 +202,27 @@ local_clock(
 	}
 
 	/*
+	 * If simulating ntpdate, set the clock according to the rules.
+	 */
+	if (mode_ntpdate) {
+		if (allow_step && fabs(fp_offset) > clock_max) {
+			step_systime(fp_offset);
+			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+			    msyslog(LOG_NOTICE, "time reset %.6f s",
+	   		    fp_offset);
+			printf("ntpd: time reset %.6f s\n", fp_offset);
+		} else {
+			adj_systime(fp_offset);
+			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+			    msyslog(LOG_NOTICE, "time slew %.6f s",
+			    fp_offset);
+			printf("ntpd: time slew %.6f s\n", fp_offset);
+		}
+		record_loop_stats();
+		exit(0);
+	}
+
+	/*
 	 * If the clock has never been set, set it and initialize the
 	 * discipline parameters. We then switch to frequency mode to
 	 * speed the inital convergence process. If lucky, after an hour
@@ -355,7 +376,6 @@ local_clock(
 				sys_poll = peer->maxpoll;
 			else if (sys_poll < peer->minpoll)
 				sys_poll = peer->minpoll;
-
 			allow_panic = TRUE;
 			if (fabs(fp_offset - last_offset) >
 			    CLOCK_SGATE * oerror && mu <
@@ -398,6 +418,7 @@ local_clock(
 			break;
 		}
 	}
+
 #if defined(KERNEL_PLL)
 	/*
 	 * This code segment works when clock adjustments are made using
@@ -594,8 +615,6 @@ local_clock(
 		    sys_jitter, drift_comp * 1e6, clock_stability * 1e6,
 		    sys_poll, tc_counter);
 #endif /* DEBUG */
-	if (mode_ntpdate)
-		retval = 2;
 	return (retval);
 }
 

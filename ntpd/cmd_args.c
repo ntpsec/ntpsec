@@ -15,7 +15,7 @@
 extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
-static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:r:s:t:v:V:x:z";
+static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:qr:s:t:v:V:x";
 
 
 /*
@@ -98,13 +98,14 @@ getstartup(
 			break;
 
 		case 'n':
+		case 'q':
 		    ++nofork;
 		    break;
 
 		case 'N':
 		    priority_done = strcmp(ntp_optarg, "high");
 		    break;
-
+			
 		case '?':
 		    ++errflg;
 		    break;
@@ -114,7 +115,7 @@ getstartup(
 		}
 
 	if (errflg || ntp_optind != argc) {
-		(void) fprintf(stderr, "usage: %s [ -abdgmnx ] [ -c config_file ] [ -e e_delay ]\n", progname);
+		(void) fprintf(stderr, "usage: %s [ -abdgmnqx ] [ -c config_file ] [ -e e_delay ]\n", progname);
 		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
@@ -241,6 +242,10 @@ getCmdOpts(
 #endif
 			break;
 
+		    case 'q':
+			mode_ntpdate = TRUE;
+			break;
+
 		    case 'r':
 			do {
 				double tmp;
@@ -282,10 +287,6 @@ getCmdOpts(
 
 		    case 'x':
 			allow_step = FALSE;
-			break;
-
-		    case 'z':
-			mode_ntpdate = TRUE;
 			break;
 
 		    default:

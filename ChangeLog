@@ -1,5 +1,15 @@
 2001-03-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (transmit): Check peer->unreach.
+	(peer_clear): peer->outdate is a f(BURST_INTERVAL1), not
+	NTP_MINPOLL.
+	* ntpd/ntp_loopfilter.c (local_clock): mode_ntpdate stuff.
+	* ntpd/ntp_crypto.c: OpenSSL/RSAREF support.
+	* ntpd/cmd_args.c: Use -q, not -z, for mode_ntpdate.
+	(getstartup): nofork on mode_ntpdate. Usage update.
+	* include/ntp_crypto.h: OpenSSL/RSAREF support.
+	From: Dave Mills.
+
 	* configure.in (rsaref): Buglet.
 
 2001-03-30  Harlan Stenn  <stenn@whimsy.udel.edu>

@@ -7,6 +7,14 @@
 #ifdef RSAREF
 #include "rsaref.h"
 #include "rsa.h"
+
+#define EVP_SignInit(a, b)	R_SignInit(a, b)
+#define EVP_SignUpdate(a, b, c)	R_SignUpdate(a, b, c);
+#define EVP_SignFinal(a, b, c, d) R_SignFinal(a, b, c, d);
+#define EVP_VerifyInit(a, b)	R_VerifyInit(a, b)
+#define EVP_VerifyUpdate(a, b, c) R_VerifyUpdate(a, b, c);
+#define EVP_VerifyFinal(a, b, c, d) R_VerifyFinal(a, b, c, d);
+
 #endif /* RSAREF */
 
 /*
