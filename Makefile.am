@@ -68,12 +68,13 @@ $(srcdir)/COPYRIGHT: html/copyright.htm
 # repo is not a bk repo, we'll get an error message from the prs command.
 # Unfortunately, I haven't found the necessary magic to redirect this error
 # output to /dev/null under ancient/unique shells like the one Ultrix uses.
-# We'll also get an error of srcdir or version is unwritable.
+# We'll also get an error if srcdir or version is unwritable.
 $(srcdir)/version: FRC.version
 	-(bk version) >/dev/null 2>&1 && \
 	    cd $(srcdir) && \
             x=`bk -R prs -hr+ -nd:I: ChangeSet` && \
-	    case "$$x" in '') ;; *) echo $$x > version ;; esac
+	    y=`cat version 2>/dev/null` || true && \
+	    case "$$x" in ''|$$y) ;; *) echo $$x > version ;; esac
 
 dist-hook:
 	@find $(distdir) -type d -name CVS -print | xargs rm -rf
