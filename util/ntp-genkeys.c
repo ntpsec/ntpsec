@@ -634,6 +634,10 @@ cleanlinks(
 	  - else, unlink dirname(f1) / f3
 	*/
 #endif /* HAVE_READLINK */
+
+	if (nosymlinks)
+		return;
+
 	if (memorex)
 		printf("Would unlink(%s)\n", f1);
 	else if (unlink(f1)) {

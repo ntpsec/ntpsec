@@ -1,3 +1,7 @@
+2000-11-26  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c (cleanlinks): Don't do it if nosymlinks.
+
 2000-11-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_parse.c (rawdcf_init_1): make Linux happier with
