@@ -628,20 +628,17 @@ local_clock(
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
 		    etemp * 1e6, NTP_MAXFREQ * 1e6);
 	etemp = SQUARE(clock_stability);
-	dtemp = SQUARE(dtemp * ULOGTOD(sys_poll));
+	dtemp = SQUARE(dtemp);
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
-	 * Here we adjust the poll interval by comparing the apparent
-	 * frequency change induced by the system jitter over the poll
-	 * interval, or fritter, to the frequency stability, or wander.
-	 * If the fritter is greater than the wander, phase noise
-	 * predominates and the averaging interval is increased;
-	 * otherwise, it is decreased. A bit of hysteresis helps calm
-	 * the dance. Works best using burst mode.
+	 * Here we adjust the poll interval by comparing the current
+	 * offset with the clock jitter. If the offset is less than the
+	 * clock jitter times a constant, then the averaging interval is
+	 * increased, otherwise it is decreased. A bit of hysteresis
+	 * helps calm the dance. Works best using burst mode.
 	 */
-	if (clock_jitter > clock_stability && fabs(clock_offset) <
-	    CLOCK_PGATE * clock_jitter) {
+	if (fabs(clock_offset) < CLOCK_PGATE * clock_jitter) {
 		tc_counter += sys_poll;
 		if (tc_counter > CLOCK_LIMIT) {
 			tc_counter = CLOCK_LIMIT;
@@ -670,8 +667,8 @@ local_clock(
 	if (debug)
 		printf(
 		    "local_clock: mu %lu jitr %.6f freq %.3f stab %.6f poll %d count %d\n",
-		    mu, clock_jitter, drift_comp * 1e6, clock_stability,
-		    sys_poll, tc_counter);
+		    mu, clock_jitter, drift_comp * 1e6,
+		    clock_stability * 1e6, sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (rval);
 #endif /* LOCKCLOCK */

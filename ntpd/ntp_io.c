@@ -639,6 +639,18 @@ set_reuseaddr(int flag) {
 	}
 }
 
+/*
+ * This is just a wrapper around an internal function so we can
+ * make other changes as necessary later on
+ */
+void
+enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
+{
+#ifdef SO_BROADCAST
+	socket_broadcast_enable(iface, 0, baddr);
+#endif
+}
+
 #ifdef OPEN_BCAST_SOCKET 
 /*
  * Enable a broadcast address to a given socket
@@ -660,6 +672,12 @@ socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) enable failure on address %s: %m",
 				stoa(maddr));
 		}
+#ifdef DEBUG
+		else if (debug > 1) {
+			printf("Broadcast enabled on socket %d for address %s\n",
+				iface->fd, stoa(maddr));
+		}
+#endif
 	}
 	iface->flags |= INT_BCASTOPEN;
 	modify_addr_in_list(maddr, iface->flags);
