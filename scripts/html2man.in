@@ -1,11 +1,9 @@
-#! /usr/bin/perl -w
+#! @PATH_PERL@ -w
 #
-# html2man.pl: Converts the NTP HTML documentation to man page format
+# html2man: Converts the NTP HTML documentation to man page format
 #
-# This file require the Perl HTML::Parser module, which in turn
-# requires HTML::Tagset, which has no dependencies.  Get them here:
-# http://search.cpan.org/search?module=HTML::Parser
-# http://search.cpan.org/search?module=HTML::Tagset
+# This file require the Perl HTML::TokeParser module:
+# http://search.cpan.org/search?module=HTML::TokeParser
 #
 # Depending on where this is run from, you might need to modify $MANDIR below.
 #
