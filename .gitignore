@@ -13,3 +13,25 @@
 .#*
 # Simulated bk default ignores end here
 A.*
+COPYRIGHT
+ElectricFence/Makefile.in
+Makefile.in
+aclocal.m4
+adjtimed/Makefile.in
+am.log
+clockstuff/Makefile.in
+configure
+include/Makefile.in
+kernel/Makefile.in
+kernel/sys/Makefile.in
+libntp/Makefile.in
+libparse/Makefile.in
+librsaref/Makefile.in
+ntpd/Makefile.in
+ntpdate/Makefile.in
+ntpdc/Makefile.in
+ntpq/Makefile.in
+ntptrace/Makefile.in
+parseutil/Makefile.in
+scripts/Makefile.in
+util/Makefile.in
