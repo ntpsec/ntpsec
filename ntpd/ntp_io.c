@@ -121,6 +121,20 @@ int wildipv6 = -1;			/* Index into inter_list for IPv6 wildcard */
 static	struct refclockio *refio;
 #endif /* REFCLOCK */
 
+
+/*
+ * Define what the possible "soft" errors can be.  These are non-fatal returns
+ * of various network related functions, like recv() and so on.
+ *
+ * For some reason, BSDI (and perhaps others) will sometimes return <0
+ * from recv() but will have errno==0.  This is broken, but we have to
+ * work around it here.
+ */
+#define SOFT_ERROR(e)	((e) == EAGAIN || \
+			 (e) == EWOULDBLOCK || \
+			 (e) == EINTR || \
+			 (e) == 0)
+
 /*
  * File descriptor masks etc. for call to select
  * Not needed for I/O Completion Ports
@@ -307,6 +321,12 @@ create_wildcards(u_short port) {
 
 isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
+
+#ifdef DEBUG
+	if (debug > 2)
+	    printf("address_okay: listen Virtual: %d, IF name: %s, Up Flag: %d\n", 
+		    listen_to_virtual_ips, isc_if->name, (isc_if->flags & INTERFACE_F_UP));
+#endif
 
 	if (listen_to_virtual_ips == 0  && (strchr(isc_if->name, (int)':') != NULL))
 		return (ISC_FALSE);
