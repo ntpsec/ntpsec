@@ -18,10 +18,6 @@
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
-#ifdef OPENSSL
-# include "ntp_crypto.h"
-#endif /* OPENSSL */
-
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -301,6 +297,7 @@ static struct keyword crypto_keywords[] = {
 	{ "rsakey",		CONF_CRYPTO_RSA },
 	{ "certificate",	CONF_CRYPTO_CERT },
 	{ "randfile",		CONF_CRYPTO_RAND },
+	{ "trusted",		CONF_CRYPTO_TRUST },
 	{ "",			CONFIG_UNKNOWN }
 };
 #endif /* OPENSSL */
@@ -1124,6 +1121,10 @@ getconfig(
 
 			    case CONF_CRYPTO_RAND:
 				crypto_config(CRYPTO_CONF_RAND, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_TRUST:
+				crypto_config(CRYPTO_CONF_TRST, tokens[i]);
 				break;
 
 			    default:

@@ -40,7 +40,7 @@ FILE	*fheader P((u_char *));	/* construct file header */
 #ifdef OPENSSL
 int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *)); /* generate req/cert */
 void	cb	 P((int, int, void *));	/* callback routine */
-u_long	asn2ntp	 P((ASN1_TIME *));	/* ASN.1 time format to NTP seconds */
+u_long	asn2ntp	 P((ASN1_TIME *)); /* ASN.1 time to NTP seconds */
 #endif /* OPENSSL */
 
 /*
@@ -76,9 +76,7 @@ main(
 	EVP_PKEY *pkey;		/* public/private keys */
 	RSA	*rsa;		/* RSA keys */
 	DSA	*dsa_params;	/* DSA parameters */
-	DH	*dh_params;	/* Diffie-Hellman parameters */
 	u_char	seed[20];	/* seed for DSA parameters */
-	int	codes;		/* DH check codes */
 	char	pathbuf[PATH_MAX];
 #endif /* OPENSSL */
 	u_char	md5key[16];
@@ -181,9 +179,8 @@ main(
 	RSA_print_fp(stdout, pkey->pkey.rsa, 0);
 */
 	/*
-	 * Generate the X509v3 certificate request. The digest algorithms
-	 * that work with RSA are MD2, MD5, SHA, SHA1, MDC2 and
-	 * RIPEMD160.
+	 * Generate the X509v3 certificates. The digest algorithms that
+	 * work with RSA are MD2, MD5, SHA, SHA1, MDC2 and RIPEMD160.
 	 */
 #ifdef HAVE_EVP_MD2
 	x509("RSA_MD2", pkey, EVP_md2());
@@ -233,34 +230,11 @@ main(
 	DSA_print_fp(stdout, pkey->pkey.dsa, 0);
 */
 	/*
-	 * Generate the X509v3 certificate request. The digest algorithms
-	 * that work with DSS (DSA) are DSS and DSS1.
+	 * Generate the X509v3 certificates. The digest algorithms that
+	 * work with DSS (DSA) are DSS and DSS1.
 	 */
 	x509("DSA_SHA", pkey, EVP_dss());
 	x509("DSA_SHA1", pkey, EVP_dss1());
-	free(pkey);
-
-	/*
-	 * Generate Diffie-Hellman parameters.
-	 */
-	printf("Generating DH parameters (%d bits)...\n", MODULUSLEN);
-	dh_params = DH_generate_parameters(PRIMELEN, 2, cb, "DH");
-	printf("\n");
-	if (dh_params == NULL) {
-		printf("DH generate parameters fails\n%s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
-		exit (-1);
-	}
-	DH_generate_key(dh_params);
-	if (!DH_check(dh_params, &codes)) {
-		printf("Invalid DH parameters\n");
-		exit (-1);
-	}
-	pkey = EVP_PKEY_new();
-	EVP_PKEY_assign_DH(pkey, dh_params);
-	str = fheader("DHpar");
-	PEM_write_DHparams(str, dh_params);
-	fclose(str);
 	free(pkey);
 #endif /* OPENSSL */
 	return (0);
@@ -268,21 +242,12 @@ main(
 
 #ifdef OPENSSL
 /*
- * Generate X509v3 certificate request and X509v3 self-signed certificate.
- * Note: At present, this works only for RSA signatures; DSA signatures
- * come a segfault. Later.
+ * Generate X509v3 self-signed certificate.
  *
- * The certificate request and certificate are saved as files in the
- * format described in the main program. The request consists of the
- * ASN.1 encoding of the version number, subject name, public key and
- * signature. The version number is 1, although this may change in
- * future. The subject name is the host name running this program and
- * the public key is the RSA or DSA key of the subject as selected by
- * the caller.
- *
- * The certificate consists of the ASN.1 encoding of the version number,
- * subject name and public key of the request and in addition the serial
- * number, issuer name and validity interval. For a self-signed
+ * The certificate certificate is saved as a file in the format
+ * described in the main program. The certificate consists of the ASN.1
+ * encoding of the version number, serial number, validity interval,
+ * issuer name, subject name and public key. For a self-signed
  * certificate, the issuer name is the same as the subject name and
  * these items are signed using the subject private key. The validity
  * interval extends from the current time to the same time one year
@@ -296,38 +261,11 @@ x509	(
 	EVP_MD *md		/* generic digest algorithm */
 	)
 {
-	X509_REQ *req;		/* X509 certificate request */
 	X509	*cert;		/* X509 certificate */
 	X509_NAME *subj;	/* distinguished (common) name */
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
 	u_char	pathbuf[PATH_MAX];
-
-	/*
-	 * Generate, sign and verify X509 certificate request.
-	 */
-	printf("%s certificate request for %s key type %d\n", id,
-	    hostname, EVP_MD_type(pkey));
-	req = X509_REQ_new();
-	X509_REQ_set_version(req, 2L);
-	subj = X509_REQ_get_subject_name(req);
-	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    hostname, strlen(hostname), -1, 0);
-	X509_REQ_set_pubkey(req, pkey);
-	X509_REQ_sign(req, pkey, md);
-	if (!X509_REQ_verify(req, pkey)) {
-		printf("Verify request fails\n%s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
-		return (-1);
-	}
-
-	/*
-	 * Write request for offline processing.
-	 */
-	sprintf(pathbuf, "%sreq", id);
-	str = fheader(pathbuf);
-	PEM_write_X509_REQ(str, req);
-	fclose(str);
 
 	/*
 	 * Generate X509 self-signed certificate.
@@ -378,7 +316,6 @@ x509	(
 	 */
 	ASN1_INTEGER_free(serial);
 	X509_free(cert);
-	X509_REQ_free(req);
 	fclose(str);
 	return (0);
 }
