@@ -12,7 +12,7 @@
         <h3>Miscellaneous Options</h3>
         <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>We have three, now looking for more.</p>
-        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">01:50</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="217">Friday, May 02, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=97>11:51 PM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=290>Sunday, December 05, 2004</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -57,7 +57,8 @@
             <p>This configuration will list all clock information and synchronization information. All other events and messages about peers, system events and so on is suppressed.</p>
             <p><tt>logfile <i>logfile</i></tt></p>
             <p>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.</p>
-            <dt><tt>setvar <i>variable</i> [default]</tt>
+			<dt><tt>phone <i>dial</i>1 <i>dial</i>2 ...</tt>
+			<dd>This command is used in conjunction with the ACTS modem driver (type 18). The arguments consist of a maximum of 10 telephone numbers used to dial USNO, NIST or European time services. The Hayes command ATDT&nbsp;is normally prepended to the number, which can contain other modem control codes as well.<dt><tt>setvar <i>variable</i> [default]</tt>
             <dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.
             <dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff | <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt>
             <dd>This command can be used to alter several system variables in very exceptional circumstances. It should occur in the configuration file before any other configuration options. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. In general, they interact in intricate ways that are hard to predict and some combinations can result in some very nasty behavior. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs anyway and this command is for them. Emphasis added: twisters are on their own and can expect no help from the support group.

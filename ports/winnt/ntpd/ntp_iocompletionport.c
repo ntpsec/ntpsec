@@ -21,6 +21,7 @@
 static HANDLE hIoCompletionPort = NULL;
 
 static HANDLE WaitableIoEventHandle = NULL;
+HANDLE WaitHandles[3] = { NULL, NULL, NULL };
 
 HANDLE
 get_io_event()
@@ -91,6 +92,7 @@ init_io_completion_port(
 	void
 	)
 {
+
 	/* Create the event used to signal an IO event
 	 */
 	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -107,6 +109,13 @@ init_io_completion_port(
 		exit(1);
 	}
 	
+	/*
+	 * Initialize the Wait Handles
+	 */
+	WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit request */
+	WaitHandles[1] = get_timer_handle();
+	WaitHandles[2] = get_io_event();
+
 	/* Have one thread servicing I/O - there were 4, but this would 
 	 * somehow cause NTP to stop replying to ntpq requests; TODO
  	 */
@@ -456,6 +465,43 @@ io_completion_port_write(
 #endif
 	}
 	return Result;
+}
+
+struct recvbuf *GetReceivedBuffers()
+{
+
+	DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, TRUE);
+	switch (Index) {
+	case WAIT_OBJECT_0 + 0 : /* exit request */
+		exit(0);
+		break;
+
+	case WAIT_OBJECT_0 + 1 : /* timer */
+		timer();
+		break;
+
+	case WAIT_OBJECT_0 + 2 : /* Io event */
+# ifdef DEBUG
+		if ( debug > 3 )
+		{
+			printf( "IoEvent occurred\n" );
+		}
+# endif
+		break;
+
+	case WAIT_IO_COMPLETION : /* loop */
+	case WAIT_TIMEOUT :
+		break;
+	case WAIT_FAILED:
+		msyslog(LOG_ERR, "ntpd: WaitForMultipleObjectsEx Failed: Error: %m");
+		break;
+
+		/* For now do nothing if not expected */
+	default:
+		break;		
+				
+	} /* switch */
+	return (getrecvbufs());	/* get received buffers */
 }
 
 #else

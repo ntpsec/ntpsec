@@ -1420,7 +1420,10 @@ poll_update(
 	 * current_time, the call is from the poll process; otherwise,
 	 * it is from the receive process.
 	 */
-	hpoll = mpoll;
+	if (peer->flags & FLAG_FIXPOLL)
+		hpoll = peer->minpoll;
+	else
+		hpoll = mpoll;
 
 	/*
 	 * If during the crypto protocol and a message is pending, make
@@ -1500,7 +1503,6 @@ poll_update(
 	if (hpoll != peer->hpoll)
 		key_expire(peer);
 #endif /* OPENSSL */
-	peer->hpoll = hpoll;
 #ifdef DEBUG
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",

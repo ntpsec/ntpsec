@@ -9,8 +9,6 @@
 # include <netinfo/ni.h>
 #endif
 
-#include <netdb.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -39,7 +37,7 @@
 
 #ifdef SYS_WINNT
 # include <io.h>
-extern HANDLE ResolverThreadHandle;
+HANDLE ResolverThreadHandle = NULL;
 #endif /* SYS_WINNT */
 
 extern int priority_done;
@@ -160,7 +158,7 @@ static	struct keyword fudge_keywords[] = {
 	{ "flag2",		CONF_FDG_FLAG2 },
 	{ "flag3",		CONF_FDG_FLAG3 },
 	{ "flag4",		CONF_FDG_FLAG4 },
-	{ "refid",		CONF_FDG_REFID },
+	{ "refid",		CONF_FDG_REFID }, /* this mapping should be cleaned up (endianness, \0) - kd 20041031 */
 	{ "stratum",		CONF_FDG_STRATUM },
 	{ "time1",		CONF_FDG_TIME1 },
 	{ "time2",		CONF_FDG_TIME2 },
@@ -204,7 +202,6 @@ static struct keyword flags_keywords[] = {
 	{ "kernel",		PROTO_KERNEL },
 	{ "monitor",		PROTO_MONITOR },
 	{ "ntp",		PROTO_NTP },
-	{ "pps",		PROTO_PPS },
 	{ "stats",		PROTO_FILEGEN },
 	{ "",			CONFIG_UNKNOWN }
 };
@@ -311,7 +308,7 @@ static struct masks logcfg_item[] = {
  */
 #define MAXTOKENS	20	/* 20 tokens on line */
 #define MAXLINE		1024	/* maximum length of line */
-#define MAXPHONE	5	/* maximum number of phone strings */
+#define MAXPHONE	10	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
 #define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
@@ -342,7 +339,7 @@ static char res_file[MAX_PATH];
  * Definitions of things either imported from or exported to outside
  */
 char const *progname;
-char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
+char	*sys_phone[MAXPHONE] = {NULL}; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
@@ -530,7 +527,6 @@ getconfig(
 #endif /* SYS_WINNT */
 	progname = argv[0];
 	res_fp = NULL;
-	memset((char *)sys_phone, 0, sizeof(sys_phone));
 	ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
 
 	/*
@@ -1763,11 +1759,12 @@ getconfig(
 			break;
 
 		    case CONFIG_PHONE:
-			for (i = 1; i < ntokens && i < MAXPHONE; i++) {
-				(void)strncpy(sys_phone[i - 1],
-					      tokens[i], MAXDIAL);
+			for (i = 1; i < ntokens && i < MAXPHONE - 1; i++) {
+				sys_phone[i - 1] =
+				    emalloc(strlen(tokens[i]) + 1);
+				strcpy(sys_phone[i - 1], tokens[i]);
 			}
-			sys_phone[i - 1][0] = '\0';
+			sys_phone[i] = NULL;
 			break;
 
 		    case CONFIG_ADJ: {

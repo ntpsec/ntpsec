@@ -1,5 +1,5 @@
 /*
- * refclock_wwvb - clock driver for Spectracom WWVB receivers
+ * refclock_wwvb - clock driver for Spectracom WWVB and GPS receivers
  */
 
 #ifdef HAVE_CONFIG_H
@@ -80,19 +80,20 @@
  * synchronized to the indicated time as returned.
  *
  * This driver does not need to be told which format is in use - it
- * figures out which one from the length of the message.The driver makes
- * no attempt to correct for the intrinsic jitter of the radio itself,
- * which is a known problem with the older radios.
+ * figures out which one from the length of the message. The driver
+ * makes no attempt to correct for the intrinsic jitter of the radio
+ * itself, which is a known problem with the older radios.
  *
  * Fudge Factors
  *
  * This driver can retrieve a table of quality data maintained
  * internally by the Netclock/2 clock. If flag4 of the fudge
  * configuration command is set to 1, the driver will retrieve this
- * table and write it to the clockstats file on when the first timecode
+ * table and write it to the clockstats file when the first timecode
  * message of a new day is received.
+ *
+ * PPS calibration fudge time 1: format 0 .003134, format 2 .004034
  */
-
 /*
  * Interface definitions
  */
@@ -100,7 +101,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-13)	/* precision assumed (about 100 us) */
 #define	REFID		"WWVB"	/* reference ID */
-#define	DESCRIPTION	"Spectracom WWVB/GPS Receivers" /* WRU */
+#define	DESCRIPTION	"Spectracom WWVB/GPS Receiver" /* WRU */
 
 #define	LENWWVB0	22	/* format 0 timecode length */
 #define LENWWVB1	22	/* format 1 timecode length */
@@ -124,6 +125,7 @@ static	int	wwvb_start	P((int, struct peer *));
 static	void	wwvb_shutdown	P((int, struct peer *));
 static	void	wwvb_receive	P((struct recvbuf *));
 static	void	wwvb_poll	P((int, struct peer *));
+static	void	wwvb_timer	P((int, struct peer *));
 
 /*
  * Transfer vector
@@ -135,7 +137,7 @@ struct	refclock refclock_wwvb = {
 	noentry,		/* not used (old wwvb_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old wwvb_buginfo) */
-	NOFLAGS			/* not used */
+	wwvb_timer		/* called once per second */
 };
 
 
@@ -187,7 +189,6 @@ wwvb_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-	peer->burst = MAXSTAGE;
 	return (1);
 }
 
@@ -248,7 +249,7 @@ wwvb_receive(
 	 * +-50 us relative to the pps; however, on an unmodified 8170
 	 * the start bit can be delayed up to 10 ms. In format 2 the
 	 * reading precision is only to the millisecond. Thus, unless
-	 * you have a pps gadget and don't have to have the year, format
+	 * you have a PPS gadget and don't have to have the year, format
 	 * 0 provides the lowest jitter.
 	 */
 	if (temp == 0) {
@@ -375,10 +376,10 @@ wwvb_receive(
 
 
 /*
- * wwvb_poll - called by the transmit procedure
+ * wwvb_timer - called once per second by the transmit procedure
  */
 static void
-wwvb_poll(
+wwvb_timer(
 	int unit,
 	struct peer *peer
 	)
@@ -392,8 +393,7 @@ wwvb_poll(
 	 * 'T' by returning a timecode in the format(s) specified above.
 	 * Note there is no checking on state, since this may not be the
 	 * only customer reading the clock. Only one customer need poll
-	 * the clock; all others just listen in. If the clock becomes
-	 * unreachable, declare a timeout and keep going.
+	 * the clock; all others just listen in.
 	 */
 	pp = peer->procptr;
 	up = (struct wwvbunit *)pp->unitptr;
@@ -403,21 +403,27 @@ wwvb_poll(
 		pollchar = 'T';
 	if (write(pp->io.fd, &pollchar, 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);
-	if (peer->burst > 0)
-		return;
+}
 
-	peer->burst = MAXSTAGE;
-	if (pp->coderecv == pp->codeproc) {
-		refclock_report(peer, CEVNT_TIMEOUT);
-		return;
-	}
-#ifdef DEBUG
-	if (debug)
-		printf("wwvb: timecode %d %s\n", pp->lencode,
-		    pp->a_lastcode);
-#endif
-	refclock_receive(peer);
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+
+/*
+ * wwvb_poll - called by the transmit procedure
+ */
+static void
+wwvb_poll(
+	int unit,
+	struct peer *peer
+	)
+{
+	register struct wwvbunit *up;
+	struct refclockproc *pp;
+
+	/*
+	 * Sweep up the samples received since the last poll. If none
+	 * are received, declare a timeout and keep going.
+	 */
+	pp = peer->procptr;
+	up = (struct wwvbunit *)pp->unitptr;
 	pp->polls++;
 
 	/*
@@ -428,6 +434,22 @@ wwvb_poll(
 	    (int)up->lasthour)
 		up->linect = MONLIN;
 	up->lasthour = pp->hour;
+
+	/*
+	 * Process median filter samples. If none received, declare a
+	 * timeout and keep going.
+	 */
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	refclock_receive(peer);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+#ifdef DEBUG
+	if (debug)
+		printf("wwvb: timecode %d %s\n", pp->lencode,
+		    pp->a_lastcode);
+#endif
 }
 
 #else

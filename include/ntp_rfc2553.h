@@ -74,6 +74,8 @@
  */
 #include <config.h>
 
+#include <netdb.h>
+
 #include "ntp_types.h"
 
 /*

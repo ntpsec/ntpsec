@@ -116,7 +116,7 @@ void open_socket (int which, char *hostname, int timespan) {
 socket. */
 
     int port, k, sl;
-    struct sockaddr_storage address, anywhere, everywhere;
+    struct sockaddr_storage address, anywhere;
 
 /* Initialise and find out the server and port number.  Note that the port
 number is in network format. */
@@ -129,14 +129,12 @@ number is in network format. */
         fatal(0,"socket index out of range or already open",NULL);
     if (verbose > 2)
 	fprintf(stderr,"Looking for the socket addresses\n");
-    find_address(&address,&anywhere,&everywhere,&port,hostname,timespan);
+    find_address(&address,&anywhere,&port,hostname,timespan);
     if (verbose > 2) {
         fprintf(stderr,"Internet address: address=");
         display_sock_in_hex(&address);
         fprintf(stderr," anywhere=");
         display_sock_in_hex(&anywhere);
-        fprintf(stderr," everywhere=");
-        display_sock_in_hex(&everywhere);
         fputc('\n',stderr);
     }
 
@@ -186,7 +184,7 @@ void open_socket (int which, char *hostname, int timespan) {
 socket. */
 
     int port, k;
-    struct in_addr address, anywhere, everywhere;
+    struct in_addr address, anywhere;
 
 /* Initialise and find out the server and port number.  Note that the port
 number is in network format. */
@@ -196,14 +194,12 @@ number is in network format. */
     if (which < 0 || which >= MAX_SOCKETS || descriptors[which] >= 0)
         fatal(0,"socket index out of range or already open",NULL);
     if (verbose > 2) fprintf(stderr,"Looking for the socket addresses\n");
-    find_address(&address,&anywhere,&everywhere,&port,hostname,timespan);
+    find_address(&address,&anywhere,&port,hostname,timespan);
     if (verbose > 2) {
         fprintf(stderr,"Internet address: address=");
         display_in_hex(&address,sizeof(struct in_addr));
         fprintf(stderr," anywhere=");
         display_in_hex(&anywhere,sizeof(struct in_addr));
-        fprintf(stderr," everywhere=");
-        display_in_hex(&everywhere,sizeof(struct in_addr));
         fputc('\n',stderr);
     }
 

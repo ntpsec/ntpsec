@@ -1743,7 +1743,8 @@ sendpkt(
 				exit(1);
 			}
 
-			netsyslog(LOG_ERR, "sendto(%s): %m", stoa(dest));
+			netsyslog(LOG_ERR, "sendto(%s) (fd=%d): %m",
+				  stoa(dest), inter->fd);
 		}
 	}
 	else
@@ -2136,6 +2137,13 @@ findinterface(
 	int rtn, i;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
+#ifdef DEBUG
+	if (debug>2)
+	    printf("Finding interface for addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
 	 * and slap a getsockname() on it. If anything breaks, as it
@@ -2173,7 +2181,7 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
 		*/
@@ -2199,11 +2207,17 @@ findbcastinter(
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 	
-	i = find_addr_in_list(addr);
+#ifdef DEBUG
+	if (debug>2)
+	    printf("Finding broadcast interface for addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+	i = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
 	if(i >= 0)
 	     return (&inter_list[i]);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if this is the correct family
 		*/
@@ -2215,7 +2229,7 @@ findbcastinter(
 		 * address or the network portion of the IP address.
 		 * Sloppy.
 		 */
-		if (!(inter_list[i].flags & INT_BROADCAST))
+		if (!(inter_list[i].flags & INT_BCASTOPEN))
 			continue;
 		if(addr->ss_family == AF_INET) {
 			if (SOCKCMP(&inter_list[i].bcast, addr))

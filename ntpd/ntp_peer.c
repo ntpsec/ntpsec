@@ -602,10 +602,14 @@ newpeer(
 	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
-	if (cast_flags & (MDF_BCLNT | MDF_BCAST)) {
+	if (cast_flags & MDF_BCAST) {
 		enable_broadcast(peer->dstadr, srcadr);
 	}
-
+#ifdef DEBUG
+	if (debug>2)
+		printf("newpeer: using fd %d and our addr %s\n",
+		    peer->dstadr->fd, stoa(&peer->dstadr->sin));
+#endif
 	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
@@ -639,6 +643,7 @@ newpeer(
 	peer->timereceived = current_time;
 #ifdef REFCLOCK
 	if (ISREFCLOCKADR(&peer->srcadr)) {
+
 		/*
 		 * We let the reference clock support do clock
 		 * dependent initialization.  This includes setting

@@ -220,7 +220,7 @@ refclock_newpeer(
 	 */
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
-	peer->flags |= FLAG_REFCLOCK;
+	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
@@ -506,8 +506,13 @@ refclock_sample(
 		return (0);
 
 	if (n > 1)
-		qsort((char *)off, (size_t)n, sizeof(double),
-		    refclock_cmpl_fp);
+		qsort(
+#ifdef QSORT_USES_VOID_P
+		    (void *)
+#else
+		    (char *)
+#endif
+		    off, (size_t)n, sizeof(double), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
@@ -575,7 +580,7 @@ refclock_receive(
 	pp = peer->procptr;
 	peer->received++;
 	peer->timereceived = current_time;
-	if (peer->leap != LEAP_NOTINSYNC && pp->leap !=
+	if (peer->leap == LEAP_NOTINSYNC || pp->leap ==
 	    LEAP_NOTINSYNC)
 		refclock_report(peer, CEVNT_FAULT);
 	peer->leap = pp->leap;

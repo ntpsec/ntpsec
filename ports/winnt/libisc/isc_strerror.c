@@ -31,13 +31,13 @@ FormatError(int error);
 char *
 GetWSAErrorMessage(int errval);
 
-char *
-NTstrerror(int err, BOOL *bfreebuf);
+static char *
+isc__NTstrerror(int err, BOOL *bfreebuf);
 
 char *
-strerror(int errnum) {
+NTstrerror(int errnum) {
 	BOOL bfreebuf;
-	return (NTstrerror(errnum, &bfreebuf));
+	return (isc__NTstrerror(errnum, &bfreebuf));
 }
 /*
  * This routine needs to free up any buffer allocated by FormatMessage
@@ -51,7 +51,7 @@ isc__strerror(int num, char *buf, size_t size) {
 	unsigned int unum = num;
 
 	freebuf = FALSE;
-	msg = NTstrerror(num, &freebuf);
+	msg = isc__NTstrerror(num, &freebuf);
 	if (msg != NULL)
 		_snprintf(buf, size, "%s", msg);
 	else
@@ -90,8 +90,8 @@ FormatError(int error) {
  * Error message function GetWSAErrorMessage below if it's within that range
  * since those messages are not available in the system error messages.
  */
-char *
-NTstrerror(int err, BOOL *bfreebuf) {
+static char *
+isc__NTstrerror(int err, BOOL *bfreebuf) {
 	char *retmsg = NULL;
 
 	/* Copy the error value first in case of other errors */	
@@ -127,7 +127,7 @@ NTperror(char *errmsg) {
 	BOOL bfreebuf = FALSE;
 	char *msg;
 
-	msg = NTstrerror(errval, &bfreebuf);
+	msg = isc__NTstrerror(errval, &bfreebuf);
 	fprintf(stderr, "%s: %s\n", errmsg, msg);
 	if(bfreebuf == TRUE) {
 		LocalFree(msg);

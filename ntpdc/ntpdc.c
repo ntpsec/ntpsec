@@ -7,7 +7,6 @@
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
-#include <netdb.h>
 
 #include "ntpdc.h"
 #include "ntp_select.h"
@@ -19,6 +18,7 @@
 #include "isc/result.h"
 
 #ifdef SYS_WINNT
+#include <Mswsock.h>
 # include <io.h>
 #else
 # define closesocket close
@@ -105,10 +105,10 @@ static	struct xcmd builtins[] = {
 	{ "help",	help,		{  OPT|NTP_STR, NO, NO, NO },
 	  { "command", "", "", "" },
 	  "tell the use and syntax of commands" },
-	{ "timeout",	timeout,	{ OPT|UINT, NO, NO, NO },
+	{ "timeout",	timeout,	{ OPT|NTP_UINT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the primary receive time out" },
-	{ "delay",	my_delay,	{ OPT|INT, NO, NO, NO },
+	{ "delay",	my_delay,	{ OPT|NTP_INT, NO, NO, NO },
 	  { "msec", "", "", "" },
 	  "set the delay added to encryption time stamps" },
 	{ "host",	host,		{ OPT|NTP_STR, OPT|NTP_STR, NO, NO },
@@ -129,7 +129,7 @@ static	struct xcmd builtins[] = {
 	{ "exit",	quit,		{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "exit ntpdc" },
-	{ "keyid",	keyid,		{ OPT|UINT, NO, NO, NO },
+	{ "keyid",	keyid,		{ OPT|NTP_UINT, NO, NO, NO },
 	  { "key#", "", "", "" },
 	  "set/show keyid to use for authenticated requests" },
 	{ "keytype",	keytype,	{ OPT|NTP_STR, NO, NO, NO },
@@ -155,8 +155,7 @@ static	struct xcmd builtins[] = {
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
 #define	MAXLINE		512		/* maximum line length */
 #define	MAXTOKENS	(1+1+MAXARGS+2)	/* maximum number of usable tokens */
-					/* command + -4|-6 + MAXARGS + */
-					/* redirection */
+#define	SCREENWIDTH  	78		/* nominal screen width in columns */
 
 /*
  * Some variables used and manipulated locally
@@ -1317,7 +1316,7 @@ getarg(
 	    case NTP_STR:
 		argp->string = str;
 		break;
-	    case ADD:
+	    case NTP_ADD:
 		if (!strcmp("-6", str)) {
 			ai_fam_templ = AF_INET6;
 			return -1;
@@ -1329,8 +1328,8 @@ getarg(
 			return 0;
 		}
 		break;
-	    case INT:
-	    case UINT:
+	    case NTP_INT:
+	    case NTP_UINT:
 		isneg = 0;
 		np = str;
 		if (*np == '-') {
@@ -1351,7 +1350,7 @@ getarg(
 		} while (*(++np) != '\0');
 
 		if (isneg) {
-			if ((code & ~OPT) == UINT) {
+			if ((code & ~OPT) == NTP_UINT) {
 				(void) fprintf(stderr,
 					       "***Value %s should be unsigned\n", str);
 				return 0;
@@ -1451,57 +1450,56 @@ help(
 	FILE *fp
 	)
 {
-	int i;
-	int n;
 	struct xcmd *xcp;
 	char *cmd;
-	const char *cmdsort[100];
-	int length[100];
-	int maxlength;
-	int numperline;
-	static const char *spaces = "                    ";	/* 20 spaces */
+	const char *list[100];
+	int word, words;     
+        int row, rows;
+	int col, cols;
 
 	if (pcmd->nargs == 0) {
-		n = 0;
+		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = xcp->keyword;
+			    list[words++] = xcp->keyword;
 		}
-		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
+                for (xcp = opcmds; xcp->keyword != 0; xcp++)
+		    list[words++] = xcp->keyword;
 
+		qsort(
 #ifdef QSORT_USES_VOID_P
-		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
+		    (void *)
 #else
-		qsort((char *)cmdsort, (size_t)n, sizeof(char *), helpsort);
+		    (char *)
 #endif
-
-		maxlength = 0;
-		for (i = 0; i < n; i++) {
-			length[i] = strlen(cmdsort[i]);
-			if (length[i] > maxlength)
-			    maxlength = length[i];
+			(list), (size_t)(words), sizeof(char *), helpsort);
+		col = 0;
+		for (word = 0; word < words; word++) {
+			int length = strlen(list[word]);
+			if (col < length) {
+			    col = length;
+                        }
 		}
-		maxlength++;
-		numperline = 76 / maxlength;
 
-		(void) fprintf(fp, "Commands available:\n");
-		for (i = 0; i < n; i++) {
-			if ((i % numperline) == (numperline-1)
-			    || i == (n-1))
-			    (void) fprintf(fp, "%s\n", cmdsort[i]);
-			else
-			    (void) fprintf(fp, "%s%s", cmdsort[i],
-					   spaces+20-maxlength+length[i]);
+		cols = SCREENWIDTH / ++col;
+                rows = (words + cols - 1) / cols;
+
+		(void) fprintf(fp, "ntpdc commands:\n");
+
+		for (row = 0; row < rows; row++) {
+                        for (word = row; word < words; word += rows) {
+				(void) fprintf(fp, "%-*.*s", col, col-1, list[word]);
+                        }
+			(void) fprintf(fp, "\n");
 		}
 	} else {
 		cmd = pcmd->argval[0].string;
-		n = findcmd(cmd, builtins, opcmds, &xcp);
-		if (n == 0) {
+		words = findcmd(cmd, builtins, opcmds, &xcp);
+		if (words == 0) {
 			(void) fprintf(stderr,
 				       "Command `%s' is unknown\n", cmd);
 			return;
-		} else if (n >= 2) {
+		} else if (words >= 2) {
 			(void) fprintf(stderr,
 				       "Command `%s' is ambiguous\n", cmd);
 			return;
@@ -1553,7 +1551,7 @@ printusage(
 	opt46 = 0;
 	(void) fprintf(fp, "usage: %s", xcp->keyword);
 	for (i = 0; i < MAXARGS && xcp->arg[i] != NO; i++) {
-		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == ADD) {
+		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == NTP_ADD) {
 			(void) fprintf(fp, " [ -4|-6 ]");
 			opt46 = 1;
 		}

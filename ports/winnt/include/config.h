@@ -1,15 +1,23 @@
 /* config.h for Windows NT */
 
-#ifndef __config
-#define __config
+#ifndef __CONFIG_H
+#define __CONFIG_H
 
-#if defined(_MSC_VER)
-/* VS V7 (aka .NET) has the IPv6 structures */
-#if _MSC_VER >= 1300
+/*
+ * IPv6 requirements
+ */
+/*
+ * For VS.NET most of the IPv6 types and structures are defined
+ */
+#if _MSC_VER > 1200
 #define HAVE_STRUCT_SOCKADDR_STORAGE
-#define ISC_PLATFORM_HAVEIN6PKTINFO
 #define ISC_PLATFORM_HAVEIPV6
+#define ISC_PLATFORM_HAVEIN6PKTINFO
 #endif
+
+#define ISC_PLATFORM_NEEDIN6ADDRANY
+#define HAVE_SOCKADDR_IN6
+
 /*
  * An attempt to cut down the number of warnings generated during compilation.
  * All of these should be benign to disable.
@@ -18,7 +26,6 @@
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
 #pragma warning(disable: 4101) /* unreferenced local variable */
 #pragma warning(disable : 4127)
-#endif
 
 /*
  * Windows NT Configuration Values
@@ -41,9 +48,24 @@
 #define _WINSOCKAPI_  
 #endif
 
-# define  OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
-# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
-# define HAVE_RANDOM 
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__
+#endif
+
+/*
+ * VS.NET's version of wspiapi.h has a bug in it
+ * where it assigns a value to a variable inside
+ * an if statement. It should be comparing them.
+ * We prevent inclusion since we are not using this
+ * code so we don't have to see the warning messages
+ */
+#ifndef _WSPIAPI_H_
+#define _WSPIAPI_H_
+#endif
+
+#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
+#define UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
+#define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
 
@@ -54,6 +76,17 @@
 #define finite _finite
 # define random      rand
 # define srandom     srand
+
+/*
+ * We need to include string.h first before we override strerror
+ * otherwise we can get errors during the build
+ */
+#include <string.h>
+/* Point to a local version for error string handling */
+# define strerror	NTstrerror
+
+char *NTstrerror(int errnum);
+
 int NT_set_process_priority(void);	/* Define this function */
 
 # define MCAST				/* Enable Multicast Support */												
@@ -93,13 +126,11 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_ERRNO_H
 # define HAVE_STDARG_H
 # define HAVE_NO_NICE
+# define HAVE_MKTIME
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
-# define HAVE_SOCKADDR_IN6
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
-
-#define ISC_PLATFORM_NEEDIN6ADDRANY
 
 # define NEED_S_CHAR_TYPEDEF
 
@@ -115,6 +146,7 @@ int NT_set_process_priority(void);	/* Define this function */
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
 
 /* Include Windows headers */
+#include <windows.h>
 #include <winsock2.h>
 
 #endif /* __config */

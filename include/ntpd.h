@@ -220,7 +220,7 @@ extern  int	sock_hash P((struct sockaddr_storage *));
 
 /* ntp_config.c */
 extern char const *	progname;
-extern char	sys_phone[][MAXDIAL];	/* ACTS phone numbers */
+extern char	*sys_phone[];		/* ACTS phone numbers */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 extern int	config_priority_override;
 extern int	config_priority;

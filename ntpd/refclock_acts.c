@@ -37,13 +37,14 @@
  *
  * The calling program is initiated by setting fudge flag1, either
  * manually or automatically. When flag1 is set, the calling program
- * dials each number listed in the phones command of the configuration
- * file in turn. The number is specified by the Hayes ATDT prefix
- * followed by the number itself, including the prefix and long-distance
- * digits and delay code, if necessary. The flag1 is reset and the
- * calling program terminated if (a) a valid clock update has been
- * determined, (b) no more numbers remain in the list, (c) a device
- * fault or timeout occurs or (d) fudge flag1 is reset manually.
+ * dials the first number in the phone command of the configuration
+ * file. If that call fails, the calling program dials the second number
+ * and so on. The number is specified by the Hayes ATDT prefix followed
+ * by the number itself, including the prefix and long-distance digits
+ * and delay code, if necessary. The flag1 is reset and the calling
+ * program terminated if (a) a valid clock update has been determined,
+ * (b) no more numbers remain in the list, (c) a device fault or timeout
+ * occurs or (d) fudge flag1 is reset manually.
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom radios. It selects the parsing algorithm depending on the
@@ -175,7 +176,7 @@
 #define WAIT		2	/* DTR timeout */
 #define MODEM		3	/* modem timeout */
 #define ANSWER		60	/* answer timeout */
-#define CONNECT		10	/* first valid message timeout */
+#define CONNECT		20	/* first valid message timeout */
 #define TIMECODE	30	/* all valid messages timeout */
 
 /*
@@ -262,6 +263,7 @@ acts_start (
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	peer->sstclktype = CTL_SST_TS_TELEPHONE;
+	peer->flags &= ~FLAG_FIXPOLL;
 	up->bufptr = pp->a_lastcode;
 	return (1);
 }
@@ -384,7 +386,7 @@ acts_message(
 
 	/*
 	 * We are waiting for the OK response to the modem setup
-	 * command. When this happens dial the number.
+	 * command. When this happens dial the number followed by a \r.
 	 */
 	case S_OK:
 		if (strcmp(pp->a_lastcode, "OK") != 0) {
@@ -405,6 +407,7 @@ acts_message(
 			acts_disc(peer);
 			return;
 		}
+		write(pp->io.fd, "\r", 1);
 		up->state = S_CONNECT;
 		up->timer = ANSWER;
 		return;
@@ -436,7 +439,7 @@ acts_message(
 
 	/*
 	 * For USNO format on-time character '*', which is on a line by
-	 * itself. By sure a timecode has been received.
+	 * itself. Be sure a timecode has been received.
 	 */
 	case 1:
 		if (*pp->a_lastcode == '*' && up->state == S_MSG) 
@@ -766,6 +769,8 @@ acts_timeout(
 			if (!io_addclock(&pp->io)) {
 				msyslog(LOG_ERR,
 				    "acts: addclock fails");
+				close(fd);
+				pp->io.fd = 0;
 				break;
 			}
 		}
@@ -868,7 +873,7 @@ acts_disc (
 		up->retry = 0;
 	} else {
 		up->retry++;
-		if (*sys_phone[up->retry] == '\0') {
+		if (sys_phone[up->retry] == NULL) {
 			up->retry = 0;
 			sprintf(tbuf, "acts: call failed");
 			record_clock_stats(&peer->srcadr, tbuf);
@@ -896,7 +901,7 @@ acts_disc (
 			ioctl(pp->io.fd, TIOCMBIC, (char *)&dtr);
 		}
 		if (pp->sloppyclockflag & CLK_FLAG2) {
-			close(pp->io.fd);
+			io_closeclock(&pp->io);
 			pp->io.fd = 0;
 			sprintf(lockfile, LOCKFILE, up->unit);
 			unlink(lockfile);

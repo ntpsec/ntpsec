@@ -32,7 +32,6 @@
 # include <poll.h>
 #endif
 #ifndef SYS_WINNT
-# include <netdb.h>
 # ifdef HAVE_SYS_SIGNAL_H
 #  include <sys/signal.h>
 # else
@@ -1808,7 +1807,7 @@ sendpkt(
 {
 	int i;
 	int cc;
-	SOCKET sock = 0;
+	SOCKET sock = INVALID_SOCKET;
 
 #ifdef SYS_WINNT
 	DWORD err;
@@ -1822,7 +1821,7 @@ sendpkt(
 		}
 	}
 
-	if ( sock == 0 ) {
+	if ( sock == INVALID_SOCKET ) {
 		netsyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
 		exit(1);
 		/*NOTREACHED*/

@@ -79,7 +79,13 @@ main(
 	}
 	if (n == 0)
 	    return;
-	qsort((char *)ovfl, (size_t)n, sizeof(long), col);
+	qsort(
+#ifdef QSORT_USES_VOID_P
+	    (void *)
+#else
+	    (char *)
+#endif
+	    ovfl, (size_t)n, sizeof(long), col);
 	w = 0;
 	j = 0;
 	for (i = 0; i < n; i++) {

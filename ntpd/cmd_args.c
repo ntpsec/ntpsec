@@ -19,16 +19,11 @@
 extern char const *progname;
 int	listen_to_virtual_ips = 1;
 
-#ifdef SYS_WINNT
-extern BOOL NoWinService;
-#endif
-
-static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
+static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
 #endif
-
 
 /*
  * getstartup - search through the options looking for a debugging flag
@@ -117,11 +112,8 @@ getstartup(
 		case 'n':
 		case 'q':
 		    ++nofork;
-#ifdef SYS_WINNT
-		    NoWinService = TRUE;	 
-#endif
 		    break;
-
+ 
 		case 'N':
 		    priority_done = 0;
 		    break;
@@ -154,7 +146,7 @@ getstartup(
 		}
 
 	if (errflg || ntp_optind != argc) {
-		(void) fprintf(stderr, "usage: %s [ -abdgmnqx ] [ -c config_file ] [ -e e_delay ]\n", progname);
+		(void) fprintf(stderr, "usage: %s [ -abdgnqx ] [ -c config_file ] [ -e e_delay ]\n", progname);
 		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
@@ -190,7 +182,6 @@ getCmdOpts(
 	)
 {
 	extern char *config_file;
-	struct sockaddr_in inaddrntp;
 	int errflg;
 	int c;
 
@@ -270,14 +261,6 @@ getCmdOpts(
 
 		    case 'L':   /* already done at pre-scan */
 		    case 'l':   /* already done at pre-scan */
-			break;
-
-		    case 'm':
-			inaddrntp.sin_family = AF_INET;
-			inaddrntp.sin_port = htons(NTP_PORT);
-			inaddrntp.sin_addr.s_addr = htonl(INADDR_NTP);
-			proto_config(PROTO_MULTICAST_ADD, 0, 0., (struct sockaddr_storage*)&inaddrntp);
-			sys_bclient = 1;
 			break;
 
 		    case 'n':	/* already done at pre-scan */
@@ -410,7 +393,7 @@ getCmdOpts(
 	}
 
 	if (errflg || ntp_optind != argc) {
-		(void) fprintf(stderr, "usage: %s [ -abdgmnx ] [ -c config_file ] [ -e e_delay ]\n", progname);
+		(void) fprintf(stderr, "usage: %s [ -abdgnx ] [ -c config_file ] [ -e e_delay ]\n", progname);
 		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");

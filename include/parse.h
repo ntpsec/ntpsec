@@ -1,21 +1,41 @@
 /*
- * /src/NTP/ntp-4/include/parse.h,v 4.5 1998/08/09 22:23:32 kardel RELEASE_19990228_A
+ * /src/NTP/ntp4-dev/include/parse.h,v 4.9 2004/11/14 16:11:05 kardel RELEASE_20041114_B
  *
- * parse.h,v 4.5 1998/08/09 22:23:32 kardel RELEASE_19990228_A
+ * parse.h,v 4.9 2004/11/14 16:11:05 kardel RELEASE_20041114_B
  *
- * Copyright (C) 1989-1998 by Frank Kardel
- * Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
- *                                    
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the author nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
  */
 
 #ifndef __PARSE_H__
 #define __PARSE_H__
 #if	!(defined(lint) || defined(__GNUC__))
-  static char parsehrcsid[]="parse.h,v 4.5 1998/08/09 22:23:32 kardel RELEASE_19990228_A";
+  static char parsehrcsid[]="parse.h,v 4.9 2004/11/14 16:11:05 kardel RELEASE_20041114_B";
 #endif
 
 #include "ntp_types.h"
@@ -152,8 +172,11 @@ extern unsigned int splclock P((void));
 /*
  * operation flags - lower nibble contains fudge flags
  */
-#define PARSE_STATISTICS    0x08  /* enable statistics */
-#define PARSE_LEAP_DELETE   0x04  /* delete leap */
+#define PARSE_TRUSTTIME     CLK_FLAG1  /* use flag1 to indicate the time2 references mean the trust time */
+#define PARSE_CLEAR         CLK_FLAG2  /* use flag2 to control pps on assert */
+#define PARSE_PPSKERNEL     CLK_FLAG3  /* use flag3 to bind PPS to kernel */
+#define PARSE_LEAP_DELETE   CLK_FLAG4  /* use flag4 to force leap deletion - only necessary when earth slows down */
+
 #define PARSE_FIXED_FMT     0x10  /* fixed format */
 #define PARSE_PPSCLOCK      0x20  /* try to get PPS time stamp via ppsclock ioctl */
 

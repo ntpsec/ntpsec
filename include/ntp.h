@@ -396,6 +396,7 @@ struct peer {
 #define FLAG_IBURST	0x0200	/* initial burst mode */
 #define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
 #define FLAG_ASSOC	0x0800	/* autokey request */
+#define FLAG_FIXPOLL	0x1000	/* stick at minpoll */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear

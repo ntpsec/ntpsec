@@ -109,35 +109,8 @@
 # endif /* HAVE_SYS_MMAN_H */
 #endif /* ONCORE_SHMEM_STATUS */
 
-/*
- * This logic first tries to get the timepps.h file from a standard location, and then
- * from the local directory.  Im going to ignore only trying the 2nd if HAVE_PPSAPI
- * is not set...
- */
-
-#ifdef HAVE_TIMEPPS_H
-# include <timepps.h>
-#else
-# ifdef HAVE_SYS_TIMEPPS_H
-#  include <sys/timepps.h>
-# else
-#  ifdef HAVE_CIOGETEV
-#   include "timepps-SunOS.h"
-#   define HAVE_PPSAPI 1
-#  else
-#   ifdef HAVE_TIOCGPPSEV
-#    include "timepps-Solaris.h"
-#    define HAVE_PPSAPI 1
-#   else
-#    ifdef TIOCDCDTIMESTAMP
-#     include "timepps-SCO.h"
-#     define HAVE_PPSAPI 1
-#    else
-#     error "Cannot compile -- no PPSAPI mechanism configured!"
-#    endif
-#   endif
-#  endif
-# endif
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
 #endif
 
 #ifdef HAVE_SYS_SIO_H

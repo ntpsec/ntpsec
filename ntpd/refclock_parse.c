@@ -1,32 +1,45 @@
 /*
- * /src/NTP/ntp-4/ntpd/refclock_parse.c,v 4.36 1999/11/28 17:18:20 kardel RELEASE_19991128_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.44 2004/11/14 15:29:41 kardel RELEASE_20041114_B
  *
- * refclock_parse.c,v 4.36 1999/11/28 17:18:20 kardel RELEASE_19991128_A
+ * refclock_parse.c,v 4.44 2004/11/14 15:29:41 kardel RELEASE_20041114_B
  *
- * generic reference clock driver for receivers
+ * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
  * optionally make use of a STREAMS module for input processing where
  * available and configured. Currently the STREAMS module
  * is only available for Suns running SunOS 4.x and SunOS5.x
  *
- * the STREAMS module is not required for operation and may be omitted
- * at the cost of reduced accuracy. As new kernel interfaces emerger this
- * restriction may be lifted in future.
- *
- * Copyright (c) 1995-1999 by Frank Kardel <kardel@acm.org>
+ * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
- * This software may not be sold for profit without a written consent
- * from the author.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the author nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
  */
 
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
@@ -42,12 +55,12 @@
  *   - Schmid clock                                         (DCF)
  *   - Conrad DCF77 receiver module                         (DCF)
  *   - FAU DCF77 NTP receiver (TimeBrick)                   (DCF)
+ *   - WHARTON 400A Series clock			    (DCF)
  *
  *   - Meinberg GPS166/GPS167                               (GPS)
  *   - Trimble (TSIP and TAIP protocol)                     (GPS)
  *
  *   - RCC8000 MSF Receiver                                 (MSF)
- *   - WHARTON 400A Series clock			    (DCF)
  *   - VARITEXT clock					    (MSF)
  */
 
@@ -79,11 +92,16 @@
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"	/* includes <sys/time.h> */
 #include "ntp_control.h"
+#include "ntp_string.h"
 
 #include <stdio.h>
 #include <ctype.h>
 #ifndef TM_IN_SYS_TIME
 # include <time.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #if !defined(STREAM) && !defined(HAVE_SYSV_TTYS) && !defined(HAVE_BSD_TTYS) && !defined(HAVE_TERMIOS)
@@ -115,14 +133,40 @@
 # include <sys/ioctl.h>
 #endif
 
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
+#endif
+
 #ifdef PPS
-#ifdef HAVE_SYS_PPSCLOCK_H
-#include <sys/ppsclock.h>
+# ifdef HAVE_SYS_PPSCLOCK_H
+#  include <sys/ppsclock.h>
+# endif
+# ifdef HAVE_TIO_SERIAL_STUFF
+#  include <linux/serial.h>
+# endif
 #endif
-#ifdef HAVE_TIO_SERIAL_STUFF
-#include <linux/serial.h>
+
+/*
+ * document type of PPS interfacing - copy of ifdef mechanism in local_input()
+ */
+#undef PPS_METHOD 
+
+#ifdef HAVE_PPSAPI
+#define PPS_METHOD "PPS API"
+#else
+#ifdef TIOCDCDTIMESTAMP
+#define PPS_METHOD "TIOCDCDTIMESTAMP"
+#else /* TIOCDCDTIMESTAMP */
+#if defined(HAVE_STRUCT_PPSCLOCKEV) && (defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV))
+#ifdef HAVE_CIOGETEV
+#define PPS_METHOD "CIOGETEV"
+#endif
+#ifdef HAVE_TIOCGPPSEV
+#define PPS_METHOD "TIOCGPPSEV"
 #endif
 #endif
+#endif /* TIOCDCDTIMESTAMP */
+#endif /* HAVE_PPSAPI */
 
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
@@ -134,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="refclock_parse.c,v 4.36 1999/11/28 17:18:20 kardel RELEASE_19991128_A";
+static char rcsid[]="4.44";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -344,9 +388,15 @@ struct parseunit
 	u_long        pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
 	u_short	      lastformat;       /* last format used */
 	u_long        lastsync;		/* time (ntp) when clock was last seen fully synchronized */
-	u_long        lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
+        u_long        maxunsync;        /* max time in seconds a receiver is trusted after loosing synchronisation */
+        double        ppsphaseadjust;   /* phase adjustment of PPS time stamp */
+        u_long        lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
 	u_long        ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
-	parsetime_t   time;		/* last (parse module) data */
+#ifdef HAVE_PPSAPI
+        pps_handle_t  ppshandle;        /* store PPSAPI handle */
+        pps_params_t  ppsparams;        /* current PPS parameters */
+#endif
+	parsetime_t   timedata;		/* last (parse module) data */
 	void         *localdata;        /* optional local, receiver-specific data */
         unsigned long localstate;       /* private local state */
 	struct errorinfo errors[ERR_CNT];  /* error state table for suppressing excessive error messages */
@@ -1952,6 +2002,78 @@ local_input(
 			 */
 			if (!PARSE_PPS(parse->parseio.parse_dtime.parse_state))
 			{
+#ifdef HAVE_PPSAPI
+				if (parse->flags & PARSE_PPSCLOCK)
+				{
+					struct timespec pps_timeout;
+					pps_info_t      pps_info;
+				
+					pps_timeout.tv_sec  = 0;
+					pps_timeout.tv_nsec = 0;
+
+					if (time_pps_fetch(parse->ppshandle, PPS_TSFMT_TSPEC, &pps_info,
+							   &pps_timeout) == 0)
+					{
+						if (pps_info.assert_sequence + pps_info.clear_sequence != parse->ppsserial)
+						{
+						        struct timespec pts;
+							/*
+							 * add PPS time stamp if available via ppsclock module
+							 * and not supplied already.
+							 */
+							if (parse->flags & PARSE_CLEAR)
+							  pts = pps_info.clear_timestamp;
+							else
+							  pts = pps_info.assert_timestamp;
+							parse->parseio.parse_dtime.parse_ptime.fp.l_ui = pts.tv_sec + JAN_1970;
+							/* XXX round down to usec - really ? */
+							pts.tv_nsec = (pts.tv_nsec + 500) / 1000;
+							if (pts.tv_nsec > 1000000) {
+							  pts.tv_nsec -= 1000000;
+							  pts.tv_sec++;
+							}
+							TVUTOTSF(pts.tv_nsec, parse->parseio.parse_dtime.parse_ptime.fp.l_uf);
+
+						        parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
+#ifdef DEBUG
+							if (debug > 3)
+							{
+								printf(
+								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
+								       rbufp->fd,
+								       pps_info.assert_sequence + pps_info.clear_sequence ,
+								       lfptoa(&parse->parseio.parse_dtime.parse_ptime.fp, 6));
+							}
+#endif
+						}
+#ifdef DEBUG
+						else
+						{
+							if (debug > 3)
+							{
+								printf(
+								       "parse: local_receive: fd %d PPSAPI seq assert %ld, seq clear %ld - NO PPS event\n",
+								       rbufp->fd,
+								       pps_info.assert_sequence, pps_info.clear_sequence);
+							}
+						}
+#endif
+						parse->ppsserial = pps_info.assert_sequence + pps_info.clear_sequence;
+					}
+#ifdef DEBUG
+					else
+					{
+						if (debug > 3)
+						{
+							printf(
+							       "parse: local_receive: fd %d PPSAPI time_pps_fetch errno = %d\n",
+							       rbufp->fd,
+							       errno);
+						}
+					}
+#endif
+				}
+#else
 #ifdef TIOCDCDTIMESTAMP
 				struct timeval dcd_time;
 				
@@ -1982,39 +2104,40 @@ local_input(
 #else /* TIOCDCDTIMESTAMP */
 #if defined(HAVE_STRUCT_PPSCLOCKEV) && (defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV))
 				if (parse->flags & PARSE_PPSCLOCK)
-				{
-					l_fp tts;
-					struct ppsclockev ev;
+				  {
+				    l_fp tts;
+				    struct ppsclockev ev;
 
 #ifdef HAVE_CIOGETEV
-					if (ioctl(parse->generic->io.fd, CIOGETEV, (caddr_t)&ev) == 0)
+				    if (ioctl(parse->generic->io.fd, CIOGETEV, (caddr_t)&ev) == 0)
 #endif
 #ifdef HAVE_TIOCGPPSEV
-					if (ioctl(parse->generic->io.fd, TIOCGPPSEV, (caddr_t)&ev) == 0)
+				      if (ioctl(parse->generic->io.fd, TIOCGPPSEV, (caddr_t)&ev) == 0)
 #endif
 					{
-						if (ev.serial != parse->ppsserial)
+					  if (ev.serial != parse->ppsserial)
+					    {
+					      /*
+					       * add PPS time stamp if available via ppsclock module
+					       * and not supplied already.
+					       */
+					      if (!buftvtots((const char *)&ev.tv, &tts))
 						{
-							/*
-							 * add PPS time stamp if available via ppsclock module
-							 * and not supplied already.
-							 */
-							if (!buftvtots((const char *)&ev.tv, &tts))
-							{
-								ERR(ERR_BADDATA)
-									msyslog(LOG_ERR,"parse: local_receive: timestamp conversion error (buftvtots) (ppsclockev.tv)");
-							}
-							else
-							{
-								parse->parseio.parse_dtime.parse_ptime.fp = tts;
-								parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
-							}
+						  ERR(ERR_BADDATA)
+						    msyslog(LOG_ERR,"parse: local_receive: timestamp conversion error (buftvtots) (ppsclockev.tv)");
 						}
-						parse->ppsserial = ev.serial;
+					      else
+						{
+						  parse->parseio.parse_dtime.parse_ptime.fp = tts;
+						  parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
+						}
+					    }
+					  parse->ppsserial = ev.serial;
 					}
-				}
+				  }
 #endif
 #endif /* TIOCDCDTIMESTAMP */
+#endif /* HAVE_PPSAPI */
 			}
 			if (count)
 			{	/* simulate receive */
@@ -2377,7 +2500,7 @@ parse_statistics(
  */
 static void
 cparse_statistics(
-	register struct parseunit *parse
+        struct parseunit *parse
 	)
 {
 	if (parse->laststatistic + PARSESTATISTICS < current_time)
@@ -2417,6 +2540,13 @@ parse_shutdown(
 		return;
 	}
 
+#ifdef HAVE_PPSAPI
+	if (parse->flags & PARSE_PPSCLOCK)
+	{
+		(void)time_pps_destroy(parse->ppshandle);
+	}
+#endif
+
 	/*
 	 * print statistics a last time and
 	 * stop statistics machine
@@ -2445,6 +2575,100 @@ parse_shutdown(
 	parse->peer = (struct peer *)0; /* unused now */
 	free(parse);
 }
+
+#ifdef HAVE_PPSAPI
+/*----------------------------------------
+ * set up PPS via PPSAPI
+ */
+static int
+parse_ppsapi(
+	struct parseunit *parse
+	)
+{
+	int cap, mode, mode1;
+	char *cp;
+	
+	parse->flags &= ~PARSE_PPSCLOCK;
+
+	if (time_pps_getcap(parse->ppshandle, &cap) < 0) {
+		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
+			CLK_UNIT(parse->peer));
+		
+		return (0);
+	}
+
+	if (time_pps_getparams(parse->ppshandle, &parse->ppsparams) < 0) {
+		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getparams failed: %m",
+			CLK_UNIT(parse->peer));
+		return (0);
+	}
+
+	/* nb. only turn things on, if someone else has turned something
+	 *	on before we get here, leave it alone!
+	 */
+
+	if (parse->flags & PARSE_CLEAR) {
+		cp = "CLEAR";
+		mode = PPS_CAPTURECLEAR;
+		mode1 = PPS_OFFSETCLEAR;
+	} else {
+		cp = "ASSERT";
+		mode = PPS_CAPTUREASSERT;
+		mode1 = PPS_OFFSETASSERT;
+	}
+
+	msyslog(LOG_INFO, "PARSE receiver #%d: initializing PPS to %s",
+		CLK_UNIT(parse->peer), cp);
+
+	if (!(mode & cap)) {
+	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED to initialize PPS to %s",
+		  CLK_UNIT(parse->peer), cp);
+	
+		return(0);
+	}
+
+	if (!(mode1 & cap)) {
+	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter",
+		  CLK_UNIT(parse->peer), cp);
+		mode1 = 0;
+	}
+
+	/* only set what is legal */
+
+	parse->ppsparams.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
+
+	if (time_pps_setparams(parse->ppshandle, &parse->ppsparams) < 0) {
+	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED set PPS parameters: %m",
+		  CLK_UNIT(parse->peer));
+		return 0;
+	}
+
+	/* If HARDPPS is on, we tell kernel */
+
+	if (parse->flags & PARSE_PPSKERNEL) {
+		int	i;
+
+		if (parse->flags & PARSE_CLEAR)
+			i = PPS_CAPTURECLEAR;
+		else
+			i = PPS_CAPTUREASSERT;
+
+		/* we know that 'i' is legal from above */
+
+		if (time_pps_kcbind(parse->ppshandle, PPS_KC_HARDPPS, i,
+		    PPS_TSFMT_TSPEC) < 0) {
+		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
+				CLK_UNIT(parse->peer));
+			return (0);
+		} else {
+		        msyslog(LOG_INFO, "PARSE receiver #%d: HARDPPS enabled",
+				CLK_UNIT(parse->peer));
+		}
+	}
+	parse->flags |= PARSE_PPSCLOCK;
+	return(1);
+}
+#endif
 
 /*--------------------------------------------------
  * parse_start - open the PARSE devices and initialize data for processing
@@ -2518,7 +2742,7 @@ parse_start(
 	parse->pollneeddata   = 0;
 	parse->laststatistic  = current_time;
 	parse->lastformat     = (unsigned short)~0;	/* assume no format known */
-	parse->time.parse_status = (unsigned short)~0;	/* be sure to mark initial status change */
+	parse->timedata.parse_status = (unsigned short)~0;	/* be sure to mark initial status change */
 	parse->lastmissed     = 0;	/* assume got everything */
 	parse->ppsserial      = 0;
 	parse->localdata      = (void *)0;
@@ -2529,17 +2753,21 @@ parse_start(
   
 	parse->parse_type     = &parse_clockinfo[type];
 	
+	parse->maxunsync      = parse->parse_type->cl_maxunsync;
+
 	parse->generic->fudgetime1 = parse->parse_type->cl_basedelay;
 
 	parse->generic->fudgetime2 = 0.0;
+	parse->ppsphaseadjust = parse->generic->fudgetime2;
 
-	parse->generic->clockdesc = parse->parse_type->cl_description;
+	parse->generic->clockdesc  = parse->parse_type->cl_description;
 
 	peer->rootdelay       = parse->parse_type->cl_rootdelay;
 	peer->sstclktype      = parse->parse_type->cl_type;
 	peer->precision       = sys_precision;
 	
 	peer->stratum         = STRATUM_REFCLOCK;
+
 	if (peer->stratum <= 1)
 	    memmove((char *)&parse->generic->refid, parse->parse_type->cl_id, 4);
 	else
@@ -2607,38 +2835,67 @@ parse_start(
 		tio.c_cflag     |= parse_clockinfo[type].cl_speed;
 #endif
 
+/*
+ * Linux PPS - the old way
+ */
 #if defined(HAVE_TIO_SERIAL_STUFF)		/* Linux hack: define PPS interface */
 		{
-		  struct serial_struct	ss;
-		  if (ioctl(fd232, TIOCGSERIAL, &ss) < 0 ||
-		      (
+			struct serial_struct	ss;
+			if (ioctl(fd232, TIOCGSERIAL, &ss) < 0 ||
+			    (
 #ifdef ASYNC_LOW_LATENCY
-		       ss.flags |= ASYNC_LOW_LATENCY,
+			     ss.flags |= ASYNC_LOW_LATENCY,
 #endif
+#ifndef HAVE_PPSAPI
 #ifdef ASYNC_PPS_CD_NEG
-		       ss.flags |= ASYNC_PPS_CD_NEG,
+			     ss.flags |= ASYNC_PPS_CD_NEG,
 #endif
-		       ioctl(fd232, TIOCSSERIAL, &ss)) < 0) {
-		    msyslog(LOG_NOTICE, "refclock_parse: TIOCSSERIAL fd %d, %m", fd232);
-		    msyslog(LOG_NOTICE,
-			    "refclock_parse: optional PPS processing not available");
-		  } else {
-		    parse->flags    |= PARSE_PPSCLOCK;
-		    msyslog(LOG_INFO,
-			    "refclock_parse: PPS detection on");
-		  }
+#endif
+			     ioctl(fd232, TIOCSSERIAL, &ss)) < 0) {
+				msyslog(LOG_NOTICE, "refclock_parse: TIOCSSERIAL fd %d, %m", fd232);
+				msyslog(LOG_NOTICE,
+					"refclock_parse: optional PPS processing not available");
+			} else {
+				parse->flags    |= PARSE_PPSCLOCK;
+#ifdef ASYNC_PPS_CD_NEG
+				NLOG(NLOG_CLOCKINFO)
+				  msyslog(LOG_INFO,
+					  "refclock_parse: PPS detection on");
+#endif
+			}
 		}
 #endif
+
+/*
+ * SUN the Solaris way
+ */
 #ifdef HAVE_TIOCSPPS			/* SUN PPS support */
 		if (CLK_PPS(parse->peer))
-		  {
-		    int i = 1;
+		    {
+			int i = 1;
 		    
-		    if (ioctl(fd232, TIOCSPPS, (caddr_t)&i) == 0)
-		      {
-			parse->flags |= PARSE_PPSCLOCK;
-		      }
-		  }
+			if (ioctl(fd232, TIOCSPPS, (caddr_t)&i) == 0)
+			    {
+				parse->flags |= PARSE_PPSCLOCK;
+			    }
+		    }
+#endif
+
+/*
+ * PPS via PPSAPI
+ */
+#if defined(HAVE_PPSAPI)
+		if (CLK_PPS(parse->peer))
+		{
+		  if (time_pps_create(fd232, &parse->ppshandle) < 0) 
+		    {
+		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS", CLK_UNIT(parse->peer));
+		    }
+		  else
+		    {
+		      parse_ppsapi(parse);
+		    }
+		}
 #endif
 
 		if (TTY_SETATTR(fd232, &tio) == -1)
@@ -2754,7 +3011,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-1999, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2004, Frank Kardel");
 		notice = 1;
 	}
 
@@ -2768,26 +3025,83 @@ parse_start(
 				CLK_UNIT(parse->peer),
 				parse->parse_type->cl_description, parsedev);
 
-			msyslog(LOG_INFO, "PARSE receiver #%d:  Stratum %d, %sPPS support, trust time %s, precision %d",
+			msyslog(LOG_INFO, "PARSE receiver #%d: Stratum %d, %sPPS support, trust time %s, precision %d",
 				CLK_UNIT(parse->peer),
 				parse->peer->stratum, CLK_PPS(parse->peer) ? "" : "no ",
-				l_mktime(parse->parse_type->cl_maxunsync), parse->peer->precision);
+				l_mktime(parse->maxunsync), parse->peer->precision);
 
-			msyslog(LOG_INFO, "PARSE receiver #%d:  rootdelay %.6f s, phaseadjust %.6f s, %s IO handling",
+			msyslog(LOG_INFO, "PARSE receiver #%d: rootdelay %.6f s, phase adjustment %.6f s, PPS phase adjustment %.6f s, %s IO handling",
 				CLK_UNIT(parse->peer),
 				parse->parse_type->cl_rootdelay,
 				parse->generic->fudgetime1,
-				parse->binding->bd_description);
+				parse->ppsphaseadjust,
+                                parse->binding->bd_description);
 
-			msyslog(LOG_INFO, "PARSE receiver #%d:  Format recognition: %s", CLK_UNIT(parse->peer),
+			msyslog(LOG_INFO, "PARSE receiver #%d: Format recognition: %s", CLK_UNIT(parse->peer),
 				parse->parse_type->cl_format);
-#ifdef PPS
-                        msyslog(LOG_INFO, "PARSE receiver #%d:  %sPPS ioctl support", CLK_UNIT(parse->peer),
-				(parse->flags & PARSE_PPSCLOCK) ? "" : "NO ");
+                        msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS ioctl support%s", CLK_UNIT(parse->peer),
+				(parse->flags & PARSE_PPSCLOCK) ? "" : "NO ",
+#ifdef PPS_METHOD
+				" (interface is " PPS_METHOD ")"
+#else
+				""
 #endif
+				);
 		}
 
 	return 1;
+}
+
+/*--------------------------------------------------
+ * parse_ctl - process changes on flags/time values
+ */
+static void
+parse_ctl(
+	    struct parseunit *parse,
+	    struct refclockstat *in
+	    )
+{
+        if (in)
+	{
+		if (in->haveflags & (CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4))
+		{
+		  parse->flags = (parse->flags & ~(CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4)) |
+		    (in->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4));
+#if defined(HAVE_PPSAPI)
+		  if (CLK_PPS(parse->peer))
+		    {
+		      parse_ppsapi(parse);
+		    }
+#endif
+		}
+		
+		if (in->haveflags & CLK_HAVETIME1)
+                {
+		  parse->generic->fudgetime1 = in->fudgetime1;
+		  msyslog(LOG_INFO, "PARSE receiver #%d: new phase adjustment %.6f s",
+			  CLK_UNIT(parse->peer),
+			  parse->generic->fudgetime1);
+		}
+		
+		if (in->haveflags & CLK_HAVETIME2)
+                {
+		  parse->generic->fudgetime2 = in->fudgetime2;
+		  if (parse->flags & PARSE_TRUSTTIME) 
+		    {
+		      parse->maxunsync = (u_long)ABS(in->fudgetime2);
+		      msyslog(LOG_INFO, "PARSE receiver #%d: new trust time %s",
+			      CLK_UNIT(parse->peer),
+			      l_mktime(parse->maxunsync));
+		    }
+		  else
+		    {
+		      parse->ppsphaseadjust = in->fudgetime2;
+		      msyslog(LOG_INFO, "PARSE receiver #%d: new PPS phase adjustment %.6f s",
+			  CLK_UNIT(parse->peer),
+			      parse->ppsphaseadjust);
+		    }
+		}
+	}
 }
 
 /*--------------------------------------------------
@@ -2857,7 +3171,7 @@ parse_control(
 	struct peer *peer
 	)
 {
-	register struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+        struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
 	parsectl_t tmpctl;
 
 	static char outstatus[400];	/* status output buffer */
@@ -2878,14 +3192,14 @@ parse_control(
 
 	unit = CLK_UNIT(parse->peer);
 
-	if (in)
-	{
-		if (in->haveflags & (CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4))
-		{
-			parse->flags = in->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4);
-		}
-	}
-
+	/*
+	 * handle changes
+	 */
+	parse_ctl(parse, in);
+		
+	/*
+	 * supply data
+	 */
 	if (out)
 	{
 		u_long sum = 0;
@@ -2895,15 +3209,14 @@ parse_control(
 		outstatus[0] = '\0';
 
 		out->type       = REFCLK_PARSE;
-		out->haveflags |= CLK_HAVETIME2;
 
 		/*
 		 * figure out skew between PPS and RS232 - just for informational
-		 * purposes - returned in time2 value
+		 * purposes
 		 */
-		if (PARSE_SYNC(parse->time.parse_state))
+		if (PARSE_SYNC(parse->timedata.parse_state))
 		{
-			if (PARSE_PPS(parse->time.parse_state) && PARSE_TIMECODE(parse->time.parse_state))
+			if (PARSE_PPS(parse->timedata.parse_state) && PARSE_TIMECODE(parse->timedata.parse_state))
 			{
 				l_fp off;
 
@@ -2911,30 +3224,30 @@ parse_control(
 				 * we have a PPS and RS232 signal - calculate the skew
 				 * WARNING: assumes on TIMECODE == PULSE (timecode after pulse)
 				 */
-				off = parse->time.parse_stime.fp;
-				L_SUB(&off, &parse->time.parse_ptime.fp); /* true offset */
+				off = parse->timedata.parse_stime.fp;
+				L_SUB(&off, &parse->timedata.parse_ptime.fp); /* true offset */
 				tt = add_var(&out->kv_list, 80, RO);
 				sprintf(tt, "refclock_ppsskew=%s", lfptoms(&off, 6));
 			}
 		}
 
-		if (PARSE_PPS(parse->time.parse_state))
+		if (PARSE_PPS(parse->timedata.parse_state))
 		{
 			tt = add_var(&out->kv_list, 80, RO|DEF);
-			sprintf(tt, "refclock_ppstime=\"%s\"", gmprettydate(&parse->time.parse_ptime.fp));
+			sprintf(tt, "refclock_ppstime=\"%s\"", gmprettydate(&parse->timedata.parse_ptime.fp));
 		}
 
 		tt = add_var(&out->kv_list, 128, RO|DEF);
 		sprintf(tt, "refclock_time=\"");
 		tt += strlen(tt);
 
-		if (parse->time.parse_time.fp.l_ui == 0)
+		if (parse->timedata.parse_time.fp.l_ui == 0)
 		{
 			strcpy(tt, "<UNDEFINED>\"");
 		}
 		else
 		{
-			sprintf(tt, "%s\"", gmprettydate(&parse->time.parse_time.fp));
+			sprintf(tt, "%s\"", gmprettydate(&parse->timedata.parse_time.fp));
 			t = tt + strlen(tt);
 		}
 
@@ -2952,7 +3265,7 @@ parse_control(
 			/*
 			 * copy PPS flags from last read transaction (informational only)
 			 */
-			tmpctl.parsegettc.parse_state |= parse->time.parse_state &
+			tmpctl.parsegettc.parse_state |= parse->timedata.parse_state &
 				(PARSEB_PPS|PARSEB_S_PPS);
 
 			(void) parsestate(tmpctl.parsegettc.parse_state, tt);
@@ -3081,7 +3394,7 @@ parse_event(
       
 		if (event != CEVNT_NOMINAL)
 		{
-	  parse->generic->lastevent = parse->generic->currentstatus;
+		        parse->generic->lastevent = parse->generic->currentstatus;
 		}
 		else
 		{
@@ -3092,17 +3405,17 @@ parse_event(
 
 		if (event == CEVNT_FAULT)
 		{
-			NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
-				ERR(ERR_BADEVENT)
-				msyslog(LOG_ERR,
-					"clock %s fault '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
-					(u_int)event);
+		        NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
+			        ERR(ERR_BADEVENT)
+			              msyslog(LOG_ERR,
+					      "clock %s fault '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
+					      (u_int)event);
 		}
 		else
 		{
-			NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
-				if (event == CEVNT_NOMINAL || list_err(parse, ERR_BADEVENT))
-				    msyslog(LOG_INFO,
+		  NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
+		          if (event == CEVNT_NOMINAL || list_err(parse, ERR_BADEVENT))
+		                    msyslog(LOG_INFO,
 					    "clock %s event '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
 					    (u_int)event);
 		}
@@ -3130,7 +3443,7 @@ parse_process(
 	 */
 	if (((parsetime->parse_status & CVT_MASK) != CVT_OK) &&
 	    ((parsetime->parse_status & CVT_MASK) != CVT_NONE) &&
-	    (parse->time.parse_status != parsetime->parse_status))
+	    (parse->timedata.parse_status != parsetime->parse_status))
 	{
 		char buffer[400];
 		
@@ -3176,6 +3489,14 @@ parse_process(
 			if ((parsetime->parse_status & CVT_ADDITIONAL) &&
 			    parse->parse_type->cl_message)
 				parse->parse_type->cl_message(parse, parsetime);
+			/*
+			 * save PPS information that comes piggyback
+			 */
+			if (PARSE_PPS(parsetime->parse_state))
+			  {
+			    parse->timedata.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
+			    parse->timedata.parse_ptime  = parsetime->parse_ptime;
+			  }
 			break; 		/* well, still waiting - timeout is handled at higher levels */
 			    
 		case CVT_FAIL:
@@ -3229,16 +3550,17 @@ parse_process(
 	/*
 	 * now, any changes ?
 	 */
-	if (parse->time.parse_state != parsetime->parse_state)
+	if ((parse->timedata.parse_state ^ parsetime->parse_state) &
+	    ~(unsigned)(PARSEB_PPS|PARSEB_S_PPS))
 	{
 		char tmp1[200];
 		char tmp2[200];
 		/*
-		 * something happend
+		 * something happend - except for PPS events
 		 */
 	
 		(void) parsestate(parsetime->parse_state, tmp1);
-		(void) parsestate(parse->time.parse_state, tmp2);
+		(void) parsestate(parse->timedata.parse_state, tmp2);
 	
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 			msyslog(LOG_INFO,"PARSE receiver #%d: STATE CHANGE: %s -> %s",
@@ -3246,9 +3568,18 @@ parse_process(
 	}
 
 	/*
+	 * carry on PPS information if still usable
+	 */
+	if (PARSE_PPS(parse->timedata.parse_state) && !PARSE_PPS(parsetime->parse_state))
+        {
+	        parsetime->parse_state |= PARSEB_PPS|PARSEB_S_PPS;
+		parsetime->parse_ptime  = parse->timedata.parse_ptime;
+	}
+
+	/*
 	 * remember for future
 	 */
-	parse->time = *parsetime;
+	parse->timedata = *parsetime;
 
 	/*
 	 * check to see, whether the clock did a complete powerup or lost PZF signal
@@ -3368,7 +3699,7 @@ parse_process(
 			if (M_ISGEQ(off.l_i, off.l_f, -1, 0x80000000) &&
 			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_f))
 			{
-				fudge = parse->generic->fudgetime2; /* pick PPS fudge factor */
+				fudge = parse->ppsphaseadjust; /* pick PPS fudge factor */
 			
 				/*
 				 * RS232 offsets within [-0.5..0.5[ - take PPS offsets
@@ -3404,7 +3735,7 @@ parse_process(
 		}
 		else
 		{
-			fudge = parse->generic->fudgetime2; /* pick PPS fudge factor */
+			fudge = parse->ppsphaseadjust; /* pick PPS fudge factor */
 			/*
 			 * Well, no time code to guide us - assume on second pulse
 			 * and pray, that we are within [-0.5..0.5[
@@ -3484,12 +3815,6 @@ parse_process(
 		}
 #endif
 
-	refclock_process_offset(parse->generic, reftime, rectime, fudge);
-	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
-	{
-		(void) pps_sample(&parse->time.parse_ptime.fp);
-	}
-	
 
 	/*
 	 * and now stick it into the clock machine
@@ -3498,7 +3823,7 @@ parse_process(
 	 * after the last time we didn't see an expected data telegram
 	 * see the clock states section above for more reasoning
 	 */
-	if (((current_time - parse->lastsync) > parse->parse_type->cl_maxunsync) ||
+	if (((current_time - parse->lastsync) > parse->maxunsync) ||
 	    (parse->lastsync <= parse->lastmissed))
 	{
 		parse->generic->leap = LEAP_NOTINSYNC;
@@ -3525,6 +3850,13 @@ parse_process(
 		    }
 	}
   
+	refclock_process_offset(parse->generic, reftime, rectime, fudge);
+	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer) &&
+	    (parse->generic->leap != LEAP_NOTINSYNC))
+	{
+		(void) pps_sample(&parse->timedata.parse_ptime.fp);
+	}
+	
 	/*
 	 * ready, unless the machine wants a sample
 	 */
@@ -3532,6 +3864,10 @@ parse_process(
 	    return;
 
 	parse->pollneeddata = 0;
+
+#if THIS_CANT_BE_RIGHT
+	parse->timedata.parse_state &= ~(unsigned)(PARSEB_PPS|PARSEB_S_PPS);
+#endif
 
 	refclock_receive(parse->peer);
 }
@@ -3590,7 +3926,7 @@ gps16x_message(
 	       parsetime_t      *parsetime
 	       )
 {
-	if (parse->time.parse_msglen && parsetime->parse_msg[0] == SOH)
+	if (parse->timedata.parse_msglen && parsetime->parse_msg[0] == SOH)
 	{
 		GPS_MSG_HDR header;
 		unsigned char *bufp = (unsigned char *)parsetime->parse_msg + 1;
@@ -4366,6 +4702,12 @@ sendcmd(
 	buf->idx = 2;
 }
 
+void	sendcmd		P((struct txbuf *buf, int c)); 
+void	sendbyte	P((struct txbuf *buf, int b)); 
+void	sendetx		P((struct txbuf *buf, struct parseunit *parse)); 
+void	sendint		P((struct txbuf *buf, int a)); 
+void	sendflt		P((struct txbuf *buf, double a)); 
+ 
 void
 sendbyte(
 	struct txbuf *buf,
@@ -5240,6 +5582,30 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.44  2004/11/14 15:29:41  kardel
+ * support PPSAPI, upgrade Copyright to Berkeley style
+ *
+ * Revision 4.43  2001/05/26 22:53:16  kardel
+ * 20010526 reconcilation
+ *
+ * Revision 4.42  2000/05/14 15:31:51  kardel
+ * PPSAPI && RAWDCF modemline support
+ *
+ * Revision 4.41  2000/04/09 19:50:45  kardel
+ * fixed rawdcfdtr_init() -> rawdcf_init_1
+ *
+ * Revision 4.40  2000/04/09 15:27:55  kardel
+ * modem line fiddle in rawdcf_init_2
+ *
+ * Revision 4.39  2000/03/18 09:16:55  kardel
+ * PPSAPI integration
+ *
+ * Revision 4.38  2000/03/05 20:25:06  kardel
+ * support PPSAPI
+ *
+ * Revision 4.37  2000/03/05 20:11:14  kardel
+ * 4.0.99g reconcilation
+ *
  * Revision 4.36  1999/11/28 17:18:20  kardel
  * disabled burst mode
  *

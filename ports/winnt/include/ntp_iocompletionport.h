@@ -28,6 +28,8 @@ extern	HANDLE get_io_event (void);
 
 static int OnSocketRecv(DWORD, struct IoCompletionInfo *, DWORD);
 
+struct recvbuf *GetReceivedBuffers(void);
+
 static int QueueIORead( struct refclockio * );
 static int OnIoReadComplete(DWORD, struct IoCompletionInfo *, DWORD);
 # endif

@@ -24,7 +24,7 @@ Directory contents:
 			- Trimble SV6 GPS receiver
 
 			  If you want to add new clock types please check
-			  with kardel@informatik.uni-erlangen.de. These files
+			  with kardel <AT> informatik.uni-erlangen.de. These files
 			  implement the conversion of RS232 data streams into
 			  timing information used by refclock_parse.c which is
 			  mostly generic except for NTP configuration constants.
