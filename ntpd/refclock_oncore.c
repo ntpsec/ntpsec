@@ -17,7 +17,7 @@
  * Tested with:
  *
  *		(UT)				   (VP)
- *   COPYRIGHT 1991-1997 MOTOROLA INC.  COPYRIGHT 1991-1996 MOTOROLA INC.
+ *   COPYRIGHT 1991-1997 MOTOROLA INC.	COPYRIGHT 1991-1996 MOTOROLA INC.
  *   SFTW P/N #     98-P36848P		SFTW P/N # 98-P36830P
  *   SOFTWARE VER # 2			SOFTWARE VER # 8
  *   SOFTWARE REV # 2			SOFTWARE REV # 8
@@ -40,6 +40,11 @@
  *   MANUFACTUR DATE 417AMA199		MANUFACTUR DATE 0C27
  *   OPTIONS LIST    AB
  *
+ * --------------------------------------------------------------------------
+ * Reg.Clemens (Mar 2004)
+ * Support for interfaces other than PPSAPI removed, for Solaris, SunOS,
+ * SCO, you now need to use one of the timepps.h files in the root dir.
+ * this driver will 'grab' it for you if you dont have one in /usr/include
  * --------------------------------------------------------------------------
  * This code uses the two devices
  *	/dev/oncore.serial.n
@@ -108,12 +113,33 @@
 # endif /* HAVE_SYS_MMAN_H */
 #endif /* ONCORE_SHMEM_STATUS */
 
-#ifdef HAVE_PPSAPI
-# ifdef HAVE_TIMEPPS_H
-#  include <timepps.h>
+/*
+ * This logic first tries to get the timepps.h file from a standard location, and then
+ * from the local directory.  Im going to ignore only trying the 2nd if HAVE_PPSAPI
+ * is not set...
+ */
+
+#ifdef HAVE_TIMEPPS_H
+# include <timepps.h>
+#else
+# ifdef HAVE_SYS_TIMEPPS_H
+#  include <sys/timepps.h>
 # else
-#  ifdef HAVE_SYS_TIMEPPS_H
-#   include <sys/timepps.h>
+#  ifdef HAVE_CIOGETEV
+#   include "timepps-SunOS.h"
+#   define HAVE_PPSAPI 1
+#  else
+#   ifdef HAVE_TIOCGPPSEV
+#    include "timepps-Solaris.h"
+#    define HAVE_PPSAPI 1
+#   else
+#    ifdef TIOCDCDTIMESTAMP
+#     include "timepps-SCO.h"
+#     define HAVE_PPSAPI 1
+#    else
+#     error "Cannot compile -- no PPSAPI mechanism configured!"
+#    endif
+#   endif
 #  endif
 # endif
 #endif
@@ -216,10 +242,8 @@ struct instance {
 	int	ttyfd;		/* TTY file descriptor */
 	int	ppsfd;		/* PPS file descriptor */
 	int	shmemfd;	/* Status shm descriptor */
-#ifdef HAVE_PPSAPI
 	pps_handle_t pps_h;
 	pps_params_t pps_p;
-#endif
 	enum receive_state o_state;		/* Receive state */
 	enum posn_mode mode;			/* 0D, 2D, 3D */
 	enum site_survey_state site_survey;	/* Site Survey state */
@@ -253,7 +277,7 @@ struct instance {
 	u_int	revision;
 
 	u_char	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
-	s_char  traim;          /* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
+	s_char	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
 				/* the following 7 are all timing counters */
 	u_char	traim_delay;	/* seconds counter, waiting for reply */
 	u_char	count;		/* cycles thru Ea before starting */
@@ -284,7 +308,7 @@ struct instance {
 	s_char	chan_in;	/* chan number from INPUT, will always use it */
 	u_char	chan_id;	/* chan number determined from part number */
 	u_char	chan_ck;	/* chan number determined by sending commands to hardware */
-	s_char  traim_in;       /* TRAIM from INPUT, will always use ON/OFF specified */
+	s_char	traim_in;	/* TRAIM from INPUT, will always use ON/OFF specified */
 	s_char	traim_id;	/* TRAIM determined from part number */
 	u_char	traim_ck;	/* TRAIM determined by sending commands to hardware */
 	u_char	once;		/* one pass code at top of BaEaHa */
@@ -301,9 +325,7 @@ static	void	oncore_shutdown       P((int, struct peer *));
 static	void	oncore_consume	      P((struct instance *));
 static	void	oncore_read_config    P((struct instance *));
 static	void	oncore_receive	      P((struct recvbuf *));
-#ifdef HAVE_PPSAPI
 static	int	oncore_ppsapi	      P((struct instance *));
-#endif
 static	void	oncore_get_timestamp  P((struct instance *, long, long));
 static	void	oncore_init_shmem     P((struct instance *));
 
@@ -445,8 +467,8 @@ static u_char oncore_cmd_Bd[]  = { 'B', 'd', 1 };				    /* 6/8/12?	Almanac Stat
 static u_char oncore_cmd_Be[]  = { 'B', 'e', 1 };				    /* 6/8/12	Request Almanac Data			*/
 static u_char oncore_cmd_Bj[]  = { 'B', 'j', 0 };				    /* 6/8	Leap Second Pending			*/
 static u_char oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6        TRAIM setup/status: msg on,  traim on   */
-static u_char oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6        TRAIM setup/status: msg off, traim off  */
+static u_char oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on,  traim on	*/
+static u_char oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim off	*/
 static u_char oncore_cmd_Ca[]  = { 'C', 'a' };					    /* 6	Self Test				*/
 static u_char oncore_cmd_Cf[]  = { 'C', 'f' };					    /* 6/8/12	Set to Defaults 			*/
 static u_char oncore_cmd_Cg[]  = { 'C', 'g', 1 };				    /* VP	Posn Fix/Idle Mode			*/
@@ -455,8 +477,8 @@ static u_char oncore_cmd_Ea0[] = { 'E', 'a', 0 };				    /* 8	Position/Data/Stat
 static u_char oncore_cmd_Ea[]  = { 'E', 'a', 1 };				    /* 8	Position/Data/Status: on		*/
 static u_char oncore_cmd_Ek[]  = { 'E', 'k', 0 }; /* just turn off */		    /* 8	Posn/Status/Data - extension		*/
 static u_char oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT     TRAIM setup/status: msg on,  traim on   */
-static u_char oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT     TRAIM setup/status: msg off, traim off  */
+static u_char oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on,  traim on	*/
+static u_char oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim off	*/
 static u_char oncore_cmd_Fa[]  = { 'F', 'a' };					    /* 8	Self Test				*/
 static u_char oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 12	Position Set				*/
 static u_char oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	Position Set: Read			*/
@@ -529,9 +551,6 @@ oncore_start(
 	register struct instance *instance;
 	struct refclockproc *pp;
 	int fd1, fd2;
-#ifndef HAVE_PPSAPI
-	int one = 1;
-#endif
 	char device1[30], device2[30];
 	const char *cp;
 	struct stat stat1, stat2;
@@ -622,39 +641,14 @@ oncore_start(
 
 	oncore_read_config(instance);
 
-#ifdef HAVE_PPSAPI
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		perror("time_pps_create: PPSAPI probably not in kernel");
 		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");
 		return(0);
 	}
 
-	if (instance->assert)
-		cp = "Initializing timing to Assert.";
-	else
-		cp = "Initializing timing to Clear.";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-
-	if (instance->hardpps) {
-		cp = "HARDPPS Set.";
-		record_clock_stats(&(instance->peer->srcadr), cp);
-	}
-
 	if (!oncore_ppsapi(instance))
 		return(0);
-#else
-# ifdef HAVE_TIOCSPPS	/* Solaris */
-	if (ioctl(fd2, TIOCSPPS, &one) < 0) {
-		msyslog(LOG_NOTICE, "oncore_start: TIOCSPPS failed: %m");
-		return (0);
-	}
-# else
-	if (ioctl(fd2, I_PUSH, "ppsclock") < 0) {
-		msyslog(LOG_NOTICE, "oncore_start: I_PUSH ppsclock failed: %m");
-		return (0);
-	}
-# endif /* HAVE_TIOCSPPS */
-#endif
 
 	pp->io.clock_recv = oncore_receive;
 	pp->io.srcclock = (caddr_t)peer;
@@ -765,15 +759,15 @@ oncore_poll(
  * Initialize PPSAPI
  */
 
-#ifdef HAVE_PPSAPI
 static int
 oncore_ppsapi(
 	struct instance *instance
 	)
 {
-	int mode;
+	int cap, mode, mode1;
+	char *cp, Msg[160];
 
-	if (time_pps_getcap(instance->pps_h, &mode) < 0) {
+	if (time_pps_getcap(instance->pps_h, &cap) < 0) {
 		msyslog(LOG_ERR, "time_pps_getcap failed: %m");
 		return (0);
 	}
@@ -787,17 +781,33 @@ oncore_ppsapi(
 	 *	on before we get here, leave it alone!
 	 */
 
-	if (instance->assert) { 	/* nb, default or ON */
-		instance->pps_p.mode = PPS_CAPTUREASSERT | PPS_OFFSETASSERT;
-		instance->pps_p.assert_offset.tv_sec = 0;
-		instance->pps_p.assert_offset.tv_nsec = 0;
+	if (instance->assert) {
+		cp = "Assert.";
+		mode = PPS_CAPTUREASSERT;
+		mode1 = PPS_OFFSETASSERT;
 	} else {
-		instance->pps_p.mode = PPS_CAPTURECLEAR  | PPS_OFFSETCLEAR;
-		instance->pps_p.clear_offset.tv_sec = 0;
-		instance->pps_p.clear_offset.tv_nsec = 0;
+		cp = "Clear.";
+		mode = PPS_CAPTURECLEAR;
+		mode1 = PPS_OFFSETCLEAR;
 	}
-	instance->pps_p.mode |= PPS_TSFMT_TSPEC;
-	instance->pps_p.mode &= mode;		/* only set what is legal */
+	sprintf(Msg, "Initializing timeing to %s.", cp);
+	record_clock_stats(&(instance->peer->srcadr), Msg);
+
+	if (!(mode & cap)) {
+		sprintf(Msg, "Can't set timeing to %s, exiting...", cp);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		return(0);
+	}
+
+	if (!(mode1 & cap)) {
+		sprintf(Msg, "Can't set PPS_%sCLEAR, this will increase jitter.", cp);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		mode1 = 0;
+	}
+
+	/* only set what is legal */
+
+	instance->pps_p.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
 
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
@@ -809,23 +819,25 @@ oncore_ppsapi(
 	if (instance->hardpps) {
 		int	i;
 
+		record_clock_stats(&(instance->peer->srcadr), "HARDPPS Set.");
+
 		if (instance->assert)
 			i = PPS_CAPTUREASSERT;
 		else
 			i = PPS_CAPTURECLEAR;
 
-		if (i&mode) {
-			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
-			    PPS_TSFMT_TSPEC) < 0) {
-				msyslog(LOG_ERR, "time_pps_kcbind failed: %m");
-				return (0);
-			}
-			pps_enable = 1;
+		/* we know that 'i' is legal from above */
+
+		if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
+		    PPS_TSFMT_TSPEC) < 0) {
+			msyslog(LOG_ERR, "time_pps_kcbind failed: %m");
+			record_clock_stats(&(instance->peer->srcadr), "HARDPPS failed, abort...");
+			return (0);
 		}
+		pps_enable = 1;
 	}
 	return(1);
 }
-#endif
 
 
 
@@ -1434,7 +1446,6 @@ oncore_get_timestamp(
 	u_long	j;
 	l_fp ts, ts_tmp;
 	double dmy;
-#ifdef HAVE_PPSAPI
 #ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec *tsp = 0;
 #else
@@ -1445,20 +1456,6 @@ oncore_get_timestamp(
 	pps_params_t current_params;
 	struct timespec timeout;
 	pps_info_t pps_i;
-#else  /* ! HAVE_PPSAPI */
-	struct timeval	*tsp = 0;
-#ifdef HAVE_CIOGETEV
-	struct ppsclockev ev;
-	int r = CIOGETEV;
-#endif
-#ifdef HAVE_TIOCGPPSEV
-	struct ppsclockev ev;
-	int r = TIOCGPPSEV;
-#endif
-#if	TIOCDCDTIMESTAMP
-	struct timeval	tv;
-#endif
-#endif	/* ! HAVE_PPS_API */
 
 #if 1
 	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall thru.
@@ -1480,7 +1477,6 @@ oncore_get_timestamp(
 	if (instance->rsm.bad_almanac)
 		return;
 
-#ifdef HAVE_PPSAPI
 	j = instance->ev_serial;
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
@@ -1538,6 +1534,7 @@ oncore_get_timestamp(
 	dmy /= 1e9;
 	ts.l_uf = dmy * 4294967296.0;
 	ts.l_ui = tsp->tv_sec;
+
 #if 0
      alternate code for previous 4 lines is
 	dmy = 1.0e-9*tsp->tv_nsec;	/* fractional part */
@@ -1550,47 +1547,11 @@ oncore_get_timestamp(
 	DTOLFP(dmy, &ts);
 	ts.l_ui = tsp->tv_sec;
 #endif	/* 0 */
-#else	/* ! HAVE_PPSAPI */
-# if defined(HAVE_TIOCGPPSEV) || defined(HAVE_CIOGETEV)
-	/* this code assumes that the ioctl returns a timeval, independent
-	   of whether HAVE_STRUCT_TIMESPEC is set or not */
 
-	j = instance->ev_serial;
-	if (ioctl(instance->ppsfd, r, (caddr_t) &ev) < 0) {
-		perror("ONCORE: IOCTL:");
-		return;
-	}
-
-	tsp = &ev.tv;
-
-	if (debug > 2)
-		printf("ONCORE: serial/j (%u, %lu) %ld.%06ld\n",
-			ev.serial, j, tsp->tv_sec, tsp->tv_usec);
-
-	if (ev.serial == j) {
-		printf("ONCORE: oncore_get_timestamp, error serial pps\n");
-		return;
-	}
-	instance->ev_serial = ev.serial;
-
-	/* convert timeval -> ntp l_fp */
-
-	TVTOTS(tsp, &ts);
-# else
-#  if defined(TIOCDCDTIMESTAMP)
-	if(ioctl(instance->ppsfd, TIOCDCDTIMESTAMP, &tv) < 0) {
-		perror("ONCORE: ioctl(TIOCDCDTIMESTAMP)");
-		return;
-	}
-	tsp = &tv;
-	TVTOTS(tsp, &ts);
-#  else
-#error "Cannot compile -- no PPS mechanism configured!"
-#  endif
-# endif
-#endif
 	/* now have timestamp in ts */
 	/* add in saw_tooth and offset, these will be ZERO if no TRAIM */
+	/* they will be IGNORED if the PPSAPI cant do PPS_OFFSET/ASSERT/CLEAR */
+	/* we just try to add them in and dont test for that here */
 
 	/* saw_tooth not really necessary if using TIMEVAL */
 	/* since its only precise to us, but do it anyway. */
@@ -1598,7 +1559,6 @@ oncore_get_timestamp(
 	/* offset in ns, and is positive (late), we subtract */
 	/* to put the PPS time transition back where it belongs */
 
-#ifdef HAVE_PPSAPI
 	/* must hand the offset for the NEXT sec off to the Kernel to do */
 	/* the addition, so that the Kernel PLL sees the offset too */
 
@@ -1642,14 +1602,7 @@ oncore_get_timestamp(
 
 	if (time_pps_setparams(instance->pps_h, &current_params))
 		perror("time_pps_setparams");
-#else
-	/* if not PPSAPI, no way to inform kernel of OFFSET, just add the */
-	/* offset for THIS second */
 
-	dmy = -1.0e-9*dt1;
-	DTOLFP(dmy, &ts_tmp);
-	L_ADD(&ts, &ts_tmp);
-#endif
 	/* have time from UNIX origin, convert to NTP origin. */
 
 	ts.l_ui += JAN_1970;
@@ -1671,7 +1624,7 @@ oncore_get_timestamp(
 		Rsm = ((instance->BEHa[129]<<8) | instance->BEHa[130]);
 
 	if (instance->chan == 6 || instance->chan == 8) {
-		char    f1[5], f2[5], f3[5], f4[5];
+		char	f1[5], f2[5], f3[5], f4[5];
 		if (instance->traim) {
 			sprintf(f1, "%d", instance->BEHn[21]);
 			sprintf(f2, "%d", instance->BEHn[22]);
@@ -1683,7 +1636,7 @@ oncore_get_timestamp(
 			strcpy(f3, "xx");
 			strcpy(f4, "xxx");
 		}
-		sprintf(instance->pp->a_lastcode,       /* MAX length 128, currently at 121 */
+		sprintf(instance->pp->a_lastcode,	/* MAX length 128, currently at 121 */
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
 		    ts.l_ui, j,
 		    instance->pp->year, instance->pp->day,
@@ -1692,14 +1645,14 @@ oncore_get_timestamp(
 		    Rsm, 0.1*(256*instance->BEHa[35]+instance->BEHa[36]),
 		    /*rsat	dop */
 		    instance->BEHa[38], instance->BEHa[39], instance->traim, f1, f2,
-		    /*  nsat visible,     nsat tracked,     traim,traim,traim */
+		    /*	nsat visible,	  nsat tracked,     traim,traim,traim */
 		    f3, f4,
 		    /* sigma neg-sawtooth */
 	  /*sat*/   instance->BEHa[41], instance->BEHa[45], instance->BEHa[49], instance->BEHa[53],
 		    instance->BEHa[57], instance->BEHa[61], instance->BEHa[65], instance->BEHa[69]
 		    );					/* will be 0 for 6 chan */
 	} else if (instance->chan == 12) {
-		char    f1[5], f2[5], f3[5], f4[5];
+		char	f1[5], f2[5], f3[5], f4[5];
 		if (instance->traim) {
 			sprintf(f1, "%d", instance->BEHn[6]);
 			sprintf(f2, "%d", instance->BEHn[7]);
@@ -1720,7 +1673,7 @@ oncore_get_timestamp(
 		    Rsm, 0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
 		    /*rsat	dop */
 		    instance->BEHa[55], instance->BEHa[56], instance->traim, f1, f2,
-		    /*  nsat visible,     nsat tracked   traim,traim,traim */
+		    /*	nsat visible,	  nsat tracked	 traim,traim,traim */
 		    f3, f4,
 		    /* sigma neg-sawtooth */
 	  /*sat*/   instance->BEHa[58], instance->BEHa[64], instance->BEHa[70], instance->BEHa[76],
@@ -2369,7 +2322,7 @@ oncore_msg_BnEnHn(
 
 	memcpy(instance->BEHn, buf, (size_t) len);	/* Bn or En or Hn */
 
-	if (!instance->traim)   /* BnEnHn will be turned off in any case */
+	if (!instance->traim)	/* BnEnHn will be turned off in any case */
 		return;
 
 	/* If Time RAIM doesn't like it, don't trust it */
