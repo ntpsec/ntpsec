@@ -116,6 +116,8 @@ static struct ctl_var sys_var[] = {
 	{ CS_PRIVATE,	RO, "privatekey" },	/* 19 */
 	{ CS_PUBLIC,	RO, "publickey" },	/* 20 */
 	{ CS_DHPARAMS,	RO, "dhparams" },	/* 21 */
+	{ CS_HOSTNAM,	RO, "hostname" },	/* 22 */
+	{ CS_REVTIME,	RO, "revoketime"},	/* 23 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -148,6 +150,8 @@ static	u_char def_sys_var[] = {
 	CS_PRIVATE,
 	CS_PUBLIC,
 	CS_DHPARAMS,
+	CS_HOSTNAM,
+	CS_REVTIME,
 #endif /* PUBKEY */
 	0
 };
@@ -199,10 +203,9 @@ static struct ctl_var peer_var[] = {
 	{ CP_PUBLIC,	RO, "publickey" },	/* 38 */
 	{ CP_SESKEY,	RO, "pcookie" },	/* 39 */
 	{ CP_SASKEY,	RO, "hcookie" },	/* 40 */
-	{ CP_AUTOSEQ,	RO, "sequence" },	/* 41 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -244,7 +247,7 @@ static u_char def_peer_var[] = {
 #ifdef PUBKEY
 	CP_PUBLIC,
 	CP_SESKEY,
-	CP_AUTOSEQ,
+	CP_INITSEQ,
 #endif /* PUBKEY */
 	0
 };
@@ -1321,6 +1324,16 @@ ctl_putsys(
 			ctl_putstr(sys_var[CS_DHPARAMS].text,
 			    dh_params_file, strlen(dh_params_file));
 		break;
+
+	case CS_HOSTNAM:
+		if (sys_hostname != NULL)
+			ctl_putstr(sys_var[CS_HOSTNAM].text,
+			    sys_hostname, sys_hostnamelen);
+		break;
+
+	case CS_REVTIME:
+		ctl_putts(sys_var[CS_REVTIME].text, &sys_revoketime);
+		break;
 #endif /* PUBKEY */
 	}
 }
@@ -1560,16 +1573,16 @@ ctl_putpeer(
 		break;
 
 	case CP_SESKEY:
-		if (peer->pcookie != NULL)
-			ctl_puthex(peer_var[CP_SESKEY].text, peer->pcookie);
+		if (peer->pcookie.key != NULL)
+			ctl_puthex(peer_var[CP_SESKEY].text,
+			    peer->pcookie.key);
 		if (peer->hcookie != NULL)
 			ctl_puthex(peer_var[CP_SASKEY].text, peer->hcookie);
 		break;
 
-	case CP_AUTOSEQ:
+	case CP_INITSEQ:
 		if (peer->keylist == NULL)
 			break;
-		ctl_putint(peer_var[CP_AUTOSEQ].text, peer->recseq);
 		ctl_putint(peer_var[CP_INITSEQ].text, peer->recauto.seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, peer->recauto.key);
 		ctl_putuint(peer_var[CP_INITTSP].text, peer->recauto.tstamp);

@@ -10,9 +10,9 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
-#ifdef PUBKEY
+#ifdef AUTOKEY
 #include "ntp_crypto.h"
-#endif /* PUBKEY */
+#endif /* AUTOKEY */
 
 /*
  *                  Table of valid association combinations
@@ -366,14 +366,13 @@ findmanycastpeer(
 	return manycast_peer;
 }
 
-#ifdef AUTOKEY
+
 /*
- * key_expire - expire all keys and roll a new private value. Note the
- * 32-bit mask is necessary for 64-bit u_ints.
+ * clear_all - flush all time values and refresh Diffie-Hellman public
+ * value.
  */
 void
-key_expire_all(
-	)
+clear_all(void)
 {
 	struct peer *peer, *next_peer;
 	int n;
@@ -384,17 +383,45 @@ key_expire_all(
 			peer_clear(peer);
 		}
 	}
+#ifdef DEBUG
+	if (debug)
+		printf("clear_all: at %lu\n", current_time);
+#endif
+}
+
+
+#ifdef AUTOKEY
+/*
+ * expire_all - flush all crypto data and update timestamp
+ */
+void
+expire_all(void)
+{
+	struct peer *peer, *next_peer;
+	int n;
+
+	for (n = 0; n < HASH_SIZE; n++) {
+		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
+			next_peer = peer->next;
+			key_expire(peer);
+			peer->pcookie.tstamp = 0;
+		}
+	}
 	sys_private = (u_int32)RANDOM & 0xffffffff;
+	L_CLR(&sys_revoketime);
+	if (sys_leap != LEAP_NOTINSYNC)
+		get_systime(&sys_revoketime);
 #ifdef PUBKEY
-	crypto_agree();
+	if (crypto_enable)
+		crypto_agree();
 #endif /* PUBKEY */
 #ifdef DEBUG
 	if (debug)
-		printf("key_expire_all: at %lu private %08x next %lu\n",
-		    current_time, sys_private, current_time + sys_revoke);
+		printf("expire_all: at %lu\n", current_time);
 #endif
 }
 #endif /* AUTOKEY */
+
 
 /*
  * unpeer - remove peer structure from hash table and free structure

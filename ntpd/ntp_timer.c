@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <sys/signal.h>
-
+#include <unistd.h>
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
@@ -18,6 +18,10 @@
 # include "ntp_iocompletionport.h"
 # include "ntp_timer.h"
 #endif
+
+#ifdef PUBKEY
+#include "ntp_crypto.h"
+#endif /* PUBKEY */
 
 /*
  * These routines provide support for the event timer.	The timer is
@@ -44,6 +48,7 @@ static	u_long hourly_timer;		/* hour timer */
 #ifdef AUTOKEY
 static	u_long revoke_timer;		/* keys revoke timer */
 u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
+l_fp	sys_revoketime;			/* last key revoke time */
 #endif /* AUTOKEY */
 
 /*
@@ -208,7 +213,7 @@ void
 timer(void)
 {
 	register struct peer *peer, *next_peer;
-	int n;
+	u_int n;
 
 	current_time += (1<<EVENT_TIMEOUT);
 
@@ -251,13 +256,18 @@ timer(void)
 		auth_agekeys();
 	}
 
+#ifdef AUTOKEY
 	/*
 	 * Garbage collect old keys and generate new private value
 	 */
-#ifdef AUTOKEY
 	if (revoke_timer <= current_time) {
 		revoke_timer += sys_revoke;
-		key_expire_all();
+		expire_all();
+#ifdef DEBUG
+		if (debug)
+			printf("key expire: at %lu  next %lu\n",
+			    current_time, revoke_timer);
+#endif
 	}
 #endif /* AUTOKEY */
 

@@ -167,7 +167,9 @@ struct ntp_control {
 #define	CS_PRIVATE	19
 #define CS_PUBLIC	20
 #define CS_DHPARAMS	21
-#define	CS_MAXCODE	CS_DHPARAMS
+#define	CS_HOSTNAM	22
+#define	CS_REVTIME	23
+#define	CS_MAXCODE	CS_REVTIME
 #else
 #define	CS_MAXCODE	CS_VARLIST
 #endif /* PUBKEY */
@@ -216,10 +218,9 @@ struct ntp_control {
 #define CP_PUBLIC	38
 #define	CP_SESKEY	39
 #define	CP_SASKEY	40
-#define	CP_AUTOSEQ	41
-#define	CP_INITSEQ	42
-#define	CP_INITKEY	43
-#define	CP_INITTSP	44
+#define	CP_INITSEQ	41
+#define	CP_INITKEY	42
+#define	CP_INITTSP	43
 #define	CP_MAXCODE	CP_INITTSP
 #else
 #define	CP_MAXCODE	CP_VARLIST

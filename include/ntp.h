@@ -151,13 +151,38 @@ typedef char s_char;
 
 #ifdef AUTOKEY
 /*
- * THe autokey structure holds the data necessary to authenticate
+ * The autokey structure holds the data necessary to authenticate
  * the key IDs.
  */
-struct autokey {
+struct autokey {		/* network byte order */
+	u_int32	tstamp;		/* timestamp */
 	keyid_t	key;		/* key ID */
 	int	seq;		/* key number */
-	u_int32	tstamp;		/* timestamp (s) */
+	u_int	siglen;		/* signature length */
+	u_char	*sig;		/* signature */
+};
+
+/*
+ * The cookie structure holds the current private value used to
+ * construct session keys.
+ */
+struct cookie {			/* network byte order */
+	u_int32	tstamp;		/* timestamp */
+	keyid_t	key;		/* key ID */
+	u_int	siglen;		/* signature length */
+	u_char	*sig;		/* signature */
+};
+
+/*
+ * The value structure holds variable length data such as host
+ * name and public value.
+ */
+struct	value {			/* network byte order */
+	u_int32	tstamp;		/* timestamp */
+	u_int	vallen;		/* value length */
+	u_char	*val;		/* value */
+	u_int	siglen;		/* signature length */
+	u_char	*sig;		/* signature */
 };
 #endif /* AUTOKEY */
 
@@ -256,17 +281,15 @@ struct peer {
 #ifdef PUBKEY
 	u_char	*pubkey;	/* public key */
 #endif /* PUBKEY */
-#ifdef AUTOKEY
 	keyid_t	pkeyid;		/* previous key ID */
+#ifdef AUTOKEY
 #define clear_to_zero pkeyid
+#define crypto_to_zero pkeyid
 	keyid_t	hcookie;	/* host cookie */
-	keyid_t	pcookie;	/* peer cookie */
-	int	recseq;		/* current key number */
+	struct cookie pcookie;	/* peer cookie */
 	struct autokey recauto;	/* autokey */
 	u_int32	cmmd;		/* peer command */
 	u_short	assoc;		/* association ID of peer */
-	u_char	*dh_public;	/* Diffie-Hellman public value */
-	u_char	*dh_key;	/* Diffie-Hellman agreed key */
 
 	/*
 	 * Variables used by authenticated server
@@ -274,20 +297,18 @@ struct peer {
 	keyid_t	*keylist;	/* session key ID list */
 	int	keynumber;	/* current key number */
 	struct autokey sndauto;	/* autokey */
-#ifdef PUBKEY
-	u_char	*sign;		/* signature of keylist values */
-	u_int	signlen;	/* length of signature */
-#endif /* PUBKEY */
 #endif /* AUTOKEY */
 
 	/*
 	 * Ephemeral state variables
 	 */
 	u_int	valid;		/* valid update counter */
-	u_int	tailcnt;	/* tailgate poll counter */
-#ifndef AUTOKEY
+#ifdef AUTOKEY
+#define end_crypto_to_zero valid
+#else
 #define clear_to_zero valid
 #endif /* AUTOKEY */
+	u_int	tailcnt;	/* tailgate poll counter */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
 	u_char	reach;		/* reachability register */
@@ -398,6 +419,11 @@ struct peer {
 #define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define	LEN_CLEAR_TO_ZERO	(END_CLEAR_TO_ZERO((struct peer *)0) \
 				    - CLEAR_TO_ZERO((struct peer *)0))
+#define CRYPTO_TO_ZERO(p)        ((char *)&((p)->clear_to_zero))
+#define END_CRYPTO_TO_ZERO(p)    ((char *)&((p)->end_clear_to_zero))
+#define LEN_CRYPTO_TO_ZERO       (END_CRYPTO_TO_ZERO((struct peer *)0) \
+				    - CRYPTO_TO_ZERO((struct peer *)0))
+
 /*
  * Reference clock identifiers (for pps signal)
  */

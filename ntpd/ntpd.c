@@ -339,6 +339,10 @@ ntpdmain(
 {
 	l_fp now;
 	char *cp;
+	u_int n;
+#ifdef AUTOKEY
+	char hostname[MAXFILENAME];
+#endif /* AUTOKEY */
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
@@ -734,13 +738,22 @@ service_main(
 	/*
 	 * Get configuration.  This (including argument list parsing) is
 	 * done in a separate module since this will definitely be different
-	 * for the gizmo board.
+	 * for the gizmo board. While at it, save the host name for later
+	 * along with the length. The crypto needs this.
 	 */
 	getconfig(argc, argv);
+#ifdef AUTOKEY
+	gethostname(hostname, MAXFILENAME);
+	for (n = strlen(hostname); n % 4 != 0; n++)
+		hostname[n] = 0;
+	sys_hostname = emalloc(n);
+	sys_hostnamelen = n;
+	memcpy(sys_hostname, hostname, n);
 #ifdef PUBKEY
 	if (crypto_enable)
 		crypto_setup();
 #endif /* PUBKEY */
+#endif /* AUTOKEY */
 	initializing = 0;
 
 #if defined(SYS_WINNT) && !defined(NODETACH)

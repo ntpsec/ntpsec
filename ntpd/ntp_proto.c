@@ -54,6 +54,10 @@ static	double sys_maxd; 	/* select error (squares) */
 static	double sys_epsil;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
+#ifdef AUTOKEY
+char	*sys_hostname;		/* gethostname() name */
+u_int	sys_hostnamelen;	/* name length (round to word) */
+#endif /* AUTOKEY */
 
 /*
  * Statistics counters
@@ -405,23 +409,34 @@ receive(
 			 * packets, the cookie was previously obtained
 			 * from the server. For symmetric modes, the
 			 * cookie was previously constructed using an
-			 * agreement protocol.
+			 * agreement protocol; however, should PKI be
+			 * unavailable, we construct a fake agreement as
+			 * the EXOR of the peer and host cookies.
 			 */
-			if (hismode == MODE_BROADCAST)
+			if (hismode == MODE_BROADCAST) {
 				pkeyid = 0;
-			else if (peer == 0)
+			} else if (peer == 0) {
 				pkeyid = session_key(
 				    &rbufp->recv_srcadr,
 				    &rbufp->dstadr->sin, 0, sys_private,
 				    0);
-			else if (hismode == MODE_CLIENT)
+			} else if (hismode == MODE_CLIENT) {
 				pkeyid = peer->hcookie;
-			else
+			} else {
 #ifdef PUBKEY
-				pkeyid = peer->pcookie;
+				if (crypto_enable)
+					pkeyid = peer->pcookie.key;
+				else
+					pkeyid = peer->pcookie.key;
+					
 #else
-				pkeyid = peer->hcookie ^ peer->pcookie;
+				if (hismode == MODE_SERVER)
+					pkeyid = peer->pcookie.key;
+				else
+					pkeyid = peer->hcookie ^
+					    peer->pcookie.key;
 #endif /* PUBKEY */
+			}
 
 			/*
 			 * The session key includes both the public
@@ -680,10 +695,21 @@ receive(
 	    (restrict_mask & RES_DONTTRUST))	/* test 9 */
 		peer->flash |= TEST9;		/* access denied */
 	if (peer->flags & FLAG_AUTHENABLE) {
+
+		/*
+		 * Here we have a little bit of nastyness. Should
+		 * authentication fail in client mode, it could either
+		 * be a hacker attempting to jam the protocol, or it
+		 * could be the server has just refreshed its keys. On
+		 * the premiss the later is more likely than the former
+		 * and that even the former can't do real evil, we
+		 * simply ask for the cookie again.
+		 */
 		if (!(peer->flags & FLAG_AUTHENTIC)) { /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
 #ifdef AUTOKEY
-			peer->pcookie = 0;
+			if (hismode == MODE_SERVER)
+				peer->pcookie.tstamp = 0;
 #endif /* AUTOKEY */
 		} else if (!(oflags & FLAG_AUTHENABLE)) {
 			report_event(EVNT_PEERAUTH, peer);
@@ -723,8 +749,6 @@ receive(
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
-			else
-				peer->hcookie = 0;
 		} else {
 			int i = 0;
 
@@ -979,8 +1003,6 @@ clock_update(void)
 {
 	u_char oleap;
 	u_char ostratum;
-	int i;
-	struct peer *peer;
 
 	/*
 	 * Reset/adjust the system clock. Do this only if there is a
@@ -1001,24 +1023,19 @@ clock_update(void)
 	ostratum = sys_stratum;
 	switch (local_clock(sys_peer, sys_offset, sys_epsil)) {
 
-		case -1:
-		/*
-		 * Clock is too screwed up. Just exit for now.
-		 */
+	/*
+	 * Clock is too screwed up. Just exit for now.
+	 */
+	case -1:
 		report_event(EVNT_SYSFAULT, (struct peer *)0);
 		exit(1);
 		/*NOTREACHED*/
 
-		case 1:
-		/*
-		 * Clock was stepped. Clear filter registers
-		 * of all peers.
-		 */
-		for (i = 0; i < HASH_SIZE; i++) {
-			for (peer = peer_hash[i]; peer != 0;
-				peer =peer->next)
-				peer_clear(peer);
-		}
+	/*
+	 * Clock was stepped. Flush all time values of all peers.
+	 */
+	case 1:
+		clear_all();
 		NLOG(NLOG_SYNCSTATUS)
 			msyslog(LOG_INFO, "synchronisation lost");
 		sys_peer = 0;
@@ -1026,13 +1043,13 @@ clock_update(void)
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
 		break;
 
-		default:
-		/*
-		 * Update the system stratum, leap bits, root delay,
-		 * root dispersion, reference ID and reference time. We
-		 * also update select dispersion and max frequency
-		 * error.
-		 */
+	/*
+	 * Update the system stratum, leap bits, root delay, root
+	 * dispersion, reference ID and reference time. We also update
+	 * select dispersion and max frequency error. If the leap
+	 * changes, we gotta reroll the keys.
+	 */
+	default:
 		sys_stratum = sys_peer->stratum + 1;
 		if (sys_stratum == 1)
 			sys_refid = sys_peer->refid;
@@ -1042,16 +1059,11 @@ clock_update(void)
 		sys_rootdelay = sys_peer->rootdelay +
 		    fabs(sys_peer->delay);
 		sys_leap = leap_consensus;
-
-		/*
-		 * This is cute. If the leap changes, we gotta reroll
-		 * the keys.
-		 */
-		if (sys_leap != oleap)
-			key_expire_all();
 	}
-	if (oleap != sys_leap)
+	if (oleap != sys_leap) {
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
+		expire_all();
+	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
 }
@@ -1148,14 +1160,6 @@ peer_clear(
 #endif
 #ifdef AUTOKEY
 	key_expire(peer);
-#ifdef PUBKEY
-	if (peer->sign != NULL)
-		free(peer->sign);
-	if (peer->dh_public != NULL)
-		free(peer->dh_public);
-	if (peer->dh_key != NULL)
-		free(peer->dh_key);
-#endif /* PUBKEY */
 #endif /* AUTOKEY */
 
 	/*
@@ -1180,15 +1184,6 @@ peer_clear(
 		peer->filter_epoch[i] = current_time;
 	}
 	poll_update(peer, peer->minpoll);
-
-	/*
-	 * Since we have a chance to correct possible funniness in
-	 * our selection of interfaces on a multihomed host, do so
-	 * by setting us to no particular interface.
-	 * WARNING: do so only in non-broadcast mode!
-	 */
-	if (peer->hmode != MODE_BROADCAST)
-		peer->dstadr = any_interface;
 }
 
 
@@ -1859,7 +1854,7 @@ peer_xmit(
 		 * are contained in extension fields, each including a
 		 * 4-octet length/code word followed by a 4-octet
 		 * association ID and optional additional data. Optional
-		 * data includes a 4-octet data length field followd by
+		 * data includes a 4-octet data length field followed by
 		 * the data itself. Request messages are sent from a
 		 * configured association; response messages can be sent
 		 * from a configured association or can take the fast
@@ -1955,8 +1950,7 @@ peer_xmit(
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
 #ifdef PUBKEY
-			if (crypto_enable && peer->cmmd != 0 &&
-			    peer->cmmd >> 16 != CRYPTO_DH) {
+			if (crypto_enable && peer->cmmd != 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
@@ -1968,9 +1962,24 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			} else
+			} else if (peer->pcookie.tstamp == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_DH, peer->hcookie,
+				    peer->assoc);
+#else
+			if (peer->cmmd != 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, (peer->cmmd >> 16) |
+				    CRYPTO_RESP, peer->hcookie,
+				    peer->associd);
+				peer->cmmd = 0;
+			}
+			if (peer->pcookie.tstamp == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
+				    peer->assoc);
 #endif /* PUBKEY */
-			if (peer->recauto.tstamp == 0) {
+			} else if (peer->recauto.tstamp == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
@@ -1979,24 +1988,6 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
-#ifdef PUBKEY
-			} else if (peer->pcookie == 0) {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_DH, peer->hcookie,
-				    peer->assoc);
-#else
-			} else if (peer->pcookie == 0) {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_PRIV, peer->hcookie,
-				    peer->assoc);
-#endif /* PUBKEY */
-			}
-			if (peer->cmmd != 0) {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->hcookie,
-				    peer->associd);
-				peer->cmmd = 0;
 			}
 			break;
 
@@ -2007,7 +1998,8 @@ peer_xmit(
 		 * client/server exchange to avoid having to wait until
 		 * the next key list regeneration. Otherwise, the poor
 		 * dude may die a lingering death until becoming
-		 * unreachable and attempting rebirth.
+		 * unreachable and attempting rebirth. Note that we ask
+		 * for the cookie at each key list regeneration anyway.
 		 */
 		case MODE_CLIENT:
 			if (peer->cmmd != 0) {
@@ -2025,7 +2017,8 @@ peer_xmit(
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->pcookie == 0) {
+			if (peer->pcookie.tstamp == 0 ||
+			    peer->keynumber == peer->sndauto.seq) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);

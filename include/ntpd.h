@@ -132,7 +132,8 @@ extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int
 extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
-extern	void	key_expire_all	P((void));
+extern	void	clear_all	P((void));
+extern	void	expire_all	P((void));
 extern	struct	peer *findmanycastpeer	P((l_fp *));
 extern	void	peer_config_manycast	P((struct peer *, struct peer *));
 
@@ -179,6 +180,11 @@ extern	void	hack_restrict	P((int, struct sockaddr_in *, struct sockaddr_in *, in
 extern	void	init_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
+#ifdef AUTOKEY
+extern	char	*sys_hostname;
+extern	u_int	sys_hostnamelen;
+extern	l_fp	sys_revoketime;
+#endif /* AUTOKEY */
 
 /* ntp_util.c */
 extern	void	init_util	P((void));

@@ -29,6 +29,9 @@
 #define CRYPTO_FLAG_PUBL  0x01	/* read peer public key from file */
 
 #ifdef PUBKEY
+
+#define MAX_DH_LEN (DH_PRIME_LEN(1024)) /* max agreed key length */
+
 /*
  * Configuration codes
  */
@@ -51,12 +54,12 @@ extern	keyid_t	session_key	P((struct sockaddr_in *, struct
 				    u_long));
 extern	void	make_keylist	P((struct peer *));
 extern	void	key_expire	P((struct peer *));
+extern	void	crypto_agree	P((void));
 #ifdef PUBKEY
 extern	void	crypto_init	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
 extern	int	crypto_public	P((struct peer *, u_char *));
-extern	void	crypto_agree	P((void));
 
 /*
  * Cryptographic values
