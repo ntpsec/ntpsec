@@ -42,6 +42,8 @@
 #endif
 #include <arpa/inet.h>
 
+extern int listen_to_virtual_ips;
+
 #if _BSDI_VERSION >= 199510
 # include <ifaddrs.h>
 #endif
@@ -288,9 +290,15 @@ create_sockets(
 		if ((ifap->ifa_flags & IFF_UP) == 0)
 		    continue;
 
+		if (debug)
+			printf("after getifaddrs(), considering %s (%s)\n",
+			       ifap->ifa_name,
+			       stoa((struct sockaddr_storage *)ifap->ifa_addr));
+
 		if ((ifap->ifa_addr->sa_family == AF_INET) {
 			if (ifap->ifa_flags & IFF_LOOPBACK) {
-				if (ntohl(((struct sockaddr_in*)ifap->ifa_addr)->sin_addr.s_addr) != 0x7f000001)
+				if (ntohl(((struct sockaddr_in*)ifap->ifa_addr)->sin_addr.s_addr) != 0x7f000001 &&
+				    !listen_to_virtual_ips)
 					continue;
 			}
 			inter_list[i].flags = 0;
@@ -455,8 +463,6 @@ create_sockets(
 	for(n = ifc.ifc_len, ifr = ifc.ifc_req; n > 0;
 	    ifr = (struct ifreq *)((char *)ifr + size))
 	{
-		extern int listen_to_virtual_ips;
-
 		size = sizeof(*ifr);
 
 # ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
@@ -1635,7 +1641,7 @@ fdbits(
 /*
  * input_handler - receive packets asynchronously
  */
-extern void
+void
 input_handler(
 	l_fp *cts
 	)
