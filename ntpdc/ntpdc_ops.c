@@ -862,7 +862,7 @@ sysstats(
 		       (u_long)ntohl(ss->newversionpkt));
 	(void) fprintf(fp, "unknown version number: %ld\n",
 		       (u_long)ntohl(ss->unknownversion));
-	(void) fprintf(fp, "bad packet length:      %ld\n",
+	(void) fprintf(fp, "bad packet format:      %ld\n",
 		       (u_long)ntohl(ss->badlength));
 	(void) fprintf(fp, "packets processed:      %ld\n",
 		       (u_long)ntohl(ss->processed));
@@ -871,7 +871,7 @@ sysstats(
 	if (itemsize != sizeof(struct info_sys_stats))
 	    return;
 	
-	(void) fprintf(fp, "limitation rejects:     %ld\n",
+	(void) fprintf(fp, "packets rejected:       %ld\n",
 		       (u_long)ntohl(ss->limitrejected));
 }
 

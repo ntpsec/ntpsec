@@ -288,7 +288,6 @@ receive(
 #endif /* AUTOKEY */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
-	l_fp p_org;
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -342,8 +341,8 @@ receive(
 	/*
 	 * Figure out his mode and validate the packet. This has some
 	 * legacy raunch that probably should be removed. If from NTPv1
-	 * mode zero, The NTPv4 mode is determined from the source port.
-	 * If the port number is zero, it is from a symmetric active
+	 * mode zero, The mode is determined from the source port. If
+	 * the port number is zero, it is from a symmetric active
 	 * association; otherwise, it is from a client association. From
 	 * NTPv2 on, all we do is toss out mode zero packets, since
 	 * control and private mode packets have already been handled.
@@ -679,6 +678,14 @@ receive(
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST | (sys_authenticate ?
 		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
+#ifdef AUTOKEY
+#ifdef PUBKEY
+		if (peer == NULL)
+			return;
+		if (peer->flags & FLAG_SKEY)
+			crypto_recv(peer, rbufp);
+#endif /* PUBKEY */
+#endif /* AUTOKEY */
 		return;
 
 	case AM_POSSBCL:
@@ -745,40 +752,10 @@ receive(
 		else if (!(oflags & FLAG_AUTHENABLE))
 			report_event(EVNT_PEERAUTH, peer);
 	}
-
-	/*
-	 * A kiss-of-death (kod) packet is returned by a server in case
-	 * the client is denied access. It consists of the client
-	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field the ASCII
-	 * string "DENY". If the packet originate timestamp matches the
-	 * association transmit timestamp the kod is legitimate. If the
-	 * peer leap bits indicate never synchronized, this must be
-	 * access deny and the association is disabled; otherwise this
-	 * must be a limit reject. In either case a naughty message is
-	 * forced to the system log.
-	 */
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
-	    pkt->stratum == 0 && memcmp(&pkt->refid, "DENY", 4) == 0) {
-		NTOHL_FP(&pkt->org, &p_org);
-		if (L_ISEQU(&peer->xmt, &p_org)) {
-			if (peer->leap == LEAP_NOTINSYNC) {
-				peer->stratum = 0;
-				peer->flash |= TEST4;
-				memcpy(&peer->refid, &pkt->refid, 4);
-				msyslog(LOG_INFO, "access denied %s\n",
-				    ntoa(&rbufp->recv_srcadr));
-			} else {
-				msyslog(LOG_INFO, "limit reject %s\n",
-				    ntoa(&rbufp->recv_srcadr));
-			}
-		}
-	}
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("receive: bad auth/deny %03x\n",
-			    peer->flash);
+			printf("receive: bad auth %03x\n", peer->flash);
 #endif
 		return;
 	}
@@ -930,6 +907,31 @@ process_packet(
 			printf("packet: bad data %03x\n",
 			    peer->flash);
 #endif
+		return;
+	}
+
+	/*
+	 * A kiss-of-death (kod) packet is returned by a server in case
+	 * the client is denied access. It consists of the client
+	 * request packet with the leap bits indicating never
+	 * synchronized, stratum zero and reference ID field the ASCII
+	 * string "DENY". If the packet originate timestamp matches the
+	 * association transmit timestamp the kod is legitimate. If the
+	 * peer leap bits indicate never synchronized, this must be
+	 * access deny and the association is disabled; otherwise this
+	 * must be a limit reject. In either case a naughty message is
+	 * forced to the system log.
+	 */
+	if (pleap == LEAP_NOTINSYNC && pstratum >= STRATUM_UNSPEC &&
+	    memcmp(&pkt->refid, "DENY", 4) == 0) {
+		if (peer->leap == LEAP_NOTINSYNC) {
+			peer->stratum = STRATUM_UNSPEC;
+			peer->flash |= TEST4;
+			memcpy(&peer->refid, &pkt->refid, 4);
+			msyslog(LOG_INFO, "access denied");
+		} else {
+			msyslog(LOG_INFO, "limit reject");
+		}
 		return;
 	}
 
@@ -1279,8 +1281,10 @@ peer_clear(
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 #ifdef REFCLOCK
-	if (!(peer->flags & FLAG_REFCLOCK))
+	if (!(peer->flags & FLAG_REFCLOCK)) {
 		peer->leap = LEAP_NOTINSYNC;
+		peer->stratum = STRATUM_UNSPEC;
+	}
 #endif
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -1441,7 +1445,6 @@ clock_filter(
 	 */
 	if (m == 0)
 		return;
-	peer->epoch = current_time;
 	etemp = peer->offset;
 	peer->offset = off / dtemp;
 	peer->delay = dly / dtemp;
@@ -1453,7 +1456,7 @@ clock_filter(
 	 * A new sample is useful only if it is younger than the last
 	 * one used.
 	 */
-	if (peer->filter_epoch[k] > peer->epoch) {
+	if (peer->filter_epoch[k] <= peer->epoch) {
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: discard %lu\n",
@@ -2368,7 +2371,7 @@ fast_xmit(
 			xpkt.li_vn_mode =
 			    PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 			    PKT_VERSION(rpkt->li_vn_mode), xmode);
-			xpkt.stratum = 0;
+			xpkt.stratum = STRATUM_UNSPEC;
 			memcpy(&xpkt.refid, "DENY", 4);
 		}
 	} else {
@@ -2626,6 +2629,7 @@ init_proto(void)
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
 	sys_precision = (s_char)default_get_precision();
+	sys_jitter = LOGTOD(sys_precision);
 	sys_rootdelay = 0;
 	sys_rootdispersion = 0;
 	sys_refid = 0;

@@ -1,3 +1,26 @@
+2001-05-06  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdc/ntpdc_ops.c (sysstats): That's 'bad packet format'
+	(instead of '... length'), and 'packets rejected' (instead of
+	'limitation rejects'.
+	* ntpd/ntp_proto.c (receive): PUBKEY fixes.  Move KoD stuff to
+	process_packet().
+	(process_packet):  Move KoD stuff here... 
+	(peer_clear): Unspec the stratum, too.
+	(clock_filter): Don't update peer->epoch here.  Fix the filter
+	test when checking the epoch.
+	(fast_xmit): Send back STRATUM_UNSPEC on a KoD packet.
+	(init_proto): Initialize sys_jitter.
+
+	* ntpd/ntp_loopfilter.c: rstclock() takes 2 parameters now.
+	(init_loopfilter): Use it...
+	(local_clock): Ditto, and change the "mu" calculation.  Improve
+	the jitter test in S_SYNC.  Use peer->epoch (not current_time) to
+	update the last_time.  Update debug info.
+	(rstclock): 2nd arg - the epoch to use.  Use it.
+	(loop_config): update call to rstclock.
+	From: Dave Mills.
+
 2001-05-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ports/winnt/ntpd/ntpd.dsp: Add cmd_args.c

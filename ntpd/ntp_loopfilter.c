@@ -124,7 +124,7 @@ static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (s/s) */
 double	clock_stability;	/* clock stability (s/s) */
 u_long	pps_control;		/* last pps sample time */
-static void rstclock P((int));	/* state transition function */
+static void rstclock P((int, double)); /* state transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -178,7 +178,7 @@ init_loopfilter(void)
 	 * Initialize state variables. Initially, we expect no drift
 	 * file, so set the state to S_NSET.
 	 */
-	rstclock(S_NSET);
+	rstclock(S_NSET, current_time);
 }
 
 /*
@@ -269,8 +269,8 @@ local_clock(
 		step_systime(fp_offset);
 		NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 		    msyslog(LOG_NOTICE, "time set %.6f s", fp_offset);
-		rstclock(S_TSET);
-		rstclock(S_FREQ);
+		rstclock(S_TSET, peer->epoch);
+		rstclock(S_FREQ, peer->epoch);
 		return (1);
 	}
 
@@ -292,7 +292,7 @@ local_clock(
 	 */
 	retval = 0;
 	clock_frequency = flladj = plladj = 0;
-	mu = current_time - last_time;
+	mu = peer->epoch - last_time;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
 
@@ -304,7 +304,7 @@ local_clock(
 		 * to S_FREQ state.
 		 */
 		case S_TSET:
-			rstclock(S_FREQ);
+			rstclock(S_FREQ, peer->epoch);
 			last_offset = clock_offset = fp_offset;
 			return (0);
 
@@ -316,7 +316,7 @@ local_clock(
 		case S_SYNC:
 			if (mu < clock_minstep)
 				return (0);
-			rstclock(S_SPIK);
+			rstclock(S_SPIK, peer->epoch);
 			return (0);
 
 		/*
@@ -327,8 +327,6 @@ local_clock(
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
-			clock_frequency = (fp_offset - clock_offset) /
-			    mu;
 			/* fall through to default */
 
 		/*
@@ -352,13 +350,13 @@ local_clock(
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time reset %.6f s",
 		   		    fp_offset);
-				rstclock(S_TSET);
+				rstclock(S_TSET, peer->epoch);
 				retval = 1;
 			} else {
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time slew %.6f s",
 				    fp_offset);
-				rstclock(S_FREQ);
+				rstclock(S_FREQ, peer->epoch);
 				last_offset = clock_offset = fp_offset;
 			}
 			break;
@@ -373,7 +371,7 @@ local_clock(
 		 * to.
 		 */
 		case S_FSET:
-			rstclock(S_TSET);
+			rstclock(S_TSET, peer->epoch);
 			last_offset = clock_offset = fp_offset;
 			return (0);
 
@@ -388,7 +386,7 @@ local_clock(
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
 			clock_offset = fp_offset;
-			rstclock(S_SYNC);
+			rstclock(S_SYNC, peer->epoch);
 			break;
 
 		/*
@@ -398,7 +396,7 @@ local_clock(
 		 */
 		case S_TSET:
 		case S_SPIK:
-			rstclock(S_SYNC);
+			rstclock(S_SYNC, peer->epoch);
 			/* fall through to default */
 
 		/*
@@ -613,7 +611,7 @@ local_clock(
 	 * helps calm the dance. Works best using burst mode.
 	 */
 	if (state == S_SYNC) {
-		if (sys_jitter / mu > clock_stability &&
+		if (sys_jitter / ULOGTOD(sys_poll) > clock_stability &&
 		    fabs(clock_offset) < CLOCK_PGATE * sys_jitter) {
 			tc_counter += sys_poll;
 			if (tc_counter > CLOCK_LIMIT) {
@@ -638,7 +636,7 @@ local_clock(
 	/*
 	 * Update the system time variables.
 	 */
-	last_time = current_time;
+	last_time = peer->epoch;
 	last_offset = clock_offset;
 	dtemp = peer->disp + sys_jitter;
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
@@ -655,8 +653,8 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: noise %.3f stabil %.3f poll %d count %d\n",
-		    sys_jitter * 1e6 / mu, clock_stability * 1e6,
+		    "local_clock: mu %.0f noise %.3f stabil %.3f poll %d count %d\n",
+		    mu, sys_jitter * 1e6 / mu, clock_stability * 1e6,
 		    sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (retval);
@@ -728,7 +726,8 @@ adj_host_clock(
  */
 static void
 rstclock(
-	int trans		/* new state */
+	int trans,		/* new state */
+	double epoch		/* start time */
 	)
 {
 	state = trans;
@@ -742,7 +741,7 @@ rstclock(
 	 */ 
 	case S_FREQ:
 		sys_poll = NTP_MINPOLL;
-		last_time = current_time;
+		last_time = epoch;
 		break;
 
 	/*
@@ -766,7 +765,7 @@ rstclock(
 	 */
 	default:
 		sys_poll = NTP_MINPOLL;
-		last_time = current_time;
+		last_time = epoch;
 		last_offset = clock_offset = 0;
 		break;
 	}
@@ -853,7 +852,7 @@ loop_config(
 		 * S_FSET to indicated the frequency has been
 		 * initialized from the previously saved drift file.
 		 */
-		rstclock(S_FSET);
+		rstclock(S_FSET, current_time);
 		drift_comp = freq;
 		if (drift_comp > NTP_MAXFREQ)
 			drift_comp = NTP_MAXFREQ;
