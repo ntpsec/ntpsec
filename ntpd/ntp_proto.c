@@ -1926,7 +1926,7 @@ default_get_precision(void)
 #endif
 #if defined(__FreeBSD__) && __FreeBSD__ >= 3
 	u_long freq;
-	int j;
+	size_t j;
 
 	/* Try to see if we can find the frequency of of the counter
 	 * which drives our timekeeping

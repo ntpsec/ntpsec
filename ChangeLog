@@ -1,5 +1,9 @@
 1999-12-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (default_get_precision): Use the right arg type
+	to pass "sizeof freq" to sysctlbyname().
+	From: Ollivier Robert <roberto@eurocontrol.fr>
+
 	* ntpd/refclock_wwv.c: Cleanup and fixes.
 	From: Dave Mills <mills@udel.edu>
 
