@@ -1495,7 +1495,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$target" in
  yes*-*-hpux*) ;;
- yes*) AC_WARN(*** But the expected answer is... no ***) ;;
+ yes*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 #HPUX only, and only by explicit request
@@ -1509,7 +1509,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$target" in
  yes*-*-hpux*) ;;
- yes*) AC_WARN(*** But the expected answer is... no ***) ;;
+ yes*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 AC_MSG_CHECKING(for PCL720 clock support)
@@ -1554,6 +1554,39 @@ case "$ac_cv_header_sun_audioio_h$ac_cv_header_sys_audioio_h" in
  *)	ntp_canaudio=no  ;;
 esac
 AC_MSG_RESULT($ntp_canaudio)
+
+dnl AC_MSG_CHECKING([struct audio_info for monitor_gain])
+dnl AC_C_STRUCT_MEMBER(ai_monitor_gain,
+dnl   [#ifdef HAVE_SUN_AUDIO_H
+dnl #include <sun/audio.h>
+dnl #endif
+dnl #ifdef HAVE_SYS_AUDIOIO_H
+dnl #include <sys/audioio.h>
+dnl #endif], [struct audio_info], monitor_gain)
+dnl case "$ai_monitor_gain" in
+dnl  *yes*)
+dnl     AC_DEFINE(HAVE_AI_MONITOR_GAIN, [struct audio_info.monitor_gain?])
+dnl     ans=yes
+dnl     ;;
+dnl  *) ans=no ;;
+dnl esac
+dnl AC_MSG_RESULT($ans)
+
+dnl  AC_CHECK_MEMBERS ((AGGREGATE.MEMBER, ...), [ACTION-IF-FOUND],
+dnl           [ACTION-IF-NOT-FOUND], [INCLUDES])
+
+AC_CHECK_MEMBERS((struct audio_info.monitor_gain,
+    struct audio_info.output_muted,
+    struct audio_info.blocksize,
+    struct audio_info.hiwat,
+    struct audio_info.lowat,
+    struct audio_info.mode), , ,
+[#ifdef HAVE_SUN_AUDIO_H
+#include <sun/audio.h>
+#endif
+#ifdef HAVE_SYS_AUDIOIO_H
+#include <sys/audioio.h>
+#endif])
 
 # Requires modem control
 AC_MSG_CHECKING(ACTS modem service)
@@ -1633,7 +1666,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 # We used to check for sunos/solaris target...
 case "$ntp_ok$ac_refclock_chu$ntp_canaudio" in
- yes*no*) AC_WARN(*** But the expected answer is...no ***) ;;
+ yes*no*) AC_MSG_WARN(*** But the expected answer is...no ***) ;;
 esac
 
 # Not under HP-UX
@@ -1703,7 +1736,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canaudio" in
- yesno) AC_WARN(*** But the expected answer is... no ***) ;;
+ yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 AC_MSG_CHECKING(Leitch CSD 5300 Master Clock System Driver)
@@ -1749,7 +1782,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$target" in
- yes*-*-ultrix*) AC_WARN(*** But the expected answer is... no ***) ;;
+ yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 AC_MSG_CHECKING(NMEA GPS receiver)
@@ -1815,7 +1848,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$target" in
- yes*-*-ultrix*) AC_WARN(*** But the expected answer is... no ***) ;;
+ yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 # Requires modem control
@@ -1853,7 +1886,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ac_cv_header_sys_tpro" in
- yesno) AC_WARN(*** But the expected answer is... no ***) ;;
+ yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 AC_MSG_CHECKING(TRAK 8810 GPS receiver)
@@ -1919,7 +1952,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$target" in
- yesvax-dec-bsd) AC_WARN(*** But the expected answer is... no ***) ;;
+ yesvax-dec-bsd) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 AC_MSG_CHECKING(Ultralink M320 WWVB receiver)
@@ -1944,7 +1977,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canaudio" in
- yesno) AC_WARN(*** But the expected answer is... no ***) ;;
+ yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
 # Requires modem control
@@ -2947,10 +2980,11 @@ esac
 # the ANSI2KNR-filtering rules.
 LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 
-AC_OUTPUT(Makefile adjtimed/Makefile clockstuff/Makefile \
+AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/Makefile scripts/mkver scripts/ntpver util/Makefile,
-[chmod +x scripts/ntpver scripts/mkver])
+scripts/Makefile scripts/mkver scripts/ntpver util/Makefile)
+AC_CONFIG_COMMANDS(default, [[chmod +x scripts/ntpver scripts/mkver]], [])
+AC_OUTPUT
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

@@ -1,3 +1,12 @@
+2000-01-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* scripts/Makefile.am (EXTRA_DIST): Need to explicitly distribute
+	mkver.in and ntpver.in now, apparently.
+	* configure.in: Search for the various audio_info members so the
+	printing in audio_show is less of a circus.  This required an
+	autoconf upgrade.  Major sigh.
+	* libntp/audio.c (audio_show): Clean up (more) properly.
+
 2000-01-21  Sven Dietrich <sven_dietrich@trimble.com>
 
 	* Add pointer to html/hints/winnt.htm to INSTALL file

@@ -144,11 +144,42 @@ audio_show(void)
 	    info.record.samples, info.record.eof,
 	    info.record.pause, info.record.error,
 	    info.record.waiting, info.record.balance);
-	printf("audio: monitor %d, muted %d\n",
-	    info.monitor_gain, info.output_muted);
+
+	{
+		int cnt = 0;	/* this will handle clean line wraps someday */
+		/* Right now, I think we're under 75 columns... */
+
+		printf("audio: monitor %d", info.monitor_gain);
+		cnt += 17;
+
+#ifdef HAVE_STRUCT_AUDIO_INFO_OUTPUT_MUTED
+		printf(", muted %d", info.output_muted);
+		cnt += 9;
+#endif
+
+#ifdef HAVE_STRUCT_AUDIO_INFO_BLOCKSIZE
+		printf(", blocksize %d", info.blocksize);
+		cnt += 16;
+#endif
+
+#ifdef HAVE_STRUCT_AUDIO_INFO_HIWAT
+		printf(", hiwat %d", info.hiwat);
+		cnt += 11;
+#endif
+
+#ifdef HAVE_STRUCT_AUDIO_INFO_LOWAT
+		printf(", lowat %d", info.lowat);
+		cnt += 11;
+#endif
+
+#ifdef HAVE_STRUCT_AUDIO_INFO_MODE
+		printf(", mode %d", info.mode);
+		cnt += 8;
+#endif
+		if (cnt) {
+			printf("\n");
+			cnt = 0;
+		}
+	}
 #endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef __NetBSD__
-	printf("audio: monitor %d, blocksize %d, hiwat %d, lowat %d, mode %d\n",
-	    info.monitor_gain, info.blocksize, info.hiwat, info.lowat, info.mode);
-#endif /* __NetBSD__ */
 }
