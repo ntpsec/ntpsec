@@ -458,8 +458,8 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
 
 #ifdef ISC_PLATFORM_HAVESCOPEID
-		((struct sockaddr_in6 *)&itf->sin)->sin6_scope_id = isc_netaddr_getzone(isc_if->address);
-		itf->scopeid = isc_netaddr_getzone(isc_if->address);
+		((struct sockaddr_in6 *)&itf->sin)->sin6_scope_id = isc_netaddr_getzone(&isc_if->address);
+		itf->scopeid = isc_netaddr_getzone(&isc_if->address);
 #endif
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
