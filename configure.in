@@ -39,13 +39,6 @@ case "$host" in
 	;;
     esac
     ;;
- alpha*-dec-osf*)
-    case "$CC" in
-     cc)
-	CFLAGS="$CFLAGS -std1"
-	;;
-    esac
-    ;;
  *-*-mpeix*)
     CPPFLAGS="$CPPFLAGS -DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE -I/SYSLOG/PUB"
     LDFLAGS="$LDFLAGS -L/SYSLOG/PUB"
