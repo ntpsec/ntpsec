@@ -15,13 +15,8 @@
 #include <netdb.h>
 #include <signal.h>
 
-/**/
 #include <netinet/in.h>
 #include <arpa/inet.h>
-/**/
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
-#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"

@@ -61,8 +61,9 @@ extern	void	crypto_agree	P((void));
  * Cryptographic values
  */
 extern	int			crypto_enable;
+extern	int			crypto_flags;
 extern	char *			private_key_file;
 extern	char *			public_key_file;
-extern	char *			dh_public_file;
+extern	char *			dh_params_file;
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

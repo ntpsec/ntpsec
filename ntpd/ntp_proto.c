@@ -400,7 +400,7 @@ receive(
 			 * constructed from public and private values.
 			 * For broadcast packets and packets with
 			 * extension fields, the cookie is public
-			 * (zero); for packets that match no
+			 * (zero). For packets that match no
 			 * association, the cookie is hashed from the
 			 * addresses and private value. For server and
 			 * symmetric packets, the cookie has been
@@ -533,6 +533,12 @@ receive(
 			break;
 		}
 		peer_config_manycast(peer2, peer);
+#ifdef PUBKEY
+		if (crypto_enable)
+			ntp_res_send(NULL, NULL,
+			    peer->srcadr.sin_addr.s_addr,
+			    peer->associd);
+#endif /* PUBKEY */
 		break;
 
 	case AM_ERR:
@@ -558,6 +564,12 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
+#ifdef PUBKEY
+		if (crypto_enable)
+			ntp_res_send(NULL, NULL,
+			    peer->srcadr.sin_addr.s_addr,
+			    peer->associd);
+#endif /* PUBKEY */
 		break;
 
 	case AM_NEWBCL:
@@ -578,17 +590,12 @@ receive(
 			break;
 		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_BURST;
 		peer->hmode = MODE_CLIENT;
-
-		/*
-		 * Crank up the resolver to fetch the canonical name and
-		 * hope it lands before the protocol gets wound up.
-		 */
-
-printf("bcst resolve %08x, %d\n", peer->srcadr.sin_addr.s_addr,
-    peer->associd);
-
-		ntp_res_send(NULL, NULL, peer->srcadr.sin_addr.s_addr,
-		    peer->associd);
+#ifdef PUBKEY
+		if (crypto_enable)
+			ntp_res_send(NULL, NULL,
+			    peer->srcadr.sin_addr.s_addr,
+			    peer->associd);
+#endif /* PUBKEY */
 		break;
 
 	case AM_POSSBCL:
@@ -1231,11 +1238,12 @@ clock_filter(
 	/*
 	 * Sort the samples in the register by distance. The winning
 	 * sample will be in ord[0]. Sort the samples only if they
-	 * are younger than the Allen intercept.
+	 * are younger than the Allen intercept; however, keep a minimum
+	 * of two samples so that we can compute jitter.
 	 */
 	dtemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
 	for (n = 0; n < NTP_SHIFT; n++) {
-		if (n > 0 && current_time - peer->filter_epoch[ord[n]] >
+		if (n > 1 && current_time - peer->filter_epoch[ord[n]] >
 		    dtemp)
 			break;
 		for (j = 0; j < n; j++) {
@@ -1934,20 +1942,22 @@ peer_xmit(
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
-			if (peer->cmmd != 0 && peer->cmmd >> 16 !=
-			    CRYPTO_DH) {
+#ifdef PUBKEY
+			if (crypto_enable && peer->cmmd != 0 &&
+			    peer->cmmd >> 16 != CRYPTO_DH) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
 				peer->cmmd = 0;
 			}
-#ifdef PUBKEY
-			if (peer->pubkey == 0) {
+			if (crypto_enable && crypto_flags &
+			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PUBL, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->pcookie == 0) {
+			} else if (crypto_enable && peer->pcookie == 0)
+			    {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DH, peer->hcookie,
 				    peer->assoc);
@@ -1989,7 +1999,8 @@ peer_xmit(
 				peer->cmmd = 0;
 			}
 #ifdef PUBKEY
-			if (peer->pubkey == 0) {
+			if (crypto_enable && crypto_flags &
+			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PUBL, peer->hcookie,
 				    peer->assoc);

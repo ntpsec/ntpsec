@@ -1,3 +1,9 @@
+2000-03-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99h1
+
+	* ntpd/ntp_resolver.c: Lose unneeded header.
+
 2000-03-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/snprintf.c: #include <config.h>

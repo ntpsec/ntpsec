@@ -20,7 +20,7 @@
  * Extension field message formats
  *
  *   +-------+-------+   +-------+-------+   +-------+-------+
- * 0 |   3   |  len  |   |   4   |  len  |   |  1/5  |  len  |
+ * 0 |   3   |  len  |   |   4   |  len  |   |   5   |  len  |
  *   +-------+-------+   +-------+-------+   +-------+-------+
  * 1 |    assoc ID   |   |    assoc ID   |   |    assoc ID   |
  *   +---------------+   +---------------+   +---------------+
@@ -30,12 +30,12 @@
  *   +---------------+   +---------------+   =     value     =
  * 4 |   final key   |   |               |   |               |
  *   +---------------+   =   signature   =   +---------------+
- * 5 | signature len |   |               |   CRYPTO_PUBL rsp 
- *   +---------------+   +---------------+   CRYPTO_DH cmd
- * 6 |               |   CRYPTO_PRIV rsp     CRYPTO_DH rsp
+ * 5 | signature len |   |               |   CRYPTO_DH req/rsp
+ *   +---------------+   +---------------+   CRYPTO_PUB rsp
+ * 6 |               |   CRYPTO_PRIV rsp
  *   =   signature   =
- *   |               |   Other commands and responses have only the
- *   +---------------+   first three words plus one word of padding.
+ *   |               |   Other requests and responses have only the
+ *   +---------------+   first two words.
  *   CRYPTO_AUTO rsp
  *
  *   CRYPTO_PUBL  1  request/respond for public key
@@ -44,7 +44,7 @@
  *   CRYPTO_PRIV  4  request/respond cookie
  *   CRYPTO_DH    5  send public value/receive signature
  *
- *   Note: commands carry the association ID of the receiver; responses
+ *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
  */
 
@@ -66,9 +66,9 @@ static R_RSA_PUBLIC_KEY public_key; /* RSA public key */
 
 int	crypto_enable;		/* master switch */
 int	crypto_flags;		/* flags that wave cryptically */
-char	*private_key_file = "ntpkey"; /* private key file */
+char	*private_key_file = NULL; /* private key file */
 char	*public_key_file = NULL; /* public key file */
-char	*dh_params_file = "ntpkey_dh"; /* D-H parameters file */
+char	*dh_params_file = NULL;	/* D-H parameters file */
 char	*keysdir = "/usr/local/etc/"; /* crypto keys directory */
 
 /*
@@ -216,6 +216,8 @@ make_keylist(
 		    peer->lastkey);
 #endif
 #ifdef PUBKEY
+	if(!crypto_enable)
+		return;
 	if (private_key.bits < MIN_RSA_MODULUS_BITS ||
 	    private_key.bits > MAX_RSA_MODULUS_BITS) {
 		rval = -1;
@@ -296,10 +298,11 @@ crypto_recv(
 		 * client and symmetric modes.
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
-			peer->recseq = ntohl(pkt[i + 2]);
 #ifdef PUBKEY
 			temp = ntohl(pkt[i + 5]);
-			if (temp == 0 || peer->pubkey == NULL) {
+			if (!crypto_enable) {
+				rval = 0;
+			} else if (temp == 0 || peer->pubkey == NULL) {
 				rval = -1;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
@@ -323,6 +326,7 @@ crypto_recv(
 			peer->flags |= FLAG_AUTOKEY;
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
+			peer->recseq = ntohl(pkt[i + 2]);
 			peer->finlseq = ntohl(pkt[i + 3]);
 			peer->finlkey = peer->pkeyid = ntohl(pkt[i +
 			    4]);
@@ -336,7 +340,10 @@ crypto_recv(
 		case CRYPTO_PRIV | CRYPTO_RESP:
 #ifdef PUBKEY
 			temp = ntohl(pkt[i + 3]);
-			if (temp == 0 || peer->pubkey == NULL) {
+			if (!crypto_enable) {
+				rval = 0;
+				temp = ntohl(pkt[i + 2]);
+			} else if (temp == 0 || peer->pubkey == NULL) {
 				rval = -1;
 				temp = 0;
 			} else {
@@ -487,7 +494,7 @@ crypto_recv(
 #endif /* PUBKEY */
 
 		/*
-		 * For other commands, save the command code for later;
+		 * For other requests, save the request code for later;
 		 * for unknown responses or errors, just ignore for now.
 		 */
 		default:
@@ -531,7 +538,7 @@ crypto_xmit(
 #endif /* PUBKEY */
 
 	/*
-	 * Generate the requested extension field command code, length
+	 * Generate the requested extension field request code, length
 	 * and association ID.
 	 */
 	i = start / 4;
@@ -675,7 +682,7 @@ crypto_xmit(
 #endif /* PUBKEY */
 
 	/*
-	 * Default - Fall through for commands; for unknown responses,
+	 * Default - Fall through for requests; for unknown responses,
 	 * flag as error.
 	 */
 	default:
@@ -686,7 +693,7 @@ crypto_xmit(
 
 	/*
 	 * Round up the field length to a multiple of 8 bytes and save
-	 * the command code and length.
+	 * the request code and length.
 	 */
 	len = ((len + 7) / 8) * 8;
 	if (len >= 4) {

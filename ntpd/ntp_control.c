@@ -1312,6 +1312,12 @@ ctl_putsys(
 			ctl_putstr(sys_var[CS_PUBLIC].text,
 			    public_key_file, strlen(public_key_file));
 		break;
+
+	case CS_DHPARAMS:
+		if (dh_params_file != NULL)
+			ctl_putstr(sys_var[CS_DHPARAMS].text,
+			    dh_params_file, strlen(dh_params_file));
+		break;
 #endif /* PUBKEY */
 	}
 }
@@ -1557,7 +1563,7 @@ ctl_putpeer(
 		break;
 
 	case CP_AUTOSEQ:
-		if (peer->keynumber == 0)
+		if (peer->keylist != NULL)
 			break;
 		ctl_putint(peer_var[CP_AUTOSEQ].text, peer->recseq);
 		ctl_puthex(peer_var[CP_INITKEY].text, peer->finlkey);
