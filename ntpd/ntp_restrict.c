@@ -458,17 +458,17 @@ hack_restrict(
 
         if(resaddr->ss_family == AF_INET6)
         {
-                if (IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)&addr6)) {
+                if (IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)addr6)) {
         		rlprev6 = 0;
 		       rl6 = restrictlist6;
 	        } else {
         		rlprev6 = restrictlist6;
 	        	rl6 = rlprev6->next;
         		while (rl6 != 0) {
-			        if (memcmp(&(rl6->addr6), &addr6, sizeof(addr6)) > 0) {
+			        if (memcmp(rl6->addr6, addr6, sizeof(addr6)) > 0) {
         				rl6 = 0;
 	        			break;
-		        	} else if (memcmp(&(rl6->addr6), &addr6, sizeof(addr6)) == 0) {
+		        	} else if (memcmp(rl6->addr6, addr6, sizeof(addr6)) == 0) {
 			        	        if ((mflags & RESM_NTPONLY)
                 				    == (rl6->mflags & RESM_NTPONLY))
 		        			    break;	/* exact match */
@@ -611,7 +611,7 @@ hack_restrict(
 			        resfree6 = rl6->next;
 			        numresfree6--;
 
-        			memcpy(&(rl6->addr6), &addr6, sizeof(addr6));
+        			memcpy(rl6->addr6, addr6, sizeof(addr6));
 	        		rl6->mflags = (u_short)mflags;
 
         			rl6->next = rlprev6->next;
@@ -647,7 +647,7 @@ hack_restrict(
 		         * interface entry.
 		         */
 		        if (rl6 != 0
-		        && !IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)&rl6->addr6)
+		        && !IN6_IS_ADDR_UNSPECIFIED((struct in6_addr*)rl6->addr6)
 		        && !(rl6->mflags & RESM_INTERFACE)) {
         			rlprev6->next = rl6->next;
 			        restrictcount6--;
