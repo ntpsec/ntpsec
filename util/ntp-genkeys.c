@@ -219,6 +219,7 @@ ctlsettrap(
 }
 
 
+#ifdef PUBKEY
 void
 crypto_config(
 	int item,		/* configuration item */
@@ -244,6 +245,7 @@ crypto_config(
 	}
 	return;
 }
+#endif
 
 
 struct interface *

@@ -1,3 +1,7 @@
+2000-08-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c (crypto_config): Only #ifdef PUBKEY
+
 2000-08-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/ntp-genkeys.c (main): Use snifflink()
