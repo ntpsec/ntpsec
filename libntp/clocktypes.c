@@ -90,6 +90,8 @@ struct clktype clktypes[] = {
 	  "HOPF_S"},
 	{ REFCLK_HOPF_PCI,	"hopf Elektronic PCI receiver (39)",
 	  "HOPF_P"},
+	{ REFCLK_JJY,	"JJY receiver (40)",
+	  "JJY" },
 	{ -1,			"", "" }
 };
 

@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<title>JJY Receivers</title>
+
+<style type="text/css">
+<!--
+body      { line-height:110%; font-family:sans-serif; }
+a         { color:#0000D0; text-decoration:none; }
+a:link    { color:#0000D0; }
+a:visited { color:#0000D0; }
+a:active  { color:#0000D0; }
+a:hover   { color:#C00040; text-decoration:underline;}
+h1        { font-size:x-large; }
+h2        { font-size:large; }
+h3        { font-size:medium; }
+h4        { font-size:medium; }
+h5        { font-size:small; }
+h6        { font-size:small; }
+img       { border-style:none; border-width:0px; }
+.bold       { font-weight:bold; }
+.italic     { font-style:italic; }
+.bolditalic { font-weight:bold;; font-style:italic; }
+.monospace  { font-family:monospace; }
+.indent     { margin-left:4em; }
+-->
+</style>
+
+</head>
+
+<body>
+
+<h1>JJY Receiver</h1>
+
+<hr>
+
+<h2>Synopsis</h2>
+
+<table cellpadding="2" cellspacing="0" border="0">
+<tr><td>Address      </td><td>:&nbsp;</td><td class="monospace">127.127.40.<span class="italic">X</span></td></tr>
+<tr><td>Reference ID </td><td>:&nbsp;</td><td class="monospace">JJY</td></tr>
+<tr><td>Driver ID    </td><td>:&nbsp;</td><td class="monospace">JJY</td></tr>
+<tr><td>Serial Device</td><td>:&nbsp;</td><td class="monospace">/dev/jjy<span class="italic">X</span></td></tr>
+<tr><td>Serial Port  </td><td>:&nbsp;</td><td class="monospace">9600 BPS, 8-bits, No parity, 1-stop-bit</td></tr>
+</table>
+
+<h2>Description</h2>
+
+<p>
+This driver supports following JJY receivers sold in Japan.<br>
+</p>
+
+<ul>
+
+<li><span class="bold">Tristate Ltd. JJY01</span><br><br>
+Information<br>
+<a href="http://www.tristate.ne.jp/rf-clock.htm">http://www.tristate.ne.jp/rf-clock.htm</a> &nbsp; ( Written in Japanese only )<br>
+<br>
+Time code format<br>
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><td>Command</td><td>Reply</td></tr>
+<tr class="monospace"><td>date&lt;CR&gt;&lt;LF&gt;</td><td>YYYY/MM/DD WWW&lt;CR&gt;&lt;LF&gt;</td></tr>
+<tr class="monospace"><td>stim&lt;CR&gt;&lt;LF&gt;</td><td>HH:MM:SS&lt;CR&gt;&lt;LF&gt;</td></tr>
+</table>
+<br><br>
+</li>
+
+<li><span class="bold">C-DEX Co.,Ltd. JST2000</span><br><br>
+Information<br>
+<a href="http://www.c-dex.co.jp/">http://www.c-dex.co.jp/</a> &nbsp; ( Written in Japanese only )<br>
+<br>
+Time code format<br>
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><td>Command</td><td>Reply</td></tr>
+<tr class="monospace"><td>&lt;ENQ&gt;1J&lt;ETX&gt;</td><td>&lt;STX&gt;JYYMMDD HHMMSSS&lt;ETX&gt;</td></tr>
+</table>
+<br><br>
+</li>
+
+</ul>
+
+<p>
+The JJY is the radio station which transmites the JST ( Japan Standard Time ) in long wave radio.<br>
+The station JJY is operated by the Communication Research Laboratory.<br>
+An operating announcement and some information are avaiable from as follows;<br>
+<a href="http://www.crl.go.jp/">http://www.crl.go.jp/</a> &nbsp; ( English and Japanese )<br>
+<a href="http://jjy.crl.go.jp/">http://jjy.crl.go.jp/</a> &nbsp; ( Written in Japanese only )<br>
+</p>
+
+<h2>Serial Port Configuration</h2>
+
+<p>
+The driver attempts to open the device <span class="bold">/dev/jjy</span><span class="bolditalic">X</span> 
+where <span class="bolditalic">X</span> is the NTP refclock unit number as defined by the LSB of the refclock address.<br>
+Valid refclock unit numbers are 0 - 3.
+</p>
+<p>
+The user is expected to provide a symbolic link to an available serial port device.<br>
+This is typically performed by a command such as:
+</p>
+<p class="monospace">ln -s /dev/ttyS0 /dev/jjy0</p>
+<p>
+Windows NT does not support symbolic links to device files. <br>
+COM<span class="italic">X</span>: is used by the driver, based on the refclock unit number, 
+where unit 1 corresponds to COM1: and unit 3 corresponds to COM3:
+</p>
+
+<h2>NTP Configuration</h2>
+
+<p>
+The server command is used to configure the JJY receiver, where the address argument in that command is the "127.127.40.<span class="italic">X</span>".<br>
+The mode option must be added for the supported JJY receiver.<br>
+</p>
+<pre class="monospace">
+# JJY receiver 
+server 127.127.40.<span class="italic">X</span> mode <span class="italic">N</span>
+#
+#   Where
+#       X = 0 to 3
+#       N = 1 for Tristate TS-JJY01
+#           2 for C-DEX JST2000
+
+# Drift file
+driftfile /var/ntp/ntp.drift
+
+# Monitor data ( Optional )
+statsdir /var/ntp/
+filegen peerstats  file  peerstats  type day enable
+filegen loopstats  file  loopstats  type day enable
+filegen clockstats file  clockstats type day enable
+</pre>
+
+<p>
+Samples of the configuration file "<span class="bold">ntp.conf</span>" for the JJY receiver.
+</p>
+
+<ul>
+
+<li><span class="bold">Tristate Ltd. JJY01</span><br><br>
+<table cellpadding="5" cellspacing="0" border="1">
+<tr>
+<td>
+<pre class="monospace">
+
+# JJY receiver ( Tristate JJY01 )
+server <span class="bold">127.127.40.0</span> mode <span class="bold">1</span>
+
+# Drift file
+driftfile /var/ntp/ntp.drift
+</pre>
+</td>
+</tr>
+</table><br>
+</li>
+
+<li><span class="bold">C-DEX Co.,Ltd. JST2000</span><br><br>
+<table cellpadding="5" cellspacing="0" border="1">
+<tr>
+<td>
+<pre class="monospace">
+
+# JJY receiver ( C-DEX JST2000 )
+server <span class="bold">127.127.40.0</span> mode <span class="bold">2</span>
+
+# Drift file
+driftfile /var/ntp/ntp.drift
+</pre>
+</td>
+</tr>
+</table><br>
+</li>
+
+</ul>
+
+
+<h2>Fudge Factors</h2>
+<dl>
+
+<dt>time1 time</dt>
+<dd>Specifies the time offset calibration factor, in seconds and fraction, with default 0.0.</dd>
+
+<dt>time2 time</dt>
+<dd>Not used by this driver.</dd>
+
+<dt>stratum number</dt>
+<dd>Specifies the driver stratum, in decimal from 0 to 15, with default 0.</dd>
+
+<dt>refid string</dt>
+<dd>Specifies the driver reference identifier, an ASCII string, with default JJY.</dd>
+
+<dt>flag1 0 | 1</dt>
+<dd>Not used by this driver.</dd>
+
+<dt>flag2 0 | 1</dt>
+<dd>Not used by this driver.</dd>
+
+<dt>flag3 0 | 1</dt>
+<dd>Not used by this driver.</dd>
+
+<dt>flag4 0 | 1</dt>
+<dd>Not used by this driver.</dd>
+
+</dl>
+
+<h2>Monitor Data</h2>
+
+<p>
+A timecode is written to the <span class="bold">clockstats</span> file, if the ntpd is configured to enable writing of statistics records<br>
+</p>
+
+<hr>
+
+<p>
+Copyright (C) 2001, Takao Abe.  All rights reserved.<br>
+Questions or Comments : <a href="mailto:abetakao@bea.hi-ho.ne.jp">abetakao@bea.hi-ho.ne.jp</a>
+</p>
+
+<p>
+This driver is developed in my private time, and is opened as voluntary contributions for the NTP.<br>
+The manufacturer of the JJY receiver has not participated in a development of this driver.<br>
+The manufacturer does not warrant anything about this driver, and is not liable for anything about this driver.
+</p>
+
+</body>
+
+</html>
