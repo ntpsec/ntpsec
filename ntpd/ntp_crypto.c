@@ -211,9 +211,9 @@ make_keylist(
 		keyid = session_key(&peer->dstadr->sin, (peer->hmode ==
 		    MODE_BROADCAST) ? &peer->dstadr->bcast :
 		    &peer->srcadr, keyid, cookie, ltemp);
-		ltemp -= 1 << peer->hpoll;
+		ltemp -= 1 << peer->kpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    ltemp <= (1 << (peer->hpoll + 1)))
+		    ltemp <= (1 << (peer->kpoll + 1)))
 			break;
 	}
 
@@ -385,11 +385,11 @@ crypto_recv(
 				    (u_char *)&cp->sig, temp,
 				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
 			}
-			temp = cp->key;
+			temp = ntohl(cp->key);
 #ifdef DEBUG
 			if (debug)
 				printf(
-			    "crypto_recv: verify %x cookie %08x ts %u\n",
+				    "crypto_recv: verify %x cookie %08x ts %u\n",
 				    rval, temp, tstamp);
 #endif
 			if (rval != 0) {
@@ -399,7 +399,7 @@ crypto_recv(
 			if (tstamp != 0)
 				peer->flags |= FLAG_AUTOKEY;
 #else
-			temp = cp->key;
+			temp = ntohl(cp->key);
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
 			if (temp != peer->pcookie.key) {

@@ -744,7 +744,7 @@ service_main(
 	getconfig(argc, argv);
 #ifdef AUTOKEY
 	gethostname(hostname, MAXFILENAME);
-	for (n = strlen(hostname); n % 4 != 0; n++)
+	for (n = strlen(hostname) + 1; n % 4 != 0; n++)
 		hostname[n] = 0;
 	sys_hostname = emalloc(n);
 	sys_hostnamelen = n;

@@ -46,7 +46,7 @@ publickey <i>keyfile</i>] [burst] [version <i>version</i>] [minpoll
 <i>minpoll</i> [maxpoll <i>maxpoll</i>] [ttl <i>ttl</i>] [publickey
 <i>file</i>]</tt></dt>
 
-<p><<dd>These four commands specify the time server name or address to
+<p><dd>These four commands specify the time server name or address to
 be used and the mode in which to operate. The <i>address</i> can be
 either a DNS name or a IP address in dotted-quad notation. Additional
 information on association behavior can be found in the <a
@@ -88,13 +88,13 @@ the subnet specified, but multicast messages go to all interfaces. In
 the current implementation, the source address used for these messages
 is the Unix host default address.</dd>
 
-<p><dd>In broadcast mode, the local server sends  periodic broadcast
-messages to a client population at the <i><tt>address</tt></i>specified,
-which is usually the broadcast address on (one of) the local network(s)
-or a multicast address assigned to NTP. The IANA has assigned the
-multicast group address 224.0.1.1 exclusively to NTP, but other
+<p><dd>In broadcast mode, the local server sends periodic broadcast
+messages to a client population at the <i><tt>address</tt></i>
+specified, which is usually the broadcast address on (one of) the local
+network(s) or a multicast address assigned to NTP. The IANA has assigned
+the multicast group address 224.0.1.1 exclusively to NTP, but other
 nonconflicting addresses can be used to contain the messages within
-administrative boundaries.. Ordinarily, this specification applies only
+administrative boundaries. Ordinarily, this specification applies only
 to the local server operating as a sender; for operation as a broadcast
 client, see the <tt>broadcastclient</tt> or <tt>multicastclient</tt>
 commands below.</dd>
@@ -103,19 +103,19 @@ commands below.</dd>
 <dd>For type <tt>m</tt> addresses (only), this mobilizes a manycast
 client-mode association for the multicast address specified. In this
 case a specific address must be supplied which matches the address used
-on the <tt>manycastserver </tt>command for the designated manycast
+on the <tt>manycastserver</tt> command for the designated manycast
 servers. The NTP multicast address 224.0.1.1 assigned by the IANA should
 NOT be used, unless specific means are taken to avoid spraying large
 areas of the Internet with these messages and causing a possibly massive
 implosion of replies at the sender. </dd>
 
-<p><dd>The <tt>manycast </tt>command specifies that the local server is
-to operate in client mode with the remote server that are discovered as
+<p><dd>The <tt>manycast</tt> command specifies that the local server is
+to operate in client mode with the remote servers that are discovered as
 the result of broadcast/multicast messages. The client broadcasts a
 request message to the group address associated with the specified
-<i><tt>address </tt></i>and specifically enabled servers respond to
+<i><tt>address</tt></i> and specifically enabled servers respond to
 these messages. The client selects the servers providing the best time
-and continues as with the <tt>server </tt>command. The remaining servers
+and continues as with the <tt>server</tt> command. The remaining servers
 are discarded as if never heard.</dd>
 
 </dl>

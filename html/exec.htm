@@ -4,9 +4,8 @@ Executive Summary - Computer Network Time Synchronization
 Executive Summary - Computer Network Time Synchronization
 </h3>
 
-<img align=left src=pic/alice12.gif>
-from <i>Alice's Adventures in Wonderland</i>, by Lewis Carroll,
-illustrations by Sir John Tenniel
+<img align=left src=pic/alice12.gif><a href=pictures.htm>
+from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 
 <p>The executive is the one on the left.
 
@@ -66,6 +65,7 @@ in corporate, department and desktop networks. It is usually necessary
 at each stratum level to employ redundant servers and diverse network
 paths in order to protect against broken software, hardware and network
 links.
+
 <p>Synchronization protocols work in one or more association modes,
 depending on the protocol design. Client/server mode, also called
 master/slave mode, is supported in both DTSS and NTP. In this mode, a
@@ -87,6 +87,39 @@ discovered by polling the server in client/server mode and then
 reverting to listen-only mode. In addition, NTP clients can broadcast a
 special "manycast" message to solicit responses from nearby servers and
 continue in client/server mode with the respondents.
+
+<h4>Security Issues</h4>
+
+<p>A reliable network time service requires provisions to prevent
+accidental or malicious attacks on the servers and clients in the
+network. Reliability requires that clients can determine that received
+messages are authentic; that is, were actually sent by the intended
+server and not manufactured or modified by an intruder. Ubiquity
+requires that any client can verify the authenticity of any server using
+only public information. This is especially important in such ubiquitous
+network services as directory services, cryptographic key management and
+time synchronization.
+
+<p>NTP includes provisions to cryptographically authenticate individual
+servers using symmetric-key cryptography in which clients authenticate
+servers using shared secret keys. However, the secret keys must be
+distributed in advance using secure means beyond the scope of the
+protocol. This can be awkward and fragile with a large population of
+potential clients, possibly intruding hackers.
+
+<p>Modern public-key cryptography provides means to reliably bind the
+server identification credentials and related public values using public
+directory services. However, these means carry a high computing cost,
+especially when large numbers of time-critical clients are involved as
+often the case with NTP servers. In addition, there are problems unique
+to NTP in the interaction between the authentication and synchronization
+functions, since each requires the other for success.
+
+<p>The recent NTP Version 4 includes a revised security model and
+authentication scheme supporting both symmetric and public-key
+cryptography. The public-key variant is specially crafted to reduce the
+risk of intrusion, minimize the consumption of processor resources and
+minimize the vulnerability to hacker attack.
 
 <h4>Computer Clock Modelling and Error Analysis</h4>
 
@@ -162,7 +195,6 @@ it can be shown that the worst-case error in reading a remote server
 clock cannot exceed one-half the roundtrip delay measured by the client.
 This is a valuable insight, since it permits strong statements about the
 correctness of the timekeeping system.
-
 <p>In the Probabilistic Clock Synchronization (PCS) scheme devised by
 Cristian, a maximum error tolerance is established in advance and time
 value samples associated with roundtrip delays that exceed twice this
@@ -258,6 +290,14 @@ presence of faults. JACM 32, 1 (January 1985), 52-78.</li>
 distributed system. ACM Operating Systems Review 19, 3 (July 1985), 44-
 54.</li>
 
+<p><li>Mills, D.L. Adaptive hybrid clock discipline algorithm for the
+Network Time Protocol. <i>IEEE/ACM Trans. Networking 6, 5</i> (October
+1998), 505-514.</li>
+
+<p><li>Mills, D.L. Improved algorithms for synchronizing computer
+network clocks. <i>IEEE/ACM Trans. Networks 3, 3</i> (June 1995), 245-
+254.</li>
+
 <p><li>Mills, D.L. Internet time synchronization: the Network Time
 Protocol. IEEE Trans. Communications COM-39, 10 (October 1991), 1482-
 1493. Also in: Yang, Z., and T.A. Marsland (Eds.). Global States and
@@ -286,7 +326,6 @@ Institute of Standards and Technology Technical Note 1337, U.S.
 Government Printing Office (January, 1990), TN61-TN119.</li>
 
 </ol>
-
 <hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
 href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
 </address></a></body></html>

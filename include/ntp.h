@@ -244,6 +244,7 @@ struct peer {
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */
 	u_char	hpoll;		/* local poll interval */
+	u_char	kpoll;		/* last poll interval */
 	u_char	minpoll;	/* min poll interval */
 	u_char	maxpoll;	/* max poll interval */
 	u_char	burst;		/* packets remaining in burst */

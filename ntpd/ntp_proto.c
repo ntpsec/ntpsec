@@ -1088,7 +1088,7 @@ poll_update(
 	 * clock. Broadcast clients are usually lead by their broadcast
 	 * partner, but faster in the initial mating dance.
 	 */
-	oldpoll = peer->hpoll;
+	oldpoll = peer->kpoll;
 	if (peer->hmode == MODE_BROADCAST) {
 		peer->hpoll = peer->minpoll;
 	} else if (peer->flags & FLAG_SYSPEER) {
@@ -1111,9 +1111,9 @@ poll_update(
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
 	} else {
-		update = max(min(peer->ppoll, peer->hpoll),
+		peer->kpoll = max(min(peer->ppoll, peer->hpoll),
 		    peer->minpoll);
-		peer->nextdate = peer->outdate + RANDPOLL(update);
+		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	}
 
 	/*
@@ -1123,7 +1123,7 @@ poll_update(
 	 * and regenerate it later.
 	 */
 #ifdef AUTOKEY
-	if (peer->hpoll != oldpoll)
+	if (peer->kpoll != oldpoll)
 		key_expire(peer);
 #endif /* AUTOKEY */
 #ifdef DEBUG

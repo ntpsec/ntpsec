@@ -1,3 +1,9 @@
+2000-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99i1
+	Dave updated some docs, implemented the kpoll variable, and
+	wiggled a host/network byte order thing in the crypto key code.
+
 2000-04-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwvb.c (wwvb_receive): Grab any character (instead
