@@ -1,5 +1,10 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c:
+	* ntpdate/ntpdate.c:
+	* ntpd/ntp_config.c: Netinfo header reorder.
+	From: Jack Bryans <jbryans@csulb.edu>
+
 	* configure.in: timespec can be found by looking in goofy places
 	under SunOS.
 

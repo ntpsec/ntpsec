@@ -5,6 +5,10 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_NETINFO
+# include <netinfo/ni.h>
+#endif
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -30,10 +34,6 @@
 #  include <sys/wait.h>
 # endif
 #endif /* VMS */
-
-#ifdef HAVE_NETINFO
-# include <netinfo/ni.h>
-#endif
 
 #ifdef SYS_WINNT
 # include <io.h>

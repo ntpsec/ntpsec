@@ -6,6 +6,10 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_NETINFO
+#include <netinfo/ni.h>
+#endif
+
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_io.h"
@@ -46,10 +50,6 @@
 struct timeval timeout = {0,0};
 #else
 struct timeval timeout = {60,0};
-#endif
-
-#ifdef HAVE_NETINFO
-#include <netinfo/ni.h>
 #endif
 
 #include "recvbuff.h"

@@ -177,7 +177,7 @@ case "$target" in
     AC_CHECK_LIB(advapi32, main)
     ;;
 esac
-AC_CHECK_LIB(elf, nlist)
+AC_CHECK_LIB(elf, nlist)	dnl Only needed for tickadj...
 dnl AC_CHECK_LIB(kvm, main, , , -lelf)
 AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
 AC_CHECK_LIB(ld, nlist)
