@@ -900,9 +900,10 @@ service_main(
 			}
 			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
-			else if (debug > 2) {
+#  ifdef DEBUG
+			else if (debug > 2)
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
-			}
+#  endif /* DEBUG */
 # else /* HAVE_SIGNALED_IO */
                         
 			wait_for_signal();
