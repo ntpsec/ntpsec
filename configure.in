@@ -1168,6 +1168,8 @@ case "$ac_cv_header_sys_sio_h" in
   yes
 #endif
      ], ac_cv_hdr_def_tiocdcdtimestamp=yes, ac_cv_hdr_def_tiocdcdtimestamp=no))
+    ;;
+esac
 
 AC_CACHE_CHECK(if nlist() values might require extra indirection,
 ac_cv_var_nlist_extra_indirection,
@@ -1228,9 +1230,9 @@ AC_MSG_RESULT($ans)
 
 AC_CACHE_CHECK(if we have the tty_clk line discipline/streams module,
  ac_cv_var_tty_clk,
- case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
+ [case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
   *yes*) ac_cv_var_tty_clk=yes ;;
- esac)
+ esac])
 case "$ac_cv_var_tty_clk" in
  yes) AC_DEFINE(TTYCLK) ;;
 esac

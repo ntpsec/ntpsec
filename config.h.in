@@ -326,9 +326,6 @@
 /* do we have the tty_clk line discipline/streams module? */
 #undef TTYCLK
 
-/* What about TTYCLK_AIOCTIMESTAMP? */
-#undef TTYCLK_AIOCTIMESTAMP
-
 /* does the kernel support precision time discipline? */
 #undef KERNEL_PLL
 
@@ -779,6 +776,9 @@
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/sio.h> header file.  */
+#undef HAVE_SYS_SIO_H
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
