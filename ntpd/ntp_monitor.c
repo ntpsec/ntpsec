@@ -18,25 +18,25 @@
 #endif
 
 /*
- * I'm still not sure I like what I've done here.  It certainly consumes
+ * I'm still not sure I like what I've done here. It certainly consumes
  * memory like it is going out of style, and also may not be as low
  * overhead as I'd imagined.
  *
- * Anyway, we record statistics based on source address, mode and version
- * (for now, anyway.  Check the code).  The receive procedure calls us with
- * the incoming rbufp before it does anything else.
+ * Anyway, we record statistics based on source address, mode and
+ * version (for now, anyway. Check the code).  The receive procedure
+ * calls us with the incoming rbufp before it does anything else.
  *
  * Each entry is doubly linked into two lists, a hash table and a
- * most-recently-used list.  When a packet arrives it is looked up
- * in the hash table.  If found, the statistics are updated and the
- * entry relinked at the head of the MRU list.  If not found, a new
- * entry is allocated, initialized and linked into both the hash
- * table and at the head of the MRU list.
+ * most-recently-used list. When a packet arrives it is looked up in
+ * the hash table.  If found, the statistics are updated and the entry
+ * relinked at the head of the MRU list. If not found, a new entry is
+ * allocated, initialized and linked into both the hash table and at the
+ * head of the MRU list.
  *
- * Memory is usually allocated by grabbing a big chunk of new memory
- * and cutting it up into littler pieces.  The exception to this when we
- * hit the memory limit.  Then we free memory by grabbing entries off
- * the tail for the MRU list, unlinking from the hash table, and
+ * Memory is usually allocated by grabbing a big chunk of new memory and
+ * cutting it up into littler pieces. The exception to this when we hit
+ * the memory limit. Then we free memory by grabbing entries off the
+ * tail for the MRU list, unlinking from the hash table, and
  * reinitializing.
  *
  * trimmed back memory consumption ... jdg 8/94
@@ -66,27 +66,27 @@
 
 /*
  * Pointers to the hash table, the MRU list and the count table.  Memory
- * for the hash and count tables is only allocated if monitoring is turned on.
+ * for the hash and count tables is only allocated if monitoring is
+ * turned on.
  */
-static  struct mon_data *mon_hash[MON_HASH_SIZE];  /* array of list ptrs */
-struct mon_data mon_mru_list;
-struct mon_data mon_fifo_list;
+static	struct mon_data *mon_hash[MON_HASH_SIZE];  /* list ptrs */
+struct	mon_data mon_mru_list;
+struct	mon_data mon_fifo_list;
 /*
  * List of free structures structures, and counters of free and total
  * structures.  The free structures are linked with the hash_next field.
  */
-static  struct mon_data *mon_free;      /* the free list or null if none */
-
-static	int mon_total_mem;		/* total number of structures allocated */
-static	int mon_mem_increments;		/* number of times we've called malloc() */
+static  struct mon_data *mon_free;      /* free list or null if none */
+static	int mon_total_mem;		/* total structures allocated */
+static	int mon_mem_increments;		/* times called malloc() */
+static	u_long	mon_thresh = .5;	/* MRU overflow call gap */
 
 /*
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-int mon_enabled;
+int	mon_enabled;
 static	int mon_have_memory;
-
 static	void	mon_getmoremem	P((void));
 static	void	remove_from_hash P((struct mon_data *));
 
@@ -126,7 +126,7 @@ mon_start(
 		return;
 	}
 	if (mode == MON_OFF)
-	    return;		/* Ooops.. */
+	    return;
 	
 	if (!mon_have_memory) {
 		mon_total_mem = 0;
@@ -138,10 +138,8 @@ mon_start(
 
 	mon_mru_list.mru_next = &mon_mru_list;
 	mon_mru_list.mru_prev = &mon_mru_list;
-
 	mon_fifo_list.fifo_next = &mon_fifo_list;
 	mon_fifo_list.fifo_prev = &mon_fifo_list;
-
 	mon_enabled = mode;
 }
 
@@ -203,11 +201,21 @@ ntp_monitor(
 	register int mode;
 
 	if (mon_enabled == MON_OFF)
-	    return;
+		return;
+
+	/*
+	 * For the really busy servers, we need to call-gap the packet
+	 * flow. So, if the MRU list fills up we need to start dropping
+	 * some packets.
+	 */
+	if (mon_total_mem >= MAXMONMEM && (RANDOM & 0xffffffff) / FRAC >
+	    mon_thresh)
+		return;
 
 	pkt = &rbufp->recv_pkt;
 	memset(&addr, 0, sizeof(addr));
-	memcpy(&addr, &(rbufp->recv_srcadr), sizeof(rbufp->recv_srcadr));
+	memcpy(&addr, &(rbufp->recv_srcadr),
+	    sizeof(rbufp->recv_srcadr));
 	hash = MON_HASH(&addr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 
@@ -221,8 +229,8 @@ ntp_monitor(
 			md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 
 			/*
-			 * Shuffle him to the head of the
-			 * mru list.  What a crock.
+			 * Shuffle him to the head of the mru list.
+			 * What a crock.
 			 */
 			md->mru_next->mru_prev = md->mru_prev;
 			md->mru_prev->mru_next = md->mru_next;
@@ -230,7 +238,6 @@ ntp_monitor(
 			md->mru_prev = &mon_mru_list;
 			mon_mru_list.mru_next->mru_prev = md;
 			mon_mru_list.mru_next = md;
-
 			return;
 		}
 		md = md->hash_next;
@@ -258,8 +265,8 @@ ntp_monitor(
 		md->fifo_next->fifo_prev = md->fifo_prev;
 		
 	} else {
-		if (mon_free == NULL)           /* if free list empty */
-		    mon_getmoremem();       /* then get more */
+		if (mon_free == NULL)		/* if free list empty */
+			mon_getmoremem();	/* then get more */
 		md = mon_free;
 		mon_free = md->hash_next;
 	}
@@ -277,15 +284,13 @@ ntp_monitor(
 	md->version = PKT_VERSION(pkt->li_vn_mode);
 	md->interface = rbufp->dstadr;
 	md->cast_flags = ((rbufp->dstadr->flags & INT_MULTICAST) &&
-			  rbufp->fd == md->interface->fd) ? MDF_MCAST: rbufp->fd ==
+	    rbufp->fd == md->interface->fd) ? MDF_MCAST: rbufp->fd ==
 		md->interface->bfd ? MDF_BCAST : MDF_UCAST;
 
 	/*
-	 * Drop him into front of the hash table.
-	 * Also put him on top of the MRU list
-	 * and at bottom of FIFO list
+	 * Drop him into front of the hash table. Also put him on top of
+	 * the MRU list and at bottom of THE FIFO list.
 	 */
-
 	md->hash_next = mon_hash[hash];
 	mon_hash[hash] = md;
 
@@ -311,7 +316,8 @@ mon_getmoremem(void)
 	register int i;
 	struct mon_data *freedata;      /* 'old' free list (null) */
 
-	md = (struct mon_data *)emalloc(MONMEMINC * sizeof(struct mon_data));
+	md = (struct mon_data *)emalloc(MONMEMINC *
+	    sizeof(struct mon_data));
 	freedata = mon_free;
 	mon_free = md;
 

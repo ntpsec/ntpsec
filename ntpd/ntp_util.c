@@ -75,6 +75,7 @@ static FILEGEN peerstats;
 static FILEGEN loopstats;
 static FILEGEN clockstats;
 static FILEGEN rawstats;
+static FILEGEN sysstats;
 #ifdef OPENSSL
 static FILEGEN cryptostats;
 #endif /* OPENSSL */
@@ -99,6 +100,7 @@ init_util(void)
 #define LOOPNAME "loopstats"
 #define CLOCKNAME "clockstats"
 #define RAWNAME "rawstats"
+#define STANAME "systats"
 #ifdef OPENSSL
 #define CRYPTONAME "cryptostats"
 #endif /* OPENSSL */
@@ -139,6 +141,15 @@ init_util(void)
 	rawstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
 	filegen_register("rawstats", &rawstats);
 
+	sysstats.fp      = NULL;
+	sysstats.prefix  = &statsdir[0];
+	sysstats.basename = (char*)emalloc(strlen(STANAME)+1);
+	strcpy(sysstats.basename, STANAME);
+	sysstats.id      = 0;
+	sysstats.type    = FILEGEN_DAY;
+	sysstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
+	filegen_register("sysstats", &sysstats);
+
 #ifdef OPENSSL
 	cryptostats.fp	 = NULL;
 	cryptostats.prefix = &statsdir[0];
@@ -154,6 +165,7 @@ init_util(void)
 #undef LOOPNAME
 #undef CLOCKNAME
 #undef RAWNAME
+#undef STANAME
 #ifdef OPENSSL
 #undef CRYPTONAME
 #endif /* OPENSSL */
@@ -243,9 +255,11 @@ hourly_stats(void)
 	NLOG(NLOG_SYSSTATIST)
 		msyslog(LOG_INFO,
 		    "offset %.6f sec freq %.3f ppm error %.6f poll %d",
-		    last_offset, drift_comp * 1e6, sys_jitter, sys_poll);
+		    last_offset, drift_comp * 1e6, sys_jitter,
+		    sys_poll);
 
 	
+	record_sys_stats();
 	if (stats_drift_file != 0) {
 		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
 			msyslog(LOG_ERR, "can't open %s: %m",
@@ -418,6 +432,12 @@ stats_config(
 				rawstats.fp = NULL;
 				filegen_setup(&rawstats, now.l_ui);
 			}
+			if(sysstats.prefix == &statsdir[0] &&
+			    sysstats.fp != NULL) {
+				fclose(sysstats.fp);
+				sysstats.fp = NULL;
+				filegen_setup(&sysstats, now.l_ui);
+			}
 #ifdef OPENSSL
 			if(cryptostats.prefix == &statsdir[0] &&
 			    cryptostats.fp != NULL) {
@@ -588,6 +608,40 @@ record_raw_stats(
 		fflush(rawstats.fp);
 	}
 }
+
+
+/*
+ * record_sys_stats - write system statistics to file *
+ * file format
+ * time (s past midnight)
+ * peer ip address
+ * local ip address
+ * sysstats...
+ */
+void
+record_sys_stats(void)
+{
+	l_fp	now;
+	u_long	day;
+
+	if (!stats_control)
+		return;
+	get_systime(&now);
+	filegen_setup(&sysstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1900;
+	now.l_ui %= 86400;
+	if (sysstats.fp != NULL) {
+                fprintf(sysstats.fp,
+		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    day, ulfptoa(&now, 3), sys_restricted, sys_stattime,
+		    sys_limitrejected, sys_newversionpkt,
+		    sys_oldversionpkt, sys_unknownversion,
+		    sys_badlength, sys_badauth, sys_processed);
+		fflush(sysstats.fp);
+		proto_clr_stats();
+	}
+}
+
 
 #ifdef OPENSSL
 /*
