@@ -1,5 +1,8 @@
 2000-07-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ElectricFence/page.c: #include config.h if it's there.
+	Properly handle the sys_errlist declaration.
+
 	* html/ntpq.htm: 
 	* html/index.htm: 
 	* html/debug.htm: 

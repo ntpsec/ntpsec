@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include "efence.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,6 +34,8 @@ static caddr_t	startAddr = (caddr_t) 0;
 
 #if ( !defined(sgi) && !defined(_AIX) )
 extern int	sys_nerr;
+#endif
+#ifdef CHAR_SYS_ERRLIST
 extern char *	sys_errlist[];
 #endif
 
