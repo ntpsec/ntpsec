@@ -303,8 +303,9 @@ receive(
 		    current_time, ntoa(&rbufp->dstadr->sin),
 		    ntoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
-	if (restrict_mask & RES_IGNORE)
+	if (restrict_mask & RES_IGNORE) {
 		return;				/* no amything */
+	}
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
 		sys_newversionpkt++;
@@ -2319,17 +2320,26 @@ fast_xmit(
 	rpkt = &rbufp->recv_pkt;
 	if (rbufp->dstadr->flags & INT_MULTICAST)
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
-	    PKT_VERSION(rpkt->li_vn_mode), xmode);
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-	xpkt.ppoll = rpkt->ppoll;
-	xpkt.precision = sys_precision;
-	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
-	xpkt.refid = sys_refid;
-	HTONL_FP(&sys_reftime, &xpkt.reftime);
-	xpkt.org = rpkt->xmt;
-	HTONL_FP(&rbufp->recv_time, &xpkt.rec);
+	if (xmode == 0) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE((LEAP_NOTINSYNC),
+		    PKT_VERSION(rpkt->li_vn_mode),
+		    PKT_MODE(rpkt->li_vn_mode));
+		xpkt.stratum = STRATUM_TO_PKT(0);
+		memcpy(&xpkt.refid, "DENY", 4);
+	} else {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
+		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+		xpkt.ppoll = rpkt->ppoll;
+		xpkt.precision = sys_precision;
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+		xpkt.refid = sys_refid;
+		HTONL_FP(&sys_reftime, &xpkt.reftime);
+		xpkt.org = rpkt->xmt;
+		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
+	}
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet

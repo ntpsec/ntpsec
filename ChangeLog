@@ -1,5 +1,8 @@
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (fast_xmit): Implement DENY mode.
+	From Dave Mills.
+
 	* ntpd/ntp_config.c: Add the "allan" tinker variable.
 	From: Juha Sarlin <juha@c3l.tyreso.se>
 
