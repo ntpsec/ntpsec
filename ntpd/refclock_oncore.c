@@ -148,17 +148,6 @@
 # include <sys/termios.h>
 #endif
 
-#ifdef HAVE_SYS_PPSCLOCK_H
-# include <sys/ppsclock.h>
-#endif
-
-#ifndef HAVE_STRUCT_PPSCLOCKEV
-struct ppsclockev {
-	struct timeval tv;
-	u_int serial;
-};
-#endif /* HAVE_STRUCT_PPSCLOCKEV */
-
 enum receive_state {
 	ONCORE_NO_IDEA,
 	ONCORE_CHECK_ID,

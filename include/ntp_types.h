@@ -66,11 +66,9 @@ typedef unsigned int u_int;
 # include "Bletch: what's 32 bits on this machine?"
 #endif /* not sizeof(int) == 4 */
 
-#ifndef HAVE_TYPE_U_INT8_T
-typedef u_char		u_int8_t;
-typedef u_short		u_int16_t;
-typedef u_int32		u_int32_t;
-#endif /* HAVE_TYPE_U_INT8_T */
+typedef u_char		ntp_u_int8_t;
+typedef u_short		ntp_u_int16_t;
+typedef u_int32		ntp_u_int32_t;
 
 typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
 

@@ -683,6 +683,10 @@ io_multicast_add(
 			netsyslog(LOG_ERR,
 			"multicast address %s not class D",
 				inet_ntoa(iaddr));
+#ifdef DEBUG
+			if (debug >= 4)
+				printf("haddr value = %x\n", haddr);
+#endif
 			return;
 		}
 		for (i = nwilds; i < ninterfaces; i++) {

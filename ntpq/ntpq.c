@@ -157,7 +157,7 @@ struct ctl_var peer_var[] = {
 	{ CP_REC,	TS,	"rec" },	/* 19 */
 	{ CP_XMT,	TS,	"xmt" },	/* 20 */
 	{ CP_REACH,	OC,	"reach" },	/* 21 */
-	{ CP_VALID,	UI,	"valid" },	/* 22 */
+	{ CP_UNREACH,	UI,	"unreach" },	/* 22 */
 	{ CP_TIMER,	UI,	"timer" },	/* 23 */
 	{ CP_DELAY,	FS,	"delay" },	/* 24 */
 	{ CP_OFFSET,	FL,	"offset" },	/* 25 */

@@ -96,6 +96,8 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_SOCKADDR_IN6
 # define ISC_PLATFORM_NEEDNTOP
 
+#define ISC_PLATFORM_NEEDIN6ADDRANY
+
 # define NEED_S_CHAR_TYPEDEF
 
 # define USE_PROTOTYPES 		/* for ntp_types.h */														

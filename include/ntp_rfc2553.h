@@ -90,8 +90,8 @@
 #define	_SS_MAXSIZE	128
 #define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
+#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t))
+#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
 #else
 #define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
@@ -108,8 +108,8 @@
 #ifndef HAVE_STRUCT_SOCKADDR_STORAGE
 struct sockaddr_storage {
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	u_int8_t	ss_len;		/* address length */
-	u_int8_t	ss_family;	/* address family */
+	ntp_u_int8_t	ss_len;		/* address length */
+	ntp_u_int8_t	ss_family;	/* address family */
 #else
 	short		ss_family;	/* address family */
 #endif
@@ -154,9 +154,9 @@ struct sockaddr_storage {
 
 struct in6_addr {
 	union {
-		u_int8_t   __u6_addr8[16];
-		u_int16_t  __u6_addr16[8];
-		u_int32_t  __u6_addr32[4];
+		ntp_u_int8_t   __u6_addr8[16];
+		ntp_u_int16_t  __u6_addr16[8];
+		ntp_u_int32_t  __u6_addr32[4];
 	} __u6_addr;			/* 128-bit IP6 address */
 };
 
@@ -180,15 +180,15 @@ extern const struct in6_addr in6addr_any;
 #ifndef HAVE_SOCKADDR_IN6
 struct sockaddr_in6 {
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	u_int8_t	sin6_len;	/* length of this struct(sa_family_t)*/
-	u_int8_t	sin6_family;	/* AF_INET6 (sa_family_t) */
+	ntp_u_int8_t	sin6_len;	/* length of this struct(sa_family_t)*/
+	ntp_u_int8_t	sin6_family;	/* AF_INET6 (sa_family_t) */
 #else
 	short		sin6_family;	/* AF_INET6 (sa_family_t) */
 #endif
-	u_int16_t	sin6_port;	/* Transport layer port # (in_port_t)*/
-	u_int32_t	sin6_flowinfo;	/* IP6 flow information */
+	ntp_u_int16_t	sin6_port;	/* Transport layer port # (in_port_t)*/
+	ntp_u_int32_t	sin6_flowinfo;	/* IP6 flow information */
 	struct in6_addr	sin6_addr;	/* IP6 address */
-	u_int32_t	sin6_scope_id;	/* scope zone index */
+	ntp_u_int32_t	sin6_scope_id;	/* scope zone index */
 };
 #endif
 
@@ -197,10 +197,10 @@ struct sockaddr_in6 {
  */
 #ifndef IN6_IS_ADDR_UNSPECIFIED
 #define IN6_IS_ADDR_UNSPECIFIED(a)	\
-	((*(const u_int32_t *)(const void *)(&(a)->s6_addr[0]) == 0) &&	\
-	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[4]) == 0) &&	\
-	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[8]) == 0) &&	\
-	 (*(const u_int32_t *)(const void *)(&(a)->s6_addr[12]) == 0))
+	((*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[0]) == 0) &&	\
+	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[4]) == 0) &&	\
+	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[8]) == 0) &&	\
+	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[12]) == 0))
 #endif
 /*
  * Multicast

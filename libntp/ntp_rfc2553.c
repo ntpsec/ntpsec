@@ -83,7 +83,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
 
-#ifndef ISC_PLATFORM_HAVEIPV6
+#ifdef ISC_PLATFORM_NEEDIN6ADDRANY
 
 #if defined(SYS_WINNT)
 /* XXX This is the preferred way, but for some reason the SunOS compiler
@@ -93,6 +93,9 @@ const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #else
 const struct in6_addr in6addr_any;
 #endif
+#endif
+
+#ifndef ISC_PLATFORM_HAVEIPV6
 
 static char *ai_errlist[] = {
 	"Success",
