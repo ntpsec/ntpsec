@@ -1878,7 +1878,7 @@ input_handler(
 	{
 		register struct refclockio *rp;
 
-		for (rp = refio; rp != 0 && n > 0; rp = rp->next)
+		for (rp = refio; rp != NULL && n > 0; rp = rp->next)
 		{
 			fd = rp->fd;
 			if (FD_ISSET(fd, &fds))
