@@ -26,48 +26,46 @@
 #ifdef DEBUG
 #include <crtdbg.h>
 #endif
+
 /* Handle to SCM for updating service status */
 static SERVICE_STATUS_HANDLE hServiceStatus = 0;
 static BOOL foreground = FALSE;
 static char ConsoleTitle[128];
+static int glb_argc;
+static char **glb_argv;
 extern char *Version;
 HANDLE hServDoneEvent = NULL;
 extern HANDLE WaitHandles[3];
 extern volatile int debug;
 
 void uninit_io_completion_port();
+int ntpdmain(int argc, char *argv[]);
 /*
  * Forward declarations
  */
 void ServiceControl(DWORD dwCtrlCode);
-void GetArgs(int *, char ***, char ***);
-int main(int, char *[]);
-//int main(int, char *[], char *[]); /* From ns_main.c */
 
-/*
- * Here we change the entry point for the executable to NTmain() from main()
- * This allows us to invoke as a service or from the command line easily.
- */
-#pragma comment(linker, "/entry:NTmain")
+
+void WINAPI service_main( DWORD argc, LPTSTR *argv )
+{
+  /* pass the global command line options on to the service */
+  ntpdmain( glb_argc, glb_argv );
+}
+
 
 /*
  * This is the entry point for the executable 
- * We can now call main() explicitly or via StartServiceCtrlDispatcher()
+ * We can call ntpdmain() explicitly or via StartServiceCtrlDispatcher()
  * as we need to.
  */
-int NTmain()
+int main( int argc, char *argv[] )
 {
 	int rc,
 	i = 1;
 
-	int argc;
-	char **envp, **argv;
-
-	/*
-	 * We changed the entry point function, so we must initialize argv,
-	 * etc. ourselves.  Ick.
-	 */
-	GetArgs(&argc, &argv, &envp);
+  /* Save the command line parameters */
+  glb_argc = argc;
+  glb_argv = argv;
 
 	/* Command line users should put -f in the options */
 	while (argv[i]) {
@@ -82,19 +80,21 @@ int NTmain()
 
 	if (foreground) {
 		/* run in console window */
-		exit(main(argc, argv));
+		exit(ntpdmain(argc, argv));
 	} else {
 		/* Start up as service */
 
 		SERVICE_TABLE_ENTRY dispatchTable[] = {
-			{ TEXT(NTP_DISPLAY_NAME), (LPSERVICE_MAIN_FUNCTION)main },
+			{ TEXT(NTP_DISPLAY_NAME), (LPSERVICE_MAIN_FUNCTION) service_main },
 			{ NULL, NULL }
 		};
 
 		rc = StartServiceCtrlDispatcher(dispatchTable);
 		if (!rc) {
+			rc = GetLastError();
+			fprintf(stderr, "StartServiceCtrlDispatcher returned: %i\n", rc);
 			fprintf(stderr, "Use -f to run from the command line.\n");
-			exit(GetLastError());
+			exit(rc);
 		}
 	}
 	exit(0);
@@ -249,46 +249,3 @@ OnConsoleEvent(
 	return TRUE;;
 }
 
-/*
- * C-runtime stuff used to initialize the app and
- * get argv, argc, envp.
- */
-
-typedef struct 
-{
-	int newmode;
-} _startupinfo;
-
-_CRTIMP void __cdecl __set_app_type(int);
- void __getmainargs(int *, char ***, char ***, int,
-				   _startupinfo *);
-
-extern int _newmode;		/* malloc new() handler mode */
-
-typedef void (__cdecl *_PVFV)(void);
-extern _PVFV *__onexitbegin;
-extern _PVFV *__onexitend;
-extern _CRTIMP char **__initenv;
-
-/*
- * Do the work that mainCRTStartup() would normally do
- */
-void GetArgs(int *argc, char ***argv, char ***envp)
-{
-	int dowildcard = 0;		/* passed to __getmainargs() */
-	_startupinfo startinfo;
-    
-	/*
-	 * Set the app type to Console (check CRT/SRC/INTERNAL.H:
-	 * #define _CONSOLE_APP 1)
-	 */
-	__set_app_type(1);
-	
-	/* Mark this module as an EXE file */
-	__onexitbegin = __onexitend = (_PVFV *)(-1);
-
-	startinfo.newmode = _newmode;
-	__getmainargs(argc, argv, envp, dowildcard, &startinfo);
-	__initenv = *envp;
-
-}

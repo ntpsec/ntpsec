@@ -259,6 +259,7 @@ main(
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpd,"ntpd",ntpdmain);
 #else
+#ifndef SYS_WINNT
 int
 main(
 	int argc,
@@ -267,7 +268,8 @@ main(
 {
 	return ntpdmain(argc, argv);
 }
-#endif
+#endif /* SYS_WINNT */
+#endif /* NO_MAIN_ALLOWED */
 #endif /* SIM */
 
 #ifdef _AIX
