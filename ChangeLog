@@ -1,3 +1,8 @@
+2001-05-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ports/winnt/ntpd/ntpd.dsp: Add cmd_args.c
+	From: Wink Saville <wink@saville.com>
+
 2001-04-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpq/ntpq.c (tstflags): 11 now.

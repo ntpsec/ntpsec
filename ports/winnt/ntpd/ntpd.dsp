@@ -87,6 +87,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\cmd_args.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\map_vme.c
 # End Source File
 # Begin Source File
@@ -347,6 +351,10 @@ SOURCE=..\libntp\messages.mc
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\hopf_PCI_io.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\refclock_acts.c
 # PROP Exclude_From_Build 1
 # End Source File
@@ -405,6 +413,14 @@ SOURCE=..\..\..\ntpd\refclock_heath.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\refclock_hopfpci.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\ntpd\refclock_hopfser.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\refclock_hpgps.c
 # PROP Exclude_From_Build 1
 # End Source File
@@ -453,18 +469,6 @@ SOURCE=..\..\..\ntpd\refclock_palisade.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_palisade.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\hopf_PCI_io.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\ntpd\refclock_hopfpci.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\ntpd\refclock_hopfser.c
 # End Source File
 # Begin Source File
 
@@ -602,8 +606,8 @@ InputPath=..\..\..\configure
 
 "$(ProjDir)\version.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	echo Using NT Shell Script to generate version.c 
-	..\scripts\mkver.bat -P ntpd 	
-
+	..\scripts\mkver.bat -P ntpd 
+	
 # End Custom Build
 
 !ENDIF 
