@@ -31,8 +31,4 @@ noinst_HEADERS = lib_strbuf.h log.h
 
 EXTRA_DIST = README
 
-#mktime_.c: mktime.c $(ANSI2KNR)
-#	$(ANSI2KNR) $< mktime_.c
 
-#strerror_.c: strerror.c $(ANSI2KNR)
-#	$(ANSI2KNR) $< strerror_.c

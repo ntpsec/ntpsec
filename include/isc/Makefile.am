@@ -31,5 +31,4 @@ noinst_HEADERS = \
 	strerror.h \
 	string.h \
 	types.h \
-	util.h \
-	$(NULL)
+	util.h
