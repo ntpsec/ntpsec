@@ -483,9 +483,15 @@ process_private(
 	/* This part is a bit tricky, we want to be sure that the size
 	 * returned is either the old or the new size.  We also can find
 	 * out if the client can accept both types of messages this way. 
+	 *
+	 * Handle the exception of REQ_CONFIG. It can have two data sizes.
 	 */
 	temp_size = INFO_ITEMSIZE(inpkt->mbz_itemsize);
-	if (temp_size != proc->sizeofitem && temp_size != proc->v6_sizeofitem){
+	if ((temp_size != proc->sizeofitem &&
+	    temp_size != proc->v6_sizeofitem) &&
+	    !(inpkt->implementation == IMPL_XNTPD &&
+	    inpkt->request == REQ_CONFIG &&
+	    temp_size == sizeof(struct old_conf_peer))) {
 		if (debug > 2)
 			printf("process_private: wrong item size, received %d, should be %d or %d\n",
 			    temp_size, proc->sizeofitem, proc->v6_sizeofitem);
@@ -525,8 +531,9 @@ process_private(
 		l_fp ftmp;
 		double dtemp;
 	
-		if (rbufp->recv_length <
-		    (REQ_LEN_HDR + (temp_size * INFO_NITEMS(inpkt->err_nitems))
+		if (rbufp->recv_length < (REQ_LEN_HDR +
+		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
+		    INFO_NITEMS(inpkt->err_nitems))
 		    + sizeof(struct req_pkt_tail))) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		}
@@ -588,7 +595,8 @@ process_private(
 		 * So far so good.  See if decryption works out okay.
 		 */
 		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
-		    REQ_LEN_NOMAC, (int)(rbufp->recv_length - REQ_LEN_NOMAC))) {
+		    rbufp->recv_length - sizeof(struct req_pkt_tail) +
+		    REQ_LEN_HDR, sizeof(struct req_pkt_tail) - REQ_LEN_HDR)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
@@ -1293,12 +1301,12 @@ do_conf(
 	struct req_pkt *inpkt
 	)
 {
-	register struct conf_peer *cp; 
+	int items;
+	u_int fl;
+	struct conf_peer *cp; 
 	struct conf_peer temp_cp;
-	register int items;
 	struct sockaddr_storage peeraddr;
 	struct sockaddr_in tmp_clock;
-	int fl;
 
 	/*
 	 * Do a check of everything to see that it looks
@@ -1377,9 +1385,9 @@ do_conf(
 
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
 		if (peer_config(&peeraddr, (struct interface *)0,
-				temp_cp.hmode, temp_cp.version, temp_cp.minpoll, 
-				temp_cp.maxpoll, fl, temp_cp.ttl, temp_cp.keyid,
-				temp_cp.keystr) == 0) {
+		    temp_cp.hmode, temp_cp.version, temp_cp.minpoll, 
+		    temp_cp.maxpoll, fl, temp_cp.ttl, temp_cp.keyid,
+		    NULL) == 0) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
