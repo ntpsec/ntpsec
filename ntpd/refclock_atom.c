@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/time.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -17,9 +16,15 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 
-#ifdef PPS
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_TERMIOS_H
+# include <sys/termios.h>
+#endif
+#ifdef HAVE_SYS_PPSCLOCK_H
 # include <sys/ppsclock.h>
-#endif /* PPS */
+#endif
 
 #ifdef HAVE_PPSAPI
 #include <sys/timepps.h>
@@ -252,14 +257,24 @@ atom_pps(
 {
 	register struct atomunit *up;
 	struct refclockproc *pp;
-#ifdef HAVE_TIMESPEC
+#ifdef HAVE_PPSAPI
+# ifdef HAVE_TIMESPEC
 	struct timespec ts;
-#else
+# else
 	struct timeval ts;
-#endif /* HAVE_TIMESPEC */
+# endif /* HAVE_TIMESPEC */
+#endif /* HAVE_PPSAPI */
 	l_fp lftmp;
 	double doffset;
 	int i;
+	int request = 
+#ifdef HAVE_CIOGETEV
+		CIOGETEV
+#endif
+#ifdef HAVE_TIOCGPPSEV
+		TIOCGPPSEV
+#endif
+		;
 
 	/*
 	 * This routine is called once per second when the LDISC_PPS
@@ -300,7 +315,7 @@ atom_pps(
  	i = up->ev.serial;
 	if (fdpps <= 0)
 		return (1);
-	if (ioctl(fdpps, CIOGETEV, (caddr_t)&up->ev) < 0)
+	if (ioctl(fdpps, request, (caddr_t)&up->ev) < 0)
 		return (1);
 	if (i == up->ev.serial)
 		return (2);

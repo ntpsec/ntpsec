@@ -12,7 +12,9 @@
  */
 
 #include <ctype.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -32,9 +34,12 @@
 #include <stropts.h>
 #endif
 
-#ifdef PPS
-#include <sys/ppsclock.h>
-#endif /* PPS */
+#ifdef HAVE_SYS_TERMIOS_H
+# include <sys/termios.h>
+#endif
+#ifdef HAVE_SYS_PPSCLOCK_H
+# include <sys/ppsclock.h>
+#endif
 
 #include "ntp_stdlib.h"
 
@@ -338,7 +343,35 @@ ees_report_event((ees), (evcode))
 #define	MINSTEP	5	/* some systems increment uS on each call */
 #define	MAXLOOPS (USECS/9)
 
-     static void
+/*
+ * Function prototypes
+ */
+
+static	int	msfees_start	P((int unit, struct peer *peer));
+static	void	msfees_shutdown	P((int unit, struct peer *peer));
+static	void	msfees_poll	P((int unit, struct peer *peer));
+static	void	msfees_init	P((void));
+static	void	dump_buf	P((l_fp *coffs, int from, int to, char *text));
+static	void	ees_report_event P((struct eesunit *ees, int code));
+static	void	ees_receive	P((struct recvbuf *rbufp));
+static	int	offcompare	P((l_fp *a, l_fp *b));
+static	void	ees_process	P((struct eesunit *ees));
+
+/*
+ * Transfer vector
+ */
+struct	refclock refclock_msfees = {
+	msfees_start,		/* start up driver */
+	msfees_shutdown,	/* shut down driver */
+	msfees_poll,		/* transmit poll message */
+	noentry,		/* not used */
+	msfees_init,		/* initialize driver */
+	noentry,		/* not used */
+	NOFLAGS			/* not used */
+};
+
+
+static void
 dump_buf(
 	l_fp *coffs,
 	int from,
@@ -403,7 +436,6 @@ msfees_start(
 	int fd232 = -1;
 	char eesdev[20];
 	struct termios ttyb, *ttyp;
-	static void ees_receive();
 	struct refclockproc *pp;
 	pp = peer->procptr;
 
@@ -625,7 +657,6 @@ ees_receive(
 	register u_char *dpend;		/* Points just *after* last data char */
 	register char *cp;
 	l_fp tmp;
-	static void ees_process();
 	int call_pps_sample = 0;
 	l_fp pps_arrvstamp;
 	int	sincelast;
@@ -634,6 +665,13 @@ ees_receive(
 	struct ppsclockev ppsclockev;
 	long *ptr = (long *) &ppsclockev;
 	int rc;
+	int request;
+#ifdef HAVE_CIOGETEV
+	request = CIOGETEV;
+#endif
+#ifdef HAVE_TIOCGPPSEV
+	request = TIOCGPPSEV;
+#endif
 
 	/* Get the clock this applies to and a pointer to the data */
 	ees = (struct eesunit *)rbufp->recv_srcclock;
@@ -684,7 +722,7 @@ ees_receive(
 			/* Incomplete.  Wait for more. */
 			if (debug & DB_LOG_AWAITMORE)
 			    msyslog(LOG_INFO,
-				    "I: ees clock %d: %d == %d: await more",
+				    "I: ees clock %d: %x == %x: await more",
 				    ees->unit, dpt, dpend);
 			return;
 		}
@@ -860,10 +898,10 @@ ees_receive(
 
 	memset((char *) &ppsclockev, 0, sizeof ppsclockev);
 
-	rc = ioctl(ees->io.fd, CIOGETEV, (char *) &ppsclockev);
+	rc = ioctl(ees->io.fd, request, (char *) &ppsclockev);
 	if (debug & DB_PRINT_EV) fprintf(stderr,
-					 "[%x] CIOGETEV u%d %d (%lx %d) gave %d (%d): %08lx %08lx %ld\n",
-					 DB_PRINT_EV, ees->unit, ees->io.fd, CIOGETEV, is_pps(ees),
+					 "[%x] CIOGETEV u%d %d (%x %d) gave %d (%d): %08lx %08lx %ld\n",
+					 DB_PRINT_EV, ees->unit, ees->io.fd, request, is_pps(ees),
 					 rc, errno, ptr[0], ptr[1], ptr[2]);
 
 	/* If we managed to get the time of arrival, process the info */
@@ -914,7 +952,7 @@ ees_receive(
 					pps_arrvstamp.l_uf,
 					ees->arrvtime.l_uf,
 					diff.l_ui, diff.l_uf,
-					ppsclockev.tv.tv_usec,
+					(int)ppsclockev.tv.tv_usec,
 					ctime(&(ppsclockev.tv.tv_sec)));
 				if (L_ISNEG(&diff)) {	/* AOK -- pps_sample */
 					suspect_4ms_step |= 2;
@@ -955,12 +993,12 @@ ees_receive(
 	/* Dump on second 1, as second 0 sometimes missed */
 	if (ees->second == 1) {
 		char text[16 * ((sizeof deltas) / (sizeof deltas[0]))];
-		char *ptr=text;
+		char *cptr=text;
 		int i;
 		for (i=0; i<((sizeof deltas) / (sizeof deltas[0])); i++) {
-			sprintf(ptr, " %d.%04d",
+			sprintf(cptr, " %d.%04d",
 				msec(deltas[i]), subms(deltas[i]));
-			while (*ptr) ptr++;
+			while (*cptr) cptr++;
 		}
 		msyslog(LOG_ERR, "Deltas: %d.%04d<->%d.%04d: %s",
 			msec(EES_STEP_F - EES_STEP_F_GRACE), subms(EES_STEP_F - EES_STEP_F_GRACE),
@@ -1007,10 +1045,10 @@ ees_receive(
 						this== (this_step -1)))
 					    other_step = this;
 					if (other_step != this) {
-						int delta = (this_step - other_step);
-						if (delta < 0) delta = - delta;
+						int idelta = (this_step - other_step);
+						if (idelta < 0) idelta = - idelta;
 						if (third_step == 0 && (
-							(delta == 1) ? (
+							(idelta == 1) ? (
 								this == (other_step +1) ||
 								this == (other_step -1) ||
 								this == (this_step +1) ||
@@ -1071,14 +1109,14 @@ ees_receive(
 					      ees->unit, suspect_4ms_step, msec(delta_sfsec), subms(delta_sfsec),
 					      msec(EES_STEP_F - EES_STEP_F_GRACE),
 					      subms(EES_STEP_F - EES_STEP_F_GRACE),
-					      msec(delta_f_abs),
-					      subms(delta_f_abs),
+					      (int)msec(delta_f_abs),
+					      (int)subms(delta_f_abs),
 					      msec(EES_STEP_F + EES_STEP_F_GRACE),
 					      subms(EES_STEP_F + EES_STEP_F_GRACE),
 					      ees->second,
 					      sincelast);
 		if ((delta_f_abs > EES_STEP_NOTE) && ees->last_l.l_i) {
-			static ees_step_notes = EES_STEP_NOTES;
+			static int ees_step_notes = EES_STEP_NOTES;
 			if (ees_step_notes > 0) {
 				ees_step_notes--;
 				printf("MSF%d: D=%3ld.%04ld@%02d :%d%s\n",
@@ -1112,7 +1150,7 @@ ees_receive(
 	fsecs = sec_of_ramp * (ees->jump_fsecs /  ees->last_step_secs);
 
 	if (debug & DB_LOG_DELTAS) msyslog(LOG_ERR,
-					   "[%x] MSF%d: %3d/%03d -> d=%11d (%d|%d)",
+					   "[%x] MSF%d: %3ld/%03d -> d=%11ld (%d|%ld)",
 					   DB_LOG_DELTAS,
 					   ees->unit, sec_of_ramp, ees->last_step_secs, fsecs,
 					   pps_arrvstamp.l_f, pps_arrvstamp.l_f + fsecs);
@@ -1199,7 +1237,7 @@ ees_process(
 	struct eesunit *ees
 	)
 {
-	static last_samples = -1;
+	static int last_samples = -1;
 	register int i, j;
 	register int noff;
 	register l_fp *coffs = ees->codeoffsets;
@@ -1235,7 +1273,7 @@ ees_process(
 	if (ees->dump_vals) dump_buf(coffs, 0, samples, "Raw  data  is:");
 
 	/* Sort the offsets, trim off the extremes, then choose one. */
-	qsort((char *) coffs, samples, sizeof(l_fp), offcompare);
+	qsort((char *) coffs, (u_int)samples, sizeof(l_fp), offcompare);
 
 	noff = samples;
 	i = 0;
@@ -1281,7 +1319,7 @@ ees_process(
 	dispersion = LFPTOFP(&tmp) / 2; /* ++++ */
 	if (debug & (DB_SYSLOG_SMPLI | DB_SYSLOG_SMPLE)) msyslog(
 		(debug & DB_SYSLOG_SMPLE) ? LOG_ERR : LOG_INFO,
-		"I: [%x] Offset=%06d (%d), disp=%06d%s [%d], %d %d=%d %d:%d %d=%d %d",
+		"I: [%x] Offset=%06d (%d), disp=%f%s [%d], %d %d=%d %d:%d %d=%d %d",
 		debug & (DB_SYSLOG_SMPLI | DB_SYSLOG_SMPLE),
 		offset.l_f / 4295, offset.l_f,
 		(dispersion * 1526) / 100,
@@ -1314,17 +1352,17 @@ ees_process(
 			if ((new & (1 << 31)) !=
 			    (((long) offset.l_uf) & ( 1 << 31)))
 			{	NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-					msyslog(LOG_INFO, "I: %x != %x (%x %x), so add %d",
+					msyslog(LOG_INFO, "I: %lx != %lx (%lx %lx), so add %d",
 						new & (1 << 31),
 						((long) offset.l_uf) & ( 1 << 31),
 						new, (long) offset.l_uf,
 						(new < 0) ? -1 : 1);
-			offset.l_ui += (new < 0) ? -1 : 1;
+				offset.l_ui += (new < 0) ? -1 : 1;
 			}
 			dispersion /= 4;
 			if (debug & (DB_SYSLOG_SMTHI | DB_SYSLOG_SMTHE)) msyslog(
 				(debug & DB_SYSLOG_SMTHE) ? LOG_ERR : LOG_INFO,
-				"I: [%x] Smooth data: %d -> %d, dispersion now %d",
+				"I: [%x] Smooth data: %ld -> %ld, dispersion now %f",
 				debug & (DB_SYSLOG_SMTHI | DB_SYSLOG_SMTHE),
 				((long) offset.l_uf) / 4295, new / 4295,
 				(dispersion * 1526) / 100);
@@ -1332,7 +1370,7 @@ ees_process(
 		}
 		else if (debug & (DB_SYSLOG_NSMTHI | DB_SYSLOG_NSMTHE)) msyslog(
 			(debug & DB_SYSLOG_NSMTHE) ? LOG_ERR : LOG_INFO,
-			"[%x] No smooth as delta not %d < %d < %d",
+			"[%x] No smooth as delta not %d < %ld < %d",
 			debug & (DB_SYSLOG_NSMTHI | DB_SYSLOG_NSMTHE),
 			- FRACT_SEC(100), diff, FRACT_SEC(100));
 	}
@@ -1380,7 +1418,7 @@ ees_process(
 static void
 msfees_poll(
 	int unit,
-	char *peer
+	struct peer *peer
 	)
 {
 	if (unit >= MAXUNITS) {
@@ -1400,10 +1438,6 @@ msfees_poll(
 	    ees_event(eesunits[unit], CEVNT_FAULT);
 }
 
-struct	refclock refclock_msfees = {
-	msfees_start, msfees_shutdown, msfees_poll,
-	noentry, msfees_init, noentry, NOFLAGS
-};
 
 #else
 int refclock_msfees_bs;

@@ -34,6 +34,15 @@
  * SUCH DAMAGE.
  */
 
+/*
+ * Modified: Marc Brett <marc.brett@westgeo.com>   Sept, 1999.
+ *
+ * 1. Added support for alternate PPS schemes, with code mostly
+ *    copied from the Oncore driver (Thanks, Poul-Henning Kamp).
+ *    This code runs on SunOS 4.1.3 with ppsclock-1.6a1 and Solaris 7.
+ */
+
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -42,7 +51,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/time.h>
+#include <sys/types.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -52,9 +61,26 @@
 
 #include "mx4200.h"
 
-#ifdef PPS
-#include <sys/ppsclock.h>
-#endif /* PPS */
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_TERMIOS_H
+# include <sys/termios.h>
+#endif
+#ifdef HAVE_SYS_PPSCLOCK_H
+# include <sys/ppsclock.h>
+#endif
+
+#ifndef HAVE_STRUCT_PPSCLOCKEV
+struct ppsclockev {
+# ifdef HAVE_TIMESPEC
+	struct timespec tv;
+# else
+	struct timeval tv;
+# endif
+	u_int serial;
+};
+#endif /* ! HAVE_STRUCT_PPSCLOCKEV */
 
 /*
  * This driver supports the Magnavox Model MX 4200 GPS Receiver
@@ -120,10 +146,8 @@
 struct mx4200unit {
 	u_int  pollcnt;			/* poll message counter */
 	u_int  polled;			/* Hand in a time sample? */
-#ifdef PPS
 	u_int  lastserial;		/* last pps serial number */
 	struct ppsclockev ppsev;	/* PPS control structure */
-#endif /* PPS */
 	double avg_lat;			/* average latitude */
 	double avg_lon;			/* average longitude */
 	double avg_alt;			/* average height */
@@ -179,7 +203,7 @@ static	void	mx4200_config	P((struct peer *));
 static	void	mx4200_ref	P((struct peer *));
 static	void	mx4200_send	P((struct peer *, char *, ...))
     __attribute__ ((format (printf, 2, 3)));
-static	u_char	mx4200_cksum	P((char *, u_int));
+static	u_char	mx4200_cksum	P((char *, int));
 static	int	mx4200_jday	P((int, int, int));
 static	void	mx4200_debug	P((struct peer *, char *, ...))
     __attribute__ ((format (printf, 2, 3)));
@@ -214,18 +238,43 @@ mx4200_start(
 	int fd;
 	char gpsdev[20];
 
+#ifdef HAVE_TIOCGPPSEV
+#ifdef HAVE_TERMIOS
+	struct termios ttyb;
+#endif /* HAVE_TERMIOS */
+#ifdef HAVE_SYSV_TTYS
+	struct termio ttyb;
+#endif /* HAVE_SYSV_TTYS */
+#ifdef HAVE_BSD_TTYS
+	struct sgttyb ttyb;
+#endif /* HAVE_BSD_TTYS */
+#endif /* HAVE_TIOCGPPSEV */
+
 	/*
 	 * Open serial port
 	 */
 	(void)sprintf(gpsdev, DEVICE, unit);
-	if (!(fd = refclock_open(gpsdev, SPEED232,
-#ifdef PPS
-				 LDISC_PPS
-#else  /* not PPS */
-				 0
-#endif /* not PPS */
-				 )))
+	if (!(fd = refclock_open(gpsdev, SPEED232, LDISC_PPS))) {
 	    return (0);
+	}
+#ifdef HAVE_TIOCGPPSEV
+	if (fdpps > 0) {
+		/*
+		 * Truly nasty hack in order to get this to work on Solaris 7.
+		 * Really, refclock_open() should set the port properly, but
+		 * it doesn't work (as of ntp-4.0.98a) - almost 99% dropped
+		 * PPS signals with "Interrupted system call".  Even this
+		 * still gives a 5% error rate.
+		 */
+		ttyb.c_iflag = IGNCR;
+		ttyb.c_oflag = 0;
+		ttyb.c_cflag = CS8 | CREAD | CLOCAL;
+		ttyb.c_lflag = ICANON;
+		if (tcsetattr(fdpps, TCSAFLUSH, &ttyb) < 0) {
+			return (0);
+		}
+	}
+#endif /* HAVE_TIOCGPPSEV */
 
 	/*
 	 * Allocate unit structure
@@ -253,7 +302,6 @@ mx4200_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-
 
 	/* Ensure the receiver is properly configured */
 	mx4200_config(peer);
@@ -1122,7 +1170,7 @@ mx4200_parse_t(
 static u_char
 mx4200_cksum(
 	register char *cp,
-	register u_int n
+	register int n
 	)
 {
 	register u_char ck;
@@ -1135,8 +1183,8 @@ mx4200_cksum(
 /*
  * Tables to compute the day of year.  Viva la leap.
  */
-static day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static int day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 /*
  * Calculate the the Julian Day
@@ -1573,25 +1621,30 @@ mx4200_pps(
 	struct peer *peer
 	)
 {
-#ifdef PPS
+	int temp_serial;
 	struct refclockproc *pp;
 	struct mx4200unit *up;
 
-	int temp_serial;
+	int request;
+#ifdef HAVE_CIOGETEV
+	request = CIOGETEV;
+#endif
+#ifdef HAVE_TIOCGPPSEV
+	request = TIOCGPPSEV;
+#endif
 
 	pp = peer->procptr;
 	up = (struct mx4200unit *)pp->unitptr;
-
 
 	/*
 	 * Grab the timestamp of the PPS signal.
 	 */
 	temp_serial = up->ppsev.serial;
-	if (ioctl(fdpps, CIOGETEV, (caddr_t)&up->ppsev) < 0) {
+	if (ioctl(fdpps, request, (caddr_t)&up->ppsev) < 0) {
 		/* XXX Actually, if this fails, we're pretty much screwed */
-		mx4200_debug(peer, "mx4200_pps: CIOGETEV: ");
-		mx4200_debug(peer, "%s", strerror(errno));
-		mx4200_debug(peer, "\n");
+		mx4200_debug(peer,
+		  "mx4200_pps: CIOGETEV/TIOCGPPSEV: serial=%d, fdpps=%d, %s\n",
+		  up->ppsev.serial, fdpps, strerror(errno));
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}
@@ -1621,8 +1674,6 @@ mx4200_pps(
 	 */
 	up->ppsev.tv.tv_sec += (u_int32) JAN_1970;
 	TVTOTS(&up->ppsev.tv,&pp->lastrec);
-
-#endif /* PPS */
 
 	return(0);
 }
@@ -1719,7 +1770,7 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 	n += strlen(cp);
 #endif /* notdef */
 
-	m = write(pp->io.fd, buf, n);
+	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
 		msyslog(LOG_ERR, "mx4200_send: write: %m (%s)", buf);
 	mx4200_debug(peer, "mx4200_send: %d %s\n", m, buf);

@@ -1209,7 +1209,7 @@ esac
 
 AC_CACHE_CHECK(for the ppsclock streams module,
  ac_cv_var_ppsclock,
- ac_cv_var_ppsclock=$ac_cv_header_sys_ppsclock_h)
+ ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev)
 case "$ac_cv_var_ppsclock" in
  yes) AC_DEFINE(PPS) ;;
 esac

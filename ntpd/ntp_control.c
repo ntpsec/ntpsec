@@ -1294,7 +1294,7 @@ ctl_putpeer(
 		break;
 		case CP_DSTPORT:
 		ctl_putuint(peer_var[CP_DSTPORT].text,
-			    (peer->dstadr
+			    (u_long)(peer->dstadr
 			     ? ntohs(peer->dstadr->sin.sin_port)
 			     : 0
 			     )
@@ -1500,7 +1500,7 @@ ctl_putclock(
 		if (mustput || (clock_stat->haveflags & CLK_HAVEVAL2)) {
 			if (clock_stat->fudgeval1 > 1)
 			ctl_putadr(clock_var[CC_FUDGEVAL2].text,
-				   clock_stat->fudgeval2);
+				   (u_int32)clock_stat->fudgeval2);
 			else
 			ctl_putid(clock_var[CC_FUDGEVAL2].text,
 				  (char *)&clock_stat->fudgeval2);

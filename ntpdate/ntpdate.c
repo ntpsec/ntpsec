@@ -713,7 +713,7 @@ transmit(
 		L_ADDUF(&server->xmt, sys_authdelay);
 		HTONL_FP(&server->xmt, &xpkt.xmt);
 		len = authencrypt(sys_authkey, (u_int32 *)&xpkt, LEN_PKT_NOMAC);
-		sendpkt(&(server->srcadr), &xpkt, LEN_PKT_NOMAC + len);
+		sendpkt(&(server->srcadr), &xpkt, (int)(LEN_PKT_NOMAC + len));
 
 		if (debug > 1)
 			printf("transmit auth to %s\n",
@@ -818,11 +818,11 @@ receive(
 			printf("receive: rpkt keyid=%ld sys_authkey=%ld decrypt=%ld\n",
 			   (long int)ntohl(rpkt->keyid1), (long int)sys_authkey,
 			   (long int)authdecrypt(sys_authkey, (u_int32 *)rpkt,
-				LEN_PKT_NOMAC, rbufp->recv_length - LEN_PKT_NOMAC));
+				LEN_PKT_NOMAC, (int)(rbufp->recv_length - LEN_PKT_NOMAC)));
 
 		if (has_mac && ntohl(rpkt->keyid1) == sys_authkey &&
 			authdecrypt(sys_authkey, (u_int32 *)rpkt, LEN_PKT_NOMAC,
-			rbufp->recv_length - LEN_PKT_NOMAC))
+			(int)(rbufp->recv_length - LEN_PKT_NOMAC)))
 			is_authentic = 1;
 		if (debug)
 			printf("receive: authentication %s\n",
@@ -895,7 +895,7 @@ receive(
 	/*
 	 * Shift this data in, then transmit again.
 	 */
-	server_data(server, (u_fp) di, &ci, 0);
+	server_data(server, (s_fp) di, &ci, 0);
 	transmit(server);
 }
 
@@ -1894,7 +1894,7 @@ printserver(
 	if (!debug) {
 		(void) fprintf(fp, "server %s, stratum %d, offset %s, delay %s\n",
 				   ntoa(&pp->srcadr), pp->stratum,
-				   lfptoa(&pp->offset, 6), fptoa(pp->delay, 5));
+				   lfptoa(&pp->offset, 6), fptoa((s_fp)pp->delay, 5));
 		return;
 	}
 
@@ -1916,7 +1916,7 @@ printserver(
 	}
 	(void) fprintf(fp,
 			   "refid [%s], delay %s, dispersion %s\n",
-			   str, fptoa(pp->delay, 5),
+			   str, fptoa((s_fp)pp->delay, 5),
 			   ufptoa(pp->dispersion, 5));
 
 	(void) fprintf(fp, "transmitted %d, in filter %d\n",
@@ -1946,7 +1946,7 @@ printserver(
 	(void) fprintf(fp, "\n");
 
 	(void) fprintf(fp, "delay %s, dispersion %s\n",
-			   fptoa(pp->delay, 5), ufptoa(pp->dispersion, 5));
+			   fptoa((s_fp)pp->delay, 5), ufptoa(pp->dispersion, 5));
 
 	(void) fprintf(fp, "offset %s\n\n",
 			   lfptoa(&pp->offset, 6));

@@ -620,7 +620,7 @@ oncore_read_config(
 			*cp = '\0';
 		i = strlen(line);
 		for (j=0; j<i; j++)	/* just in case lower case */
-			if (islower(line[j]))
+			if (islower((int)line[j]))
 				line[j] = toupper(line[j]);
 		for (j=0; j<i; j++)	/* let them use `=' between terms */
 			if (line[j] == '=')
@@ -1231,11 +1231,11 @@ oncore_msg_En(
 #else  /* ! HAVE_PPSAPI */
 #ifdef HAVE_CIOGETEV
 	struct ppsclockev ev;
-	u_long r = CIOGETEV;
+	int r = CIOGETEV;
 #endif
 #ifdef HAVE_TIOCGPPSEV
 	struct ppsclockev ev;
-	u_long r = TIOCGPPSEV;
+	int r = TIOCGPPSEV;
 #endif
 #endif	/* ! HAVE_PPS_API */
 

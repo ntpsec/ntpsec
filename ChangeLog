@@ -1,5 +1,20 @@
 1999-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntptime.c: 
+	* ntpdate/ntptimeset.c: 
+	* ntpdate/ntpdate.c: 
+	* ntpd/refclock_trak.c: 
+	* ntpd/refclock_oncore.c: 
+	* ntpd/refclock_mx4200.c: 
+	* ntpd/refclock_msfees.c: 
+	* ntpd/refclock_atom.c: 
+	* ntpd/ntp_control.c: 
+	* ntpd/ntp_config.c: 
+	* configure.in: 
+	* configure: 
+	PPS, Solaris 7, cleanup patches
+	From: Marc.Brett@westgeo.com
+
 	* ports/winnt/ntptrace/ntptrace.dsp: 
 	* ports/winnt/ntpq/ntpq.dsp: 
 	* ports/winnt/ntpdc/ntpdc.dsp: 

@@ -14,7 +14,9 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -22,9 +24,12 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 
-#ifdef PPS
-#include <sys/ppsclock.h>
-#endif /* PPS */
+#ifdef HAVE_SYS_TERMIOS_H
+# include <sys/termios.h>
+#endif
+#ifdef HAVE_SYS_PPSCLOCK_H
+# include <sys/ppsclock.h>
+#endif
 
 /*
  * This driver supports the TRAK 8810/8820 GPS Station Clock. The claimed
@@ -233,6 +238,13 @@ trak_receive(
 	char qchar;
 #ifdef PPS
 	struct ppsclockev ppsev;
+	int request;
+#ifdef HAVE_CIOGETEV
+        request = CIOGETEV;
+#endif
+#ifdef HAVE_TIOCGPPSEV
+        request = TIOCGPPSEV;
+#endif
 #endif /* PPS */
 
 	/*
@@ -305,7 +317,7 @@ trak_receive(
 		return;
 	}
 #ifdef PPS
-	if(ioctl(fdpps,CIOGETEV,(caddr_t) &ppsev) >=0) {
+	if(ioctl(fdpps,request,(caddr_t) &ppsev) >=0) {
 		ppsev.tv.tv_sec += (u_int32) JAN_1970;
 		TVTOTS(&ppsev.tv,&up->tstamp);
 	}

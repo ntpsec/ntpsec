@@ -286,7 +286,7 @@ main(
 		     ftemp, 1 << ntx.shift);
 		printf("  maximum error %lu us, estimated error %lu us,\n",
 		     (u_long)ntx.maxerror, (u_long)ntx.esterror);
-		printf("  status %s,\n", sprintb(ntx.status, TIMEX_STA_BITS));
+		printf("  status %s,\n", sprintb((u_int)ntx.status, TIMEX_STA_BITS));
 		ftemp = (double)ntx.tolerance / SCALE_FREQ;
 		gtemp = (double)ntx.precision;
 #ifdef STA_NANO

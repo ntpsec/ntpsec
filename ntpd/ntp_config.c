@@ -648,7 +648,7 @@ getconfig(
 	char line[MAXLINE];
 	char *(tokens[MAXTOKENS]);
 	int ntokens;
-	int tok;
+	int tok = CONFIG_UNKNOWN;
 	struct interface *localaddr;
 	const char *config_file;
 #ifdef HAVE_NETINFO

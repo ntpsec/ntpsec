@@ -7341,7 +7341,7 @@ echo "configure:7341: checking for the ppsclock streams module" >&5
 if eval "test \"\${ac_cv_var_ppsclock+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  ac_cv_var_ppsclock=$ac_cv_header_sys_ppsclock_h
+  ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev
 fi
 
 echo "$ac_t""$ac_cv_var_ppsclock" 1>&6
