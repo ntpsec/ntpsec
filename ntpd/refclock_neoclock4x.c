@@ -678,11 +678,9 @@ neoclock4x_control(int unit,
 
   if(NULL != out)
     {
-      static char outstatus[800];	/* status output buffer */
       char *tt;
       char tmpbuf[80];
 
-      outstatus[0] = '\0';
       out->kv_list = (struct ctl_var *)0;
       out->type    = REFCLK_NEOCLOCK4X;
 

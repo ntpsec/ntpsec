@@ -1157,9 +1157,9 @@ again:
 		       (u_long)ntohl(mem->demobilizations));
 
 	(void) fprintf(fp, "hash table counts:   ");
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		(void) fprintf(fp, "%4d", (int)mem->hashcount[i]);
-		if ((i % 8) == 7 && i != (HASH_SIZE-1)) {
+		if ((i % 8) == 7 && i != (NTP_HASH_SIZE-1)) {
 			(void) fprintf(fp, "\n                     ");
 		}
 	}

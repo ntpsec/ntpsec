@@ -1980,7 +1980,7 @@ read_status(
 
 		n = 0;
 		rpkt.status = htons(ctlsysstatus());
-		for (i = 0; i < HASH_SIZE; i++) {
+		for (i = 0; i < NTP_HASH_SIZE; i++) {
 			for (peer = assoc_hash[i]; peer != 0;
 				peer = peer->ass_next) {
 				ass_stat[n++] = htons(peer->associd);
@@ -2275,7 +2275,7 @@ read_clock_status(
 			peer = sys_peer;
 		} else {
 			peer = 0;
-			for (i = 0; peer == 0 && i < HASH_SIZE; i++) {
+			for (i = 0; peer == 0 && i < NTP_HASH_SIZE; i++) {
 				for (peer = assoc_hash[i]; peer != 0;
 					peer = peer->ass_next) {
 					if (peer->flags & FLAG_REFCLOCK)
