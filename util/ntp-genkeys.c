@@ -498,67 +498,75 @@ main(
 	int i, j;
 	mode_t std_mask;	/* Standard mask */
 	mode_t sec_mask = 077;	/* Secure mask */
+	char pathbuf[PATH_MAX];
+
+	gethostname(hostname, sizeof(hostname));
+	gettimeofday(&tv, 0);
+	ntptime = tv.tv_sec + JAN_1970;
 
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
-	if (path_keys) {
-		if (*path_keys != '/') {
-			fprintf(stderr,
-				"%s: keys path <%s> doesn't begin with a /\n",
-				progname, path_keys);
-			exit(1);
-		}
-	} else {
+	if (!path_keys) {
+		/* Shouldn't happen... */
 		path_keys = "PATH_KEYS";
+	}
+	if (*path_keys != '/') {
+		fprintf(stderr,
+			"%s: keys path <%s> doesn't begin with a /\n",
+			progname, path_keys);
+		exit(1);
 	}
 	snifflink(path_keys, &link_keys);
 
-	if (path_keysdir) {
-		if (*path_keysdir != '/') {
-			fprintf(stderr,
-				"%s: keysdir path <%s> doesn't begin with a /\n",
-				progname, path_keysdir);
-			exit(1);
-		}
-	} else {
+	if (!path_keysdir) {
+		/* Shouldn't happen... */
 		path_keysdir = "PATH_KEYSDIR";
+	}
+	if (*path_keysdir != '/') {
+		fprintf(stderr,
+			"%s: keysdir path <%s> doesn't begin with a /\n",
+			progname, path_keysdir);
+		exit(1);
 	}
 	snifflink(path_keysdir, &link_keysdir);
 
-	if (path_publickey) {
-		if (*path_publickey != '/') {
-			fprintf(stderr,
-				"%s: publickey path <%s> doesn't begin with a /\n",
-				progname, path_publickey);
-			exit(1);
-		}
-	} else {
-		path_publickey = "PATH_PUBLICKEY";
+	if (!path_publickey) {
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_%s.%lu",
+			 path_keysdir, hostname, ntptime);
+		path_publickey = strdup(pathbuf);
+	}
+	if (*path_publickey != '/') {
+		fprintf(stderr,
+			"%s: publickey path <%s> doesn't begin with a /\n",
+			progname, path_publickey);
+		exit(1);
 	}
 	snifflink(path_publickey, &link_publickey);
 
-	if (path_privatekey) {
-		if (*path_privatekey != '/') {
-			fprintf(stderr,
-				"%s: privatekey path <%s> doesn't begin with a /\n",
-				progname, path_privatekey);
-			exit(1);
-		}
-	} else {
-		path_privatekey = "PATH_PRIVATEKEY";
+	if (!path_privatekey) {
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey.%lu",
+			 path_keysdir, ntptime);
+		path_privatekey = strdup(pathbuf);
+	}
+	if (*path_privatekey != '/') {
+		fprintf(stderr,
+			"%s: privatekey path <%s> doesn't begin with a /\n",
+			progname, path_privatekey);
+		exit(1);
 	}
 	snifflink(path_privatekey, &link_privatekey);
 
-	if (path_dhparms) {
-		if (*path_dhparms != '/') {
-			fprintf(stderr,
-				"%s: dhparms path <%s> doesn't begin with a /\n",
-				progname, path_dhparms);
-			exit(1);
-		}
-	} else {
-		path_dhparms = "PATH_DHPARMS";
+	if (!path_dhparms) {
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_dh.%lu",
+			 path_keysdir, ntptime);
+		path_dhparms = strdup(pathbuf);
+	}
+	if (*path_dhparms != '/') {
+		fprintf(stderr,
+			"%s: dhparms path <%s> doesn't begin with a /\n",
+			progname, path_dhparms);
+		exit(1);
 	}
 	snifflink(path_dhparms, &link_dhparms);
 
@@ -603,9 +611,6 @@ main(
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
-	gethostname(hostname, sizeof(hostname));
-	gettimeofday(&tv, 0);
-	ntptime = tv.tv_sec + JAN_1970;
 
 	/*
 	 * Generate 16 random MD5 keys.
