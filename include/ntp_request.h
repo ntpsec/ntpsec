@@ -285,7 +285,7 @@ struct resp_pkt {
 #define INFO_FLAG_KERNEL	0x8
 #define INFO_FLAG_MONITOR	0x40
 #define INFO_FLAG_FILEGEN	0x80
-#define INFO_FLAG_PLL_SYNC	0x10
+#define INFO_FLAG_CAL		0x10
 #define INFO_FLAG_PPS_SYNC	0x20
 
 /*
@@ -557,12 +557,14 @@ struct conf_sys_flags {
 /*
  * System flags we can set/clear
  */
-#define	SYS_FLAG_BCLIENT	0x1
-#define	SYS_FLAG_PPS		0x2
-#define SYS_FLAG_NTP		0x4
-#define SYS_FLAG_KERNEL		0x8
+#define	SYS_FLAG_BCLIENT	0x01
+#define	SYS_FLAG_PPS		0x02
+#define SYS_FLAG_NTP		0x04
+#define SYS_FLAG_KERNEL		0x08
 #define SYS_FLAG_MONITOR	0x10
 #define SYS_FLAG_FILEGEN	0x20
+#define SYS_FLAG_AUTH		0x40
+#define SYS_FLAG_CAL		0x80
 
 /*
  * Structure used for returning restrict entries
