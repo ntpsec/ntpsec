@@ -1,3 +1,8 @@
+2000-01-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Get the quoting right on the sys_errlist check.
+	From documentation by: Akim Demaille <akim@epita.fr>
+
 2000-01-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: <netinet/ip.h> cannot be detected... 

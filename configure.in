@@ -729,7 +729,7 @@ esac
 
 dnl See if char *sys_errlist[] is OK.
 dnl If you get the quoting right on the next line, you tried something I didn't.
-AC_CACHE_CHECK(if declaring 'char *sys_errlist[]' is ok, ac_cv_decl_sys_errlist,
+AC_CACHE_CHECK([[if declaring 'char *sys_errlist[]' is ok]], ac_cv_decl_sys_errlist,
 [AC_TRY_COMPILE([#include <stdio.h>
 #ifdef HAVE_ERRNO_H
 #include <errno.h>

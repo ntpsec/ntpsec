@@ -6629,8 +6629,8 @@ EOF
  ;;
 esac
 
-echo $ac_n "checking if declaring 'char *sys_errlist' is ok""... $ac_c" 1>&6
-echo "configure:6634: checking if declaring 'char *sys_errlist' is ok" >&5
+echo $ac_n "checking if declaring 'char *sys_errlist[]' is ok""... $ac_c" 1>&6
+echo "configure:6634: checking if declaring 'char *sys_errlist[]' is ok" >&5
 if eval "test \"`echo '$''{'ac_cv_decl_sys_errlist'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
