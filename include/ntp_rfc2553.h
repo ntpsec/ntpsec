@@ -203,6 +203,8 @@ struct addrinfo {
 #define AI_MASK \
     (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
 
+#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
+
 /*
  * Constants for getnameinfo()
  */

@@ -24,7 +24,9 @@ socktohost(
 	register char *buffer;
 
 	LIB_GETBUF(buffer);
-	getnameinfo((struct sockaddr*)sock, SOCKLEN(sock), buffer, NI_MAXHOST, NULL, NULL, 0);
+	if (getnameinfo((struct sockaddr *)sock, SOCKLEN(sock), buffer,
+	    NI_MAXHOST, NULL, NULL, 0))
+		return stoa(sock);
 
   	return buffer;
 }

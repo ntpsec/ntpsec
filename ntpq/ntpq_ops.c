@@ -1,14 +1,15 @@
 /*
- * ntpdc_ops.c - subroutines which are called to perform operations by ntpdc
+ * ntpq_ops.c - subroutines which are called to perform operations by ntpq
  */
 
 #include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <netdb.h>
 
 #include "ntpq.h"
 #include "ntp_stdlib.h"
-
-#include <ctype.h>
-#include <netdb.h>
 
 extern char *	chosts[];
 extern char currenthost[];
@@ -55,12 +56,12 @@ static	void	radiostatus P((struct parse *, FILE *));
 static	void	pstatus 	P((struct parse *, FILE *));
 static	long	when		P((l_fp *, l_fp *, l_fp *));
 static	char *	prettyinterval	P((char *, long));
-static	int doprintpeers	P((struct varlist *, int, int, int, char *, FILE *));
-static	int dogetpeers	P((struct varlist *, int, FILE *));
-static	void	dopeers 	P((int, FILE *));
+static	int doprintpeers	P((struct varlist *, int, int, int, char *, FILE *, int));
+static	int dogetpeers	P((struct varlist *, int, FILE *, int));
+static	void	dopeers 	P((int, FILE *, int));
 static	void	peers		P((struct parse *, FILE *));
 static	void	lpeers		P((struct parse *, FILE *));
-static	void	doopeers	P((int, FILE *));
+static	void	doopeers	P((int, FILE *, int));
 static	void	opeers		P((struct parse *, FILE *));
 static	void	lopeers 	P((struct parse *, FILE *));
 
@@ -138,20 +139,20 @@ struct xcmd opcmds[] = {
 	{ "pstatus",    pstatus,    { UINT, NO, NO, NO },
 	  { "assocID", "", "", "" },
 	  "print status information returned for a peer" },
-	{ "peers",  peers,      { NO, NO, NO, NO },
-	  { "", "", "", "" },
-	  "obtain and print a list of the server's peers" },
-	{ "lpeers", lpeers,     { NO, NO, NO, NO },
-	  { "", "", "", "" },
-	  "obtain and print a list of all peers and clients" },
-	{ "opeers", opeers,     { NO, NO, NO, NO },
-	  { "", "", "", "" },
-	  "print peer list the old way, with dstadr shown rather than refid" },
-	{ "lopeers",    lopeers,    { NO, NO, NO, NO },
-	  { "", "", "", "" },
-	  "obtain and print a list of all peers and clients showing dstadr" },
+	{ "peers",  peers,      { OPT|IP_VERSION, NO, NO, NO },
+	  { "6|4", "", "", "" },
+	  "obtain and print a list of the server's peers [IP version]" },
+	{ "lpeers", lpeers,     { OPT|IP_VERSION, NO, NO, NO },
+	  { "6|4", "", "", "" },
+	  "obtain and print a list of all peers and clients [IP version]" },
+	{ "opeers", opeers,     { OPT|IP_VERSION, NO, NO, NO },
+	  { "6|4", "", "", "" },
+	  "print peer list the old way, with dstadr shown rather than refid [IP version]" },
+	{ "lopeers",    lopeers,    { OPT|IP_VERSION, NO, NO, NO },
+	  { "6|4", "", "", "" },
+	  "obtain and print a list of all peers and clients showing dstadr [IP version]" },
 	{ 0,		0,		{ NO, NO, NO, NO },
-	  { "", "", "", "" }, "" }
+	  { "6|4", "", "", "" }, "" }
 };
 
 
@@ -1231,6 +1232,38 @@ prettyinterval(
 	return buf;
 }
 
+static char
+decodeaddrtype(
+	struct sockaddr_storage *sock
+	)
+{
+	char ch = '-';
+	u_int32 dummy;
+	struct sockaddr_in6 *sin6;
+
+	switch(sock->ss_family) {
+	case AF_INET:
+		dummy = ((struct sockaddr_in *)sock)->sin_addr.s_addr;
+		dummy = ntohl(dummy);
+		ch = ((dummy&0xf0000000)==0xe0000000) ? 'm' :
+			((dummy&0x000000ff)==0x000000ff) ? 'b' :
+			((dummy&0xffffffff)==0x7f000001) ? 'l' :
+			((dummy&0xffffffe0)==0x00000000) ? '-' :
+			'u';
+		break;
+	case AF_INET6:
+		sin6 = (struct sockaddr_in6 *)sock;
+		if (IN6_IS_ADDR_MULTICAST(&sin6->sin6_addr))
+			ch = 'm';
+		else
+			ch = 'u';
+		break;
+	default:
+		ch = '-';
+		break;
+	}
+	return ch;
+}
 
 /*
  * A list of variables required by the peers command
@@ -1295,18 +1328,19 @@ doprintpeers(
 	int rstatus,
 	int datalen,
 	char *data,
-	FILE *fp
+	FILE *fp,
+	int af
 	)
 {
 	char *name;
-	char *value;
+	char *value = NULL;
 	int i;
 	int c;
 
-	u_int32 srcadr;
-	u_int32 dstadr;
+	struct sockaddr_storage srcadr;
+	struct sockaddr_storage dstadr;
 	u_long srcport;
-	const char *dstadr_refid = "0.0.0.0";
+	char *dstadr_refid = "0.0.0.0";
 	u_long stratum;
 	long ppoll;
 	long hpoll;
@@ -1323,12 +1357,16 @@ doprintpeers(
 	char type = '?';
 	char refid_string[10];
 	char whenbuf[8], pollbuf[8];
+	char clock_name[LENHOSTNAME];
 
 	memset((char *)havevar, 0, sizeof(havevar));
 	get_systime(&ts);
+	
+	memset((char *)&srcadr, 0, sizeof(struct sockaddr_storage));
+	memset((char *)&dstadr, 0, sizeof(struct sockaddr_storage));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		u_int32 dummy;
+		struct sockaddr_storage dum_store;
 
 		i = findvar(name, peer_var);
 		if (i == 0)
@@ -1339,18 +1377,12 @@ doprintpeers(
 				havevar[HAVE_SRCADR] = 1;
 			break;
 			case CP_DSTADR:
-			if (decodenetnum(value, &dummy)) {
-				dummy = ntohl(dummy);
-				type = ((dummy&0xf0000000)==0xe0000000) ? 'm' :
-					((dummy&0x000000ff)==0x000000ff) ? 'b' :
-					((dummy&0xffffffff)==0x7f000001) ? 'l' :
-					((dummy&0xffffffe0)==0x00000000) ? '-' :
-					'u';
-			}
+			if (decodenetnum(value, &dum_store))
+				type = decodeaddrtype(&dum_store);
 			if (pvl == opeervarlist) {
 				if (decodenetnum(value, &dstadr)) {
 					havevar[HAVE_DSTADR] = 1;
-					dstadr_refid = numtoa(dstadr);
+					dstadr_refid = stoa(&dstadr);
 				}
 			}
 			break;
@@ -1360,10 +1392,11 @@ doprintpeers(
 				if (*value == '\0') {
 					dstadr_refid = "0.0.0.0";
 				} else if (decodenetnum(value, &dstadr)) {
-					if (dstadr == 0)
+					if (SOCKNUL(&dstadr))
 						dstadr_refid = "0.0.0.0";
 					else
-						dstadr_refid = nntohost(dstadr);
+						dstadr_refid =
+						    nntohost(&srcadr);
 				} else if ((int)strlen(value) <= 4) {
 					refid_string[0] = '.';
 					(void) strcpy(&refid_string[1], value);
@@ -1449,15 +1482,21 @@ doprintpeers(
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
 		(void) fprintf(fp, "%-*s ", maxhostlen, currenthost);
-	(void) fprintf(fp,
-		"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
-		c, nntohost(srcadr), dstadr_refid, stratum, type,
-		prettyinterval(whenbuf, when(&ts, &rec, &reftime)),
-		prettyinterval(pollbuf, (int)poll_sec), reach,
-		lfptoms(&estdelay, 3), lfptoms(&estoffset, 3),
-		havevar[HAVE_JITTER] ? lfptoms(&estjitter, 3) :
-		lfptoms(&estdisp, 3));
-	return (1);
+	if (af == 0 || srcadr.ss_family == af){
+		strcpy(clock_name, nntohost(&srcadr));
+		
+		(void) fprintf(fp,
+			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
+			c, clock_name, dstadr_refid, stratum, type,
+			prettyinterval(whenbuf, when(&ts, &rec, &reftime)),
+			prettyinterval(pollbuf, (int)poll_sec), reach,
+			lfptoms(&estdelay, 3), lfptoms(&estoffset, 3),
+			havevar[HAVE_JITTER] ? lfptoms(&estjitter, 3) :
+			lfptoms(&estdisp, 3));
+		return (1);
+	}
+	else
+		return(1);
 }
 
 #undef	HAVE_SRCADR
@@ -1485,7 +1524,8 @@ static int
 dogetpeers(
 	struct varlist *pvl,
 	int associd,
-	FILE *fp
+	FILE *fp,
+	int af
 	)
 {
 	char *datap;
@@ -1514,8 +1554,7 @@ dogetpeers(
 		return 0;
 	}
 
-
-	return doprintpeers(pvl, associd, (int)rstatus, dsize, datap, fp);
+	return doprintpeers(pvl, associd, (int)rstatus, dsize, datap, fp, af);
 }
 
 
@@ -1525,27 +1564,26 @@ dogetpeers(
 static void
 dopeers(
 	int showall,
-	FILE *fp
+	FILE *fp,
+	int af
 	)
 {
 	register int i;
 	char fullname[LENHOSTNAME];
-	u_int32 netnum;
+	struct sockaddr_storage netnum;
 
 	if (!dogetassoc(fp))
 		return;
 
-	maxhostlen = 0;
-	if (numhosts > 1) {
-		for (i = 0; i < numhosts; ++i)
-		{ if(getnetnum(chosts[i],&netnum,fullname))
+	for (i = 0; i < numhosts; ++i) {
+		if (getnetnum(chosts[i], &netnum, fullname, af))
 			if ((int)strlen(fullname) > maxhostlen)
-			maxhostlen = strlen(fullname);
-		}
-		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "host");
+				maxhostlen = strlen(fullname);
 	}
-	fprintf(fp,
-	   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
+	if (numhosts > 1)
+		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "host");
+	(void) fprintf(fp,
+			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
 		(void) fprintf(fp, "=");
@@ -1557,7 +1595,7 @@ dopeers(
 			!(CTL_PEER_STATVAL(assoc_cache[i].status)
 			  & (CTL_PST_CONFIG|CTL_PST_REACH)))
 			continue;
-		if (!dogetpeers(peervarlist, (int)assoc_cache[i].assid, fp)) {
+		if (!dogetpeers(peervarlist, (int)assoc_cache[i].assid, fp, af)) {
 			return;
 		}
 	}
@@ -1575,7 +1613,15 @@ peers(
 	FILE *fp
 	)
 {
-	dopeers(0, fp);
+	int af = 0;
+
+	if (pcmd->nargs == 1) {
+		if (pcmd->argval->ival == 6)
+			af = AF_INET6;
+		else
+			af = AF_INET;
+	}
+	dopeers(0, fp, af);
 }
 
 
@@ -1589,7 +1635,15 @@ lpeers(
 	FILE *fp
 	)
 {
-	dopeers(1, fp);
+	int af = 0;
+
+	if (pcmd->nargs == 1) {
+		if (pcmd->argval->ival == 6)
+			af = AF_INET6;
+		else
+			af = AF_INET;
+	}
+	dopeers(1, fp, af);
 }
 
 
@@ -1599,7 +1653,8 @@ lpeers(
 static void
 doopeers(
 	int showall,
-	FILE *fp
+	FILE *fp,
+	int af
 	)
 {
 	register int i;
@@ -1610,8 +1665,6 @@ doopeers(
 	(void) fprintf(fp,
 			   "     remote           local      st t when poll reach   delay   offset    disp\n");
 	(void) fprintf(fp,
-			   "                                      (s)  (s)          (ms)     (ms)     (ms)\n");
-	(void) fprintf(fp,
 			   "==============================================================================\n");
 
 	for (i = 0; i < numassoc; i++) {
@@ -1619,7 +1672,7 @@ doopeers(
 			!(CTL_PEER_STATVAL(assoc_cache[i].status)
 			  & (CTL_PST_CONFIG|CTL_PST_REACH)))
 			continue;
-		if (!dogetpeers(opeervarlist, (int)assoc_cache[i].assid, fp)) {
+		if (!dogetpeers(opeervarlist, (int)assoc_cache[i].assid, fp, af)) {
 			return;
 		}
 	}
@@ -1637,7 +1690,15 @@ opeers(
 	FILE *fp
 	)
 {
-	doopeers(0, fp);
+	int af = 0;
+
+	if (pcmd->nargs == 1) {
+		if (pcmd->argval->ival == 6)
+			af = AF_INET6;
+		else
+			af = AF_INET;
+	}
+	doopeers(0, fp, af);
 }
 
 
@@ -1651,5 +1712,13 @@ lopeers(
 	FILE *fp
 	)
 {
-	doopeers(1, fp);
+	int af = 0;
+
+	if (pcmd->nargs == 1) {
+		if (pcmd->argval->ival == 6)
+			af = AF_INET6;
+		else
+			af = AF_INET;
+	}
+	doopeers(1, fp, af);
 }

@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <netdb.h>
 #ifdef SYS_WINNT
 # include <io.h>
@@ -344,7 +346,7 @@ struct xcmd builtins[] = {
 #define	DEFTIMEOUT	(5)		/* 5 second time out */
 #define	DEFSTIMEOUT	(2)		/* 2 second time out after first */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
-#define	DEFHOST		"127.0.0.1"	/* default host name */
+#define	DEFHOST		"localhost"	/* default host name */
 #define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
@@ -366,6 +368,7 @@ int showhostnames = 1;				/* show host names by default */
 
 int sockfd;					/* fd socket is opened on */
 int havehost = 0;				/* set to 1 when host open */
+int s_port = 0;
 struct servent *server_entry = NULL;		/* server entry for ntp */
 
 #ifdef SYS_WINNT
@@ -576,29 +579,43 @@ openhost(
 	const char *hname
 	)
 {
-	u_int32 netnum;
 	char temphost[LENHOSTNAME];
+	int a_info, i;
+	struct addrinfo hints, *ai = NULL;
+	register const char *cp;
+	char name[LENHOSTNAME];
+	char service[5];
 
-	if (server_entry == NULL) {
-		server_entry = getservbyname("ntp", "udp");
-		if (server_entry == NULL) {
-#ifdef VMS /* UCX getservbyname() doesn't work [yet], but we do know better */
-			server_entry = (struct servent *)
-				malloc(sizeof(struct servent));
-			server_entry->s_port = htons(NTP_PORT);
-#else
-			(void) fprintf(stderr, "%s: ntp/udp: unknown service\n",
-				       progname);
-			exit(1);
-#endif /* VMS & UCX */
-		}
-		if (debug > 2)
-		    printf("Got ntp/udp service entry\n");
+	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_protocol = IPPROTO_UDP;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	/*
+	 * We need to get by the [] if they were entered
+	 */
+	
+	cp = hname;
+	
+	if(*cp == '[') {
+		cp++;
+		for(i = 0; *cp != ']'; cp++, i++)
+			name[i] = *cp;
+	name[i] = '\0';
+	hname = name;
 	}
 
-	if (!getnetnum(hname, &netnum, temphost))
-	    return 0;
-	
+	sprintf(service, "%u", NTP_PORT);
+	a_info = getaddrinfo(hname, service, &hints, &ai);
+	if (a_info != 0) {
+		printf("%s\n", gai_strerror(a_info));
+		exit(-1);
+	}
+	else {
+		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
+		temphost[LENHOSTNAME] = '\0';
+	}
+
 	if (debug > 2)
 	    printf("Opening host %s\n", temphost);
 
@@ -610,13 +627,17 @@ openhost(
 	}
 	(void) strcpy(currenthost, temphost);
 
-	hostaddr.sin_family = AF_INET;
-#ifndef SYS_VXWORKS
-	hostaddr.sin_port = server_entry->s_port;
-#else
-    hostaddr.sin_port = htons(SERVER_PORT_NUM);
-#endif
-	hostaddr.sin_addr.s_addr = netnum;
+	/* port maps to the same location in both families */
+	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port;
+#ifdef SYS_VXWORKS
+	((struct sockaddr_in6 *)&hostaddr)->sin6_port = htons(SERVER_PORT_NUM);
+	if (ai->ai_family == AF_INET)
+		*(struct sockaddr_in *)&hostaddr=
+			*((struct sockaddr_in *)ai->ai_addr);
+	else
+		*(struct sockaddr_in6 *)&hostaddr=
+			*((struct sockaddr_in6 *)ai->ai_addr);
+#endif /* SYS_VXWORKS */
 
 #ifdef SYS_WINNT
 	{
@@ -630,13 +651,13 @@ openhost(
 	}
 
 
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == INVALID_SOCKET) {
 		error("socket", "", "");
 		exit(-1);
 	}
 #else
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == -1)
 	    error("socket", "", "");
 #endif /* SYS_WINNT */
@@ -652,10 +673,16 @@ openhost(
 # endif
 #endif
 
+#ifdef SYS_VXWORKS
 	if (connect(sockfd, (struct sockaddr *)&hostaddr,
 		    sizeof(hostaddr)) == -1)
+#else
+	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
+		    ai->ai_addrlen) == -1)
+#endif SYS_VXWORKS
 	    error("connect", "", "");
-	
+	if (a_info == 0)
+		freeaddrinfo(ai);
 	havehost = 1;
 	return 1;
 }
@@ -1519,7 +1546,7 @@ getarg(
 		argp->string = str;
 		break;
 	    case ADD:
-		if (!getnetnum(str, &(argp->netnum), (char *)0)) {
+		if (!getnetnum(str, &(argp->netnum), (char *)0, 0)) {
 			return 0;
 		}
 		break;
@@ -1571,6 +1598,18 @@ getarg(
 			argp->ival = -argp->ival;
 		}
 		break;
+	     case IP_VERSION:
+		if (*str) {
+			if (*str == '6') /* We want the v6 version */
+				argp->ival = 6;
+			else if (*str == '4')  /* Gimme the IPV4 */
+				argp->ival = 4;
+			else {
+				(void) fprintf(stderr, "***Version must be either 4 or 6\n");
+				return 0;
+			}
+		}
+		break;
 	}
 
 	return 1;
@@ -1584,25 +1623,34 @@ getarg(
 int
 getnetnum(
 	const char *hname,
-	u_int32 *num,
-	char *fullhost
+	struct sockaddr_storage *num,
+	char *fullhost,
+	int af
 	)
 {
-	struct hostent *hp;
+	int err;
+	int sockaddr_len;
+	struct addrinfo hints, *ai = NULL;
 
+	sockaddr_len = (af == AF_INET)
+			   ? sizeof(struct sockaddr_in)
+			   : sizeof(struct sockaddr_in6);
+	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	
+	/* decodenetnum works with addresses only */
 	if (decodenetnum(hname, num)) {
 		if (fullhost != 0) {
-			(void) sprintf(fullhost, "%lu.%lu.%lu.%lu",
-				       (u_long)((htonl(*num) >> 24) & 0xff),
-				       (u_long)((htonl(*num) >> 16) & 0xff),
-				       (u_long)((htonl(*num) >> 8) & 0xff),
-				       (u_long)(htonl(*num) & 0xff));
+			getnameinfo((struct sockaddr *)num, sockaddr_len,
+					fullhost, sizeof(fullhost), NULL, 0,
+					NI_NUMERICHOST);
+
 		}
 		return 1;
-	} else if ((hp = gethostbyname(hname)) != 0) {
-		memmove((char *)num, hp->h_addr, sizeof(u_int32));
+	} else if ((err = getaddrinfo(hname, "ntp", &hints, &ai)) == 0) {
+		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != 0)
-		    (void) strcpy(fullhost, hp->h_name);
+		    (void) strcpy(fullhost, ai->ai_canonname);
 		return 1;
 	} else {
 		(void) fprintf(stderr, "***Can't find host %s\n", hname);
@@ -1617,14 +1665,14 @@ getnetnum(
  */
 char *
 nntohost(
-	u_int32 netnum
+	struct sockaddr_storage *netnum
 	)
 {
 	if (!showhostnames)
-	    return numtoa(netnum);
-	if ((ntohl(netnum) & REFCLOCK_MASK) == REFCLOCK_ADDR)
-	    return refnumtoa(netnum);
-	return numtohost(netnum);
+	    return stoa(netnum);
+	if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
+    		return refnumtoa(netnum);
+	return socktohost(netnum);
 }
 
 
@@ -2880,7 +2928,7 @@ cookedprint(
 	struct ctl_var *varlist;
 	l_fp lfp;
 	long ival;
-	u_int32 hval;
+	struct sockaddr_storage hval;
 	u_long uval;
 	l_fp lfparr[8];
 	int narr;
@@ -2959,10 +3007,11 @@ cookedprint(
 			    case NA:
 				if (!decodenetnum(value, &hval))
 				    output_raw = '?';
-				else if (fmt == HA)
-				    output(fp, name, nntohost(hval));
-				else
-				    output(fp, name, numtoa(hval));
+				else if (fmt == HA){
+				    output(fp, name, nntohost(&hval));
+				} else {
+				    output(fp, name, stoa(&hval));
+				}
 				break;
 			
 			    case ST:
@@ -2971,7 +3020,7 @@ cookedprint(
 			
 			    case RF:
 				if (decodenetnum(value, &hval))
-				    output(fp, name, nntohost(hval));
+				    output(fp, name, nntohost(&hval));
 				else if ((int)strlen(value) <= 4)
 				    output(fp, name, value);
 				else

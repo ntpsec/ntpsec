@@ -88,11 +88,11 @@ extern char * socktoa           P((struct sockaddr_storage *));
 extern char * socktohost        P((struct sockaddr_storage *));
 extern	int	octtoint	P((const char *, u_long *));
 extern	u_long	ranp2		P((int));
-extern	char *	refnumtoa	P((struct sockaddr_storage* ));
+extern	char *	refnumtoa	P((struct sockaddr_storage *));
 extern	int	tsftomsu	P((u_long, int));
 extern	char *	uinttoa		P((u_long));
 
-extern	int	decodenetnum	P((const char *, u_int32 *));
+extern	int	decodenetnum	P((const char *, struct sockaddr_storage *));
 
 extern	const char *	FindConfig	P((const char *));
 

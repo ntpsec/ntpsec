@@ -137,13 +137,19 @@ getaddrinfo (const char *nodename, const char *servname,
 		if (ai->ai_addr == NULL)
 			return (EAI_MEMORY);
 		ai->ai_family = hp->h_addrtype;
-		ai->ai_addrlen = sizeof(struct sockaddr_storage);
+		ai->ai_addrlen = sizeof(struct sockaddr);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
 		memmove(&sockin->sin_addr, hp->h_addr, hp->h_length);
 		ai->ai_addr->sa_family = hp->h_addrtype;
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		ai->ai_addr->sa_len = sizeof(struct sockaddr);
 #endif
+		if (hints != NULL && hints->ai_flags & AI_CANONNAME) {
+			ai->ai_canonname = malloc(strlen(hp->h_name));
+			if (ai->ai_canonname == NULL)
+				return (EAI_MEMORY);
+			strcpy(ai->ai_canonname, hp->h_name);
+		}
 	}
 	if (nodename == NULL && hints != NULL) {
 		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
@@ -187,7 +193,8 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 
 	if (sa->sa_family != AF_INET)
 		return (EAI_FAMILY);
-	hp = gethostbyaddr((const char *)sa->sa_data, 4, AF_INET);
+	hp = gethostbyaddr((const char *)&((struct sockaddr_in *)sa)->sin_addr,
+	    4, AF_INET);
 	if (hp == NULL) {
 		if (h_errno == TRY_AGAIN)
 			return (EAI_AGAIN);
