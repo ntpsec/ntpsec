@@ -31,7 +31,7 @@
  *   +---------------+   =   signature   =   +---------------+
  * 4 |   timestamp   |   |               |   CRYPTO_DH req/rsp
  *   +---------------+   +---------------+   CRYPTO_PUB rsp
- * 5 | signature len |   CRYPTO_PRIV rsp
+ * 5 | signature len |   CRYPTO_PRIV rsp     CRYPTO_NAME rsp
  *   +---------------+
  * 6 |               |
  *   =   signature   =
@@ -43,7 +43,8 @@
  *   CRYPTO_ASSOC 2  request/respond association ID
  *   CRYPTO_AUTO  3  request/respond autokey values
  *   CRYPTO_PRIV  4  request/respond cookie
- *   CRYPTO_DH    5  send public value/receive signature
+ *   CRYPTO_DH    5  request public value/respond signature
+ *   CRYPTO_NAME  6  request/respond host name
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
@@ -510,6 +511,19 @@ crypto_recv(
 #endif /* PUBKEY */
 
 		/*
+		 * Receive remote host name and install public key from
+		 * file.
+		 */
+		case CRYPTO_NAME | CRYPTO_RESP:
+			crypto_public(peer, (char *)&pkt[i + 3]);
+#ifdef DEBUG
+			if (debug)
+				printf("crypto_recv: host %s\n",
+				    (char *)&pkt[i + 3]); 
+#endif
+			break;
+
+		/*
 		 * For other requests, save the request code for later;
 		 * for unknown responses or errors, just ignore for now.
 		 */
@@ -701,6 +715,16 @@ crypto_xmit(
 		len += temp + 4;
 		break;
 #endif /* PUBKEY */
+
+	/*
+	 * Send host name.
+	 */
+	case CRYPTO_NAME | CRYPTO_RESP:
+		gethostname((char *)&xpkt[i + 3], MAXFILENAME);
+		temp = strlen((char *)&xpkt[i + 3]);
+		xpkt[i + 2] = htonl(temp);
+		len += temp + 4;
+		break;
 
 	/*
 	 * Default - Fall through for requests; for unknown responses,

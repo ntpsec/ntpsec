@@ -1959,7 +1959,7 @@ peer_xmit(
 			if (crypto_enable && crypto_flags &
 			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_PUBL, peer->hcookie,
+				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
@@ -2014,7 +2014,7 @@ peer_xmit(
 			if (crypto_enable && crypto_flags &
 			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_PUBL, peer->hcookie,
+				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
