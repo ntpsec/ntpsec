@@ -1,5 +1,7 @@
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k25
+
 	* html/leap.htm: Added.
 	* html/index.htm: Update.
 	* html/driver7.htm: Update.
