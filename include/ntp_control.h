@@ -203,7 +203,7 @@ struct ntp_control {
 #define	CP_REC		19
 #define	CP_XMT		20
 #define	CP_REACH	21
-#define	CP_VALID	22
+#define	CP_UNREACH	22
 #define	CP_TIMER	23
 #define	CP_DELAY	24
 #define	CP_OFFSET	25
@@ -223,11 +223,12 @@ struct ntp_control {
 #ifdef OPENSSL
 #define CP_FLAGS	39
 #define CP_HOST		40
-#define	CP_INITSEQ	41
-#define	CP_INITKEY	42
-#define	CP_INITTSP	43
-#define	CP_DIGEST	44
-#define CP_IDENT	45
+#define CP_VALID	41
+#define	CP_INITSEQ	42
+#define	CP_INITKEY	43
+#define	CP_INITTSP	44
+#define	CP_DIGEST	45
+#define CP_IDENT	46
 #define	CP_MAXCODE	CP_IDENT
 #else
 #define	CP_MAXCODE	CP_VARLIST
