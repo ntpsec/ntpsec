@@ -222,16 +222,15 @@ hopfpci_poll(
 	pp->hour   = m_time.wHour;
 	pp->minute = m_time.wMinute;
 	pp->second = m_time.wSecond;
-	pp->msec=m_time.wMilliseconds;
-	pp->usec=0;
+	pp->nsec   = m_time.wMilliseconds * 1000000;
 	if (m_time.wStatus & LEWAPWAR)
 		pp->leap = LEAP_ADDSECOND;
 	else
 		pp->leap = LEAP_NOWARNING;
 
 	sprintf(pp->a_lastcode,"ST: %02X T: %02d:%02d:%02d.%03d D: %02d.%02d.%04d",
-		m_time.wStatus, pp->hour, pp->minute, pp->second, pp->msec,
-		m_time.wDay,  m_time.wMonth, m_time.wYear);
+		m_time.wStatus, pp->hour, pp->minute, pp->second,
+		pp->nsec / 1000000, m_time.wDay, m_time.wMonth, m_time.wYear);
 	pp->lencode = strlen(pp->a_lastcode);
 
 	get_systime(&pp->lastrec);
