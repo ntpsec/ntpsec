@@ -235,33 +235,6 @@ struct addrinfo {
 #define	EAI_PROTOCOL	13
 #define	EAI_MAX		14
 
-/*
- * Flag values for getaddrinfo()
- */
-#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
-#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
-#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
-/* valid flags for addrinfo */
-#define AI_MASK \
-    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
-
-#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
-
-/*
- * Constants for getnameinfo()
- */
-#define	NI_MAXHOST	1025
-#define	NI_MAXSERV	32
-
-/*
- * Flag values for getnameinfo()
- */
-#define	NI_NOFQDN	0x00000001
-#define	NI_NUMERICHOST	0x00000002
-#define	NI_NAMEREQD	0x00000004
-#define	NI_NUMERICSERV	0x00000008
-#define	NI_DGRAM	0x00000010
-#define NI_WITHSCOPEID	0x00000020
 
 int	getaddrinfo P((const char *, const char *,
 			 const struct addrinfo *, struct addrinfo **));
@@ -271,4 +244,39 @@ void	freeaddrinfo P((struct addrinfo *));
 char	*gai_strerror P((int));
 
 #endif /* ISC_PLATFORM_HAVEIPV6 */
+
+/*
+ * Flag values for getaddrinfo()
+ */
+#ifndef AI_NUMERICHOST
+#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
+#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
+#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
+/* valid flags for addrinfo */
+#define AI_MASK \
+    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
+
+#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
+#endif
+
+/*
+ * Constants for getnameinfo()
+ */
+#ifndef NI_MAXHOST
+#define	NI_MAXHOST	1025
+#define	NI_MAXSERV	32
+#endif
+
+/*
+ * Flag values for getnameinfo()
+ */
+#ifndef NI_NUMERICHOST
+#define	NI_NOFQDN	0x00000001
+#define	NI_NUMERICHOST	0x00000002
+#define	NI_NAMEREQD	0x00000004
+#define	NI_NUMERICSERV	0x00000008
+#define	NI_DGRAM	0x00000010
+#define NI_WITHSCOPEID	0x00000020
+#endif
+
 #endif /* !_NTP_RFC2553_H_ */
