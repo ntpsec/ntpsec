@@ -113,6 +113,15 @@ for this flag is disable</dd>
 </dl>
 </dd>
 
+<dt><tt>includefile <i>includefile</i></tt></dt>
+
+<dd>This command allows additional configuration commands to be
+included from a separate file. Include files may be nested to a
+depth of five; upon reaching the end of any include file, command
+processing resumes in the previous configuration file. This option
+is useful for sites that run <tt>ntpd</tt> on multiple hosts, with
+(mostly) common options (e.g., a restriction list).</dd>
+
 <dt><tt>logconfig <i>configkeyword</i></tt></dt>
 
 <dd>This command controls the amount and type of output written to
