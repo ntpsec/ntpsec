@@ -42,6 +42,11 @@ static char separator = '/';
 #endif /* SYS_WINNT */
 extern	char *progname;
 
+/* Declare the local functions */
+void	addto_syslog	P((int, char *));
+void	format_errmsg   P((char *, int, const char *, int));
+
+
 /*
  * This routine adds the contents of a buffer to the log
  */
@@ -78,7 +83,7 @@ void
 format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 {
 	register char c;
-	register char *n, *prog;
+	register char *n;
 	register const char *f;
 
 	char *err;
@@ -137,7 +142,6 @@ void msyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
-	register char *prog;
 
 	/*
 	 * Save the error value as soon as possible
@@ -147,7 +151,6 @@ void msyslog(int level, const char *fmt, ...)
 #else
 	int errval = errno;
 #endif
-	char *err;
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);
@@ -178,7 +181,6 @@ void netsyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
-	register char *prog;
 
 	/*
 	 * Save the error value as soon as possible
@@ -188,7 +190,6 @@ void netsyslog(int level, const char *fmt, ...)
 #else
 	int errval = errno;
 #endif
-	char *err;
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);
