@@ -1191,6 +1191,9 @@ process_packet(
 		if (debug)
 			printf("packet: bad header %03x\n",
 			    peer->flash);
+		if (debug >2)
+			printf("pstratum = %d, sys_stratum = %d, pmode = %d\n",
+				pstratum, sys_stratum, pmode);
 #endif
 		return;
 	}
