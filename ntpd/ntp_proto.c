@@ -637,9 +637,15 @@ receive(
 		 * server response. Otherwise, it must be a client
 		 * request, so send a server response and go home.
 		 */
-		if (sys_manycastserver && (rbufp->dstadr->flags &
-		    INT_MULTICAST)) {
-	
+		if (rbufp->dstadr->flags & INT_MULTICAST) {
+
+			/*
+			 * Do not respond to multicast if not configured
+			 * as a manycast server.
+			 */
+			if (!sys_manycastserver)
+				return;
+
 			/*
 			 * There is no reason to respond to a request if
 			 * our time is worse than the manycaster or it
