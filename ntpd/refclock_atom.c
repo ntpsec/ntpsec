@@ -107,8 +107,8 @@ struct ppsunit {
  */
 static	int	atom_start	P((int, struct peer *));
 static	void	atom_poll	P((int, struct peer *));
-#ifdef HAVE_PPSAPI
 static	void	atom_shutdown	P((int, struct peer *));
+#ifdef HAVE_PPSAPI
 static	void	atom_control	P((int, struct refclockstat *, struct
 				    refclockstat *, struct peer *));
 static	void	atom_timer	P((int, struct peer *));
