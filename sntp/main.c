@@ -16,7 +16,7 @@ The specification of this program is:
             [ { -r | -a } [ -P prompt ] [ -l lockfile ] ]
             [ -c count ] [ -e minerr ][ -E maxerr ]
             [ -d delay | -x [ separation ] [ -f savefile ] ]
-            [ address(es) ] ]
+            [ -4 | -6 ] [ address(es) ] ]
 
     --help, -h and -? all print the syntax of the command.
 
@@ -49,6 +49,8 @@ Naturally, this will work only if the user has enough privilege.
 
     -x indicates that the program should run as a daemon (i.e. forever), and
 allow for clock drift.
+
+    -4 or -6 force dns resolving to ipv4 or ipv6 addresses.
 
     The default is to write the current date and time to the standard output in
 a format like '1996 Oct 15 20:17:25.123 + 4.567 +/- 0.089 secs', indicating the
@@ -277,7 +279,7 @@ helpfully.  This is called before any files or sockets are opened. */
     fprintf(stderr,"            [ -c count ] [ -e minerr ] [ -E maxerr ]\n");
     fprintf(stderr,"            [ -d delay | -x [ separation ] ");
     fprintf(stderr,"[ -f savefile ] ]\n");
-    fprintf(stderr,"        [ address(es) ] ]\n");
+    fprintf(stderr,"        [ -4 | -6 ] [ address(es) ] ]\n");
     if (halt) exit(EXIT_FAILURE);
 }
 
@@ -1597,7 +1599,11 @@ one of the specialised routines to do the work. */
 
     while (argc > 1) {
         k = 1;
-        if (strcmp(argv[1],"-B") == 0 && action == 0) {
+	if (strcmp(argv[1],"-4") == 0)
+	    preferred_family(PREF_FAM_INET);
+	else if (strcmp(argv[1],"-6") == 0)
+	    preferred_family(PREF_FAM_INET6);
+        else if (strcmp(argv[1],"-B") == 0 && action == 0) {
             action = action_broadcast;
             if (argc > 2) {
                 if (sscanf(argv[2],"%d%c",&period,&c) != 1) syntax(1);

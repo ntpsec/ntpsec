@@ -23,8 +23,12 @@ functions. */
 
 static int initial = 1,
     descriptors[MAX_SOCKETS];
-static struct sockaddr_in here[MAX_SOCKETS], there[MAX_SOCKETS];
 
+#ifdef HAVE_IPV6
+static struct sockaddr_storage here[MAX_SOCKETS], there[MAX_SOCKETS];
+#else
+static struct sockaddr_in here[MAX_SOCKETS], there[MAX_SOCKETS];
+#endif
 
 
 /* There needs to be some disgusting grobble for handling timeouts, that is
@@ -56,7 +60,125 @@ void display_in_hex (const void *data, int length) {
         fprintf(stderr,"%.2x",((const unsigned char *)data)[i]);
 }
 
+#ifdef HAVE_IPV6
 
+void display_sock_in_hex (struct sockaddr_storage *sock) {
+    int family, len;
+    struct sockaddr_in *sin;
+    struct sockaddr_in6 *sin6;
+
+    family = sock->ss_family;
+    switch(family) {
+    case AF_INET:
+	sin = (struct sockaddr_in *)sock;
+	display_in_hex(&sin->sin_addr, sizeof(struct in_addr));
+	fprintf(stderr,"/");
+	display_in_hex(&sin->sin_port, 2);
+	break;
+    case AF_INET6:
+	sin6 = (struct sockaddr_in6 *)sock;
+	display_in_hex(&sin6->sin6_addr, sizeof(struct in6_addr));
+	fprintf(stderr,"/");
+	display_in_hex(&sin6->sin6_port, 2);
+	break;
+    }
+}
+
+#else
+
+void display_sock_in_hex (struct sockaddr_in *sock) {
+    int family, len;
+    struct sockaddr_in *sin;
+
+    family = sock->sin_family;
+    switch(family) {
+    case AF_INET:
+	sin = (struct sockaddr_in *)sock;
+	display_in_hex(&sin->sin_addr, sizeof(struct in_addr));
+	fprintf(stderr,"/");
+	display_in_hex(&sin->sin_port, 2);
+	break;
+    }
+}
+#endif
+
+#ifdef HAVE_IPV6
+
+void open_socket (int which, char *hostname, int timespan) {
+
+/* Locate the specified NTP server, set up a couple of addresses and open a
+socket. */
+
+    int port, k, sl;
+    struct sockaddr_storage address, anywhere, everywhere;
+
+/* Initialise and find out the server and port number.  Note that the port
+number is in network format. */
+
+    if (initial)
+	for (k = 0; k < MAX_SOCKETS; ++k)
+	    descriptors[k] = -1;
+    initial = 0;
+    if (which < 0 || which >= MAX_SOCKETS || descriptors[which] >= 0)
+        fatal(0,"socket index out of range or already open",NULL);
+    if (verbose > 2)
+	fprintf(stderr,"Looking for the socket addresses\n");
+    find_address(&address,&anywhere,&everywhere,&port,hostname,timespan);
+    if (verbose > 2) {
+        fprintf(stderr,"Internet address: address=");
+        display_sock_in_hex(&address);
+        fprintf(stderr," anywhere=");
+        display_sock_in_hex(&anywhere);
+        fprintf(stderr," everywhere=");
+        display_sock_in_hex(&everywhere);
+        fputc('\n',stderr);
+    }
+
+/* Set up our own and the target addresses.  Note that the target address will
+be reset before use in server mode. */
+
+    memset(&here[which], 0, sizeof(struct sockaddr_storage));
+    here[which] = anywhere;
+    if (!(operation == op_listen || operation == op_server))
+        ((struct sockaddr_in6 *)&here[which])->sin6_port = 0;
+    memset(&there[which], 0, sizeof(struct sockaddr_storage));
+    there[which] = (operation == op_broadcast ? everywhere : address);
+    if (verbose > 2) {
+        fprintf(stderr,"Initial sockets: here=");
+        display_sock_in_hex(&here[which]);
+        fprintf(stderr," there=");
+        display_sock_in_hex(&there[which]);
+        fputc('\n',stderr);
+    }
+
+/* Allocate a local UDP socket and configure it. */
+
+    switch(((struct sockaddr_in *)&there[which])->sin_family) {
+    case AF_INET:
+	sl = sizeof(struct sockaddr_in);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	sl = sizeof(struct sockaddr_in6);
+	break;
+#endif
+    default:
+	sl = 0;
+	break;
+    }
+    errno = 0;
+    if ((descriptors[which] = socket(here[which].ss_family,SOCK_DGRAM,0)) < 0
+	|| bind(descriptors[which],(struct sockaddr *)&here[which], sl) < 0)
+        fatal(1,"unable to allocate socket for NTP",NULL);
+    if (operation == op_broadcast) {
+        errno = 0;
+        k = setsockopt(descriptors[which],SOL_SOCKET,SO_BROADCAST,
+                (void *)&k,sizeof(k));
+        if (k != 0) fatal(1,"unable to set permission to broadcast",NULL);
+    }
+}
+
+#else
 
 void open_socket (int which, char *hostname, int timespan) {
 
@@ -124,20 +246,33 @@ be reset before use in server mode. */
     }
 }
 
-
+#endif
 
 extern void write_socket (int which, void *packet, int length) {
 
 /* Any errors in doing this are fatal - including blocking.  Yes, this leaves a
 server vulnerable to a denial of service attack. */
 
-    int k;
+    int k, sl;
 
+    switch(((struct sockaddr_in *)&there[which])->sin_family) {
+    case AF_INET:
+	sl = sizeof(struct sockaddr_in);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	sl = sizeof(struct sockaddr_in6);
+	break;
+#endif
+    default:
+	sl = 0;
+	break;
+    }
     if (which < 0 || which >= MAX_SOCKETS || descriptors[which] < 0)
         fatal(0,"socket index out of range or not open",NULL);
     errno = 0;
     k = sendto(descriptors[which],packet,(size_t)length,0,
-            (struct sockaddr *)&there[which],sizeof(there[which]));
+            (struct sockaddr *)&there[which],sl);
     if (k != length) fatal(1,"unable to send NTP packet",NULL);
 }
 
@@ -148,7 +283,11 @@ extern int read_socket (int which, void *packet, int length, int waiting) {
 /* Read a packet and return its length or -1 for failure.  Only incorrect
 length and timeout are not fatal. */
 
+#ifdef HAVE_IPV6
+    struct sockaddr_storage scratch, *ptr;
+#else
     struct sockaddr_in scratch, *ptr;
+#endif
     int n;
     int k;
 
@@ -174,10 +313,10 @@ length and timeout are not fatal. */
 /* Get the packet and clear the timeout, if any.  */
 
     if (operation == op_server)
-        memcpy(ptr = &there[which],&here[which],sizeof(struct sockaddr_in));
+        memcpy(ptr = &there[which],&here[which],sizeof(scratch));
     else
-        memcpy(ptr = &scratch,&there[which],sizeof(struct sockaddr_in));
-    n = sizeof(struct sockaddr_in);
+        memcpy(ptr = &scratch,&there[which],sizeof(scratch));
+    n = sizeof(scratch);
     errno = 0;
     k = recvfrom(descriptors[which],packet,(size_t)length,0,
         (struct sockaddr *)ptr,&n);
@@ -188,9 +327,7 @@ length and timeout are not fatal. */
     if (k <= 0) fatal(1,"unable to receive NTP packet from server",NULL);
     if (verbose > 2) {
         fprintf(stderr,"Packet of length %d received from ",k);
-        display_in_hex(&ptr->sin_addr,sizeof(struct in_addr));
-        fputc('/',stderr);
-        display_in_hex(&ptr->sin_port,sizeof(ptr->sin_port));
+        display_sock_in_hex(ptr);
         fputc('\n',stderr);
     }
     return k;
@@ -204,7 +341,11 @@ extern int flush_socket (int which) {
 for a while.  Ignore packet length oddities and return the number of packets
 skipped. */
 
+#ifdef HAVE_IPV6
+    struct sockaddr_storage scratch;
+#else
     struct sockaddr_in scratch;
+#endif
     int n;
     char buffer[256];
     int flags, count = 0, total = 0, k;
@@ -219,7 +360,7 @@ skipped. */
             fcntl(descriptors[which],F_SETFL,flags|O_NONBLOCK) == -1)
         fatal(1,"unable to set non-blocking mode",NULL);
     while (1) {
-        n = sizeof(struct sockaddr_in);
+        n = sizeof(scratch);
         errno = 0;
         k = recvfrom(descriptors[which],buffer,256,0,
             (struct sockaddr *)&scratch,&n);

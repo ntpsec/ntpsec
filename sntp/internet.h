@@ -32,8 +32,16 @@ to see whether the universal availability of 64-bit integers arrives first. */
 #define port_to_integer(x) (ntohs((unsigned short)(x)))
 
 
+#if defined(_SS_MAXSIZE) || defined(_SS_SIZE)
+#define HAVE_IPV6
+#endif
 
 /* Defined in internet.c */
-
+#ifdef HAVE_IPV6
+extern void find_address (struct sockaddr_storage *address,
+    struct sockaddr_storage *anywhere, struct sockaddr_storage *everwhere,
+    int *port, char *hostname, int timespan);
+#else
 extern void find_address (struct in_addr *address, struct in_addr *anywhere,
     struct in_addr *everwhere, int *port, char *hostname, int timespan);
+#endif

@@ -20,6 +20,8 @@ is inaccessible. */
 #undef INTERNET
 
 
+/* Used to force dns resolving to ipv4 or ipv6 addresses. */
+static int pref_family;
 
 /* There needs to be some disgusting grobble for handling timeouts, which is
 identical to the grobble in socket.c. */
@@ -41,7 +43,101 @@ static void clear_alarm (void) {
     errno = k;
 }
 
+void preferred_family(int fam) {
+	switch(fam) {
+	case PREF_FAM_INET:
+	    pref_family = AF_INET;
+	    break;
+#ifdef HAVE_IPV6
+	case PREF_FAM_INET6:
+	    pref_family = AF_INET6;
+	    break;
+#endif
+	default:
+	    fatal(0,"unable to set the preferred family", NULL);
+	    break;
+	}
+}
 
+#ifdef HAVE_IPV6
+
+void find_address (struct sockaddr_storage *address,
+    struct sockaddr_storage *anywhere, struct sockaddr_storage *everywhere,
+    int *port, char *hostname, int timespan) {
+
+/* Locate the specified NTP server and return its Internet address and port 
+number. */
+
+    int family, rval;
+    struct addrinfo hints;
+    struct addrinfo *res;
+    struct sockaddr_in *sin;
+    struct sockaddr_in6 *sin6;
+
+    res = NULL;
+    memset(address, 0, sizeof(struct sockaddr_storage));
+    memset(anywhere, 0, sizeof(struct sockaddr_storage));
+    memset(everywhere, 0, sizeof(struct sockaddr_storage));
+
+    if (setjmp(jump_buffer))
+        fatal(0,"unable to set up access to NTP server %s",hostname);
+    errno = 0;
+    if (signal(SIGALRM,jump_handler) == SIG_ERR)
+        fatal(1,"unable to set up signal handler",NULL);
+    alarm((unsigned int)timespan);
+
+/* Look up the Internet name or IP number. */
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_family = pref_family;
+    rval = getaddrinfo(hostname, "ntp", &hints, &res);
+    if (rval != 0)
+	fatal(0, "getaddrinfo failed with %s", gai_strerror(rval));
+
+/* Now clear the timer and check the result. */
+
+    clear_alarm();
+    /* There can be more than one address in the list, but for now only
+    use the first. */
+    memcpy(address, res->ai_addr, res->ai_addrlen);
+    family = res->ai_family;
+    freeaddrinfo(res);
+
+    switch(family) {
+    case AF_INET:
+	hints.ai_family = AF_INET;
+	hints.ai_flags = AI_PASSIVE;
+	rval = getaddrinfo(NULL, "ntp", &hints, &res);
+	if (rval != 0)
+	    fatal(0, "getaddrinfo failed with %s", gai_strerror(rval));
+	memcpy(anywhere, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+	rval = getaddrinfo("255.255.255.255", "ntp", &hints, &res);
+	if (rval != 0)
+	    fatal(0, "getaddrinfo failed with %s", gai_strerror(rval));
+	memcpy(everywhere, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+	break;
+    case AF_INET6:
+	hints.ai_family = AF_INET6;
+	hints.ai_flags = AI_PASSIVE;
+	rval = getaddrinfo(NULL, "ntp", &hints, &res);
+	if (rval != 0)
+	    fatal(0, "getaddrinfo failed with %s", gai_strerror(rval));
+	memcpy(anywhere, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+	/* IPv6 do not have broadcast, give it loopback. */
+	hints.ai_flags = 0;
+	rval = getaddrinfo(NULL, "ntp", &hints, &res);
+	if (rval != 0)
+	    fatal(0, "getaddrinfo failed with %s", gai_strerror(rval));
+	memcpy(everywhere, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+	break;
+    }
+}
+
+#else
 
 void find_address (struct in_addr *address, struct in_addr *anywhere,
     struct in_addr *everywhere, int *port, char *hostname, int timespan) {
@@ -122,3 +218,4 @@ Note that a port number is not assumed to be 16 bits. */
                 argv0,port_to_integer(*port));
     }
 }
+#endif

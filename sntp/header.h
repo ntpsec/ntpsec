@@ -61,6 +61,9 @@ extern void log_message (const char *message);
 /* extern void find_address (struct in_addr *address, int *port, char *hostname,
     int timespan); */
 
+#define PREF_FAM_INET	1
+#define PREF_FAM_INET6	2
+extern void preferred_family(int);
 
 
 /* Defined in socket.c */
