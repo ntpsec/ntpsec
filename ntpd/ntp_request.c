@@ -1248,7 +1248,7 @@ loop_info(
 	extern double last_offset;
 	extern double drift_comp;
 	extern int tc_counter;
-	extern u_long last_time;
+	extern u_long sys_clocktime;
 
 	li = (struct info_loop *)prepare_pkt(srcadr, inter, inpkt,
 	    sizeof(struct info_loop));
@@ -1258,7 +1258,7 @@ loop_info(
 	DTOLFP(drift_comp * 1e6, &ltmp);
 	HTONL_FP(&ltmp, &li->drift_comp);
 	li->compliance = htonl((u_int32)(tc_counter));
-	li->watchdog_timer = htonl((u_int32)(current_time - last_time));
+	li->watchdog_timer = htonl((u_int32)(current_time - sys_clocktime));
 
 	(void) more_pkt();
 	flush_pkt();

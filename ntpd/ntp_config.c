@@ -692,7 +692,10 @@ getconfig(
 			
 			peerversion = NTP_VERSION;
 			minpoll = NTP_MINDPOLL;
-			maxpoll = NTP_MAXDPOLL;
+			if (!ISREFCLOCKADR(&peeraddr))
+				maxpoll = NTP_MAXDPOLL;
+			else
+				maxpoll = minpoll;
 			peerkey = 0;
 			peerkeystr = (u_char *)"*";
 			peerflags = 0;
