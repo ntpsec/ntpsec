@@ -494,6 +494,27 @@ filep(
 }
 
 
+FILE *
+newfile(
+	const char *f1,		/* Visible file */
+	const char *f2,		/* New timestamped file name */
+	const char *f3		/* Previous symlink target */
+	)
+{
+	/*
+	   If:
+	   - no symlink support, or
+	   - there is no old symlink (!f3)
+	   - - base = dirname(f1)
+	   Otherwise:
+	   - If ('/' == *f3)
+	   - - base = dirname(f3)
+	   - else
+	   - - base = dirname(f1) / dirname(f2)
+	*/
+}
+
+
 int
 main(
 	int argc,
