@@ -136,7 +136,9 @@ int make_dh = 0;		/* Make D-H parameter file? */
 int make_md5 = 0;		/* Make MD5 keyfile? */
 int make_rsa = 0;		/* Make RSA pair? */
 int force = 0;			/* Force the installation? */
+int here = 0;			/* Put the files here (curdir)? */
 int nosymlinks = 0;		/* Just create the (timestamped) files? */
+int memorex = 0;		/* Are we live? */
 int trash = 0;			/* Trash old files? */
 int errflag = 0;
 
@@ -175,7 +177,7 @@ u_long	client_limit;
 u_long	client_limit_period;
 l_fp	sys_revoketime;
 u_long	sys_revoke;		/* keys revoke timeout */
-volatile int debug = 1;		/* debugging flag */
+volatile int debug = 0;		/* debugging flag */
 
 struct peer *
 peer_config(
@@ -377,17 +379,22 @@ usage(
 	void
 	)
 {
-	printf("Usage: %s [ -c ntp.conf ] [ -k key_file ]\n", progname);
-	printf("       [ -f ] [ -l ] [ -t ] [ -d ] [ -m ] [ -r ]\n");
+	printf("Usage: %s [ -c ntp.conf ] [ -g {d,m,r} ] [ -k key_file ]\n",
+	       progname);
+	printf("       [ -d ] [ -f ] [ -h ] [ -l ] [ -n ] [ -t ]\n");
 	printf(" where:\n");
 	printf("  -c /etc/ntp.conf   Location of ntp.conf file\n");
-	printf("  -k key_file        Location of key file\n");
+	printf("  -d     enable debug messages (can be used multiple times)\n");
 	printf("  -f     force installation of generated keys.\n");
+	printf("  -g d   Generate D-H parameter file\n");
+	printf("  -g m   Generate MD5 key file\n");
+	printf("  -g r   Generate RSA keys\n");
+	printf("  -g dmr (Can be combined)\n");
+	printf("  -h     Build keys here (current directory). Implies -l\n");
+	printf("  -k key_file        Location of key file\n");
 	printf("  -l     Don't make the symlinks\n");
+	printf("  -n     Don't actually do anything, just say what would be done\n");
 	printf("  -t     Trash the (old) files at the end of symlink\n");
-	printf("  -d     Generate D-H parameter file\n");
-	printf("  -m     Generate MD5 key file\n");
-	printf("  -r     Generate RSA keys\n");
 
 	exit(1);
 }
@@ -401,7 +408,7 @@ getCmdOpts (
 {
 	int i;
 
-	while ((i = ntp_getopt(argc, argv, "c:dflmrt")) != EOF)
+	while ((i = ntp_getopt(argc, argv, "c:dfg:hlnt")) != EOF)
 		switch (i) {
 		    case 'c':
 			config_file = ntp_optarg;
@@ -410,19 +417,39 @@ getCmdOpts (
 #endif
 			break;
 		    case 'd':
-			++make_dh;
+			++debug;
 			break;
 		    case 'f':
 			++force;
 			break;
+		    case 'g':
+			while (*ntp_optarg) {
+				switch (*ntp_optarg) {
+				    case 'd':
+					++make_dh;
+					break;
+				    case 'm':
+					++make_md5;
+					break;
+				    case 'r':
+					++make_rsa;
+					break;
+				    default:
+					++errflag;
+					break;
+				}
+				++ntp_optarg;
+			}
+			break;
+		    case 'h':
+			++here;
+			++nosymlinks;
+			break;
 		    case 'l':
 			++nosymlinks;
 			break;
-		    case 'm':
-			++make_md5;
-			break;
-		    case 'r':
-			++make_rsa;
+		    case 'n':
+			++memorex;
 			break;
 		    case 't':
 			++trash;
@@ -520,57 +547,68 @@ newfile(
 	   print any error message/bail
 	   return FILE
 	*/
-	if (
+
+	if (here)
+		snprintf(fb, sizeof fb, "%s", f2);
+	else {
+		if (
 #ifdef HAVE_READLINK
-	    !f3
+		    !f3
 #else
-	    1
+		    1
 #endif
-	   ) {
-		/* file = dirname(f1) / f2 */
-		snprintf(fb, sizeof fb, "%s", f1);
-		cp = strrchr(fb, '/');
-		if (cp) {
-			*cp = 0;
-		}
-		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
-		if (debug > 1) printf("case 1: file is <%s>\n", fb);
-	} else {
-	/*
-	   - If ('/' == *f3)
-	   - - file = dirname(f3) / f2
-	   - else
-	   - - file = dirname(f1) / dirname(f3) / f2
-	*/
-		if ('/' != *f3) {
+		   ) {
+			/* file = dirname(f1) / f2 */
 			snprintf(fb, sizeof fb, "%s", f1);
 			cp = strrchr(fb, '/');
 			if (cp) {
-				++cp;
 				*cp = 0;
 			}
-			if (debug > 1) printf("case 2: file is <%s>\n", fb);
+			snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+			if (debug > 1) printf("case 1: file is <%s>\n", fb);
 		} else {
-			*fb = 0;
+			/*
+			  - If ('/' == *f3)
+			  - - file = dirname(f3) / f2
+			  - else
+			  - - file = dirname(f1) / dirname(f3) / f2
+			*/
+			if ('/' != *f3) {
+				snprintf(fb, sizeof fb, "%s", f1);
+				cp = strrchr(fb, '/');
+				if (cp) {
+					++cp;
+					*cp = 0;
+				}
+				if (debug > 1)
+					printf("case 2: file is <%s>\n", fb);
+			} else {
+				*fb = 0;
+			}
+			snprintf(fb, sizeof fb, "%s%s", fb, f3);
+			cp = strrchr(fb, '/');
+			if (cp) {
+				*cp = 0;
+			}
+			snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+			if (debug > 1) printf("case 3: file is <%s>\n", fb);
 		}
-		snprintf(fb, sizeof fb, "%s%s", fb, f3);
-		cp = strrchr(fb, '/');
-		if (cp) {
-			*cp = 0;
-		}
-		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
-		if (debug > 1) printf("case 3: file is <%s>\n", fb);
 	}
 
 	/*
-	   fopen(file)
-	   print any error message/bail
-	   return FILE
+	  fopen(file)
+	  print any error message/bail
+	  return FILE
 	*/
-	fp = fopen(fb, "w");
-	if (fp == NULL) {
-		perror(fb);
-		exit(1);
+	if (memorex) {
+		printf("Would write file <%s>\n", fb);
+		fp = NULL;
+	} else {
+		fp = fopen(fb, "w");
+		if (fp == NULL) {
+			perror(fb);
+			exit(1);
+		}
 	}
 	return fp;
 }
@@ -596,7 +634,9 @@ cleanlinks(
 	  - else, unlink dirname(f1) / f3
 	*/
 #endif /* HAVE_READLINK */
-	if (unlink(f1)) {
+	if (memorex)
+		printf("Would unlink(%s)\n", f1);
+	else if (unlink(f1)) {
 		if (errno != ENOENT) {
 			fprintf(stderr, "unlink(%s) failed: %s\n", f1,
 				strerror(errno));
@@ -619,7 +659,9 @@ cleanlinks(
 	snprintf(fb, sizeof fb, "%s%s", fb, f2);
 	if (debug > 1) printf("cleanlinks 1: file is <%s>\n", fb);
 
-	if (symlink(fb, f1)) {
+	if (memorex)
+		printf("Would symlink <%s> -> <%s>\n", f1, fb);
+	else if (symlink(fb, f1)) {
 		fprintf(stderr, "symlink(%s,%s) failed: %s\n", fb, f1,
 			strerror(errno));
 		return;
@@ -632,7 +674,9 @@ cleanlinks(
 	*/
 	if (trash && f3) {
 		if ('/' == *f3) {
-			if (unlink(f3)) {
+			if (memorex)
+				printf("Would unlink(%s)\n", f3);
+			else if (unlink(f3)) {
 				if (errno != ENOENT) {
 					fprintf(stderr, "unlink(%s) failed: %s\n", f3,
 						strerror(errno));
@@ -648,7 +692,9 @@ cleanlinks(
 			snprintf(fb, sizeof fb, "%s/%s", fb, f3);
 			if (debug > 1)
 				printf("cleanlinks 2: file is <%s>\n", fb);
-			if (unlink(fb)) {
+			if (memorex)
+				printf("Would unlink(%s)\n", fb);
+			else if (unlink(fb)) {
 				if (errno != ENOENT) {
 					fprintf(stderr, "unlink(%s) failed: %s\n", fb,
 						strerror(errno));
@@ -780,7 +826,7 @@ main(
 	}
 	snifflink(f1_dhparms, &f3_dhparms);
 
-	if (debug) {
+	if (debug > 1) {
 		printf("After config:\n");
 		printf("keysdir    = <%s>\n", f1_keysdir? f1_keysdir: "");
 		printf("keys       = <%s> -> <%s>\n"
@@ -823,21 +869,23 @@ main(
 		 */
 		printf("Generating MD5 key file...\n");
 		str = newfile(f1_keys, f2_keys, f3_keys);
-		srandom((u_int)tv.tv_usec);
-		fprintf(str, "# MD5 key file %s\n# %s", f2_keys,
-			ctime(&tv.tv_sec));
-		for (i = 1; i <= 16; i++) {
-			for (j = 0; j < 16; j++) {
-				while (1) {
-					temp = random() & 0xff;
-					if (temp > 0x20 && temp < 0x7f)
-						break;
+		if (!memorex) {
+			srandom((u_int)tv.tv_usec);
+			fprintf(str, "# MD5 key file %s\n# %s", f2_keys,
+				ctime(&tv.tv_sec));
+			for (i = 1; i <= 16; i++) {
+				for (j = 0; j < 16; j++) {
+					while (1) {
+						temp = random() & 0xff;
+						if (temp > 0x20 && temp < 0x7f)
+							break;
+					}
+					md5key[j] = (u_char)temp;
 				}
-				md5key[j] = (u_char)temp;
+				md5key[16] = 0;
+				fprintf(str, "%2d M %16s	# MD5 key\n",
+					i, md5key);
 			}
-			md5key[16] = 0;
-			fprintf(str, "%2d M %16s	# MD5 key\n", i,
-				md5key);
 		}
 		fclose(str);
 		cleanlinks(f1_keys, f2_keys, f3_keys);
@@ -851,19 +899,22 @@ main(
 		 */
 		printf("Generating RSA public/private key pair (%d bits)...\n",
 		       MODULUSLEN);
-		protokey.bits = MODULUSLEN;
-		protokey.useFermat4 = 1;
-		R_RandomInit(&randomstr);
-		R_GetRandomBytesNeeded(&len, &randomstr);
-		for (i = 0; i < len; i++) {
-			temp = random();
-			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
-		}
-		rval = R_GeneratePEMKeys(&rsaref_public, &rsaref_private,
-					 &protokey, &randomstr);
-		if (rval) {
-			printf("R_GeneratePEMKeys error %x\n", rval);
-			return (-1);
+		if (!memorex) {
+			protokey.bits = MODULUSLEN;
+			protokey.useFermat4 = 1;
+			R_RandomInit(&randomstr);
+			R_GetRandomBytesNeeded(&len, &randomstr);
+			for (i = 0; i < len; i++) {
+				temp = random();
+				R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
+			}
+			rval = R_GeneratePEMKeys(&rsaref_public,
+						 &rsaref_private, &protokey,
+						 &randomstr);
+			if (rval) {
+				printf("R_GeneratePEMKeys error %x\n", rval);
+				return (-1);
+			}
 		}
 
 		/*
@@ -871,14 +922,18 @@ main(
 		 * private key in printable ASCII format.
 		 */
 		str = newfile(f1_privatekey, f2_privatekey, f3_privatekey);
-		len = sizeof(rsaref_private) - sizeof(rsaref_private.bits);
-		modulus = (u_int32)rsaref_private.bits;
-		fprintf(str, "# RSA private key file %s\n# %s", f2_privatekey,
-			ctime(&tv.tv_sec));
-		R_EncodePEMBlock(encoded_key, &temp,
-				 (u_char *)rsaref_private.modulus, len);
-		encoded_key[temp] = '\0';
-		fprintf(str, "%d %s\n", modulus, encoded_key);
+		if (!memorex) {
+			len = sizeof(rsaref_private)
+			    - sizeof(rsaref_private.bits);
+			modulus = (u_int32)rsaref_private.bits;
+			fprintf(str, "# RSA private key file %s\n# %s",
+				f2_privatekey,  ctime(&tv.tv_sec));
+			R_EncodePEMBlock(encoded_key, &temp,
+					 (u_char *)rsaref_private.modulus,
+					 len);
+			encoded_key[temp] = '\0';
+			fprintf(str, "%d %s\n", modulus, encoded_key);
+		}
 		fclose(str);
 		cleanlinks(f1_privatekey, f2_privatekey, f3_privatekey);
 
@@ -887,14 +942,17 @@ main(
 		 * public key in printable ASCII format.
 		 */
 		str = newfile(f1_publickey, f2_publickey, f3_publickey);
-		len = sizeof(rsaref_public) - sizeof(rsaref_public.bits);
-		modulus = (u_int32)rsaref_public.bits;
-		fprintf(str, "# RSA public key file %s\n# %s", f2_publickey,
-			ctime(&tv.tv_sec));
-		R_EncodePEMBlock(encoded_key, &temp,
-				 (u_char *)rsaref_public.modulus, len);
-		encoded_key[temp] = '\0';
-		fprintf(str, "%d %s\n", modulus, encoded_key);
+		if (!memorex) {
+			len = sizeof(rsaref_public)
+			    - sizeof(rsaref_public.bits);
+			modulus = (u_int32)rsaref_public.bits;
+			fprintf(str, "# RSA public key file %s\n# %s",
+				f2_publickey, ctime(&tv.tv_sec));
+			R_EncodePEMBlock(encoded_key, &temp,
+					 (u_char *)rsaref_public.modulus, len);
+			encoded_key[temp] = '\0';
+			fprintf(str, "%d %s\n", modulus, encoded_key);
+		}
 		fclose(str);
 		cleanlinks(f1_publickey, f2_publickey, f3_publickey);
 	}
@@ -910,40 +968,45 @@ main(
 		       PRIMELEN);
 		str = newfile(f1_dhparms, f2_dhparms, f3_dhparms);
 
-		R_RandomInit(&randomstr);
-		R_GetRandomBytesNeeded(&len, &randomstr);
-		for (i = 0; i < len; i++) {
-			temp = random();
-			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
-		}
+		if (!memorex) {
+			R_RandomInit(&randomstr);
+			R_GetRandomBytesNeeded(&len, &randomstr);
+			for (i = 0; i < len; i++) {
+				temp = random();
+				R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
+			}
 
-		/*
-		 * Generate the file "ntpkey_dh.*" containing the
-		 * Diffie-Hellman prime and generator in printable ASCII
-		 * format.
-		 */
-		len = DH_PRIME_LEN(PRIMELEN);
-		dh_params.prime = (u_char *)malloc(len);
-		dh_params.generator = (u_char *)malloc(len);
-		rval = R_GenerateDHParams(&dh_params, PRIMELEN, PRIMELEN / 2,
-					  &randomstr);
-		if (rval) {
-			printf("R_GenerateDHParams error %x\n", rval);
-			return (-1);
-		}
+			/*
+			 * Generate the file "ntpkey_dh.*" containing the
+			 * Diffie-Hellman prime and generator in printable
+			 * ASCII format.
+			 */
+			len = DH_PRIME_LEN(PRIMELEN);
+			dh_params.prime = (u_char *)malloc(len);
+			dh_params.generator = (u_char *)malloc(len);
+			rval = R_GenerateDHParams(&dh_params, PRIMELEN,
+						  PRIMELEN / 2, &randomstr);
+			if (rval) {
+				printf("R_GenerateDHParams error %x\n", rval);
+				return (-1);
+			}
 
-		fprintf(str, "# Diffie-Hellman parameter file %s\n# %s",
-			f2_dhparms, ctime(&tv.tv_sec));
-		R_EncodePEMBlock(encoded_key, &temp,
-				 (u_char *)dh_params.prime,
-				 dh_params.primeLen);
-		encoded_key[temp] = '\0';
-		fprintf(str, "%d %s\n", dh_params.primeLen, encoded_key);
-		R_EncodePEMBlock(encoded_key, &temp,
-				 (u_char *)dh_params.generator,
-				 dh_params.generatorLen);
-		encoded_key[temp] = '\0';
-		fprintf(str, "%d %s\n", dh_params.generatorLen, encoded_key);
+			fprintf(str,
+				"# Diffie-Hellman parameter file %s\n# %s",
+				f2_dhparms, ctime(&tv.tv_sec));
+			R_EncodePEMBlock(encoded_key, &temp,
+					 (u_char *)dh_params.prime,
+					 dh_params.primeLen);
+			encoded_key[temp] = '\0';
+			fprintf(str, "%d %s\n", dh_params.primeLen,
+				encoded_key);
+			R_EncodePEMBlock(encoded_key, &temp,
+					 (u_char *)dh_params.generator,
+					 dh_params.generatorLen);
+			encoded_key[temp] = '\0';
+			fprintf(str, "%d %s\n", dh_params.generatorLen,
+				encoded_key);
+		}
 		fclose(str);
 		cleanlinks(f1_dhparms, f2_dhparms, f3_dhparms);
 	}
