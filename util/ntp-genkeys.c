@@ -364,21 +364,17 @@ usage(
 	void
 	)
 {
-/*
- -c     Location of ntp.conf file 
-        (to get the expected locations of the keys) 
-        If there is no ntp.conf file, we will make no keys. 
- -f     force installation of generated keys. 
-        Otherwise, only "missing" keys will be generated 
- -d     Generate D-H parameter file 
- -m     Generate MD5 key file (is there *any* reason to generate DES 
-        keys?) 
- -r     Generate RSA keys 
-
- -k	key_file (see ntp_config.c)
- -l	Don't make the symlinks
- -t	Trash the (old) files at the end of symlink
-*/
+	printf("Usage: %s [ -c ntp.conf ] [ -k key_file ]\n", progname);
+	printf("       [ -f ] [ -l ] [ -t ] [ -d ] [ -m ] [ -r ]\n");
+	printf(" where:\n");
+	printf("  -c /etc/ntp.conf   Location of ntp.conf file\n");
+	printf("  -k key_file        Location of key file\n");
+	printf("  -f     force installation of generated keys.\n");
+	printf("  -l     Don't make the symlinks\n");
+	printf("  -t     Trash the (old) files at the end of symlink\n");
+	printf("  -d     Generate D-H parameter file\n");
+	printf("  -m     Generate MD5 key file\n");
+	printf("  -r     Generate RSA keys\n");
 
 	exit(1);
 }
