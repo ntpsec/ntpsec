@@ -559,7 +559,7 @@ AC_CHECK_FUNCS(finite, ,
       AC_DEFINE(HAVE_ISFINITE)],
       AC_MSG_RESULT(no))
     LIBS=$_libs])])
-AC_CHECK_FUNCS(getbootfile getdtablesize getrusage gettimeofday)
+AC_CHECK_FUNCS(getbootfile getclock getdtablesize getrusage gettimeofday)
 case "$target" in
  *-pc-cygwin*)
     ;;

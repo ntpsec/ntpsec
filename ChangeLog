@@ -1,5 +1,7 @@
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Look for getclock().
+
 	* ntpd/ntp_config.c (getconfig): Squawk if provided minpoll or
 	maxpoll values are out of range.
 

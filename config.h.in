@@ -506,6 +506,9 @@
 /* Define if you have the `getbootfile' function. */
 #undef HAVE_GETBOOTFILE
 
+/* Define if you have the `getclock' function. */
+#undef HAVE_GETCLOCK
+
 /* Define if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE
 
