@@ -1356,6 +1356,8 @@ ac_cv_var_use_md5=$ans])
 case "$ac_cv_var_use_md5" in
  yes)
      AC_DEFINE(AUTOKEY, , [Autokey?])
+     AC_SUBST(AUTOKEY)
+     AUTOKEY=1
      AC_DEFINE(MD5)
      ;;
 esac

@@ -44,11 +44,14 @@ case "$IAM" in
     ;;
 esac
 
-RSASUF=""
+KEYSUF=""
 
 case "$CONFIG_ARGS" in
  *--without-rsaref*)
-    [ -d rsaref2 ] && RSASUF="-norsa"
+    [ -d rsaref2 ] && KEYSUF="-norsa"
+    ;;
+ *--disable-md5*)
+    KEYSUF="-noautokey"
     ;;
 esac
 
@@ -60,7 +63,7 @@ case "$CC" in
     ;;
 esac
 
-BDIR="$BDIR$RSASUF$CCSUF"
+BDIR="$BDIR$KEYSUF$CCSUF"
 
 [ -d "$BDIR" ] || mkdir $BDIR
 [ -f "$BDIR/.buildcvo" ] || echo $CVO > $BDIR/.buildcvo

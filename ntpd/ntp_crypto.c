@@ -342,10 +342,9 @@ crypto_recv(
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: verify %x autokey %d %08x ts %u (%u)\n",
+				    "crypto_recv: verify %x autokey %d %08x ts %u\n",
 				    rval, ntohl(ap->seq),
-				    ntohl(ap->key), tstamp,
-				    peer->recauto.tstamp);
+				    ntohl(ap->key), tstamp);
 #endif
 			if (rval != 0) {
 				peer->flags &= ~FLAG_AUTOKEY;
@@ -396,7 +395,7 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			if (tstamp > 0)
+			if (!(peer->flags & FLAG_MCAST2) && tstamp > 0)
 				peer->flags |= FLAG_AUTOKEY;
 #else
 			temp = ntohl(cp->key);

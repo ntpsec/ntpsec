@@ -1,3 +1,22 @@
+2000-05-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Fix up the UNREACH code.
+	(receive): Lose some debug code.
+	(clock_update): expire_all() if LEAP_NOTINSYNC
+	crypto_xmit() a CRYPTO_AUTO if !FLAG_AUTOKEY instead of recauto.tstamp
+	crypto_xmit() a CRYPTO_PRIV (not CRYPTO_AUTO) based on pcookie.tstamp
+	crypto_xmit() a CRYPTO_AUTO (not CRYPTO_PRIV) based on FLAG_MCAST2
+	and !FLAG_AUTOKEY	
+	* ntpd/ntp_crypto.c (crypto_recv): Clean up debug output.
+	Don't AUTOKEY if FLAG_MCAST2
+	From: Dave Mills
+
+	* flock-build: Also make obe withouyt md5 (no AUTOKEY)
+	* build (BDIR): Handle -noautokey build directory suffix
+	* configure.in: Prepare for AUTOKEY in mkver.in
+	* scripts/mkver.in (ConfStr): Indicate in the version string if
+	we're not using AUTOKEY.
+
 2000-05-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/ntp-wait.in: Fun things with backspaces

@@ -102,6 +102,16 @@ transmit(
 		 */
 		if (peer->hmode != MODE_BROADCAST)
 			peer->unreach++;
+		if (peer->unreach > NTP_UNREACH) {
+			peer_clear(peer);
+			if (!(peer->flags & FLAG_CONFIG)) {
+				unpeer(peer);
+				return;
+			}
+			peer->unreach = 0;
+			peer->ppoll = peer->maxpoll;
+			hpoll++;
+		}
 		oreach = peer->reach;
 		if (oreach & 0x01)
 			peer->valid++;
@@ -118,27 +128,12 @@ transmit(
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 				peer_clear(peer);
-			}
-
-			/*
-			 * We would like to respond quickly when the
-			 * peer comes back to life. If the probes since
-			 * becoming unreachable are less than
-			 * NTP_UNREACH, clamp the poll interval to the
-			 * minimum. In order to minimize the network
-			 * traffic, the interval gradually ramps up the
-			 * the maximum after that.
-			 */
-			peer->ppoll = peer->maxpoll;
-			if (peer->unreach < NTP_UNREACH) {
-				hpoll = peer->minpoll;
-			} else {
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
 				}
-				hpoll++;
 			}
+			hpoll = peer->minpoll;
 			if (peer->flags & FLAG_BURST) {
 				if (peer->flags & FLAG_MCAST2)
 					peer->burst = NTP_SHIFT;
@@ -714,10 +709,6 @@ receive(
 	if (peer->flags & FLAG_SKEY) {
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp);
-
-printf("xxxx %08x %08x %08x %08x\n", peer->keyid, skeyid, tkeyid,
-    peer->pkeyid);
-
 		if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
@@ -1036,9 +1027,7 @@ clock_update(void)
 	}
 	if (oleap == LEAP_NOTINSYNC) {
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
-/*
 		expire_all();
-*/
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
@@ -1968,7 +1957,7 @@ peer_xmit(
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 #endif /* PUBKEY */
-			} else if (peer->recauto.tstamp == 0) {
+			} else if (!(peer->flags & FLAG_AUTOKEY)) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
@@ -2006,14 +1995,14 @@ peer_xmit(
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->recauto.tstamp == 0 &&
+			if (peer->pcookie.tstamp == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
+				    peer->assoc);
+			} else if (!(peer->flags & FLAG_AUTOKEY) &&
 			    peer->flags & FLAG_MCAST2) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
-				    peer->assoc);
-			} else if (peer->pcookie.tstamp == 0) {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 			}
 			break;
