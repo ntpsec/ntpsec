@@ -1,5 +1,11 @@
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_config.c: Add the "allan" tinker variable.
+	From: Juha Sarlin <juha@c3l.tyreso.se>
+
+	* ntpd/refclock_hopfpci.c (hopfpci_start): Lose the "correct_any"
+	stuff - it's both obsolete and wrong.
+
 	* ntpd/ntp_proto.c (receive): Keep track of packet versions.
 	Implement RES_LIMITED.
 	* include/ntp_config.h (CONF_RES_LIMITED): 

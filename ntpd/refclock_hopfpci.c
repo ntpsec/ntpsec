@@ -78,10 +78,6 @@
 #define HOPF_RADIO	0x80	/* radio clock */
 #define HOPF_RADIOHP	0xC0	/* high precision radio clock */
 
-/*
- * Imported from ntpd module
- */
-extern int correct_any;		/* if TRUE, correct offset > 1000 s */
 
 /*
  * hopfclock unit control structure.
@@ -157,8 +153,6 @@ hopfpci_start(
 	pp->unitptr = (caddr_t)up;
 
 	get_systime(&pp->lastrec);
-
-	correct_any = TRUE;
 
 	/*
 	 * Initialize miscellaneous peer variables
