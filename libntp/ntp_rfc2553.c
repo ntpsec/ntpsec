@@ -113,13 +113,15 @@ static char *ai_errlist[] = {
 };
 
 static	int ipv4_aton P((const char *, struct sockaddr_storage *));
+static	int do_nodename P((const char *nodename, struct addrinfo *ai,
+    const struct addrinfo *hints));
 
 int
 getaddrinfo (const char *nodename, const char *servname,
 	const struct addrinfo *hints, struct addrinfo **res)
 {
+	int rval;
 	struct addrinfo *ai;
-	struct hostent *hp;
 	struct sockaddr_in *sockin;
 
 	ai = calloc(sizeof(struct addrinfo), 1);
@@ -127,45 +129,18 @@ getaddrinfo (const char *nodename, const char *servname,
 		return (EAI_MEMORY);
 
 	if (nodename != NULL) {
-		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
-		if (ai->ai_addr == NULL)
-			return (EAI_MEMORY);
-		hp = gethostbyname(nodename);
-		if (hp == NULL) {
-			if (h_errno == TRY_AGAIN)
-				return (EAI_AGAIN);
-			else {
-				if (ipv4_aton(nodename,
-				    (struct sockaddr_storage *)ai->ai_addr)
-				    == 1) {
-					ai->ai_family = AF_INET;
-					ai->ai_addrlen =
-					    sizeof(struct sockaddr_in);
-					*res = ai;
-					return (0);
-				}
-				return (EAI_FAIL);
-			}
-		}
-		ai->ai_family = hp->h_addrtype;
-		ai->ai_addrlen = sizeof(struct sockaddr);
-		sockin = (struct sockaddr_in *)ai->ai_addr;
-		memcpy(&sockin->sin_addr, hp->h_addr, hp->h_length);
-		ai->ai_addr->sa_family = hp->h_addrtype;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		ai->ai_addr->sa_len = sizeof(struct sockaddr);
-#endif
-		if (hints != NULL && hints->ai_flags & AI_CANONNAME) {
-			ai->ai_canonname = malloc(strlen(hp->h_name));
-			if (ai->ai_canonname == NULL)
-				return (EAI_MEMORY);
-			strcpy(ai->ai_canonname, hp->h_name);
+		rval = do_nodename(nodename, ai, hints);
+		if (rval != 0) {
+			freeaddrinfo(ai);
+			return (rval);
 		}
 	}
 	if (nodename == NULL && hints != NULL) {
 		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
-		if (ai->ai_addr == NULL)
+		if (ai->ai_addr == NULL) {
+			freeaddrinfo(ai);
 			return (EAI_MEMORY);
+		}
 		ai->ai_family = AF_INET;
 		ai->ai_addrlen = sizeof(struct sockaddr_storage);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
@@ -178,8 +153,10 @@ getaddrinfo (const char *nodename, const char *servname,
 	if (servname != NULL) {
 		ai->ai_family = AF_INET;
 		ai->ai_socktype = SOCK_DGRAM;
-		if (strcmp(servname, "123") != 0)
+		if (strcmp(servname, "123") != 0) {
+			freeaddrinfo(ai);
 			return (EAI_SERVICE);
+		}
 		sockin = (struct sockaddr_in *)ai->ai_addr;
 		sockin->sin_port = htons(NTP_PORT);
 	}
@@ -228,6 +205,59 @@ gai_strerror(ecode)
 	if (ecode < 0 || ecode > EAI_MAX)
 		ecode = EAI_MAX;
 	return ai_errlist[ecode];
+}
+
+static int
+do_nodename(
+	const char *nodename,
+	struct addrinfo *ai,
+	const struct addrinfo *hints)
+{
+	struct hostent *hp;
+	struct sockaddr_in *sockin;
+
+	ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
+	if (ai->ai_addr == NULL)
+		return (EAI_MEMORY);
+
+	if (hints != NULL && hints->ai_flags & AI_NUMERICHOST) {
+		if (ipv4_aton(nodename,
+		    (struct sockaddr_storage *)ai->ai_addr) == 1) {
+			ai->ai_family = AF_INET;
+			ai->ai_addrlen = sizeof(struct sockaddr_in);
+			return (0);
+		}
+		return (EAI_NONAME);
+	}
+	hp = gethostbyname(nodename);
+	if (hp == NULL) {
+		if (h_errno == TRY_AGAIN)
+			return (EAI_AGAIN);
+		else {
+			if (ipv4_aton(nodename,
+			    (struct sockaddr_storage *)ai->ai_addr) == 1) {
+				ai->ai_family = AF_INET;
+				ai->ai_addrlen = sizeof(struct sockaddr_in);
+				return (0);
+			}
+			return (EAI_FAIL);
+		}
+	}
+	ai->ai_family = hp->h_addrtype;
+	ai->ai_addrlen = sizeof(struct sockaddr);
+	sockin = (struct sockaddr_in *)ai->ai_addr;
+	memcpy(&sockin->sin_addr, hp->h_addr, hp->h_length);
+	ai->ai_addr->sa_family = hp->h_addrtype;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+	ai->ai_addr->sa_len = sizeof(struct sockaddr);
+#endif
+	if (hints != NULL && hints->ai_flags & AI_CANONNAME) {
+		ai->ai_canonname = malloc(strlen(hp->h_name));
+		if (ai->ai_canonname == NULL)
+			return (EAI_MEMORY);
+		strcpy(ai->ai_canonname, hp->h_name);
+	}
+	return (0);
 }
 
 /*
