@@ -1833,7 +1833,7 @@ input_handler(
  * Define the maximum number of 0 byte consecutive reads
  * allowed before we declare it done
  */
-#define MAXZEROREADS 20
+#define MAXZEROREADS 1
 
 	int totzeroreads;
 	int buflen;
