@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.1.2)
+AM_INIT_AUTOMAKE(ntp, 4.1.2a)
 AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
