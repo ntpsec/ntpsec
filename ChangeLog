@@ -1,5 +1,7 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* README.cvs: Updated.
+
 	* configure.in: 
 	* include/ntp_machine.h:
 	* libntp/mexit.c:
