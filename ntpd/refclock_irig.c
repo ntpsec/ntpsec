@@ -137,7 +137,8 @@
  * (default) and 1 is the line-in port. It does not seem useful to
  * select the compact disc player port. Fudge flag3 enables audio
  * monitoring of the input signal. For this purpose, the monitor gain is
- * set to a default value.
+ * set to a default value. Fudgetime2 is used as a frequency vernier for
+ * broken codec sample frequency.
  */
 /*
  * Interface definitions
@@ -160,7 +161,7 @@
 #define	MAXCLP		100	/* max clips above reference per s */
 #define DRPOUT		100.	/* dropout signal level */
 #define MODMIN		0.5	/* minimum modulation index */
-#define MAXFREQ		(500e-6 * SECOND) /* freq tolerance (.025%) */
+#define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
 #define PI		3.1415926535 /* the real thing */
 
 /*
@@ -457,6 +458,7 @@ irig_receive(
 		 * 125 PPM.
 		 */
 		up->phase += up->freq / SECOND;
+		up->phase += pp->fudgetime2 / 1e6;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
@@ -832,7 +834,7 @@ irig_decode(
 		up->lastbit = 0;
 		if (up->errflg == 0) {
 #ifdef IRIG_SUCKS
-			l_fp	ltemp, mtemp, xtemp, ytemp;
+			l_fp	ltemp, mtemp;
 
 			/*
 			 * You didn't see this; I wasn't here.
