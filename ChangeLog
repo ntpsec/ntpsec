@@ -1,3 +1,7 @@
+2000-02-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_request.c: Log various error conditions.
+
 2000-02-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99g

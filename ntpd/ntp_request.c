@@ -379,6 +379,7 @@ process_private(
 	struct sockaddr_in *srcadr;
 	struct interface *inter;
 	struct req_proc *proc;
+	int ec;
 
 	/*
 	 * Initialize pointers, for convenience
@@ -389,7 +390,7 @@ process_private(
 
 #ifdef DEBUG
 	if (debug > 2)
-	    printf("prepare_pkt: impl %d req %d\n",
+	    printf("process_private: impl %d req %d\n",
 		   inpkt->implementation, inpkt->request);
 #endif
 
@@ -397,15 +398,18 @@ process_private(
 	 * Do some sanity checks on the packet.  Return a format
 	 * error if it fails.
 	 */
-	if (ISRESPONSE(inpkt->rm_vn_mode)
-	    || ISMORE(inpkt->rm_vn_mode)
-	    || INFO_VERSION(inpkt->rm_vn_mode) > NTP_VERSION
-	    || INFO_VERSION(inpkt->rm_vn_mode) < NTP_OLDVERSION
-	    || INFO_SEQ(inpkt->auth_seq) != 0
-	    || INFO_ERR(inpkt->err_nitems) != 0
-	    || INFO_MBZ(inpkt->mbz_itemsize) != 0
-	    || rbufp->recv_length > REQ_LEN_MAC
-	    || rbufp->recv_length < REQ_LEN_NOMAC) {
+	ec = 0;
+	if (   (++ec, ISRESPONSE(inpkt->rm_vn_mode))
+	    || (++ec, ISMORE(inpkt->rm_vn_mode))
+	    || (++ec, INFO_VERSION(inpkt->rm_vn_mode) > NTP_VERSION)
+	    || (++ec, INFO_VERSION(inpkt->rm_vn_mode) < NTP_OLDVERSION)
+	    || (++ec, INFO_SEQ(inpkt->auth_seq) != 0)
+	    || (++ec, INFO_ERR(inpkt->err_nitems) != 0)
+	    || (++ec, INFO_MBZ(inpkt->mbz_itemsize) != 0)
+	    || (++ec, rbufp->recv_length > REQ_LEN_MAC)
+	    || (++ec, rbufp->recv_length < REQ_LEN_NOMAC)
+		) {
+		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed", ec);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -423,7 +427,6 @@ process_private(
 		req_ack(srcadr, inter, inpkt, INFO_ERR_IMPL);
 		return;
 	}
-
 
 	/*
 	 * Search the list for the request codes.  If it isn't one
@@ -478,6 +481,8 @@ process_private(
 			    printf("bad pkt length %d\n",
 				   rbufp->recv_length);
 #endif
+			msyslog(LOG_ERR, "process_private: bad pkt length %d", 
+				rbufp->recv_length); 
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
 		}
@@ -520,16 +525,20 @@ process_private(
 	 * don't, check to see that there is none (picky, picky).
 	 */
 	if (INFO_ITEMSIZE(inpkt->mbz_itemsize) != proc->sizeofitem) {
+                msyslog(LOG_ERR, "INFO_ITEMSIZE(inpkt->mbz_itemsize) != proc->sizeofitem: %d != %d",
+			INFO_ITEMSIZE(inpkt->mbz_itemsize), proc->sizeofitem);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
 	if (proc->sizeofitem != 0)
 	    if (proc->sizeofitem*INFO_NITEMS(inpkt->err_nitems)
 		> sizeof(inpkt->data)) {
+		    msyslog(LOG_ERR, "sizeofitem*NITEMS > data: %d > %d",
+			    proc->sizeofitem*INFO_NITEMS(inpkt->err_nitems),
+			    sizeof(inpkt->data));
 		    req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		    return;
 	    }
-
 #ifdef DEBUG
 	if (debug > 3)
 	    printf("process_private: all okay, into handler\n");
@@ -1143,6 +1152,7 @@ do_conf(
 	}
 
 	if (fl) {
+		msyslog(LOG_ERR, "do_conf: fl is nonzero!");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1164,6 +1174,11 @@ do_conf(
 		!ISREFCLOCKADR(&peeraddr) &&
 #endif
 		ISBADADR(&peeraddr)) {
+#ifdef REFCLOCK
+		msyslog(LOG_ERR, "do_conf: !ISREFCLOCK && ISBADADR");
+#else
+		msyslog(LOG_ERR, "do_conf: ISBADADR");
+#endif
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1303,6 +1318,7 @@ setclr_flags(
 	register u_long flags;
 
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
+		msyslog(LOG_ERR, "setclr_flags: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1312,6 +1328,10 @@ setclr_flags(
 	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
 		      SYS_FLAG_FILEGEN)) {
+		msyslog(LOG_ERR, "setclr_flags: extra flags: %#x",
+			flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE | 
+				  SYS_FLAG_NTP | SYS_FLAG_KERNEL |
+				  SYS_FLAG_MONITOR | SYS_FLAG_FILEGEN));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1440,15 +1460,16 @@ do_restrict(
 	bad = 0;
 	while (items-- > 0 && !bad) {
 		if (cr->mflags & ~(RESM_NTPONLY))
-		    bad = 1;
+		    bad |= 1;
 		if (cr->flags & ~(RES_ALLFLAGS))
-		    bad = 1;
+		    bad |= 2;
 		if (cr->addr == htonl(INADDR_ANY) && cr->mask != htonl(INADDR_ANY))
-		    bad = 1;
+		    bad |= 4;
 		cr++;
 	}
 
 	if (bad) {
+		msyslog(LOG_ERR, "do_restrict: bad = %#x", bad);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1606,6 +1627,7 @@ reset_stats(
 	struct reset_entry *rent;
 
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
+		msyslog(LOG_ERR, "reset_stats: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1613,6 +1635,8 @@ reset_stats(
 	flags = ((struct reset_flags *)inpkt->data)->flags;
 
 	if (flags & ~RESET_ALLFLAGS) {
+		msyslog(LOG_ERR, "reset_stats: reset leaves %#x",
+			flags & ~RESET_ALLFLAGS);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1928,6 +1952,7 @@ do_setclr_trap(
 	 * the error reporting problem.
 	 */
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
+		msyslog(LOG_ERR, "do_setclr_trap: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -1986,6 +2011,7 @@ set_request_keyid(
 	 * Restrict ourselves to one item only.
 	 */
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
+		msyslog(LOG_ERR, "set_request_keyid: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -2014,6 +2040,7 @@ set_control_keyid(
 	 * Restrict ourselves to one item only.
 	 */
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
+		msyslog(LOG_ERR, "set_control_keyid: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -2256,6 +2283,7 @@ set_clock_fudge(
 				(CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4);
 			break;
 		    default:
+			msyslog(LOG_ERR, "set_clock_fudge: default!");
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
 		}
