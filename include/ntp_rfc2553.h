@@ -74,25 +74,71 @@
  */
 #include <config.h>
 
-#ifndef ISC_PLATFORM_HAVEIPV6
-
-#include <sys/types.h>
 #include "ntp_types.h"
+
+/*
+ * If various macros are not defined we need to define them
+ */
 
 #ifndef AF_INET6
 #define AF_INET6	AF_MAX
 #define PF_INET6	AF_INET6
 #endif
 
-#ifndef HAVE_TYPE_U_INT8_T
-typedef u_char		u_int8_t;
-typedef u_short		u_int16_t;
-typedef u_int32		u_int32_t;
-#endif /* HAVE_TYPE_U_INT8_T */
+#if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
 
-#ifndef HAVE_TYPE_U_INT64_T
-typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
-#endif /* HAVE_TYPE_U_INT64_T */
+#define	_SS_MAXSIZE	128
+#define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
+#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
+				_SS_PAD1SIZE - _SS_ALIGNSIZE)
+#else
+#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
+#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
+				_SS_PAD1SIZE - _SS_ALIGNSIZE)
+#endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
+#endif
+
+/*
+ * If we don't have the sockaddr_storage structure
+ * we need to define it
+ */
+
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
+struct sockaddr_storage {
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+	u_int8_t	ss_len;		/* address length */
+	u_int8_t	ss_family;	/* address family */
+#else
+	short		ss_family;	/* address family */
+#endif
+	char		__ss_pad1[_SS_PAD1SIZE];
+	ntp_uint64_t	__ss_align;	/* force desired structure storage alignment */
+	char		__ss_pad2[_SS_PAD2SIZE];
+};
+#endif
+
+/*
+ * Finally if the platform doesn't support IPv6 we need some
+ * additional definitions
+ */
+
+/*
+ * Flag values for getaddrinfo()
+ */
+#ifndef AI_NUMERICHOST
+#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
+#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
+#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
+/* valid flags for addrinfo */
+#define AI_MASK \
+    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
+
+#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
+#endif
+
+#ifndef ISC_PLATFORM_HAVEIPV6
 
 /*
  * IPv6 address
@@ -163,33 +209,6 @@ struct sockaddr_in6 {
 #define IN6_IS_ADDR_MULTICAST(a)	((a)->s6_addr[0] == 0xff)
 #endif
 
-/*
- * RFC 2553: protocol-independent placeholder for socket addresses
- */
-#define	_SS_MAXSIZE	128
-#define	_SS_ALIGNSIZE	(sizeof(u_int64_t))
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
-				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#else
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
-				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
-
-struct sockaddr_storage {
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	u_int8_t	ss_len;		/* address length */
-	u_int8_t	ss_family;	/* address family */
-#else
-	short		ss_family;	/* address family */
-#endif
-	char		__ss_pad1[_SS_PAD1SIZE];
-	u_int64_t	__ss_align;	/* force desired structure storage alignment */
-	char		__ss_pad2[_SS_PAD2SIZE];
-};
-
 struct addrinfo {
 	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
 	int	ai_family;	/* PF_xxx */
@@ -219,33 +238,6 @@ struct addrinfo {
 #define	EAI_PROTOCOL	13
 #define	EAI_MAX		14
 
-/*
- * Flag values for getaddrinfo()
- */
-#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
-#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
-#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
-/* valid flags for addrinfo */
-#define AI_MASK \
-    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
-
-#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
-
-/*
- * Constants for getnameinfo()
- */
-#define	NI_MAXHOST	1025
-#define	NI_MAXSERV	32
-
-/*
- * Flag values for getnameinfo()
- */
-#define	NI_NOFQDN	0x00000001
-#define	NI_NUMERICHOST	0x00000002
-#define	NI_NAMEREQD	0x00000004
-#define	NI_NUMERICSERV	0x00000008
-#define	NI_DGRAM	0x00000010
-#define NI_WITHSCOPEID	0x00000020
 
 int	getaddrinfo P((const char *, const char *,
 			 const struct addrinfo *, struct addrinfo **));
@@ -254,5 +246,26 @@ int	getnameinfo P((const struct sockaddr *, u_int, char *,
 void	freeaddrinfo P((struct addrinfo *));
 char	*gai_strerror P((int));
 
+/*
+ * Constants for getnameinfo()
+ */
+#ifndef NI_MAXHOST
+#define	NI_MAXHOST	1025
+#define	NI_MAXSERV	32
+#endif
+
+/*
+ * Flag values for getnameinfo()
+ */
+#ifndef NI_NUMERICHOST
+#define	NI_NOFQDN	0x00000001
+#define	NI_NUMERICHOST	0x00000002
+#define	NI_NAMEREQD	0x00000004
+#define	NI_NUMERICSERV	0x00000008
+#define	NI_DGRAM	0x00000010
+#define NI_WITHSCOPEID	0x00000020
+#endif
+
 #endif /* ISC_PLATFORM_HAVEIPV6 */
+
 #endif /* !_NTP_RFC2553_H_ */

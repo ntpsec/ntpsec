@@ -106,7 +106,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_OFFSET,	RO, "offset" },		/* 11 */
 	{ CS_DRIFT,	RO, "frequency" },	/* 12 */
 	{ CS_JITTER,	RO, "jitter" },		/* 13 */
-	{ CS_ERROR,	RO, "error" },		/* 14 */
+	{ CS_ERROR,	RO, "noise" },		/* 14 */
 	{ CS_CLOCK,	RO, "clock" },		/* 15 */
 	{ CS_PROCESSOR, RO, "processor" },	/* 16 */
 	{ CS_SYSTEM,	RO, "system" },		/* 17 */
@@ -754,6 +754,7 @@ ctlsysstatus(void)
 	register u_char this_clock;
 
 	this_clock = CTL_SST_TS_UNSPEC;
+#ifdef REFCLOCK
 	if (sys_peer != 0) {
 		if (sys_peer->sstclktype != CTL_SST_TS_UNSPEC) {
 			this_clock = sys_peer->sstclktype;
@@ -767,6 +768,7 @@ ctlsysstatus(void)
 				this_clock |= CTL_SST_TS_PPS;
 		}
 	}
+#endif /* REFCLOCK */
 	return (u_short)CTL_SYS_STATUS(sys_leap, this_clock,
 	    ctl_sys_num_events, ctl_sys_last_event);
 }
@@ -1240,7 +1242,7 @@ ctl_putsys(
 		break;
 
 	case CS_ERROR:
-		ctl_putdbl(sys_var[CS_ERROR].text, sys_error * 1e3);
+		ctl_putdbl(sys_var[CS_ERROR].text, clock_jitter * 1e3);
 		break;
 
 	case CS_CLOCK:
@@ -1557,8 +1559,7 @@ ctl_putpeer(
 		break;
 
 	case CP_JITTER:
-		ctl_putdbl(peer_var[CP_JITTER].text,
-		    SQRT(peer->jitter) * 1e3);
+		ctl_putdbl(peer_var[CP_JITTER].text, peer->jitter * 1e3);
 		break;
 
 	case CP_DISPERSION:

@@ -30,10 +30,10 @@
             sed -e 's%main.*()%vxmain()%' configure &gt; configure.vxnew<br>
             mv configure.vxnew configure<br>
             chmod 755 configure</p>
-        <p>The new version 4 of NTP requires some maths functions so it links in the maths library (-lm) in the ntpd <a href="../ntpd/Makefile.am">Makefile.am</a> change the line &quot;ntpd_LDADD = $(LDADD) -lm&quot; by removing the &quot;-lm&quot;.<br>
+        <p>The new version 4 of NTP requires some maths functions so it links in the maths library (-lm) in the ntpd <a href="../../ntpd/Makefile.am">Makefile.am</a> change the line &quot;ntpd_LDADD = $(LDADD) -lm&quot; by removing the &quot;-lm&quot;.<br>
             You are now ready to compile</p>
         <p><br>
-            The <a href="../configure.in">configure.in </a>file needed to be altered to allow for a host-target configuration to take place.</p>
+            The <a href="../../configure.in">configure.in </a>file needed to be altered to allow for a host-target configuration to take place.</p>
         <ul>
             <li>The define SYS_VXWORKS was added to the compilation flags.
             <li>Little endianess is set if the target is of type iX86.
@@ -41,13 +41,13 @@
             <li>clock_settime() is defined to be used for setting the clock.
             <li>The Linking flags have -r added to allow for relinking into the vxWorks kernel
         </ul>
-        <p>Unfortunately I have had to make use of the <a href="../include/ntp_machine.h">ntp_machine.h </a>file to add in the checks that would have been checked at linking stage by autoconf, a better method should be devised.</p>
+        <p>Unfortunately I have had to make use of the <a href="../../include/ntp_machine.h">ntp_machine.h </a>file to add in the checks that would have been checked at linking stage by autoconf, a better method should be devised.</p>
         <ul>
             <li>There is now a NO_MAIN_ALLOWED define that simulates command line args, this allows the use of the normal startup sysntax.
             <li>POSIX timers have been added.
-            <li>Structures normally found in netdb.h have been added with, the corresponding code is in <a href="../libntp/machines.c">machines.c </a>. Where possible the defines for these have been kept non-vxWorks specific.
+            <li>Structures normally found in netdb.h have been added with, the corresponding code is in <a href="../../libntp/machines.c">machines.c </a>. Where possible the defines for these have been kept non-vxWorks specific.
         </ul>
-        <p>Unfortunately there are still quite a few SYS_VXWORKS type defines in the source, but I have eliminated as many as possible. You have the choice of using the usrtime.a library avaliable from the vxworks archives or forgoing adjtime() and using the clock_[get|set]time().The <a href="../include/ntp_machine.h">ntp_machine.h </a>file clearly marks how to do this.</p>
+        <p>Unfortunately there are still quite a few SYS_VXWORKS type defines in the source, but I have eliminated as many as possible. You have the choice of using the usrtime.a library avaliable from the vxworks archives or forgoing adjtime() and using the clock_[get|set]time().The <a href="../../include/ntp_machine.h">ntp_machine.h </a>file clearly marks how to do this.</p>
         <h1><b>Compilation issues</b></h1>
         <p>You will need autoconf and automake ... available free from the gnu archives worldwide.</p>
         <p>The variable arch is the target architecture (e.g. i486)</p>

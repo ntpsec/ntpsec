@@ -275,7 +275,11 @@ if test -f /etc/redhat-release
 then
     :
 else
-    AC_CHECK_HEADERS(md5.h)
+    AC_CHECK_HEADERS(md5.h, [], [],
+[#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+])
 fi
 AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
@@ -2594,7 +2598,7 @@ case "$ntp_libparse" in
     LIBPARSE=../libparse/libparse.a
     MAKE_LIBPARSE=libparse.a
     # HMS: check_y2k trips the 34 year problem now...
-    0 && MAKE_CHECK_Y2K=check_y2k
+    false && MAKE_CHECK_Y2K=check_y2k
     AC_DEFINE(PPS_SAMPLE, 1, [PPS auxiliary interface for ATOM?])
     AC_DEFINE(CLOCK_ATOM)
     ;;
@@ -3452,7 +3456,7 @@ AC_CACHE_CHECK(if we should step and slew the time, ac_cv_var_step_slew,
 	 ans=yes
 	 ;;
       *-*-solaris2.1[[0-9]]*)
-	 ans-no
+	 ans=no
 	 ;;
       *-*-solaris2.[[012]]*)
 	 ans=yes
@@ -3703,6 +3707,15 @@ AC_TRY_LINK([
 case "$found_ipv6" in
  yes)
     AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
+
+    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], , ,
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+])
 
     AC_MSG_CHECKING(for in6_pktinfo)
     AC_TRY_COMPILE([

@@ -28,7 +28,7 @@ for (;;) {
 		# Very old servers report phase and not offset.
 		$offset = $1 if (/(?:offset|phase)=([^\s,]+)/);
 		$rootdelay = $1 if (/rootdelay=([^\s,]+)/);
-		$rootdispersion = $1 if (/rootdispersion=(^\s,]+)/);
+		$rootdispersion = $1 if (/rootdispersion=([^\s,]+)/);
 		$refid = $1 if (/refid=([^\s,]+)/);
 	}
 	close(PH) || die "$cmd failed";

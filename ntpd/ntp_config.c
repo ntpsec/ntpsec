@@ -9,6 +9,8 @@
 # include <netinfo/ni.h>
 #endif
 
+#include <netdb.h>
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -37,8 +39,6 @@
 # include <io.h>
 extern HANDLE ResolverThreadHandle;
 #endif /* SYS_WINNT */
-
-#include <netdb.h>
 
 extern int priority_done;
 

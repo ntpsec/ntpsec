@@ -33,7 +33,7 @@
  * made to minimize errors by always rounding toward zero and amortizing
  * adjustment residues. By default the adjustment quantum is 1 us for
  * the usual Unix tickadj() system call, but this can be increased if
- * necessary by a configuration command. For instance, when the
+ * necessary by the tick configuration command. For instance, when the
  * adjtime() quantum is a clock tick for a 100-Hz clock, the quantum
  * should be 10 ms.
  */
@@ -139,10 +139,13 @@ adj_systime(
 	if (isneg) {
 		adjtv.tv_sec = -adjtv.tv_sec;
 		adjtv.tv_usec = -adjtv.tv_usec;
+		sys_residual = -sys_residual;
 	}
-	if (adjtime(&adjtv, &oadjtv) < 0) {
-		msyslog(LOG_ERR, "adj_systime: %m");
-		return (0);
+	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
+		if (adjtime(&adjtv, &oadjtv) < 0) {
+			msyslog(LOG_ERR, "adj_systime: %m");
+			return (0);
+		}
 	}
 	return (1);
 }

@@ -7,8 +7,8 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "ntp_rfc2553.h"
 #include <netinet/in.h>
+#include "ntp_rfc2553.h"
 
 #include "ntp_types.h"
 
@@ -281,7 +281,7 @@ typedef u_int32 u_fp;
 #define L_SUBUF(r, uf)	M_SUBUF((r)->l_ui, (r)->l_uf, (uf))
 #define	L_ADDF(r, f)	M_ADDF((r)->l_ui, (r)->l_uf, (f))
 #define	L_RSHIFT(v)	M_RSHIFT((v)->l_i, (v)->l_uf)
-#define	L_RSHIFTU(v)	M_RSHIFT((v)->l_ui, (v)->l_uf)
+#define	L_RSHIFTU(v)	M_RSHIFTU((v)->l_ui, (v)->l_uf)
 #define	L_LSHIFT(v)	M_LSHIFT((v)->l_ui, (v)->l_uf)
 #define	L_CLR(v)	((v)->l_ui = (v)->l_uf = 0)
 

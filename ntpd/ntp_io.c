@@ -143,7 +143,7 @@ fd_set activefds;
 int maxactivefd;
 
 static	int create_sockets	P((u_short));
-static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int));
+static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
 static	void	close_socket	P((SOCKET));
 #ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
@@ -506,7 +506,7 @@ create_sockets(
 #endif
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
-		    inter_list[i].flags & INT_BROADCAST, 0);
+		    inter_list[i].flags & INT_BROADCAST, 0, &inter_list[i]);
 		if (inter_list[i].fd != INVALID_SOCKET)
 			msyslog(LOG_INFO, "Listening on interface %s, %s#%d",
 				inter_list[i].name,
@@ -517,11 +517,6 @@ create_sockets(
 			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
 				stoa((&inter_list[i].bcast)),
 				NTP_PORT);
-#if defined (HAVE_IO_COMPLETION_PORT)
-		if (inter_list[i].fd != INVALID_SOCKET) {
-			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
-		}
-#endif
 	}
 
 	/*
@@ -595,18 +590,19 @@ io_setbclient(void)
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
 
+		/* Skip the loopback addresses */
+		if (inter_list[i].flags & INT_LOOPBACK)
+			continue;
+
 		/* Do we already have the broadcast address open? */
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
-		    INT_BROADCAST, 1);
+		    INT_BROADCAST, 1, &inter_list[i]);
 		if (inter_list[i].bfd != INVALID_SOCKET) {
 			inter_list[i].flags |= INT_BCASTOPEN;
 			nif++;
-#if defined (HAVE_IO_COMPLETION_PORT)
-			io_completion_port_add_socket(inter_list[i].bfd, &inter_list[i]);
-#endif
 		}
 #ifdef DEBUG
 		if (debug) {
@@ -714,7 +710,7 @@ io_multicast_add(
 		* works under SunOS 4.x, but not OSF1 .. :-(
 		*/
 		set_reuseaddr(1);
-		s = open_socket((struct sockaddr_storage*)sinp, 0, 1);
+		s = open_socket((struct sockaddr_storage*)sinp, 0, 1, &inter_list[i]);
 		set_reuseaddr(0);
 		if (s == INVALID_SOCKET) {
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
@@ -737,9 +733,6 @@ io_multicast_add(
 			(void) strncpy(inter_list[i].name, "multicast",
 			sizeof(inter_list[i].name));
 			((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
-#if defined (HAVE_IO_COMPLETION_PORT)
-			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
-#endif
 		}
 
 		/*
@@ -761,7 +754,7 @@ io_multicast_add(
                 add_addr_to_list(&addr, i);
 		break;
 
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 	case AF_INET6 :
 
 		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
@@ -788,7 +781,9 @@ io_multicast_add(
 		memset((char *)&mreq6, 0, sizeof(mreq6));
 		memset((char *)&inter_list[i], 0, sizeof(struct interface));
 		sin6p->sin6_family = AF_INET6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		sin6p->sin6_scope_id = inter_list[i].scopeid;
+#endif
 		sin6p->sin6_addr = iaddr6;
 		sin6p->sin6_port = htons(NTP_PORT);
 
@@ -797,7 +792,7 @@ io_multicast_add(
 		 * works under SunOS 4.x, but not OSF1 .. :-(
 		 */
 		set_reuseaddr(1);
-		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
+		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1, &inter_list[i]);
 		set_reuseaddr(0);
 		if(s == INVALID_SOCKET){
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
@@ -820,9 +815,6 @@ io_multicast_add(
 			(void)strncpy(inter_list[i].name, "multicast",
 			   sizeof(inter_list[i].name));
 			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
-#if defined (HAVE_IO_COMPLETION_PORT)
-			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
-#endif
 		}
 
 		/*
@@ -832,9 +824,11 @@ io_multicast_add(
 		 * addresses. For now let the kernel figure it out.
 		 */
 		mreq6.ipv6mr_multiaddr = iaddr6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
 			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
 		else
+#endif
 			mreq6.ipv6mr_interface = 0;
 
 		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
@@ -952,7 +946,7 @@ io_multicast_del(
 		}
 		break;
 
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 	case AF_INET6 :
 		haddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
 
@@ -1018,7 +1012,8 @@ static SOCKET
 open_socket(
 	struct sockaddr_storage *addr,
 	int flags,
-	int turn_off_reuse
+	int turn_off_reuse,
+	struct interface *interf
 	)
 {
 	int errval;
@@ -1276,6 +1271,13 @@ open_socket(
 # endif
 #endif /* SYS_WINNT || VMS */
 
+
+#if defined (HAVE_IO_COMPLETION_PORT)
+/*
+ * Add the socket to the completion port
+ */
+	io_completion_port_add_socket(fd, interf);
+#endif
 	return fd;
 }
 
