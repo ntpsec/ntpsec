@@ -1,6 +1,14 @@
+1999-07-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* Makefile.am (SUBDIRS): librsaref
+	(dist-hook): Lose CVS subdirs in the distribution tarball
+
+	* include/Makefile.am (noinst_HEADERS): Added iosignal.h, recvbuff.h
+
+	* Makefile.am (dist-hook): Don't call dos2unix anymore
+
 1999-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* configure.in: 
 	* acconfig.h: 
 	* util/ntptime.c: FreeBSD nano patches
 	From: Per Hedeland <per@erix.ericsson.se> and
@@ -207,7 +215,7 @@ Wed May 26 21:03:30 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 Tue May 25 18:00:49 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
 	* ntpq/ntpq_ops.c (struct varlist): name cannot be const char *
-	since may be malloc'ed.
+	since it may be malloc'ed.
 
 	* ntpdc/ntpdc.c (sendrequest): Declare pass as const char *, don't
 	loose const in cast.

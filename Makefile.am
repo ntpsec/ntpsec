@@ -6,6 +6,7 @@ SUBDIRS = \
 	include \
 	libntp	\
 	libparse	\
+	librsaref	\
 	ntpd	\
 	ntpdate	\
 	ntpdc	\
@@ -35,11 +36,12 @@ $(srcdir)/COPYRIGHT: html/copyright.htm
 # local-dist: dist-tarZ
 
 dist-hook:
-	for i in $(DIST_HOOK_DIRS); do \
+	-for i in $(DIST_HOOK_DIRS); do \
 	  mkdir $(distdir)/$$i ; \
 	  cp -rp $(srcdir)/$$i $(distdir) ; \
 	done ; \
-	find $(distdir)/html -name '*.htm' -exec dos2unix {} {} \; ; \
+	find $(distdir) -type d -name CVS -exec rm -rf '{}' \; ; \
+	# find $(distdir)/html -name '*.htm' -exec dos2unix {} {} \; ; \
 	# cp -rp $(srcdir)/include/winnt $(distdir)/include
 
 dist-export: distdir

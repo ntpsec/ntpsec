@@ -88,14 +88,15 @@ PACKAGE = @PACKAGE@
 PATH_SH = @PATH_SH@
 PROPDELAY = @PROPDELAY@
 RANLIB = @RANLIB@
+RSAREF = @RSAREF@
 TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+#AUTOMAKE_OPTIONS = ../util/ansi2knr
 
 
-AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_LIBRARIES = @MAKE_LIBRSAREF@
 EXTRA_LIBRARIES = librsaref.a
 CLEANFILES = $(EXTRA_LIBRARIES)
@@ -141,11 +142,9 @@ LIBRARIES =  $(noinst_LIBRARIES)
 DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
-ANSI2KNR = ../util/ansi2knr
 librsaref_a_LIBADD = 
-am_librsaref_a_OBJECTS =  desc$U.o digit$U.o md2c$U.o md5c$U.o nn$U.o \
-prime$U.o r_dh$U.o r_encode$U.o r_enhanc$U.o r_keygen$U.o r_random$U.o \
-r_stdlib$U.o rsa$U.o
+am_librsaref_a_OBJECTS =  desc.o digit.o md2c.o md5c.o nn.o prime.o \
+r_dh.o r_encode.o r_enhanc.o r_keygen.o r_random.o r_stdlib.o rsa.o
 librsaref_a_OBJECTS =  $(am_librsaref_a_OBJECTS)
 AR = ar
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -193,39 +192,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 maintainer-clean-compile:
-../util/ansi2knr: ../util/ansi2knr.o
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
-
-../util/ansi2knr.o:
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr.o
-
-
-mostlyclean-kr:
-	-rm -f *_.c
-
-clean-kr:
-
-distclean-kr:
-
-maintainer-clean-kr:
-desc$U.o:
-digit$U.o:
-md2c$U.o:
-md5c$U.o:
-nn$U.o:
-prime$U.o:
-r_dh$U.o:
-r_encode$U.o:
-r_enhanc$U.o:
-r_keygen$U.o:
-r_random$U.o:
-r_stdlib$U.o:
-rsa$U.o:
-
-librsaref.a: $(librsaref_a_OBJECTS) $(librsaref_a_DEPENDENCIES)
-	-rm -f librsaref.a
-	$(AR) cru librsaref.a $(librsaref_a_OBJECTS) $(librsaref_a_LIBADD)
-	$(RANLIB) librsaref.a
 desc.o:
 digit.o:
 md2c.o:
@@ -239,34 +205,11 @@ r_keygen.o:
 r_random.o:
 r_stdlib.o:
 rsa.o:
-desc_.c: desc.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/desc.c; then echo $(srcdir)/desc.c; else echo desc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > desc_.c
-digit_.c: digit.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/digit.c; then echo $(srcdir)/digit.c; else echo digit.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > digit_.c
-md2c_.c: md2c.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/md2c.c; then echo $(srcdir)/md2c.c; else echo md2c.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > md2c_.c
-md5c_.c: md5c.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/md5c.c; then echo $(srcdir)/md5c.c; else echo md5c.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > md5c_.c
-nn_.c: nn.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/nn.c; then echo $(srcdir)/nn.c; else echo nn.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > nn_.c
-prime_.c: prime.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/prime.c; then echo $(srcdir)/prime.c; else echo prime.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > prime_.c
-r_dh_.c: r_dh.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_dh.c; then echo $(srcdir)/r_dh.c; else echo r_dh.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_dh_.c
-r_encode_.c: r_encode.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_encode.c; then echo $(srcdir)/r_encode.c; else echo r_encode.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_encode_.c
-r_enhanc_.c: r_enhanc.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_enhanc.c; then echo $(srcdir)/r_enhanc.c; else echo r_enhanc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_enhanc_.c
-r_keygen_.c: r_keygen.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_keygen.c; then echo $(srcdir)/r_keygen.c; else echo r_keygen.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_keygen_.c
-r_random_.c: r_random.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_random.c; then echo $(srcdir)/r_random.c; else echo r_random.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_random_.c
-r_stdlib_.c: r_stdlib.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/r_stdlib.c; then echo $(srcdir)/r_stdlib.c; else echo r_stdlib.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > r_stdlib_.c
-rsa_.c: rsa.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/rsa.c; then echo $(srcdir)/rsa.c; else echo rsa.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > rsa_.c
-desc_.o digit_.o md2c_.o md5c_.o nn_.o prime_.o r_dh_.o r_encode_.o \
-r_enhanc_.o r_keygen_.o r_random_.o r_stdlib_.o rsa_.o : $(ANSI2KNR)
+
+librsaref.a: $(librsaref_a_OBJECTS) $(librsaref_a_DEPENDENCIES)
+	-rm -f librsaref.a
+	$(AR) cru librsaref.a $(librsaref_a_OBJECTS) $(librsaref_a_LIBADD)
+	$(RANLIB) librsaref.a
 
 tags: TAGS
 
@@ -385,26 +328,25 @@ distclean-generic:
 maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-kr mostlyclean-tags mostlyclean-depend \
-		mostlyclean-generic
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-kr clean-tags \
-		clean-depend clean-generic mostlyclean-am
+clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-depend \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile distclean-kr \
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
 		distclean-tags distclean-depend distclean-generic \
 		clean-am
 
 distclean: distclean-am
 
 maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-kr \
-		maintainer-clean-tags maintainer-clean-depend \
-		maintainer-clean-generic distclean-am
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -413,87 +355,29 @@ maintainer-clean: maintainer-clean-am
 .PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-kr distclean-kr clean-kr \
-maintainer-clean-kr tags mostlyclean-tags distclean-tags clean-tags \
-maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
-clean-depend maintainer-clean-depend info-am info dvi-am dvi check \
-check-am installcheck-am installcheck install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all install-strip installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all install-strip \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 #EXTRA_DIST = 
 
-$(srcdir)/des.h: $(srcdir)/../rsaref2/source/des.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
+$(librsaref_a_SOURCES): stamp-rsaref
+	for i in $(librsaref_a_SOURCES); do \
+	    case "@MAKE_LIBRSAREF@" in \
+	     '') touch $$i ;; \
+	     *) cmp -s $(srcdir)/$$i $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
+		|| cp $(srcdir)/../rsaref2/source/$$i $(srcdir)/$$i ;; \
+	    esac ; \
+	done
 
-$(srcdir)/desc.c: $(srcdir)/../rsaref2/source/desc.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/digit.c: $(srcdir)/../rsaref2/source/digit.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/digit.h: $(srcdir)/../rsaref2/source/digit.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/global.h: $(srcdir)/../rsaref2/source/global.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/md2.h: $(srcdir)/../rsaref2/source/md2.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/md2c.c: $(srcdir)/../rsaref2/source/md2c.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/md5.h: $(srcdir)/../rsaref2/source/md5.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/md5c.c: $(srcdir)/../rsaref2/source/md5c.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/nn.c: $(srcdir)/../rsaref2/source/nn.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/nn.h: $(srcdir)/../rsaref2/source/nn.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/prime.c: $(srcdir)/../rsaref2/source/prime.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/prime.h: $(srcdir)/../rsaref2/source/prime.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_dh.c: $(srcdir)/../rsaref2/source/r_dh.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_encode.c: $(srcdir)/../rsaref2/source/r_encode.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_enhanc.c: $(srcdir)/../rsaref2/source/r_enhanc.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_keygen.c: $(srcdir)/../rsaref2/source/r_keygen.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_random.c: $(srcdir)/../rsaref2/source/r_random.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_random.h: $(srcdir)/../rsaref2/source/r_random.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/r_stdlib.c: $(srcdir)/../rsaref2/source/r_stdlib.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/rsa.c: $(srcdir)/../rsaref2/source/rsa.c
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/rsa.h: $(srcdir)/../rsaref2/source/rsa.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
-
-$(srcdir)/rsaref.h: $(srcdir)/../rsaref2/source/rsaref.h
-	cmp -s $@ $< 2>/dev/null || cp $< $@
+stamp-rsaref:
+	touch stamp-rsaref
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -964,7 +964,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.93a1
+VERSION=4.0.93c
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
