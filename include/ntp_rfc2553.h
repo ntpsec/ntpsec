@@ -233,8 +233,6 @@ int	getnameinfo P((const struct sockaddr *, u_int, char *,
 void	freeaddrinfo P((struct addrinfo *));
 char	*gai_strerror P((int));
 
-#endif /* ISC_PLATFORM_HAVEIPV6 */
-
 /*
  * Flag values for getaddrinfo()
  */
@@ -268,5 +266,7 @@ char	*gai_strerror P((int));
 #define	NI_DGRAM	0x00000010
 #define NI_WITHSCOPEID	0x00000020
 #endif
+
+#endif /* ISC_PLATFORM_HAVEIPV6 */
 
 #endif /* !_NTP_RFC2553_H_ */
