@@ -505,10 +505,19 @@ io_setbclient(void)
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
 		    INT_BROADCAST, 1);
 		inter_list[i].flags |= INT_BCASTOPEN;
+#ifdef DEBUG
+		if (debug)
+			printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
+				i, inter_list[i].bfd);
+#endif
 #endif
 	}
 #ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(0);
+#endif
+#ifdef DEBUG
+	if (debug)
+		printf("io_setbclient: Opened broadcast clients\n");
 #endif
 }
 
@@ -1611,7 +1620,8 @@ input_handler(
 				 */
 							(free_recvbuffs() == 0)
 #else
-							((i == 0) || (free_recvbuffs() == 0))
+							((i == wildipv4) || (i == wildipv6)||
+							(free_recvbuffs() == 0))
 #endif
 							)
 	{
@@ -1627,7 +1637,7 @@ input_handler(
 			   i, free_recvbuffs(), fd,
 			   stoa(&from));
 #endif
-		if (i == 0)
+		if (i == wildipv4 || i == wildipv6)
 		    packets_ignored++;
 		else
 		    packets_dropped++;
@@ -1770,7 +1780,8 @@ findinterface(
 	struct sockaddr_storage *addr
 	)
 {
-	int s, rtn, i;
+	SOCKET s;
+	int rtn, i;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
 	/*
@@ -1787,18 +1798,14 @@ findinterface(
 		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
 	((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
-#ifndef SYS_WINNT
-	if (s < 0)
-#else
 	if (s == INVALID_SOCKET)
-#endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
 #ifndef SYS_WINNT
 	if (rtn < 0)
 #else
-	if (rtn != 0)
+	if (rtn == SOCKET_ERROR)
 #endif
 	{
 		closesocket(s);
@@ -1810,7 +1817,7 @@ findinterface(
 #ifndef SYS_WINNT
 	if (rtn < 0)
 #else
-	if (rtn != 0)
+	if (rtn == SOCKET_ERROR)
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
@@ -1843,7 +1850,7 @@ findbcastinter(
 
 	for (i = nwilds; i < ninterfaces; i++) {
 		/*
-		* First look if is the correct family
+		* First look if this is the correct family
 		*/
 		if(inter_list[i].sin.ss_family != addr->ss_family)
 	  		continue;
