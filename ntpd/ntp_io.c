@@ -558,7 +558,7 @@ create_sockets(
 		inter_list[i].flags = 0;
 
 		af = lifr->lifr_addr.zz_family;
-		close_socket(vs);
+		closesocket(vs);
 
 		vs = socket(af, SOCK_DGRAM, 0);
 #  ifndef SYS_WINNT
@@ -734,7 +734,7 @@ create_sockets(
 		if (i > MAXINTERFACES)
 		    break;
 	}
-	close_socket(vs);
+	closesocket(vs);
 #endif	/* _BSDI_VERSION >= 199510 */
 
 	ninterfaces = i;
@@ -1418,7 +1418,7 @@ close_socket(
 	(void) closesocket(fd);
 	FD_CLR( (u_int) fd, &activefds);
 
-	if (fd >= maxactivefd) {
+	if (fd == maxactivefd) {
 		newmax = 0;
 		for (i = 0; i < maxactivefd; i++)
 			if (FD_ISSET(i, &activefds))
@@ -1442,7 +1442,7 @@ close_file(
 	(void) close(fd);
 	FD_CLR( (u_int) fd, &activefds);
 
-	if (fd >= maxactivefd) {
+	if (fd == maxactivefd) {
 		newmax = 0;
 		for (i = 0; i < maxactivefd; i++)
 			if (FD_ISSET(i, &activefds))
@@ -1526,7 +1526,7 @@ sendpkt(
 			* set the multicast ttl for outgoing packets
 			*/
 			if (setsockopt(inter->fd, IPPROTO_IP, IP_MULTICAST_TTL,
-				(char *) &ttl, sizeof(ttl)) != 0) {
+				&mttl, sizeof(mttl)) != 0) {
 				msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: %m");
 			}
 			else
