@@ -308,7 +308,6 @@ u_long finish_time = 0;
 
 
 int	ntptimesetmain	P((int argc, char *argv[]));
-extern	void	loadservers	P((char *cfgpath));
 static	void	analysis	P((int final));
 static	int	have_enough	P((void));
 static	void	transmit	P((register struct server *server));

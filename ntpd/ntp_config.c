@@ -706,6 +706,7 @@ getconfig(
 	int minpoll;
 	int maxpoll;
 	int ttl;
+	unsigned long ul;
 	keyid_t peerkey;
 	char *peerkeystr;
 	keyid_t lpeerkey;
@@ -1462,13 +1463,11 @@ getconfig(
 
 		    case CONFIG_REQUESTKEY:
 			if (ntokens >= 2) {
-				keyid_t rkey;
-
-				if (!atouint(tokens[1], &rkey)) {
+				if (!atouint(tokens[1], &ul)) {
 					msyslog(LOG_ERR,
 						"%s is undecodable as request key",
 						tokens[1]);
-				} else if (rkey == 0) {
+				} else if (ul == 0) {
 					msyslog(LOG_ERR,
 						"%s makes a poor request keyid",
 						tokens[1]);
@@ -1476,9 +1475,9 @@ getconfig(
 #ifdef DEBUG
 					if (debug > 3)
 					    printf(
-						    "set info_auth_key to %08x\n", rkey);
+						    "set info_auth_key to %08lx\n", ul);
 #endif
-					info_auth_keyid = rkey;
+					info_auth_keyid = (keyid_t)ul;
 				}
 			}
 			break;
@@ -1647,11 +1646,12 @@ getconfig(
 				    case CONF_FDG_FLAG2:
 				    case CONF_FDG_FLAG3:
 				    case CONF_FDG_FLAG4:
-					if (!atouint(tokens[++i], &lpeerkey)
-					    || lpeerkey > 1) {
+					if (!atouint(tokens[++i], &ul)
+					    || ul > 1) {
 						msyslog(LOG_ERR,
 							"fudge %s flag value in error",
 							ntoa(&peeraddr));
+						lpeerkey = (keyid_t)ul;
 						peerkey = lpeerkey;
 						errflg = i;
 						break;

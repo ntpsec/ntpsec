@@ -6,8 +6,11 @@
 #endif
 
 #include "audio.h"
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include <stdio.h>
+#include "ntp_string.h"
 
 #ifdef HAVE_SYS_AUDIOIO_H
 #include <sys/audioio.h>

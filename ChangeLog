@@ -1,5 +1,19 @@
 2000-05-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpdate/ntptimeset.c: 
+	* ntpdate/ntpdate.h: 
+	* ntpd/refclock_oncore.c (oncore_msg_En): 
+	* ntpd/ntp_util.c (stats_config): 
+	* ntpd/ntp_request.c: 
+	* ntpd/ntp_intres.c (findhostaddr): 
+	* ntpd/ntp_config.c (getconfig): 
+	* libntp/systime.c (adj_systime): 
+	* libntp/lib_strbuf.c: 
+	* libntp/authparity.c: 
+	* libntp/audio.c:
+	Header/lint cleanup
+	From/reported by: Simon Burge <simonb@netbsd.org>
+
 	* ntpd/ntp_resolver.c (findhostaddr): Compiler noise cleanup
 
 	* ntpd/ntp_intres.c: Compiler noise cleanup
