@@ -722,8 +722,8 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	{
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;*/
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
+/*		mreq.imr_interface.s_addr = htonl(INADDR_ANY); */
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -1987,14 +1987,14 @@ findinterface(
 	if (addr->ss_family == AF_INET && outifaceipv4 != -1) {
 #ifdef DEBUG
 	if (debug > 2)
-	    printf("Found interface %d for address: %s\n", outifaceipv4, stoa(addr));
+	    printf("Found only interface %d for address: %s\n", outifaceipv4, stoa(addr));
 #endif
 		return (&inter_list[outifaceipv4]);
 	}
 	if (addr->ss_family == AF_INET6 && outifaceipv6 != -1) {
 #ifdef DEBUG
 	if (debug > 2)
-	    printf("Found interface %d for address: %s\n", outifaceipv6, stoa(addr));
+	    printf("Found only interface %d for address: %s\n", outifaceipv6, stoa(addr));
 #endif
 		return (&inter_list[outifaceipv6]);
 	}
@@ -2023,7 +2023,7 @@ findinterface(
 			if (amask == imask) {
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found network local interface %d for address: %s\n", i, stoa(addr));
 #endif
 			     return (&inter_list[i]);
 			}
@@ -2038,7 +2038,7 @@ findinterface(
 			{
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found Link-Local interface %d for address: %s\n", i, stoa(addr));
 #endif
 				return (&inter_list[i]);
 			}
@@ -2048,7 +2048,7 @@ findinterface(
 			{
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found Site-Local interface %d for address: %s\n", i, stoa(addr));
 #endif
 				return (&inter_list[i]);
 			}
@@ -2066,7 +2066,7 @@ findinterface(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found PPP interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (&inter_list[i]);
 		}
@@ -2075,7 +2075,7 @@ findinterface(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-				printf("Found interface %d for address: %s\n", i, stoa(addr));
+				printf("Found PPP interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (&inter_list[i]);
 		}
@@ -2095,7 +2095,7 @@ findinterface(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found other interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (&inter_list[i]);
 		}
@@ -2111,7 +2111,7 @@ findinterface(
 				continue;
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found other interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (&inter_list[i]);
 		}
@@ -2241,7 +2241,7 @@ find_interface_index(
 			if (amask == imask) {
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found network local *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 			     return (i);
 			}
@@ -2256,7 +2256,7 @@ find_interface_index(
 			{
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found Link-Local *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 				return (i);
 			}
@@ -2266,7 +2266,7 @@ find_interface_index(
 			{
 #ifdef DEBUG
 				if (debug > 2)
-				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+				    printf("Found Site-Local *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 				return (i);
 			}
@@ -2290,7 +2290,7 @@ find_interface_index(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found PPP *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (i);
 		}
@@ -2299,7 +2299,7 @@ find_interface_index(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-				printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+				printf("Found PPP *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (i);
 		}
@@ -2323,7 +2323,7 @@ find_interface_index(
 		{
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found non-local *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (i);
 		}
@@ -2339,7 +2339,7 @@ find_interface_index(
 				continue;
 #ifdef DEBUG
 			if (debug > 2)
-			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+			    printf("Found non-local *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
 			return (i);
 		}
