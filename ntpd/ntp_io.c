@@ -54,8 +54,9 @@
 
 /*
  * Don't allow wildcard delivery
- */
+ *
 #undef UDP_WILDCARD_DELIVERY
+*/
 
 extern int listen_to_virtual_ips;
 
