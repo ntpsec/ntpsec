@@ -47,7 +47,9 @@ do
 	;;
      1) ssh $i "cd $c_d ; \
 ./build $SIG $PARSE $SNTP $BUILD_ARGS ; \
-./build $SIG $PARSE $SNTP --without-crypto $BUILD_ARGS" &
+./build $SIG $PARSE $SNTP --without-crypto $BUILD_ARGS ; \
+./build $SIG $PARSE $SNTP --disable-all-clocks $BUILD_ARGS" \
+&
 	;;
     esac
 done
