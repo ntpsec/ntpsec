@@ -1041,8 +1041,6 @@ sys_info(
 	is = (struct info_sys *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_sys));
 
-	is->peer = 0;
-	is->peer_mode = 0;
 	if (sys_peer != 0) {
 		if (sys_peer->srcadr.ss_family == AF_INET) {
 			is->peer = GET_INADDR(sys_peer->srcadr);
@@ -1053,6 +1051,12 @@ sys_info(
 			is->v6_flag = 1;
 		}
 		is->peer_mode = sys_peer->hmode;
+	} else {
+		is->peer = 0;
+		if (client_v6_capable) {
+			is->v6_flag = 0;
+		}
+		is->peer_mode = 0;
 	}
 
 	is->leap = sys_leap;
@@ -1856,7 +1860,7 @@ mon_getlist_0(
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
 		im->lasttime = htonl((u_int32)md->avg_interval);
-		im->firsttime = htonl((u_int32)(current_time - md->firsttime));
+		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
 		im->lastdrop = htonl((u_int32)md->drop_count);
 		im->count = htonl((u_int32)(md->count));
 		if (md->rmtadr.ss_family == AF_INET6) {
@@ -1892,10 +1896,6 @@ mon_getlist_1(
 	extern struct mon_data mon_mru_list;
 	extern int mon_enabled;
 
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("wants monitor 1 list\n");
-#endif
 	if (!mon_enabled) {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 		return;
@@ -1905,8 +1905,8 @@ mon_getlist_1(
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
 		im->lasttime = htonl((u_int32)md->avg_interval);
-		im->firsttime = htonl((u_int32)(current_time - md->firsttime));
-		    im->lastdrop = htonl((u_int32)md->drop_count);
+		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
+		im->lastdrop = htonl((u_int32)md->drop_count);
 		im->count = htonl((u_int32)md->count);
 		if (md->rmtadr.ss_family == AF_INET6) {
 			if (!client_v6_capable)

@@ -102,6 +102,13 @@ reinit_timer(void)
 	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
 		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	}
+	if (itimer.it_value.tv_nsec < 0 ) {
+		itimer.it_value.tv_nsec = 0;
+	}
+	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_nsec == 0) {
+		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
+		itimer.it_value.tv_nsec = 0;
+	}
 	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_nsec = 0;
 	timer_settime(ntpd_timerid, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
@@ -109,6 +116,13 @@ reinit_timer(void)
 	getitimer(ITIMER_REAL, &itimer);
 	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
 		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
+	}
+	if (itimer.it_value.tv_usec < 0 ) {
+		itimer.it_value.tv_usec = 0;
+	}
+	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_usec == 0) {
+		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
+		itimer.it_value.tv_usec = 0;
 	}
 	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_usec = 0;

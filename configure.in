@@ -800,7 +800,10 @@ case "$host" in
  *-*-aix[[45]]*)
     # Just stubs.  Idiots.
     ;;
- *-*-netbsd*)
+ *-*-netbsd1*)
+    # Just stubs.  Idiots.
+    ;;
+ *-*-netbsdelf1*)
     # Just stubs.  Idiots.
     ;;
  *-*-openbsd*)
