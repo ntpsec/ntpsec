@@ -678,7 +678,7 @@ service_main(
 	    struct rlimit rl;
 
 	    if (getrlimit(RLIMIT_STACK, &rl) != -1
-		&& (rl.rlim_cur = 20 * 4096) < rl.rlim_max)
+		&& (rl.rlim_cur = 50 * 4096) < rl.rlim_max)
 	    {
 		    if (setrlimit(RLIMIT_STACK, &rl) == -1)
 		    {
