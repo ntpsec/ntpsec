@@ -78,14 +78,6 @@ getstartup(
 		    break;
 #else
 		case 'd':
-/*
- * We need to do this in order to have a way of running
- * without running as a service
- */
-#ifdef SYS_WINNT
-		    NoWinService = TRUE;
-		    break;
-#endif
 		case 'D':
 		    msyslog(LOG_ERR, "ntpd not compiled with -DDEBUG option - no DEBUG support");
 		    fprintf(stderr, "ntpd not compiled with -DDEBUG option - no DEBUG support");
@@ -125,6 +117,9 @@ getstartup(
 		case 'n':
 		case 'q':
 		    ++nofork;
+#ifdef SYS_WINNT
+		    NoWinService = TRUE;	 
+#endif
 		    break;
 
 		case 'N':
@@ -237,15 +232,7 @@ getCmdOpts(
 #ifdef DEBUG
 			debug++;
 #else
-/*
- * We need to do this in order to have a way of running
- * without running as a service
- */
-#ifdef SYS_WINNT
-			NoWinService = TRUE;	 
-#else
 			errflg++;
-#endif
 #endif	/* DEBUG */
 			break;
 

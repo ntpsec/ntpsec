@@ -401,6 +401,10 @@ SOURCE=..\..\..\libntp\utvtoa.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\libisc\win32os.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\ymd2yd.c
 # End Source File
 # End Group
@@ -578,6 +582,10 @@ SOURCE=..\include\transmitbuff.h
 # Begin Source File
 
 SOURCE=..\include\win32_io.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\isc\win32os.h
 # End Source File
 # End Group
 # Begin Group "Generated Files"
