@@ -37,6 +37,11 @@ case "$target" in
 	;;
     esac
     ;;
+ *-*-mpeix*)
+    CPPFLAGS="$CPPFLAGS -DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE -I/SYSLOG/PUB"
+    LDFLAGS="$LDFLAGS -L/SYSLOG/PUB"
+    LIBS="$LIBS -lcurses"
+    ;;
 esac
 
 case "$host" in
@@ -185,7 +190,9 @@ AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
 AC_CHECK_LIB(ld, nlist)
 AC_CHECK_LIB(mld, nlist)
 AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
-AC_CHECK_FUNC(openlog, , AC_CHECK_LIB(gen, openlog))
+AC_CHECK_FUNC(openlog, , 
+  AC_CHECK_LIB(gen, openlog, , 
+  AC_CHECK_LIB(syslog, openlog, , , -lsocket)))
 AC_CHECK_LIB(readline, readline)
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
@@ -208,7 +215,8 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
 AC_CHECK_HEADERS(poll.h resolv.h sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
-AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_systm.h netinet/in.h)
+AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_system.h)
+AC_CHECK_HEADERS(netinet/in_systm.h netinet/in.h netinet/ip.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO)])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)
@@ -225,7 +233,7 @@ case "$target" in
     AC_CHECK_HEADERS(sys/sio.h)
     ;;
 esac
-AC_CHECK_HEADERS(sys/select.h sys/sockio.h sys/stat.h sys/stream.h)
+AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h sys/stat.h sys/stream.h)
 AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/termios.h)
 AC_CHECK_HEADERS(sys/time.h)
 AC_EGREP_CPP(yes,
@@ -578,7 +586,12 @@ AC_CHECK_FUNCS(finite, ,
       AC_DEFINE(HAVE_ISFINITE)],
       AC_MSG_RESULT(no))
     LIBS=$_libs])])
-AC_CHECK_FUNCS(getbootfile getclock getdtablesize getrusage gettimeofday)
+AC_CHECK_FUNCS(getbootfile getclock getdtablesize getrusage)
+AC_CHECK_FUNC(gettimeofday, ,[
+case "$target" in
+  *-*-mpeix*) ac_cv_func_gettimeofday=yes
+    ;;
+esac])
 case "$target" in
  *-pc-cygwin*)
     ;;
@@ -636,8 +649,13 @@ case "$target" in
  *) AC_CHECK_FUNCS(sched_setscheduler)
     ;;
 esac
-AC_CHECK_FUNCS(setlinebuf)
-AC_CHECK_FUNCS(setpgid setpriority setsid settimeofday setvbuf sigaction)
+AC_CHECK_FUNCS(setlinebuf setpgid setpriority setsid)
+AC_CHECK_FUNC(settimeofday, ,[
+case "$target" in
+  *-*-mpeix*) ac_cv_func_settimeofday=yes
+    ;;
+esac])
+AC_CHECK_FUNCS(setvbuf sigaction)
 AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
 AC_REPLACE_FUNCS(snprintf strdup strerror)
 case "$target" in
@@ -794,6 +812,17 @@ esac
 case "$target" in
  *-*-aix4.3.*)
     AC_DEFINE(DECL_HSTRERROR_0)		# Needed for XLC under AIX 4.3.2
+    ;;
+ *-*-mpeix*)
+    AC_DEFINE(DECL_ADJTIME_0)
+    AC_DEFINE(DECL_INET_NTOA_0)
+    AC_DEFINE(DECL_MKTEMP_0)
+    AC_DEFINE(DECL_MRAND48_0)
+    AC_DEFINE(DECL_SELECT_0)
+    AC_DEFINE(DECL_SETITIMER_0)
+    AC_DEFINE(DECL_SRAND48_0)
+    AC_DEFINE(DECL_SYSLOG_0)
+    AC_DEFINE(DECL_TIMEOFDAY_0)
     ;;
  *-*-osf[[45]]*)
     AC_DEFINE(DECL_PLOCK_0)
@@ -2573,6 +2602,9 @@ case "$target" in
  *-ibm-aix[[34]]*)
     ans=no
     ;;
+ *-*-mpeix*)
+    ans=no
+    ;;
  *-*-ptx*)
     ans=tick
     ;;
@@ -2629,6 +2661,9 @@ case "$target" in
  *-*-aix*)
     ans=tickadj
     ;;
+ *-*-mpeix*)
+    ans=no
+    ;;
  *-*-ptx*)
     ans=tickadj
     ;;
@@ -2681,6 +2716,9 @@ ac_cv_var_nlist_dosynctodr,
  *-*-hpux*)
     ans=no
     ;;
+ *-*-mpeix*)
+    ans=no
+    ;;
  *-*-nextstep*)
     ans=_dosynctodr
     ;;
@@ -2723,6 +2761,9 @@ ac_cv_var_nlist_noprintf,
     ans=noprintf
     ;;
  *-*-hpux*)
+    ans=no
+    ;;
+ *-*-mpeix*)
     ans=no
     ;;
  *-*-ptx*)
@@ -2781,6 +2822,9 @@ AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
       *-*-linux*)
 	 ans=txc.tick
 	 ;;
+      *-*-mpeix*)
+	 ans=no
+	 ;;
       *-*-winnt3.5)
 	 ans='(every / 10)'
 	 ;;
@@ -2827,6 +2871,9 @@ AC_CACHE_CHECK(for a default value for 'tickadj', ac_cv_var_tickadj,
       ;;
    *-*-irix*)
       ans=150
+      ;;
+   *-*-mpeix*)
+      ans=no
       ;;
    *-*-sco3.2v5.0*)
       ans=10000L/hz
@@ -2985,6 +3032,9 @@ AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery
 	 ans=yes
 	 ;;
       *-*-linux*)
+	 ans=yes
+	 ;;
+      *-*-mpeix*)
 	 ans=yes
 	 ;;
       *-*-osf*)

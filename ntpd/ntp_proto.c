@@ -2506,7 +2506,8 @@ int
 default_get_precision(void)
 {
 	struct timeval tp;
-#if !defined(SYS_WINNT) && !defined(VMS) && !defined(_SEQUENT_)
+#if !defined(SYS_WINNT) && !defined(VMS) && !defined(_SEQUENT_) && \
+    !defined(MPE)
 	struct timezone tzp;
 #elif defined(VMS) || defined(_SEQUENT_)
 	struct timezone {

@@ -402,6 +402,9 @@
 /* hstrerror()? */
 #undef DECL_HSTRERROR_0
 
+/* inet_ntoa()? */
+#undef DECL_INET_NTOA_0
+
 /* ioctl()? */
 #undef DECL_IOCTL_0
 
