@@ -19,6 +19,11 @@
 
 #ifdef REFCLOCK
 
+#ifdef HAVE_PPSAPI
+#undef STREAM
+#undef TTYCLK
+#endif
+
 #ifdef TTYCLK
 #include <sys/clkdefs.h>
 #endif /* TTYCLK */
@@ -1034,7 +1039,9 @@ refclock_ioctl(
 	 * support.
 	 */
 	if (flags & LDISC_PPS) {
+#ifdef HAVE_TIOCSPPS		/* Solaris */
 		int one = 1;
+#endif
 
 		if (fdpps > 0) {
 			msyslog(LOG_ERR,
@@ -1093,7 +1100,7 @@ refclock_ioctl(
 	 * requires ppsclock compiled into the kernel on non STREAMS
 	 * systems.
 	 */
-	if (flags & LDISC_PPS) {
+	if (flags & (LDISC_PPS | LDISC_CLKPPS)) {
 		pps_params_t	pp;
 		int mode;
 

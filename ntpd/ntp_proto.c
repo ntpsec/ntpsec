@@ -2025,6 +2025,7 @@ init_proto(void)
 #ifndef KERNEL_FLL_BUG
 	kern_enable = 1;
 #endif
+	msyslog(LOG_DEBUG, "kern_enable is %d", kern_enable);
 	stats_control = 1;
 #if defined SCO5_CLOCK
 	if ((int) sys_precision < -10) {

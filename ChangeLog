@@ -1,5 +1,9 @@
 1999-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_refclock.c (refclock_ioctl): Declaration cleanup.
+
+	* ntpd/ntp_proto.c (init_proto): msyslog kern_enable at LOG_DEBUG.
+
 	* ntpd/refclock_atom.c: Add missing declaration.
 
 1999-09-11  Harlan Stenn  <stenn@whimsy.udel.edu>
