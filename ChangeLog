@@ -1,5 +1,17 @@
 1999-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntpd.c (sys/resource.h): Include this file only #if
+ 	HAVE_SYS_RESOURCE_H.
+	(set_process_priority): Use TIOCNOTTY only if it is #define'd.
+	* ntpd/refclock_parse.c (STREAM): STREAM does not imply HAVE_TERMIOS.
+	(termios.h, termio.h, fcntl.h): Do not include those files here;
+	they are already included by ntp_refclock.h or ntp_io.h.
+	* ntpd/refclock_leitch.c (sgtty.h, termios.h, termio.h): Do not
+	include those files here; they are already included by ntp_refclock.h.
+	* ntpdate/ntpdate.c (sys/resource.h) : Include that file only #if
+	HAVE_RESOURCE_H.
+	From: Philippe De Muyter <phdm@macqel.be>
+	
 	* ntptrace/ntptrace.c (input_handler): Make it a "normal" function 
 	definition.
 	Reported by: GIANNI_CATANIA@hp-italy-om6.om.hp.com

@@ -23,9 +23,9 @@
 #  include <sys/ioctl.h>
 # endif /* HAVE_SYS_IOCTL_H */
 # include <sys/time.h>
-# if !defined(VMS)	/*wjm*/
+# ifdef HAVE_SYS_RESOURCE_H
 #  include <sys/resource.h>
-# endif /* VMS */
+# endif /* HAVE_SYS_RESOURCE_H */
 #else
 # include <signal.h>
 # include <process.h>
@@ -412,6 +412,7 @@ ntpdmain(
 # endif
 #else /* HAVE_SETPGID || HAVE_SETSID */
 			{
+# if defined(TIOCNOTTY)
 				int fid;
 
 				fid = open("/dev/tty", 2);
@@ -420,6 +421,7 @@ ntpdmain(
 					(void) ioctl(fid, (u_long) TIOCNOTTY, (char *) 0);
 					(void) close(fid);
 				}
+# endif /* defined(TIOCNOTTY) */
 # ifdef HAVE_SETPGRP_0
 				(void) setpgrp();
 # else /* HAVE_SETPGRP_0 */

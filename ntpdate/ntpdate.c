@@ -24,12 +24,11 @@
 # include <netdb.h>
 # include <sys/signal.h>
 # include <sys/ioctl.h>
-# include <sys/time.h>
-# include <sys/resource.h>
-
-#else
-# include <sys/time.h>
 #endif /* SYS_WINNT */
+#include <sys/time.h>
+#ifdef HAVE_SYS_RESOURCE_H
+# include <sys/resource.h>
+#endif /* HAVE_SYS_RESOURCE_H */
 
 #ifdef SYS_VXWORKS
 # include "ioLib.h"

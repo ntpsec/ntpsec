@@ -96,20 +96,15 @@ extern int errno;
 #ifdef STREAM
 # include <sys/stream.h>
 # include <sys/stropts.h>
-# ifndef HAVE_TERMIOS
-#  define HAVE_TERMIOS
-# endif
 #endif
 
 #ifdef HAVE_TERMIOS
-# include <termios.h>
 # define TTY_GETATTR(_FD_, _ARG_) tcgetattr((_FD_), (_ARG_))
 # define TTY_SETATTR(_FD_, _ARG_) tcsetattr((_FD_), TCSANOW, (_ARG_))
 # undef HAVE_SYSV_TTYS
 #endif
 
 #ifdef HAVE_SYSV_TTYS
-# include <termio.h>
 # define TTY_GETATTR(_FD_, _ARG_) ioctl((_FD_), TCGETA, (_ARG_))
 # define TTY_SETATTR(_FD_, _ARG_) ioctl((_FD_), TCSETAW, (_ARG_))
 #endif
@@ -118,10 +113,6 @@ extern int errno;
 /* #error CURRENTLY NO BSD TTY SUPPORT */
 # include "Bletch: BSD TTY not currently supported"
 #endif
-
-#if	!defined(O_RDWR)	/* XXX SOLARIS */
-# include <fcntl.h>
-#endif	/* !def(O_RDWR) */
 
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>

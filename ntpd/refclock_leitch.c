@@ -16,17 +16,6 @@
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 
-#if defined(HAVE_BSD_TTYS)
-#include <sgtty.h>
-#endif /* HAVE_BSD_TTYS */
-
-#if defined(HAVE_SYSV_TTYS)
-#include <termio.h>
-#endif /* HAVE_SYSV_TTYS */
-
-#if defined(HAVE_TERMIOS)
-#include <termios.h>
-#endif
 #ifdef STREAM
 #include <stropts.h>
 #if defined(LEITCHCLK)
