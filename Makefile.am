@@ -4,6 +4,7 @@ AUTOMAKE_OPTIONS = util/ansi2knr foreign
 SUBDIRS = \
 	scripts \
 	include \
+	ElectricFence	\
 	librsaref	\
 	libntp	\
 	libparse	\

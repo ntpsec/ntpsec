@@ -103,6 +103,10 @@ U = @U@
 VERSION = @VERSION@
 install_sh = @install_sh@
 
+# Harlan Stenn <stenn@whimsy.udel.edu>
+# Converted the original Makefile (now in Makefile-) to Makefile.am
+# in July of '00
+
 
 EXTRA_DIST = libefence.3 CHANGES
 libefence_a_SOURCES = efence.h efence.c page.c print.c

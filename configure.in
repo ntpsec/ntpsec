@@ -2264,6 +2264,19 @@ case "$ans" in
 esac
 AC_MSG_RESULT($ans)
 
+AC_MSG_CHECKING(if we want to compile with ElectricFence)
+AC_ARG_WITH(electricfence,	[  --with-electricfence    -],
+[ans=$withval], [ans=no])
+echo "ElectricFence: withval is <$withval>, ans is <$ans>"
+case "$ans" in
+ no) ;;
+ *)
+    LIBS="$LIBS \${top_builddir}/ElectricFence/libefence.a"
+    ans=yes
+    ;;
+esac
+AC_MSG_RESULT($ans)
+
 AC_SUBST(TESTDCF)
 AC_SUBST(DCFD)
 
