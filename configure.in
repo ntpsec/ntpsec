@@ -2089,6 +2089,16 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(for Zyfer receiver)
+AC_ARG_ENABLE(ZYFER,
+    AC_HELP_STRING([--enable-ZYFER], [+ Zyfer GPStarplus receiver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_ZYFER, 1, [Zyfer GPStarplus])
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
 AC_ARG_ENABLE(parse-clocks,	[  --enable-parse-clocks   - include all suitable PARSE clocks:],
     [ntp_eapc=$enableval],
