@@ -1,3 +1,7 @@
+1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_parse.c (local_input): ts.l_ui -> ts.fp.l_ui
+
 1999-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.96p1

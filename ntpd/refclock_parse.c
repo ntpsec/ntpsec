@@ -1935,7 +1935,7 @@ local_input(
 					TVTOTS(&dcd_time, &tstmp);
 					tstmp.l_ui += JAN_1970;
 					L_SUB(&ts.fp, &tstmp);
-					if (ts.l_ui == 0)
+					if (ts.fp.l_ui == 0)
 					{
 #ifdef DEBUG
 						if (debug)
