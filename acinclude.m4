@@ -6,5 +6,5 @@ ACAT(Cir,cus)
     AC_EGREP_CPP(Reiser,
 [#define RCAT(a,b)a/**/b
 RCAT(Rei,ser)
-], AC_DEFINE([ULONG_CONST(a)], [a/**/U]),
+], AC_DEFINE([ULONG_CONST(a)], [a/**/L]),
     AC_MSG_ERROR([How do we create an unsigned long constant?])))])

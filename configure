@@ -2034,7 +2034,7 @@ EOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   egrep "Reiser" >/dev/null 2>&1; then
   cat >>confdefs.h <<\EOF
-#define ULONG_CONST(a) a/**/U
+#define ULONG_CONST(a) a/**/L
 EOF
 
 else

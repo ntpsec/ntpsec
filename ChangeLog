@@ -1,3 +1,7 @@
+2000-05-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* acinclude.m4: Typo...
+
 2000-05-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/gpstolfp.c (GPSORIGIN): Try new ULONG_CONST macro
