@@ -512,27 +512,29 @@ oncore_start(
 		exit(1);
 	}
 
-	if (stat(pps_device, &stat1)) {
-		perror("ONCORE: stat pps_device");
-		return(0);
-	}
-
-	/* must have hardpps ON, and fd2 must be the same device as on the pps line */
-
-	if (pps_hardpps && ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))) {
-		int     i;
-
-		if (instance->assert)
-			i = PPS_CAPTUREASSERT;
-		else
-			i = PPS_CAPTURECLEAR;
-
-		if (i&mode) {
-			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
-			    PPS_TSFMT_TSPEC) < 0) {
-				msyslog(LOG_ERR,
-				    "refclock_ioctl: time_pps_kcbind failed: %m");
-				return (0);
+	if (pps_device) {
+		if (stat(pps_device, &stat1)) {
+			perror("ONCORE: stat pps_device");
+			return(0);
+		}
+	
+		/* must have hardpps ON, and fd2 must be the same device as on the pps line */
+	
+		if (pps_hardpps && ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))) {
+			int     i;
+	
+			if (instance->assert)
+				i = PPS_CAPTUREASSERT;
+			else
+				i = PPS_CAPTURECLEAR;
+	
+			if (i&mode) {
+				if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
+				    PPS_TSFMT_TSPEC) < 0) {
+					msyslog(LOG_ERR,
+					    "refclock_ioctl: time_pps_kcbind failed: %m");
+					return (0);
+				}
 			}
 		}
 	}

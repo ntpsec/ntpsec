@@ -1,5 +1,11 @@
 2000-01-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c (oncore_start): Only dance with the
+	pps_device if it's there.
+	From: reg@dwf.com
+
+	* configure.in: ONCORE is OK if ac_cv_hdr_def_tiocdcdtimestamp=yes
+
 	* build: Just overwrite the log file each time; sometimes NFS goes
 	a little goofy.
 
