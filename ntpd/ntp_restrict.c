@@ -237,8 +237,8 @@ restrictions(
 		 * Need to know whether this is from the ntp port or not.
 		 */
 		hostaddr6 = GET_INADDR6(*srcadr);
-		isntpport =
-		    ((((struct sockaddr_in6 *)srcadr)->sin6_port) == NTP_PORT);
+		isntpport = (ntohs(((struct sockaddr_in6 *)srcadr)->sin6_port)
+		    == NTP_PORT);
 
 		/*
 		 * Ignore any packets with a multicast source address

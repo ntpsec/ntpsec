@@ -31,14 +31,16 @@ socktoa(
 	switch(sock->ss_family) {
 
 		case AF_INET :
-			inet_ntop(AF_INET, &((struct sockaddr_in*)sock)->sin_addr, buffer, LIB_BUFLENGTH);
+			inet_ntop(AF_INET, &GET_INADDR(*sock), buffer,
+			    LIB_BUFLENGTH);
 			break;
 
 		case AF_INET6 :
-			inet_ntop(AF_INET6, &((struct sockaddr_in6*)sock)->sin6_addr, buffer, LIB_BUFLENGTH);
+			inet_ntop(AF_INET6, &GET_INADDR6(*sock), buffer,
+			    LIB_BUFLENGTH);
 	}
   	return buffer;
 #else
-	return numtoa(((struct sockaddr_in *)sock)->sin_addr.s_addr);
+	return numtoa(GET_INADDR(*sock));
 #endif
 }

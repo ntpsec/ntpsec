@@ -1631,6 +1631,8 @@ again:
 		       "=====================================================================\n");
 
 	while (items > 0) {
+		memset((char *)&resaddr, 0, sizeof(resaddr));
+		memset((char *)&maskaddr, 0, sizeof(maskaddr));
 		if (rl->v6_flag != 0) {
 			GET_INADDR6(resaddr) = rl->addr6;
 			GET_INADDR6(maskaddr) = rl->mask6;
