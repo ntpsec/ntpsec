@@ -2017,6 +2017,16 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(RIPENCC specific Trimble driver)
+AC_ARG_ENABLE(RIPENCC,
+    AC_HELP_STRING([--enable-RIPENCC], [+ RIPENCC specific Trimble driver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_RIPENCC, ,[RIPE NCC Trimble clock])
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(Spectracom 8170/Netclock/2 WWVB receiver)
 AC_ARG_ENABLE(SPECTRACOM,
     AC_HELP_STRING([--enable-SPECTRACOM], [+ Spectracom 8170/Netclock/2 WWVB receiver]),

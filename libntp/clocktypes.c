@@ -84,7 +84,7 @@ struct clktype clktypes[] = {
 	  "PCF"},
 	{ REFCLK_WWV_AUDIO,	"WWV/H Audio Demodulator/Decoder (36)",
 	  "WWV_AUDIO"},
-	{ REFCLK_FG,	"Forum Graphic GPS Dating Station (37)",
+	{ REFCLK_FG,		"Forum Graphic GPS Dating Station (37)",
 	  "GPS_FG"},
 	{ REFCLK_HOPF_SERIAL,	"hopf Elektronic serial line receiver (38)",
 	  "HOPF_S"},
@@ -96,6 +96,8 @@ struct clktype clktypes[] = {
 	  "TT_IRIG"},
 	{ REFCLK_ZYFER,		"Zyfer GPStarplus receiver (42)",
 	  "GPS_ZYFER" },
+	{ REFCLK_RIPENCC,	"RIPE NCC Trimble driver (43)",
+	  "GPS_RIPENCC" },
 	{ -1,			"", "" }
 };
 

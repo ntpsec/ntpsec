@@ -391,6 +391,7 @@ static u_char clocktypes[] = {
 	CTL_SST_TS_LF,		/* REFCLK_JJY (40) */
 	CTL_SST_TS_UHF,		/* REFCLK_TT560 (41) */
 	CTL_SST_TS_UHF,		/* REFCLK_ZYFER (42) */
+	CTL_SST_TS_UHF,		/* REFCLK_RIPENCC (43) */
 };
 
 
@@ -1476,18 +1477,19 @@ ctl_putpeer(
 	case CP_REFID:
 		if (peer->flags & FLAG_REFCLOCK) {
 			if (peer->stratum > 0)
-			    ctl_putadr(peer_var[CP_REFID].text,
-			        peer->refid, NULL);
+				ctl_putadr(peer_var[CP_REFID].text,
+				    peer->refid, NULL);
 			else
-			    ctl_putid(peer_var[CP_REFID].text,
-			        (char *)&peer->refid);
+				ctl_putid(peer_var[CP_REFID].text,
+				   (char *)&peer->refid);
 		} else {
-			if (peer->stratum > 1)
-			    ctl_putadr(peer_var[CP_REFID].text,
-				peer->refid, NULL);
+			if (peer->stratum > 1 && peer->stratum <
+			    STRATUM_UNSPEC)
+				ctl_putadr(peer_var[CP_REFID].text,
+				    peer->refid, NULL);
 			else
-			    ctl_putid(peer_var[CP_REFID].text,
-				(char *)&peer->refid);
+				ctl_putid(peer_var[CP_REFID].text,
+				    (char *)&peer->refid);
 		}
 		break;
 

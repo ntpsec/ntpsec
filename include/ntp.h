@@ -490,7 +490,8 @@ struct peer {
 #define REFCLK_JJY		40	/* JJY receiver  */
 #define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder */
 #define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
-#define REFCLK_MAX		42	/* Grow as needed... */
+#define REFCLK_RIPENCC		43	/* RIPE NCC Trimble driver */
+#define REFCLK_MAX		43	/* Grow as needed... */
 
  /*
  * Macro for sockaddr_storage structures operations
@@ -513,7 +514,6 @@ struct peer {
 
 #define ANY_INTERFACE_CHOOSE(sock)	(((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
  					any_interface : any6_interface)
-
 
 /*
  * We tell reference clocks from real peers by giving the reference

@@ -636,8 +636,8 @@ receive(
 		 * immediately.
 		 */
 		if (crypto_flags && ((restrict_mask & (RES_DONTSERVE |
-		    RES_LIMITED | RES_NOPEER)) || (sys_authenticate &&
-		    !is_authentic)))
+		    RES_LIMITED | RES_NOPEER | RES_DEMOBILIZE)) ||
+		    (sys_authenticate && !is_authentic)))
 			return;
 
 		peer2 = findmanycastpeer(rbufp);
@@ -664,16 +664,24 @@ receive(
 		/*
 		 * This is the first packet received from a symmetric
 		 * active peer. First, make sure the packet is
-		 * authentic. If so, mobilize a symmetric passive
-		 * association. We should figure out how to avoid
-		 * mobilizing associations when the identity schemes are
-		 * incompatible.
+		 * authentic. Send a kiss-of-death packet if we have
+		 * been kissed by a frog. Drop the packet if other
+		 * restrictions or bum authentic. Otherwise, crank up a
+		 * passive association.
 		 */
-		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
-		    RES_NOPEER)) || (has_mac && sys_authenticate &&
-		    !is_authentic)) {
-			fast_xmit(rbufp, MODE_PASSIVE, 0,
-			    restrict_mask);
+		if (restrict_mask & RES_DEMOBILIZE) {
+			if (has_mac && sys_authenticate &&
+			    !is_authentic)
+				fast_xmit(rbufp, MODE_PASSIVE, 0,
+				    restrict_mask);
+			else
+				fast_xmit(rbufp, MODE_PASSIVE, skeyid,
+				    restrict_mask);
+			return;
+
+		} else if ((restrict_mask & (RES_DONTSERVE |
+		    RES_LIMITED | RES_NOPEER)) || (has_mac &&
+		    sys_authenticate && !is_authentic)) {
 			return;
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -694,8 +702,8 @@ receive(
 		 * association.
 		 */
 		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
-		    RES_NOPEER)) || (sys_authenticate &&
-		    !is_authentic) || !sys_bclient)
+		    RES_NOPEER | RES_DEMOBILIZE)) ||
+		    (sys_authenticate && !is_authentic) || !sys_bclient)
 			return;
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -729,7 +737,8 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * Happiness and nothing broke. Earn some revenue.
+		 * Here be active, passive, server and broadcast packets
+		 * and nothing broke. Earn some revenue.
 		 */
 		break;
 
@@ -1129,6 +1138,35 @@ process_packet(
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
+	 * A kiss-of-death (kod) packet is returned by a server in case
+	 * the client is denied access. It consists of the client
+	 * request packet with the leap bits indicating never
+	 * synchronized, stratum zero and reference ID field the ASCII
+	 * string "DENY". If the packet originate timestamp matches the
+	 * association transmit timestamp the kod is legitimate. If the
+	 * peer leap bits indicate never synchronized, this must be
+	 * access deny and the association is disabled; otherwise this
+	 * must be a limit reject. In either case a naughty message is
+	 * forced to the system log.
+	 */
+	if (pleap == LEAP_NOTINSYNC && pstratum >= STRATUM_UNSPEC &&
+	    memcmp(&pkt->refid, "DENY", 4) == 0) {
+		if (peer->leap == LEAP_NOTINSYNC) {	/* test 4 */
+			peer->stratum = STRATUM_UNSPEC;
+			peer->flash |= TEST4;		/* denied */
+			memcpy(&peer->refid, &pkt->refid, 4);
+			msyslog(LOG_INFO, "access denied");
+		} else {
+			msyslog(LOG_INFO, "limit reject");
+		}
+#if DEBUG
+		if (debug)
+			printf("packet: kissed by a frog\n");
+#endif
+		return;
+	}
+
+	/*
 	 * Test for unsynchronized server.
 	 */
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
@@ -1154,31 +1192,6 @@ process_packet(
 			printf("packet: bad data %03x\n",
 			    peer->flash);
 #endif
-		return;
-	}
-
-	/*
-	 * A kiss-of-death (kod) packet is returned by a server in case
-	 * the client is denied access. It consists of the client
-	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field the ASCII
-	 * string "DENY". If the packet originate timestamp matches the
-	 * association transmit timestamp the kod is legitimate. If the
-	 * peer leap bits indicate never synchronized, this must be
-	 * access deny and the association is disabled; otherwise this
-	 * must be a limit reject. In either case a naughty message is
-	 * forced to the system log.
-	 */
-	if (pleap == LEAP_NOTINSYNC && pstratum >= STRATUM_UNSPEC &&
-	    memcmp(&pkt->refid, "DENY", 4) == 0) {
-		if (peer->leap == LEAP_NOTINSYNC) {	/* test 4 */
-			peer->stratum = STRATUM_UNSPEC;
-			peer->flash |= TEST4;		/* denied */
-			memcpy(&peer->refid, &pkt->refid, 4);
-			msyslog(LOG_INFO, "access denied");
-		} else {
-			msyslog(LOG_INFO, "limit reject");
-		}
 		return;
 	}
 
@@ -2661,18 +2674,21 @@ fast_xmit(
 
 	/*
 	 * If the caller is restricted, return a kiss-of-death packet;
-	 * otherwise, smooch politely.
+	 * otherwise, just drop it.
 	 */
 	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
-		if (!(mask & RES_DEMOBILIZE)) {
+		if (!(mask & RES_DEMOBILIZE))
 			return;
-		} else {
-			xpkt.li_vn_mode =
-			    PKT_LI_VN_MODE(LEAP_NOTINSYNC,
-			    PKT_VERSION(rpkt->li_vn_mode), xmode);
-			xpkt.stratum = STRATUM_UNSPEC;
-			memcpy(&xpkt.refid, "DENY", 4);
-		}
+
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
+		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		xpkt.stratum = STRATUM_UNSPEC;
+		memcpy(&xpkt.refid, "DENY", 4);
+#if DEBUG
+		if (debug)
+			printf(
+			    "fast_xmit: kiss-of-death packet sent\n");
+#endif
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
