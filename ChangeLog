@@ -1,5 +1,7 @@
 2000-05-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99i4
+
 	* include/ntp.h:
 	* include/ntp_crypto.h:
 	* include/ntpd.h:
