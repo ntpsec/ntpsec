@@ -2880,21 +2880,6 @@ case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
     ;;
 esac
 
-case "$target" in
- mips-sni-sysv4*)
-    # tickadj is pretty useless on newer versions of ReliantUNIX
-    # Do not bother
-    ac_cv_make_tickadj=no
- ;;
- *-*-solaris2*)
-    # DLM says tickadj is a no-no starting with solaris2.5
-    case "$target" in
-     *-*-solaris2.[0-4]*) ;;
-     *) ac_cv_make_tickadj=no ;;
-    esac
- ;;
-esac
-
 AC_SUBST(MAKE_NTPTIME)
 AC_CACHE_CHECK(if we want and can make the ntptime utility, ac_cv_make_ntptime,
 [case "$target" in
@@ -2916,15 +2901,25 @@ case "$ac_cv_make_ntptime" in
 esac
 
 AC_SUBST(MAKE_TICKADJ)
-AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
-[case "$target" in
+case "$target" in
+ mips-sni-sysv4*)
+    # tickadj is pretty useless on newer versions of ReliantUNIX
+    # Do not bother
+    ac_cv_make_tickadj=no
+    ;;
  *-*-irix*)
     ac_cv_make_tickadj=no
     ;;
- *)
-    ac_cv_make_tickadj=yes
+ *-*-solaris2*)
+    # DLM says tickadj is a no-no starting with solaris2.5
+    case "$target" in
+     *-*-solaris2.[0-4]*) ;;
+     *) ac_cv_make_tickadj=no ;;
+    esac
     ;;
-esac])
+esac
+AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
+ac_cv_make_tickadj=yes)
 case "$ac_cv_make_tickadj" in
  yes)
     MAKE_TICKADJ=tickadj

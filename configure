@@ -14107,22 +14107,7 @@ echo "$as_me: error: This shouldn't happen." >&2;}
     ;;
 esac
 
-case "$target" in
- mips-sni-sysv4*)
-    # tickadj is pretty useless on newer versions of ReliantUNIX
-    # Do not bother
-    ac_cv_make_tickadj=no
- ;;
- *-*-solaris2*)
-    # DLM says tickadj is a no-no starting with solaris2.5
-    case "$target" in
-     *-*-solaris2.0-4*) ;;
-     *) ac_cv_make_tickadj=no ;;
-    esac
- ;;
-esac
-
-echo "$as_me:14125: checking if we want and can make the ntptime utility" >&5
+echo "$as_me:14110: checking if we want and can make the ntptime utility" >&5
 echo $ECHO_N "checking if we want and can make the ntptime utility... $ECHO_C" >&6
 if test "${ac_cv_make_ntptime+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14140,7 +14125,7 @@ else
 esac
 ac_cv_make_ntptime=$ans
 fi
-echo "$as_me:14143: result: $ac_cv_make_ntptime" >&5
+echo "$as_me:14128: result: $ac_cv_make_ntptime" >&5
 echo "${ECHO_T}$ac_cv_make_ntptime" >&6
 case "$ac_cv_make_ntptime" in
  yes)
@@ -14148,21 +14133,31 @@ case "$ac_cv_make_ntptime" in
     ;;
 esac
 
-echo "$as_me:14151: checking if we want and can make the tickadj utility" >&5
+case "$target" in
+ mips-sni-sysv4*)
+    # tickadj is pretty useless on newer versions of ReliantUNIX
+    # Do not bother
+    ac_cv_make_tickadj=no
+    ;;
+ *-*-irix*)
+    ac_cv_make_tickadj=no
+    ;;
+ *-*-solaris2*)
+    # DLM says tickadj is a no-no starting with solaris2.5
+    case "$target" in
+     *-*-solaris2.0-4*) ;;
+     *) ac_cv_make_tickadj=no ;;
+    esac
+    ;;
+esac
+echo "$as_me:14153: checking if we want and can make the tickadj utility" >&5
 echo $ECHO_N "checking if we want and can make the tickadj utility... $ECHO_C" >&6
 if test "${ac_cv_make_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  case "$target" in
- *-*-irix*)
-    ac_cv_make_tickadj=no
-    ;;
- *)
-    ac_cv_make_tickadj=yes
-    ;;
-esac
+  ac_cv_make_tickadj=yes
 fi
-echo "$as_me:14165: result: $ac_cv_make_tickadj" >&5
+echo "$as_me:14160: result: $ac_cv_make_tickadj" >&5
 echo "${ECHO_T}$ac_cv_make_tickadj" >&6
 case "$ac_cv_make_tickadj" in
  yes)
@@ -14170,7 +14165,7 @@ case "$ac_cv_make_tickadj" in
     ;;
 esac
 
-echo "$as_me:14173: checking if we want and can make the timetrim utility" >&5
+echo "$as_me:14168: checking if we want and can make the timetrim utility" >&5
 echo $ECHO_N "checking if we want and can make the timetrim utility... $ECHO_C" >&6
 if test "${ac_cv_make_timetrim+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14184,7 +14179,7 @@ else
     ;;
 esac
 fi
-echo "$as_me:14187: result: $ac_cv_make_timetrim" >&5
+echo "$as_me:14182: result: $ac_cv_make_timetrim" >&5
 echo "${ECHO_T}$ac_cv_make_timetrim" >&6
 case "$ac_cv_make_timetrim" in
  yes)
@@ -14192,7 +14187,7 @@ case "$ac_cv_make_timetrim" in
     ;;
 esac
 
-echo "$as_me:14195: checking if we want UDP wildcard delivery" >&5
+echo "$as_me:14190: checking if we want UDP wildcard delivery" >&5
 echo $ECHO_N "checking if we want UDP wildcard delivery... $ECHO_C" >&6
 if test "${ac_cv_var_udp_wildcard_delivery+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14250,7 +14245,7 @@ else
 fi;
 ac_cv_var_udp_wildcard_delivery=$ans
 fi
-echo "$as_me:14253: result: $ac_cv_var_udp_wildcard_delivery" >&5
+echo "$as_me:14248: result: $ac_cv_var_udp_wildcard_delivery" >&5
 echo "${ECHO_T}$ac_cv_var_udp_wildcard_delivery" >&6
 case "$ac_cv_var_udp_wildcard_delivery" in
  yes) cat >>confdefs.h <<\EOF
@@ -14270,7 +14265,7 @@ case "$host" in
     ;;
 esac
 
-echo "$as_me:14273: checking if we should always slew the time" >&5
+echo "$as_me:14268: checking if we should always slew the time" >&5
 echo $ECHO_N "checking if we should always slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_slew_always+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14300,7 +14295,7 @@ else
 fi;
 ac_cv_var_slew_always=$ans
 fi
-echo "$as_me:14303: result: $ac_cv_var_slew_always" >&5
+echo "$as_me:14298: result: $ac_cv_var_slew_always" >&5
 echo "${ECHO_T}$ac_cv_var_slew_always" >&6
 case "$ac_cv_var_slew_always" in
  yes) cat >>confdefs.h <<\EOF
@@ -14309,7 +14304,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14312: checking if we should step and slew the time" >&5
+echo "$as_me:14307: checking if we should step and slew the time" >&5
 echo $ECHO_N "checking if we should step and slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_step_slew+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14342,7 +14337,7 @@ else
 fi;
 ac_cv_var_step_slew=$ans
 fi
-echo "$as_me:14345: result: $ac_cv_var_step_slew" >&5
+echo "$as_me:14340: result: $ac_cv_var_step_slew" >&5
 echo "${ECHO_T}$ac_cv_var_step_slew" >&6
 case "$ac_cv_var_step_slew" in
  yes) cat >>confdefs.h <<\EOF
@@ -14351,7 +14346,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14354: checking if ntpdate should step the time" >&5
+echo "$as_me:14349: checking if ntpdate should step the time" >&5
 echo $ECHO_N "checking if ntpdate should step the time... $ECHO_C" >&6
 if test "${ac_cv_var_ntpdate_step+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14372,7 +14367,7 @@ else
 fi;
 ac_cv_var_ntpdate_step=$ans
 fi
-echo "$as_me:14375: result: $ac_cv_var_ntpdate_step" >&5
+echo "$as_me:14370: result: $ac_cv_var_ntpdate_step" >&5
 echo "${ECHO_T}$ac_cv_var_ntpdate_step" >&6
 case "$ac_cv_var_ntpdate_step" in
  yes) cat >>confdefs.h <<\EOF
@@ -14381,7 +14376,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14384: checking if we should sync TODR clock every hour" >&5
+echo "$as_me:14379: checking if we should sync TODR clock every hour" >&5
 echo $ECHO_N "checking if we should sync TODR clock every hour... $ECHO_C" >&6
 if test "${ac_cv_var_sync_todr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14404,7 +14399,7 @@ else
 fi;
 ac_cv_var_sync_todr=$ans
 fi
-echo "$as_me:14407: result: $ac_cv_var_sync_todr" >&5
+echo "$as_me:14402: result: $ac_cv_var_sync_todr" >&5
 echo "${ECHO_T}$ac_cv_var_sync_todr" >&6
 case "$ac_cv_var_sync_todr" in
  yes) cat >>confdefs.h <<\EOF
@@ -14413,7 +14408,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14416: checking if we should avoid kernel FLL bug" >&5
+echo "$as_me:14411: checking if we should avoid kernel FLL bug" >&5
 echo $ECHO_N "checking if we should avoid kernel FLL bug... $ECHO_C" >&6
 if test "${ac_cv_var_kernel_fll_bug+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14471,7 +14466,7 @@ else
 fi;
 ac_cv_var_kernel_fll_bug=$ans
 fi
-echo "$as_me:14474: result: $ac_cv_var_kernel_fll_bug" >&5
+echo "$as_me:14469: result: $ac_cv_var_kernel_fll_bug" >&5
 echo "${ECHO_T}$ac_cv_var_kernel_fll_bug" >&6
 case "$ac_cv_var_kernel_fll_bug" in
  yes) cat >>confdefs.h <<\EOF
@@ -14588,7 +14583,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:14591: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:14586: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -14775,7 +14770,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:14778: error: ambiguous option: $1
+    { { echo "$as_me:14773: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -14827,12 +14822,12 @@ Try \`$0 --help' for more information." >&2;}
   'config.h' ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
 
   # This is an error.
-  -*) { { echo "$as_me:14830: error: unrecognized option: $1
+  -*) { { echo "$as_me:14825: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
    { (exit 1); exit 1; }; } ;;
-  *) { { echo "$as_me:14835: error: invalid argument: $1" >&5
+  *) { { echo "$as_me:14830: error: invalid argument: $1" >&5
 echo "$as_me: error: invalid argument: $1" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -15125,7 +15120,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:15128: creating $ac_file" >&5
+    { echo "$as_me:15123: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -15143,7 +15138,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]* | ?:[\\/]*)
          # Absolute
-         test -f "$f" || { { echo "$as_me:15146: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:15141: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -15156,7 +15151,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:15159: error: cannot find input file: $f" >&5
+           { { echo "$as_me:15154: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -15217,7 +15212,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:15220: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:15215: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -15228,7 +15223,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]* | ?:[\\/]*)
          # Absolute
-         test -f "$f" || { { echo "$as_me:15231: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:15226: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -15241,7 +15236,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:15244: error: cannot find input file: $f" >&5
+           { { echo "$as_me:15239: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -15358,7 +15353,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:15361: $ac_file is unchanged" >&5
+      { echo "$as_me:15356: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
