@@ -1,3 +1,8 @@
+1999-12-09  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: Cleanup and fixes.
+	From: Dave Mills <mills@udel.edu>
+
 1999-12-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwv.c: Cleanup and fixes
