@@ -1,3 +1,7 @@
+2000-05-06  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* build (KEYSUF): Catch --disable-autokey first.
+
 2000-05-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* flock-build: If we don't use autokey, don't use rsaref either.
