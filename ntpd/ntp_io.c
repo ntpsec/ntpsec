@@ -1924,7 +1924,7 @@ input_handler(
 						packets_dropped++;
 						if (buflen > 0)
 							nonzeroreads++;
-						else
+						else if (totskips < MAXSKIPS)
 						{
 							skiplist[totskips] = fd;
 							totskips++;
@@ -1946,13 +1946,16 @@ input_handler(
 							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 						}
 						freerecvbuf(rb);
-						skiplist[totskips] = fd;
-						totskips++;
+						if (totskips < MAXSKIPS)
+						{
+							skiplist[totskips] = fd;
+							totskips++;
+						}
 						continue;
 					}
 					if(buflen > 0)
 						nonzeroreads++;
-					else
+					else if (totskips < MAXSKIPS)
 					{
 						skiplist[totskips] = fd;
 						totskips++;
