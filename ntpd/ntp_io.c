@@ -30,26 +30,12 @@
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif /* HAVE_SYS_PARAM_H */
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-# include <netinet/in_systm.h>
-#else /* Some old linux systems at least have in_system.h instead. */
-# ifdef HAVE_NETINET_IN_SYSTEM_H
-#  include <netinet/in_system.h>
-# endif
-#endif /* HAVE_NETINET_IN_SYSTM_H */
-#ifdef HAVE_NETINET_IP_H
-# include <netinet/ip.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
 # include <sys/sockio.h>
 #endif
-#include <arpa/inet.h>
 
 /*
  * Don't allow wildcard delivery
@@ -162,12 +148,16 @@ static	void	close_file	P((SOCKET));
 #endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
-static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+/*
+ * Not all platforms support multicast
+ */
+#ifdef MCAST
 static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
-
+static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
+#endif
 
 typedef struct vsock vsock_t;
 
