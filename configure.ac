@@ -79,7 +79,7 @@ esac
 
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
-   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root clock control]),
+   AC_HELP_STRING([--enable-clockctl], [s Use /dev/clockctl for non-root clock control]),
     [ans=$enableval],
     [case "$host" in
       *-*-netbsd*)
@@ -100,7 +100,7 @@ esac
 
 AC_CACHE_CHECK(if we have linux capabilities (libcap), ac_linuxcaps,
 [AC_ARG_ENABLE(linuxcaps,
-   AC_HELP_STRING([--enable-linuxcaps], [Use Linux capabilities for non-root clock control]),
+   AC_HELP_STRING([--enable-linuxcaps], [s Use Linux capabilities for non-root clock control]),
     [ans=$enableval],
     [ans=no])
 ac_linuxcaps=$ans])
@@ -1533,7 +1533,8 @@ case "$ac_cv_var_no_parenb_ignpar" in
 esac
 
 AC_MSG_CHECKING(if we're including debugging code)
-AC_ARG_ENABLE(debugging,	[  --enable-debugging      + include debugging code],
+AC_ARG_ENABLE(debugging,
+   AC_HELP_STRING([--enable-debugging], [+ include debugging code]),
     [ntp_ok=$enableval], [ntp_ok=yes])
 if test "$ntp_ok" = "yes"; then
     AC_DEFINE(DEBUG, 1, [Enable debugging?])
@@ -1541,7 +1542,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for a the number of minutes in a DST adjustment)
-AC_ARG_ENABLE(dst_minutes,	[  --enable-dst-minutes=60 + minutes per DST adjustment],
+AC_ARG_ENABLE(dst_minutes,
+   AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),
     [ans=$enableval], [ans=60])
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
 AC_MSG_RESULT($ans)
@@ -2407,7 +2409,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
-AC_ARG_ENABLE(parse-clocks,	[  --enable-parse-clocks   - include all suitable PARSE clocks:],
+AC_ARG_ENABLE(parse-clocks,
+   AC_HELP_STRING([--enable-parse-clocks], [- include all suitable PARSE clocks:]),
     [ntp_eapc=$enableval],
     [case "$ntp_eac" in
      yes) ntp_eapc=$ntp_canparse ;;
@@ -2868,7 +2871,8 @@ fi
 AC_MSG_RESULT($ans)
 
 AC_CACHE_CHECK(if we can read kmem, ac_cv_var_can_kmem,
-[AC_ARG_ENABLE(kmem,		[  --enable-kmem           s read /dev/kmem for tick and/or tickadj],
+[AC_ARG_ENABLE(kmem,
+   AC_HELP_STRING([--enable-kmem], [s read /dev/kmem for tick and/or tickadj]),
     [ans=$enableval],
     [case "$ac_cv_func_nlist$ac_cv_func_K_open$ac_cv_func_kvm_open" in
      *yes*)
@@ -2909,8 +2913,8 @@ case "$ac_cv_var_can_kmem" in
 esac
 
 AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
-[AC_ARG_ENABLE(accurate-adjtime, [  --enable-accurate-adjtime
-                          s the adjtime() call is accurate],
+[AC_ARG_ENABLE(accurate-adjtime,
+   AC_HELP_STRING([--enable-accurate-adjtime], [s the adjtime() call is accurate]),
     [ans=$enableval],
     [case "$host" in
       i386-sequent-ptx*)
@@ -3170,7 +3174,8 @@ dnl				    (RS6000 && !NOKMEM), SINIX MIPS
 dnl But we'll only use these "values" if we can't find anything else.
 
 AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
-[AC_ARG_ENABLE(tick,		[  --enable-tick=VALUE     s force a value for 'tick'],
+[AC_ARG_ENABLE(tick,
+  AC_HELP_STRING([--enable-tick=VALUE], [s force a value for 'tick']),
     [ans=$enableval],
     [ans=no
      case "$host" in
@@ -3205,7 +3210,8 @@ case "$ac_cv_var_tick" in
 esac
 
 AC_CACHE_CHECK(for a default value for 'tickadj', ac_cv_var_tickadj,
-[AC_ARG_ENABLE(tickadj,		[  --enable-tickadj=VALUE  s force a value for 'tickadj'],
+[AC_ARG_ENABLE(tickadj,
+  AC_HELP_STRING([--enable-tickadj=VALUE], [s force a value for 'tickadj']),
   [ans=$enableval],
   [ans='500/hz'
   case "$host" in
@@ -3392,7 +3398,8 @@ case "$ac_cv_var_ntpd_sim" in
 esac
 
 AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery,
-[AC_ARG_ENABLE(udp-wildcard,	[  --enable-udp-wildcard   s use UDP wildcard delivery],
+[AC_ARG_ENABLE(udp-wildcard,
+   AC_HELP_STRING([--enable-udp-wildcard], [s use UDP wildcard delivery]),
     [ans=$enableval],
     [ans=no
      case "$host" in
@@ -3462,7 +3469,8 @@ case "$build" in
 esac
 
 AC_CACHE_CHECK(if we should always slew the time, ac_cv_var_slew_always,
-[AC_ARG_ENABLE(slew-always,	 [  --enable-slew-always    s always slew the time],
+[AC_ARG_ENABLE(slew-always,
+   AC_HELP_STRING([--enable-slew-always], [s always slew the time]),
     [ans=$enableval],
     [case "$host" in
       *-apple-aux[[23]]*)
@@ -3487,7 +3495,8 @@ case "$ac_cv_var_slew_always" in
 esac
 
 AC_CACHE_CHECK(if we should step and slew the time, ac_cv_var_step_slew,
-[AC_ARG_ENABLE(step-slew,	 [  --enable-step-slew      s step and slew the time],
+[AC_ARG_ENABLE(step-slew,
+   AC_HELP_STRING([--enable-step-slew], [s step and slew the time]),
     [ans=$enableval],
     [case "$host" in
       *-sni-sysv*)
@@ -3518,7 +3527,8 @@ case "$ac_cv_var_step_slew" in
 esac
 
 AC_CACHE_CHECK(if ntpdate should step the time, ac_cv_var_ntpdate_step,
-[AC_ARG_ENABLE(ntpdate-step,	 [  --enable-ntpdate-step   s if ntpdate should step the time],
+[AC_ARG_ENABLE(ntpdate-step,
+   AC_HELP_STRING([--enable-ntpdate-step], [s if ntpdate should step the time]),
     [ans=$enableval],
     [case "$host" in
       *-apple-aux[[23]]*)
@@ -3534,8 +3544,9 @@ case "$ac_cv_var_ntpdate_step" in
 esac
 
 AC_CACHE_CHECK(if we should sync TODR clock every hour, ac_cv_var_sync_todr,
-[AC_ARG_ENABLE(hourly-todr-sync, [  --enable-hourly-todr-sync
-                          s if we should sync TODR hourly],
+[AC_ARG_ENABLE(hourly-todr-sync,
+   AC_HELP_STRING([--enable-hourly-todr-sync],
+		  [s if we should sync TODR hourly]),
     [ans=$enableval],
     [case "$host" in
       *-*-nextstep*)
@@ -3553,7 +3564,9 @@ case "$ac_cv_var_sync_todr" in
 esac
 
 AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
-[AC_ARG_ENABLE(kernel-fll-bug, [  --enable-kernel-fll-bug s if we should avoid a kernel FLL bug],
+[AC_ARG_ENABLE(kernel-fll-bug,
+   AC_HELP_STRING([--enable-kernel-fll-bug],
+		  [s if we should avoid a kernel FLL bug]),
     [ans=$enableval],
     [case "$host" in
      *-*-solaris2.6)
@@ -3607,7 +3620,8 @@ esac
 
 AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
 [AC_ARG_ENABLE(irig-sawtooth, 
-	AC_HELP_STRING([--enable-irig-sawtooth], [s if we should enable the IRIG sawtooth filter]),
+	AC_HELP_STRING([--enable-irig-sawtooth],
+		       [s if we should enable the IRIG sawtooth filter]),
     [ans=$enableval],
     [case "$host" in
      *-*-solaris2.[[89]])
@@ -3627,7 +3641,8 @@ esac
 
 AC_CACHE_CHECK(if we should enable NIST lockclock scheme, ac_cv_var_nist_lockclock,
 [AC_ARG_ENABLE(nist, 
-	AC_HELP_STRING([--enable-nist], [- if we should enable the NIST lockclock scheme]),
+	AC_HELP_STRING([--enable-nist],
+		       [- if we should enable the NIST lockclock scheme]),
     [ans=$enableval],[ans=no])
 ac_cv_var_nist_lockclock=$ans])
 case "$ac_cv_var_nist_lockclock" in
@@ -3642,7 +3657,7 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[ISC: struct sockaddr as sa_len?])
 fi
 
-AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [use IPv6?]))
+AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [s use IPv6?]))
 
 case "$enable_ipv6" in
  yes|''|autodetect)
