@@ -1,3 +1,7 @@
+1999-12-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.98h
+
 1999-12-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/syssignal.c: Small cleanup to Marc's patch.
