@@ -413,7 +413,7 @@ process_private(
 	    || (++ec, rbufp->recv_length > REQ_LEN_MAC)
 	    || (++ec, rbufp->recv_length < REQ_LEN_HDR)
 		) {
-		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed", ec);
+		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed, pkt from %s", ec, inet_ntoa(srcadr->sin_addr));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
