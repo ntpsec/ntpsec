@@ -55,7 +55,7 @@ extern	void	key_expire	P((struct peer *));
 extern	void	crypto_init	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
-extern	void	crypto_public	P((struct peer *, u_char *));
+extern	int	crypto_public	P((struct peer *, u_char *));
 extern	void	crypto_agree	P((void));
 
 /*

@@ -736,7 +736,7 @@ receive(
 					break;
 				}
 				if (i > peer->recauto.seq) {
-					peer->recauto.seq = 0;
+					peer->recauto.tstamp = 0;
 					break;
 				}
 				if (hismode == MODE_BROADCAST)
@@ -1042,6 +1042,13 @@ clock_update(void)
 		sys_rootdelay = sys_peer->rootdelay +
 		    fabs(sys_peer->delay);
 		sys_leap = leap_consensus;
+
+		/*
+		 * This is cute. If the leap changes, we gotta reroll
+		 * the keys.
+		 */
+		if (sys_leap != oleap)
+			key_expire_all();
 	}
 	if (oleap != sys_leap)
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
@@ -1910,7 +1917,7 @@ peer_xmit(
 		 * values at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->keynumber == peer->sndauto.seq)
+			if (peer->keynumber == peer->sndauto.tstamp)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -1963,7 +1970,7 @@ peer_xmit(
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->recauto.seq == 0) {
+			if (peer->recauto.tstamp == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
@@ -2022,7 +2029,7 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->recauto.seq == 0 &&
+			} else if (peer->recauto.tstamp == 0 &&
 			    peer->flags & FLAG_MCAST2) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
@@ -2237,7 +2244,6 @@ key_expire(
 		peer->keylist = NULL;
 	}
 	peer->keynumber = peer->sndauto.seq = 0;
-	peer->recauto.key = 0;
 }
 #endif /* AUTOKEY */
 

@@ -508,20 +508,20 @@ crypto_recv(
 			    ((R_RSA_PUBLIC_KEY *)peer->pubkey)->modulus,
 			    (u_char *)&(pkt[i + 4]), temp);
 			break;
-#endif /* PUBKEY */
 
 		/*
 		 * Receive remote host name and install public key from
 		 * file.
 		 */
 		case CRYPTO_NAME | CRYPTO_RESP:
-			crypto_public(peer, (char *)&pkt[i + 3]);
+			temp = crypto_public(peer, (char *)&pkt[i + 3]);
 #ifdef DEBUG
 			if (debug)
-				printf("crypto_recv: host %s\n",
-				    (char *)&pkt[i + 3]); 
+				printf("crypto_recv: host %d %s\n",
+				    temp, (char *)&pkt[i + 3]); 
 #endif
 			break;
+#endif /* PUBKEY */
 
 		/*
 		 * For other requests, save the request code for later;
@@ -714,7 +714,6 @@ crypto_xmit(
 		    (u_char *)&public_key.modulus, temp);
 		len += temp + 4;
 		break;
-#endif /* PUBKEY */
 
 	/*
 	 * Send host name.
@@ -725,6 +724,7 @@ crypto_xmit(
 		xpkt[i + 2] = htonl(temp);
 		len += temp + 4;
 		break;
+#endif /* PUBKEY */
 
 	/*
 	 * Default - Fall through for requests; for unknown responses,
@@ -863,7 +863,7 @@ crypto_read(
  * has errors, we just keep going and expect the host to fetch the
  * public key from the peer via the extension field.
  */
-void
+int
 crypto_public(
 	struct peer *peer,	/* peer structure pointer */
 	u_char *cp		/* canonical host name */
@@ -875,7 +875,7 @@ crypto_public(
 
 	snprintf(filename, sizeof filename, "ntpkey_%s", cp);
 	if (!crypto_read(filename, (u_char *)&keybuf, keylen))
-		return;
+		return (0);
 	if (peer->keystr != NULL)
 		free(peer->keystr);
 	peer->keystr = emalloc(strlen(filename) + 1);
@@ -883,6 +883,7 @@ crypto_public(
 	if (peer->pubkey == NULL)
 		peer->pubkey = emalloc(keylen);
 	memcpy(peer->pubkey, (char *)&keybuf, keylen);
+	return (1);
 }
 
 
