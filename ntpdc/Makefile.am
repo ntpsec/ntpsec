@@ -5,7 +5,7 @@ noinst_PROGRAMS = ntpdc-layout
 noinst_DATA=	check-layout
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-LDADD =	version.o ../libntp/libntp.a @READLINE_LIBS@
+ntpdc_LDADD = version.o ../libntp/libntp.a @READLINE_LIBS@
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES = .version version.c
