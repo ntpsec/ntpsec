@@ -34,7 +34,6 @@
  * SUCH DAMAGE.  */
 
 /*static char *sccsid = "from: @(#)ctime.c	5.26 (Berkeley) 2/23/91";*/
-/*static char *rcsid = "mktime.c,v 1.1.1.3 1998/11/15 19:23:34 kardel RELEASE_19990228_A";*/
 
 /*
  * This implementation of mktime is lifted straight from the NetBSD (BSD 4.4)

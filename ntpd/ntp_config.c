@@ -160,7 +160,7 @@ static	struct keyword fudge_keywords[] = {
 	{ "flag2",		CONF_FDG_FLAG2 },
 	{ "flag3",		CONF_FDG_FLAG3 },
 	{ "flag4",		CONF_FDG_FLAG4 },
-	{ "refid",		CONF_FDG_REFID },
+	{ "refid",		CONF_FDG_REFID }, /* this mapping should be cleaned up (endianness, \0) - kd 20041031 */
 	{ "stratum",		CONF_FDG_STRATUM },
 	{ "time1",		CONF_FDG_TIME1 },
 	{ "time2",		CONF_FDG_TIME2 },

@@ -327,7 +327,7 @@ atom_pps(
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
 	if (up->handle == 0)
-		return (-1);
+		return (0);	/* do nothing - data could also be injected by pps_sample */
 
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
