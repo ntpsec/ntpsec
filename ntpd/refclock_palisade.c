@@ -89,8 +89,7 @@ struct refclock refclock_palisade = {
 int day_of_year P((char *dt));
 
 /* Extract the clock type from the mode setting */
-/* #define CLK_TYPE(x) ((int)(((x)->ttlmax) & 0x7F)) */
-#define CLK_TYPE(x) 0
+#define CLK_TYPE(x) ((int)(((x)->ttl) & 0x7F))
 
 /* Supported clock types */
 #define CLK_TRIMBLE	0	/* Trimble Palisade */
