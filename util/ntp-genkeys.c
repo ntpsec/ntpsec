@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 #include <sys/stat.h>		/* for umask() */
 #include <sys/time.h>
 
@@ -431,6 +432,30 @@ getCmdOpts (
 }
 
 
+void
+snifflink(
+	const char *file,
+	char **linkdata
+	)
+{
+#ifdef HAVE_READLINK
+	char buf[PATH_MAX];
+	int rc;
+
+	rc = readlink(file, buf, sizeof buf);
+	if (-1 == rc) {
+		if (EINVAL == errno)
+			return;
+		fprintf(stderr, "%s: readlink(%s) failed: (%d) %s\n",
+			progname, file, errno, strerror(errno));
+		exit(1);
+	}
+	*linkdata = strdup(buf);
+	/* XXX: make sure linkdata is not 0... */
+#endif /* not HAVE_READLINK */
+	return;
+}
+
 int
 main(
 	int argc,
@@ -462,11 +487,28 @@ main(
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
+	snifflink(path_keys, &link_keys);
+	snifflink(path_keysdir, &link_keysdir);
+	snifflink(path_publickey, &link_publickey);
+	snifflink(path_privatekey, &link_privatekey);
+
 	printf("After config:\n");
-	printf("path_keys       = <%s>\n", path_keys? path_keys: "");
-	printf("path_keysdir    = <%s>\n", path_keysdir? path_keysdir: "");
-	printf("path_publickey  = <%s>\n", path_publickey? path_publickey: "");
-	printf("path_privatekey = <%s>\n", path_privatekey? path_privatekey: "");
+	printf("path_keys       = <%s> -> <%s>\n"
+	       , path_keys? path_keys: ""
+	       , link_keys? link_keys: ""
+		);
+	printf("path_keysdir    = <%s> -> <%s>\n"
+	       , path_keysdir? path_keysdir: ""
+	       , link_keysdir? link_keysdir: ""
+		);
+	printf("path_publickey  = <%s> -> <%s>\n"
+	       , path_publickey? path_publickey: ""
+	       , link_publickey? link_publickey: ""
+		);
+	printf("path_privatekey = <%s> -> <%s>\n"
+	       , path_privatekey? path_privatekey: ""
+	       , link_privatekey? link_privatekey: ""
+		);
 
 	/*
 	  We:
