@@ -1,3 +1,17 @@
+2001-05-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k37
+
+	* ntpd/ntp_proto.c (clock_filter): Lose "off", xtemp and ytemp,
+	and some obsoleted calculations.  Set the peer->offset and
+	peer->delay from the filter stages.
+
+	* ntpd/ntp_loopfilter.c: Comment/document improvements.
+	(local_clock): correct the offset by one-half the difference
+	between the sample delay and minimum delay.  Lose "mu" from the
+	debug message.
+	From: Dave Mills.
+
 2001-05-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k36

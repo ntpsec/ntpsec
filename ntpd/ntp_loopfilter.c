@@ -228,14 +228,15 @@ local_clock(
 	 * If the clock is way off, panic is declared. The clock_panic
 	 * defaults to 1000 s; if set to zero, the panic will never
 	 * occur. The allow_panic defaults to FALSE, so the first panic
-	 * will exit. It can be set TRUE by a command line option, but
-	 * it will be set it FALSE when the update is within the step
-	 * range; so, subsequent panics will exit.
+	 * will exit. It can be set TRUE by a command line option, in
+	 * which case the clock will be set anyway and time marches on.
+	 * But, allow_panic will be set it FALSE when the update is
+	 * within the step range; so, subsequent panics will exit.
 	 */
 	if (fabs(fp_offset) > clock_panic && clock_panic > 0 &&
 	    !allow_panic) {
 		msyslog(LOG_ERR,
-		    "time error %.0f over %.0f seconds; set clock manually",
+		    "time error %.0f exceeds %.0f seconds; set clock manually",
 		    fp_offset, clock_panic);
 		return (-1);
 	}
@@ -247,6 +248,9 @@ local_clock(
 	 * slewed. The value defaults to 128 ms, but can be set to even
 	 * unreasonable values. If set to zero, the clock will never be
 	 * stepped.
+	 *
+	 * Note that if ntpdate is active, the terminal does not detach,
+	 * so the termination comments print directly to the console.
 	 */
 	if (mode_ntpdate) {
 		if (allow_step && fabs(fp_offset) > clock_max &&
@@ -292,7 +296,7 @@ local_clock(
 
 	/*
 	 * The huff-n'-puff filter finds the lowest delay in the recent
-	 * path. This is used to correct the offset by one-half the
+	 * interval. This is used to correct the offset by one-half the
 	 * difference between the sample delay and minimum delay. This
 	 * is most effective if the delays are highly assymetric and
 	 * clockhopping is avoided and the clock frequency wander is
@@ -305,9 +309,9 @@ local_clock(
 		if (sys_mindly == 0 || peer->delay < sys_mindly)
 			sys_mindly = peer->delay;
 		if (fp_offset > 0)
-			dtemp = -(peer->delay - sys_mindly);
+			dtemp = -(peer->delay - sys_mindly) / 2;
 		else
-			dtemp = peer->delay - sys_mindly;
+			dtemp = (peer->delay - sys_mindly) / 2;
 		fp_offset += dtemp;
 #ifdef DEBUG
 		if (debug)
@@ -323,7 +327,7 @@ local_clock(
 	 * and frequency errors. There are two main regimes: when the
 	 * offset exceeds the step threshold and when it does not.
 	 * However, if the step threshold is set to zero, a step will
-	 * never occur. See your instruction manual for the details how
+	 * never occur. See the instruction manual for the details how
 	 * these actions interact with the command line options.
 	 */
 	retval = 0;
@@ -670,14 +674,13 @@ local_clock(
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
-		record_loop_stats(last_offset, drift_comp, sys_jitter,
-		    clock_stability, sys_poll);
+	record_loop_stats(last_offset, drift_comp, sys_jitter,
+	    clock_stability, sys_poll);
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
-	"local_clock: mu %.0f fadj %.3f fll %.3f pll %.3f\n",
-		    mu, clock_frequency * 1e6, flladj * 1e6, plladj *
-		    1e6);
+		    "local_clock: fadj %.3f fll %.3f pll %.3f\n",
+		    clock_frequency * 1e6, flladj * 1e6, plladj * 1e6);
 #endif /* DEBUG */
 #ifdef DEBUG
 	if (debug)

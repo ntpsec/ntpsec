@@ -1307,7 +1307,7 @@ clock_filter(
 	double dst[NTP_SHIFT];		/* distance vector */
 	int ord[NTP_SHIFT];		/* index vector */
 	register int i, j, k, m;
-	double off, dly, dsp, jit, dtemp, etemp, ftemp;
+	double dsp, jit, dtemp, etemp, ftemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
@@ -1397,12 +1397,11 @@ clock_filter(
 	 * the shift register, quietly tiptoe home leaving only the
 	 * dispersion.
 	 */
-	off = dly = jit = dtemp = 0;
+	jit = 0;
 	peer->disp = 0;
 	k = ord[0];
 	m = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
-		double xtemp, ytemp;
 
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
@@ -1410,21 +1409,8 @@ clock_filter(
 		if (dst[i] >= MAXDISTANCE)
 			continue;
 		m++;
-		xtemp = 2 * fabs(peer->filter_offset[j] -
-		    peer->filter_offset[k]);
-		ytemp = max(peer->filter_delay[j] -
-		    peer->filter_delay[k], dsp);
-		etemp = max(dsp, 1. - xtemp / ytemp);
-		dtemp += etemp;
-		off += peer->filter_offset[j] * etemp;
-		dly += peer->filter_delay[j] * etemp;
 		jit += DIFF(peer->filter_offset[j],
 		    peer->filter_offset[k]);
-#ifdef DEBUG
-		if (debug > 1)
-			printf("clock_filter: %d %.6f %.6f %.6f\n",
-			    j, xtemp, ytemp, etemp);
-#endif
 	}
 
 	/*
@@ -1436,8 +1422,8 @@ clock_filter(
 	if (m == 0)
 		return;
 	etemp = peer->offset;
-	peer->offset = off / dtemp;
-	peer->delay = dly / dtemp;
+	peer->offset = peer->filter_offset[k];
+	peer->delay = peer->filter_delay[k];
 	if (m > 1)
 		jit /= m - 1;
 	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision)));
