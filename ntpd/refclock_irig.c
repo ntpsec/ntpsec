@@ -163,6 +163,9 @@
 #define MODMIN		0.5	/* minimum modulation index */
 #define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
 #define PI		3.1415926535 /* the real thing */
+#ifdef IRIG_SUCKS
+#define	WIGGLE		11	/* wiggle filter length */
+#endif /* IRIG_SUCKS */
 
 /*
  * Experimentally determined filter delays
@@ -252,10 +255,12 @@ struct irigunit {
 	int	bits;		/* demodulated bits */
 	int	bitcnt;		/* bit count in subfield */
 #ifdef IRIG_SUCKS
-	l_fp	waggle;		/* sawtooth accumulator (s) */
-	l_fp	wiggle;		/* sawtooth correction (s) */
+	l_fp	wigwag;		/* wiggle accumulator */
+	int	wp;		/* wiggle filter pointer */
+	l_fp	wiggle[WIGGLE];	/* wiggle filter */
+	l_fp	wigbot[WIGGLE];	/* wiggle bottom fisher*/
 #endif /* IRIG_SUCKS */
-	l_fp	wuggle;		/* sawtooth monitor (s) */
+	l_fp	wuggle;
 };
 
 /*
@@ -805,6 +810,9 @@ irig_decode(
 {
 	struct refclockproc *pp;
 	struct irigunit *up;
+#ifdef IRIG_SUCKS
+	int	i;
+#endif /* IRIG_SUCKS */
 
 	/*
 	 * Local variables
@@ -834,30 +842,21 @@ irig_decode(
 		up->lastbit = 0;
 		if (up->errflg == 0) {
 #ifdef IRIG_SUCKS
-			l_fp	ltemp, mtemp;
+			l_fp	ltemp;
 
 			/*
-			 * You didn't see this; I wasn't here.
+			 * You really don't wanna know what comes down
+			 * here. Leave it to say Solaris 2.8 broke the
+			 * nice clean audio stream, apparently affected
+			 * by a 5-ms sawtooth jitter. Sundown on
+			 * Solaris. This leaves a little twilight.
 			 *
-			 * Recent Sun kernels have developed an evil
-			 * 10-ms sawtooth modulation that ruined what
-			 * once was an excellent, low-jitter time
-			 * reference. This code tries to unmodulate the
-			 * sawtooth by using each measured time
-			 * difference to estimate the next one as the
-			 * sawtooth amplitude increases with time. Upon
-			 * retrace, the accumulated difference relative
-			 * to the current offset is uset to interpolate
-			 * and produce an unbiased result.
-			 *
-			 * It's important to remember these samples are
-			 * processed by the median filter, which tosses
-			 * out noisy samples and averages the rest. This
-			 * just helps reduce the jitter and leave at
-			 * least some good samples for the middle of the
-			 * filter. 
+			 * The scheme involves differentiation, forward
+			 * learning and integration. The sawtooth has a
+			 * period of 11 seconds. The timestamp
+			 * differences are integrated and subtracted
+			 * from the signal.
 			 */
-			mtemp = pp->lastrec;
 			if (L_ISZERO(&pp->lastrec) ||
 			    L_ISZERO(&pp->lastref)) {
 				L_CLR(&ltemp);
@@ -869,21 +868,43 @@ irig_decode(
 				ltemp.l_i = -1;
 			else
 				ltemp.l_i = 0;
-			L_ADD(&up->waggle, &ltemp);
-			if (L_ISNEG(&ltemp) ^ L_ISNEG(&up->wiggle)) {
-				L_CLR(&up->waggle);
-			} else {
-				L_SUB(&pp->lastrec, &up->waggle);
-				up->wuggle = pp->lastrec;
-				refclock_process(pp);
-				up->wiggle = ltemp;
-			}
-			pp->lastrec = mtemp;
 			pp->lastref = pp->lastrec;
-#else /* IRIG_SUCKS */
+			if (!L_ISNEG(&ltemp)) {
+				L_CLR(&up->wigwag);
+			} else {
+				L_ADD(&up->wigwag, &ltemp);
+			}
+			L_SUB(&pp->lastrec, &up->wigwag);
+			up->wiggle[up->wp] = ltemp;
+
+			/*
+			 * Bottom fisher. To understand this, you have
+			 * to know about velocity microphones and AM
+			 * transmitters. No further explanation is
+			 * offered, as this is truly a black art.
+			 */
+			ltemp = pp->lastrec;
+			up->wigbot[up->wp] = pp->lastrec;
+			for (i = 0; i < WIGGLE; i++) {
+				if (i != up->wp)
+					up->wigbot[i].l_ui++;
+				L_SUB(&ltemp, &up->wigbot[i]);
+				if (L_ISNEG(&ltemp))
+					L_ADD(&ltemp,
+					    &up->wigbot[i]);
+				else
+					ltemp = up->wigbot[i];
+			}
+			pp->lastrec = ltemp;
+
+			up->wp++;
+			up->wp %= WIGGLE;
 			up->wuggle = pp->lastrec;
 			refclock_process(pp);
+#else /* IRIG_SUCKS */
 			pp->lastref = pp->lastrec;
+			up->wuggle = pp->lastrec;
+			refclock_process(pp);
 #endif /* IRIG_SUCKS */
 		}
 		up->errflg = 0;

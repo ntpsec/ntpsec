@@ -463,11 +463,10 @@ audio_show(void)
 	    info.record.precision, info.record.encoding,
 	    info.record.gain, info.monitor_gain, info.record.port);
 	printf(
-	    "audio: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d, buf %d\n",
+	    "audio: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d\n",
 	    info.record.samples, info.record.eof,
 	    info.record.pause, info.record.error,
-	    info.record.waiting, info.record.balance,
-	    info.record.buffer_size);
+	    info.record.waiting, info.record.balance);
 #endif /* not PCM_STYLE_SOUND */
 }
 #else
