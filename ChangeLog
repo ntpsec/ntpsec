@@ -1,3 +1,11 @@
+1999-11-18  Sven Dietrich  <sven_dietrich@trimble.com>
+	* Win NT port updates
+	* ntpd.dsp: makefile only builds supported refclocks
+	* config.h: cleanup, undefine unsupported clock_atom
+	* win32_io, clock_NMEA: foundation for future refclock support
+	* recvbuff, transmitbuff, IOcompletionport: streamline packet handler
+	* html/hints/winnt.htm: Added up-to-date html docs for WINNT
+
 1999-11-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/copyright.htm: Credit Jack for his work.
