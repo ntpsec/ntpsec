@@ -740,7 +740,7 @@ receive(
 	register struct pkt *rpkt;
 	register struct server *server;
 	register s_fp di;
-	l_fp t10, t23;
+	l_fp t10, t23, tmp;
 	l_fp org;
 	l_fp rec;
 	l_fp ci;
@@ -862,9 +862,15 @@ receive(
 	L_SUB(&t23, &org);		/* pkt->org == t3 */
 
 	/* now have (t2 - t3) and (t0 - t1).	Calculate (ci) and (di) */
+	/*
+	 * Calculate (ci) = ((t1 - t0) / 2) + ((t2 - t3) / 2)
+	 * For large offsets this may prevent an overflow on '+'
+	 */
 	ci = t10;
-	L_ADD(&ci, &t23);
 	L_RSHIFT(&ci);
+	tmp = t23;
+	L_RSHIFT(&tmp);
+	L_ADD(&ci, &tmp);
 
 	/*
 	 * Calculate di in t23 in full precision, then truncate
