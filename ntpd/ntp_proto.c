@@ -76,16 +76,16 @@ u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 /*
  * Statistics counters
  */
-u_long	sys_stattime;		/* time when we started recording */
-u_long	sys_restricted; 	/* restricted */
-u_long	sys_limitrejected;	/* rate exceeded */
-u_long	sys_newversionpkt;	/* new version */
-u_long	sys_oldversionpkt;	/* old version */
-u_long	sys_unknownversion;	/* invalid version */
-u_long	sys_badlength;		/* bad length or mode */
-u_long	sys_badauth;		/* bad authentication */
-u_long	sys_processed;		/* packets processed */
+u_long	sys_stattime;		/* time since reset */
 u_long	sys_received;		/* packets received */
+u_long	sys_processed;		/* packets processed */
+u_long	sys_newversionpkt;	/* current version */
+u_long	sys_oldversionpkt;	/* recent version */
+u_long	sys_unknownversion;	/* invalid version */
+u_long	sys_restricted; 	/* access denied */
+u_long	sys_badlength;		/* bad length or format */
+u_long	sys_badauth;		/* bad authentication */
+u_long	sys_limitrejected;	/* rate exceeded */
 
 static	double	root_distance	P((struct peer *));
 static	double	clock_combine	P((struct peer **, int));
@@ -3133,12 +3133,12 @@ proto_clr_stats(void)
 {
 	sys_stattime = current_time;
 	sys_received = 0;
-	sys_restricted = 0;
-	sys_limitrejected = 0;
+	sys_processed = 0;
 	sys_newversionpkt = 0;
 	sys_oldversionpkt = 0;
 	sys_unknownversion = 0;
+	sys_restricted = 0;
 	sys_badlength = 0;
 	sys_badauth = 0;
-	sys_processed = 0;
+	sys_limitrejected = 0;
 }

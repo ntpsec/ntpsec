@@ -747,8 +747,6 @@ struct mon_data {
 	struct mon_data *hash_next;	/* next structure in hash list */
 	struct mon_data *mru_next;	/* next structure in MRU list */
 	struct mon_data *mru_prev;	/* previous structure in MRU list */
-	struct mon_data *fifo_next;	/* next structure in FIFO list */
-	struct mon_data *fifo_prev;	/* previous structure in FIFO list */
 	u_long drop_count;		/* dropped due RESLIMIT*/
 	double avg_interval;		/* average interpacket interval */
 	u_long lasttime;		/* last packet received time */

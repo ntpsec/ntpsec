@@ -1115,7 +1115,7 @@ sys_stats(
 		sizeof(struct info_sys_stats));
 	ss->timeup = htonl((u_int32)current_time);
 	ss->timereset = htonl((u_int32)(current_time - sys_stattime));
-	ss->badstratum = htonl((u_int32)sys_restricted);
+	ss->denied = htonl((u_int32)sys_restricted);
 	ss->oldversionpkt = htonl((u_int32)sys_oldversionpkt);
 	ss->newversionpkt = htonl((u_int32)sys_newversionpkt);
 	ss->unknownversion = htonl((u_int32)sys_unknownversion);

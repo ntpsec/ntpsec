@@ -58,6 +58,8 @@
 #define	INITRESLIST	10
 #define	INCRESLIST	5
 
+#define RES_AVG		8.	/* interpacket averaging factor */
+
 /*
  * The restriction list
  */
@@ -82,7 +84,7 @@ static	u_long res_not_found;
 /*
  * Parameters of the RES_LIMITED restriction option.
  */
-u_long res_avg_interval = 6;	/* min average interpacket interval */
+u_long res_avg_interval = 5;	/* min average interpacket interval */
 u_long res_min_interval = 1;	/* min interpacket interval */
 
 /*
@@ -269,9 +271,14 @@ restrictions(
 		 * the average stabilizes.
 		 */
 		md = mon_mru_list.mru_next;
-		if (md->count < 10  && current_time - md->lasttime >	
+		if (md->avg_interval == 0)
+			md->avg_interval = md->drop_count;
+		else
+			md->avg_interval += (md->drop_count -
+			    md->avg_interval) / RES_AVG;
+		if (md->count < 10 || (md->drop_count >
 		    res_min_interval && md->avg_interval >
-		    res_avg_interval)
+		    res_avg_interval))
 			flags &= ~RES_LIMITED;
 		md->drop_count = flags;
 	}
