@@ -202,17 +202,18 @@ static struct ctl_var peer_var[] = {
 	{ CP_FILTERROR,	RO, "filtdisp=" },	/* 34 */
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
-	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
+	{ CP_RANK,	RO, "rank" },		/* 37 */
+	{ CP_VARLIST,	RO, "peer_var_list" },	/* 38 */
 #ifdef OPENSSL
-	{ CP_FLAGS,	RO, "flags" },		/* 38 */
-	{ CP_HOST,	RO, "hostname" },	/* 39 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 40 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 41 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 42 */
-	{ CP_DIGEST,	RO, "signature" },	/* 43 */
-	{ CP_IDENT,	RO, "identity" },	/* 44 */
+	{ CP_FLAGS,	RO, "flags" },		/* 39 */
+	{ CP_HOST,	RO, "hostname" },	/* 40 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
+	{ CP_DIGEST,	RO, "signature" },	/* 44 */
+	{ CP_IDENT,	RO, "identity" },	/* 45 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 38/43 */
+	{ 0,		EOV, "" }		/* 39/46 */
 };
 
 
@@ -1525,6 +1526,10 @@ ctl_putpeer(
 
 	case CP_VALID:
 		ctl_putuint(peer_var[CP_VALID].text, peer->unreach);
+		break;
+
+	case CP_RANK:
+		ctl_putuint(peer_var[CP_RANK].text, peer->rank);
 		break;
 
 	case CP_TIMER:

@@ -102,3 +102,13 @@ ports/winnt/ntpd/nt_clockstuff.c.bak
 include/isc/Makefile.am.$$$
 configure.in.$$$
 include/isc/netaddr.h.$$$
+firefly.sh
+include/ntp.patch
+include/ntp_control.patch
+include/ntp_request.patch
+jedi.sh
+ntpd/ntp_control.patch
+ntpd/ntp_peer.patch
+ntpd/ntp_proto.patch
+ntpd/ntp_request.patch
+ntpq/ntpq.patch
