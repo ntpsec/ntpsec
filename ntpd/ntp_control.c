@@ -1481,10 +1481,14 @@ ctl_putpeer(
 		break;
 
 	case CP_TTL:
+		if (!(peer->cast_flags & MDF_ACAST))
+			break;
 		ctl_putint(peer_var[CP_TTL].text, peer->ttl);
 		break;
 
 	case CP_TTLMAX:
+		if (!(peer->cast_flags & (MDF_MCAST | MDF_ACAST)))
+			break;
 		ctl_putint(peer_var[CP_TTLMAX].text, peer->ttlmax);
 		break;
 

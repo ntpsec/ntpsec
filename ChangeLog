@@ -1,5 +1,8 @@
 2000-12-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_control.c (ctl_putpeer): CP_TTL and CP_TTLMAX
+	MDF_ACAST and MDF_MCAST cleanup.
+
 	* ntpd/refclock_wwv.c (wwv_start): ttlmax/ttl cleanup.
 	* ntpd/refclock_usno.c (usno_timeout): ttlmax/ttl cleanup.
 	* ntpd/refclock_parse.c (CLK_REALTYPE): ttlmax/ttl cleanup.
