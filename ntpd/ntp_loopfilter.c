@@ -379,10 +379,12 @@ local_clock(
 			etemp = min(mu, ULOGTOD(sys_poll));
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			clock_offset = fp_offset;
+ 
 			break;
 		}
 	}
 
+#if defined(KERNEL_PLL)
 	/*
 	 * This code segment works when clock adjustments are made using
 	 * precision time kernel support and the ntp_adjtime() system
@@ -393,7 +395,6 @@ local_clock(
 	 * modifications provide a true microsecond clock and nanosecond
 	 * clock, respectively.
 	 */
-#if defined(KERNEL_PLL)
 	if (pll_control && kern_enable) {
 
 		/*
@@ -407,7 +408,7 @@ local_clock(
 		 * frequency offsets for jitter and stability values and
 		 * to update the drift file.
 		 */
-		memset((char *)&ntv,  0, sizeof ntv);
+		memset(&ntv,  0, sizeof ntv);
 		if (ext_enable) {
 			ntv.modes = MOD_STATUS;
 		} else {
@@ -717,11 +718,15 @@ loop_config(
 		 * microseconds.
 		 */
 		pll_control = 1;
-		memset((char *)&ntv, 0, sizeof ntv);
+		memset(&ntv, 0, sizeof ntv);
 #if NTP_API > 3 
-		ntv.modes = MOD_NANO;
+		ntv.modes = MOD_BITS | MOD_NANO;
+#else
+		ntv.modes = MOD_BITS;
 #endif /* NTP_API */
-
+		ntv.maxerror = MAXDISPERSE;
+		ntv.esterror = MAXDISPERSE;
+		ntv.status = STA_UNSYNC | STA_PLL;
 #ifdef SIGSYS
 		/*
 		 * Use sigsetjmp() to save state and then call
@@ -736,7 +741,7 @@ loop_config(
 			pll_control = 0;
 		}
 		if (sigsetjmp(env, 1) == 0)
-			(void)ntp_adjtime(&ntv);
+			ntp_adjtime(&ntv);
 		if ((sigaction(SIGSYS, &sigsys,
 		    (struct sigaction *)NULL))) {
 			msyslog(LOG_ERR,
@@ -744,20 +749,20 @@ loop_config(
 			pll_control = 0;
 		}
 #else /* SIGSYS */
-		if (ntp_adjtime(&ntv) < 0) {
-			msyslog(LOG_ERR,
-			    "loop_config: ntp_adjtime() failed: %m");
-			pll_control = 0;
-		}
+		ntp_adjtime(&ntv);
 #endif /* SIGSYS */
-#if NTP_API > 3
+		pll_status = ntv.status;
 		if (pll_control) {
-			if (ntv.status & STA_NANO)
+#if NTP_API > 3
+			if (pll_status & STA_NANO)
 				pll_nano = 1;
-			if (ntv.status & STA_CLK)
+			if (pll_status & STA_CLK)
 				ext_enable = 1;
-		}
 #endif /* NTP_API */
+			msyslog(LOG_NOTICE,
+		  	   "kernel time discipline status %04x",
+			    pll_status);
+		}
 #endif /* KERNEL_PLL */
 		break;
 
@@ -777,39 +782,13 @@ loop_config(
 			drift_comp = -NTP_MAXFREQ;
 
 #ifdef KERNEL_PLL
-		/*
-		 * If the kernel support is available. initialize the
-		 * parameters. If an external clock is present, it
-		 * should be initialized and the STA_CLK bit set before
-		 * NTP is started. If the kernel has been running for
-		 * awhile and the offset and frequency previously set,
-		 * but the kernel is explicitly disabled, scratch the
-		 * previous offset and frequency values, but leave the
-		 * time constant alone.
-		 */
 		if (pll_control) {
 			memset((char *)&ntv, 0, sizeof ntv);
-			ntv.modes = MOD_BITS | MOD_FREQUENCY;
-			if (kern_enable) {
-				msyslog(LOG_NOTICE,
-		 	 	   "using kernel time discipline %04x",
-				    ntv.status);
+			ntv.modes = MOD_FREQUENCY;
+			if (kern_enable)
 				ntv.freq = (int32)(drift_comp *
 				    65536e6);
-			} else {
-				msyslog(LOG_NOTICE,
-		 	 	   "kernel time discipline disabled %04x",
-				    ntv.status);
-				ntv.freq = 0;
-			}
-			ntv.maxerror = MAXDISPERSE;
-			ntv.esterror = MAXDISPERSE;
-			ntv.status = STA_UNSYNC | STA_PLL;
 			(void)ntp_adjtime(&ntv);
-
-		} else {
-			msyslog(LOG_NOTICE,
-			    "using NTP daemon time discipline");
 		}
 		break;
 #endif /* KERNEL_PLL */

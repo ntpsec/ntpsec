@@ -1,3 +1,9 @@
+2000-09-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c (loop_config): V3 API needs MOD_BITS when
+	initializing ntv.modes.  Initialize ntv.{maxerror,esterror,status}
+	earlier.  Clean up KERNEL_PLL code.
+
 2000-09-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpq/ntpq.c: report offset as "offset", not "phase".  Lose

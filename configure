@@ -9953,7 +9953,7 @@ echo "${ECHO_T}$ntp_ok" >&6
 # timeval so just set it here for the one case that is KNOWN to use timespec.
 
 # The PPSAPI headers use "inline", so we must have a STDC compiler to use
-# the PPSAIP.
+# the PPSAPI.
 
 case "$ANSI2KNR" in
  '')
