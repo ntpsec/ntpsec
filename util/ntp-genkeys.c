@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/stat.h>		/* for umask() */
 #include <sys/time.h>
 
 #ifdef HAVE_NETINFO
@@ -18,6 +19,7 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
+#include "ntp_filegen.h"
 #include "ntp_unixtime.h"
 #include "ntp_config.h"
 
@@ -106,6 +108,241 @@
  * explanation of return values, if necessary.
  */
 
+
+char *config_file;
+
+#ifdef HAVE_NETINFO
+struct netinfo_config_state *config_netinfo = NULL;
+int check_netinfo = 1;
+#endif /* HAVE_NETINFO */
+
+#ifdef SYS_WINNT
+char *alt_config_file;
+LPTSTR temp;
+char config_file_storage[MAX_PATH];
+char alt_config_file_storage[MAX_PATH];
+#endif /* SYS_WINNT */
+
+int make_dh = 0;		/* Make D-H parameter file? */
+int make_md5 = 0;		/* Make MD5 keyfile? */
+int make_rsa = 0;		/* Make RSA pair? */
+int force = 0;			/* Force the installation? */
+int nosymlinks = 0;		/* Just create the (timestamped) files? */
+int trash = 0;			/* Trash old files? */
+int errflag = 0;
+
+char *path_keys;
+char *link_keys;
+
+char *path_keysdir;
+char *link_keysdir;
+
+char *path_publickey;
+char *link_publickey;
+
+char *path_privatekey;
+char *link_privatekey;
+
+char *path_dhparms;
+char *link_dhparms;
+
+
+/* Stubs and hacks so we can link with ntp_config.o */
+u_long	sys_automax;		/* maximum session key lifetime */
+int	sys_bclient;		/* we set our time to broadcasts */
+int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
+u_long	client_limit_period;
+char *	req_file;		/* name of the file with configuration info */
+keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
+struct interface *any_interface;	/* default interface */
+keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
+u_long	current_time;		/* current time (s) */
+const char *Version = "";	/* version declaration */
+keyid_t	req_keyid;		/* request keyid */
+u_long	client_limit;
+u_long	client_limit_period;
+l_fp	sys_revoketime;
+u_long	sys_revoke;		/* keys revoke timeout */
+int	crypto_flags;
+volatile int debug = 1;		/* debugging flag */
+
+struct peer *
+peer_config(
+	struct sockaddr_in *srcadr,
+	struct interface *dstadr,
+	int hmode,
+	int version,
+	int minpoll,
+	int maxpoll,
+	u_int flags,
+	int ttl,
+	keyid_t key,
+	u_char *keystr
+	)
+{
+	if (debug) printf("peer_config...\n");
+	return 0;
+}
+
+
+void
+set_sys_var(
+	char *data,
+	u_long size,
+	int def
+	)
+{
+	if (debug) printf("set_sys_var...\n");
+	return;
+}
+
+
+void
+ntp_intres (void)
+{
+	if (debug) printf("ntp_intres...\n");
+	return;
+}
+
+
+int
+ctlsettrap(
+	struct sockaddr_in *raddr,
+	struct interface *linter,
+	int traptype,
+	int version
+	)
+{
+	if (debug) printf("ctlsettrap...\n");
+	return 0;
+}
+
+
+void
+crypto_config(
+	int item,		/* configuration item */
+	char *cp		/* file name */
+	)
+{
+	if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
+	return;
+}
+
+
+struct interface *
+findinterface(
+	struct sockaddr_in *addr
+	)
+{
+ 	if (debug) printf("findinterface...\n");
+	return 0;
+}
+
+
+void
+refclock_control(
+	struct sockaddr_in *srcadr,
+	struct refclockstat *in,
+	struct refclockstat *out
+	)
+{
+	if (debug) printf("refclock_control...\n");
+	return;
+}
+
+
+void
+loop_config(
+	int item,
+	double freq
+	)
+{
+	if (debug) printf("loop_config...\n");
+	return;
+}
+
+
+void
+filegen_config(
+	FILEGEN *gen,
+	char    *basename,
+	u_int   type,
+	u_int   flag
+	)
+{
+	if (debug) printf("filegen_config...\n");
+	return;
+}
+
+
+void
+stats_config(
+	int item,
+	char *invalue	/* only one type so far */
+	)
+{
+	if (debug) printf("stats_config...\n");
+	return;
+}
+
+
+void
+hack_restrict(
+	int op,
+	struct sockaddr_in *resaddr,
+	struct sockaddr_in *resmask,
+	int mflags,
+	int flags
+	)
+{
+	if (debug) printf("hack_restrict...\n");
+	return;
+}
+
+
+void
+kill_asyncio (void)
+{
+	if (debug) printf("kill_asyncio...\n");
+	return;
+}
+
+
+void
+proto_config(
+	int item,
+	u_long value,
+	double dvalue
+	)
+{
+	if (debug) printf("proto_config...\n");
+	return;
+}
+
+void
+getauthkeys(
+	char *keyfile
+	)
+{
+	if (debug) printf("getauthkeys: got <%s>\n", keyfile);
+	path_keys = keyfile;
+	return;
+}
+
+
+FILEGEN *
+filegen_get(
+	char *name
+	)
+{
+	if (debug) printf("filegen_get...\n");
+	return 0;
+}
+
+
+/* End of stubs and hacks */
+
+
 static void
 usage(
 	void
@@ -131,71 +368,13 @@ usage(
 }
 
 
-int
-main(
+void
+getCmdOpts (
 	int argc,
 	char *argv[]
 	)
 {
-#ifdef PUBKEY
-	R_RSA_PRIVATE_KEY rsaref_private; /* RSA private key */
-	R_RSA_PUBLIC_KEY rsaref_public;	/* RSA public key */
-	R_RSA_PROTO_KEY protokey;	/* RSA prototype key */
-	R_DH_PARAMS dh_params;		/* Diffie-Hellman parameters */
-	R_RANDOM_STRUCT randomstr;	/* random structure */
-	int rval;			/* return value */
-	u_char encoded_key[MAXKEYLEN];	/* encoded PEM string buffer */
-	u_int modulus;			/* modulus length */
-	u_int len;
-#endif /* PUBKEY */
-	struct timeval tv;		/* initialization vector */
-	u_long ntptime;			/* NTP timestamp */
-	u_char hostname[256];		/* DNS host name */
-	u_char filename[256];		/* public key file name */
-	u_char md5key[17];		/* generated MD5 key */ 
-	FILE *str;			/* file handle */
-	u_int temp;
-	int i, j;
-	mode_t std_mask;	/* Standard mask */
-	mode_t sec_mask = 077;	/* Secure mask */
-	char *config_file;
-#ifdef HAVE_NETINFO
-	struct netinfo_config_state *config_netinfo = NULL;
-	int check_netinfo = 1;
-#endif /* HAVE_NETINFO */
-#ifdef SYS_WINNT
-	char *alt_config_file;
-	LPTSTR temp;
-	char config_file_storage[MAX_PATH];
-	char alt_config_file_storage[MAX_PATH];
-#endif /* SYS_WINNT */
-	int make_dh = 0;	/* Make D-H parameter file? */
-	int make_md5 = 0;	/* Make MD5 keyfile? */
-	int make_rsa = 0;	/* Make RSA pair? */
-	int force = 0;		/* Force the installation? */
-	int nosymlinks = 0;	/* Just create the (timestamped) files? */
-	int trash = 0;		/* Trash old files? */
-	int errflag = 0;
-
-	/* Initialize config_file */
-	/* HMS: from ntp_config.c - we should use 1 copy of this... */
-#ifndef SYS_WINNT
-	config_file = CONFIG_FILE;
-#else
-	temp = CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)config_file_storage, (DWORD)sizeof(config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
-		exit(1);
-	}
-	config_file = config_file_storage;
-
-	temp = ALT_CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
-		exit(1);
-	}
-	alt_config_file = alt_config_file_storage;
-#endif /* SYS_WINNT */
+	int i;
 
 	while ((i = ntp_getopt(argc, argv, "c:dflmrt")) != EOF)
 		switch (i) {
@@ -237,27 +416,41 @@ main(
 		++make_md5;
 		++make_rsa;
 	}
-		
-	/* FindConfig() */
-	/* else NetInfo */
+}
+
+
+int
+main(
+	int argc,
+	char *argv[]
+	)
+{
+#ifdef PUBKEY
+	R_RSA_PRIVATE_KEY rsaref_private; /* RSA private key */
+	R_RSA_PUBLIC_KEY rsaref_public;	/* RSA public key */
+	R_RSA_PROTO_KEY protokey;	/* RSA prototype key */
+	R_DH_PARAMS dh_params;		/* Diffie-Hellman parameters */
+	R_RANDOM_STRUCT randomstr;	/* random structure */
+	int rval;			/* return value */
+	u_char encoded_key[MAXKEYLEN];	/* encoded PEM string buffer */
+	u_int modulus;			/* modulus length */
+	u_int len;
+#endif /* PUBKEY */
+	struct timeval tv;		/* initialization vector */
+	u_long ntptime;			/* NTP timestamp */
+	u_char hostname[256];		/* DNS host name */
+	u_char filename[256];		/* public key file name */
+	u_char md5key[17];		/* generated MD5 key */ 
+	FILE *str;			/* file handle */
+	u_int temp;
+	int i, j;
+	mode_t std_mask;	/* Standard mask */
+	mode_t sec_mask = 077;	/* Secure mask */
+
+	/* Initialize config_file */
+	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
 	/*
-	  -k key_file for md5 list?
-
-	  Crack the config file, looking for:
-
-	  "keys"	The md5 key file name
-	  "keysdir"	directory to D-H and RSA keys
-	  "publickey"	The RSA public key
-	  "privatekey"	The RSA private key
-	  "dhparms"	The D-H parameter file
-
-	  There's a chance we'll do this the same way ntpd_config does...
-
-	  We need 2 variables per file:
-	  - the specified location of the file 
-	  - the file it points to (if it's a symlink)
-
 	  We:
 	  - get each target filename
 	  - if it exists, if it's a symlink get the "target"

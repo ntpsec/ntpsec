@@ -720,6 +720,9 @@ service_main(
 	 * for the gizmo board. While at it, save the host name for later
 	 * along with the length. The crypto needs this.
 	 */
+#ifdef DEBUG
+	debug = 0;
+#endif
 	getconfig(argc, argv);
 #ifdef AUTOKEY
 	gethostname(hostname, MAXFILENAME);

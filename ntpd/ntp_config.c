@@ -620,9 +620,7 @@ getconfig(
 	 * Initialize, initialize
 	 */
 	errflg = 0;
-#ifdef DEBUG
-	debug = 0;
-#endif	/* DEBUG */
+	/* HMS: don't initialize debug to 0 here! */
 #ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
 #else
