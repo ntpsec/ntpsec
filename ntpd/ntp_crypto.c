@@ -2154,13 +2154,13 @@ crypto_iff(
  *
  * Alice rolls new random challenge r and sends to Bob in the GQ
  * request message. Bob rolls new random k, then computes y = k u^r mod
- * n and g = k^b mod n and sends (y, hash(x)) to Alice in the response
+ * n and x = k^b mod n and sends (y, hash(x)) to Alice in the response
  * message. Besides making the response shorter, the hash makes it
- * effectivey impossible for an intruder to solve for a by observing
+ * effectivey impossible for an intruder to solve for b by observing
  * a number of these messages.
  * 
  * Alice receives the response and computes y^b v^r mod n. After a bit
- * of algebra, this simplifies to g^k. If the hash of this result
+ * of algebra, this simplifies to k^b. If the hash of this result
  * matches x, Alice knows that Bob has the group key b. The signed
  * response binds this knowledge to Bob's private key and the public key
  * previously received in his certificate.

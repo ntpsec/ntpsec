@@ -313,7 +313,7 @@ clear_all(void)
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (peer->flags & FLAG_CONFIG)
-				peer_clear(peer);
+				peer_clear(peer, "STEP");
 			else
 				unpeer(peer);
 		}
@@ -354,7 +354,7 @@ unpeer(
 		printf("demobilize %u %d\n", peer_to_remove->associd,
 		    peer_associations);
 #endif
-	peer_clear(peer_to_remove);
+	peer_clear(peer_to_remove, "NULL");
 	hash = HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
@@ -506,7 +506,7 @@ peer_config(
 		peer->ttl = ttl;
 		peer->keyid = key;
 		peer->precision = sys_precision;
-		peer_clear(peer);
+		peer_clear(peer, "RMOT");
 		return (peer);
 	}
 
@@ -592,7 +592,14 @@ newpeer(
 	peer->ttl = ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
-	peer_clear(peer);
+	if (cast_flags & MDF_ACAST)
+		peer_clear(peer, "ACST");
+	else if (cast_flags & MDF_MCAST)
+		peer_clear(peer, "MCST");
+	else if (cast_flags & MDF_BCAST)
+		peer_clear(peer, "BCST");
+	else
+		peer_clear(peer, "INIT");
 	if (mode_ntpdate)
 		peer_ntpdate++;
 
@@ -782,7 +789,7 @@ expire_all(void)
 			if (!(peer->flags & FLAG_SKEY)) {
 				continue;
 			} else if (peer->cast_flags & MDF_ACAST) {
-				peer_clear(peer);
+				peer_clear(peer, "ACST");
 			} else if (peer->hmode == MODE_ACTIVE ||
 			    peer->hmode == MODE_PASSIVE) {
 				key_expire(peer);

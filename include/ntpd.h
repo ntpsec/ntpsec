@@ -155,7 +155,7 @@ extern	time_t	timegm		P((struct tm *));
 /* ntp_proto.c */
 extern	void	transmit	P((struct peer *));
 extern	void	receive 	P((struct recvbuf *));
-extern	void	peer_clear	P((struct peer *));
+extern	void	peer_clear	P((struct peer *, char *));
 extern	void 	process_packet	P((struct peer *, struct pkt *, l_fp *));
 extern	void	clock_select	P((void));
 extern	void	kod_proto	P((void));
