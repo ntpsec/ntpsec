@@ -103,6 +103,10 @@ SOURCE=..\..\..\ntpd\ntp_control.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\ntp_crypto.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\ntp_filegen.c
 # End Source File
 # Begin Source File

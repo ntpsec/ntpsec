@@ -524,7 +524,10 @@ service_main(
 	char *cp;
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
-
+#ifdef AUTOKEY
+	u_int n;
+	char hostname[MAXFILENAME];
+#endif /* AUTOKEY */
 	if(!debug)
 	{
 		/* register our service control handler */

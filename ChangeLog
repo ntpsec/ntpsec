@@ -1,3 +1,13 @@
+2000-05-11  Sven Dietrich  <sven_dietrich@trimble.com>
+
+	* ports/winnt/include/config.h: New defines to support AUTOKEY
+	* ports/winnt/include/unistd.h: Added another dummy placeholder.h
+	* ports/winnt/ntpd/ntpd.dsp: Added ntp_crypt.c to makefile
+	* ports/winnt/ntpd/ntpd.c: service_main needs a local hostname[]
+	* html/hints/winnt.htm: Add remark about 4.0.99i not compiling.
+	These changes got WINNT running again. No idea if the keys stuff
+	works however.
+
 2000-05-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99i9
