@@ -1,3 +1,7 @@
+2000-08-29  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure: Fix the autoconf problem...
+
 2000-08-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 99k7

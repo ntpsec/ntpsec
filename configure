@@ -4874,7 +4874,7 @@ int
 main ()
 {
 struct ntptimeval foo;
-foo.tv_nsec;
+foo.time.tv_nsec;
   ;
   return 0;
 }
