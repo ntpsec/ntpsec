@@ -799,7 +799,7 @@ struct info_kernel {
  * Info returned with IP -> hostname lookup
  */
 /* 144 might need to become 32, matching data[] member of req_pkt */
-#define NTP_MAXHOSTNAME (144 - sizeof(u_int32) - sizeof(u_short))
+#define NTP_MAXHOSTNAME (32 - sizeof(u_int32) - sizeof(u_short))
 struct info_dns_assoc {
 	u_int32 peeraddr;	/* peer address (HMS: being careful...) */
 	associd_t associd;	/* association ID */
