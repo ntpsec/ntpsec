@@ -32,7 +32,7 @@
         </ol>
         <p>The local clock driver should be configured something like this:</p>
         <p><tt>server 127.127.1.1 prefer</tt></p>
-        <p><tt>fucge 127.127.1.1 stratum 0 refid NIST</tt></p>
+        <p><tt>fudge 127.127.1.1 stratum 0 refid NIST</tt></p>
         <p>The <tt>prefer</tt> keyword forces the driver to discipline the clock, even if other servers are configured and running correctly. This is convenient when a number of servers watch each other for monitoring and statistics gathering. In particular, the <tt>peerstats</tt> data and <tt>sysstats</tt> data can be collected at each server, aggregated for daily or weekly reports and sent by electric mail to a monitoring site. In addition, the full suite of cryptographic authentication algorithms is avialable to other servers and dependent clients.</p>
         <h4>Monitor Data</h4>
         <p>No <tt>filegen clockstats</tt> monitor data are produced by this driver.</p>
