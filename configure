@@ -6746,7 +6746,7 @@ EOF
 fi
 done
 
-for ac_func in snprintf strerror
+for ac_func in snprintf strdup strerror
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
 echo $ac_n "checking for $ac_func... $ac_c" 1>&6

@@ -1,5 +1,9 @@
 2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: AC_REPLACE_FUNCS(strdup)
+	* libntp/strdup.c (strdup): Added.
+	* libntp/Makefile.am (EXTRA_libntp_a_SOURCES): Added strdup.c
+
 	* util/Makefile.am (ntp_genkeys_DEPENDENCIES): Use $U on .o files
 	(ntp_genkeys_LDADD): ditto.
 

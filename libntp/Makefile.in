@@ -124,7 +124,7 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	icom.c audio.c
 
 EXTRA_libntp_a_SOURCES = adjtimex.c log.c mktime.c random.c snprintf.c \
-	strerror.c
+	strdup.c strerror.c
 
 libntp_a_LIBADD = @LIBOBJS@
 libntp_a_DEPENDENCIES = @LIBOBJS@
@@ -168,7 +168,7 @@ DIST_SOURCES =  $(libntp_a_SOURCES) $(EXTRA_libntp_a_SOURCES)
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  README $(noinst_HEADERS) Makefile.am Makefile.in mktime.c \
-snprintf.c strerror.c
+snprintf.c strdup.c strerror.c
 
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -199,10 +199,11 @@ $(DEPDIR)/numtoa$U.Po $(DEPDIR)/numtohost$U.Po $(DEPDIR)/octtoint$U.Po \
 $(DEPDIR)/prettydate$U.Po $(DEPDIR)/random$U.Po $(DEPDIR)/ranny$U.Po \
 $(DEPDIR)/recvbuff$U.Po $(DEPDIR)/refnumtoa$U.Po \
 $(DEPDIR)/snprintf$U.Po $(DEPDIR)/snprintf.Po $(DEPDIR)/statestr$U.Po \
-$(DEPDIR)/strerror$U.Po $(DEPDIR)/strerror.Po $(DEPDIR)/syssignal$U.Po \
-$(DEPDIR)/systime$U.Po $(DEPDIR)/tsftomsu$U.Po $(DEPDIR)/tstotv$U.Po \
-$(DEPDIR)/tvtoa$U.Po $(DEPDIR)/tvtots$U.Po $(DEPDIR)/uglydate$U.Po \
-$(DEPDIR)/uinttoa$U.Po $(DEPDIR)/utvtoa$U.Po $(DEPDIR)/ymd2yd$U.Po
+$(DEPDIR)/strdup$U.Po $(DEPDIR)/strdup.Po $(DEPDIR)/strerror$U.Po \
+$(DEPDIR)/strerror.Po $(DEPDIR)/syssignal$U.Po $(DEPDIR)/systime$U.Po \
+$(DEPDIR)/tsftomsu$U.Po $(DEPDIR)/tstotv$U.Po $(DEPDIR)/tvtoa$U.Po \
+$(DEPDIR)/tvtots$U.Po $(DEPDIR)/uglydate$U.Po $(DEPDIR)/uinttoa$U.Po \
+$(DEPDIR)/utvtoa$U.Po $(DEPDIR)/ymd2yd$U.Po
 SOURCES = $(libntp_a_SOURCES) $(EXTRA_libntp_a_SOURCES)
 OBJECTS = $(am_libntp_a_OBJECTS)
 
@@ -375,6 +376,8 @@ snprintf_.c: snprintf.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/snprintf.c; then echo $(srcdir)/snprintf.c; else echo snprintf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > snprintf_.c
 statestr_.c: statestr.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/statestr.c; then echo $(srcdir)/statestr.c; else echo statestr.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > statestr_.c
+strdup_.c: strdup.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/strdup.c; then echo $(srcdir)/strdup.c; else echo strdup.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > strdup_.c
 strerror_.c: strerror.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/strerror.c; then echo $(srcdir)/strerror.c; else echo strerror.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > strerror_.c
 syssignal_.c: syssignal.c $(ANSI2KNR)
@@ -407,9 +410,9 @@ ieee754io_.o inttoa_.o iosignal_.o lib_strbuf_.o log_.o machines_.o \
 md5c_.o memmove_.o mfp_mul_.o mfptoa_.o mfptoms_.o mktime_.o modetoa_.o \
 mstolfp_.o msutotsf_.o msyslog_.o netof_.o numtoa_.o numtohost_.o \
 octtoint_.o prettydate_.o random_.o ranny_.o recvbuff_.o refnumtoa_.o \
-snprintf_.o statestr_.o strerror_.o syssignal_.o systime_.o tsftomsu_.o \
-tstotv_.o tvtoa_.o tvtots_.o uglydate_.o uinttoa_.o utvtoa_.o ymd2yd_.o \
-: $(ANSI2KNR)
+snprintf_.o statestr_.o strdup_.o strerror_.o syssignal_.o systime_.o \
+tsftomsu_.o tstotv_.o tvtoa_.o tvtots_.o uglydate_.o uinttoa_.o \
+utvtoa_.o ymd2yd_.o : $(ANSI2KNR)
 
 tags: TAGS
 
@@ -521,6 +524,8 @@ distdir: $(DISTFILES)
 @AMDEP@include $(DEPDIR)/snprintf$U.Po
 @AMDEP@include $(DEPDIR)/snprintf.Po
 @AMDEP@include $(DEPDIR)/statestr$U.Po
+@AMDEP@include $(DEPDIR)/strdup$U.Po
+@AMDEP@include $(DEPDIR)/strdup.Po
 @AMDEP@include $(DEPDIR)/strerror$U.Po
 @AMDEP@include $(DEPDIR)/strerror.Po
 @AMDEP@include $(DEPDIR)/syssignal$U.Po
