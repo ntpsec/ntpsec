@@ -768,7 +768,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
+			mreq6.ipv6mr_interface = iface->scopeid;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -833,7 +833,7 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
+			mreq6.ipv6mr_interface = iface->scopeid;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -869,14 +869,11 @@ io_multicast_add(
 	int i = ninterfaces;	/* Use the next interface */
 	u_int32 haddr = ntohl(((struct sockaddr_in*)&addr)->sin_addr.s_addr);
 	struct in_addr iaddr;
-	SOCKET s;
-	struct sockaddr_in *sinp;
 	isc_boolean_t jstatus;
 	int ind;
 
 #ifdef ISC_PLATFORM_HAVEIPV6
 	struct in6_addr iaddr6;
-	struct sockaddr_in6 *sin6p;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
 	/* If we already have it we can just return */
@@ -934,7 +931,7 @@ io_multicast_add(
 				stoa(&addr));
 			return;
 		}
-		in = -1;
+		ind = -1;
 		for (i = nwilds; i < ninterfaces; i++) {
 			/* Be sure it's the correct family */
 			if ((inter_list[i].sin.ss_family == AF_INET6) &&
