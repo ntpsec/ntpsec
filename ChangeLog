@@ -1,3 +1,7 @@
+2000-08-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (NTP_KEYSDIR): Typo
+
 2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ElectricFence/Makefile.am (check-local): use test instead of [

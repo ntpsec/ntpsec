@@ -2996,7 +2996,7 @@ case "$host" in
     ;;
 esac
 
-AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir , [Default location of crypto key info])
+AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 
 # This is necessary so that .o files in LIBOBJS are also built via
 # the ANSI2KNR-filtering rules.
