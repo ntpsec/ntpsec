@@ -275,7 +275,7 @@ create_wildcards(u_short port) {
 	 */
 #ifdef IPV6_V6ONLY
 	if(isc_net_probeipv4() != ISC_R_SUCCESS)
-		okipv4 == ISC_FALSE;
+		okipv4 = ISC_FALSE;
 #endif
 
 	if(okipv4 == ISC_TRUE) {
