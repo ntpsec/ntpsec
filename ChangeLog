@@ -1,3 +1,7 @@
+1999-08-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Look for sys/ppstime.h.
+
 1999-07-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_io.c (create_sockets): Typo.

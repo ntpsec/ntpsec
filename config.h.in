@@ -738,6 +738,9 @@
 /* Define if you have the <sys/ppsclock.h> header file.  */
 #undef HAVE_SYS_PPSCLOCK_H
 
+/* Define if you have the <sys/ppstime.h> header file.  */
+#undef HAVE_SYS_PPSTIME_H
+
 /* Define if you have the <sys/proc.h> header file.  */
 #undef HAVE_SYS_PROC_H
 

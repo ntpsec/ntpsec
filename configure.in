@@ -215,7 +215,7 @@ case "$target" in
     ;;
 esac
 AC_CHECK_HEADERS(sys/lock.h sys/mman.h sys/modem.h sys/param.h sys/ppsclock.h)
-AC_CHECK_HEADERS(sys/proc.h sys/resource.h sys/sched.h)
+AC_CHECK_HEADERS(sys/ppstime.h sys/proc.h sys/resource.h sys/sched.h)
 case "$target" in
  *-*-sco3.2v4.2)
     ;;
