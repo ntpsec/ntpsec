@@ -128,8 +128,8 @@ int check_netinfo = 1;
 #ifdef SYS_WINNT
 char *alt_config_file;
 LPTSTR temp;
-char config_file_storage[MAX_PATH];
-char alt_config_file_storage[MAX_PATH];
+char config_file_storage[PATH_MAX];
+char alt_config_file_storage[PATH_MAX];
 #endif /* SYS_WINNT */
 
 int make_dh = 0;		/* Make D-H parameter file? */
@@ -501,6 +501,8 @@ newfile(
 	const char *f3		/* Previous symlink target */
 	)
 {
+	char fb[PATH_MAX];
+
 	/*
 	   If:
 	   - no symlink support, or
@@ -511,6 +513,27 @@ newfile(
 	   - - file = dirname(f3) / f2
 	   - else
 	   - - file = dirname(f1) / dirname(f3) / f2
+	   fopen(file)
+	   print any error message/bail
+	   return FILE
+	*/
+	if (
+#ifdef HAVE_READLINK
+	    !f3
+#else
+	    1
+#endif
+	   ) {
+		/* file = dirname(f1) / f2 */
+	} else {
+	/*
+	   - If ('/' == *f3)
+	   - - file = dirname(f3) / f2
+	   - else
+	   - - file = dirname(f1) / dirname(f3) / f2
+	*/
+	}
+	/*
 	   fopen(file)
 	   print any error message/bail
 	   return FILE
