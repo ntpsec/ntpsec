@@ -260,22 +260,22 @@ isc_net_probeipv6(void);
  *	ISC_R_UNEXPECTED
  */
 
-#ifdef ISC_PLATFORM_NEEDNTOP
 const char *
 isc_net_ntop(int af, const void *src, char *dst, size_t size);
+#ifdef ISC_PLATFORM_NEEDNTOP
 #define inet_ntop isc_net_ntop
 #endif
 
-#ifdef ISC_PLATFORM_NEEDPTON
 int
 isc_net_pton(int af, const char *src, void *dst);
+#ifdef ISC_PLATFORM_NEEDPTON
 #undef inet_pton
 #define inet_pton isc_net_pton
 #endif
 
-#ifdef ISC_PLATFORM_NEEDATON
 int
 isc_net_aton(const char *cp, struct in_addr *addr);
+#ifdef ISC_PLATFORM_NEEDATON
 #define inet_aton isc_net_aton
 #endif
 
