@@ -12296,21 +12296,40 @@ if test "${enable_kernel_fll_bug+set}" = set; then
 else
   case "$target" in
      *-*-solaris2.6)
-	 case "`uname -v`" in
-	  Generic_105181-17)
-	     ans=no
+	 unamev=`uname -v`
+	 case "$unamev" in
+	  Generic_105181-*)
+	     old_IFS="$IFS"
+	     IFS="-"
+	     set $unamev
+	     IFS="$old_IFS"
+	     if test "$2" -ge 17
+	     then
+	        # Generic_105181-17 and higher
+	        ans=no
+	     else
+	        ans=yes
+	     fi
 	     ;;
 	  *) ans=yes
 	     ;;
 	 esac
 	 ;;
      *-*-solaris2.7)
-	 case "`uname -v`" in
-	  Generic_106541-07)
-	     ans=no
-	     ;;
-	  Generic_106541-08)
-	     ans=no
+	 unamev=`uname -v`
+	 case "$unamev" in
+	  Generic_106541-*)
+	     old_IFS="$IFS"
+	     IFS="-"
+	     set $unamev
+	     IFS="$old_IFS"
+	     if test "$2" -ge 07
+	     then
+	        # Generic_106541-07 and higher
+	        ans=no
+	     else
+	        ans=yes
+	     fi
 	     ;;
 	  *) ans=yes
 	     ;;
@@ -12323,7 +12342,7 @@ else
 fi
 ac_cv_var_kernel_fll_bug=$ans
 fi
-echo "configure:12326: result: $ac_cv_var_kernel_fll_bug" >&5
+echo "configure:12345: result: $ac_cv_var_kernel_fll_bug" >&5
 echo "${ECHO_T}$ac_cv_var_kernel_fll_bug" >&6
 case "$ac_cv_var_kernel_fll_bug" in
  yes) cat >>confdefs.h <<\EOF

@@ -1,3 +1,9 @@
+2000-09-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Much improved Solaris patch-level check for the
+	FLL bug test.
+	From: Marc.Brett@westgeo.com
+
 2000-09-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/Makefile.am (noinst_HEADERS): Added ntp_tty.h
