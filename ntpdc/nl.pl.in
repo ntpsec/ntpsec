@@ -1,4 +1,4 @@
-#!/vol/perl-5.8/bin/perl -w
+#! @PATH_PERL@ -w
 
 $found = 0;
 $last = 0;
