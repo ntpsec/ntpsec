@@ -1375,7 +1375,7 @@ crypto_verify(
 	)
 {
 	EVP_PKEY *pkey;		/* server public key */
-	EVP_mD_CTX ctx;		/* signature context */
+	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* timestamp */
 	tstamp_t fstamp;	/* filestamp */
 	u_int	vallen;		/* value length */
