@@ -1,12 +1,13 @@
 dnl -*-fundamental-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(ntpd/ntp_refclock.c)
+m4_include([version.m4])
+AC_INIT(ntp, VERSION_NUMBER)
+AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
 AM_CONFIG_HEADER(config.h)
-AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.2.0)
-AC_PREREQ(2.53)
+dnl AC_ARG_PROGRAM
+AC_PREREQ(2.58)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
