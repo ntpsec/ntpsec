@@ -53,15 +53,15 @@ extern int priority_done;
 /*
  * We understand the following configuration entries and defaults.
  *
- * peer [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * server [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * broadcast [ addr ] [ version 3 ] [ key 0 ] [ ttl 1 ]
+ * peer [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
+ * server [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
+ * broadcast [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ ttl 1 ]
  * broadcastclient
- * multicastclient [ 224.0.1.1 ]
- * manycastclient [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * manycastserver [ 224.0.1.1 ]
+ * multicastclient [ -4 | -6 ] [ 224.0.1.1 ]
+ * manycastclient [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
+ * manycastserver [ -4 | -6 ] [ 224.0.1.1 ]
  * broadcastdelay 0.0102
- * restrict [ addr ] [ mask 255.255.255.0 ] ignore|noserve|notrust|noquery
+ * restrict [ -4 | -6 ] [ addr ] [ mask 255.255.255.0 ] ignore|noserve|notrust|noquery
  * driftfile file_name
  * keys file_name
  * publickey file_name
@@ -73,7 +73,7 @@ extern int priority_done;
  * trustedkey [ key ]
  * requestkey [ key]
  * controlkey [ key ]
- * trap [ addr ]
+ * trap [ -4 | -6 ] [ addr ]
  * fudge [ addr ] [ stratum ] [ refid ] ...
  * pidfile [ ]
  * setvar [ ]
@@ -301,6 +301,16 @@ static struct keyword crypto_keywords[] = {
 #endif /* OPENSSL */
 
 /*
+ * Address type selection, IPv4 or IPv4.
+ * Used on various lines.
+ */
+static struct keyword addr_type[] = {
+	{ "-4",			CONF_ADDR_IPV4 },
+	{ "-6",			CONF_ADDR_IPV6 },
+	{ "",			CONFIG_UNKNOWN }
+};
+
+/*
  * "logconfig" building blocks
  */
 struct masks {
@@ -503,6 +513,7 @@ getconfig(
 	register int i;
 	int c;
 	int errflg;
+	int istart;
 	int peerversion;
 	int minpoll;
 	int maxpoll;
@@ -640,7 +651,20 @@ getconfig(
 				break;
 			}
 
-			if (!getnetnum(tokens[1], &peeraddr, 0)) {
+			istart = 1;
+			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			switch (matchkey(tokens[istart], addr_type)) {
+			case CONF_ADDR_IPV4:
+				peeraddr.ss_family = AF_INET;
+				istart++;
+				break;
+			case CONF_ADDR_IPV6:
+				peeraddr.ss_family = AF_INET6;
+				istart++;
+				break;
+			}
+
+			if (!getnetnum(tokens[istart], &peeraddr, 0)) {
 				errflg = -1;
 			} else {
 				errflg = 0;
@@ -709,7 +733,8 @@ getconfig(
 			peerkeystr = "*";
 			peerflags = 0;
 			ttl = 0;
-			for (i = 2; i < ntokens; i++)
+			istart++;
+			for (i = istart; i < ntokens; i++)
 			    switch (matchkey(tokens[i], mod_keywords)) {
 				case CONF_MOD_VERSION:
 				    if (i >= ntokens-1) {
@@ -947,7 +972,29 @@ getconfig(
 		    case CONFIG_MULTICASTCLIENT:
 		    case CONFIG_MANYCASTSERVER:
 			if (ntokens > 1) {
-				for (i = 1; i < ntokens; i++) {
+				istart = 1;
+				memset((char *)&peeraddr, 0, sizeof(peeraddr));
+				switch (matchkey(tokens[istart], addr_type)) {
+				case CONF_ADDR_IPV4:
+					peeraddr.ss_family = AF_INET;
+					istart++;
+					break;
+				case CONF_ADDR_IPV6:
+					peeraddr.ss_family = AF_INET6;
+					istart++;
+					break;
+				}
+				/*
+				 * Abuse maskaddr to store the prefered ip
+				 * version.
+				 */
+				memset((char *)&maskaddr, 0, sizeof(maskaddr));
+				maskaddr.ss_family = peeraddr.ss_family;
+
+				for (i = istart; i < ntokens; i++) {
+					memset((char *)&peeraddr, 0,
+					    sizeof(peeraddr));
+					peeraddr.ss_family = maskaddr.ss_family;
 					if (getnetnum(tokens[i], &peeraddr, 1))
 					    proto_config(PROTO_MULTICAST_ADD,
 							 0, 0., &peeraddr);
@@ -1143,12 +1190,28 @@ getconfig(
 				msyslog(LOG_ERR, "restrict requires an address");
 				break;
 			}
-			if (STREQ(tokens[1], "default")) {
-			    /* Assume default means an IPv4 address. */
-			    ANYSOCK(&peeraddr);
-			    peeraddr.ss_family = AF_INET;
-			} else if (!getnetnum(tokens[1], &peeraddr, 1))
-			    break;
+			istart = 1;
+			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			switch (matchkey(tokens[istart], addr_type)) {
+			case CONF_ADDR_IPV4:
+				peeraddr.ss_family = AF_INET;
+				istart++;
+				break;
+			case CONF_ADDR_IPV6:
+				peeraddr.ss_family = AF_INET6;
+				istart++;
+				break;
+			}
+
+			/*
+			 * Assume default means an IPv4 address, except
+			 * if forced by a -4 or -6.
+			 */
+			if (STREQ(tokens[istart], "default")) {
+				if (peeraddr.ss_family == 0)
+					peeraddr.ss_family = AF_INET;
+			} else if (!getnetnum(tokens[istart], &peeraddr, 1))
+				break;
 
 			/*
 			 * Use peerversion as flags, peerkey as mflags.  Ick.
@@ -1157,7 +1220,8 @@ getconfig(
 			peerkey = 0;
 			errflg = 0;
 			SET_HOSTMASK(&maskaddr, peeraddr.ss_family);
-			for (i = 2; i < ntokens; i++) {
+			istart++;
+			for (i = istart; i < ntokens; i++) {
 				switch (matchkey(tokens[i], res_keywords)) {
 				    case CONF_RES_MASK:
 					if (i >= ntokens-1) {
@@ -1302,7 +1366,20 @@ getconfig(
 					"no address for trap command, line ignored");
 				break;
 			}
-			if (!getnetnum(tokens[1], &peeraddr, 1))
+			istart = 1;
+			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			switch (matchkey(tokens[istart], addr_type)) {
+			case CONF_ADDR_IPV4:
+				peeraddr.ss_family = AF_INET;
+				istart++;
+				break;
+			case CONF_ADDR_IPV6:
+				peeraddr.ss_family = AF_INET6;
+				istart++;
+				break;
+			}
+
+			if (!getnetnum(tokens[istart], &peeraddr, 1))
 			    break;
 
 			/*
@@ -1311,7 +1388,8 @@ getconfig(
 			errflg = 0;
 			peerversion = 0;
 			localaddr = 0;
-			for (i = 2; i < ntokens-1; i++)
+			istart++;
+			for (i = istart; i < ntokens-1; i++)
 			    switch (matchkey(tokens[i], trap_keywords)) {
 				case CONF_TRAP_PORT:
 				    if (i >= ntokens-1) {
@@ -1338,6 +1416,9 @@ getconfig(
 					    break;
 				    }
 
+				    memset((char *)&maskaddr, 0,
+					sizeof(maskaddr));
+				    maskaddr.ss_family = peeraddr.ss_family;
 				    if (!getnetnum(tokens[++i],
 						   &maskaddr, 1)) {
 					    errflg = 1;
@@ -1379,6 +1460,7 @@ getconfig(
 					"no address for fudge command, line ignored");
 				break;
 			}
+			memset((char *)&peeraddr, 0, sizeof(peeraddr));
 			if (!getnetnum(tokens[1], &peeraddr, 1))
 			    break;
 
@@ -2040,6 +2122,7 @@ getnetnum(
 	/* Get host address. Looking for UDP datagram connection */
  	memset(&hints, 0, sizeof (hints));
  	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_family = addr->ss_family;
 
 #ifdef DEBUG
 		if (debug > 3)

@@ -160,3 +160,9 @@
 #define CONF_CRYPTO_GQPAR	8
 #define CONF_CRYPTO_GQ		9
 #endif /* OPENSSL */
+
+/*
+ * Address selection, IPv4 or IPv6
+ */
+#define	CONF_ADDR_IPV4		1
+#define	CONF_ADDR_IPV6		2
