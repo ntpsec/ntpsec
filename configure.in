@@ -437,7 +437,7 @@ if test $ac_cv_struct_ntptimeval = yes; then
   AC_DEFINE(HAVE_STRUCT_NTPTIMEVAL, 1, [Do we have struct ntptimeval?])
 fi
 
-AC_CHECK_MEMBERS((struct ntptimeval.time.tv_nsec, struct ntptimeval.tai), , ,[
+AC_CHECK_MEMBERS((struct ntptimeval.time.tv_nsec), , ,[
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
