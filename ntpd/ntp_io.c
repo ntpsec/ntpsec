@@ -514,14 +514,14 @@ io_setbclient(void)
 		if (inter_list[i].bfd != INVALID_SOCKET)
 			inter_list[i].flags |= INT_BCASTOPEN;
 #ifdef DEBUG
-		if (debug)
+		if (debug) {
 			if (inter_list[i].bfd != INVALID_SOCKET)
 				printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
 				i, inter_list[i].bfd);
 			else
 				printf("io_setbclient: Unable to Open broadcast client on interface %d\n",
 				i);
-
+		}
 #endif
 #endif
 	}

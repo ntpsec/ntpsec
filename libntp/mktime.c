@@ -84,7 +84,7 @@
 #define TM_YEAR_BASE    1900
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 
-extern time_t	time();
+extern time_t	time P((time_t *));
 
 static int	mon_lengths[2][MONSPERYEAR] = {
 	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
