@@ -776,9 +776,7 @@ crypto_recv(
 			 */
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if (ntp_adjtime(&ntv) == TIME_ERROR)
-				msyslog(LOG_ERR,
-				    "kernel TAI update failed");
+			(void)ntp_adjtime(&ntv);
 #endif /* NTP_API */
 #endif /* KERNEL_PLL */
 			sprintf(statstr, "leap %u ts %u fs %u",
@@ -837,7 +835,7 @@ crypto_xmit(
 	struct value *vp;	/* transmit packet value pointer */
 	struct value *ep, *pp;	/* value structure pointer */
 	u_int	len;
-	struct value encrypt;
+	struct value encryptval;
 	keyid_t tcookie;
 
 	/*
@@ -884,7 +882,7 @@ crypto_xmit(
 			break;
 		}
 		if (PKT_MODE(xpkt->li_vn_mode) == MODE_SERVER) {
-			pp = &encrypt;
+			pp = &encryptval;
 			memset(pp, 0, sizeof(struct value));
 			tcookie = cookie;
 			if (crypto_encrypt(pp, ep, &tcookie)) {
