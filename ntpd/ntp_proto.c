@@ -30,14 +30,14 @@
  */
 u_char	sys_leap;		/* system leap indicator */
 u_char	sys_stratum;		/* stratum of system */
-s_char	sys_precision;		/* local clock precision */
+s_char	sys_precision;		/* local clock precision (log2 s) */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdispersion;	/* dispersion to primary source */
-u_int32 sys_refid;		/* reference source for local clock */
-u_int32 sys_peer_refid;		/* hashed refid of our current peer */
+u_int32 sys_refid;		/* source/loop in network byte order */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer;		/* our current peer */
+struct	peer *sys_pps;		/* our PPS peer */
 struct	peer *sys_prefer;	/* our cherished peer */
 int	sys_kod;		/* kod credit */
 int	sys_kod_rate = 2;	/* max kod packets per second */
@@ -56,8 +56,8 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_selerr;	/* select error (squares) */
-double	sys_error;		/* system error (s) */
+static	double sys_selerr;	/* select jitter (s) */
+double	sys_jitter;		/* system jitter (s) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -146,8 +146,9 @@ transmit(
 
 			oreach = peer->reach;
 			peer->reach <<= 1;
+			peer->outdate = current_time;
 			peer->hyst *= HYST_TC;
-			if (peer->reach == 0) {
+			if (!peer->reach) {
 
 				/*
 				 * If this association has become
@@ -269,7 +270,6 @@ transmit(
 			}
 		}
 	}
-	peer->outdate = peer->nextdate = current_time;
 
 	/*
 	 * Do not transmit if in broadcast client mode. 
@@ -1175,7 +1175,7 @@ process_packet(
 	}
 	peer->leap = pleap;
 	peer->stratum = pstratum;
-	peer->refid = pkt->refid;
+	peer->refid = pkt->refid;		/* network byte order */
 
 	/*
 	 * Test for valid peer data (tests 6-8)
@@ -1244,7 +1244,8 @@ process_packet(
 	 * sums and differences of these first-order differences, which
 	 * if done using 64-bit integer arithmetic, would be valid over
 	 * only half that span. Since the typical first-order
-	 * differences are usually very small, they are converted to 64-	 * bit doubles and all remaining calculations done in floating-
+	 * differences are usually very small, they are converted to 64-
+	 * bit doubles and all remaining calculations done in floating-
 	 * point arithmetic. This preserves the accuracy while retaining
 	 * the 68-year span.
 	 *
@@ -1259,7 +1260,8 @@ process_packet(
 	ci = peer->rec;			/* t4 - t1 */
 	L_SUB(&ci, &p_org);
 	LFPTOD(&ci, p_disp);
-	p_disp = clock_phi * max(p_disp, LOGTOD(sys_precision));
+	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
+	    clock_phi * p_disp;
 
 	/*
 	 * If running in a broadcast association, the clock offset is
@@ -1304,8 +1306,7 @@ process_packet(
 	}
 	clock_filter(peer, p_offset, p_del, p_disp);
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
-	    peer->offset, peer->delay, peer->disp,
-	    SQRT(peer->jitter));
+	    peer->offset, peer->delay, peer->disp, peer->jitter);
 }
 
 
@@ -1328,7 +1329,10 @@ clock_update(void)
 		sys_poll = sys_peer->minpoll;
 	if (sys_poll > sys_peer->maxpoll)
 		sys_poll = sys_peer->maxpoll;
-	poll_update(sys_peer, sys_poll);
+#ifdef REFCLOCK
+	if (!(sys_peer->flags & FLAG_REFCLOCK))
+		poll_update(sys_peer, sys_poll);
+#endif /* REFCLOCK */
 	if (sys_peer->epoch <= sys_clocktime)
 		return;
 
@@ -1373,18 +1377,20 @@ clock_update(void)
 	 */
 	case 1:
 		sys_stratum = (u_char)(sys_peer->stratum + 1);
-		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
-			sys_refid = sys_peer->refid;
-		else
-			sys_refid = sys_peer_refid;
+		sys_refid = sys_peer->refid;
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
-		dtemp = sys_peer->disp + (current_time -
-		    sys_peer->epoch) * clock_phi + sys_error +
-		    fabs(last_offset);
+		dtemp = sys_peer->disp + clock_phi * (current_time -
+		    sys_peer->epoch) + sys_peer->jitter +
+		    fabs(sys_peer->offset);
+#ifdef REFCLOCK
 		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
 		    MINDISPERSE)
 			dtemp = MINDISPERSE;
+#else
+		if (dtemp < MINDISPERSE)
+			dtemp = MINDISPERSE;
+#endif /* REFCLOCK */
 		sys_rootdispersion = sys_peer->rootdispersion + dtemp;
 		sys_leap = leap_consensus;
 		if (oleap == LEAP_NOTINSYNC) {
@@ -1453,7 +1459,7 @@ poll_update(
 #ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate += RESP_DELAY;
-#endif
+#endif /* REFCLOCK */
 		else if (peer->flags & (FLAG_IBURST | FLAG_BURST) &&
 		    peer->burst == NTP_BURST)
 			peer->nextdate += sys_calldelay;
@@ -1570,7 +1576,7 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
-	peer->jitter = MAXDISPERSE;
+	peer->jitter = SQRT(MAXDISPERSE);
 	peer->epoch = current_time;
 #ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
@@ -1582,7 +1588,7 @@ peer_clear(
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_UNSPEC;
 	memcpy(&peer->refid, ident, 4);
-#endif
+#endif /* REFCLOCK */
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;
@@ -1626,7 +1632,7 @@ clock_filter(
 	double	dst[NTP_SHIFT];		/* distance vector */
 	int	ord[NTP_SHIFT];		/* index vector */
 	int	i, j, k, m;
-	double	dsp, jit, dtemp, etemp;
+	double	dtemp, etemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
@@ -1637,14 +1643,12 @@ clock_filter(
 	 * precision. The delay can sometimes swing negative due to
 	 * frequency skew, so it is clamped non-negative.
 	 */
-	dsp = min(LOGTOD(peer->precision) + LOGTOD(sys_precision) +
-	    sample_disp, MAXDISPERSE);
 	j = peer->filter_nextpt;
 	peer->filter_offset[j] = sample_offset;
 	peer->filter_delay[j] = max(0, sample_delay);
-	peer->filter_disp[j] = dsp;
+	peer->filter_disp[j] = sample_disp;
 	j++; j %= NTP_SHIFT;
-	peer->filter_nextpt = (u_short) j;
+	peer->filter_nextpt = j;
 
 	/*
 	 * Update dispersions since the last update and at the same
@@ -1672,7 +1676,6 @@ clock_filter(
 	}
 	peer->filter_epoch[j] = current_time;
 
-#if 0
         /*
 	 * Sort the samples in both lists by distance.
 	 */
@@ -1688,7 +1691,7 @@ clock_filter(
 			}
 		}
 	}
-#endif
+
 	/*
 	 * Copy the index list to the association structure so ntpq
 	 * can see it later. Prune the distance list to samples less
@@ -1705,42 +1708,39 @@ clock_filter(
 	}
 	
 	/*
-	 * Compute the dispersion and jitter squares. The dispersion
-	 * is weighted exponentially by NTP_FWEIGHT (0.5) so it is
-	 * normalized close to 1.0. The jitter is the mean of the square
-	 * differences relative to the lowest delay sample. If no
-	 * acceptable samples remain in the shift register, quietly
-	 * tiptoe home leaving only the dispersion.
+	 * Compute the dispersion and jitter. The dispersion is weighted
+	 * exponentially by NTP_FWEIGHT (0.5) so it is normalized close
+	 * to 1.0. The jitter is the RMS differences relative to the
+	 * lowest delay sample. If no acceptable samples remain in the
+	 * shift register, quietly tiptoe home leaving only the
+	 * dispersion.
 	 */
-	jit = 0;
-	peer->disp = 0;
+	peer->disp = peer->jitter = 0;
 	k = ord[0];
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
-
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
 		if (i < m)
-			jit += DIFF(peer->filter_offset[j],
+			peer->jitter += DIFF(peer->filter_offset[j],
 			    peer->filter_offset[k]);
 	}
 
 	/*
 	 * If no acceptable samples remain in the shift register,
 	 * quietly tiptoe home leaving only the dispersion. Otherwise,
-	 * save the offset, delay and jitter average. Note the jitter
-	 * must not be less than the system precision.
+	 * save the offset, delay and jitter. Note the jitter must not
+	 * be less than the system precision.
 	 */
 	if (m == 0)
 		return;
 
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
-	dtemp = sqrt(peer->jitter);
 	peer->offset = peer->filter_offset[k];
 	peer->delay = peer->filter_delay[k];
 	if (m > 1)
-		jit /= m - 1;
-	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision)));
+		peer->jitter /= m - 1;
+	peer->jitter = max(SQRT(peer->jitter), LOGTOD(sys_precision));
 
 	/*
 	 * A new sample is useful only if it is younger than the last
@@ -1762,9 +1762,9 @@ clock_filter(
 	 * last update is less than twice the system poll interval,
 	 * consider the update a popcorn spike and ignore it.
 	 */
-	if (m > 1 && etemp > CLOCK_SGATE * dtemp &&
-	    (long)(peer->filter_epoch[k] - peer->epoch) < (1 <<
-	    (sys_poll + 1))) {
+	if (etemp > CLOCK_SGATE * peer->jitter &&
+	    peer->filter_epoch[k] - peer->epoch < 2. *
+	    ULOGTOD(sys_poll)) {
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: popcorn %.6f %.6f\n",
@@ -1778,15 +1778,15 @@ clock_filter(
 	 * processing. If not in a burst, tickle the select.
 	 */
 	peer->epoch = peer->filter_epoch[k];
-	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
-		clock_select();
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f, age %lu\n",
 		    m, peer->offset, peer->delay, peer->disp,
-		    SQRT(peer->jitter), peer->update - peer->epoch);
+		    peer->jitter, peer->update - peer->epoch);
 #endif
+	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
+		clock_select();
 }
 
 
@@ -1805,14 +1805,13 @@ clock_select(void)
 	int	i, j, k, n;
 	int	nlist, nl3;
 
+	int	allow, osurv;
 	double	d, e, f;
-	int	allow, sw, osurv;
 	double	high, low;
 	double	synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
 	struct peer *typeacts = NULL;
 	struct peer *typelocal = NULL;
-	struct peer *typepps = NULL;
 	struct peer *typesystem = NULL;
 
 	static int list_alloc = 0;
@@ -1829,6 +1828,7 @@ clock_select(void)
 	 */
 	osys_peer = sys_peer;
 	sys_peer = NULL;
+	sys_pps = NULL;
 	osurv = sys_survivors;
 	sys_survivors = 0;
 	sys_prefer = NULL;
@@ -1898,11 +1898,9 @@ clock_select(void)
 #endif	/* VMS && VMS_LOCALUNIT */
 				) {
 				typelocal = peer;
+#ifndef LOCKCLOCK
 				if (!(peer->flags & FLAG_PREFER))
 					continue; /* no local clock */
-#ifdef LOCKCLOCK
-				else
-					sys_prefer = peer;
 #endif /* LOCKCLOCK */
 			}
 			if (peer->sstclktype == CTL_SST_TS_TELEPHONE) {
@@ -2136,21 +2134,21 @@ clock_select(void)
 		if (debug > 2)
 			printf("select: %s distance %.6f jitter %.6f\n",
 			    ntoa(&peer_list[i]->srcadr), synch[i],
-			    SQRT(error[i]));
+			    error[i]);
 #endif
 	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
 	 * by root dispersion. Continue voting as long as there are more
-	 * than sys_minclock survivors and the minimum select jitter
-	 * squared is greater than the maximum peer jitter squared. Stop
-	 * if we are about to discard a prefer peer, who of course has
-	 * the immunity idol.
+	 * than sys_minclock survivors and the minimum select jitter is
+	 * greater than the maximum peer jitter. Stop if we are about to
+	 * discard a prefer peer, who of course has the immunity idol.
 	 */
 	while (1) {
 		d = 1e9;
 		e = -1e9;
+		f = 0;
 		k = 0;
 		for (i = 0; i < nlist; i++) {
 			if (error[i] < d)
@@ -2160,7 +2158,7 @@ clock_select(void)
 				for (j = 0; j < nlist; j++)
 					f += DIFF(peer_list[j]->offset,
 					    peer_list[i]->offset);
-				f /= nlist - 1;
+				f = SQRT(f / (nlist - 1));
 			}
 			if (f * synch[i] > e) {
 				sys_selerr = f;
@@ -2168,7 +2166,7 @@ clock_select(void)
 				k = i;
 			}
 		}
-		f = max(sys_selerr, SQUARE(LOGTOD(sys_precision))); 
+		f = max(f, LOGTOD(sys_precision));
 		if (nlist <= sys_minclock || f <= d ||
 		    peer_list[k]->flags & FLAG_PREFER)
 			break;
@@ -2176,8 +2174,7 @@ clock_select(void)
 		if (debug > 2)
 			printf(
 			    "select: drop %s select %.6f jitter %.6f\n",
-			    ntoa(&peer_list[k]->srcadr),
-			    SQRT(sys_selerr), SQRT(d));
+			    ntoa(&peer_list[k]->srcadr), sys_selerr, d);
 #endif
 		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
 		    peer_list[k]->hmode == MODE_CLIENT)
@@ -2224,11 +2221,17 @@ clock_select(void)
 			sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
-		if (peer->refclktype == REFCLK_ATOM_PPS &&
-		    peer->stratum < STRATUM_UNSPEC)
-			typepps = peer;
-		if (peer->stratum == peer_list[0]->stratum && peer ==
-		    osys_peer)
+		if (peer->refclktype == REFCLK_ATOM_PPS)
+			sys_pps = peer;
+
+
+		/*
+		 * If this is the old system peer and it's stratum is
+		 * the same as the head of the list, don't hop the
+		 * clock.
+		 */
+		if (peer == osys_peer && peer->stratum ==
+		    peer_list[0]->stratum)
 			typesystem = peer;
 	}
 
@@ -2246,78 +2249,76 @@ clock_select(void)
 
 	/*
 	 * Mitigation rules of the game. There are several types of
-	 * peers that make a difference here: (1) prefer local peers
-	 * (type REFCLK_LOCALCLOCK with FLAG_PREFER) or prefer modem
-	 * peers (type REFCLK_NIST_ATOM etc with FLAG_PREFER), (2) pps
-	 * peers (type REFCLK_ATOM_PPS), (3) remaining prefer peers
-	 * (flag FLAG_PREFER), (4) the existing system peer, if any, (5)
-	 * the head of the survivor list. Note that only one peer can be
-	 * declared prefer. The order of preference is in the order
-	 * stated. Note that all of these must be at the lowest stratum,
+	 * peers that can be selected here: (1) prefer peer (flag
+	 * FLAG_PREFER) (2) pps peers (type REFCLK_ATOM_PPS), (3) the
+	 * existing system peer, if any, and (4) the head of the
+	 * survivor list. Note that only one peer can be declared
+	 * prefer. Note that all of these must be at the lowest stratum,
 	 * i.e., the stratum of the head of the survivor list.
 	 */
-	if (sys_prefer)
-		sw = sys_prefer->refclktype == REFCLK_LOCALCLOCK ||
-		    sys_prefer->sstclktype == CTL_SST_TS_TELEPHONE ||
-		    !typepps;
-	else
-		sw = 0;
-	if (sw) {
-		sys_peer = sys_prefer;
-		sys_peer->status = CTL_PST_SEL_SYSPEER;
-		sys_offset = sys_peer->offset;
-		sys_error = SQRT(sys_peer->jitter);
+	if (sys_prefer) {
+
+		/*
+		 * If a pps peer is present, choose it; otherwise,
+		 * choose the prefer peer.
+		 */
+		if (sys_pps) {
+			sys_peer = sys_pps;
+			sys_peer->status = CTL_PST_SEL_PPS;
+			sys_offset = sys_peer->offset;
+			sys_jitter = sys_peer->jitter;
+			if (!pps_control)
+				NLOG(NLOG_SYSEVENT)
+				    msyslog(LOG_INFO,
+				    "pps sync enabled");
+			pps_control = current_time;
 #ifdef DEBUG
-		if (debug > 1)
-			printf("select: prefer offset %.6f\n",
-			    sys_offset);
+			if (debug > 1)
+				printf("select: pps offset %.6f\n",
+				    sys_offset);
 #endif
-	}
-#ifndef LOCKCLOCK
-	  else if (typepps) {
-		sys_peer = typepps;
-		sys_peer->status = CTL_PST_SEL_PPS;
-		sys_offset = sys_peer->offset;
-		sys_error = SQRT(sys_peer->jitter);
-		if (!pps_control)
-			NLOG(NLOG_SYSEVENT)
-			    msyslog(LOG_INFO, "pps sync enabled");
-		pps_control = current_time;
+		} else {
+			sys_peer = sys_prefer;
+			sys_peer->status = CTL_PST_SEL_SYSPEER;
+			sys_offset = sys_peer->offset;
+			sys_jitter = sys_peer->jitter;
 #ifdef DEBUG
-		if (debug > 1)
-			printf("select: pps offset %.6f\n",
-			    sys_offset);
+			if (debug > 1)
+				printf("select: prefer offset %.6f\n",
+				    sys_offset);
+		}
 #endif
 	} else {
+
+		/*
+		 * If a system peer has been identified, choose it;
+		 * otherwise choose the head of the survivor list.
+		 */ 
 		if (typesystem)
-			sys_peer = osys_peer;
+			sys_peer = typesystem;
 		else
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_peer->rank++;
 		sys_offset = clock_combine(peer_list, nlist);
-		sys_error = SQRT(sys_peer->jitter + sys_selerr);
+		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
+		    SQUARE(sys_selerr));
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: combine offset %.6f\n",
 			   sys_offset);
 #endif
 	}
-#endif /* LOCKCLOCK */
 	if (osys_peer != sys_peer) {
 		char *src;
 
-		if (sys_peer == NULL)
-			sys_peer_refid = 0;
-		else
-			sys_peer_refid = addr2refid(&sys_peer->srcadr);
 		report_event(EVNT_PEERSTCHG, NULL);
 
 #ifdef REFCLOCK
-                if (ISREFCLOCKADR(&sys_peer->srcadr))
+                if (sys_peer->flags & FLAG_REFCLOCK)
                         src = refnumtoa(&sys_peer->srcadr);
                 else
-#endif
+#endif /* REFCLOCK */
                         src = ntoa(&sys_peer->srcadr);
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronized to %s, stratum %d",
@@ -2357,12 +2358,12 @@ root_distance(
 {
 	/*
 	 * Careful squeak here. The value returned must be greater than
-	 * zero blamed on the peer jitter, which must be at least the
-	 * square of sys_precision.
+	 * zero blamed on the peer jitter, which is not be less then
+	 * sys_precision.
 	 */
 	return ((peer->rootdelay + peer->delay) / 2 +
 	    peer->rootdispersion + peer->disp + clock_phi *
-	    (current_time - peer->update) + SQRT(peer->jitter));
+	    (current_time - peer->update) + peer->jitter);
 }
 
 /*
@@ -2942,7 +2943,6 @@ key_expire(
  * > a synchronization loop would form
  * > never been synchronized
  * > stratum undefined or too high
- * > too long without synchronization
  * > designated noselect
  */
 static int			/* 0 if no, 1 if yes */
@@ -2950,10 +2950,12 @@ peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	return (!peer->reach || (peer->stratum > 1 && peer->refid ==
-	    peer->dstadr->addr_refid) || peer->leap == LEAP_NOTINSYNC ||
-	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
-	    FLAG_NOSELECT);
+	return (!peer->reach ||		/* unreachable */
+	    (peer->stratum > 1 && peer->dstadr->addr_refid ==
+	    peer->refid) ||		/* timing loop */
+	    peer->leap == LEAP_NOTINSYNC || /* never synchronized */
+	    peer->stratum >= STRATUM_UNSPEC || /* no source */
+	    peer->flags & FLAG_NOSELECT); /* unselected */
 }
 
 
@@ -3048,7 +3050,7 @@ init_proto(void)
 	sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
-	sys_error = LOGTOD(sys_precision);
+	sys_jitter = LOGTOD(sys_precision);
 	sys_rootdelay = 0;
 	sys_rootdispersion = 0;
 	L_CLR(&sys_reftime);
@@ -3234,7 +3236,7 @@ proto_config(
 	case PROTO_CAL:
 		cal_enable = (int)value;
 		break;
-#endif
+#endif /* REFCLOCK */
 	default:
 
 		/*

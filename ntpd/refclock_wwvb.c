@@ -412,18 +412,19 @@ wwvb_poll(
 		refclock_report(peer, CEVNT_FAULT);
 	if (peer->burst > 0)
 		return;
+
+	peer->burst = MAXSTAGE;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
-	refclock_receive(peer);
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("wwvb: timecode %d %s\n", pp->lencode,
 		    pp->a_lastcode);
 #endif
-	peer->burst = MAXSTAGE;
+	refclock_receive(peer);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	pp->polls++;
 
 	/*

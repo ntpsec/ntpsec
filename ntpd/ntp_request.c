@@ -1020,24 +1020,6 @@ sys_info(
 {
 	register struct info_sys *is;
 
-	/*
-	 * Importations from the protocol module
-	 */
-	extern u_char sys_leap;
-	extern u_char sys_stratum;
-	extern s_char sys_precision;
-	extern double sys_rootdelay;
-	extern double sys_rootdispersion;
-	extern u_int32 sys_refid;
-	extern l_fp sys_reftime;
-	extern u_char sys_poll;
-	extern struct peer *sys_peer;
-	extern int sys_bclient;
-	extern double sys_bdelay;
-	extern l_fp sys_authdelay;
-	extern double clock_stability;
-	extern double sys_jitter;
-
 	is = (struct info_sys *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_sys));
 

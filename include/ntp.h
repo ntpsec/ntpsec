@@ -176,7 +176,7 @@ struct interface {
 	char name[32];		/* name of interface */
 	int flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */
-	u_int addr_refid;	/* IPv4 addr or IPv6 hash */
+	u_int32 addr_refid;	/* IPv4 addr or IPv6 hash */
 	int num_mcast;		/* No. of IP addresses in multicast socket */
 	volatile long received;	/* number of incoming packets */
 	long sent;		/* number of outgoing packets */
@@ -298,7 +298,7 @@ struct peer {
 	u_char	reach;		/* reachability register */
 	u_long	epoch;		/* reference epoch */
 	u_int	burst;		/* packets remaining in burst */
-	u_short	filter_nextpt;	/* index into filter shift register */
+	u_int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
 	double	filter_disp[NTP_SHIFT]; /* dispersion shift register */
