@@ -1,3 +1,18 @@
+1999-09-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c: PPS cleanup
+	* ntpd/ntp_refclock.c (refclock_ioctl): PPS cleanup
+	From: Dave Mills <mills@udel.edu>
+
+	* ntptrace/ntptrace.c (ReceiveBuf): addserver() can return NIL.
+	Reported by: "Alan J. Wylie" <alanw@cyrano.com>
+
+	* libntp/ieee754io.c:
+	* ntpd/ntp_proto.c:
+	* ntpd/ntp_refclock.c:
+	Lint cleanup.
+	From: Marc.Brett@westgeo.com
+
 1999-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_refclock.c (refclock_ioctl): Declaration cleanup.

@@ -503,7 +503,8 @@ ReceiveBuf(
 
 	nextia.s_addr = server->refid;
 	nextserver = addserver(&nextia);
-	DoTrace(nextserver);
+	if (nextserver)
+	  DoTrace(nextserver);
 	return(1);
 }
 

@@ -220,7 +220,8 @@ receive(
 	int is_authentic;		/* cryptosum ok */
 	int is_mystic;			/* session key exists */
 	int is_error;			/* parse error */
-	u_long skeyid, pkeyid, tkeyid;
+/*	u_long pkeyid; */
+	u_long skeyid, tkeyid;
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
 
@@ -295,7 +296,8 @@ receive(
 	 * the extension field and the MAC follows that.
 	 */
 	has_mac = 0;
-	skeyid = pkeyid = tkeyid = 0;
+/*	pkeyid = 0; */
+	skeyid = tkeyid = 0;
 	authlen = LEN_PKT_NOMAC;
 	has_mac = rbufp->recv_length - authlen;
 	if (has_mac <= 5 * sizeof(u_int32)) {
@@ -312,7 +314,7 @@ receive(
 		 * Note that keyid3 is actually the key ident of the
 		 * MAC itself.
 		 */
-		pkeyid = (u_long)ntohl(pkt->keyid2) & 0xffffffff;
+/* 		pkeyid = (u_long)ntohl(pkt->keyid2) & 0xffffffff; */
 		skeyid = tkeyid = (u_long)ntohl(pkt->keyid3) & 0xffffffff;
 	}
 

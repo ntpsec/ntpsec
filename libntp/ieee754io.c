@@ -144,21 +144,27 @@ fetch_ieee754(
   u_long mantissa_high;
   u_long characteristic;
   long exponent;
+#ifdef LIBDEBUG
   int length;
+#endif
   unsigned char val;
   int fieldindex = 0;
   
   switch (size)
     {
     case IEEE_DOUBLE:
+#ifdef LIBDEBUG
       length = 8;
+#endif
       mbits  = 52;
       bias   = 1023;
       maxexp = 2047;
       break;
 
     case IEEE_SINGLE:
+#ifdef LIBDEBUG
       length = 4;
+#endif
       mbits  = 23;
       bias   = 127;
       maxexp = 255;
@@ -369,15 +375,19 @@ put_ieee754(
 	    )
 {
   l_fp outlfp;
+#ifdef LIBDEBUG
   unsigned int sign;
   unsigned int bias;
+#endif
 /*unsigned int maxexp;*/
   int mbits;
   int msb;
   u_long mantissa_low = 0;
   u_long mantissa_high = 0;
+#ifdef LIBDEBUG
   u_long characteristic = 0;
   long exponent;
+#endif
 /*int length;*/
   unsigned long mask;
   
@@ -388,14 +398,18 @@ put_ieee754(
     case IEEE_DOUBLE:
     /*length = 8;*/
       mbits  = 52;
+#ifdef LIBDEBUG
       bias   = 1023;
+#endif
     /*maxexp = 2047;*/
       break;
 
     case IEEE_SINGLE:
     /*length = 4;*/
       mbits  = 23;
+#ifdef LIBDEBUG
       bias   = 127;
+#endif
     /*maxexp = 255;*/
       break;
 
@@ -409,16 +423,22 @@ put_ieee754(
   if (L_ISNEG(&outlfp))
     {
       L_NEG(&outlfp);
+#ifdef LIBDEBUG
       sign = 1;
+#endif
     }
   else
     {
+#ifdef LIBDEBUG
       sign = 0;
+#endif
     }
 
   if (L_ISZERO(&outlfp))
     {
+#ifdef LIBDEBUG
       exponent = mantissa_high = mantissa_low = 0; /* true zero */
+#endif
     }
   else
     {
@@ -475,10 +495,10 @@ put_ieee754(
 	    }
 	}
 
+#ifdef LIBDEBUG
       exponent = msb - 32;
       characteristic = exponent + bias;
-      
-#ifdef LIBDEBUG
+
       if (debug > 4)
 	printf("FP: %s\n", fmt_flt(sign, mantissa_high, mantissa_low, characteristic));
 #endif

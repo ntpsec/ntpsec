@@ -950,6 +950,7 @@ refclock_ioctl(
 #ifndef SYS_VXWORKS
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
+#ifdef TTYCLK
 #ifdef HAVE_TERMIOS
 	struct termios ttyb, *ttyp;
 #endif /* HAVE_TERMIOS */
@@ -959,6 +960,7 @@ refclock_ioctl(
 #ifdef HAVE_BSD_TTYS
 	struct sgttyb ttyb, *ttyp;
 #endif /* HAVE_BSD_TTYS */
+#endif /* TTYCLK */
 
 #ifdef DEBUG
 	if (debug)
@@ -993,7 +995,9 @@ refclock_ioctl(
 		return (0);
 	}
 #endif /* HAVE_TERMIOS HAVE_BSD_TTYS */
+#ifdef TTYCLK
 	ttyp = &ttyb;
+#endif /* TTYCLK */
 #ifdef STREAM
 #ifdef TTYCLK
 	/*
@@ -1104,9 +1108,10 @@ refclock_ioctl(
 		pps_params_t	pp;
 		int mode;
 
+		memset((char *)&pp, 0, sizeof(pp));
 		if (fdpps > 0) {
 			msyslog(LOG_ERR,
-			    "refclock_ioctl: ppsclock already configured");
+			    "refclock_ioctl: ppsapi already configured");
 			return (0);
 		}
 		if (time_pps_create(fd, &fdpps) < 0) {
@@ -1121,12 +1126,13 @@ refclock_ioctl(
 			fdpps = 0;
 			return (0);
 		}
-		if(pps_assert)
-			pp.mode = PPS_CAPTUREASSERT;
+		pp.mode = PPS_TSFMT_TSPEC;
+		if (pps_assert)
+			pp.mode |= PPS_CAPTUREASSERT;
 		else
-			pp.mode = PPS_CAPTURECLEAR;
-		if(pps_hardpps) {
-			if(pps_assert)
+			pp.mode |= PPS_CAPTURECLEAR;
+		if (pps_hardpps) {
+			if (pps_assert)
 				pp.mode |= PPS_HARDPPSONASSERT;
 			else
 				pp.mode |= PPS_HARDPPSONCLEAR;

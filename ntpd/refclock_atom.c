@@ -35,24 +35,26 @@
  * In order for this driver to work, the local clock must be set to
  * within +-500 ms by another means, such as a radio clock or NTP
  * itself. The 1-pps signal is connected via a serial port and gadget
- * box consisting of a one-shot and RS232 level converter. When operated
- * at 38.4 kbps with a SPARCstation IPC, this arrangement has a worst-
- * case jitter less than 26 us.
+ * box consisting of a one-shot flopflop and RS232 level converter.
+ * Conntection is either via the carrier detect (DCD) lead or via the
+ * receive data (RD) lead. The incidental jitter using the DCD lead is
+ * essentially the interrupt latency. The incidental jitter using the RD
+ * lead has an additional component due to the line sampling clock. When
+ * operated at 38.4 kbps, this arrangement has a worst-case jitter less
+ * than 26 us.
  *
- * There are three ways in which this driver can be used. The first way
- * uses the LDISC_PPS line discipline and works only for the baseboard
- * serial ports of the Sun SPARCstation. The PPS signal is connected via
- * a gadget box to the carrier detect (CD) line of a serial port and
- * flag3 of the driver configured for that port is set. This causes the
- * ppsclock streams module to be configured for that port and capture a
- * timestamp at the on-time transition of the PPS signal. This driver
- * then reads the timestamp directly by a designated ioctl() system
- * call. This provides the most accurate time and least jitter of any
- * other scheme. There is no need to configure a dedicated device for
- * this purpose, which ordinarily is the device used for the associated
- * radio clock.
+ * There are four ways in which this driver can be used. They are
+ * described in decreasing order of merit below. The first way uses the
+ * ppsapi STREAMS module and the LDISC_PPS line discipline, while the
+ * second way uses the ppsclock STREAMS module and the LDISC_PPS line
+ * discipline. Either of these works only for the baseboard serial ports
+ * of the Sun SPARC IPC and clones. However, the ppsapi uses the
+ * proposed IETF interface expected to become standard for PPS signals.
+ * The serial port to be used is specified by the pps command in the
+ * configuration file. This driver reads the timestamp directly by a
+ * designated ioctl() system call.
  *
- * The second way uses the LDISC_CLKPPS line discipline and works for
+ * The third way uses the LDISC_CLKPPS line discipline and works for
  * any architecture supporting a serial port. If after a few seconds
  * this driver finds no ppsclock module configured, it attempts to open
  * a serial port device /dev/pps%d, where %d is the unit number, and
@@ -63,23 +65,22 @@
  * discipline, this produces an ASCII DEL character ('\377') followed by
  * a timestamp at each seconds epoch. 
  *
- * The third way involves an auxiliary radio clock driver which calls
+ * The fourth way involves an auxiliary radio clock driver which calls
  * the PPS driver with a timestamp captured by that driver. This use is
  * documented in the source code for the driver(s) involved.  Note that
  * some drivers collect the sample information themselves before calling
- * our pps_sample(), and others call us knowing only that they are running
- * shortly after an on-time tick and they expect us to retrieve the PPS
+ * pps_sample(), and others call knowing only that they are running
+ * shortly after an on-time tick and they expect to retrieve the PPS
  * offset, fudge their result, and insert it into the timestream.
  *
  * Fudge Factors
  *
- * There are no special fudge factors other than the generic and those
- * explicitly defined above. The fudge time1 parameter can be used to
- * compensate for miscellaneous UART and OS delays. Allow about 247 us
- * for uart delays at 38400 bps and about 1 ms for SunOS streams
- * nonsense.
+ * There are no special fudge factors other than the generic. The fudge
+ * time1 parameter can be used to compensate for miscellaneous UART and
+ * OS delays. Allow about 247 us for uart delays at 38400 bps and about
+ * 1 ms for STREAMS nonsense with older workstations. Velocities may
+ * vary with modern workstations. 
  */
-
 /*
  * Interface definitions
  */
@@ -267,7 +268,7 @@ atom_pps(
 {
 	register struct atomunit *up;
 	struct refclockproc *pp;
-	struct timespec *tsp;
+	struct timespec ts;
 	l_fp lftmp;
 	double doffset;
 	int i;
@@ -285,7 +286,8 @@ atom_pps(
 	 * Convert the timeval to l_fp and save for billboards. Sign-
 	 * extend the fraction and stash in the buffer. No harm is done
 	 * if previous data are overwritten. If the discipline comes bum
-	 * or the data grow stale, just forget it.
+	 * or the data grow stale, just forget it. Round the nanoseconds
+	 * to microseconds with great care.
 	 */ 
 #ifdef HAVE_PPSAPI
 	i = up->pps_info.assert_sequence;
@@ -295,17 +297,18 @@ atom_pps(
 		return (1);
 	if (i == up->pps_info.assert_sequence)
 		return (2);
-	if(pps_assert)
-		tsp = &up->pps_info.assert_timestamp;
+	if (pps_assert)
+		ts = up->pps_info.assert_timestamp;
 	else
-		tsp = &up->pps_info.clear_timestamp;
-	pp->lastrec.l_ui = tsp->tv_sec + JAN_1970;
-	TVUTOTSF(tsp->tv_nsec, pp->lastrec.l_uf);
-
-printf("pps %d %s\n", up->pps_info.assert_sequence, lfptoa(&pp->lastrec, 6));
-
+		ts = up->pps_info.clear_timestamp;
+	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
+	ts.tv_nsec = (ts.tv_nsec + 500) / 1000;
+	if (ts.tv_nsec > 1000000) {
+		ts.tv_nsec -= 1000000;
+		ts.tv_sec++;
+	}
+	TVUTOTSF(ts.tv_nsec, pp->lastrec.l_uf);
 #else
-
  	i = up->ev.serial;
 	if (fdpps <= 0)
 		return (1);
@@ -320,7 +323,8 @@ printf("pps %d %s\n", up->pps_info.assert_sequence, lfptoa(&pp->lastrec, 6));
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = -doffset + pp->fudgetime1;
+	pp->filter[pp->coderecv++ % pp->nstages] = -doffset +
+	    pp->fudgetime1;
 	up->pollcnt = 2 * 60;
 	return (0);
 }
@@ -356,7 +360,8 @@ atom_receive(
 	/*
 	 * Save the timestamp for billboards. Sign-extend the fraction
 	 * and stash in the buffer. No harm is done if previous data are
-	 * overwritten. Do this only if the ppsclock gizmo is not working.
+	 * overwritten. Do this only if the ppsclock gizmo is not
+	 * working.
 	 */
 	if (up->flags & FLAG_PPS)
 		return;
@@ -385,16 +390,14 @@ pps_sample(
 	double doffset;
 
 	/*
-	 * This routine is called once per second when the external clock driver
-	 * processes PPS information. It processes the pps timestamp
-	 * and saves the sign-extended fraction in a circular
+	 * This routine is called once per second when the external
+	 * clock driver processes PPS information. It processes the pps
+	 * timestamp and saves the sign-extended fraction in a circular
 	 * buffer for processing at the next poll event.
 	 */
 	peer = pps_peer;
-
 	if (peer == 0)		/* nobody home */
 		return 1;
-	
 	pp = peer->procptr;
 	up = (struct atomunit *)pp->unitptr;
 
@@ -409,7 +412,8 @@ pps_sample(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = -doffset + pp->fudgetime1;
+	pp->filter[pp->coderecv++ % pp->nstages] = -doffset +
+	    pp->fudgetime1;
 	up->pollcnt = 2 * 60;
 	return (0);
 }
@@ -429,14 +433,15 @@ atom_poll(
 
 	/*
 	 * Accumulate samples in the median filter. At the end of each
-	 * poll interval, do a little bookeeping and process the samples.
+	 * poll interval, do a little bookeeping and process the
+	 * samples.
 	 */
 	pp = peer->procptr;
 	up = (struct atomunit *)pp->unitptr;
 #if defined(PPS) || defined(HAVE_PPSAPI)
 	if (!(up->flags & FLAG_AUX)) {
-	if (atom_pps(peer))
-		return;
+		if (atom_pps(peer))
+			return;
 	}
 	if (peer->burst > 0)
 		return;
@@ -455,9 +460,9 @@ atom_poll(
 	 * the pps time is within +-0.5 s of the local time and the
 	 * seconds numbering is unambiguous.
 	 */
-	if (pps_update)
+	if (pps_update) {
 		pp->leap = LEAP_NOWARNING;
-	else {
+	} else {
 		pp->leap = LEAP_NOTINSYNC;
 		return;
 	}
