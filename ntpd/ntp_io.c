@@ -1161,7 +1161,7 @@ sendpkt(
         err = io_completion_port_sendto(inter, pkt, len, dest);
 	if (err != ERROR_SUCCESS)
 #else
-	cc = sendto(inter->fd, (char *)pkt, len, 0, (struct sockaddr *)dest,
+	cc = sendto(inter->fd, (char *)pkt, (size_t)len, 0, (struct sockaddr *)dest,
 		    sizeof(struct sockaddr_in));
 	if (cc == -1)
 #endif

@@ -1284,7 +1284,7 @@ ees_process(
 	if (ees->dump_vals) dump_buf(coffs, 0, samples, "Raw  data  is:");
 
 	/* Sort the offsets, trim off the extremes, then choose one. */
-	qsort((char *) coffs, (u_int)samples, sizeof(l_fp), offcompare);
+	qsort((char *) coffs, (size_t)samples, sizeof(l_fp), offcompare);
 
 	noff = samples;
 	i = 0;

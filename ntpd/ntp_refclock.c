@@ -480,7 +480,7 @@ refclock_sample(
 	while (pp->codeproc != pp->coderecv)
 		off[n++] = pp->filter[pp->codeproc++ % MAXSTAGE];
 	if (n > 1)
-		qsort((char *)off, n, sizeof(double), refclock_cmpl_fp);
+		qsort((char *)off, (size_t)n, sizeof(double), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until

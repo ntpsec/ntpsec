@@ -680,7 +680,7 @@ jupiter_process(register struct peer *peer)
 	 */
 	for (i = 0; i < NSAMPLES; i++)
 		off[i] = up->filter[i];
-	qsort((char *)off, NSAMPLES, sizeof(l_fp), jupiter_cmpl_fp);
+	qsort((char *)off, (size_t)NSAMPLES, sizeof(l_fp), jupiter_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of NSAMPLES samples until

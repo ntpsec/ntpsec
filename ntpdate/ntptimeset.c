@@ -1969,7 +1969,7 @@ sendpkt(
 	}
 
 
-	cc = sendto(fd, (char *)pkt, len, 0, (struct sockaddr *)dest,
+	cc = sendto(fd, (char *)pkt, (size_t)len, 0, (struct sockaddr *)dest,
 	    sizeof(struct sockaddr_in));
 #ifndef SYS_WINNT
 	if (cc == -1) {

@@ -670,7 +670,7 @@ sendpkt(
 	    printf("Sending %d octets\n", xdatalen);
 
 
-	if (send(sockfd, xdata, xdatalen, 0) == -1) {
+	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");
 		return -1;
 	}
@@ -1907,9 +1907,9 @@ help(
 		    cmdsort[n++] = xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
-		qsort(cmdsort, (unsigned)n, sizeof(char *), helpsort);
+		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
 #else
-		qsort((char *)cmdsort, n, sizeof(char *), helpsort);
+		qsort((char *)cmdsort, (size_t)n, sizeof(char *), helpsort);
 #endif
 
 		maxlength = 0;
@@ -3058,7 +3058,7 @@ sortassoc(void)
 #else
 		    (char *)
 #endif
-		    assoc_cache, (unsigned)numassoc,
+		    assoc_cache, (size_t)numassoc,
 		    sizeof(struct association), assoccmp);
 }
 

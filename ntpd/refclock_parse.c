@@ -5163,9 +5163,9 @@ rawdcf_init_1(
 	}
 
 #ifdef TIOCM_DTR
-	sl232 = sl232 & ~TIOCM_RTS | TIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
+	sl232 = (sl232 & ~TIOCM_RTS) | TIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
 #else
-	sl232 = sl232 & ~CIOCM_RTS | CIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
+	sl232 = (sl232 & ~CIOCM_RTS) | CIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
 #endif
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
@@ -5210,9 +5210,9 @@ rawdcf_init_2(
 	}
 
 #ifdef TIOCM_RTS
-	sl232 = sl232 & ~TIOCM_DTR | TIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
+	sl232 = (sl232 & ~TIOCM_DTR) | TIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
 #else
-	sl232 = sl232 & ~CIOCM_DTR | CIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
+	sl232 = (sl232 & ~CIOCM_DTR) | CIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
 #endif
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)

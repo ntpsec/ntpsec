@@ -1,3 +1,28 @@
+2001-04-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/hist.c:
+	* ntptrace/ntptrace.c:
+	* ntpq/ntpq.c:
+	* ntpdc/ntpdc.c:
+	* ntpdate/ntptimeset.c:
+	* ntpdate/ntpdate.c:
+	* ntpd/refclock_parse.c:
+	* ntpd/refclock_msfees.c:
+	* ntpd/refclock_jupiter.c:
+	* ntpd/ntp_refclock.c:
+	* ntpd/ntp_io.c:
+	* libparse/clk_wharton.c:
+	* libparse/clk_varitext.c:
+	* libparse/clk_trimtaip.c:
+	* libparse/clk_schmid.c:
+	* libparse/clk_rcc8000.c:
+	* libparse/clk_rawdcf.c:
+	* libparse/clk_meinberg.c:
+	* libparse/clk_hopf6021.c:
+	* libparse/clk_dcf7000.c:
+	* libparse/clk_computime.c:
+	Lint.  From: Simon Burge <simonb@wasabisystems.com>
+
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_nmea.c (nmea_receive): Fixes.

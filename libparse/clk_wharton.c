@@ -134,7 +134,7 @@ inp_wharton_400a(
 {
 	unsigned int rtc;
 	
-	parseprintf(DD_PARSE, ("inp_wharton_400a(0x%x, 0x%x, ...)\n", (int)parseio, (int)ch));
+	parseprintf(DD_PARSE, ("inp_wharton_400a(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
 	
 	switch (ch)
 	{

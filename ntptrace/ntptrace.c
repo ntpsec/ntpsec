@@ -618,7 +618,7 @@ sendpkt(
 {
 	int cc;
 
-	cc = sendto(fd, (char *)pkt, len, 0, (struct sockaddr *)dest,
+	cc = sendto(fd, (char *)pkt, (size_t)len, 0, (struct sockaddr *)dest,
 		    sizeof(struct sockaddr_in));
 	if (cc == -1) {
 #ifndef SYS_WINNT
