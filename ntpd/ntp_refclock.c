@@ -682,16 +682,23 @@ refclock_open(
 #ifdef TIOCMGET
 	u_long ltemp;
 #endif /* TIOCMGET */
+	int omode;
 
 	/*
 	 * Open serial port and set default options
 	 */
 	flags = lflags;
+
+	omode = O_RDWR;
 #ifdef O_NONBLOCK
-	fd = open(dev, O_RDWR | O_NONBLOCK, 0777);
-#else
-	fd = open(dev, O_RDWR, 0777);
-#endif /* O_NONBLOCK */
+	omode |= O_NONBLOCK;
+#endif
+#ifdef O_NOCTTY
+	omode |= O_NOCTTY;
+#endif
+
+	fd = open(dev, omode, 0777);
+
 	if (fd < 0) {
 		msyslog(LOG_ERR, "refclock_open: %s: %m", dev);
 		return (0);

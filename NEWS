@@ -1,3 +1,4 @@
+* Huff-n-Puff filter
 * Preparation for OpenSSL support
 * Resolver changes/improvements are not backward compatible with mode 7
   requests (which are implementation-specific anyway)

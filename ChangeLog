@@ -1,8 +1,17 @@
+2001-06-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_refclock.c (refclock_open): Add O_NOCTTY to the open()
+	flags when opening a serial port.
+	Reported by: joseph lang <tcnojl1@earthlink.net>
+
 2001-05-31  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/notes.htm: Typo fix.
+	From: John Stone <johns@ks.uiuc.edu>
 
 	* configure.in: 4.0.99m-rc1
 
-	* html/monopt.htm: Typo.
+	* html/monopt.htm: Typo fix.
 	* html/confopt.htm: Cruft removal.
 	From: John Stone <johns@ks.uiuc.edu>
 
