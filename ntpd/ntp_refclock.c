@@ -70,9 +70,6 @@
  * streams module described in the ppsclock directory.
  */
 #define MAXUNIT 	4	/* max units */
-#ifndef CLKLDISC
-#define CLKLDISC	10	/* XXX temp tty_clk line discipline */
-#endif
 
 #if defined(PPS) || defined(HAVE_PPSAPI)
 int fdpps;			/* pps file descriptor */
