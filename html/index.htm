@@ -1,0 +1,272 @@
+<HTML><HEAD><TITLE>
+The Network Time Protocol (NTP) Distribution
+</TITLE></HEAD><BODY><H3>
+The Network Time Protocol (NTP) Distribution
+</H3>
+
+<IMG align=left SRC=pic/barnstable.gif>From <i>pogo</i>, Walt Kelly
+
+<p>Pleased to meet you.
+<BR clear=left><HR>
+
+<H4>Introduction</H4>
+
+Note: The software contained in this distribution is available without
+charge under the conditions set forth in the <A
+HREF=copyright.htm>Copyright Notice</A>.
+
+<P>The Network Time Protocol (NTP) is used to synchronize the time of a
+computer client or server to another server or reference time source,
+such as a radio or satellite receiver or modem. It provides client
+accuracies typically within a millisecond on LANs and up to a few tens
+of milliseconds on WANs relative to a primary server synchronized to
+Coordinated Universal Time (UTC) via a Global Positioning Service (GPS)
+receiver, for example. Typical NTP configurations utilize multiple
+redundant servers and diverse network paths, in order to achieve high
+accuracy and reliability. Some configurations include cryptographic
+authentication to prevent accidental or malicious protocol attacks.
+
+<P>Background information on computer network time synchronization can
+be found on the <A HREF=exec.htm>Executive Summary - Computer Network
+Time Synchronization</A> page. Discussion on protocol conformance issues
+and interoperability with previous NTP versions can be found in the <A
+HREF=biblio.htm>Protocol Conformance Statement</A> page. Discussion on
+year-2000 issues can be found in the <A HREF=y2k.htm>Year 2000
+Conformance Statement page</A>. Background information, bibliography and
+briefing slides suitable for presentations can be found in the <A
+HREF="http://www.eecis.udel.edu/~mills/ntp.htm"> Network Time
+Synchronization Project</A> page.
+
+<H4>Building and Installing NTP</H4>
+
+The <A HREF=build.htm>Building and Installing the Distribution
+</A>page presents an overview of the procedures for compiling the
+distribution and installing it on a typical client or server. The build
+procedures inspect the system hardware and software environment and
+automatically select the appropriate options for that environment. While
+these procedures work with most computers and operating systems marketed
+today, exceptions requiring manual intervention do exist, as documented
+in the <A HREF=config.htm>Configuration Options </A>and <A
+HREF=release.htm>Release Notes </A>pages.
+
+<P>Bringing up a NTP primary server requires a radio or satellite
+receiver or modem. The distribution includes hardware drivers for over
+two dozen radio clocks and modem services. A list of the particular
+receivers and modem drivers supported in the distribution is given in
+the <A HREF=refclock.htm>Reference Clock Drivers </A>page. For most
+popular workstations marketed by Digital, Sun and Hewlett Packard, as
+well as widely available Unix clones such as FreeBSD and Linux, the
+automatic build procedures select all drivers that run on the target
+machine. While this increases the size of the executable binary
+somewhat, individual drivers can be included or excluded using the
+configure utility documented in the Configuration Options page.
+
+<H4>Configuring Clients and Servers</H4>
+<p>NTP is by its very nature a complex distributed network application
+and can be configured and used for a great many widely divergent
+timekeeping scenarios. The documentation presented on these pages
+attempts to cover the entire suite of configuration, operation and
+maintenance facilities which this distribution supports. However, most
+applications will need only a few of these facilities. If this is the
+case, the <a href=quick.htm>Quick Start</a> page may be useful to get a
+simple workstation on the air with an existing server.
+
+<p>However, in order to participate in the existing NTP synchronization
+subnet and obtain accurate, reliable time, it is usually necessary to
+construct an appropriate configuration file, commonly called
+<TT>ntp.conf</TT>, which establishes the servers and/or external
+receivers or modems to be used by this particular machine. Directions
+for constructing this file are in the <A HREF=notes.htm>Notes on
+Configuring NTP and Setting up a NTP Subnet </A>page. However, in many
+common cases involving simple network topologies and workstations, the
+file data can be specified entirely on the command line.
+
+<P>The most important factor in providing accurate, reliable time is the
+selection of modes and servers to be used in the configuration file. NTP
+support for one or more computers is normally engineered as part of the
+existing NTP synchronization subnet. The existing NTP subnet consists of
+a multiply redundant hierarchy of servers and clients, with each level
+in the hierarchy identified by stratum number. Primary servers operate
+at stratum one and provide synchronization to secondary servers
+operating at stratum two and so on to higher strata. In this hierarchy,
+clients are simply servers that have no dependents.
+
+<P>The NTP subnet in early 1999 includes 79 public primary (stratum 1)
+servers synchronized directly to UTC by radio, satellite or modem and
+located in every continent of the globe except Antarctica (soon).
+Normally, client workstations and servers with a relatively small number
+of clients do not synchronize to primary servers. There are over 100
+public secondary (stratum 2) servers synchronized to the primary servers
+and providing synchronization to a total in excess of 100,000 clients
+and servers in the Internet. The current lists are maintained in the <A
+HREF="http://www.eecis.udel.edu/~mills/ntp/index.htm">Information on Time
+and Frequency Services</A> page, which is updated frequently. There are
+numerous private primary and secondary servers not normally available to
+the public as well. You are strongly discouraged from using these
+servers, since they sometimes hide in little ghettos behind dinky links
+to the outside world and your traffic can bring up expensive ISDN lines,
+causing much grief and frustration.
+
+<p>In some cases where a network is isolated from the Internet and no
+external synchronization source is available, one of the network hosts
+can be designated as the primary server and the others operate as
+clients. In these cases the network hosts will be synchronized, but not
+necessarily to standard civil time. Even if an external synchronization
+source is available, a host can be designated as backup server in the
+event the external source becomes unreachable or inoperable. A host
+operating as the primary or backup server is configured with the <a
+href=driver1.htm>Undisciplined Local Clock</a> driver. The configuration
+options provide for a stratum number to be assigned to the server,
+usually one for a primary server and three or more for a backup server.
+
+<h4>Performance Expectations</h4>
+
+<p>In the majority of cases, the NTP subnet can keep the clock within a
+few milliseconds on LANs and a few tens of milliseconds on WANs.
+However, in some cases with network jitter of several hundred
+milliseconds or more, the clock discipline loop may not be able to
+converge to a stable frequency. In such cases, a large fraction of the
+time sample corrections are greater than the 128-ms step threshold and
+valid updates which can discipline the clock frequency are sparse. In
+these cases, the <tt>burst</tt> keyword should be used with the
+corresponding <tt>server</tt> line in the configuration file. This
+causes eight volleys in each measurement round, following which the best
+candidate is determined and used to discipline the clock. See the <a
+href=confopt.htm>Configuration Options</a> page for further information.
+
+<p>When multiple servers are configured, the NTP algorithms operate to
+determine the best combination providing the highest accuracy.
+However, there may be small systematic differences in the apparent time
+of each server due to the different network paths involved. In practice,
+this can lead to occasional <i>clockhopping</i> between servers and
+result in increased jitter as seen by the clock discipline algorithm.
+Usually, a favored server can be selected so that, under most
+circumstances, only that server is used and the others disregarded. The
+favored server is identified by the <tt>prefer</tt> keyword in the
+corresponding <tt>server</tt> or <tt>peer</tt> line in the configuration
+file. See the <a href=prefer.htm>Mitigation Rules and the
+<TT>prefer</TT> Keyword</a> page for further information.
+
+<p>In general, as the poll interval increases, so does the expected
+error. When the highest accuracy is required, the poll interval should
+be clamped at a low value using the <tt>maxpoll</tt> keyword in the
+corresponding <tt>server</tt> or <tt>peer</tt> line in the configuration
+file. A typical argument value is 6, which results in a poll interval of
+64 seconds. This should be done only sparingly, since it results in an
+increased load on the network. Where means are available, steps should
+be taken to minimize the ambient temperature variations, since the clock
+frequency is temperature dependent.
+
+<p>For the best accuracy, latencies in the hardware and software should
+by minimized wherever possible. Consider using the <tt>tty_clk</tt> line
+discipline, if available. Where available, interrupt-driven I/O is
+preferred over polled I/O. When means are available, the scheduling
+priority can be raised to avoid preempting the NTP daemon by other
+processes. This can be done using the <tt>-P</tt> option on the
+<tt>ntpd</tt> command line. However, this can lead to trouble should the
+daemon stumble on an endless program loop. While this is a "cannot
+happen" event, the possibility of this kind of bug should be considered
+in the overall robustness model for the client or server. See the <a
+href=ntpd.htm><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</a>
+page for further information.
+
+<p>The very best accuracy can be achieved only by using an external
+discipline signal, such as a pulse-per-second (PPS) or Inter-Range
+Instrumentation Group (IRIG) signal. This requires external connection
+via a serial port or audio codec. See the <a href=refclock.htm>Reference
+Clock Drivers</a> page for further information and links to device
+drivers. Using the PPS signal and kernel support, for example,
+accuracies of a few microseconds can be achieved with modern workstation
+hardware.
+
+<H4>Resolving Problems</H4>
+
+Like other things on the Internet, the NTP synchronization subnets tend to be
+large and devilishly intricate, with many opportunities for
+misconfiguration and network problems. The NTP engineering model is
+specifically designed to help isolate and repair such problems using an
+integrated management protocol, together with a suite of monitoring and
+debugging tools. There is an optional data recording facility which can
+be used to record normal and aberrant operation, log problems to the
+system log facility, and retain records of client access. The <A
+HREF=debug.htm>NTP Debugging Techniques </A>and <A
+HREF=hints.htm>Hints and Kinks </A>pages contain useful information
+for identifying problems and devising solutions.
+
+<P>Users are requested to report bugs, offer suggestions and contribute
+additions to this distribution. The <A HREF=patches.htm>Patching
+Procedures </A>page suggests procedures which greatly simplify
+distribution updates, while the <A HREF=porting.htm>Porting Hints
+</A>page suggest ways to make porting this code to new hardware and
+operating systems easier. Additional information on reference clock
+driver construction and debugging can be found in the <A
+HREF=refclock.htm>Reference Clock Drivers </A>page. Further
+information on NTP in the Internet can be found in the <A
+HREF="http://www.eecis.udel.edu/~ntp">NTP web page</A>.
+
+<H4>Program Manual Pages</H4>
+
+<ul>
+
+<li><A HREF=ntpd.htm><TT>ntpd</TT> - Network Time Protocol (NTP)
+daemon</A></LI>
+<LI><A HREF=ntpq.htm><TT>ntpq</TT> - standard NTP query
+program</A></LI>
+<LI><A HREF=ntpdc.htm><TT>ntpdc</TT> - special NTP query
+program</A></LI>
+<LI><A HREF=ntpdate.htm><TT>ntpdate</TT> - set the date and time via
+NTP</A></LI>
+<LI><A HREF=ntptrace.htm><TT>ntptrace</TT> - trace a chain of NTP
+servers back to the primary source</A></LI>
+<LI><A HREF=tickadj.htm><TT>tickadj</TT> - set time-related kernel
+variables</A></LI>
+<LI><A HREF=ntptime.htm><TT>ntptime</TT> - read kernel time
+variables</A></LI>
+
+</ul>
+
+<H4>Supporting Documentation</H4>
+
+<ul>
+
+<LI><A HREF=http://www.eecis.udel.edu/~mills/ntp.htm>NTP Reference Library</A></LI>
+<LI><A HREF=copyright.htm>Copyright Notice</A></LI>
+<LI><A HREF=exec.htm>Executive Summary - Computer Network Time
+Synchronization</A></LI>
+<LI><A HREF=biblio.htm>Protocol Conformance Statement</A></LI>
+<LI><A HREF=y2k.htm>Year 2000 Conformance Statement</A></LI>
+<LI><A HREF=notes.htm>Notes on Configuring NTP and Setting up a NTP
+Subnet</A></LI>
+<LI><A HREF=release.htm>NTP Version 4 Release Notes</A></LI>
+<LI><A HREF=build.htm>Building and Installing the
+Distribution</A></LI>
+<LI><A HREF=config.htm>Configuration Options</A></LI>
+<LI><A HREF=debug.htm>NTP Debugging Techniques</A></LI>
+<LI><A HREF=refclock.htm>Reference Clock Drivers</A></LI>
+<LI><A HREF=patches.htm>Patching Procedures</A></LI>
+<LI><A HREF=hints.htm>Hints and Kinks</A></LI>
+<LI><A HREF=porting.htm>Porting Hints</A></LI>
+
+</ul>
+
+<H4>Application Notes</H4>
+
+<ul>
+
+<LI><A HREF=prefer.htm>Mitigation Rules and the <TT>prefer</TT>
+Keyword</A></LI>
+<LI><A HREF=assoc.htm>Association Management</A></LI>
+<LI><A HREF=pps.htm>Pulse-per-second (PPS) Signal Interfacing</A></LI>
+<LI><A HREF=gadget.htm>Gadget Box PPS Level Converter and CHU
+Modem</A></LI>
+<LI><A HREF=measure.htm>Time and Time Interval Measurement with
+Application to Computer and Network Performance Evaluation</A></LI>
+<LI><A HREF=kern.htm>A Kernel Model for Precision Timekeeping</A></LI>
+<LI><A HREF=kernpps.htm>A Kernel Programming Interface for Precision
+Time Signals</A></LI>
+
+</ul>
+
+<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
+href="mailto:mills@udel.edu"> David L. Mills &lt;mills@udel.edu&gt;</a>
+</address></body></html>

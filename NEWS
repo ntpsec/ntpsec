@@ -1,0 +1,53 @@
+(4.0.93)
+* Oncore refclock needs PPS or one of two ioctls.
+* Don't make ntptime under Linux.  It doesn't compile for too many folks.
+* Autokey cleanup
+* ReliantUnix patches
+* html cleanup
+* tickadj cleanup
+* PARSE cleanup
+* IRIX -n32 cleanup
+* byte order cleanup
+* ntptrace improvements and patches
+* ntpdc improvements and patches
+* PPS cleanup
+* mx4200 cleanup
+* New clock state machine
+* SCO cleanup
+* Skip alias interfaces
+(4.0.92)
+* chronolog and dumbclock refclocks
+* SCO updates
+* Cleanup/bugfixes
+* Y2K patches
+* Updated palisade driver
+* Plug memory leak
+* wharton kernel clock
+* Oncore clock upgrades
+* NMEA clock improvements
+* PPS improvements
+* AIX portability patches
+(4.0.91)
+* New ONCORE driver
+* New MX4200 driver
+* Palisade improvements
+* config file bugfixes and problem reporting
+* autoconf upgrade and cleanup
+* HP-UX, IRIX lint cleanup
+* AIX portability patches
+* NT cleanup
+(4.0.90)
+* Nanoseconds
+* New palisade driver
+* New Oncore driver
+(4.0.73)
+* README.hackers added
+* PARSE driver is working again
+* Solaris 2.6 has nasty kernel bugs.  DO NOT enable pll!
+* DES is out of the distribution.
+(4.0.72)
+* K&R C compiling should work again.
+* IRIG patches.
+* MX4200 driver patches.
+* Jupiter driver added.
+* Palisade driver added.  Needs work (ANSI, ntoh/hton, sizeof double, ???)

@@ -1,0 +1,11 @@
+--- autoconf-2.10/acgeneral.m4-	Thu Oct 24 22:47:36 1996
++++ autoconf-2.10/acgeneral.m4	Thu Oct 24 23:07:22 1996
+@@ -338,7 +338,7 @@
+ changequote([, ])dnl
+ EOF
+     if test -n "$ac_help"; then
+-      echo "--enable and --with options recognized:$ac_help"
++      echo "--enable and --with options known (Default: + yes, - no, s system-specific):$ac_help"
+     fi
+     exit 0 ;;
+ 

@@ -1,0 +1,25 @@
+--- automake.in.orig	Wed Nov 26 15:50:17 1997
++++ automake.in	Sat Feb 21 01:26:07 1998
+@@ -786,6 +786,9 @@
+ 	    {
+ 		$output_rules .= ("\tcd " . &dirname ($options{'ansi2knr'})
+ 				  . " && \$(MAKE) ansi2knr\n\n");
++	        $output_rules .= ($options{'ansi2knr'} . ".o:\n");
++		$output_rules .= ("\tcd " . &dirname ($options{'ansi2knr'})
++				  . " && \$(MAKE) ansi2knr.o\n\n");
+ 	    }
+ 
+ 	    # Make sure ansi2knr can be found: if no path specified,
+@@ -945,10 +948,11 @@
+ 	    # we can't use $< -- some makes only define $< during a
+ 	    # suffix rule.
+  	    $output_rules .= ($base . "_.c: $base.c \$(ANSI2KNR)\n\t"
+-			      . '$(ANSI2KNR) '
++			      . '$(CPP) $(DEFS) $(INCLUDES) $(CPPFLAGS) '
+ 			      . '`if test -f $(srcdir)/' . $base . '.c'
+ 			      . '; then echo $(srcdir)/' . $base . '.c'
+ 			      . '; else echo ' . $base . '.c; fi` '
++			      . '| $(ANSI2KNR) - '
+ 			      . $base . "_.c\n");
+  	    push (@objects, $base . '_.o');
+  	    push (@objects, $base . '_.lo') if $seen_libtool;

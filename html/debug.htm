@@ -1,0 +1,373 @@
+<HTML><HEAD><TITLE>
+NTP Debugging Techniques
+</TITLE></HEAD><BODY><H3>
+NTP Debugging Techniques
+</H3>
+
+<IMG align=left SRC="pic/pogo.gif"><I>Pogo Possum</I>, with toolkit
+and bug, Walt Kelly
+<br clear=left><hr>
+
+<P>Once the NTP software distribution has been compiled and installed
+and the configuration file constructed, the next step is to verify
+correct operation and fix any bugs that may result. Usually, the command
+line that starts the daemon is included in the system startup file, so
+it is executed only at system boot time; however, the daemon can be
+stopped and restarted from root at any time. Usually, no command-line
+arguments are required, unless special actions described in the
+<TT><A HREF="ntpd.htm">ntpd</A></TT> page are required. Once started,
+the daemon will begin sending messages, as specified in the
+configuration file, and interpreting received messages.
+
+<P>The best way to verify correct operation is using the <TT><A
+HREF="ntpq.htm">ntpq</A></TT> and <TT><A HREF="ntpdc.htm">ntpdc</A></TT>
+utility programs, either on the server itself or from another machine
+elsewhere in the network. The <TT>ntpq</TT> program implements the
+management functions specified in Appendix A of the NTP specification <A
+HREF="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.ps"
+>
+RFC-1305, Appendix A</A>. The <TT>ntpdc</TT> program implements
+additional functions not provided in the standard. Both programs can be
+used to inspect the state variables defined in the specification and, in
+the case of <TT>ntpdc</TT>, additional ones of interest. In addition,
+the <TT>ntpdc</TT> program can be used to selectively enable and disable
+some functions of the daemon while the daemon is running.
+
+<P>In extreme cases with elusive bugs, the daemon can operate in two
+modes, depending on the presence of the <TT>-d</TT> command-line debug
+switch. If not present, the daemon detaches from the controlling
+terminal and proceeds autonomously. If one or more <TT>-d</TT> switches
+are present, the daemon does not detach and generates special output
+useful for debugging. In general, interpretation of this output requires
+reference to the sources. However, a single <TT>-d</TT> does produce
+only mildly cryptic output and can be very useful in finding problems
+with configuration and network troubles. With a little experience, the
+volume of output can be reduced by piping the output to <TT>grep</TT> and
+specifying a keyword, such as <tt>receive</tt> or <tt>clock</tt> of the
+trace you want to see.
+
+<P>Some problems are immediately apparent when the daemon first starts
+running. The most common of these are the lack of <tt>ntp</tt> (UDP port 123)
+in the host <TT>/etc/services</TT> file. Note that NTP always uses UDP
+and never uses TCP. Other problems are apparent in the system log file.
+The log file should show the startup banner, some cryptic initialization
+data, and the computed precision value. The next most common problem is
+incorrect DNS names. Check that each DNS name used in the configuration
+file responds to the Unix <TT>ping</TT> command.
+
+<P>When first started, the daemon normally polls the servers listed in
+the configuration file at 64-second intervals. In order to allow a
+sufficient number of samples for the NTP algorithms to reliably
+discriminate between correctly operating servers (truechimers) and
+possible intruders (falsetickers), at least four valid messages from at
+least one server is required before the daemon can set the local clock.
+However, if the current local time is more than 1000 seconds in error
+from the server time, the daemon will not set the local clock; instead,
+it will plant a message in the system log and shut down. It is necessary
+to set the local clock to within 1000 seconds first, either from the
+time-of-year (TOY) chip, the <A HREF="ntpdate.htm"><TT>ntpdate</TT></A>
+program or manually by eyeball and wristwatch.
+
+<P>After starting the daemon, run the <TT>ntpq</TT> program using the
+<TT>-n</TT> switch, which will avoid possible distractions due to name
+resolution problems. Use the <TT>pe</TT> command to display a billboard
+showing the status of configured peers and possibly other clients poking
+the daemon. After operating for a few minutes, the display should be
+something like:
+
+<PRE>
+ntpq>pe
+remote      refid       st t when poll reach   delay  offset   disp
+===================================================================
++128.4.2.6  132.249.16.1 2 u  131  256   373    9.89   16.28  23.25
+*128.4.1.20 .WWVB.       1 u  137  256   377  280.62   21.74  20.23
+-128.8.2.88 128.8.10.1   2 u  49   128   376  294.14    5.94  17.47
++128.4.2.17 .WWVB.       1 u  173  256   377  279.95   20.56  16.40
+</PRE>
+
+The host addresses shown in the <TT>remote</TT> column should agree with
+the DNS entries in the configuration file, plus any peers not mentioned
+in the file at the same or lower than your stratum that happen to be
+configured to peer with you. Be prepared for surprises in cases where
+the peer has multiple addresses or multiple names. The <TT>refid</TT>
+entry shows the current source of synchronization for each peer, while
+the <TT>st</TT> reveals the stratum, <TT>t</TT> the type (<TT>u</TT> =
+unicast, <TT>m</TT> = multicast, <TT>l</TT> = local, <TT>-</TT> = don't
+know), and <TT>poll</TT> the polling interval in seconds. The
+<TT>when</TT> entry shows the time since the peer was last heard,
+normally in seconds, while the <TT>reach</TT> entry shows the status of
+the reachability register (see RFC-1305) in octal. The remaining entries
+show the latest delay, offset and dispersion computed for the peer in
+milliseconds. Note that in NTP Version 4 the dispersion entry includes
+only the RMS error component; earlier versions included all components.
+
+<P>The tattletale character at the left margin displays the
+synchronization status of each peer. The currently selected peer is
+marked <TT>*</TT>, while additional peers designated acceptable for
+synchronization, but not currently selected, are marked <TT>+</TT>.
+Peers marked <TT>*</TT> and <TT>+</TT> are included in a weighted
+average computation to set the local clock; the data produced by peers
+marked with other symbols are discarded. See the <TT>ntpq</TT>
+documentation for the meaning of these symbols.
+
+<P>Additional details for each peer separately can be determined by the
+following procedure. First, use the <TT>as</TT> command to display an
+index of association identifiers, such as
+
+<PRE>
+ntpq>as
+ind assID status conf reach auth condition last_event cnt
+=========================================================
+ 1  11670   7414   no   yes   ok candidate  reachable   1
+ 2  11673   7614   no   yes   ok sys.peer   reachable   1
+ 3  11833   7314   no   yes   ok outlyer    reachable   1
+ 4  11868   7414   no   yes   ok candidate  reachable   1
+</PRE>
+
+Each line in this billboard is associated with the corresponding line of
+the <TT>pe</TT> billboard above. Next, use the <TT>rv</TT> command and
+the respective identifier to display a detailed synopsis of the selected
+peer, such as
+
+<PRE>
+ntpq>rv 11670
+status=7414 reach, auth, sel_sync, 1 event, event_reach
+srcadr=128.4.2.6, srcport=123, dstadr=128.4.2.7, dstport=123, keyid=1,
+stratum=2, precision=-10, rootdelay=362.00, rootdispersion=21.99,
+refid=132.249.16.1,
+reftime=af00bb44.849b0000 Fri, Jan 15 1993 4:25:40.517,
+delay= 9.89, offset= 16.28,
+dispersion=23.25, reach=373, valid=8,
+hmode=2, pmode=1, hpoll=8, ppoll=10, leap=00, flash=0x0,
+org=af00bb48.31a90000 Fri, Jan 15 1993 4:25:44.193,
+rec=af00bb48.305e3000 Fri, Jan 15 1993 4:25:44.188,
+xmt=af00bb1e.16689000 Fri, Jan 15 1993 4:25:02.087,
+filtdelay=  16.40 9.89  140.08  9.63  9.72  9.22 10.79 122.99,
+filtoffset= 13.24 16.28 -49.19 16.04 16.83 16.49 16.95 -39.43,
+filterror=  16.27 20.17  27.98 31.89 35.80 39.70 43.61  47.52
+</PRE>
+
+A detailed explanation of the fields in this billboard is beyond the
+scope of this discussion; however, most variables defined in the
+specification RFC-1305 can be found. The most useful portion for
+debugging is the last three lines, which give the roundtrip delay, clock
+offset and dispersion for each of the last eight measurement rounds, all
+in milliseconds. Note that the dispersion, which is an estimate of the
+error, increases as the age of the sample increases. From these data, it
+is usually possible to determine the incidence of severe packet loss,
+network congestion, and unstable local clock oscillators. There are no
+hard and fast rules here, since every case is unique; however, if one or
+more of the rounds show zeros, or if the clock offset changes
+dramatically in the same direction for each round, cause for alarm
+exists.
+
+<P>Finally, the state of the local clock can be determined using the
+<TT>rv</TT> command (without the argument), such as
+
+<PRE>
+ntpq>rv
+status=0664 leap_none, sync_ntp, 6 events, event_peer/strat_chg
+system="UNIX", leap=00, stratum=2, rootdelay=280.62,
+rootdispersion=45.26, peer=11673, refid=128.4.1.20,
+reftime=af00bb42.56111000 Fri, Jan 15 1993 4:25:38.336,
+poll=8, clock=af00bbcd.8a5de000 Fri, Jan 15 1993 4:27:57.540,
+phase=21.147, freq=13319.46, compliance=2
+</PRE>
+
+The most useful data in this billboard show when the clock was last
+adjusted <TT>reftime</TT>, together with its status and most recent
+exception event. An explanation of these data is in the specification
+RFC-1305.
+
+<P>When nothing seems to happen in the <TT>pe</TT> billboard after some
+minutes, there may be a network problem. The most common network problem
+is an access controlled router on the path to the selected peer. Few
+public NTP time server selectively restricts access, although this may
+change in future; however, many private network servers do. It also may
+be the case that the server is down or running in unsynchronized mode
+due to a local problem. Use the <TT>ntpq</TT> program and <tt>hosts</tt>
+command program to spy on the server variables in the same way you can
+spy on your own.
+
+<P>Once the daemon has set the local clock, it will continuously track
+the discrepancy between local time and NTP time and adjust the local
+clock accordingly. There are two components of this adjustment, time and
+frequency. These adjustments are automatically determined by the clock
+discipline algorithm. The behavior of this algorithm is carefully
+controlled to minimize residual errors due to network jitter and
+frequency variations of the local clock hardware oscillator due to
+temperature changes. However, when started for the first time, the
+algorithm may take many hours to converge to the intrinsic frequency
+of the host machine.
+<P>It has sometimes been the experience that the local clock oscillator
+frequency error is too large for the NTP discipline algorithm, which
+cannot correct frequency errors larger than 500 parts-per-million (PPM)
+or 43 seconds per day. There are two possibilities that may result in
+this problem. First, the hardware TOY clock chip must be disabled
+when using NTP, since it can destabilize the discipline process. This
+is usually done using the <TT><A HREF="tickadj.htm">tickadj</A></TT>
+program and the <TT>-s</TT> command line argument, but other means may
+be necessary. For instance, in the Sun Solaris kernel, this can be done
+using a command in the <tt>/etc/system</tt> system startup file.
+
+<P>Normally, the NTP daemon amortizes time adjustments at a rate of
+500 PPM until the remaining adjustment is completely amortized. The
+adjustment process is updated with a new time correction each second.
+This process, or slew, operates continuously as long as the adjustment
+does not exceed 128 milliseconds, which for most Internet paths is a
+rare event. If an adjustment does exceed this value, perhaps due to an
+occasional network delay spike, the correction is simply discarded;
+however, if outlyer values persist in subsequent updates for an interval
+of 900 seconds, the local clock is stepped to the new value. This
+behavior is designed to resist errors due to severely congested network
+paths, as well as errors due to confused radio clocks upon the epoch of
+a leap second.
+
+<h4>Network Problems</h4>
+
+<p>Most problems observed with NTP over the years has been some kind of
+network problem. Frequently, the problem turns out to be a filter in the
+firewall between a public server and a client on a private network. In
+other cases the problem is due simply to the fact a designated server is
+unreachable or itself unsynchronized. The Unix <tt>ping</tt> program can
+be used to verify server reachability and the <tt>traceroute</tt>
+utility to explore the path between the remote server and local client.
+The techniques used are common to other network services and considered
+beyond the scope of the discussion here.
+
+<p>Sometimes such things as access control and authentication can get in
+the way of successful synchronization. The <tt>-d</tt> command line
+debug flag is a useful diagnostic in such cases. One or more debug flags
+and the Unix <tt>grep</tt> filter can be used to identify and resolve
+intractable cases. For this purpose, the lavish commentary sprinkled in
+the <tt>ntp_proto.c</tt> source file may be helpful in resolving the
+cause. In particular, the various header and data sanity checks can be
+determined for each arriving message.
+
+<p>The Unix <tt>tcpdump</tt> program is useful to discover rogue packets
+and to calibrate the traffic between a client and its server or peer.
+The <tt>ntptrace</tt> program is useful to discover the synchronization
+path to the primary server, which can be useful should loops develop. If
+kernel support is available, the <tt>ntptime</tt> program can be used to
+display and alter the kernel state variables. The status bits reveal the
+current state; see the <tt>/usr/include/sys/timex.h</tt> header file for
+interpretation. Typical performance expectations are jitter less than 5
+microseconds and stability less than .05 PPM.
+
+<h4>With Extreme Prejudice</h4>
+
+<P>It has sometimes been the experience that the local clock oscillator
+frequency error is too large for the NTP discipline algorithm, which can
+correct frequency errors as large as 500 parts-per-million (PPM) or 43
+seconds per day. There are two possibilities that may result in this
+behavior. First, the hardware time-of-year (TOY) clock chip must be
+disabled when using NTP, since this can destabilize the discipline
+process. If this is not done, the time can be jerked from under NTP,
+with result excessive jitter and instability. The TOY chip can be
+disabled in many systems using the <TT><A
+HREF="tickadj.htm">tickadj</A></TT> program and the <TT>-s</TT> command
+line argument, but other means may be necessary. For instance, in the
+Sun Solaris kernel, this is done using a command in the
+<tt>/etc/system</tt> system startup file.
+
+<p>Second, the local intrinsic clock frequency error may exceed the 500
+PPM limit. If this occurs, the apparent clock offset will grow until
+reaching 128 ms; then, after the 900-second timeout, the clock will be
+stepped to the apparent time. If the <tt>-x</tt> option is used to
+always slew the clock, the offset will grow continuously. Eventually,
+the offset will reach 1000 seconds and the daemon will fall on its sword
+and terminate with an uncivil message to the system log.
+
+<p>The <tt>tickadj</tt> program can be used to force the clock frequency
+error to a low value which the NTP daemon can handle. This is done by
+changing the value of the <tt>tick</tt> kernel variable which defines
+the number of microseconds added to the clock at each timer interrupt.
+The best way to determine if this is the cause is to start the daemon
+with a configuration file listing a known good server and including the
+line <tt>disable ntp</tt>. For this purpose, the drift file
+<tt>/etc/ntp.drift</tt> should be temporarily removed or renamed. If
+kernel support is available and enabled, previous debugging may have
+left nonsense in the kernel variables. The <tt>ntptime</tt> program can
+be used to set the frequency variable to zero, or the system can be
+rebooted with the same effect.
+
+<p>Once the daemon has started, the <tt>ntpq</tt> program can be used to
+inspect the clock filter values, which show the roundtrip delay, offset
+and dispersion. By inspecting successive offsets in the eight-sample
+clock filter window and finding the interval between updates, the
+intrinsic clock frequency can be calculated. If this exceeds 500 PPM,
+the daemon cannot correct the frequency and a correction to the
+<tt>tick</tt> kernel variable is required. For 100-Hz kernels, which
+represent the majority of systems, this value is normally 10000, which
+results in ten milliseconds clock increment for each timer interrupt.
+Changing this value in unit increments results in frequency changes in
+100 PPM increments. The intrinsic offset calculated previously, the
+correct value of <tt>tick</tt> can be determined to the nearest 100-PPM
+value.
+
+<H4>Debugging Checklist</H4>
+
+If the <TT>ntpq</TT> or <TT>ntpdc</TT> programs do not show that
+messages are being received by the daemon or that received messages do
+not result in correct synchronization, verify the following:
+
+<OL>
+
+<LI>Verify the <TT>/etc/services</TT> file host machine is configured
+to accept UDP packets on the NTP port 123. NTP is specifically designed
+to use UDP and does not respond to TCP.</LI>
+
+<LI>Check the system log for <TT>ntpd</TT> messages about
+configuration errors, name-lookup failures or initialization
+problems.</LI>
+
+<LI>Using the <TT>ntpdc</TT> program and <TT>iostats</TT> command,
+verify that the received packets and packets sent counters are
+incrementing. If the packets sent counter does not increment and the
+configuration file includes designated servers, something may be wrong
+in the network configuration of the ntpd host. If this counter does
+increment and packets are actually being sent to the network, but the
+received packets counter does not increment, something may be wrong in
+the network or the server may not be responding.</LI>
+
+<LI>If both the packets sent counter and received packets counter do
+increment, but the <TT>rec</TT> timestamp in the <TT>pe</TT> billboard
+shows far from the current date, received packets are probably being
+discarded for some reason. There is a handy, undocumented state variable
+<TT>flash</TT> visible in the <TT>pe</TT> billboard. The value is in hex
+and normally has the value zero (OK). However, if something is wrong,
+the bits of this variable, reading from the right, correspond to the
+sanity checks listed in Section 3.4.3 of the NTP specification <A
+HREF="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305b.ps"
+>RFC-1305</A>. A bit other than zero indicates the associated sanity
+check failed.</LI>
+
+<LI>If the <TT>org, rec</TT> and <TT>xmt</TT> timestamps in the
+<TT>pe</TT> billboard appear current, but the local clock is not set, as
+indicated by a stratum number less than 16 in the <TT>rv</TT> command
+without arguments, verify that valid clock offset, roundtrip delay and
+dispersion are displayed for at least one peer. The clock offset should
+be less than 1000 seconds, the roundtrip delay less than one second and
+the dispersion less than one second.</LI>
+
+
+<LI>While the algorithm can tolerate a relatively large frequency
+error (up to 500 parts per million or 43 seconds per day), various
+configuration errors (and in some cases kernel bugs) can exceed this
+tolerance, leading to erratic behavior. This can result in frequent loss
+of synchronization, together with wildly swinging offsets. Use the
+<TT>ntpdc</TT> program (or temporary configuration file) and <TT>disable
+pll</TT> command to prevent the <TT>ntpd</TT> daemon from setting the
+clock. Using the <TT>ntpq</TT> or <TT>ntpdc</TT> programs, watch the
+apparent offset as it varies over time to determine the intrinsic
+frequency error. If the error increases by more than 22 milliseconds per
+64-second poll interval, the intrinsic frequency must be reduced by some
+means. The easiest way to do this is with the <TT><A
+HREF="tickadj.htm">tickadj</A></TT> program and the <TT>-t</TT>
+command line argument.</LI>
+
+</OL>
+
+<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
+href="mailto:mills@udel.edu"> David L. Mills &lt;mills@udel.edu&gt;</a>
+</address></body></html>

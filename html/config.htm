@@ -1,0 +1,131 @@
+<HTML><HEAD><TITLE>
+Configuration Options
+</TITLE></HEAD><BODY><H3>
+Configuration Options
+</H3>
+
+<IMG align=left SRC="pic/pogo3a.gif">From <i>pogo</i>, Walt Kelly
+<BR clear=left><HR>
+
+<H4>Basic Configuration Options - the <TT>configure</TT> utility</H4>
+
+The following options are for compiling and installing a working version
+of the NTP distribution. In most cases, the build process is completely
+automatic. In some cases where memory space is at a premium, or the
+binaries are to be installed in a different place, it is possible to
+tailor the configuration to remove such features as reference clock
+driver support, debugging support, and so forth.
+
+<P>Configuration options are specified as arguments to the
+<TT>configure</TT> script. Following is a summary of the current
+options:
+
+<P>Usage: <TT>configure [options] [host]</TT>
+<BR>Options: <TT>[defaults in brackets after descriptions]</TT>
+<PRE>
+Configuration
+  --cache-file=FILE       cache test results in FILE
+  --help                  print this message
+  --no-create             do not create output files
+  --quiet, --silent       do not print `checking...' messages
+  --version               print the version of autoconf that created configure
+Directory and file names:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [/usr/local]
+  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
+                          [same as prefix]
+  --bindir=DIR            user executables in DIR [EPREFIX/bin]
+  --sbindir=DIR           system admin executables in DIR [EPREFIX/sbin]
+  --libexecdir=DIR        program executables in DIR [EPREFIX/libexec]
+  --datadir=DIR           read-only architecture-independent data in DIR
+                          [PREFIX/share]
+  --sysconfdir=DIR        read-only single-machine data in DIR [PREFIX/etc]
+  --sharedstatedir=DIR    modifiable architecture-independent data in DIR
+                          [PREFIX/com]
+  --localstatedir=DIR     modifiable single-machine data in DIR [PREFIX/var]
+  --libdir=DIR            object code libraries in DIR [EPREFIX/lib]
+  --includedir=DIR        C header files in DIR [PREFIX/include]
+  --oldincludedir=DIR     C header files for non-gcc in DIR [/usr/include]
+  --infodir=DIR           info documentation in DIR [PREFIX/info]
+  --mandir=DIR            man documentation in DIR [PREFIX/man]
+  --srcdir=DIR            find the sources in DIR [configure dir or ..]
+  --program-prefix=PREFIX prepend PREFIX to installed program names
+  --program-suffix=SUFFIX append SUFFIX to installed program names
+  --program-transform-name=PROGRAM
+                          run sed PROGRAM on installed program names
+Host type:
+  --build=BUILD           configure for building on BUILD [BUILD=HOST]
+  --host=HOST             configure for HOST [guessed]
+  --target=TARGET         configure for TARGET [TARGET=HOST]
+Features and packages:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --x-includes=DIR        X include files are in DIR
+  --x-libraries=DIR       X library files are in DIR
+--enable and --with options recognized:
+  --enable-debugging      + include debugging code
+  --enable-dst-minutes=60 + minutes per DST adjustment
+  --enable-md5            + include support for MD5 keys
+  --enable-des            s include support for DES keys
+  --enable-BANCOMM        - Datum/Bancomm bc635/VME interface
+  --enable-GPSVME         - TrueTime GPS receiver/VME interface
+  --enable-SHM            - SHM clock attached thru shared memory
+  --enable-ONCORE         + Motorola VP/UT Oncore GPS receiver
+  --enable-all-clocks     + include all suitable non-PARSE clocks:
+  --enable-ACTS           + ACTS modem service
+  --enable-ARBITER        + Arbiter 1088A/B GPS receiver
+  --enable-ARCRON-MSF     + Arcron MSF receiver
+  --enable-AS2201         + Austron 2200A/2201A GPS receiver
+  --enable-ATOM           + PPS interface
+  --enable-CHU            + CHU modem/decoder
+  --enable-AUDIO-CHU      s - CHU audio/decoder
+  --enable-DATUM          s Datum Programmable Time System
+  --enable-HEATH          s Heath GC-1000 WWV/WWVH receiver
+  --enable-HPGPS          + HP 58503A GPS receiver
+  --enable-IRIG           s Sun IRIG audio decoder
+  --enable-LEITCH         + Leitch CSD 5300 Master Clock System Driver
+  --enable-LOCAL-CLOCK    + local clock reference
+  --enable-MSFEES         + EES M201 MSF receiver
+  --enable-MX4200         s Magnavox MX4200 GPS receiver
+  --enable-NMEA           + NMEA GPS receiver
+  --enable-PALISADE       + Palisade clock
+  --enable-PST            + PST/Traconex 1020 WWV/WWVH receiver
+  --enable-JUPITER        s Rockwell Jupiter GPS receiver
+  --enable-PTBACTS        s PTB modem service
+  --enable-TPRO           s KSI/Odetics TPRO/S GPS receiver/IRIG interface
+  --enable-TRAK           + TRAK 8810 GPS receiver
+  --enable-CHRONOLOG      + Chrono-log K-series WWVB receiver
+  --enable-DUMBCLOCK      + Dumb generic hh:mm:ss local clock
+  --enable-TRUETIME       s Kinemetrics/TrueTime receivers
+  --enable-WWVB           + Spectracom 8170/Netclock/2 WWVB receiver
+  --enable-USNO           s USNO modem service
+  --enable-parse-clocks   - include all suitable PARSE clocks:
+  --enable-COMPUTIME      s Diem Computime Radio Clock
+  --enable-DCF7000        s ELV/DCF7000 clock
+  --enable-HOPF6021       s HOPF 6021 clock
+  --enable-MEINBERG       s Meinberg clocks
+  --enable-RAWDCF         s DCF77 raw time code
+  --enable-RCC8000        s RCC 8000 clock
+  --enable-SCHMID         s Schmid DCF77 clock
+  --enable-TRIMTAIP       s Trimble GPS receiver/TAIP protocol
+  --enable-TRIMTSIP       s Trimble GPS receiver/TSIP protocol
+  --enable-WHARTON        s WHARTON 400A Series clock
+  --enable-kmem           s read /dev/kmem for tick and/or tickadj
+  --enable-accurate-adjtime
+                          s the adjtime() call is accurate
+  --enable-tick=VALUE     s force a value for 'tick'
+  --enable-tickadj=VALUE  s force a value for 'tickadj'
+  --enable-udp-wildcard   s use UDP wildcard delivery
+  --enable-slew-always    s always slew the time
+  --enable-step-slew      s step and slew the time
+  --enable-ntpdate-step   s if ntpdate should step the time
+  --enable-hourly-todr-sync
+                          s if we should sync TODR hourly
+  --enable-kernel-fll-bug s if we should avoid a kernel FLL bug
+</PRE>
+
+<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
+href="mailto:mills@udel.edu"> David L. Mills &lt;mills@udel.edu&gt;</a>
+</address></body></html>

@@ -1,0 +1,23 @@
+#!/bin/sh -
+PROG=${1-UNKNOWN}
+VERSION=${2-UNKNOWN}
+if [ ! -f .version ]; then
+  echo 0 > .version
+fi
+
+RUN="`cat .version`"
+RUN="`expr $RUN + 1`"
+echo $RUN > .version
+
+DATE="`date`"
+
+echo "Version $PROG ${VERSION} ${DATE} (${RUN})";
+
+rm -f version.c
+cat > version.c << -EoF-
+/*
+ * version file for $PROG
+ */
+#include <config.h>
+const char * Version = "$PROG ${VERSION} ${DATE} (${RUN})";
+-EoF-
