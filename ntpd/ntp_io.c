@@ -1781,8 +1781,11 @@ input_handler(
 			/*
 			 * extended FAU debugging output
 			 */
-			netsyslog(LOG_ERR, "select(%d, %s, 0L, 0L, &0.000000) error: %m",
-				maxactivefd+1, fdbits(maxactivefd, &activefds));
+			if (err != EINTR)
+			    netsyslog(LOG_ERR,
+				      "select(%d, %s, 0L, 0L, &0.0) error: %m",
+				      maxactivefd+1,
+				      fdbits(maxactivefd, &activefds));
 			if (err == EBADF) {
 				int j, b;
 
