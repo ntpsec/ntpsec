@@ -56,13 +56,14 @@ LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
  * Unspecified
  */
 
+#ifndef IN6_IS_ADDR_UNSPECIFIED
 #define IN6_IS_ADDR_UNSPECIFIED(a)      \
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == 0 && \
 *((u_long *)((a)->s6_addr) + 3) == 0 \
 )
-
+#endif
 /*
  * Loopback
  */
@@ -95,9 +96,10 @@ LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
 /*
  * Multicast
  */
+#ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	\
 	((a)->s6_addr8[0] == 0xffU)
-
+#endif
 /*
  * Unicast link / site local.
  */
