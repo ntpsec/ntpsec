@@ -146,6 +146,7 @@
 #define CONF_TOS_FLOOR		3
 #define CONF_TOS_CEILING	4
 #define CONF_TOS_COHORT		5
+#define CONF_TOS_MAXDIST	6
 
 #ifdef OPENSSL
 /*

@@ -57,6 +57,7 @@ l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_selerr;	/* select jitter (s) */
+static	double sys_maxdist = MAXDISTANCE; /* selection thresh (s) */
 double	sys_jitter;		/* system jitter (s) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
@@ -98,6 +99,7 @@ static	void	fast_xmit	P((struct recvbuf *, int, keyid_t, int));
 static	void	clock_update	P((void));
 int	default_get_precision	P((void));
 static	int	peer_unfit	P((struct peer *));
+
 
 /*
  * transmit - Transmit Procedure. See Section 3.4.2 of the
@@ -153,67 +155,68 @@ transmit(
 				/*
 				 * If this association was reachable but
 				 * now unreachable, clear it and raise a
-				 * trap. If ephemeral, dump it.
+				 * trap. If ephemeral, dump it right
+				 * away.
 				 */
 				if (oreach != 0) {
 					report_event(EVNT_UNREACH,
 					    peer);
-					peer->timereachable =
-					    current_time;
-					peer_clear(peer, "INIT");
 					if (!(peer->flags &
 					    FLAG_CONFIG)) {
 						unpeer(peer);
 						return;
 					}
+					peer->timereachable =
+					    current_time;
+					peer_clear(peer, "INIT");
 				}
 
 				/*
-				 * Until the unreach counter trips, we
-				 * send a burst if enabled and nothing
-				 * is wrong. Otherwise, we send a single
-				 * packet. After the counter trips, we
-				 * double the poll interval at each
-				 * poll.
+				 * We send an initial burst only once
+				 * after a server becomes unreachable.
+				 * After the unreach counter trips, we
+				 * send a single packet and double the
+				 * poll interval if persistent or dump
+				 * the association if ephemeral. Here it
+				 * can be ephemeral only if the server
+				 * has never been reachable.
 				 */
-				if (peer->unreach < NTP_UNREACH) {
-					peer->unreach++;
+				if (peer->unreach == 0) {
 					if (peer->flags & FLAG_IBURST &&
 					    !peer->flash)
 						peer->burst = NTP_BURST;
-				} else if (!(peer->flags &
-				    FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
+				} else if (peer->unreach > NTP_UNREACH)
+				    {
+					if (!(peer->flags &
+					    FLAG_CONFIG)) {
+						unpeer(peer);
+						return;
 
-				} else if (hpoll < peer->maxpoll)
-						hpoll++;
+					} 
+					hpoll++;
+				}
+				peer->unreach++;
 			} else {
+
 				/*
 				 * Here the peer is reachable. If it has
 				 * not been heard for three consecutive
 				 * polls, stuff infinity in the clock
 				 * filter. Next, determine the poll
 				 * interval. If the peer is unfit for
-				 * synchronization, increase it by one;
-				 * else, use the system poll interval,
-				 * but clamp it within bounds for this
-				 * peer. Send a burst only if enabled
-				 * and nothing is wrong.
+				 * synchronization, double the interval;
+				 * else, use the system poll interval.
+				 * Send a burst only if enabled and
+				 * nothing is wrong.
 				 */
 				peer->unreach = 0;
 				if (!(peer->reach & 0x07))
 					clock_filter(peer, 0., 0.,
 					    MAXDISPERSE);
 				if (peer_unfit(peer)) {
-					if (hpoll < peer->maxpoll)
-						hpoll++;
+					hpoll++;
 				} else {
 					hpoll = sys_poll;
-					if (hpoll > peer->maxpoll)
-						hpoll = peer->maxpoll;
-					else if (hpoll < peer->minpoll)
-						hpoll = peer->minpoll;
 					if (peer->flags & FLAG_BURST &&
 					    !peer->flash)
 						peer->burst = NTP_BURST;
@@ -284,6 +287,7 @@ transmit(
 		poll_update(peer, hpoll);
 	}
 }
+
 
 /*
  * receive - Receive Procedure.  See section 3.4.3 in the specification.
@@ -891,9 +895,10 @@ receive(
 		if (peer->flash & TEST5) {
 			if (has_mac == 4 && pkt->exten[0] == 0 &&
 			    peer->reach) {
-				peer_clear(peer, "AUTH");
 				if (!(peer->flags & FLAG_CONFIG))
 					unpeer(peer);
+				else
+					peer_clear(peer, "AUTH");
 			}
 			return;
 		}
@@ -951,9 +956,11 @@ receive(
 		if (debug)
 			printf("receive: dropped %03x\n", peer->flash);
 #endif
-		peer_clear(peer, "DROP");
-		if (!(peer->flags & FLAG_CONFIG))
+		if (!(peer->flags & FLAG_CONFIG)) {
 			unpeer(peer);
+			return;
+		}
+		peer_clear(peer, "DROP");
 		return;
 	}
 	if (peer->flash & ~TEST2) {
@@ -1412,22 +1419,49 @@ poll_update(
 	int	hpoll;
 
 	/*
-	 * This routine figures out when the next poll should set, and
-	 * that turns out to be wickedly complicated. The big problem is
+	 * This routine figures out when the next poll should be sent.
+	 * That turns out to be wickedly complicated. The big problem is
 	 * that sometimes the time for the next poll is in the past.
 	 * Watch out for races here between the receive process and the
 	 * poll process. The key assertion is that, if nextdate equals
 	 * current_time, the call is from the poll process; otherwise,
 	 * it is from the receive process.
+	 *
+	 * First, bracket the poll interval according to the type of
+	 * association and options. If a fixed interval is configured,
+	 * use minpoll. This primarily is for reference clocks, but
+	 * works for any association.
 	 */
-	if (peer->flags & FLAG_FIXPOLL)
+	if (peer->flags & FLAG_FIXPOLL) {
 		hpoll = peer->minpoll;
-	else
-		hpoll = mpoll;
 
 	/*
-	 * If during the crypto protocol and a message is pending, make
-	 * it wait no more than two seconds.
+	 * A manycast server beacons at minpoll until a sufficient
+	 * number of servers have been found or the ttl has toped out,
+	 * then beacons at maxpoll.
+	 */
+	} else if (peer->cast_flags & MDF_ACAST) {
+		if (sys_survivors >= sys_minclock || peer->ttl >=
+		    sys_ttlmax)
+			hpoll = peer->maxpoll;
+		else
+			hpoll = peer->minpoll;
+
+	/*
+	 * The normal case is to use the minimum of the host and peer
+	 * poll intervals, but not below minpoll and not above maxpoll.
+	 * In other words, ovesampling is okay, but undersampling is a
+	 * sin, unless this would cause excess network traffic.
+	 */
+	} else {
+		hpoll = min(max(min(peer->ppoll, mpoll), peer->minpoll),
+		    peer->maxpoll);
+	}
+
+	/*
+	 * Now we figure out if there is an override. If during the
+	 * crypto protocol and a message is pending, make it wait not
+	 * more than two seconds.
 	 */
 #ifdef OPENSSL
 	if (peer->cmmd != NULL && (sys_leap != LEAP_NOTINSYNC ||
@@ -1456,34 +1490,9 @@ poll_update(
 			peer->nextdate += sys_calldelay;
 		else
 			peer->nextdate += BURST_DELAY;
-	/*
-	 * A manycast server beacons at the minimum poll interval times
-	 * the ttl until a sufficient number of servers have been found,
-	 * then beacons at the maximum poll interval.
-	 */
-	} else if (peer->cast_flags & MDF_ACAST) {
-		if (sys_survivors >= sys_minclock || peer->ttl >=
-		    sys_ttlmax)
-			hpoll = peer->maxpoll;
-		else
-			hpoll = peer->minpoll;
-		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
 
-	/*
-	 * The normal case after all those pesky exceptions. Set the
-	 * poll to the minimum of the host and peer values, but not
-	 * below minpoll. That's max(min(ppoll, hpoll), minpoll).
-	 */
 	} else {
-		if (peer->ppoll < peer->minpoll)
-			peer->nextdate = peer->outdate +
-			    RANDPOLL(peer->minpoll);
-		if (peer->ppoll < hpoll)
-			peer->nextdate = peer->outdate +
-			    RANDPOLL(peer->ppoll);
-		else
-			peer->nextdate = peer->outdate +
-			    RANDPOLL(hpoll);
+		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
 	}
 
 	/*
@@ -1502,6 +1511,7 @@ poll_update(
 	 */
 	if (hpoll != peer->hpoll)
 		key_expire(peer);
+	peer->hpoll = hpoll;
 #endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug > 1)
@@ -1866,7 +1876,7 @@ clock_select(void)
 			 * unfit to synchronize.
 			 */
 			if (peer_unfit(peer) || root_distance(peer) >=
-			    MAXDISTANCE + 2. * clock_phi *
+			    sys_maxdist + 2. * clock_phi *
 			    ULOGTOD(sys_poll))
 				continue;
 
@@ -2316,6 +2326,7 @@ clock_select(void)
 	}
 	clock_update();
 }
+
 
 /*
  * clock_combine - combine offsets from selected peers
@@ -3211,8 +3222,15 @@ proto_config(
 	/*
 	 * Set the cohort switch.
 	 */
+	case PROTO_MAXDIST:
+		sys_maxdist = dvalue;
+		break;
+
+	/*
+	 * Set the cohort switch.
+	 */
 	case PROTO_COHORT:
-		sys_cohort= (int)dvalue;
+		sys_cohort = (int)dvalue;
 		break;
 	/*
 	 * Set the adjtime() resolution (s).
