@@ -195,7 +195,7 @@ getpass(const char * prompt)
 	fprintf(stderr, "%s", prompt);
 	fflush(stderr);
 #endif
-	for (i=0; i<sizeof(password)-1 && ((c=_getch())!='\n'); i++) {
+	for (i=0; i<sizeof(password)-1 && ((c=_getch())!='\n' && c!='\r'); i++) {
 		password[i] = (char) c;
 	}
 	password[i] = '\0';
