@@ -1333,6 +1333,7 @@ sendpkt(
 		inter->notsent++;
 		packets_notsent++;
 #if defined(HAVE_IO_COMPLETION_PORT)
+		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS && slot < 0)
 #else
 		if (errno != EWOULDBLOCK && errno != ENOBUFS && slot < 0)
@@ -1827,7 +1828,6 @@ findbcastinter(
 	struct sockaddr_storage *addr
 	)
 {
-#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 
 	for (i = 0; i < ninterfaces; i++) {
@@ -1859,7 +1859,6 @@ findbcastinter(
 				return (&inter_list[i]);
 		     }
 	}
-#endif /* SIOCGIFCONF */
  	return ANY_INTERFACE_CHOOSE(addr);
 }
 
