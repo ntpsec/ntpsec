@@ -1648,7 +1648,7 @@ getconfig(
 				    case CONF_FDG_FLAG3:
 				    case CONF_FDG_FLAG4:
 					if (!atouint(tokens[++i], &fudgeflag)
-					    || ul > 1) {
+					    || fudgeflag > 1) {
 						msyslog(LOG_ERR,
 							"fudge %s flag value in error",
 							ntoa(&peeraddr));

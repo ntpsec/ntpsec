@@ -1,3 +1,8 @@
+2000-06-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c (getconfig): Sanity check the right variable
+	From: Dave Mills.
+
 2000-06-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99j2
