@@ -1081,6 +1081,7 @@ open_socket(
 			netsyslog(LOG_ERR, "setsockopt IPTOS_LOWDELAY on fails on address %s: %m",
 				stoa(addr));
 		}
+#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 #if defined(IPV6_V6ONLY)
         if (addr->ss_family == AF_INET6)
@@ -1102,8 +1103,6 @@ open_socket(
 		}
 #endif /* IPV6_BINDV6ONLY */
 #endif /* IPV6_V6ONLY */
-
-#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 	/*
 	 * bind the local address.
