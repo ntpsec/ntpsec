@@ -363,7 +363,10 @@ TSIP_decode (
 		return 0;	
 	}
 
-	if (up->rpt_buf[0] == (char) 0x8f) {
+	/*
+	 * We cast both to u_char to as 0x8f uses the sign bit on a char
+	 */
+	if ((u_char) up->rpt_buf[0] == (u_char) 0x8f) {
 	/* 
 	 * Superpackets
 	 */

@@ -30,6 +30,11 @@
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
+/* Skip asynch rpc inclusion */
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__
+#endif
+
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
 #define _WINSOCKAPI_  
