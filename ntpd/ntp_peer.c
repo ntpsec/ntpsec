@@ -351,7 +351,6 @@ unpeer(
 #endif
 	}
 #endif /* OPENSSL */
-	peer_associations--;
 #ifdef DEBUG
 	if (debug)
 		printf("demobilize %u %d\n", peer_to_remove->associd,
@@ -413,6 +412,7 @@ unpeer(
 	peer_to_remove->next = peer_free;
 	peer_free = peer_to_remove;
 	peer_free_count++;
+	peer_associations--;
 }
 
 

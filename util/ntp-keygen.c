@@ -118,12 +118,13 @@
 /*
  * Cryptodefines
  */
-#define	PLEN		512	/* default prime modulus size (bits) */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
 #define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
 #define MAXFILENAME	256	/* max file name length */
 #define MAXHOSTNAME	256	/* max host name length */
+#ifdef OPENSSL
+#define	PLEN		512	/* default prime modulus size (bits) */
 
 /*
  * Strings used in X509v3 extension fields
@@ -136,17 +137,11 @@
 struct mv {
 	DSA	*dsa;		/* DSA parameters */
 	BIGNUM	**x;		/* private key vector */
-	struct coef *a;		/* coefficient vector */
-	BIGNUM	**g;		/* public key vector */
-	BIGNUM	*biga;		/* mysterious capital letter */
-	BIGNUM	*b;		/* group key */
-	BIGNUM	*binverse;	/* inverse group key */
-	BIGNUM	**xbar;		/* private key vector 1 */
-	BIGNUM	**xhat;		/* private key vector 2 */
 	BIGNUM	*gbar;		/* public key 1 */
 	BIGNUM	*ghat;		/* public key 2 */
-	BIGNUM	*k;		/* random roll */
-	int	n;		/* polynomial order */
+	BIGNUM	**xbar;		/* private key vector 1 */
+	BIGNUM	**xhat;		/* private key vector 2 */
+	int	n;		/* number of keys */
 	BIGNUM	*u, *v;		/* BN scratch */
 	BN_CTX	*ctx;		/* context scratch */
 };
@@ -162,6 +157,7 @@ struct	term {
 	int	size;		/* number of indices */
 	int	*ptr;		/* index vector */
 };
+#endif /* OPENSSL */
 
 /*
  * Prototypes
@@ -724,14 +720,14 @@ gen_dsa(
  * securely transmitted to all members of the group before use.
  *
  * The IFF values hide in a DSA cuckoo structure which uses the same
- * parameters.  The values are used by an identity scheme based on DSA
+ * parameters. The values are used by an identity scheme based on DSA
  * cryptography and described in Stimson p. 285. The p is a 512-bit
- * prime, q a 160-bit prime that divides p - 1 and is a qth root of 1
- * mod p; that is, g^q = 1 mod p. The TA rolls a private random a less
- * than q, then computes public g^(q - a). These values are shared among
- * all group members but not revealed in certificate or message data.
- * Alice challenges Bob to confirm identity using the protocol described
- * below.
+ * prime, g a generator of Zp and q a 160-bit prime that divides p - 1
+ * and is a qth root of 1 mod p; that is, g^q = 1 mod p. The TA rolls a
+ * private random a less than q, then computes public g^(q - a). These
+ * values are shared among all group members but not revealed in
+ * certificate or message data. Alice challenges Bob to confirm identity
+ * using the protocol described below.
  */
 EVP_PKEY *			/* IFF parameters and keys */
 gen_iff(
@@ -1020,7 +1016,35 @@ gen_gqkey(
 }
 
 /*
- * Generate Mu-Varadharajan parameters and keys
+ * Generate Mu-Varadharajan (MV) parameters and keys
+ *
+ * The Generate Mu-Varadharajan (MV) cryptosystem is intended for use
+ * where there is one encryption key for the server and a separate
+ * decryption key for each client. It operates something like a
+ * pay-per-view satellite broadcasting system where the view session key
+ * is encrypted by the broadcaster and the decryption keys are held in a
+ * tamperproof set-top box.
+ *
+ * The MV parameters and private encryption key hide in a DSA cuckoo
+ * structure which uses the same paramters. The values are used in an
+ * encryption scheme based on DSA cryptography and a polynomial formed
+ * from the binomial expansion of product terms (x - x[j]), as described
+ * in: Mu, Y., and V. Varadharajan: Robust and Secure Broadcasting,
+ * Proc. Indocrypt 2001, 223-231.
+ *
+ * The p is a 512-bit prime, g a generator of Zp and q a 160-bit prime
+ * that divides p - 1 and is a qth root of 1 mod p; that is, g^q = 1 mod
+ * p. The x[j] are generated as 160-bit random values and the product
+ * terms (x - x[j]) expanded to form coefficients in powers of x mod q.
+ * These are used as exponents of the generator g mod p to generate the
+ * private encryption key A. The pair (gbar, ghat) of public values and
+ * the pair (xbar[j], xhat[j]) of private values are used to construct
+ * the decryption keys. The devil is in the details below.
+ *
+ * The recursive scheme used to generate the polynomial coefficients,
+ * while simple and elegant, is computationally explosive and probably
+ * impractical for more than 20 coefficients. Ingenious remedies are
+ * welcome and will probably be the nucleus of a class project.
  */
 struct mv *
 gen_mvpar(
@@ -1029,6 +1053,12 @@ gen_mvpar(
 {
 	struct mv *mp;		/* MV parameters */
 	struct term *cp;	/* coefficient pointer */
+	struct coef *a;		/* coefficient vector */
+	BIGNUM	**g;		/* public key vector */
+	BIGNUM	*b;		/* group key */
+	BIGNUM	*binverse;	/* inverse group key */
+	BIGNUM	*biga;		/* mysterious capital letter */
+	BIGNUM	*k;		/* random roll */
 	u_char	seed[20];	/* seed for parameters */
 	int	*y;		/* initial index vector */
 	int	i, j, n;
@@ -1068,27 +1098,31 @@ gen_mvpar(
 	}
 
 	/*
-	 * Generate polynomial coefficients from binomial expansion.
+	 * Generate polynomial coefficients from binomial expansion of
+	 * terms prod(x - x[j]), j = 1...n. This is done by recursion
+	 * starting from an index string 1...n. The complexity grows
+	 * very quickly and is probably not appropriate for n much
+	 * greater than 15. Send patches.
 	 */
 	printf("Generating polynomial coefficients for %d keys\n", n); 
-	mp->a = malloc((n + 1) * sizeof(struct coef));
+	a = malloc((n + 1) * sizeof(struct coef));
 	i = 0;
 	for (i = 0; i <= n; i++) {
-		mp->a[i].link = NULL;
-		mp->a[i].coef = 0;
-		mp->a[i].bn = BN_new();
-		BN_zero(mp->a[i].bn);
+		a[i].link = NULL;
+		a[i].coef = 0;
+		a[i].bn = BN_new();
+		BN_zero(a[i].bn);
 	}
 	y = malloc(n * sizeof(int));
 	for (i = 0; i < n; i++)
 		y[i] = i + 1;
-	makea(mp->a, n, y, mp);
-	BN_one(mp->a[n].bn);
+	makea(a, n, y, mp);
+	BN_one(a[n].bn);
 	if (debug) {
 		for (i = 0; i <= n; i++) {
-			printf("%2d %4d %s\n", i, mp->a[i].coef,
-			    BN_bn2dec(mp->a[i].bn));
-			for (cp = mp->a[i].link; cp != NULL; cp =
+			printf("%2d %4d %s\n", i, a[i].coef,
+			    BN_bn2dec(a[i].bn));
+			for (cp = a[i].link; cp != NULL; cp =
 			    cp->link) {
 				for (j = 0; j < cp->size; j++)
 					printf(" %d", cp->ptr[j]);
@@ -1099,7 +1133,8 @@ gen_mvpar(
 	}
 
 	/*
-	 * Verify sum(a[i] x^i) = 0 for all j.
+	 * Verify sum(a[i] x^i) = 0 for all j. By design, the polynomial
+	 * has n zeros at x = x[j].
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
@@ -1108,8 +1143,8 @@ gen_mvpar(
 			BN_set_word(mp->v, i);
 			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
 			    mp->ctx);
-			BN_mod_mul(mp->v, mp->v, mp->a[i].bn,
-			    mp->dsa->q, mp->ctx);
+			BN_mod_mul(mp->v, mp->v, a[i].bn, mp->dsa->q,
+			    mp->ctx);
 			BN_add(mp->u, mp->u, mp->v);
 		}
 		BN_mod(mp->u, mp->u, mp->dsa->q, mp->ctx);
@@ -1123,10 +1158,10 @@ gen_mvpar(
 	 * Generate g[i] = g^a[i].
 	 */
 	printf("Generating public keys and parameters\n");
-	mp->g = malloc((n + 1) * sizeof(BIGNUM));
+	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
-		mp->g[i] = BN_new();
-		BN_mod_exp(mp->g[i], mp->dsa->g, mp->a[i].bn,
+		g[i] = BN_new();
+		BN_mod_exp(g[i], mp->dsa->g, a[i].bn,
 		    mp->dsa->p, mp->ctx);
 	}
 
@@ -1140,7 +1175,7 @@ gen_mvpar(
 			BN_set_word(mp->v, i);
 			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
 			    mp->ctx);
-			BN_mod_exp(mp->v, mp->g[i], mp->v, mp->dsa->p,
+			BN_mod_exp(mp->v, g[i], mp->v, mp->dsa->p,
 			    mp->ctx);
 			BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p,
 			    mp->ctx);
@@ -1154,31 +1189,31 @@ gen_mvpar(
 	    "yes" : "no");
 
 	/*
-	 * Compute A, b and b^-1.
+	 * Compute encryption key A and a nonce pair b and b^-1.
 	 */
-	mp->biga = BN_new();
-	BN_one(mp->biga);
+	biga = BN_new();
+	BN_one(biga);
 	for (j = 1; j <= n; j++) {
 		for (i = 0; i < n; i++) {
 			BN_set_word(mp->v, i);
 			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
 			    mp->ctx);
-			BN_mod_exp(mp->v, mp->g[i], mp->v, mp->dsa->p,
+			BN_mod_exp(mp->v, g[i], mp->v, mp->dsa->p,
 			    mp->ctx);
-			BN_mod_mul(mp->biga, mp->biga, mp->v,
+			BN_mod_mul(biga, biga, mp->v,
 			    mp->dsa->p, mp->ctx);
 		}
 	}
-	mp->b = BN_new(); mp->binverse = BN_new();
-	BN_rand(mp->b, BN_num_bits(mp->dsa->q), -1, 0);
-	BN_mod(mp->b, mp->b, mp->dsa->q, mp->ctx);
-	BN_mod_inverse(mp->binverse, mp->b, mp->dsa->q, mp->ctx);
-	BN_mod_mul(mp->v, mp->b, mp->binverse, mp->dsa->q, mp->ctx);
+	b = BN_new(); binverse = BN_new();
+	BN_rand(b, BN_num_bits(mp->dsa->q), -1, 0);
+	BN_mod(b, b, mp->dsa->q, mp->ctx);
+	BN_mod_inverse(binverse, b, mp->dsa->q, mp->ctx);
+	BN_mod_mul(mp->v, b, binverse, mp->dsa->q, mp->ctx);
 	printf("Confirm b b^-1 = 1: %s\n", BN_is_one(mp->v) ?
 	    "yes" : "no");
 
 	/*
-	 * Make private keys (xbar[j], xhat[j]) for all j;.
+	 * Make 160-bit private keys (xbar[j], xhat[j]) for all j.
 	 */
 	mp->xbar = malloc((n + 1) * sizeof(BIGNUM));
 	mp->xhat = malloc((n + 1) * sizeof(BIGNUM));
@@ -1193,7 +1228,7 @@ gen_mvpar(
 			    mp->ctx);
 			BN_add(mp->xbar[j], mp->xbar[j], mp->u);
 		}
-		BN_mod_mul(mp->xbar[j], mp->xbar[j], mp->binverse,
+		BN_mod_mul(mp->xbar[j], mp->xbar[j], binverse,
 		    mp->dsa->q, mp->ctx);
 		BN_set_word(mp->v, n);
 		BN_mod_exp(mp->xhat[j], mp->x[j], mp->v, mp->dsa->q,
@@ -1205,14 +1240,14 @@ gen_mvpar(
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_mul(mp->u, mp->b, mp->xbar[j], mp->dsa->q,
+		BN_mod_mul(mp->u, b, mp->xbar[j], mp->dsa->q,
 		    mp->ctx);
 		BN_mod_exp(mp->u, mp->dsa->g, mp->u, mp->dsa->p,
 		    mp->ctx);
 		BN_mod_exp(mp->v, mp->dsa->g, mp->xhat[j], mp->dsa->p,
 		    mp->ctx);
 		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
-		BN_mod_mul(mp->u, mp->u, mp->biga, mp->dsa->p, mp->ctx);
+		BN_mod_mul(mp->u, mp->u, biga, mp->dsa->p, mp->ctx);
 		if (!BN_is_one(mp->u)) {
 			printf("error %d %s\n", j, BN_bn2dec(mp->u));
 			temp = 0;
@@ -1222,14 +1257,14 @@ gen_mvpar(
 	    "yes" : "no");
 
 	/*
-	 * Make public key (gbar^k, ghat^bk).
+	 * Make 512-bit public keys (gbar, ghat).
 	 */
-	mp->k = BN_new();
-	BN_rand(mp->k, BN_num_bits(mp->dsa->q), -1, 0);
-	BN_mod(mp->k, mp->k, mp->dsa->q, mp->ctx);
+	k = BN_new();
+	BN_rand(k, BN_num_bits(mp->dsa->q), -1, 0);
+	BN_mod(k, k, mp->dsa->q, mp->ctx);
 	mp->gbar = BN_new(); mp->ghat = BN_new();
-	BN_mod_exp(mp->gbar, mp->dsa->g, mp->k, mp->dsa->p, mp->ctx);
-	BN_mod_mul(mp->u, mp->k, mp->b, mp->dsa->q, mp->ctx);
+	BN_mod_exp(mp->gbar, mp->dsa->g, k, mp->dsa->p, mp->ctx);
+	BN_mod_mul(mp->u, k, b, mp->dsa->q, mp->ctx);
 	BN_mod_exp(mp->ghat, mp->dsa->g, mp->u, mp->dsa->p, mp->ctx);
 
 	/*
@@ -1242,7 +1277,7 @@ gen_mvpar(
 		BN_mod_exp(mp->v, mp->gbar, mp->xhat[j], mp->dsa->p,
 		    mp->ctx);
 		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
-		BN_mod_exp(mp->v, mp->biga, mp->k, mp->dsa->p, mp->ctx);
+		BN_mod_exp(mp->v, biga, k, mp->dsa->p, mp->ctx);
 		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
 		if (!BN_is_one(mp->u)) {
 			printf("error %d %s\n", j, BN_bn2dec(mp->u));
@@ -1254,22 +1289,36 @@ gen_mvpar(
 
 	/*
 	 * We now have the DSA parameters (p, q, g) and public keys
-	 * (gbar^k, ghat^bk), We also have the encryption key biga and
+	 * (gbar^k, ghat^bk), We also have the encryption key A and
 	 * the set of decryption keys (xbar[j], xhat[j]) handed out to
-	 * each treasured customer. We encode in the DSA cukoo
-	 * structure:
+	 * each paying customer. The intent of this scheme is to convey
+	 * a secret key for use in symmetric cryptography to customers
+	 * who pay for the decription key. The key itself is a 512-bit
+	 * random roll. The cryptosystem can use it for any purpose. We
+	 * encode everything in the DSA cukoo structure:
 	 *
-	 * p		modulus
-	 * q		private encryption key
-	 * g		diffusion constant (k)
-	 * priv_key	public key 1
-	 * pub_key	public key 2
+	 * p		modulus p
+	 * q		private encryption key A
+	 * g		diffusion factor k
+	 * priv_key	public key 1 gbar
+	 * pub_key	public key 2 ghat
 	 */
-	BN_copy(mp->dsa->q, mp->biga);
-	BN_copy(mp->dsa->g, mp->k);
-	mp->dsa->priv_key = BN_new(); mp->dsa->pub_key = BN_new();
-	BN_copy(mp->dsa->priv_key, mp->gbar);
-	BN_copy(mp->dsa->pub_key, mp->ghat);
+	BN_copy(mp->dsa->q, biga);
+	BN_copy(mp->dsa->g, k);
+	mp->dsa->priv_key = BN_dup(mp->gbar);
+	mp->dsa->pub_key = BN_dup(mp->ghat);
+
+	/*
+	 * Free the world.
+	 */
+	for (i = 0; i <= n; i++) {
+		for (cp = a[i].link; cp != NULL; cp = cp->link)
+			free(cp->ptr);
+		BN_free(a[i].bn);
+		BN_free(g[i]);
+	}
+	free(a); free(g);
+	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(k);
 
 	/*
 	 * Write the MV parameters and public keys as a DSA private key
