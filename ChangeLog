@@ -1,3 +1,8 @@
+2001-07-06  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntp_update: COPYRIGHT needs a touch.
+	From: Mike Stump <mrs@kithrup.com>
+
 2001-07-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/config.htm: Major cleanup.

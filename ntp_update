@@ -62,7 +62,8 @@ touch `find . -name Makefile.in -print`
 #touch `find texinfo -name \*.gmo -print`
 # The following code should also touch the generated lex/yacc/rpc files
 for f in \
-	stamp-h.in
+ stamp-h.in \
+ COPYRIGHT
 do
 	touch $f
 done
