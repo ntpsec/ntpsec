@@ -205,6 +205,7 @@ session_key(
 		header[3] = htonl(private);
 		hdlen = 4 * sizeof(u_int32);
 		break;
+
 	case AF_INET6:
 		memcpy(&header[0], &GET_INADDR6(*srcadr),
 		    sizeof(struct in6_addr));
@@ -276,6 +277,7 @@ make_keylist(
 		keyid = (u_long)RANDOM & 0xffffffff;
 		if (keyid <= NTP_MAXKEY)
 			continue;
+
 		if (authhavekey(keyid))
 			continue;
 		break;
@@ -1119,6 +1121,7 @@ crypto_recv(
 				printf("crypto_recv: %s\n", statstr);
 #endif
 			break;
+
 		} else if (rval > XEVNT_OK && (code & CRYPTO_RESP)) {
 			rval = XEVNT_OK;
 		}
@@ -1216,6 +1219,7 @@ crypto_xmit(
 		} else if (vallen == 0 || vallen > MAXHOSTNAME) {
 			opcode |= CRYPTO_ERROR;
 			break;
+
 		} else {
 			memcpy(certname, ep->pkt, vallen);
 			certname[vallen] = '\0';
@@ -1223,6 +1227,7 @@ crypto_xmit(
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			if (cp->flags & CERT_PRIV)
 				continue;
+
 			if (strcmp(certname, cp->subject) == 0) {
 				len += crypto_send(fp, &cp->cert);
 				break;
@@ -1457,6 +1462,7 @@ crypto_verify(
 	 */
 	if (opcode & CRYPTO_ERROR)
 		return (XEVNT_LEN);
+
  	if (opcode & CRYPTO_RESP) {
  		if (len < VALUE_LEN)
 			return (XEVNT_LEN);
@@ -1464,6 +1470,7 @@ crypto_verify(
  		if (len < VALUE_LEN)
 			return (XEVNT_OK);
 	}
+
 	/*
 	 * We have a value header. Check for valid field lengths. The
 	 * field length must be long enough to contain the value header,
@@ -1609,6 +1616,7 @@ crypto_encrypt(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -1811,7 +1819,7 @@ void
 crypto_update(void)
 {
 	EVP_MD_CTX ctx;		/* message digest context */
-	struct cert_info *cp, *cpn, **zp; /* certificate info/value */
+	struct cert_info *cp, *cpn; /* certificate info/value */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t tstamp;	/* NTP timestamp */
 	u_int	len;
@@ -1841,29 +1849,21 @@ crypto_update(void)
 	/*
 	 * Sign certificates and timestamps. The filestamp is derived
 	 * from the certificate file extension from wherever the file
-	 * was generated. At the same time expired certificates are
-	 * expunged.
+	 * was generated. Note we do not throw expired certificates
+	 * away; they may have signed younger ones.
 	 */
-	zp = &cinfo;
 	for (cp = cinfo; cp != NULL; cp = cpn) {
 		cpn = cp->link;
-		if (tstamp > cp->last) {
-			*zp = cpn;
-			cert_free(cp);
-		} else {
-			cp->cert.tstamp = hostval.tstamp;
-			cp->cert.siglen = 0;
-			if (cp->cert.sig == NULL)
-				cp->cert.sig = emalloc(sign_siglen);
-			EVP_SignInit(&ctx, sign_digest);
-			EVP_SignUpdate(&ctx, (u_char *)&cp->cert, 12);
-			EVP_SignUpdate(&ctx, cp->cert.ptr,
-			    ntohl(cp->cert.vallen));
-			if (EVP_SignFinal(&ctx, cp->cert.sig, &len,
-			    sign_pkey))
-				cp->cert.siglen = htonl(len);
-			zp = &cp->link;
-		}
+		cp->cert.tstamp = hostval.tstamp;
+		cp->cert.siglen = 0;
+		if (cp->cert.sig == NULL)
+			cp->cert.sig = emalloc(sign_siglen);
+		EVP_SignInit(&ctx, sign_digest);
+		EVP_SignUpdate(&ctx, (u_char *)&cp->cert, 12);
+		EVP_SignUpdate(&ctx, cp->cert.ptr,
+		    ntohl(cp->cert.vallen));
+		if (EVP_SignFinal(&ctx, cp->cert.sig, &len, sign_pkey))
+			cp->cert.siglen = htonl(len);
 	}
 
 	/*
@@ -1945,6 +1945,7 @@ asn2ntp	(
 	 */
 	if (asn1time->length > 13)
 		return ((u_long)(~0));	/* We can't use -1 here. It's invalid */
+
 	v = (char *)asn1time->data;
 	tm.tm_year = (v[0] - '0') * 10 + v[1] - '0';
 	if (tm.tm_year < 50)
@@ -2054,6 +2055,7 @@ crypto_alice(
 	 */
 	if (peer->ident_pkey == NULL)
 		return (XEVNT_ID);
+
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
 		msyslog(LOG_INFO, "crypto_alice: defective key");
 		return (XEVNT_PUB);
@@ -2085,6 +2087,7 @@ crypto_alice(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2176,6 +2179,7 @@ crypto_bob(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2261,6 +2265,7 @@ crypto_iff(
 	DSA_SIG_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
+
 	else
 		return (XEVNT_ID);
 }
@@ -2343,6 +2348,7 @@ crypto_alice2(
 	 */
 	if (peer->ident_pkey == NULL)
 		return (XEVNT_ID);
+
 	if ((rsa = peer->ident_pkey->pkey.rsa) == NULL) {
 		msyslog(LOG_INFO, "crypto_alice2: defective key");
 		return (XEVNT_PUB);
@@ -2374,6 +2380,7 @@ crypto_alice2(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2465,6 +2472,7 @@ crypto_bob2(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2552,6 +2560,7 @@ crypto_gq(
 	DSA_SIG_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
+
 	else
 		return (XEVNT_ID);
 }
@@ -2655,6 +2664,7 @@ crypto_alice3(
 	 */
 	if (peer->ident_pkey == NULL)
 		return (XEVNT_ID);
+
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
 		msyslog(LOG_INFO, "crypto_alice3: defective key");
 		return (XEVNT_PUB);
@@ -2686,6 +2696,7 @@ crypto_alice3(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2782,6 +2793,7 @@ crypto_bob3(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2869,6 +2881,7 @@ crypto_mv(
 	DSA_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
+
 	else
 		return (XEVNT_ID);
 }
@@ -2933,6 +2946,7 @@ cert_parse(
 		X509_free(cert);
 		return (NULL);
 	}
+	ret->fstamp = fstamp;
 	ret->version = X509_get_version(cert);
 	X509_NAME_oneline(X509_get_subject_name(cert), pathbuf,
 	    MAXFILENAME - 1);
@@ -3025,7 +3039,7 @@ cert_parse(
 	if (strcmp(ret->subject, ret->issuer) == 0) {
 		if (!X509_verify(cert, ret->pkey)) {
 			msyslog(LOG_INFO,
-			    "cert_parse: invalid signature not verified %s",
+			    "cert_parse: signature not verified %s",
 			    pathbuf);
 			cert_free(ret);
 			X509_free(cert);
@@ -3038,8 +3052,7 @@ cert_parse(
 	 * be retroactive.
 	 */
 	if (ret->first > ret->last || ret->first < fstamp) {
-		msyslog(LOG_INFO,
-		    "cert_parse: expired %s",
+		msyslog(LOG_INFO, "cert_parse: invalid certificate %s",
 		    ret->subject);
 		cert_free(ret);
 		X509_free(cert);
@@ -3208,11 +3221,12 @@ cert_valid(
 
 	if (cinf->flags & CERT_SIGN)
 		return (XEVNT_OK);
+
 	ptr = (u_char *)cinf->cert.ptr;
 	cert = d2i_X509(NULL, &ptr, ntohl(cinf->cert.vallen));
 	if (!X509_verify(cert, pkey))
 		return (XEVNT_VFY);
-	cinf->flags |= CERT_SIGN;
+
 	X509_free(cert);
 	return (XEVNT_OK);
 }
@@ -3229,7 +3243,6 @@ cert_valid(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_PER	certificate expired
  * XEVNT_CRT	bad or missing certificate 
  */
 int
@@ -3240,30 +3253,29 @@ cert_install(
 {
 	struct cert_info *cp, *xp, *yp, **zp;
 	int	rval;
-	tstamp_t tstamp;
 
 	/*
 	 * Parse and validate the signed certificate. If valid,
 	 * construct the info/value structure; otherwise, scamper home.
-	 * Note this allows a certificate not-before time to be in the
-	 * future, but not a not-after time to be in the past.
+	 * Note that we do not check the period of validity, since the
+	 * clock may not be set yet.
 	 */
 	if ((cp = cert_parse((u_char *)ep->pkt, ntohl(ep->vallen),
 	    ntohl(ep->fstamp))) == NULL)
 		return (XEVNT_CRT);
 
-	tstamp = crypto_time();
-	if (tstamp > cp->last) {
-		cert_free(cp);
-		return (XEVNT_PER);
-	}
-
 	/*
 	 * Scan certificate list looking for another certificate with
 	 * the same subject and issuer. If another is found with the
 	 * same or older filestamp, unlink it and return the goodies to
-	 * the heap. If another is found with a later filetsamp, discard
+	 * the heap. If another is found with a later filestamp, discard
 	 * the new one and leave the building.
+	 *
+	 * Make a note to study this issue again. An earlier certificate
+	 * with a long lifetime might be overtaken by a later
+	 * certificate with a short lifetime, thus invalidating the
+	 * earlier signature. However, we gotta find a way to leak old
+	 * stuff from the cache, so we do it anyway. 
 	 */
 	rval = XEVNT_OK;
 	yp = cp;
@@ -3291,21 +3303,26 @@ cert_install(
 	 */
 	for (yp = cinfo; yp != NULL; yp = yp->link) {
 		for (xp = cinfo; xp != NULL; xp = xp->link) {
-			if (yp->flags & CERT_ERROR)
+			if (yp->flags & CERT_ERROR || (xp == yp &&
+			    !(xp->flags & CERT_TRUST)))
 				continue;
 
 			/*
-			 * If issuer Y matches subject X and signature Y
-			 * is valid using public key X, then Y is valid.
+			 * If issuer Y matches subject X, signature Y
+			 * is valid using public key X, and the
+			 * filestamp of Y is in the valid interval of X,
+			 * then Y is valid.
 			 */
-			if (strcmp(yp->issuer, xp->subject) != 0)
+			if (!(strcmp(yp->issuer, xp->subject) == 0 &&
+			    yp->fstamp >= xp->first && yp->fstamp <=
+			    yp->last))
 				continue;
 
 			if (cert_valid(yp, xp->pkey) != XEVNT_OK) {
 				yp->flags |= CERT_ERROR;
 				continue;
 			}
-			xp->flags |= CERT_SIGN;
+			yp->flags |= CERT_SIGN;
 
 			/*
 			 * If X is trusted, then Y is trusted. Note that
@@ -3560,6 +3577,7 @@ crypto_cert(
 	free(data);
 	if (ret == NULL)
 		return (NULL);
+
 	if ((ptr = strrchr(linkname, '\n')) != NULL)
 		*ptr = '\0'; 
 	sprintf(statstr, "%s 0x%x len %lu", &linkname[2], ret->flags,
@@ -3649,12 +3667,16 @@ crypto_tai(
 		ptr = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (ptr == NULL)
 			break;
+
 		if (strlen(buf) < 1)
 			continue;
+
 		if (*buf == '#')
 			continue;
+
 		if (sscanf(buf, "%u %u", &leapsec[i], &offset) != 2)
 			continue;
+
 		if (i != (int)(offset - TAI_1972)) { 
 			break;
 		}
@@ -3726,6 +3748,7 @@ crypto_setup(void)
 	 */
 	if (!crypto_flags)
 		return;
+
 	gethostname(filename, MAXFILENAME);
 	bytes = strlen(filename) + 1;
 	sys_hostname = emalloc(bytes);
