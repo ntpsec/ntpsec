@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#! /usr/bin/perl -w
 #
 # html2man.pl: Converts the NTP HTML documentation to man page format
 #
@@ -13,6 +13,8 @@
 # Last modified: <Mon Jan 28 17:24:38 2002 by pwb>
 
 require HTML::TokeParser;
+
+# use strict;		# I can dream...
 
 $MANDIR = "./man";
 
@@ -46,9 +48,9 @@ $seealso_disclaimer = 'These man pages are automatically hacked from the main NT
 $top_disclaimer = 'This file was automatically generated from HTML source, and may be ' .
     'incorrect.  See the SEE ALSO section at the end of this file for more info';
 
-mkdir $MANDIR;
-mkdir "$MANDIR/man8";
-mkdir "$MANDIR/man5";
+mkdir $MANDIR, 0777;
+mkdir "$MANDIR/man8", 0777;
+mkdir "$MANDIR/man5", 0777;
 
 # Do the actual processing
 foreach $file (keys %manfiles) {
