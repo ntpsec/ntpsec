@@ -1,7 +1,7 @@
 2001-05-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_syscall.h (ntp_gettime): Fill in the tai member.
-	Reported by Ulrich and Reg.
+	From: Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de>
 
 	* configure.in: 4.0.99k37
 
