@@ -1041,8 +1041,6 @@ sys_info(
 	is = (struct info_sys *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_sys));
 
-	is->peer = 0;
-	is->peer_mode = 0;
 	if (sys_peer != 0) {
 		if (sys_peer->srcadr.ss_family == AF_INET) {
 			is->peer = GET_INADDR(sys_peer->srcadr);
@@ -1053,6 +1051,12 @@ sys_info(
 			is->v6_flag = 1;
 		}
 		is->peer_mode = sys_peer->hmode;
+	} else {
+		is->peer = 0;
+		if (client_v6_capable) {
+			is->v6_flag = 0;
+		}
+		is->peer_mode = 0;
 	}
 
 	is->leap = sys_leap;
