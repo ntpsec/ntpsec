@@ -1,5 +1,9 @@
 2000-05-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99i5
+
+	* ntptrace/ntptrace.c: Protect sys/ioctl.h; grab config.h
+
 	* ntpd/ntp_proto.c (transmit): AUTOKEY and tstamp fixes.
 	(clock_update): Check oleap against LEAP_NOTINSYNC
 	(peer_clear): Free pubkey when we're done

@@ -8,13 +8,20 @@
  *
  *	Large portions stolen from ntpdate.c
  */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/signal.h>
-#include <sys/ioctl.h>
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
 #include <sys/time.h>
 #include <sys/resource.h>
 
