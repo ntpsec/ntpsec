@@ -419,7 +419,6 @@ ntpdmain(
 	)
 {
 	l_fp now;
-	char *cp;
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
