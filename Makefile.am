@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
-AUTOMAKE_OPTIONS = util/ansi2knr foreign
+AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
 
 SUBDIRS = \
 	scripts \
