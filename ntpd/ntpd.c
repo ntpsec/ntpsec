@@ -43,10 +43,9 @@
 # include <signal.h>
 # include <process.h>
 # include <io.h>
-# include "ntservice.h"
 # include "../libntp/log.h"
 # include <clockstuff.h>
-# include <crtdbg.h>
+#include "ntp_iocompletionport.h"
 #endif /* SYS_WINNT */
 #if defined(HAVE_RTPRIO)
 # ifdef HAVE_SYS_RESOURCE_H
@@ -132,15 +131,7 @@
 #endif /* SYS_WINNT */
 
 #if defined SYS_WINNT
-/* handles for various threads, process, and objects */
-HANDLE ResolverThreadHandle = NULL;
-/* variables used to inform the Service Control Manager of our current state */
-BOOL NoWinService = FALSE;
-SERVICE_STATUS ssStatus;
-SERVICE_STATUS_HANDLE	sshStatusHandle;
-HANDLE WaitHandles[3] = { NULL, NULL, NULL };
 char szMsgPath[255];
-static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 BOOL init_randfile();
 #endif /* SYS_WINNT */
 
@@ -475,7 +466,7 @@ ntpdmain(
 	init_winnt_time();
 
 #endif
-	getstartup(argc, argv); /* startup configuration, may set debug */
+//	getstartup(argc, argv); /* startup configuration, may set debug */
 
 	if (debug)
 	    printf("%s\n", Version);
@@ -699,23 +690,17 @@ ntpdmain(
 	(void) signal_no_reset(SIGPIPE, SIG_IGN);
 #endif	/* SIGPIPE */
 
-#if defined SYS_WINNT
-	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE)) {
-		msyslog(LOG_ERR, "Can't set console control handler: %m");
-	}
-#endif
-
 	/*
 	 * Call the init_ routines to initialize the data structures.
 	 */
-#if defined (HAVE_IO_COMPLETION_PORT)
-	init_io_completion_port();
-#endif
 	init_auth();
 	init_util();
 	init_restrict();
 	init_mon();
 	init_timer();
+#if defined (HAVE_IO_COMPLETION_PORT)
+	init_io_completion_port();
+#endif
 	init_lib();
 	init_random();
 	init_request();
@@ -868,20 +853,21 @@ getgroup:
 	 * yet to learn about anything else that is.
 	 */
 #if defined(HAVE_IO_COMPLETION_PORT)
-		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
-		WaitHandles[1] = get_timer_handle();
-		WaitHandles[2] = get_io_event();
+//		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit request */
+//		WaitHandles[1] = get_timer_handle();
+//		WaitHandles[2] = get_io_event();
 
 		for (;;) {
+#if 0
 			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, TRUE);
 			switch (Index) {
 				case WAIT_OBJECT_0 + 0 : /* exit request */
 					exit(0);
-				break;
+					break;
 
 				case WAIT_OBJECT_0 + 1 : /* timer */
 					timer();
-				break;
+					break;
 
 				case WAIT_OBJECT_0 + 2 : /* Io event */
 # ifdef DEBUG
@@ -890,13 +876,13 @@ getgroup:
 						printf( "IoEvent occurred\n" );
 					}
 # endif
-				break;
+					break;
 
 				case WAIT_IO_COMPLETION : /* loop */
 				case WAIT_TIMEOUT :
-				break;
+					break;
 				case WAIT_FAILED:
-					msyslog(LOG_ERR, "ntpdc: WaitForMultipleObjectsEx Failed: Error: %m");
+					msyslog(LOG_ERR, "ntpd: WaitForMultipleObjectsEx Failed: Error: %m");
 					break;
 
 				/* For now do nothing if not expected */
@@ -905,7 +891,8 @@ getgroup:
 				
 			} /* switch */
 			rbuflist = getrecvbufs();	/* get received buffers */
-
+#endif
+			rbuflist = GetReceivedBuffers();
 #else /* normal I/O */
 
 	was_alarmed = 0;
@@ -1096,129 +1083,3 @@ no_debug(
 }
 #endif  /* not SYS_WINNT */
 #endif	/* not DEBUG */
-
-#ifdef SYS_WINNT
-/* service_ctrl - control handler for NTP service
- * signals the service_main routine of start/stop requests
- * from the control panel or other applications making
- * win32API calls
- */
-void
-service_ctrl(
-	DWORD dwCtrlCode
-	)
-{
-	DWORD  dwState = SERVICE_RUNNING;
-
-	/* Handle the requested control code */
-	switch(dwCtrlCode)
-	{
-		case SERVICE_CONTROL_PAUSE:
-		/* see no reason to support this */
-		break;
-
-		case SERVICE_CONTROL_CONTINUE:
-		/* see no reason to support this */
-		break;
-
-		case SERVICE_CONTROL_STOP:
-			dwState = SERVICE_STOP_PENDING;
-			/*
-			 * Report the status, specifying the checkpoint and waithint,
-			 *	before setting the termination event.
-			 */
-			ssStatus.dwCurrentState = dwState;
-			ssStatus.dwWin32ExitCode = NO_ERROR;
-			ssStatus.dwWaitHint = 3000;
-			if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-			{
-				msyslog(LOG_ERR, "SetServiceStatus: %m");
-			}
-			if (WaitHandles[0] != NULL) {
-				SetEvent(WaitHandles[0]);
-			}
-		return;
-
-		case SERVICE_CONTROL_INTERROGATE:
-		/* Update the service status */
-		break;
-
-		default:
-		/* invalid control code */
-		break;
-
-	}
-
-	ssStatus.dwCurrentState = dwState;
-	ssStatus.dwWin32ExitCode = NO_ERROR;
-	if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-	{
-		msyslog(LOG_ERR, "SetServiceStatus: %m");
-	}
-}
-
-static BOOL WINAPI 
-OnConsoleEvent(  
-	DWORD dwCtrlType
-	)
-{
-	switch (dwCtrlType) {
-		case CTRL_BREAK_EVENT :
-			if (debug > 0) {
-				debug <<= 1;
-			}
-			else {
-				debug = 1;
-			}
-			if (debug > 8) {
-				debug = 0;
-			}
-			printf("debug level %d\n", debug);
-		break ;
-
-		case CTRL_C_EVENT  :
-		case CTRL_CLOSE_EVENT :
-		case CTRL_SHUTDOWN_EVENT :
-			if (WaitHandles[0] != NULL) {
-				SetEvent(WaitHandles[0]);
-			}
-		break;
-
-		default :
-			return FALSE;
-
-
-	}
-	return TRUE;;
-}
-
-
-/*
- *  NT version of exit() - all calls to exit() should be routed to
- *  this function.
- */
-void
-service_exit(
-	int status
-	)
-{
-	if (!debug) { /* did not become a service, simply exit */
-		/* service mode, need to have the service_main routine
-		 * register with the service control manager that the 
-		 * service has stopped running, before exiting
-		 */
-		ssStatus.dwCurrentState = SERVICE_STOPPED;
-		SetServiceStatus(sshStatusHandle, &ssStatus);
-
-	}
-	uninit_io_completion_port();
-	reset_winnt_time();
-
-# if defined _MSC_VER
-	_CrtDumpMemoryLeaks();
-# endif 
-#undef exit	
-	exit(status);
-}
-
-#endif /* SYS_WINNT */
