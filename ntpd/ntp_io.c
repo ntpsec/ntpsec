@@ -2001,11 +2001,10 @@ findinterface(
 	struct sockaddr_storage saddr;
 	int saddrlen;
 	u_int32 amask, imask;
-	u_int32 laddr, iaddr, maddr;
 
 	/*
 	 * If there is only one outgoing interface we already know the interface
-	 *
+	 */
 	if (addr->ss_family == AF_INET && outifaceipv4 != -1) {
 		return (&inter_list[outifaceipv4]);
 	}

@@ -145,7 +145,7 @@ getaddrinfo (const char *nodename, const char *servname,
 		}
 		ai->ai_addrlen = sizeof(struct sockaddr_storage);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
-		sockin->sin_family = ai->ai_family;
+		sockin->sin_family = (short) ai->ai_family;
 		sockin->sin_addr.s_addr = htonl(INADDR_ANY);
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
@@ -157,7 +157,13 @@ getaddrinfo (const char *nodename, const char *servname,
 			freeaddrinfo(ai);
 			return (EAI_SERVICE);
 		}
-		memcpy(ai->ai_addr->sa_data, &ntpport, sizeof(short));
+		/*
+		 * Set up the port number
+		 */
+		if (ai->ai_family == AF_INET)
+			((struct sockaddr_in *)ai->ai_addr)->sin_port = ntpport;
+		else if (ai->ai_family == AF_INET6)
+			((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = ntpport;
 	}
 	*res = ai;
 	return (0);
