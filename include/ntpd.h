@@ -152,6 +152,7 @@ extern	void	crypto_setup	P((void));
 extern	struct exten *crypto_args P((u_int, associd_t, u_char *));
 extern	int	crypto_public	P((struct peer *, u_char *, u_int));
 extern	void	value_free	P((struct value *));
+extern	time_t	timegm		P((struct tm *));
 #endif /* OPENSSL */
 
 /* ntp_proto.c */

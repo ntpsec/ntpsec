@@ -18,15 +18,12 @@
 #include "ntp_string.h"
 #include "ntp_crypto.h"
 
-#include "openssl/evp.h"
+#include "openssl/asn1_mac.h"
+#include "openssl/bn.h"
 #include "openssl/err.h"
+#include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rand.h"
-
-#include <stdio.h>
-#include <openssl/bn.h>
-#include <openssl/objects.h>
-#include <openssl/asn1_mac.h>
 
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"

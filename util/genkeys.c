@@ -1,4 +1,3 @@
-
 /*
  * Program to generate cryptographic keys for NTP clients and servers
  */
@@ -17,11 +16,15 @@
 #endif
 
 #ifdef OPENSSL
+#include "openssl/bn.h"
+#include <openssl/dh.h>
 #include "openssl/evp.h"
 #include "openssl/err.h"
 #include "openssl/rand.h"
 #include "openssl/pem.h"
-#include "openssl/x509.h"
+#include "openssl/x509v3.h"
+#include <openssl/objects.h>
+#include "openssl/asn1_mac.h"
 #endif /* OPENSSL */
 
 /*
@@ -31,8 +34,21 @@
 #define	PRIMELEN	512	/* length of DH prime */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
 #define	PATH_MAX	255	/* max file name length */
-#define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds at the epoch */
+#define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
+#define IFFLEN		PRIMELEN / 8 /* IFF exponent length (bytes) */
+
+#define PEM_STRING_IFFPARAMS "IFF PARAMETERS" /* PEM type */
+
+#define PEM_write_IFFparams(fp, x) \
+	PEM_ASN1_write((int (*)())i2d_IFFparams, \
+	    PEM_STRING_IFFPARAMS, fp, (char *)x, NULL, NULL, 0, NULL, \
+	    NULL)
+
+#define PEM_read_IFFparams(fp, x, cb, u) (DH *)PEM_ASN1_read( \
+           (char *(*)())d2i_IFFparams, PEM_STRING_IFFPARAMS, fp, \
+	   (char **)x, cb, u)
+
 /*
  * Prototypes
  */
@@ -41,6 +57,8 @@ FILE	*fheader P((u_char *));	/* construct file header */
 int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *)); /* generate req/cert */
 void	cb	 P((int, int, void *));	/* callback routine */
 u_long	asn2ntp	 P((ASN1_TIME *)); /* ASN.1 time to NTP seconds */
+int	i2d_IFFparams P((DH *, u_char **)); /* PEM write */
+DH	*d2i_IFFparams P((DH **, u_char **, long)); /* PEM read */
 #endif /* OPENSSL */
 
 /*
@@ -50,8 +68,12 @@ struct timeval tv;		/* initialization vector */
 u_long	ntptime;		/* NTP epoch */
 u_char	hostname[PATH_MAX];	/* host name */
 #ifdef OPENSSL
+char	*expa_hex;		/* IFF public value (hex) */
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
+
+char ftemp[200];
+
 
 /*
  * Main program
@@ -74,15 +96,22 @@ main(
 {
 #ifdef OPENSSL
 	EVP_PKEY *pkey;		/* public/private keys */
+	EVP_MD_CTX ctx;		/* signature context */
 	RSA	*rsa;		/* RSA keys */
 	DSA	*dsa_params;	/* DSA parameters */
+	DH	*dh_params;	/* Diffie-Hellman parameters */
+	u_char	bin[PRIMELEN / 8]; /* bignum binary */
 	u_char	seed[20];	/* seed for DSA parameters */
+	u_char	*sig;		/* DSA signature */
 	char	pathbuf[PATH_MAX];
 #endif /* OPENSSL */
 	u_char	md5key[16];
 	FILE	*str;
 	u_int	temp;
+	u_char	rbyte;
 	int	i, j;
+
+DH  *dh2;
 
 #ifdef OPENSSL
 	if (SSLeay() != OPENSSL_VERSION_NUMBER) {
@@ -105,8 +134,8 @@ main(
 	 * Generate semi-random MD5 keys.
 	 */
 	printf("Generating MD5 keys...\n");
-	srandom((u_int)tv.tv_usec);
 	str = fheader("MD5key");
+	srandom((u_int)tv.tv_usec);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < 16; j++) {
 			while (1) {
@@ -148,6 +177,50 @@ main(
 	OpenSSL_add_all_algorithms();
 
 	/*
+	 * Generate Diffie-Hellman parameters.
+	 */
+	printf("Generating DH parameters (%d bits)...\n", PRIMELEN);
+	dh_params = DH_generate_parameters(PRIMELEN, 2, cb,
+	    "DH_params");
+	if (dh_params == NULL) {
+		printf("DH generate parameters fails\n%s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		return (-1);
+		}
+	str = fheader("DHpar");
+	PEM_write_DHparams(str, dh_params);
+	fclose(str);
+	DHparams_print_fp(stdout, dh_params);
+
+	/*
+	 * Generate IFF private and public values. These are just the
+	 * Diffie-Hellman private and public values, but used in an
+	 * interesting way.
+	 */
+	printf("Generating IFF values (%d bits)...\n", PRIMELEN);
+	DH_generate_key(dh_params);
+	str = fheader("IFF");
+	temp = PRIMELEN / 8;
+	sprintf(pathbuf, "%d", temp);
+	PEM_write_IFFparams(str, dh_params);
+
+#if 0
+	BN_bn2bin(dh_params->priv_key, bin);
+	PEM_write(str, "IFF_Private", pathbuf, bin, temp);
+	BN_bn2bin(dh_params->pub_key, bin);
+	PEM_write(str, "IFF_Public", pathbuf, bin, temp);
+#endif
+	fclose(str);
+	expa_hex = BN_bn2hex(dh_params->pub_key);
+
+	str = fopen(ftemp, "r");
+
+printf("xxx %s %d\n", ftemp, str);
+
+	PEM_read_IFFparams(str, &dh2, NULL, 0);
+	DHparams_print_fp(stdout, dh2);
+
+	/*
 	 * Generate random RSA keys.
 	 */
 	printf("Generating RSA keys (%d bits)...\n", MODULUSLEN);
@@ -175,11 +248,10 @@ main(
 	str = fheader("RSAkey");
 	PEM_write_RSAPrivateKey(str, rsa, NULL, NULL, 0, NULL, NULL);
 	fclose(str);
-/*
 	RSA_print_fp(stdout, pkey->pkey.rsa, 0);
-*/
+
 	/*
-	 * Generate the X509v3 certificates. The digest algorithms that
+	 * Generate X509v3 certificates. The digest algorithms that
 	 * work with RSA are MD2, MD5, SHA, SHA1, MDC2 and RIPEMD160.
 	 */
 #ifdef HAVE_EVP_MD2
@@ -226,19 +298,39 @@ main(
 	PEM_write_DSAPrivateKey(str, dsa_params, NULL, NULL, 0, NULL,
 	    NULL);
 	fclose(str);
-/*
 	DSA_print_fp(stdout, pkey->pkey.dsa, 0);
-*/
+
 	/*
-	 * Generate the X509v3 certificates. The digest algorithms that
+	 * Generate X509v3 certificates. The digest algorithms that
 	 * work with DSS (DSA) are DSS and DSS1.
 	 */
 	x509("DSA_SHA", pkey, EVP_dss());
 	x509("DSA_SHA1", pkey, EVP_dss1());
+
+#if 0
+	/*
+	 * Generate keys as DSA signatures.
+	 */
+	printf("Generating keys as DSA signatures...\n");
+	str = fheader("SIGkey");
+	temp = EVP_PKEY_size(pkey);
+	sig = malloc(temp);
+	EVP_SignInit(&ctx, EVP_dss());
+	EVP_SignUpdate(&ctx, hostname, sizeof(hostname));
+	EVP_SignFinal(&ctx, sig, &temp, pkey);
+	PEM_write(str, "SIG_KEY", "header", sig, temp);
+	EVP_VerifyInit(&ctx, EVP_dss());
+	EVP_VerifyUpdate(&ctx, hostname, sizeof(hostname));
+	temp = EVP_VerifyFinal(&ctx, sig, temp, pkey);
+	fclose(str);
 	free(pkey);
+#endif
+	OPENSSL_free(expa_hex);
+	DH_free(dh_params);
 #endif /* OPENSSL */
 	return (0);
 }
+
 
 #ifdef OPENSSL
 /*
@@ -253,6 +345,10 @@ main(
  * interval extends from the current time to the same time one year
  * hence. For NTP purposes, it is convenient to use the NTP seconds of
  * the current time as the serial number.
+ *
+ * The certificate extension containes a random string used in the IFF
+ * scheme. The NID is currently borrowed from another application.
+ * Should be fixed.
  */
 int
 x509	(
@@ -265,6 +361,8 @@ x509	(
 	X509_NAME *subj;	/* distinguished (common) name */
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
+	X509V3_CTX ctx;		/* X509v3 context */
+	X509_EXTENSION *ext;	/* X509v3 extension */
 	u_char	pathbuf[PATH_MAX];
 
 	/*
@@ -295,6 +393,23 @@ x509	(
 		ERR_error_string(ERR_get_error(), NULL));
 		return (-1);
 	}
+
+	/*
+	 * Add X509v3 extensions.
+	 */
+	ext = X509V3_EXT_conf_nid(NULL, &ctx,
+	    NID_subject_key_identifier, expa_hex);
+	if (!ext) {
+		printf("Extension field fails\n%s\n",
+		ERR_error_string(ERR_get_error(), NULL));
+		return (-1);
+	}
+	X509_add_ext(cert, ext, -1);
+	X509_EXTENSION_free(ext);
+
+	/*
+	 * Sign and verify.
+	 */
 	X509_sign(cert, pkey, md);
 	if (!X509_verify(cert, pkey)) {
 		printf("Verify certificate fails\n%s\n",
@@ -308,9 +423,8 @@ x509	(
 	sprintf(pathbuf, "%scert", id);
 	str = fheader(pathbuf);
 	PEM_write_X509(str, cert);
-/*
 	X509_print_fp(stdout, cert);
-*/
+
 	/*
 	 * Give back the goodies.
 	 */
@@ -403,6 +517,154 @@ fheader	(
 
 	sprintf(filename, "ntpkey_%s_%s.%lu", id, hostname, ntptime);
 	str = fopen(filename, "w");
+
+strcpy(ftemp, filename);
+
 	fprintf(str, "# %s\n# %s", filename, ctime(&tv.tv_sec));
 	return(str);
+}
+
+
+/*
+ * i2d_IFFparams() - encode IFF parameters in ASN1
+ *
+ * This routine is modelled after the i2d_DHparams() routine in the
+ * OpenSSL library, but modified to encode the private and public
+ * values, as well as the prime and generator. In the IFF scheme, all of
+ * these values are secret, but must be installed in all servers and
+ * clients in the group.
+ */
+int i2d_IFFparams(
+	DH	*a,		/* Diffie-Hellman parameters */
+	u_char	**pp		/* ASN1 encoded string */
+	)
+{
+	BIGNUM	*num[4];
+	ASN1_INTEGER bs;
+	u_int j, i, tot = 0, len, max = 0;
+	int	t;
+	u_char	*p;
+
+	/*
+	 * First, do some error checking and compute the total length.
+	 */
+	if (a == NULL)
+		return (0);
+	num[0] = a->p;
+	num[1] = a->g;
+	num[2] = a->priv_key;
+	num[3] = a->pub_key;
+	for (i = 0; i < 4; i++)	{
+		if (num[i] == NULL)
+			continue;
+		j = BN_num_bits(num[i]);
+		len = ((j == 0) ? 0 : ((j / 8) + 1));
+		if (len > max)
+			max = len;
+		len = ASN1_object_size(0, len, (num[i]->neg) ?
+		    V_ASN1_NEG_INTEGER : V_ASN1_INTEGER);
+		tot += len;
+	}
+
+	t = ASN1_object_size(1, tot, V_ASN1_SEQUENCE);
+	if (pp == NULL)
+		return (t);
+
+	/*
+	 * Allocate the ASN1 string.
+	 */
+	p = *pp;
+	ASN1_put_object(&p, 1, tot, V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
+	bs.type = V_ASN1_INTEGER;
+	bs.data = (u_char *)OPENSSL_malloc(max + 4);
+	if (bs.data == NULL) {
+		ASN1err(ASN1_F_I2D_DHPARAMS, ERR_R_MALLOC_FAILURE);
+		return (0);
+	}
+
+	/*
+	 * Encode the date as ASN1 integers. The order is prime,
+	 * generator, private value, public value.
+	 */
+	for (i=0; i < 4; i++) {
+		if (num[i] == NULL)
+			continue;
+		bs.length = BN_bn2bin(num[i], bs.data);
+		i2d_ASN1_INTEGER(&bs, &p);
+	}
+	OPENSSL_free(bs.data);
+	*pp = p;
+	return (t);
+}
+
+
+/*
+ * PEM_read_IFFparams - read IFF parameters encoded in ASN1 and PEM.
+ *
+ * This routine is modelled after the d2i_DHparams() routine in the
+ * OpenSSL library, but modified to decode the private and public
+ * values, as well as the prime and generator. In the IFF scheme, all of
+ * these values are secret, but must be installed in all servers and
+ * clients in the group.
+ */
+DH *d2i_IFFparams(
+	DH	**a,		/* Diffie-Hellman parameters */
+	u_char	**pp,		/* ASN1 encoded string */
+	long	length		/* length of ASN1 encoded string */
+	)
+{
+	int i = ERR_R_NESTED_ASN1_ERROR;
+	ASN1_INTEGER *bs = NULL;
+	long	v = 0;
+	M_ASN1_D2I_vars(a, DH *, DH_new);
+
+	/*
+	 * Decode prime and generator.
+	 */
+	M_ASN1_D2I_Init();
+	M_ASN1_D2I_start_sequence();
+	M_ASN1_D2I_get(bs, d2i_ASN1_INTEGER);
+	if ((ret->p = BN_bin2bn(bs->data, bs->length, ret->p)) == NULL)
+		goto err_bn;
+	M_ASN1_D2I_get(bs, d2i_ASN1_INTEGER);
+	if ((ret->g = BN_bin2bn(bs->data, bs->length, ret->g)) == NULL)
+		goto err_bn;
+
+	/*
+	 * Decode private and public values.
+	 */
+	M_ASN1_D2I_get(bs, d2i_ASN1_INTEGER);
+	if ((ret->p = BN_bin2bn(bs->data, bs->length, ret->priv_key)) ==
+	    NULL)
+		goto err_bn;
+	M_ASN1_D2I_get(bs, d2i_ASN1_INTEGER);
+	if ((ret->g = BN_bin2bn(bs->data, bs->length, ret->pub_key)) ==
+	    NULL)
+		goto err_bn;
+
+	if (!M_ASN1_D2I_end_sequence()) {
+		M_ASN1_D2I_get(bs, d2i_ASN1_INTEGER);
+		for (i = 0; i < bs->length; i++)
+			v = (v << 8) | (bs->data[i]);
+		ret->length = (int)v;
+	}
+
+	/*
+	 * Opaque endgame.
+	 */
+	M_ASN1_BIT_STRING_free(bs);
+	M_ASN1_D2I_Finish_2(a);
+
+	/*
+	 * Error stubs.
+	 */
+err_bn:
+	i = ERR_R_BN_LIB;
+err:
+	ASN1err(ASN1_F_D2I_DHPARAMS, i);
+	if ((ret != NULL) && ((a == NULL) || (*a != ret)))
+		DH_free(ret);
+	if (bs != NULL)
+		M_ASN1_BIT_STRING_free(bs);
+	return(NULL);
 }
