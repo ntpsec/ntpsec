@@ -2294,6 +2294,7 @@ case "$ans" in
  yes|rsaref|openssl)
     case "$ans" in
      rsaref)
+	ans=no
 	;;
      *)
 	if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
