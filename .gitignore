@@ -119,3 +119,9 @@ ports/winnt/ntpd/ntpd.dsp.$$$
 ports/winnt/ntpdate/ntpdate.dsp.$$$
 ports/winnt/ntpdc/ntpdc.dsp.$$$
 ports/winnt/ntpq/ntpq.dsp.$$$
+ltmain.sh
+ntpq/ntpq-opts.c
+ntpq/ntpq-opts.h
+ntpq/ntpq-opts.menu
+ntpq/ntpq-opts.texi
+ntpq/ntpq.1
