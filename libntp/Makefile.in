@@ -105,7 +105,7 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	clocktime.c clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c \
 	emalloc.c findconfig.c fptoa.c fptoms.c getopt.c hextoint.c \
 	hextolfp.c humandate.c inttoa.c lib_strbuf.c machines.c md5c.c \
-	memmove.c mexit.c mfptoa.c mfptoms.c modetoa.c mstolfp.c msutotsf.c \
+	memmove.c mfptoa.c mfptoms.c modetoa.c mstolfp.c msutotsf.c \
 	msyslog.c netof.c numtoa.c numtohost.c octtoint.c prettydate.c \
 	ranny.c refnumtoa.c statestr.c syssignal.c systime.c tsftomsu.c \
 	tstotv.c tvtoa.c tvtots.c uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
@@ -137,8 +137,8 @@ calleapwhen$U.o caltontp$U.o calyearstart$U.o clocktime$U.o \
 clocktypes$U.o decodenetnum$U.o dofptoa$U.o dolfptoa$U.o emalloc$U.o \
 findconfig$U.o fptoa$U.o fptoms$U.o getopt$U.o hextoint$U.o \
 hextolfp$U.o humandate$U.o inttoa$U.o lib_strbuf$U.o machines$U.o \
-md5c$U.o memmove$U.o mexit$U.o mfptoa$U.o mfptoms$U.o modetoa$U.o \
-mstolfp$U.o msutotsf$U.o msyslog$U.o netof$U.o numtoa$U.o numtohost$U.o \
+md5c$U.o memmove$U.o mfptoa$U.o mfptoms$U.o modetoa$U.o mstolfp$U.o \
+msutotsf$U.o msyslog$U.o netof$U.o numtoa$U.o numtohost$U.o \
 octtoint$U.o prettydate$U.o ranny$U.o refnumtoa$U.o statestr$U.o \
 syssignal$U.o systime$U.o tsftomsu$U.o tstotv$U.o tvtoa$U.o tvtots$U.o \
 uglydate$U.o uinttoa$U.o utvtoa$U.o ymd2yd$U.o mfp_mul$U.o binio$U.o \
@@ -168,14 +168,14 @@ DEP_FILES =  .deps/a_md5encrypt.P .deps/adjtime.P .deps/atoint.P \
 .deps/fptoms.P .deps/getopt.P .deps/gpstolfp.P .deps/hextoint.P \
 .deps/hextolfp.P .deps/humandate.P .deps/ieee754io.P .deps/inttoa.P \
 .deps/iosignal.P .deps/lib_strbuf.P .deps/machines.P .deps/md5c.P \
-.deps/memmove.P .deps/mexit.P .deps/mfp_mul.P .deps/mfptoa.P \
-.deps/mfptoms.P .deps/mktime.P .deps/modetoa.P .deps/mstolfp.P \
-.deps/msutotsf.P .deps/msyslog.P .deps/netof.P .deps/numtoa.P \
-.deps/numtohost.P .deps/octtoint.P .deps/prettydate.P .deps/ranny.P \
-.deps/recvbuff.P .deps/refnumtoa.P .deps/statestr.P .deps/strerror.P \
-.deps/syssignal.P .deps/systime.P .deps/tsftomsu.P .deps/tstotv.P \
-.deps/tvtoa.P .deps/tvtots.P .deps/uglydate.P .deps/uinttoa.P \
-.deps/utvtoa.P .deps/ymd2yd.P
+.deps/memmove.P .deps/mfp_mul.P .deps/mfptoa.P .deps/mfptoms.P \
+.deps/mktime.P .deps/modetoa.P .deps/mstolfp.P .deps/msutotsf.P \
+.deps/msyslog.P .deps/netof.P .deps/numtoa.P .deps/numtohost.P \
+.deps/octtoint.P .deps/prettydate.P .deps/ranny.P .deps/recvbuff.P \
+.deps/refnumtoa.P .deps/statestr.P .deps/strerror.P .deps/syssignal.P \
+.deps/systime.P .deps/tsftomsu.P .deps/tstotv.P .deps/tvtoa.P \
+.deps/tvtots.P .deps/uglydate.P .deps/uinttoa.P .deps/utvtoa.P \
+.deps/ymd2yd.P
 SOURCES = $(libntp_a_SOURCES)
 OBJECTS = $(am_libntp_a_OBJECTS)
 
@@ -256,7 +256,6 @@ lib_strbuf$U.o:
 machines$U.o:
 md5c$U.o:
 memmove$U.o:
-mexit$U.o:
 mfptoa$U.o:
 mfptoms$U.o:
 modetoa$U.o:
@@ -366,8 +365,6 @@ md5c_.c: md5c.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/md5c.c; then echo $(srcdir)/md5c.c; else echo md5c.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > md5c_.c
 memmove_.c: memmove.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/memmove.c; then echo $(srcdir)/memmove.c; else echo memmove.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > memmove_.c
-mexit_.c: mexit.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/mexit.c; then echo $(srcdir)/mexit.c; else echo mexit.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > mexit_.c
 mfp_mul_.c: mfp_mul.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/mfp_mul.c; then echo $(srcdir)/mfp_mul.c; else echo mfp_mul.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > mfp_mul_.c
 mfptoa_.c: mfptoa.c $(ANSI2KNR)
@@ -430,12 +427,12 @@ binio_.o buftvtots_.o caljulian_.o calleapwhen_.o caltontp_.o \
 calyearstart_.o clocktime_.o clocktypes_.o decodenetnum_.o dofptoa_.o \
 dolfptoa_.o emalloc_.o findconfig_.o fptoa_.o fptoms_.o getopt_.o \
 gpstolfp_.o hextoint_.o hextolfp_.o humandate_.o ieee754io_.o inttoa_.o \
-iosignal_.o lib_strbuf_.o machines_.o md5c_.o memmove_.o mexit_.o \
-mfp_mul_.o mfptoa_.o mfptoms_.o mktime_.o modetoa_.o mstolfp_.o \
-msutotsf_.o msyslog_.o netof_.o numtoa_.o numtohost_.o octtoint_.o \
-prettydate_.o ranny_.o recvbuff_.o refnumtoa_.o statestr_.o strerror_.o \
-syssignal_.o systime_.o tsftomsu_.o tstotv_.o tvtoa_.o tvtots_.o \
-uglydate_.o uinttoa_.o utvtoa_.o ymd2yd_.o : $(ANSI2KNR)
+iosignal_.o lib_strbuf_.o machines_.o md5c_.o memmove_.o mfp_mul_.o \
+mfptoa_.o mfptoms_.o mktime_.o modetoa_.o mstolfp_.o msutotsf_.o \
+msyslog_.o netof_.o numtoa_.o numtohost_.o octtoint_.o prettydate_.o \
+ranny_.o recvbuff_.o refnumtoa_.o statestr_.o strerror_.o syssignal_.o \
+systime_.o tsftomsu_.o tstotv_.o tvtoa_.o tvtots_.o uglydate_.o \
+uinttoa_.o utvtoa_.o ymd2yd_.o : $(ANSI2KNR)
 
 tags: TAGS
 

@@ -1,3 +1,8 @@
+1999-12-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/Makefile.am (libntp_a_SOURCES): Lose mexit.c - Sven will
+	move it to the winnt port area.
+
 1999-12-03  Sven Dietrich <sven_dietrich@trimble.com>
 
 	* libntp/systime.c: Removed adjtime hack for WINNT
