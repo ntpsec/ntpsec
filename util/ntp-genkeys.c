@@ -442,6 +442,9 @@ snifflink(
 	char buf[PATH_MAX];
 	int rc;
 
+	if (!file)
+		return;
+
 	rc = readlink(file, buf, sizeof buf);
 	if (-1 == rc) {
 		if (EINVAL == errno)
