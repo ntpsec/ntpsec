@@ -572,8 +572,8 @@ ProjDir=.
 InputPath=..\..\..\configure
 
 "$(ProjDir)\version.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	echo Using environment var PERL ($(PERL)) 
-	$(PERL)\bin\perl ..\scripts\mkver.bat -P ntpd 
+	echo Using NT Shell Script to generate version.c 
+	..\scripts\mkver.bat -P ntpd 
 	
 # End Custom Build
 
@@ -585,9 +585,9 @@ ProjDir=.
 InputPath=..\..\..\configure
 
 "$(ProjDir)\version.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	echo Using environment var PERL ($(PERL)) 
-	$(PERL)\bin\perl ..\scripts\mkver.bat -P ntpd 
-	
+	echo Using NT Shell Script to generate version.c 
+	..\scripts\mkver.bat -P ntpd 	
+
 # End Custom Build
 
 !ENDIF 

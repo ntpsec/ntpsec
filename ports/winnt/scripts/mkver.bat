@@ -1,100 +1,68 @@
-@rem = '--*-Perl-*--';
-@rem = '
-@echo off
-perl -S %0.bat %1 %2 %3 %4 %5 %6 %7 %8 %9
-goto endofperl
-@rem ';
+@ECHO OFF
+
+GOTO PROG
 ######################################################################
 #
 # Revision: mkver.bat
-# Author:   Greg Schueman
-# Date:     05/03/1996 
-# Purpose:  Provide a perl script for NT to replace the
-#           mkversion shell script.
+# Author:   Frederick Czajka
+# Date:     02/10/2000
+# Purpose:  Provide a NT Shell script to replace the perl script 
+#           that replaced the UNIX mkver shell script.
 #           
+# 
 #
-#
-# Subroutines:
-#     print_help
-#     
-#
+# Notes:  I had two goals with this script one to only use native
+#         NT Shell commands and two was too emulate the PERL style
+#         output. This required some work for the DATE format as 
+#         you will see and TIME was really tricky to get a format 
+#         matching PERLs!
 #
 ######################################################################
+:PROG
 
-use English;
-use Getopt::Long;
+IF {%1} == {} GOTO USAGE
+IF {%1} == {-H} GOTO USAGE
+IF {%2} == {} GOTO USAGE
+IF {%1} == {-P} GOTO BEGIN
 
-#********************************************************************* 
-#  Program Dependency Requirements
-#*********************************************************************
+REM For any other bizarre permutation...
+GOTO USAGE
 
-#********************************************************************* 
-#  Set Environment
-#*********************************************************************
-$PROGRAM = $0;
-$USAGE   = "Usage: ${PROGRAM} [ -P <Program Name> -H ]\n";
+:BEGIN
 
+SET GENERATED_PROGRAM=%2
 
-#********************************************************************* 
-#  Subroutine Print Help 
-#*********************************************************************
-
-sub print_help 
-{
-   print STDERR $USAGE;
-   print STDERR " -P --Program Name      Database Name\n";
-   print STDERR " -H --Help         Help on options\n";
-   print STDERR "\n";
-} # print_help end
+REM Reimplemented from orginal Unix Shell script
+IF NOT EXIST .version ECHO 0 > .version
+FOR /F %%i IN (.version) do @SET RUN=%%i
+SET /A RUN=%RUN%+1
+ECHO %RUN% > .version
 
 
+FOR /F "TOKENS=2 DELIMS== " %%a IN ('findstr /b /l VERSION= ..\..\..\configure') DO @SET VER=%%a
+FOR /F "TOKENS=5-8 DELIMS=:. " %%a IN ('echo.^|time') DO SET HH=%%a&SET MM=%%b&SET SS=%%c&SET HS=%%d
+FOR /F "TOKENS=1-4 DELIMS=/ " %%a IN ('date/t') DO SET DAY=%%a&SET nmm=%%b&SET dd=%%c&SET yyyy=%%d
 
-#********************************************************************* 
-#  Main program
-#*********************************************************************
+IF %NMM% ==01 SET MONTH=Jan
+IF %NMM% ==02 SET MONTH=Feb
+IF %NMM% ==03 SET MONTH=Mar
+IF %NMM% ==04 SET MONTH=Apr
+IF %NMM% ==05 SET MONTH=May
+IF %NMM% ==06 SET MONTH=Jun
+IF %NMM% ==07 SET MONTH=Jul
+IF %NMM% ==08 SET MONTH=Aug
+IF %NMM% ==09 SET MONTH=Sep
+IF %NMM% ==10 SET MONTH=Oct
+IF %NMM% ==11 SET MONTH=Nov
+IF %NMM% ==12 SET MONTH=Dec
 
-#
-# Process runtime options
-#
-$result = GetOptions('help|H', 'prog|P=s'); 
+ECHO char * Version = "%GENERATED_PROGRAM% %VER% %DAY% %MONTH% %DD% %HH%:%MM%:%SS% %YYYY% (%RUN%)" ; > version.c
 
-if ($opt_help == 1)
-{ 
-   print_help(); 
-   exit();
-};
+GOTO EOF
+:USAGE
 
+   ECHO Usage: mkver.bat [ -P <Program Name> -H ]
+   ECHO   -P          Database Name
+   ECHO   -H          Help on options
 
-if (length($opt_prog) > 0)
-   { $GENERATED_PROGRAM=$opt_prog; } 
-else 
-   { die "Program Name parameter required."; }
-
-#
-# Program logic
-#
-
-$DATE =  localtime;
-chomp $DATE;
-$RUN = "0"; # Not working yet
-
-open( INPUT, '<..\..\..\configure' );
-open( OUTPUT, '>version.c' );
-
-while ($_ = <INPUT> )
-{
-#   if (/^[0-9a-zA-Z_]*=/) 
-   if (/^VERSION=/) 
-   {
-      $FLAGS = $POSTMATCH;
-   }
-}
-chomp $FLAGS;
-
-print OUTPUT "char * Version = \"$GENERATED_PROGRAM $FLAGS $DATE ($RUN)\" ;";
-
-close( OUTPUT );
-close( INPUT );
-
-__END__
-:endofperl
+:EOF
