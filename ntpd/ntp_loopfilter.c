@@ -38,8 +38,8 @@
 #define CLOCK_MINSTEP	900.	/* default stepout threshold (s) */
 #define CLOCK_PANIC	1000.	/* default panic threshold (s) */
 #define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
-#define CLOCK_PLL	16.	/* PLL loop gain */
-#define CLOCK_FLL	8.	/* FLL loop gain */
+#define CLOCK_PLL	16.	/* PLL loop gain (log2) */
+#define CLOCK_FLL	(NTP_MAXPOLL + 1.) /* FLL loop gain */
 #define CLOCK_AVG	4.	/* parameter averaging constant */
 #define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
@@ -455,7 +455,7 @@ local_clock(
 			 * the rules of fair engagement are broken.
 			 */
 			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
-				dtemp = NTP_MAXPOLL + 1 - sys_poll;
+				dtemp = CLOCK_FLL - sys_poll;
 				flladj = (fp_offset - clock_offset) /
 				    (max(mu, allan_xpt) * dtemp);
 			}
