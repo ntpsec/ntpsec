@@ -744,10 +744,8 @@ service_main(
 	getconfig(argc, argv);
 #ifdef AUTOKEY
 	gethostname(hostname, MAXFILENAME);
-	for (n = strlen(hostname) + 1; n % 4 != 0; n++)
-		hostname[n] = 0;
+	n = strlen(hostname) + 1;
 	sys_hostname = emalloc(n);
-	sys_hostnamelen = n;
 	memcpy(sys_hostname, hostname, n);
 #ifdef PUBKEY
 	if (crypto_enable)

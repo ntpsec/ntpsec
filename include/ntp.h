@@ -291,7 +291,7 @@ struct peer {
 	struct autokey recauto;	/* autokey */
 	u_int32	cmmd;		/* peer command */
 	u_short	assoc;		/* association ID of peer */
-
+	u_int	tailcnt;	/* authentic packet watchdog */
 	/*
 	 * Variables used by authenticated server
 	 */
@@ -309,7 +309,6 @@ struct peer {
 #else
 #define clear_to_zero valid
 #endif /* AUTOKEY */
-	u_int	tailcnt;	/* tailgate poll counter */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
 	u_char	reach;		/* reachability register */

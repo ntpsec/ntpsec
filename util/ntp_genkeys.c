@@ -9,6 +9,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
 #include "ntp_crypto.h"
+#include "ntp_unixtime.h"
 
 /*
  * Cryptodefines
@@ -32,7 +33,13 @@
  * this program in the breeze will no doubt bring a cast of thousands to
  * wiggle the options this way and that for various useful purposes.
  *
- * The ntp.keys file contains 16 MD5 keys. Each key consists of 16
+ * The names of all files begin with "ntp" and end with an extension
+ * consisting of the seconds value of the current NTP timestamp, which
+ * appears in the form ".*". This provides a way to distinguish between
+ * key generations, since the host name and timestamp can be fetched by
+ * a client during operation.
+ *
+ * The ntp.keys.* file contains 16 MD5 keys. Each key consists of 16
  * characters randomized over the ASCII 95-character printing subset.
  * The file is read by the daemon at the location specified by the keys
  * configuration file command and made visible only to root. An
@@ -46,35 +53,36 @@
  * identifier for each association is specified as the key argument in
  * the server or peer configuration file command.
  *
- * The ntpkey file contains the RSA private key. It is read by the
+ * The ntpkey.* file contains the RSA private key. It is read by the
  * daemon at the location specified by the private argument of the
  * crypto configuration file command and made visible only to root. This
  * file is useful only to the machine that generated it and never shared
  * with any other daemon or application program.
  *
- * The ntpkey_host file contains the RSA public key, where host is the
+ * The ntpkey_host.* file contains the RSA public key, where host is the
  * DNS name of the host that generated it. The file is read by the
  * daemon at the location specified by the public argument to the server
  * or peer configuration file command. This file can be widely
  * distributed and stored without using secure means, since the data are
  * public values.
  *
- * The ntp_dh file contains two Diffie-Hellman parameters, the prime
+ * The ntp_dh.* file contains two Diffie-Hellman parameters, the prime
  * modulus and the generator. The file is read by the daemon at the
  * location specified by the dhparams argument of the crypto
  * configuration file command. This file can be widely distributed and
  * stored without using secure means, since the data are public values.
  *
- * The file formats all begin with two lines, the first containing the
- * generating system DNS name and the second the datestamp. Lines
- * beginning with # are considered comments and ignored by the daemon.
- * In the ntp.keys file, the next 16 lines contain the MD5 keys in
- * order. In the ntpkey and ntpkey_host files, the next line contains
- * the modulus length in bits followed by the key as a PEM encoded
- * string. In the ntpkey_dh file, the next line contains the prime
- * length in bytes followed by the prime as a PEM encoded string, and
- * the next and final line contains the generator length in bytes
- * followed by the generator as a PEM encoded string.
+ * The file formats all begin with two lines. The first line contains
+ * the file name and decimal timestamp, while the second contains the
+ * readable datestamp. Lines beginning with # are considered comments
+ * and ignored by the daemon. In the ntp.keys.* file, the next 16 lines
+ * contain the MD5 keys in order. In the ntpkey.* and ntpkey_host.*
+ * files, the next line contains the modulus length in bits followed by
+ * the key as a PEM encoded string. In the ntpkey_dh.* file, the next
+ * line contains the prime length in bytes followed by the prime as a
+ * PEM encoded string, and the next and final line contains the
+ * generator length in bytes followed by the generator as a PEM encoded
+ * string.
  *
  * Note: See the file ./source/rsaref.h in the rsaref20 package for
  * explanation of return values, if necessary. 
@@ -93,6 +101,7 @@ main(
 	u_char encoded_key[MAXKEYLEN];	/* encoded PEM string buffer */
 	u_int modulus;			/* modulus length */
 	struct timeval tv;		/* initialization vector */
+	u_long ntptime;			/* NTP timestamp */
 	u_char hostname[256];		/* DNS host name */
 	u_char filename[256];		/* public key file name */
 	u_char md5key[17];		/* generated MD5 key */ 
@@ -102,20 +111,21 @@ main(
 	int i, j;
 
 	/*
-	 * Generate the file "ntp.keys" containing 16 random MD5 keys in
-	 * the format expected at daemon run time.
+	 * Generate 16 random MD5 keys.
 	 */
-	gethostname(&hostname, sizeof hostname);
-	printf("Generating MD5 keys...\n");
-	str = fopen("ntp.keys", "w");
+	gethostname(hostname, sizeof(hostname));
+	gettimeofday(&tv, 0);
+	ntptime = tv.tv_sec + JAN_1970;
+	sprintf(filename, "ntp.keys.%lu", ntptime);
+	printf("Generating MD5 key file...\n");
+	str = fopen(filename, "w");
 	if (str == NULL) {
-		perror("MD5/DES key file");
+		perror("MD5 key file");
 		return (-1);
 	}
-	gettimeofday(&tv, 0);
-	srandom((u_int)tv.tv_sec);
-	fprintf(str, "# MD5/DES key file generated by %s\n# %s",
-	    hostname, ctime(&tv.tv_sec));
+	srandom((u_int)tv.tv_usec);
+	fprintf(str, "# MD5 key file %s\n# %s", filename,
+	   ctime(&tv.tv_sec));
 	for (i = 1; i <= 16; i++) {
 		for (j = 0; j < 16; j++) {
 			while (1) {
@@ -132,9 +142,9 @@ main(
 	fclose(str);
 
 	/*
-	 * Roll a RSA public/private key pair.
+	 * Roll the RSA public/private key pair.
 	 */
-	printf("Generating RSA public/private key pair %d bits...\n",
+	printf("Generating RSA public/private key pair (%d bits)...\n",
 	    MODULUSLEN);
 	protokey.bits = MODULUSLEN;
 	protokey.useFermat4 = 1;
@@ -152,18 +162,19 @@ main(
 	}
 
 	/*
-	 * Generate the file "ntpkey" containing the RSA private key in
+	 * Generate the file "ntpkey.*" containing the RSA private key in
 	 * printable ASCII format.
 	 */
-	str = fopen("ntpkey", "w");
+	sprintf(filename, "ntpkey.%lu", ntptime);
+	str = fopen(filename, "w");
 	if (str == NULL) { 
 		perror("RSA private key file");
 		return (-1);
 	}
 	len = sizeof(rsaref_private) - sizeof(rsaref_private.bits);
 	modulus = (u_int32)rsaref_private.bits;
-	fprintf(str, "# RSA private key file generated by %s\n# %s",
-	    hostname, ctime(&tv.tv_sec));
+	fprintf(str, "# RSA private key file %s\n# %s", filename,
+	    ctime(&tv.tv_sec));
 	R_EncodePEMBlock(encoded_key, &temp,
 	    (u_char *)&rsaref_private.modulus, len);
 	encoded_key[temp] = '\0';
@@ -171,10 +182,10 @@ main(
 	fclose(str);
 
 	/*
-	 * Generate the file "ntpkey_host" containing the RSA public key
+	 * Generate the file "ntpkey_host.*" containing the RSA public key
 	 * in printable ASCII format.
 	 */
-	snprintf(filename, sizeof filename, "ntpkey_%s", hostname); 
+	sprintf(filename, "ntpkey_%s.%lu", hostname, ntptime);
 	str = fopen(filename, "w");
 	if (str == NULL) { 
 		perror("RSA public key file");
@@ -182,8 +193,8 @@ main(
 	}
 	len = sizeof(rsaref_public) - sizeof(rsaref_public.bits);
 	modulus = (u_int32)rsaref_public.bits;
-	fprintf(str, "# RSA public key file generated by %s\n# %s",
-	    hostname, ctime(&tv.tv_sec));
+	fprintf(str, "# RSA public key file %s\n# %s", filename,
+	    ctime(&tv.tv_sec));
 	R_EncodePEMBlock(encoded_key, &temp,
 	    (u_char *)&rsaref_public.modulus, len);
 	encoded_key[temp] = '\0';
@@ -194,13 +205,8 @@ main(
 	 * Roll the prime and generator for the Diffie-Hellman key
 	 * agreement algorithm.
 	 */
-	printf("Generating Diffie-Hellman parameters %d bits...\n",
+	printf("Generating Diffie-Hellman parameters (%d bits)...\n",
 	    PRIMELEN);
-	str = fopen("ntpkey_dh", "w");
-	if (str == NULL) { 
-		perror("Diffie-Hellman parameters file");
-		return (-1);
-	}
 	R_RandomInit(&randomstr);
 	R_GetRandomBytesNeeded(&len, &randomstr);
 	for (i = 0; i < len; i++) {
@@ -209,7 +215,7 @@ main(
 	}
 
 	/*
-	 * Generate the file "ntpkey_dh" containing the Diffie-Hellman
+	 * Generate the file "ntpkey_dh.*" containing the Diffie-Hellman
 	 * prime and generator in printable ASCII format.
 	 */
 	len = DH_PRIME_LEN(PRIMELEN);
@@ -221,9 +227,14 @@ main(
 		printf("R_GenerateDHParams error %x\n", rval);
 		return (-1);
 	}
-	fprintf(str,
-	    "# Diffie-Hellman parameter file generated by %s\n# %s",
-	    hostname, ctime(&tv.tv_sec));
+	sprintf(filename, "ntpkey_dh.%lu", ntptime);
+	str = fopen(filename, "w");
+	if (str == NULL) { 
+		perror("Diffie-Hellman parameters file");
+		return (-1);
+	}
+	fprintf(str, "# Diffie-Hellman parameter file %s\n# %s", filename,
+	    ctime(&tv.tv_sec));
 	R_EncodePEMBlock(encoded_key, &temp,
 	    (u_char *)dh_params.prime, dh_params.primeLen);
 	encoded_key[temp] = '\0';

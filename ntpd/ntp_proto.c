@@ -56,7 +56,6 @@ keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
 #ifdef AUTOKEY
 char	*sys_hostname;		/* gethostname() name */
-u_int	sys_hostnamelen;	/* name length (round to word) */
 #endif /* AUTOKEY */
 
 /*
@@ -101,6 +100,12 @@ transmit(
 		 * is not configured and not likely to stay around,
 		 * we exhaust it.
 		 */
+#ifdef AUTOKEY
+		if (peer->flags & FLAG_AUTHENABLE)
+			peer->tailcnt++;
+#endif /* AUTOKEY */
+		if (peer->hmode != MODE_BROADCAST)
+			peer->unreach++;
 		oreach = peer->reach;
 		if (oreach & 0x01)
 			peer->valid++;
@@ -120,22 +125,6 @@ transmit(
 			}
 
 			/*
-			 * If this association is unreachable and not
-			 * configured, we give it a little while before
-			 * pulling the plug. This is to allow semi-
-			 * persistent things like cryptographic
-			 * authentication to complete the dance. There
-			 * is a denial-of-service hazard here.
-			 */
-			if (!(peer->flags & FLAG_CONFIG)) {
-				peer->tailcnt++;
-				if (peer->tailcnt > NTP_TAILMAX) {
-					unpeer(peer);
-					return;
-				}
-			}
-
-			/*
 			 * We would like to respond quickly when the
 			 * peer comes back to life. If the probes since
 			 * becoming unreachable are less than
@@ -146,11 +135,12 @@ transmit(
 			 */
 			peer->ppoll = peer->maxpoll;
 			if (peer->unreach < NTP_UNREACH) {
-				if (peer->hmode == MODE_CLIENT ||
-				    peer->hmode == MODE_ACTIVE)
-					peer->unreach++;
 				hpoll = peer->minpoll;
 			} else {
+				if (!(peer->flags & FLAG_CONFIG)) {
+					unpeer(peer);
+					return;
+				}
 				hpoll++;
 			}
 			if (peer->flags & FLAG_BURST) {
@@ -171,7 +161,6 @@ transmit(
 			 * reduce the interval; if more than six samples
 			 * are in the register, increase the interval.
 			 */
-			peer->unreach = 0;
 			if (sys_peer == 0)
 				hpoll = peer->minpoll;
 			else if (sys_peer->stratum > peer->stratum)
@@ -186,6 +175,17 @@ transmit(
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
+#ifdef AUTOKEY
+			/*
+			 * If an authenticated packet has not been heard
+			 * for awhile, the server may have refreshed
+			 * keys. So, do a soft reset.
+			 */
+			if (peer->tailcnt > NTP_TAILMAX) {
+				key_expire(peer);
+				peer->pcookie.tstamp = 0;
+			}
+#endif /* AUTOKEY */
 		}
 	} else {
 		peer->burst--;
@@ -563,7 +563,7 @@ receive(
 #ifdef PUBKEY
 		if (crypto_enable)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-				     peer->associd);
+			    peer->associd);
 #endif /* PUBKEY */
 		break;
 
@@ -593,7 +593,7 @@ receive(
 #ifdef PUBKEY
 		if (crypto_enable)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-				     peer->associd);
+			    peer->associd);
 #endif /* PUBKEY */
 		break;
 
@@ -618,7 +618,7 @@ receive(
 #ifdef PUBKEY
 		if (crypto_enable)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-				     peer->associd);
+			     peer->associd);
 #endif /* PUBKEY */
 		break;
 
@@ -687,7 +687,9 @@ receive(
 	peer->flash = 0;
 	if (is_authentic) {
 		peer->flags |= FLAG_AUTHENTIC;
+#ifdef AUTOKEY
 		peer->tailcnt = 0;
+#endif /* AUTOKEY */
 	} else {
 		peer->flags &= ~FLAG_AUTHENTIC;
 	}
@@ -695,25 +697,10 @@ receive(
 	    (restrict_mask & RES_DONTTRUST))	/* test 9 */
 		peer->flash |= TEST9;		/* access denied */
 	if (peer->flags & FLAG_AUTHENABLE) {
-
-		/*
-		 * Here we have a little bit of nastyness. Should
-		 * authentication fail in client mode, it could either
-		 * be a hacker attempting to jam the protocol, or it
-		 * could be the server has just refreshed its keys. On
-		 * the premiss the later is more likely than the former
-		 * and that even the former can't do real evil, we
-		 * simply ask for the cookie again.
-		 */
-		if (!(peer->flags & FLAG_AUTHENTIC)) { /* test 5 */
+		if (!(peer->flags & FLAG_AUTHENTIC)) /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
-#ifdef AUTOKEY
-			if (hismode == MODE_SERVER)
-				peer->pcookie.tstamp = 0;
-#endif /* AUTOKEY */
-		} else if (!(oflags & FLAG_AUTHENABLE)) {
+		else if (!(oflags & FLAG_AUTHENABLE))
 			report_event(EVNT_PEERAUTH, peer);
-		}
 	}
 	if (peer->flash) {
 #ifdef DEBUG
@@ -794,6 +781,7 @@ receive(
 	 * association doesn't deserve to live, it will die in the
 	 * transmit routine if not reachable after timeout.
 	 */
+	peer->unreach = 0;
 	process_packet(peer, pkt, &rbufp->recv_time);
 }
 
@@ -1966,8 +1954,8 @@ peer_xmit(
 				    peer->associd);
 				peer->cmmd = 0;
 			}
-			if (crypto_enable && crypto_flags &
-			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
+			if (crypto_enable && !(crypto_flags &
+			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
@@ -2019,8 +2007,8 @@ peer_xmit(
 				peer->cmmd = 0;
 			}
 #ifdef PUBKEY
-			if (crypto_enable && crypto_flags &
-			    CRYPTO_FLAG_PUBL && peer->pubkey == 0) {
+			if (crypto_enable && !(crypto_flags &
+			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);

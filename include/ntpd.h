@@ -182,7 +182,6 @@ extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
 #ifdef AUTOKEY
 extern	char	*sys_hostname;
-extern	u_int	sys_hostnamelen;
 extern	l_fp	sys_revoketime;
 #endif /* AUTOKEY */
 
