@@ -2181,7 +2181,7 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
 		*/
@@ -2217,7 +2217,7 @@ findbcastinter(
 	if(i >= 0)
 	     return (&inter_list[i]);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if this is the correct family
 		*/
