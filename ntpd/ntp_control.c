@@ -191,7 +191,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_REC,	RO, "rec" },		/* 19 */
 	{ CP_XMT,	RO, "xmt" },		/* 20 */
 	{ CP_REACH,	RO, "reach" },		/* 21 */
-	{ CP_VALID,	RO, "unreach" },	/* 22 */
+	{ CP_UNREACH,	RO, "unreach" },	/* 22 */
 	{ CP_TIMER,	RO, "timer" },		/* 23 */
 	{ CP_DELAY,	RO, "delay" },		/* 24 */
 	{ CP_OFFSET,	RO, "offset" },		/* 25 */
@@ -211,13 +211,14 @@ static struct ctl_var peer_var[] = {
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 39 */
 	{ CP_HOST,	RO, "hostname" },	/* 40 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
-	{ CP_DIGEST,	RO, "signature" },	/* 44 */
-	{ CP_IDENT,	RO, "identity" },	/* 45 */
+	{ CP_VALID,	RO, "valid" },		/* 41 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
+	{ CP_DIGEST,	RO, "signature" },	/* 45 */
+	{ CP_IDENT,	RO, "identity" },	/* 46 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 39/46 */
+	{ 0,		EOV, "" }		/* 39/47 */
 };
 
 
@@ -236,7 +237,7 @@ static u_char def_peer_var[] = {
 	CP_ROOTDISPERSION,
 	CP_REFID,
 	CP_REACH,
-	CP_VALID,
+	CP_UNREACH,
 	CP_HMODE,
 	CP_PMODE,
 	CP_HPOLL,
@@ -258,6 +259,7 @@ static u_char def_peer_var[] = {
 #ifdef OPENSSL
 	CP_HOST,
 	CP_DIGEST,
+	CP_VALID,
 	CP_FLAGS,
 	CP_IDENT,
 	CP_INITSEQ,
@@ -1536,8 +1538,8 @@ ctl_putpeer(
 		ctl_putint(peer_var[CP_TTL].text, sys_ttl[peer->ttl]);
 		break;
 
-	case CP_VALID:
-		ctl_putuint(peer_var[CP_VALID].text, peer->unreach);
+	case CP_UNREACH:
+		ctl_putuint(peer_var[CP_UNREACH].text, peer->unreach);
 		break;
 
 	case CP_RANK:
@@ -1657,6 +1659,14 @@ ctl_putpeer(
 		if (peer->subject != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->subject,
 			    strlen(peer->subject));
+		break;
+
+	case CP_VALID:
+		if (peer->pkey == NULL)
+			break;
+
+		sprintf(str, "%u:%u", peer->first, peer->last);
+		ctl_putstr(peer_var[CP_VALID].text, str, strlen(str));
 		break;
 
 	case CP_IDENT:

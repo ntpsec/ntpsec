@@ -123,7 +123,7 @@ transmit(
 		 * In broadcast mode the poll interval is never changed
 		 * from minpoll.
 		 */
-		/* fall through */;
+		peer->outdate = current_time;
 
 	} else if (peer->cast_flags & MDF_ACAST) {
 
@@ -139,14 +139,15 @@ transmit(
 		 */
 		if (sys_survivors < sys_minclock && peer->ttl <
 		    sys_ttlmax)
+			peer->outdate = current_time;
 			peer->ttl++;
 	} else {
 		if (peer->burst == 0) {
 			u_char oreach;
 
 			oreach = peer->reach;
-			peer->reach <<= 1;
 			peer->outdate = current_time;
+			peer->reach <<= 1;
 			peer->hyst *= HYST_TC;
 			if (!peer->reach) {
 
@@ -1377,7 +1378,10 @@ clock_update(void)
 	 */
 	case 1:
 		sys_stratum = (u_char)(sys_peer->stratum + 1);
-		sys_refid = sys_peer->refid;
+		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
+			sys_refid = sys_peer->refid;
+		else
+			sys_refid = addr2refid(&sys_peer->srcadr);
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		dtemp = sys_peer->disp + clock_phi * (current_time -
@@ -1475,7 +1479,7 @@ poll_update(
 		    sys_ttlmax)
 			hpoll = peer->maxpoll;
 		else
-			hpoll = peer->minpoll + peer->ttl;
+			hpoll = peer->minpoll;
 		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
 
 	/*
@@ -2289,8 +2293,8 @@ clock_select(void)
 			if (debug > 1)
 				printf("select: prefer offset %.6f\n",
 				    sys_offset);
-#endif
 		}
+#endif
 	} else {
 
 		/*

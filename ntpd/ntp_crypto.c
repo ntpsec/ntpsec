@@ -604,6 +604,8 @@ crypto_recv(
 				    ntohl(cinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
+				peer->first = cinfo->first;
+				peer->last = cinfo->last;
 			}
 			peer->flash &= ~TEST10;
 			temp32 = cinfo->nid;
@@ -1427,6 +1429,7 @@ crypto_xmit(
  * XEVNT_PUB	bad or missing public key
  * XEVNT_SGL	bad signature length
  * XEVNT_SIG	signature not verified
+ * XEVNT_PER	certificate expired
  */
 static int
 crypto_verify(
@@ -1447,9 +1450,9 @@ crypto_verify(
 
 	/*
 	 * We require valid opcode and field length, timestamp,
-	 * filestamp, public key, digest, signature length and
-	 * signature, where relevant. Note that preliminary length
-	 * checks are done in the main loop.
+	 * filestamp, public key, digest, signature length, within
+	 * certificate lifetime and signature, where relevant. Note that
+	 * preliminary length checks are done in the main loop.
 	 */
 	len = ntohl(ep->opcode) & 0x0000ffff;
 	opcode = ntohl(ep->opcode) & 0xffff0000;
@@ -1530,13 +1533,16 @@ crypto_verify(
 
 	/*
 	 * If a public key and digest is present, and if valid key
-	 * length, check for valid signature. Note that the first valid
-	 * signature lights the proventic bit.
+	 * length and within certificate lifetime, check for valid
+	 * signature. Note that the first valid signature lights the
+	 * proventic bit.
 	 */
 	} else if (pkey == NULL || peer->digest == NULL) {
 		/* fall through */
-	} else if (siglen != (u_int) EVP_PKEY_size(pkey)) {
+	} else if (siglen != (u_int)EVP_PKEY_size(pkey)) {
 		rval = XEVNT_SGL;
+	} else if (tstamp < peer->first || tstamp > peer->last){
+		rval = XEVNT_PER;
 	} else {
 		EVP_VerifyInit(&ctx, peer->digest);
 		EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen +
@@ -1549,6 +1555,10 @@ crypto_verify(
 			rval = XEVNT_SIG;
 		}
 	}
+
+	/*
+	 * Wow, that was an adventure.
+	 */
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
@@ -2946,7 +2956,6 @@ cert_parse(
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->fstamp = fstamp;
 	ret->version = X509_get_version(cert);
 	X509_NAME_oneline(X509_get_subject_name(cert), pathbuf,
 	    MAXFILENAME - 1);
@@ -3303,19 +3312,13 @@ cert_install(
 	 */
 	for (yp = cinfo; yp != NULL; yp = yp->link) {
 		for (xp = cinfo; xp != NULL; xp = xp->link) {
-			if (yp->flags & CERT_ERROR || (xp == yp &&
-			    !(xp->flags & CERT_TRUST)))
-				continue;
 
 			/*
-			 * If issuer Y matches subject X, signature Y
-			 * is valid using public key X, and the
-			 * filestamp of Y is in the valid interval of X,
-			 * then Y is valid.
+			 * If issuer Y matches subject X, verify
+			 * signature Y using public key X.
 			 */
-			if (!(strcmp(yp->issuer, xp->subject) == 0 &&
-			    yp->fstamp >= xp->first && yp->fstamp <=
-			    yp->last))
+			if (strcmp(yp->issuer, xp->subject) != 0 ||
+				xp->flags & CERT_ERROR)
 				continue;
 
 			if (cert_valid(yp, xp->pkey) != XEVNT_OK) {
