@@ -384,7 +384,7 @@ crypto_recv(
 				    "crypto_recv: incorrect version or field length\n");
 #endif
 			peer->flash |= TEST12;
-			return;
+			code |= CRYPTO_ERROR;;
 		}
 		if (associd != 0)
 			peer->assoc = associd;
@@ -392,6 +392,9 @@ crypto_recv(
 			tstamp = ntohl(ep->tstamp);
 			fstamp = ntohl(ep->fstamp);
 			vallen = ntohl(ep->vallen);
+		} else {
+			tstamp = fstamp = 0;
+			vallen = 0;
 		}
 		rval = XEVNT_OK;
 		switch (code) {
@@ -406,17 +409,19 @@ crypto_recv(
 		case CRYPTO_ASSOC | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if the status word has
-			 * already been received or the response does
-			 * not match the request.
+			 * Discard the response if the status word has
+			 * already been stored. Discard the response if
+			 * it has invalid length or does not match the
+			 * request.
 			 */
-			if (peer->crypto || peer->flash & TEST2)
+			if (peer->crypto || len < VALUE_LEN + vallen ||
+			    peer->flash & TEST2)
 				break;
 
 			/*
-			 * We require only that the host name length be
-			 * reasonable and the signature digest NID be
-			 * valid.
+			 * Discard the response and report an error if
+			 * the host name length is unreasonable or the
+			 * signature digest NID is not supported.
 			 */
 			temp32 = fstamp >> 16;
 			dp = (EVP_MD *)EVP_get_digestbynid(temp32);
@@ -527,9 +532,10 @@ crypto_recv(
 		case CRYPTO_SIGN:
 
 			/*
-			 * discard the message if not verifed.
+			 * discard the message if not certified or not
+			 * verifed.
 			 */
-			if (len < VALUE_LEN)
+			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
 				break;
 
 			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
@@ -537,8 +543,10 @@ crypto_recv(
 
 			/*
 			 * Pass the extension field to the transmit
-			 * side.
+			 * side, but only if has a value field.
 			 */
+			if (len < VALUE_LEN)
+				break;
 			fp = emalloc(len);
 			memcpy(fp, ep, len);
 			temp32 = CRYPTO_RESP;
@@ -600,8 +608,7 @@ crypto_recv(
 			 * Discard the message if not certified or not
 			 * verified.
 			 */
-			if (len < VALUE_LEN || !(peer->crypto &
-			    CRYPTO_FLAG_PROV))
+			if (!(peer->crypto & CRYPTO_FLAG_PROV))
 				break;
 
 			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
@@ -609,9 +616,10 @@ crypto_recv(
 
 			/*
 			 * Pass the extension field to the transmit
-			 * side. Bail out if the cookie has already been
-			 * stored.
+			 * side, but only if it has a value field.
 			 */
+			if (len < VALUE_LEN + vallen)
+				break;
 			peer->flash &= ~TEST10;
 			fp = emalloc(len);
 			memcpy(fp, ep, len);
@@ -921,7 +929,8 @@ crypto_xmit(
 
 	/*
 	 * Generate the requested extension field request code, length
-	 * and association ID.
+	 * and association ID. If this is a response and the host is not
+	 * synchronized, light the error bit and go home.
 	 */
 	pkt = (u_int32 *)xpkt + start / 4;
 	fp = (struct exten *)pkt;
@@ -929,6 +938,8 @@ crypto_xmit(
 	associd = ntohl(ep->associd);
 	fp->associd = htonl(associd);
 	len = 8;
+	if (opcode & CRYPTO_RESP && sys_leap == LEAP_NOTINSYNC)
+		opcode |= CRYPTO_ERROR;
 	switch (opcode & 0xffff0000) {
 
 	/*
