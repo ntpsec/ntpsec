@@ -924,22 +924,22 @@ sys_info(
 	is->poll = sys_poll;
 	
 	is->flags = 0;
-	if (sys_bclient)
-	    is->flags |= INFO_FLAG_BCLIENT;
 	if (sys_authenticate)
-	    is->flags |= INFO_FLAG_AUTHENTICATE;
+		is->flags |= INFO_FLAG_AUTHENTICATE;
+	if (sys_bclient)
+		is->flags |= INFO_FLAG_BCLIENT;
+	if (cal_enable)
+		is->flags |= INFO_FLAG_CAL;
 	if (kern_enable)
-	    is->flags |= INFO_FLAG_KERNEL;
-	if (ntp_enable)
-	    is->flags |= INFO_FLAG_NTP;
-	if (pll_control)
-	    is->flags |= INFO_FLAG_PLL_SYNC;
-	if (pps_control)
-	    is->flags |= INFO_FLAG_PPS_SYNC;
+		is->flags |= INFO_FLAG_KERNEL;
 	if (mon_enabled != MON_OFF)
-	    is->flags |= INFO_FLAG_MONITOR;
+		is->flags |= INFO_FLAG_MONITOR;
+	if (ntp_enable)
+		is->flags |= INFO_FLAG_NTP;
+	if (pps_enable)
+		is->flags |= INFO_FLAG_PPS_SYNC;
 	if (stats_control)
-	    is->flags |= INFO_FLAG_FILEGEN;
+		is->flags |= INFO_FLAG_FILEGEN;
 	is->bdelay = HTONS_FP(DTOFP(sys_bdelay));
 	HTONL_UF(sys_authdelay.l_f, &is->authdelay);
 
@@ -1454,27 +1454,32 @@ setclr_flags(
 
 	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
-		      SYS_FLAG_FILEGEN)) {
+		      SYS_FLAG_FILEGEN | SYS_FLAG_AUTH | SYS_FLAG_CAL)) {
 		msyslog(LOG_ERR, "setclr_flags: extra flags: %#x",
 			flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS |
 				  SYS_FLAG_NTP | SYS_FLAG_KERNEL |
-				  SYS_FLAG_MONITOR | SYS_FLAG_FILEGEN));
+				  SYS_FLAG_MONITOR | SYS_FLAG_FILEGEN |
+				  SYS_FLAG_AUTH | SYS_FLAG_CAL));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
 
 	if (flags & SYS_FLAG_BCLIENT)
-	    proto_config(PROTO_BROADCLIENT, set, 0., NULL);
+		proto_config(PROTO_BROADCLIENT, set, 0., NULL);
 	if (flags & SYS_FLAG_PPS)
-	    proto_config(PROTO_PPS, set, 0., NULL);
+		proto_config(PROTO_PPS, set, 0., NULL);
 	if (flags & SYS_FLAG_NTP)
-	    proto_config(PROTO_NTP, set, 0., NULL);
+		proto_config(PROTO_NTP, set, 0., NULL);
 	if (flags & SYS_FLAG_KERNEL)
-	    proto_config(PROTO_KERNEL, set, 0., NULL);
+		proto_config(PROTO_KERNEL, set, 0., NULL);
 	if (flags & SYS_FLAG_MONITOR)
-	    proto_config(PROTO_MONITOR, set, 0., NULL);
+		proto_config(PROTO_MONITOR, set, 0., NULL);
 	if (flags & SYS_FLAG_FILEGEN)
-	    proto_config(PROTO_FILEGEN, set, 0., NULL);
+		proto_config(PROTO_FILEGEN, set, 0., NULL);
+	if (flags & SYS_FLAG_AUTH)
+		proto_config(PROTO_AUTHENTICATE, set, 0., NULL);
+	if (flags & SYS_FLAG_CAL)
+		proto_config(PROTO_CAL, set, 0., NULL);
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
 }
 

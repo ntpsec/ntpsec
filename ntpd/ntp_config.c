@@ -84,8 +84,8 @@ extern int priority_done;
  * setvar [ ]
  * logfile logfile
  * logconfig [+|-|=][{sync|sys|peer|clock}{{,all}{info|statistics|events|status}}]...
- * enable auth|bclient|pll|kernel|monitor|stats
- * disable auth|bclient|pll|kernel|monitor|stats
+ * enable auth|bclient|pll|kernel|monitor|stats|calibrate
+ * disable auth|bclient|pll|kernel|monitor|stats|calibrate
  * phone ...
  * pps device [assert|clear] [hardpps]
  * priority high|normal
@@ -245,12 +245,12 @@ static	struct keyword fgen_types[] = {
 static struct keyword flags_keywords[] = {
 	{ "auth",		PROTO_AUTHENTICATE },
 	{ "bclient",		PROTO_BROADCLIENT },
+	{ "calibrate",		PROTO_CAL },
 	{ "kernel",		PROTO_KERNEL },
 	{ "monitor",		PROTO_MONITOR },
 	{ "ntp",		PROTO_NTP },
-	{ "stats",		PROTO_FILEGEN },
 	{ "pps",		PROTO_PPS },
-	{ "calibrate",		PROTO_CAL },
+	{ "stats",		PROTO_FILEGEN },
 	{ "",			CONFIG_UNKNOWN }
 };
 
