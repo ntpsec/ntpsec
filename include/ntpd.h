@@ -395,7 +395,8 @@ extern int	fdpps;			/* pps file descriptor */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 
 /* ntp_restrict.c */
-extern struct restrictlist *restrictlist; /* the restriction list */
+extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
+extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
 extern u_long	client_limit;
 extern u_long	client_limit_period;
 

@@ -50,8 +50,10 @@ struct conf_entry {
 	struct conf_entry *ce_next;
 	char *ce_name;			/* name we are trying to resolve */
 	struct conf_peer ce_config;	/* configuration info for peer */
+	struct sockaddr_storage peer_store; /* address info for both fams */
 };
 #define	ce_peeraddr	ce_config.peeraddr
+#define	ce_peeraddr6	ce_config.peeraddr6
 #define	ce_hmode	ce_config.hmode
 #define	ce_version	ce_config.version
 #define ce_minpoll	ce_config.minpoll
@@ -409,7 +411,9 @@ addentry(
 
 	ce = (struct conf_entry *)emalloc(sizeof(struct conf_entry));
 	ce->ce_name = cp;
-	ANYSOCK(&ce->ce_peeraddr);
+	ce->ce_peeraddr = 0;
+	ce->ce_peeraddr6 = in6addr_any;
+	ANYSOCK(&ce->peer_store);
 	ce->ce_hmode = (u_char)mode;
 	ce->ce_version = (u_char)version;
 	ce->ce_minpoll = (u_char)minpoll;
@@ -451,13 +455,13 @@ findhostaddr(
 
 	checkparent();		/* make sure our guy is still running */
 
-	if (entry->ce_name!=NULL && SOCKNUL(&entry->ce_peeraddr)) {
+	if (entry->ce_name != NULL && SOCKNUL(&entry->peer_store)) {
 		/* HMS: Squawk? */
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
 		return 1;
 	}
 
-        if (entry->ce_name==NULL && !SOCKNUL(&entry->ce_peeraddr)) {
+        if (entry->ce_name == NULL && !SOCKNUL(&entry->peer_store)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
@@ -469,15 +473,26 @@ findhostaddr(
 				entry->ce_name);
 #endif /* DEBUG */
 		error = getaddrinfo(entry->ce_name, NULL, NULL, &addr);
-		if (error==0) entry->ce_peeraddr = *((struct sockaddr_storage*)(addr->ai_addr));
+		if (error == 0) {
+			entry->peer_store = *((struct sockaddr_storage*)(addr->ai_addr));
+			if (entry->peer_store.ss_family == AF_INET) {
+				entry->ce_peeraddr =
+				    GET_INADDR(entry->peer_store);
+				entry->ce_config.v6_flag = 0;
+			} else {
+				entry->ce_peeraddr6 =
+				    GET_INADDR6(entry->peer_store);
+				entry->ce_config.v6_flag = 1;
+			}
+		}
 	} else {
 #ifdef DEBUG
 		if (debug > 2)
 			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
-				stoa(&entry->ce_peeraddr));
+				stoa(&entry->peer_store));
 #endif
-		error = getnameinfo((const struct sockaddr *)&entry->ce_peeraddr,
-				   SOCKLEN(&entry->ce_peeraddr),
+		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
+				   SOCKLEN(&entry->peer_store),
 				   (char*)&entry->ce_name, sizeof(entry->ce_name), NULL, 0, 0);
 	}
 
@@ -1015,9 +1030,9 @@ doconfigure(
 		if (debug > 1)
 			msyslog(LOG_INFO,
 			    "doconfigure: <%s> has peeraddr %s",
-			    ce->ce_name, stoa(&ce->ce_peeraddr));
+			    ce->ce_name, stoa(&ce->peer_store));
 #endif
-		if (dores && SOCKNUL(&(ce->ce_peeraddr))) {
+		if (dores && SOCKNUL(&(ce->peer_store))) {
 			if (!findhostaddr(ce)) {
 				msyslog(LOG_ERR,
 					"couldn't resolve `%s', giving up on it",
@@ -1029,7 +1044,7 @@ doconfigure(
 			}
 		}
 
-		if (!SOCKNUL(&ce->ce_peeraddr)) {
+		if (!SOCKNUL(&ce->peer_store)) {
 			if (request(&ce->ce_config)) {
 				ceremove = ce;
 				ce = ceremove->ce_next;

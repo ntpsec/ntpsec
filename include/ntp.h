@@ -506,6 +506,11 @@ struct peer {
 #define	SRCADR(src)	(ntohl(NSRCADR((src))))	/* address in host byte order */
 #define	SRCPORT(src)	(ntohs(NSRCPORT((src))))	/* host port */
 
+#define CAST_V4(src)	((struct sockaddr_in *)&(src))
+#define CAST_V6(src)	((struct sockaddr_in6 *)&(src))
+#define GET_INADDR(src)  (CAST_V4(src)->sin_addr.s_addr)
+#define GET_INADDR6(src) (CAST_V6(src)->sin6_addr)
+
 /*
  * NTP packet format.  The mac field is optional.  It isn't really
  * an l_fp either, but for now declaring it that way is convenient.

@@ -59,7 +59,7 @@ int		ntpdcmain	P((int,	char **));
 static	int	openhost	P((const char *));
 static	int	sendpkt		P((char *, int));
 static	void	growpktdata	P((void));
-static	int	getresponse	P((int, int, int *, int *, char **));
+static	int	getresponse	P((int, int, int *, int *, char **, int));
 static	int	sendrequest	P((int, int, int, int, int, char *));
 static	void	getcmds		P((void));
 static	RETSIGTYPE abortcmd	P((int));
@@ -67,7 +67,7 @@ static	void	docmd		P((const char *));
 static	void	tokenize	P((const char *, char **, int *));
 static	int	findcmd		P((char *, struct xcmd *, struct xcmd *, struct xcmd **));
 static	int	getarg		P((char *, int, arg_v *));
-static	int	getnetnum	P((const char *, u_int32 *, char *));
+static	int	getnetnum	P((const char *, struct sockaddr_storage *, char *, int));
 static	void	help		P((struct parse *, FILE *));
 #ifdef QSORT_USES_VOID_P
 static	int	helpsort	P((const void *, const void *));
@@ -159,12 +159,11 @@ static	struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 static	struct timeval tvsout = { DEFSTIMEOUT, 0 };	/* secondary time out */
 static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
-static	struct sockaddr_in hostaddr = { 0 };		/* host address */
 static	int showhostnames = 1;				/* show host names by default */
 
-static	int sockfd;					/* fd socket is openned on */
+static	int sockfd;					/* fd socket is opened on */
 static	int havehost = 0;				/* set to 1 when host open */
-struct servent *server_entry = NULL;		/* server entry for ntp */
+int s_port = 0;
 
 #if defined (SYS_WINNT) || defined (SYS_VXWORKS)
 char password[9];
@@ -189,6 +188,12 @@ void timer(void)	{  ; };	/* 1998/06/03 - Used in ntplib/machines.c */
 
 static	char *pktdata;
 static	int pktdatasize;
+
+/*
+ * These are used to help the magic with old and new versions of ntpd.
+ */
+int impl_ver = IMPL_XNTPD;
+static int req_pkt_size = REQ_LEN_NOMAC;
 
 /*
  * For commands typed on the command line (with the -c option)
@@ -262,7 +267,6 @@ void clear_globals(void)
     showhostnames = 0;              /* show host names by default */
     ntp_optind = 0;
     ntp_optarg = 0;
-    server_entry = NULL;            /* server entry for ntp */
     havehost = 0;                   /* set to 1 when host open */
     numcmds = 0;
     numhosts = 0;
@@ -391,29 +395,48 @@ openhost(
 	const char *hname
 	)
 {
-	u_int32 netnum;
 	char temphost[LENHOSTNAME];
+	int a_info, i;
+	struct addrinfo hints, *ai = NULL;
+	register const char *cp;
+	char name[LENHOSTNAME];
+	char service[5];
 
-	if (server_entry == NULL) {
-		server_entry = getservbyname("ntp", "udp");
-		if (server_entry == NULL) {
-#ifdef VMS /* UCX getservbyname() doesn't work [yet], but we do know better */
-			server_entry = (struct servent *)
-				malloc(sizeof(struct servent));
-			server_entry->s_port = htons(NTP_PORT);
-#else
-			(void) fprintf(stderr, "%s: ntp/udp: unknown service\n",
-				       progname);
-			exit(1);
-#endif /* VMS & UCX */
-		}
-		if (debug > 2)
-		    printf("Got ntp/udp service entry\n");
+	bzero(&hints, sizeof(struct addrinfo));
+	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_protocol = IPPROTO_UDP;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	/*
+	 * We need to get by the [] if they were entered 
+	 */
+	
+	cp = hname;
+	
+	if (*cp == '[') {
+		cp++;	
+		for(i = 0; *cp != ']'; cp++, i++)
+			name[i] = *cp;	
+		name[i] = '\0';
+		hname = name;
+	}	
+
+	sprintf(service, "%u", NTP_PORT);
+	a_info = getaddrinfo(hname, service, &hints, &ai);	
+	if (a_info != 0) {
+		printf("%s\n", gai_strerror(a_info));
+		exit(-1);
 	}
 
-	if (!getnetnum(hname, &netnum, temphost))
-	    return 0;
-	
+	if (ai->ai_canonname == NULL) {
+		strncpy(temphost, stoa((struct sockaddr_storage *)ai->ai_addr),
+		    LENHOSTNAME);
+		temphost[LENHOSTNAME-1] = '\0';
+	} else {
+		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
+		temphost[LENHOSTNAME-1] = '\0';
+	}
+
 	if (debug > 2)
 	    printf("Opening host %s\n", temphost);
 
@@ -424,14 +447,18 @@ openhost(
 		havehost = 0;
 	}
 	(void) strcpy(currenthost, temphost);
-
-	hostaddr.sin_family = AF_INET;
-#ifndef SYS_VXWORKS
-	hostaddr.sin_port = server_entry->s_port;
-#else
-	hostaddr.sin_port = htons(SERVER_PORT_NUM);
-#endif
-	hostaddr.sin_addr.s_addr = netnum;
+	
+	/* port maps to the same in both families */
+	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port; 
+#ifdef SYS_VXWORKS
+	((struct sockaddr_in6 *)&hostaddr)->sin6_port = htons(SERVER_PORT_NUM);
+	if (ai->ai_family == AF_INET)
+		*(struct sockaddr_in *)&hostaddr= 
+			*((struct sockaddr_in *)ai->ai_addr);
+	else 
+		*(struct sockaddr_in6 *)&hostaddr= 
+			*((struct sockaddr_in6 *)ai->ai_addr);
+#endif /* SYS_VXWORKS */
 
 #ifdef SYS_WINNT
 	{
@@ -443,14 +470,14 @@ openhost(
 			exit(1);
 		}
 	}
- 
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == INVALID_SOCKET) {
 		error("socket", "", "");
 		exit(-1);
 	}
 #else
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == -1)
 	    error("socket", "", "");
 #endif /* SYS_WINNT */
@@ -468,11 +495,19 @@ openhost(
 # endif
 #endif
 
-	if (connect(sockfd, (struct sockaddr *)&hostaddr,
+#ifdef SYS_VXWORKS
+	if (connect(sockfd, (struct sockaddr *)&hostaddr, 
 		    sizeof(hostaddr)) == -1)
+#else
+	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
+		    ai->ai_addrlen) == -1)
+#endif /* SYS_VXWORKS */
 	    error("connect", "", "");
-	
+	if (a_info)
+		freeaddrinfo(ai);
 	havehost = 1;
+	req_pkt_size = REQ_LEN_NOMAC;
+	impl_ver = IMPL_XNTPD;
 	return 1;
 }
 
@@ -520,15 +555,18 @@ getresponse(
 	int reqcode,
 	int *ritems,
 	int *rsize,
-	char **rdata
+	char **rdata,
+	int esize
 	)
 {
 	struct resp_pkt rpkt;
 	struct timeval tvo;
 	int items;
+	int i;
 	int size;
 	int datasize;
 	char *datap;
+	char *tmp_data;
 	char haveseq[MAXSEQ+1];
 	int firstpkt;
 	int lastseq;
@@ -536,6 +574,7 @@ getresponse(
 	int seq;
 	fd_set fds;
 	int n;
+	int pad;
 
 	/*
 	 * This is pretty tricky.  We may get between 1 and many packets
@@ -659,13 +698,15 @@ getresponse(
 		return (int)INFO_ERR(rpkt.err_nitems);
 	}
 
-
 	/*
 	 * Collect items and size.  Make sure they make sense.
 	 */
 	items = INFO_NITEMS(rpkt.err_nitems);
 	size = INFO_ITEMSIZE(rpkt.mbz_itemsize);
-
+	if (esize > size)
+		pad = esize - size;
+	else 
+		pad = 0;
 	if ((datasize = items*size) > (n-RESP_HEADER_SIZE)) {
 		if (debug)
 		    printf(
@@ -678,13 +719,12 @@ getresponse(
 	 * If this isn't our first packet, make sure the size matches
 	 * the other ones.
 	 */
-	if (!firstpkt && size != *rsize) {
+	if (!firstpkt && esize != *rsize) {
 		if (debug)
 		    printf("Received itemsize %d, previous %d\n",
 			   size, *rsize);
 		goto again;
 	}
-
 	/*
 	 * If we've received this before, toss it
 	 */
@@ -716,11 +756,22 @@ getresponse(
 	        *rdata = pktdata; /* might have been realloced ! */
 		datap = pktdata + offset;
 	}
-	memmove(datap, (char *)rpkt.data, (unsigned)datasize);
-	datap += datasize;
+	/* 
+	 * We now move the pointer along according to size and number of
+	 * items.  This is so we can play nice with older implementations
+	 */
+
+	tmp_data = (char *)rpkt.data;
+	for(i = 0; i <items; i++){
+		memmove(datap, tmp_data, (unsigned)size);
+		tmp_data += size;
+		memset(datap + size, 0, pad);
+		datap += size + pad;
+	}
+
 	if (firstpkt) {
 		firstpkt = 0;
-		*rsize = size;
+		*rsize = size + pad;
 	}
 	*ritems += items;
 
@@ -769,11 +820,15 @@ sendrequest(
 
 	if (!auth) {
 		qpkt.auth_seq = AUTH_SEQ(0, 0);
-		return sendpkt((char *)&qpkt, REQ_LEN_NOMAC);
+		return sendpkt((char *)&qpkt, req_pkt_size);
 	} else {
 		l_fp ts;
 		int maclen = 0;
 		const char *pass = "\0";
+		struct req_pkt_tail *qpktail;
+
+		qpktail = (struct req_pkt_tail *)((char *)&qpkt + req_pkt_size
+		    + MAX_MAC_LEN - sizeof(struct req_pkt_tail));
 
 		if (info_auth_keyid == 0) {
 			maclen = getkeyid("Keyid: ");
@@ -795,17 +850,17 @@ sendrequest(
 		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
 		authtrust(info_auth_keyid, 1);
 		qpkt.auth_seq = AUTH_SEQ(1, 0);
-		qpkt.keyid = htonl(info_auth_keyid);
+		qpktail->keyid = htonl(info_auth_keyid);
 		get_systime(&ts);
 		L_ADD(&ts, &delay_time);
-		HTONL_FP(&ts, &qpkt.tstamp);
+		HTONL_FP(&ts, &qpktail->tstamp);
 		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
-		    REQ_LEN_NOMAC);
+		    req_pkt_size);
 		if (maclen == 0) {  
 			(void) fprintf(stderr, "Key not found\n");
 			return (1);
 		}
-		return sendpkt((char *)&qpkt, (int)(REQ_LEN_NOMAC + maclen));
+		return sendpkt((char *)&qpkt, (int)(req_pkt_size + maclen));
 	}
 	/*NOTREACHED*/
 }
@@ -825,7 +880,8 @@ doquery(
 	int *ritems,
 	int *rsize,
 	char **rdata,
- 	int quiet_mask
+ 	int quiet_mask,
+	int esize
 	)
 {
 	int res;
@@ -844,6 +900,7 @@ doquery(
 	/*
 	 * Poll the socket and clear out any pending data
 	 */
+again:
 	do {
 		tvzero.tv_sec = tvzero.tv_usec = 0;
 		FD_ZERO(&fds);
@@ -869,12 +926,43 @@ doquery(
 	/*
 	 * Get the response.  If we got a standard error, print a message
 	 */
-	res = getresponse(implcode, reqcode, ritems, rsize, rdata);
+	res = getresponse(implcode, reqcode, ritems, rsize, rdata, esize);
+
+	/*
+	 * Try to be compatible with older implementations of ntpd.
+	 */
+	if (res == INFO_ERR_FMT && req_pkt_size != 48) {
+		int oldsize;
+
+		oldsize = req_pkt_size;
+
+		switch(req_pkt_size) {
+		case REQ_LEN_NOMAC:
+			req_pkt_size = 160;
+			break;
+		case 160:
+			req_pkt_size = 48;
+			break;
+		}
+		if (impl_ver == IMPL_XNTPD) {
+			fprintf(stderr,
+			    "***Warning changing to older implementation\n");
+			return INFO_ERR_IMPL;
+		}
+
+		fprintf(stderr,
+		    "***Warning changing the request packet size from %d to %d\n",
+		    oldsize, req_pkt_size);
+		goto again;
+	}
 
  	/* log error message if not told to be quiet */
  	if ((res > 0) && (((1 << res) & quiet_mask) == 0)) {
 		switch(res) {
 		    case INFO_ERR_IMPL:
+			/* Give us a chance to try the older implementation. */
+			if (implcode == IMPL_XNTPD)
+				break;
 			(void) fprintf(stderr,
 				       "***Server implementation incompatable with our own\n");
 			break;
@@ -1173,7 +1261,7 @@ getarg(
 		argp->string = str;
 		break;
 	    case ADD:
-		if (!getnetnum(str, &(argp->netnum), (char *)0)) {
+		if (!getnetnum(str, &(argp->netnum), (char *)0, 0)) {
 			return 0;
 		}
 		break;
@@ -1207,6 +1295,18 @@ getarg(
 			argp->ival = -argp->ival;
 		}
 		break;
+	     case IP_VERSION:
+		if (*str) {
+			if (*str == '6') /* we want the v6 version*/
+				argp->ival = 6 ;
+			else if (*str == '4')
+				argp->ival = 4 ;
+			else{
+				(void) fprintf(stderr, "***Version must be either 4 or 6\n");
+				return 0;
+			}
+		}
+		break;
 	}
 
 	return 1;
@@ -1220,24 +1320,33 @@ getarg(
 static int
 getnetnum(
 	const char *hname,
-	u_int32 *num,
-	char *fullhost
+	struct sockaddr_storage *num,
+	char *fullhost,
+	int af
 	)
 {
-	struct hostent *hp;
+	int err;
+	int sockaddr_len;
+	struct addrinfo hints, *ai = NULL;
 
+	sockaddr_len = (af == AF_INET)
+			   ? sizeof(struct sockaddr_in)
+			   : sizeof(struct sockaddr_in6);
+	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	
+	/* decodenetnum only works with addresses */
 	if (decodenetnum(hname, num)) {
 		if (fullhost != 0) {
-			(void) sprintf(fullhost,
-				       "%u.%u.%u.%u", (u_int)((htonl(*num)>>24)&0xff),
-				       (u_int)((htonl(*num)>>16)&0xff), (u_int)((htonl(*num)>>8)&0xff),
-				       (u_int)(htonl(*num)&0xff));
+			getnameinfo((struct sockaddr *)num, sockaddr_len, 
+				    fullhost, sizeof(fullhost), NULL, 0, 
+				    NI_NUMERICHOST); 
 		}
 		return 1;
-	} else if ((hp = gethostbyname(hname)) != 0) {
-		memmove((char *)num, hp->h_addr, sizeof(u_int32));
+	} else if ((err = getaddrinfo(hname, "ntp", &hints, &ai)) == 0) {
+		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != 0)
-		    (void) strcpy(fullhost, hp->h_name);
+			(void) strcpy(fullhost, ai->ai_canonname);
 		return 1;
 	} else {
 		(void) fprintf(stderr, "***Can't find host %s\n", hname);
@@ -1252,14 +1361,15 @@ getnetnum(
  */
 char *
 nntohost(
-	u_int32 netnum
+	struct sockaddr_storage *netnum
 	)
 {
 	if (!showhostnames)
-	    return numtoa(netnum);
-	if ((ntohl(netnum) & REFCLOCK_MASK) == REFCLOCK_ADDR)
-	    return refnumtoa(netnum);
-	return numtohost(netnum);
+	    return stoa(netnum);
+
+	if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
+		return refnumtoa(netnum);
+	return socktohost(netnum);
 }
 
 
