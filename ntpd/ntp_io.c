@@ -738,15 +738,15 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 
 		/*
 		 * Enable reception of multicast packets
-		 * If the address is link-local we can get the interface index
+		 * If the local address is link-local we can get the interface index
 		 * from the scope id. Don't do this for other types of multicast
 		 * addresses. For now let the kernel figure it out.
 		 */
 		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
+		if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&iface->sin)->sin6_addr))
+			mreq6.ipv6mr_interface = iface->scopeid;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -978,8 +978,16 @@ io_multicast_add(
 	jstatus = socket_multicast_enable(&inter_list[ind], ind, &addr);
 
 #ifdef DEBUG
-	if (debug)
-		printf("io_multicast_add %s\n", stoa(&addr));
+	if (debug) {
+		if (jstatus == ISC_TRUE) {
+			printf("io_multicast_add: Opened multicast client on interface %d, socket: %d\n",
+			ind, inter_list[ind].fd);
+			printf("io_multicast_add %s\n", stoa(&addr));
+		}
+		else
+			printf("io_multicast_add: Unable to Open multicast client for address %s on interface %d\n",
+			stoa(&addr), ind);
+	}
 #endif
 #else /* MCAST */
 	netsyslog(LOG_ERR,
@@ -2287,16 +2295,6 @@ find_interface_index(
 		 * See if the IPv6 address is Link-Local or Site Local
 		 */
 		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (is_linklocal == ISC_TRUE &&
-			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-			{
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found Link-Local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-				return (i);
-			}
-
 			if (is_sitelocal == ISC_TRUE &&
 			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
 			{
@@ -2306,6 +2304,20 @@ find_interface_index(
 #endif
 				return (i);
 			}
+			/*
+			 * We did the sitelocal test first to see if it exists
+			 * otherwise a sitelocal address can use the linklocal interface
+			 */
+			if ((is_linklocal == ISC_TRUE  || is_sitelocal == ISC_TRUE) &&
+			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found Link-Local *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (i);
+			}
+
 		}
 	}
 
