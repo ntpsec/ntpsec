@@ -16,6 +16,7 @@ SUBDIRS = \
 	adjtimed	\
 	clockstuff	\
 	kernel	\
+	@MAKE_SNTP@
 	util
 
 DIST_SUBDIRS = $(SUBDIRS) ntptrace
