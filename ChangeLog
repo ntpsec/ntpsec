@@ -1,3 +1,8 @@
+2000-04-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c (atom_pps): Bugfix
+	From: Philippe Charnier <charnier@xp11.frmug.org>
+
 2000-03-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libparse/clk_wharton.c (cvt_wharton_400a): Do not return

@@ -324,7 +324,7 @@ atom_pps(
 		ts = up->pps_info.clear_timestamp;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
 	ts.tv_nsec = (ts.tv_nsec + 500) / 1000;
-	if (ts.tv_nsec > 1000000) {
+	if (ts.tv_nsec >= 1000000) {
 		ts.tv_nsec -= 1000000;
 		ts.tv_sec++;
 	}
