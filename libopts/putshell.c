@@ -1,6 +1,6 @@
 
 /*
- *  $Id: putshell.c,v 2.26 2004/07/22 02:46:22 bkorb Exp $
+ *  $Id: putshell.c,v 4.1 2005/01/01 00:12:42 bkorb Exp $
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that

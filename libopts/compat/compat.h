@@ -7,7 +7,7 @@
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 2.20 2004/10/15 01:54:16 bkorb Exp $
+ * $Id: compat.h,v 4.1 2005/01/01 00:12:37 bkorb Exp $
  */
 #ifndef COMPAT_H
 #define COMPAT_H 1

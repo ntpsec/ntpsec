@@ -1,7 +1,7 @@
 dnl 
 dnl EDIT THIS FILE WITH CAUTION  (libopts.m4)
 dnl 
-dnl It has been AutoGen-ed  Saturday October 30, 2004 at 05:47:01 AM EDT
+dnl It has been AutoGen-ed  Sunday January  9, 2005 at 06:06:21 AM EST
 dnl From the definitions    stdin
 dnl and the template file   conftest.tpl
 dnl
@@ -135,29 +135,6 @@ AC_MSG_ERROR([Cannot find working POSIX regex library])
 ]) # end of AC_DEFUN of LIBOPTS_WITHLIB_REGEX
 
 
-AC_DEFUN([LIBOPTS_RUN_ALLOCATED_CTIME],[
-  AC_MSG_CHECKING([whether ctime() allocates memory for its result])
-  AC_CACHE_VAL([libopts_cv_run_allocated_ctime],[
-  AC_TRY_RUN([@%:@include <time.h>
-int main (int argc, char** argv) {
-   time_t  timeVal = time( (time_t*)NULL );
-   char*   pzTime  = ctime( &timeVal );
-   free( (void*)pzTime );
-   return 0; }],
-    [libopts_cv_run_allocated_ctime=yes],[libopts_cv_run_allocated_ctime=no],[libopts_cv_run_allocated_ctime=no]
-  ) # end of TRY_RUN
-  ]) # end of AC_CACHE_VAL for libopts_cv_run_allocated_ctime
-  AC_MSG_RESULT([${libopts_cv_run_allocated_ctime}])
-
-  if test "X${libopts_cv_run_allocated_ctime}" != Xno
-  then
-    AC_DEFINE([HAVE_ALLOCATED_CTIME],[1],
-        [Define this if ctime() allocates memory for its result])
-  fi
-  
-]) # end of AC_DEFUN of LIBOPTS_RUN_ALLOCATED_CTIME
-
-
 AC_DEFUN([LIBOPTS_RUN_PATHFIND],[
   AC_MSG_CHECKING([whether pathfind(3) works])
   AC_CACHE_VAL([libopts_cv_run_pathfind],[
@@ -270,9 +247,6 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS],[
   # Check to see if a working libregex can be found.
   LIBOPTS_WITHLIB_REGEX
 
-  # Check to see if ctime() allocates memory for its result.
-  LIBOPTS_RUN_ALLOCATED_CTIME
-
   # Check to see if pathfind(3) works.
   LIBOPTS_RUN_PATHFIND
 
@@ -290,7 +264,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS],[
 dnl @synopsis  LIBOPTS_CHECK
 dnl
 dnl If autoopts-config works, add the linking information to LIBS.
-dnl Otherwise, add ``libopts-23.0.14''
+dnl Otherwise, add ``libopts-23.1.14''
 dnl to SUBDIRS and run all the config tests that the library needs.
 dnl
 AC_DEFUN([LIBOPTS_CHECK],[
@@ -356,7 +330,6 @@ AC_CHECK_HEADERS(dirent.h ndir.h sys/ndir.h, break)
 # AC_CHECK_LIB for SVR4 libgen, and use it if it defines pathfind.
 # ----------------------------------------------------------------------
 AC_CHECK_LIB(gen, pathfind)
-
   AC_MSG_CHECKING([whether autoopts-config can be found])
   AC_ARG_WITH([autoopts-config],
         AC_HELP_STRING([--with-autoopts-config],

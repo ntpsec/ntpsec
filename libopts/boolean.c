@@ -1,6 +1,6 @@
 
 /*
- *  $Id: boolean.c,v 2.11 2004/02/02 03:31:50 bkorb Exp $
+ *  $Id: boolean.c,v 4.1 2005/01/01 00:12:40 bkorb Exp $
  *
  *   Automated Options Paged Usage module.
  *

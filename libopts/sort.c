@@ -1,6 +1,6 @@
 
 /*
- *  sort.c  $Id: sort.c,v 2.8 2004/02/02 03:31:51 bkorb Exp $
+ *  sort.c  $Id: sort.c,v 4.1 2005/01/01 00:12:42 bkorb Exp $
  *
  *  This module implements argument sorting.
  */

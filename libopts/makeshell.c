@@ -1,6 +1,6 @@
 
 /*
- *  $Id: makeshell.c,v 2.51 2004/02/16 22:12:50 bkorb Exp $
+ *  $Id: makeshell.c,v 4.1 2005/01/01 00:12:40 bkorb Exp $
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.

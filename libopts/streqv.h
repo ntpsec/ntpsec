@@ -1,6 +1,6 @@
 
 /*
- *  $Id: streqv.h,v 2.15 2004/10/02 21:37:46 bkorb Exp $
+ *  $Id: streqv.h,v 4.1 2005/01/01 00:12:42 bkorb Exp $
  *
  *  String Equivalence
  *

@@ -1,6 +1,6 @@
 
 /*
- *  $Id: numeric.c,v 2.14 2004/02/02 03:31:50 bkorb Exp $
+ *  $Id: numeric.c,v 4.1 2005/01/01 00:12:41 bkorb Exp $
  *
  *   Automated Options Paged Usage module.
  *

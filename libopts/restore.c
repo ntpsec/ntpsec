@@ -1,6 +1,6 @@
 
 /*
- *  restore.c  $Id: restore.c,v 2.11 2004/02/02 03:31:51 bkorb Exp $
+ *  restore.c  $Id: restore.c,v 4.1 2005/01/01 00:12:42 bkorb Exp $
  *
  *  This module's routines will save the current option state to memory
  *  and restore it.  If saved prior to the initial optionProcess call,

@@ -1,5 +1,5 @@
 
-/*  $Id: version.c,v 2.19 2004/02/02 03:31:51 bkorb Exp $
+/*  $Id: version.c,v 4.1 2005/01/01 00:12:42 bkorb Exp $
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.

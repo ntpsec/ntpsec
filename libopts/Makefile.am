@@ -2,7 +2,7 @@
 MAINTAINERCLEANFILES  = Makefile.in
 lib_LTLIBRARIES       = libopts.la
 libopts_la_SOURCES    = libopts.c
-libopts_la_LDFLAGS    = -version-info  23:0:14
+libopts_la_LDFLAGS    = -version-info  23:1:14
 EXTRA_DIST            = COPYING.lgpl COPYING.mbsd compat \
     autoopts.c    autoopts.h    boolean.c     enumeration.c environment.c  \
     genshell.c    genshell.h    libopts.c     load.c        makeshell.c  \
