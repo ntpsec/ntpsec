@@ -653,7 +653,7 @@ main(
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
 
-	if (make_md5 || !filep(f1_keys)) {
+	if (make_md5 && (force || !filep(f1_keys))) {
 		/*
 		 * Generate 16 random MD5 keys.
 		 */
@@ -684,7 +684,8 @@ main(
 	}
 
 #ifdef PUBKEY
-	if (make_rsa || !filep(f1_publickey) || !filep(f1_privatekey)) {
+	if (make_rsa && (force || !filep(f1_publickey)
+			 || !filep(f1_privatekey))) {
 		/*
 		 * Roll the RSA public/private key pair.
 		 */
@@ -748,7 +749,7 @@ main(
 #endif /* PUBKEY */
 
 #ifdef PUBKEY
-	if (make_dh || !filep(f1_dhparms)) {
+	if (make_dh && (force || !filep(f1_dhparms))) {
 		/*
 		 * Roll the prime and generator for the Diffie-Hellman key
 		 * agreement algorithm.
