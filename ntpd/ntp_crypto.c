@@ -237,7 +237,7 @@ make_keylist(
 	 * included in the hash is zero if broadcast mode, the peer
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
-	ltemp = sys_automax;
+	ltemp = min(sys_automax, NTP_MAXSESSION * (1 << (peer->kpoll)));
 	peer->hcookie = session_key(&dstadr->sin, &peer->srcadr, 0,
 	    sys_private, 0);
 	if (peer->hmode == MODE_BROADCAST)
@@ -251,7 +251,7 @@ make_keylist(
 		    cookie, ltemp);
 		ltemp -= 1 << peer->kpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    ltemp <= (1 << (peer->kpoll + 1)))
+		    ltemp <= (1 << (peer->kpoll)))
 			break;
 	}
 
@@ -314,7 +314,6 @@ crypto_recv(
 	int len;		/* extension field length */
 	u_int code;		/* extension field opcode */
 	tstamp_t tstamp;	/* timestamp */
-	tstamp_t fstamp;	/* filestamp */
 	int i, rval;
 	u_int temp;
 #ifdef PUBKEY
@@ -322,6 +321,7 @@ crypto_recv(
 	struct value *vp;	/* value pointer */
 	u_char dh_key[MAX_KEYLEN]; /* agreed key */
 	R_RSA_PUBLIC_KEY *kp;	/* temporary public key pointer */
+	tstamp_t fstamp;	/* filestamp */
 	u_int32 *pp;		/* packet pointer */
 	u_int rsalen = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
 	u_int bits;
@@ -1011,7 +1011,6 @@ crypto_xmit(
 		len += temp;
 #endif /* PUBKEY */
 		break;
-
 
 #ifdef PUBKEY
 	/*

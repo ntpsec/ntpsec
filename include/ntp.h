@@ -103,7 +103,7 @@ typedef char s_char;
 #define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
-#define NTP_AUTOMAX	12	/* log2 default max session key lifetime */
+#define NTP_AUTOMAX	13	/* log2 default max session key lifetime */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
 #define CLOCK_SGATE	4.	/* popcorn spike gate */

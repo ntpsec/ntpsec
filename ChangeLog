@@ -1,3 +1,15 @@
+2001-03-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Documentation cleanup.
+	(receive): Watch for NULL peer->pubkey.ptr (TEST11).
+	(poll_update): peer->nextdate, not ->outdate. More cleanup around
+	the disabled PUBKEY chunk.
+	* ntpd/ntp_crypto.c (make_keylist): ltemp might be smaller than
+	sys_automax - check peer->kpoll, too.  Other ltemp cleanup.
+	(crypto_recv): fstamp is a PUBKEY-only variable.
+	* include/ntp.h (NTP_AUTOMAX): 13, not 12.
+	From: Dave Mills.
+
 2001-03-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): hpoll cleanup.  Call clock_select()

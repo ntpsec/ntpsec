@@ -114,19 +114,23 @@ transmit(
 		} else if (peer->cast_flags & MDF_ACAST) {
 
 			/*
-			 * In manycast mode we start with minimum poll
-			 * interval and ttl. If fewer than three servers
-			 * are found, the ttl is increased by one and
-			 * try again. If this continues to the max ttl,
-			 * the poll interval is bumped by one and try
-			 * again. If at least three servers are found,
-			 * the poll interval is set to the max and we
-			 * continue indefinately. However, about once
-			 * per day when the agreement parameters are
-			 * refreshed, the manycast clients are reset and
-			 * start from the beginning. This is to catch
-			 * and clamp the ttl to the lowest practical
-			 * value and avoid knocking on spurious doors.
+			 * In manycast mode we start with the minpoll
+			 * interval and ttl. However, the actual poll
+			 * interval is eight times the nominal poll
+			 * interval shown here. If fewer than three
+			 * servers are found, the ttl is increased by
+			 * one and we try again. If this continues to
+			 * the max ttl, the poll interval is bumped by
+			 * one and we try again. If at least three
+			 * servers are found, the poll interval
+			 * increases with the system poll interval to
+			 * the max and we continue indefinately.
+			 * However, about once per day when the
+			 * agreement parameters are refreshed, the
+			 * manycast clients are reset and we start from
+			 * the beginning. This is to catch and clamp the
+			 * ttl to the lowest practical value and avoid
+			 * knocking on spurious doors.
 			 */
 			if (sys_survivors < NTP_MINCLOCK) {
 				if (peer->ttl < peer->ttlmax)
@@ -143,7 +147,7 @@ transmit(
 			 * For associations expecting a reply, the
 			 * watchdog counter is bumped by one if the peer
 			 * has not been heard since the previous poll.
-			 * If the counter reaches a max, the peer is
+			 * If the counter reaches the max, the peer is
 			 * demobilized if not configured and just
 			 * cleared if it is, but in this case the poll
 			 * interval is bumped by one.
@@ -197,7 +201,8 @@ transmit(
 			 * the peer is not sane, increase it by one. If
 			 * the number of valid updates is not greater
 			 * than half the register size, clamp it to the
-			 * minimum.
+			 * minimum. This is to quickly recover the time
+			 * variables when a noisy peer shows life.
 			 */
 			if ((peer->reach & 0x03) == 0) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
@@ -800,15 +805,6 @@ receive(
 			}
 		}
 #ifdef PUBKEY
-		/*
-		 * If the autokey boogie fails, the server may be bogus
-		 * or worse. If the server has new autokey values, but
-		 * the client has not seen them, the result will be
-		 * timeout and general reset. The alternative is a
-		 * vulnerability to self-interference in manycast mode.
-		 */
-		if (!(peer->flags & FLAG_AUTOKEY))
-			peer->flash |= TEST11;
 
 		/*
 		 * This is delicious. Ordinarily, we kick out all errors
@@ -818,6 +814,8 @@ receive(
 		 * let the dude by here, but only if the jerk is not yet
 		 * reachable. After that, he's on his own.
 		 */
+		if (peer->pubkey.ptr == NULL)
+			peer->flash |= TEST11;
 		if (peer->flash && peer->reach != 0) {
 #ifdef DEBUG
 			if (debug)
@@ -1155,7 +1153,7 @@ poll_update(
 	 * randomize over the poll interval -1 to +2 seconds.
 	 */ 
 	if (peer->burst > 0) {
-		if (peer->outdate != current_time)
+		if (peer->nextdate != current_time)
 			return;
 		if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate++;
@@ -1163,11 +1161,10 @@ poll_update(
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
-#if 0 /* xxxxx */
-	} else if (peer->crypto && (!(peer->flags & FLAG_AUTOKEY) ||
-		    peer->cmmd)) {
-			peer->burst = 1;
-			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
+#ifdef 0
+	} else if (peer->cmmd || (peer->crypto &&
+	    peer->pcookie.tstamp == 0)) {
+		peer->nextdate = peer->outdate + RANDPOLL(2);
 #endif /* PUBKEY */
 	} else if (peer->cast_flags & MDF_ACAST) {
 		peer->kpoll = peer->hpoll + 3;
