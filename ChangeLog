@@ -1,5 +1,7 @@
 1999-09-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.97e
+
 	* configure.in (ac_cv_struct_sigaction_has_sa_sigaction):
 	* acconfig.h: Ditto
 	* parseutil/dcfd.c (main): Use it.
