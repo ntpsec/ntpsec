@@ -269,11 +269,7 @@ main(
 #ifdef SYS_VXWORKS
 void clear_globals(void)
 {
-    extern int ntp_optind;
-    extern char *ntp_optarg;
     showhostnames = 0;              /* show host names by default */
-    ntp_optind = 0;
-    ntp_optarg = 0;
     havehost = 0;                   /* set to 1 when host open */
     numcmds = 0;
     numhosts = 0;
@@ -289,10 +285,6 @@ ntpdcmain(
 	char *argv[]
 	)
 {
-	int c;
-	int errflg = 0;
-	extern int ntp_optind;
-	extern char *ntp_optarg;
 
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
