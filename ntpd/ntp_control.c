@@ -1106,7 +1106,6 @@ ctl_putadr(
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
-
 /*
  * ctl_putid - write a tagged clock ID into the response
  */

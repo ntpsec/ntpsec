@@ -145,10 +145,10 @@ be reset before use in server mode. */
 
     memset(&here[which], 0, sizeof(struct sockaddr_storage));
     here[which] = anywhere;
-    if (!(operation == op_listen || operation == op_server))
+    if (operation != op_listen)
         ((struct sockaddr_in6 *)&here[which])->sin6_port = 0;
     memset(&there[which], 0, sizeof(struct sockaddr_storage));
-    there[which] = (operation == op_broadcast ? everywhere : address);
+    there[which] = address;
     if (verbose > 2) {
         fprintf(stderr,"Initial sockets: here=");
         display_sock_in_hex(&here[which]);
@@ -176,12 +176,6 @@ be reset before use in server mode. */
     if ((descriptors[which] = socket(here[which].ss_family,SOCK_DGRAM,0)) < 0
 	|| bind(descriptors[which],(struct sockaddr *)&here[which], sl) < 0)
         fatal(1,"unable to allocate socket for NTP",NULL);
-    if (operation == op_broadcast) {
-        errno = 0;
-        k = setsockopt(descriptors[which],SOL_SOCKET,SO_BROADCAST,
-                (void *)&k,sizeof(k));
-        if (k != 0) fatal(1,"unable to set permission to broadcast",NULL);
-    }
 }
 
 #else
@@ -213,18 +207,17 @@ number is in network format. */
         fputc('\n',stderr);
     }
 
-/* Set up our own and the target addresses.  Note that the target address will
-be reset before use in server mode. */
+/* Set up our own and the target addresses. */
 
     memset(&here[which],0,sizeof(struct sockaddr_in));
     here[which].sin_family = AF_INET;
     here[which].sin_port =
-        (operation == op_listen || operation == op_server ? port : 0);
+        (operation == op_listen ? port : 0);
     here[which].sin_addr = anywhere;
     memset(&there[which],0,sizeof(struct sockaddr_in));
     there[which].sin_family = AF_INET;
     there[which].sin_port = port;
-    there[which].sin_addr = (operation == op_broadcast ? everywhere : address);
+    there[which].sin_addr = address;
     if (verbose > 2) {
         fprintf(stderr,"Initial sockets: here=");
         display_in_hex(&here[which].sin_addr,sizeof(struct in_addr));
@@ -244,12 +237,6 @@ be reset before use in server mode. */
             bind(descriptors[which],(struct sockaddr *)&here[which],
                     sizeof(here[which]))  < 0)
         fatal(1,"unable to allocate socket for NTP",NULL);
-    if (operation == op_broadcast) {
-        errno = 0;
-        k = setsockopt(descriptors[which],SOL_SOCKET,SO_BROADCAST,
-                (void *)&k,sizeof(k));
-        if (k != 0) fatal(1,"unable to set permission to broadcast",NULL);
-    }
 }
 
 #endif
@@ -318,10 +305,7 @@ length and timeout are not fatal. */
 
 /* Get the packet and clear the timeout, if any.  */
 
-    if (operation == op_server)
-        memcpy(ptr = &there[which],&here[which],sizeof(scratch));
-    else
-        memcpy(ptr = &scratch,&there[which],sizeof(scratch));
+    memcpy(ptr = &scratch,&there[which],sizeof(scratch));
     n = sizeof(scratch);
     errno = 0;
     k = recvfrom(descriptors[which],packet,(size_t)length,0,

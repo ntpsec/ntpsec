@@ -30,9 +30,7 @@ No changes should be needed for any system that is even remotely like Unix. */
 /* Defined in main.c */
 
 #define op_client           1          /* Behave as a challenge client */
-#define op_server           2          /* Behave as a response server */
-#define op_listen           3          /* Behave as a listening client */
-#define op_broadcast        4          /* Behave as a broadcast server */
+#define op_listen           2          /* Behave as a listening client */
 
 extern const char *argv0;
 
