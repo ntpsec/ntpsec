@@ -8,6 +8,12 @@
  * 
  */
 
+/*
+ * Ignore nonstandard extension warning.
+ * This happens when including winioctl.h
+ */
+#pragma warning( disable : 4201)
+
 #include <config.h>
 #include <windows.h>
 #include <stdio.h>

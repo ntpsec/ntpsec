@@ -531,10 +531,10 @@ process_private(
 		l_fp ftmp;
 		double dtemp;
 	
-		if (rbufp->recv_length < (REQ_LEN_HDR +
+		if (rbufp->recv_length < (int)((REQ_LEN_HDR +
 		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
 		    INFO_NITEMS(inpkt->err_nitems))
-		    + sizeof(struct req_pkt_tail))) {
+		    + sizeof(struct req_pkt_tail)))) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		}
 		tailinpkt = (struct req_pkt_tail *)((char *)&rbufp->recv_pkt +
@@ -887,8 +887,8 @@ peer_info (
 			ip->filtdelay[i] = HTONS_FP(DTOFP(pp->filter_delay[j]));
 			DTOLFP(pp->filter_offset[j], &ltmp);
 			HTONL_FP(&ltmp, &ip->filtoffset[i]);
-			ip->order[i] = (pp->filter_nextpt+NTP_SHIFT-1)
-				- pp->filter_order[i];
+			ip->order[i] = (u_char)((pp->filter_nextpt+NTP_SHIFT-1)
+				- pp->filter_order[i]);
 			if (ip->order[i] >= NTP_SHIFT)
 			    ip->order[i] -= NTP_SHIFT;
 		}

@@ -261,9 +261,9 @@ ntp_monitor(
 	md->mode = (u_char) mode;
 	md->version = PKT_VERSION(pkt->li_vn_mode);
 	md->interface = rbufp->dstadr;
-	md->cast_flags = ((rbufp->dstadr->flags & INT_MULTICAST) &&
+	md->cast_flags = (u_char)(((rbufp->dstadr->flags & INT_MULTICAST) &&
 	    rbufp->fd == md->interface->fd) ? MDF_MCAST: rbufp->fd ==
-		md->interface->bfd ? MDF_BCAST : MDF_UCAST;
+		md->interface->bfd ? MDF_BCAST : MDF_UCAST);
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of

@@ -46,7 +46,7 @@
 		int idx; \
 		for (idx = 0; idx < 16; idx++) { \
 			(dst)->s6_addr[idx] = \
-			    (src)->s6_addr[idx] & (msk)->s6_addr[idx]; \
+			    (u_char) ((src)->s6_addr[idx] & (msk)->s6_addr[idx]); \
 		} \
 	} while (0)
 
@@ -307,6 +307,8 @@ hack_restrict(
 	register struct restrictlist6 *rl6 = NULL;
 	register struct restrictlist6 *rlprev6 = NULL;
 	int i, addr_cmp, mask_cmp;
+	memset(&addr6, 0, sizeof(struct in6_addr)); 
+	memset(&mask6, 0, sizeof(struct in6_addr)); 
 
 	if (resaddr->ss_family == AF_INET) {
 		/*
