@@ -2225,7 +2225,7 @@ find_interface_index(
 	 * we need to take account of that
 	 */
 	if (addr->ss_family == AF_INET6) {
-		if (flagtype == INT_BROADCAST) {
+		if (flagtype == INT_MULTICAST) {
 			is_sitelocal = IN6_IS_ADDR_MC_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
 			is_linklocal = IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
 		}
