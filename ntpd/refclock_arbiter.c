@@ -249,8 +249,6 @@ arb_receive(
 	if (temp < 3)
 		return;
 
-printf("xxx %d %s\n", temp, tbuf);
-
 	if (up->tcswitch == 0) {
 
 		/*
