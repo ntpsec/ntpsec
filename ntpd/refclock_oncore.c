@@ -802,20 +802,16 @@ oncore_read_config(
 		if (!*cc)
 			continue;
 
-		/* Lowercase the command and find the arg */
+		/* Uppercase the command and find the arg */
 		for (ca = cc; *ca; ca++) {
 			if (isascii((int)*ca) && islower((int)*ca)) {
 				*ca = toupper(*ca);
-			} else if (isascii((int)*ca) && isspace((int)*ca)) {
+			} else if (isascii((int)*ca) && (isspace((int)*ca) || (*ca == '=')))
 				break;
-			} else if (*ca == '=') {
-				*ca = ' ';
-				break;
-			}
 		}
 		
-		/* Remove space leading the arg */
-		for (; *ca && isascii((int)*ca) && isspace((int)*ca); ca++)
+		/* Remove space (and possible =) leading the arg */
+		for (; *ca && isascii((int)*ca) && (isspace((int)*ca) || (*ca == '=')); ca++)
 			continue;
 
 		if (!strncmp(cc, "STATUS", 6)) {

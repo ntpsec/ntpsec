@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99c)
+AM_INIT_AUTOMAKE(ntp, 4.0.99d)
 AC_PREREQ(2.14)
 
 ac_cv_var_oncore_ok=no
@@ -2943,7 +2943,13 @@ AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
     [changequote(<<, >>)dnl
     case "$target" in
      *-*-solaris2.6)
-	 ans=yes
+	 case "`uname -v`" in
+	  Generic_105181-17)
+	     ans=no
+	     ;;
+	  *) ans=yes
+	     ;;
+	 esac
 	 ;;
      *-*-solaris2.7)
 	 case "`uname -v`" in

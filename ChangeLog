@@ -1,4 +1,15 @@
+2000-02-09  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ports/winnt/include/config.h: Typo (CLOCK_PALISADE comment)
+	From: Carl Byington <carl@five-ten-sg.com>
+
+	* configure.in: Disable kernel_fll_bug for Generic_105181-17 under
+	Solaris-2.6
+	From: Juergen Georgi <georgi@belwue.de>
+
 2000-02-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99d
 
 	* html/Oncore-SHMEM.htm: New document
 	* html/driver30.htm: Cleanup and improvements

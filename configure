@@ -1088,7 +1088,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.99c
+VERSION=4.0.99d
 
 if test "`CDPATH=: && cd $srcdir && pwd`" != "`pwd`" &&
    test -f $srcdir/config.status; then
@@ -10714,7 +10714,13 @@ if test "${enable_kernel_fll_bug+set}" = set; then
 else
       case "$target" in
      *-*-solaris2.6)
-	 ans=yes
+	 case "`uname -v`" in
+	  Generic_105181-17)
+	     ans=no
+	     ;;
+	  *) ans=yes
+	     ;;
+	 esac
 	 ;;
      *-*-solaris2.7)
 	 case "`uname -v`" in
