@@ -335,7 +335,7 @@ crypto_recv(
 
 		/*
 		 * Install association ID. This is used in multicast
-		 * client mode only only.
+		 * client mode only.
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
 			if (ntohl(pkt[i + 1]) != 0 && peer->flags &
@@ -345,14 +345,18 @@ crypto_recv(
 
 		/*
 		 * Install autokey values in broadcast client and
-		 * symmetric modes.
+		 * symmetric modes. Tricky here - discard old
+		 * timestamps, but don't discard duplicate timestamps if
+		 * the authentic bit is not set. 
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
 			ap = (struct autokey *)&pkt[i + 2];
 #ifdef PUBKEY
 			temp = ntohl(ap->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
-			if (tstamp <= peer->recauto.tstamp) {
+			if (tstamp < peer->recauto.tstamp || (tstamp ==
+			    peer->recauto.tstamp && peer->flags &
+			    FLAG_AUTOKEY)) {
 				rval = RV_TSP;
 			} else if (!crypto_flags) {
 				rval = RV_OK;
@@ -367,7 +371,9 @@ crypto_recv(
 				    (u_char *)ap->pkt, temp, kp);
 			}
 #else /* PUBKEY */
-			if (tstamp <= peer->recauto.tstamp)
+			if (tstamp <= peer->recauto.tstamp || (tstamp ==
+			    peer->recauto.tstamp && peer->flags &
+			    FLAG_AUTOKEY))
 				rval = RV_TSP;
 			else
 				rval = RV_OK;
@@ -392,7 +398,9 @@ crypto_recv(
 			break;
 
 		/*
-		 * Install session cookie in client and symmetric modes.
+		 * Install session cookie in client mode. Use this also
+		 * in symmetric modes when rsaref20 has not been
+		 * installed for test.
 		 */
 		case CRYPTO_PRIV:
 			peer->cmmd = ntohl(pkt[i]);
@@ -494,6 +502,7 @@ crypto_recv(
 #endif
 			if (rval != RV_OK || temp == 0)
 				break;
+			peer->flash &= ~TEST10;
 
 			/*
 			 * Initialize Diffie-Hellman parameters and
@@ -695,6 +704,7 @@ crypto_recv(
 #endif
 			if (rval != RV_OK || temp == 0)
 				break;
+			peer->flash &= ~TEST10;
 
 			/*
 			 * Initialize TAI leapsecond table and extension

@@ -182,7 +182,6 @@ transmit(
 				peer->flags &= ~FLAG_BURST;
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
-				peer->pcookie.tstamp = 0;
 				key_expire(peer);
 #endif /* AUTOKEY */
 			}
@@ -751,12 +750,18 @@ receive(
 #ifdef PUBKEY
 		/*
 		 * If the autokey boogie fails, the server may be bogus
-		 * or worse. Raise an alarm and rekey this thing.
+		 * or worse. Raise an alarm and retrieve the autokey
+		 * values again. If the server has in fact come up with
+		 * new autokey values, this saves a timeout and general
+		 * reset. On the other hand, an intruder could replay at
+		 * speed packets from old associations with different
+		 * cookies, which would cause needless server requests
+		 * and burdensome responses. Since victim client sends a
+		 * message only at poll intervals and victim server
+		 * burns no PKI cycles, the attack doesn't do much harm.
 		 */
-		if (peer->flash & TEST10) {
+		if (peer->flash & TEST10)
 			peer->flags &= ~FLAG_AUTOKEY;
-			peer->recauto.tstamp = 0;
-		}
 		if (!(peer->flags & FLAG_AUTOKEY))
 			peer->flash |= TEST11;
 
@@ -1969,8 +1974,7 @@ peer_xmit(
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
 			if (!crypto_flags && peer->pcookie.tstamp ==
-			    0 && peer->recauto.tstamp != 0 &&
-			    sys_leap != LEAP_NOTINSYNC)
+			    0 && sys_leap != LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
@@ -1983,8 +1987,7 @@ peer_xmit(
 				    sendlen, CRYPTO_DHPAR,
 				    peer->hcookie, peer->assoc);
 			else if (crypto_flags && peer->pcookie.tstamp ==
-			    0 && peer->recauto.tstamp != 0 &&
-			    sys_leap != LEAP_NOTINSYNC)
+			    0 && sys_leap != LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DH, peer->hcookie,
 				    peer->assoc);
@@ -1994,8 +1997,7 @@ peer_xmit(
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-			if (peer->pcookie.tstamp == 0 &&
-			    peer->recauto.tstamp != 0 && sys_leap !=
+			if (peer->pcookie.tstamp == 0 && sys_leap !=
 			    LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,

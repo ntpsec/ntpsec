@@ -27,5 +27,5 @@ LDADD = libefence.a
 # CFLAGS= -g -Bstatic -DPAGE_PROTECTION_VIOLATED_SIGNAL=SIGBUS
 
 check-local:
-	./eftest
-	./tstheap 3072
+	[ -f eftest] && ./eftest
+	[ -f tstheap ] && ./tstheap 3072
