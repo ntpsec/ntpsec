@@ -1,40 +1,24 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
 <html>
-<head>
-<meta name="generator" content="HTML Tidy, see www.w3.org">
-<title>Configuration Options</title>
-</head>
-<body>
-<h3>Configuration Options</h3>
 
-<img align="left" src="pic/pogo3a.gif"><a href=
-"http://www.eecis.udel.edu/~mills/pictures.htm">from <i>Pogo</i>,
-Walt Kelly</a> 
+    <head>
+        <meta name="generator" content="HTML Tidy, see www.w3.org">
+        <title>Configuration Options</title>
+    </head>
 
-<p>Gnu autoconfigure tools are in the backpack.<br clear="left">
-</p>
-
-<hr>
-<h4>Basic Configuration Options - the <tt>configure</tt>
-utility</h4>
-
-The following options are for compiling and installing a working
-version of the NTP distribution. In most cases, the build process
-is completely automatic. In some cases where memory space is at a
-premium, or the binaries are to be installed in a different place,
-it is possible to tailor the configuration to remove such features
-as reference clock driver support, debugging support, and so forth.
-
-
-<p>Configuration options are specified as arguments to the <tt>
-configure</tt> script. Following is a summary of the current
-options, as of the 4.0.99m version:</p>
-
-<p>Usage: <tt>configure [options] [host]</tt><br>
-Options: <tt>[defaults in brackets after descriptions]</tt>
-Configuration:</p>
-
-<pre>
+    <body>
+        <h3>Configuration Options</h3>
+        <img src="pic/pogo3a.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.htm">from <i>Pogo</i>, Walt Kelly</a>
+        <p>Gnu autoconfigure tools are in the backpack.<br clear="left">
+        </p>
+        <hr>
+        <h4>Basic Configuration Options - the <tt>configure</tt> utility</h4>
+        The following options are for compiling and installing a working version of the NTP distribution. In most cases, the build process is completely automatic. In some cases where memory space is at a premium, or the binaries are to be installed in a different place, it is possible to tailor the configuration to remove such features as reference clock driver support, debugging support, and so forth.
+        <p>Configuration options are specified as arguments to the <tt>configure</tt> script. Following is a summary of the current options, as of the 4.0.99m version:</p>
+        <p>Usage: <tt>configure [options] [host]</tt><br>
+            Options: <tt>[defaults in brackets after descriptions]</tt> Configuration:</p>
+        <pre>
  --cache-file=FILE      cache test results in FILE
  --help                 print this message
  --no-create            do not create output files
@@ -42,25 +26,17 @@ Configuration:</p>
  --version              print the version of autoconf that created
 configure
 </pre>
-
-Directory and file names: 
-
-<pre>
- --prefix=PREFIX        install architecture-independent files in PREFIX
-[/usr/local]
- --exec-prefix=EPREFIX  install architecture-dependent files in EPREFIX
-[same as prefix]
+        Directory and file names:
+        <pre>
+ --prefix=PREFIX        install architecture-independent files in PREFIX [/usr/local]
+ --exec-prefix=EPREFIX  install architecture-dependent files in EPREFIX [same as prefix]
  --bindir=DIR           user executables in DIR [EPREFIX/bin]
  --sbindir=DIR          system admin executables in DIR [EPREFIX/sbin]
  --libexecdir=DIR       program executables in DIR [EPREFIX/libexec]
- --datadir=DIR          read-only architecture-independent data in DIR
-[PREFIX/share]
- --sysconfdir=DIR       read-only single-machine data in DIR
-[PREFIX/etc]
- --sharedstatedir=DIR   modifiable architecture-independent data in DIR
-[PREFIX/com]
- --localstatedir=DIR    modifiable single-machine data in DIR
-[PREFIX/var]
+ --datadir=DIR          read-only architecture-independent data in DIR [PREFIX/share]
+ --sysconfdir=DIR       read-only single-machine data in DIR [PREFIX/etc]
+ --sharedstatedir=DIR   modifiable architecture-independent data in DIR [PREFIX/com]
+ --localstatedir=DIR    modifiable single-machine data in DIR [PREFIX/var]
  --libdir=DIR           object code libraries in DIR [EPREFIX/lib]
  --includedir=DIR       C header files in DIR [PREFIX/include]
  --oldincludedir=DIR    C header files for non-gcc in DIR [/usr/include]
@@ -69,42 +45,31 @@ Directory and file names:
  --srcdir=DIR           find the sources in DIR [configure dir or ..]
  --x-includes=DIR       X include files are in DIR
  --x-libraries=DIR      X library files are in DIR
- --program-prefix=PREFIX           prepend PREFIX to installed program
-names
- --program-suffix=SUFFIX           append SUFFIX to installed program
-names
- --program-transform-name=PROGRAM  run sed PROGRAM on installed program
-names
+ --program-prefix=PREFIX           prepend PREFIX to installed program names
+ --program-suffix=SUFFIX           append SUFFIX to installed program names
+ --program-transform-name=PROGRAM  run sed PROGRAM on installed program names
 </pre>
-
-Host type: 
-
-<pre>
+        Host type:
+        <pre>
  --build=BUILD          configure for building on BUILD [BUILD=HOST]
  --host=HOST            configure for HOST [guessed]
  --target=TARGET        configure for TARGET [TARGET=HOST]
 </pre>
-
-Optional packages: 
-
-<pre>
+        Optional packages:
+        <pre>
  --with-PACKAGE[=ARG]   use PACKAGE [ARG=yes]
  --without-PACKAGE      do not use PACKAGE (same as --with-PACKAGE=no)
 
- openssl-libdir=DIR     OpenSSL object code libraries in DIR [/usr/lib
-/usr/local/lib /usr/local/ssl/lib]
- openssl-incdir=DIR     OpenSSL header files in DIR [/usr/include
-/usr/local/include /usr/local/ssl/include]
+ openssl-libdir=DIR     OpenSSL object code libraries in DIR [/usr/lib/usr/local/lib/usr/local/ssl/lib]
+ openssl-incdir=DIR     OpenSSL header files in DIR [/usr/include/usr/local/include/usr/local/ssl/include]
  crypto=autokey         Use autokey cryptography
  crypto=rsaref          Use the RSAREF library
  electricfence          Compile with ElectricFence malloc debugger
 </pre>
-
-Optional features: 
-
-<pre>
+        Optional features:
+        <pre>
  --disable-FEATURE      do not include FEATURE (same as
---enable-FEATURE=no)
+ --enable-FEATURE=no)
  --enable-FEATURE[=ARG] include FEATURE [ARG=yes]
 
  accurate-adjtime       The adjtime() call is accurate
@@ -123,28 +88,22 @@ Optional features:
  tickadj=VALUE          Force a value for 'tickadj'
  udp-wildcard           Use UDP wildcard delivery
 </pre>
-
-Radio clocks (these are ordinarily enabled, if supported by the
-machine and operating system): 
-
-<pre>
- all-clocks             Include drivers for all suitable non-PARSE
-clocks [enable]
+        Radio clocks (these are ordinarily enabled, if supported by the machine and operating system):
+        <pre>
+ all-clocks             Include drivers for all suitable non-PARSE clocks [enable]
  ACTS                   NIST dialup clock
  ARBITER                Arbiter 1088A/B GPS receiver
  ARCRON_MSF             Arcron MSF receiver
  AS2201                 Austron 2200A or 2201A GPS receiver
  ATOM                   ATOM PPS interface
  AUDIO-CHU              CHU audio decoder
- BANCOMM                Datum/Bancomm BC635/VME interface
-                        (requires an explicit --enable-BANCOMM request)
+ BANCOMM                Datum/Bancomm BC635/VME interface (requires an explicit --enable-BANCOMM request)
  CHRONOLOG              Chrono-log K-series WWVB receiver
  CHU                    CHU modem decoder
  DATUM                  Datum Programmable Time System
  DUMBCLOCK              Dumb generic hh:mm:ss local clock
  FG                     Forum Graphic GPS
- GPSVME                 TrueTime GPS receiver with VME interface
-                        (requires an explicit --enable-GPSVME request)
+ GPSVME                 TrueTime GPS receiver with VME interface (requires an explicit --enable-GPSVME request)
  HEATH                  HeathKit GC-1000 Most Accurate Clock
  HOPFPCI                HOPF 6039 PCI board
  HOPFSERIAL             HOPF serial clock device
@@ -161,8 +120,7 @@ clocks [enable]
  PCF                    Conrad parallel port radio clock
  PST                    PST/Traconex 1020 WWV/H receiver
  PTBACTS                PTB dialup clock support
- SHM                    Clock attached through shared memory
-                        (requires an explicit --enable-SHM request)
+ SHM                    Clock attached through shared memory (requires an explicit --enable-SHM request)
  SPECTRACOM             Spectracom 8170/Netclock/2 WWVB receiver
  TRAK                   TRAK 8810 GPS station clock
  TPRO                   KSI/Odetics TPRO/S IRIG Interface
@@ -171,12 +129,9 @@ clocks [enable]
  USNO                   US Naval Observatory dialup clock
  WWV                    WWV audio receiver
 </pre>
-
-PARSE Clocks: 
-
-<pre>
- parse-clocks           Include drivers for all suitable PARSE clocks
-[enable]
+        PARSE Clocks:
+        <pre>
+ parse-clocks           Include drivers for all suitable PARSE clocks [enable]
  COMPUTIME              Diem Computime Radio Clock
  DCF7000                ELV/DCF7000 Clock
  HOPF6021               HOPF 6021 Radio Clock support
@@ -189,11 +144,9 @@ PARSE Clocks:
  VARITEXT               VARITEXT clock
  WHARTON                Wharton 400A Series clock
 </pre>
+        <hr>
+        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
+        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+    </body>
 
-<hr>
-<a href="index.htm"><img align="left" src="pic/home.gif"></a>
-<address><a href="mailto:mills@udel.edu">David L. Mills
-&lt;mills@udel.edu&gt;</a></address>
-</body>
 </html>
-

@@ -114,6 +114,7 @@ struct value tai_leap;		/* leapseconds table */
 /*
  * Private cryptodata in host byte order
  */
+static char *passwd = NULL;	/* private key password */
 static EVP_PKEY *host_pkey = NULL; /* host key */
 static EVP_PKEY *sign_pkey = NULL; /* sign key */
 static EVP_PKEY *iff_pkey = NULL; /* IFF key */
@@ -2457,15 +2458,15 @@ cert_parse(
 	ret->version = X509_get_version(cert);
 	X509_NAME_oneline(X509_get_subject_name(cert), pathbuf,
 	    MAXFILENAME - 1);
-	if ((ptr = strchr(pathbuf, '=')) == NULL) {
+	if ((ptr = strstr(pathbuf, "CN=")) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: invalid subject %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->subject = emalloc(strlen(++ptr) + 1);
-	strcpy(ret->subject, ptr);
+	ret->subject = emalloc(strlen(ptr) + 1);
+	strcpy(ret->subject, ptr + 3);
 
 	/*
 	 * Extract remaining objects. Note that the NTP serial number is
@@ -2480,15 +2481,15 @@ cert_parse(
 	    (u_long)ASN1_INTEGER_get(X509_get_serialNumber(cert));
 	X509_NAME_oneline(X509_get_issuer_name(cert), pathbuf,
 	    MAXFILENAME);
-	if ((ptr = strchr(pathbuf, '=')) == NULL) {
+	if ((ptr = strstr(pathbuf, "CN=")) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: invalid issuer %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->issuer = emalloc(strlen(++ptr) + 1);
-	strcpy(ret->issuer, ptr);
+	ret->issuer = emalloc(strlen(ptr) + 1);
+	strcpy(ret->issuer, ptr + 3);
 	ret->first = asn2ntp(X509_get_notBefore(cert));
 	ret->last = asn2ntp(X509_get_notAfter(cert));
 
@@ -2941,11 +2942,11 @@ crypto_key(
 		return (NULL);
 
 	/*
-	 * Read PEM-encoded key.
+	 * Read and decrypt PEM-encoded key.
 	 */
 	switch (type) {
 	case TYPE_PRIVATE:
-		pkey = PEM_read_PrivateKey(str, NULL, NULL, NULL);
+		pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd);
 		break;
 
 	case TYPE_PUBLIC:
@@ -3371,7 +3372,7 @@ crypto_setup(void)
 		gqpar_file = emalloc(strlen(filename) + 1);
 		strcpy(gqpar_file, filename);
 	}
-	gqpar_pkey = crypto_key(gqpar_file, &fstamp, TYPE_PUBLIC);
+	gqpar_pkey = crypto_key(gqpar_file, &fstamp, TYPE_PRIVATE);
 
 	/*
 	 * Load optional GQ key from file "ntpkey_gq_<hostname>".
@@ -3490,6 +3491,14 @@ crypto_config(
 	case CRYPTO_CONF_RAND:
 		rand_file = emalloc(strlen(cp) + 1);
 		strcpy(rand_file, cp);
+		break;
+
+	/*
+	 * Set private key password.
+	 */
+	case CRYPTO_CONF_PW:
+		passwd = emalloc(strlen(cp) + 1);
+		strcpy(passwd, cp);
 		break;
 
 	/*

@@ -11,6 +11,9 @@
  * followed by a type-specific descriptive label and PEM-encoded data
  * string compatible with programs of the OpenSSL library.
  *
+ * Note that private keys can be password encrypted as per OpenSSL
+ * conventions.
+ *
  * The file types include
  *
  * ntpkey_MD5key_<hostname>.<filestamp>
@@ -160,6 +163,7 @@ u_int	modulus = PLEN;		/* prime modulus size (bits) */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 char	hostname[MAXHOSTNAME];	/* host name */
 char	filename[MAXFILENAME];	/* file name */
+char	*passwd = NULL;		/* private key password */
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
@@ -216,7 +220,8 @@ main(
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
 	rval = 0;
-	while ((temp = getopt(argc, argv, "c:de:GgHIMm:pS:t")) != -1) {
+	while ((temp = getopt(argc, argv, "c:de:GgHIMm:Pp:S:t")) != -1)
+	    {
 		switch(temp) {
 
 		/*
@@ -241,14 +246,14 @@ main(
 			continue;
 
 		/*
-		 * 'G' generate GQ parameters
+		 * 'G' generate GQ parameters (GQ scheme)
 		 */
 		case 'G':
 			gqpar++;
 			continue;
 
 		/*
-		 * 'g' generate GQ key
+		 * 'g' generate GQ keys (GQ scheme)
 		 */
 		case 'g':
 			gqkey++;
@@ -262,7 +267,7 @@ main(
 			continue;
 
 		/*
-		 * 'I' generate IFF key
+		 * 'I' generate IFF parameters (IFF scheme)
 		 */
 		case 'I':
 			iffkey++;
@@ -289,10 +294,17 @@ main(
 			continue;
 		
 		/*
-		 * 'p' private certificate
+		 * 'P' generate private certificate (PC scheme)
+		 */
+		case 'P':
+			exten = EXT_KEY_PRIVATE;
+			continue;
+
+		/*
+		 * 'p' private key password
 		 */
 		case 'p':
-			exten = EXT_KEY_PRIVATE;
+			passwd = optarg;
 			continue;
 
 		/*
@@ -303,7 +315,7 @@ main(
 			continue;
 		
 		/*
-		 * 't' trusted certificate
+		 * 't' trusted certificate (TC scheme)
 		 */
 		case 't':
 			exten = EXT_KEY_TRUST;
@@ -361,7 +373,8 @@ main(
 		sprintf(filename, "ntpkey_host_%s", hostname);
 		if ((str = fopen(filename, "r")) != NULL) {
 			pkey_host = PEM_read_PrivateKey(str, NULL, NULL,
-			    NULL);
+			    passwd);
+
 			fclose(str);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_host == NULL) {
@@ -387,7 +400,7 @@ main(
 		sprintf(filename, "ntpkey_sign_%s", hostname);
 		if ((str = fopen(filename, "r")) != NULL) {
 			pkey_sign = PEM_read_PrivateKey(str, NULL, NULL,
-			    NULL);
+			    passwd);
 			fclose(str);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_sign == NULL) {
@@ -413,7 +426,7 @@ main(
 		sprintf(filename, "ntpkey_iffpar_%s", hostname);
 		if ((str = fopen(filename, "r")) != NULL) {
 			pkey_iff = PEM_read_PrivateKey(str, NULL, NULL,
-			    NULL);
+			    passwd);
 			fclose(str);
 			readlink(filename, filename, sizeof(filename));
 			if (pkey_iff == NULL) {
@@ -433,8 +446,8 @@ main(
 	if (rsa_gqpar == NULL) {
 		sprintf(filename, "ntpkey_gqpar_%s", hostname);
 		if ((str = fopen(filename, "r")) != NULL) {
-			rsa_gqpar = PEM_read_RSAPublicKey(str, NULL,
-			    NULL, NULL);
+			rsa_gqpar = PEM_read_RSAPrivateKey(str, NULL,
+			    NULL, passwd);
 			fclose(str);
 			readlink(filename, filename, sizeof(filename));
 			if (rsa_gqpar == NULL) {
@@ -590,7 +603,8 @@ gen_rsa(
 	 * encoded in PEM.
 	 */
 	str = fheader("RSAkey");
-	PEM_write_RSAPrivateKey(str, rsa, NULL, NULL, 0, NULL, NULL);
+	PEM_write_RSAPrivateKey(str, rsa, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
@@ -645,7 +659,8 @@ gen_dsa(
 	 * encoded in PEM.
 	 */
 	str = fheader("DSAkey");
-	PEM_write_DSAPrivateKey(str, dsa, NULL, NULL, 0, NULL, NULL);
+	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
@@ -768,11 +783,13 @@ gen_iff(
 
 	/*
 	 * Write the IFF parameters as a DSA private key encoded in PEM.
+	 * Note, this is not encrypted.
 	 */
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	str = fheader("IFFpar");
-	PEM_write_DSAPrivateKey(str, dsa, NULL, NULL, 0, NULL, NULL);
+	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
+	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
@@ -841,11 +858,12 @@ gen_gqpar(
 	BN_mod(rsapar->e, rsapar->e, rsapar->n, ctx);
 
 	/*
-	 * Write the GQ parameters and group key as a RSA public key
+	 * Write the GQ parameters and group key as a RSA private key
 	 * encoded in PEM.
 	 */
 	str = fheader("GQpar");
-	PEM_write_RSAPublicKey(str, rsapar);
+	PEM_write_RSAPrivateKey(str, rsapar, passwd ? EVP_des_cbc() :
+	    NULL, NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsapar, 0);

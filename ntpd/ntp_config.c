@@ -284,6 +284,7 @@ static struct keyword crypto_keywords[] = {
 	{ "host",		CONF_CRYPTO_RSA },
 	{ "iff",		CONF_CRYPTO_IFF },
 	{ "leap",		CONF_CRYPTO_LEAP },
+	{ "pw",			CONF_CRYPTO_PW },
 	{ "randfile",		CONF_CRYPTO_RAND },
 	{ "sign",		CONF_CRYPTO_SIGN },
 	{ "",			CONFIG_UNKNOWN }
@@ -1154,6 +1155,10 @@ getconfig(
 
 			    case CONF_CRYPTO_LEAP:
 				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_PW:
+				crypto_config(CRYPTO_CONF_PW, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_RAND:

@@ -91,7 +91,7 @@ written to the clockstats file to verify that the driver is running correctly.
 In addition, on platforms supporting Shared Memory, all of the messages
 received from the Oncore receiver are made available in shared memory for
 use by other programs.
-See the <A HREF=Oncore-SHMEM.htm> Oncore-SHMEM </A> manual page for
+See the <A HREF=oncore-shmem.htm> Oncore-SHMEM </A> manual page for
 information on how to use this option.
 For either debugging or using the SHMEM option, an Oncore Reference Manual
 for the specific receiver in use will be required.
@@ -135,14 +135,14 @@ Not used by this driver.</DD>
 <DT>
 <TT>flag2 0 | 1</TT></DT>
 
-<DD>Specifies the PPS signal on-time edge: 0 for assert (default),
-1 for clear.</DD>
+<DD>
+Not used by this driver.</DD>
 
 <DT>
 <TT>flag3 0 | 1</TT></DT>
 
-<DD>Controls the kernel PPS discipline: 0 for disable (default), 1
-for enable.</DD>
+<DD>
+Not used by this driver.</DD>
 
 <DT>
 <TT>flag4 0 | 1</TT></DT>
@@ -154,7 +154,7 @@ Not used by this driver.</DD>
 <P>The driver was initially developed on FreeBSD, and has since been tested
 on Linux, SunOS and Solaris.
 <P><B>Configuration</B>
-<P>There is a driver specific configuration file <TT>/etc/ntp.oncore.n</TT>
+<P>There is a driver specific configuration file <TT>/etc/ntp.oncore</TT>
 that contains information on the startup mode, the location of the GPS
 receiver, an offset of the PPS signal from zero, and the cable delay.
 The offset shifts the PPS signal to avoid interrupt pileups `on' the second,
@@ -163,10 +163,12 @@ See the driver source for information on this file.
 The default with no file is: no delay, no offset, and a site survey is done
 to get the location of the gps receiver.
 
-<P> The edge of the PPS signal that is `on-time' can be set with either flag2
-or in the driver specific configuration file with the keywords [ASSERT/CLEAR].
-Flag3 (or the word HARDPPS in the driver specific configuration file)
-will cause the PPS signal to control the kernel PLL.
+<P>The <TT>/etc/ntp.conf</TT> file will need a line of the form<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TT> pps /dev/oncore.pps.0 [ assert/clear ] hardpps</TT><BR>
+if you want the oncore driver to control the kernel PLL.
+For more information, see the  <A HREF=clockopt.htm>Reference Clock
+Options</A> page.
 
 <P><B>Performance</B>
 <P>Really good.&nbsp; With the VP/UT+, the generated PPS pulse is referenced

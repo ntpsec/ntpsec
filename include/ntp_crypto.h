@@ -87,6 +87,8 @@
 #define CRYPTO_CONF_IFF   8	/* IFF parameters file name */
 #define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
 #define CRYPTO_CONF_GQ	 10	/* GQ keys file name */
+#define CRYPTO_CONF_PW	 11	/* private key password */
+
 /*
  * Miscellaneous crypto stuff
  */

@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <meta name="generator" content="HTML Tidy, see www.w3.org">
@@ -7,59 +7,22 @@
 <body>
 <h3>Notes on setting up a NTP subnet</h3>
 
-<img align="left" src="pic/tonea.gif" alt="gif">From NBS Special
-Publication 432 (out of print) <br clear="left">
+<img align="left" src="pic/tonea.gif" alt="gif">From NBS Special Publication 432 (out of print) <br clear="left">
  
 
 <h4>Introduction</h4>
 
-This document is a collection of notes concerning the use of ntpd
-and relatedprograms, and on coping with the Network Time Protocol
-(NTP) in general. It is a major rewrite and update of an earlier
-document written by Dennis Ferguson of the University of Toronto
-and includes many changes and additions resulting from the NTP
-Version 3 specification and new Version 4 implementation features.
-It supersedes earlier documents, which should no longer be used for
-new configurations. 
+<p>This document is a collection of notes concerning the use of ntpd and related programs, and on coping with the Network Time Protocol (NTP) in general. It is a major rewrite and update of an earlier document written by Dennis Ferguson of the University of Toronto and includes many changes and additions resulting from the NTP Version 3 specification and new Version 4 implementation features. It supersedes earlier documents, which should no longer be used for new configurations. </p>
 
-<p><tt>ntpd</tt> includes a complete implementation of the NTP
-Version 3 specification, as defined in:</p>
+<p><tt>ntpd</tt> includes a complete implementation of the NTP Version 3 specification, as defined in:</p>
 
 <ul>
 <li>
-<p>Mills, D.L. Network Time Protocol (Version 3) specification,
-implementation and analysis. Network Working Group Report RFC-1305,
-University of Delaware, March 1992, 113 pp. Abstract: <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305a.ps">
-PostScript</a> | <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305a.pdf">
-PDF</a>, Body: <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305b.ps">
-PostScript</a> | <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305b.pdf">
-PDF</a>, Appendices: <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.ps">
-PostScript</a> | <a href=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.pdf">
-PDF</a></p>
+<p>Mills, D.L. Network Time Protocol (Version 3) specification, implementation and analysis. Network Working Group Report RFC-1305, University of Delaware, March 1992, 113 pp. Abstract: <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305a.ps">PostScript</a> | <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305a.pdf">PDF</a>, Body: <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305b.ps">PostScript</a> | <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305b.pdf">PDF</a>, Appendices: <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.ps">PostScript</a> | <a href="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.pdf">PDF</a></p>
 </li>
 </ul>
 
-Additional features have are described for <a href="release.htm">
-NTP Version 4</a>. It also retains compatibility with both NTP
-Version 2, as defined in RFC-1119, and NTP Version 1, as defined in
-RFC-1059, although this compatibility is sometimes strained and
-only semiautomatic. In order to support in principle the ultimate
-precision of about 232 picoseconds in the NTP specification, <tt>
-ntpd</tt> uses NTP timestamp format for external communication and
-double precision floating point arithmetic internally. <tt>
-ntpd</tt> fully implements NTP Versions 2 and 3 authentication and
-in addition Version 4 autokey. It supports the NTP mode-6 control
-message facility along with a private mode-7 control- message
-facility used to remotely reconfigure the system and monitor a
-considerable amount of internal detail. As extensions to the
-specification, a flexible address-and-mask restriction facility has
-been included. 
+<p>Additional features have are described for <a href="release.htm">NTP Version 4 Release Notes</a>. It also retains compatibility with both NTP Version 2, as defined in RFC-1119, and NTP Version 1, as defined in RFC-1059, although this compatibility is sometimes strained and only semiautomatic. In order to support in principle the ultimate precision of about 232 picoseconds in the NTP specification, <tt>ntpd</tt> uses NTP timestamp format for external communication and double precision floating point arithmetic internally. <tt>ntpd</tt> fully implements NTP Versions 2 and 3 authentication and in addition Version 4 autokey. It supports the NTP mode-6 control message facility along with a private mode-7 control- message facility used to remotely reconfigure the system and monitor a considerable amount of internal detail. As extensions to the specification, a flexible address-and-mask restriction facility has been included.</p>
 
 <p>The code is biased towards the needs of a busy time server with
 numerous, often hundreds, of clients and other servers. Tables are
@@ -92,7 +55,7 @@ the code to perverse Unix and non-Unix platforms.</p>
 <p>While this implementation conforms in most respects to the NTP
 Version 3 specification RFC-1305, a number of improvements have
 been made which are described in the conformance statement in the
-<a href="biblio.htm">Further Information and Bibliography</a> page.
+<a href="http://www.eecis.udel.edu/~mills/biblio.htm">NTP Protocol Conformance Statement</a> page.
 It has been specifically tuned to achieve the highest accuracy
 possible on whatever hardware and operating-system platform is
 available. In general, its precision and stability are limited only
@@ -824,18 +787,7 @@ actual transmission of the packet when authentication is enabled
 encrypt a single block) is computed automatically by the daemon. If
 necessary, the delay can be overriden by the <tt>authdelay</tt>
 line, which is used as a correction for the transmit timestamp.
-This can be computed for your CPU by the <a href="authspeed.htm">
-<tt>authspeed</tt></a> program included in the distribution. The
-usage is illustrated by the following:</p>
-
-<pre>
-     # for DES keys
-
-     authspeed -n 30000 auth.samplekeys
-     # for MD5 keys
-
-     authspeed -mn 30000 auth.samplekeys
-</pre>
+</p>
 
 Additional utility programs included in the <tt>./authstuff</tt>
 directory can be used to generate random keys, certify
@@ -1033,8 +985,7 @@ occur, the resolver will periodically retry the requests until a
 definite response is received. The program will continue to run
 until all entries have been resolved.</p>
 
-<h4><a name="frequency_tolerance">Dealing with Frequency Tolerance
-Violations</a> (<tt>tickadj</tt> and Friends)</h4>
+<h4>Dealing with Frequency Tolerance Violations (<tt>tickadj</tt> and Friends)</h4>
 
 The NTP Version 3 specification RFC-1305 calls for a maximum
 oscillator frequency tolerance of +-100 parts-per-million (PPM),
@@ -1110,8 +1061,7 @@ modern kernels, it is not necessary to change the other variables
 in any case.</p>
 
 <p>We have a report that says starting with Solaris 2.6 we should
-leave <i>dosynctodr</i> alone. <a href="solaris-dosynctodr.html">
-Here is the report</a>.</p>
+leave <i>dosynctodr</i> alone.</p>
 
 <p>In order to maintain reasonable correctness bounds, as well as
 reasonably good accuracy with acceptable polling intervals, <tt>

@@ -160,6 +160,7 @@
 #define	CONF_CRYPTO_IFF		7
 #define CONF_CRYPTO_GQPAR	8
 #define CONF_CRYPTO_GQ		9
+#define CONF_CRYPTO_PW		10
 #endif /* OPENSSL */
 
 /*
