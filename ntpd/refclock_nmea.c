@@ -17,8 +17,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <netdb.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"

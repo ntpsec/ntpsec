@@ -32,7 +32,6 @@
 # include <poll.h>
 #endif
 #ifndef SYS_WINNT
-# include <netdb.h>
 # ifdef HAVE_SYS_SIGNAL_H
 #  include <sys/signal.h>
 # else

@@ -18,7 +18,6 @@
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/timex.h>
 #endif
-#include <netdb.h>
 #if !defined(__bsdi__) && !defined(apollo)
 #include <netinet/in.h>
 #endif

@@ -9,7 +9,6 @@
 #include <setjmp.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <netdb.h>
 
 #include "ntpq.h"
 #include "ntp_unixtime.h"

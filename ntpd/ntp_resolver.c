@@ -44,7 +44,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <netdb.h>
 #include <signal.h>
 
 #include <netinet/in.h>

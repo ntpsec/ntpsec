@@ -7,7 +7,6 @@
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
-#include <netdb.h>
 
 #include "ntpdc.h"
 #include "ntp_select.h"
