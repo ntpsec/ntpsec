@@ -225,17 +225,17 @@ crypto_config(
 	)
 {
 	switch (item) {
-	    case CONF_CRYPTO_DH:
+	    case CRYPTO_CONF_DH:
 		if (debug) printf("crypto_config: DH/<%d> <%s>\n", item, cp);
-		path_dhparms = cp;
+		path_dhparms = strdup(cp);
 		break;
-	    case CONF_CRYPTO_PRIVATEKEY:
+	    case CRYPTO_CONF_PRIV:
 		if (debug) printf("crypto_config: PRIVATEKEY/<%d> <%s>\n", item, cp);
-		path_dhparms = cp;
+		path_privatekey = strdup(cp);
 		break;
-	    case CONF_CRYPTO_PUBLICKEY:
+	    case CRYPTO_CONF_PUBL:
 		if (debug) printf("crypto_config: PUBLICKEY/<%d> <%s>\n", item, cp);
-		path_publickey = cp;
+		path_publickey = strdup(cp);
 		break;
 	    default:
 		if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
@@ -341,7 +341,7 @@ getauthkeys(
 	)
 {
 	if (debug) printf("getauthkeys: got <%s>\n", keyfile);
-	path_keys = keyfile;
+	path_keys = strdup(keyfile);
 	return;
 }
 
@@ -467,10 +467,10 @@ main(
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
 	printf("After config:\n");
-	printf("path_keys       = <%s>\n", path_keys);
-	printf("path_keysdir    = <%s>\n", path_keysdir);
-	printf("path_publickey  = <%s>\n", path_publickey);
-	printf("path_privatekey = <%s>\n", path_privatekey);
+	printf("path_keys       = <%s>\n", path_keys? path_keys: "");
+	printf("path_keysdir    = <%s>\n", path_keysdir? path_keysdir: "");
+	printf("path_publickey  = <%s>\n", path_publickey? path_publickey: "");
+	printf("path_privatekey = <%s>\n", path_privatekey? path_privatekey: "");
 
 	/*
 	  We:

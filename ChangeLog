@@ -1,5 +1,10 @@
 2000-07-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c (main): Use strdup on the tokens returned
+	from ntp_config...
+	(crypto_config): Fix a typo...
+	(crypto_config): Even more...
+
 	* include/ntp_config.h: 
 	* ntpd/ntp_config.c: Move a whack of #defines to ntp_config.h so
 	ntp-genkeys.c can see them, too.
