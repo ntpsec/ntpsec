@@ -218,7 +218,9 @@ audio_init(
 # ifdef HAVE_STRUCT_SND_SIZE
 	struct snd_size s_size;
 # endif
+# ifdef AIOGFMT
 	snd_chan_param s_c_p;
+# endif
 #endif
 	int fd;
 	int rval;
@@ -283,11 +285,13 @@ audio_init(
 		s_size.play_size, s_size.rec_size);
 # endif /* HAVE_STRUCT_SND_SIZE */
 
+# ifdef AIOGFMT
 	if (ioctl(fd, AIOGFMT, &s_c_p) == -1)
 	    printf("audio_init: AIOGFMT: %s\n", strerror(errno));
 	else
 	    printf("audio_init: play_rate %lu, rec_rate %lu, play_format %#lx, rec_format %#lx\n",
 		s_c_p.play_rate, s_c_p.rec_rate, s_c_p.play_format, s_c_p.rec_format);
+# endif
 
 	/* Grab the device and record masks */
 
