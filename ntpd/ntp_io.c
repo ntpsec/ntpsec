@@ -356,9 +356,10 @@ create_sockets(
 			}
 
 			/*
-			* look for an already existing source interface address.  If
-			* the machine has multiple point to point interfaces, then
-			* the local address may appear more than once.
+			* look for an already existing source interface
+			* address.  If the machine has multiple point to
+			* point interfaces, then the local address may
+			* appear more than once.
 			*
 			* A second problem exists if we have two addresses on
 			* the same network (via "ifconfig alias ...").  Don't
@@ -408,9 +409,10 @@ create_sockets(
 			}
 
 			/*
-			* look for an already existing source interface address.  If
-			* the machine has multiple point to point interfaces, then
-			* the local address may appear more than once.
+			* look for an already existing source interface
+			* address.  If the machine has multiple point to
+			* point interfaces, then the local address may
+			* appear more than once.
 			*
 			* A second problem exists if we have two addresses on
 			* the same network (via "ifconfig alias ...").  Don't
@@ -718,8 +720,8 @@ create_sockets(
 	}
 
 	/*
-	 * Now that we have opened all the sockets, turn off the reuse flag for
-	 * security.
+	 * Now that we have opened all the sockets, turn off the reuse
+	 * flag for security.
 	 */
 	for (i = 0; i < ninterfaces; i++) {
 		int off = 0;
@@ -1497,8 +1499,9 @@ sendpkt(
 	case AF_INET6 :
 
 	 	/*
-         	* for the moment we use the bcast option to set multicast max hops
-         	*/
+		 * for the moment we use the bcast option to set
+		 * multicast max hops
+		 */
         	if (ttl > 0 && ttl != inter->last_ttl) {
 
                 	/*
@@ -1726,8 +1729,11 @@ input_handler(
 						}
 
 						/*
-						 * Got one.  Mark how and when it got here,
-						 * put it on the full list and do bookkeeping.
+						 * Got one.  Mark how
+						 * and when it got here,
+						 * put it on the full
+						 * list and do
+						 * bookkeeping.
 						 */
 						rb->recv_srcclock = rp->srcclock;
 						rb->dstadr = 0;
@@ -1738,13 +1744,25 @@ input_handler(
 						if (rp->io_input)
 						{
 							/*
-							 * have direct input routine for refclocks
+							 * have direct
+							 * input routine
+							 * for refclocks
 							 */
 							if (rp->io_input(rb) == 0)
 							{
 								/*
-								 * data was consumed - nothing to pass up
-								 * into block input machine
+								 * data
+								 * was
+								 * consumed
+								 * -
+								 * nothing
+								 * to
+								 * pass
+								 * up
+								 * into
+								 * block
+								 * input
+								 * machine
 								 */
 								freerecvbuf(rb);
 #if 1
@@ -1765,7 +1783,8 @@ input_handler(
 #endif /* REFCLOCK */
 
 			/*
-			 * Loop through the interfaces looking for data to read.
+			 * Loop through the interfaces looking for data
+			 * to read.
 			 */
 			for (i = ninterfaces - 1; (i >= 0) && (n > 0); i--)
 			{
@@ -1787,9 +1806,12 @@ input_handler(
 						n--;
 
 						/*
-						 * Get a buffer and read the frame.  If we
-						 * haven't got a buffer, or this is received
-						 * on the wild card socket, just dump the
+						 * Get a buffer and read
+						 * the frame.  If we
+						 * haven't got a buffer,
+						 * or this is received
+						 * on the wild card
+						 * socket, just dump the
 						 * packet.
 						 */
 						if (
@@ -1909,8 +1931,9 @@ input_handler(
 			/* We've done our work */
 			get_systime(&ts_e);
 			/*
-			 * (ts_e - ts) is the amount of time we spent processing
-			 * this gob of file descriptors.  Log it.
+			 * (ts_e - ts) is the amount of time we spent
+			 * processing this gob of file descriptors.  Log
+			 * it.
 			 */
 			L_SUB(&ts_e, &ts);
 			if (debug > 3)

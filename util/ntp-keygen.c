@@ -1,7 +1,7 @@
 /*
  * Program to generate cryptographic keys for NTP clients and servers
  *
- * This` program generates files "ntpkey_<type>_<hostname>.<filestamp>",
+ * This program generates files "ntpkey_<type>_<hostname>.<filestamp>",
  * where <type> is the file type, <hostname> is the generating host and
  * <filestamp> is the NTP seconds in decimal format. The NTP programs
  * expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
@@ -118,8 +118,6 @@
 /*
  * Cryptodefines
  */
-#define	MINLEN		256	/* max prime modulus size (bits) */
-#define	MAXLEN		2048	/* min prime modulus size (bits) */
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
 #define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds */
@@ -135,6 +133,36 @@
 #define EXT_KEY_PRIVATE		"private"
 #define EXT_KEY_TRUST		"trustRoot"
 
+struct mv {
+	DSA	*dsa;		/* DSA parameters */
+	BIGNUM	**x;		/* private key vector */
+	struct coef *a;		/* coefficient vector */
+	BIGNUM	**g;		/* public key vector */
+	BIGNUM	*biga;		/* mysterious capital letter */
+	BIGNUM	*b;		/* group key */
+	BIGNUM	*binverse;	/* inverse group key */
+	BIGNUM	**xbar;		/* private key vector 1 */
+	BIGNUM	**xhat;		/* private key vector 2 */
+	BIGNUM	*gbar;		/* public key 1 */
+	BIGNUM	*ghat;		/* public key 2 */
+	BIGNUM	*k;		/* random roll */
+	int	n;		/* polynomial order */
+	BIGNUM	*u, *v;		/* BN scratch */
+	BN_CTX	*ctx;		/* context scratch */
+};
+
+struct coef {
+	struct term *link;	/* link to next term */
+	int	coef;		/* number of products */
+	BIGNUM	*bn;		/* sum of products */
+};
+
+struct	term {
+	struct term *link;	/* link to next term */
+	int	size;		/* number of indices */
+	int	*ptr;		/* index vector */
+};
+
 /*
  * Prototypes
  */
@@ -147,10 +175,13 @@ EVP_PKEY *gen_dsa	P((char *));
 EVP_PKEY *gen_iff	P((char *));
 RSA	*gen_gqpar	P((char *));
 RSA	*gen_gqkey	P((char *, RSA *));
+struct mv *gen_mvpar	P((char *));
+void	gen_mvkey	P((char *, struct mv *));
 int	x509		P((EVP_PKEY *, const EVP_MD *, char *, char *));
 void	cb		P((int, int, void *));
 EVP_PKEY *genkey	P((char *, char *));
 u_long	asn2ntp		P((ASN1_TIME *));
+void	makea		P((struct coef *, int, int *, struct mv *));
 #endif /* OPENSSL */
 
 /*
@@ -160,6 +191,7 @@ extern char *optarg;		/* command line argument */
 int	debug = 0;		/* debug, not de bug */
 int	rval;			/* return status */
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
+int	nkeys = 0;		/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 char	hostname[MAXHOSTNAME];	/* host name */
 char	filename[MAXFILENAME];	/* file name */
@@ -186,6 +218,7 @@ main(
 	EVP_PKEY *pkey = NULL;	/* temp sign key */
 	RSA	*rsa_gqpar = NULL; /* GQ parameters */
 	RSA	*rsa_gqkey = NULL; /* GQ key */
+	struct mv *mv_par = NULL; /* MV parameters */
 	const EVP_MD *ectx;	/* EVP digest */
 	char	pathbuf[MAXFILENAME];
 	FILE	*str;		/* file handle */
@@ -220,61 +253,61 @@ main(
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
 	rval = 0;
-	while ((temp = getopt(argc, argv, "c:de:GgHIMm:Pp:S:t")) != -1)
-	    {
+	while ((temp = getopt(argc, argv, "c:de:GgHIMm:Pp:S:tV:")) !=
+	    -1) {
 		switch(temp) {
 
 		/*
-		 * 'c' select public certificate type
+		 * -c select public certificate type
 		 */
 		case 'c':
 			scheme = optarg;
 			continue;
 
 		/*
-		 * 'd' debug
+		 * -d debug
 		 */
 		case 'd':
 			debug++;
 			continue;
 
 		/*
-		 * 'e' X509v3 key usage extension (!danger!)
+		 * -e X509v3 key usage extension (!danger!)
 		 */
 		case 'e':
 			exten = optarg;
 			continue;
 
 		/*
-		 * 'G' generate GQ parameters (GQ scheme)
+		 * -G generate GQ parameters (GQ scheme)
 		 */
 		case 'G':
 			gqpar++;
 			continue;
 
 		/*
-		 * 'g' generate GQ keys (GQ scheme)
+		 * -g generate GQ keys (GQ scheme)
 		 */
 		case 'g':
 			gqkey++;
 			continue;
 
 		/*
-		 * 'H' generate host key (RSA)
+		 * -H generate host key (RSA)
 		 */
 		case 'H':
 			hostkey++;
 			continue;
 
 		/*
-		 * 'I' generate IFF parameters (IFF scheme)
+		 * -I generate IFF parameters (IFF scheme)
 		 */
 		case 'I':
 			iffkey++;
 			continue;
 
 		/*
-		 * 'M' generate MD5 keys
+		 * -M generate MD5 keys
 		 */
 		case 'M':
 			md5key++;
@@ -282,43 +315,49 @@ main(
 
 
 		/*
-		 * 'm' select modulus (256-2048)
+		 * -m select modulus (256-2048)
 		 */
 		case 'm':
 			if (sscanf(optarg, "%d", &modulus) != 1)
-				printf("invalid modulus %s\n", optarg);
-			if (modulus < MINLEN)
-				modulus = MINLEN;
-			if (modulus > MAXLEN)
-				modulus = MAXLEN; 
+				printf("invalid option -m %s\n",
+				    optarg);	
 			continue;
 		
 		/*
-		 * 'P' generate private certificate (PC scheme)
+		 * -P generate private certificate (PC scheme)
 		 */
 		case 'P':
 			exten = EXT_KEY_PRIVATE;
 			continue;
 
 		/*
-		 * 'p' private key password
+		 * -p private key password
 		 */
 		case 'p':
 			passwd = optarg;
 			continue;
 
 		/*
-		 * 'S' generate sign key (RSA or DSA)
+		 * -S generate sign key (RSA or DSA)
 		 */
 		case 'S':
 			sign = optarg;
 			continue;
 		
 		/*
-		 * 't' trusted certificate (TC scheme)
+		 * -t trusted certificate (TC scheme)
 		 */
 		case 't':
 			exten = EXT_KEY_TRUST;
+			continue;
+
+		/*
+		 * -V <keys> Mu-Varadharajan (MV scheme)
+		 */
+		case 'V':
+			if (sscanf(optarg, "%d", &nkeys) != 1)
+				printf("invalid option -V %s\n",
+				    optarg);
 			continue;
 
 		/*
@@ -364,6 +403,10 @@ main(
 		pkey_iff = gen_iff("iff");
 	if (gqpar)
 		rsa_gqpar = gen_gqpar("gqpar");
+	if (nkeys > 0) {
+		mv_par = gen_mvpar("mvpar");
+		gen_mvkey("mvkey", mv_par);
+	}
 
 	/*
 	 * If there is no new host key, look for an existing one. If not
@@ -623,7 +666,7 @@ gen_dsa(
 	)
 {
 	EVP_PKEY *pkey;		/* public/private key pair */
-	DSA	*dsa;		/* DSA parameters and key pair */
+	DSA	*dsa;		/* DSA parameters */
 	u_char	seed[20];	/* seed for parameters */
 	FILE	*str;
 
@@ -976,6 +1019,398 @@ gen_gqkey(
 	return (rsa);
 }
 
+/*
+ * Generate Mu-Varadharajan parameters and keys
+ */
+struct mv *
+gen_mvpar(
+	char	*id		/* file name id */
+	)
+{
+	struct mv *mp;		/* MV parameters */
+	struct term *cp;	/* coefficient pointer */
+	u_char	seed[20];	/* seed for parameters */
+	int	*y;		/* initial index vector */
+	int	i, j, n;
+	FILE	*str;
+	u_int	temp;
+
+	/*
+	 * Generate DSA parameters for use as MV parameters.
+	 */
+	printf("Generating MV parameters (%d bits)...\n", modulus);
+	mp = malloc(sizeof(struct mv));
+	n = nkeys;
+	mp->n = nkeys;
+	RAND_bytes(seed, sizeof(seed));
+	mp->dsa = DSA_generate_parameters(modulus, seed, sizeof(seed),
+	    NULL, NULL, cb, "MV");
+	printf("\n");
+	if (mp->dsa == NULL) {
+		printf("MV generate parameters fails\n%s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		rval = -1;
+		return (NULL);
+	}
+
+	/*
+	 * Generate random key values mod q.
+	 */
+	printf("Generating random key values (%d bits)...\n",
+	    BN_num_bits(mp->dsa->q));
+	mp->ctx = BN_CTX_new(); mp->u = BN_new(); mp->v = BN_new();
+	n = nkeys;
+	mp->x = malloc((n + 1) * sizeof(BIGNUM));
+	for (i = 1; i <= n; i++) {
+		mp->x[i] = BN_new();
+		BN_rand(mp->x[i], BN_num_bits(mp->dsa->q), -1, 0);
+		BN_mod(mp->x[i], mp->x[i], mp->dsa->q, mp->ctx);
+	}
+
+	/*
+	 * Generate polynomial coefficients from binomial expansion.
+	 */
+	printf("Generating polynomial coefficients for %d keys\n", n); 
+	mp->a = malloc((n + 1) * sizeof(struct coef));
+	i = 0;
+	for (i = 0; i <= n; i++) {
+		mp->a[i].link = NULL;
+		mp->a[i].coef = 0;
+		mp->a[i].bn = BN_new();
+		BN_zero(mp->a[i].bn);
+	}
+	y = malloc(n * sizeof(int));
+	for (i = 0; i < n; i++)
+		y[i] = i + 1;
+	makea(mp->a, n, y, mp);
+	BN_one(mp->a[n].bn);
+	if (debug) {
+		for (i = 0; i <= n; i++) {
+			printf("%2d %4d %s\n", i, mp->a[i].coef,
+			    BN_bn2dec(mp->a[i].bn));
+			for (cp = mp->a[i].link; cp != NULL; cp =
+			    cp->link) {
+				for (j = 0; j < cp->size; j++)
+					printf(" %d", cp->ptr[j]);
+				printf(" :");
+			}
+			printf("\n");
+		}
+	}
+
+	/*
+	 * Verify sum(a[i] x^i) = 0 for all j.
+	 */
+	temp = 1;
+	for (j = 1; j <= n; j++) {
+		BN_zero(mp->u);
+		for (i = 0; i <= n; i++) {
+			BN_set_word(mp->v, i);
+			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
+			    mp->ctx);
+			BN_mod_mul(mp->v, mp->v, mp->a[i].bn,
+			    mp->dsa->q, mp->ctx);
+			BN_add(mp->u, mp->u, mp->v);
+		}
+		BN_mod(mp->u, mp->u, mp->dsa->q, mp->ctx);
+		if (!BN_is_zero(mp->u))
+			temp = 0;
+	}
+	printf("Confirm sum(a[i] x^i) = 0 for all j: %s\n", temp ?
+	    "yes" : "no");
+
+	/*
+	 * Generate g[i] = g^a[i].
+	 */
+	printf("Generating public keys and parameters\n");
+	mp->g = malloc((n + 1) * sizeof(BIGNUM));
+	for (i = 0; i <= n; i++) {
+		mp->g[i] = BN_new();
+		BN_mod_exp(mp->g[i], mp->dsa->g, mp->a[i].bn,
+		    mp->dsa->p, mp->ctx);
+	}
+
+	/*
+	 * Verify prod(g[i]^(x^i)) = 1 for all j.
+	 */
+	temp = 1;
+	for (j = 1; j <= n; j++) {
+		BN_one(mp->u);
+		for (i = 0; i <= n; i++) {
+			BN_set_word(mp->v, i);
+			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
+			    mp->ctx);
+			BN_mod_exp(mp->v, mp->g[i], mp->v, mp->dsa->p,
+			    mp->ctx);
+			BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p,
+			    mp->ctx);
+		}
+		if (!BN_is_one(mp->u)) {
+			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			temp = 0;
+		}
+	}
+	printf("Confirm prod(g[i] x^i) = 1 for all j: %s\n", temp ?
+	    "yes" : "no");
+
+	/*
+	 * Compute A, b and b^-1.
+	 */
+	mp->biga = BN_new();
+	BN_one(mp->biga);
+	for (j = 1; j <= n; j++) {
+		for (i = 0; i < n; i++) {
+			BN_set_word(mp->v, i);
+			BN_mod_exp(mp->v, mp->x[j], mp->v, mp->dsa->q,
+			    mp->ctx);
+			BN_mod_exp(mp->v, mp->g[i], mp->v, mp->dsa->p,
+			    mp->ctx);
+			BN_mod_mul(mp->biga, mp->biga, mp->v,
+			    mp->dsa->p, mp->ctx);
+		}
+	}
+	mp->b = BN_new(); mp->binverse = BN_new();
+	BN_rand(mp->b, BN_num_bits(mp->dsa->q), -1, 0);
+	BN_mod(mp->b, mp->b, mp->dsa->q, mp->ctx);
+	BN_mod_inverse(mp->binverse, mp->b, mp->dsa->q, mp->ctx);
+	BN_mod_mul(mp->v, mp->b, mp->binverse, mp->dsa->q, mp->ctx);
+	printf("Confirm b b^-1 = 1: %s\n", BN_is_one(mp->v) ?
+	    "yes" : "no");
+
+	/*
+	 * Make private keys (xbar[j], xhat[j]) for all j;.
+	 */
+	mp->xbar = malloc((n + 1) * sizeof(BIGNUM));
+	mp->xhat = malloc((n + 1) * sizeof(BIGNUM));
+	for (j = 1; j <= n; j++) {
+		mp->xbar[j] = BN_new(); mp->xhat[j] = BN_new();
+		BN_zero(mp->xbar[j]);
+		for (i = 1; i <= n; i++) {
+			if (i == j)
+				continue;
+			BN_set_word(mp->v, n);
+			BN_mod_exp(mp->u, mp->x[i], mp->v, mp->dsa->q,
+			    mp->ctx);
+			BN_add(mp->xbar[j], mp->xbar[j], mp->u);
+		}
+		BN_mod_mul(mp->xbar[j], mp->xbar[j], mp->binverse,
+		    mp->dsa->q, mp->ctx);
+		BN_set_word(mp->v, n);
+		BN_mod_exp(mp->xhat[j], mp->x[j], mp->v, mp->dsa->q,
+		    mp->ctx);
+	}
+
+	/*
+	 * Verify A g^b xbar g^xhat = 1 for all j.
+	 */
+	temp = 1;
+	for (j = 1; j <= n; j++) {
+		BN_mod_mul(mp->u, mp->b, mp->xbar[j], mp->dsa->q,
+		    mp->ctx);
+		BN_mod_exp(mp->u, mp->dsa->g, mp->u, mp->dsa->p,
+		    mp->ctx);
+		BN_mod_exp(mp->v, mp->dsa->g, mp->xhat[j], mp->dsa->p,
+		    mp->ctx);
+		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
+		BN_mod_mul(mp->u, mp->u, mp->biga, mp->dsa->p, mp->ctx);
+		if (!BN_is_one(mp->u)) {
+			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			temp = 0;
+		}
+	}
+	printf("Confirm A g^b xbar g^xhat = 1 for all j: %s\n", temp ?
+	    "yes" : "no");
+
+	/*
+	 * Make public key (gbar^k, ghat^bk).
+	 */
+	mp->k = BN_new();
+	BN_rand(mp->k, BN_num_bits(mp->dsa->q), -1, 0);
+	BN_mod(mp->k, mp->k, mp->dsa->q, mp->ctx);
+	mp->gbar = BN_new(); mp->ghat = BN_new();
+	BN_mod_exp(mp->gbar, mp->dsa->g, mp->k, mp->dsa->p, mp->ctx);
+	BN_mod_mul(mp->u, mp->k, mp->b, mp->dsa->q, mp->ctx);
+	BN_mod_exp(mp->ghat, mp->dsa->g, mp->u, mp->dsa->p, mp->ctx);
+
+	/*
+	 * Verify A^k (gbar^k)^xbar (ghat^bk)^xhat = 1 for all j.
+	 */
+	temp = 1;
+	for (j = 1; j <= n; j++) {
+		BN_mod_exp(mp->u, mp->ghat, mp->xbar[j], mp->dsa->p,
+		    mp->ctx);
+		BN_mod_exp(mp->v, mp->gbar, mp->xhat[j], mp->dsa->p,
+		    mp->ctx);
+		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
+		BN_mod_exp(mp->v, mp->biga, mp->k, mp->dsa->p, mp->ctx);
+		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
+		if (!BN_is_one(mp->u)) {
+			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			temp = 0;
+		}
+	}
+	printf("Confirm A^k r^xbar s^xhat = 1 for all j: %s\n", temp ?
+	     "yes" : "no");
+
+	/*
+	 * We now have the DSA parameters (p, q, g) and public keys
+	 * (gbar^k, ghat^bk), We also have the encryption key biga and
+	 * the set of decryption keys (xbar[j], xhat[j]) handed out to
+	 * each treasured customer. We encode in the DSA cukoo
+	 * structure:
+	 *
+	 * p		modulus
+	 * q		private encryption key
+	 * g		diffusion constant (k)
+	 * priv_key	public key 1
+	 * pub_key	public key 2
+	 */
+	BN_copy(mp->dsa->q, mp->biga);
+	BN_copy(mp->dsa->g, mp->k);
+	mp->dsa->priv_key = BN_new(); mp->dsa->pub_key = BN_new();
+	BN_copy(mp->dsa->priv_key, mp->gbar);
+	BN_copy(mp->dsa->pub_key, mp->ghat);
+
+	/*
+	 * Write the MV parameters and public keys as a DSA private key
+	 * encoded in PEM.
+	 */
+	str = fheader("MVpar");
+	PEM_write_DSAPrivateKey(str, mp->dsa, passwd ? EVP_des_cbc() :
+	    NULL, NULL, 0, NULL, passwd);
+	fclose(str);
+	if (debug)
+		DSA_print_fp(stdout, mp->dsa, 0);
+	fslink(id);
+	return (mp);
+}
+
+
+/*
+ * makea() - compute coefficient terms
+ *
+ * This little darling generates all coefficient terms for the binomial
+ * expansion of prod(x - x[i]). It works for any reasonable n, but watch
+ * out for overheated CPU if n gets much larger than ten.
+ */
+void
+makea(
+	struct coef *ap,	/* coefficient pointer */
+	int	n,		/* index vector size */
+	int	*dp,		/* index vector */
+	struct mv *mp		/* parameters */
+	)
+{
+	struct term *cp;
+	int	*z, *y;
+	int	i, j;
+
+	/*
+	 * Discard index vector if duplicate.
+	 */
+	if (n == 0)
+		return;
+
+	for (cp = ap->link; cp != NULL; cp = cp->link) {
+		for (i = 0; i < n; i++) {
+ 
+			if (dp[i] != cp->ptr[i])
+				break;
+		}
+		if (i == n)
+			break;
+	}
+	if (cp != NULL)
+		return;
+
+	/*
+	 * Make a new index vector.
+	 */
+	cp = malloc(sizeof(struct term));
+	cp->link = ap->link;
+	ap->link = cp;
+	ap->coef++;
+	cp->size = n;
+	cp->ptr = malloc(n * sizeof(int));
+	BN_one(mp->u);
+	for (i = 0; i < n; i++) {
+
+		/*
+		 * Compute the product terms.
+		 */
+		BN_copy(mp->v, mp->dsa->q);
+		BN_sub(mp->v, mp->v, mp->x[dp[i]]);
+		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->q, mp->ctx);
+		cp->ptr[i] = dp[i];
+	}
+
+	/*
+	 * Sum the product terms.
+	 */
+	BN_add(ap->bn, ap->bn, mp->u);
+	BN_mod(ap->bn, ap->bn, mp->dsa->q, mp->ctx);
+
+	/*
+	 * Assemble all next shorter index combinations by removing from
+	 * the given index vector each index in turn starting from the
+	 * beginning.
+	 */
+	z = malloc((n - 1) * sizeof(int));
+	for (i = 0; i < n; i++) {
+
+		/*
+		 * Assemble indices [i, j], but delete [i, i]. Recurse
+		 * to generate the vector.
+		 */
+		y = z;
+		for (j = 0; j < n; j++) {
+			if (i != j)
+				*y++ = cp->ptr[j];
+		}
+		makea(ap + 1, n - 1, z, mp);
+	}
+	free(z);
+	return;
+}
+
+
+/*
+ * Generate MV public keys
+ */
+void
+gen_mvkey(
+	char	*id,		/* file name id */
+	struct mv *mp		/* parameters pointer */
+	)
+{
+	DSA	*dsa;		/* MV public key */
+	FILE	*str;
+	char	ident[20];
+	int	j;
+
+	dsa = malloc(sizeof(DSA));
+	dsa->p = BN_new();
+	dsa->q = BN_new();
+	dsa->g = BN_new();
+	for (j = 1; j <= mp->n; j++) {
+		BN_copy(dsa->p, mp->dsa->p);
+		BN_copy(dsa->q, mp->xbar[j]);
+		BN_copy(dsa->g, mp->xhat[j]);
+
+		/*
+		 * Write the MV public key as a DSA private key encoded
+		 * in PEM. Keep it secret for now.
+		 */
+		sprintf(ident, "MVkey%d", j);
+		str = fheader(ident);
+		PEM_write_DSAparams(str, dsa);
+		fclose(str);
+		if (debug)
+			DSA_print_fp(stdout, dsa, 0);
+	}
+	DSA_free(dsa);
+	return;
+}
 
 /*
  * Generate X509v3 self-signed certificate.
