@@ -2213,7 +2213,7 @@ findbcastinter(
 		   stoa(addr));
 #endif
 
-	i = find_addr_in_list(addr);
+	i = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
 	if(i >= 0)
 	     return (&inter_list[i]);
 
@@ -2229,7 +2229,7 @@ findbcastinter(
 		 * address or the network portion of the IP address.
 		 * Sloppy.
 		 */
-		if (!(inter_list[i].flags & INT_BROADCAST))
+		if (!(inter_list[i].flags & INT_BCASTOPEN))
 			continue;
 		if(addr->ss_family == AF_INET) {
 			if (SOCKCMP(&inter_list[i].bcast, addr))
