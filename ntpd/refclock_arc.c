@@ -650,7 +650,7 @@ arc_event_handler(
 		switch (c)
 		{
 			case '\0':
-				msyslog(LOG_NOTICW, "ARCRON: command %d has no <CR>", up->cmdqueue[0] ) ;
+				msyslog(LOG_NOTICE, "ARCRON: command %d has no <CR>", up->cmdqueue[0] ) ;
 				c = '\r' ;
 				/* fall through */
 			case '\r':
@@ -1123,9 +1123,8 @@ arc_receive(
 	pp->a_lastcode[pp->lencode + 1] = '\0'; /* Terminate for printf(). */
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 
-	/* We don't use the micro-/milli- second part... */
-	pp->usec = 0;
-	pp->msec = 0;
+	/* We don't use the nano-second part... */
+	pp->nsec = 0;
 
 	n = sscanf(pp->a_lastcode, "o%2d%2d%2d%1d%2d%2d%2d%1d%1d",
 		   &pp->hour, &pp->minute, &pp->second,
