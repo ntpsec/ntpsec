@@ -67,6 +67,12 @@ adversely affect the operation of unrelated clients. Carefully read
 the <a href="driver1.htm">Undisciplined Local Clock</a> page and
 respect the stratum limit.</p>
 
+<p>The local clock driver also supports an external synchronization
+source such as a high resolution counter disciplined by a GPS
+receiver, for example. Further information is on the <a href=
+"extern.htm">External Clock Discipline and the Local Clock
+Driver</a> page.</p>
+
 <h4>Driver Calibration</h4>
 
 <p>Some drivers depending on longwave and shortwave radio services
@@ -175,7 +181,8 @@ Type 13 Leitch CSD 5300 Master Clock Controller
 (<tt>ATOM_LEITCH</tt>)<br>
 Type 14 EES M201 MSF Receiver (<tt>MSF_EES</tt>)<br>
 <a href="driver5.htm">Type 15</a> * TrueTime generic receivers<br>
-Type 16 Bancomm GPS/IRIG Receiver (<tt>GPS_BANCOMM</tt>)<br>
+<a href="driver16">Type 16</a> Bancomm GPS/IRIG Receiver
+(<tt>GPS_BANCOMM</tt>)<br>
 Type 17 Datum Precision Time System (<tt>GPS_DATUM</tt>)<br>
 <a href="driver18.htm">Type 18</a> NIST Modem Time Service
 (<tt>ACTS_NIST</tt>)<br>
@@ -202,7 +209,9 @@ Receiver (<tt>GPS_HP</tt>)<br>
 <a href="driver30.htm">Type 30</a> Motorola UT Oncore GPS
 (<tt>GPS_ONCORE</tt>)<br>
 Type 31 Rockwell Jupiter GPS (<tt>GPS_JUPITER</tt>)<br>
-<a href="driver34.htm">Type 34</a> Ultralink WWVB Receivers<br>
+<a href="driver32.htm">Type 32</a> Chrono-log K-series WWVB
+receiver <a href="driver33.htm">Type 33</a> Dumb Clock <a href=
+"driver34.htm">Type 34</a> Ultralink WWVB Receivers<br>
 <a href="driver35.htm">Type 35</a> Conrad Parallel Port Radio Clock
 (<tt>PCF</tt>)<br>
 <a href="driver36.htm">Type 36</a> Radio WWV/H Audio

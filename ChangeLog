@@ -1,5 +1,15 @@
 2001-05-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/release.htm: Cleanup (at least).
+	* html/refclock.htm: Cleanup (at least).
+	* html/kern.htm: Cleanup (at least).
+	* html/index.htm: Cleanup (at least).
+	* html/extern.htm: Cleanup (at least).
+	* html/driver1.htm: Cleanup (at least).
+	* html/debug.htm: Cleanp (at least).
+	* html/accopt.htm: KoD documentation update.
+	From: Dave Mills.
+
 	* configure.in: 4.0.99k34
 
 	* ntpd/ntp_util.c (record_loop_stats): values are now passed in.

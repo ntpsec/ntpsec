@@ -15,16 +15,16 @@ Adventures in Wonderland</i>, Lewis Carroll</a>
 </p>
 
 <hr>
-<p>This document was last updated 31 December 2000</p>
+<p>This document was last updated 4 May 2001</p>
 
 <h4>NTP Version 4 Release Notes</h4>
 
-<p>This release of the NTP Version 4 (NTPv4) daemon for Unix
-incorporates new features and refinements to the NTP Version 3
-(NTPv3) algorithms. However, it continues the tradition of
-retaining backwards compatibility with older versions. The NTPv4
-version has been under development for quite a while and isn't
-finished yet. In fact, quite a number of NTPv4 features have
+<p>This release of the NTP Version 4 (NTPv4) daemon for Unix and
+Windows (NT4 and 2000) incorporates new features and refinements to
+the NTP Version 3 (NTPv3) algorithms. However, it continues the
+tradition of retaining backwards compatibility with older versions.
+The NTPv4 version has been under development for quite a while and
+isn't finished yet. In fact, quite a number of NTPv4 features have
 already been retrofitted in the current NTPv3, although this
 version is not actively maintained by the NTPv4 developer's
 group.</p>
@@ -224,10 +224,11 @@ features.</p>
 <p>To help reduce the level of spurious network traffic due to
 obsolete configuration files, a special control message called the
 kiss-of-death packet has been implemented. If enabled and a packet
-is denied service, a compliant server will send this message to the
-client. A compliant client will cease further transmission and send
-a message to the system log. See the <a href="accopt.htm">
-Authentication Options</a> page for further information.</p>
+is denied service or exceeds the client limie, a compliant server
+will send this message to the client. A compliant client will cease
+further transmission and send a message to the system log. See the
+<a href="accopt.htm">Authentication Options</a> page for further
+information.</p>
 </li>
 </ol>
 

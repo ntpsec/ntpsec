@@ -40,25 +40,27 @@ by a determined cracker.</p>
 <h4>The Kiss-of-Death Packet</h4>
 
 <p>Ordinarily, packets denied service are simply dropped with no
-server actions except incrementing statistics counters. Sometimes a
-more proactive response is needed, such as a control message that
+further action except incrementing statistics counters. Sometimes a
+more proactive response is needed, such as a server message that
 explicitly requests the client to stop sending and leave a message
-in the log file for the system operator. A special packet format
-has been created for this purpose called the kiss-of-death packet.
-If the <tt>demobilize</tt> flag is set, the server processes the
-packet as normal, but instead of sending back the requested
-information, it sets the leap bits unsynchronized, stratum zero and
-the ASCII string "DENY" in the reference source identifier field.
-If the flag is not set, the server simply drops the packet.</p>
+for the system operator. A special packet format has been created
+for this purpose called the kiss-of-death packet. If the <tt>
+kod</tt> flag is set and either service is denied or the client
+limit is exceeded, the server it returns the packet and sets the
+leap bits unsynchronized, stratum zero and the ASCII string "DENY"
+in the reference source identifier field. If the <tt>kod</tt> flag
+is not set, the server simply drops the packet.</p>
 
 <p>A client or peer receiving a kiss-of-death packet performs a set
-of sanity checks to minimize security exposure, then saves the
-stratum and reference identifier fields and sets the access denied
-(test 4) bit in the peer flash variable. In addition, a message is
-sent to the system log file. With the access denied bit set, the
-client will send no further packets to the server. All of these
-variables are presented in the <tt>ntpq</tt> display
-billboards.</p>
+of sanity checks to minimize security exposure. If this is the
+first packet received from the server, the client assumes an access
+denied condition at the server. It updates the stratum and
+reference identifier peer variables and sets the access denied
+(test 4) bit in the peer flash variable. If this bit is set, the
+client sends no packets to the server. If this is not the first
+packet, the client assumes a client limit condition at the server,
+but does not update the peer variables. In either case, a message
+is sent to the system log.</p>
 
 <h4>Access Control Commands</h4>
 
@@ -90,7 +92,7 @@ may be specified:</dd>
 
 <dd>
 <dl>
-<dt><tt>demobilize</tt></dt>
+<dt><tt>kod</tt></dt>
 
 <dd>If access is denied, send a kiss-of-death packet.</dd>
 
