@@ -57,9 +57,9 @@ cp /dev/null $LOGF
 [ -f config.status ] || ../configure $CONFIG_ARGS
 
 case "$MAKE" in
- '') make
+ '') make && make check
      ;;
- *)  $MAKE
+ *)  $MAKE && $MAKE check
      ;;
 esac
 ) >> $LOGF 2>&1
