@@ -1,4 +1,9 @@
+2000-02-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c: Cleanup/fixes
+	* html/driver30.htm: Cleanup
+	* html/Oncore-SHMEM.htm: Cleanup
+	From: Reg Clemens <reg@dwf.com>
 
 2000-02-16  Sven Dietrich <sven_dietrich@trimble.com>
 

@@ -14,7 +14,7 @@
  *
  *		(UT)				   (VP)
  *   COPYRIGHT 1991-1997 MOTOROLA INC.	COPYRIGHT 1991-1996 MOTOROLA INC.
- *   SFTW P/N #     98-P36848P		SFTW P/N # 98-P36830P
+ *   SFTW P/N #     98-P36848P          SFTW P/N # 98-P36830P
  *   SOFTWARE VER # 2			SOFTWARE VER # 8
  *   SOFTWARE REV # 2			SOFTWARE REV # 8
  *   SOFTWARE DATE  APR 24 1998 	SOFTWARE DATE  06 Aug 1996
@@ -61,7 +61,7 @@
  * copy of all types of messages we recognize.  This file can be mmap(2)'ed
  * by monitoring and statistics programs.
  *
- * See separate documentation for this option.
+ * See separate HTML documentation for this option.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -181,6 +181,8 @@ struct instance {
 	u_char	En[70];
 	u_char	Cj[300];
 	u_char  shmem_first;
+	u_char  shmem_reset;
+	u_char  shmem_Posn;
 	u_char	As;
 	u_char	Ay;
 	u_char	Az;
@@ -246,6 +248,8 @@ static struct msg_desc {
 	{ "Af",  15,    0,              "" },
 	{ "As",  20,    oncore_msg_As,  "" },
 	{ "At",   8,    oncore_msg_At,  "" },
+	{ "Au",  12,    0,              "" },
+	{ "Av",   8,    0,              "" },
 	{ "Aw",   8,    0,              "" },
 	{ "Ay",  11,    oncore_msg_Ay,  "" },
 	{ "Az",  11,    oncore_msg_Az,  "" },
@@ -277,12 +281,15 @@ u_char oncore_cmd_Af[] = { 'A', 'f', 0,0,0,0, 0 };
 static u_char oncore_cmd_At[] = { 'A', 't', 2 };
 
 /*
- * Position-Hold Position
+ * 0D/2D Position and Set.
  */
 u_char oncore_cmd_As[] = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };
 u_char oncore_cmd_Asx[]= { 'A', 's', 0x7f, 0xff, 0xff, 0xff,
 				     0x7f, 0xff, 0xff, 0xff,
 				     0x7f, 0xff, 0xff, 0xff, 0xff };
+u_char oncore_cmd_Au[] = { 'A', 'u', 0,0,0,0,0 };
+u_char oncore_cmd_Av[] = { 'A', 'v', 0 };
+
 
 /*
  * Set to UTC time (not GPS).
@@ -897,6 +904,10 @@ oncore_read_config(
 			instance->assert = 1;
 		} else if (!strncmp(cc, "CLEAR", 5)) {
 			instance->assert = 0;
+		} else if (!strncmp(cc, "POSN2D", 6)) {
+			instance->shmem_Posn = 2;
+		} else if (!strncmp(cc, "POSN3D", 6)) {
+			instance->shmem_Posn = 3;
 		}
 	}
 	fclose(fd);
@@ -913,6 +924,11 @@ oncore_read_config(
 		if (mode == 1 || mode == 3)
 			instance->init_type++;
 	}
+
+	/* simplify SHMEM tests later */
+
+	if (!instance->shmem)
+		instance->shmem_Posn = 0;
 }
 
 
@@ -1296,6 +1312,10 @@ oncore_msg_Cj(
 		oncore_cmd_As[14] = instance->ss_ht_type;
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_As,	sizeof oncore_cmd_As);
 
+		w32_buf(&oncore_cmd_Au[2], (int) instance->ss_ht);
+		oncore_cmd_Au[6] = instance->ss_ht_type;
+		oncore_sendmsg(instance->ttyfd, oncore_cmd_Au,  sizeof oncore_cmd_Au);
+
 		instance->site_survey = ONCORE_SS_DONE;
 		oncore_cmd_At[2] = 1;
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_At,	sizeof oncore_cmd_At);
@@ -1359,11 +1379,11 @@ oncore_msg_Ea(
 		int     i;
 
 		i = 0;
-		if (instance->Ea[72]&010)       /* 0D, Position Hold */
+		if (instance->Ea[72]&0x8)       /* 0D, Position Hold */
 			i = 1;
-		else if (instance->Ea[72]&020)  /* 2D, Altitude Hold */
+		else if (instance->Ea[72]&0x10) /* 2D, Altitude Hold */
 			i = 2;
-		else if (instance->Ea[72]&040)  /* 3D fix */
+		else if (instance->Ea[72]&0x20) /* 3D fix */
 			i = 3;
 		if (i) {
 			i *= 79;
@@ -1375,7 +1395,7 @@ oncore_msg_Ea(
 	/* When we have an almanac, start the En messages */
 
 	if (instance->o_state == ONCORE_ALMANAC) {
-		if ((instance->Ea[72] & 1)) {
+		if ((instance->Ea[72] & 0x1)) {
 			if (debug)
 				printf("ONCORE: waiting for almanac\n");
 			return;
@@ -1430,37 +1450,34 @@ oncore_msg_Ea(
 	instance->pp->minute = buf[9];
 	instance->pp->second = buf[10];
 
-#if 1
-	/* every 15s, steal one 'tick' to get 3D posn */
+	/* every 15s, steal one 'tick' to get 2D or 3D posn if asked for */
 
-	if (instance->site_survey != ONCORE_SS_SW) { /* dont screw up the HWSS by changing mode */
-		static int reset;
-
+	if (instance->shmem_Posn && instance->site_survey != ONCORE_SS_SW) {    /* dont screw up the HWSS by changing mode */
 		if (instance->pp->second%15 == 3) {     /* start the sequence */
-			reset = 1;
-			oncore_cmd_At[2] = 0;
-			oncore_sendmsg(instance->ttyfd, oncore_cmd_At,  sizeof oncore_cmd_At);
-		} else if (reset) {
-			reset = 0;
-			oncore_cmd_At[2] = 1;
+			instance->shmem_reset = 1;
+			oncore_cmd_At[2] = 0;                   /* out of 0D mode, to 3D mode */
+			oncore_sendmsg(instance->ttyfd, oncore_cmd_At, sizeof oncore_cmd_At);
+			if (instance->shmem_Posn == 2) {
+				oncore_cmd_Av[2] = 1;           /* into 2D mode */
+				oncore_sendmsg(instance->ttyfd, oncore_cmd_Av, sizeof oncore_cmd_Av);
+			}
+		} else if (instance->shmem_reset || !(instance->Ea[72] & 0x8)) {
+			instance->shmem_reset = 0;
+			if (instance->Ea[72] & 0x10) {
+				oncore_cmd_Av[2] = 0;           /* out of 2D mode */
+				oncore_sendmsg(instance->ttyfd, oncore_cmd_Av, sizeof oncore_cmd_Av);
+			}
+			oncore_cmd_At[2] = 1;                   /* into 0D mode */
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_At,  sizeof oncore_cmd_At);
 		}
-
-		if ((instance->site_survey == ONCORE_SS_DONE) && !(instance->Ea[72]&010))
-			return;
 	}
-#endif
+
 	if (instance->site_survey != ONCORE_SS_SW)
 		return;
 
 	/*
 	 * We have to average our own position for the Position Hold Mode
 	 */
-
-	/* We only take PDOP/3D fixes */
-
-	if (instance->Ea[37] & 1)
-		return;
 
 	/* Not if poor geometry or less than 3 sats */
 
@@ -1493,6 +1510,10 @@ oncore_msg_Ea(
 	w32_buf(&oncore_cmd_As[10], (int) instance->ss_ht);
 	oncore_cmd_As[14] = 0;
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_As, sizeof oncore_cmd_As);
+
+	w32_buf(&oncore_cmd_Au[2], (int) instance->ss_ht);
+	oncore_cmd_Au[6] = 0;
+	oncore_sendmsg(instance->ttyfd, oncore_cmd_Au, sizeof oncore_cmd_Au);
 
 	oncore_cmd_At[2] = 1;
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_At, sizeof oncore_cmd_At);
@@ -1534,7 +1555,7 @@ oncore_msg_En(
 #endif
 #endif	/* ! HAVE_PPS_API */
 
-	if ((instance->site_survey == ONCORE_SS_DONE) && !(instance->Ea[72]&010))
+	if ((instance->site_survey == ONCORE_SS_DONE) && !(instance->Ea[72]&0x8))
 		return;
 	if (instance->o_state != ONCORE_RUN)
 		return;
@@ -1543,7 +1564,7 @@ oncore_msg_En(
 
 	/* Don't do anything without an almanac to define the GPS->UTC delta */
 
-	if (instance->Ea[72] & 1)
+	if (instance->Ea[72] & 0x1)
 		return;
 
 	/* If Time RAIM doesn't like it, don't trust it */
@@ -1565,7 +1586,7 @@ oncore_msg_En(
 		tsp = &pps_i.assert_timestamp;
 
 		if (debug > 2)
-			printf("ONCORE: serial/j (%d, %d) %ld.%09ld\n",
+			printf("ONCORE: serial/j (%lu, %d) %ld.%09ld\n",
 			    pps_i.assert_sequence, j, tsp->tv_sec, tsp->tv_nsec);
 
 		if (pps_i.assert_sequence == j) {
@@ -1577,7 +1598,7 @@ oncore_msg_En(
 		tsp = &pps_i.clear_timestamp;
 
 		if (debug > 2)
-			printf("ONCORE: serial/j (%d, %d) %ld.%09ld\n",
+			printf("ONCORE: serial/j (%lu, %d) %ld.%09ld\n",
 			    pps_i.clear_sequence, j, tsp->tv_sec, tsp->tv_nsec);
 
 		if (pps_i.clear_sequence == j) {
