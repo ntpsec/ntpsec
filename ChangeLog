@@ -1,5 +1,14 @@
 2001-05-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k40
+
+	* include/ntp_refclock.h: Median Filter (SAMPLE - macro) - change
+	to use most recent MAXSTAGE entries when the filter overflows (ie
+	driver poking say once per second with poll > MAXSTAGE) rather
+	than blocking after MAXSTAGE entries (turf oldest rather than turf
+	most recent).
+	From: John Woolner <vk1et@tpg.com.au>
+
 	* ntpd/refclock_true.c:
 	   a. Don't cream pp->a_lastcode when we get a <cr><lf> pair 
 	   b. Fix up pp->leap handling to work correctly 
