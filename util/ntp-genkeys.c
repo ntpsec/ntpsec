@@ -502,35 +502,51 @@ main(
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
-	if (path_keys && *path_keys != '/') {
-		fprintf(stderr,
-			"%s: keys path <%s> doesn't begin with a /\n",
-			progname, path_keys);
-		exit(1);
+	if (path_keys) {
+		if (*path_keys != '/') {
+			fprintf(stderr,
+				"%s: keys path <%s> doesn't begin with a /\n",
+				progname, path_keys);
+			exit(1);
+		}
+	} else {
+		path_keys = "PATH_KEYS";
 	}
 	snifflink(path_keys, &link_keys);
 
-	if (path_keysdir && *path_keysdir != '/') {
-		fprintf(stderr,
-			"%s: keysdir path <%s> doesn't begin with a /\n",
-			progname, path_keysdir);
-		exit(1);
+	if (path_keysdir) {
+		if (*path_keysdir != '/') {
+			fprintf(stderr,
+				"%s: keysdir path <%s> doesn't begin with a /\n",
+				progname, path_keysdir);
+			exit(1);
+		}
+	} else {
+		path_keysdir = "PATH_KEYSDIR";
 	}
 	snifflink(path_keysdir, &link_keysdir);
 
-	if (path_publickey && *path_publickey != '/') {
-		fprintf(stderr,
-			"%s: publickey path <%s> doesn't begin with a /\n",
-			progname, path_publickey);
-		exit(1);
+	if (path_publickey) {
+		if (*path_publickey != '/') {
+			fprintf(stderr,
+				"%s: publickey path <%s> doesn't begin with a /\n",
+				progname, path_publickey);
+			exit(1);
+		}
+	} else {
+		path_publickey = "PATH_PUBLICKEY";
 	}
 	snifflink(path_publickey, &link_publickey);
 
-	if (path_privatekey && *path_privatekey != '/') {
-		fprintf(stderr,
-			"%s: privatekey path <%s> doesn't begin with a /\n",
-			progname, path_privatekey);
-		exit(1);
+	if (path_privatekey) {
+		if (*path_privatekey != '/') {
+			fprintf(stderr,
+				"%s: privatekey path <%s> doesn't begin with a /\n",
+				progname, path_privatekey);
+			exit(1);
+		}
+	} else {
+		path_privatekey = "PATH_PRIVATEKEY";
 	}
 	snifflink(path_privatekey, &link_privatekey);
 
@@ -571,15 +587,15 @@ main(
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
+	gethostname(hostname, sizeof(hostname));
+	gettimeofday(&tv, 0);
+	ntptime = tv.tv_sec + JAN_1970;
 
 	/*
 	 * Generate 16 random MD5 keys.
 	 */
-	gethostname(hostname, sizeof(hostname));
-	gettimeofday(&tv, 0);
-	ntptime = tv.tv_sec + JAN_1970;
-	sprintf(filename, "ntp.keys.%lu", ntptime);
 	printf("Generating MD5 key file...\n");
+	sprintf(filename, "ntp.keys.%lu", ntptime);
 	str = fopen(filename, "w");
 	if (str == NULL) {
 		perror("MD5 key file");
