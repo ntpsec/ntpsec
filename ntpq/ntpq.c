@@ -3064,9 +3064,14 @@ cookedprint(
 				break;
 			
 			    case RF:
-				if (decodenetnum(value, &hval))
-				    output(fp, name, nntohost(&hval));
-				else if ((int)strlen(value) <= 4)
+				if (decodenetnum(value, &hval)) {
+					if ((hval.ss_family == AF_INET) &&
+					    ISREFCLOCKADR(&hval))
+    						output(fp, name,
+						    refnumtoa(&hval));
+					else
+				    		output(fp, name, stoa(&hval));
+				} else if ((int)strlen(value) <= 4)
 				    output(fp, name, value);
 				else
 				    output_raw = '?';
