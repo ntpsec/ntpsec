@@ -415,6 +415,9 @@ ntpdmain(
 #endif
 	getstartup(argc, argv); /* startup configuration, may set debug */
 
+	if (debug)
+	    printf("%s\n", Version);
+
 	/*
 	 * Initialize random generator and public key pair
 	 */
