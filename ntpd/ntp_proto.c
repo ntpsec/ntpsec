@@ -1004,8 +1004,9 @@ receive(
 		peer_clear(peer, "AUTO");
 		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
-	}
 #endif /* OPENSSL */
+
+	}
 }
 
 
