@@ -846,13 +846,6 @@ struct restrictlist6 {
 #define	RESTRICT_REMOVE		3	/* remove a restrict entry */
 
 /*
- * Kiss-of-death codes
- */
-#define KOD_DENY		"DENY"	/* access denied */
-#define KOD_CRYP		"CRYP"	/* crypto failure */
-#define KOD_RATE		"RATE"	/* rate limit */
-
-/*
  * Experimental alternate selection algorithm identifiers
  */
 #define	SELECT_1	1

@@ -91,6 +91,7 @@
 /*
  * Cryptographic values
  */
+extern	char	*keysdir;	/* crypto keys directory */
 extern	u_int	crypto_flags;	/* status word */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */

@@ -377,7 +377,7 @@ static char res_file[MAX_PATH];
  */
 char const *progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
-char	*keysdir = NULL;	/* crypto keys directory */
+char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
 int	pps_assert;
 int	pps_hardpps;
