@@ -1501,9 +1501,6 @@ init_alarm(void)
 static void
 init_io(void)
 {
-	register int i;
-	register struct recvbuf *rb;
-
 	/*
 	 * Init buffer free list and stat counters
 	 */

@@ -1,6 +1,11 @@
 /*
  * ntp_config.c - read and apply configuration information
  */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/param.h>

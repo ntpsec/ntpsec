@@ -232,7 +232,7 @@ typedef unsigned long u_long;
  */
 #if defined(SYS_WINNT)
 # if !defined(HAVE_CONFIG_H)  || !defined(__config)
-#   error "NT requires config.h to be included"
+    error "NT requires config.h to be included"
 # endif /* HAVE_CONFIG_H) */
 
 #if defined SYS_WINNT

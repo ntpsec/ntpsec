@@ -61,7 +61,7 @@ static	int numresfree;		/* number of structures on free list */
 static	u_long res_calls;
 static	u_long res_found;
 static	u_long res_not_found;
-static	u_long res_timereset;
+/* static	u_long res_timereset; */
 
 /*
  * Parameters of the RES_LIMITED restriction option.
@@ -122,7 +122,7 @@ init_restrict(void)
 	res_calls = 0;
 	res_found = 0;
 	res_not_found = 0;
-	res_timereset = 0;
+	/* res_timereset = 0; */
 
 	/*
 	 * set default values for RES_LIMIT functionality

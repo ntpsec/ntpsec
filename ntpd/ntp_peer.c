@@ -124,7 +124,7 @@ static struct peer init_peer_alloc[INIT_PEER_ALLOC];
  * we try to get their poll update timers initialized to different values
  * to prevent us from sending big clumps of data all at once.
  */
-static u_long init_peer_starttime;
+/* static u_long init_peer_starttime; */
 
 static	void	getmorepeermem	P((void));
 static	void	key_expire	P((struct peer *));
@@ -159,7 +159,7 @@ init_peer(void)
 	/*
 	 * Initialization counter.
 	 */
-	init_peer_starttime = 0;
+	/* init_peer_starttime = 0; */
 
 	/*
 	 * Initialize peer memory.

@@ -1,5 +1,16 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 
+	* include/ntp_machine.h:
+	* libntp/mexit.c:
+	* ntpd/ntp_config.c:
+	* ntpd/ntp_peer.c:
+	* ntpd/ntp_restrict.c:
+	* ntpd/refclock_arc.c:
+	* ntpdate/ntpdate.c:
+	Irix, SunOS, AIX, lint patches
+	From: Marc.Brett@westgeo.com
+
 	* util/ansi2knr.c: New release (fix for bug reported by Marc Brett)
 	From: "L. Peter Deutsch" <ghost@aladdin.com>
 

@@ -173,9 +173,9 @@ AC_CHECK_LIB(rt, sched_setscheduler, ,
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h poll.h sched.h sgtty.h)
-AC_CHECK_HEADERS(stdlib.h string.h sys/wait.h termio.h termios.h timepps.h)
-AC_CHECK_HEADERS(timex.h unistd.h utmp.h utmpx.h)
+AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h netdb.h poll.h sched.h)
+AC_CHECK_HEADERS(sgtty.h stdlib.h string.h sys/wait.h termio.h termios.h)
+AC_CHECK_HEADERS(timepps.h timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in.h netinet/ip.h resolv.h)
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)
@@ -676,6 +676,9 @@ AC_CACHE_CHECK(if we may declare 'h_errno', ac_cv_decl_h_errno,
 #endif
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
 #endif
 #ifdef HAVE_RESOLV_H
 #include <resolv.h>

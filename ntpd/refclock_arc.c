@@ -1080,7 +1080,7 @@ arc_receive(
 	/* Year-2000 alert! */
 	/* Attempt to wrap 2-digit date into sensible window. */
 	if(pp->year < YEAR_PIVOT) { pp->year += 100; }		/* Y2KFixes */
-	pp->year += 1900;	/* use full four-digit year	/* Y2KFixes */
+	pp->year += 1900;	/* use full four-digit year */	/* Y2KFixes */
 	/*
 	  Attempt to do the right thing by screaming that the code will
 	  soon break when we get to the end of its useful life.  What a
