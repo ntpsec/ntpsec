@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4a from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -63,8 +63,6 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
-AMDEP = @AMDEP@
-AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
 CC = @CC@
@@ -73,11 +71,8 @@ CHUTEST = @CHUTEST@
 CLKTEST = @CLKTEST@
 CPP = @CPP@
 DCFD = @DCFD@
-DEPDIR = @DEPDIR@
 EF_LIBS = @EF_LIBS@
 EF_PROGS = @EF_PROGS@
-INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-INSTALL_STRIP_PROGRAM_ENV = @INSTALL_STRIP_PROGRAM_ENV@
 LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
@@ -101,16 +96,13 @@ PATH_SH = @PATH_SH@
 PROPDELAY = @PROPDELAY@
 RANLIB = @RANLIB@
 RSAREF = @RSAREF@
-STRIP = @STRIP@
 TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
-_am_include = @_am_include@
-install_sh = @install_sh@
 
 bin_SCRIPTS = ntp-wait
 noinst_SCRIPTS = calc_tickadj checktime freq_adj mkver ntpsweep ntpver plot_summary summary
-EXTRA_DIST = fixautomakedepsmagic hpadjtime.sh monitoring ntp-groper 	ntp-restart ntp-status rc1 rc2 stats support
+EXTRA_DIST = fixautomakedepsmagic hpadjtime.sh monitoring ntp-close 	ntp-groper ntp-restart ntp-status rc1 rc2 stats support
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h

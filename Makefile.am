@@ -46,6 +46,8 @@ EXTRA_DIST = \
 	html \
 	ports
 
+DISTCLEANFILES = .warning
+
 #ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.in
 ETAGS_ARGS = Makefile.am configure.in acconfig.h
 

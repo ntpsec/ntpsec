@@ -35,6 +35,8 @@ BUILT_SOURCES = $(nodist_librsaref_a_SOURCES)
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 
+DISTCLEANFILES = $(nodist_librsaref_a_SOURCES) stamp-rsaref
+
 #EXTRA_DIST = 
 
 $(nodist_librsaref_a_SOURCES): stamp-rsaref
