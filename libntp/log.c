@@ -1,5 +1,10 @@
 /* Microsoft Developer Support Copyright (c) 1993 Microsoft Corporation. */
 
+/* Skip asynch rpc inclusion */
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__
+#endif
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -91,6 +91,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 # define HAVE_SOCKADDR_IN6
+# define ISC_PLATFORM_NEEDNTOP
 
 # define NEED_S_CHAR_TYPEDEF
 

@@ -1,12 +1,19 @@
 /*
  * socktoa - return a numeric host name from a sockaddr_storage structure
  */
+
+#include <config.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
 #include <arpa/inet.h>
+
+#ifdef ISC_PLATFORM_NEEDNTOP
+#include <isc/net.h>
+#endif
 
 #include <stdio.h>
 
@@ -15,13 +22,11 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
-
 char *
 socktoa(
 	struct sockaddr_storage* sock
 	)
 {
-#ifdef HAVE_IPV6
 	register char *buffer;
 
 	LIB_GETBUF(buffer);
@@ -40,7 +45,4 @@ socktoa(
 			    LIB_BUFLENGTH);
 	}
   	return buffer;
-#else
-	return numtoa(GET_INADDR(*sock));
-#endif
 }
