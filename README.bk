@@ -37,7 +37,7 @@ as soon as the code is stable.
 Once you have obtained the sources, do the following:
 
 	bk -r get   (or edit)	to check out the files
-	autoreconf		generates configure and Makefile.in's
+	autoreconf -f -i	generates configure and Makefile.in's
 
 and you should be ready to go.
 
