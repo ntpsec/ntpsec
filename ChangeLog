@@ -1,5 +1,7 @@
 2000-03-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/Makefile.am (ntp_genkeys_LDADD): Might need snprintf (-lntp)
+
 	* librsaref/Makefile.am (stamp-rsaref): nodist_HEADERS are not
 	supoprted yet.  Hack around it.
 
