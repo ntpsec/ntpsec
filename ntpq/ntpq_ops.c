@@ -1546,6 +1546,8 @@ dopeers(
 	}
 	(void) fprintf(fp,
 			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
+	(void) fprintf(fp,
+			   "                                      (s)  (s)          (ms)     (ms)    (ms) \n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
 		(void) fprintf(fp, "=");
@@ -1609,6 +1611,8 @@ doopeers(
 
 	(void) fprintf(fp,
 			   "     remote           local      st t when poll reach   delay   offset    disp\n");
+	(void) fprintf(fp,
+			   "                                      (s)  (s)          (ms)     (ms)     (ms)\n");
 	(void) fprintf(fp,
 			   "==============================================================================\n");
 

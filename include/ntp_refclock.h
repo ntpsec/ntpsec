@@ -29,12 +29,14 @@
 #include <sys/modem.h>
 #endif
 
+#if 0 /* If you need that, include ntp_io.h instead */
 #if defined(STREAM)
 #include <stropts.h>
-#if defined(CLK)
+#if defined(CLK) /* This is never defined, except perhaps by a system header file */
 #include <sys/clkdefs.h>
 #endif /* CLK */
 #endif /* STREAM */
+#endif
 
 #include "recvbuff.h"
 

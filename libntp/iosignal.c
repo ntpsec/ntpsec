@@ -16,14 +16,18 @@
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
+#if 0 /* Included by ntp_fp.h */
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
+#endif
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#if 0 /* Included by ntp_if.h below */
 #ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
 # include <sys/sockio.h>
+#endif
 #endif
 #include <arpa/inet.h>
 

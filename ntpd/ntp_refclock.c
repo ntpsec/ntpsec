@@ -14,6 +14,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
+#include "ntp_tty.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 
@@ -31,6 +32,8 @@
 #ifdef HAVE_PPSCLOCK_H
 #include <sys/ppsclock.h>
 #endif /* HAVE_PPSCLOCK_H */
+
+/*#undef HAVE_PPSAPI	/* !!! !!! !!! !!! fix me */
 
 #ifdef HAVE_PPSAPI
 # ifdef HAVE_TIMEPPS_H
@@ -755,15 +758,7 @@ refclock_open(
 {
 	int fd, i;
 	int flags;
-#ifdef HAVE_TERMIOS
-	struct termios ttyb, *ttyp;
-#endif /* HAVE_TERMIOS */
-#ifdef HAVE_SYSV_TTYS
-	struct termio ttyb, *ttyp;
-#endif /* HAVE_SYSV_TTYS */
-#ifdef HAVE_BSD_TTYS
-	struct sgttyb ttyb, *ttyp;
-#endif /* HAVE_BSD_TTYS */
+	TTY ttyb, *ttyp;
 #ifdef TIOCMGET
 	u_long ltemp;
 #endif /* TIOCMGET */
@@ -967,15 +962,7 @@ refclock_ioctl(
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 #ifdef TTYCLK
-#ifdef HAVE_TERMIOS
-	struct termios ttyb, *ttyp;
-#endif /* HAVE_TERMIOS */
-#ifdef HAVE_SYSV_TTYS
-	struct termio ttyb, *ttyp;
-#endif /* HAVE_SYSV_TTYS */
-#ifdef HAVE_BSD_TTYS
-	struct sgttyb ttyb, *ttyp;
-#endif /* HAVE_BSD_TTYS */
+	TTY ttyb, *ttyp;
 #endif /* TTYCLK */
 
 #ifdef DEBUG

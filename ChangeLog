@@ -1,5 +1,18 @@
 2000-09-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp_refclock.h (stropts.h, sys/clkdefs.h): Harmful and
+	useless file include's turned off.
+	* libntp/iosignal.c (netinet/in.h, sys/sockio.h): Duplicate file
+	include's turned off.
+	* ntpd/ntp_refclock.c (ntp_tty.h): File included.
+	(refclock_open, refclock_ioctl): Use `TTY' from ntp_tty.h.
+	* ntpd/refclock_atom.c: Grab a few headers regardless; if we don't
+	CLOCK_ATOM we provide a stub pps_sample() routine wo the WHARTON
+	can be compiled/used.
+	* ntpq/ntpq_ops.c (dopeers, doopeers): Print the units for
+	each column header.
+	Tue Sep 12 16:25:51 2000  Philippe De Muyter  <phdm@macqel.be>
+
 	* ntpd/refclock_atom.c (atom_start): Lose "temp", because we now
 	initially either CAPTUREASSERT or CAPTURECLEAR.
 	(atom_pps): pps_info_t is our friend.  Update comments to reflect
