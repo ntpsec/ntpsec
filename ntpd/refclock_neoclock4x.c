@@ -731,9 +731,10 @@ neoclock4x_control(int unit,
     }
 }
 
-static int neol_hexatoi_len(const char str[],
-			    int *result,
-			    int maxlen)
+static int
+neol_hexatoi_len(const char str[],
+		 int *result,
+		 int maxlen)
 {
   int hexdigit;
   int i;
@@ -748,7 +749,8 @@ static int neol_hexatoi_len(const char str[],
   return (n);
 }
 
-int neol_atoi_len(const char str[],
+static int
+neol_atoi_len(const char str[],
 		  int *result,
 		  int maxlen)
 {
@@ -780,12 +782,13 @@ int neol_atoi_len(const char str[],
  * machines were long is 32-bit! (However, as time_t is signed, we
  * will already get problems at other places on 2038-01-19 03:14:08)
  */
-static unsigned long neol_mktime(int year,
-				 int mon,
-				 int day,
-				 int hour,
-				 int min,
-				 int sec)
+static unsigned long
+neol_mktime(int year,
+	    int mon,
+	    int day,
+	    int hour,
+	    int min,
+	    int sec)
 {
   if (0 >= (int) (mon -= 2)) {    /* 1..12 . 11,12,1..10 */
     mon += 12;      /* Puts Feb last since it has leap day */
@@ -799,13 +802,14 @@ static unsigned long neol_mktime(int year,
           )*60 + sec; /* finally seconds */
 }
 
-static void neol_localtime(unsigned long utc,
-			   int* year,
-			   int* month,
-			   int* day,
-			   int* hour,
-			   int* min,
-			   int* sec)
+static void
+neol_localtime(unsigned long utc,
+	       int* year,
+	       int* month,
+	       int* day,
+	       int* hour,
+	       int* min,
+	       int* sec)
 {
   *sec = utc % 60;
   utc /= 60;
@@ -818,10 +822,11 @@ static void neol_localtime(unsigned long utc,
   neol_jdn_to_ymd(utc + 2440588L, year, month, day);
 }
 
-static void neol_jdn_to_ymd(unsigned long jdn,
-			    int *yy,
-			    int *mm,
-			    int *dd)
+static void
+neol_jdn_to_ymd(unsigned long jdn,
+		int *yy,
+		int *mm,
+		int *dd)
 {
   unsigned long x, z, m, d, y;
   unsigned long daysPer400Years = 146097UL;
