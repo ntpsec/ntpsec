@@ -114,7 +114,7 @@ HANDLE ResolverThreadHandle = NULL;
 /* variables used to inform the Service Control Manager of our current state */
 SERVICE_STATUS ssStatus;
 SERVICE_STATUS_HANDLE	sshStatusHandle;
-HANDLE WaitHandles[3] = { NULL, NULL, NULL };
+HANDLE WaitHandles[2] = { NULL, NULL };
 char szMsgPath[255];
 static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 #endif /* SYS_WINNT */
@@ -122,11 +122,7 @@ static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 /*
  * Scheduling priority we run at
  */
-#if !defined SYS_WINNT
 # define NTPD_PRIO	(-12)
-#else
-# define NTPD_PRIO	REALTIME_PRIORITY_CLASS
-#endif
 
 /*
  * Debugging flag
@@ -230,13 +226,35 @@ set_process_priority(void)
 	int done = 0;
 
 #ifdef SYS_WINNT
+	DWORD  SingleCPUMask = 0;
+	DWORD ProcessAffinityMask, SystemAffinityMask;
+	if (!GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &SystemAffinityMask))
+		msyslog(LOG_ERR, "GetProcessAffinityMask: %m");
+	else {
+		SingleCPUMask = 1;
+# ifdef DEBUG
+		msyslog(LOG_INFO, "System AffinityMask = %x", SystemAffinityMask );
+# endif
+	}
+	while (SingleCPUMask && !(SingleCPUMask & SystemAffinityMask)) {
+		SingleCPUMask = SingleCPUMask << 1;
+	}
+
+	if (!SingleCPUMask)
+		msyslog(LOG_ERR, "Can't set Processor Affinity Mask");
+	else if (!SetProcessAffinityMask(GetCurrentProcess(), SingleCPUMask))
+		msyslog(LOG_ERR, "SetProcessAffinityMask: %m");
+# ifdef DEBUG
+	else msyslog(LOG_INFO,"ProcessorAffinity Mask: %x", SingleCPUMask );
+# endif
+
 	if (!SetPriorityClass(GetCurrentProcess(), (DWORD) REALTIME_PRIORITY_CLASS))
 		msyslog(LOG_ERR, "SetPriorityClass: %m");
 	else
 		++done;
-#else  /* not SYS_WINNT */
-# if defined(HAVE_SCHED_SETSCHEDULER)
+#endif
 
+# if defined(HAVE_SCHED_SETSCHEDULER)
 	if (!done) {
 		extern int config_priority_override, config_priority;
 		int pmax, pmin;
@@ -300,10 +318,10 @@ set_process_priority(void)
 	}
 #  endif /* HAVE_BSD_NICE */
 # endif /* NTPD_PRIO && NTPD_PRIO != 0 */
-#endif /* not SYS_WINNT */
 	if (!done)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
+
 
 /*
  * Main program.  Initialize us, disconnect us from the tty if necessary,
@@ -757,24 +775,19 @@ service_main(
 	 */
 # if defined(HAVE_IO_COMPLETION_PORT)
 		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
-		WaitHandles[1] = get_recv_buff_event();
-		WaitHandles[2] = get_timer_handle();
+		WaitHandles[1] = get_timer_handle();
 
 		for (;;) {
-			DWORD Index = MsgWaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, INFINITE, QS_ALLEVENTS, MWMO_ALERTABLE);
+			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, MWMO_ALERTABLE);
 			switch (Index) {
 				case WAIT_OBJECT_0 + 0 : /* exit request */
 					exit(0);
 				break;
 
-				case WAIT_OBJECT_0 + 1 : /* recv buffer */
-				break;
-
-				case WAIT_OBJECT_0 + 2 : /* 1 second timer */
+				case WAIT_OBJECT_0 + 1 : /* timer */
 					timer();
 				break;
-
-				case WAIT_OBJECT_0 + 3 : { /* Windows message */
+				case WAIT_OBJECT_0 + 2 : { /* Windows message */
 					MSG msg;
 					while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 						if (msg.message == WM_QUIT) {
