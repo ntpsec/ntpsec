@@ -7,37 +7,39 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 # NOTES:
 # don't use RSAREF's global.h - we use ours.
 
-nodist_librsaref_a_SOURCES = \
+nodist_librsaref_a_HEADERS = \
 	des.h \
-	desc.c \
-	digit.c \
 	digit.h \
 	md2.h \
-	md2c.c \
 	md5.h \
+	nn.h \
+	prime.h \
+	r_random.h \
+	rsa.h \
+	rsaref.h
+
+nodist_librsaref_a_SOURCES = \
+	desc.c \
+	digit.c \
+	md2c.c \
 	md5c.c \
 	nn.c \
-	nn.h \
 	prime.c \
-	prime.h \
 	r_dh.c \
 	r_encode.c \
 	r_enhanc.c \
 	r_keygen.c \
 	r_random.c \
-	r_random.h \
 	r_stdlib.c \
-	rsa.c \
-	rsa.h \
-	rsaref.h
+	rsa.c
 
-BUILT_SOURCES = $(nodist_librsaref_a_SOURCES)
+BUILT_SOURCES = $(nodist_librsaref_a_SOURCES) $(nodist_librsaref_a_HEADERS)
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 
 #EXTRA_DIST = 
 
-$(nodist_librsaref_a_SOURCES): stamp-rsaref
+$(nodist_librsaref_a_SOURCES) $(nodist_librsaref_a_HEADERS): stamp-rsaref
 
 stamp-rsaref:
 	@rm -f stamp-rsaref stamp-rsarefT
@@ -46,7 +48,15 @@ stamp-rsaref:
 	    case "@MAKE_LIBRSAREF@" in \
 	     '') touch $$i ;; \
 	     *) cmp -s $$i $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
-		|| cp $(srcdir)/../rsaref2/$$i $(srcdir)/$$i ;; \
+		|| cp $(srcdir)/../rsaref2/source/$$i $$i ;; \
 	    esac ; \
 	done
+	for i in $(nodist_librsaref_a_HEADERS); do \
+	    case "@MAKE_LIBRSAREF@" in \
+	     '') touch $$i ;; \
+	     *) cmp -s $(srcdir)/$$i $(top_srcdir)/rsaref2/source/$$i 2>/dev/null \
+		|| cp $(top_srcdir)/rsaref2/source/$$i $(srcdir)/$$i ;; \
+	    esac ; \
+	done
+	@echo timestamp > stamp-rsarefT 2> /dev/null
 	@mv stamp-rsarefT stamp-rsaref
