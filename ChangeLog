@@ -1,3 +1,7 @@
+2000-04-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* build (IAM): Show hostname if we trip a buildkey check.
+
 2000-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* build: deal with optional 1st argument (SIG), which must match
