@@ -39,7 +39,7 @@
 
 #ifdef SYS_WINNT
 # include <io.h>
-extern HANDLE ResolverThreadHandle;
+HANDLE ResolverThreadHandle = NULL;
 #endif /* SYS_WINNT */
 
 extern int priority_done;

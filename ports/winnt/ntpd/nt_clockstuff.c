@@ -47,6 +47,7 @@
 
 #include "ntp_stdlib.h"
 #include "clockstuff.h"
+#include "ntservice.h"
 #include "ntp_timer.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
@@ -148,9 +149,16 @@ void init_winnt_time(void) {
 	BOOL noslew;
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
+
+	/*
+	 * Make sure the service is initialized
+	 * before we do anything else
+	 */
+	ntservice_init();
+
 	/*
 	 * Get privileges needed for fiddling with the clock
-	  */
+	 */
 
 	  /* get the current process token handle */
 	if (!OpenProcessToken(GetCurrentProcess(),
@@ -194,22 +202,34 @@ void init_winnt_time(void) {
 	msyslog(LOG_INFO, "Adjustment rate %5.3f ppm/s", ppm_per_adjust_unit);
 #endif
 
-    /*++++ Gerhard Junker
-     * see Platform SDK for QueryPerformanceCounter
-     * On a multiprocessor machine, it should not matter which processor is called. 
-     * However, you can get different results on different processors due to bugs in the BIOS or the HAL. 
-     * To specify processor affinity for a thread, use the SetThreadAffinityMask function. 
-     * ... we will hope, the apc routine will run on the same processor
-     */
+	/*++++ Gerhard Junker
+	* see Platform SDK for QueryPerformanceCounter
+	* On a multiprocessor machine, it should not matter which processor is called. 
+	* However, you can get different results on different processors due to bugs in the BIOS or the HAL. 
+	* To specify processor affinity for a thread, use the SetThreadAffinityMask function. 
+	* ... we will hope, the apc routine will run on the same processor
+	*/
 
-    SetThreadAffinityMask(GetCurrentThread(), 1L);
+	SetThreadAffinityMask(GetCurrentThread(), 1L);
 
-    /*---- Gerhard Junker */
+	/*---- Gerhard Junker */
 
-    StartClockThread();
+	StartClockThread();
+
+	/* Set up the Console Handler */
+	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE)) {
+		msyslog(LOG_ERR, "Can't set console control handler: %m");
+	}
 
 }
 
+/*
+ * Shutdown just needs to stop the clock thread
+ */
+void shutdown_winnt_time(void)
+{
+	StopClockThread();
+}
 
 void reset_winnt_time(void) {
 
@@ -383,7 +403,7 @@ static void StartClockThread(void)
 	LARGE_INTEGER Freq = { 0, 0 };
 	
 	/* get the performance counter freq*/
-    if (!QueryPerformanceFrequency(&Freq)) {
+	if (!QueryPerformanceFrequency(&Freq)) {
 		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
 		exit (-1);
 	}
