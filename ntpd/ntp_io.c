@@ -269,7 +269,7 @@ int
 create_wildcards(u_short port) {
 
 	int idx = 0;
-	BOOL okipv4 = TRUE;
+	int okipv4 = TRUE;
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
