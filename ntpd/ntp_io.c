@@ -580,11 +580,12 @@ create_sockets(
 void
 io_setbclient(void)
 {
+#ifdef OPEN_BCAST_SOCKET 
 	int i;
+	int nif = 0;
 
-#ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(1);
-#endif
+
 	for (i = nwilds; i < ninterfaces; i++) {
 		/* Only IPv4 addresses are valid for broadcast */
 		if (inter_list[i].bcast.ss_family != AF_INET)
@@ -598,14 +599,11 @@ io_setbclient(void)
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
-#ifdef	SYS_SOLARIS
-		inter_list[i].bcast.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif
-#ifdef OPEN_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
 		    INT_BROADCAST, 1);
 		if (inter_list[i].bfd != INVALID_SOCKET) {
 			inter_list[i].flags |= INT_BCASTOPEN;
+			nif++;
 #if defined (HAVE_IO_COMPLETION_PORT)
 			io_completion_port_add_socket(inter_list[i].bfd, &inter_list[i]);
 #endif
@@ -620,14 +618,17 @@ io_setbclient(void)
 				i);
 		}
 #endif
-#endif
 	}
-#ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(0);
-#endif
 #ifdef DEBUG
 	if (debug)
-		printf("io_setbclient: Opened broadcast clients\n");
+		if (nif > 0)
+			printf("io_setbclient: Opened broadcast clients\n");
+#endif
+		if (nif == 0)
+			netsyslog(LOG_ERR, "Unable to listen for broadcasts, no broadcast interfaces available");
+#else
+	netsyslog(LOG_ERR, "io_setbclient: Broadcast Client disabled by build");
 #endif
 }
 
