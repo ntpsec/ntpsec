@@ -502,7 +502,7 @@ jupiter_control(
 		L_NEG(&instance->limit);
 
 #ifdef HAVE_PPSAPI
-	instance->assert = !pp->sloppyclockflag & CLK_FLAG3;
+	instance->assert = !(pp->sloppyclockflag & CLK_FLAG3);
 	jupiter_ppsapi(instance, !instance->assert, 0);
 #endif /* HAVE_PPSAPI */
 
