@@ -182,7 +182,6 @@ getCmdOpts(
 	)
 {
 	extern char *config_file;
-	struct sockaddr_in inaddrntp;
 	int errflg;
 	int c;
 
