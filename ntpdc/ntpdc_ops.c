@@ -1910,7 +1910,7 @@ again:
 		struct info_monitor_1 *ml = (struct info_monitor_1 *) struct_star;
 
 		(void) fprintf(fp,
-			       "remote address          port local address      count m ver code avglen   first\n");
+			       "remote address          port local address      count m ver code avgint  lstint\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
@@ -1953,7 +1953,7 @@ again:
 		struct info_monitor *ml = (struct info_monitor *) struct_star;
 
 		(void) fprintf(fp,
-			       "     address               port     count mode ver code avglen   first\n");
+			       "     address               port     count mode ver code avgint  lstint\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {

@@ -751,8 +751,7 @@ struct mon_data {
 	struct mon_data *mru_prev;	/* previous structure in MRU list */
 	u_long drop_count;		/* dropped due RESLIMIT*/
 	double avg_interval;		/* average interpacket interval */
-	u_long lasttime;		/* last packet received time */
-	u_long firsttime;		/* first packet received time */
+	u_long lasttime;		/* interval since last packet */
 	u_long count;			/* total packet count */
 	struct sockaddr_storage rmtadr;	/* address of remote host */
 	struct interface *interface;	/* interface on which this arrived */

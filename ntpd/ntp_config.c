@@ -207,16 +207,15 @@ static struct keyword flags_keywords[] = {
 	{ "",			CONFIG_UNKNOWN }
 };
 
-#ifdef OPENSSL
 /*
  * "discard" modifier keywords
  */
 static struct keyword discard_keywords[] = {
 	{ "average",		CONF_DISCARD_AVERAGE },
 	{ "minimum",		CONF_DISCARD_MINIMUM },
+	{ "monitor",		CONF_DISCARD_MONITOR },
 	{ "",			CONFIG_UNKNOWN }
 };
-#endif /* OPENSSL */
 
 /*
  * "tinker" modifier keywords
@@ -1076,17 +1075,6 @@ getconfig(
 			}
 			break;
 
-#ifdef OPENSSL
-		    case CONFIG_REVOKE:
-			if (ntokens >= 2)
-			    sys_revoke = (u_char) max(atoi(tokens[1]), KEY_REVOKE);
-			break;
-
-		    case CONFIG_AUTOMAX:
-			if (ntokens >= 2)
-			    sys_automax = 1 << max(atoi(tokens[1]), 10);
-			break;
-
 		    case CONFIG_DISCARD:
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
@@ -1107,12 +1095,28 @@ getconfig(
 			    case CONF_DISCARD_MINIMUM:
 				res_min_interval = atoi(tokens[i++]);
 				break;
+
+			    case CONF_DISCARD_MONITOR:
+				mon_age = atoi(tokens[i++]);
+				break;
+
 			    default:
 				msyslog(LOG_ERR,
 				    "discard: unknown keyword");
 				break;
 			    }
 			}
+			break;
+
+#ifdef OPENSSL
+		    case CONFIG_REVOKE:
+			if (ntokens >= 2)
+			    sys_revoke = (u_char) max(atoi(tokens[1]), KEY_REVOKE);
+			break;
+
+		    case CONFIG_AUTOMAX:
+			if (ntokens >= 2)
+			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
 
 		    case CONFIG_CRYPTO:
