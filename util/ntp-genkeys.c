@@ -541,7 +541,7 @@ main(
 			progname, f1_keysdir);
 		exit(1);
 	}
-	snifflink(f1_keysdir, &f2_keysdir);
+	snifflink(f1_keysdir, &f2_keysdir); /* Do we care? */
 
 	if (!f2_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "ntp.keys.%lu",
@@ -559,7 +559,7 @@ main(
 			progname, f1_keys);
 		exit(1);
 	}
-	snifflink(f1_keys, &f2_keys);
+	snifflink(f1_keys, &f3_keys);
 
 	if (!f2_publickey) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey_%s.%lu",
@@ -577,7 +577,7 @@ main(
 			progname, f1_publickey);
 		exit(1);
 	}
-	snifflink(f1_publickey, &f2_publickey);
+	snifflink(f1_publickey, &f3_publickey);
 
 	if (!f2_privatekey) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey.%lu",
@@ -595,7 +595,7 @@ main(
 			progname, f1_privatekey);
 		exit(1);
 	}
-	snifflink(f1_privatekey, &f2_privatekey);
+	snifflink(f1_privatekey, &f3_privatekey);
 
 	if (!f2_dhparms) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey_dh.%lu",
@@ -613,7 +613,7 @@ main(
 			progname, f1_dhparms);
 		exit(1);
 	}
-	snifflink(f1_dhparms, &f2_dhparms);
+	snifflink(f1_dhparms, &f3_dhparms);
 
 	printf("After config:\n");
 	printf("keysdir    = <%s> -> <%s>\n"
@@ -624,18 +624,22 @@ main(
 	       , f1_keys? f1_keys: ""
 	       , f2_keys? f2_keys: ""
 		);
+	printf("       old = <%s>\n", f3_keys? f3_keys: "");
 	printf("publickey  = <%s> -> <%s>\n"
 	       , f1_publickey? f1_publickey: ""
 	       , f2_publickey? f2_publickey: ""
 		);
+	printf("       old = <%s>\n", f3_publickey? f3_publickey: "");
 	printf("privatekey = <%s> -> <%s>\n"
 	       , f1_privatekey? f1_privatekey: ""
 	       , f2_privatekey? f2_privatekey: ""
 		);
+	printf("       old = <%s>\n", f3_privatekey? f3_privatekey: "");
 	printf("dhparms    = <%s> -> <%s>\n"
 	       , f1_dhparms? f1_dhparms: ""
 	       , f2_dhparms? f2_dhparms: ""
 		);
+	printf("       old = <%s>\n", f3_dhparms? f3_dhparms: "");
 
 	/*
 	  We:
