@@ -674,9 +674,7 @@ receive(
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST | (sys_authenticate ?
 		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
-		if (peer == NULL)
-			return;
-		break;
+		return;
 
 	case AM_POSSBCL:
 	case AM_PROCPKT:

@@ -530,10 +530,10 @@ newpeer(
 	 */
 	if (ISREFCLOCKADR(srcadr))
 		peer->dstadr = loopback_interface;
+	else if (cast_flags & MDF_BCLNT)
+		peer->dstadr = findbcastinter(srcadr);
 	else if (dstadr != any_interface)
 		peer->dstadr = dstadr;
-	else if (cast_flags & MDF_BCAST)
-		peer->dstadr = findbcastinter(srcadr);
 	else
 		peer->dstadr = findinterface(srcadr);
 	peer->srcadr = *srcadr;
