@@ -1,3 +1,23 @@
+1999-12-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/tickadj.htm:
+	* html/notes.htm:
+	* html/hints/solaris.html:
+	Point to the new dosynctodr report.
+
+	* html/hints/solaris.xtra.S99ntpd:
+	Update.  Should be rewritten to take advantage of the new -g
+	switch and perhaps a loop to wait until ntpd hits a reasonable
+	"state".
+	
+	* html/hints/solaris-dosynctodr.html: New information
+	From: "John W. Sopko Jr." <sopko@cs.unc.edu>
+
+1999-12-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/authkeys.c (auth_moremem): Clear memory allocated for sk.
+	From: Hugo Mildenberger <hugo.mildenberger@topmail.de>
+
 1999-12-01  Sven Dietrich <sven_dietrich@trimble.com>
 
 	* libntp/recvbuff.c: Unused functions cleanup
