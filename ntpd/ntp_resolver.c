@@ -1,3 +1,6 @@
+
+/* Currently unused */
+
 /*
 ** Ancestor was ripped off from ../ntpres/ntpres.c by Greg Troxel 4/2/92
 **

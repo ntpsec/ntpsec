@@ -834,32 +834,32 @@ request(
 		
 		    case INFO_ERR_IMPL:
 			msyslog(LOG_ERR,
-				"server reports implementation mismatch!!");
+				"ntpd reports implementation mismatch!");
 			return 0;
 		
 		    case INFO_ERR_REQ:
 			msyslog(LOG_ERR,
-				"server claims configuration request is unknown");
+				"ntpd says configuration request is unknown!");
 			return 0;
 		
 		    case INFO_ERR_FMT:
 			msyslog(LOG_ERR,
-				"server indicates a format error occurred(!!)");
+				"ntpd indicates a format error occurred!");
 			return 0;
 
 		    case INFO_ERR_NODATA:
 			msyslog(LOG_ERR,
-				"server indicates no data available (shouldn't happen)");
+				"ntpd indicates no data available!");
 			return 0;
 		
 		    case INFO_ERR_AUTH:
 			msyslog(LOG_ERR,
-				"server returns a permission denied error");
+				"ntpd returns a permission denied error!");
 			return 0;
 
 		    default:
 			msyslog(LOG_ERR,
-				"server returns unknown error code %d", n);
+				"ntpd returns unknown error code %d!", n);
 			return 0;
 		}
 	}

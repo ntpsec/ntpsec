@@ -449,12 +449,12 @@ ntpdmain(
 			int max_fd;
 #endif /* not F_CLOSEM */
 
+#if defined(F_CLOSEM)
 			/*
 			 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
 			 * by Eric Agar (saves us from doing 32767 system
 			 * calls)
 			 */
-#if defined(F_CLOSEM)
 			if (fcntl(0, F_CLOSEM, 0) == -1)
 			    msyslog(LOG_ERR, "ntpd: failed to close open files(): %m");
 #else  /* not F_CLOSEM */
