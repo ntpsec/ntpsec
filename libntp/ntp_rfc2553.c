@@ -12,6 +12,7 @@
 
 #include "ntpd.h"
 #include "ntp_malloc.h"
+#include "ntp_stdlib.h"
 #include "ntp_string.h"
 
 #ifndef HAVE_IPV6

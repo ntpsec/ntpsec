@@ -989,7 +989,7 @@ io_multicast_add(
 #else /* MCAST */
 	msyslog(LOG_ERR,
 	    "cannot add multicast address %s as no MCAST support",
-	    stoa(addr));
+	    stoa(&addr));
 #endif /* MCAST */
 }
 
