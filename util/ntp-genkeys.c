@@ -500,9 +500,36 @@ main(
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
+	if (path_keys && *path_keys != '/') {
+		fprintf(stderr,
+			"%s: keys path <%s> doesn't begin with a /\n",
+			progname, path_keys);
+		exit(1);
+	}
 	snifflink(path_keys, &link_keys);
+
+	if (path_keysdir && *path_keysdir != '/') {
+		fprintf(stderr,
+			"%s: keysdir path <%s> doesn't begin with a /\n",
+			progname, path_keysdir);
+		exit(1);
+	}
 	snifflink(path_keysdir, &link_keysdir);
+
+	if (path_publickey && *path_publickey != '/') {
+		fprintf(stderr,
+			"%s: publickey path <%s> doesn't begin with a /\n",
+			progname, path_publickey);
+		exit(1);
+	}
 	snifflink(path_publickey, &link_publickey);
+
+	if (path_privatekey && *path_privatekey != '/') {
+		fprintf(stderr,
+			"%s: privatekey path <%s> doesn't begin with a /\n",
+			progname, path_privatekey);
+		exit(1);
+	}
 	snifflink(path_privatekey, &link_privatekey);
 
 	printf("After config:\n");

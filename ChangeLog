@@ -1,3 +1,7 @@
+2000-08-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c (main): Sanity checks on the file paths.
+
 2000-08-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/ntp-genkeys.c (crypto_config): Only #ifdef PUBKEY
