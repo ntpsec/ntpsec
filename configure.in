@@ -2397,7 +2397,7 @@ case "$ans" in
 	LIBS="$LIBS -lcrypto"
 	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	AC_DEFINE(PUBKEY, , [Public key?])
-	AC_CHECK_FUNCS(EVP_mdc2)
+	AC_CHECK_FUNCS(EVP_md2 EVP_mdc2)
     fi
     ;;
 esac
