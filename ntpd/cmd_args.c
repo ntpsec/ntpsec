@@ -23,11 +23,7 @@ int	listen_to_virtual_ips = 1;
 extern BOOL NoWinService;
 #endif
 
-#ifndef HAVE_CLOCKCTL 
-static const char *ntp_options = "aAbB:c:C:dD:f:gk:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:-:";
-#else
 static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
-#endif
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -270,13 +266,15 @@ getCmdOpts(
 			allow_panic = TRUE;
 			break;
 
-#ifdef HAVE_CLOCKCTL
 		    case 'i':
+#ifdef HAVE_CLOCKCTL
 			if (!ntp_optarg)
 				errflg++;
 			else
 				chrootdir = ntp_optarg;
 			break;
+#else
+			errflg++;
 #endif
 		    case 'k':
 			getauthkeys(ntp_optarg);
@@ -331,8 +329,8 @@ getCmdOpts(
 			} while (0);
 			break;
 			
-#ifdef HAVE_CLOCKCTL
 		    case 'u':
+#ifdef HAVE_CLOCKCTL
 			user = malloc(strlen(ntp_optarg) + 1);
 			if ((user == NULL) || (ntp_optarg == NULL))
 				errflg++;
@@ -340,8 +338,10 @@ getCmdOpts(
 			group = rindex(user, ':');
 			if (group)
 				*group++ = '\0'; /* get rid of the ':' */
-			break;
+#else
+			errflg++;
 #endif
+			break;
 		    case 's':
 			stats_config(STATS_STATSDIR, ntp_optarg);
 			break;
