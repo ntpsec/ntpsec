@@ -212,17 +212,19 @@ struct ctl_var clock_var[] = {
  * flasher bits
  */
 static const char *tstflagnames[] = {
-	"dup_pkt",		/* TEST1 */
-	"bogus_pkt",		/* TEST2 */
-	"proto_unsync",		/* TEST3 */
-	"no_access",		/* TEST4 */
-	"bad_auth",			/* TEST5 */
-	"peer_unsync",		/* TEST6 */
-	"peer_stratum",		/* TEST7 */
-	"root_bounds",		/* TEST8 */
-	"peer_bounds",		/* TEST9 */
-	"bad_autokey",		/* TEST10 */
-	"not_proventic"		/* TEST11*/
+	"pkt_dup",		/* TEST1 */
+	"pkt_bogus",		/* TEST2 */
+	"pkt_proto",		/* TEST3 */
+	"pkt_denied",		/* TEST4 */
+	"pkt_auth",		/* TEST5 */
+	"pkt_synch",		/* TEST6 */
+	"pkt_dist",		/* TEST7 */
+	"pkt_autokey",		/* TEST8 */
+	"pkt_crypto",		/* TEST9 */
+	"peer_stratum",		/* TEST10 */
+	"peer_dist",		/* TEST11 */
+	"peer_loop",		/* TEST12 */
+	"peer_unfit"		/* TEST13 */
 };
 
 
@@ -3010,7 +3012,7 @@ tstflags(
 		cb += strlen(cb);
 	} else {
 		*cb++ = ' ';
-		for (i = 0; i < 11; i++) {
+		for (i = 0; i < 14; i++) {
 			if (val & 0x1) {
 				sprintf(cb, "%s%s", sep, tstflagnames[i]);
 				sep = ", ";

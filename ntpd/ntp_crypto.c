@@ -607,7 +607,7 @@ crypto_recv(
 				peer->first = cinfo->first;
 				peer->last = cinfo->last;
 			}
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			temp32 = cinfo->nid;
 			sprintf(statstr, "cert %s 0x%x %s (%u) fs %u",
 			    cinfo->subject, cinfo->flags,
@@ -656,7 +656,7 @@ crypto_recv(
 
 			peer->crypto |= CRYPTO_FLAG_VRFY |
 			    CRYPTO_FLAG_PROV;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr, "iff fs %u",
 			    ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -703,7 +703,7 @@ crypto_recv(
 
 			peer->crypto |= CRYPTO_FLAG_VRFY |
 			    CRYPTO_FLAG_PROV;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr, "gq fs %u",
 			    ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -743,7 +743,7 @@ crypto_recv(
 
 			peer->crypto |= CRYPTO_FLAG_VRFY |
 			    CRYPTO_FLAG_PROV;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr, "mv fs %u",
 			    ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -782,7 +782,7 @@ crypto_recv(
 				break;
 
 			peer->crypto |= CRYPTO_FLAG_SIGN;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			temp32 = cinfo->nid;
 			sprintf(statstr, "sign %s 0x%x %s (%u) fs %u",
 			    cinfo->issuer, cinfo->flags,
@@ -823,7 +823,7 @@ crypto_recv(
 			fp->opcode |= htonl(temp32);
 			peer->cmmd = fp;
 			if (peer->crypto & CRYPTO_FLAG_AGREE) {
-				peer->flash &= ~TEST10;
+				peer->flash &= ~TEST8;
 				break;
 			}
 
@@ -838,7 +838,7 @@ crypto_recv(
 			RAND_bytes((u_char *)&peer->pcookie, 4);
 			peer->crypto &= ~CRYPTO_FLAG_AUTO;
 			peer->crypto |= CRYPTO_FLAG_AGREE;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr, "cook %x ts %u fs %u",
 			    peer->pcookie, ntohl(ep->tstamp),
 			    ntohl(ep->fstamp));
@@ -902,7 +902,7 @@ crypto_recv(
 			else
 				peer->crypto &= ~CRYPTO_FLAG_AUTO;
 			peer->crypto |= CRYPTO_FLAG_AGREE;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr, "cook %x ts %u fs %u",
 			    peer->pcookie, ntohl(ep->tstamp),
 			    ntohl(ep->fstamp));
@@ -952,7 +952,7 @@ crypto_recv(
 			bp->key = ntohl(ap->key);
 			peer->pkeyid = bp->key;
 			peer->crypto |= CRYPTO_FLAG_AUTO;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 			sprintf(statstr,
 			    "auto seq %d key %x ts %u fs %u", bp->seq,
 			    bp->key, ntohl(ep->tstamp),
@@ -997,7 +997,7 @@ crypto_recv(
 			fp->opcode |= htonl(temp32);
 			peer->cmmd = fp;
 			if (len <= VALUE_LEN) {
-				peer->flash &= ~TEST10;
+				peer->flash &= ~TEST8;
 				break;
 			}
 			/* fall through */
@@ -1045,7 +1045,7 @@ crypto_recv(
 			}
 			crypto_flags |= CRYPTO_FLAG_TAI;
 			peer->crypto |= CRYPTO_FLAG_LEAP;
-			peer->flash &= ~TEST10;
+			peer->flash &= ~TEST8;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
 			/*

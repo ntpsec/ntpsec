@@ -1411,6 +1411,7 @@ ctl_putpeer(
 	struct peer *peer
 	)
 {
+	int temp;
 #ifdef OPENSSL
 	char str[256];
 	struct autokey *ap;
@@ -1530,7 +1531,8 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		ctl_puthex(peer_var[CP_FLASH].text, peer->flash);
+		temp = peer->flash | peer_unfit(peer);
+		ctl_puthex(peer_var[CP_FLASH].text, temp);
 		break;
 
 	case CP_TTL:

@@ -203,18 +203,26 @@ struct interface {
  * These reveal the state at the last grumble from the peer and are
  * most handy for diagnosing problems, even if not strictly a state
  * variable in the spec. These are recorded in the peer structure.
+ *
+ * Packet errors
  */
-#define TEST1		0x0001	/* duplicate packet received */
-#define TEST2		0x0002	/* bogus packet received */
-#define TEST3		0x0004	/* protocol unsynchronized */
-#define TEST4		0x0008	/* access denied or crypto failure */
-#define TEST5		0x0010	/* MAC error */
-#define TEST6		0x0020	/* peer clock unsynchronized */
-#define TEST7		0x0040	/* peer stratum out of bounds */
-#define TEST8		0x0080  /* root delay/dispersion bounds check */
-#define TEST9		0x0100	/* peer delay/dispersion bounds check */
-#define TEST10		0x0200	/* autokey error */
-#define	TEST11		0x0400	/* protocol error */
+#define TEST1		0x0001	/* duplicate packet */
+#define TEST2		0x0002	/* bogus packet */
+#define TEST3		0x0004	/* invalid timestamp */
+#define TEST4		0x0008	/* access denied */
+#define TEST5		0x0010	/* authentication error */
+#define TEST6		0x0020	/* peer not synchronized */
+#define TEST7		0x0040	/* invalid distance */
+#define TEST8		0x0080  /* autokey error */
+#define TEST9		0x0100	/* crypto error */
+
+/*
+ * Peer errors
+ */
+#define TEST10		0x0200	/* peer stratum exceeded */
+#define	TEST11		0x0400	/* peeer distance exceeded */
+#define TEST12		0x0800	/* peer synchronization loop */
+#define TEST13		0x1000	/* peer unfit for synchronization */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -362,17 +370,27 @@ struct peer {
 #define	LEAP_NOTINSYNC	0x3	/* overload, clock is free running */
 
 /*
- * Values for peer.mode
+ * Values for peer mode and packet mode. Only the modes through
+ * MODE_BROADCAST and MODE_BCLIENT appear in the transition
+ * function. MODE_CONTROL and MODE_PRIVATE can appear in packets,
+ * but those never survive to the transition function.
+ * is a
  */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
-#define	MODE_ACTIVE	1	/* symmetric active */
-#define	MODE_PASSIVE	2	/* symmetric passive */
+#define	MODE_ACTIVE	1	/* symmetric active mode */
+#define	MODE_PASSIVE	2	/* symmetric passive mode */
 #define	MODE_CLIENT	3	/* client mode */
 #define	MODE_SERVER	4	/* server mode */
 #define	MODE_BROADCAST	5	/* broadcast mode */
-#define	MODE_CONTROL	6	/* control mode packet */
-#define	MODE_PRIVATE	7	/* implementation defined function */
-#define	MODE_BCLIENT	8	/* broadcast client mode */
+/*
+ * These can appear in packets
+ */
+#define	MODE_CONTROL	6	/* control mode */
+#define	MODE_PRIVATE	7	/* private mode */
+/*
+ * This is a madeup mode for broadcast client.
+ */
+#define	MODE_BCLIENT	6	/* broadcast client mode */
 
 /*
  * Values for peer.stratum, sys_stratum
@@ -855,12 +873,6 @@ struct endpoint {
 };
 
 /*
- * Defines for association matching 
- */
-#define AM_MODES	10	/* total number of modes */
-#define NO_PEER		0	/* action when no peer is found */
-
-/*
  * Association matching AM[] return codes
  */
 #define AM_ERR		-1
@@ -870,7 +882,6 @@ struct endpoint {
 #define AM_MANYCAST	 3
 #define AM_NEWPASS	 4
 #define AM_NEWBCL	 5
-#define AM_POSSBCL	 6
 
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO
