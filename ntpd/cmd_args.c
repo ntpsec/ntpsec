@@ -15,7 +15,7 @@
 extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
-static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:r:s:t:v:V:x";
+static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:r:s:t:v:V:x:z";
 
 
 /*
@@ -282,6 +282,10 @@ getCmdOpts(
 
 		    case 'x':
 			allow_step = FALSE;
+			break;
+
+		    case 'z':
+			mode_ntpdate = TRUE;
 			break;
 
 		    default:

@@ -119,6 +119,7 @@ int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	allow_step = TRUE;	/* allow step correction */
 int	allow_panic = FALSE;	/* allow panic correction */
+int	mode_ntpdate = FALSE;	/* exit on first clock set */
 
 /*
  * Clock state machine variables
@@ -593,6 +594,8 @@ local_clock(
 		    sys_jitter, drift_comp * 1e6, clock_stability * 1e6,
 		    sys_poll, tc_counter);
 #endif /* DEBUG */
+	if (mode_ntpdate)
+		retval = 2;
 	return (retval);
 }
 

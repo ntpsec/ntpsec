@@ -1,3 +1,12 @@
+2001-03-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (clock_update): mode_ntpdate support.
+	* ntpd/ntp_loopfilter.c	(local_clock): mode_ntpdate support.
+	* ntpd/cmd_args.c: Added -z (mode_ntpdate).
+	* include/ntpd.h: mode_ntpdate added.
+	* include/ntp_crypto.h: RSAREF/OPENSSL cleanup.
+	From: Dave Mills.
+
 2001-03-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* config.h.in:

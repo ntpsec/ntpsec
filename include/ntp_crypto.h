@@ -4,10 +4,10 @@
 #ifdef AUTOKEY
 #include "global.h"
 #include "md5.h"
-#ifdef PUBKEY
+#ifdef RSAREF
 #include "rsaref.h"
 #include "rsa.h"
-#endif /* PUBKEY */
+#endif /* RSAREF */
 
 /*
  * Cryptostatus word

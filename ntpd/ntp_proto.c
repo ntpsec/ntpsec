@@ -1055,6 +1055,13 @@ clock_update(void)
 		break;
 
 	/*
+	 * Clock was set; emulating ntpdate
+	 */
+	case 2:
+		exit(0);
+		/*NOTREACHED*/;
+
+	/*
 	 * Update the system stratum, leap bits, root delay, root
 	 * dispersion, reference ID and reference time. We also update
 	 * select dispersion and max frequency error. If the leap

@@ -285,6 +285,7 @@ extern int	ext_enable;		/* external clock enabled */
 extern int	cal_enable;		/* refclock calibrate enable */
 extern int	allow_step;		/* allow step correction */
 extern int	allow_panic;		/* allow panic correction */
+extern int	mode_ntpdate;		/* exit on first clock set */
 
 /*
  * Clock state machine variables
