@@ -3727,9 +3727,12 @@ $isc_netinet6in6_hack
 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
 		[ISC: Have struct in6_pktinfo?])],
 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
+    ;;
+esac
 
-    AC_MSG_CHECKING(for in6addr_any)
-    AC_TRY_LINK([
+# We need this check run all the time...
+AC_MSG_CHECKING(for in6addr_any)
+AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -3742,9 +3745,7 @@ $isc_in_addr6_hack
 	[AC_MSG_RESULT(no)
 	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
 		[ISC: Need in6addr_any?])]
-	)
-    ;;
-esac
+)
 
 #
 # Look for a sysctl call to get the list of network interfaces.
