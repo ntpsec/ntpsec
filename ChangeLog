@@ -1,5 +1,7 @@
 1999-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.96p1
+
 	* ntpd/ntpd.c (sys/resource.h): Include this file only #if
  	HAVE_SYS_RESOURCE_H.
 	(set_process_priority): Use TIOCNOTTY only if it is #define'd.

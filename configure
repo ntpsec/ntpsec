@@ -966,7 +966,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.96
+VERSION=4.0.96p1
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -1399,7 +1399,7 @@ echo "$ac_t""$CPP" 1>&6
 
 
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
     ;;
  i386-sequent-sysv4)
@@ -1884,7 +1884,7 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     echo $ac_n "checking for main in -ladvapi32""... $ac_c" 1>&6
 echo "configure:1890: checking for main in -ladvapi32" >&5
 ac_lib_var=`echo advapi32'_'main | sed 'y%./+-%__p_%'`
@@ -5096,7 +5096,7 @@ fi
 done
 
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     ;;
  *) for ac_func in getuid
 do
@@ -5990,7 +5990,7 @@ done
     ;;
 esac
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     # I have no idea...
     ;;
  *) for ac_func in umask
@@ -6921,7 +6921,7 @@ case "$ac_cv_hdr_def_sigio" in
      *-dec-*)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -7024,7 +7024,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      vax-dec-bsd)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -7079,7 +7079,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      vax-dec-bsd)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -9279,7 +9279,7 @@ if test "${enable_tick+set}" = set; then
 else
   ans=no
      case "$target" in
-      XXX-*-pc-cygwin32)
+      XXX-*-pc-cygwin*)
 	 ;;
       *-univel-sysv*)
 	 ans=10000
@@ -9328,7 +9328,7 @@ else
        yes) ans='tick/16' ;;
       esac
       ;;
-   XXX-*-pc-cygwin32)
+   XXX-*-pc-cygwin*)
       ans=no
       ;;
    *-univel-sysv*)
