@@ -160,11 +160,12 @@ static	int	bighash		P((BIGNUM *, BIGNUM *));
 static	struct cert_info *crypto_cert P((char *));
 static	void	crypto_tai	P((char *));
 
-//#ifdef SYS_WINNT
+#ifdef SYS_WINNT
 int
 readlink(char * link, char * file, int len) {
 	return (-1);
 }
+#endif
 
 /*
  * session_key - generate session key
