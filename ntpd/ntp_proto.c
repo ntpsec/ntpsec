@@ -34,7 +34,7 @@ u_int32 sys_refid;		/* reference source for local clock */
 u_int32 sys_peer_refid;		/* hashed refid of our current peer */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
-struct	peer *sys_peer; 	/* our current peer */
+struct	peer *sys_peer;		/* our current peer */
 struct	peer *sys_prefer;	/* our cherished peer */
 int	sys_kod;		/* kod credit */
 int	sys_kod_rate = 2;	/* max kod packets per second */
@@ -46,13 +46,13 @@ u_long	sys_automax;		/* maximum session key lifetime */
  * Nonspecified system state variables.
  */
 int	sys_bclient;		/* broadcast client enable */
-double	sys_bdelay; 		/* broadcast client default delay */
+double	sys_bdelay;		/* broadcast client default delay */
 int	sys_calldelay;		/* modem callup delay (s) */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
-static	u_long sys_authdly[2]; 	/* authentication delay shift reg */
+static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_selerr; 	/* select error (squares) */
+static	double sys_selerr;	/* select error (squares) */
 static	double sys_syserr;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
@@ -82,7 +82,7 @@ u_long	sys_processed;		/* packets processed */
 u_long	sys_newversionpkt;	/* current version */
 u_long	sys_oldversionpkt;	/* recent version */
 u_long	sys_unknownversion;	/* invalid version */
-u_long	sys_restricted; 	/* access denied */
+u_long	sys_restricted;		/* access denied */
 u_long	sys_badlength;		/* bad length or format */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_limitrejected;	/* rate exceeded */
@@ -264,7 +264,7 @@ transmit(
 						return;
 					}
 					msyslog(LOG_NOTICE,
-				 	    "no reply; clock not set");
+					    "no reply; clock not set");
 					exit (0);
 				}
 				poll_update(peer, hpoll);
@@ -746,7 +746,7 @@ receive(
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
- 		if (!sys_bclient)
+		if (!sys_bclient)
 			return;			/* not a client */
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
@@ -925,7 +925,7 @@ receive(
 		/* fall through */
 
 	/*
- 	 * The packet originate timestamp is zero, meaning the other guy
+	 * The packet originate timestamp is zero, meaning the other guy
 	 * either didn't receive the first packet or died and restarted.
 	 * If the association originate timestamp is zero, this is the
 	 * first packet received, so we pass it on.
@@ -1615,7 +1615,7 @@ clock_filter(
 		    allan_xpt)
 			dst[i] = MAXDISTANCE + peer->filter_disp[j];
 		else
- 			dst[i] = peer->filter_delay[j];
+			dst[i] = peer->filter_delay[j];
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
@@ -1924,7 +1924,7 @@ clock_select(void)
 	 *
 	 * Here, nlist is the number of candidates and allow is the
 	 * number of falsetickers.
- 	 */
+	 */
 	low = 1e9;
 	high = -1e9;
 	for (allow = 0; 2 * allow < nlist; allow++) {
@@ -2245,11 +2245,23 @@ clock_select(void)
 	}
 #endif /* LOCKCLOCK */
 	if (osys_peer != sys_peer) {
+		char *src;
+
 		if (sys_peer == NULL)
 			sys_peer_refid = 0;
 		else
 			sys_peer_refid = addr2refid(&sys_peer->srcadr);
 		report_event(EVNT_PEERSTCHG, NULL);
+
+#ifdef REFCLOCK
+                if (ISREFCLOCKADR(&sys_peer->srcadr))
+                        src = refnumtoa(&sys_peer->srcadr);
+                else
+#endif
+                        src = ntoa(&sys_peer->srcadr);
+		NLOG(NLOG_SYNCSTATUS)
+		    msyslog(LOG_INFO, "synchronized to %s, stratum=%d", src,
+			    sys_peer->stratum);
 	}
 	clock_update();
 }
@@ -2459,7 +2471,7 @@ peer_xmit(
 				    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
 				exten = crypto_args(peer, CRYPTO_CERT,
- 				    peer->issuer);
+				    peer->issuer);
 
 			/*
 			 * Identity. Note we have to sign the
@@ -2530,7 +2542,7 @@ peer_xmit(
 		 * requests them and the protocol blinds it using the
 		 * agreed key. It is a protocol error if the client has
 		 * the parameters but the server does not.
- 		 */
+		 */
 		case MODE_CLIENT:
 			if (peer->cmmd != NULL) {
 				peer->cmmd->associd =
@@ -2589,7 +2601,7 @@ peer_xmit(
 
 		/*
 		 * If extension fields are present, we must use a
-		 * private value of zero and force min poll interval.  
+		 * private value of zero and force min poll interval.
 		 * Most intricate.
 		 */
 		if (sendlen > LEN_PKT_NOMAC)
@@ -2843,7 +2855,7 @@ key_expire(
 {
 	int i;
 
- 	if (peer->keylist != NULL) {
+	if (peer->keylist != NULL) {
 		for (i = 0; i <= peer->keynumber; i++)
 			authtrust(peer->keylist[i], 0);
 		free(peer->keylist);
@@ -3163,7 +3175,7 @@ proto_config(
 		 * Log this error.
 		 */
 		msyslog(LOG_INFO,
-		    "proto_config: illegal item %d, value %ld",
+			"proto_config: illegal item %d, value %ld",
 			item, value);
 	}
 }
