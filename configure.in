@@ -1364,7 +1364,6 @@ if test "$ac_cv_header_termios_h" = "yes"; then
 else
 ntp_ok=no
 fi
-
 if test "$ntp_ok" = "yes"; then
     AC_DEFINE(HAVE_TIOCGPPSEV)
     ac_cv_var_oncore_ok=yes
@@ -1401,7 +1400,6 @@ if test "$ac_cv_header_sys_ppsclock_h" = "yes"; then
 else
 ntp_ok=no
 fi
-
 if test "$ntp_ok" = "yes"; then
     ac_cv_var_oncore_ok=yes
     AC_DEFINE(HAVE_CIOGETEV)
@@ -1449,9 +1447,19 @@ typedef int u_int;
 	ntp_ok=no
 	;;
 esac
-
 if test "$ntp_ok" = "yes"; then
     AC_DEFINE(HAVE_TIO_SERIAL_STUFF)
+fi
+AC_MSG_RESULT($ntp_ok)
+
+# Check for SHMEM_STATUS support
+AC_MSG_CHECKING(SHMEM_STATUS support)
+case "$ac_cv_header_sys_mman_h" in
+ yes) ntp_ok=yes ;;
+ *)   ntp_ok=no  ;;
+esac
+if test "$ntp_ok" = "yes"; then
+    AC_DEFINE(ONCORE_SHMEM_STATUS)
 fi
 AC_MSG_RESULT($ntp_ok)
 

@@ -1,4 +1,10 @@
-2000-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+2000-01-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Move the ONCORE_SHMEM_STATUS check and definition
+	here.
+
+	* ntpd/refclock_oncore.c (oncore_init_shmem): Some systems do not
+	have MAP_HASSEMAPHORE.
 
 	* ntpd/refclock_oncore.c: Drive ONCORE_SHMEM_STATUS based on
 	HAVE_SYS_MMAN_H .  If this needs finer checks, do it in
@@ -10,6 +16,8 @@
 	  delivering receiver data stream to other processes through
 	  a memory-mapped file.
 	  From: Poul-Henning Kamp <phk@FreeBSD.org>
+
+2000-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_refclock_chu): Provide the CHU driver by
 	default, and by default prefer the AUDIO version.  We used to

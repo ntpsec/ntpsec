@@ -56,16 +56,11 @@
 #define POS_HOLD_AVERAGE	10000	/* nb, 10000s ~= 2h45m */
 
 /*
- * This feature will create a mmap(2)'ed file named according to a "STATUS" line
- * in the oncore config file, which contains the most recent copy of all
- * types of messages we recognize.  This file can be mmap(2)'ed by monitoring
- * and statistics programs.
+ * ONCORE_SHMEM_STATUS will create a mmap(2)'ed file named according to a
+ * "STATUS" line in the oncore config file, which contains the most recent
+ * copy of all types of messages we recognize.  This file can be mmap(2)'ed
+ * by monitoring and statistics programs.
  */
-
-/* HMS:  We can set ONCORE_SHMEM_STATUS in configure ... */
-#ifdef HAVE_SYS_MMAN_H
-#define ONCORE_SHMEM_STATUS	1
-#endif
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -634,7 +629,11 @@ oncore_init_shmem(struct instance *instance, char *filename)
 	}
 	free(buf);
 	instance->shmem = mmap(0, oncore_shmem_length, 
-	    PROT_READ | PROT_WRITE, MAP_HASSEMAPHORE | MAP_SHARED,
+	    PROT_READ | PROT_WRITE,
+#ifdef MAP_HASSEMAPHORE
+			       MAP_HASSEMAPHORE |
+#endif
+			       MAP_SHARED,
 	    instance->statusfd, 0LL);
 	if (instance->shmem == MAP_FAILED) {
 		instance->shmem = 0;

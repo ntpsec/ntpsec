@@ -383,6 +383,9 @@
 /* Do we need to #define _SVID3 when we #include <termios.h>? */
 #undef TERMIOS_NEEDS__SVID3
 
+/* Do we have support for SHMEM_STATUS? */
+#undef ONCORE_SHMEM_STATUS
+
 /***/
 
 /* Which way should we declare... */
