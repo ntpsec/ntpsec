@@ -3,7 +3,6 @@
  * 
  */
 
-#ifdef SYS_WINNT
 #include <stdio.h>
 #include <windows.h>
 
@@ -29,6 +28,3 @@ service_exit(
 	}
 }
 
-#else /* not SYS_WINNT */
-int mexit_bs;
-#endif /* not SYS_WINNT */
