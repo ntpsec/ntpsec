@@ -698,10 +698,11 @@ receive(
 			sys_restricted++;
 			return;
 		}
-
-		if (sys_authenticate && !is_authentic)
+		if (sys_authenticate && !is_authentic) {
+			fast_xmit(rbufp, MODE_PASSIVE, 0,
+			    restrict_mask);
 			return;
-
+		}
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 		    sys_minpoll, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
