@@ -715,19 +715,6 @@ adj_host_clock(
 		return;
 
 	/*
-	 * Intricate wrinkle for legacy only. If the local clock driver
-	 * is in use and selected for synchronization, somebody else may
-	 * tinker the adjtime() syscall. If this is the case, the driver
-	 * is marked prefer and we have to avoid calling adjtime(),
-	 * since that may truncate the other guy's requests.
-	 */
-	if (sys_peer != 0) {
-		if (sys_peer->refclktype == REFCLK_LOCALCLOCK &&
-		    sys_peer->flags & FLAG_PREFER)
-			return;
-	}
-
-	/*
 	 * Implement the phase and frequency adjustments. Note the
 	 * black art formerly practiced here has been whitewashed.
 	 */
