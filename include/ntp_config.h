@@ -56,9 +56,8 @@
 #define CONFIG_TTL		35
 #define CONFIG_INCLUDEFILE      36
 #define CONFIG_KEYSDIR		37
-#define CONFIG_CDELAY		38
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		39
+#define CONFIG_CRYPTO		38
 #endif /* OPENSSL */
 
 /*
