@@ -727,7 +727,7 @@ receive(
 				mskadr_sin.ss_family =
 				    rbufp->recv_srcadr.ss_family;
 				if (mskadr_sin.ss_family == AF_INET)
-					GET_INADDR(mskadr_sin) =~(u_int32)0;
+					GET_INADDR(mskadr_sin) = 0xffffffff;
 				else
 					memset(&GET_INADDR6(mskadr_sin), 0xff,
 					    sizeof(struct in6_addr));
@@ -998,7 +998,15 @@ receive(
 			 * trust subsequent packets.
 			 */
 			if (rval != XEVNT_SIG) {
-				mskadr_sin.sin_addr.s_addr = 0xffffffff;
+				memset((char *)&mskadr_sin, 0,
+				    sizeof(struct sockaddr_storage));
+				mskadr_sin.ss_family =
+				    rbufp->recv_srcadr.ss_family;
+				if (mskadr_sin.ss_family == AF_INET)
+					GET_INADDR(mskadr_sin) = 0xffffffff;
+				else
+					memset(&GET_INADDR6(mskadr_sin), 0xff,
+					    sizeof(struct in6_addr));
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin, 0,
 				    RES_DONTTRUST | RES_TIMEOUT);
@@ -2967,7 +2975,7 @@ void
 proto_config(
 	int	item,
 	u_long	value,
-	double	dvalue
+	double	dvalue,
 	struct sockaddr_storage* svalue
 	)
 {

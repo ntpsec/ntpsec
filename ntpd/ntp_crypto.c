@@ -121,7 +121,6 @@ static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parmeters */
 static EVP_PKEY	*gq_pkey = NULL; /* GQ parmeters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
-static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
 static char *rand_file = NTP_RANDFILE; /* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
@@ -1314,25 +1313,9 @@ crypto_xmit(
 	 * persistent rascals we toss back a kiss-of-death grenade.
 	 */
 	if (rval > XEVNT_TSP) {
-		struct sockaddr_storage mskadr_sin;
-		int	hismode;
-		int	resflag = RES_DONTSERVE | RES_TIMEOUT;
-
 		opcode |= CRYPTO_ERROR;
 		sprintf(statstr, "error %x opcode %x", rval, opcode);
 		record_crypto_stats(srcadr_sin, statstr);
-		memset((char *)&mskadr_sin, 0, sizeof(struct sockaddr_storage));
-		mskadr_sin.ss_family = srcadr_sin->ss_family;
-		if (mskadr_sin.ss_family == AF_INET)
-			GET_INADDR(mskadr_sin) =~(u_int32)0;
-		else
-			memset(&GET_INADDR6(mskadr_sin), 0xff,
-			    sizeof(struct in6_addr));
-		hismode = PKT_MODE(xpkt->li_vn_mode);
-		if (hismode != MODE_BROADCAST && hismode != MODE_SERVER)
-			resflag |= RES_DEMOBILIZE;
-		hack_restrict(RESTRICT_FLAGS, srcadr_sin, &mskadr_sin,
-		    RESM_NTPONLY, resflag);
 #ifdef DEBUG
 		if (debug)
 			printf("crypto_xmit: %s\n", statstr);

@@ -18,12 +18,6 @@
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
-#include "ntp_fp.h"
-
-#ifdef OPENSSL
-# include "ntp_crypto.h"
-#endif /* OPENSSL */
-
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
