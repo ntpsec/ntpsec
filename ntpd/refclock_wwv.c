@@ -159,7 +159,7 @@
  */
 #define ACQSN		5	/* station acquisition timeout */
 #define DATA		4	/* data sync timeout */
-#define SYNCH		30	/* station sync timeout */
+#define SYNCH		60	/* station sync timeout */
 #define HOLD		30	/* second sync holdover timeout */
 #define PANIC		(2 * 1440) /* panic timeout */
 
@@ -201,7 +201,7 @@
  */
 #define MINAVG		8	/* min averaging time */
 #define MAXAVG		1024	/* max averaging time */
-#define FCONST		4	/* frequency time constant */
+#define FCONST		3	/* frequency time constant */
 #define TCONST		16	/* data bit/digit time constant */
 
 /*
@@ -1268,7 +1268,7 @@ wwv_rf(
 	 * energy at the maximum value.
 	 */
 	dtemp = (epobuf[epoch] += (mfsync - epobuf[epoch]) /
-	    (up->avgint * FCONST));
+	    up->avgint);
 	if (dtemp > epomax) {
 		epomax = dtemp;
 		epopos = epoch;
@@ -1457,12 +1457,6 @@ wwv_qrz(
  * over all 8000 samples in the second comb filter. To assure accurate
  * and reliable time and frequency discipline, this routine performs a
  * great deal of heavy-handed heuristic data filtering and grooming.
- *
- * Note that, since the minute sync pulse is very wide (800 ms), precise
- * minute sync epoch acquisition requires at least a rough estimate of
- * the second sync pulse (5 ms). This becomes more important in choppy
- * conditions at the lower frequencies at night, since sferics and
- * cochannel crude can badly distort the minute pulse. 
  */
 static void
 wwv_endpoc(
@@ -1608,27 +1602,17 @@ wwv_endpoc(
 	 * the counter increments to +3, the averaging interval is
 	 * doubled and the counter set to zero; if it decrements to -3,
 	 * the interval is halved and the counter set to zero.
-	 *
-	 * Here be spooks. From careful observations, the epoch
-	 * sometimes makes a long run of identical samples, then takes a
-	 * lurch due apparently to lost interrupts or spooks. If this
-	 * happens, the epoch change times the maximum run length will
-	 * be greater than the averaging interval, so the lurch should
-	 * be believed but the frequency left alone. Really intricate
-	 * here.
 	 */
 	if (maxrun == 0)
 		mepoch = up->tepoch;
 	dtemp = (mepoch - zepoch) % SECOND;
 	if (up->status & FGATE) {
 		if (abs(dtemp) < MAXFREQ * MINAVG) {
-			if (maxrun * abs(dtemp) < avgcnt) {
-				up->freq += dtemp / avgcnt;
-				if (up->freq > MAXFREQ)
-					up->freq = MAXFREQ;
-				else if (up->freq < -MAXFREQ)
-					up->freq = -MAXFREQ;
-			}
+			up->freq += dtemp / (avgcnt * FCONST);
+			if (up->freq > MAXFREQ)
+				up->freq = MAXFREQ;
+			else if (up->freq < -MAXFREQ)
+				up->freq = -MAXFREQ;
 			if (abs(dtemp) < MAXFREQ * MINAVG / 2.) {
 				if (avginc < 3) {
 					avginc++;
@@ -1652,7 +1636,7 @@ wwv_endpoc(
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		sprintf(tbuf,
-		    "wwv2 %04x %4.0f %4d %4d %2d %4d %4.0f %6.1f",
+		    "wwv2 %04x %4.0f %4d %4d %2d %4d %4.0f %7.2f",
 		    up->status, up->epomax, mepoch, maxrun, avginc,
 		    avgcnt, dtemp, up->freq * 1e6 / SECOND);
 		record_clock_stats(&peer->srcadr, tbuf);
