@@ -351,11 +351,11 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			if (tstamp != 0)
+			if (tstamp > 0)
 				peer->flags |= FLAG_AUTOKEY;
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
-			peer->recauto.tstamp = ntohl(ap->tstamp);
+			peer->recauto.tstamp = tstamp;
 			peer->recauto.seq = ntohl(ap->seq);
 			peer->recauto.key = ntohl(ap->key);
 			peer->pkeyid = peer->recauto.key;
@@ -396,15 +396,15 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			if (tstamp != 0)
+			if (tstamp > 0)
 				peer->flags |= FLAG_AUTOKEY;
 #else
 			temp = ntohl(cp->key);
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
+			peer->pcookie.tstamp = tstamp;
 			if (temp != peer->pcookie.key) {
 				key_expire(peer);
-				peer->pcookie.tstamp = tstamp;
 				peer->pcookie.key = temp;
 			}
 			break;
@@ -466,9 +466,9 @@ crypto_recv(
 				break;
 			}
 			peer->flash &= ~TEST10;
+			peer->pcookie.tstamp = tstamp;
 			if (temp != peer->pcookie.key) {
 				key_expire(peer);
-				peer->pcookie.tstamp = tstamp;
 				peer->pcookie.key = temp;
 			}
 			break;

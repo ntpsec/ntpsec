@@ -2026,8 +2026,7 @@ peer_xmit(
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->pcookie.tstamp == 0 ||
-			    peer->keynumber == peer->sndauto.seq) {
+			if (peer->pcookie.tstamp == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);

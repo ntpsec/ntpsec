@@ -1573,15 +1573,15 @@ ctl_putpeer(
 		break;
 
 	case CP_SESKEY:
-		if (peer->pcookie.key != NULL)
+		if (peer->pcookie.key != 0)
 			ctl_puthex(peer_var[CP_SESKEY].text,
 			    peer->pcookie.key);
-		if (peer->hcookie != NULL)
+		if (peer->hcookie != 0)
 			ctl_puthex(peer_var[CP_SASKEY].text, peer->hcookie);
 		break;
 
 	case CP_INITSEQ:
-		if (peer->keylist == NULL)
+		if (peer->recauto.key == 0)
 			break;
 		ctl_putint(peer_var[CP_INITSEQ].text, peer->recauto.seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, peer->recauto.key);

@@ -1,3 +1,16 @@
+2000-04-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99i3
+
+	* ntpd/ntp_proto.c: Just check tstamp, forget about sndauto.seq
+	* ntpd/ntp_crypto.c (crypto_recv): Lose inappropriate ntohl()
+	conversion on tstamp.
+	AUTOKEY if tstamp>0, not !=
+	Stash tstamp before we check pcookie.key (several places)
+	* ntpd/ntp_control.c (ctl_putpeer): In CP_INITSEQ, check
+	recauto.key, not keylist.
+	From: Dave Mills
+
 2000-04-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99i2
