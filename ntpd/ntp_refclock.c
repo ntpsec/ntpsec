@@ -506,8 +506,13 @@ refclock_sample(
 		return (0);
 
 	if (n > 1)
-		qsort((char *)off, (size_t)n, sizeof(double),
-		    refclock_cmpl_fp);
+		qsort(
+#ifdef QSORT_USES_VOID_P
+		    (void *)
+#else
+		    (char *)
+#endif
+		    off, (size_t)n, sizeof(double), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
