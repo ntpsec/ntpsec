@@ -40,7 +40,8 @@ Once you have obtained the sources, do the following:
 	bk -r edit		to check out the files
 	autoreconf -f -i	generates configure and Makefile.in's
 
-and you should be ready to go.
+and you should be ready to go.  You will get some warning messages from
+autoreconf.  Ignore these messages.
 
 You can update your repository by incanting:
 

@@ -6,6 +6,7 @@
 # include <config.h>
 #endif
 
+#include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
@@ -19,9 +20,15 @@
 #include <stdio.h>
 #ifndef SYS_WINNT
 # if !defined(VMS)	/*wjm*/
-#  include <sys/param.h>
+#  ifdef HAVE_SYS_PARAM_H
+#   include <sys/param.h>
+#  endif
 # endif /* VMS */
-# include <sys/signal.h>
+# ifdef HAVE_SYS_SIGNAL_H
+#  include <sys/signal.h>
+# else
+#  include <signal.h>
+# endif
 # ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 # endif /* HAVE_SYS_IOCTL_H */
@@ -350,7 +357,7 @@ ntpdmain(
 	}
 #endif
 
-#ifdef HAVE_GETUID
+#if defined(HAVE_GETUID) && !defined(MPE) /* MPE lacks the concept of root */
 	{
 		uid_t uid;
 
