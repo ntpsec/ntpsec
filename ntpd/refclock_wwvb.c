@@ -233,6 +233,7 @@ wwvb_receive(
 	char	qualchar;	/* quality indicator */
 	char	leapchar;	/* leap indicator */
 	char	dstchar;	/* daylight/standard indicator */
+	char	tmpchar;	/* trashbin */
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -287,9 +288,9 @@ wwvb_receive(
 		 * Timecode format 0: "I  ddd hh:mm:ss DTZ=nn"
 		 */
 		if (sscanf(pp->a_lastcode,
-		    "%c %3d %2d:%2d:%2d %cTZ=%2d",
+		    "%c %3d %2d:%2d:%2d%c%cTZ=%2d",
 		    &syncchar, &pp->day, &pp->hour, &pp->minute,
-		    &pp->second, &dstchar, &tz) == 7)
+		    &pp->second, &tmpchar, &dstchar, &tz) == 8)
 			break;
 
 		case LENWWVB2:

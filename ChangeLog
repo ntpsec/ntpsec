@@ -1,3 +1,9 @@
+2000-04-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwvb.c (wwvb_receive): Grab any character (instead
+	of just a space) before the DSTchar.
+	From: Dave Mills
+
 2000-04-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99i
