@@ -1059,7 +1059,7 @@ oncore_init_shmem(
 #endif
 			       MAP_SHARED,
 	    instance->statusfd, (off_t)0);
-	if (instance->shmem == MAP_FAILED) {
+	if (instance->shmem == (u_char *)MAP_FAILED) {
 		instance->shmem = 0;
 		close (instance->statusfd);
 		exit(4);

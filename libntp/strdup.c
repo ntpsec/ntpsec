@@ -1,3 +1,6 @@
+
+#define NULL 0
+
 char *
 strdup(
 	const char *s
