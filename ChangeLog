@@ -1,5 +1,7 @@
 1999-11-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98c
+
 	* libntp/syssignal.c: Don't warn about SA_RESTART
 	* libntp/recvbuff.c: Fix free buffer count
 	From: Jeffrey C Honig <jch@bsdi.com>
