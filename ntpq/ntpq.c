@@ -611,9 +611,15 @@ openhost(
 		printf("%s\n", gai_strerror(a_info));
 		exit(-1);
 	}
-	else {
+
+	if (ai->ai_canonname == NULL) {
+		strncpy(temphost, stoa((struct sockaddr_storage *)ai->ai_addr),
+		    LENHOSTNAME);
+		temphost[LENHOSTNAME-1] = '\0';
+
+	} else {
 		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
-		temphost[LENHOSTNAME] = '\0';
+		temphost[LENHOSTNAME-1] = '\0';
 	}
 
 	if (debug > 2)
