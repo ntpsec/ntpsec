@@ -77,21 +77,21 @@ refclock_open(
 		NULL); // not template
 	if (Handle == INVALID_HANDLE_VALUE) {  
 		 
-		msyslog(LOG_ERR, "NT_COM: Device %s: CreateFile ", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s: CreateFile error: %m", dev);
 		return -1;
 	}
 
 	/*  Change the input/output buffers to be large.
 	*/
 	if (!SetupComm( Handle, 1024, 1024)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetupComm ", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetupComm error: %m", dev);
 		return -1;
 	}
 
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
 		// Error getting current DCB settings
-		msyslog(LOG_ERR, "NT_COM: Device %s: GetCommState ", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s: GetCommState error: %m", dev);
 		return -1;
 	}
 
@@ -131,7 +131,7 @@ refclock_open(
 	dcb.EofChar = 0;
 
 	if (!SetCommState(Handle, &dcb)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommState ", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommState error: %m", dev);
 		return -1;
 	}
 
@@ -143,7 +143,7 @@ refclock_open(
 
 	   // Error setting time-outs.
 	if (!SetCommTimeouts(Handle, &timeouts)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommTimeouts ", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommTimeouts error: %m", dev);
 		return -1;
 	}
 
@@ -180,7 +180,7 @@ tcsetattr(
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
 		// Error getting current DCB settings
-		msyslog(LOG_ERR, "NT_COM: GetCommState ");
+		msyslog(LOG_ERR, "NT_COM: GetCommState error: %m");
 		return FALSE;
 	}
 
@@ -237,7 +237,7 @@ tcsetattr(
 	dcb.EofChar = 0;
 
 	if (!SetCommState(Handle, &dcb)) {
-		msyslog(LOG_ERR, "NT_COM: SetCommState ");
+		msyslog(LOG_ERR, "NT_COM: SetCommState error: %m");
 		return FALSE;
 	}
 	return TRUE;
@@ -252,7 +252,7 @@ tcgetattr(
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
 		// Error getting current DCB settings
-		msyslog(LOG_ERR, "NT_COM: GetCommState ");
+		msyslog(LOG_ERR, "NT_COM: GetCommState error: %m");
 		return FALSE;
 	}
 
