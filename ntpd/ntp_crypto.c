@@ -3498,7 +3498,7 @@ crypto_cert(
 	char	linkname[MAXFILENAME]; /* filestamp buffer */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
-	u_int	len;
+	long	len;
 	char	*ptr;
 	char	*name, *header;
 	u_char	*data;
@@ -3538,7 +3538,7 @@ crypto_cert(
 	/*
 	 * Read PEM-encoded certificate and install.
 	 */
-	if (!PEM_read(str, &name, &header, &data, (long *)&len)) {
+	if (!PEM_read(str, &name, &header, &data, &len)) {
 		msyslog(LOG_ERR, "crypto_cert %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
@@ -3562,7 +3562,7 @@ crypto_cert(
 		return (NULL);
 	if ((ptr = strrchr(linkname, '\n')) != NULL)
 		*ptr = '\0'; 
-	sprintf(statstr, "%s 0x%x len %u", &linkname[2], ret->flags,
+	sprintf(statstr, "%s 0x%x len %lu", &linkname[2], ret->flags,
 	    len);
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
