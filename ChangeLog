@@ -1,5 +1,7 @@
 2000-08-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 99k7
+
 	* util/ntptime.c (main): Report TAI stuff
 	* ntpq/ntpq.c: CS_COMPLIANCE/CS_JITTER cleanup
 	* ntpd/ntp_loopfilter.c (local_clock): sys_error/sys_jitter cleanup.
