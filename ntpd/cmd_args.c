@@ -19,16 +19,11 @@
 extern char const *progname;
 int	listen_to_virtual_ips = 1;
 
-#ifdef SYS_WINNT
-extern BOOL NoWinService;
-#endif
-
 static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
 #endif
-
 
 /*
  * getstartup - search through the options looking for a debugging flag
@@ -117,9 +112,6 @@ getstartup(
 		case 'n':
 		case 'q':
 		    ++nofork;
-#ifdef SYS_WINNT
-		    NoWinService = TRUE;	 
-#endif
 		    break;
 
 		case 'N':
