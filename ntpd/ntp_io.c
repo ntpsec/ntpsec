@@ -70,6 +70,7 @@ extern int listen_to_virtual_ips;
 
 #endif
 
+#undef UDP_WILDCARD_DELIVERY
 /*
 #define ISC_PLATFORM_HAVEIPV6
  struct ipv6_mreq {  struct in6_addr ipv6mr_multiaddr;
@@ -709,7 +710,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		}
 		break;
 	case AF_INET6:
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 
 		/*
 		 * Enable reception of multicast packets
@@ -774,7 +775,7 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		}
 		break;
 	case AF_INET6:
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 
 		/*
 		 * Disable reception of multicast packets
