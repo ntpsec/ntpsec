@@ -2358,7 +2358,7 @@ case "$ans" in
 	then
 	    ans=rsaref
 	    RSAOBJS=digit.o
-	    RSASRCS=digit.c
+	    RSASRCS="digit.c digit.h"
 	    RSADIR=rsaref2
 	fi
 	if test -f $srcdir/rsaeuro1/source/rsaeuro.h

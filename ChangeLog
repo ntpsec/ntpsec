@@ -1,9 +1,12 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (RSASRCS): rsaref2 needs digit.h (I thought I fixed
+	this already).
+	
 	* configure.in (CFLAGS): Disable -Wconversion, enable
 	-Wmissing-prototypes, and allow for -Werror.
 	From: Simon Burge <simonb@wasabisystems.com>
-	
+
 	* util/ntp-genkeys.c (main): Reset the standard mask so the
 	symlinks are created with the standard mask.
 
