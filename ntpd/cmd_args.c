@@ -17,6 +17,10 @@ int	listen_to_virtual_ips = 0;
 
 static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:qr:s:t:v:V:x";
 
+#ifdef HAVE_NETINFO
+extern int	check_netinfo;
+#endif
+
 
 /*
  * getstartup - search through the options looking for a debugging flag

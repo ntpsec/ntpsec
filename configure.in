@@ -2883,15 +2883,6 @@ case "$target" in
  ;;
 esac
 
-AC_SUBST(MAKE_TICKADJ)
-AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
-ac_cv_make_tickadj=yes)
-case "$ac_cv_make_tickadj" in
- yes)
-    MAKE_TICKADJ=tickadj
-    ;;
-esac
-
 AC_SUBST(MAKE_NTPTIME)
 AC_CACHE_CHECK(if we want and can make the ntptime utility, ac_cv_make_ntptime,
 [case "$target" in
@@ -2909,6 +2900,38 @@ ac_cv_make_ntptime=$ans])
 case "$ac_cv_make_ntptime" in
  yes)
     MAKE_NTPTIME=ntptime
+    ;;
+esac
+
+AC_SUBST(MAKE_TICKADJ)
+AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
+[case "$target" in
+ *-*-irix*)
+    ac_cv_make_tickadj=no
+    ;;
+ *)
+    ac_cv_make_tickadj=yes
+    ;;
+esac])
+case "$ac_cv_make_tickadj" in
+ yes)
+    MAKE_TICKADJ=tickadj
+    ;;
+esac
+
+AC_SUBST(MAKE_TIMETRIM)
+AC_CACHE_CHECK(if we want and can make the timetrim utility, ac_cv_make_timetrim,
+[case "$target" in
+ *-*-irix*)
+    ac_cv_make_timetrim=yes
+    ;;
+ *)
+    ac_cv_make_timetrim=no
+    ;;
+esac])
+case "$ac_cv_make_timetrim" in
+ yes)
+    MAKE_TIMETRIM=timetrim
     ;;
 esac
 

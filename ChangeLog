@@ -1,5 +1,13 @@
 2001-04-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/cmd_args.c (getstartup): check_netinfo needs an extern
+	declaration.
+	Reported by: Jack Bryans <jbryans@csulb.edu>
+
+	* configure.in (ac_cv_make_timetrim): Added.
+	* util/Makefile.am (bin_PROGRAMS): MAKE_TIMETRIM
+	Requested by: Jack Bryans <jbryans@csulb.edu>
+
 	* configure.in: 4.0.99k26
 
 	* util/ntp-genkeys.c:
