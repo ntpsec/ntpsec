@@ -1627,8 +1627,8 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(PPS interface)
-AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s PPS interface],
+AC_MSG_CHECKING(ATOM PPSAPI interface)
+AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s PPSAPI interface],
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 case "$ac_cv_var_atom_ok" in
  no) ntp_ok=no ;;

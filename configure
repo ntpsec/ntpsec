@@ -564,7 +564,7 @@ Optional Features:
   --enable-ARBITER        + Arbiter 1088A/B GPS receiver
   --enable-ARCRON-MSF     + Arcron MSF receiver
   --enable-AS2201         + Austron 2200A/2201A GPS receiver
-  --enable-ATOM           s PPS interface
+  --enable-ATOM           s PPSAPI interface
   --enable-CHU            - CHU modem/decoder
   --enable-AUDIO-CHU      s CHU audio/decoder
   --enable-DATUM          s Datum Programmable Time System
@@ -10282,8 +10282,8 @@ fi
 echo "configure:10282: result: $ntp_ok" >&5
 echo "${ECHO_T}$ntp_ok" >&6
 
-echo "configure:10285: checking PPS interface" >&5
-echo $ECHO_N "checking PPS interface... $ECHO_C" >&6
+echo "configure:10285: checking ATOM PPSAPI interface" >&5
+echo $ECHO_N "checking ATOM PPSAPI interface... $ECHO_C" >&6
 # Check whether --enable-ATOM or --disable-ATOM was given.
 if test "${enable_ATOM+set}" = set; then
   enableval="$enable_ATOM"
