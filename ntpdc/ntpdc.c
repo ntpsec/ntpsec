@@ -1150,10 +1150,8 @@ docmd(
 			perror("");
 			return;
 		}
-		i = 1;		/* flag we need a close */
 	} else {
 		current_output = stdout;
-		i = 0;		/* flag no close */
 	}
 
 	if (interactive && setjmp(interrupt_buf)) {
@@ -1162,7 +1160,9 @@ docmd(
 		jump = 1;
 		(xcmd->handler)(&pcmd, current_output);
 		jump = 0;
-		if (i) (void) fclose(current_output);
+		if (current_output != stdout)
+			(void) fclose(current_output);
+		current_output = NULL;
 	}
 }
 

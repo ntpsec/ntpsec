@@ -697,7 +697,7 @@ openhost(
 #else
 	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
 		    ai->ai_addrlen) == -1)
-#endif SYS_VXWORKS
+#endif /* SYS_VXWORKS */
 	    error("connect", "", "");
 	if (a_info == 0)
 		freeaddrinfo(ai);
