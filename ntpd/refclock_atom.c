@@ -21,6 +21,10 @@
 # include <sys/ppsclock.h>
 #endif /* PPS */
 
+#ifdef HAVE_PPSAPI
+#include <sys/timepps.h>
+#endif /* HAVE_PPSAPI */
+
 /*
  * This driver furnishes an interface for pulse-per-second (PPS) signals
  * produced by a cesium clock, timing receiver or related  equipment. It
@@ -79,17 +83,26 @@
 /*
  * Interface definitions
  */
+#ifdef HAVE_PPSAPI	/* avoid others if api available */
+#undef PPS
+#undef TTYCLK
+
+extern int pps_assert;
+#endif /* HAVE_PPSAPI */
+
 #ifdef PPS		/* avoid tty_clk if ppsclock available */
 #undef TTYCLK
 #endif /* PPS */
+
 #ifdef TTYCLK
-#define	DEVICE		"/dev/pps%d" /* device name and unit */
-#ifdef B38400
-#define	SPEED232	B38400	/* uart speed (38400 baud) */
-#else
-#define SPEED232	EXTB	/* as above */
-#endif
+# define DEVICE		"/dev/pps%d"	/* device name and unit */
+# ifdef B38400
+#  define SPEED232	B38400	/* uart speed (38400 baud) */
+# else
+#  define SPEED232	EXTB	/* as above */
+# endif
 #endif /* TTYCLK */
+
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"PPS\0"	/* reference ID */
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
@@ -110,6 +123,9 @@ static	void	atom_receive	P((struct recvbuf *));
  * Unit control structure
  */
 struct atomunit {
+#ifdef HAVE_PPSAPI
+	pps_info_t pps_info;	/* pps_info control */
+#endif /* HAVE_PPSAPI */
 #ifdef PPS
 	struct	ppsclockev ev;	/* ppsclock control */
 #endif /* PPS */
@@ -123,9 +139,9 @@ struct atomunit {
 static	int	atom_start	P((int, struct peer *));
 static	void	atom_shutdown	P((int, struct peer *));
 static	void	atom_poll	P((int, struct peer *));
-#ifdef PPS
+#if defined(PPS) || defined(HAVE_PPSAPI)
 static	int	atom_pps	P((struct peer *));
-#endif /* PPS */
+#endif /* PPS || HAVE_PPSAPI */
 
 /*
  * Transfer vector
@@ -240,7 +256,7 @@ atom_shutdown(
 }
 
 
-#ifdef PPS
+#if defined(PPS) || defined(HAVE_PPSAPI)
 /*
  * atom_pps - receive data from the LDISC_PPS discipline
  */
@@ -251,7 +267,7 @@ atom_pps(
 {
 	register struct atomunit *up;
 	struct refclockproc *pp;
-
+	struct timespec *tsp;
 	l_fp lftmp;
 	double doffset;
 	int i;
@@ -271,16 +287,36 @@ atom_pps(
 	 * if previous data are overwritten. If the discipline comes bum
 	 * or the data grow stale, just forget it.
 	 */ 
-	i = up->ev.serial;
+#ifdef HAVE_PPSAPI
+	i = up->pps_info.assert_sequence;
+	if (fdpps <= 0)
+		return (1);
+	if (time_pps_fetch(fdpps, &up->pps_info) < 0)
+		return (1);
+	if (i == up->pps_info.assert_sequence)
+		return (2);
+	if(pps_assert)
+		tsp = &up->pps_info.assert_timestamp;
+	else
+		tsp = &up->pps_info.clear_timestamp;
+	pp->lastrec.l_ui = tsp->tv_sec + JAN_1970;
+	TVUTOTSF(tsp->tv_nsec, pp->lastrec.l_uf);
+
+printf("pps %d %s\n", up->pps_info.assert_sequence, lfptoa(&pp->lastrec, 6));
+
+#else
+
+ 	i = up->ev.serial;
 	if (fdpps <= 0)
 		return (1);
 	if (ioctl(fdpps, CIOGETEV, (caddr_t)&up->ev) < 0)
 		return (1);
 	if (i == up->ev.serial)
 		return (2);
-	up->flags |= FLAG_PPS;
 	pp->lastrec.l_ui = up->ev.tv.tv_sec + JAN_1970;
 	TVUTOTSF(up->ev.tv.tv_usec, pp->lastrec.l_uf);
+#endif /* HAVE_PPSAPI */ 
+	up->flags |= FLAG_PPS;
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
@@ -288,7 +324,7 @@ atom_pps(
 	up->pollcnt = 2 * 60;
 	return (0);
 }
-#endif /* PPS */
+#endif /* PPS || HAVE_PPSAPI */
 
 #ifdef TTYCLK
 /*
@@ -397,14 +433,14 @@ atom_poll(
 	 */
 	pp = peer->procptr;
 	up = (struct atomunit *)pp->unitptr;
-#ifdef PPS
+#if defined(PPS) || defined(HAVE_PPSAPI)
 	if (!(up->flags & FLAG_AUX)) {
 	if (atom_pps(peer))
 		return;
 	}
 	if (peer->burst > 0)
 		return;
-#endif /* PPS */
+#endif /* PPS || HAVE_PPSAPI */
 	pp->polls++;
 	if (up->pollcnt == 0) {
 		refclock_report(peer, CEVNT_FAULT);
@@ -427,9 +463,9 @@ atom_poll(
 	}
 	pp->variance = 0;
 	refclock_receive(peer);
-#ifdef PPS
+#if defined(PPS) || defined(HAVE_PPSAPI)
 	peer->burst = pp->nstages;
-#endif /* PPS */
+#endif /* PPS || HAVE_PPSAPI */
 }
 
 #else

@@ -1,16 +1,21 @@
-# Makefile.in generated automatically by automake 1.4a from Makefile.am
+# Makefile.in generated automatically by automake 1.2 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
+# gives unlimited permission to copy, distribute and modify it.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE.
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+#
+# this is sick - i want the source to be compile with
+# two time with different flags resulting different
+# objects - still need to find a way to communicate
+# that to automake/autoconf
+#
+# Frank Kardel
+#
 
-SHELL = @SHELL@
+
+SHELL = /bin/sh
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -31,8 +36,6 @@ mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
 
-DESTDIR =
-
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -48,15 +51,14 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
-INSTALL_STRIP_FLAG =
 transform = @program_transform_name@
 
-NORMAL_INSTALL = :
-PRE_INSTALL = :
-POST_INSTALL = :
-NORMAL_UNINSTALL = :
-PRE_UNINSTALL = :
-POST_UNINSTALL = :
+NORMAL_INSTALL = true
+PRE_INSTALL = true
+POST_INSTALL = true
+NORMAL_UNINSTALL = true
+PRE_UNINSTALL = true
+POST_UNINSTALL = true
 build_alias = @build_alias@
 build_triplet = @build@
 host_alias = @host_alias@
@@ -94,17 +96,6 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-#
-# this is sick - i want the source to be compile with
-# two time with different flags resulting different
-# objects - still need to find a way to communicate
-# that to automake/autoconf
-#
-# Frank Kardel
-#
-
-
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
@@ -129,7 +120,6 @@ libparse_a_SOURCES = parse.c \
 		     info_trimble.c \
 		     trim_info.c
 
-
 libparse_kernel_a_SOURCES = kparse.c \
                             kparse_conf.c \
                             kclk_meinberg.c \
@@ -144,12 +134,10 @@ libparse_kernel_a_SOURCES = kparse.c \
 		     	    kclk_wharton.c \
 		     	    kclk_varitext.c
 
-
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/kernel
 ETAGS_ARGS = Makefile.am
 
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c
-subdir = libparse
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -161,42 +149,36 @@ CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 ANSI2KNR = ../util/ansi2knr
 libparse_a_LIBADD = 
-am_libparse_a_OBJECTS =  parse$U.o parse_conf$U.o clk_meinberg$U.o \
+libparse_a_OBJECTS =  parse$U.o parse_conf$U.o clk_meinberg$U.o \
 clk_schmid$U.o clk_rawdcf$U.o clk_trimtsip$U.o clk_dcf7000$U.o \
 clk_trimtaip$U.o clk_rcc8000$U.o clk_hopf6021$U.o clk_computime$U.o \
 clk_wharton$U.o clk_varitext$U.o data_mbg$U.o info_trimble$U.o \
 trim_info$U.o
-libparse_a_OBJECTS =  $(am_libparse_a_OBJECTS)
 libparse_kernel_a_LIBADD = 
-am_libparse_kernel_a_OBJECTS =  kparse$U.o kparse_conf$U.o \
+libparse_kernel_a_OBJECTS =  kparse$U.o kparse_conf$U.o \
 kclk_meinberg$U.o kclk_schmid$U.o kclk_rawdcf$U.o kclk_trimtsip$U.o \
 kclk_dcf7000$U.o kclk_trimtaip$U.o kclk_rcc8000$U.o kclk_hopf6021$U.o \
 kclk_computime$U.o kclk_wharton$U.o kclk_varitext$U.o
-libparse_kernel_a_OBJECTS =  $(am_libparse_kernel_a_OBJECTS)
 AR = ar
 PROGRAMS =  $(noinst_PROGRAMS)
 
-parsesolaris_SOURCES = parsesolaris.c
-parsesolaris_OBJECTS =  parsesolaris$U.o
-parsesolaris_LDADD = $(LDADD)
-parsesolaris_DEPENDENCIES = 
-parsesolaris_LDFLAGS = 
 parsestreams_SOURCES = parsestreams.c
 parsestreams_OBJECTS =  parsestreams$U.o
 parsestreams_LDADD = $(LDADD)
-parsestreams_DEPENDENCIES = 
 parsestreams_LDFLAGS = 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES =  $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) \
-parsesolaris.c parsestreams.c
+parsesolaris_SOURCES = parsesolaris.c
+parsesolaris_OBJECTS =  parsesolaris$U.o
+parsesolaris_LDADD = $(LDADD)
+parsesolaris_LDFLAGS = 
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README Makefile.am Makefile.in
 
 
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-GZIP_ENV = --best
+TAR = gtar
+GZIP = --best
 DEP_FILES =  .deps/clk_computime.P .deps/clk_dcf7000.P \
 .deps/clk_hopf6021.P .deps/clk_meinberg.P .deps/clk_rawdcf.P \
 .deps/clk_rcc8000.P .deps/clk_schmid.P .deps/clk_trimtaip.P \
@@ -208,16 +190,17 @@ DEP_FILES =  .deps/clk_computime.P .deps/clk_dcf7000.P \
 .deps/kclk_wharton.P .deps/kparse.P .deps/kparse_conf.P .deps/parse.P \
 .deps/parse_conf.P .deps/parsesolaris.P .deps/parsestreams.P \
 .deps/trim_info.P
-SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) parsesolaris.c parsestreams.c
-OBJECTS = $(am_libparse_a_OBJECTS) $(am_libparse_kernel_a_OBJECTS) parsesolaris$U.o parsestreams$U.o
+SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) parsestreams.c parsesolaris.c
+OBJECTS = $(libparse_a_OBJECTS) $(libparse_kernel_a_OBJECTS) parsestreams$U.o parsesolaris$U.o
 
-all: all-redirect
+default: all
+
 .SUFFIXES:
 .SUFFIXES: .c .o
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu libparse/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
@@ -225,156 +208,125 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 mostlyclean-noinstLIBRARIES:
 
 clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+	test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
 distclean-noinstLIBRARIES:
 
 maintainer-clean-noinstLIBRARIES:
 
+.c.o:
+	$(COMPILE) -c $<
+
 mostlyclean-compile:
-	-rm -f *.o core *.core
+	rm -f *.o core
 
 clean-compile:
 
 distclean-compile:
-	-rm -f *.tab.c
+	rm -f *.tab.c
 
 maintainer-clean-compile:
 ../util/ansi2knr: ../util/ansi2knr.o
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
-
-../util/ansi2knr.o:
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr.o
+	cd ../util && $(MAKE) ansi2knr
 
 
 mostlyclean-kr:
-	-rm -f *_.c
+	rm -f *_.c
 
 clean-kr:
 
 distclean-kr:
 
 maintainer-clean-kr:
-parse$U.o:
-parse_conf$U.o:
-clk_meinberg$U.o:
-clk_schmid$U.o:
-clk_rawdcf$U.o:
-clk_trimtsip$U.o:
-clk_dcf7000$U.o:
-clk_trimtaip$U.o:
-clk_rcc8000$U.o:
-clk_hopf6021$U.o:
-clk_computime$U.o:
-clk_wharton$U.o:
-clk_varitext$U.o:
-data_mbg$U.o:
-info_trimble$U.o:
-trim_info$U.o:
 
 libparse.a: $(libparse_a_OBJECTS) $(libparse_a_DEPENDENCIES)
-	-rm -f libparse.a
+	rm -f libparse.a
 	$(AR) cru libparse.a $(libparse_a_OBJECTS) $(libparse_a_LIBADD)
 	$(RANLIB) libparse.a
-kparse$U.o:
-kparse_conf$U.o:
-kclk_meinberg$U.o:
-kclk_schmid$U.o:
-kclk_rawdcf$U.o:
-kclk_trimtsip$U.o:
-kclk_dcf7000$U.o:
-kclk_trimtaip$U.o:
-kclk_rcc8000$U.o:
-kclk_hopf6021$U.o:
-kclk_computime$U.o:
-kclk_wharton$U.o:
-kclk_varitext$U.o:
 
 libparse_kernel.a: $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_DEPENDENCIES)
-	-rm -f libparse_kernel.a
+	rm -f libparse_kernel.a
 	$(AR) cru libparse_kernel.a $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_LIBADD)
 	$(RANLIB) libparse_kernel.a
 
 mostlyclean-noinstPROGRAMS:
 
 clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+	test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
 distclean-noinstPROGRAMS:
 
 maintainer-clean-noinstPROGRAMS:
-parsesolaris$U.o:
-
-parsesolaris: $(parsesolaris_OBJECTS) $(parsesolaris_DEPENDENCIES)
-	@rm -f parsesolaris
-	$(LINK) $(parsesolaris_LDFLAGS) $(parsesolaris_OBJECTS) $(parsesolaris_LDADD) $(LIBS)
-parsestreams$U.o:
 
 parsestreams: $(parsestreams_OBJECTS) $(parsestreams_DEPENDENCIES)
 	@rm -f parsestreams
 	$(LINK) $(parsestreams_LDFLAGS) $(parsestreams_OBJECTS) $(parsestreams_LDADD) $(LIBS)
+
+parsesolaris: $(parsesolaris_OBJECTS) $(parsesolaris_DEPENDENCIES)
+	@rm -f parsesolaris
+	$(LINK) $(parsesolaris_LDFLAGS) $(parsesolaris_OBJECTS) $(parsesolaris_LDADD) $(LIBS)
 clk_computime_.c: clk_computime.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_computime.c; then echo $(srcdir)/clk_computime.c; else echo clk_computime.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_computime_.c
+	$(ANSI2KNR) $< clk_computime_.c
 clk_dcf7000_.c: clk_dcf7000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_dcf7000.c; then echo $(srcdir)/clk_dcf7000.c; else echo clk_dcf7000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_dcf7000_.c
+	$(ANSI2KNR) $< clk_dcf7000_.c
 clk_hopf6021_.c: clk_hopf6021.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_hopf6021.c; then echo $(srcdir)/clk_hopf6021.c; else echo clk_hopf6021.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_hopf6021_.c
+	$(ANSI2KNR) $< clk_hopf6021_.c
 clk_meinberg_.c: clk_meinberg.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_meinberg.c; then echo $(srcdir)/clk_meinberg.c; else echo clk_meinberg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_meinberg_.c
+	$(ANSI2KNR) $< clk_meinberg_.c
 clk_rawdcf_.c: clk_rawdcf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_rawdcf.c; then echo $(srcdir)/clk_rawdcf.c; else echo clk_rawdcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_rawdcf_.c
+	$(ANSI2KNR) $< clk_rawdcf_.c
 clk_rcc8000_.c: clk_rcc8000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_rcc8000.c; then echo $(srcdir)/clk_rcc8000.c; else echo clk_rcc8000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_rcc8000_.c
+	$(ANSI2KNR) $< clk_rcc8000_.c
 clk_schmid_.c: clk_schmid.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_schmid.c; then echo $(srcdir)/clk_schmid.c; else echo clk_schmid.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_schmid_.c
+	$(ANSI2KNR) $< clk_schmid_.c
 clk_trimtaip_.c: clk_trimtaip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_trimtaip.c; then echo $(srcdir)/clk_trimtaip.c; else echo clk_trimtaip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_trimtaip_.c
+	$(ANSI2KNR) $< clk_trimtaip_.c
 clk_trimtsip_.c: clk_trimtsip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_trimtsip.c; then echo $(srcdir)/clk_trimtsip.c; else echo clk_trimtsip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_trimtsip_.c
+	$(ANSI2KNR) $< clk_trimtsip_.c
 clk_varitext_.c: clk_varitext.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_varitext.c; then echo $(srcdir)/clk_varitext.c; else echo clk_varitext.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_varitext_.c
+	$(ANSI2KNR) $< clk_varitext_.c
 clk_wharton_.c: clk_wharton.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/clk_wharton.c; then echo $(srcdir)/clk_wharton.c; else echo clk_wharton.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > clk_wharton_.c
+	$(ANSI2KNR) $< clk_wharton_.c
 data_mbg_.c: data_mbg.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/data_mbg.c; then echo $(srcdir)/data_mbg.c; else echo data_mbg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > data_mbg_.c
+	$(ANSI2KNR) $< data_mbg_.c
 info_trimble_.c: info_trimble.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/info_trimble.c; then echo $(srcdir)/info_trimble.c; else echo info_trimble.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > info_trimble_.c
+	$(ANSI2KNR) $< info_trimble_.c
 kclk_computime_.c: kclk_computime.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_computime.c; then echo $(srcdir)/kclk_computime.c; else echo kclk_computime.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_computime_.c
+	$(ANSI2KNR) $< kclk_computime_.c
 kclk_dcf7000_.c: kclk_dcf7000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_dcf7000.c; then echo $(srcdir)/kclk_dcf7000.c; else echo kclk_dcf7000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_dcf7000_.c
+	$(ANSI2KNR) $< kclk_dcf7000_.c
 kclk_hopf6021_.c: kclk_hopf6021.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_hopf6021.c; then echo $(srcdir)/kclk_hopf6021.c; else echo kclk_hopf6021.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_hopf6021_.c
+	$(ANSI2KNR) $< kclk_hopf6021_.c
 kclk_meinberg_.c: kclk_meinberg.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_meinberg.c; then echo $(srcdir)/kclk_meinberg.c; else echo kclk_meinberg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_meinberg_.c
+	$(ANSI2KNR) $< kclk_meinberg_.c
 kclk_rawdcf_.c: kclk_rawdcf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_rawdcf.c; then echo $(srcdir)/kclk_rawdcf.c; else echo kclk_rawdcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_rawdcf_.c
+	$(ANSI2KNR) $< kclk_rawdcf_.c
 kclk_rcc8000_.c: kclk_rcc8000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_rcc8000.c; then echo $(srcdir)/kclk_rcc8000.c; else echo kclk_rcc8000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_rcc8000_.c
+	$(ANSI2KNR) $< kclk_rcc8000_.c
 kclk_schmid_.c: kclk_schmid.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_schmid.c; then echo $(srcdir)/kclk_schmid.c; else echo kclk_schmid.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_schmid_.c
+	$(ANSI2KNR) $< kclk_schmid_.c
 kclk_trimtaip_.c: kclk_trimtaip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_trimtaip.c; then echo $(srcdir)/kclk_trimtaip.c; else echo kclk_trimtaip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_trimtaip_.c
+	$(ANSI2KNR) $< kclk_trimtaip_.c
 kclk_trimtsip_.c: kclk_trimtsip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_trimtsip.c; then echo $(srcdir)/kclk_trimtsip.c; else echo kclk_trimtsip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_trimtsip_.c
+	$(ANSI2KNR) $< kclk_trimtsip_.c
 kclk_varitext_.c: kclk_varitext.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_varitext.c; then echo $(srcdir)/kclk_varitext.c; else echo kclk_varitext.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_varitext_.c
+	$(ANSI2KNR) $< kclk_varitext_.c
 kclk_wharton_.c: kclk_wharton.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_wharton.c; then echo $(srcdir)/kclk_wharton.c; else echo kclk_wharton.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_wharton_.c
+	$(ANSI2KNR) $< kclk_wharton_.c
 kparse_.c: kparse.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kparse.c; then echo $(srcdir)/kparse.c; else echo kparse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kparse_.c
+	$(ANSI2KNR) $< kparse_.c
 kparse_conf_.c: kparse_conf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kparse_conf.c; then echo $(srcdir)/kparse_conf.c; else echo kparse_conf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kparse_conf_.c
+	$(ANSI2KNR) $< kparse_conf_.c
 parse_.c: parse.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parse.c; then echo $(srcdir)/parse.c; else echo parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parse_.c
+	$(ANSI2KNR) $< parse_.c
 parse_conf_.c: parse_conf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parse_conf.c; then echo $(srcdir)/parse_conf.c; else echo parse_conf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parse_conf_.c
+	$(ANSI2KNR) $< parse_conf_.c
 parsesolaris_.c: parsesolaris.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parsesolaris.c; then echo $(srcdir)/parsesolaris.c; else echo parsesolaris.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parsesolaris_.c
+	$(ANSI2KNR) $< parsesolaris_.c
 parsestreams_.c: parsestreams.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parsestreams.c; then echo $(srcdir)/parsestreams.c; else echo parsestreams.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parsestreams_.c
+	$(ANSI2KNR) $< parsestreams_.c
 trim_info_.c: trim_info.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/trim_info.c; then echo $(srcdir)/trim_info.c; else echo trim_info.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > trim_info_.c
+	$(ANSI2KNR) $< trim_info_.c
 clk_computime_.o clk_dcf7000_.o clk_hopf6021_.o clk_meinberg_.o \
 clk_rawdcf_.o clk_rcc8000_.o clk_schmid_.o clk_trimtaip_.o \
 clk_trimtsip_.o clk_varitext_.o clk_wharton_.o data_mbg_.o \
@@ -386,53 +338,46 @@ parsestreams_.o trim_info_.o : $(ANSI2KNR)
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES) $(LISP)
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  ${AWK:-awk} '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $$unique $(LISP)
+ID: $(HEADERS) $(SOURCES)
+	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  ${AWK:-awk} '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+	test -z "$(ETAGS_ARGS)$(SOURCES)$(HEADERS)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $(SOURCES) $(HEADERS) -o $$here/TAGS)
 
 mostlyclean-tags:
 
 clean-tags:
 
 distclean-tags:
-	-rm -f TAGS ID
+	rm -f TAGS ID
 
 maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
+subdir = libparse
+
 distdir: $(DISTFILES)
 	here=`cd $(top_builddir) && pwd`; \
 	top_distdir=`cd $(top_distdir) && pwd`; \
-	distdir=`cd $(distdir) && pwd`; \
 	cd $(top_srcdir) \
 	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu libparse/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file || :; \
-	  fi; \
+	  test -f $(distdir)/$$file \
+	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
 
+MKDEP = gcc -M $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+
 DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+-include .deps/.P
+.deps/.P: $(BUILT_SOURCES)
+	echo > $@
 
 -include $(DEP_FILES)
 
@@ -441,93 +386,76 @@ mostlyclean-depend:
 clean-depend:
 
 distclean-depend:
-	-rm -rf .deps
 
 maintainer-clean-depend:
+	rm -rf .deps
 
-%.o: %.c
-	@echo '$(COMPILE) -c $<'; \
-	$(COMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
-	@-cp .deps/$(*D)/$(*F).pp .deps/$(*D)/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*D)/$(*F).P; \
-	rm .deps/$(*D)/$(*F).pp
+.deps/%.P: %.c
+	@echo "Computing dependencies for $<..."
+	@o='o'; \
+	test -n "$o" && o='$$o'; \
+	$(MKDEP) $< >$@.tmp \
+	  && sed "s,^\(.*\)\.o:,\1.$$o \1.l$$o $@:," < $@.tmp > $@ \
+	  && rm -f $@.tmp
+info:
+dvi:
+check: all
+	$(MAKE)
+installcheck:
+install-exec: 
+	@$(NORMAL_INSTALL)
 
-%.lo: %.c
-	@echo '$(LTCOMPILE) -c $<'; \
-	$(LTCOMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
-	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
-	  < .deps/$(*D)/$(*F).pp > .deps/$(*D)/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
-	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*D)/$(*F).P; \
-	rm -f .deps/$(*D)/$(*F).pp
-info-am:
-info: info-am
-dvi-am:
-dvi: dvi-am
-check-am: all-am
-check: check-am
-installcheck-am:
-installcheck: installcheck-am
-install-exec-am:
-install-exec: install-exec-am
+install-data: 
+	@$(NORMAL_INSTALL)
 
-install-data-am:
-install-data: install-data-am
+install: install-exec install-data all
+	@:
 
-install-am: all-am
-	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
-install: install-am
-uninstall-am:
-uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
-all-redirect: all-am
+uninstall: 
+
+all: Makefile $(LIBRARIES) $(PROGRAMS)
+
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs:
 
 
 mostlyclean-generic:
+	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	-rm -f Makefile $(CONFIG_CLEAN_FILES)
-	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	rm -f Makefile $(DISTCLEANFILES)
+	rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+mostlyclean:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
 		mostlyclean-kr mostlyclean-noinstPROGRAMS \
 		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
-mostlyclean: mostlyclean-am
-
-clean-am:  clean-noinstLIBRARIES clean-compile clean-kr \
+clean:  clean-noinstLIBRARIES clean-compile clean-kr \
 		clean-noinstPROGRAMS clean-tags clean-depend \
-		clean-generic mostlyclean-am
+		clean-generic mostlyclean
 
-clean: clean-am
-
-distclean-am:  distclean-noinstLIBRARIES distclean-compile distclean-kr \
+distclean:  distclean-noinstLIBRARIES distclean-compile distclean-kr \
 		distclean-noinstPROGRAMS distclean-tags \
-		distclean-depend distclean-generic clean-am
+		distclean-depend distclean-generic clean
+	rm -f config.status
 
-distclean: distclean-am
-
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+maintainer-clean:  maintainer-clean-noinstLIBRARIES \
 		maintainer-clean-compile maintainer-clean-kr \
 		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+		distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-maintainer-clean: maintainer-clean-am
-
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+.PHONY: default mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile mostlyclean-kr distclean-kr clean-kr \
@@ -535,12 +463,10 @@ maintainer-clean-kr mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
 clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS tags \
 mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
 distdir mostlyclean-depend distclean-depend clean-depend \
-maintainer-clean-depend info-am info dvi-am dvi check check-am \
-installcheck-am installcheck install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all install-strip installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+maintainer-clean-depend info dvi installcheck install-exec install-data \
+install uninstall all installdirs mostlyclean-generic distclean-generic \
+clean-generic maintainer-clean-generic clean mostlyclean distclean \
+maintainer-clean
 
 
 #

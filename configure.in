@@ -1479,18 +1479,6 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for ONCORE Motorola VP/UT Oncore GPS)
-AC_ARG_ENABLE(ONCORE,		[  --enable-ONCORE         + Motorola VP/UT Oncore GPS receiver],
-    [ntp_ok=$enableval], [ntp_ok=yes])
-case "$ac_cv_var_oncore_ok" in
- no) ntp_ok=no ;;
-esac
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_ONCORE)
-fi
-AC_MSG_RESULT($ntp_ok)
-
 AC_MSG_CHECKING(for default inclusion of all suitable non-PARSE clocks)
 AC_ARG_ENABLE(all-clocks,	[  --enable-all-clocks     + include all suitable non-PARSE clocks:],
     [ntp_eac=$enableval], [ntp_eac=yes])
@@ -1700,6 +1688,18 @@ AC_ARG_ENABLE(NMEA,  		[  --enable-NMEA           + NMEA GPS receiver],
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_NMEA)
+fi
+AC_MSG_RESULT($ntp_ok)
+
+AC_MSG_CHECKING(for ONCORE Motorola VP/UT Oncore GPS)
+AC_ARG_ENABLE(ONCORE,		[  --enable-ONCORE         + Motorola VP/UT Oncore GPS receiver],
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+case "$ac_cv_var_oncore_ok" in
+ no) ntp_ok=no ;;
+esac
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_ONCORE)
 fi
 AC_MSG_RESULT($ntp_ok)
 
@@ -2125,7 +2125,8 @@ AC_MSG_RESULT($ans)
 AC_SUBST(MAKE_PARSEKMODULE)
 AC_MSG_CHECKING(if we can build kernel streams modules for parse)
 ans=no
-if test "$ntp_parseutil$ac_cv_header_sys_stropts_h" = "yesyes"; then
+case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
+ yesyes)
     case "$target" in
      sparc-*-sunos4*)
         case "$ac_cv_var_kernel_pll" in
@@ -2141,7 +2142,8 @@ if test "$ntp_parseutil$ac_cv_header_sys_stropts_h" = "yesyes"; then
 	MAKE_PARSEKMODULE=parse
 	;;
     esac
-fi
+    ;;
+esac
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(if we need basic refclock support)
@@ -2604,8 +2606,8 @@ AC_CACHE_CHECK(if we want and can make the ntptime utility, ac_cv_make_ntptime,
  *linux*)
     ans=no
     ;;
- *) case "$ac_cv_struct_ntptimeval_timespec$ac_cv_struct_ntptimeval_tv_nsec$ac_cv_var_kernel_pll" in
-     *yes*yes)
+ *) case "$ac_cv_struct_ntptimeval$ac_cv_var_kernel_pll" in
+     yesyes)
 	ans=yes
 	;;
      *)
@@ -2784,8 +2786,17 @@ AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
     [ans=$enableval],
     [changequote(<<, >>)dnl
     case "$target" in
-     *-*-solaris2.[67]*)
+     *-*-solaris2.6)
 	 ans=yes
+	 ;;
+     *-*-solaris2.7)
+	 case "`uname -v`" in
+	  Generic_106541-07)
+	     ans=no
+	     ;;
+	  *) ans=yes
+	     ;;
+	 esac
 	 ;;
      *) ans=no
 	 ;;

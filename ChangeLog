@@ -1,3 +1,16 @@
+1999-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c: Add missing declaration.
+
+1999-09-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (ac_cv_make_ntptime): Just look for struct
+	ntptimeval, not timespec or nsec (Solaris 2.7 should get ntptime
+	and it uses msec).
+	(ac_cv_var_oncore_ok): Reorder so it's a "normal" clock
+
+	* configure.in: Solaris Kernel FLL bug fixed in 106541-07
+
 1999-09-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.97f
