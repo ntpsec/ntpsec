@@ -77,13 +77,13 @@ u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
  * Statistics counters
  */
 u_long	sys_stattime;		/* time when we started recording */
-u_long	sys_restricted; 	/* restricted packets */
+u_long	sys_restricted; 	/* restricted */
 u_long	sys_limitrejected;	/* rate exceeded */
-u_long	sys_newversionpkt;	/* new version packets received */
-u_long	sys_oldversionpkt;	/* old version packets received */
-u_long	sys_unknownversion;	/* don't know version packets */
-u_long	sys_badlength;		/* packets with bad length */
-u_long	sys_badauth;		/* packets dropped because of auth */
+u_long	sys_newversionpkt;	/* new version */
+u_long	sys_oldversionpkt;	/* old version */
+u_long	sys_unknownversion;	/* invalid version */
+u_long	sys_badlength;		/* bad length or mode */
+u_long	sys_badauth;		/* bad authentication */
 u_long	sys_processed;		/* packets processed */
 
 static	double	root_distance	P((struct peer *));
@@ -336,7 +336,7 @@ receive(
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
-	if (debug > 2)
+	if (debug > 1)
 		printf("receive: at %ld %s<-%s restrict %02x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr), restrict_mask);
@@ -348,15 +348,19 @@ receive(
 	pkt = &rbufp->recv_pkt;
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	if (hismode == MODE_PRIVATE) {
-		if (restrict_mask & RES_NOQUERY)
+		if (restrict_mask & RES_NOQUERY) {
+			sys_restricted++;
 			return;			/* no query private */
+		}
 		process_private(rbufp, ((restrict_mask &
 		    RES_NOMODIFY) == 0));
 		return;
 	}
 	if (hismode == MODE_CONTROL) {
-		if (restrict_mask & RES_NOQUERY)
+		if (restrict_mask & RES_NOQUERY) {
+			sys_restricted++;
 			return;			/* no query control */
+		}
 		process_control(rbufp, restrict_mask);
 		return;
 	}
@@ -404,11 +408,15 @@ receive(
 	 * Linux, will not work with Autokey.
 	 */
 	if (hismode == MODE_BROADCAST) {
-		if (!sys_bclient)
+		if (!sys_bclient) {
+			sys_badlength++;
 			return;			/* no client */
+		}
 #ifdef OPENSSL
-		if (crypto_flags && rbufp->dstadr == any_interface)
+		if (crypto_flags && rbufp->dstadr == any_interface) {
+			sys_badlength++;
 			return;			/* no client */
+		}
 #endif /* OPENSSL */
 	}
 
@@ -430,7 +438,7 @@ receive(
 
 		if (has_mac % 4 != 0 || has_mac < 0) {
 			sys_badlength++;
-			return;
+			return;			/* bad MAC length */
 		}
 		if (has_mac == 1 * 4 || has_mac == 3 * 4 || has_mac ==
 		    MAX_MAC_LEN) {
@@ -443,13 +451,13 @@ receive(
 			if (temp < 4 || temp > NTP_MAXEXTEN || temp % 4
 			    != 0) {
 				sys_badlength++;
-				return;
+				return;		/* bad MAC length */
 			}
 			authlen += temp;
 			has_mac -= temp;
 		} else {
 			sys_badlength++;
-			return;
+			return;			/* bad MAC length */
 		}
 	}
 #ifdef OPENSSL
@@ -619,21 +627,13 @@ receive(
 			 * our time is worse than the manycaster or it
 			 * has already synchronized to us.
 			 */
-
-#ifdef DEBUG
-			if (debug)
-				printf("receive: refid %x %x stratum %d %d\n",
-				    rbufp->dstadr->addr_refid,
-				    pkt->refid, sys_stratum,
-				    PKT_TO_STRATUM(pkt->stratum));
-#endif
 			if (sys_peer == NULL ||
 			    PKT_TO_STRATUM(pkt->stratum) <
 			    sys_stratum || (sys_cohort &&
 			    PKT_TO_STRATUM(pkt->stratum) ==
 			    sys_stratum) ||
 			    rbufp->dstadr->addr_refid == pkt->refid)
-				return;
+				return;		/* manycast dropped */
 		}
 
 		/*
@@ -671,20 +671,20 @@ receive(
 		 */
 		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
-			return;
+			return;			/* no trust */
 		}
 
 		if (sys_authenticate && !is_authentic)
-			return;
+			return;			/* bad auth */
 
 		if ((peer2 = findmanycastpeer(rbufp)) == NULL)
-			return;
+			return;			/* no assoc match */
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
 		    MDF_ACLNT, 0, skeyid)) == NULL)
-			return;
+			return;			/* system error */
 
 		/*
 		 * We don't need these, but it warms the billboards.
@@ -703,18 +703,18 @@ receive(
 		 */
 		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
-			return;
+			return;			/* no trust */
 		}
 		if (sys_authenticate && !is_authentic) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0,
 			    restrict_mask);
-			return;
+			return;			/* bad auth */
 		}
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
 		    skeyid)) == NULL)
-			return;
+			return;			/* system error */
 
 		break;
 
@@ -729,17 +729,19 @@ receive(
 		 */
 		if (restrict_mask & (RES_DONTTRUST | RES_NOPEER)) {
 			sys_restricted++;
-			return;
+			return;			/* no trust */
 		}
+		if (sys_authenticate && !is_authentic)
+			return;			/* bad auth */
 
-		if ((sys_authenticate && !is_authentic) || !sys_bclient)
-			return;
+ 		if (!sys_bclient)
+			return;			/* not a client */
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
-			return;
+			return;			/* system error */
 #ifdef OPENSSL
 		/*
 		 * Danger looms. If this is autokey, go process the
@@ -785,10 +787,10 @@ receive(
 				peer_clear(peer, "RSTR");
 			else
 				unpeer(peer);
-			return;
+			return;			/* no trust */
 		}
 		if (has_mac && !is_authentic)
-			peer->flash |= TEST5;		/* auth fails */
+			peer->flash |= TEST5;	/* bad auth */
 		break;
 
 	default:
@@ -894,7 +896,7 @@ receive(
 	 */
 	} else if (!L_ISZERO(&p_org)) {
 		if (peer->cast_flags & MDF_ACLNT)
-			return;
+			return;			/* not a client */
 
 		peer->flash |= TEST2;
 		/* fall through */

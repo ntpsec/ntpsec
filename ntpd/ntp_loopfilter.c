@@ -705,14 +705,12 @@ adj_host_clock(
 			    msyslog(LOG_INFO, "pps sync disabled");
 		pps_control = 0;
 	}
-	if (!ntp_enable)
-		return;
 
 	/*
-	 * If the phase-lock loop is implemented in the kernel, we
-	 * have no business going further.
+	 * If NTP is disabled or ntpdate mode enabled or the kernel
+	 * discipline enabled, we have no business going further.
 	 */
-	if (pll_control && kern_enable)
+	if (!ntp_enable || mode_ntpdate || (pll_control && kern_enable))
 		return;
 
 	/*
@@ -810,7 +808,15 @@ loop_config(
 		 * behind. While at it, ask to set nanosecond mode. If
 		 * the kernel agrees, rejoice; othewise, it does only
 		 * microseconds.
+		 *
+		 * Call out the safety patrol. If ntpdate mode or if the
+		 * step threshold has been changed by the -x option or
+		 * tinker command, kernel discipline is unsafe, so don't
+		 * do any of this stuff.
 		 */
+		if (mode_ntpdate || clock_max != CLOCK_MAX)
+			break;
+
 		pll_control = 1;
 		memset(&ntv, 0, sizeof(ntv));
 #ifdef STA_NANO
