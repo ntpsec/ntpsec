@@ -347,6 +347,16 @@ if test $ac_cv_type_u_int8_t = yes; then
 	AC_DEFINE(HAVE_TYPE_U_INT8_T,1,Does u_int8_t exist)
 fi
 
+AC_CACHE_CHECK([for u_int64_t], ac_cv_type_u_int64_t,
+[AC_TRY_COMPILE([#include <sys/types.h>],
+	[u_int64_t len = 42; return 0;],
+	ac_cv_type_u_int64_t=yes,
+	ac_cv_type_u_int64_t=no)
+])
+if test $ac_cv_type_u_int64_t = yes; then
+	AC_DEFINE(HAVE_TYPE_U_INT64_T,1,Does u_int64_t exist)
+fi
+
 AC_CACHE_CHECK(for a fallback value for HZ, ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
 case "$host" in
