@@ -199,7 +199,6 @@ int never_step = 0;
 
 int 	ntpdatemain P((int, char **));
 
-static	void	stop_timer	P((void));
 static	void	transmit	P((struct server *));
 static	void	receive 	P((struct recvbuf *));
 static	void	server_data P((struct server *, s_fp, l_fp *, u_fp));
@@ -662,19 +661,6 @@ ntpdatemain (
 
 	return clock_adjust();
 }
-
-static void
-stop_timer(void)
-{
-        struct itimerval itimer;
-
-        itimer.it_interval.tv_sec = itimer.it_value.tv_sec = 9999;
-	itimer.it_interval.tv_usec = 1000000/TIMER_HZ;
-	itimer.it_value.tv_usec = 1000000/(TIMER_HZ<<1);
-        setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
-
-}
-
 
 
 /*
@@ -1548,11 +1534,6 @@ init_alarm(void)
 	itimer.it_interval.tv_usec = 1000000/TIMER_HZ;
 	itimer.it_value.tv_usec = 1000000/(TIMER_HZ<<1);
 
-        /*itimer.it_interval.tv_sec = itimer.it_value.tv_sec = 999;
-	itimer.it_interval.tv_usec = 1000000/TIMER_HZ;
-        itimer.it_value.tv_sec = 0;
-        itimer.it_value.tv_usec = 1000;
-        */
 	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
 # endif
 #if defined SYS_CYGWIN32
@@ -1848,7 +1829,7 @@ input_handler(void)
 	fd_set fds;
 #endif
         int fdc = 0;
-        stop_timer();
+
 	/*
 	 * Do a poll to see if we have data
 	 */
