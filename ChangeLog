@@ -1,3 +1,17 @@
+2000-01-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: <netinet/ip.h> cannot be detected... 
+	* ntpd/ntp_io.h: ...but every OS has it 
+	* ntpd/refclock_oncore.c: Lint removal 
+	* ntpq/ntpq_ops.c: Lint removal 
+	* ntpq/refclock_chu.c: chu_major() is not an audio routine (?), lint 
+	* libntp/icom.c: AIX doesn't have <sys/termios.h> 
+	From: Marc.Brett@westgeo.com
+
+	* ntpd/refclock_chu.c: NetBSD needs sys/ioctl.h
+	(chu_debug): NetBSED-specific debug output.
+	From: Frederick Bruckman <fb@enteract.com>
+
 2000-01-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98m

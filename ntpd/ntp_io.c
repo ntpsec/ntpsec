@@ -19,10 +19,12 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#ifdef HAVE_NETINET_IP_H
+#ifdef HAVE_NETINET_IN_SYSTM_H
 # include <netinet/in_systm.h>
-# include <netinet/ip.h>
-#endif
+#else /* Some old linux systems at least have in_system.h instead. */
+# include <netinet/in_system.h>
+#endif /* HAVE_NETINET_IN_SYSTM_H */
+#include <netinet/ip.h>
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif

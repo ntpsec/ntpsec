@@ -8,7 +8,14 @@
 #include "icom.h"
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/termios.h>
+
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+#ifdef HAVE_SYS_TERMIOS_H
+# include <sys/termios.h>
+#endif /* HAVE_SYS_TERMIOS_H */
+
 #include <fcntl.h>
 #include <errno.h>
 

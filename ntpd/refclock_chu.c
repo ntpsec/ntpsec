@@ -14,12 +14,15 @@
 #include <math.h>
 
 #ifdef AUDIO_CHU
-#ifdef HAVE_SYS_AUDIOIO_H
-#include <sys/audioio.h>
-#endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef HAVE_SUN_AUDIOIO_H
-#include <sun/audioio.h>
-#endif /* HAVE_SUN_AUDIOIO_H */
+# ifdef HAVE_SYS_AUDIOIO_H
+#  include <sys/audioio.h>
+# endif /* HAVE_SYS_AUDIOIO_H */
+# ifdef HAVE_SUN_AUDIOIO_H
+#  include <sun/audioio.h>
+# endif /* HAVE_SUN_AUDIOIO_H */
+# ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+# endif /* HAVE_SYS_IOCTL_H */
 #endif /* AUDIO_CHU */
 
 #include "ntpd.h"
@@ -357,10 +360,10 @@ static	void	chu_clear	P((struct peer *));
 static	void	chu_a		P((struct peer *, int));
 static	void	chu_b		P((struct peer *, int));
 static	int	chu_dist	P((int, int));
+static	int	chu_major	P((struct peer *));
 #ifdef AUDIO_CHU
 static	void	chu_uart	P((struct surv *, double));
 static	void	chu_rf		P((struct peer *, double));
-static	int	chu_major	P((struct peer *));
 static	void	chu_gain	P((struct peer *));
 static	int	chu_audio	P((void));
 static	void	chu_debug	P((void));
@@ -1269,7 +1272,7 @@ chu_poll(
 	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
 #else
 	sprintf(pp->a_lastcode,
-	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d",
+	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %s %d %d %d %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
 	    pp->second, leapchar, up->dst, up->dut, minset,
 	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
@@ -1592,8 +1595,15 @@ chu_debug(
 	    info.record.samples, info.record.eof,
 	    info.record.pause, info.record.error,
 	    info.record.waiting, info.record.balance);
-	printf("chu: monitor %d, muted %d\n",
-	    info.monitor_gain, info.output_muted);
+#ifdef __NetBSD__
+	printf("chu: monitor %d, blocksize %d, hiwat %d, lowat %d, mode %d\n",
+	       info.monitor_gain, info.blocksize, info.hiwat, info.lowat,
+	       info.mode);
+#else /* __NetBSD__ */
+  	printf("chu: monitor %d, muted %d\n",
+	       info.monitor_gain, info.output_muted);
+#endif /* __NetBSD__ */
+	return;
 }
 #endif /* DEBUG */
 #endif /* AUDIO_CHU */

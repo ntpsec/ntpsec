@@ -631,7 +631,7 @@ oncore_init_shmem(struct instance *instance, char *filename)
 		exit(4);
 	}
 	free(buf);
-	instance->shmem = mmap(0, oncore_shmem_length, 
+	instance->shmem = (u_char *) mmap(0, oncore_shmem_length, 
 	    PROT_READ | PROT_WRITE,
 #ifdef MAP_HASSEMAPHORE
 			       MAP_HASSEMAPHORE |
@@ -771,12 +771,12 @@ oncore_read_config(
 		
 		/* Remove trailing space */
 		for (i = strlen(line);
-		     i > 0 && isascii(line[i - 1]) && isspace(line[i - 1]);
+		     i > 0 && isascii((int)line[i - 1]) && isspace((int)line[i - 1]);
 			)
 			line[--i] = '\0';
 
 		/* Remove leading space */
-		for (cc = line; *cc && isascii(*cc) && isspace(*cc); cc++)
+		for (cc = line; *cc && isascii((int)*cc) && isspace((int)*cc); cc++)
 			continue;
 
 		/* Stop if nothing left */
@@ -785,9 +785,9 @@ oncore_read_config(
 
 		/* Lowercase the command and find the arg */
 		for (ca = cc; *ca; ca++) {
-			if (isascii(*ca) && islower(*ca)) {
+			if (isascii((int)*ca) && islower((int)*ca)) {
 				*ca = toupper(*ca);
-			} else if (isascii(*ca) && isspace(*ca)) {
+			} else if (isascii((int)*ca) && isspace((int)*ca)) {
 				break;
 			} else if (*ca == '=') {
 				*ca = ' ';
@@ -796,7 +796,7 @@ oncore_read_config(
 		}
 		
 		/* Remove space leading the arg */
-		for (; *ca && isascii(*ca) && isspace(*ca); ca++)
+		for (; *ca && isascii((int)*ca) && isspace((int)*ca); ca++)
 			continue;
 
 		if (!strncmp(cc, "STATUS", 6)) {
@@ -806,7 +806,7 @@ oncore_read_config(
 
 		/* Uppercase argument as well */
 		for (cp = ca; *cp; cp++)
-			if (isascii(*cp) && islower(*cp))
+			if (isascii((int)*cp) && islower((int)*cp))
 				*cp = toupper(*cp);
 
 		if (!strncmp(cc, "LAT", 3)) {
