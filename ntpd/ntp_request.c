@@ -1234,7 +1234,7 @@ dns_a(
 	struct sockaddr_in peeraddr;
 	int fl;
 
-	msyslog(LOG_DEBUG, "dns_a: We're here...");
+	msyslog(LOG_INFO, "dns_a: We're here...");
 	/*
 	 * Do a check of everything to see that it looks
 	 * okay.  If not, complain about it.  Note we are
@@ -1283,7 +1283,7 @@ dns_a(
 		cp = emalloc(hnl + 1);
 		strncpy(cp, dp->hostname, hnl);
 
-		msyslog(LOG_DEBUG, "dns_a: <%s> for %s, AssocID %d",
+		msyslog(LOG_INFO, "dns_a: <%s> for %s, AssocID %d",
 			cp, inet_ntoa(peeraddr.sin_addr), associd);
 
 		/* Do Something in the "if" line to use the info we got */
