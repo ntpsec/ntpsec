@@ -1883,7 +1883,7 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
-	for (i = nwilds; i < ninterfaces; i++) {
+	for (i = 0; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
 		*/
@@ -1909,7 +1909,7 @@ findbcastinter(
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 
-	for (i = nwilds; i < ninterfaces; i++) {
+	for (i = 0; i < ninterfaces; i++) {
 		/*
 		* First look if this is the correct family
 		*/

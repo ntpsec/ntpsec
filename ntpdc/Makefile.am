@@ -9,6 +9,7 @@ ntpdc_LDADD = version.o ../libntp/libntp.a @READLINE_LIBS@
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES = .version version.c
+CLEANFILES=	check-layout layout.here nl.c
 noinst_HEADERS = ntpdc.h
 EXTRA_DIST = nl_in.c nl.pl layout.std
 ETAGS_ARGS = Makefile.am
