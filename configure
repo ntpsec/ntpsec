@@ -39,9 +39,9 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-ATOM           + PPS interface"
 ac_help="$ac_help
-  --enable-CHU            + CHU modem/decoder"
+  --enable-CHU            - CHU modem/decoder"
 ac_help="$ac_help
-  --enable-AUDIO-CHU      s - CHU audio/decoder"
+  --enable-AUDIO-CHU      + CHU audio/decoder"
 ac_help="$ac_help
   --enable-DATUM          s Datum Programmable Time System"
 ac_help="$ac_help
@@ -85,7 +85,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-TRUETIME       s Kinemetrics/TrueTime receivers"
 ac_help="$ac_help
-  --enable-ULINK           + Ultralink WWVB receiver"
+  --enable-ULINK          + Ultralink WWVB receiver"
 ac_help="$ac_help
   --enable-WWV            + WWV Audio receiver"
 ac_help="$ac_help
@@ -8252,7 +8252,7 @@ if test "${enable_CHU+set}" = set; then
   enableval="$enable_CHU"
   ntp_ok=$enableval
 else
-  ntp_ok=$ntp_eac
+  ntp_ok=no
 fi
 
 if test "$ntp_ok" = "yes"; then
@@ -8272,7 +8272,7 @@ if test "${enable_AUDIO_CHU+set}" = set; then
   enableval="$enable_AUDIO_CHU"
   ntp_ok=$enableval
 else
-  ntp_ok=no
+  ntp_ok=$ntp_eac
 fi
 
 if test "$ntp_ok" = "yes"; then
@@ -8821,7 +8821,7 @@ if test "${enable_WWV+set}" = set; then
   enableval="$enable_WWV"
   ntp_ok=$enableval
 else
-  ntp_ok=no
+  ntp_ok=yes
 fi
 
 if test "$ntp_ok" = "yes"; then

@@ -1,3 +1,14 @@
+1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: Default to compile the IRIG, CHU and WWV/H
+	drivers and compile the CHU driver for audio, not modem.
+	Requested by Dave Mills.
+
+	* html/audio.htm: 
+	* html/driver36.htm: 
+	* html/qth.htm: 
+	Dave wrote these to go along with the changes I checked in yesterday.
+	
 1999-12-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwv.c: 
