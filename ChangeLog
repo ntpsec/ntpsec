@@ -1,3 +1,14 @@
+1999-12-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: Cleanup/checkin of the current state of affairs.
+	From: Dave Mills <mills@udel.edu>
+
+	* ntpd/refclock_oncore.c: #elif conversion.  I can only hope I did
+	it right.
+
+	* ntpd/refclock_oncore.c: Various patches
+	From: Reg Clemens <reg@dwf.com> and Kamal A Mostafa <kamal@whence.com>
+
 1999-12-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (default_get_precision): Use the right arg type

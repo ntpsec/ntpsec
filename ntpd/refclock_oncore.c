@@ -77,6 +77,10 @@
 # endif
 #endif
 
+#ifdef HAVE_SYS_SIO_H
+# include <sys/sio.h>
+#endif
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -160,6 +164,7 @@ struct instance {
 	u_char	Az;
 	u_char	init_type;
 	s_char	saw_tooth;
+	u_char  timeout;        /* flag to retry Cj after Fa reset */
 };
 
 #define rcvbuf	instance->Rcvbuf
@@ -172,7 +177,6 @@ static	void	oncore_receive	  P((struct recvbuf *));
 static	void	oncore_sendmsg	  P((int fd, u_char *, u_int));
 static	void	oncore_shutdown   P((int, struct peer *));
 static	int	oncore_start	  P((int, struct peer *));
-static	void	oncore_stats	  P((struct instance *));
 
 static	void	oncore_msg_any	P((struct instance *, u_char *, u_int, int));
 static	void	oncore_msg_As	P((struct instance *, u_char *, u_int));
@@ -400,8 +404,7 @@ oncore_start(
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {
 		/* same device here */
 		if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW
-#ifdef HAVE_PPSAPI
-#else
+#if !defined(HAVE_PPSAPI) && !defined(TIOCDCDTIMESTAMP)
 		      | LDISC_PPS
 #endif
 		   ))) {
@@ -500,6 +503,7 @@ oncore_start(
 	 * We send info from config to Oncore later.
 	 */
 
+	instance->timeout = 1;
 	mode = instance->init_type;
 	if (mode == 3 || mode == 4) {
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cf, sizeof oncore_cmd_Cf);
@@ -517,6 +521,8 @@ oncore_start(
 
 	return (1);
 }
+
+
 
 /*
  * Read Input file if it exists.
@@ -763,6 +769,16 @@ oncore_poll(
 	struct instance *instance;
 
 	instance = (struct instance *) peer->procptr->unitptr;
+	if (instance->timeout) {
+		char    *cp;
+
+		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof oncore_cmd_Cj);
+		instance->o_state = ONCORE_ID_SENT;
+		cp = "state = ONCORE_ID_SENT";
+		record_clock_stats(&(instance->peer->srcadr), cp);
+		return;
+	}
+
 	if (!instance->pollcnt)
 		refclock_report(peer, CEVNT_TIMEOUT);
 	else
@@ -964,6 +980,15 @@ oncore_msg_Cf(
 
 
 
+/* there are good reasons NOT to do a @@Fa command with the ONCORE.
+ * Doing it, it was found that under some circumstances the following
+ * command would fail if issued immediately after the return from the
+ * @@Fa, but a 2sec delay seemed to fix things.  Since simply calling
+ * sleep(2) is wastefull, and may cause trouble for some OS's, repeating
+ * itimer, we set a flag, and test it at the next POLL.  If it hasnt
+ * been cleared, we reissue the @@Ca that is issued below.
+ */
+
 static void
 oncore_msg_Fa(
 	struct instance *instance,
@@ -981,12 +1006,6 @@ oncore_msg_Fa(
 			exit(1);
 		}
 
-		/* sometimes the @@Cj request does not produce any output
-		   PERHAPS the ONCORE is still busy from the selftest???
-		   try a 2 second sleep here to see if it makes any difference
-		 */
-
-		sleep(2);
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof oncore_cmd_Cj);
 		instance->o_state = ONCORE_ID_SENT;
 		cp = "state = ONCORE_ID_SENT";
@@ -1006,13 +1025,34 @@ oncore_msg_Cj(
 	u_int len
 	)
 {
-	const char *cp;
+	char *cp, *cp1;
 	int	mode;
 
+	instance->timeout = 0;
 	if (instance->o_state != ONCORE_ID_SENT)
 		return;
 
 	memcpy(instance->Cj, buf, len);
+
+	/* Write Receiver ID to clockstats file */
+
+	instance->Cj[294] = '\0';
+	for (cp=(char *)instance->Cj; cp< (char *) &instance->Cj[294]; ) {
+		cp1 = strchr(cp, '\r');
+		if (!cp1)
+			cp1 = (char *)&instance->Cj[294];
+		*cp1 = '\0';
+		record_clock_stats(&(instance->peer->srcadr), cp);
+		*cp1 = '\r';
+		cp = cp1+2;
+	}
+#ifdef HAVE_PPSAPI
+	if (instance->assert)
+		cp = "Timing on Assert.";
+	else
+		cp = "Timing on Clear.";
+	record_clock_stats(&(instance->peer->srcadr), cp);
+#endif
 
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_Cg, sizeof oncore_cmd_Cg); /* Set Posn Fix mode (not Idle (VP)) */
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_Bb, sizeof oncore_cmd_Bb); /* turn off */
@@ -1094,6 +1134,7 @@ oncore_msg_Ea(
 	)
 {
 	const char	*cp;
+	char		Msg[160];
 
 	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN)
 		return;
@@ -1128,6 +1169,7 @@ oncore_msg_Ea(
 			/* Read back Position Hold Params */
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Asx,  sizeof oncore_cmd_Asx);
 			/* Read back PPS Offset for Output */
+			/* Nb. This will fail silently for early UT (no plus) model */
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Ayx,  sizeof oncore_cmd_Ayx);
 			/* Read back Cable Delay for Output */
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Azx,  sizeof oncore_cmd_Azx);
@@ -1184,20 +1226,16 @@ oncore_msg_Ea(
 	instance->ss_ht   += buf_w32(&instance->Ea[23]);  /* GPS ellipse */
 	instance->ss_count++;
 
-	if (debug)
-		printf("ONCORE: AVG %d %d %d %d\n",
-			instance->ss_count,
-			(unsigned) (instance->ss_lat  / instance->ss_count),
-			(unsigned) (instance->ss_long / instance->ss_count),
-			(unsigned) (instance->ss_ht   / instance->ss_count)
-			);
-
 	if (instance->ss_count != POS_HOLD_AVERAGE)
 		return;
 
 	instance->ss_lat  /= POS_HOLD_AVERAGE;
 	instance->ss_long /= POS_HOLD_AVERAGE;
 	instance->ss_ht   /= POS_HOLD_AVERAGE;
+
+	sprintf(Msg, "Surveyed posn:  lat %.3f long %.3f ht %.3f",
+			instance->ss_lat, instance->ss_long, instance->ss_ht);
+	record_clock_stats(&(instance->peer->srcadr), Msg);
 
 	w32_buf(&oncore_cmd_As[2],  (int) instance->ss_lat);
 	w32_buf(&oncore_cmd_As[6],  (int) instance->ss_long);
@@ -1239,6 +1277,9 @@ oncore_msg_En(
 #ifdef HAVE_TIOCGPPSEV
 	struct ppsclockev ev;
 	int r = TIOCGPPSEV;
+#endif
+#if	TIOCDCDTIMESTAMP
+	struct timeval	tv;
 #endif
 #endif	/* ! HAVE_PPS_API */
 
@@ -1311,7 +1352,8 @@ oncore_msg_En(
 	DTOLFP(dmy, &ts);
 	ts.l_ui = tsp->tv_sec;
 #endif	/* 0 */
-#else	/* ! HAVE_PPSAPI */
+#else
+# if defined(HAVE_TIOCGPPSEV) || defined(HAVE_CIOGETEV)
 	j = instance->ev_serial;
 	if (ioctl(instance->ppsfd, r, (caddr_t) &ev) < 0) {
 		perror("ONCORE: IOCTL:");
@@ -1333,6 +1375,18 @@ oncore_msg_En(
 	/* convert timeval -> ntp l_fp */
 
 	TVTOTS(tsp, &ts);
+# else
+#  if defined(TIOCDCDTIMESTAMP)
+	if(ioctl(instance->ppsfd, TIOCDCDTIMESTAMP, &tv) < 0) {
+		perror("ONCORE: ioctl(TIOCDCDTIMESTAMP)");
+		return;
+	}
+	tsp = &tv;
+	TVTOTS(tsp, &ts);
+#  else
+#error "Cannot compile -- no PPS mechanism configured!"
+#  endif
+# endif
 #endif
 	/* now have timestamp in ts */
 	/* add in saw_tooth and offset */
@@ -1431,9 +1485,16 @@ oncore_msg_At(
 	if (instance->site_survey != ONCORE_SS_UNKNOWN)
 		return;
 
-	if (buf[4] == 2)
+
+	if (buf[4] == 2) {
+		record_clock_stats(&(instance->peer->srcadr),
+				"Initiating hardware 3D site survey");
 		instance->site_survey = ONCORE_SS_HW;
-	else {
+	} else {
+		char Msg[160];
+		sprintf(Msg, "Initiating software 3D site survey (%d samples)",
+				POS_HOLD_AVERAGE);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
 		instance->site_survey = ONCORE_SS_SW;
 
 		/*
@@ -1497,7 +1558,11 @@ oncore_msg_As(
 	u_int len
 	)
 {
-	int lat, lon, ht;
+	char Msg[120], ew, ns;
+	const char *Ht;
+	double xd, xm, xs, yd, ym, ys, hm, hft;
+	int idx, idy, is, imx, imy;
+	long lat, lon, ht;
 
 	if (!instance->printed || instance->As)
 		return;
@@ -1515,86 +1580,7 @@ oncore_msg_As(
 
 	instance->ss_ht_type = buf[16];
 
-	if (instance->Ay && instance->Az)
-		oncore_stats(instance);
-}
-
-
-
-/*
- * get PPS Offset
- */
-static void
-oncore_msg_Ay(
-	struct instance *instance,
-	u_char *buf,
-	u_int len
-	)
-{
-	if (!instance->printed || instance->Ay)
-		return;
-
-	instance->Ay = 1;
-
-	instance->offset = buf_w32(&buf[4]);
-
-	if (instance->As && instance->Az)
-		oncore_stats(instance);
-}
-
-
-
-/*
- * get Cable Delay
- */
-static void
-oncore_msg_Az(
-	struct instance *instance,
-	u_char *buf,
-	u_int len
-	)
-{
-	if (!instance->printed || instance->Az)
-		return;
-
-	instance->Az = 1;
-
-	instance->delay = buf_w32(&buf[4]);
-
-	if (instance->As && instance->Ay)
-		oncore_stats(instance);
-}
-
-
-
-/*
- * print init data in ONCORE to clockstats file
- */
-static void
-oncore_stats(
-	struct instance *instance
-	)
-{
-	char Msg[120], ew, ns, *cp, *cp1;
-	const char *Ht;
-	double xd, xm, xs, yd, ym, ys, hm, hft;
-	int idx, idy, is, imx, imy;
-	long lat, lon;
-
-	/* First, Receiver ID */
-
-	instance->Cj[294] = '\0';
-	for (cp=(char *)instance->Cj; cp< (char *) &instance->Cj[294]; ) {
-		cp1 = strchr(cp, '\r');
-		if (!cp1)
-			cp1 = (char *)&instance->Cj[294];
-		*cp1 = '\0';
-		record_clock_stats(&(instance->peer->srcadr), cp);
-		*cp1 = '\r';
-		cp = cp1+2;
-	}
-
-	/* Next Position */
+	/* Print out Position */
 
 	record_clock_stats(&(instance->peer->srcadr), "Posn:");
 	ew = 'E';
@@ -1637,24 +1623,58 @@ oncore_stats(
 	ys  = is/1000.;
 	sprintf(Msg, "Lat = %c %3ddeg %2dm %5.2fs, Long = %c %3ddeg %2dm %5.2fs, Alt = %5.2fm (%5.2fft) %s", ns, idx, imx, xs, ew, idy, imy, ys, hm, hft, Ht);
 	record_clock_stats(&(instance->peer->srcadr), Msg);
+}
 
-	/* finally, cable delay  and PPS offset */
 
-	sprintf(Msg, "Cable delay is set to %ld ns", instance->delay);
-	record_clock_stats(&(instance->peer->srcadr), Msg);
+
+/*
+ * get PPS Offset
+ * Nb. @@Ay is not supported for early UT (no plus) model
+ */
+static void
+oncore_msg_Ay(
+	struct instance *instance,
+	u_char *buf,
+	u_int len
+	)
+{
+	char Msg[120];
+
+	if (!instance->printed || instance->Ay)
+		return;
+
+	instance->Ay = 1;
+
+	instance->offset = buf_w32(&buf[4]);
 
 	sprintf(Msg, "PPS Offset  is set to %ld ns", instance->offset);
 	record_clock_stats(&(instance->peer->srcadr), Msg);
-
-#ifdef HAVE_PPSAPI
-	if (instance->assert)
-		cp = "Timing on Assert.";
-	else
-		cp = "Timing on Clear.";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-#endif
 }
 
+
+
+/*
+ * get Cable Delay
+ */
+static void
+oncore_msg_Az(
+	struct instance *instance,
+	u_char *buf,
+	u_int len
+	)
+{
+	char Msg[120];
+
+	if (!instance->printed || instance->Az)
+		return;
+
+	instance->Az = 1;
+
+	instance->delay = buf_w32(&buf[4]);
+
+	sprintf(Msg, "Cable delay is set to %ld ns", instance->delay);
+	record_clock_stats(&(instance->peer->srcadr), Msg);
+}
 #else
 int refclock_oncore_bs;
 #endif /* REFCLOCK */
