@@ -1,3 +1,10 @@
+2001-05-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k36
+
+	* ntpd/ntp_loopfilter.c: Huff-n-puff cleanup
+	From: Dave Mills.
+
 2001-05-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k35

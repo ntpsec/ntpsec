@@ -46,7 +46,6 @@
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define CLOCK_ALLAN	1024.	/* min Allan intercept (s) */
 #define CLOCK_ADF	1e11	/* Allan deviation factor */
-#define CLOCK_HUFFPUFF	120	/* min huff-n'-puff time (s) */
 
 /*
  * Clock discipline state machine. This is used to control the
@@ -292,6 +291,33 @@ local_clock(
 	sys_jitter = SQRT(dtemp + (epsil - dtemp) / CLOCK_AVG);
 
 	/*
+	 * The huff-n'-puff filter finds the lowest delay in the recent
+	 * path. This is used to correct the offset by one-half the
+	 * difference between the sample delay and minimum delay. This
+	 * is most effective if the delays are highly assymetric and
+	 * clockhopping is avoided and the clock frequency wander is
+	 * relatively small.
+	 */
+	if (sys_huffpuff != NULL) {
+		if (sys_huffpuff[sys_huffptr] == 0 || peer->delay <
+		    sys_huffpuff[sys_huffptr])
+			sys_huffpuff[sys_huffptr] = peer->delay;
+		if (sys_mindly == 0 || peer->delay < sys_mindly)
+			sys_mindly = peer->delay;
+		if (fp_offset > 0)
+			dtemp = -(peer->delay - sys_mindly);
+		else
+			dtemp = peer->delay - sys_mindly;
+		fp_offset += dtemp;
+#ifdef DEBUG
+		if (debug)
+			printf(
+			    "local_clock: size %d mindly %.6f huffpuff %.6f\n",
+			    sys_hufflen, sys_mindly, dtemp);
+#endif
+	}
+
+	/*
 	 * Clock state machine transition function. This is where the
 	 * action is and defines how the system reacts to large phase
 	 * and frequency errors. There are two main regimes: when the
@@ -487,7 +513,7 @@ local_clock(
 		 * frequency offsets for jitter and stability values and
 		 * to update the drift file.
 		 */
-		memset(&ntv,  0, sizeof ntv);
+		memset(&ntv,  0, sizeof(ntv));
 		if (ext_enable) {
 			ntv.modes = MOD_STATUS;
 		} else {
@@ -748,10 +774,17 @@ rstclock(
 void
 huffpuff()
 {
+	int i;
+
 	if (sys_huffpuff == NULL)
 		return;
 	sys_huffptr = (sys_huffptr + 1) % sys_hufflen;
-	*(sys_huffpuff + sys_huffptr) = sys_mindly;
+	sys_huffpuff[sys_huffptr] = 0;
+	sys_mindly = 0;
+	for (i = 0; i < sys_hufflen; i++) {
+		if (sys_mindly == 0 || sys_huffpuff[i] < sys_mindly)
+			sys_mindly = sys_huffpuff[i];
+	}
 }
 
 
@@ -779,7 +812,7 @@ loop_config(
 		 * microseconds.
 		 */
 		pll_control = 1;
-		memset(&ntv, 0, sizeof ntv);
+		memset(&ntv, 0, sizeof(ntv));
 #if NTP_API > 3 
 		ntv.modes = MOD_BITS | MOD_NANO;
 #else
@@ -851,7 +884,7 @@ loop_config(
 		 * previous nonsense.
 		 */
 		if (pll_control) {
-			memset((char *)&ntv, 0, sizeof ntv);
+			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_OFFSET | MOD_FREQUENCY;
 			if (kern_enable) {
 				ntv.modes |= MOD_STATUS;
@@ -896,10 +929,12 @@ loop_config(
 		break;
 	
 	case LOOP_HUFFPUFF:		/* huff-n'-puff filter length */
-		if (freq < CLOCK_HUFFPUFF)
-			freq = CLOCK_HUFFPUFF;
+		if (freq < HUFFPUFF)
+			freq = HUFFPUFF;
 		sys_hufflen = (int)(freq / HUFFPUFF);
-		sys_huffpuff = emalloc(sizeof(double) * sys_hufflen);
+		sys_huffpuff = (double *)emalloc(sizeof(double) *
+		    sys_hufflen);
+		memset(sys_huffpuff, 0, sizeof(double) * sys_hufflen);
 		break;
 	}
 }
