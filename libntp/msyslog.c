@@ -49,7 +49,7 @@ void
 addto_syslog(int level, char * buf)
 {
 	char *prog;
-	FILE *out_file;
+	FILE *out_file = syslog_file;
 
 #if !defined(VMS) && !defined (SYS_VXWORKS)
 	if (syslogit)
@@ -69,6 +69,10 @@ addto_syslog(int level, char * buf)
 		(void) fprintf(out_file, "%s[%d]: %s", prog, (int)getpid(), buf);
 		fflush (out_file);
 	}
+#if DEBUG
+	if (debug && out_file != stdout && out_file != stderr)
+		printf("addto_syslog: %s\n", buf);
+#endif
 }
 void
 format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
@@ -156,10 +160,6 @@ void msyslog(int level, const char *fmt, ...)
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 
 	vsnprintf(buf, sizeof(buf), nfmt, ap);
-#if DEBUG
-	if (debug)
-		printf("msyslog: %s\n", buf);
-#endif
 	addto_syslog(level, buf);
 	va_end(ap);
 }
@@ -201,10 +201,6 @@ void netsyslog(int level, const char *fmt, ...)
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 
 	vsnprintf(buf, sizeof(buf), nfmt, ap);
-#if DEBUG
-	if (debug)
-		printf("netsyslog: %s\n", buf);
-#endif
 	addto_syslog(level, buf);
 	va_end(ap);
 }

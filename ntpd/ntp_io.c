@@ -207,6 +207,7 @@ create_wildcards(u_short port) {
 	(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 	inter_list[idx].mask.ss_family = AF_INET;
 	((struct sockaddr_in*)&inter_list[idx].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
+	inter_list[idx].bfd = INVALID_SOCKET;
 	inter_list[idx].num_mcast = 0;
 	inter_list[idx].received = 0;
 	inter_list[idx].sent = 0;
@@ -235,6 +236,7 @@ create_wildcards(u_short port) {
 		(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 		inter_list[idx].mask.ss_family = AF_INET6;
 		memset(&((struct sockaddr_in6*)&inter_list[idx].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
+		inter_list[idx].bfd = INVALID_SOCKET;
 		inter_list[idx].num_mcast = 0;
 		inter_list[idx].received = 0;
 		inter_list[idx].sent = 0;
@@ -445,8 +447,19 @@ create_sockets(
 	/*
 	 * Calculate the address hash for each interface address.
 	 */
-	for (i = 0; i < ninterfaces; i++)
+	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].addr_refid = addr2refid(&inter_list[i].sin);
+		msyslog(LOG_INFO, "Listening on %s interface, %s#%d",
+			inter_list[i].name,
+			stoa((&inter_list[i].sin)),
+			NTP_PORT);
+		if ((inter_list[i].flags & INT_BROADCAST) &&
+		     inter_list[i].bfd != INVALID_SOCKET)
+			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
+				stoa((&inter_list[i].bcast)),
+				NTP_PORT);
+	}
+
 
 #ifdef DEBUG
 	if (debug > 1) {
