@@ -2272,6 +2272,10 @@ case "$ans" in
  no) ;;
  *)
     LIBS="$LIBS \${top_builddir}/ElectricFence/libefence.a"
+    EF_PROGS="eftest tstheap"
+    AC_SUBST(EF_PROGS)
+    EF_LIBS=libefence.a
+    AC_SUBST(EF_LIBS)
     ans=yes
     ;;
 esac

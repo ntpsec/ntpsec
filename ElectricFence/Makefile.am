@@ -4,9 +4,11 @@
 
 EXTRA_DIST = libefence.3 CHANGES
 libefence_a_SOURCES = efence.h efence.c page.c print.c
-check_PROGRAMS = eftest tstheap
+check_PROGRAMS = @EF_PROGS@
+EXTRA_PROGRAMS = eftest tstheap
 # TESTS = eftest tstheap
-noinst_LIBRARIES = libefence.a
+noinst_LIBRARIES = @EF_LIBS@
+EXTRA_LIBRARIES = libefence.a
 LDADD = libefence.a
 
 # Un-comment the following if you are running HP/UX.
