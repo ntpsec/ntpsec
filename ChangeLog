@@ -1,5 +1,8 @@
 2000-07-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_config.c (getconfig): CONFIG_PRIORITY support
+	* ntpd/ntpd.c (set_process_priority): Use it.
+
 	* ntpd/ntp_crypto.c: Crypto key stuff
 	* ntpd/ntp_proto.c: pubkey -> pubkey.ptr
 	* ntpd/ntp_control.c (ctl_putpeer): fstamp -> pubkey.fstamp

@@ -128,6 +128,8 @@ static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
  */
 #define NTPD_PRIO	(-12)
 
+int priority_done = 2;
+
 /*
  * Debugging flag
  */
@@ -227,7 +229,9 @@ catch_danger(int signo)
 static void
 set_process_priority(void)
 {
-	int done = 1;
+
+	msyslog(LOG_DEBUG, "set_process_priority: priority_done is <%d>",
+		priority_done);
 
 #ifdef SYS_WINNT
 	DWORD  SingleCPUMask = 0;
@@ -255,11 +259,11 @@ set_process_priority(void)
 	if (!SetPriorityClass(GetCurrentProcess(), (DWORD) REALTIME_PRIORITY_CLASS))
 		msyslog(LOG_ERR, "SetPriorityClass: %m");
 	else
-		++done;
+		++priority_done;
 #endif
 
 #if defined(HAVE_SCHED_SETSCHEDULER)
-	if (!done) {
+	if (!priority_done) {
 		extern int config_priority_override, config_priority;
 		int pmax, pmin;
 		struct sched_param sched;
@@ -278,12 +282,12 @@ set_process_priority(void)
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
-			++done;
+			++priority_done;
 	}
 #endif /* HAVE_SCHED_SETSCHEDULER */
 #if defined(HAVE_RTPRIO)
 # ifdef RTP_SET
-	if (!done) {
+	if (!priority_done) {
 		struct rtprio srtp;
 
 		srtp.type = RTP_PRIO_REALTIME;	/* was: RTP_PRIO_NORMAL */
@@ -292,37 +296,37 @@ set_process_priority(void)
 		if (rtprio(RTP_SET, getpid(), &srtp) < 0)
 			msyslog(LOG_ERR, "rtprio() error: %m");
 		else
-			++done;
+			++priority_done;
 	}
 # else /* not RTP_SET */
-	if (!done) {
+	if (!priority_done) {
 		if (rtprio(0, 120) < 0)
 			msyslog(LOG_ERR, "rtprio() error: %m");
 		else
-			++done;
+			++priority_done;
 	}
 # endif /* not RTP_SET */
 #endif  /* HAVE_RTPRIO */
 #if defined(NTPD_PRIO) && NTPD_PRIO != 0
 # ifdef HAVE_ATT_NICE
-	if (!done) {
+	if (!priority_done) {
 		errno = 0;
 		if (-1 == nice (NTPD_PRIO) && errno != 0)
 			msyslog(LOG_ERR, "nice() error: %m");
 		else
-			++done;
+			++priority_done;
 	}
 # endif /* HAVE_ATT_NICE */
 # ifdef HAVE_BSD_NICE
-	if (!done) {
+	if (!priority_done) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
-			++done;
+			++priority_done;
 	}
 # endif /* HAVE_BSD_NICE */
 #endif /* NTPD_PRIO && NTPD_PRIO != 0 */
-	if (!done)
+	if (!priority_done)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 

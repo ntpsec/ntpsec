@@ -40,6 +40,8 @@
 extern HANDLE ResolverThreadHandle;
 #endif /* SYS_WINNT */
 
+extern int priority_done;
+
 /*
  * These routines are used to read the configuration file at
  * startup time.  An entry in the file must fit on a single line.
@@ -93,6 +95,7 @@ extern HANDLE ResolverThreadHandle;
  * disable auth|bclient|pll|kernel|monitor|stats
  * phone ...
  * pps device [assert|clear] [hardpps]
+ * priority high|normal
  */
 
 /*
@@ -141,6 +144,7 @@ extern HANDLE ResolverThreadHandle;
 #ifdef PUBKEY
 #define CONFIG_CRYPTO		34
 #endif /* PUBKEY */
+#define CONFIG_PRIORITY		35
 
 /*
  * "peer", "server", "broadcast" modifier keywords
@@ -261,6 +265,7 @@ static	struct keyword keywords[] = {
 	{ "phone",		CONFIG_PHONE },
 	{ "pidfile",		CONFIG_PIDFILE },
 	{ "pps",		CONFIG_PPS },
+	{ "priority",		CONFIG_PRIORITY },
 	{ "requestkey",		CONFIG_REQUESTKEY },
 	{ "restrict",		CONFIG_RESTRICT },
 	{ "revoke",		CONFIG_REVOKE },
@@ -1172,6 +1177,13 @@ getconfig(
 			    stats_config(STATS_PID_FILE, tokens[1]);
 			else
 			    stats_config(STATS_PID_FILE, (char *)0);
+			break;
+
+		    case CONFIG_PRIORITY:
+			if (ntokens >= 1)
+				priority_done = strcmp(tokens[1], "high");
+			else
+				priority_done = 1;
 			break;
 
 		    case CONFIG_LOGFILE:
