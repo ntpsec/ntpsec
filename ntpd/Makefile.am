@@ -1,9 +1,9 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
+INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
+LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
@@ -45,6 +45,6 @@ $(PROGRAMS): $(LDADD)
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE)
 
-version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ @LIBRSAREF@ Makefile
+version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile
 	$(top_builddir)/scripts/mkver ntpd
 	$(COMPILE) -c version.c

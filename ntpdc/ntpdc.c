@@ -45,12 +45,11 @@ static	const char *	prompt = "ntpdc> ";	/* prompt to ask him about */
 static	u_long	info_auth_keyid;
 
 /*
- * Type of key md5 or des
+ * Type of key md5
  */
-#define	KEY_TYPE_DES	3
 #define	KEY_TYPE_MD5	4
 
-static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5*/
+static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
 
 int		ntpdcmain	P((int,	char **));
@@ -786,8 +785,7 @@ sendrequest(
 			info_auth_keyid = maclen;
 		}
 		if (!authistrusted(info_auth_keyid)) {
-			pass = getpass((info_auth_keytype == KEY_TYPE_DES)
-			    ? "DES Password: " : "MD5 Password: ");
+			pass = getpass("MD5 Password: ");
 			if (*pass == '\0') {
 				(void) fprintf(stderr,
 				    "Invalid password\n");
@@ -1501,7 +1499,7 @@ keytype(
 {
 	if (pcmd->nargs == 0)
 	    fprintf(fp, "keytype is %s\n",
-		    (info_auth_keytype == KEY_TYPE_MD5) ? "MD5" : "DES");
+		    (info_auth_keytype == KEY_TYPE_MD5) ? "MD5" : "???");
 	else
 	    switch (*(pcmd->argval[0].string)) {
 		case 'm':
@@ -1509,13 +1507,8 @@ keytype(
 		    info_auth_keytype = KEY_TYPE_MD5;
 		    break;
 
-		case 'd':
-		case 'D':
-		    info_auth_keytype = KEY_TYPE_DES;
-		    break;
-
 		default:
-		    fprintf(fp, "keytype must be 'md5' or 'des'\n");
+		    fprintf(fp, "keytype must be 'md5'\n");
 	    }
 }
 
@@ -1545,10 +1538,7 @@ passwd(
 			   (u_char *)pcmd->argval[0].string);
 		authtrust(info_auth_keyid, 1);
 	} else {
-		pass = getpass((info_auth_keytype == KEY_TYPE_DES)
-			       ? "DES Password: "
-			       : "MD5 Password: "
-			       );
+		pass = getpass("MD5 Password: ");
 		if (*pass == '\0')
 		    (void) fprintf(fp, "Password unchanged\n");
 		else {

@@ -4,12 +4,6 @@
 /* Minutes per DST adjustment */
 #undef DSTMINUTES
 
-/* MD5 authentication */
-#undef MD5
-
-/* DES authentication (COCOM only) */
-#undef DES
-
 /* time_t */
 #undef time_t
 

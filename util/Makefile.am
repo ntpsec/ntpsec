@@ -5,10 +5,10 @@ bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ genkeys
 EXTRA_PROGRAMS = byteorder hist jitter kern longsize ntptime \
 precision sht testrs6000 tickadj timetrim
 
-#ntp_genkeys_LDADD = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
-#ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
+#ntp_genkeys_LDADD = ../ntpd/ntp_config$U.o ../libntp/libntp.a
+#ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
+INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD =	../libntp/libntp.a
 #EXTRA_DIST = README TAGS

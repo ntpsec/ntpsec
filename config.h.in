@@ -5,12 +5,6 @@
 /* Minutes per DST adjustment */
 #undef DSTMINUTES
 
-/* MD5 authentication */
-#undef MD5
-
-/* DES authentication (COCOM only) */
-#undef DES
-
 /* time_t */
 #undef time_t
 
@@ -913,9 +907,6 @@
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
-
-/* Use RSAREF? */
-#undef RSAREF
 
 /* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT

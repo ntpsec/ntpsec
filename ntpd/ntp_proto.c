@@ -426,7 +426,7 @@ receive(
 	 * the game to reduce the exposure to a clogging attack. Now we
 	 * have to burn some cycles to find the association and
 	 * authenticate the packet if required. Note that we burn only
-	 * MD5 or DES cycles, again to reduce exposure. There may be no
+	 * MD5 cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
 	 *
 	 * More on the autokey mambo. Normally the local interface is

@@ -2335,58 +2335,23 @@ AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(for the level of crypto support)
 AC_ARG_WITH(crypto,
-	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl,rsaref}]),
-dnl	AC_HELP_STRING([--with-crypto], [+ ={autokey,rsaref}]),
+	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl}]),
 [ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
- yes|rsaref|openssl)
-    case "$ans" in
-     rsaref)
+ yes|openssl)
+    if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
+    then
 	ans=no
-	;;
-     *)
-	if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
-	then
-	    ans=no
-	else
-	    # We have OpenSSL inc/lib - use them.
-	    ans=openssl
-	    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
-	    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	    LIBS="$LIBS -lcrypto"
-	    AC_DEFINE(DES)
-	    AC_DEFINE(OPENSSL, , [Use OpenSSL?])
-	    AC_DEFINE(PUBKEY, , [Public key?])
-	fi
-	;;
-    esac
-
-    case "$ans" in
-     no)
-	if test -f $srcdir/rsaref2/source/digit.c
-	then
-	    ans=rsaref
-	    RSAOBJS=digit.o
-	    RSASRCS="digit.c digit.h"
-	    RSADIR=rsaref2
-	fi
-	if test -f $srcdir/rsaeuro1/source/rsaeuro.h
-	then
-	    ans=rsaref
-            RSAOBJS="md4c.o shsc.o"
-            RSASRCS="md4c.c shsc.c"
-	    RSADIR=rsaeuro1
-	fi
-	if test "$ans" = "rsaref"; then
-	    LIBRSAREF=../librsaref/librsaref.a
-	    MAKE_LIBRSAREF=librsaref.a
-	    AC_DEFINE(DES)
-	    AC_DEFINE(PUBKEY)
-	    AC_DEFINE(RSAREF, , [Use RSAREF?])
-	fi
-	;;
-    esac
+    else
+	# We have OpenSSL inc/lib - use them.
+	ans=openssl
+	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+	LIBS="$LIBS -lcrypto"
+	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
+	AC_DEFINE(PUBKEY, , [Public key?])
+    fi
     ;;
 esac
 AC_SUBST(AUTOKEY)
@@ -3175,9 +3140,8 @@ AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 
 AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
-ElectricFence/Makefile
-include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
-libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
+ElectricFence/Makefile include/Makefile kernel/Makefile kernel/sys/Makefile \
+libntp/Makefile libparse/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
 scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj \
 scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver \

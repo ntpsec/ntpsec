@@ -60,15 +60,6 @@ extern	struct savekey *auth_findkey P((keyid_t));
 extern	int	auth_moremem	P((void));
 extern	int	ymd2yd		P((int, int, int));
 
-#ifdef	DES
-extern	int	DESauthdecrypt	P((u_char *, u_int32 *, int, int));
-extern	int	DESauthencrypt	P((u_char *, u_int32 *, int));
-extern	void	DESauth_setkey	P((keyid_t, const u_int32 *));
-extern	void	DESauth_subkeys	P((const u_int32 *, u_char *, u_char *));
-extern	void	DESauth_des	P((u_int32 *, u_char *));
-extern	int	DESauth_parity	P((u_int32 *));
-#endif	/* DES */
-
 extern	int	MD5authdecrypt	P((u_char *, u_int32 *, int, int));
 extern	int	MD5authencrypt	P((u_char *, u_int32 *, int));
 extern	void	MD5auth_setkey	P((keyid_t, const u_char *, const int));

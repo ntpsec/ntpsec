@@ -45,7 +45,7 @@
 /*
  * This program generates (up to) four files:
  *
- *	ntp.keys    containing the DES/MD5 private keys,
+ *	ntp.keys    containing the MD5 private keys,
  *	ntpkey      containing the RSA private key,
  *	ntpkey_HOST containing the RSA public key
  *		     where HOST is the DNS name of the generating machine,
@@ -76,7 +76,7 @@
  * distributed by secure means to other servers and clients sharing the
  * same security compartment.
  *
- * The key identifiers for MD5 and DES keys must be less than 65536,
+ * The key identifiers for MD5 keys must be less than 65536,
  * although this program uses only the identifiers from 1 to 16.  The key
  * identifier for each association is specified as the key argument in
  * the server or peer configuration file command.

@@ -495,8 +495,8 @@ struct servent *getservbyname P((char *name, char *type));
 #endif
 
 /*
- * Byte order woes.  The DES code is sensitive to byte order.  This
- * used to be resolved by calling ntohl() and htonl() to swap things
+ * Byte order woes.
+ * This used to be resolved by calling ntohl() and htonl() to swap things
  * around, but this turned out to be quite costly on Vaxes where those
  * things are actual functions.  The code now straightens out byte
  * order troubles on its own, with no performance penalty for little

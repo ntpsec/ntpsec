@@ -5,7 +5,6 @@ SUBDIRS = \
 	scripts \
 	include \
 	ElectricFence	\
-	librsaref	\
 	libntp	\
 	libparse	\
 	ntpd	\

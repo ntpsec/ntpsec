@@ -2,7 +2,7 @@
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_LIBRARIES = libntp.a
 libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
-	authencrypt.c authkeys.c authparity.c authreadkeys.c authusekey.c \
+	authkeys.c authreadkeys.c authusekey.c \
 	buftvtots.c caljulian.c calleapwhen.c caltontp.c calyearstart.c \
 	clocktime.c clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c \
 	emalloc.c findconfig.c fptoa.c fptoms.c getopt.c hextoint.c \
@@ -17,7 +17,7 @@ EXTRA_libntp_a_SOURCES = adjtimex.c log.c mktime.c random.c snprintf.c \
 	strdup.c strerror.c
 libntp_a_LIBADD = @LIBOBJS@
 libntp_a_DEPENDENCIES = @LIBOBJS@
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
+INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h log.h
