@@ -1829,6 +1829,15 @@ input_handler(
 	)
 {
 
+	/*
+	 * List of fd's to skip the read
+	 * We don't really expect to have this many
+	 * refclocks on a system
+	 */
+#define MAXSKIPS  20
+	int skiplist[MAXSKIPS];
+	int totskips;
+	isc_boolean_t skip;
 	int nonzeroreads;
 	int buflen;
 	register int i, n;
@@ -1842,6 +1851,15 @@ input_handler(
 	fd_set fds;
 	int select_count = 0;
 	static int handler_count = 0;
+
+	/*
+	 * Initialize the skip list
+	 */
+	for (i = 0; i<MAXSKIPS; i++)
+	{
+		skiplist[i] = 0;
+	}
+	totskips = 0;
 
 	++handler_count;
 	if (handler_count != 1)
@@ -1861,6 +1879,11 @@ input_handler(
 	fds = activefds;
 	tvzero.tv_sec = tvzero.tv_usec = 0;
 
+#ifdef REFCLOCK
+	/*
+	 * Check out the reference clocks first, if any
+	 */
+
 	nonzeroreads = 1;
 	while (nonzeroreads > 0)
 	{
@@ -1869,10 +1892,6 @@ input_handler(
 		++select_count;
 		++handler_pkts;
 
-#ifdef REFCLOCK
-	/*
-	 * Check out the reference clocks first, if any
-	 */
 		if (refio != 0)
 		{
 			register struct refclockio *rp;
@@ -1880,6 +1899,20 @@ input_handler(
 			for (rp = refio; rp != 0; rp = rp->next)
 			{
 				fd = rp->fd;
+				skip = ISC_FALSE;
+				/* Check for skips */
+				for (i = 0; i < totskips; i++)
+				{
+					if (fd == skiplist[i])
+					{
+						skip = ISC_TRUE;
+						break;
+					}
+				}
+				/* fd was on skip list */
+				if (skip == ISC_TRUE)
+					continue;
+
 				if (FD_ISSET(fd, &fds))
 				{
 					n--;
@@ -1891,6 +1924,11 @@ input_handler(
 						packets_dropped++;
 						if (buflen > 0)
 							nonzeroreads++;
+						else
+						{
+							skiplist[totskips] = fd;
+							totskips++;
+						}
 						continue;	/* Keep reading until drained */
 					}
 
@@ -1908,11 +1946,17 @@ input_handler(
 							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 						}
 						freerecvbuf(rb);
-						break;
+						skiplist[totskips] = fd;
+						totskips++;
+						continue;
 					}
 					if(buflen > 0)
 						nonzeroreads++;
-
+					else
+					{
+						skiplist[totskips] = fd;
+						totskips++;
+					}
 					/*
 					 * Got one.  Mark how and when it got here,
 					 * put it on the full list and do
