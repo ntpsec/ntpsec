@@ -1862,6 +1862,7 @@ monlist(
 	)
 {
 	char *struct_star;
+	struct sockaddr_storage addr;
 	struct sockaddr_storage dstadr;
 	int items;
 	int itemsize;
@@ -1905,15 +1906,21 @@ again:
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
+			memset((char *)&addr, 0, sizeof(addr));
 			memset((char *)&dstadr, 0, sizeof(dstadr));
 			if (ml->v6_flag != 0) {
+				GET_INADDR6(addr) = ml->addr6;
+				addr.ss_family = AF_INET6;
 				GET_INADDR6(dstadr) = ml->daddr6;
 				dstadr.ss_family = AF_INET6;
 			} else {
+				GET_INADDR(addr) = ml->addr;
+				addr.ss_family = AF_INET;
 				GET_INADDR(dstadr) = ml->daddr;
 				dstadr.ss_family = AF_INET;
 			}
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+			addr.ss_len = SOCKLEN(&addr);
 			dstadr.ss_len = SOCKLEN(&dstadr);
 #endif
 			if ((pcmd->nargs == 0) ||
@@ -1921,7 +1928,7 @@ again:
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
 				(void) fprintf(fp, 
 				    "%-22.22s %5d %-15s %8ld %1d %1d %6lu %6lu %7lu\n",
-				    nntohost(&dstadr), 
+				    nntohost(&addr), 
 				    ntohs(ml->port),
 				    stoa(&dstadr),
 				    (u_long)ntohl(ml->count),
