@@ -46,6 +46,7 @@ case "$host" in
     LIBS="$LIBS -lcurses"
     ;;
 esac
+AMU_OS_CFLAGS
 
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
@@ -136,25 +137,6 @@ case "$host" in
     ;;
  *-*-irix6*)	# 6.2 (and later?)
     ac_busted_vpath_in_make=yes
-    # don't pass -n32 to gcc, it cannot handle and doesn't need it
-    if test "$GCC" != yes; then
-      case "$CFLAGS" in
-       *-n32*) ;;
-       *-n64*) ;;
-       *-64*) ;;
-       *) case "$iCFLAGS" in
-	   '') CFLAGS="-O2 -g3 -n32" ;;
-	   *)  CFLAGS="$CFLAGS -n32" ;;
-	  esac
-	  ;;
-      esac
-      case "$LDFLAGS" in
-       *-n32*) ;;
-       *-n64*) ;;
-       *-64*) ;;
-       *) LDFLAGS="$LDFLAGS -n32" ;;
-      esac
-    fi
     ;;
  *-*-solaris2.5.1)
     ac_busted_vpath_in_make=yes

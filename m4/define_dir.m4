@@ -1,14 +1,3 @@
-AC_DEFUN([hs_ULONG_CONST],
-[ AH_TEMPLATE(ULONG_CONST, [How do we create unsigned long constants?])
-AC_EGREP_CPP(Circus,
- [#define ACAT(a,b)a ## b
-ACAT(Cir,cus)
-], AC_DEFINE([ULONG_CONST(a)], [a ## UL]),
-    AC_EGREP_CPP(Reiser,
-[#define RCAT(a,b)a/**/b
-RCAT(Rei,ser)
-], AC_DEFINE([ULONG_CONST(a)], [a/**/L]),
-    AC_MSG_ERROR([How do we create an unsigned long constant?])))])
 dnl @synopsis AC_DEFINE_DIR(VARNAME, DIR [, DESCRIPTION])
 dnl
 dnl This macro defines (with AC_DEFINE) VARNAME to the expansion of the DIR
@@ -22,7 +11,7 @@ dnl
 dnl    AC_DEFINE_DIR(DATADIR, datadir)
 dnl    AC_DEFINE_DIR(PROG_PATH, bindir, [Location of installed binaries])
 dnl
-dnl @version $Id: .del-acinclude.m4~457f12ef 1.12 2003/12/24 00:39:20-05:00 stenn@whimsy.udel.edu $
+dnl @version $Id: acinclude.m4,v 1.3 2000/08/04 03:26:22 stenn Exp $
 dnl @author Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 
 AC_DEFUN([AC_DEFINE_DIR], [
