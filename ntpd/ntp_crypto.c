@@ -288,7 +288,8 @@ make_keylist(
 	 * included in the hash is zero if broadcast mode, the peer
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
-	lifetime = min(sys_automax, (unsigned long) NTP_MAXSESSION * (1 <<(peer->kpoll)));
+	lifetime = min(sys_automax, (unsigned long) NTP_MAXSESSION *
+	    (1 <<(peer->kpoll)));
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -1100,24 +1101,26 @@ crypto_recv(
 		}
 
 		/*
-		 * We log everything except length/format errors and
+		 * We don't log length/format/timestamp errors and
 		 * duplicates, which are log clogging vulnerabilities.
 		 * The first error found terminates the extension field
-		 * scan and we return the laundry to the caller.
+		 * scan and we return the laundry to the caller. A
+		 * length/format/timestamp error on transmit is
+		 * cheerfully ignored, as the message is not sent.
 		 */
-		if (rval != XEVNT_OK) {
+		if (rval > XEVNT_TSP) {
 			sprintf(statstr,
 			    "error %x opcode %x ts %u fs %u", rval,
 			    code, tstamp, fstamp);
-			if (rval > XEVNT_TSP)
-				record_crypto_stats(&peer->srcadr,
-				    statstr);
+			record_crypto_stats(&peer->srcadr, statstr);
 			report_event(rval, peer);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
 #endif
 			break;
+		} else if (rval > XEVNT_OK && (code & CRYPTO_RESP)) {
+			rval = XEVNT_OK;
 		}
 		authlen += len;
 	}
@@ -1181,10 +1184,7 @@ crypto_xmit(
 	case CRYPTO_ASSOC | CRYPTO_RESP:
 	case CRYPTO_ASSOC:
 		len += crypto_send(fp, &hostval);
-		if (crypto_time() == 0)
-			fp->fstamp = 0;
-		else
-			fp->fstamp = htonl(crypto_flags);
+		fp->fstamp = htonl(crypto_flags);
 		break;
 
 	/*
@@ -1216,7 +1216,6 @@ crypto_xmit(
 		} else if (vallen == 0 || vallen > MAXHOSTNAME) {
 			opcode |= CRYPTO_ERROR;
 			break;
-
 		} else {
 			memcpy(certname, ep->pkt, vallen);
 			certname[vallen] = '\0';
@@ -1642,9 +1641,6 @@ crypto_ident(
 	 * been found and the CRYPTO_FLAG_VALID bit is set, so the
 	 * certificate issuer is valid.
 	 */
-	if (peer->crypto & CRYPTO_FLAG_VRFY)
-		return (0);
-
 	if (peer->ident_pkey != NULL)
 		EVP_PKEY_free(peer->ident_pkey);
 	if (peer->crypto & CRYPTO_FLAG_GQ) {
@@ -1688,8 +1684,7 @@ crypto_ident(
 	}
 
 	/*
-	 * No compatible identity scheme is available. Use the default
-	 * TC scheme.
+	 * No compatible identity scheme is available. Life is hard.
 	 */
 	msyslog(LOG_INFO,
 	    "crypto_ident: no compatible identity scheme found");
@@ -1724,6 +1719,9 @@ crypto_args(
 		len += strlen(str);
 	ep = emalloc(len);
 	memset(ep, 0, len);
+	if (opcode == 0)
+		return (ep);
+
 	ep->opcode = htonl(opcode + len);
 
 	/*
@@ -1820,6 +1818,7 @@ crypto_update(void)
 
 	if ((tstamp = crypto_time()) == 0)
 		return;
+
 	hostval.tstamp = htonl(tstamp);
 
 	/*
