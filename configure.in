@@ -275,7 +275,11 @@ if test -f /etc/redhat-release
 then
     :
 else
-    AC_CHECK_HEADERS(md5.h)
+    AC_CHECK_HEADERS(md5.h, [], [],
+[#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+])
 fi
 AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
