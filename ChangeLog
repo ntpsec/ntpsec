@@ -1,4 +1,13 @@
+2000-02-25  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwvb.c (wwvb_receive): Undo the previous chagne.
+
 2000-02-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwvb.c (wwvb_receive): LENWWVB0 can return 6 or 7
+	fields.
+	From: Michael Sinatra <msinatra@uclink4.berkeley.edu>
+	with a cleanup from Ulrich.
 
 	* scripts/mkver.in (ConfStr): Make RSAREF appear as part of the
 	version.

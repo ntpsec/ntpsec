@@ -295,8 +295,7 @@ wwvb_receive(
 		case LENWWVB2:
 
 		/*
-		 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD"
-		 */
+		 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD" */
 		if (sscanf(pp->a_lastcode,
 		    "%c%c %2d %3d %2d:%2d:%2d.%3d %c",
 		    &syncchar, &qualchar, &pp->year, &pp->day,
