@@ -74,10 +74,53 @@
  */
 #include <config.h>
 
-#ifndef ISC_PLATFORM_HAVEIPV6
-
 #include <sys/types.h>
 #include "ntp_types.h"
+
+/*
+ * If various macros are not defined we need to define them
+ */
+
+#if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
+
+#define	_SS_MAXSIZE	128
+#define	_SS_ALIGNSIZE	(sizeof(u_int64_t))
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
+#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
+				_SS_PAD1SIZE - _SS_ALIGNSIZE)
+#else
+#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
+#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
+				_SS_PAD1SIZE - _SS_ALIGNSIZE)
+#endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
+#endif
+
+/*
+ * If we don't have the sockaddr_storage structure
+ * we need to define it
+ */
+
+#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
+struct sockaddr_storage {
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+	u_int8_t	ss_len;		/* address length */
+	u_int8_t	ss_family;	/* address family */
+#else
+	short		ss_family;	/* address family */
+#endif
+	char		__ss_pad1[_SS_PAD1SIZE];
+	u_int64_t	__ss_align;	/* force desired structure storage alignment */
+	char		__ss_pad2[_SS_PAD2SIZE];
+};
+#endif
+
+/*
+ * Finally if the platform doesn't support IPv6 we need some
+ * additional definitions
+ */
+
+#ifndef ISC_PLATFORM_HAVEIPV6
 
 #ifndef AF_INET6
 #define AF_INET6	AF_MAX
@@ -162,35 +205,6 @@ struct sockaddr_in6 {
 #ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	((a)->s6_addr[0] == 0xff)
 #endif
-
-/*
- * RFC 2553: protocol-independent placeholder for socket addresses
- */
-#define	_SS_MAXSIZE	128
-#define	_SS_ALIGNSIZE	(sizeof(u_int64_t))
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
-				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#else
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
-				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
-
-#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
-struct sockaddr_storage {
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	u_int8_t	ss_len;		/* address length */
-	u_int8_t	ss_family;	/* address family */
-#else
-	short		ss_family;	/* address family */
-#endif
-	char		__ss_pad1[_SS_PAD1SIZE];
-	u_int64_t	__ss_align;	/* force desired structure storage alignment */
-	char		__ss_pad2[_SS_PAD2SIZE];
-};
-#endif /* not HAVE_STRUCT_SOCKADDR_STORAGE */
 
 struct addrinfo {
 	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
