@@ -38,6 +38,7 @@
 #define lifr_addr iflr_addr
 #define lifr_name iflr_name
 #define lifr_dstaddr iflr_dstaddr
+#define lifr_broadaddr iflr_broadaddr
 #define lifr_flags iflr_flags
 #define ss_family sa_family
 #define LIFREQ if_laddrreq
@@ -449,11 +450,11 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
+	if ((ifreq.lifr_flags & IFF_BROADCAST) != 0) {
 		iter->current.flags |= INTERFACE_F_BROADCAST;
 	}
 
-	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
+	if ((ifreq.lifr_flags & IFF_MULTICAST) != 0) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
 	}
 
@@ -686,7 +687,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
-		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&ifreq)
+		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
 		    < 0) {
 			isc__strerror(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
@@ -699,7 +700,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 			return (ISC_R_IGNORE);
 		}
 		get_addr(family, &iter->current.broadcast,
-			 (struct sockaddr *)&ifreq.lifr_broadaddr);
+			 (struct sockaddr *)&lifreq.lifr_broadaddr);
 	}
 
 	/*
