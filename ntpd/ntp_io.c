@@ -2125,7 +2125,7 @@ kill_asyncio(
  * socket value and use that when we want to enumerate it.
  */
 void
-kill_asyncio(void)
+kill_asyncio(int startfd)
 {
 	vsock_t *lsock;
 	vsock_t *next;

@@ -136,6 +136,7 @@ SERVICE_STATUS_HANDLE	sshStatusHandle;
 HANDLE WaitHandles[3] = { NULL, NULL, NULL };
 char szMsgPath[255];
 static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
+BOOL init_randfile();
 #endif /* SYS_WINNT */
 
 /*
@@ -422,6 +423,11 @@ ntpdmain(
 	/*
 	 * Initialize random generator and public key pair
 	 */
+#ifdef SYS_WINNT
+	/* Initialize random file before OpenSSL checks */
+	if(!init_randfile())
+		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
+#endif
 	get_systime(&now);
 	SRANDOM((int)(now.l_i * now.l_uf));
 
