@@ -159,7 +159,7 @@ static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
 
 
@@ -480,7 +480,7 @@ create_sockets(
 #endif
 #ifdef UDP_WILDCARD_DELIVERY
 	nwilds = create_wildcards(port);
-	idx = nwilds;
+	idx = nwilds; 
 #endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
@@ -623,7 +623,7 @@ void
 enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
 {
 #ifdef SO_BROADCAST
-	socket_broadcast_enable(iface, 0, baddr);
+	socket_broadcast_enable(iface, iface->fd, baddr);
 #endif
 }
 
@@ -634,7 +634,7 @@ enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
  * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
-socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+socket_broadcast_enable(struct interface *iface, SOCKET fd, struct sockaddr_storage *maddr)
 {
 #ifdef SO_BROADCAST
 	int on = 1;
@@ -642,7 +642,7 @@ socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	if (maddr->ss_family == AF_INET)
 	{
 		/* if this interface can support broadcast, set SO_BROADCAST */
-		if (setsockopt(iface->fd, SOL_SOCKET, SO_BROADCAST,
+		if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST,
 			       (char *)&on, sizeof(on)))
 		{
 			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) enable failure on address %s: %m",
@@ -651,7 +651,7 @@ socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storag
 #ifdef DEBUG
 		else if (debug > 1) {
 			printf("Broadcast enabled on socket %d for address %s\n",
-				iface->fd, stoa(maddr));
+				fd, stoa(maddr));
 		}
 #endif
 	}
@@ -840,12 +840,13 @@ io_setbclient(void)
 	int i;
 	int nif = 0;
 	isc_boolean_t jstatus; 
+	SOCKET fd;
 
 	set_reuseaddr(1);
 
 	for (i = nwilds; i < ninterfaces; i++) {
 		/* Only IPv4 addresses are valid for broadcast */
-		if (inter_list[i].bcast.ss_family != AF_INET)
+		if (inter_list[i].sin.ss_family != AF_INET)
 			continue;
 
 		/* Is this a broadcast address? */
@@ -860,15 +861,32 @@ io_setbclient(void)
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
+		/*
+		 * Try to open the broadcast address
+		 */
+		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
+				    INT_BROADCAST, 1, &inter_list[i], i);
+
+		 /*
+		 * If we succeeded then we use it otherwise
+		 * enable the underlying address
+		 */
+		if (inter_list[i].bfd == INVALID_SOCKET) {
+			fd = inter_list[i].fd;
+		}
+		else {
+			fd = inter_list[i].bfd;
+		}
+
 		/* Enable Broadcast on socket */
-		jstatus = socket_broadcast_enable(&inter_list[i], i, &inter_list[i].sin);
+		jstatus = socket_broadcast_enable(&inter_list[i], fd, &inter_list[i].sin);
 		if (jstatus == ISC_TRUE)
 			nif++;
 #ifdef DEBUG
 		if (debug) {
 			if (jstatus == ISC_TRUE)
 				printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
-				i, inter_list[i].fd);
+				i, fd);
 			else
 				printf("io_setbclient: Unable to Open broadcast client on interface %d\n",
 				i);
