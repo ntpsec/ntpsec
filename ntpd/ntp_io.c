@@ -134,11 +134,11 @@ struct vsock {
 
 ISC_LIST(vsock_t)	sockets_list;
 
-void add_socket_to_list(SOCKET fd);
-void delete_socket_from_list(SOCKET fd);
-int create_wildcards(u_short port);
-BOOL address_okay(isc_interface_t *isc_if);
-void convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port);
+void	add_socket_to_list	P((SOCKET));
+void	delete_socket_from_list	P((SOCKET));
+int	create_wildcards	P((u_short));
+isc_boolean_t address_okay	P((isc_interface_t *));
+void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
 
 /*
  * init_io - initialize I/O data structures and call socket creation routine
@@ -248,13 +248,13 @@ create_wildcards(u_short port) {
 	return (idx);
 }
 
-BOOL
+isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
 	if (listen_to_virtual_ips == 1)
-		return (TRUE);
+		return (ISC_TRUE);
 	if ((isc_if->flags & INTERFACE_F_UP) == 0)	/* Ignore interfaces not up */
-		return (FALSE);
-	return (TRUE);
+		return (ISC_FALSE);
+	return (ISC_TRUE);
 }
 void
 convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
