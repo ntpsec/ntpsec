@@ -1,5 +1,23 @@
 1999-10-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_atom.c: AIOCTIMESTAMP patch
+	* ntpd/ntpd.c: SCO clock patch
+	* ntpd/ntp_request.c: noselect patch
+	* ntpd/ntp_refclock.c: AIOCTIMESTAMP patch
+	* ntpd/ntp_proto.c: noselect patch
+	* ntpd/ntp_intres.c: noselect patch
+	* ntpd/ntp_config.c: noselect patch
+	* include/ntp_request.h: noselect patch
+	* include/ntp.h: noselect patch
+	From: Kamal A Mostafa <kamal@whence.com>
+
+	* configure.in: 
+	* acconfig.h: TTYCLK_AIOCTIMESTAMP
+	Stuff for Kamal
+
+	* ntpd/refclock_atom.c (atom_pps): make "result" initialization
+	uglier, but more bulletproof.
+
 	* configure.in (sys/timepps.h): Fixed.
 	From: John Hay <jhay@mikom.csir.co.za>
 

@@ -138,6 +138,7 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_MOD_SKEY		7
 #define CONF_MOD_TTL		8
 #define CONF_MOD_MODE		9
+#define CONF_MOD_NOSELECT 	10
 
 #define CONF_RES_MASK		1
 #define CONF_RES_IGNORE		2
@@ -230,6 +231,7 @@ static	struct keyword mod_keywords[] = {
 	{ "minpoll",		CONF_MOD_MINPOLL },
 	{ "maxpoll",		CONF_MOD_MAXPOLL },
 	{ "prefer",		CONF_MOD_PREFER },
+	{ "noselect",		CONF_MOD_NOSELECT },
 	{ "burst",		CONF_MOD_BURST },
 	{ "autokey",		CONF_MOD_SKEY },
 	{ "mode",		CONF_MOD_MODE },    /* reference clocks */
@@ -1011,6 +1013,10 @@ getconfig(
 
 				case CONF_MOD_PREFER:
 				    peerflags |= FLAG_PREFER;
+				    break;
+
+				case CONF_MOD_NOSELECT:
+				    peerflags |= FLAG_NOSELECT;
 				    break;
 
 				case CONF_MOD_BURST:

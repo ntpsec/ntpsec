@@ -1232,6 +1232,8 @@ clock_select(void)
 		for (peer = peer_hash[n]; peer != 0; peer = peer->next) {
 			peer->flags &= ~FLAG_SYSPEER;
 			peer->status = CTL_PST_SEL_REJECT;
+			if (peer->flags & FLAG_NOSELECT)
+				continue;	/* noselect (survey only) */
 			if (peer->reach == 0)
 				continue;	/* unreachable */
 			if (peer->stratum > 1 && peer->refid ==

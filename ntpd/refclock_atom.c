@@ -179,7 +179,13 @@ atom_start(
 	 */
 	if (fdpps <= 0) {
 		(void)sprintf(device, DEVICE, unit);
-		if ((fd = refclock_open(device, SPEED232, LDISC_CLKPPS)) != 0)
+		if ((fd = refclock_open(device, SPEED232,
+#ifdef TTYCLK_AIOCTIMESTAMP
+					LDISC_RAW
+#else
+					LDISC_CLKPPS
+#endif
+					)) != 0)
 			flags |= FLAG_TTY;
 	}
 #endif /* TTYCLK */
@@ -269,12 +275,14 @@ atom_pps(
 	double doffset;
 	int i;
 #if !defined(HAVE_PPSAPI)
-#ifdef HAVE_CIOGETEV
-	int request = CIOGETEV;
-#endif
-#ifdef HAVE_TIOCGPPSEV
-	int request = TIOCGPPSEV;
-#endif
+	int request =
+# ifdef HAVE_CIOGETEV
+	  CIOGETEV
+# endif
+# ifdef HAVE_TIOCGPPSEV
+	  TIOCGPPSEV
+# endif
+	  ;
 #endif /* HAVE_PPSAPI */
 
 	/*

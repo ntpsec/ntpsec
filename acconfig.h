@@ -271,6 +271,9 @@
 /* do we have the tty_clk line discipline/streams module? */
 #undef TTYCLK
 
+/* What about TTYCLK_AIOCTIMESTAMP? */
+#undef TTYCLK_AIOCTIMESTAMP
+
 /* does the kernel support precision time discipline? */
 #undef KERNEL_PLL
 

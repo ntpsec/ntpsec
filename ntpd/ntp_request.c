@@ -1137,7 +1137,7 @@ do_conf(
 		    && cp->hmode != MODE_BROADCAST)
 		    fl = 1;
 		if (cp->flags & ~(CONF_FLAG_AUTHENABLE | CONF_FLAG_PREFER
-				  | CONF_FLAG_BURST | CONF_FLAG_SKEY))
+		      | CONF_FLAG_NOSELECT | CONF_FLAG_BURST | CONF_FLAG_SKEY))
 		    fl = 1;
 		cp++;
 	}
@@ -1174,6 +1174,8 @@ do_conf(
 		    fl |= FLAG_AUTHENABLE;
 		if (cp->flags & CONF_FLAG_PREFER)
 		    fl |= FLAG_PREFER;
+		if (cp->flags & CONF_FLAG_NOSELECT)
+		    fl |= FLAG_NOSELECT;
 		if (cp->flags & CONF_FLAG_BURST)
 		    fl |= FLAG_BURST;
 		if (cp->flags & CONF_FLAG_SKEY)

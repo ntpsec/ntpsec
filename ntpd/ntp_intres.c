@@ -869,7 +869,7 @@ readconf(
 		}
 
 		if ((intval[TOK_FLAGS] & ~(FLAG_AUTHENABLE | FLAG_PREFER |
-					   FLAG_BURST | FLAG_SKEY))
+				   FLAG_NOSELECT | FLAG_BURST | FLAG_SKEY))
 		    != 0) {
 			msyslog(LOG_ERR, "invalid flags (%ld) in file %s",
 				intval[TOK_FLAGS], name);
@@ -881,6 +881,8 @@ readconf(
 		    flags |= CONF_FLAG_AUTHENABLE;
 		if (intval[TOK_FLAGS] & FLAG_PREFER)
 		    flags |= CONF_FLAG_PREFER;
+		if (intval[TOK_FLAGS] & FLAG_NOSELECT)
+		    flags |= CONF_FLAG_NOSELECT;
 		if (intval[TOK_FLAGS] & FLAG_BURST)
 		    flags |= CONF_FLAG_BURST;
 		if (intval[TOK_FLAGS] & FLAG_SKEY)

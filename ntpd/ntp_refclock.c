@@ -25,7 +25,12 @@
 #endif
 
 #ifdef TTYCLK
-#include <sys/clkdefs.h>
+#ifdef TTYCLK_AIOCTIMESTAMP
+# include <sys/sio.h>
+# define TIOCDCDTIMESTAMP	AIOCTIMESTAMPTV
+#else
+# include <sys/clkdefs.h>
+#endif
 #endif /* TTYCLK */
 
 #ifdef HAVE_PPSCLOCK_H
@@ -827,7 +832,7 @@ refclock_open(
 		ttyp->c_lflag = 0;
 		ttyp->c_cc[VMIN] = 1;
 	}
-#ifdef TIOCMGET
+#if defined(TIOCMGET) && !defined(TTYCLK_AIOCTIMESTAMP)
 	/*
 	 * If we have modem control, check to see if modem leads are
 	 * active; if so, set remote connection. This is necessary for
@@ -1012,7 +1017,7 @@ refclock_ioctl(
 #endif /* TTYCLK */
 
 #ifdef STREAM
-#ifdef TTYCLK
+#if defined(TTYCLK) && !defined(TTYCLK_AIOCTIMESTAMP)
 	/*
 	 * The TTYCLK option provides timestamping at the driver level.
 	 * It requires the tty_clk streams module and System V STREAMS
@@ -1041,7 +1046,17 @@ refclock_ioctl(
 				    fd, rval, str);
 		}
 	}
-#endif /* TTYCLK */
+#endif /* TTYCLK and !TTYCLK_AIOCTIMESTAMP */
+
+#ifdef TTYCLK_AIOCTIMESTAMP
+	/*
+	 * The TTYCLK_AIOCTIMESTAMP option provides timestamping at the
+	 * driver level.  It requires the AIOCTIMESTAMPCTL and AIOCTIMESTAMPTV
+	 * ioctls.
+	 */
+	if (ioctl(fd, AIOCTIMESTAMPCTL, 1) < 0)
+		msyslog(LOG_ERR, "refclock_ioctl: AIOCTIMESTAMPCTL failed: %m");
+#endif
 
 #ifdef PPS
 	/*

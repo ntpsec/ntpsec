@@ -530,6 +530,7 @@ struct conf_peer {
 #define	CONF_FLAG_AUTHENABLE	0x1
 #define CONF_FLAG_PREFER	0x2
 #define CONF_FLAG_BURST		0x4
+#define CONF_FLAG_NOSELECT	0x8
 #define CONF_FLAG_SKEY		0x10
 
 /*

@@ -88,6 +88,11 @@
 #ifdef _AIX
 #include <ulimit.h>
 #endif /* _AIX */
+
+#ifdef SCO5_CLOCK
+#include <sys/ci/ciioctl.h>
+#endif
+
 /*
  * Signals we catch for debugging.	If not debugging we ignore them.
  */
@@ -560,6 +565,26 @@ service_main(
 	*/
 #endif /* SYS_WINNT */
 
+#ifdef SCO5_CLOCK
+	/*
+	 * SCO OpenServer's system clock offers much more precise timekeeping
+	 * on the base CPU than the other CPUs (for multiprocessor systems),
+	 * so we must lock to the base CPU.
+	 */
+	{
+	    int fd = open("/dev/at1", O_RDONLY);
+	    if (fd >= 0) {
+		int zero = 0;
+		if (ioctl(fd, ACPU_LOCK, &zero) < 0)
+		    msyslog(LOG_ERR, "cannot lock to base CPU: %m\n");
+		close( fd );
+	    } /* else ...
+	       *   If we can't open the device, this probably just isn't
+	       *   a multiprocessor system, so we're A-OK.
+	       */
+	}
+#endif
+
 #if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
 	/*
 	 * lock the process into memory
@@ -661,6 +686,7 @@ service_main(
 #ifdef REFCLOCK
 	init_refclock();
 #endif
+	set_process_priority();
 	init_proto();
 	init_io();
 	init_loopfilter();
@@ -674,8 +700,6 @@ service_main(
 	 * for the gizmo board.
 	 */
 	getconfig(argc, argv);
-
-	set_process_priority();
 
 	initializing = 0;
 

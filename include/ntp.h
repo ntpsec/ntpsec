@@ -320,6 +320,7 @@ struct peer {
 #define FLAG_PREFER		0x80	/* this is the preferred peer */
 #define FLAG_BURST		0x100	/* burst mode */
 #define FLAG_SKEY		0x200	/* autokey authentication */
+#define FLAG_NOSELECT		0x400	/* this is a "noselect" peer */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
