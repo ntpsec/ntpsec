@@ -36,3 +36,5 @@ ntptrace/Makefile.in
 parseutil/Makefile.in
 scripts/Makefile.in
 util/Makefile.in
+config.h.in
+stamp-h.in
