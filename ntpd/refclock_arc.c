@@ -1025,10 +1025,10 @@ arc_receive(
 		if(r == '3') { /* Only use quality value whilst sync in progress. */
 			if (up->quality_stamp < current_time) {
 				struct calendar cal;
-				u_long new_stamp;
+				l_fp new_stamp;
 			
 				get_systime (&new_stamp);
-				caljulian (new_stamp, &cal);
+				caljulian (new_stamp.l_ui, &cal);
 				up->quality_stamp = 
 					current_time + 60 - cal.second + 5;
 				quality_sum = 0;
