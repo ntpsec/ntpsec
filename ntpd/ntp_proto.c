@@ -1650,7 +1650,8 @@ clock_filter(
 	 */
 	if (m == 0)
 		return;
-	etemp = peer->offset;
+	etemp = fabs(peer->offset - peer->filter_offset[k]);
+	dtemp = sqrt(peer->jitter);
 	peer->offset = peer->filter_offset[k];
 	peer->delay = peer->filter_delay[k];
 	if (m > 1)
@@ -1677,13 +1678,13 @@ clock_filter(
 	 * the last update is less than twice the system poll interval,
 	 * consider the update a popcorn spike and ignore it.
 	 */
-	if (m > 1 && fabs(peer->offset - etemp) > SQRT(peer->jitter) *
-	    CLOCK_SGATE && peer->filter_epoch[k] - peer->epoch <
-	    (1 << (sys_poll + 1))) {
+	if (m > 1 && etemp > CLOCK_SGATE * dtemp &&
+	    peer->filter_epoch[k] - peer->epoch < (1 << (sys_poll +
+	    1))) {
 #ifdef DEBUG
 		if (debug)
-			printf("clock_filter: n %d popcorn spike %.6f jitter %.6f\n",
-			    m, peer->offset, SQRT(peer->jitter));
+			printf("clock_filter: popcorn %.6f %.6f\n",
+			    etemp, dtemp);
 #endif
 		return;
 	}

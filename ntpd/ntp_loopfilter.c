@@ -40,7 +40,7 @@
 #define CLOCK_AVG	4.	/* parameter averaging constant */
 #define CLOCK_MINSEC	256.	/* min FLL update interval (s) */
 #define CLOCK_MINSTEP	900.	/* step-change timeout (s) */
-#define	CLOCK_ALLAN	3000.	/* compromise Allan intercept (s) */
+#define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
@@ -429,24 +429,22 @@ local_clock(
 
 		/*
 		 * We come here in the normal case for linear phase and
-		 * frequency adjustments. If the offset exceeds the
-		 * previous time error estimate by CLOCK_SGATE and the
-		 * interval since the last update is less than twice the
-		 * poll interval, consider the update a popcorn spike
-		 * and ignore it.
+		 * frequency adjustments. If the difference between the
+		 * last offset and the current one exceeds the jitter by
+		 * CLOCK_SGATE (4) and the interval since the last
+		 * update is less than twice the system poll interval,
+		 * consider the update a popcorn spike and ignore it..
 		 */
 		default:
 			allow_panic = FALSE;
-			if (fabs(fp_offset - last_offset) >
-			    CLOCK_SGATE * oerror && mu <
+			dtemp = fabs(fp_offset - last_offset);
+			if (dtemp > CLOCK_SGATE * oerror && mu <
 			    ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
 				if (debug)
 					printf(
 				    "local_clock: popcorn %.6f %.6f\n",
-					    fabs(fp_offset -
-					    last_offset), CLOCK_SGATE *
-					    oerror);
+					    dtemp, oerror);
 #endif
 				last_offset = fp_offset;
 				return (0);
@@ -457,22 +455,21 @@ local_clock(
 			 * which depend on the poll interval, update
 			 * interval and Allan intercept. For the FLL,
 			 * the averaging interval is clamped not less
-			 * than the Allan intercept. For the PLL, the
-			 * averaging interval is clamped not greater
+			 * than the Allan intercept and the weight
+			 * proportional to the poll interval from zero
+			 * to unity at the Allan intercept. For the PLL,
+			 * the averaging interval is clamped not greater
 			 * than the poll interval. Particularly for the
 			 * PLL, these measures allow oversampling, but
 			 * not undersampling and insure stability even
 			 * when the rules of fair engagement are broken.
 			 */
+			etemp = min(1, sqrt(mu) / allan_xpt);
 			dtemp = max(mu, allan_xpt);
-			flladj = (fp_offset - clock_offset) /
+			flladj = (fp_offset - clock_offset) * etemp /
 			    (CLOCK_FLL * dtemp);
-
-printf("xxx diff %f d %f\n", (fp_offset - clock_offset) * 1e6,
-    CLOCK_FLL * dtemp);
- 
-			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			etemp = min(mu, ULOGTOD(sys_poll));
+			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			last_time = peer->epoch;
 			last_offset = clock_offset = fp_offset;
@@ -614,10 +611,6 @@ printf("xxx diff %f d %f\n", (fp_offset - clock_offset) * 1e6,
 	 */
 	etemp = clock_frequency + flladj + plladj;
 	drift_comp += etemp;
-
-printf("ofs %f freq %f cf %f pll %f fll %f\n", fp_offset, drift_comp *
-    1e6, clock_frequency * 1e6, plladj * 1e6, flladj * 1e6);
-
 	if (drift_comp > NTP_MAXFREQ)
 		drift_comp = NTP_MAXFREQ;
 	else if (drift_comp <= -NTP_MAXFREQ)

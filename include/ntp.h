@@ -122,7 +122,7 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* minimum survivors */
 #define	NTP_MAXCLOCK	10	/* maximum candidates */
 #define MAXDISTANCE	1.	/* max root distance */
-#define CLOCK_SGATE	4.	/* popcorn spike gate */
+#define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
 #define HYST_TC		.875	/* anti-clockhop hysteresis decay */
