@@ -7,19 +7,19 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_IRIG)
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
-#include <math.h>
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <math.h>
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+
 #include "audio.h"
 
 /*

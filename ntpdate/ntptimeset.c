@@ -121,9 +121,17 @@
 # include <config.h>
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include "ntp_fp.h"
+#include "ntp.h"
+#include "ntp_io.h"
+#include "iosignal.h"
+#include "ntp_unixtime.h"
+#include "ntpdate.h"
+#include "ntp_string.h"
+#include "ntp_syslog.h"
+#include "ntp_select.h"
+#include "ntp_stdlib.h"
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -136,7 +144,7 @@
 # include <sys/signal.h>
 # include <sys/ioctl.h>
 #endif /* SYS_WINNT */
-#include <sys/time.h>
+
 #ifdef HAVE_SYS_RESOURCE_H
 # include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
@@ -147,21 +155,6 @@
 # include "timers.h"
 #endif
 
-
-#if defined(SYS_HPUX)
-# include <utmp.h>
-#endif
-
-#include "ntp_fp.h"
-#include "ntp.h"
-#include "ntp_io.h"
-#include "iosignal.h"
-#include "ntp_unixtime.h"
-#include "ntpdate.h"
-#include "ntp_string.h"
-#include "ntp_syslog.h"
-#include "ntp_select.h"
-#include "ntp_stdlib.h"
 #include "recvbuff.h"
 
 #ifdef SYS_WINNT

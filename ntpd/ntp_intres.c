@@ -20,10 +20,14 @@
 # include <config.h>
 #endif
 
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_request.h"
+#include "ntp_stdlib.h"
+#include "ntp_syslog.h"
+
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <netdb.h>
 #include <signal.h>
 
@@ -34,12 +38,6 @@
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
-
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_request.h"
-#include "ntp_stdlib.h"
-#include "ntp_syslog.h"
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 

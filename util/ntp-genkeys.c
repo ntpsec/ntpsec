@@ -6,23 +6,21 @@
 # include <config.h>
 #endif
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <limits.h>		/* PATH_MAX */
-#include <sys/stat.h>		/* for umask() and stat() */
-#include <sys/time.h>
-
-#ifdef HAVE_NETINFO
-#include <netinfo/ni.h>
-#endif
-
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
 #include "ntp_filegen.h"
 #include "ntp_unixtime.h"
 #include "ntp_config.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>		/* PATH_MAX */
+#include <sys/stat.h>
+
+#ifdef HAVE_NETINFO
+#include <netinfo/ni.h>
+#endif
 
 #ifdef PUBKEY
 # include "ntp_crypto.h"

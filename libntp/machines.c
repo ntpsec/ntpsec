@@ -13,10 +13,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

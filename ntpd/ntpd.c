@@ -1,11 +1,15 @@
 /*
  * ntpd.c - main program for the fixed point NTP daemon
  */
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
-#include <sys/types.h>
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_stdlib.h"
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -21,7 +25,6 @@
 # ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 # endif /* HAVE_SYS_IOCTL_H */
-# include <sys/time.h>
 # ifdef HAVE_SYS_RESOURCE_H
 #  include <sys/resource.h>
 # endif /* HAVE_SYS_RESOURCE_H */
@@ -68,10 +71,6 @@
 # include <apollo/base.h>
 #endif /* SYS_DOMAINOS */
 
-#include "ntpd.h"
-#include "ntp_io.h"
-
-#include "ntp_stdlib.h"
 #include "recvbuff.h"  
 #include "ntp_cmdargs.h"  
 

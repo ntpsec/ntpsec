@@ -9,20 +9,20 @@
  * For more information, see the README.kern file in the doc directory
  * of the xntp3 distribution.
  */
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif /* HAVE_CONFIG_H */
-
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
-#include <signal.h>
-#include <setjmp.h>
 
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_syscall.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
+#include <setjmp.h>
 
 #ifdef NTP_SYSCALLS_STD
 # ifndef SYS_DECOSF1

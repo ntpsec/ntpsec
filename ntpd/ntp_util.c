@@ -1,23 +1,9 @@
 /*
  * ntp_util.c - stuff I didn't have any other place for
  */
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif
-
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
-#include <sys/time.h>
-
-#ifdef HAVE_IEEEFP_H
-# include <ieeefp.h>
-#endif
-#ifdef HAVE_MATH_H
-# include <math.h>
 #endif
 
 #include "ntpd.h"
@@ -26,6 +12,20 @@
 #include "ntp_filegen.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
+
+#ifdef HAVE_IEEEFP_H
+# include <ieeefp.h>
+#endif
+#ifdef HAVE_MATH_H
+# include <math.h>
+#endif
 
 #ifdef  DOSYNCTODR
 #if !defined(VMS)

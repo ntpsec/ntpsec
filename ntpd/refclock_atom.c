@@ -16,9 +16,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_ATOM)
 
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
 #ifdef HAVE_PPSAPI
 # ifdef HAVE_TIMEPPS_H
 #  include <timepps.h>

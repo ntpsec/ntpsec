@@ -28,8 +28,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/time.h>
-#include <time.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"

@@ -5,17 +5,17 @@
 # include <config.h>
 #endif
 
+#include "ntp_machine.h"
+#include "ntpd.h"
+#include "ntp_stdlib.h"
+
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <signal.h>
 #include <sys/signal.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#include "ntp_machine.h"
-#include "ntpd.h"
-#include "ntp_stdlib.h"
+
 #if defined(HAVE_IO_COMPLETION_PORT)
 # include "ntp_iocompletionport.h"
 # include "ntp_timer.h"

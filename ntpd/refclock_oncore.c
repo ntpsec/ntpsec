@@ -85,10 +85,14 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
 
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_unixtime.h"
+#include "ntp_refclock.h"
+#include "ntp_stdlib.h"
+
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 #ifdef ONCORE_SHMEM_STATUS
 # ifdef HAVE_SYS_MMAN_H
@@ -100,11 +104,11 @@
 #endif /* ONCORE_SHMEM_STATUS */
 
 #ifdef HAVE_PPSAPI
-#  ifdef HAVE_TIMEPPS_H
-#    include <timepps.h>
+# ifdef HAVE_TIMEPPS_H
+#  include <timepps.h>
 # else
 #  ifdef HAVE_SYS_TIMEPPS_H
-#    include <sys/timepps.h>
+#   include <sys/timepps.h>
 #  endif
 # endif
 #endif
@@ -113,14 +117,8 @@
 # include <sys/sio.h>
 #endif
 
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_unixtime.h"
-#include "ntp_refclock.h"
-#include "ntp_stdlib.h"
-
 #ifdef HAVE_SYS_TERMIOS_H
-#include <sys/termios.h>
+# include <sys/termios.h>
 #endif
 
 #ifdef HAVE_SYS_PPSCLOCK_H

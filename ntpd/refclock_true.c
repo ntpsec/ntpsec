@@ -12,15 +12,14 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_TRUETIME)
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
 
 /* This should be an atom clock but those are very hard to build.
  *

@@ -13,12 +13,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_SHM)
 
-#undef fileno   
-#include <ctype.h>
-#undef fileno   
-#include <sys/time.h>
-#undef fileno   
-
 #include "ntpd.h"
 #undef fileno   
 #include "ntp_io.h"
@@ -29,15 +23,16 @@
 #undef fileno   
 #include "ntp_stdlib.h"
 
+#undef fileno   
+#include <ctype.h>
+#undef fileno   
+
 #ifndef SYS_WINNT
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <assert.h>
-#include <time.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+# include <sys/ipc.h>
+# include <sys/shm.h>
+# include <assert.h>
+# include <unistd.h>
+# include <stdio.h>
 #endif
 
 /*

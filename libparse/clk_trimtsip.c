@@ -12,9 +12,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_TRIMTSIP)
 
-#include <sys/types.h>
-#include <sys/time.h>
-
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"

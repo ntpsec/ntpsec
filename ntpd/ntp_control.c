@@ -5,17 +5,15 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <sys/time.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
 
 #ifdef PUBKEY
 #include "ntp_crypto.h"

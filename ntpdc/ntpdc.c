@@ -1,12 +1,16 @@
 /*
  * ntpdc - control and monitor your ntpd daemon
  */
+
+#include "ntpdc.h"
+#include "ntp_select.h"
+#include "ntp_io.h"
+#include "ntp_stdlib.h"
+
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <netdb.h>
 
 #ifdef SYS_WINNT
@@ -19,11 +23,6 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif /* HAVE_LIBREADLINE */
-
-#include "ntpdc.h"
-#include "ntp_select.h"
-#include "ntp_io.h"
-#include "ntp_stdlib.h"
 
 #ifdef SYS_VXWORKS
 /* vxWorks needs mode flag -casey*/

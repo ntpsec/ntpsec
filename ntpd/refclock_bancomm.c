@@ -32,18 +32,16 @@
 #endif
 
 #if defined(REFCLOCK) && defined(CLOCK_BANC) 
-#include <stdio.h>
-#include <syslog.h>
-#include <ctype.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/time.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <syslog.h>
+#include <ctype.h>
 
 /*  STUFF BY RES */
 struct btfp_time                /* Structure for reading 5 time words   */

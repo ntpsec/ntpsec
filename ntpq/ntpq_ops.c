@@ -1,14 +1,13 @@
 /*
  * ntpdc_ops.c - subroutines which are called to perform operations by ntpdc
  */
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netdb.h>
 
 #include "ntpq.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <netdb.h>
 
 extern char *	chosts[];
 extern char currenthost[];

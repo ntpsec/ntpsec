@@ -13,22 +13,6 @@
 # include <config.h>
 #endif
 
-#include <stdio.h>
-#include <signal.h>
-#include <ctype.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/signal.h>
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
-#include <sys/time.h>
-#include <sys/resource.h>
-
-#if defined(SYS_HPUX)
-#include <utmp.h>
-#endif
-
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_io.h"
@@ -39,6 +23,17 @@
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
 #include "recvbuff.h"
+
+#include <stdio.h>
+#include <signal.h>
+#include <ctype.h>
+#include <netdb.h>
+#include <sys/signal.h>
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
+#include <sys/resource.h>
+
 /*
  * only 16 stratums, so this is more than enough.
  */

@@ -7,26 +7,17 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_HEATH)
 
-#include <stdio.h>
-#include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# ifdef TM_IN_SYS_TIME
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif /* not HAVE_SYS_IOCTL_H */
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif /* not HAVE_SYS_IOCTL_H */
 
 /*
  * This driver supports the Heath GC-1000 Most Accurate Clock, with

@@ -1,18 +1,6 @@
 /*
  * ntpq - query an NTP server using mode 6 commands
  */
-#include <stdio.h>
-#include <ctype.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netdb.h>
-#ifdef SYS_WINNT
-# include <io.h>
-#else
-#define closesocket close
-#endif /* SYS_WINNT */
 
 #include "ntpq.h"
 #include "ntp_unixtime.h"
@@ -20,6 +8,17 @@
 #include "ntp_io.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <netdb.h>
+#ifdef SYS_WINNT
+# include <io.h>
+#else
+#define closesocket close
+#endif /* SYS_WINNT */
 
 #ifdef SYS_VXWORKS
 /* vxWorks needs mode flag -casey*/

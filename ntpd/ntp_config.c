@@ -5,25 +5,6 @@
 # include <config.h>
 #endif
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/param.h>
-#include <sys/types.h>
-#include <signal.h>
-#ifndef SIGCHLD
-#define SIGCHLD SIGCLD
-#endif
-#if !defined(VMS)
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#endif /* VMS */
-#include <sys/time.h>
-
-#ifdef HAVE_NETINFO
-#include <netinfo/ni.h>
-#endif
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -34,11 +15,28 @@
 #include "ntp_cmdargs.h"
 
 #ifdef PUBKEY
-#include "ntp_crypto.h"
+# include "ntp_crypto.h"
 #endif /* PUBKEY */
 
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/param.h>
+#include <signal.h>
+#ifndef SIGCHLD
+# define SIGCHLD SIGCLD
+#endif
+#if !defined(VMS)
+# ifdef HAVE_SYS_WAIT_H
+#  include <sys/wait.h>
+# endif
+#endif /* VMS */
+
+#ifdef HAVE_NETINFO
+# include <netinfo/ni.h>
+#endif
+
 #ifdef SYS_WINNT
-#include <io.h>
+# include <io.h>
 extern HANDLE ResolverThreadHandle;
 #endif /* SYS_WINNT */
 

@@ -8,13 +8,13 @@
 #endif
 
 #ifdef REFCLOCK
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
 
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
 
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"

@@ -11,16 +11,13 @@
  * (hence probably didn't work).  Still in RCS file at cl.cam.ac.uk
  */
 
-#include <ctype.h>
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
+
+#include <ctype.h>
 #if defined(HAVE_BSD_TTYS)
 #include <sgtty.h>
 #endif /* HAVE_BSD_TTYS */

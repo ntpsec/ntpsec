@@ -8,8 +8,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PCF)
 
-#include <time.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"

@@ -6,18 +6,16 @@
 # include <config.h>
 #endif
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
-
-
-#include <signal.h>
-#include <setjmp.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <ctype.h>
+
+#include <signal.h>
+#include <setjmp.h>
 
 #if defined(VMS) && defined(VMS_LOCALUNIT)	/*wjm*/
 #include "ntp_refclock.h"

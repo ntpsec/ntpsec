@@ -23,10 +23,6 @@
  * 
  */
 
-
-#include <sys/types.h>
-#include <sys/time.h>
-
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"

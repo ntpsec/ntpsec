@@ -39,21 +39,19 @@
 # include <config.h>
 #endif
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netdb.h>
-#include <signal.h>
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_request.h"
 #include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+
+#include <stdio.h>
+#include <ctype.h>
+#include <netdb.h>
+#include <signal.h>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 

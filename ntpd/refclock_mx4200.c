@@ -49,21 +49,17 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_MX4200) && defined(HAVE_PPSAPI)
 
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
+#include <stdio.h>
+#include <ctype.h>
+
 #include "mx4200.h"
 
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
 #ifdef HAVE_SYS_TERMIOS_H
 # include <sys/termios.h>
 #endif

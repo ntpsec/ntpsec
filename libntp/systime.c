@@ -2,13 +2,13 @@
  * systime -- routines to fiddle a UNIX clock.
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "ntp_proto.h"		/* for MAX_FREQ */
+#include "ntp_machine.h"
+#include "ntp_fp.h"
+#include "ntp_syslog.h"
+#include "ntp_unixtime.h"
+#include "ntp_stdlib.h"
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
@@ -18,13 +18,6 @@
 #ifdef HAVE_UTMPX_H
 # include <utmpx.h>
 #endif /* HAVE_UTMPX_H */
-
-#include "ntp_proto.h"		/* for MAX_FREQ */
-#include "ntp_machine.h"
-#include "ntp_fp.h"
-#include "ntp_syslog.h"
-#include "ntp_unixtime.h"
-#include "ntp_stdlib.h"
 
 int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
 

@@ -8,13 +8,13 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
-#include <sys/time.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "ntp_types.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define NBUF 100001		/* size of basic histogram */
 #define NSRT 20000		/* size of overflow histogram */

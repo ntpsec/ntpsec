@@ -5,13 +5,6 @@
 # include <config.h>
 #endif
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <signal.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_request.h"
@@ -19,6 +12,12 @@
 #include "ntp_refclock.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
+
+#include <stdio.h>
+#include <signal.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "recvbuff.h"
 
 #ifdef KERNEL_PLL

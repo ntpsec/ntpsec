@@ -6,10 +6,13 @@
 # include <config.h>
 #endif
 
+#include "ntpdc.h"
+#include "ntp_control.h"
+#include "ntp_refclock.h"
+#include "ntp_stdlib.h"
+
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/timex.h>
 #endif
@@ -17,11 +20,6 @@
 #if !defined(__bsdi__) && !defined(apollo)
 #include <netinet/in.h>
 #endif
-
-#include "ntpdc.h"
-#include "ntp_control.h"
-#include "ntp_refclock.h"
-#include "ntp_stdlib.h"
 
 #include <arpa/inet.h>
 
