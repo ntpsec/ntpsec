@@ -1,3 +1,9 @@
+2000-05-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* scripts/mkver.in (ConfStr): Use -r if we're using RSAREF,
+	otherwise use -a if we're using autokey, otherwise use no extra
+	suffix.
+
 2000-05-11  Sven Dietrich  <sven_dietrich@trimble.com>
 
 	* ports/winnt/include/config.h: New defines to support AUTOKEY

@@ -5,11 +5,13 @@ ConfStr="$PROG"
 
 ConfStr="$ConfStr @VERSION@"
 
-case "@AUTOKEY@" in
- '') ConfStr="${ConfStr}-a" ;;
-esac
 case "@LIBRSAREF@" in
- '') ;;
+ '')
+    case "@AUTOKEY@" in
+     '') ;;
+     *) ConfStr="${ConfStr}-a" ;;
+    esac
+    ;;
  *)  ConfStr="${ConfStr}-r" ;;
 esac
 
