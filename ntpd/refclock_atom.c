@@ -118,7 +118,7 @@ atom_start(
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
 	register struct ppsunit *up;
-	int mode, temp;
+	int mode;
 	pps_handle_t handle;
 #endif /* HAVE_PPSAPI */
 
@@ -170,32 +170,31 @@ atom_start(
 		    "refclock_atom: time_pps_getcap failed: %m");
 		return (0);
 	}
-	up->pps_params.mode = mode & PPS_CAPTUREBOTH;
+	if (pps_assert)
+		up->pps_params.mode = mode & PPS_CAPTUREASSERT;
+	else
+		up->pps_params.mode = mode & PPS_CAPTURECLEAR;
 	if (time_pps_setparams(handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
 		return (0);
 	}
-	if (!pps_hardpps)
-		temp = 0;
-	else if (pps_assert)
-		temp = mode & PPS_CAPTUREASSERT;
-	else
-		temp = mode & PPS_CAPTURECLEAR;
-	if (time_pps_kcbind(handle, PPS_KC_HARDPPS, temp,
-	    PPS_TSFMT_TSPEC) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_atom: time_pps_kcbind failed: %m");
-		return (0);
+	if (pps_hardpps) {
+		if (time_pps_kcbind(handle, PPS_KC_HARDPPS,
+		    up->pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
+			msyslog(LOG_ERR,
+			    "refclock_atom: time_pps_kcbind failed: %m");
+			return (0);
+		}
 	}
 	(void)time_pps_getparams(handle, &up->pps_params);
 	up->handle = handle;
 #if DEBUG
 	if (debug)
 		printf(
-		    "refclock_atom: %s handle %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-		    pps_device, (int)up->handle, up->pps_params.api_version,
-		    up->pps_params.mode, mode);
+		    "refclock_atom: %s vers %d cap 0x%x mode 0x%x\n",
+		    pps_device, up->pps_params.api_version, mode,
+		    up->pps_params.mode);
 #endif
 #endif /* HAVE_PPSAPI */
 	return (1);
@@ -244,16 +243,16 @@ atom_pps(
 {
 	register struct ppsunit *up;
 	struct refclockproc *pp;
+	pps_info_t pps_info;
 	struct timespec timeout, ts;
-	double doffset;
-	int i;
+	double dtemp;
 
 	/*
-	 * Convert the timeval to l_fp and save for billboards. Sign-
-	 * extend the fraction and stash in the buffer. No harm is done
-	 * if previous data are overwritten. If the discipline comes bum
-	 * or the data grow stale, just forget it. A range gate rejects
-	 * new samples if less than a jiggle time from the next second.
+	 * Convert the timespec nanoseconds field to signed double and
+	 * save in the median filter. for billboards. No harm is done if
+	 * previous data are overwritten. If the discipline comes bum or
+	 * the data grow stale, just forget it. A range gate rejects new
+	 * samples if less than a jiggle time from the next second.
 	 */ 
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
@@ -261,27 +260,36 @@ atom_pps(
 		return (1);
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
-	i = up->pps_info.assert_sequence;
-	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC,
-	    &up->pps_info, &timeout) < 0)
+	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
+	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
+	    &timeout) < 0)
 		return (-1);
-	if (i == up->pps_info.assert_sequence)
-		return (1);
-	if (up->pps_info.current_mode & PPS_CAPTUREASSERT)
+	if (up->pps_info.current_mode & PPS_CAPTUREASSERT) {
+		if (pps_info.assert_sequence ==
+		    up->pps_info.assert_sequence)
+			return (1);
 		ts = up->pps_info.assert_timestamp;
-	else if (up->pps_info.current_mode & PPS_CAPTURECLEAR)
+	} else if (up->pps_info.current_mode & PPS_CAPTURECLEAR) {
+		if (pps_info.clear_sequence ==
+		    up->pps_info.clear_sequence)
+			return (1);
 		ts = up->pps_info.clear_timestamp;
-	else
+	} else {
 		return (-1);
+	}
 	if (ts.tv_sec == up->ts.tv_sec && ts.tv_nsec < up->ts.tv_nsec +
 	    RANGEGATE)
 		return (1);
 	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
+	dtemp = ts.tv_nsec * FRAC / 1e9;
+	if (dtemp >= FRAC)
+		pp->lastrec.l_ui++;
+	pp->lastrec.l_uf = (u_int32)dtemp;
 	if (ts.tv_nsec > NANOSECOND / 2)
 		ts.tv_nsec -= NANOSECOND;
-	doffset = -ts.tv_nsec;
-	SAMPLE(doffset / NANOSECOND + pp->fudgetime1);
+	dtemp = -ts.tv_nsec;
+	SAMPLE(dtemp / NANOSECOND + pp->fudgetime1);
 	return (0);
 }
 #endif /* HAVE_PPSAPI */

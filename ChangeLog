@@ -1,3 +1,11 @@
+2000-09-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c (atom_start): Lose "temp", because we now
+	initially either CAPTUREASSERT or CAPTURECLEAR.
+	(atom_pps): pps_info_t is our friend.  Update comments to reflect
+	reality.  DTRT with pps_info.  Do some overflow checks.
+	From: Dave Mills.
+
 2000-09-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Much improved Solaris patch-level check for the
