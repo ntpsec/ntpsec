@@ -4,6 +4,7 @@
 
 	* ntpd/ntp_loopfilter.c: Lose syscall decl, it's handled in
 	l_stdlib.h now.
+	* ntpd/ntp_request.c: Ditto
 
 Mon May 31 18:49:49 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 

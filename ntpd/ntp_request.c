@@ -202,12 +202,6 @@ extern int stats_control;
 extern struct peer *peer_hash[];
 extern struct peer *sys_peer;
 
-#ifdef NTP_SYSCALLS_STD
-# ifdef DECL_SYSCALL
-extern int syscall      P((int, void *, ...));
-# endif	/* DECL_SYSCALL */
-#endif /* NTP_SYSCALLS_STD */
-
 /*
  * A hack.  To keep the authentication module clear of ntp-ism's, we
  * include a time reset variable for its stats here.
