@@ -1710,7 +1710,7 @@ clock_select(void)
 	int	nlist, nl3;
 
 	double	d, e, f;
-	int	allow, found, sw, osurv;
+	int	allow, sw, osurv;
 	double	high, low;
 	double	synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
@@ -1737,8 +1737,6 @@ clock_select(void)
 	sys_survivors = 0;
 	sys_prefer = NULL;
 	nlist = 0;
-	low = 1e9;
-	high = -1e9;
 	for (n = 0; n < HASH_SIZE; n++)
 		nlist += peer_hash_count[n];
 	if (nlist > list_alloc) {
@@ -1837,7 +1835,7 @@ clock_select(void)
 			endpoint[nl3++].val = e;
 
 			e = e - f;		/* Center point */
-			for ( ; i >= 0; i--) {
+			for (; i >= 0; i--) {
 				if (e >= endpoint[indx[i]].val)
 					break;
 				indx[i + 2] = indx[i];
@@ -1847,7 +1845,7 @@ clock_select(void)
 			endpoint[nl3++].val = e;
 
 			e = e - f;		/* Lower end */
-			for ( ; i >= 0; i--) {
+			for (; i >= 0; i--) {
 				if (e >= endpoint[indx[i]].val)
 					break;
 				indx[i + 1] = indx[i];
@@ -1869,31 +1867,67 @@ clock_select(void)
 	 * from the falsetickers. The original algorithm was described
 	 * in Keith Marzullo's dissertation, but has been modified for
 	 * better accuracy.
+	 *
+	 * Briefly put, we first assume there are no falsetickers, then
+	 * scan the candidate list first from the low end upwards and
+	 * then from the high end downwards. The scans stop when the
+	 * number of intersections equals the number of candidates less
+	 * the number of falsetickers. If this doesn't happen for a
+	 * given number of falsetickers, we bump the number of
+	 * falsetickers and try again. If the number of falsetickers
+	 * becomes equal to or greater than half the number of
+	 * candidates, the Albanians have won the Byzantine wars and
+	 * correct syncrhonization is not possible.
+	 *
+	 * Here, nlist is the number of candidates and allow is the
+	 * number of falsetickers.
  	 */
-	i = 0;
-	j = nl3 - 1;
-	allow = nlist;		/* falsetickers assumed */
-	found = 0;
-	while (allow > 0) {
-		allow--;
-		for (n = 0; i <= j; i++) {
-			n += endpoint[indx[i]].type;
-			if (n < 0)
+	low = 1e9;
+	high = -1e9;
+	for (allow = 0; allow < nlist / 2; allow++) {
+		int	found;
+
+		/*
+		 * Bound the interval (low, high) as the largest
+		 * interval containing points from presumed truechimers.
+		 */
+		found = 0;
+		n = 0;
+		for (i = 0; i < nl3; i++) {
+			low = endpoint[indx[i]].val;
+			n -= endpoint[indx[i]].type;
+			if (n >= nlist - allow)
 				break;
 			if (endpoint[indx[i]].type == 0)
 				found++;
 		}
-		for (n = 0; i <= j; j--) {
+		n = 0;
+		for (j = nl3 - 1; j >= 0; j--) {
+			high = endpoint[indx[j]].val;
 			n += endpoint[indx[j]].type;
-			if (n > 0)
+			if (n >= nlist - allow)
 				break;
 			if (endpoint[indx[j]].type == 0)
 				found++;
 		}
+
+		/*
+		 * If the number of candidates found outside the
+		 * interval is greater than the number of falsetickers,
+		 * then at least one truechimer is outside the interval,
+		 * so go around again. This is what makes this algorithm
+		 * different than Marzullo's.
+		 */
 		if (found > allow)
+			continue;
+
+		/*
+		 * If an interval containing truechimers is found, stop.
+		 * If not, increase the number of falsetickers and go
+		 * around again.
+		 */
+		if (high > low)
 			break;
-		low = endpoint[indx[i++]].val;
-		high = endpoint[indx[j--]].val;
 	}
 
 	/*
@@ -1902,7 +1936,7 @@ clock_select(void)
 	 * of them as the only survivor. Otherwise, give up and leave
 	 * the island to the rats.
 	 */
-	if ((allow << 1) >= nlist) {
+	if (high <= low) {
 		if (typeacts != 0) {
 			typeacts->status = CTL_PST_SEL_SANE;
 			peer_list[0] = typeacts;
