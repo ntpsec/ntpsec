@@ -358,7 +358,6 @@ as2201_poll(
 	struct peer *peer
 	)
 {
-	register struct as2201unit *up;
 	struct refclockproc *pp;
 
 	/*
@@ -367,7 +366,6 @@ as2201_poll(
 	 * eavesdropper watching the radio.
 	 */
 	pp = peer->procptr;
-	up = (struct as2201unit *)pp->unitptr;
 	if (write(pp->io.fd, "\r*toc\r", 6) != 6) {
 		refclock_report(peer, CEVNT_FAULT);
 	} else {

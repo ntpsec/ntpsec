@@ -1,5 +1,31 @@
 1999-11-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in:
+	* ntpd/ntpd.c:
+	DEC OSF cleanup (editorial comments by HMS)
+	From: Tom Smith <smith@cag.lkg.dec.com> 
+	
+	* ntpd/ntp_refclock.c: MAXUNIT bugfix
+	From: Marc.Brett@westgeo.com
+	
+	* ntpd/ntp_refclock.c:
+	* ntpd/ntpd.c:
+	* ntpd/refclock_arc.c:
+	* ntpd/refclock_as2201.c:
+	* ntpd/refclock_atom.c:
+	* ntpdc/ntpdc.c:
+	* ntpq/ntpq.c:
+	Code cleanup.
+	From: Marc.Brett@westgeo.com
+
+	* include/ntp_stdlib.h:
+	* libntp/systime.c:
+	* ntpd/ntp_proto.c:
+	Replaced the 'sco5_oldclock' variable with 'systime_10ms_ticks'. 
+	Cleared libntp/systime.c and include/ntp_stdlib.h of references
+	to SCO5_CLOCK and RELIANTUNIX_CLOCK (moved to ntpd/ntp_proto.c). 
+	From: Kamal A Mostafa <kamal@whence.com>	
+
 	* configure.in: alpha-dec-osf4* -> alpha*-dec-osf4*|alpha*-dec-osf5*
 	From: Tom Smith <smith@cag.lkg.dec.com>
 

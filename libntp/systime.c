@@ -31,9 +31,7 @@ extern DWORD units_per_tick;
 static long last_Adj = 0;
 #endif
 
-#if defined SCO5_CLOCK
-int sco5_oldclock;	/* runtime detection of new clock */
-#endif /* SCO5_CLOCK */
+int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
 
 #define MAXFREQ 500e-6
 
@@ -82,10 +80,7 @@ get_systime(
 	(void) GETTIMEOFDAY(&tv, (struct timezone *)0);
 	now->l_i = tv.tv_sec + JAN_1970;
 
-#if defined(SCO5_CLOCK) || defined(RELIANTUNIX_CLOCK)
-#if defined(SCO5_CLOCK)
-	if (sco5_oldclock == 1) {
-#endif /* SCO5_CLOCK */
+	if (systime_10ms_ticks) {
 		/* fake better than 10ms resolution by interpolating 
 	   	accumulated residual (in adj_systime(), see below) */
 		dtemp = tv.tv_usec / 1e6;
@@ -97,12 +92,7 @@ get_systime(
 			}
 		}
 		dtemp *= FRAC;
-#if defined(SCO5_CLOCK)
-	}
-	else	/* HEY!!! Watch this "else" statement ... */
-#endif /* SCO5_CLOCK */
-#endif /* SCO5_CLOCK || RELIANTUNIX_CLOCK */
-	{	/* HEY!!! See that "else" statement up there??? */
+	} else {
 		dtemp = tv.tv_usec * FRAC / 1e6;
 	}
 
@@ -144,32 +134,21 @@ adj_systime(
 		dtemp = -dtemp;
 	}
 
-#if defined(SCO5_CLOCK) || defined(RELIANTUNIX_CLOCK)
-#if defined(SCO5_CLOCK)
-	if (sco5_oldclock == 1) {
-#endif /* SCO5_CLOCK */
+	if (systime_10ms_ticks) {
 		/* accumulate changes until we have enough to adjust a tick */
 		if (dtemp < 5000e-6) {
 			if (isneg) sys_residual = -dtemp;
 			else sys_residual = dtemp;
 			dtemp = 0;
-		}
-		else {
+		} else {
 			if (isneg) sys_residual = 10000e-6 - dtemp;
 			else sys_residual = dtemp - 10000e-6;
 			dtemp = 10000e-6;
 		}
-#if defined(SCO5_CLOCK)
-	}
-	else {
+	} else {
 		if (dtemp > sys_maxfreq)
 			dtemp = sys_maxfreq;
 	}
-#endif /* SCO5_CLOCK */
-#else  /* SCO5_CLOCK || RELIANTUNIX_CLOCK */
-  	if (dtemp > sys_maxfreq)
-  		dtemp = sys_maxfreq;
-#endif /* SCO5_CLOCK */
 
 #ifdef SYS_WINNT
 	dtemp = dtemp * 1000000.0;

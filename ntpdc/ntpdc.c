@@ -1206,14 +1206,14 @@ getarg(
  */
 static int
 getnetnum(
-	const char *host,
+	const char *hname,
 	u_int32 *num,
 	char *fullhost
 	)
 {
 	struct hostent *hp;
 
-	if (decodenetnum(host, num)) {
+	if (decodenetnum(hname, num)) {
 		if (fullhost != 0) {
 			(void) sprintf(fullhost,
 				       "%u.%u.%u.%u", (u_int)((htonl(*num)>>24)&0xff),
@@ -1221,13 +1221,13 @@ getnetnum(
 				       (u_int)(htonl(*num)&0xff));
 		}
 		return 1;
-	} else if ((hp = gethostbyname(host)) != 0) {
+	} else if ((hp = gethostbyname(hname)) != 0) {
 		memmove((char *)num, hp->h_addr, sizeof(u_int32));
 		if (fullhost != 0)
 		    (void) strcpy(fullhost, hp->h_name);
 		return 1;
 	} else {
-		(void) fprintf(stderr, "***Can't find host %s\n", host);
+		(void) fprintf(stderr, "***Can't find host %s\n", hname);
 		return 0;
 	}
 	/*NOTREACHED*/
@@ -1661,7 +1661,7 @@ error(
  */
 static u_long
 getkeyid(
-	const char *prompt
+	const char *keyprompt
 	)
 {
 	register char *p;
@@ -1677,7 +1677,7 @@ getkeyid(
 		fi = stdin;
 	    else
 		setbuf(fi, (char *)NULL);
-	fprintf(stderr, "%s", prompt); fflush(stderr);
+	fprintf(stderr, "%s", keyprompt); fflush(stderr);
 	for (p=pbuf; (c = getc(fi))!='\n' && c!=EOF;) {
 		if (p < &pbuf[18])
 		    *p++ = c;

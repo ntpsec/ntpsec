@@ -909,7 +909,8 @@ service_main(
 		 */
 	}
 # endif /* HAVE_IO_COMPLETION_PORT */
-	exit(0);
+	exit(1); /* unreachable */
+	return 1;		/* DEC OSF cc braindamage */
 }
 
 

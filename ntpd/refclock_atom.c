@@ -433,7 +433,9 @@ atom_poll(
 	struct peer *peer
 	)
 {
+#if defined(PPS) || defined(HAVE_PPSAPI)
 	register struct atomunit *up;
+#endif /* PPS || HAVE_PPSAPI */
 	struct refclockproc *pp;
 
 	/*
@@ -442,8 +444,8 @@ atom_poll(
 	 * samples.
 	 */
 	pp = peer->procptr;
-	up = (struct atomunit *)pp->unitptr;
 #if defined(PPS) || defined(HAVE_PPSAPI)
+	up = (struct atomunit *)pp->unitptr;
 	if (!(up->flags & !(FLAG_AUX | FLAG_TTY))) {
 		int err;
 

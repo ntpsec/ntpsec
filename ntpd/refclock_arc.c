@@ -779,7 +779,7 @@ arc_receive(
 	struct peer *peer;
 	char c;
 	int i, n, wday, month, bst, status;
-	int last_offset;
+	int arc_last_offset;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -801,7 +801,7 @@ arc_receive(
 	}
 
 	/*
-	  The `last_offset' is the offset in lastcode[] of the last byte
+	  The `arc_last_offset' is the offset in lastcode[] of the last byte
 	  received, and which we assume actually received the input
 	  timestamp.
 
@@ -810,7 +810,7 @@ arc_receive(
 	  trailing \r, and that that \r will be timestamped.  But this
 	  assumption also works if receive the characters one-by-one.)
 	*/
-	last_offset = pp->lencode+rbufp->recv_length - 1;
+	arc_last_offset = pp->lencode+rbufp->recv_length - 1;
 
 	/*
 	  We catch a timestamp iff:
@@ -837,7 +837,7 @@ arc_receive(
 	   (pp->lencode == 1) &&
 #endif
 	   ((pp->lencode != 1) || (c != '\r')) &&
-	   (last_offset >= 1)) {
+	   (arc_last_offset >= 1)) {
 		/* Note that the timestamp should be corrected if >1 char rcvd. */
 		l_fp timestamp;
 		timestamp = rbufp->recv_time;
@@ -858,11 +858,11 @@ arc_receive(
 		  allow for the trailing \r, normally not used but a good
 		  handle for tty_clk or somesuch kernel timestamper.
 		*/
-		if(last_offset > LENARC) {
+		if(arc_last_offset > LENARC) {
 #ifdef ARCRON_DEBUG
 			if(debug) {
 				printf("arc: input code too long (%d cf %d); rejected.\n",
-				       last_offset, LENARC);
+				       arc_last_offset, LENARC);
 			}
 #endif
 			pp->lencode = 0;
@@ -870,16 +870,16 @@ arc_receive(
 			return;
 		}
 
-		L_SUBUF(&timestamp, charoffsets[last_offset]);
+		L_SUBUF(&timestamp, charoffsets[arc_last_offset]);
 #ifdef ARCRON_DEBUG
 		if(debug > 1) {
 			printf(
 				"arc: %s%d char(s) rcvd, the last for lastcode[%d]; -%sms offset applied.\n",
 				((rbufp->recv_length > 1) ? "*** " : ""),
 				rbufp->recv_length,
-				last_offset,
+				arc_last_offset,
 				mfptoms((unsigned long)0,
-					charoffsets[last_offset],
+					charoffsets[arc_last_offset],
 					1));
 		}
 #endif

@@ -208,7 +208,7 @@ refclock_newpeer(
 	}
 	clktype = (u_char)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
-	if (clktype >= num_refclock_conf || unit > MAXUNIT ||
+	if (clktype >= num_refclock_conf || unit >= MAXUNIT ||
 		refclock_conf[clktype]->clock_start == noentry) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock type %d invalid\n",
@@ -318,13 +318,11 @@ refclock_transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	struct refclockproc *pp;
 	u_char clktype;
 	int unit;
 	int hpoll;
 	u_long next;
 
-	pp = peer->procptr;
 	clktype = peer->refclktype;
 	unit = peer->refclkunit;
 	peer->sent++;
@@ -1189,7 +1187,7 @@ refclock_control(
 		return;
 	clktype = (u_char)REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
-	if (clktype >= num_refclock_conf || unit > MAXUNIT)
+	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
 		return;
 	if (!(peer = typeunit[clktype][unit]))
 		return;
@@ -1289,7 +1287,7 @@ refclock_buginfo(
 		return;
 	clktype = (u_char) REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
-	if (clktype >= num_refclock_conf || unit > MAXUNIT)
+	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
 		return;
 	if (!(peer = typeunit[clktype][unit]))
 		return;

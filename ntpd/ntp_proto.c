@@ -2037,17 +2037,18 @@ init_proto(void)
 #endif
 	msyslog(LOG_DEBUG, "kern_enable is %d", kern_enable);
 	stats_control = 1;
-#if defined SCO5_CLOCK
-	if ((int) sys_precision < -10) {
-		sco5_oldclock = 0;
-		msyslog(LOG_INFO, "new SCO clock detected");
-	}
-	else {
-		sco5_oldclock = 1;
-		msyslog(LOG_INFO, "old SCO clock; using ntp patches");
-	}
-#endif /* SCO5_CLOCK */
 
+	/*
+	 * Some system clocks should only be adjusted in 10ms increments.
+	 */
+#if defined RELIANTUNIX_CLOCK
+	systime_10ms_ticks = 1;			/* Reliant UNIX */
+#elif defined SCO5_CLOCK
+	if (sys_precision >= (s_char)-10)	/* pre- SCO OpenServer 5.0.6 */
+		systime_10ms_ticks = 1;
+#endif
+	if (systime_10ms_ticks)
+		msyslog(LOG_INFO, "using 10ms tick adjustments");
 }
 
 
