@@ -2085,6 +2085,7 @@ esac
 AC_SUBST(LIBPARSE)
 AC_SUBST(MAKE_LIBPARSE)
 AC_SUBST(MAKE_LIBPARSE_KERNEL)
+AC_SUBST(MAKE_CHECK_Y2K)
 AC_MSG_CHECKING(if we need to make and use the parse libraries)
 ans=no
 case "$ntp_libparse" in
@@ -2093,6 +2094,7 @@ case "$ntp_libparse" in
     AC_DEFINE(CLOCK_PARSE)
     LIBPARSE=../libparse/libparse.a
     MAKE_LIBPARSE=libparse.a
+    MAKE_CHECK_Y2K=check_y2k
     AC_DEFINE(PPS_SAMPLE)
     AC_DEFINE(CLOCK_ATOM)
     ;;

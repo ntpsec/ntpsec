@@ -1,5 +1,12 @@
 1999-08-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* parseutil/dcfd.c: Renamed drift_comp to accum_drift
+
+	* configure.in: Added MAKE_CHECK_Y2K support; check_y2k needs libparse.
+	* ntpd/Makefile.am (check_PROGRAMS): Use MAKE_CHECK_Y2K
+	* ntpd/Makefile.am (check-local): Added.
+	* parseutil/Makefile.am (check-local): Added.
+
 	* include/ntp.h: Y2KFixes
 	* libparse/parse.c: Ditto
 	* ntpd/Makefile.am (check_PROGRAMS): Ditto

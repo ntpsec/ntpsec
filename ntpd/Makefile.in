@@ -78,6 +78,7 @@ LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
+MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
 MAKE_LIBPARSE_KERNEL = @MAKE_LIBPARSE_KERNEL@
 MAKE_LIBRSAREF = @MAKE_LIBRSAREF@
@@ -98,8 +99,6 @@ VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
-							#	Y2Kfixes
-check_PROGRAMS = check_y2k
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD = version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
@@ -107,6 +106,9 @@ ntpd_LDADD = $(LDADD) -lm
 DISTCLEANFILES = .version version.c
 #EXTRA_DIST = ntpd.mak
 ETAGS_ARGS = Makefile.am
+###							Y2Kfixes
+check_PROGRAMS = @MAKE_CHECK_Y2K@
+EXTRA_PROGRAMS = check_y2k
 
 ntpd_SOURCES = map_vme.c ntp_config.c ntp_control.c ntp_io.c \
 	ntp_loopfilter.c ntp_monitor.c ntp_peer.c ntp_proto.c \
@@ -136,6 +138,11 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 ANSI2KNR = ../util/ansi2knr
+check_y2k_SOURCES = check_y2k.c
+check_y2k_OBJECTS =  check_y2k$U.o
+check_y2k_LDADD = $(LDADD)
+check_y2k_DEPENDENCIES =  version.o ../libntp/libntp.a
+check_y2k_LDFLAGS = 
 am_ntpd_OBJECTS =  map_vme$U.o ntp_config$U.o ntp_control$U.o ntp_io$U.o \
 ntp_loopfilter$U.o ntp_monitor$U.o ntp_peer$U.o ntp_proto$U.o \
 ntp_refclock$U.o ntp_request$U.o ntp_restrict$U.o ntp_timer$U.o \
@@ -156,20 +163,21 @@ ntpd_LDFLAGS =
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES =  $(ntpd_SOURCES)
+DIST_SOURCES =  check_y2k.c $(ntpd_SOURCES)
 DIST_COMMON =  Makefile.am Makefile.in
 
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 GZIP_ENV = --best
-DEP_FILES =  .deps/map_vme.P .deps/ntp_config.P .deps/ntp_control.P \
-.deps/ntp_filegen.P .deps/ntp_intres.P .deps/ntp_io.P \
-.deps/ntp_loopfilter.P .deps/ntp_monitor.P .deps/ntp_peer.P \
-.deps/ntp_proto.P .deps/ntp_refclock.P .deps/ntp_request.P \
-.deps/ntp_restrict.P .deps/ntp_timer.P .deps/ntp_util.P .deps/ntpd.P \
-.deps/refclock_acts.P .deps/refclock_arbiter.P .deps/refclock_arc.P \
-.deps/refclock_as2201.P .deps/refclock_atom.P .deps/refclock_bancomm.P \
+DEP_FILES =  .deps/check_y2k.P .deps/map_vme.P .deps/ntp_config.P \
+.deps/ntp_control.P .deps/ntp_filegen.P .deps/ntp_intres.P \
+.deps/ntp_io.P .deps/ntp_loopfilter.P .deps/ntp_monitor.P \
+.deps/ntp_peer.P .deps/ntp_proto.P .deps/ntp_refclock.P \
+.deps/ntp_request.P .deps/ntp_restrict.P .deps/ntp_timer.P \
+.deps/ntp_util.P .deps/ntpd.P .deps/refclock_acts.P \
+.deps/refclock_arbiter.P .deps/refclock_arc.P .deps/refclock_as2201.P \
+.deps/refclock_atom.P .deps/refclock_bancomm.P \
 .deps/refclock_chronolog.P .deps/refclock_chu.P .deps/refclock_conf.P \
 .deps/refclock_datum.P .deps/refclock_dumbclock.P \
 .deps/refclock_gpsvme.P .deps/refclock_heath.P .deps/refclock_hpgps.P \
@@ -179,8 +187,8 @@ DEP_FILES =  .deps/map_vme.P .deps/ntp_config.P .deps/ntp_control.P \
 .deps/refclock_parse.P .deps/refclock_pst.P .deps/refclock_ptbacts.P \
 .deps/refclock_shm.P .deps/refclock_tpro.P .deps/refclock_trak.P \
 .deps/refclock_true.P .deps/refclock_usno.P .deps/refclock_wwvb.P
-SOURCES = $(ntpd_SOURCES)
-OBJECTS = $(am_ntpd_OBJECTS)
+SOURCES = check_y2k.c $(ntpd_SOURCES)
+OBJECTS = check_y2k$U.o $(am_ntpd_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -221,6 +229,15 @@ uninstall-binPROGRAMS:
 	  rm -f $(DESTDIR)$(bindir)/$$f; \
 	done
 
+mostlyclean-checkPROGRAMS:
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+distclean-checkPROGRAMS:
+
+maintainer-clean-checkPROGRAMS:
+
 mostlyclean-compile:
 	-rm -f *.o core *.core
 
@@ -245,6 +262,11 @@ clean-kr:
 distclean-kr:
 
 maintainer-clean-kr:
+check_y2k$U.o:
+
+check_y2k: $(check_y2k_OBJECTS) $(check_y2k_DEPENDENCIES)
+	@rm -f check_y2k
+	$(LINK) $(check_y2k_LDFLAGS) $(check_y2k_OBJECTS) $(check_y2k_LDADD) $(LIBS)
 map_vme$U.o:
 ntp_config$U.o:
 ntp_control$U.o:
@@ -294,19 +316,11 @@ refclock_oncore$U.o:
 refclock_chronolog$U.o:
 refclock_dumbclock$U.o:
 
-								#Y2Kfixes [
-check_y2k.o: Makefile check_y2k.c ../config.h \
-	    ../include/ntp.h ../include/ntpd.h ../include/ntp_calendar.h
-	$(COMPILE) -o check_y2k.o -c check_y2k.c
-
-check_y2k: check_y2k.o 
-	@if [ -f check_y2k ]; then rm -f check_y2k; fi
-	$(LINK) $(ntpd_LDFLAGS) check_y2k.o $(ntpd_LDADD) $(LIBS)
-								#Y2Kfixes ]
-
 ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
 	@rm -f ntpd
 	$(LINK) $(ntpd_LDFLAGS) $(ntpd_OBJECTS) $(ntpd_LDADD) $(LIBS)
+check_y2k_.c: check_y2k.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/check_y2k.c; then echo $(srcdir)/check_y2k.c; else echo check_y2k.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > check_y2k_.c
 map_vme_.c: map_vme.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/map_vme.c; then echo $(srcdir)/map_vme.c; else echo map_vme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > map_vme_.c
 ntp_config_.c: ntp_config.c $(ANSI2KNR)
@@ -403,11 +417,11 @@ refclock_usno_.c: refclock_usno.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_usno.c; then echo $(srcdir)/refclock_usno.c; else echo refclock_usno.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_usno_.c
 refclock_wwvb_.c: refclock_wwvb.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwvb.c; then echo $(srcdir)/refclock_wwvb.c; else echo refclock_wwvb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwvb_.c
-map_vme_.o ntp_config_.o ntp_control_.o ntp_filegen_.o ntp_intres_.o \
-ntp_io_.o ntp_loopfilter_.o ntp_monitor_.o ntp_peer_.o ntp_proto_.o \
-ntp_refclock_.o ntp_request_.o ntp_restrict_.o ntp_timer_.o ntp_util_.o \
-ntpd_.o refclock_acts_.o refclock_arbiter_.o refclock_arc_.o \
-refclock_as2201_.o refclock_atom_.o refclock_bancomm_.o \
+check_y2k_.o map_vme_.o ntp_config_.o ntp_control_.o ntp_filegen_.o \
+ntp_intres_.o ntp_io_.o ntp_loopfilter_.o ntp_monitor_.o ntp_peer_.o \
+ntp_proto_.o ntp_refclock_.o ntp_request_.o ntp_restrict_.o \
+ntp_timer_.o ntp_util_.o ntpd_.o refclock_acts_.o refclock_arbiter_.o \
+refclock_arc_.o refclock_as2201_.o refclock_atom_.o refclock_bancomm_.o \
 refclock_chronolog_.o refclock_chu_.o refclock_conf_.o \
 refclock_datum_.o refclock_dumbclock_.o refclock_gpsvme_.o \
 refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
@@ -502,6 +516,8 @@ info: info-am
 dvi-am:
 dvi: dvi-am
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 installcheck-am:
 installcheck: installcheck-am
@@ -534,27 +550,28 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-compile \
-		mostlyclean-kr mostlyclean-tags mostlyclean-depend \
-		mostlyclean-generic
+mostlyclean-am:  mostlyclean-binPROGRAMS mostlyclean-checkPROGRAMS \
+		mostlyclean-compile mostlyclean-kr mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-binPROGRAMS clean-compile clean-kr clean-tags \
-		clean-depend clean-generic mostlyclean-am
+clean-am:  clean-binPROGRAMS clean-checkPROGRAMS clean-compile clean-kr \
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-binPROGRAMS distclean-compile distclean-kr \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+distclean-am:  distclean-binPROGRAMS distclean-checkPROGRAMS \
+		distclean-compile distclean-kr distclean-tags \
+		distclean-depend distclean-generic clean-am
 
 distclean: distclean-am
 
 maintainer-clean-am:  maintainer-clean-binPROGRAMS \
-		maintainer-clean-compile maintainer-clean-kr \
-		maintainer-clean-tags maintainer-clean-depend \
-		maintainer-clean-generic distclean-am
+		maintainer-clean-checkPROGRAMS maintainer-clean-compile \
+		maintainer-clean-kr maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -562,17 +579,21 @@ maintainer-clean: maintainer-clean-am
 
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-kr distclean-kr clean-kr \
-maintainer-clean-kr tags mostlyclean-tags distclean-tags clean-tags \
-maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
-clean-depend maintainer-clean-depend info-am info dvi-am dvi check \
-check-am installcheck-am installcheck install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all install-strip installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+mostlyclean-checkPROGRAMS distclean-checkPROGRAMS clean-checkPROGRAMS \
+maintainer-clean-checkPROGRAMS mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile mostlyclean-kr distclean-kr \
+clean-kr maintainer-clean-kr tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check-local check check-am installcheck-am installcheck \
+install-exec-am install-exec install-data-am install-data install-am \
+install uninstall-am uninstall all-redirect all-am all install-strip \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+check-local: @MAKE_CHECK_Y2K@
+	[ -z "@MAKE_CHECK_Y2K@" ] || ./@MAKE_CHECK_Y2K@
 
 $(PROGRAMS): $(LDADD)
 

@@ -166,7 +166,7 @@ static char pat[] = "-\\|/";
 static struct timeval max_adj_offset = { 0, 128000 };
 
 static long clock_adjust = 0;	/* current adjustment value (usec * 2^USECSCALE) */
-static long drift_comp   = 0;	/* accumulated drift value  (usec / ADJINTERVAL) */
+static long accum_drift   = 0;	/* accumulated drift value  (usec / ADJINTERVAL) */
 static long adjustments  = 0;
 static char skip_adjust  = 1;	/* discard first adjustment (bad samples) */
 
@@ -958,10 +958,10 @@ read_drift(
 		fclose(df);
 		LPRINTF("read_drift: %d.%03d ppm ", idrift, fdrift);
 
-		drift_comp = idrift << USECSCALE;
+		accum_drift = idrift << USECSCALE;
 		fdrift     = (fdrift << USECSCALE) / 1000;
-		drift_comp += fdrift & (1<<USECSCALE);
-		LPRINTF("read_drift: drift_comp %ld ", (long int)drift_comp);
+		accum_drift += fdrift & (1<<USECSCALE);
+		LPRINTF("read_drift: drift_comp %ld ", (long int)accum_drift);
 	}
 }
 
@@ -980,10 +980,10 @@ update_drift(
 	df = fopen(drift_file, "w");
 	if (df != NULL)
 	{
-		int idrift = R_SHIFT(drift_comp, USECSCALE);
-		int fdrift = drift_comp & ((1<<USECSCALE)-1);
+		int idrift = R_SHIFT(accum_drift, USECSCALE);
+		int fdrift = accum_drift & ((1<<USECSCALE)-1);
 
-		LPRINTF("update_drift: drift_comp %ld ", (long int)drift_comp);
+		LPRINTF("update_drift: drift_comp %ld ", (long int)accum_drift);
 		fdrift = (fdrift * 1000) / (1<<USECSCALE);
 		fprintf(df, "%4d.%03d %c%ld.%06ld %.24s\n", idrift, fdrift,
 			(offset < 0) ? '-' : '+', (long int)(abs(offset) / 1000000),
@@ -1042,18 +1042,18 @@ adjust_clock(
 	if (tmp > FREQ_WEIGHT)
 	    tmp = FREQ_WEIGHT;
 
-	drift_comp  += R_SHIFT(usecoffset << USECSCALE, TIMECONSTANT+TIMECONSTANT+FREQ_WEIGHT-tmp);
+	accum_drift  += R_SHIFT(usecoffset << USECSCALE, TIMECONSTANT+TIMECONSTANT+FREQ_WEIGHT-tmp);
 
-	if (drift_comp > MAX_DRIFT)		/* clamp into interval */
-	    drift_comp = MAX_DRIFT;
+	if (accum_drift > MAX_DRIFT)		/* clamp into interval */
+	    accum_drift = MAX_DRIFT;
 	else
-	    if (drift_comp < -MAX_DRIFT)
-		drift_comp = -MAX_DRIFT;
+	    if (accum_drift < -MAX_DRIFT)
+		accum_drift = -MAX_DRIFT;
 
 	update_drift(drift_file, usecoffset, reftime);
 	LPRINTF("clock_adjust: %s, clock_adjust %ld, drift_comp %ld(%ld) ",
 		pr_timeval(offset),(long int) R_SHIFT(clock_adjust, USECSCALE),
-		(long int)R_SHIFT(drift_comp, USECSCALE), (long int)drift_comp);
+		(long int)R_SHIFT(accum_drift, USECSCALE), (long int)accum_drift);
 }
 
 /*-----------------------------------------------------------------------
@@ -1072,7 +1072,7 @@ periodic_adjust(
 
 	clock_adjust -= adjustment;
 
-	adjustment += R_SHIFT(drift_comp, USECSCALE+ADJINTERVAL);
+	adjustment += R_SHIFT(accum_drift, USECSCALE+ADJINTERVAL);
 
 	adj_time(adjustment);
 }

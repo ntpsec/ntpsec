@@ -190,7 +190,7 @@ extern	void	record_raw_stats P((struct sockaddr_in *, struct sockaddr_in *, l_fp
  */
 
 /* ntp_config.c */
-extern char *	progname;
+extern char const *	progname;
 extern char	sys_phone[][MAXDIAL];	/* ACTS phone numbers */
 extern char	pps_device[];		/* PPS device name */
 #if defined(HAVE_SCHED_SETSCHEDULER)

@@ -5,3 +5,6 @@ EXTRA_PROGRAMS = testdcf dcfd
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 #EXTRA_DIST= TAGS
+
+check-local: dcfd
+	./dcfd -Y
