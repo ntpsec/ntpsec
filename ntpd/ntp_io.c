@@ -158,13 +158,15 @@ struct vsock {
 
 ISC_LIST(vsock_t)	sockets_list;
 
-struct vaddr {
+typedef struct remaddr remaddr_t;
+
+struct remaddr {
       struct sockaddr_storage        addr;
       int                            if_index;
-      ISC_LINK(struct vaddr)              link;
+      ISC_LINK(remaddr_t)              link;
 };
 
-ISC_LIST(struct vaddr)       remoteaddr_list;
+ISC_LIST(remaddr_t)       remoteaddr_list;
 
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
@@ -2192,7 +2194,7 @@ delete_socket_from_list(SOCKET fd) {
 }
 void
 add_addr_to_list(struct sockaddr_storage *addr, int if_index){
-	struct vaddr *laddr = malloc(sizeof(struct vaddr));
+	remaddr_t *laddr = malloc(sizeof(remaddr_t));
 	memcpy(&laddr->addr, addr, sizeof(addr));
 	laddr->if_index = if_index;
 
@@ -2208,8 +2210,8 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index){
 void
 delete_addr_from_list(struct sockaddr_storage *addr) {
 
-	struct vaddr *next;
-	struct vaddr *laddr = ISC_LIST_HEAD(remoteaddr_list);
+	remaddr_t *next;
+	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
@@ -2230,8 +2232,8 @@ delete_addr_from_list(struct sockaddr_storage *addr) {
 int
 find_addr_in_list(struct sockaddr_storage *addr) {
 
-	struct vaddr *next;
-	struct vaddr *laddr = ISC_LIST_HEAD(remoteaddr_list);
+	remaddr_t *next;
+	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 #ifdef DEBUG
 	if (debug)
 	    printf("Finding addr %s in list of addresses\n",

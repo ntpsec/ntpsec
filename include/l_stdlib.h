@@ -152,7 +152,9 @@ extern	int	snprintf	P((char *, size_t, const char *, ...));
 #endif
 
 /* HMS: does this need further protection? */
+#ifndef HAVE_VSNPRINTF
 extern	int	vsnprintf	P((char *, size_t, const char *, va_list));
+#endif
 
 #ifdef DECL_SRAND48_0
 extern	void	srand48		P((long));
