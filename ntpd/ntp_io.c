@@ -1891,7 +1891,7 @@ input_handler(
 						char buf[RX_BUFF_SIZE];
 
 						buflen = read(fd, buf, sizeof buf);
-						if (buflen < 0)
+						if (buflen <= 0)
 							break;	/* Done */
 						packets_dropped++;
 						if (buflen == 0)
@@ -1912,10 +1912,10 @@ input_handler(
 					if (buflen < 0)
 					{
 						freerecvbuf(rb);
-						if (errno != EINTR) {
-							netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
-							break;
+						if (errno != EINTR && errno != EAGAIN) {
+							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 						}
+						break;
 					}
 					if(buflen == 0)
 						totzeroreads++;
@@ -1959,9 +1959,10 @@ input_handler(
 					rp->recvcount++;
 					packets_received++;
 				} /* End while (totzeroreads < MAXZEROREADS) */
-			}
-		}
-	}
+			} /* End if (FD_ISSET(fd, &fds)) */
+		} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
+	} /* End if (refio != 0) */
+
 #endif /* REFCLOCK */
 
 	/*
