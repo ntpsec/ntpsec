@@ -1286,7 +1286,7 @@ wwv_rf(
 			dtemp += epobuf[k] * epobuf[k];
 			k++;
  		} 
-		up->eposnr = wwv_snr(epomax, sqrt(dtemp / MS));
+		up->eposnr = wwv_snr(epomax, dtemp / (MS / 2)) / 10.;
 		epopos -= pdelay + TCKCYC * MS;
 		if (epopos < 0)
 			epopos += SECOND;
@@ -1379,7 +1379,7 @@ wwv_qrz(
 	if (up->mphase == 0) {
 		sp->synmax = sp->maxeng;
 		sp->synsnr = wwv_snr(sp->synmax, sp->noieng / (MINUTE -
-		    2 * SECOND));
+		    2 * SECOND) / (MS / 2.) / SYNCYC) / 10.;
 		epoch = (sp->pos - sp->lastpos) % MINUTE;
 
 		/*
