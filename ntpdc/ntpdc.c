@@ -2,12 +2,13 @@
  * ntpdc - control and monitor your ntpd daemon
  */
 
+#include <stdio.h>
+
 #include "ntpdc.h"
 #include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
 
-#include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
