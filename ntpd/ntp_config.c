@@ -342,7 +342,6 @@ static char res_file[MAX_PATH];
 char const *progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
-char	pps_device[MAXPPS + 1]; /* PPS device name */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
