@@ -20,6 +20,15 @@
 
 static HANDLE hIoCompletionPort = NULL;
 
+static HANDLE WaitableIoEventHandle = NULL;
+
+HANDLE
+get_io_event()
+{
+	return( WaitableIoEventHandle );
+}
+
+
 static int 
 OnExitRequest(DWORD Key, struct IoCompletionInfo *Info, DWORD Bytes)
 {
@@ -82,6 +91,16 @@ init_io_completion_port(
 	void
 	)
 {
+	/* Create the event used to signal an IO event
+	 */
+	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (WaitableIoEventHandle == NULL) {
+		msyslog(LOG_ERR, "Can't create I/O event handle: %m");
+		exit(1);
+	}
+
+	/* Create the IO completion port
+	 */
 	hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (hIoCompletionPort == NULL) {
 		msyslog(LOG_ERR, "Can't create I/O completion port: %m");
@@ -156,6 +175,13 @@ OnIoReadComplete(DWORD i, struct IoCompletionInfo *Info, DWORD Bytes)
 		buff->dstadr = NULL;
 		buff->recv_srcclock = rio->srcclock;
 		add_full_recv_buffer(buff);
+		if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+			if (debug > 3) {
+				printf( "Error %d setting IoEventHandle\n", GetLastError() );
+			}
+#endif
+		}
 		buff = NULL;
 	}
 	else 
@@ -256,6 +282,13 @@ OnSocketRecv(DWORD i, struct IoCompletionInfo *Info, DWORD Bytes)
 	}
 #endif
 		add_full_recv_buffer(buff);
+		if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+			if (debug > 3) {
+				printf( "Error %d setting IoEventHandle\n", GetLastError() );
+			}
+#endif
+		}
 	}
 	else {
 		freerecvbuf(buff);
