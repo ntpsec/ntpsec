@@ -774,10 +774,6 @@ refclock_open(
 	u_long ltemp;
 #endif /* TIOCMGET */
 
-	flags = lflags;
-	if (strcmp(dev, pps_device) == 0)
-		flags |= LDISC_PPS;
-
 	/*
 	 * Open serial port and set default options
 	 */

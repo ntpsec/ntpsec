@@ -1,5 +1,8 @@
 1999-12-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_refclock.c (refclock_open): More PPS cleanup
+	From: Dave Mills <mills@udel.edu>
+
 	* ntpq/ntpq.c:
 	* ntpq/ntpq_ops.c:
 	Make `ntpq -pn' independent of DNS, ad advertised.
