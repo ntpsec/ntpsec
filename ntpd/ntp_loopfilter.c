@@ -695,8 +695,8 @@ local_clock(
 	if (debug)
 		printf(
 		    "local_clock: mu %.0f noi %.3f stb %.3f pol %d cnt %d\n",
-		    mu, sys_jitter * 1e6 / mu, clock_stability * 1e6,
-		    sys_poll, tc_counter);
+		    mu, sys_jitter * 1e6, clock_stability * 1e6, sys_poll,
+		    tc_counter);
 #endif /* DEBUG */
 	return (retval);
 }
