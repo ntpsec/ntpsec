@@ -1,5 +1,7 @@
 2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (ac_cv_var_atom_ok): Cleanup ATOM/PPSAPI stuff...
+
 	* scripts/ntp-close: Find "close" ntp servers.
 	From: Neal McBurnett <neal@bcn.boulder.co.us>
 

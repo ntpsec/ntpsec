@@ -1422,27 +1422,30 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+
+# ATOM/PPSAPI stuff.
+
+# ATOM used to require struct timespec, but that's been fixed now.
+
+# case "$ac_cv_struct_timespec" in
+#  'yes')
+#     ac_cv_var_atom_ok=yes
+#     ;;
+# esac
+ac_cv_var_atom_ok=yes
+
 # Check for header timepps.h, if found then we have PPS API (Draft RFC) stuff.
 
-# The PPSAPI headers use "inline", so we must have a STDC compiler to use
-# the PPSAPI.
+# The PPSAPI headers need "inline" ($ac_cv_c_inline='inline')
 
-# The PPSAPI needs ATOM, which needs struct timespec.
+# The PPSAPI needs ATOM
 
-case "$ac_cv_struct_timespec" in
- 'yes')
-    ac_cv_var_atom_ok=yes
-    ;;
-esac
+# The PPSAPI needs struct timespec.
 
-case "$ANSI2KNR" in
- '')
-    case "$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
-     yes*yes*)
-	AC_DEFINE(HAVE_PPSAPI)
-	ac_cv_var_oncore_ok=yes
-	;;
-    esac
+case "$ac_cv_c_inline$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
+ inlineyes*yes*)
+    AC_DEFINE(HAVE_PPSAPI)
+    ac_cv_var_oncore_ok=yes
     ;;
 esac
 
