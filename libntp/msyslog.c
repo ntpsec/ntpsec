@@ -20,8 +20,8 @@
 
 #include "ntp_types.h"
 #include "ntp_string.h"
-#include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+#include "ntp_stdlib.h"
 
 #ifdef SYS_WINNT
 # include "..\ports\winnt\libntp\log.h"

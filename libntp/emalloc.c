@@ -3,8 +3,8 @@
  */
 #include "ntp_types.h"
 #include "ntp_malloc.h"
-#include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+#include "ntp_stdlib.h"
 
 #if defined SYS_WINNT && defined DEBUG
 #include <crtdbg.h>

@@ -476,6 +476,9 @@
 /* Define if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Define if you have the `finite' function. */
+#undef HAVE_FINITE
+
 /* Define if you have the `getbootfile' function. */
 #undef HAVE_GETBOOTFILE
 
@@ -496,6 +499,9 @@
 
 /* Define if you have the <ieeefp.h> header file. */
 #undef HAVE_IEEEFP_H
+
+/* Define if you have the `isfinite' function. */
+#undef HAVE_ISFINITE
 
 /* Define if you have the `kvm_open' function. */
 #undef HAVE_KVM_OPEN
@@ -538,6 +544,9 @@
 
 /* Define if you have the <machine/inline.h> header file. */
 #undef HAVE_MACHINE_INLINE_H
+
+/* Define if you have the <math.h> header file. */
+#undef HAVE_MATH_H
 
 /* Define if you have the `memcpy' function. */
 #undef HAVE_MEMCPY

@@ -549,7 +549,7 @@ findhostaddr(
 #ifdef DEBUG
 		if (debug > 2) {
 			struct in_addr si;
-			char *hes;
+			const char *hes;
 #ifndef HAVE_HSTRERROR
 			char hnum[20];
 			

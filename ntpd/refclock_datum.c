@@ -438,7 +438,7 @@ datum_pts_poll(
 	)
 {
 	int i;
-	int index;
+	int unit_index;
 	int error_code;
 	struct datum_pts_unit *datum_pts;
 
@@ -451,10 +451,10 @@ datum_pts_poll(
 	** Find the right unit and send out a time request once it is found.
 	*/
 
-	index = -1;
+	unit_index = -1;
 	for (i=0; i<nunits; i++) {
 		if (datum_pts_unit[i]->unit == unit) {
-			index = i;
+			unit_index = i;
 			datum_pts = datum_pts_unit[i];
 			error_code = write(datum_pts->PTS_fd, TIME_REQUEST, 6);
 			if (error_code != 6) perror("TIME_REQUEST");
@@ -467,7 +467,7 @@ datum_pts_poll(
 	** Print out an error message if we could not find the right unit.
 	*/
 
-	if (index == -1) {
+	if (unit_index == -1) {
 
 #ifdef DEBUG_DATUM_PTC
 		if (debug)

@@ -16,6 +16,9 @@
 #ifdef HAVE_IEEEFP_H
 # include <ieeefp.h>
 #endif
+#ifdef HAVE_MATH_H
+# include <math.h>
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -351,7 +354,16 @@ stats_config(
 			break;
 		}
 		(void) fclose(fp);
-		if (   !finite(old_drift)
+		if (
+#ifdef HAVE_FINITE
+			!finite(old_drift)
+#else  /* not HAVE_FINITE */
+# ifdef HAVE_ISFINITE
+			!isfinite(old_drift)
+# else  /* not HAVE_ISFINITE */
+			0
+# endif /* not HAVE_ISFINITE */
+#endif /* not HAVE_FINITE */
 		    || (fabs(old_drift) > (NTP_MAXFREQ * 1e6))) {
 			msyslog(LOG_ERR, "invalid frequency (%f) in %s", 
 			    old_drift, stats_drift_file);

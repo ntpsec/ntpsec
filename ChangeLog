@@ -1,3 +1,19 @@
+2000-07-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_datum.c (datum_pts_poll): index -> unit_index
+	* ntpd/ntp_resolver.c (findhostaddr): const cleanup
+	* libntp/recvbuff.c: 
+	* libntp/msyslog.c: 
+	* libntp/emalloc.c: 
+	* libntp/authreadkeys.c:
+	Fix header order.
+	From: Simon Burge <simonb@netbsd.org>
+
+	* ntpd/ntp_util.c (stats_config): Use HAVE_FINITE and HAVE_ISFINITE
+	* configure.in (ac_cv_struct_ntptimeval_timespec): isfinite()
+	checks for HP-UX11.
+	From: Albert Chin-A-Young <china@thewrittenword.com>
+
 2000-07-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* flock-build (LIST): Lose malarky, update some machine/OS descriptions

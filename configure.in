@@ -192,9 +192,9 @@ AC_CHECK_LIB(rt, sched_setscheduler, ,
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h memory.h netdb.h poll.h)
-AC_CHECK_HEADERS(resolv.h sched.h sgtty.h stdlib.h string.h termio.h termios.h)
-AC_CHECK_HEADERS(timepps.h timex.h unistd.h utmp.h utmpx.h)
+AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
+AC_CHECK_HEADERS(poll.h resolv.h sched.h sgtty.h stdlib.h string.h termio.h)
+AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_systm.h netinet/in.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO)])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
@@ -555,8 +555,17 @@ case "$target" in
  *) AC_CHECK_FUNCS(clock_settime)
     ;;
 esac
-AC_CHECK_FUNCS(daemon getbootfile getdtablesize getrusage)
-AC_CHECK_FUNCS(gettimeofday)
+AC_CHECK_FUNCS(daemon)
+AC_CHECK_FUNCS(finite, ,
+  AC_CHECK_FUNCS(isfinite, ,
+    AC_MSG_CHECKING(for isfinite with <math.h>)
+    _libs=$LIBS
+    LIBS="$LIBS -lm"
+    AC_TRY_LINK([#include <math.h>], [float f = 0.0; isfinite(f)],
+      [AC_MSG_RESULT(yes)
+      AC_DEFINE(HAVE_ISFINITE)])
+    LIBS=$_libs))
+AC_CHECK_FUNCS(getbootfile getdtablesize getrusage gettimeofday)
 case "$target" in
  *-pc-cygwin*)
     ;;
