@@ -312,7 +312,6 @@ extern int	forground_process;	/* run the process in the forground */
 extern u_char	sys_poll;		/* system poll interval (log2 s) */
 extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
-extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
 extern double	allan_xpt;		/* Allan intercept (s) */
 extern double	clock_jitter;		/* clock jitter (s) */

@@ -120,9 +120,10 @@ static double clock_offset;	/* current offset (s) */
 double	clock_jitter;		/* offset jitter (s) */
 double	drift_comp;		/* frequency (s/s) */
 double	clock_stability;	/* frequency stability (s/s) */
-u_long	last_time;		/* last clock update time (s) */
-u_long	pps_control;		/* last pps sample time */
-static void rstclock P((int, double)); /* transition function */
+u_long	sys_clocktime;		/* last system clock update */
+u_long	pps_control;		/* last pps update */
+
+static void rstclock P((int, u_long, double)); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -181,7 +182,7 @@ init_loopfilter(void)
 	 * Initialize state variables. Initially, we expect no drift
 	 * file, so set the state to S_NSET.
 	 */
-	rstclock(S_NSET, 0);
+	rstclock(S_NSET, 0, 0);
 	clock_jitter = LOGTOD(sys_precision);
 }
 
@@ -321,7 +322,7 @@ local_clock(
 	 * stepped. 
 	 */
 	clock_frequency = flladj = plladj = 0;
-	mu = sys_clocktime - last_time;
+	mu = peer->epoch - sys_clocktime;
 	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
@@ -388,12 +389,12 @@ local_clock(
 			sys_poll = NTP_MINPOLL;
 			rval = 2;
 			if (state == S_NSET) {
-				rstclock(S_FREQ, 0);
+				rstclock(S_FREQ, peer->epoch, 0);
 				return (rval);
 			}
 			break;
 		}
-		rstclock(S_SYNC, 0);
+		rstclock(S_SYNC, peer->epoch, 0);
 	} else {
 		switch (state) {
 
@@ -405,7 +406,7 @@ local_clock(
 		 */
 		case S_NSET:
 			clock_offset = fp_offset;
-			rstclock(S_FREQ, fp_offset);
+			rstclock(S_FREQ, peer->epoch, fp_offset);
 			return (0);
 
 		/*
@@ -441,30 +442,30 @@ local_clock(
 			/*
 			 * The FLL and PLL frequency gain constants
 			 * depend on the poll interval and Allan
-			 * intercept. The PLL constant is calculated
-			 * throughout the poll interval range, but the
-			 * update interval is clamped so as not to
-			 * exceed the poll interval. The FLL gain is
-			 * zero below one-half the Allan intercept and
-			 * unity at MAXPOLL. It decreases as 1 /
-			 * (MAXPOLL + 1 - poll interval) in a feeble
-			 * effort to match the loop stiffness to the
-			 * Allan wobble. Particularly for the PLL, these
-			 * measures allow oversampling, but not
-			 * undersampling and insure stability even when
-			 * the rules of fair engagement are broken.
+			 * intercept. The FLL is not used below one-half
+			 * the Allan intercept. Above that the loop gain
+			 * increases in steps to 1 / CLOCK_AVG. 
 			 */
 			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
 				dtemp = CLOCK_FLL - sys_poll;
+				if (dtemp < CLOCK_AVG)
+					dtemp = CLOCK_AVG;
 				flladj = (fp_offset - clock_offset) /
 				    (max(mu, allan_xpt) * dtemp);
 			}
+
+			/*
+			 * For the PLL the integration interval
+			 * (numerator) is the minimum of the update
+			 * interval and poll interval. This allows
+			 * oversampling, but not undersampling.
+			 */ 
 			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			break;
 		}
-		rstclock(S_SYNC, fp_offset);
+		rstclock(S_SYNC, peer->epoch, fp_offset);
 	}
 
 #ifdef KERNEL_PLL
@@ -663,14 +664,14 @@ local_clock(
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
 	 */
-	record_loop_stats(last_offset, drift_comp, clock_jitter,
+	record_loop_stats(clock_offset, drift_comp, clock_jitter,
 	    clock_stability, sys_poll);
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %lu jitr %.3f freq %.3f stab %.3f poll %d count %d\n",
-		    mu, clock_jitter, drift_comp * 1e6, clock_stability *
-		    1e6, sys_poll, tc_counter);
+		    "local_clock: mu %lu jitr %.6f freq %.3f stab %.6f poll %d count %d\n",
+		    mu, clock_jitter, drift_comp * 1e6, clock_stability,
+		    sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (rval);
 #endif /* LOCKCLOCK */
@@ -722,10 +723,14 @@ adj_host_clock(
 		return;
 
 	/*
-	 * Implement the phase and frequency adjustments. Note the
-	 * black art formerly practiced here has been whitewashed.
+	 * Implement the phase and frequency adjustments. The gain
+	 * factor (denominator) is not allowed to increase beyond the
+	 * Allan intercept. It doesn't make sense to average phase noise
+	 * beyond this point and it helps to damp residual offset at the
+	 * longer poll intervals.
 	 */
-	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
+	adjustment = clock_offset / (CLOCK_PLL * min(ULOGTOD(sys_poll),
+	    allan_xpt));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 #endif /* LOCKCLOCK */
@@ -739,18 +744,19 @@ adj_host_clock(
  */
 static void
 rstclock(
-	int trans,		/* new state */
-	double offset		/* last offset */
+	int	trans,		/* new state */
+	u_long	update,		/* new update time */
+	double	offset		/* new offset */
 	)
 {
 	state = trans;
-	last_time = sys_clocktime;
+	sys_clocktime = update;
 	last_base = offset - clock_offset;
 	last_offset = clock_offset = offset;
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: time %lu clock %.6f offset %.6f freq %.3f state %d\n",
-		    last_time, last_base, last_offset, drift_comp *
+		printf("local_clock: time %lu base %.6f offset %.6f freq %.3f state %d\n",
+		    sys_clocktime, last_base, last_offset, drift_comp *
 		    1e6, trans);
 #endif
 }
@@ -875,7 +881,7 @@ loop_config(
 		 */
 		if (freq <= NTP_MAXFREQ && freq >= -NTP_MAXFREQ) {
 			drift_comp = freq;
-			rstclock(S_FSET, 0);
+			rstclock(S_FSET, 0, 0);
 		} else {
 			drift_comp = 0;
 		}
@@ -939,7 +945,7 @@ loop_config(
 
 	case LOOP_FREQ:			/* initial frequency */	
 		drift_comp = freq / 1e6;
-		rstclock(S_FSET, 0);
+		rstclock(S_FSET, 0, 0);
 		break;
 	}
 }
