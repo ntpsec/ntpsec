@@ -519,6 +519,10 @@ process_private(
 			/*
 			 * He's a loser.  Tell him.
 			 */
+#ifdef DEBUG
+			if (debug > 4)
+			    printf("xmit/rcv timestamp delta > INFO_TS_MAXSKEW\n");
+#endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
@@ -529,6 +533,10 @@ process_private(
 		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
 		    rbufp->recv_length - sizeof(struct req_pkt_tail) +
 		    REQ_LEN_HDR, sizeof(struct req_pkt_tail) - REQ_LEN_HDR)) {
+#ifdef DEBUG
+			if (debug > 4)
+			    printf("authdecrypt failed\n");
+#endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
