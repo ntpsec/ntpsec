@@ -10,6 +10,8 @@
 #include "ntp_io.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+#include "isc/net.h"
+#include "isc/result.h"
 
 #include <ctype.h>
 #include <signal.h>
@@ -366,6 +368,7 @@ struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
 int ai_fam_templ;				/* address family */
+int ai_fam_default;				/* default address family */
 SOCKET sockfd;					/* fd socket is opened on */
 int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
@@ -498,7 +501,12 @@ ntpqmain(
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 
+	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+		ai_fam_default = AF_INET;
+	}
+
 	progname = argv[0];
+	ai_fam_templ = ai_fam_default;
 	while ((c = ntp_getopt(argc, argv, "46c:dinp")) != EOF)
 	    switch (c) {
 		case '4':
@@ -2164,7 +2172,7 @@ host(
 	}
 
 	i = 0;
-	ai_fam_templ = 0;
+	ai_fam_templ = ai_fam_default;
 	if (pcmd->nargs == 2) {
 		if (!strcmp("-4", pcmd->argval[i].string))
 			ai_fam_templ = AF_INET;

@@ -8,6 +8,8 @@
 #include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include "isc/net.h"
+#include "isc/result.h"
 
 #include <ctype.h>
 #include <signal.h>
@@ -164,6 +166,7 @@ static	char currenthost[LENHOSTNAME];			/* current host name */
 int showhostnames = 1;					/* show host names by default */
 
 static	int ai_fam_templ;				/* address family */
+static	int ai_fam_default;				/* default address family */
 static	SOCKET sockfd;					/* fd socket is opened on */
 static	int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
@@ -298,7 +301,12 @@ ntpdcmain(
 	taskPrioritySet(taskIdSelf(), 100 );
 #endif
 
+	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+		ai_fam_default = AF_INET;
+	}
+
 	progname = argv[0];
+	ai_fam_templ = ai_fam_default;
 	while ((c = ntp_getopt(argc, argv, "46c:dilnps")) != EOF)
 	    switch (c) {
 		case '4':
@@ -1096,7 +1104,7 @@ docmd(
 	int rval;
 	struct xcmd *xcmd;
 
-	ai_fam_templ = 0;
+	ai_fam_templ = ai_fam_default;
 	/*
 	 * Tokenize the command line.  If nothing on it, return.
 	 */
