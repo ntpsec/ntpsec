@@ -28,6 +28,12 @@
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 
+#define ICOM 	1		/* undefine to suppress ICOM code */
+
+#ifdef ICOM
+#include "icom.h"
+#endif /* ICOM */
+
 /*
  * Audio CHU demodulator/decoder
  *
@@ -37,8 +43,8 @@
  * 7335 kHz and 14670 kHz in upper sideband, compatible AM mode. An
  * ordinary shortwave receiver can be tuned manually to one of these
  * frequencies or, in the case of ICOM receivers, the receiver can be
- * tuned automatically using the minimuf and icom programs as
- * propagation conditions change throughout the day and night.
+ * tuned automatically using this program as propagation conditions
+ * change throughout the day and night.
  *
  * The driver receives, demodulates and decodes the radio signals when
  * connected to the audio codec of a Sun workstation running SunOS or
@@ -171,7 +177,12 @@
  * input port, where 0 is the mike port (default) and 1 is the line-in
  * port. It does not seem useful to select the compact disc player port.
  * Fudge flag3 enables audio monitoring of the input signal. For this
- * purpose, the speaker volume must be set before the driver is started. 
+ * purpose, the speaker volume must be set before the driver is started.
+ *
+ * The ICOM code is normally compiled in the driver. It isn't used,
+ * unless the mode keyword on the server configuration command specifies
+ * a nonzero ICOM ID select code. The C-IV trace is turned on if the
+ * debug level is greater than one.
  */
 /*
  * Interface definitions
@@ -179,6 +190,9 @@
 #define	SPEED232	B300	/* uart speed (300 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"CHU"	/* reference ID */
+#ifdef ICOM
+#define DWELL		5	/* minutes before qsy */
+#endif /* ICOM */
 #ifdef AUDIO_CHU
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 
@@ -232,6 +246,7 @@
 #define STAMP		0x0080	/* too few timestamps */
 #define INYEAR		0x0100	/* valid B frame */
 #define INSYNC		0x0200	/* clock synchronized */
+#define AUTOT		0x0400	/* enable autotune */
 
 /*
  * Alarm status bits (alarm)
@@ -269,6 +284,9 @@ struct chuunit {
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
 	int	bufptr;		/* buffer index pointer */
+	int	chan;		/* frequency identifier */
+	char	ident[10];	/* transmitter frequency */
+	int	dwell;		/* dwell minutes at current frequency */
 
 	/*
 	 * Character burst variables
@@ -283,7 +301,7 @@ struct chuunit {
 	int	burstcnt;	/* format A bursts this minute */
 
 	/*
-	 * Foremat particulars
+	 * Format particulars
 	 */
 	int	leap;		/* leap/dut code */
 	int	dut;		/* UTC1 correction */
@@ -354,11 +372,14 @@ static	void	chu_debug	P((void));
 static char hexchar[] = "0123456789abcdef_-=";
 #ifdef AUDIO_CHU
 #ifdef HAVE_SYS_AUDIOIO_H
-struct	audio_device device;	/* audio device ident */
+struct audio_device device;	/* audio device ident */
 #endif /* HAVE_SYS_AUDIOIO_H */
 static struct audio_info info;	/* audio device info */
-static int	chu_ctl_fd;	/* audio control file descriptor */
+static int chu_ctl_fd;		/* audio control file descriptor */
 #endif /* AUDIO_CHU */
+#ifdef ICOM
+static double qsy[] = {3.330, 7.335, 14.670, 0}; /* frequencies (MHz) */
+#endif /* ICOM */
 
 /*
  * Transfer vector
@@ -385,8 +406,11 @@ chu_start(
 {
 	struct chuunit *up;
 	struct refclockproc *pp;
-
 	int	fd;		/* file descriptor */
+#ifdef ICOM
+	char	tbuf[80];	/* trace buffer */
+	int	temp;
+#endif /* ICOM */
 #ifdef AUDIO_CHU
 	int	i;		/* index */
 	double	step;		/* codec adjustment */
@@ -403,7 +427,7 @@ chu_start(
 	char device[20];	/* device name */
 
 	/*
-	 * Open serial port. Use RAW line discipline (required).
+	 * Open serial port in raw mode.
 	 */
 	(void)sprintf(device, DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED232, LDISC_RAW))) {
@@ -463,6 +487,30 @@ chu_start(
 	}
 	DTOLFP(1. / SECOND, &up->tick);
 #endif /* AUDIO_CHU */
+	strcpy(up->ident, "X");
+#ifdef ICOM
+	temp = 0;
+#ifdef DEBUG
+	if (debug > 1)
+		temp = P_TRACE;
+#endif
+	if (peer->ttl > 0) {
+		if (icom_init("/dev/icom", temp) >= 0)
+			up->status |= AUTOT;
+	}
+	if (up->status & AUTOT) {
+		if (icom_freq(peer->ttl, qsy[up->chan]) == 0) {
+			sprintf(up->ident, "%.1f",
+			    qsy[up->chan]); 
+			sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
+			record_clock_stats(&peer->srcadr, tbuf);
+#ifdef DEBUG
+			if (debug)
+				printf("%s\n", tbuf);
+#endif
+		}
+	}
+#endif /* ICOM */
 	return (1);
 }
 
@@ -1147,7 +1195,9 @@ chu_poll(
 	char	synchar, qual, leapchar;
 	int	minset;
 	int	temp;
-
+#ifdef ICOM
+	char	tbuf[80];	/* trace buffer */
+#endif /* ICOM */
 	pp = peer->procptr;
 	up = (struct chuunit *)pp->unitptr;
 	if (pp->coderecv == pp->codeproc)
@@ -1167,10 +1217,30 @@ chu_poll(
 	 * Don't mess with anything if nothing has been heard.
 	 */
 	chu_burst(peer);
+#ifdef ICOM
+	if (up->burstcnt > 2) {
+		up->dwell = 0;
+	} else if (up->dwell < DWELL) {
+		up->dwell++;
+	} else if (up->status & AUTOT) {
+		up->dwell = 0;
+		up->chan++;
+		if (qsy[up->chan] == 0)
+			up->chan = 0;
+		icom_freq(peer->ttl, qsy[up->chan]);
+		sprintf(up->ident, "%.3f", qsy[up->chan]); 
+		sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
+		record_clock_stats(&peer->srcadr, tbuf);
+#ifdef DEBUG
+		if (debug)
+			printf("%s\n", tbuf);
+#endif
+	}
+#endif /* ICOM */
 	if (up->burstcnt == 0)
 		return;
 	temp = chu_major(peer);
-	if (temp > 0 && up->status & INYEAR)
+	if (up->status & INYEAR)
 		up->status |= INSYNC;
 	qual = 0;
 	if (up->status & (BFRAME | AFRAME))
@@ -1193,16 +1263,16 @@ chu_poll(
 	}
 #ifdef AUDIO_CHU
 	sprintf(pp->a_lastcode,
-	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %d %d %d %d",
+	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
 	    pp->second, leapchar, up->dst, up->dut, minset, up->gain,
-	    up->tai, up->burstcnt, up->mindist, up->ntstamp);
+	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
 #else
 	sprintf(pp->a_lastcode,
-	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %d %d %d",
+	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
-	    pp->second, leapchar, up->dst, up->dut, minset, up->tai,
-	    up->burstcnt, up->mindist, up->ntstamp);
+	    pp->second, leapchar, up->dst, up->dut, minset,
+	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
 #endif /* AUDIO_CHU */
 	pp->lencode = strlen(pp->a_lastcode);
 

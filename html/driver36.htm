@@ -9,17 +9,21 @@ Radio WWV/H Audio Demodulator/Decoder
 Address: 127.127.36.<I>u</I>
 <br>Reference ID: <tt>WWV</tt> or <tt>WWVH</tt>
 <br>Driver ID: <tt>WWV_AUDIO</tt>
+<br>Autotune Port: <tt>/dev/icom</tt>; 1200 baud, 8-bits, no parity
 <br>Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
 
 <h4>Description</h4>
 
 This driver synchronizes the computer time using data encoded in
 shortwave radio transmissions from NIST time/frequency stations WWV in
-Ft. Collins, CO, and WWVH in Kauai, HI. When used in conjunction with a
-shortwave receiver and the audio codec native to some workstations, it
-implements a radio clock with nominal timing error less than 125 <font
-face=Symbol>m</font>s when tracking one of the stations and frequency
-drift less than 0.5 PPM when not tracking either station.
+Ft. Collins, CO, and WWVH in Kauai, HI. Transmissions are made
+continuously on 2.5, 5, 10, 15 and 20 MHz. An ordinary shortwave
+receiver can be tuned manually to one of these frequencies or, in the
+case of ICOM receivers, the receiver can be tuned automatically by this
+program as propagation conditions change throughout the day and night.
+The performance of this driver when tracking one of the stations is
+ordinarily better than 1 ms in time with frequency drift less than 0.5
+PPM when not tracking either station.
 
 <p>The demodulation and decoding algorithms used by this driver are
 based on a machine language program developed for the TAPR DSP93 DSP
@@ -82,28 +86,28 @@ loop to discipline the codec sample clock and thus the demodulator
 phase.
 
 <p>The data bit probabilities are determined from the subcarrier
-envelope using a threshold-corrected slicer. The envelope amplitude 30
-ms from the beginning of the second establishes the minimum (noise
-floor) value, while the amplitude 200 ms from the beginning establishes
-the maximum (signal peak) value. The slice level is midway between these
-two values. The negative-going envelope transition at the slice level
-establishes the length of the data pulse, which in turn establish
-probabilities for binary zero (P0) or binary one (P1). The values are
-established by linear interpolation between the pulse lengths for P0
-(300 ms) and P1 (500 ms) so that the sum is equal to one. If the program
-has not synchronized to the minute pulse, or if the data bit amplitude,
-signal/noise ratio (SNR) or length are below thresholds, the bit is
-considered invalid and all three probabilities are set to zero.
+envelope using a threshold-corrected slicer. The averaged envelope
+amplitude 30 ms from the beginning of the second establishes the minimum
+(noise floor) value, while the amplitude 200 ms from the beginning
+establishes the maximum (signal peak) value. The slice level is midway
+between these two values. The negative-going envelope transition at the
+slice level establishes the length of the data pulse, which in turn
+establish probabilities for binary zero (P0) or binary one (P1). The
+values are established by linear interpolation between the pulse lengths
+for P0 (300 ms) and P1 (500 ms) so that the sum is equal to one. If the
+program has not synchronized to the minute pulse, or if the data bit
+amplitude, signal/noise ratio (SNR) or length are below thresholds, the
+bit is considered invalid and all three probabilities are set to zero.
 
-<p>The difference between the P1 and P0 probabilities, called the
-likelihood, for each data bit is exponentially averaged in a set of 60
-accumulators, one for each second, to determine the semi-static
-miscellaneous bits, such as DST indicator, leap second warning and DUT1
-correction. In this design, an average value larger than a positive
-threshold is interpreted as a hit on one and a value smaller than a
-negative threshold as a hit on zero. Values between the two thresholds,
-which can occur due to signal fades or loss of signal, are interpreted
-as a miss, and result in no change of indication.
+<p>The difference between the P1 and P0 probabilities, or likelihood,
+for each data bit is exponentially averaged in a set of 60 accumulators,
+one for each second, to determine the semi-static miscellaneous bits,
+such as DST indicator, leap second warning and DUT1 correction. In this
+design, an average value larger than a positive threshold is interpreted
+as a hit on one and a value smaller than a negative threshold as a hit
+on zero. Values between the two thresholds, which can occur due to
+signal fades or loss of signal, are interpreted as a miss, and result in
+no change of indication.
 
 <p>The BCD digit in each digit position of the timecode is represented
 as four data bits, all of which must be valid for the digit itself to be
@@ -162,24 +166,22 @@ may be available at different times or even at the same time. Since the
 propagation times from either station are almost always different, each
 station must be reliably identified before attempting to set the clock.
 
-<p>Station identification is done using the 800-ms minute pulse
-transmitted by each station. In the acquisition phase the entire minute
-is searched using both the WWV and WWVH using matched filters and a
-pulse gate discriminator similar to that found in radar acquisition and
-tracking receivers. The peak amplitude found determines a range gate and
-window where the next pulse is expected to be found. The minute is
-scanned again to verify the peak is indeed in the window and with
-acceptable amplitude, SNR and jitter. At this point the receiver begins
-to track the second sync pulse and operate as above until the clock is
-set.
+<p>Station identification uses the 800-ms minute pulse transmitted by
+each station. In the acquisition phase the entire minute is searched
+using both the WWV and WWVH using matched filters and a pulse gate
+discriminator similar to that found in radar acquisition and tracking
+receivers. The peak amplitude found determines a range gate and window
+where the next pulse is expected to be found. The minute is scanned
+again to verify the peak is indeed in the window and with acceptable
+amplitude, SNR and jitter. At this point the receiver begins to track
+the second sync pulse and operate as above until the clock is set.
 
-<p>Once the clock is set, the range gate is fixed and only energy within
-the window is considered for the sync pulses. As long as the minute
-pulse from either station has acceptable amplitude and SNR, tracking
-functions can be enabled for that station. A compare counter keeps track
-of the number of minutes when the minute pulse jitter is less than a
-threshold. When both stations are available, the one with the maximum
-compare count is selected.
+<p>Once the minute is synchronized, the range gate is fixed and only
+energy within the window is considered for the minute sync pulse. A
+compare counter increments by one if the minute pulse has acceptable
+amplitude, SNR and jitter and decrements otherwise. This is used as a
+quality indicator and reported in the timecode and also for the autotune
+function described below.
 
 <h4>Performance</h4>
 
@@ -230,23 +232,22 @@ It then acquires second sync, which can take up to several minutes,
 depending on signal quality. At the same time the program accumulates
 likelihood values for each of the nine digits of the clock, plus the
 seven miscellaneous bits included in the WWV/H transmission format. The
-minute units digit is decoded first and, when several repetitions have
-compared correctly, the remaining eight digits are decoded. When several
+minute units digit is decoded first and, when five repetitions have
+compared correctly, the remaining eight digits are decoded. When five
 repetitions of all nine digits have decoded correctly, which normally
 takes 15 minutes with good signals and up to an hour when buried in
-noise, the clock is set and is selectable to discipline the system
-clock.
+noise, and no alarms are raised, the clock is set (or verified) and is
+selectable to discipline the system clock.
 
-<p>As long as the clock is set or verified and the second sync is
-acquired, the system clock offsets are provided once each second to the
-reference clock interface, where they are saved in a buffer. At the end
-of each minute, the buffer samples are groomed by the median filter and
-trimmed-mean averaging functions. Using these functions, the system
-clock can in principle be disciplined to a much finer resolution than
-the 125-<font face=Symbol>m</font>s sample interval would suggest,
-although the ultimate accuracy is probably limited by propagation delay
-variations due to ionspheric
-height variations.
+<p>As long as the clock is set or verified, the system clock offsets are
+provided once each second to the reference clock interface, where they
+are saved in a buffer. At the end of each minute, the buffer samples are
+groomed by the median filter and trimmed-mean averaging functions. Using
+these functions, the system clock can in principle be disciplined to a
+much finer resolution than the 125-<font face=Symbol>m</font>s sample
+interval would suggest, although the ultimate accuracy is probably
+limited by propagation delay variations due to ionspheric height
+variations.
 
 <p>As long as signals are available, the clock frequency is disciplined
 for use during times when the signals are unavailable. The algorithm
@@ -262,29 +263,28 @@ variations.
 WWVH signals may appear alone, together or not at all. When the program
 is first started, the NTP reference identifier appears as <tt>NONE</tt>.
 When the program has acquired one or both stations and mitigated which
-one is best, it sets the station identifier character in the timecode as
-described below. In addition, the NTP reference identifier is set to the
-station callsign. If the propagation delays has been properly set with
-the <tt>fudge time1</tt> (WWV) and <tt>fudge time2</tt> (WWVH) commands
-in the configuration file, handover from one station to the other will
-be seamless.
+one is best, it sets the station identifier in the timecode as described
+below. In addition, the NTP reference identifier is set to the station
+callsign. If the propagation delays has been properly set with the
+<tt>fudge time1</tt> (WWV) and <tt>fudge time2</tt> (WWVH) commands in
+the configuration file, handover from one station to the other will be
+seamless.
 
 <p>Once the clock has been set for the first time, it will appear
 reachable and selectable to discipline the system clock, even if the
 broadcast signal fades to obscurity. A consequence of this design is
 that, once the clock is set, the time and frequency are disciplined only
 by the second sync pulse and the clock digits themselves are driven by
-the clock state machine and cannot be changed, even if the maximum
-likelihood digits disagree. However, as long as the clock is set
-correctly, it will continue to read correctly after a period of signal
-loss, as long as it does not drift more than 500 ms from the correct
-time. Assuming the clock frequency can be disciplined within 1 PPM, the
-clock could coast without signals for some 5.8 days without exceeding
-that limit. If for some reason this did happen, the clock would be in
-the wrong second and would never resynchronize. To protect against this
-most unlikely situation, if after four days with no signals, the clock
-is considered unset and resumes the synchronization procedure from the
-beginning.
+the clock state machine and ordinarily never changed. However, as long
+as the clock is set correctly, it will continue to read correctly after
+a period of signal loss, as long as it does not drift more than 500 ms
+from the correct time. Assuming the clock frequency can be disciplined
+within 1 PPM, the clock could coast without signals for some 5.8 days
+without exceeding that limit. If for some reason this did happen, the
+clock would be in the wrong second and would never resynchronize. To
+protect against this most unlikely situation, if after four days with no
+signals, the clock is considered unset and resumes the synchronization
+procedure from the beginning.
 
 <p>To work well, this program needs a communications receiver with good
 audio response at 100 Hz. Most shortwave and communications receivers
@@ -297,6 +297,46 @@ low frequency buzz at about 10 Hz which appears in the audio output and
 can affect data recovery under marginal conditions. Although not tested,
 it would seem very likely that a cheap shortwave receiver could function
 just as well as an expensive communications receiver.
+
+<h4>Autotune</h4>
+
+<p>The driver includes provisions to automatically tune the radio in
+response to changing radio propagation conditions throughout the day and
+night. The radio interface is compatible with the ICOM CI-V standard,
+which is a bidirectional serial bus operating at TTL levels. The bus can
+be connected to a standard serial port using a level converter such as
+the CT-17. The serial port speed is presently compiled in the program,
+but can be changed in the <tt>icom.h</tt> header file.
+
+<p>Each ICOM radio is assigned a unique 8-bit ID select code, usually
+expressed in hex format. To activate the CI-V interface, the
+<tt>mode</tt> keyword of the <tt>server</tt> configuration command
+specifies a nonzero select code in decimal format. A table of ID select
+codes for the known ICOM radios is given below. A missing <tt>mode</tt>
+keyword or a zero argument leaves the interface disabled. The driver
+will attempt to open the device <tt>/dev/icom</tt> and, if successful
+will activate the autotune function and tune the radio to each operating
+frequency in turn while attempting to acquire minute sync from either
+WWV or WWVH.
+
+<p>Once acquiring minute sync, the program operates as above to acquire
+second sync and set the clock. However, during the three seconds
+beginning at second 58 of each minute it tunes the radio to one of the
+five broadcast frequencies to measure the sync pulse and data pulse
+amplitudes and SNR and update the compare counter. Each of the five
+frequencies are probed in a five-minute rotation to build a database of
+current propagation conditions for all signals that can be heard at the
+time. At the end of each rotation, a mitigation procedure scans the
+database and retunes the radio to thebest frequency and station found.
+
+<p>For the autotune function to work well, the radio should be set for a
+fast AGC recovery time. This is most important while tracking a strong
+signal, which is normally the case, and then probing another frequency,
+which may have much weaker signals.
+
+<p>The driver is liberal in what it assumes of the configuration. If the
+<tt>/dev/icom</tt> link is not present or the open fails or the CI-V bus
+or radio is inoperative, the driver quietly gives up with no harm done.
 
 <h4>Debugging Aids</h4>
 
@@ -352,15 +392,13 @@ formats:
 working on the unit digit of the minute. They show the results of
 decoding each bit of the transmitted timecode.
 
-<p><tt>wwv3 ss stat sigl alrm ampl phas snr prob like</tt>
-
+<p><tt>wwv3 ss stat sigl ampl phas snr prob like</tt>
 <p>where <tt>ss</tt>, <tt>stat</tt> and <tt>sigl</tt> are as above,
-<tt>alrm</tt> is the alarm word, <tt>ampl</tt> the subcarrier amplitude,
-<tt>phas</tt> the subcarrier phase, <tt>snr</tt> the subcarrier SNR,
-<tt>prob</tt> the bit probability and <tt>like</tt> the bit likelihood.
-An example is:
+<tt>ampl</tt> is the subcarrier amplitude, <tt>phas</tt> the subcarrier
+phase, <tt>snr</tt> the subcarrier SNR, <tt>prob</tt> the bit
+probability and <tt>like</tt> the bit likelihood. An example is:
 
-<p><tt>wwv3 28 0323  4122 e0f8  4286     0  24.8 -5545 -1735</tt>
+<p><tt>wwv3 28 0323  4122 4286     0  24.8 -5545 -1735</tt>
 
 <p>Here the program has acquired minute and second sync, but has not yet
 set the clock. However, it has just decoded bit 28 of the minute. The
@@ -435,13 +473,23 @@ The WWV minute pulse amplitude and SNR are well above the threshold
 1 sample relative to the last one and 1 sample relative to the second
 sync pulse.
 
+<p>Format <tt>wwv5</tt> messages are produced once per minute by the WWV
+and WWVH autotune station processes which precess over the five channels
+or frequencies available. These messages are described in the Autotune
+section.
+
+<p>If the CI-V interface for ICOM radios is active, a debug level
+greater than 1 will produce a trace of the CI-V command and response
+messages. Interpretation of these messages requires knowledge of the
+CI-V protocol, which is beyond the scope of this document.
+
 <h4>Monitor Data</h4>
 
 When enabled by the <tt>filegen</tt> facility, every received timecode
 is written to the <tt>clockstats</tt> file in the following format:
 
 <pre>
-        sq yy ddd hh:mm:ss.fff ld du lset agc stn errs freq cons
+        sq yy ddd hh:mm:ss.fff ld du lset agc stn rfrq errs freq cons
 
         s       sync indicator
         q       quality character
@@ -455,7 +503,7 @@ is written to the <tt>clockstats</tt> file in the following format:
         dut     DUT sign and magnitude
         lset    minutes since last set
         agc     audio gain
-        stn     transmitter identifier
+        stn     station identifier and frequency
         comp    minute sync compare counter
         errs    bit error counter
         freq    frequency offset
@@ -478,7 +526,6 @@ set.</dd>
 <dd>The quality character is a four-bit hexadecimal code showing which
 alarms have been raised. Each bit is associated with a specific alarm
 condition according to the following:
-
 <dl>
 
 <dt><tt>0x8</tt>
@@ -536,16 +583,14 @@ to 255. Ordinarily, the receiver audio gain control or IRIG level
 control should be set for a value midway in this range.
 
 <dt><tt>stn</tt>
-<dd>The station identifier shows the current source of minute sync,
-<tt>C</tt> for WWV or <tt>H</tt> for WWVH, as long as that station is
-being heard. If neither station is being heard, the identifier becomes
-<tt>X</tt> and, if both are heard, <tt>M</tt>.</dd>
+<dd>The station identifier shows the station, <tt>C</tt> for WWV or
+<tt>H</tt> for WWVH, and frequency being tracked. If neither station is
+heard on any frequency, the station identifier shows <tt>X</tt>.</dd>
 
 <dt><tt>comp</tt>
 <dd>The minute sync compare counter is useful to determine the quality
 of the minute sync signal and can range from 0 (no signal) to 5
 (best).</dd>
-
 <dt><tt>errs</tt>
 <dd>The bit error counter is useful to determine the quality of the data
 signal received in the most recent minute. It is normal to drop a couple
@@ -566,6 +611,87 @@ indicates the program is operating at the best possible resolution in
 time and frequency.</dd>
 
 </dl>
+
+<h4>Modes</h4>
+
+<p>The <tt>mode</tt> keyword of the <tt>server</tt> configuration
+command specifies the ICOM ID select code. A missing or zero argument
+disables the CI-V interface. Following are the ID select codes for the
+known radios.
+
+<p><table cols=6 width=100%>
+
+<tr>
+<td>Radio</td>
+<td>Hex</td>
+<td>Decimal</td>
+<td>Radio</td>
+<td>Hex</td>
+<td>Decimal</td>
+</tr>
+
+<tr>
+<td>IC725</td>
+<td>0x28</td>
+<td>40</td>
+<td>IC781</td>
+<td>0x26</td>
+<td>38</td>
+</tr>
+
+<tr>
+<td>IC726</td>
+<td>0x30</td>
+<td>48</td>
+<td>R7000</td>
+<td>0x08</td>
+<td>8</td>
+</tr>
+
+<tr>
+<td>IC735</td>
+<td>0x04</td>
+<td>4</td>
+<td>R71</td>
+<td>0x1A</td>
+<td>26</td>
+</tr>
+<tr>
+<td>IC751</td>
+<td>0x1c</td>
+<td>28</td>
+<td>R7100</td>
+<td>0x34</td>
+<td>52</td>
+</tr>
+<tr>
+<td>IC761</td>
+<td>0x1e</td>
+<td>30</td>
+<td>R72</td>
+<td>0x32</td>
+<td>50</td>
+</tr>
+
+<tr>
+<td>IC765</td>
+<td>0x2c</td>
+<td>44</td>
+<td>R8500</td>
+<td>0x4a</td>
+<td>74</td>
+</tr>
+
+<tr>
+<td>IC775</td>
+<td>0x46</td>
+<td>68</td>
+<td>R9000</td>
+<td>0x2a</td>
+<td>42</td>
+</tr>
+
+</table>
 
 <h4>Fudge Factors</h4>
 
@@ -595,16 +721,13 @@ described above.
 <dd>Specifies the microphone port if set to zero or the line-in port if
 set to one. It does not seem useful to specify the compact disc player
 port.</dd>
-
 <dt><tt>flag3 0 | 1</tt></dt>
 <dd>Enables audio monitoring of the input signal. For this purpose, the
 speaker volume must be set before the driver is started.</dd>
 
 <dt><tt>flag4 0 | 1</tt></dt>
 <dd>Enable verbose <tt>clockstats</tt> recording if set.</dd>
-
 </dl>
-
 <h4>Additional Information</h4>
 
 <A HREF="refclock.htm">Reference Clock Drivers</A>

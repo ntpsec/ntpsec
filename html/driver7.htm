@@ -9,7 +9,8 @@ Radio CHU Audio Demodulator/Decoder
 Address: 127.127.7.<I>u</I>
 <br>Reference ID: <tt>CHU</tt>
 <br>Driver ID: <tt>CHU</tt>
-<br>Serial Port: <tt>/dev/chu<I>u</I></tt>; 300 baud, 8-bits, no parity
+<br>Modem Port: <tt>/dev/chu<I>u</I></tt>; 300 baud, 8-bits, no parity
+<br>Autotune Port: <tt>/dev/icom</tt>; 1200 baud, 8-bits, no parity
 <br>Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
 
 <h4>Description</h4>
@@ -19,13 +20,15 @@ transmissions from Canadian time/frequency station CHU in Ottawa,
 Ontario. Transmissions are made continuously on 3330 kHz, 7335 kHz and
 14670 kHz in upper sideband, compatible AM mode. An ordinary shortwave
 receiver can be tuned manually to one of these frequencies or, in the
-case of ICOM receivers, the receiver can be tuned automatically using
-the <tt>minimuf</tt> and <tt>icom</tt> programs as propagation
-conditions change throughout the day and night.
+case of ICOM receivers, the receiver can be tuned automatically as
+propagation conditions change throughout the day and night. The
+performance of this driver when tracking the station is ordinarily
+better than 1 ms in time with frequency drift less than 0.5 PPM when not
+tracking the station.
 
 <p>While there are currently no known commercial CHU receivers, a simple
 but effective receiver/demodulator can be constructed from an ordinary
-shortwave receiver and Bell 103 compatible, 300-bps modem or modem chip,
+shortwave receiver and Bell 103 compatible, 300-b/s modem or modem chip,
 as described in the <a href=pps.htm>Pulse-per-second (PPS) Signal
 Interfacing</a> page. The driver can be compiled to use a modem to
 receive the radio signal and demodulate the data. Alternatively, the
@@ -103,11 +106,146 @@ of timestamps determined in the range 0-60. For a valid timecode,
 <tt>bcnt</tt> must be at least 3, <tt>dist</tt> must be greater than
 <tt>bcnt</tt> and <tt>tsmp</tt> must be at least 20.
 
+<h4>Program Operation</h4>
+
+<p>The program consists of four major parts: the DSP modem, maximum
+likelihood UART, burst assembler and majority decoder. The DSP modem
+demodulates Bell 103 modem answer-frequency signals; that is, frequency-
+shift keyed (FSK) tones of 2225 Hz (mark) and 2025 Hz (space). This is
+done using a 4th-order IIR filter and limiter/discriminator with 500-Hz
+bandpass centered on 2125 Hz and followed by a FIR raised-cosine lowpass
+filter optimized for the 300-b/s data rate. Alternately, the driver can
+be compiled to delete the modem and input 300 b/s data directly from an
+external modem via a serial port.
+
+<p>The maximum likelihood UART is implemented using a set of eight
+11-stage shift registers, one for each of eight phases of the 300-b/s
+bit clock. At each phase a new baseband signal value from the DSP modem
+is shifted into the corresponding register and the maximum and minimum
+over all 11 samples computed. This establishes a slice level midway
+between the maximum and minimum over all stages. For each stage, a
+signal level above this level is a mark (1) and below is a space (0). A
+quality metric is calculated for each register with respect to the slice
+level and the a-priori signal consisting of a mark bit (previous stop
+bit), space (start) bit, eight arbitrary information bits and the first
+of the two mark (stop) bits.
+<p>The shift registers are processed in round-robin order as each modem
+value arrives until one of them shows a valid framing pattern consisting
+of a mark bit, space bit, eight arbitrary data bits and a mark bit. When
+found, the data bits from the register with the best metric is chosen as
+the maximum likelihood character and the UART begins to process the next
+character.
+
+<p>The burst assembler processes characters either from the maximum
+likelihood UART or directly from the serial port as configured. A burst
+begins when a character is received and is processed after a timeout
+interval when no characters are received. If the interval between
+characters is greater than two characters, but less than the timeout
+interval, the burst is rejected as a runt and a new burst begun. As each
+character is received, a timestamp is captured and saved for later
+processing.
+
+<p>A valid burst consists of ten characters in two replicated
+five-character blocks. A format B block contains the year and other
+information in ten hexadecimal digits. A format A block contains the
+timecode in ten decimal digits, the first of which is a framing code
+(6). The burst assembler must deal with cases where the first character
+of a format A burst is lost or is noise. This is done using the framing
+code to correct the phase, either one character early or one character
+late.
+
+<p>The burst distance is incremented by one for each bit in the first
+block that matches the corresponding bit in the second block and
+decremented by one otherwise. In a format B burst the second block is
+bit-inverted relative to the first, so a perfect burst of five 8-bit
+characters has distance -40. In a format A block the two blocks are
+identical, so a perfect burst has distance +40. Format B bursts must be
+perfect to be acceptable; however, format A bursts, which are further
+processed by the majority decoder, are acceptable if the distance is at
+least 28.
+
+<p>Each minute of transmission includes eight format A bursts containing
+two timecodes for each second from 31 through 39. The majority decoder
+uses a decoding matrix of ten rows, one for each digit position in the
+timecode, and 16 columns, one for each 4-bit code combination that might
+be decoded at that position. In order to use the character timestamps,
+it is necessary to reliably determine the second number of each burst.
+In a valid burst, the last digit of the two timecodes in the block must
+match and the value must be in the range 2-9 and greater than in the
+previous burst.
+
+<p>As each hex digit of a valid burst is processed, the value at the row
+corresponding to the digit position in the timecode and column
+corresponding to the code found at that position is incremented. At the
+end of each minute of transmission, each row of the decoding matrix
+encodes the number of occurrences of each code found at the
+corresponding position of the timecode. However, the first digit
+(framing code) is always 6, the ninth (second tens) is always 3 and the
+last (second units) changes for each burst, so are not used.
+
+<p>The maximum over all occurrences at each timecode digit position is
+the distance for that position and the corresponding code is the maximum
+likelihood candidate. If the distance is zero, the decoder assumes a
+miss; if the distance is not more than half the total number of
+occurrences, the decoder assumes a soft error; if two different codes
+with the same distance are found, the decoder assumes a hard error. In
+all these cases the decoder encodes a non-decimal character which will
+later cause a format error when the timecode is reformatted. The
+decoding distance is defined as the minimum distance over the first nine
+digits; the tenth digit varies over the seconds and is uncounted.
+
+<p>The result of the majority decoder is a nine-digit timecode
+representing the maximum likelihood candidate for the transmitted
+timecode in that minute. Note that the second and fraction within the
+minute are always zero and that the actual reference point to calculate
+timestamp offsets is backdated to the first second of the minute. At
+this point the timecode block is reformatted and the year, days, hours
+and minutes extracted along with other information from the format B
+burst, including DST state, DUT1 correction and leap warning. The
+reformatting operation checks the timecode for invalid code combinations
+that might have been left by the majority decoder and rejects the entire
+timecode if found.
+
+<p>If the timecode is valid, it is passed to the reference clock
+interface along with the backdated timestamp offsets accumulated over
+the minute. A perfect set of nine bursts could generate as many as 90
+timestamps, but the maximum the interface can handle is 60. These are
+processed by the interface using a median filter and trimmed-mean
+average, so the resulting system clock correction is usually much better
+than would otherwise be the case with radio noise, UART jitter and
+occasional burst errors.
+
+<h4>Autotune</h4>
+
+<p>The driver includes provisions to automatically tune the radio in
+response to changing radio propagation conditions throughout the day and
+night. The radio interface is compatible with the ICOM CI-V standard,
+which is a bidirectional serial bus operating at TTL levels. The bus can
+be connected to a standard serial port using a level converter such as
+the CT-17. The serial port speed is presently compiled in the program,
+but can be changed in the <tt>icom.h</tt> header file.
+
+<p>Each ICOM radio is assigned a unique 8-bit ID select code, usually
+expressed in hex format. To activate the CI-V interface, the
+<tt>mode</tt> keyword of the <tt>server</tt> configuration command
+specifies a nonzero select code in decimal format. A table of ID select
+codes for the known ICOM radios is given below. A missing <tt>mode</tt>
+keyword or a zero argument leaves the interface disabled. The driver
+will attempt to open the device <tt>/dev/icom</tt> and, if successful
+will tune the radio to 3.330 MHz. If after five minutes at this
+frequency not more than two format A bursts have been received for any
+minute, the driver will tune to 7.335 MHz, then to 14.670 MHz, then
+return to 3.330 MHz and continue in this cycle.
+
+<p>The driver is liberal in what it assumes of the configuration. If the
+<tt>/dev/icom</tt> link is not present or the open fails or the CI-V bus
+or radio is inoperative, the driver quietly gives up with no harm done.
+
 <h4>Radio Broadcast Format</h4>
 
 <p>The CHU time broadcast includes an audio signal compatible with the
 Bell 103 modem standard (mark = 2225 Hz, space = 2025 Hz). It consist of
-nine, ten-character bursts transmitted at 300 bps and beginning each
+nine, ten-character bursts transmitted at 300 b/s and beginning each
 second from second 31 to second 39 of the minute. Each character
 consists of eight data bits plus one start bit and two stop bits to
 encode two hex digits. The burst data consist of five characters (ten
@@ -119,14 +257,12 @@ characters are repeated in the opposite polarity.
 hex digits
 
 <p><tt>6dddhhmmss6dddhhmmss</tt>
-
 <p>The first ten digits encode a frame marker (<tt>6</tt>) followed by
 the day (<tt>ddd</tt>), hour (<tt>hh</tt>), minute (<tt>mm</tt>) and
 second (<tt>ss</tt>). Since format A bursts are sent during the
 third decade of seconds the tens digit of <tt>ss</tt> is always 3. The
 driver uses this to determine correct burst synchronization. These
 digits are then repeated with the same polarity.
-
 <p>Format B bursts are sent at second 31 of the minute in hex digits
 
 <p><tt>xdyyyyttaaxdyyyyttaa</tt>
@@ -158,7 +294,7 @@ likely to happen in our universe.</dd>
 
 <p>By design, the last stop bit of the last character in the burst
 coincides with 0.5 second. Since characters have 11 bits and are
-transmitted at 300 bps, the last stop bit of the first character
+transmitted at 300 b/s, the last stop bit of the first character
 coincides with 0.5 - 10 * 11/300 = 0.133 second. Depending on the UART,
 character interrupts can vary somewhere between the beginning of bit 9
 and end of bit 11. These eccentricities can be corrected along with the
@@ -190,9 +326,7 @@ received in seconds 32 through 39 of the minute:
 distance (0-40) and <tt>code</tt> the burst characters as received. Note
 that the hex digits in each character are reversed and the last ten
 digits inverted, so the burst
-
 <p><tt>11 40 1091891300ef6e76ecff</tt>
-
 <p>is interpreted as containing 11 characters with burst distance 40.
 The nibble-swapped timecode shows DUT1 +0.1 second, year 1998 and TAI -
 UTC 31 seconds.
@@ -214,13 +348,18 @@ Note that the hex digits in each character are reversed, so the burst
 field alignment 0, synchronization distance 16 and burst number 9. The
 nibble-swapped timecode shows day 58, hour 21, minute 29 and second 39.
 
+<p>If the CI-V interface for ICOM radios is active, a debug level
+greater than 1 will produce a trace of the CI-V command and response
+messages. Interpretation of these messages requires knowledge of the
+CI-V protocol, which is beyond the scope of this document.
+
 <h4>Monitor Data</h4>
 
 When enabled by the <tt>filegen</tt> facility, every received timecode
 is written to the <tt>clockstats</tt> file in the following format:
 
 <pre>
-        sq yy ddd hh:mm:ss.fff ld dut lset agc bcnt dist tsmp
+        sq yy ddd hh:mm:ss.fff ld dut lset agc rfrq bcnt dist tsmp
 
         s       sync indicator
         q       quality character
@@ -235,6 +374,7 @@ is written to the <tt>clockstats</tt> file in the following format:
         dut     DUT sign and magnitude in deciseconds
         lset    minutes since last set
         agc     audio gain (0-255)
+        rfrq    radio frequency
         bcnt    burst count
         dist    decoding distance
         tsmp    timestamps captured
@@ -257,7 +397,6 @@ alarms have been raised during the most recent minute. Each bit is
 associated with a specific alarm condition according to the following:
 
 <dl>
-
 <dt><tt>8</tt>
 <dd>Decoder alarm. A majority of repetitions for at least one digit of
 the timecode fails to agree.
@@ -283,7 +422,6 @@ detected a condition that may in future result in an error.
 <dt><tt>yyyy ddd hh:mm:ss.fff</tt></tt>
 <dd>The timecode format itself is self explanatory. Note that the
 Gregorian year is decoded directly from the transmitted timecode.</dd>
-
 <dt><tt>l</tt>
 <dd>The leap second warning is normally space, but changes to <tt>L</tt>
 if a leap second is to occur at the end of the month of June or
@@ -307,6 +445,10 @@ broadcast signal.</dd>
 to 255. Ordinarily, the receiver audio gain control or IRIG level
 control should be set for a value midway in this range.
 
+<dt><tt>rfrq</tt>
+<dd>The current radio frequency, if the CI-V interface is active, or 'X'
+if not.</dd>
+
 <dt><tt>bcnt</tt>
 <dd>The number of format A bursts received during the most recent minute
 bursts were received.</dd>
@@ -318,8 +460,90 @@ minute bursts were received.</dd>
 <dt><tt>tsmp</tt>
 <dd>The number of timestamps determined during the most recent
 minute bursts were received.</dd>
-
 </dl>
+
+<h4>Modes</h4>
+
+<p>The <tt>mode</tt> keyword of the <tt>server</tt> configuration
+command specifies the ICOM ID select code. A missing or zero argument
+disables the CI-V interface. Following are the ID select codes for the
+known radios.
+
+<p><table cols=6 width=100%>
+
+<tr>
+<td>Radio</td>
+<td>Hex</td>
+<td>Decimal</td>
+<td>Radio</td>
+<td>Hex</td>
+<td>Decimal</td>
+</tr>
+
+<tr>
+<td>IC725</td>
+<td>0x28</td>
+<td>40</td>
+<td>IC781</td>
+<td>0x26</td>
+<td>38</td>
+</tr>
+
+<tr>
+<td>IC726</td>
+<td>0x30</td>
+<td>48</td>
+<td>R7000</td>
+<td>0x08</td>
+<td>8</td>
+</tr>
+
+<tr>
+<td>IC735</td>
+<td>0x04</td>
+<td>4</td>
+<td>R71</td>
+<td>0x1A</td>
+<td>26</td>
+</tr>
+
+<tr>
+<td>IC751</td>
+<td>0x1c</td>
+<td>28</td>
+<td>R7100</td>
+<td>0x34</td>
+<td>52</td>
+</tr>
+
+<tr>
+<td>IC761</td>
+<td>0x1e</td>
+<td>30</td>
+<td>R72</td>
+<td>0x32</td>
+<td>50</td>
+</tr>
+
+<tr>
+<td>IC765</td>
+<td>0x2c</td>
+<td>44</td>
+<td>R8500</td>
+<td>0x4a</td>
+<td>74</td>
+</tr>
+
+<tr>
+<td>IC775</td>
+<td>0x46</td>
+<td>68</td>
+<td>R9000</td>
+<td>0x2a</td>
+<td>42</td>
+</tr>
+
+</table>
 
 <h4>Fudge Factors</h4>
 

@@ -1,3 +1,21 @@
+2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: 
+	* ntpd/refclock_chu.c: 
+	* libntp/icom.c: 
+	* libntp/Makefile.am: 
+	* include/icom.h: 
+	* html/driver7.htm: 
+	* html/driver36.htm: 
+	Support for ICOM.  The WWV/H driver, by the way, is getting truly
+	awesome.  The CHU autotune function works okay as it is.  I'd like
+	to find somebody else to test the audio drivers just to make sure
+	I haven't done something stupid.  There is a new define ICOM
+	intended for the driver autotune function; however, I crafted the
+	thing in much the same way as the refclock_atom.c thing - it tries
+	to open /dev/icom and, if that fails, goes quietly to sleep.
+	From: Dave Mills <mills@udel.edu>
+
 2000-01-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_oncore.c (oncore_read_config): Patches and cleanup
