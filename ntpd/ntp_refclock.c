@@ -347,7 +347,7 @@ refclock_transmit(
 	peer->outdate = next;
 	if (peer->burst > 0)
 		peer->burst--;
-	poll_update(peer, 0);
+	poll_update(peer, peer->hpoll);
 }
 
 

@@ -6,7 +6,9 @@
 #include "ntp_types.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "ntp_fp.h"
 
+#if 0
 /*
  * calmonthtab - days-in-the-month table
  */
@@ -24,7 +26,6 @@ static u_short calmonthtab[11] = {
 	NOV
 };
 
-#if 0
 void
 caljulian(
 	u_long		  		ntptime,
@@ -123,8 +124,6 @@ caljulian(
    Will handle ntp epoch wraparound as long as the underlying os/library 
    does so for the unix epoch, i.e. works after 2038.
 */
-
-struct tm * ntp2unix_tm(u_long ntp, int local);
 
 void
 caljulian(

@@ -827,7 +827,7 @@ send_slow(
 static int
 get2(char *p, int *val)
 {
-  if (!isdigit((int)p[0]) || !isdigit(p[1])) return 0;
+  if (!isdigit((int)p[0]) || !isdigit((int)p[1])) return 0;
   *val = (p[0] - '0') * 10 + p[1] - '0';
   return 1;
 }

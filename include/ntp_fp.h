@@ -358,6 +358,8 @@ extern	void	get_systime	P((l_fp *));
 extern	int	step_systime	P((double));
 extern	int	adj_systime	P((double));
 
+extern	struct tm * ntp2unix_tm P((u_long ntp, int local));
+
 #define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 #define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 

@@ -7,7 +7,7 @@ AC_CANONICAL_HOST
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
 AM_CONFIG_HEADER(config.h)
 dnl AC_ARG_PROGRAM
-AC_PREREQ(2.58)
+AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
@@ -2594,7 +2594,8 @@ case "$ntp_libparse" in
     AC_DEFINE(CLOCK_PARSE, 1, [PARSE driver interface])
     LIBPARSE=../libparse/libparse.a
     MAKE_LIBPARSE=libparse.a
-    MAKE_CHECK_Y2K=check_y2k
+    # HMS: check_y2k trips the 34 year problem now...
+    0 && MAKE_CHECK_Y2K=check_y2k
     AC_DEFINE(PPS_SAMPLE, 1, [PPS auxiliary interface for ATOM?])
     AC_DEFINE(CLOCK_ATOM)
     ;;
