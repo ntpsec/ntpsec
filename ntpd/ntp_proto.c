@@ -161,7 +161,7 @@ transmit(
 			if (peer->unreach < NTP_UNREACH) {
 				peer->unreach++;
 			} else if (peer->flags & FLAG_CONFIG) {
-				peer_clear(peer);
+				peer_clear(peer, "IDLE");
 				hpoll++;
 			} else {
 				unpeer(peer);
@@ -181,7 +181,7 @@ transmit(
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 				if (peer->flags & FLAG_CONFIG) {
-					peer_clear(peer);
+					peer_clear(peer, "IDLE");
 				} else {
 					unpeer(peer);
 					return;
@@ -831,7 +831,7 @@ receive(
 		if (peer->flash & TEST5) {
 			if (has_mac == 4 && pkt->exten[0] == 0) {
 				if (peer->flags & FLAG_CONFIG)
-					peer_clear(peer);
+					peer_clear(peer, "AUTH");
 				else
 					unpeer(peer);
 			}
@@ -892,7 +892,7 @@ receive(
 			printf("receive: dropped %03x\n", peer->flash);
 #endif
 		if (peer->flags & FLAG_CONFIG)
-			peer_clear(peer);
+			peer_clear(peer, "DROP");
 		else
 			unpeer(peer);
 		return;
@@ -977,9 +977,8 @@ receive(
 			 * the error is recoverable.
 			 */
 			if (peer->flags & FLAG_CONFIG) {
-				peer_clear(peer);
+				peer_clear(peer, "CRYP");
 				peer->flash |= TEST4;
-				memcpy(&peer->refid, "CRYP", 4);
 			} else {
 				unpeer(peer);
 			}
@@ -1023,9 +1022,8 @@ receive(
 				    peer->flash);
 #endif
 			if (peer->flags & FLAG_CONFIG) {
-				peer_clear(peer);
+				peer_clear(peer, "CRYP");
 				peer->flash |= TEST4;
-				memcpy(&peer->refid, "CRYP", 4);
 			} else {
 				unpeer(peer);
 			}
@@ -1313,7 +1311,6 @@ clock_update(void)
 		clear_all();
 		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
-		memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronisation lost");
@@ -1457,7 +1454,8 @@ poll_update(
  */
 void
 peer_clear(
-	struct peer *peer
+	struct peer *peer,		/* peer structure */
+	char	*ident			/* tally lights */
 	)
 {
 	int	i;
@@ -1510,26 +1508,12 @@ peer_clear(
 	if (!(peer->flags & FLAG_REFCLOCK)) {
 		peer->leap = LEAP_NOTINSYNC;
 		peer->stratum = STRATUM_UNSPEC;
-		if (peer->cast_flags & MDF_ACAST)
-			memcpy(&peer->refid, "ACST", 4);
-		else if (peer->cast_flags & MDF_MCAST)
-			memcpy(&peer->refid, "MCST", 4);
-		else if (peer->cast_flags & MDF_BCAST)
-			memcpy(&peer->refid, "BCST", 4);
-		else
-			memcpy(&peer->refid, "INIT", 4);
+		memcpy(&peer->refid, ident, 4);
 	}
 #else
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_UNSPEC;
-	if (peer->cast_flags & MDF_ACAST)
-		memcpy(&peer->refid, "ACST", 4);
-	else if (peer->cast_flags & MDF_MCAST)
-		memcpy(&peer->refid, "MCST", 4);
-	else if (peer->cast_flags & MDF_BCAST)
-		memcpy(&peer->refid, "BCST", 4);
-	else
-		memcpy(&peer->refid, "INIT", 4);
+	memcpy(&peer->refid, ident, 4);
 #endif
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -1548,8 +1532,8 @@ peer_clear(
 	peer->nextdate += (u_int)RANDOM % START_DELAY;
 #ifdef DEBUG
 	if (debug)
-		printf("peer_clear: at %ld assoc ID %d\n",
-		    current_time, peer->associd);
+		printf("peer_clear: at %ld assoc ID %d refid %s\n",
+		    current_time, peer->associd, ident);
 #endif
 }
 
