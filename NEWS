@@ -1,6 +1,13 @@
+(4.0.98)
+* Solaris kernel FLL bug is fixed in 106541-07
+* Bug/lint cleanup
+* PPS cleanup
+* ReliantUNIX patches
 * NetInfo support
 * Ultralink driver
 * Trimble OEM Ace-II support
+* DCF77 power choices
+* Oncore improvements
 (4.0.97)
 * NT patches
 * AIX,SunOS,IRIX portability

@@ -1,19 +1,34 @@
 1999-09-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* acconfig.h:
-	* config.guess:
-	* config.h.in:
-	* config.sub:
-	* configure.in:
-	* html/copyright.htm:
-	* html/notes.htm:
-	* html/ntpd.htm:
-	* html/ntpdate.htm:
-	* include/ntp.h:
-	* ntpd/ntp_config.c:
-	* ntpdate/ntpdate.c:
-	* util/tickadj.c:
-	NetInfo support.
+	* configure.in: 4.0.98
+
+	NetInfo support:
+
+	* config.guess
+	* config.sub
+	Add Mac OS (versions 10 and up).
+
+	* acconfig.h
+	* config.h.in
+	* configure.in
+	Check for NetInfo API; add HAVE_NETINFO macro and friends.
+
+	* include/ntp.h
+	* ntpd/ntp_config.c
+	* ntpdate/ntpdate.c
+	Add support for reading configuration from NetInfo.
+
+	* ntpd/ntp_config.c
+	Get rid of unnecessary eol variable in tokenizer.
+
+	* html/notes.htm
+	* html/ntpd.htm
+	* html/ntpdate.htm
+	Document NetInfo functionality.
+
+	* util/tickadj.c
+	Use HAVE_KVM_OPEN conditional around kvm.h include.
+	
 	From: Wilfredo Sanchez <wsanchez@apple.com>
 
 1999-09-15  Harlan Stenn  <stenn@whimsy.udel.edu>
