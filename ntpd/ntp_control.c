@@ -2728,12 +2728,13 @@ report_event(
 		/*
 		 * Dump it all. Later, maybe less.
 		 */
-		for (i = 1; i <= CP_MAXCODE; i++)
+		for (i = 1; i <= CP_MAXCODE; i++) {
 #ifdef OPENSSL
 			if (i > CP_VARLIST)
 				continue;
 #endif /* OPENSSL */
 			ctl_putpeer(i, peer);
+		}
 #ifdef REFCLOCK
 		/*
 		 * for clock exception events: add clock variables to
