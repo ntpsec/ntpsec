@@ -1,3 +1,7 @@
+2000-02-27  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntpd.c: Only log EINTR if debug > 2.
+
 2000-02-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/mkver.in (ConfStr): Use `-r' when configured with crypto.

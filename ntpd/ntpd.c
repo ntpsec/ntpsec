@@ -858,10 +858,8 @@ service_main(
 			}
 			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
-			else if (debug) {
-#   if !defined SYS_VXWORKS && !defined SCO5_CLOCK /* to unclutter log */
+			else if (debug > 2) {
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
-#   endif
 			}
 #  else /* HAVE_SIGNALED_IO */
                         
