@@ -585,8 +585,8 @@ local_clock(
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
 	allan_xpt = max(CLOCK_ALLAN, clock_stability * CLOCK_ADF);
 
-printf("xxx %.3f %.3f\n", sys_jitter / ULOGTOD(sys_poll + 1),
-clock_stability * 1.5);
+printf("xxx %.3f %.3f\n", sys_jitter / ULOGTOD(sys_poll + 1) * 1e6,
+clock_stability * 1.5 * 1e6);
 
 	/*
 	 * In SYNC state, adjust the poll interval.

@@ -1,3 +1,14 @@
+2001-04-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c (local_clock): debug message improvements
+	from Dave Mills.
+
+	* libntp/emalloc.c (emalloc): Tell people we are exiting if we log
+	an out-of-memory condition.
+
+	* util/ntp-genkeys.c (main): Don't allow '#' in a generated MD5
+	key.  Reported by: Dave Tyson <Dave.Tyson@liverpool.ac.uk>
+
 2001-04-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (clock_update): minpoll cleanup.

@@ -880,6 +880,14 @@ main(
 				for (j = 0; j < 16; j++) {
 					while (1) {
 						temp = random() & 0xff;
+						/*
+						** Harlan says Karnaugh maps
+						** are not his friend, and
+						** compilers can optimize
+						** this most easily.
+						*/
+						if (temp == '#')
+							continue;
 						if (temp > 0x20 && temp < 0x7f)
 							break;
 					}
