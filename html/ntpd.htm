@@ -260,6 +260,11 @@ ntpd</tt> will attempt to read its configuration from the NetInfo
 if the default ntp.conf file cannot be read and no file is
 specified by the <tt>-c</tt> option.</p>
 
+<p>In contexts where a host name is expected, a <tt>-4</tt> qualifier
+preceding the host name forces DNS resolution to the IPv4
+namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the
+IPv6 namespace.</p>
+
 <p>Various internal <tt>ntpd</tt> variables can be displayed and
 configuration options altered while the <tt>ntpd</tt> is running
 using the <tt><a href="ntpq.htm">ntpq</a></tt> and <tt><a href=
@@ -272,6 +277,16 @@ to <tt>022</tt>.</p>
 <h4>Command Line Options</h4>
 
 <dl>
+<dt><tt>-4</tt></dt>
+
+<dd>Force DNS resolution of following host names to the IPv4
+namespace.</dd>
+
+<dt><tt>-6</tt></dt>
+
+<dd>Force DNS resolution of following host names to the IPv6
+namespace.</dd>
+
 <dt><tt>-a</tt></dt>
 
 <dd>Enable authentication mode (default).</dd>
@@ -288,8 +303,6 @@ to <tt>022</tt>.</p>
 
 <dd>Specify the name and path of the configuration file. (Disable
 netinfo?)</dd>
-
-
 
 <dt><tt>-d</tt></dt>
 

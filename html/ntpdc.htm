@@ -58,6 +58,11 @@ state of the local server must be authenticated, which requires
 both the remote program and local server share a common key and key
 identifier.</p>
 
+<p>Note that in contexts where a host name is expected, a <tt>-4</tt>
+qualifier preceding the host name forces DNS resolution to the IPv4
+namespace, while a </tt>-6</tt> qualifier forces DNS resolution to the
+IPv6 namespace.</p>
+
 <h4>Command Line Options</h4>
 
 Specifying a command line option other than <tt>-i</tt> or <tt>
@@ -67,6 +72,16 @@ attempt to read interactive format commands from the standard
 input. 
 
 <dl>
+<dt><tt>-4</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv4 namespace.</dd>
+
+<dt><tt>-6</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv6 namespace.</dd>
+
 <dt><tt>-c <i>command</i></tt></dt>
 
 <dd>The following argument is interpreted as an interactive format

@@ -68,6 +68,11 @@ an alternative to running a daemon, doing so once every hour or two
 will result in precise enough timekeeping to avoid stepping the
 clock.</p>
 
+<p>Note that in contexts where a host name is expected, a <tt>-4</tt>
+qualifier preceding the host name forces DNS resolution to the IPv4
+namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the
+IPv6 namespace.</p>
+
 <p>If NetInfo support is compiled into <tt>ntpdate</tt>, then the
 <tt>server</tt> argument is optional if <tt>ntpdate</tt> can find a
 time server in the NetInfo configuration for <tt>ntpd</tt>.</p>
@@ -75,6 +80,16 @@ time server in the NetInfo configuration for <tt>ntpd</tt>.</p>
 <h4>Command Line Options</h4>
 
 <dl>
+<dt><tt>-4</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv4 namespace.</dd>
+
+<dt><tt>-6</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv6 namespace.</dd>
+
 <dt><tt>-a <i>key</i></tt></dt>
 
 <dd>Enable the authentication function and specify the key

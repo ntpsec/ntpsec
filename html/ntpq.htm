@@ -54,6 +54,11 @@ one attempt to retransmit requests, and will time requests out if
 the remote host is not heard from within a suitable timeout
 time.</p>
 
+<p>Note that in contexts where a host name is expected, a <tt>-4</tt>
+qualifier preceding the host name forces DNS resolution to the IPv4
+namespace, while a </tt>-6</tt> qualifier forces DNS resolution to the
+IPv6 namespace.</p>
+
 <p>For examples and usage, see the <a href="debug.htm">NTP
 Debugging Techniques</a> page.</p>
 
@@ -64,11 +69,25 @@ host(s) immediately. Otherwise, <tt>ntpq</tt> will attempt to read
 interactive format commands from the standard input.</p>
 
 <dl>
+<dt><tt>-4</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv4 namespace.</dd>
+
+<dt><tt>-6</tt></dt>
+
+<dd>Force DNS resolution of following host names on the command
+line to the IPv6 namespace.</dd>
+
 <dt><tt>-c</tt></dt>
 
 <dd>The following argument is interpreted as an interactive format
 command and is added to the list of commands to be executed on the
 specified host(s). Multiple <tt>-c</tt> options may be given.</dd>
+
+<dt><tt>-d</tt></dt>
+
+<dd>Turn on debugging mode.</dd>
 
 <dt><tt>-i</tt></dt>
 
@@ -657,7 +676,6 @@ page. If any bits are set and the association has previously been
 marked reachable, the packet is discarded; otherwise, the originate
 and receive timestamps are saved, as required by the NTP protocol,
 and processing continues.</p>
-
 
 <p>The <tt>flash</tt> bits for each test are defined as
 follows.</p>
