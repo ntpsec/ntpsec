@@ -1,3 +1,7 @@
+2000-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k
+
 2000-07-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (peer_xmit): PUBKEY cleanup
