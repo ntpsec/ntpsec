@@ -1,3 +1,7 @@
+2000-03-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/Makefile.am (EXTRA_libntp_a_SOURCES): Use it correctly...
+
 2000-03-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/Makefile.am (EXTRA_DIST): Added snprintf.c
