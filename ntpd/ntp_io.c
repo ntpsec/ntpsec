@@ -2226,14 +2226,31 @@ find_interface_index(
 	 */
 	if (addr->ss_family == AF_INET6) {
 		if (flagtype == INT_MULTICAST) {
-			is_sitelocal = IN6_IS_ADDR_MC_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
-			is_linklocal = IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+			if (IN6_IS_ADDR_MC_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
+				is_sitelocal = ISC_TRUE;
+			else
+				is_sitelocal = ISC_FALSE;
+			if (IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
+				is_linklocal = ISC_TRUE;
+			else
+				is_linklocal = ISC_FALSE;
 		}
 		else {
-			is_sitelocal = IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
-			is_linklocal = IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
+				is_sitelocal = ISC_TRUE;
+			else
+				is_sitelocal = ISC_FALSE;
+			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
+				is_linklocal = ISC_TRUE;
+			else
+				is_linklocal = ISC_FALSE;
 		}
 	}
+#ifdef DEBUG
+	if (debug > 2)
+		printf("Addr %s is %s sitelocal: %d\n", stoa(addr), ((is_sitelocal == ISC_TRUE) ? " ":"not"), is_sitelocal);
+		printf("Addr %s is %s linklocal: %d\n", stoa(addr), ((is_linklocal == ISC_TRUE) ? " ":"not"), is_linklocal);
+#endif
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 	/*
 	 * If we got this far we need to try and match the
@@ -2270,7 +2287,7 @@ find_interface_index(
 		 * See if the IPv6 address is Link-Local or Site Local
 		 */
 		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (is_linklocal &&
+			if (is_linklocal == ISC_TRUE &&
 			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
 			{
 #ifdef DEBUG
@@ -2280,7 +2297,7 @@ find_interface_index(
 				return (i);
 			}
 
-			if (is_sitelocal &&
+			if (is_sitelocal == ISC_TRUE &&
 			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
 			{
 #ifdef DEBUG
