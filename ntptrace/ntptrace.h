@@ -10,7 +10,7 @@
  * remember about the server.
  */
 struct server {
-	struct sockaddr_in srcadr;	/* address of remote host */
+	struct sockaddr_storage srcadr;	/* address of remote host */
 	u_char leap;			/* leap indicator */
 	u_char stratum;			/* stratum of remote server */
 	s_char precision;		/* server's clock precision */

@@ -74,7 +74,7 @@ int sys_version = NTP_OLDVERSION;	/* version to poll with */
 /*
  * File descriptor masks etc. for call to select
  */
-int fd;
+SOCKET fd;
 fd_set fdmask;
 
 /*
@@ -91,7 +91,7 @@ static	int		ReceiveBuf	P((struct server *, struct recvbuf *));
 static	struct	server *addserver	P((struct in_addr *));
 static	struct	server *addservbyname	P((const char *));
 static	void	setup_io	P((void));
-static	void	sendpkt	P((struct sockaddr_in *, struct pkt *, int));
+static	void	sendpkt	P((struct sockaddr_storage *, struct pkt *, int));
 static	int		getipaddr	P((const char *, u_int32 *));
 static	int		decodeipaddr	P((const char *, u_int32 *));
 static	void	printserver	P((struct server *, FILE *));
@@ -199,7 +199,7 @@ ntptracemain(
 #ifdef SYS_WINNT
 	wVersionRequested = MAKEWORD(1,1);
 	if (WSAStartup(wVersionRequested, &wsaData)) {
-		msyslog(LOG_ERR, "No useable winsock.dll: %m");
+		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
 		exit(1);
 	}
 #endif /* SYS_WINNT */
@@ -250,7 +250,7 @@ DoTrace(
 {
 	int retries = sys_retries;
 
-	if (!server->srcadr.sin_addr.s_addr) {
+	if (!GET_INADDR(server->srcadr)) {
 		if (nonames)
 		    printf("%s:\t*Not Synchronized*\n", ntoa(&server->srcadr));
 		else
@@ -351,7 +351,7 @@ DoReceive(
 			return(0);
 		}
 		else if (n == -1) {
-			msyslog(LOG_ERR, "select() error: %m");
+			netsyslog(LOG_ERR, "select() error: %m");
 			return(0);
 		}
 		get_systime(&ts);
@@ -422,7 +422,7 @@ ReceiveBuf(
 			   rbufp->recv_length);
 		return(0);		/* funny length packet */
 	}
-	if (rbufp->recv_srcadr.sin_addr.s_addr != server->srcadr.sin_addr.s_addr) {
+	if (GET_INADDR(rbufp->recv_srcadr) != GET_INADDR(server->srcadr)) {
 		if (debug)
 		    printf("receive: wrong server\n");
 		return(0);		/* funny length packet */
@@ -552,9 +552,9 @@ addserver(
 	server = (struct server *)emalloc(sizeof(struct server));
 	memset((char *)server, 0, sizeof(struct server));
 
-	server->srcadr.sin_family = AF_INET;
-	server->srcadr.sin_addr = *iap;
-	server->srcadr.sin_port = htons(NTP_PORT);
+	server->srcadr.ss_family = AF_INET;
+	((struct sockaddr_in *)&server->srcadr)->sin_addr = *iap;
+	((struct sockaddr_in *)&server->srcadr)->sin_port = htons(NTP_PORT);
 
 	sys_servers[sys_numservers++] = server;
 	
@@ -600,7 +600,7 @@ setup_io(void)
 	    == INVALID_SOCKET
 #endif
 	    ) {
-		msyslog(LOG_ERR, "socket() failed: %m");
+		netsyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 		/*NOTREACHED*/
 	}
@@ -617,7 +617,7 @@ setup_io(void)
  */
 static void
 sendpkt(
-	struct sockaddr_in *dest,
+	struct sockaddr_storage *dest,
 	struct pkt *pkt,
 	int len
 	)
@@ -625,17 +625,18 @@ sendpkt(
 	int cc;
 
 	cc = sendto(fd, (char *)pkt, (size_t)len, 0, (struct sockaddr *)dest,
-		    sizeof(struct sockaddr_in));
-	if (cc == -1) {
+		    SOCKLEN(dest));
+	if (cc == SOCKET_ERROR) {
 #ifndef SYS_WINNT
 		if (errno != EWOULDBLOCK && errno != ENOBUFS)
 #else /* SYS_WINNT */
 		    int iSockErr = WSAGetLastError();
 		if (iSockErr != WSAEWOULDBLOCK && iSockErr != WSAENOBUFS)
 #endif /* SYS_WINNT */
-		    msyslog(LOG_ERR, "sendto(%s): %m", ntoa(dest));
+		    netsyslog(LOG_ERR, "sendto(%s): %m", ntoa(dest));
 	}
 }
+
 
 /*
  * getipaddr - given a host name, return its host address
@@ -728,7 +729,7 @@ printserver(
 	}
 
 	(void) fprintf(fp, "server %s, port %d\n", ntoa(&pp->srcadr),
-	    ntohs(pp->srcadr.sin_port));
+	    SRCPORT(&pp->srcadr));
 
 	(void) fprintf(fp, "stratum %d, precision %d, leap %c%c\n",
 	    pp->stratum, pp->precision, pp->leap & 0x2 ? '1' : '0',

@@ -425,6 +425,16 @@ create_sockets(
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
 		    inter_list[i].flags & INT_BROADCAST, 0);
+		if (inter_list[i].bfd != INVALID_SOCKET)
+			msyslog(LOG_INFO, "Listening on interface %s, %s#%d",
+				inter_list[i].name,
+				stoa((&inter_list[i].sin)),
+				NTP_PORT);
+		if ((inter_list[i].flags & INT_BROADCAST) &&
+		     inter_list[i].bfd != INVALID_SOCKET)
+			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
+				stoa((&inter_list[i].bcast)),
+				NTP_PORT);
 	}
 
 	/*
@@ -449,15 +459,6 @@ create_sockets(
 	 */
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].addr_refid = addr2refid(&inter_list[i].sin);
-		msyslog(LOG_INFO, "Listening on %s interface, %s#%d",
-			inter_list[i].name,
-			stoa((&inter_list[i].sin)),
-			NTP_PORT);
-		if ((inter_list[i].flags & INT_BROADCAST) &&
-		     inter_list[i].bfd != INVALID_SOCKET)
-			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
-				stoa((&inter_list[i].bcast)),
-				NTP_PORT);
 	}
 
 
