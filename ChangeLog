@@ -1,5 +1,7 @@
 2000-07-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* README.cvs: Cleanup.
+
 	* ntpd/refclock_datum.c (datum_pts_poll): index -> unit_index
 	* ntpd/ntp_resolver.c (findhostaddr): const cleanup
 	* libntp/recvbuff.c: 
