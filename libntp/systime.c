@@ -37,7 +37,11 @@
  * adjtime() quantum is a clock tick for a 100-Hz clock, the quantum
  * should be 10 ms.
  */
-double	sys_tick = 1e-6;	/* tickadj() quantum (s) */
+#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
+double	sys_tick = 10e-3;	/* 10 ms tickadj() */
+#else
+double	sys_tick = 1e-6;	/* 1 us tickadj() */
+#endif
 double	sys_residual = 0;	/* adjustment residue (s) */
 
 #ifndef SIM

@@ -1315,8 +1315,9 @@ process_packet(
 static void
 clock_update(void)
 {
-	u_char oleap;
-	u_char ostratum;
+	u_char	oleap;
+	u_char	ostratum;
+	double	dtemp;
 
 	/*
 	 * There must be a system peer at this point. If we just changed
@@ -1342,7 +1343,7 @@ clock_update(void)
 	switch (local_clock(sys_peer, sys_offset)) {
 
 	/*
-	 * Clock is too screwed up. Just exit for now.
+	 * Clock exceeds panic threshold. Life as we know it ends.
 	 */
 	case -1:
 		report_event(EVNT_SYSFAULT, NULL);
@@ -1352,7 +1353,7 @@ clock_update(void)
 	/*
 	 * Clock was stepped. Flush all time values of all peers.
 	 */
-	case 1:
+	case 2:
 		clear_all();
 		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
@@ -1366,19 +1367,25 @@ clock_update(void)
 		break;
 
 	/*
-	 * Update the system stratum, leap bits, root delay, root
-	 * dispersion, reference ID and reference time. We also update
-	 * select dispersion and max frequency error. If the leap
-	 * changes, we gotta reroll the keys.
+	 * Clock was slewed. Update the system stratum, leap bits, root
+	 * delay, root dispersion, reference ID and reference time. If
+	 * the leap changes, we gotta reroll the keys.
 	 */
-	default:
-		sys_stratum = (u_char) (sys_peer->stratum + 1);
+	case 1:
+		sys_stratum = (u_char)(sys_peer->stratum + 1);
 		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
 		else
 			sys_refid = sys_peer_refid;
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
+		dtemp = sys_peer->disp + (current_time -
+		    sys_peer->epoch) * clock_phi + sys_error +
+		    fabs(last_offset);
+		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
+		    MINDISPERSE)
+			dtemp = MINDISPERSE;
+		sys_rootdispersion = sys_peer->rootdispersion + dtemp;
 		sys_leap = leap_consensus;
 		if (oleap == LEAP_NOTINSYNC) {
 			report_event(EVNT_SYNCCHG, NULL);
@@ -1386,6 +1393,13 @@ clock_update(void)
 			expire_all();
 #endif /* OPENSSL */
 		}
+		break;
+	/*
+	 * Popcorn spike or step threshold exceeded. Pretend it never
+	 * happened.
+	 */
+	default:
+		break;
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, NULL);
@@ -1658,6 +1672,7 @@ clock_filter(
 	}
 	peer->filter_epoch[j] = current_time;
 
+#if 0
         /*
 	 * Sort the samples in both lists by distance.
 	 */
@@ -1673,7 +1688,7 @@ clock_filter(
 			}
 		}
 	}
-
+#endif
 	/*
 	 * Copy the index list to the association structure so ntpq
 	 * can see it later. Prune the distance list to samples less
@@ -1718,6 +1733,7 @@ clock_filter(
 	 */
 	if (m == 0)
 		return;
+
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
 	dtemp = sqrt(peer->jitter);
 	peer->offset = peer->filter_offset[k];

@@ -52,31 +52,29 @@
  * synchronization behavior during initialization and following a
  * timewarp.
  *
- *	State	< max	> max			Comments
+ *	State	< step		> step		Comments
  *	====================================================
- *	NSET	FREQ	FREQ			no ntp.drift
+ *	NSET	FREQ		step, FREQ	no ntp.drift
  *
- *	FSET	TSET	if (allow) TSET,	ntp.drift
- *			else FREQ
+ *	FSET	SYNC		step, SYNC	ntp.drift
  *
- *	TSET	SYNC	FREQ			time set
+ *	FREQ	if (mu < 900)	if (mu < 900)	set freq
+ *		    ignore	    ignore
+ *		else		else
+ *		    freq, SYNC	    freq, step, SYNC
  *
- *	FREQ	SYNC	if (mu < 900) FREQ	calculate frequency
- *			else if (allow) TSET
- *			else FREQ
+ *	SYNC	SYNC		if (mu < 900)	adjust phase/freq
+ *				    ignore
+ *				else
+ *				    SPIK
  *
- *	SYNC	SYNC	if (mu < 900) SYNC	normal state
- *			else SPIK
- *
- *	SPIK	SYNC	if (allow) TSET		spike detector
- *			else FREQ
+ *	SPIK	SYNC		step, SYNC	set phase
  */
 #define S_NSET	0		/* clock never set */
 #define S_FSET	1		/* frequency set from the drift file */
-#define S_TSET	2		/* time set */
+#define S_SPIK	2		/* spike detected */
 #define S_FREQ	3		/* frequency mode */
 #define S_SYNC	4		/* clock synchronized */
-#define S_SPIK	5		/* spike detected */
 
 /*
  * Kernel PLL/PPS state machine. This is used with the kernel PLL
@@ -122,7 +120,7 @@ static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (s/s) */
 double	clock_stability;	/* clock stability (s/s) */
 u_long	pps_control;		/* last pps sample time */
-static void rstclock P((int, u_long, double)); /* transition function */
+static void rstclock P((int, double)); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -149,8 +147,9 @@ u_char	sys_poll = NTP_MINDPOLL; /* system poll interval (log2 s) */
 int	state;			/* clock discipline state */
 int	tc_counter;		/* hysteresis counter */
 u_long	last_time;		/* time of last clock update (s) */
-double	last_offset;		/* last clock offset (s) */
-double	sys_jitter;		/* system jitter (s) */
+double	last_offset;		/* last time offset (s) */
+double	last_clock;		/* last clock offset (s) */
+double	sys_jitter;		/* clock jitter (s) */
 
 /*
  * Huff-n'-puff filter variables
@@ -182,13 +181,18 @@ init_loopfilter(void)
 	 * Initialize state variables. Initially, we expect no drift
 	 * file, so set the state to S_NSET.
 	 */
-	rstclock(S_NSET, current_time, 0);
+	rstclock(S_NSET, 0);
 	sys_jitter = LOGTOD(sys_precision);
 }
 
 /*
- * local_clock - the NTP logical clock loop filter. Returns 1 if the
- * clock was stepped, 0 if it was slewed and -1 if it is hopeless.
+ * local_clock - the NTP logical clock loop filter.
+ *
+ * Return codes:
+ * -1	update ignored: exceeds panic threshold
+ * 0	update ignored: popcorn or exceeds step threshold
+ * 1	clock was slewed
+ * 2	clock was stepped
  *
  * LOCKCLOCK: The only thing this routine does is set the
  * sys_rootdispersion variable equal to the peer dispersion.
@@ -199,12 +203,12 @@ local_clock(
 	double fp_offset	/* clock offset (s) */
 	)
 {
+	int	rval;		/* return code */
 	u_long mu;		/* interval since last update (s) */
 	double flladj;		/* FLL frequency adjustment (ppm) */
 	double plladj;		/* PLL frequency adjustment (ppm) */
 	double clock_frequency;	/* clock frequency adjustment (ppm) */
 	double dtemp, etemp;	/* double temps */
-	int retval;		/* return value */
 
 	/*
 	 * If the loop is opened, monitor and record the offsets
@@ -213,12 +217,11 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assocID %d offset %.9f state %d\n",
-		    peer->associd, fp_offset, state);
+		    "local_clock: assocID %d offset %.9f freq %.3f state %d\n",
+		    peer->associd, fp_offset, drift_comp * 1e6, state);
 #endif
 #ifdef LOCKCLOCK
-	sys_rootdispersion = peer->rootdispersion;
-		return (0);
+	return (0);
 
 #else /* LOCKCLOCK */
 	if (!ntp_enable) {
@@ -233,8 +236,8 @@ local_clock(
 	 * occur. The allow_panic defaults to FALSE, so the first panic
 	 * will exit. It can be set TRUE by a command line option, in
 	 * which case the clock will be set anyway and time marches on.
-	 * But, allow_panic will be set it FALSE when the update is
-	 * within the step range; so, subsequent panics will exit.
+	 * But, allow_panic will be set FALSE when the update is less
+	 * than the step threshold; so, subsequent panics will exit.
 	 */
 	if (fabs(fp_offset) > clock_panic && clock_panic > 0 &&
 	    !allow_panic) {
@@ -313,91 +316,105 @@ local_clock(
 	 * However, if the step threshold is set to zero, a step will
 	 * never occur. See the instruction manual for the details how
 	 * these actions interact with the command line options.
+	 *
+	 * Note the system poll is set to minpoll only if the clock is
+	 * stepped. 
 	 */
-	retval = 0;
 	clock_frequency = flladj = plladj = 0;
-	mu = peer->epoch - last_time;
+	mu = current_time - last_time;
+	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
 
 		/*
-		 * In S_TSET state the time has been set at the last
-		 * valid update and the offset at that time set to zero.
-		 * If following that we cruise outside the capture
-		 * range, assume a really bad frequency error and switch
-		 * to S_FREQ state.
-		 */
-		case S_TSET:
-			rstclock(S_FREQ, peer->epoch, fp_offset);
-			break;
-
-		/*
-		 * In S_SYNC state we ignore outlyers. At the first
-		 * outlyer after the stepout threshold, switch to S_SPIK
-		 * state.
+		 * In S_SYNC state we ignore the first outlyer amd
+		 * switch to S_SPIK state.
 		 */
 		case S_SYNC:
-			if (mu < clock_minstep)
-				return (0);
 			state = S_SPIK;
-			return (0);
+
+			/* fall through to S_SPIK/S_FREQ */
 
 		/*
-		 * In S_FREQ state we ignore outlyers. At the first
-		 * outlyer after 900 s, compute the apparent phase and
-		 * frequency correction.
+		 * In S_SPIK state we ignore succeeding outlyers until
+		 * either an inlyer is found or the stepout threshold is
+		 * exceeded.
+		 *
+		 * In S_FREQ state we ignore outlyers and inlyers. At
+		 * the first outlyer after the stepout threshold,
+		 * compute the apparent frequency correction and step
+		 * the phase.
 		 */
+		case S_SPIK:
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
 
-			/* fall through to S_SPIK */
+			clock_frequency = (fp_offset - last_clock -
+			    clock_offset) / mu;
 
-		/*
-		 * In S_SPIK state a large correction is necessary.
-		 * Since the outlyer may be due to a large frequency
-		 * error, compute the apparent frequency correction.
-		 */
-		case S_SPIK:
-			clock_frequency = (fp_offset - clock_offset) /
-			    mu;
 			/* fall through to default */
 
 		/*
-		 * We get here directly in S_NSET and S_FSET states and
-		 * indirectly from S_FREQ and S_SPIK states. The clock
-		 * is either reset or shaken, but never stirred.
-		 */
+		 * We get here by default in S_NSET and S_FSET states
+		 * and from above in S_FREQ state. Step the phase and
+		 * clamp down the poll interval.
+		 *
+		 * In S_NSET state an initial frequency correction is
+		 * not available, usually because the frequency file has
+		 * not yet been written. Since the time is outside the
+		 * capture range, the clock is stepped. The frequency
+		 * will be set directly following the stepout interval.
+		 *
+		 * In S_FSET state the initial frequency has been set
+		 * from the frequency file. Since the time is outside
+		 * the capture range, the clock is stepped immediately,
+		 * rather than after the stepout interval. Guys get
+		 * nervous if it takes 17 minutes to set the clock for
+		 * the first time.
+		 *
+		 * In S_SPIK state the stepout threshold has expired and
+		 * the phase is still above the step threshold. Note
+		 * that a single spike greater than the step threshold
+		 * is always suppressed, even at the longer poll
+		 * intervals.
+		 */ 
 		default:
 			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
 			reinit_timer();
-			if (state == S_NSET)
-				rstclock(S_FREQ, peer->epoch, 0);
-			else
-				rstclock(S_TSET, peer->epoch, 0);
-			retval = 1;
+			tc_counter = 0;
+			sys_poll = NTP_MINPOLL;
+			rval = 2;
+			if (state == S_NSET) {
+				rstclock(S_FREQ, 0);
+				return (rval);
+			}
 			break;
 		}
+		rstclock(S_SYNC, 0);
 	} else {
 		switch (state) {
 
 		/*
-		 * If the frequency has not been initialized from the
-		 * file, drop everything until it is.
+		 * In S_NSET state this is the first update received and
+		 * the frequency has not been initialized. The first
+		 * thing to do is directly measure the oscillator
+		 * frequency.
 		 */
 		case S_NSET:
-			rstclock(S_FREQ, peer->epoch, fp_offset);
-			break;
+			clock_offset = fp_offset;
+			rstclock(S_FREQ, fp_offset);
+			return (0);
 
 		/*
-		 * In S_FSET state this is the first update. Adjust the
-		 * phase, but don't adjust the frequency until the next
-		 * update.
+		 * In S_FSET state this is the first update and the
+		 * frequency has been initialized. Adjust the phase, but
+		 * don't adjust the frequency until the next update.
 		 */
 		case S_FSET:
-			rstclock(S_TSET, peer->epoch, fp_offset);
+			clock_offset = fp_offset;
 			break;
 
 		/*
@@ -408,28 +425,19 @@ local_clock(
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
-			clock_frequency = (fp_offset - clock_offset) /
-			    mu;
-			rstclock(S_SYNC, peer->epoch, fp_offset);
+
+			clock_frequency = (fp_offset - last_clock -
+			    clock_offset) / mu;
 			break;
 
 		/*
-		 * Either the clock has just been set or the previous
-		 * update was a spike and ignored. Since this update is
-		 * not an outlyer, fold the tent and resume life.
-		 */
-		case S_TSET:
-		case S_SPIK:
-			state = S_SYNC;
-			/* fall through to default */
-
-		/*
-		 * We come here in the normal case for linear phase and
-		 * frequency adjustments. If the difference between the
-		 * last offset and the current one exceeds the jitter by
+		 * We get here by default in S_SYNC and S_SPIK states.
+		 * Here we compute the frequency update due to PLL and
+		 * FLL contributions. If the difference between the last
+		 * offset and the current one exceeds the jitter by
 		 * CLOCK_SGATE and the interval since the last update is
 		 * less than twice the system poll interval, consider
-		 * the update a popcorn spike and ignore it..
+		 * the update a popcorn spike and ignore it.
 		 */
 		default:
 			allow_panic = FALSE;
@@ -446,7 +454,6 @@ local_clock(
 				last_offset = fp_offset;
 				return (0);
 			}
-
 
 			/*
 			 * The FLL and PLL frequency gain constants
@@ -472,10 +479,9 @@ local_clock(
 			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
-			last_time = peer->epoch;
-			last_offset = clock_offset = fp_offset;
 			break;
 		}
+		rstclock(S_SYNC, fp_offset);
 	}
 
 #ifdef KERNEL_PLL
@@ -635,56 +641,48 @@ local_clock(
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
-	 * In SYNC state, adjust the poll interval. The trick here is to
-	 * compare the apparent frequency change induced by the system
-	 * jitter over the poll interval, or fritter, to the frequency
-	 * stability. If the fritter is greater than the stability,
-	 * phase noise predominates and the averaging interval is
-	 * increased; otherwise, it is decreased. A bit of hysteresis
-	 * helps calm the dance. Works best using burst mode.
+	 * Here we adjust the poll interval by comparing the apparent
+	 * frequency change induced by the system jitter over the poll
+	 * interval, or fritter, to the frequency stability, or wander.
+	 * If the fritter is greater than the wander, phase noise
+	 * predominates and the averaging interval is increased;
+	 * otherwise, it is decreased. A bit of hysteresis helps calm
+	 * the dance. Works best using burst mode.
 	 */
-	if (state == S_SYNC) {
-		if (sys_jitter > clock_stability && fabs(clock_offset) <
-		    CLOCK_PGATE * sys_jitter) {
-			tc_counter += sys_poll;
-			if (tc_counter > CLOCK_LIMIT) {
-				tc_counter = CLOCK_LIMIT;
-				if (sys_poll < peer->maxpoll) {
-					tc_counter = 0;
- 					sys_poll++;
-				}
+	if (sys_jitter > clock_stability && fabs(clock_offset) <
+	    CLOCK_PGATE * sys_jitter) {
+		tc_counter += sys_poll;
+		if (tc_counter > CLOCK_LIMIT) {
+			tc_counter = CLOCK_LIMIT;
+			if (sys_poll < peer->maxpoll) {
+				tc_counter = 0;
+					sys_poll++;
 			}
-		} else {
-			tc_counter -= sys_poll << 1;
-			if (tc_counter < -CLOCK_LIMIT) {
-				tc_counter = -CLOCK_LIMIT;
-				if (sys_poll > peer->minpoll) {
-					tc_counter = 0;
-					sys_poll--;
-				}
+		}
+	} else {
+		tc_counter -= sys_poll << 1;
+		if (tc_counter < -CLOCK_LIMIT) {
+			tc_counter = -CLOCK_LIMIT;
+			if (sys_poll > peer->minpoll) {
+				tc_counter = 0;
+				sys_poll--;
 			}
 		}
 	}
 
 	/*
-	 * Update the system time variables.
+	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
 	 */
-	dtemp = peer->disp + (current_time - peer->epoch) * clock_phi +
-	    sys_error + fabs(last_offset);
-	if (!(peer->flags & FLAG_REFCLOCK) && dtemp < MINDISPERSE)
-		dtemp = MINDISPERSE;
-	sys_rootdispersion = peer->rootdispersion + dtemp;
 	record_loop_stats(last_offset, drift_comp, sys_error,
 	    clock_stability, sys_poll);
-
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %lu rootjit %.6f stab %.3f poll %d count %d\n",
-		    mu, dtemp, clock_stability * 1e6, sys_poll,
-		    tc_counter);
+		    "local_clock: mu %lu jitr %.3f freq %.3f stab %.3f poll %d count %d\n",
+		    mu, sys_jitter, drift_comp * 1e6, clock_stability *
+		    1e6, sys_poll, tc_counter);
 #endif /* DEBUG */
-	return (retval);
+	return (rval);
 #endif /* LOCKCLOCK */
 }
 
@@ -763,19 +761,18 @@ adj_host_clock(
 static void
 rstclock(
 	int trans,		/* new state */
-	u_long epoch,		/* last time */
 	double offset		/* last offset */
 	)
 {
-	tc_counter = 0;
-	sys_poll = NTP_MINPOLL;
 	state = trans;
-	last_time = epoch;
+	last_time = current_time;
+	last_clock = offset - clock_offset;
 	last_offset = clock_offset = offset;
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: time %lu offset %.6f state %d\n",
-		    last_time, last_offset, trans);
+		printf("local_clock: time %lu clock %.6f offset %.6f freq %.3f state %d\n",
+		    last_time, last_clock, last_offset, drift_comp *
+		    1e6, trans);
 #endif
 }
 
@@ -790,6 +787,7 @@ huffpuff()
 
 	if (sys_huffpuff == NULL)
 		return;
+
 	sys_huffptr = (sys_huffptr + 1) % sys_hufflen;
 	sys_huffpuff[sys_huffptr] = 1e9;
 	sys_mindly = 1e9;
@@ -898,7 +896,7 @@ loop_config(
 		 */
 		if (freq <= NTP_MAXFREQ && freq >= -NTP_MAXFREQ) {
 			drift_comp = freq;
-			rstclock(S_FSET, current_time, 0);
+			rstclock(S_FSET, 0);
 		} else {
 			drift_comp = 0;
 		}
@@ -962,7 +960,7 @@ loop_config(
 
 	case LOOP_FREQ:			/* initial frequency */	
 		drift_comp = freq / 1e6;
-		rstclock(S_FSET, current_time, 0);
+		rstclock(S_FSET, 0);
 		break;
 	}
 }
