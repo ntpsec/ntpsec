@@ -934,7 +934,7 @@ neol_query_firmware(int fd,
 	      continue;
 	    }
 	  
-	  //msyslog(LOG_NOTICE, "NeoClock4X(%d): firmware %c = %02Xh", unit, c, c);
+	  /*msyslog(LOG_NOTICE, "NeoClock4X(%d): firmware %c = %02Xh", unit, c, c); */
 	  if(0x0A == c || 0x0D == c)
 	    {
 	      if(last_c_was_crlf)

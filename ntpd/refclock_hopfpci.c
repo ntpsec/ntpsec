@@ -191,7 +191,7 @@ hopfpci_shutdown(
 	close(fd);
 #else
 	CloseHopfDevice();
-//	UnmapViewOfFile (up);
+/*	UnmapViewOfFile (up); */
 #endif
 }
 

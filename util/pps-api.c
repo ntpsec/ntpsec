@@ -72,7 +72,7 @@ main(int argc, char **argv)
 
 	pp.mode = PPS_CAPTUREASSERT | PPS_ECHOASSERT;
 	pp.mode = PPS_CAPTUREBOTH;
-	// pp.mode = PPS_CAPTUREASSERT;
+	/* pp.mode = PPS_CAPTUREASSERT; */
 
 	i = time_pps_setparams(ph, &pp);
 	if (i < 0)
