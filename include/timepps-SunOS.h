@@ -390,13 +390,10 @@ time_pps_fetch(
 	const struct timespec *timeout
 	)
 {
-#if 0
 	struct ppsclockev {
 		struct timeval tv;
 		u_int serial;
-	};
-#endif
-	struct ppsclockev ev;
+	} ev;
 	pps_info_t infobuf;
 
 	/*
