@@ -889,7 +889,7 @@ if eval "$MISSING --run :"; then
   am_missing_run="$MISSING --run "
 else
   am_missing_run=
-  echo "configure: warning: `missing' script is too old or missing" 1>&2
+  echo "configure: warning: \`missing' script is too old or missing" 1>&2
 fi
 
 for ac_prog in mawk gawk nawk awk
