@@ -62,7 +62,7 @@
 
 #include "ntp_machine.h"
 
-#if !HAVE_MKTIME
+#if !HAVE_MKTIME || !HAVE_TIMEGM
 
 #ifndef DSTMINUTES
 #define DSTMINUTES 60
@@ -179,7 +179,8 @@ tmcomp(
 static time_t
 time2(
 	struct tm *	tmp,
-	int * 		okayp
+	int * 		okayp,
+	int		usezn
 	)
 {
 	register int			dir;
@@ -227,7 +228,10 @@ time2(
 	*/
 	t = (t < 0) ? 0 : ((time_t) 1 << bits);
 	for ( ; ; ) {
-	        mytm = *localtime(&t);
+		if (usezn)
+	        	mytm = *localtime(&t);
+		else
+	        	mytm = *gmtime(&t);
 		dir = tmcomp(&mytm, &yourtm);
 		if (dir != 0) {
 			if (bits-- < 0)
@@ -245,11 +249,18 @@ time2(
 		return WRONG;
 	}
 	t += saved_seconds;
-	*tmp = *localtime(&t);
+	if (usezn)
+		*tmp = *localtime(&t);
+	else
+		*tmp = *gmtime(&t);
 	*okayp = TRUE;
 	return t;
 }
+#else
+int mktime_bs;
+#endif /* !HAVE_MKTIME || !HAVE_TIMEGM */
 
+#if !HAVE_MKTIME
 static time_t
 time1(
 	struct tm * tmp
@@ -260,7 +271,7 @@ time1(
 
 	if (tmp->tm_isdst > 1)
 		tmp->tm_isdst = 1;
-	t = time2(tmp, &okay);
+	t = time2(tmp, &okay, 1);
 	if (okay || tmp->tm_isdst < 0)
 		return t;
 
@@ -274,6 +285,22 @@ mktime(
 {
 	return time1(tmp);
 }
-#else
-int mktime_bs;
-#endif
+#endif /* !HAVE_MKTIME */
+
+#if !HAVE_TIMEGM
+time_t
+timegm(
+	struct tm * tmp
+	)
+{
+	register time_t			t;
+	int				okay;
+
+	tmp->tm_isdst = 0;
+	t = time2(tmp, &okay, 0);
+	if (okay || tmp->tm_isdst < 0)
+		return t;
+
+	return WRONG;
+}
+#endif /* !HAVE_TIMEGM */
