@@ -631,7 +631,7 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 check-local: @MAKE_CHECK_Y2K@
-	[ -z "@MAKE_CHECK_Y2K@" ] || ./@MAKE_CHECK_Y2K@
+	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
 
 $(PROGRAMS): $(LDADD)
 

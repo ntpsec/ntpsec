@@ -18,7 +18,7 @@ check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k
 
 check-local: @MAKE_CHECK_Y2K@
-	[ -z "@MAKE_CHECK_Y2K@" ] || ./@MAKE_CHECK_Y2K@
+	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
 
 ntpd_SOURCES = cmd_args.c jupiter.h map_vme.c ntp_config.c ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \
