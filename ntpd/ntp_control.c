@@ -1894,10 +1894,10 @@ ctl_getitem(
 					if (cp < reqend)
 						cp++;
 					*tp-- = '\0';
-					while (tp > buf) {
-						*tp-- = '\0';
+					while (tp >= buf) {
 						if (!isspace((int)(*tp)))
 							break;
+						*tp-- = '\0';
 					}
 					reqpt = cp;
 					*data = buf;
