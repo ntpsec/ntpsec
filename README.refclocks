@@ -47,3 +47,4 @@ JJY		40	/* JJY receiver */
 TT560		41	/* TrueTime 560 IRIG-B decoder */
 ZYFER		42	/* Zyfer GPStarplus receiver */
 RIPENCC		43	/* RIPE NCC Trimble driver */
+???????		44	Claas Hilbrecht (20020711)
