@@ -857,23 +857,17 @@ irig_decode(
 			 * differences are integrated and subtracted
 			 * from the signal.
 			 */
-			if (L_ISZERO(&pp->lastrec) ||
-			    L_ISZERO(&pp->lastref)) {
-				L_CLR(&ltemp);
-			} else {
-				ltemp = pp->lastrec;
-				L_SUB(&ltemp, &pp->lastref);
-			}
+			ltemp = pp->lastrec;
+			L_SUB(&ltemp, &pp->lastref);
 			if (ltemp.l_f < 0)
 				ltemp.l_i = -1;
 			else
 				ltemp.l_i = 0;
 			pp->lastref = pp->lastrec;
-			if (!L_ISNEG(&ltemp)) {
+			if (!L_ISNEG(&ltemp))
 				L_CLR(&up->wigwag);
-			} else {
+			else
 				L_ADD(&up->wigwag, &ltemp);
-			}
 			L_SUB(&pp->lastrec, &up->wigwag);
 			up->wiggle[up->wp] = ltemp;
 
@@ -883,20 +877,17 @@ irig_decode(
 			 * transmitters. No further explanation is
 			 * offered, as this is truly a black art.
 			 */
-			ltemp = pp->lastrec;
 			up->wigbot[up->wp] = pp->lastrec;
 			for (i = 0; i < WIGGLE; i++) {
 				if (i != up->wp)
 					up->wigbot[i].l_ui++;
-				L_SUB(&ltemp, &up->wigbot[i]);
-				if (L_ISNEG(&ltemp))
-					L_ADD(&ltemp,
+				L_SUB(&pp->lastrec, &up->wigbot[i]);
+				if (L_ISNEG(&pp->lastrec))
+					L_ADD(&pp->lastrec,
 					    &up->wigbot[i]);
 				else
-					ltemp = up->wigbot[i];
+					pp->lastrec = up->wigbot[i];
 			}
-			pp->lastrec = ltemp;
-
 			up->wp++;
 			up->wp %= WIGGLE;
 			up->wuggle = pp->lastrec;

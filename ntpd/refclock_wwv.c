@@ -84,6 +84,9 @@
 #define MAXERR		30	/* max data bit errors in minute */
 #define NCHAN		5	/* number of channels */
 #define	AUDIO_PHI	5e-6	/* max frequency error */
+#ifdef IRIG_SUCKS
+#define	WIGGLE		11	/* wiggle filter length */
+#endif /* IRIG_SUCKS */
 
 /*
  * General purpose status bits (status)
@@ -514,6 +517,12 @@ struct wwvunit {
 	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clipped count */
+#ifdef IRIG_SUCKS
+	l_fp	wigwag;		/* wiggle accumulator */
+	int	wp;		/* wiggle filter pointer */
+	l_fp	wiggle[WIGGLE];	/* wiggle filter */
+	l_fp	wigbot[WIGGLE];	/* wiggle bottom fisher*/
+#endif /* IRIG_SUCKS */
 
 	/*
 	 * Variables used to establish basic system timing
@@ -1808,6 +1817,10 @@ wwv_rsec(
 	double bit;		/* bit likelihood */
 	char tbuf[80];		/* monitor buffer */
 	int sw, arg, nsec;
+#ifdef IRIG_SUCKS
+	int	i;
+	l_fp	ltemp;
+#endif /* IRIG_SUCKS */
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
@@ -1916,6 +1929,9 @@ wwv_rsec(
 			rp->count++;
 		}
 
+		/*
+		 * Set up for next minute.
+		 */
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
 			    "wwv5 %2d %04x %3d %4d %d %.0f/%.1f %s %04x %.0f %.0f/%.1f %s %04x %.0f %.0f/%.1f",
@@ -2011,10 +2027,9 @@ wwv_rsec(
 		if (up->fd_icom > 0) {
 			up->schan = (up->schan + 1) % NCHAN;
 			wwv_qsy(peer, up->schan);
-			up->status |= SELV | SELH;
 		}
 #endif /* ICOM */
-		up->status |= SFLAG;
+		up->status |= SFLAG | SELV | SELH;
 		up->errbit = up->errcnt;
 		up->errcnt = 0;
 		break;
@@ -2093,10 +2108,62 @@ wwv_rsec(
 		up->status |= INSYNC;
 		up->watch = 0;
 		pp->disp = 0;
-		pp->lastref = up->timestamp;
 	}
 	up->rsec = nsec;
-	if (up->status & INSYNC) {
+#ifdef IRIG_SUCKS
+
+	/*
+	 * You really don't wanna know what comes down here. Leave it to
+	 * say Solaris 2.8 broke the nice clean audio stream, apparently
+	 * affected by a 5-ms sawtooth jitter. Sundown on Solaris. This
+	 * leaves a little twilight.
+	 *
+	 * The scheme involves differentiation, forward learning and
+	 * integration. The sawtooth has a period of 11 seconds. The
+	 * timestamp differences are integrated and subtracted from the
+	 * signal.
+	 */
+	ltemp = pp->lastrec;
+	L_SUB(&ltemp, &pp->lastref);
+	if (ltemp.l_f < 0)
+		ltemp.l_i = -1;
+	else
+		ltemp.l_i = 0;
+	pp->lastref = pp->lastrec;
+	if (!L_ISNEG(&ltemp))
+		L_CLR(&up->wigwag);
+	else
+		L_ADD(&up->wigwag, &ltemp);
+	L_SUB(&pp->lastrec, &up->wigwag);
+	up->wiggle[up->wp] = ltemp;
+
+	/*
+	 * Bottom fisher. To understand this, you have to know about
+	 * velocity microphones and AM transmitters. No further
+	 * explanation is offered, as this is truly a black art.
+	 */
+	up->wigbot[up->wp] = pp->lastrec;
+	for (i = 0; i < WIGGLE; i++) {
+		if (i != up->wp)
+			up->wigbot[i].l_ui++;
+		L_SUB(&pp->lastrec, &up->wigbot[i]);
+		if (L_ISNEG(&pp->lastrec))
+			L_ADD(&pp->lastrec, &up->wigbot[i]);
+		else
+			pp->lastrec = up->wigbot[i];
+	}
+	up->wp++;
+	up->wp %= WIGGLE;
+#endif /* IRIG_SUCKS */
+
+	/*
+	 * If victory has been declared and at least one station is
+	 * above the noise, crank the system clock. It should not be a
+	 * surprise, especially if the radio is not tunable, that
+	 * sometimes no stations are above the noise and the reference
+	 * ID set to NONE.
+	 */
+	if (up->status & INSYNC && up->status & (SELV | SELH)) {
 		pp->second = up->rsec;
 		pp->minute = up->decvec[MN].digit + up->decvec[MN +
 		    1].digit * 10;
@@ -2461,25 +2528,35 @@ wwv_snr(
 /*
  * wwv_newchan - change to new data channel
  *
- * The radio actually appears to have 10-channels, one channel for each
+ * The radio actually appears to have ten channels, one channel for each
  * of five frequencies and each of two stations (WWV and WWVH), although
  * if not tunable only the 15 MHz channels appear live. While the radio
  * is tuned to the working data channel frequency and station for most
  * of the minute, during seconds 59, 0 and 1 the radio is tuned to a
- * probe frequency in order to search for minute sync and data pulses.
- * The search for WWV and WWVH stations operates simultaneously, with
- * WWV on 1000 Hz and WWVH on 1200 Hz. The probe frequency rotates each
- * minute over 2.5, 5, 10, 15 and 20 MHz in order and yes, we all know
- * WWVH is dark on 20 MHz, but few remember when WWV was lit on 25 MHz.
+ * probe frequency in order to search for minute sync pulse and data
+ * subcarrier from other transmitters.
  *
- * This routine selects the best channel using the channel bit counter
- * and minute pulse amplitude as mitigation metrics. This counter holds
- * the number of reachability register 1 bits in the last six probes.
- * Normally, the award goes to the the channel with the highest counter
- * value. In case of ties, the award goes to the channel with the
- * highest minute sync pulse amplitude.
+ * The search for WWV and WWVH operates simultaneously, with WWV minute
+ * sync pulse at 1000 Hz and WWVH at 1200 Hz. The probe frequency
+ * rotates each minute over 2.5, 5, 10, 15 and 20 MHz in order and yes,
+ * we all know WWVH is dark on 20 MHz, but few remember when WWV was lit
+ * on 25 MHz.
  *
- * The routine performs an important squelch function to keep dirty data from polluting the integrators. During acquisition and until the clock is synchronized, the signal metric must be at least MTR (13); after that the metrict must be at least TTHR (50). If either of these is not true, the station select bits are cleared so the second sync is disabled and the data bit integrators averaged to a miss. 
+ * This routine selects the best channel using a metric computed from
+ * the reachability shift register and minute pulse amplitude. The high
+ * order bits of the metric show the number of reachability register 1
+ * bits in the last six probes, while the low order bits hold the minute
+ * sync pulse amplitude. Normally, the award goes to the the channel
+ * with the highest metric; but, case of ties, the award goes to the
+ * channel with the highest minute sync pulse amplitude and then to the
+ * highest frequency.
+ *
+ * The routine performs an important squelch function to keep dirty data
+ * from polluting the integrators. During acquisition and until the
+ * clock is synchronized, the signal metric must be at least MTR (13);
+ * after that the metrict must be at least TTHR (50). If either of these
+ * is not true, the station select bits are cleared so the second sync
+ * is disabled and the data bit integrators averaged to a miss. 
  */
 static void
 wwv_newchan(
@@ -2499,8 +2576,8 @@ wwv_newchan(
 	 * Search all five station pairs looking for the channel with
 	 * maximum metric, where the metric is defined as the high order
 	 * bits the bit count and the low order bits the minute sync
-	 * pulse amplitude. Note that the dropdead default is WWV on 20
-	 * MHz, but it should never get that far.
+	 * pulse amplitude. If no station is found above thresholds, the
+	 * reference ID is set to NONE and we wait for hotter ions.
 	 */
 	j = 0;
 	sp = NULL;
@@ -2568,6 +2645,7 @@ wwv_newgame(
 		cp->wwvh.select = SELH;
 		sprintf(cp->wwvh.refid, "WH%.0f", floor(qsy[i])); 
 	}
+	wwv_newgame();
 }
 
 /*
