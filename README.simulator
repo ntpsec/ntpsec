@@ -1,32 +1,19 @@
 
-			README for the NTP Simulator
+			README for the NTPD Simulator
+			-----------------------------
 
-This file describes the details of the NTP discrete event simulator implemented
-in this release. It allows the ntpd deamon to be run in the "simulator" mode by
-defining the SIM parameter in the config.h file. The simulator emulates simple
-"client-server" NTP associations between a node and specified time servers.
-When run in the "simulator" mode, ntpd accepts four extra input parameters 
 
-1. initial time offset in micro-seconds
-2. systematic frequency offset in ppm
-3. random frequency noise parameter in ppm
-4. random network jitter parameter in micro-seconds
-
-They can be specified using the -O, -T, -W and -J options to ntpd respectively.
-For example, the command
-		ntpd -O1 -T100 -W10 -J100 -cntp.conf
-simulates the run of ntpd  on a node having an initial time offset of 1sec,
-a frequency offset of 100 ppm, a random frequency noise of 10 ppm and network
-jitter of 100 micro-seconds using the ntp.conf configuration file. A unix clock
-model with a tick value of 10000  micro-seconds and a tickadj of 5 micro-seconds
-is used to simulate the local clock. An average network delay of 1 milli-second
-is assumed.
-
-Currently only the client-server mode of ntp operation can been simulated using
-the simulator. Multiple servers are allowed. However the server clocks are not
-simulated. It is assumed that the servers "know" the time. The simulator
-operates in the same way that NTP works. Every second the local node sends a NTP
-packet to all servers whose timer has expired and processes any packet received
-from servers so far. Simulation is achieved by generating a server reply back to
-the node for any packet sent by the node.
+	ntpdsim <ntp params>
+		-O <initial time offset in micro-seconds - default 0>
+		-T <systematic frequency offset in ppm - default 0>
+		-W <random frequency noise parameter in ppm - default 0>
+		-J <jitter from client to server in micro-seconds - default 0>
+		-K <jitter from server to server in micro-seconds - default0>
+		-Y <avg nw delay in micro-seconds - default 1000>
+		-Z <avg processing delay at server in microseconds - default 10>
+		-C <server accuracy in ppm - default 10>
+		-B <interval between screen beeps in seconds - default 3600>
+		-H <clock tick - default 10000>
+		-I <clock tickadj - default 5>
+		-S <simulation time in seconds in seconds - default 86400>
 

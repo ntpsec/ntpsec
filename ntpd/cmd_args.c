@@ -20,7 +20,7 @@ extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
 
-static const char *ntp_options = "aAbc:dD:f:gJ:k:l:LmnN:O:p:P:qr:s:t:T:W:v:V:x";
+static const char *ntp_options = "aAbB:c:C:dD:f:gH:I:J:k:K:l:LmnN:O:p:P:qr:s:S:t:T:W:v:V:xY:Z:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -302,20 +302,48 @@ getCmdOpts(
 			allow_step = FALSE;
 			break;
 #ifdef SIM
-                case 'T':
-                        ntp_node.ferr = (double)atof(ntp_optarg);
+		case 'B':
+                        ntp_node.bdly = (double)atof(ntp_optarg);
                         break;
-                case 'O':
-			ntp_node.clk_time =
-				ntp_node.time+((double)atof(ntp_optarg)/1e6);
-                        ntp_node.ntp_time =
-				ntp_node.time+((double)atof(ntp_optarg)/1e6);
+		case 'C':
+                        ntp_node.snse = (double)atof(ntp_optarg);
                         break;
-                case 'W':
-                        ntp_node.fnse = (double)atof(ntp_optarg);
+		case 'H':
+                        ntp_node.tick = (u_int32)atol(ntp_optarg);
+                        break;
+                case 'I':
+                        ntp_node.tickadj = (u_int32)atol(ntp_optarg);
                         break;
                 case 'J':
-                        ntp_node.nnse = (double)atof(ntp_optarg);
+                        ntp_node.nnse1 = (double)atof(ntp_optarg);
+			if(ntp_node.nnse2 ==0)
+				ntp_node.nnse2 = (double)atof(ntp_optarg);
+                        break;
+		case 'K':
+                        ntp_node.nnse2 = (double)atof(ntp_optarg);
+			if(ntp_node.nnse1 ==0) 
+                                ntp_node.nnse1 = (double)atof(ntp_optarg);
+                        break;
+		case 'O':
+                        ntp_node.clk_time =
+                                ntp_node.time+((double)atof(ntp_optarg)/1e6);
+                        ntp_node.ntp_time =
+                                ntp_node.time+((double)atof(ntp_optarg)/1e6);
+                        break;
+		case 'S':
+                        ntp_node.sim_time = (double)atof(ntp_optarg);
+                        break;
+		case 'T':
+                        ntp_node.ferr = (double)atof(ntp_optarg);
+                        break;
+		case 'W':
+                        ntp_node.fnse = (double)atof(ntp_optarg);
+                        break;
+		case 'Y':
+                        ntp_node.ndly = (double)atof(ntp_optarg);
+                        break;
+		case 'Z': 
+                        ntp_node.pdly = (double)atof(ntp_optarg);
                         break;
 #endif /* SIM */
 		    default:

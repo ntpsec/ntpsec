@@ -54,11 +54,16 @@ typedef struct nde
 	double offset;			/* clock reading offset */
 	double ferr;			/* systematic frequency offset*/
 	double fnse;			/* random frequency noise */
-	double ndly;			/* base delat to server */
-	double nnse;			/* randon network noise */
+	double bdly;			/* beep delay for visual output */
+	double ndly;			/* base delay to server */
+	double pdly;                    /* processing delay */
+	double nnse1;			/* random network noise */
+	double nnse2;                   /* random network noise */
+	double snse;			/* server noise */
         double time;			/* Correct Node Time */
 	double clk_time;                /* Unsynchronised Clock Time */
 	double ntp_time;		/* Synchronised NTP Time */
+	double sim_time;		/* Time to run simulation */
 	double adj;			/* Time to be adjusted */
         Queue events;			/* Node Event Queue */
 	struct recvbuf *rbuflist;	/* Node Receive Buffer */
