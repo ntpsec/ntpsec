@@ -23,3 +23,20 @@ While the whitespace is optional, the function name MUST start at column 0.
 We'd like to see *all* system function declarations live in include/l_stdlib.h
 and NEVER appear in the .c files.
 
+---
+
+To submit patches please use the 'bk send' command:
+
+ > cd REPO
+ > bk citool	(or bk ci ... ;  bk commit ... )
+ > bk pull	# make sure your repo is up-to-date
+ > bk send -d -ubk://www.ntp.org/home/bk/REPO YOUR-EMAIL-ADDRESS
+		# This will send you the patches
+		# If you have a mailer that wraps lines or otherwise
+		# changes the body of the message, add '-wuu'
+ # save this email to a file
+ > bk receive -vv -a < mail-file-containing-the-patch
+		# Sanity check.
+ > bk send -d -ubk://www.ntp.org/home/bk/REPO bugs@ntp.org
+		# If you needed to add '-wuu' then add it here, too.
+		# this command sends the patch to the NTP project.
