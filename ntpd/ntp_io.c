@@ -1829,13 +1829,7 @@ input_handler(
 	)
 {
 
-/*
- * Define the maximum number of 0 byte consecutive reads
- * allowed before we declare it done
- */
-#define MAXZEROREADS 1
-
-	int totzeroreads;
+	int nonzeroreads;
 	int buflen;
 	register int i, n;
 	register struct recvbuf *rb;
@@ -1853,6 +1847,11 @@ input_handler(
 	if (handler_count != 1)
 	    msyslog(LOG_ERR, "input_handler: handler_count is %d!", handler_count);
 	handler_calls++;
+
+	/*
+	 * If we have something to do, freeze a timestamp.
+	 * See below for the other cases (nothing (left) to do or error)
+	 */
 	ts = *cts;
 
 	/*
@@ -1862,42 +1861,36 @@ input_handler(
 	fds = activefds;
 	tvzero.tv_sec = tvzero.tv_usec = 0;
 
-	/*
-	 * If we have something to do, freeze a timestamp.
-	 * See below for the other cases (nothing (left) to do or error)
-	 */
-	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
-	++select_count;
-	++handler_pkts;
+	nonzeroreads = 1;
+	while (nonzeroreads > 0)
+	{
+		nonzeroreads = 0;
+		n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
+		++select_count;
+		++handler_pkts;
 
 #ifdef REFCLOCK
 	/*
 	 * Check out the reference clocks first, if any
 	 */
-	if (refio != 0)
-	{
-		register struct refclockio *rp;
-
-		for (rp = refio; rp != 0; rp = rp->next)
+		if (refio != 0)
 		{
-			fd = rp->fd;
-			if (FD_ISSET(fd, &fds))
+			register struct refclockio *rp;
+
+			for (rp = refio; rp != 0; rp = rp->next)
 			{
-				n--;
-				totzeroreads = 0;
-				while (totzeroreads < MAXZEROREADS) {
+				fd = rp->fd;
+				if (FD_ISSET(fd, &fds))
+				{
+					n--;
 					if (free_recvbuffs() == 0)
 					{
 						char buf[RX_BUFF_SIZE];
 
 						buflen = read(fd, buf, sizeof buf);
-						if (buflen <= 0)
-							break;	/* Done */
 						packets_dropped++;
-						if (buflen == 0)
-							totzeroreads++;
-						else
-							totzeroreads = 0;
+						if (buflen > 0)
+							nonzeroreads++;
 						continue;	/* Keep reading until drained */
 					}
 
@@ -1917,10 +1910,8 @@ input_handler(
 						freerecvbuf(rb);
 						break;
 					}
-					if(buflen == 0)
-						totzeroreads++;
-					else
-						totzeroreads = 0;
+					if(buflen > 0)
+						nonzeroreads++;
 
 					/*
 					 * Got one.  Mark how and when it got here,
@@ -1958,10 +1949,10 @@ input_handler(
 
 					rp->recvcount++;
 					packets_received++;
-				} /* End while (totzeroreads < MAXZEROREADS) */
-			} /* End if (FD_ISSET(fd, &fds)) */
-		} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
-	} /* End if (refio != 0) */
+				} /* End if (FD_ISSET(fd, &fds)) */
+			} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
+		} /* End if (refio != 0) */
+	} /* End while (nonzeroreads > 0) */
 
 #endif /* REFCLOCK */
 
