@@ -101,4 +101,7 @@ Non-Y2K Problems Observed:
        1122         instance->pp->year = buf[6]*256+buf[7];
        Multiply by 256????
  
-
+    Response from PHK:
+       The entire protocol is binary, the year is a 16 bit quantity 
+       which according to the manual can have the range 1998-2018. 
+ 

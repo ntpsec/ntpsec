@@ -1088,7 +1088,7 @@ tick(
 {
 	static unsigned long last_notice = 0;
 
-#if !defined(SA_ONSTACK) && !defined(SV_ONSTACK)
+#if !defined(HAVE_SIGACTION) && !defined(HAVE_SIGVEC)
 	(void)signal(SIGALRM, tick);
 #endif
 
@@ -1579,7 +1579,7 @@ main(
 		/*
 		 * setup periodic operations (state control / frequency control)
 		 */
-#ifdef SV_ONSTACK
+#ifdef HAVE_SIGVEC
 		{
 			struct sigvec vec;
 
@@ -1594,7 +1594,7 @@ main(
 			}
 		}
 #else
-#ifdef SA_ONSTACK
+#ifdef HAVE_SIGACTION
 		{
 			struct sigaction act;
 
