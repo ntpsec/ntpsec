@@ -201,7 +201,9 @@ palisade_start (
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	pp->nstages = PALISADE_SAMPLES;
+#ifndef PALISADE
 	pp->nskeep = PALISADE_SAMPLES * 3 / 5;
+#endif
 
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG

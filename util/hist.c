@@ -14,15 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
 #include "ntp_types.h"
-*/
 
 #define NBUF 100001		/* size of basic histogram */
 #define NSRT 20000		/* size of overflow histogram */
 #define NCNT (600 * 1000000)	/* sample interval (us) */
 
-int col(long *, long *);
+int col P((long *, long *));
 
 int
 main(

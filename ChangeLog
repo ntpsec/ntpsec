@@ -1,3 +1,9 @@
+1999-06-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_palisade.c: Patches from Marc Brett
+	* ntpd/refclock_palisade.h: Ditto.
+	* util/hist.c: Ditto.
+
 Tue Jun  1 00:40:04 1999  Harlan Stenn  <stenn@pogo.udel.edu>
 
 	* build: mips-dec-ultrix4.4 hates "set -e"
