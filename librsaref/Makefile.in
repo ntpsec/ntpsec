@@ -10,10 +10,6 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-#AUTOMAKE_OPTIONS = ../util/ansi2knr
-
-
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -49,9 +45,10 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_STRIP_FLAG =
 transform = @program_transform_name@
 
 NORMAL_INSTALL = :
@@ -97,6 +94,10 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+#AUTOMAKE_OPTIONS = ../util/ansi2knr
+
+
 noinst_LIBRARIES = @MAKE_LIBRSAREF@
 EXTRA_LIBRARIES = librsaref.a
 CLEANFILES = $(EXTRA_LIBRARIES)
@@ -105,12 +106,34 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 # don't use RSAREF's global.h - we use ours.
 # We already have a copy of des.h
 
-librsaref_a_SOURCES =  	desc.c 	digit.c 	digit.h 	md2.h 	md2c.c 	md5.h 	md5c.c 	nn.c 	nn.h 	prime.c 	prime.h 	r_dh.c 	r_encode.c 	r_enhanc.c 	r_keygen.c 	r_random.c 	r_random.h 	r_stdlib.c 	rsa.c 	rsa.h 	rsaref.h
+librsaref_a_SOURCES = \
+	desc.c \
+	digit.c \
+	digit.h \
+	md2.h \
+	md2c.c \
+	md5.h \
+	md5c.c \
+	nn.c \
+	nn.h \
+	prime.c \
+	prime.h \
+	r_dh.c \
+	r_encode.c \
+	r_enhanc.c \
+	r_keygen.c \
+	r_random.c \
+	r_random.h \
+	r_stdlib.c \
+	rsa.c \
+	rsa.h \
+	rsaref.h
 
 
 BUILT_SOURCES = $(librsaref_a_SOURCES)
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
+subdir = librsaref
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -121,28 +144,29 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 librsaref_a_LIBADD = 
-librsaref_a_OBJECTS =  desc.o digit.o md2c.o md5c.o nn.o prime.o r_dh.o \
-r_encode.o r_enhanc.o r_keygen.o r_random.o r_stdlib.o rsa.o
+am_librsaref_a_OBJECTS =  desc.o digit.o md2c.o md5c.o nn.o prime.o \
+r_dh.o r_encode.o r_enhanc.o r_keygen.o r_random.o r_stdlib.o rsa.o
+librsaref_a_OBJECTS =  $(am_librsaref_a_OBJECTS)
 AR = ar
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES =  $(librsaref_a_SOURCES)
 DIST_COMMON =  Makefile.am Makefile.in
 
 
-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
 GZIP_ENV = --best
 DEP_FILES =  .deps/desc.P .deps/digit.P .deps/md2c.P .deps/md5c.P \
 .deps/nn.P .deps/prime.P .deps/r_dh.P .deps/r_encode.P .deps/r_enhanc.P \
 .deps/r_keygen.P .deps/r_random.P .deps/r_stdlib.P .deps/rsa.P
 SOURCES = $(librsaref_a_SOURCES)
-OBJECTS = $(librsaref_a_OBJECTS)
+OBJECTS = $(am_librsaref_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .c .o
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu librsaref/Makefile
 
@@ -160,12 +184,6 @@ distclean-noinstLIBRARIES:
 
 maintainer-clean-noinstLIBRARIES:
 
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
 mostlyclean-compile:
 	-rm -f *.o core *.core
 
@@ -175,6 +193,19 @@ distclean-compile:
 	-rm -f *.tab.c
 
 maintainer-clean-compile:
+desc.o:
+digit.o:
+md2c.o:
+md5c.o:
+nn.o:
+prime.o:
+r_dh.o:
+r_encode.o:
+r_enhanc.o:
+r_keygen.o:
+r_random.o:
+r_stdlib.o:
+rsa.o:
 
 librsaref.a: $(librsaref_a_OBJECTS) $(librsaref_a_DEPENDENCIES)
 	-rm -f librsaref.a
@@ -186,7 +217,7 @@ tags: TAGS
 ID: $(HEADERS) $(SOURCES) $(LISP)
 	list='$(SOURCES) $(HEADERS)'; \
 	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
+	  ${AWK:-awk} '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	here=`pwd` && cd $(srcdir) \
 	  && mkid -f$$here/ID $$unique $(LISP)
@@ -196,7 +227,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
 	here=`pwd`; \
 	list='$(SOURCES) $(HEADERS)'; \
 	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
+	  ${AWK:-awk} '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
 	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
@@ -212,8 +243,6 @@ maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
-subdir = librsaref
-
 distdir: $(DISTFILES)
 	here=`cd $(top_builddir) && pwd`; \
 	top_distdir=`cd $(top_distdir) && pwd`; \
@@ -223,7 +252,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -246,22 +275,22 @@ maintainer-clean-depend:
 
 %.o: %.c
 	@echo '$(COMPILE) -c $<'; \
-	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
-	@-cp .deps/$(*F).pp .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
+	$(COMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
+	@-cp .deps/$(*D)/$(*F).pp .deps/$(*D)/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
 	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm .deps/$(*F).pp
+	    >> .deps/$(*D)/$(*F).P; \
+	rm .deps/$(*D)/$(*F).pp
 
 %.lo: %.c
 	@echo '$(LTCOMPILE) -c $<'; \
-	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*D)/$(*F).pp -c $<
 	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
-	  < .deps/$(*F).pp > .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
+	  < .deps/$(*D)/$(*F).pp > .deps/$(*D)/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*D)/$(*F).pp \
 	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-	    >> .deps/$(*F).P; \
-	rm -f .deps/$(*F).pp
+	    >> .deps/$(*D)/$(*F).P; \
+	rm -f .deps/$(*D)/$(*F).pp
 info-am:
 info: info-am
 dvi-am:
@@ -284,7 +313,7 @@ uninstall: uninstall-am
 all-am: Makefile $(LIBRARIES)
 all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
 installdirs:
 
 
@@ -332,8 +361,8 @@ clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
 install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
+uninstall-am uninstall all-redirect all-am all install-strip \
+installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
