@@ -124,6 +124,20 @@ struct sockaddr_storage {
  * additional definitions
  */
 
+/*
+ * Flag values for getaddrinfo()
+ */
+#ifndef AI_NUMERICHOST
+#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
+#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
+#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
+/* valid flags for addrinfo */
+#define AI_MASK \
+    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
+
+#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
+#endif
+
 #ifndef ISC_PLATFORM_HAVEIPV6
 
 /*
@@ -231,20 +245,6 @@ int	getnameinfo P((const struct sockaddr *, u_int, char *,
 			 size_t, char *, size_t, int));
 void	freeaddrinfo P((struct addrinfo *));
 char	*gai_strerror P((int));
-
-/*
- * Flag values for getaddrinfo()
- */
-#ifndef AI_NUMERICHOST
-#define	AI_PASSIVE	0x00000001 /* get address to use bind() */
-#define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
-#define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
-/* valid flags for addrinfo */
-#define AI_MASK \
-    (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
-
-#define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
-#endif
 
 /*
  * Constants for getnameinfo()
