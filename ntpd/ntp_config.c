@@ -1050,7 +1050,7 @@ getconfig(
 			    temp = matchkey(tokens[i++], tos_keywords, 1);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
-				    "tinker: missing argument");
+				    "tos: missing argument");
 				errflg++;
 				break;
 			    }

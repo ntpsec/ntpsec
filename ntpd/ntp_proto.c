@@ -3223,7 +3223,7 @@ proto_config(
 		break;
 
 	/*
-	 * Set the cohort switch.
+	 * Set the select threshold.
 	 */
 	case PROTO_MAXDIST:
 		sys_maxdist = dvalue;
