@@ -109,8 +109,6 @@ kernel		Directory containing sources for kernel programs such as
 libntp		Directory containing library source code used by most
 		programs in the distribution.
 
-ntp_update	Update an NTP CVS tree.
-
 ntpdate		Directory containing sources for a program to set the
 		local machine time from one or more remote machines
 		running NTP.  Operates like rdate, but much more accurate.
