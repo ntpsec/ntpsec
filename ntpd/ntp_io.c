@@ -333,10 +333,11 @@ address_okay(isc_interface_t *isc_if) {
 
 	/* XXXPDM This should be fixed later, but since we may not have set
 	 * the UP flag, we at least get to use the interface.
+	 * The UP flag is not always set so we don't do this right now.
 	 */
-	if ((isc_if->flags & INTERFACE_F_UP) == 0)
+/*	if ((isc_if->flags & INTERFACE_F_UP) == 0)
 		return (ISC_FALSE);
-
+*/
 	return (ISC_TRUE);
 }
 void
