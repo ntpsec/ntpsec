@@ -2356,7 +2356,7 @@ get_clock_info(
 		ic->timestarted = htonl((u_int32)clock_stat.timereset);
 		DTOLFP(clock_stat.fudgetime1, &ltmp);
 		HTONL_FP(&ltmp, &ic->fudgetime1);
-		DTOLFP(clock_stat.fudgetime1, &ltmp);
+		DTOLFP(clock_stat.fudgetime2, &ltmp);
 		HTONL_FP(&ltmp, &ic->fudgetime2);
 		ic->fudgeval1 = htonl((u_int32)clock_stat.fudgeval1);
 		ic->fudgeval2 = htonl((u_int32)clock_stat.fudgeval2);
