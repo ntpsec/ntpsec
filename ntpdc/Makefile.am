@@ -42,7 +42,7 @@ version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 
 # I ran nl_in.c (attached, to be installed into ntpdc) through
 # $(CC) -E nl_in.c | nl.pl > nl.c
-nl.c: nl_in.c nl.pl
-	$(CC) -E $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(srcdir)/nl_in.c | ./nl.pl > nl.c
+nl.c: nl_in.c nl.pl Makefile.am
+	$(CC) -E $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(srcdir)/nl_in.c | ./nl.pl > nl.c
 
 include ../bincheck.mf
