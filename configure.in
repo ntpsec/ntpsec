@@ -644,7 +644,7 @@ case "$host" in
     ;;
 esac
 case "$host" in
- *-*-aix4*)
+ *-*-aix[[45]]*)
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
 	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
 	# IBM pulls its thumbs out long enough to implement clock_settime,
@@ -687,7 +687,7 @@ case "$host" in
 esac
 AC_CHECK_FUNCS(mktime)
 case "$host" in
- *-*-aix4*)
+ *-*-aix[[45]]*)
     # Just a stub.  Idiots.
     ;;
  *-*-irix[[45]]*)
@@ -722,7 +722,7 @@ case "$ac_cv_func_mrand48" in
  *) AC_REPLACE_FUNCS(random) ;;
 esac
 case "$host" in
- *-*-aix4*)
+ *-*-aix[[45]]*)
     # Just a stub in AIX 4.  Idiots.
     ;;
  *-*-solaris2.5*)
@@ -742,7 +742,7 @@ AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
 AC_CHECK_FUNCS(snprintf strdup strerror strstr)
 AC_CHECK_FUNCS(timegm)
 case "$host" in
- *-*-aix4*)
+ *-*-aix[[45]]*)
     # Just stubs.  Idiots.
     ;;
  *-*-netbsd*)
@@ -1230,7 +1230,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
         ans=no
         ;;
-     *-*-aix4*)
+     *-*-aix[[45]]*)
         ans=no
         ;;
      *-*-hpux*)
@@ -1281,7 +1281,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
         ans=no
         ;;
-     *-*-aix4*)
+     *-*-aix[[45]]*)
 	ans=no
 	;;
      *-*-hpux*)
@@ -2766,7 +2766,7 @@ AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
       *-fujitsu-uxp*)
 	 ans=yes
 	 ;;
-      *-ibm-aix4*)
+      *-ibm-aix[[45]]*)
 	 ans=yes
 	 ;;
       *-*-linux*)
@@ -2803,7 +2803,7 @@ case "$host" in
  *-hp-hpux*)
     ans=old_tick
     ;;
- *-ibm-aix[[34]]*)
+ *-ibm-aix[[345]]*)
     ans=no
     ;;
  *-*-mpeix*)
@@ -3243,7 +3243,7 @@ AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery
       *-*-aix3.2*)
 	 ans=yes
 	 ;;
-      *-*-aix4*)
+      *-*-aix[[45]]*)
 	 ans=yes
 	 ;;
       *-*-bsdi*)
