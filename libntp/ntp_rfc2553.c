@@ -251,7 +251,7 @@ do_nodename(
 	ai->ai_addr->sa_len = sizeof(struct sockaddr);
 #endif
 	if (hints != NULL && hints->ai_flags & AI_CANONNAME) {
-		ai->ai_canonname = malloc(strlen(hp->h_name));
+		ai->ai_canonname = malloc(strlen(hp->h_name) + 1);
 		if (ai->ai_canonname == NULL)
 			return (EAI_MEMORY);
 		strcpy(ai->ai_canonname, hp->h_name);
