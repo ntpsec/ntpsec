@@ -2209,7 +2209,7 @@ crypto_iff(
 	DSA_SIG	*sdsa;		/* DSA parameters */
 	BIGNUM	*bn, *bk;
 	u_int	len;
-	const u_char *ptr;
+	u_char	*ptr;
 	int	temp;
 
 	/*
@@ -2497,7 +2497,7 @@ crypto_gq(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	DSA_SIG	*sdsa;		/* RSA signature context fake */
 	BIGNUM	*y, *v;
-	const u_char *ptr;
+	u_char	*ptr;
 	u_int	len;
 	int	temp;
 
@@ -2815,7 +2815,7 @@ crypto_mv(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	BIGNUM	*k, *u, *v;
 	u_int	len;
-	const u_char *ptr;
+	u_char	*ptr;
 	int	temp;
 
 	/*
