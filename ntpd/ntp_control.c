@@ -200,8 +200,9 @@ static struct ctl_var peer_var[] = {
 	{ CP_SESKEY,	RO, "pcookie" },	/* 39 */
 	{ CP_SASKEY,	RO, "hcookie" },	/* 40 */
 	{ CP_AUTOSEQ,	RO, "sequence" },	/* 41 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
-	{ CP_INITSEQ,	RO, "initsequence" },	/* 43 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -1566,8 +1567,9 @@ ctl_putpeer(
 		if (peer->keylist != NULL)
 			break;
 		ctl_putint(peer_var[CP_AUTOSEQ].text, peer->recseq);
-		ctl_puthex(peer_var[CP_INITKEY].text, peer->finlkey);
-		ctl_putint(peer_var[CP_INITSEQ].text, peer->finlseq);
+		ctl_putint(peer_var[CP_INITSEQ].text, peer->recauto.seq);
+		ctl_puthex(peer_var[CP_INITKEY].text, peer->recauto.key);
+		ctl_putuint(peer_var[CP_INITTSP].text, peer->recauto.tstamp);
 #endif /* PUBKEY */
 	}
 }

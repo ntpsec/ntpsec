@@ -217,9 +217,10 @@ struct ntp_control {
 #define	CP_SESKEY	39
 #define	CP_SASKEY	40
 #define	CP_AUTOSEQ	41
-#define	CP_INITKEY	42
-#define	CP_INITSEQ	43
-#define	CP_MAXCODE	CP_INITSEQ
+#define	CP_INITSEQ	42
+#define	CP_INITKEY	43
+#define	CP_INITTSP	44
+#define	CP_MAXCODE	CP_INITTSP
 #else
 #define	CP_MAXCODE	CP_VARLIST
 #endif /* PUBKEY */

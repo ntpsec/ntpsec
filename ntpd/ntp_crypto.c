@@ -29,9 +29,11 @@
  *   +---------------+   +---------------+   =     value     =
  * 4 |   final key   |   |               |   |               |
  *   +---------------+   =   signature   =   +---------------+
- * 5 | signature len |   |               |   CRYPTO_DH req/rsp
+ * 4 |   timestamp   |   |               |   CRYPTO_DH req/rsp
  *   +---------------+   +---------------+   CRYPTO_PUB rsp
- * 6 |               |   CRYPTO_PRIV rsp
+ * 5 | signature len |   CRYPTO_PRIV rsp
+ *   +---------------+
+ * 6 |               |
  *   =   signature   =
  *   |               |   Other requests and responses have only the
  *   +---------------+   first two words.
@@ -143,17 +145,21 @@ make_keylist(
 {
 	keyid_t keyid;		/* next key ID */
 	keyid_t cookie;		/* private value */
+	l_fp tstamp;		/* NTP timestamp */
 	u_long ltemp;
 	int i, n;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
 	int rval;		/* return value */
-	u_int32 xpkt[2];	/* data in network byte order */
+	u_int32 xpkt[3];	/* data in network byte order */
 #endif /* PUBKEY */
 
 	/*
 	 * Allocate the key list if necessary.
 	 */
+	L_CLR(&tstamp);
+	if (sys_leap != LEAP_NOTINSYNC)
+		get_systime(&tstamp);
 	if (peer->keylist == 0)
 		peer->keylist = (keyid_t *)emalloc(sizeof(keyid_t) *
 		    NTP_MAXSESSION);
@@ -185,8 +191,10 @@ make_keylist(
 	if (peer->hmode == MODE_BROADCAST) {
 		cookie = 0;
 		n = NTP_MAXSESSION;
+/*
 	} else if (peer->hmode == MODE_SERVER) {
 		cookie = peer->hcookie;
+*/
 	} else {
 		cookie = peer->pcookie;
 	}
@@ -203,16 +211,17 @@ make_keylist(
 	}
 
 	/*
-	 * Save the last session key ID and sequence number, then sign
-	 * these values for later retrieval by the clients. Be careful
-	 * not to use invalid key media.
+	 * Save the last session key ID, sequence number and timestamp,
+	 * then sign these values for later retrieval by the clients. Be
+	 * careful not to use invalid key media.
 	 */
-	peer->lastseq = peer->keynumber;
-	peer->lastkey = keyid;
+	peer->sndauto.seq = peer->keynumber;
+	peer->sndauto.key = keyid;
+	peer->sndauto.tstamp = tstamp.l_ui;
 #if DEBUG
 	if (debug)
-		printf("make_keys: %d %08x\n", peer->lastseq,
-		    peer->lastkey);
+		printf("make_keys: %d %08x %u\n", peer->sndauto.seq,
+		    peer->sndauto.key, peer->sndauto.tstamp);
 #endif
 #ifdef PUBKEY
 	if(!crypto_enable)
@@ -223,10 +232,11 @@ make_keylist(
 	} else {
 		if (peer->sign == NULL)
 			peer->sign = emalloc(MAX_SIGNATURE_LEN);
-		xpkt[0] = htonl(peer->lastseq);
-		xpkt[1] = htonl(peer->lastkey);
+		xpkt[0] = htonl(peer->sndauto.seq);
+		xpkt[1] = htonl(peer->sndauto.key);
+		xpkt[2] = htonl(peer->sndauto.tstamp);
 		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)xpkt, 8);
+		R_SignUpdate(&ctx, (u_char *)xpkt, 12);
 		rval = R_SignFinal(&ctx, peer->sign, &peer->signlen,
 		    &private_key);
 	}
@@ -291,14 +301,15 @@ crypto_recv(
 			break;
 
 		/*
-		 * Install autokey values. We believe the values only if
-		 * the public key is valid and the signature has valid
-		 * length and is verified. This is used in multicast
-		 * client and symmetric modes.
+		 * Install autokey values in broadcast client and
+		 * symmetric modes. We believe the values only if the
+		 * public key is valid and the signature has valid
+		 * length and is verified. However, we mark as authentic
+		 * only if the timestamp is nonzero.
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
 #ifdef PUBKEY
-			temp = ntohl(pkt[i + 5]);
+			temp = ntohl(pkt[i + 6]);
 			if (!crypto_enable) {
 				rval = 0;
 			} else if (temp == 0 || peer->pubkey == NULL) {
@@ -306,35 +317,42 @@ crypto_recv(
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
 				R_VerifyUpdate(&ctx, (char *)&pkt[i +
-				    3], 8);
+				    3], 12);
 				rval = R_VerifyFinal(&ctx,
-				    (char *)&pkt[i + 6], temp,
+				    (char *)&pkt[i + 7], temp,
 				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
 			}
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: verify %x autokey %d %08x\n",
+				    "crypto_recv: verify %x autokey %d %08x %u (%u)\n",
 				    rval, (u_int32)ntohl(pkt[i + 3]),
-				    (u_int32)ntohl(pkt[i + 4]));
+				    (u_int32)ntohl(pkt[i + 4]),
+				    (u_int32)ntohl(pkt[i + 5]),
+				    peer->recauto.tstamp);
 #endif
+			if (ntohl(pkt[i + 5]) < peer->recauto.tstamp)
+				break;
 			if (rval != 0) {
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			peer->flags |= FLAG_AUTOKEY;
+			if (ntohl(pkt[i + 5]) != 0)
+				peer->flags |= FLAG_AUTOKEY;
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
 			peer->recseq = ntohl(pkt[i + 2]);
-			peer->finlseq = ntohl(pkt[i + 3]);
-			peer->finlkey = peer->pkeyid = ntohl(pkt[i +
+			peer->recauto.seq = ntohl(pkt[i + 3]);
+			peer->recauto.key = peer->pkeyid = ntohl(pkt[i +
 			    4]);
+			peer->recauto.tstamp = ntohl(pkt[i + 5]);
 			break;
 
 		/*
-		 * Install session cookie. We believe the value only if
-		 * the public key is valid and the signature has valid
-		 * length and is verified. This is used in client mode.
+		 * Install session cookie in client mode. We believe the
+		 * value only if the public key is valid and the
+		 * signature has valid length and is verified. However,
+		 * we mark as authentic only if the value is nonzero.
 		 */
 		case CRYPTO_PRIV | CRYPTO_RESP:
 #ifdef PUBKEY
@@ -364,7 +382,8 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			peer->flags |= FLAG_AUTOKEY;
+			if (temp != 0)
+				peer->flags |= FLAG_AUTOKEY;
 #else
 			temp = ntohl(pkt[i + 2]);
 #endif /* PUBKEY */
@@ -377,12 +396,12 @@ crypto_recv(
 
 #ifdef PUBKEY
 		/*
-		 * Compute Diffie-Hellman key agreement. We allocate
-		 * space and save the public value to compute the
-		 * signature later, Then we allocate space for the
-		 * agreed key, run the agreement algorithm and stash the
-		 * key vale. We use only the first u_int32 for the host
-		 * cookie. Wasteful. This is used in symmetric modes.
+		 * Compute Diffie-Hellman key agreement in symmetric
+		 * modes. We allocate space and save the public value to
+		 * compute the signature later, Then we allocate space
+		 * for the agreed key, run the agreement algorithm and
+		 * stash the key value. We use only the first u_int32
+		 * for the host cookie. Wasteful.
 		 */
 		case CRYPTO_DH:
 			temp = ntohl(pkt[i + 2]);
@@ -420,11 +439,11 @@ crypto_recv(
 			break;
 
 		/*
-		 * Verify signature of Diffie-Hellman public values. The
-		 * verification fails if the signature length does not
-		 * match the modulus length or any of the public values
-		 * or the agreed key is not valid. This is used in
-		 * symmetric modes.
+		 * Verify signature of Diffie-Hellman public values in
+		 * symmetric modes. The verification fails if the
+		 * signature length does not match the modulus length or
+		 * any of the public values or the agreed key is not
+		 *valid.
 		 */
 		case CRYPTO_DH | CRYPTO_RESP:
 			temp = ntohl(pkt[i + 2]);
@@ -554,10 +573,12 @@ crypto_xmit(
 		break;
 
 	/*
-	 * Find peer and send autokey data and signature. We send the
-	 * data only if the peer exists and the make_keylist routine has
-	 * previously constructed the list and successfully signed the
-	 * data. This is used in multicast server and symmetric modes.
+	 * Find peer and send autokey data and signature in broadcast
+	 * server and symmetric modes. We send the data only if the peer
+	 * exists and the make_keylist routine has previously
+	 * constructed the list and successfully signed the data. Note
+	 * that the timestamp is zero if the server has not
+	 * synchronized.
 	 */
 	case CRYPTO_AUTO | CRYPTO_RESP:
 		peer = findpeerbyassoc(associd);
@@ -566,27 +587,30 @@ crypto_xmit(
 			break;
 		}
 		xpkt[i + 2] = htonl(peer->keynumber);
-		xpkt[i + 3] = htonl(peer->lastseq);
-		xpkt[i + 4] = htonl(peer->lastkey);
-		xpkt[i + 5] = 0;
-		len += 16;
+		xpkt[i + 3] = htonl(peer->sndauto.seq);
+		xpkt[i + 4] = htonl(peer->sndauto.key);
+		xpkt[i + 5] = htonl(peer->sndauto.tstamp);
+		xpkt[i + 6] = 0;
+		len += 20;
 #ifdef PUBKEY
 		if (peer->signlen == 0)
 			break;
-		xpkt[i + 5] = htonl(peer->signlen);
-		memcpy((u_char *)&xpkt[i + 6], peer->sign,
+		xpkt[i + 6] = htonl(peer->signlen);
+		memcpy((u_char *)&xpkt[i + 7], peer->sign,
 		    peer->signlen);
 		len += peer->signlen;
 #endif /* PUBKEY */
 		break;
 
 	/*
-	 * Send peer cookie and signature. We send the signature only if
-	 * the private key exists and is valid. This is used in server
-	 * mode.
+	 * Send peer cookie and signature in server mode. We send the
+	 * signature only if the private key exists and is valid. Note
+	 * that the cookie is zero of the server has not synchronized.
 	 */
 	case CRYPTO_PRIV | CRYPTO_RESP:
-		xpkt[i + 2] = htonl(cookie);
+		xpkt[i + 2] = 0;
+		if (sys_leap != LEAP_NOTINSYNC)
+			xpkt[i + 2] = htonl(cookie);
 		xpkt[i + 3] = 0;
 		len += 8;
 #ifdef PUBKEY
@@ -611,9 +635,9 @@ crypto_xmit(
 
 #ifdef PUBKEY
 	/*
-	 * Send Diffie-Hellman public value. We send only if the
-	 * parameters have been initialized and the public/private
-	 * values have been set up. This is used in symmetric modes.
+	 * Send Diffie-Hellman public value in symmetric modes. We send
+	 * only if the parameters have been initialized and the
+	 * public/private values have been set up.
 	 */
 	case CRYPTO_DH:
 		xpkt[i + 2] = 0;
@@ -627,9 +651,9 @@ crypto_xmit(
 		break;
 
 	/*
-	 * Find peer and send signature of Diffie-Hellman public values.
-	 * This takes a leap of faith, or maybe just a stumble of
-	 * depravity. This is used in symmetric modes.
+	 * Find peer and send signature of Diffie-Hellman public values
+	 * in symmetric modes. We send only if the public key exists and
+	 * is valid and the public values exist.
 	 */
 	case CRYPTO_DH | CRYPTO_RESP:
 		peer = findpeerbyassoc(associd);
@@ -663,7 +687,7 @@ crypto_xmit(
 
 	/*
 	 * Send public key. We send the public key only if it exists and
-	 * is valid. This is used in all modes.
+	 * is valid. This is used in all modes, primarily for testing.
 	 */
 	case CRYPTO_PUBL | CRYPTO_RESP:
 		xpkt[i + 2] = 0;
@@ -893,8 +917,8 @@ void
 crypto_setup(void)
 {
 	FILE *str;
-	u_char hostname[MAXFILENAME];
-	u_char filename[MAXFILENAME];
+	char hostname[MAXFILENAME];
+	char filename[MAXFILENAME];
 
 	/*
 	 * Load RSA private key from file.
@@ -909,7 +933,7 @@ crypto_setup(void)
 	 * host is the DNS name of this machine.
 	 */
 	if (public_key_file == NULL) {
-		gethostname(&hostname, MAXFILENAME);
+		gethostname(hostname, MAXFILENAME);
 		snprintf(filename, sizeof filename, "ntpkey_%s",
 			 hostname);
 		public_key_file = emalloc(strlen(filename) + 1);

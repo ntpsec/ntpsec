@@ -342,20 +342,20 @@ receive(
 	authlen = LEN_PKT_NOMAC;
 	while ((has_mac = rbufp->recv_length - authlen) > 0) {
 		int temp;
+
 		if (has_mac % 4 != 0 || has_mac < 0) {
 			sys_badlength++;
 			return;
 		}
 		if (has_mac == 1 * 4 || has_mac == 3 * 4 || has_mac ==
 		    MAX_MAC_LEN) {
-			skeyid =
-			    (u_long)ntohl(((u_int32 *)pkt)[authlen /
-			    4]) & 0xffffffff;
+			skeyid = ntohl(((u_int32 *)pkt)[authlen / 4]);
 			break;
+
 		} else if (has_mac > MAX_MAC_LEN) {
 			temp = ntohl(((u_int32 *)pkt)[authlen / 4]) &
 			    0xffff;
-			if (temp < 4) {
+			if (temp < 4 || temp % 4 != 0) {
 				sys_badlength++;
 				return;
 			}
@@ -398,19 +398,16 @@ receive(
 			/*
 			 * More on the autokey dance (AKD). A cookie is
 			 * constructed from public and private values.
-			 * For broadcast packets and packets with
-			 * extension fields, the cookie is public
+			 * For broadcast packets, the cookie is public
 			 * (zero). For packets that match no
 			 * association, the cookie is hashed from the
-			 * addresses and private value. For server and
-			 * symmetric packets, the cookie has been
-			 * previously obtained from the server via an
-			 * extension field. for symmetric modes, a
-			 * common cookie is constructed as the exclusive
-			 * OR of the two cookies.
+			 * addresses and private value. For server
+			 * packets, the cookie was previously obtained
+			 * from the server. For symmetric modes, the
+			 * cookie was previously constructed using an
+			 * agreement protocol.
 			 */
-			if (authlen > LEN_PKT_NOMAC || hismode ==
-			    MODE_BROADCAST)
+			if (hismode == MODE_BROADCAST)
 				pkeyid = 0;
 			else if (peer == 0)
 				pkeyid = session_key(
@@ -426,19 +423,30 @@ receive(
 			 * The session key includes both the public
 			 * values and cookie. We have to be careful to
 			 * use the right socket addresses for broadcast
-			 * and unicast packets. Note the hash is saved
-			 * for use later in the AKD mambo.
+			 * and unicast packets. In case of an extension
+			 * field, the cookie used for authentication
+			 * purposes is zero. Note the hash is saved for
+			 * use later in the autokey mambo.
 			 */
-			if (hismode == MODE_BROADCAST)
+			if (hismode == MODE_BROADCAST) {
 				tkeyid = session_key(
 				    &rbufp->recv_srcadr,
 				    &rbufp->dstadr->bcast, skeyid,
 				    pkeyid, 2);
-			else
+			} else if (authlen > LEN_PKT_NOMAC) {
+				session_key(&rbufp->recv_srcadr,
+				    &rbufp->dstadr->sin, skeyid, 0, 2);
+				tkeyid = session_key(
+				    &rbufp->recv_srcadr,
+				    &rbufp->dstadr->sin, skeyid, pkeyid,
+				    0);
+			} else {
 				tkeyid = session_key(
 				    &rbufp->recv_srcadr,
 				    &rbufp->dstadr->sin, skeyid, pkeyid,
 				    2);
+			}
+
 		}
 #endif /* AUTOKEY */
 
@@ -692,41 +700,39 @@ receive(
 	 *
 	 * 1. If there is no key or the key is not auto, do nothing.
 	 *
-	 * 2. If this is a server reply, check only to see that the
+	 * 2. If an extension field contains a verified signature, it is
+	 *    self-authenticated and we sit the dance.
+	 *
+	 * 3. If this is a server reply, check only to see that the
 	 *    transmitted key ID matches the received key ID.
 	 *
-	 * 3. If there are no extension fields or if this is a
-	 *    broadcast, the cookie is zero. Dance the conga line and
-	 *    check to see that one or more hashes of the current key ID
+	 * 4. Check to see that one or more hashes of the current key ID
 	 *    matches the previous key ID or ultimate original key ID
 	 *    obtained from the broadcaster or symmetric peer. If no
 	 *    match, arm for an autokey values update.
-	 *
-	 * 4. The only remaining case is where an extension field is
-	 *    present and did not contain a verified signature and this	
-	 *    is a symmetric mode reply. This reply cannot be verified,
-	 *    so just let the packet header check kick it out and hope
-	 *    the next packet can be verified.
 	 */
 	if (peer->flags & FLAG_SKEY) {
-		int i = 0;
-
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp);
-		if (hismode == MODE_SERVER) {
+		if (!peer->flash & TEST10) {
+			peer->pkeyid = skeyid;
+		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
-		} else if (authlen == LEN_PKT_NOMAC || hismode ==
-		    MODE_BROADCAST) {
+			else
+				peer->hcookie = 0;
+		} else {
+			int i = 0;
+
 			for (i = 0;; i++) {
 				if (tkeyid == peer->pkeyid ||
-				    tkeyid == peer->finlkey) {
+				    tkeyid == peer->recauto.key) {
 					peer->flash &= ~TEST10;
 					peer->pkeyid = skeyid;
 					break;
 				}
-				if (i > peer->finlseq) {
-					peer->finlseq = 0;
+				if (i > peer->recauto.seq) {
+					peer->recauto.seq = 0;
 					break;
 				}
 				if (hismode == MODE_BROADCAST)
@@ -740,20 +746,17 @@ receive(
 					    &rbufp->dstadr->sin,
 					    tkeyid, pkeyid, 0);
 			}
-#ifdef PUBKEY
-			/*
-			 * If the autokey boogie fails, the server may
-			 * be bogus or worse. Raise an alarm and rekey
-			 * this thing.
-			 */
-			if (authlen == LEN_PKT_NOMAC) {
-				if (peer->flash & TEST10)
-					peer->flags &= ~FLAG_AUTOKEY;
-				if (!(peer->flags & FLAG_AUTOKEY))
-					peer->flash |= TEST11;
-			}
-#endif /* PUBKEY */
 		}
+#ifdef PUBKEY
+		/*
+		 * If the autokey boogie fails, the server may be bogus
+		 * or worse. Raise an alarm and rekey this thing.
+		 */
+		if (peer->flash & TEST10)
+			peer->flags &= ~FLAG_AUTOKEY;
+		if (!(peer->flags & FLAG_AUTOKEY))
+			peer->flash |= TEST11;
+#endif /* PUBKEY */
 	}
 #endif /* AUTOKEY */
 
@@ -1149,6 +1152,7 @@ peer_clear(
 	 * a multicast client in client mode in order to recover the
 	 * initial autokey values.
 	 */
+	peer->flags &= ~FLAG_AUTOKEY;
 	if (peer->flags & FLAG_MCAST2) {
 		peer->flags |= FLAG_MCAST1 | FLAG_BURST;
 		peer->hmode = MODE_CLIENT;
@@ -1902,7 +1906,7 @@ peer_xmit(
 		 * values at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->keynumber == peer->lastseq)
+			if (peer->keynumber == peer->sndauto.seq)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -1953,21 +1957,21 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PUBL, peer->hcookie,
 				    peer->assoc);
-			} else if (crypto_enable && peer->pcookie == 0)
-			    {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_DH, peer->hcookie,
-				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->finlseq == 0) {
+			if (peer->recauto.seq == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->keynumber == peer->lastseq) {
+			} else if (peer->keynumber == peer->sndauto.seq)
+			    {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
+			} else if (peer->pcookie == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_DH, peer->hcookie,
+				    peer->assoc);
 			}
 			if (peer->cmmd != 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
@@ -2007,7 +2011,7 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->finlseq == 0 && peer->flags &
+			} else if (peer->recauto.seq == 0 && peer->flags &
 			    FLAG_MCAST2) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
@@ -2134,12 +2138,15 @@ fast_xmit(
 	/*
 	 * The received packet contains a MAC, so the transmitted packet
 	 * must be authenticated. For private-key cryptography, use the
-	 * the public and private values to generate the cookie, which
-	 * is unique for every source-destination-key ID combination. If
-	 * an extension field is present, do what needs, but with
-	 * private value of zero so the poor jerk can decode it. If no
-	 * extension field is present, use the cookie to generate the
-	 * session key.
+	 * predefined private keys to generate the cryptosum. For
+	 * autokeys in client/server mode, use the server private value
+	 * values to generate the cookie, which is unique for every
+	 * source-destination-key ID combination. For symmetric passive
+	 * mode, which is the only other mode to get here, flip the
+	 * addresses and do the same. If an extension field is present,
+	 * do what needs, but with private value of zero so the poor
+	 * jerk can decode it. If no extension field is present, use the
+	 * cookie to generate the session key.
 	 */
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY) {
@@ -2212,14 +2219,14 @@ key_expire(
 {
 	int i;
 
-	if (peer->keylist != NULL) {
+ 	if (peer->keylist != NULL) {
 		for (i = 0; i <= peer->keynumber; i++)
 			authtrust(peer->keylist[i], 0);
 		free(peer->keylist);
 		peer->keylist = NULL;
 	}
-	peer->keynumber = peer->lastseq = 0;
-	peer->lastkey = 0;
+	peer->keynumber = peer->sndauto.seq = 0;
+	peer->recauto.key = 0;
 }
 #endif /* AUTOKEY */
 

@@ -150,6 +150,18 @@ typedef char s_char;
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
 
+#ifdef AUTOKEY
+/*
+ * THe autokey structure holds the data necessary to authenticate
+ * the key IDs.
+ */
+struct autokey {
+	keyid_t	key;		/* key ID */
+	int	seq;		/* key number */
+	u_int32	tstamp;		/* timestamp (s) */
+};
+#endif /* AUTOKEY */
+
 /*
  * The interface structure is used to hold the addresses and socket
  * numbers of each of the interfaces we are using.
@@ -250,9 +262,8 @@ struct peer {
 #define clear_to_zero pkeyid
 	keyid_t	hcookie;	/* host cookie */
 	keyid_t	pcookie;	/* peer cookie */
-	int	recseq;		/* session key number */
-	keyid_t	finlkey;	/* initial key ID */
-	int	finlseq;	/* initial key number */
+	int	recseq;		/* current key number */
+	struct autokey recauto;	/* autokey */
 	u_int32	cmmd;		/* peer command */
 	u_short	assoc;		/* association ID of peer */
 	u_char	*dh_public;	/* Diffie-Hellman public value */
@@ -263,8 +274,7 @@ struct peer {
 	 */
 	keyid_t	*keylist;	/* session key ID list */
 	int	keynumber;	/* current key number */
-	keyid_t	lastkey;	/* initial key ID */
-	int	lastseq;	/* initial key number */
+	struct autokey sndauto;	/* autokey */
 #ifdef PUBKEY
 	u_char	*sign;		/* signature of keylist values */
 	u_int	signlen;	/* length of signature */
