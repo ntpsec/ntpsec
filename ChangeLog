@@ -1,3 +1,8 @@
+2000-09-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/Makefile.am (noinst_HEADERS): Added ntp_tty.h
+	Reported by Dave Mills
+
 2000-09-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntptrace/ntptrace.c: 
