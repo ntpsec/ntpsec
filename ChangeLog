@@ -1,5 +1,11 @@
 2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/icom.c (sndpkt): Make declaration and definition equivalent.
+	(doublefreq): Ditto.
+
+	* ntpd/refclock_oncore.c (MAP_FAILED): Some systems do not #define
+	this.
+
 	* ntpd/refclock_wwv.c: 
 	* ntpd/refclock_chu.c: 
 	* libntp/icom.c: 

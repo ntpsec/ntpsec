@@ -68,7 +68,7 @@ icom_freq(			/* returns 0 (ok), EIO (error) */
 /*
  * doublefreq(freq, y, len) - double to ICOM frequency with padding
  */
-void
+static void
 doublefreq(			/* returns void */
 	double freq,		/* frequency */
 	u_char *x,		/* radio frequency */
@@ -170,7 +170,7 @@ icom_init(
  * response. Even with this precaution, some of the older radios
  * occasionally fail to receive a command and it has to be sent again.
  */
-int
+static int
 sndpkt(				/* returns octet count */
 	int r,			/* radio address */
 	u_char *cmd,		/* command vector */
