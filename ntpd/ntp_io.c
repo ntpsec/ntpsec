@@ -777,10 +777,9 @@ addr_ismulticast(struct sockaddr_storage *maddr)
 			return (ISC_TRUE);
 		}
 	case AF_INET6 :
+
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-		struct in6_addr iaddr6;
-		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
-		if (!IN6_IS_ADDR_MULTICAST(&iaddr6)) {
+		if (!IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)maddr)->sin6_addr)) {
 			netsyslog(LOG_ERR,
 			    "address %s not IPv6 multicast address",
 				stoa(maddr));
