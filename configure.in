@@ -2228,6 +2228,7 @@ AC_MSG_CHECKING(for the level of crypto support)
 AC_ARG_WITH(crypto,	[  --with-crypto           + ={md5,autokey,rsaref}],
 [ans=$withval], [ans=yes])
 case "$ans" in
+ no) ans=md5 ;;
  yes|rsaref)
     ans=md5
     if test -f $srcdir/rsaref2/source/rsa.c
@@ -2240,9 +2241,12 @@ case "$ans" in
 	AC_DEFINE(PUBKEY, , [Public key?])
     fi
     ;;
- autokey)
+esac
+AC_SUBST(AUTOKEY)
+case "$ans" in
+ md5) ;;
+ *)
     AC_DEFINE(AUTOKEY, , [Autokey?])
-    AC_SUBST(AUTOKEY)
     AUTOKEY=1
     ;;
 esac
