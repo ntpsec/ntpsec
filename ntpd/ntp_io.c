@@ -2098,7 +2098,7 @@ findbcastinter(
 	struct sockaddr_storage *addr
 	)
 {	
-	int i = find_flagged_addr_in_list(addr, INT_BCASTOPEN);
+	int i = find_flagged_addr_in_list(addr, INT_BROADCAST);
 	if(i >= 0)
 	     return (&inter_list[i]);
 
