@@ -417,6 +417,8 @@ address_okay(isc_interface_t *isc_if) {
 	if (specific_interface != NULL) {
 		if (strcasecmp(isc_if->name, specific_interface) == 0)
 			return (ISC_TRUE);
+		else
+			return (ISC_FALSE);
 	}
 	else {
 		if (listen_to_virtual_ips == 0  && 
