@@ -72,10 +72,16 @@
 /* Enable OpenSSL */
 #define OPENSSL 1
 
+/*
+ * Miscellaneous functions that Microsoft maps
+ * to other names
+ */
+#define vsnprintf _vsnprintf
+#define snprintf _snprintf
 #define isascii __isascii
 #define finite _finite
-# define random      rand
-# define srandom     srand
+#define random      rand
+#define srandom     srand
 
 /*
  * We need to include string.h first before we override strerror

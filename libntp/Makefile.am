@@ -21,7 +21,8 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	$(srcdir)/../libisc/net.c $(srcdir)/../libisc/isc_strerror.c \
 	$(srcdir)/../libisc/inet_ntop.c \
 	$(srcdir)/../libisc/inet_pton.c \
-	$(srcdir)/../libisc/inet_aton.c
+	$(srcdir)/../libisc/netaddr.c $(srcdir)/../libisc/sockaddr.c \
+	$(srcdir)/../libisc/netscope.c
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c log.c random.c
