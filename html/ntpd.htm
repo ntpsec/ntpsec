@@ -289,6 +289,8 @@ to <tt>022</tt>.</p>
 <dd>Specify the name and path of the configuration file. (Disable
 netinfo?)</dd>
 
+
+
 <dt><tt>-d</tt></dt>
 
 <dd>Specify debugging mode. This flag may occur multiple times,
@@ -335,20 +337,20 @@ group address 224.0.1.1 (requires multicast kernel).</dd>
 
 <dd>Don't fork.</dd>
 
-<dt><tt>-N <i>priority</i></tt></dt>
+<dt><tt>-N</tt></dt>
 
 <dd>To the extent permitted by the operating system, run the <tt>
-ntpd</tt> at a high priority.</dd>
+ntpd</tt> at the highest priority.</dd>
 
 <dt><tt>-p <i>pidfile</i></tt></dt>
 
 <dd>Specify the name and path to record the <tt>ntpd</tt>'s process
 ID.</dd>
 
-<dt><tt>-P</tt></dt>
+<dt><tt>-P <i>priority</i></tt></dt>
 
-<dd>Override the priority limit set by the operating system. Not
-recommended for sissies.</dd>
+<dd>To the extent permitted by the operating system, run the <tt>
+ntpd</tt> at priority <i>priority</i>.</dd>
 
 <dt><tt>-q</tt></dt>
 

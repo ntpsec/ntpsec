@@ -29,9 +29,18 @@ tens of milliseconds on WANs relative to Coordinated Universal Time
 (UTC) via a Global Positioning Service (GPS) receiver, for example.
 Typical NTP configurations utilize multiple redundant servers and
 diverse network paths in order to achieve high accuracy and
-reliability. Some configurations include cryptographic
-authentication to prevent accidental or malicious protocol attacks
-and some provide automatic server discovery using IP multicast.</p>
+reliability.</p>
+
+<p>This software release implements NTP Version 4 (NTPv4), but is
+in general backwards compatible with previous versions, except NTP
+Version 1, support for which is no longer viable. NTPv4 includes
+support for both symmetric key and public key cryptography to
+prevent accidental or malicious protocol attacks, as well as
+automatic server discovery using IP multicast means. This release
+includes full support for the IPv6 address family, where the
+operating system sypports it, as well as the default IPv4 address
+family. Either or both families can be used at the same time on the
+same machine.</p>
 
 <p>Background information on computer network time synchronization
 can be found on the <a href="exec.htm">Executive Summary - Computer

@@ -1,44 +1,51 @@
-<html><head><title>
-Configuration Options
-</title></head><body><h3>
-Configuration Options
-</h3>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Configuration Options</title>
+</head>
+<body>
+<h3>Configuration Options</h3>
 
-<img align=left src=pic/pogo3a.gif><a
-href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>Pogo</i>,
-Walt Kelly</a>
+<img align="left" src="pic/pogo3a.gif"><a href=
+"http://www.eecis.udel.edu/~mills/pictures.htm">from <i>Pogo</i>,
+Walt Kelly</a> 
 
-<p>Gnu autoconfigure tools are in the backpack.
-<br clear=left><hr>
+<p>Gnu autoconfigure tools are in the backpack.<br clear="left">
+</p>
 
-<H4>Basic Configuration Options - the <TT>configure</TT> utility</H4>
+<hr>
+<h4>Basic Configuration Options - the <tt>configure</tt>
+utility</h4>
 
-The following options are for compiling and installing a working version
-of the NTP distribution. In most cases, the build process is completely
-automatic. In some cases where memory space is at a premium, or the
-binaries are to be installed in a different place, it is possible to
-tailor the configuration to remove such features as reference clock
-driver support, debugging support, and so forth.
+The following options are for compiling and installing a working
+version of the NTP distribution. In most cases, the build process
+is completely automatic. In some cases where memory space is at a
+premium, or the binaries are to be installed in a different place,
+it is possible to tailor the configuration to remove such features
+as reference clock driver support, debugging support, and so forth.
 
-<P>Configuration options are specified as arguments to the
-<TT>configure</TT> script. Following is a summary of the current
-options, as of the 4.0.99m version:
 
-<P>Usage: <TT>configure [options] [host]</TT>
-<BR>Options: <TT>[defaults in brackets after descriptions]</TT>
-Configuration:
-<PRE>
+<p>Configuration options are specified as arguments to the <tt>
+configure</tt> script. Following is a summary of the current
+options, as of the 4.0.99m version:</p>
+
+<p>Usage: <tt>configure [options] [host]</tt><br>
+Options: <tt>[defaults in brackets after descriptions]</tt>
+Configuration:</p>
+
+<pre>
  --cache-file=FILE      cache test results in FILE
  --help                 print this message
  --no-create            do not create output files
  --quiet, --silent      do not print `checking...' messages
  --version              print the version of autoconf that created
 configure
-</PRE>
+</pre>
 
-Directory and file names:
+Directory and file names: 
 
-<PRE>
+<pre>
  --prefix=PREFIX        install architecture-independent files in PREFIX
 [/usr/local]
  --exec-prefix=EPREFIX  install architecture-dependent files in EPREFIX
@@ -68,19 +75,19 @@ names
 names
  --program-transform-name=PROGRAM  run sed PROGRAM on installed program
 names
-</PRE>
+</pre>
 
-Host type:
+Host type: 
 
-<PRE>
+<pre>
  --build=BUILD          configure for building on BUILD [BUILD=HOST]
  --host=HOST            configure for HOST [guessed]
  --target=TARGET        configure for TARGET [TARGET=HOST]
-</PRE>
+</pre>
 
-Optional packages:
+Optional packages: 
 
-<PRE>
+<pre>
  --with-PACKAGE[=ARG]   use PACKAGE [ARG=yes]
  --without-PACKAGE      do not use PACKAGE (same as --with-PACKAGE=no)
 
@@ -91,11 +98,11 @@ Optional packages:
  crypto=autokey         Use autokey cryptography
  crypto=rsaref          Use the RSAREF library
  electricfence          Compile with ElectricFence malloc debugger
-</PRE>
+</pre>
 
-Optional features:
+Optional features: 
 
-<PRE>
+<pre>
  --disable-FEATURE      do not include FEATURE (same as
 --enable-FEATURE=no)
  --enable-FEATURE[=ARG] include FEATURE [ARG=yes]
@@ -115,12 +122,12 @@ Optional features:
  tick=VALUE             Force a value for 'tick'
  tickadj=VALUE          Force a value for 'tickadj'
  udp-wildcard           Use UDP wildcard delivery
-</PRE>
+</pre>
 
 Radio clocks (these are ordinarily enabled, if supported by the
-machine and operating system):
+machine and operating system): 
 
-<PRE>
+<pre>
  all-clocks             Include drivers for all suitable non-PARSE
 clocks [enable]
  ACTS                   NIST dialup clock
@@ -163,11 +170,11 @@ clocks [enable]
  ULINK                  Ultralink WWVB receiver
  USNO                   US Naval Observatory dialup clock
  WWV                    WWV audio receiver
-</PRE>
+</pre>
 
-PARSE Clocks:
+PARSE Clocks: 
 
-<PRE>
+<pre>
  parse-clocks           Include drivers for all suitable PARSE clocks
 [enable]
  COMPUTIME              Diem Computime Radio Clock
@@ -181,8 +188,12 @@ PARSE Clocks:
  TRIMTSIP               Trimble GPS/TSIP Protocol
  VARITEXT               VARITEXT clock
  WHARTON                Wharton 400A Series clock
-</PRE>
+</pre>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></a></body></html>
+<hr>
+<a href="index.htm"><img align="left" src="pic/home.gif"></a>
+<address><a href="mailto:mills@udel.edu">David L. Mills
+&lt;mills@udel.edu&gt;</a></address>
+</body>
+</html>
+

@@ -125,9 +125,10 @@ correction. However, due to provisions that reduce vulnerability to
 noise spikes, the second correction will not be done until after
 the stepout threshold. When the frequency error is very large, it
 may take a number of cycles like this until converging on the
-nominal frequency correction. After this, the correction is written
-to the <tt>ntp.drift</tt> file, which is read upon subsequent
-restarts, so the herky-jerky cycles should not recur.</p>
+nominal frequency correction. After this, and at one-hour
+intervals, the correction is written to the <tt>ntp.drift</tt>
+file, which is read upon subsequent restarts, so the herky-jerky
+cycles should not recur.</p>
 
 <h4>Verifying Correct Operation</h4>
 
@@ -162,6 +163,104 @@ reachability register (see RFC-1305) in octal. The remaining
 entries show the latest delay, offset and jitter in milliseconds.
 Note that in NTP Version 4 what used to be the <tt>dispersion</tt>
 column has been replaced by the <tt>jitter</tt> column.</p>
+
+<p>As per the NTP specification RFC-1305, when the <tt>stratum</tt>
+is between 0 and 15 for a NTP server, the <tt>refid</tt> field
+shows the server DNS name or, if not found, the IP address in
+dotted-quad. When the <tt>stratum</tt> is any value for a reference
+clock, this field shows the identification string assigned to the
+clock. However, until the client has synchronized to a server, or
+when the <tt>stratum</tt> for a NTP server is 0 (appears as 16 in
+the billboards), the status cannot be determined. As a help in
+debugging, the <tt>refid</tt> field is set as follows.</p>
+
+<p>Peer Variables</p>
+
+<dl>
+<dt><tt>ACST</tt></dt>
+
+<dd>The association belongs to a anycast server.</dd>
+
+<dt><tt>AUTH</tt></dt>
+
+<dd>Server authentication failed. Please wait while the association
+is restarted.</dd>
+
+<dt><tt>AUTO</tt></dt>
+
+<dd>Autokey sequence failed. Please wait while the association is
+restarted.</dd>
+
+<dt><tt>BCST</tt></dt>
+
+<dd>The association belongs to a broadcast server.</dd>
+
+<dt><tt>CRYP</tt></dt>
+
+<dd>Cryptographic authentication or identification failed. The
+details should be in the system log file or the <tt>
+cryptostats</tt> statistics file, if configured. No further
+messages will be sent to the server.</dd>
+
+<dt><tt>DENY</tt></dt>
+
+<dd>Access denied by remote server. No further messages will be
+sent to the server.</dd>
+
+<dt><tt>DROP</tt></dt>
+
+<dd>Lost peer in symmetric mode. Please wait while the association
+is restarted.</dd>
+
+<dt><tt>RSTR</tt></dt>
+
+<dd>Access denied due to local policy. No further messages will be
+sent to the server.</dd>
+
+<dt><tt>INIT</tt></dt>
+
+<dd>The association has not yet synchronized for the first
+time.</dd>
+
+<dt><tt>MCST</tt></dt>
+
+<dd>The association belongs to a manycast server.</dd>
+
+<dt><tt>NKEY</tt></dt>
+
+<dd>No key found. Either the key was never installed or is not
+trusted.</dd>
+
+<dt><tt>RATE</tt></dt>
+
+<dd>Rate exceeded. The server has temporarily denied access because
+the client exceeded the rate threshold.</dd>
+
+<dt><tt>RMOT</tt></dt>
+
+<dd>Somebody is tinkering with the association from a remote host
+running <tt>ntpdc</tt>. Not to worry unless some rascal has stolen
+your keys.</dd>
+
+<dt><tt>STEP</tt></dt>
+
+<dd>A step change in system time has occured, but the association
+has not yet resynchronized.</dd>
+</dl>
+
+<p>System Variables</p>
+
+<dl>
+<dt><tt>INIT</tt></dt>
+
+<dd>The system clock has not yet synchronized for the first
+time.</dd>
+
+<dt><tt>STEP</tt></dt>
+
+<dd>A step change in system time has occured, but the system clock
+has not yet resynchronized.</dd>
+</dl>
 
 <p>The tattletale symbol at the left margin displays the
 synchronization status of each peer. The currently selected peer is
@@ -209,24 +308,22 @@ xmt=bd11b21a.ac34c1a8  Sat, Jul  8 2000 13:58:50.672,
 filtdelay=   10.45  10.50  10.63  10.40  10.48  10.43  10.49  11.26,
 filtoffset=  -1.18  -1.26  -1.26  -1.35  -1.35  -1.42  -1.54  -1.81,
 filtdisp=     0.51   1.47   2.46   3.45   4.40   5.34   6.33   7.28,
-hostname="miro.time.saic.com", publickey=3171359012, pcookie=0x6629adb2,
-hcookie=0x61f99cdb, initsequence=61, initkey=0x287b649c,
+hostname="miro.time.saic.com", signature=md5WithRSAEncryption, flags=0x83f01, initsequence=61, initkey=0x287b649c,
 timestamp=3172053041
 </pre>
 
 <p>A detailed explanation of the fields in this billboard are
 beyond the scope of this discussion; however, most variables
 defined in the NTP Version 3 specification RFC-1305 are available
-along with others defined for NTP Version 4. This particular
-example was chosen to illustrate probably the most complex
-configuration involving symmetric modes and public-key
+along with others defined for NTPv4 on the <tt>ntpq</tt> page. This
+particular example was chosen to illustrate probably the most
+complex configuration involving symmetric modes and public-key
 cryptography. As the result of debugging experience, the names and
-values of these variables may change from time to time. An
-explanation of the current set is on the <tt>ntpq</tt> page.</p>
+values of these variables may change from time to time.</p>
 
 <p>A useful indicator of miscellaneous problems is the <tt>
 flash</tt> value, which reveals the state of the various sanity
-tests on incoming packets. There are currently eleven bits, one for
+tests on incoming packets. There are currently 12 bits, one for
 each test, numbered from the right, which is for test 1. If the
 test fails, the corresponding bit is set to one and zero otherwise.
 If any bit is set following each processing step, the packet is
@@ -270,8 +367,10 @@ refid=pogo.udel.edu,
 reftime=bd11b220.ac89f40a  Sat, Jul  8 2000 13:58:56.673, poll=6,
 clock=bd11b225.ee201472  Sat, Jul  8 2000 13:59:01.930, state=4,
 phase=0.179, frequency=44.298, jitter=0.022, stability=0.001,
-hostname="barnstable.udel.edu", publickey=3171372095, params=3171372095,
-refresh=3172016539
+hostname="barnstable.udel.edu", signature=md5WithRSAEncryption,
+flags=0x80011, hostkey=3171372095, refresh=3172016539
+cert="grundoon.udel.edu grundoon.udel.edu 0x3 3233600829"
+cert="whimsy.udel.edu whimsy.udel.edu 0x5 3233682156"
 </pre>
 
 <p>An explanation about most of these variables is in the RFC-1305
@@ -322,7 +421,7 @@ to resist errors due to severely congested network paths, as well
 as errors due to confused radio clocks upon the epoch of a leap
 second.</p>
 
-<h4>Special Problems</h4>
+<h4>Large Frequency Errors</h4>
 
 <p>The frequency tolerance of computer clock oscillators can vary
 widely, which can put a strain on the daemon's ability to
@@ -358,18 +457,19 @@ alters certain kernel variables and, while the utility attempts to
 figure out an acceptable way to do this, there are many cases where
 <tt>tickadj</tt> is incompatible with a running kernel.</p>
 
+<h4>Access Controls</h4>
+
 <p>Provisions are included in <tt>ntpd</tt> for access controls
 which deflect unwanted traffic from selected hosts or networks. The
 controls described on the <a href="accopt.htm">Access Control
 Options</a> include detailed packet filter operations based on
 source address and address mask. Normally, filtered packets are
 dropped without notice other than to increment tally counters.
-However, the server can configure to generate what is called a
-kiss-of-death (KOD) packet and send to the client. In case of
-outright access denied, the KOD is the response to the first client
-packet. In this case the client association is permanently disabled
-and the access denied bit (test 4) is set in the flash peer
-variable mentioned above and a message is sent to the system
+However, the server can be configured to send a "kiss-of-death"
+(KOD) packet to the client either when explicitly configured or
+when cryptographic authentication fails for some reason. The client
+association is permanently disabled, the access denied bit (TEST4)
+is set in the flash variable and a message is sent to the system
 log.</p>
 
 <p>The access control provisions include a limit on the packet rate
@@ -379,6 +479,8 @@ client association has synchronized, the association is not
 disabled, but a message is sent to the system log. See the <a href=
 "accopt.htm">Access Control Options</a> page for further
 informatin.</p>
+
+<h4>Large Delay Variations</h4>
 
 <p>In some reported scenarios an access line may show low to
 moderate network delays during some period of the day and moderate
@@ -390,9 +492,12 @@ such scenarios, since this could result in several time steps,
 especially if the condition persists for greater than the stepout
 threshold.</p>
 
-<p>The recommended approach in such scenarios is first to calibrate
-the local clock frequency error by running <tt>ntpd</tt> in
-continuous mode during the quiet interval and let it write the
+<p>Specific provisions have been built into <tt>ntpd</tt> to cope
+with these problems. The scheme is called "huff-'n-puff and is
+described on the <a href="miscopt.htm">Miscellaneous Options</a>
+page. An alternative approach in such scenarios is first to
+calibrate the local clock frequency error by running <tt>ntpd</tt>
+in continuous mode during the quiet interval and let it write the
 frequency to the <tt>ntp.drift</tt> file. Then, run <tt>ntpd
 -q</tt> from a cron job each day at some time in the quiet
 interval. In systems with the nanokernel or microkernel performance
@@ -406,12 +511,12 @@ milliseconds.</p>
 <p>Reliable source authentication requires the use of symmetric key
 or public key cryptography, as described on the <a href=
 "authopt.htm">Authentication Options</a> page. In symmetric key
-cryptography servers and clients share secret keys contained in a
-key file In public key cryptography, which requires the OpenSSL
-software library, the server has a private key, never shared, and a
-public key with unrestricted distribution. The cryptographic media
-required are produced by the <a href="genkeys.htm">
-,<tt>ntp-genkeys</tt></a> program.</p>
+cryptography servers and clients share session keys contained in a
+secret key file In public key cryptography, which requires the
+OpenSSL software library, the server has a private key, never
+shared, and a public key with unrestricted distribution. The
+cryptographic media required are produced by the <a href=
+"ntp-genkeys.htm"><tt>ntp-keygen</tt></a> program.</p>
 
 <p>Problems with symmetric key authentication are usually due to
 mismatched keys or improper use of the <tt>trustedkey</tt> command.
@@ -433,28 +538,32 @@ authenticated. Users are cautioned that running with authentication
 disabled is very dangerous, since an intruder can easily strike up
 an association and inject false time values.</p>
 
-<p>Public key cryptography is supported in NTPv4 uses the Autokey
-protocol, which is described in an Internet Draft. Development of
-this protocol is ongoing and likely to evolve in various ways.
-However, Autokey version 2, which is the latest and current
-version, is a maturing product. Further details of the protocol are
-on the <a href="authopt.htm">Authentication Options</a> page.
-Common problems with configuration and key generation are
-mismatched key files, broken links and missing or broken random
-seed file.</p>
+<p>Public key cryptography is supported in NTPv4 using the Autokey
+protocol, which is described in briefings on the NTP Project page
+linked from www.ntp.org. Development of this protocol is nearing
+maturity and the <tt>ntpd</tt> implementation is basically
+complete. Autokey version 2, which is the latest and current
+version, includes provisions to walk certificate trails, operate as
+certificate authorities and verify identity using
+challenge/response identification schemes. Further details of the
+protocol are on the <a href="authopt.htm">Authentication
+Options</a> page. Common problems with configuration and key
+generation are mismatched key files, broken links and missing or
+broken random seed file.</p>
 
 <p>As in the symmetric key cryptography case, the trace facility is
-a good way to verify correct operation. The daemon requires a
-random seed bile, correct public/private key file and a valid
-certificate file; otherwise it exits immediately with a message to
-the system log. As each file is loaded a trace message appears with
-its filestamp. There are a number of checks to insure that only
-consistent data are used and that the certificate is valid. When
-the protocol is in operation a number of checks are done to verify
-the server has the expected credentials and its filestamps and
-timestamps are consistent. Errors found are reported using NTP
-control and monitoring protocol traps with extended trap codes
-shown in the Authentication Options page.</p>
+a good way to verify correct operation. A statistics file <tt>
+cryptostats</tt> records protocol transactions and error messages.
+The daemon requires a random seed file, public/private key file and
+a valid certificate file; otherwise it exits immediately with a
+message to the system log. As each file is loaded a trace message
+appears with its filestamp. There are a number of checks to insure
+that only consistent data are used and that the certificate is
+valid. When the protocol is in operation a number of checks are
+done to verify the server has the expected credentials and its
+filestamps and timestamps are consistent. Errors found are reported
+using NTP control and monitoring protocol traps with extended trap
+codes shown in the Authentication Options page.</p>
 
 <p>To assist debugging every NTP extension field is displayed in
 the trace along with the Autokey operation code. Every extension
@@ -514,8 +623,7 @@ the servers as truechimers or falsetickers, may be unable to find a
 majority of truechimers among the server population.</li>
 
 <li>If all else fails, see the FAQ and/or the discussion and
-briefings at <a href="http://www.eecis.udel.edu/~mills/ntp.htm">
-Network Time Synchronization Project.</a></li>
+briefings at the NTP Project page.</li>
 </ol>
 
 <hr>

@@ -54,13 +54,13 @@ configuration operations. In addition, if public key cryptography
 is enabled, the commands specify the message digest and signature
 encryption scheme.</p>
 
-<p>Authentication is always enabled, although ineffective if no
-keys are configured as described below. If a NTP packet arrives
-including a message authentication code (MAC), only if it passes
-all cryptographic checks is it accepted for further processing. The
-checks require correct key ID, key value and message contents. If
-the packet has been modified in any way or replayed by an intruder,
-it will fail one or more of these checks and be discarded.
+<p>Authentication is always enabled, although ineffective if not
+configured as described below. If a NTP packet arrives including a
+message authentication code (MAC), only if it passes all
+cryptographic checks is it accepted for further processing. The
+checks require correct key ID, key value and message digest. If the
+packet has been modified in any way or replayed by an intruder, it
+will fail one or more of these checks and be discarded.
 Furthermore, the Autokey scheme requires a preliminary protocol
 exchange to obtain the server public key, verify its credentials
 and compute a private session key.</p>
@@ -70,69 +70,53 @@ remote configuration commands require cryptographic authentication.
 This flag can be set or reset by the <tt>enable</tt> and <tt>
 disable</tt> commands and also by remote configuration commands
 sent by a <tt>ntpdc</tt> program running in another machine. If
-this flag is enabled, which is the default case, new broadcast
-client and symmetric passive associations and remote configuration
-commands must be cryptographically authenticated using either
-symmetric key or public key schemes. If this flag is disabled,
-these operations are effective even if not cryptographic
-authenticated.</p>
-
-<p>It should be understood that operating with the <tt>auth</tt>
-disabled invites a significant vulnerability where a rogue hacker
-can seriously disrupt system timekeeping. It is important to note
-that this flag has no purpose other than to allow or disallow a new
-association in response to new broadcast client and symmetric
-passive associations and remote configuration commands and, in
-particular, the flag has no effect on the authentication process
-itself.</p>
-
-<p>In networks with firewalls and large numbers of broadcast
-clients it may be acceptable to disable authentication, since that
-avoids key distribution and simplifies network maintenance.
-However, when the configuration file contains host names, or when a
-server or client is configured remotely, host names are resolved
-using the DNS and a separate name resolution process. In order to
-protect against bogus configuration messages, name resolution
-messages are authenticated using an internally generated key which
-is normally invisible to the user. However, if cryptographic
-support is disabled, the name resolution process will fail. This
-can be avoided either by specifying IP addresses instead of host
-names, which is generally inadvisable, or by enabling the <tt>
-auth</tt>flag for name resolution and disabled it once the name
-resolution process is complete.</p>
+this flag is enabled, which is the default case, new
+broadcast/manycast client and symmetric passive associations and
+remote configuration commands must be cryptographically
+authenticated using either symmetric key or public key schemes. If
+this flag is disabled, these operations are effective even if not
+cryptographic authenticated. It should be understood that operating
+with the <tt>auth</tt> disabled invites a significant vulnerability
+where a rogue hacker can seriously disrupt system timekeeping. It
+is important to note that this flag has no purpose other than to
+allow or disallow a new association in response to new broadcast
+and symmetric active messages and remote configuration commands
+and, in particular, the flag has no effect on the authentication
+process itself.</p>
 
 <p>An attractive alternative where multicast support is available
 is manycast mode, in which clients periodically troll for servers
 as described in the <a href="assoc.htm">Association Management</a>
-page. Cryptographic authentication in this mode the Autokey
-protocol described below. The principle advantage of manycast mode
-is that potential servers need not be configured in advance, since
-the client finds them during regular operation, and the
-configuration files for all clients can be identical.</p>
+page. Either symmetric key or public key cryptographic
+authentication can be used in this mode. The principle advantage of
+manycast mode is that potential servers need not be configured in
+advance, since the client finds them during regular operation, and
+the configuration files for all clients can be identical.</p>
 
 <p>While the algorithms for symmetric key cryptography are included
 in the NTPv4 distribution, public key cryptography requires the
 OpenSSL software library to be installed before building the NTP
-distribution. Public key cryptography provides secure
-authentication of servers without compromising accuracy and
-stability. The security model and protocol schemes for both
-symmetric key and public key cryptography are summarized below and
-detailed in the briefings, papers and reports at <a href=
-"http://www.ntp.org">www.ntp.org</a>.</p>
+distribution. Directions for doing that are on the <a href=
+"build.htm">Building and Installing the Distribution</a> page.</p>
+
+<p>The security model and protocol schemes for both symmetric key
+and public key cryptography are summarized below; further details
+are in the briefings, papers and reports at the NTP project page
+linked from <a href="http://www.ntp.org">www.ntp.org</a>.</p>
 
 <h4>Symmetric Key Cryptography</h4>
 
 The original RFC-1305 specification allows any one of possibly
 65,534 keys, each distinguished by a 32-bit key identifier, to
 authenticate an association. The servers and clients involved must
-agree on the key and key identifier to authenticate their messages.
+agree on the key and key identifier to authenticate NTP packets.
 Keys and related information are specified in a key file, usually
-called <tt>ntp.keys</tt>, which must be exchanged and stored using
-secure procedures beyond the scope of the NTP protocol itself.
-Besides the keys used for ordinary NTP associations, additional
-keys can be used as passwords for the <tt><a href="ntpq.htm">
-ntpq</a></tt> and <tt><a href="ntpdc.htm">ntpdc</a></tt> utility
-programs. 
+called <tt>ntp.keys</tt>, which must be distributed and stored
+using secure procedures beyond the scope of the NTP protocol
+itself. Besides the keys used for ordinary NTP associations,
+additional keys can be used as passwords for the <tt><a href=
+"ntpq.htm">ntpq</a></tt> and <tt><a href="ntpdc.htm">ntpdc</a></tt>
+utility programs. 
 
 <p>When <tt>ntpd</tt> is first started, it reads the key file
 specified in the <tt>keys</tt> configuration command and installs
@@ -153,42 +137,45 @@ utility.</p>
 in RFC-1305 and in addition the Autokey protocol, which is based on
 public key cryptography. The Autokey Version 2 protocol verifies
 packet integrity using MD5 message digests and verifies the source
-with digital signatures and any of several digest/signature schemes
-available in the OpenSSL software library. This library is
-available from <a href="http://www.openssl.org">
-http://www.openssl.org</a> and can be installed using the
-procedures outlined in the <a href="build.htm">Building and
-Installing the Distribution</a> page. Once installed, the configure
-and build process automatically detects the library and links the
-interface routines required.</p>
+with digital signatures and any of several digest/signature
+schemes. Optional identification schemes based on cryptographic
+challenge/response algorithms are also available. Using all of
+these schemes provides strong security against replay with or
+without modification, spoofing, masquerade and most forms of
+clogging attacks.</p>
+
+<p>The cryptographic means necessary for all Autokey operations
+provided by the OpenSSL software library. This library is available
+from <a href="http://www.openssl.org">http://www.openssl.org</a>
+and can be installed using the procedures outlined in the <a href=
+"build.htm">Building and Installing the Distribution</a> page. Once
+installed, the configure and build process automatically detects
+the library and links the interface routines required.</p>
 
 <p>The Autokey protocol has several modes of operation
-corresponding to the various NTP modes supported. Digital
-signatures with any of several message digest and signature
-encryption schemes are used in all modes to verify that the server
-is authentic and not an intruder. Most modes use a special cookie
-which can be computed independently by the client and server, but
-encrypted in transmission. All modes use in addition a variant of
-the S-KEY scheme, in which a pseudo-random key list is generated
-and used in reverse order. These schemes are described along with
-an executive summary, current status, briefing slides and reading
-list, on the <a href=
+corresponding to the various NTP modes supported. Most modes use a
+special cookie which can be computed independently by the client
+and server, but encrypted in transmission. All modes use in
+addition a variant of the S-KEY scheme, in which a pseudo-random
+key list is generated and used in reverse order. These schemes are
+described along with an executive summary, current status, briefing
+slides and reading list, on the <a href=
 "http://www.eecis.udel.edu/~mills/autokey.htm">Autonomous
 Authentication</a> page.</p>
 
 <p>The specific cryptographic environment used by Autokey servers
 and clients is determined by a set of files and soft links. This
-includes a host key file, certificate file and optional sign file
-and leapsecond file. The digest/signature scheme is specified in
-the X.509 certificate configured during installation along with the
-matching sign key. There are several schemes available in the
-OpenSSL software library, each identified by a specific string such
-as <tt>md5WithRSAEncryption</tt>, which stands for the MD5 message
-digest with RSA encryption scheme. The current NTP distribution
-supports all the schemes in the OpenSSL library, including those
-based on RSA and DSA digital signatures. The schemes currently
-available are described in the <a href="genkeys.htm"><tt>
-ntp-genkeys</tt></a> page.</p>
+includes a required host key file, required certificate file and
+optional sign key file, leapsecond file and identification scheme
+files. The digest/signature scheme is specified in the X.509
+certificate along with the matching sign key. There are several
+schemes available in the OpenSSL software library, each identified
+by a specific string such as <tt>md5WithRSAEncryption</tt>, which
+stands for the MD5 message digest with RSA encryption scheme. The
+current NTP distribution supports all the schemes in the OpenSSL
+library, including those based on RSA and DSA digital signatures.
+The schemes currently available are described in the <a href=
+"genkeys.htm"><tt>ntp-keygen</tt></a> page.</p>
 
 <p>The digest/signature scheme and certificate are provided to
 dependent clients in the Autokey protocol. Different client or peer
@@ -205,86 +192,131 @@ algorithm specified in the certificate.</p>
 explanation of the subprotocols, called dances, is beyond the scope
 of this page. Detailed information and briefings can be found via
 the NTP project page at <a href="html://www.ntp.org">
-www.ntp.org</a>. Briefly, the all dances start out with a client
-request for the server name and status word. The next step is to
-request the server host certificate and the third to request the
-certificate of the server that signed the first certificate. If the
-client verifies the server certificate signature, the server is
-pronounced authentic. The fourth step is to present a certificate
-to the server acting as certificate authority and request that it
-be signed and returned. This allows a client acting as a server for
-the next higher stratum to prove authenticity.</p>
+www.ntp.org</a>. Briefly, the dances start when a client requests
+the server name and status word. Next, the client requests the
+server host certificate used to verify the signature of subsequent
+data supplied by the server.</p>
+
+<p>Next comes the identification procedure which confirms the
+server group membership. There are four schemes to prove
+identification: one using private certificates (PC), a second using
+trusted certificates (TC), a third using a modified Schnorr
+algorithm (IFF aka Identify Friend or Foe) and the fourth using a
+modified Guillou-Quisquater (GQ) algorithm. The particular scheme
+and required parameters and certificates are selected during
+operation of the <tt>ntp-keygen</tt> utility.</p>
+
+<p>The PC scheme uses a private certificate as group key. The
+certificate is distributed to all other group members by secret
+means and never revealed outside the group. The TC scheme involves
+a conventional certificate trail and a sequence of certificates,
+each signed by an issuer one stratum level lower than the client
+and terminating on a self signed trusted certificate, as described
+in RFC-2510.</p>
+
+<p>The two remaining schemes involve a cryptographically strong
+challenge-response exchange. Both the IFF and GQ schemes start when
+the client sends a nonce to the server, which then rolls its own
+nonce, performs a mathematical operation and sends the results
+along with a message digest to the client. The client performs a
+second mathematical operation to produce a digest that must match
+the one included in the message.</p>
 
 <p>The next steps retrieve the cryptographic values needed in the
 particular dance, including the cookie, autokey values and
-leapsecond table. As one of these steps the client presents the
-server with its certificate and asks that it be signed using the
-server private key. The server response is saved for future
-dependent clients as proof that the client itself is a legitimate
-member of the community and not an intruder attempting to
-impersonate a legitimate member.</p>
+leapsecond table. As a required step in the TC identification
+scheme, the client presents the server with its certificate and
+asks that it be signed using the server private key. The server
+response is saved for future dependent clients to walk the
+certificate trail.</p>
+
+<h4>Interoperability</h4>
+
+<p>A specific combination of authentication scheme (none, symmetric
+key, public key) and identification scheme (PC, TC, IFF, GQ) is
+called a cryptotype, although not all combinations are legal. There
+may be management configurations where the clients, servers and
+peers may not all support the same cryptotypes. A secure NTPv4
+subnet can be configured in several ways while keeping in mind the
+principles explained in this section. Note however that some
+cryptotype combinations may successfully interoperate with each
+other, but may not represent good security practice.</p>
+
+<p>The cryptotype of an association is determined at the time of
+mobilization, either at configuration time or some time later when
+a message of appropriate cryptotype arrives. When mobilized by a
+<tt>server</tt> or <tt>peer</tt> configuration command and no <tt>
+key</tt> or <tt>autokey</tt> subcommands are present, the
+association is not authenticated; if the <tt>key</tt> subcommand is
+present, the association is authenticated using the symmetric key
+ID given as argument; if the <tt>autokey</tt> subcommand is
+present, the association is authenticated using Autokey.</p>
+
+<p>When multiple identification schemes are supported in the
+Autokey protocol, the first message exchange determines which one
+is used. The client request message contains bits corresponding to
+which schemes it has available. The server response message
+contains bits corresponding to which schemes it has available. Both
+server and client match the received bits with their own and select
+the common scheme judged most secure. For this purpose the order
+from most secure to least is GC, IFF, TC. Note that PC does not
+interoperate with any of the rest, since they require the server
+certificate which a PC server will not reveal.</p>
+
+<p>Following the principle that time is a public value, a server
+responds to any client packet that matches its cryptotype
+capabilities. Thus, a server receiving an unauthenticated packet
+will respond with an unauthenticated packet, while the same server
+receiving a packet of a cryptotype it supports will respond with
+packets of that cryptotype. However, unconfigured broadcast or
+manycast client associations or symmetric passive associations will
+not be mobilized unless the server supports a cryptotype compatible
+with the first packet received. By default, unauthenticated
+associations will not be mobilized unless overridden in a decidedly
+dangerous way.</p>
+
+<p>Some examples may help to reduce confusion. Client Alice has no
+specific cryptotype selected. Server Bob has both a symmetric key
+file and minimal Autokey files. Alice's unauthenticated messages
+arrive at Bob, who replies with unauthenticated messages. Cathy has
+a copy of Bob's symmetric key file and has selected key ID 4 in
+messages to Bob. Bob verifies the message with his key ID 4. If
+it's the same key and the message is verified, Bob sends Cathy a
+reply authenticated with that key. If verification fails, Bob sends
+Cathy a thing called a crypto-NAK, which tells her something broke.
+She can see the evidence using the <tt>ntpq</tt> program.</p>
+
+<p>Denise has rolled her own host key and certificate. She also
+uses one of the identification schemes as Bob. She sends the first
+Autokey message to Bob and they both dance the protocol
+authentication and identification steps. If all comes out okay,
+Denise and Bob continue as described above and in the Internet
+Draft cited earlier.</p>
+
+<p>It should be clear from the above that Bob can support all the
+girls at the same time, as long as he has compatible authentication
+and identification credentials. Now, Bob can act just like the
+girls in his own choice of servers; he can run multiple configured
+associations with multiple different servers (or the same server,
+although that might not be useful). But, wise security policy might
+preclude some cryptotype combinations; for instance, running an
+identification scheme with one server and no authentication with
+another might not be wise.</p>
 
 <h4>Key Management</h4>
 
 <p>The cryptographic values used by the Autokey protocol are
 incorporated as a set of files generated by the <a href=
-"genkeys.htm"><tt>ntp-genkeys</tt></a> utility program, including
-the required symmetric keys, host key pair and public certificate
-files and optional sign key and leapseconds files. The symmetric
-keys file is necessary for the <tt>ntpq</tt> and <tt>ntpdc</tt>
-utility programs. The remaining files are necessary for the Autokey
-protocol. The files incorporate cryptographic values generated by
-the OpenSSL library algorithms and are in printable PEM-encoded
-ASCII format. Further information about these files and how they
-are generated and installed is on the <tt>ntp-genkeys</tt>
-page.</p>
-
-<p>All key files are installed by default in <tt>
-/usr/local/etc</tt>, which is normally in a shared filesystem in
-NFS-mounted networks and avoids installing them in each machine
-separately. The default can be overridden by the <tt>keysdir</tt>
-configuration command. Ordinarily, the host keys are permitted root
-read-only; the others are public values permitted world readable.
-Since uniqueness is insured by the hostname and file name
-extensions, the files for a NFS server and dependent clients can
-all be installed in the same directory. This is different than the
-original Autokey version 1 support, which required the private key
-to be installed separately for each client.</p>
-
-<p>The recommended practice is to keep the file name extensions
-when installing a file and to install a soft link from the default
-name specified in the <tt>ntp-genkeys</tt> page to the actual file.
-This allows new file generations to be activated simply by changing
-the link. However, <tt>ntpd</tt> parses the link name when present
-to extract the filestamp and sends it along with the public key and
-host name when requested. This allows clients to verify that the
-file and generation time are always current. The actual location of
-each file can be overridden by the <tt>crypto</tt> configuration
-command, but this is not recommended.</p>
-
-<p>All cryptographic keys and related values should be regenerated
-on a periodic and automatic basis, like once per month. The <tt>
-ntp-genkeys</tt> program uses the same timestamp extension for all
-files generated at one time, so each generation is distinct and can
-be readily recognized in monitoring data. While a host key pair and
-certificate must be generated by every server and peer, the
-certificates do not need to be explicitly copied to all machines in
-the same security compartment, since they can be obtained
-automatically using the Autokey protocol.</p>
-
-<p>Servers and peers can make a new generation in the following
-way. All machines have loaded the current keys and certificate at
-startup. At designated intervals, each machine generates a new
-public/private key pair and certificate and makes links from the
-default file names to the new file names. The <tt>ntpd</tt> daemon
-is restarted after each new generation and load the new files. The
-Autokey protocol is designed so that after a few minutes the
-clients time out and restart the protocol from the beginning, with
-result the new generation is loaded and operation continues as
-before. If for some reason this does not happen, the <tt>ntpd</tt>
-daemon refreshes all crhyptographic values at intervals of about
-one day, so that the protocol is restarted for all client
-associations and results in the same actions.</p>
+"genkeys.htm"><tt>ntp-keygen</tt></a> utility program, including
+symmetric keys, required host key and public certificate files and
+optional sign key, identification parameters and leapseconds files.
+The symmetric keys file is necessary for the <tt>ntpq</tt> and <tt>
+ntpdc</tt> utility programs. The remaining files are necessary only
+for the Autokey protocol. The files incorporate cryptographic
+values generated by the OpenSSL library algorithms and are in
+printable PEM-encoded ASCII format. Further information about these
+files and how they are generated and installed is on the <tt>
+ntp-keygen</tt> page.</p>
 
 <h4>Random Seed File</h4>
 
@@ -301,27 +333,27 @@ page.</p>
 
 <p>The entropy seed used by the OpenSSL library is contained in a
 file, usually called <tt>.rnd</tt>, which must be available when
-starting the NTP daemon or the <tt>ntp-genkeys</tt> program. The
-NTP daemon will first look for the file using the path specified by
-the <tt>randfile</tt> subcommand of the <tt>crypto</tt> command. If
-not specified in this way, or when starting the <tt>
-ntp-genkeys</tt> program, the OpenSSL library will look for the
-file using the path specified by the <tt>RANDFILE</tt> environment
-variable in the user home directory, whether root or some other
-user. If the <tt>RANDFILE</tt> environment variable is not present,
-the library will look for the <tt>.rnd</tt> file in the user home
-directory. If the file is not available or cannot be written, the
-daemon exits with a message to the system log and the <tt>
-ntp-genkeys</tt> program exits with a suitable error message.</p>
+starting the NTP daemon or the <tt>ntp-keygen</tt> program. The NTP
+daemon will first look for the file using the path specified by the
+<tt>randfile</tt> subcommand of the <tt>crypto</tt> command. If not
+specified in this way, or when starting the <tt>ntp-keygen</tt>
+program, the OpenSSL library will look for the file using the path
+specified by the <tt>RANDFILE</tt> environment variable in the user
+home directory, whether root or some other user. If the <tt>
+RANDFILE</tt> environment variable is not present, the library will
+look for the <tt>.rnd</tt> file in the user home directory. If the
+file is not available or cannot be written, the daemon exits with a
+message to the system log and the <tt>ntp-keygen</tt> program exits
+with a suitable error message.</p>
 
 <p>The daemon will occasionally add additional entropy and write to
 the file when generating new keys and certificates, for example, so
-the file must be writable by root. If the <tt>ntp-genkeys</tt>
+the file must be writable by root. If the <tt>ntp-keygen</tt>
 program is run by other than root, or if the Unix <tt>su</tt>
 command is used to assume root, the home directory assumed by the
 OpenSSL library might not be root. Probably the safest way to
 generate keys is to log in as root, change to the keys directory
-and run the <tt>ntp-genkeys</tt> program from there</p>
+and run the <tt>ntp-keygen</tt> program from there</p>
 
 <h4>Authentication Commands</h4>
 
@@ -357,17 +389,40 @@ subcommands:</dd>
 
 <dd>
 <dl>
-<dt><tt>certificate <i>file</i></tt></dt>
+<dt><tt>cert <i>file</i></tt></dt>
 
-<dd>Specifies the location of the public certificate file, which by
-default is linked from <tt>ntpkey_cert_<i>hostname</i></tt> in the
+<dd>Specifies the location of the required host public certificate
+file. This overrides the link <tt>ntpkey_cert_<i>hostname</i></tt>
+in the keys directory.</dd>
+
+<dt><tt>gq <i>file</i></tt></dt>
+
+<dd>Specifies the location of the optional GQ keys file. This
+overrides the link <tt>ntpkey_gq_<i>hostname</i></tt> in the keys
+directory.</dd>
+
+<dt><tt>gqpar <i>file</i></tt></dt>
+
+<dd>Specifies the location of the optional GQ parameters file. This
+overrides the link <tt>ntpkey_gqpar_<i>hostname</i></tt> in the
+keys directory.</dd>
+
+<dt><tt>host <i>file</i></tt></dt>
+
+<dd>Specifies the location of the required host key file. This
+overrides the link <tt>ntpkey_key_<i>hostname</i></tt> in the keys
+directory.</dd>
+
+<dt><tt>iff <i>file</i></tt></dt>
+
+<dd>Specifies the location of the optional IFF parameters file.
+This overrides the link <tt>ntpkey_iff_<i>hostname</i></tt> in the
 keys directory.</dd>
 
 <dt><tt>leap <i>file</i></tt></dt>
 
-<dd>Specifies the location of the optional leapsecond table file,
-which by default is linked from <tt>ntpkey_leap</tt> in the keys
-directory.</dd>
+<dd>Specifies the location of the optional leapsecond file. This
+overrides the link <tt>ntpkey_leap</tt> in the keys directory.</dd>
 
 <dt><tt>randfile <i>file</i></tt></dt>
 
@@ -375,34 +430,26 @@ directory.</dd>
 OpenSSL library. The defaults are described in the main text
 above.</dd>
 
-<dt><tt>rsakey <i>file</i></tt></dt>
+<dt><tt>sign <i>file</i></tt></dt>
 
-<dd>Specifies the location of the public/private key file, which by
-default is linked from <tt>ntpkey_key_<i>hostname</i></tt> in the
-keys directory.</dd>
-
-<dt><tt>signkey <i>file</i></tt></dt>
-
-<dd>Specifies the location of the optional sign key file used to
-construct digital signatures, which by default is linked from <tt>
-ntpkey_sign_<i>hostname</i></tt> in the keys directory. If this
-file is not present, the <tt>rsakey</tt> file is used.</dd>
+<dd>Specifies the location of the optional sign key file. This
+overrides the link <tt>ntpkey_sign_<i>hostname</i></tt> in the keys
+directory. If this file is not found, the host key is also the sign
+key.</dd>
 </dl>
 </dd>
 
 <dt><tt>keys <i>keyfile</i></tt></dt>
 
-<dd>Specifies the location of the MD5 symmetric key file containing
-the keys and key identifiers used by <tt>ntpd</tt>, <tt>ntpq</tt>
-and <tt>ntpdc</tt> when operating with symmetric key
-cryptography.</dd>
+<dd>Specifies the location of the MD5 key file containing the keys
+and key identifiers used by <tt>ntpd</tt>, <tt>ntpq</tt> and <tt>
+ntpdc</tt> when operating with symmetric key cryptography.</dd>
 
 <dt><tt>keysdir <i>path</i></tt></dt>
 
-<dd>This command requires the OpenSSL library. It specifies the
-default directory path for the cryptographic files generated by the
-<tt>ntp-genkeys</tt> program. The default is <tt>
-/usr/local/etc/</tt>.</dd>
+<dd>This command specifies the default directory path for
+cryptographic keys, parameters and certificates.. The default is
+<tt>/usr/local/etc/</tt>.</dd>
 
 <dt><tt>requestkey <i>key</i></tt></dt>
 
@@ -486,26 +533,31 @@ signed by a different private key.</dd>
 
 <dd>The certificate is invalid or signed with the wrong key.</dd>
 
-<dt>110 (certificate expired)</dt>
+<dt>110 (certificate not verified)</dt>
 
-<dd>The certificate is not yet valid or has expired.</dd>
+<dd>The certificate is not yet valid or has expired or the
+signature could not be verified.</dd>
 
 <dt>111 (bad or missing cookie)</dt>
 
-<dd>The cookie is corrupted or bogus.</dd>
+<dd>The cookie is missing, corrupted or bogus.</dd>
 
 <dt>112 (bad or missing leapseconds table)</dt>
 
-<dd>The leapseconds file is corrupted or bogus.</dd>
+<dd>The leapseconds table is missing, corrupted or bogus.</dd>
 
 <dt>113 (bad or missing certificate)</dt>
 
-<dd>The server does not have the requested certificate.</dd>
+<dd>The certificate is missing, corrupted or bogus.</dd>
+
+<dt>114 (bad or missing identification)</dt>
+
+<dd>The identification key is missing, corrupt or bogus.</dd>
 </dl>
 
 <h4>Files</h4>
 
-<p>See the <a href="genkeys.htm"><tt>ntp-genkeys</tt></a> page.</p>
+<p>See the <a href="genkeys.htm"><tt>ntp-keygen</tt></a> page.</p>
 
 <hr>
 <a href="index.htm"><img align="left" src="pic/home.gif" alt=
