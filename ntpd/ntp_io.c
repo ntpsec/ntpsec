@@ -440,15 +440,19 @@ create_sockets(
 
 	if (isc_net_probeipv6() == ISC_R_SUCCESS)
 		scan_ipv6 = ISC_TRUE;
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(DEBUG)
 	else
-		netsyslog(LOG_ERR, "no IPv6 interfaces found");
+		if(debug)
+			netsyslog(LOG_ERR, "no IPv6 interfaces found");
 #endif
 
 	if (isc_net_probeipv4() == ISC_R_SUCCESS)
 		scan_ipv4 = ISC_TRUE;
+#ifdef DEBUG
 	else
-		netsyslog(LOG_ERR, "no IPv4 interfaces found");
+		if(debug)
+			netsyslog(LOG_ERR, "no IPv4 interfaces found");
+#endif
 
 	nwilds = create_wildcards(port);
 	idx = nwilds;
