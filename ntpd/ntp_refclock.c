@@ -19,11 +19,6 @@
 
 #ifdef REFCLOCK
 
-#ifdef HAVE_PPSAPI
-#undef STREAM
-#undef TTYCLK
-#endif
-
 #ifdef TTYCLK
 #ifdef TTYCLK_AIOCTIMESTAMP
 # include <sys/sio.h>
@@ -65,24 +60,28 @@
  * The support routines are passed a pointer to the peer structure,
  * which is used for all peer-specific processing and contains a pointer
  * to the refclockproc structure, which in turn containes a pointer to
- * the unit structure, if used. In addition, some routines expect an
- * address in the dotted quad form 127.127.t.u, where t is the clock
- * type and u the unit. A table typeunit[type][unit] contains the peer
- * structure pointer for each configured clock type and unit.
+ * the unit structure, if used. The peer structure is identified by an
+ * interface address in the dotted quad form 127.127.t.u, where t is the
+ * clock type and u the unit. Some legacy drivers derive the
+ * refclockproc structure pointer from the table typeunit[type][unit].
+ * This interface is strongly discouraged and may be abandoned in
+ * future.
  *
- * Most drivers support the 1-pps signal provided by some radios and
- * connected via a level converted described in the gadget directory.
- * The signal is captured using a separate, dedicated serial port and
- * the tty_clk line discipline/streams modules described in the kernel
- * directory. For the highest precision, the signal is captured using
- * the carrier-detect line of the same serial port using the ppsclock
- * streams module described in the ppsclock directory.
+ * The routines include support for the 1-pps signal provided by some
+ * radios and connected via a level converted described in the gadget
+ * directory. The signal is captured using a serial port and one of
+ * three STREAMS modules described in the refclock_atom.c file. For the
+ * highest precision, the signal is captured using the carrier-detect
+ * line of a serial port and either the ppsclock or ppsapi streams
+ * module or some devilish ioctl() folks keep slipping in as a patch. Be
+ * advised ALL support for other than the duly standardized ppsapi
+ * interface will eventually be withdrawn.
  */
 #define MAXUNIT 	4	/* max units */
 
 #if defined(PPS) || defined(HAVE_PPSAPI)
 int fdpps;			/* pps file descriptor */
-#endif /* PPS */
+#endif /* PPS HAVE_PPSAPI */
 
 #define FUDGEFAC	.1	/* fudge correction factor */
 
@@ -100,14 +99,13 @@ static struct peer *typeunit[REFCLK_MAX + 1][MAXUNIT];
 static int refclock_cmpl_fp P((const void *, const void *));
 #else
 static int refclock_cmpl_fp P((const double *, const double *));
-#endif
-
-static int refclock_sample(struct refclockproc *);
+#endif /* QSORT_USES_VOID_P */
+static int refclock_sample P((struct refclockproc *));
 
 #ifdef HAVE_PPSAPI
-extern int pps_assert;
-extern int pps_hardpps;
-#endif
+extern int pps_assert;		/* capture edge 1:assert, 0:clear */
+extern int pps_hardpps;		/* PPS kernel 1:on, 0:off */
+#endif /* HAVE_PPSAPI */
 
 /*
  * refclock_report - note the occurance of an event
@@ -325,6 +323,7 @@ refclock_transmit(
 	u_char clktype;
 	int unit;
 	int hpoll;
+	u_long next;
 
 	pp = peer->procptr;
 	clktype = peer->refclktype;
@@ -332,11 +331,12 @@ refclock_transmit(
 	peer->sent++;
 
 	/*
-	 * This is a ripoff of the peer transmit routine, but specialized
-	 * for reference clocks. We do a little less protocol here and
-	 * call the driver-specific transmit routine.
+	 * This is a ripoff of the peer transmit routine, but
+	 * specialized for reference clocks. We do a little less
+	 * protocol here and call the driver-specific transmit routine.
 	 */
 	hpoll = peer->hpoll;
+	next = peer->outdate;
 	if (peer->burst == 0) {
 		u_char oreach;
 #ifdef DEBUG
@@ -373,11 +373,13 @@ refclock_transmit(
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NSTAGE;
 		}
-		peer->outdate = current_time;
+		next = current_time;
 	}
 	get_systime(&peer->xmt);
 	if (refclock_conf[clktype]->clock_poll != noentry)
 		(refclock_conf[clktype]->clock_poll)(unit, peer);
+	peer->outdate = next;
+	poll_update(peer, hpoll);
 	if (peer->burst > 0)
 		peer->burst--;
 	poll_update(peer, hpoll);
@@ -416,15 +418,13 @@ refclock_cmpl_fp(
 		return (1);
 	return (0);
 }
-#endif
+#endif /* QSORT_USES_VOID_P */
 
 
 /*
- * refclock_process_offset - process a pile of offset samples from the clock
+ * refclock_process_offset - update median filter
  *
- * This routine uses the given offset and receive time stamp and fill the
- * appropriate filter buffers further processing is left to refclock_sample.
- * Samples that overflow the buffer are quietly discarded.
+ * This routine uses the given offset and timestamps to construct a new entry in the median filter circular buffer. Samples that overflow the filter are quietly discarded.
  */
 void
 refclock_process_offset(
@@ -445,12 +445,14 @@ refclock_process_offset(
 }
 
 /*
- * refclock_process - process a pile of samples from the clock
+ * refclock_process - process a sample from the clock
  *
  * This routine converts the timecode in the form days, hours, minutes,
- * seconds, milliseconds/microseconds to internal timestamp format.
- * Further processing is then delegated to refclock sample
- */
+ * seconds and milliseconds/microseconds to internal timestamp format,
+ * then constructs a new entry in the median filter circular buffer.
+ * Return success (1) if the data are correct and consistent with the
+ * converntional calendar.
+*/
 int
 refclock_process(
 	struct refclockproc *pp
@@ -474,23 +476,20 @@ refclock_process(
 	} else {
 		MSUTOTSF(pp->msec, offset.l_uf);
 	}
-	refclock_process_offset(pp, offset, pp->lastrec, pp->fudgetime1);
+	refclock_process_offset(pp, offset, pp->lastrec,
+	    pp->fudgetime1);
 	return (1);
 }
 
 /*
  * refclock_sample - process a pile of samples from the clock
  *
- * This routine converts the timecode in the form days, hours, minutes,
- * seconds, milliseconds/microseconds to internal timestamp format. It
- * then calculates the difference from the receive timestamp and
- * assembles the samples in a shift register. It implements a recursive
- * median filter to suppress spikes in the data, as well as determine a
- * rough dispersion estimate. A configuration constant time adjustment
- * fudgetime1 can be added to the final offset to compensate for various
- * systematic errors. The routine returns one if success and zero if
- * failure due to invalid timecode data or very noisy offsets.
- *
+ * This routine implements a recursive median filter to suppress spikes
+ * in the data, as well as determine a performance statistic. It
+ * calculates the mean offset and mean-square variance. A time
+ * adjustment fudgetime1 can be added to the final offset to compensate
+ * for various systematic errors. The routine returns the number of
+ * samples processed, which could be 0.
  */
 static int
 refclock_sample(
@@ -503,7 +502,7 @@ refclock_sample(
 
 	/*
 	 * Copy the raw offsets and sort into ascending order. Don't do
-	 * anything if the buffer is empty.:1
+	 * anything if the buffer is empty.
 	 */
 	if (pp->codeproc == pp->coderecv)
 		return (0);
@@ -544,7 +543,7 @@ refclock_sample(
 		    "refclock_sample: n %d offset %.6f disp %.6f std %.6f\n",
 		    n, pp->offset, pp->disp, SQRT(pp->variance));
 #endif
-	return (1);
+	return (n);
 }
 
 
@@ -606,10 +605,10 @@ refclock_receive(
  *
  * This routine processes the timecode received from the clock and
  * removes the parity bit and control characters. If a timestamp is
- * present in the timecode, as produced by the tty_clk line
- * discipline/streams module, it returns that as the timestamp;
- * otherwise, it returns the buffer timestamp. The routine return code
- * is the number of characters in the line.
+ * present in the timecode, as produced by the tty_clk STREAMS module,
+ * it returns that as the timestamp; otherwise, it returns the buffer
+ *  timestamp. The routine return code is the number of characters in
+ * the line.
  */
 int
 refclock_gtlin(
@@ -625,19 +624,19 @@ refclock_gtlin(
 	char c;
 #ifdef TIOCDCDTIMESTAMP
 	struct timeval dcd_time;
-#endif
+#endif /* TIOCDCDTIMESTAMP */
 #ifdef HAVE_PPSAPI
 	pps_info_t pi;
 	struct timespec timeout, *tsp;
 	double a;
-#endif
+#endif /* HAVE_PPSAPI */
 
 	/*
 	 * Check for the presence of a timestamp left by the tty_clock
-	 * line discipline/streams module and, if present, use that
-	 * instead of the buffer timestamp captured by the I/O routines.
-	 * We recognize a timestamp by noting its value is earlier than
-	 * the buffer timestamp, but not more than one second earlier.
+	 * module and, if present, use that instead of the buffer
+	 * timestamp captured by the I/O routines. We recognize a
+	 * timestamp by noting its value is earlier than the buffer
+	 * timestamp, but not more than one second earlier.
 	 */
 	dpt = (char *)&rbufp->recv_space;
 	dpend = dpt + rbufp->recv_length;
@@ -783,7 +782,7 @@ refclock_open(
 	fd = open(dev, O_RDWR | O_NONBLOCK, 0777);
 #else
 	fd = open(dev, O_RDWR, 0777);
-#endif
+#endif /* O_NONBLOCK */
 	if (fd == -1) {
 		msyslog(LOG_ERR, "refclock_open: %s: %m", dev);
 		return (0);
@@ -940,12 +939,16 @@ refclock_open(
 		    "refclock_open: fd %d ioctl failed: %m", fd);
 		return (0);
 	}
+
+	/*
+	 * If this is the PPS device, so say and initialize the thing.
+	 */
 	if (strcmp(dev, pps_device) == 0)
 		(void)refclock_ioctl(fd, LDISC_PPS);
 	return (fd);
 }
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
-#endif /* SYS_VXWORKS */
+#endif /* SYS_VXWORKS SYS_WINNT */
 
 /*
  * refclock_ioctl - set serial port control functions
@@ -953,9 +956,9 @@ refclock_open(
  * This routine attempts to hide the internal, system-specific details
  * of serial ports. It can handle POSIX (termios), SYSV (termio) and BSD
  * (sgtty) interfaces with varying degrees of success. The routine sets
- * up the tty_clk and ppsclock streams module/line discipline, if
- * compiled in the daemon and requested in the call. The routine returns
- * one if success and zero if failure.
+ * up optional features such as tty_clk, ppsclock and ppsapi, as well as
+ * their many other variants. The routine returns 1 if success and 0 if
+ * failure.
  */
 int
 refclock_ioctl(
@@ -964,7 +967,7 @@ refclock_ioctl(
 	)
 {
 	/* simply return 1 if no UNIX line discipline is supported */
-#ifndef SYS_VXWORKS
+#if !defined SYS_VXWORKS && !defined SYS_WINNT
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 #ifdef TTYCLK
@@ -986,22 +989,26 @@ refclock_ioctl(
 
 	/*
 	 * The following sections select optional features, such as
-	 * modem control, line discipline and so forth. Some require
-	 * specific operating system support in the form of streams
+	 * modem control, PPS capture and so forth. Some require
+	 * specific operating system support in the form of STREAMS
 	 * modules, which can be loaded and unloaded at run time without
-	 * rebooting the kernel, or line discipline modules, which must
-	 * be compiled in the kernel. The streams modules require System
-	 * V STREAMS support, while the line discipline modules require
-	 * 4.3bsd or later. The checking frenzy is attenuated here,
+	 * rebooting the kernel. The STREAMS modules require System
+	 * V STREAMS support. The checking frenzy is attenuated here,
 	 * since the device is already open.
 	 *
-	 * Note that both the clk and ppsclock modules are optional; the
-	 * dang thing still works, but the accuracy improvement using
-	 * them will not be available. The ppsclock module is associated
-	 * with a specific, declared line and should be used only once.
+	 * Note that the tty_clk and ppsclock modules are optional; if
+	 * configured and unavailable, the dang thing still works, but
+	 * the accuracy improvement using them will not be available.
+	 * The only known implmentations of these moldules are specific
+	 * to SunOS 4.x. Use the ppsclock module ONLY with Sun baseboard
+	 * ttya or ttyb. Using it with the SPIF multipexor crashes the
+	 * kernel.
 	 *
-	 * Use the LDISC_PPS option ONLY with Sun baseboard ttya or
-	 * ttyb. Using it with the SPIF multipexor crashes the kernel.
+	 * The preferred way to capture PPS timestamps is using the
+	 * ppsapi interface, which is machine independent. The SunOS 4.x
+	 * and Digital Unix 4.x interfaces use STREAMS modules and
+	 * support both the ppsapi specification and ppsclock
+	 * functionality, but other systems may vary widely.
 	 */
 	if (flags == 0)
 		return (1);
@@ -1016,7 +1023,10 @@ refclock_ioctl(
 	ttyp = &ttyb;
 #endif /* TTYCLK */
 
-#ifdef STREAM
+	/*
+	 * The following features may or may not require System V
+	 * STREAMS support, depending on the particular implementation.
+	 */
 #if defined(TTYCLK) && !defined(TTYCLK_AIOCTIMESTAMP)
 	/*
 	 * The TTYCLK option provides timestamping at the driver level.
@@ -1024,7 +1034,7 @@ refclock_ioctl(
 	 * support. If not available, don't complain.
 	 */
 	if (flags & (LDISC_CLK | LDISC_CLKPPS | LDISC_ACTS)) {
-		int rval;
+		int rval = 0;
 
 		if (ioctl(fd, I_PUSH, "clk") < 0) {
 			msyslog(LOG_NOTICE,
@@ -1042,34 +1052,35 @@ refclock_ioctl(
 				msyslog(LOG_ERR,
 				    "refclock_ioctl: CLK_SETSTR failed: %m");
 			if (debug)
-				printf("refclock_open: fd %d CLK_SETSTR %d str %s\n",
+				printf("refclock_ioctl: fd %d CLK_SETSTR %d str %s\n",
 				    fd, rval, str);
 		}
 	}
 #endif /* TTYCLK and !TTYCLK_AIOCTIMESTAMP */
-
 #ifdef TTYCLK_AIOCTIMESTAMP
 	/*
 	 * The TTYCLK_AIOCTIMESTAMP option provides timestamping at the
-	 * driver level.  It requires the AIOCTIMESTAMPCTL and AIOCTIMESTAMPTV
-	 * ioctls.
+	 * driver level. It requires the AIOCTIMESTAMPCTL and
+	 * AIOCTIMESTAMPTV ioctls.
 	 */
 	if (ioctl(fd, AIOCTIMESTAMPCTL, 1) < 0)
-		msyslog(LOG_ERR, "refclock_ioctl: AIOCTIMESTAMPCTL failed: %m");
-#endif
+		msyslog(LOG_ERR,
+		    "refclock_ioctl: AIOCTIMESTAMPCTL failed: %m");
+#endif /* TTYCLK_AIOCTIMESTAMP */
 
-#ifdef PPS
+#if defined(PPS) && !defined(HAVE_PPSAPI)
 	/*
 	 * The PPS option provides timestamping at the driver level.
 	 * It uses a 1-pps signal and level converter (gadget box) and
 	 * requires the ppsclock streams module and System V STREAMS
-	 * support.
+	 * support. This option has been superseded by the ppsapi
+	 * option and may be withdrawn in future.
 	 */
 	if (flags & LDISC_PPS) {
+		int rval = 0;
 #ifdef HAVE_TIOCSPPS		/* Solaris */
-		int rval;
 		int one = 1;
-#endif
+#endif /* HAVE_TIOCSPPS */
 
 		if (fdpps > 0) {
 			msyslog(LOG_ERR,
@@ -1077,66 +1088,40 @@ refclock_ioctl(
 			return (0);
 		}
 #ifdef HAVE_TIOCSPPS		/* Solaris */
-		if ((rval = ioctl(fd, TIOCSPPS, &one)) < 0) {
+		if (ioctl(fd, TIOCSPPS, &one) < 0) {
 			msyslog(LOG_NOTICE,
 				"refclock_ioctl: TIOCSPPS failed: %m");
+			return (0);
 		}
 		if (debug)
 			printf("refclock_ioctl: fd %d TIOCSPPS %d\n",
 			    fd, rval);
-#else /* not HAVE_TIOCSPPS */
-		if ((rval = ioctl(fd, I_PUSH, "ppsclock")) < 0) {
+#else
+		if (ioctl(fd, I_PUSH, "ppsclock") < 0) {
 			msyslog(LOG_NOTICE,
 				"refclock_ioctl: I_PUSH ppsclock failed: %m");
+			return (0);
 		}
 		if (debug)
 			printf("refclock_ioctl: fd %d ppsclock %d\n",
 			    fd, rval);
 #endif /* not HAVE_TIOCSPPS */
-		else {
-			fdpps = fd;
-		}
+		fdpps = fd;
 	}
-#else
-	if (flags & LDISC_PPS)
-		msyslog(LOG_NOTICE,
-			"refclock_ioctl: PPS requested but unavailable");
-#endif /* PPS */
+#endif /* PPS HAVE_PPSAPI */
 
-#else /* not STREAM */
-
-#ifdef HAVE_TERMIOS
-#ifdef TTYCLK
-	/*
-	 * The TTYCLK option provides timestamping at the driver level.
-	 * It requires the tty_clk line discipline and 4.3bsd or later.
-	 * If not available, don't complain.
-	 */
-	if (flags & (LDISC_CLK | LDISC_CLKPPS | LDISC_ACTS)) {
-		(void)tcgetattr(fd, ttyp);
-		ttyp->c_lflag = 0;
-		if (flags & LDISC_CLKPPS)
-			ttyp->c_cc[VERASE] = ttyp->c_cc[VKILL] = '\377';
-		else if (flags & LDISC_ACTS) {
-			ttyp->c_cc[VERASE] = '*';
-			ttyp->c_cc[VKILL] = '#';
-		} else
-			ttyp->c_cc[VERASE] = ttyp->c_cc[VKILL] = '\n';
-		ttyp->c_line = CLKLDISC;
-		(void)tcsetattr(fd, TCSANOW, ttyp);
-		(void)tcflush(fd, TCIOFLUSH);
-	}
-#endif /* TTYCLK */
 #ifdef HAVE_PPSAPI
 	/*
-	 * The PPS option provides timestamping at the driver level.
+	 * The PPSAPI option provides timestamping at the driver level.
 	 * It uses a 1-pps signal and level converter (gadget box) and
 	 * requires ppsapi compiled into the kernel on non STREAMS
-	 * systems.
+	 * systems. This is the preferred way to capture PPS timestamps
+	 * and is expected to become an IETF cross-platform standard.
 	 */
 	if (flags & (LDISC_PPS | LDISC_CLKPPS)) {
 		pps_params_t pp;
 		int mode, temp;
+		pps_handle_t handle;
 
 		memset((char *)&pp, 0, sizeof(pp));
 		if (fdpps > 0) {
@@ -1144,23 +1129,20 @@ refclock_ioctl(
 			    "refclock_ioctl: ppsapi already configured");
 			return (0);
 		}
-		if (time_pps_create(fd, &fdpps) < 0) {
+		if (time_pps_create(fd, &handle) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_create failed: %m");
-			fdpps = 0;
 			return (0);
 		}
-		if (time_pps_getcap(fdpps, &mode) < 0) {
+		if (time_pps_getcap(handle, &mode) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_getcap failed: %m");
-			fdpps = 0;
 			return (0);
 		}
 		pp.mode = mode & PPS_CAPTUREBOTH;
-		if (time_pps_setparams(fdpps, &pp) < 0) {
+		if (time_pps_setparams(handle, &pp) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_setparams failed: %m");
-			fdpps = 0;
 			return (0);
 		}
 		if (!pps_hardpps)
@@ -1169,51 +1151,22 @@ refclock_ioctl(
 			temp = mode & PPS_CAPTUREASSERT;
 		else
 			temp = mode & PPS_CAPTURECLEAR;
-		if (time_pps_kcbind(fdpps, PPS_KC_HARDPPS, temp,
+		if (time_pps_kcbind(handle, PPS_KC_HARDPPS, temp,
 		    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_kcbind failed: %m");
-			fdpps = 0;
 			return (0);
 		}
-		(void)time_pps_getparams(fdpps, &pp);
+		(void)time_pps_getparams(handle, &pp);
+		fdpps = (int)handle;
 		if (debug)
 			printf(
 			    "refclock_ioctl: fd %d ppsapi vers %d mode 0x%x cap 0x%x\n",
 			    fdpps, pp.api_version, pp.mode, mode);
 	}
 #endif /* HAVE_PPSAPI */
-#endif /* HAVE_TERMIOS */
-
-#ifdef HAVE_BSD_TTYS
-#ifdef TTYCLK
-	/*
-	 * The TTYCLK option provides timestamping at the driver level.
-	 * It requires the tty_clk line discipline and 4.3bsd or later.
-	 * If not available, don't complain.
-	 */
-	if (flags & (LDISC_CLK | LDISC_CLKPPS | LDISC_ACTS)) {
-		int ldisc = CLKLDISC;
-
-		(void)ioctl(fd, TIOCGETP, (char *)ttyp);
-		if (flags & LDISC_CLKPPS)
-			ttyp->sg_erase = ttyp->sg_kill = '\377';
-		else if (flags & LDISC_ACTS) {
-			ttyp->sg_erase = '*';
-			ttyp->sg_kill = '#';
-		} else
-			ttyp->sg_erase = ttyp->sg_kill = '\r';
-		ttyp->sg_flags = RAW;
-		(void)ioctl(fd, TIOCSETP, ttyp);
-		(void)ioctl(fd, TIOCSETD, (char *)&ldisc);
-	}
-#endif /* TTYCLK */
-#endif /* HAVE_BSD_TTYS */
-
-#endif /* STREAM */
-
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
-#endif /* SYS_VXWORKS */
+#endif /* SYS_VXWORKS SYS_WINNT */
 	return (1);
 }
 

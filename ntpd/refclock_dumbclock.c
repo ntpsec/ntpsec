@@ -330,15 +330,10 @@ dumbclock_receive(
 	 */
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
-		peer->burst = 0;
 		return;
 	}
-	if (peer->burst > 0)
-		return;
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
 	refclock_receive(peer);
-
 	up->lasthour = pp->hour;
 }
 
@@ -367,7 +362,7 @@ dumbclock_poll(
 #if 0
 	pp = peer->procptr;
 	up = (struct dumbclock_unit *)pp->unitptr;
-	if (peer->burst == 0 && peer->reach == 0)
+	if (peer->reach == 0)
 		refclock_report(peer, CEVNT_TIMEOUT);
 	if (up->linect > 0)
 		pollchar = 'R';

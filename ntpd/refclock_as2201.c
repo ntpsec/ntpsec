@@ -377,12 +377,12 @@ as2201_poll(
 	}
 	if (peer->burst > 0)
                 return;
-	peer->burst = NSTAGE;
         if (pp->coderecv == pp->codeproc) {
                 refclock_report(peer, CEVNT_TIMEOUT);
                 return;
         }
         refclock_receive(peer);
+	peer->burst = NSTAGE;
 }
 
 #else

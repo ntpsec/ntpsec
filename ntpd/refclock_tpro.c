@@ -104,7 +104,7 @@ tpro_start(
 	 * Initialize miscellaneous peer variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = pp->NSTAGE;
+	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	return (1);
@@ -191,18 +191,17 @@ tpro_poll(
 		pp->leap = LEAP_NOWARNING;
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
-		peer->burst = 0;
 		return;
 	}
 	if (peer->burst > 0)
 		return;
-	peer->burst = NSTAGE;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
+	peer->burst = NSTAGE;
 }
 
 #else

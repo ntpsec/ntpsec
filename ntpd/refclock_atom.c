@@ -25,7 +25,6 @@
 #ifdef HAVE_SYS_PPSCLOCK_H
 # include <sys/ppsclock.h>
 #endif
-
 #ifdef HAVE_PPSAPI
 #include <sys/timepps.h>
 #endif /* HAVE_PPSAPI */
@@ -181,11 +180,11 @@ atom_start(
 		(void)sprintf(device, DEVICE, unit);
 		if ((fd = refclock_open(device, SPEED232,
 #ifdef TTYCLK_AIOCTIMESTAMP
-					LDISC_RAW
+		    LDISC_RAW
 #else
-					LDISC_CLKPPS
+		    LDISC_CLKPPS
 #endif
-					)) != 0)
+		    )) != 0)
 			flags |= FLAG_TTY;
 	}
 #endif /* TTYCLK */
@@ -457,7 +456,6 @@ atom_poll(
 	pp->polls++;
 	if (peer->burst > 0)
 		return;
-	peer->burst = MAXSTAGE;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
@@ -479,6 +477,7 @@ atom_poll(
 	pp->variance = 0;
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
+	peer->burst = MAXSTAGE;
 }
 
 #else

@@ -226,14 +226,9 @@ receive(
 	int retcode = AM_NOMATCH;
 
 	/*
-	 * Let the monitoring software take a look at this first.
+	 * Monitor the packet and get restrictions
 	 */
 	ntp_monitor(rbufp);
-
-	/*
-	 * Watch for denial-of-service attacks; restrict selected
-	 * clients.
-	 */
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
 	if (debug > 1)
@@ -242,13 +237,9 @@ receive(
 #endif
 	if (restrict_mask & RES_IGNORE)
 		return;
-	if (restrict_mask & RES_LIMITED) {
-		sys_limitrejected++;
-		return;
-	}
 
 	/*
-	 * Catch packets whose version number we can't deal with
+	 * Discard packets with invalid version number.
 	 */
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) >= NTP_VERSION)
@@ -267,23 +258,38 @@ receive(
 	 */
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY)
-			return;
+		    return;
 		process_private(rbufp, ((restrict_mask & RES_NOMODIFY) ==
-			0));
+		    0));
 		return;
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_CONTROL) {
 		if (restrict_mask & RES_NOQUERY)
-			return;
+		    return;
 		process_control(rbufp, restrict_mask);
 		return;
 	}
 
 	/*
-	 * Restrict remaining modes packets.
+	 * Restrict revenue packets.
 	 */
-	if ((restrict_mask & RES_IGNORE) || (PKT_MODE(pkt->li_vn_mode) ==
-		MODE_BROADCAST && !sys_bclient))
+	if (restrict_mask & RES_DONTSERVE)
+		return;
+
+        /*
+	 * See if we only accept limited number of clients from the net
+	 * this guy is from. Note: the flag is determined dynamically
+	 * within restrictions()
+	 */
+	if (restrict_mask & RES_LIMITED) {
+		sys_limitrejected++;
+                return;
+        }
+
+	/*
+	 * If we are not a broadcast client, ignore broadcast packets.
+	 */
+	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST && !sys_bclient))
 		return;
 
 	/*
@@ -576,7 +582,7 @@ receive(
 	else
 		peer->flags &= ~FLAG_AUTHENTIC;
 	if (peer->hmode == MODE_BROADCAST && (restrict_mask & RES_DONTTRUST))
-		peer->flags |= TEST10;		/* access denied */
+		peer->flash |= TEST10;		/* access denied */
 	if (peer->flags & FLAG_AUTHENABLE) {
 		if (!(peer->flags & FLAG_AUTHENTIC))
 			peer->flash |= TEST5;	/* authentication failed */
@@ -587,7 +593,7 @@ receive(
 			report_event(EVNT_PEERAUTH, peer);
 		}
 	}
-	if ((peer->flash & ~TEST9) != 0) {
+	if ((peer->flash & ~(u_int)TEST9) != 0) {
 
 		/*
 		 * The packet is bogus, so we throw it away before becoming
@@ -991,9 +997,9 @@ poll_update(
 	}
 #ifdef DEBUG
 	if (debug > 1)
-		printf("poll_update: at %lu %s poll %d next %lu\n",
-		    current_time, ntoa(&peer->srcadr), hpoll,
-		    peer->nextdate);
+		printf("poll_update: at %lu %s poll %d burst %d last %lu next %lu\n",
+		    current_time, ntoa(&peer->srcadr), hpoll, peer->burst,
+		    peer->outdate, peer->nextdate);
 #endif
 }
 

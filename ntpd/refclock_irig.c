@@ -150,7 +150,7 @@
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
 
 #define AUDIO_BUFSIZ	160	/* codec buffer size (Solaris only) */
-#define SAMPLE		8000	/* nominal sample rate (Hz) */
+#define SAMPLES		8000	/* nominal sample rate (Hz) */
 #define BAUD		80	/* samples per baud interval */
 #define OFFSET		128	/* companded sample offset */
 #define SIZE		256	/* decompanding table size */
@@ -162,7 +162,7 @@
 #define	MAXSIG		6000.	/* maximum signal level */
 #define DRPOUT		100.	/* dropout signal level */
 #define MODMIN		0.5	/* minimum modulation index */
-#define MAXFREQ		(250e-6 * SAMPLE) /* freq tolerance (.025%) */
+#define MAXFREQ		(250e-6 * SAMPLES) /* freq tolerance (.025%) */
 #define PI		3.1415926535 /* the real thing */
 
 /*
@@ -380,7 +380,7 @@ irig_start(
                 if (i % 16 == 0)
 		    step *= 2.;
 	}
-	DTOLFP(1. / SAMPLE, &up->tick);
+	DTOLFP(1. / SAMPLES, &up->tick);
 	return (1);
 }
 
@@ -436,7 +436,7 @@ irig_receive(
 	 */
 	up->timestamp = rbufp->recv_time;
 	up->bufcnt = rbufp->recv_length;
-	DTOLFP((double)up->bufcnt / SAMPLE, &ltemp);
+	DTOLFP((double)up->bufcnt / SAMPLES, &ltemp);
 	L_SUB(&up->timestamp, &ltemp);
 	dpt = rbufp->recv_buffer;
 	for (up->bufptr = 0; up->bufptr < up->bufcnt; up->bufptr++) {
@@ -462,7 +462,7 @@ irig_receive(
 		 * unit produces a change of 360 degrees; a frequency
 		 * change of one unit produces a change of 1 Hz.
 		 */
-		up->phase += up->freq / SAMPLE;
+		up->phase += up->freq / SAMPLES;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
@@ -478,7 +478,7 @@ irig_receive(
 		 * Once each second, determine the IRIG format, codec
 		 * port and gain.
 		 */
-		up->seccnt = (up->seccnt + 1) % SAMPLE;
+		up->seccnt = (up->seccnt + 1) % SAMPLES;
 		if (up->seccnt == 0) {
 			if (up->irig_b > up->irig_e) {
 				up->decim = 1;
@@ -755,7 +755,7 @@ irig_base(
 		 * this plus the delay since the last carrier positive
 		 * zero crossing.
 		 */
-		DTOLFP(up->decim * (dtemp / SAMPLE + 1.) + up->fdelay,
+		DTOLFP(up->decim * (dtemp / SAMPLES + 1.) + up->fdelay,
 		       &ltemp);
 		pp->lastrec = up->timestamp;
 		L_SUB(&pp->lastrec, &ltemp);
@@ -892,7 +892,7 @@ irig_decode(
 				pp->hour, pp->minute, pp->second,
 				up->maxsignal, info.record.gain, up->modndx,
 				up->envxing, up->tc, up->yxing, up->freq *
-				1e6 / SAMPLE, ulfptoa(&up->montime, 6));
+				1e6 / SAMPLES, ulfptoa(&up->montime, 6));
 			pp->lencode = strlen(pp->a_lastcode);
 			if (up->timecnt == 0 || pp->sloppyclockflag &
 			    CLK_FLAG4)
@@ -972,7 +972,7 @@ irig_gain(
 		up->gain += 4;
 		if (up->gain > AUDIO_MAX_GAIN)
 		    up->gain = AUDIO_MAX_GAIN;
-	} else if (up->clipcnt > SAMPLE / 100) {
+	} else if (up->clipcnt > SAMPLES / 100) {
 		up->gain -= 4;
 		if (up->gain < AUDIO_MIN_GAIN)
 		    up->gain = AUDIO_MIN_GAIN;

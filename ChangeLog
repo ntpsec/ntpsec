@@ -1,3 +1,22 @@
+1999-11-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwvb.c: burst fixes
+	* ntpd/refclock_ulink.c: burst fixes
+	* ntpd/refclock_tpro.c: burst and NSTAGE fixes
+	* ntpd/refclock_pst.c: burst fixes
+	* ntpd/refclock_irig.c: SAMPLE -> SAMPLES
+	* ntpd/refclock_heath.c: burst fixes
+	* ntpd/refclock_dumbclock.c: burst fixes
+	* ntpd/refclock_chronolog.c: burst fixes
+	* ntpd/refclock_bancomm.c: burst fixes
+	* ntpd/refclock_atom.c: burst fixes
+	* ntpd/refclock_as2201.c: burst fixes
+	* ntpd/ntp_refclock.c: PPSAPI, code, and comment cleanup/fixes
+	* ntpd/ntp_proto.c: Broadcast/restrict cleanup
+	* ntpd/ntp_loopfilter.c: Cleanup and fixes
+	* libntp/gpstolfp.c: Lose the UL qualifiers - old compilers hate them
+	From: Dave Mills <mills@udel.edu>
+	
 1999-10-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: TIOCSPPS cleanup

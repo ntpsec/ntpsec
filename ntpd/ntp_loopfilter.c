@@ -93,11 +93,11 @@
 /*
  * Program variables
  */
-static double	clock_offset;		/* clock offset adjustment (ppm) */
+static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (ppm) */
 double	clock_stability;	/* clock stability (ppm) */
 double	clock_max = CLOCK_MAX;	/* max offset allowed before step (s) */
-static double	clock_panic = CLOCK_PANIC; /* max offset allowed before panic */
+static double clock_panic = CLOCK_PANIC; /* max offset allowed before panic */
 u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
@@ -135,7 +135,7 @@ double	sys_error;		/* system standard error (s) */
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
-void pll_trap		P((int));
+static void pll_trap P((int));	/* configuration trap */
 #ifdef SIGSYS
 static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
@@ -163,15 +163,15 @@ init_loopfilter(void)
 int
 local_clock(
 	struct peer *peer,	/* synch source peer structure */
-	double fp_offset,	/* clock offset */
-	double epsil		/* jittter (square) */
+	double fp_offset,	/* clock offset (s) */
+	double epsil		/* jittter (square s*s) */
 	)
 {
 	double mu;		/* interval since last update (s) */
 	double oerror;		/* previous error estimate */
 	double flladj;		/* FLL frequency adjustment (ppm) */
 	double plladj;		/* PLL frequency adjustment (ppm) */
-	double clock_frequency;	/* clock frequency (ppm) adjustment */
+	double clock_frequency;	/* clock frequency adjustment (ppm) */
 	double dtemp, etemp;	/* double temps */
 	int retval;		/* return value */
 
@@ -193,7 +193,7 @@ local_clock(
 	 */
 #ifndef SYS_WINNT
 	if (fabs(fp_offset) >= clock_panic && !correct_any) {
-			msyslog(LOG_ERR,
+		msyslog(LOG_ERR,
 		    "time error %.0f over %d seconds; set clock manually)",
 		    fp_offset, (int)clock_panic);
 		return (-1);
@@ -253,8 +253,9 @@ local_clock(
 		 * state.
 		 */
 		case S_SYNC:
-			if (mu >= CLOCK_MINSTEP)
-				rstclock(S_SPIK);
+			if (mu < CLOCK_MINSTEP)
+				return (0);
+			rstclock(S_SPIK);
 			return (0);
 
 		/*
@@ -267,8 +268,7 @@ local_clock(
 				return (0);
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
-			clock_offset = fp_offset;
-			break;
+			/* fall through to default */
 
 		/*
 		 * In S_SPIK state a large correction is necessary.
@@ -278,11 +278,12 @@ local_clock(
 		case S_SPIK:
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
+			/* fall through to default */
 
 		/*
 		 * We get here directly in S_FSET state and indirectly
-		 * from S_SPIK state. The clock is either reset or
-		 * shaken, but never stirred.
+		 * from S_FREQ and S_SPIK states. The clock is either
+		 * reset or shaken, but never stirred.
 		 */
 		default:
 			if (allow_set_backward) {
@@ -338,6 +339,7 @@ local_clock(
 		case S_TSET:
 		case S_SPIK:
 			rstclock(S_SYNC);
+			/* fall through to default */
 
 		/*
 		 * We come here in the normal case for linear phase and
@@ -378,7 +380,6 @@ local_clock(
 			    CLOCK_AVG);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
 			plladj = fp_offset * mu / (dtemp * dtemp);
-			clock_frequency = flladj + plladj;
 			clock_offset = fp_offset;
 			break;
 		}
@@ -425,12 +426,16 @@ local_clock(
 #endif /* STA_NANO */
 				ntv.offset = (int32)(clock_offset *
 				    1e6 + dtemp);
+			if (clock_frequency != 0) {
+				ntv.modes |= MOD_FREQUENCY;
+				ntv.freq = (int32)((clock_frequency +
+				    drift_comp) * 65536e6);
+			}
 #ifdef STA_NANO
 			ntv.constant = sys_poll;
 #else
 			ntv.constant = sys_poll - 4;
 #endif /* STA_NANO */
-
 			ntv.esterror = (u_int32)(sys_error * 1e6);
 			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
 			    sys_rootdispersion) * 1e6);
@@ -492,6 +497,7 @@ local_clock(
 		sys_poll = ntv.constant + 4;
 #endif /* STA_NANO */
 		clock_frequency = ntv.freq / 65536e6 - drift_comp;
+		flladj = plladj = 0;
 
 		/*
 		 * If the kernel pps discipline is working, monitor its
@@ -525,7 +531,7 @@ local_clock(
 	 * drift_comp is a sham and used only for updating the drift
 	 * file and for billboard eye candy.
 	 */
-	drift_comp += clock_frequency;
+	drift_comp += clock_frequency + flladj + plladj;
 	if (drift_comp > sys_maxfreq)
 		drift_comp = sys_maxfreq;
 	else if (drift_comp <= -sys_maxfreq)
@@ -829,7 +835,7 @@ loop_config(
  * the kernel. In this case the phase-lock loop is emulated by
  * the stock adjtime() syscall and a lot of indelicate abuse.
  */
-RETSIGTYPE
+static RETSIGTYPE
 pll_trap(
 	int arg
 	)
