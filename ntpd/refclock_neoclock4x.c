@@ -410,8 +410,8 @@ neoclock4x_receive(struct recvbuf *rbufp)
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HOUR], &pp->hour, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_MINUTE], &pp->minute, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_SECOND], &pp->second, 2);
-  neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &pp->msec, 2);
-  pp->msec *= 10; /* convert 1/100s from neoclock to real miliseconds */
+  neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &pp->nsec, 2);
+  pp->nsec *= 10000; /* convert 1/100s from neoclock to real nanoseconds */
   
   memcpy(up->radiosignal, &pp->a_lastcode[NEOCLOCK4X_OFFSET_RADIOSIGNAL], 3);
   up->radiosignal[3] = 0;
@@ -466,7 +466,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
       msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
 	      up->unit,
 	      pp->year, month, day,
-	      pp->hour, pp->minute, pp->second, pp->msec);
+	      pp->hour, pp->minute, pp->second, pp->nsec/1000);
     }
 
   up->utc_year   = pp->year;
@@ -475,7 +475,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   up->utc_hour   = pp->hour;
   up->utc_minute = pp->minute;
   up->utc_second = pp->second;
-  up->utc_msec   = pp->msec;
+  up->utc_msec   = pp->nsec/1000;
   
   if(!refclock_process(pp))
     {
