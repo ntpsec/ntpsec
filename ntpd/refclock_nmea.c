@@ -24,13 +24,7 @@
 #include "ntp_stdlib.h"
 
 #ifdef HAVE_PPSAPI
-# ifdef HAVE_TIMEPPS_H
-#  include <timepps.h>
-# else
-#  ifdef HAVE_SYS_TIMEPPS_H
-#   include <sys/timepps.h>
-#  endif
-# endif
+# include "ppsapi_timepps.h"
 #endif /* HAVE_PPSAPI */
 
 /*

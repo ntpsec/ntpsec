@@ -133,7 +133,9 @@
 # include <sys/ioctl.h>
 #endif
 
-#include "ppsapi_timepps.h"
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
+#endif
 
 #ifdef PPS
 # ifdef HAVE_SYS_PPSCLOCK_H

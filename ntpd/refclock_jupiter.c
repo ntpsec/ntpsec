@@ -48,7 +48,9 @@
 
 #include "jupiter.h"
 
-#include "ppsapi_timepps.h"
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
+#endif
 
 #ifdef XNTP_BIG_ENDIAN
 #define getshort(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))

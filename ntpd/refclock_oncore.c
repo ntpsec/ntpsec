@@ -109,7 +109,9 @@
 # endif /* HAVE_SYS_MMAN_H */
 #endif /* ONCORE_SHMEM_STATUS */
 
-#include "ppsapi_timepps.h"
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
+#endif
 
 #ifdef HAVE_SYS_SIO_H
 # include <sys/sio.h>
