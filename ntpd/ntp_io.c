@@ -832,7 +832,8 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
-			"setsockopt IP_ADD_MEMBERSHIP failure: %m for %x / %x (%s)",
+			"setsockopt IP_ADD_MEMBERSHIP failure: %m on socket %d, addr %s for %x / %x (%s)",
+			iface->fd, stoa(&iface->sin),
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
@@ -859,8 +860,10 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
-			 "setsockopt IPV6_JOIN_GROUP failure: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(maddr));
+			 "setsockopt IPV6_JOIN_GROUP failure: %m on socket %d, addr %s for interface %d(%s)",
+			iface->fd, stoa(&iface->sin),
+			mreq6.ipv6mr_interface, stoa(maddr));
+			iface->fd, stoa(&iface->sin),
 			return ISC_FALSE;
 		}
 		break;
@@ -897,7 +900,8 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
-			"setsockopt IP_DROP_MEMBERSHIP failure: %m for %x / %x (%s)",
+			"setsockopt IP_DROP_MEMBERSHIP failure: %m on socket %d, addr %s for %x / %x (%s)",
+			iface->fd, stoa(&iface->sin),
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
@@ -924,8 +928,9 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
-			 "setsockopt IPV6_LEAVE_GROUP failure: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(maddr));
+			"setsockopt IPV6_LEAVE_GROUP failure: %m on socket %d, addr %s for %d(%s)",
+			iface->fd, stoa(&iface->sin),
+			mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
 		break;
