@@ -31,7 +31,6 @@ int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
  */
 double sys_residual = 0;	/* residual from previous adjustment */
 
-
 #ifndef SIM
 /*
  * get_systime - return the system time in timestamp format biased by
@@ -95,8 +94,8 @@ get_systime(
 
 
 /*
- * adj_systime - called once every second to make system time adjustments.
- * Returns 1 if okay, 0 if trouble.
+ * adj_systime - called once every second to make system time
+ * adjustments. Returns 1 if okay, 0 if trouble.
  */
 #if !defined SYS_WINNT
 int
@@ -259,8 +258,8 @@ step_systime(
 	 */
 
 	/*
-	 * Write old and new time entries in utmp and wtmp if step adjustment
-	 * is greater than one second.
+	 * Write old and new time entries in utmp and wtmp if step
+	 * adjustment is greater than one second.
 	 *
 	 * This might become even Uglier...
 	 */
@@ -368,20 +367,19 @@ step_systime(
  * Clock routines for the simulator - Harish Nair, with help
  */
 /*
- * get_systime - return the system time in timestamp format 
+ * get_systime - return the system time in NTP timestamp format 
  */
 void
 get_systime(
-        l_fp *now
-        )
+        l_fp *now		/* current system time in l_fp */        )
 {
 	/*
 	 * To fool the code that determines the local clock precision,
 	 * we advance the clock a minimum of 200 nanoseconds on every
-	 * clock read. This is appropriate for a typical 2GHz machine.
-	 * Note we make no attempt here to simulate reading error, since
-	 * a typical modern machine has precisions in the 1-5 nanosecond
-	 * range. 
+	 * clock read. This is appropriate for a typical modern machine
+	 * with nanosecond clocks. Note we make no attempt here to
+	 * simulate reading error, since the error is so small. This may
+	 * change when the need comes to implement picosecond clocks.
 	 */
 	if (ntp_node.ntp_time == ntp_node.last_time)
 		ntp_node.ntp_time += 200e-9;
@@ -393,16 +391,16 @@ get_systime(
 /*
  * adj_systime - advance or retard the system clock
  */
-int
+int				/* always succeeds */
 adj_systime(
-        double now
+        double now		/* time adjustment (s) */
         )
 {
 	/*
-	 * It's important that this code replaces the old adjustment,
-	 * even if it did not complete. It's also important that the
-	 * code not restrict the adjustment range, since with ntpdate
-	 * emulation the range can be much larger than 500 PPM. 
+	 * Just like the tickadj() function, this code replaces the
+	 * current adjustment amount. It's important that the code not
+	 * restrict the adjustment range, since with ntpdate emulation
+	 * the range can be much larger than 500 PPM. 
 	 */
 	ntp_node.adj = now;
         return (1);
@@ -412,13 +410,13 @@ adj_systime(
 /*
  * step_systime - step the system clock
  */
-int
+int				/* always succeeds */
 step_systime(
-        double now
+        double now		/* step adjustment (s) */
         )
 {
 	/*
-	 * This pretty brutal and assumes the system clock code was
+	 * This is pretty brutal and assumes the system clock code was
 	 * written by other than amateurs. Good clock code is a black
 	 * art anyway.
 	 */
@@ -429,25 +427,31 @@ step_systime(
 /*
  * node_clock - update the clocks
  */
-int
+int				/* always succeeds */
 node_clock(
-	Node *n,
-	double t
+	Node *n,		/* global node pointer */
+	double t		/* node time */
 	)
 {
 	double	dtemp;
 
 	/*
-	 * Advance client clock (ntp_time) and add phase corrections.
-	 * Advance server clock (clk_time) and add systematic and random
-	 * walk frequency errors. We assume the random walk wiggles are
-	 * from a Gaussian distribution.
+	 * Advance client clock (ntp_time). Advance server clock
+	 * (clk_time) adjusted for systematic and random frequency
+	 * errors. The random error is a random walk computed as the
+	 * integral of samples from a Gaussian distribution.
 	 */
 	dtemp = t - n->ntp_time;
 	n->time = t;
 	n->ntp_time += dtemp;
+	n->ferr += gauss(0, dtemp * n->fnse * 1e-6);
 	n->clk_time += dtemp * (1 + n->ferr * 1e-6);
-	n->ferr += gauss(0, n->fnse * 1e-6); 
+
+	/*
+	 * Perform the adjtime() function. If the adjustment completed
+	 * in the previous interval, amortize the entire amount; if not,
+	 * carry the leftover to the next interval.
+	 */
 	dtemp *= n->slew;
 	if (dtemp < fabs(n->adj)) {
 		if (n->adj < 0) {
@@ -466,17 +470,20 @@ node_clock(
 
  
 /*
- * Strike a sample from a Gaussian distribution with mean m and
- * standard deviation s.
+ * gauss() - returns samples from a gaussion distribution
  */
-double
+double				/* Gaussian sample */
 gauss(
-	double m,
-	double s
+	double m,		/* sample mean */
+	double s		/* sample standard deviation (sigma) */
 	)
 {
         double q1, q2;
 
+	/*
+	 * Roll a sample from a Gaussian distribution with mean m and
+	 * standard deviation s.
+	 */
 	if (s == 0)
 		return (m);
         while ((q1 = drand48()) == 0);
@@ -486,17 +493,20 @@ gauss(
 
  
 /*
- * Strike a sample from a composite distribution with propagation
- * delay m and exponential service with parameter s.
+ * poisson() - returns samples from a network delay distribution
  */
-double
+double				/* delay sample (s) */
 poisson(
-	double m,
-	double s
+	double m,		/* fixed propagation delay (s) */
+	double s		/* exponential parameter (mu) */
 	)
 {
         double q1;
 
+	/*
+	 * Roll a sample from a composite distribution with propagation
+	 * delay m and exponential service time with parameter s.
+	 */
 	if (s == 0)
 		return (m);
         while ((q1 = drand48()) == 0);

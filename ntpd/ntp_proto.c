@@ -1590,7 +1590,6 @@ clock_filter(
 		j++; j %= NTP_SHIFT;
 	}
 
-#ifndef SIM
         /*
 	 * Sort the samples in both lists by distance.
 	 */
@@ -1606,7 +1605,6 @@ clock_filter(
 			}
 		}
 	}
-#endif /* SIM */
 
 	/*
 	 * Copy the index list to the association structure so ntpq

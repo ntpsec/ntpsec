@@ -39,11 +39,10 @@
 
 /*
  * This contains odds and ends.  Right now the only thing you'll find
- * in here is the hourly stats printer and some code to support rereading
- * the keys file, but I may eventually put other things in here such as
- * code to do something with the leap bits.
+ * in here is the hourly stats printer and some code to support
+ * rereading the keys file, but I may eventually put other things in
+ * here such as code to do something with the leap bits.
  */
-
 /*
  * Name of the keys file
  */
@@ -203,27 +202,27 @@ hourly_stats(void)
 
 #if !defined(VMS)
 	/* (prr) getpriority returns -1 on error, but -1 is also a valid
-	 * return value (!), so instead we have to zero errno before the call
-	 * and check it for non-zero afterwards.
+	 * return value (!), so instead we have to zero errno before the
+	 * call and check it for non-zero afterwards.
 	 */
-
 	errno = 0;
 	prio_set = 0;
 	o_prio = getpriority(PRIO_PROCESS,0); /* Save setting */
 
-	/* (prr) if getpriority succeeded, call setpriority to raise
+	/*
+	 * (prr) if getpriority succeeded, call setpriority to raise
 	 * scheduling priority as high as possible.  If that succeeds
 	 * as well, set the prio_set flag so we remember to reset
-	 * priority to its previous value below.  Note that on Solaris 2.6
-	 * (and beyond?), both getpriority and setpriority will fail with
-	 * ESRCH, because sched_setscheduler (called from main) put us in
-	 * the real-time scheduling class which setpriority doesn't know about.
-	 * Being in the real-time class is better than anything setpriority
-	 * can do, anyhow, so this error is silently ignored.
+	 * priority to its previous value below.  Note that on Solaris
+	 * 2.6 (and beyond?), both getpriority and setpriority will fail
+	 * with ESRCH, because sched_setscheduler (called from main) put
+	 * us in the real-time scheduling class which setpriority
+	 * doesn't know about. Being in the real-time class is better
+	 * than anything setpriority can do, anyhow, so this error is
+	 * silently ignored.
 	 */
-
 	if ((errno == 0) && (setpriority(PRIO_PROCESS,0,-20) == 0))
-	    prio_set = 1;	/* overdrive */
+		prio_set = 1;	/* overdrive */
 #endif /* VMS */
 #ifdef HAVE_GETCLOCK
         (void) getclock(TIMEOFDAY, &ts);
@@ -232,13 +231,12 @@ hourly_stats(void)
 #else /*  not HAVE_GETCLOCK */
 	GETTIMEOFDAY(&tv,(struct timezone *)NULL);
 #endif /* not HAVE_GETCLOCK */
-	if (ntp_set_tod(&tv,(struct timezone *)NULL) != 0)
-	{
+	if (ntp_set_tod(&tv,(struct timezone *)NULL) != 0) {
 		msyslog(LOG_ERR, "can't sync battery time: %m");
 	}
 #if !defined(VMS)
 	if (prio_set)
-	    setpriority(PRIO_PROCESS, 0, o_prio); /* downshift */
+		setpriority(PRIO_PROCESS, 0, o_prio); /* downshift */
 #endif /* VMS */
 #endif /* DOSYNCTODR */
 
@@ -301,14 +299,14 @@ stats_config(
 	double old_drift;
 	int len;
 
-	/* Expand environment strings under Windows NT, since the command
-	 * interpreter doesn't do this, the program must.
+	/*
+	 * Expand environment strings under Windows NT, since the
+	 * command interpreter doesn't do this, the program must.
 	 */
 #ifdef SYS_WINNT
 	char newvalue[MAX_PATH], parameter[MAX_PATH];
 
-	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH))
-	{
+	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH)) {
  		switch(item) {
 		    case STATS_FREQ_FILE:
 			strcpy(parameter,"STATS_FREQ_FILE");
@@ -327,15 +325,13 @@ stats_config(
 
 		msyslog(LOG_ERR,
 		    "ExpandEnvironmentStrings(%s) failed: %m\n", parameter);
-	}
-	else 
+	} else {
 		value = newvalue;
+	}
 #else    
 	value = invalue;
 #endif /* SYS_WINNT */
 
-	
-	
 	switch(item) {
 	    case STATS_FREQ_FILE:
 		if (stats_drift_file != 0) {
@@ -350,49 +346,41 @@ stats_config(
 
 		stats_drift_file = (char*)emalloc((u_int)(len + 1));
 #if !defined(VMS)
-		stats_temp_file = (char*)emalloc((u_int)(len + sizeof(".TEMP")));
+		stats_temp_file = (char*)emalloc((u_int)(len +
+		    sizeof(".TEMP")));
 #else
-		stats_temp_file = (char*)emalloc((u_int)(len + sizeof("-TEMP")));
+		stats_temp_file = (char*)emalloc((u_int)(len +
+		    sizeof("-TEMP")));
 #endif /* VMS */
 		memmove(stats_drift_file, value, (unsigned)(len+1));
 		memmove(stats_temp_file, value, (unsigned)len);
 #if !defined(VMS)
-		memmove(stats_temp_file + len, ".TEMP", sizeof(".TEMP"));
+		memmove(stats_temp_file + len, ".TEMP",
+		    sizeof(".TEMP"));
 #else
-		memmove(stats_temp_file + len, "-TEMP", sizeof("-TEMP"));
+		memmove(stats_temp_file + len, "-TEMP",
+		    sizeof("-TEMP"));
 #endif /* VMS */
 
 		/*
-		 * Open drift file and read frequency
+		 * Open drift file and read frequency. If the file is
+		 * missing or contains errors, tell the loop to reset.
 		 */
 		if ((fp = fopen(stats_drift_file, "r")) == NULL) {
-			loop_config(LOOP_DRIFTCOMP, 0);
+			loop_config(LOOP_DRIFTCOMP, 1e9);
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
-			msyslog(LOG_ERR, "Un-parsable frequency in %s", 
+			msyslog(LOG_ERR, "Frequency format error in %s", 
 			    stats_drift_file);
-			(void) fclose(fp);
+			loop_config(LOOP_DRIFTCOMP, 1e9);
+			fclose(fp);
 			break;
 		}
-		(void) fclose(fp);
-		if (
-#ifdef HAVE_FINITE
-			!finite(old_drift)
-#else  /* not HAVE_FINITE */
-# ifdef HAVE_ISFINITE
-			!isfinite(old_drift)
-# else  /* not HAVE_ISFINITE */
-			0
-# endif /* not HAVE_ISFINITE */
-#endif /* not HAVE_FINITE */
-		    || (fabs(old_drift) > (NTP_MAXFREQ * 1e6))) {
-			msyslog(LOG_ERR, "invalid frequency (%f) in %s", 
-			    old_drift, stats_drift_file);
-			old_drift = 0.0;
-		}
-		msyslog(LOG_INFO, "frequency initialized %.3f from %s",
-		    old_drift, stats_drift_file);
+		fclose(fp);
+		msyslog(LOG_INFO,
+		    "frequency initialized %.3f PPM from %s",
+			old_drift, stats_drift_file);
 		loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 		break;
 	

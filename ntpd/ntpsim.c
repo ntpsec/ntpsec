@@ -95,7 +95,7 @@ ntpsim(
 
 
 /*
- * return an event
+ * Return an event
  */
 Event
 event(
@@ -111,7 +111,7 @@ event(
 }
 
 /*
- * creates an event queue
+ * Create an event queue
  */
 Queue
 queue(
@@ -130,7 +130,7 @@ queue(
 
 
 /*
- * push an event into the event queue
+ * Push an event into the event queue
  */
 void push(
 	Event e,
@@ -146,7 +146,7 @@ void push(
 
 
 /*
- * pop the first event from the event queue
+ * Pop the first event from the event queue
  */
 Event
 pop(
@@ -212,7 +212,7 @@ ntptmr(
 
 
 /*
- * Send a packet. This results in calling the netpkt routine below.
+ * srvr_rply() - send packet
  */
 int srvr_rply(
 	Node *n,
@@ -226,7 +226,9 @@ int srvr_rply(
 	double	dtemp, etemp;
 
 	/*
-	 * Insert packet header values.
+	 * Insert packet header values. We make this look like a
+	 * stratum-1 server with a GPS clock, but nobody will ever
+	 * notice that.
 	 */
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING, NTP_VERSION,
 	    MODE_SERVER);
@@ -238,7 +240,7 @@ int srvr_rply(
         xpkt.rootdispersion = 0;
 
 	/*
-	 * Insert timestamps.
+	 * Insert the timestamps.
 	 */
         xpkt.org = rpkt->xmt;
 	dtemp = poisson(n->ndly, n->snse); /* client->server delay */
@@ -249,7 +251,7 @@ int srvr_rply(
 	dtemp += poisson(n->ndly, n->snse); /* server->client delay */
 
 	/*
-	 * Insert the buffer data.
+	 * Insert the I/O stuff.
 	 */
 	rbuf.receiver = receive;
         get_systime(&rbuf.recv_time);
@@ -262,6 +264,11 @@ int srvr_rply(
 		abortsim("server-malloc");
         memcpy(rbuf.dstadr, inter, sizeof(struct interface));
         rbuf.next = NULL;
+
+	/*
+	 * Very carefully predict the time of arrival for the received
+	 * packet. 
+	 */ 
 	LFPTOD(&xpkt.org, etemp);
 	etemp += dtemp;
 	xvnt = event(etemp, PACKET);
@@ -272,7 +279,7 @@ int srvr_rply(
 
 
 /*
- * Packet recieve. Insert the received packet onto the buffer list.
+ * netpkt() - receive packet
  */
 void
 netpkt(
@@ -283,6 +290,10 @@ netpkt(
 	struct recvbuf *rbuf;
 	struct recvbuf *obuf;
 
+	/*
+	 * Insert the packet on the receive queue and record the arrival
+	 * time.
+	 */
 	if ((rbuf = malloc(sizeof(struct recvbuf))) == NULL)
 		abortsim("ntprcv-malloc");
 	memcpy(rbuf, &e.rcv_buf, sizeof(struct recvbuf));
@@ -290,6 +301,12 @@ netpkt(
 	DTOLFP(n->ntp_time, &rbuf->recv_time);
 	rbuf->next = NULL;
 	obuf = n->rbuflist;
+
+	/*
+	 * In the present incarnation, no more than one buffer can be on
+	 * the queue; however, we sniff the queue anyway as a hint for
+	 * further development.
+	 */
 	if (obuf == NULL) {
 		n->rbuflist = rbuf;
 	} else {
@@ -301,7 +318,7 @@ netpkt(
 
 
 /*
- * Make a noise
+ * ndbeep() - progress indicator
  */
 void
 ndbeep(
