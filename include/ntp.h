@@ -119,27 +119,27 @@ typedef char s_char;
 /*
  * Selection algorithm tuning parameters
  */
-#define	NTP_MINCLOCK	4	/* minimum survivors */
-#define	NTP_MAXCLOCK	50	/* maximum candidates */
+#define	NTP_MINCLOCK	3	/* min cluster survivors */
+#define	NTP_MAXCLOCK	50	/* max selection candidates */
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
 #define HYST_TC		.875	/* anti-clockhop hysteresis decay */
 #define MAX_TTL		8	/* max ttl mapping vector size */
-#define NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define NTP_MAXEXTEN	1024	/* max extension field size */
 
 /*
  * Miscellaneous stuff
  */
-#define NTP_MAXKEY	65535	/* maximum authentication key number */
+#define NTP_MAXKEY	65535	/* max authentication key number */
 
 /*
  * Limits of things
  */
 #define	MAXFILENAME	128	/* max length of file name */
 #define MAXHOSTNAME	512	/* max length of host/node name */
-#define NTP_MAXSTRLEN	256	/* maximum string length */
+#define NTP_MAXSTRLEN	256	/* max string length */
 #define MAXINTERFACES	512	/* max number of interfaces */
 
 /*

@@ -522,6 +522,8 @@ dolist(
 	if (res != 0)
 		return 0;
 
+	if (numhosts > 1)
+		(void) fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
 		if (associd == 0)
 			(void) fprintf(fp, "No system%s variables returned\n",
@@ -533,6 +535,7 @@ dolist(
 		return 1;
 	}
 
+	(void) fprintf(fp,"assID=%d ",associd);
 	printvars(dsize, datap, (int)rstatus, type, fp);
 	return 1;
 }
@@ -595,11 +598,15 @@ writelist(
 	if (res != 0)
 		return;
 
+	if (numhosts > 1)
+		(void) fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0)
 		(void) fprintf(fp, "done! (no data returned)\n");
-	else
+	else {
+		(void) fprintf(fp,"assID=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
 			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
+	}
 	return;
 }
 
@@ -666,11 +673,15 @@ writevar(
 	if (res != 0)
 		return;
 
+	if (numhosts > 1)
+		(void) fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0)
 		(void) fprintf(fp, "done! (no data returned)\n");
-	else
+	else {
+		(void) fprintf(fp,"assID=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
 			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
+	}
 	return;
 }
 
@@ -871,11 +882,15 @@ dogetassoc(
 		return 0;
 
 	if (dsize == 0) {
+		if (numhosts > 1)
+			(void) fprintf(fp, "server=%s ", currenthost);
 		(void) fprintf(fp, "No association ID's returned\n");
 		return 0;
 	}
 
 	if (dsize & 0x3) {
+		if (numhosts > 1)
+			(void) fprintf(stderr, "server=%s ", currenthost);
 		(void) fprintf(stderr,
 				   "***Server returned %d octets, should be multiple of 4\n",
 				   dsize);
@@ -928,7 +943,7 @@ printassoc(
 	 * Output a header
 	 */
 	(void) fprintf(fp,
-			   "ind assID status  conf reach auth condition  last_event cnt\n");
+			   "\nind assID status  conf reach auth condition  last_event cnt\n");
 	(void) fprintf(fp,
 			   "===========================================================\n");
 	for (i = 0; i < numassoc; i++) {
@@ -1127,6 +1142,8 @@ radiostatus(
 	if (res != 0)
 		return;
 
+	if (numhosts > 1)
+		(void) fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
 		(void) fprintf(fp, "No radio status string returned\n");
 		return;
@@ -1161,6 +1178,8 @@ pstatus(
 	if (res != 0)
 		return;
 
+	if (numhosts > 1)
+		(void) fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
 		(void) fprintf(fp,
 				   "No information returned for association %u\n",
@@ -1168,6 +1187,7 @@ pstatus(
 		return;
 	}
 
+	(void) fprintf(fp,"assID=%d ",associd);
 	printvars(dsize, datap, (int)rstatus, TYPE_PEER, fp);
 }
 
@@ -1558,6 +1578,8 @@ dogetpeers(
 		return 0;
 
 	if (dsize == 0) {
+		if (numhosts > 1)
+			(void) fprintf(stderr, "server=%s ", currenthost);
 		(void) fprintf(stderr,
 				   "***No information returned for association %d\n",
 				   associd);
@@ -1591,7 +1613,7 @@ dopeers(
 				maxhostlen = strlen(fullname);
 	}
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "host");
+		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
 	(void) fprintf(fp,
 			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
@@ -1668,12 +1690,24 @@ doopeers(
 	)
 {
 	register int i;
+	char fullname[LENHOSTNAME];
+	struct sockaddr_storage netnum;
 
 	if (!dogetassoc(fp))
 		return;
 
+	for (i = 0; i < numhosts; ++i) {
+		if (getnetnum(chosts[i], &netnum, fullname, af))
+			if ((int)strlen(fullname) > maxhostlen)
+				maxhostlen = strlen(fullname);
+	}
+	if (numhosts > 1)
+		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
 	(void) fprintf(fp,
 			   "     remote           local      st t when poll reach   delay   offset    disp\n");
+	if (numhosts > 1)
+		for (i = 0; i <= maxhostlen; ++i)
+		(void) fprintf(fp, "=");
 	(void) fprintf(fp,
 			   "==============================================================================\n");
 
