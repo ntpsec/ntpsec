@@ -1,5 +1,8 @@
 2000-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* build (RSASUF): If we have rsaref2/ and are building
+	--without-rsaref, note it as a build-directory suffix.
+
 	* configure.in: 4.0.99h
 	Crypto merge
 
