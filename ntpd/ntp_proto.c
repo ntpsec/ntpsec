@@ -99,8 +99,8 @@ transmit(
 		/*
 		 * The polling state machine. There are two kinds of
 		 * machines, those that never expect a reply (broadcast
-		 * and manycast modes) and those that do (all other
-		 * modes). The dance is intricate...
+		 * and manycast server modes) and those that do (all
+		 * other modes). The dance is intricate...
 		 */
 		if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 
@@ -157,7 +157,6 @@ transmit(
 
 			} else {
 				peer_clear(peer);
-				peer->ppoll = peer->maxpoll;
 				hpoll++;
 			}
 		}
@@ -975,7 +974,7 @@ process_packet(
 	t23 = p_rec;			/* compute t2 - t3 */
 	L_SUB(&t23, &p_org);
 	ci = t10;
-	p_disp = CLOCK_PHI * (peer->rec.l_ui - p_org.l_ui);
+	p_disp = clock_phi * (peer->rec.l_ui - p_org.l_ui);
 
 	/*
 	 * If running in a broadcast association, the clock offset is
@@ -1120,17 +1119,16 @@ poll_update(
 #endif /* AUTOKEY */
 
 	/*
-	 * The wiggle-the-poll-interval dance. Broadcasters and
-	 * manycasters dance the band. Reference clock partners sit this
-	 * one out. Dancers surviving the clustering algorithm beat
-	 * system rythms. Broadcast clients are led by their broadcast
-	 * partner, but faster in the initial mating dance.
+	 * If the peer has been declared truechimer, the host poll
+	 * interval is the system poll interval. If not, the interval is
+	 * given as argument. This allows each association to ramp up
+	 * the poll interval for useless sources.
 	 */
 
 #ifdef AUTOKEY
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
-	if (peer->flags & FLAG_SYSPEER)
+	if (peer->status == CTL_PST_SEL_CORRECT)
 		peer->hpoll = sys_poll;
 	else
 		peer->hpoll = hpoll;
@@ -1138,8 +1136,6 @@ poll_update(
 		peer->hpoll = peer->maxpoll;
 	else if (peer->hpoll < peer->minpoll)
 		peer->hpoll = peer->minpoll;
-	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST))
-		peer->ppoll = peer->hpoll;
 
 	/*
 	 * bit of adventure here. If during a burst and not timeout,
@@ -1233,7 +1229,8 @@ peer_clear(
 		peer->hmode = MODE_CLIENT;
 	}
 	peer->estbdelay = sys_bdelay;
-	peer->hpoll = peer->ppoll = peer->kpoll = peer->minpoll;
+	peer->hpoll = peer->kpoll = peer->minpoll;
+	peer->ppoll = peer->maxpoll;
 	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
 	peer->leap = LEAP_NOTINSYNC;
@@ -1272,7 +1269,7 @@ clock_filter(
 	 * each sample is equal to the sample dispersion plus one-half
 	 * the sample delay. Also initialize the sort index vector.
 	 */
-	dtemp = CLOCK_PHI * (current_time - peer->update);
+	dtemp = clock_phi * (current_time - peer->update);
 	peer->update = current_time;
 	ord = peer->filter_order;
 	j = peer->filter_nextpt;
@@ -1504,7 +1501,7 @@ clock_select(void)
 			    peer->dstadr->sin.sin_addr.s_addr) ||
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
-			    CLOCK_PHI * ULOGTOD(sys_poll)))
+			    clock_phi * ULOGTOD(sys_poll)))
 				continue;
 
 			/*
@@ -1664,6 +1661,7 @@ clock_select(void)
 			continue;
 		}
 		peer->status = CTL_PST_SEL_CORRECT;
+		poll_update(peer, peer->hpoll);
 		d = root_distance(peer) + peer->stratum * MAXDISPERSE;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
@@ -1802,7 +1800,6 @@ clock_select(void)
 	for (i = nlist - 1; i >= 0; i--) {
 		peer_list[i]->status = CTL_PST_SEL_SYNCCAND;
 		peer_list[i]->flags |= FLAG_SYSPEER;
-		poll_update(peer_list[i], peer_list[i]->hpoll);
 		if (peer_list[i]->stratum == peer_list[0]->stratum) {
 			leap_consensus |= peer_list[i]->leap;
 			if (peer_list[i]->refclktype ==
@@ -1915,7 +1912,7 @@ root_distance(
 	 * square of sys_precision.
 	 */
 	return ((peer->rootdelay + peer->delay) / 2 +
-	    peer->rootdispersion + peer->disp + CLOCK_PHI *
+	    peer->rootdispersion + peer->disp + clock_phi *
 	    (current_time - peer->update) + SQRT(peer->jitter));
 }
 
@@ -2190,11 +2187,9 @@ peer_xmit(
 		 * private value of zero and force min poll interval.
 		 * Most intricate.
 		 */
-		if (sendlen > LEN_PKT_NOMAC) {
+		if (sendlen > LEN_PKT_NOMAC)
 			session_key(&peer->dstadr->sin, &peer->srcadr,
 			    xkeyid, 0, 2);
-			poll_update(peer, peer->minpoll);
-		}
 	} 
 #endif /* AUTOKEY */
 	xkeyid = peer->keyid;
@@ -2213,6 +2208,8 @@ peer_xmit(
 		exit(-1);
 	}
 	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, pktlen);
+	if (sendlen > LEN_PKT_NOMAC)
+		poll_update(peer, peer->minpoll);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over

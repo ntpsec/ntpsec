@@ -35,9 +35,7 @@
 #define CONFIG_CONTROLKEY	15
 #define CONFIG_TRAP		16
 #define CONFIG_FUDGE		17
-#ifdef PUBKEY
-#define CONFIG_KEYSDIR		18
-#endif /* PUBKEY */
+#define CONFIG_TINKER		18
 #define CONFIG_STATSDIR		19
 #define CONFIG_FILEGEN		20
 #define CONFIG_STATISTICS	21
@@ -55,6 +53,7 @@
 #define CONFIG_MANYCASTSERVER	33
 #ifdef PUBKEY
 #define CONFIG_CRYPTO		34
+#define CONFIG_KEYSDIR		35
 #endif /* PUBKEY */
 
 /*
@@ -124,6 +123,14 @@
 #define CONF_PPS_ASSERT		1
 #define CONF_PPS_CLEAR		2
 #define CONF_PPS_HARDPPS	3
+
+/*
+ * "tinker" modifier keywords
+ */
+#define CONF_CLOCK_MAX		1
+#define CONF_CLOCK_PANIC	2
+#define CONF_CLOCK_PHI		3
+#define CONF_CLOCK_MINSTEP	4
 
 #ifdef PUBKEY
 /*

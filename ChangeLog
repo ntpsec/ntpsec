@@ -1,3 +1,32 @@
+2001-02-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdate/ntpdate.h (NTP_MAXAGE): Added.
+	* ntpd/ntp_refclock.c (refclock_receive): Cleanup.
+	* ntpd/ntp_proto.c (transmit): Don't reset peer->ppoll in one case.
+	Update peer->hpoll based on CTL_PST_SEL_CORRECT, not FLAG_SYSPEER.
+	Don't update peer->ppoll based on MDF_[BM]CAST.
+	(peer_clear): ppoll is initialized to maxpoll.
+	(clock_select): call poll_update(peer->hpoll) earlier.
+	(peer_xmit): Call poll_update later.
+	* ntpd/ntp_peer.c (peer_config): Rework initial values of [hkp]poll.
+	* ntpd/ntp_loopfilter.c (CLOCK_PHI): Added.  Deal with other
+	(allow_*) stuff.  Treat Windows/NT the same as others regarding
+	panic steps.  Deal with tinker stuff.
+	* ntpd/ntp_config.c: Tinker stuff.
+	* ntpd/cmd_args.c (getCmdOpts): -g now wiggles "allow_panic"
+	(renamed from "correct_any").  -x now wiggles "allow_step"
+	(renamed from "allow_step_backward").
+	* include/ntpd.h: Add tinker variables.  Rename/rework variables
+	associated with "permission to step" and "permission to make a
+	panic correction"	
+	* include/ntp_config.h (CONFIG_TINKER): Added.
+	(CONF_CLOCK_MAX): Tinker keyword
+	(CONF_CLOCK_PANIC): Tinker keyword
+	(CONF_CLOCK_PHI): Tinker keyword
+	(CONF_CLOCK_MINSTEP): Tinker keyword
+	* include/ntp.h (NTP_MINCLOCK): Tinker and other cleanup.
+	From: Dave Mills
+	
 2001-02-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): Don't peer_clear() and reset

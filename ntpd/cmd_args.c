@@ -206,7 +206,7 @@ getCmdOpts(
 			break;
 
 		    case 'g':
-			correct_any = TRUE;
+			allow_panic = TRUE;
 			break;
 
 		    case 'k':
@@ -281,7 +281,7 @@ getCmdOpts(
 			break;
 
 		    case 'x':
-			allow_set_backward = FALSE;
+			allow_step = FALSE;
 			break;
 
 		    default:

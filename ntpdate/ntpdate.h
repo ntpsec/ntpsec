@@ -63,6 +63,8 @@ struct server {
  */
 #define	NTPDATE_THRESHOLD	(FP_SECOND >> 1)	/* 1/2 second */
 
+#define NTP_MAXAGE	86400	/* one day in seconds */
+
 /*
  * When doing adjustments, ntpdate actually overadjusts (currently
  * by 50%, though this may change).  While this will make it take longer

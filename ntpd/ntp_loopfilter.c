@@ -36,8 +36,9 @@
  */
 #define CLOCK_MAX	.128	/* default max offset (s) */
 #define CLOCK_PANIC	1000.	/* default panic offset (s) */
-#define CLOCK_MAXSTAB	2e-6	/* max frequency stability */
+#define CLOCK_MAXSTAB	2e-6	/* max frequency stability (s/s) */
 #define CLOCK_MAXERR	1e-2	/* max phase jitter (s) */
+#define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
 #define SHIFT_PLL	4	/* PLL loop gain (shift) */
 #define CLOCK_AVG	4.	/* FLL loop gain */
 #define CLOCK_MINSEC	256.	/* min FLL update interval (s) */
@@ -94,10 +95,12 @@
  * Program variables
  */
 static double clock_offset;	/* clock offset adjustment (s) */
-double	drift_comp;		/* clock frequency (ppm) */
-double	clock_stability;	/* clock stability (ppm) */
-double	clock_max = CLOCK_MAX;	/* max offset allowed before step (s) */
-static double clock_panic = CLOCK_PANIC; /* max offset before panic */
+double	drift_comp;		/* clock frequency (s/s) */
+double	clock_stability;	/* clock stability (s/s) */
+double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
+double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
+double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
+double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
 u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
@@ -116,8 +119,8 @@ int	kern_enable;		/* kernel support enabled */
 int	pps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
-int	allow_set_backward = TRUE; /* step corrections allowed */
-int	correct_any = FALSE;	/* corrections > 1000 s allowed */
+int	allow_step = TRUE;	/* allow step correction */
+int	allow_panic = FALSE;	/* allow panic correction */
 
 /*
  * Clock state machine variables
@@ -192,14 +195,13 @@ local_clock(
 	/*
 	 * If the clock is way off, don't tempt fate by correcting it.
 	 */
-#ifndef SYS_WINNT
-	if (fabs(fp_offset) >= clock_panic && !correct_any) {
+	if (fabs(fp_offset) > clock_panic && !allow_panic) {
 		msyslog(LOG_ERR,
-		    "time error %.0f over %d seconds; set clock manually",
-		    fp_offset, (int)clock_panic);
+		    "time error %.0f over %.0f seconds; set clock manually",
+		    fp_offset, clock_panic);
 		return (-1);
 	}
-#endif
+
 	/*
 	 * If the clock has never been set, set it and initialize the
 	 * discipline parameters. We then switch to frequency mode to
@@ -250,22 +252,22 @@ local_clock(
 
 		/*
 		 * In S_SYNC state we ignore outlyers. At the first
-		 * outlyer after CLOCK_MINSTEP (900 s), switch to S_SPIK
+		 * outlyer after 900 s, switch to S_SPIK
 		 * state.
 		 */
 		case S_SYNC:
-			if (mu < CLOCK_MINSTEP)
+			if (mu < clock_minstep)
 				return (0);
 			rstclock(S_SPIK);
 			return (0);
 
 		/*
 		 * In S_FREQ state we ignore outlyers. At the first
-		 * outlyer after CLOCK_MINSTEP (900 s), compute the
-		 * apparent phase and frequency correction.
+		 * outlyer after 900 s, compute the * apparent phase
+		 * and frequency correction.
 		 */
 		case S_FREQ:
-			if (mu < CLOCK_MINSTEP)
+			if (mu < clock_minstep)
 				return (0);
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
@@ -287,7 +289,7 @@ local_clock(
 		 * reset or shaken, but never stirred.
 		 */
 		default:
-			if (allow_set_backward || correct_any) {
+			if (allow_step) {
 				step_systime(fp_offset);
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time reset %.6f s",
@@ -318,12 +320,12 @@ local_clock(
 			return (0);
 
 		/*
-		 * In S_FREQ state we ignore updates until CLOCK_MINSTEP
-		 * (900 s). After that, correct the phase and frequency
-		 * and switch to S_SYNC state.
+		 * In S_FREQ state we ignore updates until 900 s. After
+		 * that, correct the phase and frequency * and switch to
+		 * S_SYNC state.
 		 */
 		case S_FREQ:
-			if (mu < CLOCK_MINSTEP)
+			if (mu < clock_minstep)
 				return (0);
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
@@ -363,6 +365,7 @@ local_clock(
 				last_offset = fp_offset;
 				return (0);
 			}
+			allow_panic = TRUE;
 
 			/*
 			 * Compute the FLL and PLL frequency adjustments
@@ -619,7 +622,7 @@ adj_host_clock(
 	 * maximum error and the local clock driver will pick it up and
 	 * pass to the common refclock routines. Very elegant.
 	 */
-	sys_rootdispersion += CLOCK_PHI;
+	sys_rootdispersion += clock_phi;
 
 	/*
 	 * Declare PPS kernel unsync if the pps signal has not been
@@ -667,7 +670,6 @@ rstclock(
 	int trans		/* new state */
 	)
 {
-	correct_any = FALSE;
 	state = trans;
 	switch (state) {
 
@@ -810,6 +812,22 @@ loop_config(
 		}
 		break;
 #endif /* KERNEL_PLL */
+
+		case LOOP_MAX:
+			clock_max = freq;
+			break;
+
+		case LOOP_PANIC:
+			clock_panic = freq;
+			break;
+
+		case LOOP_PHI:
+			clock_phi = freq;
+			break;
+
+		case LOOP_MINSTEP:
+			clock_minstep = freq; 
+			break;
 	}
 }
 

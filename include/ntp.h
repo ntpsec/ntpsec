@@ -93,9 +93,7 @@ typedef char s_char;
 #define	NTP_VERSION	((u_char)4) /* current version number */
 #define	NTP_OLDVERSION	((u_char)1) /* oldest credible version */
 #define	NTP_PORT	123	/* included for sake of non-unix machines */
-#define	NTP_MAXAGE	86400	/* one day in seconds */
 #define NTP_UNREACH	16	/* poll interval backoff count */
-#define NTP_TAILMAX	4	/* tailgate poll counter max */
 #define NTP_MINDPOLL	6	/* log2 default min poll interval (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll interval (~17 m) */
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
@@ -103,14 +101,12 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* minimum survivors */
 #define NTP_CANCLOCK	6	/* minimum candidates */
 #define	NTP_MAXCLOCK	10	/* maximum candidates */
-#define	NTP_WINDOW	8	/* reachability register size */
 #define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
 #define NTP_AUTOMAX	12	/* log2 default max session key lifetime */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
-#define NTP_SWEIGHT	.75	/* select weight */
 #define CLOCK_SGATE	4.	/* popcorn spike gate */
 #define BURST_INTERVAL1	4	/* first interburst interval (log2) */
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
@@ -136,15 +132,6 @@ typedef char s_char;
 #define MAXDISPERSE	16.	/* max dispersion (square) */
 #define MINDISPERSE	.01	/* min dispersion */
 #define MAXDISTANCE	1.	/* max root distance */
-
-/*
- * Loop filter parameters.  See section 5.1 of the specification.
- *
- * Note that these are appropriate for a crystal time base.  If your
- * system clock is line frequency controlled you should read the
- * specification for appropriate modifications.
- */
-#define CLOCK_PHI	15e-6	/* max frequency wander */
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
 
@@ -674,6 +661,10 @@ struct pkt {
 #define LOOP_DRIFTCOMP		2	/* set frequency offset */
 #define LOOP_PPSDELAY		3	/* set pps delay */
 #define LOOP_PPSBAUD		4	/* set pps baud rate */
+#define LOOP_MAX		5	/* set step offset */
+#define LOOP_PANIC		6	/* set panic offseet */
+#define LOOP_PHI		7	/* set dispersion rate */
+#define LOOP_MINSTEP		8	/* set step timeout */
 
 /*
  * Configuration items for the stats printer

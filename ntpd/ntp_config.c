@@ -257,6 +257,17 @@ static struct keyword pps_keywords[] = {
 	{ "",			CONFIG_UNKNOWN }
 };
 
+/*
+ * "tinker" modifier keywords
+ */
+static struct keyword tinker_keywords[] = {
+	{ "step",		CONF_CLOCK_MAX },
+	{ "panic",		CONF_CLOCK_PANIC },
+	{ "dispersion",		CONF_CLOCK_PHI },
+	{ "stepout",		CONF_CLOCK_MINSTEP },
+	{ "",			CONFIG_UNKNOWN }
+};
+
 #ifdef PUBKEY
 /*
  * "crypto" modifier keywords
@@ -909,6 +920,40 @@ getconfig(
 			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
 
+		    case CONFIG_TINKER:
+			for (i = 1; i < ntokens; i++) {
+			    int temp;
+			    double ftemp;
+
+			    temp = matchkey(tokens[i++],
+				 tinker_keywords);
+			    if (i > ntokens - 1) {
+				msyslog(LOG_ERR,
+				    "tinker: missing argument");
+				errflg++;
+				break;
+			    }
+			    sscanf(tokens[i], "%lf", &ftemp);
+			    switch(temp) {
+			    case CONF_CLOCK_MAX:
+                                loop_config(LOOP_MAX, ftemp);
+				break;
+
+			    case CONF_CLOCK_PANIC:
+				loop_config(LOOP_MAX, ftemp);
+				break;
+
+			    case CONF_CLOCK_PHI:
+				loop_config(LOOP_PHI, ftemp);
+				break;
+
+			    case CONF_CLOCK_MINSTEP:
+				loop_config(LOOP_MINSTEP, ftemp);
+				break;
+			    }
+			}
+			break;
+
 #ifdef PUBKEY
 		    case CONFIG_KEYSDIR:
 			if (ntokens < 2) {
@@ -918,7 +963,7 @@ getconfig(
 			}
 			crypto_config(CRYPTO_CONF_KEYS, tokens[1]);
 			break;
-
+	
 		    case CONFIG_CRYPTO:
 			if (ntokens == 1) {
 				crypto_config(CRYPTO_CONF_FLAGS	, "0");

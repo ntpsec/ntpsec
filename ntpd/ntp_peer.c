@@ -467,8 +467,8 @@ peer_config(
 		peer->version = (u_char)version;
 		peer->minpoll = (u_char)minpoll;
 		peer->maxpoll = (u_char)maxpoll;
-		peer->hpoll = peer->minpoll;
-		peer->ppoll = peer->minpoll;
+		peer->hpoll = peer->kpoll = peer->minpoll;
+		peer->ppoll = peer->maxpoll;
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;

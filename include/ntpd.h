@@ -263,9 +263,12 @@ extern fd_set	activefds;
 extern int	maxactivefd;
 
 /* ntp_loopfilter.c */
-extern double	drift_comp;		/* clock frequency (ppm) */
-extern double	clock_stability;	/* clock stability (ppm) */
-extern double	clock_max;		/* max offset allowed before step (s) */
+extern double	drift_comp;		/* clock frequency (s/s) */
+extern double	clock_stability;	/* clock stability (s/s) */
+extern double	clock_max;		/* max offset before step (s) */
+extern double	clock_panic;		/* max offset before panic (s) */
+extern double	clock_phi;		/* dispersion rate (s/s) */
+extern double	clock_minstep;		/* step timeout (s) */
 extern u_long	pps_control;		/* last pps sample time */
 #ifdef KERNEL_PLL
 extern int	pll_status;		/* status bits for kernel pll */
@@ -280,8 +283,8 @@ extern int	kern_enable;		/* kernel support enabled */
 extern int	pps_enable;		/* kernel PPS discipline enabled */
 extern int	ext_enable;		/* external clock enabled */
 extern int	cal_enable;		/* refclock calibrate enable */
-extern int	allow_set_backward;	/* step corrections allowed */
-extern int	correct_any;		/* corrections > 1000 s allowed */
+extern int	allow_step;		/* allow step correction */
+extern int	allow_panic;		/* allow panic correction */
 
 /*
  * Clock state machine variables

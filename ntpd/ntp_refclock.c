@@ -586,7 +586,7 @@ refclock_receive(
 	clock_filter(peer, pp->offset, 0., pp->jitter);
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
-	    peer->offset, peer->delay, CLOCK_PHI * (current_time -
+	    peer->offset, peer->delay, clock_phi * (current_time -
 	    peer->epoch), SQRT(peer->jitter));
 	if (cal_enable && last_offset < MINDISPERSE) {
 #ifdef KERNEL_PLL
@@ -615,7 +615,7 @@ refclock_gtlin(
 	struct recvbuf *rbufp,	/* receive buffer pointer */
 	char *lineptr,		/* current line pointer */
 	int bmax,		/* remaining characters in line */
-	l_fp *tsptr 	/* pointer to timestamp returned */
+	l_fp *tsptr		/* pointer to timestamp returned */
 	)
 {
 	char *dpt, *dpend, *dp;
