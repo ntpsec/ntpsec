@@ -44,7 +44,8 @@ u_long	sys_automax;		/* maximum session key lifetime */
 /*
  * Nonspecified system state variables.
  */
-int	sys_bclient;		/* we set our time to broadcasts */
+int	sys_bclient;		/* we set oukiss
+r time to broadcasts */
 double	sys_bdelay; 		/* broadcast client default delay */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
@@ -90,7 +91,6 @@ static	void	peer_xmit	P((struct peer *));
 static	void	fast_xmit	P((struct recvbuf *, int, keyid_t, int));
 static	void	clock_update	P((void));
 int	default_get_precision	P((void));
-
 
 /*
  * transmit - Transmit Procedure. See Section 3.4.2 of the
@@ -291,6 +291,7 @@ receive(
 	int	is_authentic;		/* cryptosum ok */
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_storage *dstadr_sin;	/* active runway */
+	struct sockaddr_storage mskadr_sin;	/* mask for restrict */
 	l_fp	p_org;			/* originate timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef OPENSSL
@@ -602,13 +603,13 @@ receive(
 		/*
 		 * Note that we don't require an authentication check
 		 * here, since we can't set the system clock; but, we do
-		 * set the key ID to zero to tell the caller about this.
+		 * send a crypto-NAK to tell the caller about this.
 		 */
-		if (is_authentic)
+		if (has_mac && sys_authenticate && !is_authentic)
+			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
+		else
 			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
-		else
-			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
 		return;
 
 #ifdef OPENSSL
@@ -643,13 +644,6 @@ receive(
 		if (peer2 == 0)
 			return;
 
-		/*
-		 * Check for compatible identity scheme before
-		 * mobilizing an association.
-		 */
-		if (!crypto_check(rbufp))
-			return;
-
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST |
@@ -676,20 +670,12 @@ receive(
 		 * incompatible.
 		 */
 		if ((restrict_mask & (RES_DONTSERVE | RES_LIMITED |
-		    RES_NOPEER)) || (sys_authenticate &&
+		    RES_NOPEER)) || (has_mac && sys_authenticate &&
 		    !is_authentic)) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0,
 			    restrict_mask);
 			return;
 		}
-
-		/*
-		 * Check for compatible identity scheme before
-		 * mobilizing an association.
-		 */
-		if (!crypto_check(rbufp))
-			return;
-
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 	 	    sys_minpoll, NTP_MAXDPOLL, sys_authenticate ?
@@ -712,13 +698,6 @@ receive(
 		    !is_authentic) || !sys_bclient)
 			return;
 
-		/*
-		 * Check for compatible identity scheme before
-		 * mobilizing an association.
-		 */
-		if (!crypto_check(rbufp))
-			return;
-
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
@@ -730,12 +709,18 @@ receive(
 		/*
 		 * Danger looms. If this is autokey, go process the
 		 * extension fields. If something goes wrong, abandon
-		 8 ship.
+		 * ship. We know this must be an ephemeral association.
 		 */
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 			crypto_recv(peer, rbufp);
-			if (peer->flash)
+			if (peer->flash) {
 				unpeer(peer);
+				mskadr_sin.sin_addr.s_addr =
+				    ~(u_int32)0;
+				hack_restrict(RESTRICT_FLAGS,
+				    &rbufp->recv_srcadr, &mskadr_sin,
+				    RESM_NTPONLY, RES_DONTSERVE);
+			}
 		}
 #endif /* OPENSSL */
 		return;
@@ -751,9 +736,17 @@ receive(
 	default:
 
 		/*
-		 * Invalid mode combination. Leave the island
-		 * immediately.
+		 * Invalid mode combination. This happens when a passive
+		 * mode packet arrives and matches another passive
+		 * association or no association at all, or when a
+		 * server mode packet arrives and matches a broadcast
+		 * client association. This is usually the result of
+		 * reconfiguring a client on-fly. If authenticated
+		 * passive mode packet, send a crypto-NAK; otherwise,
+		 * ignore it.
 		 */
+		if (has_mac && hismode == MODE_PASSIVE)
+			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
 #ifdef DEBUG
 		if (debug)
 			printf("receive: bad protocol %d\n", retcode);
@@ -908,14 +901,15 @@ receive(
 			 * originate timestamp must be nonzero. We need
 			 * to send something to the active peer that
 			 * will cause it to restart. If this happens or
-			 * we light or fail authentication, send a
+			 * we light or dim authentication, send a
 			 * crypto_NAK, which is tha analog of the TCP
 			 * RESET and get out of Dodge City.
 			 */ 
 			if (L_ISZERO(&peer->xmt) || peer->flash &
 			    TEST5) {
-				fast_xmit(rbufp, MODE_PASSIVE, 0,
-				    restrict_mask);
+				if (has_mac)
+					fast_xmit(rbufp, MODE_PASSIVE,
+					    0, restrict_mask);
 				unpeer(peer);
 				return;
 			}
@@ -975,10 +969,6 @@ receive(
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp);
-		if (peer->cmmd != 0) {
-			peer->ppoll = pkt->ppoll;
-			poll_update(peer, 0);
-		}
 		if (peer->flash & TEST12) {
 			/* fall through */
 
@@ -1005,43 +995,82 @@ receive(
 				    tkeyid, pkeyid, 0);
 			}
 		}
+		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 11 */
+			peer->flash |= TEST11;	/* not proventic */
 
 		/*
-		 * If errors flash at this point and loopback, clamp the
-		 * poll to minimum. If the certificate has been stored,
-		 * scratch the association. If the server is not
-		 * reachable, assume this is the first symmetric mode
-		 * packet that warmed up the association and let it by.
-		 * It will die later after leaving the originate and
-		 * receive timestamp in the dust for the reply.
+		 * If the transmit queue is nonempty, clamp the host
+		 * poll interval to the packet poll interval.
+		 */
+		if (peer->cmmd != 0) {
+			peer->ppoll = pkt->ppoll;
+			poll_update(peer, 0);
+		}
+		/*
+		 * There are three error bits that can flash at this
+		 * point: TEST10, which indicates an autokey sequence
+		 * error, TEST11, which indicates non-proventic, and
+		 * TEST12, which indicates a catastrophic error. If any
+		 * flash at this point, clamp the host poll interval to
+		 * the minimum.
 		 */
 		if (peer->flash) {
 			poll_update(peer, peer->minpoll);
-			if (peer->crypto & CRYPTO_FLAG_PROV) {
+
+			/*
+			 * If TEST12 is lit, the crypto machine is
+			 * jammed or an intruder lurks. We demobilize
+			 * the association and him on the the restrict
+			 * list. If the packet mode is not broadcast or
+			 * server, we add KOD restrict as well.
+			 */
+			if (peer->flash & TEST12) {
+				int resflag;
+
+				if (!(peer->flags & FLAG_CONFIG))
+					unpeer(peer);
+				else
+					peer_clear(peer);
+				mskadr_sin.sin_addr.s_addr =
+				    ~(u_int32)0;
+				if (hismode == MODE_BROADCAST ||
+				    hismode == MODE_SERVER)
+					resflag = RES_DONTSERVE;
+				else
+					resflag = RES_DONTSERVE |
+					    RES_DEMOBILIZE;
+				hack_restrict(RESTRICT_FLAGS,
+				    &rbufp->recv_srcadr, &mskadr_sin,
+				    RESM_NTPONLY, resflag);
 #ifdef DEBUG
 				if (debug)
 					printf(
 					    "packet: bad crypto %03x\n",
 					    peer->flash);
 #endif
-				if (!(peer->flags & FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
-				} else {
-					peer_clear(peer);
-				}
 				return;
 			}
-		}
-		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 11 */
-			peer->flash |= TEST11;	/* autokey failed */
-		if (peer->flash && peer->reach) {
+
+			/*
+			 * If TEST10 is lit and we have installed the
+			 * autokey values, the server has probably
+			 * restarted. We demobilize the association and
+			 * wait for better times.
+			 */
+			if (peer->flash & TEST10 && peer->crypto &
+			    CRYPTO_FLAG_AUTO) {
+				if (!(peer->flags & FLAG_CONFIG))
+					unpeer(peer);
+				else
+					peer_clear(peer);
 #ifdef DEBUG
-			if (debug)
-				printf("packet: bad autokey %03x\n",
-				    peer->flash);
+				if (debug)
+					printf(
+					    "packet: bad auto %03x\n",
+					    peer->flash);
 #endif
-			return;
+				return;
+			}
 		}
 	}
 #endif /* OPENSSL */
@@ -1117,7 +1146,6 @@ process_packet(
 	 * timestamp and the receive timestamp is copied from the
 	 * packet receive timestamp.
 	 */
-	peer->leap = pleap;
 	peer->org = p_xmt;
 	peer->rec = *recv_ts;
 	if (peer->flash) {
@@ -1191,6 +1219,7 @@ process_packet(
 	 */
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
 	    &p_rec, &p_xmt, &peer->rec);
+	peer->leap = pleap;
 	peer->pmode = pmode;
 	peer->stratum = pstratum;
 	peer->ppoll = pkt->ppoll;
@@ -2359,8 +2388,8 @@ peer_xmit(
 			else
 				exten = crypto_args(peer, CRYPTO_ASSOC |
 				    CRYPTO_RESP, NULL);
-			sendlen += crypto_xmit(&xpkt, sendlen, exten,
-			    0);
+			sendlen += crypto_xmit(&xpkt, &peer->srcadr,
+			    sendlen, exten, 0);
 			free(exten);
 			break;
 
@@ -2378,14 +2407,14 @@ peer_xmit(
 			if (peer->cmmd != NULL) {
 				peer->cmmd->associd =
 				    htonl(peer->associd);
-				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, 0);
+				sendlen += crypto_xmit(&xpkt,
+				    &peer->srcadr, sendlen, peer->cmmd,
+				    0);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
 			exten = NULL;
-			if (peer->leap == LEAP_NOTINSYNC ||
-			    !peer->crypto)
+			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
 				    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
@@ -2440,8 +2469,8 @@ peer_xmit(
 				exten = crypto_args(peer, CRYPTO_TAI,
 				    NULL);
 			if (exten != NULL) {
-				sendlen += crypto_xmit(&xpkt, sendlen,
-				    exten, 0);
+				sendlen += crypto_xmit(&xpkt,
+				    &peer->srcadr, sendlen, exten, 0);
 				free(exten);
 			}
 			break;
@@ -2468,14 +2497,14 @@ peer_xmit(
 			if (peer->cmmd != NULL) {
 				peer->cmmd->associd =
 				    htonl(peer->associd);
-				sendlen += crypto_xmit(&xpkt, sendlen,
-				    peer->cmmd, 0);
+				sendlen += crypto_xmit(&xpkt,
+				    &peer->srcadr, sendlen, peer->cmmd,
+				    0);
 				free(peer->cmmd);
 				peer->cmmd = NULL;
 			}
 			exten = NULL;
-			if (peer->leap == LEAP_NOTINSYNC ||
-			    !peer->crypto)
+			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
 				    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
@@ -2524,8 +2553,8 @@ peer_xmit(
 				exten = crypto_args(peer, CRYPTO_TAI,
 				    NULL);
 			if (exten != NULL) {
-				sendlen += crypto_xmit(&xpkt, sendlen,
-				    exten, 0);
+				sendlen += crypto_xmit(&xpkt,
+				    &peer->srcadr, sendlen, exten, 0);
 				free(exten);
 			}
 			break;
@@ -2708,7 +2737,8 @@ fast_xmit(
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;
 			rpkt->exten[0] |= htonl(temp32);
-			sendlen += crypto_xmit(&xpkt, sendlen,
+			sendlen += crypto_xmit(&xpkt,
+			    &rbufp->recv_srcadr, sendlen,
 			    (struct exten *)rpkt->exten, cookie);
 		} else {
 			session_key(&rbufp->dstadr->sin,

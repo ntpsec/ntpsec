@@ -3,8 +3,9 @@ AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd @MAKE_NTPDSIM@
 noinst_LIBRARIES = libntpd.a
 INCLUDES = -I$(top_srcdir)/include
-# LDADD might need RESLIB and ADJLIB
-LDADD =	version.o libntpd.a @LIBPARSE@
+# LDADD might need RESLIB and ADJLIB.
+# If LIBPARSE, we need libntpd.a there twice...
+LDADD =	version.o libntpd.a @LIBPARSE@ libntpd.a
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
