@@ -486,6 +486,7 @@ getconfig(
 	int minpoll;
 	int maxpoll;
 	int ttl;
+	long stratum;
 	unsigned long ul;
 	keyid_t peerkey;
 	u_char *peerkeystr;
@@ -1298,9 +1299,7 @@ getconfig(
 
 
 				    case CONF_FDG_STRATUM:
-					/* HMS: the (long *)_ may be trouble */
-					if (!atoint(tokens[++i],
-						    (long *)&clock_stat.fudgeval1))
+				      if (!atoint(tokens[++i], &stratum))
 					{
 						msyslog(LOG_ERR,
 							"fudge %s stratum value in error",
@@ -1308,6 +1307,7 @@ getconfig(
 						errflg = i;
 						break;
 					}
+					clock_stat.fudgeval1 = stratum;
 					clock_stat.haveflags |= CLK_HAVEVAL1;
 					break;
 

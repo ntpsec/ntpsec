@@ -96,12 +96,12 @@ void msyslog(int level, const char *fmt, ...)
 			continue;
 		}
 		err = 0;
-#if !defined(VMS) && !defined(SYS_WINNT) && !defined (SYS_VXWORKS)
+#if !defined(VMS) && !defined(SYS_WINNT) && !defined (SYS_VXWORKS) && !defined (HAVE_STRERROR)
 		if ((unsigned)olderrno > sys_nerr)
 		    sprintf((char *)(err = xerr), "error %d", olderrno);
 		else
 		    err = (char*)sys_errlist[olderrno];
-#elif defined(VMS) || defined (SYS_VXWORKS)
+#elif defined(VMS) || defined (SYS_VXWORKS) || defined(HAVE_STRERROR)
 		err = strerror(olderrno);
 #else  /* SYS_WINNT */
 		err = xerr;

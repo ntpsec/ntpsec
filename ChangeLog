@@ -1,3 +1,21 @@
+2001-04-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ElectricFence/page.c (stringErrorReport): Follow Rainer's lead
+	and use strerror().
+
+	* ntpd/refclock_shm.c (shm_start): Always use strerror. 
+	* libntp/msyslog.c (msyslog): Use strerror if present. 
+	From: Rainer Orth  <ro@TechFak.Uni-Bielefeld.
+	
+	* ntpd/ntp_config.c (getconfig): Read stratum fudge value into 
+	long variable.
+	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE> 
+
+	* libparse/parsesolaris.c (rdchar): Cast ~0 to unsigned long. 
+	* libntp/buftvtots.c (buftvtots): Allow for 8-byte tv_sec, tv_usec 
+	in struct timeval.
+	From: Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
 2001-04-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_config.c (getconfig): move "tinker" so it's generally

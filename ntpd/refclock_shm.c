@@ -89,35 +89,19 @@ struct shmTime {
 };
 struct shmTime *getShmTime (int unit) {
 #ifndef SYS_WINNT
-	extern char *sys_errlist[ ];
-	extern int sys_nerr;
 	int shmid=0;
 
 	assert (unit<10); /* MAXUNIT is 4, so should never happen */
 	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
 		      IPC_CREAT|(unit<2?0700:0777));
 	if (shmid==-1) { /*error */
-		char buf[20];
-		char *pe=buf;
-		if (errno<sys_nerr)
-		    pe=sys_errlist[errno];
-		else {
-			sprintf (buf,"errno=%d",errno);
-		}
-		msyslog(LOG_ERR,"SHM shmget (unit %d): %s",unit,pe);
+		msyslog(LOG_ERR,"SHM shmget (unit %d): %s",unit,strerror(errno));
 		return 0;
 	}
 	else { /* no error  */
 		struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
 		if ((int)(long)p==-1) { /* error */
-			char buf[20];
-			char *pe=buf;
-			if (errno<sys_nerr)
-			    pe=sys_errlist[errno];
-			else {
-				sprintf (buf,"errno=%d",errno);
-			}
-			msyslog(LOG_ERR,"SHM shmat (unit %d): %s",unit,pe);
+			msyslog(LOG_ERR,"SHM shmat (unit %d): %s",unit,strerror(errno));
 			return 0;
 		}
 		return p;
