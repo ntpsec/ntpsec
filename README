@@ -12,6 +12,8 @@ well as setting up an NTP subnet, is in the HTML pages in the ./html/
 directory. For more information on NTP and how to get a working setup,
 read WHERE-TO-START.
 
+For Windows/NT, visit html/hints/winnt .
+
 The base directory ./ contains the autoconfiguation files, source
 directories and related stuff:
 
@@ -38,8 +40,6 @@ TODO            List of items the NTP developers are working on.
 
 WHERE-TO-START	Hints on what to read in order to get a working
 		configuration.
-
-WINNT-README.html	Information on ntp for Windows NT.
 
 Makefile.am	Automake file configuration file. Edit only if you have the
 		GNU automake and autoconf utilities installed.
