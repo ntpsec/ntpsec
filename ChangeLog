@@ -1,3 +1,8 @@
+2000-04-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99h6
+	Dave improved the crypto stuff some more.
+
 2000-04-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_acts.c (acts_receive): Do a better job with year
