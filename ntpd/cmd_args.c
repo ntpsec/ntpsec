@@ -20,7 +20,7 @@ extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
 
-static const char *ntp_options = "aAbB:c:C:dD:f:gH:I:J:k:K:l:LmnN:O:p:P:qr:s:S:t:T:W:v:V:xY:Z:";
+static const char *ntp_options = "aAbB:c:C:dD:f:gH:I:J:k:K:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -112,7 +112,7 @@ getstartup(
 		    break;
 
 		case 'N':
-		    priority_done = strcmp(ntp_optarg, "high");
+		    priority_done = 0;
 		    break;
 			
 		case '?':
