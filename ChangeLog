@@ -1,4 +1,14 @@
+2000-01-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_io.c (open_socket): TOS support
+	From: Marc.Brett@westgeo.com
+
 2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: Declaration cleanup
+	* ntpd/refclock_fg.c (fg_receive): Not all sprintf's are created
+	equal...
+	From: Marc.Brett@westgeo.com
 
 	* ntpd/refclock_wwv.c: Dave Cleaned and Improved things.
 	* ntpd/ntp_loopfilter.c (local_clock): Dave fixed something.

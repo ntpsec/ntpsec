@@ -19,6 +19,10 @@
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IP_H
+# include <netinet/in_systm.h>
+# include <netinet/ip.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
@@ -880,7 +884,7 @@ open_socket(
 	int turn_off_reuse
 	)
 {
-	int fd;
+	int fd, tos;
 	int on = 1, off = 0;
 
 	/* create a datagram (UDP) socket */
@@ -904,6 +908,15 @@ open_socket(
 	{
 		msyslog(LOG_ERR, "setsockopt SO_REUSEADDR on fails: %m");
 	}
+
+#if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
+	/* set IP_TOS to minimize packet delay */
+	tos = IPTOS_LOWDELAY;
+	if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &tos, sizeof(tos)) < 0)
+	{
+		msyslog(LOG_ERR, "setsockopt IPTOS_LOWDELAY on fails: %m");
+	}
+#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 	/*
 	 * bind the local address.

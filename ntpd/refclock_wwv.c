@@ -598,7 +598,7 @@ static	double	wwv_rsec	P((struct peer *, double));
 static	void	wwv_qrz		P((struct peer *, struct sync *,
 				    double));
 static	void	wwv_corr4	P((struct peer *, struct decvec *,
-				    double [], double [][]));
+				    double *, double **));
 static	void	wwv_gain	P((struct peer *));
 static	void	wwv_tsec	P((struct wwvunit *));
 static	double	wwv_data	P((struct wwvunit *, double));

@@ -241,7 +241,8 @@ fg_receive(
         pp->minute = BP1(6)*10 + BP2(6);
         pp->second = BP1(7)*10 + BP2(7);
         pp->usec = BP1(8)*100 + BP2(8)*10 + BP1(9);
-        pp->lencode = sprintf(pp->a_lastcode, "%d %d %d %d %d", pp->year, pp->day, pp->hour, pp->minute, pp->second);
+	sprintf(pp->a_lastcode, "%d %d %d %d %d", pp->year, pp->day, pp->hour, pp->minute, pp->second);
+	pp->lencode = strlen(pp->a_lastcode);
         get_systime(&pp->lastrec);
 
 #ifdef DEBUG
