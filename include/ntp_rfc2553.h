@@ -68,9 +68,7 @@
 #ifndef _NTP_RFC2553_H_
 #define _NTP_RFC2553_H_
 
-#if defined(_SS_MAXSIZE) || defined(_SS_SIZE)
-#define HAVE_IPV6
-#else
+#ifndef ISC_PLATFORM_HAVEIPV6
 
 #include <sys/types.h>
 #include "ntp_types.h"
@@ -250,5 +248,5 @@ int	getnameinfo P((const struct sockaddr *, u_int, char *,
 void	freeaddrinfo P((struct addrinfo *));
 char	*gai_strerror P((int));
 
-#endif /* _SS_MAXSIZE */
+#endif /* ISC_PLATFORM_HAVEIPV6 */
 #endif /* !_NTP_RFC2553_H_ */

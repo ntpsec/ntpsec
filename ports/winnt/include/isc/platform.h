@@ -30,7 +30,12 @@
  *** Network.
  ***/
 
+/*
+ * This should not be defined yet until we can support IPV6
+ * on Windows Platforms.
+ *
 #define ISC_PLATFORM_HAVEIPV6
+*/
 #define ISC_PLATFORM_NEEDPORTT
 #undef MSG_TRUNC
 #define ISC_PLATFORM_NEEDNTOP
