@@ -51,8 +51,8 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2]; 	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_maxd; 	/* select error (squares) */
-static	double sys_epsil;	/* system error (squares) */
+static	double sys_selerr; 	/* select error (squares) */
+static	double sys_syserr;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 u_int sys_survivors;		/* truest of the truechimers */
@@ -192,22 +192,21 @@ transmit(
 			/*
 			 * Here the peer is reachable. If there is no
 			 * system peer or if the stratum of the system
-			 * peer is greater than this peer, clamp the
-			 * poll interval to the minimum. If less than
-			 * two samples are in the reachability register,
-			 * reduce the interval; if more than six samples
-			 * are in the register, increase the interval.
+			 * peer is greater than this peer or if less
+			 * than five samples are in the reachability
+			 * register, clamp the interval to the minimum.
+			 * If more than six samples are in the register,
+			 * increase the interval by one.
 			 */
-			if (sys_peer == NULL)
-				hpoll = peer->minpoll;
-			else if (sys_peer->stratum > peer->stratum)
-				hpoll = peer->minpoll;
 			if ((peer->reach & 0x03) == 0) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (peer->valid <= 2 && hpoll > peer->minpoll)
-				hpoll--;
+			if (sys_peer == NULL)
+				hpoll = peer->minpoll;
+			else if (sys_peer->stratum > peer->stratum ||
+			    peer->valid < 5)
+				hpoll = peer->minpoll;
 			else if (peer->valid >= NTP_SHIFT - 2)
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
@@ -239,20 +238,15 @@ transmit(
 	poll_update(peer, hpoll);
 
 	/*
-	 * We need to be very careful about honking uncivilized time. If
-	 * in broadcast mode, transmit only if synchronized to a valid
-	 * source and this is not the local clock driver configured as
-	 * the prefer peer. If not in broadcast mode, transmit only if
-	 * not broadcast client mode.
+	 * We need to be very careful about honking uncivilized time.
+	 * Never transmit if in broadcast client mode. If in broadcast
+	 * mode, transmit only if synchronized to a valid source. 
 	 */
-	if (peer->hmode == MODE_BROADCAST) {
+	if (peer->hmode == MODE_BCLIENT) {
+		return;
+	} else if (peer->hmode == MODE_BROADCAST) {
 		if (sys_peer == NULL)
 			return;
-		else if (sys_peer->refclktype == REFCLK_LOCALCLOCK &&
-		    sys_peer->flags & FLAG_PREFER)
-			return;
-	} else if (peer->hmode == MODE_BCLIENT) {
-		return;
 	}
 	peer_xmit(peer);
 }
@@ -920,16 +914,17 @@ process_packet(
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
 	LFPTOD(&ci, dtemp);
-	if (pleap == LEAP_NOTINSYNC ||		 /* 6 */
+	if (pleap == LEAP_NOTINSYNC ||		/* 6 */
 	    pstratum >= STRATUM_UNSPEC || dtemp < 0)
 		peer->flash |= TEST6;		/* bad synch */
 	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* 7 */
 		if (pstratum > sys_stratum && pmode != MODE_ACTIVE) {
-			peer->flash |= TEST7; /* bad stratum */
+			peer->flash |= TEST7;	/* bad stratum */
 			sys_badstratum++;
 		}
 	}
-	if (p_del < 0 || p_del / 2 + p_disp >= MAXDISPERSE) /* 8 */
+	if (p_del < 0 || p_disp < 0 || p_del /	/* 8 */
+	    2 + p_disp >= MAXDISPERSE)
 		peer->flash |= TEST8;		/* bad peer distance */
 	if (peer->flash) {
 #ifdef DEBUG
@@ -1061,7 +1056,7 @@ clock_update(void)
 #endif
 	oleap = sys_leap;
 	ostratum = sys_stratum;
-	switch (local_clock(sys_peer, sys_offset, sys_epsil)) {
+	switch (local_clock(sys_peer, sys_offset, sys_syserr)) {
 
 	/*
 	 * Clock is too screwed up. Just exit for now.
@@ -1311,6 +1306,8 @@ clock_filter(
 		if (n > 1 && current_time - peer->filter_epoch[ord[n]] >
 		    dtemp)
 			break;
+		if (distance[n] >= MAXDISTANCE)
+			continue;
 		for (j = 0; j < n; j++) {
 			if (distance[j] > distance[n]) {
 				etemp = distance[j];
@@ -1321,38 +1318,45 @@ clock_filter(
 				ord[n] = k;
 			}
 		}
-	} 
+	}
 	
 	/*
 	 * Compute the offset, delay, dispersion and jitter squares
 	 * weighted by the reciprocal of distance and normalized. The
 	 * dispersion is weighted exponentially by NTP_FWEIGHT (0.5) so
-	 * to normalize close to 1.0. . When no acceptable samples
-	 * remain in the shift register, quietly tiptoe home.
+	 * to normalize close to 1.0. If no acceptable samples remain in
+	 * the shift register, quietly tiptoe home leaving only the
+	 * dispersion.
 	 */
-	off = dly = dsp = dtemp = 0;
-	jit = SQUARE(LOGTOD(sys_precision));
+	off = dly = dsp = jit = dtemp = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		dsp = NTP_FWEIGHT * (dsp + peer->filter_disp[ord[i]]);
-		if (i < n && distance[i] < MAXDISTANCE) {
-			dtemp += 1. / distance[i];
-			off += peer->filter_offset[ord[i]] /
-			    distance[i];
-			dly += peer->filter_delay[ord[i]] /
-			    distance[i];
-			jit += DIFF(peer->filter_offset[ord[i]],
-			    peer->filter_offset[ord[0]]) /
-			    distance[i];
-		}
+		if (i >= n)
+			continue;
+		dtemp += 1. / distance[i];
+		off += peer->filter_offset[ord[i]] / distance[i];
+		dly += peer->filter_delay[ord[i]] / distance[i];
+		jit += DIFF(peer->filter_offset[ord[i]],
+		    peer->filter_offset[ord[0]]) / distance[i];
 	}
-	if (dtemp == 0)
+
+	/*
+	 * If no acceptable samples remain in the shift register,
+	 * quietly tiptoe home leaving only the dispersion. Otherwise
+	 * normalize the offset, delay and jitter averages. Note the
+	 * jitter must be at least the clock precision.
+	 */
+	peer->disp = dsp;
+	if (n == 0)
 		return;
-	peer->delay = dly / dtemp;
-	peer->disp = min(dsp, MAXDISPERSE);
-	peer->jitter = min(jit / dtemp, MAXDISPERSE);
 	peer->epoch = current_time;
 	etemp = peer->offset;
 	peer->offset = off / dtemp;
+	peer->delay = dly / dtemp;
+	if (n > 1)
+		jit = min(jit / (dtemp - 1. / distance[0]),
+		    MAXDISPERSE);
+	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision))); 
 
 	/*
 	 * A new sample is useful only if it is younger than the last
@@ -1694,32 +1698,35 @@ clock_select(void)
 			peer->status = CTL_PST_SEL_DISTSYSPEER;
 	}
 	while (1) {
-		sys_maxd = 0;
 		d = 1e9;
-		for (k = i = nlist - 1; i >= 0; i--) {
-			double sdisp = 0;
+		e = -1e9;
+		for (i = 0; i < nlist; i++) {
 
-			for (j = nlist - 1; j > 0; j--) {
-				sdisp += DIFF(peer_list[i]->offset,
-				    peer_list[j]->offset);
-			}
-			sdisp *= synch[i];
-			if (sdisp > sys_maxd) {
-				sys_maxd = sdisp;
-				k = i;
-			}
 			if (error[i] < d)
 				d = error[i];
+			f = 0;
+			if (nlist > 1) {
+				for (j = 0; j < nlist; j++)
+					f += DIFF(peer_list[j]->offset,
+					    peer_list[i]->offset);
+				f /= nlist - 1;
+			}
+			f = max(f, SQUARE(LOGTOD(sys_precision))); 
+			if (f * synch[i] > e) {
+				sys_selerr = f;
+				e = f * synch[i];
+				k = i;
+			}
 		}
 
 #ifdef DEBUG
 		if (debug > 2)
 			printf(
 			    "select: survivors %d select %.6f peer %.6f\n",
-			    nlist, SQRT(sys_maxd), SQRT(d));
+			    k, SQRT(sys_selerr), SQRT(d));
 #endif
-		if (nlist <= NTP_MINCLOCK || sys_maxd <= d ||
-			peer_list[k]->flags & FLAG_PREFER)
+		if (nlist <= NTP_MINCLOCK || sys_selerr <= d ||
+		    peer_list[k]->flags & FLAG_PREFER)
 			break;
 		if (!(peer_list[k]->flags & FLAG_CONFIG))
 			unpeer(peer_list[k]);
@@ -1823,7 +1830,7 @@ clock_select(void)
 		sys_peer = sys_prefer;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = sys_peer->offset;
-		sys_epsil = sys_peer->jitter;
+		sys_syserr = sys_peer->jitter;
 #ifdef DEBUG
 		if (debug > 2)
 			printf("select: prefer offset %.6f\n",
@@ -1833,7 +1840,7 @@ clock_select(void)
 		sys_peer = typepps;
 		sys_peer->status = CTL_PST_SEL_PPS;
 		sys_offset = sys_peer->offset;
-		sys_epsil = sys_peer->jitter;
+		sys_syserr = sys_peer->jitter;
 		if (!pps_control)
 			NLOG(NLOG_SYSEVENT)
 			    msyslog(LOG_INFO,
@@ -1851,7 +1858,7 @@ clock_select(void)
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = clock_combine(peer_list, nlist);
-		sys_epsil = sys_peer->jitter + sys_maxd;
+		sys_syserr = sys_peer->jitter + sys_selerr;
 #ifdef DEBUG
 		if (debug > 2)
 			printf("select: combine offset %.6f\n",

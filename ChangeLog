@@ -1,3 +1,12 @@
+2001-01-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k17
+
+	* ntpd/refclock_local.c (STRATUM): 3 -> 5
+	* ntpd/ntp_proto.c: sys_maxd -> sys_selerr, sys_epsil ->
+	sys_syserr.  various cleanups and improvements.
+	From: Dave Mills.
+
 2001-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k16
