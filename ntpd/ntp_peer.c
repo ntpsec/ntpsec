@@ -21,14 +21,12 @@
  *                             packet->mode
  * peer->mode      | UNSPEC  ACTIVE PASSIVE  CLIENT  SERVER  BCAST
  * ----------      | ---------------------------------------------
- * NO_PEER         |   e       1       e       1       1       1
+ * NO_PEER         |   e       1       0       1       1       1
  * ACTIVE          |   e       1       1       0       0       0
  * PASSIVE         |   e       1       e       0       0       0
  * CLIENT          |   e       0       0       0       1       1
  * SERVER          |   e       0       0       0       0       0
  * BCAST	   |   e       0       0       0       0       0
- * CONTROL	   |   e       0       0       0       0       0
- * PRIVATE	   |   e       0       0       0       0       0
  * BCLIENT         |   e       0       0       0       e       1
  *
  * One point to note here: a packet in BCAST mode can potentially match
@@ -38,27 +36,25 @@
  * circumvent that problem by requiring that the first b(m)roadcast
  * received after the change back to BCLIENT mode sets the clock.
  */
+#define AM_MODES	7	/* number of rows and columns */
+#define NO_PEER		0	/* action when no peer is found */
 
 int AM[AM_MODES][AM_MODES] = {
 /*	{ UNSPEC,   ACTIVE,     PASSIVE,    CLIENT,     SERVER,     BCAST } */
 
-/*NONE*/{ AM_ERR, AM_NEWPASS, AM_ERR,     AM_FXMIT,   AM_MANYCAST, AM_NEWBCL},
+/*NONE*/{ AM_ERR, AM_NEWPASS, AM_NOMATCH, AM_FXMIT,   AM_MANYCAST, AM_NEWBCL},
 
 /*A*/	{ AM_ERR, AM_PROCPKT, AM_PROCPKT, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
 /*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_POSSBCL},
+/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
 
 /*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
 /*BCST*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*CNTL*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*PRIV*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
-
-/*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_ERR,      AM_PROCPKT},
+/*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_PROCPKT},
 };
 
 #define MATCH_ASSOC(x,y)	AM[(x)][(y)]
@@ -238,14 +234,6 @@ findpeer(
 			 * look for the next valid peer association.
 			 */
 			*action = MATCH_ASSOC(peer->hmode, pkt_mode);
-
-			/*
-			 * Sigh!  Check if BCLIENT peer in client
-			 * server mode, else return error.
-			 */
-			if ((*action == AM_POSSBCL) && !(peer->flags &
-			    FLAG_MCAST))
-				*action = AM_ERR;
 
 			/*
 			 * if an error was returned, exit back right
