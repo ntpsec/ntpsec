@@ -326,8 +326,6 @@ mx4200_config(
 	up->last_leap   	= 0;	/* LEAP_NOWARNING */
 	up->clamp_time  	= current_time + (AVGING_TIME * 60 * 60);
 	up->log_time    	= current_time + SLEEPTIME;
-	pp->nstages		= MNSAMPLES;
-	pp->nskeep		= MNKEEP;
 
 	/*
 	 * "007" Control Port Configuration

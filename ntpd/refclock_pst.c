@@ -156,8 +156,7 @@ pst_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->flags |= FLAG_BURST;
-	peer->burst = pp->nstages;
+	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, WWVREFID, 4);
 	return (1);
@@ -251,19 +250,6 @@ pst_receive(
 	}
 
 	/*
-	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp.
-	 */
-	if (!refclock_process(pp)) {
-		refclock_report(peer, CEVNT_BADTIME);
-		peer->burst = 0;
-		return;
-	}
-	if (peer->burst > 0)
-		return;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
-	/*
 	 * Decode synchronization, quality and last update. If
 	 * unsynchronized, set the leap bits accordingly and exit. Once
 	 * synchronized, the dispersion depends only on when the clock
@@ -279,7 +265,14 @@ pst_receive(
 	if (peer->stratum <= 1)
 		peer->refid = pp->refid;
 	pp->disp = PST_PHI * ltemp;
-	refclock_receive(peer);
+
+	/*
+	 * Process the new sample in the median filter and determine the
+	 * timecode timestamp.
+	 */
+	if (!refclock_process(pp))
+		refclock_report(peer, CEVNT_BADTIME);
+
 }
 
 
@@ -303,14 +296,21 @@ pst_poll(
 	 */
 	pp = peer->procptr;
 	up = (struct pstunit *)pp->unitptr;
-	if (peer->burst ==0 && peer->reach == 0)
-		refclock_report(peer, CEVNT_TIMEOUT);
 	up->tcswitch = 0;
 	up->lastptr = pp->a_lastcode;
 	if (write(pp->io.fd, "QTQDQMT", 6) != 6)
 		refclock_report(peer, CEVNT_FAULT);
 	else
 		pp->polls++;
+	if (peer->burst > 0)
+		return;
+	peer->burst = NSTAGE;
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	refclock_receive(peer);
 }
 
 #else

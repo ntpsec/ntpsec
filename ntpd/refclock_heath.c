@@ -242,6 +242,7 @@ heath_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	up->pollcnt = 2;
@@ -302,7 +303,6 @@ heath_receive(
 	 */
 	pp->lastrec = up->tstamp;
 	up->pollcnt = 2;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 	    printf("heath: timecode %d %s\n", pp->lencode,
@@ -432,11 +432,8 @@ heath_receive(
 		pp->msec = (dsec - '0') * 100;
 		pp->leap = LEAP_NOWARNING;
 	}
-	if (!refclock_process(pp)) {
+	if (!refclock_process(pp))
 		refclock_report(peer, CEVNT_BADTIME);
-		return;
-	}
-	refclock_receive(peer);
 }
 
 
@@ -460,10 +457,6 @@ heath_poll(
 	 */
 	pp = peer->procptr;
 	up = (struct heathunit *)pp->unitptr;
-	if (up->pollcnt == 0)
-	    refclock_report(peer, CEVNT_TIMEOUT);
-	else
-	    up->pollcnt--;
 	pp->polls++;
 
 	/*
@@ -475,10 +468,18 @@ heath_poll(
 	 * pulse might get too short. Later.
 	 */
 	if (ioctl(pp->io.fd, TIOCMBIC, (char *)&bits) < 0)
-	    refclock_report(peer, CEVNT_FAULT);
+		refclock_report(peer, CEVNT_FAULT);
 	get_systime(&up->tstamp);
 	ioctl(pp->io.fd, TIOCMBIS, (char *)&bits);
-
+	if (peer->burst > 0)
+		return;
+	peer->burst = NSTAGE;
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	refclock_receive(peer);
 }
 
 #else

@@ -429,9 +429,6 @@ oncore_start(
 	}
 	memset((char *) instance, 0, sizeof *instance);
 	pp = peer->procptr;
-	pp->nstages = 16;
-	pp->nskeep = pp->nstages * 3 / 5;
-
 	pp->unitptr = (caddr_t)instance;
 	instance->unit	= unit;
 	instance->ttyfd = fd1;

@@ -359,8 +359,6 @@ irig_start(
 	up->tc = MINTC;
 	up->decim = 1;
 	up->fdelay = IRIG_B;
-	pp->nstages = 50;
-	pp->nskeep = 30;
 	up->gain = (AUDIO_MAX_GAIN - AUDIO_MIN_GAIN) / 2;
 	if (irig_audio() < 0) {
 		io_closeclock(&pp->io);
@@ -485,13 +483,9 @@ irig_receive(
 			if (up->irig_b > up->irig_e) {
 				up->decim = 1;
 				up->fdelay = IRIG_B;
-				pp->nstages = 50;
-				pp->nskeep = 30;
 			} else {
 				up->decim = 10;
 				up->fdelay = IRIG_E;
-				pp->nstages = 5;
-				pp->nskeep = 3;
 			}
 			if (pp->sloppyclockflag & CLK_FLAG2)
 			    up->port = AUDIO_LINE_IN;
@@ -850,7 +844,7 @@ irig_decode(
 			up->timecnt++;
 			refclock_process(pp);
 		}
-		if (up->timecnt >= pp->nstages) {
+		if (up->timecnt >= MAXSTAGE) {
 			refclock_receive(peer);
 			up->timecnt = 0;
 			up->pollcnt = 2;

@@ -199,11 +199,6 @@ palisade_start (
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
-	pp->nstages = 1;
-#ifndef PALISADE
-	pp->nskeep = 1;
-#endif
-
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG
                 printf("Palisade(%d) io_addclock\n",unit);

@@ -1186,7 +1186,10 @@ arc_receive(
 	}
 #endif
 
-	refclock_process(pp);
+	if (!refclock_process(pp)) {
+		refclock_report(peer, CEVNT_BADTIME);
+		return;
+	}
 	refclock_receive(peer);
 }
 

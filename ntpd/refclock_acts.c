@@ -712,8 +712,6 @@ acts_receive (
 		pp->offset += (msADV - up->msADV) * 1000 * 1e-6;
 	} else {
 		up->msADV = msADV;
-		pp->nstages = up->msgcnt;
-		pp->nskeep = up->msgcnt * 2 / 3;
 		if (!refclock_process(pp)) {
 			refclock_report(peer, CEVNT_BADTIME);
 			return;

@@ -153,7 +153,7 @@ ulink_start(
 	 */
 	peer->precision = PRECISION;
 	peer->flags |= FLAG_BURST;
-	peer->burst = pp->nstages;
+	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	return (1);
@@ -252,23 +252,8 @@ ulink_receive(
 	       &syncchar, &qualchar, &modechar, &pp->year, &pp->day,
 	       &leapchar,&pp->hour, &pp->minute, &pp->second,&pp->msec);
 
-	pp->msec*=10; /* M320 returns 10's of msecs */
-
-	/*
-	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp.
-	 */
-	if (!refclock_process(pp)) {
-	  refclock_report(peer, CEVNT_BADTIME);
-	  peer->burst = 0;
-	  return;
-	}
-	if (peer->burst > 0)
-	  return;
-
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
-	qualchar=' ';
+	pp->msec *= 10; /* M320 returns 10's of msecs */
+	qualchar = ' ';
 
 	/*
 	 * Decode synchronization, quality and leap characters. If
@@ -278,18 +263,14 @@ ulink_receive(
 	 * quality character.
 	 */
 	pp->disp = .001;
-
 	pp->leap = LEAP_NOWARNING;
-	refclock_receive(peer);
 
 	/*
-	 * If the monitor flag is set (flag4), we dump the internal
-	 * quality table at the first timecode beginning the day.
+	 * Process the new sample in the median filter and determine the
+	 * timecode timestamp.
 	 */
-	if (pp->sloppyclockflag & CLK_FLAG4 && pp->hour <
-	    (int)up->lasthour)
-		up->linect = MONLIN;
-	up->lasthour = pp->hour;
+	if (!refclock_process(pp))
+		refclock_report(peer, CEVNT_BADTIME);
 }
 
 
@@ -302,13 +283,35 @@ ulink_poll(
 	struct peer *peer
 	)
 {
+	register struct ulinkunit *up;
 	struct refclockproc *pp;
 	char pollchar;
 
 	pp = peer->procptr;
+	up = (struct wwvbunit *)pp->unitptr;
 	pollchar = 'T';
-	write(pp->io.fd, &pollchar, 1);
-	pp->polls++;
+	if (write(pp->io.fd, &pollchar, 1) != 1)
+		refclock_report(peer, CEVNT_FAULT);
+	else
+		pp->polls++;
+	if (peer->burst > 0)
+		return;
+	peer->burst = NSTAGE;
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	refclock_receive(peer);
+
+	/*
+	 * If the monitor flag is set (flag4), we dump the internal
+	 * quality table at the first timecode beginning the day.
+	 */
+	if (pp->sloppyclockflag & CLK_FLAG4 && pp->hour <
+	    (int)up->lasthour)
+		up->linect = MONLIN;
+	up->lasthour = pp->hour;
 }
 
 #else

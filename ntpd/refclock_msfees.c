@@ -556,7 +556,6 @@ msfees_start(
 	unitinuse[unit] = 1;
 	pp->unitptr = (caddr_t) &eesunits[unit];
 	pp->clockdesc = EESDESCRIPTION;
-	pp->nstages = MAXSTAGE;
 	msyslog(LOG_ERR, "ees clock: %s OK on %d", eesdev, unit);
 	return (1);
 

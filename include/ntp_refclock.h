@@ -183,10 +183,9 @@ struct refclockproc {
 	int	second;		/* second of minute */
 	int	msec;		/* millisecond of second */
 	long	usec;		/* microsecond of second (alt) */
-	int	nstages;	/* median filter stages */
-	int	nskeep;		/* trimmed filter stages */
 	u_long	yearstart;	/* beginning of year */
-	u_long	coderecv;	/* sample counter */
+	int	coderecv;	/* put pointer */
+	int	codeproc;	/* get pointer */
 	l_fp	lastref;	/* timecode timestamp */
 	l_fp	lastrec;	/* local timestamp */
 	double	offset;		/* mean offset */
@@ -237,10 +236,7 @@ struct refclock {
 /*
  * auxiliary PPS interface (implemented by refclock_atom())
  */
-#ifdef PPS_SAMPLE
-extern int pps_sample P((l_fp *));
-#endif
-
+extern	int	pps_sample P((l_fp *));
 extern	int	io_addclock_simple P((struct refclockio *));
 extern	int	io_addclock	P((struct refclockio *));
 extern	void	io_closeclock	P((struct refclockio *));
@@ -255,8 +251,7 @@ extern	int	refclock_open	P((char *, int, int));
 extern	void	refclock_transmit P((struct peer *));
 extern	int	refclock_ioctl	P((int, int));
 extern 	int	refclock_process P((struct refclockproc *));
-extern 	int	refclock_process_offset P((struct refclockproc *, l_fp, l_fp, double));
-extern 	void	refclock_sample P((struct refclockproc *));
+extern 	void	refclock_process_offset P((struct refclockproc *, l_fp, l_fp, double));
 extern	void	refclock_report	P((struct peer *, int));
 extern	int	refclock_gtlin	P((struct recvbuf *, char *, int,
 				    l_fp *));

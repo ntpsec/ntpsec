@@ -1,3 +1,29 @@
+1999-10-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwvb.c: 
+	* ntpd/refclock_usno.c: 
+	* ntpd/refclock_ulink.c: 
+	* ntpd/refclock_tpro.c: 
+	* ntpd/refclock_pst.c: 
+	* ntpd/refclock_parse.c: 
+	* ntpd/refclock_palisade.c: 
+	* ntpd/refclock_oncore.c: 
+	* ntpd/refclock_mx4200.c: 
+	* ntpd/refclock_msfees.c: 
+	* ntpd/refclock_jupiter.c: 
+	* ntpd/refclock_irig.c: 
+	* ntpd/refclock_heath.c: 
+	* ntpd/refclock_chu.c: 
+	* ntpd/refclock_atom.c: 
+	* ntpd/refclock_as2201.c: 
+	* ntpd/refclock_arc.c: 
+	* ntpd/refclock_arbiter.c: 
+	* ntpd/refclock_acts.c: 
+	* ntpd/ntp_refclock.c: 
+	* include/ntp_refclock.h: 
+	Bunches of fixes.
+	From: Dave Mills <mills@udel.edu>
+
 1999-10-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver16.htm: New version

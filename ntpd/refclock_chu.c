@@ -416,8 +416,6 @@ chu_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	pp->nstages = MAXSTAGE;
-	pp->nskeep = MAXSTAGE * 3 / 5;
 	memcpy((char *)&pp->refid, REFID, 4);
 	DTOLFP(CHAR, &up->charstamp);
 	up->pollcnt = 2;
@@ -1256,8 +1254,8 @@ chu_poll(
 		toffset = offset;
 		L_SUB(&toffset, &up->tstamp[i]);
 		LFPTOD(&toffset, dtemp);
-		pp->filter[(pp->coderecv++) % pp->nstages] = dtemp +
-		    FUDGE + pp->fudgetime1;
+		pp->filter[pp->coderecv++ % MAXSTAGE] = dtemp + FUDGE +
+		    pp->fudgetime1;
 	}
 	if (i > 0)
 		refclock_receive(peer);

@@ -85,23 +85,15 @@
  * Interface definitions
  */
 #ifdef HAVE_PPSAPI	/* avoid others if api available */
-#undef PPS
-#undef TTYCLK
-
 extern int pps_assert;
 #endif /* HAVE_PPSAPI */
-
-#ifdef PPS		/* avoid tty_clk if ppsclock available */
-#undef TTYCLK
-#endif /* PPS */
-
 #ifdef TTYCLK
-# define DEVICE		"/dev/pps%d"	/* device name and unit */
-# ifdef B38400
-#  define SPEED232	B38400	/* uart speed (38400 baud) */
-# else
-#  define SPEED232	EXTB	/* as above */
-# endif
+#define DEVICE		"/dev/pps%d"	/* device name and unit */
+#ifdef B38400
+#define SPEED232	B38400	/* uart speed (38400 baud) */
+#else
+#define SPEED232	EXTB	/* as above */
+#endif
 #endif /* TTYCLK */
 
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
@@ -112,9 +104,7 @@ extern int pps_assert;
 #define FLAG_PPS	0x02	/* ppsclock heard from */
 #define FLAG_AUX	0x04	/* auxiliary PPS source */
 
-#ifdef PPS_SAMPLE
 static struct peer *pps_peer;	/* atom driver for auxiliary PPS sources */
-#endif
 
 #ifdef TTYCLK
 static	void	atom_receive	P((struct recvbuf *));
@@ -131,7 +121,6 @@ struct atomunit {
 	struct	ppsclockev ev;	/* ppsclock control */
 #endif /* PPS */
 	int	flags;		/* flags that wave */
-	int	pollcnt;	/* poll message counter */
 };
 
 /*
@@ -175,16 +164,19 @@ atom_start(
 	char device[20];
 #endif /* TTYCLK */
 
+	pps_peer = peer;
 	flags = 0;
+
 #ifdef TTYCLK
 	/*
 	 * Open serial port. Use LDISC_CLKPPS line discipline only
 	 * if the LDISC_PPS line discipline is not availble,
 	 */
-	(void)sprintf(device, DEVICE, unit);
-	if ((fd = refclock_open(device, SPEED232, LDISC_CLKPPS)) == 0)
-		return (0);
-	flags |= FLAG_TTY;
+	if (fdpps <= 0) {
+		(void)sprintf(device, DEVICE, unit);
+		if ((fd = refclock_open(device, SPEED232, LDISC_CLKPPS)) != 0)
+			flags |= FLAG_TTY;
+	}
 #endif /* TTYCLK */
 
 	/*
@@ -213,20 +205,14 @@ atom_start(
 		}
 	}
 #endif /* TTYCLK */
-#ifdef PPS_SAMPLE
-	if (pps_peer == 0)
-		pps_peer = peer;
-#endif /* PPS_SAMPLE */
+
 	/*
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-	up->pollcnt = 2;
 	up->flags = flags;
-	pp->nstages = MAXSTAGE;
-	pp->nskeep = MAXSTAGE * 3 / 5;
 	return (1);
 }
 
@@ -249,10 +235,8 @@ atom_shutdown(
 	if (up->flags & FLAG_TTY)
 		io_closeclock(&pp->io);
 #endif /* TTYCLK */
-#ifdef PPS_SAMPLE
 	if (pps_peer == peer)
 		pps_peer = 0;
-#endif /* PPS_SAMPLE */
 	free(up);
 }
 
@@ -272,7 +256,7 @@ atom_pps(
 	struct timespec ts;
 #else
 	struct timeval ts;
-#endif
+#endif /* HAVE_TIMESPEC */
 	l_fp lftmp;
 	double doffset;
 	int i;
@@ -327,9 +311,8 @@ atom_pps(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = -doffset +
+	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset +
 	    pp->fudgetime1;
-	up->pollcnt = 2 * 60;
 	return (0);
 }
 #endif /* PPS || HAVE_PPSAPI */
@@ -372,12 +355,10 @@ atom_receive(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = -doffset + pp->fudgetime1;
-	up->pollcnt = 2;
+	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset + pp->fudgetime1;
 }
 #endif /* TTYCLK */
 
-#ifdef PPS_SAMPLE
 /*
  * pps_sample - receive PPS data from some other clock driver
  */
@@ -416,12 +397,10 @@ pps_sample(
 	L_CLR(&lftmp);
 	L_ADDF(&lftmp, pp->lastrec.l_f);
 	LFPTOD(&lftmp, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = -doffset +
+	pp->filter[pp->coderecv++ % MAXSTAGE] = -doffset +
 	    pp->fudgetime1;
-	up->pollcnt = 2 * 60;
 	return (0);
 }
-#endif /* PPS_SAMPLE */
 
 /*
  * atom_poll - called by the transmit procedure
@@ -447,15 +426,15 @@ atom_poll(
 		if (atom_pps(peer))
 			return;
 	}
+#endif /* PPS || HAVE_PPSAPI */
 	if (peer->burst > 0)
 		return;
-#endif /* PPS || HAVE_PPSAPI */
-	pp->polls++;
-	if (up->pollcnt == 0) {
-		refclock_report(peer, CEVNT_FAULT);
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
-	up->pollcnt--;
+	peer->burst = NSTAGE;
+	pp->polls++;
 
 	/*
 	 * Valid time (leap bits zero) is returned only if the prefer
@@ -471,10 +450,8 @@ atom_poll(
 		return;
 	}
 	pp->variance = 0;
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
-#if defined(PPS) || defined(HAVE_PPSAPI)
-	peer->burst = pp->nstages;
-#endif /* PPS || HAVE_PPSAPI */
 }
 
 #else

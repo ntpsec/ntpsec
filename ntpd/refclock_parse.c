@@ -3487,12 +3487,7 @@ parse_process(
 		}
 #endif
 
-	if (!refclock_process_offset(parse->generic, reftime, rectime, fudge))
-	{
-		parse_event(parse, CEVNT_BADTIME);
-		return;
-	}
-
+	refclock_process_offset(parse->generic, reftime, rectime, fudge);
 	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 	{
 		(void) pps_sample(&parse->time.parse_ptime.fp);

@@ -76,8 +76,6 @@
  * AS2201 unit control structure.
  */
 struct as2201unit {
-	int	pollcnt;	/* poll message counter */
-
 	char	*lastptr;	/* statistics buffer pointer */
 	char	stats[SMAX];	/* statistics buffer */
 	int	linect;		/* count of lines remaining */
@@ -197,11 +195,9 @@ as2201_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NTP_SHIFT;
+	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-	up->pollcnt = 2;
-
 	up->lastptr = up->stats;
 	up->index = 0;
 	return (1);
@@ -281,7 +277,6 @@ as2201_receive(
 			up->linect = atoi(pp->a_lastcode);
 			return;
 		} else {
-			up->pollcnt = 2;
 			record_clock_stats(&peer->srcadr, up->stats);
 #ifdef DEBUG
 			if (debug)
@@ -313,6 +308,14 @@ as2201_receive(
 	}
 
 	/*
+	 * Test for synchronization (this is a temporary crock).
+	 */
+	if (pp->a_lastcode[2] != ':')
+		pp->leap = LEAP_NOTINSYNC;
+	else
+		pp->leap = LEAP_NOWARNING;
+
+	/*
 	 * Process the new sample in the median filter and determine the
 	 * timecode timestamp.
 	 */
@@ -320,15 +323,6 @@ as2201_receive(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-
-	/*
-	 * Test for synchronization (this is a temporary crock).
-	 */
-	if (pp->a_lastcode[2] != ':')
-		pp->leap = LEAP_NOTINSYNC;
-	else
-		pp->leap = LEAP_NOWARNING;
-	refclock_receive(peer);
 
 	/*
 	 * If CLK_FLAG4 is set, initialize the statistics buffer and
@@ -374,10 +368,6 @@ as2201_poll(
 	 */
 	pp = peer->procptr;
 	up = (struct as2201unit *)pp->unitptr;
-	if (up->pollcnt == 0)
-	    refclock_report(peer, CEVNT_TIMEOUT);
-	else
-	    up->pollcnt--;
 	if (write(pp->io.fd, "\r*toc\r", 6) != 6) {
 		refclock_report(peer, CEVNT_FAULT);
 	} else {
@@ -385,6 +375,14 @@ as2201_poll(
 		if (!(pp->sloppyclockflag & CLK_FLAG2))
 			get_systime(&pp->lastrec);
 	}
+	if (peer->burst > 0)
+                return;
+	peer->burst = NSTAGE;
+        if (pp->coderecv == pp->codeproc) {
+                refclock_report(peer, CEVNT_TIMEOUT);
+                return;
+        }
+        refclock_receive(peer);
 }
 
 #else

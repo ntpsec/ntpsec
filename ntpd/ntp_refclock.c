@@ -95,6 +95,8 @@ static int refclock_cmpl_fp P((const void *, const void *));
 static int refclock_cmpl_fp P((const double *, const double *));
 #endif
 
+static int refclock_sample(struct refclockproc *);
+
 #ifdef HAVE_PPSAPI
 extern int pps_assert;
 extern int pps_hardpps;
@@ -232,8 +234,6 @@ refclock_newpeer(
 
 	pp->type = clktype;
 	pp->timestarted = current_time;
-	pp->nstages = NSTAGE;
-	pp->nskeep = NSTAGE * 3 / 5;
 
 	/*
 	 * If the interface has been set to any_interface, set it to the
@@ -364,7 +364,7 @@ refclock_transmit(
 			} else if (peer->valid > NTP_SHIFT - 2)
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
-				peer->burst = pp->nstages;
+				peer->burst = NSTAGE;
 		}
 		peer->outdate = current_time;
 	}
@@ -415,11 +415,11 @@ refclock_cmpl_fp(
 /*
  * refclock_process_offset - process a pile of offset samples from the clock
  *
- * This routine uses the given offset and receive time stamp
- * and fill the appropriate filter buffers further processing is left to
- * refclock_sample
+ * This routine uses the given offset and receive time stamp and fill the
+ * appropriate filter buffers further processing is left to refclock_sample.
+ * Samples that overflow the buffer are quietly discarded.
  */
-int
+void
 refclock_process_offset(
 	struct refclockproc *pp,
 	l_fp offset,
@@ -428,14 +428,15 @@ refclock_process_offset(
 	)
 {
 	double doffset;
-	
+
+	if ((pp->coderecv + 1) % MAXSTAGE == pp->codeproc % MAXSTAGE)
+		return;
 	pp->lastref = offset;
 	pp->lastrec = lastrec;
 	pp->variance = 0;
 	L_SUB(&offset, &lastrec);
 	LFPTOD(&offset, doffset);
-	pp->filter[pp->coderecv++ % pp->nstages] = doffset + fudge;
-	return (1);
+	pp->filter[pp->coderecv++ % MAXSTAGE] = doffset + fudge;
 }
 
 /*
@@ -468,7 +469,8 @@ refclock_process(
 	} else {
 		MSUTOTSF(pp->msec, offset.l_uf);
 	}
-	return refclock_process_offset(pp, offset, pp->lastrec, pp->fudgetime1);
+	refclock_process_offset(pp, offset, pp->lastrec, pp->fudgetime1);
+	return (1);
 }
 
 /*
@@ -485,30 +487,33 @@ refclock_process(
  * failure due to invalid timecode data or very noisy offsets.
  *
  */
-void
+static int
 refclock_sample(
 	struct refclockproc *pp
 	)
 {
-	int i, j, k;
+	int i, j, k, n;
 	double offset, disp;
 	double off[MAXSTAGE];
 
 	/*
-	 * Copy the raw offsets and sort into ascending order.
+	 * Copy the raw offsets and sort into ascending order. Don't do
+	 * anything if the buffer is empty.:1
 	 */
-	for (j = 0; j < pp->nstages && (u_int)j < pp->coderecv; j++)
-		off[j] = pp->filter[j];
-	qsort((char *)off, (u_int)j, sizeof(double), refclock_cmpl_fp);
+	if (pp->codeproc == pp->coderecv)
+		return (0);
+	n = 0;
+	while (pp->codeproc != pp->coderecv)
+		off[n++] = pp->filter[pp->codeproc++ % MAXSTAGE];
+	if (n > 1)
+		qsort((char *)off, n, sizeof(double), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
-	 * nskeep samples remain.
+	 * approximately 60 percent of the samples remain.
 	 */
-	i = 0;
-	k = j;
-	if (k > pp->nskeep)
-		k = pp->nskeep;
+	i = 0; j = n;
+	k = n - (n * 2) / NSTAGE;
 	while ((j - i) > k) {
 		offset = off[(j + i) / 2];
 		if (off[j - 1] - offset < offset - off[i])
@@ -531,9 +536,10 @@ refclock_sample(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "refclock_sample: offset %.6f disp %.6f std %.6f\n",
-		    pp->offset, pp->disp, SQRT(pp->variance));
+		    "refclock_sample: n %d offset %.6f disp %.6f std %.6f\n",
+		    n, pp->offset, pp->disp, SQRT(pp->variance));
 #endif
+	return (1);
 }
 
 
@@ -579,7 +585,8 @@ refclock_receive(
 	peer->reftime = peer->org = pp->lastrec;
 	peer->rootdispersion = pp->disp + SQRT(pp->variance);
 	get_systime(&peer->rec);
-	refclock_sample(pp);
+	if (!refclock_sample(pp))
+		return;
 	clock_filter(peer, pp->offset, 0., 0.);
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
@@ -1331,10 +1338,6 @@ refclock_buginfo(
 	bug->values[5] = pp->msec;
 	bug->values[6] = pp->yearstart;
 	bug->values[7] = pp->coderecv;
-
-	bug->ntimes = pp->nstages + 3;
-	if (bug->ntimes > NCLKBUGTIMES)
-	    bug->ntimes = NCLKBUGTIMES;
 	bug->stimes = 0xfffffffc;
 	bug->times[0] = pp->lastref;
 	bug->times[1] = pp->lastrec;

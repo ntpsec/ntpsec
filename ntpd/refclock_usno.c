@@ -327,8 +327,6 @@ usno_receive(
 	 * dispersion. The fudge time1 value is added to each sample as
 	 * received.
 	 */
-	pp->nstages = up->msgcnt;
-	pp->nskeep = up->msgcnt * 2 / 3;
 	if (!refclock_process(pp)) {
 #ifdef DEBUG
 		if (debug)

@@ -708,7 +708,6 @@ jupiter_process(register struct peer *peer)
 	 */
 	pp->lastref = up->lastref;
 	pp->coderecv = up->coderecv;
-	pp->nstages = up->nkeep + 2;
 	pp->filter[0] = off[0];			/* smallest offset */
 	pp->filter[1] = off[NSAMPLES-1];	/* largest offset */
 	for (j = 2, k = i; k < n; j++, k++)

@@ -92,7 +92,6 @@
 #define	REFID		"GPS " /* reference ID */
 #define	DESCRIPTION	"Arbiter 1088A/B GPS Receiver" /* WRU */
 
-#define ARB_NSTAGE	45	/* median filter stages */
 #define	LENARB		24	/* format B5 timecode length */
 #define MAXSTA		30	/* max length of status string */
 #define MAXPOS		70	/* max length of position string */
@@ -101,7 +100,6 @@
  * ARB unit control structure
  */
 struct arbunit {
-	int	pollcnt;	/* poll message counter */
 	l_fp	laststamp;	/* last receive timestamp */
 	int	tcswitch;	/* timecode switch/counter */
 	char	qualchar;	/* IEEE P1344 quality (TQ command) */
@@ -178,9 +176,6 @@ arb_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-	up->pollcnt = 2;
-	pp->nstages = ARB_NSTAGE;
-	pp->nskeep = ARB_NSTAGE * 3 / 5;
 	write(pp->io.fd, "B0", 2);
 	return (1);
 }
@@ -287,8 +282,6 @@ arb_receive(
 		return;
 	}
 	pp->lencode = temp;
-	up->pollcnt = 2;
-	up->tcswitch++;
 
 	/*
 	 * We get down to business, check the timecode format and decode
@@ -317,20 +310,7 @@ arb_receive(
 		write(pp->io.fd, "B0", 2);
 		return;
 	}
-
-	/*
-	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp.
-	 */
-	if (!refclock_process(pp)) {
-		refclock_report(peer, CEVNT_BADTIME);
-		write(pp->io.fd, "B0", 2);
-		return;
-	}
-	if (up->tcswitch <= pp->nstages)
-		return;
-	up->tcswitch = 0;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	up->tcswitch++;
 
 	/*
 	 * We decode the clock dispersion from the time quality
@@ -395,8 +375,15 @@ arb_receive(
 		printf("arbiter: timecode %d %s\n", pp->lencode,
 		    pp->a_lastcode);
 #endif
-	write(pp->io.fd, "B0", 2);
-	refclock_receive(peer);
+	if (up->tcswitch >= NSTAGE)
+		write(pp->io.fd, "B0", 2);
+
+	/*
+	 * Process the new sample in the median filter and determine the
+	 * timecode timestamp.
+	 */
+	if (!refclock_process(pp))
+		refclock_report(peer, CEVNT_BADTIME);
 }
 
 
@@ -424,16 +411,17 @@ arb_poll(
 	 */
 	pp = peer->procptr;
 	up = (struct arbunit *)pp->unitptr;
-	if (up->pollcnt == 0)
-		refclock_report(peer, CEVNT_TIMEOUT);
-	else
-		up->pollcnt--;
+	up->tcswitch = 0;
 	if (write(pp->io.fd, "TQ", 2) != 2) {
 		refclock_report(peer, CEVNT_FAULT);
 	} else
 		pp->polls++;
-	up->tcswitch = 0;
-	
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	refclock_receive(peer);
 }
 
 #else
