@@ -947,7 +947,7 @@ mx4200_receive(
  *	10 int  User Time Bias: Operator specified bias, in nanoseconds
  *	11 int  Leap Second Flag: Indicates that a leap second will
  *			occur.  This value is usually zero, except during
- *			the week prior to the leap second occurence, when
+ *			the week prior to the leap second occurrence, when
  *			this value will be set to +1 or -1.  A value of
  *			+1 indicates that GPS time will be 1 second
  *			further ahead of UTC time.

@@ -4704,7 +4704,7 @@ int print_msg_table_header (int rptcode, char *HdrStr, int force)
 {
 	/* force header is to help auto-output function */
 	/* last_rptcode is to determine whether to print a header */
-	/* for the first occurence of a series of reports */
+	/* for the first occurrence of a series of reports */
 	static int
 		last_rptcode = 0;
    int

@@ -40,7 +40,7 @@
  * change throughout the day and night.
  *
  * The driver receives, demodulates and decodes the radio signals when
- * connected to the audio codec of supported workstation hardware and
+ * connected to the audio codec of a suported workstation hardware and
  * operating system. These include Solaris, SunOS, FreeBSD, NetBSD and
  * Linux. In this implementation, only one audio driver and codec can be
  * supported on a single machine.
@@ -197,8 +197,7 @@
 #define TUNE		.001	/* offset for narrow filter (kHz) */
 #define DWELL		5	/* minutes in a probe cycle */
 #define NCHAN		3	/* number of channels */
-#undef  NSTAGE
-#define NSTAGE		3	/* number of integrator stages */
+#define ISTAGE		3	/* number of integrator stages */
 #endif /* ICOM */
 
 #ifdef HAVE_AUDIO
@@ -233,7 +232,8 @@
 #define MINSYNC		8	/* min sync distance (of 16) */
 #define MINSTAMP	20	/* min timestamps (of 60) */
 #define METRIC		50.	/* min channel metric */
-#define PANIC		(4 * 1440) /* panic restart */
+#define PANIC		1440	/* panic timeout (m) */
+#define HOLD		30	/* reach hold (m) */
 
 /*
  * Hex extension codes (>= 16)
@@ -290,7 +290,7 @@ struct surv {
  * three frequencies.
  */
 struct xmtr {
-	double	integ[NSTAGE];	/* circular integrator */
+	double	integ[ISTAGE];	/* circular integrator */
 	double	metric;		/* integrator sum */
 	int	iptr;		/* integrator pointer */
 	int	probe;		/* dwells since last probe */
@@ -1256,8 +1256,9 @@ chu_poll(
 {
 	struct refclockproc *pp;
 	struct chuunit *up;
+	l_fp	offset;
 	char	synchar, qual, leapchar;
-	int	minset;
+	int	minset, i;
 	double	dtemp;
 
 	pp = peer->procptr;
@@ -1266,11 +1267,17 @@ chu_poll(
 		up->errflg = CEVNT_TIMEOUT;
 	else
 		pp->polls++;
+
+	/*
+	 * If once in sync and the radio has not been heard for awhile
+	 * (30 m), it is no longer reachable. If not heard in a long
+	 * while (one day), turn out the lights and start from scratch.
+	 */
 	minset = ((current_time - peer->update) + 30) / 60;
 	if (up->status & INSYNC) {
 		if (minset > PANIC)
 			up->status = 0;
-		else
+		else if (minset <= HOLD)
 			peer->reach |= 1;
 	}
 
@@ -1338,11 +1345,24 @@ chu_poll(
 	pp->lencode = strlen(pp->a_lastcode);
 
 	/*
-	 * If timestamps have been stuffed, the timecode is ipso fatso
-	 * correct and can be selected to discipline the clock.
+	 * If in sync and the signal metric is above threshold, the
+	 * timecode is ipso fatso valid and can be selected to
+	 * discipline the clock. Be sure not to leave stray timestamps
+	 * around if signals are too weak or the clock time is invalid.
 	 */
 	if (up->status & INSYNC && dtemp > METRIC) {
-		refclock_receive(peer);
+		if (!clocktime(pp->day, pp->hour, pp->minute, 0, GMT,
+		    up->tstamp[0].l_ui, &pp->yearstart, &offset.l_ui)) {
+			up->errflg = CEVNT_BADTIME;
+		} else {
+			offset.l_uf = 0;
+			for (i = 0; i < up->ntstamp; i++)
+				refclock_process_offset(pp, offset,
+				    up->tstamp[i], FUDGE +
+				    pp->fudgetime1);
+			pp->lastref = up->timestamp;
+			refclock_receive(peer);
+		}
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	} else if (pp->sloppyclockflag & CLK_FLAG4) {
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
@@ -1374,7 +1394,6 @@ chu_major(
 	struct chuunit *up;
 
 	u_char	code[11];	/* decoded timecode */
-	l_fp	offset;		/* l_fp temps */
 	int	mindist;	/* minimum distance */
 	int	val1, val2;	/* maximum distance */
 	int	synchar;	/* stray cat */
@@ -1387,18 +1406,18 @@ chu_major(
 	/*
 	 * Majority decoder. Each burst encodes two replications at each
 	 * digit position in the timecode. Each row of the decoding
-	 * matrix encodes the number of occurences of each digit found
+	 * matrix encodes the number of occurrences of each digit found
 	 * at the corresponding position. The maximum over all
-	 * occurences at each position is the distance for this position
-	 * and the corresponding digit is the maximumn likelihood
-	 * candidate. If the distance is zero, assume a miss '_'; if the
-	 * distance is not more than half the total number of
-	 * occurences, assume a soft error '*'; if two different digits
-	 * with the same distance are found, assume a hard error '='.
-	 * These will later cause a format error when the timecode is
-	 * interpreted. The decoding distance is defined as the minimum
-	 * distance over the first nine digits. The tenth digit varies
-	 * over the seconds, so we don't count it.
+	 * occurrences at each position is the distance for this
+	 * position and the corresponding digit is the maximum
+	 * likelihood candidate. If the distance is zero, assume a miss
+	 * '_'; if the distance is not more than half the total number
+	 * of occurrences, assume a soft error '*'; if two different
+	 * digits with the same distance are found, assume a hard error
+	 * '='. These will later cause a format error when the timecode
+	 * is interpreted. The decoding distance is defined as the
+	 * minimum distance over the first nine digits. The tenth digit
+	 * varies over the seconds, so we don't count it.
 	 */
 	mindist = 16;
 	for (i = 0; i < 9; i++) {
@@ -1428,7 +1447,7 @@ chu_major(
 
 	/*
 	 * A valid timecode requires a minimum distance at least half
-	 * the total number of occurences. A valid timecode also
+	 * the total number of occurrences. A valid timecode also
 	 * requires at least 20 valid timestamps.
 	 */
 	if (up->burstcnt < MINBURST || mindist < up->burstcnt)
@@ -1452,16 +1471,6 @@ chu_major(
 		up->errflg = CEVNT_BADREPLY;
 		return (0);
 	}
-	if (!clocktime(pp->day, pp->hour, pp->minute, 0, GMT,
-	    up->tstamp[0].l_ui, &pp->yearstart, &offset.l_ui)) {
-		up->errflg = CEVNT_BADTIME;
-		return (0);
-	}
-	offset.l_uf = 0;
-	for (i = 0; i < up->ntstamp; i++)
-		refclock_process_offset(pp, offset, up->tstamp[i],
-		    FUDGE + pp->fudgetime1);
-	pp->lastref = up->timestamp;
 	return (mindist * 100. / (2. * up->burstcnt));
 }
 
@@ -1532,7 +1541,7 @@ chu_newchan(
 	sp->metric -= sp->integ[sp->iptr];
 	sp->integ[sp->iptr] = met;
 	sp->metric += sp->integ[sp->iptr];
-	sp->iptr = (sp->iptr + 1) % NSTAGE;
+	sp->iptr = (sp->iptr + 1) % ISTAGE;
 	metric = 0;
 	j = 0;
 	for (i = 0; i < NCHAN; i++) {
