@@ -744,7 +744,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+		if (IN6_IS_ADDR_LINKLOCAL(&iaddr6))
 			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
 		else
 #endif
@@ -754,7 +754,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
 			 "setsockopt IPV6_JOIN_GROUP failure: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(maddr));
+			 ind, stoa(maddr));
 			return ISC_FALSE;
 		}
 		break;
@@ -809,7 +809,7 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		iaddr6 = ((struct sockaddr_in6*)&maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+		if (IN6_IS_ADDR_LINKLOCAL(&iaddr6))
 			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
 		else
 #endif
