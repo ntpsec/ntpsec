@@ -766,7 +766,9 @@ io_multicast_add(
 	 * Try opening a socket for the specified class D address. This
 	 * works under SunOS 4.x, but not OSF1 .. :-(
 	 */
+	set_reuseaddr(1);
 	s = open_socket(sinp, 0, 1);
+	set_reuseaddr(0);
 	if (s < 0) {
 		memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 		i = 0;
