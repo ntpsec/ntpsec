@@ -250,6 +250,7 @@ atom_ppsapi(
 		    pps_assert);
 		return (0);
 	}
+	up->pps_params.mode |= PPS_TSFMT_TSPEC;
 	if (time_pps_setparams(up->handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
@@ -257,7 +258,8 @@ atom_ppsapi(
 	}
 	if (enb_hardpps) {
 		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
-		    up->pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
+				    up->pps_params.mode & ~PPS_TSFMT_TSPEC,
+				    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_atom: time_pps_kcbind failed: %m");
 			return (0);

@@ -1,5 +1,14 @@
 2001-03-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_atom.c (atom_ppsapi): PPS API RFC alignment patches.
+	From: Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de>
+
+	* util/ntptime.c: MNT options
+	From: Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de>
+
+	* ntpd/ntp_refclock.c (refclock_newpeer): Lose "extra" free().
+	From: Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de>
+
 	* configure.in: 4.0.99k18 and auto* upgrade
 
 2001-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>

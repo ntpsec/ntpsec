@@ -261,7 +261,6 @@ refclock_newpeer(
 	 */
 	if (!((refclock_conf[clktype]->clock_start)(unit, peer))) {
 		refclock_unpeer(peer);
-		free(pp);
 		return (0);
 	}
 	peer->hpoll = peer->minpoll;
