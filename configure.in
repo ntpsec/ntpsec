@@ -556,8 +556,7 @@ AC_CACHE_CHECK(for struct sockaddr_storage, ac_cv_struct_sockaddr_storage,
 #include <sys/socket.h>
 #include <netinet/in.h>
 ],[
-extern struct sockaddr_storage *ss;
-return 0;],
+struct sockaddr_storage n;],
 	ac_cv_struct_sockaddr_storage=yes,
 	ac_cv_struct_sockaddr_storage=no)
 ])
