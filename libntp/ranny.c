@@ -14,8 +14,6 @@
  */
 #include "ntp_stdlib.h"
 
-extern	time_t	time		P((time_t *loc));
-
 /*
  * 55 random numbers, not all even.  Note we don't initialize ran_y
  * directly since I have had thoughts of putting this in an EPROM

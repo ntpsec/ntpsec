@@ -1,7 +1,7 @@
 /* config.h for Windows NT */
 
-#ifndef __config
-#define __config
+#ifndef __CONFIG_H
+#define __CONFIG_H
 
 #if defined(_MSC_VER)
 /* VS V7 (aka .NET) has the IPv6 structures */
@@ -41,9 +41,24 @@
 #define _WINSOCKAPI_  
 #endif
 
-# define  OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
-# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
-# define HAVE_RANDOM 
+#ifndef __RPCASYNC_H__
+#define __RPCASYNC_H__
+#endif
+
+/*
+ * VS.NET's version of wspiapi.h has a bug in it
+ * where it assigns a value to a variable inside
+ * an if statement. It should be comparing them.
+ * We prevent inclusion since we are not using this
+ * code so we don't have to see the warning messages
+ */
+#ifndef _WSPIAPI_H_
+#define _WSPIAPI_H_
+#endif
+
+#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
+#define UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
+#define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
 
@@ -54,6 +69,17 @@
 #define finite _finite
 # define random      rand
 # define srandom     srand
+
+/*
+ * We need to include string.h first before we override strerror
+ * otherwise we can get errors during the build
+ */
+#include <string.h>
+/* Point to a local version for error string handling */
+# define strerror	NTstrerror
+
+char *NTstrerror(int errnum);
+
 int NT_set_process_priority(void);	/* Define this function */
 
 # define MCAST				/* Enable Multicast Support */												
@@ -93,6 +119,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_ERRNO_H
 # define HAVE_STDARG_H
 # define HAVE_NO_NICE
+# define HAVE_MKTIME
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 # define HAVE_SOCKADDR_IN6
@@ -103,6 +130,16 @@ int NT_set_process_priority(void);	/* Define this function */
 
 # define NEED_S_CHAR_TYPEDEF
 
+/*
+ * For VS.NET most of the IPv6 types are defined
+ */
+#if _MSC_VER > 1200
+#define HAVE_STRUCT_SOCKADDR_STORAGE
+#define ISC_PLATFORM_HAVEIPV6
+#define ISC_PLATFORM_HAVEIN6PKTINFO
+#else
+#define ISC_PLATFORM_NEEDIN6ADDRANY
+#endif
 # define USE_PROTOTYPES 		/* for ntp_types.h */														
 
 #define ULONG_CONST(a) a ## UL
@@ -115,6 +152,7 @@ int NT_set_process_priority(void);	/* Define this function */
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
 
 /* Include Windows headers */
-#include <winsock2.h>
+//#include <winsock2.h>
+#include <windows.h>
 
 #endif /* __config */

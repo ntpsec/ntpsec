@@ -46,11 +46,12 @@
 #define s6_addr8	s6_addr
 #define in6_addr in_addr6
 
+#ifndef IN6ADDR_ANY_INIT
 #define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
+#endif
+#ifndef IN6ADDR_LOOPBACK_INIT
 #define IN6ADDR_LOOPBACK_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }}
-
-LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_any;
-LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
+#endif
 
 /*
  * Unspecified
@@ -67,16 +68,19 @@ LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
 /*
  * Loopback
  */
+#ifndef IN6_IS_ADDR_LOOPBACK
 #define IN6_IS_ADDR_LOOPBACK(a) (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == 0 && \
 *((u_long *)((a)->s6_addr) + 3) == htonl(1) \
 )
+#endif
 
 /*
  * IPv4 compatible
  */
+#ifndef IN6_IS_ADDR_V4COMPAT
 #define IN6_IS_ADDR_V4COMPAT(a)  (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
@@ -84,14 +88,17 @@ LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
 *((u_long *)((a)->s6_addr) + 3) != 0 && \
 *((u_long *)((a)->s6_addr) + 3) != htonl(1) \
 )
+#endif
 
 /*
  * Mapped
  */
+#ifndef IN6_IS_ADDR_V4MAPPED
 #define IN6_IS_ADDR_V4MAPPED(a) (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == htonl(0x0000ffff))
+#endif
 
 /*
  * Multicast
@@ -103,11 +110,16 @@ LIBISC_EXTERNAL_DATA extern const struct in_addr6 in6addr_loopback;
 /*
  * Unicast link / site local.
  */
+#ifndef IN6_IS_ADDR_LINKLOCAL
 #define IN6_IS_ADDR_LINKLOCAL(a)	(\
 (*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
 ((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0x80))
+#endif
+
+#ifndef IN6_IS_ADDR_SITELOCAL
 #define IN6_IS_ADDR_SITELOCAL(a)	(\
 (*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
 ((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0xc0))
+#endif
 
 #endif /* ISC_IPV6_H */
