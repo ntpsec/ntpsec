@@ -1054,7 +1054,7 @@ gen_gqkey(
  * encryption scheme based on DSA cryptography and a polynomial formed
  * from the expansion of product terms (x - x[j]), as described in: Mu,
  * Y., and V. Varadharajan: Robust and Secure Broadcasting, Proc.
- * Indocrypt 2001, 223-231.
+ * Indocrypt 2001, 223-231. The paper has significant errors.
  *
  * The p is a 512-bit prime, g a generator of Zp and q a 160-bit prime
  * that divides p - 1 and is a qth root of 1 mod p; that is, g^q = 1 mod
@@ -1082,12 +1082,15 @@ gen_mv(
 	BIGNUM	**x;		/* private key vector */
 	BIGNUM	**a;		/* coefficient vector */
 	BIGNUM	**g;		/* public key vector */
+	BIGNUM	**s;		/* private enabling keys */
 	BIGNUM	**xbar;		/* private key vector 1 */
 	BIGNUM	**xhat;		/* private key vector 2 */
 	BIGNUM	*b;		/* group key */
 	BIGNUM	*binverse;	/* inverse group key */
-	BIGNUM	*biga;		/* mysterious capital letter */
+	BIGNUM	*biga;		/* master encryption key */
+	BIGNUM	*bige;		/* session encryption key */
 	BIGNUM	*k;		/* random roll */
+	BIGNUM	*ss;		/* enabling key */
 	BIGNUM	*gbar;		/* public key 1 */
 	BIGNUM	*ghat;		/* public key 2 */
 	BIGNUM	*u, *v, *w;	/* BN scratch */
@@ -1182,7 +1185,8 @@ gen_mv(
 	}
 
 	/*
-	 * Verify prod(g[i]^(x[j]^i)) = 1 for all i, j.
+	 * Verify prod(g[i]^(x[j]^i)) = 1 for all i, j. Note the
+	 * expression given in the paper is incorrect.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
@@ -1201,7 +1205,8 @@ gen_mv(
 
 	/*
 	 * Make 512-bit encryption key A and 160-bit nonce pair b and
-	 * b^-1.
+	 * b^-1. Keep A around for awhile, since it is expensive to
+	 * compute.
 	 */
 	biga = BN_new();
 	BN_one(biga);
@@ -1223,66 +1228,84 @@ gen_mv(
 
 	/*
 	 * Make 160-bit decryption keys (xbar[j], xhat[j]) for all j.
+	 * Also make 512-bit s[j] = r q for some r and prod(s[j]), both
+	 * mod p.
 	 */
 	xbar = malloc((n + 1) * sizeof(BIGNUM));
 	xhat = malloc((n + 1) * sizeof(BIGNUM));
+	s = malloc((n + 1) * sizeof(BIGNUM));
+	ss = BN_new();
+	BN_set_word(ss, 1);
 	for (j = 1; j <= n; j++) {
-		xbar[j] = BN_new(); xhat[j] = BN_new();
+		xbar[j] = BN_new(); xhat[j] = BN_new(); s[j] = BN_new();
+		BN_set_word(u, j);
+		BN_mod_mul(s[j], u, dsa->q, dsa->p, ctx);
+		BN_add_word(s[j], 1);
+		BN_mod_mul(ss, ss, s[j], dsa->p, ctx);
 		BN_zero(xbar[j]);
+		BN_set_word(v, n);
 		for (i = 1; i <= n; i++) {
 			if (i == j)
 				continue;
-			BN_set_word(v, n);
 			BN_mod_exp(u, x[i], v, dsa->q, ctx);
 			BN_add(xbar[j], xbar[j], u);
 		}
 		BN_mod_mul(xbar[j], xbar[j], binverse, dsa->q, ctx);
-		BN_set_word(v, n);
 		BN_mod_exp(xhat[j], x[j], v, dsa->q, ctx);
+		BN_mod_mul(xhat[j], xhat[j], s[j], dsa->p, ctx);
 	}
 
 	/*
-	 * Verify A g^(b xbar[j]) g^xhat[j] = 1 for all j.
+	 * Verify A^s g^(s b xbar[j]) g^(s xhat[j]) = 1 for all j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_mul(u, b, xbar[j], dsa->q, ctx);
+		BN_mod_mul(u, ss, b, dsa->q, ctx);
+		BN_mod_mul(u, u, xbar[j], dsa->q, ctx);
 		BN_mod_exp(u, dsa->g, u, dsa->p, ctx);
-		BN_mod_exp(v, dsa->g, xhat[j], dsa->p, ctx);
+		BN_mod_mul(v, ss, xhat[j], dsa->q, ctx);
+		BN_mod_exp(v, dsa->g, v, dsa->p, ctx);
 		BN_mod_mul(u, u, v, dsa->p, ctx);
-		BN_mod_mul(u, u, biga, dsa->p, ctx);
+		BN_mod_exp(v, biga, ss, dsa->p, ctx);
+		BN_mod_mul(u, u, v, dsa->p, ctx);
 		if (!BN_is_one(u))
 			temp = 0;
 	}
-	printf("Confirm A g^b xbar[j] g^xhat[j] = 1 for all j: %s\n",
+	printf("Confirm A^s g^(s b xbar[j]) g^(s xhat[j]) = 1 for all j: %s\n",
 	    temp ? "yes" : "no");
 
 	/*
-	 * Make 512-bit values A = A^k, gbar = g^k and ghat = g^bk.
+	 * Make 512-bit values E = A^(s k), gbar = g^(s k) and
+	 * ghat = g^(s k b).
 	 */
-	k = BN_new();
+	bige = BN_new(); k = BN_new();
 	BN_rand(k, BN_num_bits(dsa->q), -1, 0);
 	BN_mod(k, k, dsa->q, ctx);
-	BN_mod_exp(biga, biga, k, dsa->p, ctx);
+	BN_mod_mul(v, ss, k, dsa->q, ctx);
+	BN_mod_exp(bige, biga, v, dsa->p, ctx);
 	gbar = BN_new(); ghat = BN_new();
-	BN_mod_exp(gbar, dsa->g, k, dsa->p, ctx);
-	BN_mod_mul(u, k, b, dsa->q, ctx);
-	BN_mod_exp(ghat, dsa->g, u, dsa->p, ctx);
+	BN_mod_exp(gbar, dsa->g, v, dsa->p, ctx);
+	BN_mod_mul(v, v, b, dsa->q, ctx);
+	BN_mod_exp(ghat, dsa->g, v, dsa->p, ctx);
 
 	/*
-	 * Verify A gbar^xbar[j] ghat^xhat[j] = 1 for all j.
+	 * Verify E gbar^xbar[j] ghat^xhat[j] = 1 for all j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
 		BN_mod_exp(v, gbar, xhat[j], dsa->p, ctx);
 		BN_mod_exp(u, ghat, xbar[j], dsa->p, ctx);
 		BN_mod_mul(u, u, v, dsa->p, ctx);
-		BN_mod_mul(u, biga, u, dsa->p, ctx);
-		if (!BN_is_one(u))
+		BN_mod_mul(u, bige, u, dsa->p, ctx);
+
+		BN_mod_inverse(v, u, dsa->p, ctx);
+		if (!BN_is_one(u)) {
+			printf("revoke %i\n", j);
 			temp = 0;
+		}
 	}
 	printf(
-	    "Confirm A gbar^xbar[j] ghat^xhat[j] = 1 for all j: %s\n",
+	    "Confirm A^(s k) gbar^xbar[j] ghat^xhat[j] = 1 for all j: %s\n",
 	    temp ? "yes" : "no");
 
 	/*
@@ -1293,12 +1316,12 @@ gen_mv(
 	 *
 	 * p		modulus p
 	 * q		private encryption key A
-	 * g		diffusion factor k (not used)
+	 * g		enabling key ss
 	 * priv_key	public key 1 gbar
 	 * pub_key	public key 2 ghat
 	 */
-	BN_copy(dsa->q, biga);
-	BN_copy(dsa->g, k);
+	BN_copy(dsa->q, bige);
+	BN_copy(dsa->g, ss);
 	dsa->priv_key = BN_dup(gbar);
 	dsa->pub_key = BN_dup(ghat);
 
@@ -1332,7 +1355,8 @@ gen_mv(
 	for (j = 1; j <= n; j++) {
 		BN_copy(dsa->q, xbar[j]);
 		BN_copy(dsa->g, xhat[j]);
-		BN_free(xbar[j]); BN_free(xhat[j]); BN_free(x[j]);
+		BN_free(xbar[j]); BN_free(xhat[j]);
+		BN_free(x[j]); BN_free(s[j]);
 
 		/*
 		 * Write the MV public key as a DSA private key encoded
@@ -1359,13 +1383,13 @@ gen_mv(
 		BN_free(g[i]);
 	}
 	BN_free(u); BN_free(v); BN_free(w); BN_CTX_free(ctx);
-	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(k);
-	BN_free(gbar); BN_free(ghat);
+	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(bige);
+	BN_free(k); BN_free(ss); BN_free(gbar); BN_free(ghat);
 
 	/*
 	 * Free the world.
 	 */
-	free(x); free(a); free(g); free(xbar); free(xhat);
+	free(x); free(a); free(g); free(s); free(xbar); free(xhat);
 	DSA_free(dsa);
 	return;
 }
