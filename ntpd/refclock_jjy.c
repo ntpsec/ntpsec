@@ -188,7 +188,7 @@ jjy_start ( int unit, struct peer *peer )
 
 #ifdef DEBUG
 	if ( debug ) {
-		printf ( "jjy_start (refclock_jjy.c) : %s  mode=%d  ", ntoa(&peer->srcadr), peer->ttlmax ) ;
+		printf ( "jjy_start (refclock_jjy.c) : %s  mode=%d  ", ntoa(&peer->srcadr), peer->ttl ) ;
 		printf ( DEVICE, unit ) ;
 		printf ( "\n" ) ;
 	}
@@ -202,15 +202,15 @@ jjy_start ( int unit, struct peer *peer )
 	sprintf ( pDeviceName, DEVICE, unit ) ;
 
 	/*
-	 * peer->ttlmax is a mode number specified by "127.127.40.X mode N" in the ntp.conf
+	 * peer->ttl is a mode number specified by "127.127.40.X mode N" in the ntp.conf
 	 */
-	switch ( peer->ttlmax ) {
+	switch ( peer->ttl ) {
 	case 0 :
 	case 1 : iDiscipline = LDISC_CLK ; break ;
 	case 2 : iDiscipline = LDISC_RAW ; break ;
 	default :
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
-		          ntoa(&peer->srcadr), peer->ttlmax ) ;
+		          ntoa(&peer->srcadr), peer->ttl ) ;
 		free ( (void*) pDeviceName ) ;
 		return RC_START_ERROR ;
 	}
@@ -233,9 +233,9 @@ jjy_start ( int unit, struct peer *peer )
 	up->linediscipline = iDiscipline ;
 
 	/*
-	 * peer->ttlmax is a mode number specified by "127.127.40.X mode N" in the ntp.conf
+	 * peer->ttl is a mode number specified by "127.127.40.X mode N" in the ntp.conf
 	 */
-	switch ( peer->ttlmax ) {
+	switch ( peer->ttl ) {
 	case 0 :
 		/*
 		 * The mode 0 is a default clock type at this time.
@@ -255,7 +255,7 @@ jjy_start ( int unit, struct peer *peer )
 		break ;
 	default :
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
-		          ntoa(&peer->srcadr), peer->ttlmax ) ;
+		          ntoa(&peer->srcadr), peer->ttl ) ;
 		close ( fd ) ;
 		free ( (void*) up ) ;
 		return RC_START_ERROR ;

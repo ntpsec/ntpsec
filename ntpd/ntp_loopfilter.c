@@ -456,7 +456,7 @@ local_clock(
 		 * and ignore it.
 		 */
 		default:
-			allow_panic = TRUE;
+			allow_panic = FALSE;
 			if (fabs(fp_offset - last_offset) >
 			    CLOCK_SGATE * oerror && mu <
 			    ULOGTOD(sys_poll + 1)) {

@@ -215,7 +215,7 @@ heath_start(
 	 * Open serial port
 	 */
 	(void)sprintf(device, DEVICE, unit);
-	if (!(fd = refclock_open(device, speed[peer->ttlmax & 0x3], 0)))
+	if (!(fd = refclock_open(device, speed[peer->ttl & 0x3], 0)))
 	    return (0);
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;

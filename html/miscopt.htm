@@ -64,8 +64,9 @@ ntpdc</tt></a> utility program.</dd>
 <dt><tt>auth</tt></dt>
 
 <dd>Enables the server to synchronize with unconfigured peers only
-if the peer has been correctly authenticated using a trusted key
-and key identifier. The default for this flag is enable.</dd>
+if the peer has been correctly authenticated using either public
+key or private key cryptography. The default for this flag is
+enable.</dd>
 
 <dt><tt>bclient</tt></dt>
 
@@ -107,8 +108,8 @@ disable.</dd>
 <dt><tt>stats</tt></dt>
 
 <dd>Enables the statistics facility. See the <a href="monopt.htm">
-Monitoring Options</a> page for further information. The
-default</dd>
+Monitoring Options</a> page for further information. The default
+for this flag is disable</dd>
 </dl>
 </dd>
 
@@ -174,9 +175,9 @@ the names of all system variables. The <tt>peer_var_list</tt> holds
 the names of all peer variables and the <tt>clock_var_list</tt>
 holds the names of the reference clock variables.</dd>
 
-<dt><tt>tinker [ step <i>step</i> | panic <i>panic</i> | dispersion
-<i>dispersion</i> | stepout <i>stepout</i> | minpoll <i>minpoll</i>
-]</tt></dt>
+<dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i>
+| huffpuff | <i>huffpuff</i> | minpoll <i>minpoll</i> | panic <i>
+panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt></dt>
 
 <dd>This command can be used to alter several system variables in
 very exceptional circumstances. It should occur in the
@@ -190,50 +191,22 @@ folks can't resist twisting the knobs anyway and this command is
 for them. Emphasis added: twisters are on their own and can expect
 no help from the support group. 
 
-<p>All arguments are in floating point seconds or seconds per
-second. The <tt>minpoll</tt> argument is an integer in seconds to
-the power of two. The variables operate as follows:</p>
+<p>The variables operate as follows:</p>
 </dd>
 
 <dd>
 <dl>
-<dt><tt>step <i>step</i></tt></dt>
-
-<dd>The argument becomes the new value for the step threshold,
-normally 0.128 s. If set to zero, step adjustments will never
-occur. In general, if the intent is only to avoid step adjustments,
-the step threshold should be left alone and the <tt>-x</tt> command
-line option be used instead.</dd>
-
-<dt><tt>panic <i>panic</i></tt></dt>
-
-<dd>The argument becomes the new value for the panic threshold,
-normally 1000 s. If set to zero, the panic sanity check is disabled
-and a clock offset of any value will be accepted.</dd>
-
-<dt><tt>dispersion <i>dispersion</i></tt></dt>
-
-<dd>The argument becomes the new value for the dispersion increase
-rate, normally .000015.</dd>
-
-<dt><tt>stepout <i>stepout</i></tt></dt>
-
-<dd>The argument becomes the new value for the watchdog timeout,
-normally 900 s.</dd>
-
-<dt><tt>minpoll <i>minpoll</i></tt></dt>
-
-<dd>The argument becomes the new value for the minimum poll
-interval used when configuring multicast client, manycast client
-and , symmetric passive mode association. The value defaults to 6
-(64 s) and has a lower limit of 4 (16 s).</dd>
-
 <dt><tt>allan <i>allan</i></tt></dt>
 
 <dd>The argument becomes the new value for the minimum Allan
 intercept, which is a parameter of the PLL/FLL clock discipline
-algorithm. The value defaults to 1024 s, which is also the lower
-limit.</dd>
+algorithm. The value in log2 seconds defaults to 7 (1024 s), which
+is also the lower limit.</dd>
+
+<dt><tt>dispersion <i>dispersion</i></tt></dt>
+
+<dd>The argument becomes the new value for the dispersion increase
+rate, normally .000015 s/s.</dd>
 
 <dt><tt>huffpuff <i>huffpuff</i></tt></dt>
 
@@ -243,6 +216,32 @@ the algorithm will search for a minimum delay. The lower limit is
 900 s (15 m), but a more reasonable value is 7200 (2 hours). There
 is no default, since the filter is not enabled unless this command
 is given.</dd>
+
+<dt><tt>minpoll <i>minpoll</i></tt></dt>
+
+<dd>The argument becomes the new value for the minimum poll
+interval used when configuring multicast client, manycast client
+and , symmetric passive mode association. The value in log2 seconds
+defaults to 6 (64 s) and has a lower limit of 4 (16 s).</dd>
+
+<dt><tt>panic <i>panic</i></tt></dt>
+
+<dd>The argument is the panic threshold, normally 1000 s. If set to
+zero, the panic sanity check is disabled and a clock offset of any
+value will be accepted.</dd>
+
+<dt><tt>step <i>step</i></tt></dt>
+
+<dd>The argument is the step threshold, normally 0.128 s. If set to
+zero, step adjustments will never occur. In general, if the intent
+is only to avoid step adjustments, the step threshold should be
+left alone and the <tt>-x</tt> command line option be used
+instead.</dd>
+
+<dt><tt>stepout <i>stepout</i></tt></dt>
+
+<dd>The argument becomes the new value for the watchdog timeout,
+normally 900 s.</dd>
 </dl>
 </dd>
 
@@ -263,6 +262,13 @@ programs may also request their own trap dynamically, configuring a
 trap receiver will ensure that no messages are lost when the server
 is started.</p>
 </dd>
+
+<dt><tt>ttl <i>hop</i> ...</tt></dt>
+
+<dd>This command specifies a list of TTL values in increasing
+order. up to 8 values can be specified. In manycast mode these
+values are used in turn in an expanding-ring search. The default is
+eight multiples of 32 starting at 31.</dd>
 </dl>
 
 <h4>Files</h4>
