@@ -2085,7 +2085,10 @@ getnetnum(
 #ifdef DEBUG
 		if (debug > 3)
 			printf(
-				"getaddrinfo: \"%s\" invalid host address, line ignored\n",
+				"getaddrinfo: \"%s\" invalid host address%s.\n",
+				(complain)
+				? ", line ignored"
+				: "",
 				num);
 #endif
 		return 0;
@@ -2283,7 +2286,7 @@ do_resolve_internal(void)
 		 */
 
 		closelog();
-		kill_asyncio();
+		kill_asyncio(0);
 
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 

@@ -81,7 +81,7 @@ extern	void	io_setbclient	P((void));
 extern	void	io_unsetbclient P((void));
 extern	void	io_multicast_add P((struct sockaddr_storage));
 extern	void	io_multicast_del P((struct sockaddr_storage));
-extern	void	kill_asyncio	 P((void));
+extern	void	kill_asyncio	 P((int));
 
 extern	void	sendpkt 	P((struct sockaddr_storage *, struct interface *, int, struct pkt *, int));
 #ifdef HAVE_SIGNALED_IO

@@ -2108,12 +2108,14 @@ io_closeclock(
 	 */
 #ifndef HAVE_IO_COMPLETION_PORT
 void
-kill_asyncio(void)
+kill_asyncio(
+	int startfd
+	)
 {
 	SOCKET i;
 
 	BLOCKIO();
-	for (i = 0; i <= maxactivefd; i++)
+	for (i = startfd; i <= maxactivefd; i++)
 	    (void)close_socket(i);
 }
 #else
