@@ -1,4 +1,4 @@
-/*
+*
  * ntptrace - show the chain from an NTP host leading back to
  *	its source of time
  *
@@ -99,7 +99,10 @@ HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
 void timer(void)	{  ; };	/* 1998/06/03 - Used in ntplib/machines.c */
 #endif /* SYS_WINNT */
 
-extern void input_handler(l_fp * x) { ; };
+void
+input_handler(l_fp * x)
+{ ;
+}
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntptrace,"ntptrace",ntptracemain);

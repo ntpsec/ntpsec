@@ -18,7 +18,7 @@ AC_PROG_CC
 AC_PROG_CPP
 
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
     ;;
  i386-sequent-sysv4)
@@ -153,7 +153,7 @@ esac
 AC_PROG_INSTALL
 
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     AC_CHECK_LIB(advapi32, main)
     ;;
 esac
@@ -520,7 +520,7 @@ esac
 AC_CHECK_FUNCS(daemon getbootfile getdtablesize getrusage)
 AC_CHECK_FUNCS(gettimeofday)
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     ;;
  *) AC_CHECK_FUNCS(getuid)
     ;;
@@ -585,7 +585,7 @@ case "$target" in
     ;;
 esac
 case "$target" in
- *-pc-cygwin32)
+ *-pc-cygwin*)
     # I have no idea...
     ;;
  *) AC_CHECK_FUNCS(umask)
@@ -979,7 +979,7 @@ case "$ac_cv_hdr_def_sigio" in
      *-dec-*)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -1033,7 +1033,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      vax-dec-bsd)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -1079,7 +1079,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      vax-dec-bsd)
         ans=no
         ;;
-     *-pc-cygwin32)
+     *-pc-cygwin*)
 	ans=no
 	;;
      *-sni-sysv*)
@@ -2457,7 +2457,7 @@ AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
     [ans=$enableval],
     [ans=no
      case "$target" in
-      XXX-*-pc-cygwin32)
+      XXX-*-pc-cygwin*)
 	 ;;
       *-univel-sysv*)
 	 ans=10000
@@ -2491,7 +2491,7 @@ AC_CACHE_CHECK(for a default value for 'tickadj', ac_cv_var_tickadj,
        yes) ans='tick/16' ;;
       esac
       ;;
-   XXX-*-pc-cygwin32)
+   XXX-*-pc-cygwin*)
       ans=no
       ;;
    *-univel-sysv*)

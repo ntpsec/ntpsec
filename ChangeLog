@@ -1,3 +1,13 @@
+1999-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntptrace/ntptrace.c (input_handler): Make it a "normal" function 
+	definition.
+	Reported by: GIANNI_CATANIA@hp-italy-om6.om.hp.com
+
+	* configure.in:  pc-cygwin32 -> pc-cygwin* because of a change in
+	B20.
+	From: Stephen Gildea <gildea@intouchsys.com>
+
 1999-08-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.96
