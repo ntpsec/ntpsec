@@ -4,7 +4,7 @@ bin_PROGRAMS=	ntpq
 AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@ $(LIBOPTS_LDADD)
+ntpq_LDADD=	version.o @READLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 DISTCLEANFILES=	.version version.c
 noinst_HEADERS=	ntpq.h
 ETAGS_ARGS=	Makefile.am

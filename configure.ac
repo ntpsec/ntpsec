@@ -51,6 +51,41 @@ esac
 AMU_OS_CFLAGS
 LIBOPTS_CHECK
 
+AC_MSG_CHECKING(for bin subdirectory)
+AC_ARG_WITH(binsubdir,
+	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
+	use_binsubdir="$withval", use_binsubdir="bin")
+
+case "$use_binsubdir" in
+ bin)
+    ;;
+ sbin)
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
+    ;;
+esac
+AC_MSG_RESULT($use_binsubdir)
+BINSUBDIR=$use_binsubdir
+AC_SUBST(BINSUBDIR)
+
+AC_MSG_CHECKING(if we want to use arlib)
+AC_ARG_WITH(arlib,
+	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
+	[ans=$withval], [ans=no])
+AC_MSG_RESULT($ans)
+
+if test -d $srcdir/arlib
+then
+    case "$ans" in
+     yes)
+	ARLIB_DIR=arlib
+	AC_CONFIG_SUBDIRS(arlib)
+	;;
+    esac
+fi
+AC_SUBST(ARLIB_DIR)
+
 AC_ARG_WITH(rpath,
 	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
 [ans=$withval], [ans=x])
@@ -474,6 +509,15 @@ AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_CHECK_TYPE(time_t, long)
+AC_CHECK_TYPES(uintptr_t)
+ 
+AH_VERBATIM([TYPEDEF_UINTPTR_T],
+[/* Provide a typedef for uintptr_t? */
+#ifndef HAVE_UINTPTR_T
+typedef unsigned int	uintptr_t;
+#define HAVE_UINTPTR_T	1
+#endif])
+
 AC_STRUCT_TM
 
 AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
@@ -3921,39 +3965,6 @@ found_rt_iflist
 ###
 
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
-
-AC_SUBST(ARLIB_DIR)
-if test -d $srcdir/arlib
-then
-    AC_ARG_WITH(arlib,
-	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
-    [ans=$withval], [ans=no])
-
-    case "$ans" in
-     yes)
-	ARLIB_DIR=arlib
-	AC_CONFIG_SUBDIRS(arlib)
-	;;
-    esac
-fi
-
-AC_MSG_CHECKING(for bin subdirectory)
-AC_ARG_WITH(binsubdir,
-	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
-	use_binsubdir="$withval", use_binsubdir="bin")
-
-case "$use_binsubdir" in
- bin)
-    ;;
- sbin)
-    ;;
- *)
-    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
-    ;;
-esac
-AC_MSG_RESULT($use_binsubdir)
-BINSUBDIR=$use_binsubdir
-AC_SUBST(BINSUBDIR)
 
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(ElectricFence/Makefile)
