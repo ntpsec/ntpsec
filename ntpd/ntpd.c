@@ -130,11 +130,6 @@
 # define SIGDIE4 	SIGTERM
 #endif /* SYS_WINNT */
 
-#if defined SYS_WINNT
-char szMsgPath[255];
-BOOL init_randfile();
-#endif /* SYS_WINNT */
-
 /*
  * Scheduling priority we run at
  */
@@ -448,17 +443,6 @@ ntpdmain(
 #endif
 
 #ifdef SYS_WINNT
-	/* Set the Event-ID message-file name. */
-	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) {
-		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
-		exit(1);
-	}
-	addSourceToRegistry("NTP", szMsgPath);
-
-	/* Initialize random file before OpenSSL checks */
-	if(!init_randfile())
-		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
-
 	/*
 	 * Initialize the time structures and variables
 	 */
@@ -852,46 +836,9 @@ getgroup:
 	 * yet to learn about anything else that is.
 	 */
 #if defined(HAVE_IO_COMPLETION_PORT)
-//		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit request */
-//		WaitHandles[1] = get_timer_handle();
-//		WaitHandles[2] = get_io_event();
 
-		for (;;) {
-#if 0
-			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, TRUE);
-			switch (Index) {
-				case WAIT_OBJECT_0 + 0 : /* exit request */
-					exit(0);
-					break;
-
-				case WAIT_OBJECT_0 + 1 : /* timer */
-					timer();
-					break;
-
-				case WAIT_OBJECT_0 + 2 : /* Io event */
-# ifdef DEBUG
-					if ( debug > 3 )
-					{
-						printf( "IoEvent occurred\n" );
-					}
-# endif
-					break;
-
-				case WAIT_IO_COMPLETION : /* loop */
-				case WAIT_TIMEOUT :
-					break;
-				case WAIT_FAILED:
-					msyslog(LOG_ERR, "ntpd: WaitForMultipleObjectsEx Failed: Error: %m");
-					break;
-
-				/* For now do nothing if not expected */
-				default:
-					break;		
-				
-			} /* switch */
-			rbuflist = getrecvbufs();	/* get received buffers */
-#endif
-			rbuflist = GetReceivedBuffers();
+	for (;;) {
+		rbuflist = GetReceivedBuffers();
 #else /* normal I/O */
 
 	was_alarmed = 0;

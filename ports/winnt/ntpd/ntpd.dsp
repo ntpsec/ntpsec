@@ -133,11 +133,6 @@ SOURCE=.\ntp_iocompletionport.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\ntp_iopacket.c
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\ntpd\ntp_loopfilter.c
 # SUBTRACT CPP /YX
 # End Source File
