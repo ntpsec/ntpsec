@@ -1,5 +1,9 @@
 2001-05-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver20.htm: Reality check.
+	* ntpd/refclock_nmea.c: Comment cleanup
+	From: John Woolner <vk1et@tpg.com.au>
+
 	* html/release.htm: Cleanup (at least).
 	* html/refclock.htm: Cleanup (at least).
 	* html/kern.htm: Cleanup (at least).

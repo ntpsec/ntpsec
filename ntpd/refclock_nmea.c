@@ -44,6 +44,15 @@
  * The PPSAPI part of the driver understands fudge flag2 and flag3. If
  * flag2 is set, it will use the clear edge of the pulse. If flag3 is
  * set, kernel hardpps is enabled.
+ *
+ * GPS sentences other than RMC (the default) may be enabled by setting
+ * the relevent bits of 'mode' in the server configuration line
+ * server 127.127.20.x mode X
+ * 
+ * bit 0 - enables RMC (1)
+ * bit 1 - enables GGA (2)
+ * bit 2 - enables GLL (4)
+ * multiple sentences may be selected
  */
 
 /*
