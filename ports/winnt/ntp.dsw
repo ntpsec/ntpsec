@@ -1,0 +1,148 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "instsrv"=".\instsrv\Instsrv.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/instsrv", ASCAAAAA
+    ..\..\..\ntp-4.0.94\ports\winnt\instsrv
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libntp"=".\libntp\libntp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/libntp", UJHAAAAA
+    .\libntp
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ntpd"=".\ntpd\ntpd.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/ntpd", DKHAAAAA
+    .\ntpd
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ntpdate"=".\ntpdate\ntpdate.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/ntpdate", JKHAAAAA
+    .\ntpdate
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ntpdc"=".\ntpdc\ntpdc.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/ntpdc", LKHAAAAA
+    .\ntpdc
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ntpq"=".\ntpq\ntpq.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/ntpq", NKHAAAAA
+    .\ntpq
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ntptrace"=".\ntptrace\ntptrace.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt/ntptrace", PKHAAAAA
+    .\ntptrace
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ntp-4.0.94b/ports/winnt", WIHAAAAA
+    .
+    end source code control
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

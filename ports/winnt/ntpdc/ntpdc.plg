@@ -1,0 +1,2317 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: instsrv - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP18.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /I "." /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/Instsrv.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP18.tmp" 
+Creating temporary file "C:\TEMP\RSP19.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/Instsrv.pdb" /machine:I386 /out:"Release/Instsrv.exe" 
+".\Release\instsrv.obj"
+]
+Creating command line "link.exe @C:\TEMP\RSP19.tmp"
+<h3>Output Window</h3>
+Compiling...
+instsrv.c
+C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(217) : warning C4100: 'pszAppname' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(278) : warning C4057: 'initializing' : 'char *' differs in indirection to slightly different base types from 'unsigned char *'
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(333) : warning C4189: 'last_error' : local variable is initialized but not referenced
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(335) : warning C4189: 'rv' : local variable is initialized but not referenced
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(334) : warning C4189: 'timeout' : local variable is initialized but not referenced
+D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(440) : warning C4715: 'main' : not all control paths return a value
+Linking...
+
+
+
+<h3>Results</h3>
+Instsrv.exe - 0 error(s), 7 warning(s)
+<h3>
+--------------------Configuration: instsrv - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP1B.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /I "." /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR"Debug/" /Fp"Debug/Instsrv.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP1B.tmp" 
+Creating temporary file "C:\TEMP\RSP1C.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/Instsrv.pdb" /debug /machine:I386 /out:"Debug/Instsrv.exe" /pdbtype:sept 
+".\Debug\instsrv.obj"
+]
+Creating command line "link.exe @C:\TEMP\RSP1C.tmp"
+<h3>Output Window</h3>
+Compiling...
+instsrv.c
+c:\program files\microsoft visual studio\vc98\include\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(217) : warning C4100: 'pszAppname' : unreferenced formal parameter
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(278) : warning C4057: 'initializing' : 'char *' differs in indirection to slightly different base types from 'unsigned char *'
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(333) : warning C4189: 'last_error' : local variable is initialized but not referenced
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(335) : warning C4189: 'rv' : local variable is initialized but not referenced
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(334) : warning C4189: 'timeout' : local variable is initialized but not referenced
+d:\ntp-4.0.94b\ports\winnt\instsrv\instsrv.c(440) : warning C4715: 'main' : not all control paths return a value
+Linking...
+
+
+
+<h3>Results</h3>
+Instsrv.exe - 0 error(s), 7 warning(s)
+<h3>
+--------------------Configuration: libntp - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP1E.bat" with contents
+[
+@echo off
+mc -h . -r . -e h .\messages.mc
+]
+Creating command line "C:\TEMP\RSP1E.bat"
+Creating temporary file "C:\TEMP\RSP1F.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /I "." /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/libntp.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\libntp\a_md5encrypt.c"
+"D:\ntp-4.0.94b\libntp\adjtime.c"
+"D:\ntp-4.0.94b\libntp\atoint.c"
+"D:\ntp-4.0.94b\libntp\atolfp.c"
+"D:\ntp-4.0.94b\libntp\atouint.c"
+"D:\ntp-4.0.94b\libntp\authencrypt.c"
+"D:\ntp-4.0.94b\libntp\authkeys.c"
+"D:\ntp-4.0.94b\libntp\authparity.c"
+"D:\ntp-4.0.94b\libntp\authreadkeys.c"
+"D:\ntp-4.0.94b\libntp\authusekey.c"
+"D:\ntp-4.0.94b\libntp\binio.c"
+"D:\ntp-4.0.94b\libntp\buftvtots.c"
+"D:\ntp-4.0.94b\libntp\caljulian.c"
+"D:\ntp-4.0.94b\libntp\calleapwhen.c"
+"D:\ntp-4.0.94b\libntp\caltontp.c"
+"D:\ntp-4.0.94b\libntp\calyearstart.c"
+"D:\ntp-4.0.94b\libntp\clocktime.c"
+"D:\ntp-4.0.94b\libntp\clocktypes.c"
+"D:\ntp-4.0.94b\libntp\decodenetnum.c"
+"D:\ntp-4.0.94b\libntp\dofptoa.c"
+"D:\ntp-4.0.94b\libntp\dolfptoa.c"
+"D:\ntp-4.0.94b\libntp\emalloc.c"
+"D:\ntp-4.0.94b\libntp\findconfig.c"
+"D:\ntp-4.0.94b\libntp\fptoa.c"
+"D:\ntp-4.0.94b\libntp\fptoms.c"
+"D:\ntp-4.0.94b\libntp\getopt.c"
+"D:\ntp-4.0.94b\libntp\gpstolfp.c"
+"D:\ntp-4.0.94b\libntp\hextoint.c"
+"D:\ntp-4.0.94b\libntp\hextolfp.c"
+"D:\ntp-4.0.94b\libntp\humandate.c"
+"D:\ntp-4.0.94b\libntp\ieee754io.c"
+"D:\ntp-4.0.94b\libntp\inttoa.c"
+"D:\ntp-4.0.94b\libntp\iosignal.c"
+"D:\ntp-4.0.94b\libntp\lib_strbuf.c"
+"D:\ntp-4.0.94b\libntp\log.c"
+"D:\ntp-4.0.94b\libntp\machines.c"
+"D:\ntp-4.0.94b\libntp\md5c.c"
+"D:\ntp-4.0.94b\libntp\memmove.c"
+"D:\ntp-4.0.94b\libntp\mfp_mul.c"
+"D:\ntp-4.0.94b\libntp\mfptoa.c"
+"D:\ntp-4.0.94b\libntp\mfptoms.c"
+"D:\ntp-4.0.94b\libntp\mktime.c"
+"D:\ntp-4.0.94b\libntp\modetoa.c"
+"D:\ntp-4.0.94b\libntp\mstolfp.c"
+"D:\ntp-4.0.94b\libntp\msutotsf.c"
+"D:\ntp-4.0.94b\libntp\msyslog.c"
+"D:\ntp-4.0.94b\libntp\netof.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c"
+"D:\ntp-4.0.94b\libntp\numtoa.c"
+"D:\ntp-4.0.94b\libntp\numtohost.c"
+"D:\ntp-4.0.94b\libntp\octtoint.c"
+"D:\ntp-4.0.94b\libntp\prettydate.c"
+"D:\ntp-4.0.94b\libntp\ranny.c"
+"D:\ntp-4.0.94b\libntp\recvbuff.c"
+"D:\ntp-4.0.94b\libntp\refnumtoa.c"
+"D:\ntp-4.0.94b\libntp\statestr.c"
+"D:\ntp-4.0.94b\libntp\strerror.c"
+"D:\ntp-4.0.94b\libntp\syssignal.c"
+"D:\ntp-4.0.94b\libntp\systime.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\transmitbuff.c"
+"D:\ntp-4.0.94b\libntp\tsftomsu.c"
+"D:\ntp-4.0.94b\libntp\tstotv.c"
+"D:\ntp-4.0.94b\libntp\tvtoa.c"
+"D:\ntp-4.0.94b\libntp\tvtots.c"
+"D:\ntp-4.0.94b\libntp\uglydate.c"
+"D:\ntp-4.0.94b\libntp\uinttoa.c"
+"D:\ntp-4.0.94b\libntp\utvtoa.c"
+"D:\ntp-4.0.94b\libntp\ymd2yd.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP1F.tmp" 
+Message Compiler
+MC: Compiling .\messages.mc
+Creating temporary file "C:\TEMP\RSP20.tmp" with contents
+[
+/nologo /out:"Release\libntp.lib" 
+".\Release\a_md5encrypt.obj"
+".\Release\adjtime.obj"
+".\Release\atoint.obj"
+".\Release\atolfp.obj"
+".\Release\atouint.obj"
+".\Release\authencrypt.obj"
+".\Release\authkeys.obj"
+".\Release\authparity.obj"
+".\Release\authreadkeys.obj"
+".\Release\authusekey.obj"
+".\Release\binio.obj"
+".\Release\buftvtots.obj"
+".\Release\caljulian.obj"
+".\Release\calleapwhen.obj"
+".\Release\caltontp.obj"
+".\Release\calyearstart.obj"
+".\Release\clocktime.obj"
+".\Release\clocktypes.obj"
+".\Release\decodenetnum.obj"
+".\Release\dofptoa.obj"
+".\Release\dolfptoa.obj"
+".\Release\emalloc.obj"
+".\Release\findconfig.obj"
+".\Release\fptoa.obj"
+".\Release\fptoms.obj"
+".\Release\getopt.obj"
+".\Release\gpstolfp.obj"
+".\Release\hextoint.obj"
+".\Release\hextolfp.obj"
+".\Release\humandate.obj"
+".\Release\ieee754io.obj"
+".\Release\inttoa.obj"
+".\Release\iosignal.obj"
+".\Release\lib_strbuf.obj"
+".\Release\log.obj"
+".\Release\machines.obj"
+".\Release\md5c.obj"
+".\Release\memmove.obj"
+".\Release\mfp_mul.obj"
+".\Release\mfptoa.obj"
+".\Release\mfptoms.obj"
+".\Release\mktime.obj"
+".\Release\modetoa.obj"
+".\Release\mstolfp.obj"
+".\Release\msutotsf.obj"
+".\Release\msyslog.obj"
+".\Release\netof.obj"
+".\Release\nt_clockstuff.obj"
+".\Release\numtoa.obj"
+".\Release\numtohost.obj"
+".\Release\octtoint.obj"
+".\Release\prettydate.obj"
+".\Release\ranny.obj"
+".\Release\recvbuff.obj"
+".\Release\refnumtoa.obj"
+".\Release\statestr.obj"
+".\Release\strerror.obj"
+".\Release\syssignal.obj"
+".\Release\systime.obj"
+".\Release\transmitbuff.obj"
+".\Release\tsftomsu.obj"
+".\Release\tstotv.obj"
+".\Release\tvtoa.obj"
+".\Release\tvtots.obj"
+".\Release\uglydate.obj"
+".\Release\uinttoa.obj"
+".\Release\utvtoa.obj"
+".\Release\ymd2yd.obj"
+]
+Creating command line "link.exe -lib @C:\TEMP\RSP20.tmp"
+<h3>Output Window</h3>
+Compiling...
+a_md5encrypt.c
+adjtime.c
+atoint.c
+atolfp.c
+atouint.c
+authencrypt.c
+authkeys.c
+D:\ntp-4.0.94b\libntp\authkeys.c(546) : warning C4100: 'length' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\authkeys.c(545) : warning C4100: 'pkt' : unreferenced formal parameter
+authparity.c
+authreadkeys.c
+authusekey.c
+D:\ntp-4.0.94b\libntp\authreadkeys.c(173) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authreadkeys.c(177) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authreadkeys.c(179) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authusekey.c(33) : warning C4100: 'keyno' : unreferenced formal parameter
+binio.c
+D:\ntp-4.0.94b\libntp\authusekey.c(133) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\binio.c(30) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(31) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(55) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(56) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(58) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(80) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(81) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(105) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(106) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(107) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(108) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+buftvtots.c
+caljulian.c
+D:\ntp-4.0.94b\libntp\caljulian.c(113) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+calleapwhen.c
+caltontp.c
+calyearstart.c
+clocktime.c
+clocktypes.c
+decodenetnum.c
+dofptoa.c
+D:\ntp-4.0.94b\libntp\dofptoa.c(56) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(65) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(70) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+dolfptoa.c
+D:\ntp-4.0.94b\libntp\dolfptoa.c(62) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dolfptoa.c(63) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+emalloc.c
+findconfig.c
+fptoa.c
+fptoms.c
+getopt.c
+gpstolfp.c
+hextoint.c
+hextolfp.c
+humandate.c
+ieee754io.c
+D:\ntp-4.0.94b\libntp\ieee754io.c(312) : warning C4018: '>' : signed/unsigned mismatch
+D:\ntp-4.0.94b\libntp\ieee754io.c(368) : warning C4100: 'offsets' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\ieee754io.c(365) : warning C4100: 'bufpp' : unreferenced formal parameter
+inttoa.c
+iosignal.c
+lib_strbuf.c
+log.c
+C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+D:\ntp-4.0.94b\libntp\log.c(26) : warning C4100: 'pszAppname' : unreferenced formal parameter
+machines.c
+D:\ntp-4.0.94b\libntp\machines.c(224) : warning C4013: '_getch' undefined; assuming extern returning int
+D:\ntp-4.0.94b\libntp\machines.c(225) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\machines.c(216) : warning C4100: 'prompt' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\machines.c(243) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+md5c.c
+memmove.c
+mfp_mul.c
+mfptoa.c
+mfptoms.c
+mktime.c
+modetoa.c
+mstolfp.c
+msutotsf.c
+msyslog.c
+D:\ntp-4.0.94b\libntp\msyslog.c(90) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\msyslog.c(95) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+netof.c
+nt_clockstuff.c
+D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c(58) : warning C4013: 'msyslog' undefined; assuming extern returning int
+numtoa.c
+numtohost.c
+octtoint.c
+prettydate.c
+ranny.c
+recvbuff.c
+refnumtoa.c
+statestr.c
+strerror.c
+D:\ntp-4.0.94b\libntp\strerror.c(36) : warning C4018: '<' : signed/unsigned mismatch
+syssignal.c
+systime.c
+D:\ntp-4.0.94b\libntp\systime.c(184) : warning C4244: '=' : conversion from 'double ' to 'long ', possible loss of data
+D:\ntp-4.0.94b\libntp\systime.c(288) : warning C4115: 'timezone' : named type definition in parentheses
+transmitbuff.c
+tsftomsu.c
+tstotv.c
+tvtoa.c
+tvtots.c
+uglydate.c
+uinttoa.c
+utvtoa.c
+ymd2yd.c
+Creating library...
+
+
+
+<h3>Results</h3>
+libntp.lib - 0 error(s), 41 warning(s)
+<h3>
+--------------------Configuration: libntp - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP21.bat" with contents
+[
+@echo off
+mc -h . -r . -e h .\messages.mc
+]
+Creating command line "C:\TEMP\RSP21.bat"
+Creating temporary file "C:\TEMP\RSP22.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /I "." /FI"windows.h" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/libntp.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\libntp\a_md5encrypt.c"
+"D:\ntp-4.0.94b\libntp\adjtime.c"
+"D:\ntp-4.0.94b\libntp\atoint.c"
+"D:\ntp-4.0.94b\libntp\atolfp.c"
+"D:\ntp-4.0.94b\libntp\atouint.c"
+"D:\ntp-4.0.94b\libntp\authencrypt.c"
+"D:\ntp-4.0.94b\libntp\authkeys.c"
+"D:\ntp-4.0.94b\libntp\authparity.c"
+"D:\ntp-4.0.94b\libntp\authreadkeys.c"
+"D:\ntp-4.0.94b\libntp\authusekey.c"
+"D:\ntp-4.0.94b\libntp\binio.c"
+"D:\ntp-4.0.94b\libntp\buftvtots.c"
+"D:\ntp-4.0.94b\libntp\caljulian.c"
+"D:\ntp-4.0.94b\libntp\calleapwhen.c"
+"D:\ntp-4.0.94b\libntp\caltontp.c"
+"D:\ntp-4.0.94b\libntp\calyearstart.c"
+"D:\ntp-4.0.94b\libntp\clocktime.c"
+"D:\ntp-4.0.94b\libntp\clocktypes.c"
+"D:\ntp-4.0.94b\libntp\decodenetnum.c"
+"D:\ntp-4.0.94b\libntp\dofptoa.c"
+"D:\ntp-4.0.94b\libntp\dolfptoa.c"
+"D:\ntp-4.0.94b\libntp\emalloc.c"
+"D:\ntp-4.0.94b\libntp\findconfig.c"
+"D:\ntp-4.0.94b\libntp\fptoa.c"
+"D:\ntp-4.0.94b\libntp\fptoms.c"
+"D:\ntp-4.0.94b\libntp\getopt.c"
+"D:\ntp-4.0.94b\libntp\gpstolfp.c"
+"D:\ntp-4.0.94b\libntp\hextoint.c"
+"D:\ntp-4.0.94b\libntp\hextolfp.c"
+"D:\ntp-4.0.94b\libntp\humandate.c"
+"D:\ntp-4.0.94b\libntp\ieee754io.c"
+"D:\ntp-4.0.94b\libntp\inttoa.c"
+"D:\ntp-4.0.94b\libntp\iosignal.c"
+"D:\ntp-4.0.94b\libntp\lib_strbuf.c"
+"D:\ntp-4.0.94b\libntp\log.c"
+"D:\ntp-4.0.94b\libntp\machines.c"
+"D:\ntp-4.0.94b\libntp\md5c.c"
+"D:\ntp-4.0.94b\libntp\memmove.c"
+"D:\ntp-4.0.94b\libntp\mfp_mul.c"
+"D:\ntp-4.0.94b\libntp\mfptoa.c"
+"D:\ntp-4.0.94b\libntp\mfptoms.c"
+"D:\ntp-4.0.94b\libntp\mktime.c"
+"D:\ntp-4.0.94b\libntp\modetoa.c"
+"D:\ntp-4.0.94b\libntp\mstolfp.c"
+"D:\ntp-4.0.94b\libntp\msutotsf.c"
+"D:\ntp-4.0.94b\libntp\msyslog.c"
+"D:\ntp-4.0.94b\libntp\netof.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c"
+"D:\ntp-4.0.94b\libntp\numtoa.c"
+"D:\ntp-4.0.94b\libntp\numtohost.c"
+"D:\ntp-4.0.94b\libntp\octtoint.c"
+"D:\ntp-4.0.94b\libntp\prettydate.c"
+"D:\ntp-4.0.94b\libntp\ranny.c"
+"D:\ntp-4.0.94b\libntp\recvbuff.c"
+"D:\ntp-4.0.94b\libntp\refnumtoa.c"
+"D:\ntp-4.0.94b\libntp\statestr.c"
+"D:\ntp-4.0.94b\libntp\strerror.c"
+"D:\ntp-4.0.94b\libntp\syssignal.c"
+"D:\ntp-4.0.94b\libntp\systime.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\transmitbuff.c"
+"D:\ntp-4.0.94b\libntp\tsftomsu.c"
+"D:\ntp-4.0.94b\libntp\tstotv.c"
+"D:\ntp-4.0.94b\libntp\tvtoa.c"
+"D:\ntp-4.0.94b\libntp\tvtots.c"
+"D:\ntp-4.0.94b\libntp\uglydate.c"
+"D:\ntp-4.0.94b\libntp\uinttoa.c"
+"D:\ntp-4.0.94b\libntp\utvtoa.c"
+"D:\ntp-4.0.94b\libntp\ymd2yd.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP22.tmp" 
+Message Compiler
+MC: Compiling .\messages.mc
+Creating temporary file "C:\TEMP\RSP23.tmp" with contents
+[
+/nologo /out:"Debug\libntp.lib" 
+".\Debug\a_md5encrypt.obj"
+".\Debug\adjtime.obj"
+".\Debug\atoint.obj"
+".\Debug\atolfp.obj"
+".\Debug\atouint.obj"
+".\Debug\authencrypt.obj"
+".\Debug\authkeys.obj"
+".\Debug\authparity.obj"
+".\Debug\authreadkeys.obj"
+".\Debug\authusekey.obj"
+".\Debug\binio.obj"
+".\Debug\buftvtots.obj"
+".\Debug\caljulian.obj"
+".\Debug\calleapwhen.obj"
+".\Debug\caltontp.obj"
+".\Debug\calyearstart.obj"
+".\Debug\clocktime.obj"
+".\Debug\clocktypes.obj"
+".\Debug\decodenetnum.obj"
+".\Debug\dofptoa.obj"
+".\Debug\dolfptoa.obj"
+".\Debug\emalloc.obj"
+".\Debug\findconfig.obj"
+".\Debug\fptoa.obj"
+".\Debug\fptoms.obj"
+".\Debug\getopt.obj"
+".\Debug\gpstolfp.obj"
+".\Debug\hextoint.obj"
+".\Debug\hextolfp.obj"
+".\Debug\humandate.obj"
+".\Debug\ieee754io.obj"
+".\Debug\inttoa.obj"
+".\Debug\iosignal.obj"
+".\Debug\lib_strbuf.obj"
+".\Debug\log.obj"
+".\Debug\machines.obj"
+".\Debug\md5c.obj"
+".\Debug\memmove.obj"
+".\Debug\mfp_mul.obj"
+".\Debug\mfptoa.obj"
+".\Debug\mfptoms.obj"
+".\Debug\mktime.obj"
+".\Debug\modetoa.obj"
+".\Debug\mstolfp.obj"
+".\Debug\msutotsf.obj"
+".\Debug\msyslog.obj"
+".\Debug\netof.obj"
+".\Debug\nt_clockstuff.obj"
+".\Debug\numtoa.obj"
+".\Debug\numtohost.obj"
+".\Debug\octtoint.obj"
+".\Debug\prettydate.obj"
+".\Debug\ranny.obj"
+".\Debug\recvbuff.obj"
+".\Debug\refnumtoa.obj"
+".\Debug\statestr.obj"
+".\Debug\strerror.obj"
+".\Debug\syssignal.obj"
+".\Debug\systime.obj"
+".\Debug\transmitbuff.obj"
+".\Debug\tsftomsu.obj"
+".\Debug\tstotv.obj"
+".\Debug\tvtoa.obj"
+".\Debug\tvtots.obj"
+".\Debug\uglydate.obj"
+".\Debug\uinttoa.obj"
+".\Debug\utvtoa.obj"
+".\Debug\ymd2yd.obj"
+]
+Creating command line "link.exe -lib @C:\TEMP\RSP23.tmp"
+<h3>Output Window</h3>
+Compiling...
+a_md5encrypt.c
+c:\program files\microsoft visual studio\vc98\include\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+adjtime.c
+atoint.c
+atolfp.c
+atouint.c
+authencrypt.c
+authkeys.c
+D:\ntp-4.0.94b\libntp\authkeys.c(546) : warning C4100: 'length' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\authkeys.c(545) : warning C4100: 'pkt' : unreferenced formal parameter
+authparity.c
+authreadkeys.c
+authusekey.c
+D:\ntp-4.0.94b\libntp\authusekey.c(33) : warning C4100: 'keyno' : unreferenced formal parameter
+binio.c
+D:\ntp-4.0.94b\libntp\binio.c(30) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(31) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(55) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(56) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(58) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(80) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(81) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(105) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(106) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(107) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(108) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+buftvtots.c
+caljulian.c
+D:\ntp-4.0.94b\libntp\caljulian.c(113) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+calleapwhen.c
+caltontp.c
+calyearstart.c
+clocktime.c
+clocktypes.c
+decodenetnum.c
+dofptoa.c
+D:\ntp-4.0.94b\libntp\dofptoa.c(56) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(65) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(70) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+dolfptoa.c
+D:\ntp-4.0.94b\libntp\dolfptoa.c(62) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dolfptoa.c(63) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+emalloc.c
+findconfig.c
+fptoa.c
+fptoms.c
+getopt.c
+gpstolfp.c
+hextoint.c
+hextolfp.c
+humandate.c
+ieee754io.c
+D:\ntp-4.0.94b\libntp\ieee754io.c(312) : warning C4018: '>' : signed/unsigned mismatch
+D:\ntp-4.0.94b\libntp\ieee754io.c(368) : warning C4100: 'offsets' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\ieee754io.c(365) : warning C4100: 'bufpp' : unreferenced formal parameter
+inttoa.c
+iosignal.c
+lib_strbuf.c
+log.c
+D:\ntp-4.0.94b\libntp\log.c(26) : warning C4100: 'pszAppname' : unreferenced formal parameter
+machines.c
+D:\ntp-4.0.94b\libntp\machines.c(224) : warning C4013: '_getch' undefined; assuming extern returning int
+D:\ntp-4.0.94b\libntp\machines.c(225) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\machines.c(243) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+md5c.c
+memmove.c
+mfp_mul.c
+mfptoa.c
+mfptoms.c
+mktime.c
+modetoa.c
+mstolfp.c
+msutotsf.c
+msyslog.c
+D:\ntp-4.0.94b\libntp\msyslog.c(90) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\msyslog.c(95) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+netof.c
+nt_clockstuff.c
+D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c(58) : warning C4013: 'msyslog' undefined; assuming extern returning int
+numtoa.c
+numtohost.c
+octtoint.c
+prettydate.c
+ranny.c
+recvbuff.c
+refnumtoa.c
+statestr.c
+strerror.c
+D:\ntp-4.0.94b\libntp\strerror.c(36) : warning C4018: '<' : signed/unsigned mismatch
+syssignal.c
+systime.c
+D:\ntp-4.0.94b\libntp\systime.c(184) : warning C4244: '=' : conversion from 'double ' to 'long ', possible loss of data
+D:\ntp-4.0.94b\libntp\systime.c(288) : warning C4115: 'timezone' : named type definition in parentheses
+transmitbuff.c
+tsftomsu.c
+tstotv.c
+tvtoa.c
+tvtots.c
+uglydate.c
+uinttoa.c
+utvtoa.c
+ymd2yd.c
+Creating library...
+
+
+
+<h3>Results</h3>
+libntp.lib - 0 error(s), 36 warning(s)
+<h3>
+--------------------Configuration: libntp - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP24.bat" with contents
+[
+@echo off
+mc -h . -r . -e h .\messages.mc
+]
+Creating command line "C:\TEMP\RSP24.bat"
+Creating temporary file "C:\TEMP\RSP25.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /I "." /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/libntp.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\libntp\a_md5encrypt.c"
+"D:\ntp-4.0.94b\libntp\adjtime.c"
+"D:\ntp-4.0.94b\libntp\atoint.c"
+"D:\ntp-4.0.94b\libntp\atolfp.c"
+"D:\ntp-4.0.94b\libntp\atouint.c"
+"D:\ntp-4.0.94b\libntp\authencrypt.c"
+"D:\ntp-4.0.94b\libntp\authkeys.c"
+"D:\ntp-4.0.94b\libntp\authparity.c"
+"D:\ntp-4.0.94b\libntp\authreadkeys.c"
+"D:\ntp-4.0.94b\libntp\authusekey.c"
+"D:\ntp-4.0.94b\libntp\binio.c"
+"D:\ntp-4.0.94b\libntp\buftvtots.c"
+"D:\ntp-4.0.94b\libntp\caljulian.c"
+"D:\ntp-4.0.94b\libntp\calleapwhen.c"
+"D:\ntp-4.0.94b\libntp\caltontp.c"
+"D:\ntp-4.0.94b\libntp\calyearstart.c"
+"D:\ntp-4.0.94b\libntp\clocktime.c"
+"D:\ntp-4.0.94b\libntp\clocktypes.c"
+"D:\ntp-4.0.94b\libntp\decodenetnum.c"
+"D:\ntp-4.0.94b\libntp\dofptoa.c"
+"D:\ntp-4.0.94b\libntp\dolfptoa.c"
+"D:\ntp-4.0.94b\libntp\emalloc.c"
+"D:\ntp-4.0.94b\libntp\findconfig.c"
+"D:\ntp-4.0.94b\libntp\fptoa.c"
+"D:\ntp-4.0.94b\libntp\fptoms.c"
+"D:\ntp-4.0.94b\libntp\getopt.c"
+"D:\ntp-4.0.94b\libntp\gpstolfp.c"
+"D:\ntp-4.0.94b\libntp\hextoint.c"
+"D:\ntp-4.0.94b\libntp\hextolfp.c"
+"D:\ntp-4.0.94b\libntp\humandate.c"
+"D:\ntp-4.0.94b\libntp\ieee754io.c"
+"D:\ntp-4.0.94b\libntp\inttoa.c"
+"D:\ntp-4.0.94b\libntp\iosignal.c"
+"D:\ntp-4.0.94b\libntp\lib_strbuf.c"
+"D:\ntp-4.0.94b\libntp\log.c"
+"D:\ntp-4.0.94b\libntp\machines.c"
+"D:\ntp-4.0.94b\libntp\md5c.c"
+"D:\ntp-4.0.94b\libntp\memmove.c"
+"D:\ntp-4.0.94b\libntp\mfp_mul.c"
+"D:\ntp-4.0.94b\libntp\mfptoa.c"
+"D:\ntp-4.0.94b\libntp\mfptoms.c"
+"D:\ntp-4.0.94b\libntp\mktime.c"
+"D:\ntp-4.0.94b\libntp\modetoa.c"
+"D:\ntp-4.0.94b\libntp\mstolfp.c"
+"D:\ntp-4.0.94b\libntp\msutotsf.c"
+"D:\ntp-4.0.94b\libntp\msyslog.c"
+"D:\ntp-4.0.94b\libntp\netof.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c"
+"D:\ntp-4.0.94b\libntp\numtoa.c"
+"D:\ntp-4.0.94b\libntp\numtohost.c"
+"D:\ntp-4.0.94b\libntp\octtoint.c"
+"D:\ntp-4.0.94b\libntp\prettydate.c"
+"D:\ntp-4.0.94b\libntp\ranny.c"
+"D:\ntp-4.0.94b\libntp\recvbuff.c"
+"D:\ntp-4.0.94b\libntp\refnumtoa.c"
+"D:\ntp-4.0.94b\libntp\statestr.c"
+"D:\ntp-4.0.94b\libntp\strerror.c"
+"D:\ntp-4.0.94b\libntp\syssignal.c"
+"D:\ntp-4.0.94b\libntp\systime.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\transmitbuff.c"
+"D:\ntp-4.0.94b\libntp\tsftomsu.c"
+"D:\ntp-4.0.94b\libntp\tstotv.c"
+"D:\ntp-4.0.94b\libntp\tvtoa.c"
+"D:\ntp-4.0.94b\libntp\tvtots.c"
+"D:\ntp-4.0.94b\libntp\uglydate.c"
+"D:\ntp-4.0.94b\libntp\uinttoa.c"
+"D:\ntp-4.0.94b\libntp\utvtoa.c"
+"D:\ntp-4.0.94b\libntp\ymd2yd.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP25.tmp" 
+Message Compiler
+MC: Compiling .\messages.mc
+Creating temporary file "C:\TEMP\RSP26.tmp" with contents
+[
+/nologo /out:"Release\libntp.lib" 
+".\Release\a_md5encrypt.obj"
+".\Release\adjtime.obj"
+".\Release\atoint.obj"
+".\Release\atolfp.obj"
+".\Release\atouint.obj"
+".\Release\authencrypt.obj"
+".\Release\authkeys.obj"
+".\Release\authparity.obj"
+".\Release\authreadkeys.obj"
+".\Release\authusekey.obj"
+".\Release\binio.obj"
+".\Release\buftvtots.obj"
+".\Release\caljulian.obj"
+".\Release\calleapwhen.obj"
+".\Release\caltontp.obj"
+".\Release\calyearstart.obj"
+".\Release\clocktime.obj"
+".\Release\clocktypes.obj"
+".\Release\decodenetnum.obj"
+".\Release\dofptoa.obj"
+".\Release\dolfptoa.obj"
+".\Release\emalloc.obj"
+".\Release\findconfig.obj"
+".\Release\fptoa.obj"
+".\Release\fptoms.obj"
+".\Release\getopt.obj"
+".\Release\gpstolfp.obj"
+".\Release\hextoint.obj"
+".\Release\hextolfp.obj"
+".\Release\humandate.obj"
+".\Release\ieee754io.obj"
+".\Release\inttoa.obj"
+".\Release\iosignal.obj"
+".\Release\lib_strbuf.obj"
+".\Release\log.obj"
+".\Release\machines.obj"
+".\Release\md5c.obj"
+".\Release\memmove.obj"
+".\Release\mfp_mul.obj"
+".\Release\mfptoa.obj"
+".\Release\mfptoms.obj"
+".\Release\mktime.obj"
+".\Release\modetoa.obj"
+".\Release\mstolfp.obj"
+".\Release\msutotsf.obj"
+".\Release\msyslog.obj"
+".\Release\netof.obj"
+".\Release\nt_clockstuff.obj"
+".\Release\numtoa.obj"
+".\Release\numtohost.obj"
+".\Release\octtoint.obj"
+".\Release\prettydate.obj"
+".\Release\ranny.obj"
+".\Release\recvbuff.obj"
+".\Release\refnumtoa.obj"
+".\Release\statestr.obj"
+".\Release\strerror.obj"
+".\Release\syssignal.obj"
+".\Release\systime.obj"
+".\Release\transmitbuff.obj"
+".\Release\tsftomsu.obj"
+".\Release\tstotv.obj"
+".\Release\tvtoa.obj"
+".\Release\tvtots.obj"
+".\Release\uglydate.obj"
+".\Release\uinttoa.obj"
+".\Release\utvtoa.obj"
+".\Release\ymd2yd.obj"
+]
+Creating command line "link.exe -lib @C:\TEMP\RSP26.tmp"
+<h3>Output Window</h3>
+Compiling...
+a_md5encrypt.c
+adjtime.c
+atoint.c
+atolfp.c
+atouint.c
+authencrypt.c
+authkeys.c
+D:\ntp-4.0.94b\libntp\authkeys.c(546) : warning C4100: 'length' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\authkeys.c(545) : warning C4100: 'pkt' : unreferenced formal parameter
+authparity.c
+authreadkeys.c
+authusekey.c
+D:\ntp-4.0.94b\libntp\authreadkeys.c(173) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authreadkeys.c(177) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authreadkeys.c(179) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\authusekey.c(33) : warning C4100: 'keyno' : unreferenced formal parameter
+binio.c
+D:\ntp-4.0.94b\libntp\authusekey.c(133) : warning C4702: unreachable code
+D:\ntp-4.0.94b\libntp\binio.c(30) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(31) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(55) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(56) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(58) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(80) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(81) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(105) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(106) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(107) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(108) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+buftvtots.c
+caljulian.c
+D:\ntp-4.0.94b\libntp\caljulian.c(113) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+calleapwhen.c
+caltontp.c
+calyearstart.c
+clocktime.c
+clocktypes.c
+decodenetnum.c
+dofptoa.c
+D:\ntp-4.0.94b\libntp\dofptoa.c(56) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(65) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(70) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+dolfptoa.c
+D:\ntp-4.0.94b\libntp\dolfptoa.c(62) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dolfptoa.c(63) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+emalloc.c
+findconfig.c
+fptoa.c
+fptoms.c
+getopt.c
+gpstolfp.c
+hextoint.c
+hextolfp.c
+humandate.c
+ieee754io.c
+D:\ntp-4.0.94b\libntp\ieee754io.c(312) : warning C4018: '>' : signed/unsigned mismatch
+D:\ntp-4.0.94b\libntp\ieee754io.c(368) : warning C4100: 'offsets' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\ieee754io.c(365) : warning C4100: 'bufpp' : unreferenced formal parameter
+inttoa.c
+iosignal.c
+lib_strbuf.c
+log.c
+C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+D:\ntp-4.0.94b\libntp\log.c(26) : warning C4100: 'pszAppname' : unreferenced formal parameter
+machines.c
+D:\ntp-4.0.94b\libntp\machines.c(224) : warning C4013: '_getch' undefined; assuming extern returning int
+D:\ntp-4.0.94b\libntp\machines.c(225) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\machines.c(216) : warning C4100: 'prompt' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\machines.c(243) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+md5c.c
+memmove.c
+mfp_mul.c
+mfptoa.c
+mfptoms.c
+mktime.c
+modetoa.c
+mstolfp.c
+msutotsf.c
+msyslog.c
+D:\ntp-4.0.94b\libntp\msyslog.c(90) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\msyslog.c(95) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+netof.c
+nt_clockstuff.c
+D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c(58) : warning C4013: 'msyslog' undefined; assuming extern returning int
+numtoa.c
+numtohost.c
+octtoint.c
+prettydate.c
+ranny.c
+recvbuff.c
+refnumtoa.c
+statestr.c
+strerror.c
+D:\ntp-4.0.94b\libntp\strerror.c(36) : warning C4018: '<' : signed/unsigned mismatch
+syssignal.c
+systime.c
+D:\ntp-4.0.94b\libntp\systime.c(184) : warning C4244: '=' : conversion from 'double ' to 'long ', possible loss of data
+D:\ntp-4.0.94b\libntp\systime.c(288) : warning C4115: 'timezone' : named type definition in parentheses
+transmitbuff.c
+tsftomsu.c
+tstotv.c
+tvtoa.c
+tvtots.c
+uglydate.c
+uinttoa.c
+utvtoa.c
+ymd2yd.c
+Creating library...
+<h3>
+--------------------Configuration: ntpd - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP27.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpd
+]
+Creating command line "C:\TEMP\RSP27.bat"
+Creating command line "rc.exe /l 0x409 /fo"Release/messages.res" /i "\ntp-4.0.94b\ports\winnt\libntp" /d "NDEBUG" "D:\ntp-4.0.94b\ports\winnt\libntp\messages.rc"" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP28.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/ntpd.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ntpd\map_vme.c"
+"D:\ntp-4.0.94b\ntpd\ntp_config.c"
+"D:\ntp-4.0.94b\ntpd\ntp_control.c"
+"D:\ntp-4.0.94b\ntpd\ntp_filegen.c"
+"D:\ntp-4.0.94b\ntpd\ntp_intres.c"
+"D:\ntp-4.0.94b\ntpd\ntp_io.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c"
+"D:\ntp-4.0.94b\ntpd\ntp_loopfilter.c"
+"D:\ntp-4.0.94b\ntpd\ntp_monitor.c"
+"D:\ntp-4.0.94b\ntpd\ntp_peer.c"
+"D:\ntp-4.0.94b\ntpd\ntp_proto.c"
+"D:\ntp-4.0.94b\ntpd\ntp_refclock.c"
+"D:\ntp-4.0.94b\ntpd\ntp_request.c"
+"D:\ntp-4.0.94b\ntpd\ntp_restrict.c"
+"D:\ntp-4.0.94b\ntpd\ntp_timer.c"
+"D:\ntp-4.0.94b\ntpd\ntp_util.c"
+"D:\ntp-4.0.94b\ntpd\ntpd.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\version.c"
+"D:\ntp-4.0.94b\ntpd\refclock_acts.c"
+"D:\ntp-4.0.94b\ntpd\refclock_arbiter.c"
+"D:\ntp-4.0.94b\ntpd\refclock_arc.c"
+"D:\ntp-4.0.94b\ntpd\refclock_as2201.c"
+"D:\ntp-4.0.94b\ntpd\refclock_atom.c"
+"D:\ntp-4.0.94b\ntpd\refclock_bancomm.c"
+"D:\ntp-4.0.94b\ntpd\refclock_chu.c"
+"D:\ntp-4.0.94b\ntpd\refclock_conf.c"
+"D:\ntp-4.0.94b\ntpd\refclock_datum.c"
+"D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c"
+"D:\ntp-4.0.94b\ntpd\refclock_gpsvme.c"
+"D:\ntp-4.0.94b\ntpd\refclock_heath.c"
+"D:\ntp-4.0.94b\ntpd\refclock_hpgps.c"
+"D:\ntp-4.0.94b\ntpd\refclock_irig.c"
+"D:\ntp-4.0.94b\ntpd\refclock_jupiter.c"
+"D:\ntp-4.0.94b\ntpd\refclock_leitch.c"
+"D:\ntp-4.0.94b\ntpd\refclock_local.c"
+"D:\ntp-4.0.94b\ntpd\refclock_msfees.c"
+"D:\ntp-4.0.94b\ntpd\refclock_mx4200.c"
+"D:\ntp-4.0.94b\ntpd\refclock_nmea.c"
+"D:\ntp-4.0.94b\ntpd\refclock_oncore.c"
+"D:\ntp-4.0.94b\ntpd\refclock_palisade.c"
+"D:\ntp-4.0.94b\ntpd\refclock_parse.c"
+"D:\ntp-4.0.94b\ntpd\refclock_pst.c"
+"D:\ntp-4.0.94b\ntpd\refclock_ptbacts.c"
+"D:\ntp-4.0.94b\ntpd\refclock_shm.c"
+"D:\ntp-4.0.94b\ntpd\refclock_tpro.c"
+"D:\ntp-4.0.94b\ntpd\refclock_trak.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c"
+"D:\ntp-4.0.94b\ntpd\refclock_true.c"
+"D:\ntp-4.0.94b\ntpd\refclock_usno.c"
+"D:\ntp-4.0.94b\ntpd\refclock_wwvb.c"
+"D:\ntp-4.0.94b\libparse\clk_computime.c"
+"D:\ntp-4.0.94b\libparse\clk_dcf7000.c"
+"D:\ntp-4.0.94b\libparse\clk_hopf6021.c"
+"D:\ntp-4.0.94b\libparse\clk_meinberg.c"
+"D:\ntp-4.0.94b\libparse\clk_rawdcf.c"
+"D:\ntp-4.0.94b\libparse\clk_rcc8000.c"
+"D:\ntp-4.0.94b\libparse\clk_schmid.c"
+"D:\ntp-4.0.94b\libparse\clk_trimtaip.c"
+"D:\ntp-4.0.94b\libparse\clk_trimtsip.c"
+"D:\ntp-4.0.94b\libparse\parse.c"
+"D:\ntp-4.0.94b\libparse\parse_conf.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP28.tmp" 
+Creating temporary file "C:\TEMP\RSP29.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/ntpd.pdb" /machine:I386 /out:"Release/ntpd.exe" 
+".\Release\map_vme.obj"
+".\Release\ntp_config.obj"
+".\Release\ntp_control.obj"
+".\Release\ntp_filegen.obj"
+".\Release\ntp_intres.obj"
+".\Release\ntp_io.obj"
+".\Release\ntp_iocompletionport.obj"
+".\Release\ntp_loopfilter.obj"
+".\Release\ntp_monitor.obj"
+".\Release\ntp_peer.obj"
+".\Release\ntp_proto.obj"
+".\Release\ntp_refclock.obj"
+".\Release\ntp_request.obj"
+".\Release\ntp_restrict.obj"
+".\Release\ntp_timer.obj"
+".\Release\ntp_util.obj"
+".\Release\ntpd.obj"
+".\Release\win32_io.obj"
+".\Release\version.obj"
+".\Release\refclock_acts.obj"
+".\Release\refclock_arbiter.obj"
+".\Release\refclock_arc.obj"
+".\Release\refclock_as2201.obj"
+".\Release\refclock_atom.obj"
+".\Release\refclock_bancomm.obj"
+".\Release\refclock_chu.obj"
+".\Release\refclock_conf.obj"
+".\Release\refclock_datum.obj"
+".\Release\refclock_dumbclock.obj"
+".\Release\refclock_gpsvme.obj"
+".\Release\refclock_heath.obj"
+".\Release\refclock_hpgps.obj"
+".\Release\refclock_irig.obj"
+".\Release\refclock_jupiter.obj"
+".\Release\refclock_leitch.obj"
+".\Release\refclock_local.obj"
+".\Release\refclock_msfees.obj"
+".\Release\refclock_mx4200.obj"
+".\Release\refclock_nmea.obj"
+".\Release\refclock_oncore.obj"
+".\Release\refclock_palisade.obj"
+".\Release\refclock_parse.obj"
+".\Release\refclock_pst.obj"
+".\Release\refclock_ptbacts.obj"
+".\Release\refclock_shm.obj"
+".\Release\refclock_tpro.obj"
+".\Release\refclock_trak.obj"
+".\Release\refclock_trimbledc.obj"
+".\Release\refclock_true.obj"
+".\Release\refclock_usno.obj"
+".\Release\refclock_wwvb.obj"
+".\Release\clk_computime.obj"
+".\Release\clk_dcf7000.obj"
+".\Release\clk_hopf6021.obj"
+".\Release\clk_meinberg.obj"
+".\Release\clk_rawdcf.obj"
+".\Release\clk_rcc8000.obj"
+".\Release\clk_schmid.obj"
+".\Release\clk_trimtaip.obj"
+".\Release\clk_trimtsip.obj"
+".\Release\parse.obj"
+".\Release\parse_conf.obj"
+".\Release\messages.res"
+"\ntp-4.0.94b\ports\winnt\libntp\Release\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP29.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+map_vme.c
+ntp_config.c
+D:\ntp-4.0.94b\ntpd\ntp_config.c(1920) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_config.c(2183) : warning C4505: 'catchchild' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpd\ntp_config.c(415) : see declaration of 'catchchild'
+ntp_control.c
+D:\ntp-4.0.94b\ntpd\ntp_config.c(1958) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_config.c(2171) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_control.c(678) : warning C4244: 'return' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1675) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1674) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1706) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1705) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1772) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1771) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1882) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1881) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1990) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1989) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2106) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2105) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2288) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2568) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2610) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2619) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+ntp_filegen.c
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1936) : warning C4701: local variable 'val' may be used without having been initialized
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2591) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(320) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(382) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(383) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned char ', possible loss of data
+ntp_intres.c
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(517) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(522) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(594) : warning C4018: '==' : signed/unsigned mismatch
+ntp_io.c
+D:\ntp-4.0.94b\ntpd\ntp_io.c(149) : warning C4013: 'init_transmitbuff' undefined; assuming extern returning int
+D:\ntp-4.0.94b\ntpd\ntp_io.c(231) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(395) : warning C4057: 'function' : 'unsigned long *' differs in indirection to slightly different base types from 'int *'
+D:\ntp-4.0.94b\ntpd\ntp_io.c(509) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(576) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(638) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(502) : warning C4101: 'TODO_FillInTheNameWithSomeThingReasonble' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntp_io.c(944) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1180) : warning C4244: 'initializing' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1139) : warning C4101: 'cc' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1657) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1697) : warning C4018: '==' : signed/unsigned mismatch
+ntp_iocompletionport.c
+D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c(230) : warning C4057: 'function' : 'int *' differs in indirection to slightly different base types from 'unsigned long *'
+D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c(289) : warning C4057: 'function' : 'int *' differs in indirection to slightly different base types from 'unsigned long *'
+ntp_loopfilter.c
+ntp_monitor.c
+D:\ntp-4.0.94b\ntpd\ntp_monitor.c(282) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+ntp_peer.c
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(111) : warning C4211: nonstandard extension used : redefined extern to static
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(249) : warning C4100: 'fd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(536) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(613) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(624) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_proto.c
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(770) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(930) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(975) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1016) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1064) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1097) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1146) : warning C4018: '<' : signed/unsigned mismatch
+ntp_refclock.c
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(126) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(127) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(226) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(366) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(712) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(945) : warning C4100: 'flags' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(944) : warning C4100: 'fd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1321) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_request.c
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(117) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(216) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1203) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1303) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_request.c(729) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_request.c(748) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_request.c(2253) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_restrict.c
+ntp_timer.c
+ntp_util.c
+ntpd.c
+D:\ntp-4.0.94b\ntpd\ntpd.c(302) : warning C4101: 'cp' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(304) : warning C4101: 'rbuf' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(303) : warning C4101: 'rbuflist' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(477) : warning C4101: 'rbuflist' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(1086) : warning C4505: 'no_debug' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpd\ntpd.c(167) : see declaration of 'no_debug'
+win32_io.c
+D:\ntp-4.0.94b\ntpd\ntpd.c(484) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntpd.c(873) : warning C4702: unreachable code
+D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c(27) : warning C4100: 'flags' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c(142) : warning C4100: 'optional_actions' : unreferenced formal parameter
+version.c
+refclock_acts.c
+refclock_arbiter.c
+refclock_arc.c
+refclock_as2201.c
+refclock_atom.c
+refclock_bancomm.c
+refclock_chu.c
+refclock_conf.c
+refclock_datum.c
+refclock_dumbclock.c
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(174) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(223) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(342) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+refclock_gpsvme.c
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(119) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(126) : warning C4706: assignment within conditional expression
+refclock_heath.c
+refclock_hpgps.c
+refclock_irig.c
+refclock_jupiter.c
+refclock_leitch.c
+refclock_local.c
+D:\ntp-4.0.94b\ntpd\refclock_local.c(151) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_local.c(181) : warning C4100: 'unit' : unreferenced formal parameter
+refclock_msfees.c
+refclock_mx4200.c
+refclock_nmea.c
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(141) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(177) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(329) : warning C4100: 'unit' : unreferenced formal parameter
+refclock_oncore.c
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(100) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(107) : warning C4706: assignment within conditional expression
+refclock_palisade.c
+D:\ntp-4.0.94b\ntpd\refclock_palisade.c(249) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_palisade.c(343) : warning C4310: cast truncates constant value
+D:\ntp-4.0.94b\ntpd\refclock_palisade.c(601) : warning C4100: 'unit' : unreferenced formal parameter
+refclock_parse.c
+refclock_pst.c
+refclock_ptbacts.c
+refclock_shm.c
+refclock_tpro.c
+refclock_trak.c
+refclock_trimbledc.c
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(124) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(151) : warning C4101: 'secs' : unreferenced local variable
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(150) : warning C4101: 'secint' : unreferenced local variable
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(152) : warning C4101: 'secfrac' : unreferenced local variable
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(149) : warning C4101: 'st' : unreferenced local variable
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(149) : warning C4101: 'ts' : unreferenced local variable
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(153) : warning C4189: 'event' : local variable is initialized but not referenced
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(204) : warning C4244: 'function' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(205) : warning C4047: 'function' : 'unsigned char *' differs in levels of indirection from 'unsigned char (*)[500]'
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(205) : warning C4024: 'trimbledc_io' : different types for formal and actual parameter 3
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(243) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(280) : warning C4100: 'up' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(279) : warning C4100: 't_in' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(278) : warning C4100: 'bufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(277) : warning C4100: 'buflen' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(276) : warning C4100: 'noevents' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(290) : warning C4505: 'trimbledc_decode' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(142) : see declaration of 'trimbledc_decode'
+refclock_true.c
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(81) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ports\winnt\ntpd\refclock_trimbledc.c(205) : warning C4761: integral size mismatch in argument; conversion supplied
+refclock_usno.c
+refclock_wwvb.c
+clk_computime.c
+clk_dcf7000.c
+clk_hopf6021.c
+clk_meinberg.c
+clk_rawdcf.c
+clk_rcc8000.c
+clk_schmid.c
+clk_trimtaip.c
+clk_trimtsip.c
+parse.c
+parse_conf.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpd.exe - 0 error(s), 155 warning(s)
+<h3>
+--------------------Configuration: libntp - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP2B.bat" with contents
+[
+@echo off
+mc -h . -r . -e h .\messages.mc
+]
+Creating command line "C:\TEMP\RSP2B.bat"
+Creating temporary file "C:\TEMP\RSP2C.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /I "." /FI"windows.h" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/libntp.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\libntp\a_md5encrypt.c"
+"D:\ntp-4.0.94b\libntp\adjtime.c"
+"D:\ntp-4.0.94b\libntp\atoint.c"
+"D:\ntp-4.0.94b\libntp\atolfp.c"
+"D:\ntp-4.0.94b\libntp\atouint.c"
+"D:\ntp-4.0.94b\libntp\authencrypt.c"
+"D:\ntp-4.0.94b\libntp\authkeys.c"
+"D:\ntp-4.0.94b\libntp\authparity.c"
+"D:\ntp-4.0.94b\libntp\authreadkeys.c"
+"D:\ntp-4.0.94b\libntp\authusekey.c"
+"D:\ntp-4.0.94b\libntp\binio.c"
+"D:\ntp-4.0.94b\libntp\buftvtots.c"
+"D:\ntp-4.0.94b\libntp\caljulian.c"
+"D:\ntp-4.0.94b\libntp\calleapwhen.c"
+"D:\ntp-4.0.94b\libntp\caltontp.c"
+"D:\ntp-4.0.94b\libntp\calyearstart.c"
+"D:\ntp-4.0.94b\libntp\clocktime.c"
+"D:\ntp-4.0.94b\libntp\clocktypes.c"
+"D:\ntp-4.0.94b\libntp\decodenetnum.c"
+"D:\ntp-4.0.94b\libntp\dofptoa.c"
+"D:\ntp-4.0.94b\libntp\dolfptoa.c"
+"D:\ntp-4.0.94b\libntp\emalloc.c"
+"D:\ntp-4.0.94b\libntp\findconfig.c"
+"D:\ntp-4.0.94b\libntp\fptoa.c"
+"D:\ntp-4.0.94b\libntp\fptoms.c"
+"D:\ntp-4.0.94b\libntp\getopt.c"
+"D:\ntp-4.0.94b\libntp\gpstolfp.c"
+"D:\ntp-4.0.94b\libntp\hextoint.c"
+"D:\ntp-4.0.94b\libntp\hextolfp.c"
+"D:\ntp-4.0.94b\libntp\humandate.c"
+"D:\ntp-4.0.94b\libntp\ieee754io.c"
+"D:\ntp-4.0.94b\libntp\inttoa.c"
+"D:\ntp-4.0.94b\libntp\iosignal.c"
+"D:\ntp-4.0.94b\libntp\lib_strbuf.c"
+"D:\ntp-4.0.94b\libntp\log.c"
+"D:\ntp-4.0.94b\libntp\machines.c"
+"D:\ntp-4.0.94b\libntp\md5c.c"
+"D:\ntp-4.0.94b\libntp\memmove.c"
+"D:\ntp-4.0.94b\libntp\mfp_mul.c"
+"D:\ntp-4.0.94b\libntp\mfptoa.c"
+"D:\ntp-4.0.94b\libntp\mfptoms.c"
+"D:\ntp-4.0.94b\libntp\mktime.c"
+"D:\ntp-4.0.94b\libntp\modetoa.c"
+"D:\ntp-4.0.94b\libntp\mstolfp.c"
+"D:\ntp-4.0.94b\libntp\msutotsf.c"
+"D:\ntp-4.0.94b\libntp\msyslog.c"
+"D:\ntp-4.0.94b\libntp\netof.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c"
+"D:\ntp-4.0.94b\libntp\numtoa.c"
+"D:\ntp-4.0.94b\libntp\numtohost.c"
+"D:\ntp-4.0.94b\libntp\octtoint.c"
+"D:\ntp-4.0.94b\libntp\prettydate.c"
+"D:\ntp-4.0.94b\libntp\ranny.c"
+"D:\ntp-4.0.94b\libntp\recvbuff.c"
+"D:\ntp-4.0.94b\libntp\refnumtoa.c"
+"D:\ntp-4.0.94b\libntp\statestr.c"
+"D:\ntp-4.0.94b\libntp\strerror.c"
+"D:\ntp-4.0.94b\libntp\syssignal.c"
+"D:\ntp-4.0.94b\libntp\systime.c"
+"D:\ntp-4.0.94b\ports\winnt\libntp\transmitbuff.c"
+"D:\ntp-4.0.94b\libntp\tsftomsu.c"
+"D:\ntp-4.0.94b\libntp\tstotv.c"
+"D:\ntp-4.0.94b\libntp\tvtoa.c"
+"D:\ntp-4.0.94b\libntp\tvtots.c"
+"D:\ntp-4.0.94b\libntp\uglydate.c"
+"D:\ntp-4.0.94b\libntp\uinttoa.c"
+"D:\ntp-4.0.94b\libntp\utvtoa.c"
+"D:\ntp-4.0.94b\libntp\ymd2yd.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP2C.tmp" 
+Message Compiler
+MC: Compiling .\messages.mc
+Creating temporary file "C:\TEMP\RSP2D.tmp" with contents
+[
+/nologo /out:"Debug\libntp.lib" 
+".\Debug\a_md5encrypt.obj"
+".\Debug\adjtime.obj"
+".\Debug\atoint.obj"
+".\Debug\atolfp.obj"
+".\Debug\atouint.obj"
+".\Debug\authencrypt.obj"
+".\Debug\authkeys.obj"
+".\Debug\authparity.obj"
+".\Debug\authreadkeys.obj"
+".\Debug\authusekey.obj"
+".\Debug\binio.obj"
+".\Debug\buftvtots.obj"
+".\Debug\caljulian.obj"
+".\Debug\calleapwhen.obj"
+".\Debug\caltontp.obj"
+".\Debug\calyearstart.obj"
+".\Debug\clocktime.obj"
+".\Debug\clocktypes.obj"
+".\Debug\decodenetnum.obj"
+".\Debug\dofptoa.obj"
+".\Debug\dolfptoa.obj"
+".\Debug\emalloc.obj"
+".\Debug\findconfig.obj"
+".\Debug\fptoa.obj"
+".\Debug\fptoms.obj"
+".\Debug\getopt.obj"
+".\Debug\gpstolfp.obj"
+".\Debug\hextoint.obj"
+".\Debug\hextolfp.obj"
+".\Debug\humandate.obj"
+".\Debug\ieee754io.obj"
+".\Debug\inttoa.obj"
+".\Debug\iosignal.obj"
+".\Debug\lib_strbuf.obj"
+".\Debug\log.obj"
+".\Debug\machines.obj"
+".\Debug\md5c.obj"
+".\Debug\memmove.obj"
+".\Debug\mfp_mul.obj"
+".\Debug\mfptoa.obj"
+".\Debug\mfptoms.obj"
+".\Debug\mktime.obj"
+".\Debug\modetoa.obj"
+".\Debug\mstolfp.obj"
+".\Debug\msutotsf.obj"
+".\Debug\msyslog.obj"
+".\Debug\netof.obj"
+".\Debug\nt_clockstuff.obj"
+".\Debug\numtoa.obj"
+".\Debug\numtohost.obj"
+".\Debug\octtoint.obj"
+".\Debug\prettydate.obj"
+".\Debug\ranny.obj"
+".\Debug\recvbuff.obj"
+".\Debug\refnumtoa.obj"
+".\Debug\statestr.obj"
+".\Debug\strerror.obj"
+".\Debug\syssignal.obj"
+".\Debug\systime.obj"
+".\Debug\transmitbuff.obj"
+".\Debug\tsftomsu.obj"
+".\Debug\tstotv.obj"
+".\Debug\tvtoa.obj"
+".\Debug\tvtots.obj"
+".\Debug\uglydate.obj"
+".\Debug\uinttoa.obj"
+".\Debug\utvtoa.obj"
+".\Debug\ymd2yd.obj"
+]
+Creating command line "link.exe -lib @C:\TEMP\RSP2D.tmp"
+<h3>Output Window</h3>
+Compiling...
+a_md5encrypt.c
+adjtime.c
+atoint.c
+atolfp.c
+atouint.c
+authencrypt.c
+authkeys.c
+D:\ntp-4.0.94b\libntp\authkeys.c(546) : warning C4100: 'length' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\authkeys.c(545) : warning C4100: 'pkt' : unreferenced formal parameter
+authparity.c
+authreadkeys.c
+authusekey.c
+D:\ntp-4.0.94b\libntp\authusekey.c(33) : warning C4100: 'keyno' : unreferenced formal parameter
+binio.c
+D:\ntp-4.0.94b\libntp\binio.c(30) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(31) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(55) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(56) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(58) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(80) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(81) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(105) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(106) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(107) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\binio.c(108) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+buftvtots.c
+caljulian.c
+D:\ntp-4.0.94b\libntp\caljulian.c(113) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+calleapwhen.c
+caltontp.c
+calyearstart.c
+clocktime.c
+clocktypes.c
+decodenetnum.c
+dofptoa.c
+D:\ntp-4.0.94b\libntp\dofptoa.c(56) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(57) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(65) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dofptoa.c(70) : warning C4244: '=' : conversion from 'int ' to 'short ', possible loss of data
+dolfptoa.c
+D:\ntp-4.0.94b\libntp\dolfptoa.c(62) : warning C4244: '/=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\libntp\dolfptoa.c(63) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+emalloc.c
+findconfig.c
+fptoa.c
+fptoms.c
+getopt.c
+gpstolfp.c
+hextoint.c
+hextolfp.c
+humandate.c
+ieee754io.c
+D:\ntp-4.0.94b\libntp\ieee754io.c(312) : warning C4018: '>' : signed/unsigned mismatch
+D:\ntp-4.0.94b\libntp\ieee754io.c(368) : warning C4100: 'offsets' : unreferenced formal parameter
+D:\ntp-4.0.94b\libntp\ieee754io.c(365) : warning C4100: 'bufpp' : unreferenced formal parameter
+inttoa.c
+iosignal.c
+lib_strbuf.c
+log.c
+D:\ntp-4.0.94b\libntp\log.c(26) : warning C4100: 'pszAppname' : unreferenced formal parameter
+machines.c
+D:\ntp-4.0.94b\libntp\machines.c(224) : warning C4013: '_getch' undefined; assuming extern returning int
+D:\ntp-4.0.94b\libntp\machines.c(225) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\machines.c(243) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+md5c.c
+memmove.c
+mfp_mul.c
+mfptoa.c
+mfptoms.c
+mktime.c
+modetoa.c
+mstolfp.c
+msutotsf.c
+msyslog.c
+D:\ntp-4.0.94b\libntp\msyslog.c(90) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\libntp\msyslog.c(95) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+netof.c
+nt_clockstuff.c
+D:\ntp-4.0.94b\ports\winnt\libntp\nt_clockstuff.c(58) : warning C4013: 'msyslog' undefined; assuming extern returning int
+numtoa.c
+numtohost.c
+octtoint.c
+prettydate.c
+ranny.c
+recvbuff.c
+refnumtoa.c
+statestr.c
+strerror.c
+D:\ntp-4.0.94b\libntp\strerror.c(36) : warning C4018: '<' : signed/unsigned mismatch
+syssignal.c
+systime.c
+D:\ntp-4.0.94b\libntp\systime.c(184) : warning C4244: '=' : conversion from 'double ' to 'long ', possible loss of data
+D:\ntp-4.0.94b\libntp\systime.c(288) : warning C4115: 'timezone' : named type definition in parentheses
+transmitbuff.c
+tsftomsu.c
+tstotv.c
+tvtoa.c
+tvtots.c
+uglydate.c
+uinttoa.c
+utvtoa.c
+ymd2yd.c
+Creating library...
+<h3>
+--------------------Configuration: ntpd - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP2E.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpd
+]
+Creating command line "C:\TEMP\RSP2E.bat"
+Creating command line "rc.exe /l 0x409 /fo"Debug/messages.res" /i "\ntp-4.0.94b\ports\winnt\libntp" /d "_DEBUG" "D:\ntp-4.0.94b\ports\winnt\libntp\messages.rc"" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP2F.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /FI"windows.h" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR"Debug/" /Fp"Debug/ntpd.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ntpd\map_vme.c"
+"D:\ntp-4.0.94b\ntpd\ntp_config.c"
+"D:\ntp-4.0.94b\ntpd\ntp_control.c"
+"D:\ntp-4.0.94b\ntpd\ntp_filegen.c"
+"D:\ntp-4.0.94b\ntpd\ntp_intres.c"
+"D:\ntp-4.0.94b\ntpd\ntp_io.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c"
+"D:\ntp-4.0.94b\ntpd\ntp_loopfilter.c"
+"D:\ntp-4.0.94b\ntpd\ntp_monitor.c"
+"D:\ntp-4.0.94b\ntpd\ntp_peer.c"
+"D:\ntp-4.0.94b\ntpd\ntp_proto.c"
+"D:\ntp-4.0.94b\ntpd\ntp_refclock.c"
+"D:\ntp-4.0.94b\ntpd\ntp_request.c"
+"D:\ntp-4.0.94b\ntpd\ntp_restrict.c"
+"D:\ntp-4.0.94b\ntpd\ntp_timer.c"
+"D:\ntp-4.0.94b\ntpd\ntp_util.c"
+"D:\ntp-4.0.94b\ntpd\ntpd.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpd\version.c"
+"D:\ntp-4.0.94b\ntpd\refclock_acts.c"
+"D:\ntp-4.0.94b\ntpd\refclock_arbiter.c"
+"D:\ntp-4.0.94b\ntpd\refclock_arc.c"
+"D:\ntp-4.0.94b\ntpd\refclock_as2201.c"
+"D:\ntp-4.0.94b\ntpd\refclock_atom.c"
+"D:\ntp-4.0.94b\ntpd\refclock_bancomm.c"
+"D:\ntp-4.0.94b\ntpd\refclock_chu.c"
+"D:\ntp-4.0.94b\ntpd\refclock_conf.c"
+"D:\ntp-4.0.94b\ntpd\refclock_datum.c"
+"D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c"
+"D:\ntp-4.0.94b\ntpd\refclock_gpsvme.c"
+"D:\ntp-4.0.94b\ntpd\refclock_heath.c"
+"D:\ntp-4.0.94b\ntpd\refclock_hpgps.c"
+"D:\ntp-4.0.94b\ntpd\refclock_irig.c"
+"D:\ntp-4.0.94b\ntpd\refclock_jupiter.c"
+"D:\ntp-4.0.94b\ntpd\refclock_leitch.c"
+"D:\ntp-4.0.94b\ntpd\refclock_local.c"
+"D:\ntp-4.0.94b\ntpd\refclock_msfees.c"
+"D:\ntp-4.0.94b\ntpd\refclock_mx4200.c"
+"D:\ntp-4.0.94b\ntpd\refclock_nmea.c"
+"D:\ntp-4.0.94b\ntpd\refclock_oncore.c"
+"D:\ntp-4.0.94b\ntpd\refclock_palisade.c"
+"D:\ntp-4.0.94b\ntpd\refclock_parse.c"
+"D:\ntp-4.0.94b\ntpd\refclock_pst.c"
+"D:\ntp-4.0.94b\ntpd\refclock_ptbacts.c"
+"D:\ntp-4.0.94b\ntpd\refclock_shm.c"
+"D:\ntp-4.0.94b\ntpd\refclock_tpro.c"
+"D:\ntp-4.0.94b\ntpd\refclock_trak.c"
+"D:\ntp-4.0.94b\ntpd\refclock_true.c"
+"D:\ntp-4.0.94b\ntpd\refclock_usno.c"
+"D:\ntp-4.0.94b\ntpd\refclock_wwvb.c"
+"D:\ntp-4.0.94b\libparse\clk_computime.c"
+"D:\ntp-4.0.94b\libparse\clk_dcf7000.c"
+"D:\ntp-4.0.94b\libparse\clk_hopf6021.c"
+"D:\ntp-4.0.94b\libparse\clk_rawdcf.c"
+"D:\ntp-4.0.94b\libparse\clk_rcc8000.c"
+"D:\ntp-4.0.94b\libparse\clk_schmid.c"
+"D:\ntp-4.0.94b\libparse\clk_trimtaip.c"
+"D:\ntp-4.0.94b\libparse\clk_trimtsip.c"
+"D:\ntp-4.0.94b\libparse\parse.c"
+"D:\ntp-4.0.94b\libparse\parse_conf.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP2F.tmp" 
+Creating temporary file "C:\TEMP\RSP30.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/ntpd.pdb" /debug /machine:I386 /out:"Debug/ntpd.exe" /pdbtype:sept 
+".\Debug\map_vme.obj"
+".\Debug\ntp_config.obj"
+".\Debug\ntp_control.obj"
+".\Debug\ntp_filegen.obj"
+".\Debug\ntp_intres.obj"
+".\Debug\ntp_io.obj"
+".\Debug\ntp_iocompletionport.obj"
+".\Debug\ntp_loopfilter.obj"
+".\Debug\ntp_monitor.obj"
+".\Debug\ntp_peer.obj"
+".\Debug\ntp_proto.obj"
+".\Debug\ntp_refclock.obj"
+".\Debug\ntp_request.obj"
+".\Debug\ntp_restrict.obj"
+".\Debug\ntp_timer.obj"
+".\Debug\ntp_util.obj"
+".\Debug\ntpd.obj"
+".\Debug\win32_io.obj"
+".\Debug\version.obj"
+".\Debug\refclock_acts.obj"
+".\Debug\refclock_arbiter.obj"
+".\Debug\refclock_arc.obj"
+".\Debug\refclock_as2201.obj"
+".\Debug\refclock_atom.obj"
+".\Debug\refclock_bancomm.obj"
+".\Debug\refclock_chu.obj"
+".\Debug\refclock_conf.obj"
+".\Debug\refclock_datum.obj"
+".\Debug\refclock_dumbclock.obj"
+".\Debug\refclock_gpsvme.obj"
+".\Debug\refclock_heath.obj"
+".\Debug\refclock_hpgps.obj"
+".\Debug\refclock_irig.obj"
+".\Debug\refclock_jupiter.obj"
+".\Debug\refclock_leitch.obj"
+".\Debug\refclock_local.obj"
+".\Debug\refclock_msfees.obj"
+".\Debug\refclock_mx4200.obj"
+".\Debug\refclock_nmea.obj"
+".\Debug\refclock_oncore.obj"
+".\Debug\refclock_palisade.obj"
+".\Debug\refclock_parse.obj"
+".\Debug\refclock_pst.obj"
+".\Debug\refclock_ptbacts.obj"
+".\Debug\refclock_shm.obj"
+".\Debug\refclock_tpro.obj"
+".\Debug\refclock_trak.obj"
+".\Debug\refclock_true.obj"
+".\Debug\refclock_usno.obj"
+".\Debug\refclock_wwvb.obj"
+".\Debug\clk_computime.obj"
+".\Debug\clk_dcf7000.obj"
+".\Debug\clk_hopf6021.obj"
+".\Debug\clk_rawdcf.obj"
+".\Debug\clk_rcc8000.obj"
+".\Debug\clk_schmid.obj"
+".\Debug\clk_trimtaip.obj"
+".\Debug\clk_trimtsip.obj"
+".\Debug\parse.obj"
+".\Debug\parse_conf.obj"
+".\Debug\messages.res"
+"\ntp-4.0.94b\ports\winnt\libntp\Debug\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP30.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+map_vme.c
+c:\program files\microsoft visual studio\vc98\include\rpcasync.h(45) : warning C4115: '_RPC_ASYNC_STATE' : named type definition in parentheses
+ntp_config.c
+D:\ntp-4.0.94b\ntpd\ntp_config.c(1920) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_config.c(2183) : warning C4505: 'catchchild' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpd\ntp_config.c(415) : see declaration of 'catchchild'
+ntp_control.c
+D:\ntp-4.0.94b\ntpd\ntp_config.c(1958) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_config.c(2171) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_control.c(678) : warning C4244: 'return' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1675) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1674) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1706) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1705) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1772) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1771) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1882) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1881) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1990) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1989) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2106) : warning C4100: 'restrict_mask' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2105) : warning C4100: 'rbufp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2288) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2568) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2610) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2619) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+ntp_filegen.c
+D:\ntp-4.0.94b\ntpd\ntp_control.c(1936) : warning C4701: local variable 'val' may be used without having been initialized
+D:\ntp-4.0.94b\ntpd\ntp_control.c(2591) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(320) : warning C4244: '-=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(382) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_filegen.c(383) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned char ', possible loss of data
+ntp_intres.c
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(517) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(522) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_intres.c(594) : warning C4018: '==' : signed/unsigned mismatch
+ntp_io.c
+D:\ntp-4.0.94b\ntpd\ntp_io.c(149) : warning C4013: 'init_transmitbuff' undefined; assuming extern returning int
+D:\ntp-4.0.94b\ntpd\ntp_io.c(231) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(395) : warning C4057: 'function' : 'unsigned long *' differs in indirection to slightly different base types from 'int *'
+D:\ntp-4.0.94b\ntpd\ntp_io.c(509) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(576) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(638) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(502) : warning C4101: 'TODO_FillInTheNameWithSomeThingReasonble' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntp_io.c(944) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1180) : warning C4244: 'initializing' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1139) : warning C4101: 'cc' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1657) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpd\ntp_io.c(1697) : warning C4018: '==' : signed/unsigned mismatch
+ntp_iocompletionport.c
+D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c(230) : warning C4057: 'function' : 'int *' differs in indirection to slightly different base types from 'unsigned long *'
+D:\ntp-4.0.94b\ports\winnt\ntpd\ntp_iocompletionport.c(289) : warning C4057: 'function' : 'int *' differs in indirection to slightly different base types from 'unsigned long *'
+ntp_loopfilter.c
+ntp_monitor.c
+D:\ntp-4.0.94b\ntpd\ntp_monitor.c(282) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+ntp_peer.c
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(111) : warning C4211: nonstandard extension used : redefined extern to static
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(249) : warning C4100: 'fd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(536) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(613) : warning C4244: '=' : conversion from 'const int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_peer.c(624) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_proto.c
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(770) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(930) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(975) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1016) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1064) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1097) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_proto.c(1146) : warning C4018: '<' : signed/unsigned mismatch
+ntp_refclock.c
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(126) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(127) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(226) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(366) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(712) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(945) : warning C4100: 'flags' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(944) : warning C4100: 'fd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1321) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_request.c
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(117) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(216) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1203) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_refclock.c(1303) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\ntp_request.c(729) : warning C4244: '=' : conversion from 'unsigned int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_request.c(748) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpd\ntp_request.c(2253) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+ntp_restrict.c
+ntp_timer.c
+ntp_util.c
+ntpd.c
+D:\ntp-4.0.94b\ntpd\ntpd.c(302) : warning C4101: 'cp' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(304) : warning C4101: 'rbuf' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(303) : warning C4101: 'rbuflist' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(477) : warning C4101: 'rbuflist' : unreferenced local variable
+D:\ntp-4.0.94b\ntpd\ntpd.c(911) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntpd.c(929) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\ntpd.c(1086) : warning C4505: 'moredebug' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpd\ntpd.c(164) : see declaration of 'moredebug'
+D:\ntp-4.0.94b\ntpd\ntpd.c(1086) : warning C4505: 'lessdebug' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpd\ntpd.c(165) : see declaration of 'lessdebug'
+win32_io.c
+D:\ntp-4.0.94b\ntpd\ntpd.c(484) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c(27) : warning C4100: 'flags' : unreferenced formal parameter
+D:\ntp-4.0.94b\ports\winnt\ntpd\win32_io.c(142) : warning C4100: 'optional_actions' : unreferenced formal parameter
+version.c
+refclock_acts.c
+refclock_arbiter.c
+refclock_arc.c
+refclock_as2201.c
+refclock_atom.c
+refclock_bancomm.c
+refclock_chu.c
+refclock_conf.c
+refclock_datum.c
+refclock_dumbclock.c
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(174) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(223) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(342) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+refclock_gpsvme.c
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(119) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\refclock_dumbclock.c(126) : warning C4706: assignment within conditional expression
+refclock_heath.c
+refclock_hpgps.c
+refclock_irig.c
+refclock_jupiter.c
+refclock_leitch.c
+refclock_local.c
+D:\ntp-4.0.94b\ntpd\refclock_local.c(151) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_local.c(181) : warning C4100: 'unit' : unreferenced formal parameter
+refclock_msfees.c
+refclock_mx4200.c
+refclock_nmea.c
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(141) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(177) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(329) : warning C4100: 'unit' : unreferenced formal parameter
+refclock_oncore.c
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(100) : warning C4706: assignment within conditional expression
+D:\ntp-4.0.94b\ntpd\refclock_nmea.c(107) : warning C4706: assignment within conditional expression
+refclock_palisade.c
+D:\ntp-4.0.94b\ntpd\refclock_palisade.c(249) : warning C4100: 'unit' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpd\refclock_palisade.c(343) : warning C4310: cast truncates constant value
+refclock_parse.c
+refclock_pst.c
+refclock_ptbacts.c
+refclock_shm.c
+refclock_tpro.c
+refclock_trak.c
+refclock_true.c
+refclock_usno.c
+refclock_wwvb.c
+clk_computime.c
+clk_dcf7000.c
+clk_hopf6021.c
+clk_rawdcf.c
+clk_rcc8000.c
+clk_schmid.c
+clk_trimtaip.c
+clk_trimtsip.c
+parse.c
+parse_conf.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpd.exe - 0 error(s), 132 warning(s)
+<h3>
+--------------------Configuration: ntpdate - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP32.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpdate
+]
+Creating command line "C:\TEMP\RSP32.bat"
+Creating temporary file "C:\TEMP\RSP33.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/ntpdate.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ntpdate\ntpdate.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpdate\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP33.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP34.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib winmm.lib /nologo /subsystem:console /incremental:no /pdb:"Release/ntpdate.pdb" /machine:I386 /out:"Release/ntpdate.exe" 
+".\Release\ntpdate.obj"
+".\Release\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Release\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP34.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpdate.c
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(892) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dw2' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dw1' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dwUser' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'uMsg' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'uTimerID' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1552) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1506) : warning C4101: 'rb' : unreferenced local variable
+D:\ntp-4.0.94b\ntpdate\ntpdate.c(1505) : warning C4101: 'i' : unreferenced local variable
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpdate.exe - 0 error(s), 9 warning(s)
+<h3>
+--------------------Configuration: ntpdate - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP36.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpdate
+]
+Creating command line "C:\TEMP\RSP36.bat"
+Creating temporary file "C:\TEMP\RSP37.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/ntpdate.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ntpdate\ntpdate.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpdate\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP37.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP38.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/ntpdate.pdb" /debug /machine:I386 /out:"Debug/ntpdate.exe" /pdbtype:sept 
+".\Debug\ntpdate.obj"
+".\Debug\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Debug\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP38.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpdate.c
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(892) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dw2' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dw1' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'dwUser' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'uMsg' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1340) : warning C4100: 'uTimerID' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1552) : warning C4018: '==' : signed/unsigned mismatch
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1506) : warning C4101: 'rb' : unreferenced local variable
+d:\ntp-4.0.94b\ntpdate\ntpdate.c(1505) : warning C4101: 'i' : unreferenced local variable
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpdate.exe - 0 error(s), 9 warning(s)
+<h3>
+--------------------Configuration: ntpdc - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP3A.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpdc
+]
+Creating command line "C:\TEMP\RSP3A.bat"
+Creating temporary file "C:\TEMP\RSP3B.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/ntpdc.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ntpdc\ntpdc.c"
+"D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpdc\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP3B.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP3C.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/ntpdc.pdb" /machine:I386 /out:"Release/ntpdc.exe" 
+".\Release\ntpdc.obj"
+".\Release\ntpdc_ops.obj"
+".\Release\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Release\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP3C.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpdc.c
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(559) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(848) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(941) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1286) : warning C4090: 'function' : different 'const' qualifiers
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1286) : warning C4022: 'qsort' : pointer mismatch for actual parameter 1
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1603) : warning C4100: 'fp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1602) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1618) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1683) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpdc\ntpdc.c(1690) : warning C4505: 'abortcmd' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpdc\ntpdc.c(62) : see declaration of 'abortcmd'
+ntpdc_ops.c
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(291) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(352) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(750) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(829) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(887) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(941) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(994) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1325) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1735) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1818) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1867) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(2042) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(2352) : warning C4100: 'pcmd' : unreferenced formal parameter
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpdc.exe - 0 error(s), 23 warning(s)
+<h3>
+--------------------Configuration: ntpdc - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP3E.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpdc
+]
+Creating command line "C:\TEMP\RSP3E.bat"
+Creating temporary file "C:\TEMP\RSP3F.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/ntpdc.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ntpdc\ntpdc.c"
+"D:\ntp-4.0.94b\ntpdc\ntpdc_ops.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpdc\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP3F.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP40.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/ntpdc.pdb" /debug /machine:I386 /out:"Debug/ntpdc.exe" /pdbtype:sept 
+".\Debug\ntpdc.obj"
+".\Debug\ntpdc_ops.obj"
+".\Debug\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Debug\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP40.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpdc.c
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(559) : warning C4018: '==' : signed/unsigned mismatch
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(848) : warning C4018: '==' : signed/unsigned mismatch
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(941) : warning C4100: 'sig' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1286) : warning C4090: 'function' : different 'const' qualifiers
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1286) : warning C4022: 'qsort' : pointer mismatch for actual parameter 1
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1603) : warning C4100: 'fp' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1602) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1618) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1683) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+d:\ntp-4.0.94b\ntpdc\ntpdc.c(1690) : warning C4505: 'abortcmd' : unreferenced local function has been removed
+        d:\ntp-4.0.94b\ntpdc\ntpdc.c(62) : see declaration of 'abortcmd'
+ntpdc_ops.c
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(291) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(352) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(750) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(829) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(887) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(941) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(994) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1325) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1735) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1818) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(1867) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(2042) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpdc\ntpdc_ops.c(2352) : warning C4100: 'pcmd' : unreferenced formal parameter
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntpdc.exe - 0 error(s), 23 warning(s)
+<h3>
+--------------------Configuration: ntpq - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP42.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpq
+]
+Creating command line "C:\TEMP\RSP42.bat"
+Creating temporary file "C:\TEMP\RSP43.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/ntpq.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ntpq\ntpq.c"
+"D:\ntp-4.0.94b\ntpq\ntpq_ops.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpq\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP43.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP44.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/ntpq.pdb" /machine:I386 /out:"Release/ntpq.exe" 
+".\Release\ntpq.obj"
+".\Release\ntpq_ops.obj"
+".\Release\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Release\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP44.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpq.c
+D:\ntp-4.0.94b\ntpq\ntpq.c(739) : warning C4018: '==' : signed/unsigned mismatch
+D:\ntp-4.0.94b\ntpq\ntpq.c(1063) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1282) : warning C4100: 'sig' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(1654) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1656) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1657) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1672) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1679) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1681) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1682) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1685) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1686) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1689) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1690) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1703) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1705) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1706) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1711) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1713) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1714) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1719) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1721) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1722) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(1907) : warning C4090: 'function' : different 'const' qualifiers
+D:\ntp-4.0.94b\ntpq\ntpq.c(1907) : warning C4022: 'qsort' : pointer mismatch for actual parameter 1
+D:\ntp-4.0.94b\ntpq\ntpq.c(2086) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2150) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2233) : warning C4100: 'fp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2232) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2248) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2264) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2279) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(2395) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(2443) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(2666) : warning C4100: 'datatype' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq.c(3035) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq.c(3096) : warning C4505: 'abortcmd' : unreferenced local function has been removed
+        D:\ntp-4.0.94b\ntpq\ntpq.c(223) : see declaration of 'abortcmd'
+ntpq_ops.c
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(453) : warning C4100: 'fp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(467) : warning C4100: 'fp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(481) : warning C4100: 'fp' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(480) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(494) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(934) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1055) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1070) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1085) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1099) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1348) : warning C4244: '=' : conversion from 'const int ' to 'char ', possible loss of data
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1294) : warning C4100: 'associd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1572) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1586) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1632) : warning C4100: 'pcmd' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1646) : warning C4100: 'pcmd' : unreferenced formal parameter
+version.c
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'srcadr' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'stratum' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1445) : warning C4701: local variable 'hpoll' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1445) : warning C4701: local variable 'ppoll' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'reach' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estdelay' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estoffset' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estjitter' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estdisp' may be used without having been initialized
+D:\ntp-4.0.94b\ntpq\ntpq_ops.c(1439) : warning C4701: local variable 'srcport' may be used without having been initialized
+Linking...
+
+
+
+<h3>Results</h3>
+ntpq.exe - 0 error(s), 63 warning(s)
+<h3>
+--------------------Configuration: ntpq - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP46.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntpq
+]
+Creating command line "C:\TEMP\RSP46.bat"
+Creating temporary file "C:\TEMP\RSP47.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/ntpq.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ntpq\ntpq.c"
+"D:\ntp-4.0.94b\ntpq\ntpq_ops.c"
+"D:\ntp-4.0.94b\ports\winnt\ntpq\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP47.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP48.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/ntpq.pdb" /debug /machine:I386 /out:"Debug/ntpq.exe" /pdbtype:sept 
+".\Debug\ntpq.obj"
+".\Debug\ntpq_ops.obj"
+".\Debug\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Debug\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP48.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntpq.c
+d:\ntp-4.0.94b\ntpq\ntpq.c(739) : warning C4018: '==' : signed/unsigned mismatch
+d:\ntp-4.0.94b\ntpq\ntpq.c(1063) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1282) : warning C4100: 'sig' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(1654) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1656) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1657) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1672) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1679) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1681) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1682) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1685) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1686) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1689) : warning C4244: '=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1690) : warning C4244: '+=' : conversion from 'int ' to 'unsigned short ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1703) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1705) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1706) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1711) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1713) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1714) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1719) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1721) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1722) : warning C4244: '+=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(1907) : warning C4090: 'function' : different 'const' qualifiers
+d:\ntp-4.0.94b\ntpq\ntpq.c(1907) : warning C4022: 'qsort' : pointer mismatch for actual parameter 1
+d:\ntp-4.0.94b\ntpq\ntpq.c(2086) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2150) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2233) : warning C4100: 'fp' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2232) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2248) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2264) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2279) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(2395) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(2443) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(2666) : warning C4100: 'datatype' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq.c(3035) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq.c(3096) : warning C4505: 'abortcmd' : unreferenced local function has been removed
+        d:\ntp-4.0.94b\ntpq\ntpq.c(223) : see declaration of 'abortcmd'
+ntpq_ops.c
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(453) : warning C4100: 'fp' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(467) : warning C4100: 'fp' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(481) : warning C4100: 'fp' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(480) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(494) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(934) : warning C4244: '=' : conversion from 'int ' to 'unsigned char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1055) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1070) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1085) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1099) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1348) : warning C4244: '=' : conversion from 'const int ' to 'char ', possible loss of data
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1294) : warning C4100: 'associd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1572) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1586) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1632) : warning C4100: 'pcmd' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1646) : warning C4100: 'pcmd' : unreferenced formal parameter
+version.c
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'srcadr' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'stratum' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1445) : warning C4701: local variable 'hpoll' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1445) : warning C4701: local variable 'ppoll' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'reach' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estdelay' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estoffset' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estjitter' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1459) : warning C4701: local variable 'estdisp' may be used without having been initialized
+d:\ntp-4.0.94b\ntpq\ntpq_ops.c(1439) : warning C4701: local variable 'srcport' may be used without having been initialized
+Linking...
+
+
+
+<h3>Results</h3>
+ntpq.exe - 0 error(s), 63 warning(s)
+<h3>
+--------------------Configuration: ntptrace - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP4A.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntptrace
+]
+Creating command line "C:\TEMP\RSP4A.bat"
+Creating temporary file "C:\TEMP\RSP4B.tmp" with contents
+[
+/nologo /MT /W4 /GX /O2 /I "..\..\..\include" /I "..\include" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Release/ntptrace.pch" /YX"windows.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\ntp-4.0.94b\ntptrace\ntptrace.c"
+"D:\ntp-4.0.94b\ports\winnt\ntptrace\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP4B.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP4C.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/ntptrace.pdb" /machine:I386 /out:"Release/ntptrace.exe" 
+".\Release\ntptrace.obj"
+".\Release\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Release\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP4C.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntptrace.c
+D:\ntp-4.0.94b\ntptrace\ntptrace.c(102) : warning C4100: 'x' : unreferenced formal parameter
+D:\ntp-4.0.94b\ntptrace\ntptrace.c(588) : warning C4018: '==' : signed/unsigned mismatch
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntptrace.exe - 0 error(s), 2 warning(s)
+<h3>
+--------------------Configuration: ntptrace - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP4E.bat" with contents
+[
+@echo off
+echo Using environment var PERL (d:\prg\perl)
+d:\prg\perl\bin\perl ..\scripts\mkver.bat -P ntptrace
+]
+Creating command line "C:\TEMP\RSP4E.bat"
+Creating temporary file "C:\TEMP\RSP4F.tmp" with contents
+[
+/nologo /MTd /W4 /Gm /GX /ZI /Od /I "..\..\..\include" /I "..\include" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /Fp"Debug/ntptrace.pch" /YX"windows.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\ntp-4.0.94b\ntptrace\ntptrace.c"
+"D:\ntp-4.0.94b\ports\winnt\ntptrace\version.c"
+]
+Creating command line "cl.exe @C:\TEMP\RSP4F.tmp" 
+Performing Custom Build Step on ..\..\..\configure
+Using environment var PERL (d:\prg\perl)
+Creating temporary file "C:\TEMP\RSP50.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/ntptrace.pdb" /debug /machine:I386 /out:"Debug/ntptrace.exe" /pdbtype:sept 
+".\Debug\ntptrace.obj"
+".\Debug\version.obj"
+"\ntp-4.0.94b\ports\winnt\libntp\Debug\libntp.lib"
+]
+Creating command line "link.exe @C:\TEMP\RSP50.tmp"
+<h3>Output Window</h3>
+Compiling...
+ntptrace.c
+d:\ntp-4.0.94b\ntptrace\ntptrace.c(102) : warning C4100: 'x' : unreferenced formal parameter
+d:\ntp-4.0.94b\ntptrace\ntptrace.c(588) : warning C4018: '==' : signed/unsigned mismatch
+version.c
+Linking...
+
+
+
+<h3>Results</h3>
+ntptrace.exe - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>
