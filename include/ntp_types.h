@@ -72,9 +72,7 @@ typedef u_short		u_int16_t;
 typedef u_int32		u_int32_t;
 #endif /* HAVE_TYPE_U_INT8_T */
 
-#ifndef HAVE_TYPE_U_INT64_T
-typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
-#endif /* HAVE_TYPE_U_INT64_T */
+typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
 
 typedef unsigned short associd_t; /* association ID */
 typedef u_int32 keyid_t;	/* cryptographic key ID */
