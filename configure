@@ -7005,8 +7005,8 @@ else
 int
 main ()
 {
-  extern char *sys_errlist[];
-  
+extern char *sys_errlist[];
+
   ;
   return 0;
 }
@@ -7707,7 +7707,7 @@ else
   ans=no
 case "$ac_cv_hdr_def_sigpoll" in
  yes)
-        case "$target" in
+    case "$target" in
      mips-sgi-irix*)
 	ans=no
 	;;
@@ -7741,7 +7741,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *) ans=yes
         ;;
     esac
-        ;;
+    ;;
 esac
 ac_cv_var_use_udp_sigpoll=$ans
 fi
@@ -9977,7 +9977,7 @@ if test "${enable_kmem+set}" = set; then
   enableval="$enable_kmem"
   ans=$enableval
 else
-      case "$ac_cv_func_nlist$ac_cv_func_K_open$ac_cv_func_kvm_open" in
+  case "$ac_cv_func_nlist$ac_cv_func_K_open$ac_cv_func_kvm_open" in
      *yes*)
 	ans=yes
 	;;
@@ -10004,7 +10004,7 @@ else
 	ans=no
 	;;
     esac
-        
+    
 fi
 
 ac_cv_var_can_kmem=$ans
@@ -10029,7 +10029,7 @@ if test "${enable_accurate_adjtime+set}" = set; then
   enableval="$enable_accurate_adjtime"
   ans=$enableval
 else
-      case "$target" in
+  case "$target" in
       i386-sequent-ptx*)
 	 ans=no
 	 ;;
@@ -10057,7 +10057,7 @@ else
       *) ans=no
 	 ;;
      esac
-          
+     
 fi
 
 ac_cv_var_adjtime_is_accurate=$ans
@@ -10610,7 +10610,7 @@ if test "${enable_slew_always+set}" = set; then
   enableval="$enable_slew_always"
   ans=$enableval
 else
-      case "$target" in
+  case "$target" in
       *-apple-aux[23]*)
 	 ans=yes
 	 ;;
@@ -10626,7 +10626,7 @@ else
       *) ans=no
 	 ;;
      esac
-          
+     
 fi
 
 ac_cv_var_slew_always=$ans
@@ -10649,7 +10649,7 @@ if test "${enable_step_slew+set}" = set; then
   enableval="$enable_step_slew"
   ans=$enableval
 else
-      case "$target" in
+  case "$target" in
       *-sni-sysv*)
 	 ans=yes
 	 ;;
@@ -10668,7 +10668,7 @@ else
       *) ans=no
 	 ;;
      esac
-          
+     
 fi
 
 ac_cv_var_step_slew=$ans
@@ -10691,14 +10691,14 @@ if test "${enable_ntpdate_step+set}" = set; then
   enableval="$enable_ntpdate_step"
   ans=$enableval
 else
-      case "$target" in
+  case "$target" in
       *-apple-aux[23]*)
 	 ans=yes
 	 ;;
       *) ans=no
 	 ;;
      esac
-          
+     
 fi
 
 ac_cv_var_ntpdate_step=$ans
@@ -10753,7 +10753,7 @@ if test "${enable_kernel_fll_bug+set}" = set; then
   enableval="$enable_kernel_fll_bug"
   ans=$enableval
 else
-      case "$target" in
+  case "$target" in
      *-*-solaris2.6)
 	 case "`uname -v`" in
 	  Generic_105181-17)
@@ -10778,7 +10778,7 @@ else
      *) ans=no
 	 ;;
     esac
-        
+    
 fi
 
 ac_cv_var_kernel_fll_bug=$ans

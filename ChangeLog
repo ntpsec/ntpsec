@@ -1,5 +1,8 @@
 2000-02-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Lose the changequote calls and fix the quoting.
+	Reported by: Akim Demaille <akim@epita.fr>
+
 	* ntpd/ntp_request.c: Log various error conditions.
 
 2000-02-27  Harlan Stenn  <stenn@whimsy.udel.edu>
