@@ -1543,6 +1543,7 @@ passwd(
 	if (!interactive) {
 		authusekey(info_auth_keyid, info_auth_keytype,
 			   (u_char *)pcmd->argval[0].string);
+		authtrust(info_auth_keyid, 1);
 	} else {
 		pass = getpass((info_auth_keytype == KEY_TYPE_DES)
 			       ? "DES Password: "
@@ -1550,9 +1551,11 @@ passwd(
 			       );
 		if (*pass == '\0')
 		    (void) fprintf(fp, "Password unchanged\n");
-		else
+		else {
 		    authusekey(info_auth_keyid, info_auth_keytype,
 			       (u_char *)pass);
+		    authtrust(info_auth_keyid, 1);
+		}
 	}
 }
 

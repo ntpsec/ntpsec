@@ -1467,7 +1467,8 @@ input_handler(
 	}
 	else if (rb->recv_length < 0)
 	{
-		msyslog(LOG_ERR, "recvfrom() fd=%d: %m", fd);
+		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
+			inet_ntoa(rb->recv_srcadr.sin_addr), fd);
 #ifdef DEBUG
 		if (debug)
 		    printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);

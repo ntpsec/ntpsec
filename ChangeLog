@@ -1,3 +1,11 @@
+2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_io.c (input_handler): Better recvfrom() error message
+	From: Dean Gibson <timekeeper@tcp-udp.net>
+
+	* ntpdc/ntpdc.c (passwd): Get them working again.
+	From: Benjamin Greenwald <beng@lcs.mit.edu>
+
 2000-09-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_atom.c:
