@@ -742,24 +742,49 @@ rereadkeys(void)
  */
 int
 sock_hash(
-     struct sockaddr_storage *addr
-     )
+	struct sockaddr_storage *addr
+	)
 {
-        int hashVal = 0;
-        int i;
+	int hashVal;
+	int i;
 	int len;
-        char* ch;
+	char *ch;
 
-	ch = (char*)addr;
-	len = SOCKLEN(addr);
+	hashVal = 0;
+	len = 0;
+	/*
+	 * We can't just hash the whole thing because there are hidden
+	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
+	 * so just use the family, port and address.
+	 */
+	ch = (char *)&addr->ss_family;
+	hashVal = 37 * hashVal + (int)*ch;
+	if (sizeof(addr->ss_family) > 1) {
+		ch++;
+		hashVal = 37 * hashVal + (int)*ch;
+	}
+	ch = (char *)&((struct sockaddr_in *)addr)->sin_port;
+	hashVal = 37 * hashVal + (int)*ch;
+	ch++;
+	hashVal = 37 * hashVal + (int)*ch;
+	switch(addr->ss_family) {
+	case AF_INET:
+		ch = (char *)&((struct sockaddr_in *)addr)->sin_addr;
+		len = sizeof(struct in_addr);
+		break;
+	case AF_INET6:
+		ch = (char *)&((struct sockaddr_in6 *)addr)->sin6_addr;
+		len = sizeof(struct in6_addr);
+		break;
+	}
 
-         for(i = 0; i < len ; i++)
-                 hashVal = 37 * hashVal + (int)*(ch + i);
+	for (i = 0; i < len ; i++)
+		hashVal = 37 * hashVal + (int)*(ch + i);
 
-         hashVal = hashVal % 128;  /* % MON_HASH_SIZE hardcoded */
+	hashVal = hashVal % 128;  /* % MON_HASH_SIZE hardcoded */
 
-         if (hashVal < 0)
-                 hashVal += 128;
+	if (hashVal < 0)
+		hashVal += 128;
 
-         return hashVal;
+	return hashVal;
 }
