@@ -1396,7 +1396,7 @@ doprintpeers(
 						dstadr_refid = "0.0.0.0";
 					else
 						dstadr_refid =
-						    nntohost(&srcadr);
+						    nntohost(&dstadr);
 				} else if ((int)strlen(value) <= 4) {
 					refid_string[0] = '.';
 					(void) strcpy(&refid_string[1], value);
