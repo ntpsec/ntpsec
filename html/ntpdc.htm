@@ -424,77 +424,15 @@ is willing to continue on in this fashion.</dd>
 <dd>This command provides a way to set certain data for a reference
 clock. See the source listing for further information.</dd>
 
-<dt><tt>enable [ <i>flag</i> ] [ ... ]</tt><br>
-<tt>disable [ <i>flag</i> ] [ ... ]</tt></dt>
+<dt><tt>enable [ auth | bclient | calibrate | kernel | monitor |
+ntp | pps | stats]</tt><br>
+<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp |
+pps | stats]</tt></dt>
 
 <dd>These commands operate in the same way as the <tt>enable</tt>
 and <tt>disable</tt> configuration file commands of <tt>ntpd</tt>.
-Following is a description of the flags. Note that only the <tt>
-auth</tt>, <tt>bclient</tt>, <tt>monitor</tt>, <tt>pll</tt>, <tt>
-pps</tt> and <tt>stats</tt> flags can be set by <tt>ntpdc</tt>; the
-<tt>pll_kernel</tt> and <tt>pps_kernel</tt> flags are
-read-only.</dd>
-
-<dd>
-<dl>
-<dt><tt>auth</tt></dt>
-
-<dd>Enables the server to synchronize with unconfigured peers only
-if the peer has been correctly authenticated using a trusted key
-and key identifier. The default for this flag is enable.</dd>
-
-<dt><tt>bclient</tt></dt>
-
-<dd>Enables the server to listen for a message from a broadcast or
-multicast server, as in the <tt>multicastclient</tt> command with
-default address. The default for this flag is disable.</dd>
-
-<dt><tt>monitor</tt></dt>
-
-<dd>Enables the monitoring facility. See the <tt>ntpdc</tt> program
-and the <tt>monlist</tt> command or further information. The
-default for this flag is enable.</dd>
-
-<dt><tt>pll</tt></dt>
-
-<dd>Enables the server to adjust its local clock by means of NTP.
-If disabled, the local clock free-runs at its intrinsic time and
-frequency offset. This flag is useful in case the local clock is
-controlled by some other device or protocol and NTP is used only to
-provide synchronization to other clients. In this case, the local
-clock driver is used. See the <a href="refclock.htm">Reference
-Clock Drivers</a> page for further information. The default for
-this flag is enable.</dd>
-
-<dt><tt>pps</tt></dt>
-
-<dd>Enables the pulse-per-second (PPS) signal when frequency and
-time is disciplined by the precision time kernel modifications. See
-the <a href="kern.htm">A Kernel Model for Precision Timekeeping</a>
-page for further information. The default for this flag is
-disable.</dd>
-
-<dt><tt>stats</tt></dt>
-
-<dd>Enables the statistics facility. See the <a href="monopt.htm">
-Monitoring Options</a> page for further information. The default
-for this flag is enable.</dd>
-
-<dt><tt>pll_kernel</tt></dt>
-
-<dd>When the precision time kernel modifications are installed,
-this indicates the kernel controls the clock discipline; otherwise,
-the daemon controls the clock discipline.</dd>
-
-<dt><tt>pps_kernel</tt></dt>
-
-<dd>When the precision time kernel modifications are installed and
-a pulse-per-second (PPS) signal is available, this indicates the
-PPS signal controls the clock discipline; otherwise, the daemon or
-kernel controls the clock discipline, as indicated by the <tt>
-pll_kernel</tt> flag.</dd>
-</dl>
-</dd>
+See the <a href="miscopt.htm">Miscellaneous Options</a> page for
+further information.</dd>
 
 <dt><tt>restrict <i>address mask flag</i> [ <i>flag</i> ]</tt></dt>
 
@@ -565,7 +503,8 @@ this, the program is occasionally useful.
 
 <hr>
 <a href="index.htm"><img align="left" src="pic/home.gif" alt=
-"gif"></a>
+"gif"></a> 
+
 <address><a href="mailto:mills@udel.edu">David L. Mills
 &lt;mills@udel.edu&gt;</a></address>
 </body>
