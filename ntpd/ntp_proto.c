@@ -1695,18 +1695,15 @@ clock_select(void)
 	}
 	while (1) {
 		sys_maxd = 0;
-		d = error[0];
+		d = 1e9;
 		for (k = i = nlist - 1; i >= 0; i--) {
 			double sdisp = 0;
-			double dtemp = 0;
 
 			for (j = nlist - 1; j > 0; j--) {
-				dtemp += 1. / synch[j];
 				sdisp += DIFF(peer_list[i]->offset,
-				    peer_list[j]->offset) /
-				    synch[j];
+				    peer_list[j]->offset);
 			}
-			sdisp /= dtemp;
+			sdisp *= synch[i];
 			if (sdisp > sys_maxd) {
 				sys_maxd = sdisp;
 				k = i;

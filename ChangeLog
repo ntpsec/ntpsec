@@ -1,5 +1,11 @@
 2001-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* config.h.in: Regenerated - became empty somehow.
+	Reported by John.Hay@icomtek.csir.co.za
+
+	* ntpd/ntp_proto.c (clock_select): Fix sdisp calculation.
+	From Dave Mills.
+
 	* util/ntp-genkeys.c:
 	* ntpd/refclock_chu.c:
 	* ntpd/refclock_atom.c:
