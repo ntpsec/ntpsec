@@ -1634,7 +1634,8 @@ clock_filter(
 	peer->filter_offset[j] = sample_offset;
 	peer->filter_delay[j] = max(0, sample_delay);
 	peer->filter_disp[j] = sample_disp;
-	j++; j %= NTP_SHIFT;
+	peer->filter_epoch[j] = current_time;
+	j = (j + 1) % NTP_SHIFT;
 	peer->filter_nextpt = j;
 
 	/*
@@ -1661,7 +1662,6 @@ clock_filter(
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
-	peer->filter_epoch[j] = current_time;
 
         /*
 	 * Sort the samples in both lists by distance.
@@ -1770,7 +1770,7 @@ clock_filter(
 		printf(
 		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f, age %lu\n",
 		    m, peer->offset, peer->delay, peer->disp,
-		    peer->jitter, peer->update - peer->epoch);
+		    peer->jitter, k);
 #endif
 	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
 		clock_select();
