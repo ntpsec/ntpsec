@@ -1,3 +1,12 @@
+2000-12-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (process_packet): pleap/pstratum.
+	(peer_xmit): Use CRYPTO_FLAG_AUTO.
+	* ntpd/ntp_crypto.c (make_keylist): Use CRYPTO_FLAG_AUTO. Only
+	sign host name and timestamps if the clock is synched.
+	* include/ntp_crypto.h (CRYPTO_FLAG_AUTO): Added.
+	From: Dave Mills
+
 2000-12-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): Call clock_select in a few new

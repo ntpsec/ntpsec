@@ -257,6 +257,7 @@ make_keylist(
 	ap->seq = htonl(peer->keynumber);
 	ap->key = htonl(keyid);
 	ap->siglen = 0;
+	crypto_flags |= CRYPTO_FLAG_AUTO;
 #if DEBUG
 	if (debug)
 		printf("make_keys: %d %08x %08x ts %u\n",
@@ -900,6 +901,7 @@ crypto_xmit(
 	 * perp has replayed an old message.
 	 */
 	case CRYPTO_AUTO | CRYPTO_RESP:
+		crypto_flags &= ~CRYPTO_FLAG_AUTO;
 		peer = findpeerbyassoc(associd);
 		if (peer == NULL) {
 			opcode |= CRYPTO_ERROR;
@@ -1198,14 +1200,13 @@ crypto_agree(void)
 	int rval, i;
 
 	/*
-	 * Sign host name and timestamps.
+	 * Sign host name and timestamps, but only if the clock is
+	 * synchronized.
 	 */
-	if (sys_leap == LEAP_NOTINSYNC) {
-		tstamp = 0;
-	} else {
-		get_systime(&lstamp);
-		tstamp = lstamp.l_ui;
-	}
+	if (sys_leap == LEAP_NOTINSYNC)
+		return;
+	get_systime(&lstamp);
+	tstamp = lstamp.l_ui;
 	host.tstamp = htonl(tstamp);
 	if (!crypto_flags)
 		return;

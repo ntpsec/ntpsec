@@ -16,6 +16,7 @@
 #define CRYPTO_FLAG_RSA	  0x02	/* public/private keys */
 #define CRYPTO_FLAG_DH	  0x04	/* agreement parameters */
 #define CRYPTO_FLAG_TAI	  0x08	/* leapseconds table */
+#define CRYPTO_FLAG_AUTO  0x10	/* autokey update */
 
 /*
  * Extension field definitions

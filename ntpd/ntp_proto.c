@@ -219,10 +219,9 @@ transmit(
 
 			/*
 			 * If a broadcast client at this point, the
-			 * burst has concluded, so we turn off the
-			 * burst, switch to client mode and purge the
-			 * keylist, since no further transmissions will
-			 * be made.
+			 * burst has concluded, so we switch to client
+			 * mode and purge the keylist, since no further
+			 * transmissions will be made.
 			 */
 			if (peer->cast_flags & MDF_BCLNT) {
 				peer->hmode = MODE_BCLIENT;
@@ -858,7 +857,7 @@ process_packet(
 	double dtemp;
 	l_fp p_rec, p_xmt, p_org, p_reftime;
 	l_fp ci;
-	int pmode;
+	int pmode, pleap, pstratum;
 
 	/*
 	 * Swap header fields and keep the books. The books amount to
@@ -884,11 +883,13 @@ process_packet(
 	peer->rec = *recv_ts;
 	peer->ppoll = pkt->ppoll;
 	pmode = PKT_MODE(pkt->li_vn_mode);
+	pleap = PKT_LEAP(pkt->li_vn_mode);
+	pstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
 		peer->oldpkt++;
 	if (L_ISEQU(&peer->org, &p_xmt))	/* 1 */
 		peer->flash |= TEST1;		/* dupe */
-	if (PKT_MODE(pkt->li_vn_mode) != MODE_BROADCAST) {
+	if (pmode != MODE_BROADCAST) {
 		if (!L_ISEQU(&peer->xmt, &p_org)) /* 2 */
 			peer->flash |= TEST2;	/* bogus */
 		if (L_ISZERO(&p_rec) || L_ISZERO(&p_org)) /* test 3 */
@@ -918,11 +919,11 @@ process_packet(
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
 	LFPTOD(&ci, dtemp);
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC || /* 6 */
-	    PKT_TO_STRATUM(pkt->stratum) >= STRATUM_UNSPEC || dtemp < 0)
+	if (pleap == LEAP_NOTINSYNC ||		 /* 6 */
+	    pstratum >= STRATUM_UNSPEC || dtemp < 0)
 		peer->flash |= TEST6;		/* bad synch */
 	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* 7 */
-		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
+		if (pstratum > sys_stratum && pmode != MODE_ACTIVE) {
 			peer->flash |= TEST7; /* bad stratum */
 			sys_badstratum++;
 		}
@@ -945,9 +946,9 @@ process_packet(
 	 */
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
 	    &p_rec, &p_xmt, &peer->rec);
-	peer->leap = PKT_LEAP(pkt->li_vn_mode);
-	peer->pmode = pmode;		/* unspec */
-	peer->stratum = PKT_TO_STRATUM(pkt->stratum);
+	peer->leap = pleap;
+	peer->pmode = pmode;
+	peer->stratum = pstratum;
 	peer->precision = pkt->precision;
 	peer->rootdelay = p_del;
 	peer->rootdispersion = p_disp;
@@ -1149,10 +1150,10 @@ poll_update(
 	 * just slink away. If timeout, figure what the next timeout
 	 * should be. If IBURST or a reference clock, use one second. If
 	 * not and the dude was reachable during the previous poll
-	 * interval, randomize over two seconds; otherwise, randomize
-	 * over sixteen seconds. This is to give time for an ISDN
-	 * circuit to complete the call, for example. If not during a
-	 * burst, randomize over the poll interval.
+	 * interval, randomize over 1-4 seconds; otherwise, randomize
+	 * over 15-18 seconds. This is to give time for a modem to
+	 * complete the call, for example. If not during a burst,
+	 * randomize over the poll interval -1 to +2 seconds.
 	 */ 
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
@@ -2019,7 +2020,7 @@ peer_xmit(
 		 * them at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->keynumber == ntohl(peer->sndauto.seq))
+			if (crypto_flags & CRYPTO_FLAG_AUTO)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -2097,12 +2098,11 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			else if (peer->keynumber == peer->sndauto.seq &&
+			else if ((crypto_flags & CRYPTO_FLAG_AUTO) &&
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
-				    peer->hcookie,
-				    peer->associd);
+				    peer->hcookie, peer->associd);
 #ifdef PUBKEY
 			else if (peer->crypto & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
