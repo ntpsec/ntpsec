@@ -1,3 +1,15 @@
+2000-01-21  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* Add pointer to html/hints/winnt.htm to INSTALL file
+	* Fix NT makefiles to accomodate at least one weird
+	  version of Visual C that can't handle the LFs without
+	  the DOS CR also.
+
+2000-01-20  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* Update Copyright in Palisade driver to 2000
+	* Fix Palisade MIN & MAX POLL to optimal values
+
 2000-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver7.htm: Patches from Dave Mills
