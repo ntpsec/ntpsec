@@ -1,3 +1,18 @@
+2000-07-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99j4
+
+	* ntpq/ntpq.c: Lose PUBKEY stuff - older ntpq's will complain when
+	they see the info in a packet.
+	* ntpd/ntp_proto.c (peer_xmit): TAI changes.
+	* ntpd/ntp_crypto.c: Fix host/network byteorder stuff.  Follow
+	global->struct changes.  TAI changes.  Bugfixes.
+	* ntpd/ntp_control.c: Follow field reorder/rename.
+	* include/ntp_crypto.h: Move crypto stuff from separate globals
+	into structs.
+	* include/ntp_control.h (CS_HOST): Reorder/rename some fields
+	From: Dave Mills
+
 2000-06-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_peer.c (unpeer): Moved keystr cleanup inside ifdef PUBKEY

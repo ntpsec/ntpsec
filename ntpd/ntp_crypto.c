@@ -84,35 +84,36 @@
  */
 static R_RSA_PRIVATE_KEY private_key; /* RSA private key */
 static R_RSA_PUBLIC_KEY public_key; /* RSA public key */
-static struct value host;	/* host name/public key */
-static struct value dhparam;	/* Diffie_Hellman parameters */
-static struct value dhpub;	/* Diffie_Hellman public value */
-static struct value tai_leap;	/* TAI leapseconds table */
 static u_char *dh_private;	/* DH private value */
 static u_int dh_keyLen;		/* DH private value length */
+static char *keysdir = "/usr/local/etc/"; /* crypto keys directory */
+static char *private_key_file = NULL; /* private key file */
+static char *public_key_file = NULL; /* public key file */
+static char *dh_params_file = NULL; /* DH parameters file */
+static char *tai_leap_file = NULL; /* TAI leapseconds file */
+
+
+/*
+ * Global cryptodata in network byte order
+ */
+struct value host;		/* host name/public key */
+struct value dhparam;		/* Diffie_Hellman parameters */
+struct value dhpub;		/* Diffie_Hellman public value */
+struct value tai_leap;		/* TAI leapseconds table */
 
 /*
  * Global cryptodata in host byte order.
  */
 int	crypto_flags;		/* flags that wave cryptically */
 R_DH_PARAMS dh_params;		/* Diffie-Hellman parameters */
-char	*private_key_file = NULL; /* private key file */
-u_int	private_key_fstamp;	/* RSA private key filestamp */
-char	*public_key_file = NULL; /* public key file */
-u_int	public_key_fstamp;	/* RSA public key filestamp */
-char	*dh_params_file = NULL;	/* DH parameters file */
-u_int	dh_params_fstamp;	/* DH parameters filestamp */
-char	*keysdir = "/usr/local/etc/"; /* crypto keys directory */
-u_int	tai_leap_fstamp;	/* TAI leapseconds filestamp */
-char	*tai_leap_file = NULL;	/* TAI leapseconds file */
 u_int	sys_tai;		/* current UTC offset from TAI */
 
 /*
  * Cryptotypes
  */
-static	void	crypto_rsa	P((char *, u_int *, u_char *, u_int));
-static	void	crypto_dh	P((char *, u_int *));
-static	void	crypto_tai	P((char *, u_int *));
+static	u_int	crypto_rsa	P((char *, u_char *, u_int));
+static	void	crypto_dh	P((char *));
+static	void	crypto_tai	P((char *));
 #endif /* PUBKEY */
 
 
@@ -470,7 +471,7 @@ crypto_recv(
 				    rval, temp, tstamp,
 				    ntohl(vp->fstamp));
 #endif
-			if (rval != RV_OK)
+			if (rval != RV_OK || temp == 0)
 				break;
 
 			/*
@@ -479,7 +480,7 @@ crypto_recv(
 			 * the private key length is set arbitrarily at
 			 * half the prime length.
 			 */
-			dhparam.fstamp = htonl(vp->fstamp);
+			dhparam.fstamp = vp->fstamp;
 			dhparam.vallen = vp->vallen;
 			if (dhparam.val != NULL)
 				free(dhparam.val);
@@ -503,7 +504,7 @@ crypto_recv(
 			 * Initialize Diffie-Hellman public value
 			 * extension field.
 			 */
-			dhpub.fstamp = htonl(vp->fstamp);
+			dhpub.fstamp = vp->fstamp;
 			dhpub.vallen = htonl(dh_params.primeLen);
 			if (dhpub.val != NULL)
 				free(dhpub.val);
@@ -551,7 +552,7 @@ crypto_recv(
 			 * value. We use only the first u_int32 for the
 			 * host cookie. Wasteful.
 			 */
-			if (rval != RV_OK) {
+			if (rval != RV_OK || temp == 0) {
 				temp = 0;
 			} else {
 				rval = R_ComputeDHAgreedKey(dh_key,
@@ -616,7 +617,8 @@ crypto_recv(
 					peer->keystr = emalloc(temp);
 					strcpy(peer->keystr,
 					    (char *)&pkt[j]);
-					peer->fstamp = tstamp;
+					peer->fstamp =
+					    ntohl(vp->fstamp);
 					peer->flash &= ~TEST10;
 				}
 			}
@@ -658,14 +660,14 @@ crypto_recv(
 				    rval, temp, tstamp,
 				    ntohl(vp->fstamp));
 #endif
-			if (rval != RV_OK)
+			if (rval != RV_OK || temp == 0)
 				break;
 
 			/*
 			 * Initialize TAI leapsecond table and extension
 			 * field in network byte order.
 			 */
-			tai_leap.fstamp = htonl(vp->fstamp);
+			tai_leap.fstamp = vp->fstamp;
 			tai_leap.vallen = vp->vallen;
 			if (tai_leap.val == NULL)
 				free(tai_leap.val);
@@ -677,10 +679,6 @@ crypto_recv(
 			memcpy(pp, &vp->val, temp);
 			sys_tai = temp / 4 + TAI_1972;
 			crypto_agree();
-
-for (i = 0; i < temp / 4; i++)
-	printf("xxx %u %u\n", i, ntohl(*pp++));
-
 			break;
 #endif /* PUBKEY */
 
@@ -926,6 +924,7 @@ void
 crypto_setup(void)
 {
 	char filename[MAXFILENAME];
+	u_int fstamp;			/* filestamp */
 	u_int len, temp;
 	u_int32 *pp;
 
@@ -938,19 +937,15 @@ crypto_setup(void)
 	memset(&host, 0, sizeof(host));
 	memset(&dhparam, 0, sizeof(dhparam));
 	memset(&dhpub, 0, sizeof(dhpub));
+	memset(&tai_leap, 0, sizeof(tai_leap));
 
 	/*
 	 * Load required RSA private key from file, default "ntpkey".
 	 */
 	if (private_key_file == NULL)
 		private_key_file = "ntpkey";
-	crypto_rsa(private_key_file, &private_key_fstamp,
-	    (u_char *)&private_key, sizeof(R_RSA_PRIVATE_KEY));
-	if (private_key.bits == 0) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: required RSA private key file missing or corrupted");
-		exit;
-	}
+	host.fstamp = htonl(crypto_rsa(private_key_file,
+	    (u_char *)&private_key, sizeof(R_RSA_PRIVATE_KEY)));
 
 	/*
 	 * Load required RSA public key from file, default
@@ -963,18 +958,13 @@ crypto_setup(void)
 		public_key_file = emalloc(strlen(filename) + 1);
 		strcpy(public_key_file, filename);
 	}
-	crypto_rsa(public_key_file, &public_key_fstamp,
-	    (u_char *)&public_key, sizeof(R_RSA_PUBLIC_KEY));
-	if (public_key.bits == 0) {
+	fstamp = htonl(crypto_rsa(public_key_file,
+	    (u_char *)&public_key, sizeof(R_RSA_PUBLIC_KEY)));
+	if (fstamp != host.fstamp || strstr(public_key_file,
+	    sys_hostname) == NULL) {
 		msyslog(LOG_ERR,
-		    "crypto_setup: required RSA public key file missing or corrupted");
-		exit;
-	}
-	if (strstr(public_key_file, sys_hostname) == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: RSA public key file %s not generated by this host",
-		    public_key_file);
-		exit;
+		    "RSA public/private key files mismatch");
+		exit (-1);
 	}
 
 	/*
@@ -987,7 +977,6 @@ crypto_setup(void)
 	strcpy(filename, sys_hostname);
 	for (len = strlen(filename) + 1; len % 4 != 0; len++)
 		filename[len - 1] = 0;
-	host.fstamp = htonl(public_key_fstamp);
 	temp = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
 	host.vallen = htonl(temp + len);
 	host.val = emalloc(temp + len);
@@ -995,7 +984,6 @@ crypto_setup(void)
 	*pp++ = htonl(public_key.bits);
 	memcpy(pp, &public_key.modulus, temp - 4);
 	memcpy(&host.val[temp], filename, len);
-	temp = private_key.bits / 8;
 	host.sig = emalloc(private_key.bits / 8);
 
 	/*
@@ -1006,7 +994,7 @@ crypto_setup(void)
 	 */
 	if (dh_params_file == NULL)
 		dh_params_file = "ntpkey_dh";
-	crypto_dh(dh_params_file, &dh_params_fstamp);
+	crypto_dh(dh_params_file);
 
 	/*
 	 * Load optional TAI leapseconds file, default "leap-second". If
@@ -1016,7 +1004,7 @@ crypto_setup(void)
 	 */
 	if (tai_leap_file == NULL)
 		tai_leap_file = "leap-seconds";
-	crypto_tai(tai_leap_file, &tai_leap_fstamp);
+	crypto_tai(tai_leap_file);
 }
 
 
@@ -1029,8 +1017,7 @@ crypto_agree(void)
 	R_RANDOM_STRUCT randomstr;	/* wiggle bits */
 	R_SIGNATURE_CTX ctx;		/* signature context */
 	u_int len, temp;
-	int rval;
-	int i;
+	int rval, i;
 
 	/*
 	 * Sign host name and timestamps.
@@ -1042,14 +1029,14 @@ crypto_agree(void)
 	rval = R_SignFinal(&ctx, host.sig, &len, &private_key);
 	if (rval != RV_OK || len != private_key.bits / 8) {
 		msyslog(LOG_ERR, "host signature fails %x", rval);
-		exit(1);
+		exit (-1);
 	}
 	host.siglen = ntohl(len);
 
 	/*
 	 * Sign Diffie-Hellman parameters and timestamps.
 	 */
-	if (dhparam.vallen > 0) {
+	if (dhparam.vallen != 0) {
 		dhparam.tstamp = htonl(sys_revoketime.l_ui);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
@@ -1059,31 +1046,29 @@ crypto_agree(void)
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
 			    "DH parameters signature fails %x", rval);
-			exit(1);
+			exit (-11);
 		}
 		dhparam.siglen = ntohl(len);
-	}
 
-	/*
-	 * Compute Diffie-Hellman public value.
-	 */
-	R_RandomInit(&randomstr);
-	R_GetRandomBytesNeeded(&len, &randomstr);
-	for (i = 0; i < len; i++) {
-		temp = RANDOM;
-		R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
-	}
-	rval = R_SetupDHAgreement(dhpub.val, dh_private, dh_keyLen,
-	    &dh_params, &randomstr);
-	if (rval != RV_OK) {
-		msyslog(LOG_ERR, "invalid DH parameters");
-		exit(1);
-	}
+		/*
+		 * Compute Diffie-Hellman public value.
+		 */
+		R_RandomInit(&randomstr);
+		R_GetRandomBytesNeeded(&len, &randomstr);
+		for (i = 0; i < len; i++) {
+			temp = RANDOM;
+			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
+		}
+		rval = R_SetupDHAgreement(dhpub.val, dh_private,
+		    dh_keyLen, &dh_params, &randomstr);
+		if (rval != RV_OK) {
+			msyslog(LOG_ERR, "invalid DH parameters");
+			exit (-1);
+		}
 
-	/*
-	 * Sign Diffie-Hellman public value and timestamps.
-	 */
-	if (dhpub.vallen > 0) {
+		/*
+		 * Sign Diffie-Hellman public value and timestamps.
+		 */
 		dhpub.tstamp = htonl(sys_revoketime.l_ui);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
@@ -1093,7 +1078,7 @@ crypto_agree(void)
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
 			    "DH public value signature fails %x", rval);
-			exit(1);
+			exit (-1);
 		}
 		dhpub.siglen = ntohl(len);
 	}
@@ -1101,7 +1086,7 @@ crypto_agree(void)
 	/*
 	 * Sign TAI leapsecond table and timestamps.
 	 */
-	if (tai_leap.vallen > 0) {
+	if (tai_leap.vallen != 0) {
 		tai_leap.tstamp = htonl(sys_revoketime.l_ui);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
@@ -1112,7 +1097,7 @@ crypto_agree(void)
 		if (rval != RV_OK || len != private_key.bits / 8) {
 			msyslog(LOG_ERR,
 			    "TAI leapseconds signature fails %x", rval);
-			exit(1);
+			exit (-1);
 		}
 		tai_leap.siglen = ntohl(len);
 	}
@@ -1129,10 +1114,9 @@ crypto_agree(void)
 /*
  * crypto_rsa - read RSA key, decode and check for errors.
  */
-static void
+u_int
 crypto_rsa(
 	char *cp,		/* file name */
-	u_int *fstamp,		/* filestamp */
 	u_char *key,		/* key pointer */
 	u_int keylen		/* key length */
 	)
@@ -1142,6 +1126,7 @@ crypto_rsa(
 	u_char encoded_key[MAX_ENCLEN]; /* encoded key buffer */
 	char filename[MAXFILENAME]; /* name of parameter file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int fstamp;		/* filestamp */
 	u_int bits, len;
 	char *rptr;
 	int rval;
@@ -1158,7 +1143,7 @@ crypto_rsa(
 	str = fopen(filename, "r");
 	if (str == NULL) {
 		msyslog(LOG_ERR, "RSA file %s not found", filename);
-		return;
+		exit (-1);
 	}
 
 	/*
@@ -1196,7 +1181,7 @@ crypto_rsa(
 	if (rval != RV_OK) {
 		fclose(str);
 		msyslog(LOG_ERR, "RSA file %s error %x", cp, rval);
-		return;
+		exit (-1);
 	}
 	fclose(str);
 	*(u_int *)buf = bits;
@@ -1213,24 +1198,25 @@ crypto_rsa(
 		rptr = strrchr(filename, '.');
 	}
 	if (rptr != NULL)
-		sscanf(++rptr, "%u", fstamp);
+		sscanf(++rptr, "%u", &fstamp);
+	else
+		fstamp = 0;
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "crypto_rsa: RSA file %s link %d fs %u modulus %d\n",
-		    cp, rval, *fstamp, bits);
+		    cp, rval, fstamp, bits);
 #endif
-	return;
+	return (fstamp);
 }
 
 
 /*
  * crypto_dh - read DH parameters, decode and check for errors.
  */
-static void
+void
 crypto_dh(
-	char *cp,		/* file name */
-	u_int *fstamp		/* filestamp */
+	char *cp		/* file name */
 	)
 {
 	FILE *str;		/* file handle */
@@ -1242,6 +1228,7 @@ crypto_dh(
 	u_int generatorlen;	/* generator length (octets) */
 	char filename[MAXFILENAME]; /* name of parameter file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int fstamp;		/* filestamp */
 	u_int32 *pp;
 	u_int len;
 	char *rptr;
@@ -1363,17 +1350,18 @@ crypto_dh(
 	} else {
 		rptr = strrchr(filename, '.');
 	}
-	if (rptr != NULL) {
-		sscanf(++rptr, "%u", fstamp);
-		dhparam.fstamp = htonl(*fstamp);
-		dhpub.fstamp = htonl(*fstamp);
-	}
+	if (rptr != NULL)
+		sscanf(++rptr, "%u", &fstamp);
+	else
+		fstamp = 0;
+	dhparam.fstamp = htonl(fstamp);
+	dhpub.fstamp = htonl(fstamp);
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "crypto_dh: DH file %s link %d fs %u prime %u gen %u\n",
-		    dh_params_file, rval, dh_params_fstamp,
-		    dh_params.primeLen, dh_params.generatorLen);
+		    dh_params_file, rval, fstamp, dh_params.primeLen,
+		    dh_params.generatorLen);
 #endif
 }
 
@@ -1381,10 +1369,9 @@ crypto_dh(
 /*
  * crypto_tai - read TAI offset table and check for errors.
  */
-static void
+void
 crypto_tai(
-	char *cp,		/* file name */
-	u_int *fstamp		/* filestamp */
+	char *cp		/* file name */
 	)
 {
 	FILE *str;		/* file handle */
@@ -1393,6 +1380,7 @@ crypto_tai(
 	u_int offset;		/* offset at leap (s) */
 	char filename[MAXFILENAME]; /* name of parameter file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int fstamp;		/* filestamp */
 	u_int32 *pp;
 	u_int len;
 	char *rptr;
@@ -1463,15 +1451,16 @@ crypto_tai(
 	} else {
 		rptr = strrchr(filename, '.');
 	}
-	if (rptr != NULL) {
-		sscanf(++rptr, "%u", fstamp);
-		tai_leap.fstamp = htonl(*fstamp);
-	}
+	if (rptr != NULL)
+		sscanf(++rptr, "%u", &fstamp);
+	else
+		fstamp = 0;
+	tai_leap.fstamp = htonl(fstamp);
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "crypto_tai: TAI file %s link %d fs %u offset %u\n",
-		    tai_leap_file, rval, tai_leap_fstamp,
+		    tai_leap_file, rval, fstamp,
 		    ntohl(tai_leap.vallen) / 4 + TAI_1972);
 #endif
 }

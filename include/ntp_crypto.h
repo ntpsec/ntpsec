@@ -66,12 +66,10 @@ extern	int	crypto_public	P((struct peer *, u_char *, u_int));
  */
 extern	int	crypto_flags;
 extern	R_DH_PARAMS dh_params;
-extern	char *	private_key_file;
-extern	u_int	private_key_fstamp;
-extern	char *	public_key_file;
-extern	u_int	public_key_fstamp;
-extern	char *	dh_params_file;
-extern	u_int	dh_params_fstamp;
-extern	u_int	sys_tai;
+extern	struct value host;	/* public key/host name */
+extern	struct value dhparam;	/* Diffie-Hellman parameters */
+extern	struct value dhpub;	/* Diffie-Hellman public value */
+extern	struct value tai_leap;	/* TAI leapseconds table */
+extern	u_int	sys_tai;	/* current UTC offset from TAI */
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

@@ -114,11 +114,11 @@ static struct ctl_var sys_var[] = {
 	{ CS_STABIL,	RO, "stability" },	/* 18 */
 	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
 #ifdef PUBKEY
-	{ CS_PRIVATE,	RO, "privatekey" },	/* 120 */
+	{ CS_HOST,	RO, "hostname" },	/* 20 */
 	{ CS_PUBLIC,	RO, "publickey" },	/* 21 */
-	{ CS_DHPARAMS,	RO, "dhparams" },	/* 22 */
-	{ CS_HOSTNAM,	RO, "hostname" },	/* 23 */
-	{ CS_REVTIME,	RO, "revoketime"},	/* 24 */
+	{ CS_DHPARAMS,	RO, "agree" },		/* 22 */
+	{ CS_REVTIME,	RO, "refresh"},		/* 23 */
+	{ CS_LEAPTAB,	RO, "leaptable" },	/* 24 */
 	{ CS_TAI,	RO, "tai"},		/* 25 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
@@ -150,11 +150,10 @@ static	u_char def_sys_var[] = {
 	CS_COMPLIANCE,
 	CS_STABIL,
 #ifdef PUBKEY
-	CS_PRIVATE,
-	CS_PUBLIC,
+	CS_HOST,
 	CS_DHPARAMS,
-	CS_HOSTNAM,
 	CS_REVTIME,
+	CS_LEAPTAB,
 	CS_TAI,
 #endif /* PUBKEY */
 	0
@@ -204,12 +203,13 @@ static struct ctl_var peer_var[] = {
 	{ CP_DISP,	PADDING,"" },       /* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" }, /* 37 */
 #ifdef PUBKEY
-	{ CP_PUBLIC,	RO, "publickey" },	/* 38 */
-	{ CP_SESKEY,	RO, "pcookie" },	/* 39 */
-	{ CP_SASKEY,	RO, "hcookie" },	/* 40 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
+	{ CP_HOST,	RO, "hostname" },	/* 38 */
+	{ CP_PUBLIC,	RO, "publickey" },	/* 39 */
+	{ CP_SESKEY,	RO, "pcookie" },	/* 40 */
+	{ CP_SASKEY,	RO, "hcookie" },	/* 41 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -249,7 +249,7 @@ static u_char def_peer_var[] = {
 	CP_FILTOFFSET,
 	CP_FILTERROR,
 #ifdef PUBKEY
-	CP_PUBLIC,
+	CP_HOST,
 	CP_SESKEY,
 	CP_INITSEQ,
 #endif /* PUBKEY */
@@ -1151,9 +1151,6 @@ ctl_putsys(
 #ifdef HAVE_UNAME
 	char str[256];
 #endif
-#ifdef PUBKEY
-	char str1[256];
-#endif ?* PUBKEY */
 
 	switch (varid) {
 
@@ -1320,46 +1317,30 @@ ctl_putsys(
 		break;
 
 #ifdef PUBKEY
-	case CS_PRIVATE:
-		if (private_key_file == NULL)
+	case CS_HOST:
+		ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
+			strlen(sys_hostname));
+		if (host.fstamp == 0)
 			break;
-		strcpy(str1, private_key_file);
-		if (private_key_fstamp != 0)
-			sprintf(str1, "%s.%u", str1, private_key_fstamp);
-		ctl_putstr(sys_var[CS_PRIVATE].text, str1, strlen(str1));
-		break;
-
-	case CS_PUBLIC:
-		if (public_key_file == NULL)
-			break;
-		strcpy(str1, public_key_file);
-		if (public_key_fstamp != 0)
-			sprintf(str1, "%s.%u", str1, public_key_fstamp);
-		ctl_putstr(sys_var[CS_PUBLIC].text, str1, strlen(str1));
+		ctl_putuint(sys_var[CS_PUBLIC].text, host.fstamp);
 		break;
 
 	case CS_DHPARAMS:
-		if (dh_params_file == NULL)
+		if (dhparam.fstamp == 0)
 			break;
-		strcpy(str1, dh_params_file);
-		if (dh_params_fstamp != 0)
-			sprintf(str1, "%s.%u", str1, dh_params_fstamp);
-		ctl_putstr(sys_var[CS_DHPARAMS].text, str1,
-		    strlen(str1));
-		break;
-
-	case CS_HOSTNAM:
-		if (sys_hostname == NULL)
-			break;
-		ctl_putstr(sys_var[CS_HOSTNAM].text, sys_hostname,
-		    strlen(sys_hostname));
+		ctl_putuint(sys_var[CS_DHPARAMS].text, dhparam.fstamp);
 		break;
 
 	case CS_REVTIME:
-		if (sys_revoketime.l_ui == 0)
+		if (dhpub.fstamp == 0)
 			break;
-		ctl_putuint(sys_var[CS_REVTIME].text,
-		    sys_revoketime.l_ui);
+		ctl_putuint(sys_var[CS_REVTIME].text, dhpub.fstamp);
+		break;
+
+	case CS_LEAPTAB:
+		if (tai_leap.fstamp == 0)
+			break;
+		ctl_putuint(sys_var[CS_LEAPTAB].text, tai_leap.fstamp);
 		break;
 
 	case CS_TAI:
@@ -1381,10 +1362,6 @@ ctl_putpeer(
 	struct peer *peer
 	)
 {
-#ifdef PUBKEY
-	u_int len;
-#endif /* PUBKEY */
-
 	switch (varid) {
 
 	case CP_CONFIG:
@@ -1598,11 +1575,13 @@ ctl_putpeer(
 		}
 		break;
 #ifdef PUBKEY
-	case CP_PUBLIC:
-		if (peer->keystr == NULL)
-			break;
-		len = strlen(peer->keystr);
-		ctl_putstr(peer_var[CP_PUBLIC].text, peer->keystr, len);
+	case CP_HOST:
+		if (peer->keystr != NULL)
+			ctl_putstr(peer_var[CP_HOST].text, peer->keystr,
+			    strlen(peer->keystr));
+		if (peer->fstamp != 0)
+			ctl_putuint(peer_var[CP_PUBLIC].text,
+			    peer->fstamp);
 		break;
 
 	case CP_SESKEY:
@@ -1610,15 +1589,19 @@ ctl_putpeer(
 			ctl_puthex(peer_var[CP_SESKEY].text,
 			    peer->pcookie.key);
 		if (peer->hcookie != 0)
-			ctl_puthex(peer_var[CP_SASKEY].text, peer->hcookie);
+			ctl_puthex(peer_var[CP_SASKEY].text,
+			    peer->hcookie);
 		break;
 
 	case CP_INITSEQ:
 		if (peer->recauto.key == 0)
 			break;
-		ctl_putint(peer_var[CP_INITSEQ].text, peer->recauto.seq);
-		ctl_puthex(peer_var[CP_INITKEY].text, peer->recauto.key);
-		ctl_putuint(peer_var[CP_INITTSP].text, peer->recauto.tstamp);
+		ctl_putint(peer_var[CP_INITSEQ].text,
+		    peer->recauto.seq);
+		ctl_puthex(peer_var[CP_INITKEY].text,
+		    peer->recauto.key);
+		ctl_putuint(peer_var[CP_INITTSP].text,
+		    peer->recauto.tstamp);
 		break;
 #endif /* PUBKEY */
 	}

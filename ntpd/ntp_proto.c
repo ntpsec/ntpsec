@@ -2025,6 +2025,11 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME,
 				    peer->pcookie.key, peer->assoc);
+			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			    sys_tai == 0)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_TAI,
+				    peer->pcookie.key, peer->assoc);
 			else
 #endif /* PUBKEY */
 			if (peer->pcookie.tstamp == 0)
