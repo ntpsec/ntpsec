@@ -612,8 +612,8 @@ generated and signed.</dd>
 <p>The <tt>flash</tt> code is a valuable debugging aid displayed in
 the peer variables list. It shows the results of the original
 sanity checks defined in the NTP specification RFC-1305 and
-additional ones added in NTP Version 4. There are eleven tests
-designated <tt>TEST1</tt> through <tt>TEST11</tt>. The tests are
+additional ones added in NTP Version 4. There are 12 tests
+designated <tt>TEST1</tt> through <tt>TEST12</tt>. The tests are
 performed in a certain order designed to gain maximum diagnostic
 information while protecting against accidental or malicious
 errors. The <tt>flash</tt> variable is first initialized to zero.
@@ -703,6 +703,12 @@ See the <a href="authopt.htm">Authentication Options</a> page.</dd>
 <dd>The autokey protocol has not verified the server or peer is
 proventic and has valid public key credentials. See the <a href=
 "authopt.htm">Authentication Options</a> page.</dd>
+
+<dt><tt>TEST12</tt></dt>
+
+<dd>A protocol or configuration error has occured in the public key
+algorithms or a possible intrusion event has been detected. See the
+<a href="authopt.htm">Authentication Options</a> page.</dd>
 </dl>
 
 <h4>Bugs</h4>

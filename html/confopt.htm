@@ -134,24 +134,20 @@ page.</dd>
 
 <dt><tt>burst</tt></dt>
 
-<dd>when the server is reachable and at each poll interval, send a
-burst of eight packets instead of the usual one packet. The spacing
-between the first and the second packets is about 16s to allow a
-modem call to complete, while the spacing between the remaining
-packets is about 2s. This is designed to improve timekeeping
-quality with the <tt>server</tt> command and <tt>s</tt>
-addresses.</dd>
+<dd>When the server is reachable, send a burst of eight packets
+instead of the usual one. The packet spacing is about 2 s. This is
+designed to improve timekeeping quality with the <tt>server</tt>
+command and <tt>s</tt> addresses.</dd>
 
 <dt><tt>iburst</tt></dt>
 
-<dd>When the server is unreachable and at each poll interval, send
-a burst of eight packets instead of the usual one. As long as the
-server is unreachable, the spacing between packets is about 16s to
-allow a modem call to complete. Once the server is reachable, the
-spacing between packets is about 2s. This is designed to speed the
-initial synchronization acquisition with the <tt>server</tt>
-command and <tt>s</tt> addresses and when <tt>ntpd</tt> is started
-with the <tt>-q</tt> option.</dd>
+<dd>When the server is unreachable, send a burst of eight packets
+instead of the usual one. As long as the server is unreachable, the
+packet spacing is about 16s to allow a modem call to complete. Once
+the server is reachable, the packet spacing is about 2s. This is
+designed to speed the initial synchronization acquisition with the
+<tt>server</tt> command and <tt>s</tt> addresses and when <tt>
+ntpd</tt> is started with the <tt>-q</tt> option.</dd>
 
 <dt><tt>key</tt> <i><tt>key</tt></i></dt>
 

@@ -31,13 +31,17 @@ NTPv4 features have already been retrofitted in the older NTPv3,
 although this version is not actively maintained by the NTPv4
 developer's group.</p>
 
-<p>The primary purpose of this release is to verify the code
-compiles and runs properly in the various architectures, operating
-systems and hardware complement that can't be verified by the
-developer corps. Of particular interest are Windows 2000, VMS and
-various reference clock drivers. As always, corrections and
-bugfixes are warmly received, especially in the form of context
-diffs.</p>
+<p>The code compiles and runs properly in at the test host
+configuration available to the developer corps, including Sun
+Microsystems, Digital/Compaq, Hewlett Packard, FreeBSD and Linux.
+Other volunteers have verified it works in IRIX, Windows NT and
+several others. We invite comments and corrections about the
+various architectures, operating systems and hardware complement
+that can't be verified by the developer corps. Of particular
+interest are Windows 2000, VMS and various reference clock drivers.
+As always, corrections and bugfixes are warmly received, especially
+in the form of context diffs sent to <a href="mailto:bugs@ntp.org">
+&lt;bugs@ntp.org&gt;</a>&lt;.</p>
 
 <p>This note summarizes the differences between this software
 release of NTPv4, called ntp-4.x.x, and the previous NTPv3 version,
@@ -62,18 +66,20 @@ expressed without loss of accuracy in this format.</p>
 </li>
 
 <li>
-<p>The clock discipline algorithm has been redesigned to improve
+<p>The clock discipline algorithms have been redesigned to improve
 accuracy, reduce the impact of network jitter and allow increased
 in poll intervals to well over one day with only moderate sacrifice
 in accuracy. A new feature called <i>huffpuff</i> maximizes
-accuracy in cases of higly assymetric network delays typical of
+accuracy in cases of highly asymmetric network delays typical of
 ISDN and modem access circuits. The NTPv4 design allows servers to
 increase the poll intervals even when synchronized directly to the
 peer. In NTPv3 the poll interval in such cases was clamped to the
 minimum, usually 64 s. For those servers with hundreds of clients,
 the new design can dramatically reduce the network load, especially
 when large numbers of potential clients, as in national laboratory
-services.</p>
+services. A scheme designed to reduce "clockhopping" when the
+choice of servers changes frequently as the result of comparatively
+insignificant quality changes.</p>
 </li>
 
 <li>
@@ -116,22 +122,21 @@ monopt.htm="">Monitoring Options</a> page.</p>
 <p>NTPv4 includes two new association modes which in most
 applications can avoid per-host configuration altogether. Both of
 these are based on IP multicast technology and Autokey
-cryptography. They provide for automatic discovery, configuration
-and authentication of servers and clients without identifying
-servers or clients in advance. In multicast mode a server sends a
-message at fixed intervals using specified multicast group
-addresses, while clients listen on these addresses. Upon receiving
-the message, a client exchanges several messages with the server in
-order to calibrate the multicast propagation delay between the
-client and server. In manycast mode a client sends a message to a
-specified multicast group address and expects one or more servers
-to reply. Using engineered algorithms, the client selects an
-appropriate subset of servers from the messages received and
-continues an ordinary client/server campaign. The manycast scheme
-can provide somewhat better accuracy than the multicast scheme at
-the price of additional network overhead. See the <a href=
-"assoc.htm">Association Management</a> page for further
-information.</p>
+cryptography. They provide automatic discovery, configuration and
+authentication of servers and clients without identifying servers
+or clients in advance. In multicast mode a server sends a message
+at fixed intervals using specified multicast group addresses, while
+clients listen on these addresses. Upon receiving the message, a
+client exchanges several messages with the server in order to
+calibrate the multicast propagation delay between the client and
+server. In manycast mode a client sends a message to a specified
+multicast group address and expects one or more servers to reply.
+Using engineered algorithms, the client selects an appropriate
+subset of servers from the messages received and continues an
+ordinary client/server campaign. The manycast scheme can provide
+somewhat better accuracy than the multicast scheme at the price of
+additional network overhead. See the <a href="assoc.htm">
+Association Management</a> page for further information.</p>
 </li>
 
 <li>
