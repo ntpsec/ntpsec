@@ -1,3 +1,17 @@
+2001-04-26  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdc/ntpdc_ops.c: restrict/unrestrict support for version and
+	demobilize.  Implement demobilze.
+	* ntpd/ntp_proto.c (receive): Improve version testing, including
+	RES_DEMOBILIZE support.
+	(fast_xmit): Patches to kiss-of-death packet.
+	* ntpd/ntp_loopfilter.c (local_clock): S_SYNC case now also checks
+	abs(clock_offset) against CLOCK_PGATE*sys_jitter.
+	* ntpd/ntp_config.c: CONF_RES_DEMOBILIZE/demobilize support.
+	* include/ntp_config.h (CONF_RES_DEMOBILIZE): Added.
+	* include/ntp.h (RES_DEMOBILIZE): Added.
+	From Dave Mills.
+
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/accopt.htm: Document the "version" parameter

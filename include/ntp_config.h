@@ -89,6 +89,7 @@
 #define CONF_RES_NTPPORT	10
 #define CONF_RES_LIMITED	11
 #define CONF_RES_VERSION	12
+#define CONF_RES_DEMOBILIZE	13
 
 /*
  * "trap" modifier keywords

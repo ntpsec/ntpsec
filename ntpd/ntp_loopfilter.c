@@ -613,7 +613,8 @@ local_clock(
 	 * helps calm the dance. Works best using burst mode.
 	 */
 	if (state == S_SYNC) {
-		if (sys_jitter / mu > clock_stability) {
+		if (sys_jitter / mu > clock_stability &&
+		    fabs(clock_offset) < CLOCK_PGATE * sys_jitter) {
 			tc_counter += sys_poll;
 			if (tc_counter > CLOCK_LIMIT) {
 				tc_counter = CLOCK_LIMIT;

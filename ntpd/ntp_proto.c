@@ -293,7 +293,9 @@ receive(
 	 * length for control and private mode packets must be checked
 	 * by the service routines. Note that no statistics counters are
 	 * recorded for restrict violations, since these counters are in
-	 * the restriction routine.
+	 * the restriction routine. In case of invalid version,
+	 * restricted service or too many clients, return a kiss-of-
+	 * death packet. 
 	 */
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
@@ -308,14 +310,14 @@ receive(
 	}
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
-		sys_newversionpkt++;
-	} else if (restrict_mask & RES_VERSION) {
-		sys_unknownversion++;		/* unknown version */
-		return;
-	} else if (PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
-		sys_oldversionpkt++;
+		sys_newversionpkt++;		/* new version */
+	} else if (!(restrict_mask & RES_VERSION) &&
+	    PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
+		sys_oldversionpkt++;		/* old version */
 	} else {
-		sys_unknownversion++;		/* unknown version */
+		if (restrict_mask & RES_DEMOBILIZE)
+			fast_xmit(rbufp, 0, 0);	/* unknown version */
+		sys_unknownversion++;
 		return;
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
@@ -331,11 +333,16 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
-	if (restrict_mask & RES_DONTSERVE)
-		return;				/* no time service */
+	if (restrict_mask & RES_DONTSERVE) {
+		if (restrict_mask & RES_DEMOBILIZE)
+			fast_xmit(rbufp, 0, 0);	/* no time service */
+		return;
+	}
 	if (restrict_mask & RES_LIMITED) {
+		if (restrict_mask & RES_DEMOBILIZE)
+			fast_xmit(rbufp, 0, 0);	/* too many clients */
 		sys_limitrejected++;
-                return;				/* too many clients */
+                return;
         }
 	if (rbufp->recv_length < LEN_PKT_NOMAC) {
 		sys_badlength++;
@@ -438,6 +445,17 @@ receive(
 	 */
 	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
 	    hismode, &retcode);
+
+	/*
+	 * Kiss-of-death packet
+	 */
+	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
+	    pkt->stratum == 0 && memcmp(&pkt->refid, "DENY", 4) == 0) {
+
+printf("xxx %x %d %4s\n", PKT_LEAP(pkt->li_vn_mode),
+	pkt->stratum, &pkt->refid);
+
+	}
 	is_authentic = 0;
 	dstadr_sin = &rbufp->dstadr->sin;
 	if (has_mac == 0) {
@@ -2324,7 +2342,7 @@ fast_xmit(
 		xpkt.li_vn_mode = PKT_LI_VN_MODE((LEAP_NOTINSYNC),
 		    PKT_VERSION(rpkt->li_vn_mode),
 		    PKT_MODE(rpkt->li_vn_mode));
-		xpkt.stratum = STRATUM_TO_PKT(0);
+		xpkt.stratum = 0;
 		memcpy(&xpkt.refid, "DENY", 4);
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
