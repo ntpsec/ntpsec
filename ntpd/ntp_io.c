@@ -979,8 +979,8 @@ io_multicast_add(
 			 "...multicast address %s using wildcard socket",
 			 stoa(&addr));
 		} else {
-			interlist[i].fd = s;
-			interlist[i].bfd = INVALID_SOCKET;
+			inter_list[i].fd = s;
+			inter_list[i].bfd = INVALID_SOCKET;
 			(void)strncpy(inter_list[i].name, "multicast",
 			   sizeof(inter_list[i].name));
 			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
@@ -994,7 +994,7 @@ io_multicast_add(
 		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		   (char *)&mreq6, sizeof(mreq6)) == -1)
 			msyslog(LOG_ERR,
-			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s),
+			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s)",
 			 mreq6.ipv6mr_interface, stoa(&addr));
 		inter_list[i].flags |= INT_MULTICAST;
 		if(i >= ninterfaces)

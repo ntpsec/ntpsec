@@ -91,3 +91,4 @@ version
 builderrors.txt
 ports/winnt/libntp/messages.aps
 ports/winnt/ntpd/stderr
+ntpd/ntp_io.cold
