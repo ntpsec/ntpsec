@@ -107,7 +107,6 @@ atom_start(
 	struct refclockproc *pp;
 	int flags;
 #ifdef HAVE_PPSAPI
-	char device[20];
 	pps_params_t pps;
 	int mode, temp;
 	pps_handle_t handle;
@@ -118,18 +117,24 @@ atom_start(
 
 #ifdef HAVE_PPSAPI
 	/*
-	 * Open port, if not done already.
+	 * Open PPS device, if not done already. If some driver has
+	 * already opened the PPS device, the fdpps has the file
+	 * descriptor for it. If not and the pps_device string is non-
+	 * null, then this must be the device name. If the pps_device is
+	 * null, then open the canned device /dev/pps%d, or wherever the
+	 * link points.
 	 */
 	if (fdpps > 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: ppsapi already configured");
 		return (0);
 	} else {
-		sprintf(device, DEVICE, unit);
-		fddev = open(device, O_RDWR, 0777);
+		if (strlen(pps_device) == 0)
+			sprintf(pps_device, DEVICE, unit);
+		fddev = open(pps_device, O_RDWR, 0777);
 		if (fddev <= 0) {
 			msyslog(LOG_ERR,
-			    "refclock_atom: %s: %m", device);
+			    "refclock_atom: %s: %m", pps_device);
 			return (0);
 		}
 	}
@@ -171,8 +176,8 @@ atom_start(
 #if DEBUG
 	if (debug)
 		printf(
-		    "refclock_atom: fd %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-		    fdpps, pps.api_version, pps.mode, mode);
+		    "refclock_atom: %s fdpps %d ppsapi vers %d mode 0x%x cap 0x%x\n",
+		    pps_device, fdpps, pps.api_version, pps.mode, mode);
 #endif
 #endif /* HAVE_PPSAPI */
 
