@@ -1,3 +1,7 @@
+2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_control.c: Header cleanup
+
 2001-04-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Properly align --help output. 

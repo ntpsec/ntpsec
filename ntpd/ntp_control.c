@@ -15,11 +15,8 @@
 #include <ctype.h>
 #include <signal.h>
 
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-
 
 #ifdef PUBKEY
 #include "ntp_crypto.h"
