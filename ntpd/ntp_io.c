@@ -7,6 +7,11 @@
 # include <config.h>
 #endif
 
+/*
+ * Don't allow wildcard delivery
+ */
+#undef UDP_WILDCARD_DELIVERY
+
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
