@@ -1328,10 +1328,19 @@ oncore_msg_any(
 	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
+#ifdef HAVE_GETCLOCK
+	struct timespec ts;
+#endif
 	struct timeval tv;
 
 	if (debug > 3) {
+#ifdef HAVE_GETCLOCK
+		(void) getclock(TIMEOFDAY, &ts); 
+		tv.tv_sec = ts.tv_sec; 
+		tv.tv_usec = ts.tv_nsec / 1000; 
+#else
 		GETTIMEOFDAY(&tv, 0);
+#endif
 		printf("ONCORE[%d]: %ld.%06ld\n", instance->unit, (long) tv.tv_sec, (long) tv.tv_usec);
 
 		if (!*fmt) {
