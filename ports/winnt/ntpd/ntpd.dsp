@@ -151,6 +151,10 @@ SOURCE=..\..\..\ntpd\ntp_request.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\ntp_resolver.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\ntp_restrict.c
 # End Source File
 # Begin Source File
