@@ -925,7 +925,11 @@ getconfig(
 			break;
 
 		    case CONFIG_BROADCASTCLIENT:
-			proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
+			if (ntokens == 1) {
+				proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
+			} else {
+				proto_config(PROTO_BROADCLIENT, 2, 0., NULL);
+			}
 			break;
 
 		    case CONFIG_MULTICASTCLIENT:
@@ -1089,15 +1093,15 @@ getconfig(
 			    }
 			    switch(temp) {
 			    case CONF_DISCARD_AVERAGE:
-				res_avg_interval = atoi(tokens[i++]);
+				res_avg_interval = atoi(tokens[i]);
 				break;
 
 			    case CONF_DISCARD_MINIMUM:
-				res_min_interval = atoi(tokens[i++]);
+				res_min_interval = atoi(tokens[i]);
 				break;
 
 			    case CONF_DISCARD_MONITOR:
-				mon_age = atoi(tokens[i++]);
+				mon_age = atoi(tokens[i]);
 				break;
 
 			    default:
