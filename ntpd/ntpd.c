@@ -130,6 +130,7 @@
 /* handles for various threads, process, and objects */
 HANDLE ResolverThreadHandle = NULL;
 /* variables used to inform the Service Control Manager of our current state */
+BOOL NoWinService = FALSE;
 SERVICE_STATUS ssStatus;
 SERVICE_STATUS_HANDLE	sshStatusHandle;
 HANDLE WaitHandles[3] = { NULL, NULL, NULL };
@@ -518,16 +519,22 @@ ntpdmain(
 #  else /* SYS_WINNT */
 
 		{
-			SERVICE_TABLE_ENTRY dispatchTable[] = {
+			if (NoWinService == FALSE) {
+				SERVICE_TABLE_ENTRY dispatchTable[] = {
 				{ TEXT("NetworkTimeProtocol"), (LPSERVICE_MAIN_FUNCTION)service_main },
 				{ NULL, NULL }
-			};
+				};
 
-			/* daemonize */
-			if (!StartServiceCtrlDispatcher(dispatchTable))
-			{
-				msyslog(LOG_ERR, "StartServiceCtrlDispatcher: %m");
-				ExitProcess(2);
+				/* daemonize */
+				if (!StartServiceCtrlDispatcher(dispatchTable))
+				{
+					msyslog(LOG_ERR, "StartServiceCtrlDispatcher: %m");
+					ExitProcess(2);
+				}
+			}
+			else {
+				service_main(argc, argv);
+				return 0;
 			}
 		}
 #  endif /* SYS_WINNT */
@@ -554,7 +561,8 @@ service_main(
 	char *cp;
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
-	if(!debug)
+
+	if(!debug && NoWinService == FALSE)
 	{
 		/* register our service control handler */
 		sshStatusHandle = RegisterServiceCtrlHandler( TEXT("NetworkTimeProtocol"),
@@ -782,17 +790,19 @@ service_main(
 	if(!debug)
 	{
 # endif
+		if (NoWinService == FALSE) {
 		/* report to the service control manager that the service is running */
-		ssStatus.dwCurrentState = SERVICE_RUNNING;
-		ssStatus.dwWin32ExitCode = NO_ERROR;
-		if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-		{
-			msyslog(LOG_ERR, "SetServiceStatus: %m");
-			if (ResolverThreadHandle != NULL)
-				CloseHandle(ResolverThreadHandle);
-			ssStatus.dwCurrentState = SERVICE_STOPPED;
-			SetServiceStatus(sshStatusHandle, &ssStatus);
-			return;
+			ssStatus.dwCurrentState = SERVICE_RUNNING;
+			ssStatus.dwWin32ExitCode = NO_ERROR;
+			if (!SetServiceStatus(sshStatusHandle, &ssStatus))
+			{
+				msyslog(LOG_ERR, "SetServiceStatus: %m");
+				if (ResolverThreadHandle != NULL)
+					CloseHandle(ResolverThreadHandle);
+				ssStatus.dwCurrentState = SERVICE_STOPPED;
+				SetServiceStatus(sshStatusHandle, &ssStatus);
+				return;
+			}
 		}
 # if defined(DEBUG)
 	}
