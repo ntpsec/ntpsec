@@ -590,7 +590,7 @@ local_clock(
 			if (ntv.status != pll_status)
 				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE,
-				    "kernel time sync re-enabled %04x",
+				    "kernel time sync enabled %04x",
 				    ntv.status);
 		}
 		pll_status = ntv.status;
