@@ -894,6 +894,7 @@ struct endpoint {
 #define AM_MANYCAST	4		/* manycast packet */
 #define AM_NEWPASS	5		/* new passive */
 #define AM_NEWBCL	6		/* new broadcast */
+#define	AM_POSSBCL	7		/* discard broadcast */
 
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO

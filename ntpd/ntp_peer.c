@@ -48,7 +48,7 @@ int AM[AM_MODES][AM_MODES] = {
 
 /*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
+/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_POSSBCL},
 
 /*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
@@ -227,8 +227,9 @@ findpeer(
 	hash = NTP_HASH_ADDR(srcadr);
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
 		if (SOCKCMP(srcadr, &peer->srcadr) &&
-		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr) &&
-		    peer->version == pkt_version) {
+		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+			if (peer->version != pkt_version)
+				continue;
 
 			/*
 			 * if the association matching rules determine
