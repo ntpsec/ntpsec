@@ -98,7 +98,6 @@ struct keyword {
  * Command keywords
  */
 static	struct keyword keywords[] = {
-	{ "authenticate",	CONFIG_AUTHENTICATE },
 	{ "automax",		CONFIG_AUTOMAX },
 	{ "broadcast",		CONFIG_BROADCAST },
 	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
@@ -935,24 +934,6 @@ getconfig(
 				sys_bclient = 1;
 			else if (tok == CONFIG_MANYCASTSERVER)
 				sys_manycastserver = 1;
-			break;
-
-		    case CONFIG_AUTHENTICATE:
-			errflg = 0;
-			if (ntokens >= 2) {
-				if (STREQ(tokens[1], "yes"))
-				    proto_config(PROTO_AUTHENTICATE, 1, 0.);
-				else if (STREQ(tokens[1], "no"))
-				    proto_config(PROTO_AUTHENTICATE, 0, 0.);
-				else
-				    errflg++;
-			} else {
-				errflg++;
-			}
-
-			if (errflg)
-			    msyslog(LOG_ERR,
-				    "should be `authenticate yes|no'");
 			break;
 
 		    case CONFIG_KEYS:
