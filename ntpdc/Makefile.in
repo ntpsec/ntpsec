@@ -11,6 +11,11 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+@SET_MAKE@
+
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+
+
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -63,9 +68,6 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
-
-@SET_MAKE@
-AMDEP = @AMDEP@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -84,7 +86,6 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
-MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -112,10 +113,8 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 _am_include = @_am_include@
+_am_quote = @_am_quote@
 install_sh = @install_sh@
-
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpdc
@@ -137,39 +136,39 @@ CONFIG_CLEAN_FILES =
 bin_PROGRAMS = ntpdc$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
-CPPFLAGS = @CPPFLAGS@
-LIBS = @LIBS@
-ANSI2KNR = ../util/ansi2knr
 am_ntpdc_OBJECTS = ntpdc$U.$(OBJEXT) ntpdc_ops$U.$(OBJEXT)
 ntpdc_OBJECTS = $(am_ntpdc_OBJECTS)
 ntpdc_LDADD = $(LDADD)
 ntpdc_DEPENDENCIES = version.o ../libntp/libntp.a
-ntpdc_LDFLAGS = 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ntpdc_LDFLAGS =
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/ntpdc$U.Po $(DEPDIR)/ntpdc_ops$U.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
 DIST_SOURCES = $(ntpdc_SOURCES)
 HEADERS = $(noinst_HEADERS)
 
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP@DEP_FILES = $(DEPDIR)/ntpdc$U.Po $(DEPDIR)/ntpdc_ops$U.Po
 DIST_COMMON = README $(noinst_HEADERS) Makefile.am Makefile.in
-
 SOURCES = $(ntpdc_SOURCES)
-OBJECTS = $(am_ntpdc_OBJECTS)
 
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
 
-$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  ntpdc/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
@@ -195,29 +194,47 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+ntpdc$(EXEEXT): $(ntpdc_OBJECTS) $(ntpdc_DEPENDENCIES)
+	@rm -f ntpdc$(EXEEXT)
+	$(LINK) $(ntpdc_LDFLAGS) $(ntpdc_OBJECTS) $(ntpdc_LDADD) $(LIBS)
+
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntpdc$U.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntpdc_ops$U.Po@_am_quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+CCDEPMODE = @CCDEPMODE@
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+ntpdc_.c: ntpdc.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpdc.c; then echo $(srcdir)/ntpdc.c; else echo ntpdc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpdc_.c
+ntpdc_ops_.c: ntpdc_ops.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpdc_ops.c; then echo $(srcdir)/ntpdc_ops.c; else echo ntpdc_ops.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpdc_ops_.c
+ntpdc_.$(OBJEXT) ntpdc_ops_.$(OBJEXT) : $(ANSI2KNR)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
 
 distclean-compile:
 	-rm -f *.tab.c
-../util/ansi2knr: ../util/ansi2knr.$(OBJEXT)
+
+ANSI2KNR = ../util/ansi2knr
+../util/ansi2knr:
 	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
-
-../util/ansi2knr.$(OBJEXT):
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr.$(OBJEXT)
-
 
 mostlyclean-kr:
 	-rm -f *_.c
-
-ntpdc: $(ntpdc_OBJECTS) $(ntpdc_DEPENDENCIES)
-	@rm -f ntpdc
-	$(LINK) $(ntpdc_LDFLAGS) $(ntpdc_OBJECTS) $(ntpdc_LDADD) $(LIBS)
-ntpdc_.c: ntpdc.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpdc.c; then echo $(srcdir)/ntpdc.c; else echo ntpdc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpdc_.c
-ntpdc_ops_.c: ntpdc_ops.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpdc_ops.c; then echo $(srcdir)/ntpdc_ops.c; else echo ntpdc_ops.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpdc_ops_.c
-ntpdc_.$(OBJEXT) ntpdc_ops_.$(OBJEXT) : $(ANSI2KNR)
 
 tags: TAGS
 
@@ -230,7 +247,7 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	       END { for (i in files) print i; }'`; \
 	mkid -fID $$unique $(LISP)
 
-TAGS: $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -251,27 +268,6 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID
 
-@AMDEP@@_am_include@ $(DEPDIR)/ntpdc$U.Po
-@AMDEP@@_am_include@ $(DEPDIR)/ntpdc_ops$U.Po
-
-distclean-depend:
-	-rm -rf $(DEPDIR)
-
-@AMDEP@CCDEPMODE = @CCDEPMODE@
-
-.c.o:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `cygpath -w $<`
-
-
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ..
@@ -280,6 +276,10 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \

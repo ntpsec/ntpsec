@@ -11,6 +11,13 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+@SET_MAKE@
+
+# Harlan Stenn <stenn@whimsy.udel.edu>
+# Converted the original Makefile (now in Makefile-) to Makefile.am
+# in July of '00
+
+
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -63,9 +70,6 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
-
-@SET_MAKE@
-AMDEP = @AMDEP@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -84,7 +88,6 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
-MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -112,12 +115,8 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 _am_include = @_am_include@
+_am_quote = @_am_quote@
 install_sh = @install_sh@
-
-# Harlan Stenn <stenn@whimsy.udel.edu>
-# Converted the original Makefile (now in Makefile-) to Makefile.am
-# in July of '00
-
 
 EXTRA_DIST = libefence.3 CHANGES
 libefence_a_SOURCES = efence.h efence.c page.c print.c
@@ -135,61 +134,56 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
-CPPFLAGS = @CPPFLAGS@
-LIBS = @LIBS@
 libefence_a_AR = $(AR) cru
-libefence_a_LIBADD = 
+libefence_a_LIBADD =
 am_libefence_a_OBJECTS = efence.$(OBJEXT) page.$(OBJEXT) print.$(OBJEXT)
 libefence_a_OBJECTS = $(am_libefence_a_OBJECTS)
-AR = ar
 EXTRA_PROGRAMS = eftest$(EXEEXT) tstheap$(EXEEXT)
 check_PROGRAMS = @EF_PROGS@
 eftest_SOURCES = eftest.c
 eftest_OBJECTS = eftest.$(OBJEXT)
 eftest_LDADD = $(LDADD)
 eftest_DEPENDENCIES = libefence.a
-eftest_LDFLAGS = 
+eftest_LDFLAGS =
 tstheap_SOURCES = tstheap.c
 tstheap_OBJECTS = tstheap.$(OBJEXT)
 tstheap_LDADD = $(LDADD)
 tstheap_DEPENDENCIES = libefence.a
-tstheap_LDFLAGS = 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+tstheap_LDFLAGS =
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/efence.Po $(DEPDIR)/eftest.Po \
+@AMDEP_TRUE@	$(DEPDIR)/page.Po $(DEPDIR)/print.Po \
+@AMDEP_TRUE@	$(DEPDIR)/tstheap.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libefence_a_SOURCES) eftest.c tstheap.c
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP@DEP_FILES = $(DEPDIR)/efence.Po $(DEPDIR)/eftest.Po \
-@AMDEP@ $(DEPDIR)/page.Po $(DEPDIR)/print.Po $(DEPDIR)/tstheap.Po
-DIST_COMMON = README COPYING Makefile.am Makefile.in
 
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+DIST_SOURCES = $(libefence_a_SOURCES) eftest.c tstheap.c
+DIST_COMMON = README COPYING Makefile.am Makefile.in
 SOURCES = $(libefence_a_SOURCES) eftest.c tstheap.c
-OBJECTS = $(am_libefence_a_OBJECTS) eftest.$(OBJEXT) tstheap.$(OBJEXT)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .h .o .obj
+.SUFFIXES: .c .o .obj
 
-$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  ElectricFence/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT) core *.core
-
-distclean-compile:
-	-rm -f *.tab.c
 
 libefence.a: $(libefence_a_OBJECTS) $(libefence_a_DEPENDENCIES)
 	-rm -f libefence.a
@@ -199,13 +193,42 @@ libefence.a: $(libefence_a_OBJECTS) $(libefence_a_DEPENDENCIES)
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
-eftest: $(eftest_OBJECTS) $(eftest_DEPENDENCIES)
-	@rm -f eftest
+eftest$(EXEEXT): $(eftest_OBJECTS) $(eftest_DEPENDENCIES)
+	@rm -f eftest$(EXEEXT)
 	$(LINK) $(eftest_LDFLAGS) $(eftest_OBJECTS) $(eftest_LDADD) $(LIBS)
 
-tstheap: $(tstheap_OBJECTS) $(tstheap_DEPENDENCIES)
-	@rm -f tstheap
+tstheap$(EXEEXT): $(tstheap_OBJECTS) $(tstheap_DEPENDENCIES)
+	@rm -f tstheap$(EXEEXT)
 	$(LINK) $(tstheap_LDFLAGS) $(tstheap_OBJECTS) $(tstheap_LDADD) $(LIBS)
+
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/efence.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/eftest.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/page.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/print.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/tstheap.Po@_am_quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+CCDEPMODE = @CCDEPMODE@
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
 
 tags: TAGS
 
@@ -218,7 +241,7 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	       END { for (i in files) print i; }'`; \
 	mkid -fID $$unique $(LISP)
 
-TAGS: $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -239,30 +262,6 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID
 
-@AMDEP@@_am_include@ $(DEPDIR)/efence.Po
-@AMDEP@@_am_include@ $(DEPDIR)/eftest.Po
-@AMDEP@@_am_include@ $(DEPDIR)/page.Po
-@AMDEP@@_am_include@ $(DEPDIR)/print.Po
-@AMDEP@@_am_include@ $(DEPDIR)/tstheap.Po
-
-distclean-depend:
-	-rm -rf $(DEPDIR)
-
-@AMDEP@CCDEPMODE = @CCDEPMODE@
-
-.c.o:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `cygpath -w $<`
-
-
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ..
@@ -271,6 +270,10 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \
@@ -349,6 +352,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic
+
+uninstall-am:
 
 .PHONY: all all-am check check-am check-local clean clean-checkPROGRAMS \
 	clean-generic clean-noinstLIBRARIES distclean distclean-compile \

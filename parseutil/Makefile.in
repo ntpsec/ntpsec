@@ -11,6 +11,11 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+@SET_MAKE@
+
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+
+
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -63,9 +68,6 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
-
-@SET_MAKE@
-AMDEP = @AMDEP@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -84,7 +86,6 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
-MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -112,10 +113,8 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 _am_include = @_am_include@
+_am_quote = @_am_quote@
 install_sh = @install_sh@
-
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
@@ -133,42 +132,42 @@ EXTRA_PROGRAMS = testdcf$(EXEEXT) dcfd$(EXEEXT)
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 PROGRAMS = $(noinst_PROGRAMS)
 
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
-CPPFLAGS = @CPPFLAGS@
-LIBS = @LIBS@
-ANSI2KNR = ../util/ansi2knr
 dcfd_SOURCES = dcfd.c
 dcfd_OBJECTS = dcfd$U.$(OBJEXT)
 dcfd_LDADD = $(LDADD)
-dcfd_DEPENDENCIES = 
-dcfd_LDFLAGS = 
+dcfd_DEPENDENCIES =
+dcfd_LDFLAGS =
 testdcf_SOURCES = testdcf.c
 testdcf_OBJECTS = testdcf$U.$(OBJEXT)
 testdcf_LDADD = $(LDADD)
-testdcf_DEPENDENCIES = 
-testdcf_LDFLAGS = 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+testdcf_DEPENDENCIES =
+testdcf_LDFLAGS =
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/dcfd$U.Po $(DEPDIR)/testdcf$U.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = dcfd.c testdcf.c
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP@DEP_FILES = $(DEPDIR)/dcfd$U.Po $(DEPDIR)/testdcf$U.Po
-DIST_COMMON = README Makefile.am Makefile.in
 
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+DIST_SOURCES = dcfd.c testdcf.c
+DIST_COMMON = README Makefile.am Makefile.in
 SOURCES = dcfd.c testdcf.c
-OBJECTS = dcfd$U.$(OBJEXT) testdcf$U.$(OBJEXT)
 
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
 
-$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  parseutil/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
@@ -176,33 +175,51 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
+dcfd$(EXEEXT): $(dcfd_OBJECTS) $(dcfd_DEPENDENCIES)
+	@rm -f dcfd$(EXEEXT)
+	$(LINK) $(dcfd_LDFLAGS) $(dcfd_OBJECTS) $(dcfd_LDADD) $(LIBS)
+
+testdcf$(EXEEXT): $(testdcf_OBJECTS) $(testdcf_DEPENDENCIES)
+	@rm -f testdcf$(EXEEXT)
+	$(LINK) $(testdcf_LDFLAGS) $(testdcf_OBJECTS) $(testdcf_LDADD) $(LIBS)
+
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/dcfd$U.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/testdcf$U.Po@_am_quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+CCDEPMODE = @CCDEPMODE@
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+dcfd_.c: dcfd.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/dcfd.c; then echo $(srcdir)/dcfd.c; else echo dcfd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > dcfd_.c
+testdcf_.c: testdcf.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/testdcf.c; then echo $(srcdir)/testdcf.c; else echo testdcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > testdcf_.c
+dcfd_.$(OBJEXT) testdcf_.$(OBJEXT) : $(ANSI2KNR)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
 
 distclean-compile:
 	-rm -f *.tab.c
-../util/ansi2knr: ../util/ansi2knr.$(OBJEXT)
+
+ANSI2KNR = ../util/ansi2knr
+../util/ansi2knr:
 	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
-
-../util/ansi2knr.$(OBJEXT):
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr.$(OBJEXT)
-
 
 mostlyclean-kr:
 	-rm -f *_.c
-
-dcfd: $(dcfd_OBJECTS) $(dcfd_DEPENDENCIES)
-	@rm -f dcfd
-	$(LINK) $(dcfd_LDFLAGS) $(dcfd_OBJECTS) $(dcfd_LDADD) $(LIBS)
-
-testdcf: $(testdcf_OBJECTS) $(testdcf_DEPENDENCIES)
-	@rm -f testdcf
-	$(LINK) $(testdcf_LDFLAGS) $(testdcf_OBJECTS) $(testdcf_LDADD) $(LIBS)
-dcfd_.c: dcfd.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/dcfd.c; then echo $(srcdir)/dcfd.c; else echo dcfd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > dcfd_.c
-testdcf_.c: testdcf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/testdcf.c; then echo $(srcdir)/testdcf.c; else echo testdcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > testdcf_.c
-dcfd_.$(OBJEXT) testdcf_.$(OBJEXT) : $(ANSI2KNR)
 
 tags: TAGS
 
@@ -215,7 +232,7 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	       END { for (i in files) print i; }'`; \
 	mkid -fID $$unique $(LISP)
 
-TAGS: $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -236,27 +253,6 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID
 
-@AMDEP@@_am_include@ $(DEPDIR)/dcfd$U.Po
-@AMDEP@@_am_include@ $(DEPDIR)/testdcf$U.Po
-
-distclean-depend:
-	-rm -rf $(DEPDIR)
-
-@AMDEP@CCDEPMODE = @CCDEPMODE@
-
-.c.o:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c -o $@ `cygpath -w $<`
-
-
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ..
@@ -265,6 +261,10 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \
@@ -342,6 +342,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic mostlyclean-kr
+
+uninstall-am:
 
 .PHONY: all all-am check check-am check-local clean clean-generic \
 	clean-noinstPROGRAMS distclean distclean-compile \

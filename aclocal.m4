@@ -34,7 +34,7 @@ dnl
 dnl    AC_DEFINE_DIR(DATADIR, datadir)
 dnl    AC_DEFINE_DIR(PROG_PATH, bindir, [Location of installed binaries])
 dnl
-dnl @version $Id: .del-aclocal.m4~3aed0663 1.67 2001/05/10 05:16:42-00:00 stenn@whimsy.udel.edu $
+dnl @version $Id: .del-aclocal.m4~3aed0663 1.68 2001/05/10 05:47:08-00:00 stenn@whimsy.udel.edu $
 dnl @author Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 
 AC_DEFUN(AC_DEFINE_DIR, [
@@ -182,6 +182,7 @@ if (
       # -L didn't work.
       set X `ls -t $srcdir/configure conftest.file`
    fi
+   rm -f conftest.file
    if test "$[*]" != "X $srcdir/configure conftest.file" \
       && test "$[*]" != "X conftest.file $srcdir/configure"; then
 
@@ -202,7 +203,6 @@ else
    AC_MSG_ERROR([newly created file is older than distributed files!
 Check your system clock])
 fi
-rm -f conftest*
 AC_MSG_RESULT(yes)])
 
 
@@ -243,7 +243,7 @@ AC_DEFUN([AM_MISSING_HAS_RUN],
 [test x"${MISSING+set}" = xset ||
   MISSING="\${SHELL} `CDPATH=:; cd $ac_aux_dir && pwd`/missing"
 # Use eval to expand $SHELL
-if eval "$MISSING --run :"; then
+if eval "$MISSING --run true"; then
   am_missing_run="$MISSING --run "
 else
   am_missing_run=
@@ -441,22 +441,11 @@ AC_DEFUN([AM_DEP_TRACK],
 [AC_ARG_ENABLE(dependency-tracking,
 [  --disable-dependency-tracking Speeds up one-time builds
   --enable-dependency-tracking  Do not reject slow dependency extractors])
-if test "x$enable_dependency_tracking" = xno; then
-  AMDEP="#"
-else
+if test "x$enable_dependency_tracking" != xno; then
   am_depcomp="$ac_aux_dir/depcomp"
-  if test ! -f "$am_depcomp"; then
-    AMDEP="#"
-  else
-    AMDEP=
-  fi
-fi
-AC_SUBST(AMDEP)
-if test -z "$AMDEP"; then
   AMDEPBACKSLASH='\'
-else
-  AMDEPBACKSLASH=
 fi
+AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
 pushdef([subst], defn([AC_SUBST]))
 subst(AMDEPBACKSLASH)
 popdef([subst])
@@ -518,7 +507,6 @@ ac_aux_dir="$ac_aux_dir"])])
 # Check to see how make treats includes.
 AC_DEFUN([AM_MAKE_INCLUDE],
 [am_make=${MAKE-make}
-# BSD make uses .include
 cat > confinc << 'END'
 doit:
 	@echo done
@@ -526,17 +514,56 @@ END
 # If we don't find an include directive, just comment out the code.
 AC_MSG_CHECKING([for style of include used by $am_make])
 _am_include='#'
-for am_inc in include .include; do
-   echo "$am_inc confinc" > confmf
-   if test "`$am_make -f confmf 2> /dev/null`" = "done"; then
-      _am_include=$am_inc
-      break
+_am_quote=
+_am_result=none
+# First try GNU make style include.
+echo "include confinc" > confmf
+if test "`$am_make -s -f confmf 2> /dev/null`" = "done"; then
+   _am_include=include
+   _am_quote=
+   _am_result=GNU
+fi
+# Now try BSD make style include.
+if test "$_am_include" = "#"; then
+   echo '.include "confinc"' > confmf
+   if test "`$am_make -s -f confmf 2> /dev/null`" = "done"; then
+      _am_include=.include
+      _am_quote='"'
+      _am_result=BSD
    fi
-done
+fi
 AC_SUBST(_am_include)
-AC_MSG_RESULT($_am_include)
+AC_SUBST(_am_quote)
+AC_MSG_RESULT($_am_result)
 rm -f confinc confmf
 ])
+
+# serial 3
+
+# AM_CONDITIONAL(NAME, SHELL-CONDITION)
+# -------------------------------------
+# Define a conditional.
+#
+# FIXME: Once using 2.50, use this:
+# m4_match([$1], [^TRUE\|FALSE$], [AC_FATAL([$0: invalid condition: $1])])dnl
+AC_DEFUN([AM_CONDITIONAL],
+[ifelse([$1], [TRUE],
+        [errprint(__file__:__line__: [$0: invalid condition: $1
+])dnl
+m4exit(1)])dnl
+ifelse([$1], [FALSE],
+       [errprint(__file__:__line__: [$0: invalid condition: $1
+])dnl
+m4exit(1)])dnl
+AC_SUBST([$1_TRUE])
+AC_SUBST([$1_FALSE])
+if $2; then
+  $1_TRUE=
+  $1_FALSE='#'
+else
+  $1_TRUE='#'
+  $1_FALSE=
+fi])
 
 
 # serial 1
