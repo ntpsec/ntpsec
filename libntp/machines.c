@@ -18,7 +18,7 @@
 #endif
 
 #ifdef SYS_WINNT
-# include <conio.h>
+int _getch(void);	/* Declare the one function rather than include conio.h */
 #else
 
 #ifdef SYS_VXWORKS

@@ -1031,7 +1031,9 @@ getgroup:
 		 * Go around again
 		 */
 	}
+#ifndef SYS_WINNT
 	exit(1); /* unreachable */
+#endif
 #ifndef SYS_WINNT
 	return 1;		/* DEC OSF cc braindamage */
 #endif
@@ -1105,7 +1107,7 @@ lessdebug(
 }
 #endif
 #else /* not DEBUG */
-/*
+#ifndef SYS_WINNT/*
  * no_debug - We don't do the debug here.
  */
 static RETSIGTYPE
@@ -1118,6 +1120,7 @@ no_debug(
 	msyslog(LOG_DEBUG, "ntpd not compiled for debugging (signal %d)", sig);
 	errno = saved_errno;
 }
+#endif  /* not SYS_WINNT */
 #endif	/* not DEBUG */
 
 #ifdef SYS_WINNT
