@@ -192,7 +192,7 @@ peer_config(
 	u_char *keystr
 	)
 {
-	if (debug) printf("peer_config...\n");
+	if (debug > 1) printf("peer_config...\n");
 	return 0;
 }
 
@@ -204,7 +204,7 @@ set_sys_var(
 	int def
 	)
 {
-	if (debug) printf("set_sys_var...\n");
+	if (debug > 1) printf("set_sys_var...\n");
 	return;
 }
 
@@ -212,7 +212,7 @@ set_sys_var(
 void
 ntp_intres (void)
 {
-	if (debug) printf("ntp_intres...\n");
+	if (debug > 1) printf("ntp_intres...\n");
 	return;
 }
 
@@ -225,7 +225,7 @@ ctlsettrap(
 	int version
 	)
 {
-	if (debug) printf("ctlsettrap...\n");
+	if (debug > 1) printf("ctlsettrap...\n");
 	return 0;
 }
 
@@ -239,19 +239,19 @@ crypto_config(
 {
 	switch (item) {
 	    case CRYPTO_CONF_DH:
-		if (debug) printf("crypto_config: DH/<%d> <%s>\n", item, cp);
+		if (debug > 0) printf("crypto_config: DH/<%d> <%s>\n", item, cp);
 		f1_dhparms = strdup(cp);
 		break;
 	    case CRYPTO_CONF_PRIV:
-		if (debug) printf("crypto_config: PRIVATEKEY/<%d> <%s>\n", item, cp);
+		if (debug > 0) printf("crypto_config: PRIVATEKEY/<%d> <%s>\n", item, cp);
 		f1_privatekey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_PUBL:
-		if (debug) printf("crypto_config: PUBLICKEY/<%d> <%s>\n", item, cp);
+		if (debug > 0) printf("crypto_config: PUBLICKEY/<%d> <%s>\n", item, cp);
 		f1_publickey = strdup(cp);
 		break;
 	    default:
-		if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
+		if (debug > 1) printf("crypto_config: <%d> <%s>\n", item, cp);
 		break;
 	}
 	return;
@@ -264,7 +264,7 @@ findinterface(
 	struct sockaddr_in *addr
 	)
 {
- 	if (debug) printf("findinterface...\n");
+ 	if (debug > 1) printf("findinterface...\n");
 	return 0;
 }
 
@@ -276,7 +276,7 @@ refclock_control(
 	struct refclockstat *out
 	)
 {
-	if (debug) printf("refclock_control...\n");
+	if (debug > 1) printf("refclock_control...\n");
 	return;
 }
 
@@ -287,7 +287,7 @@ loop_config(
 	double freq
 	)
 {
-	if (debug) printf("loop_config...\n");
+	if (debug > 1) printf("loop_config...\n");
 	return;
 }
 
@@ -300,7 +300,7 @@ filegen_config(
 	u_int   flag
 	)
 {
-	if (debug) printf("filegen_config...\n");
+	if (debug > 1) printf("filegen_config...\n");
 	return;
 }
 
@@ -311,7 +311,7 @@ stats_config(
 	char *invalue	/* only one type so far */
 	)
 {
-	if (debug) printf("stats_config...\n");
+	if (debug > 1) printf("stats_config...\n");
 	return;
 }
 
@@ -325,7 +325,7 @@ hack_restrict(
 	int flags
 	)
 {
-	if (debug) printf("hack_restrict...\n");
+	if (debug > 1) printf("hack_restrict...\n");
 	return;
 }
 
@@ -333,7 +333,7 @@ hack_restrict(
 void
 kill_asyncio (void)
 {
-	if (debug) printf("kill_asyncio...\n");
+	if (debug > 1) printf("kill_asyncio...\n");
 	return;
 }
 
@@ -345,7 +345,7 @@ proto_config(
 	double dvalue
 	)
 {
-	if (debug) printf("proto_config...\n");
+	if (debug > 1) printf("proto_config...\n");
 	return;
 }
 
@@ -354,7 +354,7 @@ getauthkeys(
 	char *keyfile
 	)
 {
-	if (debug) printf("getauthkeys: got <%s>\n", keyfile);
+	if (debug > 0) printf("getauthkeys: got <%s>\n", keyfile);
 	f1_keys = strdup(keyfile);
 	return;
 }
@@ -365,7 +365,7 @@ filegen_get(
 	char *name
 	)
 {
-	if (debug) printf("filegen_get...\n");
+	if (debug > 1) printf("filegen_get...\n");
 	return 0;
 }
 
