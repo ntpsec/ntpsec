@@ -235,7 +235,6 @@ main(
 	char	*sign = NULL;	/* sign key */
 	EVP_PKEY *pkey = NULL;	/* temp key */
 	const EVP_MD *ectx;	/* EVP digest */
-	char	hostbuf[MAXHOSTNAME + 1];
 	char	pathbuf[MAXFILENAME + 1];
 	const char *scheme = NULL; /* digest/signature scheme */
 	char	*exten = NULL;	/* private extension */
@@ -244,6 +243,7 @@ main(
 	FILE	*fstr = NULL;	/* file handle */
 	int	iffsw = 0;	/* IFF key switch */
 #endif /* OPENSSL */
+	char	hostbuf[MAXHOSTNAME + 1];
 	u_int	temp;
 
 #ifdef SYS_WINNT
@@ -269,9 +269,9 @@ main(
 	/*
 	 * Process options, initialize host name and timestamp.
 	 */
-#ifdef OPENSSL
 	gethostname(hostbuf, MAXHOSTNAME);
 	hostname = hostbuf;
+#ifdef OPENSSL
 	trustname = hostbuf;
 	passwd1 = hostbuf;
 #endif
