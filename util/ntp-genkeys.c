@@ -597,17 +597,24 @@ cleanlinks(
 	*/
 #endif /* HAVE_READLINK */
 	if (unlink(f1)) {
-		fprintf(stderr, "unlink(%s) failed: %s\n", f1,
-			strerror(errno));
-		return;
+		if (errno != ENOENT) {
+			fprintf(stderr, "unlink(%s) failed: %s\n", f1,
+				strerror(errno));
+			return;
+		}
 	}
 	/* file = dirname(f3) / f2 */
-	snprintf(fb, sizeof fb, "%s", f3);
-	cp = strrchr(fb, '/');
-	if (cp) {
-		*cp = 0;
+	if (f3) {
+		snprintf(fb, sizeof fb, "%s", f3);
+		cp = strrchr(fb, '/');
+		if (cp) {
+			++cp;
+			*cp = 0;
+		}
+	} else {
+		*fb = 0;
 	}
-	snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+	snprintf(fb, sizeof fb, "%s%s", fb, f2);
 	if (debug > 1) printf("cleanlinks 1: file is <%s>\n", fb);
 
 	if (symlink(fb, f1)) {
@@ -621,12 +628,14 @@ cleanlinks(
 	  - if f3 begins with a /, unlink it
 	  - else, unlink dirname(f1) / f3
 	*/
-	if (trash) {
+	if (trash && f3) {
 		if ('/' == *f3) {
 			if (unlink(f3)) {
-				fprintf(stderr, "unlink(%s) failed: %s\n", f3,
-					strerror(errno));
-				return;
+				if (errno != ENOENT) {
+					fprintf(stderr, "unlink(%s) failed: %s\n", f3,
+						strerror(errno));
+					return;
+				}
 			}
 		} else {
 			snprintf(fb, sizeof fb, "%s", f1);
@@ -638,9 +647,11 @@ cleanlinks(
 			if (debug > 1)
 				printf("cleanlinks 2: file is <%s>\n", fb);
 			if (unlink(fb)) {
-				fprintf(stderr, "unlink(%s) failed: %s\n", fb,
-					strerror(errno));
-				return;
+				if (errno != ENOENT) {
+					fprintf(stderr, "unlink(%s) failed: %s\n", fb,
+						strerror(errno));
+					return;
+				}
 			}
 		}
 	}
