@@ -42,9 +42,9 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_jupiter.c refclock_leitch.c refclock_local.c \
 	refclock_msfees.c refclock_mx4200.c refclock_nmea.c refclock_oncore.c \
 	refclock_palisade.c refclock_palisade.h refclock_parse.c \
-	refclock_pcf.c refclock_pst.c refclock_ptbacts.c refclock_shm.c \
+	refclock_pcf.c refclock_pst.c refclock_shm.c \
 	refclock_tpro.c refclock_trak.c refclock_true.c refclock_tt560.c \
-	refclock_ulink.c refclock_usno.c refclock_wwv.c refclock_wwvb.c \
+	refclock_ulink.c refclock_wwv.c refclock_wwvb.c \
 	refclock_zyfer.c refclock_ripencc.c refclock_neoclock4x.c
 
 $(PROGRAMS): $(LDADD)

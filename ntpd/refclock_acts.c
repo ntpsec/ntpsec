@@ -22,12 +22,13 @@
 #endif /* HAVE_SYS_IOCTL_H */
 
 /*
- * This driver supports the NIST, USNO, PTB and NPL modem time services,
- * as well as Spectracom receivers connected via a modem. The driver
- * periodically dials a number from a telephone list, receives the
- * timecode data and calculates the local clock correction. It is
- * designed primarily for use as a backup when neither a radio clock nor
- * connectivity to Internet time servers is available.
+ * This driver supports the US (NIST, USNO) and European (PTB, NPL,
+ * etc.) modem time services, as well as Spectracom GPS and WWVB
+ * receivers connected via a modem. The driver periodically dials a
+ * number from a telephone list, receives the timecode data and
+ * calculates the local clock correction. It is designed primarily for
+ * use as backup when neither a radio clock nor connectivity to Internet
+ * time servers is available.
  *
  * For best results the propagation delay due to the individual modem
  * and telephone circuit must be known. The ACTS echo-delay measurement
@@ -35,8 +36,8 @@
  * be determined by other means. Systematic corrections range from 200
  * to 400 milliseconds, depending on the particular service and call
  * routing. Variations from call to call can reach 100 miliseconds and
- * between messages during a call from a few milliseconds to 30
- * milliseconds.
+ * between messages during a call from a few milliseconds to 50
+ * milliseconds or more.
  *
  * This driver requires a 1200-bps modem with a Hayes-compatible command
  * set and control over the modem data terminal ready (DTR) control
@@ -56,17 +57,16 @@
  * remain in the list, (c) a device fault or timeout occurs or (d) fudge
  * flag1 is reset manually using ntpdc.
  *
- * The driver is is transparent to each of the modem time services and
+ * The driver is transparent to each of the modem time services and
  * Spectracom radios. It selects the parsing algorithm depending on the
  * message length. There is some hazard should the message be corrupted.
  * However, the data format is checked carefully and only if all checks
  * succeed is the message accepted. Corrupted lines are discarded
  * without complaint.
  *
- *
  * Fudge controls
  *
- * flag1	force a call in manual state
+ * flag1	force a call in manual mode
  * flag2	enable port locking (not verified)
  * flag3	no modem; port is directly connected to device
  * flag4	not used
@@ -75,15 +75,16 @@
  *
  * Ordinarily, the serial port is connected to a modem; however, it can
  * be connected directly to a device or another computer for testing and
- * calibration. In this case set fudge flag 3. In principle, fudge flag2
+ * calibration. In this case set fudge flag3 and the driver will send a
+ * single character 'T' at each poll event. In principle, fudge flag2
  * enables port locking, allowing the modem to be shared when not in use
  * by this driver. At least on Solaris with the current NTP I/O
- * routines, this results in lots of ugly error messages.
+ * routines, this results only in lots of ugly error messages.
  */
 /*
  * National Institute of Science and Technology (NIST)
  *
- * Phone: 303 494 4774 (Boulder, CO)
+ * Phone: (303) 494-4774 (Boulder, CO); (808) 335-4721 (Hawaii)
  *
  * Data Format
  *
@@ -101,7 +102,7 @@
  *
  * US Naval Observatory (USNO)
  *
- * Phone: 202 762 1594 (Washington, DC); 719 567 6742 (Boulder, CO)
+ * Phone: (202) 762-1594 (Washington, DC); (719) 567-6742 (Boulder, CO)
  *
  * Data Format (two lines, repeating at one-second intervals)
  *
@@ -114,27 +115,14 @@
  * hhmmss	second of day
  * ...
  *
- * Physikalisch-Technische Bundesanstalt (PTB)
- *
- * Phone: +49 531 512038 (Germany)
+ * European Services (PTB, NPL, etc.)
+
+ * PTB: +49 531 512038 (Germany)
+ * NPL: 0906 851 6333 (UK only)
  *
  * Data format
  *
  * 1995-01-23 20:58:51 MEZ  10402303260219950123195849740+40000500
- *
- * National Physical Laboratory (NPL)
- *
- * Phone: 0906 851 6333 (UK)
- *
- * Data format
- *
- * yyyy-mm-dd hh:mm:ss UTC+0 ... as per PTB
- *
- * The NPL TRUETIME format is similar the PTB format except for the
- * timezone, which is UTC+0 or UTC+1 for standard and daylight saving
- * time. The phone number is a premium rate service and cannot be
- * dialled from outside the UK. See www.npl.co.uk/time/truetime.html
- * for further information.
  *
  * Spectracom GPS and WWVB Receivers
  *
@@ -165,8 +153,8 @@
 /*
  * Service identifiers.
  */
-#define REFACTS		"ACTS"	/* ACTS reference ID */
-#define LENACTS		50	/* ACTS format */
+#define REFACTS		"NIST"	/* NIST reference ID */
+#define LENACTS		50	/* NIST format */
 #define REFUSNO		"USNO"	/* USNO reference ID */
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
@@ -535,6 +523,7 @@ acts_receive (
 			pp->leap = LEAP_ADDSECOND;
 		else
 			pp->leap = LEAP_NOWARNING;
+		memcpy(&pp->refid, REFWWVB, 4);
 		if (up->msgcnt == 0)
 			record_clock_stats(&peer->srcadr, tbuf);
 		up->msgcnt++;
