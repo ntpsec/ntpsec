@@ -531,9 +531,14 @@ main(
 	}
 	snifflink(path_keysdir, &link_keysdir);
 
+	if (!link_publickey) {
+		snprintf(pathbuf, sizeof pathbuf, "ntpkey_%s.%lu",
+			 hostname, ntptime);
+		link_publickey = strdup(pathbuf);
+	}
 	if (!path_publickey) {
-		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_%s.%lu",
-			 path_keysdir, hostname, ntptime);
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_%s",
+			 path_keysdir, hostname);
 		path_publickey = strdup(pathbuf);
 	}
 	if (*path_publickey != '/') {
@@ -544,9 +549,14 @@ main(
 	}
 	snifflink(path_publickey, &link_publickey);
 
+	if (!link_privatekey) {
+		snprintf(pathbuf, sizeof pathbuf, "ntpkey.%lu",
+			 ntptime);
+		link_privatekey = strdup(pathbuf);
+	}
 	if (!path_privatekey) {
-		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey.%lu",
-			 path_keysdir, ntptime);
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey",
+			 path_keysdir);
 		path_privatekey = strdup(pathbuf);
 	}
 	if (*path_privatekey != '/') {
@@ -557,9 +567,14 @@ main(
 	}
 	snifflink(path_privatekey, &link_privatekey);
 
+	if (!link_dhparms) {
+		snprintf(pathbuf, sizeof pathbuf, "ntpkey_dh.%lu",
+			 ntptime);
+		link_dhparms = strdup(pathbuf);
+	}
 	if (!path_dhparms) {
-		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_dh.%lu",
-			 path_keysdir, ntptime);
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntpkey_dh",
+			 path_keysdir);
 		path_dhparms = strdup(pathbuf);
 	}
 	if (*path_dhparms != '/') {
