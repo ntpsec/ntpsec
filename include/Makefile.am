@@ -3,6 +3,8 @@ AUTOMAKE_OPTIONS = ../util/ansi2knr
 ETAGS_ARGS = $(srcdir)/Makefile.am
 #EXTRA_DIST = TAGS
 
+SUBDIRS = isc
+
 noinst_HEADERS = \
 	adjtime.h \
 	audio.h \
@@ -51,5 +53,4 @@ noinst_HEADERS = \
 	parse_conf.h \
 	recvbuff.h \
 	trimble.h
-
 
