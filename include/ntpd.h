@@ -219,7 +219,6 @@ extern  int	sock_hash P((struct sockaddr_storage *));
 /* ntp_config.c */
 extern char const *	progname;
 extern char	sys_phone[][MAXDIAL];	/* ACTS phone numbers */
-extern char	pps_device[];		/* PPS device name */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 extern int	config_priority_override;
 extern int	config_priority;
@@ -390,7 +389,7 @@ extern u_long	sys_received;		/* packets received */
 
 /* ntp_refclock.c */
 #ifdef REFCLOCK
-#if defined(PPS) || defined(HAVE_PPSAPI)
+#ifdef PPS
 extern int	fdpps;			/* pps file descriptor */
 #endif /* PPS */
 #endif

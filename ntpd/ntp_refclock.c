@@ -30,10 +30,6 @@
 # endif
 #endif /* TTYCLK */
 
-#ifdef HAVE_PPSCLOCK_H
-#include <sys/ppsclock.h>
-#endif /* HAVE_PPSCLOCK_H */
-
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
@@ -73,8 +69,10 @@
 #define MAXUNIT 	4	/* max units */
 #define FUDGEFAC	.1	/* fudge correction factor */
 
-int fdpps;			/* pps file descriptor */
-int cal_enable;			/* enable refclock calibrate */
+#ifdef PPS
+int	fdpps;			/* ppsclock legacy */
+#endif /* PPS */
+int	cal_enable;		/* enable refclock calibrate */
 
 /*
  * Type/unit peer index. Used to find the peer structure for control and
@@ -731,15 +729,9 @@ refclock_open(
 		msyslog(LOG_ERR, "refclock_open: %s: %m", dev);
 		return (0);
 	}
-
-	/*
-	 * This little jewel lights up the PPS file descriptor if the
-	 * device name matches the name in the pps line in the
-	 * configuration file. This is so the atom driver can glom onto
-	 * the right device. Very silly.
-	 */
-	if (strcmp(dev, pps_device) == 0)
-		fdpps = fd;
+#ifdef PPS
+	fdpps = fd;		/* ppsclock legacy */
+#endif /* PPS */
 
 	/*
 	 * The following sections initialize the serial line port in
