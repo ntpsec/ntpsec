@@ -246,7 +246,13 @@ AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h)
-AC_CHECK_HEADERS(md5.h)
+# HMS: Lame, but fast.
+if test -f /etc/redhat-release
+then
+    :
+else
+    AC_CHECK_HEADERS(md5.h)
+fi
 AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h)
