@@ -1,5 +1,7 @@
 2001-03-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k20
+
 	* ntpd/refclock_heath.c: Add support for GC-1000 II.
 	From Dave Mills.
 
