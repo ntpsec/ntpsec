@@ -330,7 +330,7 @@ AC_EGREP_CPP(yes,
 yes
 #endif
 ], [AC_CHECK_HEADERS(sys/timepps.h)])
-AC_CHECK_HEADERS(sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h)
+AC_CHECK_HEADERS(sys/timers.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$host" in
 *-convex-*)
@@ -382,6 +382,12 @@ AC_CHECK_HEADERS(sys/shm.h, [], [],
 #endif
 #if HAVE_SYS_IPC_H
 # include <sys/ipc.h>
+#endif
+])
+
+AC_CHECK_HEADERS(sys/timex.h, [], [],
+[#if HAVE_SYS_TIME_H
+# include <sys/time.h>
 #endif
 ])
 
