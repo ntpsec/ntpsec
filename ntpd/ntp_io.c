@@ -864,7 +864,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
 		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
-/*		mreq.imr_interface.s_addr = htonl(INADDR_ANY); */
+		mreq.imr_interface.s_addr = htonl(INADDR_ANY); 
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
