@@ -70,7 +70,10 @@ struct timeval timeout = {60,0};
 #include "recvbuff.h"
 
 #ifdef SYS_WINNT
-# define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy
+#define EPROTONOSUPPORT WSAEPROTONOSUPPORT
+#define EAFNOSUPPORT    WSAEAFNOSUPPORT
+#define EPFNOSUPPORT    WSAEPFNOSUPPORT
+#define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy
 				on Windows NT timers. */
 #pragma comment(lib, "winmm")
 #endif /* SYS_WINNT */

@@ -145,7 +145,7 @@ extern	void	crypto_update	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
 extern	u_int	crypto_ident	P((struct peer *));
-extern	struct exten *crypto_args P((struct peer *, u_int, u_char *));
+extern	struct exten *crypto_args P((struct peer *, u_int, char *));
 extern	int	crypto_public	P((struct peer *, u_char *, u_int));
 extern	void	value_free	P((struct value *));
 #endif /* OPENSSL */

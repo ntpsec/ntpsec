@@ -158,6 +158,12 @@ static	int	bighash		P((BIGNUM *, BIGNUM *));
 static	struct cert_info *crypto_cert P((char *));
 static	void	crypto_tai	P((char *));
 
+//#ifdef SYS_WINNT
+int
+readlink(char * link, char * file, int len) {
+	return (-1);
+}
+
 /*
  * session_key - generate session key
  *
@@ -364,7 +370,7 @@ crypto_recv(
 	u_int	code;		/* extension field opcode */
 	u_int	vallen = 0;	/* value length */
 	X509	*cert;		/* X509 certificate */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	keyid_t	cookie;		/* crumbles */
 	int	rval = XEVNT_OK;
 	u_char	*ptr;
@@ -1143,7 +1149,7 @@ crypto_xmit(
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp;	/* certificate info/value pointer */
 	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int	vallen;
 	u_int	len;
 	struct value vtemp;
@@ -1189,7 +1195,7 @@ crypto_xmit(
 		vtemp.tstamp = ep->tstamp;
 		vtemp.fstamp = ep->fstamp;
 		vtemp.vallen = ep->vallen;
-		vtemp.ptr = (char *)ep->pkt;
+		vtemp.ptr = (unsigned char *)ep->pkt;
 		len += crypto_send(fp, &vtemp);
 		break;
 
@@ -1687,7 +1693,7 @@ struct exten *
 crypto_args(
 	struct peer *peer,	/* peer structure pointer */
 	u_int	opcode,		/* operation code */
-	u_char	*str		/* argument string */
+	char	*str		/* argument string */
 	)
 {
 	tstamp_t tstamp;	/* NTP timestamp */
@@ -1715,7 +1721,7 @@ crypto_args(
 	ep->vallen = 0;
 	if (str != NULL) {
 		ep->vallen = htonl(strlen(str));
-		memcpy(ep->pkt, str, strlen(str));
+		memcpy((char *)ep->pkt, str, strlen(str));
 	} else {
 		ep->pkt[0] = peer->associd;
 	}
@@ -1790,7 +1796,7 @@ crypto_update(void)
 {
 	EVP_MD_CTX ctx;		/* message digest context */
 	struct cert_info *cp, **zp; /* certificate info/value */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t tstamp;	/* NTP timestamp */
 	u_int	len;
 
@@ -1920,7 +1926,7 @@ asn2ntp	(
 	 * greater than 100. Dontcha love ASN.1? Better than MIL-188.
 	 */
 	if (asn1time->length > 13)
-		return (-1);
+		return ((u_long)(~0));	/* We can't use -1 here. It's invalid */
 	v = (char *)asn1time->data;
 	tm.tm_year = (v[0] - '0') * 10 + v[1] - '0';
 	if (tm.tm_year < 50)
@@ -2865,16 +2871,17 @@ cert_parse(
 	X509V3_EXT_METHOD *method;
 	STACK_OF(CONF_VALUE) *nval;
 	CONF_VALUE *val;
-	u_char	pathbuf[MAXFILENAME];
-	u_char	*ptr;
+	char	pathbuf[MAXFILENAME];
+	u_char	*uptr;
+	char	*ptr;
 	char	*ext_str;
 	int	temp, cnt, i;
 
 	/*
 	 * Decode ASN.1 objects and construct certificate structure.
 	 */
-	ptr = asn1cert;
-	if ((cert = d2i_X509(NULL, &ptr, len)) == NULL) {
+	uptr = asn1cert;
+	if ((cert = d2i_X509(NULL, &uptr, len)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
@@ -2895,7 +2902,8 @@ cert_parse(
 	ret->version = X509_get_version(cert);
 	X509_NAME_oneline(X509_get_subject_name(cert), pathbuf,
 	    MAXFILENAME - 1);
-	if ((ptr = strstr(pathbuf, "CN=")) == NULL) {
+	ptr = strstr(pathbuf, "CN=");
+	if (ptr == NULL) {
 		msyslog(LOG_ERR, "cert_parse: invalid subject %s",
 		    pathbuf);
 		cert_free(ret);
@@ -2949,8 +2957,8 @@ cert_parse(
 		 * insists on text strings.
 		 */
 		case NID_ext_key_usage:
-			ptr = ext->value->data;
-			ext_str = method->d2i(NULL, &ptr,
+			uptr = ext->value->data;
+			ext_str = method->d2i(NULL, &uptr,
 			    ext->value->length);
 			nval = method->i2v(method, ext_str, NULL);
 			val = sk_CONF_VALUE_value(nval, 0);
@@ -3095,7 +3103,7 @@ cert_sign(
 	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    sys_hostname, strlen(sys_hostname), -1, 0);
+	    (unsigned char *) sys_hostname, strlen(sys_hostname), -1, 0);
 	subj = X509_get_subject_name(req);
 	X509_set_subject_name(cert, subj);
 	X509_set_pubkey(cert, pkey);
@@ -3370,9 +3378,9 @@ crypto_key(
 	EVP_PKEY *pkey = NULL;	/* public/private key */
 	char	filename[MAXFILENAME]; /* name of key file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	int	rval;
-	u_char	*ptr;
+	char	*ptr;
 
 	/*
 	 * Open the key file. If the first character of the file
@@ -3448,11 +3456,11 @@ crypto_cert(
 	FILE	*str;		/* file handle */
 	char	filename[MAXFILENAME]; /* name of certificate file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
 	int	rval;
 	u_int	len;
-	u_char	*ptr;
+	char	*ptr;
 	char	*name, *header;
 	u_char	*data;
 
@@ -3537,15 +3545,15 @@ crypto_tai(
 	)
 {
 	FILE	*str;		/* file handle */
-	u_char	buf[NTP_MAXSTRLEN];	/* file line buffer */
+	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
 	u_int	leapsec[MAX_LEAP]; /* NTP time at leaps */
 	u_int	offset;		/* offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
-	u_char	*ptr;
+	char	*ptr;
 	int	rval, i;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
@@ -3625,7 +3633,7 @@ crypto_tai(
 	len = i * 4;
 	tai_leap.vallen = htonl(len);
 	ptr = emalloc(len);
-	tai_leap.ptr = ptr;
+	tai_leap.ptr = (unsigned char *) ptr;
 	for (; i >= 0; i--) {
 		*ptr++ = htonl(leapsec[i]);
 	}
@@ -3746,7 +3754,7 @@ crypto_setup(void)
 		msyslog(LOG_ERR,
 		    "warning: host key is not RSA key type");
 	hostval.vallen = htonl(strlen(sys_hostname));
-	hostval.ptr = sys_hostname;
+	hostval.ptr = (unsigned char *) sys_hostname;
 	
 	/*
 	 * Construct public key extension field for agreement scheme.

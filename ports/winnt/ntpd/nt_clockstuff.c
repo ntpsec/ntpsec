@@ -214,6 +214,14 @@ void reset_winnt_time(void) {
 	if (!SetSystemTimeAdjustment(0, TRUE)) {
 		msyslog(LOG_ERR, "Failed to reset clock state, SetSystemTimeAdjustment(): %m");
 	}
+        /************ Added back in 2003-01-26 *****************/
+	/* read the current system time, and write it back to
+           force CMOS update: */
+	{
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+		SetSystemTime(&st);
+	}
 }
 
 
