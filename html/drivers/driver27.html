@@ -14,17 +14,20 @@
         <hr>
         <h4>Synopsis</h4>
         <p>Address: 127.127.27.<i>u</i><br>
-            Reference ID: <tt>MSFa</tt><br>
+            Reference ID: <tt>MSFa</tt> or <tt>WVBa</tt><br>
             Driver ID: <tt>MSF_ARCRON</tt><br>
             Serial Port: <tt>/dev/arc<i>u</i></tt>; 300 baud, 8-bits, 2-stop, no parity<br>
             Features: <tt>tty_clk</tt></p>
         <h4>Description</h4>
-        <p>This driver supports the Arcron MSF receiver, and would probably also support the DCF77 variant of the same clock. The clock reports its ID as ``<tt>MSFa</tt>'' to indicate MSF as a source and the use of the ARCRON driver.</p>
-        <p>This documentation describes version V1.1 (1997/06/23) of the source and has been tested (amongst others) against ntpd3-5.90 on Solaris-1 (SunOS 4.1.3_U1 on an SS1 serving as a router and firewall) and against ntpd3-5.90 on Solaris-2.5 (on a SS1+ and TurboSPARC 170MHz). This code will probably work, and show increased stability, reduced jitter and more efficiency (fewer context switches) with the <tt>tty_clk</tt> discipline/STREAMS module installed, but this has not been tested. For a to-do list see the comments at the start of the code.</p>
+        <p>This driver supports the Arcron receiver, MSF, WWVB and probably DCF77 variants. The clock reports its ID as ``<tt>MSFa</tt>'' or ``<tt>WVBa</tt>'' to indicate MSF or WWVB as a source and the use of the ARCRON driver.</p>
+	<p>This documentation describes v1.2 (2003/2/17) of the source and has been tested against ntpd 4.1.1 on linux x86. Changes from v1.1 include patches to work with the new ntp-4 code and options to use the WWVB (North American) frequency. Note, MSF and WWVB are different models of the Arcron clock, with different recievers and slightly different firmware. Because of deficiencies in the clock documentation, support and, apparently, firmware implementation, the MSF and WWVB version must be announced by a special flag.</p>
+	<p>To use WWVB, flag1 (fudge factor) must be 1 (see the example below). If flag1 is 0, or unspecified, the default MSF version is assumed. This should assure backwards compatibility and so break no working setups. When reading the following documentation, the MSF references should also apply to WWVB, except that the WWVB clock is forced to UTC timezone, while the MSF version will read the timezone set at the clock.</p>
+
+	<p>The previous documentation described version V1.1 (1997/06/23) of the source and had been tested (amongst others) against ntpd3-5.90 on Solaris-1 (SunOS 4.1.3_U1 on an SS1 serving as a router and firewall) and against ntpd3-5.90 on Solaris-2.5 (on a SS1+ and TurboSPARC 170MHz). That code will claimed increased stability, reduced jitter and more efficiency (fewer context switches) with the <tt>tty_clk</tt> discipline/STREAMS module installed, but this has not been tested. For a to-do list see the comments at the start of the code.</p>
         <p>This code has been significantly slimmed down since the V1.0 version, roughly halving the memory footprint of its code and data.</p>
         <p>This driver is designed to allow the unit to run from batteries as designed, for something approaching the 2.5 years expected in the usual stand-alone mode, but no battery-life measurements have been taken.</p>
-        <p>Much of this code is originally from the other refclock driver files with thanks. The code was originally made to work with the clock by <a href="mailto:derek@toybox.demon.co.uk">Derek Mulcahy</a>, with modifications by <a href="mailto:d@hd.org">Damon Hart-Davis</a>. Thanks also to <a href="mailto:lyndond@sentinet.co.uk">Lyndon David</a> for some of the specifications of the clock.</p>
-        <p>There is support for a Tcl/Tk monitor written by Derek Mulcahy that examines the output stats; see the <a href="http://www2.exnet.com/NTP/ARC/ARC.html">ARC Rugby MSF Receiver</a> page for more details and the code.</p>
+        <p>Much of this code is originally from the other refclock driver files with thanks. The code was originally made to work with the clock by <a href="mailto:derek@toybox.demon.co.uk">Derek Mulcahy</a>, with modifications by <a href="mailto:d@hd.org">Damon Hart-Davis</a>. Thanks also to <a href="mailto:lyndond@sentinet.co.uk">Lyndon David</a> for some of the specifications of the clock. <a href="mailto:palfille@partners.org">Paul Alfille</a> added support for the WWVB clock.</p>
+        <p>There is support for a Tcl/Tk monitor written by Derek Mulcahy that examines the output stats; see the <a href="http://www2.exnet.com/NTP/ARC/ARC.html">ARC Rugby MSF Receiver</a> page for more details and the code. Information on the WWVB version is available from <a href="http://www.arctime.com">Atomic Time</a> as their <a href="http://www.atomictime.com/Product17.html">Atomic Time PC</a>.</p>
         <p>Look at the notes at the start of the code for further information; some of the more important details follow.</p>
         <p>The driver interrogates the clock at each poll (ie every 64s by default) for a timestamp. The clock responds at the start of the next second (with the start bit of the first byte being on-time). The time is in `local' format, including the daylight savings adjustment when it is in effect. The driver code converts the time back to UTC.</p>
         <p>The clock claims to be accurate to within about 20ms of the MSF-broadcast time, and given the low data transmission speed from clock to host, and the fact that the clock is not in continuous sync with MSF, it seems sensible to set the `precision' of this clock to -5 or -4, -4 being used in this code, which builds in a reported dispersion of over 63ms (ie says ``This clock is not very good.''). You can improve the reported precision to -4 (and thus reduce the base dispersion to about 31ms) by setting the fudge <tt>flag3</tt> to <tt>1</tt>.</p>
@@ -95,7 +98,7 @@
                 <li>month units
                 <li>year tens (years range from 00 to 99)
                 <li>year units
-                <li>BST/UTC status
+                <li>BST/UTC status (Ignored in WWVB version)
                 <dl compact>
                     <dt>bit 7
                     <dd>parity
@@ -148,6 +151,8 @@ server 127.127.27.0 # ARCRON MSF radio clock(1).
 # Fudge stratum and other features as required.
 # ADJUST time1 VALUE FOR YOUR HOST, CLOCK AND LOCATION!
 fudge 127.127.27.0 stratum 1 time1 0.016 flag3 1 flag4 1
+# WWVB users should change that line to:
+fudge 127.127.27.0 stratum 1 time1 0.016 flag1 1 flag3 1 flag4 1
 
 peer 11.22.33.9 # tick(1--2).
 peer 11.22.33.4 # tock(3), boot/NFS server.
@@ -217,7 +222,7 @@ May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, w
             <dt><tt>refid <i>string</i></tt>
             <dd>Specifies the driver reference identifier, an ASCII string from one to four characters, with default <tt>MSFa</tt>.
             <dt><tt>flag1 0 | 1</tt>
-            <dd>Not used by this driver.
+            <dd>0 MSF, 1 WWVB (MSF British/Rugby frequency is the default, WWVB North America).
             <dt><tt>flag2 0 | 1</tt>
             <dd>Not used by this driver.
             <dt><tt>flag3 0 | 1</tt>
@@ -233,3 +238,4 @@ May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, w
     </body>
 
 </html>
+
