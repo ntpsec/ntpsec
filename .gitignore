@@ -12,8 +12,8 @@
 #*
 .#*
 # Simulated bk default ignores end here
-.buildkey
 *~
+.buildkey
 A.*
 COPYRIGHT
 ElectricFence/Makefile.in
@@ -24,6 +24,8 @@ am.log
 br-flock
 clockstuff/Makefile.in
 configure
+html/pic/thumbs.db
+html/thumbs.db
 include/Makefile.in
 kernel/Makefile.in
 kernel/sys/Makefile.in
@@ -33,6 +35,13 @@ librsaref/Makefile.in
 ntpd/Makefile.in
 ntpd/crypto.bak
 ntpd/crypto.c
+ntpd/loop.bak
+ntpd/loop.c
+ntpd/ntp_crypto.c.1
+ntpd/ntp_proto.c.1
+ntpd/peer.bak
+ntpd/peer.c
+ntpd/precision
 ntpd/proto.bak
 ntpd/proto.c
 ntpdate/Makefile.in
@@ -42,12 +51,3 @@ ntptrace/Makefile.in
 parseutil/Makefile.in
 scripts/Makefile.in
 util/Makefile.in
-html/pic/thumbs.db
-html/thumbs.db
-ntpd/loop.bak
-ntpd/loop.c
-ntpd/ntp_crypto.c.1
-ntpd/ntp_proto.c.1
-ntpd/peer.bak
-ntpd/peer.c
-ntpd/precision
