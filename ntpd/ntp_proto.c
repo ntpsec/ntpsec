@@ -167,8 +167,6 @@ transmit(
 				hpoll++;
 			}
 		}
-		if (peer->reach & 0x80)
-			peer->flags |= FLAG_CLUST;
 		oreach = peer->reach;
 		peer->reach <<= 1;
 		peer->hyst *= HYST_TC;
@@ -189,7 +187,7 @@ transmit(
 				}
 			}
 			if (peer->flags & FLAG_IBURST)
-				peer->burst = NTP_SHIFT;
+				peer->burst = NTP_BURST;
 		} else {
 
 			/*
@@ -198,11 +196,8 @@ transmit(
 			 * the clock filter. Next, determine the poll
 			 * interval. If the peer is a synchronization
 			 * candidate, use the system poll interval. If
-			 * the peer is not sane, increase it by one. If
-			 * the number of valid updates is not greater
-			 * than half the register size, clamp it to the
-			 * minimum. This is to quickly recover the time
-			 * variables when a noisy peer shows life.
+			 * we cannot synchronize to the peer increase it
+			 * by one. 
 			 */
 			if (!(peer->reach & 0x07)) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
@@ -215,7 +210,7 @@ transmit(
 			else
 				hpoll = sys_poll;
 			if (peer->flags & FLAG_BURST)
-				peer->burst = NTP_SHIFT;
+				peer->burst = NTP_BURST;
 		}
 	} else {
 		peer->burst--;
@@ -908,7 +903,7 @@ receive(
 		 * It will die later after leaving the originate and
 		 * receive timestamp in the dust for the reply.
 		 */
-		if (peer->flash) {
+		if (peer->flash && !(peer->flash & TEST2)) {
 			poll_update(peer, peer->minpoll);
 			if (peer->crypto & CRYPTO_FLAG_PROV) {
 #ifdef DEBUG
@@ -923,8 +918,6 @@ receive(
 					peer_clear(peer);
 				}
 				return;
-			} else {
-				poll_update(peer, peer->minpoll);
 			}
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV))
@@ -1451,7 +1444,7 @@ clock_filter(
 	peer->filter_delay[j] = max(0, sample_delay);
 	peer->filter_disp[j] = dsp;
 	peer->filter_epoch[j] = current_time;
-	j++; j %=NTP_SHIFT;
+	j++; j %= NTP_SHIFT;
 	peer->filter_nextpt = j;
 
 	/*
@@ -1848,15 +1841,14 @@ clock_select(void)
 	 * Note the hysteresis gimmick that increases the effective
 	 * distance for those rascals that have not made the final cut.
 	 * This is to discourage clockhopping. Note also the prejudice
-	 * agains lower stratum peers if the floor is elevated.
+	 * against lower stratum peers if the floor is elevated.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
-		if (nlist > 1 && (low >= peer->offset || peer->offset >=
+		if (nlist > 1 && (peer->offset <= low || peer->offset >=
 		    high)) {
-			if (!(peer->flags & FLAG_CONFIG) &&
-			    peer->flags & FLAG_CLUST)
+			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
 			continue;
 		}
@@ -1937,7 +1929,8 @@ clock_select(void)
 			    ntoa(&peer_list[k]->srcadr),
 			    SQRT(sys_selerr), SQRT(d));
 #endif
-		if (!(peer_list[k]->flags & FLAG_CONFIG))
+		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
+		    peer_list[k]->hmode == MODE_CLIENT)
 			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];

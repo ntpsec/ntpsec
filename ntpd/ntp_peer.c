@@ -335,7 +335,9 @@ unpeer(
 
 #ifdef OPENSSL
 	if (peer_to_remove->flags & FLAG_SKEY) {
-		sprintf(statstr, "unpeer %d", peer_to_remove->associd);
+		sprintf(statstr, "unpeer %d flash %x reach %3o flags %x",
+		    peer_to_remove->associd, peer_to_remove->flash,
+		    peer_to_remove->reach, peer_to_remove->flags);
 		record_crypto_stats(&peer_to_remove->srcadr, statstr);
 #ifdef DEBUG
 		if (debug)

@@ -102,7 +102,8 @@ typedef char s_char;
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~4.5 h) */
 #define	NTP_MINCLOCK	3	/* minimum survivors */
 #define	NTP_MAXCLOCK	10	/* maximum candidates */
-#define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
+#define	NTP_SHIFT	8	/* number of clock filter stages */
+#define NTP_BURST	10	/* burst mode counter */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
@@ -187,7 +188,7 @@ struct cert_info {
 	struct cert_info *link;	/* forward link */
 	u_int	flags;		/* flags that wave */
 	EVP_PKEY *pkey;		/* generic key */
-	long	cert_version;	/* X509 version */
+	long	version;	/* X509 version */
 	int	nid;		/* signature/digest ID */
 	EVP_MD	*digest;	/* message digest algorithm */
 	u_long	serial;		/* serial number */
@@ -418,7 +419,6 @@ struct peer {
 #define FLAG_IBURST	0x0200	/* initial burst mode */
 #define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
 #define FLAG_ASSOC	0x0800	/* autokey reqeust */
-#define FLAG_CLUST	0x1000	/* >= 8 samples in the can */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
