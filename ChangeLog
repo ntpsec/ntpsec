@@ -1,3 +1,32 @@
+2000-12-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c (wwv_start): Call audio_init with DEVICE_AUDIO.
+	* ntpd/refclock_irig.c (irig_start): Call audio_init with DEVICE_AUDIO.
+	* ntpd/refclock_chu.c: Documentation cleanup.
+	(DEVICE_AUDIO): Added.
+	(fd_audio): Added.
+	(chu_start): Separate audio from serial device.
+	(chu_receive): Rewrite - get data from serial or audio device as
+	appropriate.
+	(chu_audio_receive): Renamed (from chu_receive) to allow both
+	audio and serial capability.
+	(chu_serial_receive): Ditto.
+	(chu_decode): Do the Right Thing based on audio/serial data.
+	* ntpd/ntp_refclock.c (refclock_open): Check for failure using <0
+	instead of ==-1.
+	* libntp/audio.c: Header cleanup, and remove
+	HAVE_STRUCT_AUDIO_INFO_* related fields.
+	(audio_init): Func arg is device to attempt to open.
+	* include/audio.h (audio_init): Now takes a char * argument.
+	From Dave Mills.
+
+	* configure.in (ntp_refclock): HAVE_AUDIO added.  Remove
+	HAVE_STRUCT_AUDIO_INFO_* stuff; Dave rewrote the audio stuff.
+
+2000-12-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k12
+
 2000-12-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/release.htm:
@@ -30,7 +59,7 @@
 	(receive): Set peer->unreach = 0 before we call process_packet().
 	(process_packet): ditto, before calling poll_update().  Lose some
 	debugging, MODE_BCLIENT/CLIENT cleanup.
-	(poll_update): Bump nextupdate on FLAG_REFCLOC, not _REFCLOCK or
+	(poll_update): Bump nextupdate on FLAG_REFCLOCK, not _REFCLOCK or
 	_IBURST.
 	(peer_clear): Don't set IBURST on MDF_BCLNT.
 	From: Dave Mills.
@@ -174,7 +203,7 @@
 
 2000-10-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* ntpq/ntpq_ops.c (dopeers): Daev didn't like the patch to show
+	* ntpq/ntpq_ops.c (dopeers): Dave didn't like the patch to show
 	the units on the times...
 	* ntpdc/ntpdc_ops.c (doset): SYS_FLAG_PPS cleanup
 	* ntpd/refclock_wwv.c (wwv_newchan): Update the peer refid if
@@ -225,7 +254,7 @@
 	* ntpd/ntp_refclock.c (ntp_tty.h): File included.
 	(refclock_open, refclock_ioctl): Use `TTY' from ntp_tty.h.
 	* ntpd/refclock_atom.c: Grab a few headers regardless; if we don't
-	CLOCK_ATOM we provide a stub pps_sample() routine wo the WHARTON
+	CLOCK_ATOM we provide a stub pps_sample() routine so the WHARTON
 	can be compiled/used.
 	* ntpq/ntpq_ops.c (dopeers, doopeers): Print the units for
 	each column header.
@@ -265,7 +294,7 @@
 
 2000-09-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* ntpd/refclock_oncore.c (oncore_get_timestamp): Prind debug
+	* ntpd/refclock_oncore.c (oncore_get_timestamp): Print debug
 	messages being aware of HAVE_STRUCT_TIMESPEC.
 
 	* ntpd/refclock_atom.c: Have pps_params tag along in the ppsunit

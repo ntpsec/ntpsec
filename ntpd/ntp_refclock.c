@@ -777,7 +777,7 @@ refclock_open(
 #else
 	fd = open(dev, O_RDWR, 0777);
 #endif /* O_NONBLOCK */
-	if (fd == -1) {
+	if (fd < 0) {
 		msyslog(LOG_ERR, "refclock_open: %s: %m", dev);
 		return (0);
 	}

@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99k11)
+AM_INIT_AUTOMAKE(ntp, 4.0.99k12)
 AC_PREREQ(2.49)
 
 ac_cv_var_oncore_ok=no
@@ -462,19 +462,6 @@ AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,
 # ifdef HAVE_TIMEX_H
 # include <timex.h>
 # endif
-#endif])
-
-AC_CHECK_MEMBERS([struct audio_info.monitor_gain,
-    struct audio_info.output_muted,
-    struct audio_info.blocksize,
-    struct audio_info.hiwat,
-    struct audio_info.lowat,
-    struct audio_info.mode], , ,
-[#ifdef HAVE_SUN_AUDIO_H
-#include <sun/audio.h>
-#endif
-#ifdef HAVE_SYS_AUDIOIO_H
-#include <sys/audioio.h>
 #endif])
 
 AC_C_INLINE
@@ -1575,27 +1562,13 @@ AC_MSG_RESULT($ntp_canparse)
 
 AC_MSG_CHECKING([if we have support for audio clocks])
 case "$ac_cv_header_sun_audioio_h$ac_cv_header_sys_audioio_h" in
- *yes*)	ntp_canaudio=yes ;;
- *)	ntp_canaudio=no  ;;
+ *yes*)
+    ntp_canaudio=yes
+    AC_DEFINE(HAVE_AUDIO, , [Do we have audio support?])
+    ;;
+ *) ntp_canaudio=no ;;
 esac
 AC_MSG_RESULT($ntp_canaudio)
-
-dnl AC_MSG_CHECKING([struct audio_info for monitor_gain])
-dnl AC_C_STRUCT_MEMBER(ai_monitor_gain,
-dnl   [#ifdef HAVE_SUN_AUDIO_H
-dnl #include <sun/audio.h>
-dnl #endif
-dnl #ifdef HAVE_SYS_AUDIOIO_H
-dnl #include <sys/audioio.h>
-dnl #endif], [struct audio_info], monitor_gain)
-dnl case "$ai_monitor_gain" in
-dnl  *yes*)
-dnl     AC_DEFINE(HAVE_AI_MONITOR_GAIN, [struct audio_info.monitor_gain?])
-dnl     ans=yes
-dnl     ;;
-dnl  *) ans=no ;;
-dnl esac
-dnl AC_MSG_RESULT($ans)
 
 # Requires modem control
 AC_MSG_CHECKING(ACTS modem service)

@@ -173,10 +173,18 @@
  * Fudge flag3 enables audio monitoring of the input signal. For this
  * purpose, the speaker volume must be set before the driver is started.
  *
- * The ICOM code is normally compiled in the driver. It isn't used,
- * unless the mode keyword on the server configuration command specifies
- * a nonzero ICOM ID select code. The C-IV trace is turned on if the
- * debug level is greater than one.
+ * The audio codec code is normally compiled in the driver if the
+ * architecture supports it (AUDIO_CHU defined), but is used only if the
+ * link /dev/chu_audio is defined and valid. The serial port
+ * code is alwasy compiled in the driver, but is used only if the autdio
+ * codec is not available and the link /dev/chu%d is defined and valid.
+ * The ICOM code is normally compiled in the driver if selected (ICOM
+ * defined), but is used only if the link /dev/icom%d is defined and
+ * valid and the mode keyword on the server configuration command
+ * specifies a nonzero mode (ICOM ID select code). The C-IV speed is
+ * 9600 bps if the high order 0x80 bit of the mode is zero and 1200 bps
+ * if one. The C-IV trace is turned on if the debug level is greater
+ * than one.
  */
 /*
  * Interface definitions
@@ -184,12 +192,13 @@
 #define	SPEED232	B300	/* uart speed (300 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"CHU"	/* reference ID */
+#define	DEVICE		"/dev/chu%d" /* device name and unit */
+#define	SPEED232	B300	/* UART speed (300 baud) */
 #ifdef ICOM
 #define DWELL		5	/* minutes before qsy */
 #define NCHAN		3	/* number of channels */
 #endif /* ICOM */
 #ifdef AUDIO_CHU
-#define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 
 /*
  * Audio demodulator definitions
@@ -202,10 +211,10 @@
 #define LIMIT		1000.	/* soft limiter threshold */
 #define AGAIN		6.	/* baseband gain */
 #define LAG		10	/* discriminator lag */
+#define	DEVICE_AUDIO	"/dev/chu_audio" /* device name */
+#define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
 #else
-#define	DEVICE		"/dev/chu%d" /* device name and unit */
-#define	SPEED232	B300	/* UART speed (300 baud) */
-#define	DESCRIPTION	"CHU Audio Receiver" /* WRU */
+#define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 #endif /* AUDIO_CHU */
 
 /*
@@ -279,9 +288,9 @@ struct chuunit {
 	int	bufptr;		/* buffer index pointer */
 	char	ident[10];	/* transmitter frequency */
 #ifdef ICOM
+	int	fd_icom;	/* ICOM file descriptor */
 	int	chan;		/* frequency identifier */
 	int	dwell;		/* dwell minutes at current frequency */
-	int	fd_icom;	/* ICOM file descriptor */
 #endif /* ICOM */
 
 	/*
@@ -308,6 +317,7 @@ struct chuunit {
 	/*
 	 * Audio codec variables
 	 */
+	int	fd_audio;	/* audio port file descriptor */
 	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
@@ -358,7 +368,9 @@ static	int	chu_major	P((struct peer *));
 static	void	chu_uart	P((struct surv *, double));
 static	void	chu_rf		P((struct peer *, double));
 static	void	chu_gain	P((struct peer *));
+static	void	chu_audio_receive P((struct recvbuf *rbufp));
 #endif /* AUDIO_CHU */
+static	void	chu_serial_receive P((struct recvbuf *rbufp));
 
 /*
  * Global variables
@@ -393,43 +405,52 @@ chu_start(
 {
 	struct chuunit *up;
 	struct refclockproc *pp;
+	char device[20];	/* device name */
 	int	fd;		/* file descriptor */
 #ifdef ICOM
 	char	tbuf[80];	/* trace buffer */
 	int	temp;
 #endif /* ICOM */
 #ifdef AUDIO_CHU
+	int	fd_audio;	/* audio port file descriptor */
 	int	i;		/* index */
 	double	step;		/* codec adjustment */
 
 	/*
-	 * Open audio device
+	 * Open audio device.
 	 */
-	fd = audio_init();
-	if (fd < 0)
-		return (0);
+	fd_audio = audio_init(DEVICE_AUDIO);
 #ifdef DEBUG
-	if (debug)
+	if (fd_audio > 0 && debug)
 		audio_show();
 #endif
-#else
-	char device[20];	/* device name */
 
 	/*
 	 * Open serial port in raw mode.
 	 */
-	(void)sprintf(device, DEVICE, unit);
-	if (!(fd = refclock_open(device, SPEED232, LDISC_RAW))) {
-		return (0);
+	if (fd_audio > 0) {
+		fd = fd_audio;
+	} else {
+		sprintf(device, DEVICE, unit);
+		fd = refclock_open(device, SPEED232, LDISC_RAW);
 	}
+#else /* AUDIO_CHU */
+
+	/*
+	 * Open serial port in raw mode.
+	 */
+	sprintf(device, DEVICE, unit);
+	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* AUDIO_CHU */
+	if (fd <= 0)
+		return (0);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
 	if (!(up = (struct chuunit *)
 	      emalloc(sizeof(struct chuunit)))) {
-		(void) close(fd);
+		close(fd);
 		return (0);
 	}
 	memset((char *)up, 0, sizeof(struct chuunit));
@@ -440,7 +461,7 @@ chu_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void)close(fd);
+		close(fd);
 		free(up);
 		return (0);
 	}
@@ -453,12 +474,14 @@ chu_start(
 	memcpy((char *)&pp->refid, REFID, 4);
 	DTOLFP(CHAR, &up->charstamp);
 #ifdef AUDIO_CHU
-	up->gain = 127;
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
-	 * contains all the 256 values in the interest of speed.
+	 * contains all the 256 values in the interest of speed. We do
+	 * this even if the audio codec is not available. C'est la lazy.
 	 */
+	up->fd_audio = fd_audio;
+	up->gain = 127;
 	up->comp[0] = up->comp[OFFSET] = 0.;
 	up->comp[1] = 1; up->comp[OFFSET + 1] = -1.;
 	up->comp[2] = 3; up->comp[OFFSET + 2] = -3.;
@@ -524,19 +547,55 @@ chu_shutdown(
 
 	pp = peer->procptr;
 	up = (struct chuunit *)pp->unitptr;
+	if (up == NULL)
+		return;
 	io_closeclock(&pp->io);
 	if (up->fd_icom > 0)
 		close(up->fd_icom);
 	free(up);
 }
 
-#ifdef AUDIO_CHU
-
 /*
- * chu_receive - receive data from the audio device
+ * chu_receive - receive data from the audio or serial device
  */
 static void
 chu_receive(
+	struct recvbuf *rbufp	/* receive buffer structure pointer */
+	)
+{
+	struct chuunit *up;
+	struct refclockproc *pp;
+	struct peer *peer;
+
+	peer = (struct peer *)rbufp->recv_srcclock;
+	pp = peer->procptr;
+	up = (struct chuunit *)pp->unitptr;
+
+	/*
+	 * If the audio codec is warmed up, the buffer contains codec
+	 * samples which need to be demodulated and decoded into CHU
+	 * characters using the software UART. Otherwise, the buffer
+	 * contains CHU characters from the serial port, so the software
+	 * UART is bypassed. In this case the CPU will probably run a
+	 * few degrees cooler.
+	 */
+#ifdef AUDIO_CHU
+	if (up->fd_audio > 0)
+		chu_audio_receive(rbufp);
+	else
+		chu_serial_receive(rbufp);
+#else
+	chu_serial_receive(rbufp);
+#endif /* AUDIO_CHU */
+}
+
+#ifdef AUDIO_CHU
+
+/*
+ * chu_audio_receive - receive data from the audio device
+ */
+static void
+chu_audio_receive(
 	struct recvbuf *rbufp	/* receive buffer structure pointer */
 	)
 {
@@ -849,14 +908,14 @@ chu_uart(
 	sp->es_min = es_min;
 	sp->dist = dist / (11 * (es_max - es_min));
 }
+#endif /* AUDIO_CHU */
 
 
-#else /* AUDIO_CHU */
 /*
- * chu_receive - receive data from the serial interface
+ * chu_serial_receive - receive data from the serial device
  */
 static void
-chu_receive(
+chu_serial_receive(
 	struct recvbuf *rbufp	/* receive buffer structure pointer */
 	)
 {
@@ -877,11 +936,10 @@ chu_receive(
 	dpt = (u_char *)&rbufp->recv_space;
 	chu_decode(peer, *dpt);
 }
-#endif /* AUDIO_CHU */
 
 
 /*
- * chu_decode - decode the data
+ * chu_decode - decode the character data
  */
 static void
 chu_decode(
@@ -1109,9 +1167,15 @@ chu_a(
 	    4) & 0xf))
 		temp = 0;
 #ifdef AUDIO_CHU
-	sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
-	    up->status, up->maxsignal, nchar, up->burdist, k,
-	    up->syndist, temp);
+	if (up->fd_audio)
+		sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
+		    up->status, up->maxsignal, nchar, up->burdist, k,
+		    up->syndist, temp);
+	else
+		sprintf(tbuf, "chuA %04x %2d %2d %2d %2d %1d ",
+		    up->status, nchar, up->burdist, k, up->syndist,
+		    temp);
+
 #else
 	sprintf(tbuf, "chuA %04x %2d %2d %2d %2d %1d ", up->status,
 	    nchar, up->burdist, k, up->syndist, temp);
@@ -1256,11 +1320,20 @@ chu_poll(
 		pp->leap = LEAP_NOWARNING;
 	}
 #ifdef AUDIO_CHU
-	sprintf(pp->a_lastcode,
-	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d %d",
-	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
-	    pp->second, leapchar, up->dst, up->dut, minset, up->gain,
-	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
+	if (up->fd_audio)
+		sprintf(pp->a_lastcode,
+		    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d %d",
+		    synchar, qual, pp->year, pp->day, pp->hour,
+		    pp->minute, pp->second, leapchar, up->dst, up->dut,
+		    minset, up->gain, up->ident, up->tai, up->burstcnt,
+		    up->mindist, up->ntstamp);
+	else
+		sprintf(pp->a_lastcode,
+		    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %s %d %d %d %d",
+		    synchar, qual, pp->year, pp->day, pp->hour,
+		    pp->minute, pp->second, leapchar, up->dst, up->dut,
+		    minset, up->ident, up->tai, up->burstcnt,
+		    up->mindist, up->ntstamp);
 #else
 	sprintf(pp->a_lastcode,
 	    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %s %d %d %d %d",

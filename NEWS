@@ -1,3 +1,10 @@
+* Resolver changes/improvements are not backward compatible with mode 7
+  requests (which are implementation-specific anyway)
+* leap second stuff
+* manycast should work now
+* ntp-genkeys does new good things.
+* scripts/ntp-close
+* PPS cleanup and improvements
 * readline support for ntpdc
 * ulink331 driver
 * Crypto/authentication rewrite

@@ -64,6 +64,7 @@
 /*
  * Interface definitions
  */
+#define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"NONE"	/* reference ID */
 #define	DESCRIPTION	"WWV/H Audio Demodulator/Decoder" /* WRU */
@@ -646,7 +647,7 @@ wwv_start(
 	/*
 	 * Open audio device
 	 */
-	fd = audio_init();
+	fd = audio_init(DEVICE_AUDIO);
 	if (fd < 0)
 		return (0);
 #ifdef DEBUG

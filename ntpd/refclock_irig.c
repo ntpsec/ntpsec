@@ -140,6 +140,7 @@
 /*
  * Interface definitions
  */
+#define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	PRECISION	(-17)	/* precision assumed (about 10 us) */
 #define	REFID		"IRIG"	/* reference ID */
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
@@ -310,7 +311,7 @@ irig_start(
 	/*
 	 * Open audio device
 	 */
-	fd = audio_init();
+	fd = audio_init(DEVICE_AUDIO);
 	if (fd < 0)
 		return (0);
 #ifdef DEBUG

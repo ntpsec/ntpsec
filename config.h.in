@@ -479,6 +479,9 @@
 /* Define if you have the <arpa/nameser.h> header file. */
 #undef HAVE_ARPA_NAMESER_H
 
+/* Do we have audio support? */
+#undef HAVE_AUDIO
+
 /* Define if you have the <bstring.h> header file. */
 #undef HAVE_BSTRING_H
 
@@ -706,24 +709,6 @@
 
 /* Define if you have the <string.h> header file. */
 #undef HAVE_STRING_H
-
-/* Define if `blocksize' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_BLOCKSIZE
-
-/* Define if `hiwat' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_HIWAT
-
-/* Define if `lowat' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_LOWAT
-
-/* Define if `mode' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_MODE
-
-/* Define if `monitor_gain' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_MONITOR_GAIN
-
-/* Define if `output_muted' is member of `struct audio_info'. */
-#undef HAVE_STRUCT_AUDIO_INFO_OUTPUT_MUTED
 
 /* Do we have struct ntptimeval? */
 #undef HAVE_STRUCT_NTPTIMEVAL
