@@ -131,7 +131,7 @@
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
 #define MSGCNT		20	/* max message count */
-#define SMAX		80	/* max clockstats line length */
+#define SMAX		256	/* max clockstats line length */
 
 /*
  * Calling program modes
@@ -159,7 +159,7 @@
  *
  * AT	command prefix
  * B1	US answer tone
- * &C1	enable carrier detect
+ * &C0	enable carrier detect
  * &D2	hang up and return to command mode on DTR transition
  * E0	modem command echo disabled
  * l1	set modem speaker volume to low level
