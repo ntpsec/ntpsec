@@ -2372,7 +2372,7 @@ AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(for the level of crypto support)
 AC_ARG_WITH(crypto,
-	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl}]),
+	AC_HELP_STRING([--with-crypto], [+ =openssl]),
 [ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
@@ -2389,14 +2389,6 @@ case "$ans" in
 	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	AC_DEFINE(PUBKEY, , [Public key?])
     fi
-    ;;
-esac
-AC_SUBST(AUTOKEY)
-case "$ans" in
- no) ;;
- *)
-    AC_DEFINE(AUTOKEY, , [Autokey?])
-    AUTOKEY=1
     ;;
 esac
 AC_MSG_RESULT($ans)
