@@ -285,6 +285,7 @@ nmea_ppsapi(
 			    "refclock_nmea: time_pps_kcbind failed: %m");
 			return (0);
 		}
+		pps_enable = 1;
 	}
 	peer->precision = PPS_PRECISION;
 

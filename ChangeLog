@@ -1,5 +1,13 @@
 2001-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c (oncore_start): Set pps_enable=1, just
+	like the atom driver does.
+	From: reg@dwf.com
+
+	* ntpd/refclock_nmea.c (nmea_ppsapi): Set pps_enable=1, just like
+	the atom driver does.
+	From: Scott Allendorf <sca@newton.physics.uiowa.edu>
+
 	* ntpd/ntp_config.c (getconfig): CONF_CLOCK_PANIC was using the
 	wrong config flag.
 	From: <justin_forrester@hp.com>
