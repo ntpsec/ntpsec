@@ -459,6 +459,8 @@ oncore_start(
 		instance->pps_p.clear_offset.tv_sec = 0;
 		instance->pps_p.clear_offset.tv_nsec = 0;
 	}
+	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) 
+		instance->pps_p.mode &= ~(PPS_HARDPPSONCLEAR|PPS_HARDPPSONASSERT);
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
 		exit(1);

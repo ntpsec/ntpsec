@@ -10,10 +10,9 @@
 /*
  * Handle gcc __attribute__ if available.
  */
-#ifndef NeXT
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || (defined(__STRICT_ANSI__))
 #  define __attribute__(Spec) /* empty */
 # endif
 /* The __-protected variants of `format' and `printf' attributes
@@ -22,10 +21,6 @@
 #  define __format__ format
 #  define __printf__ printf
 # endif
-#endif
-#else
-#define __format__ format
-#define __printf__ printf
 #endif
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)

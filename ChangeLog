@@ -1,3 +1,15 @@
+1999-08-29  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp_stdlib.h: Clean up previous NeXT patch.
+	From: Jack Bryans <jbryans@csulb.edu>
+
+	* ntpd/refclock_parse.c: Permit RTS to power a DCF77.
+	From: Carsten Paeth <calle@calle.in-berlin.de>
+
+	* ntpd/refclock_oncore.c (oncore_start): This makes the Oncore run 
+	on systems without hardpps().
+	From: Poul-Henning Kamp <phk@freebsd.org>
+
 1999-08-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.97c

@@ -613,9 +613,16 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  * RAWDCF receivers that need to be powered from DTR
  * (like Expert mouse clock)
  */
-static	int	rawdcf_init	P((struct parseunit *));
+static	int	rawdcfdtr_init	P((struct parseunit *));
 #define RAWDCFDTR_DESCRIPTION	"RAW DCF77 CODE (DTR OPTION)"
-#define RAWDCFDTR_INIT 		rawdcf_init
+#define RAWDCFDTR_INIT 		rawdcfdtr_init
+
+/*
+ * RAWDCF receivers that need to be powered from RTS
+ */
+static	int	rawdcfrts_init	P((struct parseunit *));
+#define RAWDCFRTS_DESCRIPTION	"RAW DCF77 CODE (RTS OPTION)"
+#define RAWDCFRTS_INIT 		rawdcfrts_init
 
 /*
  * Trimble GPS receivers (TAIP and TSIP protocols)
@@ -1208,7 +1215,30 @@ static struct parse_clockinfo
                 VARITEXT_LFLAG,
                 VARITEXT_SAMPLES,
                 VARITEXT_KEEP
-        }
+        },
+	{				/* mode 17 */
+		RAWDCF_FLAGS,
+		NO_POLL,
+		RAWDCFRTS_INIT,
+		NO_EVENT,
+		NO_END,
+		NO_MESSAGE,
+		NO_DATA,
+		RAWDCF_ROOTDELAY,
+		RAWDCF_BASEDELAY,
+		DCF_A_ID,
+		RAWDCFRTS_DESCRIPTION,
+		RAWDCF_FORMAT,
+		DCF_TYPE,
+		RAWDCF_MAXUNSYNC,
+		RAWDCF_SPEED,
+		RAWDCF_CFLAG,
+		RAWDCF_IFLAG,
+		RAWDCF_OFLAG,
+		RAWDCF_LFLAG,
+		RAWDCF_SAMPLES,
+		RAWDCF_KEEP
+	},
 };
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
@@ -5114,11 +5144,11 @@ trimbletsip_message(
  **/
 
 /*--------------------------------------------------
- * rawdcf_init - set up modem lines for RAWDCF receivers
+ * rawdcfdtr_init - set up modem lines for RAWDCF receivers
  */
 #if defined(TIOCMSET) && (defined(TIOCM_DTR) || defined(CIOCM_DTR))
 static int
-rawdcf_init(
+rawdcfdtr_init(
 	struct parseunit *parse
 	)
 {
@@ -5142,7 +5172,7 @@ rawdcf_init(
 }
 #else
 static int
-rawdcf_init(
+rawdcfdtr_init(
 	struct parseunit *parse
 	)
 {
@@ -5150,6 +5180,43 @@ rawdcf_init(
 	return 0;
 }
 #endif  /* DTR initialisation type */
+
+/*--------------------------------------------------
+ * rawdcfrts_init - set up modem lines for RAWDCF receivers
+ */
+#if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
+static int
+rawdcfrts_init(
+	struct parseunit *parse
+	)
+{
+	/*
+	 * You can use the RS232 to supply the power for a DCF77 receiver.
+	 * Here a voltage between the RTS and the DTR line is used.
+	 */
+	
+#ifdef TIOCM_RTS
+	int sl232 = TIOCM_RTS;	/* turn on RTS for power supply */
+#else
+	int sl232 = CIOCM_RTS;	/* turn on RTS for power supply */
+#endif
+
+	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
+	{
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_RTS): %m", CLK_UNIT(parse->peer));
+	}
+	return 0;
+}
+#else
+static int
+rawdcfrts_init(
+	struct parseunit *parse
+	)
+{
+	msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init: WARNING: OS interface incapable of setting RTS to power DCF modules", CLK_UNIT(parse->peer));
+	return 0;
+}
+#endif  /* RTS initialisation type */
 
 #else	/* defined(REFCLOCK) && defined(PARSE) */
 int refclock_parse_bs;
