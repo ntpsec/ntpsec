@@ -1144,8 +1144,8 @@ process_packet(
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("packet: bad data %03x\n",
-			    peer->flash);
+			printf("packet: bad data %03x from address: %s\n",
+			    peer->flash, stoa(&peer->srcadr));
 #endif
 		return;
 	}
