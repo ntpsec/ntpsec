@@ -3655,7 +3655,7 @@ crypto_tai(
 			continue;
 		if (sscanf(buf, "%u %u", &leapsec[i], &offset) != 2)
 			continue;
-		if (i != offset - TAI_1972) { 
+		if (i != (int)(offset - TAI_1972)) { 
 			break;
 		}
 		i++;

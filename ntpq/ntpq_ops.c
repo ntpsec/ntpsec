@@ -932,7 +932,7 @@ printassoc(
 	(void) fprintf(fp,
 			   "===========================================================\n");
 	for (i = 0; i < numassoc; i++) {
-		statval = CTL_PEER_STATVAL(assoc_cache[i].status);
+		statval = (u_char) CTL_PEER_STATVAL(assoc_cache[i].status);
 		if (!showall && !(statval & (CTL_PST_CONFIG|CTL_PST_REACH)))
 			continue;
 		event = CTL_PEER_EVENT(assoc_cache[i].status);
@@ -1339,12 +1339,12 @@ doprintpeers(
 
 	struct sockaddr_storage srcadr;
 	struct sockaddr_storage dstadr;
-	u_long srcport;
+	u_long srcport = 0;
 	char *dstadr_refid = "0.0.0.0";
-	u_long stratum;
-	long ppoll;
-	long hpoll;
-	u_long reach;
+	u_long stratum = 0;
+	long ppoll = 0;
+	long hpoll = 0;
+	u_long reach = 0;
 	l_fp estoffset;
 	l_fp estdelay;
 	l_fp estjitter;
@@ -1364,6 +1364,12 @@ doprintpeers(
 	
 	memset((char *)&srcadr, 0, sizeof(struct sockaddr_storage));
 	memset((char *)&dstadr, 0, sizeof(struct sockaddr_storage));
+
+	/* Initialize by zeroing out estimate variables */
+	memset((char *)&estoffset, 0, sizeof(l_fp));
+	memset((char *)&estdelay, 0, sizeof(l_fp));
+	memset((char *)&estjitter, 0, sizeof(l_fp));
+	memset((char *)&estdisp, 0, sizeof(l_fp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
 		struct sockaddr_storage dum_store;
