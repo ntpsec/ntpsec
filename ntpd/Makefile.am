@@ -4,7 +4,7 @@ bin_PROGRAMS = ntpd @MAKE_NTPDSIM@
 noinst_LIBRARIES = libntpd.a
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-LDADD =	version.o @LIBPARSE@ libntpd.a
+LDADD =	version.o libntpd.a @LIBPARSE@
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
