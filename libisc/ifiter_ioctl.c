@@ -454,9 +454,11 @@ internal_current4(isc_interfaceiter_t *iter) {
 		iter->current.flags |= INTERFACE_F_BROADCAST;
 	}
 
+#ifdef IFF_MULTICAST
 	if ((ifreq.ifr_flags & IFF_MULTICAST) != 0) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
 	}
+#endif
 
 #if !defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
 	if (family == AF_INET) 
@@ -527,7 +529,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
-		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&ifreq)
+		if (ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
 		    < 0) {
 			isc__strerror(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
