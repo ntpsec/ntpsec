@@ -20,6 +20,10 @@ ntp-groper	script useful for reaching out and rattling the cages of
 
 ntp-restart	script useful for killing and restarting the NTP daemon
 
+ntpsweep	prints per host given in <file> the NTP stratum level, the
+		clock offset in seconds, the daemon version, the operating
+		system and the processor.
+
 ntpver		What version of the NTP daemon is running?
 
 stats		directory containing awk and shell scripts useful for

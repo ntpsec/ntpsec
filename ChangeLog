@@ -1,5 +1,8 @@
 1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/ntpsweep: Nifty utility
+	From: Hans.Lambermont@nl.origin-it.com
+
 	* ntpd/refclock_fg.c: 
 	* ntpd/refclock_conf.c: 
 	* ntpd/ntp_control.c: 
