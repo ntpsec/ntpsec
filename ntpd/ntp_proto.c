@@ -827,7 +827,7 @@ receive(
 		return;
 
 	/*
-	 * For broadcast server mode, loopback checking is not useful.
+	 * For broadcast client mode, loopback checking is not useful.
 	 */
 	} else if (hismode == MODE_BROADCAST) {
 		/* fall through */
@@ -922,7 +922,7 @@ receive(
 	 *    match, sit the dance and wait for timeout.
 	 *
 	 * In case of crypto error, fire the orchestra and stop dancing.
-	 * This is considered a permanant error, go directly to jail.
+	 * This is considered a permanant error, so go directly to jail.
 	 */
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST8;
@@ -1132,6 +1132,11 @@ process_packet(
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
 	}
+
+	/*
+	 * If we have gone a long time since the last packet, clamp down
+	 * the poll interval to speed up resynchronization.
+	 */
 	if (!peer->reach && peer->unreach > NTP_UNREACH)
 		poll_update(peer, peer->minpoll);
 	else
