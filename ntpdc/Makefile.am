@@ -7,7 +7,7 @@ INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD =	version.o ../libntp/libntp.a @READLINE_LIBS@
 # ntpdc-layout doesn't need any additional libraries at all
-ntpdc_layout_LDADD =
+ntpdc_layout_LDADD=
 DISTCLEANFILES = .version version.c
 noinst_HEADERS = ntpdc.h
 EXTRA_DIST = nl_in.c nl.pl layout.std
@@ -17,7 +17,7 @@ ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
 
 ntpdc-layout.o: nl.c
 
-layout.here:
+layout.here: ntpdc-layout
 	ntpdc-layout > $@
 
 check-layout: ntpdc-layout layout.std layout.here

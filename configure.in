@@ -2647,7 +2647,7 @@ case "$ans" in
 	ans=openssl
 	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	LIBS="$LIBS -lcrypto"
+	AC_SUBST(LCRYPTO, [-lcrypto])
 	MAKE_NTP_KEYGEN=ntp-keygen
 	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	AC_CHECK_FUNCS(EVP_md2 EVP_mdc2)

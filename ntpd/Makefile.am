@@ -11,8 +11,8 @@ LDADD =	version.o libntpd.a @LIBPARSE@ libntpd.a
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm
-ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm
+ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm @LCRYPTO@
+ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
