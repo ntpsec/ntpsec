@@ -1268,6 +1268,8 @@ doquery(
 			done = 1;
 			goto again;
 		}
+		if (numhosts > 1)
+			(void) fprintf(stderr, "server=%s ", currenthost);
 		switch(res) {
 		    case CERR_BADFMT:
 			(void) fprintf(stderr,
