@@ -1,10 +1,18 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* Package */
+#undef PACKAGE
+
+/* Version */
+#undef VERSION
 
 /* debugging code */
 #undef DEBUG
 
 /* Minutes per DST adjustment */
 #undef DSTMINUTES
+
+/* MD5 authentication */
+#undef MD5
 
 /* DES authentication (COCOM only) */
 #undef DES
@@ -261,6 +269,9 @@
 /* can we use SIGPOLL for tty IO? */
 #undef USE_TTY_SIGPOLL
 
+/* should we use clock_settime()? */
+#undef USE_CLOCK_SETTIME
+
 /* do we want the CHU driver? */
 #undef CLOCK_CHU
 
@@ -287,6 +298,9 @@
 
 /* do we need an s_char typedef? */
 #undef NEED_S_CHAR_TYPEDEF
+
+/* include the GDT Surveying code? */
+#undef GDT_SURVEYING
 
 /* does SIOCGIFCONF return size in the buffer? */
 #undef SIZE_RETURNED_IN_BUFFER
@@ -373,6 +387,10 @@
 /* Do we have support for SHMEM_STATUS? */
 #undef ONCORE_SHMEM_STATUS
 
+/***/
+
+/* Which way should we declare... */
+
 /* adjtime()? */
 #undef DECL_ADJTIME_0
 
@@ -393,6 +411,9 @@
 
 /* memmove()? */
 #undef DECL_MEMMOVE_0
+
+/* memset()? */
+#undef DECL_MEMSET_0
 
 /* mkstemp()? */
 #undef DECL_MKSTEMP_0

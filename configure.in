@@ -160,7 +160,6 @@ AC_PROG_RANLIB
 AC_PATH_PROG(PATH_SH, sh)
 AC_PATH_PROG(PATH_PERL, perl)
 
-echo hs_ULONG_CONST
 hs_ULONG_CONST
 
 case "$target" in
@@ -515,7 +514,7 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_TYPES((s_char))
+AC_CHECK_TYPES(s_char)
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
  *yes)
     # We have a typedef for s_char.  Might as well believe it...
@@ -1569,12 +1568,12 @@ dnl AC_MSG_RESULT($ans)
 dnl  AC_CHECK_MEMBERS ((AGGREGATE.MEMBER, ...), [ACTION-IF-FOUND],
 dnl           [ACTION-IF-NOT-FOUND], [INCLUDES])
 
-AC_CHECK_MEMBERS((struct audio_info.monitor_gain,
+AC_CHECK_MEMBERS([struct audio_info.monitor_gain,
     struct audio_info.output_muted,
     struct audio_info.blocksize,
     struct audio_info.hiwat,
     struct audio_info.lowat,
-    struct audio_info.mode), , ,
+    struct audio_info.mode], , ,
 [#ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
 #endif
