@@ -878,7 +878,7 @@ io_multicast_add(
 		* Try opening a socket for the specified class D address. This
 		* works under SunOS 4.x, but not OSF1 .. :-(
 		*/
-		s = open_socket((struct sockaddr_storage*)&sinp, 0, 1);
+		s = open_socket((struct sockaddr_storage*)sinp, 0, 1);
 		if (s < 0) {
 			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 			i = 0;
@@ -982,20 +982,6 @@ io_multicast_add(
 #endif /* HAVE_IPV6 */
 	}
 
-	/*
-	 * enable reception of multicast packets
-	 */
-	mreq.imr_multiaddr = iaddr;
-	mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-	if (setsockopt(inter_list[i].fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-	    (char *)&mreq, sizeof(mreq)) == -1)
-		msyslog(LOG_ERR,
-		    "setsockopt IP_ADD_MEMBERSHIP fails: %m for %x / %x (%s)",
-		    mreq.imr_multiaddr.s_addr,
-		    mreq.imr_interface.s_addr, inet_ntoa(iaddr));
-	inter_list[i].flags |= INT_MULTICAST;
-	if (i >= ninterfaces)
-	    ninterfaces = i+1;
 #ifdef DEBUG
 	if (debug)
 		printf("io_multicast_add %s\n", inet_ntoa(iaddr));
