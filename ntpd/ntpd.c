@@ -11,6 +11,10 @@
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
 
+#ifdef SIM
+#include "ntpsim.h"
+#endif
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -185,7 +189,16 @@ static	RETSIGTYPE	no_debug	P((int));
 int 		ntpdmain		P((int, char **));
 static void	set_process_priority	P((void));
 
-
+#ifdef SIM
+int
+main(
+	int argc,
+	char *argv[]
+	)
+{
+	return ntpsim(argc, argv);
+}
+#else /* SIM */
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpd,"ntpd",ntpdmain);
 #else
@@ -198,6 +211,7 @@ main(
 	return ntpdmain(argc, argv);
 }
 #endif
+#endif /* SIM */
 
 #ifdef _AIX
 /*

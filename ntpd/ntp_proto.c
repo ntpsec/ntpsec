@@ -288,6 +288,7 @@ receive(
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_in *dstadr_sin;	/* active runway */
 	l_fp	p_org;			/* originate timestamp */
+	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef OPENSSL
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
 	struct autokey *ap;		/* autokey structure pointer */
@@ -740,6 +741,12 @@ receive(
 		peer->flags |= FLAG_AUTHENTIC;
 	else
 		peer->flags &= ~FLAG_AUTHENTIC;
+
+	/*
+	 * The packet is dropped if it has an autokey key ID and the
+	 * status word has not been stored, if a nontrusted broadcast,
+	 * or if a duplicate of a previous packet.
+	 */
 	if (!(peer->flags & FLAG_CONFIG) && has_mac) {
 		peer->flags |= FLAG_AUTHENABLE;
 #ifdef OPENSSL
@@ -754,6 +761,9 @@ receive(
 	if (peer->hmode == MODE_BROADCAST &&
 	    (restrict_mask & RES_DONTTRUST))	/* test 4 */
 		peer->flash |= TEST4;		/* access denied */
+	NTOHL_FP(&pkt->xmt, &p_xmt);		/* test 1 */
+	if (L_ISEQU(&peer->org, &p_xmt))
+		peer->flash |= TEST1;		/* dupe */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
@@ -764,34 +774,23 @@ receive(
 	}
 
 	/*
-	 * A valid packet must be from an authentic and allowed source.
-	 * Autokey authenticated packets must pass additional tests and
-	 * public-key authenticated packets must have the credentials
-	 * verified. If all tests are passed, the packet is forwarded
-	 * for processing. If not, the packet is discarded and the
-	 * association demobilized if appropriate.
-	 */
+	 * Except for broadcast mode, every packet received must match
+	 * one previously sent. If the packet is authenticated, it must
+	 * have correct MAC. However, if authentication fails, the
+	 * legitimate sender may have just changed keys, or it could be
+	 * an intruder attempting to disrupt legitimate activities. We
+	 * have to be careful here.
+	/*
+	NTOHL_FP(&pkt->org, &p_org);		/* test 2 */
+	if (hismode != MODE_BROADCAST && !L_ISEQU(&peer->xmt, &p_org))
+		peer->flash |= TEST2;		/* bogus */
 	if (peer->flags & FLAG_AUTHENABLE) {
 		if (!(peer->flags & FLAG_AUTHENTIC)) /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
 		else if (!(oflags & FLAG_AUTHENABLE))
 			report_event(EVNT_PEERAUTH, peer);
 	}
-
-	/*
-	 * While the association timeout eventually recovers from
-	 * protocol restarts and signature refreshes, the dance can be
-	 * rather tedious, especially in symmetric modes. So, in case of
-	 * authentication failure, we try to jitterbug on the assumption
-	 * that, if the originate timestamp in the response packet
-	 * matches the transmit timestamp in the association, the packet
-	 * is very likely a valid response to one sent earlier. See
-	 * below for more jitterbug in other error cases.
-	 */
-	NTOHL_FP(&pkt->org, &p_org);
-	if (hismode != MODE_BROADCAST && !L_ISEQU(&peer->xmt, &p_org))
-		peer->flash |= TEST2;
-	if (peer->flash & ~TEST2) {
+	if (peer->flash) {
 #ifdef OPENSSL
 		switch (hismode) {
 
@@ -833,7 +832,7 @@ receive(
 #endif /* OPENSSL */
 #ifdef DEBUG
 		if (debug)
-			printf("receive: bad auth %03x\n",
+			printf("receive: bad auth or loopback %03x\n",
 			    peer->flash);
 #endif
 		return;
@@ -903,7 +902,7 @@ receive(
 		 * It will die later after leaving the originate and
 		 * receive timestamp in the dust for the reply.
 		 */
-		if (peer->flash && !(peer->flash & TEST2)) {
+		if (peer->flash) {
 			poll_update(peer, peer->minpoll);
 			if (peer->crypto & CRYPTO_FLAG_PROV) {
 #ifdef DEBUG
@@ -920,8 +919,8 @@ receive(
 				return;
 			}
 		}
-		if (!(peer->crypto & CRYPTO_FLAG_PROV))
-			peer->flash |= TEST11;
+		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 11 */
+			peer->flash |= TEST11;		/* autokey failed */
 		if (peer->flash && peer->reach) {
 #ifdef DEBUG
 			if (debug)
@@ -982,28 +981,32 @@ process_packet(
 		p_org = peer->rec;
 
 	/*
-	 * Test for old, duplicate or unsynch packets (tests 1-3).
+	 * Test for unsynchronized server.
 	 */
-	peer->rec = *recv_ts;
 	pmode = PKT_MODE(pkt->li_vn_mode);
 	pleap = PKT_LEAP(pkt->li_vn_mode);
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
 		peer->oldpkt++;
-	if (L_ISEQU(&peer->org, &p_xmt))	/* 1 */
-		peer->flash |= TEST1;		/* dupe */
 	if (pmode != MODE_BROADCAST && (L_ISZERO(&p_rec) ||
-	    L_ISZERO(&p_org)))			/* 3 */
+	    L_ISZERO(&p_org)))			/* test 3 */
 		peer->flash |= TEST3;		/* unsynch */
-	if (L_ISZERO(&p_xmt))			/* 3 */
+	if (L_ISZERO(&p_xmt))			/* test 3 */
 		peer->flash |= TEST3;		/* unsynch */
-	peer->org = p_xmt;
 
 	/*
-	 * If tests 1-3 fail, the packet is discarded leaving only the
-	 * receive and origin timestamps and poll interval, which is
-	 * enough to get the protocol started.
+	 * If any tests fail, the packet is discarded leaving only the
+	 * timestamps, which are enough to get the protocol started. The
+	 * originate timestamp is copied from the packet transmit
+	 * timestamp and the transmit timestamp is copied from the
+	 * packet receive timestamp so that replays of either the server
+	 * or client packets can be detected. The transmit timestamp
+	 * will later be overwritten when the next packet is sent. The
+	 * receive timestamp is set to the time the packet was received.
 	 */
+	peer->org = p_xmt;
+	peer->xmt = p_rec;
+	peer->rec = *recv_ts;
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
@@ -1027,9 +1030,9 @@ process_packet(
 	 */
 	if (pleap == LEAP_NOTINSYNC && pstratum >= STRATUM_UNSPEC &&
 	    memcmp(&pkt->refid, "DENY", 4) == 0) {
-		if (peer->leap == LEAP_NOTINSYNC) {
+		if (peer->leap == LEAP_NOTINSYNC) {	/* test 4 */
 			peer->stratum = STRATUM_UNSPEC;
-			peer->flash |= TEST4;
+			peer->flash |= TEST4;		/* denied */
 			memcpy(&peer->refid, &pkt->refid, 4);
 			msyslog(LOG_INFO, "access denied");
 		} else {
@@ -1044,18 +1047,22 @@ process_packet(
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
 	LFPTOD(&ci, dtemp);
-	if (pleap == LEAP_NOTINSYNC ||		/* 6 */
+	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
 	    pstratum >= STRATUM_UNSPEC || dtemp < 0)
 		peer->flash |= TEST6;		/* bad synch */
-	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* 7 */
+	if (!(peer->flags & FLAG_CONFIG) && sys_peer != NULL) { /* test 7 */
 		if (pstratum > sys_stratum && pmode != MODE_ACTIVE) {
 			peer->flash |= TEST7;	/* bad stratum */
 			sys_badstratum++;
 		}
 	}
-	if (p_del < 0 || p_disp < 0 || p_del /	/* 8 */
+	if (p_del < 0 || p_disp < 0 || p_del /	/* test 8 */
 	    2 + p_disp >= MAXDISPERSE)
 		peer->flash |= TEST8;		/* bad peer distance */
+
+	/*
+	 * If any tests fail at this point, the packet is discarded.
+	 */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
@@ -1138,7 +1145,7 @@ process_packet(
 	p_del = max(p_del, LOGTOD(sys_precision));
 	LFPTOD(&ci, p_offset);
 	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
-	    p_disp >= MAXDISPERSE)		/* 9 */
+	    p_disp >= MAXDISPERSE)		/* test 9 */
 		peer->flash |= TEST9;		/* bad peer distance */
 
 	/*
@@ -1208,6 +1215,10 @@ clock_update(void)
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronisation lost");
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
+#ifdef OPENSSL
+		if (oleap != LEAP_NOTINSYNC)
+			expire_all();
+#endif /* OPENSSL */
 		break;
 
 	/*
@@ -2438,9 +2449,7 @@ fast_xmit(
 	l_fp xmt_ts;		/* transmit timestamp */
 	l_fp xmt_tx;		/* transmit timestamp after authent */
 	int sendlen, authlen;
-#ifdef OPENSSL
 	u_int32	temp32;
-#endif
 
 	/*
 	 * Initialize transmit packet header fields from the receive

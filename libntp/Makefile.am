@@ -1,7 +1,7 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
-noinst_LIBRARIES = libntp.a
-libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
+noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
+libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	audio.c authkeys.c authreadkeys.c authusekey.c binio.c buftvtots.c \
 	caljulian.c calleapwhen.c caltontp.c calyearstart.c clocktime.c \
 	clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c emalloc.c \
@@ -11,8 +11,10 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	numtoa.c numtohost.c octtoint.c prettydate.c ranny.c recvbuff.c \
 	refnumtoa.c snprintf.c statestr.c strdup.c strerror.c strstr.c\
-	syssignal.c systime.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
+	syssignal.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
 	uglydate.c uinttoa.c utvtoa.c ymd2yd.c
+libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
+libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c log.c random.c
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am

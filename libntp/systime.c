@@ -9,6 +9,10 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
+#ifdef SIM
+#include "ntpsim.h"
+#endif /*SIM */
+
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
@@ -30,6 +34,7 @@ int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
 double sys_residual = 0;	/* residual from previous adjustment */
 
 
+#ifndef SIM
 /*
  * get_systime - return the system time in timestamp format biased by
  * the current time offset.
@@ -358,3 +363,206 @@ step_systime(
 	}
 	return (1);
 }
+
+#else
+
+/*Clock routines for the simulator - Harish nair */
+
+/*
+ * get_systime - return the system time in timestamp format biased by
+ * the current time offset.
+ */
+void
+get_systime(
+        l_fp *now
+        )
+{
+        struct timeval tv;
+        double dtemp;
+ 
+        (void) GETTIMEOFDAY(&tv, (struct timezone *)0);
+        now->l_i = tv.tv_sec;
+        dtemp = tv.tv_usec * FRAC / 1e6;
+        if (dtemp >= FRAC)
+                now->l_i++;
+        now->l_uf = (u_int32)dtemp;
+}
+ 
+ 
+/*
+ * adj_systime - called once every second to make system time adjustments.
+ * Returns 1 if okay, 0 if trouble.
+ */
+int
+adj_systime(
+        double now
+        )
+{
+        double dtemp;
+        struct timeval adjtv;
+        u_char isneg = 0;
+        struct timeval oadjtv;
+ 
+        /*
+         * Add the residual from the previous adjustment to the new
+         * adjustment, bound and round.
+         */
+        dtemp = sys_residual + now;
+        sys_residual = 0;
+        if (dtemp < 0) {
+                isneg = 1;
+                dtemp = -dtemp;
+        }
+ 
+        if (dtemp > NTP_MAXFREQ)
+                dtemp = NTP_MAXFREQ;
+ 
+        dtemp = dtemp * 1e6 + .5;
+ 
+        if (isneg)
+                dtemp = -dtemp;
+        adjtv.tv_sec = 0;
+        adjtv.tv_usec = (int32)dtemp;
+
+        if (node_adjtime(&ntp_node, &adjtv, &oadjtv) < 0)
+        {
+                msyslog(LOG_ERR, "Can't adjust time (%ld sec, %ld usec): %m",
+                        (long)adjtv.tv_sec, (long)adjtv.tv_usec);
+                return 0;
+        }
+        else {
+        sys_residual += oadjtv.tv_usec / 1e6;
+        }
+#ifdef DEBUG
+        if (debug > 6)
+                printf("adj_systime: adj %.9f -> remaining residual %.9f\n", now, sys_residual);
+#endif
+        return 1;
+}
+ 
+ 
+/*
+ * step_systime - step the system clock.
+ */
+int
+step_systime(
+        double now
+        )
+{
+        struct timeval timetv, adjtv, oldtimetv;
+        int isneg = 0;
+        double dtemp;
+ 
+        dtemp = sys_residual + now;
+        if (dtemp < 0) {
+                isneg = 1;
+                dtemp = - dtemp;
+                adjtv.tv_sec = (int32)dtemp;
+                adjtv.tv_usec = (u_int32)((dtemp - (double)adjtv.tv_sec) *
+                                          1e6 + .5);
+        } else {
+                adjtv.tv_sec = (int32)dtemp;
+                adjtv.tv_usec = (u_int32)((dtemp - (double)adjtv.tv_sec) *
+                                          1e6 + .5);
+        }
+        (void) GETTIMEOFDAY(&timetv, (struct timezone *)0);
+        oldtimetv = timetv;
+ 
+#ifdef DEBUG
+        if (debug)
+                printf("step_systime: step %.6f residual %.6f\n", now, sys_residual);
+#endif
+
+	if (isneg) {
+                timetv.tv_sec -= adjtv.tv_sec;
+                timetv.tv_usec -= adjtv.tv_usec;
+                if (timetv.tv_usec < 0) {
+                        timetv.tv_sec--;
+                        timetv.tv_usec += 1000000;
+                }
+        } else {
+                timetv.tv_sec += adjtv.tv_sec;
+                timetv.tv_usec += adjtv.tv_usec;
+                if (timetv.tv_usec >= 1000000) {
+                        timetv.tv_sec++;
+                        timetv.tv_usec -= 1000000;
+                }
+        }
+        if (node_settime(&ntp_node, &timetv) != 0) {
+                msyslog(LOG_ERR, "Can't set time of day: %m");
+                return (0);
+        }
+        sys_residual = 0;
+ 
+        return (1);
+}
+
+/* simulates a clock */
+int node_clock(Node *n, double t)
+{
+        double diff=0.0, noise=0.0, adj=0.0;
+        u_int32 ticks=0;
+ 
+        if(n->time<t) {
+                diff=((t>n->time)?(t-n->time)*1e6:0)+n->offset;
+                ticks = diff/n->tick;;
+                n->offset = ((u_int32)diff)%n->tick;
+                noise = ticks*n->tick*guassian(n->ferr, n->fnse)/1e6;
+                if(n->adj!=0) adj = ticks*n->tickadj;
+                if(abs(n->adj)<adj) adj = abs(n->adj);
+                if(n->adj<0) adj = -adj;
+                if(ticks*n->tick-noise+adj<0) printf("Monotonicity Violated\n");                n->clk_time += (ticks*n->tick-noise)/1e6;
+                n->ntp_time += (ticks*n->tick-noise+adj)/1e6;
+                n->adj -= adj;
+                n->time = t;
+        }
+        return(0);
+}
+ 
+/* called from get_systime in systime.c */
+int node_gettime(Node *n, struct timeval *tv)
+{
+        u_int32 error = guassian(n->tick/100, sqrt(n->tick/100));
+ 
+        node_clock(n, n->time+(n->tick+error)/1e6);
+        tv->tv_sec = (long)n->ntp_time;
+        tv->tv_usec = (long)(n->ntp_time*1e6-tv->tv_sec*1e6);
+        return(0);
+}
+ 
+/* called from adj_systime in systime.c */
+int node_adjtime(Node *n, struct timeval *adjtv, struct timeval *oadjtv)
+{
+        oadjtv->tv_sec = 0;
+        oadjtv->tv_usec = n->adj*1e6;
+        n->adj += (adjtv->tv_sec*1e6+adjtv->tv_usec);
+        return(0);
+}
+ 
+/* called from step_systime in systime.c */
+int node_settime(Node *n, struct timeval *tv)
+{
+        n->adj = 0.0;
+        n->ntp_time = (tv->tv_sec*1e6+tv->tv_usec)/1e6;
+        return(0);
+}
+ 
+/* simulates the guassian noise associated with a clock */
+double guassian(double m, double s)
+{
+        double q1, q2;
+        while((q1=(double)drand48()/32768.)==0);
+        q2 = ((double)drand48()/32768.);
+        return(m+(s*sqrt(-2*log(q1))*cos(2*PI*q2)));
+}
+
+/* Gives clock precision given frequency */
+int get_precision(int freq)
+{
+        int i=0, f=freq;
+        for (i = 1; f ; i--) f >>= 1;
+        return (i);
+}
+
+#endif /* SIM */
+
