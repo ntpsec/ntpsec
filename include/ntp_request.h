@@ -482,9 +482,9 @@ struct info_sys_stats {
 	u_int32 unknownversion;	/* don't know version packets */
 	u_int32 badlength;	/* packets with bad length */
 	u_int32 processed;	/* packets processed */
-	u_int32 badauth;		/* packets dropped because of authorization */
-	u_int32 wanderhold;	/* (obsolete) */
-	u_int32 limitrejected;	/* rejected because of client limitation */
+	u_int32 badauth;	/* packets dropped because of authorization */
+	u_int32 received;	/* packets received */
+	u_int32 limitrejected;	/* rate limited packets */
 };
 
 
@@ -500,7 +500,7 @@ struct old_info_sys_stats {
 	u_int32 unknownversion;	/* don't know version packets */
 	u_int32 badlength;	/* packets with bad length */
 	u_int32 processed;	/* packets processed */
-	u_int32 badauth;		/* packets dropped because of authorization */
+	u_int32 badauth;	/* packets dropped because of authorization */
 	u_int32 wanderhold;
 };
 

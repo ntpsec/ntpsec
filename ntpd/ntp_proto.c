@@ -85,6 +85,7 @@ u_long	sys_unknownversion;	/* invalid version */
 u_long	sys_badlength;		/* bad length or mode */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_processed;		/* packets processed */
+u_long	sys_received;		/* packets received */
 
 static	double	root_distance	P((struct peer *));
 static	double	clock_combine	P((struct peer **, int));
@@ -329,6 +330,15 @@ receive(
 	 * simply discarded without prejudice. Some restrictions have to
 	 * be handled later in order to generate a kiss-of-death packet.
 	 */
+	/*
+	 * Bogus port check is before anything, since it probably
+	 * reveals a clogging attack.
+	 */
+	sys_received++;
+	if (SRCPORT(&rbufp->recv_srcadr) == 0) {
+		sys_badlength++;
+		return;				/* bogus port */
+	}
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
@@ -369,7 +379,6 @@ receive(
 		return;				/* runt packet */
 	}
 	
-
 	/*
 	 * Version check must be after the query packets, since they
 	 * intentionally use early version.
@@ -378,19 +387,17 @@ receive(
 		sys_newversionpkt++;		/* new version */
 	} else if (!(restrict_mask & RES_VERSION) &&
 	    PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
-		sys_oldversionpkt++;		/* old version */
+		sys_oldversionpkt++;		/* previous version */
 	} else {
 		sys_unknownversion++;
-		return;				/* invalid version */
+		return;				/* old version */
 	}
 
 	/*
 	 * Figure out his mode and validate the packet. This has some
-	 * legacy raunch that probably should be removed. If from NTPv1
-	 * mode zero, The NTPv4 mode is determined from the source port.
-	 * If the port number is zero, it is from a symmetric active
-	 * association, which is not supported in NTPv4. Otherwise, it
-	 * is from a client association and we fake it.
+	 * legacy raunch that probably should be removed. In very early
+	 * NTP versions mode 0 was equivalent to what later versions
+	 * would interpret as client mode.
 	 */
 	if (hismode == MODE_UNSPEC) {
 		if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION) {
@@ -3125,6 +3132,7 @@ void
 proto_clr_stats(void)
 {
 	sys_stattime = current_time;
+	sys_received = 0;
 	sys_restricted = 0;
 	sys_limitrejected = 0;
 	sys_newversionpkt = 0;

@@ -68,10 +68,9 @@ extern int priority_done;
  * privatekey file_name
  * statsdir /var/NTP/
  * filegen peerstats [ file peerstats ] [ type day ] [ link ]
- * clientlimit [ n ]
- * clientperiod [ 3600 ]
+ * police [ min n ] [ avg n ]
  * trustedkey [ key ]
- * requestkey [ key]
+ * requestkey [ key ]
  * controlkey [ key ]
  * trap [ -4 | -6 ] [ addr ]
  * fudge [ addr ] [ stratum ] [ refid ] ...
@@ -105,8 +104,6 @@ static	struct keyword keywords[] = {
 	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
 	{ "broadcastdelay",	CONFIG_BDELAY },
 	{ "calldelay",		CONFIG_CDELAY},
-	{ "clientlimit",	CONFIG_CLIENTLIMIT },
-	{ "clientperiod",	CONFIG_CLIENTPERIOD },
 #ifdef OPENSSL
 	{ "crypto",		CONFIG_CRYPTO },
 #endif /* OPENSSL */
@@ -127,6 +124,7 @@ static	struct keyword keywords[] = {
 	{ "peer",		CONFIG_PEER },
 	{ "phone",		CONFIG_PHONE },
 	{ "pidfile",		CONFIG_PIDFILE },
+	{ "discard",		CONFIG_DISCARD },
 	{ "requestkey",		CONFIG_REQUESTKEY },
 	{ "restrict",		CONFIG_RESTRICT },
 	{ "revoke",		CONFIG_REVOKE },
@@ -245,6 +243,15 @@ static struct keyword flags_keywords[] = {
 	{ "ntp",		PROTO_NTP },
 	{ "pps",		PROTO_PPS },
 	{ "stats",		PROTO_FILEGEN },
+	{ "",			CONFIG_UNKNOWN }
+};
+
+/*
+ * "discard" modifier keywords
+ */
+static struct keyword discard_keywords[] = {
+	{ "average",		CONF_DISCARD_AVERAGE },
+	{ "minimum",		CONF_DISCARD_MINIMUM },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1111,7 +1118,35 @@ getconfig(
 			if (ntokens >= 2)
 			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
-	
+
+		    case CONFIG_DISCARD:
+			for (i = 1; i < ntokens; i++) {
+			    int temp;
+
+			    temp = matchkey(tokens[i++],
+				discard_keywords, 1);
+			    if (i > ntokens - 1) {
+				msyslog(LOG_ERR,
+				    "discard: missing argument");
+				errflg++;
+				break;
+			    }
+			    switch(temp) {
+			    case CONF_DISCARD_AVERAGE:
+				res_avg_interval = atoi(tokens[i++]);
+				break;
+
+			    case CONF_DISCARD_MINIMUM:
+				res_min_interval = atoi(tokens[i++]);
+				break;
+			    default:
+				msyslog(LOG_ERR,
+				    "discard: unknown keyword");
+				break;
+			    }
+			}
+			break;
+
 		    case CONFIG_CRYPTO:
 			if (ntokens == 1) {
 				crypto_config(CRYPTO_CONF_NONE, NULL);
@@ -1120,7 +1155,8 @@ getconfig(
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
 
-			    temp = matchkey(tokens[i++], crypto_keywords, 1);
+			    temp = matchkey(tokens[i++],
+				 crypto_keywords, 1);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
 				    "crypto: missing argument");
@@ -1130,43 +1166,53 @@ getconfig(
 			    switch(temp) {
 
 			    case CONF_CRYPTO_CERT:
-				crypto_config(CRYPTO_CONF_CERT, tokens[i]);
+				crypto_config(CRYPTO_CONF_CERT,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_RSA:
-				crypto_config(CRYPTO_CONF_PRIV, tokens[i]);
+				crypto_config(CRYPTO_CONF_PRIV,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_IFFPAR:
-				crypto_config(CRYPTO_CONF_IFFPAR, tokens[i]);
+				crypto_config(CRYPTO_CONF_IFFPAR,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_GQPAR:
-				crypto_config(CRYPTO_CONF_GQPAR, tokens[i]);
+				crypto_config(CRYPTO_CONF_GQPAR,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_MVPAR:
-				crypto_config(CRYPTO_CONF_MVPAR, tokens[i]);
+				crypto_config(CRYPTO_CONF_MVPAR,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_LEAP:
-				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
+				crypto_config(CRYPTO_CONF_LEAP,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_PW:
-				crypto_config(CRYPTO_CONF_PW, tokens[i]);
+				crypto_config(CRYPTO_CONF_PW,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_RAND:
-				crypto_config(CRYPTO_CONF_RAND, tokens[i]);
+				crypto_config(CRYPTO_CONF_RAND,
+				    tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_SIGN:
-				crypto_config(CRYPTO_CONF_SIGN, tokens[i]);
+				crypto_config(CRYPTO_CONF_SIGN,
+				    tokens[i]);
 				break;
 
 			    default:
-				msyslog(LOG_ERR, "crypto: unknown keyword");
+				msyslog(LOG_ERR,
+				    "crypto: unknown keyword");
 				break;
 			    }
 			}
@@ -1692,49 +1738,6 @@ getconfig(
 							  "default")))
 					     ? DEF
 					     : 0)));
-			}
-			break;
-
-		    case CONFIG_CLIENTLIMIT:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no value for clientlimit command - line ignored");
-			} else {
-				u_long ui;
-
-				if (!atouint(tokens[1], &ui)) {
-					msyslog(LOG_ERR,
-						"illegal value for clientlimit command - line ignored");
-				} else {
-					char bp[80];
-
-#ifdef DEBUG
-					if (debug)
-						sprintf(bp, "client_limit=%lu", ui);
-#endif
-					set_sys_var(bp, strlen(bp)+1, RO);
-					client_limit = ui;
-				}
-			}
-			break;
-
-		    case CONFIG_CLIENTPERIOD:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no value for clientperiod command - line ignored");
-			} else {
-				u_long ui;
-
-				if (!atouint(tokens[1], &ui)) {
-					msyslog(LOG_ERR,
-						"illegal value for clientperiod command - line ignored");
-				} else {
-					char bp[80];
-
-					sprintf(bp, "client_limit_period=%ld", ui);
-					set_sys_var(bp, strlen(bp)+1, RO);
-					client_limit_period = ui;
-				}
 			}
 			break;
 

@@ -749,10 +749,11 @@ struct mon_data {
 	struct mon_data *mru_prev;	/* previous structure in MRU list */
 	struct mon_data *fifo_next;	/* next structure in FIFO list */
 	struct mon_data *fifo_prev;	/* previous structure in FIFO list */
-	u_long lastdrop;		/* last time dropped due to RES_LIMIT*/
-	u_long lasttime;		/* last time data updated */
-	u_long firsttime;		/* time structure initialized */
-	u_long count;			/* count we have seen */
+	u_long drop_count;		/* dropped due RESLIMIT*/
+	double avg_interval;		/* average interpacket interval */
+	u_long lasttime;		/* last packet received time */
+	u_long firsttime;		/* first packet received time */
+	u_long count;			/* total packet count */
 	struct sockaddr_storage rmtadr;	/* address of remote host */
 	struct interface *interface;	/* interface on which this arrived */
 	u_short rmtport;		/* remote port last came from */

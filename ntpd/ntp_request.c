@@ -1111,20 +1111,8 @@ sys_stats(
 	/*
 	 * Importations from the protocol module
 	 */
-/*
-	extern u_long sys_stattime;
-	extern u_long sys_oldversionpkt;
-	extern u_long sys_newversionpkt;
-	extern u_long sys_unknownversion;
-	extern u_long sys_badlength;
-	extern u_long sys_badauth;
-	extern u_long sys_processed;
-	extern u_long sys_restricted;
-	extern u_long sys_limitrejected;
-*/
 	ss = (struct info_sys_stats *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_sys_stats));
-
+		sizeof(struct info_sys_stats));
 	ss->timeup = htonl((u_int32)current_time);
 	ss->timereset = htonl((u_int32)(current_time - sys_stattime));
 	ss->badstratum = htonl((u_int32)sys_restricted);
@@ -1135,6 +1123,7 @@ sys_stats(
 	ss->processed = htonl((u_int32)sys_processed);
 	ss->badauth = htonl((u_int32)sys_badauth);
 	ss->limitrejected = htonl((u_int32)sys_limitrejected);
+	ss->received = htonl((u_int32)sys_received);
 	(void) more_pkt();
 	flush_pkt();
 }
@@ -1878,12 +1867,9 @@ mon_getlist_0(
 	    sizeof(struct info_monitor) - offset);
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
-		im->lasttime = htonl((u_int32)(current_time - md->lasttime));
+		im->lasttime = htonl((u_int32)md->avg_interval);
 		im->firsttime = htonl((u_int32)(current_time - md->firsttime));
-		if (md->lastdrop)
-		    im->lastdrop = htonl((u_int32)(current_time - md->lastdrop));
-		else
-		    im->lastdrop = 0;
+		im->lastdrop = htonl((u_int32)md->drop_count);
 		im->count = htonl((u_int32)(md->count));
 		if (md->rmtadr.ss_family == AF_INET6) {
 			if (!client_v6_capable)
@@ -1935,12 +1921,9 @@ mon_getlist_1(
 	    sizeof(struct info_monitor_1) - offset);
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
-		im->lasttime = htonl((u_int32)(current_time - md->lasttime));
+		im->lasttime = htonl((u_int32)md->avg_interval);
 		im->firsttime = htonl((u_int32)(current_time - md->firsttime));
-		if (md->lastdrop)
-		    im->lastdrop = htonl((u_int32)(current_time - md->lastdrop));
-		else
-		    im->lastdrop = 0;
+		    im->lastdrop = htonl((u_int32)md->drop_count);
 		im->count = htonl((u_int32)md->count);
 		if (md->rmtadr.ss_family == AF_INET6) {
 			if (!client_v6_capable)
