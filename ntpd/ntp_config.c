@@ -19,6 +19,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
+#include <isc/boolean.h>
+#include <isc/net.h>
 
 #include <stdio.h>
 #include <ctype.h>
@@ -2110,6 +2112,11 @@ getnetnum(
 	    hints.ai_family = addr->ss_family;
 	else
 	    hints.ai_family = AF_UNSPEC;
+	/*
+	 * If we don't have an IPv6 stack, just look up IPv4 addresses
+	 */
+	if (isc_net_probeipv6() != ISC_TRUE)
+		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
 #ifdef DEBUG

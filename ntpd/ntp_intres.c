@@ -41,6 +41,9 @@
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
 
+#include <isc/boolean.h>
+#include <isc/net.h>
+
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
@@ -451,6 +454,7 @@ findhostaddr(
 	)
 {
 	struct addrinfo *addr;
+	struct addrinfo hints;
 	int error;
 
 	checkparent();		/* make sure our guy is still running */
@@ -472,7 +476,16 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
 				entry->ce_name);
 #endif /* DEBUG */
-		error = getaddrinfo(entry->ce_name, NULL, NULL, &addr);
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;
+		/*
+		 * If the IPv6 stack is not available look only for IPv4 addresses
+		 */
+		if (isc_net_probeipv6() == ISC_FALSE)
+			hints.ai_family = AF_INET;
+
+		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
 		if (error == 0) {
 			entry->peer_store = *((struct sockaddr_storage*)(addr->ai_addr));
 			if (entry->peer_store.ss_family == AF_INET) {
@@ -538,6 +551,13 @@ openntp(void)
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
+
+	/*
+	 * If the IPv6 stack is not available look only for IPv4 addresses
+	 */
+	if (isc_net_probeipv6() == ISC_FALSE)
+		hints.ai_family = AF_INET;
+
 	hints.ai_socktype = SOCK_DGRAM;
 	if (getaddrinfo(NULL, "ntp", &hints, &addrResult)!=0) {
 		msyslog(LOG_ERR, "getaddrinfo failed: %m");
