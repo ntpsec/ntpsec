@@ -49,7 +49,7 @@ refclock_open(
 
 	/*  Change the input/output buffers to be large.
 	*/
-	if (!SetupComm( Handle, 8192, 4096)) {
+	if (!SetupComm( Handle, 1024, 1024)) {
 		msyslog(LOG_ERR, "NT_COM: Device %s: SetupComm ", dev);
 		return -1;
 	}
@@ -103,16 +103,15 @@ refclock_open(
 
 	timeouts.ReadIntervalTimeout = 20; 
 	timeouts.ReadTotalTimeoutMultiplier = 0;
-	timeouts.ReadTotalTimeoutConstant = 60000;
+	timeouts.ReadTotalTimeoutConstant = 5000;
 	timeouts.WriteTotalTimeoutMultiplier = 0;
-	timeouts.WriteTotalTimeoutConstant = 60000;
+	timeouts.WriteTotalTimeoutConstant = 5000;
 
 	   // Error setting time-outs.
 	if (!SetCommTimeouts(Handle, &timeouts)) {
 		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommTimeouts ", dev);
 		return -1;
 	}
-
 
 	return (int) Handle;
 }
@@ -262,4 +261,25 @@ tcgetattr(
 
 	return TRUE; /* ok */
 }
+
+
+extern int tcflush(int fd, int mode) {
+
+
+
+
+return 0;
+
+}
+
+extern int cfsetispeed(struct termios *tio, int speed) {
+		
+		
+};	
+
+
+extern int cfsetospeed(struct termios *tio, int speed) {
+		
+		
+};	
 

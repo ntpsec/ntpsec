@@ -15,15 +15,19 @@ typedef struct IoCompletionInfo {
 	IoCompletionInfoFunction *	iofunction;
 } IoCompletionInfo;
 
-extern	void	init_io_completion_port P((void));
-extern	void	uninit_io_completion_port P((void));
+extern	void	init_io_completion_port (void);
+extern	void	uninit_io_completion_port (void);
 
-extern	int	io_completion_port_add_clock_io	P((struct refclockio * /*rio */));
+extern	int	io_completion_port_add_clock_io	(struct refclockio * /*rio */);
 
-extern	void	io_completion_port_add_socket P((struct interface *));
+extern	void	io_completion_port_add_socket (struct interface *);
 
-extern	DWORD	io_completion_port_sendto P((struct interface *, struct pkt *, int, struct sockaddr_in*));
+extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, struct sockaddr_in*);
 
+static int OnSocketRecv(DWORD, struct IoCompletionInfo *, DWORD);
+
+static int QueueIORead( struct refclockio * );
+static int OnIoReadComplete(DWORD, struct IoCompletionInfo *, DWORD);
 # endif
 
 #endif
