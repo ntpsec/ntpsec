@@ -7,10 +7,6 @@ Project: "instsrv"=".\instsrv\Instsrv.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/instsrv", ASCAAAAA
-    .\instsrv
-    end source code control
 }}}
 
 Package=<4>
@@ -23,10 +19,6 @@ Project: "libntp"=".\libntp\libntp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/libntp", UJHAAAAA
-    .\libntp
-    end source code control
 }}}
 
 Package=<4>
@@ -39,10 +31,6 @@ Project: "ntpd"=".\ntpd\ntpd.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/ntpd", DKHAAAAA
-    .\ntpd
-    end source code control
 }}}
 
 Package=<4>
@@ -58,10 +46,6 @@ Project: "ntpdate"=".\ntpdate\ntpdate.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/ntpdate", JKHAAAAA
-    .\ntpdate
-    end source code control
 }}}
 
 Package=<4>
@@ -77,10 +61,6 @@ Project: "ntpdc"=".\ntpdc\ntpdc.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/ntpdc", LKHAAAAA
-    .\ntpdc
-    end source code control
 }}}
 
 Package=<4>
@@ -96,29 +76,6 @@ Project: "ntpq"=".\ntpq\ntpq.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt/ntpq", NKHAAAAA
-    .\ntpq
-    end source code control
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libntp
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "ntptrace"=".\ntptrace\ntptrace.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-    begin source code control
-    "$/ntp/ports/winnt/ntptrace", PKHAAAAA
-    .\ntptrace
-    end source code control
 }}}
 
 Package=<4>
@@ -134,10 +91,6 @@ Global:
 
 Package=<5>
 {{{
-    begin source code control
-    "$/ntp/ports/winnt", WIHAAAAA
-    .
-    end source code control
 }}}
 
 Package=<3>
