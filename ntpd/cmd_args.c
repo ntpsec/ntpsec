@@ -19,6 +19,9 @@
 extern char const *progname;
 int	listen_to_virtual_ips = 1;
 
+#ifdef SYS_WINNT
+extern BOOL NoWinService;
+#endif
 
 #ifndef HAVE_CLOCKCTL 
 static const char *ntp_options = "aAbB:c:C:dD:f:gk:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:-:";
@@ -79,6 +82,14 @@ getstartup(
 		    break;
 #else
 		case 'd':
+/*
+ * We need to do this in order to have a way of running
+ * without running as a service
+ */
+#ifdef SYS_WINNT
+		    NoWinService = TRUE;
+		    break;
+#endif
 		case 'D':
 		    msyslog(LOG_ERR, "ntpd not compiled with -DDEBUG option - no DEBUG support");
 		    fprintf(stderr, "ntpd not compiled with -DDEBUG option - no DEBUG support");
@@ -230,7 +241,15 @@ getCmdOpts(
 #ifdef DEBUG
 			debug++;
 #else
+/*
+ * We need to do this in order to have a way of running
+ * without running as a service
+ */
+#ifdef SYS_WINNT
+			NoWinService = TRUE;	 
+#else
 			errflg++;
+#endif
 #endif	/* DEBUG */
 			break;
 

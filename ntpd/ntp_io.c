@@ -58,9 +58,6 @@ extern int listen_to_virtual_ips;
 #include <transmitbuff.h>
 #endif
 
-/* Temporarily define netsyslog as an alias to msyslog */
-#define netsyslog msyslog
-
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
  * recvbuf buffers are preallocated for input.	In the signal
@@ -402,7 +399,7 @@ create_sockets(
 			continue;
 
 		/* Check to see if we are going to use the interface */
-		if (address_okay(&isc_if)) {
+		if (address_okay(&isc_if) == ISC_TRUE) {
 			convert_isc_if(&isc_if, &inter_list[idx], port);
 			inter_list[idx].fd = INVALID_SOCKET;
 			inter_list[idx].bfd = INVALID_SOCKET;

@@ -237,7 +237,7 @@ SOURCE=..\..\..\libntp\lib_strbuf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\log.c
+SOURCE=.\log.c
 # End Source File
 # Begin Source File
 
@@ -457,15 +457,15 @@ SOURCE=..\..\..\libntp\lib_strbuf.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\log.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\log.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\include\md5.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\isc\net.h
 # End Source File
 # Begin Source File
 
