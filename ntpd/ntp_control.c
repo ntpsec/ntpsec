@@ -1354,8 +1354,8 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			sprintf(cbuf, "%s %s %c %u", cp->subject,
-			    cp->issuer, cp->flags & CERT_VALID ? 'T' : 'U',
+			sprintf(cbuf, "%s %s 0x%x %u", cp->subject,
+			    cp->issuer, cp->flags,
 			    ntohl(cp->cert.fstamp));
 			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
 			    strlen(cbuf));

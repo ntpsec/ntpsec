@@ -124,9 +124,7 @@ static	struct keyword keywords[] = {
 	{ "fudge",		CONFIG_FUDGE },
 	{ "includefile",	CONFIG_INCLUDEFILE },
 	{ "keys",		CONFIG_KEYS },
-#ifdef OPENSSL
 	{ "keysdir",		CONFIG_KEYSDIR },
-#endif /* OPENSSL */
 	{ "logconfig",		CONFIG_LOGCONFIG },
 	{ "logfile",		CONFIG_LOGFILE },
 	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
@@ -164,9 +162,6 @@ static	struct keyword mod_keywords[] = {
 	{ "mode",		CONF_MOD_MODE },    /* refclocks */
 	{ "noselect",		CONF_MOD_NOSELECT },
 	{ "prefer",		CONF_MOD_PREFER },
-#ifdef OPENSSL
-	{ "certificate",	CONF_MOD_CERT },
-#endif /* OPENSSL */
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
 	{ "version",		CONF_MOD_VERSION },
 	{ "",			CONFIG_UNKNOWN }
@@ -300,13 +295,14 @@ static struct keyword tos_keywords[] = {
  * "crypto" modifier keywords
  */
 static struct keyword crypto_keywords[] = {
-	{ "signkey",		CONF_CRYPTO_SIGN },
+	{ "cert",		CONF_CRYPTO_CERT },
+	{ "gq",			CONF_CRYPTO_GQ },
+	{ "gqpar",		CONF_CRYPTO_GQPAR },
+	{ "host",		CONF_CRYPTO_RSA },
+	{ "iff",		CONF_CRYPTO_IFF },
 	{ "leap",		CONF_CRYPTO_LEAP },
-	{ "rsakey",		CONF_CRYPTO_RSA },
-	{ "certificate",	CONF_CRYPTO_CERT },
 	{ "randfile",		CONF_CRYPTO_RAND },
-	{ "trusted",		CONF_CRYPTO_TRUST },
-	{ "keysdir",		CONF_CRYPTO_KEYS },
+	{ "sign",		CONF_CRYPTO_SIGN },
 	{ "",			CONFIG_UNKNOWN }
 };
 #endif /* OPENSSL */
@@ -381,6 +377,7 @@ static char res_file[MAX_PATH];
  */
 char const *progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
+char	*keysdir = NULL;	/* crypto keys directory */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
 int	pps_assert;
 int	pps_hardpps;
@@ -802,18 +799,6 @@ getconfig(
 				    peerflags |= FLAG_SKEY |
 					FLAG_AUTHENABLE;
 				    break;
-
-				case CONF_MOD_CERT:
-				    if (i >= ntokens - 1) {
-					msyslog(LOG_ERR,
-					    "Public key file name required");
-					errflg = 1;
-					break;
-				    }
-				    peerflags |= FLAG_SKEY |
-					FLAG_AUTHENABLE;
- 				    peerkeystr = tokens[++i];
-				    break;
 #endif /* OPENSSL */
 
 				case CONF_MOD_TTL:
@@ -1007,6 +992,16 @@ getconfig(
 			}
 			break;
 
+		    case CONFIG_KEYSDIR:
+			if (ntokens < 2) {
+			    msyslog(LOG_ERR,
+				"Keys directory name required");
+			    break;
+			}
+			keysdir = emalloc(strlen(tokens[1]) + 1);
+			strcpy(keysdir, tokens[1]);
+			break;
+
 		    case CONFIG_TINKER:
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
@@ -1110,15 +1105,6 @@ getconfig(
 			if (ntokens >= 2)
 			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
-
-		    case CONFIG_KEYSDIR:
-			if (ntokens < 2) {
-			    msyslog(LOG_ERR,
-				"Keys directory name required");
-			    break;
-			}
-			crypto_config(CRYPTO_CONF_KEYS, tokens[1]);
-			break;
 	
 		    case CONFIG_CRYPTO:
 			if (ntokens == 1) {
@@ -1136,32 +1122,37 @@ getconfig(
 				break;
 			    }
 			    switch(temp) {
-			    case CONF_CRYPTO_LEAP:
-				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
+
+			    case CONF_CRYPTO_CERT:
+				crypto_config(CRYPTO_CONF_CERT, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_RSA:
 				crypto_config(CRYPTO_CONF_PRIV, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_SIGN:
-				crypto_config(CRYPTO_CONF_SIGN, tokens[i]);
+			    case CONF_CRYPTO_IFF:
+				crypto_config(CRYPTO_CONF_IFF, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_CERT:
-				crypto_config(CRYPTO_CONF_CERT, tokens[i]);
+			    case CONF_CRYPTO_GQPAR:
+				crypto_config(CRYPTO_CONF_GQPAR, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_GQ:
+				crypto_config(CRYPTO_CONF_GQ, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_LEAP:
+				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_RAND:
 				crypto_config(CRYPTO_CONF_RAND, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_TRUST:
-				crypto_config(CRYPTO_CONF_TRST, tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_KEYS:
-				crypto_config(CRYPTO_CONF_KEYS, tokens[i]);
+			    case CONF_CRYPTO_SIGN:
+				crypto_config(CRYPTO_CONF_SIGN, tokens[i]);
 				break;
 
 			    default:

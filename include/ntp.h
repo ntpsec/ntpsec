@@ -112,8 +112,10 @@ typedef char s_char;
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
 #define CLOCK_SGATE	4.	/* popcorn spike gate */
-#define BURST_INTERVAL1	4	/* first interburst interval (log2) */
-#define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
+#define BURST_DELAY	2	/* interburst delay (s) */
+#define CALL_DELAY	10	/* modem callup delay (s) */
+#define	RESP_DELAY	1	/* crypto response delay (s) */
+#define	START_DELAY	10	/* association startup delay (s) */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
 #define HYST_TC		.875	/* anti-clockhop hysteresis decay factor */
@@ -196,6 +198,8 @@ struct cert_info {
 	tstamp_t last;		/* valid not after */
 	u_char	*subject;	/* subject common name */
 	u_char	*issuer;	/* issuer common name */
+	u_char	*grpkey;	/* GQ group key */
+	u_int	grplen;		/* GQ group key length */
 	struct value cert;	/* certificate/value */
 };
 #endif /* OPENSSL */
@@ -303,6 +307,8 @@ struct peer {
 	u_char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
+	BIGNUM	*iffval;	/* IFF challenge */
+	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct value tai_leap;	/* leapseconds values */

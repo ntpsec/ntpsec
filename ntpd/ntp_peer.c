@@ -11,7 +11,7 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #ifdef OPENSSL
-#include "ntp_crypto.h"
+#include "openssl/rand.h"
 #endif /* OPENSSL */
 
 /*
@@ -335,7 +335,7 @@ unpeer(
 
 #ifdef OPENSSL
 	if (peer_to_remove->flags & FLAG_SKEY) {
-		sprintf(statstr, "unpeer %d flash %x reach %3o flags %x",
+		sprintf(statstr, "unpeer %d flash %x reach %03o flags %04x",
 		    peer_to_remove->associd, peer_to_remove->flash,
 		    peer_to_remove->reach, peer_to_remove->flags);
 		record_crypto_stats(&peer_to_remove->srcadr, statstr);
