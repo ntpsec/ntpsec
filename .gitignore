@@ -92,3 +92,6 @@ builderrors.txt
 ports/winnt/libntp/messages.aps
 ports/winnt/ntpd/stderr
 ntpd/ntp_io.cold
+cmd_args.diff
+ntp_io.diff
+ntpd/ntp_io.csave
