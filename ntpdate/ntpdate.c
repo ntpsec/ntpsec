@@ -108,6 +108,7 @@ volatile int debug = 0;
 /*
  * File descriptor masks etc. for call to select
  */
+int ai_fam_templ;
 int nbsock;
 int fd[MAX_AF];  /* support up to 2 sockets */
 int fd_family[MAX_AF];  /* to remember the socket family */
@@ -352,9 +353,15 @@ ntpdatemain (
 	/*
 	 * Decode argument list
 	 */
-	while ((c = ntp_getopt(argc, argv, "a:bBde:k:o:p:qr:st:uv")) != EOF)
+	while ((c = ntp_getopt(argc, argv, "46a:bBde:k:o:p:qr:st:uv")) != EOF)
 		switch (c)
 		{
+		case '4':
+			ai_fam_templ = AF_INET;
+			break;
+		case '6':
+			ai_fam_templ = AF_INET6;
+			break;
 		case 'a':
 			c = atoi(ntp_optarg);
 			sys_authenticate = 1;
@@ -444,8 +451,8 @@ ntpdatemain (
 	
 	if (errflg) {
 		(void) fprintf(stderr,
-				   "usage: %s [-bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
-				   progname);
+		    "usage: %s [-46bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
+		    progname);
 		exit(2);
 	}
 
@@ -1323,9 +1330,9 @@ addserver(
         char service[5];
 	sprintf(service, "%d", NTP_PORT);
 
-        /* Get host address. Looking for UDP datagram connection and IPv6 address format*/
+        /* Get host address. Looking for UDP datagram connection. */
         memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_UNSPEC;
+        hints.ai_family = ai_fam_templ;
         hints.ai_socktype = SOCK_DGRAM;
 
         printf("Looking for host %s and service %s\n", serv, service);
