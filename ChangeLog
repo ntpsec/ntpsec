@@ -1,5 +1,9 @@
 2000-01-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* README.des: Cleanup
+
+2000-01-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
 	* configure.in: 4.0.99
 
 	* html/driver36.htm: Cleanup
