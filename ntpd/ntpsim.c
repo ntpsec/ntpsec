@@ -1,6 +1,7 @@
 /* NTP simulator engine - Harish Nair */
 /* University of Delaware, 09/11/2001 */
 
+#include "ntpd.h"
 #include "ntpsim.h"
 
 /* Defines... */
