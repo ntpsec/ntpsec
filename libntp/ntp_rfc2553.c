@@ -153,7 +153,7 @@ getaddrinfo (const char *nodename, const char *servname,
 	if (servname != NULL) {
 		ai->ai_family = AF_INET;
 		ai->ai_socktype = SOCK_DGRAM;
-		if (strcmp(servname, "123") != 0) {
+		if (strcmp(servname, "ntp") != 0) {
 			freeaddrinfo(ai);
 			return (EAI_SERVICE);
 		}

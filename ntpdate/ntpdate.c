@@ -1332,7 +1332,7 @@ addserver(
         int error;
         /* Service name */
         char service[5];
-	sprintf(service, "%d", NTP_PORT);
+	strcpy(service, "ntp");
 
         /* Get host address. Looking for UDP datagram connection. */
         memset(&hints, 0, sizeof(hints));
@@ -1656,7 +1656,7 @@ init_io(void)
 	 * Open the socket
 	 */
 
-	sprintf(service, "%d", NTP_PORT);
+	strcpy(service, "ntp");
 
         /*
          * Init hints addrinfo structure

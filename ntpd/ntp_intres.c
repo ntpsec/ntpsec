@@ -538,7 +538,7 @@ openntp(void)
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
-	if (getaddrinfo(NULL, "123", &hints, &addrResult)!=0) {
+	if (getaddrinfo(NULL, "ntp", &hints, &addrResult)!=0) {
 		msyslog(LOG_ERR, "getaddrinfo failed: %m");
 		exit(1);
 	}
