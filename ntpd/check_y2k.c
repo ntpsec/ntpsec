@@ -106,7 +106,8 @@
 int debug = 0;			/* debugging requests for parse stuff */
 char const *progname = "check_y2k";
 
-long Days ( int Year )		/* return number of days since year "0" */
+long
+Days ( int Year )		/* return number of days since year "0" */
 {
     long  Return;
 		/* this is a known to be good algorithm */
@@ -137,7 +138,8 @@ static struct tm LocalTime;
 #define Error(year) if ( (year)>=2036 && LocalTime.tm_year < 110 ) \
 	Warnings++; else Fatals++
 
-int main( void )
+int
+main( void )
 {
     int Fatals;
     int Warnings;

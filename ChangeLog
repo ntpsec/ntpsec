@@ -1,5 +1,7 @@
 2000-01-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/check_y2k.c (main): Reformat for ansi2knr
+
 	* configure.in (AC_OUTPUT): Revert to obsolete form until automake
 	catches up.
 
