@@ -117,10 +117,10 @@ reinit_timer(void)
 	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
 		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	}
-	if (itimer.it_value.tv_nsec < 0 ) {
+	if (itimer.it_value.tv_usec < 0 ) {
 		itimer.it_value.tv_usec = 0;
 	}
-	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_nsec == 0) {
+	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_usec == 0) {
 		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 		itimer.it_value.tv_usec = 0;
 	}
