@@ -170,7 +170,7 @@ transmit(
 			 * unreachable, raise a trap. If ephemeral, dump
 			 * it right away.
 			 */
-			if (oreach != 0) {
+			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
@@ -1124,15 +1124,7 @@ process_packet(
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
 	}
-
-	/*
-	 * If we have gone a long time since the last packet, clamp down
-	 * the poll interval to speed up resynchronization.
-	 */
-	if (!peer->reach && peer->unreach > NTP_UNREACH)
-		poll_update(peer, peer->minpoll);
-	else
-		poll_update(peer, peer->hpoll);
+	poll_update(peer, peer->hpoll);
 	peer->reach |= 1;
 
 	/*
@@ -1349,7 +1341,7 @@ poll_update(
 
 	/*
 	 * A manycast server beacons at minpoll until a sufficient
-	 * number of servers have been found or the ttl has toped out,
+	 * number of servers have been found or the ttl has topped out,
 	 * then beacons at maxpoll.
 	 */
 	} else if (peer->cast_flags & MDF_ACAST) {
@@ -1842,6 +1834,7 @@ clock_select(void)
 			for (i = nl3 - 1; i >= 0; i--) {
 				if (e >= endpoint[indx[i]].val)
 					break;
+
 				indx[i + 3] = indx[i];
 			}
 			indx[i + 3] = nl3;
@@ -1852,6 +1845,7 @@ clock_select(void)
 			for (; i >= 0; i--) {
 				if (e >= endpoint[indx[i]].val)
 					break;
+
 				indx[i + 2] = indx[i];
 			}
 			indx[i + 2] = nl3;
@@ -1862,6 +1856,7 @@ clock_select(void)
 			for (; i >= 0; i--) {
 				if (e >= endpoint[indx[i]].val)
 					break;
+
 				indx[i + 1] = indx[i];
 			}
 			indx[i + 1] = nl3;

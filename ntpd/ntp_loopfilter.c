@@ -390,7 +390,6 @@ local_clock(
 			    fp_offset);
 			reinit_timer();
 			tc_counter = 0;
-			sys_poll = NTP_MINPOLL;
 			rval = 2;
 			if (state == S_NSET) {
 				rstclock(S_FREQ, peer->epoch, 0);
@@ -648,7 +647,7 @@ local_clock(
 			tc_counter = CLOCK_LIMIT;
 			if (sys_poll < peer->maxpoll) {
 				tc_counter = 0;
-					sys_poll++;
+				sys_poll++;
 			}
 		}
 	} else {
