@@ -10,6 +10,7 @@
 
 /* Disable the openssl md5 includes because it clash with ours. */
 #define NO_MD5
+#define OPENSSL_NO_MD5
 
 #include "ntp_machine.h"
 
