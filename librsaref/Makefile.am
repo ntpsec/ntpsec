@@ -41,7 +41,7 @@ $(librsaref_a_SOURCES): stamp-rsaref
 
 stamp-rsaref:
 	@rm -f stamp-rsaref stamp-rsarefT
-	@echo timestamp > stamp-hT 2> /dev/null
+	@echo timestamp > stamp-rsarefT 2> /dev/null
 	for i in $(librsaref_a_SOURCES); do \
 	    case "@MAKE_LIBRSAREF@" in \
 	     '') touch $$i ;; \

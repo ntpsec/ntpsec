@@ -1,5 +1,7 @@
 2000-02-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* librsaref/Makefile.am (stamp-rsaref): Typo
+
 	* configure.in (ac_cv_func_ctty_for_f_setown): Yes for OpenBSD
 	(ac_cv_var_ntp_syscalls): Fix quoting of description
 	From: Jonathan Rozes <jrozes@vinton.com>
@@ -37,7 +39,7 @@
 2000-02-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_nmea.c: Correctly interpret the quality indicator.
-	Deal with the time suppliedin centiseconds.  GPGCA/GPGGA cleanup.
+	Deal with the time supplied in centiseconds.  GPGCA/GPGGA cleanup.
 	From: Andrew Hood <ajhood@fl.net.au>
 
 	* libparse/Makefile.am (K_CFLAGS): Use instead.  Add NEED_NTP_BOPS.
