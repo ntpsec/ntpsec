@@ -4,6 +4,7 @@
  *  as int and u_int.
  *  For 32 bit systems, define them as long and u_long
  */
+#include <sys/types.h>
 #include "ntp_machine.h"
 
 #ifndef _NTP_TYPES_
