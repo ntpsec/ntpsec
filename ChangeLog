@@ -1,7 +1,14 @@
 2000-07-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp_config.h: 
+	* ntpd/ntp_config.c: Move a whack of #defines to ntp_config.h so
+	ntp-genkeys.c can see them, too.
+
 	* util/ntp-genkeys.c: Add stubs to work with ../ntpd/ntp_config.o,
 	start hooking things up.
+	(main): debugging
+	(crypto_config): better implementation
+	
 
 	* ntpd/ntp_config.c (getconfig): 
 	* ntpd/ntpd.c: Initialize "debug" here, not in ntp_config.c

@@ -224,7 +224,23 @@ crypto_config(
 	char *cp		/* file name */
 	)
 {
-	if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
+	switch (item) {
+	    case CONF_CRYPTO_DH:
+		if (debug) printf("crypto_config: DH/<%d> <%s>\n", item, cp);
+		path_dhparms = cp;
+		break;
+	    case CONF_CRYPTO_PRIVATEKEY:
+		if (debug) printf("crypto_config: PRIVATEKEY/<%d> <%s>\n", item, cp);
+		path_dhparms = cp;
+		break;
+	    case CONF_CRYPTO_PUBLICKEY:
+		if (debug) printf("crypto_config: PUBLICKEY/<%d> <%s>\n", item, cp);
+		path_publickey = cp;
+		break;
+	    default:
+		if (debug) printf("crypto_config: <%d> <%s>\n", item, cp);
+		break;
+	}
 	return;
 }
 
@@ -449,6 +465,12 @@ main(
 
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
+
+	printf("After config:\n");
+	printf("path_keys       = <%s>\n", path_keys);
+	printf("path_keysdir    = <%s>\n", path_keysdir);
+	printf("path_publickey  = <%s>\n", path_publickey);
+	printf("path_privatekey = <%s>\n", path_privatekey);
 
 	/*
 	  We:
