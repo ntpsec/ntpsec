@@ -1,5 +1,7 @@
 2000-08-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c (main): Another small step...
+
 	* configure.in: 99k5
 
 	* include/ntp_request.h: Make data[] member of req_pkt 32 again.

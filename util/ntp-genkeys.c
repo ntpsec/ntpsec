@@ -509,8 +509,9 @@ main(
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
 	if (!path_keys) {
-		/* Shouldn't happen... */
-		path_keys = "PATH_KEYS";
+		snprintf(pathbuf, sizeof pathbuf, "%s/ntp.keys",
+			 NTP_KEYSDIR);
+		path_keys = strdup(pathbuf);
 	}
 	if (*path_keys != '/') {
 		fprintf(stderr,
