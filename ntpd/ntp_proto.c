@@ -1593,7 +1593,6 @@ clock_filter(
 	peer->filter_offset[j] = sample_offset;
 	peer->filter_delay[j] = max(0, sample_delay);
 	peer->filter_disp[j] = dsp;
-	peer->filter_epoch[j] = current_time;
 	j++; j %= NTP_SHIFT;
 	peer->filter_nextpt = (u_short) j;
 
@@ -1607,11 +1606,10 @@ clock_filter(
 	dtemp = clock_phi * (current_time - peer->update);
 	peer->update = current_time;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
-		if (i != 0) {
+		if (i != 0)
 			peer->filter_disp[j] += dtemp;
-			if (peer->filter_disp[j] >= MAXDISPERSE)
-				peer->filter_disp[j] = MAXDISPERSE;
-		}
+		if (peer->filter_disp[j] >= MAXDISPERSE) 
+			peer->filter_disp[j] = MAXDISPERSE;
 		if (peer->filter_disp[j] >= MAXDISPERSE)
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
@@ -1622,6 +1620,7 @@ clock_filter(
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
+	peer->filter_epoch[j] = current_time;
 
         /*
 	 * Sort the samples in both lists by distance.
