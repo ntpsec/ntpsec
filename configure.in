@@ -220,8 +220,13 @@ case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
      AC_CHECK_LIB(readline, readline,
       LIBS="-lreadline -lcurses $LIBS"
       AC_DEFINE(HAVE_LIBREADLINE)
-      AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?])
-      , , -lcurses))
+      AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?]),
+      AC_CHECK_LIB(edit, readline,
+       LIBS="-ledit -lcurses"
+       AC_DEFINE(HAVE_LIBEDIT, , [Do we have the edit library?])
+       AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?])
+       , , -lcurses)
+      , -lcurses))
     READLINE_LIBS=$LIBS
     AC_SUBST(READLINE_LIBS)
     LIBS=$save_LIBS
