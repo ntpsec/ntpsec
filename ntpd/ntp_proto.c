@@ -1111,7 +1111,7 @@ process_packet(
 	l_fp	*recv_ts
 	)
 {
-	l_fp	t34, t21;
+	double	t34, t21;
 	double	p_offset, p_del, p_disp;
 	double	dtemp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime;
@@ -1222,20 +1222,36 @@ process_packet(
 	poll_update(peer, 0);
 
 	/*
-	 * If running in a client/server association, calculate the
-	 * clock offset c, roundtrip delay d and dispersion e. We use
-	 * the equations (reordered from those in the spec). Note that,
-	 * in a broadcast association, org has been set to the time of
-	 * last reception. Note the computation of dispersion includes
-	 * the system precision plus that due to the frequency error
-	 * since the originate time.
+	 * For a client/server association, calculate the clock offset,
+	 * roundtrip delay and dispersion. The equations are reordered
+	 * from the spec for more efficient use of temporaries. For a
+	 * broadcast association, offset the last measurement by the
+	 * computed delay during the client/server volley. Note that
+	 * org has been set to the time of last reception. Note the
+	 * computation of dispersion includes the system precision plus
+	 * that due to the frequency error since the originate time.
+	 *
+	 * It is very important to respect the hazards of overflow. The
+	 * only permitted operation on raw timestamps is subtraction,
+	 * where the result is a signed quantity spanning from 68 years in
+	 * the past to 68 years in the future. To avoid loss of precision,
+	 * these calculations are done using 64-bit integer arithmetic.
+	 * However, the offset and delay calculations are sums and
+	 * differences of these first-order differences, which if done
+	 * using 64-bit integer arithmetic, would be valid over only half
+	 * that span. Since the typical first-order differences are
+	 * usually very small, they are converted to 64-bit doubles and
+	 * all remaining calculations done in floating-point arithmetic.
+	 * This preserves the accuracy while retaining the 68-year span.
 	 *
 	 * Let t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->rec:
 	 */
-	t34 = p_xmt;			/* t3 - t4 */
-	L_SUB(&t34, &peer->rec);
-	t21 = p_rec;			/* t2 - t1 */
-	L_SUB(&t21, &p_org);
+	ci = p_xmt;			/* t3 - t4 */
+	L_SUB(&ci, &peer->rec);
+	LFPTOD(&ci, t34);
+	ci = p_rec;			/* t2 - t1 */
+	L_SUB(&ci, &p_org);
+	LFPTOD(&ci, t21);
 	ci = peer->rec;			/* t4 - t1 */
 	L_SUB(&ci, &p_org);
 	LFPTOD(&ci, p_disp);
@@ -1250,27 +1266,22 @@ process_packet(
 	 * MODE_BCLIENT mode. The next broadcast message after that
 	 * computes the broadcast offset and clears FLAG_MCAST.
 	 */
-	ci = t34;
 	if (pmode == MODE_BROADCAST) {
+		p_offset = t34;
 		if (peer->flags & FLAG_MCAST) {
-			LFPTOD(&ci, p_offset);
 			peer->estbdelay = peer->offset - p_offset;
 			if (peer->hmode == MODE_CLIENT)
 				return;
 
 			peer->flags &= ~FLAG_MCAST;
 		}
-		DTOLFP(peer->estbdelay, &t34);
-		L_ADD(&ci, &t34);
+		p_offset += peer->estbdelay;
 		p_del = peer->delay;
 	} else {
-		L_ADD(&ci, &t21);	/* (t2 - t1) + (t3 - t4) */
-		L_RSHIFT(&ci);
-		L_SUB(&t21, &t34);	/* (t2 - t1) - (t3 - t4) */
-		LFPTOD(&t21, p_del);
+		p_offset = (t21 + t34) / 2.;
+		p_del = t21 - t34;
 	}
 	p_del = max(p_del, LOGTOD(sys_precision));
-	LFPTOD(&ci, p_offset);
 	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
 	    p_disp >= MAXDISPERSE)		/* test 9 */
 		peer->flash |= TEST9;		/* bad root distance */
