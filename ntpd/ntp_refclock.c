@@ -213,7 +213,7 @@ refclock_newpeer(
 	/*
 	 * Allocate and initialize interface structure
 	 */
-	pp = emalloc(sizeof(struct refclockproc));
+	pp = (struct refclockproc *)emalloc(sizeof(struct refclockproc));
 	if (pp == NULL)
 		return (0);
 
