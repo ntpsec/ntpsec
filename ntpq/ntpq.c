@@ -1677,7 +1677,7 @@ getnetnum(
 		return 1;
 	} else if ((err = getaddrinfo(hname, "ntp", &hints, &ai)) == 0) {
 		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
-		if (fullhost != 0)
+		if (ai->ai_canonname != 0)
 		    (void) strcpy(fullhost, ai->ai_canonname);
 		return 1;
 	} else {
