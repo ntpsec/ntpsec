@@ -1845,6 +1845,24 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(for hopf serial clock device)
+AC_ARG_ENABLE(HOPFSERIAL,	[  --enable-HOPFSERIAL     + hopf serial clock device],
+      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+  if test "$ntp_ok" = "yes"; then
+      ntp_refclock=yes
+      AC_DEFINE(CLOCK_HOPF_SERIAL)
+  fi
+  AC_MSG_RESULT($ntp_ok)
+
+AC_MSG_CHECKING(for hopf PCI clock 6039)
+AC_ARG_ENABLE(HOPFPCI,		[  --enable-HOPFPCI        + hopf 6039 PCI board],
+      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_HOPF_PCI)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(HP 58503A GPS receiver)
 AC_ARG_ENABLE(HPGPS,
     AC_HELP_STRING([--enable-HPGPS], [+ HP 58503A GPS receiver]),
