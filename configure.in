@@ -2513,9 +2513,11 @@ case "$ans" in
 	case "$host" in
 	 *-*-darwin*)
 	    test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
+	    ;;
 	 *)
 	    test -f $i/libcrypto.a -a -f $i/libssl.a && break
 	    ;;
+	esac
     done
     case "$i" in
      no)
