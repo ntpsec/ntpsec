@@ -1,3 +1,7 @@
+2000-01-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (CLOCK_WWV): Require <sys/audioio.h> or <sun/audioio.h>
+
 1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98i
