@@ -11126,13 +11126,13 @@ cat >$CONFIG_STATUS <<EOF
 
 # Files that config.status was made for.
 config_files="\\
-  Makefile adjtimed/Makefile clockstuff/Makefile include/Makefile
-  kernel/Makefile kernel/sys/Makefile libntp/Makefile libparse/Makefile
-  librsaref/Makefile ntpd/Makefile ntpdc/Makefile ntpdate/Makefile
-  ntpq/Makefile ntptrace/Makefile parseutil/Makefile scripts/Makefile
-  scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver
-  scripts/ntp-wait scripts/ntpsweep scripts/ntpver scripts/plot_summary
-  scripts/summary util/Makefile"
+  Makefile adjtimed/Makefile clockstuff/Makefile ElectricFence/Makefile
+  include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile
+  libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile
+  ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile
+  scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj
+  scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver
+  scripts/plot_summary scripts/summary util/Makefile"
 config_headers="\\
   config.h"
 config_commands="\\
@@ -11218,6 +11218,7 @@ do
   'Makefile' ) CONFIG_FILES="\$CONFIG_FILES Makefile" ;;
   'adjtimed/Makefile' ) CONFIG_FILES="\$CONFIG_FILES adjtimed/Makefile" ;;
   'clockstuff/Makefile' ) CONFIG_FILES="\$CONFIG_FILES clockstuff/Makefile" ;;
+  'ElectricFence/Makefile' ) CONFIG_FILES="\$CONFIG_FILES ElectricFence/Makefile" ;;
   'include/Makefile' ) CONFIG_FILES="\$CONFIG_FILES include/Makefile" ;;
   'kernel/Makefile' ) CONFIG_FILES="\$CONFIG_FILES kernel/Makefile" ;;
   'kernel/sys/Makefile' ) CONFIG_FILES="\$CONFIG_FILES kernel/sys/Makefile" ;;

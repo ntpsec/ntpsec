@@ -1,3 +1,46 @@
+2000-07-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (AC_CONFIG_FILES): Added ElectricFence/Makefile
+	* ElectricFence: Imporpted.
+
+2000-07-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp_genkeys.c (main): Cleanup
+	* ntpd/refclock_wwv.c (wwv_qrz): sqrt -> SQRT
+	* ntpd/refclock_chu.c (chu_rf): sqrt -> SQRT
+	* ntpd/ntpd.c (set_process_priority): Disable  high-priority for now.
+	PUBKEY cleanup.
+	* ntpd/ntp_timer.c: sys_revoketime cleanup.
+	* ntpd/ntp_proto.c (receive): PUBKEY cleanup.  Comment and code
+	cleanup.
+	(process_packet): Comment and code (PUBKEY) cleanup.
+	(peer_xmit): Comment and code cleanup.
+	(fast_xmit): Comment and code cleanup.
+	* ntpd/ntp_peer.c (expire_all): revoketime cleanup.  PUBKEY cleanup.
+	* ntpd/ntp_crypto.c: Comment reorg.  DH parameters are now
+	file-static instead of local to subroutines.
+	(make_keylist): peer->pcookie.key cleanup/fix
+	(crypto_recv): Subroutine documentation cleanup, other cleanup
+	(crypto_xmit): Cleanup/document.
+	(crypto_setup): Cleanup/document.
+	(crypto_agree): Cleanup/document.
+	(crypto_rsa): now static
+	(crypto_dh): now static.  Comment cleanup.  Code cleanup.
+	(crypto_tai): now static.  Code and comment cleanup.
+	(crypto_config): Deal with CRYPTO_CONF_LEAP.
+	* ntpd/ntp_control.c (CS_DHPARAMS): Rename corresponding token to
+	"params".  Remove CS_TAI from def_sys_var[].
+	(ctl_putsys): CS_HOST, CS_DHPARAMSm CS_REVTIME, and CS_LEAPTIME
+	bugfix.  CS_TAI cleanup.
+	* ntpd/ntp_config.c (CONF_CRYPTO_LEAP): Added
+	(getconfig): Added CONF_CRYPTO_LEAP support.
+	* include/ntp_syslog.h: Lose GIZMO stuff.
+	* include/ntp_crypto.h (CRYPTO_CONF_LEAP): Added
+	* include/ntp.h: struct autokey, cookie,value, and pkt changes for
+	signature field.  Update the inline docs on pkt's exten field.
+	From: Dave Mills
+	
+
 2000-07-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_util.c (stats_config): If we read a bogus old_drift,
