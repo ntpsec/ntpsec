@@ -62,7 +62,7 @@ extern const struct in6_addr isc_in6addr_loopback;
  */
 
 #ifndef IN6_IS_ADDR_UNSPECIFIED
-#define IN6_IS_ADDR_UNSPECIFIED(a)      \
+#define IN6_IS_ADDR_UNSPECIFIED(a)     (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == 0 && \
