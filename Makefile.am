@@ -26,6 +26,7 @@ EXTRA_DIST = \
 	NOTES.y2kfixes \
 	README.bk \
 	README.hackers \
+	README.versions \
 	TODO \
 	WHERE-TO-START \
 	acconfig.h \
