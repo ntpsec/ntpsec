@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#define ISC_ONLY_IPV6
+
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SOCKIO_H
