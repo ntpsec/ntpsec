@@ -440,7 +440,7 @@ atom_poll(
 	pp = peer->procptr;
 	up = (struct atomunit *)pp->unitptr;
 #if defined(PPS) || defined(HAVE_PPSAPI)
-	if (!(up->flags & FLAG_AUX)) {
+	if (!(up->flags & !(FLAG_AUX | FLAG_TTY))) {
 		if (atom_pps(peer))
 			return;
 	}

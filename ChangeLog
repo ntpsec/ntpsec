@@ -1,5 +1,8 @@
 1999-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_atom.c (atom_poll): PPS cleanup
+	From: Dave Mills <mills@udel.edu>
+
 	* libntp/msyslog.c: 
 	* libntp/gpstolfp.c: 
 	Lint cleanup
