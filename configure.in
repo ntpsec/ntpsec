@@ -1176,6 +1176,12 @@ case "$ac_cv_header_sys_sio_h" in
     ;;
 esac
 
+case "$ac_cv_hdr_def_tiocdcdtimestamp" in
+ yes)
+    ac_cv_var_oncore_ok=yes
+    ;;
+esac
+
 AC_CACHE_CHECK(if nlist() values might require extra indirection,
 ac_cv_var_nlist_extra_indirection,
 [ans=no
@@ -1410,7 +1416,7 @@ AC_MSG_RESULT($ntp_ok)
 # there is NO way that I can tell to tell if a given OS is using timespec or
 # timeval so just set it here for the one case that is KNOWN to use timespec.
 
-case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$ac_cv_hdr_def_tiocdcdtimestamp" in
+case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
  *yes*)
     AC_DEFINE(HAVE_PPSAPI)
     ac_cv_var_oncore_ok=yes

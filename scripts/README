@@ -6,6 +6,9 @@ files in the parent directory for directions on how to use these files.
 
 calc_tickadj	Calculates "optimal" value for tick given ntp.drift file
 
+freq_adj	Calculates and optionally sets the clock frequency
+		based on ntp.drift .  For FreeBSD systems.
+
 mkver.in	script to create new version numbers for all sources
 
 monitoring      directory containing perl scripts useful for monitoring
