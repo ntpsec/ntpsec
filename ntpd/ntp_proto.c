@@ -31,7 +31,7 @@ s_char	sys_precision;		/* local clock precision */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdispersion;	/* dispersion to primary source */
 u_int32 sys_refid;		/* reference source for local clock */
-struct sockaddr_storage sock_sys_refid; /* socket structure for reference source for local clock */
+u_int32 host_refid;		/* reference source for host */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
@@ -205,8 +205,10 @@ transmit(
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if ((peer->stratum > 1 && peer->refid ==
-			    ((struct sockaddr_in*)&peer->dstadr->sin)->sin_addr.s_addr) ||
+			if ((peer->stratum > 1 &&
+			    peer->dstadr->sin.ss_family == AF_INET ?
+			    peer->refid == GET_INADDR(peer->dstadr->sin) :
+			    peer->refid == host_refid) ||
 			    peer->stratum == STRATUM_UNSPEC)
 				hpoll++;
 			else
@@ -603,10 +605,9 @@ receive(
 			    sys_stratum || (sys_cohort &&
 			    PKT_TO_STRATUM(pkt->stratum) ==
 			    sys_stratum) ||
-			    /* XXX How do I check IPv6 addresses ? */
-			    (rbufp->dstadr->sin.ss_family == AF_INET &&
-			    ((struct sockaddr_in*)&rbufp->dstadr->sin)->sin_addr.s_addr ==
-			    pkt->refid))
+			    rbufp->dstadr->sin.ss_family == AF_INET ?
+			    GET_INADDR(rbufp->dstadr->sin) == pkt->refid :
+			    host_refid == pkt->refid)
 				return;
 		}
 
@@ -1354,7 +1355,8 @@ clock_update(void)
 		else if (sys_stratum == STRATUM_UNSPEC)
 			memcpy(&sys_refid, "UNSP", 4);
 		else
-			sys_refid = 0;  /* <**** REFID case to solve *****> */
+			sys_refid = sys_peer->srcadr.ss_family == AF_INET ?
+			    GET_INADDR(sys_peer->srcadr) : host_refid;
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
@@ -1830,10 +1832,10 @@ clock_select(void)
 			 * root distance, since the poll interval can
 			 * increase to a day and a half.
 			 */
-					/* <**** REFID case to solve ***> */
-			if (!peer->reach || /* (peer->stratum > 1 &&
-			    peer->refid ==
-			    peer->dstadr->sin.sin_addr.s_addr) || */
+			if (!peer->reach || (peer->stratum > 1 &&
+			    peer->dstadr->sin.ss_family == AF_INET ?
+			    peer->refid == GET_INADDR(peer->dstadr->sin) :
+			    peer->refid == host_refid) ||
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
 			    clock_phi * ULOGTOD(sys_poll)))
