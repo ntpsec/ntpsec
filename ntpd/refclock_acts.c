@@ -176,7 +176,7 @@
 #define WAIT		2	/* DTR timeout */
 #define MODEM		3	/* modem timeout */
 #define ANSWER		60	/* answer timeout */
-#define CONNECT		10	/* first valid message timeout */
+#define CONNECT		20	/* first valid message timeout */
 #define TIMECODE	30	/* all valid messages timeout */
 
 /*
@@ -871,7 +871,7 @@ acts_disc (
 		up->retry = 0;
 	} else {
 		up->retry++;
-		if (*sys_phone[up->retry] == '\0') {
+		if (sys_phone[up->retry] == NULL) {
 			up->retry = 0;
 			sprintf(tbuf, "acts: call failed");
 			record_clock_stats(&peer->srcadr, tbuf);
