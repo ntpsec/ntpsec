@@ -72,14 +72,14 @@ ntpq&gt; pe
             <dt><tt>RMOT</tt>
             <dd>Somebody is tinkering with the association from a remote host running <tt>ntpdc</tt>. Not to worry unless some rascal has stolen your keys.
             <dt><tt>STEP</tt>
-            <dd>A step change in system time has occured, but the association has not yet resynchronized.
+            <dd>A step change in system time has occurred, but the association has not yet resynchronized.
         </dl>
         <p>System Kiss Codes</p>
         <dl>
             <dt><tt>INIT</tt>
             <dd>The system clock has not yet synchronized for the first time.
             <dt><tt>STEP</tt>
-            <dd>A step change in system time has occured, but the system clock has not yet resynchronized.
+            <dd>A step change in system time has occurred, but the system clock has not yet resynchronized.
         </dl>
         <p>The tattletale symbol at the left margin displays the synchronization status of each peer. The currently selected peer is marked <tt>*</tt>, while additional peers designated acceptable for synchronization are marked <tt>+</tt>. Peers marked <tt>*</tt> and <tt>+</tt> are included in the weighted average computation to set the local clock; the data produced by peers marked with other symbols are discarded. See the <tt>ntpq</tt> page for the meaning of these symbols.</p>
         <p>Additional details for each peer separately can be determined by the following procedure. First, use the <tt>as</tt> command to display an index of association identifiers, such as</p>

@@ -63,7 +63,7 @@
             <dt><tt>0x0002</tt>
             <dd>Data pulse error. For the data pulse in second 1, either the amplitude or SNR is below threshold (1000 and 10 dB, respectively).
             <dt><tt>0x0004</tt>
-            <dd>Probe pulse error. Two or more decoding errors have occured for the data pulses in seconds 58, 59 and 1.
+            <dd>Probe pulse error. Two or more decoding errors have occurred for the data pulses in seconds 58, 59 and 1.
         </dl>
         <p>If none of the scoreboard bits are set, a hit is declared, otherwise a miss. At the end of each probe, the frequency and station with the maximum metric is chosen, with ties going first to the highest frequency and then to WWV in order. During the acquisition phase a station is considered valid only if the metric is above 13; after the clock is synchronized a station is valid only if the metric is above 50. If no stations are valid, the driver ignores all signals and sets the reference ID field to NONE.</p>
         <h4>Diagnostics</h4>
