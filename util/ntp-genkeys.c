@@ -610,6 +610,8 @@ cleanlinks(
 		if (cp) {
 			++cp;
 			*cp = 0;
+		} else {
+			*fb = 0;
 		}
 	} else {
 		*fb = 0;
