@@ -3,7 +3,7 @@
  * Refclock_neoclock4x.c
  * - NeoClock4X driver for DCF77 or FIA Timecode
  *
- * Date: 2003-01-10 v1.12
+ * Date: 2003-07-07 v1.13
  *
  * see http://www.linum.com/redir/jump/id=neoclock4x&action=redir
  * for details about the NeoClock4X device
@@ -434,6 +434,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   /* read last received timecode */
   pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
+  pp->leap = LEAP_NOWARNING;
 
   if(NEOCLOCK4X_TIMECODELEN != pp->lencode)
     {
@@ -600,6 +601,9 @@ neoclock4x_receive(struct recvbuf *rbufp)
       return;
     }
   refclock_receive(peer);
+
+  /* report good status */
+  refclock_report(peer, CEVNT_NOMINAL);
 
   record_clock_stats(&peer->srcadr, pp->a_lastcode);
 }
@@ -1049,4 +1053,9 @@ int refclock_neoclock4x_bs;
  * - replaced ldiv
  * - add code to support FreeBSD
  *
+ * 2003/07/07 cjh
+ * Revision 1.13
+ * - fix reporting of clock status
+ *   changes. previously a bad clock
+ *   status was never reset.
  */
