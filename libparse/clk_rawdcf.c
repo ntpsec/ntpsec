@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp-4/libparse/clk_rawdcf.c,v 4.8 1999/11/28 09:13:50 kardel RELEASE_19991128_A
+ * /src/NTP/ntp-4/libparse/clk_rawdcf.c,v 4.9 1999/12/06 13:42:23 kardel Exp
  *  
- * clk_rawdcf.c,v 4.8 1999/11/28 09:13:50 kardel RELEASE_19991128_A
+ * clk_rawdcf.c,v 4.9 1999/12/06 13:42:23 kardel Exp
  *
  * Raw DCF77 pulse clock support
  *
@@ -476,12 +476,12 @@ cvt_rawdcf(
 				if ((newtime - t->tcode) == 60) /* guard against multi bit errors */
 				{
 					clock_time->utctime = newtime;
-					t->tcode            = newtime;
 				}
 				else
 				{
 					rtc = CVT_FAIL|CVT_BADTIME;
 				}
+				t->tcode            = newtime;
 			}
 	       }
         }
@@ -583,6 +583,9 @@ int clk_rawdcf_bs;
  * History:
  *
  * clk_rawdcf.c,v
+ * Revision 4.9  1999/12/06 13:42:23  kardel
+ * transfer correctly converted time codes always into tcode
+ *
  * Revision 4.8  1999/11/28 09:13:50  kardel
  * RECON_4_0_98F
  *

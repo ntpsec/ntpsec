@@ -1,3 +1,8 @@
+1999-12-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libparse/clk_rawdcf.c (cvt_rawdcf): Buglet.
+	From: Frank Kardel <kardel@acm.org>
+
 1999-12-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/Makefile.am (ntpd_SOURCES): Added refclock_wwv.c
