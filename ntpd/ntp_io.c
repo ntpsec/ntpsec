@@ -1849,20 +1849,6 @@ findinterface(
 	int rtn, i;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
-
-	/* Try the local interface addresses first */
-	for (i = nwilds; i < ninterfaces; i++) {
-		/*
-		* First look if is the the correct family
-		*/
-		if(inter_list[i].sin.ss_family != addr->ss_family)
-	  		continue;
-		/*
-		 * We match the unicast address only.
-		 */
-		if (SOCKCMP(&inter_list[i].sin, addr))
-			return (&inter_list[i]);
-	}
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
 	 * and slap a getsockname() on it. If anything breaks, as it
