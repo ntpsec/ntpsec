@@ -92,6 +92,7 @@ static	void	peer_xmit	P((struct peer *));
 static	void	fast_xmit	P((struct recvbuf *, int, keyid_t, int));
 static	void	clock_update	P((void));
 int	default_get_precision	P((void));
+static	int	peer_unfit	P((struct peer *));
 
 /*
  * transmit - Transmit Procedure. See Section 3.4.2 of the
@@ -215,25 +216,22 @@ transmit(
 				 * not been heard for three consecutive
 				 * polls, stuff the clock filter. Next,
 				 * determine the poll interval. If the
-				 * peer is a synchronization candidate,
-				 * use the system poll interval. If we
-				 * cannot synchronize to the peer
-				 * increase it by one. 
+				 * peer is unfit for synchronization,
+				 * increase it by one; otherwise, use
+				 * the system poll interval. 
 				 */
 				if (!(peer->reach & 0x07)) {
 					clock_filter(peer, 0., 0.,
 					    MAXDISPERSE);
 					clock_select();
 				}
-				if ((peer->stratum > 1 &&
-				    peer->refid == peer->dstadr->addr_refid) ||
-				    peer->stratum == STRATUM_UNSPEC)
+				if (peer_unfit(peer))
 					hpoll++;
 				else
 					hpoll = sys_poll;
 				if (peer->flags & FLAG_BURST)
 					peer->burst = NTP_BURST;
-				}
+			}
 		} else {
 			peer->burst--;
 			if (peer->burst == 0) {
@@ -1774,17 +1772,10 @@ clock_select(void)
 			peer->status = CTL_PST_SEL_REJECT;
 
 			/*
-			 * A peer leaves the island immediately if
-			 * unreachable, synchronized to us or suffers
-			 * excessive root distance. Careful with the
-			 * root distance, since the poll interval can
-			 * increase to a day and a half.
+			 * Leave the island immediately if the peer is
+			 * unfit to synchronize.
 			 */
-			if (!peer->reach || (peer->stratum > 1 &&
-			    peer->refid == peer->dstadr->addr_refid) ||
-			    peer->stratum >= STRATUM_UNSPEC ||
-			    (root_distance(peer) >= MAXDISTANCE + 2 *
-			    clock_phi * ULOGTOD(sys_poll)))
+			if (peer_unfit(peer))
 				continue;
 
 			/*
@@ -2304,6 +2295,7 @@ peer_xmit(
 #ifdef OPENSSL
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		struct exten *exten;	/* extension field */
+		u_int	opcode;
 
 		/*
 		 * The Public Key Dance (PKD): Cryptographic credentials
@@ -2410,28 +2402,13 @@ peer_xmit(
  				    peer->issuer);
 
 			/*
-			 * Identity.  We look first for GQ, then IFF. If
-			 * the server has MV, then we look for that. If
-			 * not found, we skip identity confirmation.
-			 * Note we have to sign the certificate before
-			 * the cookie to avoid a deadlock when the
-			 * passive peer is walking the certificate
-			 * trail. Awesome.
+			 * Identity. Note we have to sign the
+			 * certificate before the cookie to avoid a
+			 * deadlock when the passive peer is walking the
+			 * certificate trail. Awesome.
 			 */
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    crypto_flags & peer->crypto &
-			    CRYPTO_FLAG_GQ)
-				exten = crypto_args(peer, CRYPTO_GQ,
-				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    crypto_flags & peer->crypto &
-			    CRYPTO_FLAG_IFF)
-				exten = crypto_args(peer, CRYPTO_IFF,
-				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    peer->crypto & CRYPTO_FLAG_MV)
-				exten = crypto_args(peer, CRYPTO_MV,
-				    NULL);
+			else if ((opcode = crypto_ident(peer)) != 0)
+				exten = crypto_args(peer, opcode, NULL);
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			   !(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
@@ -2513,24 +2490,10 @@ peer_xmit(
 				    peer->issuer);
 
 			/*
-			 * Identity. We look first for GQ, then IFF. If
-			 * the server has MV, then we look for that. If
-			 * not found, we skip identity confirmation.
+			 * Identity.
 			 */
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    crypto_flags & peer->crypto &
-			    CRYPTO_FLAG_GQ)
-				exten = crypto_args(peer, CRYPTO_GQ,
-				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    crypto_flags & peer->crypto &
-			    CRYPTO_FLAG_IFF)
-				exten = crypto_args(peer, CRYPTO_IFF,
-				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY) &&
-			    peer->crypto & CRYPTO_FLAG_MV)
-				exten = crypto_args(peer, CRYPTO_MV,
-				    NULL);
+			else if ((opcode = crypto_ident(peer)) != 0)
+				exten = crypto_args(peer, opcode, NULL);
 
 			/*
 			 * Autokey
@@ -2836,6 +2799,29 @@ key_expire(
 #endif
 }
 #endif /* OPENSSL */
+
+
+/*
+ * Determine if the peer is unfit for synchronization
+ *
+ * A peer is unfit for synchronization if
+ * > not reachable
+ * > a synchronization loop would form
+ * > never been synchronized
+ * > stratum undefined or too high
+ * > too long without synchronization
+ */
+int				/* 0 if no, 1 if yes */
+peer_unfit(
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	return (!peer->reach || (peer->stratum > 1 && peer->refid ==
+	    peer->dstadr->addr_refid) || peer->leap == LEAP_NOTINSYNC ||
+	    peer->stratum >= STRATUM_UNSPEC || root_distance(peer) >=
+	    MAXDISTANCE + 2. * clock_phi * ULOGTOD(sys_poll) );
+}
+
 
 /*
  * Find the precision of this particular machine
