@@ -265,7 +265,7 @@
 #ifdef AUDIO_CHU
 struct surv {
 	double	shift[12];	/* mark register */
-	double	max, min;	/* max/min envelope signals */
+	double	es_max, es_min;	/* max/min envelope signals */
 	double	dist;		/* sample distance */
 	int	uart;		/* decoded character */
 };
@@ -649,7 +649,7 @@ chu_receive(
  * code. Hopefully, the compiler will efficiently implement the move-
  * and-muiltiply-and-add operations.
  */
-void
+static void
 chu_rf(
 	struct peer *peer,	/* peer structure pointer */
 	double	sample		/* analog sample */
@@ -764,7 +764,7 @@ chu_rf(
 	if (up->baud > 1. / (BAUD * 8.)) {
 		up->baud -= 1. / (BAUD * 8.);
 		sp = &up->surv[up->decptr];
-		span = sp->max - sp->min;
+		span = sp->es_max - sp->es_min;
 		up->maxsignal += (span - up->maxsignal) / 80.;
 		if (up->dbrk > 0) {
 			up->dbrk--;
@@ -797,13 +797,13 @@ chu_rf(
  * program selects over the last eight survivors the one with maximum
  * distance to determine the decoded character.
  */
-void
+static void
 chu_uart(
 	struct surv *sp,	/* survivor structure pointer */
 	double	sample		/* baseband signal */
 	)
 {
-	double	max, min;	/* max/min envelope */
+	double	es_max, es_min;	/* max/min envelope */
 	double	slice;		/* slice level */
 	double	dist;		/* distance */
 	double	dtemp;
@@ -813,15 +813,15 @@ chu_uart(
 	 * Save the sample and shift right. At the same time, measure
 	 * the maximum and minimum over all eleven samples.
 	 */
-	max = -1e6;
-	min = 1e6;
+	es_max = -1e6;
+	es_min = 1e6;
 	sp->shift[0] = sample;
 	for (i = 11; i > 0; i--) {
 		sp->shift[i] = sp->shift[i - 1];
-		if (sp->shift[i] > max)
-			max = sp->shift[i];
-		if (sp->shift[i] < min)
-			min = sp->shift[i];
+		if (sp->shift[i] > es_max)
+			es_max = sp->shift[i];
+		if (sp->shift[i] < es_min)
+			es_min = sp->shift[i];
 	}
 
 	/*
@@ -830,7 +830,7 @@ chu_uart(
 	 * the distance on the assumption the first and last bits must
 	 * be mark, the second space and the rest either mark or space.
 	 */ 
-	slice = (max + min) / 2.;
+	slice = (es_max + es_min) / 2.;
 	dist = 0;
 	sp->uart = 0;
 	for (i = 1; i < 12; i++) {
@@ -839,19 +839,19 @@ chu_uart(
 		if (dtemp > slice)
 			sp->uart |= 0x1;
 		if (i == 1 || i == 11) {
-			dist += dtemp - min;
+			dist += dtemp - es_min;
 		} else if (i == 10) {
-			dist += max - dtemp;
+			dist += es_max - dtemp;
 		} else {
 			if (dtemp > slice)
-				dist += dtemp - min;
+				dist += dtemp - es_min;
 			else
-				dist += max - dtemp;
+				dist += es_max - dtemp;
 		}
 	}
-	sp->max = max;
-	sp->min = min;
-	sp->dist = dist / (11 * (max - min));
+	sp->es_max = es_max;
+	sp->es_min = es_min;
+	sp->dist = dist / (11 * (es_max - es_min));
 }
 
 
