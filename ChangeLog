@@ -1,3 +1,11 @@
+Tue Jun  1 00:40:04 1999  Harlan Stenn  <stenn@pogo.udel.edu>
+
+	* build: mips-dec-ultrix4.4 hates "set -e"
+
+	* flock-build: Created
+
+	* build: added -l option
+
 Mon May 31 20:28:40 1999  Harlan Stenn  <stenn@pogo.udel.edu>
 
 	* README: Removed auto{make,conf}.patch files

@@ -1,10 +1,19 @@
 #! /bin/sh
 
+LOGF=make.log
+case "$1" in
+ -l) LOG=1
+    shift
+    ;;
+ *) LOG=0
+    ;;
+esac
+
 CONFIG_ARGS="$@"
 
 IAM=`hostname || uname -n`
 
-set -e
+#set -e
 #set -x
 
 CVO=`./config.guess`
@@ -42,6 +51,9 @@ BDIR="$BDIR$CCSUF"
 
 cd $BDIR
 
+(
+cp /dev/null $LOGF
+
 [ -f config.status ] || ../configure $CONFIG_ARGS
 
 case "$MAKE" in
@@ -50,3 +62,5 @@ case "$MAKE" in
  *)  $MAKE
      ;;
 esac
+) >> $LOGF 2>&1
+
