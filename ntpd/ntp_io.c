@@ -70,7 +70,6 @@ extern int listen_to_virtual_ips;
 
 #endif
 
-#undef UDP_WILDCARD_DELIVERY
 /*
 #define ISC_PLATFORM_HAVEIPV6
  struct ipv6_mreq {  struct in6_addr ipv6mr_multiaddr;
