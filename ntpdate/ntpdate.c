@@ -471,7 +471,7 @@ ntpdatemain (
 	 * Add servers we are going to be polling
 	 */
 #ifdef HAVE_NETINFO
-	inetinfoservers = getnetinfoservers();
+	netinfoservers = getnetinfoservers();
 #endif
 
 	for ( ; ntp_optind < argc; ntp_optind++)

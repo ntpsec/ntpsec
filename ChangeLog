@@ -1,3 +1,10 @@
+2000-01-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdate/ntpdate.c (ntpdatemain): Typo
+	From: Jack Bryans <jbryans@csulb.edu>
+
+	* Makefile.am (EXTRA_DIST): Add flock-build.  Probably UDel specific...
+
 2000-01-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/check_y2k.c (main): Reformat for ansi2knr
