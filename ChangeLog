@@ -1,5 +1,7 @@
 1999-07-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* Makefile.am (EXTRA_DIST): Lose ntpmak; "build" does a better job.
+
 	* ntpq/Makefile.am (version.o): Use mkver
 	* ntptrace/Makefile.am (version.o): Ditto
 	* ntpdate/Makefile.am (version.o): Ditto

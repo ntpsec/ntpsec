@@ -1,7 +1,7 @@
 If you want DES support in ntp:
 
-- convert your DES keys to MD5 by changing the 'A', 'N' or 'S' to 'M'
-- visualize whirled peas
+- Use MD5 instead:
+- - convert your DES keys to MD5 by changing the 'A', 'N' or 'S' to 'M'
 
 If you *need* DES support:
 

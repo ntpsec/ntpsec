@@ -1,4 +1,4 @@
-README file for directory ./clockstuff of the NTP Version 3 distribution
+README file for directory ./clockstuff of the NTP Version 4 distribution
 
 This directory contains the sources for utility programs designed to
 support radio clocks. The chutest.c and clktest.c are desgined to

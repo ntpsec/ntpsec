@@ -6,7 +6,7 @@ files in the parent directory for directions on how to use these files.
 
 calc_tickadj	Calculates "optimal" value for tick given ntp.drift file
 
-mkversion	script to create new version numbers for all sources
+mkver.in	script to create new version numbers for all sources
 
 monitoring      directory containing perl scripts useful for monitoring
                 operations
