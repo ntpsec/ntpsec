@@ -413,8 +413,9 @@ arb_poll(
 	up->tcswitch = 0;
 	if (write(pp->io.fd, "TQ", 2) != 2) {
 		refclock_report(peer, CEVNT_FAULT);
-	} else
+	} else {
 		pp->polls++;
+	}
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;

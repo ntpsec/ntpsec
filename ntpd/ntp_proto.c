@@ -108,8 +108,6 @@ transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	int	hpoll;
-
 
 	/*
 	 * The polling state machine. There are two kinds of machines,
@@ -117,28 +115,22 @@ transmit(
 	 * server modes) and those that do (all other modes). The dance
 	 * is intricate...
 	 */
-	hpoll = peer->hpoll;
 	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 
 		/*
-		 * In broadcast mode the poll interval is fixed
-		 * at minpoll.
+		 * In broadcast mode the poll interval is never changed
+		 * from minpoll.
 		 */
-		hpoll = peer->minpoll;
+		/* fall through */;
+
 	} else if (peer->cast_flags & MDF_ACAST) {
 
 		/*
 		 * In manycast mode we start with the minpoll interval
-		 * and ttl. However, the actual poll interval is eight
-		 * times the nominal poll interval shown here. If fewer
-		 * than sys_minclock servers are found, the ttl is
-		 * increased by one and we try again. If this continues
-		 * to the max ttl, the poll interval is bumped by one
-		 * and we try again. If at least sys_minclock servers
-		 * are found, the poll interval increases with the
-		 * system poll interval to the max and we continue
-		 * indefinately. However, about once per day when the
-		 * agreement parameters are refreshed, the manycast
+		 * and unity ttl. The ttl is increased by one for each
+		 * poll until either enough servers have been found or
+		 * the maximum ttl is reached. About once per day when
+		 * the agreement parameters are refreshed, the manycast
 		 * clients are reset and we start from the beginning.
 		 * This is to catch and clamp the ttl to the lowest
 		 * practical value and avoid knocking on spurious doors.
@@ -146,7 +138,6 @@ transmit(
 		if (sys_survivors < sys_minclock && peer->ttl <
 		    sys_ttlmax)
 			peer->ttl++;
-		hpoll = sys_poll;
 	} else {
 		if (peer->burst == 0) {
 			u_char oreach;
@@ -193,11 +184,12 @@ transmit(
 				    FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
+
 				} else if (peer->flash & TEST5) {
 					peer_clear(peer, "CRYPTO");
 					peer->flash += TEST4;
 				} else {
-					hpoll++;
+					peer->hpoll++;
 				}
 			} else {
 				/*
@@ -210,15 +202,13 @@ transmit(
 				 * the system poll interval. 
 				 */
 				peer->unreach = 0;
-				if (!(peer->reach & 0x07)) {
+				if (!(peer->reach & 0x07))
 					clock_filter(peer, 0., 0.,
 					    MAXDISPERSE);
-					clock_select();
-				}
 				if (peer_unfit(peer))
-					hpoll++;
+					peer->hpoll++;
 				else
-					hpoll = sys_poll;
+					peer->hpoll = sys_poll;
 				if (peer->flags & FLAG_BURST)
 					peer->burst = NTP_BURST;
 			}
@@ -263,40 +253,42 @@ transmit(
 					}
 				}
 				clock_select();
-				poll_update(peer, hpoll);
+				poll_update(peer);
 				return;
 			}
 		}
 	}
-	peer->outdate = current_time;
+	peer->outdate = peer->nextdate = current_time;
 
 	/*
 	 * Do not transmit if in broadcast client mode. 
 	 */
 	if (peer->hmode == MODE_BCLIENT) {
-		poll_update(peer, hpoll);
+		poll_update(peer);
 		return;
 
 	/*
 	 * Do not transmit in broadcast mode unless we are synchronized.
 	 */
 	} else if (peer->hmode == MODE_BROADCAST && sys_peer == NULL) {
-		poll_update(peer, hpoll);
+		poll_update(peer);
 		return;
 	}
 
 	/*
-	 * Do not transmit if in access-deny or crypto jail.
+	 * Do not transmit if in access-deny or crypto jail. Clamp the
+	 * poll to minimum if a get out of jail free card shows up.
 	 */
 	if (peer->flash & TEST4) {
 		if (!(peer->flags & FLAG_CONFIG)) {
 			unpeer(peer);
 			return;
 		}
+		peer->hpoll= peer->minpoll;
 	} else {
 		peer_xmit(peer);
 	}
-	poll_update(peer, hpoll);
+	poll_update(peer);
 }
 
 /*
@@ -1041,7 +1033,7 @@ receive(
 		 */
 		if (peer->cmmd != 0) {
 			peer->ppoll = pkt->ppoll;
-			poll_update(peer, 0);
+			poll_update(peer);
 		}
 	}
 #endif /* OPENSSL */
@@ -1066,7 +1058,6 @@ receive(
 		return;
 	}
 
-#ifdef OPENSSL
 	/*
 	 * If TEST10 is lit, the autokey sequence has broken, which
 	 * probably means the server has refreshed its private value.
@@ -1083,7 +1074,6 @@ receive(
 		else
 			unpeer(peer);
 	}
-#endif /* OPENSSL */
 }
 
 
@@ -1220,7 +1210,7 @@ process_packet(
 		peer->timereachable = current_time;
 	}
 	peer->reach |= 1;
-	poll_update(peer, 0);
+	poll_update(peer);
 
 	/*
 	 * For a client/server association, calculate the clock offset,
@@ -1300,8 +1290,6 @@ process_packet(
 		return;
 	}
 	clock_filter(peer, p_offset, p_del, p_disp);
-	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
-		clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp,
 	    SQRT(peer->jitter));
@@ -1318,13 +1306,16 @@ clock_update(void)
 	u_char ostratum;
 
 	/*
-	 * Reset/adjust the system clock. Do this only if there is a
-	 * system peer and the peer epoch is not older than the last
-	 * update.
+	 * There must be a system peer at this point. If we just changed
+	 * the system peer, but have a newer sample from the old one,
+	 * wait until newer data are available.
 	 */
-	if (sys_peer == NULL)
-		return;
-
+	if (sys_poll < sys_peer->minpoll)
+		sys_poll = sys_peer->minpoll;
+	if (sys_poll > sys_peer->maxpoll)
+		sys_poll = sys_peer->maxpoll;
+	sys_peer->hpoll = sys_poll;
+	poll_update(sys_peer);
 	if (sys_peer->epoch <= sys_clocktime)
 		return;
 
@@ -1394,56 +1385,53 @@ clock_update(void)
  */
 void
 poll_update(
-	struct peer *peer,
-	int	hpoll
+	struct peer *peer
 	)
 {
+	u_char	hpoll;
 #ifdef OPENSSL
 	int	oldpoll;
 #endif /* OPENSSL */
 
 	/*
-	 * A little foxtrot to determine what controls the poll
-	 * interval. If the peer is reachable, but the last four polls
-	 * have not been answered, use the minimum. If declared
-	 * truechimer, use the system poll interval. This allows each
-	 * association to ramp up the poll interval for useless sources
-	 * and to clamp it to the minimum when first starting up.
+	 * This routine figures out when the next poll should set, and
+	 * that turns out to be wickedly complicated. The big problem is
+	 * that sometimes the time for the next poll is in the past.
+	 * Watch out for races here between the receive process and the
+	 * poll process. The key assertion is that, if nextdate ==
+	 * current_time, the call is from the poll process; otherwise,
+	 * it is from the receive process.
 	 */
+	hpoll = peer->hpoll;
 #ifdef OPENSSL
-	oldpoll = peer->kpoll;
+	oldpoll = hpoll;
 #endif /* OPENSSL */
-	if (hpoll > 0) {
-		if (hpoll > peer->maxpoll)
-			peer->hpoll = peer->maxpoll;
-		else if (hpoll < peer->minpoll)
-			peer->hpoll = peer->minpoll;
-		else
-			peer->hpoll = (u_char)hpoll;
-	}
+	if (hpoll > peer->maxpoll)
+		hpoll = peer->maxpoll;
+	else if (hpoll < peer->minpoll)
+		hpoll = peer->minpoll;
 
 	/*
-	 * Bit of adventure here. If during a burst and not a poll, just
-	 * slink away. If a poll, figure what the next poll should be.
-	 * If a burst is pending and a reference clock or a pending
-	 * crypto response, delay for one second. If the first sent in a
-	 * burst, delay ten seconds for the modem to come up. For others
-	 * in the burst, delay two seconds.
-	 *
-	 * In case of manycast server, make the poll interval, which is
-	 * axtually the manycast beacon interval, eight times the system
-	 * poll interval. Normally when the host poll interval settles
-	 * up to 1024 s, the beacon interval settles up to 2.3 hours.
+	 * If during the crypto protocol and a message is pending, make
+	 * it wait no more than two seconds.
 	 */
 #ifdef OPENSSL
 	if (peer->cmmd != NULL && (sys_leap != LEAP_NOTINSYNC ||
 	    peer->crypto)) {
 		peer->nextdate = current_time + RESP_DELAY;
+
+	/*
+	 * If we get called from the receive routine while a burst is
+	 * pending, just slink away. If from the poll routine and a
+	 * reference clock or a pending crypto response, delay for one
+	 * second. If this is the first sent in a burst, wait for the
+	 * modem to come up. For others in the burst, delay two seconds.
+	 */
 	} else if (peer->burst > 0) {
 #else /* OPENSSL */
 	if (peer->burst > 0) {
 #endif /* OPENSSL */
-		if (hpoll == 0 && peer->nextdate != current_time)
+		if (peer->nextdate != current_time)
 			return;
 #ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
@@ -1454,20 +1442,44 @@ poll_update(
 			peer->nextdate += sys_calldelay;
 		else
 			peer->nextdate += BURST_DELAY;
+	/*
+	 * A manycast server beacons at the minimum poll interval times
+	 * the ttl until a sufficient number of servers have been found,
+	 * then beacons at the maximum poll interval.
+	 */
 	} else if (peer->cast_flags & MDF_ACAST) {
 		if (sys_survivors >= sys_minclock || peer->ttl >=
 		    sys_ttlmax)
-			peer->kpoll = (u_char)(peer->hpoll + 3);
+			hpoll = peer->maxpoll;
 		else
-			peer->kpoll = peer->hpoll;
-		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
+			hpoll = peer->minpoll + peer->ttl;
+		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
+
+	/*
+	 * The normal case after all those pesky exceptions. Set the
+	 * poll to the minimum of the host and peer values, but not
+	 * below minpoll. That's max(min(ppoll, hpoll), minpoll).
+	 */
 	} else {
-		peer->kpoll = (u_char) max(min(peer->ppoll,
-		    peer->hpoll), peer->minpoll);
-		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
+		if (peer->ppoll < peer->minpoll)
+			peer->nextdate = peer->outdate +
+			    RANDPOLL(peer->minpoll);
+		if (peer->ppoll < hpoll)
+			peer->nextdate = peer->outdate +
+			    RANDPOLL(peer->ppoll);
+		else
+			peer->nextdate = peer->outdate +
+			    RANDPOLL(hpoll);
 	}
-	if (peer->nextdate < current_time)
-		peer->nextdate = current_time;
+
+	/*
+	 * If the time for the next poll has already happened, bring it
+	 * up to the next second after this one. This way the only way
+	 * to get nexdate == current time is from the poll routine.
+	 */
+	peer->hpoll = hpoll;
+	if (peer->nextdate <= current_time)
+		peer->nextdate = current_time + 1;
 #ifdef OPENSSL
 	/*
 	 * Bit of crass arrogance at this point. If the poll interval
@@ -1475,14 +1487,14 @@ poll_update(
 	 * keylist are probably bogus. In this case purge the keylist
 	 * and regenerate it later.
 	 */
-	if (peer->kpoll != oldpoll)
+	if (peer->hpoll != oldpoll)
 		key_expire(peer);
 #endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
 		    current_time, ntoa(&peer->srcadr), peer->flags,
-		    peer->kpoll, peer->burst, peer->outdate,
+		    peer->hpoll, peer->burst, peer->outdate,
 		    peer->nextdate);
 #endif
 }
@@ -1539,7 +1551,7 @@ peer_clear(
 	if (peer == sys_peer)
 		sys_peer = NULL;
 	peer->estbdelay = sys_bdelay;
-	peer->hpoll = peer->kpoll = peer->minpoll;
+	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
@@ -1568,7 +1580,7 @@ peer_clear(
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (oreach)
-		poll_update(peer, 0);
+		poll_update(peer);
 	else if (initializing)
 		peer->nextdate = current_time + peer_associations;
 	else
@@ -1744,9 +1756,11 @@ clock_filter(
 
 	/*
 	 * The mitigated sample statistics are saved for later
-	 * processing.
+	 * processing. If not in a burst, tickle the select.
 	 */
 	peer->epoch = peer->filter_epoch[k];
+	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
+		clock_select();
 #ifdef DEBUG
 	if (debug)
 		printf(
