@@ -275,7 +275,7 @@ create_wildcards(u_short port) {
 	 */
 #ifdef IPV6_V6ONLY
 	if(isc_net_probeipv4() != ISC_R_SUCCESS)
-		okipv4 == ISC_FALSE;
+		okipv4 = ISC_FALSE;
 #endif
 
 	if(okipv4 == ISC_TRUE) {
@@ -582,12 +582,16 @@ io_setbclient(void)
 {
 	int i;
 
-#ifdef OPEN_BCAST_SOCKET
+#ifndef NO_BCAST_SOCKET
 	set_reuseaddr(1);
 #endif
 	for (i = nwilds; i < ninterfaces; i++) {
 		/* Only IPv4 addresses are valid for broadcast */
 		if (inter_list[i].bcast.ss_family != AF_INET)
+			continue;
+
+		/* Skip the loopback address */
+		if (inter_list[i].flags & INT_LOOPBACK)
 			continue;
 
 		/* Is this a broadcast address? */
@@ -601,7 +605,7 @@ io_setbclient(void)
 #ifdef	SYS_SOLARIS
 		inter_list[i].bcast.sin_addr.s_addr = htonl(INADDR_ANY);
 #endif
-#ifdef OPEN_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
+#ifndef NO_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
 		    INT_BROADCAST, 1);
 		if (inter_list[i].bfd != INVALID_SOCKET) {
@@ -622,7 +626,7 @@ io_setbclient(void)
 #endif
 #endif
 	}
-#ifdef OPEN_BCAST_SOCKET
+#ifndef NO_BCAST_SOCKET
 	set_reuseaddr(0);
 #endif
 #ifdef DEBUG
