@@ -1286,8 +1286,7 @@ clock_filter(
 	 * Shift the new sample into the register and discard the oldest
 	 * one. The new offset and delay come directly from the caller.
 	 * The dispersion from the caller is increased by the sum of the
-	 * precision in the the packet header and the precision of this
-	 * machine.
+	 * peer precision and the system precision.
 	 */
 	dsp = LOGTOD(peer->precision) + LOGTOD(sys_precision) +
 	    sample_disp;
@@ -1336,8 +1335,6 @@ clock_filter(
 		if (n > 1 && current_time - peer->filter_epoch[ord[n]] >
 		    dtemp)
 			break;
-		if (distance[n] >= MAXDISTANCE)
-			continue;
 		for (j = 0; j < n; j++) {
 			if (distance[j] > distance[n]) {
 				etemp = distance[j];
@@ -1364,7 +1361,7 @@ clock_filter(
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
-		if (i >= n)
+		if (i >= n || distance[i] >= MAXDISTANCE)
 			continue;
 		etemp = 2 * fabs(peer->filter_offset[j] -
 		    peer->filter_offset[imin]);
@@ -1374,9 +1371,7 @@ clock_filter(
 		off += peer->filter_offset[j] * etemp;
 		dly += peer->filter_delay[j] * etemp;
 		jit += DIFF(peer->filter_offset[j],
-		    peer->filter_offset[ord[0]]) * etemp;
-printf("xxx %.6f %.6f %.6f\n", peer->filter_offset[j],
-    peer->filter_delay[j], etemp);
+		    peer->filter_offset[ord[0]]);
 	}
 
 	/*
@@ -1392,9 +1387,8 @@ printf("xxx %.6f %.6f %.6f\n", peer->filter_offset[j],
 	peer->offset = off / dtemp;
 	peer->delay = dly / dtemp;
 	if (n > 1)
-		jit = min(jit / (dtemp - 1. / distance[0]),
-		    MAXDISPERSE);
-	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision))); 
+		jit /= n - 1;
+	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision)));
 
 	/*
 	 * A new sample is useful only if it is younger than the last
