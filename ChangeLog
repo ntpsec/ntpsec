@@ -9,6 +9,18 @@
 
 1999-12-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/plot_summary.pl: Improved option parsing.  Fixed one
+	minor Perl compatibility error.
+	* scripts/summary.pl: Official revision for NTPv4: Parse new
+	statistic file formats correctly, provide error checking for bad
+	input files, and guard against negative arguments to sqrt()
+	because of numeric effects.  Use one pattern to select valid
+	statistic files.  Add selectable output directory
+	(``--output-directory'') and improved option parsing.  Directory
+	with statistic files (now settable also with
+	``--input-directory'') defaults to ``/var/log/ntp''.
+	From: Ulrich Windl  <Ulrich.Windl@rz.uni-regensburg.de>
+
 	* html/driver8.htm: 
 	* libparse/clk_computime.c: 
 	* libparse/clk_dcf7000.c: 
