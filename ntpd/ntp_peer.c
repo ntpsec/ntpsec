@@ -214,9 +214,10 @@ struct peer *
 findpeer(
 	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
-	int fd,
-	int pkt_mode,
-	int *action
+	int	fd,
+	int	pkt_version,
+	int	pkt_mode,
+	int	*action
 	)
 {
 	register struct peer *peer;
@@ -225,8 +226,9 @@ findpeer(
 	findpeer_calls++;
 	hash = NTP_HASH_ADDR(srcadr);
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
-		if (SOCKCMP(srcadr, &peer->srcadr)
-		    && NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+		if (SOCKCMP(srcadr, &peer->srcadr) &&
+		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr) &&
+		    peer->version == pkt_version) {
 
 			/*
 			 * if the association matching rules determine

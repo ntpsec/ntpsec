@@ -25,6 +25,13 @@
 #endif
 
 /*
+ * This macro defines the authentication state. If x is 1 authentication
+ * is required; othewise it is optional.
+ */
+#define	AUTH(x, y)	((x) ? (y) == AUTH_OK : (y) == AUTH_OK || \
+			    (y) == AUTH_NONE)
+
+/*
  * System variables are declared here. See Section 3.2 of the
  * specification.
  */
@@ -268,6 +275,7 @@ receive(
 {
 	register struct peer *peer;	/* peer structure pointer */
 	register struct pkt *pkt;	/* receive packet pointer */
+	int	hisversion;		/* packet version */
 	int	hismode;		/* packet mode */
 	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
@@ -320,6 +328,7 @@ receive(
 		return;				/* no anything */
 	}
 	pkt = &rbufp->recv_pkt;
+	hisversion = PKT_VERSION(pkt->li_vn_mode);
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	if (hismode == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY) {
@@ -351,10 +360,10 @@ receive(
 	 * Version check must be after the query packets, since they
 	 * intentionally use early version.
 	 */
-	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
+	if (hisversion == NTP_VERSION) {
 		sys_newversionpkt++;		/* new version */
-	} else if (!(restrict_mask & RES_VERSION) &&
-	    PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION) {
+	} else if (!(restrict_mask & RES_VERSION) && hisversion >=
+	    NTP_OLDVERSION) {
 		sys_oldversionpkt++;		/* previous version */
 	} else {
 		sys_unknownversion++;
@@ -368,21 +377,11 @@ receive(
 	 * would interpret as client mode.
 	 */
 	if (hismode == MODE_UNSPEC) {
-		if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION) {
+		if (hisversion == NTP_OLDVERSION) {
 			hismode = MODE_CLIENT;
 		} else {
 			sys_badlength++;
 			return;                 /* invalid mode */
-		}
-	}
-
-	/*
-	 * Discard broadcast if not enabled as broadcast client.
-	 */
-	if (hismode == MODE_BROADCAST) {
-		if (!sys_bclient || restrict_mask & RES_NOPEER) {
-			sys_restricted++;
-			return;			/* no client */
 		}
 	}
 
@@ -426,16 +425,6 @@ receive(
 			return;			/* bad MAC length */
 		}
 	}
-
-	/*
-	 * If specified, access control rejects packets which have no
-	 * MAC.
-	 */
-	if (restrict_mask & RES_DONTTRUST && !has_mac) {
-		sys_restricted++;
-		return;
-	}
-	restrict_mask &= ~RES_DONTTRUST;
 #ifdef OPENSSL
 	pkeyid = tkeyid = 0;
 #endif /* OPENSSL */
@@ -460,7 +449,7 @@ receive(
 	 * unicast address anyway. Don't ask.
 	 */
 	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
-	    hismode, &retcode);
+	    hisversion, hismode, &retcode);
 	dstadr_sin = &rbufp->dstadr->sin;
 	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);
@@ -479,6 +468,9 @@ receive(
 	 * is nonzero, the authentication code must not be NONE.
 	 */
 	if (has_mac == 0) {
+		if (restrict_mask & RES_DONTTRUST)
+			is_authentic = AUTH_ERROR; /* required */
+		else
 			is_authentic = AUTH_NONE; /* not required */
 #ifdef DEBUG
 		if (debug)
@@ -601,8 +593,7 @@ receive(
 			    "receive: at %ld %s<-%s mode %d code %d keyid %08x len %d mac %d auth %d\n",
 			    current_time, stoa(dstadr_sin),
 			    stoa(&rbufp->recv_srcadr), hismode, retcode,
-			    skeyid, authlen, has_mac,
-			    is_authentic);
+			    skeyid, authlen, has_mac, is_authentic);
 #endif
 	}
 
@@ -614,53 +605,60 @@ receive(
 	 * is mobilized: a broadcast packet mobilizes a broadcast client
 	 * aassociation; a manycast server packet mobilizes a manycast
 	 * client association; a symmetric active packet mobilizes a
-	 * symmetric passive association. And, the adventure
-	 * continues...
+	 * symmetric passive association.
 	 */
 	switch (retcode) {
 
 	/*
-	 * This is a client mode packet not matching any association, so
-	 * it must be from a manycast client. If there are no errors and
-	 * we (as manycast server) toss a server mode packet back to the
-	 * rascal.
+	 * This is a client mode packet not matching any association. If
+	 * an ordinary client, simply toss a server mode packet back
+	 * over the fence. If a manycast client, we have to work a
+	 * little harder.
 	 */
 	case AM_FXMIT:
-		if (rbufp->dstadr->flags & INT_MCASTOPEN) {
-
-			/*
-			 * Do not respond to multicast if not configured
-			 * as a manycast server.
-			 */
-			if (hismode == MODE_CLIENT &&
-			    !sys_manycastserver)
-				return;
-
-			/*
-			 * There is no reason to respond to a request if
-			 * our time is worse than the manycaster or it
-			 * has already synchronized to us.
-			 */
-			if (sys_peer == NULL ||
-			    PKT_TO_STRATUM(pkt->stratum) <
-			    sys_stratum || (sys_cohort &&
-			    PKT_TO_STRATUM(pkt->stratum) ==
-			    sys_stratum) || rbufp->dstadr->addr_refid ==
-			    pkt->refid)
-				return;		/* manycast dropped */
-		}
 
 		/*
-		 * Note that we don't require authentication here, since
-		 * we can't set the system clock; but, we do send a
-		 * crypto-NAK (kiss the frog) if authentication failed.
+		 * The vanilla case is when this is not a multicast
+		 * interface. If authentication succeeds, return a
+		 * server mode packet; if not, return a crypto-NAK.
 		 */
-		if (is_authentic == AUTH_ERROR)
-			fast_xmit(rbufp, MODE_SERVER, 0, restrict_mask);
-		else
+		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
+			if (AUTH(0, is_authentic))
+				fast_xmit(rbufp, MODE_SERVER, skeyid,
+				    restrict_mask);
+			else
+				fast_xmit(rbufp, MODE_SERVER, 0,
+				    restrict_mask);
+			return;			/* hooray */
+
+		/*
+		 * This must be manycast. Do not respond if not
+		 * configured as a manycast server.
+		 */
+		} else if (hismode == MODE_CLIENT &&
+		    !sys_manycastserver) {
+			return;			/* not enabled */
+
+		/*
+		 * Do not respond if our time is worse than the
+		 * manycaster or it has already synchronized to us.
+		 */
+		} else if (sys_peer == NULL ||
+		    PKT_TO_STRATUM(pkt->stratum) < sys_stratum ||
+		    (sys_cohort && PKT_TO_STRATUM(pkt->stratum) ==
+		    sys_stratum) || rbufp->dstadr->addr_refid ==
+		    pkt->refid) {
+			return;			/* no help */
+
+		/*
+		 * Respond only if authentication succeeds. Don't do a
+		 * crypto-NAK, as that would not be useful.
+		 */
+		} else if (AUTH(sys_authenticate, is_authentic)) {
 			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
-		return;
+		}
+		return;				/* hooray */
 
 	/*
 	 * This is a server mode packet returned in response to a client
@@ -680,19 +678,22 @@ receive(
 	 * the guy is already here, don't fire up a duplicate.
 	 */
 	case AM_MANYCAST:
-		if (!(is_authentic == AUTH_NONE || is_authentic ==
-		    AUTH_OK))
+		if (restrict_mask & RES_NOPEER) {
+			sys_restricted++;
+			return;			/* not enabled */
+
+		} else if (!AUTH(sys_authenticate, is_authentic)) {
 			return;			/* bad auth */
 
-		if ((peer2 = findmanycastpeer(rbufp)) == NULL)
+		} else if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			return;			/* no assoc match */
 
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
-		    MDF_ACLNT, 0, skeyid);
-		if (peer == NULL)
+		} else if ((peer = newpeer(&rbufp->recv_srcadr,
+		    rbufp->dstadr, MODE_CLIENT,
+		    hisversion, NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST,
+		    MDF_UCAST | MDF_ACLNT, 0, skeyid)) == NULL) {
 			return;			/* system error */
+		}
 
 		/*
 		 * We don't need these, but it warms the billboards.
@@ -726,8 +727,11 @@ receive(
 	 * kiss any frogs here.
 	 */
 	case AM_NEWBCL:
-		if (!(is_authentic == AUTH_NONE || is_authentic ==
-		    AUTH_OK))
+		if (restrict_mask & RES_NOPEER || sys_bclient == 0) {
+			sys_restricted++;
+			return;			/* not enabled */
+
+		} else if (!AUTH(sys_authenticate, is_authentic)) {
 			return;			/* bad auth */
 
 		/*
@@ -736,43 +740,41 @@ receive(
 		 * In the latter, autokey will not work, as it requires
 		 * a cryptographic data exchange.
 		 */
-		if (sys_bclient == 1) {
-			peer = newpeer(&rbufp->recv_srcadr,
-			    rbufp->dstadr, MODE_CLIENT,
-			    PKT_VERSION(pkt->li_vn_mode), NTP_MINDPOLL,
-			    NTP_MAXDPOLL, FLAG_MCAST | FLAG_IBURST,
-			    MDF_BCLNT, 0, skeyid);
-#ifdef OPENSSL
-			if (peer == NULL)
+		} else if (sys_bclient == 1) {
+			if ((peer = newpeer(&rbufp->recv_srcadr,
+			    rbufp->dstadr, MODE_CLIENT, hisversion,
+			    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
+			    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
+			    {
 				return;		/* system error */
-			if (!(peer->flags & FLAG_SKEY))
+#ifdef OPENSSL
+			if (!(peer->flags & FLAG_SKEY)) {
 				return;
 
-			rval = crypto_recv(peer, rbufp);
-			if (rval != XEVNT_OK) {	/* crypto error */
+			} else if (crypto_recv(peer, rbufp) != XEVNT_OK)
+			    {
 				peer_clear(peer, "CRYP");
 				unpeer(peer);
 			}
-		}
 #endif /* OPENSSL */
 			return;
 
+
+#ifdef OPENSSL
 		/*
 		 * Autokey cryptography requires a two-way exchange
 		 * between the client and server. If a two-way exchange
 		 * is not possible, neither is Autokey.
 		 */
-#ifdef OPENSSL
-		if (!(peer->flags & FLAG_SKEY))
-			return;
+		} else if (peer->flags & FLAG_SKEY)
+			return;			/* no autokey */
 #endif /* OPENSSL */
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_BCLIENT, PKT_VERSION(pkt->li_vn_mode),
+		} else if ((peer = newpeer(&rbufp->recv_srcadr,
+		    rbufp->dstadr, MODE_BCLIENT, hisversion,
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_BCLNT, 0,
-		    skeyid);
-		if (peer == NULL)
+		    skeyid)) == NULL) {
 			return;			/* system error */
-
+		}
 		/* fall through */
 
 	/*
@@ -788,19 +790,36 @@ receive(
 	 * mobilize a passive association. If not, kiss the frog.
 	 */
 	case AM_NEWPASS:
-		if (!((is_authentic == AUTH_NONE || is_authentic ==
-		    AUTH_OK) && L_ISZERO(&p_org))) {
+		if (restrict_mask & RES_NOPEER) {
+			sys_restricted++;
+			return; 		/* not enabled */
+
+		/*
+		 * Pay close attention, as the following test has
+		 * interesting consequences. If the inbound packet has
+		 * no MAC and authentication is enabled, this mode works
+		 * just as in client/server mode. If no MAC and
+		 * authentiation is disabled, a symmetric passive
+		 * association is mobilized instead.
+		 *
+		 * If the inbound packet has a MAC and is correctly
+		 * authenticated, a symmetric passive association is
+		 * mobilized. A crypto-NAK is returned if authentication
+		 * fails. The reason this works is that a crypto-NAK
+		 * without a MAC looks like an ordinary packet.
+		 */
+		} else if (!AUTH(sys_authenticate, is_authentic) ||
+		     (sys_authenticate && !L_ISZERO(&p_org))) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0,
 			    restrict_mask);
 			return;			/* bad auth */
-		}
-		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
-		    skeyid);
-		if (peer == NULL)
-			return;			/* system error */
 
+		} else if ((peer = newpeer(&rbufp->recv_srcadr,
+		    rbufp->dstadr, MODE_PASSIVE, hisversion,
+		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
+		    skeyid)) == NULL) {
+			return;			/* system error */
+		}
 		/* fall through */
 
 	/*
@@ -839,33 +858,12 @@ receive(
 		return;
 	}
 
-	/* 
-	 * If the association is authenticated, each packet carries a
-	 * MAC with nonzero key ID. Subsequently, if a packet arrives
-	 * with no MAC, it is dropped. This is designed to avoid a bait-
-	 * and-switch attack.
-	 */
-	if (is_authentic == AUTH_ERROR || (peer->keyid != 0 &&
-	    is_authentic == AUTH_NONE)) {
-		peer->flash |= TEST5;	/* bad auth */
-		return;
-	}
-
 	/*
-	 * The packet matches association p. Verify the timestamps are
-	 * valid and the packet is not a replay or bogus. Note the only
-	 * way we can get here is either with an newlly-mobilized
-	 * association or via PROCPK, so the flashers are properly
-	 * illuminated.
-	 */
-	peer->received++;
-	peer->timereceived = current_time;
-
-	/*
-	 * If the transmit timestamp is zero, the server is broken.
+	 * Comes now an exhaustive set of sanity checks. If the transmit
+	 * timestamp is zero, the server is broken.
 	 */
 	if (L_ISZERO(&p_xmt)) {
-		return;
+		return;				/* read rfc1305 */
 
 	/*
 	 * If the transmit timestamp duplicates a previous one, the
@@ -873,9 +871,9 @@ receive(
 	 * the most recent packet, authenticated or not.
 	 */
 	} else if (L_ISEQU(&peer->org, &p_xmt)) {
-		peer->flash |= TEST1;		/* dupe */
+		peer->flash |= TEST1;
 		peer->oldpkt++;
-		return;
+		return;				/* dupe */
 
 	/*
 	 * The timestamps are valid and the receive packet matches the
@@ -887,16 +885,25 @@ receive(
 		peer_clear(peer, "AUTH");
 		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
-		return;
+		return;				/* crypto-NAK */
+
+	/* 
+	 * If the association is authenticated, the key ID is nonzero
+	 * and received packets must be authenticated. This is designed
+	 * to avoid a bait-and-switch attack, which was possible in past
+	 * versions.
+	 */
+	} else if (!AUTH(peer->keyid, is_authentic)) {
+		peer->flash |= TEST5;
+		return;				/* bad auth */
 	}
 
 	/*
-	 * The flashers that can survive here include TEST2 (bogus),
-	 * TEST3 (synch) and TEST5 (auth). Let the first two pass, since
-	 * they might contain useful extension fields.
+	 * That was hard and I am sweaty, but the packet is squeaky
+	 * clean. Get on with real work.
 	 */
-	if (peer->flash & ~(TEST2 | TEST3))
-		return;
+	peer->received++;
+	peer->timereceived = current_time;
 
 #ifdef OPENSSL
 	/*
@@ -1004,9 +1011,8 @@ receive(
 		peer_clear(peer, "AUTO");
 		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
-#endif /* OPENSSL */
-
 	}
+#endif /* OPENSSL */
 }
 
 
@@ -3070,10 +3076,9 @@ proto_config(
 		break;
 
 	/*
-	 * Add multicast group address.
+	 * Add muliticast group address.
 	 */
 	case PROTO_MULTICAST_ADD:
-		sys_bclient = (int)value;
 		if (svalue)
 		    io_multicast_add(*svalue);
 		sys_bclient = 1;
