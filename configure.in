@@ -3440,14 +3440,81 @@ case "$ac_cv_var_irig_sucks" in
  yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
 esac
 
-false && ISC_PLATFORM_HAVEIF_LADDRCONF="#define ISC_PLATFORM_HAVEIF_LADDRCONF 1"
-false && ISC_PLATFORM_HAVEIF_LADDRREQ="#define ISC_PLATFORM_HAVEIF_LADDRREQ 1"
-false && ISC_PLATFORM_HAVEIN6PKTINFO="#define ISC_PLATFORM_HAVEIN6PKTINFO 1"
-false && ISC_PLATFORM_HAVEIPV6="#define ISC_PLATFORM_HAVEIPV6 1"
+#
+# ISC stuff
+#
+
 if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     ISC_PLATFORM_HAVESALEN="#define ISC_PLATFORM_HAVESALEN 1"
 fi
-false && ISC_PLATFORM_NEEDIN6ADDRANY="#define ISC_PLATFORM_NEEDIN6ADDRANY 1"
+
+AC_MSG_CHECKING(for IPv6 structures)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>],
+[struct sockaddr_in6 sin6; return (0);],
+	[AC_MSG_RESULT(yes)
+	 found_ipv6=yes],
+	[AC_MSG_RESULT(no)
+	 found_ipv6=no])
+
+AC_MSG_CHECKING([for struct if_laddrconf])
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <net/if6.h>
+],[ struct if_laddrconf a; ],
+	[AC_MSG_RESULT(yes)
+	ISC_PLATFORM_HAVEIF_LADDRCONF="#define ISC_PLATFORM_HAVEIF_LADDRCONF 1"],
+	[AC_MSG_RESULT(no)
+	ISC_PLATFORM_HAVEIF_LADDRCONF="#undef ISC_PLATFORM_HAVEIF_LADDRCONF"])
+
+AC_MSG_CHECKING([for struct if_laddrreq])
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <net/if6.h>
+],[ struct if_laddrreq a; ],
+	[AC_MSG_RESULT(yes)
+	ISC_PLATFORM_HAVEIF_LADDRREQ="#define ISC_PLATFORM_HAVEIF_LADDRREQ 1"],
+	[AC_MSG_RESULT(no)
+	ISC_PLATFORM_HAVEIF_LADDRREQ="#undef ISC_PLATFORM_HAVEIF_LADDRREQ"])
+
+case "$found_ipv6" in
+ yes)
+    ISC_PLATFORM_HAVEIPV6="#define ISC_PLATFORM_HAVEIPV6 1"
+
+    AC_MSG_CHECKING(for in6_pktinfo)
+    AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+],
+	[struct in6_pktinfo xyzzy; return (0);],
+		[AC_MSG_RESULT(yes)
+		 ISC_PLATFORM_HAVEIN6PKTINFO="#define ISC_PLATFORM_HAVEIN6PKTINFO 1"],
+		[AC_MSG_RESULT(no -- disabling runtime ipv6 support)
+		 ISC_PLATFORM_HAVEIN6PKTINFO="#undef ISC_PLATFORM_HAVEIN6PKTINFO"])
+
+
+	AC_MSG_CHECKING(for in6addr_any)
+	AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+$isc_in_addr6_hack
+],
+	[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);],
+		[AC_MSG_RESULT(yes)
+		 ISC_PLATFORM_NEEDIN6ADDRANY="#undef ISC_PLATFORM_NEEDIN6ADDRANY"
+		[AC_MSG_RESULT(no)
+		 ISC_PLATFORM_NEEDIN6ADDRANY="#define ISC_PLATFORM_NEEDIN6ADDRANY 1"
+
+    ;;
+esac
 
 AC_SUBST(ISC_PLATFORM_BRACEPTHREADONCEINIT)
 AC_SUBST(ISC_PLATFORM_FIXIN6ISADDR)
