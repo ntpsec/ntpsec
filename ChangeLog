@@ -1,5 +1,11 @@
 1999-12-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libparse/Makefile.in: Manually hacked to remove the
+	libparse_kernel.a.[co] cruft
+
+	* libparse/Makefile.am (k*.o): Generate these form the Makefile,
+	not from separate .c files
+
 	* html/tickadj.htm:
 	* html/notes.htm:
 	* html/hints/solaris.html:

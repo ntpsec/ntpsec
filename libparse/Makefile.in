@@ -95,14 +95,6 @@ U = @U@
 VERSION = @VERSION@
 
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-#
-# this is sick - i want the source to be compile with
-# two time with different flags resulting different
-# objects - still need to find a way to communicate
-# that to automake/autoconf
-#
-# Frank Kardel
-#
 
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
@@ -130,19 +122,20 @@ libparse_a_SOURCES = parse.c \
 		     trim_info.c
 
 
-libparse_kernel_a_SOURCES = kparse.c \
-                            kparse_conf.c \
-                            kclk_meinberg.c \
-                            kclk_schmid.c \
-		            kclk_rawdcf.c \
-		            kclk_trimtsip.c \
-	                    kclk_dcf7000.c \
-                            kclk_trimtaip.c \
-                            kclk_rcc8000.c \
-                            kclk_hopf6021.c \
-	                    kclk_computime.c \
-		     	    kclk_wharton.c \
-		     	    kclk_varitext.c
+libparse_kernel_a_SOURCES = 
+libparse_kernel_a_LIBADD = kparse$U.o \
+			    kparse_conf$U.o \
+			    kclk_computime$U.o \
+			    kclk_dcf7000$U.o \
+			    kclk_hopf6021$U.o \
+			    kclk_meinberg$U.o \
+			    kclk_rawdcf$U.o \
+			    kclk_rcc8000$U.o \
+			    kclk_schmid$U.o \
+			    kclk_trimtaip$U.o \
+			    kclk_trimtsip$U.o \
+			    kclk_varitext$U.o \
+			    kclk_wharton$U.o
 
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/kernel
@@ -167,12 +160,11 @@ clk_trimtaip$U.o clk_rcc8000$U.o clk_hopf6021$U.o clk_computime$U.o \
 clk_wharton$U.o clk_varitext$U.o data_mbg$U.o info_trimble$U.o \
 trim_info$U.o
 libparse_a_OBJECTS =  $(am_libparse_a_OBJECTS)
-libparse_kernel_a_LIBADD = 
-am_libparse_kernel_a_OBJECTS =  kparse$U.o kparse_conf$U.o \
-kclk_meinberg$U.o kclk_schmid$U.o kclk_rawdcf$U.o kclk_trimtsip$U.o \
-kclk_dcf7000$U.o kclk_trimtaip$U.o kclk_rcc8000$U.o kclk_hopf6021$U.o \
-kclk_computime$U.o kclk_wharton$U.o kclk_varitext$U.o
-libparse_kernel_a_OBJECTS =  $(am_libparse_kernel_a_OBJECTS)
+libparse_kernel_a_DEPENDENCIES =  kparse$U.o kparse_conf$U.o \
+kclk_computime$U.o kclk_dcf7000$U.o kclk_hopf6021$U.o kclk_meinberg$U.o \
+kclk_rawdcf$U.o kclk_rcc8000$U.o kclk_schmid$U.o kclk_trimtaip$U.o \
+kclk_trimtsip$U.o kclk_varitext$U.o kclk_wharton$U.o
+libparse_kernel_a_OBJECTS = 
 AR = ar
 PROGRAMS =  $(noinst_PROGRAMS)
 
@@ -201,13 +193,9 @@ DEP_FILES =  .deps/clk_computime.P .deps/clk_dcf7000.P \
 .deps/clk_hopf6021.P .deps/clk_meinberg.P .deps/clk_rawdcf.P \
 .deps/clk_rcc8000.P .deps/clk_schmid.P .deps/clk_trimtaip.P \
 .deps/clk_trimtsip.P .deps/clk_varitext.P .deps/clk_wharton.P \
-.deps/data_mbg.P .deps/info_trimble.P .deps/kclk_computime.P \
-.deps/kclk_dcf7000.P .deps/kclk_hopf6021.P .deps/kclk_meinberg.P \
-.deps/kclk_rawdcf.P .deps/kclk_rcc8000.P .deps/kclk_schmid.P \
-.deps/kclk_trimtaip.P .deps/kclk_trimtsip.P .deps/kclk_varitext.P \
-.deps/kclk_wharton.P .deps/kparse.P .deps/kparse_conf.P .deps/parse.P \
-.deps/parse_conf.P .deps/parsesolaris.P .deps/parsestreams.P \
-.deps/trim_info.P
+.deps/data_mbg.P .deps/info_trimble.P \
+.deps/parse.P .deps/parse_conf.P .deps/parsesolaris.P \
+.deps/parsestreams.P .deps/trim_info.P
 SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) parsesolaris.c parsestreams.c
 OBJECTS = $(am_libparse_a_OBJECTS) $(am_libparse_kernel_a_OBJECTS) parsesolaris$U.o parsestreams$U.o
 
@@ -276,19 +264,6 @@ libparse.a: $(libparse_a_OBJECTS) $(libparse_a_DEPENDENCIES)
 	-rm -f libparse.a
 	$(AR) cru libparse.a $(libparse_a_OBJECTS) $(libparse_a_LIBADD)
 	$(RANLIB) libparse.a
-kparse$U.o:
-kparse_conf$U.o:
-kclk_meinberg$U.o:
-kclk_schmid$U.o:
-kclk_rawdcf$U.o:
-kclk_trimtsip$U.o:
-kclk_dcf7000$U.o:
-kclk_trimtaip$U.o:
-kclk_rcc8000$U.o:
-kclk_hopf6021$U.o:
-kclk_computime$U.o:
-kclk_wharton$U.o:
-kclk_varitext$U.o:
 
 libparse_kernel.a: $(libparse_kernel_a_OBJECTS) $(libparse_kernel_a_DEPENDENCIES)
 	-rm -f libparse_kernel.a
@@ -339,32 +314,6 @@ data_mbg_.c: data_mbg.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/data_mbg.c; then echo $(srcdir)/data_mbg.c; else echo data_mbg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > data_mbg_.c
 info_trimble_.c: info_trimble.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/info_trimble.c; then echo $(srcdir)/info_trimble.c; else echo info_trimble.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > info_trimble_.c
-kclk_computime_.c: kclk_computime.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_computime.c; then echo $(srcdir)/kclk_computime.c; else echo kclk_computime.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_computime_.c
-kclk_dcf7000_.c: kclk_dcf7000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_dcf7000.c; then echo $(srcdir)/kclk_dcf7000.c; else echo kclk_dcf7000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_dcf7000_.c
-kclk_hopf6021_.c: kclk_hopf6021.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_hopf6021.c; then echo $(srcdir)/kclk_hopf6021.c; else echo kclk_hopf6021.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_hopf6021_.c
-kclk_meinberg_.c: kclk_meinberg.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_meinberg.c; then echo $(srcdir)/kclk_meinberg.c; else echo kclk_meinberg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_meinberg_.c
-kclk_rawdcf_.c: kclk_rawdcf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_rawdcf.c; then echo $(srcdir)/kclk_rawdcf.c; else echo kclk_rawdcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_rawdcf_.c
-kclk_rcc8000_.c: kclk_rcc8000.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_rcc8000.c; then echo $(srcdir)/kclk_rcc8000.c; else echo kclk_rcc8000.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_rcc8000_.c
-kclk_schmid_.c: kclk_schmid.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_schmid.c; then echo $(srcdir)/kclk_schmid.c; else echo kclk_schmid.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_schmid_.c
-kclk_trimtaip_.c: kclk_trimtaip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_trimtaip.c; then echo $(srcdir)/kclk_trimtaip.c; else echo kclk_trimtaip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_trimtaip_.c
-kclk_trimtsip_.c: kclk_trimtsip.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_trimtsip.c; then echo $(srcdir)/kclk_trimtsip.c; else echo kclk_trimtsip.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_trimtsip_.c
-kclk_varitext_.c: kclk_varitext.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_varitext.c; then echo $(srcdir)/kclk_varitext.c; else echo kclk_varitext.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_varitext_.c
-kclk_wharton_.c: kclk_wharton.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kclk_wharton.c; then echo $(srcdir)/kclk_wharton.c; else echo kclk_wharton.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kclk_wharton_.c
-kparse_.c: kparse.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kparse.c; then echo $(srcdir)/kparse.c; else echo kparse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kparse_.c
-kparse_conf_.c: kparse_conf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kparse_conf.c; then echo $(srcdir)/kparse_conf.c; else echo kparse_conf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kparse_conf_.c
 parse_.c: parse.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parse.c; then echo $(srcdir)/parse.c; else echo parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parse_.c
 parse_conf_.c: parse_conf.c $(ANSI2KNR)
@@ -378,11 +327,8 @@ trim_info_.c: trim_info.c $(ANSI2KNR)
 clk_computime_.o clk_dcf7000_.o clk_hopf6021_.o clk_meinberg_.o \
 clk_rawdcf_.o clk_rcc8000_.o clk_schmid_.o clk_trimtaip_.o \
 clk_trimtsip_.o clk_varitext_.o clk_wharton_.o data_mbg_.o \
-info_trimble_.o kclk_computime_.o kclk_dcf7000_.o kclk_hopf6021_.o \
-kclk_meinberg_.o kclk_rawdcf_.o kclk_rcc8000_.o kclk_schmid_.o \
-kclk_trimtaip_.o kclk_trimtsip_.o kclk_varitext_.o kclk_wharton_.o \
-kparse_.o kparse_conf_.o parse_.o parse_conf_.o parsesolaris_.o \
-parsestreams_.o trim_info_.o : $(ANSI2KNR)
+info_trimble_.o parse_.o parse_conf_.o \
+parsesolaris_.o parsestreams_.o trim_info_.o : $(ANSI2KNR)
 
 tags: TAGS
 
@@ -551,24 +497,44 @@ info_trimble.c: $(top_srcdir)/include/trimble.h mkinfo_rcmd.sed mkinfo_scmd.sed
 	sed -n -f mkinfo_scmd.sed $(top_srcdir)/include/trimble.h  > info_trimble.c || rm -f info_trimble.c
 	sed -n -f mkinfo_rcmd.sed $(top_srcdir)/include/trimble.h >> info_trimble.c || rm -f info_trimble.c
 
-#
-# HACK following below...
-#
-kparse_conf.o: parse_conf.c
-kparse.o: parse.c
-kclk_rawdcf.o: clk_rawdcf.c
-kclk_trimtsip.o: clk_trimtsip.c
-kclk_meinberg.o: clk_meinberg.c
-kclk_schmid.o: clk_schmid.c
-kclk_rawdcf.o: clk_rawdcf.c
-kclk_trimtsip.o: clk_trimtsip.c
-kclk_dcf7000.o: clk_dcf7000.c
-kclk_trimtaip.o: clk_trimtaip.c
-kclk_rcc8000.o: clk_rcc8000.c
-kclk_hopf6021.o: clk_hopf6021.c
-kclk_computime.o: clk_computime.c
-kclk_wharton.o: clk_wharton.c
-kclk_varitext.o: clk_varitext.c
+kclk_computime$U.o: clk_computime$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_dcf7000$U.o: clk_dcf7000$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_hopf6021$U.o: clk_hopf6021$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_meinberg$U.o: clk_meinberg$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_rawdcf$U.o: clk_rawdcf$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_rcc8000$U.o: clk_rcc8000$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_schmid$U.o: clk_schmid$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_trimtaip$U.o: clk_trimtaip$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_trimtsip$U.o: clk_trimtsip$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_varitext$U.o: clk_varitext$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kclk_wharton$U.o: clk_wharton$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kparse$U.o: parse$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
+
+kparse_conf$U.o: parse_conf$U.c
+	$(COMPILE) -DPARSESTREAM -c $< -o $@
 
 parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 	$(LD) -r -o $@ $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a
