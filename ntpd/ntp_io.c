@@ -479,8 +479,9 @@ create_sockets(
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
 #ifdef UDP_WILDCARD_DELIVERY
-	nwilds = create_wildcards(port);
+/*	nwilds = create_wildcards(port);
 	idx = nwilds;
+*/
 #endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
