@@ -149,7 +149,7 @@ hopfpci_start(
 	pp->io.clock_recv = noentry;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
-	pp->io.fd = -1;
+	pp->io.fd = INVALID_SOCKET;
 	pp->unitptr = (caddr_t)up;
 
 	get_systime(&pp->lastrec);
@@ -231,7 +231,7 @@ hopfpci_poll(
 	sprintf(pp->a_lastcode,"ST: %02X T: %02d:%02d:%02d.%03ld D: %02d.%02d.%04d",
 		m_time.wStatus, pp->hour, pp->minute, pp->second,
 		pp->nsec / 1000000, m_time.wDay, m_time.wMonth, m_time.wYear);
-	pp->lencode = strlen(pp->a_lastcode);
+	pp->lencode = (u_short)strlen(pp->a_lastcode);
 
 	get_systime(&pp->lastrec);
 

@@ -161,9 +161,10 @@ static	struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 static	struct timeval tvsout = { DEFSTIMEOUT, 0 };	/* secondary time out */
 static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
-static	int showhostnames = 1;				/* show host names by default */
+int showhostnames = 1;					/* show host names by default */
 
-#ifndef SYS_WINNT
+static	int ai_fam_templ;				/* address family */
+static	SOCKET sockfd;					/* fd socket is opened on */
 static	int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
 
@@ -1440,10 +1441,10 @@ help(
 		n = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = xcp->keyword;
+			    cmdsort[n++] = (char *)xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
+		    cmdsort[n++] = (char *)xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
 		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
@@ -1864,7 +1865,7 @@ getkeyid(
 	fprintf(stderr, "%s", keyprompt); fflush(stderr);
 	for (p=pbuf; (c = getc(fi))!='\n' && c!=EOF;) {
 		if (p < &pbuf[18])
-		    *p++ = c;
+		    *p++ = (char) c;
 	}
 	*p = '\0';
 	if (fi != stdin)

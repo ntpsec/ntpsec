@@ -88,7 +88,12 @@ getstartup(
 			{
 				FILE *new_file;
 
-				new_file = fopen(ntp_optarg, "a");
+				if(strcmp(ntp_optarg, "stderr") == 0)
+					new_file = stderr;
+				else if(strcmp(ntp_optarg, "stdout") == 0)
+					new_file = stdout;
+				else
+					new_file = fopen(ntp_optarg, "a");
 				if (new_file != NULL) {
 					NLOG(NLOG_SYSINFO)
 						msyslog(LOG_NOTICE, "logging to file %s", ntp_optarg);
@@ -295,7 +300,7 @@ getCmdOpts(
 		    case 'v':
 		    case 'V':
 			set_sys_var(ntp_optarg, strlen(ntp_optarg)+1,
-			    RW | ((c == 'V') ? DEF : 0));
+			    (u_short) (RW | ((c == 'V') ? DEF : 0)));
 			break;
 
 		    case 'x':

@@ -152,14 +152,15 @@ nmea_start(
 	 */
 	(void)sprintf(device, DEVICE, unit);
 
-	if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
+	fd = refclock_open(device, SPEED232, LDISC_CLK);
+	if (fd < 0)
 	    return (0);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct nmeaunit *)
-	      emalloc(sizeof(struct nmeaunit)))) {
+	up = (struct nmeaunit *)emalloc(sizeof(struct nmeaunit));
+	if (up == NULL) {
 		(void) close(fd);
 		return (0);
 	}
@@ -385,7 +386,7 @@ nmea_receive(
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+	rd_lencode = (u_short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 
 	/*
 	 * There is a case that a <CR><LF> gives back a "blank" line

@@ -129,11 +129,7 @@ struct refclockio {
 				of refclock input data */
 	caddr_t	srcclock;	/* pointer to clock structure */
 	int	datalen;	/* lenth of data */
-#ifndef SYS_WINNT
-	int	fd;		/* file descriptor */
-#else
 	SOCKET	fd;		/* file descriptor */
-#endif
 	u_long	recvcount;	/* count of receive completions */
 };
 

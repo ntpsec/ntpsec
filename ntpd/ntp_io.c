@@ -68,6 +68,9 @@ extern int listen_to_virtual_ips;
 
 #endif /* VMS */
 
+#if defined(SYS_WINNT)
+#include <transmitbuff.h>
+#endif
 
 #if defined(VMS) || defined(SYS_WINNT)
 /* structure used in SIOCGIFCONF request (after [KSR] OSF/1) */
@@ -110,7 +113,9 @@ struct ifconf {
 #define lifr_dstaddr ifr_dstaddr
 #define lifr_broadaddr ifr_broadaddr
 #define lifr_flags ifr_flags
+#ifndef zz_family
 #define zz_family sa_family
+#endif
 #define lifreq ifreq
 #else
 #define zz_family ss_family
@@ -167,10 +172,10 @@ static	struct refclockio *refio;
  * File descriptor masks etc. for call to select
  */
 fd_set activefds;
-SOCKET maxactivefd;
+int maxactivefd;
 
 static	int create_sockets	P((u_int));
-static	SOCKET	open_socket	P((struct sockaddr_in *, int, int));
+static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int));
 static	void	close_socket	P((SOCKET));
 static	void	close_file	P((int));
 static	char *	fdbits		P((int, fd_set *));
@@ -250,8 +255,12 @@ create_sockets(
 # ifdef STREAMS_TLI
 	struct strioctl ioc;
 # endif /* STREAMS_TLI */
+	char	buf[MAXINTERFACES*sizeof(struct lifreq)];
+	struct	lifconf	lifc;
+	struct	lifreq	lifreq, *lifr;
 	SOCKET	vs;
-	int n, i, j, size = 0;
+	int af, n, i, j, len, size = 0;
+	struct	sockaddr_storage resmask;
 #endif	/* _BSDI_VERSION >= 199510 */
 
 #ifdef DEBUG
@@ -262,19 +271,25 @@ create_sockets(
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
-	inter_list[0].sin.sin_port = (u_short) port;
+	((struct sockaddr_in*)&inter_list[0].sin)->sin_addr.s_addr = htonl(INADDR_ANY);
+	((struct sockaddr_in*)&inter_list[0].sin)->sin_port = (u_short) port;
+	inter_list[0].sin.ss_family = AF_INET;
+	(void) strncpy(inter_list[0].name, "wildcard", sizeof(inter_list[0].name));
+	inter_list[0].mask.ss_family = AF_INET;
+	((struct sockaddr_in*)&inter_list[0].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
 	inter_list[0].received = 0;
 	inter_list[0].sent = 0;
 	inter_list[0].notsent = 0;
 	inter_list[0].flags = INT_BROADCAST;
 	any_interface = &inter_list[0];
 
+#ifdef HAVE_IPV6
 	/*
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
 	inter_list[1].sin.ss_family = AF_INET6;
 	((struct sockaddr_in6*)&inter_list[1].sin)->sin6_addr = in6addr_any;
-	((struct sockaddr_in6*)&inter_list[1].sin)->sin6_port = port;
+	((struct sockaddr_in6*)&inter_list[1].sin)->sin6_port = (u_short) port;
 	(void) strncpy(inter_list[1].name, "wildcard", sizeof(inter_list[1].name));
 	memset(&((struct sockaddr_in6*)&inter_list[1].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 	inter_list[1].mask.ss_family = AF_INET6;
@@ -283,7 +298,7 @@ create_sockets(
 	inter_list[1].notsent = 0;
 	inter_list[1].flags = 0;
 	any6_interface = &inter_list[1];
-
+#endif
 
 #if _BSDI_VERSION >= 199510
 #if 	_BSDI_VERSION >= 199701
@@ -292,7 +307,11 @@ create_sockets(
 		msyslog(LOG_ERR, "getifaddrs: %m");
 		exit(1);
 	}
+#ifdef HAVE_IPV6
 	i = 2;
+#else
+	i = 1;
+#endif
 	for (ifap = ifaddrs; ifap != NULL; ifap = ifap->ifa_next)
 #else
 	    if (getifaddrs(&ifaddrs, &num_if) < 0)
@@ -301,7 +320,11 @@ create_sockets(
 		    exit(1);
 	    }
 
+#ifdef HAVE_IPV6
 	i = 2;
+#else
+	i = 1;
+#endif
 
 	for (ifap = ifaddrs, lp = ifap + num_if; ifap < lp; ifap++)
 #endif
@@ -438,7 +461,11 @@ create_sockets(
 		exit(1);
 	}
 
+#ifdef HAVE_IPV6
 	i = 2;
+#else
+	i = 1;
+#endif
 # if !defined(SYS_WINNT)
 	lifc.lifc_len = sizeof(buf);
 # endif
@@ -490,8 +517,13 @@ create_sockets(
 			len = SOCKLEN(&lifr->lifr_addr);
 # endif
 		size = sizeof(*lifr);
+#ifndef SYS_WINNT
 		if (size < sizeof(lifr->lifr_name) + len)
 			size = sizeof(lifr->lifr_name) + len;
+#else
+		if(size  < len)
+			size = len;
+#endif
 		n -= size;
 
 # if !defined(SYS_WINNT)
@@ -526,16 +558,15 @@ create_sockets(
 		inter_list[i].flags = 0;
 
 		af = lifr->lifr_addr.zz_family;
-		close(vs);
+		close_socket(vs);
 
-		if (
-			(vs = socket(af, SOCK_DGRAM, 0))
+		vs = socket(af, SOCK_DGRAM, 0);
 #  ifndef SYS_WINNT
-			< 0
+		if (vs < 0)
 #  else /* SYS_WINNT */
-			== INVALID_SOCKET
+		if (vs == INVALID_SOCKET)
 #  endif /* SYS_WINNT */
-			) {
+			{
 			msyslog(LOG_ERR,
 			    "create_sockets: socket(%s, SOCK_DGRAM) failed: %m",
 			    af == AF_INET ? "AF_INET" : "AF_INET6");
@@ -625,7 +656,8 @@ create_sockets(
   		(void)strncpy(inter_list[i].name, lifreq.lifr_name,
   			      sizeof(inter_list[i].name));
 # endif
-		inter_list[i].sin.sin_port = (u_short) port;
+		memcpy(&(inter_list[i].sin), &lifr->lifr_addr, SOCKLEN(&lifr->lifr_addr));
+		((struct sockaddr_in*)&inter_list[i].sin)->sin_port = (u_short) port;
 # if !defined SYS_WINNT && !defined SYS_CYGWIN32 /* no interface flags on NT */
 		if (inter_list[i].flags & INT_BROADCAST) {
 #  ifdef STREAMS_TLI
@@ -651,7 +683,7 @@ create_sockets(
 			inter_list[i].bcast =
 			    *(struct sockaddr_storage *)&lifreq.lifr_broadaddr;
 #  endif /* lifr_broadaddr */
-			((struct sockaddr_in*)&inter_list[i].bcast)->sin_port = port;
+			((struct sockaddr_in*)&inter_list[i].bcast)->sin_port = (u_short) port;
 		}
 
 		if (inter_list[i].sin.ss_family == AF_INET) {
@@ -675,7 +707,11 @@ create_sockets(
 		inter_list[i].mask.ss_family = inter_list[i].sin.ss_family;
 # else
 		/* winnt here */
-		inter_list[i].bcast.sin_port	   = (u_short) port;
+		inter_list[i].bcast	= *(struct sockaddr_storage*)&lifreq.lifr_broadaddr;
+		inter_list[i].bcast.ss_family = inter_list[i].sin.ss_family;
+		((struct sockaddr_in*)&inter_list[i].bcast)->sin_port = (u_short) port;
+		inter_list[i].mask	= *(struct sockaddr_storage*)&ifreq.ifr_mask;
+		inter_list[i].mask.ss_family = inter_list[i].sin.ss_family;
 # endif /* not SYS_WINNT */
 
 		/* correct the mask for ipv6 addresses */
@@ -698,7 +734,7 @@ create_sockets(
 		if (i > MAXINTERFACES)
 		    break;
 	}
-	closesocket(vs);
+	close_socket(vs);
 #endif	/* _BSDI_VERSION >= 199510 */
 
 	ninterfaces = i;
@@ -733,7 +769,9 @@ create_sockets(
 	/*
 	 * enable possible multicast reception on the broadcast socket
 	 */
-	inter_list[0].bcast.sin_port = (u_short) port;
+	inter_list[0].bcast.ss_family = AF_INET;
+	((struct sockaddr_in*)&inter_list[0].bcast)->sin_port = (u_short) port;
+	((struct sockaddr_in*)&inter_list[0].bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
 
 	/*
@@ -874,7 +912,7 @@ io_multicast_add(
 			inet_ntoa(iaddr));
 		} else {
 			inter_list[i].fd = s;
-			inter_list[i].bfd = -1;
+			inter_list[i].bfd = INVALID_SOCKET;
 			(void) strncpy(inter_list[i].name, "multicast",
 			sizeof(inter_list[i].name));
 			((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
@@ -923,7 +961,47 @@ io_multicast_add(
 		sin6p = (struct sockaddr_in6*)&inter_list[i].sin;
 		memset((char *)&mreq6, 0, sizeof(mreq6));
 		memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
-		inter_list[i].bfd = INVALID_SOCKET;
+		sin6p->sin6_family = AF_INET6;
+		sin6p->sin6_addr = iaddr6;
+		sin6p->sin6_port = htons(123)
+
+		/*
+		 * Try opening a socket for the specified class D address. This
+		 * works under SunOS 4.x, but not OSF1 .. :-(
+		 */
+		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
+		if(s < 0){
+			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
+			i = 0;
+			/* HACK ! -- stuff in an address */
+			inter_list[i].bcast = addr;
+			msyslog(LOG_ERR,
+			 "...multicast address %s using wildcard socket",
+			 stoa(&addr));
+		} else {
+			interlist[i].fd = s;
+			interlist[i].bfd = -1
+			(void)strncpy(inter_list[i].name, "multicast",
+			   sizeof(inter_list[i].name));
+			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
+		}
+
+		/*
+		 * enable reception of multicast packets
+		 */
+		mreq6.ipv6mr_multiaddr = iaddr6;
+		mreq6.ipv6mr_interface = 0;
+		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
+		   (char *)&mreq6, sizeof(mreq6)) == -1)
+			msyslog(LOG_ERR,
+			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s),
+			 mreq6.ipv6mr_interface, stoa(&addr));
+		inter_list[i].flags |= INT_MULTICAST;
+		if(i >= ninterfaces)
+			ninterfaces = i+1;
+
+		break
+#endif /* HAVE_IPV6 */
 	}
 
 #ifdef DEBUG
@@ -984,8 +1062,10 @@ io_multicast_del(
 
 		if (!IN_CLASSD(haddr))
 		{
-			inter_list[i].fd = INVALID_SOCKET;
-			inter_list[i].bfd = INVALID_SOCKET;
+			sinaddr.sin_addr.s_addr = ((struct sockaddr_in*)&addr)->sin_addr.s_addr;
+			msyslog(LOG_ERR,
+				 "invalid multicast address %s", stoa(&addr));
+			return;
 		}
 
 		/*
@@ -1009,8 +1089,8 @@ io_multicast_del(
 				/* we have an explicit fd, so we can close it */
 				close_socket(inter_list[i].fd);
 				memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
-				inter_list[i].fd = -1;
-				inter_list[i].bfd = -1;
+				inter_list[i].fd = INVALID_SOCKET;
+				inter_list[i].bfd = INVALID_SOCKET;
 			}
 			else
 			{
@@ -1058,8 +1138,8 @@ io_multicast_del(
 				/* we have an explicit fd, so we can close it */
 				close_socket(inter_list[i].fd);
 				memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
-				inter_list[i].fd = -1;
-				inter_list[i].bfd = -1;
+				inter_list[i].fd = INVALID_SOCKET;
+				inter_list[i].bfd = INVALID_SOCKET;
 			}
 			else
 			{
@@ -1092,6 +1172,9 @@ open_socket(
 	int turn_off_reuse
 	)
 {
+#ifdef SYS_WINNT
+	int errval;
+#endif
 	SOCKET fd;
 	int on = 1, off = 0;
 #if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
@@ -1100,27 +1183,35 @@ open_socket(
 
 #ifndef HAVE_IPV6
 	if (addr->ss_family == AF_INET6)
-		return (-1);
+		return (INVALID_SOCKET);
 #endif /* HAVE_IPV6 */
 	/* create a datagram (UDP) socket */
-	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0))
 #ifndef SYS_WINNT
-	      < 0
-#else
-	      == INVALID_SOCKET
-#endif /* SYS_WINNT */
-	      )
-	{
+	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) < 0) {
 		if(addr->ss_family == AF_INET)
 			msyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed: %m");
 		else if(addr->ss_family == AF_INET6)
 			msyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed: %m");
 		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
 		    errno == EPFNOSUPPORT)
-			return (-1);
+			return (INVALID_SOCKET);
 		exit(1);
 		/*NOTREACHED*/
 	}
+#else
+	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
+		errval = WSAGetLastError();
+		if(addr->ss_family == AF_INET)
+			msyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed: %m");
+		else if(addr->ss_family == AF_INET6)
+			msyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed: %m");
+		if (errno == WSAEPROTONOSUPPORT || errno == WSAEAFNOSUPPORT ||
+		    errno == WSAEPFNOSUPPORT)
+			return (INVALID_SOCKET);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#endif /* SYS_WINNT */
 
 	/* set SO_REUSEADDR since we will be binding the same port
 	   number on each interface */
@@ -1178,15 +1269,22 @@ open_socket(
                                 fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
                                 stoa(addr),
                                 IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
-		else return -1;
+		else return INVALID_SOCKET;
 
 		msyslog(LOG_ERR, buff);
-		closesocket(fd);
+		close_socket(fd);
 
 		/*
 		 * soft fail if opening a multicast address
 		 */
-		    return INVALID_SOCKET;
+ 		if(addr->ss_family == AF_INET){
+			if(IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)))
+				return (INVALID_SOCKET);
+		}
+		else {
+			if(IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr))
+				return (INVALID_SOCKET);
+		}
 #if 0
 		exit(1);
 #else
@@ -1422,14 +1520,16 @@ sendpkt(
 		* for the moment we use the bcast option to set multicast ttl
 		*/
 		if (ttl > 0 && ttl != inter->last_ttl) {
-			char mttl = ttl;
+			char mttl = (char) ttl;
 
 			/*
 			* set the multicast ttl for outgoing packets
 			*/
 			if (setsockopt(inter->fd, IPPROTO_IP, IP_MULTICAST_TTL,
-			&mttl, sizeof(mttl)) == -1)
-				msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: %m");
+				(char *) &ttl, sizeof(ttl)) != 0) {
+				int errval = WSAGetLastError();
+				msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: err = %d %m", errval);
+			}
 			else
    				inter->last_ttl = ttl;
 		}
@@ -1938,15 +2038,27 @@ findinterface(
 		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
 	((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
+#ifndef SYS_WINNT
 	if (s < 0)
+#else
+	if (s == INVALID_SOCKET)
+#endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
+#ifndef SYS_WINNT
 	if (rtn < 0)
+#else
+	if (rtn != 0)
+#endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	rtn = getsockname(s, (struct sockaddr *)&saddr, &saddrlen);
+#ifndef SYS_WINNT
 	if (rtn < 0)
+#else
+	if (rtn != 0)
+#endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	close_socket(s);

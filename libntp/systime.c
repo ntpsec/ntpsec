@@ -231,7 +231,7 @@ step_systime(
 			timetv.tv_usec -= 1000000;
 		}
 	}
-	if (ntp_set_tod(&timetv, (struct timezone *)0) != 0) {
+	if (ntp_set_tod(&timetv, NULL) != 0) {
 		msyslog(LOG_ERR, "Can't set time of day: %m");
 		return (0);
 	}

@@ -365,11 +365,8 @@ char currenthost[LENHOSTNAME];			/* current host name */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
-#ifndef SYS_WINNT
-int sockfd;					/* fd socket is opened on */
-#else
+int ai_fam_templ;			/* address family */
 SOCKET sockfd;					/* fd socket is opened on */
-#endif
 int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
 struct servent *server_entry = NULL;		/* server entry for ntp */
@@ -493,6 +490,7 @@ ntpqmain(
 	int errflg = 0;
 	extern int ntp_optind;
 	extern char *ntp_optarg;
+	int ai_fam_templ;
 
 #ifdef NO_MAIN_ALLOWED
     clear_globals();
@@ -673,18 +671,12 @@ openhost(
 			exit(1);
 		}
 	}
-
+#endif /* SYS_WINNT */
 
 	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == INVALID_SOCKET) {
 		error("socket", "", "");
-		exit(-1);
 	}
-#else
-	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
-	if (sockfd == -1)
-	    error("socket", "", "");
-#endif /* SYS_WINNT */
 
 	
 #ifdef NEED_RCVBUF_SLOP
@@ -1119,7 +1111,7 @@ sendrequest(
 	 * Fill in the packet
 	 */
 	qpkt.li_vn_mode = PKT_LI_VN_MODE(0, pktversion, MODE_CONTROL);
-	qpkt.r_m_e_op = (u_char)opcode & CTL_OP_MASK;
+	qpkt.r_m_e_op = (u_char)(opcode & CTL_OP_MASK);
 	qpkt.sequence = htons(sequence);
 	qpkt.status = 0;
 	qpkt.associd = htons((u_short)associd);
@@ -1743,10 +1735,10 @@ rtdatetolfp(
 		return 0;
 	}
 
-	cal.monthday = *cp++ - '0';	/* ascii dependent */
+	cal.monthday = (u_char) (*cp++ - '0');	/* ascii dependent */
 	if (isdigit((int)*cp)) {
-		cal.monthday = (cal.monthday << 3) + (cal.monthday << 1);
-		cal.monthday += *cp++ - '0';
+		cal.monthday = (u_char)((cal.monthday << 3) + (cal.monthday << 1));
+		cal.monthday = (u_char)(cal.monthday + *cp++ - '0');
 	}
 
 	if (*cp++ != '-')
@@ -1761,25 +1753,25 @@ rtdatetolfp(
 		break;
 	if (i == 12)
 	    return 0;
-	cal.month = i + 1;
+	cal.month = (u_char)(i + 1);
 
 	if (*cp++ != '-')
 	    return 0;
 	
 	if (!isdigit((int)*cp))
 	    return 0;
-	cal.year = *cp++ - '0';
+	cal.year = (u_short)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.year = (cal.year << 3) + (cal.year << 1);
-		cal.year += *cp++ - '0';
+		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
+		cal.year = (u_short)(*cp++ - '0');
 	}
 	if (isdigit((int)*cp)) {
-		cal.year = (cal.year << 3) + (cal.year << 1);
-		cal.year += *cp++ - '0';
+		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
+		cal.year = (u_short)(cal.year + *cp++ - '0');
 	}
 	if (isdigit((int)*cp)) {
-		cal.year = (cal.year << 3) + (cal.year << 1);
-		cal.year += *cp++ - '0';
+		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
+		cal.year = (u_short)(cal.year + *cp++ - '0');
 	}
 
 	/*
@@ -1792,26 +1784,26 @@ rtdatetolfp(
 
 	if (*cp++ != ' ' || !isdigit((int)*cp))
 	    return 0;
-	cal.hour = *cp++ - '0';
+	cal.hour = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.hour = (cal.hour << 3) + (cal.hour << 1);
-		cal.hour += *cp++ - '0';
+		cal.hour = (u_char)((cal.hour << 3) + (cal.hour << 1));
+		cal.hour = (u_char)(cal.hour + *cp++ - '0');
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
 	    return 0;
-	cal.minute = *cp++ - '0';
+	cal.minute = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.minute = (cal.minute << 3) + (cal.minute << 1);
-		cal.minute += *cp++ - '0';
+		cal.minute = (u_char)((cal.minute << 3) + (cal.minute << 1));
+		cal.minute = (u_char)(cal.minute + *cp++ - '0');
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
 	    return 0;
-	cal.second = *cp++ - '0';
+	cal.second = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.second = (cal.second << 3) + (cal.second << 1);
-		cal.second += *cp++ - '0';
+		cal.second = (u_char)((cal.second << 3) + (cal.second << 1));
+		cal.second = (u_char)(cal.second + *cp++ - '0');
 	}
 
 	/*
@@ -1990,10 +1982,10 @@ help(
 		n = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = xcp->keyword;
+			    cmdsort[n++] = (char *)xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
+		    cmdsort[n++] = (char *)xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
 		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
@@ -2498,7 +2490,7 @@ getkeyid(
 	fprintf(stderr, "%s", keyprompt); fflush(stderr);
 	for (p=pbuf; (c = getc(fi))!='\n' && c!=EOF;) {
 		if (p < &pbuf[18])
-		    *p++ = c;
+		    *p++ = (char)c;
 	}
 	*p = '\0';
 	if (fi != stdin)
@@ -2546,7 +2538,7 @@ atoascii(
 
 		if (c < ' ') {
 			*ocp++ = '^';
-			*ocp++ = c + '@';
+			*ocp++ = (u_char)(c + '@');
 		} else if (c == 0177) {
 			*ocp++ = '^';
 			*ocp++ = '?';
@@ -2971,7 +2963,7 @@ cookedprint(
 	register int varid;
 	char *name;
 	char *value;
-	int output_raw;
+	char output_raw;
 	int fmt;
 	struct ctl_var *varlist;
 	l_fp lfp;

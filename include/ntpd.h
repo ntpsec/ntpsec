@@ -18,10 +18,6 @@ void	service_main	(DWORD, LPTSTR *);
 void	service_ctrl	(DWORD);
 void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
-#else
-#define SOCKET	int
-#define INVALID_SOCKET	-1
-#define closesocket close
 #endif /* SYS_WINNT */
 
 /* ntp_config.c */
@@ -124,7 +120,7 @@ extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_storage *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_storage *, struct interface *, int, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
-extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
+extern	struct peer *newpeer	P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
@@ -279,7 +275,7 @@ extern struct interface *loopback_interface; /* loopback interface */
  * File descriptor masks etc. for call to select
  */
 extern fd_set	activefds;
-extern SOCKET	maxactivefd;
+extern int	maxactivefd;
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */
@@ -306,6 +302,7 @@ extern int	allow_step;		/* allow step correction */
 extern int	allow_panic;		/* allow panic correction */
 extern int	mode_ntpdate;		/* exit on first clock set */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
+extern int	forground_process;	/* run the process in the forground */
 
 /*
  * Clock state machine variables

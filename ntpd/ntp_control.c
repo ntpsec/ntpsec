@@ -2540,7 +2540,7 @@ ctlsettrap(
 	tptouse->tr_sequence = 1;
 	tptouse->tr_addr = *raddr;
 	tptouse->tr_localaddr = linter;
-	tptouse->tr_version = version;
+	tptouse->tr_version = (u_char) version;
 	tptouse->tr_flags = TRAP_INUSE;
 	if (traptype == TRAP_TYPE_CONFIG)
 		tptouse->tr_flags |= TRAP_CONFIGURED;
@@ -2853,7 +2853,8 @@ set_var(
 	if (!data || !size)
 		return;
 
-	if ((k = *kv)) {
+	k = *kv;
+	if (k != NULL) {
 		while (!(k->flags & EOV)) {
 			s = data;
 			t = k->text;

@@ -500,13 +500,13 @@ peer_config(
 	 */
 	if (peer != 0) {
 		peer->hmode = (u_char)hmode;
-		peer->version = (u_char)version;
-		peer->minpoll = (u_char)minpoll;
-		peer->maxpoll = (u_char)maxpoll;
+		peer->version = (u_char) version;
+		peer->minpoll = (u_char) minpoll;
+		peer->maxpoll = (u_char) maxpoll;
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;
-		peer->ttl = ttl;
+		peer->ttl = (u_char) ttl;
 		peer->keyid = key;
 		peer->precision = sys_precision;
 		peer_clear(peer, "RMOT");
@@ -599,7 +599,7 @@ newpeer(
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
 	peer->cast_flags = cast_flags;
-	peer->ttl = ttl;
+	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
 	if (cast_flags & MDF_ACAST)

@@ -239,7 +239,7 @@ hopfserial_receive (
 
 	up->rpt_next = 0; /* wait until next poll interval occur */
 
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
+	pp->lencode = (u_short)refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
 
 	if (pp->lencode  == 0)
 		return;

@@ -85,7 +85,7 @@
 
 #ifndef HAVE_IPV6
 
-#if 0
+#if defined(SYS_WINNT)
 /* XXX This is the preferred way, but for some reason the SunOS compiler
  * does not like it.
  */
@@ -222,8 +222,7 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 }
 
 char *
-gai_strerror(ecode)
-	int ecode;
+gai_strerror(int ecode)
 {
 	if (ecode < 0 || ecode > EAI_MAX)
 		ecode = EAI_MAX;

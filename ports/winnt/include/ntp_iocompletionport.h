@@ -22,7 +22,7 @@ extern	int	io_completion_port_add_clock_io	(struct refclockio * /*rio */);
 
 extern	void	io_completion_port_add_socket (struct interface *);
 
-extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, struct sockaddr_in*);
+extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, struct sockaddr_storage*);
 
 extern	HANDLE get_io_event (void);
 

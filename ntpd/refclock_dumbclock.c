@@ -119,14 +119,15 @@ dumbclock_start(
 	if (debug)
 		printf ("starting Dumbclock with device %s\n",device);
 #endif
-	if (!(fd = refclock_open(device, SPEED232, 0)))
+	fd = refclock_open(device, SPEED232, 0);
+	if (fd < 0)
 		return (0);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct dumbclock_unit *)
-	      emalloc(sizeof(struct dumbclock_unit)))) {
+	up = (struct dumbclock_unit *)emalloc(sizeof(struct dumbclock_unit));
+	if (up == NULL) {
 		(void) close(fd);
 		return (0);
 	}
@@ -223,7 +224,7 @@ dumbclock_receive(
 		    up->tcswitch = 0;
 		return;
 	}
-	pp->lencode = temp;
+	pp->lencode = (u_short)temp;
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
 	up->tcswitch = 1;
@@ -337,7 +338,7 @@ dumbclock_receive(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-	up->lasthour = pp->hour;
+	up->lasthour = (u_char)pp->hour;
 }
 
 #if 0

@@ -347,7 +347,7 @@ io_completion_port_sendto(
 	struct interface *inter,	
 	struct pkt *pkt,	
 	int len, 
-	struct sockaddr_in* dest)
+	struct sockaddr_storage* dest)
 {
 	transmitbuf *buff = NULL;
 	DWORD Result = ERROR_SUCCESS;

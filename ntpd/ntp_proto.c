@@ -1065,7 +1065,7 @@ process_packet(
 	double	dtemp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime;
 	l_fp	ci;
-	int	pmode, pleap, pstratum;
+	u_char	pmode, pleap, pstratum;
 
 	/*
 	 * Swap header fields and keep the books. The books amount to
@@ -1304,7 +1304,7 @@ clock_update(void)
 	 * changes, we gotta reroll the keys.
 	 */
 	default:
-		sys_stratum = sys_peer->stratum + 1;
+		sys_stratum = (u_char) (sys_peer->stratum + 1);
 		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
 		else
@@ -1354,7 +1354,7 @@ poll_update(
 		else if (hpoll < peer->minpoll)
 			peer->hpoll = peer->minpoll;
 		else
-			peer->hpoll = hpoll;
+			peer->hpoll = (u_char) hpoll;
 	}
 
 	/*
@@ -1392,12 +1392,12 @@ poll_update(
 	} else if (peer->cast_flags & MDF_ACAST) {
 		if (sys_survivors >= sys_minclock || peer->ttl >=
 		    sys_ttlmax)
-			peer->kpoll = peer->hpoll + 3;
+			peer->kpoll = (u_char) (peer->hpoll + 3);
 		else
 			peer->kpoll = peer->hpoll;
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	} else {
-		peer->kpoll = max(min(peer->ppoll, peer->hpoll),
+		peer->kpoll = (u_char) max(min(peer->ppoll, peer->hpoll),
 		    peer->minpoll);
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	}
@@ -1432,7 +1432,7 @@ peer_clear(
 	char	*ident			/* tally lights */
 	)
 {
-	int	i;
+	u_char	i;
 
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1557,7 +1557,7 @@ clock_filter(
 	peer->filter_disp[j] = dsp;
 	peer->filter_epoch[j] = current_time;
 	j++; j %= NTP_SHIFT;
-	peer->filter_nextpt = j;
+	peer->filter_nextpt = (u_short) j;
 
 	/*
 	 * Update dispersions since the last update and at the same
@@ -1609,7 +1609,7 @@ clock_filter(
 	 */
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
-		peer->filter_order[i] = ord[i];
+		peer->filter_order[i] = (u_char) ord[i];
 		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
 		    MAXDISTANCE))
 			continue;
@@ -2104,8 +2104,8 @@ clock_select(void)
 	 */
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
-		leap_consensus |= peer->leap;
 		peer = peer_list[i];
+		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
 		if (peer->stratum >= sys_floor && osurv >= sys_minclock)
@@ -2935,7 +2935,7 @@ init_proto(void)
 	sys_stattime = 0;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {
-		sys_ttl[i] = (i + 1) * 256 / MAX_TTL - 1;
+		sys_ttl[i] = (u_char) ((i + 1) * 256 / MAX_TTL - 1);
 		sys_ttlmax = i;
 	}
 #ifdef OPENSSL

@@ -88,3 +88,6 @@ scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
 version
+builderrors.txt
+ports/winnt/libntp/messages.aps
+ports/winnt/ntpd/stderr

@@ -109,7 +109,10 @@ volatile int debug = 0;
  * File descriptor masks etc. for call to select
  */
 
-#ifndef SYS_WINNT
+int ai_fam_templ;
+int nbsock;
+SOCKET fd[MAX_AF];	/* support up to 2 sockets */
+SOCKET fd_family[MAX_AF];	/* to remember the socket family */
 #ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
 #else
@@ -936,7 +939,7 @@ server_data(
 	u_fp e
 	)
 {
-	register int i;
+	u_short i;
 
 	i = server->filter_nextpt;
 	if (i < NTP_SHIFT) {
@@ -944,7 +947,7 @@ server_data(
 		server->filter_offset[i] = *c;
 		server->filter_soffset[i] = LFPTOFP(c);
 		server->filter_error[i] = e;
-		server->filter_nextpt = i + 1;
+		server->filter_nextpt = (u_short)(i + 1);
 	}
 }
 
@@ -1780,7 +1783,7 @@ sendpkt(
 {
         int i;
 	int cc;
-        int sock = 0;
+        SOCKET sock = 0;
 
 #ifdef SYS_WINNT
 	DWORD err;

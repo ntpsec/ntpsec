@@ -147,6 +147,11 @@ int priority_done = 2;		/* 0 - Set priority */
 volatile int debug;
 
 /*
+ * Set the processing not to be in the forground
+ */
+int forground_process = FALSE;
+
+/*
  * No-fork flag.  If set, we do not become a background daemon.
  */
 int nofork;
@@ -177,8 +182,10 @@ static	RETSIGTYPE	finish		P((int));
 #endif	/* SIGDIE2 */
 
 #ifdef	DEBUG
+#ifndef SYS_WINNT
 static	RETSIGTYPE	moredebug	P((int));
 static	RETSIGTYPE	lessdebug	P((int));
+#endif
 #else /* not DEBUG */
 static	RETSIGTYPE	no_debug	P((int));
 #endif	/* not DEBUG */
@@ -530,8 +537,9 @@ service_main(
 	if(!debug)
 	{
 		/* register our service control handler */
-		if (!(sshStatusHandle = RegisterServiceCtrlHandler( TEXT("NetworkTimeProtocol"),
-									(LPHANDLER_FUNCTION)service_ctrl)))
+		sshStatusHandle = RegisterServiceCtrlHandler( TEXT("NetworkTimeProtocol"),
+							(LPHANDLER_FUNCTION)service_ctrl);
+		if(sshStatusHandle == 0)
 		{
 			msyslog(LOG_ERR, "RegisterServiceCtrlHandler failed: %m");
 			return;
@@ -570,7 +578,7 @@ service_main(
 	debug = 0; /* will be immediately re-initialized 8-( */
 	getstartup(argc, argv); /* startup configuration, catch logfile this time */
 
-#if !defined(SYS_WINNT) && !defined(VMS)
+#if !defined(VMS)
 
 # ifndef LOG_DAEMON
 	openlog(cp, LOG_PID);
@@ -852,7 +860,7 @@ service_main(
 	{
 # if !defined(HAVE_SIGNALED_IO) 
 		extern fd_set activefds;
-		extern SOCKET maxactivefd;
+		extern int maxactivefd;
 
 		fd_set rdfdes;
 		int nfound;
@@ -948,7 +956,9 @@ service_main(
 		 */
 	}
 	exit(1); /* unreachable */
+#ifndef SYS_WINNT
 	return 1;		/* DEC OSF cc braindamage */
+#endif
 }
 
 
@@ -981,6 +991,7 @@ finish(
 
 
 #ifdef DEBUG
+#ifndef SYS_WINNT
 /*
  * moredebug - increase debugging verbosity
  */
@@ -1016,6 +1027,7 @@ lessdebug(
 	}
 	errno = saved_errno;
 }
+#endif
 #else /* not DEBUG */
 /*
  * no_debug - We don't do the debug here.

@@ -207,7 +207,7 @@ struct resp_pkt {
 				|((u_short)(nitems)&0xfff))))
 
 #define	INFO_MBZ(mbz_itemsize)	((ntohs(mbz_itemsize)>>12)&0xf)
-#define	INFO_ITEMSIZE(mbz_itemsize)	(ntohs(mbz_itemsize)&0xfff)
+#define	INFO_ITEMSIZE(mbz_itemsize)	((u_short)(ntohs(mbz_itemsize)&0xfff))
 #define	MBZ_ITEMSIZE(itemsize)	(htons((u_short)(itemsize)))
 
 

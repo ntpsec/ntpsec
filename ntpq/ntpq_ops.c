@@ -1245,11 +1245,11 @@ decodeaddrtype(
 	case AF_INET:
 		dummy = ((struct sockaddr_in *)sock)->sin_addr.s_addr;
 		dummy = ntohl(dummy);
-		ch = ((dummy&0xf0000000)==0xe0000000) ? 'm' :
+		ch = (char)(((dummy&0xf0000000)==0xe0000000) ? 'm' :
 			((dummy&0x000000ff)==0x000000ff) ? 'b' :
 			((dummy&0xffffffff)==0x7f000001) ? 'l' :
 			((dummy&0xffffffe0)==0x00000000) ? '-' :
-			'u';
+			'u');
 		break;
 	case AF_INET6:
 		sin6 = (struct sockaddr_in6 *)sock;

@@ -421,7 +421,7 @@ static	void save_resolve P((char *, int, int, int, int, u_int, int,
     keyid_t, u_char *));
 static	void do_resolve_internal P((void));
 static	void abort_resolve P((void));
-#if !defined(VMS)
+#if !defined(VMS) && !defined(SYS_WINNT)
 static	RETSIGTYPE catchchild P((int));
 #endif /* VMS */
 
@@ -1101,7 +1101,7 @@ getconfig(
 
 		    case CONFIG_TTL:
 			for (i = 1; i < ntokens && i < MAX_TTL; i++) {
-			    sys_ttl[i - 1] = atoi(tokens[i]);
+			    sys_ttl[i - 1] = (u_char) atoi(tokens[i]);
 			    sys_ttlmax = i - 1;
 			}
 			break;
@@ -1691,12 +1691,12 @@ getconfig(
 					"no value for setvar command - line ignored");
 			} else {
 				set_sys_var(tokens[1], strlen(tokens[1])+1,
-					    RW |
+					    (u_short) (RW |
 					    ((((ntokens > 2)
 					       && !strcmp(tokens[2],
 							  "default")))
 					     ? DEF
-					     : 0));
+					     : 0)));
 			}
 			break;
 
@@ -2129,7 +2129,7 @@ getnetnum(
 }
 
 
-#if !defined(VMS)
+#if !defined(VMS) && !defined(SYS_WINNT)
 /*
  * catchchild - receive the resolver's exit status
  */
@@ -2173,7 +2173,6 @@ save_resolve(
 #else
 		/* no /tmp directory under NT */
 		{
-			DWORD len;
 			if(!(GetTempPath((DWORD)MAX_PATH, (LPTSTR)res_file))) {
 				msyslog(LOG_ERR, "cannot get pathname for temporary directory: %m");
 				return;
@@ -2367,13 +2366,14 @@ do_resolve_internal(void)
 		 */
 		DWORD dwThreadId;
 		fflush(stdout);
-		if (!(ResolverThreadHandle = CreateThread(
-			NULL,								 /* no security attributes	*/
-			0,									 /* use default stack size	*/
+		ResolverThreadHandle = CreateThread(
+			NULL,				 /* no security attributes	*/
+			0,				 /* use default stack size	*/
 			(LPTHREAD_START_ROUTINE) ntp_intres, /* thread function		*/
-			NULL,								 /* argument to thread function   */
-			0,									 /* use default creation flags	  */
-			&dwThreadId))) {					 /* returns the thread identifier */
+			NULL,				 /* argument to thread function   */
+			0,				 /* use default creation flags	  */
+			&dwThreadId);			 /* returns the thread identifier */
+		if (ResolverThreadHandle == NULL) {
 			msyslog(LOG_ERR, "CreateThread() failed, can't start ntp_intres");
 			abort_resolve();
 		}

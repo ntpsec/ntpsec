@@ -235,6 +235,18 @@ typedef unsigned long u_long;
 #endif /* 0 */
 
 /*
+ * Define these here for non-Windows NT systems
+ * SOCKET and INVALID_SOCKET are native macros
+ * on Windows NT and since they have different
+ * requirements we use them in the code and
+ * make them macros for everyone else
+ */
+#ifndef SYS_WINNT
+# define SOCKET	int
+# define INVALID_SOCKET	-1
+# define closesocket close
+#endif
+/*
  * Windows NT
  */
 #if defined(SYS_WINNT)
@@ -250,6 +262,7 @@ typedef unsigned long u_long;
 # define ifr_addr iiAddress.AddressIn
 # define ifr_broadaddr iiBroadcastAddress.AddressIn
 # define ifr_mask iiNetmask.AddressIn
+# define zz_family sin_family
 
 # define S_IFREG _S_IFREG
 # define stat _stat
@@ -259,6 +272,7 @@ typedef unsigned long u_long;
 # define unlink _unlink
 # define fileno _fileno
 # define write _write
+# define vsnprintf _vsnprintf
 #ifndef close
 # define close _close
 #endif
@@ -534,7 +548,7 @@ extern char *strdup(const char *);
 #endif
 
 #ifndef HAVE_TIMEGM
-extern	time_t	timegm		P((struct tm *));
+extern time_t	timegm		P((struct tm *));
 #endif
 
 #ifdef HAVE_SYSV_TTYS

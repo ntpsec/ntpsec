@@ -85,6 +85,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_NO_NICE
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
+# define HAVE_SOCKADDR_IN6
 //# define volatile
 # define STDC_HEADERS
 

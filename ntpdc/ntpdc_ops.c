@@ -660,7 +660,7 @@ again:
 			pl->addr6 = GET_INADDR6(pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
-		pl->port = s_port;
+		pl->port = (u_short)s_port;
 		pl->hmode = pl->flags = 0;
 		pl = (struct info_peer_list *)((char *)pl + sendsize);
 	}
@@ -733,7 +733,7 @@ again:
 			pl->addr6 = GET_INADDR6(pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
-		pl->port = s_port;
+		pl->port = (u_short)s_port;
 		pl->hmode = plist[qitems].flags = 0;
 		pl = (struct info_peer_list *)((char *)pl + sendsize);
 	}
@@ -1761,6 +1761,13 @@ do_restrict(
 	int res;
 	int err;
 	int sendsize;
+
+	/* Initialize cres */
+	cres.addr = 0;
+	cres.mask = 0;
+	cres.flags = 0;
+	cres.mflags = 0;
+	cres.v6_flag = 0;
 
 again:
 	if (impl_ver == IMPL_XNTPD)

@@ -108,7 +108,8 @@ refclock_report(
 {
 	struct refclockproc *pp;
 
-	if (!(pp = peer->procptr))
+	pp = peer->procptr;
+	if (pp == NULL)
 		return;
 	if (code == CEVNT_BADREPLY)
 		pp->badformat++;
@@ -117,8 +118,8 @@ refclock_report(
 	if (code == CEVNT_TIMEOUT)
 		pp->noreply++;
 	if (pp->currentstatus != code) {
-		pp->currentstatus = code;
-		pp->lastevent = code;
+		pp->currentstatus = (u_char)code;
+		pp->lastevent = (u_char)code;
 		if (code == CEVNT_FAULT)
 			msyslog(LOG_ERR,
 				"clock %s event '%s' (0x%02x)",
@@ -212,7 +213,8 @@ refclock_newpeer(
 	/*
 	 * Allocate and initialize interface structure
 	 */
-	if (!(pp = (struct refclockproc *)emalloc(sizeof(struct refclockproc))))
+	pp = (struct refclockproc *)emalloc(sizeof(struct refclockproc));
+	if (pp == NULL)
 		return (0);
 	memset((char *)pp, 0, sizeof(struct refclockproc));
 	typeunit[clktype][unit] = peer;
@@ -222,7 +224,7 @@ refclock_newpeer(
 	 * Initialize structures
 	 */
 	peer->refclktype = clktype;
-	peer->refclkunit = unit;
+	peer->refclkunit = (u_char)unit;
 	peer->flags |= FLAG_REFCLOCK;
 	peer->maxpoll = peer->minpoll;
 	peer->stratum = STRATUM_REFCLOCK;
@@ -605,7 +607,7 @@ refclock_gtlin(
 	 * timestamp by noting its value is earlier than the buffer
 	 * timestamp, but not more than one second earlier.
 	 */
-	dpt = rbufp->recv_buffer;
+	dpt = (char *)rbufp->recv_buffer;
 	dpend = dpt + rbufp->recv_length;
 	trtmp = rbufp->recv_time;
 
@@ -984,7 +986,8 @@ refclock_control(
 	unit = REFCLOCKUNIT(srcadr);
 	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
 		return;
-	if (!(peer = typeunit[clktype][unit]))
+	peer = typeunit[clktype][unit];
+	if (peer == NULL)
 		return;
 	if (peer->procptr == NULL)
 		return;
@@ -1090,7 +1093,8 @@ refclock_buginfo(
 	unit = REFCLOCKUNIT(srcadr);
 	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
 		return;
-	if (!(peer = typeunit[clktype][unit]))
+	peer = typeunit[clktype][unit];
+	if (peer == NULL)
 		return;
 	pp = peer->procptr;
 

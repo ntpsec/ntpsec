@@ -24,6 +24,7 @@
 #include "ntp_stdlib.h"
 
 #ifdef SYS_WINNT
+# include <stdarg.h>
 # include "..\ports\winnt\libntp\log.h"
 # include "..\ports\winnt\libntp\messages.h"
 #endif
@@ -35,13 +36,9 @@ FILE *syslog_file = NULL;
 u_long ntp_syslogmask =  ~ (u_long) 0;
 
 #ifdef SYS_WINNT
-HANDLE  hEventSource;
-LPTSTR lpszStrings[1];
-static WORD event_type[] = {
-	EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE,
-	EVENTLOG_WARNING_TYPE,
-	EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE,
-};
+static char separator = '\\';
+#else
+static char separator = '/';
 #endif /* SYS_WINNT */
 extern	char *progname;
 
@@ -60,13 +57,18 @@ void msyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
-#if defined(SYS_WINNT)
-	char xerr[50];
-#endif
 	register char c;
 	register char *n, *prog;
 	register const char *f;
-	int olderrno;
+
+	/*
+	 * Save the error value as soon as possible
+	 */
+#ifdef SYS_WINNT
+	int olderrno = GetLastError();
+#else
+	int olderrno = errno;
+#endif
 	char *err;
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
@@ -78,7 +80,6 @@ void msyslog(int level, const char *fmt, ...)
 	fmt = va_arg(ap, char *);
 #endif
 
-	olderrno = errno;
 	n = nfmt;
 	f = fmt;
 	while ((c = *f++) != '\0' && c != '\n' && n < &nfmt[252]) {
@@ -92,20 +93,7 @@ void msyslog(int level, const char *fmt, ...)
 			continue;
 		}
 		err = 0;
-#if !defined(SYS_WINNT)
 		err = strerror(olderrno);
-#else  /* SYS_WINNT */
-		err = xerr;
-		FormatMessage( 
-			FORMAT_MESSAGE_FROM_SYSTEM,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default language */
-			(LPTSTR) err,
-			sizeof(xerr),
-			NULL);
-
-#endif /* SYS_WINNT */
 		if ((n + strlen(err)) < &nfmt[254]) {
 			strcpy(n, err);
 			n += strlen(err);
@@ -120,27 +108,7 @@ void msyslog(int level, const char *fmt, ...)
 	vsnprintf(buf, sizeof(buf), nfmt, ap);
 #if !defined(VMS) && !defined (SYS_VXWORKS)
 	if (syslogit)
-#ifndef SYS_WINNT
 	    syslog(level, "%s", buf);
-#else
-	{
-		lpszStrings[0] = buf;
- 
-		switch (event_type[level])
-		{
-		    case EVENTLOG_ERROR_TYPE:
-			reportAnEEvent(NTP_ERROR,1,lpszStrings);
-			break;
-		    case EVENTLOG_INFORMATION_TYPE:
-			reportAnIEvent(NTP_INFO,1,lpszStrings);
-			break;
-		    case EVENTLOG_WARNING_TYPE:
-			reportAnWEvent(NTP_WARNING,1,lpszStrings);
-			break;
-		} /* switch end */
-
-	} 
-#endif /* SYS_WINNT */
 	else
 #endif /* VMS  && SYS_VXWORKS*/
 	{
@@ -148,7 +116,7 @@ void msyslog(int level, const char *fmt, ...)
 			: level <= LOG_ERR ? stderr : stdout;
 		/* syslog() provides the timestamp, so if we're not using
 		   syslog, we must provide it. */
-		prog = strrchr(progname, '/');
+		prog = strrchr(progname, separator);
 		if (prog == NULL)
 		    prog = progname;
 		else

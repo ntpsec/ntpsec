@@ -867,9 +867,9 @@ peer_info (
 		ip->precision = pp->precision;
 		ip->version = pp->version;
 		ip->reach = pp->reach;
-		ip->unreach = pp->unreach;
+		ip->unreach = (u_char) pp->unreach;
 		ip->flash = (u_char)pp->flash;
-		ip->flash2 = pp->flash;
+		ip->flash2 = (u_short) pp->flash;
 		ip->estbdelay = HTONS_FP(DTOFP(pp->estbdelay));
 		ip->ttl = pp->ttl;
 		ip->associd = htons(pp->associd);

@@ -120,6 +120,15 @@ SOURCE=..\..\..\ntpd\ntp_intres.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\ntp_io.c
+
+!IF  "$(CFG)" == "ntpd - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "ntpd - Win32 Debug"
+
+# SUBTRACT CPP /FA<none>
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

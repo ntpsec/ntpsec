@@ -269,6 +269,10 @@ SOURCE=..\..\..\libntp\netof.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ntp_rfc2553.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\numtoa.c
 # End Source File
 # Begin Source File
@@ -301,11 +305,23 @@ SOURCE=.\SetSystemTime.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\socktoa.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\socktohost.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\strerror.c
+SOURCE=.\strerror.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\syslog.c
 # End Source File
 # Begin Source File
 

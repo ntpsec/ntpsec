@@ -93,6 +93,9 @@ typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
 /*
  * IPv6 address
  */
+#ifdef SYS_WINNT
+#define in6_addr in_addr6
+#else
 struct in6_addr {
 	union {
 		u_int8_t   __u6_addr8[16];
@@ -102,16 +105,23 @@ struct in6_addr {
 };
 
 #define s6_addr   __u6_addr.__u6_addr8
+#endif
 
 /*
  * Definition of some useful macros to handle IP6 addresses
  */
+#ifdef SYS_WINNT
+#define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
+#else
 #define IN6ADDR_ANY_INIT \
 	{{{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
 	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }}}
+#endif
+
 extern const struct in6_addr in6addr_any;
 
 #define SIN6_LEN
+#ifndef HAVE_SOCKADDR_IN6
 struct sockaddr_in6 {
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	u_int8_t	sin6_len;	/* length of this struct(sa_family_t)*/
@@ -124,6 +134,7 @@ struct sockaddr_in6 {
 	struct in6_addr	sin6_addr;	/* IP6 address */
 	u_int32_t	sin6_scope_id;	/* scope zone index */
 };
+#endif
 
 /*
  * Unspecified
