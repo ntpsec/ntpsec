@@ -287,6 +287,7 @@ typedef unsigned long u_long;
 # define register
 #endif
  typedef char *caddr_t;
+# define vsnprintf _vsnprintf
 #endif /* SYS_WINNT */
 
 int ntp_set_tod P((struct timeval *tvp, void *tzp));
