@@ -509,7 +509,7 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_TYPE(s_char, signed char)
+AC_CHECK_TYPES((s_char))
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
  *yes)
     # We have a typedef for s_char.  Might as well believe it...

@@ -786,6 +786,9 @@
 /* Define if you have the <sys/wait.h> header file. */
 #undef HAVE_SYS_WAIT_H
 
+/* Define if the system has the type `s_char'. */
+#undef HAVE_S_CHAR
+
 /* Define if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
 
@@ -911,9 +914,6 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #undef off_t
-
-/* Define to `signed char' if <sys/types.h> does not define. */
-#undef s_char
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
