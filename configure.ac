@@ -805,7 +805,48 @@ AC_CHECK_FUNCS(finite, ,
       AC_DEFINE(HAVE_ISFINITE)],
       AC_MSG_RESULT(no))
     LIBS=$_libs])])
-AC_CHECK_FUNCS(getbootfile getclock getdtablesize getrusage)
+AC_CHECK_FUNCS(getbootfile getclock getdtablesize)
+
+AC_ARG_ENABLE(getifaddrs,
+    AC_HELP_STRING([--enable-getifaddrs],
+	[s Enable the use of getifaddrs() [[yes|no|glibc]].
+glibc: Use getifaddrs() in glibc if you know it supports IPv6.]),
+    want_getifaddrs="$enableval",  want_getifaddrs="yes")
+
+case $want_getifaddrs in
+yes|glibc)
+#
+# Do we have getifaddrs() ?
+#
+case $host in
+*-linux*)
+	# Some recent versions of glibc support getifaddrs() which does not
+	# provide AF_INET6 addresses while the function provided by the USAGI
+	# project handles the AF_INET6 case correctly.  We need to avoid
+	# using the former but prefer the latter unless overridden by
+	# --enable-getifaddrs=glibc.
+	if test $use_getifaddrs = glibc
+	then
+		AC_CHECK_FUNCS(getifaddrs)
+	else
+		save_LIBS="$LIBS"
+		LIBS="-L/usr/local/v6/lib $LIBS"
+		AC_CHECK_LIB(inet6, getifaddrs,
+			LIBS="$LIBS -linet6"
+			AC_DEFINE(HAVE_GETIFADDRS),
+			LIBS=${save_LIBS})
+	fi
+	;;
+*)
+	AC_CHECK_FUNCS(getifaddrs)
+	;;
+esac
+;;
+no)
+;;
+esac
+
+AC_CHECK_FUNCS(getrusage)
 AC_CHECK_FUNC(gettimeofday, ,[
 case "$host" in
   *-*-mpeix*) ac_cv_func_gettimeofday=yes
@@ -818,6 +859,28 @@ case "$host" in
     ;;
 esac
 AC_CHECK_FUNCS(hstrerror)
+
+#
+# Check for if_nametoindex() for IPv6 scoped addresses support
+#
+AC_CHECK_FUNC(if_nametoindex, ac_cv_have_if_nametoindex=yes,
+		ac_cv_have_if_nametoindex=no)
+case $ac_cv_have_if_nametoindex in
+ no)
+	case "$host" in
+  	*-hp-hpux*)
+  		AC_CHECK_LIB(ipv6, if_nametoindex,
+				ac_cv_have_if_nametoindex=yes
+				LIBS="-lipv6 $LIBS",)
+  	;;
+	esac
+esac
+case $ac_cv_have_if_nametoindex in
+ yes)
+	AC_DEFINE(ISC_PLATFORM_HAVEIFNAMETOINDEX, 1, [ISC: do we have if_nametoindex()?])
+	;;
+esac
+
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 AC_CHECK_FUNC(inet_aton, [], [AC_DEFINE(ISC_PLATFORM_NEEDATON, 1, [ISC: provide inet_aton()])])
@@ -3764,6 +3827,26 @@ $isc_netinet6in6_hack
 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
 		[ISC: Have struct in6_pktinfo?])],
 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
+
+    # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
+    AC_MSG_CHECKING(for sin6_scope_id in struct sockaddr_in6)
+    AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+],
+	[struct sockaddr_in6 xyzzy; xyzzy.sin6_scope_id = 0; return (0);],
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, ,
+		[ISC: Have sin6_scope_id?])],
+	 result="#define LWRES_HAVE_SIN6_SCOPE_ID 1"],
+	[AC_MSG_RESULT(no)
+	 ISC_PLATFORM_HAVESCOPEID="#undef ISC_PLATFORM_HAVESCOPEID"
+	 result="#undef LWRES_HAVE_SIN6_SCOPE_ID"])
+    LWRES_HAVE_SIN6_SCOPE_ID="$result"
+
     ;;
 esac
 
