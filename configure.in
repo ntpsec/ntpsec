@@ -6,7 +6,7 @@ AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 AM_INIT_AUTOMAKE(ntp, 4.1.1c-rc1)
-AC_PREREQ(2.52)		# We need the cross-compile-aware SIZEOF stuff.
+AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
@@ -323,22 +323,7 @@ if test "$ac_cv_have_prototypes" = yes; then
 fi
 
 AC_C_CONST
-case "$build" in
- $host)
-    AC_C_BIGENDIAN
-    ;;
- *) case "$host" in
-     i*86-*-*)	# Was i*86-*-vxworks*
-	# LITTLEENDIAN
-	;;
-     *-*-vxworks*)
-	AC_DEFINE(WORDS_BIGENDIAN)
-	;;
-     *) AC_MSG_ERROR(Cross-compiling needs explicit byte order)
-	;;
-    esac
-    ;;
-esac
+AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
