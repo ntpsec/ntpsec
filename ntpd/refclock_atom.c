@@ -293,7 +293,7 @@ atom_pps(
 	i = up->pps_info.assert_sequence;
 	if (fdpps <= 0)
 		return (1);
-	if (time_pps_fetch(fdpps, &up->pps_info) < 0)
+	if (time_pps_fetch(fdpps, 0, &up->pps_info, 0) < 0)
 		return (1);
 	if (i == up->pps_info.assert_sequence)
 		return (2);

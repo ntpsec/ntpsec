@@ -1,3 +1,15 @@
+1999-10-09  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c: 
+	* ntpd/refclock_atom.c: 
+	* ntpd/ntp_refclock.c: 
+	PPS API code updated to the current spec
+	From: Dave Mills
+
+	* configure.in (ac_cv_make_tickadj): Don't make tickadj starting
+	with solaris2.5
+	Requested by: Dave Mills
+
 1999-10-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: We might need -lsocket for the -lnsl check.

@@ -630,7 +630,7 @@ refclock_gtlin(
 	trtmp = rbufp->recv_time;
 
 #ifdef HAVE_PPSAPI
-	if ((rbufp->fd == fdpps) && (time_pps_fetch(fdpps, &pi) >= 0)) {
+	if (rbufp->fd == fdpps && time_pps_fetch(fdpps, 0, &pi, 0) >= 0) {
 		if(pps_assert)
 			tsp = &pi.assert_timestamp;
 		else
@@ -1126,20 +1126,25 @@ refclock_ioctl(
 			fdpps = 0;
 			return (0);
 		}
-		pp.mode = PPS_TSFMT_TSPEC;
 		if (pps_assert)
-			pp.mode |= PPS_CAPTUREASSERT;
+			pp.mode = PPS_CAPTUREASSERT;
 		else
-			pp.mode |= PPS_CAPTURECLEAR;
-		if (pps_hardpps) {
-			if (pps_assert)
-				pp.mode |= PPS_HARDPPSONASSERT;
-			else
-				pp.mode |= PPS_HARDPPSONCLEAR;
-		}
+			pp.mode = PPS_CAPTURECLEAR;
 		if (time_pps_setparams(fdpps, &pp) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ioctl: time_pps_setparams failed");
+			fdpps = 0;
+			return (0);
+		}
+		if (pps_hardpps) {
+			if (pps_assert)
+				mode |= PPS_CAPTUREASSERT;
+			else
+				mode |= PPS_CAPTURECLEAR;
+		}
+		if (time_pps_kcbind(fdpps, 0, mode, 0) < 0) {
+			msyslog(LOG_ERR,
+			    "refclock_ioctl: time_pps_kpcbind failed");
 			fdpps = 0;
 			return (0);
 		}

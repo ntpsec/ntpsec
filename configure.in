@@ -2610,11 +2610,18 @@ case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
     ;;
 esac
 
-# tickadj is pretty useless on newer versions of ReliantUNIX
-# Do not bother
 case "$target" in
  mips-sni-sysv4*)
+    # tickadj is pretty useless on newer versions of ReliantUNIX
+    # Do not bother
     ac_cv_make_tickadj=no
+ ;;
+ *-*-solaris2*)
+    # DLM says tickadj is a no-no starting with solaris2.5
+    case "$target" in
+     *-*-solaris2.[0-4]*) ;;
+     *) ac_cv_make_tickadj=no ;;
+    esac
  ;;
 esac
 

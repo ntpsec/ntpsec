@@ -451,16 +451,18 @@ oncore_start(
 	}
 
 	if (instance->assert) {
-		instance->pps_p.mode = PPS_CAPTUREASSERT | PPS_OFFSETASSERT | PPS_HARDPPSONASSERT;
+		instance->pps_p.mode = PPS_CAPTUREASSERT | PPS_OFFSETASSERT;
 		instance->pps_p.assert_offset.tv_sec = 0;
 		instance->pps_p.assert_offset.tv_nsec = 0;
 	} else {
-		instance->pps_p.mode = PPS_CAPTURECLEAR  | PPS_OFFSETCLEAR  | PPS_HARDPPSONCLEAR;
+		instance->pps_p.mode = PPS_CAPTURECLEAR  | PPS_OFFSETCLEAR;
 		instance->pps_p.clear_offset.tv_sec = 0;
 		instance->pps_p.clear_offset.tv_nsec = 0;
 	}
+/*
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) 
 		instance->pps_p.mode &= ~(PPS_HARDPPSONCLEAR|PPS_HARDPPSONASSERT);
+*/
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
 		exit(1);
@@ -1257,7 +1259,7 @@ oncore_msg_En(
 
 #ifdef HAVE_PPSAPI
 	j = instance->ev_serial;
-	if (time_pps_fetch(instance->pps_h, &pps_i) < 0) {
+	if (time_pps_fetch(instance->pps_h, 0, &pps_i, 0) < 0) {
 		printf("ONCORE: time_pps_fetch failed\n");
 		return;
 	}
