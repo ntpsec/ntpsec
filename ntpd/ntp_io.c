@@ -305,6 +305,7 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
 
+		/* Broadcast does not exist on IPv6 so ignore any data
 		if((isc_if->flags & INTERFACE_F_BROADCAST) != 0) {
 			itf->flags |= INT_BROADCAST;
 			itf->bcast.ss_family = itf->sin.ss_family;
@@ -313,7 +314,7 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 				 sizeof(struct in6_addr));
 			((struct sockaddr_in6 *)&itf->bcast)->sin6_port = port;
 		}
-
+*/
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
 		       &(isc_if->netmask.type.in6),
@@ -492,9 +493,15 @@ io_setbclient(void)
 	set_reuseaddr(1);
 #endif
 	for (i = nwilds; i < ninterfaces; i++) {
+		/* Only IPv4 addresses are valid for broadcast */
+		if (inter_list[i].bcast.ss_family != AF_INET)
+			continue;
+
+		/* Is this a broadcast address? */
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
 
+		/* Do we already have the broadcast address open? */
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
@@ -504,11 +511,17 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
 		    INT_BROADCAST, 1);
-		inter_list[i].flags |= INT_BCASTOPEN;
+		if (inter_list[i].bfd != INVALID_SOCKET)
+			inter_list[i].flags |= INT_BCASTOPEN;
 #ifdef DEBUG
 		if (debug)
-			printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
+			if (inter_list[i].bfd != INVALID_SOCKET)
+				printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
 				i, inter_list[i].bfd);
+			else
+				printf("io_setbclient: Unable to Open broadcast client on interface %d\n",
+				i);
+
 #endif
 #endif
 	}
@@ -903,10 +916,9 @@ open_socket(
 	int tos;
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
-#ifndef HAVE_IPV6
-	if (addr->ss_family == AF_INET6)
+	if ((addr->ss_family == AF_INET6) && (isc_net_probeipv6() != ISC_R_SUCCESS))
 		return (INVALID_SOCKET);
-#endif /* HAVE_IPV6 */
+
 	/* create a datagram (UDP) socket */
 #ifndef SYS_WINNT
 	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) < 0) {
