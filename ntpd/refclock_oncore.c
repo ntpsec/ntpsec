@@ -126,7 +126,7 @@ struct instance {
 	pps_handle_t pps_h;
 	pps_params_t pps_p;
 #endif
-	enum receive_state state;		/* Receive state */
+	enum receive_state o_state;		/* Receive state */
 
 	enum site_survey_state site_survey;	/* Site Survey state */
 
@@ -469,7 +469,7 @@ oncore_start(
 #endif
 	instance->pp = pp;
 	instance->peer = peer;
-	instance->state = ONCORE_NO_IDEA;
+	instance->o_state = ONCORE_NO_IDEA;
 	cp = "state = ONCORE_NO_IDEA";
 	record_clock_stats(&(instance->peer->srcadr), cp);
 
@@ -503,12 +503,12 @@ oncore_start(
 	mode = instance->init_type;
 	if (mode == 3 || mode == 4) {
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cf, sizeof oncore_cmd_Cf);
-		instance->state = ONCORE_RESET_SENT;
+		instance->o_state = ONCORE_RESET_SENT;
 		cp = "state = ONCORE_RESET_SENT";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 	} else {
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Fa, sizeof oncore_cmd_Fa);
-		instance->state = ONCORE_TEST_SENT;
+		instance->o_state = ONCORE_TEST_SENT;
 		cp = "state = ONCORE_TEST_SENT";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 	}
@@ -954,9 +954,9 @@ oncore_msg_Cf(
 {
 	const char *cp;
 
-	if (instance->state == ONCORE_RESET_SENT) {
+	if (instance->o_state == ONCORE_RESET_SENT) {
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Fa, sizeof oncore_cmd_Fa);
-		instance->state = ONCORE_TEST_SENT;
+		instance->o_state = ONCORE_TEST_SENT;
 		cp = "state = ONCORE_TEST_SENT";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 	}
@@ -973,7 +973,7 @@ oncore_msg_Fa(
 {
 	const char *cp;
 
-	if (instance->state == ONCORE_TEST_SENT) {
+	if (instance->o_state == ONCORE_TEST_SENT) {
 		if (debug > 2)
 			printf("ONCORE: >>@@Fa %x %x\n", buf[4], buf[5]);
 		if (buf[4] || buf[5]) {
@@ -988,7 +988,7 @@ oncore_msg_Fa(
 
 		sleep(2);
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof oncore_cmd_Cj);
-		instance->state = ONCORE_ID_SENT;
+		instance->o_state = ONCORE_ID_SENT;
 		cp = "state = ONCORE_ID_SENT";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 	}
@@ -1009,7 +1009,7 @@ oncore_msg_Cj(
 	const char *cp;
 	int	mode;
 
-	if (instance->state != ONCORE_ID_SENT)
+	if (instance->o_state != ONCORE_ID_SENT)
 		return;
 
 	memcpy(instance->Cj, buf, len);
@@ -1079,7 +1079,7 @@ oncore_msg_Cj(
 
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_Ea,	sizeof oncore_cmd_Ea);
 
-	instance->state = ONCORE_ALMANAC;
+	instance->o_state = ONCORE_ALMANAC;
 	cp = "state = ONCORE_ALMANAC";
 	record_clock_stats(&(instance->peer->srcadr), cp);
 }
@@ -1095,21 +1095,21 @@ oncore_msg_Ea(
 {
 	const char	*cp;
 
-	if (instance->state != ONCORE_ALMANAC && instance->state != ONCORE_RUN)
+	if (instance->o_state != ONCORE_ALMANAC && instance->o_state != ONCORE_RUN)
 		return;
 
 	memcpy(instance->Ea, buf, len);
 
 	/* When we have an almanac, start the En messages */
 
-	if (instance->state == ONCORE_ALMANAC) {
+	if (instance->o_state == ONCORE_ALMANAC) {
 		if ((instance->Ea[72] & 1)) {
 			if (debug)
 				printf("ONCORE: waiting for almanac\n");
 			return;
 		} else {
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_En, sizeof oncore_cmd_En);
-			instance->state = ONCORE_RUN;
+			instance->o_state = ONCORE_RUN;
 			cp = "state = ONCORE_RUN";
 			record_clock_stats(&(instance->peer->srcadr), cp);
 		}
@@ -1242,7 +1242,7 @@ oncore_msg_En(
 #endif
 #endif	/* ! HAVE_PPS_API */
 
-	if (instance->state != ONCORE_RUN)
+	if (instance->o_state != ONCORE_RUN)
 		return;
 
 	memcpy(instance->En, buf, len);

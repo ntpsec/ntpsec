@@ -1,5 +1,7 @@
 1999-10-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c: Rename instance.state to instance.o_state
+
 	* refclock_oncore.c: 
 	* refclock_mx4200.c: 
 	* refclock_chu.c: 
