@@ -29,6 +29,7 @@ EXTRA_DIST = \
 	README.cvs \
 	README.des \
 	README.hackers \
+	README.refclocks \
 	README.rsa \
 	README.versions \
 	TODO \
