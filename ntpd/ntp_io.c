@@ -2052,6 +2052,24 @@ findinterface(
 		}
 	}
 
+	/*
+	 * If we got here and failed because it was not a local network
+	 * address, see if we have a PPP interface and use that
+	 */
+	for (i = nwilds; i < ninterfaces; i++)
+	{
+		if (addr->ss_family == AF_INET)
+			if (((struct sockaddr_in *)&inter_list[i].sin)->sin_family == AF_INET && 
+			     inter_list[i].flags & INT_PPP)
+				return (&inter_list[i]);
+		else if (addr->ss_family == AF_INET6)
+			if (((struct sockaddr_in6 *)&inter_list[i].sin)->sin6_family == AF_INET6 && 
+			     inter_list[i].flags & INT_PPP)
+				return (&inter_list[i]);
+
+	}
+
+
 	saddrlen = SOCKLEN(addr);
 	ind = find_addr_in_list(addr);
 	if (ind >= 0)
