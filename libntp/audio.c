@@ -423,6 +423,7 @@ audio_gain(
 	}
 #else /* not PCM_STYLE_SOUND */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, (char *)&info);
+	info.record.encoding = AUDIO_ENCODING_ULAW;
 	info.record.error = 0;
 	info.record.gain = gain;
 	if (o_mongain != mongain)
