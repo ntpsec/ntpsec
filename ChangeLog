@@ -1,3 +1,9 @@
+1999-11-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_loopfilter.c: Keep clock_frequency changes in a temp
+	variable so we can record it to loopstats (near as HMS can tell).
+	From: Dave Mills <mills@udel.edu>
+
 1999-11-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* acconfig.h: RELIANTUNIX_CLOCK

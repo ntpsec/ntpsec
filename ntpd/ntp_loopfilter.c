@@ -531,13 +531,14 @@ local_clock(
 	 * drift_comp is a sham and used only for updating the drift
 	 * file and for billboard eye candy.
 	 */
-	drift_comp += clock_frequency + flladj + plladj;
+	etemp = clock_frequency + flladj + plladj;
+	drift_comp += etemp;
 	if (drift_comp > sys_maxfreq)
 		drift_comp = sys_maxfreq;
 	else if (drift_comp <= -sys_maxfreq)
 		drift_comp = -sys_maxfreq;
 	dtemp = SQUARE(clock_stability);
-	etemp = SQUARE(clock_frequency) - dtemp;
+	etemp = SQUARE(etemp) - dtemp;
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
 	allan_xpt = max(CLOCK_ALLAN, clock_stability * CLOCK_ADF);
 
