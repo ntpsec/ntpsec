@@ -269,6 +269,15 @@ timer(void)
 		adjust_timer += 1;
 		adj_host_clock();
 		kod_proto();
+#ifdef REFCLOCK
+		for (n = 0; n < NTP_HASH_SIZE; n++) {
+			for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
+				next_peer = peer->next;
+				if (peer->flags & FLAG_REFCLOCK)
+					refclock_timer(peer);
+			}
+		}
+#endif /* REFCLOCK */
 	}
 
 	/*

@@ -178,6 +178,7 @@ extern	int	refclock_newpeer P((struct peer *));
 extern	void	refclock_unpeer P((struct peer *));
 extern	void	refclock_receive P((struct peer *));
 extern	void	refclock_transmit P((struct peer *));
+extern	void	refclock_timeout P((struct peer *));
 extern	void	init_refclock	P((void));
 #endif	/* REFCLOCK */
 

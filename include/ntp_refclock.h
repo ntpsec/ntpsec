@@ -234,7 +234,7 @@ struct refclock {
 				    struct refclockstat *, struct peer *));
 	void (*clock_init)	P((void));
 	void (*clock_buginfo)	P((int, struct refclockbug *, struct peer *));
-	u_long clock_flags;
+	void (*clock_timer)	P((int, struct peer *));
 };
 
 /*
@@ -255,6 +255,7 @@ extern	void	refclock_control P((struct sockaddr_storage *,
 				    struct refclockstat *,
 				    struct refclockstat *));
 extern	int	refclock_open	P((char *, int, int));
+extern	void	refclock_timer	P((struct peer *));
 extern	void	refclock_transmit P((struct peer *));
 extern	int	refclock_ioctl	P((int, int));
 extern 	int	refclock_process P((struct refclockproc *));
