@@ -75,7 +75,6 @@
 #include <config.h>
 
 #include "ntp_types.h"
-#include <netdb.h>
 
 /*
  * If various macros are not defined we need to define them
