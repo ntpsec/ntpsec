@@ -2077,11 +2077,12 @@ getnetnum(
 	else
 	    hints.ai_family = AF_UNSPEC;
 
+	hints.ai_socktype = SOCK_DGRAM;
 #ifdef DEBUG
 		if (debug > 3)
 			printf("getaddrinfo %s\n", num);
 #endif
-	if (getaddrinfo(num, NULL, &hints, &ptr)!=0) {
+	if (getaddrinfo(num, "ntp", &hints, &ptr)!=0) {
 		if (complain)
 			msyslog(LOG_ERR,
 				"getaddrinfo: \"%s\" invalid host address, line ignored",
@@ -2094,7 +2095,6 @@ getnetnum(
 				? ", line ignored"
 				: "");
 #endif
-                freeaddrinfo(ptr);
 		return 0;
 	}
 
