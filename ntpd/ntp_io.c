@@ -482,7 +482,7 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(1);
 #endif
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
 
@@ -1804,7 +1804,7 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
 		*/
@@ -1828,9 +1828,10 @@ findbcastinter(
 	struct sockaddr_storage *addr
 	)
 {
+#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 
-	for (i = 0; i < ninterfaces; i++) {
+	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the correct family
 		*/
@@ -1859,6 +1860,7 @@ findbcastinter(
 				return (&inter_list[i]);
 		     }
 	}
+#endif /* SIOCGIFCONF */
  	return ANY_INTERFACE_CHOOSE(addr);
 }
 
