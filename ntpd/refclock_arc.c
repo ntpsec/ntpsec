@@ -1,6 +1,5 @@
 /*
- * refclock_arc - clock driver for ARCRON MSF receivers
- * and WWVB
+ * refclock_arc - clock driver for ARCRON MSF/DCF/WWVB receivers
  */
 
 #ifdef HAVE_CONFIG_H
@@ -8,10 +7,11 @@
 #endif
 
 #if defined(REFCLOCK) && defined(CLOCK_ARCRON_MSF)
-static const char arc_version[] = { "V1.2 2003/02/12" };
+static const char arc_version[] = { "V1.3 2003/02/21" };
 
-
-#undef ARCRON_DEBUG /* Define only while in development... */
+/* define PRE_NTP420 for compatibility to previous versions of NTP (at least
+   to 4.1.0 */
+#undef PRE_NTP420
 
 #ifndef ARCRON_NOT_KEEN
 #define ARCRON_KEEN 1 /* Be keen, and trusting of the clock, if defined. */
@@ -31,6 +31,8 @@ static const char arc_version[] = { "V1.2 2003/02/12" };
 Code by Derek Mulcahy, <derek@toybox.demon.co.uk>, 1997.
 Modifications by Damon Hart-Davis, <d@hd.org>, 1997.
 Modifications by Paul Alfille, <palfille@partners.org>, 2003.
+Modifications by Christopher Price, <cprice@cs-home.com>, 2003.
+
 
 THIS CODE IS SUPPLIED AS IS, WITH NO WARRANTY OF ANY KIND.  USE AT
 YOUR OWN RISK.
@@ -42,6 +44,33 @@ Built against ntp3-5.90 on Solaris 2.5 using gcc 2.7.2.
 This code may be freely copied and used and incorporated in other
 systems providing the disclaimer and notice of authorship are
 reproduced.
+
+-------------------------------------------------------------------------------
+
+Christopher's notes:
+
+MAJOR CHANGES SINCE V1.2 
+========================
+ 1) Applied patch by Andrey Bray <abuse@madhouse.demon.co.uk>
+    2001-02-17 comp.protocols.time.ntp
+
+ 2) Added WWVB support via clock mode command, localtime/UTC time configured
+    via flag1=(0=UTC, 1=localtime)
+
+ 3) Added ignore resync request via flag2=(0=resync, 1=ignore resync)
+
+ 4) Added simplified conversion from localtime to UTC with dst/bst translation
+
+ 5) Added average signal quality poll
+
+ 6) Fixed a badformat error when no code is available due to stripping 
+    \n & \r's 
+
+ 7) Fixed a badformat error when clearing lencode & memset a_lastcode in poll
+    routine
+
+ 8) Lots of code cleanup, including standardized DEBUG macros and removal 
+    of unused code 
 
 -------------------------------------------------------------------------------
 
@@ -229,58 +258,6 @@ TO-DO LIST
   * Possibly use average or maximum signal quality reported during
     resync, rather than just the last one, which may be atypical.
 
--------------------------------------------------------------------------------
-
-Paul Alfille's additions ( WWVB frequency )
-
-* Simple: We now use flag1 = 1 to indicate WWVB protocol
-  No flag1, or flag1=0 indicates MSF protocol
-  
-* Example ntp.conf:
-server 127.127.27.0 # ARCRON clock
-fudge 127.127.27.0 flag1 1 # WWVB
-
-* Notes:
-
-  In North America, Arcron (www.arctime.com) sells a WWVB
-  version. The documentation is not accurate, but the accompaning
-  Windows-based utility functions and the serial datastream was
-  inspected.
-  
-  There are 2 main problems:
-  
-  1. The "i" command "Transmit world time" does not work
-    Unfortunately, this appears to be the only method of telling
-    what time zone the clock is set to.
-    
-  2. There appears to no way to distinguishing the MSF and WWVB
-    clocks from their serial output. (Albeit, I don't have the
-    MSF version to test.)
-    
-  Therefore, WWVB must be specifically indicated (by flag1) and
-  UTC timezone is explicitly set prior to each clock query.
-  
-  In theory, the time zone could be set only once, but there is
-  no downside to resetting, and the clock could be altered by another
-  program, or physically at the clock.
-  
-  I don't know the implications of not properly setting the leapyear
-  and daylight savings flags. I suspect it isn't important since we
-  don't use the information.
-  
-* Changes:
-  1. the cmdqueue is changed to use command names, with a lookup for
-    full command text. This eases timezone command addition.
-  2. each time the "o" - time request is made, "80c" is sent first,
-    the UTC timezone setup.
-  3. The BST/UTC flags of the MSF version are faked (as UTC) in WWVB mode.
-  4. The Time zone command is acknowledged (and ignored) in the
-    receiving routine -- it's called an "8" command.
-  5. REFID is "WVBa" for the WWVB version
-  6. patch to go to ntp-4 applied, see
-    comp.protocols.time.ntp 2001-02-17
-    Andrey Bray (abuse@madhouse.demon.co.uk)
-  
 */
 
 
@@ -361,6 +338,7 @@ Also note h<cr> command which starts a resync to MSF signal.
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
+#include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
@@ -379,7 +357,7 @@ Also note h<cr> command which starts a resync to MSF signal.
 #endif
 
 /*
- * This driver supports the ARCRON MSF and WWVB Radio Controlled Clock
+ * This driver supports the ARCRON MSF/DCF/WWVB Radio Controlled Clock
  */
 
 /*
@@ -390,11 +368,16 @@ Also note h<cr> command which starts a resync to MSF signal.
 #define PRECISION       (-4)            /* Precision  (~63 ms). */
 #define HIGHPRECISION   (-5)            /* If things are going well... */
 #define REFID           "MSFa"          /* Reference ID. */
-#define REFID_WWVB      "WVBa"          /* Reference ID. */
-#define DESCRIPTION     "ARCRON MSF Receiver"
-#define DESCRIPTION_WWVB "ARCRON WWVB Receiver"
-#define NSAMPLES        4               /* Stages of short filter. */
-#define NSAMPLESLONG    8               /* Stages of long filter. */
+#define REFID_MSF       "MSF"           /* Reference ID. */
+#define REFID_DCF77     "DCF"           /* Reference ID. */
+#define REFID_WWVB      "WWVB"          /* Reference ID. */
+#define DESCRIPTION     "ARCRON MSF/DCF/WWVB Receiver"
+
+#ifdef PRE_NTP420
+#define MODE ttlmax
+#else
+#define MODE ttl
+#endif
 
 #define LENARC          16              /* Format `o' timecode length. */
 
@@ -462,25 +445,6 @@ Also note h<cr> command which starts a resync to MSF signal.
 #endif
      };
 
-/* macro to tell if WWVB or MSF */
-#define ISWWVB(pp) ((pp)->sloppyclockflag & CLK_FLAG1)
-
-/* Chose filter length dependent on fudge flag 4. */
-#define CHOSENSAMPLES(pp) \
-(((pp)->sloppyclockflag & CLK_FLAG4) ? NSAMPLESLONG : NSAMPLES)
-     /*
-Chose how many filter samples to keep.  Several factors are in play.
-
- 1) Discard at least one sample to allow a spike value to be
-    discarded.
-
- 2) Discard about 1-in-8 to 1-in-30 samples to handle spikes.
-
- 3) Keep an odd number of samples to avoid median value being biased
-    high or low.
-*/
-#define NKEEP(pp) ((CHOSENSAMPLES(pp) - 1 - (CHOSENSAMPLES(pp)>>3)) | 1)
-
 #define DEFAULT_RESYNC_TIME  (57*60)    /* Gap between resync attempts (s). */
 #define RETRY_RESYNC_TIME    (27*60)    /* Gap to emergency resync attempt. */
 #ifdef ARCRON_KEEN
@@ -500,7 +464,7 @@ Chose how many filter samples to keep.  Several factors are in play.
 
 
 /* Length of queue of command bytes to be sent. */
-#define CMDQUEUELEN 4                   /* Enough for 4 commands */
+#define CMDQUEUELEN 4                   /* Enough for two cmds + each \r. */
 /* Queue tick time; interval in seconds between chars taken off queue. */
 /* Must be >= 2 to allow o\r response to come back uninterrupted. */
 #define QUEUETICK   2                   /* Allow o\r reply to finish. */
@@ -514,17 +478,17 @@ struct arcunit {
 
 	int quality;        /* Quality of reception 0--5 for unit. */
 	/* We may also use the values -1 or 6 internally. */
+	u_long quality_stamp; /* Next time to reset quality average. */
 
 	u_long next_resync; /* Next resync time (s) compared to current_time. */
 	int resyncing;      /* Resync in progress if true. */
 
 	/* In the outgoing queue, cmdqueue[0] is next to be sent. */
-	int cmdleng ; /* number of commands in the command queue */
-	int cmdchar ; /* char number in current command */	
 	char cmdqueue[CMDQUEUELEN+1]; /* Queue of outgoing commands + \0. */
 
 	u_long saved_flags; /* Saved fudge flags. */
 };
+
 #ifdef ARCRON_LEAPSECOND_KEEN
 /* The flag `possible_leap' is set non-zero when any MSF unit
        thinks a leap-second may have happened.
@@ -593,7 +557,7 @@ dummy_event_handler(
 	struct peer *peer
 	)
 {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug) { printf("arc: dummy_event_handler() called.\n"); }
 #endif
 }
@@ -601,10 +565,7 @@ dummy_event_handler(
 /*
 Normal event handler.
 
-Take first command off queue and send it's text to the clock.
-The queue holds the command name: o, g, h, 8
-cmdchar is a variable giving the char in the name to send
-the end of the command is marked by an '\r'
+Take first character off queue and send to clock if not a null.
 
 Shift characters down and put a null on the end.
 
@@ -621,56 +582,26 @@ arc_event_handler(
 	register struct arcunit *up = (struct arcunit *)pp->unitptr;
 	int i;
 	char c;
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug > 2) { printf("arc: arc_event_handler() called.\n"); }
 #endif
 
-	if ( up->cmdleng > 0 ) { 
-		switch (up->cmdqueue[0])       /* Next cmd to be sent. */
-		{
-			case 'g':	/* Transmit reception status */
-				c = "g\r"[up->cmdchar++] ;
-				break ;
-			case 'h':	/* Start reception attempt including time comparison */
-				c = "h\r"[up->cmdchar++] ;
-				break ;
-			case 'o':	/* Transmit time/date information */
-				c = "o\r"[up->cmdchar++] ;
-				break ;
-			case '8':	/* UTC timezone command (actually the -c- command) */
-				c = "80c\r"[up->cmdchar++] ;
-				break ;
-			default:
-				msyslog(LOG_NOTICE, "arc: bad command in queue %c\n",up->cmdqueue[0]);
-				c = '\r' ;
+	c = up->cmdqueue[0];       /* Next char to be sent. */
+	/* Shift down characters, shifting trailing \0 in at end. */
+	for(i = 0; i < CMDQUEUELEN; ++i)
+	{ up->cmdqueue[i] = up->cmdqueue[i+1]; }
+
+	/* Don't send '\0' characters. */
+	if(c != '\0') {
+		if(write(pp->io.fd, &c, 1) != 1) {
+			msyslog(LOG_NOTICE, "ARCRON: write to fd %d failed", pp->io.fd);
 		}
-#ifdef ARCRON_DEBUG
-	msyslog(LOG_NOTICE, "arc: Send byte <%c> %c[%d]\n", c,up->cmdqueue[0],up->cmdchar-1);
-#endif
-		switch (c)
-		{
-			case '\0':
-				msyslog(LOG_NOTICE, "ARCRON: command %d has no <CR>", up->cmdqueue[0] ) ;
-				c = '\r' ;
-				/* fall through */
-			case '\r':
-        			/* Shift down commands. */
-				for ( i=0 ; i<up->cmdleng ; ++i ) {
-					up->cmdqueue[i] = up->cmdqueue[i+1];
-				}
-				-- up->cmdleng ; /* shorten queue */
-				up->cmdchar = 0 ; /* start at first char */
-				/* fall though */
-			default:
-				if(write(pp->io.fd, &c, 1) != 1) {
-					msyslog(LOG_NOTICE, "ARCRON: write to fd %d failed", pp->io.fd);
-				}
-		}
-#ifdef ARCRON_DEBUG
-	} else { if(debug) { printf("arc: command queue empty\n"); }
+#ifdef DEBUG
+		else if(debug) { printf("arc: sent `%2.2x', fd %d.\n", c, pp->io.fd); }
 #endif
 	}
-	ENQUEUE(up) ;
+
+	ENQUEUE(up);
 }
 
 /*
@@ -691,7 +622,7 @@ arc_start(
 #endif
 
 	msyslog(LOG_NOTICE, "ARCRON: %s: opening unit %d", arc_version, unit);
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug) {
 		printf("arc: %s: attempt to open unit %d.\n", arc_version, unit);
 	}
@@ -706,7 +637,7 @@ arc_start(
 	(void)sprintf(device, DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED, LDISC_CLK)))
 		return(0);
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug) { printf("arc: unit %d using open().\n", unit); }
 #endif
 	fd = open(device, OPEN_FLAGS);
@@ -718,9 +649,9 @@ arc_start(
 	}
 
 	fcntl(fd, F_SETFL, 0); /* clear the descriptor flags */
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug)
-	{ printf("Opened RS232 port with file descriptor %d.\n", fd); }
+	{ printf("arc: opened RS232 port with file descriptor %d.\n", fd); }
 #endif
 
 #ifdef HAVE_TERMIOS
@@ -760,8 +691,28 @@ arc_start(
 	 */
 	peer->precision = PRECISION;
 	peer->stratum = 2;              /* Default to stratum 2 not 0. */
-	pp->clockdesc = DESCRIPTION ; /* default = MSF */
-	memcpy((char *)&pp->refid, REFID, 4); /* default = MSF */
+	pp->clockdesc = DESCRIPTION;
+	if (peer->MODE > 3) {
+		msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d", peer->MODE);
+		return 0;
+	}
+#ifdef DEBUG
+	if(debug) { printf("arc: mode = %d.\n", peer->MODE); }
+#endif
+	switch (peer->MODE) {
+	    case 1:
+		memcpy((char *)&pp->refid, REFID_MSF, 4);
+		break;
+	    case 2:
+		memcpy((char *)&pp->refid, REFID_DCF77, 4);
+		break;
+	    case 3:
+		memcpy((char *)&pp->refid, REFID_WWVB, 4);
+		break;
+	    default:
+		memcpy((char *)&pp->refid, REFID, 4);
+		break;
+	}
 	/* Spread out resyncs so that they should remain separated. */
 	up->next_resync = current_time + INITIAL_RESYNC_DELAY + (67*unit)%1009;
 
@@ -769,8 +720,10 @@ arc_start(
 	up->resyncing = 0;              /* Not resyncing yet. */
 	up->saved_flags = 0;            /* Default is all flags off. */
 	/* Clear send buffer out... */
-	up->cmdleng = 0 ;	/* number of commands in queue */
-	up->cmdchar = 0 ;	/* character offset in current command string */
+	{
+		int i;
+		for(i = CMDQUEUELEN; i >= 0; --i) { up->cmdqueue[i] = '\0'; }
+	}
 #endif
 
 #ifdef ARCRON_KEEN
@@ -778,8 +731,11 @@ arc_start(
 #else
 	up->quality = MIN_CLOCK_QUALITY;/* Don't trust the clock yet. */
 #endif
-	peer->action = arc_event_handler ;
-	ENQUEUE(up) ;
+
+	peer->action = arc_event_handler;
+
+	ENQUEUE(up);
+
 	return(1);
 }
 
@@ -796,11 +752,28 @@ arc_shutdown(
 	register struct arcunit *up;
 	struct refclockproc *pp;
 
-	peer->action = dummy_event_handler ;
+	peer->action = dummy_event_handler;
+
 	pp = peer->procptr;
 	up = (struct arcunit *)pp->unitptr;
 	io_closeclock(&pp->io);
 	free(up);
+}
+
+/*
+Compute space left in output buffer.
+*/
+static int
+space_left(
+	register struct arcunit *up
+	)
+{
+	int spaceleft;
+
+	/* Compute space left in buffer after any pending output. */
+	for(spaceleft = 0; spaceleft < CMDQUEUELEN; ++spaceleft)
+	{ if(up->cmdqueue[CMDQUEUELEN - 1 - spaceleft] != '\0') { break; } }
+	return(spaceleft);
 }
 
 /*
@@ -813,24 +786,25 @@ static int
 send_slow(
 	register struct arcunit *up,
 	int fd,
-	char c
+	const char *s
 	)
 {
+	int sl = strlen(s);
+	int spaceleft = space_left(up);
 
-#ifdef ARCRON_DEBUG
-	msyslog(LOG_NOTICE, "arc: Add to buffer char = %c length=%d.\n", c , up->cmdleng);
-	if(debug > 1) { printf("arc: cmdleng = %d.\n", up->cmdleng); }
+#ifdef DEBUG
+	if(debug > 1) { printf("arc: spaceleft = %d.\n", spaceleft); }
 #endif
-	if(CMDQUEUELEN-1 <= up->cmdleng) { /* Should not normally happen... */
-#ifdef ARCRON_DEBUG
+	if(spaceleft < sl) { /* Should not normally happen... */
+#ifdef DEBUG
 		msyslog(LOG_NOTICE, "ARCRON: send-buffer overrun (%d/%d)",
-		       up->cmdleng, CMDQUEUELEN);
+		       sl, spaceleft);
 #endif
 		return(0);                      /* FAILED! */
 	}
 
 	/* Copy in the command to be sent. */
-	up->cmdqueue[up->cmdleng++] = c ;
+	while(*s) { up->cmdqueue[CMDQUEUELEN - spaceleft--] = *s++; }
 
 	return(1);
 }
@@ -854,8 +828,11 @@ arc_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	char c;
-	int i, n, wday, month, bst, status;
+	int i, n, wday, month, flags, status;
 	int arc_last_offset;
+	static int quality_average = 0;
+	static int quality_sum = 0;
+	static int quality_polls = 0;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -865,18 +842,15 @@ arc_receive(
 	up = (struct arcunit *)pp->unitptr;
 
 
-#ifdef ARCRON_DEBUG
-	msyslog(LOG_NOTICE, "arc: Receive bytes %d <%s>.\n", rbufp->recv_length, rbufp->recv_buffer);
-#endif
 	/*
 	  If the command buffer is empty, and we are resyncing, insert a
 	  g\r quality request into it to poll for signal quality again.
 	*/
-	if((up->resyncing) && (up->cmdleng == 0)) {
+	if((up->resyncing) && (space_left(up) == CMDQUEUELEN)) {
 #ifdef DEBUG
 		if(debug > 1) { printf("arc: inserting signal-quality poll.\n"); }
 #endif
-		send_slow(up, pp->io.fd, 'g');
+		send_slow(up, pp->io.fd, "g\r");
 	}
 
 	/*
@@ -938,7 +912,7 @@ arc_receive(
 		  handle for tty_clk or somesuch kernel timestamper.
 		*/
 		if(arc_last_offset > LENARC) {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 			if(debug) {
 				printf("arc: input code too long (%d cf %d); rejected.\n",
 				       arc_last_offset, LENARC);
@@ -950,7 +924,7 @@ arc_receive(
 		}
 
 		L_SUBUF(&timestamp, charoffsets[arc_last_offset]);
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 		if(debug > 1) {
 			printf(
 				"arc: %s%d char(s) rcvd, the last for lastcode[%d]; -%sms offset applied.\n",
@@ -979,7 +953,7 @@ arc_receive(
 		   L_ISGEQ(&(up->lastrec), &timestamp))
 #endif
 		{
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 			if(debug > 1) {
 				printf("arc: system timestamp captured.\n");
 #ifdef ARCRON_MULTIPLE_SAMPLES
@@ -1003,7 +977,7 @@ arc_receive(
 	/* eg on receipt of the \r coming in on its own after the      */
 	/* timecode.                                                   */
 	if(pp->lencode >= LENARC) {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 		if(debug && (rbufp->recv_buffer[0] != '\r'))
 		{ printf("arc: rubbish in pp->a_lastcode[].\n"); }
 #endif
@@ -1028,11 +1002,12 @@ arc_receive(
 		*/
 		if((c == 'o') && (pp->lencode == 1)) {
 			L_CLR(&(up->lastrec));
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 			if(debug > 1) { printf("arc: clearing timestamp.\n"); }
 #endif
 		}
 	}
+	if (pp->lencode == 0) return;
 
 	/* Handle a quality message. */
 	if(pp->a_lastcode[0] == 'g') {
@@ -1044,17 +1019,31 @@ arc_receive(
 		if(((q & 0x70) != 0x30) || ((q & 0xf) > MAX_CLOCK_QUALITY) ||
 		   ((r & 0x70) != 0x30)) {
 			/* Badly formatted response. */
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 			if(debug) { printf("arc: bad `g' response %2x %2x.\n", r, q); }
 #endif
 			return;
 		}
 		if(r == '3') { /* Only use quality value whilst sync in progress. */
-			up->quality = (q & 0xf);
+			if (up->quality_stamp < current_time) {
+				struct calendar cal;
+				u_long new_stamp;
+			
+				get_systime (&new_stamp);
+				caljulian (new_stamp, &cal);
+				up->quality_stamp = 
+					current_time + 60 - cal.second + 5;
+				quality_sum = 0;
+				quality_polls = 0;
+			}
+			quality_sum += (q & 0xf);
+			quality_polls++;
+			quality_average = (quality_sum / quality_polls);
 #ifdef DEBUG
-			if(debug) { printf("arc: signal quality %d.\n", up->quality); }
+			if(debug) { printf("arc: signal quality %d (%d).\n", quality_average, (q & 0xf)); }
 #endif
 		} else if( /* (r == '2') && */ up->resyncing) {
+			up->quality = quality_average;
 #ifdef DEBUG
 			if(debug)
 			{
@@ -1068,6 +1057,9 @@ arc_receive(
 			       up->quality,
 			       quality_action(up->quality));
 			up->resyncing = 0; /* Resync is over. */
+			quality_average = 0;
+			quality_sum = 0;
+			quality_polls = 0;
 
 #ifdef ARCRON_KEEN
 			/* Clock quality dubious; resync earlier than usual. */
@@ -1078,13 +1070,6 @@ arc_receive(
 		}
 		pp->lencode = 0;
 		return;
-	}
-
-
-	/* Handle a UTC timezone message. */
-	if(pp->a_lastcode[0] == '8') {
-		if(pp->lencode >= 3) { pp->lencode = 0 ; } /* command length=3 '80c' */
-		return; 
 	}
 
 	/* Stop now if this is not a timecode message. */
@@ -1099,13 +1084,13 @@ arc_receive(
 
 
 	/* WE HAVE NOW COLLECTED ONE TIMESTAMP (phew)... */
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 	if(debug > 1) { printf("arc: NOW HAVE TIMESTAMP...\n"); }
 #endif
 
 	/* But check that we actually captured a system timestamp on it. */
 	if(L_ISZERO(&(up->lastrec))) {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 		if(debug) { printf("arc: FAILED TO GET SYSTEM TIMESTAMP\n"); }
 #endif
 		pp->lencode = 0;
@@ -1121,26 +1106,29 @@ arc_receive(
 	pp->a_lastcode[pp->lencode] = ((up->quality == QUALITY_UNKNOWN) ?
 				       '6' : ('0' + up->quality));
 	pp->a_lastcode[pp->lencode + 1] = '\0'; /* Terminate for printf(). */
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 
+#ifdef PRE_NTP420
+	/* We don't use the micro-/milli- second part... */
+	pp->usec = 0;
+	pp->msec = 0;
+#else
 	/* We don't use the nano-second part... */
 	pp->nsec = 0;
-
+#endif	
 	n = sscanf(pp->a_lastcode, "o%2d%2d%2d%1d%2d%2d%2d%1d%1d",
 		   &pp->hour, &pp->minute, &pp->second,
-		   &wday, &pp->day, &month, &pp->year, &bst, &status);
+		   &wday, &pp->day, &month, &pp->year, &flags, &status);
 
 	/* Validate format and numbers. */
 	if(n != 9) {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 		/* Would expect to have caught major problems already... */
 		if(debug) { printf("arc: badly formatted data.\n"); }
 #endif
+		pp->lencode = 0;
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
-	
-	if ( ISWWVB(pp) ) { bst = 4 ; }  /* set to UTC */
 	/*
 	  Validate received values at least enough to prevent internal
 	  array-bounds problems, etc.
@@ -1153,15 +1141,21 @@ arc_receive(
 	   (month < 1) || (month > 12) ||
 	   (pp->year < 0) || (pp->year > 99)) {
 		/* Data out of range. */
-		refclock_report(peer, CEVNT_BADREPLY);
-		return;
-	}
-	/* Check that BST/UTC bits are the complement of one another. */
-	if(!(bst & 2) == !(bst & 4)) {
+		pp->lencode = 0;
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
 
+
+	if(peer->MODE == 0) { /* compatiblity to original version */
+		int bst = flags;
+		/* Check that BST/UTC bits are the complement of one another. */
+		if(!(bst & 2) == !(bst & 4)) {
+			pp->lencode = 0;
+			refclock_report(peer, CEVNT_BADREPLY);
+			return;
+		}
+	}
 	if(status & 0x8) { msyslog(LOG_NOTICE, "ARCRON: battery low"); }
 
 	/* Year-2000 alert! */
@@ -1183,7 +1177,7 @@ arc_receive(
 		printf("arc: n=%d %02d:%02d:%02d %02d/%02d/%04d %1d %1d\n",
 		       n,
 		       pp->hour, pp->minute, pp->second,
-		       pp->day, month, pp->year, bst, status);
+		       pp->day, month, pp->year, flags, status);
 	}
 #endif
 
@@ -1203,41 +1197,159 @@ arc_receive(
 			msyslog(LOG_NOTICE, "ARCRON: signal lost");
 			pp->leap = LEAP_NOTINSYNC; /* MSF clock is free-running. */
 			up->status = status;
+			pp->lencode = 0;
 			refclock_report(peer, CEVNT_FAULT);
 			return;
 		}
 	}
 	up->status = status;
 
-	pp->day += moff[month - 1];
+	if (peer->MODE == 0) { /* compatiblity to original version */
+		int bst = flags;
 
-	if(isleap_4(pp->year) && month > 2) { pp->day++; }	/* Y2KFixes */
+		pp->day += moff[month - 1];
 
-	/* Convert to UTC if required */
-	if(bst & 2) {
-		pp->hour--;
-		if (pp->hour < 0) {
-			pp->hour = 23;
-			pp->day--;
-			/* If we try to wrap round the year (BST on 1st Jan), reject.*/
-			if(pp->day < 0) {
-				refclock_report(peer, CEVNT_BADTIME);
-				return;
+		if(isleap_4(pp->year) && month > 2) { pp->day++; }/* Y2KFixes */
+
+		/* Convert to UTC if required */
+		if(bst & 2) {
+			pp->hour--;
+			if (pp->hour < 0) {
+				pp->hour = 23;
+				pp->day--;
+				/* If we try to wrap round the year
+				 * (BST on 1st Jan), reject.*/
+				if(pp->day < 0) {
+					pp->lencode = 0;
+					refclock_report(peer, CEVNT_BADTIME);
+					return;
+				}
 			}
 		}
 	}
 
-	/* If clock signal quality is unknown, revert to default PRECISION...*/
-	if(up->quality == QUALITY_UNKNOWN) { peer->precision = PRECISION; }
-	/* ...else improve precision if flag3 is set... */
-	else {
-		peer->precision = ((pp->sloppyclockflag & CLK_FLAG3) ?
-				   HIGHPRECISION : PRECISION);
+	if(peer->MODE > 0) {
+		if(pp->sloppyclockflag & CLK_FLAG1) {
+			struct tm  local;
+		        struct tm *gmtp;
+		        time_t     unixtime;
+
+		        /*
+		         * Convert to GMT for sites that distribute localtime.
+			 * This means we have to do Y2K conversion on the
+			 * 2-digit year; otherwise, we get the time wrong.
+	        	 */
+	   
+			local.tm_year  = pp->year-1900;
+	     	  	local.tm_mon   = month-1;
+	      	  	local.tm_mday  = pp->day;
+	        	local.tm_hour  = pp->hour;
+	        	local.tm_min   = pp->minute;
+	        	local.tm_sec   = pp->second;
+	        	switch (peer->MODE) {
+			    case 1:
+				local.tm_isdst = (flags & 2);
+				break;
+			    case 2:
+			        local.tm_isdst = (flags & 2);
+				break;
+			    case 3:
+				switch (flags & 3) {
+				    case 0: /* It is unclear exactly when the 
+				    	       Arcron changes from DST->ST and 
+					       ST->DST. Testing has shown this
+					       to be irregular. For the time 
+					       being, let the OS decide. */
+				        local.tm_isdst = 0;
+#ifdef DEBUG
+					if (debug)
+					    printf ("arc: DST = 00 (0)\n"); 
+#endif
+					break;
+				    case 1: /* dst->st time */
+				        local.tm_isdst = -1;
+#ifdef DEBUG
+					if (debug) 
+					    printf ("arc: DST = 01 (1)\n"); 
+#endif
+					break;
+				    case 2: /* st->dst time */
+				        local.tm_isdst = -1;
+#ifdef DEBUG
+					if (debug) 
+					    printf ("arc: DST = 10 (2)\n"); 
+#endif
+					break;
+				    case 3: /* dst time */
+				        local.tm_isdst = 1;
+#ifdef DEBUG
+					if (debug) 
+					    printf ("arc: DST = 11 (3)\n"); 
+#endif
+					break;
+				}
+				break;
+			    default:
+				msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d",
+		      			peer->MODE);
+				return;
+				break;
+			}
+	        	unixtime = mktime (&local);
+	        	if ((gmtp = gmtime (&unixtime)) == NULL)
+	        	{
+				pp->lencode = 0;
+			        refclock_report (peer, CEVNT_FAULT);
+			        return;
+	        	}
+			pp->year = gmtp->tm_year+1900;
+	        	month = gmtp->tm_mon+1;
+		    	pp->day = ymd2yd(pp->year,month,gmtp->tm_mday);
+	       	 	/* pp->day = gmtp->tm_yday; */
+	        	pp->hour = gmtp->tm_hour;
+	        	pp->minute = gmtp->tm_min;
+	        	pp->second = gmtp->tm_sec;
+#ifdef DEBUG
+	        	if (debug)
+			{
+				printf ("arc: time is %04d/%02d/%02d %02d:%02d:%02d UTC\n",
+					pp->year,month,gmtp->tm_mday,pp->hour,pp->minute,
+					pp->second);
+			}
+#endif
+		} else 
+		{
+		    	/*
+		     	* For more rational sites distributing UTC
+		     	*/
+		    	pp->day    = ymd2yd(pp->year,month,pp->day);
+		}
+	}
+
+	if (peer->MODE == 0) { /* compatiblity to original version */
+				/* If clock signal quality is 
+				 * unknown, revert to default PRECISION...*/
+		if(up->quality == QUALITY_UNKNOWN) { 
+			peer->precision = PRECISION; 
+		} else { /* ...else improve precision if flag3 is set... */
+			peer->precision = ((pp->sloppyclockflag & CLK_FLAG3) ?
+					   HIGHPRECISION : PRECISION);
+		}
+	} else {
+		if ((status == 0x3) && (pp->sloppyclockflag & CLK_FLAG2)) {
+			peer->precision = ((pp->sloppyclockflag & CLK_FLAG3) ?
+					   HIGHPRECISION : PRECISION);
+		} else if (up->quality == QUALITY_UNKNOWN) {
+			peer->precision = PRECISION;
+		} else {
+			peer->precision = ((pp->sloppyclockflag & CLK_FLAG3) ?
+					   HIGHPRECISION : PRECISION);
+		}
 	}
 
 	/* Notice and log any change (eg from initial defaults) for flags. */
 	if(up->saved_flags != pp->sloppyclockflag) {
-#ifdef ARCRON_DEBUG
+#ifdef DEBUG
 		msyslog(LOG_NOTICE, "ARCRON: flags enabled: %s%s%s%s",
 		       ((pp->sloppyclockflag & CLK_FLAG1) ? "1" : "."),
 		       ((pp->sloppyclockflag & CLK_FLAG2) ? "2" : "."),
@@ -1245,14 +1357,10 @@ arc_receive(
 		       ((pp->sloppyclockflag & CLK_FLAG4) ? "4" : "."));
 		/* Note effects of flags changing... */
 		if(debug) {
-			printf("arc: CHOSENSAMPLES(pp) = %d.\n", CHOSENSAMPLES(pp));
-			printf("arc: NKEEP(pp) = %d.\n", NKEEP(pp));
 			printf("arc: PRECISION = %d.\n", peer->precision);
 		}
 #endif
 		up->saved_flags = pp->sloppyclockflag;
-		pp->clockdesc = ISWWVB(pp)?DESCRIPTION_WWVB:DESCRIPTION;
-		memcpy((char *)&pp->refid, ISWWVB(pp)?REFID_WWVB:REFID, 4);
 	}
 
 	/* Note time of last believable timestamp. */
@@ -1276,9 +1384,11 @@ arc_receive(
 #endif
 
 	if (!refclock_process(pp)) {
+		pp->lencode = 0;
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
 }
 
@@ -1298,14 +1408,13 @@ request_time(
 #ifdef DEBUG
 	if(debug) { printf("arc: unit %d: requesting time.\n", unit); }
 #endif
-	if (
-		( ISWWVB(pp) && !send_slow(up, pp->io.fd, '8') )
-		||
-		!send_slow(up, pp->io.fd, 'o')
-	) {
-#ifdef ARCRON_DEBUG
-		msyslog(LOG_NOTICE, "ARCRON: unit %d: problem sending", unit);
+	if (!send_slow(up, pp->io.fd, "o\r")) {
+#ifdef DEBUG
+		if (debug) {
+			printf("arc: unit %d: problem sending", unit);
+		}
 #endif
+		pp->lencode = 0;
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
@@ -1327,8 +1436,10 @@ arc_poll(
 
 	pp = peer->procptr;
 	up = (struct arcunit *)pp->unitptr;
+#if 0
 	pp->lencode = 0;
 	memset(pp->a_lastcode, 0, sizeof(pp->a_lastcode));
+#endif
 
 #if 0
 	/* Flush input. */
@@ -1336,7 +1447,8 @@ arc_poll(
 #endif
 
 	/* Resync if our next scheduled resync time is here or has passed. */
-	resync_needed = (up->next_resync <= current_time);
+	resync_needed = ( !(pp->sloppyclockflag & CLK_FLAG2) &&
+			  (up->next_resync <= current_time) );
 
 #ifdef ARCRON_LEAPSECOND_KEEN
 	/*
@@ -1379,7 +1491,7 @@ arc_poll(
 		if(debug) { printf("arc: sending resync command (h\\r).\n"); }
 #endif
 		msyslog(LOG_NOTICE, "ARCRON: unit %d: sending resync command", unit);
-		send_slow(up, pp->io.fd, 'h');
+		send_slow(up, pp->io.fd, "h\r");
 
 		/* Schedule our next resync... */
 		up->next_resync = current_time + DEFAULT_RESYNC_TIME;
@@ -1404,6 +1516,7 @@ arc_poll(
 			printf("arc: clock quality %d too poor.\n", up->quality);
 		}
 #endif
+		pp->lencode = 0;
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
@@ -1414,6 +1527,3 @@ arc_poll(
 #else
 int refclock_arc_bs;
 #endif
-
-
-

@@ -251,6 +251,11 @@ create_wildcards(u_short port) {
 
 isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
+
+	/* XXXPDM This should be fixed later, but since we may not have set
+	 * the UP flag, we at least get to use the interface. The listen_to
+	 * _virtual_ips check should be last.
+	 */
 	if (listen_to_virtual_ips == 1)
 		return (ISC_TRUE);
 	if ((isc_if->flags & INTERFACE_F_UP) == 0)	/* Ignore interfaces not up */
@@ -521,7 +526,7 @@ set_reuseaddr(int flag) {
 			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
 					SO_REUSEADDR, (char *)&flag,
 					sizeof(flag))) {
-				netsyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR, %s) failed: %m", flag ? "on" : "off");
+				netsyslog(LOG_ERR, "set_reuseaddr: setsockopt(SO_REUSEADDR, %s) failed: %m", flag ? "on" : "off");
 			}
 		}
 	}
@@ -541,7 +546,7 @@ io_multicast_add(
 	int i = ninterfaces;	/* Use the next interface */
 	u_int32 haddr = ntohl(((struct sockaddr_in*)&addr)->sin_addr.s_addr);
 	struct in_addr iaddr;
-	int s;
+	SOCKET s;
 	struct sockaddr_in *sinp;
 
 #ifdef HAVE_IPV6
@@ -560,7 +565,7 @@ io_multicast_add(
 				inet_ntoa(iaddr));
 			return;
 		}
-		for (i = 0; i < ninterfaces; i++) {
+		for (i = nwilds; i < ninterfaces; i++) {
 			 /* Be sure it's the correct family */
                         if (inter_list[i].sin.ss_family != AF_INET)
                                 continue;
@@ -587,7 +592,7 @@ io_multicast_add(
 		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sinp, 0, 1);
 		set_reuseaddr(0);
-		if (s < 0) {
+		if (s == INVALID_SOCKET) {
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
 			if (wildipv4 >= 0) {
 				i = wildipv4;
@@ -637,7 +642,7 @@ io_multicast_add(
 				stoa(&addr));
 			return;
 		}
-		for (i = 0; i < ninterfaces; i++) {
+		for (i = nwilds; i < ninterfaces; i++) {
 			/* Be sure it's the correct family */
 			if(inter_list[i].sin.ss_family != AF_INET6)
 				continue;
@@ -664,7 +669,7 @@ io_multicast_add(
 		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
 		set_reuseaddr(0);
-		if(s < 0){
+		if(s == INVALID_SOCKET){
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
 			if (wildipv6 >= 0) {
 				i = wildipv6;
@@ -785,7 +790,7 @@ io_multicast_del(
 				continue;
 			if (!SOCKCMP(&addr, &inter_list[i].sin))
 				continue;
-			if (i != 0)
+			if (i != wildipv4)
 			{
 				/* we have an explicit fd, so we can close it */
 				close_socket(inter_list[i].fd);
@@ -835,7 +840,7 @@ io_multicast_del(
 				continue;
 			if (!SOCKCMP(&addr, &inter_list[i].sin))
 				continue;
-			if (i != 0)
+			if (i != wildipv6)
 			{
 				/* we have an explicit fd, so we can close it */
 				close_socket(inter_list[i].fd);
@@ -1058,15 +1063,13 @@ open_socket(
 		/*NOTREACHED*/
 	}
 #elif defined(FIONBIO)
-	if (
 # if defined(VMS)
-		(ioctl(fd,FIONBIO,&1) < 0)
+		if (ioctl(fd,FIONBIO,&on) < 0)
 # elif defined(SYS_WINNT)
-		(ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
+		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
 # else
-		(ioctl(fd,FIONBIO,&on) < 0)
+		if (ioctl(fd,FIONBIO,&on) < 0)
 # endif
-	   )
 	{
 		netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on address %s: %m",
 			stoa(addr));
