@@ -111,10 +111,9 @@
 #define SSYNC		0x0002	/* second epoch sync */
 #define DSYNC		0x0004	/* minute units sync */
 #define INSYNC		0x0008	/* clock synchronized */
-#define SLOSS		0x0010	/* seconds sync signal lost */
-#define SJITR		0x0020	/* seconds sync excessive jitter */
-#define DGATE		0x0040	/* data bit error */
-#define BGATE		0x0080	/* BCD digit bit error */
+#define FGATE		0x0010	/* frequency gate */
+#define DGATE		0x0020	/* data bit error */
+#define BGATE		0x0040	/* BCD digit bit error */
 #define SFLAG		0x1000	/* probe flag */
 #define LEPDAY		0x2000	/* leap second day */
 #define LEPSEC		0x4000	/* leap second minute */
@@ -135,26 +134,18 @@
  * Alarm status bits (alarm)
  *
  * These bits indicate various alarm conditions, which are decoded to
- * form the quality character included in the timecode. There are four
- * four-bit nibble fields in the word, each corresponding to a specific
- * alarm condition. At the end of each minute, the word is shifted left
- * one position and the least significant bit of each nibble cleared.
- * These bits can be set during the next minute if the associated alarm
- * condition is raised. This provides a way to remember alarm conditions
- * up to four minutes.
- *
- * If not tracking second sync, the SYNERR alarm is raised. The data
- * error counter is incremented for each invalid data bit. If too many
- * data bit errors are encountered in one minute, the MODERR alarm is
- * raised. The DECERR alarm is raised if a maximum likelihood digit
- * fails to compare with the current clock digit. If the probability of
- * any miscellaneous bit or any digit falls below the threshold, the
- * SYMERR alarm is raised.
+ * form the quality character included in the timecode. If not tracking
+ * second sync, the SYNERR alarm is raised. The data error counter is
+ * incremented for each invalid data bit. If too many data bit errors
+ * are encountered in one minute, the MODERR alarm is raised. The DECERR
+ * alarm is raised if a maximum likelihood digit fails to compare with
+ * the current clock digit. If the probability of any miscellaneous bit
+ * or any digit falls below the threshold, the SYMERR alarm is raised.
  */
-#define DECERR		0	/* BCD digit compare error */
-#define SYMERR		4	/* low bit or digit probability */
-#define MODERR		8	/* too many data bit errors */
-#define SYNERR		12	/* not synchronized to station */
+#define DECERR		1	/* BCD digit compare error */
+#define SYMERR		2	/* low bit or digit probability */
+#define MODERR		4	/* too many data bit errors */
+#define SYNERR		8	/* not synchronized to station */
 
 /*
  * Watchcat timeouts (watch)
@@ -1141,11 +1132,13 @@ wwv_rf(
 	}
 
 	/*
-	 * Here be dragons. When the channel bit counter reaches
-	 * threshold and the second counter matches the minute epoch
-	 * within the second, the driver has synchronized to the
-	 * station. The second number is the remaining seconds until the
-	 * next minute epoch, while the second phase is zero.
+	 * When the channel metric reaches threshold and the second
+	 * counter matches the minute epoch within the second, the
+	 * driver has synchronized to the station. The second number is
+	 * the remaining seconds until the next minute epoch, while the
+	 * sync epoch is zero. Watch out for the first second; if
+	 * already synchronized to the second, the buffered sync epoch
+	 * must be set. 
 	 */
 	if (up->status & MSYNC) {
 		wwv_epoch(peer);
@@ -1158,7 +1151,9 @@ wwv_rf(
 			up->status |= MSYNC;
 			up->watch = 0;
 			if (!(up->status & SSYNC))
-				up->yepoch = up->repoch = epoch;
+				up->repoch = up->yepoch = epoch;
+			else
+				up->repoch = up->yepoch;
 			for (i = 0; i < NCHAN; i++) {
 				cp = &up->mitig[i];
 				cp->wwv.count = cp->wwv.reach = 0;
@@ -1307,6 +1302,8 @@ wwv_rf(
 		if (epopos < 0)
 			epopos += SECOND;
 		wwv_endpoc(peer, epopos);
+		if (!(up->status & SSYNC))
+			up->alarm |= SYNERR;
 		epomax = 0;
 		if (!(up->status & MSYNC))
 			wwv_gain(peer);
@@ -1448,10 +1445,10 @@ wwv_qrz(
 		}
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv8 %d %3d %s %d %5.0f %5.1f %5ld %5ld %5d %ld",
+			    "wwv8 %d %3d %s %d %5.0f %5.1f %5ld %5d %ld",
 			    up->port, up->gain, sp->refid, sp->count,
-			    sp->synmax, snr, up->mphase, sp->pos,
-			    up->tepoch, epoch);
+			    sp->synmax, snr, sp->pos, up->tepoch,
+			    epoch);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 			if (debug)
@@ -1496,7 +1493,6 @@ wwv_endpoc(
 	static int syncnt;	/* run length counter */
 	static int maxrun;	/* longest run length */
 	static int mepoch;	/* longest run epoch */
-	static int jitcnt;	/* jitter holdoff counter */
 	static int avgcnt;	/* averaging interval counter */
 	static int avginc;	/* averaging ratchet */
 	static int iniflg;	/* initialization flag */
@@ -1536,57 +1532,40 @@ wwv_endpoc(
 	}
 
 	/*
-	 * If the epoch candidate is within 1 ms of the last one, the
-	 * new candidate replaces the last one and the jitter counter is
-	 * reset; otherwise, the candidate is ignored and the jitter
-	 * counter is incremented. If the jitter counter exceeds the
-	 * frequency averaging interval, the new candidate replaces the
-	 * old one anyway. The compare counter is incremented if the new
-	 * candidate is identical to the last one; otherwise, it is
-	 * forced to zero.
-	 *
-	 * Careful attention to detail here. If the signal amplitude
-	 * falls below the threshold or if no stations are heard or the
-	 * jitter is too high for too long a time, we dim the second
-	 * sync lamp and start over.
+	 * If the signal amplitude or SNR fall below thresholds or if no
+	 * stations are heard, dim the second sync lamp and start over.
 	 */
-	up->status &= ~(SLOSS | SJITR);
 	if (!(up->status & (SELV | SELH)) || up->epomax < STHR ||
 	    up->eposnr < SSNR) {
-		up->status |= SLOSS;
-		up->status &= ~SSYNC;
-		jitcnt = avgcnt = syncnt = maxrun = 0;
+		up->status &= ~(SSYNC | FGATE);
+		avgcnt = syncnt = maxrun = 0;
 		return;
 	}
 	avgcnt++;
+
+	/*
+	 * If the epoch candidate is the same as the last one, increment
+	 * the compare counter. If not, save the length and epoch of the
+	 * current run for use later and reset the counter.
+	 */
 	tmp2 = (up->tepoch - xepoch) % SECOND;
-	if (abs(tmp2) <= MS || jitcnt >= up->avgint) {
-		jitcnt = 0;
-		if (tmp2 != 0) {
-			if (syncnt > maxrun) {
-				maxrun = syncnt;
-				mepoch = xepoch;
-			}
-			syncnt = 0;
-		} else {
-			syncnt++;
-		}
-		xepoch = up->tepoch;
+	if (tmp2 == 0) {
+		syncnt++;
 	} else {
-		if (syncnt > maxrun) {
+		if (maxrun > 0 && mepoch == xepoch) {
+			maxrun += syncnt;
+		} else if (syncnt > maxrun) {
 			maxrun = syncnt;
 			mepoch = xepoch;
 		}
 		syncnt = 0;
-		jitcnt++;
-		up->status |= SJITR;
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status & (SSYNC |
 	    MSYNC))) {
 		sprintf(tbuf,
-		    "wwv1 %04x %5.0f %5.1f %5d %5d %4d %4d %4d",
+		    "wwv1 %04x %5.0f %5.1f %5d %5d %4d %4d",
 		    up->status, up->epomax, up->eposnr, up->tepoch,
-		    tmp2, avgcnt, syncnt, jitcnt);
+		    tmp2, avgcnt, syncnt);
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 		if (debug)
@@ -1605,15 +1584,12 @@ wwv_endpoc(
 	 * including the the 1000/1200-Hz comb filter and codec clock
 	 * loop. It also affects the 100-Hz subcarrier loop and the bit
 	 * and digit comparison counter thresholds.
-	 *
-	 * The best averaging interval epoches are when the jitter
-	 * counter is zero, but in any case the epoches cannot be more
-	 * than twice the averaging interval. This avoids lockup,
-	 * especially when first starting up when the interval is small.
 	 */
-	if ((jitcnt == 0 && avgcnt < up->avgint) || (jitcnt != 0 &&
-	    avgcnt < 2 * up->avgint))
+	if (avgcnt < up->avgint) {
+		xepoch = up->tepoch;
 		return;
+	}
+
 	/*
 	 * During the averaging interval the longest run of identical
 	 * epoches is determined. If the longest run is at least 10
@@ -1621,13 +1597,16 @@ wwv_endpoc(
 	 * reference epoch for the next interval. If not, the second
 	 * synd lamp is dark and flashers set.
 	 */
-	if (syncnt > maxrun) {
+	if (maxrun > 0 && mepoch == xepoch) {
+		maxrun += syncnt;
+	} else if (syncnt > maxrun) {
 		maxrun = syncnt;
 		mepoch = xepoch;
 	}
+	xepoch = up->tepoch;
 	if (maxrun > SCMP) {
-		up->yepoch = mepoch;
 		up->status |= SSYNC;
+		up->yepoch = mepoch;
 	} else {
 		up->status &= ~SSYNC;
 	}
@@ -1648,48 +1627,54 @@ wwv_endpoc(
 	 * be greater than the averaging interval, so the lurch should
 	 * be believed but the frequency left alone. Really intricate
 	 * here.
-	 */ 
-	dtemp = (up->tepoch - zepoch) % SECOND;
-	if (abs(dtemp) < MAXFREQ * MINAVG) {
-		if (maxrun * abs(up->tepoch - zepoch) < avgcnt) {
-			up->freq += dtemp / avgcnt;
-			if (up->freq > MAXFREQ)
-				up->freq = MAXFREQ;
-			else if (up->freq < -MAXFREQ)
-				up->freq = -MAXFREQ;
-		}
-		if (abs(dtemp) < MAXFREQ * MINAVG / 2.) {
-			if (avginc < 3) {
-				avginc++;
-			} else {
-				if (up->avgint < MAXAVG) {
-					up->avgint <<= 1;
-					avginc = 0;
+	 */
+	if (maxrun == 0)
+		mepoch = up->tepoch;
+	dtemp = (mepoch - zepoch) % SECOND;
+	if (up->status & FGATE) {
+		if (abs(dtemp) < MAXFREQ * MINAVG) {
+			if (maxrun * abs(mepoch - zepoch) <
+			    avgcnt) {
+				up->freq += dtemp / avgcnt;
+				if (up->freq > MAXFREQ)
+					up->freq = MAXFREQ;
+				else if (up->freq < -MAXFREQ)
+					up->freq = -MAXFREQ;
+			}
+			if (abs(dtemp) < MAXFREQ * MINAVG / 2) {
+				if (avginc < 3) {
+					avginc++;
+				} else {
+					if (up->avgint < MAXAVG) {
+						up->avgint <<= 1;
+						avginc = 0;
+					}
 				}
 			}
-		}
-	} else {
-		if (avginc > -3) {
-			avginc--;
 		} else {
-			if (up->avgint > MINAVG) {
-				up->avgint >>= 1;
-				avginc = 0;
+			if (avginc > -3) {
+				avginc--;
+			} else {
+				if (up->avgint > MINAVG) {
+					up->avgint >>= 1;
+					avginc = 0;
+				}
 			}
 		}
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		sprintf(tbuf,
-		    "wwv2 %04x %4.0f %4d %4d %4d %+2d %4d %4.0f %6.1f",
-		    up->status, up->epomax, up->tepoch, maxrun, jitcnt,
-		    avginc, avgcnt, dtemp, up->freq * 1e6 / SECOND);
+		    "wwv2 %04x %4.0f %4d %4d %2d %4d %4.0f %6.1f",
+		    up->status, up->epomax, mepoch, maxrun, avginc,
+		    avgcnt, dtemp, up->freq * 1e6 / SECOND);
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 		if (debug)
 			printf("%s\n", tbuf);
 #endif /* DEBUG */
 	}
-	zepoch = up->tepoch;
+	up->status |= FGATE;
+	zepoch = mepoch;
 	avgcnt = syncnt = maxrun = 0;
 }
 
@@ -1982,6 +1967,7 @@ wwv_rsec(
 #endif /* ICOM */
 		up->status &= ~SFLAG;
 		up->errcnt = 0;
+		up->alarm = 0;
 		wwv_newchan(peer);
 		break;
 
@@ -2043,7 +2029,7 @@ wwv_rsec(
 		else if (bitvec[up->rsec] < -BTHR)
 			up->misc &= ~arg;
 		else
-			up->alarm |= 1 << SYMERR;
+			up->alarm |= SYMERR;
 		break;
 
 	/*
@@ -2055,7 +2041,7 @@ wwv_rsec(
 		else if (bitvec[up->rsec] < -BTHR)
 			up->misc &= ~arg;
 		else
-			up->alarm |= 1 << SYMERR;
+			up->alarm |= SYMERR;
 		up->mitig[up->dchan].gain = up->gain;
 #ifdef ICOM
 		if (up->fd_icom > 0) {
@@ -2090,6 +2076,8 @@ wwv_rsec(
 		 * kernel is armed one second before the actual leap is
 		 * scheduled.
 		 */
+		if (up->status & SSYNC && up->digcnt >= 9)
+			up->status |= INSYNC;
 		if (up->status & LEPDAY) {
 			pp->leap = LEAP_ADDSECOND;
 		} else {
@@ -2104,21 +2092,8 @@ wwv_rsec(
 			printf("wwv: timecode %d %s\n", pp->lencode,
 			    pp->a_lastcode);
 #endif /* DEBUG */
-
-		/*
-		 * If the time since the last second sync dimmed exceeds
-		 * panic, game over and restart from scratch. If in sync
-		 * and the time since the last timestamp is less than 30
-		 * m, update the clock and light the reach bit.
-		 */
-		if (up->watch > PANIC) {
-			wwv_newgame(peer);
-			return;
-
-		} else if (up->status & INSYNC && up->watch < HOLD) {
+		if (up->status & INSYNC && up->watch < HOLD)
 			refclock_receive(peer);
-		}
-		up->alarm = (up->alarm & ~0x8888) << 1;
 		break;
 
 	/*
@@ -2136,23 +2111,22 @@ wwv_rsec(
 	}
 
 	/*
-	 * If digit sync has not been acquired before timeout, game over
-	 * and restart from scratch.
+	 * If digit sync has not been acquired before timeout or if no
+	 * station has been heard, game over and restart from scratch.
 	 */
-	if (!(up->status & DSYNC) && up->watch > DIGIT) {
+	if (!(up->status & DSYNC) && (!(up->status & (SELV | SELH)) ||
+	    up->watch > DIGIT)) {
 		wwv_newgame(peer);
 		return;
 	}
 
 	/*
-	 * If tracking second sync and all nine digits have been found
-	 * and compared correctly, declare victory.
+	 * If no timestamps have been struck before timeout, game over
+	 * and restart from scratch.
 	 */
-	if (up->status & SSYNC) {
-		if (up->digcnt >= 9)
-			up->status |= INSYNC;
-	} else {
-		up->alarm |= 1 << SYNERR;
+	if (up->watch > PANIC) {
+		wwv_newgame(peer);
+		return;
 	}
 	pp->disp += AUDIO_PHI;
 	up->rsec = nsec;
@@ -2203,10 +2177,10 @@ wwv_rsec(
 #endif /* IRIG_SUCKS */
 
 	/*
-	 * If victory has been declared and seconds sync is lit, wind
-	 * the system clock. It should not be a surprise, especially if
-	 * the radio is not tunable, that sometimes no stations are
-	 * above the noise and the reference ID set to NONE.
+	 * If victory has been declared and seconds sync is lit, strike
+	 * a timestamp. It should not be a surprise, especially if the
+	 * radio is not tunable, that sometimes no stations are above
+	 * the noise and the reference ID set to NONE.
 	 */
 	if (up->status & INSYNC && up->status & SSYNC) {
 		pp->second = up->rsec;
@@ -2284,7 +2258,7 @@ wwv_data(
 		up->status |= DGATE;
 		up->errcnt++;
 		if (up->errcnt > MAXERR)
-			up->alarm |= 1 << MODERR;
+			up->alarm |= MODERR;
 		return (0); 
 	}
 
@@ -2398,10 +2372,10 @@ wwv_corr4(
 	}
 	if (vp->digsnr < BSNR) {
 		vp->count = 0;
-		up->alarm |= 1 << SYMERR;
+		up->alarm |= SYMERR;
 	} else if (vp->digprb < BTHR) {
 		vp->count = 0;
-		up->alarm |= 1 << SYMERR;
+		up->alarm |= SYMERR;
 		if (!(up->status & INSYNC)) {
 			vp->phase = 0;
 			vp->digit = mldigit;
@@ -2419,7 +2393,7 @@ wwv_corr4(
 		up->digcnt++;
 	}
 	if (vp->digit != mldigit)
-		up->alarm |= 1 << DECERR;
+		up->alarm |= DECERR;
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
 	    INSYNC)) {
 		sprintf(tbuf,
@@ -2799,7 +2773,7 @@ timecode(
 {
 	struct sync *sp;
 	int year, day, hour, minute, second, dut;
-	char synchar, qual, leapchar, dst;
+	char synchar, leapchar, dst;
 	char cptr[50];
 	
 
@@ -2807,15 +2781,6 @@ timecode(
 	 * Common fixed-format fields
 	 */
 	synchar = (up->status & INSYNC) ? ' ' : '?';
-	qual = 0;
-	if (up->alarm & (3 << DECERR))
-		qual |= 0x1;
-	if (up->alarm & (3 << SYMERR))
-		qual |= 0x2;
-	if (up->alarm & (3 << MODERR))
-		qual |= 0x4;
-	if (up->alarm & (3 << SYNERR))
-		qual |= 0x8;
 	year = up->decvec[YR].digit + up->decvec[YR + 1].digit * 10 +
 	    2000;
 	day = up->decvec[DA].digit + up->decvec[DA + 1].digit * 10 +
@@ -2828,7 +2793,7 @@ timecode(
 	dut = up->misc & 0x7;
 	if (!(up->misc & DUTS))
 		dut = -dut;
-	sprintf(ptr, "%c%1X", synchar, qual);
+	sprintf(ptr, "%c%1X", synchar, up->alarm);
 	sprintf(cptr, " %4d %03d %02d:%02d:%02d %c%c %+d",
 	    year, day, hour, minute, second, leapchar, dst, dut);
 	strcat(ptr, cptr);
