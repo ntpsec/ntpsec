@@ -418,7 +418,6 @@ ntp_set_tod(
 	)
 {
 	int rc;
-	struct timeval adjtv;
 
 #ifdef HAVE_CLOCK_SETTIME
 	{
@@ -438,6 +437,8 @@ ntp_set_tod(
 #endif /* HAVE_CLOCK_SETTIME */
 #ifdef HAVE_SETTIMEOFDAY
 	{
+		struct timeval adjtv;
+
 		/*
 		 * Some broken systems don't reset adjtime() when the
 		 * clock is stepped.
