@@ -1800,8 +1800,8 @@ main(
 					/*
 					 * output interpreted DCF77 data
 					 */
-					PRINTF(offsets ? "%s, %2d:%02d:%02d, %d.%02d.%02d, <%s%s%s%s> (%c%d.%06ds)" :
-					       "%s, %2d:%02d:%02d, %d.%02d.%02d, <%s%s%s%s>",
+					PRINTF(offsets ? "%s, %2ld:%02ld:%02d, %ld.%02ld.%02ld, <%s%s%s%s> (%c%ld.%06lds)" :
+					       "%s, %2ld:%02ld:%02d, %ld.%02ld.%02ld, <%s%s%s%s>",
 					       wday[clock_time.wday],
 					       clock_time.hour, clock_time.minute, i, clock_time.day, clock_time.month,
 					       clock_time.year,
