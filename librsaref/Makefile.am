@@ -27,7 +27,8 @@ nodist_librsaref_a_SOURCES = \
 	prime.h \
 	r_random.h \
 	rsa.h \
-	rsaref.h
+	rsaref.h \
+	@RSASRCS@
 
 librsaref_a_LIBADD = @RSAOBJS@
 librsaref_a_DEPENDENCIES = $(librsaref_a_LIBADD)

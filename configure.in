@@ -2237,6 +2237,7 @@ esac
 AC_MSG_RESULT($ans)
 
 AC_SUBST(RSAOBJS)
+AC_SUBST(RSASRCS)
 AC_SUBST(RSADIR)
 AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
@@ -2345,12 +2346,14 @@ case "$ans" in
 	then
 	    ans=rsaref
 	    RSAOBJS=digit.o
+	    RSASRCS=digit.c
 	    RSADIR=rsaref2
 	fi
 	if test -f $srcdir/rsaeuro1/source/rsaeuro.h
 	then
 	    ans=rsaref
             RSAOBJS="md4c.o shsc.o"
+            RSASRCS="md4c.c shsc.c"
 	    RSADIR=rsaeuro1
 	fi
 	if test "$ans" = "rsaref"; then

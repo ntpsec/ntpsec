@@ -1,5 +1,12 @@
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (poll_update): Some operations can only be done
+	if we're compiling with some REFCLOCKs.
+	From Dave Mills.
+
+	* configure.in (RSASRCS): Added.
+	* librsaref/Makefile.am (nodist_librsaref_a_SOURCES): Use RSASRCS.
+
 	* configure.in: Limit the DECL_HSTRERROR_0 to aix4.3.*.  RSN, we
 	could also limit it to xlc...
 

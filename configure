@@ -13440,12 +13440,14 @@ EOF
 	then
 	    ans=rsaref
 	    RSAOBJS=digit.o
+	    RSASRCS=digit.c
 	    RSADIR=rsaref2
 	fi
 	if test -f $srcdir/rsaeuro1/source/rsaeuro.h
 	then
 	    ans=rsaref
             RSAOBJS="md4c.o shsc.o"
+            RSASRCS="md4c.c shsc.c"
 	    RSADIR=rsaeuro1
 	fi
 	if test "$ans" = "rsaref"; then
@@ -13480,10 +13482,10 @@ EOF
     AUTOKEY=1
     ;;
 esac
-echo "$as_me:13483: result: $ans" >&5
+echo "$as_me:13485: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "$as_me:13486: checking if we want to compile with ElectricFence" >&5
+echo "$as_me:13488: checking if we want to compile with ElectricFence" >&5
 echo $ECHO_N "checking if we want to compile with ElectricFence... $ECHO_C" >&6
 
 # Check whether --with-electricfence or --without-electricfence was given.
@@ -13504,10 +13506,10 @@ case "$ans" in
     ans=yes
     ;;
 esac
-echo "$as_me:13507: result: $ans" >&5
+echo "$as_me:13509: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "$as_me:13510: checking if we can make dcf parse utilities" >&5
+echo "$as_me:13512: checking if we can make dcf parse utilities" >&5
 echo $ECHO_N "checking if we can make dcf parse utilities... $ECHO_C" >&6
 ans=no
 if test "$ntp_parseutil" = "yes"; then
@@ -13519,10 +13521,10 @@ if test "$ntp_parseutil" = "yes"; then
 	;;
     esac
 fi
-echo "$as_me:13522: result: $ans" >&5
+echo "$as_me:13524: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "$as_me:13525: checking if we can build kernel streams modules for parse" >&5
+echo "$as_me:13527: checking if we can build kernel streams modules for parse" >&5
 echo $ECHO_N "checking if we can build kernel streams modules for parse... $ECHO_C" >&6
 ans=no
 case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
@@ -13547,10 +13549,10 @@ EOF
     esac
     ;;
 esac
-echo "$as_me:13550: result: $ans" >&5
+echo "$as_me:13552: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "$as_me:13553: checking if we need basic refclock support" >&5
+echo "$as_me:13555: checking if we need basic refclock support" >&5
 echo $ECHO_N "checking if we need basic refclock support... $ECHO_C" >&6
 if test "$ntp_refclock" = "yes"; then
     cat >>confdefs.h <<\EOF
@@ -13558,10 +13560,10 @@ if test "$ntp_refclock" = "yes"; then
 EOF
 
 fi
-echo "$as_me:13561: result: $ntp_refclock" >&5
+echo "$as_me:13563: result: $ntp_refclock" >&5
 echo "${ECHO_T}$ntp_refclock" >&6
 
-echo "$as_me:13564: checking if we want HP-UX adjtimed support" >&5
+echo "$as_me:13566: checking if we want HP-UX adjtimed support" >&5
 echo $ECHO_N "checking if we want HP-UX adjtimed support... $ECHO_C" >&6
 case "$target" in
  *-*-hpux[56789]*)
@@ -13577,10 +13579,10 @@ if test "$ans" = "yes"; then
 EOF
 
 fi
-echo "$as_me:13580: result: $ans" >&5
+echo "$as_me:13582: result: $ans" >&5
 echo "${ECHO_T}$ans" >&6
 
-echo "$as_me:13583: checking if we can read kmem" >&5
+echo "$as_me:13585: checking if we can read kmem" >&5
 echo $ECHO_N "checking if we can read kmem... $ECHO_C" >&6
 if test "${ac_cv_var_can_kmem+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13621,7 +13623,7 @@ else
 fi;
 ac_cv_var_can_kmem=$ans
 fi
-echo "$as_me:13624: result: $ac_cv_var_can_kmem" >&5
+echo "$as_me:13626: result: $ac_cv_var_can_kmem" >&5
 echo "${ECHO_T}$ac_cv_var_can_kmem" >&6
 
 case "$ac_cv_var_can_kmem" in
@@ -13632,7 +13634,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:13635: checking if adjtime is accurate" >&5
+echo "$as_me:13637: checking if adjtime is accurate" >&5
 echo $ECHO_N "checking if adjtime is accurate... $ECHO_C" >&6
 if test "${ac_cv_var_adjtime_is_accurate+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13674,7 +13676,7 @@ else
 fi;
 ac_cv_var_adjtime_is_accurate=$ans
 fi
-echo "$as_me:13677: result: $ac_cv_var_adjtime_is_accurate" >&5
+echo "$as_me:13679: result: $ac_cv_var_adjtime_is_accurate" >&5
 echo "${ECHO_T}$ac_cv_var_adjtime_is_accurate" >&6
 case "$ac_cv_var_adjtime_is_accurate" in
  yes) cat >>confdefs.h <<\EOF
@@ -13683,7 +13685,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:13686: checking the name of 'tick' in the kernel" >&5
+echo "$as_me:13688: checking the name of 'tick' in the kernel" >&5
 echo $ECHO_N "checking the name of 'tick' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_tick+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13717,7 +13719,7 @@ case "$target" in
 esac
 ac_cv_var_nlist_tick=$ans
 fi
-echo "$as_me:13720: result: $ac_cv_var_nlist_tick" >&5
+echo "$as_me:13722: result: $ac_cv_var_nlist_tick" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_tick" >&6
 case "$ac_cv_var_nlist_tick" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -13727,7 +13729,7 @@ EOF
  ;;
 esac
 #
-echo "$as_me:13730: checking for the units of 'tick'" >&5
+echo "$as_me:13732: checking for the units of 'tick'" >&5
 echo $ECHO_N "checking for the units of 'tick'... $ECHO_C" >&6
 if test "${ac_cv_var_tick_nano+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13740,7 +13742,7 @@ case "$target" in
 esac
 ac_cv_var_tick_nano=$ans
 fi
-echo "$as_me:13743: result: $ac_cv_var_tick_nano" >&5
+echo "$as_me:13745: result: $ac_cv_var_tick_nano" >&5
 echo "${ECHO_T}$ac_cv_var_tick_nano" >&6
 case "$ac_cv_var_tick_nano" in
  nsec)
@@ -13751,7 +13753,7 @@ EOF
     ;;
 esac
 #
-echo "$as_me:13754: checking the name of 'tickadj' in the kernel" >&5
+echo "$as_me:13756: checking the name of 'tickadj' in the kernel" >&5
 echo $ECHO_N "checking the name of 'tickadj' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13794,7 +13796,7 @@ case "$target" in
 esac
 ac_cv_var_nlist_tickadj=$ans
 fi
-echo "$as_me:13797: result: $ac_cv_var_nlist_tickadj" >&5
+echo "$as_me:13799: result: $ac_cv_var_nlist_tickadj" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_tickadj" >&6
 case "$ac_cv_var_nlist_tickadj" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -13804,7 +13806,7 @@ EOF
  ;;
 esac
 #
-echo "$as_me:13807: checking for the units of 'tickadj'" >&5
+echo "$as_me:13809: checking for the units of 'tickadj'" >&5
 echo $ECHO_N "checking for the units of 'tickadj'... $ECHO_C" >&6
 if test "${ac_cv_var_tickadj_nano+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13817,7 +13819,7 @@ case "$target" in
 esac
 ac_cv_var_tickadj_nano=$ans
 fi
-echo "$as_me:13820: result: $ac_cv_var_tickadj_nano" >&5
+echo "$as_me:13822: result: $ac_cv_var_tickadj_nano" >&5
 echo "${ECHO_T}$ac_cv_var_tickadj_nano" >&6
 case "$ac_cv_var_tickadj_nano" in
  nsec)
@@ -13828,7 +13830,7 @@ EOF
     ;;
 esac
 #
-echo "$as_me:13831: checking half-heartedly for 'dosynctodr' in the kernel" >&5
+echo "$as_me:13833: checking half-heartedly for 'dosynctodr' in the kernel" >&5
 echo $ECHO_N "checking half-heartedly for 'dosynctodr' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_dosynctodr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13870,7 +13872,7 @@ else
 esac
 ac_cv_var_nlist_dosynctodr=$ans
 fi
-echo "$as_me:13873: result: $ac_cv_var_nlist_dosynctodr" >&5
+echo "$as_me:13875: result: $ac_cv_var_nlist_dosynctodr" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_dosynctodr" >&6
 case "$ac_cv_var_nlist_dosynctodr" in
  no) ;;
@@ -13881,7 +13883,7 @@ EOF
      ;;
 esac
 #
-echo "$as_me:13884: checking half-heartedly for 'noprintf' in the kernel" >&5
+echo "$as_me:13886: checking half-heartedly for 'noprintf' in the kernel" >&5
 echo $ECHO_N "checking half-heartedly for 'noprintf' in the kernel... $ECHO_C" >&6
 if test "${ac_cv_var_nlist_noprintf+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13917,7 +13919,7 @@ else
 esac
 ac_cv_var_nlist_noprintf=$ans
 fi
-echo "$as_me:13920: result: $ac_cv_var_nlist_noprintf" >&5
+echo "$as_me:13922: result: $ac_cv_var_nlist_noprintf" >&5
 echo "${ECHO_T}$ac_cv_var_nlist_noprintf" >&6
 case "$ac_cv_var_nlist_noprintf" in
  no) ;;
@@ -13928,7 +13930,7 @@ EOF
      ;;
 esac
 
-echo "$as_me:13931: checking for a default value for 'tick'" >&5
+echo "$as_me:13933: checking for a default value for 'tick'" >&5
 echo $ECHO_N "checking for a default value for 'tick'... $ECHO_C" >&6
 if test "${ac_cv_var_tick+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13961,7 +13963,7 @@ else
 fi;
 ac_cv_var_tick=$ans
 fi
-echo "$as_me:13964: result: $ac_cv_var_tick" >&5
+echo "$as_me:13966: result: $ac_cv_var_tick" >&5
 echo "${ECHO_T}$ac_cv_var_tick" >&6
 case "$ac_cv_var_tick" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -13971,7 +13973,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:13974: checking for a default value for 'tickadj'" >&5
+echo "$as_me:13976: checking for a default value for 'tickadj'" >&5
 echo $ECHO_N "checking for a default value for 'tickadj'... $ECHO_C" >&6
 if test "${ac_cv_var_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14029,7 +14031,7 @@ else
 fi;
 ac_cv_var_tickadj=$ans
 fi
-echo "$as_me:14032: result: $ac_cv_var_tickadj" >&5
+echo "$as_me:14034: result: $ac_cv_var_tickadj" >&5
 echo "${ECHO_T}$ac_cv_var_tickadj" >&6
 case "$ac_cv_var_tickadj" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
@@ -14060,17 +14062,17 @@ esac
 ac_cv_make_tickadj=yes
 case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
  nonono)	# Don't read KMEM, no presets.  Bogus.
-    { echo "$as_me:14063: WARNING: Can't read kmem" >&5
+    { echo "$as_me:14065: WARNING: Can't read kmem" >&5
 echo "$as_me: WARNING: Can't read kmem" >&2;}
     ac_cv_make_tickadj=no
     ;;
  nono*)		# Don't read KMEM, no PRESET_TICK but PRESET_TICKADJ.  Bogus.
-    { echo "$as_me:14068: WARNING: Can't read kmem but no PRESET_TICK.  No tickadj." >&5
+    { echo "$as_me:14070: WARNING: Can't read kmem but no PRESET_TICK.  No tickadj." >&5
 echo "$as_me: WARNING: Can't read kmem but no PRESET_TICK.  No tickadj." >&2;}
     ac_cv_make_tickadj=no
     ;;
  no*no)		# Don't read KMEM, PRESET_TICK but no PRESET_TICKADJ.  Bogus.
-    { echo "$as_me:14073: WARNING: Can't read kmem but no PRESET_TICKADJ.  No tickadj." >&5
+    { echo "$as_me:14075: WARNING: Can't read kmem but no PRESET_TICKADJ.  No tickadj." >&5
 echo "$as_me: WARNING: Can't read kmem but no PRESET_TICKADJ.  No tickadj." >&2;}
     ac_cv_make_tickadj=no
     ;;
@@ -14079,7 +14081,7 @@ echo "$as_me: WARNING: Can't read kmem but no PRESET_TICKADJ.  No tickadj." >&2;
  yesnono)	# Read KMEM, no presets.  Cool.
     ;;
  yesno*)	# Read KMEM, no PRESET_TICK but PRESET_TICKADJ.  Bogus.
-    { echo "$as_me:14082: WARNING: PRESET_TICKADJ is defined but not PRESET_TICK.  Please report this." >&5
+    { echo "$as_me:14084: WARNING: PRESET_TICKADJ is defined but not PRESET_TICK.  Please report this." >&5
 echo "$as_me: WARNING: PRESET_TICKADJ is defined but not PRESET_TICK.  Please report this." >&2;}
     ;;
  yes*no)	# Read KMEM, PRESET_TICK but no PRESET_TICKADJ.  Cool.
@@ -14087,7 +14089,7 @@ echo "$as_me: WARNING: PRESET_TICKADJ is defined but not PRESET_TICK.  Please re
  yes*)		# READ KMEM, PRESET_TICK and PRESET_TICKADJ.
     ;;
  *)		# Generally bogus.
-    { { echo "$as_me:14090: error: This shouldn't happen." >&5
+    { { echo "$as_me:14092: error: This shouldn't happen." >&5
 echo "$as_me: error: This shouldn't happen." >&2;}
    { (exit 1); exit 1; }; }
     ;;
@@ -14108,14 +14110,14 @@ case "$target" in
  ;;
 esac
 
-echo "$as_me:14111: checking if we want and can make the tickadj utility" >&5
+echo "$as_me:14113: checking if we want and can make the tickadj utility" >&5
 echo $ECHO_N "checking if we want and can make the tickadj utility... $ECHO_C" >&6
 if test "${ac_cv_make_tickadj+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_cv_make_tickadj=yes
 fi
-echo "$as_me:14118: result: $ac_cv_make_tickadj" >&5
+echo "$as_me:14120: result: $ac_cv_make_tickadj" >&5
 echo "${ECHO_T}$ac_cv_make_tickadj" >&6
 case "$ac_cv_make_tickadj" in
  yes)
@@ -14123,7 +14125,7 @@ case "$ac_cv_make_tickadj" in
     ;;
 esac
 
-echo "$as_me:14126: checking if we want and can make the ntptime utility" >&5
+echo "$as_me:14128: checking if we want and can make the ntptime utility" >&5
 echo $ECHO_N "checking if we want and can make the ntptime utility... $ECHO_C" >&6
 if test "${ac_cv_make_ntptime+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14141,7 +14143,7 @@ else
 esac
 ac_cv_make_ntptime=$ans
 fi
-echo "$as_me:14144: result: $ac_cv_make_ntptime" >&5
+echo "$as_me:14146: result: $ac_cv_make_ntptime" >&5
 echo "${ECHO_T}$ac_cv_make_ntptime" >&6
 case "$ac_cv_make_ntptime" in
  yes)
@@ -14149,7 +14151,7 @@ case "$ac_cv_make_ntptime" in
     ;;
 esac
 
-echo "$as_me:14152: checking if we want UDP wildcard delivery" >&5
+echo "$as_me:14154: checking if we want UDP wildcard delivery" >&5
 echo $ECHO_N "checking if we want UDP wildcard delivery... $ECHO_C" >&6
 if test "${ac_cv_var_udp_wildcard_delivery+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14207,7 +14209,7 @@ else
 fi;
 ac_cv_var_udp_wildcard_delivery=$ans
 fi
-echo "$as_me:14210: result: $ac_cv_var_udp_wildcard_delivery" >&5
+echo "$as_me:14212: result: $ac_cv_var_udp_wildcard_delivery" >&5
 echo "${ECHO_T}$ac_cv_var_udp_wildcard_delivery" >&6
 case "$ac_cv_var_udp_wildcard_delivery" in
  yes) cat >>confdefs.h <<\EOF
@@ -14227,7 +14229,7 @@ case "$host" in
     ;;
 esac
 
-echo "$as_me:14230: checking if we should always slew the time" >&5
+echo "$as_me:14232: checking if we should always slew the time" >&5
 echo $ECHO_N "checking if we should always slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_slew_always+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14257,7 +14259,7 @@ else
 fi;
 ac_cv_var_slew_always=$ans
 fi
-echo "$as_me:14260: result: $ac_cv_var_slew_always" >&5
+echo "$as_me:14262: result: $ac_cv_var_slew_always" >&5
 echo "${ECHO_T}$ac_cv_var_slew_always" >&6
 case "$ac_cv_var_slew_always" in
  yes) cat >>confdefs.h <<\EOF
@@ -14266,7 +14268,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14269: checking if we should step and slew the time" >&5
+echo "$as_me:14271: checking if we should step and slew the time" >&5
 echo $ECHO_N "checking if we should step and slew the time... $ECHO_C" >&6
 if test "${ac_cv_var_step_slew+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14299,7 +14301,7 @@ else
 fi;
 ac_cv_var_step_slew=$ans
 fi
-echo "$as_me:14302: result: $ac_cv_var_step_slew" >&5
+echo "$as_me:14304: result: $ac_cv_var_step_slew" >&5
 echo "${ECHO_T}$ac_cv_var_step_slew" >&6
 case "$ac_cv_var_step_slew" in
  yes) cat >>confdefs.h <<\EOF
@@ -14308,7 +14310,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14311: checking if ntpdate should step the time" >&5
+echo "$as_me:14313: checking if ntpdate should step the time" >&5
 echo $ECHO_N "checking if ntpdate should step the time... $ECHO_C" >&6
 if test "${ac_cv_var_ntpdate_step+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14329,7 +14331,7 @@ else
 fi;
 ac_cv_var_ntpdate_step=$ans
 fi
-echo "$as_me:14332: result: $ac_cv_var_ntpdate_step" >&5
+echo "$as_me:14334: result: $ac_cv_var_ntpdate_step" >&5
 echo "${ECHO_T}$ac_cv_var_ntpdate_step" >&6
 case "$ac_cv_var_ntpdate_step" in
  yes) cat >>confdefs.h <<\EOF
@@ -14338,7 +14340,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14341: checking if we should sync TODR clock every hour" >&5
+echo "$as_me:14343: checking if we should sync TODR clock every hour" >&5
 echo $ECHO_N "checking if we should sync TODR clock every hour... $ECHO_C" >&6
 if test "${ac_cv_var_sync_todr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14361,7 +14363,7 @@ else
 fi;
 ac_cv_var_sync_todr=$ans
 fi
-echo "$as_me:14364: result: $ac_cv_var_sync_todr" >&5
+echo "$as_me:14366: result: $ac_cv_var_sync_todr" >&5
 echo "${ECHO_T}$ac_cv_var_sync_todr" >&6
 case "$ac_cv_var_sync_todr" in
  yes) cat >>confdefs.h <<\EOF
@@ -14370,7 +14372,7 @@ EOF
  ;;
 esac
 
-echo "$as_me:14373: checking if we should avoid kernel FLL bug" >&5
+echo "$as_me:14375: checking if we should avoid kernel FLL bug" >&5
 echo $ECHO_N "checking if we should avoid kernel FLL bug... $ECHO_C" >&6
 if test "${ac_cv_var_kernel_fll_bug+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14428,7 +14430,7 @@ else
 fi;
 ac_cv_var_kernel_fll_bug=$ans
 fi
-echo "$as_me:14431: result: $ac_cv_var_kernel_fll_bug" >&5
+echo "$as_me:14433: result: $ac_cv_var_kernel_fll_bug" >&5
 echo "${ECHO_T}$ac_cv_var_kernel_fll_bug" >&6
 case "$ac_cv_var_kernel_fll_bug" in
  yes) cat >>confdefs.h <<\EOF
@@ -14545,7 +14547,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:14548: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:14550: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -14732,7 +14734,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:14735: error: ambiguous option: $1
+    { { echo "$as_me:14737: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -14784,12 +14786,12 @@ Try \`$0 --help' for more information." >&2;}
   'config.h' ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
 
   # This is an error.
-  -*) { { echo "$as_me:14787: error: unrecognized option: $1
+  -*) { { echo "$as_me:14789: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
    { (exit 1); exit 1; }; } ;;
-  *) { { echo "$as_me:14792: error: invalid argument: $1" >&5
+  *) { { echo "$as_me:14794: error: invalid argument: $1" >&5
 echo "$as_me: error: invalid argument: $1" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -14946,6 +14948,7 @@ s,@MAKE_LIBPARSE@,$MAKE_LIBPARSE,;t t
 s,@MAKE_LIBPARSE_KERNEL@,$MAKE_LIBPARSE_KERNEL,;t t
 s,@MAKE_CHECK_Y2K@,$MAKE_CHECK_Y2K,;t t
 s,@RSAOBJS@,$RSAOBJS,;t t
+s,@RSASRCS@,$RSASRCS,;t t
 s,@RSADIR@,$RSADIR,;t t
 s,@RSAREF@,$RSAREF,;t t
 s,@LIBRSAREF@,$LIBRSAREF,;t t
@@ -15080,7 +15083,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:15083: creating $ac_file" >&5
+    { echo "$as_me:15086: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -15098,7 +15101,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]* | ?:[\\/]*)
          # Absolute
-         test -f "$f" || { { echo "$as_me:15101: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:15104: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -15111,7 +15114,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:15114: error: cannot find input file: $f" >&5
+           { { echo "$as_me:15117: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -15172,7 +15175,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:15175: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:15178: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -15183,7 +15186,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]* | ?:[\\/]*)
          # Absolute
-         test -f "$f" || { { echo "$as_me:15186: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:15189: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -15196,7 +15199,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:15199: error: cannot find input file: $f" >&5
+           { { echo "$as_me:15202: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -15313,7 +15316,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:15316: $ac_file is unchanged" >&5
+      { echo "$as_me:15319: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \

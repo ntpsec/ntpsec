@@ -105,6 +105,7 @@ RANLIB = @RANLIB@
 RSADIR = @RSADIR@
 RSAOBJS = @RSAOBJS@
 RSAREF = @RSAREF@
+RSASRCS = @RSASRCS@
 STRIP = @STRIP@
 TESTDCF = @TESTDCF@
 U = @U@
@@ -143,7 +144,8 @@ nodist_librsaref_a_SOURCES = \
 	prime.h \
 	r_random.h \
 	rsa.h \
-	rsaref.h
+	rsaref.h \
+	@RSASRCS@
 
 
 librsaref_a_LIBADD = @RSAOBJS@

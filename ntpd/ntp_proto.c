@@ -1149,8 +1149,10 @@ poll_update(
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
+#ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate++;
+#endif
 		else if (peer->reach & 0x1)
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
 		else
@@ -1243,9 +1245,13 @@ peer_clear(
 	peer->ppoll = peer->maxpoll;
 	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
-	peer->leap = LEAP_NOTINSYNC;
-	peer->stratum = STRATUM_UNSPEC;
 	peer->epoch = current_time;
+#ifdef REFCLOCK
+	if (!(peer->flags & FLAG_REFCLOCK)) {
+		peer->leap = LEAP_NOTINSYNC;
+		peer->stratum = STRATUM_UNSPEC;
+	}
+#endif
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;
