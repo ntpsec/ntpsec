@@ -27,12 +27,13 @@ void (*funcPtr[]) (Node *, Event) = {
  */
 int
 ntpsim(
-	int argc,
-	char *argv[]
+	int	argc,
+	char	*argv[]
 	)
 {
-	Event e;
-	double maxtime;
+	Event	e;
+	double	maxtime;
+	struct timeval seed;
 
 	/*
 	 * Initialize the global node
@@ -74,6 +75,12 @@ ntpsim(
         mon_start(MON_OFF);
 	getconfig(argc, argv);
         initializing = 0;
+
+	/*
+	 * Watch out here, we want the real time, not the silly stuff.
+	 */
+	gettimeofday(&seed, NULL);
+	srand48(seed.tv_usec);
 
 	/*
 	 * Push a beep and timer interrupt on the queue

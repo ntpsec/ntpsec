@@ -420,7 +420,7 @@ step_systime(
 	 * written by other than amateurs. Good clock code is a black
 	 * art anyway.
 	 */
-	ntp_node.ntp_time += now;
+	ntp_node.clk_time -= now;
         return (1);
 }
 
@@ -444,7 +444,9 @@ node_clock(
 	dtemp = t - n->ntp_time;
 	n->time = t;
 	n->ntp_time += dtemp;
+/*
 	n->ferr += gauss(0, dtemp * n->fnse * 1e-6);
+*/
 	n->clk_time += dtemp * (1 + n->ferr * 1e-6);
 
 	/*
@@ -482,7 +484,8 @@ gauss(
 
 	/*
 	 * Roll a sample from a Gaussian distribution with mean m and
-	 * standard deviation s.
+	 * standard deviation s. For m = 0, s = 1, mean(y) = 0,
+	 * std(y) = 1.
 	 */
 	if (s == 0)
 		return (m);
@@ -505,7 +508,8 @@ poisson(
 
 	/*
 	 * Roll a sample from a composite distribution with propagation
-	 * delay m and exponential service time with parameter s.
+	 * delay m and exponential distribution time with parameter s.
+	 * For m = 0, s = 1, mean(y) = std(y) = 1.
 	 */
 	if (s == 0)
 		return (m);

@@ -40,6 +40,7 @@
 #define CLOCK_AVG	4.	/* parameter averaging constant */
 #define CLOCK_MINSEC	256.	/* min FLL update interval (s) */
 #define CLOCK_MINSTEP	900.	/* step-change timeout (s) */
+#define	CLOCK_ALLAN	3000.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
@@ -111,7 +112,7 @@ double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
 double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
 double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
-double	allan_xpt = (1 << NTP_MINDPOLL); /* Allan intercept (s) */
+double	allan_xpt = CLOCK_ALLAN; /* Allan intercept (s) */
 
 /*
  * Program variables
@@ -466,6 +467,10 @@ local_clock(
 			dtemp = max(mu, allan_xpt);
 			flladj = (fp_offset - clock_offset) /
 			    (CLOCK_FLL * dtemp);
+
+printf("xxx diff %f d %f\n", (fp_offset - clock_offset) * 1e6,
+    CLOCK_FLL * dtemp);
+ 
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			etemp = min(mu, ULOGTOD(sys_poll));
 			plladj = fp_offset * etemp / (dtemp * dtemp);
@@ -609,6 +614,10 @@ local_clock(
 	 */
 	etemp = clock_frequency + flladj + plladj;
 	drift_comp += etemp;
+
+printf("ofs %f freq %f cf %f pll %f fll %f\n", fp_offset, drift_comp *
+    1e6, clock_frequency * 1e6, plladj * 1e6, flladj * 1e6);
+
 	if (drift_comp > NTP_MAXFREQ)
 		drift_comp = NTP_MAXFREQ;
 	else if (drift_comp <= -NTP_MAXFREQ)
@@ -862,17 +871,18 @@ loop_config(
 	case LOOP_DRIFTCOMP:
 
 		/*
-		 * Initialize the kernel frequency and clamp to
-		 * reasonable value. Also set the initial state to
-		 * S_FSET to indicated the frequency has been
-		 * initialized from the previously saved drift file.
+		 * If the frequency value is reasonable, set the initial
+		 * frequency to the given value and the state to S_FSET.
+		 * Otherwise, the drift file may be missing or broken,
+		 * so set the frequency to zero. This erases past
+		 * history should somebody break something.
 		 */
-		rstclock(S_FSET, current_time, 0);
-		drift_comp = freq;
-		if (drift_comp > NTP_MAXFREQ)
-			drift_comp = NTP_MAXFREQ;
-		if (drift_comp < -NTP_MAXFREQ)
-			drift_comp = -NTP_MAXFREQ;
+		if (freq <= NTP_MAXFREQ && freq >= -NTP_MAXFREQ) {
+			drift_comp = freq;
+			rstclock(S_FSET, current_time, 0);
+		} else {
+			drift_comp = 0;
+		}
 
 #ifdef KERNEL_PLL
 		/*
