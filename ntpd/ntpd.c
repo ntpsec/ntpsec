@@ -125,7 +125,7 @@ HANDLE ResolverThreadHandle = NULL;
 /* variables used to inform the Service Control Manager of our current state */
 SERVICE_STATUS ssStatus;
 SERVICE_STATUS_HANDLE	sshStatusHandle;
-HANDLE WaitHandles[2] = { NULL, NULL };
+HANDLE WaitHandles[3] = { NULL, NULL, NULL };
 char szMsgPath[255];
 static BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 #endif /* SYS_WINNT */
@@ -783,6 +783,7 @@ service_main(
 #if defined(HAVE_IO_COMPLETION_PORT)
 		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
 		WaitHandles[1] = get_timer_handle();
+	    WaitHandles[2] = get_io_event();
 
 		for (;;) {
 			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, MWMO_ALERTABLE);
@@ -794,16 +795,36 @@ service_main(
 				case WAIT_OBJECT_0 + 1 : /* timer */
 					timer();
 				break;
-				case WAIT_OBJECT_0 + 2 : { /* Windows message */
+
+				case WAIT_OBJECT_0 + 2 : /* Io event */
+# ifdef DEBUG
+					if ( debug > 3 )
+					{
+						printf( "IoEvent occurred\n" );
+					}
+# endif
+				break;
+
+# if 1
+				/*
+				 * FIXME: According to the documentation for WaitForMultipleObjectsEx
+				 *        this is not possible. This may be a vestigial from when this was
+				 *        MsgWaitForMultipleObjects, maybe it should be removed?
+				 */
+				case WAIT_OBJECT_0 + 3 : /* windows message */
+				{
 					MSG msg;
-					while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-						if (msg.message == WM_QUIT) {
-							exit(0);
+					while ( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
+					{
+						if ( msg.message == WM_QUIT )
+						{
+							exit( 0 );
 						}
-						DispatchMessage(&msg);
+						DispatchMessage( &msg );
 					}
 				}
 				break;
+# endif
 
 				case WAIT_IO_COMPLETION : /* loop */
 				case WAIT_TIMEOUT :
