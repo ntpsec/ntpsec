@@ -174,7 +174,6 @@ nmea_start(
           struct hostent *he;
           struct protoent *p;
           struct sockaddr_in so_addr;
-          socklen_t so_addr_len = sizeof(so_addr);
 
           if ((len = readlink(device,buffer,sizeof(buffer))) == -1)
             return(0);
@@ -195,7 +194,7 @@ nmea_start(
 
           if ((fd = socket(PF_INET,SOCK_STREAM,p->p_proto)) == -1)
             return(0);
-          if (connect(fd,(struct sockaddr *)&so_addr,so_addr_len) == -1) {
+          if (connect(fd,(struct sockaddr *)&so_addr,SOCKLEN(&so_addr)) == -1) {
             close(fd);
             return (0);
           }
