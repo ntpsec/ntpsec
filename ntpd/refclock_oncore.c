@@ -758,6 +758,7 @@ oncore_ppsapi(
 				    "refclock_ioctl: time_pps_kcbind failed: %m");
 				return (0);
 			}
+			pps_enable = 1;
 		}
 	}
 	return(1);
