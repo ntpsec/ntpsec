@@ -1980,7 +1980,8 @@ peer_xmit(
 
 		/*
 		 * In symmetric modes the public key, leapsecond table,
-		 * agreement parameters and autokey values are required. 		 *
+		 * agreement parameters and autokey values are required.
+ 		 *
 		 * 1. If a response is pending, always send it first.
 		 *
 		 * 2. Don't send anything except a public-key request
