@@ -25,7 +25,6 @@ static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:
 extern int	check_netinfo;
 #endif
 
-
 /*
  * getstartup - search through the options looking for a debugging flag
  */
@@ -114,7 +113,7 @@ getstartup(
 		case 'q':
 		    ++nofork;
 		    break;
-
+ 
 		case 'N':
 		    priority_done = 0;
 		    break;
