@@ -236,7 +236,7 @@ local_clock(
 	if (fabs(fp_offset) > clock_panic && clock_panic > 0 &&
 	    !allow_panic) {
 		msyslog(LOG_ERR,
-		    "time error %.0f exceeds %.0f seconds; set clock manually",
+		    "time correction of %.0f seconds exceeds sanity limit (%.0f); set clock manually to the correct UTC time.",
 		    fp_offset, clock_panic);
 		return (-1);
 	}
