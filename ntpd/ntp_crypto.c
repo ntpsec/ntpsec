@@ -295,9 +295,9 @@ crypto_recv(
 		i = authlen / 4;
 		len = ntohl(pkt[i]) & 0xffff;
 		code = (ntohl(pkt[i]) >> 16) & 0xffff;
-		tstamp = ntohl(pkt[i + 2]);
-		if (code & CRYPTO_RESP)
+		if (code & CRYPTO_RESP && ntohl(pkt[i + 1]) != 0)
 			peer->assoc = ntohl(pkt[i + 1]);
+		tstamp = ntohl(pkt[i + 2]);
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -404,8 +404,8 @@ crypto_recv(
 			peer->flash &= ~TEST10;
 			peer->pcookie.tstamp = tstamp;
 			if (temp != peer->pcookie.key) {
-				key_expire(peer);
 				peer->pcookie.key = temp;
+				key_expire(peer);
 			}
 			break;
 
@@ -468,8 +468,8 @@ crypto_recv(
 			peer->flash &= ~TEST10;
 			peer->pcookie.tstamp = tstamp;
 			if (temp != peer->pcookie.key) {
-				key_expire(peer);
 				peer->pcookie.key = temp;
+				key_expire(peer);
 			}
 			break;
 

@@ -100,10 +100,6 @@ transmit(
 		 * is not configured and not likely to stay around,
 		 * we exhaust it.
 		 */
-#ifdef AUTOKEY
-		if (peer->flags & FLAG_AUTHENABLE)
-			peer->tailcnt++;
-#endif /* AUTOKEY */
 		if (peer->hmode != MODE_BROADCAST)
 			peer->unreach++;
 		oreach = peer->reach;
@@ -175,17 +171,6 @@ transmit(
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
-#ifdef AUTOKEY
-			/*
-			 * If an authenticated packet has not been heard
-			 * for awhile, the server may have refreshed
-			 * keys. So, do a soft reset.
-			 */
-			if (peer->tailcnt > NTP_TAILMAX) {
-				key_expire(peer);
-				peer->pcookie.tstamp = 0;
-			}
-#endif /* AUTOKEY */
 		}
 	} else {
 		peer->burst--;
@@ -202,6 +187,7 @@ transmit(
 				peer->flags &= ~FLAG_BURST;
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
+				peer->pcookie.tstamp = 0;
 				key_expire(peer);
 #endif /* AUTOKEY */
 			}
@@ -687,9 +673,6 @@ receive(
 	peer->flash = 0;
 	if (is_authentic) {
 		peer->flags |= FLAG_AUTHENTIC;
-#ifdef AUTOKEY
-		peer->tailcnt = 0;
-#endif /* AUTOKEY */
 	} else {
 		peer->flags &= ~FLAG_AUTHENTIC;
 	}
@@ -731,25 +714,28 @@ receive(
 	if (peer->flags & FLAG_SKEY) {
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp);
-		if (!peer->flash & TEST10) {
-			peer->pkeyid = skeyid;
-		} else if (hismode == MODE_SERVER) {
+
+printf("xxxx %08x %08x %08x %08x\n", peer->keyid, skeyid, tkeyid,
+    peer->pkeyid);
+
+		if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
+		} else if (!peer->flash & TEST10) {
+			peer->pkeyid = skeyid;
 		} else {
-			int i = 0;
+			int i;
 
-			for (i = 0;; i++) {
+			for (i = 0; ; i++) {
 				if (tkeyid == peer->pkeyid ||
 				    tkeyid == peer->recauto.key) {
 					peer->flash &= ~TEST10;
 					peer->pkeyid = skeyid;
 					break;
 				}
-				if (i > peer->recauto.seq) {
-					peer->recauto.tstamp = 0;
+				if (i > peer->recauto.seq)
 					break;
-				}
+
 				if (hismode == MODE_BROADCAST)
 					tkeyid = session_key(
 					    &rbufp->recv_srcadr,
@@ -1048,9 +1034,11 @@ clock_update(void)
 		    fabs(sys_peer->delay);
 		sys_leap = leap_consensus;
 	}
-	if (oleap != sys_leap) {
+	if (oleap == LEAP_NOTINSYNC) {
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
+/*
 		expire_all();
+*/
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
@@ -1148,6 +1136,10 @@ peer_clear(
 #endif
 #ifdef AUTOKEY
 	key_expire(peer);
+#ifdef PUBKEY
+	if (peer->pubkey != NULL)
+		free(peer->pubkey);
+#endif /* PUBKEY */
 #endif /* AUTOKEY */
 
 	/*
@@ -1909,7 +1901,7 @@ peer_xmit(
 		 * values at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->keynumber == peer->sndauto.tstamp)
+			if (peer->keynumber == peer->sndauto.seq)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -2014,14 +2006,14 @@ peer_xmit(
 				    peer->assoc);
 			} else
 #endif /* PUBKEY */
-			if (peer->pcookie.tstamp == 0) {
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_PRIV, peer->hcookie,
-				    peer->assoc);
-			} else if (peer->recauto.tstamp == 0 &&
+			if (peer->recauto.tstamp == 0 &&
 			    peer->flags & FLAG_MCAST2) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
+				    peer->assoc);
+			} else if (peer->pcookie.tstamp == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 			}
 			break;

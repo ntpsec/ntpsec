@@ -1,5 +1,16 @@
 2000-05-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (transmit): AUTOKEY and tstamp fixes.
+	(clock_update): Check oleap against LEAP_NOTINSYNC
+	(peer_clear): Free pubkey when we're done
+	Check peer's keynumber against the seq in MODE_BROADCAST.
+	Reorder tstamp changes.
+	* ntpd/ntp_crypto.c (crypto_recv): Check the packet if we get a
+	CRYPTO_RESP and reorder the update of tstamp.
+	(crypto_recv): Don't expire the peer until we're thru with it.
+	* include/ntp.h: AUTOKEY and pkeyid changes
+	From Dave Mills
+
 	* ntpdate/ntpdate.c: Protect sys/ioctl.h
 
 2000-05-01  Harlan Stenn  <stenn@whimsy.udel.edu>

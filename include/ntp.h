@@ -277,21 +277,21 @@ struct peer {
 	/*
 	 * Variables used by authenticated client
 	 */
+#ifdef AUTOKEY
+	u_short	assoc;		/* association ID of peer */
+#endif /* AUTOKEY */
 	keyid_t	keyid;		/* current key ID */
 	u_char	*keystr;	/* public key file name */
+	keyid_t	pkeyid;		/* previous key ID */
+#define clear_to_zero pkeyid
+#ifdef AUTOKEY
 #ifdef PUBKEY
 	u_char	*pubkey;	/* public key */
 #endif /* PUBKEY */
-	keyid_t	pkeyid;		/* previous key ID */
-#ifdef AUTOKEY
-#define clear_to_zero pkeyid
-#define crypto_to_zero pkeyid
 	keyid_t	hcookie;	/* host cookie */
 	struct cookie pcookie;	/* peer cookie */
 	struct autokey recauto;	/* autokey */
 	u_int32	cmmd;		/* peer command */
-	u_short	assoc;		/* association ID of peer */
-	u_int	tailcnt;	/* authentic packet watchdog */
 	/*
 	 * Variables used by authenticated server
 	 */
@@ -304,11 +304,6 @@ struct peer {
 	 * Ephemeral state variables
 	 */
 	u_int	valid;		/* valid update counter */
-#ifdef AUTOKEY
-#define end_crypto_to_zero valid
-#else
-#define clear_to_zero valid
-#endif /* AUTOKEY */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
 	u_char	reach;		/* reachability register */
