@@ -1,6 +1,8 @@
 /*
  * ntp_loopfilter.c - implements the NTP loop filter algorithm
  *
+ * ATTENTION: Get approval from Dave Mills on all changes to this file!
+ *
  */
 #ifdef HAVE_CONFIG_H
 # include <config.h>
