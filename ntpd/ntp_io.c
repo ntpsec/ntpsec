@@ -415,7 +415,7 @@ address_okay(isc_interface_t *isc_if) {
 	 * Check if the interface is specified
 	 */
 	if (specific_interface != NULL) {
-		if (stricmp(isc_if->name, specific_interface) == 0)
+		if (strcasecmp(isc_if->name, specific_interface) == 0)
 			return (ISC_TRUE);
 	}
 	else {
