@@ -143,8 +143,8 @@ static	int	crypto_encrypt	P((struct value *, struct value *,
  */
 keyid_t				/* returns next key ID */
 session_key(
-	struct sockaddr_in *srcadr, /* source address */
-	struct sockaddr_in *dstadr, /* destination address */
+	struct sockaddr_storage *srcadr, /* source address */
+	struct sockaddr_storage *dstadr, /* destination address */
 	keyid_t	keyno,		/* key ID */
 	keyid_t	private,	/* private value */
 	u_long	lifetime 	/* key lifetime */
@@ -160,8 +160,16 @@ session_key(
 	 * Generate the session key and key ID. If the lifetime is
 	 * greater than zero, install the key and call it trusted.
 	 */
-	header[0] = srcadr->sin_addr.s_addr;
-	header[1] = dstadr->sin_addr.s_addr;
+	switch(srcadr->ss_family) {
+	case AF_INET:
+		header[0] = ((struct sockaddr_in *)srcadr)->sin_addr.s_addr;
+		header[1] = ((struct sockaddr_in *)dstadr)->sin_addr.s_addr;
+		break;
+	case AF_INET6:
+		/* XXX we need some IPv6 code here! */
+		msyslog(LOG_ERR, "IPv6 crypto code missing");
+		break;
+	}
 	header[2] = htonl(keyno);
 	header[3] = htonl(private);
 	EVP_DigestInit(&ctx, EVP_md5());

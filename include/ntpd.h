@@ -143,7 +143,7 @@ extern	void	resetmanycast	P((void));
 #ifdef OPENSSL
 extern	void	crypto_recv	P((struct peer *, struct recvbuf *, int));
 extern	int	crypto_xmit	P((struct pkt *, int, u_int32 *, keyid_t, u_int));
-extern	keyid_t	session_key	P((struct sockaddr_in *, struct sockaddr_in *, keyid_t, keyid_t, u_long));
+extern	keyid_t	session_key	P((struct sockaddr_storage *, struct sockaddr_storage *, keyid_t, keyid_t, u_long));
 extern	void	make_keylist	P((struct peer *, struct interface *));
 extern	void	key_expire	P((struct peer *));
 extern	void	crypto_sign	P((void));
@@ -211,7 +211,7 @@ extern	void	record_peer_stats P((struct sockaddr_storage *, int, double, double,
 extern	void	record_loop_stats P((double, double, double, double, int));
 extern	void	record_clock_stats P((struct sockaddr_storage *, const char *));
 extern	void	record_raw_stats P((struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *));
-extern	void	record_crypto_stats P((struct sockaddr_in *, const char *));
+extern	void	record_crypto_stats P((struct sockaddr_storage *, const char *));
 extern  int	sock_hash P((struct sockaddr_storage *));
 
 /*

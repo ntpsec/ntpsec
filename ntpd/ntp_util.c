@@ -648,7 +648,7 @@ record_raw_stats(
  */
 void
 record_crypto_stats(
-	struct sockaddr_in *addr,
+	struct sockaddr_storage *addr,
 	const char *text
 	)
 {
@@ -678,7 +678,7 @@ record_crypto_stats(
 			    day, sec, msec, text);
 		else
 			fprintf(cryptostats.fp, "%lu %lu.%03lu %s %s\n",
-			    day, sec, msec, ntoa(addr), text);
+			    day, sec, msec, stoa(addr), text);
 		fflush(cryptostats.fp);
 	}
 }
