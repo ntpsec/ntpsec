@@ -1,0 +1,16 @@
+#! @PATH_PERL@ -w
+
+use Getopt::Std;
+use vars qw($opt_n);
+
+getopts('d:nt:');
+
+$cmd = 'ntpq -c "rv 0 state"';
+
+for (;;) {
+    open(Q, $cmd."|") || die "Can't start ntpq: $!";
+    while(<Q>) {
+      exit 0 if (/^state=4/);
+    }
+    close(Q);
+}

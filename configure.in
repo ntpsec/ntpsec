@@ -156,6 +156,7 @@ AC_MINIX
 AC_ISC_POSIX
 AC_PROG_RANLIB
 AC_PATH_PROG(PATH_SH, sh)
+AC_PATH_PROG(PATH_PERL, perl)
 
 case "$target" in
  *-*-vxworks*)
@@ -2992,7 +2993,7 @@ AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/Makefile scripts/mkver scripts/ntpver util/Makefile)
-AC_CONFIG_COMMANDS(default, [[chmod +x scripts/ntpver scripts/mkver]], [])
+scripts/Makefile scripts/mkver scripts/ntp-wait scripts/ntpver util/Makefile)
+AC_CONFIG_COMMANDS(default, [[chmod +x scripts/ntp-wait scripts/ntpver scripts/mkver]], [])
 AC_OUTPUT
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

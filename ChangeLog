@@ -1,5 +1,10 @@
 2000-02-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/Makefile.am (noinst_SCRIPTS): Addede ntp-wait
+
+	* configure.in: Get the path to perl
+	(AC_CONFIG_*): Added scripts/ntp-wait
+
 	* ntptrace/ntptrace.c (DoTrace): If the server's srcadr is 0.0.0.0
 	then we haven't synced yet.  Note and punt.
 	Reported by: Bdale Garbee <bdale@gag.com>,http://bugs.debian.org/56551
