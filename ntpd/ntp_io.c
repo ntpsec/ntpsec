@@ -145,7 +145,9 @@ int maxactivefd;
 static	int create_sockets	P((u_short));
 static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int));
 static	void	close_socket	P((SOCKET));
+#ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
+#endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 
@@ -1283,6 +1285,7 @@ close_socket(
  * close_file - close a file and remove from the activefd list
  * added 1/31/1997 Greg Schueman for Windows NT portability
  */
+#ifdef REFCLOCK
 static void
 close_file(
 	SOCKET fd
@@ -1308,6 +1311,7 @@ close_file(
 	delete_socket_from_list(fd);
 
 }
+#endif
 
 
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
