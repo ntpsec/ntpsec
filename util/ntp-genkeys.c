@@ -342,6 +342,9 @@ filegen_get(
  *	-v		Be verbose
  *	hostname ...	Generate keys for the listed hostnames
  *			NB: USE OF THIS IS A VIOLATION OF SECURITY PROTOCOLS
+ *
+ * Note that if multiple hostnames are specified we have to make a choice
+ * about the filenames we get by reading an ntp.conf file.
  */
 
 #define GEN_DSA		1
@@ -570,6 +573,7 @@ genthings(
 	)
 {
 	int rc = 0;
+	int i;
 
 
 	printf("Generating things for %s...\n", hostname);
@@ -587,6 +591,14 @@ genthings(
 	 */
 
 	rc |= genrest();
+
+	if (gen_certs) {
+		printf("Some requested certs were not made:\n");
+		for (i = 0; i < certlist_n; ++i) {
+			if (gen_certs & certlist[i].cert_bit)
+				printf("%s\n", certlist[i].cert_name);
+		}
+	}
 
 	/*
 	 * make the (sym)links.
@@ -837,8 +849,11 @@ genrest(
 		else
 			snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
 		str = fopen(filename, "r");
-		if (str == NULL)
+		if (str == NULL) {
+			fprintf(stderr, "fopen(%s) failed: %s\n", filename,
+				strerror(errno));
 			return (NULL);
+		}
 
 		/*
 		 * Read PEM-encoded key.
@@ -964,14 +979,6 @@ genrest(
 		}
 
 		free(pkey);
-
-		if (gen_certs) {
-			printf("Some requested certs were not made:\n");
-			for (i = 0; i < certlist_n; ++i) {
-				if (gen_certs & certlist[i].cert_bit)
-					printf("%s\n", certlist[i].cert_name);
-			}
-		}
 	}
 
 	if (gen_dh) {
