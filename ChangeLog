@@ -1,5 +1,8 @@
 2000-06-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/snprintf.c: Added stdio.h
+	From: Marc Brett <mbrett@rgs0.london.waii.com>
+
 	* include/ntp.h: struct autokey's siglen is u_int32.  So is the
 	siglen in struct cookie.  So is siglen and value length in struct
 	value. Add fstamp to struct peer.  Resize the exten AUTOKEY field
@@ -30,6 +33,15 @@
 	(crypto_dh): 
 	Do some debug logging if readlink() fails with something other
 	than EINVAL (file isn't a symlink).
+
+2000-06-04  James R. Van Zandt  <jrv@vanzandt.mv.com>
+
+	* html/miscopt.htm (trap): punctuation
+
+	* html/ntpd.htm (-g): typo
+
+	* html/miscopt.htm (logconfig): List the "clock" event class.
+	"allprefix" should be two words.
 
 2000-05-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 

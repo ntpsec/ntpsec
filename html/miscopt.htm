@@ -92,7 +92,7 @@ file. By default, all output is turned on. All
 <I><tt>configkeyword</tt></I> keywords can be prefixed with <tt>=</tt>,
 <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the
 <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages.
-<tt>syslog messages</tt> can be controlled in four classes (,
+<tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>,
 <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes
 four types of messages can be controlled.</dd>
 
@@ -102,7 +102,7 @@ information. Event messages (<tt>events</tt>) control logging of events
 controlled with the <tt>statistics</tt> keyword. The final message group
 is the status messages. This describes mainly the synchronizations
 status. Configuration keywords are formed by concatenating the message
-class with the event class. The <tt>allprefix</tt> can be used instead
+class with the event class. The <tt>all</tt> prefix can be used instead
 of a message class. A message class may also be followed by the
 <tt>all</tt> keyword to enable/disable all messages of the respective
 message class.</dd>
@@ -145,7 +145,7 @@ variables.</dd>
 <I>interface_address</I>]</tt></dt>
 <dd>This command configures a trap receiver at the given host address
 and port number for sending messages with the specified local interface
-address. If the port number is unspecified. a value of 18447 is used. If
+address. If the port number is unspecified, a value of 18447 is used. If
 the interface address is not specified, the message is sent with a
 source address of the local interface the message is sent through. Note
 that on a multihomed host the interface used may vary from time to time

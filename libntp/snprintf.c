@@ -7,6 +7,7 @@
 #else
 #include <varargs.h>
 #endif
+#include <stdio.h>
 
 #ifdef __STDC__
 int snprintf(char *str, size_t n, const char *fmt, ...)
