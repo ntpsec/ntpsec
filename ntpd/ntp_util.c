@@ -463,37 +463,26 @@ stats_config(
 void
 record_peer_stats(
 	struct sockaddr_storage *addr,
-	int status,
-	double offset,
-	double delay,
-	double dispersion,
-	double skew
+	int	status,
+	double	offset,
+	double	delay,
+	double	dispersion,
+	double	skew
 	)
 {
-	struct timeval tv;
-#ifdef HAVE_GETCLOCK
-        struct timespec ts;
-#endif
-	u_long day, sec, msec;
+	l_fp	now;
+	u_long	day;
 
 	if (!stats_control)
 		return;
-#ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
-#endif /* not HAVE_GETCLOCK */
-	day = tv.tv_sec / 86400 + MJD_1970;
-	sec = tv.tv_sec % 86400;
-	msec = tv.tv_usec / 1000;
-
-	filegen_setup(&peerstats, (u_long)(tv.tv_sec + JAN_1970));
+	get_systime(&now);
+	filegen_setup(&peerstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1970;
+	now.l_ui %= 86400;
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
-		    "%lu %lu.%03lu %s %x %.9f %.9f %.9f %.9f\n",
-		    day, sec, msec, stoa(addr), status, offset,
+		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n",
+		    day, ulfptoa(&now, 3), stoa(addr), status, offset,
 		    delay, dispersion, skew);
 		fflush(peerstats.fp);
 	}
@@ -510,36 +499,25 @@ record_peer_stats(
  */
 void
 record_loop_stats(
-	double offset,
-	double freq,
-	double jitter,
-	double stability,
+	double	offset,
+	double	freq,
+	double	jitter,
+	double	stability,
 	int spoll
 	)
 {
-	struct timeval tv;
-#ifdef HAVE_GETCLOCK
-        struct timespec ts;
-#endif
-	u_long day, sec, msec;
+	l_fp	now;
+	u_long	day;
 
 	if (!stats_control)
 		return;
-#ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
-#endif /* not HAVE_GETCLOCK */
-	day = tv.tv_sec / 86400 + MJD_1970;
-	sec = tv.tv_sec % 86400;
-	msec = tv.tv_usec / 1000;
-
-	filegen_setup(&loopstats, (u_long)(tv.tv_sec + JAN_1970));
+	get_systime(&now);
+	filegen_setup(&loopstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1970;
+	now.l_ui %= 86400;
 	if (loopstats.fp != NULL) {
-		fprintf(loopstats.fp, "%lu %lu.%03lu %.9f %.6f %.9f %.6f %d\n",
-		    day, sec, msec, offset, freq * 1e6, jitter,
+		fprintf(loopstats.fp, "%lu %s %.9f %.6f %.9f %.6f %d\n",
+		    day, ulfptoa(&now, 3), offset, freq * 1e6, jitter,
 		    stability * 1e6, spoll);
 		fflush(loopstats.fp);
 	}
@@ -560,29 +538,18 @@ record_clock_stats(
 	const char *text
 	)
 {
-	struct timeval tv;
-#ifdef HAVE_GETCLOCK
-        struct timespec ts;
-#endif
-	u_long day, sec, msec;
+	l_fp	now;
+	u_long	day;
 
 	if (!stats_control)
 		return;
-#ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
-#endif /* not HAVE_GETCLOCK */
-	day = tv.tv_sec / 86400 + MJD_1970;
-	sec = tv.tv_sec % 86400;
-	msec = tv.tv_usec / 1000;
-
-	filegen_setup(&clockstats, (u_long)(tv.tv_sec + JAN_1970));
+	get_systime(&now);
+	filegen_setup(&clockstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1970;
+	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
-		fprintf(clockstats.fp, "%lu %lu.%03lu %s %s\n",
-		    day, sec, msec, stoa(addr), text);
+		fprintf(clockstats.fp, "%lu %s %s %s\n",
+		    day, ulfptoa(&now, 3), stoa(addr), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -601,35 +568,24 @@ void
 record_raw_stats(
         struct sockaddr_storage *srcadr,
         struct sockaddr_storage *dstadr,
-	l_fp *t1,
-	l_fp *t2,
-	l_fp *t3,
-	l_fp *t4
+	l_fp	*t1,
+	l_fp	*t2,
+	l_fp	*t3,
+	l_fp	*t4
 	)
 {
-	struct timeval tv;
-#ifdef HAVE_GETCLOCK
-        struct timespec ts;
-#endif
-	u_long day, sec, msec;
+	l_fp	now;
+	u_long	day;
 
 	if (!stats_control)
 		return;
-#ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
-#endif /* not HAVE_GETCLOCK */
-	day = tv.tv_sec / 86400 + MJD_1970;
-	sec = tv.tv_sec % 86400;
-	msec = tv.tv_usec / 1000;
-
-	filegen_setup(&rawstats, (u_long)(tv.tv_sec + JAN_1970));
+	get_systime(&now);
+	filegen_setup(&rawstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1970;
+	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-                fprintf(rawstats.fp, "%lu %lu.%03lu %s %s %s %s %s %s\n",
-		    day, sec, msec, stoa(srcadr), stoa(dstadr),
+                fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n",
+		    day, ulfptoa(&now, 3), stoa(srcadr), stoa(dstadr),
 		    ulfptoa(t1, 9), ulfptoa(t2, 9), ulfptoa(t3, 9),
 		    ulfptoa(t4, 9));
 		fflush(rawstats.fp);
@@ -652,33 +608,22 @@ record_crypto_stats(
 	const char *text
 	)
 {
-	struct timeval tv;
-#ifdef HAVE_GETCLOCK
-        struct timespec ts;
-#endif
-	u_long day, sec, msec;
+	l_fp	now;
+	u_long	day;
 
 	if (!stats_control)
 		return;
-#ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
-#endif /* not HAVE_GETCLOCK */
-	day = tv.tv_sec / 86400 + MJD_1970;
-	sec = tv.tv_sec % 86400;
-	msec = tv.tv_usec / 1000;
-
-	filegen_setup(&cryptostats, (u_long)(tv.tv_sec + JAN_1970));
+	get_systime(&now);
+	filegen_setup(&cryptostats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1970;
+	now.l_ui %= 86400;
 	if (cryptostats.fp != NULL) {
 		if (addr == NULL)
-			fprintf(cryptostats.fp, "%lu %lu.%03lu %s\n",
-			    day, sec, msec, text);
+			fprintf(cryptostats.fp, "%lu %s %s\n",
+			    day, ulfptoa(&now, 3), text);
 		else
-			fprintf(cryptostats.fp, "%lu %lu.%03lu %s %s\n",
-			    day, sec, msec, stoa(addr), text);
+			fprintf(cryptostats.fp, "%lu %s %s %s\n",
+			    day, ulfptoa(&now, 3), stoa(addr), text);
 		fflush(cryptostats.fp);
 	}
 }
