@@ -344,30 +344,37 @@ SOURCE=..\libntp\messages.mc
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_acts.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arbiter.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arc.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_as2201.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_atom.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_bancomm.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_chu.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -376,6 +383,7 @@ SOURCE=..\..\..\ntpd\refclock_conf.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_datum.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -384,26 +392,32 @@ SOURCE=..\..\..\ntpd\refclock_dumbclock.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_gpsvme.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_heath.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_hpgps.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_irig.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_jupiter.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_leitch.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -412,10 +426,12 @@ SOURCE=..\..\..\ntpd\refclock_local.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_msfees.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_mx4200.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -424,6 +440,7 @@ SOURCE=..\..\..\ntpd\refclock_nmea.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_oncore.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -436,64 +453,47 @@ SOURCE=..\..\..\ntpd\refclock_palisade.h
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_parse.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_pst.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_ptbacts.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_shm.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_tpro.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_trak.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\refclock_trimbledc.c
-
-!IF  "$(CFG)" == "ntpd - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "ntpd - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\refclock_trimbledc.h
-
-!IF  "$(CFG)" == "ntpd - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "ntpd - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_true.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_usno.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_wwvb.c
+# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Group "Parse Lib"
@@ -502,47 +502,47 @@ SOURCE=..\..\..\ntpd\refclock_wwvb.c
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_computime.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_dcf7000.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_hopf6021.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_meinberg.c
-
-!IF  "$(CFG)" == "ntpd - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "ntpd - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_rawdcf.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_rcc8000.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_schmid.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_trimtaip.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\clk_trimtsip.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -552,10 +552,12 @@ SOURCE=..\..\..\libparse\data_mbg.c
 # Begin Source File
 
 SOURCE=..\..\..\libparse\parse.c
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\libparse\parse_conf.c
+# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Source File
