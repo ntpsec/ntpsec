@@ -526,13 +526,6 @@ process_private(
 		/*
 		 * So far so good.  See if decryption works out okay.
 		 */
-		printf("process_private: rbufp->recv_length %d\n",
-		    rbufp->recv_length);
-		printf("process_private: l1 %d, l2 %d, l3 %d, l4 %d\n",
-		    rbufp->recv_length - sizeof(*tailinpkt),
-		    sizeof(struct req_pkt_tail),
-		    REQ_LEN_NOMAC,
-		    (int)(rbufp->recv_length - REQ_LEN_NOMAC));
 		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
 		    rbufp->recv_length - sizeof(struct req_pkt_tail) +
 		    REQ_LEN_HDR, sizeof(struct req_pkt_tail) - REQ_LEN_HDR)) {
