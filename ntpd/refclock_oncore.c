@@ -34,18 +34,17 @@
  *  or	/etc/ntp.oncore
  * --------------------------------------------------------------------------
  * Reg.Clemens <reg@dwf.com> Sep98.
- *  Original code written for FreeBSD.
- *  With these mods it works on SunOS, Solaris (untested) and Linux
- *    (RedHat 5.1 2.0.35 + PPSKit, 2.1.126 + changes).
+ *  With these mods it works on SunOS, Solaris and Linux
+ *    (SunOS 4.1.3 + ppsclock)
+ *    (Solaris7 + MU4)
+ *    (RedHat 5.1 2.0.35 + PPSKit, 2.1.126 + or later).
  *
  *  Lat,Long,Ht, cable-delay, offset, and the ReceiverID (along with the
  *  state machine state) are printed to CLOCKSTATS if that file is enabled
  *  in /etc/ntp.conf.
  *
  * --------------------------------------------------------------------------
- */
-
-/*
+ *
  * According to the ONCORE manual (TRM0003, Rev 3.2, June 1998, page 3.13)
  * doing an average of 10000 valid 2D and 3D fixes is what the automatic
  * site survey mode does.  Looking at the output from the receiver
@@ -60,6 +59,8 @@
  * "STATUS" line in the oncore config file, which contains the most recent
  * copy of all types of messages we recognize.  This file can be mmap(2)'ed
  * by monitoring and statistics programs.
+ *
+ * See separate documentation for this option.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -142,7 +143,6 @@ struct instance {
 	int	ttyfd;		/* TTY file descriptor */
 	int	ppsfd;		/* PPS file descriptor */
 	int	statusfd;	/* Status shm descriptor */
-	u_char	*shmem;
 #ifdef HAVE_PPSAPI
 	pps_handle_t pps_h;
 	pps_params_t pps_p;
@@ -158,6 +158,10 @@ struct instance {
 
 	long	delay;		/* ns */
 	long	offset; 	/* ns */
+
+	u_char	*shmem;
+	u_int   shmem_Cb;
+	u_int   shmem_Ea;
 
 	double	ss_lat;
 	double	ss_long;
@@ -175,6 +179,7 @@ struct instance {
 	u_char	Ea[77];
 	u_char	En[70];
 	u_char	Cj[300];
+	u_char  shmem_first;
 	u_char	As;
 	u_char	Ay;
 	u_char	Az;
@@ -256,8 +261,6 @@ static struct msg_desc {
 	{ "Sz",   8,    0,              "" },
 	{ {0},	  7,	0, ""}
 };
-
-static unsigned int oncore_shmem_Cb;
 
 /*
  * Position Set.
@@ -370,7 +373,7 @@ static u_char oncore_cmd_Fa[] = { 'F', 'a' };
  */
 
 	/* to buffer, int w, u_char *buf */
-#define w32_buf(buf,w)	{ unsigned int i_tmp;		   \
+#define w32_buf(buf,w)  { u_int i_tmp;                     \
 			  i_tmp = (w<0) ? (~(-w)+1) : (w); \
 			  (buf)[0] = (i_tmp >> 24) & 0xff; \
 			  (buf)[1] = (i_tmp >> 16) & 0xff; \
@@ -517,17 +520,17 @@ oncore_start(
 			perror("ONCORE: stat pps_device");
 			return(0);
 		}
-	
+
 		/* must have hardpps ON, and fd2 must be the same device as on the pps line */
-	
+
 		if (pps_hardpps && ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))) {
 			int     i;
-	
+
 			if (instance->assert)
 				i = PPS_CAPTUREASSERT;
 			else
 				i = PPS_CAPTURECLEAR;
-	
+
 			if (i&mode) {
 				if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
 				    PPS_TSFMT_TSPEC) < 0) {
@@ -600,22 +603,29 @@ oncore_init_shmem(struct instance *instance, char *filename)
 	int i, l, n;
 	char *buf;
 	struct msg_desc *mp;
-	static unsigned int oncore_shmem_length;
+	u_int oncore_shmem_length;
 
-	if (oncore_messages[0].shmem == 0) {
-		n = 1;
-		for (mp = oncore_messages; mp->flag[0]; mp++) {
-			mp->shmem = n;
-			/* Allocate space for multiplexed almanac */
-			if (!strcmp(mp->flag, "Cb")) {
-				oncore_shmem_Cb = n;
-				n += (mp->len + 2) * 34;
-			}
-			n += mp->len + 2;
+	if (instance->shmem_first)
+		return;
+
+	instance->shmem_first++;
+	n = 1;
+	for (mp = oncore_messages; mp->flag[0]; mp++) {
+		mp->shmem = n;
+		/* Allocate space for multiplexed almanac */
+		if (!strcmp(mp->flag, "Cb")) {
+			instance->shmem_Cb = n;
+			n += (mp->len + 3) * 34;
 		}
-		oncore_shmem_length = n + 2;
-		fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", oncore_shmem_length);
+		if (!strcmp(mp->flag, "Ea")) {
+			instance->shmem_Ea = n;
+			n += (mp->len + 3) * 3;
+		}
+		n += mp->len + 3;
 	}
+	oncore_shmem_length = n + 2;
+	fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", oncore_shmem_length);
+
 	instance->statusfd = open(filename, O_RDWR|O_CREAT|O_TRUNC, 0644);
 	if (instance->statusfd < 0) {
 		perror(filename);
@@ -633,7 +643,7 @@ oncore_init_shmem(struct instance *instance, char *filename)
 		exit(4);
 	}
 	free(buf);
-	instance->shmem = (u_char *) mmap(0, oncore_shmem_length, 
+	instance->shmem = (u_char *) mmap(0, oncore_shmem_length,
 	    PROT_READ | PROT_WRITE,
 #ifdef MAP_HASSEMAPHORE
 			       MAP_HASSEMAPHORE |
@@ -649,18 +659,24 @@ oncore_init_shmem(struct instance *instance, char *filename)
 		l = mp->shmem;
 		instance->shmem[l + 0] = mp->len >> 8;
 		instance->shmem[l + 1] = mp->len & 0xff;
-		instance->shmem[l + 2] = '@';
+		instance->shmem[l + 2] = 0;
 		instance->shmem[l + 3] = '@';
-		instance->shmem[l + 4] = mp->flag[0];
-		instance->shmem[l + 5] = mp->flag[1];
-		if (!strcmp(mp->flag, "Cb")) {
-			for (i = 1; i < 35; i++) {
-				instance->shmem[l + i * 35 + 0] = mp->len >> 8;
-				instance->shmem[l + i * 35 + 1] = mp->len & 0xff;
-				instance->shmem[l + i * 35 + 2] = '@';
-				instance->shmem[l + i * 35 + 3] = '@';
-				instance->shmem[l + i * 35 + 4] = mp->flag[0];
-				instance->shmem[l + i * 35 + 5] = mp->flag[1];
+		instance->shmem[l + 4] = '@';
+		instance->shmem[l + 5] = mp->flag[0];
+		instance->shmem[l + 6] = mp->flag[1];
+		if (!strcmp(mp->flag, "Cb") || !strcmp(mp->flag, "Ea")) {
+			if (!strcmp(mp->flag, "Cb"))
+				n = 35;
+			else
+				n = 4;
+			for (i = 1; i < n; i++) {
+				instance->shmem[l + i * (mp->len+3) + 0] = mp->len >> 8;
+				instance->shmem[l + i * (mp->len+3) + 1] = mp->len & 0xff;
+				instance->shmem[l + i * (mp->len+3) + 2] = 0;
+				instance->shmem[l + i * (mp->len+3) + 3] = '@';
+				instance->shmem[l + i * (mp->len+3) + 4] = '@';
+				instance->shmem[l + i * (mp->len+3) + 5] = mp->flag[0];
+				instance->shmem[l + i * (mp->len+3) + 6] = mp->flag[1];
 			}
 		}
 	}
@@ -1041,9 +1057,11 @@ oncore_consume(
 		for (i = 2; i < l-3; i++)
 			j ^= rcvbuf[i];
 		if (j == rcvbuf[l-3]) {
-			if (instance->shmem != NULL) 
-				memcpy(instance->shmem + oncore_messages[m].shmem + 2,
+			if (instance->shmem != NULL) {
+				instance->shmem[oncore_messages[m].shmem + 2]++;
+				memcpy(instance->shmem + oncore_messages[m].shmem + 3,
 				    rcvbuf, l);
+			}
 			oncore_msg_any(instance, rcvbuf, (unsigned) (l-3), m);
 			if (oncore_messages[m].handler)
 				oncore_messages[m].handler(instance, rcvbuf, (unsigned) (l-3));
@@ -1150,8 +1168,9 @@ oncore_msg_Cb(
 		i = buf[5] + 23;
 	else
 		i = 34;
-	i *= 35;
-	memcpy(instance->shmem + oncore_shmem_Cb + i + 2, buf, len + 3);
+	i *= 36;
+	instance->shmem[instance->shmem_Cb + i + 2]++;
+	memcpy(instance->shmem + instance->shmem_Cb + i + 3, buf, len + 3);
 }
 
 /*
@@ -1339,6 +1358,23 @@ oncore_msg_Ea(
 
 	memcpy(instance->Ea, buf, len);
 
+	if (instance->shmem) {
+		int     i;
+
+		i = 0;
+		if (instance->Ea[72]&010)       /* 0D, Position Hold */
+			i = 1;
+		else if (instance->Ea[72]&020)  /* 2D, Altitude Hold */
+			i = 2;
+		else if (instance->Ea[72]&040)  /* 3D fix */
+			i = 3;
+		if (i) {
+			i *= 79;
+			instance->shmem[instance->shmem_Ea + i + 2]++;
+			memcpy(instance->shmem + instance->shmem_Ea + i + 3, buf, len + 3);
+		}
+	}
+
 	/* When we have an almanac, start the En messages */
 
 	if (instance->o_state == ONCORE_ALMANAC) {
@@ -1397,6 +1433,26 @@ oncore_msg_Ea(
 	instance->pp->minute = buf[9];
 	instance->pp->second = buf[10];
 
+#if 1
+	/* every 15s, steal one 'tick' to get 3D posn */
+
+	if (instance->site_survey != ONCORE_SS_SW) { /* dont screw up the HWSS by changing mode */
+		static int reset;
+
+		if (instance->pp->second%15 == 3) {     /* start the sequence */
+			reset = 1;
+			oncore_cmd_At[2] = 0;
+			oncore_sendmsg(instance->ttyfd, oncore_cmd_At,  sizeof oncore_cmd_At);
+		} else if (reset) {
+			reset = 0;
+			oncore_cmd_At[2] = 1;
+			oncore_sendmsg(instance->ttyfd, oncore_cmd_At,  sizeof oncore_cmd_At);
+		}
+
+		if ((instance->site_survey == ONCORE_SS_DONE) && !(instance->Ea[72]&010))
+			return;
+	}
+#endif
 	if (instance->site_survey != ONCORE_SS_SW)
 		return;
 
@@ -1481,6 +1537,8 @@ oncore_msg_En(
 #endif
 #endif	/* ! HAVE_PPS_API */
 
+	if ((instance->site_survey == ONCORE_SS_DONE) && !(instance->Ea[72]&010))
+		return;
 	if (instance->o_state != ONCORE_RUN)
 		return;
 

@@ -1,3 +1,8 @@
+2000-01-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c: Patches/improvements
+	From: Reg Clemens <reg@dwf.com>
+	
 2000-01-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99c
