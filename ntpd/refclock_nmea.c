@@ -208,14 +208,14 @@ nmea_receive(
 	 */
 #define GPRMC	0
 #define GPXXX	1
-#define GPGCA	2
+#define GPGGA	2
 	cp = pp->a_lastcode;
 	cmdtype=0;
 	if(strncmp(cp,"$GPRMC",6)==0) {
 		cmdtype=GPRMC;
 	}
 	else if(strncmp(cp,"$GPGGA",6)==0) {
-		cmdtype=GPGCA;
+		cmdtype=GPGGA;
 	}
 	else if(strncmp(cp,"$GPXXX",6)==0) {
 		cmdtype=GPXXX;
@@ -225,7 +225,7 @@ nmea_receive(
 
 	switch( cmdtype ) {
 	    case GPRMC:
-	    case GPGCA:
+	    case GPGGA:
 		/*
 		 *	Check time code format of NMEA
 		 */
@@ -245,10 +245,21 @@ nmea_receive(
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
-		dp = field_parse(cp,2);
-		if( dp[0] != 'A')  {
-			refclock_report(peer, CEVNT_BADREPLY);
-			return;
+		switch( cmdtype ) {
+		    case GPRMC:
+			dp = field_parse(cp,2);
+			if( dp[0] != 'A')  {
+			    refclock_report(peer, CEVNT_BADREPLY);
+			    return;
+			}
+			break;
+		    case GPGGA:
+			dp = field_parse(cp,6);
+			if( dp[0] == '0')  {
+			    refclock_report(peer, CEVNT_BADREPLY);
+			    return;
+			}
+			break;
 		}
 		break;
 	    case GPXXX:
@@ -258,7 +269,7 @@ nmea_receive(
 
 	}
 
-	if (cmdtype ==GPGCA) {
+	if (cmdtype ==GPGGA) {
 		/* only time */
 		time_t tt = time(NULL);
 		struct tm * t = gmtime(&tt);
@@ -308,8 +319,20 @@ nmea_receive(
 	pp->minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
 	pp->second = ((dp[4] - '0') * 10) + dp[5] - '0';
 	pp->msec = 0; 
+	if (dp[6] == '.') {
+		if (isdigit((int)dp[7])) {
+			pp->msec += (dp[7] - '0') * 100;
+			if (isdigit((int)dp[8])) {
+				pp->msec += (dp[8] - '0') * 10;
+				if (isdigit((int)dp[9])) {
+					pp->msec += (dp[9] - '0');
+				}
+			}
+		}
+	}
 
-	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59) {
+	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59 
+	 || pp->msec > 1000) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}

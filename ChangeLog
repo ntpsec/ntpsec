@@ -1,5 +1,9 @@
 2000-02-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_nmea.c: Correctly interpret the quality indicator.
+	Deal with the time suppliedin centiseconds.  GPGCA/GPGGA cleanup.
+	From: Andrew Hood <ajhood@fl.net.au>
+
 	* libparse/Makefile.am (K_CFLAGS): Use instead.  Add NEED_NTP_BOPS.
 
 2000-02-10  Harlan Stenn  <stenn@whimsy.udel.edu>
