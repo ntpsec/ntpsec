@@ -325,13 +325,15 @@ case "$host" in
 esac
 AC_CHECK_HEADERS(sys/ipc.h)
 AC_CHECK_HEADERS(sys/lock.h sys/mman.h sys/modem.h sys/param.h sys/ppsclock.h)
-AC_CHECK_HEADERS(sys/ppstime.h sys/proc.h sys/resource.h sys/sched.h)
+# HMS: Check sys/proc.h and sys/resource.h after some others
+AC_CHECK_HEADERS(sys/ppstime.h sys/sched.h)
 case "$host" in
  *-*-sco*)
     AC_CHECK_HEADERS(sys/sio.h)
     ;;
 esac
-AC_CHECK_HEADERS(sys/select.h sys/shm.h sys/signal.h sys/sockio.h)
+# HMS: Check sys/shm.h after some others
+AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
 case "$host" in
  *-*-netbsd*) ;;
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
@@ -376,6 +378,30 @@ dnl #if HAVE_SYS_SOCKET_H
 dnl # include <sys/socket.h>
 dnl #endif
 dnl ])
+
+AC_CHECK_HEADERS(sys/proc.h, [], [],
+[#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+])
+
+AC_CHECK_HEADERS(sys/resource.h, [], [],
+[#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+])
+
+AC_CHECK_HEADERS(sys/shm.h, [], [],
+[#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_SYS_IPC_H
+# include <sys/ipc.h>
+#endif
+])
 
 AC_CHECK_HEADERS(resolv.h, [], [],
 [#if HAVE_SYS_TYPES_H
