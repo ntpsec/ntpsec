@@ -1,5 +1,7 @@
 1999-11-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98d
+
 	* ntpd/refclock_parse.c: Cleanup/fixes
 	From: John Hay <jhay@mikom.csir.co.za>
 
