@@ -60,7 +60,6 @@ try_proto(int domain) {
 	}
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
@@ -83,7 +82,6 @@ try_proto(int domain) {
 	}
 #endif
 #endif
-#endif
 
 	closesocket(s);
 
@@ -94,10 +92,8 @@ static void
 initialize_action(void) {
 	ipv4_result = try_proto(PF_INET);
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	ipv6_result = try_proto(PF_INET6);
-#endif
 #endif
 #endif
 }

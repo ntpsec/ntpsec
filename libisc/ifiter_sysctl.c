@@ -182,6 +182,13 @@ internal_current(isc_interfaceiter_t *iter) {
 		if ((ifam->ifam_flags & IFF_LOOPBACK) != 0)
 			iter->current.flags |= INTERFACE_F_LOOPBACK;
 
+		if ((ifam->ifam_flags & IFF_BROADCAST) != 0) {
+			iter->current.flags |= INTERFACE_F_BROADCAST;
+		}
+
+		if ((ifam->ifam_flags & IFF_MULTICAST) != 0) {
+			iter->current.flags |= INTERFACE_F_MULTICAST;
+		}
 		/*
 		 * This is not an interface address.
 		 * Force another iteration.
@@ -250,6 +257,9 @@ internal_current(isc_interfaceiter_t *iter) {
 		if (dst_sa != NULL &&
 		    (iter->current.flags & IFF_POINTOPOINT) != 0)
 			get_addr(family, &iter->current.dstaddress, dst_sa);
+		if (dst_sa != NULL &&
+		    (iter->current.flags & IFF_BROADCAST) != 0)
+			get_addr(family, &iter->current.broadcast, dst_sa);
 
 		return (ISC_R_SUCCESS);
 	} else {

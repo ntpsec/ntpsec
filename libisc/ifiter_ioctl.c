@@ -38,6 +38,7 @@
 #define lifr_addr iflr_addr
 #define lifr_name iflr_name
 #define lifr_dstaddr iflr_dstaddr
+#define lifr_broadaddr iflr_broadaddr
 #define lifr_flags iflr_flags
 #define ss_family sa_family
 #define LIFREQ if_laddrreq
@@ -449,6 +450,14 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
+	if ((ifreq.ifr_flags & IFF_BROADCAST) != 0) {
+		iter->current.flags |= INTERFACE_F_BROADCAST;
+	}
+
+	if ((ifreq.ifr_flags & IFF_MULTICAST) != 0) {
+		iter->current.flags |= INTERFACE_F_MULTICAST;
+	}
+
 #if !defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
 	if (family == AF_INET) 
 		goto inet;
@@ -512,6 +521,27 @@ internal_current4(isc_interfaceiter_t *iter) {
 			 (struct sockaddr *)&ifreq.ifr_dstaddr);
 	}
 
+	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
+		/*
+		 * Ignore the HP/UX warning about "interger overflow during
+		 * conversion.  It comes from its own macro definition,
+		 * and is really hard to shut up.
+		 */
+		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&ifreq)
+		    < 0) {
+			isc__strerror(errno, strbuf, sizeof(strbuf));
+			UNEXPECTED_ERROR(__FILE__, __LINE__,
+				isc_msgcat_get(isc_msgcat,
+					       ISC_MSGSET_IFITERIOCTL,
+					       ISC_MSG_GETDESTADDR,
+					       "%s: getting "
+					       "broadcast address: %s"),
+					 ifreq.ifr_name, strbuf);
+			return (ISC_R_IGNORE);
+		}
+		get_addr(family, &iter->current.broadcast,
+			 (struct sockaddr *)&ifreq.ifr_broadaddr);
+	}
 	/*
 	 * Get the network mask.
 	 */
@@ -618,6 +648,14 @@ internal_current6(isc_interfaceiter_t *iter) {
 	if ((lifreq.lifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
+	if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
+		iter->current.flags |= INTERFACE_F_BROADCAST;
+	}
+
+	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
+		iter->current.flags |= INTERFACE_F_MULTICAST;
+	}
+
 	/*
 	 * If the interface is point-to-point, get the destination address.
 	 */
@@ -641,6 +679,28 @@ internal_current6(isc_interfaceiter_t *iter) {
 		}
 		get_addr(family, &iter->current.dstaddress,
 			 (struct sockaddr *)&lifreq.lifr_dstaddr);
+	}
+
+	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
+		/*
+		 * Ignore the HP/UX warning about "interger overflow during
+		 * conversion.  It comes from its own macro definition,
+		 * and is really hard to shut up.
+		 */
+		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
+		    < 0) {
+			isc__strerror(errno, strbuf, sizeof(strbuf));
+			UNEXPECTED_ERROR(__FILE__, __LINE__,
+				isc_msgcat_get(isc_msgcat,
+					       ISC_MSGSET_IFITERIOCTL,
+					       ISC_MSG_GETDESTADDR,
+					       "%s: getting "
+					       "broadcast address: %s"),
+					 lifreq.lifr_name, strbuf);
+			return (ISC_R_IGNORE);
+		}
+		get_addr(family, &iter->current.broadcast,
+			 (struct sockaddr *)&lifreq.lifr_broadaddr);
 	}
 
 	/*

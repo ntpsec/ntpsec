@@ -259,16 +259,10 @@ internal_current(isc_interfaceiter_t *iter, int family) {
 
 	if ((flags & IFF_BROADCAST) != 0) {
 		iter->current.flags |= INTERFACE_F_BROADCAST;
-//		sprintf(iter->current.name, "Broadcast Interface %d",
-//			iter->numIF);
-//		ifNamed = TRUE;
 	}
 
 	if ((flags & IFF_MULTICAST) != 0) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
-//		sprintf(iter->current.name, "Multicast Interface %d",
-//			iter->numIF);
-//		ifNamed = TRUE;
 	}
 
 	/*
