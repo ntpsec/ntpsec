@@ -2024,28 +2024,15 @@ findinterface(
 		 * we have a match on the outgoing interface
 		 */
 		if (addr->ss_family == AF_INET) {
-			laddr = htonl(((struct sockaddr_in*)addr)->sin_addr.s_addr);
-			maddr = ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr;
-			iaddr = ((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr;
+			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+			imask = (((struct sockaddr_in*)&inter_list[i].sin)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
 
-			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-			imask = (((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-/*
-			if ((((struct sockaddr_in*)&addr)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr) ==
-			     (((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr))
-*/
 			if (amask == imask)
 			     return (&inter_list[i]);
 		}
 	}
-
-
 
 	saddrlen = SOCKLEN(addr);
 	ind = find_addr_in_list(addr);

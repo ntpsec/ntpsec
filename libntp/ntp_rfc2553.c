@@ -70,17 +70,17 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <sys/socket.h>
-#include "ntp_rfc2553.h"
+#include <isc/net.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <netdb.h>
+#include "ntp_rfc2553.h"
 
 #include "ntpd.h"
 #include "ntp_malloc.h"
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
-#include <isc/net.h>
 
 #ifdef ISC_PLATFORM_NEEDIN6ADDRANY
 
@@ -124,6 +124,7 @@ getaddrinfo (const char *nodename, const char *servname,
 	int rval;
 	struct addrinfo *ai;
 	struct sockaddr_in *sockin;
+	short ntpport = htons(NTP_PORT);
 
 	ai = calloc(sizeof(struct addrinfo), 1);
 	if (ai == NULL)
@@ -142,24 +143,21 @@ getaddrinfo (const char *nodename, const char *servname,
 			freeaddrinfo(ai);
 			return (EAI_MEMORY);
 		}
-		ai->ai_family = AF_INET;
 		ai->ai_addrlen = sizeof(struct sockaddr_storage);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
-		sockin->sin_family = AF_INET;
+		sockin->sin_family = ai->ai_family;
 		sockin->sin_addr.s_addr = htonl(INADDR_ANY);
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
 #endif
 	}
 	if (servname != NULL) {
-		ai->ai_family = AF_INET;
 		ai->ai_socktype = SOCK_DGRAM;
 		if (strcmp(servname, "ntp") != 0) {
 			freeaddrinfo(ai);
 			return (EAI_SERVICE);
 		}
-		sockin = (struct sockaddr_in *)ai->ai_addr;
-		sockin->sin_port = htons(NTP_PORT);
+		memcpy(ai->ai_addr->sa_data, &ntpport, sizeof(short));
 	}
 	*res = ai;
 	return (0);
@@ -225,29 +223,36 @@ do_nodename(
 	 */
 	if(strchr(nodename, ':') != NULL) {
 		if (inet_pton(AF_INET6, nodename,
-		    (struct sockaddr_storage *)ai->ai_addr) == 1) {
+		    &((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr) == 1) {
+			((struct sockaddr_in6 *)ai->ai_addr)->sin6_family = AF_INET6;
 			ai->ai_family = AF_INET6;
 			ai->ai_addrlen = sizeof(struct sockaddr_in6);
 			return (0);
 		}
 	}
 
-	if (hints != NULL && hints->ai_flags & AI_NUMERICHOST) {
-		if (inet_pton(AF_INET, nodename,
-		    (struct sockaddr_storage *)ai->ai_addr) == 1) {
-			ai->ai_family = AF_INET;
-			ai->ai_addrlen = sizeof(struct sockaddr_in);
-			return (0);
-		}
-		return (EAI_NONAME);
+	/*
+	 * See if we have an IPv4 address
+	 */
+	if (inet_pton(AF_INET, nodename,
+	    &((struct sockaddr_in *)ai->ai_addr)->sin_addr) == 1) {
+		((struct sockaddr *)ai->ai_addr)->sa_family = AF_INET;
+		ai->ai_family = AF_INET;
+		ai->ai_addrlen = sizeof(struct sockaddr_in);
+		return (0);
 	}
+
+	/*
+	 * Look for a name
+	 */
 	hp = gethostbyname(nodename);
 	if (hp == NULL) {
 		if (h_errno == TRY_AGAIN)
 			return (EAI_AGAIN);
 		else {
 			if (inet_pton(AF_INET, nodename,
-			    (struct sockaddr_storage *)ai->ai_addr) == 1) {
+			    &((struct sockaddr_in *)ai->ai_addr)->sin_addr) == 1) {
+				((struct sockaddr *)ai->ai_addr)->sa_family = AF_INET;
 				ai->ai_family = AF_INET;
 				ai->ai_addrlen = sizeof(struct sockaddr_in);
 				return (0);

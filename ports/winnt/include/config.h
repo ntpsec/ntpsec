@@ -49,6 +49,7 @@
 /* Enable OpenSSL */
 #define OPENSSL 1
 
+#define isascii __isascii
 #define finite _finite
 # define random      rand
 # define srandom     srand

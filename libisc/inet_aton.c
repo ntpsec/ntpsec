@@ -81,9 +81,6 @@ static char rcsid[] = "$Id: inet_aton.c,v 1.15.12.3 2004/03/08 09:04:49 marka Ex
 #include <isc/types.h>
 #include <isc/net.h>
 
-#ifdef SYS_WINNT
-#define isascii __isascii
-#endif
 /*
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
