@@ -3597,8 +3597,7 @@ crypto_tai(
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
 	char	*ptr;
-	int	rval;
-	u_int	i;
+	int	rval, i;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
 	struct timex ntv;	/* kernel interface structure */
