@@ -45,11 +45,6 @@
 /*
  * Function prototypes
  */
-#ifndef NTP_SYSCALLS_LIBC
-# ifdef DECL_SYSCALL
-extern int syscall	P((int, void *, ...));
-# endif /* DECL_SYSCALL */
-#endif /* NTP_SYSCALLS_LIBC */
 char *sprintb		P((u_int, const char *));
 const char *timex_state	P((int));
 volatile int debug = 0;
