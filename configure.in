@@ -645,10 +645,13 @@ case "$host" in
     # Just a stub.  Idiots.
     ;;
  *-*-irix*)
-    # Just stubs in Irix.  Idiots.
+    # Just a stub in Irix.  Idiots.
+    ;;
+ *-*-qnx*)
+    # Apparently there but not working in QNX.  Idiots?
     ;;
  *-*-sco3.2v5.0.*)
-    # Just stubs.  Idiots.
+    # Just a stub.  Idiots.
     ;;
  alpha*-dec-osf4*|alpha*-dec-osf5*)
     # mlockall is there, as a #define calling memlk via <sys/mman.h>
