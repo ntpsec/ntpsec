@@ -3531,6 +3531,22 @@ case "$ac_cv_header_sys_sysctl_h" in
     ;;
 esac
 
+#
+# Look for a sysctl call to get the list of network interfaces.
+#
+AC_MSG_CHECKING(for interface list sysctl)
+AC_EGREP_CPP(found_rt_iflist, [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/socket.h>
+#ifdef NET_RT_IFLIST  
+found_rt_iflist
+#endif
+],
+        [AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_IFLIST_SYSCTL)],
+        [AC_MSG_RESULT(no)])
+
 case "$build" in
  $host)
     ;;
