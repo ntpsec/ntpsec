@@ -1639,10 +1639,11 @@ crypto_ident(
 	/*
 	 * If the server identity has already been verified, no further
 	 * action is necessary. Otherwise, try to load the identity file
-	 * containing the scheme parameters. If the file does not exist,
-	 * not to worry. Note we can't get here unless the trusted
-	 * certificate has been found and the CRYPTO_FLAG_VALID bit is
-	 * set, so the certificate issuer is valid.
+	 * of the certificate issuer. If the issuer file is not found,
+	 * try the host file. If nothing found, declare a cryptobust.
+	 * Note we can't get here unless the trusted certificate has
+	 * been found and the CRYPTO_FLAG_VALID bit is set, so the
+	 * certificate issuer is valid.
 	 */
 	if (peer->crypto & CRYPTO_FLAG_VRFY)
 		return (0);
@@ -1655,6 +1656,12 @@ crypto_ident(
 		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_GQ);
+
+		snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
+		    sys_hostname);
+		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_GQ);
 	}
 	if (peer->crypto & CRYPTO_FLAG_IFF) {
 		snprintf(filename, MAXFILENAME, "ntpkey_iff_%s",
@@ -1662,10 +1669,22 @@ crypto_ident(
 		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_IFF);
+
+		snprintf(filename, MAXFILENAME, "ntpkey_iff_%s",
+		    sys_hostname);
+		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_IFF);
 	}
 	if (peer->crypto & CRYPTO_FLAG_MV) {
 		snprintf(filename, MAXFILENAME, "ntpkey_mv_%s",
 		    peer->issuer);
+		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_MV);
+
+		snprintf(filename, MAXFILENAME, "ntpkey_mv_%s",
+		    sys_hostname);
 		peer->ident_pkey = crypto_key(filename, &peer->fstamp);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_MV);
@@ -2190,7 +2209,7 @@ crypto_iff(
 	DSA_SIG	*sdsa;		/* DSA parameters */
 	BIGNUM	*bn, *bk;
 	u_int	len;
-	u_char	*ptr;
+	const u_char *ptr;
 	int	temp;
 
 	/*
@@ -2202,7 +2221,8 @@ crypto_iff(
 		return (XEVNT_PUB);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
-		msyslog(LOG_INFO, "crypto_iff: invalid filestamp");
+		msyslog(LOG_INFO, "crypto_iff: invalid filestamp %u",
+		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
@@ -2477,7 +2497,7 @@ crypto_gq(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	DSA_SIG	*sdsa;		/* RSA signature context fake */
 	BIGNUM	*y, *v;
-	u_char	*ptr;
+	const u_char *ptr;
 	u_int	len;
 	int	temp;
 
@@ -2490,7 +2510,8 @@ crypto_gq(
 		return (XEVNT_PUB);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
-		msyslog(LOG_INFO, "crypto_gq: invalid filestamp");
+		msyslog(LOG_INFO, "crypto_gq: invalid filestamp %u",
+		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((rsa = peer->ident_pkey->pkey.rsa) == NULL) {
@@ -2794,7 +2815,7 @@ crypto_mv(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	BIGNUM	*k, *u, *v;
 	u_int	len;
-	u_char	*ptr;
+	const u_char *ptr;
 	int	temp;
 
 	/*
@@ -2806,7 +2827,8 @@ crypto_mv(
 		return (XEVNT_PUB);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
-		msyslog(LOG_INFO, "crypto_mv: invalid filestamp");
+		msyslog(LOG_INFO, "crypto_mv: invalid filestamp %u",
+		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
@@ -3389,15 +3411,14 @@ crypto_key(
 	FILE	*str;		/* file handle */
 	EVP_PKEY *pkey = NULL;	/* public/private key */
 	char	filename[MAXFILENAME]; /* name of key file */
-	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
+	char	linkname[MAXFILENAME]; /* filestamp buffer) */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
-	int	rval;
 	char	*ptr;
 
 	/*
-	 * Open the key file. If the first character of the file
-	 * name is not '/', prepend the keys directory string. If
-	 * something goes wrong, abandon ship.
+	 * Open the key file. If the first character of the file name is
+	 * not '/', prepend the keys directory string. If something goes
+	 * wrong, abandon ship.
 	 */
 	if (*cp == '/')
 		strcpy(filename, cp);
@@ -3406,6 +3427,25 @@ crypto_key(
 	str = fopen(filename, "r");
 	if (str == NULL)
 		return (NULL);
+
+	/*
+	 * Read the filestamp, which is contained in the first line.
+	 */
+	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
+		msyslog(LOG_ERR, "crypto_key: no data %s\n",
+		    filename);
+		return (NULL);
+	}
+	if ((ptr = strrchr(ptr, '.')) == NULL) {
+		msyslog(LOG_ERR, "crypto_key: no filestamp %s\n",
+		    filename);
+		return (NULL);
+	}
+	if (sscanf(++ptr, "%u", fstamp) != 1) {
+		msyslog(LOG_ERR, "crypto_key: invalid timestamp %s\n",
+		    filename);
+		return (NULL);
+	}
 
 	/*
 	 * Read and decrypt PEM-encoded private key.
@@ -3419,27 +3459,11 @@ crypto_key(
 	}
 
 	/*
-	 * If a link is present, extract the filestamp from the linked
-	 * file name. If not, extract the filestamp from the file name
-	 * in the first line of the file. We don't need to check for
-	 * errors here, since the key has already been read
-	 * successfully.
+	 * Leave tracks in the cryptostats.
 	 */
-	rval = readlink(filename, linkname, MAXFILENAME - 1);
-	if (rval > 0) {
-		linkname[rval] = '\0';
-		ptr = strrchr(linkname, '.');
-	} else {
-		str = fopen(filename, "r");
-		ptr = fgets(linkname, MAXFILENAME, str);
-		fclose(str);
-		ptr = strrchr(ptr, '.');
-	}
-	if (ptr != NULL)
-		sscanf(++ptr, "%u", fstamp);
-	else
-		*fstamp = 0;
-	sprintf(statstr, "%s link %d fs %u mod %d", cp, rval, *fstamp,
+	if ((ptr = strrchr(linkname, '\n')) != NULL)
+		*ptr = '\0'; 
+	sprintf(statstr, "%s mod %d", &linkname[2],
 	    EVP_PKEY_size(pkey) * 8);
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
@@ -3474,10 +3498,9 @@ crypto_cert(
 	struct cert_info *ret; /* certificate information */
 	FILE	*str;		/* file handle */
 	char	filename[MAXFILENAME]; /* name of certificate file */
-	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
+	char	linkname[MAXFILENAME]; /* filestamp buffer */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
-	int	rval;
 	u_int	len;
 	char	*ptr;
 	char	*name, *header;
@@ -3495,6 +3518,25 @@ crypto_cert(
 	str = fopen(filename, "r");
 	if (str == NULL)
 		return (NULL);
+
+	/*
+	 * Read the filestamp, which is contained in the first line.
+	 */
+	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
+		msyslog(LOG_ERR, "crypto_cert: no data %s\n",
+		    filename);
+		return (NULL);
+	}
+	if ((ptr = strrchr(ptr, '.')) == NULL) {
+		msyslog(LOG_ERR, "crypto_cert: no filestamp %s\n",
+		    filename);
+		return (NULL);
+	}
+	if (sscanf(++ptr, "%u", &fstamp) != 1) {
+		msyslog(LOG_ERR, "crypto_cert: invalid filestamp %s\n",
+		    filename);
+		return (NULL);
+	}
 
 	/*
 	 * Read PEM-encoded certificate and install.
@@ -3515,29 +3557,16 @@ crypto_cert(
 	free(name);
 
 	/*
-	 * Extract filestamp if present.
-	 */
-	rval = readlink(filename, linkname, MAXFILENAME - 1);
-	if (rval > 0) {
-		linkname[rval] = '\0';
-		ptr = strrchr(linkname, '.');
-	} else {
-		ptr = strrchr(filename, '.');
-	}
-	if (ptr != NULL)
-		sscanf(++ptr, "%u", &fstamp);
-	else
-		fstamp = 0;
-
-	/*
 	 * Parse certificate and generate info/value structure.
 	 */
 	ret = cert_parse(data, len, fstamp);
 	free(data);
 	if (ret == NULL)
 		return (NULL);
-	sprintf(statstr, "%s 0x%x link %d fs %u len %u", cp, ret->flags,
-	    rval, fstamp, len);
+	if ((ptr = strrchr(linkname, '\n')) != NULL)
+		*ptr = '\0'; 
+	sprintf(statstr, "%s 0x%x len %u", &linkname[2], ret->flags,
+	    len);
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 	if (debug)

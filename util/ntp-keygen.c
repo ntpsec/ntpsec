@@ -375,6 +375,8 @@ main(
 		}
 	}
 
+	if (passwd1 != NULL && passwd2 == NULL)
+		passwd2 = passwd1;
 #ifdef OPENSSL
 	/*
 	 * Seed random number generator and grow weeds.
