@@ -70,6 +70,7 @@
 #endif
 
 #include <sys/types.h>
+#include <ctype.h>
 #include <sys/socket.h>
 #include "ntp_rfc2553.h"
 #ifdef HAVE_NETINET_IN_H
@@ -113,6 +114,8 @@ static char *ai_errlist[] = {
 	"Unknown error", 				/* EAI_MAX        */
 };
 
+static	int ipv4_aton P((const char *, struct sockaddr_storage *));
+
 int
 getaddrinfo (const char *nodename, const char *servname,
 	const struct addrinfo *hints, struct addrinfo **res)
@@ -126,20 +129,27 @@ getaddrinfo (const char *nodename, const char *servname,
 		return (EAI_MEMORY);
 
 	if (nodename != NULL) {
+		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
+		if (ai->ai_addr == NULL)
+			return (EAI_MEMORY);
 		hp = gethostbyname(nodename);
 		if (hp == NULL) {
 			if (h_errno == TRY_AGAIN)
 				return (EAI_AGAIN);
-			else
+			else {
+				if (ipv4_aton(nodename,
+				    (struct sockaddr_storage *)ai->ai_addr)
+				    == 1) {
+					*res = ai;
+					return (0);
+				}
 				return (EAI_FAIL);
+			}
 		}
-		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
-		if (ai->ai_addr == NULL)
-			return (EAI_MEMORY);
 		ai->ai_family = hp->h_addrtype;
 		ai->ai_addrlen = sizeof(struct sockaddr);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
-		memmove(&sockin->sin_addr, hp->h_addr, hp->h_length);
+		memcpy(&sockin->sin_addr, hp->h_addr, hp->h_length);
 		ai->ai_addr->sa_family = hp->h_addrtype;
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		ai->ai_addr->sa_len = sizeof(struct sockaddr);
@@ -217,5 +227,74 @@ gai_strerror(ecode)
 	return ai_errlist[ecode];
 }
 
+/*
+ * ipv4_aton - return a net number (this is crude, but careful)
+ */
+static int
+ipv4_aton(
+	const char *num,
+	struct sockaddr_storage *saddr
+	)
+{
+	const char *cp;
+	char *bp;
+	int i;
+	int temp;
+	char buf[80];		/* will core dump on really stupid stuff */
+	u_int32 netnum;
+	struct sockaddr_in *addr;
 
+	cp = num;
+	netnum = 0;
+	for (i = 0; i < 4; i++) {
+		bp = buf;
+		while (isdigit((int)*cp))
+			*bp++ = *cp++;
+		if (bp == buf)
+			break;
+
+		if (i < 3) {
+			if (*cp++ != '.')
+				break;
+		} else if (*cp != '\0')
+			break;
+
+		*bp = '\0';
+		temp = atoi(buf);
+		if (temp > 255)
+			break;
+		netnum <<= 8;
+		netnum += temp;
+#ifdef DEBUG
+		if (debug > 3)
+			printf("ipv4_aton %s step %d buf %s temp %d netnum %lu\n",
+			   num, i, buf, temp, (u_long)netnum);
+#endif
+	}
+
+	if (i < 4) {
+#ifdef DEBUG
+		if (debug > 3)
+			printf(
+				"ipv4_aton: \"%s\" invalid host number, line ignored\n",
+				num);
+#endif
+		return (0);
+	}
+
+	/*
+	 * make up socket address.	Clear it out for neatness.
+	 */
+	memset((void *)saddr, 0, sizeof(struct sockaddr_storage));
+	addr = (struct sockaddr_in *)saddr;
+	addr->sin_family = AF_INET;
+	addr->sin_port = htons(NTP_PORT);
+	addr->sin_addr.s_addr = htonl(netnum);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("ipv4_aton given %s, got %s (%lx)\n",
+		   num, ntoa(saddr), (u_long)netnum);
+#endif
+	return (1);
+}
 #endif /* !HAVE_IPV6 */
