@@ -470,8 +470,8 @@ printpeer(
 		       pp->ppoll, pp->hpoll, (u_long)pp->keyid, pp->version, ntohs(pp->associd));
 
 	(void) fprintf(fp,
-		       "valid %d, reach %03o, unreach %d, flash 0x%04x, ",
-		       pp->valid, pp->reach, pp->unreach, pp->flash2);
+		       "reach %03o, unreach %d, flash 0x%04x, ",
+		       pp->reach, pp->unreach, pp->flash2);
 
 	(void) fprintf(fp, "boffset %s, ttl/mode %d\n",
 		       fptoa(NTOHS_FP(pp->estbdelay), 5), pp->ttl);

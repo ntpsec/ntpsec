@@ -189,7 +189,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_REC,	RO, "rec" },		/* 19 */
 	{ CP_XMT,	RO, "xmt" },		/* 20 */
 	{ CP_REACH,	RO, "reach" },		/* 21 */
-	{ CP_VALID,	RO, "valid" },		/* 22 */
+	{ CP_VALID,	RO, "unreach" },	/* 22 */
 	{ CP_TIMER,	RO, "timer" },		/* 23 */
 	{ CP_DELAY,	RO, "delay" },		/* 24 */
 	{ CP_OFFSET,	RO, "offset" },		/* 25 */
@@ -1503,7 +1503,7 @@ ctl_putpeer(
 		break;
 
 	case CP_VALID:
-		ctl_putuint(peer_var[CP_VALID].text, peer->valid);
+		ctl_putuint(peer_var[CP_VALID].text, peer->unreach);
 		break;
 
 	case CP_TIMER:

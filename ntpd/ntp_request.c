@@ -739,7 +739,6 @@ peer_info (
 		ip->hpoll = pp->hpoll;
 		ip->precision = pp->precision;
 		ip->version = pp->version;
-		ip->valid = pp->valid;
 		ip->reach = pp->reach;
 		ip->unreach = pp->unreach;
 		ip->flash = (u_char)pp->flash;

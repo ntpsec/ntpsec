@@ -539,8 +539,8 @@ newpeer(
 	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
-	peer->minpoll = (u_char)minpoll;
-	peer->maxpoll = (u_char)maxpoll;
+	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
+	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags | (key > NTP_MAXKEY ? FLAG_SKEY : 0);
 	peer->cast_flags = cast_flags;
 	peer->ttlmax = ttl;
@@ -800,7 +800,7 @@ resetmanycast(void)
 		    peer->next) {
 			if (peer->cast_flags & MDF_ACAST) {
 				peer->ttl = 0;
-				peer_clear(peer);
+				poll_update(peer, peer->hpoll);
 			}
 		}
 	}

@@ -297,7 +297,6 @@ struct peer {
 	/*
 	 * Ephemeral state variables
 	 */
-	u_int	valid;		/* valid update counter */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
 	u_char	ttl;            /* ttl for manycast mode */

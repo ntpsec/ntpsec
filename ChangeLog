@@ -1,3 +1,31 @@
+2001-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdc/ntpdc_ops.c (printpeer): No more "valid".
+	* ntpd/ntp_request.c (peer_info): No more "valid".
+	* ntpd/ntp_refclock.c (refclock_transmit): valid/hpoll cleanup.
+	* ntpd/ntp_proto.c (transmit): valid/hpoll and peer->ttl cleanup.
+	peer->valid/oreach cleanup.
+	(receive): Call newpeer() with the pkt->ppoll, not
+	NTP_MINDPOLL (in several places).
+	In AM_NEWPASS, if we have a NULL peer, return.
+	(poll_update): Added xpoll definition, fixed oldpoll definition.
+	Algorithmic improvements.
+	* ntpd/ntp_peer.c (newpeer): Better minpoll/maxpoll
+	initialization. 
+	(resetmanycast): That's a poll_update() on an MDF_ACAST, not a
+	poll_clear().
+	* ntpd/ntp_crypto.c: include <fcntl.h>.
+	(crypto_recv): Leave the crypto_flags alone when wiggling the
+	peer-> stuff.
+	(crypto_cert): Make room for daddy.  Do a real open() on the cert
+	file.  Read the cert.  Initial hack and slash.  Better debug info.
+	* ntpd/ntp_control.c: CP_VALID now does "unreach".
+	(ctl_putpeer): Ditto.
+	* include/ntp_request.h: info_peer gets a placeholder for "valid".
+	* include/ntp_crypto.h (CRYPTO_FLAG_CERT): Comment update.
+	* include/ntp.h: Lose "valid" from struct peer.
+	From: Dave Mills.
+
 2001-03-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): hpoll calc logic cleanup.

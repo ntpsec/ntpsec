@@ -342,25 +342,21 @@ refclock_transmit(
 		 * network code.
 		 */
 		oreach = peer->reach;
-		if (oreach & 0x01)
-			peer->valid++;
-		if (oreach & 0x80)
-			peer->valid--;
-				peer->reach <<= 1;
-		if (peer->reach == 0) {
-			if (oreach != 0) {
+		peer->reach <<= 1;
+		if (!peer->reach) {
+			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 				peer_clear(peer);
 			}
 		} else {
-			if ((oreach & 0x03) == 0) {
+			if (!(oreach & 0x03)) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (peer->valid <= 2) {
+			if (!(oreach & 0x0f)) {
 				hpoll--;
-			} else if (peer->valid > NTP_SHIFT - 2)
+			} else if ((oreach & 0x0f) == 0x0f)
 				hpoll++;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NSTAGE;
@@ -575,7 +571,7 @@ refclock_receive(
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
-	if (peer->reach == 0)
+	if (!peer->reach)
 		report_event(EVNT_REACH, peer);
 	peer->reach |= 1;
 	peer->reftime = peer->org = pp->lastrec;

@@ -336,7 +336,7 @@ struct info_peer {
 	u_char hpoll;		/* peer.hpoll */
 	s_char precision;	/* peer.precision */
 	u_char version;		/* peer.version */
-	u_char valid;		/* peer.valid */
+	u_char unused8;
 	u_char reach;		/* peer.reach */
 	u_char unreach;		/* peer.unreach */
 	u_char flash;		/* old peer.flash */

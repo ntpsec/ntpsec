@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
@@ -685,7 +686,6 @@ crypto_recv(
 			}
 			peer->flash &= ~TEST10;
 			peer->flags |= FLAG_PROVEN;
-			crypto_flags |= CRYPTO_FLAG_CERT;
 			peer->crypto &= ~CRYPTO_FLAG_CERT;
 
 			/*
@@ -1626,16 +1626,14 @@ crypto_cert(
 	char *cp		/* file name */
 	)
 {
-	FILE *str;		/* file handle */
-	u_char buf[MAX_LINLEN];	/* file line buffer */
-	u_int certbuf[MAX_KEYLEN]; /* certificate */
+	u_char buf[5000];	/* file line buffer */
 	char filename[MAXFILENAME]; /* name of certificate file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
 	u_int fstamp;		/* filestamp */
 	u_int32 *pp;
 	u_int len;
 	char *rptr;
-	int rval, i;
+	int rval, fd;
 
 	/*
 	 * Open the file and discard comment lines. If the first
@@ -1648,8 +1646,8 @@ crypto_cert(
 		strcpy(filename, cp);
 	else
 		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
-	str = fopen(filename, "r");
-	if (str == NULL) {
+	fd = open(filename, O_RDONLY, 0777);
+	if (fd <= 0) {
 		msyslog(LOG_INFO,
 		    "crypto: certificate file %s not found",
 		    filename);
@@ -1658,28 +1656,12 @@ crypto_cert(
 
 	/*
 	 * We are rather paranoid here, since an intruder might cause a
-	 * coredump by infiltrating naughty values. Empty lines and
-	 * comments are ignored. Other lines must begin with two
-	 * integers followed by junk or comments. The first integer is
-	 * the NTP seconds of leap insertion, the second is the offset
-	 * of TAI relative to UTC after that insertion. The second word
-	 * must equal the initial insertion of ten seconds on 1 January
-	 * 1972 plus one second for each succeeding insertion.
+	 * coredump by infiltrating naughty values.
 	 */
-	i = 0;
 	rval = RV_OK;
-	while (i < MAX_LEAP) {
-		rptr = fgets(buf, MAX_LINLEN - 1, str);
-		if (rptr == NULL)
-			break;
-		if (strlen(buf) < 1)
-			continue;
-		if (*buf == '#')
-			continue;
-		i++;
-	}
-	fclose(str);
-	if (rval != RV_OK || i == 0) {
+	len = read(fd, buf, 5000);
+	close(fd);
+	if (rval != RV_OK) {
 		msyslog(LOG_ERR,
 		    "crypto: certificate file %s error %d", cp,
 		    rval);
@@ -1689,13 +1671,10 @@ crypto_cert(
 	/*
 	 * The extension field entry consists of the raw certificate.
 	 */
-	len = i * 4;
-	certif.vallen = htonl(len);
+	certif.vallen = htonl(200);	/* xxxxxxxxxxxxxxxxxx */
 	pp = emalloc(len);
 	certif.ptr = (u_char *)pp;
-	for (; i >= 0; i--) {
-		*pp++ = htonl(certbuf[i]);
-	}
+	memcpy(pp, buf, len);
 	certif.sig = emalloc(private_key.bits / 8);
 	crypto_flags |= CRYPTO_FLAG_CERT;
 
@@ -1717,8 +1696,8 @@ crypto_cert(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_cert: certif file %s link %d fs %u\n",
-		    cp, rval, fstamp);
+		    "crypto_cert: certif file %s link %d fs %u len %d\n",
+		    cp, rval, fstamp, len);
 #endif
 }
 

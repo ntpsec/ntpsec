@@ -132,14 +132,10 @@ transmit(
 			 * ttl to the lowest practical value and avoid
 			 * knocking on spurious doors.
 			 */
-			if (sys_survivors < NTP_MINCLOCK) {
-				if (peer->ttl < peer->ttlmax)
-					peer->ttl++;
-				else
-					hpoll++;
-			} else {
-				hpoll = sys_poll;
-			}
+			if (sys_survivors < NTP_MINCLOCK && peer->ttl <
+			    peer->ttlmax)
+				peer->ttl++;
+			hpoll = sys_poll;
 #endif /* AUTOKEY */
 		} else {
 
@@ -165,10 +161,6 @@ transmit(
 			}
 		}
 		oreach = peer->reach;
-		if (oreach & 0x01)
-			peer->valid++;
-		if (oreach & 0x80)
-			peer->valid--;
 		peer->reach <<= 1;
 		if (peer->reach == 0) {
 
@@ -204,7 +196,7 @@ transmit(
 			 * minimum. This is to quickly recover the time
 			 * variables when a noisy peer shows life.
 			 */
-			if ((peer->reach & 0x03) == 0) {
+			if (!(peer->reach & 0x03)) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
@@ -620,7 +612,7 @@ receive(
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST |
+		    pkt->ppoll, NTP_MAXDPOLL, FLAG_IBURST |
 		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
 		    MDF_UCAST, 0, skeyid);
 		if (peer == NULL)
@@ -641,8 +633,10 @@ receive(
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    NTP_MINDPOLL, NTP_MAXDPOLL, sys_authenticate ?
+	 	    pkt->ppoll, NTP_MAXDPOLL, sys_authenticate ?
 		    FLAG_AUTHENABLE : 0, MDF_UCAST, 0, skeyid);
+		if (peer == NULL)
+			return;
 		break;
 
 	case AM_NEWBCL:
@@ -660,12 +654,11 @@ receive(
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
+		    pkt->ppoll, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST | (sys_authenticate ?
 		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
 		if (peer == NULL)
 			return;
-
 		break;
 
 	case AM_POSSBCL:
@@ -796,7 +789,7 @@ receive(
 		 */
 		if (!(peer->flags & FLAG_PROVEN))
 			peer->flash |= TEST11;
-		if (peer->flash && peer->reach != 0) {
+		if (peer->flash && peer->reach) {
 #ifdef DEBUG
 			if (debug)
 				printf("packet: bad autokey %03x\n",
@@ -933,7 +926,7 @@ process_packet(
 	peer->rootdispersion = p_disp;
 	peer->refid = pkt->refid;
 	peer->reftime = p_reftime;
-	if (peer->reach == 0) {
+	if (!(peer->reach)) {
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
 	}
@@ -1099,8 +1092,9 @@ poll_update(
 	int hpoll
 	)
 {
+	int xpoll;
 #ifdef AUTOKEY
-	long oldpoll;
+	int oldpoll;
 #endif /* AUTOKEY */
 
 #ifdef AUTOKEY
@@ -1109,25 +1103,28 @@ poll_update(
 
 	/*
 	 * A little foxtrot to determine what controls the poll
-	 * interval. If the peer is reachable, but less than half the
-	 * polls have been answered, use the minimum. If reachable and
-	 * declared truechimer, use the system poll interval. In other
-	 * cases use the argument set by the transmit routine. This
-	 * allows each association to ramp up the poll interval for
-	 * useless sources.
+	 * interval. If the peer is reachable, but but the last four
+	 * polls have not been answered, use the minimum. If declared
+	 * truechimer, use the system poll interval. This allows each
+	 * association to ramp up the poll interval for useless sources
+	 * and to clamp it to the minimum when first starting up.
 	 */
-	if (peer->valid > 0) {
-		if (peer->valid <= NTP_SHIFT / 2)
-			hpoll = peer->minpoll;
+	xpoll = hpoll;
+	if (peer->reach) {
+		if (!(peer->reach & 0x0f))
+			xpoll = peer->minpoll;
 		else if (peer->flags & FLAG_SYSPEER)
-			peer->hpoll = sys_poll;
-	} else {
-		peer->hpoll = hpoll;
+			xpoll = sys_poll;
+#ifdef PUBKEY
+	} else if (peer->crypto && !(peer->flags & FLAG_AUTOKEY)) {
+		xpoll = peer->minpoll;
+#endif /* PUBKEY */
 	}
-	if (peer->hpoll > peer->maxpoll)
-		peer->hpoll = peer->maxpoll;
-	else if (peer->hpoll < peer->minpoll)
-		peer->hpoll = peer->minpoll;
+	if (xpoll > peer->maxpoll)
+		xpoll = peer->maxpoll;
+	else if (xpoll < peer->minpoll)
+		xpoll = peer->minpoll;
+	peer->hpoll = xpoll;
 
 	/*
 	 * Bit of adventure here. If during a burst and not timeout,
@@ -1154,7 +1151,10 @@ poll_update(
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
 	} else if (peer->cast_flags & MDF_ACAST) {
-		peer->kpoll = peer->hpoll + 3;
+		if (sys_survivors < NTP_MINCLOCK)
+			peer->kpoll = peer->hpoll;
+		else
+			peer->kpoll = peer->hpoll + 3;
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	} else {
 		peer->kpoll = max(min(peer->ppoll, peer->hpoll),
@@ -1495,7 +1495,7 @@ clock_select(void)
 			 * root distance, since the poll interval can
 			 * increase to a day and a half.
 			 */ 
-			if (peer->reach == 0 || (peer->stratum > 1 &&
+			if (!peer->reach || (peer->stratum > 1 &&
 			    peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
 			    peer->stratum >= STRATUM_UNSPEC ||

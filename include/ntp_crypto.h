@@ -14,7 +14,7 @@
  */
 #define CRYPTO_FLAG_ENAB  0x01	/* crypto enable */
 #define CRYPTO_FLAG_RSA	  0x02	/* public/private keys */
-#define CRYPTO_FLAG_CERT  0x04	/* PKI certificate */
+#define CRYPTO_FLAG_CERT  0x04	/* certificate */
 #define CRYPTO_FLAG_DH	  0x08	/* agreement parameters */
 #define CRYPTO_FLAG_TAI	  0x10	/* leapseconds table */
 
