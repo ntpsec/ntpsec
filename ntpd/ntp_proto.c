@@ -930,7 +930,7 @@ process_packet(
 		}
 	}
 	if (p_del < 0 || p_del / 2 + p_disp >= MAXDISPERSE) /* 8 */
-		peer->flash |= TEST8;		/* bad distance */
+		peer->flash |= TEST8;		/* bad peer distance */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
@@ -1013,7 +1013,7 @@ process_packet(
 	LFPTOD(&ci, p_offset);
 	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
 	    p_disp >= MAXDISPERSE)		/* 9 */
-		peer->flash |= TEST9;		/* bad synch distance */
+		peer->flash |= TEST9;		/* bad peer distance */
 
 	/*
 	 * If any flasher bits remain set at this point, abandon ship.
@@ -1643,8 +1643,8 @@ clock_select(void)
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
-		if (nlist > 1 && (low >= peer->offset ||
-			peer->offset >= high)) {
+		if (nlist > 1 && (low >= peer->offset || peer->offset >=
+		    high)) {
 			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
 			continue;
@@ -1660,10 +1660,12 @@ clock_select(void)
 		for (k = j; k > 0; k--) {
 			if (d >= synch[k - 1])
 				break;
-			synch[k] = synch[k - 1];
 			peer_list[k] = peer_list[k - 1];
+			error[k] = error[k - 1];
+			synch[k] = synch[k - 1];
 		}
 		peer_list[k] = peer;
+		error[k] = peer->jitter;
 		synch[k] = d;
 		j++;
 	}
@@ -1686,7 +1688,6 @@ clock_select(void)
 	 */
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
-		error[i] = peer->jitter;
 		if (i < NTP_CANCLOCK)
 			peer->status = CTL_PST_SEL_SELCAND;
 		else
@@ -1700,10 +1701,10 @@ clock_select(void)
 			double dtemp = 0;
 
 			for (j = nlist - 1; j > 0; j--) {
-				dtemp += 1. / synch[i];
+				dtemp += 1. / synch[j];
 				sdisp += DIFF(peer_list[i]->offset,
 				    peer_list[j]->offset) /
-				    synch[i];
+				    synch[j];
 			}
 			sdisp /= dtemp;
 			if (sdisp > sys_maxd) {
