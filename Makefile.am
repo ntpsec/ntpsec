@@ -65,6 +65,20 @@ dist-hook:
 	@find $(distdir) -type d -name CVS -print | xargs rm -rf
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 
+.warning:
+	@echo "Compiling with GCC now generates lots of new warnings."
+	@echo " "
+	@echo "Don't be concerned. They're just warnings."
+	@echo " "
+	@echo "Don't send bug reports about the warnings, either."
+	@echo " "
+	@echo "Feel free to send patches that fix these warnings, though."
+	@echo " "
+	@sleep 1
+	@touch .warning
+
+# HMS: The following seems to be a work-in-progress...
+
 CVO=`$(srcdir)/config.guess`
 
 .buildcvo:
@@ -88,18 +102,7 @@ BHOST=`(hostname || uname -n)`
 		echo " "; \
 	fi
 
-.warning:
-	@echo "Compiling with GCC now generates lots of new warnings."
-	@echo " "
-	@echo "Don't be concerned. They're just warnings."
-	@echo " "
-	@echo "Don't send bug reports about the warnings, either."
-	@echo " "
-	@echo "Feel free to send patches that fix these warnings, though."
-	@echo " "
-	@sleep 1
-	@touch .warning
-
 FRC.distwarn FRC.checkcvo FRC.checkhost:
 
-dot.emacs: FRC.distwarn
+# HMS: what was I trying to do with this?
+#dot.emacs: FRC.distwarn
