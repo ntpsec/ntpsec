@@ -605,7 +605,7 @@ struct	refclock refclock_wwv = {
  */
 static int
 wwv_start(
-	int	unit,		/* instance number (not used) */
+	int	unit,		/* instance number (used by PCM) */
 	struct peer *peer	/* peer structure pointer */
 	)
 {
@@ -623,30 +623,44 @@ wwv_start(
 	double	step;		/* codec adjustment */
 
 	/*
-	 * Open audio device
-	 */
-	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ);
-	if (fd < 0)
-		return (0);
-#ifdef DEBUG
-	if (debug)
-		audio_show();
-#endif
-
-	/*
 	 * Allocate and initialize unit structure
 	 */
 	if (!(up = (struct wwvunit *)
-	      emalloc(sizeof(struct wwvunit)))) {
-		(void) close(fd);
+	      emalloc(sizeof(struct wwvunit))))
 		return (0);
-	}
 	memset(up, 0, sizeof(struct wwvunit));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = wwv_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
+
+	/*
+	 * Set the input port and monitor gain for the next buffer.
+	 */
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		up->port = 2;
+	else
+		up->port = 1;
+	if (pp->sloppyclockflag & CLK_FLAG3)
+		up->mongain = MONGAIN;
+	else
+		up->mongain = 0;
+
+	/*
+	 * Open audio device
+	 */
+	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit,
+			up->mongain, up->port);
+	if (fd < 0) {
+		free(up);
+		return (0);
+	}
+#ifdef DEBUG
+	if (debug)
+		audio_show();
+#endif
+
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		(void)close(fd);
@@ -821,18 +835,6 @@ wwv_receive(
 		}
 		L_ADD(&up->timestamp, &up->tick);
 	}
-
-	/*
-	 * Set the input port and monitor gain for the next buffer.
-	 */
-	if (pp->sloppyclockflag & CLK_FLAG2)
-		up->port = 2;
-	else
-		up->port = 1;
-	if (pp->sloppyclockflag & CLK_FLAG3)
-		up->mongain = MONGAIN;
-	else
-		up->mongain = 0;
 }
 
 
@@ -2656,7 +2658,7 @@ wwv_gain(
 		if (up->gain < 0)
 			up->gain = 0;
 	}
-	audio_gain(up->gain, up->mongain, up->port);
+	audio_gain(up->gain);
 	up->clipcnt = 0;
 }
 
