@@ -1928,6 +1928,16 @@ case "$ntp_ok$host" in
  yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
+AC_MSG_CHECKING(for NeoClock4X receiver)
+AC_ARG_ENABLE(NEOCLOCK4X,
+    AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_NEOCLOCK4X, 1, [NeoClock4X])
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(NMEA GPS receiver)
 AC_ARG_ENABLE(NMEA,
     AC_HELP_STRING([--enable-NMEA], [+ NMEA GPS receiver]),
@@ -2149,16 +2159,6 @@ AC_ARG_ENABLE(ZYFER,
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_ZYFER, 1, [Zyfer GPStarplus])
-fi
-AC_MSG_RESULT($ntp_ok)
-
-AC_MSG_CHECKING(for NeoClock4X receiver)
-AC_ARG_ENABLE(NEOCLOCK4X,
-    AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_NEOCLOCK4X, 1, [NeoClock4X])
 fi
 AC_MSG_RESULT($ntp_ok)
 
