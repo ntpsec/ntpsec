@@ -9214,17 +9214,20 @@ echo "configure:9214: checking if we want and can make the ntptime utility" >&5
 if eval "test \"\${ac_cv_make_ntptime+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  case "$ac_cv_struct_ntptimeval_timespec$ac_cv_var_kernel_pll$target" in
- noyes*linux*)
+  case "$target" in
+ *linux*)
     ans=no
     ;;
- noyes*)
-    ans=yes
+ *) case "$ac_cv_struct_ntptimeval_timespec$ac_cv_struct_ntptimeval_tv_nsc$ac_cv_var_kernel_pll" in
+     *yes*yes)
+	ans=yes
+	;;
+     *)
+	ans=no
+	;;
+    esac
     ;;
- *)
-    ans=no
-    ;;
-esac;
+esac
 ac_cv_make_ntptime=$ans
 fi
 
@@ -9236,7 +9239,7 @@ case "$ac_cv_make_ntptime" in
 esac
 
 echo $ac_n "checking if we want UDP wildcard delivery""... $ac_c" 1>&6
-echo "configure:9240: checking if we want UDP wildcard delivery" >&5
+echo "configure:9243: checking if we want UDP wildcard delivery" >&5
 if eval "test \"\${ac_cv_var_udp_wildcard_delivery+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9315,7 +9318,7 @@ case "$host" in
 esac
 
 echo $ac_n "checking if we should always slew the time""... $ac_c" 1>&6
-echo "configure:9319: checking if we should always slew the time" >&5
+echo "configure:9322: checking if we should always slew the time" >&5
 if eval "test \"\${ac_cv_var_slew_always+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9355,7 +9358,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should step and slew the time""... $ac_c" 1>&6
-echo "configure:9359: checking if we should step and slew the time" >&5
+echo "configure:9362: checking if we should step and slew the time" >&5
 if eval "test \"\${ac_cv_var_step_slew+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9398,7 +9401,7 @@ EOF
 esac
 
 echo $ac_n "checking if ntpdate should step the time""... $ac_c" 1>&6
-echo "configure:9402: checking if ntpdate should step the time" >&5
+echo "configure:9405: checking if ntpdate should step the time" >&5
 if eval "test \"\${ac_cv_var_ntpdate_step+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9429,7 +9432,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should sync TODR clock every hour""... $ac_c" 1>&6
-echo "configure:9433: checking if we should sync TODR clock every hour" >&5
+echo "configure:9436: checking if we should sync TODR clock every hour" >&5
 if eval "test \"\${ac_cv_var_sync_todr+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9462,7 +9465,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should avoid kernel FLL bug""... $ac_c" 1>&6
-echo "configure:9466: checking if we should avoid kernel FLL bug" >&5
+echo "configure:9469: checking if we should avoid kernel FLL bug" >&5
 if eval "test \"\${ac_cv_var_kernel_fll_bug+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
