@@ -35,12 +35,15 @@ libparse/Makefile.in
 librsaref/*.h
 librsaref/Makefile.in
 ntpd/Makefile.in
+ntpd/atom.bak
+ntpd/atom.c
 ntpd/crypto.bak
 ntpd/crypto.c
 ntpd/loop.bak
 ntpd/loop.c
 ntpd/ntp_crypto.c.1
 ntpd/ntp_proto.c.1
+ntpd/ntp_proto.c.2
 ntpd/peer.bak
 ntpd/peer.c
 ntpd/precision
@@ -55,6 +58,3 @@ rsaref2
 scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
-ntpd/atom.bak
-ntpd/atom.c
-ntpd/ntp_proto.c.2
