@@ -1,5 +1,12 @@
 * OpenSSL integration
 --
+* ntpdc improvements
+* JJY driver
+* HP MPE/iX port
+* Win/NT port upgrade
+* Dynix PTX port fixes
+* Document conversion from CVS to BK
+* readline support for ntpq
 (4.1.0)
 * CERT problem fixed (99k23)
 * Huff-n-Puff filter
