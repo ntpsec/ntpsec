@@ -1911,10 +1911,10 @@ input_handler(
 
 					if (buflen < 0)
 					{
-						freerecvbuf(rb);
 						if (errno != EINTR && errno != EAGAIN) {
 							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 						}
+						freerecvbuf(rb);
 						break;
 					}
 					if(buflen == 0)
@@ -2237,8 +2237,21 @@ findbcastinter(
 #endif
 
 	i = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
-	if(i >= 0)
-	     return (&inter_list[i]);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("Found bcastinter index %d\n", i);
+#endif
+		/*
+		 * Do nothing right now
+		 * Eventually we will find the interface this
+		 * way, but until it works properly we just see
+		 * which one we got
+		 */
+/*	if(i >= 0)
+	{
+		return (&inter_list[i]);
+	}
+*/
 
 	for (i = nwilds; i < ninterfaces; i++) {
 		/*
