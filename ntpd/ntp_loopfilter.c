@@ -124,7 +124,7 @@ static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (s/s) */
 double	clock_stability;	/* clock stability (s/s) */
 u_long	pps_control;		/* last pps sample time */
-static void rstclock P((int, double)); /* state transition function */
+static void rstclock P((int, double, double)); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -178,7 +178,7 @@ init_loopfilter(void)
 	 * Initialize state variables. Initially, we expect no drift
 	 * file, so set the state to S_NSET.
 	 */
-	rstclock(S_NSET, current_time);
+	rstclock(S_NSET, current_time, 0);
 }
 
 /*
@@ -269,8 +269,7 @@ local_clock(
 		step_systime(fp_offset);
 		NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 		    msyslog(LOG_NOTICE, "time set %.6f s", fp_offset);
-		rstclock(S_TSET, peer->epoch);
-		rstclock(S_FREQ, peer->epoch);
+		rstclock(S_FREQ, peer->epoch, fp_offset);
 		return (1);
 	}
 
@@ -304,19 +303,18 @@ local_clock(
 		 * to S_FREQ state.
 		 */
 		case S_TSET:
-			rstclock(S_FREQ, peer->epoch);
-			last_offset = clock_offset = fp_offset;
-			return (0);
+			state = S_FREQ;
+			break;
 
 		/*
 		 * In S_SYNC state we ignore outlyers. At the first
-		 * outlyer after 900 s, switch to S_SPIK
+		 * outlyer after the stepout threshold, switch to S_SPIK
 		 * state.
 		 */
 		case S_SYNC:
 			if (mu < clock_minstep)
 				return (0);
-			rstclock(S_SPIK, peer->epoch);
+			state = S_SPIK;
 			return (0);
 
 		/*
@@ -327,7 +325,7 @@ local_clock(
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
-			/* fall through to default */
+			/* fall through to S_SPIK */
 
 		/*
 		 * In S_SPIK state a large correction is necessary.
@@ -350,14 +348,14 @@ local_clock(
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time reset %.6f s",
 		   		    fp_offset);
-				rstclock(S_TSET, peer->epoch);
+				rstclock(S_TSET, peer->epoch, 0);
 				retval = 1;
 			} else {
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time slew %.6f s",
 				    fp_offset);
-				rstclock(S_FREQ, peer->epoch);
-				last_offset = clock_offset = fp_offset;
+				rstclock(S_FREQ, peer->epoch,
+				    fp_offset);
 			}
 			break;
 		}
@@ -365,28 +363,25 @@ local_clock(
 		switch (state) {
 
 		/*
-		 * If this is the first update, initialize the
-		 * discipline parameters and pretend we had just set the
-		 * clock. We don't want to step the clock unless we have
-		 * to.
+		 * In S_FSET state this is the first update. Adjust the
+		 * phase, but don't adjust the frequency until the next
+		 * update.
 		 */
 		case S_FSET:
-			rstclock(S_TSET, peer->epoch);
-			last_offset = clock_offset = fp_offset;
-			return (0);
+			rstclock(S_TSET, peer->epoch, fp_offset);
+			break;
 
 		/*
-		 * In S_FREQ state we ignore updates until 900 s. After
-		 * that, correct the phase and frequency and switch to
-		 * S_SYNC state.
+		 * In S_FREQ state ignore updates until the stepout
+		 * threshold. After that, correct the phase and
+		 * frequency and switch to S_SYNC state.
 		 */
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
 			clock_frequency = (fp_offset - clock_offset) /
 			    mu;
-			clock_offset = fp_offset;
-			rstclock(S_SYNC, peer->epoch);
+			rstclock(S_SYNC, peer->epoch, fp_offset);
 			break;
 
 		/*
@@ -396,7 +391,7 @@ local_clock(
 		 */
 		case S_TSET:
 		case S_SPIK:
-			rstclock(S_SYNC, peer->epoch);
+			state = S_SYNC;
 			/* fall through to default */
 
 		/*
@@ -451,7 +446,8 @@ local_clock(
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
 			etemp = min(mu, ULOGTOD(sys_poll));
 			plladj = fp_offset * etemp / (dtemp * dtemp);
-			clock_offset = fp_offset;
+			last_time = peer->epoch;
+			last_offset = clock_offset = fp_offset;
 			break;
 		}
 	}
@@ -636,8 +632,6 @@ local_clock(
 	/*
 	 * Update the system time variables.
 	 */
-	last_time = peer->epoch;
-	last_offset = clock_offset;
 	dtemp = peer->disp + sys_jitter;
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
@@ -727,48 +721,15 @@ adj_host_clock(
 static void
 rstclock(
 	int trans,		/* new state */
-	double epoch		/* start time */
+	double epoch,		/* last time */
+	double offset		/* last offset */
 	)
 {
+	tc_counter = 0;
+	sys_poll = NTP_MINPOLL;
 	state = trans;
-	switch (state) {
-
-	/*
-	 * Frequency mode. The clock has ben set, but the frequency has
-	 * not yet been determined. Note that the Allan intercept is set
-	 * insure the clock filter considers only the most recent
-	 * measurements.
-	 */ 
-	case S_FREQ:
-		sys_poll = NTP_MINPOLL;
-		last_time = epoch;
-		break;
-
-	/*
-	 * Synchronized mode. Discipline the poll interval.
-	 */
-	case S_SYNC:
-		sys_poll = NTP_MINPOLL;
-		tc_counter = 0;
-		break;
-
-	/*
-	 * Don't do anything in S_SPIK state; just continue from S_SYNC
-	 * state.
-	 */
-	case S_SPIK:
-		break;
-
-	/*
-	 * S_NSET, S_FSET and S_TSET states. These transient states set
-	 * the time reference for future frequency updates.
-	 */
-	default:
-		sys_poll = NTP_MINPOLL;
-		last_time = epoch;
-		last_offset = clock_offset = 0;
-		break;
-	}
+	last_time = epoch;
+	last_offset = clock_offset = offset;
 }
 
 
@@ -852,7 +813,7 @@ loop_config(
 		 * S_FSET to indicated the frequency has been
 		 * initialized from the previously saved drift file.
 		 */
-		rstclock(S_FSET, current_time);
+		rstclock(S_FSET, current_time, 0);
 		drift_comp = freq;
 		if (drift_comp > NTP_MAXFREQ)
 			drift_comp = NTP_MAXFREQ;

@@ -1,3 +1,15 @@
+2001-05-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k32
+
+	* ntpd/ntp_loopfilter.c: rstclock now takes a 3rd argument, the
+	last offset.
+	(init_loopfilter): Use it.
+	(local_clock): Use it.  Clean up the code.
+	(loop_config): Use it.
+	(rstclock): Implement it.  Clean up the code.
+	From Dave Mills.
+
 2001-05-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k31
