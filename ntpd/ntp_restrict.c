@@ -396,10 +396,10 @@ hack_restrict(
 {
 	register u_int32 addr = 0;
 	register u_int32 mask = 0;
-       uint8_t addr6[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	uint8_t addr6[16];
 	register struct restrictlist *rl = NULL;
 	register struct restrictlist *rlprev = NULL;
-       register struct restrictlist6 *rl6 = NULL;
+	register struct restrictlist6 *rl6 = NULL;
 	register struct restrictlist6 *rlprev6 = NULL;
 	int i;
 

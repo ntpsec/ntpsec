@@ -1528,8 +1528,6 @@ list_restrict(
 			ir = (struct info_restrict *)more_pkt();
 		}
 		break;
-
-	default :
 	}
 
 	flush_pkt();

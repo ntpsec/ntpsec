@@ -318,6 +318,16 @@ AC_TYPE_SIZE_T
 AC_CHECK_TYPE(time_t, long)
 AC_STRUCT_TM
 
+AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
+[AC_TRY_COMPILE([#include <sys/types.h>],
+	[u_int8_t len = 42; return 0;],
+	ac_cv_type_u_int8_t=yes,
+	ac_cv_type_u_int8_t=no)
+])
+if test $ac_cv_type_u_int8_t = yes; then
+	AC_DEFINE(HAVE_TYPE_U_INT8_T,1,Does u_int8_t exist)
+fi
+
 AC_CACHE_CHECK(for a fallback value for HZ, ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
 case "$target" in

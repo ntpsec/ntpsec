@@ -1368,12 +1368,12 @@ findserver(
                                 mc_server = server;
                 }
                 else {
-                #ifdef AF_INET6
+#ifdef AF_INET6
                         if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)(&server->srcadr))->sin6_addr))
 			mc_server = server;
-                #else
+#else
                         return 0;
-                #endif
+#endif
                 }
 	}
 

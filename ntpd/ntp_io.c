@@ -834,10 +834,12 @@ io_multicast_add(
 	int s;
 	struct sockaddr_in *sinp;
 
+#ifdef HAVE_IPV6
 	struct ipv6_mreq mreq6;
 	uint8_t haddr6[16];
 	struct in6_addr iaddr6;
 	struct sockaddr_in6 *sin6p;
+#endif /* HAVE_IPV6 */
 
 	switch (addr.ss_family)
 	{
@@ -907,6 +909,7 @@ io_multicast_add(
 
 		break;
 
+#ifdef HAVE_IPV6
 	case AF_INET6 :
 
 		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
@@ -973,6 +976,7 @@ io_multicast_add(
 		    ninterfaces = i+1;
 
 	       break;
+#endif /* HAVE_IPV6 */
 	}
 
 	/*
@@ -1033,9 +1037,11 @@ io_multicast_del(
 	u_int32 haddr;
 	struct sockaddr_in sinaddr;
 
+#ifdef HAVE_IPV6
 	struct ipv6_mreq mreq6;
 	struct in6_addr haddr6;
 	struct sockaddr_in6 sin6addr;
+#endif /* HAVE_IPV6 */
 
 	switch (addr.ss_family)
 	{
@@ -1088,6 +1094,7 @@ io_multicast_del(
 		}
 		break;
 
+#ifdef HAVE_IPV6
 	case AF_INET6 :
 		haddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
 
@@ -1135,7 +1142,7 @@ io_multicast_del(
 			}
 		}
 		break;
-		default :
+#endif /* HAVE_IPV6 */
 	}/* switch */
 #else /* not MCAST */
 	msyslog(LOG_ERR, "this function requires multicast kernel");
@@ -1159,6 +1166,10 @@ open_socket(
 	int tos;
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
+#ifndef HAVE_IPV6
+	if (addr->ss_family == AF_INET6)
+		return (-1);
+#endif /* HAVE_IPV6 */
 	/* create a datagram (UDP) socket */
 	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0))
 #ifndef SYS_WINNT
@@ -1434,20 +1445,26 @@ sendpkt(
 		struct	in_addr addr;
 	};
 
+#ifdef HAVE_IPV6
 	struct cache6 {
 		u_short port;
 		struct in6_addr addr;
 	};
+#endif /* HAVE_IPV6 */
 
 #ifndef ERRORCACHESIZE
 #define ERRORCACHESIZE 8
 #endif
 #if ERRORCACHESIZE > 0
 	static struct cache badaddrs[ERRORCACHESIZE];
+#ifdef HAVE_IPV6
 	static struct cache6 badaddrs6[ERRORCACHESIZE];
+#endif /* HAVE_IPV6 */
 #else
 #define badaddrs ((struct cache *)0)		/* Only used in empty loops! */
+#ifdef HAVE_IPV6
 #define badaddrs6 ((struct cache6 *)0)		/* Only used in empty loops! */
+#endif /* HAVE_IPV6 */
 #endif
 #ifdef DEBUG
 	if (debug > 1)
@@ -1480,6 +1497,7 @@ sendpkt(
 		}
 		break;
 
+#ifdef HAVE_IPV6
 	case AF_INET6 :
 
 	 	/*
@@ -1497,6 +1515,7 @@ sendpkt(
 	                        inter->last_ttl = ttl;
 	        }
 	        break;
+#endif /* HAVE_IPV6 */
 
 	default :
 		exit(1);
@@ -1512,11 +1531,13 @@ sendpkt(
 				badaddrs[slot].addr.s_addr == ((struct sockaddr_in*)dest)->sin_addr.s_addr)
 			break;
 		}
+#ifdef HAVE_IPV6
 		else if (dest->ss_family == AF_INET6) {
 			if (badaddrs6[slot].port == ((struct sockaddr_in6*)dest)->sin6_port &&
 				badaddrs6[slot].addr.s6_addr == ((struct sockaddr_in6*)dest)->sin6_addr.s6_addr)
 			break;
 		}
+#endif /* HAVE_IPV6 */
 		else exit(1);  /* address family not supported yet */
 
 #if defined(HAVE_IO_COMPLETION_PORT)
@@ -1552,6 +1573,7 @@ sendpkt(
 					}
 				break;
 
+#ifdef HAVE_IPV6
 			case AF_INET6 :
 
 				for (slot = ERRORCACHESIZE; --slot >= 0; )
@@ -1562,6 +1584,7 @@ sendpkt(
                                     		break;
                             		}
                 		break;
+#endif /* HAVE_IPV6 */
 
 			default :
 				exit(1);
@@ -1584,10 +1607,11 @@ sendpkt(
 			case AF_INET :
 				badaddrs[slot].port = 0;
 				break;
+#ifdef HAVE_IPV6
 			case AF_INET6 :
 				badaddrs6[slot].port = 0;
 				break;
-			default :
+#endif /* HAVE_IPV6 */
 			}
 		}
 	}

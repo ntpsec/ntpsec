@@ -21,6 +21,7 @@ socktoa(
 	struct sockaddr_storage* sock
 	)
 {
+#ifdef HAVE_IPV6
 	register char *buffer;
 
 	LIB_GETBUF(buffer);
@@ -35,7 +36,9 @@ socktoa(
 
 		case AF_INET6 :
 			inet_ntop(AF_INET6, &((struct sockaddr_in6*)sock)->sin6_addr, buffer, LIB_BUFLENGTH);
-		default :
 	}
   	return buffer;
+#else
+	return numtoa(((struct sockaddr_in *)sock)->sin_addr.s_addr);
+#endif
 }
