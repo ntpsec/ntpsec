@@ -299,7 +299,6 @@ local_clock(
 				    fp_offset);
 				rstclock(S_FREQ);
 				last_offset = clock_offset = fp_offset;
-				return (0);
 			}
 			break;
 		}

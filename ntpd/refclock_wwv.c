@@ -127,9 +127,8 @@
  * These are used to establish the signal quality for each of the five
  * frequencies and two stations.
  */
-#define DATANG		0x0001	/* data below threshold or SNR */
-#define SYNCNG		0x0002	/* sync below threshold or SNR */
-#define JITRNG		0x0004	/* jitter above threshold */
+#define SYNCNG		0x0001	/* sync below threshold or SNR */
+#define JITRNG		0x0002	/* jitter above threshold */
 #define SELV		0x0100	/* WWV station select */
 #define SELH		0x0200	/* WWVH station select */
 
@@ -168,7 +167,6 @@
 #define ACQSN		5	/* acquisition timeout */
 #define HSPEC		15	/* second sync timeout */
 #define DIGIT		20	/* minute unit digit timeout */
-#define CHQSY		15	/* channel timeout */
 #define PANIC		(4 * 1440) /* panic timeout */
 
 /*
@@ -181,9 +179,9 @@
 #define ASNR		6.0	/* acquisition SNR threshold (dB) */
 #define AWND		50	/* acquisition window threshold (ms) */
 #define AMIN		3	/* acquisition min compare count */
-#define AMAX		5	/* max compare count */
-#define QTHR		1000	/* QSY amplitude threshold */
-#define QSNR		10.0	/* QSY SNR threshold (dB) */
+#define AMAX		6	/* max compare count */
+#define QTHR		2000	/* QSY amplitude threshold */
+#define QSNR		20.0	/* QSY SNR threshold (dB) */
 #define STHR		500	/* second sync amplitude threshold */
 #define SCMP		10 	/* second sync compare threshold */
 #define DTHR		1000	/* bit amplitude threshold */
@@ -479,10 +477,13 @@ struct decvec {
  * for WWVH. Other than frequency, the format is the same.
  */
 struct sync {
-	double	amp;		/* amplitude (square) */
-	double	synamp;		/* sync amplitude at 800 ms */
+	double	amp;		/* sync amplitude (I, Q square) */
+	double	synamp;		/* sync envelope at 800 ms */
+	double	synmax;		/* sync envelope at 0 s */
+	double	synmin;		/* avg sync envelope at 59 s, 1 s */
+	double	synsnr;		/* sync signal SNR */
 	double	noise;		/* max amplitude off pulse */
-	double	p_max;		/* max amplitude on pulse */
+	double	sigmax;		/* max amplitude on pulse */
 	double	lastmax;	/* last max amplitude on pulse */
 	long	pos;		/* position at maximum amplitude */
 	long	lastpos;	/* last position at maximum amplitude */
@@ -492,9 +493,6 @@ struct sync {
 	char	refid[5];	/* reference identifier */
 	char	ident[4];	/* station identifier */
 	int	select;		/* select bits */
-	double	synmax;		/* max sync signal */
-	double	synmin;		/* min sync signal */
-	double	synsnr;		/* sync signal SNR */
 };
 
 /*
@@ -503,9 +501,6 @@ struct sync {
  */
 struct chan {
 	int	gain;		/* audio gain */
-	double	datmax;		/* max data signal after second 59 */
-	double	datmin;		/* min data signal after second 0 */
-	double	datsnr;		/* data SNR */
 	struct sync wwv;	/* wwv station */
 	struct sync wwvh;	/* wwvh station */
 };
@@ -572,7 +567,6 @@ struct wwvunit {
 	 * Variables used to estimate signal levels and bit/digit
 	 * probabilities
 	 */
-	double	datmax;		/* data signal at 200 ms (peak) */
 	double	sigamp;		/* I-channel peak signal amplitude */
 	double	noiamp;		/* I-channel average noise amplitude */
 	double	datsnr;		/* data SNR (dB) */
@@ -992,25 +986,40 @@ wwv_epoch(
 	wwv_rf(peer, sig);
 
 	/*
-	 * Estimate the noise level by integrating the I-channel energy
-	 * at epoch 30 ms when not probing.
+	 * In data mode, scan the second looking for a data pulse. In
+	 * probe mode, just latch the sync pulse amplitude.
 	 */
-	if (up->rphase == 30 * MS && !(up->status & SFLAG)) {
-		up->noiamp += (up->irig - up->noiamp) / (MINAVG <<
-		    up->avgint);
+	if (!(up->status & MSYNC) || up->status & SFLAG) {
 
-	/*
-	 * Strobe the peak I-channel data signal at epoch 200 ms.
-	 * Compute the SNR and adjust the 100-Hz reference oscillator
-	 * phase using the Q-channel data signal at that epoch. Save the
-	 * envelope amplitude for the probe channel, but don't jiggle
-	 * the subcarrier phase during the probe.
-	 */
-	} else if (up->rphase == 200 * MS) {
-		if (up->status & SFLAG) {
-			up->datmax = sqrt(up->irig * up->irig +
-			    up->qrig * up->qrig);
-		} else {
+		/*
+		 * Sample the minute sync pulse amplitude at epoch 800
+		 * for both the WWV and WWVH stations. This will be used
+		 * later for channel mitigation.
+		 */
+		if (up->rphase == 800 * MS) {
+			sp = &up->mitig[up->achan].wwv;
+			sp->synamp = sqrt(sp->amp);
+			sp = &up->mitig[up->achan].wwvh;
+			sp->synamp = sqrt(sp->amp);
+		}
+	} else {
+
+		/*
+		 * Estimate the noise level by integrating the I-channel
+		 * energy at epoch 30 ms.
+		 */
+		if (up->rphase == 30 * MS) {
+			up->noiamp += (up->irig - up->noiamp) /
+			    (MINAVG << up->avgint);
+
+		/*
+		 * Strobe the peak I-channel data signal at epoch 200
+		 * ms. Compute the SNR and adjust the 100-Hz reference
+		 * oscillator phase using the Q-channel data signal at
+		 * that epoch. Save the envelope amplitude for the probe
+		 * channel.
+		 */
+		} else if (up->rphase == 200 * MS) {
 			up->sigamp = up->irig;
 			if (up->sigamp < 0)
 				up->sigamp = 0;
@@ -1025,31 +1034,19 @@ wwv_epoch(
 				if (up->datapt < 0)
 					up->datapt += 80;
 			}
-		}
-
-	/*
-	 * The slice level is set half way between the peak signal and
-	 * noise levels. Strobe the negative zero crossing after epoch
-	 * 200 ms and record the epoch at that time. This defines the
-	 * length of the data pulse, which will later be converted into
-	 * scaled bit probabilities. At epoch 800 ms, save the WWV and
-	 * WWVH minute pulse envelope amplitudes for the probe channel.
-	 */
-	} else if (up->rphase > 200 * MS) {
-		dtemp = (up->sigamp + up->noiamp) / 2;
-		if (up->irig < dtemp && dpulse == 0)
-			dpulse = up->rphase;
 
 		/*
-		 * Same the minute sync pulse amplitude at epoch 800 for
-		 * both the WWV and WWVH stations. This will be used
-		 * later for channel mitigation.
+		 * The slice level is set half way between the peak
+		 * signal and noise levels. Strobe the negative zero
+		 * crossing after epoch 200 ms and record the epoch at
+		 * that time. This defines the length of the data pulse,
+		 * which will later be converted into scaled bit
+		 * probabilities.
 		 */
-		if (up->rphase == 800 * MS) {
-			sp = &up->mitig[up->achan].wwv;
-			sp->synamp = sqrt(sp->amp);
-			sp = &up->mitig[up->achan].wwvh;
-			sp->synamp = sqrt(sp->amp);
+		} else if (up->rphase > 200 * MS) {
+			dtemp = (up->sigamp + up->noiamp) / 2;
+			if (up->irig < dtemp && dpulse == 0)
+				dpulse = up->rphase;
 		}
  	}
 
@@ -1067,10 +1064,12 @@ wwv_epoch(
 
 		/*
 		 * Determine the current offset from the time of century
-		 * and the sample timestamp, but only if no alarms have
-		 * been raised in the present or previous minute.
+		 * and the sample timestamp, but only if the SYNERR
+		 * alarm has not been raised in the present or previous
+		 * minute.
 		 */
-		if (up->status & INSYNC && (up->alarm & 0x3333) == 0) {
+		if ((up->status & INSYNC) && (up->alarm & (3 <<
+		    SYNERR)) == 0) {
 			pp->second = up->tsec;
 			pp->minute = up->decvec[MN].digit +
 			    up->decvec[MN + 1].digit * 10;
@@ -1350,7 +1349,6 @@ wwv_rf(
 			if (up->mphase < 0)
 				up->mphase += MINUTE;
 		} else if (!(up->status & MSYNC)) {
-			up->alarm |= 1 << SYNERR;
 
 	 		/*
 			 * If minute sync has not been acquired, the
@@ -1406,11 +1404,9 @@ wwv_rf(
 			 * lamp and raises an alarm.
 			 */
 			up->swatch++;
-			if (!(up->status & SSYNC))
-				up->alarm |= 1 << SYNERR;
-			else if ((up->epomax < STHR && !(up->status &
-			    SFLAG)) || up->swatch > HSPEC) {
+			if (up->epomax < STHR || up->swatch > HSPEC) {
 				up->status &= ~SSYNC;
+				up->alarm |= 1 << SYNERR;
 				up->swatch = 0;
 			}
 		}
@@ -1532,9 +1528,9 @@ wwv_rf(
 		up->epomax = epomax;
 		epomax = 0;
 	}
-	dtemp = (epobuf[up->epoch] += (mfsync - epobuf[up->epoch]) /
-	    (MINAVG << up->avgint));
-	if (dtemp > epomax && !(up->status & SFLAG)) {
+	dtemp = (epobuf[up->epoch] += (mfsync -
+	    epobuf[up->epoch]) / (MINAVG << up->avgint));
+	if (dtemp > epomax) {
 		epomax = dtemp;
 		epopos = up->epoch - 5 * MS;
 		if (epopos < 0)
@@ -1602,8 +1598,8 @@ wwv_qrz(
 			epoch = sp->mepoch;
 		else
 			epoch = sp->lastpos;
-		if (syncx > sp->p_max) {
-			sp->p_max = syncx;
+		if (syncx > sp->sigmax) {
+			sp->sigmax = syncx;
 			sp->pos = up->mphase;
 		}
 		if (abs(MOD(up->mphase - epoch, MINUTE)) > SYNSIZ &&
@@ -1622,7 +1618,7 @@ wwv_qrz(
 		sp->select &= ~JITRNG;
 		if (abs(sp->jitter) > AWND * MS)
 			sp->select |= JITRNG;
-		sp->p_max = sqrt(sp->p_max);
+		sp->sigmax = sqrt(sp->sigmax);
 		sp->noise = sqrt(sp->noise);
 		if (up->status & MSYNC) {
 
@@ -1630,7 +1626,7 @@ wwv_qrz(
 			 * If in minute sync, just count the runs up and
 			 * down.
 			 */
-			if (sp->select & (DATANG | SYNCNG | JITRNG)) {
+			if (sp->select & (SYNCNG | JITRNG)) {
 				if (sp->count > 0)
 					sp->count--;
 			} else {
@@ -1644,8 +1640,8 @@ wwv_qrz(
 			 * little dance to find a valid minute sync
 			 * pulse, emphasis valid.
 			 */
-			snr = wwv_snr(sp->p_max, sp->noise);
-			isgood = sp->p_max > ATHR && snr > ASNR &&
+			snr = wwv_snr(sp->sigmax, sp->noise);
+			isgood = sp->sigmax > ATHR && snr > ASNR &&
 			    !(sp->select & JITRNG);
 			switch (sp->count) {
 
@@ -1657,7 +1653,7 @@ wwv_qrz(
 			 * If found, bump to state 1.
 			 */
 			case 0:
-				if (sp->p_max >= ATHR)
+				if (sp->sigmax >= ATHR)
 					sp->count++;
 				break;
 
@@ -1673,7 +1669,7 @@ wwv_qrz(
 			 * state 2.
 			 */
 			case 1:
-			if (sp->p_max < ATHR) {
+			if (sp->sigmax < ATHR) {
 					sp->count--;
 					break;
 				} else if (!isgood) {
@@ -1701,7 +1697,7 @@ wwv_qrz(
 			sprintf(tbuf,
 	    "wwv8 %2d %04x %5.0f %s %d %5.0f %5.1f %7ld %7ld %7ld",
 			    up->rsec, up->status, up->epomax, sp->ident,
-			    sp->count, sp->p_max, snr, sp->pos,
+			    sp->count, sp->sigmax, snr, sp->pos,
 			    sp->jitter, MOD(sp->pos - up->nepoch -
 			    SYNSIZ, MINUTE));
 			if (pp->sloppyclockflag & CLK_FLAG4)
@@ -1711,9 +1707,9 @@ wwv_qrz(
 				printf("%s\n", tbuf);
 #endif
 		}
-		sp->lastmax = sp->p_max;
+		sp->lastmax = sp->sigmax;
 		sp->lastpos = sp->pos;
-		sp->p_max = sp->noise = 0;
+		sp->sigmax = sp->noise = 0;
 	}
 }
 
@@ -1974,7 +1970,6 @@ wwv_rsec(
 	 */
 	case SYNC2:			/* 0 */
 		cp = &up->mitig[up->achan];
-		cp->datmin = up->datmax;
 		sp = &cp->wwv;
 		sp->synmax = sp->synamp;
 		sp = &cp->wwvh;
@@ -1983,35 +1978,28 @@ wwv_rsec(
 
 	case SYNC3:			/* 1 */
 		cp = &up->mitig[up->achan];
-		cp->datmax = (cp->datmax + up->datmax) / 2;
-		cp->datsnr = wwv_snr(cp->datmax, cp->datmin);
 
 		sp = &cp->wwv;
 		sp->synmin = (sp->synmin + sp->synamp) / 2;
 		sp->synsnr = wwv_snr(sp->synmax, sp->synmin);
-		sp->select &= ~(DATANG | SYNCNG);
-		if (cp->datmax < QTHR || cp->datsnr < QSNR)
-			sp->select |= DATANG;
+		sp->select &= ~SYNCNG;
 		if (sp->synmax < QTHR || sp->synsnr < QSNR)
 			sp->select |= SYNCNG;
 
 		rp = &cp->wwvh;
 		rp->synmin = (rp->synmin + rp->synamp) / 2;
 		rp->synsnr = wwv_snr(rp->synmax, rp->synmin);
-		rp->select &= ~(DATANG | SYNCNG);
-		if (cp->datmax < QTHR || cp->datsnr < QSNR)
-			rp->select |= DATANG;
+		rp->select &= ~SYNCNG;
 		if (rp->synmax < QTHR || rp->synsnr < QSNR)
 			rp->select |= SYNCNG;
 
 		if (up->status & MSYNC) {
 			sprintf(tbuf,
-    "agc %d data %.0f/%.1f sync %3s %04x %d %.0f/%.1f/%ld %3s %04x %d %.0f/%.1f/%ld",
-			    up->gain, cp->datmax, cp->datsnr, sp->ident,
-			    sp->select, sp->count, sp->synmax,
-			    sp->synsnr, sp->jitter, rp->ident,
-			    rp->select, rp->count, rp->synmax,
-			    rp->synsnr, rp->jitter);
+    "agc %d sync %3s %04x %d %.0f/%.1f/%ld %3s %04x %d %.0f/%.1f/%ld",
+			    up->gain, sp->ident, sp->select, sp->count,
+			    sp->synmax, sp->synsnr, sp->jitter,
+			    rp->ident, rp->select, rp->count,
+			    rp->synmax,rp->synsnr, rp->jitter);
 			if (pp->sloppyclockflag & CLK_FLAG4)
 				record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -2103,21 +2091,20 @@ wwv_rsec(
 		break;
 
 	/*
-	 * The endgame. If all nine clock digits are valid and
-	 * synchronized to the second, the clock is set set and forever
-	 * keeps the tick. If at least one digit is set, which by design
-	 * must be the minute units digit, the clock state machine
-	 * begins to count the minutes. If the SECWARN bit is set on the
-	 * last minute of 30 June or 31 December, the LEPSEC bit is set.
-	 * At the end of the minute in which LEPSEC is set the
-	 * transmitter and receiver insert an extra second (60) in the
-	 * timescale and the minute sync skips a second. We only get to
-	 * test this wrinkle at intervals of about 18 months, so your
-	 * mileage may vary.
+	 * The endgame. If all nine clock digits are valid and the
+	 * SYNERR alarm is not raised in the current or previous second,
+	 * the clock is set set or validated. If at least one digit is
+	 * set, which by design must be the minute units digit, the
+	 * clock state machine begins to count the minutes. If the
+	 * SECWARN bit is set on the last minute of 30 June or 31
+	 * December, the LEPSEC bit is set. At the end of the minute in
+	 * which LEPSEC is set the transmitter and receiver insert an
+	 * extra second (60) in the timescale and the minute sync skips
+	 * a second. We only get to test this wrinkle at intervals of
+	 * about 18 months, so your mileage may vary.
 	 */
 	case MIN1:			/* 59 */
 		cp = &up->mitig[up->achan];
-		cp->datmax = up->datmax;
 		sp = &cp->wwv;
 		sp->synmin = sp->synamp;
 		sp = &cp->wwvh;
@@ -2132,7 +2119,8 @@ wwv_rsec(
 		up->minset = ((current_time - peer->update) + 30) / 60;
 		if (up->digcnt > 0)
 			up->status |= DSYNC;
-		if (up->digcnt >= 9 && (up->alarm & 0x3333) == 0) {
+		if (up->digcnt >= 9 && (up->alarm & (3 << SYNERR)) == 0)
+		    {
 			up->status |= INSYNC;
 			up->watch = 0;
 		}
@@ -2260,7 +2248,7 @@ wwv_corr4(
 	struct refclockproc *pp;
 	struct wwvunit *up;
 
-	double s_max, nxtmax;	/* metrics */
+	double topmax, nxtmax;	/* metrics */
 	double acc;		/* accumulator */
 	char tbuf[80];		/* monitor buffer */
 	int mldigit;		/* max likelihood digit */
@@ -2275,7 +2263,7 @@ wwv_corr4(
 	 * any BCD digit bit is bad, consider all bits a miss.
 	 */
 	mldigit = 0;
-	s_max = nxtmax = -MAXSIG;
+	topmax = nxtmax = -MAXSIG;
 	for (i = 0; tab[i][0] != 0; i++) {
 		acc = 0;
 		for (j = 0; j < 4; j++) {
@@ -2283,17 +2271,17 @@ wwv_corr4(
 				acc += data[j] * tab[i][j];
 		}
 		acc = (vp->like[i] += (acc - vp->like[i]) / TCONST);
-		if (acc > s_max) {
-			nxtmax = s_max;
-			s_max = acc;
+		if (acc > topmax) {
+			nxtmax = topmax;
+			topmax = acc;
 			mldigit = i;
 		} else if (acc > nxtmax) {
 			nxtmax = acc;
 		}
 	}
 	vp->mldigit = mldigit;
-	vp->digprb = s_max;
-	vp->digsnr = wwv_snr(s_max, nxtmax);
+	vp->digprb = topmax;
+	vp->digsnr = wwv_snr(topmax, nxtmax);
 
 	/*
 	 * The maximum likelihood digit is compared with the current
@@ -2309,8 +2297,7 @@ wwv_corr4(
 		vp->phase = diff;
 		vp->count = 0;
 	}
-	if (vp->digprb < BTHR || vp->digsnr < BSNR || !(up->status &
-	    MSYNC)) {
+	if (vp->digprb < BTHR || vp->digsnr < BSNR) {
 		vp->count = 0;
 		up->alarm |= 1 << SYMERR;
 	} else if (vp->count < BCMP) {
@@ -2506,7 +2493,7 @@ wwv_snr(
  * rotation, this routine mitigates over all channels and chooses the
  * best frequency and station.
  */
-static void
+void
 wwv_newchan(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -2619,7 +2606,7 @@ wwv_qsy(
  * stn	station identifier (station and frequency)
  * comp	minute sync compare counter
  * errs	bit errors in last minute * freq	frequency offset (PPM) * avgt	averaging time (s) */
-static int
+int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */
 	char *ptr		/* target string */
@@ -2636,13 +2623,13 @@ timecode(
 	 */
 	synchar = (up->status & INSYNC) ? ' ' : '?';
 	qual = 0;
-	if (up->alarm & (0x3 << (DECERR)))
+	if (up->alarm & (3 << (DECERR)))
 		qual |= 0x1;
-	if (up->alarm & (0x3 << (SYMERR)))
+	if (up->alarm & (3 << (SYMERR)))
 		qual |= 0x2;
-	if (up->alarm & (0x3 << (MODERR)))
+	if (up->alarm & (3 << (MODERR)))
 		qual |= 0x4;
-	if (up->alarm & (0x3 << (SYNERR)))
+	if (up->alarm & (3 << (SYNERR)))
 		qual |= 0x8;
 	year = up->decvec[7].digit + up->decvec[7].digit * 10;
 	if (year < UTCYEAR)

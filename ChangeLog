@@ -1,5 +1,8 @@
 2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_wwv.c: Dave Cleaned and Improved things.
+	* ntpd/ntp_loopfilter.c (local_clock): Dave fixed something.
+
 	* ntpd/refclock_wwv.c: Rename max to p_max or s_max as appropriate
 	to avoid native SunOS compiler collision.
 	(wwv_epoch): Make declaration == definition
