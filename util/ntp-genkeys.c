@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <limits.h>
+#include <limits.h>		/* PATH_MAX */
 #include <sys/stat.h>		/* for umask() */
 #include <sys/time.h>
 
@@ -26,6 +26,14 @@
 
 #ifdef PUBKEY
 # include "ntp_crypto.h"
+#endif
+
+#ifndef PATH_MAX
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX _POSIX_PATH_MAX
+# else
+#  define PATH_MAX 255
+# endif
 #endif
 
 /*
