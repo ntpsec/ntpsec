@@ -1,5 +1,15 @@
 2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+        * README.rsa: Describe RSAEuro support, provide alternate rsa.c 
+	patch. 
+	* configure.in: Check for rsaeuro1, RSAOBJS, RSADIR respectively. 
+	* html/build.htm: Hint at rsaeuro1 directory. 
+	* include/global.h (BYTE): Define. 
+	* librsaref/Makefile.am (nodist_librsaref_a_SOURCES): Removed rsaref2 
+	specific sources. 
+	(librsaref_a_LIBADD): Add appropriate objects. 
+	(librsaref_a_DEPENDENCIES): Work around automake limitation. 
+	(stamp-rsaref): Use RSADIR. 
 	* scripts/README: Document ntp-close. 
 	* scripts/Makefile.am (EXTRA_DIST): Distribute it. 
 	* Makefile.am (DISTCLEANFILES): Remove .warning.

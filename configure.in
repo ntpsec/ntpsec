@@ -2233,6 +2233,8 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT($ans)
 
+AC_SUBST(RSAOBJS)
+AC_SUBST(RSADIR)
 AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
@@ -2336,9 +2338,19 @@ case "$ans" in
 
     case "$ans" in
      no)
-	if test -f $srcdir/rsaref2/source/rsa.c
+	if test -f $srcdir/rsaref2/source/digit.c
 	then
 	    ans=rsaref
+	    RSAOBJS=digit.o
+	    RSADIR=rsaref2
+	fi
+	if test -f $srcdir/rsaeuro1/source/rsaeuro.h
+	then
+	    ans=rsaref
+            RSAOBJS="md4c.o shsc.o"
+	    RSADIR=rsaeuro1
+	fi
+	if test "$ans" = "rsaref"; then
 	    LIBRSAREF=../librsaref/librsaref.a
 	    MAKE_LIBRSAREF=librsaref.a
 	    AC_DEFINE(DES)

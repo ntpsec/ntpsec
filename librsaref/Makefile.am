@@ -9,7 +9,6 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 
 nodist_librsaref_a_SOURCES = \
 	desc.c \
-	digit.c \
 	md2c.c \
 	md5c.c \
 	nn.c \
@@ -22,7 +21,6 @@ nodist_librsaref_a_SOURCES = \
 	r_stdlib.c \
 	rsa.c \
 	des.h \
-	digit.h \
 	md2.h \
 	md5.h \
 	nn.h \
@@ -30,6 +28,9 @@ nodist_librsaref_a_SOURCES = \
 	r_random.h \
 	rsa.h \
 	rsaref.h
+
+librsaref_a_LIBADD = @RSAOBJS@
+librsaref_a_DEPENDENCIES = $(librsaref_a_LIBADD)
 
 BUILT_SOURCES = $(nodist_librsaref_a_SOURCES)
 INCLUDES = -I$(top_srcdir)/include
@@ -51,8 +52,8 @@ stamp-rsaref:
 		 *.h) r_dst=$(srcdir)/$$i ;; \
 		 *)   r_dst=$$i ;; \
 		esac ; \
-	 	cmp -s $${r_dst} $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
-			|| cp $(srcdir)/../rsaref2/source/$$i $${r_dst} ;; \
+	 	cmp -s $${r_dst} $(srcdir)/../@RSADIR@/source/$$i 2>/dev/null \
+			|| cp $(srcdir)/../@RSADIR@/source/$$i $${r_dst} ;; \
 	    esac ; \
 	done
 	@echo timestamp > stamp-rsarefT 2> /dev/null
