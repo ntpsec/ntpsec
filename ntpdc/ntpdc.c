@@ -155,8 +155,7 @@ static	struct xcmd builtins[] = {
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
 #define	MAXLINE		512		/* maximum line length */
 #define	MAXTOKENS	(1+1+MAXARGS+2)	/* maximum number of usable tokens */
-					/* command + -4|-6 + MAXARGS + */
-					/* redirection */
+#define	SCREENWIDTH  	78		/* nominal screen width in columns */
 
 /*
  * Some variables used and manipulated locally
@@ -1451,21 +1450,18 @@ help(
 	FILE *fp
 	)
 {
-	int i;
-	int n;
 	struct xcmd *xcp;
 	char *cmd;
-	const char *cmdsort[100];
-	int length[100];
-	int maxlength;
-	int numperline;
-	static const char *spaces = "                    ";	/* 20 spaces */
+	const char *list[100];
+	int word, words;     
+        int row, rows;
+	int col, cols;
 
 	if (pcmd->nargs == 0) {
-		n = 0;
+		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = xcp->keyword;
+			    list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
 		    cmdsort[n++] = xcp->keyword;
@@ -1476,33 +1472,34 @@ help(
 #else
 		    (char *)
 #endif
-		    cmdsort, (size_t)n, sizeof(char *), helpsort);
-		maxlength = 0;
-		for (i = 0; i < n; i++) {
-			length[i] = strlen(cmdsort[i]);
-			if (length[i] > maxlength)
-			    maxlength = length[i];
+			(list), (size_t)(words), sizeof(char *), helpsort);
+		col = 0;
+		for (word = 0; word < words; word++) {
+			int length = strlen(list[word]);
+			if (col < length) {
+			    col = length;
+                        }
 		}
-		maxlength++;
-		numperline = 76 / maxlength;
 
-		(void) fprintf(fp, "Commands available:\n");
-		for (i = 0; i < n; i++) {
-			if ((i % numperline) == (numperline-1)
-			    || i == (n-1))
-			    (void) fprintf(fp, "%s\n", cmdsort[i]);
-			else
-			    (void) fprintf(fp, "%s%s", cmdsort[i],
-					   spaces+20-maxlength+length[i]);
+		cols = SCREENWIDTH / ++col;
+                rows = (words + cols - 1) / cols;
+
+		(void) fprintf(fp, "ntpdc commands:\n");
+
+		for (row = 0; row < rows; row++) {
+                        for (word = row; word < words; word += rows) {
+				(void) fprintf(fp, "%-*.*s", col, col-1, list[word]);
+                        }
+			(void) fprintf(fp, "\n");
 		}
 	} else {
 		cmd = pcmd->argval[0].string;
-		n = findcmd(cmd, builtins, opcmds, &xcp);
-		if (n == 0) {
+		words = findcmd(cmd, builtins, opcmds, &xcp);
+		if (words == 0) {
 			(void) fprintf(stderr,
 				       "Command `%s' is unknown\n", cmd);
 			return;
-		} else if (n >= 2) {
+		} else if (words >= 2) {
 			(void) fprintf(stderr,
 				       "Command `%s' is ambiguous\n", cmd);
 			return;
