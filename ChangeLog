@@ -1,5 +1,7 @@
 1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntp_update: Check out copyright.htm before COPYRIGHT
+
 	* ntpd/ntp_config.c: Support for PPS assert/clear/hardpps
 	* ntpd/ntp_refclock.c (refclock_ioctl): Ditto
 	(refclock_gtlin): Ditto

@@ -48,9 +48,8 @@ else
     set -- $UPDATE_OPTIONS ${1+"$@"}
 fi
 
-
 echo "Pass 1: Updating autoconf and bison generated files"
-find * -name configure.in -o -name '*.y' | xargs cvs -q update
+find * -name configure.in -o -name '*.y' -o name copyright.htm | xargs cvs -q update
 
 echo "Pass 2: Updating full tree"
 cvs -q update ${1+"$@"}
