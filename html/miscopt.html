@@ -12,7 +12,7 @@
         <h3>Miscellaneous Options</h3>
         <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>We have three, now looking for more.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">00:50</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="240">Sunday, February 09, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">01:50</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="217">Friday, May 02, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -23,11 +23,11 @@
             <dt><tt>calldelay <i>delay</i></tt>
             <dd>This option controls the delay in seconds between the first and second packets sent in burst or iburst mode to allow additional time for a modem or ISDN call to complete.
             <dt><tt>driftfile <i>driftfile</i></tt>
-            <dd>This command specifies the complete path and name of the file used to record the frequency of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency and then updated once per hour with the current frequency  computed by the daemon. If the file name is specified, but the file itself does not exist, the starts with an initial frequency of zero and creates the file when writing it for the first time. If this command is not given, the daemon will always start with an initial frequency of zero.            <p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
+            <dd>This command specifies the complete path and name of the file used to record the frequency of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency and then updated once per hour with the current frequency computed by the daemon. If the file name is specified, but the file itself does not exist, the starts with an initial frequency of zero and creates the file when writing it for the first time. If this command is not given, the daemon will always start with an initial frequency of zero.
+            <p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
             <dt><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
                 <tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt>
             <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
-
             <dl>
                 <dt><tt>auth</tt>
                 <dd>Enables the server to synchronize with unconfigured peers only if the peer has been correctly authenticated using either public key or private key cryptography. The default for this flag is enable.
@@ -59,7 +59,7 @@
             <p>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.</p>
             <dt><tt>setvar <i>variable</i> [default]</tt>
             <dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.
-            <dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | huffpuff | <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt>
+            <dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff | <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt>
             <dd>This command can be used to alter several system variables in very exceptional circumstances. It should occur in the configuration file before any other configuration options. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. In general, they interact in intricate ways that are hard to predict and some combinations can result in some very nasty behavior. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs anyway and this command is for them. Emphasis added: twisters are on their own and can expect no help from the support group.
             <p>The variables operate as follows:</p>
             <dl>
@@ -67,6 +67,8 @@
                 <dd>The argument becomes the new value for the minimum Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm. The value in log2 seconds defaults to 7 (1024 s), which is also the lower limit.
                 <dt><tt>dispersion <i>dispersion</i></tt>
                 <dd>The argument becomes the new value for the dispersion increase rate, normally .000015 s/s.
+                <dt><tt>freq <i>freq</i></tt>
+                <dd>The argument becomes the initial value of the frequency offset in parts-per-million. This overrides the value in the frequency file, if present, and avoids the initial training state if it is not.
                 <dt><tt>huffpuff <i>huffpuff</i></tt>
                 <dd>The argument becomes the new value for the experimental huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours). There is no default, since the filter is not enabled unless this command is given.
                 <dt><tt>panic <i>panic</i></tt>
