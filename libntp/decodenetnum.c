@@ -29,7 +29,7 @@ decodenetnum(
 	name[i] = '\0';
 	num = name; 
 	}
-	bzero(&hints, sizeof(struct addrinfo));
+	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_flags = AI_NUMERICHOST;
 	err = getaddrinfo(num, NULL, &hints, &ai);
 	if (err != 0)
