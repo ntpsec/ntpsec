@@ -95,7 +95,7 @@ main(
 	int c;
 	int errflg	= 0;
 	int cost	= 0;
-	int rawtime	= 0;
+	volatile int rawtime	= 0;
 
 	memset((char *)&ntx, 0, sizeof(ntx));
 	progname = argv[0];
