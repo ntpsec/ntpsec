@@ -16,7 +16,8 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	syssignal.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
 	uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
 	../libisc/assertions.c ../libisc/error.c ../libisc/interfaceiter.c \
-	../libisc/lib.c ../libisc/mem.c ../libisc/msgcat.c ../libisc/net.c
+	../libisc/lib.c ../libisc/mem.c ../libisc/msgcat.c ../libisc/net.c \
+	../libisc/strerror.c
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c log.c random.c
