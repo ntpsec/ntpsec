@@ -129,20 +129,6 @@ int wildipv6 = -1;			/* Index into inter_list for IPv6 wildcard */
 static	struct refclockio *refio;
 #endif /* REFCLOCK */
 
-
-/*
- * Define what the possible "soft" errors can be.  These are non-fatal returns
- * of various network related functions, like recv() and so on.
- *
- * For some reason, BSDI (and perhaps others) will sometimes return <0
- * from recv() but will have errno==0.  This is broken, but we have to
- * work around it here.
- */
-#define SOFT_ERROR(e)	((e) == EAGAIN || \
-			 (e) == EWOULDBLOCK || \
-			 (e) == EINTR || \
-			 (e) == 0)
-
 /*
  * File descriptor masks etc. for call to select
  * Not needed for I/O Completion Ports
@@ -186,6 +172,7 @@ ISC_LIST(remaddr_t)       remoteaddr_list;
 
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
+int	find_socket_in_if	P((SOCKET ));
 void	add_addr_to_list	P((struct sockaddr_storage *, int, int));
 int     modify_addr_in_list	P((struct sockaddr_storage *, int));
 void	delete_addr_from_list	P((struct sockaddr_storage *));
@@ -1340,6 +1327,7 @@ close_socket(
 	     SOCKET fd
 	)
 {
+	int ind;
 	SOCKET i, newmax;
 
 	(void) closesocket(fd);
@@ -1358,8 +1346,14 @@ close_socket(
 		maxactivefd = newmax;
 	}
 #endif
+	/*
+	 * Remove the socket from the socket list
+	 * and remove the address from the address list
+	 */
+	ind = find_socket_in_if(fd);
 	delete_socket_from_list(fd);
-
+	if (ind >= 0)
+		delete_addr_from_list(&inter_list[ind].sin);
 }
 
 
@@ -1969,10 +1963,16 @@ findinterface(
 	struct sockaddr_storage *addr
 	)
 {
+	int ind;
+
 	SOCKET s;
 	int rtn, i;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
+	ind = find_addr_in_list(addr);
+	if (ind >= 0)
+		return (&inter_list[ind]);
+
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
 	 * and slap a getsockname() on it. If anything breaks, as it
@@ -2032,44 +2032,11 @@ struct interface *
 findbcastinter(
 	struct sockaddr_storage *addr
 	)
-{
-#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
-	register int i;
-	
-	i = find_addr_in_list(addr);
+{	
+	int i = find_flagged_addr_in_list(addr, INT_BCASTOPEN);
 	if(i >= 0)
 	     return (&inter_list[i]);
 
-	for (i = 0; i < ninterfaces; i++) {
-		/*
-		* First look if this is the correct family
-		*/
-		if(inter_list[i].sin.ss_family != addr->ss_family)
-	  		continue;
-		/*
-		 * We match only those interfaces marked as
-		 * broadcastable and either the explicit broadcast
-		 * address or the network portion of the IP address.
-		 * Sloppy.
-		 */
-		if (!(inter_list[i].flags & INT_BROADCAST))
-			continue;
-		if(addr->ss_family == AF_INET) {
-			if (SOCKCMP(&inter_list[i].bcast, addr))
-				return (&inter_list[i]);
-			if ((NSRCADR(&inter_list[i].sin) &
-				NSRCADR(&inter_list[i].mask)) == (NSRCADR(addr) &
-			    	NSRCADR(&inter_list[i].mask)))
-				return (&inter_list[i]);
-		}
-		else if(addr->ss_family == AF_INET6) {
-			if (SOCKCMP(&inter_list[i].bcast, addr))
-				return (&inter_list[i]);
-			if (SOCKCMP(netof(&inter_list[i].sin), netof(addr)))
-				return (&inter_list[i]);
-		     }
-	}
-#endif /* SIOCGIFCONF */
  	return ANY_INTERFACE_CHOOSE(addr);
 }
 
@@ -2278,6 +2245,26 @@ delete_socket_from_list(SOCKET fd) {
 			lsock = next;
 	}
 }
+
+/*
+ * Scan through the inter_list of interfaces looking for the socket
+ */
+int
+find_socket_in_if(SOCKET fd) {
+	int i;
+#ifdef DEBUG
+	if (debug)
+	    printf("Finding socket %d in list of interfaces\n", fd);
+#endif
+
+	for (i = 0; i < ninterfaces; i++)
+	{
+		if(inter_list[i].fd == fd)
+			return (i);
+	}
+	return (-1); /* Not found */
+}
+
 void
 add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 	remaddr_t *laddr = (remaddr_t *)malloc(sizeof(remaddr_t));
