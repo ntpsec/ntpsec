@@ -48,6 +48,7 @@ case "$host" in
 esac
 
 AMU_OS_CFLAGS
+LIBOPTS_CHECK
 
 AC_ARG_WITH(rpath,
 	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
@@ -203,6 +204,7 @@ esac
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(LDFLAGS)dnl
 
+AC_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_GCC_TRADITIONAL
 AC_C_VOLATILE
