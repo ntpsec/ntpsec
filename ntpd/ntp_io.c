@@ -1999,7 +1999,6 @@ findinterface(
 	struct sockaddr_storage *addr
 	)
 {
-	int ind;
 	int i;
 	SOCKET s;
 	int rtn;
@@ -2007,6 +2006,10 @@ findinterface(
 	int saddrlen;
 	u_int32 amask, imask;
 
+#ifdef DEBUG
+	if (debug > 2)
+	    printf("Finding interface for address: %s\n", stoa(addr));
+#endif
 	/*
 	 * If there is only one outgoing interface we already know the interface
 	 */
@@ -2215,11 +2218,14 @@ findbcastinter(
 	struct sockaddr_storage *addr
 	)
 {	
-	int ind;
 	int i;
 	u_int32 amask, imask;
 	int flagtype = INT_BROADCAST;
 
+#ifdef DEBUG
+	if (debug > 2)
+	    printf("Finding *cast interface for address: %s\n", stoa(addr));
+#endif
 	/*
 	 * If we got this far we need to try and match the
 	 * network part of the address
@@ -2609,7 +2615,7 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 int
 modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
-	int index;
+	int ind;
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 #ifdef DEBUG
@@ -2618,18 +2624,18 @@ modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 		   stoa(addr));
 #endif
 
-	index = -1;
+	ind = -1;
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
 			laddr->flags = flag;
-			index = laddr->if_index;
+			ind = laddr->if_index;
 			break;
 		}
 		else
 			laddr = next;
 	}
-	return (index); /* Not found */
+	return (ind); /* Not found */
 }
 
 void
