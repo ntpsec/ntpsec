@@ -27,7 +27,7 @@
 
 #if defined SYS_WINNT
 #include "ntp_timer.h"
-extern DWORD units_per_tick;
+#include "clockstuff.h"
 static long last_Adj = 0;
 #endif
 
@@ -80,6 +80,7 @@ get_systime(
 	(void) GETTIMEOFDAY(&tv, (struct timezone *)0);
 	now->l_i = tv.tv_sec + JAN_1970;
 
+#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
 	if (systime_10ms_ticks) {
 		/* fake better than 10ms resolution by interpolating 
 	   	accumulated residual (in adj_systime(), see below) */
@@ -92,9 +93,10 @@ get_systime(
 			}
 		}
 		dtemp *= FRAC;
-	} else {
-		dtemp = tv.tv_usec * FRAC / 1e6;
-	}
+	} else
+#endif
+
+	dtemp = tv.tv_usec * FRAC / 1e6;
 
 	if (dtemp >= FRAC)
 		now->l_i++;
@@ -134,6 +136,7 @@ adj_systime(
 		dtemp = -dtemp;
 	}
 
+#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
 	if (systime_10ms_ticks) {
 		/* accumulate changes until we have enough to adjust a tick */
 		if (dtemp < 5000e-6) {
@@ -145,29 +148,28 @@ adj_systime(
 			else sys_residual = dtemp - 10000e-6;
 			dtemp = 10000e-6;
 		}
-	} else {
+	} else 
+#endif
 		if (dtemp > sys_maxfreq)
 			dtemp = sys_maxfreq;
-	}
 
-#ifdef SYS_WINNT
-	dtemp = dtemp * 1000000.0;
-#else
 	dtemp = dtemp * 1e6 + .5;
-#endif
+
 	if (isneg)
 		dtemp = -dtemp;
 	adjtv.tv_sec = 0;
 	adjtv.tv_usec = (int32)dtemp;
 
+
 #if defined SYS_WINNT || defined SYS_CYGWIN32	
 	/* dtemp is in micro seconds. NT uses 100 ns units,
 	 * so a unit change in dwTimeAdjustment corresponds
-	 * to slewing 10 ppm. 
+	 * to slewing 10 ppm on a 100 Hz system. 
 	 * Calculate the number of 100ns units to add, 
+	 * using OS tick frequency as per suggestion from Harry Pyle,
 	 * and leave the remainder in dtemp */
-	dwTimeAdjustment = dtemp / 10;
-	dtemp +=  (double) -dwTimeAdjustment * 10.0;	
+	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5) );
+	dtemp += (double) -dwTimeAdjustment * ppm_per_adjust_unit;	
 	dwTimeAdjustment += units_per_tick;
 
 	/* only adjust the clock if adjustment changes */

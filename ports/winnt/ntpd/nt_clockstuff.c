@@ -18,8 +18,8 @@ static DWORD initial_units_per_tick = 0;
 static DWORD lastLowTimer = 0;
 
 ULONGLONG PerfFrequency = 0;
-
 DWORD units_per_tick = 0;
+DOUBLE ppm_per_adjust_unit = 0.0;
 
 void init_winnt_time(void) {
 	BOOL noslew;
@@ -32,11 +32,15 @@ void init_winnt_time(void) {
 
 	units_per_tick = initial_units_per_tick;
 
-#ifdef DEBUG
-	msyslog(LOG_INFO, "Initial Clock increment %7.1f us\n",
-			(float) (units_per_tick / 10));
-#endif
+	/* Calculate the time adjustment resulting from incrementing 
+	 * units per tick by 1 unit for 1 second */
+	ppm_per_adjust_unit = 1000000.0 / (double) every;
 
+#ifdef DEBUG
+	msyslog(LOG_INFO, "Initial Clock increment %7.1f us",
+			(float) (units_per_tick / 10));
+	msyslog(LOG_INFO, "Adjustment rate %5.3f ppm/s", ppm_per_adjust_unit);
+#endif
 }
 
 
@@ -120,10 +124,12 @@ TimerApcFunction(
 	(void) lpArgToCompletionRoutine; /* not used */
 
 	if (dwTimerLowValue == lastLowTimer) return;
-	lastLowTimer = dwTimerLowValue;
 	
 	/* Grab the counter first of all */
 	QueryPerformanceCounter(&LargeIntNowCount);
+
+	/* Save this for next time */
+	lastLowTimer = dwTimerLowValue;
 
 	/* Check to see if the counter has rolled. This happens
 	   more often on Multi-CPU systems */
@@ -135,9 +141,8 @@ TimerApcFunction(
 		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS - 
 			(ULONGLONG) LargeIntNowCount.QuadPart;
 #ifdef DEBUG
-		msyslog(LOG_INFO, 
-			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
-				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
+		msyslog(LOG_INFO, "Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
+		   RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
 #endif
 	}
 
