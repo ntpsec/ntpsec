@@ -20,6 +20,7 @@
 # include <config.h>
 #endif
 
+#include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_request.h"

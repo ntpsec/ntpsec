@@ -1,5 +1,7 @@
-
+#include "ntp_malloc.h"
 #define NULL 0
+
+char *strdup(const char *s);
 
 char *
 strdup(

@@ -26,9 +26,13 @@
 #ifdef HAVE_NETINET_IN_SYSTM_H
 # include <netinet/in_systm.h>
 #else /* Some old linux systems at least have in_system.h instead. */
-# include <netinet/in_system.h>
+# ifdef HAVE_NETINET_IN_SYSTEM_H
+#  include <netinet/in_system.h>
+# endif
 #endif /* HAVE_NETINET_IN_SYSTM_H */
-#include <netinet/ip.h>
+#ifdef HAVE_NETINET_IP_H
+# include <netinet/ip.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
@@ -465,7 +469,7 @@ create_sockets(
 			(ifreq.ifr_flags & IFF_LOOPBACK)
 #  else /* not IFF_LOCAL_LOOPBACK and not IFF_LOOPBACK */
 			/* test against 127.0.0.1 (yuck!!) */
-			(inter_list[i].sin.sin_addr.s_addr == inet_addr("127.0.0.1"))
+			((*(struct sockaddr_in *)&ifr->ifr_addr).sin_addr.s_addr == inet_addr("127.0.0.1"))
 #  endif /* not IFF_LOCAL_LOOPBACK and not IFF_LOOPBACK */
 			)
 		{
@@ -1589,7 +1593,7 @@ findbcastinter(
 	struct sockaddr_in *addr
 	)
 {
-#if defined(SIOCGIFCONF) || defined(SYS_WINNT)
+#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 	register u_int32 xaddr;
 
