@@ -1,3 +1,14 @@
+2000-08-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/cmd_args.c (getCmdOpts): Crack -N at pre-scan, as we do the
+	priority wiggle before the final scan.
+	From: Tom Smith <smith@cag.lkg.dec.com>
+	We might do better to move the priority wiggle to after the final
+	scan.  Especially if we want to permit command-line options to
+	have decent control over the priority.  When we rewrite the config
+	file stuff we might go to a multi-scan to solve some of these
+	problems.
+
 2000-08-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: '99k6, and manually fix configure.

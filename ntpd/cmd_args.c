@@ -28,6 +28,7 @@ getstartup(
 	)
 {
 	int errflg;
+	extern int priority_done;
 	int c;
 
 #ifdef DEBUG
@@ -100,6 +101,10 @@ getstartup(
 		    ++nofork;
 		    break;
 
+		case 'N':
+		    priority_done = strcmp(ntp_optarg, "high");
+		    break;
+
 		case '?':
 		    ++errflg;
 		    break;
@@ -142,7 +147,6 @@ getCmdOpts(
 	)
 {
 	extern char *config_file;
-	extern int priority_done;
 	int errflg;
 	int c;
 
@@ -221,8 +225,7 @@ getCmdOpts(
 		    case 'n':	/* already done at pre-scan */
 			break;
 
-		    case 'N':
-			priority_done = strcmp(ntp_optarg, "high");
+		    case 'N':	/* already done at pre-scan */
 			break;
 
 		    case 'p':
