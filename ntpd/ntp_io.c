@@ -541,12 +541,13 @@ create_sockets(
 	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);
 		for (i = 0; i < ninterfaces; i++) {
-			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x\n",
+			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x,  scope=%d\n",
 			       i,
 			       inter_list[i].fd,
 			       inter_list[i].bfd,
 			       inter_list[i].name,
-			       inter_list[i].flags);
+			       inter_list[i].flags,
+			       inter_list[i].scopeid);
 			/* Leave these as three printf calls. */
 			printf("              sin=%s",
 			       stoa((&inter_list[i].sin)));
