@@ -35,6 +35,6 @@ sntp_SOURCES = \
 	timing.c \
 	unix.c \
 	$(EMPTY)
-man_MANS = sntp.1
+#man_MANS = sntp.1
 
-EXTRA_DIST = $(man_MANS)
+EXTRA_DIST = sntp.1
