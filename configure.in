@@ -3327,14 +3327,34 @@ fi
 ## the ANSI2KNR-filtering rules.
 #LIB@&t@OBJS=`echo "$LIB@&t@OBJS" | sed 's,\.[[^.]]* ,$U&,g;s,\.[[^.]]*$,$U&,'`
 
-AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
- ElectricFence/Makefile include/Makefile kernel/Makefile kernel/sys/Makefile \
- libntp/Makefile libparse/Makefile ntpd/Makefile ntpdc/Makefile \
- ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
- scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj \
- scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntptrace \
- scripts/ntpver 
- scripts/plot_summary scripts/summary util/Makefile)
+AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(ElectricFence/Makefile)
+AC_CONFIG_FILES(adjtimed/Makefile)
+AC_CONFIG_FILES(clockstuff/Makefile)
+AC_CONFIG_FILES(include/Makefile)
+AC_CONFIG_FILES(kernel/Makefile)
+AC_CONFIG_FILES(kernel/sys/Makefile)
+AC_CONFIG_FILES(libntp/Makefile)
+AC_CONFIG_FILES(libparse/Makefile)
+AC_CONFIG_FILES(ntpd/Makefile)
+AC_CONFIG_FILES(ntpdate/Makefile)
+AC_CONFIG_FILES(ntpdc/Makefile)
+AC_CONFIG_FILES(ntpq/Makefile)
+AC_CONFIG_FILES(ntptrace/Makefile)
+AC_CONFIG_FILES(parseutil/Makefile)
+AC_CONFIG_FILES(scripts/Makefile)
+AC_CONFIG_FILES(scripts/calc_tickadj)
+AC_CONFIG_FILES(scripts/checktime)
+AC_CONFIG_FILES(scripts/freq_adj)
+AC_CONFIG_FILES(scripts/mkver)
+AC_CONFIG_FILES(scripts/ntp-wait)
+AC_CONFIG_FILES(scripts/ntpsweep)
+AC_CONFIG_FILES(scripts/ntptrace)
+AC_CONFIG_FILES(scripts/ntpver)
+AC_CONFIG_FILES(scripts/plot_summary)
+AC_CONFIG_FILES(scripts/summary)
+AC_CONFIG_FILES(util/Makefile)
+
 AC_CONFIG_COMMANDS(default, [[chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntptrace scripts/ntpver scripts/plot_summary scripts/summary]], [])
+
 AC_OUTPUT
-#test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
