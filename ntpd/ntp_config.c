@@ -134,6 +134,7 @@ static	struct keyword keywords[] = {
 	{ "setvar",		CONFIG_SETVAR },
 	{ "statistics",		CONFIG_STATISTICS },
 	{ "statsdir",		CONFIG_STATSDIR },
+	{ "tick",		CONFIG_ADJ },
 	{ "tinker",		CONFIG_TINKER },
 	{ "tos",		CONFIG_TOS },
 	{ "trap",		CONFIG_TRAP },
@@ -525,7 +526,6 @@ getconfig(
 	struct interface *localaddr;
 	struct refclockstat clock_stat;
 	FILEGEN *filegen;
-	u_char asterisk = '*';
 
 	/*
 	 * Initialize, initialize
@@ -1776,6 +1776,14 @@ getconfig(
 					      tokens[i], MAXDIAL);
 			}
 			sys_phone[i - 1][0] = '\0';
+			break;
+
+		    case CONFIG_ADJ: {
+			    double ftemp;
+
+			    sscanf(tokens[1], "%lf", &ftemp);
+			    proto_config(PROTO_ADJ, 0, ftemp, NULL);
+			}
 			break;
 
 		}

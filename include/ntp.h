@@ -710,6 +710,7 @@ struct pkt {
 #define PROTO_CEILING		17
 #define PROTO_COHORT		18
 #define PROTO_CALLDELAY		19
+#define PROTO_ADJ		20
 
 /*
  * Configuration items for the loop filter

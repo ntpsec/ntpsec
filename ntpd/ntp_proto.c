@@ -1072,7 +1072,7 @@ process_packet(
 	l_fp	*recv_ts
 	)
 {
-	l_fp	t10, t23;
+	l_fp	t34, t21;
 	double	p_offset, p_del, p_disp;
 	double	dtemp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime;
@@ -1191,16 +1191,16 @@ process_packet(
 	 * the system precision plus that due to the frequency error
 	 * since the originate time.
 	 *
-	 * c = ((t2 - t3) + (t1 - t0)) / 2
-	 * d = (t2 - t3) - (t1 - t0)
-	 * e = (org - rec) (seconds only)
+	 * Let t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->rec:
 	 */
-	t10 = p_xmt;			/* compute t1 - t0 */
-	L_SUB(&t10, &peer->rec);
-	t23 = p_rec;			/* compute t2 - t3 */
-	L_SUB(&t23, &p_org);
-	ci = t10;
-	p_disp = clock_phi * (peer->rec.l_ui - p_org.l_ui);
+	t34 = p_xmt;			/* t3 - t4 */
+	L_SUB(&t34, &peer->rec);
+	t21 = p_rec;			/* t2 - t1 */
+	L_SUB(&t21, &p_org);
+	ci = peer->rec;			/* t4 - t1 */
+	L_SUB(&ci, &p_org);
+	LFPTOD(&ci, p_disp);
+	p_disp = clock_phi * max(p_disp, LOGTOD(sys_precision));
 
 	/*
 	 * If running in a broadcast association, the clock offset is
@@ -1211,6 +1211,7 @@ process_packet(
 	 * MODE_BCLIENT mode. The next broadcast message after that
 	 * computes the broadcast offset and clears FLAG_MCAST.
 	 */
+	ci = t34;
 	if (pmode == MODE_BROADCAST) {
 		if (peer->flags & FLAG_MCAST) {
 			LFPTOD(&ci, p_offset);
@@ -1220,14 +1221,14 @@ process_packet(
 
 			peer->flags &= ~FLAG_MCAST;
 		}
-		DTOLFP(peer->estbdelay, &t10);
-		L_ADD(&ci, &t10);
+		DTOLFP(peer->estbdelay, &t34);
+		L_ADD(&ci, &t34);
 		p_del = peer->delay;
 	} else {
-		L_ADD(&ci, &t23);
+		L_ADD(&ci, &t21);	/* (t2 - t1) + (t3 - t4) */
 		L_RSHIFT(&ci);
-		L_SUB(&t23, &t10);
-		LFPTOD(&t23, p_del);
+		L_SUB(&t21, &t34);	/* (t2 - t1) - (t3 - t4) */
+		LFPTOD(&t21, p_del);
 	}
 	p_del = max(p_del, LOGTOD(sys_precision));
 	LFPTOD(&ci, p_offset);
@@ -2953,20 +2954,6 @@ init_proto(void)
 #endif
 	pps_enable = 0;
 	stats_control = 1;
-
-	/*
-	 * Some system clocks should only be adjusted in 10ms
-	 * increments.
-	 */
-#if defined RELIANTUNIX_CLOCK
-	systime_10ms_ticks = 1;		  /* Reliant UNIX */
-#elif defined SCO5_CLOCK
-	if (sys_precision >= (s_char)-10) /* pre-SCO OpenServer 5.0.6 */
-		systime_10ms_ticks = 1;
-#endif
-	if (systime_10ms_ticks)
-		NLOG(NLOG_SYSEVENT)
-		    msyslog(LOG_INFO, "using 10ms tick adjustments");
 }
 
 
@@ -3103,6 +3090,12 @@ proto_config(
 	 */
 	case PROTO_COHORT:
 		sys_cohort= (int)dvalue;
+		break;
+	/*
+	 * Set the adjtime() resolution (s).
+	 */
+	case PROTO_ADJ:
+		sys_tick = dvalue;
 		break;
 
 #ifdef REFCLOCK

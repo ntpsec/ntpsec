@@ -57,8 +57,9 @@
 #define CONFIG_INCLUDEFILE      36
 #define CONFIG_KEYSDIR		37
 #define CONFIG_CDELAY		38
+#define CONFIG_ADJ		39
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		39
+#define CONFIG_CRYPTO		40
 #endif /* OPENSSL */
 
 /*

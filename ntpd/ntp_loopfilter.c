@@ -613,6 +613,11 @@ local_clock(
 		drift_comp = NTP_MAXFREQ;
 	else if (drift_comp <= -NTP_MAXFREQ)
 		drift_comp = -NTP_MAXFREQ;
+	if (fabs(etemp) > NTP_MAXFREQ)
+		msyslog(LOG_NOTICE,
+		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
+		    etemp * 1e6, NTP_MAXFREQ * 1e6);
+
 	dtemp = SQUARE(clock_stability);
 	etemp = SQUARE(etemp) - dtemp;
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
