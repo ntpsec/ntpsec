@@ -179,8 +179,8 @@ AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h netdb.h poll.h resolv.h)
-AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
-AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
+AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h termios.h)
+AC_CHECK_HEADERS(timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in.h netinet/ip.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO)])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
@@ -204,7 +204,8 @@ case "$target" in
     ;;
 esac
 AC_CHECK_HEADERS(sys/sockio.h sys/stat.h sys/stream.h sys/stropts.h)
-AC_CHECK_HEADERS(sys/sysctl.h sys/termios.h sys/time.h sys/timepps.h)
+AC_CHECK_HEADERS(sys/sysctl.h sys/termios.h sys/time.h)
+AC_EGREP_HEADER(PPS_API_VERS_1, sys/timepps.h, AC_CHECK_HEADERS(sys/timepps.h))
 AC_CHECK_HEADERS(sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$target" in

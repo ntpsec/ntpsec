@@ -819,9 +819,6 @@
 /* Define if you have the <termios.h> header file.  */
 #undef HAVE_TERMIOS_H
 
-/* Define if you have the <timepps.h> header file.  */
-#undef HAVE_TIMEPPS_H
-
 /* Define if you have the <timex.h> header file.  */
 #undef HAVE_TIMEX_H
 

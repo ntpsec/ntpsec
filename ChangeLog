@@ -1,4 +1,11 @@
+1999-10-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c (CONFIG_FILE): NT changes
+	From: Sven Dietrich <Sven_Dietrich@trimble.com>
+
 1999-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: sys/timepps.h verification changes
 
 	* ntpd/refclock_atom.c (atom_poll): PPS cleanup
 	From: Dave Mills <mills@udel.edu>
