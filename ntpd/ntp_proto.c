@@ -109,10 +109,15 @@ transmit(
 			hpoll = peer->minpoll;
 			peer->unreach = 0;
 		} else {
-			if (peer->cast_flags & MDF_ACAST &&
-			    sys_survivors >= NTP_MINCLOCK) {
-				hpoll = peer->maxpoll;
-				peer->unreach = 0;
+			if (peer->cast_flags & MDF_ACAST) {
+				if (sys_survivors < NTP_MINCLOCK) {
+					peer->ttl++;
+					if (peer->ttl > peer->ttlmax)
+						peer->ttl = peer->ttlmax;
+				} else {	
+					hpoll = peer->maxpoll;
+					peer->unreach = 0;
+				}
 			} else {
 				peer->unreach++;
 			}
@@ -1676,7 +1681,7 @@ clock_select(void)
 	 * chance. If they didn't pass the sanity and intersection
 	 * tests, they have already been voted off the island.
 	 */
-	if (nlist < NTP_CANCLOCK && nlist < sys_survivors)
+	if (nlist < NTP_MINCLOCK && nlist < sys_survivors)
 		resetmanycast();
 	sys_survivors = nlist;
 

@@ -161,6 +161,7 @@ struct ctl_var peer_var[] = {
 	{ CP_FILTERROR,	AR,	"filtdisp" },	/* 34 */
 	{ CP_FLASH,     FX,	"flash" },	/* 35 */ 
 	{ CP_TTL,	UI,	"ttl" },	/* 36 */
+	{ CP_TTLMAX,	UI,	"ttlmax" },	/* 37 */
 	/*
 	 * These are duplicate entries so that we can
 	 * process deviant version of the ntp protocol.

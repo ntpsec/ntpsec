@@ -382,9 +382,10 @@ resetmanycast(void)
 
 		for (peer = peer_hash[i]; peer != 0; peer =
 		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST)
+			if (peer->cast_flags & MDF_ACAST) {
+				peer->ttl = 0;
 				poll_update(peer, peer->minpoll);
-
+			}
 		}
 	}
 }
@@ -602,7 +603,7 @@ peer_config(
 		peer->flags = flags | FLAG_CONFIG |
 			(peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;
-		peer->ttl = (u_char)ttl;
+		peer->ttlmax = ttl;
 		peer->keyid = key;
 		return (peer);
 	}
@@ -673,7 +674,7 @@ newpeer(
 	peer->flags = flags;
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->minpoll;
-	peer->ttl = ttl;
+	peer->ttlmax = ttl;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->precision = sys_precision;
 	peer->jitter = MAXDISPERSE;

@@ -202,7 +202,8 @@ static struct ctl_var peer_var[] = {
 	{ CP_FILTERROR,	RO, "filtdisp=" },	/* 34 */
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
-	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
+	{ CP_TTLMAX,	RO, "ttlmax" },		/* 37 */
+	{ CP_VARLIST,	RO, "peer_var_list" },	/* 38 */
 #ifdef PUBKEY
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
@@ -240,6 +241,7 @@ static u_char def_peer_var[] = {
 	CP_FLASH,
 	CP_KEYID,
 	CP_TTL,
+	CP_TTLMAX,
 	CP_OFFSET,
 	CP_DELAY,
 	CP_DISPERSION,
@@ -1482,9 +1484,14 @@ ctl_putpeer(
 		ctl_putint(peer_var[CP_TTL].text, peer->ttl);
 		break;
 
+	case CP_TTLMAX:
+		ctl_putint(peer_var[CP_TTLMAX].text, peer->ttlmax);
+		break;
+
 	case CP_VALID:
 		ctl_putuint(peer_var[CP_VALID].text, peer->valid);
 		break;
+
 	case CP_TIMER:
 		ctl_putuint(peer_var[CP_TIMER].text,
 		    peer->nextdate - current_time);

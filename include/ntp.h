@@ -258,6 +258,7 @@ struct peer {
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
 	u_char	ttl;		/* m'cast time to live/refclock mode */
+	u_char	ttlmax;		/* max ttl */
 
 	/*
 	 * Variables used by reference clock support
