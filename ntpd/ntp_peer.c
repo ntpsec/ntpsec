@@ -614,8 +614,8 @@ newpeer(
 		if (debug)
 			printf("peer: %s\n", statstr);
 #endif
-#endif /* OPENSSL */
 	}
+#endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug)
 		printf(
