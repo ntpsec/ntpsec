@@ -760,10 +760,6 @@ sock_hash(
 		ch++;
 		hashVal = 37 * hashVal + (int)*ch;
 	}
-	ch = (char *)&((struct sockaddr_in *)addr)->sin_port;
-	hashVal = 37 * hashVal + (int)*ch;
-	ch++;
-	hashVal = 37 * hashVal + (int)*ch;
 	switch(addr->ss_family) {
 	case AF_INET:
 		ch = (char *)&((struct sockaddr_in *)addr)->sin_addr;

@@ -159,25 +159,14 @@ transmit(
 
 				/*
 				 * If nothing is likely to change in
-				 * future, slap a restrict bit so we
+				 * future, flash a restrict bit so we
 				 * won't bother the dude again.
 				 */
-				if (strcmp((char *)&peer->refid,
-				    "RSTR") == 0 ||
-				    strcmp((char *)&peer->refid,
-				    "DENY") == 0 ||
-				    strcmp((char *)&peer->refid,
-				    "CRYP") == 0) {
-					struct sockaddr_storage mskadr_sin;
-
-					SET_HOSTMASK(&mskadr_sin,
-					    peer->srcadr.ss_family);
-					hack_restrict(RESTRICT_FLAGS,
-					    &peer->srcadr, &mskadr_sin,
-					    0, RES_DONTTRUST |
-					    RES_TIMEOUT);
+				if (memcmp((char *)&peer->refid,
+				    "DENY", 4) == 0 ||
+				    memcmp((char *)&peer->refid,
+				    "CRYP", 4) == 0)
 					peer->flash |= TEST4;
-				}
 			} else {
 				unpeer(peer);
 				return;
@@ -234,7 +223,16 @@ transmit(
 					peer->burst = NTP_BURST;
 			}
 		} else {
-			peer->burst--;
+
+			/*
+			 * Source rate control. If we are restrained,
+			 * each burst is one packet.
+			 */
+			if (memcmp((char *)&peer->refid, "RSTR", 4) ==
+			    0)
+				peer->burst = 0;
+			else
+				peer->burst--;
 			if (peer->burst == 0) {
 				/*
 				 * If a broadcast client at this point,
@@ -260,13 +258,16 @@ transmit(
 				 */
 				if (mode_ntpdate) {
 					peer_ntpdate--;
-					if (peer_ntpdate > 0)
+					if (peer_ntpdate > 0) {
+						poll_update(
+						    peer, hpoll);
 						return;
-
+					}
 					msyslog(LOG_NOTICE,
 				 	    "no reply; clock not set");
 					exit (0);
 				}
+				poll_update(peer, hpoll);
 				return;
 			}
 		}
@@ -1371,7 +1372,7 @@ poll_update(
 		else if (hpoll < peer->minpoll)
 			peer->hpoll = peer->minpoll;
 		else
-			peer->hpoll = (u_char) hpoll;
+			peer->hpoll = (u_char)hpoll;
 	}
 
 	/*
@@ -1395,7 +1396,7 @@ poll_update(
 #else /* OPENSSL */
 	if (peer->burst > 0) {
 #endif /* OPENSSL */
-		if (peer->nextdate != current_time)
+		if (hpoll == 0 && peer->nextdate != current_time)
 			return;
 #ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
@@ -1414,8 +1415,8 @@ poll_update(
 			peer->kpoll = peer->hpoll;
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	} else {
-		peer->kpoll = (u_char) max(min(peer->ppoll, peer->hpoll),
-		    peer->minpoll);
+		peer->kpoll = (u_char) max(min(peer->ppoll,
+		    peer->hpoll), peer->minpoll);
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	}
 	if (peer->nextdate < current_time)
@@ -1449,7 +1450,7 @@ peer_clear(
 	char	*ident			/* tally lights */
 	)
 {
-	u_char	i;
+	u_char	oreach, i;
 
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1460,6 +1461,7 @@ peer_clear(
 	 * purged, too. This makes it much harder to sneak in some
 	 * unauthenticated data in the clock filter.
 	 */
+	oreach = peer->reach;
 #ifdef OPENSSL
 	key_expire(peer);
 	if (peer->pkey != NULL)
@@ -1522,15 +1524,20 @@ peer_clear(
 	}
 
 	/*
-	 * Randomize the first poll to avoid bunching. During
-	 * initialization use the association count to spread out the
-	 * polls at one-second intervals.
+	 * Randomize the first poll to avoid bunching, but only if the
+	 * rascal has never been heard. During initialization use the
+	 * association count to spread out the polls at one-second
+	 * intervals.
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
-	if (initializing)
-		peer->nextdate += peer_associations;
+	peer->burst = 0;
+	if (oreach)
+		poll_update(peer, 0);
+	else if (initializing)
+		peer->nextdate = current_time + peer_associations;
 	else
-		peer->nextdate += (u_int)RANDOM % peer_associations;
+		peer->nextdate = current_time + (u_int)RANDOM %
+		    peer_associations;
 #ifdef DEBUG
 	if (debug)
 		printf("peer_clear: at %ld assoc ID %d refid %s\n",
