@@ -100,3 +100,4 @@ ntpd/Copy of ntp_io.csave
 libntp/Makefile.am.$$$
 ports/winnt/ntpd/nt_clockstuff.c.bak
 include/isc/Makefile.am.$$$
+configure.in.$$$

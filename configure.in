@@ -3517,7 +3517,7 @@ esac
 
 case "$ac_cv_header_sys_sysctl_h" in
  yes)
-    AC_DEFINE(HAVE_IFLIST_SYSCTL, ,[[ISC: sys/sysctl.h implies iflist_sysctl]])
+    AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[[ISC: sys/sysctl.h implies iflist_sysctl]])
     ;;
 esac
 
