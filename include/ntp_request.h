@@ -474,17 +474,17 @@ struct info_sys {
  * System stats.  These are collected in the protocol module
  */
 struct info_sys_stats {
-	u_int32 timeup;		/* time we have been up and running */
-	u_int32 timereset;	/* time since these were last cleared */
-	u_int32 badstratum;	/* packets claiming an invalid stratum */
-	u_int32 oldversionpkt;	/* old version packets received */
-	u_int32 newversionpkt;	/* new version packets received */
-	u_int32 unknownversion;	/* don't know version packets */
-	u_int32 badlength;	/* packets with bad length */
+	u_int32 timeup;		/* time since restart */
+	u_int32 timereset;	/* time since reset */
+	u_int32 denied;		/* access denied */
+	u_int32 oldversionpkt;	/* recent version */
+	u_int32 newversionpkt;	/* current version */
+	u_int32 unknownversion;	/* bad version */
+	u_int32 badlength;	/* bad length or format */
 	u_int32 processed;	/* packets processed */
-	u_int32 badauth;	/* packets dropped because of authorization */
+	u_int32 badauth;	/* bad authentication */
 	u_int32 received;	/* packets received */
-	u_int32 limitrejected;	/* rate limited packets */
+	u_int32 limitrejected;	/* rate exceeded */
 };
 
 
@@ -492,16 +492,16 @@ struct info_sys_stats {
  * System stats - old version
  */
 struct old_info_sys_stats {
-	u_int32 timeup;		/* time we have been up and running */
-	u_int32 timereset;	/* time since these were last cleared */
-	u_int32 badstratum;	/* packets claiming an invalid stratum */
-	u_int32 oldversionpkt;	/* old version packets received */
-	u_int32 newversionpkt;	/* new version packets received */
-	u_int32 unknownversion;	/* don't know version packets */
-	u_int32 badlength;	/* packets with bad length */
+	u_int32 timeup;		/* time since restart */
+	u_int32 timereset;	/* time since reset */
+	u_int32 denied;		/* access denied */
+	u_int32 oldversionpkt;	/* recent version */
+	u_int32 newversionpkt;	/* current version */
+	u_int32 unknownversion;	/* bad version */
+	u_int32 badlength;	/* bad length or format */
 	u_int32 processed;	/* packets processed */
-	u_int32 badauth;	/* packets dropped because of authorization */
-	u_int32 wanderhold;
+	u_int32 badauth;	/* bad authentication */
+	u_int32 wanderhold;	/* (not used) */
 };
 
 

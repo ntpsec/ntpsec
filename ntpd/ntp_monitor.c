@@ -1,5 +1,5 @@
 /*
- * ntp_monitor.c - monitor who is using the ntpd server
+ * ntp_monitor - monitor ntpd statistics
  */
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -54,7 +54,6 @@
 #ifndef MONMEMINC
 #define	MONMEMINC	40	/* allocate them 40 at a time */
 #endif
-#define MONAVG		8.	/* interpacket averaging factor */
 
 /*
  * Hashing stuff
@@ -197,8 +196,7 @@ ntp_monitor(
 
 	pkt = &rbufp->recv_pkt;
 	memset(&addr, 0, sizeof(addr));
-	memcpy(&addr, &(rbufp->recv_srcadr),
-	    sizeof(rbufp->recv_srcadr));
+	memcpy(&addr, &(rbufp->recv_srcadr), sizeof(addr));
 	hash = MON_HASH(&addr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 	md = mon_hash[hash];
@@ -208,13 +206,7 @@ ntp_monitor(
 		 * Match address only to conserve MRU size.
 		 */
 		if (SOCKCMP(&md->rmtadr, &addr)) {
-			if (md->lasttime == md->firsttime)
-				md->avg_interval = current_time -
-				    md->lasttime;
-			else
-				md->avg_interval += ((current_time -
-				    md->lasttime) - md->avg_interval) /
-				    MONAVG;
+			md->drop_count = current_time - md->lasttime;
 			md->lasttime = current_time;
 			md->count++;
 			md->rmtport = NSRCPORT(&rbufp->recv_srcadr);

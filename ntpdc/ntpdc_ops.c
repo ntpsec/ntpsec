@@ -1019,30 +1019,30 @@ again:
 		checkitemsize(itemsize, sizeof(struct info_sys_stats));
 		return;
 	}
-	fprintf(fp, "system uptime:          %ld\n",
+	fprintf(fp, "time since restart:     %ld\n",
 	       (u_long)ntohl(ss->timeup));
 	fprintf(fp, "time since reset:       %ld\n",
 		(u_long)ntohl(ss->timereset));
         fprintf(fp, "packets received:       %ld\n",
 		(u_long)ntohl(ss->received));
-	fprintf(fp, "packets restricted:     %ld\n",
-	       (u_long)ntohl(ss->badstratum));
-	fprintf(fp, "old version packets:    %ld\n",
-	       (u_long)ntohl(ss->oldversionpkt));
-	fprintf(fp, "new version packets:    %ld\n",
-	       (u_long)ntohl(ss->newversionpkt));
-	fprintf(fp, "unknown version number: %ld\n",
-	       (u_long)ntohl(ss->unknownversion));
-	fprintf(fp, "bad packet format:      %ld\n",
-	       (u_long)ntohl(ss->badlength));
 	fprintf(fp, "packets processed:      %ld\n",
-	       (u_long)ntohl(ss->processed));
+		(u_long)ntohl(ss->processed));
+	fprintf(fp, "current version:        %ld\n",
+	       (u_long)ntohl(ss->newversionpkt));
+	fprintf(fp, "previous version:       %ld\n",
+	       (u_long)ntohl(ss->oldversionpkt));
+	fprintf(fp, "bad version:            %ld\n",
+	       (u_long)ntohl(ss->unknownversion));
+	fprintf(fp, "access denied:          %ld\n",
+		(u_long)ntohl(ss->denied));
+	fprintf(fp, "bad length or format:   %ld\n",
+	       (u_long)ntohl(ss->badlength));
 	fprintf(fp, "bad authentication:     %ld\n",
 	       (u_long)ntohl(ss->badauth));
 	if (itemsize != sizeof(struct info_sys_stats))
 	    return;
 	
-	fprintf(fp, "packets limited:        %ld\n",
+	fprintf(fp, "rate exceeded:          %ld\n",
 	       (u_long)ntohl(ss->limitrejected));
 }
 
