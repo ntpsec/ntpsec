@@ -237,6 +237,10 @@ SOURCE=..\..\..\libntp\memmove.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mexit.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\mfp_mul.c
 # End Source File
 # Begin Source File
@@ -365,6 +369,10 @@ SOURCE=..\..\..\include\binio.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\clockstuff.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\config.h
 # End Source File
 # Begin Source File
@@ -378,6 +386,10 @@ SOURCE=..\..\..\include\ieee754io.h
 # Begin Source File
 
 SOURCE=..\include\netinet\in.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\arpa\inet.h
 # End Source File
 # Begin Source File
 
@@ -429,6 +441,14 @@ SOURCE=..\..\..\include\ntp_fp.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\ntp_if.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_io.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\ntp_iocompletionport.h
 # End Source File
 # Begin Source File
@@ -446,6 +466,10 @@ SOURCE=..\..\..\include\ntp_proto.h
 # Begin Source File
 
 SOURCE=..\..\..\include\ntp_refclock.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_select.h
 # End Source File
 # Begin Source File
 
@@ -473,6 +497,10 @@ SOURCE=..\..\..\include\ntp_unixtime.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\ntpd.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\include\recvbuff.h
 # End Source File
 # Begin Source File
@@ -489,7 +517,19 @@ SOURCE=..\include\syslog.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\termios.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\sys\time.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\transmitbuff.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\win32_io.h
 # End Source File
 # End Group
 # Begin Group "Generated Files"
