@@ -1,3 +1,9 @@
+2001-06-25  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c (oncore_msg_BaEaHa): Fix wrong offset for
+	rsm.bad_almanac
+	From: Reynir Siik <reynir@royal.net>
+
 2001-06-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99m-rc2

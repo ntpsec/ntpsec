@@ -1917,7 +1917,7 @@ oncore_msg_BaEaHa(
 		instance->rsm.bad_fix	  = instance->Ea[64]&0x52;
 		vp = &instance->shmem[instance->shmem_Ba];
 	} else if (instance->chan == 8) {
-		instance->rsm.bad_almanac = instance->Ea[77]&0x1;
+		instance->rsm.bad_almanac = instance->Ea[72]&0x1;
 		instance->rsm.bad_fix	  = instance->Ea[72]&0x52;
 		vp = &instance->shmem[instance->shmem_Ea];
 	} else if (instance->chan == 12) {
