@@ -417,27 +417,36 @@ ntp_set_tod(
 	void *tzp
 	)
 {
-	int rc;
+	int rc = -1;
 	struct timeval adjtv;
 
+#ifdef DEBUG
+	if (debug)
+	    printf("In ntp_set_tod\n");
+#endif
+
 #ifdef HAVE_CLOCK_SETTIME
-	{
+	if (rc) {
 		struct timespec ts;
 
+		set_tod_using = "clock_settime";
 		/* Convert timeval to timespec */
 		ts.tv_sec = tvp->tv_sec;
 		ts.tv_nsec = 1000 *  tvp->tv_usec;
 
+		errno = 0;
 		rc = clock_settime(CLOCK_REALTIME, &ts);
-		if (!rc)
-		{
-			set_tod_using = "clock_settime";
-			return rc;
-		}
 	}
+#ifdef DEBUG
+	if (debug) {
+		printf("ntp_set_tod: %s: %d: %s\n",
+			set_tod_using, rc, strerror(errno));
+	}
+#endif
 #endif /* HAVE_CLOCK_SETTIME */
 #ifdef HAVE_SETTIMEOFDAY
-	{
+	if (rc) {
+		set_tod_using = "settimeofday";
 		/*
 		 * Some broken systems don't reset adjtime() when the
 		 * clock is stepped.
@@ -445,27 +454,37 @@ ntp_set_tod(
 		adjtv.tv_sec = adjtv.tv_usec = 0;
 		adjtime(&adjtv, NULL);
 		rc = SETTIMEOFDAY(tvp, tzp);
-		if (!rc)
-		{
-			set_tod_using = "settimeofday";
-			return rc;
-		}
 	}
+#ifdef DEBUG
+	if (debug) {
+		printf("ntp_set_tod: %s: %d: %s\n",
+			set_tod_using, rc, strerror(errno));
+	}
+#endif
 #endif /* HAVE_SETTIMEOFDAY */
 #ifdef HAVE_STIME
-	{
+	if (rc) {
 		long tp = tvp->tv_sec;
 
+		set_tod_using = "stime";
 		rc = stime(&tp); /* lie as bad as SysVR4 */
-		if (!rc)
-		{
-			set_tod_using = "stime";
-			return rc;
-		}
 	}
+#ifdef DEBUG
+	if (debug) {
+		printf("ntp_set_tod: %s: %d: %s\n",
+			set_tod_using, rc, strerror(errno));
+	}
+#endif
 #endif /* HAVE_STIME */
-	set_tod_using = "Failed!";
-	return -1;
+	if (rc)
+	    set_tod_using = "Failed!";
+#ifdef DEBUG
+	if (debug) {
+		printf("ntp_set_tod: Final: %s: %d: %s\n",
+			set_tod_using, rc, strerror(errno));
+	}
+#endif
+	return rc;
 }
 
 #endif /* not SYS_WINNT */
