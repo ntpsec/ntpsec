@@ -482,7 +482,7 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET
 	set_reuseaddr(1);
 #endif
-	for (i = nwilds; i < ninterfaces; i++) {
+	for (i = 0; i < ninterfaces; i++) {
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
 
