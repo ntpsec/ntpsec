@@ -4,6 +4,11 @@ bin_PROGRAMS = ntpd
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
 # LDADD might need RESLIB and ADJLIB
 LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
+# ntpd may need:
+# log10                               refclock_wwv.o
+# sqrt                                ntp_control.o
+# floor                               refclock_wwv.o
+# which are (usually) provided by -lm.
 ntpd_LDADD = $(LDADD) -lm
 DISTCLEANFILES = .version version.c
 #EXTRA_DIST = ntpd.mak

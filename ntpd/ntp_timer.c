@@ -10,7 +10,9 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <sys/signal.h>
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"

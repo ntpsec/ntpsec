@@ -1,3 +1,11 @@
+2000-05-31  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_timer.c: Protect <unistd.h>
+
+2000-05-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/Makefile.am: Document what we expect from -lm
+
 2000-05-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99j
