@@ -15,28 +15,29 @@ case "${host_os}" in
 				;;
 		esac
 		;;
-	osf[[1-3]]* )
-		# get the right version of struct sockaddr
-		case "${CC}" in
-			cc )
-				ac_cv_os_cflags="-std -D_SOCKADDR_LEN -D_NO_PROTO"
-				;;
-			* )
-				ac_cv_os_cflags="-D_SOCKADDR_LEN -D_NO_PROTO"
-				;;
-		esac
-		;;
-	osf* )
-		# get the right version of struct sockaddr
-		case "${CC}" in
-			cc )
-				ac_cv_os_cflags="-std -D_SOCKADDR_LEN"
-				;;
-			* )
-				ac_cv_os_cflags="-D_SOCKADDR_LEN"
-				;;
-		esac
-		;;
+# HMS: am-utils needed this but we don't (apparently)
+#	osf[[1-3]]* )
+#		# get the right version of struct sockaddr
+#		case "${CC}" in
+#			cc )
+#				ac_cv_os_cflags="-std -D_SOCKADDR_LEN -D_NO_PROTO"
+#				;;
+#			* )
+#				ac_cv_os_cflags="-D_SOCKADDR_LEN -D_NO_PROTO"
+#				;;
+#		esac
+#		;;
+#	osf* )
+#		# get the right version of struct sockaddr
+#		case "${CC}" in
+#			cc )
+#				ac_cv_os_cflags="-std -D_SOCKADDR_LEN"
+#				;;
+#			* )
+#				ac_cv_os_cflags="-D_SOCKADDR_LEN"
+#				;;
+#		esac
+#		;;
 	aix[[1-3]]* )
 		ac_cv_os_cflags="" ;;
 	aix4.[[0-2]]* )
