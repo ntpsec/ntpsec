@@ -404,6 +404,8 @@ create_sockets(
 	for(n = ifc.ifc_len, ifr = ifc.ifc_req; n > 0;
 	    ifr = (struct ifreq *)((char *)ifr + size))
 	{
+		extern int listen_to_virtual_ips;
+
 		size = sizeof(*ifr);
 
 # ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
@@ -414,17 +416,29 @@ create_sockets(
 
 # if !defined(SYS_WINNT)
 		/* Exclude logical interfaces (indicated by ':' in the interface name)	*/
-		if (strchr(ifr->ifr_name, (int)':') != NULL) {
+		if (debug)
+			printf("interface <%s> ", ifr->ifr_name);
+		if ((listen_to_virtual_ips == 0)
+		    && (strchr(ifr->ifr_name, (int)':') != NULL)) {
+			if (debug)
+			    printf("ignored\n");
 			continue;
 		}
+		if (debug)
+		    printf("OK\n");
 
-		if
+		if (
 #  ifdef VMS /* VMS+UCX */
-	    (((struct sockaddr *)&(ifr->ifr_addr))->sa_family != AF_INET)
+			(((struct sockaddr *)&(ifr->ifr_addr))->sa_family != AF_INET)
 #  else
-	    (ifr->ifr_addr.sa_family != AF_INET)
+			(ifr->ifr_addr.sa_family != AF_INET)
 #  endif /* VMS+UCX */
-	    continue;
+			) {
+			if (debug)
+			    printf("ignoring %s - not AF_INET\n",
+				   ifr->ifr_name);
+			continue;
+		}
 # endif /* SYS_WINNT */
 		ifreq = *ifr;
 		inter_list[i].flags = 0;
@@ -435,21 +449,23 @@ create_sockets(
 		ioc.ic_timout = 0;
 		ioc.ic_dp = (caddr_t)&ifreq;
 		ioc.ic_len = sizeof(struct ifreq);
-		if(ioctl(vs, I_STR, &ioc))
-		{
+		if(ioctl(vs, I_STR, &ioc)) {
 			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFFLAGS) failed: %m");
 			continue;
 		}
 #  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGIFFLAGS, (char *)&ifreq) < 0)
-		{
+		if (ioctl(vs, SIOCGIFFLAGS, (char *)&ifreq) < 0) {
 			if (errno != ENXIO)
 			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFFLAGS) failed: %m");
 			continue;
 		}
 #  endif /* not STREAMS_TLI */
-		if ((ifreq.ifr_flags & IFF_UP) == 0)
-		    continue;
+		if ((ifreq.ifr_flags & IFF_UP) == 0) {
+			if (debug)
+			    printf("ignoring %s - interface not UP\n",
+				   ifr->ifr_name);
+			continue;
+		}
 		inter_list[i].flags = 0;
 		if (ifreq.ifr_flags & IFF_BROADCAST)
 		    inter_list[i].flags |= INT_BROADCAST;
@@ -499,7 +515,7 @@ create_sockets(
 # endif /* not SYS_WINNT */
 #endif /* 0 */
 # if defined(SYS_WINNT)
-   {int TODO_FillInTheNameWithSomeThingReasonble;}
+		{int TODO_FillInTheNameWithSomeThingReasonble;}
 # else
   		(void)strncpy(inter_list[i].name, ifreq.ifr_name,
   			      sizeof(inter_list[i].name));
@@ -520,21 +536,18 @@ create_sockets(
 		}
 # endif /* SUN_3_3_STINKS */
 # if !defined SYS_WINNT && !defined SYS_CYGWIN32 /* no interface flags on NT */
-		if (inter_list[i].flags & INT_BROADCAST)
-		{
+		if (inter_list[i].flags & INT_BROADCAST) {
 #  ifdef STREAMS_TLI
 			ioc.ic_cmd = SIOCGIFBRDADDR;
 			ioc.ic_timout = 0;
 			ioc.ic_dp = (caddr_t)&ifreq;
 			ioc.ic_len = sizeof(struct ifreq);
-			if(ioctl(vs, I_STR, &ioc))
-			{
+			if(ioctl(vs, I_STR, &ioc)) {
 				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFBRDADDR) failed: %m");
 				exit(1);
 			}
 #  else /* not STREAMS_TLI */
-			if (ioctl(vs, SIOCGIFBRDADDR, (char *)&ifreq) < 0)
-			{
+			if (ioctl(vs, SIOCGIFBRDADDR, (char *)&ifreq) < 0) {
 				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFBRDADDR) failed: %m");
 				exit(1);
 			}
@@ -556,14 +569,12 @@ create_sockets(
 		ioc.ic_timout = 0;
 		ioc.ic_dp = (caddr_t)&ifreq;
 		ioc.ic_len = sizeof(struct ifreq);
-		if(ioctl(vs, I_STR, &ioc))
-		{
+		if(ioctl(vs, I_STR, &ioc)) {
 			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFNETMASK) failed: %m");
 			exit(1);
 		}
 #  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0)
-		{
+		if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
 			msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFNETMASK) failed: %m");
 			exit(1);
 		}
@@ -584,8 +595,7 @@ create_sockets(
 		 */
 		for (j=0; j < i; j++)
 		    if (inter_list[j].sin.sin_addr.s_addr ==
-			inter_list[i].sin.sin_addr.s_addr)
-		    {
+			inter_list[i].sin.sin_addr.s_addr) {
 			    break;
 		    }
 		if (j == i)
@@ -599,8 +609,7 @@ create_sockets(
 	ninterfaces = i;
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
-	for (i = 0; i < ninterfaces; i++)
-	{
+	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd =
 		    open_socket(&inter_list[i].sin,
 				inter_list[i].flags & INT_BROADCAST, 0);
@@ -610,20 +619,17 @@ create_sockets(
 	 * Now that we have opened all the sockets, turn off the reuse flag for
 	 * security.
 	 */
-	for (i = 0; i < ninterfaces; i++)
-	{
+	for (i = 0; i < ninterfaces; i++) {
 		int off = 0;
 
 		/*
 		 * if inter_list[ n ].fd  is -1, we might have a adapter
 		 * configured but not present
 		 */
-		if( inter_list[ i ].fd != -1 )
-		{
+		if ( inter_list[ i ].fd != -1 ) {
 			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
 				       SO_REUSEADDR, (char *)&off,
-				       sizeof(off)))
-			{
+				       sizeof(off))) {
 				msyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR,off) failed: %m");
 			}
 		}
@@ -648,11 +654,9 @@ create_sockets(
 
 	any_interface = &inter_list[0];
 #ifdef DEBUG
-	if (debug > 2)
-	{
+	if (debug > 2) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);
-		for (i = 0; i < ninterfaces; i++)
-		{
+		for (i = 0; i < ninterfaces; i++) {
 			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x\n",
 			       i,
 			       inter_list[i].fd,
@@ -662,7 +666,7 @@ create_sockets(
 			/* Leave these as three printf calls. */
 			printf("              sin=%s",
 			       inet_ntoa((inter_list[i].sin.sin_addr)));
-			if(inter_list[i].flags & INT_BROADCAST)
+			if (inter_list[i].flags & INT_BROADCAST)
 			    printf("  bcast=%s,",
 				   inet_ntoa((inter_list[i].bcast.sin_addr)));
 			printf("  mask=%s\n",
@@ -671,9 +675,7 @@ create_sockets(
 	}
 #endif
 #if defined (HAVE_IO_COMPLETION_PORT)
-
-	for (i = 0; i < ninterfaces; i++)
-	{
+	for (i = 0; i < ninterfaces; i++) {
 		io_completion_port_add_socket(&inter_list[i]);
 	}
 #endif
@@ -908,8 +910,7 @@ open_socket(
 	/*
 	 * bind the local address.
 	 */
-	if (bind(fd, (struct sockaddr *)addr, sizeof(*addr)) < 0)
-	{
+	if (bind(fd, (struct sockaddr *)addr, sizeof(*addr)) < 0) {
 		char buff[160];
 		sprintf(buff,
 			"bind() fd %d, family %d, port %d, addr %s, in_classd=%d flags=%d fails: %%m",

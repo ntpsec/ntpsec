@@ -48,7 +48,7 @@ extern HANDLE ResolverThreadHandle;
 # ifndef SYS_WINNT
 #  define	CONFIG_FILE "/etc/ntp.conf"
 # else /* SYS_WINNT */
-#  define	CONFIG_FILE 	"%windir%\\ntp.conf"
+#  define	CONFIG_FILE	"%windir%\\ntp.conf"
 #  define	ALT_CONFIG_FILE "%windir%\\ntp.ini"
 # endif /* SYS_WINNT */
 #endif /* not CONFIG_FILE */
@@ -91,31 +91,31 @@ extern HANDLE ResolverThreadHandle;
  */
 #define CONFIG_UNKNOWN		0
 
-#define CONFIG_PEER 	1
+#define CONFIG_PEER		1
 #define CONFIG_SERVER		2
 #define CONFIG_AUTOMAX		3
 #define CONFIG_DRIFTFILE	4
 #define CONFIG_BROADCAST	5
 #define CONFIG_BROADCASTCLIENT	6
-#define CONFIG_AUTHENTICATE 7
-#define CONFIG_KEYS 	8
+#define CONFIG_AUTHENTICATE	7
+#define CONFIG_KEYS		8
 #define CONFIG_REVOKE		9
 #define CONFIG_PPS		10
-#define CONFIG_RESTRICT 	11
+#define CONFIG_RESTRICT		11
 #define CONFIG_BDELAY		12
 #define CONFIG_TRUSTEDKEY	13
 #define CONFIG_REQUESTKEY	14
 #define CONFIG_CONTROLKEY	15
-#define CONFIG_TRAP 	16
+#define CONFIG_TRAP		16
 #define CONFIG_FUDGE		17
-#define CONFIG_RESOLVER 	18		/* (not used) */
-#define CONFIG_STATSDIR 	19
+#define CONFIG_18		18 /* unused */
+#define CONFIG_STATSDIR		19
 #define CONFIG_FILEGEN		20
 #define CONFIG_STATISTICS	21
 #define CONFIG_PIDFILE		22
 #define CONFIG_SETVAR		23
 #define CONFIG_CLIENTLIMIT	24
-#define CONFIG_CLIENTPERIOD 25
+#define CONFIG_CLIENTPERIOD	25
 #define CONFIG_MULTICASTCLIENT	26
 #define CONFIG_ENABLE		27
 #define CONFIG_DISABLE		28
@@ -129,26 +129,26 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_MOD_KEY		2
 #define CONF_MOD_MINPOLL	3
 #define CONF_MOD_MAXPOLL	4
-#define CONF_MOD_PREFER 	5
+#define CONF_MOD_PREFER		5
 #define CONF_MOD_BURST		6
 #define CONF_MOD_SKEY		7
 #define CONF_MOD_TTL		8
 #define CONF_MOD_MODE		9
 
 #define CONF_RES_MASK		1
-#define CONF_RES_IGNORE 	2
+#define CONF_RES_IGNORE		2
 #define CONF_RES_NOSERVE	3
 #define CONF_RES_NOTRUST	4
 #define CONF_RES_NOQUERY	5
 #define CONF_RES_NOMODIFY	6
-#define CONF_RES_NOPEER 	7
-#define CONF_RES_NOTRAP 	8
-#define CONF_RES_LPTRAP 	9
+#define CONF_RES_NOPEER		7
+#define CONF_RES_NOTRAP		8
+#define CONF_RES_LPTRAP		9
 #define CONF_RES_NTPPORT	10
-#define CONF_RES_LIMITED		11
+#define CONF_RES_LIMITED	11
 
 #define CONF_TRAP_PORT		1
-#define CONF_TRAP_INTERFACE 2
+#define CONF_TRAP_INTERFACE	2
 
 #define CONF_FDG_TIME1		1
 #define CONF_FDG_TIME2		2
@@ -161,7 +161,7 @@ extern HANDLE ResolverThreadHandle;
 
 #define CONF_FGEN_FILE		1
 #define CONF_FGEN_TYPE		2
-#define CONF_FGEN_FLAG_LINK 3
+#define CONF_FGEN_FLAG_LINK	3
 #define CONF_FGEN_FLAG_NOLINK	4
 #define CONF_FGEN_FLAG_ENABLE	5
 #define CONF_FGEN_FLAG_DISABLE	6
@@ -182,82 +182,82 @@ struct keyword {
  * Command keywords
  */
 static	struct keyword keywords[] = {
-	{ "peer",       CONFIG_PEER },
-	{ "server",     CONFIG_SERVER },
-	{ "driftfile",      CONFIG_DRIFTFILE },
-	{ "broadcast",      CONFIG_BROADCAST },
-	{ "broadcastclient",    CONFIG_BROADCASTCLIENT },
-	{ "multicastclient",    CONFIG_MULTICASTCLIENT },
-	{ "manycastclient", CONFIG_MANYCASTCLIENT },
-	{ "manycastserver", CONFIG_MANYCASTSERVER },
-	{ "authenticate",   CONFIG_AUTHENTICATE },
-	{ "keys",       CONFIG_KEYS },
-	{ "revoke",     CONFIG_REVOKE },
-	{ "pps",        CONFIG_PPS },
-	{ "automax",        CONFIG_AUTOMAX },
-	{ "restrict",       CONFIG_RESTRICT },
-	{ "broadcastdelay", CONFIG_BDELAY },
-	{ "trustedkey",     CONFIG_TRUSTEDKEY },
-	{ "requestkey",     CONFIG_REQUESTKEY },
-	{ "controlkey",     CONFIG_CONTROLKEY },
-	{ "trap",       CONFIG_TRAP },
-	{ "fudge",      CONFIG_FUDGE },
-	{ "statsdir",       CONFIG_STATSDIR },
-	{ "filegen",        CONFIG_FILEGEN },
-	{ "statistics",     CONFIG_STATISTICS },
-	{ "pidfile",        CONFIG_PIDFILE },
-	{ "setvar",     CONFIG_SETVAR },
-	{ "clientlimit",    CONFIG_CLIENTLIMIT },
-	{ "clientperiod",   CONFIG_CLIENTPERIOD },
-	{ "enable",     CONFIG_ENABLE },
-	{ "disable",        CONFIG_DISABLE },
-	{ "phone",      CONFIG_PHONE },
-	{ "logfile",        CONFIG_LOGFILE },
-	{ "logconfig",      CONFIG_LOGCONFIG },
-	{ "",           CONFIG_UNKNOWN }
+	{ "peer",		CONFIG_PEER },
+	{ "server",		CONFIG_SERVER },
+	{ "driftfile",		CONFIG_DRIFTFILE },
+	{ "broadcast",		CONFIG_BROADCAST },
+	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
+	{ "multicastclient",	CONFIG_MULTICASTCLIENT },
+	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
+	{ "manycastserver",	CONFIG_MANYCASTSERVER },
+	{ "authenticate",	CONFIG_AUTHENTICATE },
+	{ "keys",		CONFIG_KEYS },
+	{ "revoke",		CONFIG_REVOKE },
+	{ "pps",		CONFIG_PPS },
+	{ "automax",		CONFIG_AUTOMAX },
+	{ "restrict",		CONFIG_RESTRICT },
+	{ "broadcastdelay",	CONFIG_BDELAY },
+	{ "trustedkey",		CONFIG_TRUSTEDKEY },
+	{ "requestkey",		CONFIG_REQUESTKEY },
+	{ "controlkey",		CONFIG_CONTROLKEY },
+	{ "trap",		CONFIG_TRAP },
+	{ "fudge",		CONFIG_FUDGE },
+	{ "statsdir",		CONFIG_STATSDIR },
+	{ "filegen",		CONFIG_FILEGEN },
+	{ "statistics",		CONFIG_STATISTICS },
+	{ "pidfile",		CONFIG_PIDFILE },
+	{ "setvar",		CONFIG_SETVAR },
+	{ "clientlimit",	CONFIG_CLIENTLIMIT },
+	{ "clientperiod",	CONFIG_CLIENTPERIOD },
+	{ "enable",		CONFIG_ENABLE },
+	{ "disable",		CONFIG_DISABLE },
+	{ "phone",		CONFIG_PHONE },
+	{ "logfile",		CONFIG_LOGFILE },
+	{ "logconfig",		CONFIG_LOGCONFIG },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
  * "peer", "server", "broadcast" modifier keywords
  */
 static	struct keyword mod_keywords[] = {
-	{ "version",    CONF_MOD_VERSION },
-	{ "key",    CONF_MOD_KEY },
-	{ "minpoll",    CONF_MOD_MINPOLL },
-	{ "maxpoll",    CONF_MOD_MAXPOLL },
-	{ "prefer", CONF_MOD_PREFER },
-	{ "burst",  CONF_MOD_BURST },
-	{ "autokey",    CONF_MOD_SKEY },
-	{ "mode",   CONF_MOD_MODE },    /* reference clocks */
-	{ "ttl",    CONF_MOD_TTL },     /* NTP peers */
-	{ "",       CONFIG_UNKNOWN }
+	{ "version",		CONF_MOD_VERSION },
+	{ "key",		CONF_MOD_KEY },
+	{ "minpoll",		CONF_MOD_MINPOLL },
+	{ "maxpoll",		CONF_MOD_MAXPOLL },
+	{ "prefer",		CONF_MOD_PREFER },
+	{ "burst",		CONF_MOD_BURST },
+	{ "autokey",		CONF_MOD_SKEY },
+	{ "mode",		CONF_MOD_MODE },    /* reference clocks */
+	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
  * "restrict" modifier keywords
  */
 static	struct keyword res_keywords[] = {
-	{ "mask",   CONF_RES_MASK },
-	{ "ignore", CONF_RES_IGNORE },
-	{ "noserve",    CONF_RES_NOSERVE },
-	{ "notrust",    CONF_RES_NOTRUST },
-	{ "noquery",    CONF_RES_NOQUERY },
-	{ "nomodify",   CONF_RES_NOMODIFY },
-	{ "nopeer", CONF_RES_NOPEER },
-	{ "notrap", CONF_RES_NOTRAP },
-	{ "lowpriotrap", CONF_RES_LPTRAP },
-	{ "ntpport",    CONF_RES_NTPPORT },
-	{ "limited",    CONF_RES_LIMITED },
-	{ "",       CONFIG_UNKNOWN }
+	{ "mask",		CONF_RES_MASK },
+	{ "ignore",		CONF_RES_IGNORE },
+	{ "noserve",		CONF_RES_NOSERVE },
+	{ "notrust",		CONF_RES_NOTRUST },
+	{ "noquery",		CONF_RES_NOQUERY },
+	{ "nomodify",		CONF_RES_NOMODIFY },
+	{ "nopeer",		CONF_RES_NOPEER },
+	{ "notrap",		CONF_RES_NOTRAP },
+	{ "lowpriotrap",	CONF_RES_LPTRAP },
+	{ "ntpport",		CONF_RES_NTPPORT },
+	{ "limited",		CONF_RES_LIMITED },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
  * "trap" modifier keywords
  */
 static	struct keyword trap_keywords[] = {
-	{ "port",   CONF_TRAP_PORT },
-	{ "interface",  CONF_TRAP_INTERFACE },
-	{ "",       CONFIG_UNKNOWN }
+	{ "port",		CONF_TRAP_PORT },
+	{ "interface",		CONF_TRAP_INTERFACE },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 
@@ -265,15 +265,15 @@ static	struct keyword trap_keywords[] = {
  * "fudge" modifier keywords
  */
 static	struct keyword fudge_keywords[] = {
-	{ "time1",  CONF_FDG_TIME1 },
-	{ "time2",  CONF_FDG_TIME2 },
-	{ "stratum",    CONF_FDG_STRATUM },
-	{ "refid",  CONF_FDG_REFID },
-	{ "flag1",  CONF_FDG_FLAG1 },
-	{ "flag2",  CONF_FDG_FLAG2 },
-	{ "flag3",  CONF_FDG_FLAG3 },
-	{ "flag4",  CONF_FDG_FLAG4 },
-	{ "",       CONFIG_UNKNOWN }
+	{ "time1",		CONF_FDG_TIME1 },
+	{ "time2",		CONF_FDG_TIME2 },
+	{ "stratum",		CONF_FDG_STRATUM },
+	{ "refid",		CONF_FDG_REFID },
+	{ "flag1",		CONF_FDG_FLAG1 },
+	{ "flag2",		CONF_FDG_FLAG2 },
+	{ "flag3",		CONF_FDG_FLAG3 },
+	{ "flag4",		CONF_FDG_FLAG4 },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 
@@ -281,50 +281,50 @@ static	struct keyword fudge_keywords[] = {
  * "filegen" modifier keywords
  */
 static	struct keyword filegen_keywords[] = {
-	{ "file",   CONF_FGEN_FILE },
-	{ "type",   CONF_FGEN_TYPE },
-	{ "link",       CONF_FGEN_FLAG_LINK },
-	{ "nolink",     CONF_FGEN_FLAG_NOLINK },
-	{ "enable",     CONF_FGEN_FLAG_ENABLE },
-	{ "disable",    CONF_FGEN_FLAG_DISABLE },
-	{ "",       CONFIG_UNKNOWN }
+	{ "file",		CONF_FGEN_FILE },
+	{ "type",		CONF_FGEN_TYPE },
+	{ "link",		CONF_FGEN_FLAG_LINK },
+	{ "nolink",		CONF_FGEN_FLAG_NOLINK },
+	{ "enable",		CONF_FGEN_FLAG_ENABLE },
+	{ "disable",		CONF_FGEN_FLAG_DISABLE },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
  * "type" modifier keywords
  */
 static	struct keyword fgen_types[] = {
-	{ "none",   FILEGEN_NONE  },
-	{ "pid",    FILEGEN_PID   },
-	{ "day",        FILEGEN_DAY   },
-	{ "week",       FILEGEN_WEEK  },
-	{ "month",      FILEGEN_MONTH },
-	{ "year",   FILEGEN_YEAR  },
-	{ "age",        FILEGEN_AGE   },
-	{ "",       CONFIG_UNKNOWN}
+	{ "none",		FILEGEN_NONE  },
+	{ "pid",		FILEGEN_PID   },
+	{ "day",		FILEGEN_DAY   },
+	{ "week",		FILEGEN_WEEK  },
+	{ "month",		FILEGEN_MONTH },
+	{ "year",		FILEGEN_YEAR  },
+	{ "age",		FILEGEN_AGE   },
+	{ "",			CONFIG_UNKNOWN}
 };
 
 /*
  * "enable", "disable" modifier keywords
  */
 static struct keyword flags_keywords[] = {
-	{ "auth",   PROTO_AUTHENTICATE },
-	{ "bclient",    PROTO_BROADCLIENT },
-	{ "ntp",    PROTO_NTP },
-	{ "kernel", PROTO_KERNEL },
-	{ "monitor",    PROTO_MONITOR },
-	{ "stats",  PROTO_FILEGEN },
-	{ "",       CONFIG_UNKNOWN }
+	{ "auth",		PROTO_AUTHENTICATE },
+	{ "bclient",		PROTO_BROADCLIENT },
+	{ "ntp",		PROTO_NTP },
+	{ "kernel",		PROTO_KERNEL },
+	{ "monitor",		PROTO_MONITOR },
+	{ "stats",		PROTO_FILEGEN },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
  * pps modifier keywords
  */
 static struct keyword pps_keywords[] = {
-	{ "assert",	CONF_PPS_ASSERT },
-	{ "clear",	CONF_PPS_CLEAR },
-	{ "hardpps",	CONF_PPS_HARDPPS },
-	{ "",		CONFIG_UNKNOWN }
+	{ "assert",		CONF_PPS_ASSERT },
+	{ "clear",		CONF_PPS_CLEAR },
+	{ "hardpps",		CONF_PPS_HARDPPS },
+	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
@@ -336,27 +336,27 @@ struct masks {
 };
 
 static struct masks logcfg_class[] = {
-	{ "sys",    NLOG_OSYS },
-	{ "peer",   NLOG_OPEER },
-	{ "clock",  NLOG_OCLOCK },
-	{ "sync",   NLOG_OSYNC },
+	{ "sys",		NLOG_OSYS },
+	{ "peer",		NLOG_OPEER },
+	{ "clock",		NLOG_OCLOCK },
+	{ "sync",		NLOG_OSYNC },
 	{ (char *)0,	0 }
 };
 
 static struct masks logcfg_item[] = {
-	{ "info",       NLOG_INFO },
-	{ "allinfo",        NLOG_SYSINFO|NLOG_PEERINFO|NLOG_CLOCKINFO|NLOG_SYNCINFO },
-	{ "events",     NLOG_EVENT },
-	{ "allevents",  NLOG_SYSEVENT|NLOG_PEEREVENT|NLOG_CLOCKEVENT|NLOG_SYNCEVENT },
-	{ "status",     NLOG_STATUS },
-	{ "allstatus",  NLOG_SYSSTATUS|NLOG_PEERSTATUS|NLOG_CLOCKSTATUS|NLOG_SYNCSTATUS },
-	{ "statistics", NLOG_STATIST },
-	{ "allstatistics",  NLOG_SYSSTATIST|NLOG_PEERSTATIST|NLOG_CLOCKSTATIST|NLOG_SYNCSTATIST },
-	{ "allclock",       (NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OCLOCK },
-	{ "allpeer",        (NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OPEER },
-	{ "allsys",     (NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYS },
-	{ "allsync",        (NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYNC },
-	{ "all",        NLOG_SYSMASK|NLOG_PEERMASK|NLOG_CLOCKMASK|NLOG_SYNCMASK },
+	{ "info",		NLOG_INFO },
+	{ "allinfo",		NLOG_SYSINFO|NLOG_PEERINFO|NLOG_CLOCKINFO|NLOG_SYNCINFO },
+	{ "events",		NLOG_EVENT },
+	{ "allevents",		NLOG_SYSEVENT|NLOG_PEEREVENT|NLOG_CLOCKEVENT|NLOG_SYNCEVENT },
+	{ "status",		NLOG_STATUS },
+	{ "allstatus",		NLOG_SYSSTATUS|NLOG_PEERSTATUS|NLOG_CLOCKSTATUS|NLOG_SYNCSTATUS },
+	{ "statistics",		NLOG_STATIST },
+	{ "allstatistics",	NLOG_SYSSTATIST|NLOG_PEERSTATIST|NLOG_CLOCKSTATIST|NLOG_SYNCSTATIST },
+	{ "allclock",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OCLOCK },
+	{ "allpeer",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OPEER },
+	{ "allsys",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYS },
+	{ "allsync",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYNC },
+	{ "all",		NLOG_SYSMASK|NLOG_PEERMASK|NLOG_CLOCKMASK|NLOG_SYNCMASK },
 	{ (char *)0,	0 }
 };
 
@@ -364,19 +364,19 @@ static struct masks logcfg_item[] = {
  * Limits on things
  */
 #define MAXTOKENS	20	/* 20 tokens on line */
-#define MAXLINE 	1024	/* maximum length of line */
+#define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	5	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
-#define MAXFILENAME 128 /* maximum length of a file name (alloca()?) */
+#define MAXFILENAME	128	/* maximum length of a file name (alloca()?) */
 
 
 /*
  * Miscellaneous macros
  */
-#define STRSAME(s1, s2) 	(*(s1) == *(s2) && strcmp((s1), (s2)) == 0)
-#define ISEOL(c)		((c) == '#' || (c) == '\n' || (c) == '\0')
-#define ISSPACE(c)		((c) == ' ' || (c) == '\t')
-#define STREQ(a, b) 	(*(a) == *(b) && strcmp((a), (b)) == 0)
+#define STRSAME(s1, s2)	(*(s1) == *(s2) && strcmp((s1), (s2)) == 0)
+#define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
+#define ISSPACE(c)	((c) == ' ' || (c) == '\t')
+#define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
  * File descriptor used by the resolver save routines, and temporary file
@@ -398,11 +398,12 @@ char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
 int	pps_assert = 1;
 int	pps_hardpps;
+int	listen_to_virtual_ips = 0;
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
 #endif
-static const char *ntp_options = "aAbc:dD:f:gk:l:mnp:P:r:s:t:v:V:x";
+static const char *ntp_options = "aAbc:dD:f:gk:l:Lmnp:P:r:s:t:v:V:x";
 
 /*
  * Function prototypes
@@ -537,10 +538,9 @@ getstartup(
 		    ++errflg;
 		    break;
 #endif
-		case '?':
-		    ++errflg;
+		case 'L':
+		    listen_to_virtual_ips = 1;
 		    break;
-
 		case 'l':
 			{
 				FILE *new_file;
@@ -567,6 +567,10 @@ getstartup(
 		    ++nofork;
 		    break;
 
+		case '?':
+		    ++errflg;
+		    break;
+
 		default:
 			break;
 		}
@@ -581,7 +585,7 @@ getstartup(
 #endif
 		exit(2);
 	}
-	ntp_optind = 0; 	/* reset ntp_optind to restart ntp_getopt */
+	ntp_optind = 0;	/* reset ntp_optind to restart ntp_getopt */
 
 #ifdef DEBUG
 	if (debug) {
@@ -730,6 +734,7 @@ getconfig(
 			getauthkeys(ntp_optarg);
 			break;
 
+		    case 'L':   /* already done at pre-scan */
 		    case 'l':   /* already done at pre-scan */
 			break;
 
@@ -840,18 +845,18 @@ getconfig(
 	while ((tok = gettokens(fp, line, tokens, &ntokens))
 		   != CONFIG_UNKNOWN) {
 		switch(tok) {
-			case CONFIG_PEER:
-			case CONFIG_SERVER:
-			case CONFIG_MANYCASTCLIENT:
-			case CONFIG_BROADCAST:
+		    case CONFIG_PEER:
+		    case CONFIG_SERVER:
+		    case CONFIG_MANYCASTCLIENT:
+		    case CONFIG_BROADCAST:
 			if (tok == CONFIG_PEER)
-				hmode = MODE_ACTIVE;
+			    hmode = MODE_ACTIVE;
 			else if (tok == CONFIG_SERVER)
-				hmode = MODE_CLIENT;
+			    hmode = MODE_CLIENT;
 			else if (tok == CONFIG_MANYCASTCLIENT)
-				hmode = MODE_CLIENT;
+			    hmode = MODE_CLIENT;
 			else
-				hmode = MODE_BROADCAST;
+			    hmode = MODE_BROADCAST;
 
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
@@ -881,19 +886,19 @@ getconfig(
 				 * and unicast address for manycastclient!
 				 */
 				if (((tok == CONFIG_SERVER) ||
-					 (tok == CONFIG_PEER)) &&
+				     (tok == CONFIG_PEER)) &&
 #ifdef REFCLOCK
-					!ISREFCLOCKADR(&peeraddr) &&
+				    !ISREFCLOCKADR(&peeraddr) &&
 #endif
-					IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
+				    IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
 					msyslog(LOG_ERR,
 						"attempt to configure invalid address %s",
 						ntoa(&peeraddr));
 					break;
 				}
 				if ((tok == CONFIG_MANYCASTCLIENT) &&
-					!IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
-						msyslog(LOG_ERR,
+				    !IN_CLASSD(ntohl(peeraddr.sin_addr.s_addr))) {
+					msyslog(LOG_ERR,
 						"attempt to configure invalid address %s",
 						ntoa(&peeraddr));
 					break;
@@ -1003,19 +1008,21 @@ getconfig(
 			}
 			if (errflg == 0) {
 				if (peer_config(&peeraddr,
-				    (struct interface *)0, hmode, peerversion, 
-				    minpoll, maxpoll, peerflags, ttl, peerkey)
+						(struct interface *)0, hmode,
+						peerversion, minpoll, maxpoll,
+						peerflags, ttl, peerkey)
 				    == 0) {
 					msyslog(LOG_ERR,
-					    "configuration of %s failed",
-					    ntoa(&peeraddr));
+						"configuration of %s failed",
+						ntoa(&peeraddr));
 				}
 			} else if (errflg == -1) {
 				save_resolve(tokens[1], hmode, peerversion,
-				     minpoll, maxpoll, peerflags, ttl, peerkey);
+					     minpoll, maxpoll, peerflags, ttl,
+					     peerkey);
 			}
 			break;
-			
+
 		    case CONFIG_DRIFTFILE:
 			if (ntokens >= 2)
 			    stats_config(STATS_FREQ_FILE, tokens[1]);
@@ -1029,65 +1036,64 @@ getconfig(
 			else
 			    stats_config(STATS_PID_FILE, (char *)0);
 			break;
-				
-		    case CONFIG_LOGFILE:
-			    if (ntokens >= 2) {
-				    FILE *new_file;
-				    new_file = fopen(tokens[1], "a");
-				    if (new_file != NULL) {
-					    NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-						    msyslog(LOG_NOTICE, "logging to file %s", tokens[1]);
-					    if (syslog_file != NULL &&
-						fileno(syslog_file) != fileno(new_file))
-						(void)fclose(syslog_file);
 
-					    syslog_file = new_file;
-					    syslogit = 0;
-				    }
-				    else
-					msyslog(LOG_ERR,
-						"Cannot open log file %s",
-						tokens[1]);
-			    }
-			    else
-				msyslog(LOG_ERR, "logfile needs one argument");
-		    break;
+		    case CONFIG_LOGFILE:
+			if (ntokens >= 2) {
+				FILE *new_file;
+				new_file = fopen(tokens[1], "a");
+				if (new_file != NULL) {
+					NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
+					    msyslog(LOG_NOTICE, "logging to file %s", tokens[1]);
+					if (syslog_file != NULL &&
+					    fileno(syslog_file) != fileno(new_file))
+					    (void)fclose(syslog_file);
+
+					syslog_file = new_file;
+					syslogit = 0;
+				}
+				else
+				    msyslog(LOG_ERR,
+					    "Cannot open log file %s",
+					    tokens[1]);
+			}
+			else
+			    msyslog(LOG_ERR, "logfile needs one argument");
+			break;
 
 		    case CONFIG_LOGCONFIG:
-				    for (i = 1; i < ntokens; i++)
-				    {
-					    int add = 1;
-					    int equals = 0;
-					    char * s = &tokens[i][0];
+			for (i = 1; i < ntokens; i++)
+			{
+				int add = 1;
+				int equals = 0;
+				char * s = &tokens[i][0];
 
-					    switch (*s)
-					    {
-						case '+':
-						case '-':
-						case '=':
-						    add = *s == '+';
-						    equals = *s == '=';
-						    s++;
-						    break;
+				switch (*s) {
+				    case '+':
+				    case '-':
+				    case '=':
+					add = *s == '+';
+					equals = *s == '=';
+					s++;
+					break;
 
-						default:
-						    break;
-					    }
-					    if (equals) {
-						    ntp_syslogmask = get_logmask(s);
-					    } else {				
-						    if (add) {
-							    ntp_syslogmask |= get_logmask(s);
-						    } else {
-							    ntp_syslogmask &= ~get_logmask(s);
-						    }
-					    }
+				    default:
+					break;
+				}
+				if (equals) {
+					ntp_syslogmask = get_logmask(s);
+				} else {				
+					if (add) {
+						ntp_syslogmask |= get_logmask(s);
+					} else {
+						ntp_syslogmask &= ~get_logmask(s);
+					}
+				}
 #ifdef DEBUG
-					    if (debug)
-						printf("ntp_syslogmask = 0x%08lx (%s)\n", ntp_syslogmask, tokens[i]);
+				if (debug)
+				    printf("ntp_syslogmask = 0x%08lx (%s)\n", ntp_syslogmask, tokens[i]);
 #endif
-				    }
-			    break;
+			}
+			break;
 
 		    case CONFIG_BROADCASTCLIENT:
 			proto_config(PROTO_BROADCLIENT, 1, 0.);
@@ -1099,72 +1105,72 @@ getconfig(
 				for (i = 1; i < ntokens; i++) {
 					if (getnetnum(tokens[i], &peeraddr, 1))
 					    proto_config(PROTO_MULTICAST_ADD,
-						peeraddr.sin_addr.s_addr, 0.);
+							 peeraddr.sin_addr.s_addr, 0.);
 				}
 			} else
-				proto_config(PROTO_MULTICAST_ADD,
-				    htonl(INADDR_NTP), 0.);
+			    proto_config(PROTO_MULTICAST_ADD,
+					 htonl(INADDR_NTP), 0.);
 			if (tok == CONFIG_MULTICASTCLIENT) {
 				sys_bclient = 1;
 #ifdef DEBUG
 				if (debug)
-					printf("sys_bclient\n");
+				    printf("sys_bclient\n");
 #endif /* DEBUG */
 			}
 			else if (tok == CONFIG_MANYCASTSERVER) {
 				sys_manycastserver = 1;
 #ifdef DEBUG
 				if (debug)
-					printf("sys_manycastserver\n");
+				    printf("sys_manycastserver\n");
 #endif /* DEBUG */
 			}
 			break;
 
-			case CONFIG_AUTHENTICATE:
+		    case CONFIG_AUTHENTICATE:
 			errflg = 0;
 			if (ntokens >= 2) {
 				if (STREQ(tokens[1], "yes"))
-					proto_config(PROTO_AUTHENTICATE, 1, 0.);
+				    proto_config(PROTO_AUTHENTICATE, 1, 0.);
 				else if (STREQ(tokens[1], "no"))
-					proto_config(PROTO_AUTHENTICATE, 0, 0.);
+				    proto_config(PROTO_AUTHENTICATE, 0, 0.);
 				else
-					errflg++;
+				    errflg++;
 			} else {
 				errflg++;
 			}
 
 			if (errflg)
-				msyslog(LOG_ERR,
-					"should be `authenticate yes|no'");
+			    msyslog(LOG_ERR,
+				    "should be `authenticate yes|no'");
 			break;
 
-			case CONFIG_KEYS:
+		    case CONFIG_KEYS:
 			if (ntokens >= 2) {
 				getauthkeys(tokens[1]);
 			}
 			break;
 
-			case CONFIG_REVOKE:
+		    case CONFIG_REVOKE:
 			if (ntokens >= 2) {
 				sys_revoke = 1 << max(atoi(tokens[1]), 10);
 			}
 			break;
 
-			case CONFIG_AUTOMAX:
+		    case CONFIG_AUTOMAX:
 			if (ntokens >= 2) {
 				sys_automax = 1 << max(atoi(tokens[1]), 10);
 			}
 			break;
 
-			case CONFIG_RESTRICT:
+		    case CONFIG_RESTRICT:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR, "restrict requires an address");
 				break;
 			}
 			if (STREQ(tokens[1], "default"))
-				peeraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+			    peeraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 			else if (!getnetnum(tokens[1], &peeraddr, 1))
-				break;
+			    break;
 
 			/*
 			 * Use peerversion as flags, peerkey as mflags.  Ick.
@@ -1175,7 +1181,7 @@ getconfig(
 			maskaddr.sin_addr.s_addr = ~(u_int32)0;
 			for (i = 2; i < ntokens; i++) {
 				switch (matchkey(tokens[i], res_keywords)) {
-					case CONF_RES_MASK:
+				    case CONF_RES_MASK:
 					if (i >= ntokens-1) {
 						msyslog(LOG_ERR,
 							"mask keyword needs argument");
@@ -1184,62 +1190,62 @@ getconfig(
 					}
 					i++;
 					if (!getnetnum(tokens[i], &maskaddr, 1))
-						errflg++;
+					    errflg++;
 					break;
 
-					case CONF_RES_IGNORE:
+				    case CONF_RES_IGNORE:
 					peerversion |= RES_IGNORE;
 					break;
 
-					case CONF_RES_NOSERVE:
+				    case CONF_RES_NOSERVE:
 					peerversion |= RES_DONTSERVE;
 					break;
 
-					case CONF_RES_NOTRUST:
+				    case CONF_RES_NOTRUST:
 					peerversion |= RES_DONTTRUST;
 					break;
 
-					case CONF_RES_NOQUERY:
+				    case CONF_RES_NOQUERY:
 					peerversion |= RES_NOQUERY;
 					break;
 
-					case CONF_RES_NOMODIFY:
+				    case CONF_RES_NOMODIFY:
 					peerversion |= RES_NOMODIFY;
 					break;
 
-					case CONF_RES_NOPEER:
+				    case CONF_RES_NOPEER:
 					peerversion |= RES_NOPEER;
 					break;
 
-					case CONF_RES_NOTRAP:
+				    case CONF_RES_NOTRAP:
 					peerversion |= RES_NOTRAP;
 					break;
 
-					case CONF_RES_LPTRAP:
+				    case CONF_RES_LPTRAP:
 					peerversion |= RES_LPTRAP;
 					break;
 
-					case CONF_RES_NTPPORT:
+				    case CONF_RES_NTPPORT:
 					peerkey |= RESM_NTPONLY;
 					break;
 
-					case CONF_RES_LIMITED:
+				    case CONF_RES_LIMITED:
 					peerversion |= RES_LIMITED;
 					break;
 
-					case CONFIG_UNKNOWN:
+				    case CONFIG_UNKNOWN:
 					errflg++;
 					break;
 				}
 			}
 			if (SRCADR(&peeraddr) == htonl(INADDR_ANY))
-				maskaddr.sin_addr.s_addr = 0;
+			    maskaddr.sin_addr.s_addr = 0;
 			if (!errflg)
-				hack_restrict(RESTRICT_FLAGS, &peeraddr, &maskaddr,
-					 (int)peerkey, peerversion);
+			    hack_restrict(RESTRICT_FLAGS, &peeraddr, &maskaddr,
+					  (int)peerkey, peerversion);
 			break;
 
-			case CONFIG_BDELAY:
+		    case CONFIG_BDELAY:
 			if (ntokens >= 2) {
 				double tmp;
 
@@ -1253,7 +1259,7 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_TRUSTEDKEY:
+		    case CONFIG_TRUSTEDKEY:
 			for (i = 1; i < ntokens; i++) {
 				u_long tkey;
 
@@ -1268,7 +1274,7 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_REQUESTKEY:
+		    case CONFIG_REQUESTKEY:
 			if (ntokens >= 2) {
 				u_long rkey;
 
@@ -1283,15 +1289,15 @@ getconfig(
 				} else {
 #ifdef DEBUG
 					if (debug > 3)
-						printf(
-							"set info_auth_key to %lu\n", rkey);
+					    printf(
+						    "set info_auth_key to %lu\n", rkey);
 #endif
 					info_auth_keyid = rkey;
 				}
 			}
 			break;
 
-			case CONFIG_CONTROLKEY:
+		    case CONFIG_CONTROLKEY:
 			if (ntokens >= 2) {
 				u_long ckey;
 
@@ -1306,14 +1312,14 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_TRAP:
+		    case CONFIG_TRAP:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"no address for trap command, line ignored");
 				break;
 			}
 			if (!getnetnum(tokens[1], &peeraddr, 1))
-				break;
+			    break;
 
 			/*
 			 * Use peerversion for port number.  Barf.
@@ -1339,7 +1345,7 @@ getconfig(
 					    errflg = 1;
 				    }
 				    break;
-					
+
 				case CONF_TRAP_INTERFACE:
 				    if (i >= ntokens-1) {
 					    msyslog(LOG_ERR,
@@ -1347,13 +1353,13 @@ getconfig(
 					    errflg = 1;
 					    break;
 				    }
-					
+
 				    if (!getnetnum(tokens[++i],
 						   &maskaddr, 1)) {
 					    errflg = 1;
 					    break;
 				    }
-					
+
 				    localaddr = findinterface(&maskaddr);
 				    if (localaddr == NULL) {
 					    msyslog(LOG_ERR,
@@ -1362,12 +1368,12 @@ getconfig(
 					    errflg = 1;
 				    }
 				    break;
-					
+
 				case CONFIG_UNKNOWN:
 				    errflg++;
 				    break;
 			    }
-			
+
 			if (!errflg) {
 				if (peerversion != 0)
 				    peeraddr.sin_port = htons( (u_short) peerversion);
@@ -1382,7 +1388,7 @@ getconfig(
 					    ntoa(&peeraddr));
 			}
 			break;
-		
+
 		    case CONFIG_FUDGE:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
@@ -1391,14 +1397,14 @@ getconfig(
 			}
 			if (!getnetnum(tokens[1], &peeraddr, 1))
 			    break;
-			
+
 			if (!ISREFCLOCKADR(&peeraddr)) {
 				msyslog(LOG_ERR,
 					"%s is inappropriate address for the fudge command, line ignored",
 					ntoa(&peeraddr));
 				break;
 			}
-			
+
 			memset((void *)&clock_stat, 0, sizeof clock_stat);
 			errflg = 0;
 			for (i = 2; i < ntokens-1; i++) {
@@ -1416,7 +1422,7 @@ getconfig(
 					clock_stat.haveflags |= CLK_HAVETIME1;
 					break;
 
-					case CONF_FDG_TIME2:
+				    case CONF_FDG_TIME2:
 					if (sscanf(tokens[++i], "%lf",
 						   &clock_stat.fudgetime2) != 1) {
 						msyslog(LOG_ERR,
@@ -1427,7 +1433,8 @@ getconfig(
 					}
 					clock_stat.haveflags |= CLK_HAVETIME2;
 					break;
-					
+
+
 				    case CONF_FDG_STRATUM:
 					/* HMS: the (long *)_ may be trouble */
 					if (!atoint(tokens[++i],
@@ -1441,7 +1448,7 @@ getconfig(
 					}
 					clock_stat.haveflags |= CLK_HAVEVAL1;
 					break;
-					
+
 				    case CONF_FDG_REFID:
 					/* HMS: Endianness and 0 bytes? */
 					/* XXX */
@@ -1465,30 +1472,30 @@ getconfig(
 					}
 					peerkey = lpeerkey;
 					switch(c) {
-						case CONF_FDG_FLAG1:
+					    case CONF_FDG_FLAG1:
 						c = CLK_FLAG1;
 						clock_stat.haveflags|=CLK_HAVEFLAG1;
 						break;
-						case CONF_FDG_FLAG2:
+					    case CONF_FDG_FLAG2:
 						c = CLK_FLAG2;
 						clock_stat.haveflags|=CLK_HAVEFLAG2;
 						break;
-						case CONF_FDG_FLAG3:
+					    case CONF_FDG_FLAG3:
 						c = CLK_FLAG3;
 						clock_stat.haveflags|=CLK_HAVEFLAG3;
 						break;
-						case CONF_FDG_FLAG4:
+					    case CONF_FDG_FLAG4:
 						c = CLK_FLAG4;
 						clock_stat.haveflags|=CLK_HAVEFLAG4;
 						break;
 					}
 					if (peerkey == 0)
-						clock_stat.flags &= ~c;
+					    clock_stat.flags &= ~c;
 					else
-						clock_stat.flags |= c;
+					    clock_stat.flags |= c;
 					break;
 
-					case CONFIG_UNKNOWN:
+				    case CONFIG_UNKNOWN:
 					errflg = -1;
 					break;
 				}
@@ -1507,13 +1514,13 @@ getconfig(
 #endif
 			break;
 
-			case CONFIG_STATSDIR:
+		    case CONFIG_STATSDIR:
 			if (ntokens >= 2) {
 				stats_config(STATS_STATSDIR,tokens[1]);
 			}
 			break;
 
-			case CONFIG_STATISTICS:
+		    case CONFIG_STATISTICS:
 			for (i = 1; i < ntokens; i++) {
 				filegen = filegen_get(tokens[i]);
 
@@ -1525,14 +1532,14 @@ getconfig(
 				}
 #ifdef DEBUG
 				if (debug > 3)
-					printf("enabling filegen for %s statistics \"%s%s\"\n",
+				    printf("enabling filegen for %s statistics \"%s%s\"\n",
 					   tokens[i], filegen->prefix, filegen->basename);
 #endif
 				filegen->flag |= FGEN_FLAG_ENABLED;
 			}
 			break;
 
-			case CONFIG_FILEGEN:
+		    case CONFIG_FILEGEN:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"no id for filegen command, line ignored");
@@ -1558,7 +1565,7 @@ getconfig(
 
 			for (i = 2; i < ntokens; i++) {
 				switch (matchkey(tokens[i], filegen_keywords)) {
-					case CONF_FGEN_FILE:
+				    case CONF_FGEN_FILE:
 					if (i >= ntokens - 1) {
 						msyslog(LOG_ERR,
 							"filegen %s file requires argument",
@@ -1568,7 +1575,7 @@ getconfig(
 					}
 					peerversion = ++i;
 					break;
-					case CONF_FGEN_TYPE:
+				    case CONF_FGEN_TYPE:
 					if (i >= ntokens -1) {
 						msyslog(LOG_ERR,
 							"filegen %s type requires argument",
@@ -1586,41 +1593,45 @@ getconfig(
 					}
 					break;
 
-					case CONF_FGEN_FLAG_LINK:
+				    case CONF_FGEN_FLAG_LINK:
 					peerflags |= FGEN_FLAG_LINK;
 					break;
 
-					case CONF_FGEN_FLAG_NOLINK:
+				    case CONF_FGEN_FLAG_NOLINK:
 					peerflags &= ~FGEN_FLAG_LINK;
 					break;
 
-					case CONF_FGEN_FLAG_ENABLE:
+				    case CONF_FGEN_FLAG_ENABLE:
 					peerflags |= FGEN_FLAG_ENABLED;
 					break;
 
-					case CONF_FGEN_FLAG_DISABLE:
+				    case CONF_FGEN_FLAG_DISABLE:
 					peerflags &= ~FGEN_FLAG_ENABLED;
 					break;
 				}
 			}
 			if (!errflg) {
 				filegen_config(filegen, tokens[peerversion],
-						   (u_char)peerkey, (u_char)peerflags);
+					       (u_char)peerkey, (u_char)peerflags);
 			}
 			break;
 
-			case CONFIG_SETVAR:
+		    case CONFIG_SETVAR:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"no value for setvar command - line ignored");
 			} else {
-				set_sys_var(tokens[1], strlen(tokens[1])+1, RW |
-						((((ntokens > 2) && !strcmp(tokens[2],
-									"default"))) ? DEF : 0));
+				set_sys_var(tokens[1], strlen(tokens[1])+1,
+					    RW |
+					    ((((ntokens > 2)
+					       && !strcmp(tokens[2],
+							  "default")))
+					     ? DEF
+					     : 0));
 			}
 			break;
 
-			case CONFIG_CLIENTLIMIT:
+		    case CONFIG_CLIENTLIMIT:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"no value for clientlimit command - line ignored");
@@ -1643,7 +1654,7 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_CLIENTPERIOD:
+		    case CONFIG_CLIENTPERIOD:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"no value for clientperiod command - line ignored");
@@ -1663,7 +1674,7 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_ENABLE:
+		    case CONFIG_ENABLE:
 			for (i = 1; i < ntokens; i++) {
 				int flag;
 
@@ -1679,7 +1690,7 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_DISABLE:
+		    case CONFIG_DISABLE:
 			for (i = 1; i < ntokens; i++) {
 				int flag;
 
@@ -1695,15 +1706,15 @@ getconfig(
 			}
 			break;
 
-			case CONFIG_PHONE:
+		    case CONFIG_PHONE:
 			for (i = 1; i < ntokens && i < MAXPHONE; i++) {
 				(void)strncpy(sys_phone[i - 1],
-					tokens[i], MAXDIAL);
+					      tokens[i], MAXDIAL);
 			}
 			sys_phone[i - 1][0] = '\0';
 			break;
 
-			case CONFIG_PPS:
+		    case CONFIG_PPS:
 			if (ntokens < 2) {
 				msyslog(LOG_ERR,
 					"pps missing device name");
@@ -1715,16 +1726,16 @@ getconfig(
 
 				flag = matchkey(tokens[i], pps_keywords);
 				switch(flag) {
-				case CONF_PPS_ASSERT:
+				    case CONF_PPS_ASSERT:
 					pps_assert = 1;
 					break;
-				case CONF_PPS_CLEAR:
+				    case CONF_PPS_CLEAR:
 					pps_assert = 0;
 					break;
-				case CONF_PPS_HARDPPS:
+				    case CONF_PPS_HARDPPS:
 					pps_hardpps = 1;
 					break;
-				default:
+				    default:
 					msyslog(LOG_ERR,
 						"pps unknown flag %s",
 						tokens[i]);
@@ -1732,7 +1743,7 @@ getconfig(
 					break;
 				}
 				if(errflg)
-					break;
+				    break;
 			}
 			break;
 		}
@@ -2014,7 +2025,7 @@ abort_resolve(void)
 		(void) fclose(res_fp);
 	res_fp = NULL;
 
-#ifndef SYS_VXWORKS 		/* we don't open the file to begin with */
+#ifndef SYS_VXWORKS		/* we don't open the file to begin with */
 #if !defined(VMS)
 	(void) unlink(res_file);
 #else
@@ -2170,7 +2181,7 @@ do_resolve_internal(void)
 		if (!(ResolverThreadHandle = CreateThread(
 			NULL,								 /* no security attributes	*/
 			0,									 /* use default stack size	*/
-			(LPTHREAD_START_ROUTINE) ntp_intres, /* thread function 		*/
+			(LPTHREAD_START_ROUTINE) ntp_intres, /* thread function		*/
 			NULL,								 /* argument to thread function   */
 			0,									 /* use default creation flags	  */
 			&dwThreadId))) {					 /* returns the thread identifier */

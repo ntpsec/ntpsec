@@ -1,3 +1,8 @@
+1999-08-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c: Added listen_to_virtual_ips support (-L flag)
+	* ntpd/ntp_io.c: Ditto
+
 1999-08-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_intres.c (request): Lint cleanup
