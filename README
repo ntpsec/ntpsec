@@ -46,10 +46,6 @@ acconfig.h	Autoconf template header file. Edit only if you
 adjtimed        Directory containing the sources for the adjtime daemon
 		for HP/UX systems prior to HP-UX 10.0.
 
-autoconf-2.12.patches	  Patches for GNU autoconf-2.12
-
-automake-1.2d.patches	  Patches for GNU automake-1.2d
-
 authstuff       Directory containing sources for miscellaneous programs
 		to test, calibrate and certify the cryptographic
 		mechanisms for DES and MD5 based authentication. These

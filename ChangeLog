@@ -1,3 +1,7 @@
+Mon May 31 20:28:40 1999  Harlan Stenn  <stenn@pogo.udel.edu>
+
+	* README: Removed auto{make,conf}.patch files
+
 Tue May 25 01:20:53 1999  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* Makefile.am ($(srcdir)/COPYRIGHT): Added
