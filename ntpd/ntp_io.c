@@ -151,7 +151,7 @@ static	void	set_reuseaddr	P((int));
 static	int find_interface_index P((struct sockaddr_storage *, int, int));
 static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
 
 
@@ -639,6 +639,18 @@ set_reuseaddr(int flag) {
 	}
 }
 
+/*
+ * This is just a wrapper around an internal function so we can
+ * make other changes as necessary later on
+ */
+void
+enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
+{
+#ifdef SO_BROADCAST
+	socket_broadcast_enable(iface, baddr);
+#endif
+}
+
 #ifdef OPEN_BCAST_SOCKET 
 /*
  * Enable a broadcast address to a given socket
@@ -646,7 +658,7 @@ set_reuseaddr(int flag) {
  * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
-socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+socket_broadcast_enable(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef SO_BROADCAST
 	int on = 1;
@@ -660,6 +672,12 @@ socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) enable failure on address %s: %m",
 				stoa(maddr));
 		}
+#ifdef DEBUG
+		else if (debug > 1) {
+			printf("Broadcast enabled on socket %d for address %s\n",
+				iface->fd, stoa(maddr));
+		}
+#endif
 	}
 	iface->flags |= INT_BCASTOPEN;
 	modify_addr_in_list(maddr, iface->flags);
@@ -867,7 +885,7 @@ io_setbclient(void)
 			continue;
 
 		/* Enable Broadcast on socket */
-		jstatus = socket_broadcast_enable(&inter_list[i], i, &inter_list[i].sin);
+		jstatus = socket_broadcast_enable(&inter_list[i], &inter_list[i].sin);
 		if (jstatus == ISC_TRUE)
 			nif++;
 #ifdef DEBUG

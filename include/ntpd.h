@@ -11,8 +11,8 @@
 #include "recvbuff.h"
 
 #ifdef SYS_WINNT
-#define exit service_exit
-extern	void	service_exit	(int);
+#define exit ntservice_exit
+extern	void	ntservice_exit	(int);
 /*	declare the service threads */
 void	service_main	(DWORD, LPTSTR *);
 void	service_ctrl	(DWORD);
@@ -73,6 +73,7 @@ extern	void	ntp_intres	P((void));
 /* ntp_io.c */
 extern	struct interface *findinterface P((struct sockaddr_storage *));
 extern  struct interface *findbcastinter P((struct sockaddr_storage *));
+extern  void	enable_broadcast P((struct interface *, struct sockaddr_storage *));
 
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));
@@ -178,7 +179,6 @@ extern	int	refclock_newpeer P((struct peer *));
 extern	void	refclock_unpeer P((struct peer *));
 extern	void	refclock_receive P((struct peer *));
 extern	void	refclock_transmit P((struct peer *));
-extern	void	refclock_timeout P((struct peer *));
 extern	void	init_refclock	P((void));
 #endif	/* REFCLOCK */
 
@@ -312,6 +312,7 @@ extern int	forground_process;	/* run the process in the forground */
 extern u_char	sys_poll;		/* system poll interval (log2 s) */
 extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
+extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
 extern double	allan_xpt;		/* Allan intercept (s) */
 extern double	clock_jitter;		/* clock jitter (s) */
@@ -350,7 +351,6 @@ extern u_char	sys_stratum;		/* stratum of system */
 extern s_char	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* distance to current sync source */
 extern double	sys_rootdispersion;	/* dispersion of system clock */
-extern u_long	sys_clocktime;		/* last system clock update */
 extern u_int32	sys_refid;		/* reference source for local clock */
 extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */
