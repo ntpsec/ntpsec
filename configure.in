@@ -271,8 +271,6 @@ AC_CHECK_HEADERS(net/if.h, [], [],
 AC_CHECK_HEADERS(net/if6.h)
 AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
 AC_CHECK_HEADERS(netinet/in.h)
-#HMS
-dnl AC_CHECK_HEADERS(netinet/ip.h)
 AC_CHECK_HEADERS(netinet/ip.h, [], [],
 [#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -3586,11 +3584,6 @@ then
 	;;
     esac
 fi
-
-# HMS: I think we avoid this problem now...
-## This is necessary so that .o files in LIBOBJS are also built via
-## the ANSI2KNR-filtering rules.
-#LIB@&t@OBJS=`echo "$LIB@&t@OBJS" | sed 's,\.[[^.]]* ,$U&,g;s,\.[[^.]]*$,$U&,'`
 
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(ElectricFence/Makefile)
