@@ -199,8 +199,9 @@
 /*
  * Acquisition and tracking time constants
  */
-#define MINAVG		8	/* min time constant */
-#define MAXAVG		1024	/* max time constant */
+#define MINAVG		8	/* min averaging time */
+#define MAXAVG		1024	/* max averaging time */
+#define FCONST		4	/* frequency time constant */
 #define TCONST		16	/* data bit/digit time constant */
 
 /*
@@ -1262,12 +1263,12 @@ wwv_rf(
 	 * propagation delay. Once each second look for second sync. If
 	 * not in minute sync, fiddle the codec gain. Note the SNR is
 	 * computed from the maximum sample and the envelope of the
-	 * sample 6 ms before it, so if we slip more than a cycle the
+	 * sample 10 ms before it, so if we slip more than a cycle the
 	 * SNR should plummet. The signal is scaled to produce unit
 	 * energy at the maximum value.
 	 */
 	dtemp = (epobuf[epoch] += (mfsync - epobuf[epoch]) /
-	    up->avgint);
+	    (up->avgint * FCONST));
 	if (dtemp > epomax) {
 		epomax = dtemp;
 		epopos = epoch;
@@ -1277,7 +1278,7 @@ wwv_rf(
 
 		up->epomax = epomax;
 		dtemp = 0;
-		j = epopos - 6 * MS;
+		j = epopos - 10 * MS;
 		if (j < 0)
 			j += SECOND;
 		up->eposnr = wwv_snr(epomax, epobuf[j]);
