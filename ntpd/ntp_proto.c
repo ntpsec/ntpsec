@@ -1890,6 +1890,7 @@ clock_select(void)
 			 * nobody else is around. These guys are all
 			 * configured, so we never throw them away.
 			 */
+#ifdef REFCLOCK
 			if (peer->refclktype == REFCLK_LOCALCLOCK
 #if defined(VMS) && defined(VMS_LOCALUNIT)
 			/* wjm: VMS_LOCALUNIT taken seriously */
@@ -1908,6 +1909,7 @@ clock_select(void)
 				if (!(peer->flags & FLAG_PREFER))
 					continue; /* no acts */
 			}
+#endif /* REFCLOCK */
 
 			/*
 			 * If we get this far, the peer can stay on the
@@ -2221,9 +2223,10 @@ clock_select(void)
 			sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
+#ifdef REFCLOCK
 		if (peer->refclktype == REFCLK_ATOM_PPS)
 			sys_pps = peer;
-
+#endif /* REFCLOCK */
 
 		/*
 		 * If this is the old system peer and it's stratum is

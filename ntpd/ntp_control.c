@@ -754,6 +754,7 @@ ctlsysstatus(void)
 	register u_char this_clock;
 
 	this_clock = CTL_SST_TS_UNSPEC;
+#ifdef REFCLOCK
 	if (sys_peer != 0) {
 		if (sys_peer->sstclktype != CTL_SST_TS_UNSPEC) {
 			this_clock = sys_peer->sstclktype;
@@ -767,6 +768,7 @@ ctlsysstatus(void)
 				this_clock |= CTL_SST_TS_PPS;
 		}
 	}
+#endif /* REFCLOCK */
 	return (u_short)CTL_SYS_STATUS(sys_leap, this_clock,
 	    ctl_sys_num_events, ctl_sys_last_event);
 }
