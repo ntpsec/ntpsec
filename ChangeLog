@@ -1,5 +1,7 @@
 2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c (snifflink): Ignore ENOENT, too.
+
 	* ntpd/ntp_proto.c (peer_xmit): Crypto cleanup
 	* ntpd/ntp_crypto.c: Cleanup
 	* ntpd/ntp_control.c: Join the club

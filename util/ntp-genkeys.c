@@ -456,8 +456,11 @@ snifflink(
 
 	rc = readlink(file, buf, sizeof buf);
 	if (-1 == rc) {
-		if (EINVAL == errno)
+		switch (errno) {
+		    case EINVAL:	/* Fall thru */
+		    case ENOENT:
 			return;
+		}
 		fprintf(stderr, "%s: readlink(%s) failed: (%d) %s\n",
 			progname, file, errno, strerror(errno));
 		exit(1);
