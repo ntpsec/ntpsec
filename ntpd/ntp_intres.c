@@ -640,6 +640,11 @@ request(
 	reqpkt.request = REQ_CONFIG;		/* configure a new peer */
 	reqpkt.err_nitems = ERR_NITEMS(0, 1);	/* one item */
 	reqpkt.mbz_itemsize = MBZ_ITEMSIZE(sizeof(struct conf_peer));
+	/* Make sure mbz_itemsize <= sizeof reqpkt.data */
+	if (sizeof(struct conf_peer) > sizeof (reqpkt.data)) {
+		msyslog(LOG_ERR, "Bletch: conf_peer is too big for reqpkt.data!");
+		exit(1);
+	}
 	memmove(reqpkt.data, (char *)conf, sizeof(struct conf_peer));
 	reqpkt.keyid = htonl(req_keyid);
 

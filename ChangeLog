@@ -1,3 +1,65 @@
+2000-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/refclock.htm:
+	* html/rdebug.htm:
+	* html/prefer.htm:
+	* html/pps.htm:
+	* html/ntpdc.htm:
+	* html/miscopt.htm:
+	* html/ldisc.htm:
+	* html/kern.htm:
+	* html/index.htm:
+	* html/exec.htm:
+	* html/driver22.htm: 
+	* html/clockopt.htm: 
+	Updates from Dave Mills
+
+	* ntpd/ntp_intres.c (request): Sanity check the size of the response
+
+2000-10-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpq/ntpq_ops.c (dopeers): Daev didn't like the patch to show
+	the units on the times...
+	* ntpdc/ntpdc_ops.c (doset): SYS_FLAG_PPS cleanup
+	* ntpd/refclock_wwv.c (wwv_newchan): Update the peer refid if
+	we're talking to a stratum 0 source
+	* ntpd/refclock_trak.c: Needs PPS
+	* ntpd/refclock_oncore.c: Disable for now
+	* ntpd/refclock_mx4200.c: Needs PPSAPI, not PPS
+	Header cleanup.  PPS interface cleanup.
+	Process sentences with a switch
+	Cleanup and sanity checks
+	* ntpd/refclock_datum.c: header cleanup, light body cleanup
+	* ntpd/refclock_conf.c: CLOCK_TRAK needs PPS
+	MX4200 needs PPSAPI, not PPS
+	Disable ONCORE for now
+	* ntpd/refclock_bancomm.c: Surgery
+	* ntpd/refclock_atom.c: Cleanup
+	(atom_control): added
+	(atom_ppsapi): added
+	* ntpd/ntp_request.c (setclr_flags): SYS_FLAG_PPS cleanup
+	* ntpd/ntp_refclock.c: stropts.h back in in TTYCLK and
+	HAVE_SYS_CLKDEFS_H 
+	Get ntp_syscall if KERNEL_PLL
+	Define cal_enable
+	(refclock_receive): Cleanup
+	(refclock_control): sanity check procptr
+	* ntpd/ntp_proto.c (init_proto): pps_enable
+	(proto_config): Turn on/off PPS discipline
+	* ntpd/ntp_loopfilter.c: pps_enable
+	(local_clock): record_loop_stats() if !ntp_enable
+	(local_clock): Turn off PPS if it's not enabled
+	Other cleanup/fixes
+	* ntpd/ntp_config.c: pps and calibrate keywords.  Initialize
+	pps_assert to 0, not 1 (swap assert/clear?)
+	* include/ntpd.h: We have pll_status if KERNEL_PLL
+	Added pps_enable and cal_enable
+	* include/ntp_request.h (SYS_FLAG_PPS): Renamed from
+	SYS_FLAG_AUTHENTICATE
+	* include/ntp.h (PROTO_PPS): Added
+	(PROTO_CAL): Added
+	From: Dave Mills
+	
 2000-09-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_refclock.h (stropts.h, sys/clkdefs.h): Harmful and
