@@ -1497,7 +1497,7 @@ dnl AC_SUBST(UNIXCERT)
 ntp_refclock=no
 
 AC_MSG_CHECKING(for hopf serial clock device)
-AC_ARG_ENABLE(HOPFSERIAL,		[  --enable-HOPFSERIAL       +  hopf serial clock device],
+AC_ARG_ENABLE(HOPFSERIAL,		[  --enable-HOPFSERIAL     + hopf serial clock device],
       [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
   if test "$ntp_ok" = "yes"; then
       ntp_refclock=yes
@@ -1507,7 +1507,7 @@ AC_ARG_ENABLE(HOPFSERIAL,		[  --enable-HOPFSERIAL       +  hopf serial clock dev
 
 
 AC_MSG_CHECKING(for hopf PCI clock 6039)
-AC_ARG_ENABLE(HOPFPCI,		[  --enable-HOPFPCI       + hopf 6039 PCI board],
+AC_ARG_ENABLE(HOPFPCI,		[  --enable-HOPFPCI        + hopf 6039 PCI board],
       [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -2307,9 +2307,8 @@ AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(for the level of crypto support)
 AC_ARG_WITH(crypto,
-	dnl	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl,rsaref}]),
 	AC_HELP_STRING([--with-crypto], [+ ={autokey,rsaref}]),
-
+dnl	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl,rsaref}]),
 [ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
@@ -2361,7 +2360,7 @@ esac
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(if we want to compile with ElectricFence)
-AC_ARG_WITH(electricfence,	[  --with-electricfence    -],
+AC_ARG_WITH(electricfence,	[  --with-electricfence    - compile with ElectricFence malloc debugger],
 [ans=$withval], [ans=no])
 case "$ans" in
  no) ;;

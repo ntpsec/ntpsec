@@ -1,5 +1,13 @@
 2001-04-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Properly align --help output. 
+	Explain ElectricFence. 
+	From: Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE> 
+
+	* ntpd/ntp_loopfilter.c (local_clock): Lose debugging statements.
+	* ntpd/ntp_proto.c (clock_filter): Rewrite.
+	From: Dave Mills
+
 	* ntpd/ntp_control.c (ctl_getitem): msyslog() possible buffer
 	overflow exploit.
 

@@ -1274,9 +1274,10 @@ clock_filter(
 	double sample_disp
 	)
 {
-	register int i, j, k, m, n;
-	register u_char *ord;
-	double off, dly, dsp, jit, dtemp, etemp;
+	register int i, j, k, m;
+	int ord[NTP_SHIFT];
+	double dst[NTP_SHIFT];
+	double off, dly, dsp, jit, dtemp, etemp, ftemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
@@ -1297,41 +1298,63 @@ clock_filter(
 	peer->filter_nextpt = j;
 
 	/*
-	 * Update dispersions since the last update.
+	 * Update dispersions since the last update and at the same
+	 * time initialize the distance and index vectors. The distance
+	 * is a compound metric: If the sample dispersion is less than
+	 * MAXDISTANCE younger than the Allan intercept, use delay.
+	 * Otherwise, use MAXDISTANCE plus conventional distance.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
+	etemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
 	peer->update = current_time;
-	ord = peer->filter_order;
 	for (i = 0; i < NTP_SHIFT; i++) {
-		if (j != peer->filter_nextpt) {
+		if (i != 0) {
 			peer->filter_disp[j] += dtemp;
 			if (peer->filter_disp[j] > MAXDISPERSE)
 				peer->filter_disp[j] = MAXDISPERSE;
 		}
+		ftemp = peer->filter_delay[j] / 2. +
+		    peer->filter_disp[j];
+		if (ftemp < MAXDISTANCE || current_time -
+		    peer->filter_epoch[j] < dtemp)
+			dst[i] = peer->filter_delay[j];
+		else
+			dst[i] = MAXDISTANCE + ftemp;
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
 
-	/*
-	 * Sort the samples in the register by delay. The winning sample
-	 * will be in ord[0]. Sort the samples only if they are younger
-	 * than the Allen intercept; however, keep a minimum of two
-	 * samples so that we can compute jitter.
+        /*
+	 * Sort the samples in the register by the compound metric.
 	 */
-	dtemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
-	for (n = 0; n < NTP_SHIFT; n++) {
-		if (n > 1 && current_time - peer->filter_epoch[ord[n]] >
-		    dtemp)
-			break;
-		for (j = 0; j < n; j++) {
-			if (peer->filter_delay[ord[j]] >
-			    peer->filter_delay[ord[n]] ||
-			    peer->filter_disp[ord[j]] >= MAXDISPERSE) {
+	for (i = 1; i < NTP_SHIFT; i++) {
+		for (j = 0; j < i; j++) {
+			if (dst[j] > dst[i]) {
 				k = ord[j];
-				ord[j] = ord[n];
-				ord[n] = k;
+				ord[j] = ord[i];
+				ord[i] = k;
+				etemp = dst[j];
+				dst[j] = dst[i];
+				dst[i] = etemp;
 			}
 		}
+	}
+
+	/*
+	 * Copy the ord[] array to the association structure so ntpq
+	 * can see it later.
+	 */
+	for (i = 0; i < NTP_SHIFT; i++) {
+		peer->filter_order[i] = ord[i];
+#if DEBUG
+		if (debug > 1) {
+			j = ord[i];
+			printf("clock_filter: %d %d %f %f %f %f\n", i,
+			    j, dst[i], peer->filter_offset[j],
+			    peer->filter_delay[j],
+			    peer->filter_disp[j]);
+		}
+#endif
 	}
 	
 	/*
@@ -1354,9 +1377,7 @@ clock_filter(
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
-		etemp = peer->filter_delay[j] / 2. +
-		    peer->filter_disp[j];
-		if (i >= n || etemp >= MAXDISTANCE)
+		if (dst[i] >= MAXDISTANCE)
 			continue;
 		m++;
 		xtemp = 2 * fabs(peer->filter_offset[j] -

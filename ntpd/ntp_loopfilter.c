@@ -275,13 +275,7 @@ local_clock(
 	retval = 0;
 	clock_frequency = flladj = plladj = 0;
 	mu = current_time - last_time;
-
-printf("yyy %f %f %f %d\n", fabs(fp_offset), mu, clock_max, state);
-
 	if (fabs(fp_offset) > clock_max) {
-
-printf("zzz %f %f %f %d\n", fabs(fp_offset), mu, clock_minstep, state);
-
 		switch (state) {
 
 		/*
@@ -352,9 +346,6 @@ printf("zzz %f %f %f %d\n", fabs(fp_offset), mu, clock_minstep, state);
 			break;
 		}
 	} else {
-
-printf("xxx %f %f %d\n", mu, clock_minstep, state);
-
 		switch (state) {
 
 		/*
@@ -447,6 +438,8 @@ printf("xxx %f %f %d\n", mu, clock_minstep, state);
 			break;
 		}
 	}
+
+printf("uuu\n");
 
 #if defined(KERNEL_PLL)
 	/*
@@ -772,7 +765,8 @@ loop_config(
 {
 
 	switch (item) {
-	    case LOOP_DRIFTINIT:
+
+	case LOOP_DRIFTINIT:
 
 #ifdef KERNEL_PLL
 		/*
@@ -832,7 +826,7 @@ loop_config(
 #endif /* KERNEL_PLL */
 		break;
 
-	    case LOOP_DRIFTCOMP:
+	case LOOP_DRIFTCOMP:
 
 		/*
 		 * Initialize the kernel frequency and clamp to
@@ -866,29 +860,29 @@ loop_config(
 			}
 			(void)ntp_adjtime(&ntv);
 		}
-		break;
 #endif /* KERNEL_PLL */
+		break;
 
-		case LOOP_MAX:
-			clock_max = freq;
-			break;
+	case LOOP_MAX:
+		clock_max = freq;
+		break;
 
-		case LOOP_PANIC:
-			clock_panic = freq;
-			break;
+	case LOOP_PANIC:
+		clock_panic = freq;
+		break;
 
-		case LOOP_PHI:
-			clock_phi = freq;
-			break;
+	case LOOP_PHI:
+		clock_phi = freq;
+		break;
 
-		case LOOP_MINSTEP:
-			clock_minstep = freq; 
-			break;
+	case LOOP_MINSTEP:
+		clock_minstep = freq; 
+		break;
 
-		case LOOP_MINPOLL:
-			if (freq < NTP_MINPOLL)
-				freq = NTP_MINPOLL;
-			sys_minpoll = (u_char)freq;
+	case LOOP_MINPOLL:
+		if (freq < NTP_MINPOLL)
+			freq = NTP_MINPOLL;
+		sys_minpoll = (u_char)freq;
 	}
 }
 
