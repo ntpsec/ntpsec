@@ -235,7 +235,7 @@ case "$target" in
 esac
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h sys/stat.h sys/stream.h)
 AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/termios.h)
-AC_CHECK_HEADERS(sys/time.h)
+AC_CHECK_HEADERS(sys/time.h sys/signal.h)
 AC_EGREP_CPP(yes,
 [#include <sys/timepps.h>
 #ifdef PPS_API_VERS_1
@@ -838,6 +838,9 @@ case "$target" in
     AC_DEFINE(DECL_PLOCK_0)
     AC_DEFINE(DECL_STIME_1)
     ;;
+ *-*-qnx*)
+    AC_DEFINE(DECL_ADJTIME_0)
+    ;;
  *-*-riscos4*)
     AC_DEFINE(DECL_ADJTIME_0)
     AC_DEFINE(DECL_BZERO_0)
@@ -1170,6 +1173,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-osf*)
         ans=no
         ;;
+     *-*-qnx*)
+        ans=no
+        ;;
      *-*-sunos*)
 	ans=no
 	;;
@@ -1219,6 +1225,9 @@ case "$ac_cv_hdr_def_sigpoll" in
 	ans=no
 	;;
      *-*-ultrix*)
+        ans=no
+        ;;
+     *-*-qnx*)
         ans=no
         ;;
      *) ans=yes
@@ -2483,6 +2492,19 @@ esac
 if test "$ans" = "yes"; then
     MAKE_ADJTIMED=adjtimed
     AC_DEFINE(NEED_HPUX_ADJTIME)
+fi
+AC_MSG_RESULT($ans)
+
+AC_MSG_CHECKING(if we want QNX adjtime support)
+case "$target" in
+ *-*-qnx*)
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+if test "$ans" = "yes"; then
+    AC_DEFINE(NEED_QNX_ADJTIME, 1, [Do we need the qnx adjtime call?])
 fi
 AC_MSG_RESULT($ans)
 

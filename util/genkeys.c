@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 
 #ifdef OPENSSL
 #include "openssl/evp.h"
