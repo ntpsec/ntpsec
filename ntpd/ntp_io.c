@@ -110,8 +110,8 @@ u_long io_timereset;		/* time counters were reset */
 /*
  * Interface stuff
  */
-struct interface *any_interface = NULL;	/* default ipv4 interface */
-struct interface *any6_interface = NULL;/* default ipv6 interface */
+struct interface *any_interface;	/* default ipv4 interface */
+struct interface *any6_interface;	/* default ipv6 interface */
 struct interface *loopback_interface;	/* loopback ipv4 interface */
 struct interface *loopback6_interface;	/* loopback ipv6 interface */
 struct interface inter_list[MAXINTERFACES]; /* Interface list */
@@ -120,11 +120,6 @@ int nwilds;				/* Total number of wildcard intefaces */
 int wildipv4 = -1;			/* Index into inter_list for IPv4 wildcard */
 int wildipv6 = -1;			/* Index into inter_list for IPv6 wildcard */
 
-/*
- * These should be set if there is only one */
-int outifaceipv4 = -1;		/* The only IPv4 outgoing interface */
-int outifaceipv6 = -1;		/* The only IPv6 outgoing interface */
-
 #ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
@@ -132,6 +127,20 @@ int outifaceipv6 = -1;		/* The only IPv6 outgoing interface */
  */
 static	struct refclockio *refio;
 #endif /* REFCLOCK */
+
+
+/*
+ * Define what the possible "soft" errors can be.  These are non-fatal returns
+ * of various network related functions, like recv() and so on.
+ *
+ * For some reason, BSDI (and perhaps others) will sometimes return <0
+ * from recv() but will have errno==0.  This is broken, but we have to
+ * work around it here.
+ */
+#define SOFT_ERROR(e)	((e) == EAGAIN || \
+			 (e) == EWOULDBLOCK || \
+			 (e) == EINTR || \
+			 (e) == 0)
 
 /*
  * File descriptor masks etc. for call to select
@@ -148,11 +157,11 @@ static	void	close_file	P((SOCKET));
 #endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
-static	int find_interface_index P((struct sockaddr_storage *, int, int));
 static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
 
 
 typedef struct vsock vsock_t;
@@ -177,7 +186,6 @@ ISC_LIST(remaddr_t)       remoteaddr_list;
 
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
-int	find_socket_in_if	P((SOCKET ));
 void	add_addr_to_list	P((struct sockaddr_storage *, int, int));
 int     modify_addr_in_list	P((struct sockaddr_storage *, int));
 void	delete_addr_from_list	P((struct sockaddr_storage *));
@@ -270,6 +278,63 @@ init_io(void)
 #endif
 }
 
+/*
+ * Function to dump the contents of the interface structure
+ * For debugging use only.
+ */
+#ifdef DEBUG
+void
+interface_dump(struct interface *itf)
+{
+	u_char* cp;
+	int i;
+	/* Limit the size of the sockaddr_storage hex dump */
+	int maxsize = min(32, sizeof(struct sockaddr_storage));
+
+	printf("Dumping interface: %p\n", itf);
+	printf("fd = %d\n", itf->fd);
+	printf("bfd = %d\n", itf->bfd);
+	printf("sin = %s,\n", stoa(&(itf->sin)));
+	cp = (u_char*) &(itf->sin);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("bcast = %s,\n", stoa(&(itf->bcast)));
+	cp = (u_char*) &(itf->bcast);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("mask = %s,\n", stoa(&(itf->mask)));
+	cp = (u_char*) &(itf->mask);
+	for(i = 0; i < maxsize; i++)
+	{
+		printf("%02x", *cp++);
+		if((i+1)%4 == 0)
+			printf(" ");
+	}
+	printf("\n");
+	printf("name = %s\n", itf->name);
+	printf("flags = 0x%08x\n", itf->flags);
+	printf("last_ttl = %d\n", itf->last_ttl);
+	printf("addr_refid = %08x\n", itf->addr_refid);
+	printf("num_mcast = %d\n", itf->num_mcast);
+	printf("received = %ld\n", itf->received);
+	printf("sent = %ld\n", itf->sent);
+	printf("notsent = %ld\n", itf->notsent);
+	printf("ifindex = %u\n", itf->ifindex);
+	printf("scopeid = %u\n", itf->scopeid);
+
+}
+#endif
+
 #ifdef UDP_WILDCARD_DELIVERY
 int
 create_wildcards(u_short port) {
@@ -285,7 +350,6 @@ create_wildcards(u_short port) {
 #endif
 
 	if(okipv4 == ISC_TRUE) {
-		inter_list[idx].family = AF_INET;
 		inter_list[idx].sin.ss_family = AF_INET;
 		((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr = htonl(INADDR_ANY);
 		((struct sockaddr_in*)&inter_list[idx].sin)->sin_port = port;
@@ -316,7 +380,6 @@ create_wildcards(u_short port) {
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
 	if (isc_net_probeipv6() == ISC_R_SUCCESS) {
-		inter_list[idx].family = AF_INET6;
 		inter_list[idx].sin.ss_family = AF_INET6;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr = in6addr_any;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_port = port;
@@ -363,7 +426,6 @@ void
 convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 
 	if(isc_if->af == AF_INET) {
-		itf->family = AF_INET;
 		itf->sin.ss_family = (u_short) isc_if->af;
 		strcpy(itf->name, isc_if->name);
 		memcpy(&(((struct sockaddr_in*)&itf->sin)->sin_addr),
@@ -393,14 +455,12 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 	}
 #ifdef ISC_PLATFORM_HAVEIPV6
 	else if (isc_if->af == AF_INET6) {
-		itf->family = AF_INET6;
 		itf->sin.ss_family = (u_short) isc_if->af;
 		strcpy(itf->name, isc_if->name);
 		memcpy(&(((struct sockaddr_in6 *)&itf->sin)->sin6_addr),
 		       &(isc_if->address.type.in6),
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
-		((struct sockaddr_in6 *)&itf->sin)->sin6_scope_id = isc_if->scopeid;
 
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
@@ -441,8 +501,6 @@ create_sockets(
 {
 	struct sockaddr_storage resmask;
 	int i;
-	isc_boolean_t ofacesetipv4;
-	isc_boolean_t ofacesetipv6;
 	isc_mem_t *mctx = NULL;
 	isc_interfaceiter_t *iter = NULL;
 	isc_boolean_t scan_ipv4 = ISC_FALSE;
@@ -479,9 +537,8 @@ create_sockets(
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
 #ifdef UDP_WILDCARD_DELIVERY
-/*	nwilds = create_wildcards(port);
-	idx = nwilds;
-*/
+	nwilds = create_wildcards(port);
+	idx = nwilds; 
 #endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
@@ -552,34 +609,10 @@ create_sockets(
 	 * Wildcard interfaces, if any, are ignored.
 	 */
 
-	ofacesetipv4 = ISC_FALSE;
-	ofacesetipv6 = ISC_FALSE;
 	for (i = nwilds; i < ninterfaces; i++) {
 		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
-
-		/*
-		 * We set the outgoing interface number ONLY if there is just one
-		 */
-		if (inter_list[i].family == AF_INET) {
-			if((outifaceipv4 == -1) && !(inter_list[i].flags & INT_LOOPBACK) && 
-				ofacesetipv4 == ISC_FALSE) {
-				outifaceipv4 = i;
-				ofacesetipv4 = ISC_TRUE;
-			}
-			else if ((outifaceipv4 != -1) && !(inter_list[i].flags & INT_LOOPBACK))
-				outifaceipv4 = -1;
-		}
-		if (inter_list[i].family == AF_INET6) {
-			if((outifaceipv6 == -1) && !(inter_list[i].flags & INT_LOOPBACK) && 
-				ofacesetipv6 == ISC_FALSE) {
-				outifaceipv6 = i;
-				ofacesetipv6 = ISC_TRUE;
-			}
-			else if ((outifaceipv6 != -1) && !(inter_list[i].flags & INT_LOOPBACK))
-				outifaceipv6 = -1;
-		}
 	}
 
 	/*
@@ -609,6 +642,8 @@ create_sockets(
 				   stoa((&inter_list[i].bcast)));
 			printf("  mask=%s\n",
 			       stoa((&inter_list[i].mask)));
+			if (debug > 4)	/* in-depth debugging only */
+				interface_dump(&inter_list[i]);
 		}
 	}
 #endif
@@ -648,7 +683,7 @@ void
 enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
 {
 #ifdef SO_BROADCAST
-	socket_broadcast_enable(iface, baddr);
+	socket_broadcast_enable(iface, iface->fd, baddr);
 #endif
 }
 
@@ -659,7 +694,7 @@ enable_broadcast(struct interface *iface, struct sockaddr_storage *baddr)
  * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
-socket_broadcast_enable(struct interface *iface, struct sockaddr_storage *maddr)
+socket_broadcast_enable(struct interface *iface, SOCKET fd, struct sockaddr_storage *maddr)
 {
 #ifdef SO_BROADCAST
 	int on = 1;
@@ -667,7 +702,7 @@ socket_broadcast_enable(struct interface *iface, struct sockaddr_storage *maddr)
 	if (maddr->ss_family == AF_INET)
 	{
 		/* if this interface can support broadcast, set SO_BROADCAST */
-		if (setsockopt(iface->fd, SOL_SOCKET, SO_BROADCAST,
+		if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST,
 			       (char *)&on, sizeof(on)))
 		{
 			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) enable failure on address %s: %m",
@@ -676,7 +711,7 @@ socket_broadcast_enable(struct interface *iface, struct sockaddr_storage *maddr)
 #ifdef DEBUG
 		else if (debug > 1) {
 			printf("Broadcast enabled on socket %d for address %s\n",
-				iface->fd, stoa(maddr));
+				fd, stoa(maddr));
 		}
 #endif
 	}
@@ -722,6 +757,54 @@ socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_stora
  */
 #ifdef MCAST
 /*
+ * Check to see if the address is a multicast address
+ */
+static isc_boolean_t
+addr_ismulticast(struct sockaddr_storage *maddr)
+{
+	u_int32 haddr = ntohl(((struct sockaddr_in*)maddr)->sin_addr.s_addr);
+	switch (maddr->ss_family)
+	{
+	case AF_INET :
+		if (!IN_CLASSD(haddr)) {
+			netsyslog(LOG_ERR,
+			"multicast address %s not class D",
+				stoa(maddr));
+			return (ISC_FALSE);
+		}
+		else
+		{
+			return (ISC_TRUE);
+		}
+	case AF_INET6 :
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+		struct in6_addr iaddr6;
+		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
+		if (!IN6_IS_ADDR_MULTICAST(&iaddr6)) {
+			netsyslog(LOG_ERR,
+			    "address %s not IPv6 multicast address",
+				stoa(maddr));
+			return (ISC_FALSE);
+		}
+		else
+		{
+			return (ISC_TRUE);
+		}
+
+/*
+ * If we don't have IPV6 support any IPV6 address is not multicast
+ */
+#else
+		return (ISC_FALSE);
+#endif
+	/*
+	 * Never valid
+	 */
+	default:
+		return (ISC_FALSE);
+	}
+}
+/*
  * Add a multicast address to a given socket
  * The socket is in the inter_list all we need to do is enable
  * multicasting. It is not this function's job to select the socket
@@ -740,8 +823,8 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	{
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
-/*		mreq.imr_interface.s_addr = htonl(INADDR_ANY); */
+/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;*/
+		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -756,14 +839,14 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 
 		/*
 		 * Enable reception of multicast packets
-		 * If the local address is link-local we can get the interface index
+		 * If the address is link-local we can get the interface index
 		 * from the scope id. Don't do this for other types of multicast
 		 * addresses. For now let the kernel figure it out.
 		 */
 		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&iface->sin)->sin6_addr))
+		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
 			mreq6.ipv6mr_interface = iface->scopeid;
 		else
 #endif
@@ -773,7 +856,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
 			 "setsockopt IPV6_JOIN_GROUP failure: %m on interface %d(%s)",
-			 ind, stoa(maddr));
+			 mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
 		break;
@@ -828,8 +911,8 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		iaddr6 = ((struct sockaddr_in6*)&maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
+		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+			mreq6.ipv6mr_interface = iface->scopeid;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -865,12 +948,13 @@ io_setbclient(void)
 	int i;
 	int nif = 0;
 	isc_boolean_t jstatus; 
+	SOCKET fd;
 
 	set_reuseaddr(1);
 
 	for (i = nwilds; i < ninterfaces; i++) {
 		/* Only IPv4 addresses are valid for broadcast */
-		if (inter_list[i].family != AF_INET)
+		if (inter_list[i].sin.ss_family != AF_INET)
 			continue;
 
 		/* Is this a broadcast address? */
@@ -885,15 +969,32 @@ io_setbclient(void)
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
+		/*
+		 * Try to open the broadcast address
+		 */
+		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
+				    INT_BROADCAST, 1, &inter_list[i], i);
+
+		 /*
+		 * If we succeeded then we use it otherwise
+		 * enable the underlying address
+		 */
+		if (inter_list[i].bfd == INVALID_SOCKET) {
+			fd = inter_list[i].fd;
+		}
+		else {
+			fd = inter_list[i].bfd;
+		}
+
 		/* Enable Broadcast on socket */
-		jstatus = socket_broadcast_enable(&inter_list[i], &inter_list[i].sin);
+		jstatus = socket_broadcast_enable(&inter_list[i], fd, &inter_list[i].sin);
 		if (jstatus == ISC_TRUE)
 			nif++;
 #ifdef DEBUG
 		if (debug) {
 			if (jstatus == ISC_TRUE)
 				printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
-				i, inter_list[i].fd);
+				i, fd);
 			else
 				printf("io_setbclient: Unable to Open broadcast client on interface %d\n",
 				i);
@@ -939,14 +1040,15 @@ io_multicast_add(
 	)
 {
 #ifdef MCAST
-	u_int32 haddr = ntohl(((struct sockaddr_in*)&addr)->sin_addr.s_addr);
-	struct in_addr iaddr;
+	int i = ninterfaces;	/* Use the next interface */
 	isc_boolean_t jstatus;
 	int ind;
 
-#ifdef ISC_PLATFORM_HAVEIPV6
-	struct in6_addr iaddr6;
-#endif /* ISC_PLATFORM_HAVEIPV6 */
+	/*
+	 * Check to see if this is a multicast address
+	 */
+	if (addr_ismulticast(&addr) == ISC_FALSE)
+		return;
 
 	/* If we already have it we can just return */
 	if (find_flagged_addr_in_list(&addr, INT_MCASTOPEN) >= 0)
@@ -956,60 +1058,102 @@ io_multicast_add(
 		return;
 	}
 
-	switch (addr.ss_family)
-	{
-	case AF_INET :
-		iaddr = (((struct sockaddr_in*)&addr)->sin_addr);
-		if (!IN_CLASSD(haddr)) {
-			netsyslog(LOG_ERR,
-			"multicast address %s not class D",
-				inet_ntoa(iaddr));
-#ifdef DEBUG
-			if (debug >= 4)
-				printf("haddr value = %x\n", haddr);
-#endif
-			return;
+	/*
+	 * Find an empty slot to use
+	 */
+	ind = -1;
+	for (i = nwilds; i < ninterfaces; i++) {
+		/* found a free slot */
+		if (SOCKNUL(&inter_list[i].sin) &&
+		    inter_list[i].fd <= 0 && inter_list[i].bfd <= 0)
+		{
+			ind = i;
+			break;
 		}
-		break;
-
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-	case AF_INET6 :
-
-		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
-		if (!IN6_IS_ADDR_MULTICAST(&iaddr6)) {
-			netsyslog(LOG_ERR,
-			    "address %s not IPv6 multicast address",
-				stoa(&addr));
-			return;
-		}
-		break;
-#endif /* ISC_PLATFORM_HAVEIPV6 */
 	}
-
-	ind = find_interface_index(&addr, INT_MULTICAST, nwilds);
-	if (ind < 0) {
+	/*
+	 * We didn't find a slot and nothing available. Log and return
+	 */
+	if (ind < 0 && ninterfaces >= MAXINTERFACES)
+	{
 		netsyslog(LOG_ERR,
-		"No wildcard socket available to use for address %s",
+		"No interface available to use for address %s",
 		stoa(&addr));
 		return;
 	}
+	else
+	{
+		ind = ninterfaces;
+	}
+	/*
+	 * Open a new socket for the multicast address
+	 */
+	memset((char *)&inter_list[ind], 0, sizeof(struct interface));
+	inter_list[ind].sin.ss_family = addr.ss_family;
+	switch(addr.ss_family) {
+	case AF_INET:
+		memcpy(&(((struct sockaddr_in *)&inter_list[ind].sin)->sin_addr),
+		       &(((struct sockaddr_in*)&addr)->sin_addr),
+		       sizeof(struct in_addr));
+		((struct sockaddr_in*)&inter_list[ind].sin)->sin_port = htons(NTP_PORT);
+		memset(&((struct sockaddr_in*)&inter_list[ind].mask)->sin_addr.s_addr, 0xff, sizeof(struct in_addr));
+		break;
+	case AF_INET6:
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+		memcpy(&(((struct sockaddr_in6 *)&inter_list[ind].sin)->sin6_addr),
+		       &((struct sockaddr_in6*)&addr)->sin6_addr,
+		       sizeof(struct in6_addr));
+		((struct sockaddr_in6*)&inter_list[ind].sin)->sin6_port = htons(NTP_PORT);
+		memset(&((struct sockaddr_in6*)&inter_list[ind].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
+#endif
+		break;
+	}
+		
+	inter_list[ind].bfd = INVALID_SOCKET;
+	inter_list[ind].fd = open_socket(&inter_list[ind].sin,
+			    INT_MULTICAST, 1, &inter_list[ind], ind);
+	if (inter_list[ind].fd != INVALID_SOCKET)
+	{
+		inter_list[ind].bfd = INVALID_SOCKET;
+		(void) strncpy(inter_list[ind].name, "multicast",
+			sizeof(inter_list[ind].name));
+		((struct sockaddr_in*)&inter_list[ind].mask)->sin_addr.s_addr =
+						htonl(~(u_int32)0);
+		if (ind >= ninterfaces)
+			ninterfaces = ind + 1;
+	}
+	else
+	{
+		memset((char *)&inter_list[ind], 0, sizeof(struct interface));
+		ind = -1;
+		if (addr.ss_family == AF_INET)
+			ind = wildipv4;
+		else if (addr.ss_family == AF_INET6)
+			ind = wildipv6;
+
+		if (ind >= 0) {
+			/* HACK ! -- stuff in an address */
+			inter_list[ind].bcast = addr;
+			netsyslog(LOG_ERR,
+			 "...multicast address %s using wildcard socket",
+			 stoa(&addr));
+		} else {
+			netsyslog(LOG_ERR,
+			"No multicast socket available to use for address %s",
+			stoa(&addr));
+			return;
+		}
+	}
+
 	jstatus = socket_multicast_enable(&inter_list[ind], ind, &addr);
 
 #ifdef DEBUG
-	if (debug) {
-		if (jstatus == ISC_TRUE) {
-			printf("io_multicast_add: Opened multicast client on interface %d, socket: %d\n",
-			ind, inter_list[ind].fd);
-			printf("io_multicast_add %s\n", stoa(&addr));
-		}
-		else
-			printf("io_multicast_add: Unable to Open multicast client for address %s on interface %d\n",
-			stoa(&addr), ind);
-	}
+	if (debug)
+		printf("io_multicast_add %s on interface %d\n", stoa(&addr), ind);
 #endif
 #else /* MCAST */
 	netsyslog(LOG_ERR,
-	    "cannot add multicast address %s: no Multicast support",
+	    "Cannot add multicast address %s: no Multicast support",
 	    stoa(&addr));
 #endif /* MCAST */
 }
@@ -1071,7 +1215,7 @@ io_multicast_del(
 		for (i = 0; i < ninterfaces; i++)
 		{
 			/* Be sure it's the correct family */
-			if (inter_list[i].family != AF_INET6)
+			if (inter_list[i].sin.ss_family != AF_INET6)
 				continue;
 			if (!(inter_list[i].flags & INT_MCASTOPEN))
 				continue;
@@ -1360,7 +1504,6 @@ close_socket(
 	     SOCKET fd
 	)
 {
-	int ind;
 	SOCKET i, newmax;
 
 	(void) closesocket(fd);
@@ -1379,14 +1522,8 @@ close_socket(
 		maxactivefd = newmax;
 	}
 #endif
-	/*
-	 * Remove the socket from the socket list
-	 * and remove the address from the address list
-	 */
-	ind = find_socket_in_if(fd);
 	delete_socket_from_list(fd);
-	if (ind >= 0)
-		delete_addr_from_list(&inter_list[ind].sin);
+
 }
 
 
@@ -1483,7 +1620,7 @@ sendpkt(
 
 #ifdef MCAST
 
-	switch (inter->family) {
+	switch (inter->sin.ss_family) {
 
 	case AF_INET :
 
@@ -1996,165 +2133,10 @@ findinterface(
 	struct sockaddr_storage *addr
 	)
 {
-	int i;
 	SOCKET s;
-	int rtn;
+	int rtn, i;
 	struct sockaddr_storage saddr;
-	int saddrlen;
-	u_int32 amask, imask;
-
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("Finding interface for address: %s\n", stoa(addr));
-#endif
-	/*
-	 * If there is only one outgoing interface we already know the interface
-	 */
-	if (addr->ss_family == AF_INET && outifaceipv4 != -1) {
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("Found only interface %d for address: %s\n", outifaceipv4, stoa(addr));
-#endif
-		return (&inter_list[outifaceipv4]);
-	}
-	if (addr->ss_family == AF_INET6 && outifaceipv6 != -1) {
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("Found only interface %d for address: %s\n", outifaceipv6, stoa(addr));
-#endif
-		return (&inter_list[outifaceipv6]);
-	}
-
-	/*
-	 * If we got this far we need to try and match the
-	 * network part of the address
-	 */
-	for (i= nwilds; i < ninterfaces; i++)
-	{
-		/*
-		 * Skip the loopback. It can't act as an outgoing interface
-		 */
-		if (inter_list[i].flags & INT_LOOPBACK)
-			continue;
-		/*
-		 * For IPv4 we can check the network mask to see if
-		 * we have a match on the outgoing interface
-		 */
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET) {
-			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-			imask = (((struct sockaddr_in*)&inter_list[i].sin)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-
-			if (amask == imask) {
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found network local interface %d for address: %s\n", i, stoa(addr));
-#endif
-			     return (&inter_list[i]);
-			}
-		}
-
-		/*
-		 * See if the IPv6 address is Link-Local or Site Local
-		 */
-		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
-			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-			{
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found Link-Local interface %d for address: %s\n", i, stoa(addr));
-#endif
-				return (&inter_list[i]);
-			}
-
-			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
-			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-			{
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found Site-Local interface %d for address: %s\n", i, stoa(addr));
-#endif
-				return (&inter_list[i]);
-			}
-		}
-	}
-
-	/*
-	 * If we got here and failed because it was not a local network
-	 * address, see if we have a PPP interface and use that
-	 */
-	for (i = nwilds; i < ninterfaces; i++)
-	{
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET &&
-			inter_list[i].flags & INT_PPP)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found PPP interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (&inter_list[i]);
-		}
-		else if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6 &&
-			 inter_list[i].flags & INT_PPP)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-				printf("Found PPP interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (&inter_list[i]);
-		}
-	}
-
-	/*
-	 * If we got this far, we still don't have an interface.
-	 * We pick the first one which is not loopback or link/site local
-	 */
-
-	for (i = nwilds; i < ninterfaces; i++)
-	{
-		if (inter_list[i].flags & INT_LOOPBACK)
-			continue;
-
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found other interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (&inter_list[i]);
-		}
-
-		/*
-		 * Skip if it's an IPv6 address and is Link-Local or Site Local
-		 */
-		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-				continue;
-
-			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-				continue;
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found other interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (&inter_list[i]);
-		}
-
-	}
-	/*
-	 * If we got here then we are really in trouble
-	 */
-
-#ifdef DEBUG
-	if (debug > 1)
-	    printf("Having trouble finding interface for address: %s\n", stoa(addr));
-#endif
-
-
-	saddrlen = SOCKLEN(addr);
-
+	int saddrlen = SOCKLEN(addr);
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
 	 * and slap a getsockname() on it. If anything breaks, as it
@@ -2214,214 +2196,45 @@ struct interface *
 findbcastinter(
 	struct sockaddr_storage *addr
 	)
-{	
-	int i;
-	int flagtype = INT_BROADCAST;
-
-	i = find_interface_index(addr, flagtype, nwilds);
-	if (i < 0 || i >= ninterfaces)
-		return (NULL);
-	else
-		return (&inter_list[i]);
-}
-
-/*
- * find_interface_index - find the index of the interface given
- * the external address, a flag and a start index
- */
-
-static int
-find_interface_index(
-		     struct sockaddr_storage *addr,
-		     int flagtype,
-		     int startind)
 {
-	int i;
-	u_int32 amask, imask;
-	isc_boolean_t is_sitelocal = ISC_FALSE;
-	isc_boolean_t is_linklocal = ISC_FALSE;
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("Finding *cast interface for address: %s\n", stoa(addr));
-#endif
+#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
+	register int i;
+	
+	i = find_addr_in_list(addr);
+	if(i >= 0)
+	     return (&inter_list[i]);
 
-#ifdef ISC_PLATFORM_HAVEIPV6
-	/*
-	 * For IPv6, if the remote address is a multicast address we need
-	 * we need to take account of that
-	 */
-	if (addr->ss_family == AF_INET6) {
-		if (flagtype == INT_MULTICAST) {
-			if (IN6_IS_ADDR_MC_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
-				is_sitelocal = ISC_TRUE;
-			else
-				is_sitelocal = ISC_FALSE;
-			if (IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
-				is_linklocal = ISC_TRUE;
-			else
-				is_linklocal = ISC_FALSE;
-		}
-		else {
-			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
-				is_sitelocal = ISC_TRUE;
-			else
-				is_sitelocal = ISC_FALSE;
-			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
-				is_linklocal = ISC_TRUE;
-			else
-				is_linklocal = ISC_FALSE;
-		}
-	}
-#ifdef DEBUG
-	if (debug > 2)
-		printf("Addr %s is %s sitelocal: %d\n", stoa(addr), ((is_sitelocal == ISC_TRUE) ? " ":"not"), is_sitelocal);
-		printf("Addr %s is %s linklocal: %d\n", stoa(addr), ((is_linklocal == ISC_TRUE) ? " ":"not"), is_linklocal);
-#endif
-#endif /* ISC_PLATFORM_HAVEIPV6 */
-	/*
-	 * If we got this far we need to try and match the
-	 * network part of the address
-	 */
-	for (i= startind; i < ninterfaces; i++)
-	{
+	for (i = 0; i < ninterfaces; i++) {
 		/*
-		 * Skip the loopback. It can't act as an outgoing interface
-		 * If it doesn't have the requested flag, skipp it too
+		* First look if this is the correct family
+		*/
+		if(inter_list[i].sin.ss_family != addr->ss_family)
+	  		continue;
+		/*
+		 * We match only those interfaces marked as
+		 * broadcastable and either the explicit broadcast
+		 * address or the network portion of the IP address.
+		 * Sloppy.
 		 */
-		if (inter_list[i].flags & INT_LOOPBACK  || !(inter_list[i].flags & flagtype))
+		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
-		/*
-		 * For IPv4 we can check the network mask to see if
-		 * we have a match on the outgoing interface
-		 */
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET) {
-			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-			imask = (((struct sockaddr_in*)&inter_list[i].sin)->sin_addr.s_addr &
-			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
-
-			if (amask == imask) {
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found network local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-			     return (i);
-			}
+		if(addr->ss_family == AF_INET) {
+			if (SOCKCMP(&inter_list[i].bcast, addr))
+				return (&inter_list[i]);
+			if ((NSRCADR(&inter_list[i].sin) &
+				NSRCADR(&inter_list[i].mask)) == (NSRCADR(addr) &
+			    	NSRCADR(&inter_list[i].mask)))
+				return (&inter_list[i]);
 		}
-
-		/*
-		 * See if the IPv6 address is Link-Local or Site Local
-		 */
-		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (is_sitelocal == ISC_TRUE &&
-			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-			{
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found Site-Local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-				return (i);
-			}
-			/*
-			 * We did the sitelocal test first to see if it exists
-			 * otherwise a sitelocal address can use the linklocal interface
-			 */
-			if ((is_linklocal == ISC_TRUE  || is_sitelocal == ISC_TRUE) &&
-			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-			{
-#ifdef DEBUG
-				if (debug > 2)
-				    printf("Found Link-Local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-				return (i);
-			}
-
-		}
+		else if(addr->ss_family == AF_INET6) {
+			if (SOCKCMP(&inter_list[i].bcast, addr))
+				return (&inter_list[i]);
+			if (SOCKCMP(netof(&inter_list[i].sin), netof(addr)))
+				return (&inter_list[i]);
+		     }
 	}
-
-	/*
-	 * If we got here and failed because it was not a local network
-	 * address, see if we have a PPP interface and use that
-	 */
-	for (i = startind; i < ninterfaces; i++)
-	{
-		/*
-		 * Skip the loopback. It can't act as an outgoing interface
-		 * If it doesn't have the requested flag, skipp it too
-		 */
-		if (inter_list[i].flags & INT_LOOPBACK  || !(inter_list[i].flags & flagtype))
-			continue;
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET &&
-			inter_list[i].flags & INT_PPP)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found PPP *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (i);
-		}
-		else if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6 &&
-			 inter_list[i].flags & INT_PPP)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-				printf("Found PPP *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (i);
-		}
-	}
-
-	/*
-	 * If we got this far, we still don't have an interface.
-	 * We pick the first one which is not loopback or link/site local
-	 */
-
-	for (i = startind; i < ninterfaces; i++)
-	{
-		/*
-		 * Skip the loopback. It can't act as an outgoing interface
-		 * If it doesn't have the requested flag, skipp it too
-		 */
-		if (inter_list[i].flags & INT_LOOPBACK  || !(inter_list[i].flags & flagtype))
-			continue;
-
-		if (addr->ss_family == AF_INET && inter_list[i].family == AF_INET)
-		{
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found non-local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (i);
-		}
-
-		/*
-		 * Skip if it's an IPv6 address and is Link-Local or Site Local
-		 */
-		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-				continue;
-
-			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
-				continue;
-#ifdef DEBUG
-			if (debug > 2)
-			    printf("Found non-local *cast interface %d for address: %s\n", i, stoa(addr));
-#endif
-			return (i);
-		}
-
-	}
-	/*
-	 * If we got here then we are really in trouble
-	 */
-
-#ifdef DEBUG
-	if (debug > 1)
-	    printf("Having trouble finding *cast flag: %d interface for address: %s\n", flagtype, stoa(addr));
-#endif
-
-	return (-1);
-
+#endif /* SIOCGIFCONF */
+ 	return ANY_INTERFACE_CHOOSE(addr);
 }
 
 
@@ -2629,26 +2442,6 @@ delete_socket_from_list(SOCKET fd) {
 			lsock = next;
 	}
 }
-
-/*
- * Scan through the inter_list of interfaces looking for the socket
- */
-int
-find_socket_in_if(SOCKET fd) {
-	int i;
-#ifdef DEBUG
-	if (debug)
-	    printf("Finding socket %d in list of interfaces\n", fd);
-#endif
-
-	for (i = 0; i < ninterfaces; i++)
-	{
-		if(inter_list[i].fd == fd)
-			return (i);
-	}
-	return (-1); /* Not found */
-}
-
 void
 add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 	remaddr_t *laddr = (remaddr_t *)malloc(sizeof(remaddr_t));
@@ -2671,7 +2464,7 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 int
 modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
-	int ind;
+	int index;
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 #ifdef DEBUG
@@ -2680,18 +2473,18 @@ modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 		   stoa(addr));
 #endif
 
-	ind = -1;
+	index = -1;
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
 			laddr->flags = flag;
-			ind = laddr->if_index;
+			index = laddr->if_index;
 			break;
 		}
 		else
 			laddr = next;
 	}
-	return (ind); /* Not found */
+	return (index); /* Not found */
 }
 
 void
