@@ -754,7 +754,7 @@ io_multicast_add(
                 add_addr_to_list(&addr, i);
 		break;
 
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 	case AF_INET6 :
 
 		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
@@ -946,7 +946,7 @@ io_multicast_del(
 		}
 		break;
 
-#ifdef ISC_PLATFORM_HAVEIPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 	case AF_INET6 :
 		haddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
 
