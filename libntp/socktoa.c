@@ -38,6 +38,7 @@ socktoa(
 
 		switch(sock->ss_family) {
 
+		default:
 		case AF_INET :
 			inet_ntop(AF_INET, &GET_INADDR(*sock), buffer,
 			    LIB_BUFLENGTH);
@@ -46,8 +47,10 @@ socktoa(
 		case AF_INET6 :
 			inet_ntop(AF_INET6, &GET_INADDR6(*sock), buffer,
 			    LIB_BUFLENGTH);
+#if 0
 		default:
 			strcpy(buffer, "unknown");
+#endif
 		}
 	}
   	return buffer;
