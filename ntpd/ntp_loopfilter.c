@@ -583,14 +583,14 @@ local_clock(
 	sys_rootdispersion = peer->rootdispersion + dtemp;
 	(void)record_loop_stats();
 #ifdef DEBUG
-	if (debug)
+	if (debug > 1)
 		printf(
 	"local_clock: mu %.0f allan %.0f fadj %.3f fll %.3f pll %.3f\n",
 		    mu, allan_xpt, clock_frequency * 1e6, flladj * 1e6,
 		    plladj * 1e6);
 #endif /* DEBUG */
 #ifdef DEBUG
-	if (debug)
+	if (debug > 1)
 		printf(
 	"local_clock: jitter %.6f freq %.3f stab %.3f poll %d count %d\n",
 		    sys_error, drift_comp * 1e6, clock_stability * 1e6,

@@ -30,7 +30,7 @@
 
 int
 authusekey(
-	u_long keyno,
+	keyid_t keyno,
 	int keytype,
 	const u_char *str
 	)

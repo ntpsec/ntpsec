@@ -11,6 +11,7 @@
 #include "recvbuff.h"
 
 #define MAXINTERFACES	512
+#define MAXFILENAME	128	/* maximum length of a file name */
 
 #ifdef SYS_WINNT
 #define exit service_exit
@@ -71,6 +72,8 @@ extern  void    set_var P((struct ctl_var **, const char *, unsigned long, int))
 extern  void    set_sys_var P((char *, unsigned long, int));
 
 /* ntp_intres.c */
+extern	void	ntp_res_send	P((void *, char *, u_int32, u_short));
+extern	void	ntp_res_recv	P((void));
 extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
@@ -125,7 +128,7 @@ extern	struct peer *findpeerbyassoc P((int));
 extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, int, u_long));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
-extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int, int, int, int, int, int, u_long));
+extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int, int, int, int, int, int, keyid_t, u_char *));
 extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
@@ -137,7 +140,7 @@ extern	void	peer_config_manycast	P((struct peer *, struct peer *));
 extern	void	transmit	P((struct peer *));
 extern	void	receive 	P((struct recvbuf *));
 extern	void	peer_clear	P((struct peer *));
-extern	int 	process_packet	P((struct peer *, struct pkt *, l_fp *));
+extern	void 	process_packet	P((struct peer *, struct pkt *, l_fp *));
 extern	void	clock_select	P((void));
 
 /*
@@ -203,7 +206,7 @@ extern int	config_priority;
 struct ctl_trap;
 extern struct ctl_trap ctl_trap[];
 extern int	num_ctl_traps;
-extern u_long	ctl_auth_keyid;		/* keyid used for authenticating write requests */
+extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
 
 /*
  * Statistic counters to keep track of requests and responses.
@@ -225,7 +228,7 @@ extern u_long	numctlbadop; 		/* bad op code found in packet */
 extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 
 /* ntp_intres.c */
-extern u_long	req_keyid;		/* request keyid */
+extern keyid_t	req_keyid;		/* request keyid */
 extern char *	req_file;		/* name of the file with configuration info */
 
 /*
@@ -326,7 +329,7 @@ extern int	sys_bclient;		/* we set our time to broadcasts */
 extern double	sys_bdelay; 		/* broadcast client default delay */
 extern int	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
-extern u_long	sys_private;		/* private value for session seed */
+extern keyid_t	sys_private;		/* private value for session seed */
 extern int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
 
 /*
@@ -350,7 +353,7 @@ extern int	fdpps;			/* pps file descriptor */
 #endif
 
 /* ntp_request.c */
-extern u_long	info_auth_keyid;	/* keyid used to authenticate requests */
+extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 
 /* ntp_restrict.c */
 extern struct restrictlist *restrictlist; /* the restriction list */

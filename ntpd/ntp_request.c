@@ -60,6 +60,7 @@ static	void	mem_stats	P((struct sockaddr_in *, struct interface *, struct req_pk
 static	void	io_stats	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	timer_stats	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	loop_info	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
+static	void	dns_a		P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	do_conf		P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	do_unconf	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	set_sys_flag	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
@@ -77,7 +78,7 @@ static	void	reset_peer	P((struct sockaddr_in *, struct interface *, struct req_p
 static	void	do_key_reread	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	trust_key	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	untrust_key	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
-static	void	do_trustkey	P((struct sockaddr_in *, struct interface *, struct req_pkt *, int));
+static	void	do_trustkey	P((struct sockaddr_in *, struct interface *, struct req_pkt *, u_long));
 static	void	get_auth_info	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
 static	void	reset_auth_stats P((void));
 static	void	req_get_traps	P((struct sockaddr_in *, struct interface *, struct req_pkt *));
@@ -112,6 +113,7 @@ static	struct req_proc ntp_codes[] = {
 	{ REQ_MEM_STATS,	NOAUTH,	0,	mem_stats },
 	{ REQ_LOOP_INFO,	NOAUTH,	0,	loop_info },
 	{ REQ_TIMER_STATS,	NOAUTH,	0,	timer_stats },
+	{ REQ_HOSTNAME_ASSOCID,	AUTH, sizeof(struct info_dns_assoc), dns_a },
 	{ REQ_CONFIG,	    AUTH, sizeof(struct conf_peer), do_conf },
 	{ REQ_UNCONFIG,	    AUTH, sizeof(struct conf_unpeer), do_unconf },
 	{ REQ_SET_SYS_FLAG, AUTH, sizeof(struct conf_sys_flags), set_sys_flag },
@@ -150,7 +152,7 @@ static	struct req_proc ntp_codes[] = {
  * Authentication keyid used to authenticate requests.  Zero means we
  * don't allow writing anything.
  */
-u_long info_auth_keyid;
+keyid_t info_auth_keyid;
 
 /*
  * Statistic counters to keep track of requests and responses.
@@ -533,7 +535,8 @@ process_private(
 	if (proc->sizeofitem != 0)
 	    if (proc->sizeofitem*INFO_NITEMS(inpkt->err_nitems)
 		> sizeof(inpkt->data)) {
-		    msyslog(LOG_ERR, "sizeofitem*NITEMS > data: %d > %d",
+		    msyslog(LOG_ERR, "sizeofitem(%d)*NITEMS(%d) > data: %d > %d",
+	    		    proc->sizeofitem, INFO_NITEMS(inpkt->err_nitems),
 			    proc->sizeofitem*INFO_NITEMS(inpkt->err_nitems),
 			    sizeof(inpkt->data));
 		    req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -619,14 +622,16 @@ peer_list_sum(
 			if (debug > 3)
 			    printf("sum: got one\n");
 #endif
-			ips->dstadr = (pp->processed) ?
-				pp->cast_flags == MDF_BCAST ?
-				pp->dstadr->bcast.sin_addr.s_addr:
-				pp->cast_flags ?
-				pp->dstadr->sin.sin_addr.s_addr ?
-				pp->dstadr->sin.sin_addr.s_addr:
-				pp->dstadr->bcast.sin_addr.s_addr:
-				1 : 5;
+			ips->dstadr =
+			    (pp->processed)
+			    ? pp->cast_flags == MDF_BCAST
+			      ? pp->dstadr->bcast.sin_addr.s_addr
+			      : pp->cast_flags
+			        ? pp->dstadr->sin.sin_addr.s_addr
+			          ? pp->dstadr->sin.sin_addr.s_addr
+			          : pp->dstadr->bcast.sin_addr.s_addr
+			        : 1
+			    : 5;
 			ips->srcadr = pp->srcadr.sin_addr.s_addr;
 			ips->srcport = pp->srcadr.sin_port;
 			ips->stratum = pp->stratum;
@@ -695,14 +700,16 @@ peer_info (
 		ipl++;
 		if ((pp = findexistingpeer(&addr, (struct peer *)0, -1)) == 0)
 		    continue;
-		ip->dstadr = (pp->processed) ?
-			pp->cast_flags == MDF_BCAST ?
-			pp->dstadr->bcast.sin_addr.s_addr:
-			pp->cast_flags ?
-			pp->dstadr->sin.sin_addr.s_addr ?
-			pp->dstadr->sin.sin_addr.s_addr:
-			pp->dstadr->bcast.sin_addr.s_addr:
-			2 : 6;
+		ip->dstadr =
+		    (pp->processed)
+		    ? pp->cast_flags == MDF_BCAST
+		      ? pp->dstadr->bcast.sin_addr.s_addr
+		      : pp->cast_flags
+		        ? pp->dstadr->sin.sin_addr.s_addr
+		          ? pp->dstadr->sin.sin_addr.s_addr
+		          : pp->dstadr->bcast.sin_addr.s_addr
+		        : 2
+		    : 6;
 		ip->srcadr = NSRCADR(&pp->srcadr);
 		ip->srcport = NSRCPORT(&pp->srcadr);
 		ip->flags = 0;
@@ -797,14 +804,16 @@ peer_stats (
 		ipl++;
 		if ((pp = findexistingpeer(&addr, (struct peer *)0, -1)) == 0)
 		    continue;
-		ip->dstadr = (pp->processed) ?
-			pp->cast_flags == MDF_BCAST ?
-			pp->dstadr->bcast.sin_addr.s_addr:
-			pp->cast_flags ?
-			pp->dstadr->sin.sin_addr.s_addr ?
-			pp->dstadr->sin.sin_addr.s_addr:
-			pp->dstadr->bcast.sin_addr.s_addr:
-			3 : 7;
+		ip->dstadr =
+		    (pp->processed)
+		    ? pp->cast_flags == MDF_BCAST
+		      ? pp->dstadr->bcast.sin_addr.s_addr
+		      : pp->cast_flags
+		        ? pp->dstadr->sin.sin_addr.s_addr
+		          ? pp->dstadr->sin.sin_addr.s_addr
+		          : pp->dstadr->bcast.sin_addr.s_addr
+		        : 3
+		    : 7;
 		ip->srcadr = NSRCADR(&pp->srcadr);
 		ip->srcport = NSRCPORT(&pp->srcadr);
 		ip->flags = 0;
@@ -1198,12 +1207,92 @@ do_conf(
 		peeraddr.sin_addr.s_addr = cp->peeraddr;
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
 		if (peer_config(&peeraddr, (struct interface *)0,
-				cp->hmode, cp->version, cp->minpoll, cp->maxpoll,
-				fl, cp->ttl, cp->keyid) == 0) {
+			cp->hmode, cp->version, cp->minpoll, cp->maxpoll,
+			fl, cp->ttl, cp->keyid, cp->keystr) == 0) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
 		cp++;
+	}
+
+	req_ack(srcadr, inter, inpkt, INFO_OKAY);
+}
+
+
+/*
+ * dns_a - Snarf DNS info for an association ID
+ */
+static void
+dns_a(
+	struct sockaddr_in *srcadr,
+	struct interface *inter,
+	struct req_pkt *inpkt
+	)
+{
+	register struct info_dns_assoc *dp;
+	register int items;
+	struct sockaddr_in peeraddr;
+	int fl;
+
+	msyslog(LOG_DEBUG, "dns_a: We're here...");
+	/*
+	 * Do a check of everything to see that it looks
+	 * okay.  If not, complain about it.  Note we are
+	 * very picky here.
+	 */
+	items = INFO_NITEMS(inpkt->err_nitems);
+	dp = (struct info_dns_assoc *)inpkt->data;
+
+	/*
+	 * Looks okay, try it out
+	 */
+	items = INFO_NITEMS(inpkt->err_nitems);
+	dp = (struct info_dns_assoc *)inpkt->data;
+	memset((char *)&peeraddr, 0, sizeof(struct sockaddr_in));
+	peeraddr.sin_family = AF_INET;
+	peeraddr.sin_port = htons(NTP_PORT);
+
+	/*
+	 * Make sure the address is valid
+	 */
+	if (
+#ifdef REFCLOCK
+		!ISREFCLOCKADR(&peeraddr) &&
+#endif
+		ISBADADR(&peeraddr)) {
+#ifdef REFCLOCK
+		msyslog(LOG_ERR, "dns_a: !ISREFCLOCK && ISBADADR");
+#else
+		msyslog(LOG_ERR, "dns_a: ISBADADR");
+#endif
+		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
+		return;
+	}
+
+	while (items-- > 0) {
+		u_short associd;
+		size_t hnl;
+		char *cp;
+
+		associd = dp->associd; /* Validate this value? */
+		peeraddr.sin_addr.s_addr = dp->peeraddr;
+		for (hnl = 0; *dp->hostname && hnl < sizeof dp->hostname; ++hnl) ;
+		if (hnl >= sizeof dp->hostname) {
+			/* Squawk bad data */
+		}
+		cp = emalloc(hnl + 1);
+		strncpy(cp, dp->hostname, hnl);
+
+		msyslog(LOG_DEBUG, "dns_a: <%s> for %s, AssocID %d",
+			cp, inet_ntoa(peeraddr.sin_addr), associd);
+
+		/* Do Something in the "if" line to use the info we got */
+		if (0) {
+			/* If it didn't work */
+			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
+			return;
+		}
+		dp++;
 	}
 
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
@@ -1760,7 +1849,7 @@ do_trustkey(
 	struct sockaddr_in *srcadr,
 	struct interface *inter,
 	struct req_pkt *inpkt,
-	int trust
+	u_long trust
 	)
 {
 	register u_long *kp;
@@ -2005,7 +2094,7 @@ set_request_keyid(
 	struct req_pkt *inpkt
 	)
 {
-	u_long keyid;
+	keyid_t keyid;
 
 	/*
 	 * Restrict ourselves to one item only.
@@ -2033,8 +2122,8 @@ set_control_keyid(
 	struct req_pkt *inpkt
 	)
 {
-	u_long keyid;
-	extern u_long ctl_auth_keyid;
+	keyid_t keyid;
+	extern keyid_t ctl_auth_keyid;
 
 	/*
 	 * Restrict ourselves to one item only.

@@ -65,5 +65,7 @@ typedef unsigned int u_int;
 # include "Bletch: what's 32 bits on this machine?"
 #endif /* not sizeof(int) == 4 */
 
+typedef u_int32 keyid_t;
+
 #endif /* _NTP_TYPES_ */
 

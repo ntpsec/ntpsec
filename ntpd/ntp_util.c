@@ -2,16 +2,20 @@
  * ntp_util.c - stuff I didn't have any other place for
  */
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
-# ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
-# endif
-# include <sys/time.h>
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
+#include <sys/time.h>
+
+#ifdef HAVE_IEEEFP_H
+# include <ieeefp.h>
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -341,12 +345,18 @@ stats_config(
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
-			msyslog(LOG_ERR, "invalid frequency from %s", 
+			msyslog(LOG_ERR, "Un-parsable frequency in %s", 
 			    stats_drift_file);
 			(void) fclose(fp);
 			break;
 		}
 		(void) fclose(fp);
+		if (   !finite(old_drift)
+		    || (fabs(old_drift) > (sys_maxfreq * 1e6))) {
+			msyslog(LOG_ERR, "invalid frequency (%lf) in %s", 
+			    old_drift, stats_drift_file);
+			exit(1);
+		}
 		msyslog(LOG_INFO, "frequency initialized %.3f from %s",
 		    old_drift, stats_drift_file);
 		loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);

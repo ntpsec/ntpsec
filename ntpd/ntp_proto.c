@@ -14,6 +14,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
 #include "ntp_string.h"
+#include "ntp_crypto.h"
 
 #if defined(VMS) && defined(VMS_LOCALUNIT)	/*wjm*/
 #include "ntp_refclock.h"
@@ -24,7 +25,7 @@
 #endif
 
 /*
- * System variables are declared here.	See Section 3.2 of the
+ * System variables are declared here. See Section 3.2 of the
  * specification.
  */
 u_char	sys_leap;		/* system leap indicator */
@@ -36,7 +37,9 @@ u_int32 sys_refid;		/* reference source for local clock */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
+#ifdef AUTOKEY
 u_long	sys_automax;		/* maximum session key lifetime */
+#endif /* AUTOKEY */
 
 /*
  * Nonspecified system state variables.
@@ -49,7 +52,7 @@ static	u_long sys_authdly[2]; 	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_maxd; 	/* select error (squares) */
 static	double sys_epsil;	/* system error (squares) */
-u_long	sys_private;		/* private value for session seed */
+keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
 
 /*
@@ -68,12 +71,10 @@ u_long	sys_limitrejected;	/* pkts rejected due to client count per net */
 static	double	root_distance	P((struct peer *));
 static	double	clock_combine	P((struct peer **, int));
 static	void	peer_xmit	P((struct peer *));
-static	void	fast_xmit	P((struct recvbuf *, int, u_long));
+static	void	fast_xmit	P((struct recvbuf *, int, keyid_t));
 static	void	clock_update	P((void));
 int	default_get_precision	P((void));
-#ifdef MD5
-static	void	make_keylist	P((struct peer *));
-#endif /* MD5 */
+
 
 /*
  * transmit - Transmit Procedure. See Section 3.4.2 of the
@@ -101,22 +102,30 @@ transmit(
 			peer->valid++;
 		if (oreach & 0x80)
 			peer->valid--;
-		if (!(peer->flags & FLAG_CONFIG) && peer->valid >
-		    NTP_SHIFT / 2 && (peer->reach & 0x80) &&
-		    peer->status < CTL_PST_SEL_SYNCCAND)
-			peer->reach = 0;
 		peer->reach <<= 1;
 		if (peer->reach == 0) {
 
 			/*
-			 * If this is an uncofigured association and
-			 * has become unreachable, demobilize it.
+			 * If this association has become unreachable,
+			 * clear it and raise a trap.
 			 */
 			if (oreach != 0) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 				peer_clear(peer);
-				if (!(peer->flags & FLAG_CONFIG)) {
+			}
+
+			/*
+			 * If this association is unreachable and not
+			 * configured, we give it a little while before
+			 * pulling the plug. This is to allow semi-
+			 * persistent things like cryptographic
+			 * authentication to complete the dance. There
+			 * is a denial-of-service hazard here.
+			 */
+			if (!(peer->flags & FLAG_CONFIG)) {
+				peer->tailcnt++;
+				if (peer->tailcnt > NTP_TAILMAX) {
 					unpeer(peer);
 					return;
 				}
@@ -133,14 +142,19 @@ transmit(
 			 */
 			peer->ppoll = peer->maxpoll;
 			if (peer->unreach < NTP_UNREACH) {
-				if (peer->hmode == MODE_CLIENT)
+				if (peer->hmode == MODE_CLIENT ||
+				    peer->hmode == MODE_ACTIVE)
 					peer->unreach++;
 				hpoll = peer->minpoll;
 			} else {
 				hpoll++;
 			}
-			if (peer->flags & FLAG_BURST)
-				peer->burst = 2;
+			if (peer->flags & FLAG_BURST) {
+				if (peer->flags & FLAG_MCAST2)
+					peer->burst = NTP_SHIFT;
+				else
+					peer->burst = 2;
+			}
 
 		} else {
 
@@ -162,7 +176,7 @@ transmit(
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (peer->valid <= 2)
+			if (peer->valid <= 2 && hpoll > peer->minpoll)
 				hpoll--;
 			else if (peer->valid >= NTP_SHIFT - 2)
 				hpoll++;
@@ -172,9 +186,20 @@ transmit(
 	} else {
 		peer->burst--;
 		if (peer->burst == 0) {
+
+			/*
+			 * If a broadcast client at this point, the
+			 * burst has concluded, so we turn off the
+			 * burst, switch to client mode and purge the
+			 * keylist, since no further transmissions will
+			 * be made.
+			 */
 			if (peer->flags & FLAG_MCAST2) {
 				peer->flags &= ~FLAG_BURST;
 				peer->hmode = MODE_BCLIENT;
+#ifdef AUTOKEY
+				key_expire(peer);
+#endif /* AUTOKEY */
 			}
 			clock_select();
 			poll_update(peer, hpoll);
@@ -216,203 +241,232 @@ receive(
 	int hismode;
 	int oflags;
 	int restrict_mask;
-	int has_mac;			/* has MAC field */
-	int authlen;			/* length of MAC field */
+	int has_mac;			/* length of MAC field */
+	int authlen;			/* offset of MAC field */
 	int is_authentic;		/* cryptosum ok */
-	int is_mystic;			/* session key exists */
 	int is_error;			/* parse error */
-/*	u_long pkeyid; */
-	u_long skeyid, tkeyid;
+	keyid_t pkeyid, skeyid, tkeyid;	/* cryptographic keys */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
 
 	/*
-	 * Monitor the packet and get restrictions
+	 * Monitor the packet and get restrictions. Note that the packet
+	 * length for control and private mode packets must be checked
+	 * by the service routines. Note that no statistics counters are
+	 * recorded for restrict violations, since these counters are in
+	 * the restriction routine.
 	 */
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
 #ifdef DEBUG
-	if (debug > 1)
-		printf("receive: from %s restrict %02x\n",
-		    ntoa(&rbufp->recv_srcadr), restrict_mask);
+	if (debug > 2)
+		printf("receive: at %ld %s restrict %02x\n",
+		    current_time, ntoa(&rbufp->recv_srcadr),
+		    restrict_mask);
 #endif
 	if (restrict_mask & RES_IGNORE)
-		return;
-
-	/*
-	 * Discard packets with invalid version number.
-	 */
+		return;				/* no amything */
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) >= NTP_VERSION)
 		sys_newversionpkt++;
 	else if (PKT_VERSION(pkt->li_vn_mode) >= NTP_OLDVERSION)
 		sys_oldversionpkt++;
 	else {
-		sys_unknownversion++;
+		sys_unknownversion++;		/* unknown version */
 		return;
 	}
-
-	/*
-	 * Restrict control/private mode packets. Note that packet
-	 * length has to be checked in the control/private mode protocol
-	 * module.
-	 */
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY)
-		    return;
+		    return;			/* no query private */
 		process_private(rbufp, ((restrict_mask &
 		    RES_NOMODIFY) == 0));
 		return;
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_CONTROL) {
 		if (restrict_mask & RES_NOQUERY)
-		    return;
+		    return;			/* no query control */
 		process_control(rbufp, restrict_mask);
 		return;
 	}
-
-	/*
-	 * Restrict revenue packets.
-	 */
 	if (restrict_mask & RES_DONTSERVE)
-		return;
-
-        /*
-	 * See if we only accept limited number of clients from the net
-	 * this guy is from. Note: the flag is determined dynamically
-	 * within restrictions()
-	 */
+		return;				/* no time service */
 	if (restrict_mask & RES_LIMITED) {
 		sys_limitrejected++;
-                return;
+                return;				/* too many clients */
         }
-
-	/*
-	 * If we are not a broadcast client, ignore broadcast packets.
-	 */
-	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
-	    !sys_bclient))
-		return;
-
-	/*
-	 * This is really awful ugly. We figure out whether an extension
-	 * field is present and then measure the MAC size. If the number
-	 * of words following the packet header is less than or equal to
-	 * 5, no extension field is present and these words constitute
-	 * the MAC. If the number of words is greater than 5, an
-	 * extension field is present and the first word contains the
-	 * length of the extension field and the MAC follows that.
-	 */
-	has_mac = 0;
-/*	pkeyid = 0; */
-	skeyid = tkeyid = 0;
-	authlen = LEN_PKT_NOMAC;
-	has_mac = rbufp->recv_length - authlen;
-	if (has_mac <= 5 * sizeof(u_int32)) {
-		skeyid = (u_long)ntohl(pkt->keyid1) & 0xffffffff;
-	} else {
-		authlen += (u_long)ntohl(pkt->keyid1) & 0xffffffff;
-		has_mac = rbufp->recv_length - authlen;
-		if (authlen <= 0) {
-			sys_badlength++;
-			return;
-		}
-
-		/*
-		 * Note that keyid3 is actually the key ident of the
-		 * MAC itself.
-		 */
-/* 		pkeyid = (u_long)ntohl(pkt->keyid2) & 0xffffffff; */
-		skeyid = tkeyid = (u_long)ntohl(pkt->keyid3) &
-		    0xffffffff;
+	if (rbufp->recv_length < LEN_PKT_NOMAC) {
+		sys_badlength++;
+		return;				/* no runt packets */
 	}
 
 	/*
-	 * Figure out his mode and validate it.
+	 * Figure out his mode and validate the packet. This has some
+	 * legacy raunch that probably should be removed. If from NTPv1
+	 * mode zero, The NTPv4 mode is determined from the source port.
+	 * If the port number is zero, it is from a symmetric active
+	 * association; otherwise, it is from a client association. From
+	 * NTPv2 on, all we do is toss out mode zero packets, since
+	 * control and private mode packets have already been handled.
+	 * In either case, toss out broadcast packets if we are not a
+	 * broadcast client. 
 	 */
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION && hismode ==
-		0) {
-		/*
-		 * Easy.  If it is from the NTP port it is
-		 * a sym act, else client.
-		 */
+	    0) {
 		if (SRCPORT(&rbufp->recv_srcadr) == NTP_PORT)
 			hismode = MODE_ACTIVE;
 		else
 			hismode = MODE_CLIENT;
 	} else {
-		if (hismode != MODE_ACTIVE && hismode != MODE_PASSIVE &&
-			hismode != MODE_SERVER && hismode != MODE_CLIENT &&
-			hismode != MODE_BROADCAST)
+		if (hismode == MODE_UNSPEC) {
+			sys_badlength++;
+			return;			/* invalid mode */
+		}
+	}
+	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
+	    !sys_bclient))
+		return;
+
+	/*
+	 * Parse the extension field if present. We figure out whether
+	 * an extension field is present by measuring the MAC size. If
+	 * the number of words following the packet header is 0 or 1, no
+	 * MAC is present and the packet is not authenticated. If 1, the
+	 * packet is a reply to a previous request that failed to
+	 * authenticate. If 3, the packet is authenticated with DES; if
+	 * 5, the packet is authenticated with MD5. If greater than 5,
+	 * an extension field is present. If 2 or 4, the packet is a
+	 * runt and thus discarded.
+	 */
+	pkeyid = skeyid = tkeyid = 0;
+	authlen = LEN_PKT_NOMAC;
+	while ((has_mac = rbufp->recv_length - authlen) > 0) {
+		int temp;
+		if (has_mac % 4 != 0 || has_mac < 0) {
+			sys_badlength++;
 			return;
+		}
+		if (has_mac == 1 * 4 || has_mac == 3 * 4 || has_mac ==
+		    MAX_MAC_LEN) {
+			skeyid =
+			    (u_long)ntohl(((u_int32 *)pkt)[authlen /
+			    4]) & 0xffffffff;
+			break;
+		} else if (has_mac > MAX_MAC_LEN) {
+			temp = ntohl(((u_int32 *)pkt)[authlen / 4]) &
+			    0xffff;
+			if (temp < 4) {
+				sys_badlength++;
+				return;
+			}
+			authlen += temp;
+		} else {
+			sys_badlength++;
+			return;
+		}
 	}
 
 	/*
-	 * If he included a mac field, decrypt it to see if it is
-	 * authentic.
+	 * We have tossed out as many buggy packets as possible early in
+	 * the game to reduce the exposure to a clogging attack. Now we
+	 * have to burn some cycles to find the association and
+	 * authenticate the packet if required. Note that we burn only
+	 * MD5 or DES cycles, again to reduce exposure. There may be no
+	 * matching association and that's okay.
 	 */
-	is_authentic = is_mystic = 0;
+	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
+	    hismode, &retcode);
+	is_authentic = 0;
 	if (has_mac == 0) {
 #ifdef DEBUG
 		if (debug)
-			printf("receive: at %ld from %s mode %d\n",
-				current_time, ntoa(&rbufp->recv_srcadr),
-				hismode);
+			printf("receive: at %ld %s mode %d code %d\n",
+			    current_time, ntoa(&rbufp->recv_srcadr),
+			    hismode, retcode);
 #endif
 	} else {
-		is_mystic = authistrusted(skeyid);
-#ifdef MD5
-		if (skeyid > NTP_MAXKEY && !is_mystic) {
+#ifdef AUTOKEY
+		/*
+		 * For autokey modes, generate the session key
+		 * and install in the key cache. Use the socket
+		 * multicast or unicast address as appropriate.
+		 * Remember, we don't know these addresses until
+		 * the first packet has been received. Bummer.
+		 */
+		if (skeyid > NTP_MAXKEY) {
+		
+			/*
+			 * More on the autokey dance (AKD). A cookie is
+			 * constructed from public and private values.
+			 * For broadcast packets and packets with
+			 * extension fields, the cookie is public
+			 * (zero); for packets that match no
+			 * association, the cookie is hashed from the
+			 * addresses and private value. For server and
+			 * symmetric packets, the cookie has been
+			 * previously obtained from the server via an
+			 * extension field. for symmetric modes, a
+			 * common cookie is constructed as the exclusive
+			 * OR of the two cookies.
+			 */
+			if (authlen > LEN_PKT_NOMAC || hismode ==
+			    MODE_BROADCAST)
+				pkeyid = 0;
+			else if (peer == 0)
+				pkeyid = session_key(
+				    &rbufp->recv_srcadr,
+				    &rbufp->dstadr->sin, 0, sys_private,
+				    0);
+			else if (hismode == MODE_CLIENT)
+				pkeyid = peer->hcookie;
+			else
+				pkeyid = peer->pcookie;
 
 			/*
-			 * For multicast mode, generate the session key
-			 * and install in the key cache. For client
-			 * mode, generate the session key for the
-			 * unicast address. For server mode, the session
-			 * key should already be in the key cache, since
-			 * it was generated when the last request was
-			 * sent.
+			 * The session key includes both the public
+			 * values and cookie. We have to be careful to
+			 * use the right socket addresses for broadcast
+			 * and unicast packets. Note the hash is saved
+			 * for use later in the AKD mambo.
 			 */
-			if (hismode == MODE_BROADCAST) {
+			if (hismode == MODE_BROADCAST)
 				tkeyid = session_key(
-					ntohl((&rbufp->recv_srcadr)->sin_addr.s_addr),
-					ntohl(rbufp->dstadr->bcast.sin_addr.s_addr),
-					skeyid, (u_long)(4 * (1 << pkt->ppoll)));
-			} else if (hismode != MODE_SERVER) {
+				    &rbufp->recv_srcadr,
+				    &rbufp->dstadr->bcast, skeyid,
+				    pkeyid, 2);
+			else
 				tkeyid = session_key(
-					ntohl((&rbufp->recv_srcadr)->sin_addr.s_addr),
-					ntohl(rbufp->dstadr->sin.sin_addr.s_addr),
-					skeyid, (u_long)(4 * (1 << pkt->ppoll)));
-			}
-
+				    &rbufp->recv_srcadr,
+				    &rbufp->dstadr->sin, skeyid, pkeyid,
+				    2);
 		}
-#endif /* MD5 */
+#endif /* AUTOKEY */
 
 		/*
 		 * Compute the cryptosum. Note a clogging attack may
-		 * succceed in bloating the key cache.
+		 * succeed in bloating the key cache. If an autokey,
+		 * purge it immediately, since we won't be needing it
+		 * again.
 		 */
 		if (authdecrypt(skeyid, (u_int32 *)pkt, authlen,
 		    has_mac))
 			is_authentic = 1;
 		else
 			sys_badauth++;
+#ifdef AUTOKEY
+		if (skeyid > NTP_MAXKEY)
+			authtrust(skeyid, 0);
+#endif /* AUTOKEY */
 #ifdef DEBUG
 		if (debug)
 			printf(
-				"receive: at %ld %s mode %d keyid %08lx mac %d auth %d\n",
-				current_time, ntoa(&rbufp->recv_srcadr),
-				hismode, skeyid, has_mac, is_authentic);
+			    "receive: at %ld %s mode %d code %d keyid %08x len %d mac %d auth %d\n",
+			    current_time, ntoa(&rbufp->recv_srcadr),
+			    hismode, retcode, skeyid, authlen, has_mac,
+			    is_authentic);
 #endif
 	}
 
-	/*
-	 * Find the peer.  This will return a null if this guy isn't in
-	 * the database.
-	 */
-	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
-		hismode, &retcode);
 	/*
 	 * The new association matching rules are driven by a table
 	 * specified in ntp.h. We have replaced the *default* behaviour
@@ -442,14 +496,7 @@ receive(
 			else
 				fast_xmit(rbufp, MODE_SERVER, 0);
 		}
-
-		/*
-		 * We can't get here if an association is mobilized, so
-		 * just toss the key, if appropriate.
-		 */
-		if (!is_mystic && skeyid > NTP_MAXKEY)
-			authtrust(skeyid, 0);
-			return;
+		return;
 
 	case AM_MANYCAST:
 
@@ -505,8 +552,8 @@ receive(
 		 * properly authenticated.
 		 */
 		if ((sys_authenticate && !is_authentic)) {
-			is_error = 1;
-	    		break;
+			fast_xmit(rbufp, MODE_PASSIVE, 0);
+			return;
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
@@ -557,141 +604,151 @@ receive(
 		 * throw the structure away without fear of breaking
 		 * anything.
 		 */
-		if (!is_mystic && skeyid > NTP_MAXKEY)
-			authtrust(skeyid, 0);
 		if (peer != 0)
 			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
 #ifdef DEBUG
 		if (debug)
-			printf("match error code %d assoc %d\n",
-			    retcode, peer_associations);
+			printf("receive: bad protocol %d\n", retcode);
 #endif
 		return;
 	}
 
 	/*
-	 * If the peer isn't configured, set his keyid and authenable
-	 * status based on the packet.
+	 * If the peer isn't configured, set his authenable and autokey
+	 * status based on the packet. Once the status is set, it can't
+	 * be unset. It seems like a silly idea to do this here, rather
+	 * in the configuration routine, but in some goofy cases the
+	 * first packet sent cannot be authenticated and we need a way
+	 * for the dude to change his mind.
 	 */
 	oflags = peer->flags;
 	peer->timereceived = current_time;
+	peer->received++;
 	if (!(peer->flags & FLAG_CONFIG) && has_mac) {
 		peer->flags |= FLAG_AUTHENABLE;
-		if (skeyid > NTP_MAXKEY) {
-			if (peer->flags & FLAG_MCAST2)
-				peer->keyid = skeyid;
-			else
-				peer->flags |= FLAG_SKEY;
-		}
+#ifdef AUTOKEY
+		if (skeyid > NTP_MAXKEY)
+			peer->flags |= FLAG_SKEY;
+#endif /* AUTOKEY */
 	}
 
 	/*
-	 * Determine if this guy is basically trustable. If not, flush
-	 * the bugger. If this is the first packet that is
-	 * authenticated, flush the clock filter. This is to foil
-	 * clogging attacks that might starve the poor dear.
+	 * A valid packet must be from an authentic and allowed source.
+	 * All packets must pass the authentication allowed tests.
+	 * Autokey authenticated packets must pass additional tests and
+	 * public-key authenticated packets must have the credentials
+	 * verified. If all tests are passed, the packet is forwarded
+	 * for processing. If not, the packet is discarded and the
+	 * association demobilized if appropriate.
 	 */
 	peer->flash = 0;
-	if (is_authentic)
+	if (is_authentic) {
 		peer->flags |= FLAG_AUTHENTIC;
-	else
+		peer->tailcnt = 0;
+	} else {
 		peer->flags &= ~FLAG_AUTHENTIC;
-	if (peer->hmode == MODE_BROADCAST && (restrict_mask &
-	    RES_DONTTRUST))
-		peer->flash |= TEST10;		/* access denied */
+	}
+	if (peer->hmode == MODE_BROADCAST &&
+	    (restrict_mask & RES_DONTTRUST))	/* test 9 */
+		peer->flash |= TEST9;		/* access denied */
 	if (peer->flags & FLAG_AUTHENABLE) {
-		if (!(peer->flags & FLAG_AUTHENTIC))
+		if (!(peer->flags & FLAG_AUTHENTIC)) { /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
-		else if (skeyid == 0)
-			peer->flash |= TEST9;	/* peer not auth */
-		else if (!(oflags & FLAG_AUTHENABLE)) {
-			peer_clear(peer);
+#ifdef AUTOKEY
+			peer->pcookie = 0;
+#endif /* AUTOKEY */
+		} else if (!(oflags & FLAG_AUTHENABLE)) {
 			report_event(EVNT_PEERAUTH, peer);
 		}
 	}
-	if ((peer->flash & ~(u_int)TEST9) != 0) {
-
-		/*
-		 * The packet is bogus, so we throw it away before
-		 * becoming a denial-of-service hazard. We don't throw
-		 * the current association away if it is configured or
-		 * if it has prior reachable friends.
-		 */
-		if (!is_mystic && skeyid > NTP_MAXKEY)
-			authtrust(skeyid, 0);
-		if (!(peer->flags & FLAG_CONFIG) && peer->reach == 0)
-			unpeer(peer);
+	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf(
-			    "invalid packet 0x%02x code %d assoc %d\n",
-			    peer->flash, retcode, peer_associations);
+			printf("receive: bad packet %03x\n",
+			    peer->flash);
 #endif
 		return;
 	}
 
-#ifdef MD5
+#ifdef AUTOKEY
 	/*
-	 * The autokey dance. The cha-cha requires that the hash of the
-	 * current session key matches the previous key identifier.
-	 * Heaps of trouble if the steps falter.
+	 * More autokey dance. The rules of the cha-cha are as follows:
+	 *
+	 * 1. If there is no key or the key is not auto, do nothing.
+	 *
+	 * 2. If this is a server reply, check only to see that the
+	 *    transmitted key ID matches the received key ID.
+	 *
+	 * 3. If there are no extension fields or if this is a
+	 *    broadcast, the cookie is zero. Dance the conga line and
+	 *    check to see that one or more hashes of the current key ID
+	 *    matches the previous key ID or ultimate original key ID
+	 *    obtained from the broadcaster or symmetric peer. If no
+	 *    match, arm for an autokey values update.
+	 *
+	 * 4. The only remaining case is where an extension field is
+	 *    present and did not contain a verified signature and this	
+	 *    is a symmetric mode reply. This reply cannot be verified,
+	 *    so just let the packet header check kick it out and hope
+	 *    the next packet can be verified.
 	 */
-	if (skeyid > NTP_MAXKEY) {
-		int i;
+	if (peer->flags & FLAG_SKEY) {
+		int i = 0;
 
-		/*
-		 * In the case of a new autokey, verify the hash matches
-		 * one of the previous four hashes. If not, raise the
-		 * authentication flasher and hope the next one works.
-		 */
+		peer->flash |= TEST10;
+		crypto_recv(peer, rbufp);
 		if (hismode == MODE_SERVER) {
-			peer->pkeyid = peer->keyid;
-		} else if (peer->flags & FLAG_MCAST2) {
-			if (peer->pkeyid > NTP_MAXKEY)
-				authtrust(peer->pkeyid, 0);
-			for (i = 0; i < 4 && tkeyid != peer->pkeyid;
-			    i++) {
-				tkeyid = session_key(
-					ntohl((&rbufp->recv_srcadr)->sin_addr.s_addr),
-					ntohl(rbufp->dstadr->bcast.sin_addr.s_addr),
-					tkeyid, 0);
+			if (skeyid == peer->keyid)
+				peer->flash &= ~TEST10;
+		} else if (authlen == LEN_PKT_NOMAC || hismode ==
+		    MODE_BROADCAST) {
+			for (i = 0;; i++) {
+				if (tkeyid == peer->pkeyid ||
+				    tkeyid == peer->finlkey) {
+					peer->flash &= ~TEST10;
+					peer->pkeyid = skeyid;
+					break;
+				}
+				if (i > peer->finlseq) {
+					peer->finlseq = 0;
+					break;
+				}
+				if (hismode == MODE_BROADCAST)
+					tkeyid = session_key(
+					    &rbufp->recv_srcadr,
+					    &rbufp->dstadr->bcast,
+					    tkeyid, pkeyid, 0);
+				else
+					tkeyid = session_key(
+					    &rbufp->recv_srcadr,
+					    &rbufp->dstadr->sin,
+					    tkeyid, pkeyid, 0);
 			}
-		} else {
-			if (peer->pkeyid > NTP_MAXKEY)
-				authtrust(peer->pkeyid, 0);
-			for (i = 0; i < 4 && tkeyid != peer->pkeyid;
-			    i++) {
-				tkeyid = session_key(
-				    ntohl((&rbufp->recv_srcadr)->sin_addr.s_addr),
-				    ntohl(rbufp->dstadr->sin.sin_addr.s_addr),
-				    tkeyid, 0);
+#ifdef PUBKEY
+			/*
+			 * If the autokey boogie fails, the server may
+			 * be bogus or worse. Raise an alarm and rekey
+			 * this thing.
+			 */
+			if (authlen == LEN_PKT_NOMAC) {
+				if (peer->flash & TEST10)
+					peer->flags &= ~FLAG_AUTOKEY;
+				if (!(peer->flags & FLAG_AUTOKEY))
+					peer->flash |= TEST11;
 			}
+#endif /* PUBKEY */
 		}
-#ifdef XXX /* temp until certificate code is mplemented */
-		if (tkeyid != peer->pkeyid)
-			peer->flash |= TEST9;	/* peer not authentic */
-#endif
-		peer->pkeyid = skeyid;
 	}
-#endif /* MD5 */
+#endif /* AUTOKEY */
 
 	/*
-	 * Gawdz, it's come to this. Process the dang packet. If
-	 * something breaks and the association doesn't deserve to live,
-	 * toss it. Be careful in active mode and return a packet
-	 * anyway.
+	 * We have survived the gaunt. Forward to the packet routine. If
+	 * a symmetric passive association has been mobilized and the
+	 * association doesn't deserve to live, it will die in the
+	 * transmit routine if not reachable after timeout.
 	 */
-	process_packet(peer, pkt, &(rbufp->recv_time));
-	if (!(peer->flags & FLAG_CONFIG) && peer->reach == 0) {
-		if (peer->hmode == MODE_PASSIVE) {
-			if (is_authentic)
-				fast_xmit(rbufp, MODE_PASSIVE, skeyid);
-			else
-				fast_xmit(rbufp, MODE_PASSIVE, 0);
-		}
-		unpeer(peer);
-	}
+	process_packet(peer, pkt, &rbufp->recv_time);
 }
 
 
@@ -701,7 +758,7 @@ receive(
  *	reasonable expectation that we will be having a long term
  *	relationship with this host.
  */
-int
+void
 process_packet(
 	register struct peer *peer,
 	register struct pkt *pkt,
@@ -716,7 +773,10 @@ process_packet(
 	int pmode;
 
 	/*
-	 * Swap header fields and keep the books.
+	 * Swap header fields and keep the books. The books amount to
+	 * the receive timestamp and poll interval in the header. We
+	 * need these even if there are other problems in order to crank
+	 * up the state machine.
 	 */
 	sys_processed++;
 	peer->processed++;
@@ -741,20 +801,17 @@ process_packet(
 	if (L_ISEQU(&peer->org, &p_xmt))	/* test 1 */
 		peer->flash |= TEST1;		/* duplicate packet */
 	if (PKT_MODE(pkt->li_vn_mode) != MODE_BROADCAST) {
-		if (!L_ISEQU(&peer->xmt, &p_org)) { /* test 2 */
-			peer->bogusorg++;
+		if (!L_ISEQU(&peer->xmt, &p_org)) /* test 2 */
 			peer->flash |= TEST2;	/* bogus packet */
-		}
-		if (L_ISZERO(&p_rec) || L_ISZERO(&p_org))
-			peer->flash |= TEST3;	/* unsynchronized */
-	} else {
-		if (L_ISZERO(&p_org))
+		if (L_ISZERO(&p_rec) || L_ISZERO(&p_org)) /* test 3 */
 			peer->flash |= TEST3;	/* unsynchronized */
 	}
+	if (L_ISZERO(&p_xmt))			/* test 3 */
+		peer->flash |= TEST3;		/* unsynchronized */
 	peer->org = p_xmt;
 
 	/*
-	 * Test for valid header (tests 5 through 10)
+	 * Test for valid packet header (tests 6 through 8)
 	 */
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
@@ -765,35 +822,33 @@ process_packet(
 		peer->flash |= TEST6;	/* peer clock unsynchronized */
 	if (!(peer->flags & FLAG_CONFIG) && sys_peer != 0) { /* test 7 */
 		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
-			peer->flash |= TEST7; /* peer stratum too high */
+			peer->flash |= TEST7;	/* peer stratum too high */
 			sys_badstratum++;
 		}
 	}
-	if (fabs(p_del) >= MAXDISPERSE	/* test 8 */
+	if (fabs(p_del) >= MAXDISPERSE		/* test 8 */
 	    || p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;	/* delay/dispersion too high */
+		peer->flash |= TEST8;		/* delay/dispersion too high */
 
 	/*
-	 * If the packet header is invalid (tests 5 through 10), exit.
-	 * XXX we let TEST9 sneak by until the certificate code is
-	 * implemented, but only to mobilize the association.
+	 * If the packet header is invalid, abandon ship. Otherwise
+	 * capture the header data.
 	 */
-	if (peer->flash & (TEST5 | TEST6 | TEST7 | TEST8 | TEST10)) {
+	if (peer->flash & ~(u_int)(TEST1 | TEST2 | TEST3 | TEST4)) {
 #ifdef DEBUG
 		if (debug)
-			printf(
-			    "invalid packet header 0x%02x mode %d\n",
-			    peer->flash, pmode);
+			printf("packet: bad header %03x\n",
+			    peer->flash);
 #endif
-		return (0);
+		return;
 	}
 
 	/*
-	 * Valid header; update our state.
+	 * The header is valid. Capture the remaining header values and
+	 * mark as reachable.
 	 */
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin,
 	    &p_org, &p_rec, &p_xmt, &peer->rec);
-
 	peer->leap = PKT_LEAP(pkt->li_vn_mode);
 	peer->pmode = pmode;		/* unspec */
 	peer->stratum = PKT_TO_STRATUM(pkt->stratum);
@@ -849,12 +904,17 @@ process_packet(
 	 */
 	if (pmode == MODE_BROADCAST) {
 		if (peer->flags & FLAG_MCAST1) {
-			if (peer->hmode == MODE_BCLIENT)
-				peer->flags &= ~FLAG_MCAST1;
 			LFPTOD(&ci, p_offset);
 			peer->estbdelay = peer->offset - p_offset;
-			return (1);
-
+			if (peer->hmode != MODE_BCLIENT) {
+#ifdef DEBUG
+				if (debug)
+					printf("packet: bclient %03x\n",
+					    peer->flash);
+#endif
+				return;
+			}
+			peer->flags &= ~FLAG_MCAST1;
 		}
 		DTOLFP(peer->estbdelay, &t10);
 		L_ADD(&ci, &t10);
@@ -870,27 +930,22 @@ process_packet(
 		peer->flash |= TEST4;	/* delay/dispersion too big */
 
 	/*
-	 * If the packet data are invalid (tests 1 through 4), exit.
+	 * If the packet data are invalid (tests 1 through 4), abandon
+	 * ship. Otherwise, forward to the clock filter.
 	 */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("invalid packet data 0x%02x mode %d\n",
-			    peer->flash, pmode);
+			printf("packet: bad data %03x\n",
+			    peer->flash);
 #endif
-		return(1);
+		return;
 	}
-
-
-	/*
-	 * This one is valid. Mark it so, give it to clock_filter().
-	 */
 	clock_filter(peer, p_offset, p_del, fabs(p_disp));
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp,
 	    SQRT(peer->variance));
-	return(1);
 }
 
 
@@ -983,7 +1038,7 @@ poll_update(
 	int hpoll
 	)
 {
-	long update;
+	long update, oldpoll;
 
 	/*
 	 * The wiggle-the-poll-interval dance. Broadcasters dance only
@@ -992,6 +1047,7 @@ poll_update(
 	 * clock. Broadcast clients are usually lead by their broadcast
 	 * partner, but faster in the initial mating dance.
 	 */
+	oldpoll = peer->hpoll;
 	if (peer->hmode == MODE_BROADCAST) {
 		peer->hpoll = peer->minpoll;
 	} else if (peer->flags & FLAG_SYSPEER) {
@@ -1018,11 +1074,22 @@ poll_update(
 		    peer->minpoll);
 		peer->nextdate = peer->outdate + RANDPOLL(update);
 	}
+
+	/*
+	 * Bit of crass arrogance at this point. If the poll interval
+	 * has changed and we have a keylist, the lifetimes in the
+	 * keylist are probably bogus. In this case purge the keylist
+	 * and regenerate it later.
+	 */
+#ifdef AUTOKEY
+	if (peer->hpoll != oldpoll)
+		key_expire(peer);
+#endif /* AUTOKEY */
 #ifdef DEBUG
 	if (debug > 1)
-		printf("poll_update: at %lu %s poll %d burst %d last %lu next %lu\n",
-		    current_time, ntoa(&peer->srcadr), hpoll,
-		    peer->burst, peer->outdate, peer->nextdate);
+		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
+		    current_time, ntoa(&peer->srcadr), peer->flags,
+		    hpoll, peer->burst, peer->outdate, peer->nextdate);
 #endif
 }
 
@@ -1037,6 +1104,40 @@ peer_clear(
 {
 	register int i;
 
+	/*
+	 * If cryptographic credentials have been acquired, toss them to
+	 * Valhalla. Note that autokeys are ephemeral, in that they are
+	 * tossed immediately upon use. Therefore, the keylist can be
+	 * purged anytime without needing to preserve random keys. Note
+	 * that, if the peer is purged, the cryptographic variables are
+	 * purged, too. This makes it much harder to sneak in some
+	 * unauthenticated data in the clock filter.
+	 */
+#ifdef DEBUG
+	if (debug)
+		printf("peer_clear: at %ld\n", current_time);
+#endif
+#ifdef AUTOKEY
+	key_expire(peer);
+#ifdef PUBKEY
+	if (peer->sign != NULL)
+		free(peer->sign);
+	if (peer->dh_public != NULL)
+		free(peer->dh_public);
+	if (peer->dh_key != NULL)
+		free(peer->dh_key);
+#endif /* PUBKEY */
+#endif /* AUTOKEY */
+
+	/*
+	 * If he dies as a multicast client, he comes back to life as
+	 * a multicast client in client mode in order to recover the
+	 * initial autokey values.
+	 */
+	if (peer->flags & FLAG_MCAST2) {
+		peer->flags |= FLAG_MCAST1 | FLAG_BURST;
+		peer->hmode = MODE_CLIENT;
+	}
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->minpoll;
@@ -1073,21 +1174,22 @@ clock_filter(
 	double sample_disp
 	)
 {
-	register int i, j, k, n = 0;
+	register int i, j, k, n;
 	register u_char *ord;
 	double distance[NTP_SHIFT];
-	double x, y, z, off;
+	double off, dly, var, dsp, dtemp, etemp;
 
 	/*
-	 * Update error bounds and calculate distances. Also initialize
-	 * sort index vector.
+	 * Update error bounds and calculate distances. The distance for
+	 * each sample is equal to the sample dispersion plus one-half
+	 * the sample delay. Also initialize the sort index vector.
 	 */
-	x = CLOCK_PHI * (current_time - peer->update);
+	dtemp = CLOCK_PHI * (current_time - peer->update);
 	peer->update = current_time;
 	ord = peer->filter_order;
 	j = peer->filter_nextpt;
 	for (i = 0; i < NTP_SHIFT; i++) {
-		peer->filter_disp[j] += x;
+		peer->filter_disp[j] += dtemp;
 		if (peer->filter_disp[j] > MAXDISPERSE)
 			peer->filter_disp[j] = MAXDISPERSE;
 		distance[i] = fabs(peer->filter_delay[j]) / 2 +
@@ -1098,15 +1200,19 @@ clock_filter(
 	}
 
 	/*
-	 * Insert the new sample at the beginning of the register.
+	 * Shift the new sample into the register and discard the oldest
+	 * one. The new offset and delay come directly from the caller.
+	 * The dispersion from the caller is increased by the sum of the
+	 * precision in the the packet header and the precision of this
+	 * machine.
 	 */
 	peer->filter_offset[peer->filter_nextpt] = sample_offset;
 	peer->filter_delay[peer->filter_nextpt] = sample_delay;
-	x = LOGTOD(peer->precision) + LOGTOD(sys_precision) +
+	dsp = LOGTOD(peer->precision) + LOGTOD(sys_precision) +
 	    sample_disp;
-	peer->filter_disp[peer->filter_nextpt] = min(x, MAXDISPERSE);
+	peer->filter_disp[peer->filter_nextpt] = min(dsp, MAXDISPERSE);
 	peer->filter_epoch[peer->filter_nextpt] = current_time;
-	distance[0] = min(x + fabs(sample_delay) / 2, MAXDISTANCE);
+	distance[0] = min(dsp + fabs(sample_delay) / 2, MAXDISTANCE);
 	peer->filter_nextpt++;
 	if (peer->filter_nextpt >= NTP_SHIFT)
 		peer->filter_nextpt = 0;
@@ -1116,44 +1222,49 @@ clock_filter(
 	 * sample will be in ord[0]. Sort the samples only if they
 	 * are younger than the Allen intercept.
 	 */
-	y = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
-	for (n = 0; n < NTP_SHIFT && current_time -
-	    peer->filter_epoch[ord[n]] <= y; n++) {
+	dtemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
+	for (n = 0; n < NTP_SHIFT; n++) {
+		if (n > 0 && current_time - peer->filter_epoch[ord[n]] >
+		    dtemp)
+			break;
 		for (j = 0; j < n; j++) {
 			if (distance[j] > distance[n]) {
-				x = distance[j];
+				etemp = distance[j];
 				k = ord[j];
 				distance[j] = distance[n];
 				ord[j] = ord[n];
-				distance[n] = x;
+				distance[n] = etemp;
 				ord[n] = k;
 			}
 		}
 	} 
 	
 	/*
-	 * Compute the error bound and standard error.
+	 * Compute the offset, delay, variance (squares) and error
+	 * bound. The offset, delay and variance are weighted by the
+	 * reciprocal of distance and normalized. The error bound is
+	 * weighted exponentially.
 	 */
-	x = y = z = off = 0.;
+	off = dly = var = dsp = dtemp = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
-		x = NTP_FWEIGHT * (x + peer->filter_disp[ord[i]]);
-		if (i < n) {
-			z += 1. / distance[i];
+		dsp = NTP_FWEIGHT * (dsp + peer->filter_disp[ord[i]]);
+		if (i < n && distance[i] < MAXDISTANCE) {
+			dtemp += 1. / distance[i];
 			off += peer->filter_offset[ord[i]] /
 			    distance[i];
-			y += DIFF(peer->filter_offset[ord[i]],
-			    peer->filter_offset[ord[0]]);
+			dly += peer->filter_delay[ord[i]] /
+			    distance[i];
+			var += DIFF(peer->filter_offset[ord[i]],
+			    peer->filter_offset[ord[0]]) /
+			    SQUARE(distance[i]);
 		}
 	}
-	peer->delay = peer->filter_delay[ord[0]];
-	peer->variance = min(y / n, MAXDISPERSE);
-	peer->disp = min(x, MAXDISPERSE);
+	peer->delay = dly / dtemp;
+	peer->variance = min(var / SQUARE(dtemp), MAXDISPERSE);
+	peer->disp = min(dsp, MAXDISPERSE);
 	peer->epoch = current_time;
-	x = peer->offset;
-	if (peer->flags & FLAG_BURST)
-		peer->offset = off / z;
-	else
-		peer->offset = peer->filter_offset[ord[0]];
+	etemp = peer->offset;
+	peer->offset = off / dtemp;
 
 	/*
 	 * A new sample is useful only if it is younger than the last
@@ -1174,15 +1285,21 @@ clock_filter(
 	 * poll interval, consider the update a popcorn spike and ignore
 	 * it.
 	 */
-	if (fabs(x - peer->offset) > CLOCK_SGATE &&
+	if (fabs(etemp - peer->offset) > CLOCK_SGATE &&
 	    peer->filter_epoch[ord[0]] - peer->epoch < (1 <<
 	    (sys_poll + 1))) {
 #ifdef DEBUG
 		if (debug)
-			printf("clock_filter: popcorn spike %.6f\n", x);
+			printf("clock_filter: popcorn spike %.6f\n",
+			    off);
 #endif
 		return;
 	}
+
+	/*
+	 * The mitigated sample statistics are saved for later
+	 * processing, but can be processed only once.
+	 */
 	peer->epoch = peer->filter_epoch[ord[0]];
 	peer->pollsw = TRUE;
 #ifdef DEBUG
@@ -1219,10 +1336,10 @@ clock_select(void)
 
 	static int list_alloc = 0;
 	static struct endpoint *endpoint = NULL;
-	static int *index = NULL;
+	static int *indx = NULL;
 	static struct peer **peer_list = NULL;
 	static u_int endpoint_size = 0;
-	static u_int index_size = 0;
+	static u_int indx_size = 0;
 	static u_int peer_list_size = 0;
 
 	/*
@@ -1238,17 +1355,17 @@ clock_select(void)
 	if (nlist > list_alloc) {
 		if (list_alloc > 0) {
 			free(endpoint);
-			free(index);
+			free(indx);
 			free(peer_list);
 		}
 		while (list_alloc < nlist) {
 			list_alloc += 5;
 			endpoint_size += 5 * 3 * sizeof *endpoint;
-			index_size += 5 * 3 * sizeof *index;
+			indx_size += 5 * 3 * sizeof *indx;
 			peer_list_size += 5 * sizeof *peer_list;
 		}
 		endpoint = (struct endpoint *)emalloc(endpoint_size);
-		index = (int *)emalloc(index_size);
+		indx = (int *)emalloc(indx_size);
 		peer_list = (struct peer **)emalloc(peer_list_size);
 	}
 
@@ -1313,40 +1430,41 @@ clock_select(void)
 			f = root_distance(peer);
 			e = e + f;
 			for (i = nl3 - 1; i >= 0; i--) {
-				if (e >= endpoint[index[i]].val)
+				if (e >= endpoint[indx[i]].val)
 					break;
-				index[i + 3] = index[i];
+				indx[i + 3] = indx[i];
 			}
-			index[i + 3] = nl3;
+			indx[i + 3] = nl3;
 			endpoint[nl3].type = 1;
 			endpoint[nl3++].val = e;
 
 			e = e - f;		/* Center point */
 			for ( ; i >= 0; i--) {
-				if (e >= endpoint[index[i]].val)
+				if (e >= endpoint[indx[i]].val)
 					break;
-				index[i + 2] = index[i];
+				indx[i + 2] = indx[i];
 			}
-			index[i + 2] = nl3;
+			indx[i + 2] = nl3;
 			endpoint[nl3].type = 0;
 			endpoint[nl3++].val = e;
 
 			e = e - f;		/* Lower end */
 			for ( ; i >= 0; i--) {
-				if (e >= endpoint[index[i]].val)
+				if (e >= endpoint[indx[i]].val)
 					break;
-				index[i + 1] = index[i];
+				indx[i + 1] = indx[i];
 			}
-			index[i + 1] = nl3;
+			indx[i + 1] = nl3;
 			endpoint[nl3].type = -1;
 			endpoint[nl3++].val = e;
 		}
 	}
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug > 2)
 		for (i = 0; i < nl3; i++)
-		printf("select: endpoint %2d %.6f\n",
-		   endpoint[index[i]].type, endpoint[index[i]].val);
+			printf("select: endpoint %2d %.6f\n",
+			   endpoint[indx[i]].type,
+			   endpoint[indx[i]].val);
 #endif
 	i = 0;
 	j = nl3 - 1;
@@ -1355,23 +1473,23 @@ clock_select(void)
 	while (allow > 0) {
 		allow--;
 		for (n = 0; i <= j; i++) {
-			n += endpoint[index[i]].type;
+			n += endpoint[indx[i]].type;
 			if (n < 0)
 				break;
-			if (endpoint[index[i]].type == 0)
+			if (endpoint[indx[i]].type == 0)
 				found++;
 		}
 		for (n = 0; i <= j; j--) {
-			n += endpoint[index[j]].type;
+			n += endpoint[indx[j]].type;
 			if (n > 0)
 				break;
-			if (endpoint[index[j]].type == 0)
+			if (endpoint[indx[j]].type == 0)
 				found++;
 		}
 		if (found > allow)
 			break;
-		low = endpoint[index[i++]].val;
-		high = endpoint[index[j--]].val;
+		low = endpoint[indx[i++]].val;
+		high = endpoint[indx[j--]].val;
 	}
 
 	/*
@@ -1402,7 +1520,7 @@ clock_select(void)
 		}
 	}
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug > 2)
 		printf("select: low %.6f high %.6f\n", low, high);
 #endif
 
@@ -1439,7 +1557,7 @@ clock_select(void)
 	nlist = j;
 
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug > 2)
 		for (i = 0; i < nlist; i++)
 			printf("select: %s distance %.6f\n",
 			    ntoa(&peer_list[i]->srcadr), synch[i]);
@@ -1479,7 +1597,7 @@ clock_select(void)
 		}
 
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf(
 			    "select: survivors %d select %.6f peer %.6f\n",
 			    nlist, SQRT(sys_maxd), SQRT(d));
@@ -1494,7 +1612,7 @@ clock_select(void)
 		nlist--;
 	}
 #ifdef DEBUG
-	if (debug > 1) {
+	if (debug > 2) {
 		for (i = 0; i < nlist; i++)
 			printf(
 			    "select: %s offset %.6f, distance %.6f poll %d\n",
@@ -1563,7 +1681,7 @@ clock_select(void)
 		sys_offset = sys_peer->offset;
 		sys_epsil = sys_peer->variance;
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("select: prefer offset %.6f\n",
 			    sys_offset);
 #endif
@@ -1577,7 +1695,7 @@ clock_select(void)
 				msyslog(LOG_INFO, "pps sync enabled");
 		pps_control = current_time;
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("select: pps offset %.6f\n", sys_offset);
 #endif
 	} else {
@@ -1587,7 +1705,7 @@ clock_select(void)
 		sys_offset = clock_combine(peer_list, nlist);
 		sys_epsil = sys_peer->variance + sys_maxd;
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("select: combine offset %.6f\n",
 			   sys_offset);
 #endif
@@ -1639,279 +1757,449 @@ peer_xmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	struct pkt xpkt;
+	struct pkt xpkt;	/* transmit packet */
 	int find_rtt = (peer->cast_flags & MDF_MCAST) &&
-		peer->hmode != MODE_BROADCAST;
-	int sendlen;
+	    peer->hmode != MODE_BROADCAST;
+	int sendlen, pktlen;
+	keyid_t xkeyid;		/* transmit key ID */
+	l_fp xmt_tx;
 
 	/*
-	 * Initialize protocol fields.
+	 * Initialize transmit packet header fields.
 	 */
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
-		peer->version, peer->hmode);
+	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
+	    peer->hmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion +
-		LOGTOD(sys_precision)));
+	    LOGTOD(sys_precision)));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	HTONL_FP(&peer->org, &xpkt.org);
 	HTONL_FP(&peer->rec, &xpkt.rec);
 
 	/*
-	 * Authenticate the packet if enabled and either configured or
-	 * the previous packet was authenticated. If for some reason the
-	 * key associated with the key identifier is not in the key
-	 * cache, then honk key zero.
+	 * If the received packet contains a MAC, the transmitted packet
+	 * is authenticated and contains a MAC. If not, the transmitted
+	 * packet is not authenticated.
+	 *
+	 * In the current I/O semantics we can't find the local
+	 * interface address to generate a session key until after
+	 * receiving a packet. So, the first packet goes out
+	 * unauthenticated. That's why the really icky test next is
+	 * here.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (peer->flags & FLAG_AUTHENABLE) {
-		u_long xkeyid;
-		l_fp xmt_tx;
-
-		/*
-		 * Transmit encrypted packet compensated for the
-		 * encryption delay.
-		 */
-#ifdef MD5
-		if (peer->flags & FLAG_SKEY) {
-
-			/*
-			 * In autokey mode, allocate and initialize a
-			 * key list if not already done. Then, use the
-			 * list in inverse order, discarding keys once
-			 * used. Keep the latest key around until the
-			 * next one, so clients can use client/server
-			 * packets to compute propagation delay. Note we
-			 * have to wait until the receive side of the
-			 * socket is bound and the server address
-			 * confirmed.
-			 */
-			if (ntohl(peer->dstadr->sin.sin_addr.s_addr) ==
-			    0 &&
-				ntohl(peer->dstadr->bcast.sin_addr.s_addr) == 0)
-				peer->keyid = 0;
-			else {
-				 if (peer->keylist == 0) {
-					make_keylist(peer);
-				} else {
-					authtrust(peer->keylist[peer->keynumber], 0);
-					if (peer->keynumber == 0)
-						make_keylist(peer);
-					else {
-						peer->keynumber--;
-						xkeyid = peer->keylist[peer->keynumber];
-						if (!authistrusted(xkeyid))
-							make_keylist(peer);
-					}
-				}
-				peer->keyid = peer->keylist[peer->keynumber];
-				xpkt.keyid1 = htonl(2 * sizeof(u_int32));
-				xpkt.keyid2 = htonl(sys_private);
-				sendlen += 2 * sizeof(u_int32);
-			}
-		}
-#endif /* MD5 */
-		xkeyid = peer->keyid;
+	if (!(peer->flags & FLAG_AUTHENABLE) ||
+	    (peer->dstadr->sin.sin_addr.s_addr == 0 &&
+	    peer->dstadr->bcast.sin_addr.s_addr == 0)) {
 		get_systime(&peer->xmt);
-		L_ADD(&peer->xmt, &sys_authdelay);
 		HTONL_FP(&peer->xmt, &xpkt.xmt);
-		sendlen += authencrypt(xkeyid, (u_int32 *)&xpkt,
-		    sendlen);
-		get_systime(&xmt_tx);
 		sendpkt(&peer->srcadr, find_rtt ? any_interface :
-		    peer->dstadr, ((peer->cast_flags & MDF_MCAST) &&
-		    !find_rtt) ? ((peer->cast_flags & MDF_ACAST) ? -7 :
-		    peer->ttl) : -7, &xpkt, sendlen);
-
-		/*
-		 * Calculate the encryption delay. Keep the minimum over
-		 * the latest two samples.
-		 */
-		L_SUB(&xmt_tx, &peer->xmt);
-		L_ADD(&xmt_tx, &sys_authdelay);
-		sys_authdly[1] = sys_authdly[0];
-		sys_authdly[0] = xmt_tx.l_uf;
-		if (sys_authdly[0] < sys_authdly[1])
-			sys_authdelay.l_uf = sys_authdly[0];
-		else
-			sys_authdelay.l_uf = sys_authdly[1];
-		peer->sent++;
-#ifdef DEBUG
-		if (debug)
-			printf(
-			    "transmit: at %ld to %s mode %d keyid %08lx index %d\n",
-			    current_time, ntoa(&peer->srcadr),
-			    peer->hmode, xkeyid, peer->keynumber);
-#endif
-	} else {
-		/*
-		 * Transmit non-authenticated packet.
-		 */
-		get_systime(&(peer->xmt));
-		HTONL_FP(&peer->xmt, &xpkt.xmt);
-		sendpkt(&(peer->srcadr), find_rtt ? any_interface :
 		    peer->dstadr, ((peer->cast_flags & MDF_MCAST) &&
 		    !find_rtt) ? ((peer->cast_flags & MDF_ACAST) ? -7 :
 		    peer->ttl) : -8, &xpkt, sendlen);
 		peer->sent++;
 #ifdef DEBUG
 		if (debug)
-			printf("transmit: at %ld to %s mode %d\n",
-				current_time, ntoa(&peer->srcadr),
-				peer->hmode);
+			printf("transmit: at %ld %s mode %d\n",
+			    current_time, ntoa(&peer->srcadr),
+			    peer->hmode);
 #endif
+		return;
 	}
+
+	/*
+	 * The received packet contains a MAC, so the transmitted packet
+	 * must be authenticated. If autokey is enabled, fuss with the
+	 * various modes; otherwise, private key cryptography is used.
+	 */
+#ifdef AUTOKEY
+	if ((peer->flags & FLAG_SKEY)) {
+		u_int cmmd;
+
+		/*
+		 * The Public Key Dance (PKD): Cryptographic credentials
+		 * are contained in extension fields, each including a
+		 * 4-octet length/code word followed by a 4-octet
+		 * association ID and optional additional data. Optional
+		 * data includes a 4-octet data length field followd by
+		 * the data itself. Request messages are sent from a
+		 * configured association; response messages can be sent
+		 * from a configured association or can take the fast
+		 * path without ever matching an association. Response
+		 * messages have the same code as the request, but have
+		 * a response bit and possibly an error bit set. In this
+		 * implementation, a message may contain no more than
+		 * one command and no more than one response.
+		 *
+		 * Cryptographic session keys include both a public and
+		 * a private componet. Request and response messages
+		 * using extension fields are always sent with the
+		 * private component set to zero. Packets without
+		 * extension fields indlude the private component when
+		 * the session key is generated.
+		 */
+		while (1) {
+		
+			/*
+			 * Allocate and initialize a keylist if not
+			 * already done. Then, use the list in inverse
+			 * order, discarding keys once used. Keep the
+			 * latest key around until the next one, so
+			 * clients can use client/server packets to
+			 * compute propagation delay.
+			 *
+			 * Note that once a key is used from the list,
+			 * it is retained in the key cache until the
+			 * next key is used. This is to allow a client
+			 * to retrieve the encrypted session key
+			 * identifier to verify authenticity.
+			 *
+			 * If for some reason a key is no longer in the
+			 * key cache, a birthday has happened and the
+			 * pseudo-random sequence is probably broken. In
+			 * that case, purge the keylist and regenerate
+			 * it.
+			 */
+			if (peer->keynumber == 0)
+				make_keylist(peer);
+			else
+				peer->keynumber--;
+			xkeyid = peer->keylist[peer->keynumber];
+			if (authistrusted(xkeyid))
+				break;
+			else
+				key_expire(peer);
+		}
+		peer->keyid = xkeyid;
+		switch (peer->hmode) {
+
+		/*
+		 * In broadcast mode and a new keylist; otherwise, send
+		 * the association ID so the client can request the
+		 * values at other times.
+		 */
+		case MODE_BROADCAST:
+			if (peer->keynumber == peer->lastseq)
+				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
+			else
+				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
+			sendlen += crypto_xmit((u_int32 *)&xpkt,
+			    sendlen, cmmd, peer->hcookie,
+			    peer->associd);
+			break;
+
+		/*
+		 * In symmetric modes the public key, Diffie-Hellman
+		 * values and autokey values are required. In principle,
+		 * these values can be provided in any order; however,
+		 * the protocol is most efficient if the values are
+		 * provided in the order listed. This happens with the
+		 * following rules:
+		 *
+		 * 1. Don't send anything except a public-key request or
+		 *    a public-key response until the public key has
+		 *    been stored. 
+		 *
+		 * 2. If a public-key response is pending, always send
+		 *    it first before any other command or response.
+		 *
+		 * 3. Once the public key has been stored, don't send
+		 *    anything except Diffie-Hellman commands or
+		 *    responses until the agreed key has been stored.
+		 *
+		 * 4. If a Diffie-Hellman response is pending, always
+		 *    send it last after any other command or response.
+		 *
+		 * 5. When the agreed key has been stored and the key
+		 *    list is regenerated, send the autokey values
+		 *    gratis.
+		 */
+		case MODE_ACTIVE:
+		case MODE_PASSIVE:
+			if (peer->cmmd != 0 && peer->cmmd >> 16 !=
+			    CRYPTO_DH) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, (peer->cmmd >> 16) |
+				    CRYPTO_RESP, peer->hcookie,
+				    peer->associd);
+				peer->cmmd = 0;
+			}
+#ifdef PUBKEY
+			if (peer->pubkey == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PUBL, peer->hcookie,
+				    peer->assoc);
+			} else if (peer->pcookie == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_DH, peer->hcookie,
+				    peer->assoc);
+			} else
+#endif /* PUBKEY */
+			if (peer->finlseq == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_AUTO, peer->hcookie,
+				    peer->assoc);
+			} else if (peer->keynumber == peer->lastseq) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
+				    peer->hcookie, peer->associd);
+			}
+			if (peer->cmmd != 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, (peer->cmmd >> 16) |
+				    CRYPTO_RESP, peer->hcookie,
+				    peer->associd);
+				peer->cmmd = 0;
+			}
+			break;
+
+		/*
+		 * In client mode, the public key, host cookie and
+		 * autokey values are required. In broadcast client
+		 * mode, these values must be acquired during the
+		 * client/server exchange to avoid having to wait until
+		 * the next key list regeneration. Otherwise, the poor
+		 * dude may die a lingering death until becoming
+		 * unreachable and attempting rebirth.
+		 */
+		case MODE_CLIENT:
+			if (peer->cmmd != 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, (peer->cmmd >> 16) |
+				    CRYPTO_RESP, peer->hcookie,
+				    peer->associd);
+				peer->cmmd = 0;
+			}
+#ifdef PUBKEY
+			if (peer->pubkey == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PUBL, peer->hcookie,
+				    peer->assoc);
+			} else
+#endif /* PUBKEY */
+			if (peer->pcookie == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
+				    peer->assoc);
+			} else if (peer->finlseq == 0 && peer->flags &
+			    FLAG_MCAST2) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_AUTO, peer->hcookie,
+				    peer->assoc);
+			}
+			break;
+		}
+
+		/*
+		 * If extension fields are present, we must use a
+		 * private value of zero. Most intricate.
+		 */
+		if (sendlen > LEN_PKT_NOMAC)
+			session_key(&peer->dstadr->sin,
+			    (peer->hmode == MODE_BROADCAST) ?
+	    		    &peer->dstadr->bcast : &peer->srcadr,
+			    xkeyid, 0, 2);
+	} 
+#endif /* AUTOKEY */
+	xkeyid = peer->keyid;
+	get_systime(&peer->xmt);
+	L_ADD(&peer->xmt, &sys_authdelay);
+	HTONL_FP(&peer->xmt, &xpkt.xmt);
+	pktlen = sendlen + authencrypt(xkeyid, (u_int32 *)&xpkt,
+	    sendlen);
+#ifdef AUTOKEY
+	if (xkeyid > NTP_MAXKEY)
+		authtrust(xkeyid, 0);
+#endif /* AUTOKEY */
+	get_systime(&xmt_tx);
+	sendpkt(&peer->srcadr, find_rtt ? any_interface : peer->dstadr,
+	    ((peer->cast_flags & MDF_MCAST) && !find_rtt) ?
+	    ((peer->cast_flags & MDF_ACAST) ? -7 : peer->ttl) : -7,
+	    &xpkt, pktlen);
+
+	/*
+	 * Calculate the encryption delay. Keep the minimum over
+	 * the latest two samples.
+	 */
+	L_SUB(&xmt_tx, &peer->xmt);
+	L_ADD(&xmt_tx, &sys_authdelay);
+	sys_authdly[1] = sys_authdly[0];
+	sys_authdly[0] = xmt_tx.l_uf;
+	if (sys_authdly[0] < sys_authdly[1])
+		sys_authdelay.l_uf = sys_authdly[0];
+	else
+		sys_authdelay.l_uf = sys_authdly[1];
+	peer->sent++;
+#ifdef AUTOKEY
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d index %d\n",
+		    current_time, ntoa(&peer->srcadr), peer->hmode,
+		    xkeyid, sendlen, pktlen - sendlen, peer->keynumber);
+#endif
+#else
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d\n",
+		    current_time, ntoa(&peer->srcadr), peer->hmode,
+		    xkeyid, sendlen, pktlen - sendlen);
+#endif
+#endif /* AUTOKEY */
 }
 
+
 /*
- * fast_xmit - Send packet for nonpersistent association.
+ * fast_xmit - Send packet for nonpersistent association. Note that
+ * neither the source or destination can be a broadcast address.
  */
 static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
 	int xmode,		/* transmit mode */
-	u_long xkeyid		/* transmit key ID */
+	keyid_t xkeyid		/* transmit key ID */
 	)
 {
-	struct pkt xpkt;
-	struct pkt *rpkt;
-	int sendlen;
-	l_fp xmt_ts;
+	struct pkt xpkt;	/* transmit packet structure */
+	struct pkt *rpkt;	/* receive packet structure */
+	l_fp xmt_ts;		/* transmit timestamp */
+	l_fp xmt_tx;		/* transmit timestamp after authent */
+	int sendlen, pktlen;
 
 	/*
-	 * Initialize transmit packet header fields in the receive
+	 * Initialize transmit packet header fields from the receive
 	 * buffer provided. We leave some fields intact as received.
 	 */
 	rpkt = &rbufp->recv_pkt;
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
-		PKT_VERSION(rpkt->li_vn_mode), xmode);
+	    PKT_VERSION(rpkt->li_vn_mode), xmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = rpkt->ppoll;
 	xpkt.precision = sys_precision;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion +
-		LOGTOD(sys_precision)));
+	    LOGTOD(sys_precision)));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	xpkt.org = rpkt->xmt;
 	HTONL_FP(&rbufp->recv_time, &xpkt.rec);
+
+	/*
+	 * If the received packet contains a MAC, the transmitted packet
+	 * is authenticated and contains a MAC. If not, the transmitted
+	 * packet is not authenticated.
+	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (rbufp->recv_length > sendlen) {
-		l_fp xmt_tx;
-
-		/*
-		 * Transmit encrypted packet compensated for the
-		 * encryption delay.
-		 */
-		if (xkeyid > NTP_MAXKEY) {
-			xpkt.keyid1 = htonl(2 * sizeof(u_int32));
-			xpkt.keyid2 = htonl(sys_private);
-			sendlen += 2 * sizeof(u_int32);
-		}
-		get_systime(&xmt_ts);
-		L_ADD(&xmt_ts, &sys_authdelay);
-		HTONL_FP(&xmt_ts, &xpkt.xmt);
-		sendlen += authencrypt(xkeyid, (u_int32 *)&xpkt,
-		    sendlen);
-		get_systime(&xmt_tx);
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -9, &xpkt,
-		    sendlen);
-
-		/*
-		 * Calculate the encryption delay. Keep the minimum over
-		 * the latest two samples.
-		 */
-		L_SUB(&xmt_tx, &xmt_ts);
-		L_ADD(&xmt_tx, &sys_authdelay);
-		sys_authdly[1] = sys_authdly[0];
-		sys_authdly[0] = xmt_tx.l_uf;
-		if (sys_authdly[0] < sys_authdly[1])
-			sys_authdelay.l_uf = sys_authdly[0];
-		else
-			sys_authdelay.l_uf = sys_authdly[1];
-#ifdef DEBUG
-		if (debug)
-			printf(
-			    "transmit: at %ld to %s mode %d keyid %08lx\n",
-				current_time, ntoa(&rbufp->recv_srcadr),
-				xmode, xkeyid);
-#endif
-	} else {
-
-		/*
-		 * Transmit non-authenticated packet.
-		 */
+	if (rbufp->recv_length == sendlen) {
 		get_systime(&xmt_ts);
 		HTONL_FP(&xmt_ts, &xpkt.xmt);
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -10, &xpkt,
-			sendlen);
+		    sendlen);
 #ifdef DEBUG
 		if (debug)
-			printf("transmit: at %ld to %s mode %d\n",
-				current_time, ntoa(&rbufp->recv_srcadr),
-				xmode);
+			printf("transmit: at %ld %s mode %d\n",
+			    current_time, ntoa(&rbufp->recv_srcadr),
+			    xmode);
 #endif
+		return;
 	}
+
+	/*
+	 * The received packet contains a MAC, so the transmitted packet
+	 * must be authenticated. For private-key cryptography, use the
+	 * the public and private values to generate the cookie, which
+	 * is unique for every source-destination-key ID combination. If
+	 * an extension field is present, do what needs, but with
+	 * private value of zero so the poor jerk can decode it. If no
+	 * extension field is present, use the cookie to generate the
+	 * session key.
+	 */
+#ifdef AUTOKEY
+	if (xkeyid > NTP_MAXKEY) {
+		keyid_t cookie;
+		u_int code;
+
+		if (xmode == MODE_SERVER)
+			cookie = session_key(&rbufp->recv_srcadr,
+			    &rbufp->dstadr->sin, 0, sys_private, 0);
+		else
+			cookie = session_key(&rbufp->dstadr->sin,
+			    &rbufp->recv_srcadr, 0, sys_private, 0);
+		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
+		    sizeof(u_int32)) {
+			session_key(&rbufp->dstadr->sin,
+			    &rbufp->recv_srcadr, xkeyid, 0, 2);
+			code = (htonl(rpkt->exten[0]) >> 16) |
+			    CRYPTO_RESP;
+			sendlen += crypto_xmit((u_int32 *)&xpkt,
+			    sendlen, code, cookie,
+			    (int)htonl(rpkt->exten[1]));
+		} else {
+			session_key(&rbufp->dstadr->sin,
+			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
+		}
+	}
+#endif /* AUTOKEY */
+	get_systime(&xmt_ts);
+	L_ADD(&xmt_ts, &sys_authdelay);
+	HTONL_FP(&xmt_ts, &xpkt.xmt);
+	pktlen = sendlen + authencrypt(xkeyid, (u_int32 *)&xpkt,
+	    sendlen);
+#ifdef AUTOKEY
+	if (xkeyid > NTP_MAXKEY)
+		authtrust(xkeyid, 0);
+#endif /* AUTOKEY */
+	get_systime(&xmt_tx);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -9, &xpkt, pktlen);
+
+	/*
+	 * Calculate the encryption delay. Keep the minimum over the
+	 * latest two samples.
+	 */
+	L_SUB(&xmt_tx, &xmt_ts);
+	L_ADD(&xmt_tx, &sys_authdelay);
+	sys_authdly[1] = sys_authdly[0];
+	sys_authdly[0] = xmt_tx.l_uf;
+	if (sys_authdly[0] < sys_authdly[1])
+		sys_authdelay.l_uf = sys_authdly[0];
+	else
+		sys_authdelay.l_uf = sys_authdly[1];
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "transmit: at %ld %s mode %d keyid %08x len %d mac %d\n",
+		    current_time, ntoa(&rbufp->recv_srcadr),
+		    xmode, xkeyid, sendlen, pktlen - sendlen);
+#endif
 }
 
-#ifdef MD5
+
+#ifdef AUTOKEY
 /*
- * Compute key list
+ * key_expire - purge the key list
  */
-static void
-make_keylist(
-	struct peer *peer
+void
+key_expire(
+	struct peer *peer	/* peer structure pointer */
 	)
 {
 	int i;
-	u_long keyid;
-	u_long ltemp;
 
-	/*
-	 * Allocate the key list if necessary.
-	 */
-	if (peer->keylist == 0)
-		peer->keylist = (u_long *)emalloc(sizeof(u_long) *
-		    NTP_MAXSESSION);
-
-	/*
-	 * Generate an initial key ID which is unique and greater than
-	 * NTP_MAXKEY.
-	 */
-	while (1) {
-		keyid = (u_long)RANDOM & 0xffffffff;
-		if (keyid <= NTP_MAXKEY)
-			continue;
-		if (authhavekey(keyid))
-			continue;
-		break;
+	if (peer->keylist != NULL) {
+		for (i = 0; i <= peer->keynumber; i++)
+			authtrust(peer->keylist[i], 0);
+		free(peer->keylist);
+		peer->keylist = NULL;
 	}
-
-	/*
-	 * Generate up to NTP_MAXSESSION session keys. Stop if the
-	 * next one would not be unique or not a session key ID or if
-	 * it would expire before the next poll.
-	 */
-	ltemp = sys_automax;
-	for (i = 0; i < NTP_MAXSESSION; i++) {
-		peer->keylist[i] = keyid;
-		peer->keynumber = i;
-		keyid = session_key(
-		    ntohl(peer->dstadr->sin.sin_addr.s_addr),
-		    (peer->hmode == MODE_BROADCAST || (peer->flags &
-		    FLAG_MCAST2)) ?
-		    ntohl(peer->dstadr->bcast.sin_addr.s_addr):
-		    ntohl(peer->srcadr.sin_addr.s_addr), keyid, ltemp);
-		ltemp -= 1 << peer->hpoll;
-		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    ltemp <= (1 << (peer->hpoll + 1)))
-			break;
-	}
+	peer->keynumber = peer->lastseq = 0;
+	peer->lastkey = 0;
 }
-#endif /* MD5 */
+#endif /* AUTOKEY */
 
 /*
  * Find the precision of this particular machine
@@ -2055,7 +2343,9 @@ init_proto(void)
 	sys_processed = 0;
 	sys_badauth = 0;
 	sys_manycastserver = 0;
+#ifdef AUTOKEY
 	sys_automax = 1 << NTP_AUTOMAX;
+#endif /* AUTOKEY */
 
 	/*
 	 * Default these to enable

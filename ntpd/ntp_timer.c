@@ -41,8 +41,10 @@ volatile int alarm_flag;
 static	u_long adjust_timer;		/* second timer */
 static	u_long keys_timer;		/* minute timer */
 static	u_long hourly_timer;		/* hour timer */
+#ifdef AUTOKEY
 static	u_long revoke_timer;		/* keys revoke timer */
-u_long	sys_revoke = KEY_REVOKE;	/* keys revoke timeout */
+u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
+#endif /* AUTOKEY */
 
 /*
  * Statistics counter for the interested.
@@ -250,12 +252,14 @@ timer(void)
 	}
 
 	/*
-	 * Garbage collect revoked keys
+	 * Garbage collect old keys and generate new private value
 	 */
+#ifdef AUTOKEY
 	if (revoke_timer <= current_time) {
-		revoke_timer += RANDPOLL(sys_revoke);
+		revoke_timer += sys_revoke;
 		key_expire_all();
 	}
+#endif /* AUTOKEY */
 
 	/*
 	 * Finally, call the hourly routine.

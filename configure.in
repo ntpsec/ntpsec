@@ -187,8 +187,8 @@ AC_CHECK_LIB(rt, sched_setscheduler, ,
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h netdb.h poll.h resolv.h)
-AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h termios.h)
+AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h memory.h netdb.h poll.h)
+AC_CHECK_HEADERS(resolv.h sched.h sgtty.h stdlib.h string.h termio.h termios.h)
 AC_CHECK_HEADERS(timepps.h timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_systm.h netinet/in.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO)])
@@ -1352,7 +1352,10 @@ AC_CACHE_CHECK(if we want to use MD5 authentication, ac_cv_var_use_md5,
     [ans=$enableval], [ans=yes])
 ac_cv_var_use_md5=$ans])
 case "$ac_cv_var_use_md5" in
- yes) AC_DEFINE(MD5) ;;
+ yes)
+     AC_DEFINE(AUTOKEY, , [Autokey?])
+     AC_DEFINE(MD5)
+     ;;
 esac
 
 # Check for ioctls TIOCGPPSEV
@@ -2229,15 +2232,27 @@ AC_MSG_RESULT($ans)
 AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
+AC_SUBST(MAKE_NTP_GENKEYS)
 AC_MSG_CHECKING(if we need to make and use the RSAREF library)
-ans=no
-if test -f $srcdir/rsaref2/source/rsa.c
-then
-    ans=yes
-    LIBRSAREF=../librsaref/librsaref.a
-    MAKE_LIBRSAREF=librsaref.a
-    AC_DEFINE(DES)
-fi
+AC_ARG_WITH(rsaref,	[  --with-rsaref           + Use rsaref if possible],
+[ans=yes
+case "$withval" in
+ no) ans=no ;;
+esac], [ans=yes])
+case "$ans" in
+ yes)
+    ans=no
+    if test -f $srcdir/rsaref2/source/rsa.c
+    then
+	ans=yes
+	LIBRSAREF=../librsaref/librsaref.a
+	MAKE_LIBRSAREF=librsaref.a
+	MAKE_NTP_GENKEYS=ntp_genkeys
+	AC_DEFINE(DES)
+	AC_DEFINE(PUBKEY, , [Public key?])
+    fi
+    ;;
+esac
 AC_MSG_RESULT($ans)
 
 AC_SUBST(TESTDCF)

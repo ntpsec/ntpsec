@@ -159,7 +159,8 @@ adj_systime(
 	/* casey - we need a posix type thang here */
 	if (adjtime(&adjtv, &oadjtv) < 0)
 	{
-		msyslog(LOG_ERR, "Can't adjust time: %m");
+		msyslog(LOG_ERR, "Can't adjust time (%d sec, %d usec): %m",
+			adjtv.tv_sec, adjtv.tv_usec);
 		return 0;
 	} 
 	else {

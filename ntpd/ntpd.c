@@ -92,6 +92,10 @@
 # include <sys/ci/ciioctl.h>
 #endif
 
+#ifdef PUBKEY
+#include "ntp_crypto.h"
+#endif /* PUBKEY */
+
 /*
  * Signals we catch for debugging.	If not debugging we ignore them.
  */
@@ -378,10 +382,13 @@ ntpdmain(
 	}
 	addSourceToRegistry("NTP", szMsgPath);
 #endif
+	getstartup(argc, argv); /* startup configuration, may set debug */
 
+	/*
+	 * Initialize random generator and public key pair
+	 */
 	get_systime(&now);
 	SRANDOM((int)(now.l_i * now.l_uf));
-	getstartup(argc, argv); /* startup configuration, may set debug */
 
 #if !defined(VMS)
 # ifndef NODETACH
@@ -714,12 +721,14 @@ service_main(
 #ifdef REFCLOCK
 	init_refclock();
 #endif
+#ifdef PUBKEY
+	crypto_init();		/* Call *before* going to high-priority */
+#endif /* PUBKEY */
 	set_process_priority();
-	init_proto();
+	init_proto();		/* Call at high priority */
 	init_io();
 	init_loopfilter();
-
-	mon_start(MON_ON);		/* monitor on by default now	  */
+	mon_start(MON_ON);	/* monitor on by default now	  */
 				/* turn off in config if unwanted */
 
 	/*
@@ -728,7 +737,10 @@ service_main(
 	 * for the gizmo board.
 	 */
 	getconfig(argc, argv);
-
+#ifdef PUBKEY
+	if (crypto_enable)
+		crypto_setup();
+#endif /* PUBKEY */
 	initializing = 0;
 
 #if defined(SYS_WINNT) && !defined(NODETACH)

@@ -30,7 +30,7 @@ struct savekey {
 		u_char MD5_key[32];	/* MD5 key */
 #endif
 	} k;
-	u_long keyid;		/* key identifier */
+	keyid_t keyid;		/* key identifier */
 	u_short flags;		/* flags that wave */
 	u_long lifetime;	/* remaining lifetime */
 #ifdef	MD5
@@ -73,7 +73,7 @@ int authnumfreekeys;
 /*
  * The key cache. We cache the last key we looked at here.
  */
-u_long	cache_keyid;		/* key identifier */
+keyid_t	cache_keyid;		/* key identifier */
 u_char	*cache_key;		/* key pointer */
 u_int	cache_keylen;		/* key length */
 u_short cache_flags;		/* flags that wave */
@@ -97,7 +97,7 @@ init_auth(void)
  */
 struct savekey *
 auth_findkey(
-	u_long keyno
+	keyid_t keyno
 	)
 {
 	struct savekey *sk;
@@ -118,7 +118,7 @@ auth_findkey(
  */
 int
 auth_havekey(
-	u_long keyno
+	keyid_t keyno
 	)
 {
 	struct savekey *sk;
@@ -142,7 +142,7 @@ auth_havekey(
  */
 int
 authhavekey(
-	u_long keyno
+	keyid_t keyno
 	)
 {
 	struct savekey *sk;
@@ -211,15 +211,15 @@ auth_moremem(void)
  */
 void
 authtrust(
-	u_long keyno,
-	int trust
+	keyid_t keyno,
+	u_long trust
 	)
 {
 	struct savekey *sk;
 
 #ifdef DEBUG
-	if (debug > 1)
-		printf("authtrust: keyid %08lx life %d\n", (u_long)keyno, trust);
+	if (debug > 2)
+		printf("authtrust: keyid %08x life %lu\n", keyno, trust);
 #endif
 	sk = key_hash[KEYHASH(keyno)];
 	while (sk != 0) {
@@ -288,7 +288,7 @@ authtrust(
  */
 int
 authistrusted(
-	u_long keyno
+	keyid_t keyno
 	)
 {
 	struct savekey *sk;
@@ -321,7 +321,7 @@ authistrusted(
  */
 void
 DESauth_setkey(
-	u_long keyno,
+	keyid_t keyno,
 	const u_int32 *key
 	)
 {
@@ -371,7 +371,7 @@ DESauth_setkey(
 #ifdef	MD5
 void
 MD5auth_setkey(
-	u_long keyno,
+	keyid_t keyno,
 	const u_char *key,
 	const int len
 	)
@@ -503,7 +503,7 @@ auth_agekeys(void)
  */
 int
 authencrypt(
-	u_long keyno,
+	keyid_t keyno,
 	u_int32 *pkt,
 	int length
 	)
@@ -515,7 +515,7 @@ authencrypt(
 	 * consists of a single word with value zero.
 	 */
 	authencryptions++;
-	pkt[length / 4] = (u_long)htonl(keyno);
+	pkt[length / 4] = htonl(keyno);
 	if (keyno == 0) {
 		return (4);
 	}
@@ -541,7 +541,7 @@ authencrypt(
  */
 int
 authdecrypt(
-	u_long keyno,
+	keyid_t keyno,
 	u_int32 *pkt,
 	int length,
 	int size
@@ -555,7 +555,7 @@ authdecrypt(
 	 */
 	authdecryptions++;
 	if (keyno == 0)
-		return (1);
+		return (0);
 
 	if (!authhavekey(keyno) || size < 4)
 		return (0);

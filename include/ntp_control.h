@@ -163,8 +163,14 @@ struct ntp_control {
 #define	CS_SYSTEM	16
 #define	CS_STABIL	17
 #define CS_VARLIST	18
-
+#ifdef PUBKEY
+#define	CS_PRIVATE	19
+#define CS_PUBLIC	20
+#define CS_DHPARAMS	21
+#define	CS_MAXCODE	CS_DHPARAMS
+#else
 #define	CS_MAXCODE	CS_VARLIST
+#endif /* PUBKEY */
 
 /*
  * Peer variables we understand
@@ -206,8 +212,17 @@ struct ntp_control {
 #define	CP_FLASH	35
 #define CP_DISP		36
 #define CP_VARLIST	37
-
+#ifdef PUBKEY
+#define CP_PUBLIC	38
+#define	CP_SESKEY	39
+#define	CP_SASKEY	40
+#define	CP_AUTOSEQ	41
+#define	CP_INITKEY	42
+#define	CP_INITSEQ	43
+#define	CP_MAXCODE	CP_INITSEQ
+#else
 #define	CP_MAXCODE	CP_VARLIST
+#endif /* PUBKEY */
 
 /*
  * Clock variables we understand

@@ -1,7 +1,6 @@
 /*
  * ntp_config.c - read and apply configuration information
  */
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -31,6 +30,10 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
+
+#ifdef PUBKEY
+#include "ntp_crypto.h"
+#endif /* PUBKEY */
 
 #ifdef SYS_WINNT
 #include <io.h>
@@ -71,6 +74,8 @@ extern HANDLE ResolverThreadHandle;
  * restrict [ addr ] [ mask 255.255.255.0 ] ignore|noserve|notrust|noquery
  * driftfile file_name
  * keys file_name
+ * publickey file_name
+ * privatekey file_name
  * statsdir /var/NTP/
  * filegen peerstats [ file peerstats ] [ type day ] [ link ]
  * clientlimit [ n ]
@@ -95,6 +100,9 @@ extern HANDLE ResolverThreadHandle;
  */
 #define CONFIG_UNKNOWN		0
 
+/*
+ * Command keywords
+ */
 #define CONFIG_PEER		1
 #define CONFIG_SERVER		2
 #define CONFIG_AUTOMAX		3
@@ -112,7 +120,9 @@ extern HANDLE ResolverThreadHandle;
 #define CONFIG_CONTROLKEY	15
 #define CONFIG_TRAP		16
 #define CONFIG_FUDGE		17
-#define CONFIG_18		18 /* unused */
+#ifdef PUBKEY
+#define CONFIG_KEYSDIR		18
+#endif /* PUBKEY */
 #define CONFIG_STATSDIR		19
 #define CONFIG_FILEGEN		20
 #define CONFIG_STATISTICS	21
@@ -128,7 +138,13 @@ extern HANDLE ResolverThreadHandle;
 #define CONFIG_LOGCONFIG	31
 #define CONFIG_MANYCASTCLIENT	32
 #define CONFIG_MANYCASTSERVER	33
+#ifdef PUBKEY
+#define CONFIG_CRYPTO		34
+#endif /* PUBKEY */
 
+/*
+ * "peer", "server", "broadcast" modifier keywords
+ */
 #define CONF_MOD_VERSION	1
 #define CONF_MOD_KEY		2
 #define CONF_MOD_MINPOLL	3
@@ -139,7 +155,13 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_MOD_TTL		8
 #define CONF_MOD_MODE		9
 #define CONF_MOD_NOSELECT 	10
+#ifdef PUBKEY
+#define CONF_MOD_PUBLICKEY	11
+#endif /* PUBKEY */
 
+/*
+ * "restrict" modifier keywords
+ */
 #define CONF_RES_MASK		1
 #define CONF_RES_IGNORE		2
 #define CONF_RES_NOSERVE	3
@@ -152,9 +174,15 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_RES_NTPPORT	10
 #define CONF_RES_LIMITED	11
 
+/*
+ * "trap" modifier keywords
+ */
 #define CONF_TRAP_PORT		1
 #define CONF_TRAP_INTERFACE	2
 
+/*
+ * "fudge" modifier keywords
+ */
 #define CONF_FDG_TIME1		1
 #define CONF_FDG_TIME2		2
 #define CONF_FDG_STRATUM	3
@@ -164,6 +192,9 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_FDG_FLAG3		7
 #define CONF_FDG_FLAG4		8
 
+/*
+ * "filegen" modifier keywords
+ */
 #define CONF_FGEN_FILE		1
 #define CONF_FGEN_TYPE		2
 #define CONF_FGEN_FLAG_LINK	3
@@ -171,9 +202,22 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_FGEN_FLAG_ENABLE	5
 #define CONF_FGEN_FLAG_DISABLE	6
 
+/*
+ * "pps" modifier keywords
+ */
 #define CONF_PPS_ASSERT		1
 #define CONF_PPS_CLEAR		2
 #define CONF_PPS_HARDPPS	3
+
+#ifdef PUBKEY
+/*
+ * "crypto" modifier keywords
+ */
+#define CONF_CRYPTO_DH		1
+#define	CONF_CRYPTO_PRIVATEKEY	2
+#define	CONF_CRYPTO_PUBLICKEY	3
+#define CONF_CRYPTO_FLAGS	4
+#endif /* PUBKEY */
 
 /*
  * Translation table - keywords to function index
@@ -187,38 +231,44 @@ struct keyword {
  * Command keywords
  */
 static	struct keyword keywords[] = {
-	{ "peer",		CONFIG_PEER },
-	{ "server",		CONFIG_SERVER },
-	{ "driftfile",		CONFIG_DRIFTFILE },
+	{ "authenticate",	CONFIG_AUTHENTICATE },
+	{ "automax",		CONFIG_AUTOMAX },
 	{ "broadcast",		CONFIG_BROADCAST },
 	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
-	{ "multicastclient",	CONFIG_MULTICASTCLIENT },
-	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
-	{ "manycastserver",	CONFIG_MANYCASTSERVER },
-	{ "authenticate",	CONFIG_AUTHENTICATE },
-	{ "keys",		CONFIG_KEYS },
-	{ "revoke",		CONFIG_REVOKE },
-	{ "pps",		CONFIG_PPS },
-	{ "automax",		CONFIG_AUTOMAX },
-	{ "restrict",		CONFIG_RESTRICT },
 	{ "broadcastdelay",	CONFIG_BDELAY },
-	{ "trustedkey",		CONFIG_TRUSTEDKEY },
-	{ "requestkey",		CONFIG_REQUESTKEY },
-	{ "controlkey",		CONFIG_CONTROLKEY },
-	{ "trap",		CONFIG_TRAP },
-	{ "fudge",		CONFIG_FUDGE },
-	{ "statsdir",		CONFIG_STATSDIR },
-	{ "filegen",		CONFIG_FILEGEN },
-	{ "statistics",		CONFIG_STATISTICS },
-	{ "pidfile",		CONFIG_PIDFILE },
-	{ "setvar",		CONFIG_SETVAR },
 	{ "clientlimit",	CONFIG_CLIENTLIMIT },
 	{ "clientperiod",	CONFIG_CLIENTPERIOD },
-	{ "enable",		CONFIG_ENABLE },
+#ifdef PUBKEY
+	{ "crypto",		CONFIG_CRYPTO },
+#endif /* PUBKEY */
+	{ "controlkey",		CONFIG_CONTROLKEY },
 	{ "disable",		CONFIG_DISABLE },
-	{ "phone",		CONFIG_PHONE },
-	{ "logfile",		CONFIG_LOGFILE },
+	{ "driftfile",		CONFIG_DRIFTFILE },
+	{ "enable",		CONFIG_ENABLE },
+	{ "filegen",		CONFIG_FILEGEN },
+	{ "fudge",		CONFIG_FUDGE },
+	{ "keys",		CONFIG_KEYS },
+#ifdef PUBKEY
+	{ "keysdir",		CONFIG_KEYSDIR },
+#endif /* PUBKEY */
 	{ "logconfig",		CONFIG_LOGCONFIG },
+	{ "logfile",		CONFIG_LOGFILE },
+	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
+	{ "manycastserver",	CONFIG_MANYCASTSERVER },
+	{ "multicastclient",	CONFIG_MULTICASTCLIENT },
+	{ "peer",		CONFIG_PEER },
+	{ "phone",		CONFIG_PHONE },
+	{ "pidfile",		CONFIG_PIDFILE },
+	{ "pps",		CONFIG_PPS },
+	{ "requestkey",		CONFIG_REQUESTKEY },
+	{ "restrict",		CONFIG_RESTRICT },
+	{ "revoke",		CONFIG_REVOKE },
+	{ "server",		CONFIG_SERVER },
+	{ "setvar",		CONFIG_SETVAR },
+	{ "statistics",		CONFIG_STATISTICS },
+	{ "statsdir",		CONFIG_STATSDIR },
+	{ "trap",		CONFIG_TRAP },
+	{ "trustedkey",		CONFIG_TRUSTEDKEY },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -226,16 +276,19 @@ static	struct keyword keywords[] = {
  * "peer", "server", "broadcast" modifier keywords
  */
 static	struct keyword mod_keywords[] = {
-	{ "version",		CONF_MOD_VERSION },
-	{ "key",		CONF_MOD_KEY },
-	{ "minpoll",		CONF_MOD_MINPOLL },
-	{ "maxpoll",		CONF_MOD_MAXPOLL },
-	{ "prefer",		CONF_MOD_PREFER },
-	{ "noselect",		CONF_MOD_NOSELECT },
-	{ "burst",		CONF_MOD_BURST },
 	{ "autokey",		CONF_MOD_SKEY },
-	{ "mode",		CONF_MOD_MODE },    /* reference clocks */
+	{ "burst",		CONF_MOD_BURST },
+	{ "key",		CONF_MOD_KEY },
+	{ "maxpoll",		CONF_MOD_MAXPOLL },
+	{ "minpoll",		CONF_MOD_MINPOLL },
+	{ "mode",		CONF_MOD_MODE },    /* refclocks */
+	{ "noselect",		CONF_MOD_NOSELECT },
+	{ "prefer",		CONF_MOD_PREFER },
+#ifdef PUBKEY
+	{ "publickey",		CONF_MOD_PUBLICKEY },
+#endif /* PUBKEY */
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
+	{ "version",		CONF_MOD_VERSION },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -243,17 +296,17 @@ static	struct keyword mod_keywords[] = {
  * "restrict" modifier keywords
  */
 static	struct keyword res_keywords[] = {
-	{ "mask",		CONF_RES_MASK },
 	{ "ignore",		CONF_RES_IGNORE },
-	{ "noserve",		CONF_RES_NOSERVE },
-	{ "notrust",		CONF_RES_NOTRUST },
-	{ "noquery",		CONF_RES_NOQUERY },
+	{ "limited",		CONF_RES_LIMITED },
+	{ "lowpriotrap",	CONF_RES_LPTRAP },
+	{ "mask",		CONF_RES_MASK },
 	{ "nomodify",		CONF_RES_NOMODIFY },
 	{ "nopeer",		CONF_RES_NOPEER },
+	{ "noquery",		CONF_RES_NOQUERY },
+	{ "noserve",		CONF_RES_NOSERVE },
 	{ "notrap",		CONF_RES_NOTRAP },
-	{ "lowpriotrap",	CONF_RES_LPTRAP },
+	{ "notrust",		CONF_RES_NOTRUST },
 	{ "ntpport",		CONF_RES_NTPPORT },
-	{ "limited",		CONF_RES_LIMITED },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -266,19 +319,18 @@ static	struct keyword trap_keywords[] = {
 	{ "",			CONFIG_UNKNOWN }
 };
 
-
 /*
  * "fudge" modifier keywords
  */
 static	struct keyword fudge_keywords[] = {
-	{ "time1",		CONF_FDG_TIME1 },
-	{ "time2",		CONF_FDG_TIME2 },
-	{ "stratum",		CONF_FDG_STRATUM },
-	{ "refid",		CONF_FDG_REFID },
 	{ "flag1",		CONF_FDG_FLAG1 },
 	{ "flag2",		CONF_FDG_FLAG2 },
 	{ "flag3",		CONF_FDG_FLAG3 },
 	{ "flag4",		CONF_FDG_FLAG4 },
+	{ "refid",		CONF_FDG_REFID },
+	{ "stratum",		CONF_FDG_STRATUM },
+	{ "time1",		CONF_FDG_TIME1 },
+	{ "time2",		CONF_FDG_TIME2 },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -287,12 +339,12 @@ static	struct keyword fudge_keywords[] = {
  * "filegen" modifier keywords
  */
 static	struct keyword filegen_keywords[] = {
+	{ "disable",		CONF_FGEN_FLAG_DISABLE },
+	{ "enable",		CONF_FGEN_FLAG_ENABLE },
 	{ "file",		CONF_FGEN_FILE },
-	{ "type",		CONF_FGEN_TYPE },
 	{ "link",		CONF_FGEN_FLAG_LINK },
 	{ "nolink",		CONF_FGEN_FLAG_NOLINK },
-	{ "enable",		CONF_FGEN_FLAG_ENABLE },
-	{ "disable",		CONF_FGEN_FLAG_DISABLE },
+	{ "type",		CONF_FGEN_TYPE },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -300,13 +352,13 @@ static	struct keyword filegen_keywords[] = {
  * "type" modifier keywords
  */
 static	struct keyword fgen_types[] = {
+	{ "age",		FILEGEN_AGE   },
+	{ "day",		FILEGEN_DAY   },
+	{ "month",		FILEGEN_MONTH },
 	{ "none",		FILEGEN_NONE  },
 	{ "pid",		FILEGEN_PID   },
-	{ "day",		FILEGEN_DAY   },
 	{ "week",		FILEGEN_WEEK  },
-	{ "month",		FILEGEN_MONTH },
 	{ "year",		FILEGEN_YEAR  },
-	{ "age",		FILEGEN_AGE   },
 	{ "",			CONFIG_UNKNOWN}
 };
 
@@ -316,15 +368,15 @@ static	struct keyword fgen_types[] = {
 static struct keyword flags_keywords[] = {
 	{ "auth",		PROTO_AUTHENTICATE },
 	{ "bclient",		PROTO_BROADCLIENT },
-	{ "ntp",		PROTO_NTP },
 	{ "kernel",		PROTO_KERNEL },
 	{ "monitor",		PROTO_MONITOR },
+	{ "ntp",		PROTO_NTP },
 	{ "stats",		PROTO_FILEGEN },
 	{ "",			CONFIG_UNKNOWN }
 };
 
 /*
- * pps modifier keywords
+ * "pps" modifier keywords
  */
 static struct keyword pps_keywords[] = {
 	{ "assert",		CONF_PPS_ASSERT },
@@ -332,6 +384,19 @@ static struct keyword pps_keywords[] = {
 	{ "hardpps",		CONF_PPS_HARDPPS },
 	{ "",			CONFIG_UNKNOWN }
 };
+
+#ifdef PUBKEY
+/*
+ * "crypto" modifier keywords
+ */
+static struct keyword crypto_keywords[] = {
+	{ "dh",			CONF_CRYPTO_DH },
+	{ "flags",		CONF_CRYPTO_FLAGS },
+	{ "privatekey",		CONF_CRYPTO_PRIVATEKEY },
+	{ "publickey",		CONF_CRYPTO_PUBLICKEY },
+	{ "",			CONFIG_UNKNOWN }
+};
+#endif /* PUBKEY */
 
 /*
  * "logconfig" building blocks
@@ -342,10 +407,10 @@ struct masks {
 };
 
 static struct masks logcfg_class[] = {
-	{ "sys",		NLOG_OSYS },
-	{ "peer",		NLOG_OPEER },
 	{ "clock",		NLOG_OCLOCK },
+	{ "peer",		NLOG_OPEER },
 	{ "sync",		NLOG_OSYNC },
+	{ "sys",		NLOG_OSYS },
 	{ (char *)0,	0 }
 };
 
@@ -373,8 +438,6 @@ static struct masks logcfg_item[] = {
 #define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	5	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
-#define MAXFILENAME	128	/* maximum length of a file name (alloca()?) */
-
 
 /*
  * Miscellaneous macros
@@ -439,7 +502,8 @@ static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
 static	int gettokens P((FILE *, char *, char **, int *));
 static	int matchkey P((char *, struct keyword *));
 static	int getnetnum P((const char *, struct sockaddr_in *, int));
-static	void save_resolve P((char *, int, int, int, int, int, int, u_long));
+static	void save_resolve P((char *, int, int, int, int, int, int,
+    keyid_t, u_char *));
 static	void do_resolve_internal P((void));
 static	void abort_resolve P((void));
 #if !defined(VMS)
@@ -640,8 +704,9 @@ getconfig(
 	int minpoll;
 	int maxpoll;
 	int ttl;
-	u_long peerkey;
-	u_long lpeerkey;
+	keyid_t peerkey;
+	char *peerkeystr;
+	keyid_t lpeerkey;
 	int peerflags;
 	int hmode;
 	struct sockaddr_in peeraddr;
@@ -954,6 +1019,7 @@ getconfig(
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
+			peerkeystr = "*";
 			peerflags = 0;
 			ttl = 0;
 			for (i = 2; i < ntokens; i++)
@@ -1022,10 +1088,26 @@ getconfig(
 				case CONF_MOD_BURST:
 				    peerflags |= FLAG_BURST;
 				    break;
-
+#ifdef AUTOKEY
 				case CONF_MOD_SKEY:
-				    peerflags |= FLAG_SKEY | FLAG_AUTHENABLE;
+				    peerflags |= FLAG_SKEY |
+					FLAG_AUTHENABLE;
 				    break;
+
+#ifdef PUBKEY
+				case CONF_MOD_PUBLICKEY:
+				    if (i >= ntokens - 1) {
+					msyslog(LOG_ERR,
+					    "Public key file name required");
+					errflg = 1;
+					break;
+				    }
+				    peerflags |= FLAG_SKEY |
+					FLAG_AUTHENABLE;
+ 				    peerkeystr = tokens[++i];
+				    break;
+#endif /* PUBKEY */
+#endif /* AUTOKEY */
 
 				case CONF_MOD_TTL:
 				    if (i >= ntokens-1) {
@@ -1056,19 +1138,20 @@ getconfig(
 				errflg = 1;
 			}
 			if (errflg == 0) {
-				if (peer_config(&peeraddr,
-						(struct interface *)0, hmode,
-						peerversion, minpoll, maxpoll,
-						peerflags, ttl, peerkey)
-				    == 0) {
+			    if (peer_config(&peeraddr,
+				    (struct interface *)0, hmode,
+				    peerversion, minpoll, maxpoll, peerflags,
+				    ttl, peerkey, peerkeystr) == 0) {
 					msyslog(LOG_ERR,
 						"configuration of %s failed",
 						ntoa(&peeraddr));
-				}
+			    }
+	
 			} else if (errflg == -1) {
-				save_resolve(tokens[1], hmode, peerversion,
-					     minpoll, maxpoll, peerflags, ttl,
-					     peerkey);
+				save_resolve(tokens[1], hmode,
+				    peerversion, minpoll, maxpoll,
+				    peerflags, ttl, peerkey,
+				    peerkeystr);
 			}
 			break;
 
@@ -1089,6 +1172,7 @@ getconfig(
 		    case CONFIG_LOGFILE:
 			if (ntokens >= 2) {
 				FILE *new_file;
+
 				new_file = fopen(tokens[1], "a");
 				if (new_file != NULL) {
 					NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
@@ -1199,17 +1283,56 @@ getconfig(
 			}
 			break;
 
+#ifdef AUTOKEY
 		    case CONFIG_REVOKE:
-			if (ntokens >= 2) {
-				sys_revoke = 1 << max(atoi(tokens[1]), 10);
-			}
+			if (ntokens >= 2)
+			    sys_revoke = 1 << max(atoi(tokens[1]), 10);
 			break;
 
 		    case CONFIG_AUTOMAX:
-			if (ntokens >= 2) {
-				sys_automax = 1 << max(atoi(tokens[1]), 10);
+			if (ntokens >= 2)
+			    sys_automax = 1 << max(atoi(tokens[1]), 10);
+			break;
+
+#ifdef PUBKEY
+		    case CONFIG_KEYSDIR:
+			if (ntokens < 2) {
+			    msyslog(LOG_ERR,
+				"Keys directory name required");
+			    break;
+			}
+			crypto_config(CRYPTO_CONF_KEYS, tokens[1]);
+			break;
+
+		    case CONFIG_CRYPTO:
+			crypto_enable = 1;
+			for (i = 2; i < ntokens; i++) {
+			    switch (matchkey(tokens[i],
+				crypto_keywords)) {
+
+			    case CONF_CRYPTO_FLAGS:
+				    crypto_config(CRYPTO_CONF_FLAGS,
+					tokens[i++]);
+
+			    case CONF_CRYPTO_DH:
+				    crypto_config(CRYPTO_CONF_DH,
+					tokens[i++]);
+				    break;
+
+			    case CONF_CRYPTO_PRIVATEKEY:
+				    crypto_config(CRYPTO_CONF_PRIV,
+					tokens[i++]);
+				    break;
+
+			    case CONF_CRYPTO_PUBLICKEY:
+				    crypto_config(CRYPTO_CONF_PUBL,
+					tokens[i++]);
+				    break;
+			    }
 			}
 			break;
+#endif /* PUBKEY */
+#endif /* AUTOKEY */
 
 		    case CONFIG_RESTRICT:
 			if (ntokens < 2) {
@@ -1310,7 +1433,7 @@ getconfig(
 
 		    case CONFIG_TRUSTEDKEY:
 			for (i = 1; i < ntokens; i++) {
-				u_long tkey;
+				keyid_t tkey;
 
 				tkey = atol(tokens[i]);
 				if (tkey == 0) {
@@ -1325,7 +1448,7 @@ getconfig(
 
 		    case CONFIG_REQUESTKEY:
 			if (ntokens >= 2) {
-				u_long rkey;
+				keyid_t rkey;
 
 				if (!atouint(tokens[1], &rkey)) {
 					msyslog(LOG_ERR,
@@ -1339,7 +1462,7 @@ getconfig(
 #ifdef DEBUG
 					if (debug > 3)
 					    printf(
-						    "set info_auth_key to %lu\n", rkey);
+						    "set info_auth_key to %08x\n", rkey);
 #endif
 					info_auth_keyid = rkey;
 				}
@@ -1348,7 +1471,7 @@ getconfig(
 
 		    case CONFIG_CONTROLKEY:
 			if (ntokens >= 2) {
-				u_long ckey;
+				keyid_t ckey;
 
 				ckey = atol(tokens[1]);
 				if (ckey == 0) {
@@ -1558,15 +1681,14 @@ getconfig(
 			 */
 			if (!errflg) {
 				refclock_control(&peeraddr, &clock_stat,
-						 (struct refclockstat *)0);
+				    (struct refclockstat *)0);
 			}
 #endif
 			break;
 
 		    case CONFIG_STATSDIR:
-			if (ntokens >= 2) {
+			if (ntokens >= 2)
 				stats_config(STATS_STATSDIR,tokens[1]);
-			}
 			break;
 
 		    case CONFIG_STATISTICS:
@@ -1808,6 +1930,7 @@ getconfig(
 		 */
 		do_resolve_internal();
 	}
+	ntp_res_send(0, 0, inet_addr("127.0.0.1"), 0);	/* HMS: Testing... */
 }
 
 
@@ -2167,7 +2290,8 @@ save_resolve(
 	int maxpoll,
 	int flags,
 	int ttl,
-	u_long keyid
+	keyid_t keyid,
+	u_char *keystr
 	)
 {
 #ifndef SYS_VXWORKS
@@ -2208,8 +2332,14 @@ save_resolve(
 	}
 #endif
 
-	(void) fprintf(res_fp, "%s %d %d %d %d %d %d %lu\n", name, mode,
-			   version, minpoll, maxpoll, flags, ttl, keyid);
+	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %08x %s\n", name,
+	    mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("config: %s %d %d %d %d %d %d %08x %s\n", name, mode,
+		    version, minpoll, maxpoll, flags, ttl, keyid, keystr);
+#endif
+
 #else  /* SYS_VXWORKS */
 	/* save resolve info to a struct */
 #endif /* SYS_VXWORKS */
@@ -2326,10 +2456,10 @@ do_resolve_internal(void)
 		 * async io information causes it to process requests from
 		 * all file decriptor causing a race between the NTP daemon
 		 * and the resolver. which then eats data when it wins 8-(.
-		 * It is absolutly necessary to kill ane io associations
-		 * shared with the NTP daemon. I currently don't want
+		 * It is absolutly necessary to kill any IO associations
+		 * shared with the NTP daemon.
 		 *
-		 * we also block SIGIO (currently no portes means to
+		 * We also block SIGIO (currently no ports means to
 		 * disable the signal handle for IO).
 		 *
 		 * Thanks to wgstuken@informatik.uni-erlangen.de to notice
