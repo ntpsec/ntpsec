@@ -189,6 +189,19 @@ void init_winnt_time(void) {
 			(float) (units_per_tick / 10));
 	msyslog(LOG_INFO, "Adjustment rate %5.3f ppm/s", ppm_per_adjust_unit);
 #endif
+
+    /*++++ Gerhard Junker
+     * see Platform SDK for QueryPerformanceCounter
+     * On a multiprocessor machine, it should not matter which processor is called. 
+     * However, you can get different results on different processors due to bugs in the BIOS or the HAL. 
+     * To specify processor affinity for a thread, use the SetThreadAffinityMask function. 
+     * ... we will hope, the apc routine will run on the same processor
+     */
+
+    SetThreadAffinityMask(GetCurrentThread(), 1L);
+
+    /*---- Gerhard Junker */
+
 }
 
 
