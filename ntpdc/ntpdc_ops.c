@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <stddef.h>
 
 #include "ntpdc.h"
 #include "ntp_control.h"
@@ -307,7 +308,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_peer_list)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_peer_list) - ALT_LONG))
+	    !checkitemsize(itemsize, v4sizeof(struct info_peer_list)))
 	    return;
 
 	while (items > 0) {
@@ -397,8 +398,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_peer_summary)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_peer_summary) -
-	    ALT_2ADDR_LONG))
+	    !checkitemsize(itemsize, v4sizeof(struct info_peer_summary)))
 		return;
 
 	(void) fprintf(fp,
@@ -644,7 +644,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct info_peer_list);
 	else
-		sendsize = sizeof(struct info_peer_list) - ALT_LONG;
+		sendsize = v4sizeof(struct info_peer_list);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
 		if (pcmd->argval[qitems].netnum.ss_family == AF_INET) {
@@ -681,7 +681,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_peer)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_peer) - ALT_2ADDR_LONG))
+	    !checkitemsize(itemsize, v4sizeof(struct info_peer)))
 	    return;
 
 	while (items-- > 0) {
@@ -716,7 +716,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct info_peer_list);
 	else
-		sendsize = sizeof(struct info_peer_list) - ALT_LONG;
+		sendsize = v4sizeof(struct info_peer_list);
 
 	memset((char *)plist, 0, sizeof(struct info_peer_list) * min(MAXARGS, 4));
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
@@ -755,8 +755,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_peer_stats)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_peer_stats) -
-	    ALT_2ADDR_INT))
+	    !checkitemsize(itemsize, v4sizeof(struct info_peer_stats)))
 	    return;
 
 	while (items-- > 0) {
@@ -917,7 +916,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_sys)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_sys) - ALT_LONG))
+	    !checkitemsize(itemsize, v4sizeof(struct info_sys)))
 	    return;
 
 	memset((char *)&peeraddr, 0, sizeof(peeraddr));
@@ -1298,7 +1297,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_peer);
 	else
-		sendsize = sizeof(struct conf_peer) - ALT_LONG;
+		sendsize = v4sizeof(struct conf_peer);
 
 	items = pcmd->nargs;
 
@@ -1426,7 +1425,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_unpeer);
 	else
-		sendsize = sizeof(struct conf_unpeer) - ALT_INT;
+		sendsize = v4sizeof(struct conf_unpeer);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
 		if (pcmd->argval[0].netnum.ss_family == AF_INET) {
@@ -1622,8 +1621,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_restrict)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_restrict) -
-	    ALT_2ADDR_LONG))
+	    !checkitemsize(itemsize, v4sizeof(struct info_restrict)))
 	    return;
 
 	(void) fprintf(fp,
@@ -1774,7 +1772,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_restrict);
 	else
-		sendsize = sizeof(struct conf_restrict) - ALT_2ADDR_INT;
+		sendsize = v4sizeof(struct conf_restrict);
 
 	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
 		cres.addr = GET_INADDR(pcmd->argval[0].netnum);
@@ -1908,7 +1906,7 @@ again:
 	    return;
 
 	if (itemsize == sizeof(struct info_monitor_1) ||
-	    itemsize == sizeof(struct info_monitor_1) - ALT_2ADDR_LONG) {
+	    itemsize == v4sizeof(struct info_monitor_1)) {
 		struct info_monitor_1 *ml = (struct info_monitor_1 *) struct_star;
 
 		(void) fprintf(fp,
@@ -1951,7 +1949,7 @@ again:
 			items--;
 		}
 	} else if (itemsize == sizeof(struct info_monitor) ||
-	    itemsize == sizeof(struct info_monitor) - ALT_LONG) {
+	    itemsize == v4sizeof(struct info_monitor)) {
 		struct info_monitor *ml = (struct info_monitor *) struct_star;
 
 		(void) fprintf(fp,
@@ -2115,7 +2113,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_unpeer);
 	else
-		sendsize = sizeof(struct conf_unpeer) - ALT_INT;
+		sendsize = v4sizeof(struct conf_unpeer);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
 		if (pcmd->argval[qitems].netnum.ss_family == AF_INET) {
@@ -2335,7 +2333,7 @@ again:
 	    return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_trap)) &&
-	    !checkitemsize(itemsize, sizeof(struct info_trap) - ALT_2ADDR_INT))
+	    !checkitemsize(itemsize, v4sizeof(struct info_trap)))
 	    return;
 
 	for (i = 0; i < items; i++ ) {
@@ -2429,7 +2427,7 @@ again:
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_trap);
 	else
-		sendsize = sizeof(struct conf_trap) - ALT_2ADDR_INT;
+		sendsize = v4sizeof(struct conf_trap);
 
 	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
 		ctrap.trap_address = GET_INADDR(pcmd->argval[0].netnum);

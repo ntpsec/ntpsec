@@ -15,6 +15,7 @@
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
+#include <stddef.h>
 #include <signal.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -38,6 +39,8 @@
  * keep us friendly with older implementations.  A little ugly.
  */
 static int client_v6_capable = 0;   /* the client can handle longer messages */
+
+#define v6sizeof(type)	(client_v6_capable ? sizeof(type) : v4sizeof(type))
 
 struct req_proc {
 	short request_code;	/* defined request code */
@@ -113,9 +116,9 @@ static	void	get_clkbug_info P((struct sockaddr_storage *, struct interface *, st
 static	struct req_proc ntp_codes[] = {
 	{ REQ_PEER_LIST,	NOAUTH,	0, 0,	peer_list },
 	{ REQ_PEER_LIST_SUM,	NOAUTH,	0, 0,	peer_list_sum },
-	{ REQ_PEER_INFO,    NOAUTH, (sizeof(struct info_peer_list) - ALT_LONG),
+	{ REQ_PEER_INFO,    NOAUTH, v4sizeof(struct info_peer_list),
 				sizeof(struct info_peer_list), peer_info},
-	{ REQ_PEER_STATS,   NOAUTH, (sizeof(struct info_peer_list) - ALT_LONG),
+	{ REQ_PEER_STATS,   NOAUTH, v4sizeof(struct info_peer_list),
 				sizeof(struct info_peer_list), peer_stats},
 	{ REQ_SYS_INFO,		NOAUTH,	0, 0,	sys_info },
 	{ REQ_SYS_STATS,	NOAUTH,	0, 0,	sys_stats },
@@ -123,34 +126,34 @@ static	struct req_proc ntp_codes[] = {
 	{ REQ_MEM_STATS,	NOAUTH,	0, 0,	mem_stats },
 	{ REQ_LOOP_INFO,	NOAUTH,	0, 0,	loop_info },
 	{ REQ_TIMER_STATS,	NOAUTH,	0, 0,	timer_stats },
-	{ REQ_CONFIG,	    AUTH, (sizeof(struct conf_peer) - ALT_LONG),
+	{ REQ_CONFIG,	    AUTH, v4sizeof(struct conf_peer),
 				sizeof(struct conf_peer), do_conf },
-	{ REQ_UNCONFIG,	    AUTH, (sizeof(struct conf_unpeer) - ALT_INT),
+	{ REQ_UNCONFIG,	    AUTH, v4sizeof(struct conf_unpeer),
 				sizeof(struct conf_unpeer), do_unconf },
 	{ REQ_SET_SYS_FLAG, AUTH, sizeof(struct conf_sys_flags),
 				sizeof(struct conf_sys_flags), set_sys_flag },
 	{ REQ_CLR_SYS_FLAG, AUTH, sizeof(struct conf_sys_flags), 
 				sizeof(struct conf_sys_flags),  clr_sys_flag },
 	{ REQ_GET_RESTRICT,	NOAUTH,	0, 0,	list_restrict },
-	{ REQ_RESADDFLAGS, AUTH, (sizeof(struct conf_restrict) - ALT_LONG),
+	{ REQ_RESADDFLAGS, AUTH, v4sizeof(struct conf_restrict),
 				sizeof(struct conf_restrict), do_resaddflags },
-	{ REQ_RESSUBFLAGS, AUTH, (sizeof(struct conf_restrict) - ALT_LONG),
+	{ REQ_RESSUBFLAGS, AUTH, v4sizeof(struct conf_restrict),
 				sizeof(struct conf_restrict), do_ressubflags },
-	{ REQ_UNRESTRICT, AUTH, (sizeof(struct conf_restrict) - ALT_LONG),
+	{ REQ_UNRESTRICT, AUTH, v4sizeof(struct conf_restrict),
 				sizeof(struct conf_restrict), do_unrestrict },
 	{ REQ_MON_GETLIST,	NOAUTH,	0, 0,	mon_getlist_0 },
 	{ REQ_MON_GETLIST_1,	NOAUTH,	0, 0,	mon_getlist_1 },
 	{ REQ_RESET_STATS, AUTH, sizeof(struct reset_flags), 0, reset_stats },
-	{ REQ_RESET_PEER,  AUTH, (sizeof(struct conf_unpeer) - ALT_INT),
+	{ REQ_RESET_PEER,  AUTH, v4sizeof(struct conf_unpeer),
 				sizeof(struct conf_unpeer), reset_peer },
 	{ REQ_REREAD_KEYS,	AUTH,	0, 0,	do_key_reread },
 	{ REQ_TRUSTKEY,   AUTH, sizeof(u_long), sizeof(u_long), trust_key },
 	{ REQ_UNTRUSTKEY, AUTH, sizeof(u_long), sizeof(u_long), untrust_key },
 	{ REQ_AUTHINFO,		NOAUTH,	0, 0,	get_auth_info },
 	{ REQ_TRAPS,		NOAUTH, 0, 0,	req_get_traps },
-	{ REQ_ADD_TRAP,	AUTH, (sizeof(struct conf_trap) - ALT_LONG),
+	{ REQ_ADD_TRAP,	AUTH, v4sizeof(struct conf_trap),
 				sizeof(struct conf_trap), req_set_trap },
-	{ REQ_CLR_TRAP,	AUTH, (sizeof(struct conf_trap) - ALT_LONG),
+	{ REQ_CLR_TRAP,	AUTH, v4sizeof(struct conf_trap),
 				sizeof(struct conf_trap), req_clr_trap },
 	{ REQ_REQUEST_KEY, AUTH, sizeof(u_long), sizeof(u_long), 
 				set_request_keyid },
@@ -644,14 +647,9 @@ peer_list(
 	register struct peer *pp;
 	register int i;
 	register int skip = 0;
-	int offset;
 
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_LONG;
 	ip = (struct info_peer_list *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_peer_list) - offset);
+	    v6sizeof(struct info_peer_list));
 	for (i = 0; i < HASH_SIZE && ip != 0; i++) {
 		pp = peer_hash[i];
 		while (pp != 0 && ip != 0) {
@@ -707,18 +705,13 @@ peer_list_sum(
 	register int i;
 	l_fp ltmp;
 	register int skip;
-	int offset;
 
 #ifdef DEBUG
 	if (debug > 2)
 	    printf("wants peer list summary\n");
 #endif
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_2ADDR_LONG;
 	ips = (struct info_peer_summary *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_peer_summary) - offset);
+	    v6sizeof(struct info_peer_summary));
 	for (i = 0; i < HASH_SIZE && ips != 0; i++) {
 		pp = peer_hash[i];
 		while (pp != 0 && ips != 0) {
@@ -808,7 +801,6 @@ peer_info (
 	register struct info_peer *ip;
 	register int items;
 	register int i, j;
-	int offset;
 	struct sockaddr_storage addr;
 	extern struct peer *sys_peer;
 	l_fp ltmp;
@@ -817,12 +809,8 @@ peer_info (
 	items = INFO_NITEMS(inpkt->err_nitems);
 	ipl = (struct info_peer_list *) inpkt->data;
 
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_2ADDR_LONG;
 	ip = (struct info_peer *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_peer) - offset);
+	    v6sizeof(struct info_peer));
 	while (items-- > 0 && ip != 0) {
 		memset((char *)&addr, 0, sizeof(addr));
 		NSRCPORT(&addr) = ipl->port;
@@ -937,19 +925,14 @@ peer_stats (
 	register struct peer *pp;
 	register struct info_peer_stats *ip;
 	register int items;
-	int offset;
 	struct sockaddr_storage addr;
 	extern struct peer *sys_peer;
 
 	printf("peer_stats: called\n");
 	items = INFO_NITEMS(inpkt->err_nitems);
 	ipl = (struct info_peer_list *) inpkt->data;
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_2ADDR_LONG;
 	ip = (struct info_peer_stats *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_peer_stats) - offset);
+	    v6sizeof(struct info_peer_stats));
 	while (items-- > 0 && ip != 0) {
 		memset((char *)&addr, 0, sizeof(addr));
 		NSRCPORT(&addr) = ipl->port;
@@ -1036,7 +1019,6 @@ sys_info(
 	)
 {
 	register struct info_sys *is;
-	int offset;
 
 	/*
 	 * Importations from the protocol module
@@ -1056,12 +1038,8 @@ sys_info(
 	extern double clock_stability;
 	extern double sys_jitter;
 
-	if (client_v6_capable)
-		offset = 0;
-	else 
-		offset = ALT_LONG;
 	is = (struct info_sys *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_sys) - offset);
+	    v6sizeof(struct info_sys));
 
 	is->peer = 0;
 	is->peer_mode = 0;
@@ -1692,19 +1670,14 @@ list_restrict(
 	register struct info_restrict *ir;
 	register struct restrictlist *rl;
 	register struct restrictlist6 *rl6;
-	int offset;
 
 #ifdef DEBUG
 	if (debug > 2)
 	    printf("wants restrict list summary\n");
 #endif
-	if (client_v6_capable) 
-		offset = 0;
-	else
-		offset = ALT_2ADDR_LONG;	
 
 	ir = (struct info_restrict *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_restrict) - offset);
+	    v6sizeof(struct info_restrict));
 	
 	for (rl = restrictlist; rl != 0 && ir != 0; rl = rl->next) {
 		ir->addr = htonl(rl->addr);
@@ -1867,7 +1840,6 @@ mon_getlist_0(
 {
 	register struct info_monitor *im;
 	register struct mon_data *md;
-	int offset;
 	extern struct mon_data mon_mru_list;
 	extern int mon_enabled;
 
@@ -1879,12 +1851,8 @@ mon_getlist_0(
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 		return;
 	}
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_LONG;
 	im = (struct info_monitor *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_monitor) - offset);
+	    v6sizeof(struct info_monitor));
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
 		im->lasttime = htonl((u_int32)md->avg_interval);
@@ -1921,7 +1889,6 @@ mon_getlist_1(
 {
 	register struct info_monitor_1 *im;
 	register struct mon_data *md;
-	int offset;
 	extern struct mon_data mon_mru_list;
 	extern int mon_enabled;
 
@@ -1933,12 +1900,8 @@ mon_getlist_1(
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 		return;
 	}
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_2ADDR_LONG;
 	im = (struct info_monitor_1 *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_monitor_1) - offset);
+	    v6sizeof(struct info_monitor_1));
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
 		im->lasttime = htonl((u_int32)md->avg_interval);
@@ -2257,7 +2220,6 @@ req_get_traps(
 	register struct info_trap *it;
 	register struct ctl_trap *tr;
 	register int i;
-	int offset;
 
 	/*
 	 * Imported from the control module
@@ -2270,12 +2232,8 @@ req_get_traps(
 		return;
 	}
 
-	if (client_v6_capable)
-		offset = 0;
-	else
-		offset = ALT_2ADDR_INT;		
 	it = (struct info_trap *)prepare_pkt(srcadr, inter, inpkt,
-	    sizeof(struct info_trap) - offset);
+	    v6sizeof(struct info_trap));
 
 	for (i = 0, tr = ctl_trap; i < CTL_MAXTRAPS; i++, tr++) {
 		if (tr->tr_flags & TRAP_INUSE) {

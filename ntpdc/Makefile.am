@@ -1,9 +1,12 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpdc
+noinst_PROGRAMS = ntpdc-layout
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD =	version.o ../libntp/libntp.a @READLINE_LIBS@
+# ntpdc-layout doesn't need any additional libraries at all
+ntpdc_layout_LDADD =
 DISTCLEANFILES = .version version.c
 noinst_HEADERS = ntpdc.h
 #EXTRA_DIST = ntpdc.mak
