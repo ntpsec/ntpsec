@@ -465,7 +465,7 @@ ntpdmain(
 	init_winnt_time();
 
 #endif
-//	getstartup(argc, argv); /* startup configuration, may set debug */
+	getstartup(argc, argv); /* startup configuration, may set debug */
 
 	if (debug)
 	    printf("%s\n", Version);
