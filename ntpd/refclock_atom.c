@@ -200,7 +200,7 @@ atom_shutdown(
 	if (fddev > 0)
 		close(fddev);
 	if (fdpps > 0)
-		time_destroy(fdpps);
+		time_pps_destroy(fdpps);
 	fdpps = 0;
 #endif /* HAVE_PPSAPI */
 	if (pps_peer == peer)

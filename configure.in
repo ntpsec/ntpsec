@@ -5,8 +5,8 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99k7)
-AC_PREREQ(2.14)
+AM_INIT_AUTOMAKE(ntp, 4.0.99k8)
+AC_PREREQ(2.49)
 
 ac_cv_var_oncore_ok=no
 
@@ -15,6 +15,7 @@ iCFLAGS="$CFLAGS"
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
+AC_PROG_CC_STDC
 AC_PROG_CPP
 
 case "$target" in
@@ -437,7 +438,7 @@ if test $ac_cv_struct_ntptimeval = yes; then
   AC_DEFINE(HAVE_STRUCT_NTPTIMEVAL, 1, [Do we have struct ntptimeval?])
 fi
 
-AC_CHECK_MEMBERS((struct ntptimeval.time.tv_nsec), , ,[
+AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,[
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
@@ -453,12 +454,12 @@ AC_CHECK_MEMBERS((struct ntptimeval.time.tv_nsec), , ,[
 # endif
 #endif])
 
-AC_CHECK_MEMBERS((struct audio_info.monitor_gain,
+AC_CHECK_MEMBERS([struct audio_info.monitor_gain,
     struct audio_info.output_muted,
     struct audio_info.blocksize,
     struct audio_info.hiwat,
     struct audio_info.lowat,
-    struct audio_info.mode), , ,
+    struct audio_info.mode], , ,
 [#ifdef HAVE_SUN_AUDIO_H
 #include <sun/audio.h>
 #endif
@@ -510,7 +511,7 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_TYPES((s_char))
+AC_CHECK_TYPES([s_char])
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
  *yes)
     # We have a typedef for s_char.  Might as well believe it...
@@ -552,14 +553,15 @@ case "$target" in
 esac
 AC_CHECK_FUNCS(daemon)
 AC_CHECK_FUNCS(finite, ,
-  AC_CHECK_FUNCS(isfinite, ,
-    AC_MSG_CHECKING(for isfinite with <math.h>)
+  [AC_CHECK_FUNCS(isfinite, ,
+    [AC_MSG_CHECKING(for isfinite with <math.h>)
     _libs=$LIBS
     LIBS="$LIBS -lm"
     AC_TRY_LINK([#include <math.h>], [float f = 0.0; isfinite(f)],
       [AC_MSG_RESULT(yes)
-      AC_DEFINE(HAVE_ISFINITE)])
-    LIBS=$_libs))
+      AC_DEFINE(HAVE_ISFINITE)],
+      AC_MSG_RESULT(no))
+    LIBS=$_libs])])
 AC_CHECK_FUNCS(getbootfile getdtablesize getrusage gettimeofday)
 case "$target" in
  *-pc-cygwin*)
@@ -1414,11 +1416,18 @@ AC_MSG_RESULT($ntp_ok)
 # there is NO way that I can tell to tell if a given OS is using timespec or
 # timeval so just set it here for the one case that is KNOWN to use timespec.
 
-case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
- *yes*)
-    AC_DEFINE(HAVE_PPSAPI)
-    ac_cv_var_oncore_ok=yes
-    AC_DEFINE(HAVE_TIMESPEC)
+# The PPSAPI headers use "inline", so we must have a STDC compiler to use
+# the PPSAIP.
+
+case "$ANSI2KNR" in
+ '')
+    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
+     *yes*)
+	AC_DEFINE(HAVE_PPSAPI)
+	ac_cv_var_oncore_ok=yes
+	AC_DEFINE(HAVE_TIMESPEC)
+	;;
+    esac
     ;;
 esac
 
