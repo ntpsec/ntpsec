@@ -288,7 +288,7 @@ ulink_poll(
 	char pollchar;
 
 	pp = peer->procptr;
-	up = (struct wwvbunit *)pp->unitptr;
+	up = (struct ulinkunit *)pp->unitptr;
 	pollchar = 'T';
 	if (write(pp->io.fd, &pollchar, 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);

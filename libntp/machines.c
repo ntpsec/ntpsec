@@ -167,7 +167,9 @@ ntp_set_tod(
 #endif /* HAVE_SETTIMEOFDAY */
 #ifdef HAVE_STIME
 	{
-		rc = stime(&tvp->tv_sec); /* lie as bad as SysVR4 */
+		long tp = tvp->tv_sec;
+
+		rc = stime(&tp); /* lie as bad as SysVR4 */
 		if (!rc)
 		{
 			set_tod_using = "stime";

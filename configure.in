@@ -572,6 +572,12 @@ case "$target" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
     ;;
+ alpha*-dec-osf5*)
+    # mlockall is there, as a #define calling memlk via <sys/mman.h>
+    # Not easy to test for - cheat.
+    AC_CHECK_FUNCS(memlk, [ac_cv_func_mlockall='yes'])
+    AC_CHECK_FUNCS(mlockall)
+    ;;
  *) AC_CHECK_FUNCS(mlockall)
     ;;
 esac

@@ -227,15 +227,17 @@ catch_danger(int signo)
 static void
 set_process_priority(void)
 {
+	int done = 0;
+
 #ifdef SYS_WINNT
 	if (!SetPriorityClass(GetCurrentProcess(), (DWORD) REALTIME_PRIORITY_CLASS))
-	{
 		msyslog(LOG_ERR, "SetPriorityClass: %m");
-		return;
-	}
+	else
+		++done;
 #else  /* not SYS_WINNT */
 # if defined(HAVE_SCHED_SETSCHEDULER)
-	{
+
+	if (!done) {
 		extern int config_priority_override, config_priority;
 		int pmax, pmin;
 		struct sched_param sched;
@@ -252,43 +254,60 @@ set_process_priority(void)
 				sched.sched_priority = config_priority;
 		}
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
-		{
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
-			return;
-		}
+		else
+			++done;
 	}
-# else /* not HAVE_SCHED_SETSCHEDULER */
-#  if defined(HAVE_RTPRIO)
-#	ifdef RTP_SET
-	{
+# endif /* HAVE_SCHED_SETSCHEDULER */
+# if defined(HAVE_RTPRIO)
+#  ifdef RTP_SET
+	if (!done) {
 		struct rtprio srtp;
 
 		srtp.type = RTP_PRIO_REALTIME;	/* was: RTP_PRIO_NORMAL */
 		srtp.prio = 0;		/* 0 (hi) -> RTP_PRIO_MAX (31,lo) */
 
-		if (rtprio(RTP_SET, getpid(), &srtp) < 0) {
+		if (rtprio(RTP_SET, getpid(), &srtp) < 0)
 			msyslog(LOG_ERR, "rtprio() error: %m");
-			return;
-		}
+		else
+			++done;
 	}
-#	else /* not RTP_SET */
-	if (rtprio(0, 120) < 0) {
-		msyslog(LOG_ERR, "rtprio() error: %m");
-		return;
+#  else /* not RTP_SET */
+	if (!done) {
+		if (rtprio(0, 120) < 0)
+			msyslog(LOG_ERR, "rtprio() error: %m");
+		else
+			++done;
 	}
-#	endif /* not RTP_SET */
-#  else  /* not HAVE_RTPRIO */
-#	if defined(NTPD_PRIO) && NTPD_PRIO != 0
-#	 ifdef HAVE_ATT_NICE
-	nice (NTPD_PRIO);
-#	 endif /* HAVE_ATT_NICE */
-#	 ifdef HAVE_BSD_NICE
-	(void) setpriority(PRIO_PROCESS, 0, NTPD_PRIO);
-#	 endif /* HAVE_BSD_NICE */
-#	endif /* NTPD_PRIO && NTPD_PRIO != 0 */
-#  endif /* not HAVE_RTPRIO */
-# endif /* not HAVE_SCHED_SETSCHEDULER */
+#  endif /* not RTP_SET */
+# endif  /* HAVE_RTPRIO */
+# if defined(NTPD_PRIO) && NTPD_PRIO != 0
+#  ifdef HAVE_ATT_NICE
+	if (!done) {
+		nice (NTPD_PRIO);
+		/*
+		** HMS: One of my AT&T books says nice() returns the new
+		** nice value minus NZERO, or -1 (and errno gets set).
+		** If we can verify this behavioe *always*, we can do some
+		** better checking and logging here.
+		*/
+		++done;
+	}
+#  endif /* HAVE_ATT_NICE */
+#  ifdef HAVE_BSD_NICE
+	if (!done) {
+		errno = 0;
+		(void) setpriority(PRIO_PROCESS, 0, NTPD_PRIO);
+		if (errno)
+			msyslog(LOG_ERR, "setpriority() error: %m");
+		else
+			++done;
+	}
+#  endif /* HAVE_BSD_NICE */
+# endif /* NTPD_PRIO && NTPD_PRIO != 0 */
 #endif /* not SYS_WINNT */
+	if (!done)
+		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 
 /*

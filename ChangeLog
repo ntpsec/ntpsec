@@ -1,5 +1,14 @@
 1999-11-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (HAVE_MLOCKALL): Deal with dec-osf5 realities
+	* ntpd/refclock_ulink.c (ulink_poll): Fix cast.
+	* libntp/machines.c (ntp_set_tod): Use a long* for the argument to
+	stime().
+	Reported by: Tom Smith <smith@cag.lkg.dec.com>
+
+	* ntpd/ntpd.c (set_process_priority): Use whatever we have until
+	something works.
+
 	* ntpd/ntp_loopfilter.c: Keep clock_frequency changes in a temp
 	variable so we can record it to loopstats (near as HMS can tell).
 	From: Dave Mills <mills@udel.edu>
