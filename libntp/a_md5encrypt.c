@@ -8,15 +8,14 @@
  * www.rsa.com.
  */
 
-/* Disable the openssl md5 includes because it clash with ours. */
-#define NO_MD5
-#define OPENSSL_NO_MD5
-
 #include "ntp_machine.h"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+/* Disable the openssl md5 includes, because they'd clash with ours. */
+#undef OPENSSL
 
 #include "ntp_machine.h"
 #include <stdio.h>
