@@ -41,7 +41,7 @@ void uninit_io_completion_port();
  */
 void ServiceControl(DWORD dwCtrlCode);
 void GetArgs(int *, char ***, char ***);
-int ntpdmain(int, char *[]);
+int main(int, char *[]);
 //int main(int, char *[], char *[]); /* From ns_main.c */
 
 /*
@@ -82,12 +82,12 @@ int NTmain()
 
 	if (foreground) {
 		/* run in console window */
-		exit(ntpdmain(argc, argv));
+		exit(main(argc, argv));
 	} else {
 		/* Start up as service */
 
 		SERVICE_TABLE_ENTRY dispatchTable[] = {
-			{ TEXT(NTP_DISPLAY_NAME), (LPSERVICE_MAIN_FUNCTION)ntpdmain },
+			{ TEXT(NTP_DISPLAY_NAME), (LPSERVICE_MAIN_FUNCTION)main },
 			{ NULL, NULL }
 		};
 

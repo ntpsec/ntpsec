@@ -1472,11 +1472,14 @@ help(
 		    cmdsort[n++] = xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
+#ifndef SYS_WINNT
 		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
+#else
+		qsort((void *)cmdsort, (size_t)n, sizeof(char *), helpsort);
+#endif
 #else
 		qsort((char *)cmdsort, (size_t)n, sizeof(char *), helpsort);
 #endif
-
 		maxlength = 0;
 		for (i = 0; i < n; i++) {
 			length[i] = strlen(cmdsort[i]);

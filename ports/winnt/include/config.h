@@ -3,13 +3,21 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#if defined(_MSC_VER)
-/* VS V7 (aka .NET) has the IPv6 structures */
-#if _MSC_VER >= 1300
+/*
+ * IPv6 requirements
+ */
+/*
+ * For VS.NET most of the IPv6 types and structures are defined
+ */
+#if _MSC_VER > 1200
 #define HAVE_STRUCT_SOCKADDR_STORAGE
-#define ISC_PLATFORM_HAVEIN6PKTINFO
 #define ISC_PLATFORM_HAVEIPV6
+#define ISC_PLATFORM_HAVEIN6PKTINFO
 #endif
+
+#define ISC_PLATFORM_NEEDIN6ADDRANY
+#define HAVE_SOCKADDR_IN6
+
 /*
  * An attempt to cut down the number of warnings generated during compilation.
  * All of these should be benign to disable.
@@ -18,7 +26,6 @@
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
 #pragma warning(disable: 4101) /* unreferenced local variable */
 #pragma warning(disable : 4127)
-#endif
 
 /*
  * Windows NT Configuration Values
@@ -122,24 +129,11 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_MKTIME
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
-# define HAVE_SOCKADDR_IN6
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
 
-#define ISC_PLATFORM_NEEDIN6ADDRANY
-
 # define NEED_S_CHAR_TYPEDEF
 
-/*
- * For VS.NET most of the IPv6 types are defined
- */
-#if _MSC_VER > 1200
-#define HAVE_STRUCT_SOCKADDR_STORAGE
-#define ISC_PLATFORM_HAVEIPV6
-#define ISC_PLATFORM_HAVEIN6PKTINFO
-#else
-#define ISC_PLATFORM_NEEDIN6ADDRANY
-#endif
 # define USE_PROTOTYPES 		/* for ntp_types.h */														
 
 #define ULONG_CONST(a) a ## UL
