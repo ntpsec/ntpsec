@@ -1912,10 +1912,7 @@ input_handler(
 					if (buflen < 0)
 					{
 						freerecvbuf(rb);
-						if (errno != EINTR) {
-							netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
-							break;
-						}
+						break;
 					}
 					if(buflen == 0)
 						totzeroreads++;
@@ -2087,10 +2084,6 @@ input_handler(
 		/* Check more interfaces */
 		}
 	}
-select_again:;
-	/*
-	 * Done everything from that select.
-	 */
 
 	/*
 	 * If nothing to do, just return.
