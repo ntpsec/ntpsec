@@ -490,7 +490,7 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
 				stoa(&entry->peer_store));
 #endif
-		entry->ce_name = emalloc(MAXHOSTNAMELEN);
+		entry->ce_name = (char *)emalloc(MAXHOSTNAMELEN);
 		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
 				   SOCKLEN(&entry->peer_store),
 				   (char *)&entry->ce_name, MAXHOSTNAMELEN,

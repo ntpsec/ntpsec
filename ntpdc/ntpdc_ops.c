@@ -293,7 +293,7 @@ peerlist(
 
 again:
 	res = doquery(impl_ver, REQ_PEER_LIST, 0, 0, 0, (char *)NULL, &items,
-		      &itemsize, (void *)&plist, 0, 
+		      &itemsize, (char **)&plist, 0, 
 		      sizeof(struct info_peer_list));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -383,7 +383,7 @@ dopeers(
 
 again:
 	res = doquery(impl_ver, REQ_PEER_LIST_SUM, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&plist, 0, 
+		      &items, &itemsize, (char **)&plist, 0, 
 		      sizeof(struct info_peer_summary));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -667,7 +667,7 @@ again:
 
 	res = doquery(impl_ver, REQ_PEER_INFO, 0, qitems,
 		      sendsize, (char *)plist, &items,
-		      &itemsize, (void *)&pp, 0, sizeof(struct info_peer));
+		      &itemsize, (char **)&pp, 0, sizeof(struct info_peer));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
 		impl_ver = IMPL_XNTPD_OLD;
@@ -740,7 +740,7 @@ again:
 
 	res = doquery(impl_ver, REQ_PEER_STATS, 0, qitems,
 		      sendsize, (char *)plist, &items,
-		      &itemsize, (void *)&pp, 0, 
+		      &itemsize, (char **)&pp, 0, 
 		      sizeof(struct info_peer_stats));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -838,7 +838,7 @@ loopinfo(
 
 again:
 	res = doquery(impl_ver, REQ_LOOP_INFO, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&il, 0, 
+		      &items, &itemsize, (char **)&il, 0, 
 		      sizeof(struct info_loop));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -901,7 +901,7 @@ sysinfo(
 
 again:
 	res = doquery(impl_ver, REQ_SYS_INFO, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&is, 0,
+		      &items, &itemsize, (char **)&is, 0,
 		      sizeof(struct info_sys));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -998,7 +998,7 @@ sysstats(
 
 again:
 	res = doquery(impl_ver, REQ_SYS_STATS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&ss, 0, 
+		      &items, &itemsize, (char **)&ss, 0, 
 		      sizeof(struct info_sys_stats));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -1064,7 +1064,7 @@ iostats(
 
 again:
 	res = doquery(impl_ver, REQ_IO_STATS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&io, 0, 
+		      &items, &itemsize, (char **)&io, 0, 
 		      sizeof(struct info_io_stats));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -1126,7 +1126,7 @@ memstats(
 
 again:
 	res = doquery(impl_ver, REQ_MEM_STATS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&mem, 0, 
+		      &items, &itemsize, (char **)&mem, 0, 
 		      sizeof(struct info_mem_stats));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -1185,7 +1185,7 @@ timerstats(
 
 again:
 	res = doquery(impl_ver, REQ_TIMER_STATS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&tim, 0, 
+		      &items, &itemsize, (char **)&tim, 0, 
 		      sizeof(struct info_timer_stats));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -1606,7 +1606,7 @@ reslist(
 
 again:
 	res = doquery(impl_ver, REQ_GET_RESTRICT, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&rl, 0, 
+		      &items, &itemsize, (char **)&rl, 0, 
 		      sizeof(struct info_restrict));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2260,7 +2260,7 @@ authinfo(
 
 again:
 	res = doquery(impl_ver, REQ_AUTHINFO, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&ia, 0, 
+		      &items, &itemsize, (char **)&ia, 0, 
 		      sizeof(struct info_auth));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2318,7 +2318,7 @@ traps(
 
 again:
 	res = doquery(impl_ver, REQ_TRAPS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&it, 0, 
+		      &items, &itemsize, (char **)&it, 0, 
 		      sizeof(struct info_trap));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2559,7 +2559,7 @@ ctlstats(
 
 again:
 	res = doquery(impl_ver, REQ_GET_CTLSTATS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&ic, 0, 
+		      &items, &itemsize, (char **)&ic, 0, 
 		      sizeof(struct info_control));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2635,7 +2635,7 @@ clockstat(
 again:
 	res = doquery(impl_ver, REQ_GET_CLOCKINFO, 0, qitems,
 		      sizeof(u_int32), (char *)clist, &items,
-		      &itemsize, (void *)&cl, 0, sizeof(struct info_clock));
+		      &itemsize, (char **)&cl, 0, sizeof(struct info_clock));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
 		impl_ver = IMPL_XNTPD_OLD;
@@ -2808,7 +2808,7 @@ clkbug(
 again:
 	res = doquery(impl_ver, REQ_GET_CLKBUGINFO, 0, qitems,
 		      sizeof(u_int32), (char *)clist, &items,
-		      &itemsize, (void *)&cl, 0, sizeof(struct info_clkbug));
+		      &itemsize, (char **)&cl, 0, sizeof(struct info_clkbug));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
 		impl_ver = IMPL_XNTPD_OLD;
@@ -2895,7 +2895,7 @@ kerninfo(
 
 again:
 	res = doquery(impl_ver, REQ_GET_KERNEL, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&ik, 0, 
+		      &items, &itemsize, (char **)&ik, 0, 
 		      sizeof(struct info_kernel));
 
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
