@@ -1,3 +1,17 @@
+1999-07-25  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.94b
+
+	* acconfig.h:
+	* configure.in:
+	* libparse/Makefile.am:
+	* libparse/parse_conf.c:
+	* libparse/clk_varitext.c:
+	* libparse/kclk_varitext.c:
+	* ntpd/refclock_parse.c: VARITEXT parse clock
+	* ntpdate/ntpdate.c: bugfix
+	From: Tony McConnell <tonym@datel-technology.co.uk>
+
 1999-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_syscall.h (ntp_gettime): Make it static

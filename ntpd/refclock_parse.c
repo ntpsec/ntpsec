@@ -48,6 +48,7 @@
  *
  *   - RCC8000 MSF Receiver                                 (MSF)
  *   - WHARTON 400A Series clock			    (DCF)
+ *   - VARITEXT clock					    (MSF)
  */
 
 /*
@@ -771,6 +772,25 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define COMPUTIME_SAMPLES     5
 #define COMPUTIME_KEEP        3
 
+/*
+ * Varitext Radio Clock Receiver
+ */
+#define VARITEXT_FLAGS       0
+#define VARITEXT_ROOTDELAY   0.0
+#define VARITEXT_BASEDELAY   0.0
+#define VARITEXT_ID          "MSF"
+#define VARITEXT_DESCRIPTION "Varitext receiver"
+#define VARITEXT_FORMAT      "Varitext Radio Clock"
+#define VARITEXT_TYPE        DCF_TYPE
+#define VARITEXT_MAXUNSYNC   (60*60)       /* only trust clock for 1 hour */
+#define VARITEXT_SPEED       (B9600)
+#define VARITEXT_CFLAG       (CS7|CREAD|CLOCAL|PARENB|PARODD)
+#define VARITEXT_IFLAG       (IGNPAR|IGNBRK|INPCK) /*|ISTRIP)*/
+#define VARITEXT_OFLAG       0
+#define VARITEXT_LFLAG       0
+#define VARITEXT_SAMPLES     32
+#define VARITEXT_KEEP        20
+
 static struct parse_clockinfo
 {
 	u_long  cl_flags;		/* operation flags (io modes) */
@@ -1174,7 +1194,30 @@ static struct parse_clockinfo
 	0,				/* terminal local flags */
 	5/*?*/,				/* samples for median filter */
 	3/*?*/,				/* samples for median filter to keep */
-	}
+	},
+        {                            /* mode 16 */
+                VARITEXT_FLAGS,
+                NO_POLL,
+                NO_INIT,
+                NO_EVENT,
+                NO_END,
+                NO_MESSAGE,
+                NO_DATA,
+                VARITEXT_ROOTDELAY,
+                VARITEXT_BASEDELAY,
+                VARITEXT_ID,
+                VARITEXT_DESCRIPTION,
+                VARITEXT_FORMAT,
+                VARITEXT_TYPE,
+                VARITEXT_MAXUNSYNC,
+                VARITEXT_SPEED,
+                VARITEXT_CFLAG,
+                VARITEXT_IFLAG,
+                VARITEXT_OFLAG,
+                VARITEXT_LFLAG,
+                VARITEXT_SAMPLES,
+                VARITEXT_KEEP
+        }
 };
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);

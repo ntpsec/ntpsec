@@ -73,6 +73,9 @@
 /* WHARTON 400A Series protocol */
 #undef CLOCK_WHARTON_400A
 
+/* VARITEXT protocol */
+#undef CLOCK_VARITEXT
+
 /* Diems Computime Radio Clock */
 #undef CLOCK_COMPUTIME
 

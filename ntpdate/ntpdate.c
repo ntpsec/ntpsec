@@ -1816,7 +1816,8 @@ l_step_systime(
 	if (debug)
 		return 1;
 #ifdef FORCE_NTPDATE_STEP
-	return step_systime(ts);
+	LFPTOD(ts, dtemp);
+	return step_systime(dtemp);
 #else
 	l_adj_systime(ts);
 	return 1;

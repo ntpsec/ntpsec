@@ -26,6 +26,7 @@ libparse_a_SOURCES = parse.c \
                      clk_hopf6021.c \
 	             clk_computime.c \
 		     clk_wharton.c \
+		     clk_varitext.c \
                      data_mbg.c \
 		     info_trimble.c \
 		     trim_info.c
@@ -41,7 +42,8 @@ libparse_kernel_a_SOURCES = kparse.c \
                             kclk_rcc8000.c \
                             kclk_hopf6021.c \
 	                    kclk_computime.c \
-		     	    kclk_wharton.c
+		     	    kclk_wharton.c \
+		     	    kclk_varitext.c
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/kernel
 ETAGS_ARGS = Makefile.am
@@ -73,6 +75,7 @@ kclk_rcc8000.o: clk_rcc8000.c
 kclk_hopf6021.o: clk_hopf6021.c
 kclk_computime.o: clk_computime.c
 kclk_wharton.o: clk_wharton.c
+kclk_varitext.o: clk_varitext.c
 
 parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 	$(LD) -r -o $@ $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a

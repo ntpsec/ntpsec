@@ -75,6 +75,10 @@ extern clockformat_t clock_computime;
 extern clockformat_t clock_wharton_400a;
 #endif
 
+#ifdef CLOCK_VARITEXT
+extern clockformat_t clock_varitext;
+#endif
+
 /*
  * format definitions
  */
@@ -111,6 +115,9 @@ clockformat_t *clockformats[] =
 #endif
 #ifdef CLOCK_WHARTON_400A
 	&clock_wharton_400a,
+#endif
+#ifdef CLOCK_VARITEXT
+        &clock_varitext,
 #endif
 	0};
 

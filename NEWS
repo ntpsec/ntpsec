@@ -1,3 +1,5 @@
+* NT port cleanup
+* VARITEXT Parse clock added
 (4.0.94)
 * PPS updates (including ntp.config options)
 * Lose the old DES stuff in favor of the (optional) RSAREF stuff
