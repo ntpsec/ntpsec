@@ -1067,23 +1067,23 @@ getconfig(
 			    switch(temp) {
 
 			    case CONF_TOS_MINCLOCK:
-				proto_config(PROTO_MINCLOCK, 0, ftemp);
+				proto_config(PROTO_MINCLOCK, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_MINSANE:
-				proto_config(PROTO_MINSANE, 0, ftemp);
+				proto_config(PROTO_MINSANE, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_FLOOR:
-				proto_config(PROTO_FLOOR, 0, ftemp);
+				proto_config(PROTO_FLOOR, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_CEILING:
-				proto_config(PROTO_CEILING, 0, ftemp);
+				proto_config(PROTO_CEILING, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_COHORT:
-				proto_config(PROTO_COHORT, 0, ftemp);
+				proto_config(PROTO_COHORT, 0, ftemp, NULL);
 				break;
 			    }
 			}
