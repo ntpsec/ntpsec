@@ -650,7 +650,7 @@ case "$target" in
     ;;
 esac
 AC_CHECK_FUNCS(setlinebuf setpgid setpriority setsid)
-AC_CHECK_FUNC(settimeofday, ,[
+AC_CHECK_FUNCS(settimeofday, ,[
 case "$target" in
   *-*-mpeix*) ac_cv_func_settimeofday=yes
     ;;
