@@ -8,8 +8,7 @@ noinst_LIBRARIES=	libntpd.a
 
 AM_CPPFLAGS= -I$(top_srcdir)/include -I../include
 # LDADD might need RESLIB and ADJLIB.
-# If LIBPARSE, we need libntpd.a 2wagain afterwards...
-LDADD =	version.o libntpd.a @LIBPARSE@ libntpd.a
+LDADD=	version.o libntpd.a @LIBPARSE@
 
 # ntpd may need:
 # log10                               refclock_wwv.o
