@@ -11,6 +11,7 @@ AC_PREREQ(2.53)
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
 ac_cv_var_ripe_ncc_ok=no
+ac_cv_var_jupiter_ok=no
 
 dnl Grab any initial CFLAGS so we can pick better defaults.
 iCFLAGS="$CFLAGS"
@@ -1646,6 +1647,7 @@ case "$ac_cv_c_inline$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_
     AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
     ac_cv_var_oncore_ok=yes
     ac_cv_var_ripe_ncc_ok=yes
+    ac_cv_var_jupiter_ok=yes
     ;;
 esac
 
@@ -2003,25 +2005,18 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-# Not Ultrix
 AC_MSG_CHECKING(Rockwell Jupiter GPS receiver)
 AC_ARG_ENABLE(JUPITER,
     AC_HELP_STRING([--enable-JUPITER], [s Rockwell Jupiter GPS receiver]),
-    [ntp_ok=$enableval],
-    [case "$ac_cv_var_ppsclock" in
-#     yes) ntp_ok=$ntp_eac
-#        ;;
-     *) ntp_ok=no
-        ;;
-    esac])
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+case "$ac_cv_var_jupiter_ok" in
+ no) ntp_ok=no ;;
+esac
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_JUPITER, 1, [Rockwell Jupiter GPS clock?])
 fi
 AC_MSG_RESULT($ntp_ok)
-case "$ntp_ok$host" in
- yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
-esac
 
 AC_MSG_CHECKING(Leitch CSD 5300 Master Clock System Driver)
 AC_ARG_ENABLE(LEITCH,

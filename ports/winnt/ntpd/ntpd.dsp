@@ -432,7 +432,6 @@ SOURCE=..\..\..\ntpd\refclock_irig.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_jupiter.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 

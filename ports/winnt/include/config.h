@@ -68,6 +68,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define CLOCK_DUMBCLOCK
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
+# define CLOCK_JUPITER
 
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define NTP_POSIX_SOURCE
