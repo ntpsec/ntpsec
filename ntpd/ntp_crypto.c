@@ -946,7 +946,11 @@ crypto_xmit(
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
 		cp = (struct cookie *)&xpkt[i + 2];
+#ifdef PUBKEY
 		cp->tstamp = host.tstamp;
+#else
+		cp->tstamp = 0;
+#endif /* PUBKEY */
 		cp->key = htonl(crypto_flags);
 		cp->siglen = 0;
 		len += 12;

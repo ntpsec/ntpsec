@@ -134,7 +134,7 @@ transmit(
 				else
 					hpoll++;
 			} else {
-				hpoll = peer->maxpoll;
+				hpoll = sys_poll;
 			}
 #endif /* AUTOKEY */
 		} else {
@@ -233,8 +233,8 @@ transmit(
 				key_expire(peer);
 #endif /* AUTOKEY */
 			}
-			clock_select();
 			poll_update(peer, hpoll);
+			clock_select();
 			return;
 
 		}
@@ -776,6 +776,7 @@ receive(
 	if (peer->flags & FLAG_SKEY) {
 		peer->flash |= TEST10;
 		crypto_recv(peer, rbufp);
+		poll_update(peer, peer->hpoll);
 		if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST10;
@@ -881,7 +882,6 @@ process_packet(
 	 * Test for old, duplicate or unsynch packets (tests 1-3).
 	 */
 	peer->rec = *recv_ts;
-	peer->ppoll = pkt->ppoll;
 	pmode = PKT_MODE(pkt->li_vn_mode);
 	pleap = PKT_LEAP(pkt->li_vn_mode);
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
@@ -949,6 +949,7 @@ process_packet(
 	peer->leap = pleap;
 	peer->pmode = pmode;
 	peer->stratum = pstratum;
+	peer->ppoll = pkt->ppoll;
 	peer->precision = pkt->precision;
 	peer->rootdelay = p_del;
 	peer->rootdispersion = p_disp;
@@ -1134,12 +1135,14 @@ poll_update(
 #ifdef AUTOKEY
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
-	if (hpoll > peer->maxpoll)
-		peer->hpoll = peer->maxpoll;
-	else if (hpoll < peer->minpoll)
-		peer->hpoll = peer->minpoll;
+	if (peer->flags & FLAG_SYSPEER)
+		peer->hpoll = sys_poll;
 	else
 		peer->hpoll = hpoll;
+	if (peer->hpoll > peer->maxpoll)
+		peer->hpoll = peer->maxpoll;
+	else if (peer->hpoll < peer->minpoll)
+		peer->hpoll = peer->minpoll;
 
 	/*
 	 * bit of adventure here. If during a burst and not timeout,
@@ -1152,7 +1155,7 @@ poll_update(
 	 * randomize over the poll interval -1 to +2 seconds.
 	 */ 
 	if (peer->burst > 0) {
-		if (peer->nextdate != current_time)
+		if (peer->outdate != current_time)
 			return;
 		if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate++;
@@ -1160,6 +1163,15 @@ poll_update(
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
+#if 0 /* xxxxx */
+	} else if (peer->crypto && (!(peer->flags & FLAG_AUTOKEY) ||
+		    peer->cmmd)) {
+			peer->burst = 1;
+			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
+#endif /* PUBKEY */
+	} else if (peer->cast_flags & MDF_ACAST) {
+		peer->kpoll = peer->hpoll + 3;
+		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	} else {
 		peer->kpoll = max(min(peer->ppoll, peer->hpoll),
 		    peer->minpoll);
@@ -1796,7 +1808,7 @@ clock_select(void)
 		peer = peer_list[i];
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
-		poll_update(peer, sys_poll);
+		poll_update(peer, peer->hpoll);
 		if (peer->stratum == peer_list[0]->stratum) {
 			leap_consensus |= peer->leap;
 			if (peer->refclktype == REFCLK_ATOM_PPS &&

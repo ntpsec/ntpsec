@@ -1,3 +1,18 @@
+2001-03-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): hpoll cleanup.  Call clock_select()
+	after calling poll_update, not before.
+	(receive): Call poll_update after crypto_recv if FLAG_SKEY.
+	(process_packet): Set peer->ppoll Later.
+	(poll_update): peer->hpoll sanity checking.  Set peer->outdate,
+	not ->nextate, when burst > 0.  MDF_ACAST cleanup.
+	(clock_select): Fix hpoll typo in call to poll_update().
+	* ntpd/ntp_crypto.c (crypto_xmit): tstamp's value is a function of
+	PUBKEY.
+	* include/ntp.h (clear_to_zero): #define value is a function of
+	AUTOKEY.
+	From: Dave Mills.
+
 2001-02-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): Documentation/code update.

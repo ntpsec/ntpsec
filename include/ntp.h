@@ -267,14 +267,16 @@ struct peer {
 	/*
 	 * Variables used by authenticated client
 	 */
-#define clear_to_zero assoc
 #ifdef AUTOKEY
+#define clear_to_zero assoc
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
 #ifdef PUBKEY
 	struct value pubkey;	/* public key */
 	u_char	*keystr;	/* public key file name */
 #endif /* PUBKEY */
+#else /* AUTOKEY */
+#define clear_to_zero keyid
 #endif /* AUTOKEY */
 	keyid_t	keyid;		/* current key ID */
 	keyid_t	pkeyid;		/* previous key ID */
