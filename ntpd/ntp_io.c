@@ -1527,8 +1527,7 @@ sendpkt(
 			*/
 			if (setsockopt(inter->fd, IPPROTO_IP, IP_MULTICAST_TTL,
 				(char *) &ttl, sizeof(ttl)) != 0) {
-				int errval = WSAGetLastError();
-				msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: err = %d %m", errval);
+				msyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails: %m");
 			}
 			else
    				inter->last_ttl = ttl;
