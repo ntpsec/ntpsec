@@ -1,3 +1,7 @@
+2000-02-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libparse/Makefile.am (K_CFLAGS): Use instead.  Add NEED_NTP_BOPS.
+
 2000-02-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/ntp-wait.in: Intensify, including some suggestions from

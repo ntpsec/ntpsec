@@ -26,10 +26,10 @@
 #include "parse.h"
 
 #ifndef PARSESTREAM
-#include <stdio.h>
+# include <stdio.h>
 #else
-#include "sys/parsestreams.h"
-# endif
+# include "sys/parsestreams.h"
+#endif
 
 #include "ascii.h"
 #include "binio.h"
