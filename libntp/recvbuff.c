@@ -41,13 +41,13 @@ free_recvbuffs (void)
 u_long
 full_recvbuffs (void)
 {
-	return free_recvbufs;
+	return full_recvbufs;
 }
 
 u_long
 total_recvbuffs (void)
 {
-	return free_recvbufs;
+	return total_recvbufs;
 }
 
 u_long
