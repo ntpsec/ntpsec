@@ -90,7 +90,6 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
-#include "ntp_machine.h"
 #include <strings.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,6 +99,7 @@
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#include "ntp_types.h"
 
 #ifdef OPENSSL
 #include "openssl/bn.h"
@@ -118,17 +118,18 @@
 #define	MAXLEN		2048	/* min prime modulus size (bits) */
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
-#define	PATH_MAX	255	/* max file name length */
 #define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
+#define MAXFILENAME	256	/* max file name length */
+#define MAXHOSTNAME	256	/* max host name length */
 
 /*
  * Strings used in X509v3 extension fields
  */
-#define KEY_USAGE	"digitalSignature,keyCertSign"
-#define BASIC_CONSTRAINTS "critical,CA:TRUE"
-#define EXT_KEY_PRIVATE	"private"
-#define EXT_KEY_TRUST	"trustRoot"
+#define KEY_USAGE		"digitalSignature,keyCertSign"
+#define BASIC_CONSTRAINTS	"critical,CA:TRUE"
+#define EXT_KEY_PRIVATE		"private"
+#define EXT_KEY_TRUST		"trustRoot"
 
 /*
  * Prototypes
@@ -151,14 +152,13 @@ u_long	asn2ntp		P((ASN1_TIME *));
 /*
  * Program variables
  */
-char	*progname = "genkeys";	/* msylog dragged this in what for? */
 extern char *optarg;		/* command line argument */
-int	debug = 0;		/* de bug, not de bug */
+int	debug = 0;		/* debug, not de bug */
 int	rval;			/* return status */
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
-char	hostname[PATH_MAX];	/* host name */
-char	filename[PATH_MAX];	/* file name */
+char	hostname[MAXHOSTNAME];	/* host name */
+char	filename[MAXFILENAME];	/* file name */
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
@@ -182,7 +182,7 @@ main(
 	RSA	*rsa_gqpar = NULL; /* GQ parameters */
 	RSA	*rsa_gqkey = NULL; /* GQ key */
 	const EVP_MD *ectx;	/* EVP digest */
-	char	pathbuf[PATH_MAX];
+	char	pathbuf[MAXFILENAME];
 	FILE	*str;		/* file handle */
 	int	md5key = 0;	/* MD5 keys */
 	int	hostkey = 0;	/* RSA keys */
@@ -321,22 +321,21 @@ main(
 	/*
 	 * Seed random number generator and grow weeds.
 	 */
+	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
-	if (RAND_file_name(pathbuf, PATH_MAX) == NULL) {
+	if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
 		printf("RAND_file_name %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (-1);
 	}
 	temp = RAND_load_file(pathbuf, -1);
 	if (temp == 0) {
-		printf("RAND_load_file <%s>: \n\t%s\n",
-		    pathbuf,
-		    ERR_error_string(ERR_get_error(), NULL));
+		printf("RAND_load_file %s not found or empty\n",
+		    pathbuf);
 		return (-1);
 	}
 	printf("Random seed file %s %u bytes\n", pathbuf, temp);
 	RAND_add(&epoch, sizeof(epoch), 4.0);
-	ERR_load_crypto_strings();
 
 	/*
 	 * Generate new parameters and keys as requested. These replace
@@ -984,7 +983,7 @@ x509	(
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
 	const char *id;		/* digest/signature scheme name */
-	u_char	pathbuf[PATH_MAX];
+	u_char	pathbuf[MAXFILENAME];
 
 	/*
 	 * Generate X509 self-signed certificate.
@@ -1237,7 +1236,7 @@ fslink(
 	const char *id		/* file name id */
 	)
 {
-	char	linkname[PATH_MAX]; /* link name */
+	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
 
 	sprintf(linkname, "ntpkey_%s_%s", id, hostname);

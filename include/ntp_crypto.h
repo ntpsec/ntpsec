@@ -3,7 +3,6 @@
  */
 #ifdef OPENSSL
 #include "openssl/evp.h"
-
 /*
  * The following bits are set by the CRYPTO_ASSOC message from
  * the server and are not modified by the client.
@@ -87,6 +86,68 @@
 #define CRYPTO_CONF_IFF   8	/* IFF parameters file name */
 #define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
 #define CRYPTO_CONF_GQ	 10	/* GQ keys file name */
+/*
+ * Miscellaneous crypto stuff
+ */
+#define NTP_MAXSESSION	100	/* maximum session key list entries */
+#define NTP_AUTOMAX	13	/* log2 default max session key life */
+#define KEY_REVOKE	16	/* log2 default key revoke timeout */
+#define NTP_MAXEXTEN	1024	/* maximum extension field size */
+
+/*
+ * The autokey structure holds the values used to authenticate key IDs.
+ */
+struct autokey {		/* network byte order */
+	keyid_t	key;		/* key ID */
+	int32	seq;		/* key number */
+};
+
+/*
+ * The value structure holds variable length data such as public
+ * key, agreement parameters, public valule and leapsecond table.
+ * They are in network byte order.
+ */
+struct value {			/* network byte order */
+	tstamp_t tstamp;	/* timestamp */
+	tstamp_t fstamp;	/* filestamp */
+	u_int32	vallen;		/* value length */
+	u_char	*ptr;		/* data pointer (various) */
+	u_int32	siglen;		/* signature length */
+	u_char	*sig;		/* signature */
+};
+
+/*
+ * The packet extension field structures are used to hold values
+ * and signatures in network byte order.
+ */
+struct exten {
+	u_int32	opcode;		/* opcode */
+	u_int32	associd;	/* association ID */
+	u_int32	tstamp;		/* timestamp */
+	u_int32	fstamp;		/* filestamp */
+	u_int32	vallen;		/* value length */
+	u_int32	pkt[1];		/* start of value field */
+};
+
+/*
+ * The certificate info/value structure
+ */
+struct cert_info {
+	struct cert_info *link;	/* forward link */
+	u_int	flags;		/* flags that wave */
+	EVP_PKEY *pkey;		/* generic key */
+	long	version;	/* X509 version */
+	int	nid;		/* signature/digest ID */
+	const EVP_MD *digest;	/* message digest algorithm */
+	u_long	serial;		/* serial number */
+	tstamp_t first;		/* valid not before */
+	tstamp_t last;		/* valid not after */
+	u_char	*subject;	/* subject common name */
+	u_char	*issuer;	/* issuer common name */
+	u_char	*grpkey;	/* GQ group key */
+	u_int	grplen;		/* GQ group key length */
+	struct value cert;	/* certificate/value */
+};
 
 /*
  * Cryptographic values
@@ -95,8 +156,6 @@ extern	char	*keysdir;	/* crypto keys directory */
 extern	u_int	crypto_flags;	/* status word */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
-extern	struct value dhparam;	/* agreement parameters */
-extern	struct value dhpub;	/* public value */
 extern	struct value tai_leap;	/* leapseconds table */
 extern	u_int	sys_tai;	/* current UTC offset from TAI */
 #endif /* OPENSSL */

@@ -127,8 +127,8 @@ init_restrict(void)
 	/*
 	 * set default values for RES_LIMIT functionality
 	 */
-	client_limit = 3;
-	client_limit_period = 3600;
+	client_limit = 10;
+	client_limit_period = 60;
 	res_limited_refcnt = 0;
 
 	sprintf(bp, "client_limit=%ld", client_limit);

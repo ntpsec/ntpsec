@@ -16,7 +16,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_string.h"
-#include "ntp_crypto.h"
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
@@ -31,10 +30,14 @@
 #endif /* KERNEL_PLL */
 
 /*
- * Extension field message format (host byte order)
+ * Extension field message format
+ *
+ * These are always signed and saved before sending in network byte
+ * order. They must be converted to and from host byte order for
+ * processing.
  *
  * +-------+-------+
- * |   op  |  len  |
+ * |   op  |  len  | <- extension pointer
  * +-------+-------+
  * |    assocID    |
  * +---------------+
@@ -88,8 +91,6 @@
  */
 #define TAI_1972	10	/* initial TAI offset (s) */
 #define MAX_LEAP	100	/* max UTC leapseconds (s) */
-#define MIN_HOSTLEN	4	/* min host name length */
-#define MAX_HOSTLEN	256	/* max host name length */
 #define VALUE_LEN	(6 * 4) /* min response field length */
 #define YEAR		(60 * 60 * 24 * 365) /* seconds in year */
 #define NTP_RANDFILE	"/.rnd"	/* OpenSSL random seed file */
@@ -120,6 +121,7 @@ static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parmeters */
 static EVP_PKEY	*gq_pkey = NULL; /* GQ parmeters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
+static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
 static char *rand_file = NTP_RANDFILE; /* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
@@ -327,7 +329,7 @@ make_keylist(
  * are believed even if the signature fails, but only if the proventic
  * bit is not set.
  */
-void
+int
 crypto_recv(
 	struct peer *peer,	/* peer structure pointer */
 	struct recvbuf *rbufp	/* packet buffer pointer */
@@ -348,7 +350,7 @@ crypto_recv(
 	X509	*cert;		/* X509 certificate */
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	keyid_t	cookie;		/* crumbles */
-	int	rval;
+	int	rval = XEVNT_OK;
 	u_char	*ptr;
 	u_int32 temp32;
 #ifdef KERNEL_PLL
@@ -498,8 +500,8 @@ crypto_recv(
 			temp32 = (fstamp >> 16) & 0xffff;
 			dp =
 			    (const EVP_MD *)EVP_get_digestbynid(temp32);
-			if (vallen < MIN_HOSTLEN || vallen >
-			    MAX_HOSTLEN)
+			if (vallen < MINHOSTNAME || vallen >
+			    MAXHOSTNAME)
 				rval = XEVNT_LEN;
 			else if (dp == NULL)
 				rval = XEVNT_MD;
@@ -1040,8 +1042,8 @@ crypto_recv(
 		/*
 		 * We log everything except length/format errors and
 		 * duplicates, which are log clogging vulnerabilities.
-		 * All errors flash a major error so nothing further
-		 * will be sent.
+		 * The first error found terminates the extension field
+		 * scan and we return the laundry to the caller.
 		 */
 		if (rval != XEVNT_OK) {
 			sprintf(statstr,
@@ -1051,15 +1053,15 @@ crypto_recv(
 				record_crypto_stats(&peer->srcadr,
 				    statstr);
 			report_event(rval, peer);
-			peer->flash |= TEST12;
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
 #endif
+			break;
 		}
 		authlen += len;
 	}
-	return;
+	return (rval);
 }
 
 
@@ -1087,7 +1089,7 @@ crypto_xmit(
 	u_int	opcode;		/* extension field opcode */
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp;	/* certificate info/value pointer */
-	char	certname[MAX_HOSTLEN + 1]; /* subject name buffer */
+	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int	vallen;
 	u_int	len;
@@ -1151,8 +1153,8 @@ crypto_xmit(
 		vallen = ntohl(ep->vallen);
 		if (vallen == 8) {
 			strcpy(certname, sys_hostname);
-		} else if (vallen < MIN_HOSTLEN || vallen >
-		    MAX_HOSTLEN) {
+		} else if (vallen < MINHOSTNAME || vallen >
+		    MAXHOSTNAME) {
 			opcode |= CRYPTO_ERROR;
 			break;
 
@@ -1296,7 +1298,6 @@ crypto_xmit(
 	default:
 		if (opcode & CRYPTO_RESP)
 			opcode |= CRYPTO_ERROR;
-		break;
 	}
 
 	/*
@@ -1305,19 +1306,9 @@ crypto_xmit(
 	 * persistent rascals we toss back a kiss-of-death grenade.
 	 */
 	if (rval > XEVNT_TSP) {
-		struct sockaddr_in mskadr_sin;
-		int	hismode;
-		int	resflag = RES_DONTSERVE | RES_TIMEOUT;
-
 		opcode |= CRYPTO_ERROR;
 		sprintf(statstr, "error %x opcode %x", rval, opcode);
 		record_crypto_stats(srcadr_sin, statstr);
-		mskadr_sin.sin_addr.s_addr = ~(u_int32)0;
-		hismode = PKT_MODE(xpkt->li_vn_mode);
-		if (hismode != MODE_BROADCAST && hismode != MODE_SERVER)
-			resflag |= RES_DEMOBILIZE;
-		hack_restrict(RESTRICT_FLAGS, srcadr_sin, &mskadr_sin,
-		    RESM_NTPONLY, resflag);
 #ifdef DEBUG
 		if (debug)
 			printf("crypto_xmit: %s\n", statstr);
@@ -2531,7 +2522,6 @@ cert_parse(
 			break;
 
 		default:
-			break;
 		}
 	}
 

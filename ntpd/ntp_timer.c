@@ -23,10 +23,6 @@
 # include "ntp_timer.h"
 #endif
 
-#ifdef OPENSSL
-#include "ntp_crypto.h"
-#endif /* OPENSSL */
-
 /*
  * These routines provide support for the event timer.	The timer is
  * implemented by an interrupt routine which sets a flag once every
@@ -231,6 +227,7 @@ timer(void)
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
+		kod_proto();
 	}
 
 	/*

@@ -14,12 +14,15 @@ netof(
 {
 	register u_int32 netnum;
 
+	/*
+	 * We live in a modern CIDR world where the basement nets, which
+	 * used to be class A, are now probably associated with each
+	 * host address. So, for class-A nets, all bits are significant.
+	 */
 	netnum = num;
 	if(IN_CLASSC(netnum))
 	    netnum &= IN_CLASSC_NET;
 	else if (IN_CLASSB(netnum))
 	    netnum &= IN_CLASSB_NET;
-	else			/* treat all other like class A */
-	    netnum &= IN_CLASSA_NET;
 	return netnum;
 }

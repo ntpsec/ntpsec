@@ -960,22 +960,23 @@ sys_stats(
 	/*
 	 * Importations from the protocol module
 	 */
+/*
 	extern u_long sys_stattime;
-	extern u_long sys_badstratum;
 	extern u_long sys_oldversionpkt;
 	extern u_long sys_newversionpkt;
 	extern u_long sys_unknownversion;
 	extern u_long sys_badlength;
-	extern u_long sys_processed;
 	extern u_long sys_badauth;
+	extern u_long sys_processed;
+	extern u_long sys_restricted;
 	extern u_long sys_limitrejected;
-
+*/
 	ss = (struct info_sys_stats *)prepare_pkt(srcadr, inter, inpkt,
-						  sizeof(struct info_sys_stats));
+	    sizeof(struct info_sys_stats));
 
 	ss->timeup = htonl((u_int32)current_time);
 	ss->timereset = htonl((u_int32)(current_time - sys_stattime));
-	ss->badstratum = htonl((u_int32)sys_badstratum);
+	ss->badstratum = htonl((u_int32)sys_restricted);
 	ss->oldversionpkt = htonl((u_int32)sys_oldversionpkt);
 	ss->newversionpkt = htonl((u_int32)sys_newversionpkt);
 	ss->unknownversion = htonl((u_int32)sys_unknownversion);

@@ -331,9 +331,9 @@ unpeer(
 	)
 {
 	int hash;
+#ifdef OPENSSL
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 
-#ifdef OPENSSL
 	if (peer_to_remove->flags & FLAG_SKEY) {
 		sprintf(statstr, "unpeer %d flash %x reach %03o flags %04x",
 		    peer_to_remove->associd, peer_to_remove->flash,
@@ -468,7 +468,6 @@ peer_config(
 
 	default:
 		cast_flags = MDF_UCAST;
-		break;
 	}
 
 	/*
@@ -520,7 +519,9 @@ newpeer(
 {
 	register struct peer *peer;
 	register int i;
+#ifdef OPENSSL
 	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+#endif /* OPENSSL */
 
 	/*
 	 * Allocate a new peer structure. Some dirt here, since some of

@@ -1610,7 +1610,7 @@ getconfig(
 			} else {
 				u_long ui;
 
-				if (!atouint(tokens[1], &ui) || !ui) {
+				if (!atouint(tokens[1], &ui)) {
 					msyslog(LOG_ERR,
 						"illegal value for clientlimit command - line ignored");
 				} else {
@@ -1633,7 +1633,7 @@ getconfig(
 			} else {
 				u_long ui;
 
-				if (!atouint(tokens[1], &ui) || ui < 64) {
+				if (!atouint(tokens[1], &ui)) {
 					msyslog(LOG_ERR,
 						"illegal value for clientperiod command - line ignored");
 				} else {
