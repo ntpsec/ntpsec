@@ -1,3 +1,7 @@
+2001-03-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k18 and auto* upgrade
+
 2001-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpdc/ntpdc_ops.c (printpeer): No more "valid".
