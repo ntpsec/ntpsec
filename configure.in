@@ -443,6 +443,7 @@ if test "$ac_cv_struct_ntptimeval_tv_nsec" = "yes"; then
 	AC_DEFINE(HAVE_TV_NSEC_IN_NTPTIMEVAL)
 fi
 
+AC_C_INLINE
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 case "$host" in
  $target)

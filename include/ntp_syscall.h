@@ -23,7 +23,8 @@ extern	int	__adjtimex	P((struct timex *));
 
 #  define ntp_adjtime(t)	__adjtimex((t))
 
-inline	int ntp_gettime(
+static inline int
+ntp_gettime(
 	struct ntptimeval *ntv
 	)
 {

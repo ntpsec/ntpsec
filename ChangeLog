@@ -1,3 +1,9 @@
+1999-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp_syscall.h (ntp_gettime): Make it static
+	* configure.in: Added AC_C_INLINE
+	Reported by: "Charles C. Fu" <ccwf@klab.caltech.edu>
+
 1999-07-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntpd.h:
@@ -28,6 +34,8 @@
 	
 1999-07-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.94a
+	
 	* configure.in (ac_cv_make_ntptime): Add tv_nsec check.
 
 	* include/Makefile.am (noinst_HEADERS): Forgot ntp_syscall.h
