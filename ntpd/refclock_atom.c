@@ -268,6 +268,7 @@ atom_pps(
 	l_fp lftmp;
 	double doffset;
 	int i;
+#if defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV)
 	int request = 
 #ifdef HAVE_CIOGETEV
 		CIOGETEV
@@ -276,6 +277,7 @@ atom_pps(
 		TIOCGPPSEV
 #endif
 		;
+#endif
 
 	/*
 	 * This routine is called once per second when the LDISC_PPS

@@ -2,6 +2,9 @@
 
 	* ntpd/refclock_atom.c (atom_poll): PPS cleanup
 	From: Dave Mills <mills@udel.edu>
+	(atom_pps): Portability patch
+	From: John Hay <jhay@mikom.csir.co.za>
+
 
 	* libntp/msyslog.c: 
 	* libntp/gpstolfp.c: 
