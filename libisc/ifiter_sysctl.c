@@ -185,10 +185,12 @@ internal_current(isc_interfaceiter_t *iter) {
 		if ((ifam->ifam_flags & IFF_BROADCAST) != 0) {
 			iter->current.flags |= INTERFACE_F_BROADCAST;
 		}
-
+#ifdef IFF_MULTICAST
 		if ((ifam->ifam_flags & IFF_MULTICAST) != 0) {
 			iter->current.flags |= INTERFACE_F_MULTICAST;
 		}
+#endif
+
 		/*
 		 * This is not an interface address.
 		 * Force another iteration.
