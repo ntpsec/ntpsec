@@ -276,7 +276,7 @@ make_keylist(
 		    rval);
 	else
 		ap->siglen = htonl(len);
-	crypto_flags |= CRYPTO_FLAG_AUTO;
+	peer->flags |= CRYPTO_FLAG_AUTO;
 #endif /* PUBKEY */
 }
 
@@ -378,7 +378,8 @@ crypto_recv(
 #ifdef PUBKEY
 			temp = ntohl(ap->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
-			if (tstamp < peer->recauto.tstamp || (tstamp ==
+			if (tstamp == 0 || tstamp <
+			    peer->recauto.tstamp || (tstamp ==
 			    peer->recauto.tstamp && (peer->flags &
 			    FLAG_AUTOKEY))) {
 				rval = RV_TSP;
@@ -443,7 +444,8 @@ crypto_recv(
 #ifdef PUBKEY
 			temp = ntohl(cp->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
-			if (tstamp < peer->pcookie.tstamp || (tstamp ==
+			if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp || (tstamp ==
 			    peer->pcookie.tstamp && (peer->flags &
 			    FLAG_AUTOKEY))) {
 				rval = RV_TSP;
@@ -527,6 +529,8 @@ crypto_recv(
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
+			} else if (tstamp == 0) {
+				rval = RV_TSP;
 			} else if (tstamp < ntohl(dhparam.fstamp) ||
 			    fstamp < ntohl(dhparam.fstamp)) {
 				rval = RV_FSP;
@@ -634,9 +638,10 @@ crypto_recv(
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
-			} else if (tstamp < peer->pcookie.tstamp ||
-			    (tstamp == peer->pcookie.tstamp &&
-			    (peer->flags & FLAG_AUTOKEY))) {
+			} else if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp || (tstamp ==
+			    peer->pcookie.tstamp && (peer->flags &
+			    FLAG_AUTOKEY))) {
 				rval = RV_TSP;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
@@ -709,9 +714,10 @@ crypto_recv(
 				rval = RV_KEY;
 			} else if (ntohl(pkt[j]) != bits / 8) {
 				rval = RV_SIG;
-			} else if (tstamp < peer->pubkey.tstamp ||
-			    (tstamp == peer->pubkey.tstamp &&
-			    (peer->flags & FLAG_AUTOKEY))) {
+			} else if (tstamp == 0 || tstamp <
+			    peer->pubkey.tstamp || (tstamp ==
+			    peer->pubkey.tstamp && (peer->flags &
+			    FLAG_AUTOKEY))) {
 				rval = RV_TSP;
 			} else if (tstamp < peer->pubkey.fstamp ||
 			    fstamp < peer->pubkey.fstamp) {
@@ -735,8 +741,9 @@ crypto_recv(
 				} else {
 					j = i + 5 + rsalen / 4;
 					peer->pubkey.ptr = (u_char *)kp;
-					temp = 1+ strlen((char *)&pkt[j]);
-					peer->keystr = emalloc(temp);
+					temp = strlen((char *)&pkt[j]);
+					peer->keystr = emalloc(temp +
+					    1);
 					strcpy(peer->keystr,
 					    (char *)&pkt[j]);
 					peer->pubkey.tstamp = tstamp;
@@ -776,6 +783,8 @@ crypto_recv(
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
+			} else if (tstamp == 0) {
+				rval = RV_TSP;
 			} else if (tstamp < ntohl(tai_leap.fstamp) ||
 			    fstamp < ntohl(tai_leap.fstamp)) {
 				rval = RV_FSP;
@@ -918,12 +927,12 @@ crypto_xmit(
 	 * perp has replayed an old message.
 	 */
 	case CRYPTO_AUTO | CRYPTO_RESP:
-		crypto_flags &= ~CRYPTO_FLAG_AUTO;
 		peer = findpeerbyassoc(associd);
 		if (peer == NULL) {
 			opcode |= CRYPTO_ERROR;
 			break;
 		}
+		peer->flags &= ~CRYPTO_FLAG_AUTO;
 		ap = (struct autokey *)&xpkt[i + 2];
 		ap->tstamp = peer->sndauto.tstamp;
 		ap->seq = peer->sndauto.seq;

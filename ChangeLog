@@ -1,3 +1,22 @@
+2001-02-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Don't peer_clear() and reset
+	minpoll unconditionally; make sure the peer is configured.
+	(poll_update): When updating peer->ppoll, check on BCAST and
+	MCAST, not ACAST
+	(peer_clear): PUBKEY cleanup.  Zero out the peer structure
+	earlier. Initialization cleanup/fixes.
+	(peer_xmit): CRYPTO_FLAG_AUTO is in peer->flags now.
+	(key_expire): Debug output.
+	* ntpd/ntp_peer.c (unpeer): PUBKEY cleanup.
+	(newpeer): peer variable setup cleanup.
+	* ntpd/ntp_crypto.c (make_keylist): Keep CRYPTO_FLAG_AUTO in
+	peer->flags, not crypto_flags.
+	(crypto_xmit): Ditto.
+	(crypto_recv): Fix up RV_TSP logic (several places).
+	* include/ntp.h (clear_to_zero): Moved...
+	From: Dave Mills.
+
 2001-02-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (peer_xmit): Crypto-related fixes

@@ -339,12 +339,6 @@ unpeer(
 		    peer_associations);
 #endif
 	peer_clear(peer_to_remove);
-#ifdef PUBKEY
-	if (peer_to_remove->keystr != NULL)
-		free(peer_to_remove->keystr);
-	if (peer_to_remove->pubkey.ptr != NULL)
-		free(peer_to_remove->pubkey.ptr);
-#endif /* PUBKEY */
 	hash = HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
@@ -543,25 +537,16 @@ newpeer(
 	else
 		peer->dstadr = findinterface(srcadr);
 	peer->srcadr = *srcadr;
-	peer->cast_flags = cast_flags;
 	peer->hmode = (u_char)hmode;
-	peer->keyid = key;
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)minpoll;
 	peer->maxpoll = (u_char)maxpoll;
 	peer->flags = flags | (key > NTP_MAXKEY ? FLAG_SKEY : 0);
-	peer->hpoll = peer->minpoll;
-	peer->ppoll = peer->minpoll;
+	peer->cast_flags = cast_flags;
 	peer->ttlmax = ttl;
-	peer->leap = LEAP_NOTINSYNC;
+	peer->keyid = key;
 	peer->precision = sys_precision;
-	peer->jitter = MAXDISPERSE;
-	peer->epoch = current_time;
-	peer->stratum = STRATUM_UNSPEC;
 	peer_clear(peer);
-	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) -
-	    1));
 
 	/*
 	 * Assign an association ID and increment the system variable.

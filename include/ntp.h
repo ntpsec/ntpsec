@@ -281,6 +281,7 @@ struct peer {
 	/*
 	 * Variables used by authenticated client
 	 */
+#define clear_to_zero pkeyid
 #ifdef AUTOKEY
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
@@ -291,7 +292,6 @@ struct peer {
 #endif /* AUTOKEY */
 	keyid_t	keyid;		/* current key ID */
 	keyid_t	pkeyid;		/* previous key ID */
-#define clear_to_zero pkeyid
 #ifdef AUTOKEY
 	keyid_t	hcookie;	/* host cookie */
 	struct cookie pcookie;	/* peer cookie */

@@ -176,14 +176,14 @@ transmit(
 			if (oreach != 0) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
-				peer_clear(peer);
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
 					clock_select();
 					return;
-
+				} else {
+					peer_clear(peer);
+					hpoll = peer->minpoll;
 				}
-				hpoll = peer->minpoll;
 			}
 			if (peer->flags & FLAG_IBURST)
 				peer->burst = NTP_SHIFT;
@@ -1138,7 +1138,7 @@ poll_update(
 		peer->hpoll = peer->maxpoll;
 	else if (peer->hpoll < peer->minpoll)
 		peer->hpoll = peer->minpoll;
-	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST | MDF_ACAST))
+	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST))
 		peer->ppoll = peer->hpoll;
 
 	/*
@@ -1211,7 +1211,14 @@ peer_clear(
 #endif
 #ifdef AUTOKEY
 	key_expire(peer);
+#ifdef PUBKEY
+	if (peer->keystr != NULL)
+		free(peer->keystr);
+	if (peer->pubkey.ptr != NULL)
+		free(peer->pubkey.ptr);
+#endif /* PUBKEY */
 #endif /* AUTOKEY */
+	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 
 	/*
 	 * If he dies as a broadcast client, he comes back to life as
@@ -1225,18 +1232,21 @@ peer_clear(
 		peer->flags |=  FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
 	}
-	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 	peer->estbdelay = sys_bdelay;
-	peer->hpoll = peer->minpoll;
+	peer->hpoll = peer->ppoll = peer->kpoll = peer->minpoll;
 	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
+	peer->leap = LEAP_NOTINSYNC;
+	peer->stratum = STRATUM_UNSPEC;
 	peer->epoch = current_time;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;
 		peer->filter_epoch[i] = current_time;
 	}
-	poll_update(peer, peer->minpoll);
+	peer->update = peer->outdate = current_time;
+	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) -
+	    1));
 }
 
 
@@ -2036,7 +2046,7 @@ peer_xmit(
 		 * them at other times.
 		 */
 		case MODE_BROADCAST:
-			if (crypto_flags & CRYPTO_FLAG_AUTO)
+			if (peer->flags & CRYPTO_FLAG_AUTO)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -2115,7 +2125,7 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			else if ((crypto_flags & CRYPTO_FLAG_AUTO) &&
+			else if ((peer->flags & CRYPTO_FLAG_AUTO) &&
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
@@ -2394,6 +2404,10 @@ key_expire(
 		peer->keylist = NULL;
 	}
 	peer->keynumber = peer->sndauto.seq = 0;
+#ifdef DEBUG
+	if (debug)
+		printf("key_expire: at %lu\n", current_time);
+#endif
 }
 #endif /* AUTOKEY */
 
