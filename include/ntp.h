@@ -173,9 +173,9 @@ struct value {			/* network byte order */
 struct interface {
 	int fd;			/* socket this is opened on */
 	int bfd;		/* socket for receiving broadcasts */
- 	struct sockaddr_storage sin;	/* interface address */
- 	struct sockaddr_storage bcast; /* broadcast address */
- 	struct sockaddr_storage mask; /* interface mask */
+	struct sockaddr_in sin;	/* interface address */
+	struct sockaddr_in bcast; /* broadcast address */
+	struct sockaddr_in mask; /* interface mask */
 	char name[8];		/* name of interface */
 	int flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */
@@ -219,7 +219,7 @@ struct interface {
 struct peer {
 	struct peer *next;	/* pointer to next association */
 	struct peer *ass_next;	/* link pointer in associd hash */
-	struct sockaddr_storage srcadr; /* address of remote host */
+	struct sockaddr_in srcadr; /* address of remote host */
 	struct interface *dstadr; /* pointer to address on local host */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
@@ -445,33 +445,11 @@ struct peer {
 #define REFCLK_PCF		35	/* Conrad parallel port radio clock */
 #define REFCLK_WWV_AUDIO	36	/* WWV/H audio demodulator/decoder */
 #define REFCLK_FG		37	/* Forum Graphic GPS */
-#define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial line receiver  */
+#define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial receiver  */
 #define REFCLK_HOPF_PCI		39	/* hopf DCF77/GPS PCI receiver  */
-#define REFCLK_JJY		40	/* JJY receiver  */
-#define REFCLK_MAX		40	/* Grow as needed... */
-
- /*
- * Macro for sockaddr_storage structures operations
- */
-#define SOCKCMP(sock1, sock2)    (((struct sockaddr_storage*)sock1)->ss_family == ((struct sockaddr_storage*)sock2)->ss_family ? \
- 				      ((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
- 				      		memcmp(&((struct sockaddr_in*)sock1)->sin_addr, &((struct sockaddr_in*)sock2)->sin_addr, sizeof(struct in_addr))==0  :  \
- 				      		memcmp(&((struct sockaddr_in6*)sock1)->sin6_addr, &((struct sockaddr_in6*)sock2)->sin6_addr, sizeof(struct in6_addr))==0 : \
- 				      0)
-
-#define SOCKNUL(sock1)	    (((struct sockaddr_storage*)sock1)->ss_family == AF_INET ? \
- 				       (((struct sockaddr_in*)sock1)->sin_addr.s_addr == 0) : \
- 				       (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6*)sock1)->sin6_addr)))
-
-#define SOCKLEN(sock)	  (((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
- 					(sizeof(struct sockaddr_in)) : \
- 					(sizeof(struct sockaddr_in6)))
-
-#define ANYSOCK(sock)           memset(((struct sockaddr_in*)sock), 0, sizeof(struct sockaddr_storage)-sizeof(struct sockaddr_in))
-
-#define ANY_INTERFACE_CHOOSE(sock)	(((struct sockaddr_storage*)sock)->ss_family == AF_INET ? \
- 					any_interface : any6_interface)
-
+#define REFCLK_JJY		40	/* JJY receiver */
+#define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder (40) */
+#define REFCLK_MAX		41	/* Grow as needed... */
 
 /*
  * We tell reference clocks from real peers by giving the reference
@@ -501,15 +479,10 @@ struct peer {
 /*
  * Utilities for manipulating addresses and port numbers
  */
-#define	NSRCADR(src)	(((struct sockaddr_in*)src)->sin_addr.s_addr) /* address in net byte order */
-#define	NSRCPORT(src)	(((struct sockaddr_in*)src)->sin_port)	/* port in net byte order */
+#define	NSRCADR(src)	((src)->sin_addr.s_addr) /* address in net byte order */
+#define	NSRCPORT(src)	((src)->sin_port)	/* port in net byte order */
 #define	SRCADR(src)	(ntohl(NSRCADR((src))))	/* address in host byte order */
 #define	SRCPORT(src)	(ntohs(NSRCPORT((src))))	/* host port */
-
-#define CAST_V4(src)	((struct sockaddr_in *)&(src))
-#define CAST_V6(src)	((struct sockaddr_in6 *)&(src))
-#define GET_INADDR(src)  (CAST_V4(src)->sin_addr.s_addr)
-#define GET_INADDR6(src) (CAST_V6(src)->sin6_addr)
 
 /*
  * NTP packet format.  The mac field is optional.  It isn't really
@@ -628,9 +601,9 @@ struct pkt {
  * To speed lookups, peers are hashed by the low order bits of the
  * remote IP address. These definitions relate to that.
  */
-#define	HASH_SIZE	128
+#define	HASH_SIZE	32
 #define	HASH_MASK	(HASH_SIZE-1)
-#define	HASH_ADDR(src)	sock_hash(src)
+#define	HASH_ADDR(src)	((SRCADR((src))^(SRCADR((src))>>8)) & HASH_MASK)
 
 /*
  * How we randomize polls.  The poll interval is a power of two.
@@ -724,7 +697,7 @@ struct mon_data {
 	u_long lasttime;		/* last time data updated */
 	u_long firsttime;		/* time structure initialized */
 	u_long count;			/* count we have seen */
-	struct sockaddr_storage rmtadr;	/* address of remote host */
+	u_int32 rmtadr;			/* address of remote host */
 	struct interface *interface;	/* interface on which this arrived */
 	u_short rmtport;		/* remote port last came from */
 	u_char mode;			/* mode of incoming packet */
@@ -753,21 +726,12 @@ struct mon_data {
  */
 struct restrictlist {
 	struct restrictlist *next;	/* link to next entry */
-	u_int32 addr;                   /* Ipv4 host address (host byte order) */
-	u_int32 mask;                   /* Ipv4 mask for address (host byte order) */
+	u_int32 addr;			/* host address (host byte order) */
+	u_int32 mask;			/* mask for address (host byte order) */
 	u_long count;			/* number of packets matched */
 	u_short flags;			/* accesslist flags */
 	u_short mflags;			/* match flags */
 };
-
-struct restrictlist6 {
-	struct restrictlist6 *next;      /* link to next entry */
-	uint8_t addr6[16];              /* Ipv6 host address (host byte order) */
-	u_long count;			/* number of packets matched */
-	u_short flags;			/* accesslist flags */
-	u_short mflags;			/* match flags */
-};
-
 
 /*
  * Access flags

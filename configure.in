@@ -1572,27 +1572,10 @@ dnl AC_SUBST(UNIXCERT)
 
 ntp_refclock=no
 
-AC_MSG_CHECKING(for hopf serial clock device)
-AC_ARG_ENABLE(HOPFSERIAL,		[  --enable-HOPFSERIAL     + hopf serial clock device],
-      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-  if test "$ntp_ok" = "yes"; then
-      ntp_refclock=yes
-      AC_DEFINE(CLOCK_HOPF_SERIAL)
-  fi
-  AC_MSG_RESULT($ntp_ok)
-
-AC_MSG_CHECKING(for hopf PCI clock 6039)
-AC_ARG_ENABLE(HOPFPCI,		[  --enable-HOPFPCI        + hopf 6039 PCI board],
-      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_HOPF_PCI)
-fi
-AC_MSG_RESULT($ntp_ok)
-
 # HPUX only, and by explicit request
 AC_MSG_CHECKING(Datum/Bancomm bc635/VME interface)
-AC_ARG_ENABLE(BANCOMM,		[  --enable-BANCOMM        - Datum/Bancomm bc635/VME interface],
+AC_ARG_ENABLE(BANCOMM,
+    AC_HELP_STRING([--enable-BANCOMM], [- Datum/Bancomm bc635/VME interface]),
     [ntp_ok=$enableval], [ntp_ok=no])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1606,7 +1589,8 @@ esac
 
 #HPUX only, and only by explicit request
 AC_MSG_CHECKING(TrueTime GPS receiver/VME interface)
-AC_ARG_ENABLE(GPSVME,		[  --enable-GPSVME         - TrueTime GPS receiver/VME interface],
+AC_ARG_ENABLE(GPSVME,
+    AC_HELP_STRING([--enable-GPSVME], [- TrueTime GPS receiver/VME interface]),
     [ntp_ok=$enableval], [ntp_ok=no])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1617,6 +1601,26 @@ case "$ntp_ok$target" in
  yes*-*-hpux*) ;;
  yes*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
+
+AC_MSG_CHECKING(for hopf serial clock device)
+AC_ARG_ENABLE(HOPFSERIAL,
+    AC_HELP_STRING([--enable-HOPFSERIAL], [+ hopf serial clock device]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_HOPF_SERIAL)
+fi
+AC_MSG_RESULT($ntp_ok)
+
+AC_MSG_CHECKING(for hopf PCI clock 6039)
+AC_ARG_ENABLE(HOPFPCI,
+    AC_HELP_STRING([--enable-HOPFPCI], [+ hopf 6039 PCI board]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_HOPF_PCI)
+fi
+AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for PCL720 clock support)
 case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_i8253_h" in
@@ -1631,7 +1635,8 @@ esac
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(for SHM clock attached thru shared memory)
-AC_ARG_ENABLE(SHM,		[  --enable-SHM            - SHM clock attached thru shared memory],
+AC_ARG_ENABLE(SHM,
+    AC_HELP_STRING([--enable-SHM], [- SHM clock attached thru shared memory]),
     [ntp_ok=$enableval], [ntp_ok=no])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1640,7 +1645,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for default inclusion of all suitable non-PARSE clocks)
-AC_ARG_ENABLE(all-clocks,	[  --enable-all-clocks     + include all suitable non-PARSE clocks:],
+AC_ARG_ENABLE(all-clocks,
+    AC_HELP_STRING([--enable-all-clocks], [+ include all suitable non-PARSE clocks:]),
     [ntp_eac=$enableval], [ntp_eac=yes])
 AC_MSG_RESULT($ntp_eac)
 
@@ -1666,7 +1672,8 @@ AC_MSG_RESULT($ntp_canaudio)
 
 # Requires modem control
 AC_MSG_CHECKING(ACTS modem service)
-AC_ARG_ENABLE(ACTS,		[  --enable-ACTS           + ACTS modem service],
+AC_ARG_ENABLE(ACTS,
+    AC_HELP_STRING([--enable-ACTS], [+ ACTS modem service]),
     [ntp_ok=$enableval],
     [AC_EGREP_CPP(yes,
         [#include <termios.h>
@@ -1684,7 +1691,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(Arbiter 1088A/B GPS receiver)
-AC_ARG_ENABLE(ARBITER,		[  --enable-ARBITER        + Arbiter 1088A/B GPS receiver],
+AC_ARG_ENABLE(ARBITER,
+    AC_HELP_STRING([--enable-ARBITER], [+ Arbiter 1088A/B GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1693,7 +1701,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(Arcron MSF receiver)
-AC_ARG_ENABLE(ARCRON_MSF,	[  --enable-ARCRON-MSF     + Arcron MSF receiver],
+AC_ARG_ENABLE(ARCRON_MSF,
+    AC_HELP_STRING([--enable-ARCRON-MSF], [+ Arcron MSF receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1701,8 +1710,19 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Austron 2200A/2201A GPS receiver)
+AC_ARG_ENABLE(AS2201,
+    AC_HELP_STRING([--enable-AS2201], [+ Austron 2200A/2201A GPS receiver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_AS2201)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(ATOM PPS interface)
-AC_ARG_ENABLE(ATOM,		[  --enable-ATOM           s ATOM PPS interface],
+AC_ARG_ENABLE(ATOM,	
+    AC_HELP_STRING([--enable-ATOM], [s ATOM PPS interface]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 case "$ac_cv_var_atom_ok" in
  no) ntp_ok=no ;;
@@ -1713,17 +1733,19 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Austron 2200A/2201A GPS receiver)
-AC_ARG_ENABLE(AS2201,		[  --enable-AS2201         + Austron 2200A/2201A GPS receiver],
+AC_MSG_CHECKING(Chrono-log K-series WWVB receiver)
+AC_ARG_ENABLE(CHRONOLOG,
+    AC_HELP_STRING([--enable-CHRONOLOG], [+ Chrono-log K-series WWVB receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
-    AC_DEFINE(CLOCK_AS2201)
+    AC_DEFINE(CLOCK_CHRONOLOG)
 fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(CHU modem/decoder)
-AC_ARG_ENABLE(CHU,    		[  --enable-CHU            - CHU modem/decoder],
+AC_ARG_ENABLE(CHU,
+    AC_HELP_STRING([--enable-CHU], [- CHU modem/decoder]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1733,7 +1755,8 @@ AC_MSG_RESULT($ntp_ok)
 ac_refclock_chu=$ntp_ok
 
 AC_MSG_CHECKING(CHU audio/decoder)
-AC_ARG_ENABLE(AUDIO-CHU,	[  --enable-AUDIO-CHU      s CHU audio/decoder],
+AC_ARG_ENABLE(AUDIO-CHU,
+    AC_HELP_STRING([--enable-AUDIO-CHU], [s CHU audio/decoder]),
     [ntp_ok=$enableval],
     [case "$ntp_eac$ac_refclock_chu$ntp_canaudio" in
  *no*)	ntp_ok=no  ;;
@@ -1750,7 +1773,8 @@ esac
 
 # Not under HP-UX
 AC_MSG_CHECKING(Datum Programmable Time System)
-AC_ARG_ENABLE(DATUM,		[  --enable-DATUM          s Datum Programmable Time System],
+AC_ARG_ENABLE(DATUM,
+    AC_HELP_STRING([--enable-DATUM], [s Datum Programmable Time System]),
     [ntp_ok=$enableval],
     [case "$ac_cv_header_termios_h" in
     yes)
@@ -1765,8 +1789,19 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Dumb generic hh:mm:ss local clock)
+AC_ARG_ENABLE(DUMBCLOCK,
+    AC_HELP_STRING([--enable-DUMBCLOCK], [+ Dumb generic hh:mm:ss local clock]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_DUMBCLOCK)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(Forum Graphic GPS)
-AC_ARG_ENABLE(FG,		[  --enable-FG             + Forum Graphic GPS],
+AC_ARG_ENABLE(FG,
+    AC_HELP_STRING([--enable-FG], [+ Forum Graphic GPS]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1776,7 +1811,8 @@ AC_MSG_RESULT($ntp_ok)
 
 # Requires modem control
 AC_MSG_CHECKING(Heath GC-1000 WWV/WWVH receiver)
-AC_ARG_ENABLE(HEATH,		[  --enable-HEATH          s Heath GC-1000 WWV/WWVH receiver],
+AC_ARG_ENABLE(HEATH,
+    AC_HELP_STRING([--enable-HEATH], [s Heath GC-1000 WWV/WWVH receiver]),
     [ntp_ok=$enableval],
     [AC_EGREP_CPP(yes,
         [#include <termios.h>
@@ -1794,7 +1830,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(HP 58503A GPS receiver)
-AC_ARG_ENABLE(HPGPS,		[  --enable-HPGPS          + HP 58503A GPS receiver],
+AC_ARG_ENABLE(HPGPS,
+    AC_HELP_STRING([--enable-HPGPS], [+ HP 58503A GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1803,7 +1840,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(Sun IRIG audio decoder)
-AC_ARG_ENABLE(IRIG,  		[  --enable-IRIG           s Sun IRIG audio decoder],
+AC_ARG_ENABLE(IRIG,
+    AC_HELP_STRING([--enable-IRIG], [s Sun IRIG audio decoder]),
     [ntp_ok=$enableval],
     [case "$ntp_eac$ntp_canaudio" in
      *no*)	ntp_ok=no  ;;
@@ -1819,16 +1857,38 @@ case "$ntp_ok$ntp_canaudio" in
 esac
 
 AC_MSG_CHECKING(for JJY receiver)
-AC_ARG_ENABLE(JJY,		[  --enable-JJY            + JJY receiver],
-      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+AC_ARG_ENABLE(JJY,
+    AC_HELP_STRING([--enable-JJY], [+ JJY receiver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_JJY)
 fi
 AC_MSG_RESULT($ntp_ok)
 
+# Not Ultrix
+AC_MSG_CHECKING(Rockwell Jupiter GPS receiver)
+AC_ARG_ENABLE(JUPITER,
+    AC_HELP_STRING([--enable-JUPITER], [s Rockwell Jupiter GPS receiver]),
+    [ntp_ok=$enableval],
+    [case "$ac_cv_var_ppsclock" in
+#     yes) ntp_ok=$ntp_eac
+#        ;;
+     *) ntp_ok=no
+        ;;
+    esac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_JUPITER)
+fi
+AC_MSG_RESULT($ntp_ok)
+case "$ntp_ok$target" in
+ yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+esac
+
 AC_MSG_CHECKING(Leitch CSD 5300 Master Clock System Driver)
-AC_ARG_ENABLE(LEITCH,		[  --enable-LEITCH         + Leitch CSD 5300 Master Clock System Driver],
+AC_ARG_ENABLE(LEITCH,
+    AC_HELP_STRING([--enable-LEITCH], [+ Leitch CSD 5300 Master Clock System Driver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1837,7 +1897,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(local clock reference)
-AC_ARG_ENABLE(LOCAL-CLOCK,	[  --enable-LOCAL-CLOCK    + local clock reference],
+AC_ARG_ENABLE(LOCAL-CLOCK,
+    AC_HELP_STRING([--enable-LOCAL-CLOCK], [+ local clock reference]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1846,7 +1907,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(EES M201 MSF receiver)
-AC_ARG_ENABLE(MSFEES,		[  --enable-MSFEES         + EES M201 MSF receiver],
+AC_ARG_ENABLE(MSFEES,
+    AC_HELP_STRING([--enable-MSFEES], [+ EES M201 MSF receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1856,7 +1918,8 @@ AC_MSG_RESULT($ntp_ok)
 
 # Not Ultrix
 AC_MSG_CHECKING(Magnavox MX4200 GPS receiver)
-AC_ARG_ENABLE(MX4200,		[  --enable-MX4200         s Magnavox MX4200 GPS receiver],
+AC_ARG_ENABLE(MX4200,
+    AC_HELP_STRING([--enable-MX4200 ], [s Magnavox MX4200 GPS receiver]),
     [ntp_ok=$enableval],
     [case "$ac_cv_var_ppsclock" in
      yes) ntp_ok=$ntp_eac
@@ -1874,7 +1937,8 @@ case "$ntp_ok$target" in
 esac
 
 AC_MSG_CHECKING(NMEA GPS receiver)
-AC_ARG_ENABLE(NMEA,  		[  --enable-NMEA           + NMEA GPS receiver],
+AC_ARG_ENABLE(NMEA,
+    AC_HELP_STRING([--enable-NMEA], [+ NMEA GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1883,7 +1947,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for ONCORE Motorola VP/UT Oncore GPS)
-AC_ARG_ENABLE(ONCORE,		[  --enable-ONCORE         s Motorola VP/UT Oncore GPS receiver],
+AC_ARG_ENABLE(ONCORE,
+    AC_HELP_STRING([--enable-ONCORE], [s Motorola VP/UT Oncore GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 case "$ac_cv_var_oncore_ok" in
  no) ntp_ok=no ;;
@@ -1895,7 +1960,8 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for Palisade clock)
-AC_ARG_ENABLE(PALISADE,		[  --enable-PALISADE       + Palisade clock],
+AC_ARG_ENABLE(PALISADE,
+    AC_HELP_STRING([--enable-PALISADE], [+ Palisade clock]),
     [ntp_ok=$enableval],
     [case "$ac_cv_header_termios_h" in
     yes)
@@ -1911,8 +1977,19 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Conrad parallel port radio clock)
+AC_ARG_ENABLE(PCF,
+    AC_HELP_STRING([--enable-PCF ], [+ Conrad parallel port radio clock]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_PCF)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(PST/Traconex 1020 WWV/WWVH receiver)
-AC_ARG_ENABLE(PST,		[  --enable-PST            + PST/Traconex 1020 WWV/WWVH receiver],
+AC_ARG_ENABLE(PST,
+    AC_HELP_STRING([--enable-PST], [+ PST/Traconex 1020 WWV/WWVH receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1920,28 +1997,10 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-# Not Ultrix
-AC_MSG_CHECKING(Rockwell Jupiter GPS receiver)
-AC_ARG_ENABLE(JUPITER,		[  --enable-JUPITER        s Rockwell Jupiter GPS receiver],
-    [ntp_ok=$enableval],
-    [case "$ac_cv_var_ppsclock" in
-#     yes) ntp_ok=$ntp_eac
-#        ;;
-     *) ntp_ok=no
-        ;;
-    esac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_JUPITER)
-fi
-AC_MSG_RESULT($ntp_ok)
-case "$ntp_ok$target" in
- yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
-esac
-
 # Requires modem control
 AC_MSG_CHECKING(PTB modem service)
-AC_ARG_ENABLE(PTBACTS,		[  --enable-PTBACTS        s PTB modem service],
+AC_ARG_ENABLE(PTBACTS,
+    AC_HELP_STRING([--enable-PTBACTS], [s PTB modem service]),
     [ntp_ok=$enableval],
     [AC_EGREP_CPP(yes,
         [#include <termios.h>
@@ -1958,8 +2017,19 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Spectracom 8170/Netclock/2 WWVB receiver)
+AC_ARG_ENABLE(SPECTRACOM,
+    AC_HELP_STRING([--enable-SPECTRACOM], [+ Spectracom 8170/Netclock/2 WWVB receiver]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_SPECTRACOM)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(KSI/Odetics TPRO/S GPS receiver/IRIG interface)
-AC_ARG_ENABLE(TPRO,		[  --enable-TPRO           s KSI/Odetics TPRO/S GPS receiver/IRIG interface],
+AC_ARG_ENABLE(TPRO,
+    AC_HELP_STRING([--enable-TPRO], [s KSI/Odetics TPRO/S GPS receiver/IRIG interface]),
     [ntp_ok=$enableval],
     [case "$ac_cv_header_sys_tpro_h" in
      yes)
@@ -1978,7 +2048,8 @@ case "$ntp_ok$ac_cv_header_sys_tpro" in
 esac
 
 AC_MSG_CHECKING(TRAK 8810 GPS receiver)
-AC_ARG_ENABLE(TRAK,		[  --enable-TRAK           + TRAK 8810 GPS receiver],
+AC_ARG_ENABLE(TRAK,
+    AC_HELP_STRING([--enable-TRAK], [+ TRAK 8810 GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -1986,45 +2057,10 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Chrono-log K-series WWVB receiver)
-AC_ARG_ENABLE(CHRONOLOG,	[  --enable-CHRONOLOG      + Chrono-log K-series WWVB receiver],
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_CHRONOLOG)
-fi
-AC_MSG_RESULT($ntp_ok)
-
-AC_MSG_CHECKING(Dumb generic hh:mm:ss local clock)
-AC_ARG_ENABLE(DUMBCLOCK,	[  --enable-DUMBCLOCK      + Dumb generic hh:mm:ss local clock],
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_DUMBCLOCK)
-fi
-AC_MSG_RESULT($ntp_ok)
-
-AC_MSG_CHECKING(Conrad parallel port radio clock)
-AC_ARG_ENABLE(PCF,		[  --enable-PCF            + Conrad parallel port radio clock],
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_PCF)
-fi
-AC_MSG_RESULT($ntp_ok)
-
-AC_MSG_CHECKING(Spectracom 8170/Netclock/2 WWVB receiver)
-AC_ARG_ENABLE(SPECTRACOM,	[  --enable-SPECTRACOM     + Spectracom 8170/Netclock/2 WWVB receiver],
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_SPECTRACOM)
-fi
-AC_MSG_RESULT($ntp_ok)
-
 # Not on a vax-dec-bsd
 AC_MSG_CHECKING(Kinemetrics/TrueTime receivers)
-AC_ARG_ENABLE(TRUETIME,		[  --enable-TRUETIME       s Kinemetrics/TrueTime receivers],
+AC_ARG_ENABLE(TRUETIME,
+    AC_HELP_STRING([--enable-TRUETIME], [s Kinemetrics/TrueTime receivers]),
     [ntp_ok=$enableval],
     [case "$target" in
      vax-dec-bsd)
@@ -2043,8 +2079,19 @@ case "$ntp_ok$target" in
  yesvax-dec-bsd) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
+AC_MSG_CHECKING(TrueTime 560 IRIG-B decoder)
+AC_ARG_ENABLE(TT560,
+    AC_HELP_STRING([--enable-TT650], [+ TrueTime 560 IRIG-B decoder]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_TT560, , [TrueTime 560 IRIG-B decoder?])
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(Ultralink M320 WWVB receiver)
-AC_ARG_ENABLE(ULINK,		[  --enable-ULINK          + Ultralink WWVB receiver],
+AC_ARG_ENABLE(ULINK,
+    AC_HELP_STRING([--enable-ULINK], [+ Ultralink WWVB receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -2052,25 +2099,10 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(WWV receiver)
-AC_ARG_ENABLE(WWV, 		[  --enable-WWV            + WWV Audio receiver],
-    [ntp_ok=$enableval],
-    [case "$ntp_eac$ntp_canaudio" in
-     *no*)	ntp_ok=no  ;;
-     *)		ntp_ok=yes ;;
-    esac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_WWV)
-fi
-AC_MSG_RESULT($ntp_ok)
-case "$ntp_ok$ntp_canaudio" in
- yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
-esac
-
 # Requires modem control
 AC_MSG_CHECKING(USNO modem service)
-AC_ARG_ENABLE(USNO,		[  --enable-USNO           s USNO modem service],
+AC_ARG_ENABLE(USNO,
+    AC_HELP_STRING([--enable-USNO], [s USNO modem service]),
     [ntp_ok=$enableval],
     [AC_EGREP_CPP(yes,
         [#include <termios.h>
@@ -2086,6 +2118,23 @@ if test "$ntp_ok" = "yes"; then
     AC_DEFINE(CLOCK_USNO)
 fi
 AC_MSG_RESULT($ntp_ok)
+
+AC_MSG_CHECKING(WWV receiver)
+AC_ARG_ENABLE(WWV,
+    AC_HELP_STRING([--enable-WWV], [+ WWV Audio receiver]),
+    [ntp_ok=$enableval],
+    [case "$ntp_eac$ntp_canaudio" in
+     *no*)	ntp_ok=no  ;;
+     *)		ntp_ok=yes ;;
+    esac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_WWV)
+fi
+AC_MSG_RESULT($ntp_ok)
+case "$ntp_ok$ntp_canaudio" in
+ yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+esac
 
 AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
 AC_ARG_ENABLE(parse-clocks,	[  --enable-parse-clocks   - include all suitable PARSE clocks:],
@@ -2112,7 +2161,8 @@ ntp_parseutil=no
 ntp_rawdcf=no
 
 AC_MSG_CHECKING(Diem Computime Radio Clock)
-AC_ARG_ENABLE(COMPUTIME,	[  --enable-COMPUTIME      s Diem Computime Radio Clock],
+AC_ARG_ENABLE(COMPUTIME,
+    AC_HELP_STRING([--enable-COMPUTIME], [s Diem Computime Radio Clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2127,7 +2177,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(ELV/DCF7000 clock)
-AC_ARG_ENABLE(DCF7000,		[  --enable-DCF7000        s ELV/DCF7000 clock],
+AC_ARG_ENABLE(DCF7000,
+    AC_HELP_STRING([--enable-DCF7000], [s ELV/DCF7000 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2142,7 +2193,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(HOPF 6021 clock)
-AC_ARG_ENABLE(HOPF6021,		[  --enable-HOPF6021       s HOPF 6021 clock],
+AC_ARG_ENABLE(HOPF6021,
+    AC_HELP_STRING([--enable-HOPF6021 ], [s HOPF 6021 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2157,7 +2209,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(Meinberg clocks)
-AC_ARG_ENABLE(MEINBERG,		[  --enable-MEINBERG       s Meinberg clocks],
+AC_ARG_ENABLE(MEINBERG,
+    AC_HELP_STRING([--enable-MEINBERG], [s Meinberg clocks]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2172,7 +2225,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(DCF77 raw time code)
-AC_ARG_ENABLE(RAWDCF,		[  --enable-RAWDCF         s DCF77 raw time code],
+AC_ARG_ENABLE(RAWDCF,
+    AC_HELP_STRING([--enable-RAWDCF], [s DCF77 raw time code]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2210,7 +2264,8 @@ case "$ntp_rawdcf" in
 esac
 
 AC_MSG_CHECKING(RCC 8000 clock)
-AC_ARG_ENABLE(RCC8000,		[  --enable-RCC8000        s RCC 8000 clock],
+AC_ARG_ENABLE(RCC8000,
+    AC_HELP_STRING([--enable-RCC8000], [s RCC 8000 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2225,7 +2280,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(Schmid DCF77 clock)
-AC_ARG_ENABLE(SCHMID,		[  --enable-SCHMID         s Schmid DCF77 clock],
+AC_ARG_ENABLE(SCHMID,
+    AC_HELP_STRING([--enable-SCHMID ], [s Schmid DCF77 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2240,7 +2296,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(Trimble GPS receiver/TAIP protocol)
-AC_ARG_ENABLE(TRIMTAIP,		[  --enable-TRIMTAIP       s Trimble GPS receiver/TAIP protocol],
+AC_ARG_ENABLE(TRIMTAIP,
+    AC_HELP_STRING([--enable-TRIMTAIP], [s Trimble GPS receiver/TAIP protocol]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2255,7 +2312,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(Trimble GPS receiver/TSIP protocol)
-AC_ARG_ENABLE(TRIMTSIP,		[  --enable-TRIMTSIP       s Trimble GPS receiver/TSIP protocol],
+AC_ARG_ENABLE(TRIMTSIP,
+    AC_HELP_STRING([--enable-TRIMTSIP], [s Trimble GPS receiver/TSIP protocol]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2270,7 +2328,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(WHARTON 400A Series clock)
-AC_ARG_ENABLE(WHARTON,		[  --enable-WHARTON        s WHARTON 400A Series clock],
+AC_ARG_ENABLE(WHARTON,
+    AC_HELP_STRING([--enable-WHARTON], [s WHARTON 400A Series clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
@@ -2285,7 +2344,8 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 AC_MSG_CHECKING(VARITEXT clock)
-AC_ARG_ENABLE(VARITEXT,		[  --enable-VARITEXT       s VARITEXT clock],
+AC_ARG_ENABLE(VARITEXT,
+    AC_HELP_STRING([--enable-VARITEXT], [s VARITEXT clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
 if test "$ntp_ok" = "yes"; then
     ntp_libparse=yes
