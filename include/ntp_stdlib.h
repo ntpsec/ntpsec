@@ -65,6 +65,7 @@ extern	int	ymd2yd		P((int, int, int));
 extern	int	MD5authdecrypt	P((u_char *, u_int32 *, int, int));
 extern	int	MD5authencrypt	P((u_char *, u_int32 *, int));
 extern	void	MD5auth_setkey	P((keyid_t, const u_char *, const int));
+extern	u_int32	addr2refid	P((struct sockaddr_storage *));
 
 extern	int	atoint		P((const char *, long *));
 extern	int	atouint		P((const char *, u_long *));

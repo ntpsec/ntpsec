@@ -31,7 +31,7 @@ s_char	sys_precision;		/* local clock precision */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdispersion;	/* dispersion to primary source */
 u_int32 sys_refid;		/* reference source for local clock */
-u_int32 host_refid;		/* reference source for host */
+u_int32 sys_peer_refid;		/* hashed refid of our current peer */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
@@ -226,9 +226,7 @@ transmit(
 					clock_select();
 				}
 				if ((peer->stratum > 1 &&
-				    peer->dstadr->sin.ss_family == AF_INET ?
-				    peer->refid == GET_INADDR(peer->dstadr->sin) :
-				    peer->refid == host_refid) ||
+				    peer->refid == peer->dstadr->addr_refid) ||
 				    peer->stratum == STRATUM_UNSPEC)
 					hpoll++;
 				else
@@ -627,9 +625,7 @@ receive(
 			    sys_stratum || (sys_cohort &&
 			    PKT_TO_STRATUM(pkt->stratum) ==
 			    sys_stratum) ||
-			    rbufp->dstadr->sin.ss_family == AF_INET ?
-			    GET_INADDR(rbufp->dstadr->sin) == pkt->refid :
-			    host_refid == pkt->refid)
+			    rbufp->dstadr->addr_refid == pkt->refid)
 				return;
 		}
 
@@ -1311,8 +1307,7 @@ clock_update(void)
 		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
 		else
-			sys_refid = sys_peer->srcadr.ss_family == AF_INET ?
-			    GET_INADDR(sys_peer->srcadr) : host_refid;
+			sys_refid = sys_peer_refid;
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
@@ -1776,9 +1771,7 @@ clock_select(void)
 			 * increase to a day and a half.
 			 */
 			if (!peer->reach || (peer->stratum > 1 &&
-			    peer->dstadr->sin.ss_family == AF_INET ?
-			    peer->refid == GET_INADDR(peer->dstadr->sin) :
-			    peer->refid == host_refid) ||
+			    peer->refid == peer->dstadr->addr_refid) ||
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
 			    clock_phi * ULOGTOD(sys_poll)))
@@ -2154,8 +2147,13 @@ clock_select(void)
 			   sys_offset);
 #endif
 	}
-	if (osys_peer != sys_peer)
+	if (osys_peer != sys_peer) {
+		if (sys_peer == NULL)
+			sys_peer_refid = 0;
+		else
+			sys_peer_refid = addr2refid(&sys_peer->srcadr);
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
+	}
 	clock_update();
 }
 

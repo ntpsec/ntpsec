@@ -352,7 +352,6 @@ extern s_char	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* distance to current sync source */
 extern double	sys_rootdispersion;	/* dispersion of system clock */
 extern u_int32	sys_refid;		/* reference source for local clock */
-extern u_int32	host_refid;		/* reference source for host */
 extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */
 extern struct peer *sys_prefer;		/* our cherished peer */

@@ -7,9 +7,6 @@
 # include <config.h>
 #endif
 
-/* Disable the openssl md5 includes because it clash with ours. */
-#define NO_MD5
-
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -18,9 +15,6 @@
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
-
-#include "global.h"
-#include "md5.h"
 
 #ifdef SIM
 #include "ntpsim.h"
@@ -149,7 +143,6 @@ static	struct refclockio *refio;
 fd_set activefds;
 int maxactivefd;
 
-static	void create_host_refid	P((void));
 static	int create_sockets	P((u_int));
 static	int open_socket		P((struct sockaddr_storage *, int, int));
 static	void	close_socket	P((int));
@@ -204,46 +197,10 @@ init_io(void)
 	(void) create_sockets(htons(NTP_PORT));
 	UNBLOCKIO();
 
-	create_host_refid();
-
 #ifdef DEBUG
 	if (debug)
 	    printf("init_io: maxactivefd %d\n", maxactivefd);
 #endif
-}
-
-/*
- * create_host_refid - create a host refid for use by ntp_proto.c during
- * symmetric modes to detect loops.
- */
-static void
-create_host_refid(void)
-{
-	unsigned char digest[16];
-	u_int i;
-	MD5_CTX md5;
-
-	MD5Init(&md5);
-	for (i = 2; i < ninterfaces; i++) {
-		if (inter_list[i].sin.ss_family == AF_INET) {
-			MD5Update(&md5,
-			    (u_char *)&GET_INADDR(inter_list[0].sin),
-			    sizeof(struct in_addr));
-		} else {
-			MD5Update(&md5,
-			    (u_char *)&GET_INADDR6(inter_list[0].sin),
-			    sizeof(struct in6_addr));
-		}
-	}
-	MD5Final(digest, &md5);
-	host_refid = digest[0];
-	host_refid <<= 8;
-	host_refid |= digest[1];
-	host_refid <<= 8;
-	host_refid |= digest[2];
-	host_refid <<= 8;
-	host_refid |= digest[3];
-	host_refid = htonl(host_refid);
 }
 
 /*
@@ -818,6 +775,13 @@ create_sockets(
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
 	}
+
+	/*
+	 * Calculate the address hash for each interface address.
+	 */
+	for (i = 0; i < ninterfaces; i++)
+		inter_list[i].addr_refid = addr2refid(&inter_list[i].sin);
+
 #ifdef DEBUG
 	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);

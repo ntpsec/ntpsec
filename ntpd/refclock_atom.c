@@ -488,7 +488,7 @@ atom_poll(
 	if (peer->stratum == 0)
 		peer->refid = pp->refid;
 	else
-		peer->refid = sys_peer->refid;
+		peer->refid = addr2refid(&sys_prefer->srcadr);
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	peer->burst = ASTAGE;
