@@ -83,7 +83,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
+#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI)
 
 #include <stdio.h>
 #include <ctype.h>
@@ -221,6 +221,7 @@ struct instance {
 	long	offset; 	/* ns */
 
 	u_char	*shmem;
+	char	*shmem_fname;
 	u_int	shmem_Cb;
 	u_int	shmem_Ba;
 	u_int	shmem_Ea;
@@ -277,7 +278,7 @@ static	void	oncore_sendmsg	     P((int fd, u_char *, size_t));
 static	void	oncore_shutdown      P((int, struct peer *));
 static	int	oncore_start	     P((int, struct peer *));
 static	void	oncore_get_timestamp P((struct instance *, long, long));
-static	void	oncore_init_shmem    P((struct instance *, char *));
+static	void	oncore_init_shmem    P((struct instance *));
 static	void	oncore_print_As      P((struct instance *));
 
 static	void	oncore_msg_any	   P((struct instance *, u_char *, size_t, int));
@@ -646,7 +647,7 @@ oncore_start(
 		instance->pps_p.clear_offset.tv_nsec = 0;
 	}
 	instance->pps_p.mode |= PPS_TSFMT_TSPEC;
-	instance->pps_p.mode &= mode;		/* only do it if it is legal */
+	instance->pps_p.mode &= mode;		/* only set what is legal */
 
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
@@ -871,8 +872,16 @@ oncore_read_config(
 		for (; *ca && isascii((int)*ca) && (isspace((int)*ca) || (*ca == '=')); ca++)
 			continue;
 
-		if (!strncmp(cc, "STATUS", (size_t) 6)) {
-			oncore_init_shmem(instance, ca);
+		/*
+		 * move call to oncore_shmem_init() from here to after
+		 * we have determined Oncore Model, so we can ignore
+		 * request if model doesnt 'support' it
+		 */
+
+		if (!strncmp(cc, "STATUS", (size_t) 6) || !strncmp(cc, "SHMEM", (size_t) 5)) {
+			i = strlen(ca);
+			instance->shmem_fname = (char *) malloc((unsigned) (i+1));
+			strcpy(instance->shmem_fname, ca);
 			continue;
 		}
 
@@ -996,8 +1005,7 @@ oncore_read_config(
 
 static void
 oncore_init_shmem(
-	struct instance *instance,
-	char *filename
+	struct instance *instance
 	)
 {
 #ifdef ONCORE_SHMEM_STATUS
@@ -1010,6 +1018,12 @@ oncore_init_shmem(
 		return;
 
 	instance->shmem_first++;
+
+	if ((instance->statusfd = open(instance->shmem_fname, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
+		perror(instance->shmem_fname);
+		return;
+	}
+
 	n = 1;
 	for (mp = oncore_messages; mp->flag[0]; mp++) {
 		mp->shmem = n;
@@ -1035,21 +1049,16 @@ oncore_init_shmem(
 	oncore_shmem_length = n + 2;
 	fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", (int) oncore_shmem_length);
 
-	instance->statusfd = open(filename, O_RDWR|O_CREAT|O_TRUNC, 0644);
-	if (instance->statusfd < 0) {
-		perror(filename);
-		exit(4);
-	}
 	buf = malloc(oncore_shmem_length);
 	if (buf == NULL) {
 		perror("malloc");
-		exit(4);
+		return;
 	}
 	memset(buf, 0, sizeof(buf));
 	i = write(instance->statusfd, buf, oncore_shmem_length);
 	if (i != oncore_shmem_length) {
-		perror(filename);
-		exit(4);
+		perror(instance->shmem_fname);
+		return;
 	}
 	free(buf);
 	instance->shmem = (u_char *) mmap(0, oncore_shmem_length,
@@ -1062,7 +1071,7 @@ oncore_init_shmem(
 	if (instance->shmem == (u_char *)MAP_FAILED) {
 		instance->shmem = 0;
 		close (instance->statusfd);
-		exit(4);
+		return;
 	}
 	for (mp = oncore_messages; mp->flag[0]; mp++) {
 		l = mp->shmem;
@@ -1321,7 +1330,11 @@ oncore_msg_any(
 	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
+#ifdef HAVE_STRUCT_TIMESPEC
+	struct timespec tv;
+#else
 	struct timeval tv;
+#endif
 
 	if (debug > 3) {
 		GETTIMEOFDAY(&tv, 0);
@@ -1536,10 +1549,18 @@ oncore_msg_Cj_id(
 	 */
 
 /*BAD M12*/ if (instance->model == ONCORE_M12 && instance->version == 1 && instance->revision <= 3) {
-		instance->shmem = 0;
+		instance->shmem_fname = 0;
 		cp = "*** SHMEM turned off for ONCORE M12 ***";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 	}
+
+	/*
+	 * we now know model number and have zeroed
+	 * instance->shmem_fname if SHMEM is not supported
+	 */
+
+	if (instance->shmem_fname);
+		oncore_init_shmem(instance);
 
 	if (instance->shmem)
 		cp = "SHMEM is available";
@@ -1573,7 +1594,6 @@ oncore_msg_Cj_id(
 		cp = "state = ONCORE_TEST_SENT";
 		record_clock_stats(&(instance->peer->srcadr), cp);
 		instance->timeout = 4;
-
 	}
 }
 
@@ -1941,7 +1961,7 @@ fprintf(stderr, "ONCORE: DEBUG BITS: (%x %x), (%x %x),  %x %x %x %x %x\n",
 
 		/* stuck in here as it only gets done once */
 
-		if (!instance->saw_At) {
+		if (instance->chan != 12 && !instance->saw_At) {
 			cp = "Not Good, no @@At command, must be a GT/GT+";
 			record_clock_stats(&(instance->peer->srcadr), cp);
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_Av1, sizeof(oncore_cmd_Av1));
@@ -2241,6 +2261,8 @@ oncore_get_timestamp(
 	struct timeval	*tsp = 0;
 #endif
 #ifdef HAVE_PPSAPI
+	int	current_mode;
+	pps_params_t current_params;
 	struct timespec timeout;
 	pps_info_t pps_i;
 #else  /* ! HAVE_PPSAPI */
@@ -2381,7 +2403,42 @@ oncore_get_timestamp(
 	else
 		instance->pps_p.clear_offset.tv_nsec  = -dt2;
 
-	if (time_pps_setparams(instance->pps_h, &instance->pps_p))
+	/* The following code is necessary, and not just a time_pps_setparams,
+	 * using the saved instance->pps_p, since some other process on the
+	 * machine may have diddled with the mode bits (say adding something
+	 * that it needs).  We take what is there and ADD what we need.
+	 * [[ The results from the time_pps_getcap is unlikely to change so
+	 *    we could probably just save it, but I choose to do the call ]]
+	 * Unfortunately, there is only ONE set of mode bits in the kernel per
+	 * interface, and not one set for each open handle.
+	 *
+	 * There is still a race condition here where we might mess up someone
+	 * elses mode, but if he is being careful too, he should survive.
+	 */
+
+	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
+		msyslog(LOG_ERR,
+		    "refclock_ioctl: time_pps_getcap failed: %m");
+		return (0);
+	}
+
+	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
+		msyslog(LOG_ERR,
+		    "refclock_ioctl: time_pps_getparams failed: %m");
+		return (0);
+	}
+
+		/* or current and mine */
+	current_params.mode |= instance->pps_p.mode;
+		/* but only set whats legal */
+	current_params.mode &= current_mode;
+
+	current_params.assert_offset.tv_sec = 0;
+	current_params.assert_offset.tv_nsec = -dt2;
+	current_params.clear_offset.tv_sec = 0;
+	current_params.clear_offset.tv_nsec = -dt2;
+
+	if (time_pps_setparams(instance->pps_h, &current_params))
 		perror("time_pps_setparams");
 #else
 	/* if not PPSAPI, no way to inform kernel of OFFSET, just add the */

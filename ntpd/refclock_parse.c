@@ -767,8 +767,6 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define COMPUTIME_SAMPLES     5
 #define COMPUTIME_KEEP        3
 
-static poll_info_t we400a_pollinfo = { 60, "T", 1 };
-
 /*
  * Varitext Radio Clock Receiver
  */
@@ -1169,18 +1167,18 @@ static struct parse_clockinfo
 	},
 	{				/* mode 15 */
 		0,				/* operation flags (io modes) */
-  		poll_dpoll,			/* active poll routine */
-		poll_init,			/* active poll init routine */
+  		NO_POLL,			/* active poll routine */
+		NO_INIT,			/* active poll init routine */
   		NO_EVENT,		        /* special event handling (e.g. reset clock) */
   		NO_END,				/* active poll end routine */
   		NO_MESSAGE,			/* process a lower layer message */
-		((void *)(&we400a_pollinfo)),   /* local data area for "poll" mechanism */
+		NO_DATA,			/* local data area for "poll" mechanism */
 		0,				/* rootdelay */
-		1.0 / 960,			/* current offset by which the RS232
+		11.0 /* bits */ / 9600,		/* current offset by which the RS232
 				           	time code is delayed from the actual time */
 		DCF_ID,				/* ID code */
 		"WHARTON 400A Series clock",	/* device name */
-		"WHARTON 400A Series clock Output Format 5",	/* fixed format */
+		"WHARTON 400A Series clock Output Format 1",	/* fixed format */
 			/* Must match a format-name in a libparse/clk_xxx.c file */
 		DCF_TYPE,			/* clock type (ntp control) */
 		(1*60*60),		        /* time to trust oscillator after loosing synch */

@@ -1,5 +1,35 @@
 2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_conf.c: 
+	* ntpd/refclock_oncore.c: Re-enabled oncore driver for HAVE_PPSAPI
+	case only.
+
+2000-09-12  Philippe De Muyter  <phdm@macqel.be>
+
+        * ntpd/refclock_parse.c (we400a_pollinfo): Useless variable removed.
+        [WHARTON slot]: Set NO_POLL, NO_INIT and NO_DATA; fix `fixed format'
+        and `offset' fields.
+
+	* include/ntp_tty.h: New file
+	* libntp/icom.c: Use it.
+
+	* ntp_update (UPDATE_OPTIONS): Use -d, too.  Fix Pass 1 comment.
+
+2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c: shmem_fname added.  oncore_init_shmem()
+	updated. 
+	(oncore_start): Comment cleanup
+	(oncore_read_config): Move call to oncore_shmem_init()
+	(oncore_init_shmem): Prototype change
+	(oncore_init_shmem): Don't exit on errors
+	(oncore_msg_any): timespec/timeval cleanup
+	(oncore_msg_Cj_id): shmem_fname changes
+	(oncore_msg_BaEaHa): saw_At bugfix
+	(oncore_get_timestamp): Added current_mode/current_params.  Commented.
+	Added time_pps_getcap() calls.
+	From: Reg Clemens <reg@dwf.com>
+
 	* ntpd/ntp_io.c (input_handler): Better recvfrom() error message
 	From: Dean Gibson <timekeeper@tcp-udp.net>
 
