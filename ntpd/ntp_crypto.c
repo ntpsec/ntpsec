@@ -523,6 +523,8 @@ crypto_recv(
 			peer->subject = emalloc(vallen + 1);
 			memcpy(peer->subject, ep->pkt, vallen);
 			peer->subject[vallen] = '\0';
+			peer->issuer = emalloc(vallen + 1);
+			strcpy(peer->issuer, peer->subject);
 			temp32 = (fstamp >> 16) & 0xffff;
 			sprintf(statstr,
 			    "flags 0x%x host %s signature %s", fstamp,
@@ -591,11 +593,6 @@ crypto_recv(
 				    ntohl(cinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
-				if (cinfo->grpkey != NULL)
-					peer->grpkey =
-					    BN_bin2bn(cinfo->grpkey,
-					     cinfo->grplen, NULL);
-				peer->crypto |= CRYPTO_FLAG_VALID;
 			}
 			peer->flash &= ~TEST10;
 			temp32 = cinfo->nid;
@@ -1903,18 +1900,34 @@ crypto_alice(
 	DSA	*dsa;		/* IFF key */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
-	tstamp_t tstamp;	/* NTP timestamp */
+	char	filename[MAXFILENAME + 1];
+	tstamp_t tstamp;
+	tstamp_t fstamp;
 	u_int	len;
 
 	/*
-	 * If the IFF parameters are not valid, something awful
-	 * happened.
+	 * If the IFF parameters are not valid or there is no trusted
+	 * host, something awful happened. Otherwise, load the identity
+	 * file containing the scheme parameters.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
+	if (!(crypto_flags & CRYPTO_FLAG_IFF) || peer->issuer == NULL) {
 		msyslog(LOG_ERR, "crypto_alice: IFF unavailable");
 		return (XEVNT_PUB);
 	}
-	dsa = iff_pkey->pkey.dsa;
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	snprintf(filename, MAXFILENAME, "ntpkey_iff_%s", peer->issuer);
+	peer->ident_pkey = crypto_key(filename, &fstamp, TYPE_PRIVATE);
+	if (peer->ident_pkey == NULL) {
+		msyslog(LOG_ERR,
+		    "crypto_alice: file %s not found or corrupt",
+		    filename);
+		return (XEVNT_PUB);
+	}
+	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: IFF defective key");
+		return (XEVNT_PUB);
+	}
 
 	/*
 	 * Roll new random r (0 < r < q). The OpenSSL library has a bug
@@ -1975,7 +1988,7 @@ crypto_bob(
 
 	/*
 	 * If the IFF parameters are not valid, something awful
-	 * happened.
+	 * happened or we are being tormented.
 	 */
 	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
 		msyslog(LOG_ERR, "crypto_bob: IFF unavailable");
@@ -2064,14 +2077,18 @@ crypto_iff(
 	int	temp;
 
 	/*
-	 * If the IFF parameters are not valid, something awful
-	 * happened.
+	 * If the IFF parameters are not valid or no challenge was sent,
+	 * something awful happened or we are being tormented.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
+	if (!(crypto_flags & CRYPTO_FLAG_IFF) || peer->ident_pkey ==
+	    NULL) {
 		msyslog(LOG_ERR, "crypto_iff: IFF unavailable");
 		return (XEVNT_PUB);
 	}
-	dsa = iff_pkey->pkey.dsa;
+	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: IFF defective key");
+		return (XEVNT_PUB);
+	}
 	if (peer->iffval == NULL) {
 		msyslog(LOG_ERR, "crypto_iff: missing IFF challenge");
 		return (XEVNT_PUB);
@@ -2085,8 +2102,7 @@ crypto_iff(
 	ptr = (u_char *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_iff %s\n",
-		    ERR_error_string(ERR_get_error(),
-		    NULL));
+		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_PUB);
 	}
 
@@ -2183,18 +2199,35 @@ crypto_alice2(
 	RSA	*rsapar;	/* GQ parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
-	tstamp_t tstamp;	/* NTP timestamp */
+	char	filename[MAXFILENAME + 1];
+	tstamp_t tstamp;
+	tstamp_t fstamp;
 	u_int	len;
 
 	/*
-	 * If the GQ parameters are not valid, something awful
-	 * happened.
+	 * If the GQ parameters are not valid or there is no trusted
+	 * host, something awful happened. Otherwise, load the identity
+	 * file containing the scheme parameters.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
+	if (!(crypto_flags & CRYPTO_FLAG_GQ) || peer->issuer == NULL) {
 		msyslog(LOG_ERR, "crypto_alice2: GQ unavailable");
 		return (XEVNT_PUB);
 	}
-	rsapar = gqpar_pkey->pkey.rsa;
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
+	    peer->issuer);
+	peer->ident_pkey = crypto_key(filename, &fstamp, TYPE_PRIVATE);
+	if (peer->ident_pkey == NULL) {
+		msyslog(LOG_ERR,
+		    "crypto_alice: file %s not found or corrupt",
+		    filename);
+		return (XEVNT_PUB);
+	}
+	if ((rsapar = peer->ident_pkey->pkey.rsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: GQ defective key");
+		return (XEVNT_PUB);
+	}
 
 	/*
 	 * Roll new random r (0 < r < n). The OpenSSL library has a bug
@@ -2256,7 +2289,7 @@ crypto_bob2(
 
 	/*
 	 * If the GQ parameters are not valid, something awful
-	 * happened.
+	 * happened or we are being tormented.
 	 */
 	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
 		msyslog(LOG_ERR, "crypto_bob2: GQ unavailable");
@@ -2346,13 +2379,18 @@ crypto_gq(
 	int	temp;
 
 	/*
-	 * If the GQ parameters are not valid, something awful happened.
+	 * If the GQ parameters are not valid or no challenge was sent,
+	 * something awful happened or we are being tormented.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
+	if (!(crypto_flags & CRYPTO_FLAG_GQ) || peer->ident_pkey ==
+	    NULL) {
 		msyslog(LOG_ERR, "crypto_gq: GQ unavailable");
 		return (XEVNT_PUB);
 	}
-	rsapar = gqpar_pkey->pkey.rsa;
+	if ((rsapar = peer->ident_pkey->pkey.rsa) == NULL) {
+		msyslog(LOG_ERR, "crypto_alice: GQ defective key");
+		return (XEVNT_PUB);
+	}
 	if (peer->iffval == NULL) {
 		msyslog(LOG_ERR, "crypto_gq: missing GQ challenge");
 		return (XEVNT_PUB);
@@ -2850,14 +2888,25 @@ cert_install(
 			/*
 			 * If subject Y matches the server subject name,
 			 * then Y has completed the certificate trail.
+			 * Save the group key and light the valid bit.
 			 */
 			if (strcmp(yp->subject, peer->subject) != 0)
 				continue;
 
+			if (yp->grpkey != NULL) {
+				if (peer->grpkey != NULL)
+					BN_free(peer->grpkey);
+				peer->grpkey = BN_bin2bn(yp->grpkey,
+				     yp->grplen, NULL);
+			}
+			peer->crypto |= CRYPTO_FLAG_VALID;
+
 			/*
 			 * If this is the default identity scheme, the
 			 * identity is confirmed valid. The next
-			 * signature will set the server proventic.
+			 * signature will set the server proventic. If
+			 * this is an identity scheme, fetch the
+			 * identity credentials.
 			 */
 			if (peer->crypto & crypto_flags &
 			    (CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ))

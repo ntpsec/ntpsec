@@ -1447,6 +1447,8 @@ peer_clear(
 	key_expire(peer);
 	if (peer->pkey != NULL)
 		EVP_PKEY_free(peer->pkey);
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
 	if (peer->subject != NULL)
 		free(peer->subject);
 	if (peer->issuer != NULL)
@@ -2470,7 +2472,7 @@ peer_xmit(
 				    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
 				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->subject);
+				    peer->issuer);
 
 			/*
 			 * Identity
@@ -2485,9 +2487,6 @@ peer_xmit(
 			    CRYPTO_FLAG_IFF)
 				exten = crypto_args(peer, CRYPTO_IFF,
 				    NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->issuer);
 
 			/*
 			 * Autokey

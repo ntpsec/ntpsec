@@ -267,7 +267,8 @@ struct peer {
 	u_char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
-	BIGNUM	*iffval;	/* IFF challenge */
+	EVP_PKEY *ident_pkey;	/* identity key */
+	BIGNUM	*iffval;	/* IFF/GQ challenge */
 	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */

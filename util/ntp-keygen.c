@@ -36,6 +36,11 @@
  *	Guillou-Quisquater (GQ) parameters and keys used to verify
  *	trusted group membership
  *
+ * ntpkey_MVkey_<hostname>.<filestamp>,
+ * ntpkey_MPkey<n>_<hostname>.<filestamp>
+ *	Mu-Varadharajan (MV) parameters and keys used to verify	trusted
+ *	 group membership
+ *
  * ntpkey_XXXcert_<hostname>.<filestamp>
  *	X509v3 certificate using RSA or DSA public keys and signatures.
  *	XXX is a code identifying the message digest and signature
@@ -137,10 +142,6 @@
 struct mv {
 	DSA	*dsa;		/* DSA parameters */
 	BIGNUM	**x;		/* private key vector */
-	BIGNUM	*gbar;		/* public key 1 */
-	BIGNUM	*ghat;		/* public key 2 */
-	BIGNUM	**xbar;		/* private key vector 1 */
-	BIGNUM	**xhat;		/* private key vector 2 */
 	int	n;		/* number of keys */
 	BIGNUM	*u, *v;		/* BN scratch */
 	BN_CTX	*ctx;		/* context scratch */
@@ -162,8 +163,8 @@ struct	term {
 /*
  * Prototypes
  */
-FILE	*fheader	P((u_char *));
-void	fslink		P((const char *));
+FILE	*fheader	P((const char *, const char *));
+void	fslink		P((const char *, const char *));
 int	gen_md5		P((char *));
 #ifdef OPENSSL
 EVP_PKEY *gen_rsa	P((char *));
@@ -171,8 +172,7 @@ EVP_PKEY *gen_dsa	P((char *));
 EVP_PKEY *gen_iff	P((char *));
 RSA	*gen_gqpar	P((char *));
 RSA	*gen_gqkey	P((char *, RSA *));
-struct mv *gen_mvpar	P((char *));
-void	gen_mvkey	P((char *, struct mv *));
+void	gen_mv		P((char *));
 int	x509		P((EVP_PKEY *, const EVP_MD *, char *, char *));
 void	cb		P((int, int, void *));
 EVP_PKEY *genkey	P((char *, char *));
@@ -189,8 +189,9 @@ int	rval;			/* return status */
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 int	nkeys = 0;		/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
-char	hostname[MAXHOSTNAME];	/* host name */
-char	filename[MAXFILENAME];	/* file name */
+char	*hostname;		/* host name (subject name) */
+char	*trustname;		/* trusted host name (issuer name) */
+char	filename[MAXFILENAME + 1]; /* file name */
 char	*passwd = NULL;		/* private key password */
 #ifdef OPENSSL
 long	d0, d1, d2, d3;		/* callback counters */
@@ -214,9 +215,9 @@ main(
 	EVP_PKEY *pkey = NULL;	/* temp sign key */
 	RSA	*rsa_gqpar = NULL; /* GQ parameters */
 	RSA	*rsa_gqkey = NULL; /* GQ key */
-	struct mv *mv_par = NULL; /* MV parameters */
 	const EVP_MD *ectx;	/* EVP digest */
-	char	pathbuf[MAXFILENAME];
+	char	hostbuf[MAXHOSTNAME + 1];
+	char	pathbuf[MAXFILENAME + 1];
 	FILE	*str;		/* file handle */
 	int	md5key = 0;	/* MD5 keys */
 	int	hostkey = 0;	/* RSA keys */
@@ -245,12 +246,14 @@ main(
 	/*
 	 * Process options, initialize host name and timestamp.
 	 */
-	gethostname(hostname, sizeof(hostname));
+	gethostname(hostbuf, MAXHOSTNAME);
+	hostname = hostbuf;
+	trustname = hostbuf;
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
 	rval = 0;
-	while ((temp = getopt(argc, argv, "c:de:GgHIMm:Pp:S:tV:")) !=
-	    -1) {
+	while ((temp = getopt(argc, argv,
+	    "c:de:GgHIi:Mm:Pp:S:s:TV:")) != -1) {
 		switch(temp) {
 
 		/*
@@ -303,6 +306,12 @@ main(
 			continue;
 
 		/*
+		 * -i set issuer name
+		 */
+		case 'i':
+			trustname = optarg;
+
+		/*
 		 * -M generate MD5 keys
 		 */
 		case 'M':
@@ -339,11 +348,17 @@ main(
 		case 'S':
 			sign = optarg;
 			continue;
+
+		/*
+		 * -s set subject name
+		 */
+		case 's':
+			hostname = optarg;
 		
 		/*
-		 * -t trusted certificate (TC scheme)
+		 * -T trusted certificate (TC scheme)
 		 */
-		case 't':
+		case 'T':
 			exten = EXT_KEY_TRUST;
 			continue;
 
@@ -399,14 +414,12 @@ main(
 		pkey_iff = gen_iff("iff");
 	if (gqpar)
 		rsa_gqpar = gen_gqpar("gqpar");
-	if (nkeys > 0) {
-		mv_par = gen_mvpar("mvpar");
-		gen_mvkey("mvkey", mv_par);
-	}
+	if (nkeys > 0)
+		gen_mv("mvkey");
 
 	/*
 	 * If there is no new host key, look for an existing one. If not
-	 ( found, create one.
+	 ( found, create it.
 	 */
 	while (pkey_host == NULL) {
 		sprintf(filename, "ntpkey_host_%s", hostname);
@@ -565,6 +578,34 @@ main(
 }
 
 
+#if 0
+/*
+ * Generate random MD5 key with password.
+ */
+int
+gen_md5(
+	char	*id		/* file name id */
+	)
+{
+	BIGNUM	*key;
+	BIGNUM	*keyid;
+	FILE	*str;
+	u_char	bin[16];
+
+	printf("Generating MD5 keys...\n");
+	str = fheader("MD5key", hostname);
+	keyid = BN_new(); key = BN_new();
+	BN_rand(keyid, 16, -1, 0);
+	BN_rand(key, 128, -1, 0);
+	BN_bn2bin(key, bin);
+	PEM_write_fp(str, MD5, NULL, bin);
+	fclose(str);
+	fslink(id, hostname);
+	return (1);
+}
+
+
+#else
 /*
  * Generate semi-random MD5 keys compatible with NTPv3 and NTPv4
  */
@@ -579,7 +620,7 @@ gen_md5(
 	int	i, j;
 
 	printf("Generating MD5 keys...\n");
-	str = fheader("MD5key");
+	str = fheader("MD5key", hostname);
 	srandom(epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < 16; j++) {
@@ -597,9 +638,11 @@ gen_md5(
 		    md5key);
 	}
 	fclose(str);
-	fslink(id);
+	fslink(id, hostname);
 	return (1);
 }
+#endif /* OPENSSL */
+
 
 #ifdef OPENSSL
 /*
@@ -641,17 +684,18 @@ gen_rsa(
 	 * Write the RSA parameters and keys as a RSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("RSAkey");
+	str = fheader("RSAkey", hostname);
 	PEM_write_RSAPrivateKey(str, rsa, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
-	fslink(id);
+	fslink(id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	return (pkey);
 }
+
  
 /*
  * Generate DSA public/private keys
@@ -697,13 +741,13 @@ gen_dsa(
 	 * Write the DSA parameters and keys as a DSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("DSAkey");
+	str = fheader("DSAkey", hostname);
 	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
-	fslink(id);
+	fslink(id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	return (pkey);
@@ -826,13 +870,13 @@ gen_iff(
 	 */
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	str = fheader("IFFpar");
+	str = fheader("IFFpar", trustname);
 	PEM_write_DSAPrivateKey(str, dsa, passwd ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		DSA_print_fp(stdout, dsa, 0);
-	fslink(id);
+	fslink(id, trustname);
 	return (pkey);
 }
 
@@ -900,13 +944,13 @@ gen_gqpar(
 	 * Write the GQ parameters and group key as a RSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("GQpar");
+	str = fheader("GQpar", trustname);
 	PEM_write_RSAPrivateKey(str, rsapar, passwd ? EVP_des_cbc() :
 	    NULL, NULL, 0, NULL, passwd);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsapar, 0);
-	fslink(id);
+	fslink(id, trustname);
 	return (rsapar);
 }
 
@@ -1006,14 +1050,15 @@ gen_gqkey(
 	 * Write the GQ public/private keys as a RSA public key encoded
 	 * in PEM.
 	 */
-	str = fheader("GQkey");
+	str = fheader("GQkey", trustname);
 	PEM_write_RSAPublicKey(str, rsa);
 	fclose(str);
 	if (debug)
 		RSA_print_fp(stdout, rsa, 0);
-	fslink(id);
+	fslink(id, trustname);
 	return (rsa);
 }
+
 
 /*
  * Generate Mu-Varadharajan (MV) parameters and keys
@@ -1026,7 +1071,7 @@ gen_gqkey(
  * tamperproof set-top box.
  *
  * The MV parameters and private encryption key hide in a DSA cuckoo
- * structure which uses the same paramters. The values are used in an
+ * structure which uses the same parameters. The values are used in an
  * encryption scheme based on DSA cryptography and a polynomial formed
  * from the binomial expansion of product terms (x - x[j]), as described
  * in: Mu, Y., and V. Varadharajan: Robust and Secure Broadcasting,
@@ -1034,20 +1079,27 @@ gen_gqkey(
  *
  * The p is a 512-bit prime, g a generator of Zp and q a 160-bit prime
  * that divides p - 1 and is a qth root of 1 mod p; that is, g^q = 1 mod
- * p. The x[j] are generated as 160-bit random values and the product
- * terms (x - x[j]) expanded to form coefficients in powers of x mod q.
+ * p. A set of 160-bit values x[j], j = 1...n, are generated as the
+ * zeros of a polynomial of order n. The product terms (x - x[j]) are
+ * expanded to form coefficients in powers of x[i] mod q, i = 0...n.
  * These are used as exponents of the generator g mod p to generate the
  * private encryption key A. The pair (gbar, ghat) of public values and
- * the pair (xbar[j], xhat[j]) of private values are used to construct
- * the decryption keys. The devil is in the details below.
+ * the pairs (xbar[j], xhat[j]) of private values are used to construct
+ * the decryption keys. The devil is in the details.
+ *
+ * This routine generates an encryption file including the prime modulus
+ * p, encryption key A and public key (gbar, ghat). It then generates 
+ * decryption files including the prime modulus, public key and private
+ * key (xbar[j], xhat[j]) for each client. The server encrypts a block
+ * y = A^x; the jth client decrypts x = (gbar^xhat[j] ghat^xbar[j])^y.
  *
  * The recursive scheme used to generate the polynomial coefficients,
  * while simple and elegant, is computationally explosive and probably
  * impractical for more than 20 coefficients. Ingenious remedies are
  * welcome and will probably be the nucleus of a class project.
  */
-struct mv *
-gen_mvpar(
+void
+gen_mv(
 	char	*id		/* file name id */
 	)
 {
@@ -1059,11 +1111,17 @@ gen_mvpar(
 	BIGNUM	*binverse;	/* inverse group key */
 	BIGNUM	*biga;		/* mysterious capital letter */
 	BIGNUM	*k;		/* random roll */
+	BIGNUM	*gbar;		/* public key 1 */
+	BIGNUM	*ghat;		/* public key 2 */
+	BIGNUM	**xbar;		/* private key vector 1 */
+	BIGNUM	**xhat;		/* private key vector 2 */
 	u_char	seed[20];	/* seed for parameters */
 	int	*y;		/* initial index vector */
 	int	i, j, n;
 	FILE	*str;
+	char	*s;
 	u_int	temp;
+	char	ident[20];
 
 	/*
 	 * Generate DSA parameters for use as MV parameters.
@@ -1080,13 +1138,13 @@ gen_mvpar(
 		printf("MV generate parameters fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		rval = -1;
-		return (NULL);
+		return;
 	}
 
 	/*
-	 * Generate random key values mod q.
+	 * Generate random polynomial roots mod q.
 	 */
-	printf("Generating random key values (%d bits)...\n",
+	printf("Generating polynomial roots (%d bits)...\n",
 	    BN_num_bits(mp->dsa->q));
 	mp->ctx = BN_CTX_new(); mp->u = BN_new(); mp->v = BN_new();
 	n = nkeys;
@@ -1098,15 +1156,14 @@ gen_mvpar(
 	}
 
 	/*
-	 * Generate polynomial coefficients from binomial expansion of
-	 * terms prod(x - x[j]), j = 1...n. This is done by recursion
-	 * starting from an index string 1...n. The complexity grows
-	 * very quickly and is probably not appropriate for n much
-	 * greater than 15. Send patches.
+	 * Generate polynomial coefficients a[i], i = 0...n, from the
+	 * binomial expansion of root products (x - x[j]), j = 1...n.
+	 * This is done by recursion starting from an index string
+	 * 1...n. The complexity grows very quickly and is probably not
+	 * appropriate for n much greater than 15. Send patches.
 	 */
 	printf("Generating polynomial coefficients for %d keys\n", n); 
 	a = malloc((n + 1) * sizeof(struct coef));
-	i = 0;
 	for (i = 0; i <= n; i++) {
 		a[i].link = NULL;
 		a[i].coef = 0;
@@ -1120,8 +1177,9 @@ gen_mvpar(
 	BN_one(a[n].bn);
 	if (debug) {
 		for (i = 0; i <= n; i++) {
-			printf("%2d %4d %s\n", i, a[i].coef,
-			    BN_bn2dec(a[i].bn));
+			s = BN_bn2dec(a[i].bn);
+			printf("%2d %4d %s\n", i, a[i].coef, s);
+			free(s);
 			for (cp = a[i].link; cp != NULL; cp =
 			    cp->link) {
 				for (j = 0; j < cp->size; j++)
@@ -1151,22 +1209,22 @@ gen_mvpar(
 		if (!BN_is_zero(mp->u))
 			temp = 0;
 	}
-	printf("Confirm sum(a[i] x^i) = 0 for all j: %s\n", temp ?
+	printf("Confirm sum(a[i] x[j]^i) = 0 for all i, j: %s\n", temp ?
 	    "yes" : "no");
 
 	/*
-	 * Generate g[i] = g^a[i].
+	 * Generate g[i] = g^a[i] for all i and the generator g.
 	 */
-	printf("Generating public keys and parameters\n");
+	printf("Generating g[i] parameters\n");
 	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
-		BN_mod_exp(g[i], mp->dsa->g, a[i].bn,
-		    mp->dsa->p, mp->ctx);
+		BN_mod_exp(g[i], mp->dsa->g, a[i].bn, mp->dsa->p,
+		    mp->ctx);
 	}
 
 	/*
-	 * Verify prod(g[i]^(x^i)) = 1 for all j.
+	 * Verify prod(g[i]^(x[j]^i)) = 1 for all i, j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
@@ -1181,15 +1239,18 @@ gen_mvpar(
 			    mp->ctx);
 		}
 		if (!BN_is_one(mp->u)) {
-			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			s = BN_bn2dec(mp->u);
+			printf("error %d %s\n", j, s);
+			free(s);
 			temp = 0;
 		}
 	}
-	printf("Confirm prod(g[i] x^i) = 1 for all j: %s\n", temp ?
-	    "yes" : "no");
+	printf("Confirm prod(g[i]^(x[j]^i)) = 1 for all i, j: %s\n",
+	    temp ? "yes" : "no");
 
 	/*
-	 * Compute encryption key A and a nonce pair b and b^-1.
+	 * Make 512-bit encryption key A and 160-bit nonce pair b and
+	 * b^-1.
 	 */
 	biga = BN_new();
 	BN_one(biga);
@@ -1213,103 +1274,151 @@ gen_mvpar(
 	    "yes" : "no");
 
 	/*
-	 * Make 160-bit private keys (xbar[j], xhat[j]) for all j.
+	 * Make 160-bit decryption keys (xbar[j], xhat[j]) for all j.
 	 */
-	mp->xbar = malloc((n + 1) * sizeof(BIGNUM));
-	mp->xhat = malloc((n + 1) * sizeof(BIGNUM));
+	xbar = malloc((n + 1) * sizeof(BIGNUM));
+	xhat = malloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
-		mp->xbar[j] = BN_new(); mp->xhat[j] = BN_new();
-		BN_zero(mp->xbar[j]);
+		xbar[j] = BN_new(); xhat[j] = BN_new();
+		BN_zero(xbar[j]);
 		for (i = 1; i <= n; i++) {
 			if (i == j)
 				continue;
 			BN_set_word(mp->v, n);
 			BN_mod_exp(mp->u, mp->x[i], mp->v, mp->dsa->q,
 			    mp->ctx);
-			BN_add(mp->xbar[j], mp->xbar[j], mp->u);
+			BN_add(xbar[j], xbar[j], mp->u);
 		}
-		BN_mod_mul(mp->xbar[j], mp->xbar[j], binverse,
+		BN_mod_mul(xbar[j], xbar[j], binverse,
 		    mp->dsa->q, mp->ctx);
 		BN_set_word(mp->v, n);
-		BN_mod_exp(mp->xhat[j], mp->x[j], mp->v, mp->dsa->q,
+		BN_mod_exp(xhat[j], mp->x[j], mp->v, mp->dsa->q,
 		    mp->ctx);
 	}
 
 	/*
-	 * Verify A g^b xbar g^xhat = 1 for all j.
+	 * Verify A g^(b xbar[j]) g^xhat[j] = 1 for all j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_mul(mp->u, b, mp->xbar[j], mp->dsa->q,
+		BN_mod_mul(mp->u, b, xbar[j], mp->dsa->q,
 		    mp->ctx);
 		BN_mod_exp(mp->u, mp->dsa->g, mp->u, mp->dsa->p,
 		    mp->ctx);
-		BN_mod_exp(mp->v, mp->dsa->g, mp->xhat[j], mp->dsa->p,
+		BN_mod_exp(mp->v, mp->dsa->g, xhat[j], mp->dsa->p,
 		    mp->ctx);
 		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
 		BN_mod_mul(mp->u, mp->u, biga, mp->dsa->p, mp->ctx);
 		if (!BN_is_one(mp->u)) {
-			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			s = BN_bn2dec(mp->u);
+			printf("error %d %s\n", j, s);
+			free(s);
 			temp = 0;
 		}
 	}
-	printf("Confirm A g^b xbar g^xhat = 1 for all j: %s\n", temp ?
-	    "yes" : "no");
+	printf("Confirm A g^b xbar[j] g^xhat[j] = 1 for all j: %s\n",
+	    temp ? "yes" : "no");
 
 	/*
-	 * Make 512-bit public keys (gbar, ghat).
+	 * Make 512-bit values A = A^k, gbar = g^k and ghat = g^bk.
 	 */
 	k = BN_new();
 	BN_rand(k, BN_num_bits(mp->dsa->q), -1, 0);
 	BN_mod(k, k, mp->dsa->q, mp->ctx);
-	mp->gbar = BN_new(); mp->ghat = BN_new();
-	BN_mod_exp(mp->gbar, mp->dsa->g, k, mp->dsa->p, mp->ctx);
+	BN_mod_exp(biga, biga, k, mp->dsa->p, mp->ctx);
+	gbar = BN_new(); ghat = BN_new();
+	BN_mod_exp(gbar, mp->dsa->g, k, mp->dsa->p, mp->ctx);
 	BN_mod_mul(mp->u, k, b, mp->dsa->q, mp->ctx);
-	BN_mod_exp(mp->ghat, mp->dsa->g, mp->u, mp->dsa->p, mp->ctx);
+	BN_mod_exp(ghat, mp->dsa->g, mp->u, mp->dsa->p, mp->ctx);
 
 	/*
-	 * Verify A^k (gbar^k)^xbar (ghat^bk)^xhat = 1 for all j.
+	 * Verify A gbar^xbar[j] ghat^xhat[j] = 1 for all j.
 	 */
 	temp = 1;
 	for (j = 1; j <= n; j++) {
-		BN_mod_exp(mp->u, mp->ghat, mp->xbar[j], mp->dsa->p,
+		BN_mod_exp(mp->v, gbar, xhat[j], mp->dsa->p,
 		    mp->ctx);
-		BN_mod_exp(mp->v, mp->gbar, mp->xhat[j], mp->dsa->p,
+		BN_mod_exp(mp->u, ghat, xbar[j], mp->dsa->p,
 		    mp->ctx);
 		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
-		BN_mod_exp(mp->v, biga, k, mp->dsa->p, mp->ctx);
-		BN_mod_mul(mp->u, mp->u, mp->v, mp->dsa->p, mp->ctx);
+		BN_mod_mul(mp->u, biga, mp->u, mp->dsa->p, mp->ctx);
 		if (!BN_is_one(mp->u)) {
-			printf("error %d %s\n", j, BN_bn2dec(mp->u));
+			s = BN_bn2dec(mp->u);
+			printf("error %d %s\n", j, s);
+			free(s);
 			temp = 0;
 		}
 	}
-	printf("Confirm A^k r^xbar s^xhat = 1 for all j: %s\n", temp ?
-	     "yes" : "no");
+	printf(
+	    "Confirm A gbar^xbar[j] ghat^xhat[j] = 1 for all j: %s\n",
+	    temp ? "yes" : "no");
 
 	/*
-	 * We now have the DSA parameters (p, q, g) and public keys
-	 * (gbar^k, ghat^bk), We also have the encryption key A and
-	 * the set of decryption keys (xbar[j], xhat[j]) handed out to
-	 * each paying customer. The intent of this scheme is to convey
-	 * a secret key for use in symmetric cryptography to customers
-	 * who pay for the decription key. The key itself is a 512-bit
-	 * random roll. The cryptosystem can use it for any purpose. We
-	 * encode everything in the DSA cukoo structure:
+	 * We now have the modulus p, encryption key A, public key
+	 * (gbar^k, ghat^bk) and a set of decryption keys (xbar[j],
+	 * xhat[j]) for all j. The broadcaster parameters and keys are
+	 * contained in a DSA cuckoo structure:
 	 *
 	 * p		modulus p
 	 * q		private encryption key A
-	 * g		diffusion factor k
+	 * g		diffusion factor k (not used)
 	 * priv_key	public key 1 gbar
 	 * pub_key	public key 2 ghat
 	 */
 	BN_copy(mp->dsa->q, biga);
 	BN_copy(mp->dsa->g, k);
-	mp->dsa->priv_key = BN_dup(mp->gbar);
-	mp->dsa->pub_key = BN_dup(mp->ghat);
+	mp->dsa->priv_key = BN_dup(gbar);
+	mp->dsa->pub_key = BN_dup(ghat);
 
 	/*
-	 * Free the world.
+	 * Write the parameters and public key as a DSA private key
+	 * encoded in PEM. This is used only by the broadcaster(s).
+	 */
+	str = fheader("MVkey", trustname);
+	PEM_write_DSAPrivateKey(str, mp->dsa, passwd ? EVP_des_cbc() :
+	    NULL, NULL, 0, NULL, passwd);
+	fclose(str);
+	if (debug)
+		DSA_print_fp(stdout, mp->dsa, 0);
+	fslink(id, trustname);
+
+	/*
+	 * Write the parameters and private key (xbar[j], xhat[j]) for
+	 * all j as a DSA private key encoded in PEM. It is used only by
+	 * the designated recipient(s) who pay a suitably outrageous fee
+	 * for the service.
+	 *
+	 * The receiver parameters and keys are contained in the DSA
+	 * cuckoo structure:
+	 *
+	 * p		modulus p
+	 * q		private key 1 xbar[j]
+	 * g		private key 2 xhat[j]
+	 * priv_key	public key 1 gbar
+	 * pub_key	public key 2 ghat
+	 */
+	for (j = 1; j <= mp->n; j++) {
+		BN_copy(mp->dsa->q, xbar[j]);
+		BN_copy(mp->dsa->g, xhat[j]);
+		BN_free(xbar[j]); BN_free(xhat[j]);
+
+		/*
+		 * Write the MV public key as a DSA private key encoded
+		 * in PEM. In this context the public key is really
+		 * public only to the designated recipients and denied
+		 * to all others.
+		 */
+		sprintf(ident, "MVkey%d", j);
+		str = fheader(ident, trustname);
+		PEM_write_DSAPrivateKey(str, mp->dsa, passwd ?
+		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd);
+		fclose(str);
+		if (debug)
+			DSA_print_fp(stdout, mp->dsa, 0);
+	}
+
+	/*
+	 * Free the western hemisphere.
 	 */
 	for (i = 0; i <= n; i++) {
 		for (cp = a[i].link; cp != NULL; cp = cp->link)
@@ -1321,17 +1430,11 @@ gen_mvpar(
 	BN_free(b); BN_free(binverse); BN_free(biga); BN_free(k);
 
 	/*
-	 * Write the MV parameters and public keys as a DSA private key
-	 * encoded in PEM.
+	 * Free the world.
 	 */
-	str = fheader("MVpar");
-	PEM_write_DSAPrivateKey(str, mp->dsa, passwd ? EVP_des_cbc() :
-	    NULL, NULL, 0, NULL, passwd);
-	fclose(str);
-	if (debug)
-		DSA_print_fp(stdout, mp->dsa, 0);
-	fslink(id);
-	return (mp);
+	BN_free(gbar); BN_free(ghat); DSA_free(mp->dsa);
+	free(mp);
+	return;
 }
 
 
@@ -1340,7 +1443,7 @@ gen_mvpar(
  *
  * This little darling generates all coefficient terms for the binomial
  * expansion of prod(x - x[i]). It works for any reasonable n, but watch
- * out for overheated CPU if n gets much larger than ten.
+ * out for overheated CPU if n gets much larger than fifteen.
  */
 void
 makea(
@@ -1424,44 +1527,6 @@ makea(
 
 
 /*
- * Generate MV public keys
- */
-void
-gen_mvkey(
-	char	*id,		/* file name id */
-	struct mv *mp		/* parameters pointer */
-	)
-{
-	DSA	*dsa;		/* MV public key */
-	FILE	*str;
-	char	ident[20];
-	int	j;
-
-	dsa = malloc(sizeof(DSA));
-	dsa->p = BN_new();
-	dsa->q = BN_new();
-	dsa->g = BN_new();
-	for (j = 1; j <= mp->n; j++) {
-		BN_copy(dsa->p, mp->dsa->p);
-		BN_copy(dsa->q, mp->xbar[j]);
-		BN_copy(dsa->g, mp->xhat[j]);
-
-		/*
-		 * Write the MV public key as a DSA private key encoded
-		 * in PEM. Keep it secret for now.
-		 */
-		sprintf(ident, "MVkey%d", j);
-		str = fheader(ident);
-		PEM_write_DSAparams(str, dsa);
-		fclose(str);
-		if (debug)
-			DSA_print_fp(stdout, dsa, 0);
-	}
-	DSA_free(dsa);
-	return;
-}
-
-/*
  * Generate X509v3 self-signed certificate.
  *
  * The certificate consists of the version number, serial number,
@@ -1486,7 +1551,7 @@ x509	(
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
 	const char *id;		/* digest/signature scheme name */
-	u_char	pathbuf[MAXFILENAME];
+	u_char	pathbuf[MAXFILENAME + 1];
 
 	/*
 	 * Generate X509 self-signed certificate.
@@ -1511,7 +1576,7 @@ x509	(
 	    hostname, strlen(hostname), -1, 0);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    hostname, strlen(hostname), -1, 0);
+	    trustname, strlen(trustname), -1, 0);
 	if (!X509_set_pubkey(cert, pkey)) {
 		printf("Assign key fails\n%s\n",
 		ERR_error_string(ERR_get_error(), NULL));
@@ -1607,13 +1672,13 @@ x509	(
 	 * Write the certificate encoded in PEM.
 	 */
 	sprintf(pathbuf, "%scert", id);
-	str = fheader(pathbuf);
+	str = fheader(pathbuf, hostname);
 	PEM_write_X509(str, cert);
 	fclose(str);
 	if (debug)
 		X509_print_fp(stdout, cert);
 	X509_free(cert);
-	fslink("cert");
+	fslink("cert", hostname);
 	return (1);
 }
 
@@ -1687,6 +1752,7 @@ cb	(
 }
 #endif /* OPENSSL */
 
+
 /*
  * Generate key
  */
@@ -1715,12 +1781,13 @@ genkey(
  */
 FILE *
 fheader	(
-	u_char	*id		/* file name id */
+	const char *id,		/* file name id */
+	const char *name	/* owner name */
 	)
 {
 	FILE	*str;		/* file handle */
 
-	sprintf(filename, "ntpkey_%s_%s.%lu", id, hostname, epoch +
+	sprintf(filename, "ntpkey_%s_%s.%lu", id, name, epoch +
 	    JAN_1970);
 	if ((str = fopen(filename, "w")) == NULL) {
 		perror("Write");
@@ -1736,13 +1803,14 @@ fheader	(
  */
 void
 fslink(
-	const char *id		/* file name id */
+	const char *id,		/* file name id */
+	const char *name	/* owner name */
 	)
 {
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
 
-	sprintf(linkname, "ntpkey_%s_%s", id, hostname);
+	sprintf(linkname, "ntpkey_%s_%s", id, name);
 	remove(linkname);
 	temp = symlink(filename, linkname);
 	if (temp < 0)
