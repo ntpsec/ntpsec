@@ -413,13 +413,8 @@ adj_systime(
 		adjtv.tv_usec = -adjtv.tv_usec;
 		sys_residual = -sys_residual;
 	}
-
-	/*
-	 * We went to all the trouble just to be sure the emulation is
-	 * precise. We now return to our regularly scheduled concert.
-	 */
-	ntp_node.clk_time -= adjtv.tv_sec + adjtv.tv_usec / 1e6;
-        return (1);
+	ntp_node.adj = now;
+	return (1);
 }
  
  
