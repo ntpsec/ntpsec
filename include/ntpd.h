@@ -207,6 +207,7 @@ extern	void	record_peer_stats P((struct sockaddr_storage *, int, double, double,
 extern	void	record_loop_stats P((double, double, double, double, int));
 extern	void	record_clock_stats P((struct sockaddr_storage *, const char *));
 extern	void	record_raw_stats P((struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *));
+extern	void	record_sys_stats P((void));
 extern	void	record_crypto_stats P((struct sockaddr_storage *, const char *));
 extern  int	sock_hash P((struct sockaddr_storage *));
 

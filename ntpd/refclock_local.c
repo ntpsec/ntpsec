@@ -1,7 +1,8 @@
-/* wjm 17-aug-1995: add a hook for special treatment of VMS_LOCALUNIT */
 
 /*
  * refclock_local - local pseudo-clock driver
+ *
+ * wjm 17-aug-1995: add a hook for special treatment of VMS_LOCALUNIT
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -69,31 +70,34 @@
  *
  * Fudge Factors
  *
- * The stratum for this driver set at 5 by default, but it can be changed
- * by the fudge command and/or the ntpdc utility. The reference ID is
- * "LCL" by default, but can be changed using the same mechanism. *NEVER*
- * configure this driver to operate at a stratum which might possibly
- * disrupt a client with access to a bona fide primary server, unless the
- * local clock oscillator is reliably disciplined by another source.
- * *NEVER NEVER* configure a server which might devolve to an undisciplined
- * local clock to use multicast mode. Always remember that an improperly
- * configured local clock driver let loose in the Internet can cause
- * very serious disruption. This is why most of us who care about good
- * time use cryptographic authentication.
+ * The stratum for this driver set at 5 by default, but it can be
+ * changed by the fudge command and/or the ntpdc utility. The reference
+ * ID is "LCL" by default, but can be changed using the same mechanism.
+ * *NEVER* configure this driver to operate at a stratum which might
+ * possibly disrupt a client with access to a bona fide primary server,
+ * unless the local clock oscillator is reliably disciplined by another
+ * source. *NEVER NEVER* configure a server which might devolve to an
+ * undisciplined local clock to use multicast mode. Always remember that
+ * an improperly configured local clock driver let loose in the Internet
+ * can cause very serious disruption. This is why most of us who care
+ * about good time use cryptographic authentication.
  *
  * This driver provides a mechanism to trim the local clock in both time
  * and frequency, as well as a way to manipulate the leap bits. The
  * fudge time1 parameter adjusts the time, in seconds, and the fudge
- * time2 parameter adjusts the frequency, in ppm. The fudge time1 parameter
- * is additive; that is, it adds an increment to the current time. The
- * fudge time2 parameter directly sets the frequency.
+ * time2 parameter adjusts the frequency, in ppm. The fudge time1
+ * parameter is additive; that is, it adds an increment to the current
+ * time. The fudge time2 parameter directly sets the frequency.
  */
-
 /*
  * Local interface definitions
  */
 #define PRECISION	(-7)	/* about 10 ms precision */
-#define REFID		"LCL\0" /* reference ID */
+#if defined(VMS) && defined(VMS_LOCALUNIT)
+#define REFID		"LCLv"	/* reference ID */
+#else /* VMS VMS_LOCALUNIT */
+#define REFID		"LCL\0"	/* reference ID */
+#endif /* VMS VMS_LOCALUNIT */
 #define DESCRIPTION "Undisciplined local clock" /* WRU */
 
 #define STRATUM 	5	/* default stratum */
@@ -164,11 +168,6 @@ local_start(
 	pp->stratum = STRATUM;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-#if defined(VMS) && defined(VMS_LOCALUNIT)
-	/* provide a non-standard REFID */
-	if(unit == VMS_LOCALUNIT)
-		memcpy((char *)&pp->refid,"LCLv",4);
-#endif	/* VMS && VMS_LOCALUNIT */
 	poll_time = current_time;
 	return (1);
 }
@@ -183,20 +182,19 @@ local_poll(
 	struct peer *peer
 	)
 {
-	struct refclockproc *pp;
-#if defined(KERNEL_PLL) && defined(STA_CLK)
+#if defined(KERNEL_PLL) && defined(LOCKCLOCK)
 	struct timex ntv;
-	int retval;
-#endif /* KERNEL_PLL STA_CLK */
+#endif /* KERNEL_PLL LOCKCLOCK */
+	struct refclockproc *pp;
 
 #if defined(VMS) && defined(VMS_LOCALUNIT)
-	if(unit == VMS_LOCALUNIT) {
+	if (unit == VMS_LOCALUNIT) {
 		extern void vms_local_poll(struct peer *);
 
 		vms_local_poll(peer);
 		return;
 	}
-#endif	/* VMS && VMS_LOCALUNIT */
+#endif /* VMS && VMS_LOCALUNIT */
 	pp = peer->procptr;
 	pp->polls++;
 
@@ -211,48 +209,38 @@ local_poll(
 	pp->fudgetime1 += pp->fudgetime2 * 1e-6 * (current_time -
 	    poll_time);
 	poll_time = current_time;
-	refclock_process_offset(pp, pp->lastrec, pp->lastrec, pp->fudgetime1);
+	refclock_process_offset(pp, pp->lastrec, pp->lastrec,
+	    pp->fudgetime1);
+
+	/*
+	 * If another process is disciplining the system clock, we set
+	 * the leap bits and quality indicators from the kernel.
+	 */
+#if defined(KERNEL_PLL) && defined(LOCKCLOCK)
+	memset((char *)&ntv,  0, sizeof ntv);
+	switch (ntp_adjtime(&ntv)) {
+	case TIME_OK:
+		pp->leap = LEAP_NOWARNING;
+		break;
+
+	case TIME_INS:
+		pp->leap = LEAP_ADDSECOND;
+		break;
+
+	case TIME_DEL:
+		pp->leap = LEAP_DELSECOND;
+		break;
+
+	default:
+		pp->leap = LEAP_NOTINSYNC;
+	}
+	pp->disp = ntv.maxerror / 1e6;
+	pp->jitter = SQUARE(ntv.esterror / 1e6);
+#else /* KERNEL_PLL LOCKCLOCK */
 	pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
 	pp->jitter = 0;
-#if defined(KERNEL_PLL) && defined(STA_CLK)
-
-	/*
-	 * If the kernel pll code is up and running, somebody else
-	 * may come diddle the clock. If so, they better use ntp_adjtime(),
-	 * and set the STA_CLK bit in the status word. In this case, the
-	 * performance information is read from the kernel and becomes the
-	 * variables presented to the clock mitigation process.
-	 */
-	if (pll_control && kern_enable && (peer->flags & FLAG_PREFER)) {
-		memset((char *)&ntv,  0, sizeof ntv);
-		retval = ntp_adjtime(&ntv);
-		if (ntv.status & STA_CLK) {
-			ext_enable = 1;
-			switch(retval) {
-
-				case TIME_OK:
-				pp->leap = LEAP_NOWARNING;
-				break;
-
-				case TIME_INS:
-				pp->leap = LEAP_ADDSECOND;
-				break;
-
-				case TIME_DEL:
-				pp->leap = LEAP_DELSECOND;
-				break;
-
-				case TIME_ERROR:
-				pp->leap = LEAP_NOTINSYNC;
-			}
-			pp->disp = ntv.maxerror / 1e6;
-			pp->jitter = SQUARE(ntv.esterror / 1e6);
-		}
-	} else {
-		ext_enable = 0;
-	}
-#endif /* KERNEL_PLL STA_CLK */
+#endif /* KERNEL_PLL LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	pp->fudgetime1 = 0;

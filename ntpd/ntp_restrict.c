@@ -14,35 +14,33 @@
 
 /*
  * This code keeps a simple address-and-mask list of hosts we want
- * to place restrictions on (or remove them from).  The restrictions
+ * to place restrictions on (or remove them from). The restrictions
  * are implemented as a set of flags which tell you what the host
- * can't do.  There is a subroutine entry to return the flags.  The
+ * can't do. There is a subroutine entry to return the flags. The
  * list is kept sorted to reduce the average number of comparisons
  * and make sure you get the set of restrictions most specific to
  * the address.
  *
  * The algorithm is that, when looking up a host, it is first assumed
- * that the default set of restrictions will apply.  It then searches
- * down through the list.  Whenever it finds a match it adopts the match's
- * flags instead.  When you hit the point where the sorted address is
- * greater than the target, you return with the last set of flags you
- * found.  Because of the ordering of the list, the most specific match
- * will provide the final set of flags.
+ * that the default set of restrictions will apply. It then searches
+ * down through the list. Whenever it finds a match it adopts the
+ * match's flags instead. When you hit the point where the sorted
+ * address is greater than the target, you return with the last set of
+ * flags you found. Because of the ordering of the list, the most
+ * specific match will provide the final set of flags.
  *
  * This was originally intended to restrict you from sync'ing to your
- * own broadcasts when you are doing that, by restricting yourself
- * from your own interfaces.  It was also thought it would sometimes
- * be useful to keep a misbehaving host or two from abusing your primary
- * clock.  It has been expanded, however, to suit the needs of those
- * with more restrictive access policies.
+ * own broadcasts when you are doing that, by restricting yourself from
+ * your own interfaces. It was also thought it would sometimes be useful
+ * to keep a misbehaving host or two from abusing your primary clock. It
+ * has been expanded, however, to suit the needs of those with more
+ * restrictive access policies.
  */
-
 /*
  * We will use two lists, one for IPv4 addresses and one for IPv6
  * addresses. This is not protocol-independant but for now I can't
  * find way to respect this. We'll check this later... JFB 07/2001
  */
-
 #define SET_IPV6_ADDR_MASK(dst, src, msk) \
 	do { \
 		int idx; \
@@ -65,8 +63,8 @@
  */
 struct restrictlist *restrictlist;
 struct restrictlist6 *restrictlist6;
-static	int restrictcount;	/* count of entries in the restriction list */
-static	int restrictcount6;	/* count of entries in the restriction list 2*/
+static	int restrictcount;	/* count of entries in the res list */
+static	int restrictcount6;	/* count of entries in the res list 2*/
 
 /*
  * The free list and associated counters.  Also some uninteresting
@@ -91,9 +89,9 @@ static	u_long res_not_found;
 u_long client_limit;
 u_long client_limit_period;
 /*
- * count number of restriction entries referring to RES_LIMITED
- * controls activation/deactivation of monitoring
- * (with respect to RES_LIMITED control)
+ * Count number of restriction entries referring to RES_LIMITED controls
+ * activation/deactivation of monitoring (with respect to RES_LIMITED
+ * control)
  */
 static	u_long res_limited_refcnt;
 static	u_long res_limited_refcnt6;
@@ -162,9 +160,9 @@ init_restrict(void)
 	res_limited_refcnt6 = 0;
 
 	sprintf(bp, "client_limit=%ld", client_limit);
-	set_sys_var(bp, strlen(bp)+1, RO);
+	set_sys_var(bp, strlen(bp) + 1, RO);
 	sprintf(bp, "client_limit_period=%ld", client_limit_period);
-	set_sys_var(bp, strlen(bp)+1, RO);
+	set_sys_var(bp, strlen(bp) + 1, RO);
 }
 
 
@@ -196,29 +194,31 @@ restrictions(
 	/* IPv4 source address */
 	if (srcadr->ss_family == AF_INET) {
 		/*
-		 * We need the host address in host order.  Also need to know
-		 * whether this is from the ntp port or not.
+		 * We need the host address in host order.  Also need to
+		 * know whether this is from the ntp port or not.
 		 */
 		hostaddr = SRCADR(srcadr);
 		isntpport = (SRCPORT(srcadr) == NTP_PORT);
 
 		/*
 		 * Ignore any packets with a multicast source address
-		 * (this should be done early in the receive process, later!)
+		 * (this should be done early in the receive process,
+		 * later!)
 		 */
 		if (IN_CLASSD(SRCADR(srcadr)))
 			return (int)RES_IGNORE;
 
 		/*
-		 * Set match to first entry, which is default entry.  Work our
-		 * way down from there.
+		 * Set match to first entry, which is default entry.
+		 * Work our way down from there.
 		 */
 		match = restrictlist;
 
 		for (rl = match->next; rl != 0 && rl->addr <= hostaddr;
 		    rl = rl->next)
 			if ((hostaddr & rl->mask) == rl->addr) {
-				if ((rl->mflags & RESM_NTPONLY) && !isntpport)
+				if ((rl->mflags & RESM_NTPONLY) &&
+				    !isntpport)
 					continue;
 				match = rl;
 			}
@@ -234,31 +234,36 @@ restrictions(
 	/* IPv6 source address */
 	if (srcadr->ss_family == AF_INET6) {
 		/*
-		 * Need to know whether this is from the ntp port or not.
+		 * Need to know whether this is from the ntp port or
+		 * not.
 		 */
 		hostaddr6 = GET_INADDR6(*srcadr);
-		isntpport = (ntohs(((struct sockaddr_in6 *)srcadr)->sin6_port)
-		    == NTP_PORT);
+		isntpport = (ntohs((
+		    (struct sockaddr_in6 *)srcadr)->sin6_port) ==
+		    NTP_PORT);
 
 		/*
 		 * Ignore any packets with a multicast source address
-		 * (this should be done early in the receive process, later!)
+		 * (this should be done early in the receive process,
+		 * later!)
 		 */
 		if (IN6_IS_ADDR_MULTICAST(&hostaddr6))
 			return (int)RES_IGNORE;
 
 		/*
-		 * Set match to first entry, which is default entry.  Work our
-		 * way down from there.
+		 * Set match to first entry, which is default entry.
+		 *  Work our way down from there.
 		 */
 		match6 = restrictlist6;
-		for (rl6 = match6->next; rl6 != 0 && (memcmp(&(rl6->addr6),
-		    &hostaddr6, sizeof(hostaddr6)) <= 0); rl6 = rl6->next) {
+		for (rl6 = match6->next; rl6 != 0 &&
+		    (memcmp(&(rl6->addr6), &hostaddr6,
+		    sizeof(hostaddr6)) <= 0); rl6 = rl6->next) {
 			SET_IPV6_ADDR_MASK(&hostservaddr6, &hostaddr6,
 			    &rl6->mask6);
 			if (memcmp(&hostservaddr6, &(rl6->addr6),
 			    sizeof(hostservaddr6)) == 0) {
-				if ((rl6->mflags & RESM_NTPONLY) && !isntpport)
+				if ((rl6->mflags & RESM_NTPONLY) &&
+				    !isntpport)
 					continue;
 				match6 = rl6;
 			}
@@ -310,10 +315,10 @@ restrictions(
 
 		/*
 		 * How nice, MRU list provides our current client as the
-		 * first entry in the list.
-		 * Monitoring was verified to be active above, thus we
-		 * know an entry for our client must exist, or some 
-		 * brain dead set the memory limit for mon entries to ZERO!!!
+		 * first entry in the list. Monitoring was verified to
+		 * be active above, thus we know an entry for our client
+		 * must exist, or some brain dead set the memory limit
+		 * for mon entries to ZERO!!!
 		 */
 		this_client = mon_mru_list.mru_next;
 
@@ -419,11 +424,11 @@ hack_restrict(
 		 */
 		addr = SRCADR(resaddr);
 		mask = SRCADR(resmask);
-		addr &= mask;		/* make sure low bits are zero */
+		addr &= mask;		/* make sure low bits zero */
 
 		/*
-		 * If this is the default address, point at first on list.
-		 * Else go searching for it.
+		 * If this is the default address, point at first on
+		 * list. Else go searching for it.
 		 */
 		if (addr == 0) {
 			rlprev = 0;
@@ -437,17 +442,17 @@ hack_restrict(
 					break;
 				} else if (rl->addr == addr) {
 					if (rl->mask == mask) {
-						if ((mflags & RESM_NTPONLY) ==
-						    (rl->mflags & RESM_NTPONLY))
-							break;/* exact match */
-						if (!(mflags & RESM_NTPONLY)) {
-							/*
-							 * No flag fits before flag
-							 */
+						if ((mflags &
+						    RESM_NTPONLY) ==
+						    (rl->mflags &
+						    RESM_NTPONLY))
+							break;
+
+						if (!(mflags &
+						    RESM_NTPONLY)) {
 							rl = 0;
 							break;
 						}
-						/* continue on */
 					} else if (rl->mask > mask) {
 						rl = 0;
 						break;
@@ -461,8 +466,8 @@ hack_restrict(
 
 	if (resaddr->ss_family == AF_INET6) {
 		mask6 = GET_INADDR6(*resmask);
-		SET_IPV6_ADDR_MASK(&addr6, &GET_INADDR6(*resaddr), &mask6);
-
+		SET_IPV6_ADDR_MASK(&addr6,
+		    &GET_INADDR6(*resaddr), &mask6);
 		if (IN6_IS_ADDR_UNSPECIFIED(&addr6)) {
 			rlprev6 = 0;
 			rl6 = restrictlist6;
@@ -476,17 +481,17 @@ hack_restrict(
 					rl6 = 0;
 					break;
 				} else if (addr_cmp == 0) {
-					mask_cmp = memcmp(&rl6->mask6, &mask6,
-					    sizeof(mask6));
+					mask_cmp = memcmp(&rl6->mask6,
+					    &mask6, sizeof(mask6));
 					if (mask_cmp == 0) {
-						if ((mflags & RESM_NTPONLY) ==
-						    (rl6->mflags & RESM_NTPONLY))
-							break; /* exact match */
-						if (!(mflags & RESM_NTPONLY)) {
-							/*
-							 * No flag fits
-							 * before flag
-							 */
+						if ((mflags &
+						    RESM_NTPONLY) ==
+						    (rl6->mflags &
+						    RESM_NTPONLY))
+							break;
+
+						if (!(mflags &
+						    RESM_NTPONLY)) {
 							rl6 = 0;
 							break;
 						}
@@ -515,17 +520,18 @@ hack_restrict(
 		switch (op) {
 		case RESTRICT_FLAGS:
 			/*
-			 * Here we add bits to the flags.  If this is a new
-			 * restriction add it.
+			 * Here we add bits to the flags. If this is a
+			 * new restriction add it.
 			 */
 			if (rl == 0) {
 				if (numresfree == 0) {
 					rl = (struct restrictlist *)
 					    emalloc(INCRESLIST *
-					    sizeof(struct restrictlist));
-					memset((char *)rl, 0, INCRESLIST *
-					    sizeof(struct restrictlist));
-
+					    sizeof(struct
+					    restrictlist));
+					memset((char *)rl, 0,
+					    INCRESLIST * sizeof(struct
+					    restrictlist));
 					for (i = 0; i < INCRESLIST; i++) {
 						rl->next = resfree;
 						resfree = rl;
@@ -546,9 +552,9 @@ hack_restrict(
 				rlprev->next = rl;
 				restrictcount++;
 			}
-			if ((rl->flags ^ (u_short)flags) & RES_LIMITED) {
+			if ((rl->flags ^ (u_short)flags) &
+			    RES_LIMITED) {
 				res_limited_refcnt++;
-				/* ensure data gets collected */
 				mon_start(MON_RES);
 			}
 			rl->flags |= (u_short)flags;
@@ -556,11 +562,12 @@ hack_restrict(
 
 		case RESTRICT_UNFLAG:
 			/*
-			 * Remove some bits from the flags.  If we didn't
+			 * Remove some bits from the flags. If we didn't
 			 * find this one, just return.
 			 */
 			if (rl != 0) {
-				if ((rl->flags ^ (u_short)flags) & RES_LIMITED) {
+				if ((rl->flags ^ (u_short)flags) &
+				    RES_LIMITED) {
 					res_limited_refcnt--;
 					if (res_limited_refcnt == 0)
 						mon_stop(MON_RES);
@@ -595,47 +602,46 @@ hack_restrict(
 			break;
 
 		default:
-			/* Oh, well */
 			break;
 		}
 	} else if (resaddr->ss_family == AF_INET6) {
 		switch (op) {
 		case RESTRICT_FLAGS:
 			/*
-			 * Here we add bits to the flags.  If this is a new
-			 * restriction add it.
+			 * Here we add bits to the flags. If this is a
+			 * new restriction add it.
 			 */
 			if (rl6 == 0) {
 				if (numresfree6 == 0) {
-					rl6 = (struct restrictlist6 *)emalloc(
-					    INCRESLIST *
-					    sizeof(struct restrictlist6));
-					memset((char *)rl6, 0, INCRESLIST *
-					    sizeof(struct restrictlist6));
+					rl6 = (struct
+					    restrictlist6 *)emalloc(
+					    INCRESLIST * sizeof(struct
+					    restrictlist6));
+					memset((char *)rl6, 0,
+					    INCRESLIST * sizeof(struct
+					    restrictlist6));
 
-					for (i = 0; i < INCRESLIST; i++) {
+					for (i = 0; i < INCRESLIST;
+					    i++) {
 						rl6->next = resfree6;
 						resfree6 = rl6;
 						rl6++;
 					}
 					numresfree6 = INCRESLIST;
 				}
-
 				rl6 = resfree6;
 				resfree6 = rl6->next;
 				numresfree6--;
-
 				rl6->addr6 = addr6;
 				rl6->mask6 = mask6;
 				rl6->mflags = (u_short)mflags;
-
 				rl6->next = rlprev6->next;
 				rlprev6->next = rl6;
 				restrictcount6++;
 			}
-			if ((rl6->flags ^ (u_short)flags) & RES_LIMITED) {
+			if ((rl6->flags ^ (u_short)flags) &
+			    RES_LIMITED) {
 				res_limited_refcnt6++;
-				/* ensure data gets collected */
 				mon_start(MON_RES);
 			}
 			rl6->flags |= (u_short)flags;
@@ -643,11 +649,12 @@ hack_restrict(
 
 		case RESTRICT_UNFLAG:
 			/*
-			 * Remove some bits from the flags.  If we didn't
+			 * Remove some bits from the flags. If we didn't
 			 * find this one, just return.
 			 */
 			if (rl6 != 0) {
-				if ((rl6->flags ^ (u_short)flags) & RES_LIMITED) {
+				if ((rl6->flags ^ (u_short)flags) &
+				    RES_LIMITED) {
 					res_limited_refcnt6--;
 					if (res_limited_refcnt6 == 0)
 						mon_stop(MON_RES);
@@ -674,7 +681,6 @@ hack_restrict(
 				}
 				memset((char *)rl6, 0,
 				    sizeof(struct restrictlist6));
-
 				rl6->next = resfree6;
 				resfree6 = rl6;
 				numresfree6++;
@@ -682,11 +688,7 @@ hack_restrict(
 			break;
 
 		default:
-			/* Oh, well */
 			break;
 		}
 	}
-
-
-	/* done! */
 }
