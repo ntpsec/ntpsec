@@ -57,6 +57,10 @@ extern	int	cfsetospeed	P((struct termios *, speed_t));
 
 extern	char *	getpass		P((const char *));
 
+#ifdef DECL_HSTRERROR_0
+extern	const char * hstrerror	P((int));
+#endif
+
 #ifdef DECL_INET_NTOA_0
 struct in_addr;
 extern	char *	inet_ntoa	P((struct in_addr));

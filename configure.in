@@ -773,6 +773,9 @@ case "$ac_cv_decl_syscall" in
 esac
 
 case "$target" in
+ *-*-aix*)
+    AC_DEFINE(DECL_HSTRERROR_0)		# Needed for XLC under AIX 4.3.2
+    ;;
  *-*-osf[[45]]*)
     AC_DEFINE(DECL_PLOCK_0)
     AC_DEFINE(DECL_STIME_1)

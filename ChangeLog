@@ -1,5 +1,12 @@
 2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* acconfig.h: Lose extra declarations of PACKAGE and VERSION.
+
+	* acconfig.h: 
+	* configure.in:
+	* include/l_stdlib.h: DECL_HSTRERROR_0 needed for xlc under AIX 4.3.2.
+	Reported by: Harald Barth <haba@pdc.kth.se>
+
 	* ntpd/ntp_proto.c (proto_config): cal_enable (PROTO_CAL) is
 	invalid if no refclocks are present.
 	From: Frodo Looijaard <frodol@dds.nl>

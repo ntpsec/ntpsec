@@ -1,9 +1,3 @@
-/* Package */
-#undef PACKAGE
-
-/* Version */
-#undef VERSION
-
 /* debugging code */
 #undef DEBUG
 
@@ -404,6 +398,9 @@
 
 /* cfset[io]speed()? */
 #undef DECL_CFSETISPEED_0
+
+/* hstrerror()? */
+#undef DECL_HSTRERROR_0
 
 /* ioctl()? */
 #undef DECL_IOCTL_0
