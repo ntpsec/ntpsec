@@ -1826,7 +1826,7 @@ input_handler(
 	handler_calls++;
 	ts = *cts;
 
-	for (;;)
+/*	for (;;) */
 	{
 		/*
 		 * Do a poll to see who has data
@@ -1839,8 +1839,9 @@ input_handler(
 		 * If we have something to do, freeze a timestamp.
 		 * See below for the other cases (nothing (left) to do or error)
 		 */
-		while (0 < (n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero)))
+/*		while (0 < (n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero))) */
 		{
+			n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
 			++select_count;
 			++handler_pkts;
 
@@ -1875,9 +1876,10 @@ input_handler(
 						rb->recv_length =
 						    read(fd, (char *)&rb->recv_space, (unsigned)i);
 
-						if (rb->recv_length <= 0 ||errno != 0)
+						if (rb->recv_length <= 0)
 						{
-							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
+							if (rb->recv_length < 0 && errno != EINTR)
+								netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
 							freerecvbuf(rb);
 							continue;
 						}
