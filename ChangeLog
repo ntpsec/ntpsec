@@ -1,5 +1,7 @@
 2000-07-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* flock-build (LIST): Lose malarky, update some machine/OS descriptions
+
 	* configure.in: 4.0.99j4
 
 	* ntpq/ntpq.c: Lose PUBKEY stuff - older ntpq's will complain when
