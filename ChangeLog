@@ -1,5 +1,8 @@
 1999-11-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_parse.c: Cleanup/fixes
+	From: John Hay <jhay@mikom.csir.co.za>
+
 	* ntpd/refclock_parse.c: Lose #include "ntp_select.h"
 	* ntpd/ntpd.c: Lose #include "ntp_select.h"
 	* ntpd/ntp_io.c: Lose #include "ntp_select.h"

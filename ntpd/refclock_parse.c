@@ -1269,10 +1269,10 @@ static char * l_mktime    P((u_long));
 static void
 clear_err(
 	struct parseunit *parse,
-	u_long            state
+	u_long            lstate
 	)
 {
-	if (state == ERR_ALL)
+	if (lstate == ERR_ALL)
 	{
 		int i;
 
@@ -1287,22 +1287,22 @@ clear_err(
 	}
 	else
 	{
-		parse->errors[state].err_stage   = err_tbl[state];
-		parse->errors[state].err_cnt     = 0;
-		parse->errors[state].err_last    = 0;
-		parse->errors[state].err_started = 0;
-		parse->errors[state].err_suppressed = 0;
+		parse->errors[lstate].err_stage   = err_tbl[lstate];
+		parse->errors[lstate].err_cnt     = 0;
+		parse->errors[lstate].err_last    = 0;
+		parse->errors[lstate].err_started = 0;
+		parse->errors[lstate].err_suppressed = 0;
 	}
 }
 
 static int
 list_err(
 	struct parseunit *parse,
-	u_long            state
+	u_long            lstate
 	)
 {
 	int do_it;
-	struct errorinfo *err = &parse->errors[state];
+	struct errorinfo *err = &parse->errors[lstate];
 
 	if (err->err_started == 0)
 	{
@@ -2122,7 +2122,7 @@ init_iobinding(
  */
 static char *
 parsestate(
-	u_long state,
+	u_long lstate,
 	char *buffer
 	)
 {
@@ -2166,7 +2166,7 @@ parsestate(
 	i = 0;
 	while (flagstrings[i].bit)
 	{
-		if (flagstrings[i].bit & state)
+		if (flagstrings[i].bit & lstate)
 		{
 			if (buffer[0])
 			    strcat(buffer, "; ");
@@ -2175,7 +2175,7 @@ parsestate(
 		i++;
 	}
 
-	if (state & (PARSEB_S_LEAP|PARSEB_S_ANTENNA|PARSEB_S_PPS|PARSEB_S_POSITION))
+	if (lstate & (PARSEB_S_LEAP|PARSEB_S_ANTENNA|PARSEB_S_PPS|PARSEB_S_POSITION))
 	{
       char *s, *t;
 
@@ -2189,7 +2189,7 @@ parsestate(
 		i = 0;
 		while (sflagstrings[i].bit)
 		{
-			if (sflagstrings[i].bit & state)
+			if (sflagstrings[i].bit & lstate)
 			{
 				if (t != s)
 				{
@@ -2212,7 +2212,7 @@ parsestate(
  */
 static char *
 parsestatus(
-	u_long state,
+	u_long lstate,
 	char *buffer
 	)
 {
@@ -2238,7 +2238,7 @@ parsestatus(
 	i = 0;
 	while (flagstrings[i].bit)
 	{
-		if (flagstrings[i].bit & state)
+		if (flagstrings[i].bit & lstate)
 		{
 			if (buffer[0])
 			    strcat(buffer, "; ");
@@ -2255,7 +2255,7 @@ parsestatus(
  */
 static const char *
 clockstatus(
-	u_long state
+	u_long lstate
 	)
 {
 	static char buffer[20];
@@ -2279,14 +2279,14 @@ clockstatus(
 	i = 0;
 	while (flagstrings[i].value != ~0)
 	{
-		if (flagstrings[i].value == state)
+		if (flagstrings[i].value == lstate)
 		{
 			return flagstrings[i].name;
 		}
 		i++;
 	}
 
-	sprintf(buffer, "unknown #%ld", (u_long)state);
+	sprintf(buffer, "unknown #%ld", (u_long)lstate);
 
 	return buffer;
 }
@@ -2548,9 +2548,6 @@ parse_start(
 	    parse->generic->refid = htonl(PARSEHSREFID);
 	
 	parse->generic->io.fd = fd232;
-	
-	parse->generic->nstages = parse->parse_type->cl_samples;
-	parse->generic->nskeep  = parse->parse_type->cl_keep;
 	
 	parse->peer = peer;		/* marks it also as busy */
 
