@@ -1,5 +1,8 @@
 1999-09-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_ulink.c: Typos in C++ comment
+	Reported by: Thomas.Tornblom@Sun.SE 
+
 	* configure.in: 4.0.98a
 
 	* ntpd/ntp_config.c (getconfig): Fix typo.

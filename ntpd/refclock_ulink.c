@@ -91,7 +91,7 @@ static	int	ulink_start	P((int, struct peer *));
 static	void	ulink_shutdown	P((int, struct peer *));
 static	void	ulink_receive	P((struct recvbuf *));
 static	void	ulink_poll	P((int, struct peer *));
-static  int     fd; // We need to keep the serial port oprn to power the ULM320
+static  int     fd; /* We need to keep the serial port open to power the ULM320 */
 
 /*
  * Transfer vector
