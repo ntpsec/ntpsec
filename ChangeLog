@@ -1,5 +1,8 @@
 2000-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* flock-build: build ignores the -l flag; lose it.
+	* build: Remove unused -l stuff (LOG variable).
+
 	* ntpd/ntp_refclock.c: HAVE_PPSAPI header cleanup
 	From: Reg Clemens <reg@dwf.com>
 

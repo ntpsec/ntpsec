@@ -1,13 +1,6 @@
 #! /bin/sh
 
 LOGF=make.log
-case "$1" in
- -l) LOG=1
-    shift
-    ;;
- *) LOG=0
-    ;;
-esac
 
 CONFIG_ARGS="$@"
 

@@ -23,5 +23,6 @@ esac
 for i in  churchy hepzibah pogo porkypine snavely  
 do
     echo $i
-    ssh $i "cd $c_d ; ./build -l" &
+    # Perhaps we should call build with --enable-parse-clocks
+    ssh $i "cd $c_d ; ./build" &
 done
