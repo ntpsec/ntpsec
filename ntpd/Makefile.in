@@ -78,6 +78,8 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 DCFD = @DCFD@
 DEPDIR = @DEPDIR@
+EF_LIBS = @EF_LIBS@
+EF_PROGS = @EF_PROGS@
 LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
@@ -124,8 +126,8 @@ ETAGS_ARGS = Makefile.am
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k
 
-ntpd_SOURCES = jupiter.h map_vme.c ntp_config.c ntp_control.c ntp_crypto.c \
-	ntp_filegen.c \
+ntpd_SOURCES = cmd_args.c jupiter.h map_vme.c ntp_config.c ntp_control.c \
+	ntp_crypto.c ntp_filegen.c \
 	ntp_intres.c ntp_io.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
 	ntp_proto.c ntp_refclock.c ntp_request.c ntp_resolver.c \
 	ntp_restrict.c ntp_timer.c \
@@ -156,11 +158,11 @@ check_y2k_OBJECTS =  check_y2k$U.o
 check_y2k_LDADD = $(LDADD)
 check_y2k_DEPENDENCIES =  version.o ../libntp/libntp.a
 check_y2k_LDFLAGS = 
-am_ntpd_OBJECTS =  map_vme$U.o ntp_config$U.o ntp_control$U.o \
-ntp_crypto$U.o ntp_filegen$U.o ntp_intres$U.o ntp_io$U.o \
-ntp_loopfilter$U.o ntp_monitor$U.o ntp_peer$U.o ntp_proto$U.o \
-ntp_refclock$U.o ntp_request$U.o ntp_resolver$U.o ntp_restrict$U.o \
-ntp_timer$U.o ntp_util$U.o ntpd$U.o refclock_acts$U.o \
+am_ntpd_OBJECTS =  cmd_args$U.o map_vme$U.o ntp_config$U.o \
+ntp_control$U.o ntp_crypto$U.o ntp_filegen$U.o ntp_intres$U.o \
+ntp_io$U.o ntp_loopfilter$U.o ntp_monitor$U.o ntp_peer$U.o \
+ntp_proto$U.o ntp_refclock$U.o ntp_request$U.o ntp_resolver$U.o \
+ntp_restrict$U.o ntp_timer$U.o ntp_util$U.o ntpd$U.o refclock_acts$U.o \
 refclock_arbiter$U.o refclock_arc$U.o refclock_as2201$U.o \
 refclock_atom$U.o refclock_bancomm$U.o refclock_chronolog$U.o \
 refclock_chu$U.o refclock_conf$U.o refclock_datum$U.o \
@@ -186,15 +188,16 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 GZIP_ENV = --best
 depcomp = $(SHELL) $(top_srcdir)/depcomp
-DEP_FILES =  @AMDEP@ $(DEPDIR)/check_y2k$U.Po $(DEPDIR)/map_vme$U.Po \
-$(DEPDIR)/ntp_config$U.Po $(DEPDIR)/ntp_control$U.Po \
-$(DEPDIR)/ntp_crypto$U.Po $(DEPDIR)/ntp_filegen$U.Po \
-$(DEPDIR)/ntp_intres$U.Po $(DEPDIR)/ntp_io$U.Po \
-$(DEPDIR)/ntp_loopfilter$U.Po $(DEPDIR)/ntp_monitor$U.Po \
-$(DEPDIR)/ntp_peer$U.Po $(DEPDIR)/ntp_proto$U.Po \
-$(DEPDIR)/ntp_refclock$U.Po $(DEPDIR)/ntp_request$U.Po \
-$(DEPDIR)/ntp_resolver$U.Po $(DEPDIR)/ntp_restrict$U.Po \
-$(DEPDIR)/ntp_timer$U.Po $(DEPDIR)/ntp_util$U.Po $(DEPDIR)/ntpd$U.Po \
+DEP_FILES =  @AMDEP@ $(DEPDIR)/check_y2k$U.Po $(DEPDIR)/cmd_args$U.Po \
+$(DEPDIR)/map_vme$U.Po $(DEPDIR)/ntp_config$U.Po \
+$(DEPDIR)/ntp_control$U.Po $(DEPDIR)/ntp_crypto$U.Po \
+$(DEPDIR)/ntp_filegen$U.Po $(DEPDIR)/ntp_intres$U.Po \
+$(DEPDIR)/ntp_io$U.Po $(DEPDIR)/ntp_loopfilter$U.Po \
+$(DEPDIR)/ntp_monitor$U.Po $(DEPDIR)/ntp_peer$U.Po \
+$(DEPDIR)/ntp_proto$U.Po $(DEPDIR)/ntp_refclock$U.Po \
+$(DEPDIR)/ntp_request$U.Po $(DEPDIR)/ntp_resolver$U.Po \
+$(DEPDIR)/ntp_restrict$U.Po $(DEPDIR)/ntp_timer$U.Po \
+$(DEPDIR)/ntp_util$U.Po $(DEPDIR)/ntpd$U.Po \
 $(DEPDIR)/refclock_acts$U.Po $(DEPDIR)/refclock_arbiter$U.Po \
 $(DEPDIR)/refclock_arc$U.Po $(DEPDIR)/refclock_as2201$U.Po \
 $(DEPDIR)/refclock_atom$U.Po $(DEPDIR)/refclock_bancomm$U.Po \
@@ -298,6 +301,8 @@ ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
 	$(LINK) $(ntpd_LDFLAGS) $(ntpd_OBJECTS) $(ntpd_LDADD) $(LIBS)
 check_y2k_.c: check_y2k.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/check_y2k.c; then echo $(srcdir)/check_y2k.c; else echo check_y2k.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > check_y2k_.c
+cmd_args_.c: cmd_args.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cmd_args.c; then echo $(srcdir)/cmd_args.c; else echo cmd_args.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cmd_args_.c
 map_vme_.c: map_vme.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/map_vme.c; then echo $(srcdir)/map_vme.c; else echo map_vme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > map_vme_.c
 ntp_config_.c: ntp_config.c $(ANSI2KNR)
@@ -406,14 +411,15 @@ refclock_wwv_.c: refclock_wwv.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwv.c; then echo $(srcdir)/refclock_wwv.c; else echo refclock_wwv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwv_.c
 refclock_wwvb_.c: refclock_wwvb.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwvb.c; then echo $(srcdir)/refclock_wwvb.c; else echo refclock_wwvb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwvb_.c
-check_y2k_.o map_vme_.o ntp_config_.o ntp_control_.o ntp_crypto_.o \
-ntp_filegen_.o ntp_intres_.o ntp_io_.o ntp_loopfilter_.o ntp_monitor_.o \
-ntp_peer_.o ntp_proto_.o ntp_refclock_.o ntp_request_.o ntp_resolver_.o \
-ntp_restrict_.o ntp_timer_.o ntp_util_.o ntpd_.o refclock_acts_.o \
-refclock_arbiter_.o refclock_arc_.o refclock_as2201_.o refclock_atom_.o \
-refclock_bancomm_.o refclock_chronolog_.o refclock_chu_.o \
-refclock_conf_.o refclock_datum_.o refclock_dumbclock_.o refclock_fg_.o \
-refclock_gpsvme_.o refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
+check_y2k_.o cmd_args_.o map_vme_.o ntp_config_.o ntp_control_.o \
+ntp_crypto_.o ntp_filegen_.o ntp_intres_.o ntp_io_.o ntp_loopfilter_.o \
+ntp_monitor_.o ntp_peer_.o ntp_proto_.o ntp_refclock_.o ntp_request_.o \
+ntp_resolver_.o ntp_restrict_.o ntp_timer_.o ntp_util_.o ntpd_.o \
+refclock_acts_.o refclock_arbiter_.o refclock_arc_.o refclock_as2201_.o \
+refclock_atom_.o refclock_bancomm_.o refclock_chronolog_.o \
+refclock_chu_.o refclock_conf_.o refclock_datum_.o \
+refclock_dumbclock_.o refclock_fg_.o refclock_gpsvme_.o \
+refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
 refclock_jupiter_.o refclock_leitch_.o refclock_local_.o \
 refclock_msfees_.o refclock_mx4200_.o refclock_nmea_.o \
 refclock_oncore_.o refclock_palisade_.o refclock_parse_.o \
@@ -469,6 +475,7 @@ distdir: $(DISTFILES)
 	done
 
 @AMDEP@include $(DEPDIR)/check_y2k$U.Po
+@AMDEP@include $(DEPDIR)/cmd_args$U.Po
 @AMDEP@include $(DEPDIR)/map_vme$U.Po
 @AMDEP@include $(DEPDIR)/ntp_config$U.Po
 @AMDEP@include $(DEPDIR)/ntp_control$U.Po

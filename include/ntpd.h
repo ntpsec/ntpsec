@@ -26,7 +26,6 @@ void	worker_thread	(void *);
 #endif /* SYS_WINNT */
 
 /* ntp_config.c */
-extern	void	getstartup	P((int, char **));
 extern	void	getconfig	P((int, char **));
 
 /* ntp_config.c */

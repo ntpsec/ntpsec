@@ -21,6 +21,8 @@ noinst_HEADERS = \
 	ntif.h \
 	ntp.h \
 	ntp_calendar.h \
+	ntp_cmdargs.h \
+	ntp_config.h \
 	ntp_control.h \
 	ntp_crypto.h \
 	ntp_datum.h \

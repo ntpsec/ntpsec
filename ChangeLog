@@ -1,3 +1,20 @@
+2000-07-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k4
+	* util/ntp-genkeys.c: Start hacking for new functionality.
+	* include/Makefile.am (noinst_HEADERS): Added ntp_cmdargs.h and
+	ntp_config.h .
+	* ntpd/ntp_config.c: Grab ntp_cmdargs.h.  Make some new globals
+	(ugh), move ntpd-specific variables and code to cmd_args.c .
+	* ntpd/cmd_args.c: Move command argument processing functions from
+	ntp_config.c to this file.
+	* ntpd/Makefile.am (ntpd_SOURCES): Added cmd_args.c
+	* include/ntpd.h: Move getstartup() to ntp_cmdargs.h
+	* include/ntp_cmdargs.h: New file
+	Begin the hacking fest to make it easier for ntp-genkeys to use
+	ntpd's config processing code.  I really hope this is the lesser
+	of the evils...
+	
 2000-07-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/ntp-genkeys.c (usage): Added.

@@ -1,15 +1,29 @@
 /*
  * Program to generate MD5 and RSA keys for NTP clients and servers
  */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/time.h>
+
+#ifdef HAVE_NETINFO
+#include <netinfo/ni.h>
+#endif
+
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
-#include "ntp_crypto.h"
 #include "ntp_unixtime.h"
+#include "ntp_config.h"
+
+#ifdef PUBKEY
+# include "ntp_crypto.h"
+#endif
 
 /*
  * Cryptodefines
@@ -145,20 +159,51 @@ main(
 	mode_t std_mask;	/* Standard mask */
 	mode_t sec_mask = 077;	/* Secure mask */
 	char *config_file;
+#ifdef HAVE_NETINFO
+	struct netinfo_config_state *config_netinfo = NULL;
+	int check_netinfo = 1;
+#endif /* HAVE_NETINFO */
+#ifdef SYS_WINNT
+	char *alt_config_file;
+	LPTSTR temp;
+	char config_file_storage[MAX_PATH];
+	char alt_config_file_storage[MAX_PATH];
+#endif /* SYS_WINNT */
 	int make_dh = 0;	/* Make D-H parameter file? */
 	int make_md5 = 0;	/* Make MD5 keyfile? */
 	int make_rsa = 0;	/* Make RSA pair? */
 	int force = 0;		/* Force the installation? */
 	int nosymlinks = 0;	/* Just create the (timestamped) files? */
 	int trash = 0;		/* Trash old files? */
+	int errflag = 0;
 
 	/* Initialize config_file */
-	/* What abuot netinfo? */
+	/* HMS: from ntp_config.c - we should use 1 copy of this... */
+#ifndef SYS_WINNT
+	config_file = CONFIG_FILE;
+#else
+	temp = CONFIG_FILE;
+	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)config_file_storage, (DWORD)sizeof(config_file_storage))) {
+		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
+		exit(1);
+	}
+	config_file = config_file_storage;
+
+	temp = ALT_CONFIG_FILE;
+	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
+		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
+		exit(1);
+	}
+	alt_config_file = alt_config_file_storage;
+#endif /* SYS_WINNT */
 
 	while ((i = ntp_getopt(argc, argv, "c:dflmrt")) != EOF)
 		switch (i) {
 		    case 'c':
 			config_file = ntp_optarg;
+#ifdef HAVE_NETINFO
+			check_netinfo = 0;
+#endif
 			break;
 		    case 'd':
 			++make_dh;
@@ -179,11 +224,14 @@ main(
 			++trash;
 			break;
 		    case '?':
-			usage();
+			++errflag;
 			break;
 		}
 
-	/* If no type were specified, for for them all. */
+	if (errflag)
+		usage();
+
+	/* If no file type was specified, make them all. */
 	if (!(make_dh | make_md5 | make_rsa)) {
 		++make_dh;
 		++make_md5;
@@ -209,6 +257,22 @@ main(
 	  We need 2 variables per file:
 	  - the specified location of the file 
 	  - the file it points to (if it's a symlink)
+
+	  We:
+	  - get each target filename
+	  - if it exists, if it's a symlink get the "target"
+	  - for each file we're going to install:
+	  - - build the new timestamped file
+	  - - install it with the timestamp suffix
+	  - - If it's OK to make links:
+	  - - - remove any old link
+	  - - - make any needed directories?
+	  - - - make the link
+	  - - - remove the old file (if (trash))
+
+	  We'll probably learn about how the link should be installed.
+	  We will start by using fully-rooted paths, but we should use
+	  whatever information we have from the old link.
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
