@@ -30,4 +30,23 @@
 # include "win32_io.h"
 #endif
 
+/*
+ * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
+ * to (and can).  This is here initially for QNX, but may help for
+ * others as well...
+ */
+#ifndef FNDELAY
+# ifndef O_NONBLOCK
+#  error Both FNDELAY and O_NONBLOCK are undefined on this system
+# endif
+# define FNDELAY O_NONBLOCK
+#endif
+
+#ifndef FASYNC
+# ifndef O_ASYNC
+#  error Both FASYNC and O_ASYNC are undefined on this system
+# endif
+# define FASYNC O_ASYNC
+#endif
+
 #endif
