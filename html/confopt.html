@@ -12,7 +12,7 @@
 		<h3>Server Options</h3>
 		<img src="pic/boom3a.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>The chicken is getting configuration advice.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="97">09:18 PM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="307">Thursday, December 04, 2003</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">12:19 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="280">Sunday, February 13, 2005</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -65,7 +65,8 @@
 			<dd>Marks the server as unused, except for display purposes. The server is discarded by the selection algroithm.
 			<dt><tt>prefer</tt>
 			<dd>Marks the server as preferred. All other things being equal, this host will be chosen for synchronization among a set of correctly operating hosts. See the <a href="prefer.html">Mitigation Rules and the <tt>prefer</tt> Keyword</a> page for further information.
-			<dt><tt>ttl <i>ttl</i></tt>
+			<dt><tt>true</tt>
+			<dd>Force the association to assume truechimer status; that is, always survive the selection and clustering algorithms. This option can be used with any association, but is most useful for reference clocks with large jitter on the serial port and precision pulse-per-second (PPS) signals. Caution: this option defeats the algorithms designed to cast out falsetickers and can allow these sources to set the system clock. <dt><tt>ttl <i>ttl</i></tt>
 			<dd>This option is used only with broadcast server and manycast client modes. It specifies the time-to-live <i><tt>ttl</tt></i> to use on broadcast server and multicast server and the maximum <i><tt>ttl</tt></i> for the expanding ring search with manycast client packets. Selection of the proper value, which defaults to 127, is something of a black art and should be coordinated with the network administrator.
 			<dt><tt>version <i>version</i></tt>
 			<dd>Specifies the version number to be used for outgoing NTP packets. Versions 1-4 are the choices, with version 4 the default.

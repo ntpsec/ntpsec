@@ -259,6 +259,7 @@ main(
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpd,"ntpd",ntpdmain);
 #else
+#ifndef SYS_WINNT
 int
 main(
 	int argc,
@@ -267,7 +268,8 @@ main(
 {
 	return ntpdmain(argc, argv);
 }
-#endif
+#endif /* SYS_WINNT */
+#endif /* NO_MAIN_ALLOWED */
 #endif /* SIM */
 
 #ifdef _AIX
@@ -709,6 +711,7 @@ ntpdmain(
 	debug = 0;
 #endif
 	getconfig(argc, argv);
+	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 #ifdef OPENSSL
 	crypto_setup();
 #endif /* OPENSSL */
@@ -757,7 +760,7 @@ getuser:
 			} else {
 getgroup:	
 				if ((gr = getgrnam(group)) != NULL) {
-					sw_gid = pw->pw_gid;
+					sw_gid = gr->gr_gid;
 				} else {
 					errno = 0;
 					msyslog(LOG_ERR, "Cannot find group `%s'", group);

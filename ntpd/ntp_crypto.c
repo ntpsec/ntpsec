@@ -778,7 +778,8 @@ crypto_recv(
 			 * versions and link the newest version first on
 			 * the list.
 			 */
-			if ((rval = cert_install(ep, peer)) != XEVNT_OK) 				break;
+			if ((rval = cert_install(ep, peer)) != XEVNT_OK)
+				break;
 
 			peer->crypto |= CRYPTO_FLAG_SIGN;
 			peer->flash &= ~TEST10;

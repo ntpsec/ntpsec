@@ -87,6 +87,11 @@ static FILEGEN cryptostats;
 int stats_control;
 
 /*
+ * Initial frequency offset later passed to the loopfilter.
+ */
+double	old_drift;
+
+/*
  * init_util - initialize the utilities
  */
 void
@@ -310,7 +315,6 @@ stats_config(
 {
 	FILE *fp;
 	char *value;
-	double old_drift;
 	int len;
 
 	/*
@@ -381,21 +385,19 @@ stats_config(
 		 * missing or contains errors, tell the loop to reset.
 		 */
 		if ((fp = fopen(stats_drift_file, "r")) == NULL) {
-			loop_config(LOOP_DRIFTCOMP, 1e9);
+			old_drift = 1e9;
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
 			msyslog(LOG_ERR, "Frequency format error in %s", 
 			    stats_drift_file);
-			loop_config(LOOP_DRIFTCOMP, 1e9);
-			fclose(fp);
+			old_drift = 1e9;
 			break;
 		}
 		fclose(fp);
 		msyslog(LOG_INFO,
 		    "frequency initialized %.3f PPM from %s",
 			old_drift, stats_drift_file);
-		loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 		break;
 	
 	    case STATS_STATSDIR:
