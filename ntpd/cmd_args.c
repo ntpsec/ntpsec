@@ -21,9 +21,9 @@ int	listen_to_virtual_ips = 1;
 
 
 #ifndef HAVE_CLOCKCTL 
-static const char *ntp_options = "aAbB:c:C:dD:f:gk:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:";
+static const char *ntp_options = "aAbB:c:C:dD:f:gk:l:LmnNO:p:P:qr:s:S:t:T:W:v:V:xY:Z:-:";
 #else
-static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:";
+static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LmnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 #endif
 
 #ifdef HAVE_NETINFO
@@ -127,6 +127,25 @@ getstartup(
 		case '?':
 		    ++errflg;
 		    break;
+
+	    case '-':
+	      if ( ! strcmp(ntp_optarg, "version") ) {
+		printf("%.80s: %.80s\n", progname, Version);
+		exit(0);
+	      } else if ( ! strcmp(ntp_optarg, "help") ) {
+		/* usage(); */
+		/* exit(0); */
+		++errflg;
+	      } else if ( ! strcmp(ntp_optarg, "copyright") ) {
+		printf("unknown\n");
+		exit(0);
+	      } else {
+		fprintf(stderr, "%.80s: Error unknown argument '--%.80s'\n",
+			progname,
+			ntp_optarg);
+		exit(12);
+	      }
+	      break;
 
 		default:
 			break;
