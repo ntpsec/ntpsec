@@ -203,7 +203,7 @@ AC_CHECK_LIB(readline, readline, ,
  AC_CHECK_LIB(readline, readline,
   LIBS="-lreadline -lcurses $LIBS"
   AC_DEFINE(HAVE_LIBREADLINE)
-  AC_DEFINE(HAVE_LIBCURSES)
+  AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?])
   , , -lcurses))
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
