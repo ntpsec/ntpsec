@@ -1,3 +1,8 @@
+1999-12-03  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* libntp/mexit.c: Moved WINNT port specific file to ports/winnt/libntp
+	* ports/winnt/libntp/libntp.dsp: Fix WinNT makefile for new source loc.
+
 1999-12-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/Makefile.am (libntp_a_SOURCES): Lose mexit.c - Sven will
