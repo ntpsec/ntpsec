@@ -1026,23 +1026,44 @@ clock_select(void)
 	 */
 	nlist = 0;	/* none yet */
 	for (server = sys_servers; server != NULL; server = server->next_server) {
-		if (server->delay == 0)
-			continue;	/* no data */
-		if (server->stratum > NTP_INFIN)
-			continue;	/* stratum no good */
-		if (server->delay > NTP_MAXWGT) {
-			continue;	/* too far away */
+		if (server->delay == 0) {
+			if (debug)
+				printf("%s: Server dropped: no data\n", ntoa(&server->srcadr));
+			continue;   /* no data */
 		}
-		if (server->leap == LEAP_NOTINSYNC)
-			continue;	/* he's in trouble */
+		if (server->stratum > NTP_INFIN) {
+			if (debug)
+				printf("%s: Server dropped: strata too high\n", ntoa(&server->srcadr));
+			continue;   /* stratum no good */
+		}
+		if (server->delay > NTP_MAXWGT) {
+			if (debug)
+				printf("%s: Server dropped: server too far away\n", 
+				       ntoa(&server->srcadr));
+			continue;   /* too far away */
+		}
+		if (server->leap == LEAP_NOTINSYNC) {
+			if (debug)
+				printf("%s: Server dropped: Leap not in sync\n", ntoa(&server->srcadr));
+			continue;   /* he's in trouble */
+		}
 		if (!L_ISHIS(&server->org, &server->reftime)) {
-			continue;	/* very broken host */
+			if (debug)
+				printf("%s: Server dropped: server is very broken\n", 
+				       ntoa(&server->srcadr));
+			continue;   /* very broken host */
 		}
 		if ((server->org.l_ui - server->reftime.l_ui)
-			>= NTP_MAXAGE) {
+		    >= NTP_MAXAGE) {
+			if (debug)
+				printf("%s: Server dropped: Server has gone too long without sync\n", 
+				       ntoa(&server->srcadr));
 			continue;	/* too long without sync */
 		}
 		if (server->trust != 0) {
+			if (debug)
+				printf("%s: Server dropped: Server is untrusted\n",
+				       ntoa(&server->srcadr));
 			continue;
 		}
 
