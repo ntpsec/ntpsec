@@ -2,7 +2,7 @@
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd @MAKE_NTPDSIM@
 noinst_LIBRARIES = libntpd.a
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include -I../include
 # LDADD might need RESLIB and ADJLIB.
 # If LIBPARSE, we need libntpd.a 2wagain afterwards...
 LDADD =	version.o libntpd.a @LIBPARSE@ libntpd.a
