@@ -172,11 +172,11 @@
 #define MTHR		13.	/* acquisition signal gate (percent) */
 #define TTHR		50.	/* tracking signal gate (percent) */
 #define AWND		20	/* acquisition jitter threshold (ms) */
-#define ATHR		2000.	/* QRZ minute sync threshold */
+#define ATHR		3000.	/* QRZ minute sync threshold */
 #define ASNR		20.	/* QRZ minute sync SNR threshold (dB) */
-#define QTHR		2000.	/* QSY minute sync threshold */
+#define QTHR		3000.	/* QSY minute sync threshold */
 #define QSNR		20.	/* QSY minute sync SNR threshold (dB) */
-#define STHR		2000.	/* second sync threshold */
+#define STHR		3000.	/* second sync threshold */
 #define	SSNR		15.	/* second sync SNR threshold (dB) */
 #define SCMP		10 	/* second sync compare threshold */
 #define DTHR		1000.	/* bit threshold */
@@ -1273,20 +1273,14 @@ wwv_rf(
 		epopos = epoch;
 	}
 	if (epoch == 0) {
-		int k, j;
+		int j;
 
 		up->epomax = epomax;
 		dtemp = 0;
-		k = epopos - 7 * MS;
-		for (j = 0; j < MS; j++) {
-			if (k < 0)
-				k += SECOND;
-			if (k >= SECOND)
-				k -= SECOND;
-			dtemp += epobuf[k] * epobuf[k];
-			k++;
- 		} 
-		up->eposnr = wwv_snr(epomax, dtemp / (MS / 2)) / 10.;
+		j = epopos - 6 * MS;
+		if (j < 0)
+			j += SECOND;
+		up->eposnr = wwv_snr(epomax, epobuf[j]);
 		epopos -= pdelay + TCKCYC * MS;
 		if (epopos < 0)
 			epopos += SECOND;
@@ -1379,7 +1373,7 @@ wwv_qrz(
 	if (up->mphase == 0) {
 		sp->synmax = sp->maxeng;
 		sp->synsnr = wwv_snr(sp->synmax, sp->noieng / (MINUTE -
-		    2 * SECOND) / (MS / 2.) / SYNCYC) / 10.;
+		    2. * SECOND));
 		epoch = (sp->pos - sp->lastpos) % MINUTE;
 
 		/*
@@ -1435,7 +1429,7 @@ wwv_qrz(
 		}
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv8 %d %3d %s %d %5.0f %5.1f %5.1f %5ld %5d %ld",
+			    "wwv8 %d %3d %s %d %5.0f %5.1f %5.0f %5ld %5d %ld",
 			    up->port, up->gain, sp->refid, sp->count,
 			    sp->synmax, sp->synsnr, wwv_metric(sp),
 			    sp->pos, up->tepoch, epoch);
@@ -2547,7 +2541,7 @@ wwv_snr(
 	} else if (noise <= 0) {
 		rval = MAXSNR;
 	} else {
-		rval = 20 * log10(signal / noise);
+		rval = 20. * log10(signal / noise);
 		if (rval > MAXSNR)
 			rval = MAXSNR;
 	}
