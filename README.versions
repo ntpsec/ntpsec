@@ -3,7 +3,7 @@ NTP uses A.B.C - style release numbers.
 
 The third (C) part of the version number can be:
 
- 0-69 for releases on the A.B.C series.
+ 0-69 for patches/bugfixes to the A.B.C series.
  70-79 for alpha releases of the A.B+1.0 series.
  80+ for beta releases of the A.B+1.0 series.
 
