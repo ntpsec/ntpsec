@@ -1,5 +1,16 @@
 2000-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c: Drive ONCORE_SHMEM_STATUS based on
+	HAVE_SYS_MMAN_H .  If this needs finer checks, do it in
+	configure.in .
+	(oncore_read_config): Add the isascii() checks; older versions of
+	Unix don't guarantee correct behavior of is*() without it.
+
+	* ntpd/refclock_oncore.c: Add proof-of-concept support for 
+	  delivering receiver data stream to other processes through
+	  a memory-mapped file.
+	  From: Poul-Henning Kamp <phk@FreeBSD.org>
+
 	* configure.in (ac_refclock_chu): Provide the CHU driver by
 	default, and by default prefer the AUDIO version.  We used to
 	limit this to SunOS or Solaris; now we drive by the availability

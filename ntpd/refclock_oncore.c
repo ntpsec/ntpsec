@@ -55,6 +55,18 @@
 
 #define POS_HOLD_AVERAGE	10000	/* nb, 10000s ~= 2h45m */
 
+/*
+ * This feature will create a mmap(2)'ed file named according to a "STATUS" line
+ * in the oncore config file, which contains the most recent copy of all
+ * types of messages we recognize.  This file can be mmap(2)'ed by monitoring
+ * and statistics programs.
+ */
+
+/* HMS:  We can set ONCORE_SHMEM_STATUS in configure ... */
+#ifdef HAVE_SYS_MMAN_H
+#define ONCORE_SHMEM_STATUS	1
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -66,6 +78,11 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#ifdef ONCORE_SHMEM_STATUS
+# ifdef HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+# endif /* HAVE_SYS_MMAN_H */
+#endif /* ONCORE_SHMEM_STATUS */
 
 #ifdef HAVE_PPSAPI
 #  ifdef HAVE_TIMEPPS_H
@@ -126,6 +143,8 @@ struct instance {
 	int	unit;		/* 127.127.30.unit */
 	int	ttyfd;		/* TTY file descriptor */
 	int	ppsfd;		/* PPS file descriptor */
+	int	statusfd;	/* Status shm descriptor */
+	u_char	*shmem;
 #ifdef HAVE_PPSAPI
 	pps_handle_t pps_h;
 	pps_params_t pps_p;
@@ -184,6 +203,7 @@ static	void	oncore_msg_At	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Ay	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Az	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Bj	P((struct instance *, u_char *, u_int));
+static	void	oncore_msg_Cb	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Cf	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Cj	P((struct instance *, u_char *, u_int));
 static	void	oncore_msg_Ea	P((struct instance *, u_char *, u_int));
@@ -210,6 +230,7 @@ static struct {
 	const int	len;
 	void		(*handler) P((struct instance *, u_char *, u_int));
 	const char	*fmt;
+	int		shmem;
 } oncore_messages[] = {
 	/* Ea and En first since they're most common */
 	{ "Ea",  76,    oncore_msg_Ea,  "mdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdimsdimsdsC" },
@@ -227,7 +248,7 @@ static struct {
 	{ "AB",   8,    0,              "" },
 	{ "Bb",  92,    0,              "" },
 	{ "Bj",   8,    oncore_msg_Bj,  "" },
-	{ "Cb",  33,    0,              "" },
+	{ "Cb",  33,    oncore_msg_Cb,  "" },
 	{ "Cf",   7,    oncore_msg_Cf,  "" },
 	{ "Cg",   8,    0,              "" },
 	{ "Ch",   9,    0,              "" },
@@ -238,6 +259,8 @@ static struct {
 	{ {0},	  7,	0, ""}
 };
 
+static unsigned int oncore_shmem_length;
+static unsigned int oncore_shmem_Cb;
 
 /*
  * Position Set.
@@ -266,6 +289,11 @@ u_char oncore_cmd_Asx[]= { 'A', 's', 0x7f, 0xff, 0xff, 0xff,
 u_char oncore_cmd_Aw[] = { 'A', 'w', 1 };
 
 /*
+ * Output Almanac when it changes
+ */
+u_char oncore_cmd_Be[] = { 'B', 'e', 1 };
+
+/*
  * Read back PPS Offset for Output
  */
 u_char oncore_cmd_Ay[]	= { 'A', 'y', 0, 0, 0, 0 };
@@ -285,7 +313,7 @@ u_char oncore_cmd_AB[] = { 'A', 'B', 4 };
 /*
  * Visible Satellite Status Msg.
  */
-u_char oncore_cmd_Bb[] = { 'B', 'b', 0 };      /* just turn off */
+u_char oncore_cmd_Bb[] = { 'B', 'b', 1 };
 
 /*
  * Leap Second Pending Message
@@ -566,6 +594,75 @@ oncore_start(
 
 
 
+static void
+oncore_init_shmem(struct instance *instance, char *filename)
+{
+#ifdef ONCORE_SHMEM_STATUS
+	int i, l, m, n;
+	char *buf;
+
+	if (oncore_messages[0].shmem == 0) {
+		n = 1;
+		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) - 1;
+		for(m = 0; m < l; m++) {
+			oncore_messages[m].shmem = n;
+			/* Allocate space for multiplexed almanac */
+			if (!strcmp(oncore_messages[m].flag, "Cb")) {
+				oncore_shmem_Cb = n;
+				n += (oncore_messages[m].len + 2) * 34;
+			}
+			n += oncore_messages[m].len + 2;
+		}
+		oncore_shmem_length = n;
+		fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", oncore_shmem_length);
+	}
+	instance->statusfd = open(filename, O_RDWR|O_CREAT|O_TRUNC, 0644);
+	if (instance->statusfd < 0) {
+		perror(filename);
+		exit(4);
+	}
+	buf = malloc(oncore_shmem_length);
+	if (buf == NULL) {
+		perror("malloc");
+		exit(4);
+	}
+	memset(buf, 0, sizeof(buf));
+	i = write(instance->statusfd, buf, oncore_shmem_length);
+	if (i != oncore_shmem_length) {
+		perror(filename);
+		exit(4);
+	}
+	free(buf);
+	instance->shmem = mmap(0, oncore_shmem_length, 
+	    PROT_READ | PROT_WRITE, MAP_HASSEMAPHORE | MAP_SHARED,
+	    instance->statusfd, 0LL);
+	if (instance->shmem == MAP_FAILED) {
+		instance->shmem = 0;
+		close (instance->statusfd);
+		exit(4);
+	}
+	l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) - 1;
+	for(m = 0; m < l; m++) {
+		instance->shmem[oncore_messages[m].shmem + 0] = oncore_messages[m].len >> 8;
+		instance->shmem[oncore_messages[m].shmem + 1] = oncore_messages[m].len & 0xff;
+		instance->shmem[oncore_messages[m].shmem + 2] = '@';
+		instance->shmem[oncore_messages[m].shmem + 3] = '@';
+		instance->shmem[oncore_messages[m].shmem + 4] = oncore_messages[m].flag[0];
+		instance->shmem[oncore_messages[m].shmem + 5] = oncore_messages[m].flag[1];
+		if (!strcmp(oncore_messages[m].flag, "Cb")) {
+			for (i = 1; i < 35; i++) {
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 0] = oncore_messages[m].len >> 8;
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 1] = oncore_messages[m].len & 0xff;
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 2] = '@';
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 3] = '@';
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 4] = oncore_messages[m].flag[0];
+				instance->shmem[oncore_messages[m].shmem + i * 35 + 5] = oncore_messages[m].flag[1];
+			}
+		}
+	}
+#endif /* ONCORE_SHMEM_STATUS */
+} 
+
 /*
  * Read Input file if it exists.
  */
@@ -669,15 +766,29 @@ oncore_read_config(
 		if ((cp=strchr(line, '#')))
 			*cp = '\0';
 		i = strlen(line);
-		for (j=0; j<i; j++)	/* just in case lower case */
-			if (islower((int)line[j]))
+		if (line[i - 1] == '\n')
+			line[--i] = '\0';
+		for (j=0; j<i; j++) {	/* let them use `=' between terms */
+			if (isascii((int)line[j]) && islower((int)line[j]))
 				line[j] = toupper(line[j]);
-		for (j=0; j<i; j++)	/* let them use `=' between terms */
-			if (line[j] == '=')
+			if (line[j] == '=') {
 				line[j] = ' ';
+				break;
+			}
+		}
 		for (j=0; j<i; j++)
 			if (line[j] != ' ')
 				break;
+		if (!strncmp(&line[j], "STATUS", 6)) {
+			j += 6;
+			while (isascii(line[j]) && isspace(line[j]))
+				j++;
+			oncore_init_shmem(instance, &line[j]);
+			continue;
+		}
+		for (j=0; j<i; j++)	/* just in case lower case */
+			if (isascii((int)line[j]) && islower((int)line[j]))
+				line[j] = toupper(line[j]);
 		if (!strncmp(&line[j], "LAT", 3)) {
 			j += 3;
 			f1 = f2 = f3 = 0;
@@ -880,7 +991,8 @@ oncore_consume(
 	struct instance *instance
 	)
 {
-	int i, l, j, m;
+	int i, j, m;
+	unsigned l;
 
 	while (rcvptr >= 7) {
 		if (rcvbuf[0] != '@' || rcvbuf[1] != '@') {
@@ -916,6 +1028,9 @@ oncore_consume(
 		for (i = 2; i < l-3; i++)
 			j ^= rcvbuf[i];
 		if (j == rcvbuf[l-3]) {
+			if (instance->shmem != NULL) 
+				memcpy(instance->shmem + oncore_messages[m].shmem + 2,
+				    rcvbuf, l);
 			oncore_msg_any(instance, rcvbuf, (unsigned) (l-3), m);
 			if (oncore_messages[m].handler)
 				oncore_messages[m].handler(instance, rcvbuf, (unsigned) (l-3));
@@ -998,6 +1113,33 @@ oncore_msg_any(
 }
 
 
+
+/*
+ * Demultiplex the almanac into shmem
+ */
+static void
+oncore_msg_Cb(
+	struct instance *instance,
+	u_char *buf,
+	u_int len
+	)
+{
+	int i;
+
+	if (instance->shmem == NULL)
+		return;
+
+	if (buf[4] == 5) 
+		i = buf[5];
+	else if (buf[4] == 4 && buf[5] <= 5)
+		i = buf[5] + 24;
+	else if (buf[4] == 4 && buf[5] <= 10)
+		i = buf[5] + 23;
+	else
+		i = 34;
+	i *= 35;
+	memcpy(instance->shmem + oncore_shmem_Cb + i + 2, buf, len + 3);
+}
 
 /*
  * Set to Factory Defaults (Reasonable for UT w/ no Battery Backup
@@ -1101,6 +1243,7 @@ oncore_msg_Cj(
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_Ek, sizeof oncore_cmd_Ek); /* turn off */
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_Aw, sizeof oncore_cmd_Aw); /* UTC time */
 	oncore_sendmsg(instance->ttyfd, oncore_cmd_AB, sizeof oncore_cmd_AB); /* Appl type static */
+	oncore_sendmsg(instance->ttyfd, oncore_cmd_Be, sizeof oncore_cmd_Be); /* Tell us the Almanac */
 
 	mode = instance->init_type;
 	if (debug)
