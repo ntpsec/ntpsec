@@ -1,6 +1,8 @@
 #! /bin/sh
 
 BUILD_ARGS="$@"
+PARSE="--enable-parse-clocks"
+#PARSE=
 
 # * baldwin        sparc-sun-solaris2.7
 #   bridgeport     sparc-sun-solaris2.6
@@ -28,7 +30,7 @@ esac
 for i in $LIST
 do
     echo $i
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --with-crypto=autokey $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-crypto $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG $PARSE $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG $PARSE --with-crypto=autokey $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG $PARSE --without-crypto $BUILD_ARGS" &
 done

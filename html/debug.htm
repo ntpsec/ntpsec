@@ -1,105 +1,37 @@
-<HTML><HEAD><TITLE>
+<html><head><title>
 NTP Debugging Techniques
-</TITLE></HEAD><BODY><H3>
+</title></head><body><h3>
 NTP Debugging Techniques
-</H3>
+</h3>
 
-<IMG align=left SRC="pic/pogo.gif"><I>Pogo Possum</I>, with toolkit
-and bug, Walt Kelly
+<img align=left src=pic/pogo.gif><a href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>Pogo</i>, Walt Kelly</a>
+
+<p>We make house calls and bring our own bugs.
 <br clear=left><hr>
 
-<p>Once the NTP software distribution has been compiled and installed
-and the configuration file constructed, the next step is to verify
-correct operation and fix any bugs that may result. Usually, the command
-line that starts the daemon is included in the system startup file, so
-it is executed only at system boot time; however, the daemon can be
-stopped and restarted from root at any time. Usually, no command-line
-arguments are required, unless special actions described in the
-<tt><A HREF="ntpd.htm">ntpd</A></tt> page are required. Once started,
-the daemon will begin sending and receiving messages, as specified in
-the configuration file.
+<p>Once the NTP software distribution has been compiled and installed and the configuration file constructed, the next step is to verify correct operation and fix any bugs that may result. Usually, the command line that starts the daemon is included in the system startup file, so it is executed only at system boot time; however, the daemon can be stopped and restarted from root at any time. Usually, no command-line arguments are required, unless special actions described in the <tt><A HREF="ntpd.htm">ntpd</A></tt> page are required. Once started, the daemon will begin sending and receiving messages, as specified in the configuration file.
 
 <h4>Initial Startup</h4>
 
-<p>The best way to verify correct operation is using the <tt><A
-HREF="ntpq.htm">ntpq</A></tt> and <tt><A HREF="ntpdc.htm">ntpdc</A></tt>
-utility programs, either on the server itself or from another machine
-elsewhere in the network. The <tt>ntpq</tt> program implements the
-management functions specified in Appendix A of the NTP specification <A
-HREF=
-"http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.ps">
-RFC-1305, Appendix A</A>. The <tt>ntpdc</tt> program implements
-additional functions not provided in the standard. Both programs can be
-used to inspect the state variables defined in the specification and, in
-the case of <tt>ntpdc</tt>, additional ones of interest. In addition,
-the <tt>ntpdc</tt> program can be used to selectively reconfigure and
-enable or disable some functions while the daemon is running.
+<p>The best way to verify correct operation is using the <tt><A HREF="ntpq.htm">ntpq</A></tt> and <tt><A HREF="ntpdc.htm">ntpdc</A></tt> utility programs, either on the server itself or from another machine elsewhere in the network. The <tt>ntpq</tt> program implements the management functions specified in the NTP specification <A HREF="http://www.eecis.udel.edu/~mills/database/rfc/rfc1305/rfc1305c.ps">
+RFC-1305, Appendix A</A>. The <tt>ntpdc</tt> program implements additional functions not provided in the standard. Both programs can be used to inspect the state variables defined in the specification and, in the case of <tt>ntpdc</tt>, additional ones of interest. In addition, the <tt>ntpdc</tt> program can be used to selectively reconfigure and enable or disable some functions while the daemon is running.
 
-<p>In extreme cases with elusive bugs, the daemon can operate in two
-modes, depending on the presence of the <tt>-d</tt> command-line debug
-switch. If not present, the daemon detaches from the controlling
-terminal and proceeds autonomously. If one or more <tt>-d</tt> switches
-are present, the daemon does not detach and generates special output
-useful for debugging. In general, interpretation of this output requires
-reference to the sources. However, a single <tt>-d</tt> does produce
-only mildly cryptic output and can be very useful in finding problems
-with configuration and network troubles. With a little experience, the
-volume of output can be reduced by piping the output to <tt>grep
-</tt>and specifying the keyword of the trace you want to see.
+<p>In extreme cases with elusive bugs, the daemon can operate in two modes, depending on the presence of the <tt>-d</tt> command-line debug switch. If not present, the daemon detaches from the controlling
+terminal and proceeds autonomously. If one or more <tt>-d</tt> switches are present, the daemon does not detach and generates special output useful for debugging. In general, interpretation of this output requires reference to the sources. However, a single <tt>-d</tt> does produce only mildly cryptic output and can be very useful in finding problems with configuration and network troubles. With a little experience, the volume of output can be reduced by piping the output to <tt>grep </tt>and specifying the keyword of the trace you want to see.
 
-<p>Some problems are immediately apparent when the daemon first starts
-running. The most common of these are the lack of a UDP port for NTP
-(123) in the Unix <tt>/etc/services</tt> file. Note that NTP does not
-use TCP in any form. Other problems are apparent in the system log file.
-The log file should show the startup banner, some cryptic initialization
-data and the computed precision value. The next most common problem is
-incorrect DNS names. Check that each DNS name used in the configuration
-file responds to the Unix <tt>ping</tt> command.
+<p>Some problems are immediately apparent when the daemon first starts running. The most common of these are the lack of a UDP port for NTP (123) in the Unix <tt>/etc/services</tt> file. Note that NTP does not use TCP in any form. Other problems are apparent in the system log file. The log file should show the startup banner, some cryptic initialization data and the computed precision value. The next most common problem is incorrect DNS names. Check that each DNS name used in the configuration file responds to the Unix <tt>ping</tt> command.
 
-<p>When first started, the daemon normally polls the servers listed in
-the configuration file at 64-s intervals. In order to allow a sufficient
-number of samples for the NTP algorithms to reliably discriminate
-between correctly operating servers and possible intruders, at least
-four valid messages from the majority of servers and peers listed in the
-configuration file is required before the daemon can set the local
-clock. However, if the current system time is greater than 1000 s in
-error from the server times, the daemon will not set the local clock;
-instead, it will plant a message in the system log and shut down. It is
-necessary to set the local clock to within 1000 s first, either by a
-time-of-year hardware clock, by first using the <A
-HREF="ntpdate.htm"><tt>ntpdate</tt></A> program or manually be eyeball
-and wristwatch.
+<p>When first started, the daemon normally polls the servers listed in the configuration file at 64-s intervals. In order to allow a sufficient number of samples for the NTP algorithms to reliably discriminate between correctly operating servers and possible intruders, at least four valid messages from the majority of servers and peers listed in the configuration file is required before the daemon can set the local clock. However, if the current system time is greater than 1000 s in error from the server times, the daemon will not set the local clock; instead, it will plant a message in the system log and shut down. It is necessary to set the local clock to within 1000 s first, either by a time-of-year hardware clock, by first using the <A HREF="ntpdate.htm"><tt>ntpdate</tt></A> program or manually be eyeball and wristwatch.
 
-<p>If the initial time error is less than 1000 s but greater than 125
-ms, the daemon will perform a step adjustment; otherwise, it will
-gradually slew the clock to the nominal time. However, if a step
-adjustment, the clock discipline algorithm will start all over again,
-requiring another round of at least four messages as before. This is
-necessary so that all servers and peers operate on the same set of time
-values.
+<p>If the initial time error is less than 1000 s but greater than 125 ms, the daemon will perform a step adjustment; otherwise, it will gradually slew the clock to the nominal time. However, if a step adjustment, the clock discipline algorithm will start all over again, requiring another round of at least four messages as before. This is necessary so that all servers and peers operate on the same set of time values.
 
-<p>If, as discussed later in this page, for some reason the hardware
-clock oscillator frequency error is relatively large, the time errors
-upon first startup of the daemon may increase over time until exceeding
-125 ms, which requires another step correction. However, due to
-provisions that reduce vulnerability to noise spikes, the second
-correction will not be done until 900 s have elapsed since the last
-adjustment. When the frequency error is very large, it may take a number
-of cycles like this until converging on the nominal frequency
-correction. After this, the correction is written to the
-<tt>ntp.drift</tt> file, which is read upon subsequent restarts, so the
-herky-jerky cycles should not recur.
+<p>If, as discussed later in this page, for some reason the hardware clock oscillator frequency error is relatively large, the time errors upon first startup of the daemon may increase over time until exceeding 125 ms, which requires another step correction. However, due to provisions that reduce vulnerability to noise spikes, the second correction will not be done until 900 s have elapsed since the last adjustment. When the frequency error is very large, it may take a number of cycles like this until converging on the nominal frequency correction. After this, the correction is written to the <tt>ntp.drift</tt> file, which is read upon subsequent restarts, so the herky-jerky cycles should not recur.
 
 <h4>Verifying Correct Operation</h4>
 
-<p>After starting the daemon, run the <tt>ntpq</tt> program using the
-<tt>-n</tt> switch, which will avoid possible distractions due to name
-resolution problems. Use the <tt>pe</tt> command to display a billboard
-showing the status of configured peers and possibly other clients poking
-the daemon. After operating for a few minutes, the display should be
-something like:
+<p>After starting the daemon, run the <tt>ntpq</tt> program using the <tt>-n</tt> switch, which will avoid possible distractions due to name resolution problems. Use the <tt>pe</tt> command to display a billboard showing the status of configured peers and possibly other clients poking the daemon. After operating for a few minutes, the display should be something like:
 
-<pre>ntpq> pe
+<p><pre>ntpq> pe
      remote      refid       st t when poll reach delay offset jitter
 =====================================================================
 -isipc6.cairn.ne .GPS1.        1 u  18  64  377  65.592 -5.891  0.044
@@ -108,33 +40,11 @@ something like:
 *pogo.udel.edu   .GPS1.        1 u  95 128  377   0.607  0.123  0.027
 </pre>
 
-<p>The host names or addresses shown in the <tt>remote</tt> column
-correspond to the server and peer entries listed in the configuration
-file; however, the DNS names might not agree if the names listed are not
-the canonical DNS names. The <tt>refid</tt> column shows the current
-source of synchronization, while the <tt>st</tt> column reveals the
-stratum, <tt>t</tt> the type (<tt>u</tt> = unicast, <tt>m</tt> =
-multicast, <tt>l</tt> = local, <tt>-</tt> = don't know), and
-<tt>poll</tt> the poll interval in seconds. The <tt>when</tt> column
-shows the time since the peer was last heard in seconds, while the
-<tt>reach</tt> column shows the status of the reachability register (see
-RFC-1305) in octal. The remaining entries show the latest delay, offset
-and jitter in milliseconds. Note that in NTP Version 4 what used to be
-the <tt>dispersion</tt> column has been replaced by the <tt>jitter</tt>
-column.
+<p>The host names or addresses shown in the <tt>remote</tt> column correspond to the server and peer entries listed in the configuration file; however, the DNS names might not agree if the names listed are not the canonical DNS names. The <tt>refid</tt> column shows the current source of synchronization, while the <tt>st</tt> column reveals the stratum, <tt>t</tt> the type (<tt>u</tt> = unicast, <tt>m</tt> = multicast, <tt>l</tt> = local, <tt>-</tt> = don't know), and <tt>poll</tt> the poll interval in seconds. The <tt>when</tt> column shows the time since the peer was last heard in seconds, while the <tt>reach</tt> column shows the status of the reachability register (see RFC-1305) in octal. The remaining entries show the latest delay, offset and jitter in milliseconds. Note that in NTP Version 4 what used to be the <tt>dispersion</tt> column has been replaced by the <tt>jitter</tt> column.
 
-<p>The tattletale symbol at the left margin displays the synchronization
-status of each peer. The currently selected peer is marked <tt>*</tt>,
-while additional peers designated acceptable for synchronization, but
-not currently selected, are marked <tt>+</tt>. Peers marked <tt>*</tt>
-and <tt>+</tt> are included in the weighted average computation to set
-the local clock; the data produced by peers marked with other symbols
-are discarded. See the <tt>ntpq</tt> page for the meaning of these
-symbols.
+<p>The tattletale symbol at the left margin displays the synchronization status of each peer. The currently selected peer is marked <tt>*</tt>, while additional peers designated acceptable for synchronization, but not currently selected, are marked <tt>+</tt>. Peers marked <tt>*</tt> and <tt>+</tt> are included in the weighted average computation to set the local clock; the data produced by peers marked with other symbols are discarded. See the <tt>ntpq</tt> page for the meaning of these symbols.
 
-<p>Additional details for each peer separately can be determined by the
-following procedure. First, use the <tt>as</tt> command to display an
-index of association identifiers, such as
+<p>Additional details for each peer separately can be determined by the following procedure. First, use the <tt>as</tt> command to display an index of association identifiers, such as
 
 <p><pre>ntpq> as
 ind assID status  conf reach auth condition  last_event cnt
@@ -145,13 +55,7 @@ ind assID status  conf reach auth condition  last_event cnt
   4 50255  f614   yes   yes   ok   sys.peer   reachable  1
 </pre>
 
-<p>Each line in this billboard is associated with the corresponding line
-in the <tt>pe</tt> billboard above. The <tt>assID</tt> shows the unique
-identifier for each mobilized association, while the <tt>status</tt>
-column shows the peer status word in hex, as defined in the NTP
-specification. Next, use the <tt>rv</tt> command and the respective
-<tt>assID</tt> identifier to display a detailed synopsis for the
-selected peer, such as
+<p>Each line in this billboard is associated with the corresponding line in the <tt>pe</tt> billboard above. The <tt>assID</tt> shows the unique identifier for each mobilized association, while the <tt>status</tt> column shows the peer status word in hex, as defined in the NTP specification. Next, use the <tt>rv</tt> command and the respective <tt>assID</tt> identifier to display a detailed synopsis for the selected peer, such as
 
 <p><pre>ntpq> rv 50253
 status=f414 reach, conf, auth, sel_candidat, 1 event, event_reach,
@@ -172,79 +76,22 @@ hcookie=0x61f99cdb, initsequence=61, initkey=0x287b649c,
 timestamp=3172053041
 </pre>
 
-<p>A detailed explanation of the fields in this billboard are beyond the
-scope of this discussion; however, most variables defined in the NTP
-Version 3 specification RFC-1305 are available along with others defined
-for NTP Version 4. This particular example was chosen to illustrate
-probably the most complex configuration involving symmetric modes and
-public-key cryptography. As the result of debugging experience, the
-names and values of these variables may change from time to time. An
-explanation of the current set is on the <tt>ntpq</tt> page.
+<p>A detailed explanation of the fields in this billboard are beyond the scope of this discussion; however, most variables defined in the NTP Version 3 specification RFC-1305 are available along with others defined for NTP Version 4. This particular example was chosen to illustrate probably the most complex configuration involving symmetric modes and public-key cryptography. As the result of debugging experience, the names and values of these variables may change from time to time. An explanation of the current set is on the <tt>ntpq</tt> page.
 
-<p>A useful indicator of miscellaneous problems is the <tt>flash</tt>
-value, which reveals the state of the various sanity tests on incoming
-packets. There are currently eleven bits, one for each test, numbered
-from the right, which is for test 1. If the test fails, the
-corresponding bit is set to one and zero otherwise. If any bit is set
-following each processing step, the packet is discarded. The meaning of
-each test is described on the <tt>ntpq</tt> page.
+<p>A useful indicator of miscellaneous problems is the <tt>flash</tt> value, which reveals the state of the various sanity tests on incoming packets. There are currently eleven bits, one for each test, numbered from the right, which is for test 1. If the test fails, the corresponding bit is set to one and zero otherwise. If any bit is set following each processing step, the packet is discarded. The meaning of each test is described on the <tt>ntpq</tt> page.
 
-<p>The three lines identified as <tt>filtdelay</tt>, <tt>filtoffset</tt>
-and <tt>filtdisp</tt> reveal the roundtrip delay, clock offset and
-dispersion for each of the last eight measurement rounds, all in
-milliseconds. Note that the dispersion, which is an estimate of the
-error, increases as the age of the sample increases. From these data, it
-is usually possible to determine the incidence of severe packet loss,
-network congestion, and unstable local clock oscillators. There are no
-hard and fast rules here, since every case is unique; however, if one or
-more of the rounds show large values or change radically from one round
-to another, the network is probably congested or lossy.
+<p>The three lines identified as <tt>filtdelay</tt>, <tt>filtoffset</tt> and <tt>filtdisp</tt> reveal the roundtrip delay, clock offset and dispersion for each of the last eight measurement rounds, all in milliseconds. Note that the dispersion, which is an estimate of the error, increases as the age of the sample increases. From these data, it is usually possible to determine the incidence of severe packet loss, network congestion, and unstable local clock oscillators. There are no hard and fast rules here, since every case is unique; however, if one or more of the rounds show large values or change radically from one round to another, the network is probably congested or lossy.
 
-<p>Once the daemon has set the local clock, it will continuously track
-the discrepancy between local time and NTP time and adjust the local
-clock accordingly. There are two components of this adjustment, time and
-frequency. These adjustments are automatically determined by the clock
-discipline algorithm, which functions as a hybrid phase/frequency
-feedback loop. The behavior of this algorithm is carefully controlled to
-minimize residual errors due to network jitter and frequency variations
-of the local clock hardware oscillator that normally occur in practice.
-However, when started for the first time, the algorithm may take some
-time to converge on the intrinsic frequency error of the host machine.
+<p>Once the daemon has set the local clock, it will continuously track the discrepancy between local time and NTP time and adjust the local clock accordingly. There are two components of this adjustment, time and frequency. These adjustments are automatically determined by the clock discipline algorithm, which functions as a hybrid phase/frequency feedback loop. The behavior of this algorithm is carefully controlled to minimize residual errors due to network jitter and frequency variations of the local clock hardware oscillator that normally occur in practice. However, when started for the first time, the algorithm may take some time to converge on the intrinsic frequency error of the host machine.
 
-<p>The frequency tolerance of computer clock oscillators can vary
-widely, which can put a strain on the daemon's ability to compensate for
-the intrinsic frequency error. While the daemon can handle frequency
-errors up to 500 parts-per-million (PPM), or 43 seconds per day, values
-much above 100 PPM reduce the headroom and increase the time to learn
-the particular value and record it in the <tt>ntp.drift</tt> file. In
-extreme cases before the particular oscillator frequency error has been
-determined, the residual system time offsets can sweep from one extreme
-to the other of the 128-ms tracking window only for the behavior to
-repeat at 900-s intervals until the measurements have converged.
+<p>The frequency tolerance of computer clock oscillators can vary widely, which can put a strain on the daemon's ability to compensate for the intrinsic frequency error. While the daemon can handle frequency errors up to 500 parts-per-million (PPM), or 43 seconds per day, values much above 100 PPM reduce the headroom and increase the time to learn the particular value and record it in the <tt>ntp.drift</tt> file. In extreme cases before the particular oscillator frequency error has been determined, the residual system time offsets can sweep from one extreme to the other of the 128-ms tracking window only for the behavior to repeat at 900-s intervals until the measurements have converged.
 
-<p>In order to determine if excessive frequency error is a problem,
-observe the nominal <tt>filtoffset</tt> values for a number of rounds
-and divide by the poll interval. If the result is something approaching
-500 PPM, there is a good chance that NTP will not work properly until
-the frequency error is reduced by some means. A common cause is the
-hardware time-of-year (TOY) clock chip, which must be disabled when NTP
-disciplines the software clock. For some systems this can be done using
-the <tt><A HREF="tickadj.htm">tickadj</A></tt> utility and the <tt>-
-s</tt> command line argument. For other systems this can be done using a
-command in the system startup file.
+<p>In order to determine if excessive frequency error is a problem, observe the nominal <tt>filtoffset</tt> values for a number of rounds and divide by the poll interval. If the result is something approaching 500 PPM, there is a good chance that NTP will not work properly until the frequency error is reduced by some means. A common cause is the hardware time-of-year (TOY) clock chip, which must be disabled when NTP disciplines the software clock. For some systems this can be done using the <tt><A HREF="tickadj.htm">tickadj</A></tt> utility and the <tt>-s</tt> command line argument. For other systems this can be done using a command in the system startup file.
 
-<p>If the TOY chip is not the cause, the problem may be that the
-hardware clock frequency may simply be too slow or two fast. In some
-systems this might require tweaking a trimmer capacitor on the
-motherboard. For other systems the clock frequency can be adjusted in
-increments of 100 PPM using the <tt>tickadj</tt> utility and the <tt>-
-t</tt> command line argument. Note that the <tt>tickadj</tt> alters
-certain kernel variables and, while the utility attempts to figure out
-an acceptable way to do this, there are many cases where
+<p>If the TOY chip is not the cause, the problem may be that the hardware clock frequency may simply be too slow or two fast. In some systems this might require tweaking a trimmer capacitor on the motherboard. For other systems the clock frequency can be adjusted in increments of 100 PPM using the <tt>tickadj</tt> utility and the <tt>-t</tt> command line argument. Note that the <tt>tickadj</tt> alters certain kernel variables and, while the utility attempts to figure out an acceptable way to do this, there are many cases where
 <tt>tickadj</tt> is incompatible with a running kernel.
 
-<p>The state of the local clock itself can be determined using the
-<tt>rv</tt> command (without the argument), such as
+<p>The state of the local clock itself can be determined using the <tt>rv</tt> command (without the argument), such as
 
 <p><pre>ntpq> rv
 status=0644 leap_none, sync_ntp, 4 events, event_peer/strat_chg,
@@ -259,104 +106,35 @@ hostname="barnstable.udel.edu", publickey=3171372095, params=3171372095,
 refresh=3172016539
 </pre>
 
-<p>An explanation about most of these variables is in the RFC-1305
-specification. The most useful ones include <tt>clock</tt>, which shows
-when the clock was last adjusted, and <tt>reftime</tt>, which shows when
-the server clock of <tt>refid</tt> was last adjusted. The
-<tt>version</tt>, <tt>processor</tt> and <tt>system</tt> values are very
-helpful when included in bug reports. The mean millisecond time offset
-(<tt>phase</tt>) and deviation (<tt>jitter</tt>) monitor the clock
-quality, while the mean PPM frequency offset (<tt>frequency</tt>) and
-deviation (<tt>stability</tt>) monitor the clock stability and serve as
-a useful diagnostic tool. It has been the experience of NTP operators
-over the years that these data represent useful environment and hardware
-alarms. If the motherboard fan freezes up or some hardware bit sticks,
-the system clock is usually the first to notice it.
+<p>An explanation about most of these variables is in the RFC-1305 specification. The most useful ones include <tt>clock</tt>, which shows when the clock was last adjusted, and <tt>reftime</tt>, which shows when the server clock of <tt>refid</tt> was last adjusted. The <tt>version</tt>, <tt>processor</tt> and <tt>system</tt> values are very helpful when included in bug reports. The mean millisecond time offset (<tt>phase</tt>) and deviation (<tt>jitter</tt>) monitor the clock quality, while the mean PPM frequency offset (<tt>frequency</tt>) and deviation (<tt>stability</tt>) monitor the clock stability and serve as a useful diagnostic tool. It has been the experience of NTP operators over the years that these data represent useful environment and hardware alarms. If the motherboard fan freezes up or some hardware bit sticks, the system clock is usually the first to notice it.
 
-<p>Among the new variables added for NTP Version 4 are the
-<tt>hostname</tt>, <tt>publickey</tt>, <tt>params</tt> and
-<tt>refresh</tt>, which are used for the Autokey public-key cryptography
-described on the <a href=authopt.htm>Authentication Options</a> page.
-The values show the filestamps, in NTP seconds, that the associated
-values were created. These are useful in diagnosing problems with
-cryptographic key consistency and ordering principles.
+<p>Among the new variables added for NTP Version 4 are the <tt>hostname</tt>, <tt>publickey</tt>, <tt>params</tt> and <tt>refresh</tt>, which are used for the Autokey public-key cryptography described on the <a href=authopt.htm>Authentication Options</a> page. The values show the filestamps, in NTP seconds, that the associated values were created. These are useful in diagnosing problems with cryptographic key consistency and ordering principles.
 
-<p>When nothing seems to happen in the <tt>pe</tt> billboard after some
-minutes, there may be a network problem. One common network problem
-is an access controlled router on the path to the selected peer or an
-access controlled server using methods described on the <a
-href=accopt.htm>Access Control Options</a> page. Another common problem
-is that the server is down or running in unsynchronized mode due to a
-local problem. Use the <tt>ntpq</tt> program to spy on the server
-variables in the same way you can spy on your own.
+<p>When nothing seems to happen in the <tt>pe</tt> billboard after some minutes, there may be a network problem. One common network problem is an access controlled router on the path to the selected peer or an access controlled server using methods described on the <a href=accopt.htm>Access Control Options</a> page. Another common problem is that the server is down or running in unsynchronized mode due to a local problem. Use the <tt>ntpq</tt> program to spy on the server variables in the same way you can spy on your own.
 
-<p>Normally, the daemon will adjust the local clock in small steps in
-such a way that system and user programs are unaware of its operation.
-The adjustment process operates continuously as long as the apparent
-clock error exceeds 128 milliseconds, which for most Internet paths is a
-quite rare event. If the event is simply an outlyer due to an occasional
-network delay spike, the correction is simply discarded; however, if the
-apparent time error persists for an interval of about 20 minutes, the
-local clock is stepped to the new value (as an option, the daemon can be
-compiled to slew at an accelerated rate to the new value, rather than be
-stepped). This behavior is designed to resist errors due to severely
-congested network paths, as well as errors due to confused radio clocks
-upon the epoch of a leap second.
+<p>Normally, the daemon will adjust the local clock in small steps in such a way that system and user programs are unaware of its operation. The adjustment process operates continuously as long as the apparent clock error exceeds 128 milliseconds, which for most Internet paths is a quite rare event. If the event is simply an outlyer due to an occasional network delay spike, the correction is simply discarded; however, if the apparent time error persists for an interval of about 20 minutes, the local clock is stepped to the new value (as an option, the daemon can be compiled to slew at an accelerated rate to the new value, rather than be stepped). This behavior is designed to resist errors due to severely congested network paths, as well as errors due to confused radio clocks upon the epoch of a leap second.
 
 <H4>Debugging Checklist</H4>
 
-If the <tt>ntpq</tt> or <tt>ntpdc</tt> programs do not show that
-messages are being received by the daemon or that received messages do
-not result in correct synchronization, verify the following:
+If the <tt>ntpq</tt> or <tt>ntpdc</tt> programs do not show that messages are being received by the daemon or that received messages do not result in correct synchronization, verify the following:
 
 <OL>
 
-<p><li>Verify the <tt>/etc/services</tt> file host machine is configured
-to accept UDP packets on the NTP port 123. NTP is specifically designed
-to use UDP and does not respond to TCP.</li>
+<p><li>Verify the <tt>/etc/services</tt> file host machine is configured to accept UDP packets on the NTP port 123. NTP is specifically designed to use UDP and does not respond to TCP.</li>
 
-<p><li>Check the system log for <tt>ntpd</tt> messages about
-configuration errors, name-lookup failures or initialization
-problems.</li>
+<p><li>Check the system log for <tt>ntpd</tt> messages about configuration errors, name-lookup failures or initialization problems.</li>
 
-<p><li>Verify using <tt>ping</tt> or other utility that packets actually
-do make the round trip between the client and server. Verify using
-<tt>nslookup</tt> or other utility that the DNS server names do exist
-and resolve to valid Internet addresses.
+<p><li>Verify using <tt>ping</tt> or other utility that packets actually do make the round trip between the client and server. Verify using <tt>nslookup</tt> or other utility that the DNS server names do exist and resolve to valid Internet addresses.
 
-<p><li>Using the <tt>ntpdc</tt> program, verify that the packets
-received and packets sent counters are incrementing. If the sent counter
-does not increment and the configuration file includes configured
-servers, something may be wrong in the host network or interface
-configuration. If this counter does increment, but the received counter
-does not increment, something may be wrong in the network or the server
-NTP daemon may not be running or the server itself may be down or not
-responding.</li>
+<p><li>Using the <tt>ntpdc</tt> program, verify that the packets received and packets sent counters are incrementing. If the sent counter does not increment and the configuration file includes configured servers, something may be wrong in the host network or interface configuration. If this counter does increment, but the received counter does not increment, something may be wrong in the network or the server NTP daemon may not be running or the server itself may be down or not responding.</li>
 
-<p><li>If both the sent and received counters do increment, but the
-<tt>reach</tt> values in the <tt>pe</tt> billboard with <tt>ntpq</tt>
-continues to show zero, received packets are probably being discarded
-for some reason. If this is the case, the cause should be evident from
-the <tt>flash</tt> variable as discussed above and on the <tt>ntpq</tt>
-page.</li>
+<p><li>If both the sent and received counters do increment, but the <tt>reach</tt> values in the <tt>pe</tt> billboard with <tt>ntpq</tt> continues to show zero, received packets are probably being discarded for some reason. If this is the case, the cause should be evident from the <tt>flash</tt> variable as discussed above and on the <tt>ntpq</tt> page.</li>
 
-<p><li>If the <tt>reach</tt> values in the <tt>pe</tt> billboard show
-the servers are alive and responding, note the tattletale symbols at the
-left margin, which indicate the status of each server resulting from the
-various grooming and mitigation algorithms. The interpretation of these
-symbols is discussed on the <tt>ntpq</tt> page. After a few minutes of
-operation, one or another of the reachable server candidates should show
-a * tattletale symbol. If this doesn't happen, the intersection
-algorithm, which classifies the servers as truechimers or falsetickers,
-may be unable to find a majority of truechimers among the server
+<p><li>If the <tt>reach</tt> values in the <tt>pe</tt> billboard show the servers are alive and responding, note the tattletale symbols at the left margin, which indicate the status of each server resulting from the various grooming and mitigation algorithms. The interpretation of these symbols is discussed on the <tt>ntpq</tt> page. After a few minutes of operation, one or another of the reachable server candidates should show a * tattletale symbol. If this doesn't happen, the intersection algorithm, which classifies the servers as truechimers or falsetickers, may be unable to find a majority of truechimers among the server
 population.</li>
 
-<p><li>If all else fails, see the FAQ and/or the discussion and
-briefings at <a href=http://www.eecis.udel.edu/~mills/ntp.htm>Network
-Time Synchronization Project<a>.</li>
+<p><li>If all else fails, see the FAQ and/or the discussion and briefings at <a href=http://www.eecis.udel.edu/~mills/ntp.htm>Network Time Synchronization Project<a>.</li>
 
 </OL>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></a></body></html>
+<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a></address></a></body></html>

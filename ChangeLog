@@ -1,4 +1,53 @@
+2001-01-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/pic/wingdorothy.gif:
+	* html/pic/bustardfly.gif:
+	* html/pic/boom3a.gif:
+	* html/pic/tonea.gif:
+	* html/pic/stack1a.jpg:
+	* html/pic/pogoa.gif:
+	* html/pic/pogo8.gif:
+	* html/pic/pogo6.gif:
+	* html/pic/pogo5.gif:
+	* html/pic/pogo4.gif:
+	* html/pic/pogo3.gif:
+	* html/pic/pogo1.gif:
+	* html/pic/oz2.gif:
+	* html/pic/flatheads.gif:
+	* html/pic/boom4.gif:
+	* html/pic/boom3.gif:
+	* html/pic/appletree.gif:
+	* html/pic/alice51.gif:
+	* html/pic/alice44.gif:
+	* html/pic/alice35.gif:
+	* html/pic/alice31.gif:
+	* html/pic/alice15b.gif:
+	* html/pic/alice13.gif:
+	* html/pic/alice11.gif:
+	* html/release.htm:
+	* html/rdebug.htm:
+	* html/prefer.htm:
+	* html/porting.htm:
+	* html/ntptrace.htm:
+	* html/ntpq.htm:
+	* html/ntpdate.htm:
+	* html/monopt.htm:
+	* html/kernpps.htm:
+	* html/index.htm:
+	* html/hints.htm:
+	* html/gadget.htm:
+	* html/driver7.htm:
+	* html/copyright.htm:
+	* html/config.htm:
+	* html/build.htm:
+	* html/authopt.htm:
+	* html/assoc.htm:
+	* html/accopt.htm: 
+	Cleanup from Dave Mills.
+
 2000-12-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k13
 
 	* ntpd/refclock_wwv.c (wwv_start): Call audio_init with DEVICE_AUDIO.
 	* ntpd/refclock_irig.c (irig_start): Call audio_init with DEVICE_AUDIO.

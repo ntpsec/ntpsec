@@ -2,7 +2,13 @@
 Debugging Hints for Reference Clock Drivers
 </title></head><body><h3>
 Debugging Hints for Reference Clock Drivers
-</h3><hr>
+</h3>
+
+<img align=left src=pic/oz2.gif><a href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>The
+Wizard of Oz</i>, L. Frank Baum</a>
+
+<p>Call the girls and the'll sweep your bugs.
+<br clear=left><hr>
 
 <p>The <a href=ntpq.htm><tt>ntpq</tt></a> and <a href=ntpdc.htm><tt>ntpdc</tt></a> utility programs can be used to debug reference clocks, either on the server itself or from another machine elsewhere in the network. The server is compiled, installed and started using the configuration file described in the <a href=ntpd.htm><tt>ntpd</tt></a> page and its dependencies. If the clock appears in the <tt>ntpq</tt> utility and <tt>pe</tt> command, no errors have occured and the daemon has started, opened the devices specified and waiting for peers and radios to come up. If not, the first thing to look for are error messages on the system log. These are usually due to improper configuration, missing links or multiple instances of the daemon. 
 

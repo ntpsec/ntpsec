@@ -1181,7 +1181,7 @@ fi
 # Define the identity of the package.
 PACKAGE=ntp
 
-VERSION=4.0.99k12
+VERSION=4.0.99k13
 
 cat >>confdefs.h <<EOF
 #define PACKAGE "$PACKAGE"

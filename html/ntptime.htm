@@ -1,90 +1,54 @@
-<HTML>
-<HEAD>
-   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-   <META NAME="GENERATOR" CONTENT="Mozilla/4.01 [en] (Win95; I) [Netscape]">
-   <TITLE>ntptime - read kernel time variables
-</TITLE>
-</HEAD>
-<BODY>
+<HTML><HEAD><TITLE>
+ntptime - read kernel time variables
+</TITLE></HEAD><BODY><H3>
+<TT>ntptime</TT> - read kernel time variables
+</H3>
 
-<H3>
-<TT>ntptime</TT> - read kernel time variables</H3>
 
-<HR>
-<H4>
-Synopsis</H4>
-<TT>ntptime [ -chr ] [ -e <I>est_error</I> ] [ -f <I>frequency</I> ] [
--m <I>max_error</I> ] [ -o <I>offset</I> ] [ -s <I>status</I> ] [ -t <I>time_constant</I>
-]</TT>
-<H4>
-Description</H4>
-This program is useful only with special kernels described in the <A HREF="kern.htm">A
-Kernel Model for Precision Timekeeping </A>page. It reads and displays
-time-related kernel variables using the <TT>ntp_gettime()</TT> system call.
-A similar display can be obtained using the <TT>ntpdc</TT> program and
-<TT>kerninfo</TT> command.
-<H4>
-Options</H4>
+<img align=left src=pic/pogo5.gif><a href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>Pogo</i>, Walt Kelly</a>
+
+<p>The turtle is been swimming in the kernel.
+<br clear=left><hr>
+
+<h4>Synopsis</H4>
+
+<TT>ntptime [ -chr ] [ -e <I>est_error</I> ] [ -f <I>frequency</I> ] [ -m <I>max_error</I> ] [ -o <I>offset</I> ] [ -s <I>status</I> ] [ -t <I>time_constant</I>]</TT>
+
+<H4>Description</H4>
+
+This program is useful only with special kernels described in the <A HREF="kern.htm">A Kernel Model for Precision Timekeeping </A>page. It reads and displays time-related kernel variables using the <TT>ntp_gettime()</TT> system call. A similar display can be obtained using the <TT>ntpdc</TT> program and <TT>kerninfo</TT> command.
+
+<H4>Options</H4>
 
 <DL>
-<DT>
-<TT>-c</TT></DT>
 
-<DD>
-Display the execution time of <TT>ntptime</TT> itself.</DD>
+<DT><TT>-c</TT></DT>
+<DD>Display the execution time of <TT>ntptime</TT> itself.</DD>
 
-<DT>
-<TT>-e <I>est_error</I></TT></DT>
+<DT><TT>-e <I>est_error</I></TT></DT>
+<DD>Specify estimated error, in microseconds.</DD>
 
-<DD>
-Specify estimated error, in microseconds.</DD>
+<DT><TT>-f <I>frequency</I></TT></DT>
+<DD>Specify frequency offset, in parts per million.</DD>
 
-<DT>
-<TT>-f <I>frequency</I></TT></DT>
+<DT><TT>-h</TT></DT>
+<DD>Display help information.</DD>
 
-<DD>
-Specify frequency offset, in parts per million.</DD>
+<DT><TT>-m <I>max_error</I></TT></DT>
+<DD>Specify max possible errors, in microseconds.</DD>
 
-<DT>
-<TT>-h</TT></DT>
+<DT><TT>-o <I>offset</I></TT></DT>
+<DD>Specify clock offset, in microseconds.</DD>
 
-<DD>
-Display help information.</DD>
+<DT><TT>-r</TT></DT>
+<DD>Display Unix and NTP times in raw format.</DD>
 
-<DT>
-<TT>-m <I>max_error</I></TT></DT>
+<DT><TT>-s <I>status</I></TT></DT>
+<DD>Specify clock status. Better know what you are doing.</DD>
 
-<DD>
-Specify max possible errors, in microseconds.</DD>
+<DT><TT>-t <I>time_constant</I></TT></DT>
+<DD>Specify time constant, an integer in the range 0-10.</DD>
 
-<DT>
-<TT>-o <I>offset</I></TT></DT>
-
-<DD>
-Specify clock offset, in microseconds.</DD>
-
-<DT>
-<TT>-r</TT></DT>
-
-<DD>
-Display Unix and NTP times in raw format.</DD>
-
-<DT>
-<TT>-s <I>status</I></TT></DT>
-
-<DD>
-Specify clock status. Better know what you are doing.</DD>
-
-<DT>
-<TT>-t <I>time_constant</I></TT></DT>
-
-<DD>
-Specify time constant, an integer in the range 0-10.</DD>
 </DL>
 
-<HR>
-<ADDRESS>
-David L. Mills (mills@udel.edu)</ADDRESS>
-
-</BODY>
-</HTML>
+<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a href=mailto:mills@udel.edu>David L. Mills &lt;mills@udel.edu&gt;</a></address></a></body></html>
