@@ -979,7 +979,7 @@ getconfig(
 				"Keys directory name required");
 			    break;
 			}
-			keysdir = emalloc(strlen(tokens[1]) + 1);
+			keysdir = (char *)emalloc(strlen(tokens[1]) + 1);
 			strcpy(keysdir, tokens[1]);
 			break;
 
