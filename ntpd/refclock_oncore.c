@@ -2301,10 +2301,17 @@ oncore_get_timestamp(
 		tsp = &pps_i.assert_timestamp;
 
 		if (debug > 2)
+#ifdef HAVE_STRUCT_TIMESPEC
 			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%09ld\n",
 			    instance->unit,
 			    (long)pps_i.assert_sequence, j,
 			    (long)tsp->tv_sec, (long)tsp->tv_nsec);
+#else
+			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%06ld\n",
+			    instance->unit,
+			    (long)pps_i.assert_sequence, j,
+			    (long)tsp->tv_sec, (long)tsp->tv_usec);
+#endif
 
 		if (pps_i.assert_sequence == j) {
 			printf("ONCORE: oncore_get_timestamp, error serial pps\n");
@@ -2315,9 +2322,15 @@ oncore_get_timestamp(
 		tsp = &pps_i.clear_timestamp;
 
 		if (debug > 2)
+#ifdef HAVE_STRUCT_TIMESPEC
 			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%09ld\n",
 			    instance->unit,
 			    pps_i.clear_sequence, j, tsp->tv_sec, tsp->tv_nsec);
+#else
+			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%06ld\n",
+			    instance->unit,
+			    pps_i.clear_sequence, j, tsp->tv_sec, tsp->tv_usec);
+#endif
 
 		if (pps_i.clear_sequence == j) {
 			printf("ONCORE: oncore_get_timestamp, error serial pps\n");

@@ -1,3 +1,13 @@
+2000-09-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c (oncore_get_timestamp): Prind debug
+	messages being aware of HAVE_STRUCT_TIMESPEC.
+
+	* ntpd/refclock_atom.c: Have pps_params tag along in the ppsunit
+	structure, where it really belongs.
+	(atom_pps): Use PPS_CAPTURE{ASSERT,CLEAR}
+	From: Dave Mills.
+
 2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (ac_cv_var_atom_ok): Cleanup ATOM/PPSAPI stuff...

@@ -76,8 +76,9 @@ static struct peer *pps_peer;	/* atom driver for PPS sources */
 struct ppsunit {
 	struct timespec ts;	/* last timestamp */
 	int fddev;		/* pps device descriptor */
-	pps_info_t pps_info;	/* pps_info control */
-	pps_handle_t handle;	/* PPSAPI handlebars */
+	pps_params_t pps_params; /* pps parameters */
+	pps_info_t pps_info;	/* last pps data */
+	pps_handle_t handle;	/* pps handlebars */
 };
 #endif /* HAVE_PPSAPI */
 
@@ -117,7 +118,6 @@ atom_start(
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
 	register struct ppsunit *up;
-	pps_params_t pps;
 	int mode, temp;
 	pps_handle_t handle;
 #endif /* HAVE_PPSAPI */
@@ -159,7 +159,6 @@ atom_start(
 	/*
 	 * Light up the PPSAPI interface, select edge, enable kernel.
 	 */
-	memset(&pps, 0, sizeof(pps));
 	if (time_pps_create(up->fddev, &handle) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_create failed: %m");
@@ -170,8 +169,8 @@ atom_start(
 		    "refclock_atom: time_pps_getcap failed: %m");
 		return (0);
 	}
-	pps.mode = mode & PPS_CAPTUREBOTH;
-	if (time_pps_setparams(handle, &pps) < 0) {
+	up->pps_params.mode = mode & PPS_CAPTUREBOTH;
+	if (time_pps_setparams(handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
 		return (0);
@@ -188,14 +187,14 @@ atom_start(
 		    "refclock_atom: time_pps_kcbind failed: %m");
 		return (0);
 	}
-	(void)time_pps_getparams(handle, &pps);
+	(void)time_pps_getparams(handle, &up->pps_params);
 	up->handle = handle;
 #if DEBUG
 	if (debug)
 		printf(
 		    "refclock_atom: %s handle %d ppsapi vers %d mode 0x%x cap 0x%x\n",
-		    pps_device, up->handle, pps.api_version, pps.mode,
-		    mode);
+		    pps_device, up->handle, up->pps_params.api_version,
+		    up->pps_params.mode, mode);
 #endif
 #endif /* HAVE_PPSAPI */
 	return (1);
@@ -266,10 +265,12 @@ atom_pps(
 	    &up->pps_info, &timeout);
 	if (rval < 0 || i == up->pps_info.assert_sequence)
 		return (1);
-	if (pps_assert)
+	if (up->pps_info.current_mode & PPS_CAPTUREASSERT)
 		ts = up->pps_info.assert_timestamp;
-	else
+	else if (up->pps_info.current_mode & PPS_CAPTURECLEAR)
 		ts = up->pps_info.clear_timestamp;
+	else
+		return (1);
 	if (ts.tv_sec == up->ts.tv_sec && ts.tv_nsec < up->ts.tv_nsec +
 	    RANGEGATE)
 		return (1);
