@@ -82,6 +82,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define QSORT_USES_VOID_P
 # define HAVE_SETVBUF
 # define HAVE_VSPRINTF
+# define HAVE_SNPRINTF
 # define HAVE_PROTOTYPES		/* from ntpq.mak */
 # define HAVE_MEMMOVE
 # define HAVE_TERMIOS_H
