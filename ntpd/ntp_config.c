@@ -447,6 +447,8 @@ static struct masks logcfg_item[] = {
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t')
 #define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
+#define KEY_TYPE_MD5	4
+
 /*
  * File descriptor used by the resolver save routines, and temporary file
  * name.
@@ -1924,6 +1926,36 @@ getconfig(
 	if (config_netinfo) free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
 
+#if !defined(VMS) && !defined(SYS_VXWORKS)
+	/* find a keyid */
+	if (info_auth_keyid == 0)
+		req_keyid = 65535;
+	else
+		req_keyid = info_auth_keyid;
+
+	/* if doesn't exist, make up one at random */
+	if (!authhavekey(req_keyid)) {
+		char rankey[9];
+		int j;
+
+		for (i = 0; i < 8; i++)
+			for (j = 1; j < 100; ++j) {
+				rankey[i] = RANDOM & 0xff;
+				if (rankey[i] != 0) break;
+			}
+		rankey[8] = 0;
+		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
+		authtrust(req_keyid, 1);
+		if (!authhavekey(req_keyid)) {
+			msyslog(LOG_ERR, "getconfig: Couldn't generate a valid random key!");
+			/* HMS: Should this be fatal? */
+		}
+	}
+
+	/* save keyid so we will accept config requests with it */
+	info_auth_keyid = req_keyid;
+#endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
+
 	if (res_fp != NULL) {
 		/*
 		 * Need name resolution
@@ -2372,8 +2404,6 @@ abort_resolve(void)
 }
 
 
-#define KEY_TYPE_MD5	4
-
 /*
  * do_resolve_internal - start up the resolver function (not program)
  */
@@ -2401,33 +2431,6 @@ do_resolve_internal(void)
 	res_fp = NULL;
 
 #if !defined(VMS) && !defined (SYS_VXWORKS)
-	/* find a keyid */
-	if (info_auth_keyid == 0)
-		req_keyid = 65535;
-	else
-		req_keyid = info_auth_keyid;
-
-	/* if doesn't exist, make up one at random */
-	if (!authhavekey(req_keyid)) {
-		char rankey[9];
-		int j;
-
-		for (i = 0; i < 8; i++)
-			for (j = 1; j < 100; ++j) {
-				rankey[i] = RANDOM & 0xff;
-				if (rankey[i] != 0) break;
-			}
-		rankey[8] = 0;
-		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
-		authtrust(req_keyid, 1);
-		if (!authhavekey(req_keyid)) {
-			msyslog(LOG_ERR, "do_resolve_internal: Couldn't generate a valid random key!");
-			/* HMS: Should this be fatal? */
-		}
-	}
-
-	/* save keyid so we will accept config requests with it */
-	info_auth_keyid = req_keyid;
 	req_file = res_file;	/* set up pointer to res file */
 #ifndef SYS_WINNT
 	(void) signal_no_reset(SIGCHLD, catchchild);
