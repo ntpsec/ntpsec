@@ -34,7 +34,6 @@ EXTRA_DIST = \
 	README.versions \
 	TODO \
 	WHERE-TO-START \
-	acconfig.h \
 	build \
 	config.guess \
 	config.h.in \
@@ -54,7 +53,7 @@ EXTRA_DIST = \
 DISTCLEANFILES = .warning
 
 #ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.in
-ETAGS_ARGS = Makefile.am configure.in acconfig.h
+ETAGS_ARGS = Makefile.am configure.in
 
 # HMS: make ports be the last directory...
 # DIST_HOOK_DIRS = conf html scripts ports
