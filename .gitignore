@@ -16,6 +16,7 @@
 .buildkey
 A.*
 COPYRIGHT
+ChangeLog
 ElectricFence/Makefile.in
 Makefile.in
 aclocal.m4

@@ -2675,15 +2675,15 @@ timecode(
 		qual |= 0x4;
 	if (up->alarm & (3 << SYNERR))
 		qual |= 0x8;
-	year = up->decvec[7].digit + up->decvec[7].digit * 10;
+	year = up->decvec[YR].digit + up->decvec[YR + 1].digit * 10;
 	if (year < UTCYEAR)
 		year += 2000;
 	else
 		year += 1900;
-	day = up->decvec[4].digit + up->decvec[5].digit * 10 +
-	    up->decvec[6].digit * 100;
-	hour = up->decvec[2].digit + up->decvec[3].digit * 10;
-	minute = up->decvec[0].digit + up->decvec[1].digit * 10;
+	day = up->decvec[DA].digit + up->decvec[DA + 1].digit * 10 +
+	    up->decvec[DA + 2].digit * 100;
+	hour = up->decvec[HR].digit + up->decvec[HR + 1].digit * 10;
+	minute = up->decvec[MN].digit + up->decvec[MN + 1].digit * 10;
 	second = up->tsec;
 	frac = (up->tphase * 1000) / SECOND;
 	leapchar = (up->misc & SECWAR) ? 'L' : ' ';

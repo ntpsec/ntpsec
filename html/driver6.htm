@@ -17,14 +17,13 @@ Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
 
 <p>Note: This driver supersedes an older one of the same name,
 address and ID which required replacing the original kernel audio
-driver with another which works only on older Sun SPARCstation
-systems. The new driver described here uses the stock kernel audio
-driver and works in SunOS 4.1.3 and Solaris 2.6 versions and
-probably all versions in between. The new driver requires no
-modification of the operating system. While it is generic and
-likely portable to other systems, it is somewhat slower than the
-original, since the extensive signal conditioning, filtering and
-decoding is done in user space, not kernel space.</p>
+driver with another which worked only on older Sun SPARC
+architectures and SunOS operating systems. The new driver requires
+no modification of the operating system and works on SunOS 4.1.3
+and Solaris 2.8 and probably all others in between. While it is
+generic and likely portable to other systems, it is somewhat slower
+than the original, since the extensive signal conditioning,
+filtering and decoding is done in user space, not kernel space.</p>
 
 <h4>Description</h4>
 
@@ -96,41 +95,9 @@ sample frequency error less than 250 PPM (.025 percent).</p>
 
 <p>The program performs a number of error checks to protect against
 overdriven or underdriven input signal levels, incorrect signal
-format or improper hardware configuration. Specifically, if any of
-the following errors occur for a timecode, the data are rejected.
-Secifically, if any of the following errors occur for a time
-measurement, the data are rejected.</p>
-
-<ol>
-<li>The peak carrier amplitude is less than 100 units. This usually
-means dead IRIG signal source, broken cable or wrong input
-port.</li>
-
-<li>The frequency error is greater than &plusmn;250 PPM (.025
-percent). This usually means broken codec hardware or wrong codec
-configuration.</li>
-
-<li>The modulation index is less than 0.5. This usually means
-overdriven IRIG signal or wrong IRIG format.</li>
-
-<li>A frame synchronization error has occured. This usually means
-wrong IRIG signal format or the IRIG signal source has lost
-synchronization (signature control).</li>
-
-<li>A data decoding error has occured. This usually means wrong
-IRIG signal format.</li>
-
-<li>The current second of the day is not exactly one greater than
-the previous one. This usually means a very noisy IRIG signal or
-insufficient CPU resources.</li>
-
-<li>An audio codec error (overrun) occured. This usually means
-insufficient CPU resources, as sometimes happens with Sun SPARC
-IPCs when doing something useful.</li>
-</ol>
-
-Note that additional checks are done elsewhere in the reference
-clock interface routines. 
+format or improper hardware configuration. The specific checks are
+detailed later in this page. Note that additional checks are done
+elsewhere in the reference clock interface routines.</p>
 
 <p>Unlike other drivers, which can have multiple instantiations,
 this one supports only one. It does not seem likely that more than
@@ -204,14 +171,60 @@ format:
 bits are interpreted as below. This is followed by the IRIG status
 indicator, year of century, day of year and time of day. The status
 indicator and year are not produced by some IRIG devices. Following
-these fields are the signal amplitude (0-8100), codec gain (0-255),
-field phase (0-79), time constant (2-20), modulation index (0-1),
-carrier phase error (0&plusmn;0.5) and carrier frequency error
-(PPM). The last field is the on-time timestamp in NTP format. The
-fraction part is a good indicator of how well the driver is doing.
-With an UltrSPARC 30, this is normally within a few tens of
+these fields are the carrier amplitude (0-8100), codec gain
+(0-255), field phase (0-79), time constant (2-20), modulation index
+(0-1), carrier phase error (0&plusmn;0.5) and carrier frequency
+error (PPM). The last field is the on-time timestamp in NTP format.
+The fraction part is a good indicator of how well the driver is
+doing. With an UltrSPARC 30, this is normally within a few tens of
 microseconds relative to the IRIG-B signal and within a few hundred
 microseconds with IRIG-E.</p>
+
+<p>The error flags are defined as follows in hex:</p>
+
+<dl>
+<dt><tt>x01</tt></dt>
+
+<dd>Low signal. The carrier amplitude is less than 100 units. This
+is usually the result of no signal or wrong input port.</dd>
+
+<dt><tt>x02</tt></dt>
+
+<dd>Frequency error. The codec frequency error is greater than 250
+PPM. This may be due to wrong signal format or (rarely) defective
+codec.</dd>
+
+<dt><tt>x04</tt></dt>
+
+<dd>Modulation error. The IRIG modulation index is less than 0.5.
+This is usually the result of an overdriven codec, wrong signal
+format or wrong input port.</dd>
+
+<dt><tt>x08</tt></dt>
+
+<dd>Frame synch error. The decoder frame does not match the IRIG
+frame. This is usually the result of an overdriven codec, wrong
+signal format or noisy IRIG signal. It may also be the result of an
+IRIG signature check which indicates a failure of the IRIG signal
+synchronization source.</dd>
+
+<dt><tt>x10</tt></dt>
+
+<dd>Data bit error. The data bit length is out of tolerance. This
+is usually the result of an overdriven codec, wrong signal format
+or noisy IRIG signal.</dd>
+
+<dt><tt>x20</tt></dt>
+
+<dd>Seconds numbering discrepancy. The decoder second does not
+match the IRIG second. This is usually the result of an overdriven
+codec, wrong signal format or noisy IRIG signal.</dd>
+
+<dt><tt>x40</tt></dt>
+
+<dd>Codec error (overrun). The machine is not fast enough to keep
+up with the codec.</dd>
+</dl>
 
 <h4>Fudge Factors</h4>
 
