@@ -1,5 +1,22 @@
 2001-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k29
+
+	* html/miscopt.htm: Document the "allan" tinker variable.
+	* ntpd/ntp_proto.c (clock_filter): Update comments.  Lose etemp;
+	we now use allan_xpt for this.
+	* ntpd/ntp_loopfilter.c: Added allan_xpt as a tinker variable.
+	Reorganize variables and improve comments.
+	(local_clock): Improve comments, use (new) allan_xpt instead of
+	CLOCK_ALLAN.  Fix test in S_SYNC state.  Update debug info.
+	(rstclock): No longer force allan_xpt to CVLOCK_ALLAN in S_FREQ,
+	S_SYNC, or default case.
+	(loop_config): Document dangerous tinker variables, and add
+	LOOP_ALLAN to the list.
+	* include/ntp_config.h (CONF_CLOCK_ALLAN): Added.
+	* include/ntp.h (LOOP_ALLAN): Added.
+	Allan intercept fixes from Dave Mills.
+
 	* scripts/mkver.in: Use the C locale so  the dates come out in a
 	consistent format.
 	From: ASANO Naoyuki <n_asano@imjp.co.jp>

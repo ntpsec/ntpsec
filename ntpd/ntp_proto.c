@@ -1305,11 +1305,10 @@ clock_filter(
 	 * Update dispersions since the last update and at the same
 	 * time initialize the distance and index vectors. The distance
 	 * is a compound metric: If the sample dispersion is less than
-	 * MAXDISTANCE and younger than the Allan intercept, use delay.
-	 * Otherwise, use MAXDISTANCE plus conventional distance.
+	 * MAXDISTANCE and younger than the minimum Allan intercept, use
+	 * delay. Otherwise, use MAXDISTANCE plus conventional distance.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
-	etemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
 	peer->update = current_time;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		if (i != 0) {
@@ -1320,7 +1319,7 @@ clock_filter(
 		ftemp = peer->filter_delay[j] / 2. +
 		    peer->filter_disp[j];
 		if (ftemp < MAXDISTANCE && current_time -
-		    peer->filter_epoch[j] < etemp)
+		    peer->filter_epoch[j] < allan_xpt)
 			dst[i] = peer->filter_delay[j];
 		else
 			dst[i] = MAXDISTANCE + ftemp;
@@ -1329,7 +1328,7 @@ clock_filter(
 	}
 
         /*
-	 * Sort the sampsamples in the register by the compound metric.
+	 * Sort the samples in the register by the compound metric.
 	 */
 	for (i = 1; i < NTP_SHIFT; i++) {
 		for (j = 0; j < i; j++) {

@@ -671,6 +671,7 @@ struct pkt {
 #define LOOP_PHI		5	/* set dispersion rate */
 #define LOOP_MINSTEP		6	/* set step timeout */
 #define LOOP_MINPOLL		7	/* set min poll interval (log2 s) */
+#define LOOP_ALLAN		8	/* set minimum Allan intercept */
 
 /*
  * Configuration items for the stats printer

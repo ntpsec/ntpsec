@@ -109,15 +109,20 @@
 #define PPS_MAXAGE 120		/* kernel pps signal timeout (s) */
 
 /*
+ * Program variables that can be tinkered.
+ */
+double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
+double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
+double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
+double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
+double	allan_xpt = CLOCK_ALLAN; /* minimum Allan intercept (s) */
+
+/*
  * Program variables
  */
 static double clock_offset;	/* clock offset adjustment (s) */
 double	drift_comp;		/* clock frequency (s/s) */
 double	clock_stability;	/* clock stability (s/s) */
-double	clock_max = CLOCK_MAX;	/* max offset before step (s) */
-double	clock_panic = CLOCK_PANIC; /* max offset before panic (s) */
-double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
-double	clock_minstep = CLOCK_MINSTEP; /* step timeout (s) */
 u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
@@ -149,7 +154,6 @@ int	state;			/* clock discipline state */
 int	tc_counter;		/* poll-adjust counter */
 u_long	last_time;		/* time of last clock update (s) */
 double	last_offset;		/* last clock offset (s) */
-double	allan_xpt;		/* Allan intercept (s) */
 double	sys_jitter;		/* system RMS jitter (s) */
 
 #if defined(KERNEL_PLL)
@@ -430,19 +434,20 @@ local_clock(
 			 * Compute the FLL and PLL frequency adjustments
 			 * conditioned on intricate weighting factors.
 			 * For the FLL, the averaging interval is
-			 * clamped not to decrease below the Allan
-			 * intercept and the gain is decreased from
-			 * unity for mu above CLOCK_MINSEC (1024 s) to
-			 * zero below CLOCK_MINSEC (256 s). For the PLL,
-			 * the averaging interval is clamped not to
-			 * exceed the sustem poll interval. These
-			 * measures insure stability of the clock
-			 * discipline even when the rules of fair
-			 * engagement are broken.
+			 * clamped to a minimum of 1024 s and the gain
+			 * is decreased from unity for mu above 1024 s
+			 * to zero below 256 s. For the PLL, the
+			 * averaging interval is clamped not to exceed
+			 * the sustem poll interval. No gain factor is
+			 * necessary, since the frequency steering above
+			 * 1024 s is negligible. Particularly for the
+			 * PLL, these measures allow oversampling, but
+			 * not undersampling and insure stability even
+			 * when the rules of fair engagement are broken.
 			 */
 			dtemp = max(mu, allan_xpt);
 			etemp = min(max(0, mu - CLOCK_MINSEC) /
-			    CLOCK_ALLAN, 1.);
+			    allan_xpt, 1.);
 			flladj = fp_offset * etemp / (dtemp *
 			    CLOCK_AVG);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
@@ -597,14 +602,18 @@ local_clock(
 	dtemp = SQUARE(clock_stability);
 	etemp = SQUARE(etemp) - dtemp;
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
-	allan_xpt = max(CLOCK_ALLAN, clock_stability * CLOCK_ADF);
 
 	/*
-	 * In SYNC state, adjust the poll interval.
+	 * In SYNC state, adjust the poll interval. The trick here is to
+	 * compare the apparent frequency change induced by the system
+	 * jitter over the poll interval, or fritter, to the frequency
+	 * stability. If the fritter is greater than the stability,
+	 * phase noise predominates and the averaging interval is
+	 * increased; otherwise, it is decreased. A bit of hysteresis
+	 * helps calm the dance. Works best using burst mode.
 	 */
 	if (state == S_SYNC) {
-		if (clock_stability < CLOCK_MAXSTAB &&
-		    fabs(clock_offset) < CLOCK_PGATE * sys_jitter) {
+		if (sys_jitter / mu > clock_stability) {
 			tc_counter += sys_poll;
 			if (tc_counter > CLOCK_LIMIT) {
 				tc_counter = CLOCK_LIMIT;
@@ -638,15 +647,15 @@ local_clock(
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
-	"local_clock: mu %.0f allan %.0f fadj %.3f fll %.3f pll %.3f\n",
-		    mu, allan_xpt, clock_frequency * 1e6, flladj * 1e6,
-		    plladj * 1e6);
+	"local_clock: mu %.0f fadj %.3f fll %.3f pll %.3f\n",
+		    mu, clock_frequency * 1e6, flladj * 1e6, plladj *
+		    1e6);
 #endif /* DEBUG */
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug)
 		printf(
-		    "local_clock: jit %.6f freq %.3f stab %.3f poll %d cnt %d\n",
-		    sys_jitter, drift_comp * 1e6, clock_stability * 1e6,
+		    "local_clock: noise %.3f stabil %.3f poll %d count %d\n",
+		    sys_jitter * 1e6 / mu, clock_stability * 1e6,
 		    sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (retval);
@@ -732,7 +741,6 @@ rstclock(
 	 */ 
 	case S_FREQ:
 		sys_poll = NTP_MINPOLL;
-		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		break;
 
@@ -741,7 +749,6 @@ rstclock(
 	 */
 	case S_SYNC:
 		sys_poll = NTP_MINPOLL;
-		allan_xpt = CLOCK_ALLAN;
 		tc_counter = 0;
 		break;
 
@@ -758,7 +765,6 @@ rstclock(
 	 */
 	default:
 		sys_poll = NTP_MINPOLL;
-		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		last_offset = clock_offset = 0;
 		break;
@@ -875,26 +881,34 @@ loop_config(
 #endif /* KERNEL_PLL */
 		break;
 
-	case LOOP_MAX:
+	/*
+	 * Special tinker variables for Ulrich Windl. Very dangerous.
+	 */
+	case LOOP_MAX:			/* step threshold */
 		clock_max = freq;
 		break;
 
-	case LOOP_PANIC:
+	case LOOP_PANIC:		/* panic exit threshold */
 		clock_panic = freq;
 		break;
 
-	case LOOP_PHI:
+	case LOOP_PHI:			/* dispersion rate */
 		clock_phi = freq;
 		break;
 
-	case LOOP_MINSTEP:
+	case LOOP_MINSTEP:		/* watchdog bark */
 		clock_minstep = freq; 
 		break;
 
-	case LOOP_MINPOLL:
+	case LOOP_MINPOLL:		/* ephemeral association poll */
 		if (freq < NTP_MINPOLL)
 			freq = NTP_MINPOLL;
 		sys_minpoll = (u_char)freq;
+
+	case LOOP_ALLAN:		/* minimum Allan intercept */
+		if (freq < CLOCK_ALLAN)
+			freq = CLOCK_ALLAN;
+		allan_xpt = freq;
 	}
 }
 
