@@ -75,6 +75,19 @@
 #include <config.h>
 
 #include "ntp_types.h"
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+# include <netinet/in_systm.h>
+#else /* Some old linux systems at least have in_system.h instead. */
+# ifdef HAVE_NETINET_IN_SYSTEM_H
+#  include <netinet/in_system.h>
+# endif
+#endif /* HAVE_NETINET_IN_SYSTM_H */
+#ifdef HAVE_NETINET_IP_H
+# include <netinet/ip.h>
+#endif
 
 /*
  * If various macros are not defined we need to define them
