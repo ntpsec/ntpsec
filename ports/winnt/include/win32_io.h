@@ -197,7 +197,7 @@ extern	BOOL	TTY_SETATTR P((int fd, const DCB *tio));
 
 */
 
-extern	int	refclock_open	(char *, int, int);
+//extern	int	refclock_open	(char *, int, int);
 extern int ioctl	(int, int, int *);
 extern	int	tcsetattr	(int fd, int optional_actions, const struct termios *);
 extern	int	tcgetattr	(int fd, struct termios *);
