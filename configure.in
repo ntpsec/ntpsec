@@ -939,10 +939,6 @@ case "$host" in
     ;;
 esac
 
-AC_CACHE_CHECK(if we should use a streams device for ifconfig,
- ac_cv_var_use_streams_device_for_ifconfig,
- ac_cv_var_use_streams_device_for_ifconfig=no)
-
 AC_CACHE_CHECK(if we need extra room for SO_RCVBUF, ac_cv_var_rcvbuf_slop,
 [ans=no
 case "$host" in

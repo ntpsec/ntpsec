@@ -432,13 +432,6 @@ create_sockets(
 	}
 	free(ifaddrs);
 #else	/* _BSDI_VERSION >= 199510 */
-# ifdef USE_STREAMS_DEVICE_FOR_IF_CONFIG
-	if ((vs = open("/dev/ip", O_RDONLY)) < 0)
-	{
-		msyslog(LOG_ERR, "create_sockets: open(/dev/ip) failed: %m");
-		exit(1);
-	}
-# else /* not USE_STREAMS_DEVICE_FOR_IF_CONFIG */
 	if (
 		(vs = socket(AF_INET, SOCK_DGRAM, 0))
 #  ifndef SYS_WINNT
@@ -450,7 +443,6 @@ create_sockets(
 		msyslog(LOG_ERR, "create_sockets: socket(AF_INET, SOCK_DGRAM) failed: %m");
 		exit(1);
 	}
-# endif /* not USE_STREAMS_DEVICE_FOR_IF_CONFIG */
 
 	i = 2;
 # if !defined(SYS_WINNT)
@@ -536,7 +528,6 @@ create_sockets(
 		lifreq = *lifr;
 		inter_list[i].flags = 0;
 
-# ifndef USE_STREAMS_DEVICE_FOR_IF_CONFIG
 		af = lifr->lifr_addr.zz_family;
 		close(vs);
 
@@ -553,7 +544,6 @@ create_sockets(
 			    af == AF_INET ? "AF_INET" : "AF_INET6");
 			exit(1);
 		}
-# endif /* not USE_STREAMS_DEVICE_FOR_IF_CONFIG */
 
 		/* is it broadcast capable? */
 # ifndef SYS_WINNT
@@ -584,7 +574,6 @@ create_sockets(
 		if ((lifreq.lifr_flags & IFF_BROADCAST) && lifr->lifr_addr.zz_family == AF_INET)
 		    inter_list[i].flags |= INT_BROADCAST;
 # endif /* not SYS_WINNT */
-# if !defined(SUN_3_3_STINKS)
 		switch (lifr->lifr_addr.zz_family) {
 		case AF_INET :
 			if (
@@ -633,30 +622,6 @@ create_sockets(
 			msyslog(LOG_ERR, "create_sockets: loopback test failed on inter_list[i]");
 		}
 
-# endif /* not SUN_3_3_STINKS */
-
-#if 0
-# ifndef SYS_WINNT
-#  ifdef STREAMS_TLI
-		ioc.ic_cmd = SIOCGLIFADDR;
-		ioc.ic_timout = 0;
-		ioc.ic_dp = (caddr_t)&lifreq;
-		ioc.ic_len = sizeof(struct lifreq);
-		if (ioctl(vs, I_STR, &ioc))
-		{
-			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFADDR) failed: %m");
-			continue;
-		}
-#  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGLIFADDR, (char *)&lifreq) < 0)
-		{
-			if (errno != ENXIO)
-			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFADDR) failed: %m");
-			continue;
-		}
-#  endif /* not STREAMS_TLI */
-# endif /* not SYS_WINNT */
-#endif /* 0 */
 # if defined(SYS_WINNT)
 		{int TODO_FillInTheNameWithSomeThingReasonble;}
 # else
@@ -665,33 +630,6 @@ create_sockets(
 # endif
 		memcpy(&inter_list[i].sin, &lifr->lifr_addr, SOCKLEN(&lifr->lifr_addr));
 		((struct sockaddr_in*)&inter_list[i].sin)->sin_port = port;
-# if defined(SUN_3_3_STINKS)
-		/*
-		 * Oh, barf!  I'm too disgusted to even explain this
-		 */
-		switch (lifr->lifr_addr.sa_family) {
-
-		CASE AF_INET :
-			if (SRCADR(&inter_list[i].sin) == 0x7f000001)
-			{
-				inter_list[i].flags |= INT_LOOPBACK;
-				if (loopback_interface == 0)
-					loopback_interface = &inter_list[i];
-			}
-			break;
-
-		CASE AF_INET6 :
-			if (IN6_IS_ADDR_LOOPBACK(&((struct sockaddr_in6*)&inter_list[i].sin->sin6_addr)))
-                        {
-                                inter_list[i].flags |= INT_LOOPBACK;
-                                if (loopback_interface == 0)
-                                	loopback_interface = &inter_list[i];
-                        }
-                        break;
-                default :
-		}
-
-# endif /* SUN_3_3_STINKS */
 # if !defined SYS_WINNT && !defined SYS_CYGWIN32 /* no interface flags on NT */
 		if (inter_list[i].flags & INT_BROADCAST) {
 #  ifdef STREAMS_TLI
