@@ -1,5 +1,10 @@
 1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_gpsvme.c: Fixes
+	From: Michael Barone <michael.barone@lmco.com>
+	Patch severely hacked by HMS to "make it conform".  I hope I
+	didn't break anything.
+
 	* scripts/ntpsweep: Nifty utility
 	From: Hans.Lambermont@nl.origin-it.com
 
