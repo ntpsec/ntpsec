@@ -1386,8 +1386,9 @@ sendpkt(
 			/*
 			* set the multicast ttl for outgoing packets
 			*/
+			u_char mttl = (u_char) ttl;
 			if (setsockopt(inter->fd, IPPROTO_IP, IP_MULTICAST_TTL,
-				(char *) &ttl, sizeof(ttl)) != 0) {
+				(const void *) &mttl, sizeof(mttl)) != 0) {
 				netsyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails on address %s: %m",
 					stoa(&inter->sin));
 			}
@@ -1408,8 +1409,9 @@ sendpkt(
                 	/*
                  	* set the multicast ttl for outgoing packets
                  	*/
+			u_int ittl = (u_int) ttl;
                 	if (setsockopt(inter->fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-                    	&ttl, sizeof(ttl)) == -1)
+                    	(const void *) &ittl, sizeof(ittl)) == -1)
 	                        netsyslog(LOG_ERR, "setsockopt IP_MULTICAST_TTL fails on address %s: %m",
 					stoa(&inter->sin));
                 	else
