@@ -1,3 +1,16 @@
+
+
+2000-02-16  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* winnt/scripts/mkver.bat:    Frederick Czajka [w2k@austin.rr.com]
+	  winnt/ntpq/ntpq.dsp:        modified mkver.bat to eliminate the
+	  winnt/ntpd/ntpd.dsp:	      need to have Perl installed and the
+	  winnt/ntpdc/ntpdc.dsp:      PERL environment variable to be set.
+	  winnt/ntpdate/ntpdate.dsp:
+	  winnt/ntptrace/ntptrace.dsp:    Thanks, Frederick!
+
+	* ntpd/refclock_nmea.c: Correctly interpret the quality indicator.
+
 2000-02-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_nmea.c: Correctly interpret the quality indicator.

@@ -1,3 +1,4 @@
+* WINNT no longer requires Perl for building with Visual C++ 6.0
 * algorithmic improvements, bugfixes
 * Solaris dosynctodr info update
 * html/pic/* is *lots* smaller
