@@ -3,6 +3,7 @@
 AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ
 
 SUBDIRS = \
+	scripts \
 	include \
 	libntp	\
 	libparse	\

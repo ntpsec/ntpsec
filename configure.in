@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.97)
+AM_INIT_AUTOMAKE(ntp, 4.0.97a)
 AC_PREREQ(2.13)
 
 ac_cv_var_oncore_ok=no
@@ -2800,6 +2800,6 @@ AC_OUTPUT(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/mkver scripts/ntpver util/Makefile,
+scripts/Makefile scripts/mkver scripts/ntpver util/Makefile,
 [chmod +x scripts/ntpver scripts/mkver])
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])
