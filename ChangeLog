@@ -1,5 +1,12 @@
 1999-08-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Better tests for -lnsl and -lsocket
+	From: Albert Chin-A-Young <china@thewrittenword.com>
+
+	Works for me - handle openlog() and -lgen the same way.
+
+	* Makefile.am (EXTRA_DIST): Add in the y2k notes
+
 	* parseutil/dcfd.c: Renamed drift_comp to accum_drift
 
 	* configure.in: Added MAKE_CHECK_Y2K support; check_y2k needs libparse.

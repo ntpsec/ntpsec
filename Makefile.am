@@ -18,7 +18,7 @@ SUBDIRS = \
 	kernel	\
 	util
 
-EXTRA_DIST = ChangeLog COPYRIGHT NEWS README.des README.hackers TODO WHERE-TO-START acconfig.h config.guess config.h.in config.sub excludes install-sh dot.emacs build
+EXTRA_DIST = ChangeLog COPYRIGHT NEWS README.des README.hackers TODO WHERE-TO-START acconfig.h config.guess config.h.in config.sub excludes install-sh dot.emacs build NOTES.y2kfixes readme.y2kfixes results.y2kfixes
 #ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.in
 ETAGS_ARGS = Makefile.am configure.in acconfig.h
 

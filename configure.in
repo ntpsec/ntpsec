@@ -152,54 +152,25 @@ esac
 
 AC_PROG_INSTALL
 
-dnl We might need this for other systems...
-check_libnsl=yes
-check_libsocket=yes
-changequote(<<, >>)dnl
-case "$target" in
- *-*-irix[56]*)
-    check_libnsl=no
-    check_libsocket=no
-    ;;
-esac
-changequote([, ])dnl
-
-check_libgen=no
-case "$target" in
- *-univel-sysv4.2*)
-    check_libgen=yes
-    ;;
-esac
 case "$target" in
  *-pc-cygwin32)
     AC_CHECK_LIB(advapi32, main)
     ;;
 esac
 AC_CHECK_LIB(elf, nlist)
-case "$check_libgen" in
- yes)
-    AC_CHECK_LIB(gen, openlog)
-    ;;
-esac
 dnl AC_CHECK_LIB(kvm, main, , , -lelf)
 AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
 AC_CHECK_LIB(ld, nlist)
 AC_CHECK_LIB(mld, nlist)
-case "$check_libnsl" in
- yes)
-    AC_CHECK_LIB(nsl, gethostbyaddr, , , -lsocket)
-    ;;
-esac
+AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent))
+AC_CHECK_FUNC(openlog, , AC_CHECK_LIB(gen, openlog))
+
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
 dnl so only use one of them
 AC_CHECK_LIB(rt, sched_setscheduler, ,
 	AC_CHECK_LIB(posix4, sched_setscheduler))
-case "$check_libsocket" in
- yes)
-    AC_CHECK_LIB(socket, socket)
-    ;;
-esac
+AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h poll.h sched.h sgtty.h)
