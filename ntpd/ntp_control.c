@@ -106,21 +106,22 @@ static struct ctl_var sys_var[] = {
 	{ CS_OFFSET,	RO, "offset" },		/* 11 */
 	{ CS_DRIFT,	RO, "frequency" },	/* 12 */
 	{ CS_JITTER,	RO, "jitter" },		/* 13 */
-	{ CS_CLOCK,	RO, "clock" },		/* 14 */
-	{ CS_PROCESSOR, RO, "processor" },	/* 15 */
-	{ CS_SYSTEM,	RO, "system" },		/* 16 */
-	{ CS_VERSION,	RO, "version" },	/* 17 */
-	{ CS_STABIL,	RO, "stability" },	/* 18 */
-	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
+	{ CS_ERROR,	RO, "error" },		/* 14 */
+	{ CS_CLOCK,	RO, "clock" },		/* 15 */
+	{ CS_PROCESSOR, RO, "processor" },	/* 16 */
+	{ CS_SYSTEM,	RO, "system" },		/* 17 */
+	{ CS_VERSION,	RO, "version" },	/* 18 */
+	{ CS_STABIL,	RO, "stability" },	/* 19 */
+	{ CS_VARLIST,	RO, "sys_var_list" },	/* 20 */
 #ifdef OPENSSL
-	{ CS_FLAGS,	RO, "flags" },		/* 20 */
-	{ CS_HOST,	RO, "hostname" },	/* 21 */
-	{ CS_PUBLIC,	RO, "hostkey" },	/* 22 */
-	{ CS_CERTIF,	RO, "cert" },		/* 23 */
-	{ CS_REVTIME,	RO, "refresh" },	/* 24 */
-	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 25 */
-	{ CS_TAI,	RO, "tai" },		/* 26 */
-	{ CS_DIGEST,	RO, "signature" },	/* 27 */
+	{ CS_FLAGS,	RO, "flags" },		/* 21 */
+	{ CS_HOST,	RO, "hostname" },	/* 22 */
+	{ CS_PUBLIC,	RO, "hostkey" },	/* 23 */
+	{ CS_CERTIF,	RO, "cert" },		/* 24 */
+	{ CS_REVTIME,	RO, "refresh" },	/* 25 */
+	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 26 */
+	{ CS_TAI,	RO, "tai" },		/* 27 */
+	{ CS_DIGEST,	RO, "signature" },	/* 28 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 28 */
 };
@@ -148,6 +149,7 @@ static	u_char def_sys_var[] = {
 	CS_STATE,
 	CS_OFFSET,
 	CS_DRIFT,
+	CS_ERROR,
 	CS_JITTER,
 	CS_STABIL,
 #ifdef OPENSSL
@@ -1235,6 +1237,10 @@ ctl_putsys(
 
 	case CS_JITTER:
 		ctl_putdbl(sys_var[CS_JITTER].text, sys_jitter * 1e3);
+		break;
+
+	case CS_ERROR:
+		ctl_putdbl(sys_var[CS_ERROR].text, sys_error * 1e3);
 		break;
 
 	case CS_CLOCK:
