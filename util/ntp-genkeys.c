@@ -501,7 +501,9 @@ newfile(
 	const char *f3		/* Previous symlink target */
 	)
 {
+	FILE *fp;
 	char fb[PATH_MAX];
+	char *cp;
 
 	/*
 	   If:
@@ -525,6 +527,13 @@ newfile(
 #endif
 	   ) {
 		/* file = dirname(f1) / f2 */
+		snprintf(fb, sizeof fb, "%s", f1);
+		cp = strrchr(fb, '/');
+		if (cp) {
+			*cp = 0;
+		}
+		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+		printf("case 1: file is <%s>\n", fb);
 	} else {
 	/*
 	   - If ('/' == *f3)
@@ -532,12 +541,37 @@ newfile(
 	   - else
 	   - - file = dirname(f1) / dirname(f3) / f2
 	*/
+		if ('/' != *f3) {
+			snprintf(fb, sizeof fb, "%s", f1);
+			cp = strrchr(fb, '/');
+			if (cp) {
+				++cp;
+				*cp = 0;
+			}
+			printf("case 2: file is <%s>\n", fb);
+		} else {
+			*fb = 0;
+		}
+		snprintf(fb, sizeof fb, "%s%s", fb, f3);
+		cp = strrchr(fb, '/');
+		if (cp) {
+			*cp = 0;
+		}
+		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
+		printf("case 3: file is <%s>\n", fb);
 	}
+
 	/*
 	   fopen(file)
 	   print any error message/bail
 	   return FILE
 	*/
+	fp = fopen(fb, "w");
+	if (fp == NULL) {
+		perror(fb);
+		exit(1);
+	}
+	return fp;
 }
 
 
@@ -702,6 +736,8 @@ main(
 		 * Generate 16 random MD5 keys.
 		 */
 		printf("Generating MD5 key file...\n");
+		str = newfile(f1_keys, f2_keys, f3_keys);
+
 		sprintf(filename, "ntp.keys.%lu", ntptime);
 		str = fopen(filename, "w");
 		if (str == NULL) {
@@ -755,6 +791,8 @@ main(
 		 * private key in printable ASCII format.
 		 */
 		sprintf(filename, "ntpkey.%lu", ntptime);
+		str = newfile(f1_privatekey, f2_privatekey, f3_privatekey);
+
 		str = fopen(filename, "w");
 		if (str == NULL) { 
 			perror("RSA private key file");
@@ -775,6 +813,8 @@ main(
 		 * public key in printable ASCII format.
 		 */
 		sprintf(filename, "ntpkey_%s.%lu", hostname, ntptime);
+		str = newfile(f1_publickey, f2_publickey, f3_publickey);
+
 		str = fopen(filename, "w");
 		if (str == NULL) { 
 			perror("RSA public key file");
@@ -821,6 +861,8 @@ main(
 			printf("R_GenerateDHParams error %x\n", rval);
 			return (-1);
 		}
+		str = newfile(f1_dhparms, f2_dhparms, f3_dhparms);
+
 		sprintf(filename, "ntpkey_dh.%lu", ntptime);
 		str = fopen(filename, "w");
 		if (str == NULL) { 
