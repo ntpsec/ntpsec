@@ -5,7 +5,8 @@
 #include <config.h>
 #endif
 
-#if defined(HAVE_SYS_AUDIOIO_H) || defined(HAVE_SUN_AUDIOIO_H)
+#if defined(HAVE_SYS_AUDIOIO_H) || defined(HAVE_SUN_AUDIOIO_H) || \
+    defined(HAVE_SYS_SOUNDCARD_H) || defined(HAVE_MACHINE_SOUNDCARD_H)
 
 #include "audio.h"
 #include "ntp_stdlib.h"
@@ -31,13 +32,26 @@
 
 #include <fcntl.h>
 
+#ifdef HAVE_MACHINE_SOUNDCARD_H
+# include <machine/soundcard.h>
+# define PCM_STYLE_SOUND
+#else
+# ifdef HAVE_SYS_SOUNDCARD_H
+#  include <sys/soundcard.h>
+#  define PCM_STYLE_SOUND
+# endif
+#endif
+
 /*
  * Global variables
  */
 #ifdef HAVE_SYS_AUDIOIO_H
 static struct audio_device device; /* audio device ident */
 #endif /* HAVE_SYS_AUDIOIO_H */
+#ifdef PCM_STYLE_SOUND
+#else /* not PCM_STYLE_SOUND */
 static struct audio_info info;	/* audio device info */
+#endif /* not PCM_STYLE_SOUND */
 static int ctl_fd;		/* audio control file descriptor */
 
 
@@ -60,6 +74,17 @@ audio_init(
 {
 	int fd;
 	int rval;
+	char *actl =
+#ifdef PCM_STYLE_SOUND
+		"/dev/mixer"
+#else
+		"/dev/audioctl"
+#endif
+		;
+#ifdef PCM_STYLE_SOUND
+	struct snd_size s_size;
+	snd_chan_param s_c_p;
+#endif
 
 	/*
 	 * Open audio device. Do not complain if not there.
@@ -71,9 +96,9 @@ audio_init(
 	/*
 	 * Open audio control device.
 	 */
-	ctl_fd = open("/dev/audioctl", O_RDWR);
+	ctl_fd = open(actl, O_RDWR);
 	if (ctl_fd < 0) {
-		msyslog(LOG_ERR, "audio: invalid control device\n");
+		msyslog(LOG_ERR, "audio: invalid control device <%s>\n", actl);
 		close(fd);
 		return(ctl_fd);
 	}
@@ -81,10 +106,26 @@ audio_init(
 	/*
 	 * Set audio device parameters.
 	 */
+#ifdef PCM_STYLE_SOUND
+	printf("audio_init: <%s> bufsiz %d\n", dname, bufsiz);
+	rval = fd;
+
+	if (ioctl(fd, AIOGSIZE, &s_size) == -1)
+	    printf("AIOGSIZE: %s\n", strerror(errno));
+	else
+	    printf("play_size %d, rec_size %d\n",
+		s_size.play_size, s_size.rec_size);
+
+	if (ioctl(fd, AIOGFMT, &s_c_p) == -1)
+	    printf("AIOGFMT: %s\n", strerror(errno));
+	else
+	    printf("play_rate %lu, rec_rate %lu, play_format %#lx, rec_format %#lx\n",
+		s_c_p.play_rate, s_c_p.rec_rate, s_c_p.play_format, s_c_p.rec_format);
+#else /* not PCM_STYLE_SOUND */
 	AUDIO_INITINFO(&info);
-#ifdef HAVE_SYS_AUDIOIO_H
+# ifdef HAVE_SYS_AUDIOIO_H
 	info.record.buffer_size = bufsiz;
-#endif /* HAVE_SYS_AUDIOIO_H */
+# endif /* HAVE_SYS_AUDIOIO_H */
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio: invalid control device parameters\n");
@@ -92,7 +133,9 @@ audio_init(
 		close(fd);
 		return(rval);
 	}
-	return (fd);
+	rval = fd;
+#endif /* not PCM_STYLE_SOUND */
+	return (rval);
 }
 
 
@@ -101,26 +144,86 @@ audio_init(
  */
 int
 audio_gain(
-	int gain,		/* gain 0-255 */
-	int mongain,		/* monitor gain 0-255 */
-	int port		/* port */
+	int gain,		/* volume level (gain) 0-255 */
+	int mongain,		/* input to output mix (monitor gain) 0-255 */
+	int port		/* selected I/O port: 1 mic/2 line in */
 	)
 {
 	int rval;
+	static int done;
 
+#ifdef PCM_STYLE_SOUND
+	int l, r;
+
+	rval = 0;
+
+	r = l = 100 * gain / 255;	/* Normalize to 0-100 */
+# ifdef DEBUG
+	if (debug > 1)
+	    printf("audio_gain: gain %d/%d\n", gain, l);
+# endif
+	l |= r << 8;
+	rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_IGAIN, &l);
+	if (rval == -1) {
+	    printf("SOUND_MIXER_WRITE_IGAIN: %s\n", strerror(errno));
+	    return (rval);
+	}
+
+	if (!done) {
+		r = l = 100 * mongain / 255;	/* Normalize to 0-100 */
+# ifdef DEBUG
+		if (debug > 1)
+			printf("audio_gain: mongain %d/%d\n", mongain, l);
+# endif
+		l |= r << 8;
+		rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_OGAIN, &l);
+		if (rval == -1) {
+			printf("SOUND_MIXER_WRITE_OGAIN: %s\n",
+			       strerror(errno));
+			return (rval);
+		}
+
+# ifdef DEBUG
+		if (debug > 1)
+			printf("audio_gain: port %d\n", port);
+# endif
+		l = (1 << ((port == 2) ? SOUND_MIXER_LINE : SOUND_MIXER_MIC));
+		rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_RECSRC, &l);
+		if (rval == -1) {
+			printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
+			       strerror(errno));
+			return (rval);
+		}
+# ifdef DEBUG
+		if (debug > 1) {
+			if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &l) == -1)
+				printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
+				       strerror(errno));
+			else
+				printf("audio_gain: recsrc is %d\n", l);
+		}
+# endif
+		++done;
+	}
+#else /* not PCM_STYLE_SOUND */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
-	info.monitor_gain = mongain;
-	info.record.gain = gain;
-	info.record.port = port;
 	info.record.error = 0;
-	info.play.gain = AUDIO_MAX_GAIN;
-	info.play.port = AUDIO_SPEAKER;
+	info.record.gain = gain;
+	if (!done) {
+		info.record.port = port;
+		info.monitor_gain = mongain;
+		info.play.gain = AUDIO_MAX_GAIN;
+		info.play.port = AUDIO_SPEAKER;
+		++done;
+	}
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio_gain: %m");
 		return (rval);
 	}
-	return (info.record.error);
+	rval = info.record.error;
+#endif /* not PCM_STYLE_SOUND */
+	return (rval);
 }
 
 
@@ -133,11 +236,24 @@ audio_gain(
 void
 audio_show(void)
 {
-#ifdef HAVE_SYS_AUDIOIO_H
+#ifdef PCM_STYLE_SOUND
+	int devmask = 0, recmask = 0, recsrc = 0, orecsrc;
+
+	printf("audio_show: ctl_fd %d\n", ctl_fd);
+	if (ioctl(ctl_fd, SOUND_MIXER_READ_DEVMASK, &devmask) == -1)
+	    printf("SOUND_MIXER_READ_DEVMASK: %s\n", strerror(errno));
+	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECMASK, &recmask) == -1)
+	    printf("SOUND_MIXER_READ_RECMASK: %s\n", strerror(errno));
+	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &recsrc) == -1)
+	    printf("SOUND_MIXER_READ_RECSRC: %s\n", strerror(errno));
+	orecsrc = recsrc;
+
+#else /* not PCM_STYLE_SOUND */
+# ifdef HAVE_SYS_AUDIOIO_H
 	ioctl(ctl_fd, (int)AUDIO_GETDEV, &device);
 	printf("audio: name %s, version %s, config %s\n",
 	    device.name, device.version, device.config);
-#endif /* HAVE_SYS_AUDIOIO_H */
+# endif /* HAVE_SYS_AUDIOIO_H */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
 	printf(
 	    "audio: rate %d, chan %d, prec %d, code %d, gain %d, mon %d, port %d\n",
@@ -149,7 +265,8 @@ audio_show(void)
 	    info.record.samples, info.record.eof,
 	    info.record.pause, info.record.error,
 	    info.record.waiting, info.record.balance);
+#endif /* not PCM_STYLE_SOUND */
 }
 #else
 int audio_bs;
-#endif /* HAVE_SYS_AUDIOIO_H HAVE_SUN_AUDIOIO_H */
+#endif /* HAVE_{SYS_AUDIOIO,SUN_AUDIOIO,MACHINE_SOUNDCARD,SYS_SOUNDCARD}_H */
