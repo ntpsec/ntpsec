@@ -11,7 +11,7 @@ which 90-99% of all NTP systems are run ....
 
 The specification of this program is:
 
-    msntp [ --help | -h | -? ] [ -v | -V | -W ]
+    sntp [ --help | -h | -? ] [ -v | -V | -W ]
         [ -B [ period ] | -S | -q [ -f savefile ] |
             [ { -r | -a } [ -P prompt ] [ -l lockfile ] ]
             [ -c count ] [ -e minerr ][ -E maxerr ]
@@ -86,13 +86,13 @@ values are from 1 to 3600, and the default is 15 if 'address' is specified and
 Acceptable values are from 1 to 1440 (a day), and the default is 300.
 
     'lockfile' may be used in an update mode to ensure that there is only
-one copy of msntp running at once.  The default is installation-dependent,
-but will usually be /etc/msntp.pid.
+one copy of sntp running at once.  The default is installation-dependent,
+but will usually be /etc/sntp.pid.
 
     'savefile' may be used in daemon mode to store a record of previous
-packets, which may speed up recalculating the drift after msntp has to be
+packets, which may speed up recalculating the drift after sntp has to be
 restarted (e.g. because of network or server outages).  The default is
-installation-dependent, but will usually be /etc/msntp.state.  Note that
+installation-dependent, but will usually be /etc/sntp.state.  Note that
 there is no locking of this file, and using it twice may cause chaos.
 
     'address' is the DNS name or IP number of a host to poll; if no name is
@@ -1600,16 +1600,16 @@ one of the specialised routines to do the work. */
     char c;
 
     if (argv[0] == NULL || argv[0][0] == '\0')
-        argv0 = "msntp";
+        argv0 = "sntp";
     else if ((argv0 = strrchr(argv[0],'/')) != NULL)
         ++argv0;
     else
         argv0 = argv[0];
     setvbuf(stdout,NULL,_IOLBF,BUFSIZ);
     setvbuf(stderr,NULL,_IOLBF,BUFSIZ);
-    if (INT_MAX < 2147483647) fatal(0,"msntp requires >= 32-bit ints",NULL);
+    if (INT_MAX < 2147483647) fatal(0,"sntp requires >= 32-bit ints",NULL);
     if (DBL_EPSILON > 1.0e-13)
-        fatal(0,"msntp requires doubles with eps <= 1.0e-13",NULL);
+        fatal(0,"sntp requires doubles with eps <= 1.0e-13",NULL);
     for (k = 0; k < MAX_SOCKETS; ++k) hostnames[k] = NULL;
 
 /* Decode the arguments. */

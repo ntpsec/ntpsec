@@ -706,10 +706,14 @@ main(
 	if (pkey_iff != NULL && rval == 0 && iffsw) {
 		DSA	*dsa;
 		char	*sptr;
+		char	*tld;
 
 		sptr = strrchr(filename, '.');
+		tld = malloc(strlen(sptr));	/* we have an extra byte ... */
+		strcpy(tld, 1+sptr);		/* ... see? */
 		sprintf(filename, "ntpkey_IFFkey_%s.%s", trustname,
-		    ++sptr);
+		    tld);
+		free(tld);
 		fprintf(stderr, "Writing new IFF key %s\n", filename);
 		fprintf(stdout, "# %s\n# %s", filename, ctime(&epoch));
 		dsa = pkey_iff->pkey.dsa;
