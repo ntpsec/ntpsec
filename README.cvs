@@ -28,6 +28,9 @@ PLEASE NOTE:
 	which will force any local changes to your NTP files to be
 	discarded and replaced with the versions in the repository.
 
+	If "ntp_update -C" does not work  just remove the "broken"
+	files (probably Makefile.in files) and re-run ntp_udate.
+
 There are some mailing lists for the NTP CVS distribution.  For more
 information, send a message to <majordomo@ntp.org> with the word "lists"
 in the body of the message.

@@ -2718,6 +2718,7 @@ proto_config(
 		pps_enable = (int)value;
 		break;
 
+#ifdef REFCLOCK
 	case PROTO_CAL:
 
 		/*
@@ -2725,6 +2726,7 @@ proto_config(
 		 */
 		cal_enable = (int)value;
 		break;
+#endif
 
 	default:
 

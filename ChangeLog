@@ -1,5 +1,11 @@
 2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (proto_config): cal_enable (PROTO_CAL) is
+	invalid if no refclocks are present.
+	From: Frodo Looijaard <frodol@dds.nl>
+
+	* README.cvs: On some systems, the -C option fails.
+
 	* ntpd/refclock_nmea.c:
 	* ntpd/ntp_refclock.c:
 	* html/driver20.htm:
