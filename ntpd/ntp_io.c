@@ -1326,11 +1326,7 @@ input_handler(
 						{
 							char buf[RX_BUFF_SIZE];
 
-#ifndef SYS_WINNT
 							(void) read(fd, buf, sizeof buf);
-#else
-							(void) ReadFile((HANDLE)fd, buf, (DWORD)sizeof buf, NULL, NULL);
-#endif /* SYS_WINNT */
 							packets_dropped++;
 							goto select_again;
 						}
@@ -1340,14 +1336,8 @@ input_handler(
 						i = (rp->datalen == 0
 						     || rp->datalen > sizeof(rb->recv_space))
 						    ? sizeof(rb->recv_space) : rp->datalen;
-#ifndef SYS_WINNT
 						rb->recv_length =
-						    read(fd, (char *)&rb->recv_space, (unsigned)i)
-#else  /* SYS_WINNT */
-						    ReadFile((HANDLE)fd, (char *)&rb->recv_space, (DWORD)i,
-							     (LPDWORD)&(rb->recv_length), NULL)
-#endif /* SYS_WINNT */
-						    ;
+						    read(fd, (char *)&rb->recv_space, (unsigned)i);
 
 						if (rb->recv_length == -1)
 						{
@@ -1546,35 +1536,20 @@ input_handler(
 		}
 		else if (n == -1)
 		{
-#ifndef SYS_WINNT
 			int err = errno;
-#else
-			DWORD err = WSAGetLastError();
-#endif /* SYS_WINNT */
 
 			/*
 			 * extended FAU debugging output
 			 */
 			msyslog(LOG_ERR, "select(%d, %s, 0L, 0L, &0.000000) error: %m",
 				maxactivefd+1, fdbits(maxactivefd, &activefds));
-			if (
-#ifndef SYS_WINNT
-				(err == EBADF)
-#else
-				(err == WSAEBADF)
-#endif /* SYS_WINNT */
-				)
-			{
+			if (err == EBADF) {
 				int j, b;
 
 				fds = activefds;
 				for (j = 0; j <= maxactivefd; j++)
 				    if (
-#ifndef SYS_WINNT
 					    (FD_ISSET(j, &fds) && (read(j, &b, 0) == -1))
-#else
-					    (FD_ISSET(j, &fds) && (!ReadFile((HANDLE)j, &b, 0, NULL, NULL)))
-#endif /* SYS_WINNT */
 					    )
 					msyslog(LOG_ERR, "Bad file descriptor %d", j);
 			}

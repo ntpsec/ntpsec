@@ -108,7 +108,7 @@
 #define SIGDIE4 	SIGTERM
 #endif /* SYS_WINNT */
 
-#if defined SYS_WINNT || defined SYS_CYGWIN32
+#if defined SYS_WINNT
 /* handles for various threads, process, and objects */
 HANDLE ResolverThreadHandle = NULL;
 /* variables used to inform the Service Control Manager of our current state */
@@ -549,7 +549,6 @@ service_main(
 #	define	LOG_NTP LOG_DAEMON
 #  endif
 	openlog(cp, LOG_PID | LOG_NDELAY, LOG_NTP);
-#ifndef SYS_CYGWIN32
 #  ifdef DEBUG
 	if (debug)
 		setlogmask(LOG_UPTO(LOG_DEBUG));
@@ -557,8 +556,6 @@ service_main(
 #  endif /* DEBUG */
 		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
 # endif /* LOG_DAEMON */
-#endif
-
 #endif	/* !SYS_WINNT && !VMS */
 
 	NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
@@ -669,7 +666,7 @@ service_main(
 	/*
 	 * Set up signals we should never pay attention to.
 	 */
-#if defined SIGPIPE && !defined SYS_CYGWIN32
+#if defined SIGPIPE
 	(void) signal_no_reset(SIGPIPE, SIG_IGN);
 #endif	/* SIGPIPE */
 
@@ -759,7 +756,6 @@ service_main(
 	 * yet to learn about anything else that is.
 	 */
 # if defined(HAVE_IO_COMPLETION_PORT)
-	{
 		WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, NULL); /* exit reques */
 		WaitHandles[1] = get_recv_buff_event();
 		WaitHandles[2] = get_timer_handle();
@@ -771,14 +767,7 @@ service_main(
 					exit(0);
 				break;
 
-				case WAIT_OBJECT_0 + 1 : {/* recv buffer */
-					if (NULL != (rbuf = get_full_recv_buffer())) {
-						if (rbuf->receiver != NULL) {
-							rbuf->receiver(rbuf);
-						}
-						freerecvbuf(rbuf);
-					}
-				}
+				case WAIT_OBJECT_0 + 1 : /* recv buffer */
 				break;
 
 				case WAIT_OBJECT_0 + 2 : /* 1 second timer */
@@ -800,10 +789,9 @@ service_main(
 				case WAIT_TIMEOUT :
 				break;
 				
-			}
+			} /* switch */
+			rbuflist = getrecvbufs();	/* get received buffers */
 
-		}
-	}
 # else /* normal I/O */
 
 	was_alarmed = 0;
@@ -858,7 +846,7 @@ service_main(
 			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
 			else if (debug) {
-#   if !defined SYS_VXWORKS && !defined SYS_CYGWIN32 && !defined SCO5_CLOCK /* to unclutter log */
+#   if !defined SYS_VXWORKS && !defined SCO5_CLOCK /* to unclutter log */
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #   endif
 			}
@@ -887,6 +875,7 @@ service_main(
 			was_alarmed = 0;
 		}
 
+# endif /* HAVE_IO_COMPLETION_PORT */
 		/*
 		 * Call the data procedure to handle each received
 		 * packet.
@@ -908,7 +897,6 @@ service_main(
 		 * Go around again
 		 */
 	}
-# endif /* HAVE_IO_COMPLETION_PORT */
 	exit(1); /* unreachable */
 	return 1;		/* DEC OSF cc braindamage */
 }
