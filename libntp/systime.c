@@ -25,12 +25,6 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
-#if defined SYS_WINNT
-#include "ntp_timer.h"
-#include "clockstuff.h"
-static long last_Adj = 0;
-#endif
-
 int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
 
 #define MAXFREQ 500e-6
@@ -110,6 +104,7 @@ get_systime(
  * adj_systime - called once every second to make system time adjustments.
  * Returns 1 if okay, 0 if trouble.
  */
+#if !defined SYS_WINNT
 int
 adj_systime(
 	double now
@@ -118,12 +113,7 @@ adj_systime(
 	double dtemp;
 	struct timeval adjtv;
 	u_char isneg = 0;
-#if !defined SYS_WINNT && !defined SYS_CYGWIN32
 	struct timeval oadjtv;
-#else
-	int rc;
-   long dwTimeAdjustment;
-#endif
 
 	/*
 	 * Add the residual from the previous adjustment to the new
@@ -160,30 +150,6 @@ adj_systime(
 	adjtv.tv_sec = 0;
 	adjtv.tv_usec = (int32)dtemp;
 
-
-#if defined SYS_WINNT || defined SYS_CYGWIN32	
-	/* dtemp is in micro seconds. NT uses 100 ns units,
-	 * so a unit change in dwTimeAdjustment corresponds
-	 * to slewing 10 ppm on a 100 Hz system. 
-	 * Calculate the number of 100ns units to add, 
-	 * using OS tick frequency as per suggestion from Harry Pyle,
-	 * and leave the remainder in dtemp */
-	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5) );
-	dtemp += (double) -dwTimeAdjustment * ppm_per_adjust_unit;	
-	dwTimeAdjustment += units_per_tick;
-
-	/* only adjust the clock if adjustment changes */
-	if (last_Adj != dwTimeAdjustment) { 	
-			last_Adj = dwTimeAdjustment;  
-# ifdef DEBUG
-		if (debug > 1) 
-			printf("SetSystemTimeAdjustment( %ld)\n", dwTimeAdjustment);			
-# endif
-			rc = !SetSystemTimeAdjustment(dwTimeAdjustment, FALSE);
-	}
-	else rc = 0;
-	if (rc)
-#else
 	/*
 	 * Here we do the actual adjustment. If for some reason the adjtime()
 	 * call fails, like it is not implemented or something like that,
@@ -192,17 +158,12 @@ adj_systime(
 	 */
 	/* casey - we need a posix type thang here */
 	if (adjtime(&adjtv, &oadjtv) < 0)
-#endif /* SYS_WINNT */
 	{
 		msyslog(LOG_ERR, "Can't adjust time: %m");
 		return 0;
 	} 
 	else {
-#if !defined (SYS_WINNT) && !defined (SYS_CYGWIN32)
 	sys_residual += oadjtv.tv_usec / 1e6;
-#else
-	sys_residual = dtemp / 1000000.0;
-#endif /* SYS_WINNT */
 	}
 #ifdef DEBUG
 	if (debug > 6)
@@ -210,6 +171,7 @@ adj_systime(
 #endif
 	return 1;
 }
+#endif
 
 
 /*

@@ -1,3 +1,9 @@
+1999-12-03  Sven Dietrich <sven_dietrich@trimble.com>
+
+	* libntp/systime.c: Removed adjtime hack for WINNT
+	* ports/winnt/ntpd/nt_clockstuff.c: Winnt double precision adjtime 
+	* ports/winnt/inlcude/clockstuff.h: Remove no longer needed externs
+
 1999-12-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libparse/Makefile.in: Manually hacked to remove the

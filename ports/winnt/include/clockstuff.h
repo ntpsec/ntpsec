@@ -19,7 +19,4 @@
 
 #define FILETIME_1970     0x019db1ded53e8000
 #define HECTONANOSECONDS  10000000ui64
-
-extern DWORD units_per_tick;
-extern double ppm_per_adjust_unit;
 #endif

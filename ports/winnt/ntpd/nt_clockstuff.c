@@ -2,7 +2,14 @@
 #include "config.h"
 #endif
 
+#include "ntp_stdlib.h"
 #include "clockstuff.h"
+#include "ntp_timer.h"
+
+extern double sys_residual;	/* residual from previous adjustment */
+extern double sys_maxfreq;
+
+static long last_Adj = 0;
 
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
 
@@ -18,8 +25,78 @@ static DWORD initial_units_per_tick = 0;
 static DWORD lastLowTimer = 0;
 
 ULONGLONG PerfFrequency = 0;
-DWORD units_per_tick = 0;
-DOUBLE ppm_per_adjust_unit = 0.0;
+static DWORD units_per_tick = 0;
+static DOUBLE ppm_per_adjust_unit = 0.0;
+
+/*
+ * adj_systime - called once every second to make system time adjustments.
+ * Returns 1 if okay, 0 if trouble.
+ */
+int
+adj_systime(
+	double now
+	)
+{
+	double dtemp;
+	u_char isneg = 0;
+	int rc;
+   long dwTimeAdjustment;
+
+	/*
+	 * Add the residual from the previous adjustment to the new
+	 * adjustment, bound and round.
+	 */
+	dtemp = sys_residual + now;
+	sys_residual = 0;
+	if (dtemp < 0) {
+		isneg = 1;
+		dtemp = -dtemp;
+	}
+
+	if (dtemp > sys_maxfreq)
+		dtemp = sys_maxfreq;
+
+	dtemp = dtemp * 1e6;
+
+	if (isneg)
+		dtemp = -dtemp;
+
+	/* dtemp is in micro seconds. NT uses 100 ns units,
+	 * so a unit change in dwTimeAdjustment corresponds
+	 * to slewing 10 ppm on a 100 Hz system. 
+	 * Calculate the number of 100ns units to add, 
+	 * using OS tick frequency as per suggestion from Harry Pyle,
+	 * and leave the remainder in dtemp */
+	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5)) ;
+	dtemp += (double) -dwTimeAdjustment * ppm_per_adjust_unit;	
+
+	/* only adjust the clock if adjustment changes */
+	if (last_Adj != dwTimeAdjustment) { 	
+			last_Adj = dwTimeAdjustment;  
+# ifdef DEBUG
+		if (debug > 1) 
+			printf("SetSystemTimeAdjustment( %ld) + (%ld)\n", dwTimeAdjustment, units_per_tick);			
+# endif
+			dwTimeAdjustment += units_per_tick;
+			rc = !SetSystemTimeAdjustment(dwTimeAdjustment, FALSE);
+	}
+	else rc = 0;
+	if (rc)
+	{
+		msyslog(LOG_ERR, "Can't adjust time: %m");
+		return 0;
+	} 
+	else {
+		sys_residual = dtemp / 1000000.0;
+	}
+
+#ifdef DEBUG
+	if (debug > 6)
+		printf("adj_systime: adj %.9f -> remaining residual %.9f\n", now, sys_residual);
+#endif
+	return 1;
+}
+
 
 void init_winnt_time(void) {
 	BOOL noslew;
@@ -141,8 +218,9 @@ TimerApcFunction(
 		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS - 
 			(ULONGLONG) LargeIntNowCount.QuadPart;
 #ifdef DEBUG
-		msyslog(LOG_INFO, "Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
-		   RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
+		msyslog(LOG_INFO, 
+			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
+				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
 #endif
 	}
 
