@@ -212,7 +212,9 @@ dnl HMS: What a hack...
 AC_CHECK_HEADERS(readline/history.h readline/readline.h)
 case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
  *no*) ;;
- *) AC_CHECK_LIB(readline, readline, ,
+ *) save_LIBS=$LIBS
+    LIBS=
+    AC_CHECK_LIB(readline, readline, ,
      AC_MSG_NOTICE([Trying again with -lcurses])
      unset ac_cv_lib_readline_readline
      AC_CHECK_LIB(readline, readline,
@@ -220,6 +222,9 @@ case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
       AC_DEFINE(HAVE_LIBREADLINE)
       AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?])
       , , -lcurses))
+    READLINE_LIBS=$LIBS
+    AC_SUBST(READLINE_LIBS)
+    LIBS=$save_LIBS
     ;;
 esac
 
