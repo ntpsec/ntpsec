@@ -1,3 +1,7 @@
+1999-10-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: We might need -lsocket for the -lnsl check.
+
 1999-09-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_ulink.c: Typos in C++ comment
