@@ -134,13 +134,10 @@ transmit(
 				}
 			}
 			hpoll = peer->minpoll;
-			if (peer->flags & FLAG_BURST) {
-				if (peer->flags & FLAG_MCAST2)
-					peer->burst = NTP_SHIFT;
-				else
-					peer->burst = 2;
-			}
-
+			if (peer->flags & FLAG_IBURST)
+				peer->burst = NTP_SHIFT;
+			else if (peer->flags & FLAG_BURST)
+				peer->burst = 2;
 		} else {
 
 			/*
@@ -178,8 +175,8 @@ transmit(
 			 * keylist, since no further transmissions will
 			 * be made.
 			 */
+			peer->flags &= ~FLAG_IBURST;
 			if (peer->flags & FLAG_MCAST2) {
-				peer->flags &= ~FLAG_BURST;
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
 				key_expire(peer);
@@ -232,6 +229,7 @@ receive(
 	keyid_t skeyid;			/* cryptographic keys */
 #ifdef AUTOKEY
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
+	struct sockaddr_in *dstadr_sin;	/* active runway */
 #endif /* AUTOKEY */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
@@ -311,7 +309,7 @@ receive(
 		}
 	}
 	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
-	    !sys_bclient))
+	    !sys_bclient) || rbufp->dstadr == any_interface)
 		return;
 
 	/*
@@ -363,10 +361,17 @@ receive(
 	 * authenticate the packet if required. Note that we burn only
 	 * MD5 or DES cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
+	 *
+	 * More on the autokey mambo. Normally the local interface
+	 * address is the unicast one. However, if the sender is a
+	 * broadcaster, the broadcast address is used. Notwithstanding
+	 * that, if the sender is a multicaster, the broadcast address
+	 * is null, so use the unicast address anyway. Don't ask.
 	 */
 	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
 	    hismode, &retcode);
 	is_authentic = 0;
+	dstadr_sin = &rbufp->dstadr->sin;
 	if (has_mac == 0) {
 #ifdef DEBUG
 		if (debug)
@@ -409,51 +414,38 @@ receive(
 			 *
 			 * # if unsync, 0
 			 * % can't happen
-			 *
-			 * You won't believe this. If in passive mode
-			 * and peer->assoc is nonzero, the active peer
-			 * has previously synchronized and will be using
-			 * nonzero cookie. If peer->assoc is zero, that
-			 * never happened and his cookie is zero. What
-			 * tangled cookies we weave.
 			 */
 			if (hismode == MODE_BROADCAST) {
 				pkeyid = 0;
+				if (rbufp->dstadr->bcast.sin_addr.s_addr
+				    != 0)
+					dstadr_sin =
+					    &rbufp->dstadr->bcast;
 			} else if (peer == 0) {
 				pkeyid = session_key(
-				    &rbufp->recv_srcadr,
-				    &rbufp->dstadr->sin, 0, sys_private,
-				    0);
+				    &rbufp->recv_srcadr, dstadr_sin, 0,
+				    sys_private, 0);
 			} else {
 				pkeyid = peer->pcookie.key;
 			}
 
 			/*
 			 * The session key includes both the public
-			 * values and cookie. We have to be careful to
-			 * use the right socket addresses for broadcast
-			 * and unicast packets. In case of an extension
+			 * values and cookie. In case of an extension
 			 * field, the cookie used for authentication
 			 * purposes is zero. Note the hash is saved for
 			 * use later in the autokey mambo.
 			 */
-			if (hismode == MODE_BROADCAST) {
-				tkeyid = session_key(
-				    &rbufp->recv_srcadr,
-				    &rbufp->dstadr->bcast, skeyid,
-				    pkeyid, 2);
-			} else if (authlen > LEN_PKT_NOMAC) {
+			if (authlen > LEN_PKT_NOMAC && pkeyid != 0) {
 				session_key(&rbufp->recv_srcadr,
-				    &rbufp->dstadr->sin, skeyid, 0, 2);
+				    dstadr_sin, skeyid, 0, 2);
 				tkeyid = session_key(
-				    &rbufp->recv_srcadr,
-				    &rbufp->dstadr->sin, skeyid, pkeyid,
-				    0);
+				    &rbufp->recv_srcadr, dstadr_sin,
+				    skeyid, pkeyid, 0);
 			} else {
 				tkeyid = session_key(
-				    &rbufp->recv_srcadr,
-				    &rbufp->dstadr->sin, skeyid, pkeyid,
-				    2);
+				    &rbufp->recv_srcadr, dstadr_sin,
+				    skeyid, pkeyid, 2);
 			}
 
 		}
@@ -508,6 +500,9 @@ receive(
 		 * zero to tell the caller about this.
 		 */
 		if (!sys_bclient || sys_manycastserver) {
+			if (IN_CLASSD(
+			    ntohl(dstadr_sin->sin_addr.s_addr)))
+				rbufp->dstadr = mcast_interface;
 			if (is_authentic)
 				fast_xmit(rbufp, MODE_SERVER, skeyid);
 			else
@@ -526,7 +521,7 @@ receive(
 		 * be properly authenticated and it's darn funny of the
 		 * manycaster isn't around now. 
 		 */
-		if ((sys_authenticate && !is_authentic)) {
+		if (sys_authenticate && !is_authentic) {
 			is_error = 1;
 			break;
 		}
@@ -544,12 +539,14 @@ receive(
 		 */
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST |
+		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)), 0,
+		    skeyid);
 		if (peer == 0) {
 			is_error = 1;
 			break;
 		}
-		peer_config_manycast(peer2, peer);
+		peer->cast_flags |= peer2->flags & MDF_ACAST;
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
@@ -579,7 +576,7 @@ receive(
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
+	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, 0, skeyid);
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
@@ -600,10 +597,10 @@ receive(
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_MCLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
+		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, 0, skeyid);
 		if (peer == 0)
 			break;
-		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_BURST;
+		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_IBURST;
 		peer->hmode = MODE_CLIENT;
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
@@ -725,6 +722,7 @@ receive(
 			peer->pkeyid = skeyid;
 		} else {
 			int i;
+
 			for (i = 0; ; i++) {
 				if (tkeyid == peer->pkeyid ||
 				    tkeyid == peer->recauto.key) {
@@ -734,34 +732,19 @@ receive(
 				}
 				if (i > peer->recauto.seq)
 					break;
-
-				if (hismode == MODE_BROADCAST)
-					tkeyid = session_key(
-					    &rbufp->recv_srcadr,
-					    &rbufp->dstadr->bcast,
-					    tkeyid, pkeyid, 0);
-				else
-					tkeyid = session_key(
-					    &rbufp->recv_srcadr,
-					    &rbufp->dstadr->sin,
-					    tkeyid, pkeyid, 0);
+				tkeyid = session_key(
+				    &rbufp->recv_srcadr, dstadr_sin,
+				    tkeyid, pkeyid, 0);
 			}
 		}
 #ifdef PUBKEY
 		/*
 		 * If the autokey boogie fails, the server may be bogus
-		 * or worse. Raise an alarm and retrieve the autokey
-		 * values again. If the server has in fact come up with
-		 * new autokey values, this saves a timeout and general
-		 * reset. On the other hand, an intruder could replay at
-		 * speed packets from old associations with different
-		 * cookies, which would cause needless server requests
-		 * and burdensome responses. Since victim client sends a
-		 * message only at poll intervals and victim server
-		 * burns no PKI cycles, the attack doesn't do much harm.
+		 * or worse. If the server has new autokey values, but
+		 * the client has not seen them, the result will be
+		 * timeout and general reset. The alternative is a
+		 * vulnerability to self-interference in manycast mode.
 		 */
-		if (peer->flash & TEST10)
-			peer->flags &= ~FLAG_AUTOKEY;
 		if (!(peer->flags & FLAG_AUTOKEY))
 			peer->flash |= TEST11;
 
@@ -1119,7 +1102,7 @@ poll_update(
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
-		if (peer->flags & FLAG_REFCLOCK)
+		if (peer->flags & (FLAG_REFCLOCK | FLAG_IBURST))
 			peer->nextdate++;
 		else if (peer->reach & 0x1)
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
@@ -1131,13 +1114,13 @@ poll_update(
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	}
 
+#ifdef AUTOKEY
 	/*
 	 * Bit of crass arrogance at this point. If the poll interval
 	 * has changed and we have a keylist, the lifetimes in the
 	 * keylist are probably bogus. In this case purge the keylist
 	 * and regenerate it later.
 	 */
-#ifdef AUTOKEY
 	if (peer->kpoll != oldpoll)
 		key_expire(peer);
 #endif /* AUTOKEY */
@@ -1184,7 +1167,7 @@ peer_clear(
 	 */
 	peer->flags &= ~FLAG_AUTOKEY;
 	if (peer->flags & FLAG_MCAST2) {
-		peer->flags |= FLAG_MCAST1 | FLAG_BURST;
+		peer->flags |= FLAG_MCAST1 | FLAG_IBURST;
 		peer->hmode = MODE_CLIENT;
 	}
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
@@ -1811,11 +1794,22 @@ peer_xmit(
 	)
 {
 	struct pkt xpkt;	/* transmit packet */
-	int find_rtt = (peer->cast_flags & MDF_MCAST) &&
-	    peer->hmode != MODE_BROADCAST;
+	int find_rtt;
+	struct interface *dstadr;
 	int sendlen, pktlen;
 	keyid_t xkeyid;		/* transmit key ID */
 	l_fp xmt_tx;
+
+	/*
+	 * Nonsense time. If multicast or if the interface is not bound,
+	 * use the multicast interface. Mommy swat me for this is ugly.
+	 */
+	find_rtt = (peer->cast_flags & MDF_MCAST) && peer->hmode !=
+	    MODE_BROADCAST;
+	if (find_rtt || peer->dstadr == any_interface)
+		dstadr = mcast_interface;
+	else
+		dstadr = peer->dstadr;
 
 	/*
 	 * Initialize transmit packet header fields.
@@ -1838,22 +1832,18 @@ peer_xmit(
 	 * is authenticated and contains a MAC. If not, the transmitted
 	 * packet is not authenticated.
 	 *
-	 * In the current I/O semantics we can't find the local
-	 * interface address to generate a session key until after
-	 * receiving a packet. So, the first packet goes out
-	 * unauthenticated. That's why the really icky test next is
-	 * here.
+	 * In the current I/O semantics the default interface is set
+	 * until after receiving a packet and setting the right
+	 * interface. So, the first packet goes out unauthenticated.
+	 * That's why the really icky test next is here.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (!(peer->flags & FLAG_AUTHENABLE) ||
-	    (peer->dstadr->sin.sin_addr.s_addr == 0 &&
-	    peer->dstadr->bcast.sin_addr.s_addr == 0)) {
+	if (!(peer->flags & FLAG_AUTHENABLE)) {
 		get_systime(&peer->xmt);
 		HTONL_FP(&peer->xmt, &xpkt.xmt);
-		sendpkt(&peer->srcadr, find_rtt ? any_interface :
-		    peer->dstadr, ((peer->cast_flags & MDF_MCAST) &&
-		    !find_rtt) ? ((peer->cast_flags & MDF_ACAST) ? -7 :
-		    peer->ttl) : -8, &xpkt, sendlen);
+		sendpkt(&peer->srcadr, dstadr, ((peer->cast_flags &
+		    MDF_MCAST) && !find_rtt) ? ((peer->cast_flags &
+		    MDF_ACAST) ? -7 : peer->ttl) : -8, &xpkt, sendlen);
 		peer->sent++;
 #ifdef DEBUG
 		if (debug)
@@ -1918,7 +1908,7 @@ peer_xmit(
 			 * it.
 			 */
 			if (peer->keynumber == 0)
-				make_keylist(peer);
+				make_keylist(peer, dstadr);
 			else
 				peer->keynumber--;
 			xkeyid = peer->keylist[peer->keynumber];
@@ -2012,7 +2002,8 @@ peer_xmit(
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
-				    peer->hcookie, peer->associd);
+				    peer->hcookie,
+				    peer->associd);
 #ifdef PUBKEY
 			else if (crypto_flags & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
@@ -2071,10 +2062,8 @@ peer_xmit(
 		 * private value of zero. Most intricate.
 		 */
 		if (sendlen > LEN_PKT_NOMAC)
-			session_key(&peer->dstadr->sin,
-			    (peer->hmode == MODE_BROADCAST) ?
-	    		    &peer->dstadr->bcast : &peer->srcadr,
-			    xkeyid, 0, 2);
+			session_key(&dstadr->sin, &peer->srcadr, xkeyid,
+			    0, 2);
 	} 
 #endif /* AUTOKEY */
 	xkeyid = peer->keyid;
@@ -2092,10 +2081,9 @@ peer_xmit(
 		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
 		exit(-1);
 	}
-	sendpkt(&peer->srcadr, find_rtt ? any_interface : peer->dstadr,
-	    ((peer->cast_flags & MDF_MCAST) && !find_rtt) ?
-	    ((peer->cast_flags & MDF_ACAST) ? -7 : peer->ttl) : -7,
-	    &xpkt, pktlen);
+	sendpkt(&peer->srcadr, dstadr, ((peer->cast_flags &
+	    MDF_MCAST) && !find_rtt) ? ((peer->cast_flags & MDF_ACAST) ?
+	    -7 : peer->ttl) : -7, &xpkt, pktlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2217,7 +2205,7 @@ fast_xmit(
 			    CRYPTO_RESP;
 			sendlen += crypto_xmit((u_int32 *)&xpkt,
 			    sendlen, code, cookie,
-			    (u_int)htonl(rpkt->exten[1]));
+			    htonl(rpkt->exten[1]));
 		} else {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);

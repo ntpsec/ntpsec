@@ -138,7 +138,7 @@ char *req_file;		/* name of the file with configuration info */
 static	RETSIGTYPE bong		P((int));
 static	void	checkparent	P((void));
 static	void	removeentry	P((struct conf_entry *));
-static	void	addentry	P((char *, int, int, int, int, int,
+static	void	addentry	P((char *, int, int, int, int, u_int,
 				   int, keyid_t, char *));
 static	int	findhostaddr	P((struct conf_entry *));
 static	void	openntp		P((void));
@@ -160,7 +160,7 @@ struct ntp_res_c_pkt {		/* Control packet: */
 	int version;
 	int minpoll;
 	int maxpoll;
-	int flags;
+	u_int flags;
 	int ttl;
 	keyid_t keyid;
 	u_char keystr[MAXFILENAME];
@@ -387,7 +387,7 @@ addentry(
 	int version,
 	int minpoll,
 	int maxpoll,
-	int flags,
+	u_int flags,
 	int ttl,
 	keyid_t keyid,
 	char *keystr
@@ -400,9 +400,9 @@ addentry(
 #ifdef DEBUG
 	if (debug > 1)
 		msyslog(LOG_INFO, 
-			"intres: <%s> %d %d %d %d %d %d %u %s\n",
-			name, mode, version,
-			minpoll, maxpoll, flags, ttl, keyid, keystr);
+		    "intres: <%s> %d %d %d %d %x %d %x %s\n", name,
+		    mode, version, minpoll, maxpoll, flags, ttl, keyid,
+		    keystr);
 #endif
 	len = strlen(name) + 1;
 	cp = (char *)emalloc(len);
@@ -923,7 +923,7 @@ readconf(
 	register int i;
 	char *token[NUMTOK];
 	u_long intval[NUMTOK];
-	int flags;
+	u_int flags;
 	char buf[MAXLINESIZE];
 	char *bp;
 
@@ -977,7 +977,7 @@ readconf(
 		}
 
 		if ((intval[TOK_FLAGS] & ~(FLAG_AUTHENABLE | FLAG_PREFER |
-				   FLAG_NOSELECT | FLAG_BURST | FLAG_SKEY))
+		    FLAG_NOSELECT | FLAG_BURST | FLAG_IBURST | FLAG_SKEY))
 		    != 0) {
 			msyslog(LOG_ERR, "invalid flags (%ld) in file %s",
 				intval[TOK_FLAGS], name);
@@ -993,6 +993,8 @@ readconf(
 		    flags |= CONF_FLAG_NOSELECT;
 		if (intval[TOK_FLAGS] & FLAG_BURST)
 		    flags |= CONF_FLAG_BURST;
+		if (intval[TOK_FLAGS] & FLAG_IBURST)
+		    flags |= CONF_FLAG_IBURST;
 		if (intval[TOK_FLAGS] & FLAG_SKEY)
 		    flags |= CONF_FLAG_SKEY;
 

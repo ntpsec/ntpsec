@@ -22,29 +22,25 @@ remote server or peer (IP class A, B and C), (b) the broadcast address
 of a local interface, (m) a multicast address (IP class D), or (r) a
 reference clock address (127.127.x.x). Note that some options are not
 supported by all these commands while autokey and burst modes are
-supported by these commands,
-their effect in some weird mode combinations can be meaningless
-or even destructive.
+supported by these commands, their effect in some weird mode
+combinations can be meaningless or even destructive.
 
 <dl>
 
-<dt><tt>peer <i>address</i> [key <i>key</i> | autokey | publickey
-<i>keyfile</i>] [burst] [version <i>version</i>] [prefer] [minpoll
-<i>minpoll</i>] [maxpoll <i>maxpoll</i>]</tt></dt>
+<dt><tt>peer <i>address</i> [key <i>key</i> | autokey] [version
+<i>version</i>] [prefer] [minpoll <i>minpoll</i>] [maxpoll
+<i>maxpoll</i>]</tt></dt>
 
-<p><dt><tt>server <i>address</i> [key <i>key</i> | autokey | publickey
-<i>keyfile</i>] [burst] [version <i>version</i>] [prefer] [minpoll
-<i>minpoll</i>] [maxpoll <i>maxpoll</i>] [publickey
-<i>keyfile</i>]</tt></dt>
+<p><dt><tt>server <i>address</i> [key <i>key</i> | autokey] [burst]
+[iburst] [version <i>version</i>] [prefer] [minpoll <i>minpoll</i>]
+[maxpoll <i>maxpoll</i>]</tt></dt>
 
-<p><dt><tt>broadcast <i>address</i> [key <i>key</i> | autokey] [burst]
-[version <i>version</i>] [minpoll <i>minpoll</i>] [maxpoll
-<i>maxpoll</i>] [ttl <i>ttl</i>]</tt></dt>
+<p><dt><tt>broadcast <i>address</i> [key <i>key</i> | autokey] [version
+<i>version</i>] [minpoll <i>minpoll</i>] [ttl <i>ttl</i>]</tt></dt>
 
-<p><dt><tt>manycastclient <i>address</i> [key <i>key</i> | autokey |
-publickey <i>keyfile</i>] [burst] [version <i>version</i>] [minpoll
-<i>minpoll</i> [maxpoll <i>maxpoll</i>] [ttl <i>ttl</i>] [publickey
-<i>file</i>]</tt></dt>
+<p><dt><tt>manycastclient <i>address</i> [key <i>key</i> | autokey]
+[version <i>version</i>] [minpoll <i>minpoll</i> [ttl
+<i>ttl</i>]</tt></dt>
 
 <p><dd>These four commands specify the time server name or address to
 be used and the mode in which to operate. The <i>address</i> can be
@@ -129,9 +125,13 @@ are discarded as if never heard.</dd>
 include authentication fields encrypted using the autokey scheme
 described in the <a href=authopt.htm>Authentication Options</a>
 page.</dd>
+
 <dt><tt>burst</tt></dt>
-<dd>At each poll interval, send a burst of eight packets spaced, instead
-of the usual one.</dd>
+<dd>At each poll interval, send a burst of eight packets spaced at 1-s
+intervals instead of the usual one.</dd>
+<dt><tt>iburst</tt></dt>
+<dd>At the first poll interval, send a burst of eight packets spaced at
+1-s intervals instead of the usual one.</dd>
 
 <dt><tt>key </tt><i><tt>key</tt></i></dt>
 <dd>All packets sent to and received from the server or peer are to
@@ -151,14 +151,6 @@ inclusive.</dd>
 host will be chosen for synchronization among a set of correctly
 operating hosts. See the <a href="prefer.htm">Mitigation Rules and the
 <tt>prefer</tt> Keyword </a>page for further information.</dd>
-
-<DT><TT>publickey <I>file</I></TT></DT>
-<DD>This command requires the NTP daemon build process be configured
-with the RSA library. The command specifies the name of the public key
-file for the server or peer. The default name for this file is
-<tt>ntpkey_<i>host</i></tt>, where <i>host</i> is the DNS canonical name
-of the server or peer. See the <a href=authopt.htm>Authentication
-Options</a> page for further information.</dd>
 
 <dt><tt>ttl <i>ttl</i></tt></dt>
 <dd>This option is used only with broadcast mode. It specifies the

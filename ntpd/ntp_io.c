@@ -116,8 +116,9 @@ u_long io_timereset;		/* time counters were reset */
 /*
  * Interface stuff
  */
-struct interface *any_interface;	/* pointer to default interface */
-struct interface *loopback_interface;	/* point to loopback interface */
+struct interface *any_interface;	/* default interface */
+struct interface *loopback_interface;	/* loopback interface */
+struct interface *mcast_interface;	/* multicast interface */
 static	struct interface inter_list[MAXINTERFACES];
 static	int ninterfaces;
 
@@ -241,6 +242,7 @@ create_sockets(
 	inter_list[0].sent = 0;
 	inter_list[0].notsent = 0;
 	inter_list[0].flags = INT_BROADCAST;
+	any_interface = &inter_list[0];
 
 #if _BSDI_VERSION >= 199510
 #if 	_BSDI_VERSION >= 199701
@@ -274,46 +276,32 @@ create_sockets(
 		if ((ifap->ifa_flags & IFF_UP) == 0)
 		    continue;
 
-		if (ifap->ifa_flags & IFF_LOOPBACK)
-		{
+		if (ifap->ifa_flags & IFF_LOOPBACK) {
 			sin = (struct sockaddr_in *)ifap->ifa_addr;
 			if (ntohl(sin->sin_addr.s_addr) != 0x7f000001)
-			{
 				continue;
-			}
 		}
-
 		inter_list[i].flags = 0;
 		if (ifap->ifa_flags & IFF_BROADCAST)
-		    inter_list[i].flags |= INT_BROADCAST;
-
-		(void)strcpy(inter_list[i].name, ifap->ifa_name);
-
+			inter_list[i].flags |= INT_BROADCAST;
+		strcpy(inter_list[i].name, ifap->ifa_name);
 		sin = (struct sockaddr_in *)ifap->ifa_addr;
 		inter_list[i].sin = *sin;
 		inter_list[i].sin.sin_port = port;
-
-		if (ifap->ifa_flags & IFF_LOOPBACK)
-		{
+		if (ifap->ifa_flags & IFF_LOOPBACK) {
 			inter_list[i].flags = INT_LOOPBACK;
 			if (loopback_interface == NULL
 			    || ntohl(sin->sin_addr.s_addr) != 0x7f000001)
 			    loopback_interface = &inter_list[i];
 		}
-
-		if (inter_list[i].flags & INT_BROADCAST)
-		{
+		if (inter_list[i].flags & INT_BROADCAST) {
 			sin = (struct sockaddr_in *)ifap->ifa_broadaddr;
 			inter_list[i].bcast = *sin;
 			inter_list[i].bcast.sin_port = port;
 		}
-
-		if (ifap->ifa_flags & (IFF_LOOPBACK|IFF_POINTOPOINT))
-		{
+		if (ifap->ifa_flags & (IFF_LOOPBACK|IFF_POINTOPOINT)) {
 			inter_list[i].mask.sin_addr.s_addr = 0xffffffff;
-		}
-		else
-		{
+		} else {
 			sin = (struct sockaddr_in *)ifap->ifa_netmask;
 			inter_list[i].mask = *sin;
 		}
@@ -613,10 +601,16 @@ create_sockets(
 	ninterfaces = i;
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
+
+	/*
+	 * There is a crock here. We set mcast_interface to the first
+	 * non-loopback interface.
+	 */
 	for (i = 0; i < ninterfaces; i++) {
-		inter_list[i].fd =
-		    open_socket(&inter_list[i].sin,
-				inter_list[i].flags & INT_BROADCAST, 0);
+		inter_list[i].fd = open_socket(&inter_list[i].sin,
+		    inter_list[i].flags & INT_BROADCAST, 0);
+		if (!(inter_list[i].flags & INT_LOOPBACK))
+			mcast_interface = &inter_list[i];
 	}
 
 	/*
@@ -653,13 +647,13 @@ create_sockets(
 	 */
 	resmask.sin_addr.s_addr = ~ (u_int32)0;
 	for (i = 1; i < ninterfaces; i++)
-	    hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
-			  RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
-
-	any_interface = &inter_list[0];
+		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
+		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
 #ifdef DEBUG
-	if (debug > 2) {
+	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);
+		printf("multicast %s\n",
+		    inet_ntoa(mcast_interface->sin.sin_addr));
 		for (i = 0; i < ninterfaces; i++) {
 			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x\n",
 			       i,
@@ -1131,7 +1125,7 @@ findbcastinter(
 		    return &inter_list[i];
 	}
 #endif /* SIOCGIFCONF */
-	return any_interface;
+	return mcast_interface;
 }
 
 
@@ -1172,13 +1166,6 @@ sendpkt(
 #else
 #define badaddrs ((struct cache *)0)		/* Only used in empty loops! */
 #endif
-
-	/*
-	 * check if the source address is a multicast address - replace
-	 * interface with any-interface if so.
-	 */
-	if (IN_MULTICAST(ntohl(inter->sin.sin_addr.s_addr)))
-	    inter = any_interface;
 #ifdef DEBUG
 	if (debug > 1)
 	    printf("%ssendpkt(fd=%d dst=%s, src=%s, ttl=%d, len=%d)\n",

@@ -425,7 +425,7 @@ u_long numasyncmsgs;		/* number of async messages we've sent */
 static struct ntp_control rpkt;
 static u_char	res_version;
 static u_char	res_opcode;
-static u_short	res_associd;
+static associd_t res_associd;
 static int	res_offset;
 static u_char * datapt;
 static u_char * dataend;
@@ -1860,7 +1860,7 @@ control_unspec(
 	 * doesn't exist.
 	 */
 	if (res_associd != 0) {
-		if ((peer = findpeerbyassoc((int)res_associd)) == 0) {
+		if ((peer = findpeerbyassoc(res_associd)) == 0) {
 			ctl_error(CERR_BADASSOC);
 			return;
 		}
@@ -1921,7 +1921,7 @@ read_status(
 			    sizeof(u_short), 1);
 		ctl_flushpkt(0);
 	} else {
-		peer = findpeerbyassoc((int)res_associd);
+		peer = findpeerbyassoc(res_associd);
 		if (peer == 0) {
 			ctl_error(CERR_BADASSOC);
 		} else {
@@ -2020,7 +2020,7 @@ read_variables(
 		 * Wants info for a particular peer. See if we know
 		 * the guy.
 		 */
-		peer = findpeerbyassoc((int)res_associd);
+		peer = findpeerbyassoc(res_associd);
 		if (peer == 0) {
 			ctl_error(CERR_BADASSOC);
 			return;
@@ -2209,7 +2209,7 @@ read_clock_status(
 			}
 		}
 	} else {
-		peer = findpeerbyassoc((int)res_associd);
+		peer = findpeerbyassoc(res_associd);
 		if (peer == 0 || !(peer->flags & FLAG_REFCLOCK)) {
 			ctl_error(CERR_BADASSOC);
 			return;

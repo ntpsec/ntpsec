@@ -308,7 +308,7 @@ findpeer(
  */
 struct peer *
 findpeerbyassoc(
-	associd_t assoc
+	u_int assoc
 	)
 {
 	register struct peer *peer;
@@ -511,7 +511,7 @@ peer_config(
 	int version,
 	int minpoll,
 	int maxpoll,
-	int flags,
+	u_int flags,
 	int ttl,
 	keyid_t key,
 	u_char *keystr
@@ -556,19 +556,10 @@ peer_config(
 		 * structure for him.
 		 */
 		peer = newpeer(srcadr, dstadr, hmode, version, minpoll,
-		    maxpoll, ttl, key);
+		    maxpoll, flags | FLAG_CONFIG, ttl, key);
 		if (peer == 0)
 			return (peer);
-		peer->flags |= flags | FLAG_CONFIG;
 	}
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "peer_config: %s mode %d vers %d min %d max %d flags 0x%04x ttl %d key %08x\n",
-		    ntoa(&peer->srcadr), peer->hmode, peer->version,
-		    peer->minpoll, peer->maxpoll, peer->flags, peer->ttl,
-		    peer->keyid);
-#endif
 #ifdef PUBKEY
 	if (!(peer->flags & FLAG_SKEY) || peer->hmode == MODE_BROADCAST)
 		return (peer);
@@ -591,8 +582,9 @@ newpeer(
 	int version,
 	int minpoll,
 	int maxpoll,
+	u_int flags,
 	int ttl,
-	u_long key
+	keyid_t key
 	)
 {
 	register struct peer *peer;
@@ -638,6 +630,7 @@ newpeer(
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)minpoll;
 	peer->maxpoll = (u_char)maxpoll;
+	peer->flags = flags;
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->minpoll;
 	peer->ttl = ttl;
@@ -648,7 +641,7 @@ newpeer(
 	peer->stratum = STRATUM_UNSPEC;
 	peer_clear(peer);
 	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINDPOLL) - 1));
+	peer->nextdate = peer->outdate + (RANDOM & ((1 << NTP_MINPOLL) - 1));
 
 	/*
 	 * Assign him an association ID and increment the system variable
@@ -698,8 +691,11 @@ newpeer(
 	assoc_hash_count[i]++;
 #ifdef DEBUG
 	if (debug)
-		printf("mobilize %u %d next %lu\n", peer->associd,
-		    peer_associations, peer->nextdate - peer->outdate);
+		printf(
+		    "newpeer: %s mode %d vers %d min %d max %d flags 0x%04x ttl %d key %08x\n",
+		    ntoa(&peer->srcadr), peer->hmode, peer->version,
+		    peer->minpoll, peer->maxpoll, peer->flags, peer->ttl,
+		    peer->keyid);
 #endif
 	return peer;
 }
@@ -745,20 +741,6 @@ peer_unconfig(
 		peer = findexistingpeer(srcadr, peer, mode);
 	}
 	return num_found;
-}
-
-/*
- * peer_copy_manycast - copy manycast peer variables to new association
- *   (right now it simply copies the transmit timestamp)
- */
-void
-peer_config_manycast(
-	struct peer *peer1,
-	struct peer *peer2
-	)
-{
-	peer2->cast_flags = MDF_ACAST;
-	peer2->xmt = peer1->xmt;
 }
 
 /*

@@ -1,3 +1,23 @@
+2000-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_request.c: 
+	* ntpd/ntp_proto.c: 
+	* ntpd/ntp_peer.c: 
+	* ntpd/ntp_io.c: 
+	* ntpd/ntp_intres.c: 
+	* ntpd/ntp_crypto.c (make_keylist): 
+	* ntpd/ntp_control.c: 
+	* ntpd/ntp_config.c (CONF_MOD_IBURST, save_resolve): 
+	* include/ntpd.h (findpeerbyassoc, newpeer, peer_config, *_interface): 
+	* include/ntp_request.h (CONF_FLAG_IBURST): 
+	* include/ntp_crypto.h (crypto_xmit, make_keylist): 
+	* include/ntp.h (FLAG_IBURST): 
+	* html/release.htm: 
+	* html/confopt.htm: 
+	* html/assoc.htm: 
+	Add iburst option, fix broadcast/multicast and some types.
+	From: Dave Mills
+
 2000-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/Makefile.am (bin_SCRIPTS): Install ntp-wait

@@ -178,7 +178,8 @@ session_key(
  */
 void
 make_keylist(
-	struct peer *peer	/* peer structure pointer */
+	struct peer *peer,	/* peer structure pointer */
+	struct interface *dstadr /* interface */
 	)
 {
 	struct autokey *ap;	/* autokey pointer */
@@ -224,8 +225,8 @@ make_keylist(
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
 	ltemp = sys_automax;
-	peer->hcookie = session_key(&peer->dstadr->sin, &peer->srcadr,
-	    0, sys_private, 0);
+	peer->hcookie = session_key(&dstadr->sin, &peer->srcadr, 0,
+	    sys_private, 0);
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -233,9 +234,8 @@ make_keylist(
 	for (i = 0; i < NTP_MAXSESSION; i++) {
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
-		keyid = session_key(&peer->dstadr->sin, (peer->hmode ==
-		    MODE_BROADCAST) ? &peer->dstadr->bcast :
-		    &peer->srcadr, keyid, cookie, ltemp);
+		keyid = session_key(&dstadr->sin, &peer->srcadr, keyid,
+		    cookie, ltemp);
 		ltemp -= 1 << peer->kpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
 		    ltemp <= (1 << (peer->kpoll + 1)))
@@ -817,7 +817,7 @@ crypto_xmit(
 	int start,		/* offset to extension field */
 	u_int code,		/* extension field code */
 	keyid_t cookie,		/* session cookie */
-	associd_t associd	/* association ID */
+	u_int associd		/* association ID */
 	)
 {
 	struct peer *peer;	/* peer structure pointer */

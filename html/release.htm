@@ -51,23 +51,15 @@ in such cases was clamped to the minimum, usually 64 s. For those
 servers with hundreds of clients, the new design can dramatically reduce
 the network load.</LI>
 
-<P><LI>A <A HREF=assoc.htm>burst-mode</A> feature is available which
-results in good accuracy with intermittent connections typical of PPP
-and ISDN services. When enabled, at each poll interval the server sends
-eight messages over the next 30-s interval and processes them in a
-batch. However, the interval between the first and subsequent messages
-is about 20 s in order for a dialup modem to complete the call. Outlyers
-due to initial dial-up delays, etc., are avoided and the server
-synchronizes with its peer generally within 30 s.</LI>
-
-<P><LI>In addition to the NTPv3 authentication scheme, which uses
-private-key cryptography, a new NTPv4 <A HREF=authopt.htm>autokey
-</A>authentication scheme is available. Autokey uses public-key
-technology and avoids the need to distribute keys by separate means. The
-design is such that full accuracy is available without degradation due
-to processing demands of the public-key routines. It can be used in any
-of the NTP association modes, but is most useful in broadcast/multicast
-modes.</LI>
+<P><LI>There are two <A HREF=assoc.htm>burst-mode</A> features available
+where special conditions apply. One of these is enabled by the
+<tt>iburst</tt> keyword in the <tt>server</tt> configuration command. It
+is intended for cases where it is important to set the clock quickly
+when an association is first mobilized. The other is enabled by the
+<tt>burst</tt> keyword in the <tt>server</tt> configuration command. It
+is intended for cases where the network attachment requires an initial
+calling or training procedure. See the <A HREF=assoc.htm>Association
+Management</a> page for further information.
 
 <P><LI>NTPv4 includes two new association modes which in most
 applications can avoid per-host configuration altogether. Both of these
@@ -137,7 +129,6 @@ note the NTP authentication routines use the interface defined in the
 <P><LI>The enable and disable commands have a few changes in their
 arguments see the <TT>ntpd</TT> <A HREF=confopt.htm>Configuration
 Options</A> page for details.</LI>
-
 <P><LI>The scheme for enabling the <TT>ppsclock</TT> line
 discipline/streams module has changed. Formerly, it was enabled by
 setting <TT>fudge flag3</TT> for the serial port connected to the PPS
@@ -187,7 +178,8 @@ kernel</TT> command either in the configuration file or via
 <TT>ntpdc</TT>.</LI>
 
 <p><li>A new pulse-per-second (PPS) generic interface described in <a
-href=http://www.eecis.udel.edu/~mills/reports.htm>Mogul, J., D. Mills, J.
+href=http://www.eecis.udel.edu/~mills/reports.htm>Mogul, J., D. Mills,
+J.
 Brittenson, J. Stone and U. Windl. Pulse-per-second API for Unix-like
 operating systems, version 1. Request for Comments RFC-2783, Internet
 Engineering Task Force, March 2000, 31 pp</a> is supported. Older

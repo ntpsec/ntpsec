@@ -50,11 +50,11 @@
  */
 extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
 extern	int	crypto_xmit	P((u_int32 *, int, u_int, keyid_t,
-				    associd_t));
+				    u_int));
 extern	keyid_t	session_key	P((struct sockaddr_in *, struct
 				    sockaddr_in *, keyid_t, keyid_t,
 				    u_long));
-extern	void	make_keylist	P((struct peer *));
+extern	void	make_keylist	P((struct peer *, struct interface *));
 extern	void	key_expire	P((struct peer *));
 extern	void	crypto_agree	P((void));
 #ifdef PUBKEY

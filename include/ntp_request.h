@@ -532,11 +532,12 @@ struct conf_peer {
 	char keystr[MAXFILENAME]; /* public key file name*/
 };
 
-#define	CONF_FLAG_AUTHENABLE	0x1
-#define CONF_FLAG_PREFER	0x2
-#define CONF_FLAG_BURST		0x4
-#define CONF_FLAG_NOSELECT	0x8
-#define CONF_FLAG_SKEY		0x10
+#define	CONF_FLAG_AUTHENABLE	0x01
+#define CONF_FLAG_PREFER	0x02
+#define CONF_FLAG_BURST		0x04
+#define CONF_FLAG_IBURST	0x08
+#define CONF_FLAG_NOSELECT	0x10
+#define CONF_FLAG_SKEY		0x20
 
 /*
  * Structure for passing peer deletion information.  Currently

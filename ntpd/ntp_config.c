@@ -154,12 +154,13 @@ extern int priority_done;
 #define CONF_MOD_MAXPOLL	4
 #define CONF_MOD_PREFER		5
 #define CONF_MOD_BURST		6
-#define CONF_MOD_SKEY		7
-#define CONF_MOD_TTL		8
-#define CONF_MOD_MODE		9
-#define CONF_MOD_NOSELECT 	10
+#define CONF_MOD_IBURST		7
+#define CONF_MOD_SKEY		8
+#define CONF_MOD_TTL		9
+#define CONF_MOD_MODE		10
+#define CONF_MOD_NOSELECT 	11
 #ifdef PUBKEY
-#define CONF_MOD_PUBLICKEY	11
+#define CONF_MOD_PUBLICKEY	12
 #endif /* PUBKEY */
 
 /*
@@ -282,6 +283,7 @@ static	struct keyword keywords[] = {
 static	struct keyword mod_keywords[] = {
 	{ "autokey",		CONF_MOD_SKEY },
 	{ "burst",		CONF_MOD_BURST },
+	{ "iburst",		CONF_MOD_IBURST },
 	{ "key",		CONF_MOD_KEY },
 	{ "maxpoll",		CONF_MOD_MAXPOLL },
 	{ "minpoll",		CONF_MOD_MINPOLL },
@@ -509,7 +511,7 @@ static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
 static	int gettokens P((FILE *, char *, char **, int *));
 static	int matchkey P((char *, struct keyword *));
 static	int getnetnum P((const char *, struct sockaddr_in *, int));
-static	void save_resolve P((char *, int, int, int, int, int, int,
+static	void save_resolve P((char *, int, int, int, int, u_int, int,
     keyid_t, u_char *));
 static	void do_resolve_internal P((void));
 static	void abort_resolve P((void));
@@ -715,7 +717,7 @@ getconfig(
 	keyid_t peerkey;
 	u_char *peerkeystr;
 	u_long fudgeflag;
-	int peerflags;
+	u_int peerflags;
 	int hmode;
 	struct sockaddr_in peeraddr;
 	struct sockaddr_in maskaddr;
@@ -1100,6 +1102,10 @@ getconfig(
 				case CONF_MOD_BURST:
 				    peerflags |= FLAG_BURST;
 				    break;
+
+				case CONF_MOD_IBURST:
+				    peerflags |= FLAG_IBURST;
+				    break;
 #ifdef AUTOKEY
 				case CONF_MOD_SKEY:
 				    peerflags |= FLAG_SKEY |
@@ -1160,10 +1166,9 @@ getconfig(
 			    }
 	
 			} else if (errflg == -1) {
-				save_resolve(tokens[1], hmode,
-				    peerversion, minpoll, maxpoll,
-				    peerflags, ttl, peerkey,
-				    peerkeystr);
+				save_resolve(tokens[1], hmode, peerversion,
+				    minpoll, maxpoll, peerflags, ttl,
+				    peerkey, peerkeystr);
 			}
 			break;
 
@@ -1255,20 +1260,10 @@ getconfig(
 			} else
 			    proto_config(PROTO_MULTICAST_ADD,
 					 htonl(INADDR_NTP), 0.);
-			if (tok == CONFIG_MULTICASTCLIENT) {
+			if (tok == CONFIG_MULTICASTCLIENT)
 				sys_bclient = 1;
-#ifdef DEBUG
-				if (debug)
-				    printf("sys_bclient\n");
-#endif /* DEBUG */
-			}
-			else if (tok == CONFIG_MANYCASTSERVER) {
+			else if (tok == CONFIG_MANYCASTSERVER)
 				sys_manycastserver = 1;
-#ifdef DEBUG
-				if (debug)
-				    printf("sys_manycastserver\n");
-#endif /* DEBUG */
-			}
 			break;
 
 		    case CONFIG_AUTHENTICATE:
@@ -1801,10 +1796,9 @@ getconfig(
 					break;
 				}
 			}
-			if (!errflg) {
+			if (!errflg)
 				filegen_config(filegen, tokens[peerversion],
-					       (u_char)peerkey, (u_char)peerflags);
-			}
+			           (u_char)peerkey, (u_char)peerflags);
 			break;
 
 		    case CONFIG_SETVAR:
@@ -2340,7 +2334,7 @@ save_resolve(
 	int version,
 	int minpoll,
 	int maxpoll,
-	int flags,
+	u_int flags,
 	int ttl,
 	keyid_t keyid,
 	u_char *keystr
@@ -2388,7 +2382,7 @@ save_resolve(
 	    mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("config: %s %d %d %d %d %d %d %08x %s\n", name, mode,
+		printf("config: %s %d %d %d %d %x %d %08x %s\n", name, mode,
 		    version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #endif
 

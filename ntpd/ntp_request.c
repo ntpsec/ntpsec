@@ -1134,7 +1134,7 @@ do_conf(
 	struct req_pkt *inpkt
 	)
 {
-	int fl;
+	u_int fl;
 	register struct conf_peer *cp;
 	register int items;
 	struct sockaddr_in peeraddr;
@@ -1156,8 +1156,9 @@ do_conf(
 		    && cp->hmode != MODE_CLIENT
 		    && cp->hmode != MODE_BROADCAST)
 		    fl = 1;
-		if (cp->flags & ~(CONF_FLAG_AUTHENABLE | CONF_FLAG_PREFER
-		      | CONF_FLAG_NOSELECT | CONF_FLAG_BURST | CONF_FLAG_SKEY))
+		if (cp->flags & ~(CONF_FLAG_AUTHENABLE | CONF_FLAG_PREFER |
+		    CONF_FLAG_NOSELECT | CONF_FLAG_BURST | CONF_FLAG_IBURST |
+		    CONF_FLAG_SKEY))
 		    fl = 1;
 		cp++;
 	}
@@ -1197,13 +1198,15 @@ do_conf(
 	while (items-- > 0) {
 		fl = 0;
 		if (cp->flags & CONF_FLAG_AUTHENABLE)
-		    fl |= FLAG_AUTHENABLE;
+			fl |= FLAG_AUTHENABLE;
 		if (cp->flags & CONF_FLAG_PREFER)
-		    fl |= FLAG_PREFER;
+			fl |= FLAG_PREFER;
 		if (cp->flags & CONF_FLAG_NOSELECT)
-		    fl |= FLAG_NOSELECT;
+			fl |= FLAG_NOSELECT;
 		if (cp->flags & CONF_FLAG_BURST)
-		    fl |= FLAG_BURST;
+			fl |= FLAG_BURST;
+		if (cp->flags & CONF_FLAG_IBURST)
+			fl |= FLAG_IBURST;
 		if (cp->flags & CONF_FLAG_SKEY)
 			fl |= FLAG_SKEY;
 		peeraddr.sin_addr.s_addr = cp->peeraddr;
@@ -1270,13 +1273,13 @@ dns_a(
 	}
 
 	while (items-- > 0) {
-		u_short associd;
+		associd_t associd;
 		size_t hnl;
 		struct peer *peer;
 		int bogon = 0;
 
 		associd = dp->associd;
-		peer = findpeerbyassoc((int)associd);
+		peer = findpeerbyassoc(associd);
 		if (peer == 0 || peer->flags & FLAG_REFCLOCK) {
 			msyslog(LOG_ERR, "dns_a: %s",
 				(peer == 0)
@@ -1420,7 +1423,7 @@ setclr_flags(
 	u_long set
 	)
 {
-	register u_long flags;
+	register u_int flags;
 
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
 		msyslog(LOG_ERR, "setclr_flags: err_nitems > 1");
@@ -1433,7 +1436,7 @@ setclr_flags(
 	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
 		      SYS_FLAG_FILEGEN)) {
-		msyslog(LOG_ERR, "setclr_flags: extra flags: %#lx",
+		msyslog(LOG_ERR, "setclr_flags: extra flags: %#x",
 			flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE | 
 				  SYS_FLAG_NTP | SYS_FLAG_KERNEL |
 				  SYS_FLAG_MONITOR | SYS_FLAG_FILEGEN));
