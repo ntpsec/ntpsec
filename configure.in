@@ -2837,7 +2837,7 @@ AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
       *-*-linux*)
 	 ans=yes
 	 ;;
-      *-*-solaris2.[[01]]*)
+      *-*-solaris2.[[01]])
 	 ans=no
 	 ;;
       *-*-solaris2*)
@@ -3245,7 +3245,10 @@ case "$host" in
  *-*-solaris2*)
     # DLM says tickadj is a no-no starting with solaris2.5
     case "$host" in
-     *-*-solaris2.[0-4]*) ;;
+     *-*-solaris2.1[[0-9]]*)
+	ac_cv_make_tickadj=no
+	;;
+     *-*-solaris2.[[0-4]]*) ;;
      *) ac_cv_make_tickadj=no ;;
     esac
     ;;
@@ -3402,6 +3405,9 @@ AC_CACHE_CHECK(if we should step and slew the time, ac_cv_var_step_slew,
       *-*-ptx*)
 	 ans=yes
 	 ;;
+      *-*-solaris2.1[[0-9]]*)
+	 ans-no
+	 ;;
       *-*-solaris2.[[012]]*)
 	 ans=yes
 	 ;;
@@ -3511,6 +3517,9 @@ AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
     [ans=$enableval],
     [case "$host" in
      *-*-solaris2.[[89]])
+	ans=yes
+	;;
+     *-*-solaris2.1[[0-9]]*)
 	ans=yes
 	;;
      *) ans=no

@@ -16,6 +16,8 @@
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 # include <stdarg.h>
+#else
+# include <varargs.h>
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
