@@ -856,7 +856,6 @@ io_multicast_add(
 
 #ifdef HAVE_IPV6
 	struct ipv6_mreq mreq6;
-	u_int8_t haddr6[16];
 	struct in6_addr iaddr6;
 	struct sockaddr_in6 *sin6p;
 #endif /* HAVE_IPV6 */
@@ -933,7 +932,6 @@ io_multicast_add(
 	case AF_INET6 :
 
 		iaddr6 = ((struct sockaddr_in6*)&addr)->sin6_addr;
-		memcpy(&haddr6, &(((struct sockaddr_in6*)&addr)->sin6_addr.s6_addr), sizeof(struct in6_addr));
 		if (!IN6_IS_ADDR_MULTICAST(&iaddr6)) {
 			msyslog(LOG_ERR,
 			    "address %s not IPv6 multicast address",

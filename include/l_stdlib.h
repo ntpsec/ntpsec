@@ -10,8 +10,6 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
