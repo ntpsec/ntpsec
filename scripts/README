@@ -1,4 +1,4 @@
-README file for directory ./scripts of the NTP Version 3 distribution
+README file for directory ./scripts of the NTP Version 4 distribution
 
 This directory contains shell and perl script files for the configuration,
 monitoring and support of NTP installations. See the README and RELNOTES
