@@ -60,17 +60,19 @@ selected file names.</p>
 
 <p>Running the program as other than root and using the Unix <tt>
 su</tt> command to assume root may not work properly, since by
-default the OpenSSL library looks for the random seed file in the
-user home directory. However, installing the keys as root might not
-work in NFS-mounted file systems, as NFS clients may not be able to
-write to the shared keys directory, even as root. NFS clients
-should run the program as root or some other user and save the key
-files in a writable directory that can be read directly or
-indirectly by the NFS server. The NFS server can then copy them to
-the shared keys directory. Since the <tt>ntp-genkeys</tt> program
-does not write the random seed file, it is convenient to define the
-<tt>$RANDFILE</tt> environment variable used by the OpenSSL library
-as the path to the random seed file.</p>
+default the OpenSSL library looks for the random seed file <tt>
+.rnd</tt> in the user home directory. However, there should be only
+one <tt>.rnd</tt>, most conveniently in the root directory, so it
+is convenient to define the <tt>$RANDFILE</tt> environment variable
+used by the OpenSSL library as the path to <tt>/.rnd.</tt></p>
+
+<p>Installing the keys as root might not work in NFS-mounted shared
+file systems, as NFS clients may not be able to write to the shared
+keys directory, even as root. In this case, NFS clients can specify
+the files in another directory such as <tt>/etc</tt> using the <tt>
+keysdir</tt> command. There is no need for one client to read the
+keys and certificates of another client or the server, as these
+values are obtained by the Autokey protocol during operation.</p>
 
 <h4>File Naming Conventions</h4>
 
@@ -181,30 +183,20 @@ OpenSSL software library provides routines that can automate this
 process. The reader is referred to the OpenSSL documentation for
 further details.</p>
 
-<p>The <tt>ntp-genkeys</tt> program generates a X.509 public
-certificate request in a file named <tt>
-ntpkey_<i>digestname</i>req_<i>hostname</i>.<i>filestamp</i></tt>,
+<p>The <tt>ntp-genkeys</tt> program generates a X.509 Version 3
+public certificate in a file named <tt>
+ntpkey_<i>digestname</i>cert_<i>hostname</i>.<i>filestamp</i></tt>,
 where <i>digestname</i> is the name of the digest/signature scheme.
-This file is not used by the current Autokey version, but might be
-useful in related applications. The file contains only public
-values and can be freely transmitted and stored anywhere without
-further cryptographic protection. The NTP daemon expects this file
-with name <tt>ntpkey_req_<i>hostname</i></tt>, so a soft link is
-needed to direct this name to the particular file name generated.
-Where security considerations require, this file can be transmitted
-to a trusted certificate authority (CA) and returned as a signed
-public certificate for use in the Autokey protocol.</p>
-
-<p>For convenience, the <tt>ntp-genkeys</tt> program also generates
-a self-signed X.509 public certificate in a file named <tt>
-ntpkey_<i>digestname</i>cert_<i>hostname</i>.<i>filestamp</i></tt>.
 The file contains only public values and can be freely transmitted
 and stored anywhere without further cryptographic protection. The
 NTP daemon expects this file with name <tt>
 ntpkey_cert_<i>hostname</i></tt>, so a soft link is needed to
-direct this name to the particular file name used. This file can be
-used in lieu of a CA certificate and has compatible encoding and
-content.</p>
+direct this name to the particular file name generated. The Autokey
+protocol includes provisions to retrieve the server certificate and
+to have the server sign and return the client certificate. Where
+security considerations require, certificates can be transmitted to
+a trusted certificate authority (CA) and returned as a signed
+public certificate for use in the Autokey protocol.</p>
 
 <p>The Autokey protocol supports all digest/signature schemes
 available in the OpenSSL library, including those using the MD2,
