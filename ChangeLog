@@ -1,5 +1,8 @@
 2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Limit the DECL_HSTRERROR_0 to aix4.3.*.  RSN, we
+	could also limit it to xlc...
+
 	* configure.in: 4.0.99k25
 
 	* html/leap.htm: Added.

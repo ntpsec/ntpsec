@@ -773,7 +773,7 @@ case "$ac_cv_decl_syscall" in
 esac
 
 case "$target" in
- *-*-aix*)
+ *-*-aix4.3.*)
     AC_DEFINE(DECL_HSTRERROR_0)		# Needed for XLC under AIX 4.3.2
     ;;
  *-*-osf[[45]]*)

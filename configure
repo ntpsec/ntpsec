@@ -10673,7 +10673,7 @@ EOF
 esac
 
 case "$target" in
- *-*-aix*)
+ *-*-aix4.3.*)
     cat >>confdefs.h <<\EOF
 #define DECL_HSTRERROR_0 1
 EOF
