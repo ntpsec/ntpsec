@@ -22,39 +22,36 @@ system version seems to be different than any other. The device
 drivers may be different, the input/output system may be
 idiosyncratic and the libraries may have different semantics. It is
 not possible in a software distribution such as this one to support
-every individual sysdtem with a common set of binaries, even with
+every individual system with a common set of binaries, even with
 the same system but different versions. Therefore, it is necessary
-to configure each system individually for each system and version,
-both at compile time and at run time. In almost all cases, these
-procedures are completely automatic and all the newbie user need do
-is type "make" and the autoconfigure system does the rest. There
-are some exceptions, as noted below.</p>
+to individually configure the software build for each system and
+version, both at compile time and at run time. In almost all cases,
+these procedures are completely automatic and all the newbie user
+need do is type "configure", "make" and "install" in that order and
+the autoconfigure system does the rest. There are some exceptions,
+as noted below.</p>
 
 <p>Some programs included in this distribution use cryptographic
 algorithms to verify server authenticity and credentials. As
 required by the International Trade in Arms Regulations (ITAR), now
 called the Defense Trade Regulations (DTR), certain cryptographic
 products and media, including the Data Encryption Standard (DES),
-cannot be exported without per-instance license. For this reason,
-the DES encryption routine has been removed from the the current
-version, even though it is used only to compute a message digest.
-Current DTR regulations allow export of the the MD5 message digest
-routine, which is in fact the preferred algorithm, and this is
-included in the current version.</p>
+cannot be exported without per-instance license. In order to
+simplify software distribution and export without requiring a
+license, the cryptographic routines used by NTPv4 use a
+cryptographic library obtainable from other sources. Formerly, the
+library was based on the rsaref2.0 library available from RSA
+Laboratories, but has been replaced by the OpenSSL library
+available from <a href="http://www.openssl.org">
+http://www.openssl.org</a>. This library is faster, has more
+functionality and is available in most countries of the world.</p>
 
-<p>The NTP authentication routines conform to the interface used by
-RSA Laboratories in the <tt>rsaref20.zip</tt> package, which was
-formerly downloadable from <tt>ftp.rsa.com</tt> or via the web at
-<tt>www.rsa.com</tt>, but this may no longer be the case. Outside
-the US and Canada, the functionally identical <tt>rsaeuro.zip</tt>
-package is available from J.S.A. Kapp and other sources. The
-recommended way to integrate the routines in either package with
-the NTP build procedures is to uncompress and extract the <tt>
-rsaref20</tt> files in a top level directory with that name. Then
-install a link to that directory from <tt>rsaref2</tt> in the top
-level directory of the distribution. Use <tt>rsaeuro1</tt> instead
-for that distribution. These steps must be completed
-before the configuration process described below.</p>
+<p>The OpenSSL library must be built and installed prior to
+building NTPv4. The procedures for doing that are included in the
+OpenSSL documentation. The library is found during the normal NTPv4
+configure phase and the interface routines compiled automatically.
+Only the <tt>libcrypto.a</tt> library and associated header files
+are used.</p>
 
 <h4>Building and Installing under Unix</h4>
 

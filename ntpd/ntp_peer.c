@@ -10,9 +10,9 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
-#ifdef AUTOKEY
+#ifdef OPENSSL
 #include "ntp_crypto.h"
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 /*
  *                  Table of valid association combinations
@@ -597,7 +597,7 @@ newpeer(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "newpeer: %s->%s mode %d vers %d poll %d %d flags %x %x ttl %d key %08x\n",
+		    "newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
 		    ntoa(&peer->dstadr->sin), ntoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
@@ -700,7 +700,7 @@ peer_all_reset(void)
 }
 
 
-#ifdef AUTOKEY
+#ifdef OPENSSL
 /*
  * expire_all - flush all crypto data and update timestamps.
  */
@@ -718,30 +718,28 @@ expire_all(void)
 	 * everything. Then, recompute and sign the agreement public
 	 * value, if present.
 	 */
+	if (!crypto_flags)
+		return;
 	for (n = 0; n < HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (peer->cast_flags & MDF_ACAST) {
 				peer_clear(peer);
-#ifdef AUTOKEY
 			} else {
 				key_expire(peer);
-				peer->pcookie.tstamp = 0;
-#endif /* AUTOKEY */
+				peer->cookval.tstamp = 0;
 			}
 				
 		}
 	}
 	sys_private = (u_int32)RANDOM & 0xffffffff;
-#ifdef PUBKEY
-	crypto_agree();
-#endif /* PUBKEY */
+	crypto_sign();
 #ifdef DEBUG
 	if (debug)
 		printf("expire_all: at %lu\n", current_time);
 #endif
 }
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 
 /*

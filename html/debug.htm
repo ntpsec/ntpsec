@@ -61,33 +61,32 @@ see.</p>
 <p>Some problems are immediately apparent when the daemon first
 starts running. The most common of these are the lack of a UDP port
 for NTP (123) in the Unix <tt>/etc/services</tt> file (or
-equivalent in some systems). Note that NTP does not use TCP in any
-form. Other problems are apparent in the system log file. The log
-file should show the startup banner, some cryptic initialization
-data and the computed precision value. The next most common problem
-is incorrect DNS names. Check that each DNS name used in the
-configuration file exists and that the address responds to the Unix
-<tt>ping</tt> command.</p>
+equivalent in some systems). <b>Note that NTP does not use TCP in
+any form.</b> Other problems are apparent in the system log file.
+The log file should show the startup banner, some cryptic
+initialization data and the computed precision value. The next most
+common problem is incorrect DNS names. Check that each DNS name
+used in the configuration file exists and that the address responds
+to the Unix <tt>ping</tt> command.</p>
 
 <p>When first started, the daemon normally polls the servers listed
 in the configuration file at 64-s intervals. In order to allow a
 sufficient number of samples for the NTP algorithms to reliably
-discriminate between correctly operating servers and possible
-intruders, at least four valid messages from the majority of
-servers and peers listed in the configuration file is required
-before the daemon can set the local clock. However, if the
-difference between the client time and server time is greater than
-the panic threshold, which defaults to 1000 s, the daemon will send
-a message to the system log and shut down without setting the
-clock. It is necessary to set the local clock to within the panic
-threshold first, either manually by eyeball and wristwatch and the
-Unix <tt>date</tt> command, or by the <tt>ntpdate</tt> or <tt>ntpd
--q</tt> commands. The panic threshold can be changed by the <tt>
-tinker panic</tt> command discribed on the <a href="miscopt.htm">
-Miscellaneous Options</a> page. The panic threshold can be disabled
-entirely by the <tt>-g</tt> command line option described on the <a
-href="ntpd.htm">ntpd - Network Time Protocol (NTP) daemon</a>
-page.</p>
+discriminate between truechimer servers and possible falsetickers,
+at least four valid messages from the majority of servers and peers
+listed in the configuration file is required before the daemon can
+set the local clock. However, if the difference between the client
+time and server time is greater than the panic threshold, which
+defaults to 1000 s, the daemon will send a message to the system
+log and shut down without setting the clock. It is necessary to set
+the local clock to within the panic threshold first, either
+manually by eyeball and wristwatch and the Unix <tt>date</tt>
+command, or by the <tt>ntpdate</tt> or <tt>ntpd -q</tt> commands.
+The panic threshold can be changed by the <tt>tinker panic</tt>
+command discribed on the <a href="miscopt.htm">Miscellaneous
+Options</a> page. The panic threshold can be disabled entirely by
+the <tt>-g</tt> command line option described on the <a href=
+"ntpd.htm">ntpd - Network Time Protocol (NTP) daemon</a> page.</p>
 
 <p>If the difference between local time and server time is less
 than the panic threshold but greater than the step threshold, which
@@ -402,26 +401,85 @@ kernel continuously disciplines the frequency so that the residual
 correction produced by <tt>ntpd</tt> is usually less than a few
 milliseconds.</p>
 
+<h4>Cryptographic Authentication</h4>
+
+<p>Reliable source authentication requires the use of symmetric key
+or public key cryptography, as described on the <a href=
+"authopt.htm">Authentication Options</a> page. In symmetric key
+cryptography servers and clients share secret keys contained in a
+key file In public key cryptography, which requires the OpenSSL
+software library, the server has a private key, never shared, and a
+public key with unrestricted distribution. The cryptographic media
+required are produced by the <a href="genkeys.htm">
+,<tt>ntp-genkeys</tt></a> program.</p>
+
+<p>Problems with symmetric key authentication are usually due to
+mismatched keys or improper use of the <tt>trustedkey</tt> command.
+A simple way to check for problems is to use the trace facility,
+which is enabled using the <tt>ntpd -d</tt> command line. As each
+packet is received a trace line is displayed which shows the
+authentication status in the <tt>auth</tt> field. A status of 1
+indicates the packet was successful authenticated; otherwise it has
+failed.</p>
+
+<p>A common misconception is the implication of the <tt>auth</tt>
+bit in the <tt>enable</tt> and <tt>disable</tt> commands. This bit
+does not affect authentication in any way other than to enable or
+disable mobilization of a new persistent association in
+broadcast/multicast client, manycast client or symmetric passive
+modes. If enabled, which is the default, these associations require
+authentication; if not, an association is mobilized even if not
+authenticated. Users are cautioned that running with authentication
+disabled is very dangerous, since an intruder can easily strike up
+an association and inject false time values.</p>
+
+<p>Public key cryptography is supported in NTPv4 uses the Autokey
+protocol, which is described in an Internet Draft. Development of
+this protocol is ongoing and likely to evolve in various ways.
+However, Autokey version 2, which is the latest and current
+version, is a maturing product. Further details of the protocol are
+on the <a href="authopt.htm">Authentication Options</a> page.
+Common problems with configuration and key generation are
+mismatched key files, broken links and missing or broken random
+seed file.</p>
+
+<p>As in the symmetric key cryptography case, the trace facility is
+a good way to verify correct operation. The daemon requires a
+random seed bile, correct public/private key file and a valid
+certificate file; otherwise it exits immediately with a message to
+the system log. As each file is loaded a trace message appears with
+its filestamp. There are a number of checks to insure that only
+consistent data are used and that the certificate is valid. When
+the protocol is in operation a number of checks are done to verify
+the server has the expected credentials and its filestamps and
+timestamps are consistent. Errors found are reported using NTP
+control and monitoring protocol traps with extended trap codes
+shown in the Authentication Options page.</p>
+
+<p>To assist debugging every NTP extension field is displayed in
+the trace along with the Autokey operation code. Every extension
+field carrying a verified signature is identified and displayed
+along with filestamp and timestamp where meaningful. In all except
+broadcast/multicast client mode, correct operation of the protocol
+is confirmed by the absence of extension fields and an <tt>
+auth</tt> value of one. It is normal in broadcast/multicast client
+mode that the broadcast server use one extension field to show the
+host name, status word and association ID.</p>
+
 <h4>Debugging Checklist</h4>
 
-If the <tt>ntpq</tt> or <tt>ntpdc</tt> programs do not show that
+<p>If the <tt>ntpq</tt> or <tt>ntpdc</tt> programs do not show that
 messages are being received by the daemon or that received messages
-do not result in correct synchronization, verify the following: 
+do not result in correct synchronization, verify the following:</p>
 
 <ol>
-<li style="list-style: none"></li>
-
 <li>Verify the <tt>/etc/services</tt> file host machine is
 configured to accept UDP packets on the NTP port 123. NTP is
 specifically designed to use UDP and does not respond to TCP.</li>
 
-<li style="list-style: none"></li>
-
 <li>Check the system log for <tt>ntpd</tt> messages about
 configuration errors, name-lookup failures or initialization
 problems.</li>
-
-<li style="list-style: none"></li>
 
 <li>Verify using <tt>ping</tt> or other utility that packets
 actually do make the round trip between the client and server.
@@ -437,16 +495,12 @@ received counter does not increment, something may be wrong in the
 network or the server NTP daemon may not be running or the server
 itself may be down or not responding.</li>
 
-<li style="list-style: none"></li>
-
 <li>If both the sent and received counters do increment, but the
 <tt>reach</tt> values in the <tt>pe</tt> billboard with <tt>
 ntpq</tt> continues to show zero, received packets are probably
 being discarded for some reason. If this is the case, the cause
 should be evident from the <tt>flash</tt> variable as discussed
 above and on the <tt>ntpq</tt> page.</li>
-
-<li style="list-style: none"></li>
 
 <li>If the <tt>reach</tt> values in the <tt>pe</tt> billboard show
 the servers are alive and responding, note the tattletale symbols
@@ -458,8 +512,6 @@ reachable server candidates should show a * tattletale symbol. If
 this doesn't happen, the intersection algorithm, which classifies
 the servers as truechimers or falsetickers, may be unable to find a
 majority of truechimers among the server population.</li>
-
-<li style="list-style: none"></li>
 
 <li>If all else fails, see the FAQ and/or the discussion and
 briefings at <a href="http://www.eecis.udel.edu/~mills/ntp.htm">

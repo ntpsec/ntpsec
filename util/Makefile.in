@@ -118,13 +118,14 @@ install_sh = @install_sh@
 
 
 AUTOMAKE_OPTIONS = ansi2knr
-bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-genkeys
+#bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-genkeys
+bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ genkeys
 EXTRA_PROGRAMS = byteorder hist jitter kern longsize ntptime \
 precision sht testrs6000 tickadj timetrim
 
 
-ntp_genkeys_LDADD = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
-ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
+#ntp_genkeys_LDADD = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
+#ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a $(LIBRSAREF)
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/librsaref
 # LDADD might need RESLIB and ADJLIB
@@ -142,7 +143,7 @@ EXTRA_PROGRAMS = byteorder$(EXEEXT) hist$(EXEEXT) jitter$(EXEEXT) \
 kern$(EXEEXT) longsize$(EXEEXT) ntptime$(EXEEXT) precision$(EXEEXT) \
 sht$(EXEEXT) testrs6000$(EXEEXT) tickadj$(EXEEXT) timetrim$(EXEEXT)
 bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
-ntp-genkeys$(EXEEXT)
+genkeys$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 
@@ -155,6 +156,11 @@ byteorder_OBJECTS = byteorder$U.$(OBJEXT)
 byteorder_LDADD = $(LDADD)
 byteorder_DEPENDENCIES = ../libntp/libntp.a
 byteorder_LDFLAGS = 
+genkeys_SOURCES = genkeys.c
+genkeys_OBJECTS = genkeys$U.$(OBJEXT)
+genkeys_LDADD = $(LDADD)
+genkeys_DEPENDENCIES = ../libntp/libntp.a
+genkeys_LDFLAGS = 
 hist_SOURCES = hist.c
 hist_OBJECTS = hist$U.$(OBJEXT)
 hist_LDADD = $(LDADD)
@@ -175,9 +181,6 @@ longsize_OBJECTS = longsize$U.$(OBJEXT)
 longsize_LDADD = $(LDADD)
 longsize_DEPENDENCIES = ../libntp/libntp.a
 longsize_LDFLAGS = 
-ntp_genkeys_SOURCES = ntp-genkeys.c
-ntp_genkeys_OBJECTS = ntp-genkeys$U.$(OBJEXT)
-ntp_genkeys_LDFLAGS = 
 ntptime_SOURCES = ntptime.c
 ntptime_OBJECTS = ntptime$U.$(OBJEXT)
 ntptime_LDADD = $(LDADD)
@@ -211,20 +214,19 @@ timetrim_LDFLAGS =
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = byteorder.c hist.c jitter.c kern.c longsize.c \
-ntp-genkeys.c ntptime.c precision.c sht.c testrs6000.c tickadj.c \
-timetrim.c
+DIST_SOURCES = byteorder.c genkeys.c hist.c jitter.c kern.c longsize.c \
+ntptime.c precision.c sht.c testrs6000.c tickadj.c timetrim.c
 depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP@DEP_FILES = $(DEPDIR)/byteorder$U.Po $(DEPDIR)/hist$U.Po \
-@AMDEP@ $(DEPDIR)/jitter$U.Po $(DEPDIR)/kern$U.Po \
-@AMDEP@ $(DEPDIR)/longsize$U.Po $(DEPDIR)/ntp-genkeys$U.Po \
-@AMDEP@ $(DEPDIR)/ntptime$U.Po $(DEPDIR)/precision$U.Po \
-@AMDEP@ $(DEPDIR)/sht$U.Po $(DEPDIR)/testrs6000$U.Po \
-@AMDEP@ $(DEPDIR)/tickadj$U.Po $(DEPDIR)/timetrim$U.Po
+@AMDEP@DEP_FILES = $(DEPDIR)/byteorder$U.Po $(DEPDIR)/genkeys$U.Po \
+@AMDEP@ $(DEPDIR)/hist$U.Po $(DEPDIR)/jitter$U.Po $(DEPDIR)/kern$U.Po \
+@AMDEP@ $(DEPDIR)/longsize$U.Po $(DEPDIR)/ntptime$U.Po \
+@AMDEP@ $(DEPDIR)/precision$U.Po $(DEPDIR)/sht$U.Po \
+@AMDEP@ $(DEPDIR)/testrs6000$U.Po $(DEPDIR)/tickadj$U.Po \
+@AMDEP@ $(DEPDIR)/timetrim$U.Po
 DIST_COMMON = README Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
 
-SOURCES = byteorder.c hist.c jitter.c kern.c longsize.c ntp-genkeys.c ntptime.c precision.c sht.c testrs6000.c tickadj.c timetrim.c
-OBJECTS = byteorder$U.$(OBJEXT) hist$U.$(OBJEXT) jitter$U.$(OBJEXT) kern$U.$(OBJEXT) longsize$U.$(OBJEXT) ntp-genkeys$U.$(OBJEXT) ntptime$U.$(OBJEXT) precision$U.$(OBJEXT) sht$U.$(OBJEXT) testrs6000$U.$(OBJEXT) tickadj$U.$(OBJEXT) timetrim$U.$(OBJEXT)
+SOURCES = byteorder.c genkeys.c hist.c jitter.c kern.c longsize.c ntptime.c precision.c sht.c testrs6000.c tickadj.c timetrim.c
+OBJECTS = byteorder$U.$(OBJEXT) genkeys$U.$(OBJEXT) hist$U.$(OBJEXT) jitter$U.$(OBJEXT) kern$U.$(OBJEXT) longsize$U.$(OBJEXT) ntptime$U.$(OBJEXT) precision$U.$(OBJEXT) sht$U.$(OBJEXT) testrs6000$U.$(OBJEXT) tickadj$U.$(OBJEXT) timetrim$U.$(OBJEXT)
 
 all: all-am
 
@@ -281,6 +283,10 @@ byteorder: $(byteorder_OBJECTS) $(byteorder_DEPENDENCIES)
 	@rm -f byteorder
 	$(LINK) $(byteorder_LDFLAGS) $(byteorder_OBJECTS) $(byteorder_LDADD) $(LIBS)
 
+genkeys: $(genkeys_OBJECTS) $(genkeys_DEPENDENCIES)
+	@rm -f genkeys
+	$(LINK) $(genkeys_LDFLAGS) $(genkeys_OBJECTS) $(genkeys_LDADD) $(LIBS)
+
 hist: $(hist_OBJECTS) $(hist_DEPENDENCIES)
 	@rm -f hist
 	$(LINK) $(hist_LDFLAGS) $(hist_OBJECTS) $(hist_LDADD) $(LIBS)
@@ -296,10 +302,6 @@ kern: $(kern_OBJECTS) $(kern_DEPENDENCIES)
 longsize: $(longsize_OBJECTS) $(longsize_DEPENDENCIES)
 	@rm -f longsize
 	$(LINK) $(longsize_LDFLAGS) $(longsize_OBJECTS) $(longsize_LDADD) $(LIBS)
-
-ntp-genkeys: $(ntp_genkeys_OBJECTS) $(ntp_genkeys_DEPENDENCIES)
-	@rm -f ntp-genkeys
-	$(LINK) $(ntp_genkeys_LDFLAGS) $(ntp_genkeys_OBJECTS) $(ntp_genkeys_LDADD) $(LIBS)
 
 ntptime: $(ntptime_OBJECTS) $(ntptime_DEPENDENCIES)
 	@rm -f ntptime
@@ -326,6 +328,8 @@ timetrim: $(timetrim_OBJECTS) $(timetrim_DEPENDENCIES)
 	$(LINK) $(timetrim_LDFLAGS) $(timetrim_OBJECTS) $(timetrim_LDADD) $(LIBS)
 byteorder_.c: byteorder.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/byteorder.c; then echo $(srcdir)/byteorder.c; else echo byteorder.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > byteorder_.c
+genkeys_.c: genkeys.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/genkeys.c; then echo $(srcdir)/genkeys.c; else echo genkeys.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > genkeys_.c
 hist_.c: hist.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/hist.c; then echo $(srcdir)/hist.c; else echo hist.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > hist_.c
 jitter_.c: jitter.c $(ANSI2KNR)
@@ -334,8 +338,6 @@ kern_.c: kern.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/kern.c; then echo $(srcdir)/kern.c; else echo kern.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > kern_.c
 longsize_.c: longsize.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/longsize.c; then echo $(srcdir)/longsize.c; else echo longsize.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > longsize_.c
-ntp-genkeys_.c: ntp-genkeys.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp-genkeys.c; then echo $(srcdir)/ntp-genkeys.c; else echo ntp-genkeys.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp-genkeys_.c
 ntptime_.c: ntptime.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntptime.c; then echo $(srcdir)/ntptime.c; else echo ntptime.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntptime_.c
 precision_.c: precision.c $(ANSI2KNR)
@@ -348,10 +350,11 @@ tickadj_.c: tickadj.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/tickadj.c; then echo $(srcdir)/tickadj.c; else echo tickadj.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > tickadj_.c
 timetrim_.c: timetrim.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/timetrim.c; then echo $(srcdir)/timetrim.c; else echo timetrim.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > timetrim_.c
-byteorder_.$(OBJEXT) hist_.$(OBJEXT) jitter_.$(OBJEXT) kern_.$(OBJEXT) \
-longsize_.$(OBJEXT) ntp-genkeys_.$(OBJEXT) ntptime_.$(OBJEXT) \
-precision_.$(OBJEXT) sht_.$(OBJEXT) testrs6000_.$(OBJEXT) \
-tickadj_.$(OBJEXT) timetrim_.$(OBJEXT) : $(ANSI2KNR)
+byteorder_.$(OBJEXT) genkeys_.$(OBJEXT) hist_.$(OBJEXT) \
+jitter_.$(OBJEXT) kern_.$(OBJEXT) longsize_.$(OBJEXT) \
+ntptime_.$(OBJEXT) precision_.$(OBJEXT) sht_.$(OBJEXT) \
+testrs6000_.$(OBJEXT) tickadj_.$(OBJEXT) timetrim_.$(OBJEXT) : \
+$(ANSI2KNR)
 
 tags: TAGS
 
@@ -386,11 +389,11 @@ distclean-tags:
 	-rm -f TAGS ID
 
 @AMDEP@@_am_include@ $(DEPDIR)/byteorder$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/genkeys$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/hist$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/jitter$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/kern$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/longsize$U.Po
-@AMDEP@@_am_include@ $(DEPDIR)/ntp-genkeys$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/ntptime$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/precision$U.Po
 @AMDEP@@_am_include@ $(DEPDIR)/sht$U.Po

@@ -21,9 +21,9 @@
 # include "ntp_timer.h"
 #endif
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 #include "ntp_crypto.h"
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 
 /*
  * These routines provide support for the event timer.	The timer is
@@ -48,10 +48,10 @@ static	u_long adjust_timer;		/* second timer */
 static	u_long keys_timer;		/* minute timer */
 static	u_long hourly_timer;		/* hour timer */
 static	u_long huffpuff_timer;		/* huff-n'-puff timer */
-#ifdef AUTOKEY
+#ifdef OPENSSL
 static	u_long revoke_timer;		/* keys revoke timer */
 u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 /*
  * Statistics counter for the interested.
@@ -267,7 +267,7 @@ timer(void)
 		huffpuff();
 	}
 
-#ifdef AUTOKEY
+#ifdef OPENSSL
 	/*
 	 * Garbage collect old keys and generate new private value
 	 */
@@ -280,7 +280,7 @@ timer(void)
 			    current_time, revoke_timer);
 #endif
 	}
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 	/*
 	 * Finally, call the hourly routine.

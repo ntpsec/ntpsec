@@ -133,11 +133,27 @@ extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
-#ifdef AUTOKEY
+#ifdef OPENSSL
 extern	void	expire_all	P((void));
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
 extern	void	resetmanycast	P((void));
+
+/* ntp_crypto.c */
+#ifdef OPENSSL
+extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
+extern	int	crypto_xmit	P((struct pkt *, int, u_int32 *, keyid_t, u_int));
+extern	keyid_t	session_key	P((struct sockaddr_in *, struct sockaddr_in *, keyid_t, keyid_t, u_long));
+extern	void	make_keylist	P((struct peer *, struct interface *));
+extern	void	key_expire	P((struct peer *));
+extern	void	crypto_sign	P((void));
+extern	void	crypto_config	P((int, char *));
+extern	void	crypto_setup	P((void));
+extern	int	crypto_public	P((struct peer *, u_char *, u_int));
+extern	struct cert_info *cert_parse P((u_char *, u_int));
+extern	void	cert_free	P((struct cert_info *));
+extern	void	value_free	P((struct value *));
+#endif /* OPENSSL */
 
 /* ntp_proto.c */
 extern	void	transmit	P((struct peer *));
@@ -182,10 +198,10 @@ extern	void	hack_restrict	P((int, struct sockaddr_in *, struct sockaddr_in *, in
 extern	void	init_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
-#ifdef AUTOKEY
+#ifdef OPENSSL
 extern	char	*sys_hostname;
 extern	l_fp	sys_revoketime;
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 /* ntp_util.c */
 extern	void	init_util	P((void));
@@ -195,6 +211,7 @@ extern	void	record_peer_stats P((struct sockaddr_in *, int, double, double, doub
 extern	void	record_loop_stats P((double, double, double, double, int));
 extern	void	record_clock_stats P((struct sockaddr_in *, const char *));
 extern	void	record_raw_stats P((struct sockaddr_in *, struct sockaddr_in *, l_fp *, l_fp *, l_fp *, l_fp *));
+extern	void	record_crypto_stats P((struct sockaddr_in *, const char *));
 
 /*
  * Variable declarations for ntpd.

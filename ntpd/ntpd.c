@@ -92,9 +92,9 @@
 # include <sys/ci/ciioctl.h>
 #endif
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 #include "ntp_crypto.h"
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 
 /*
  * Signals we catch for debugging.	If not debugging we ignore them.
@@ -328,10 +328,6 @@ ntpdmain(
 {
 	l_fp now;
 	char *cp;
-#ifdef AUTOKEY
-	u_int n;
-	char hostname[MAXFILENAME];
-#endif /* AUTOKEY */
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
@@ -513,10 +509,6 @@ service_main(
 	char *cp;
 	struct recvbuf *rbuflist;
 	struct recvbuf *rbuf;
-#ifdef AUTOKEY
-	u_int n;
-	char hostname[MAXFILENAME];
-#endif /* AUTOKEY */
 	if(!debug)
 	{
 		/* register our service control handler */
@@ -734,15 +726,9 @@ service_main(
 	debug = 0;
 #endif
 	getconfig(argc, argv);
-#ifdef AUTOKEY
-	gethostname(hostname, MAXFILENAME);
-	n = strlen(hostname) + 1;
-	sys_hostname = emalloc(n);
-	memcpy(sys_hostname, hostname, n);
-#ifdef PUBKEY
+#ifdef OPENSSL
 	crypto_setup();
-#endif /* PUBKEY */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 	initializing = 0;
 
 #if defined(SYS_WINNT) && !defined(NODETACH)

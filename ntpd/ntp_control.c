@@ -18,9 +18,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 #include "ntp_crypto.h"
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 
 /*
  * Structure to hold request procedure information
@@ -114,16 +114,16 @@ static struct ctl_var sys_var[] = {
 	{ CS_VERSION,	RO, "version" },	/* 17 */
 	{ CS_STABIL,	RO, "stability" },	/* 18 */
 	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
-#ifdef PUBKEY
+#ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 20 */
 	{ CS_HOST,	RO, "hostname" },	/* 21 */
-	{ CS_PUBLIC,	RO, "publickey" },	/* 22 */
+	{ CS_PUBLIC,	RO, "hostkey" },	/* 22 */
 	{ CS_CERTIF,	RO, "certificate" },	/* 23 */
-	{ CS_DHPARAMS,	RO, "params" },		/* 24 */
-	{ CS_REVTIME,	RO, "refresh" },	/* 25 */
-	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 26 */
-	{ CS_TAI,	RO, "tai"},		/* 27 */
-#endif /* PUBKEY */
+	{ CS_REVTIME,	RO, "refresh" },	/* 24 */
+	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 25 */
+	{ CS_TAI,	RO, "tai" },		/* 26 */
+	{ CS_DIGEST,	RO, "signature" },	/* 27 */
+#endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 28 */
 };
 
@@ -152,14 +152,15 @@ static	u_char def_sys_var[] = {
 	CS_DRIFT,
 	CS_JITTER,
 	CS_STABIL,
-#ifdef PUBKEY
-	CS_FLAGS,
+#ifdef OPENSSL
 	CS_HOST,
+	CS_DIGEST,
+	CS_FLAGS,
 	CS_CERTIF,
-	CS_DHPARAMS,
+	CS_PUBLIC,
 	CS_REVTIME,
 	CS_LEAPTAB,
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	0
 };
 
@@ -207,17 +208,17 @@ static struct ctl_var peer_var[] = {
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
 	{ CP_TTLMAX,	RO, "ttlmax" },		/* 37 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 38 */
-#ifdef PUBKEY
+#ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
-	{ CP_PUBLIC,	RO, "publickey" },	/* 40 */
-	{ CP_CERTIF,	RO, "certificate" },	/* 41 */
-	{ CP_SESKEY,	RO, "pcookie" },	/* 42 */
-	{ CP_SASKEY,	RO, "hcookie" },	/* 43 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 44 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 45 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 46 */
-#endif /* PUBKEY */
+	{ CP_CERTIF,	RO, "certificate" },	/* 40 */
+	{ CP_SESKEY,	RO, "pcookie" },	/* 41 */
+	{ CP_SASKEY,	RO, "hcookie" },	/* 42 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
+	{ CP_DIGEST,	RO, "signature" },	/* 46 */
+#endif /* OPENSSL */
 	{ 0,		EOV, ""  }		/* 47 */
 };
 
@@ -257,13 +258,14 @@ static u_char def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
-#ifdef PUBKEY
-	CP_FLAGS,
+#ifdef OPENSSL
 	CP_HOST,
+	CP_DIGEST,
+	CP_FLAGS,
 	CP_CERTIF,
 	CP_SESKEY,
 	CP_INITSEQ,
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	0
 };
 
@@ -1161,9 +1163,7 @@ ctl_putsys(
 	)
 {
 	l_fp tmp;
-#ifdef HAVE_UNAME
 	char str[256];
-#endif
 
 	switch (varid) {
 
@@ -1249,8 +1249,7 @@ ctl_putsys(
 		ctl_putstr(sys_var[CS_SYSTEM].text, str_system,
 		    sizeof(str_system) - 1);
 #else
-		(void)strcpy(str, utsnamebuf.sysname);
-		(void)strcat(str, utsnamebuf.release);
+		sprintf(str, "%s/%s", utsnamebuf.sysname, utsnamebuf.release);
 		ctl_putstr(sys_var[CS_SYSTEM].text, str, strlen(str));
 #endif /* HAVE_UNAME */
 		break;
@@ -1328,31 +1327,38 @@ ctl_putsys(
 		}
 		break;
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 	case CS_FLAGS:
-		if (crypto_flags)
-			ctl_puthex(sys_var[CS_FLAGS].text,
-			    crypto_flags);
+		if (crypto_flags) {
+			ctl_puthex(sys_var[CS_FLAGS].text, crypto_flags);
+		}
+		break;
+
+	case CS_DIGEST:
+		if (crypto_flags) {
+			const EVP_MD *dp;
+
+			dp = EVP_get_digestbynid(crypto_flags >> 16);
+			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
+			ctl_putstr(sys_var[CS_DIGEST].text, str,
+			    strlen(str));
+		}
 		break;
 
 	case CS_HOST:
-		ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
-			strlen(sys_hostname));
-		if (host.fstamp != 0)
-			ctl_putuint(sys_var[CS_PUBLIC].text,
-			    ntohl(host.fstamp));
+		if (sys_hostname != NULL)
+			ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
+			    strlen(sys_hostname));
 		break;
 
 	case CS_CERTIF:
-		if (certif.fstamp != 0)
-			ctl_putuint(sys_var[CS_CERTIF].text,
-			    ntohl(certif.fstamp));
+		if (cinfo.fstamp != 0)
+			ctl_putuint(sys_var[CS_CERTIF].text, cinfo.fstamp);
 		break;
 
-	case CS_DHPARAMS:
-		if (dhparam.fstamp != 0)
-			ctl_putuint(sys_var[CS_DHPARAMS].text,
-			    ntohl(dhparam.fstamp));
+	case CS_PUBLIC:
+		if (host.fstamp != 0)
+			ctl_putuint(sys_var[CS_PUBLIC].text, host.fstamp);
 		break;
 
 	case CS_REVTIME:
@@ -1368,7 +1374,7 @@ ctl_putsys(
 		if (sys_tai != 0)
 			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	}
 }
 
@@ -1382,6 +1388,11 @@ ctl_putpeer(
 	struct peer *peer
 	)
 {
+#ifdef OPENSSL
+	char str[256];
+	struct autokey *ap;
+#endif /* OPENSSL */
+
 	switch (varid) {
 
 	case CP_CONFIG:
@@ -1602,47 +1613,53 @@ ctl_putpeer(
 			ctl_putdata(buf, (unsigned)(s - buf), 0);
 		}
 		break;
-#ifdef PUBKEY
+#ifdef OPENSSL
 	case CP_FLAGS:
 		if (peer->crypto)
 			ctl_puthex(peer_var[CP_FLAGS].text, peer->crypto);
+		break;
+
+	case CP_DIGEST:
+		if (peer->crypto) {
+			const EVP_MD *dp;
+
+			dp = EVP_get_digestbynid(peer->crypto >> 16);
+			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
+			ctl_putstr(peer_var[CP_DIGEST].text, str,
+       	                     strlen(str));
+		}
 		break;
 
 	case CP_HOST:
 		if (peer->keystr != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->keystr,
 			    strlen(peer->keystr));
-		if (peer->pubkey.fstamp != 0)
-			ctl_putuint(peer_var[CP_PUBLIC].text,
-			    peer->pubkey.fstamp);
 		break;
 
 	case CP_CERTIF:
-		if (peer->certif.fstamp != 0)
+		if (peer->cinfo.fstamp != 0)
 			ctl_putuint(peer_var[CP_CERTIF].text,
-			    peer->certif.fstamp);
+			    peer->cinfo.fstamp);
 		break;
 
 	case CP_SESKEY:
-		if (peer->pcookie.key != 0)
+		if (peer->pcookie != 0)
 			ctl_puthex(peer_var[CP_SESKEY].text,
-			    peer->pcookie.key);
+			    peer->pcookie);
 		if (peer->hcookie != 0)
 			ctl_puthex(peer_var[CP_SASKEY].text,
 			    peer->hcookie);
 		break;
 
 	case CP_INITSEQ:
-		if (peer->recauto.key == 0)
+		if ((ap = (struct autokey *)peer->recval.ptr) == NULL)
 			break;
-		ctl_putint(peer_var[CP_INITSEQ].text,
-		    peer->recauto.seq);
-		ctl_puthex(peer_var[CP_INITKEY].text,
-		    peer->recauto.key);
+		ctl_putint(peer_var[CP_INITSEQ].text, ap->seq);
+		ctl_puthex(peer_var[CP_INITKEY].text, ap->key);
 		ctl_putuint(peer_var[CP_INITTSP].text,
-		    peer->recauto.tstamp);
+		    peer->recval.tstamp);
 		break;
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	}
 }
 
@@ -2605,7 +2622,7 @@ report_event(
 	 * Record error code in proper spots, but have mercy on the
 	 * log file.
 	 */
-	if (!(err & PEER_EVENT)) {
+	if (!(err & (PEER_EVENT | CRPT_EVENT))) {
 		if (ctl_sys_num_events < CTL_SYS_MAXEVENTS)
 			ctl_sys_num_events++;
 		if (ctl_sys_last_event != (u_char)err) {
@@ -2683,10 +2700,10 @@ report_event(
 		 * variables. Don't send crypto strings.
 		 */
 		for (i = 1; i <= CS_MAXCODE; i++) {
-#ifdef PUBKEY
+#ifdef OPENSSL
 			if (i > CS_VARLIST)
 				continue;
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 			ctl_putsys(i);
 		}
 #ifdef REFCLOCK
@@ -2712,7 +2729,7 @@ report_event(
 					    strlen(kv->text), 0);
 			free_varlist(clock_stat.kv_list);
 		}
-#endif /*REFCLOCK*/
+#endif /* REFCLOCK */
 	} else {
 		rpkt.associd = htons(peer->associd);
 		rpkt.status = htons(ctlpeerstatus(peer));
@@ -2721,10 +2738,10 @@ report_event(
 		 * Dump it all. Later, maybe less.
 		 */
 		for (i = 1; i <= CP_MAXCODE; i++)
-#ifdef PUBKEY
+#ifdef OPENSSL
 			if (i > CP_VARLIST)
 				continue;
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 			ctl_putpeer(i, peer);
 #ifdef REFCLOCK
 		/*
@@ -2751,7 +2768,7 @@ report_event(
 					    strlen(kv->text), 0);
 			free_varlist(clock_stat.kv_list);
 		}
-#endif /*REFCLOCK*/
+#endif /* REFCLOCK */
 	}
 
 	/*

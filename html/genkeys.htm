@@ -24,151 +24,255 @@ Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>This program generates random keys used by either or both the
 NTPv3/NTPv4 symmetric key or the NTPv4 public key (Autokey)
 cryptographic authentication schemes. By default the program
-generates the <tt>ntp.keys</tt> file containing 16 random symmetric
-keys. In addition, if the <tt>rsaref20</tt> package is configured
-for the software build, the program generates cryptographic values
-used by the Autokey scheme. These values are incorporated as a set
-of three files, <tt>ntpkey</tt> containing the RSA private key,
-<tt>ntpkey_<i>host</i></tt> containing the RSA public key, where
-<tt><i>host</i></tt> is the DNS name of the generating machine, and
-<tt>ntpkey_dh</tt> containing the parameters for the Diffie-Hellman
-key-agreement algorithm. All files and are in printable ASCII
-format. A timestamp in NTP seconds is appended to each. Since the
-algorithms are seeded by the system clock, each run of this program
-produces a different file and file name.</p>
+generates a symmetric key file containing 16 random keys for the
+MD5 message digest algorithm. In addition, if the OpenSSL software
+library has been installed, the program generates cryptographic key
+files used by the Autokey protocol. These files contain the
+public/private key pair, certificate request, certificate and
+Diffie-Hellman parameters. While all available files are generated,
+the Autokey Version 2 protocol requires only the public/private key
+pair and certificate files. All files are in PEM-encoded printable
+ASCII format, so they can be embedded as MIME attachments in mail
+to other sites and certificate authorities.</p>
 
-<p>The <tt>ntp.keys</tt> file contains 16 MD5 keys. Each key
-consists of 16 characters randomized over the ASCII 95-character
-printing subset. The file is read by the daemon at the location
-specified by the <tt>keys</tt> configuration file command and made
-visible only to root. An additional key consisting of a easily
-remembered password should be added by hand for use with the <tt>
-ntpq</tt> and <tt>ntpdc</tt> programs. The file must be distributed
-by secure means to other servers and clients sharing the same
-security compartment. While the key identifiers for MD5 and DES
-keys must be in the range 1-65534, inclusive, the <tt>
-ntp-genkeys</tt> program uses only the identifiers from 1 to 16.
-The key identifier for each association is specified as the key
-argument in the <tt>server</tt> or peer configuration file
-command.</p>
+<p>As explained in the <a href="authopt.htm">Authentication
+Options</a> page, all cryptographically sound key generation
+schemes must have means to randomize the entropy seed used to
+initialize the internal random number generator. It is important to
+understand that entropy must be evolved for each file generation
+and agreement calculation, for otherwise the random number sequence
+would be predictable. The OpenSSL library uses a designated random
+seed file for this purpose. The file must be available when
+starting the NTP daemon and <tt>ntp-genkeys</tt> program.
+Directions for doing this are on the Authentication Options
+page.</p>
 
-<p>The <tt>ntpkey</tt> file contains the RSA private key. It is
-read by the daemon at the location specified by the <tt>
-privatekey</tt> argument of the <tt>crypto</tt> configuration file
-command and made visible only to root. This file is useful only to
-the machine that generated it and never shared with any other
-daemon or application program.</p>
+<p>The safest way to run the <tt>ntp-genkeys</tt> program is logged
+in directly as root. The recommended procedure is change to the
+keys directory, usually <tt>/ust/local/etc</tt> then run the
+program, which in its present form has no command line options. The
+program generates key files for all message digest and signature
+encryption schemes supported by the OpenSSL library. The key files
+are guaranteed to be unique, so no existing key files will be
+overwritten. Then, using procedures described below, install soft
+links from the default file names used by the daemon to the
+selected file names.</p>
 
-<p>The <tt>ntpkey_<i>host</i></tt> file contains the RSA public
-key, where <tt><i>host</i></tt> is the DNS name of the host that
-generated it. The file is read by the daemon at the location
-specified by the <tt>publickey</tt> argument to the <tt>server</tt>
-or <tt>peer</tt> configuration file command. This file can be
-widely distributed and stored without using secure means, since the
-data are public values.</p>
+<p>Running the program as other than root and using the Unix <tt>
+su</tt> command to assume root may not work properly, since by
+default the OpenSSL library looks for the random seed file in the
+user home directory. However, installing the keys as root might not
+work in NFS-mounted file systems, as NFS clients may not be able to
+write to the shared keys directory, even as root. NFS clients
+should run the program as root or some other user and save the key
+files in a writable directory that can be read directly or
+indirectly by the NFS server. The NFS server can then copy them to
+the shared keys directory. Since the <tt>ntp-genkeys</tt> program
+does not write the random seed file, it is convenient to define the
+<tt>$RANDFILE</tt> environment variable used by the OpenSSL library
+as the path to the random seed file.</p>
 
-<p>The <tt>ntp_dh</tt> file contains two Diffie-Hellman parameters:
-the prime modulus and the generator. The file is read by the daemon
-at the location specified by the <tt>dhparams</tt> argument of the
-<tt>crypto</tt> configuration file command. The file can be
-distributed by insecure means to other servers and clients sharing
-the same key agreement compartment, since the data are public
-values.</p>
+<h4>File Naming Conventions</h4>
+
+<p>All file names include the <i>hostname</i> of the generating
+host together with the NTP <i>filestamp</i> of creation. This
+insures uniqueness for each generation of keys throughout the NTP
+subnet. The hostname is the node name of the generating host as
+returned by the Unix <tt>gethostname()</tt> library routine. The
+filestamp is the NTP seconds in decimal ASCII format. Both the <tt>
+ntp-genkeys</tt> program and the Autokey protocol use these names
+to insure the cryptographic data are consistent and to avoid replay
+attacks. Since the file data are derived from random values seeded
+by the system clock and the file name includes the filestamp, every
+generation produces a different file and different file name.
+However, the NTP daemon looks for the generic file names without
+the filestamp extension on the assumption that soft links are
+installed from the generic name to the particular file generation
+name.</p>
+
+<p>Files containing public-key cryptographic values depend upon
+selection of the message digest and signature encryption scheme.
+There are several schemes available in the OpenSSL software
+library, each identified by a specific string such as the default
+<tt>RSA_MD5</tt>, which stands for the MD5 message digest with RSA
+encryption scheme. The <tt>ntp-genkeys</tt> program can make
+public/private keys, certificates and certificate requests for all
+schemes supported by the OpenSSL library.</p>
+
+<p>In its present form, the <tt>ntp-genkeys</tt> program generates
+files for all digest/signature schemes supported by the OpenSSL
+library and NTP daemon. The recommended practice is to copy all of
+these files to the default directory <tt>/usr/local/etc</tt> and
+install links to select which ones to use according to the default
+file names listed below. At its present level of OpenSSL
+development, the message digest algorithm is specifically bound to
+the signature encryption algorithm, so only a limited number of
+combinations are available. Further details are in the OpenSSL
+documentation.</p>
+
+<h4>Symmetric Key File</h4>
+
+<p>The <tt>ntp-genkeys</tt> program generates MD5 symmetric keys in
+a file named <tt>
+ntpkey_MD5key_<i>hostname</i>.<i>filestamp</i></tt>. Since the file
+contains private shared values, it should be visible only to root
+and distributed by secure means to other servers and clients
+sharing the same security compartment. The NTP daemon expects this
+file with name <tt>ntp.keys</tt>, so a soft link is needed to
+direct this name to the particular file name generated. While this
+file is not used with the Autokey Version 2 protocol, it is needed
+to authenticate some remote configuration commands used by the <a
+href="ntpdc.htm"><tt>ntpq</tt></a> and <a href="ntpq.htm"><tt>
+ntpdc</tt></a> utilities.</p>
+
+<p>The symmetric key file contains 16 MD5 keys. Each key consists
+of 16 characters randomized over a ASCII 93-character printing
+subset. The file is read by the daemon at the location specified by
+the <tt>keys</tt> configuration file command. Additional keys
+consisting of easily remembered passwords should be added by hand
+for use with the <tt>ntpq</tt> and <tt>ntpdc</tt> programs. While
+the key identifiers for MD5 keys must be in the range 1-65,534,
+inclusive, the <tt>ntp-genkeys</tt> program uses only the
+identifiers from 1 to 16. The key identifier for each association
+is specified as the key argument in the <tt>server</tt> or peer
+configuration command.</p>
+
+<h4>Public/Private Key Files</h4>
+
+<p>The Autokey protocol requires every host to have a
+public/private host key pair and an optional public/private sign
+key pair. The <tt>ntp-genkeys</tt> program generates a
+public/private key pair in a file named <tt>
+ntpkey_<i>keyname</i>key_<i>hostname</i>.<i>filestamp</i></tt>,
+where <i>keyname</i> is the name of the public key algorithm.
+Currently, the program generates public/private key files for both
+RSA and DSA algorithms. Since the host key is used to encrypt some
+data, it must be an RSA type. The sign key file can be a DSA type
+or the same or different RSA type. Since these files contains
+private unshared values that are useful only to the machine that
+generated them, they should be visible only to root and never
+shared with any other system or application program. The NTP daemon
+expects the host key file with name <tt>
+ntpkey_key_<i>hostname</i></tt> and the sign key file with name
+<tt>ntpkey_sign_<i>hostname</i></tt>, so soft links are needed to
+direct these names to the particular file name generated.</p>
+
+<p>The <tt>ntp-genkeys</tt> program generates the Diffie-Hellman
+parameters in a file named <tt>
+ntpkey_dh_<i>hostname</i>.<i>filestamp</i></tt>. This file is not
+used by the current Autokey version, but might be useful in related
+applications. The file contains only public values and can be
+freely transmitted and stored anywhere without further
+cryptographic protection. A number of hosts can use the same file
+in a shared directory.</p>
+
+<h4>Public Certificates</h4>
+
+<p>The Autokey protocol requires every host to have a digitally
+signed public certificate. Security procedures require the public
+key and host credentials, such as host name, responsible person,
+mail address, etc., to be provided in the form of a X.509
+certificate request to a trusted certificate authority or CA. The
+CA attaches a digital signature to the request and returns the
+certificate itself to the requesting party. The integrity of these
+procedures depend on the certificate trail that ultimately must end
+on a self-signed certificate provided by the ultimate CA. The
+OpenSSL software library provides routines that can automate this
+process. The reader is referred to the OpenSSL documentation for
+further details.</p>
+
+<p>The <tt>ntp-genkeys</tt> program generates a X.509 public
+certificate request in a file named <tt>
+ntpkey_<i>digestname</i>req_<i>hostname</i>.<i>filestamp</i></tt>,
+where <i>digestname</i> is the name of the digest/signature scheme.
+This file is not used by the current Autokey version, but might be
+useful in related applications. The file contains only public
+values and can be freely transmitted and stored anywhere without
+further cryptographic protection. The NTP daemon expects this file
+with name <tt>ntpkey_req_<i>hostname</i></tt>, so a soft link is
+needed to direct this name to the particular file name generated.
+Where security considerations require, this file can be transmitted
+to a trusted certificate authority (CA) and returned as a signed
+public certificate for use in the Autokey protocol.</p>
+
+<p>For convenience, the <tt>ntp-genkeys</tt> program also generates
+a self-signed X.509 public certificate in a file named <tt>
+ntpkey_<i>digestname</i>cert_<i>hostname</i>.<i>filestamp</i></tt>.
+The file contains only public values and can be freely transmitted
+and stored anywhere without further cryptographic protection. The
+NTP daemon expects this file with name <tt>
+ntpkey_cert_<i>hostname</i></tt>, so a soft link is needed to
+direct this name to the particular file name used. This file can be
+used in lieu of a CA certificate and has compatible encoding and
+content.</p>
+
+<p>The Autokey protocol supports all digest/signature schemes
+available in the OpenSSL library, including those using the MD2,
+MD5, SHA, SHA1, MDC2 and RIPE160 message digest algorithms.
+However, the scheme specified in the certificate must be compatible
+with the sign key. Certificates using any digest algorithm are
+compatible with RSA sign keys; however, only SHA and SHA1
+certificates are compatible with DSA sign keys.</p>
+
+<h4>Leapseconds Table</h4>
+
+<p>The NIST provides a file documenting the epoch for all historic
+occasions of leap second insertion since 1972. The leapsecond table
+shows each epoch of insertion along with the offset of
+International Atomic Time (TAI) with respect to Coordinated
+Universal Time (UTC), as disseminated by NTP. The table can be
+obtained directly from NIST national time servers using <tt>
+ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.</p>
+
+<p>While not strictly a security function, the Autokey protocol
+provides means to securely retrieve the leapsecond table from a
+server or peer. Servers load the leapsecond table directly from the
+file specified in the <tt>crypto</tt> command, with default <tt>
+ntpkey_leap</tt>, while clients can obtain the table indirectly
+from the servers using the Autokey protocol. Once loaded, the table
+can be provided on request to other clients and servers.</p>
+
+<h4>File Formats</h4>
 
 <p>The file formats begin with two lines, the first containing the
-generating system DNS name and the second the datestamp. Lines
-beginning with <tt>#</tt> are considered comments and ignored by
-the daemon. In the <tt>ntp.keys</tt> file, the next 16 lines
-contain the MD5 keys in order. If necessary, this file can be
-further customized by an ordinary text editor. The format is
-described in the following section. In the <tt>ntpkey</tt> and <tt>
-ntpkey_<i>host</i></tt> files, the next line contains the modulus
-length in bits followed by the key as a PEM encoded string. In the
-<tt>ntpkey_dh</tt> file, the next line contains the prime length in
-bytes followed by the prime as a PEM encoded string, and the next
-and final line contains the generator length in bytes followed by
-the generator as a PEM encoded string.</p>
+actual file name, including the generated hostname and filestamp.
+The second line contains the datestamp in conventional format.
+Lines beginning with <tt>#</tt> are considered comments and ignored
+by the daemon. In the <tt>ntp.keys</tt> file, the next 16 lines
+contain the MD5 keys. If necessary, this file can be further
+customized using an ordinary text editor. The format is described
+below. For all other files the actual cryptographic value is
+encoded in PEM-encoded printable ASCII format preceded and followed
+by MIME content identifier lines. Some values such as certificates
+and Diffied-Hellman parameters are encoded using ASN.1 encoding
+rules.</p>
 
-<p>Note: See the file <tt>./source/rsaref.h</tt> in the <tt>
-rsaref20</tt> package for explanation of return values, if
-necessary.</p>
-
-<h4>Symmetric Key File Format</h4>
-
-In the case of DES, the keys are 56 bits long with, depending on
-type, a parity check on each byte. In the case of MD5, the keys are
-64 bits (8 bytes). <tt>ntpd</tt> reads its keys from a file
-specified using the <tt>-k</tt> command line option or the <tt>
-keys</tt> statement in the configuration file. While key number 0
-is fixed by the NTP standard (as 56 zero bits) and may not be
-changed, one or more of the keys numbered 1 through 15 may be
-arbitrarily set in the keys file. 
-
-<p>The key file uses the same comment conventions as the
-configuration file. Key entries use a fixed format of the form</p>
+<p>The format of the symmetric keys file is somewhat different than
+the other files in the interest of backward compatibility. Since
+DES-CBC is deprecated in NTPv4, the only key format of interest is
+MD5 alphanumeric strings. Keys are entered one per line in the
+format</p>
 
 <p><i><tt>keyno type key</tt></i></p>
 
-<p>where <i><tt>keyno</tt></i> is a positive integer, <i><tt>
-type</tt></i> is a single character which defines the key format,
-and <i><tt>key</tt></i> is the key itself.</p>
-
-<p>The key may be given in one of three different formats,
-controlled by the <i><tt>type</tt></i> character. The three key
-types, and corresponding formats, are listed following.</p>
-
-<dl>
-<dt><tt>S</tt></dt>
-
-<dd>The key is a 64-bit hexadecimal number in the format specified
-in the DES specification; that is, the high order seven bits of
-each octet are used to form the 56-bit key while the low order bit
-of each octet is given a value such that odd parity is maintained
-for the octet. Leading zeroes must be specified (i.e., the key must
-be exactly 16 hex digits long) and odd parity must be maintained.
-Hence a zero key, in standard format, would be given as <tt>
-0101010101010101</tt>.</dd>
-
-<dt><tt>N</tt></dt>
-
-<dd>The key is a 64-bit hexadecimal number in the format specified
-in the NTP standard. This is the same as the DES format, except the
-bits in each octet have been rotated one bit right so that the
-parity bit is now the high order bit of the octet. Leading zeroes
-must be specified and odd parity must be maintained. A zero key in
-NTP format would be specified as <tt>8080808080808080</tt>.</dd>
-
-<dt><tt>A</tt></dt>
-
-<dd>The key is a 1-to-8 character ASCII string. A key is formed
-from this by using the low order 7 bits of each ASCII character in
-the string, with zeroes added on the right when necessary to form a
-full width 56-bit key, in the same way that encryption keys are
-formed from Unix passwords.</dd>
-
-<dt><tt>M</tt></dt>
-
-<dd>The key is a 1-to-8 character ASCII string, using the MD5
-authentication scheme. Note that both the keys and the
-authentication schemes (DES or MD5) must be identical between a set
-of peers sharing the same key number.</dd>
-</dl>
+<p>where <i><tt>keyno</tt></i> is a positive integer in the range
+1-65,535, <i><tt>type</tt></i> is the string <tt>MD5</tt> defining
+the key format and <i><tt>key</tt></i> is the key itself, which is
+a printable ASCII string 16 characters or less in length. Each
+character is chosen from the 93 printable characters in the range
+0x21 through 0x7f excluding space and the '#' character.</p>
 
 <p>Note that the keys used by the <tt>ntpq</tt> and <tt>ntpdc</tt>
 programs are checked against passwords requested by the programs
 and entered by hand, so it is generally appropriate to specify
-these keys in ASCII format.</p>
-
-<h4>Files</h4>
-
-The RSA Laboratories package <tt>rsaref20</tt> of cryptographic
-routines is necessary in order to build and use this program. 
+these keys in human readable ASCII format.</p>
 
 <h4>Bugs</h4>
 
-It can take quite a while to generate the RSA public/private key
-pair and Diffie-Hellman parameters, from a few seconds on a modern
-workstation to several minutes on older machines. 
+It can take quite a while to generate some cryptographic values,
+from one to several minutes with modern architectures such as
+UltraSPARC and up tens of minutes to an hour with older
+architectures such as SPARC IPC. 
 
 <hr>
 <a href="index.htm"><img align="left" src="pic/home.gif" alt=

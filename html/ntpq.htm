@@ -86,15 +86,15 @@ interactive command.</dd>
 
 <h4>Internal Commands</h4>
 
-Interactive format commands consist of a keyword followed by zero
-to four arguments. Only enough characters of the full keyword to
-uniquely identify the command need be typed. The output of a
+<p>Interactive format commands consist of a keyword followed by
+zero to four arguments. Only enough characters of the full keyword
+to uniquely identify the command need be typed. The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
 <tt>&lt;</tt>, followed by a file name, to the command line. A
 number of interactive format commands are executed entirely within
 the <tt>ntpq</tt> program itself and do not result in NTP mode 6
-requests being sent to a server. These are described following. 
+requests being sent to a server. These are described following.</p>
 
 <dl>
 <dt><tt>? [<i>command_keyword</i>]</tt><br>
@@ -183,10 +183,6 @@ packets. Defaults to 3, Note that mode 6 control messages (and
 modes, for that matter) didn't exist in NTP version 1. There appear
 to be no servers left which demand version 1.</dd>
 
-<dt><tt>quit</tt></dt>
-
-<dd>Exit <tt>ntpq</tt>.</dd>
-
 <dt><tt>passwd</tt></dt>
 
 <dd>This command prompts you to type in a password (which will not
@@ -194,6 +190,10 @@ be echoed) which will be used to authenticate configuration
 requests. The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.</dd>
+
+<dt><tt>quit</tt></dt>
+
+<dd>Exit <tt>ntpq</tt>.</dd>
 
 <dt><tt>raw</tt></dt>
 
@@ -212,12 +212,12 @@ a timeout will be twice the timeout value set.</dd>
 
 <h4>Control Message Commands</h4>
 
-Each peer known to an NTP server has a 16 bit integer association
-identifier assigned to it. NTP control messages which carry peer
-variables must identify the peer the values correspond to by
-including its association ID. An association ID of 0 is special,
-and indicates the variables are system variables, whose names are
-drawn from a separate name space. 
+<p>Each peer known to an NTP server has a 16 bit integer
+association identifier assigned to it. NTP control messages which
+carry peer variables must identify the peer the values correspond
+to by including its association ID. An association ID of 0 is
+special, and indicates the variables are system variables, whose
+names are drawn from a separate name space.</p>
 
 <p>Control message commands result in one or more NTP mode 6
 messages being sent to the server, and cause the data returned to
@@ -326,14 +326,66 @@ unknown), the stratum of the remote peer, the type of the peer
 (local, unicast, multicast or broadcast), when the last packet was
 received, the polling interval, in seconds, the reachability
 register, in octal, and the current estimated delay, offset and
-dispersion of the peer, all in milliseconds.</dd>
+dispersion of the peer, all in milliseconds. The character at the
+left margin of each line shows the synchronization status of the
+association and is a valuable diagnostic tool. The encoding and
+meaning of this character, called the tally code, is given later in
+this page.</dd>
 
-<dd>The character in the left margin indicates the fate of this
-peer in the clock selection process. Following is a list of these
-characters, the pigeon used in the <tt>rv</tt> command, and a short
-explanation of the condition revealed.</dd>
+<dt><tt>pstatus <i>assocID</i></tt></dt>
 
-<dd>
+<dd>Sends a read status request to the server for the given
+association. The names and values of the peer variables returned
+will be printed. Note that the status word from the header is
+displayed preceding the variables, both in hexidecimal and in
+pidgeon English.</dd>
+
+<dt><tt>readlist [ <i>assocID</i> ]</tt><br>
+<tt>rl [ <i>assocID</i> ]</tt></dt>
+
+<dd>Requests that the values of the variables in the internal
+variable list be returned by the server. If the association ID is
+omitted or is 0 the variables are assumed to be system variables.
+Otherwise they are treated as peer variables. If the internal
+variable list is empty a request is sent without data, which should
+induce the remote server to return a default display.</dd>
+
+<dt><tt>readvar <i>assocID</i> <i>variable_name</i> [ = <i>
+value</i> ] [ ...]</tt><br>
+<tt>rv <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i> ] [
+...]</tt></dt>
+
+<dd>Requests that the values of the specified variables be returned
+by the server by sending a read variables request. If the
+association ID is omitted or is given as zero the variables are
+system variables, otherwise they are peer variables and the values
+returned will be those of the corresponding peer. Omitting the
+variable list will send a request with no data which should induce
+the server to return a default display. The encoding and meaning of
+the variables derived from NTPv3 is given in RFC-1305; the encoding
+and meaning of the additional NTPv4 variables are given later in
+this page.</dd>
+
+<dt><tt>writevar <i>assocID</i> <i>variable_name</i> [ = <i>
+value</i> [ ...]</tt></dt>
+
+<dd>Like the readvar request, except the specified variables are
+written instead of read.</dd>
+
+<dt><tt>writelist [ <i>assocID</i> ]</tt></dt>
+
+<dd>Like the readlist request, except the internal list variables
+are written instead of read.</dd>
+</dl>
+
+<h4>Tally Codes</h4>
+
+<p>The character in the left margin in the <tt>peers</tt>
+billboard, called the tally code, shows the fate of each
+association in the clock selection process. Following is a list of
+these characters, the pigeon used in the <tt>rv</tt> command, and a
+short explanation of the condition revealed.</p>
+
 <dl>
 <dt><tt>space reject</tt></dt>
 
@@ -380,17 +432,193 @@ synchronization is derived from a pulse-per-second (PPS) signal,
 either indirectly via the PPS reference clock driver or directly
 via kernel interface.</dd>
 </dl>
+
+<h4>NTPv4 Additional Variables</h4>
+
+<p>Additional variables displayed in the system variables list
+returned by the readvariables command include the following.</p>
+
+<dl>
+<dt><tt>state <i>state</i></tt></dt>
+
+<dd>Shows the state of the clock discipline state machine.</dd>
+
+<dt><tt>jitter <i>value</i></tt></dt>
+
+<dd>Shows the estimated time error of the system clock measured as
+an exponential average of RMS time differences.</dd>
+
+<dt><tt>stability <i>value</i></tt></dt>
+
+<dd>Shows the estimated frequency stability of the system clock
+measured as an exponential average of RMS frequency
+differences.</dd>
+</dl>
+
+<p>When the NTPv4 daemon is compiled with the OpenSSL software
+library, additional system variables are displayed, including the
+following:</p>
+
+<dl>
+<dt><tt>certificate <i>filestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the certificate file was
+created.</dd>
+
+<dt><tt>hostname <i>host</i></tt></dt>
+
+<dd>Shows the name of the host as returned by the Unix <tt>
+gethostname()</tt> library function.</dd>
+
+<dt><tt>flags <i>hex</i></tt></dt>
+
+<dd>Shows the current flags word bits and message digest algorithm
+identifier (NID) in hex format. The flag high order two bytes of
+the four-byte flag word contain the NID encoded as in the OpenSSL
+software ligrary, while the low-order bits are interpreted as
+follows:</dd>
+
+<dd>
+<dl>
+<dt><tt>0x01</tt></dt>
+
+<dd>autokey enabled</dd>
+
+<dt><tt>0x02</tt></dt>
+
+<dd>Public/private key file loaded</dd>
+
+<dt><tt>0x04</tt></dt>
+
+<dd>X.509 certificate file loaded</dd>
+
+<dt><tt>0x08</tt></dt>
+
+<dd>Diffie-Hellman parameters file loaded</dd>
+
+<dt><tt>0x10</tt></dt>
+
+<dd>NIST leapseconds table file loaded</dd>
+</dl>
 </dd>
 
-<dd>The <tt>flash</tt> variable is a valuable debugging aid. It
-displays the results of the original sanity checks defined in the
-NTP specification RFC-1305 and additional ones added in NTP Version
-4. There are eleven tests called <tt>TEST1</tt> through <tt>
-TEST11</tt>. The tests are performed in a certain order designed to
-gain maximum diagnostic information while protecting against
-accidental or malicious errors. The <tt>flash</tt> variable is
-first initialized to zero. If after each set of tests one or more
-bits are set, the packet is discarded. 
+<dt><tt>hostkey <i>filestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the public/private key file was
+created.</dd>
+
+<dt><tt>hostname <i>hostname</i></tt></dt>
+
+<dd>Shows the node name of the host.</dd>
+
+<dt><tt>leapseconds <i>filestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the NIST leapseconds table file was
+created.</dd>
+
+<dt><tt>params <i>filestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the Diffie-Hellman agreement
+parameter file was created.</dd>
+
+<dt><tt>refresh <i>timestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the host public cryptographic values
+were refreshed and signed.</dd>
+
+<dt><tt>signature <i>scheme</i></tt></dt>
+
+<dd>Shows the host message digest and digital signature scheme, as
+encoded by the OpenSSL software library.</dd>
+
+<dt><tt>tai <i>offset</i></tt></dt>
+
+<dd>Shows the TAI-UTC offset in seconds obtained from the NIST
+leapseconds table.</dd>
+</dl>
+
+<p>Additional variables displayed in the peer variables list
+returned by the readvariables command include the following.</p>
+
+<dl>
+<dt><tt>flash <i>flashcode</i></tt></dt>
+
+<dd>Shows the flash code for the most recent packet received. The
+encoding and meaning of these codes is given later in this
+page.</dd>
+
+<dt><tt>jitter <i>value</i></tt></dt>
+
+<dd>Shows the estimated time error of the peer clock measured as an
+exponential average of RMS time differences.</dd>
+
+<dt><tt>unreach <i>count</i></tt></dt>
+
+<dd>Shows the value of the counter which records the number of poll
+intervals since the last valid packet was received.</dd>
+</dl>
+
+<p>When the NTPv4 daemon is compiled with the OpenSSL software
+library, additional peer variables are displayed, including the
+following:</p>
+
+<dl>
+<dt><tt>certificate <i>filestamp</i></tt></dt>
+
+<dd>Shows the NTP seconds when the server certificate file was
+created.</dd>
+
+<dt><tt>flags <i>hex</i></tt></dt>
+
+<dd>Shows the current flag bits. See the source code for the bit
+encodeing.</dd>
+
+<dt><tt>hcookie <i>hex</i></tt></dt>
+
+<dd>Shows the host cookie used in the key agreement algorithm.</dd>
+
+<dt><tt>hostname <i>hostname</i></tt></dt>
+
+<dd>Shows the node name of the server.</dd>
+
+<dt><tt>initkey <i>key</i></tt></dt>
+
+<dd>Shows the initial key used by the key list generator in the
+autokey protocol.</dd>
+
+<dt><tt>initsequence <i>index</i></tt></dt>
+
+<dd>Shows the initial index used by the key list generator in the
+autokey protocol.</dd>
+
+<dt><tt>pcookie <i>hex</i></tt></dt>
+
+<dd>Specifies the peer cookie used in the key agreement
+algorithm.</dd>
+
+<dt><tt>signature <i>scheme</i></tt></dt>
+
+<dd>Shows the server message digest and digital signature scheme,
+as encoded by the OpenSSL software library.</dd>
+
+<dt><tt>timestamp <i>time</i></tt></dt>
+
+<dd>Shows the NTP seconds when the last autokey key list was
+generated and signed.</dd>
+</dl>
+
+<h4>Flash Codes</h4>
+
+<p>The <tt>flash</tt> code is a valuable debugging aid displayed in
+the peer variables list. It shows the results of the original
+sanity checks defined in the NTP specification RFC-1305 and
+additional ones added in NTP Version 4. There are eleven tests
+designated <tt>TEST1</tt> through <tt>TEST11</tt>. The tests are
+performed in a certain order designed to gain maximum diagnostic
+information while protecting against accidental or malicious
+errors. The <tt>flash</tt> variable is first initialized to zero.
+If after each set of tests one or more bits are set, the packet is
+discarded.</p>
 
 <p>Tests <tt>TEST4</tt> and <tt>TEST5</tt> check the access
 permissions and cryptographic message digest. If any bits are set
@@ -416,9 +644,7 @@ filter and mitigation algorithms.</p>
 
 <p>The <tt>flash</tt> bits for each test read in increasing order
 from the least significant bit are defined as follows.</p>
-</dd>
 
-<dd>
 <dl>
 <dt><tt>TEST1</tt></dt>
 
@@ -459,7 +685,7 @@ unsynchronized and its clock needs to be wound up.</dd>
 <dt><tt>TEST8</tt></dt>
 
 <dd>Either the root delay or dispersion is greater than one second,
-which is highly unlikely unless the peer is synchronized to
+which is highly unlikely unless the peer is unsynchronized to
 Mars.</dd>
 
 <dt><tt>TEST9</tt></dt>
@@ -475,167 +701,8 @@ See the <a href="authopt.htm">Authentication Options</a> page.</dd>
 <dt><tt>TEST11</tt></dt>
 
 <dd>The autokey protocol has not verified the server or peer is
-authentic and has valid public key credentials. See the <a href=
+proventic and has valid public key credentials. See the <a href=
 "authopt.htm">Authentication Options</a> page.</dd>
-
-<dt>Additional system variables used by the NTP Version 4 Autokey
-support include the following:</dt>
-
-<dd>
-<dl>
-<dt><tt>certificate <i>filestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the certificate file was
-created.</dd>
-
-<dt><tt>hostname <i>host</i></tt></dt>
-
-<dd>Shows the name of the host as returned by the Unix <tt>
-gethostname()</tt> library function.</dd>
-
-<dt><tt>flags <i>hex</i></tt></dt>
-
-<dd>Shows the current flag bits, where the <tt><i>hex</i></tt> bits
-are interpreted as follows:</dd>
-
-<dd>
-<dl>
-<dt><tt>0x01</tt></dt>
-
-<dd>autokey enabled</dd>
-
-<dt><tt>0x02</tt></dt>
-
-<dd>RSA public/private key files present</dd>
-
-<dt><tt>0x04</tt></dt>
-
-<dd>PKI certificate file present</dd>
-
-<dt><tt>0x08</tt></dt>
-
-<dd>Diffie-Hellman parameters file present</dd>
-
-<dt><tt>0x10</tt></dt>
-
-<dd>NIST leapseconds table file present</dd>
-</dl>
-</dd>
-
-<dt><tt>leapseconds <i>filestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the NIST leapseconds table file was
-created.</dd>
-
-<dt><tt>params <i>filestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the Diffie-Hellman agreement
-parameter file was created.</dd>
-
-<dt><tt>publickey <i>filestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the RSA public/private key files
-were created.</dd>
-
-<dt><tt>refresh <i>timestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the public cryptographic values were
-refreshed and signed.</dd>
-
-<dt><tt>tai <i>offset</i></tt></dt>
-
-<dd>Shows the TAI-UTC offset in seconds obtained from the NIST
-leapseconds table.</dd>
-</dl>
-</dd>
-
-<dt>Additional peer variables used by the NTP Version 4 Autokey
-support include the following:</dt>
-
-<dd>
-<dl>
-<dt><tt>certificate <i>filestamp</i></tt></dt>
-
-<dd>Shows the NTP seconds when the certificate file was
-created.</dd>
-
-<dt><tt>flags <i>hex</i></tt></dt>
-
-<dd>Shows the current flag bits, where the <i>hex</i> bits are
-interpreted as in the system variable of the same name. The bits
-are set in the first autokey message received from the server and
-then reset as the associated data are obtained from the server and
-stored.</dd>
-
-<dt><tt>hcookie <i>hex</i></tt></dt>
-
-<dd>Shows the host cookie used in the key agreement algorithm.</dd>
-
-<dt><tt>initkey <i>key</i></tt></dt>
-
-<dd>Shows the initial key used by the key list generator in the
-autokey protocol.</dd>
-
-<dt><tt>initsequence <i>index</i></tt></dt>
-
-<dd>Shows the initial index used by the key list generator in the
-autokey protocol.</dd>
-
-<dt><tt>pcookie <i>hex</i></tt></dt>
-
-<dd>Specifies the peer cookie used in the key agreement
-algorithm.</dd>
-
-<dt><tt>timestamp <i>time</i></tt></dt>
-
-<dd>Shows the NTP seconds when the last autokey key list was
-generated and signed.</dd>
-</dl>
-</dd>
-</dl>
-</dd>
-
-<dt><tt>pstatus <i>assocID</i></tt></dt>
-
-<dd>Sends a read status request to the server for the given
-association. The names and values of the peer variables returned
-will be printed. Note that the status word from the header is
-displayed preceding the variables, both in hexidecimal and in
-pidgeon English.</dd>
-
-<dt><tt>readlist [ <i>assocID</i> ]</tt><br>
-<tt>rl [ <i>assocID</i> ]</tt></dt>
-
-<dd>Requests that the values of the variables in the internal
-variable list be returned by the server. If the association ID is
-omitted or is 0 the variables are assumed to be system variables.
-Otherwise they are treated as peer variables. If the internal
-variable list is empty a request is sent without data, which should
-induce the remote server to return a default display.</dd>
-
-<dt><tt>readvar <i>assocID</i> <i>variable_name</i> [ = <i>
-value</i> ] [ ...]</tt><br>
-<tt>rv <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i> ] [
-...]</tt></dt>
-
-<dd>Requests that the values of the specified variables be returned
-by the server by sending a read variables request. If the
-association ID is omitted or is given as zero the variables are
-system variables, otherwise they are peer variables and the values
-returned will be those of the corresponding peer. Omitting the
-variable list will send a request with no data which should induce
-the server to return a default display.</dd>
-
-<dt><tt>writevar <i>assocID</i> <i>variable_name</i> [ = <i>
-value</i> [ ...]</tt></dt>
-
-<dd>Like the readvar request, except the specified variables are
-written instead of read.</dd>
-
-<dt><tt>writelist [ <i>assocID</i> ]</tt></dt>
-
-<dd>Like the readlist request, except the internal list variables
-are written instead of read.</dd>
 </dl>
 
 <h4>Bugs</h4>

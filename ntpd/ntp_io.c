@@ -768,6 +768,10 @@ io_multicast_add(
 	inter_list[i].flags |= INT_MULTICAST;
 	if (i >= ninterfaces)
 	    ninterfaces = i+1;
+#ifdef DEBUG
+	if (debug)
+		printf("io_multicast_add %s\n", inet_ntoa(iaddr));
+#endif
 #else /* MCAST */
 	struct in_addr iaddr;
 

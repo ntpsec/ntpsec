@@ -18,9 +18,9 @@
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 # include "ntp_crypto.h"
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -105,19 +105,20 @@ static	struct keyword keywords[] = {
 	{ "broadcastdelay",	CONFIG_BDELAY },
 	{ "clientlimit",	CONFIG_CLIENTLIMIT },
 	{ "clientperiod",	CONFIG_CLIENTPERIOD },
-#ifdef PUBKEY
+#ifdef OPENSSL
 	{ "crypto",		CONFIG_CRYPTO },
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	{ "controlkey",		CONFIG_CONTROLKEY },
 	{ "disable",		CONFIG_DISABLE },
 	{ "driftfile",		CONFIG_DRIFTFILE },
 	{ "enable",		CONFIG_ENABLE },
 	{ "filegen",		CONFIG_FILEGEN },
 	{ "fudge",		CONFIG_FUDGE },
+	{ "includefile",	CONFIG_INCLUDEFILE },
 	{ "keys",		CONFIG_KEYS },
-#ifdef PUBKEY
+#ifdef OPENSSL
 	{ "keysdir",		CONFIG_KEYSDIR },
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 	{ "logconfig",		CONFIG_LOGCONFIG },
 	{ "logfile",		CONFIG_LOGFILE },
 	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
@@ -153,9 +154,9 @@ static	struct keyword mod_keywords[] = {
 	{ "mode",		CONF_MOD_MODE },    /* refclocks */
 	{ "noselect",		CONF_MOD_NOSELECT },
 	{ "prefer",		CONF_MOD_PREFER },
-#ifdef PUBKEY
-	{ "publickey",		CONF_MOD_PUBLICKEY },
-#endif /* PUBKEY */
+#ifdef OPENSSL
+	{ "certificate",	CONF_MOD_CERT },
+#endif /* OPENSSL */
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
 	{ "version",		CONF_MOD_VERSION },
 	{ "",			CONFIG_UNKNOWN }
@@ -272,19 +273,19 @@ static struct keyword tinker_keywords[] = {
 	{ "",			CONFIG_UNKNOWN }
 };
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 /*
  * "crypto" modifier keywords
  */
 static struct keyword crypto_keywords[] = {
-	{ "dh",			CONF_CRYPTO_DH },
-	{ "flags",		CONF_CRYPTO_FLAGS },
+	{ "signkey",		CONF_CRYPTO_SIGN },
 	{ "leap",		CONF_CRYPTO_LEAP },
-	{ "privatekey",		CONF_CRYPTO_PRIVATEKEY },
-	{ "publickey",		CONF_CRYPTO_PUBLICKEY },
+	{ "rsakey",		CONF_CRYPTO_RSA },
+	{ "certificate",	CONF_CRYPTO_CERT },
+	{ "randfile",		CONF_CRYPTO_RAND },
 	{ "",			CONFIG_UNKNOWN }
 };
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 
 /*
  * "logconfig" building blocks
@@ -326,6 +327,7 @@ static struct masks logcfg_item[] = {
 #define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	5	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
+#define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
 /*
  * Miscellaneous macros
@@ -499,7 +501,9 @@ getconfig(
 	int hmode;
 	struct sockaddr_in peeraddr;
 	struct sockaddr_in maskaddr;
-	FILE *fp;
+	FILE *fp[MAXINCLUDELEVEL+1];
+	FILE *includefile;
+	int includelevel = 0;
 	char line[MAXLINE];
 	char *(tokens[MAXTOKENS]);
 	int ntokens;
@@ -556,7 +560,7 @@ getconfig(
 	getCmdOpts(argc, argv);
 
 	if (
-	    (fp = fopen(FindConfig(config_file), "r")) == NULL
+	    (fp[0] = fopen(FindConfig(config_file), "r")) == NULL
 #ifdef HAVE_NETINFO
 	    /* If there is no config_file, try NetInfo. */
 	    && check_netinfo && !(config_netinfo = get_netinfo_config())
@@ -567,7 +571,7 @@ getconfig(
 #ifdef SYS_WINNT
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
 
-		if ((fp = fopen(FindConfig(alt_config_file), "r")) == NULL) {
+		if ((fp[0] = fopen(FindConfig(alt_config_file), "r")) == NULL) {
 
 			/*
 			 * Broadcast clients can sometimes run without
@@ -584,14 +588,21 @@ getconfig(
 	}
 
 	for (;;) {
-		if (fp)
-			tok = gettokens(fp, line, tokens, &ntokens);
+		if (fp[includelevel])
+			tok = gettokens(fp[includelevel], line, tokens, &ntokens);
 #ifdef HAVE_NETINFO
 		else
 			tok = gettokens_netinfo(config_netinfo, tokens, &ntokens);
 #endif /* HAVE_NETINFO */
 
-		if (tok == CONFIG_UNKNOWN) break;
+		if (tok == CONFIG_UNKNOWN) {
+		    if (includelevel > 0) {
+			fclose(fp[includelevel--]);
+			continue;
+		    } else {
+			break;
+		    }
+		}
 
 		switch(tok) {
 		    case CONFIG_PEER:
@@ -739,14 +750,13 @@ getconfig(
 				case CONF_MOD_IBURST:
 				    peerflags |= FLAG_IBURST;
 				    break;
-#ifdef AUTOKEY
+#ifdef OPENSSL
 				case CONF_MOD_SKEY:
 				    peerflags |= FLAG_SKEY |
 					FLAG_AUTHENABLE;
 				    break;
 
-#ifdef PUBKEY
-				case CONF_MOD_PUBLICKEY:
+				case CONF_MOD_CERT:
 				    if (i >= ntokens - 1) {
 					msyslog(LOG_ERR,
 					    "Public key file name required");
@@ -757,8 +767,7 @@ getconfig(
 					FLAG_AUTHENABLE;
  				    peerkeystr = tokens[++i];
 				    break;
-#endif /* PUBKEY */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 				case CONF_MOD_TTL:
 				    if (i >= ntokens-1) {
@@ -796,6 +805,9 @@ getconfig(
 						"configuration of %s failed",
 						ntoa(&peeraddr));
 			    }
+			    if (tok == CONFIG_MANYCASTCLIENT)
+				proto_config(PROTO_MULTICAST_ADD,
+				    peeraddr.sin_addr.s_addr, 0.);
 	
 			} else if (errflg == -1) {
 				save_resolve(tokens[1], hmode, peerversion,
@@ -816,6 +828,25 @@ getconfig(
 			    stats_config(STATS_PID_FILE, tokens[1]);
 			else
 			    stats_config(STATS_PID_FILE, (char *)0);
+			break;
+
+		    case CONFIG_INCLUDEFILE:
+			if (ntokens < 2) {
+			    msyslog(LOG_ERR, "includefile needs one argument");
+			    break;
+			}
+			if (includelevel >= MAXINCLUDELEVEL) {
+			    fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
+			    msyslog(LOG_INFO, "getconfig: Maximum include file level exceeded.");
+			    break;
+			}
+			includefile = fopen(FindConfig(tokens[1]), "r");
+			if (includefile == NULL) {
+			    fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(tokens[1]));
+			    msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(tokens[1]));
+			    break;
+			}
+			fp[++includelevel] = includefile;
 			break;
 
 		    case CONFIG_LOGFILE:
@@ -942,7 +973,7 @@ getconfig(
 				break;
 
 			    case CONF_CLOCK_PANIC:
-				loop_config(LOOP_MAX, ftemp);
+				loop_config(LOOP_PANIC, ftemp);
 				break;
 
 			    case CONF_CLOCK_PHI:
@@ -968,7 +999,7 @@ getconfig(
 			}
 			break;
 
-#ifdef AUTOKEY
+#ifdef OPENSSL
 		    case CONFIG_REVOKE:
 			if (ntokens >= 2)
 			    sys_revoke = 1 << max(atoi(tokens[1]), 10);
@@ -979,7 +1010,6 @@ getconfig(
 			    sys_automax = 1 << max(atoi(tokens[1]), 10);
 			break;
 
-#ifdef PUBKEY
 		    case CONFIG_KEYSDIR:
 			if (ntokens < 2) {
 			    msyslog(LOG_ERR,
@@ -991,7 +1021,7 @@ getconfig(
 	
 		    case CONFIG_CRYPTO:
 			if (ntokens == 1) {
-				crypto_config(CRYPTO_CONF_FLAGS	, "0");
+				crypto_config(CRYPTO_CONF_NONE, NULL);
 				break;
 			}
 			for (i = 1; i < ntokens; i++) {
@@ -1005,28 +1035,24 @@ getconfig(
 				break;
 			    }
 			    switch(temp) {
-			    case CONF_CRYPTO_FLAGS:
-				crypto_config(CRYPTO_CONF_FLAGS, tokens[i]);
-				break;
-
 			    case CONF_CRYPTO_LEAP:
 				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_DH:
-				crypto_config(CRYPTO_CONF_DH, tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_PRIVATEKEY:
+			    case CONF_CRYPTO_RSA:
 				crypto_config(CRYPTO_CONF_PRIV, tokens[i]);
 				break;
 
-			    case CONF_CRYPTO_PUBLICKEY:
-				crypto_config(CRYPTO_CONF_PUBL, tokens[i]);
+			    case CONF_CRYPTO_SIGN:
+				crypto_config(CRYPTO_CONF_SIGN, tokens[i]);
 				break;
 
 			    case CONF_CRYPTO_CERT:
 				crypto_config(CRYPTO_CONF_CERT, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_RAND:
+				crypto_config(CRYPTO_CONF_RAND, tokens[i]);
 				break;
 
 			    default:
@@ -1035,8 +1061,7 @@ getconfig(
 			    }
 			}
 			break;
-#endif /* PUBKEY */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 		    case CONFIG_RESTRICT:
 			if (ntokens < 2) {
@@ -1626,8 +1651,8 @@ getconfig(
 			break;
 		}
 	}
-	if (fp)
-		(void)fclose(fp);
+	if (fp[0])
+		(void)fclose(fp[0]);
 
 #ifdef HAVE_NETINFO
 	if (config_netinfo)
