@@ -194,7 +194,7 @@ local_clock(
 #ifndef SYS_WINNT
 	if (fabs(fp_offset) >= clock_panic && !correct_any) {
 		msyslog(LOG_ERR,
-		    "time error %.0f over %d seconds; set clock manually)",
+		    "time error %.0f over %d seconds; set clock manually",
 		    fp_offset, (int)clock_panic);
 		return (-1);
 	}

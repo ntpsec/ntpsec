@@ -13,23 +13,14 @@
 #include <time.h>
 #include <math.h>
 
-#ifdef AUDIO_CHU
-# ifdef HAVE_SYS_AUDIOIO_H
-#  include <sys/audioio.h>
-# endif /* HAVE_SYS_AUDIOIO_H */
-# ifdef HAVE_SUN_AUDIOIO_H
-#  include <sun/audioio.h>
-# endif /* HAVE_SUN_AUDIOIO_H */
-# ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
-# endif /* HAVE_SYS_IOCTL_H */
-#endif /* AUDIO_CHU */
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#ifdef AUDIO_CHU
+#include "audio.h"
+#endif /* AUDIO_CHU */
 
 #define ICOM 	1		/* undefine to suppress ICOM code */
 
@@ -198,11 +189,13 @@
 #endif /* ICOM */
 #ifdef AUDIO_CHU
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
+#ifdef ICOM
+#define NCHAN		3	/* number of channels */
+#endif /* ICOM */
 
 /*
  * Audio demodulator definitions
  */
-#define AUDIO_BUFSIZ	160	/* codec buffer size (Solaris only) */
 #define SECOND		8000	/* nominal sample rate (Hz) */
 #define BAUD		300	/* modulation rate (bps) */
 #define OFFSET		128	/* companded sample offset */
@@ -249,7 +242,6 @@
 #define STAMP		0x0080	/* too few timestamps */
 #define INYEAR		0x0100	/* valid B frame */
 #define INSYNC		0x0200	/* clock synchronized */
-#define AUTOT		0x0400	/* enable autotune */
 
 /*
  * Alarm status bits (alarm)
@@ -287,9 +279,12 @@ struct chuunit {
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
 	int	bufptr;		/* buffer index pointer */
-	int	chan;		/* frequency identifier */
 	char	ident[10];	/* transmitter frequency */
+#ifdef ICOM
+	int	chan;		/* frequency identifier */
 	int	dwell;		/* dwell minutes at current frequency */
+	int	fd_icom;	/* ICOM file descriptor */
+#endif /* ICOM */
 
 	/*
 	 * Character burst variables
@@ -365,23 +360,14 @@ static	int	chu_major	P((struct peer *));
 static	void	chu_uart	P((struct surv *, double));
 static	void	chu_rf		P((struct peer *, double));
 static	void	chu_gain	P((struct peer *));
-static	int	chu_audio	P((void));
-static	void	chu_debug	P((void));
 #endif /* AUDIO_CHU */
 
 /*
  * Global variables
  */
 static char hexchar[] = "0123456789abcdef_-=";
-#ifdef AUDIO_CHU
-#ifdef HAVE_SYS_AUDIOIO_H
-struct audio_device device;	/* audio device ident */
-#endif /* HAVE_SYS_AUDIOIO_H */
-static struct audio_info info;	/* audio device info */
-static int chu_ctl_fd;		/* audio control file descriptor */
-#endif /* AUDIO_CHU */
 #ifdef ICOM
-static double qsy[] = {3.330, 7.335, 14.670, 0}; /* frequencies (MHz) */
+static double qsy[NCHAN] = {3.33, 7.335, 14.67}; /* frequencies (MHz) */
 #endif /* ICOM */
 
 /*
@@ -421,11 +407,13 @@ chu_start(
 	/*
 	 * Open audio device
 	 */
-	fd = open("/dev/audio", O_RDWR | O_NONBLOCK, 0777);
-	if (fd == -1) {
-		perror("chu: audio");
+	fd = audio_init();
+	if (fd < 0)
 		return (0);
-	}
+#ifdef DEBUG
+	if (debug)
+		audio_show();
+#endif
 #else
 	char device[20];	/* device name */
 
@@ -467,12 +455,7 @@ chu_start(
 	memcpy((char *)&pp->refid, REFID, 4);
 	DTOLFP(CHAR, &up->charstamp);
 #ifdef AUDIO_CHU
-	up->gain = (AUDIO_MAX_GAIN - AUDIO_MIN_GAIN) / 2;
-	if (chu_audio() < 0) {
-		io_closeclock(&pp->io);
-		free(up);
-		return (0);
-	}
+	up->gain = 127;
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -498,13 +481,24 @@ chu_start(
 		temp = P_TRACE;
 #endif
 	if (peer->ttl > 0) {
-		if (icom_init("/dev/icom", B9600, temp) >= 0)
-			up->status |= AUTOT;
+		if (peer->ttl & 0x80)
+			up->fd_icom = icom_init("/dev/icom", B1200,
+			    temp);
+		else
+			up->fd_icom = icom_init("/dev/icom", B9600,
+			    temp);
 	}
-	if (up->status & AUTOT) {
-		if (icom_freq(peer->ttl, qsy[up->chan]) == 0) {
-			sprintf(up->ident, "%.1f",
-			    qsy[up->chan]); 
+	if (up->fd_icom > 0) {
+		if (icom_freq(up->fd_icom, peer->ttl & 0x7f,
+		    qsy[up->chan]) < 0) {
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_ERR,
+			    "ICOM bus error; autotune disabled");
+			up->errflg = CEVNT_FAULT;
+			close(up->fd_icom);
+			up->fd_icom = 0;
+		} else {
+			sprintf(up->ident, "%.1f", qsy[up->chan]); 
 			sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -533,6 +527,8 @@ chu_shutdown(
 	pp = peer->procptr;
 	up = (struct chuunit *)pp->unitptr;
 	io_closeclock(&pp->io);
+	if (up->fd_icom > 0)
+		close(up->fd_icom);
 	free(up);
 }
 
@@ -588,11 +584,10 @@ chu_receive(
 		up->seccnt = (up->seccnt + 1) % SECOND;
 		if (up->seccnt == 0) {
 			if (pp->sloppyclockflag & CLK_FLAG2)
-				up->port = AUDIO_LINE_IN;
+				up->port = 2;
 			else
-				up->port = AUDIO_MICROPHONE;
+				up->port = 1;
 			chu_gain(peer);
-			up->clipcnt = 0;
 		}
 		chu_rf(peer, sample);
 
@@ -1225,12 +1220,10 @@ chu_poll(
 		up->dwell = 0;
 	} else if (up->dwell < DWELL) {
 		up->dwell++;
-	} else if (up->status & AUTOT) {
+	} else if (up->fd_icom > 0) {
 		up->dwell = 0;
-		up->chan++;
-		if (qsy[up->chan] == 0)
-			up->chan = 0;
-		icom_freq(peer->ttl, qsy[up->chan]);
+		up->chan = (up->chan + 1) % NCHAN;
+		icom_freq(up->fd_icom, peer->ttl & 0x7f, qsy[up->chan]);
 		sprintf(up->ident, "%.3f", qsy[up->chan]); 
 		sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
 		record_clock_stats(&peer->srcadr, tbuf);
@@ -1495,118 +1488,22 @@ chu_gain(
 	/*
 	 * Apparently, the codec uses only the high order bits of the
 	 * gain control field. Thus, it may take awhile for changes to
-	 * wiggle the hardware bits. Set the new bits in the structure
-	 * and call AUDIO_SETINFO. Upon return, the old bits are in the
-	 * structure.
+	 * wiggle the hardware bits.
 	 */
 	if (up->clipcnt == 0) {
 		up->gain += 4;
-		if (up->gain > AUDIO_MAX_GAIN)
-			up->gain = AUDIO_MAX_GAIN;
+		if (up->gain > 255)
+			up->gain = 255;
 	} else if (up->clipcnt > SECOND / 100) {
 		up->gain -= 4;
-		if (up->gain < AUDIO_MIN_GAIN)
-			up->gain = AUDIO_MIN_GAIN;
+		if (up->gain < 0)
+			up->gain = 0;
 	}
-	AUDIO_INITINFO(&info);
-	info.record.port = up->port;
-	info.record.gain = up->gain;
-	info.record.error = 0;
-	ioctl(chu_ctl_fd, (int)AUDIO_SETINFO, &info);
-	if (info.record.error)
-		up->errflg = CEVNT_FAULT;
+	audio_gain(up->gain, up->port);
+	up->clipcnt = 0;
 }
-
-
-/*
- * chu_audio - initialize audio device
- *
- * This code works with SunOS 4.1.3 and Solaris 2.6; however, it is
- * believed generic and applicable to other systems with a minor twid
- * or two. All it does is open the device, set the buffer size (Solaris
- * only), preset the gain and set the input port. It assumes that the
- * codec sample rate (8000 Hz), precision (8 bits), number of channels
- * (1) and encoding (ITU-T G.711 mu-law companded) have been set by
- * default.
- */
-static int
-chu_audio(
-	)
-{
-	/*
-	 * Open audio control device
-	 */
-	if ((chu_ctl_fd = open("/dev/audioctl", O_RDWR)) < 0) {
-		perror("audioctl");
-		return(-1);
-	}
-#ifdef HAVE_SYS_AUDIOIO_H
-	/*
-	 * Set audio device parameters.
-	 */
-	AUDIO_INITINFO(&info);
-	info.record.buffer_size = AUDIO_BUFSIZ;
-	if (ioctl(chu_ctl_fd, (int)AUDIO_SETINFO, &info) < 0) {
-		perror("AUDIO_SETINFO");
-		close(chu_ctl_fd);
-		return(-1);
-	}
-#endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef DEBUG
-	chu_debug();
-#endif /* DEBUG */
-	return(0);
-}
-
-
-#ifdef DEBUG
-/*
- * chu_debug - display audio parameters
- *
- * This code doesn't really do anything, except satisfy curiousity and
- * verify the ioctl's work.
- */
-static void
-chu_debug(
-	)
-{
-	if (debug == 0)
-		return;
-#ifdef HAVE_SYS_AUDIOIO_H
-	ioctl(chu_ctl_fd, (int)AUDIO_GETDEV, &device);
-	printf("chu: name %s, version %s, config %s\n",
-	    device.name, device.version, device.config);
-#endif /* HAVE_SYS_AUDIOIO_H */
-	ioctl(chu_ctl_fd, (int)AUDIO_GETINFO, &info);
-	printf(
-	    "chu: samples %d, channels %d, precision %d, encoding %d\n",
-	    info.record.sample_rate, info.record.channels,
-	    info.record.precision, info.record.encoding);
-#ifdef HAVE_SYS_AUDIOIO_H
-	printf("chu: gain %d, port %d, buffer %d\n",
-	    info.record.gain, info.record.port,
-	    info.record.buffer_size);
-#else /* HAVE_SYS_AUDIOIO_H */
-	printf("chu: gain %d, port %d\n",
-	    info.record.gain, info.record.port);
-#endif /* HAVE_SYS_AUDIOIO_H */
-	printf(
-	    "chu: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d\n",
-	    info.record.samples, info.record.eof,
-	    info.record.pause, info.record.error,
-	    info.record.waiting, info.record.balance);
-#ifdef __NetBSD__
-	printf("chu: monitor %d, blocksize %d, hiwat %d, lowat %d, mode %d\n",
-	       info.monitor_gain, info.blocksize, info.hiwat, info.lowat,
-	       info.mode);
-#else /* __NetBSD__ */
-  	printf("chu: monitor %d, muted %d\n",
-	       info.monitor_gain, info.output_muted);
-#endif /* __NetBSD__ */
-	return;
-}
-#endif /* DEBUG */
 #endif /* AUDIO_CHU */
+
 
 #else
 int refclock_chu_bs;

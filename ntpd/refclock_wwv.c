@@ -11,12 +11,6 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <math.h>
-#ifdef HAVE_SYS_AUDIOIO_H
-#include <sys/audioio.h>
-#endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef HAVE_SUN_AUDIOIO_H
-#include <sun/audioio.h>
-#endif /* HAVE_SUN_AUDIOIO_H */
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
@@ -26,6 +20,7 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "audio.h"
 
 #define ICOM 	1		/* undefine to suppress ICOM code */
 
@@ -72,7 +67,6 @@
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"NONE"	/* reference ID */
 #define	DESCRIPTION	"WWV/H Audio Demodulator/Decoder" /* WRU */
-#define AUDIO_BUFSIZ	160	/* codec buffer size (Solaris only) */
 #define SECOND		8000	/* second epoch (sample rate) (Hz) */
 #define MINUTE		(SECOND * 60) /* minute epoch */
 #define OFFSET		128	/* companded sample offset */
@@ -167,7 +161,7 @@
  */
 #define ACQSN		5	/* acquisition timeout */
 #define HSPEC		15	/* second sync timeout */
-#define DIGIT		20	/* minute unit digit timeout */
+#define DIGIT		30	/* minute unit digit timeout */
 #define PANIC		(4 * 1440) /* panic timeout */
 
 /*
@@ -606,12 +600,10 @@ static	void	wwv_gain	P((struct peer *));
 static	void	wwv_tsec	P((struct wwvunit *));
 static	double	wwv_data	P((struct wwvunit *, double));
 static	int	timecode	P((struct wwvunit *, char *));
-static	int	wwv_audio	P((void));
-static	void	wwv_show	P((void));
 static	double	wwv_snr		P((double, double));
 static	int	carry		P((struct decvec *));
 static	void	wwv_newchan	P((struct peer *));
-static	void	wwv_qsy		P((struct peer *, int));
+static	int	wwv_qsy		P((struct peer *, int));
 static double qsy[NCHAN] = {2.5, 5, 10, 15, 20}; /* frequencies (MHz) */
 
 /*
@@ -626,15 +618,6 @@ struct	refclock refclock_wwv = {
 	noentry,		/* not used (old wwv_buginfo) */
 	NOFLAGS			/* not used */
 };
-
-/*
- * Global variables
- */
-#ifdef HAVE_SYS_AUDIOIO_H
-struct	audio_device device;	/* audio device ident */
-#endif /* HAVE_SYS_AUDIOIO_H */
-static struct	audio_info info; /* audio device info */
-static int	wwv_ctl_fd;	/* audio control file descriptor */
 
 
 /*
@@ -663,11 +646,13 @@ wwv_start(
 	/*
 	 * Open audio device
 	 */
-	fd = open("/dev/audio", O_RDWR | O_NONBLOCK, 0777);
-	if (fd == -1) {
-		perror("audio");
+	fd = audio_init();
+	if (fd < 0)
 		return (0);
-	}
+#ifdef DEBUG
+	if (debug)
+		audio_show();
+#endif
 
 	/*
 	 * Allocate and initialize unit structure
@@ -697,10 +682,6 @@ wwv_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	DTOLFP(1. / SECOND, &up->tick);
-	if (wwv_audio() < 0) {
-		io_closeclock(&pp->io);
-		return(0);
-	}
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -735,7 +716,7 @@ wwv_start(
 	 * Initialize the station processes for audio gain, select bit,
 	 * station/frequency identifier and reference identifier.
 	 */
-	up->gain = (AUDIO_MAX_GAIN - AUDIO_MIN_GAIN) / 2;
+	up->gain = 127;
 	for (i = 0; i < NCHAN; i++) {
 		cp = &up->mitig[i];
 		cp->gain = up->gain;
@@ -748,7 +729,9 @@ wwv_start(
 	}
 
 	/*
-	 * Initialize autotune if available. Start out at 15 MHz.
+	 * Initialize autotune if available. Start out at 15 MHz. Note
+	 * that the ICOM select code must be less than 128, so the high
+	 * order bit can be used to select the line speed.
 	 */
 #ifdef ICOM
 	temp = 0;
@@ -756,11 +739,26 @@ wwv_start(
 	if (debug > 1)
 		temp = P_TRACE;
 #endif
-	if (peer->ttl != 0)
-		up->fd_icom = icom_init("/dev/icom", B9600, temp);
+	if (peer->ttl != 0) {
+		if (peer->ttl & 0x80)
+			up->fd_icom = icom_init("/dev/icom", B1200,
+			    temp);
+		else
+			up->fd_icom = icom_init("/dev/icom", B9600,
+			    temp);
+	}
+	if (up->fd_icom > 0) {
+		up->schan = 3;
+		if ((temp = wwv_qsy(peer, up->schan)) < 0) {
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_ERR,
+			    "ICOM bus error; autotune disabled");
+			up->errflg = CEVNT_FAULT;
+			close(up->fd_icom);
+			up->fd_icom = 0;
+		}
+	}
 #endif /* ICOM */
-	up->schan = 3;
-	wwv_qsy(peer, up->schan);
 	return (1);
 }
 
@@ -780,6 +778,8 @@ wwv_shutdown(
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
 	io_closeclock(&pp->io);
+	if (up->fd_icom > 0)
+		close(up->fd_icom);
 	free(up);
 }
 
@@ -869,9 +869,9 @@ wwv_receive(
 		up->seccnt = (up->seccnt + 1) % SECOND;
 		if (up->seccnt == 0) {
 			if (pp->sloppyclockflag & CLK_FLAG2)
-			    up->port = AUDIO_LINE_IN;
+			    up->port = 2;
 			else
-			    up->port = AUDIO_MICROPHONE;
+			    up->port = 1;
 		}
 
 		/*
@@ -1185,11 +1185,7 @@ wwv_rf(
 				sp = &up->mitig[up->achan].wwv;
 			else
 				sp = &up->mitig[up->achan].wwvh;
-			if (sp->count == 0 || up->watch >= ACQSN) {
-				up->watch = sp->count = 0;
-				up->schan = (up->schan + 1) % NCHAN;
-				wwv_qsy(peer, up->schan);
-			} else if (sp->count >= AMIN) {
+			if (sp->count >= AMIN) {
 				up->watch = up->swatch = 0;
 				up->status |= MSYNC;
 				ltemp = sp->mepoch - SYNSIZ;
@@ -1204,6 +1200,11 @@ wwv_rf(
 						up->yepoch += SECOND;
 				}
 				wwv_newchan(peer);
+			} else if (sp->count == 0 || up->watch >= ACQSN)
+			    {
+				up->watch = sp->count = 0;
+				up->schan = (up->schan + 1) % NCHAN;
+				wwv_qsy(peer, up->schan);
 			}
 		} else {
 
@@ -2598,7 +2599,7 @@ wwv_newchan(
  * channel and restores the AGC for that channel. If a tunable receiver
  * is not available, just fake it.
  */
-static void
+static int
 wwv_qsy(
 	struct peer *peer,	/* peer structure pointer */
 	int	chan		/* channel */
@@ -2606,18 +2607,19 @@ wwv_qsy(
 {
 	struct refclockproc *pp;
 	struct wwvunit *up;
+	int rval = 0;
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
 	up->mitig[up->achan].gain = up->gain;
 #ifdef ICOM
-	if (up->fd_icom >= 0)
-		icom_freq(peer->ttl, qsy[chan]);
-#endif /*  */
+	if (up->fd_icom > 0)
+		rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
+		    qsy[chan]);
+#endif /* ICOM */
 	up->achan = chan;
 	up->gain = up->mitig[up->achan].gain;
-	up->clipcnt = 0;
-	return;
+	return (rval);
 }
 
 
@@ -2731,117 +2733,21 @@ wwv_gain(
 	/*
 	 * Apparently, the codec uses only the high order bits of the
 	 * gain control field. Thus, it may take awhile for changes to
-	 * wiggle the hardware bits. Set the new bits in the structure
-	 * and call AUDIO_SETINFO. Upon return, the old bits are in the
-	 * structure.
+	 * wiggle the hardware bits.
 	 */
 	if (up->clipcnt == 0) {
 		up->gain += 4;
-		if (up->gain > AUDIO_MAX_GAIN)
-			up->gain = AUDIO_MAX_GAIN;
+		if (up->gain > 255)
+			up->gain = 255;
 	} else if (up->clipcnt > SECOND / 100) {
 		up->gain -= 4;
-		if (up->gain < AUDIO_MIN_GAIN)
-			up->gain = AUDIO_MIN_GAIN;
+		if (up->gain < 0)
+			up->gain = 0;
 	}
+	audio_gain(up->gain, up->port);
 	up->clipcnt = 0;
-	AUDIO_INITINFO(&info);
-	info.record.port = up->port;
-	info.record.gain = up->gain;
-	info.record.error = 0;
-	ioctl(wwv_ctl_fd, (int)AUDIO_SETINFO, &info);
-	if (info.record.error)
-		up->errflg = CEVNT_FAULT;
 }
 
-
-/*
- * wwv_audio - initialize audio device
- *
- * This code works with SunOS 4.x and Solaris 2.x; however, it is
- * believed generic and applicable to other systems with a minor twid
- * or two. All it does is open the device, set the buffer size (Solaris
- * only), preset the gain and set the input port. It assumes that the
- * codec sample rate (8000 Hz), precision (8 bits), number of channels
- * (1) and encoding (ITU-T G.711 mu-law companded) have been set by
- * default.
- */
-static int
-wwv_audio(
-	)
-{
-	/*
-	 * Open audio control device
-	 */
-	if ((wwv_ctl_fd = open("/dev/audioctl", O_RDWR)) < 0) {
-		perror("audioctl");
-		return(-1);
-	}
-#ifdef HAVE_SYS_AUDIOIO_H
-	/*
-	 * Set audio device parameters.
-	 */
-	AUDIO_INITINFO(&info);
-	info.record.gain = (AUDIO_MAX_GAIN - AUDIO_MIN_GAIN) / 2;
-	info.record.buffer_size = AUDIO_BUFSIZ;
-	if (ioctl(wwv_ctl_fd, (int)AUDIO_SETINFO, &info) < 0) {
-		perror("AUDIO_SETINFO");
-		close(wwv_ctl_fd);
-		return(-1);
-	}
-#endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef DEBUG
-	wwv_show();
-#endif /* DEBUG */
-	return(0);
-}
-
-
-#ifdef DEBUG
-/*
- * wwv_show - display audio parameters
- *
- * This code doesn't really do anything, except satisfy curiousity and
- * verify the ioctl's work.
- */
-static void
-wwv_show(
-	)
-{
-	if (debug == 0)
-		return;
-#ifdef HAVE_SYS_AUDIOIO_H
-	ioctl(wwv_ctl_fd, (int)AUDIO_GETDEV, &device);
-	printf("wwv: name %s, version %s, config %s\n",
-	    device.name, device.version, device.config);
-#endif /* HAVE_SYS_AUDIOIO_H */
-	ioctl(wwv_ctl_fd, (int)AUDIO_GETINFO, &info);
-	printf(
-	    "wwv: samples %d, channels %d, precision %d, encoding %d\n",
-	    info.record.sample_rate, info.record.channels,
-	    info.record.precision, info.record.encoding);
-#ifdef HAVE_SYS_AUDIOIO_H
-	printf("wwv: gain %d, port %d, buffer %d\n",
-	    info.record.gain, info.record.port,
-	    info.record.buffer_size);
-#else /* HAVE_SYS_AUDIOIO_H */
-	printf("wwv: gain %d, port %d\n",
-	    info.record.gain, info.record.port);
-#endif /* HAVE_SYS_AUDIOIO_H */
-	printf(
-	    "wwv: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d\n",
-	    info.record.samples, info.record.eof,
-	    info.record.pause, info.record.error,
-	    info.record.waiting, info.record.balance);
-#ifdef __NetBSD__
-	printf("wwv: monitor %d, blocksize %d, hiwat %d, lowat %d, mode %d\n",
-	    info.monitor_gain, info.blocksize, info.hiwat, info.lowat, info.mode);
-#else /* __NetBSD__ */
-	printf("wwv: monitor %d, muted %d\n",
-	    info.monitor_gain, info.output_muted);
-#endif /* __NetBSD__ */
-}
-#endif /* DEBUG */
 
 #else
 int refclock_wwv_bs;

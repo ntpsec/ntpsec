@@ -114,7 +114,7 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	ranny.c refnumtoa.c statestr.c syssignal.c systime.c tsftomsu.c \
 	tstotv.c tvtoa.c tvtots.c uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
 	mfp_mul.c binio.c ieee754io.c gpstolfp.c recvbuff.c iosignal.c \
-	icom.c
+	icom.c audio.c
 
 libntp_a_LIBADD = @LIBOBJS@
 libntp_a_DEPENDENCIES = @LIBOBJS@
@@ -148,7 +148,7 @@ msutotsf$U.o msyslog$U.o netof$U.o numtoa$U.o numtohost$U.o \
 octtoint$U.o prettydate$U.o ranny$U.o refnumtoa$U.o statestr$U.o \
 syssignal$U.o systime$U.o tsftomsu$U.o tstotv$U.o tvtoa$U.o tvtots$U.o \
 uglydate$U.o uinttoa$U.o utvtoa$U.o ymd2yd$U.o mfp_mul$U.o binio$U.o \
-ieee754io$U.o gpstolfp$U.o recvbuff$U.o iosignal$U.o icom$U.o
+ieee754io$U.o gpstolfp$U.o recvbuff$U.o iosignal$U.o icom$U.o audio$U.o
 libntp_a_OBJECTS =  $(am_libntp_a_OBJECTS)
 AR = ar
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -167,7 +167,7 @@ GZIP_ENV = --best
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 DEP_FILES =  @AMDEP@ $(DEPDIR)/a_md5encrypt$U.Po $(DEPDIR)/adjtime$U.Po \
 $(DEPDIR)/atoint$U.Po $(DEPDIR)/atolfp$U.Po $(DEPDIR)/atouint$U.Po \
-$(DEPDIR)/authencrypt$U.Po $(DEPDIR)/authkeys$U.Po \
+$(DEPDIR)/audio$U.Po $(DEPDIR)/authencrypt$U.Po $(DEPDIR)/authkeys$U.Po \
 $(DEPDIR)/authparity$U.Po $(DEPDIR)/authreadkeys$U.Po \
 $(DEPDIR)/authusekey$U.Po $(DEPDIR)/binio$U.Po $(DEPDIR)/buftvtots$U.Po \
 $(DEPDIR)/caljulian$U.Po $(DEPDIR)/calleapwhen$U.Po \
@@ -252,6 +252,8 @@ atolfp_.c: atolfp.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/atolfp.c; then echo $(srcdir)/atolfp.c; else echo atolfp.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > atolfp_.c
 atouint_.c: atouint.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/atouint.c; then echo $(srcdir)/atouint.c; else echo atouint.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > atouint_.c
+audio_.c: audio.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/audio.c; then echo $(srcdir)/audio.c; else echo audio.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > audio_.c
 authencrypt_.c: authencrypt.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/authencrypt.c; then echo $(srcdir)/authencrypt.c; else echo authencrypt.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > authencrypt_.c
 authkeys_.c: authkeys.c $(ANSI2KNR)
@@ -374,7 +376,7 @@ utvtoa_.c: utvtoa.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/utvtoa.c; then echo $(srcdir)/utvtoa.c; else echo utvtoa.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > utvtoa_.c
 ymd2yd_.c: ymd2yd.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ymd2yd.c; then echo $(srcdir)/ymd2yd.c; else echo ymd2yd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ymd2yd_.c
-a_md5encrypt_.o adjtime_.o atoint_.o atolfp_.o atouint_.o \
+a_md5encrypt_.o adjtime_.o atoint_.o atolfp_.o atouint_.o audio_.o \
 authencrypt_.o authkeys_.o authparity_.o authreadkeys_.o authusekey_.o \
 binio_.o buftvtots_.o caljulian_.o calleapwhen_.o caltontp_.o \
 calyearstart_.o clocktime_.o clocktypes_.o decodenetnum_.o dofptoa_.o \
@@ -439,6 +441,7 @@ distdir: $(DISTFILES)
 @AMDEP@include $(DEPDIR)/atoint$U.Po
 @AMDEP@include $(DEPDIR)/atolfp$U.Po
 @AMDEP@include $(DEPDIR)/atouint$U.Po
+@AMDEP@include $(DEPDIR)/audio$U.Po
 @AMDEP@include $(DEPDIR)/authencrypt$U.Po
 @AMDEP@include $(DEPDIR)/authkeys$U.Po
 @AMDEP@include $(DEPDIR)/authparity$U.Po

@@ -38,22 +38,23 @@
  * Local function prototypes
  */
 static void doublefreq		P((double, u_char *, int));
-static int sndpkt		P((int, u_char *, u_char *));
-static int sndoctet		P((int));
-static int rcvoctet		P((void));
+static int sndpkt		P((int, int, u_char *, u_char *));
+static int sndoctet		P((int, int));
+static int rcvoctet		P((int));
 
 /*
  * Local variables
  */
 static int flags;		/* trace flags */
-static int fd_icom;		/* radio file descriptor */
 static int state;		/* fsa state */
 
+
 /*
- * icom_freq(radio, freq) - load radio frequency
+ * icom_freq(fd, ident, freq) - load radio frequency
  */
 int
 icom_freq(			/* returns 0 (ok), EIO (error) */
+	int fd,			/* file descriptor */
 	int ident,		/* ICOM radio identifier */
 	double freq		/* frequency (MHz) */
 	)
@@ -66,11 +67,12 @@ icom_freq(			/* returns 0 (ok), EIO (error) */
 	else
 		temp = 5;
 	doublefreq(freq * 1e6, &cmd[1], temp);
-	temp = sndpkt(ident, cmd, rsp);
+	temp = sndpkt(fd, ident, cmd, rsp);
 	if (temp < 1 || rsp[0] != ACK)
 		return (EIO);
 	return (0);
 }
+
 
 /*
  * doublefreq(freq, y, len) - double to ICOM frequency with padding
@@ -99,6 +101,7 @@ doublefreq(			/* returns void */
 	x[i] = FI;
 }
 
+
 /*
  * Packet routines
  *
@@ -126,7 +129,7 @@ doublefreq(			/* returns void */
  *	+------+------+------+------+------+--//--+------+
  */
 /*
- * initpkt() - initialize serial interface
+ * icom_open() - open and initialize serial interface
  *
  * This routine opens the serial interface for raw transmission; that
  * is, character-at-a-time, no stripping, checking or monkeying with the
@@ -139,23 +142,24 @@ icom_init(
 	int speed,		/* line speed */
 	int trace		/* trace flags */	)
 {
-	struct termios ttyb, *ttyp;
+	struct termios ttyb;
+	int fd;
 
 	flags = trace;
-	ttyp = &ttyb;
-	if ((fd_icom = open(device, O_RDWR, 0777)) < 0)
-		return (fd_icom);
-	tcgetattr(fd_icom, ttyp);
-	ttyp->c_iflag = 0;	/* input modes */
-	ttyp->c_oflag = 0;	/* output modes */
-	ttyp->c_cflag = IBAUD|CS8|CREAD|CLOCAL;	/* control modes */
-	ttyp->c_lflag = 0;	/* local modes */
-	ttyp->c_cc[VMIN] = 0;	/* min chars */
-	ttyp->c_cc[VTIME] = 5;	/* receive timeout */
-	cfsetispeed(ttyp, (u_int)speed);
-	cfsetospeed(ttyp, (u_int)speed);
-	tcsetattr(fd_icom, TCSANOW, ttyp);
-	return (0);
+	fd = open(device, O_RDWR, 0777);
+	if (fd < 0)
+		return (fd);
+	tcgetattr(fd, &ttyb);
+	ttyb.c_iflag = 0;	/* input modes */
+	ttyb.c_oflag = 0;	/* output modes */
+	ttyb.c_cflag = IBAUD|CS8|CREAD|CLOCAL;	/* control modes */
+	ttyb.c_lflag = 0;	/* local modes */
+	ttyb.c_cc[VMIN] = 0;	/* min chars */
+	ttyb.c_cc[VTIME] = 5;	/* receive timeout */
+	cfsetispeed(&ttyb, (u_int)speed);
+	cfsetospeed(&ttyb, (u_int)speed);
+	tcsetattr(fd, TCSANOW, &ttyb);
+	return (fd);
 }
 
 
@@ -182,6 +186,7 @@ icom_init(
  */
 static int
 sndpkt(				/* returns octet count */
+	int fd,			/* file descriptor */
 	int r,			/* radio address */
 	u_char *cmd,		/* command vector */
 	u_char *rsp		/* response vector */
@@ -189,7 +194,7 @@ sndpkt(				/* returns octet count */
 {
 	int i, j, temp;
 
-	(void)tcflush(fd_icom, TCIOFLUSH);
+	(void)tcflush(fd, TCIOFLUSH);
 	for (i = 0; i < RETRY; i++) {
 		state = S_IDLE;
 
@@ -198,18 +203,18 @@ sndpkt(				/* returns octet count */
 		 */
 		if (flags & P_TRACE)
 			printf("icom T:");
-		sndoctet(PAD);	/* send header */
-		sndoctet(PR);
-		sndoctet(PR);
-		sndoctet(r);
-		sndoctet(TX);
+		sndoctet(fd, PAD);	/* send header */
+		sndoctet(fd, PR);
+		sndoctet(fd, PR);
+		sndoctet(fd, r);
+		sndoctet(fd, TX);
 		for (j = 0; j < BMAX; j++) { /* send body */
-			if (sndoctet(cmd[j]) == FI)
+			if (sndoctet(fd, cmd[j]) == FI)
 				break;
 		}
-		while (rcvoctet() != FI); /* purge echos */
+		while (rcvoctet(fd) != FI); /* purge echos */
 		if (cmd[0] == V_FREQT || cmd[0] == V_MODET)
-			return(0);	/* shortcut for broadcast */
+			return (0);	/* shortcut for broadcast */
 
 		/*
 		 * Receive packet. First, delete all characters
@@ -220,7 +225,7 @@ sndpkt(				/* returns octet count */
 		if (flags & P_TRACE)
 			printf("\nicom R:");
 		j = 0;
-		while ((temp = rcvoctet()) != FI) {
+		while ((temp = rcvoctet(fd)) != FI) {
 			switch (state) {
 
 			case S_IDLE:
@@ -270,13 +275,14 @@ sndpkt(				/* returns octet count */
 			printf("\n");
 		if (j > 0) {
 			rsp[j++] = FI;
-			return(j);
+			return (j);
 		}
 	}
 	if (flags & P_ERMSG)
-		printf("ciom: retries exceeded\n");
-	return(0);
+		printf("icom: retries exceeded\n");
+	return (0);
 }
+
 
 /*
  * Interface routines
@@ -287,29 +293,33 @@ sndpkt(				/* returns octet count */
  * (including the trailing FI) is discarded.
  */
 /*
- * sndoctet(x) - send octet
+ * sndoctet(fd, x) - send octet
  */
 static int
 sndoctet(			/* returns octet */
+	int fd,			/* file descriptor */
 	int x			/* octet */
 	)
 {
 	u_char y;
 
 	y = (u_char)x;
-	write(fd_icom, &y, 1);
+	write(fd, &y, 1);
 	return (x);
 }
 
+
 /*
- * rcvoctet () - receive octet
+ * rcvoctet(fd) - receive octet
  */
 static int
-rcvoctet()			/* returns octet */
+rcvoctet(			/* returns octet */
+	int fd			/* file descriptor */
+	)
 {
 	u_char y;
 
-	if (read(fd_icom, &y, 1) < 1)
+	if (read(fd, &y, 1) < 1)
 		y = FI;		/* come here if timeout */
 	if (flags & P_TRACE && y != PAD)
 		printf(" %02x", y);
