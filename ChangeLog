@@ -1,3 +1,7 @@
+2000-02-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99f
+
 2000-02-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_mx4200.c: Remove the DOP-weighted position
