@@ -535,7 +535,7 @@ record_loop_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (loopstats.fp != NULL) {
-		fprintf(loopstats.fp, "%lu %s %.9f %.3f %.9f %.3f %d\n",
+		fprintf(loopstats.fp, "%lu %s %.9f %.3f %.9f %.6f %d\n",
 		    day, ulfptoa(&now, 3), offset, freq * 1e6, jitter,
 		    stability * 1e6, spoll);
 		fflush(loopstats.fp);

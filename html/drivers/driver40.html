@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
-<html>
+<html lang ="en">
 
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
@@ -11,14 +11,17 @@
     <body>
         <h3>JJY Receivers</h3>
         <hr>
+
         <h4>Synopsis</h4>
         Address: 127.127.40.<i>u</i><br>
         Reference ID: <tt>JJY</tt><br>
         Driver ID: <tt>JJY</tt><br>
         Serial Port: <tt>/dev/jjy<i>u</i></tt>; 9600 baud, 8-bits, no parity, 1 stop bit
+
         <h4>Description</h4>
         <p>This driver supports the following JJY receivers sold in Japan.</p>
         <ul>
+
             <li>Tristate Ltd. JJY01 <a href="http://www.tristate.ne.jp/">http://www.tristate.ne.jp/</a> (Japanese only)<br>
             <dl>
                 <dt>Time code format
@@ -43,9 +46,11 @@
                 <br>
                 <dt>NTP configuration ( ntp.conf )
                 <dd>
-                <p>server 127.127.40.X mode 1</p>
+                <p>server &nbsp; 127.127.40.X &nbsp; mode 1</p>
                 <br>
             </dl>
+</li>
+
             <li>C-DEX Co.,Ltd. JST2000 <a href="http://www.c-dex.co.jp/">http://www.c-dex.co.jp/</a> (Japanese only)<br>
             <dl>
                 <dt>Time code format
@@ -65,16 +70,53 @@
                 <br>
                 <dt>NTP configuration ( ntp.conf )
                 <dd>
-                <p>server 127.127.40.X mode 2</p>
+                <p>server &nbsp; 127.127.40.X &nbsp; mode 2</p>
                 <br>
             </dl>
+</li>
+
+<li><p>Echo Keisokuki Co.,Ltd. LT-2000 <a href="http://www.clock.co.jp/">http://www.clock.co.jp/</a> (Japanese only)</p>
+<dl>
+<dt>Time code format</dt>
+<dd><br>
+<table summary="CommandAndReply">
+<tr>
+<td>Command</td><td>&nbsp;</td><td>Reply</td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td></td>
+<td>( Mode 2 : Continuous ) </td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>YYMMDDWHHMMSS&lt;ST1&gt;&lt;ST2&gt;&lt;ST3&gt;&lt;ST4&gt;&lt;CR&gt;</code></td>
+</tr>
+<tr>
+<td><code>#</code></td>
+<td></td>
+<td>( Mode 1 : Request&Send )</td>
+</tr>
+</table>
+<br>
+</dd>
+<dt>NTP configuration ( ntp.conf )</dt>
+<dd>
+<p>server &nbsp; 127.127.40.X &nbsp; mode 3</p>
+</dd>
+</dl>
+</li>
+
         </ul>
-        <p>JJY is the radio station which transmites the JST (Japan Standard Time) in long wave radio. The station JJY is operated by the National Institute of Information and Communications Technology. An operating announcement and some information are avaiable from <a href="http://www.crl.go.jp/">http://www.nict.go.jp/</a> (English and Japanese) and <a href="http://jjy.crl.go.jp/">http://jjy.nict.go.jp/</a> (English and Japanese)</p>
+        <p>JJY is the radio station which transmites the JST (Japan Standard Time) in long wave radio. The station JJY is operated by the National Institute of Information and Communications Technology. An operating announcement and some information are avaiable from <a href="http://www.nict.go.jp/">http://www.nict.go.jp/</a> (English and Japanese) and <a href="http://jjy.nict.go.jp/">http://jjy.nict.go.jp/</a> (English and Japanese)</p>
         <p>The user is expected to provide a symbolic link to an available serial port device. This is typically performed by a command such as:</p>
         <p><tt>ln -s /dev/ttyS0 /dev/jjy0</tt></p>
         <p>Windows NT does not support symbolic links to device files. COM<i>X</i>: is the unit used by the driver, based on the refclock unit number, where unit 1 corresponds to COM1: and unit 3 corresponds to COM3:</p>
+
         <h4>Monitor Data</h4>
         <p>The driver writes each timecode as received to the <tt>clockstats</tt> file.</p>
+
         <h4>Fudge Factors</h4>
         <dl>
             <dt><tt>time1 <i>time</i></tt>
