@@ -1,3 +1,7 @@
+1999-07-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntp_update (UPDATE_OPTIONS): Typo.
+
 1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntp_update: Check out copyright.htm before COPYRIGHT
