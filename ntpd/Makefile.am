@@ -8,6 +8,8 @@ ntpd_LDADD = $(LDADD) -lm
 DISTCLEANFILES = .version version.c
 #EXTRA_DIST = ntpd.mak
 ETAGS_ARGS = Makefile.am
+###							Y2Kfixes
+check_PROGRAMS = check_y2k
 
 ntpd_SOURCES = map_vme.c ntp_config.c ntp_control.c ntp_io.c \
 	ntp_loopfilter.c ntp_monitor.c ntp_peer.c ntp_proto.c \

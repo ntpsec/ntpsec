@@ -42,6 +42,7 @@
  * NTP compilation environment
  */
 #include "ntp_stdlib.h"
+#include "ntpd.h"   /* indirectly include ntp.h to get YEAR_PIVOT   Y2KFixes */
 
 /*
  * select which terminal handling to use (currently only SysV variants)
@@ -744,25 +745,20 @@ dcf_to_unixtime(
 	/*
 	 * map 2 digit years to 19xx (DCF77 is a 20th century item)
 	 */
-	if (clock_time->year < 100)
-	    clock_time->year += 1900;
-
-	/*
-	 * assume that we convert timecode within the unix/UTC epoch -
-	 * prolonges validity of 2 digit years
-	 */
-	if (clock_time->year < 1998)
-	    clock_time->year += 100;		/* XXX this will do it till <2098 */
+	if ( clock_time->year < YEAR_PIVOT ) 	/* in case of	   Y2KFixes [ */
+		clock_time->year += 100;	/* *year%100, make tm_year */
+						/* *(do we need this?) */
+	if ( clock_time->year < YEAR_BREAK )	/* (failsafe if) */
+	    clock_time->year += 1900;				/* Y2KFixes ] */
 
 	/*
 	 * must have been a really bad year code - drop it
 	 */
-	if (clock_time->year < 1998)
+	if (clock_time->year < (YEAR_PIVOT + 1900) )		/* Y2KFixes */
 	{
 		SETRTC(CVT_FAIL|CVT_BADDATE);
 		return -1;
 	}
-  
 	/*
 	 * sorry, slow section here - but it's not time critical anyway
 	 */
@@ -770,10 +766,7 @@ dcf_to_unixtime(
 	/*
 	 * calculate days since 1970 (watching leap years)
 	 */
-	t =  (clock_time->year - 1970) * 365;
-	t += (clock_time->year >> 2) - (1970 >> 2);
-	t -= clock_time->year / 100 - 1970 / 100;
-	t += clock_time->year / 400 - 1970 / 400;
+	t = julian0( clock_time->year ) - julian0( 1970 );
 
   				/* month */
 	if (clock_time->month <= 0 || clock_time->month > 12)
@@ -782,8 +775,10 @@ dcf_to_unixtime(
 		return -1;		/* bad month */
 	}
 				/* adjust current leap year */
+#if 0
 	if (clock_time->month < 3 && days_per_year(clock_time->year) == 366)
 	    t--;
+#endif
 
 	/*
 	 * collect days from months excluding the current one
@@ -1213,8 +1208,135 @@ usage(
 	fprintf(stderr, "\t-f              print all databits (includes PTB private data)\n");
 	fprintf(stderr, "\t-l              print loop filter debug information\n");
 	fprintf(stderr, "\t-o              print offet average for current minute\n");
+	fprintf(stderr, "\t-Y              make internal Y2K checks then exit\n");	/* Y2KFixes */
 	fprintf(stderr, "\t-d <drift_file> specify alternate drift file\n");
 	fprintf(stderr, "\t-D <input delay>specify delay from input edge to processing in micro seconds\n");
+}
+
+/*-----------------------------------------------------------------------
+ * check_y2k() - internal check of Y2K logic
+ *	(a lot of this logic lifted from ../ntpd/check_y2k.c)
+ */
+int
+check_y2k( void )
+{ 
+    int  year;			/* current working year */
+    int  year0 = 1900;		/* sarting year for NTP time */
+    int  yearend;		/* ending year we test for NTP time.
+				    * 32-bit systems: through 2036, the
+				      **year in which NTP time overflows.
+				    * 64-bit systems: a reasonable upper
+				      **limit (well, maybe somewhat beyond
+				      **reasonable, but well before the
+				      **max time, by which time the earth
+				      **will be dead.) */
+    time_t Time;
+    struct tm LocalTime;
+
+    int Fatals, Warnings;
+#define Error(year) if ( (year)>=2036 && LocalTime.tm_year < 110 ) \
+	Warnings++; else Fatals++
+
+    Fatals = Warnings = 0;
+
+    Time = time( (time_t *)NULL );
+    LocalTime = *localtime( &Time );
+
+    year = ( sizeof( u_long ) > 4 ) 	/* save max span using year as temp */
+		? ( 400 * 3 ) 		/* three greater gregorian cycles */
+		: ((int)(0x7FFFFFFF / 365.242 / 24/60/60)* 2 ); /*32-bit limit*/
+			/* NOTE: will automacially expand test years on
+			 * 64 bit machines.... this may cause some of the
+			 * existing ntp logic to fail for years beyond
+			 * 2036 (the current 32-bit limit). If all checks
+			 * fail ONLY beyond year 2036 you may ignore such
+			 * errors, at least for a decade or so. */
+    yearend = year0 + year;
+
+    year = 1900+YEAR_PIVOT;
+    printf( "  starting year %04d\n", (int) year );
+    printf( "  ending year   %04d\n", (int) yearend );
+
+    for ( ; year < yearend; year++ )
+    {
+	clocktime_t  ct;
+	time_t	     Observed;
+	time_t	     Expected;
+	unsigned     Flag;
+	unsigned long t;
+
+	ct.day = 1;
+	ct.month = 1;
+	ct.year = year;
+	ct.hour = ct.minute = ct.second = ct.usecond = 0;
+	ct.utcoffset = 0;
+	ct.flags = 0;
+
+	Flag = 0;
+ 	Observed = dcf_to_unixtime( &ct, &Flag );
+		/* seems to be a clone of parse_to_unixtime() with
+		 * *a minor difference to arg2 type */
+	if ( ct.year != year )
+	{
+	    fprintf( stdout, 
+	       "%04d: dcf_to_unixtime(,%d) CORRUPTED ct.year: was %d\n",
+	       (int)year, (int)Flag, (int)ct.year );
+	    Error(year);
+	    break;
+	}
+	t = julian0(year) - julian0(1970);	/* Julian day from 1970 */
+	Expected = t * 24 * 60 * 60;
+	if ( Observed != Expected  ||  Flag )
+	{   /* time difference */
+	    fprintf( stdout, 
+	       "%04d: dcf_to_unixtime(,%d) FAILURE: was=%lu s/b=%lu  (%ld)\n",
+	       year, (int)Flag, 
+	       (unsigned long)Observed, (unsigned long)Expected,
+	       ((long)Observed - (long)Expected) );
+	    Error(year);
+	    break;
+	}
+
+	if ( year >= YEAR_PIVOT+1900 )
+	{
+	    /* check year % 100 code we put into dcf_to_unixtime() */
+	    ct.year = year % 100;
+	    Flag = 0;
+
+	    Observed = dcf_to_unixtime( &ct, &Flag );
+
+	    if ( Observed != Expected  ||  Flag )
+	    {   /* time difference */
+		fprintf( stdout, 
+"%04d: dcf_to_unixtime(%d,%d) FAILURE: was=%lu s/b=%lu  (%ld)\n",
+		   year, (int)ct.year, (int)Flag, 
+		   (unsigned long)Observed, (unsigned long)Expected,
+		   ((long)Observed - (long)Expected) );
+		Error(year);
+		break;
+	    }
+
+	    /* check year - 1900 code we put into dcf_to_unixtime() */
+	    ct.year = year - 1900;
+	    Flag = 0;
+
+	    Observed = dcf_to_unixtime( &ct, &Flag );
+
+	    if ( Observed != Expected  ||  Flag ) {   /* time difference */
+		    fprintf( stdout, 
+			     "%04d: dcf_to_unixtime(%d,%d) FAILURE: was=%lu s/b=%lu  (%ld)\n",
+			     year, (int)ct.year, (int)Flag, 
+			     (unsigned long)Observed, (unsigned long)Expected,
+			     ((long)Observed - (long)Expected) );
+		    Error(year);
+		break;
+	    }
+
+
+	}
+    }
+
+    return ( Fatals );
 }
 
 /*--------------------------------------------------
@@ -1339,6 +1461,10 @@ main(
 				}
 				break;
 	      
+			    case 'Y':	
+				errs=check_y2k();
+				exit( errs ? 1 : 0 );
+
 			    default:
 				fprintf(stderr, "%s: unknown option -%c\n", argv[0], c);
 				errs=1;

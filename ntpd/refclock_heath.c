@@ -361,6 +361,7 @@ heath_receive(
 		t.tm_mday = day; /* not converted to yday yet */
 		t.tm_mon = month-1; /* ditto */
 		t.tm_year = pp->year;
+		if ( t.tm_year < YEAR_PIVOT ) t.tm_year += 100;	/* Y2KFixes */
 
 		t.tm_wday = -1; /* who knows? */
 		t.tm_yday = -1; /* who knows? */
@@ -399,6 +400,7 @@ heath_receive(
 	 * Yes, I know this code incorrectly thinks that 2000 is a leap
 	 * year; but, the latest year that can be set by the DIPswitches
 	 * is 1997 anyay. Life is short.
+	 *	Hey! Year 2000 IS a leap year!			   Y2KFixes
 	 */
 	if (month < 1 || month > 12 || day < 1) {
 		refclock_report(peer, CEVNT_BADTIME);

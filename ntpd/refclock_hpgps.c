@@ -444,13 +444,13 @@ hpgps_receive(
 
 	/* 
 	 * Compute the day of year from the yyyymmdd format.
-	 * Exception noted for year 2000.
 	 */
 	if (month < 1 || month > 12 || day < 1) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-	if ((pp->year % 4) || (pp->year == 2000)) {
+
+	if ( ! isleap_4(pp->year) ) {				/* Y2KFixes */
 		/* not a leap year */
 		if (day > day1tab[month - 1]) {
 			refclock_report(peer, CEVNT_BADTIME);
@@ -490,10 +490,10 @@ hpgps_receive(
 		day--;
 		if (day < 1) {
 			pp->year--;
-			if ((pp->year % 4) || (pp->year % 400))
-			    day = 365;
-			else
+			if ( isleap_4(pp->year) )		/* Y2KFixes */
 			    day = 366;
+			else
+			    day = 365;
 		}
 	}
 

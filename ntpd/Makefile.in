@@ -98,6 +98,8 @@ VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
+							#	Y2Kfixes
+check_PROGRAMS = check_y2k
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD = version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
@@ -291,6 +293,16 @@ refclock_palisade$U.o:
 refclock_oncore$U.o:
 refclock_chronolog$U.o:
 refclock_dumbclock$U.o:
+
+								#Y2Kfixes [
+check_y2k.o: Makefile check_y2k.c ../config.h \
+	    ../include/ntp.h ../include/ntpd.h ../include/ntp_calendar.h
+	$(COMPILE) -o check_y2k.o -c check_y2k.c
+
+check_y2k: check_y2k.o 
+	@if [ -f check_y2k ]; then rm -f check_y2k; fi
+	$(LINK) $(ntpd_LDFLAGS) check_y2k.o $(ntpd_LDADD) $(LIBS)
+								#Y2Kfixes ]
 
 ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
 	@rm -f ntpd

@@ -1079,15 +1079,15 @@ arc_receive(
 
 	/* Year-2000 alert! */
 	/* Attempt to wrap 2-digit date into sensible window. */
-	/* This code was written in 1997, so that is the window start. */
-	if(pp->year < 97) { pp->year += 2000; }
-	else /* if(pp->year < 100) */ { pp->year += 1900; }
+	if(pp->year < YEAR_PIVOT) { pp->year += 100; }		/* Y2KFixes */
+	pp->year += 1900;	/* use full four-digit year	/* Y2KFixes */
 	/*
 	  Attempt to do the right thing by screaming that the code will
 	  soon break when we get to the end of its useful life.  What a
 	  hero I am...  PLEASE FIX LEAP-YEAR AND WRAP CODE IN 209X!
 	*/
-	if(pp->year >= 2090) {          /* This should get attention B^> */
+	if(pp->year >= YEAR_PIVOT+2000-2 ) {  			/* Y2KFixes */
+		/*This should get attention B^> */
 		msyslog(LOG_NOTICE,
 		       "ARCRON: fix me!  EITHER YOUR DATE IS BADLY WRONG or else I will break soon!");
 	}
@@ -1124,8 +1124,7 @@ arc_receive(
 
 	pp->day += moff[month - 1];
 
-	/* Good 'til 1st March 2100 */
-	if(((pp->year % 4) == 0) && month > 2) { pp->day++; }
+	if(isleap_4(pp->year) && month > 2) { pp->day++; }	/* Y2KFixes */
 
 	/* Convert to UTC if required */
 	if(bst & 2) {

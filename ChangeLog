@@ -1,3 +1,20 @@
+1999-08-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp.h: Y2KFixes
+	* libparse/parse.c: Ditto
+	* ntpd/Makefile.am (check_PROGRAMS): Ditto
+	* ntpd/refclock_acts.c: Ditto
+	* ntpd/refclock_arc.c (arc_receive): Ditto
+	* ntpd/refclock_heath.c: Ditto
+	* ntpd/refclock_hpgps.c: Ditto
+	* parseutil/Makefile.am (check-local): Ditto
+	* parseutil/dcfd.c (check_y2k): Ditto
+	* NOTES.y2kfixes: Ditto
+	* readme.y2kfixes: Ditto
+	* results.y2kfixes: Ditto
+	* ntpd/check_y2k.c: Ditto
+	From: y2k@y2k.labs.att.com
+
 1999-08-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Look for sys/ppstime.h.

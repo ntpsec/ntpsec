@@ -8,6 +8,55 @@
 #include "ntp_types.h"
 #include <math.h>
 
+	/* common definitions for Y2K repairs			[ Y2KFixes */
+
+		/* (this might better be put in ntp_calendar.h) */
+#define YEAR_BREAK 500		/* assume years < this are tm_year values: */
+				    /*    Break < AnyFourDigitYear
+				       && Break > Anytm_yearYear */
+#define YEAR_PIVOT 98		/* 97/98: assume years < this are year 2000+ */
+	/* FYI: official UNIX pivot year is 68/69 */
+
+  /* Number of Days since (mythical) 1.BC Gregorian to 1 January of given year*/
+#define julian0(year) \
+	(	\
+	  ( (year) * 365 ) + ( (year) > 0  	\
+		? ( ((year)+3) / 4 - ((year-1) / 100) + ((year-1) / 400) )  \
+		: 0 ) \
+	)
+
+  /* Number of days since start of NTP time to 1 January of given year */
+#define ntp0(year)  ( julian0(year) - julian0(1900) )
+
+  /* Number of days since start of UNIX time to 1 January of given year */
+#define unix0(year)  ( julian0(year) - julian0(1970) )
+
+  /* LEAP YEAR test for full 4-digit years (e.g, 1999, 2010) */
+#define isleap_4(y)     /* a TRUE and PROPER leap year test */ \
+		   ((y)%4 == 0 && !((y)%100 == 0 && !(y%400 == 0)))
+	    /* NOTE: year 2000 TRULY IS A LEAP YEAR!!! */
+
+  /* LEAP YEAR test for tm_year (struct tm) years (e.g, 99, 110) */
+#define isleap_tm(y)     /* a TRUE and PROPER leap year test */ \
+		   ((y)%4 == 0 && !((y)%100 == 0 && !(((y)+1900)%400 == 0)))
+
+  /* to convert simple two-digit years to tm_year style years:
+	if ( year < YEAR_PIVOT ) year += 100;
+
+   * to convert either two-digit OR tm_year years to four-digit years:
+	if ( year < YEAR_PIVOT ) year += 100;
+	if ( year < YEAR_BREAK ) year += 1900;
+
+ CALL TO STANDARD:
+   * As the Internet is an INTERNATIONAL network, it makes SENSE to use
+     the international standard ISO 8601 to format dates and times.
+     Basically this is yyyy-mm-dd for years and hh:mm:ss for times
+     (joining the two togeather in computer readable media calls for
+     yyyy-mm-ddThh:mm:ss, though yyyy-mm-dd hh:mm:ss is often used
+     for human readable forms even though it is not not strictly
+     valid ISO 8601). Standard time-zone offsets ([+-]hh:mm) are allowed.
+					ghealton	         ] Y2KFixes */
+
 /*
  * How to get signed characters.  On machines where signed char works,
  * use it.  On machines where signed char doesn't work, char had better

@@ -660,12 +660,14 @@ acts_receive (
 	 * short. Would only the timecode mavens resist the urge to
 	 * express months of the year and days of the month in favor of
 	 * days of the year.
+	 *	NOTE: year 2000 IS a leap year!!!  ghealton	Y2KFixes
 	 */
 	if (month < 1 || month > 12 || day < 1) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-	if (pp->year % 4) {
+	if ( pp->year <= YEAR_PIVOT ) pp->year += 100;		/* Y2KFixes */
+	if ( !isleap_tm(pp->year) ) {				/* Y2KFixes */
 		if (day > day1tab[month - 1]) {
 			refclock_report(peer, CEVNT_BADTIME);
 			return;
