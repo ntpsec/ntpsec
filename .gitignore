@@ -23,6 +23,7 @@ adjtimed/Makefile.in
 am.log
 br-flock
 clockstuff/Makefile.in
+config.h.in
 configure
 html/pic/thumbs.db
 html/thumbs.db
@@ -50,4 +51,5 @@ ntpq/Makefile.in
 ntptrace/Makefile.in
 parseutil/Makefile.in
 scripts/Makefile.in
+stamp-h.in
 util/Makefile.in
