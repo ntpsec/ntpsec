@@ -36,7 +36,8 @@ ntpd_SOURCES = cmd_args.c jupiter.h map_vme.c ntp_config.c ntp_control.c \
 	refclock_palisade.c refclock_palisade.h refclock_parse.c \
 	refclock_pcf.c refclock_pst.c refclock_ptbacts.c refclock_shm.c \
 	refclock_tpro.c refclock_trak.c refclock_true.c refclock_tt560.c \
-	refclock_ulink.c refclock_usno.c refclock_wwv.c refclock_wwvb.c
+	refclock_ulink.c refclock_usno.c refclock_wwv.c refclock_wwvb.c \
+	refclock_zyfer.c
 
 $(PROGRAMS): $(LDADD)
 

@@ -448,8 +448,9 @@ struct peer {
 #define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial receiver  */
 #define REFCLK_HOPF_PCI		39	/* hopf DCF77/GPS PCI receiver  */
 #define REFCLK_JJY		40	/* JJY receiver */
-#define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder (40) */
-#define REFCLK_MAX		41	/* Grow as needed... */
+#define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder */
+#define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
+#define REFCLK_MAX		42	/* Grow as needed... */
 
  /*
  * Macro for sockaddr_storage structures operations
