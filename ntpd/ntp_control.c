@@ -375,48 +375,6 @@ u_long numctlbadop; 	/* bad op code found in packet */
 u_long numasyncmsgs;		/* number of async messages we've sent */
 
 /*
- * Imported from the I/O module
- */
-extern struct interface *any_interface;
-
-/*
- * Imported from the main routines
- */
-extern int	debug;
-
-/*
- * Imported from the timer module
- */
-extern u_long current_time;
-
-extern struct peer *assoc_hash[];
-extern int	pps_control;	/* flag for 1-pps signal present */
-
-/*
- * Importations from the protocol module
- */
-extern u_char	sys_leap;
-extern u_char	sys_stratum;
-extern s_char	sys_precision;
-extern double	sys_rootdelay;
-extern double	sys_rootdispersion;
-extern u_long	sys_refid;
-extern l_fp sys_reftime;
-extern u_char	sys_poll;
-extern struct peer *sys_peer;
-extern int sys_authenticate;
-
-/*
- * Imported from the loop filter module
- */
-extern double	last_offset;
-extern double	drift_comp;
-extern double	sys_error;
-extern double	clock_stability;
-extern int	pll_control;
-extern int	state;
-
-/*
  * Response packet used by these routines.	Also some state information
  * so that we can handle packet formatting within a common set of
  * subroutines.  Note we try to enter data in place whenever possible,
@@ -1666,7 +1624,7 @@ ctl_getitem(
 	cp = reqpt;
 	while (!(v->flags & EOV)) {
 		if (!(v->flags & PADDING) && *cp == *(v->text)) {
-			tp = (char *)v->text;
+			tp = v->text;
 			while (*tp != '\0' && *tp != '=' && cp < reqend && *cp == *tp) {
 				cp++;
 				tp++;

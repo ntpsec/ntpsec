@@ -368,12 +368,6 @@ static char res_file[MAX_PATH];
 /*
  * Definitions of things either imported from or exported to outside
  */
-#ifdef DEBUG
-extern int debug;
-#endif
-extern int nofork;
-extern u_long sys_revoke;	/* keys revoke timeout */
-extern u_long sys_automax;	/* maximum size of autokey list */
 char	*progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
@@ -382,10 +376,6 @@ int	config_priority_override = 0;
 int	config_priority;
 #endif
 static const char *ntp_options = "aAbc:dD:f:gk:l:mnp:P:r:s:t:v:V:x";
-
-#ifdef SYS_WINNT
-extern HANDLE ResolverThreadHandle;
-#endif
 
 /*
  * Function prototypes
@@ -478,8 +468,6 @@ getstartup(
 {
 	int errflg;
 	int c;
-	extern int ntp_optind;
-	extern char *ntp_optarg;
 
 #ifdef DEBUG
 	debug = 0;		/* no debugging by default */
@@ -616,15 +604,6 @@ getconfig(
 	char alt_config_file_storage[MAX_PATH];
 #endif /* SYS_WINNT */
 	struct refclockstat clock_stat;
-	extern int ntp_optind;
-	extern char *ntp_optarg;
-	extern char *Version;
-	extern char *set_tod_using;
-	extern u_long info_auth_keyid;
-	extern int allow_set_backward;
-	extern int correct_any;
-	extern int sys_bclient; /* from ntp_proto.c */
-	extern int sys_manycastserver; /* from ntp_proto.c */
 	FILEGEN *filegen;
 
 	/*
@@ -1288,7 +1267,6 @@ getconfig(
 			case CONFIG_CONTROLKEY:
 			if (ntokens >= 2) {
 				u_long ckey;
-				extern u_long ctl_auth_keyid;
 
 				ckey = atol(tokens[1]);
 				if (ckey == 0) {
@@ -1364,8 +1342,6 @@ getconfig(
 			    }
 			
 			if (!errflg) {
-				extern struct interface *any_interface;
-				
 				if (peerversion != 0)
 				    peeraddr.sin_port = htons( (u_short) peerversion);
 				else
@@ -1628,7 +1604,6 @@ getconfig(
 					msyslog(LOG_ERR,
 						"illegal value for clientlimit command - line ignored");
 				} else {
-					extern u_long client_limit;
 					char bp[80];
 
 #ifdef DEBUG
@@ -1652,7 +1627,6 @@ getconfig(
 					msyslog(LOG_ERR,
 						"illegal value for clientperiod command - line ignored");
 				} else {
-					extern u_long client_limit_period;
 					char bp[80];
 
 					sprintf(bp, "client_limit_period=%ld", ui);
@@ -2015,12 +1989,6 @@ static void
 do_resolve_internal(void)
 {
 	int i;
-
-#if !defined(VMS)
-	extern u_long req_keyid;	/* request keyid */
-	extern char *req_file;		/* name of the file with config info */
-#endif
-	extern u_long info_auth_keyid;
 
 	if (res_fp == NULL) {
 		/* belch */

@@ -116,23 +116,6 @@
 #define NOT_INITIALIZED	-9999.	/* initial pivot longitude */
 
 /*
- * Imported from the ntp_timer module
- */
-extern u_long current_time;	/* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-#ifdef PPS
-/*
- * Imported from loop_filter module
- */
-extern int fdpps;		/* ppsclock file descriptor */
-#endif /* PPS */
-
-/*
  * MX4200 unit control structure.
  */
 struct mx4200unit {

@@ -33,7 +33,7 @@ s_char	sys_precision;		/* local clock precision */
 double	sys_rootdelay;		/* distance to current sync source */
 double	sys_rootdispersion;	/* dispersion of system clock */
 u_int32 sys_refid;		/* reference source for local clock */
-double	sys_offset; 		/* current local clock offset */
+static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
 u_long	sys_automax;		/* maximum session key lifetime */
@@ -45,7 +45,7 @@ int	sys_bclient;		/* we set our time to broadcasts */
 double	sys_bdelay; 		/* broadcast client default delay */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
-u_long	sys_authdly[2]; 	/* authentication delay shift reg */
+static	u_long sys_authdly[2]; 	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_maxd; 	/* select error (squares) */
 static	double sys_epsil;	/* system error (squares) */
@@ -63,44 +63,7 @@ u_long	sys_unknownversion;	/* don't know version packets */
 u_long	sys_badlength;		/* packets with bad length */
 u_long	sys_processed;		/* packets processed */
 u_long	sys_badauth;		/* packets dropped because of auth */
-u_long	sys_limitrejected;	/* pkts rejected due toclient count per net */
-
-/*
- * Imported from ntp_timer.c
- */
-extern u_long current_time;
-
-/*
- * Imported from ntp_io.c
- */
-extern struct interface *any_interface;
-
-/*
- * Imported from ntp_loopfilter.c
- */
-extern int kern_enable;		/* kernel discipline enabled  */
-extern int ntp_enable;		/* clock discipline enabled */
-extern int pps_update;		/* prefer peer survived and in range */
-extern int pps_control;		/* typepps && pps_update */
-extern u_char sys_poll;		/* system poll interval log2 */
-extern double allan_xpt;	/* Allan intercept */
-extern double clock_max;	/* max offset allowed before step */
-/*
- * Imported from ntp_util.c
- */
-extern int stats_control;
-
-/*
- * The peer hash table. Imported from ntp_peer.c
- */
-extern struct peer *peer_hash[];
-extern int peer_hash_count[];
-extern int peer_associations;
-
-/*
- * debug flag
- */
-extern int debug;
+u_long	sys_limitrejected;	/* pkts rejected due to client count per net */
 
 static	double	root_distance	P((struct peer *));
 static	double	clock_combine	P((struct peer **, int));
@@ -110,10 +73,6 @@ static	void	clock_update	P((void));
 #ifdef MD5
 static	void	make_keylist	P((struct peer *));
 #endif /* MD5 */
-
-#if defined SCO5_CLOCK
-extern int sco5_oldclock;
-#endif /* SCO5_CLOCK */
 
 /*
  * transmit - Transmit Procedure. See Section 3.4.2 of the
@@ -729,7 +688,6 @@ process_packet(
 	int pmode;
 #ifdef SYS_WINNT
 	DWORD dwWaitResult;
-	extern HANDLE hMutex;
 #endif /* SYS_WINNT */
 
 	/*
@@ -2054,7 +2012,7 @@ default_get_precision(void)
 		}
 	}
 	NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-		msyslog(LOG_INFO, "precision = %d usec", val);
+		msyslog(LOG_INFO, "precision = %ld usec", val);
 	if (usec >= HUSECS)
 		val = MINSTEP;	/* val <= MINSTEP; fast machine */
 	diff = HUSECS;
@@ -2186,7 +2144,6 @@ proto_config(
 		/*
 		 * Add muliticast group address
 		 */
-		sys_bclient = 1;
 		io_multicast_add(value);
 		break;
 
@@ -2194,7 +2151,6 @@ proto_config(
 		/*
 		 * Delete multicast group address
 		 */
-		sys_bclient = 1;
 		io_multicast_del(value);
 		break;
 

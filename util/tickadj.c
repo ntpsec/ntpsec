@@ -213,7 +213,7 @@ main(
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 char *progname;
-int debug;
+volatile int debug;
 
 int dokmem = 1;
 int writetickadj = 0;
@@ -243,8 +243,6 @@ main(
 {
 	int c;
 	int errflg = 0;
-	extern int ntp_optind;
-	extern char *ntp_optarg;
 	off_t tickadj_offset;
 	off_t tick_offset;
 	off_t dosync_offset;

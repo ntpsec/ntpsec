@@ -2,6 +2,9 @@
  * ntp_refclock.h - definitions for reference clock support
  */
 
+#ifndef NTP_REFCLOCK_H
+#define NTP_REFCLOCK_H
+
 #include "ntp_types.h"
 
 #if defined(HAVE_BSD_TTYS)
@@ -256,3 +259,5 @@ extern	void	refclock_report	P((struct peer *, int));
 extern	int	refclock_gtlin	P((struct recvbuf *, char *, int,
 				    l_fp *));
 #endif /* REFCLOCK */
+
+#endif /* NTP_REFCLOCK_H */

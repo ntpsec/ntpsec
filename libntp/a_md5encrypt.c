@@ -24,15 +24,6 @@
 #include "md5.h"
 #include "ntp_stdlib.h"
 
-/*
- * Inported from authkeys
- */
-extern u_long cache_keyid;
-extern u_char *cache_key;
-extern u_int cache_keylen;
-
-extern int debug;
-
 #define BLOCK_OCTETS	16	/* message digest size */
 #define NTP_MAXKEY	65535	/* max identifier from ntp.h */
 

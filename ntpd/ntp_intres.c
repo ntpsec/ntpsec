@@ -59,7 +59,7 @@ struct conf_entry {
  * confentries is a pointer to the list of configuration entries
  * we have left to do.
  */
-struct conf_entry *confentries = NULL;
+static struct conf_entry *confentries = NULL;
 
 /*
  * We take an interrupt every thirty seconds, at which time we decrement
@@ -127,12 +127,6 @@ char *req_file;		/* name of the file with configuration info */
 
 /* end stuff to be filled in */
 
-
-extern int sys_authenticate;
-extern int debug;		/* use global debug flag */
-#ifndef SYS_WINNT
-extern int errno;
-#endif /* SYS_WINNT */
 
 static	RETSIGTYPE bong		P((int));
 static	void	checkparent	P((void));
@@ -403,16 +397,6 @@ findhostaddr(
 		 * If the resolver is in use, see if the failure is
 		 * temporary.  If so, return success.
 		 */
-
-	/* (prr) aix 4.3 defines h_errno as (*(int *)h_errno_which()) for
-	 * MT purposes.  This makes the line "extern int h_errno" choke
-	 * the compiler.  Hopefully adding !defined(h_errno) fixes this
-	 * without breaking any other platforms.
-	 */
-
-#if !defined(SYS_WINNT) && !defined(h_errno)
-		extern int h_errno;
-#endif /* SYS_WINNT && h_errno */
 		if (h_errno == TRY_AGAIN)
 		    return (1);
 #endif
@@ -856,27 +840,27 @@ readconf(
 		if (intval[TOK_HMODE] != MODE_ACTIVE &&
 		    intval[TOK_HMODE] != MODE_CLIENT &&
 		    intval[TOK_HMODE] != MODE_BROADCAST) {
-			msyslog(LOG_ERR, "invalid mode (%d) in file %s",
+			msyslog(LOG_ERR, "invalid mode (%ld) in file %s",
 				intval[TOK_HMODE], name);
 			exit(1);
 		}
 
 		if (intval[TOK_VERSION] > NTP_VERSION ||
 		    intval[TOK_VERSION] < NTP_OLDVERSION) {
-			msyslog(LOG_ERR, "invalid version (%d) in file %s",
+			msyslog(LOG_ERR, "invalid version (%ld) in file %s",
 				intval[TOK_VERSION], name);
 			exit(1);
 		}
 		if (intval[TOK_MINPOLL] < NTP_MINPOLL ||
 		    intval[TOK_MINPOLL] > NTP_MAXPOLL) {
-			msyslog(LOG_ERR, "invalid MINPOLL value (%d) in file %s",
+			msyslog(LOG_ERR, "invalid MINPOLL value (%ld) in file %s",
 				intval[TOK_MINPOLL], name);
 			exit(1);
 		}
 
 		if (intval[TOK_MAXPOLL] < NTP_MINPOLL ||
 		    intval[TOK_MAXPOLL] > NTP_MAXPOLL) {
-			msyslog(LOG_ERR, "invalid MAXPOLL value (%d) in file %s",
+			msyslog(LOG_ERR, "invalid MAXPOLL value (%ld) in file %s",
 				intval[TOK_MAXPOLL], name);
 			exit(1);
 		}
@@ -884,7 +868,7 @@ readconf(
 		if ((intval[TOK_FLAGS] & ~(FLAG_AUTHENABLE | FLAG_PREFER |
 					   FLAG_BURST | FLAG_SKEY))
 		    != 0) {
-			msyslog(LOG_ERR, "invalid flags (%d) in file %s",
+			msyslog(LOG_ERR, "invalid flags (%ld) in file %s",
 				intval[TOK_FLAGS], name);
 			exit(1);
 		}

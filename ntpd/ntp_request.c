@@ -20,16 +20,7 @@
 #include "ntp_stdlib.h"
 
 #ifdef KERNEL_PLL
-# ifdef HAVE_SYS_TIMEX_H
-#  include <sys/timex.h>
-# endif
-# ifdef NTP_SYSCALLS_STD
-#  define ntp_adjtime(t)  syscall(SYS_ntp_adjtime, (t))
-# else /* NOT NTP_SYSCALLS_STD */
-#  ifdef HAVE___ADJTIMEX
-#   define ntp_adjtime(t)  __adjtimex((t))
-#  endif
-# endif /* NOT NTP_SYSCALLS_STD */
+#include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
 /*
@@ -196,7 +187,7 @@ extern u_long current_time;
 extern int pll_control;
 extern int kern_enable;
 extern int ntp_enable;
-extern int pps_control;
+extern u_long pps_control;
 
 /*
  * Imported from ntp_monitor.c
@@ -1835,7 +1826,7 @@ get_auth_info(
 	 * Importations from the authentication module
 	 */
 	extern u_long authnumkeys;
-	extern u_long authnumfreekeys;
+	extern int authnumfreekeys;
 	extern u_long authkeylookups;
 	extern u_long authkeynotfound;
 	extern u_long authencryptions;

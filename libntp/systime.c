@@ -25,8 +25,6 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
-extern int debug;
-
 #if defined SCO5_CLOCK
 int sco5_oldclock;	/* runtime detection of new clock */
 #endif /* SCO5_CLOCK */

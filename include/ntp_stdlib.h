@@ -7,9 +7,26 @@
 #include "ntp_string.h"
 #include "l_stdlib.h"
 
+/*
+ * Handle gcc __attribute__ if availabe.
+ */
+#ifndef __attribute__
+/* This feature is available in gcc versions 2.5 and later.  */
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
+#  define __attribute__(Spec) /* empty */
+# endif
+/* The __-protected variants of `format' and `printf' attributes
+   are accepted by gcc versions 2.6.4 (effectively 2.7) and later.  */
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
+#  define __format__ format
+#  define __printf__ printf
+# endif
+#endif
+
 #if defined(__STDC__)
 # include <stdarg.h>
-extern	void	msyslog		P((int, const char *, ...));
+extern	void	msyslog		P((int, const char *, ...))
+				__attribute__((__format__(__printf__, 2, 3)));
 #else
 # include <varargs.h>
 extern	void msyslog		P(());
@@ -68,6 +85,7 @@ extern	int	atoint		P((const char *, long *));
 extern	int	atouint		P((const char *, u_long *));
 extern	int	hextoint	P((const char *, u_long *));
 extern	char *	humandate	P((u_long));
+extern	char *	humanlogtime	P((void));
 extern	char *	inttoa		P((long));
 extern	char *	mfptoa		P((u_long, u_long, int));
 extern	char *	mfptoms		P((u_long, u_long, int));
@@ -91,4 +109,60 @@ extern	int	decodenetnum	P((const char *, u_int32 *));
 
 extern	const char *	FindConfig	P((const char *));
 
-extern void signal_no_reset P((int, RETSIGTYPE (*func)(int)));
+extern	void	signal_no_reset P((int, RETSIGTYPE (*func)(int)));
+
+extern	void	getauthkeys 	P((char *));
+extern	void	auth_agekeys	P((void));
+extern	void	rereadkeys	P((void));
+
+/*
+ * Variable declarations for libntp.
+ */
+
+/*
+ * Defined by any program.
+ */
+extern volatile int debug;		/* debugging flag */
+
+/* authkeys.c */
+extern u_long	authkeynotfound;	/* keys not found */
+extern u_long	authkeylookups;		/* calls to lookup keys */
+extern u_long	authnumkeys;		/* number of active keys */
+extern u_long	authkeyexpired;		/* key lifetime expirations */
+extern u_long	authkeyuncached;	/* cache misses */
+extern u_long	authencryptions;	/* calls to encrypt */
+extern u_long	authdecryptions;	/* calls to decrypt */
+
+extern int	authnumfreekeys;
+
+/*
+ * The key cache. We cache the last key we looked at here.
+ */
+extern u_long	cache_keyid;		/* key identifier */
+extern u_char *	cache_key;		/* key pointer */
+extern u_int	cache_keylen;		/* key length */
+
+/* clocktypes.c */
+extern struct clktype clktypes[];
+
+/* getopt.c */
+extern char *	ntp_optarg;		/* global argument pointer */
+extern int	ntp_optind;		/* global argv index */
+
+/* machines.c */
+extern const char *set_tod_using;
+
+/* mexit.c */
+#if defined SYS_WINNT || defined SYS_CYGWIN32
+extern HANDLE	hServDoneEvent;
+#endif
+
+/* systime.c */
+#if defined SCO5_CLOCK
+extern int	sco5_oldclock;		/* runtime detection of new clock */
+#endif /* SCO5_CLOCK */
+
+extern double	sys_maxfreq;		/* max frequency correction */
+
+/* version.c */
+extern const char *Version;		/* version declaration */

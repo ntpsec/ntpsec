@@ -86,16 +86,6 @@ struct vmedate {               /* structure returned by get_vmetime.c */
 #define GMT             0       /* hour offset from Greenwich */
 
 /*
- * Imported from ntp_timer module
- */
-extern u_long current_time;     /* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;               /* global debug flag */
-
-/*
  * VME unit control structure.
  */
 struct vmeunit {

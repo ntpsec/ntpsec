@@ -27,10 +27,6 @@
 #define SERVER_PORT_NUM     123
 #endif
 
-#if defined(VMS)
-extern char *getpass(const char *);
-#endif
-
 /*
  * Because we potentially understand a lot of commands we will run
  * interactive if connected to a terminal.
@@ -439,7 +435,7 @@ FILE *current_output;
 extern struct xcmd opcmds[];
 
 char *progname;
-int debug;
+volatile int debug;
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpq,"ntpq",ntpqmain);
@@ -1093,7 +1089,7 @@ sendrequest(
 	if (!auth && !always_auth) {
 		return sendpkt((char *)&qpkt, pktsize);
 	} else {
-		char *pass = "\0";
+		const char *pass = "\0";
 		int maclen = 0;
 		u_long my_keyid;
 
@@ -1127,7 +1123,7 @@ sendrequest(
 			}
 		}
 		info_auth_keyid = maclen;
-		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
 		authtrust(info_auth_keyid, 1);
 
 		/*
@@ -1908,7 +1904,7 @@ help(
 		    cmdsort[n++] = xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
-		qsort((void *)cmdsort, (unsigned)n, sizeof(char *), helpsort);
+		qsort(cmdsort, (unsigned)n, sizeof(char *), helpsort);
 #else
 		qsort((char *)cmdsort, n, sizeof(char *), helpsort);
 #endif
@@ -2253,9 +2249,9 @@ version(
 	FILE *fp
 	)
 {
-	extern char *Version;
 
 	(void) fprintf(fp, "%s\n", Version);
+	return;
 }
 
 

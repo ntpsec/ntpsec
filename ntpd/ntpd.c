@@ -104,7 +104,6 @@
 
 #if defined SYS_WINNT || defined SYS_CYGWIN32
 /* handles for various threads, process, and objects */
-extern HANDLE hServDoneEvent;
 HANDLE	process_handle = NULL, WorkerThreadHandle = NULL,
 	ResolverThreadHandle = NULL, TimerThreadHandle = NULL,
 	hMutex = NULL;
@@ -139,7 +138,7 @@ int initializing;
 /*
  * Version declaration
  */
-extern char *Version;
+extern const char *Version;
 
 /*
  * Alarm flag.	Imported from timer module
@@ -152,7 +151,7 @@ int was_alarmed;
 /*
  * We put this here, since the argument profile is syscall-specific
  */
-extern int syscall	P((int, struct timeval *, struct timeval *));
+extern int syscall	P((int, ...));
 #endif /* DECL_SYSCALL */
 
 #ifdef SYS_WINNT
@@ -335,7 +334,7 @@ ntpdmain(
 		uid = getuid();
 		if (uid)
 		{
-			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %d", uid);
+			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %ld", (long)uid);
 			exit(1);
 		}
 	}

@@ -34,10 +34,7 @@ FILE *syslog_file = NULL;
 
 u_long ntp_syslogmask =  ~ (u_long) 0;
 
-#ifndef VMS
-#ifndef SYS_WINNT
-extern	int errno;
-#else
+#ifdef SYS_WINNT
 HANDLE  hEventSource;
 LPTSTR lpszStrings[1];
 static WORD event_type[] = {
@@ -46,7 +43,6 @@ static WORD event_type[] = {
 	EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE,
 };
 #endif /* SYS_WINNT */
-#endif /* VMS */
 extern	char *progname;
 
 #if defined(__STDC__)
@@ -156,8 +152,6 @@ void msyslog(int level, const char *fmt, ...)
 	else
 #endif /* VMS  && SYS_VXWORKS*/
 	{
-		extern char * humanlogtime P((void));
-
 		FILE *out_file = syslog_file ? syslog_file
 			: level <= LOG_ERR ? stderr : stdout;
 		/* syslog() provides the timestamp, so if we're not using

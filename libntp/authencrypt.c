@@ -22,12 +22,6 @@
 #include "des.h"
 #include "ntp_stdlib.h"
 
-/*
- * Imported from authkeys
- */
-extern u_long cache_keyid;
-extern u_char *cache_key;
-
 #define BLOCK_OCTETS	8	/* message digest size */
 #define MAXTPKT 	128 /* max packet size */
 

@@ -74,36 +74,9 @@
 #define CLKLDISC	10	/* XXX temp tty_clk line discipline */
 #endif
 
-/*
- * The refclock configuration table. Imported from refclock_conf
- */
-extern	struct	refclock *refclock_conf[];
-extern	u_char	num_refclock_conf;
-
-/*
- * Imported from the I/O module
- */
-extern	struct	interface *any_interface;
-extern	struct	interface *loopback_interface;
-
 #if defined(PPS) || defined(HAVE_PPSAPI)
 int fdpps;			/* pps file descriptor */
 #endif /* PPS */
-
-/*
- * Imported from the timer module
- */
-extern	u_long	current_time;
-
-/*
- * Imported from the main and peer modules.
- */
-extern	int debug;
-
-/*
- * Imported from ntp_config module
- */
-extern char pps_device[];	/* PPS device name */
 
 /*
  * Type/unit peer index. Used to find the peer structure for control and

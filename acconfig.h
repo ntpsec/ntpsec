@@ -154,6 +154,12 @@
 /* Dumb generic hh:mm:ss local clock */
 #undef CLOCK_DUMBCLOCK
 
+/* define if we need to declare int errno; */
+#undef DECL_ERRNO
+
+/* define if we may declare int h_errno; */
+#undef DECL_H_ERRNO
+
 /* define if it's OK to declare char *sys_errlist[]; */
 #undef CHAR_SYS_ERRLIST
 

@@ -162,16 +162,6 @@ static	struct refclockio *refio;
 fd_set activefds;
 int maxactivefd;
 
-/*
- * Imported from ntp_timer.c
- */
-extern u_long current_time;
-
-#ifndef SYS_WINNT
-extern int errno;
-#endif /* SYS_WINNT */
-extern int debug;
-
 static	int create_sockets	P((u_int));
 static	int open_socket		P((struct sockaddr_in *, int, int));
 static	void	close_socket	P((int));
@@ -185,11 +175,6 @@ static	void	block_sigio	P((void));
 static	void	unblock_sigio	P((void));
 static	void	set_signal	P((void));
 #endif /* HAVE_SIGNALED_IO */
-#ifndef STREAMS_TLI
-# ifndef SYS_WINNT
-extern	char	*inet_ntoa	P((struct in_addr));
-# endif /* SYS_WINNT */
-#endif /* STREAMS_TLI */
 
 /*
  * init_io - initialize I/O data structures and call socket creation routine
@@ -834,7 +819,7 @@ io_multicast_add(
 		       (char *)&mreq, sizeof(mreq)) == -1)
 	    msyslog(LOG_ERR,
 		    "setsockopt IP_ADD_MEMBERSHIP fails: %m for %x / %x (%s)",
-		    mreq.imr_multiaddr, mreq.imr_interface.s_addr,
+		    mreq.imr_multiaddr.s_addr, mreq.imr_interface.s_addr,
 		    inet_ntoa(iaddr));
 	inter_list[i].flags |= INT_MULTICAST;
 	if (i >= ninterfaces) ninterfaces = i+1;
@@ -1223,7 +1208,7 @@ getrecvbufs(void)
 		register int i;
 
 		if (total_recvbufs >= RECV_TOOMANY)
-		    msyslog(LOG_ERR, "too many recvbufs allocated (%d)",
+		    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
 			    total_recvbufs);
 		else
 		{

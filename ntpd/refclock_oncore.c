@@ -329,8 +329,6 @@ static u_char oncore_cmd_En[] = { 'E', 'n', 1, 1, 0,10, 2, 0, 0, 0, 0, 0, 0, 0, 
  */
 static u_char oncore_cmd_Fa[] = { 'F', 'a' };
 
-extern int debug;	/* global debug flag */
-
 #define DEVICE1 	"/dev/oncore.serial.%d"   /* name of serial device */
 #define DEVICE2 	"/dev/oncore.pps.%d"   /* name of pps device */
 #define INIT_FILE	"/etc/ntp.oncore" /* optional init file */

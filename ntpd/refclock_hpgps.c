@@ -96,11 +96,6 @@
 #define NTCODET2        21      /* number of chars to checksum in format T2 */
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * Tables to compute the day of year from yyyymmdd timecode.
  * Viva la leap.
  */

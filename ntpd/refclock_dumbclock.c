@@ -57,12 +57,6 @@
 #define INSANE_SECONDS 3600
 
 /*
- * Imported from ntpd module
- */
-extern	int	debug;			     /* global debug flag */
-extern	u_long current_time;
-
-/*
  * Dumb clock control structure
  */
 struct dumbclock_unit {

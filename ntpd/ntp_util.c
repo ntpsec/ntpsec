@@ -72,31 +72,10 @@ static FILEGEN clockstats;
 static FILEGEN rawstats;
 
 /*
- * We query the errno to see what kind of error occurred
- * when opening the drift file.
- */
-#ifndef SYS_WINNT
-extern int errno;
-#endif /* SYS_WINNT */
-
-/*
- * Imported from ntp_proto and ntp_loopfilter.
- */
-extern double last_offset;
-extern double drift_comp;
-extern double sys_error;
-extern double clock_stability;
-extern u_char sys_poll;
-
-/*
  * This controls whether stats are written to the fileset. Provided
  * so that ntpdc can turn off stats when the file system fills up. 
  */
 int stats_control;
-
-#ifdef DEBUG
-extern int debug;
-#endif
 
 /*
  * init_util - initialize the utilities
@@ -378,7 +357,7 @@ stats_config(
 		if (strlen(value) >= sizeof(statsdir)) {
 			msyslog(LOG_ERR,
 			    "value for statsdir too long (>%d, sigh)",
-			    sizeof(statsdir)-1);
+			    (int)sizeof(statsdir)-1);
 		} else {
 			l_fp now;
 

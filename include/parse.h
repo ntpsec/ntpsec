@@ -62,7 +62,6 @@ extern unsigned int splclock P((void));
 #include <stdio.h>
 #include "ntp_syslog.h"
 #ifdef	DEBUG
-extern int debug;
 #define DD_PARSE 5
 #define DD_RAWDCF 4
 #define parseprintf(LEVEL, ARGS) if (debug > LEVEL) printf ARGS

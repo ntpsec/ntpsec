@@ -148,11 +148,6 @@ const char *types[] = {"unknown", "goes", "tm", "tcu", "omega"};
 #define typeStr(x) (((int)x<(int)t_Max) ? types[(int)x] : "?")
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * unit control structure
  */
 struct true_unit {

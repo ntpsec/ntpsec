@@ -58,10 +58,10 @@ static	int restrictcount;	/* count of entries in the restriction list */
 static	struct restrictlist *resfree;
 static	int numresfree;		/* number of structures on free list */
 
-u_long res_calls;
-u_long res_found;
-u_long res_not_found;
-u_long res_timereset;
+static	u_long res_calls;
+static	u_long res_found;
+static	u_long res_not_found;
+static	u_long res_timereset;
 
 /*
  * Parameters of the RES_LIMITED restriction option.
@@ -74,24 +74,14 @@ u_long client_limit_period;
 /*
  * count number of restriction entries referring to RES_LIMITED
  * controls activation/deactivation of monitoring
- * (with respect ro RES_LIMITED control)
+ * (with respect to RES_LIMITED control)
  */
-u_long res_limited_refcnt;
+static	u_long res_limited_refcnt;
 
 /*
  * Our initial allocation of list entries.
  */
 static	struct restrictlist resinit[INITRESLIST];
-
-/*
- * Imported from the timer module
- */
-extern u_long current_time;
-
-/*
- * debug flag
- */
-extern int debug;
 
 /*
  * init_restrict - initialize the restriction data structures
@@ -217,8 +207,6 @@ restrictions(
 	if (match->flags & RES_LIMITED) {
 		int lcnt;
 		struct mon_data *md, *this_client;
-		extern int mon_enabled;
-		extern struct mon_data mon_fifo_list, mon_mru_list;
 
 #ifdef DEBUG
 		if (debug > 2)

@@ -127,8 +127,6 @@
 
 #define DATUM_MAX_ERROR2 (DATUM_MAX_ERROR*DATUM_MAX_ERROR)
 
-extern int debug;		/* global debug flag - not relly used */
-
 /*
 ** The Datum PTS structure
 */

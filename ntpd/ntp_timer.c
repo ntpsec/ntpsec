@@ -42,11 +42,6 @@ static	u_long revoke_timer;		/* keys revoke timer */
 u_long	sys_revoke = KEY_REVOKE;	/* keys revoke timeout */
 
 /*
- * Imported from ntp_peer
- */
-extern struct peer *peer_hash[];
-
-/*
  * Statistics counter for the interested.
  */
 volatile u_long alarm_overflow;
@@ -89,7 +84,6 @@ init_timer(void)
 #  endif
 # else /* SYS_WINNT */
 	TIMECAPS tc;
-	extern HANDLE hMutex;
 	UINT wTimerRes, wTimerID;
 # endif /* SYS_WINNT */
 #if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
@@ -240,7 +234,6 @@ timer(void)
 	register struct peer *peer, *next_peer;
 	int n;
 #ifdef SYS_WINNT
-	extern HANDLE hMutex;
 	DWORD dwWaitResult;
 
 	dwWaitResult = WaitForSingleObject(
@@ -333,8 +326,6 @@ alarming(
 	int sig
 	)
 {
-	extern int initializing;	/* from main line code */
-
 #if !defined(VMS)
 	if (initializing)
 		return;

@@ -2,6 +2,9 @@
  * ntp_fp.h - definitions for NTP fixed/floating-point arithmetic
  */
 
+#ifndef NTP_FP_H
+#define NTP_FP_H
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -366,3 +369,5 @@ extern	int	adj_systime	P((double));
 #define	ulfptoa(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 0)
 #define	ulfptoms(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 1)
 #define	umfptoa(_fpi, _fpf, _ndec) dolfptoa((_fpi), (_fpf), 0, (_ndec), 0)
+
+#endif /* NTP_FP_H */

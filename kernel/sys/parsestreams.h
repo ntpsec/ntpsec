@@ -25,9 +25,11 @@
 #if defined(PARSESTREAM) && defined(HAVE_SYS_STREAM_H)
 #define PARSEKERNEL
 
-#ifndef HAVE_STRUCT_PPSCLOCKEV
-#include <sys/ppsclock.h>
+#ifdef HAVE_SYS_TERMIOS_H
+#include <sys/termios.h>
 #endif
+
+#include <sys/ppsclock.h>
 
 #define NTP_NEED_BOPS
 

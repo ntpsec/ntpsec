@@ -56,7 +56,7 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wall"
     # CFLAGS="$CFLAGS -Wtraditional"
     CFLAGS="$CFLAGS -Wshadow"
-    CFLAGS="$CFLAGS -Wwrite-strings"
+    # CFLAGS="$CFLAGS -Wwrite-strings"
     CFLAGS="$CFLAGS -Wconversion"
     CFLAGS="$CFLAGS -Wpointer-arith"
     CFLAGS="$CFLAGS -Wcast-qual"
@@ -190,7 +190,11 @@ case "$check_libnsl" in
     AC_CHECK_LIB(nsl, gethostbyaddr, , , -lsocket)
     ;;
 esac
-AC_CHECK_LIB(posix4, main)	dnl What function can we look for?
+dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
+dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
+dnl so only use one of them
+AC_CHECK_LIB(rt, sched_setscheduler, ,
+	AC_CHECK_LIB(posix4, sched_setscheduler))
 case "$check_libsocket" in
  yes)
     AC_CHECK_LIB(socket, socket)
@@ -201,7 +205,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h poll.h sched.h sgtty.h)
 AC_CHECK_HEADERS(stdlib.h string.h termio.h termios.h timepps.h)
 AC_CHECK_HEADERS(timex.h unistd.h utmp.h utmpx.h)
-AC_CHECK_HEADERS(net/if.h netinet/in.h netinet/ip.h)
+AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in.h netinet/ip.h resolv.h)
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)
 AC_CHECK_HEADERS(sys/clkdefs.h sys/file.h)
@@ -631,6 +635,41 @@ esac
 
 CFLAGS=$save_CFLAGS
 
+AC_CACHE_CHECK(if we need to declare 'errno', ac_cv_decl_errno,
+[AC_TRY_COMPILE([#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif],
+  [errno = 0;],
+  ac_cv_decl_errno=no, ac_cv_decl_errno=yes)])
+case "$ac_cv_decl_errno" in
+ yes) AC_DEFINE(DECL_ERRNO) ;;
+esac
+
+dnl FIXME: from ntpd/ntp_intres.c, but there's no info which header produces
+dnl the clash.  <resolv.h> isn't currently used.
+dnl
+dnl (prr) aix 4.3 defines h_errno as (*(int *)h_errno_which()) for
+dnl MT purposes.  This makes the line "extern int h_errno" choke
+dnl the compiler.  Hopefully adding !defined(h_errno) fixes this
+dnl without breaking any other platforms.
+dnl
+AC_CACHE_CHECK(if we may declare 'h_errno', ac_cv_decl_h_errno,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
+#ifdef HAVE_RESOLV_H
+#include <resolv.h>
+#endif],
+  [extern int h_errno;],
+  ac_cv_decl_h_errno=yes, ac_cv_decl_h_errno=no)])
+case "$ac_cv_decl_errno" in
+ yes) AC_DEFINE(DECL_H_ERRNO) ;;
+esac
+
 dnl See if char *sys_errlist[] is OK.
 dnl If you get the quoting right on the next line, you tried something I didn't.
 AC_CACHE_CHECK(if declaring 'char *sys_errlist[]' is ok, ac_cv_decl_sys_errlist,
@@ -660,7 +699,7 @@ AC_CACHE_CHECK(if declaring 'syscall()' is ok, ac_cv_decl_syscall,
 #define P(x) ()
 #endif
 ],
-  [extern int syscall P((int, struct timeval *, struct timeval *));],
+  [extern int syscall P((int, ...));],
   ac_cv_decl_syscall=yes, ac_cv_decl_syscall=no)])
 case "$ac_cv_decl_syscall" in
  yes) AC_DEFINE(DECL_SYSCALL) ;;

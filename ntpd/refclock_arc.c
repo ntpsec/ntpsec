@@ -441,16 +441,6 @@ Chose how many filter samples to keep.  Several factors are in play.
 #endif
 
 
-/*
- * Imported from ntp_timer module
- */
-extern u_long current_time;             /* Current time (s). */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;                       /* Global debug flag. */
-
 /* Length of queue of command bytes to be sent. */
 #define CMDQUEUELEN 4                   /* Enough for two cmds + each \r. */
 /* Queue tick time; interval in seconds between chars taken off queue. */

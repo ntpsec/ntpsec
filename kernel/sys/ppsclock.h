@@ -37,10 +37,12 @@
 #ifndef TIOCGPPSEV
 #define PPSCLOCKSTR	"ppsclock"
 
+#ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
 	struct timeval tv;
 	u_int serial;
 };
+#endif
 
 #if defined(__STDC__) || defined(SYS_HPUX)
 #ifdef	_IOR

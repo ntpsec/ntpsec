@@ -98,29 +98,9 @@
 #define FLAG_PPS	0x02	/* ppsclock heard from */
 #define FLAG_AUX	0x04	/* auxiliary PPS source */
 
-/*
- * Imported from ntp_timer module
- */
-extern u_long current_time;	/* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-extern u_long current_time;
-
-/*
- * Imported from ntp_loopfilter module
- */
-#ifdef PPS
-extern int fdpps;		/* pps file descriptor */
-#endif /* PPS */
-
 #ifdef PPS_SAMPLE
 static struct peer *pps_peer;	/* atom driver for auxiliary PPS sources */
 #endif
-
-extern int pps_update;		/* prefer peer valid update */
 
 #ifdef TTYCLK
 static	void	atom_receive	P((struct recvbuf *));

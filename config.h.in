@@ -209,6 +209,12 @@
 /* Dumb generic hh:mm:ss local clock */
 #undef CLOCK_DUMBCLOCK
 
+/* define if we need to declare int errno; */
+#undef DECL_ERRNO
+
+/* define if we may declare int h_errno; */
+#undef DECL_H_ERRNO
+
 /* define if it's OK to declare char *sys_errlist[]; */
 #undef CHAR_SYS_ERRLIST
 
@@ -642,6 +648,9 @@
 /* Define if you have the </sys/sync/sema.h> header file.  */
 #undef HAVE__SYS_SYNC_SEMA_H
 
+/* Define if you have the <arpa/nameser.h> header file.  */
+#undef HAVE_ARPA_NAMESER_H
+
 /* Define if you have the <bstring.h> header file.  */
 #undef HAVE_BSTRING_H
 
@@ -668,6 +677,9 @@
 
 /* Define if you have the <poll.h> header file.  */
 #undef HAVE_POLL_H
+
+/* Define if you have the <resolv.h> header file.  */
+#undef HAVE_RESOLV_H
 
 /* Define if you have the <sched.h> header file.  */
 #undef HAVE_SCHED_H
@@ -810,8 +822,8 @@
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 
-/* Define if you have the posix4 library (-lposix4).  */
-#undef HAVE_LIBPOSIX4
+/* Define if you have the rt library (-lrt).  */
+#undef HAVE_LIBRT
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET

@@ -88,14 +88,14 @@ int assoc_hash_count[HASH_SIZE];
 /*
  * The free list.  Clean structures only, please.
  */
-struct peer *peer_free;
+static struct peer *peer_free;
 int peer_free_count;
 
 /*
  * Association ID.  We initialize this value randomly, the assign a new
  * value every time the peer structure is incremented.
  */
-u_short current_association_ID;
+static u_short current_association_ID;
 
 /*
  * Memory allocation watermarks.
@@ -108,26 +108,11 @@ u_short current_association_ID;
  */
 u_long peer_timereset;		/* time stat counters were zeroed */
 u_long findpeer_calls;		/* number of calls to findpeer */
-u_long assocpeer_calls;		/* number of calls to findpeerbyassoc */
+static u_long assocpeer_calls;	/* number of calls to findpeerbyassoc */
 u_long peer_allocations;	/* number of allocations from the free list */
 u_long peer_demobilizations;	/* number of structs freed to free list */
 int total_peer_structs;		/* number of peer structs in circulation */
 int peer_associations;		/* number of active associations */
-
-/*
- * default interface.  Imported from the io module.
- */
-extern struct interface *any_interface;
-
-/*
- * Imported from ntp_proto
- */
-extern u_long sys_private;	/* our little secret */
-
-/*
- * Imported from the timer module.
- */
-extern u_long current_time;
 
 /*
  * Our initial allocation of peer space
@@ -139,9 +124,7 @@ static struct peer init_peer_alloc[INIT_PEER_ALLOC];
  * we try to get their poll update timers initialized to different values
  * to prevent us from sending big clumps of data all at once.
  */
-u_long init_peer_starttime;
-extern int initializing;
-extern int debug;
+static u_long init_peer_starttime;
 
 static	void	getmorepeermem	P((void));
 static	void	key_expire	P((struct peer *));
@@ -599,8 +582,6 @@ newpeer(
 	 * Some dirt here.  Some of the initialization requires
 	 * knowlege of our system state.
 	 */
-	extern s_char sys_precision;
-	
 	if (peer_free_count == 0)
 	    getmorepeermem();
 

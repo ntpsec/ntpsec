@@ -90,24 +90,6 @@
 #define TIMECODE	(MSGCNT+16)	/* timecode timeout (s) */
 
 /*
- * Imported from ntp_timer module
- */
-extern	u_long	current_time;	/* current time (s) */
-extern	u_long	last_time;	/* last clock update time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-
-/*
- * Imported from ntp_proto module
- */
-extern	struct peer *sys_peer;	/* who is running the show */
-extern	u_char sys_poll;	/* log2 of system poll interval */
-extern	struct peer *sys_peer;	/* system peer structure pointer */
-
-/*
  * Unit control structure
  */
 struct usnounit {

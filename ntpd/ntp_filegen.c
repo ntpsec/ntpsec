@@ -40,18 +40,6 @@
 
 
 /*
- * to check reason on open failure
- */
-#ifndef SYS_WINNT
-extern int errno;
-#endif /* SYS_WINNT */
-
-/*
- * imported from timer
- */
-extern u_long current_time;
-
-/*
  * redefine this if your system dislikes filename suffixes like
  * X.19910101 or X.1992W50 or ....
  */
@@ -202,8 +190,8 @@ filegen_open(
 				/*
 				 * Ehh? Not a regular file ?? strange !!!!
 				 */
-				msyslog(LOG_ERR, "expected regular file for %s (found mode 0%o)",
-					basename, stats.st_mode);
+				msyslog(LOG_ERR, "expected regular file for %s (found mode 0%lo)",
+					basename, (unsigned long)stats.st_mode);
 			}
 		} else {
 			/*

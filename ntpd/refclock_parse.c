@@ -1193,9 +1193,6 @@ static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 static struct parseunit *parseunits[MAXUNITS];
 
-extern u_long current_time;
-extern s_char sys_precision;
-
 static int notice = 0;
 
 #define PARSE_STATETIME(parse, i) ((parse->generic->currentstatus == i) ? parse->statetime[i] + current_time - parse->lastchange : parse->statetime[i])
@@ -1275,7 +1272,7 @@ list_err(
 
 	if (do_it && err->err_suppressed)
 	{
-		msyslog(LOG_INFO, "PARSE receiver #%d: %d message%s suppressed, error condition class persists for %s",
+		msyslog(LOG_INFO, "PARSE receiver #%d: %ld message%s suppressed, error condition class persists for %s",
 			CLK_UNIT(parse->peer), err->err_suppressed, (err->err_suppressed == 1) ? " was" : "s where",
 			l_mktime(current_time - err->err_started));
 		err->err_suppressed = 0;
@@ -1469,7 +1466,7 @@ static bind_t io_bindings[] =
 			  if (!buftvtots((const char *)&(&(_X_))->tv, &ts)) \
 			    {                                               \
                               ERR(ERR_BADDATA)	 		            \
-                                msyslog(LOG_ERR,"parse: stream_receive: timestamp conversion error (buftvtots) (%s) (%d.%06d) ", (_Y_), (&(_X_))->tv.tv_sec, (&(_X_))->tv.tv_usec);\
+                                msyslog(LOG_ERR,"parse: stream_receive: timestamp conversion error (buftvtots) (%s) (%ld.%06ld) ", (_Y_), (long)(&(_X_))->tv.tv_sec, (long)(&(_X_))->tv.tv_usec);\
 			      return;                                       \
 			    }                                               \
 			  else                                              \
@@ -1731,7 +1728,7 @@ stream_receive(
 	{
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR,"PARSE receiver #%d: stream_receive: bad size (got %d expected %d)",
-				CLK_UNIT(parse->peer), rbufp->recv_length, sizeof(parsetime_t));
+				CLK_UNIT(parse->peer), rbufp->recv_length, (int)sizeof(parsetime_t));
 		parse->generic->baddata++;
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
@@ -1749,12 +1746,12 @@ stream_receive(
 		   CLK_UNIT(parse->peer),
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
-		   parsetime.parse_time.tv.tv_sec,
-		   parsetime.parse_time.tv.tv_usec,
-		   parsetime.parse_stime.tv.tv_sec,
-		   parsetime.parse_stime.tv.tv_usec,
-		   parsetime.parse_ptime.tv.tv_sec,
-		   parsetime.parse_ptime.tv.tv_usec);
+		   (long)parsetime.parse_time.tv.tv_sec,
+		   (long)parsetime.parse_time.tv.tv_usec,
+		   (long)parsetime.parse_stime.tv.tv_sec,
+		   (long)parsetime.parse_stime.tv.tv_usec,
+		   (long)parsetime.parse_ptime.tv.tv_sec,
+		   (long)parsetime.parse_ptime.tv.tv_usec);
 	  }
 #endif
 
@@ -2005,7 +2002,7 @@ local_receive(
 	{
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %d expected %d)",
-				CLK_UNIT(parse->peer), rbufp->recv_length, sizeof(parsetime_t));
+				CLK_UNIT(parse->peer), rbufp->recv_length, (int)sizeof(parsetime_t));
 		parse->generic->baddata++;
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
@@ -2023,12 +2020,12 @@ local_receive(
 		   CLK_UNIT(parse->peer),
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
-		   parsetime.parse_time.tv.tv_sec,
-		   parsetime.parse_time.tv.tv_usec,
-		   parsetime.parse_stime.tv.tv_sec,
-		   parsetime.parse_stime.tv.tv_usec,
-		   parsetime.parse_ptime.tv.tv_sec,
-		   parsetime.parse_ptime.tv.tv_usec);
+		   (long)parsetime.parse_time.tv.tv_sec,
+		   (long)parsetime.parse_time.tv.tv_usec,
+		   (long)parsetime.parse_stime.tv.tv_sec,
+		   (long)parsetime.parse_stime.tv.tv_usec,
+		   (long)parsetime.parse_ptime.tv.tv_sec,
+		   (long)parsetime.parse_ptime.tv.tv_usec);
 	  }
 #endif
 
@@ -2305,7 +2302,7 @@ parse_statistics(
 				    percent = 10000;
 
 				if (s_time)
-				    msyslog(LOG_INFO, "PARSE receiver #%d: state %18s: %13s (%3d.%02d%%)",
+				    msyslog(LOG_INFO, "PARSE receiver #%d: state %18s: %13s (%3ld.%02ld%%)",
 					    CLK_UNIT(parse->peer),
 					    clockstatus((unsigned int)i),
 					    l_mktime(s_time),
@@ -2616,7 +2613,7 @@ parse_start(
 
 	if (parse->binding == (bind_t *)0)
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.");
+			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.", CLK_UNIT(parse->peer));
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 			return 0;			/* well, ok - special initialisation broke */
 		}      
@@ -3697,7 +3694,7 @@ gps16x_message(
 						NLOG(NLOG_CLOCKSTATUS)
 							ERR(ERR_BADSTATUS)
 							msyslog(LOG_ERR,"PARSE receiver #%d: ANTENNA FAILURE: %s",
-								p, CLK_UNIT(parse->peer));
+								CLK_UNIT(parse->peer), p);
 						
 						p += strlen(p);
 						mbg_tm_str((unsigned char **)&p, &antinfo.tm_disconn);
@@ -3911,7 +3908,7 @@ gps16x_message(
 		}
 		else
 		{
-			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%x), data_len = %d, data_csum = 0x%x (expected 0x%x)",
+			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%lx), data_len = %d, data_csum = 0x%x (expected 0x%lx)",
 				CLK_UNIT(parse->peer),
 				header.gps_hdr_csum, mbg_csum(parsetime->parse_msg + 1, 6),
 				header.gps_len,
@@ -3975,9 +3972,9 @@ gps16x_poll(
 		
 		mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
 		printf("PARSE receiver #%d: transmitted message #%ld (%d bytes) >%s<\n",
-			CLK_UNIT(parse->peer),
+		       CLK_UNIT(parse->peer),
 		       parse->localstate - 1,
-		       outp - cmd_buffer,
+		       (int)(outp - cmd_buffer),
 		       buffer); 
 	}
 #endif
@@ -3993,7 +3990,7 @@ gps16x_poll(
 	if (rtc != outp - cmd_buffer)
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd incomplete (%d of %d bytes sent)", CLK_UNIT(parse->peer), rtc, outp - cmd_buffer);
+			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd incomplete (%d of %d bytes sent)", CLK_UNIT(parse->peer), rtc, (int)(outp - cmd_buffer));
 	}
 
 	clear_err(parse, ERR_BADIO);
@@ -4176,7 +4173,7 @@ trimbletaip_event(
 					    if (rtc != strlen(*iv))
 					    {
 						    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: failed to send cmd incomplete (%d of %d bytes sent)",
-							    CLK_UNIT(parse->peer), rtc, strlen(*iv));
+							    CLK_UNIT(parse->peer), rtc, (int)strlen(*iv));
 						    return;
 					    }
 				    }

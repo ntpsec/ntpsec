@@ -10,10 +10,6 @@
 #include "ntp_types.h"
 #include "ntp_fp.h"
 
-#ifdef DEBUG
-extern int debug;
-#endif
-
 #define LOW_MASK  (u_int32)((1<<(FRACTION_PREC/2))-1)
 #define HIGH_MASK (u_int32)(LOW_MASK << (FRACTION_PREC/2))
 

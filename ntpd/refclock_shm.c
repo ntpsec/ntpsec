@@ -54,16 +54,6 @@
 #define NSAMPLES        3       /* stages of median filter */
 
 /*
- * Imported from ntp_timer module
- */
-extern u_long current_time;     /* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;               /* global debug flag */
-
-/*
  * Function prototypes
  */
 static  int     shm_start       (int, struct peer *);

@@ -13,12 +13,6 @@
 # include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifndef HAVE___NTP_GETTIME
-# ifdef HAVE___ADJTIMEX
-#  define SUBST_ADJTIMEX 1
-# endif
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>
@@ -27,50 +21,13 @@
 #include <setjmp.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
+#include "ntp_syscall.h"
 #include "ntp_stdlib.h"
 
-#ifdef HAVE_SYS_TIMEX_H
-# include <sys/timex.h>
-#endif
-# ifdef NTP_SYSCALLS_STD
-
-#ifdef HAVE_SYS_TIMEX_H
-#include <sys/timex.h>
-#endif
-
-#ifndef	SYS_DECOSF1
-# define BADCALL -1		/* this is supposed to be a bad syscall */
-#endif /* SYS_DECOSF1 */
-
-# ifdef DECL_SYSCALL
-extern int syscall      P((int, void *, ...));
-# endif	/* DECL_SYSCALL */
-
-#  define ntp_gettime(t)  syscall(SYS_ntp_gettime, (t))
-#  define ntp_adjtime(t)  syscall(SYS_ntp_adjtime, (t))
-# else /* NOT NTP_SYSCALLS_STD */
-#  ifdef HAVE___NTP_GETTIME
-#   define ntp_gettime(t)  __ntp_gettime((t))
-#  endif
-#  ifdef HAVE___ADJTIMEX
-#   define ntp_adjtime(t)  __adjtimex((t))
-inline	int ntp_gettime(struct ntptimeval *ntv)
-{
-	struct timex	tntx;
-	int		result;
-	tntx.modes = 0;
-	result = __adjtimex (&tntx);
-	ntv->time = tntx.time;
-	ntv->maxerror = tntx.maxerror;
-	ntv->esterror = tntx.esterror;
-	return(result);
-}
-#  endif
-# endif /* NOT NTP_SYSCALLS_STD */
-
-#ifdef SUBST_ADJTIMEX
-int adjtimex (struct timex *);
-#define ntp_gettime(t)  ((t)->modes=0,adjtimex(t))
+#ifdef NTP_SYSCALLS_STD
+# ifndef SYS_DECOSF1
+#  define BADCALL -1		/* this is supposed to be a bad syscall */
+# endif /* SYS_DECOSF1 */
 #endif
 
 #define TIMEX_MOD_BITS \
@@ -95,7 +52,7 @@ extern int syscall	P((int, void *, ...));
 #endif /* NTP_SYSCALLS_LIBC */
 char *sprintb		P((u_int, const char *));
 const char *timex_state	P((int));
-int debug = 0;
+volatile int debug = 0;
 
 #ifdef SIGSYS
 void pll_trap		P((int));

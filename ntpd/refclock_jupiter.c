@@ -114,17 +114,7 @@ char *strerror(int);
 #define WEEKSECS (7 * 24 * 60 * 60)
 
 /*
- * Imported from the ntp_timer module
- */
-extern u_long current_time;	/* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
- * Juptier unit control structure.
+ * Jupiter unit control structure.
  */
 struct jupiterunit {
 	u_int  pollcnt;			/* poll message counter */

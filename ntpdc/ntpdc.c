@@ -27,10 +27,6 @@
 #define SERVER_PORT_NUM     123
 #endif
 
-#if defined(VMS)
-extern char *getpass(const char *);
-#endif
-
 /*
  * Because we now potentially understand a lot of commands (and
  * it requires a lot of commands to talk to ntpd) we will run
@@ -240,7 +236,7 @@ static	FILE *current_output;
 extern struct xcmd opcmds[];
 
 char *progname;
-int debug;
+volatile int debug;
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpdc,"ntpdc",ntpdcmain);
@@ -774,7 +770,7 @@ sendrequest(
 	} else {
 		l_fp ts;
 		int maclen = 0;
-		char *pass = "\0";
+		const char *pass = "\0";
 
 		if (info_auth_keyid == 0) {
 			maclen = getkeyid("Keyid: ");
@@ -794,7 +790,7 @@ sendrequest(
 				return (1);
 			}
 		}
-		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
 		authtrust(info_auth_keyid, 1);
 		qpkt.auth_seq = AUTH_SEQ(1, 0);
 		qpkt.keyid = htonl(info_auth_keyid);
@@ -1287,7 +1283,7 @@ help(
 		    cmdsort[n++] = xcp->keyword;
 
 #ifdef QSORT_USES_VOID_P
-		qsort((void *)cmdsort, n, sizeof(char *), helpsort);
+		qsort(cmdsort, n, sizeof(char *), helpsort);
 #else
 		qsort((char *)cmdsort, n, sizeof(char *), helpsort);
 #endif
@@ -1623,9 +1619,9 @@ version(
 	FILE *fp
 	)
 {
-	extern char *Version;
 
 	(void) fprintf(fp, "%s\n", Version);
+	return;
 }
 
 

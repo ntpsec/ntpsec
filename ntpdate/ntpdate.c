@@ -90,7 +90,7 @@ static timer_t ntpdate_timerid;
 /*
  * Debugging flag
  */
-int debug = 0;
+volatile int debug = 0;
 
 /*
  * File descriptor masks etc. for call to select
@@ -177,14 +177,9 @@ char key_file_storage[MAX_PATH+1], *key_file ;
 /*
  * Miscellaneous flags
  */
-extern	int syslogit;
 int verbose = 0;
 int always_step = 0;
 int never_step = 0;
-
-#ifndef SYS_WINNT
-extern int errno;
-#endif /* SYS_WINNT */
 
 int 	ntpdatemain P((int, char **));
 static	void	transmit	P((struct server *));
@@ -224,8 +219,6 @@ CALL(ntpdate,"ntpdate",ntpdatemain);
 
 void clear_globals()
 {
-  extern int ntp_optind;
-
   /*
    * Debugging flag
    */
@@ -309,9 +302,6 @@ ntpdatemain (
 	l_fp tmp;
 	int errflg;
 	int c;
-	extern char *ntp_optarg;
-	extern int ntp_optind;
-	extern char *Version;
 #ifdef SYS_WINNT
 	HANDLE process_handle;
 
@@ -1352,7 +1342,6 @@ init_alarm(void)
 # endif
 #else
 	TIMECAPS tc;
-	extern HANDLE hMutex;
 	UINT wTimerRes, wTimerID;
 # endif /* SYS_WINNT */
 #if defined SYS_CYGWIN32 || defined SYS_WINNT

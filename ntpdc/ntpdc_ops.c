@@ -215,7 +215,6 @@ struct xcmd opcmds[] = {
  * Imported from ntpdc.c
  */
 extern int showhostnames;
-extern int debug;
 extern struct servent *server_entry;
 
 /*
@@ -906,7 +905,7 @@ iostats(
 	if (!checkitemsize(itemsize, sizeof(struct info_io_stats)))
 	    return;
 
-	(void) fprintf(fp, "time since reset:      %ld\n",
+	(void) fprintf(fp, "time since reset:     %ld\n",
 		       (u_long)ntohl(io->timereset));
 	(void) fprintf(fp, "receive buffers:      %d\n",
 		       ntohs(io->totalrecvbufs));
@@ -2103,7 +2102,6 @@ clockstat(
 	FILE *fp
 	)
 {
-        extern struct clktype clktypes[];
 	struct info_clock *cl;
 	/* 8 is the maximum number of clocks which will fit in a packet */
 	u_long clist[min(MAXARGS, 8)];

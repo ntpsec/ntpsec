@@ -55,12 +55,6 @@
 #define MONLIN		15	/* number of monitoring lines */
 
 /*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-extern	u_long current_time;
-
-/*
  * Chrono-log unit control structure
  */
 struct chronolog_unit {

@@ -73,11 +73,6 @@
 #define	LENTOC		19	/* yy:ddd:hh:mm:ss.mmm timecode lngth */
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * AS2201 unit control structure.
  */
 struct as2201unit {

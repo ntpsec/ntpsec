@@ -43,9 +43,6 @@ static char RCSid[] = "adjtimed.c,v 3.1 1993/07/06 01:04:45 jbj Exp";
 
 double atof (const char *);
 
-extern int ntp_optind;
-extern char *ntp_optarg;
-
 int InitClockRate (void);
 int AdjustClockRate (register struct timeval *delta, register struct timeval *olddelta);
 long GetClockRate (void);

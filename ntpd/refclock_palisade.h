@@ -141,18 +141,6 @@
 #define	R2D		(180.0/GPS_PI)
 
 /*
- * Imported from ntpd module
- */
-#ifdef DEBUG
-extern int debug;               /* global debug flag */
-#endif
-
-/*
- * Imported from ntp_timer module
- */
-extern u_long current_time;     /* current time (s) */
-
-/*
  * Palisade unit control structure.
  */
 struct palisade_unit {

@@ -98,11 +98,6 @@
 #define MAXPOS		70	/* max length of position string */
 
 /*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-
-/*
  * ARB unit control structure
  */
 struct arbunit {

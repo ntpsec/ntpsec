@@ -82,12 +82,6 @@
 #define LENPST		46	/* min timecode length */
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-extern u_long current_time;
-
-/*
  * Unit control structure
  */
 struct pstunit {

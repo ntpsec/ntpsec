@@ -107,12 +107,6 @@
 #define MONLIN		15	/* number of monitoring lines */
 
 /*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-extern	u_long current_time;
-
-/*
  * WWVB unit control structure
  */
 struct wwvbunit {

@@ -41,7 +41,7 @@ int maxhosts = 20;
 /*
  * Debugging flag
  */
-int debug = 0;
+volatile int debug = 0;
 
 #ifndef SYS_VXWORKS
 int nonames = 0;			/* if set, don't print hostnames */
@@ -83,8 +83,6 @@ fd_set fdmask;
  */
 int verbose = 0;
 int always_step = 0;
-
-extern int errno;
 
 int		ntptracemain	P((int,	char **));
 static	void	DoTrace		P((struct server *));
@@ -140,9 +138,6 @@ ntptracemain(
 	struct server *firstserver;
 	int errflg;
 	int c;
-	extern char *ntp_optarg;
-	extern int ntp_optind;
-	extern char *Version;
 
 	errflg = 0;
 	progname = argv[0];

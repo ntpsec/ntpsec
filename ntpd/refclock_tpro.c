@@ -34,16 +34,6 @@
 #define	DESCRIPTION	"KSI/Odetics TPRO/S IRIG Interface" /* WRU */
 
 /*
- * Imported from ntp_timer module
- */
-extern u_long current_time;	/* current time (s) */
-
-/*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * Unit control structure
  */
 struct tprounit {

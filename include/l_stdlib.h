@@ -18,7 +18,7 @@
 # include <sys/types.h>
 #endif
 
-/* Needed for speed_t.  */
+/* Needed for speed_t. */
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #endif
@@ -53,6 +53,11 @@ extern	int	cfsetospeed	P((struct termios *, speed_t));
 
 extern	char *	getpass		P((const char *));
 
+#ifdef DECL_INET_NTOA_0
+struct in_addr;
+extern	char *	inet_ntoa	P((struct in_addr));
+#endif
+
 #ifdef DECL_IOCTL_0
 extern	int	ioctl		P((int, u_long, char *));
 #endif
@@ -63,7 +68,7 @@ extern	int	bind		P((int, struct sockaddr *, int));
 extern	int	connect		P((int, struct sockaddr *, int));
 extern	int	recv		P((int, char *, int, int));
 extern	int	recvfrom	P((int, char *, int, int, struct sockaddr *, int *));
-extern	int	send		P((int, char *, int,int));
+extern	int	send		P((int, char *, int, int));
 extern	int	sendto		P((int, char *, int, int, struct sockaddr *, int));
 extern	int	setsockopt	P((int, int, int, char *, int));
 extern	int	socket		P((int, int, int));
@@ -164,6 +169,10 @@ extern	int	stime		P((const time_t *));
 extern	long	strtol		P((const char *, char **, int));
 #endif
 
+#ifdef DECL_SYSCALL
+extern	int	syscall		P((int, ...));
+#endif
+
 #ifdef DECL_SYSLOG_0
 extern	void	closelog	P((void));
 #ifndef LOG_DAEMON
@@ -192,6 +201,17 @@ extern	int	settimeofday	P((struct timeval *, void *));
 
 #ifdef DECL_TOLOWER_0
 extern	int	tolower		P((int));
+#endif
+
+/*
+ * Necessary variable declarations.
+ */
+#ifdef DECL_ERRNO
+extern	int	errno;
+#endif
+
+#ifdef DECL_H_ERRNO
+extern	int	h_errno;
 #endif
 
 /*******************************************************/

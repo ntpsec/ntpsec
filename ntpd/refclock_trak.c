@@ -96,18 +96,6 @@
 #define	LENTRAK		24	/* timecode length */
 #define C_CTO		"RQTS\r" /* start continuous time output */
 
-#ifdef PPS
-/*
- * Imported from ntp_loopfilter module
- */
-extern int fdpps;               /* pps file descriptor */
-#endif /* PPS */
-
-/*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-
 /*
  * Unit control structure
  */

@@ -24,16 +24,7 @@
 #endif /* VMS */
 
 #ifdef KERNEL_PLL
-#ifdef HAVE_SYS_TIMEX_H
-#include <sys/timex.h>
-#endif
-#ifdef NTP_SYSCALLS_STD
-#define ntp_adjtime(t) syscall(SYS_ntp_adjtime, (t))
-#else /* NOT NTP_SYSCALLS_STD */
-#ifdef HAVE___ADJTIMEX
-#define ntp_adjtime(t) __adjtimex((t))
-#endif
-#endif /* NOT NTP_SYSCALLS_STD */
+#include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
 /*
@@ -102,11 +93,11 @@
 /*
  * Program variables
  */
-double	clock_offset;		/* clock offset adjustment (ppm) */
+static double	clock_offset;		/* clock offset adjustment (ppm) */
 double	drift_comp;		/* clock frequency (ppm) */
 double	clock_stability;	/* clock stability (ppm) */
 double	clock_max = CLOCK_MAX;	/* max offset allowed before step (s) */
-double	clock_panic = CLOCK_PANIC; /* max offset allowed before panic */
+static double	clock_panic = CLOCK_PANIC; /* max offset allowed before panic */
 u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
@@ -241,7 +232,7 @@ local_clock(
 	if (fabs(fp_offset) >= clock_panic && !correct_any) {
 		msyslog(LOG_ERR,
 		    "time error %.0f over %d seconds; set clock manually)",
-		    fp_offset, clock_panic);
+		    fp_offset, (int)clock_panic);
 		return (-1);
 	}
 

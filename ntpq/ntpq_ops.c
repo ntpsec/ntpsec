@@ -179,7 +179,7 @@ char flash2[] = " .+*    "; /* flash decode for version 2 */
 char flash3[] = " x.-+#*o"; /* flash decode for peer status version 3 */
 
 struct varlist {
-	const char *name;
+	char *name;
 	char *value;
 } varlist[MAXLIST] = { { 0, 0 } };
 
@@ -188,11 +188,11 @@ struct varlist {
  */
 extern int showhostnames;
 extern int rawmode;
-extern int debug;
 extern struct servent *server_entry;
 extern struct association assoc_cache[];
 extern int numassoc;
 extern u_char pktversion;
+extern struct ctl_var peer_var[];
 
 /*
  * For quick string comparisons
@@ -1322,7 +1322,6 @@ doprintpeers(
 	u_long poll;
 	char type = '?';
 	char refid_string[10];
-	extern struct ctl_var peer_var[];
 	char whenbuf[8], pollbuf[8];
 
 	memset((char *)havevar, 0, sizeof(havevar));
@@ -1607,9 +1606,9 @@ doopeers(
 		return;
 
 	(void) fprintf(fp,
-			   "     remote           local      st t when poll reach  delay  offset   disp\n");
+			   "     remote           local      st t when poll reach   delay   offset    disp\n");
 	(void) fprintf(fp,
-			   "===========================================================================\n");
+			   "==============================================================================\n");
 
 	for (i = 0; i < numassoc; i++) {
 		if (!showall &&

@@ -317,11 +317,6 @@ static int deltas[60];
 static l_fp acceptable_slop; /* = { 0, 1 << (FRACTION_PREC -2) }; */
 static l_fp onesec; /* = { 1, 0 }; */
 
-/* Imported from the timer module */
-extern u_long current_time;
-
-extern s_char sys_precision;
-
 #ifdef	DEBUG
 static int debug;
 #endif
@@ -409,8 +404,6 @@ msfees_start(
 	char eesdev[20];
 	struct termios ttyb, *ttyp;
 	static void ees_receive();
-	extern int io_addclock();
-	extern void io_closeclock();
 	struct refclockproc *pp;
 	pp = peer->procptr;
 
@@ -582,7 +575,6 @@ msfees_shutdown(
 	)
 {
 	register struct eesunit *ees;
-	extern void io_closeclock();
 
 	if (unit >= MAXUNITS) {
 		msyslog(LOG_ERR,
@@ -642,7 +634,6 @@ ees_receive(
 	int	suspect_4ms_step = 0;
 	struct ppsclockev ppsclockev;
 	long *ptr = (long *) &ppsclockev;
-	extern errno;
 	int rc;
 
 	/* Get the clock this applies to and a pointer to the data */

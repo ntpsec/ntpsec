@@ -1,4 +1,188 @@
+Mon May 31 18:49:49 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* ntpd/ntp_proto.c (proto_config): Don't set sys_bclient on
+	PROTO_MULTICAST_ADD, only caller can decide; remove wrong set on
+	PROTO_MULTICAST_DEL.
+
+Mon May 31 18:49:49 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* ntpd/refclock_parse.c (stream_receive): Cast size_t to int to
+	match format.
+	(local_receive): Likewise.
+	(trimbletaip_event): Likewise.
+	(stream_receive): Cast struct timeval members to long to match
+	format.
+	(local_receive): Likewise.
+
+	* ntpd/ntp_util.c (stats_config): Cast size_t to int to match
+	format.
+
+	* libparse/clk_rawdcf.c (cvt_rawdcf): Cast ptr difference to int
+	to match format.
+	* ntpd/refclock_parse.c (gps16x_poll): Likewise.
+
+	* ntpd/ntp_filegen.c (filegen_open): Use long format, cast arg to
+	match. 
+
+	* ntpd/refclock_parse.c (list_err): Use long format to match arg.
+	(parse_statistics): Likewise.
+	(gps16x_message): Likewise.
+	(cvt_ts): Use long format, cast args to match.
+	(parse_start): Add missing arg.
+	(gps16x_message): Swap args to match format.
+
+	* ntpd/ntpd.c (ntpdmain): Cast uid to long, adapt format.
+
+	* ntpd/ntp_intres.c (readconf): Use long format to match arg.
+	* ntpd/ntp_io.c (getrecvbufs): Likewise.
+	* ntpd/ntp_proto.c (default_get_precision): Likewise.
+
+	* ntpd/ntp_loopfilter.c (local_clock): Cast clock_panic to int to
+ 	match format.
+
+	* ntpd/ntp_io.c (io_multicast_add): Print s_addr member, not
+	struct in_addr, to match format.
+
+	* include/ntp_stdlib.h: Declare msyslog() as printf-like for gcc
+	format checking.
+
+Fri May 28 16:39:35 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* ntpdc/ntpdc_ops.c (iostats): Align timereset line.
+
+	* ntpq/ntpq_ops.c (doopeers): Properly align header.
+
+	* ntpdc/ntpdc_ops.c (debug): Removed declaration, already in
+	ntp_stdlib.h.
+	* ntpq/ntpq_ops.c: Likewise.
+
+	* ntpdate/ntpdate.c (debug): Declare volatile to match
+	ntp_stdlib.h.
+	* ntpdc/ntpdc.c, ntpq/ntpq.c, ntptrace/ntptrace.c, util/tickadj.c,
+	util/ntptime.c: Likewise.
+
+	* include/parse.h (debug): Don't declare to avoid clash with
+	ntp_stdlib.h.
+
+	* include/Makefile.am (noinst_HEADERS): Add new ntp_syscall.h.
+
+	* configure.in: Also check for -lrt for POSIX.1c functions.
+
+Wed May 26 21:03:30 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* configure.in: Removed -Wwrite-strings from CFLAGS.
+
+	* ntpdc/ntpdc.c (help): Remove superfluous cast.
+	* ntpq/ntpq.c (help): Likewise.
+
+Tue May 25 18:00:49 1999  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* ntpq/ntpq_ops.c (struct varlist): name cannot be const char *
+	since may be malloc'ed.
+
+	* ntpdc/ntpdc.c (sendrequest): Declare pass as const char *, don't
+	loose const in cast.
+	* ntpq/ntpq.c (sendrequest): Likewise.
+
+	* ntpd/ntp_control.c (ctl_getitem): Remove superfluous cast.
+	* include/ntpd.h (struct ctl_var): text cannot be const char *
+	since it's malloc'ed.
+
 1999-06-22  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/l_stdlib.h: Don't include <netinet/in.h>, add	forward
+	declaration of struct in_addr instead.
+	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
+
+	Patch:
+	
+	* include/l_stdlib.h: Fixed syscall() declaration.
+	* configure.in: Updated test to match.
+
+	* configure.in: Check if we need to declare errno and h_errno.
+	Check for <resolv.h> which may provide a h_errno declaration and
+	<arpa/nameserv.h> which the latter needs.
+	* acconfig.h: Provide the necessary templates.
+
+	* include/ntp_syscall.h: New file, hides various implementations
+	of ntp_adjtime() and ntp_gettime() syscalls.
+	* ntpd/ntp_loopfilter.c: Use it.
+	* ntpd/ntp_request.c: Likewise.
+	* ntpd/refclock_local.c: Likewise.
+	* util/ntptime.c: Likewise.
+
+	* include/l_stdlib.h: Include <netinet/in.h>, declare inet_ntoa if
+	necessary.
+	Moved syscall() declaration here.
+
+	* kernel/sys/parsestreams.h: Include <sys/termios.h> for it's
+	definition of struct ppsclockev.
+	Include <sys/ppsclock.h> unconditionally for definition of
+	CIOGETEV via TIOCGPPSEV.
+	* kernel/sys/ppsclock.h: Protect struct ppsclockev from
+	redefinition.
+
+	* include/ntp_refclock.h: Protect it from multiple inclusion.
+	* include/ntp_fp.h: Likewise.
+	* include/ntp.h: Likewise.
+	
+	* include/ntpd.h: Include ntp_refclock.h for MAXDIAL declaration.
+	* libntp/authkeys.c: Include ntpd.h for current_time declaration.
+
+	* include/ntpd.h (getauthkeys, auth_agekeys, rereadkeys): Moved
+	prototypes to ntp_stdlib.h
+
+	* include/ntp_stdlib.h: Declare variables exported by libntp.
+	* include/ntpd.h: Likewise for ntpd.
+	
+	* libntp/authkeys.c (key_hash, authnokey, authfreekeys,
+	cache_flags): Made static.
+	* libntp/systime.c (tvu_maxslew, tsf_maxslew, sys_clock_offset,
+	sys_residual): Likewise.
+	* ntpd/ntp_intres.c (confentries): Likewise.
+	* ntpd/ntp_loopfilter.c (clock_offset, clock_panic): Likewise.
+	(pll_nano): Likewise. Removed duplicate definition.
+	* ntpd/ntp_peer.c (peer_free, current_association_ID,
+	assocpeer_calls, init_peer_starttime): Likewise. 
+	* ntpd/ntp_proto.c (sys_offset, sys_authdly): Likewise.
+	* ntpd/ntp_request.c (numrequests, numresppkts, errorcounter):
+	Likewise. 
+	* ntpd/ntp_restrict.c (res_calls, res_found, res_not_found,
+	res_timereset, res_limited_refcnt): Likewise. 
+	* ntpd/ntpd.c (was_alarmed, worker_thread): Likewise.
+
+	* ntpq/ntpq_ops.c: Moved declaration of external variable from
+	ntpq.c to file scope.
+
+	* adjtimed/adjtimed.c: Moved declarations of external variables to
+	ntpd.h and ntp_stdlib.h.
+	* clockstuff/propdelay.c: Likewise.
+	* libntp/a_md5encrypt.c, libntp/authencrypt.c, libntp/authkeys.c,
+	libntp/mfp_mul.c, libntp/msyslog.c, libntp/systime.c: Likewise.
+	* ntpd/ntp_config.c, ntpd/ntp_control.c, ntpd/ntp_filegen.c,
+	ntpd/ntp_intres.c, ntpd/ntp_io.c, ntpd/ntp_loopfilter.c,
+	ntpd/ntp_monitor.c, ntpd/ntp_peer.c, ntpd/ntp_proto.c,
+	ntpd/ntp_refclock.c, ntpd/ntp_request.c, ntpd/ntp_restrict.c,
+	ntpd/ntp_timer.c, ntpd/ntp_util.c, ntpd/ntpd.c,
+	ntpd/refclock_acts.c, ntpd/refclock_arbiter.c, ntpd/refclock_arc.c,
+	ntpd/refclock_as2201.c, ntpd/refclock_atom.c,
+	ntpd/refclock_bancomm.c, ntpd/refclock_chronolog.c,
+	ntpd/refclock_chu.c, ntpd/refclock_datum.c,
+	ntpd/refclock_dumbclock.c, ntpd/refclock_gpsvme.c,
+	ntpd/refclock_heath.c, ntpd/refclock_hpgps.c, ntpd/refclock_irig.c,
+	ntpd/refclock_jupiter.c, ntpd/refclock_leitch.c,
+	ntpd/refclock_local.c, ntpd/refclock_msfees.c,
+	ntpd/refclock_mx4200.c, ntpd/refclock_nmea.c,
+	ntpd/refclock_oncore.c, ntpd/refclock_palisade.h,
+	ntpd/refclock_parse.c, ntpd/refclock_pst.c, ntpd/refclock_shm.c,
+	ntpd/refclock_tpro.c, ntpd/refclock_trak.c, ntpd/refclock_true.c,
+	ntpd/refclock_usno.c, ntpd/refclock_wwvb.c: Likewise.
+	* ntpdate/ntpdate.c: Likewise.
+	* ntpdc/ntpdc.c, ntpdc/ntpdc_ops.c: Likewise.
+	* ntpq/ntpq.c: Likewise.
+	* ntptrace/ntptrace.c: Likewise.
+	* util/ntptime.c, til/tickadj.c: Likewise.
+	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
 
 	* include/ntp_machine.h: Removed superfluous yy/mm/dd comments.
 	* include/ntpd.h: Likewise.

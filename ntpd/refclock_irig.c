@@ -187,11 +187,6 @@
 #define IRIG_ERR_ERROR	0x40	/* codec error (overrun) */
 
 /*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-
-/*
  * IRIG unit control structure
  */
 struct irigunit {

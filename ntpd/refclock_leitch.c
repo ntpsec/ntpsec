@@ -74,11 +74,6 @@ if ((write(A->leitchio.fd,M,sizeof(M)) < 0)) {\
 #define STATE_TIME3 4
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * LEITCH unit control structure
  */
 struct leitchunit {

@@ -43,11 +43,6 @@
 #define LENNMEA		75	/* min timecode length */
 
 /*
- * Imported from ntpd module
- */
-extern int debug;		/* global debug flag */
-
-/*
  * Tables to compute the ddd of year form icky dd/mm timecode. Viva la
  * leap.
  */

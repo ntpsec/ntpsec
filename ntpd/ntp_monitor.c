@@ -89,11 +89,6 @@ static	int mon_mem_increments;		/* number of times we've called malloc() */
 int mon_enabled;
 static	int mon_have_memory;
 
-/*
- * Imported from the timer module
- */
-extern u_long current_time;
-
 static	void	mon_getmoremem	P((void));
 static	void	remove_from_hash P((struct mon_data *));
 

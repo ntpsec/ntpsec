@@ -17,20 +17,8 @@
 #include "ntp_stdlib.h"
 
 #ifdef KERNEL_PLL
-#ifdef HAVE_SYS_TIMEX_H
-#include <sys/timex.h>
+#include "ntp_syscall.h"
 #endif
-#ifdef NTP_SYSCALLS_STD
-#define ntp_adjtime(t)  syscall(SYS_ntp_adjtime, (t))
-#ifdef DECL_SYSCALL
-extern int syscall	P((int, void *, ...));
-#endif /* DECL_SYSCALL */
-#else /* NOT NTP_SYSCALLS_STD */
-#ifdef HAVE___ADJTIMEX
-#define ntp_adjtime(t)  __adjtimex((t))
-#endif
-#endif /* NOT NTP_SYSCALLS_STD */
-#endif /* KERNEL_PLL */
 
 /*
  * This is a hack to allow a machine to use its own system clock as a

@@ -11,6 +11,7 @@
 #include "ntp_types.h"
 #include "ntp_fp.h"
 #include "ntp.h"
+#include "ntpd.h"
 #include "ntp_string.h"
 #include "ntp_malloc.h"
 #include "ntp_stdlib.h"

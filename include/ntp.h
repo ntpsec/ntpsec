@@ -2,6 +2,9 @@
  * ntp.h - NTP definitions for the masses
  */
 
+#ifndef NTP_H
+#define NTP_H
+
 #include "ntp_types.h"
 #include <math.h>
 
@@ -685,3 +688,5 @@ struct endpoint {
 #define AM_NEWPASS	 4
 #define AM_NEWBCL	 5
 #define AM_POSSBCL	 6
+
+#endif /* NTP_H */

@@ -233,12 +233,6 @@
 #define CHU_ERR_ERROR	0x100	/* codec error (overrun) */
 #endif /* AUDIO_CHU */
 
-/*
- * Imported from ntpd module
- */
-extern	int	debug;		/* global debug flag */
-extern	u_long current_time;
-
 #ifdef AUDIO_CHU
 struct surv {
 	double	shift[12];	/* mark register */
