@@ -63,7 +63,7 @@
 #define XEVNT_LEN	XEVNT_CMD(1) /* bad field format or length */
 #define XEVNT_TSP	XEVNT_CMD(2) /* bad timestamp */
 #define XEVNT_FSP	XEVNT_CMD(3) /* bad filestamp */
-#define XEVNT_PUB	XEVNT_CMD(4) /* bad procedure or data */
+#define XEVNT_PUB	XEVNT_CMD(4) /* bad or missing public key */
 #define XEVNT_MD	XEVNT_CMD(5) /* unsupported digest type */
 #define XEVNT_KEY	XEVNT_CMD(6) /* unsupported identity type */
 #define XEVNT_SGL	XEVNT_CMD(7) /* bad signature length */
@@ -73,7 +73,8 @@
 #define XEVNT_CKY	XEVNT_CMD(11) /* bad or missing cookie */
 #define XEVNT_DAT	XEVNT_CMD(12) /* bad or missing leapseconds table */
 #define XEVNT_CRT	XEVNT_CMD(13) /* bad or missing certificate */
-#define XEVNT_ID	XEVNT_CMD(14) /* bad or missing identification */
+#define XEVNT_ID	XEVNT_CMD(14) /* bad or missing group key */
+#define	XEVNT_ERR	XEVNT_CMD(15) /* protocol error */
 
 /*
  * Configuration codes

@@ -156,7 +156,7 @@ extern	void	value_free	P((struct value *));
 extern	void	transmit	P((struct peer *));
 extern	void	receive 	P((struct recvbuf *));
 extern	void	peer_clear	P((struct peer *, char *));
-extern	void 	process_packet	P((struct peer *, struct pkt *, l_fp *));
+extern	void 	process_packet	P((struct peer *, struct pkt *));
 extern	void	clock_select	P((void));
 extern	void	kod_proto	P((void));
 extern	int	peer_unfit	P((struct peer *));

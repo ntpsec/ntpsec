@@ -888,13 +888,12 @@ struct endpoint {
  */
 #define AM_ERR		-1		/* error */
 #define AM_NOMATCH	0		/* no match */
-#define	AM_SERV		1		/* server packet */
-#define AM_PROCPKT	2		/* symmetric packet */	
-#define AM_BCST		3		/* broadcast packet */	
-#define AM_FXMIT	4		/* client packet */
-#define AM_MANYCAST	5		/* manycast packet */
-#define AM_NEWPASS	6		/* new passive */
-#define AM_NEWBCL	7		/* new broadcast */
+#define AM_PROCPKT	1		/* server/symmetric packet */	
+#define AM_BCST		2		/* broadcast packet */	
+#define AM_FXMIT	3		/* client packet */
+#define AM_MANYCAST	4		/* manycast packet */
+#define AM_NEWPASS	5		/* new passive */
+#define AM_NEWBCL	6		/* new broadcast */
 
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO
