@@ -1826,303 +1826,276 @@ input_handler(
 	handler_calls++;
 	ts = *cts;
 
-/*	for (;;) */
-	{
-		/*
-		 * Do a poll to see who has data
-		 */
+	/*
+	 * Do a poll to see who has data
+	 */
 
-		fds = activefds;
-		tvzero.tv_sec = tvzero.tv_usec = 0;
+	fds = activefds;
+	tvzero.tv_sec = tvzero.tv_usec = 0;
 
-		/*
-		 * If we have something to do, freeze a timestamp.
-		 * See below for the other cases (nothing (left) to do or error)
-		 */
-/*		while (0 < (n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero))) */
-		{
-			n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
-			++select_count;
-			++handler_pkts;
+	/*
+	 * If we have something to do, freeze a timestamp.
+	 * See below for the other cases (nothing (left) to do or error)
+	 */
+	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
+	++select_count;
+	++handler_pkts;
 
 #ifdef REFCLOCK
-			/*
-			 * Check out the reference clocks first, if any
-			 */
-			if (refio != 0)
+	/*
+	 * Check out the reference clocks first, if any
+	 */
+	if (refio != 0)
+	{
+		register struct refclockio *rp;
+
+		for (rp = refio; rp != 0 && n > 0; rp = rp->next)
+		{
+			fd = rp->fd;
+			if (FD_ISSET(fd, &fds))
 			{
-				register struct refclockio *rp;
-
-				for (rp = refio; rp != 0 && n > 0; rp = rp->next)
+				n--;
+				if (free_recvbuffs() == 0)
 				{
-					fd = rp->fd;
-					if (FD_ISSET(fd, &fds))
+					char buf[RX_BUFF_SIZE];
+
+					(void) read(fd, buf, sizeof buf);
+					packets_dropped++;
+					goto select_again;
+				}
+
+				rb = get_free_recv_buffer();
+
+				i = (rp->datalen == 0
+				    || rp->datalen > sizeof(rb->recv_space))
+				    ? sizeof(rb->recv_space) : rp->datalen;
+				rb->recv_length =
+				    read(fd, (char *)&rb->recv_space, (unsigned)i);
+
+				if (rb->recv_length <= 0)
+				{
+					if (rb->recv_length < 0 && errno != EINTR)
+						netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
+					freerecvbuf(rb);
+					continue;
+				}
+
+				/*
+				 * Got one.  Mark how and when it got here,
+				 * put it on the full list and do
+				 * bookkeeping.
+				 */
+				rb->recv_srcclock = rp->srcclock;
+				rb->dstadr = 0;
+				rb->fd = fd;
+				rb->recv_time = ts;
+				rb->receiver = rp->clock_recv;
+
+				if (rp->io_input)
+				{
+					/*
+					 * have direct
+					 * input routine
+					 * for refclocks
+					 */
+					if (rp->io_input(rb) == 0)
 					{
-						n--;
-						if (free_recvbuffs() == 0)
-						{
-							char buf[RX_BUFF_SIZE];
-
-							(void) read(fd, buf, sizeof buf);
-							packets_dropped++;
-							goto select_again;
-						}
-
-						rb = get_free_recv_buffer();
-
-						i = (rp->datalen == 0
-						     || rp->datalen > sizeof(rb->recv_space))
-						    ? sizeof(rb->recv_space) : rp->datalen;
-						rb->recv_length =
-						    read(fd, (char *)&rb->recv_space, (unsigned)i);
-
-						if (rb->recv_length <= 0)
-						{
-							if (rb->recv_length < 0 && errno != EINTR)
-								netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
-							freerecvbuf(rb);
-							continue;
-						}
-
 						/*
-						 * Got one.  Mark how
-						 * and when it got here,
-						 * put it on the full
-						 * list and do
-						 * bookkeeping.
+						 * data was consumed -
+						 * nothing to pass up
+						 * into block input
+						 * machine
 						 */
-						rb->recv_srcclock = rp->srcclock;
-						rb->dstadr = 0;
-						rb->fd = fd;
-						rb->recv_time = ts;
-						rb->receiver = rp->clock_recv;
-
-						if (rp->io_input)
-						{
-							/*
-							 * have direct
-							 * input routine
-							 * for refclocks
-							 */
-							if (rp->io_input(rb) == 0)
-							{
-								/*
-								 * data
-								 * was
-								 * consumed
-								 * -
-								 * nothing
-								 * to
-								 * pass
-								 * up
-								 * into
-								 * block
-								 * input
-								 * machine
-								 */
-								freerecvbuf(rb);
-#if 0
-								goto select_again;
-#else
-								continue;
-#endif
-							}
-						}
-
-						add_full_recv_buffer(rb);
-
-						rp->recvcount++;
-						packets_received++;
+						freerecvbuf(rb);
+						continue;
 					}
 				}
+
+				add_full_recv_buffer(rb);
+
+				rp->recvcount++;
+				packets_received++;
 			}
+		}
+	}
 #endif /* REFCLOCK */
 
-			/*
-			 * Loop through the interfaces looking for data
-			 * to read.
-			 */
-			for (i = ninterfaces - 1; (i >= 0) && (n > 0); i--)
+	/*
+	 * Loop through the interfaces looking for data
+	 * to read.
+	 */
+	for (i = ninterfaces - 1; (i >= 0) && (n > 0); i--)
+	{
+		for (doing = 0; (doing < 2) && (n > 0); doing++)
+		{
+			if (doing == 0)
 			{
-				for (doing = 0; (doing < 2) && (n > 0); doing++)
-				{
-					if (doing == 0)
-					{
-						fd = inter_list[i].fd;
-					}
-					else
-					{
-						if (!(inter_list[i].flags & INT_BCASTOPEN))
-						    break;
-						fd = inter_list[i].bfd;
-					}
-					if (fd < 0) continue;
-					if (FD_ISSET(fd, &fds))
-					{
-						n--;
+				fd = inter_list[i].fd;
+			}
+			else
+			{
+				if (!(inter_list[i].flags & INT_BCASTOPEN))
+				    break;
+				fd = inter_list[i].bfd;
+			}
+			if (fd < 0) continue;
+			if (FD_ISSET(fd, &fds))
+			{
+				n--;
 
-						/*
-						 * Get a buffer and read
-						 * the frame.  If we
-						 * haven't got a buffer,
-						 * or this is received
-						 * on the wild card
-						 * socket, just dump the
-						 * packet.
-						 */
+				/*
+				 * Get a buffer and read the frame.  If we
+				 * haven't got a buffer, or this is received
+				 * on the wild card socket, just dump the
+				 * packet.
+				 */
 #ifdef UDP_WILDCARD_DELIVERY
 				/*
 				 * these guys manage to put properly addressed
 				 * packets into the wildcard queue
 				 */
-						if (free_recvbuffs() == 0)
+				if (free_recvbuffs() == 0)
 #else
-						if((i == wildipv4) || (i == wildipv6)||
-						   (free_recvbuffs() == 0))
+				if((i == wildipv4) || (i == wildipv6)||
+				   (free_recvbuffs() == 0))
 #endif
-	{
-		char buf[RX_BUFF_SIZE];
-		struct sockaddr_storage from;
+				{
+					char buf[RX_BUFF_SIZE];
+					struct sockaddr_storage from;
 
-		fromlen = sizeof from;
-		(void) recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr*)&from, &fromlen);
+					fromlen = sizeof from;
+					(void) recvfrom(fd, buf, sizeof(buf), 0,
+							(struct sockaddr*)&from, &fromlen);
 #ifdef DEBUG
-		if (debug)
-		    printf("%s on %d(%lu) fd=%d from %s\n",
-		    (i == wildipv4 || i == wildipv6) ? "ignore" : "drop",
-			   i, free_recvbuffs(), fd,
-			   stoa(&from));
+					if (debug)
+					    printf("%s on %d(%lu) fd=%d from %s\n",
+					    (i == wildipv4 || i == wildipv6) ? "ignore" : "drop",
+					     i, free_recvbuffs(), fd,
+					     stoa(&from));
 #endif
-		if (i == wildipv4 || i == wildipv6)
-		    packets_ignored++;
-		else
-		    packets_dropped++;
-		continue;
-	}
+					if (i == wildipv4 || i == wildipv6)
+					    packets_ignored++;
+					else
+					    packets_dropped++;
+					continue;
+				}
 
-	rb = get_free_recv_buffer();
+				rb = get_free_recv_buffer();
 
-	fromlen = sizeof(struct sockaddr_storage);
-	rb->recv_length = recvfrom(fd,
-				   (char *)&rb->recv_space,
-				   sizeof(rb->recv_space), 0,
-				   (struct sockaddr *)&rb->recv_srcadr,
-				   &fromlen);
-	if (rb->recv_length == 0
+				fromlen = sizeof(struct sockaddr_storage);
+				rb->recv_length = recvfrom(fd,
+						  (char *)&rb->recv_space,
+						   sizeof(rb->recv_space), 0,
+						   (struct sockaddr *)&rb->recv_srcadr,
+						   &fromlen);
+				if (rb->recv_length == 0
 #ifdef EWOULDBLOCK
-		 || errno==EWOULDBLOCK
+				 || errno==EWOULDBLOCK
 #endif
 #ifdef EAGAIN
-		 || errno==EAGAIN
+				 || errno==EAGAIN
 #endif
-		 ) {
-		freerecvbuf(rb);
-	    continue;
-	}
-	else if (rb->recv_length < 0)
-	{
-		netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
- 			stoa(&rb->recv_srcadr), fd);
+				 ) {
+					freerecvbuf(rb);
+					continue;
+				}
+				else if (rb->recv_length < 0)
+				{
+					netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
+ 					stoa(&rb->recv_srcadr), fd);
 #ifdef DEBUG
-		if (debug)
-		    printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);
+					if (debug)
+						printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);
 #endif
-		freerecvbuf(rb);
-		continue;
-	}
+					freerecvbuf(rb);
+					continue;
+				}
 #ifdef DEBUG
-	if (debug > 2) {
-		if(rb->recv_srcadr.ss_family == AF_INET)
-			printf("input_handler: if=%d fd=%d length %d from %08lx %s\n",
-		   		i, fd, rb->recv_length,
-				(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
-				0x00000000ffffffff,
-			   	stoa(&rb->recv_srcadr));
-		else
-			printf("input_handler: if=%d fd=%d length %d from %s\n",
-				i, fd, rb->recv_length,
-				stoa(&rb->recv_srcadr));
-        }
+				if (debug > 2) {
+					if(rb->recv_srcadr.ss_family == AF_INET)
+						printf("input_handler: if=%d fd=%d length %d from %08lx %s\n",
+		   					i, fd, rb->recv_length,
+							(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
+							0x00000000ffffffff,
+							stoa(&rb->recv_srcadr));
+					else
+						printf("input_handler: if=%d fd=%d length %d from %s\n",
+							i, fd, rb->recv_length,
+							stoa(&rb->recv_srcadr));
+				}
 #endif
+
+				/*
+				 * Got one.  Mark how and when it got here,
+				 * put it on the full list and do bookkeeping.
+				 */
+				rb->dstadr = &inter_list[i];
+				rb->fd = fd;
+				rb->recv_time = ts;
+				rb->receiver = receive;
+
+				add_full_recv_buffer(rb);
+
+				inter_list[i].received++;
+				packets_received++;
+				continue;
+			}
+		/* Check more interfaces */
+		}
+	}
+select_again:;
+	/*
+	 * Done everything from that select.
+	 */
 
 	/*
-	 * Got one.  Mark how and when it got here,
-	 * put it on the full list and do bookkeeping.
+	 * If nothing to do, just return.
+	 * If an error occurred, complain and return.
 	 */
-	rb->dstadr = &inter_list[i];
-	rb->fd = fd;
-	rb->recv_time = ts;
-	rb->receiver = receive;
-
-	add_full_recv_buffer(rb);
-
-	inter_list[i].received++;
-	packets_received++;
-	continue;
-					}
-					/* Check more interfaces */
-				}
-			}
-		select_again:;
-			/*
-			 * Done everything from that select.  Poll again.
-			 */
+	if (n == 0)
+	{
+		if (select_count == 0) /* We really had nothing to do */
+		{
+			if (debug)
+			    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
+			--handler_count;
+			return;
 		}
-
+		/* We've done our work */
+		get_systime(&ts_e);
 		/*
-		 * If nothing more to do, try again.
-		 * If nothing to do, just return.
-		 * If an error occurred, complain and return.
+		 * (ts_e - ts) is the amount of time we spent
+		 * processing this gob of file descriptors.  Log
+		 * it.
 		 */
-		if (n == 0)
-		{
-			if (select_count == 0) /* We really had nothing to do */
-			{
-				if (debug)
-				    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
-				--handler_count;
-				return;
-			}
-			/* We've done our work */
-			get_systime(&ts_e);
-			/*
-			 * (ts_e - ts) is the amount of time we spent
-			 * processing this gob of file descriptors.  Log
-			 * it.
-			 */
-			L_SUB(&ts_e, &ts);
-			if (debug > 3)
-			    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
+		L_SUB(&ts_e, &ts);
+		if (debug > 3)
+		    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
 
-			/* just bail. */
-			--handler_count;
-			return;
+		/* just bail. */
+		--handler_count;
+		return;
+	}
+	else if (n == -1)
+	{
+		int err = errno;
+		/*
+		 * extended FAU debugging output
+		 */
+		if (err != EINTR)
+		    netsyslog(LOG_ERR,
+			      "select(%d, %s, 0L, 0L, &0.0) error: %m",
+			      maxactivefd+1,
+			      fdbits(maxactivefd, &activefds));
+		if (err == EBADF) {
+			int j, b;
+			fds = activefds;
+			for (j = 0; j <= maxactivefd; j++)
+			    if ((FD_ISSET(j, &fds) && (read(j, &b, 0) == -1)))
+				netsyslog(LOG_ERR, "Bad file descriptor %d", j);
 		}
-		else if (n == -1)
-		{
-			int err = errno;
-
-			/*
-			 * extended FAU debugging output
-			 */
-			if (err != EINTR)
-			    netsyslog(LOG_ERR,
-				      "select(%d, %s, 0L, 0L, &0.0) error: %m",
-				      maxactivefd+1,
-				      fdbits(maxactivefd, &activefds));
-			if (err == EBADF) {
-				int j, b;
-
-				fds = activefds;
-				for (j = 0; j <= maxactivefd; j++)
-				    if (
-					    (FD_ISSET(j, &fds) && (read(j, &b, 0) == -1))
-					    )
-					netsyslog(LOG_ERR, "Bad file descriptor %d", j);
-			}
-			--handler_count;
-			return;
-		}
+		--handler_count;
+		return;
 	}
 	msyslog(LOG_ERR, "input_handler: fell out of infinite for(;;) loop!");
 	--handler_count;
