@@ -1312,7 +1312,7 @@ crypto_rsa(
 	if (*cp == '/')
 		strcpy(filename, cp);
 	else
-		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
+		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
 		msyslog(LOG_ERR, "crypto: RSA file %s not found",
@@ -1419,7 +1419,7 @@ crypto_dh(
 	if (*cp == '/')
 		strcpy(filename, cp);
 	else
-		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
+		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
 		msyslog(LOG_INFO,
@@ -1564,7 +1564,7 @@ crypto_tai(
 	if (*cp == '/')
 		strcpy(filename, cp);
 	else
-		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
+		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
 		msyslog(LOG_INFO,

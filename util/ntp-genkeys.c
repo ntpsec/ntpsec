@@ -505,12 +505,15 @@ newfile(
 	   If:
 	   - no symlink support, or
 	   - there is no old symlink (!f3)
-	   - - base = dirname(f1)
+	   - - file = dirname(f1) / f2
 	   Otherwise:
 	   - If ('/' == *f3)
-	   - - base = dirname(f3)
+	   - - file = dirname(f3) / f2
 	   - else
-	   - - base = dirname(f1) / dirname(f2)
+	   - - file = dirname(f1) / dirname(f3) / f2
+	   fopen(file)
+	   print any error message/bail
+	   return FILE
 	*/
 }
 

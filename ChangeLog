@@ -1,5 +1,8 @@
 2000-08-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_crypto.c (crypto_rsa): Now that we're using
+	NTP_KEYSDIR, make sure there is a '/ between the dir and the file.
+
 	* util/ntp-genkeys.c (main): More small steps...
 
 2000-08-12  Harlan Stenn  <stenn@whimsy.udel.edu>
