@@ -18,7 +18,7 @@ ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
 ntpdc-layout.o: nl.c
 
 layout.here: ntpdc-layout
-	ntpdc-layout > $@
+	./ntpdc-layout > $@
 
 check-layout: ntpdc-layout layout.std layout.here
 	cmp $(srcdir)/layout.std layout.here && echo stamp > $@
