@@ -309,7 +309,11 @@ case "$host" in
     ;;
 esac
 AC_CHECK_HEADERS(sys/select.h sys/shm.h sys/signal.h sys/sockio.h)
-AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
+case "$host" in
+ *-*-netbsd*) ;;
+ *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
+    ;;
+esac
 AC_CHECK_HEADERS(sys/stat.h sys/stream.h)
 AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/systune.h)
 AC_CHECK_HEADERS(sys/termios.h sys/time.h sys/signal.h)
