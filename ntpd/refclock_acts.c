@@ -769,6 +769,8 @@ acts_timeout(
 			if (!io_addclock(&pp->io)) {
 				msyslog(LOG_ERR,
 				    "acts: addclock fails");
+				close(fd);
+				pp->io.fd = 0;
 				break;
 			}
 		}
@@ -899,7 +901,7 @@ acts_disc (
 			ioctl(pp->io.fd, TIOCMBIC, (char *)&dtr);
 		}
 		if (pp->sloppyclockflag & CLK_FLAG2) {
-			close(pp->io.fd);
+			io_closeclock(&pp->io);
 			pp->io.fd = 0;
 			sprintf(lockfile, LOCKFILE, up->unit);
 			unlink(lockfile);

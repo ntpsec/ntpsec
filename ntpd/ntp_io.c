@@ -2373,14 +2373,7 @@ io_closeclock(
 		    }
 
 		if (rp == 0)
-		{
-			/*
-			 * Internal error.	Report it.
-			 */
-			msyslog(LOG_ERR,
-				"internal error: refclockio structure not found");
 			return;
-		}
 	}
 
 	/*

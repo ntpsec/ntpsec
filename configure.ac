@@ -482,7 +482,7 @@ AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
 	ac_cv_type_u_int8_t=no)
 ])
 if test $ac_cv_type_u_int8_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT8_T,1,Does u_int8_t exist)
+	AC_DEFINE(HAVE_TYPE_U_INT8_T, 1, [Does u_int8_t exist?])
 fi
 
 AC_CACHE_CHECK([for u_int64_t], ac_cv_type_u_int64_t,
@@ -492,8 +492,22 @@ AC_CACHE_CHECK([for u_int64_t], ac_cv_type_u_int64_t,
 	ac_cv_type_u_int64_t=no)
 ])
 if test $ac_cv_type_u_int64_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT64_T,1,Does u_int64_t exist)
+	AC_DEFINE(HAVE_TYPE_U_INT64_T, 1, [Does u_int64_t exist?])
 fi
+
+#
+# Look for in_port_t.
+#
+AC_MSG_CHECKING(for type in_port_t)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>],
+[in_port_t port = 25; return (0);],
+	[AC_MSG_RESULT(yes)
+	],
+        [AC_MSG_RESULT(no)
+	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Do we need our own in_port_t?])
+	])
 
 AC_CACHE_CHECK(for a fallback value for HZ, ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
@@ -3780,6 +3794,26 @@ case "$host" in
 	isc_netinet6in6_hack=""
 	;;
 esac
+
+#
+# This is similar to the netinet6/in6.h issue.
+#
+case "$host" in
+*-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
+        # UnixWare
+	# ISC_PLATFORM_NEEDNETINETIN6H="#define ISC_PLATFORM_NEEDNETINETIN6H 1"
+	# LWRES_PLATFORM_NEEDNETINETIN6H="#define LWRES_PLATFORM_NEEDNETINETIN6H 1"
+	AC_DEFINE(ISC_PLATFORM_FIXIN6ISADDR, 1,[Do we need to fix in6isaddr?])
+	isc_netinetin6_hack="#include <netinet/in6.h>"
+	;;
+*)
+	# ISC_PLATFORM_NEEDNETINETIN6H="#undef ISC_PLATFORM_NEEDNETINETIN6H"
+	# LWRES_PLATFORM_NEEDNETINETIN6H="#undef LWRES_PLATFORM_NEEDNETINETIN6H"
+        # ISC_PLATFORM_FIXIN6ISADDR="#undef ISC_PLATFORM_FIXIN6ISADDR"
+	isc_netinetin6_hack=""
+	;;
+esac
+
 
 AC_MSG_CHECKING([for struct if_laddrconf])
 AC_TRY_LINK([
