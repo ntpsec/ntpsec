@@ -306,6 +306,7 @@ static struct keyword crypto_keywords[] = {
 	{ "certificate",	CONF_CRYPTO_CERT },
 	{ "randfile",		CONF_CRYPTO_RAND },
 	{ "trusted",		CONF_CRYPTO_TRUST },
+	{ "keysdir",		CONF_CRYPTO_KEYS },
 	{ "",			CONFIG_UNKNOWN }
 };
 #endif /* OPENSSL */
@@ -1157,6 +1158,10 @@ getconfig(
 
 			    case CONF_CRYPTO_TRUST:
 				crypto_config(CRYPTO_CONF_TRST, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_KEYS:
+				crypto_config(CRYPTO_CONF_KEYS, tokens[i]);
 				break;
 
 			    default:

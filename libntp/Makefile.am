@@ -8,15 +8,13 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	findconfig.c fptoa.c fptoms.c getopt.c gpstolfp.c hextoint.c \
 	hextolfp.c humandate.c icom.c ieee754io.c inttoa.c iosignal.c \
 	lib_strbuf.c machines.c md5c.c memmove.c mfp_mul.c mfptoa.c \
-	mfptoms.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
+	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
-	ranny.c recvbuff.c refnumtoa.c socktoa.c socktohost.c statestr.c \
+	ranny.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
+	statestr.c strdup.c strerror.c strstr.c \
 	syssignal.c systime.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
 	uglydate.c uinttoa.c utvtoa.c ymd2yd.c
 EXTRA_libntp_a_SOURCES = adjtimex.c log.c random.c
-#	mktime.c snprintf.c strdup.c strerror.c strstr.c
-libntp_a_LIBADD = @LIBOBJS@
-libntp_a_DEPENDENCIES = @LIBOBJS@
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 

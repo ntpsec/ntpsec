@@ -389,7 +389,8 @@ static u_char clocktypes[] = {
 	CTL_SST_TS_UHF, 	/* REFCLK_HOPF_SERIAL (38) */
 	CTL_SST_TS_UHF,		/* REFCLK_HOPF_PCI (39) */
 	CTL_SST_TS_LF,		/* REFCLK_JJY (40) */
-	CTL_SST_TS_UHF,		/* REFCLK_ZYFER (41) */
+	CTL_SST_TS_UHF,		/* REFCLK_TT560 (41) */
+	CTL_SST_TS_UHF,		/* REFCLK_ZYFER (42) */
 };
 
 
@@ -1363,7 +1364,8 @@ ctl_putsys(
 
 	case CS_PUBLIC:
 		if (hostval.fstamp != 0)
-			ctl_putuint(sys_var[CS_PUBLIC].text, hostval.fstamp);
+			ctl_putuint(sys_var[CS_PUBLIC].text,
+			    ntohl(hostval.fstamp));
 		break;
 
 	case CS_REVTIME:
