@@ -12,7 +12,7 @@
         <h3>How to Write a Reference Clock Driver</h3>
         <img src="pic/pogo4.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>You need a little magic.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:26</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">03:11 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 13, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links10.txt"></script>
@@ -23,7 +23,7 @@
             <li class="inline"><a href="#intf">Interface Routine Overview</a>
         </ul>
         <hr>
-        <h4 id="#desc">Description</h4>
+        <h4 id="desc">Description</h4>
         <p>NTP reference clock support maintains the fiction that the clock is actually an ordinary peer in the NTP tradition, but operating at a synthetic stratum of zero. The entire suite of algorithms used to filter the received data, select the best clocks or peers and combine them to produce a system clock correction operate just like ordinary NTP peers. In this way, defective clocks can be detected and removed from the peer population. As no packets are exchanged with a reference clock; however, the transmit, receive and packet procedures are replaced with separate code to simulate them.</p>
         <p>It is important to understand how the NTP clock driver interface works. The driver assumes three timescales: standard time maintained by a distant laboratory such as USNO or NIST, reference time maintained by the external radio and the system time maintained by NTP. The radio synchronizes reference time and frequency to standard time via radio, satellite or modem. As the transmission means may not always be reliable, most radios continue to provide clock updates for some time after signal loss using an internal reference oscillator. In such cases the radio may or may not reveal the time since last synchronized and/or the estimated time error.</p>
         <p>All three timescales run <i>only</i> in Coordinated Universal Time (UTC), 24-hour format, and are not adjusted for local timezone or standard/daylight time. The local timezone, standard/daylight indicator and year, if provided, are ignored. However, it is important to determine whether a leap second is to be inserted in the UTC timescale in the near future so NTP can insert it in the system timescale at the appropriate epoch.</p>
@@ -40,7 +40,7 @@
         <p>The interface code and this documentation have been developed over some time and required not a little hard work converting old drivers, etc. Should you find success writing a driver for a new radio or modem service, please consider contributing it to the common good. Send the driver file itself and patches for the other files to Dave Mills (mills@udel.edu).</p>
         <h4>Conventions, Fudge Factors and Flags</h4>
         <p>Most drivers support manual or automatic calibration for systematic offset bias using values encoded in the <tt>fudge</tt> configuration command. By convention, the <tt>time1</tt> value defines the calibration offset in seconds. For those drivers that support statistics collection using the <tt>filegen</tt> utility and the <tt>clockstats</tt> file, the <tt>flag4</tt> switch enables the utility. When a PPS signal is available, a special automatic calibration facility is provided. If the <tt>flag1</tt> switch is set and the PPS signal is actively disciplining the system time, the calibration value is automatically adjusted to maintain a residual offset of zero. Should the PPS signal or the prefer peer fail, the adjustment is frozen and the remaining drivers continue to discipline the system clock with a minimum of residual error.</p>
-        <h4 id="#file">Files Which Need to be Changed</h4>
+        <h4 id="file">Files Which Need to be Changed</h4>
         <p>A new reference clock implementation needs to supply, in addition to the driver itself, several changes to existing files.</p>
         <dl>
             <dt><tt>./include/ntp.h</tt>
@@ -74,7 +74,7 @@
 </pre>
             <dd>or simply run <tt>make</tt>, which will do this command sequence automatically.
         </dl>
-        <h4 id="#intf">Interface Routine Overview</h4>
+        <h4 id="intf">Interface Routine Overview</h4>
         <dl>
             <dt><tt>refclock_newpeer</tt> - initialize and start a reference clock
             <dd>This routine allocates and initializes the interface structure which supports a reference clock in the form of an ordinary NTP peer. A driver-specific support routine completes the initialization, if used. Default peer variables which identify the clock and establish its reference ID and stratum are set here. It returns one if success and zero if the clock address is invalid or already running, insufficient resources are available or the driver declares a bum rap.

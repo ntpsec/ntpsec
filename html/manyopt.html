@@ -12,7 +12,7 @@
         <h3>Automatic NTP Configuration Options</h3>
         <img src="pic/alice51.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>Make sure who your friends are.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:25</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">03:13 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 13, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links9.txt"></script>
@@ -23,7 +23,7 @@
             <li class="inline"><a href="#opt">Manycast Options</a>
         </ul>
         <hr>
-        <h4 id="#many">Manycasting</h4>
+        <h4 id="many">Manycasting</h4>
         <p>Manycasting is a automatic discovery and configuration paradigm new to NTPv4. It is intended as a means for a multicast client to troll the nearby network neighborhood to find cooperating manycast servers, validate them using cryptographic means and evaluate their time values with respect to other servers that might be lurking in the vicinity. The intended result is that each manycast client mobilizes client associations with some number of the &quot;best&quot; of the nearby manycast servers, yet automatically reconfigures to sustain this number of servers should one or another fail.</p>
         <p>Note that the manycasting paradigm does not coincide with the anycast paradigm described in RFC-1546, which is designed to find a single server from a clique of servers providing the same service. The manycast paradigm is designed to find a plurality of redundant servers satisfying defined optimality criteria.</p>
         <p>Manycasting can be used with either symmetric key or public key cryptography. The public key infrastructure (PKI) offers the best protection against compromised keys and is generally considered stronger, at least with relatively large key sizes. It is implemented using the Autokey protocol and the OpenSSL cryptographic library available from <a href="http://www.openssl.org">http://www.openssl.org</a>. The library can also be used with other NTPv4 modes as well and is highly recommended, especially for broadcast modes.</p>
@@ -40,10 +40,10 @@
         <p>The remaining configuration files for all secondary servers and clients have the same contents, except for the <tt>tos</tt> command, which is specific for each stratum level. For stratum 1 and stratum 2 servers, that command is not necessary. For stratum 3 and above servers the <tt>floor</tt> value is set to the intended stratum number. Thus, all stratum 3 configuration files are identical, all stratum 4 files are identical and so forth.</p>
         <p>Once operations have stabilized in this scenario, the primary servers will find the primary reference source and each other, since they both operate at the same stratum (1), but not with any secondary server or client, since these operate at a higher stratum. The secondary servers will find the servers at the same stratum level. If one of the primary servers loses its GPS receiver, it will continue to operate as a client and other clients will time out the corresponding association and re-associate accordingly.</p>
         <p>Some administrators prefer to avoid running <tt>ntpd</tt> continuously and run either <tt>ntpdate</tt> or <tt>ntpd -q</tt> as a cron job. In either case the servers must be configured in advance and the program fails if none are available when the cron job runs. A really slick application of manycast is with <tt>ntpd -q</tt>. The program wakes up, scans the local landscape looking for the usual suspects, selects the best from among the rascals, sets the clock and then departs. Servers do not have to be configured in advance and all clients throughout the network can have the same configuration file.</p>
-        <h4 id="#auto">Manycast Interactions with Autokey</h4>
+        <h4 id="auto">Manycast Interactions with Autokey</h4>
         <p>Each time a manycast client sends a client mode packet to a multicast group address, all manycast servers in scope generate a reply including the host name and status word. The manycast clients then run the Autokey protocol, which collects and verifies all certificates involved. Following the burst interval all but three survivors are cast off, but the certificates remain in the local cache. It often happens that several complete signing trails from the client to the primary servers are collected in this way.</p>
         <p>About once an hour or less often if the poll interval exceeds this, the client regenerates the Autokey key list. This is in general transparent in client/server mode. However, about once per day the server private value used to generate cookies is refreshed along with all manycast client associations. In this case all cryptographic values including certificates is refreshed. If a new certificate has been generated since the last refresh epoch, it will automatically revoke all prior certificates that happen to be in the certificate cache. At the same time, the manycast scheme starts all over from the beginning and the expanding ring shrinks to the minimum and increments from there while collecting all servers in scope.</p>
-        <h4 id="#opt">Manycast Options</h4>
+        <h4 id="opt">Manycast Options</h4>
         <dl>
             <dt><tt>tos [ ceiling <i>ceiling</i> | cohort {0 | 1} |floor <i>floor</i> | minclock <i>minclock</i> | minsane <i>minsane</i> ]</tt>
             <dd>This command affects the clock selection and clustering algorithms. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in manycast mode. The variables operate as follows:
