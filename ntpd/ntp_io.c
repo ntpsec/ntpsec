@@ -2007,9 +2007,17 @@ findinterface(
 	 * If there is only one outgoing interface we already know the interface
 	 */
 	if (addr->ss_family == AF_INET && outifaceipv4 != -1) {
+#ifdef DEBUG
+	if (debug > 2)
+	    printf("Found interface %d for address: %s\n", outifaceipv4, stoa(addr));
+#endif
 		return (&inter_list[outifaceipv4]);
 	}
 	if (addr->ss_family == AF_INET6 && outifaceipv6 != -1) {
+#ifdef DEBUG
+	if (debug > 2)
+	    printf("Found interface %d for address: %s\n", outifaceipv6, stoa(addr));
+#endif
 		return (&inter_list[outifaceipv6]);
 	}
 
@@ -2034,8 +2042,13 @@ findinterface(
 			imask = (((struct sockaddr_in*)&inter_list[i].sin)->sin_addr.s_addr &
 			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
 
-			if (amask == imask)
+			if (amask == imask) {
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
 			     return (&inter_list[i]);
+			}
 		}
 
 		/*
@@ -2044,11 +2057,23 @@ findinterface(
 		if (addr->ss_family == AF_INET6) {
 			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
 			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
 				return (&inter_list[i]);
+			}
 
 			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
 			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
 				return (&inter_list[i]);
+			}
 		}
 	}
 
@@ -2061,19 +2086,86 @@ findinterface(
 		if (addr->ss_family == AF_INET)
 			if (((struct sockaddr_in *)&inter_list[i].sin)->sin_family == AF_INET && 
 			     inter_list[i].flags & INT_PPP)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
 				return (&inter_list[i]);
+			}
 		else if (addr->ss_family == AF_INET6)
 			if (((struct sockaddr_in6 *)&inter_list[i].sin)->sin6_family == AF_INET6 && 
 			     inter_list[i].flags & INT_PPP)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
 				return (&inter_list[i]);
+			}
 
 	}
+
+	/*
+	 * If we got this far, we still don't have an interface.
+	 * We pick the first one which is not loopback or link/site local
+	 */
+
+	for (i = nwilds; i < ninterfaces; i++)
+	{
+		if (inter_list[i].flags & INT_LOOPBACK)
+			continue;
+
+		/*
+		 * See if it's an IPv6 address and is Link-Local or Site Local
+		 */
+		if (addr->ss_family == AF_INET6) {
+			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				continue;
+
+			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				continue;
+		}
+		if (addr->ss_family == AF_INET)
+			if (((struct sockaddr_in *)&inter_list[i].sin)->sin_family == AF_INET)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+		else if (addr->ss_family == AF_INET6)
+			if (((struct sockaddr_in6 *)&inter_list[i].sin)->sin6_family == AF_INET6)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+
+	}
+	/*
+	 * If we got here then we are really in trouble
+	 */
+
+#ifdef DEBUG
+	if (debug > 1)
+	    printf("Having trouble finding interface for address: %s\n", stoa(addr));
+#endif
 
 
 	saddrlen = SOCKLEN(addr);
 	ind = find_addr_in_list(addr);
 	if (ind >= 0)
+	{
+#ifdef DEBUG
+		if (debug > 2)
+		    printf("Found interface %d for address: %s\n", ind, stoa(addr));
+#endif
 		return (&inter_list[ind]);
+	}
 
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
@@ -2135,11 +2227,150 @@ findbcastinter(
 	struct sockaddr_storage *addr
 	)
 {	
-	int i = find_flagged_addr_in_list(addr, INT_BROADCAST);
-	if(i >= 0)
-	     return (&inter_list[i]);
+	int ind;
+	int i;
+	u_int32 amask, imask;
+	int flagtype = INT_BROADCAST;
 
- 	return ANY_INTERFACE_CHOOSE(addr);
+	/*
+	 * If we got this far we need to try and match the
+	 * network part of the address
+	 */
+	for (i= nwilds; i < ninterfaces; i++)
+	{
+		/*
+		 * Skip the loopback. It can't act as an outgoing interface
+		 */
+		if (inter_list[i].flags & INT_LOOPBACK || !inter_list[i].flags & flagtype)
+			continue;
+		/*
+		 * For IPv4 we can check the network mask to see if
+		 * we have a match on the outgoing interface
+		 */
+		if (addr->ss_family == AF_INET) {
+			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+			imask = (((struct sockaddr_in*)&inter_list[i].sin)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+
+			if (amask == imask) {
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+			     return (&inter_list[i]);
+			}
+		}
+
+		/*
+		 * See if the IPv6 address is Link-Local or Site Local
+		 */
+		if (addr->ss_family == AF_INET6) {
+			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+
+			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+		}
+	}
+
+	/*
+	 * If we got here and failed because it was not a local network
+	 * address, see if we have a PPP interface and use that
+	 */
+	for (i = nwilds; i < ninterfaces; i++)
+	{
+		if (!inter_list[i].flags & flagtype)
+			continue;
+
+		if (addr->ss_family == AF_INET)
+			if (((struct sockaddr_in *)&inter_list[i].sin)->sin_family == AF_INET && 
+			     inter_list[i].flags & INT_PPP)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+		else if (addr->ss_family == AF_INET6)
+			if (((struct sockaddr_in6 *)&inter_list[i].sin)->sin6_family == AF_INET6 && 
+			     inter_list[i].flags & INT_PPP)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+
+	}
+
+	/*
+	 * If we got this far, we still don't have an interface.
+	 * We pick the first one which is not loopback or link/site local
+	 */
+
+	for (i = nwilds; i < ninterfaces; i++)
+	{
+		if (inter_list[i].flags & INT_LOOPBACK || !inter_list[i].flags & flagtype)
+			continue;
+
+		/*
+		 * See if it's an IPv6 address and is Link-Local or Site Local
+		 */
+		if (addr->ss_family == AF_INET6) {
+			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				continue;
+
+			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
+				continue;
+		}
+		if (addr->ss_family == AF_INET)
+			if (((struct sockaddr_in *)&inter_list[i].sin)->sin_family == AF_INET)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+		else if (addr->ss_family == AF_INET6)
+			if (((struct sockaddr_in6 *)&inter_list[i].sin)->sin6_family == AF_INET6)
+			{
+#ifdef DEBUG
+				if (debug > 2)
+				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
+#endif
+				return (&inter_list[i]);
+			}
+
+	}
+	/*
+	 * If we got here then we are really in trouble
+	 */
+
+#ifdef DEBUG
+	if (debug > 1)
+	    printf("Having trouble finding *cast interface for address: %s\n", stoa(addr));
+#endif
+
+	return (NULL);
+
 }
 
 
