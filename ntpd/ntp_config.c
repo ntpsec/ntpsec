@@ -2072,7 +2072,7 @@ getnetnum(
 		if (debug > 3)
 			printf("getaddrinfo %s\n", num);
 #endif
-	if (getaddrinfo(num, "123", &hints, &ptr)!=0) {
+	if (getaddrinfo(num, "ntp", &hints, &ptr)!=0) {
 		if (complain)
 			msyslog(LOG_ERR,
 				"getaddrinfo: \"%s\" invalid host address, line ignored",

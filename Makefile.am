@@ -45,6 +45,7 @@ EXTRA_DIST = \
 	results.y2kfixes \
 	conf \
 	html \
+	libisc \
 	ports \
 	version
 

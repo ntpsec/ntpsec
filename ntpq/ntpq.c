@@ -613,7 +613,7 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	sprintf(service, "%u", NTP_PORT);
+	strcpy(service, "ntp");
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
