@@ -41,7 +41,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7c\inc32" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /YX"windows.h" /FD /c
+# ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7d\inc32" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7c\inc32" /FI"windows.h" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR /YX"" /FD /GZ /c
+# ADD CPP /nologo /MDd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7d\inc32" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /FR /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -265,10 +266,6 @@ SOURCE=..\..\..\libntp\memmove.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mexit.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\mfp_mul.c
 # End Source File
 # Begin Source File
@@ -465,7 +462,7 @@ SOURCE=..\..\..\include\iosignal.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\ipv6.h
+SOURCE=..\include\isc\ipv6.h
 # End Source File
 # Begin Source File
 

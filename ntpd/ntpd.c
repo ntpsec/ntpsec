@@ -43,6 +43,7 @@
 # include <signal.h>
 # include <process.h>
 # include <io.h>
+# include "ntservice.h"
 # include "../libntp/log.h"
 # include <clockstuff.h>
 # include <crtdbg.h>
@@ -216,6 +217,48 @@ static	RETSIGTYPE	no_debug	P((int));
 
 int 		ntpdmain		P((int, char **));
 static void	set_process_priority	P((void));
+static void init_logging P((char *));
+
+/*
+ * Initialize the logging
+ */
+void
+init_logging(char *name)
+{
+	char *cp;
+
+	/*
+	 * Logging.  This may actually work on the gizmo board.  Find a name
+	 * to log with by using the basename
+	 */
+	cp = strrchr(name, '/');
+	if (cp == 0)
+		cp = name;
+	else
+		cp++;
+
+#if !defined(VMS)
+
+# ifndef LOG_DAEMON
+	openlog(cp, LOG_PID);
+# else /* LOG_DAEMON */
+
+#  ifndef LOG_NTP
+#	define	LOG_NTP LOG_DAEMON
+#  endif
+	openlog(cp, LOG_PID | LOG_NDELAY, LOG_NTP);
+#  ifdef DEBUG
+	if (debug)
+		setlogmask(LOG_UPTO(LOG_DEBUG));
+	else
+#  endif /* DEBUG */
+		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
+# endif /* LOG_DAEMON */
+#endif	/* !SYS_WINNT && !VMS */
+
+	NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
+		msyslog(LOG_NOTICE, "%s", Version);
+}
 
 #ifdef SIM
 int
@@ -387,6 +430,8 @@ ntpdmain(
 	debug = 0;			/* no debugging by default */
 	nofork = 0;			/* will fork by default */
 
+	init_logging(argv[0]);		/* Open the log file */
+
 #ifdef HAVE_UMASK
 	{
 		mode_t uv;
@@ -419,6 +464,16 @@ ntpdmain(
 		exit(1);
 	}
 	addSourceToRegistry("NTP", szMsgPath);
+
+	/* Initialize random file before OpenSSL checks */
+	if(!init_randfile())
+		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
+
+	/*
+	 * Initialize the time structures and variables
+	 */
+	init_winnt_time();
+
 #endif
 	getstartup(argc, argv); /* startup configuration, may set debug */
 
@@ -428,11 +483,6 @@ ntpdmain(
 	/*
 	 * Initialize random generator and public key pair
 	 */
-#ifdef SYS_WINNT
-	/* Initialize random file before OpenSSL checks */
-	if(!init_randfile())
-		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
-#endif
 	get_systime(&now);
 	SRANDOM((int)(now.l_i * now.l_uf));
 
@@ -527,131 +577,13 @@ ntpdmain(
 #endif /* _AIX */
 		}
 #   endif /* not HAVE_DAEMON */
-#  else /* SYS_WINNT */
-
-		{
-			if (NoWinService == FALSE) {
-				SERVICE_TABLE_ENTRY dispatchTable[] = {
-				{ TEXT("NetworkTimeProtocol"), (LPSERVICE_MAIN_FUNCTION)service_main },
-				{ NULL, NULL }
-				};
-
-				/* daemonize */
-				if (!StartServiceCtrlDispatcher(dispatchTable))
-				{
-					msyslog(LOG_ERR, "StartServiceCtrlDispatcher: %m");
-					ExitProcess(2);
-				}
-			}
-			else {
-				service_main(argc, argv);
-				return 0;
-			}
-		}
 #  endif /* SYS_WINNT */
 	}
 # endif /* NODETACH */
-# if defined(SYS_WINNT) && !defined(NODETACH)
-	else
-		service_main(argc, argv);
-	return 0;	/* must return a value */
-} /* end main */
-
-/*
- * If this runs as a service under NT, the main thread will block at
- * StartServiceCtrlDispatcher() and another thread will be started by the
- * Service Control Dispatcher which will begin execution at the routine
- * specified in that call (viz. service_main)
- */
-void
-service_main(
-	DWORD argc,
-	LPTSTR *argv
-	)
-{
-	char *cp;
-	struct recvbuf *rbuflist;
-	struct recvbuf *rbuf;
-
-	if(!debug && NoWinService == FALSE)
-	{
-		/* register our service control handler */
-		sshStatusHandle = RegisterServiceCtrlHandler( TEXT("NetworkTimeProtocol"),
-							(LPHANDLER_FUNCTION)service_ctrl);
-		if(sshStatusHandle == 0)
-		{
-			msyslog(LOG_ERR, "RegisterServiceCtrlHandler failed: %m");
-			return;
-		}
-
-		/* report pending status to Service Control Manager */
-		ssStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-		ssStatus.dwCurrentState = SERVICE_START_PENDING;
-		ssStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-		ssStatus.dwWin32ExitCode = NO_ERROR;
-		ssStatus.dwServiceSpecificExitCode = 0;
-		ssStatus.dwCheckPoint = 1;
-		ssStatus.dwWaitHint = 5000;
-		if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-		{
-			msyslog(LOG_ERR, "SetServiceStatus: %m");
-			ssStatus.dwCurrentState = SERVICE_STOPPED;
-			SetServiceStatus(sshStatusHandle, &ssStatus);
-			return;
-		}
-
-	}  /* debug */
-# endif /* defined(SYS_WINNT) && !defined(NODETACH) */
 #endif /* VMS */
-
-	/*
-	 * Logging.  This may actually work on the gizmo board.  Find a name
-	 * to log with by using the basename of argv[0]
-	 */
-	cp = strrchr(argv[0], '/');
-	if (cp == 0)
-		cp = argv[0];
-	else
-		cp++;
 
 	debug = 0; /* will be immediately re-initialized 8-( */
 	getstartup(argc, argv); /* startup configuration, catch logfile this time */
-
-#if !defined(VMS)
-
-# ifndef LOG_DAEMON
-	openlog(cp, LOG_PID);
-# else /* LOG_DAEMON */
-
-#  ifndef LOG_NTP
-#	define	LOG_NTP LOG_DAEMON
-#  endif
-	openlog(cp, LOG_PID | LOG_NDELAY, LOG_NTP);
-#  ifdef DEBUG
-	if (debug)
-		setlogmask(LOG_UPTO(LOG_DEBUG));
-	else
-#  endif /* DEBUG */
-		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
-# endif /* LOG_DAEMON */
-#endif	/* !SYS_WINNT && !VMS */
-
-	NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-		msyslog(LOG_NOTICE, "%s", Version);
-
-#ifdef SYS_WINNT
-	/* GMS 1/18/1997
-	 * TODO: lock the process in memory using SetProcessWorkingSetSize() and VirtualLock() functions
-	 *
-	 process_handle = GetCurrentProcess();
-	 if (SetProcessWorkingSetSize(process_handle, 2097152 , 4194304 ) == TRUE) {
-	 if (VirtualLock(0 , 4194304) == FALSE)
-	 msyslog(LOG_ERR, "VirtualLock() failed: %m");
-	 } else {
-	 msyslog(LOG_ERR, "SetProcessWorkingSetSize() failed: %m");
-	 }
-	*/
-#endif /* SYS_WINNT */
 
 #ifdef SCO5_CLOCK
 	/*
@@ -778,7 +710,6 @@ service_main(
 	 */
 #if defined (HAVE_IO_COMPLETION_PORT)
 	init_io_completion_port();
-	init_winnt_time();
 #endif
 	init_auth();
 	init_util();
@@ -815,29 +746,6 @@ service_main(
 #endif /* OPENSSL */
 	initializing = 0;
 
-#if defined(SYS_WINNT) && !defined(NODETACH)
-# if defined(DEBUG)
-	if(!debug)
-	{
-# endif
-		if (NoWinService == FALSE) {
-		/* report to the service control manager that the service is running */
-			ssStatus.dwCurrentState = SERVICE_RUNNING;
-			ssStatus.dwWin32ExitCode = NO_ERROR;
-			if (!SetServiceStatus(sshStatusHandle, &ssStatus))
-			{
-				msyslog(LOG_ERR, "SetServiceStatus: %m");
-				if (ResolverThreadHandle != NULL)
-					CloseHandle(ResolverThreadHandle);
-				ssStatus.dwCurrentState = SERVICE_STOPPED;
-				SetServiceStatus(sshStatusHandle, &ssStatus);
-				return;
-			}
-		}
-# if defined(DEBUG)
-	}
-# endif  
-#endif
 
 #ifdef HAVE_DROPROOT
 	if( droproot ) {
@@ -1102,10 +1010,7 @@ getgroup:
 		 * Go around again
 		 */
 	}
-#ifndef SYS_WINNT
-	exit(1);	/* unreachable */
-	return 1;	/* DEC OSF cc braindamage */
-#endif
+	return 1;
 }
 
 

@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <ws2tcpip.h>
+#include <isc/ipv6.h>
 #include <isc/net.h>
 #include <isc/strerror.h>
 #include <isc/string.h>

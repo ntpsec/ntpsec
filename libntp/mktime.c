@@ -62,7 +62,7 @@
 
 #include "ntp_machine.h"
 
-#if !HAVE_MKTIME || !HAVE_TIMEGM
+#if !defined(HAVE_MKTIME) || !defined(HAVE_TIMEGM)
 
 #ifndef DSTMINUTES
 #define DSTMINUTES 60
@@ -83,8 +83,6 @@
 #define MONSPERYEAR     12
 #define TM_YEAR_BASE    1900
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
-
-extern time_t	time P((time_t *));
 
 static int	mon_lengths[2][MONSPERYEAR] = {
 	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
@@ -260,7 +258,7 @@ time2(
 int mktime_bs;
 #endif /* !HAVE_MKTIME || !HAVE_TIMEGM */
 
-#if !HAVE_MKTIME
+#ifndef HAVE_MKTIME
 static time_t
 time1(
 	struct tm * tmp
@@ -287,7 +285,7 @@ mktime(
 }
 #endif /* !HAVE_MKTIME */
 
-#if !HAVE_TIMEGM
+#ifndef HAVE_TIMEGM
 time_t
 timegm(
 	struct tm * tmp

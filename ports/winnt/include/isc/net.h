@@ -97,8 +97,8 @@
 #include <isc/lang.h>
 #include <isc/types.h>
 
-#include <ws2tcpip.h>
-#include <isc/ipv6.h>
+//#include <ws2tcpip.h>
+//#include <isc/ipv6.h>
 
 /*
  * This is here because named client, interfacemgr.c, etc. use the name as
@@ -110,11 +110,13 @@
 #define INADDR_LOOPBACK 0x7f000001UL
 #endif
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 #ifndef ISC_PLATFORM_HAVEIN6PKTINFO
 struct in6_pktinfo {
 	struct in6_addr ipi6_addr;    /* src/dst IPv6 address */
 	unsigned int    ipi6_ifindex; /* send/recv interface index */
 };
+#endif
 #endif
 
 /*
