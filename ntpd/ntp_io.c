@@ -269,32 +269,39 @@ int
 create_wildcards(u_short port) {
 
 	int idx = 0;
+	int okipv4 = TRUE;
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
-	inter_list[idx].sin.ss_family = AF_INET;
-	((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr = htonl(INADDR_ANY);
-	((struct sockaddr_in*)&inter_list[idx].sin)->sin_port = port;
-	(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
-	inter_list[idx].mask.ss_family = AF_INET;
-	((struct sockaddr_in*)&inter_list[idx].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
-	inter_list[idx].bfd = INVALID_SOCKET;
-	inter_list[idx].num_mcast = 0;
-	inter_list[idx].received = 0;
-	inter_list[idx].sent = 0;
-	inter_list[idx].notsent = 0;
-	inter_list[idx].flags = INT_BROADCAST;
-	any_interface = &inter_list[idx];
+#ifdef IPV6_V6ONLY
+	okipv4 = (isc_net_probeipv4() == ISC_R_SUCCESS);
+#endif
+
+	if(okipv4) {
+		inter_list[idx].sin.ss_family = AF_INET;
+		((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr = htonl(INADDR_ANY);
+		((struct sockaddr_in*)&inter_list[idx].sin)->sin_port = port;
+		(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
+		inter_list[idx].mask.ss_family = AF_INET;
+		((struct sockaddr_in*)&inter_list[idx].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
+		inter_list[idx].bfd = INVALID_SOCKET;
+		inter_list[idx].num_mcast = 0;
+		inter_list[idx].received = 0;
+		inter_list[idx].sent = 0;
+		inter_list[idx].notsent = 0;
+		inter_list[idx].flags = INT_BROADCAST;
+		any_interface = &inter_list[idx];
 #if defined(MCAST)
 	/*
 	 * enable possible multicast reception on the broadcast socket
 	 */
-	inter_list[idx].bcast.ss_family = AF_INET;
-	((struct sockaddr_in*)&inter_list[idx].bcast)->sin_port = port;
-	((struct sockaddr_in*)&inter_list[idx].bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
+		inter_list[idx].bcast.ss_family = AF_INET;
+		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_port = port;
+		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
-	wildipv4 = idx;
-	idx++;
+		wildipv4 = idx;
+		idx++;
+	}
 
 #ifdef ISC_PLATFORM_HAVEIPV6
 	/*
@@ -541,12 +548,13 @@ create_sockets(
 	if (debug > 1) {
 		printf("create_sockets: ninterfaces=%d\n", ninterfaces);
 		for (i = 0; i < ninterfaces; i++) {
-			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x\n",
+			printf("interface %d:  fd=%d,  bfd=%d,  name=%.8s,  flags=0x%x,  scope=%d\n",
 			       i,
 			       inter_list[i].fd,
 			       inter_list[i].bfd,
 			       inter_list[i].name,
-			       inter_list[i].flags);
+			       inter_list[i].flags,
+			       inter_list[i].scopeid);
 			/* Leave these as three printf calls. */
 			printf("              sin=%s",
 			       stoa((&inter_list[i].sin)));
@@ -1073,6 +1081,7 @@ open_socket(
 			netsyslog(LOG_ERR, "setsockopt IPTOS_LOWDELAY on fails on address %s: %m",
 				stoa(addr));
 		}
+#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 #if defined(IPV6_V6ONLY)
         if (addr->ss_family == AF_INET6)
@@ -1094,8 +1103,6 @@ open_socket(
 		}
 #endif /* IPV6_BINDV6ONLY */
 #endif /* IPV6_V6ONLY */
-
-#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 	/*
 	 * bind the local address.

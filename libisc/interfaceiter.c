@@ -74,11 +74,14 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 
 		/*
 		 * For KAME addresses we need to fix up the address
-		 * for public consumption 
+		 * for public consumption if it is a multicast address
 		 */
 #ifdef __KAME__
-		dst->type.in6.s6_addr[2] = 0;
-		dst->type.in6.s6_addr[3] = 0;
+		if (IN6_IS_ADDR_MC_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)) {
+			dst->type.in6.s6_addr[2] = 0;
+			dst->type.in6.s6_addr[3] = 0;
+		}
+
 #endif
 		break;
 	default:
@@ -103,7 +106,7 @@ get_scopeid(unsigned int family, struct sockaddr *src) {
 		break;
 	case AF_INET6:
 #ifdef __KAME__
-	if (IN6_IS_ADDR_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)) {
+	if (IN6_IS_ADDR_MC_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)) {
 		u_int8_t *p;
 		p = &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[0];
 		scopeid = ((u_int16_t)p[2] << 8) | p[3];
