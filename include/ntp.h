@@ -178,6 +178,7 @@ struct interface {
 	int flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */
 	u_int addr_refid;	/* IPv4 addr or IPv6 hash */
+	int num_mcast;		/* No. of IP addresses in multicast socket */
 	volatile long received;	/* number of incoming packets */
 	long sent;		/* number of outgoing packets */
 	long notsent;		/* number of send failures */
