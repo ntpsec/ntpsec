@@ -34,6 +34,6 @@ $(PROGRAMS): $(LDADD)
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE)
 
-version.o: $(ntpd_OBJECTS) ../libntp/libntp.a Makefile
-	$(top_srcdir)/scripts/mkversion ntpd @VERSION@
+version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ @LIBRSAREF@ Makefile
+	$(top_builddir)/scripts/mkver ntpd
 	$(COMPILE) -c version.c

@@ -1,3 +1,15 @@
+1999-07-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpq/Makefile.am (version.o): Use mkver
+	* ntptrace/Makefile.am (version.o): Ditto
+	* ntpdate/Makefile.am (version.o): Ditto
+	* ntpd/Makefile.am (version.o): Ditto
+	* ntpdc/Makefile.am (version.o): Ditto
+
+	* configure.in (AC_OUTPUT): scripts/mkver
+
+	* scripts/mkver.in: Created.  Note RSAREF in the version string
+
 1999-07-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* README.des: Updated.

@@ -15,5 +15,5 @@ $(PROGRAMS): $(LDADD)
 	cd ../libntp && $(MAKE)
 
 version.o: $(ntptrace_OBJECTS) ../libntp/libntp.a Makefile
-	$(top_srcdir)/scripts/mkversion ntptrace @VERSION@
+	$(top_builddir)/scripts/mkver ntptrace
 	$(COMPILE) -c version.c

@@ -9561,7 +9561,7 @@ trap 'rm -fr `echo "Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/ntpver util/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+scripts/mkver scripts/ntpver util/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -9689,7 +9689,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
 libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
 ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/ntpver util/Makefile"}
+scripts/mkver scripts/ntpver util/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -9862,7 +9862,7 @@ cat >> $CONFIG_STATUS <<EOF
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h
-chmod +x scripts/ntpver
+chmod +x scripts/ntpver scripts/mkver
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
