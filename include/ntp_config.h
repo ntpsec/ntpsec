@@ -135,9 +135,8 @@
 #define CONF_CLOCK_PANIC	2
 #define CONF_CLOCK_PHI		3
 #define CONF_CLOCK_MINSTEP	4
-#define CONF_CLOCK_MINPOLL	5
-#define CONF_CLOCK_ALLAN	6
-#define CONF_CLOCK_HUFFPUFF	7
+#define CONF_CLOCK_ALLAN	5
+#define CONF_CLOCK_HUFFPUFF	6
 
 /*
  * "tos" modifier keywords

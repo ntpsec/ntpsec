@@ -299,7 +299,6 @@ extern int	kern_enable;		/* kernel support enabled */
 extern int	pps_enable;		/* kernel PPS discipline enabled */
 extern int	ext_enable;		/* external clock enabled */
 extern int	cal_enable;		/* refclock calibrate enable */
-extern int	allow_step;		/* allow step correction */
 extern int	allow_panic;		/* allow panic correction */
 extern int	mode_ntpdate;		/* exit on first clock set */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
@@ -309,12 +308,11 @@ extern int	forground_process;	/* run the process in the forground */
  * Clock state machine variables
  */
 extern u_char	sys_poll;		/* system poll interval (log2 s) */
-extern u_char	sys_minpoll;		/* min system poll interval (log2 s) */
 extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
-extern u_char	allan_xpt;		/* Allan intercept (s) */
+extern double	allan_xpt;		/* Allan intercept (s) */
 extern double	sys_error;		/* system RMS error (s) */
 extern double	sys_jitter;		/* system RMS jitter (s) */
 

@@ -484,7 +484,8 @@ receive(
 		if (debug)
 			printf("receive: at %ld %s<-%s mode %d code %d\n",
 			    current_time, stoa(&rbufp->dstadr->sin),
-			    stoa(&rbufp->recv_srcadr), hismode, retcode);
+			    stoa(&rbufp->recv_srcadr), hismode,
+			    retcode);
 #endif
 	} else {
 #ifdef OPENSSL
@@ -618,6 +619,14 @@ receive(
 			 * our time is worse than the manycaster or it
 			 * has already synchronized to us.
 			 */
+
+#ifdef DEBUG
+			if (debug)
+				printf("receive: refid %x %x stratum %d %d\n",
+				    rbufp->dstadr->addr_refid,
+				    pkt->refid, sys_stratum,
+				    PKT_TO_STRATUM(pkt->stratum));
+#endif
 			if (sys_peer == NULL ||
 			    PKT_TO_STRATUM(pkt->stratum) <
 			    sys_stratum || (sys_cohort &&
@@ -673,7 +682,7 @@ receive(
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
 		    MDF_ACLNT, 0, skeyid)) == NULL)
 			return;
 
@@ -703,7 +712,7 @@ receive(
 		}
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
+		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
 		    skeyid)) == NULL)
 			return;
 
@@ -728,7 +737,7 @@ receive(
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
 			return;
 #ifdef OPENSSL
@@ -1134,7 +1143,7 @@ process_packet(
 	}
 	if (p_del < 0 || p_disp < 0 || p_del /	/* test 8 */
 	    2 + p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;		/* bad peer distance */
+		peer->flash |= TEST8;		/* bad peer values */
 
 	/*
 	 * If any tests fail at this point, the packet is discarded.
@@ -1219,7 +1228,7 @@ process_packet(
 	LFPTOD(&ci, p_offset);
 	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
 	    p_disp >= MAXDISPERSE)		/* test 9 */
-		peer->flash |= TEST9;		/* bad peer distance */
+		peer->flash |= TEST9;		/* bad root distance */
 
 	/*
 	 * If any flasher bits remain set at this point, abandon ship.
@@ -1252,14 +1261,13 @@ clock_update(void)
 
 	/*
 	 * Reset/adjust the system clock. Do this only if there is a
-	 * system peer and we haven't seen that peer lately. Watch for
-	 * timewarps here.
+	 * system peer and the peer epoch is not older than the last
+	 * update.
 	 */
 	if (sys_peer == NULL)
 		return;
-	if (sys_peer->pollsw == FALSE)
+	if (sys_peer->epoch <= last_time)
 		return;
-	sys_peer->pollsw = FALSE;
 #ifdef DEBUG
 	if (debug)
 		printf("clock_update: at %ld assoc %d \n", current_time,
@@ -1473,7 +1481,6 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->kpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
-	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 #ifdef REFCLOCK
@@ -1575,7 +1582,7 @@ clock_filter(
 		if (peer->filter_disp[j] >= MAXDISPERSE)
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
-		    ULOGTOD(allan_xpt))
+		    allan_xpt)
 			dst[i] = MAXDISTANCE + peer->filter_disp[j];
 		else
  			dst[i] = peer->filter_delay[j];
@@ -1683,10 +1690,9 @@ clock_filter(
 
 	/*
 	 * The mitigated sample statistics are saved for later
-	 * processing, but can be processed only once.
+	 * processing.
 	 */
 	peer->epoch = peer->filter_epoch[k];
-	peer->pollsw = TRUE;
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -2657,8 +2663,6 @@ fast_xmit(
 
 		sys_kod--;
 		memcpy(&xpkt.refid, code, 4);
-		msyslog(LOG_INFO, "kiss-of-death %s to %s",
-		    code, ntoa(&rbufp->recv_srcadr));
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
@@ -2880,7 +2884,7 @@ default_get_precision(void)
 	NLOG(NLOG_SYSINFO)
 	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
-		tick *= 2;;
+		tick *= 2;
 	if (tick - 1. > 1. - tick / 2)
 		i--;
 	return (-i);
@@ -2931,7 +2935,7 @@ init_proto(void)
 	sys_stattime = 0;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {
-		sys_ttl[i] = (u_char) ((i + 1) * 256 / MAX_TTL - 1);
+		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
 #ifdef OPENSSL

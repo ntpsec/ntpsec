@@ -24,75 +24,69 @@
 /*
  * ntpsim declarations
  */
- 
 typedef enum {
         BEEP, CLOCK, TIMER, PACKET
-}funcTkn;
+} funcTkn;
 
-typedef struct
-{
+typedef struct {
         double time;
         union {
                 struct pkt evnt_pkt;
 		struct recvbuf evnt_buf;
-        }buffer;
+        } buffer;
 #define ntp_pkt buffer.evnt_pkt
 #define rcv_buf buffer.evnt_buf
         funcTkn function;
-}Event;
+} Event;
 
-typedef struct List
-{
+typedef struct List {
         Event event;
         struct List *next;
-}*Queue;
+} *Queue;
 
-typedef struct nde
-{
-	u_int32 tick;			/* tick - 1/freq */
-	u_int32 tickadj;		/* tickadj - slew rate */
-	double offset;			/* clock reading offset */
-	double ferr;			/* systematic frequency offset*/
-	double fnse;			/* random frequency noise */
-	double bdly;			/* beep delay for visual output */
-	double ndly;			/* base delay to server */
-	double pdly;                    /* processing delay */
-	double nnse1;			/* random network noise */
-	double nnse2;                   /* random network noise */
-	double snse;			/* server noise */
-        double time;			/* Correct Node Time */
-	double clk_time;                /* Unsynchronised Clock Time */
-	double ntp_time;		/* Synchronised NTP Time */
-	double sim_time;		/* Time to run simulation */
-	double adj;			/* Time to be adjusted */
-        Queue events;			/* Node Event Queue */
+typedef struct nde {
+        double	time;			/* simulation time */
+	double	sim_time;		/* end simulation time */
+	double	ntp_time;		/* client disciplined time */
+	double	adj;			/* remaining time correction */
+	double	slew;			/* correction slew rate */
+
+	double	clk_time;		/* server time */
+	double	ferr;			/* frequency errort */
+	double	fnse;			/* random walk noise */
+	double	ndly;			/* network delay */
+	double	snse;			/* phase noise */
+	double	pdly;			/* processing delay */
+	double	bdly;			/* beep interval */
+
+	double	last_time;		/* last clock read time */
+        Queue	events;			/* Node Event Queue */
 	struct recvbuf *rbuflist;	/* Node Receive Buffer */
-}Node;
+} Node;
 
-/* Function Prototypes */
-int ntpsim(int argc, char *argv[]);
-Event event(double, funcTkn);
-Queue queue(Event, Queue );
-Node node(void);
-void ntpinit(int argc, char *argv[]);
-void push(Event, Queue *);
-Event pop(Queue *);
-void run(Node *);
-void ndbeep(Node *, Event);
-void ndeclk(Node *, Event);
-void ntptmr(Node *, Event);
-void netpkt(Node *, Event);
-int srvr_rply(Node *, struct sockaddr_storage *, struct interface *,
-    struct pkt *);
-double guassian(double, double);
-int node_clock(Node *, double);
-int node_gettime(Node *, struct timeval *);
-int node_adjtime(Node *, struct timeval *, struct timeval *);
-int node_settime(Node *, struct timeval *);
-int get_precision(int);
-void abortsim(char *);
+/*
+ * Function prototypes
+ */
+int	ntpsim		P((int argc, char *argv[]));
+Event	event		P((double, funcTkn));
+Queue	queue		P((Event, Queue ));
+Node	node		P((void));
+void	push		P((Event, Queue *));
+Event	pop		P((Queue *));
+void	ndbeep		P((Node *, Event));
+void	ndeclk		P((Node *, Event));
+void	ntptmr		P((Node *, Event));
+void	netpkt		P((Node *, Event));
+int	srvr_rply	P((Node *, struct sockaddr_storage *,
+			    struct interface *, struct pkt *));
+double	gauss		P((double, double));
+double	poisson		P((double, double));
+int	node_clock	P((Node *, double));
+void	abortsim	P((char *));
 
-/* The global Node */
+/*
+ * The global Node
+ */
 Node ntp_node;
 
 #endif

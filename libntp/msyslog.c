@@ -106,6 +106,10 @@ void msyslog(int level, const char *fmt, ...)
 	*n = '\0';
 
 	vsnprintf(buf, sizeof(buf), nfmt, ap);
+#if DEBUG
+	if (debug)
+		printf("msyslog: %s\n", buf);
+#endif
 #if !defined(VMS) && !defined (SYS_VXWORKS)
 	if (syslogit)
 	    syslog(level, "%s", buf);
