@@ -141,7 +141,6 @@ int trash = 0;			/* Trash old files? */
 int errflag = 0;
 
 char *f1_keysdir = NTP_KEYSDIR;
-char *f2_keysdir;
 
 char *f1_keys;			/* Visible MD5 key file name */
 char *f2_keys;			/* timestamped */
@@ -541,7 +540,6 @@ main(
 			progname, f1_keysdir);
 		exit(1);
 	}
-	snifflink(f1_keysdir, &f2_keysdir); /* Do we care? */
 
 	if (!f2_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "ntp.keys.%lu",
@@ -550,7 +548,7 @@ main(
 	}
 	if (!f1_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntp.keys",
-			 NTP_KEYSDIR);
+			 f1_keysdir);
 		f1_keys = strdup(pathbuf);
 	}
 	if (*f1_keys != '/') {
@@ -615,44 +613,39 @@ main(
 	}
 	snifflink(f1_dhparms, &f3_dhparms);
 
-	printf("After config:\n");
-	printf("keysdir    = <%s> -> <%s>\n"
-	       , f1_keysdir? f1_keysdir: ""
-	       , f2_keysdir? f2_keysdir: ""
-		);
-	printf("keys       = <%s> -> <%s>\n"
-	       , f1_keys? f1_keys: ""
-	       , f2_keys? f2_keys: ""
-		);
-	printf("       old = <%s>\n", f3_keys? f3_keys: "");
-	printf("publickey  = <%s> -> <%s>\n"
-	       , f1_publickey? f1_publickey: ""
-	       , f2_publickey? f2_publickey: ""
-		);
-	printf("       old = <%s>\n", f3_publickey? f3_publickey: "");
-	printf("privatekey = <%s> -> <%s>\n"
-	       , f1_privatekey? f1_privatekey: ""
-	       , f2_privatekey? f2_privatekey: ""
-		);
-	printf("       old = <%s>\n", f3_privatekey? f3_privatekey: "");
-	printf("dhparms    = <%s> -> <%s>\n"
-	       , f1_dhparms? f1_dhparms: ""
-	       , f2_dhparms? f2_dhparms: ""
-		);
-	printf("       old = <%s>\n", f3_dhparms? f3_dhparms: "");
+	if (debug) {
+		printf("After config:\n");
+		printf("keysdir    = <%s>\n", f1_keysdir? f1_keysdir: "");
+		printf("keys       = <%s> -> <%s>\n"
+		       , f1_keys? f1_keys: ""
+		       , f2_keys? f2_keys: ""
+		      );
+		printf("       old = <%s>\n", f3_keys? f3_keys: "");
+		printf("publickey  = <%s> -> <%s>\n"
+		       , f1_publickey? f1_publickey: ""
+		       , f2_publickey? f2_publickey: ""
+		      );
+		printf("       old = <%s>\n", f3_publickey? f3_publickey: "");
+		printf("privatekey = <%s> -> <%s>\n"
+		       , f1_privatekey? f1_privatekey: ""
+		       , f2_privatekey? f2_privatekey: ""
+		      );
+		printf("       old = <%s>\n", f3_privatekey? f3_privatekey: "");
+		printf("dhparms    = <%s> -> <%s>\n"
+		       , f1_dhparms? f1_dhparms: ""
+		       , f2_dhparms? f2_dhparms: ""
+		      );
+		printf("       old = <%s>\n", f3_dhparms? f3_dhparms: "");
+	}
 
 	/*
-	  We:
-	  - get each target filename
-	  - if it exists, if it's a symlink get the "target"
-	  - for each file we're going to install:
-	  - - build the new timestamped file
-	  - - install it with the timestamp suffix
-	  - - If it's OK to make links:
-	  - - - remove any old link
-	  - - - make any needed directories?
-	  - - - make the link
-	  - - - remove the old file (if (trash))
+	  for each file we're going to install:
+	  - make the new timestamped file
+	  - if (!nosymlinks)
+	  - - remove any old link
+	  - - make the link
+	  - - if (trash)
+	  - - - remove the old file
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
