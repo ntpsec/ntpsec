@@ -1733,5 +1733,9 @@ crypto_config(
 		break;
 	}
 }
+#else
+int ntp_crypto_bs_pubkey;
 #endif /* PUBKEY */
+#else
+int ntp_crypto_bs_autokey;
 #endif /* AUTOKEY */

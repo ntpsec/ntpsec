@@ -61,4 +61,6 @@ DESauth_parity(
 	 */
 	return (parity_err == 0);
 }
+#else
+int authparity_bs;
 #endif /* DES */

@@ -205,11 +205,9 @@ ulink_receive(
 
 	l_fp	trtmp;		/* arrival timestamp */
 	int	quality;	/* quality indicator */
-	int	tz;		/* time zone */
 	int	temp;		/* int temp */
 	char	syncchar;	/* synchronization indicator */
 	char	leapchar;	/* leap indicator */
-	char	dstchar;	/* daylight/standard indicator */
 	char	modechar;	/* model 320 mode flag */
 
 	/*
@@ -247,8 +245,7 @@ ulink_receive(
 	 * its contents. If the timecode has invalid length or is not in
 	 * proper format, we declare bad format and exit.
 	 */
-	syncchar = leapchar = dstchar = modechar = ' ';
-	tz = 0;
+	syncchar = leapchar = modechar = ' ';
 	pp->msec = 0;
 
 	switch (pp->lencode ) {
@@ -418,12 +415,10 @@ ulink_poll(
 	struct peer *peer
 	)
 {
-        register struct ulinkunit *up;
         struct refclockproc *pp;
         char pollchar;
 
         pp = peer->procptr;
-        up = (struct ulinkunit *)pp->unitptr;
         pollchar = 'T';
 	if (pp->sloppyclockflag & CLK_FLAG1) {
 	        if (write(pp->io.fd, &pollchar, 1) != 1)

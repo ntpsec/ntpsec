@@ -1,5 +1,11 @@
 2000-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_ulink.c (ulink_receive): 
+	* ntpd/ntp_crypto.c: 
+	* libntp/authparity.c: 
+	Lint/noise cleanup
+	From: Marc Brett <mbrett@rgs0.london.waii.com>
+
 	* ntpd/ntp_proto.c: Specifically track manycastserver and
 	survivors
 	From: Dave Mills
