@@ -120,7 +120,7 @@ struct req_pkt {
 	u_char request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
-	char data[144];			/* data area */
+	char data[32];			/* data area (144 byte max) */
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* encryption key */
 	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
@@ -798,6 +798,7 @@ struct info_kernel {
 /*
  * Info returned with IP -> hostname lookup
  */
+/* 144 might need to become 32, matching data[] member of req_pkt */
 #define NTP_MAXHOSTNAME (144 - sizeof(u_int32) - sizeof(u_short))
 struct info_dns_assoc {
 	u_int32 peeraddr;	/* peer address (HMS: being careful...) */
