@@ -947,9 +947,6 @@ case "$host" in
  *-*-domainos)
     ans=no
     ;;
- *-*-linux*)
-    ans=no
-    ;;
 esac
 ac_cv_var_open_bcast_socket=$ans])
 case "$ac_cv_var_open_bcast_socket" in
