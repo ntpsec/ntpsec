@@ -55,3 +55,4 @@ rsaref2
 scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
+ChangeLog

@@ -22,6 +22,7 @@ SUBDIRS = \
 EXTRA_DIST = \
 	COPYRIGHT \
 	ChangeLog \
+	ChangeLog-4.1.0 \
 	NEWS \
 	NOTES.y2kfixes \
 	README.bk \
