@@ -275,11 +275,11 @@ receive(
 	struct recvbuf *rbufp
 	)
 {
-	register struct peer *peer;
-	register struct pkt *pkt;
-	int	hismode;
-	int	oflags;
-	int	restrict_mask;
+	register struct peer *peer;	/* peer structure pointer */
+	register struct pkt *pkt;	/* receive packet pointer */
+	int	hismode;		/* packet mode */
+	int	oflags;			/* temp flags */
+	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
 	int	is_authentic;		/* cryptosum ok */
@@ -288,9 +288,9 @@ receive(
 #ifdef OPENSSL
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
 	l_fp	p_org;			/* originate timestamp */
-	int	is_org;			/* org matches previous xmt */
-	struct autokey *ap;
-	struct peer *peer2;
+	int	is_org;			/* loopback ok */
+	struct autokey *ap;		/* autokey structure pointer */
+	struct peer *peer2;		/* aux peer structure pointer */
 #endif /* OPENSSL */
 	int retcode = AM_NOMATCH;
 
@@ -692,7 +692,7 @@ receive(
 			return;
 #ifdef OPENSSL
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
-			crypto_recv(peer, rbufp);
+			crypto_recv(peer, rbufp, 1);
 			if (peer->flash)
 				unpeer(peer);
 		}
@@ -739,7 +739,7 @@ receive(
 	if (!(peer->flags & FLAG_CONFIG) && has_mac) {
 		peer->flags |= FLAG_AUTHENABLE;
 #ifdef OPENSSL
-		if (skeyid > NTP_MAXKEY) {
+		if (skeyid > NTP_MAXKEY) {	/* test 5 */
 			if (crypto_flags)
 				peer->flags |= FLAG_SKEY;
 			else
@@ -747,23 +747,26 @@ receive(
 		}
 #endif /* OPENSSL */
 	}
+	if (peer->hmode == MODE_BROADCAST &&
+	    (restrict_mask & RES_DONTTRUST))	/* test 4 */
+		peer->flash |= TEST4;		/* access denied */
+	if (peer->flash) {
+#ifdef DEBUG
+		if (debug)
+			printf("receive: denied %03x\n",
+			    peer->flash);
+#endif
+		return;
+	}
 
 	/*
 	 * A valid packet must be from an authentic and allowed source.
-	 * All packets must pass the authentication allowed tests.
 	 * Autokey authenticated packets must pass additional tests and
 	 * public-key authenticated packets must have the credentials
 	 * verified. If all tests are passed, the packet is forwarded
 	 * for processing. If not, the packet is discarded and the
 	 * association demobilized if appropriate.
 	 */
-	if (peer->hmode == MODE_BROADCAST &&
-	    (restrict_mask & RES_DONTTRUST))	/* test 4 */
-		peer->flash |= TEST4;		/* access denied */
-#ifdef OPENSSL
-	NTOHL_FP(&pkt->org, &p_org);
-	is_org = L_ISEQU(&peer->xmt, &p_org);
-#endif /* OPENSSL */
 	if (peer->flags & FLAG_AUTHENABLE) {
 		if (!(peer->flags & FLAG_AUTHENTIC)) /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
@@ -781,6 +784,10 @@ receive(
 	 * is very likely a valid response to one sent earlier. See
 	 * below for more jitterbug in other error cases.
 	 */
+#ifdef OPENSSL
+	NTOHL_FP(&pkt->org, &p_org);
+	is_org = L_ISEQU(&peer->xmt, &p_org);
+#endif /* OPENSSL */
 	if (peer->flash) {
 #ifdef OPENSSL
 		switch (hismode) {
@@ -789,16 +796,13 @@ receive(
 		 * In client mode if the packet matches the last one
 		 * sent and is a crypto-NAK, the server has either
 		 * restarted or refreshed the private value, so we
-		 * retrieve the server cookie and continue where we left
+		 * start over.
 		 * off.
 		 */
 		case MODE_SERVER:
 			if (is_org && has_mac == 4 && pkt->exten[0] ==
-			    0) {
-				key_expire(peer);
-				peer->crypto &= ~(CRYPTO_FLAG_AUTO |
-				    CRYPTO_FLAG_AGREE);
-			}
+			    0)
+				peer_clear(peer);
 			break;
 
 		/*
@@ -819,7 +823,8 @@ receive(
 #endif /* OPENSSL */
 #ifdef DEBUG
 		if (debug)
-			printf("receive: bad auth %03x\n", peer->flash);
+			printf("receive: bad auth %03x\n",
+			    peer->flash);
 #endif
 		return;
 	}
@@ -830,20 +835,24 @@ receive(
 	 *
 	 * 1. If there is no key or the key is not auto, do nothing.
 	 *
-	 * 2. If an extension field contains a verified signature, it is
+	 * 2. If this packet is in response to the one just previously
+	 *    sent or from a broadcast server, do the extension fields.
+	 *    Otherwise, assume bogosity and bail out.
+	 *
+	 * 3. If an extension field contains a verified signature, it is
 	 *    self-authenticated and we sit the dance.
 	 *
-	 * 3. If this is a server reply, check only to see that the
+	 * 4. If this is a server reply, check only to see that the
 	 *    transmitted key ID matches the received key ID.
 	 *
-	 * 4. Check to see that one or more hashes of the current key ID
+	 * 5. Check to see that one or more hashes of the current key ID
 	 *    matches the previous key ID or ultimate original key ID
 	 *    obtained from the broadcaster or symmetric peer. If no
 	 *    match, sit the dance and wait for timeout.
 	 */
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST10;
-		crypto_recv(peer, rbufp);
+		crypto_recv(peer, rbufp, is_org);
 		if (peer->flash & TEST12) {
 			/* fall through */
 
@@ -872,25 +881,28 @@ receive(
 		}
 
 		/*
-		 * This is delicious. Ordinarily, we kick out all errors
-		 * at this point; however, in symmetric mode and just
-		 * warming up, an unsynchronized peer must inject the
-		 * timestamps, even if it fails further up the road. So,
-		 * let the dude by here, but only if the jerk is not yet
-		 * reachable. After that, he's on his own.
+		 * If errors flash at this point and loopback, clamp the
+		 * poll to minimum. If the certificate has been stored,
+		 * scratch the association. If the server is not
+		 * reachable, assume this is the first symmetric mode
+		 * packet that warmed up the association and let it by.
+		 * It will die later after leaving the originate and
+		 * receive timestamp in the dust for the reply.
 		 */
-		if (peer->flash && is_org && (peer->crypto &
-		    CRYPTO_FLAG_PROV)) {
+		if (peer->flash && is_org) {
+			poll_update(peer, peer->minpoll);
+			if (peer->crypto & CRYPTO_FLAG_PROV) {
+				if (peer->flags & FLAG_CONFIG)
+					peer_clear(peer);
+				else
+					unpeer(peer);
 #ifdef DEBUG
-			if (debug)
-				printf("packet: bad crypto %03x\n",
-				    peer->flash);
+				if (debug)
+					printf("packet: bad crypto %03x\n",
+					    peer->flash);
 #endif
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
-			else
-				peer_clear(peer);
-			return;
+				return;
+			}
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV))
 			peer->flash |= TEST11;

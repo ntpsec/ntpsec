@@ -13,3 +13,9 @@
 .#*
 # Simulated bk default ignores end here
 A.*
+.buildkey
+br-flock
+ntpd/crypto.bak
+ntpd/crypto.c
+ntpd/proto.bak
+ntpd/proto.c

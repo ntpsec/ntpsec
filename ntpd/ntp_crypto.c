@@ -275,14 +275,16 @@ make_keylist(
 	vp->fstamp = cinfo.fstamp;
 	vp->vallen = htonl(sizeof(struct autokey));
 	vp->siglen = 0;
-	if (vp->sig == NULL)
-		vp->sig = emalloc(sign_siglen);
-	EVP_SignInit(&ctx, digest);
-	EVP_SignUpdate(&ctx, (u_char *)vp, 12);
-	EVP_SignUpdate(&ctx, vp->ptr, sizeof(struct autokey));
-	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
-	peer->flags |= FLAG_ASSOC;
+	if (vp->tstamp != 0) {
+		if (vp->sig == NULL)
+			vp->sig = emalloc(sign_siglen);
+		EVP_SignInit(&ctx, digest);
+		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
+		EVP_SignUpdate(&ctx, vp->ptr, sizeof(struct autokey));
+		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+			vp->siglen = htonl(len);
+		peer->flags |= FLAG_ASSOC;
+	}
 #if DEBUG
 	if (debug)
 		printf("make_keys: %d %08x %08x ts %u fs %u poll %d\n",
@@ -306,7 +308,8 @@ make_keylist(
 void
 crypto_recv(
 	struct peer *peer,	/* peer structure pointer */
-	struct recvbuf *rbufp	/* packet buffer pointer */
+	struct recvbuf *rbufp,	/* packet buffer pointer */
+	int	is_org		/* timestamps test */
 	)
 {
 	EVP_MD_CTX ctx;		/* signature context */
@@ -349,11 +352,9 @@ crypto_recv(
 	authlen = LEN_PKT_NOMAC;
 	while ((has_mac = rbufp->recv_length - authlen) > MAX_MAC_LEN) {
 		pkt = (u_int32 *)&rbufp->recv_pkt + authlen / 4;
-		len = ntohl(pkt[0]) & 0x0000ffff;
 		code = ntohl(pkt[0]) & 0xffff0000;
+		len = ntohl(pkt[0]) & 0x0000ffff;
 		associd = ntohl(pkt[1]);
-		if (associd != 0)
-			peer->assoc = associd;
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -372,6 +373,8 @@ crypto_recv(
 			peer->flash |= TEST12;
 			return;
 		}
+		if (associd != 0)
+			peer->assoc = associd;
 		switch (code) {
 
 		/*
@@ -381,9 +384,13 @@ crypto_recv(
 		 * defines the signature scheme. This the only message
 		 * not validated by signature, but its timestamps are
 		 * not used by NTP.
+		 *
+		 * Discard the message if the status word has already
+		 * been received or the response does not match the
+		 * request..
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
-			if (peer->crypto)
+			if (peer->crypto || !is_org)
 				break;
 			vp = (struct value *)&pkt[2];
 			fstamp = ntohl(vp->fstamp);
@@ -430,10 +437,15 @@ crypto_recv(
 		 * Decode X509 certificate in ASN.1 format and extract
 		 * the data containing, among other things, subject
 		 * name and public key.
+		 *
+		 * Discard the message if the status word has not been
+		 * received or the certificate has already been received
+		 * or the response does not match the request.
 		 */
 		case CRYPTO_CERT | CRYPTO_RESP:
-			if (!peer->crypto)
-				return;
+			if (!peer->crypto || peer->crypto &
+			    CRYPTO_FLAG_PROV || !is_org)
+				break;
 			vp = (struct value *)&pkt[2];
 			tstamp = ntohl(vp->tstamp);
 			fstamp = ntohl(vp->fstamp);
@@ -523,11 +535,16 @@ crypto_recv(
 		/*
 		 * Roll a random cookie and install in symmetric mode.
 		 * Encrypt for the response, which is transmitted later.
+		 *
+		 * Discard the message if the certificate has not been
+		 * received or the cookie has alread been received or
+		 * the response does not match the request or another
+		 * response has already been queued.
 		 */
 		case CRYPTO_COOK:
-			if (!peer->crypto)
-				return;
-			if (peer->cmmd != NULL)
+			if (!(peer->crypto & CRYPTO_FLAG_PROV) ||
+			    peer->crypto & CRYPTO_FLAG_AGREE ||
+			    !is_org || peer->cmmd != NULL)
 				break;
 			if ((vp = crypto_verify(pkt, &peer->cookval,
 			    peer)) == NULL)
@@ -571,11 +588,17 @@ crypto_recv(
 
 		/*
 		 * Decrypt and install session cookie in client and
-		 * symmetric modes.
+		 * symmetric modes. If the cookie bit is set, the
+		 * working cookie is the EXOR of the current and new
+		 * values.
+		 *
+		 * Discard the response if the certificate has not been
+		 * received or the response does not match the request.
 		 */
 		case CRYPTO_COOK | CRYPTO_RESP:
-			if (!peer->crypto)
-				return;
+			if (!(peer->crypto & CRYPTO_FLAG_PROV) ||
+			    !is_org)
+				break;
 			if ((vp = crypto_verify(pkt, &peer->cookval,
 			    peer)) == NULL)
 				break;
@@ -605,7 +628,10 @@ crypto_recv(
 			key_expire(peer);
 			peer->cookval.tstamp = vp->tstamp;
 			peer->cookval.fstamp = vp->fstamp;
-			peer->pcookie = cookie;
+			if (peer->crypto & CRYPTO_FLAG_AGREE)
+				peer->pcookie ^= cookie;
+			else
+				peer->pcookie = cookie;
 			if (peer->hmode == MODE_CLIENT &&
 			    !(peer->cast_flags & MDF_BCLNT))
 				peer->crypto |= CRYPTO_FLAG_AUTO;
@@ -630,10 +656,14 @@ crypto_recv(
 		 * rolled. Ordinarily, this is automatic as this message
 		 * is piggybacked on the first NTP packet sent upon
 		 * either of these events.
+		 *
+		 * Discard the response if the certificate has not been
+		 * received. A broadcast client or symmetric peer can
+		 * receive this response without a matching request.
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
-			if (!peer->crypto)
-				return;
+			if (!(peer->crypto & CRYPTO_FLAG_PROV))
+				break;
 			if ((vp = crypto_verify(pkt, &peer->recval,
 			    peer)) == NULL)
 				break;
@@ -673,11 +703,18 @@ crypto_recv(
 		 * protocol. While the entire table is installed at the
 		 * server, presently only the current TAI offset is
 		 * provided via the kernel to other applications.
+		 *
+		 * Discard the request if the certificate has not been
+		 * received or the leapseconds table has already been
+		 * received or the response does not match the request
+		 * or another response has already been queued. Discard
+		 * the response if the certificate has not been received
+		 * or the response does not match the request.
 		 */
 		case CRYPTO_TAI:
-			if (!peer->crypto)
-				return;
-			if (peer->cmmd != NULL)
+			if (!(peer->crypto & CRYPTO_FLAG_PROV) ||
+			    peer->crypto & CRYPTO_FLAG_LEAP ||
+			    !is_org || peer->cmmd != NULL)
 				break;
 			ptr32 = emalloc(len);
 			memcpy(ptr32, pkt, len);
@@ -689,6 +726,9 @@ crypto_recv(
 			/* fall through */
 
 		case CRYPTO_TAI | CRYPTO_RESP:
+			if (!(peer->crypto & CRYPTO_FLAG_PROV) ||
+			    !is_org)
+				break;
 			if ((vp = crypto_verify(pkt, &peer->tai_leap,
 			   peer)) == NULL)
 				break;
