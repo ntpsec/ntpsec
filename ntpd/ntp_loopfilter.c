@@ -810,11 +810,11 @@ loop_config(
 		 */
 		pll_control = 1;
 		memset(&ntv, 0, sizeof(ntv));
-#if NTP_API > 3 
+#ifdef STA_NANO
 		ntv.modes = MOD_BITS | MOD_NANO;
 #else
 		ntv.modes = MOD_BITS;
-#endif /* NTP_API */
+#endif /* STA_NANO */
 		ntv.maxerror = MAXDISPERSE;
 		ntv.esterror = MAXDISPERSE;
 		ntv.status = STA_UNSYNC;
@@ -844,12 +844,12 @@ loop_config(
 #endif /* SIGSYS */
 		pll_status = ntv.status;
 		if (pll_control) {
-#if NTP_API > 3
+#ifdef STA_NANO
 			if (pll_status & STA_NANO)
 				pll_nano = 1;
 			if (pll_status & STA_CLK)
 				ext_enable = 1;
-#endif /* NTP_API */
+#endif /* STA_NANO */
 			msyslog(LOG_NOTICE,
 		  	   "kernel time discipline status %04x",
 			    pll_status);

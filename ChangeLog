@@ -1,3 +1,16 @@
+2001-05-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* README.cvs: More updates and cleanup.
+
+	* ntpd/ntp_loopfilter.c (loop_config): 
+	Check against STA_NANO instead of (NTP_API > 3) to catch kernels
+	that were rolled while the spec was evolving.
+	From: John.Hay@icomtek.csir.co.za
+
+	* README.cvs: Note that we want to check out NTP into a clean
+	subdir.
+	Reported by jrd@cc.usu.edu (Joe Doupnik)
+
 2001-05-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k40
