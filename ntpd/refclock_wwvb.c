@@ -187,9 +187,9 @@ wwvb_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
+	peer->burst = NSTAGE;
 	return (1);
 }
 

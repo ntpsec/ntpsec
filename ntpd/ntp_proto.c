@@ -1031,6 +1031,7 @@ clock_update(void)
 		NLOG(NLOG_SYNCSTATUS)
 			msyslog(LOG_INFO, "synchronisation lost");
 		sys_peer = NULL;
+		sys_poll = NTP_MINDPOLL;
 		sys_stratum = STRATUM_UNSPEC;
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
 		break;
@@ -1081,7 +1082,7 @@ poll_update(
 	 * The wiggle-the-poll-interval dance. Broadcasters dance only
 	 * the minpoll beat. Reference clock partners sit this one out.
 	 * Dancers surviving the clustering algorithm beat to the system
-	 * clock. Broadcast clients are usually lead by their broadcast
+	 * poll. Broadcast clients are usually lead by their broadcast
 	 * partner, but faster in the initial mating dance.
 	 */
 
@@ -1089,18 +1090,16 @@ poll_update(
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
 
-	if (peer->hmode == MODE_BROADCAST) {
+	if (peer->hmode == MODE_BROADCAST) 
 		peer->hpoll = peer->minpoll;
-	} else if (peer->flags & FLAG_SYSPEER) {
+	else if (peer->flags & FLAG_SYSPEER)
 		peer->hpoll = sys_poll;
-	} else {
-		if (hpoll > peer->maxpoll)
-			peer->hpoll = peer->maxpoll;
-		else if (hpoll < peer->minpoll)
-			peer->hpoll = peer->minpoll;
-		else
-			peer->hpoll = hpoll;
-	}
+	else
+		peer->hpoll = hpoll;
+	if (peer->hpoll > peer->maxpoll)
+		peer->hpoll = peer->maxpoll;
+	else if (peer->hpoll < peer->minpoll)
+		peer->hpoll = peer->minpoll;
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
@@ -1115,7 +1114,8 @@ poll_update(
 		    peer->minpoll);
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
 	}
-
+	if (peer->nextdate < current_time)
+		peer->nextdate = current_time;
 #ifdef AUTOKEY
 	/*
 	 * Bit of crass arrogance at this point. If the poll interval
@@ -1550,13 +1550,14 @@ clock_select(void)
 			nlist = 1;
 		} else {
 			if (sys_peer != NULL) {
+				sys_peer = NULL;
+				sys_poll = NTP_MINDPOLL;
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
 				NLOG(NLOG_SYNCSTATUS)
 				msyslog(LOG_INFO,
 				    "synchronisation lost");
 			}
-			sys_peer = NULL;
 			return;
 		}
 	}
@@ -1725,8 +1726,10 @@ clock_select(void)
 				sys_prefer = peer_list[i];
 			}
 		} else {
-			if (peer_list[i] == sys_peer)
+			if (peer_list[i] == sys_peer) {
 				sys_peer = NULL;
+				sys_poll = NTP_MINDPOLL;
+			}
 		}
 	}
 

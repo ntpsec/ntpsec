@@ -81,7 +81,8 @@ extern int pps_hardpps;		/* enables the kernel PPS interface */
 #define	REFID		"PPS\0"	/* reference ID */
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
 #define NANOSECOND	1000000000 /* one second (ns) */
-#define RANGEGATE	(NANOSECOND - 500000) /* range gate (ns) */
+#define RANGEGATE	500000	/* range gate (ns) */
+#define ASTAGE		8	/* filter stages */
 
 static struct peer *pps_peer;	/* atom driver for PPS sources */
 
@@ -92,6 +93,7 @@ static struct peer *pps_peer;	/* atom driver for PPS sources */
 struct ppsunit {
 	struct timespec ts;	/* last timestamp */
 	int fddev;		/* pps device descriptor */
+	pps_params_t pps_params; /* pps parameters */
 	pps_info_t pps_info;	/* last pps data */
 	pps_handle_t handle;	/* pps handlebars */
 };
@@ -153,9 +155,10 @@ atom_start(
 	pps_peer = peer;
 	pp = peer->procptr;
 	peer->precision = PRECISION;
-	peer->stratum = STRATUM_UNSPEC; 
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
+	peer->burst = ASTAGE;
+	peer->stratum = STRATUM_UNSPEC; 
 #ifdef HAVE_PPSAPI
 	up = emalloc(sizeof(struct ppsunit));
 	memset(up, 0, sizeof(struct ppsunit));
@@ -227,7 +230,6 @@ atom_ppsapi(
 {
 	struct refclockproc *pp;
 	register struct ppsunit *up;
-	pps_params_t pps_params;
 	int capability;
 
 	pp = peer->procptr;
@@ -237,25 +239,25 @@ atom_ppsapi(
 		    "refclock_atom: time_pps_getcap failed: %m");
 		return (0);
 	}
-	memset(&pps_params, 0, sizeof(pps_params_t));
+	memset(&up->pps_params, 0, sizeof(pps_params_t));
 	if (enb_clear)
-		pps_params.mode = capability & PPS_CAPTURECLEAR;
+		up->pps_params.mode = capability & PPS_CAPTURECLEAR;
 	else
-		pps_params.mode = capability & PPS_CAPTUREASSERT;
-	if (!pps_params.mode) {
+		up->pps_params.mode = capability & PPS_CAPTUREASSERT;
+	if (!up->pps_params.mode) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: invalid capture edge %d",
 		    pps_assert);
 		return (0);
 	}
-	if (time_pps_setparams(up->handle, &pps_params) < 0) {
+	if (time_pps_setparams(up->handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
 		return (0);
 	}
 	if (enb_hardpps) {
 		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
-		    pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
+		    up->pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_atom: time_pps_kcbind failed: %m");
 			return (0);
@@ -263,11 +265,11 @@ atom_ppsapi(
 	}
 #if DEBUG
 	if (debug) {
-		time_pps_getparams(up->handle, &pps_params);
+		time_pps_getparams(up->handle, &up->pps_params);
 		printf(
 		    "refclock_ppsapi: fd %d capability 0x%x version %d mode 0x%x kern %d\n",
-		    up->fddev, capability, pps_params.api_version,
-		    pps_params.mode, enb_hardpps);
+		    up->fddev, capability, up->pps_params.api_version,
+		    up->pps_params.mode, enb_hardpps);
 	}
 #endif
 	return (1);
@@ -290,7 +292,7 @@ atom_shutdown(
 	up = (struct ppsunit *)pp->unitptr;
 	if (up->fddev > 0)
 		close(up->fddev);
-	if (up->handle > 0)
+	if (up->handle != 0)
 		time_pps_destroy(up->handle);
 	if (pps_peer == peer)
 		pps_peer = 0;
@@ -326,20 +328,20 @@ atom_pps(
 	 */ 
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
-	if (up->handle <= 0)
-		return (1);
+	if (up->handle == 0)
+		return (-1);
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
 	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
 	    &timeout) < 0)
 		return (-1);
-	if (up->pps_info.current_mode & PPS_CAPTUREASSERT) {
+	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
 		if (pps_info.assert_sequence ==
 		    up->pps_info.assert_sequence)
 			return (1);
 		ts = up->pps_info.assert_timestamp;
-	} else if (up->pps_info.current_mode & PPS_CAPTURECLEAR) {
+	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
 		if (pps_info.clear_sequence ==
 		    up->pps_info.clear_sequence)
 			return (1);
@@ -347,9 +349,13 @@ atom_pps(
 	} else {
 		return (-1);
 	}
-	if (ts.tv_sec == up->ts.tv_sec && ts.tv_nsec < up->ts.tv_nsec +
-	    RANGEGATE)
+	if (!((ts.tv_sec == up->ts.tv_sec && ts.tv_nsec -
+	    up->ts.tv_nsec > NANOSECOND - RANGEGATE) ||
+	    (ts.tv_sec - up->ts.tv_sec == 1 && ts.tv_nsec -
+	    up->ts.tv_nsec < RANGEGATE))) {
+		up->ts = ts;
 		return (1);
+	}
 	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
@@ -358,8 +364,12 @@ atom_pps(
 	pp->lastrec.l_uf = (u_int32)dtemp;
 	if (ts.tv_nsec > NANOSECOND / 2)
 		ts.tv_nsec -= NANOSECOND;
-	dtemp = -ts.tv_nsec;
-	SAMPLE(dtemp / NANOSECOND + pp->fudgetime1);
+	dtemp = -(double)ts.tv_nsec / NANOSECOND;
+	SAMPLE(dtemp + pp->fudgetime1);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("atom_pps %f %f\n", dtemp, pp->fudgetime1);
+#endif
 	return (0);
 }
 #endif /* HAVE_PPSAPI */
@@ -427,15 +437,15 @@ atom_poll(
 	 * little bookeeping and process the surviving samples.
 	 */
 	pp = peer->procptr;
+	pp->polls++;
 #ifdef HAVE_PPSAPI
 	err = atom_pps(peer);
-	if (err > 0) {
-		return;
-	} else if (err < 0) {
+	if (err < 0) {
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
 #endif /* HAVE_PPSAPI */
+
 	/*
 	 * Valid time is returned only if the prefer peer has survived
 	 * the intersection algorithm and within clock_max of local time
@@ -445,28 +455,33 @@ atom_poll(
 	 * the first valid update and the stratum is set at the prefer
 	 * peer.
 	 */
+	if (peer->burst > 0)
+		return;
 	peer->stratum = STRATUM_UNSPEC;
-	if (!sys_prefer)
+	if (pp->codeproc == pp->coderecv) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		peer->burst = ASTAGE;
 		return;
-	if (fabs(sys_prefer->offset) > clock_max)
+
+	} else if (!sys_prefer) {
+		pp->codeproc = pp->coderecv;
+		peer->burst = ASTAGE;
 		return;
+
+	} else if (fabs(sys_prefer->offset) > clock_max) {
+		pp->codeproc = pp->coderecv;
+		peer->burst = ASTAGE;
+		return;
+	}
 	peer->stratum = sys_prefer->stratum;
 	if (peer->stratum <= 1)
 		peer->refid = pp->refid;
 	else
 		peer->refid = peer->srcadr.sin_addr.s_addr;
 	pp->leap = LEAP_NOWARNING;
-	pp->polls++;
-	if (peer->burst > 0)
-		return;
-	if (pp->coderecv == pp->codeproc) {
-		refclock_report(peer, CEVNT_TIMEOUT);
-		return;
-	}
 	refclock_receive(peer);
-	peer->burst = MAXSTAGE;
+	peer->burst = ASTAGE;
 }
-
 #else
 int refclock_atom_bs;
 int

@@ -1,3 +1,29 @@
+2000-10-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k10
+
+	* ntpd/refclock_wwvb.c (wwvb_start): Cosmetic reorder.
+	* ntpd/refclock_atom.c (RANGEGATE): Cleanup.  Add ASTAGE.
+	Add ppsparams to struct ppsunit.
+	(atom_start): Init peer->burst to ASTAGE.
+	(atom_shutdown): Multi-handle
+	(atom_pps): Multi-handle
+	(atom_pps): RANGEGATE cleanup
+	(atom_poll): Poll count cleanup.  Error check cleanup.  Burst cleanup.
+	* ntpd/ntp_refclock.c (refclock_transmit): Lose the pre-burst
+	check poll_update().
+	(refclock_sample): Fix the jitter calc.
+	(refclock_receive): Pass the jitter to the clock_filter().
+
+	* ntpd/ntp_proto.c (clock_update): If we lose sync, reset the poll
+	to NTP_MINDPOLL.
+	(poll_update): Poll wiggles.  Make sure peer->nextdate is timely.
+	(clock_select): If we lose sync, reset the poll to NTP_MINDPOLL.
+	* ntpd/ntp_loopfilter.c (local_clock): Show the asocid in debug
+	output.  popcorn debug message changes.  Clamp the poll interval
+	if the system peer has changed.  PPS wiggle changes.
+	From Dave Mills.
+
 2000-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_pcf.c (pcf_start): 

@@ -181,8 +181,8 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: offset %.6f jitter %.6f state %d\n",
-		    fp_offset, SQRT(epsil), state);
+		    "local_clock: assid %d offset %.6f jitter %.6f state %d\n",
+		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 	if (!ntp_enable) {
 		record_loop_stats();
@@ -357,7 +357,8 @@ local_clock(
 				if (debug)
 					printf(
 					    "local_clock: popcorn %.6f %.6f\n",
-					    fp_offset, last_offset);
+					    fabs(fp_offset - last_offset),
+					    CLOCK_SGATE * oerror);
 #endif
 				last_offset = fp_offset;
 				return (0);
@@ -389,6 +390,14 @@ local_clock(
 			break;
 		}
 	}
+
+	/*
+	 * Clamp the poll interval if the system peer has changed.
+	 */
+	if (sys_poll > peer->maxpoll)
+		sys_poll = peer->maxpoll;
+	else if (sys_poll < peer->minpoll)
+		sys_poll = peer->minpoll;
 
 #if defined(KERNEL_PLL)
 	/*
@@ -464,32 +473,35 @@ local_clock(
 			 */
 			if (sys_poll > NTP_MAXDPOLL)
 				ntv.status |= STA_FLL;
-		}
 
-		/*
-		 * Wiggle the PPS bits according to the health of the
-		 * prefer peer. Note that we explicitly turn off the
-		 * PPS if not enabled.
-		 */
-		if (pps_enable) {
-			if (pll_status & STA_PPSSIGNAL)
+			/*
+			 * If the PPS signal is up and enabled, light
+			 * the frequency bit. If the PPS driver is
+			 * working, light the phase bit as well. If not,
+			 * douse the lights, since somebody else may
+			 * have left the switch on.
+			 */
+			if (pps_enable && pll_status & STA_PPSSIGNAL) {
 				ntv.status |= STA_PPSFREQ;
-			if (pll_status & STA_PPSFREQ && pps_stratum <
-			    STRATUM_UNSPEC)
-				ntv.status |= STA_PPSTIME;
-		} else {
-			pll_status &= ~(STA_PPSFREQ | STA_PPSTIME);
+				if (pps_stratum < STRATUM_UNSPEC)
+					ntv.status |= STA_PPSTIME;
+			} else {
+				ntv.status &= ~(STA_PPSFREQ |
+				    STA_PPSTIME);
+			}
 		}
 
 		/*
-		 * Update the offset and frequency from the kernel
-		 * variables.
+		 * Pass the stuff to the kernel. If it squeals, turn off
+		 * the pigs. In any case, fetch the kernel offset and
+		 * frequency and pretend we did it here.
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
 			if (ntv.status != pll_status)
 				msyslog(LOG_ERR,
 				    "kernel time discipline status change %x",
 				    ntv.status);
+			ntv.status &= ~(STA_PPSFREQ | STA_PPSTIME);
 		}
 		pll_status = ntv.status;
 		if (pll_nano)
@@ -500,8 +512,7 @@ local_clock(
 		flladj = plladj = 0;
 
 		/*
-		 * If the kernel pps discipline is working, monitor its
-		 * performance.
+		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
 			if (!pps_control)
@@ -512,7 +523,6 @@ local_clock(
 				sys_jitter = ntv.jitter / 1e9;
 			else
 				sys_jitter = ntv.jitter / 1e6;
-			sys_poll = NTP_MINDPOLL;
 		}
 	}
 #endif /* KERNEL_PLL */

@@ -379,7 +379,6 @@ refclock_transmit(
 	if (refclock_conf[clktype]->clock_poll != noentry)
 		(refclock_conf[clktype]->clock_poll)(unit, peer);
 	peer->outdate = next;
-	poll_update(peer, hpoll);
 	if (peer->burst > 0)
 		peer->burst--;
 	poll_update(peer, hpoll);
@@ -498,7 +497,7 @@ refclock_sample(
 	)
 {
 	int i, j, k, m, n;
-	double offset, jitter;
+	double offset;
 	double off[MAXSTAGE];
 
 	/*
@@ -530,14 +529,14 @@ refclock_sample(
 	/*
 	 * Determine the offset and jitter.
 	 */
-	offset = jitter = 0;
-	for (k = i; k < j; k++) {
+	offset = 0;
+	for (k = i; k < j; k++)
 		offset += off[k];
-		if (k > i)
-			jitter += SQUARE(off[k] - off[k - 1]);
-	}
 	pp->offset = offset / m;
-	pp->jitter = jitter / m;
+	if (m > 1)
+		pp->jitter = SQUARE(off[i] - off[j - 1]);
+	else
+		pp->jitter = 0;
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -592,18 +591,17 @@ refclock_receive(
 	get_systime(&peer->rec);
 	if (!refclock_sample(pp))
 		return;
-	clock_filter(peer, pp->offset, 0., 0.);
+	clock_filter(peer, pp->offset, 0., pp->jitter);
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, CLOCK_PHI * (current_time -
 	    peer->epoch), SQRT(peer->jitter));
 	if (cal_enable && last_offset < MINDISPERSE) {
-		if (
-			peer != sys_peer
 #ifdef KERNEL_PLL
-			|| pll_status & STA_PPSTIME
+		if (peer != sys_peer || pll_status & STA_PPSTIME)
+#else
+		if (peer != sys_peer)
 #endif /* KERNEL_PLL */
-			)
 			pp->fudgetime1 -= pp->offset * FUDGEFAC;
 		else
 			pp->fudgetime1 -= pp->fudgetime1 * FUDGEFAC;
