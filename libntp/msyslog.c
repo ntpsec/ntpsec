@@ -96,12 +96,7 @@ void msyslog(int level, const char *fmt, ...)
 			continue;
 		}
 		err = 0;
-#if !defined(VMS) && !defined(SYS_WINNT) && !defined (SYS_VXWORKS) && !defined (HAVE_STRERROR)
-		if ((unsigned)olderrno > sys_nerr)
-		    sprintf((char *)(err = xerr), "error %d", olderrno);
-		else
-		    err = (char*)sys_errlist[olderrno];
-#elif defined(VMS) || defined (SYS_VXWORKS) || defined(HAVE_STRERROR)
+#if !defined(SYS_WINNT)
 		err = strerror(olderrno);
 #else  /* SYS_WINNT */
 		err = xerr;
@@ -114,7 +109,7 @@ void msyslog(int level, const char *fmt, ...)
 			sizeof(xerr),
 			NULL);
 
-#endif /* VMS && SYS_WINNT */
+#endif /* SYS_WINNT */
 		if ((n + strlen(err)) < &nfmt[254]) {
 			strcpy(n, err);
 			n += strlen(err);

@@ -1,5 +1,6 @@
 2001-04-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/msyslog.c:
 	* ElectricFence/page.c (stringErrorReport): Follow Rainer's lead
 	and use strerror().
 

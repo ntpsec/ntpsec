@@ -32,13 +32,6 @@
 
 static caddr_t	startAddr = (caddr_t) 0;
 
-#if ( !defined(sgi) && !defined(_AIX) )
-extern int	sys_nerr;
-#endif
-#ifdef CHAR_SYS_ERRLIST
-extern char *	sys_errlist[];
-#endif
-
 static const char *
 stringErrorReport(void)
 {
