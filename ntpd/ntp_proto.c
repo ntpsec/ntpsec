@@ -643,7 +643,7 @@ receive(
 			 * Do not respond to multicast if not configured
 			 * as a manycast server.
 			 */
-			if (!sys_manycastserver)
+			if (hismode == MODE_CLIENT && !sys_manycastserver)
 				return;
 
 			/*
