@@ -756,10 +756,11 @@ int
 refclock_open(
 	char *dev,		/* device name pointer */
 	int speed,		/* serial port speed (code) */
-	int flags		/* line discipline flags */
+	int lflags		/* line discipline flags */
 	)
 {
 	int fd, i;
+	int flags;
 #ifdef HAVE_TERMIOS
 	struct termios ttyb, *ttyp;
 #endif /* HAVE_TERMIOS */
@@ -773,9 +774,16 @@ refclock_open(
 	u_long ltemp;
 #endif /* TIOCMGET */
 
+	flags = lflags;
+	if (strcmp(dev, pps_device) == 0)
+		flags |= LDISC_PPS;
+
 	/*
 	 * Open serial port and set default options
 	 */
+	flags = lflags;
+	if (strcmp(dev, pps_device) == 0)
+		flags |= LDISC_PPS;
 #ifdef O_NONBLOCK
 	fd = open(dev, O_RDWR | O_NONBLOCK, 0777);
 #else
@@ -937,12 +945,6 @@ refclock_open(
 		    "refclock_open: fd %d ioctl failed: %m", fd);
 		return (0);
 	}
-
-	/*
-	 * If this is the PPS device, so say and initialize the thing.
-	 */
-	if (strcmp(dev, pps_device) == 0)
-		(void)refclock_ioctl(fd, LDISC_PPS);
 	return (fd);
 }
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
@@ -958,7 +960,7 @@ refclock_open(
  * their many other variants. The routine returns 1 if success and 0 if
  * failure.
  */
-int
+static int
 refclock_ioctl(
 	int fd, 		/* file descriptor */
 	int flags		/* line discipline flags */
