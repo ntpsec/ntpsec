@@ -2158,6 +2158,7 @@ clock_select(void)
 		peer = peer_list[i];
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
+		peer->rank++;
 		peer->flags |= FLAG_SYSPEER;
 		if (peer->stratum >= sys_floor && osurv >= sys_minclock)
 			peer->hyst = HYST;
@@ -2237,6 +2238,7 @@ clock_select(void)
 		else
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
+		sys_peer->rank++;
 		sys_offset = clock_combine(peer_list, nlist);
 		sys_syserr = sys_peer->jitter + sys_selerr;
 #ifdef DEBUG

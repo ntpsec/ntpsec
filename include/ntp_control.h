@@ -217,15 +217,16 @@ struct ntp_control {
 #define	CP_FILTERROR	34
 #define	CP_FLASH	35
 #define CP_TTL		36
-#define CP_VARLIST	37
+#define	CP_RANK		37
+#define CP_VARLIST	38
 #ifdef OPENSSL
-#define CP_FLAGS	38
-#define CP_HOST		39
-#define	CP_INITSEQ	40
-#define	CP_INITKEY	41
-#define	CP_INITTSP	42
-#define	CP_DIGEST	43
-#define CP_IDENT	44
+#define CP_FLAGS	39
+#define CP_HOST		40
+#define	CP_INITSEQ	41
+#define	CP_INITKEY	42
+#define	CP_INITTSP	43
+#define	CP_DIGEST	44
+#define CP_IDENT	45
 #define	CP_MAXCODE	CP_IDENT
 #else
 #define	CP_MAXCODE	CP_VARLIST

@@ -342,6 +342,7 @@ struct peer {
 	u_long	oldpkt;		/* packets duplicate packet */
 	u_long	seldisptoolarge; /* packets dispersion to large*/
 	u_long	selbroken;	/* not used */
+	u_long	rank;	/* number of times selected or in cluster */
 };
 
 /*
