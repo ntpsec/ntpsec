@@ -1,5 +1,8 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ansi2knr.c: New release (fix for bug reported by Marc Brett)
+	From: "L. Peter Deutsch" <ghost@aladdin.com>
+
 	* include/ntp_stdlib.h: NeXT portability patch
 	From: Jack Bryans <jbryans@csulb.edu>
 
