@@ -453,6 +453,8 @@
 /* toupper()? */
 #undef DECL_TOUPPER_0
 
+#undef ULONG_CONST
+
 /* Autokey? */
 #undef AUTOKEY
 
@@ -911,7 +913,7 @@
 # undef __CHAR_UNSIGNED__
 #endif
 
-/* Define to empty if the keyword `const' is not conform to ANSI C. */
+/* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
 /* Define to `int' if <sys/types.h> doesn't define. */

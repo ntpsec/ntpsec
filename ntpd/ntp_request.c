@@ -1234,7 +1234,6 @@ dns_a(
 	register struct info_dns_assoc *dp;
 	register int items;
 	struct sockaddr_in peeraddr;
-	int fl;
 
 	/*
 	 * Do a check of everything to see that it looks

@@ -472,3 +472,5 @@
 
 /* toupper()? */
 #undef DECL_TOUPPER_0
+
+#undef ULONG_CONST

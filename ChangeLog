@@ -1,5 +1,7 @@
 2000-05-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/gpstolfp.c (GPSORIGIN): Try new ULONG_CONST macro
+
 	* ntpdate/ntptimeset.c: 
 	* ntpdate/ntpdate.h: 
 	* ntpd/refclock_oncore.c (oncore_msg_En): 

@@ -10,6 +10,17 @@ dnl but WITHOUT ANY WARRANTY, to the extent permitted by law; without
 dnl even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 dnl PARTICULAR PURPOSE.
 
+AC_DEFUN(hs_ULONG_CONST,
+[ AC_EGREP_CPP(Circus,
+ [#define ACAT(a,b)a ## b
+ACAT(Cir,cus)
+], AC_DEFINE([ULONG_CONST(a)], [a ## UL]),
+    AC_EGREP_CPP(Reiser,
+[#define RCAT(a,b)a/**/b
+RCAT(Rei,ser)
+], AC_DEFINE([ULONG_CONST(a)], [a/**/U]),
+    AC_MSG_ERROR([How do we create an unsigned long constant?])))])
+
 # Like AC_CONFIG_HEADER, but automatically create stamp file.
 
 AC_DEFUN(AM_CONFIG_HEADER,

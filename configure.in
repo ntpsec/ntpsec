@@ -160,6 +160,9 @@ AC_PROG_RANLIB
 AC_PATH_PROG(PATH_SH, sh)
 AC_PATH_PROG(PATH_PERL, perl)
 
+echo hs_ULONG_CONST
+hs_ULONG_CONST
+
 case "$target" in
  *-*-vxworks*)
     ac_link="$ac_link $VX_KERNEL"
