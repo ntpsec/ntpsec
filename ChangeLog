@@ -1,5 +1,23 @@
 1999-11-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpdate/ntpdate.c: Add the ability for ntpdate to query a
+	multicast address.  We use the response to the multicast address
+	to learn new servers which we then add to the peer list and query.
+	In changing this I made the list of peers a linked list.
+
+	To be complete I should detect a broadcast address and make it
+	behave the same way.  But that requires a scan of the interface
+	list which is more complicated that I want to deal with...
+
+	Fix a bug, allowing ntpdate to compile if SLEWALWAYS and STEP_SLEW
+	are both defined.
+
+	From: Jeffrey C Honig <jch@bsdi.com>
+
+	
+	* ntpd/ntp_refclock.c: sys/sio.h and SCO5_CLOCK cleanup
+	From: Kamal A Mostafa <kamal@whence.com>	
+
 	* ntpd/ntp_loopfilter.c: Let -g do a "correct any" for the first
 	time adjustment.
 	From: Dave Mills <mills@udel.edu>

@@ -20,10 +20,11 @@
 #ifdef REFCLOCK
 
 #ifdef TTYCLK
-# ifdef SCO5_CLOCK
-#  include <sys/sio.h>
-# else
+# ifdef HAVE_SYS_CLKDEFS_H
 #  include <sys/clkdefs.h>
+# endif
+# ifdef HAVE_SYS_SIO_H
+#  include <sys/sio.h>
 # endif
 #endif /* TTYCLK */
 
