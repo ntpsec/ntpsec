@@ -8,14 +8,21 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
+#define NUM_NETOF_BUFS	10
+static struct sockaddr_storage ssbuf[NUM_NETOF_BUFS];
+static int next_ssbuf = 0;
+
 struct sockaddr_storage*
 netof(
         struct sockaddr_storage* hostaddr
 	)
 {
 	register u_int32 netnum;
-        struct sockaddr_storage *netaddr = malloc(sizeof(struct sockaddr_storage));
+        struct sockaddr_storage *netaddr;
 
+	netaddr = &ssbuf[next_ssbuf++];
+	if (next_ssbuf == NUM_NETOF_BUFS)
+		next_ssbuf = 0;
         memcpy(netaddr, hostaddr, sizeof(struct sockaddr_storage));
 
         if(netaddr->ss_family == AF_INET) {
