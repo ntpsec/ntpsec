@@ -285,6 +285,7 @@ local_clock(
 			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
+			reinit_timer();
 		}
 		rstclock(S_FREQ, peer->epoch, 0);
 		return (1);
@@ -393,6 +394,7 @@ local_clock(
 			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
+			reinit_timer();
 			rstclock(S_TSET, peer->epoch, 0);
 			retval = 1;
 			break;

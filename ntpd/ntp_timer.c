@@ -79,6 +79,43 @@ static HANDLE WaitableTimerHandle = NULL;
 static	RETSIGTYPE alarming P((int));
 #endif /* SYS_WINNT */
 
+#if !defined(VMS)
+# if !defined SYS_WINNT || defined(SYS_CYGWIN32)
+#  ifndef HAVE_TIMER_SETTIME
+	struct itimerval itimer;
+#  else 
+	static timer_t ntpd_timerid;
+	struct itimerspec itimer;
+#  endif /* HAVE_TIMER_SETTIME */
+# endif /* SYS_WINNT */
+#endif /* VMS */
+
+/*
+ * reinit_timer - reinitialize interval timer.
+ */
+void 
+reinit_timer(void)
+{
+#if !defined(SYS_WINNT) && !defined(VMS)
+#  if defined(HAVE_TIMER_CREATE) && defined(HAVE_TIMER_SETTIME)
+	timer_gettime(ntpd_timerid, &itimer);
+	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
+		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
+	}
+	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
+	itimer.it_interval.tv_nsec = 0;
+	timer_settime(ntpd_timerid, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
+#  else
+	getitimer(ITIMER_REAL, &itimer);
+	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
+		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
+	}
+	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
+	itimer.it_interval.tv_usec = 0;
+	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
+#  endif
+# endif /* VMS */
+}
 
 /*
  * init_timer - initialize the timer data structures
@@ -86,20 +123,10 @@ static	RETSIGTYPE alarming P((int));
 void
 init_timer(void)
 {
-#if !defined(VMS)
-# if !defined SYS_WINNT || defined(SYS_CYGWIN32)
-#  ifndef HAVE_TIMER_SETTIME
-	struct itimerval itimer;
-#  else
-	static timer_t ntpd_timerid;	/* should be global if we ever want */
-					/* to kill timer without rebooting ... */
-	struct itimerspec itimer;
-#  endif /* HAVE_TIMER_SETTIME */
-# else /* SYS_WINNT */
+# if defined SYS_WINNT & !defined(SYS_CYGWIN32)
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
 # endif /* SYS_WINNT */
-#endif /* !VMS */
 
 	/*
 	 * Initialize...

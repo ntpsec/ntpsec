@@ -192,6 +192,7 @@ extern	void	hack_restrict	P((int, struct sockaddr_storage *, struct sockaddr_sto
 
 /* ntp_timer.c */
 extern	void	init_timer	P((void));
+extern	void	reinit_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
 #ifdef OPENSSL
