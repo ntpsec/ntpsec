@@ -149,7 +149,6 @@ struct shmTime *getShmTime (int unit) {
 		return p;
 	}
 #endif
-	return 0;
 }
 /*
  * shm_start - attach to shared memory
@@ -201,7 +200,8 @@ shm_shutdown(
 	pp = peer->procptr;
 	up = (struct shmTime *)pp->unitptr;
 #ifndef SYS_WINNT
-	shmdt (up);
+	/* HMS: shmdt()wants char* or const void * */
+	(void) shmdt (up);
 #else
 	UnmapViewOfFile (up);
 #endif
