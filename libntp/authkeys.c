@@ -441,6 +441,7 @@ auth_delkeys(void)
 			 * Don't lose info as to which keys are trusted.
 			 */
 			if (sk->flags & KEY_TRUSTED) {
+				skp = &(sk->next);
 				memset(&sk->k, 0, sizeof(sk->k));
 				sk->lifetime = 0;
 				sk->keylen = 0;
