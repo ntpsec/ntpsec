@@ -41,6 +41,7 @@ struct	peer *sys_peer;		/* our current peer */
 struct	peer *sys_prefer;	/* our cherished peer */
 int	sys_kod;		/* kod credit */
 int	sys_kod_rate = 2;	/* max kod packets per second */
+u_long	sys_clocktime;		/* last system clock update */
 #ifdef OPENSSL
 u_long	sys_automax;		/* maximum session key lifetime */
 #endif /* OPENSSL */
@@ -237,6 +238,7 @@ transmit(
 			else
 				peer->burst--;
 			if (peer->burst == 0) {
+
 				/*
 				 * If a broadcast client at this point,
 				 * the burst has concluded, so we switch
@@ -251,7 +253,8 @@ transmit(
 #endif /* OPENSSL */
 				}
 				poll_update(peer, hpoll);
-				clock_select();
+				if (peer->reach & ((1 << NTP_BURST) - 1))
+					clock_select();
 
 				/*
 				 * If ntpdate mode and the clock has not
@@ -1272,7 +1275,8 @@ process_packet(
 		return;
 	}
 	clock_filter(peer, p_offset, p_del, p_disp);
-	clock_select();
+	if (peer->burst == 0)
+		clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp,
 	    SQRT(peer->jitter));
@@ -1295,8 +1299,11 @@ clock_update(void)
 	 */
 	if (sys_peer == NULL)
 		return;
-	if (sys_peer->epoch <= last_time)
+
+	if (sys_peer->epoch <= sys_clocktime)
 		return;
+
+	sys_clocktime = sys_peer->epoch;
 #ifdef DEBUG
 	if (debug)
 		printf("clock_update: at %ld assoc %d \n", current_time,
@@ -1824,7 +1831,9 @@ clock_select(void)
 			 * Leave the island immediately if the peer is
 			 * unfit to synchronize.
 			 */
-			if (peer_unfit(peer))
+			if (peer_unfit(peer) || root_distance(peer) >=
+			    MAXDISTANCE + 2. * clock_phi *
+			    ULOGTOD(sys_poll))
 				continue;
 
 			/*
@@ -2893,9 +2902,8 @@ peer_unfit(
 {
 	return (!peer->reach || (peer->stratum > 1 && peer->refid ==
 	    peer->dstadr->addr_refid) || peer->leap == LEAP_NOTINSYNC ||
-	    peer->stratum >= STRATUM_UNSPEC || root_distance(peer) >=
-	    MAXDISTANCE + 2. * clock_phi * ULOGTOD(sys_poll) ||
-	    peer->flags & FLAG_NOSELECT );
+	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
+	    FLAG_NOSELECT);
 }
 
 
