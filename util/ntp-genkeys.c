@@ -508,6 +508,18 @@ main(
 	/* Initialize config_file */
 	getconfig(argc, argv);	/* ntpd/ntp_config.c */
 
+	if (!path_keysdir) {
+		/* Shouldn't happen... */
+		path_keysdir = "PATH_KEYSDIR";
+	}
+	if (*path_keysdir != '/') {
+		fprintf(stderr,
+			"%s: keysdir path <%s> doesn't begin with a /\n",
+			progname, path_keysdir);
+		exit(1);
+	}
+	snifflink(path_keysdir, &link_keysdir);
+
 	if (!path_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntp.keys",
 			 NTP_KEYSDIR);
@@ -520,18 +532,6 @@ main(
 		exit(1);
 	}
 	snifflink(path_keys, &link_keys);
-
-	if (!path_keysdir) {
-		/* Shouldn't happen... */
-		path_keysdir = "PATH_KEYSDIR";
-	}
-	if (*path_keysdir != '/') {
-		fprintf(stderr,
-			"%s: keysdir path <%s> doesn't begin with a /\n",
-			progname, path_keysdir);
-		exit(1);
-	}
-	snifflink(path_keysdir, &link_keysdir);
 
 	if (!link_publickey) {
 		snprintf(pathbuf, sizeof pathbuf, "ntpkey_%s.%lu",
