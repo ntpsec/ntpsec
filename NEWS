@@ -10,6 +10,7 @@
 * ntpdc improvements
 * GOES refclock fix
 * JJY driver
+* AIX 5 port
 * bsdi port fixes
 * Cray unicos port upgrade
 * HP MPE/iX port
