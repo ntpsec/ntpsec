@@ -217,8 +217,8 @@ struct interface {
 #define TEST7		0x0040	/* peer stratum out of bounds */
 #define TEST8		0x0080  /* root delay/dispersion bounds check */
 #define TEST9		0x0100	/* peer delay/dispersion bounds check */
-#define TEST10		0x0200	/* autokey not authentic */
-#define TEST11		0x0400	/* autokey not confirmed */
+#define TEST10		0x0200	/* autokey failed */
+#define	TEST11		0x0400	/* proventic not confirmed */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -272,8 +272,9 @@ struct peer {
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
 #ifdef PUBKEY
-	struct value pubkey;	/* public key */
-	u_char	*keystr;	/* public key file name */
+	struct	value pubkey;	/* public key */
+	struct	value certif;	/* certificate */
+	u_char	*keystr;	/* host name */
 #endif /* PUBKEY */
 #else /* AUTOKEY */
 #define clear_to_zero keyid
@@ -395,6 +396,7 @@ struct peer {
 #define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
 #define FLAG_AUTOKEY	0x0800	/* autokey confirmed */
 #define FLAG_ASSOC	0x1000	/* autokey reqeust */
+#define FLAG_PROVEN	0x2000	/* proventic confirmed */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -499,23 +501,22 @@ struct peer {
  * and must be converted (except the mac, which isn't, really).
  */
 struct pkt {
-	u_char li_vn_mode;	/* leap indicator, version and mode */
-	u_char stratum;		/* peer stratum */
-	u_char ppoll;		/* peer poll interval */
-	s_char precision;	/* peer clock precision */
-	u_fp rootdelay;		/* distance to primary clock */
-	u_fp rootdispersion;	/* clock dispersion */
-	u_int32 refid;		/* reference clock ID */
-	l_fp reftime;		/* time peer clock was last updated */
-	l_fp org;		/* originate time stamp */
-	l_fp rec;		/* receive time stamp */
-	l_fp xmt;		/* transmit time stamp */
+	u_char	li_vn_mode;	/* leap indicator, version and mode */
+	u_char	stratum;	/* peer stratum */
+	u_char	ppoll;		/* peer poll interval */
+	s_char	precision;	/* peer clock precision */
+	u_fp	rootdelay;	/* distance to primary clock */
+	u_fp	rootdispersion;	/* clock dispersion */
+	u_int32	refid;		/* reference clock ID */
+	l_fp	reftime;	/* time peer clock was last updated */
+	l_fp	org;		/* originate time stamp */
+	l_fp	rec;		/* receive time stamp */
+	l_fp	xmt;		/* transmit time stamp */
 
 #define	LEN_PKT_NOMAC	12 * sizeof(u_int32) /* min header length */
 #define	LEN_PKT_MAC	LEN_PKT_NOMAC +  sizeof(u_int32)
 #define MIN_MAC_LEN	3 * sizeof(u_int32)	/* DES */
 #define MAX_MAC_LEN	5 * sizeof(u_int32)	/* MD5 */
-#define	MAX_EXT_LEN	264			/* RSA public key */
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64
@@ -524,14 +525,19 @@ struct pkt {
 	 * command is 152 octets and maximum autokey response is 460
 	 * octets. A packet can contain no more than one command and one
 	 * response, so the maximum total extension field length is 672
-	 * octets.
+	 * octets. But, to handle humungus certificates, the bank must
+	 * be broke.
 	 */
 #ifdef AUTOKEY
-	u_int32 exten[672 / 4];	/* extension field */
+#ifdef PUBKEY
+	u_int32	exten[5000 / 4]; /* max extension field */
 #else
+	u_int32	exten[672 / 4];	/* max extension field */
+#endif /* PUBKEY */
+#else /* AUTOKEY */
 	u_int32	exten[1];	/* misused */
 #endif /* AUTOKEY */
-	u_char mac[MAX_MAC_LEN]; /* mac */
+	u_char	mac[MAX_MAC_LEN]; /* mac */
 };
 
 /*

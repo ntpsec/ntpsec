@@ -1,3 +1,28 @@
+2001-03-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): hpoll calc logic cleanup.
+	(receive): New cert stuff.
+	(poll_update): Improvements.
+	(peer_clear): New cert stuff.
+	(peer_xmit): New cert stuff.
+	* ntpd/ntp_crypto.c: New cert stuff, documentation cleanup.  Lose
+	extraneous poll_uopdate()s.
+	* ntpd/ntp_control.c: Deal with new cert stuff.
+	* ntpd/ntp_config.c (getconfig): Handle CONF_CRYPTO_CERT.
+	* include/ntp_crypto.h (CRYPTO_FLAG_CERT): Added.
+	(CRYPTO_CERT): Added.
+	(CRYPTO_CONF_CERT): Added.
+	Add declaration for struct value certif.
+	* include/ntp_control.h (CS_CERTIF): Added.
+	(CP_CERTIF): Added.
+	* include/ntp_config.h (CONF_CRYPTO_CERT): Added.
+	* include/ntp.h (TEST10,TEST11): New meaning.  Add certif to
+	struct peer.
+	(FLAG_PROVEN): Added.
+	(MAX_EXT_LEN): Removed.
+	exten grew from 672/4 to 5000/4 for PUBKEY.
+	From: Dave Mills.
+
 2001-03-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (transmit): Documentation cleanup.

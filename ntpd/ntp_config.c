@@ -999,6 +999,11 @@ getconfig(
 			    case CONF_CRYPTO_PUBLICKEY:
 				crypto_config(CRYPTO_CONF_PUBL, tokens[i]);
 				break;
+
+			    case CONF_CRYPTO_CERT:
+				crypto_config(CRYPTO_CONF_CERT, tokens[i]);
+				break;
+
 			    default:
 				msyslog(LOG_ERR, "crypto: unknown keyword");
 				break;

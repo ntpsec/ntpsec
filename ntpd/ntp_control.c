@@ -117,12 +117,13 @@ static struct ctl_var sys_var[] = {
 	{ CS_FLAGS,	RO, "flags" },		/* 20 */
 	{ CS_HOST,	RO, "hostname" },	/* 21 */
 	{ CS_PUBLIC,	RO, "publickey" },	/* 22 */
-	{ CS_DHPARAMS,	RO, "params" },		/* 23 */
-	{ CS_REVTIME,	RO, "refresh"},		/* 24 */
-	{ CS_LEAPTAB,	RO, "leaptable" },	/* 25 */
-	{ CS_TAI,	RO, "tai"},		/* 26 */
+	{ CS_CERTIF,	RO, "certificate" },	/* 23 */
+	{ CS_DHPARAMS,	RO, "params" },		/* 24 */
+	{ CS_REVTIME,	RO, "refresh" },	/* 25 */
+	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 26 */
+	{ CS_TAI,	RO, "tai"},		/* 27 */
 #endif /* PUBKEY */
-	{ 0,		EOV,	""  }
+	{ 0,		EOV, "" }		/* 28 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -153,6 +154,7 @@ static	u_char def_sys_var[] = {
 #ifdef PUBKEY
 	CS_FLAGS,
 	CS_HOST,
+	CS_CERTIF,
 	CS_DHPARAMS,
 	CS_REVTIME,
 	CS_LEAPTAB,
@@ -208,13 +210,14 @@ static struct ctl_var peer_var[] = {
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
 	{ CP_PUBLIC,	RO, "publickey" },	/* 40 */
-	{ CP_SESKEY,	RO, "pcookie" },	/* 41 */
-	{ CP_SASKEY,	RO, "hcookie" },	/* 42 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
+	{ CP_CERTIF,	RO, "certificate" },	/* 41 */
+	{ CP_SESKEY,	RO, "pcookie" },	/* 42 */
+	{ CP_SASKEY,	RO, "hcookie" },	/* 43 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 44 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 45 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 46 */
 #endif /* PUBKEY */
-	{ 0,		EOV, ""  }		/* 46 */
+	{ 0,		EOV, ""  }		/* 47 */
 };
 
 
@@ -256,6 +259,7 @@ static u_char def_peer_var[] = {
 #ifdef PUBKEY
 	CP_FLAGS,
 	CP_HOST,
+	CP_CERTIF,
 	CP_SESKEY,
 	CP_INITSEQ,
 #endif /* PUBKEY */
@@ -1336,6 +1340,12 @@ ctl_putsys(
 			    ntohl(host.fstamp));
 		break;
 
+	case CS_CERTIF:
+		if (certif.fstamp != 0)
+			ctl_putuint(sys_var[CS_CERTIF].text,
+			    ntohl(certif.fstamp));
+		break;
+
 	case CS_DHPARAMS:
 		if (dhparam.fstamp != 0)
 			ctl_putuint(sys_var[CS_DHPARAMS].text,
@@ -1602,6 +1612,12 @@ ctl_putpeer(
 		if (peer->pubkey.fstamp != 0)
 			ctl_putuint(peer_var[CP_PUBLIC].text,
 			    peer->pubkey.fstamp);
+		break;
+
+	case CP_CERTIF:
+		if (peer->certif.fstamp != 0)
+			ctl_putuint(peer_var[CP_CERTIF].text,
+			    peer->certif.fstamp);
 		break;
 
 	case CP_SESKEY:

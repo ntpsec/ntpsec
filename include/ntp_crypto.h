@@ -14,9 +14,9 @@
  */
 #define CRYPTO_FLAG_ENAB  0x01	/* crypto enable */
 #define CRYPTO_FLAG_RSA	  0x02	/* public/private keys */
-#define CRYPTO_FLAG_DH	  0x04	/* agreement parameters */
-#define CRYPTO_FLAG_TAI	  0x08	/* leapseconds table */
-#define CRYPTO_FLAG_AUTO  0x10	/* autokey update */
+#define CRYPTO_FLAG_CERT  0x04	/* PKI certificate */
+#define CRYPTO_FLAG_DH	  0x08	/* agreement parameters */
+#define CRYPTO_FLAG_TAI	  0x10	/* leapseconds table */
 
 /*
  * Extension field definitions
@@ -31,7 +31,8 @@
 #define CRYPTO_DHPAR	((CRYPTO_VN << 8) | 5) /* agreement params */
 #define CRYPTO_DH	((CRYPTO_VN << 8) | 6) /* public value */
 #define CRYPTO_NAME	((CRYPTO_VN << 8) | 7) /* host name/pub key */
-#define CRYPTO_TAI	((CRYPTO_VN << 8) | 8) /* leapseconds table */
+#define CRYPTO_CERT	((CRYPTO_VN << 8) | 8) /* PKI certificate */
+#define CRYPTO_TAI	((CRYPTO_VN << 8) | 9) /* leapseconds table */
 #define CRYPTO_RESP	0x8000			/* response */
 #define CRYPTO_ERROR	0x4000			/* error */
 
@@ -46,6 +47,7 @@
 #define CRYPTO_CONF_DH    4	/* load Diffie_Hellman pars from file */
 #define CRYPTO_CONF_LEAP  5	/* load leapsecond table */
 #define CRYPTO_CONF_KEYS  6	/* set keys directory path */
+#define CRYPTO_CONF_CERT  7	/* load PKI certificate from file */
 #endif /* PUBKEY */
 
 /*
@@ -73,6 +75,7 @@ extern	u_int	crypto_flags;	/* status word */
 #ifdef PUBKEY
 extern	R_DH_PARAMS dh_params;
 extern	struct value host;	/* host name/public key */
+extern	struct value certif;	/* certificate */
 extern	struct value dhparam;	/* agreement parameters */
 extern	struct value dhpub;	/* public value */
 extern	struct value tai_leap;	/* leapseconds table */

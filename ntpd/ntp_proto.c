@@ -208,17 +208,12 @@ transmit(
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (sys_peer == NULL || (peer->flags &
-			    FLAG_SYSPEER))
-				hpoll = sys_poll;
-			else if ((peer->stratum > 1 && peer->refid ==
+			if ((peer->stratum > 1 && peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
 			    clock_phi * ULOGTOD(sys_poll)))
 				hpoll++;
-			else if (peer->valid <= NTP_SHIFT / 2)
-				hpoll = peer->minpoll;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
 		}
@@ -630,11 +625,6 @@ receive(
 		    MDF_UCAST, 0, skeyid);
 		if (peer == NULL)
 			return;
-#if defined(PUBKEY) && 0
-		if (crypto_flags)
-			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-			    peer->associd);
-#endif /* PUBKEY */
 		break;
 
 	case AM_NEWPASS:
@@ -653,11 +643,6 @@ receive(
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 	 	    NTP_MINDPOLL, NTP_MAXDPOLL, sys_authenticate ?
 		    FLAG_AUTHENABLE : 0, MDF_UCAST, 0, skeyid);
-#if defined(PUBKEY) && 0
-		if (crypto_flags)
-			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-			    peer->associd);
-#endif /* PUBKEY */
 		break;
 
 	case AM_NEWBCL:
@@ -681,11 +666,6 @@ receive(
 		if (peer == NULL)
 			return;
 
-#if defined(PUBKEY) && 0
-		if (crypto_flags)
-			ntp_res_name(peer->srcadr.sin_addr.s_addr,
-			     peer->associd);
-#endif /* PUBKEY */
 		break;
 
 	case AM_POSSBCL:
@@ -814,7 +794,7 @@ receive(
 		 * let the dude by here, but only if the jerk is not yet
 		 * reachable. After that, he's on his own.
 		 */
-		if (peer->pubkey.ptr == NULL)
+		if (!(peer->flags & FLAG_PROVEN))
 			peer->flash |= TEST11;
 		if (peer->flash && peer->reach != 0) {
 #ifdef DEBUG
@@ -1123,27 +1103,34 @@ poll_update(
 	long oldpoll;
 #endif /* AUTOKEY */
 
-	/*
-	 * If the peer has been declared truechimer, the host poll
-	 * interval is the system poll interval. If not, the interval is
-	 * given as argument. This allows each association to ramp up
-	 * the poll interval for useless sources.
-	 */
-
 #ifdef AUTOKEY
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
-	if (peer->flags & FLAG_SYSPEER)
-		peer->hpoll = sys_poll;
-	else
+
+	/*
+	 * A little foxtrot to determine what controls the poll
+	 * interval. If the peer is reachable, but less than half the
+	 * polls have been answered, use the minimum. If reachable and
+	 * declared truechimer, use the system poll interval. In other
+	 * cases use the argument set by the transmit routine. This
+	 * allows each association to ramp up the poll interval for
+	 * useless sources.
+	 */
+	if (peer->valid > 0) {
+		if (peer->valid <= NTP_SHIFT / 2)
+			hpoll = peer->minpoll;
+		else if (peer->flags & FLAG_SYSPEER)
+			peer->hpoll = sys_poll;
+	} else {
 		peer->hpoll = hpoll;
+	}
 	if (peer->hpoll > peer->maxpoll)
 		peer->hpoll = peer->maxpoll;
 	else if (peer->hpoll < peer->minpoll)
 		peer->hpoll = peer->minpoll;
 
 	/*
-	 * bit of adventure here. If during a burst and not timeout,
+	 * Bit of adventure here. If during a burst and not timeout,
 	 * just slink away. If timeout, figure what the next timeout
 	 * should be. If IBURST or a reference clock, use one second. If
 	 * not and the dude was reachable during the previous poll
@@ -1151,6 +1138,11 @@ poll_update(
 	 * over 15-18 seconds. This is to give time for a modem to
 	 * complete the call, for example. If not during a burst,
 	 * randomize over the poll interval -1 to +2 seconds.
+	 *
+	 * In case of manycast server, make the poll interval, which is
+	 * axtually the manycast beacon interval, eight times the system
+	 * poll interval. Normally when the host poll interval settles
+	 * up to 17.1 s, the beacon interval settles up to 2.3 hours.
 	 */ 
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
@@ -1161,11 +1153,6 @@ poll_update(
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
 		else
 			peer->nextdate += RANDPOLL(BURST_INTERVAL1);
-#ifdef 0
-	} else if (peer->cmmd || (peer->crypto &&
-	    peer->pcookie.tstamp == 0)) {
-		peer->nextdate = peer->outdate + RANDPOLL(2);
-#endif /* PUBKEY */
 	} else if (peer->cast_flags & MDF_ACAST) {
 		peer->kpoll = peer->hpoll + 3;
 		peer->nextdate = peer->outdate + RANDPOLL(peer->kpoll);
@@ -1227,6 +1214,8 @@ peer_clear(
 		free(peer->keystr);
 	if (peer->pubkey.ptr != NULL)
 		free(peer->pubkey.ptr);
+	if (peer->certif.ptr != NULL)
+		free(peer->certif.ptr);
 #endif /* PUBKEY */
 #endif /* AUTOKEY */
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
@@ -2097,6 +2086,10 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
+			else if (peer->crypto & CRYPTO_FLAG_CERT)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_CERT, peer->hcookie,
+				    peer->assoc);
 			else if (crypto_flags && peer->crypto &
 			    CRYPTO_FLAG_DH && sys_leap !=
 			    LEAP_NOTINSYNC)
@@ -2163,6 +2156,10 @@ peer_xmit(
 			    NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
+				    peer->assoc);
+			else if (peer->crypto & CRYPTO_FLAG_CERT)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_CERT, peer->hcookie,
 				    peer->assoc);
 #endif /* PUBKEY */
 			else if (peer->pcookie.tstamp == 0)

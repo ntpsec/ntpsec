@@ -168,10 +168,11 @@ struct ntp_control {
 #define CS_FLAGS	20
 #define CS_HOST		21
 #define CS_PUBLIC	22
-#define CS_DHPARAMS	23
-#define	CS_REVTIME	24
-#define CS_LEAPTAB	25
-#define CS_TAI		26
+#define	CS_CERTIF	23
+#define CS_DHPARAMS	24
+#define	CS_REVTIME	25
+#define CS_LEAPTAB	26
+#define CS_TAI		27
 #define	CS_MAXCODE	CS_TAI
 #else
 #define	CS_MAXCODE	CS_VARLIST
@@ -222,11 +223,12 @@ struct ntp_control {
 #define CP_FLAGS	39
 #define CP_HOST		40
 #define CP_PUBLIC	41
-#define	CP_SESKEY	42
-#define	CP_SASKEY	43
-#define	CP_INITSEQ	44
-#define	CP_INITKEY	45
-#define	CP_INITTSP	46
+#define	CP_CERTIF	42
+#define	CP_SESKEY	43
+#define	CP_SASKEY	44
+#define	CP_INITSEQ	45
+#define	CP_INITKEY	46
+#define	CP_INITTSP	47
 #define	CP_MAXCODE	CP_INITTSP
 #else
 #define	CP_MAXCODE	CP_VARLIST

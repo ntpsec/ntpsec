@@ -23,7 +23,7 @@
  * Extension field message formats
  *
  *   +-------+-------+   +-------+-------+   +-------+-------+
- * 0 |   3   |  len  |   |  4,2  |  len  |   |   5   |  len  |
+ * 0 |   3   |  len  |   |  2,4  |  len  |   |  5-9  |  len  |
  *   +-------+-------+   +-------+-------+   +-------+-------+
  * 1 |    assocID    |   |    assocID    |   |    assocID    |
  *   +---------------+   +---------------+   +---------------+
@@ -46,6 +46,7 @@
  *                                           CRYPTO_DHPAR rsp
  *                                           CRYPTO_DH rsp
  *                                           CRYPTO_NAME rsp
+ *                                           CRYPTO_CERT rsp
  *                                           CRYPTO_TAI rsp
  *
  *   CRYPTO_STAT  1  -    offer/select
@@ -55,12 +56,12 @@
  *   CRYPTO_DHPAR 5  220  agreement parameters
  *   CRYPTO_DH    6  152  public value
  *   CRYPTO_NAME  7  460  host name/public key
- *   CRYPTO_TAI   8  144  leapseconds table
+ *   CRYPTO_CERT  8  ?    certificate
+ *   CRYPTO_TAI   9  144  leapseconds table
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
  */
-
 /*
  * Minimum sizes of fields
  */
@@ -85,7 +86,7 @@ u_int	sys_tai;		/* current UTC offset from TAI */
 #define MAX_ENCLEN	(ENCODED_CONTENT_LEN(1024)) /* max enc key */
 
 /*
- * Private cryptodata in networ byte order.
+ * Private cryptodata in network byte order.
  */
 static R_RSA_PRIVATE_KEY private_key; /* private key */
 static R_RSA_PUBLIC_KEY public_key; /* public key */
@@ -95,6 +96,7 @@ static u_int dh_keyLen;		/* private value length */
 static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
 static char *private_key_file = NULL; /* private key file */
 static char *public_key_file = NULL; /* public key file */
+static char *certif_file = NULL; /* certificate file */
 static char *dh_params_file = NULL; /* agreement parameters file */
 static char *tai_leap_file = NULL; /* leapseconds file */
 
@@ -102,6 +104,7 @@ static char *tai_leap_file = NULL; /* leapseconds file */
  * Global cryptodata in network byte order
  */
 struct value host;		/* host name/public key */
+struct value certif;		/* certificate */
 struct value dhparam;		/* agreement parameters */
 struct value dhpub;		/* public value */
 struct value tai_leap;		/* leapseconds table */
@@ -110,6 +113,7 @@ struct value tai_leap;		/* leapseconds table */
  * Cryptotypes
  */
 static	u_int	crypto_rsa	P((char *, u_char *, u_int));
+static	void	crypto_cert	P((char *));
 static	void	crypto_dh	P((char *));
 static	void	crypto_tai	P((char *));
 #endif /* PUBKEY */
@@ -129,6 +133,7 @@ static	void	crypto_tai	P((char *));
 #define RV_DAT		9	/* missing or corrupted data */
 #define RV_DEC		10	/* PEM decoding error */
 #define RV_DUP		11	/* duplicate flags */
+#define RV_VN		12	/* incorrect version */
 
 /*
  * session_key - generate session key
@@ -347,6 +352,17 @@ crypto_recv(
 		i = authlen / 4;
 		len = ntohl(pkt[i]) & 0xffff;
 		code = (ntohl(pkt[i]) >> 16) & 0xffff;
+		temp = (code >> 8) & 0x3f;
+		if (temp != CRYPTO_VN) {
+			sys_unknownversion++;
+#ifdef DEBUG
+			if (debug)
+				printf(
+				    "crypto_recv: incorrect version %d should be %d\n",
+				    temp, CRYPTO_VN);
+#endif
+			return;
+		}
 		tstamp = ntohl(pkt[i + 2]);
 #ifdef DEBUG
 		if (debug)
@@ -454,7 +470,6 @@ crypto_recv(
 		 * been installed.
 		 */
 		case CRYPTO_PRIV:
-			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			/* fall through */
 
@@ -535,6 +550,160 @@ crypto_recv(
 		 * the configuration file, they are ignored.
 		 */
 #ifdef PUBKEY
+		/*
+		 * Install public key and host name.
+		 */
+		case CRYPTO_NAME | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
+			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
+			temp = ntohl(vp->vallen);
+			j = i + 5 + ntohl(vp->vallen) / 4;
+			bits = ntohl(pkt[i + 5]);
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} else if (temp < rsalen || bits <
+			    MIN_RSA_MODULUS_BITS || bits >
+			    MAX_RSA_MODULUS_BITS) {
+				rval = RV_KEY;
+			} else if (ntohl(pkt[j]) != bits / 8) {
+				rval = RV_SIG;
+			} else if (tstamp == 0 || tstamp <
+			    peer->pubkey.tstamp || (tstamp ==
+			    peer->pubkey.tstamp && (peer->flags &
+			    FLAG_AUTOKEY))) {
+				rval = RV_TSP;
+			} else if (tstamp < peer->pubkey.fstamp ||
+			    fstamp < peer->pubkey.fstamp) {
+				rval = RV_FSP;
+			} else if (fstamp == peer->pubkey.fstamp &&
+			    (peer->flags & FLAG_AUTOKEY)) {
+				rval = RV_FSP;
+			} else {
+				R_VerifyInit(&ctx, DA_MD5);
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
+				kp = emalloc(sizeof(R_RSA_PUBLIC_KEY));
+				kp->bits = bits;
+				memcpy(kp->modulus, &pkt[i + 6],
+				    rsalen - 4);
+				rval = R_VerifyFinal(&ctx,
+				    (u_char *)&pkt[j + 1],
+				    ntohl(pkt[j]), kp);
+				if (rval != 0) {
+					free(kp);
+				} else {
+					j = i + 5 + rsalen / 4;
+					peer->pubkey.ptr = (u_char *)kp;
+					temp = strlen((char *)&pkt[j]);
+					peer->keystr = emalloc(temp +
+					    1);
+					strcpy(peer->keystr,
+					    (char *)&pkt[j]);
+					peer->pubkey.tstamp = tstamp;
+					peer->pubkey.fstamp = fstamp;
+					peer->flash &= ~TEST10;
+					if (!(peer->crypto &
+					    CRYPTO_FLAG_CERT))
+						peer->flags |=
+						    FLAG_PROVEN;
+				}
+			}
+#ifdef DEBUG
+			if (debug)
+
+				printf(
+				    "crypto_recv: verify %x host %s ts %u fs %u\n",
+				    rval, (char *)&pkt[i + 5 + rsalen /
+				    4], tstamp, fstamp);
+#endif
+			if (rval != RV_OK) {
+				if (rval != RV_TSP)
+					msyslog(LOG_ERR,
+					    "crypto: %x host %s ts %u fs %u\n",
+					    rval, (char *)&pkt[i + 5 +
+					    rsalen / 4], tstamp,
+					    fstamp);
+			}
+			break;
+
+		/*
+		 * Install certificate.
+		 */
+		case CRYPTO_CERT | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
+			vp = (struct value *)&pkt[i + 2];
+			fstamp = ntohl(vp->fstamp);
+			temp = ntohl(vp->vallen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
+			j = i + 5 + temp / 4;
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (ntohl(pkt[j]) != kp->bits / 8) {
+				rval = RV_SIG;
+			} else if (tstamp == 0) {
+				rval = RV_TSP;
+			} else if (tstamp <
+			    ntohl(peer->certif.fstamp) || fstamp <
+			    ntohl(peer->certif.fstamp)) {
+				rval = RV_FSP;
+			} else if (fstamp ==
+			    ntohl(peer->certif.fstamp) && (peer->flags &
+			    FLAG_AUTOKEY)) {
+				peer->crypto &= ~CRYPTO_FLAG_CERT;
+				rval = RV_FSP;
+			} else {
+				R_VerifyInit(&ctx, DA_MD5);
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
+				rval = R_VerifyFinal(&ctx,
+				    (u_char *)&pkt[j + 1],
+				    ntohl(pkt[j]), kp);
+			}
+#ifdef DEBUG
+			if (debug)
+				printf(
+				    "crypto_recv: verify %x certificate %u ts %u fs %u\n",
+				    rval, temp, tstamp, fstamp);
+#endif
+
+			/*
+			 * If the peer data are newer than the host
+			 * data, replace the host data. Otherwise,
+			 * wait for the peer to fetch the host data.
+			 */
+			if (rval != RV_OK || temp == 0) {
+				if (rval != RV_TSP)
+					msyslog(LOG_ERR,
+					    "crypto: %x certificate %u ts %u fs %u\n",
+					    rval, temp, tstamp, fstamp);
+				break;
+			}
+			peer->flash &= ~TEST10;
+			peer->flags |= FLAG_PROVEN;
+			crypto_flags |= CRYPTO_FLAG_CERT;
+			peer->crypto &= ~CRYPTO_FLAG_CERT;
+
+			/*
+			 * Initialize agreement parameters and extension
+			 * field in network byte order. Note the private
+			 * key length is set arbitrarily at half the
+			 * prime length.
+			 */
+			peer->certif.tstamp = vp->tstamp;
+			peer->certif.fstamp = vp->fstamp;
+			peer->certif.vallen = vp->vallen;
+			if (peer->certif.ptr == NULL)
+				free(peer->certif.ptr);
+			peer->certif.ptr = emalloc(temp);
+			memcpy(peer->certif.ptr, vp->pkt, temp);
+			crypto_agree();
+			break;
+
 		/*
 		 * Install agreement parameters in symmetric modes.
 		 */
@@ -636,12 +805,9 @@ crypto_recv(
 
 		/*
 		 * Verify public value and compute agreed key in
-		 * symmetric modes. If the filestamp is later than the
-		 * current value, we abandon and refill the agreement
-		 * parameters.
+		 * symmetric modes.
 		 */
 		case CRYPTO_DH:
-			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			if (!crypto_flags)
 				peer->cmmd |= CRYPTO_ERROR;
@@ -723,79 +889,6 @@ crypto_recv(
 			break;
 
 		/*
-		 * Install public key and host name.
-		 */
-		case CRYPTO_NAME | CRYPTO_RESP:
-			if (!crypto_flags)
-				break;
-			vp = (struct value *)&pkt[i + 2];
-			fstamp = ntohl(vp->fstamp);
-			temp = ntohl(vp->vallen);
-			j = i + 5 + ntohl(vp->vallen) / 4;
-			bits = ntohl(pkt[i + 5]);
-			if (len < VALUE_LEN) {
-				rval = RV_LEN;
-			} else if (temp < rsalen || bits <
-			    MIN_RSA_MODULUS_BITS || bits >
-			    MAX_RSA_MODULUS_BITS) {
-				rval = RV_KEY;
-			} else if (ntohl(pkt[j]) != bits / 8) {
-				rval = RV_SIG;
-			} else if (tstamp == 0 || tstamp <
-			    peer->pubkey.tstamp || (tstamp ==
-			    peer->pubkey.tstamp && (peer->flags &
-			    FLAG_AUTOKEY))) {
-				rval = RV_TSP;
-			} else if (tstamp < peer->pubkey.fstamp ||
-			    fstamp < peer->pubkey.fstamp) {
-				rval = RV_FSP;
-			} else if (fstamp == peer->pubkey.fstamp &&
-			    (peer->flags & FLAG_AUTOKEY)) {
-				rval = RV_FSP;
-			} else {
-				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)vp,
-				    temp + 12);
-				kp = emalloc(sizeof(R_RSA_PUBLIC_KEY));
-				kp->bits = bits;
-				memcpy(kp->modulus, &pkt[i + 6],
-				    rsalen - 4);
-				rval = R_VerifyFinal(&ctx,
-				    (u_char *)&pkt[j + 1],
-				    ntohl(pkt[j]), kp);
-				if (rval != 0) {
-					free(kp);
-				} else {
-					j = i + 5 + rsalen / 4;
-					peer->pubkey.ptr = (u_char *)kp;
-					temp = strlen((char *)&pkt[j]);
-					peer->keystr = emalloc(temp +
-					    1);
-					strcpy(peer->keystr,
-					    (char *)&pkt[j]);
-					peer->pubkey.tstamp = tstamp;
-					peer->pubkey.fstamp = fstamp;
-					peer->flash &= ~TEST10;
-				}
-			}
-#ifdef DEBUG
-			if (debug)
-
-				printf(
-				    "crypto_recv: verify %x host %s ts %u fs %u\n",
-				    rval, (char *)&pkt[i + 5 + rsalen /
-				    4], tstamp, fstamp);
-#endif
-			if (rval != RV_OK) {
-				if (rval != RV_TSP)
-					msyslog(LOG_ERR,
-					    "crypto: %x host %s ts %u fs %u\n",
-					    rval, (char *)&pkt[i + 5 +
-					    rsalen / 4], tstamp,
-					    fstamp);
-			}
-			break;
-		/*
 		 * Install leapseconds table.
 		 */
 		case CRYPTO_TAI | CRYPTO_RESP:
@@ -872,10 +965,10 @@ crypto_recv(
 			if (tai_leap.ptr == NULL)
 				free(tai_leap.ptr);
 			tai_leap.ptr = emalloc(temp);
+			memcpy(tai_leap.ptr, vp->pkt, temp);
 			if (tai_leap.sig == NULL)
 				tai_leap.sig =
 				    emalloc(private_key.bits / 8);
-			memcpy(tai_leap.ptr, vp->pkt, temp);
 			crypto_agree();
 			break;
 #endif /* PUBKEY */
@@ -887,7 +980,6 @@ crypto_recv(
 		default:
 			if (code & (CRYPTO_RESP | CRYPTO_ERROR))
 				break;
-			poll_update(peer, peer->minpoll);
 			peer->cmmd = ntohl(pkt[i]);
 			break;
 
@@ -1020,6 +1112,32 @@ crypto_xmit(
 	 * they are ignored and an error response is returned.
 	 */
 	/*
+	 * Send certificate, timestamp and signature.
+	 */
+	case CRYPTO_CERT | CRYPTO_RESP:
+		if (!crypto_flags) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
+		vp = (struct value *)&xpkt[i + 2];
+		vp->tstamp = certif.tstamp;
+		vp->fstamp = certif.fstamp;
+		vp->vallen = 0;
+		len += 12;
+		temp = ntohl(certif.vallen);
+		if (temp == 0)
+			break;
+		vp->vallen = htonl(temp);
+		memcpy(vp->pkt, certif.ptr, temp);
+		len += temp;
+		j = i + 5 + temp / 4;
+		temp = public_key.bits / 8;
+		xpkt[j++] = htonl(temp);
+		memcpy(&xpkt[j], certif.sig, temp);
+		len += temp + 4;
+		break;
+
+	/*
 	 * Send agreement parameters, timestamp and signature.
 	 */
 	case CRYPTO_DHPAR | CRYPTO_RESP:
@@ -1097,6 +1215,7 @@ crypto_xmit(
 		memcpy(&xpkt[j], host.sig, temp);
 		len += temp + 4;
 		break;
+
 	/*
 	 * Send leapseconds table, timestamp and signature.
 	 */
@@ -1170,6 +1289,7 @@ crypto_setup(void)
 	 */
 	memset(&private_key, 0, sizeof(private_key));
 	memset(&public_key, 0, sizeof(public_key));
+	memset(&certif, 0, sizeof(certif));
 	memset(&dh_params, 0, sizeof(dh_params));
 	memset(&host, 0, sizeof(host));
 	memset(&dhparam, 0, sizeof(dhparam));
@@ -1228,6 +1348,18 @@ crypto_setup(void)
 	host.sig = emalloc(private_key.bits / 8);
 
 	/*
+	 * Load optional certificate from file, default "ntpkey_certif".
+	 * If the file is missing or defective, the values can later be
+	 * retrieved from a server.
+	 */
+	if (certif_file == NULL)
+		snprintf(filename, MAXFILENAME, "ntpkey_certif_%s",
+		    sys_hostname);
+		certif_file = emalloc(strlen(filename) + 1);
+		strcpy(certif_file, filename);
+	crypto_cert(certif_file);
+
+	/*
 	 * Load optional agreement parameters from file, default
 	 * "ntpkey_dh". If the file is missing or defective, the values
 	 * can later be retrieved from a server.
@@ -1281,6 +1413,26 @@ crypto_agree(void)
 		exit (-1);
 	}
 	host.siglen = ntohl(len);
+
+	/*
+	 * Sign certificate and timestamps.
+	 */
+	if (certif.vallen != 0) {
+		certif.tstamp = htonl(tstamp);
+		R_SignInit(&ctx, DA_MD5);
+		R_SignUpdate(&ctx, (u_char *)&certif, 12);
+		R_SignUpdate(&ctx, certif.ptr,
+		    ntohl(certif.vallen));
+		rval = R_SignFinal(&ctx, certif.sig, &len,
+		    &private_key);
+		if (rval != RV_OK || len != private_key.bits / 8) {
+			msyslog(LOG_ERR,
+			    "crypto: certificate signature fails %x",
+			    rval);
+			exit (-1);
+		}
+		certif.siglen = ntohl(len);
+	}
 
 	/*
 	 * Sign agreement parameters and timestamps.
@@ -1385,7 +1537,7 @@ crypto_rsa(
 	int rval;
 
 	/*
-	 * Open the key file and discard comment lines. If the first
+	 * Open the file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
 	 * directory string. 
 	 */
@@ -1434,7 +1586,7 @@ crypto_rsa(
 		rval = RV_OK;
 	if (rval != RV_OK) {
 		fclose(str);
-		msyslog(LOG_ERR, "crypto: key file %s error %x", cp,
+		msyslog(LOG_ERR, "crypto: RSA file %s error %x", cp,
 		    rval);
 		exit (-1);
 	}
@@ -1467,6 +1619,111 @@ crypto_rsa(
 
 
 /*
+ * crypto_cert - read certificate
+ */
+static void
+crypto_cert(
+	char *cp		/* file name */
+	)
+{
+	FILE *str;		/* file handle */
+	u_char buf[MAX_LINLEN];	/* file line buffer */
+	u_int certbuf[MAX_KEYLEN]; /* certificate */
+	char filename[MAXFILENAME]; /* name of certificate file */
+	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int fstamp;		/* filestamp */
+	u_int32 *pp;
+	u_int len;
+	char *rptr;
+	int rval, i;
+
+	/*
+	 * Open the file and discard comment lines. If the first
+	 * character of the file name is not '/', prepend the keys
+	 * directory string. If the file is not found, not to worry; it
+	 * can be retrieved over the net. But, if it is found with
+	 * errors, we crash and burn.
+	 */
+	if (*cp == '/')
+		strcpy(filename, cp);
+	else
+		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
+	str = fopen(filename, "r");
+	if (str == NULL) {
+		msyslog(LOG_INFO,
+		    "crypto: certificate file %s not found",
+		    filename);
+		return;
+	}
+
+	/*
+	 * We are rather paranoid here, since an intruder might cause a
+	 * coredump by infiltrating naughty values. Empty lines and
+	 * comments are ignored. Other lines must begin with two
+	 * integers followed by junk or comments. The first integer is
+	 * the NTP seconds of leap insertion, the second is the offset
+	 * of TAI relative to UTC after that insertion. The second word
+	 * must equal the initial insertion of ten seconds on 1 January
+	 * 1972 plus one second for each succeeding insertion.
+	 */
+	i = 0;
+	rval = RV_OK;
+	while (i < MAX_LEAP) {
+		rptr = fgets(buf, MAX_LINLEN - 1, str);
+		if (rptr == NULL)
+			break;
+		if (strlen(buf) < 1)
+			continue;
+		if (*buf == '#')
+			continue;
+		i++;
+	}
+	fclose(str);
+	if (rval != RV_OK || i == 0) {
+		msyslog(LOG_ERR,
+		    "crypto: certificate file %s error %d", cp,
+		    rval);
+		exit (-1);
+	}
+
+	/*
+	 * The extension field entry consists of the raw certificate.
+	 */
+	len = i * 4;
+	certif.vallen = htonl(len);
+	pp = emalloc(len);
+	certif.ptr = (u_char *)pp;
+	for (; i >= 0; i--) {
+		*pp++ = htonl(certbuf[i]);
+	}
+	certif.sig = emalloc(private_key.bits / 8);
+	crypto_flags |= CRYPTO_FLAG_CERT;
+
+	/*
+	 * Extract filestamp if present.
+	 */
+	rval = readlink(filename, linkname, MAXFILENAME - 1);
+	if (rval > 0) {
+		linkname[rval] = '\0';
+		rptr = strrchr(linkname, '.');
+	} else {
+		rptr = strrchr(filename, '.');
+	}
+	if (rptr != NULL)
+		sscanf(++rptr, "%u", &fstamp);
+	else
+		fstamp = 0;
+	certif.fstamp = htonl(fstamp);
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "crypto_cert: certif file %s link %d fs %u\n",
+		    cp, rval, fstamp);
+#endif
+}
+
+
+/*
  * crypto_dh - read agreement parameters, decode and check for errors.
  */
 static void
@@ -1490,7 +1747,7 @@ crypto_dh(
 	int rval;
 
 	/*
-	 * Open the key file and discard comment lines. If the first
+	 * Open the file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
 	 * directory string. If the file is not found, not to worry; it
 	 * can be retrieved over the net. But, if it is found with
@@ -1551,7 +1808,7 @@ crypto_dh(
 		rval = RV_OK;
 	if (rval != RV_OK) {
 		msyslog(LOG_ERR,
-		    "crypto: parameter file %s error %x", cp,
+		    "crypto: parameters file %s error %x", cp,
 		    rval);
 		exit (-1);
 	}
@@ -1608,7 +1865,7 @@ crypto_dh(
 	if (debug)
 		printf(
 		    "crypto_dh: pars file %s link %d fs %u prime %u gen %u\n",
-		    dh_params_file, rval, fstamp, dh_params.primeLen,
+		    cp, rval, fstamp, dh_params.primeLen,
 		    dh_params.generatorLen);
 #endif
 }
@@ -1626,7 +1883,7 @@ crypto_tai(
 	u_char buf[MAX_LINLEN];	/* file line buffer */
 	u_int leapsec[MAX_LEAP]; /* NTP time at leaps */
 	u_int offset;		/* offset at leap (s) */
-	char filename[MAXFILENAME]; /* name of parameter file */
+	char filename[MAXFILENAME]; /* name of leapseconds file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
 	u_int fstamp;		/* filestamp */
 	u_int32 *pp;
@@ -1640,7 +1897,7 @@ crypto_tai(
 #endif /* KERNEL_PLL */
 
 	/*
-	 * Open the key file and discard comment lines. If the first
+	 * Open the file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
 	 * directory string. If the file is not found, not to worry; it
 	 * can be retrieved over the net. But, if it is found with
@@ -1714,7 +1971,8 @@ crypto_tai(
 	ntv.modes = MOD_TAI;
 	ntv.constant = sys_tai;
 	if (ntp_adjtime(&ntv) == TIME_ERROR)
-		msyslog(LOG_ERR, "kernel TAI update failed");
+		msyslog(LOG_ERR,
+		    "crypto: kernel TAI update failed");
 #endif /* NTP_API */
 #endif /* KERNEL_PLL */
 
@@ -1737,57 +1995,11 @@ crypto_tai(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_tai: leap file %s link %d fs %u offset %u\n",
-		    tai_leap_file, rval, fstamp,
-		    ntohl(tai_leap.vallen) / 4 + TAI_1972);
+		    "crypto_tai: leapseconds file %s link %d fs %u offset %u\n",
+		    cp, rval, fstamp, ntohl(tai_leap.vallen) / 4 +
+		    TAI_1972);
 #endif
 }
-
-#if 0
-/*
- * crypto_public - read and install the public key from the public key
- * file. The name of the file is in the form "ntpkey_host", where host
- * is the DNS canonical name of the host. If the file is not found or
- * has errors, we just keep going and expect the host to fetch the
- * public key from the peer via the extension field.
- */
-int
-crypto_public(
-	struct peer *peer,	/* peer structure pointer */
-	u_char *cp,		/* canonical host name */
-	u_int fstamp		/* filestamp */
-	)
-{
-	R_RSA_PUBLIC_KEY keybuf;
-	u_int keylen = sizeof(R_RSA_PUBLIC_KEY);
-	char filename[MAXFILENAME];
-	u_int temp;
-
-	/*
-	 * If the filestamp is nonzero, append it as the file name
-	 * extension. If not and a link name has a filestamp, append
-	 * that for looks.
-	 */
-	if (fstamp == 0)
-		snprintf(filename, MAXFILENAME, "ntpkey_%s", cp);
-	else
-		snprintf(filename, MAXFILENAME, "ntpkey_%s.%u", cp,
-		    fstamp);
-	crypto_rsa(filename, &temp, (u_char *)&keybuf, keylen);
-	if (keybuf.bits == 0)
-		return (0);
-	if (fstamp == 0 && temp != 0)
-		sprintf(filename, "%s.%u", filename, temp);
-	if (peer->keystr != NULL)
-		free(peer->keystr);
-	peer->keystr = emalloc(strlen(filename) + 1);
-	strcpy(peer->keystr, filename);
-	if (peer->pubkey.ptr == NULL)
-		peer->pubkey.ptr = emalloc(keylen);
-	memcpy(peer->pubkey.ptr, (char *)&keybuf, keylen);
-	return (1);
-}
-#endif
 
 
 /*
@@ -1823,6 +2035,14 @@ crypto_config(
 	case CRYPTO_CONF_PUBL:
 		public_key_file = emalloc(strlen(cp) + 1);
 		strcpy(public_key_file, cp);
+		break;
+
+	/*
+	 * Set certificate file name.
+	 */
+	case CRYPTO_CONF_CERT:
+		certif_file = emalloc(strlen(cp) + 1);
+		strcpy(certif_file, cp);
 		break;
 
 	/*
