@@ -3489,16 +3489,15 @@ AC_CONFIG_FILES(ntpq/Makefile)
 AC_CONFIG_FILES(ntptrace/Makefile)
 AC_CONFIG_FILES(parseutil/Makefile)
 AC_CONFIG_FILES(scripts/Makefile)
-AC_CONFIG_FILES(scripts/calc_tickadj)
-AC_CONFIG_FILES(scripts/checktime)
-AC_CONFIG_FILES(scripts/freq_adj)
-AC_CONFIG_FILES(scripts/mkver)
-AC_CONFIG_FILES(scripts/ntp-wait)
-AC_CONFIG_FILES(scripts/ntpsweep)
-AC_CONFIG_FILES(scripts/ntptrace)
-AC_CONFIG_FILES(scripts/ntpver)
-AC_CONFIG_FILES(scripts/plot_summary)
-AC_CONFIG_FILES(scripts/summary)
+AC_CONFIG_FILES(scripts/calc_tickadj,	[chmod +x scripts/calc_tickadj])
+AC_CONFIG_FILES(scripts/checktime,	[chmod +x scripts/checktime])
+AC_CONFIG_FILES(scripts/freq_adj,	[chmod +x scripts/freq_adj])
+AC_CONFIG_FILES(scripts/mkver,		[chmod +x scripts/mkver])
+AC_CONFIG_FILES(scripts/ntp-wait,	[chmod +x scripts/ntp-wait])
+AC_CONFIG_FILES(scripts/ntpsweep,	[chmod +x scripts/ntpsweep])
+AC_CONFIG_FILES(scripts/ntpver,		[chmod +x scripts/ntpver])
+AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
+AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
 case "$MAKE_SNTP" in
@@ -3507,7 +3506,5 @@ case "$MAKE_SNTP" in
     AC_CONFIG_SUBDIRS(sntp)
     ;;
 esac
-
-AC_CONFIG_COMMANDS(default, [[chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntptrace scripts/ntpver scripts/plot_summary scripts/summary]], [])
 
 AC_OUTPUT
