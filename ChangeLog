@@ -1,5 +1,7 @@
 2001-05-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k38
+
 	* ntpd/ntp_proto.c (clock_filter): Huff-n-Puff and Popcorn
 	improvements.
 	* ntpd/ntp_loopfilter.c (local_clock): Debug cleanup
