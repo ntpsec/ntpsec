@@ -3070,9 +3070,10 @@ proto_config(
 		break;
 
 	/*
-	 * Add muliticast group address.
+	 * Add multicast group address.
 	 */
 	case PROTO_MULTICAST_ADD:
+		sys_bclient = (int)value;
 		if (svalue)
 		    io_multicast_add(*svalue);
 		break;

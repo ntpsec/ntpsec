@@ -38,10 +38,13 @@
 #endif
 
 /*
- * Don't allow wildcard delivery
- *
-#undef UDP_WILDCARD_DELIVERY
-*/
+ * Macro to allow packets to be delivered to wildcard sockets
+ * This should only be turned on if absolutely necessary
+ * and requires a manual change and rebuild of the code
+ * It is not recommended since that means you don't know
+ * to which address it's being delivered.
+ */
+#define ALLOW_WILDCARD_PACKETS
 
 extern int listen_to_virtual_ips;
 extern const char *specific_interface;
@@ -61,13 +64,6 @@ extern const char *specific_interface;
 #endif
 
 #endif
-
-/*
-#define ISC_PLATFORM_HAVEIPV6
- struct ipv6_mreq {  struct in6_addr ipv6mr_multiaddr;
-				  unsigned int ipv6mr_interface;
-} ipv6_mreq;
-*/
 
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
@@ -248,6 +244,8 @@ init_io(void)
 	io_timereset = 0;
 	loopback_interface = NULL;
 	loopback6_interface = NULL;
+	any_interface = NULL;
+	any6_interface = NULL;
 
 #ifdef REFCLOCK
 	refio = 0;
@@ -331,7 +329,6 @@ interface_dump(struct interface *itf)
 }
 #endif
 
-#ifdef UDP_WILDCARD_DELIVERY
 int
 create_wildcards(u_short port) {
 
@@ -358,7 +355,13 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_BROADCAST | INT_UP;
+#ifdef ALLOW_WILDCARD_SOCKETS
 		any_interface = &inter_list[idx];
+		wildipv4 = idx;
+		inter_list[idx].ignore_packets = ISC_FALSE;
+#else
+		inter_list[idx].ignore_packets = ISC_TRUE;
+#endif
 #if defined(MCAST)
 	/*
 	 * enable possible multicast reception on the broadcast socket
@@ -367,7 +370,6 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_port = port;
 		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
-		wildipv4 = idx;
 		idx++;
 	}
 
@@ -388,14 +390,18 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_UP;
+#ifdef ALLOW_WILDCARD_SOCKETS
 		any6_interface = &inter_list[idx];
 		wildipv6 = idx;
+		inter_list[idx].ignore_packets = ISC_FALSE;
+#else
+		inter_list[idx].ignore_packets = ISC_TRUE;
+#endif
 		idx++;
 	}
 #endif
 	return (idx);
 }
-#endif /* UDP_WILDCARD_DELIVERY */
 
 isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
@@ -553,19 +559,16 @@ create_sockets(
 		if(debug)
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
-#ifdef UDP_WILDCARD_DELIVERY
 		/*
-		 * Do not allow creation of wildcard address
-		 * sockets since it appears that it could
-		 * allow it to receive broadcast packets
-		 * Further fix will be more comprehensive.
-		 * PDMXXX
+		 * Create wildcard addresses
+		 * This ensures that no other application
+		 * can be receiving ntp packets 
+		 */
 
 	if (specific_interface == NULL) {
 		nwilds = create_wildcards(port);
 		idx = nwilds;
-	} */
-#endif
+	}
 
 	result = isc_interfaceiter_create(mctx, &iter);
 	if (result != ISC_R_SUCCESS)
@@ -591,17 +594,28 @@ create_sockets(
 		if (scan_ipv6 == ISC_FALSE && family == AF_INET6)
 			continue;
 
-		/* Check to see if we are going to use the interface */
+		/* 
+		 * Check to see if we are going to use the interface
+		 * If we don't use it we mark it to drop any packet
+		 * received but we still must create the socket and
+		 * bind to it. This prevents other apps binding to it
+		 * and potentially causing problems with more than one
+		 * process fiddling with the clock
+		 */
 		if (address_okay(&isc_if) == ISC_TRUE) {
-			convert_isc_if(&isc_if, &inter_list[idx], port);
-			inter_list[idx].fd = INVALID_SOCKET;
-			inter_list[idx].bfd = INVALID_SOCKET;
-			inter_list[idx].num_mcast = 0;
-			inter_list[idx].received = 0;
-			inter_list[idx].sent = 0;
-			inter_list[idx].notsent = 0;
-			idx++;
+			inter_list[idx].ignore_packets = ISC_FALSE;
 		}
+		else {
+			inter_list[idx].ignore_packets = ISC_TRUE;
+		}
+		convert_isc_if(&isc_if, &inter_list[idx], port);
+		inter_list[idx].fd = INVALID_SOCKET;
+		inter_list[idx].bfd = INVALID_SOCKET;
+		inter_list[idx].num_mcast = 0;
+		inter_list[idx].received = 0;
+		inter_list[idx].sent = 0;
+		inter_list[idx].notsent = 0;
+		idx++;
 	}
 	isc_interfaceiter_destroy(&iter);
 
@@ -982,6 +996,9 @@ io_setbclient(void)
 	set_reuseaddr(1);
 
 	for (i = nwilds; i < ninterfaces; i++) {
+		/* use only allowed addresses */
+		if (inter_list[i].ignore_packets == ISC_TRUE)
+			continue;
 		/* Only IPv4 addresses are valid for broadcast */
 		if (inter_list[i].sin.ss_family != AF_INET)
 			continue;
@@ -1148,6 +1165,7 @@ io_multicast_add(
 			sizeof(inter_list[ind].name));
 		((struct sockaddr_in*)&inter_list[ind].mask)->sin_addr.s_addr =
 						htonl(~(u_int32)0);
+		inter_list[ind].ignore_packets = ISC_FALSE;
 		if (ind >= ninterfaces)
 			ninterfaces = ind + 1;
 	}
@@ -2036,19 +2054,12 @@ input_handler(
 				/*
 				 * Get a buffer and read the frame.  If we
 				 * haven't got a buffer, or this is received
-				 * on the wild card socket, just dump the
+				 * on a disallowed socket, just dump the
 				 * packet.
 				 */
-#ifdef UDP_WILDCARD_DELIVERY
-				/*
-				 * these guys manage to put properly addressed
-				 * packets into the wildcard queue
-				 */
-				if (free_recvbuffs() == 0)
-#else
-				if((i == wildipv4) || (i == wildipv6)||
-				   (free_recvbuffs() == 0))
-#endif
+
+				if (free_recvbuffs() == 0 ||
+				    inter_list[i].ignore_packets == ISC_TRUE)
 				{
 					char buf[RX_BUFF_SIZE];
 					struct sockaddr_storage from;
@@ -2059,11 +2070,11 @@ input_handler(
 #ifdef DEBUG
 					if (debug)
 					    printf("%s on %d(%lu) fd=%d from %s\n",
-					    (i == wildipv4 || i == wildipv6) ? "ignore" : "drop",
+					    (inter_list[i].ignore_packets == ISC_TRUE) ? "ignore" : "drop",
 					     i, free_recvbuffs(), fd,
 					     stoa(&from));
 #endif
-					if (i == wildipv4 || i == wildipv6)
+					if (inter_list[i].ignore_packets == ISC_TRUE)
 					    packets_ignored++;
 					else
 					    packets_dropped++;
@@ -2202,7 +2213,7 @@ findinterface(
 	)
 {
 	SOCKET s;
-	int rtn, i;
+	int rtn, i, idx;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
 #ifdef DEBUG
@@ -2249,18 +2260,35 @@ findinterface(
 #endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
+	idx = -1;
 	for (i = nwilds; i < ninterfaces; i++) {
+		/* Don't both with ignore interfaces */
+		if (inter_list[i].ignore_packets == ISC_TRUE)
+			continue;
 		/*
-		* First look if is the the correct family
-		*/
+		 * First look if is the the correct family
+		 */
 		if(inter_list[i].sin.ss_family != saddr.ss_family)
 	  		continue;
 		/*
 		 * We match the unicast address only.
 		 */
 		if (SOCKCMP(&inter_list[i].sin, &saddr))
-			return (&inter_list[i]);
+		{
+			idx = i;
+			break;
+		}
 	}
+	if (idx != -1)
+	{
+#ifdef DEBUG
+		if (debug > 1)
+			printf("Found interface index %d for address %s\n",
+				idx, stoa(addr));
+#endif
+		return (&inter_list[idx]);
+	}
+
 	return ANY_INTERFACE_CHOOSE(addr);
 }
 
@@ -2299,9 +2327,12 @@ findbcastinter(
 */
 
 	for (i = nwilds; i < ninterfaces; i++) {
+		/* Don't both with ignore interfaces */
+		if (inter_list[i].ignore_packets == ISC_TRUE)
+			continue;
 		/*
-		* First look if this is the correct family
-		*/
+		 * First look if this is the correct family
+		 */
 		if(inter_list[i].sin.ss_family != addr->ss_family)
 	  		continue;
 		/*
