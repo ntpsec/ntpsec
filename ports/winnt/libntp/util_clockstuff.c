@@ -5,6 +5,7 @@
 #include "clockstuff.h"
 
 DWORD units_per_tick = 0;
+DOUBLE ppm_per_adjust_unit = 0.0; /* to satisfy libntp */
 
 int
 gettimeofday(
