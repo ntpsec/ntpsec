@@ -42,7 +42,7 @@ extern	struct refclock	refclock_chu;
 #define	refclock_chu	refclock_none
 #endif
 
-#ifdef CLOCK_WWV_AUDIO
+#ifdef CLOCK_WWV
 extern  struct refclock refclock_wwv;
 #else
 #define refclock_wwv    refclock_none

@@ -1,3 +1,9 @@
+1999-12-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: Cleanup and fixes
+	* ntpd/refclock_conf.c: WWV declaration cleanup.
+	From: Dave Mills <mills@udel.edu>
+	
 1999-12-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libparse/clk_rawdcf.c (cvt_rawdcf): Buglet.
