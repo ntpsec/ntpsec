@@ -272,10 +272,9 @@ findpeer(
 			 * Sigh!  Check if BCLIENT peer in client
 			 * server mode, else return error
 			 */
-			if ((*action == AM_POSSBCL) &&
-			    !(peer->cast_flags & FLAG_MCAST1)) {
+			if ((*action == AM_POSSBCL) && !(peer->flags &
+			    FLAG_MCAST1))
 				*action = AM_ERR;
-			}
 
 			/* if an error was returned, exit back right here */
 			if (*action == AM_ERR)

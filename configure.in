@@ -2248,7 +2248,6 @@ case "$ans" in
 	ans=rsaref
 	LIBRSAREF=../librsaref/librsaref.a
 	MAKE_LIBRSAREF=librsaref.a
-	MAKE_NTP_GENKEYS=ntp_genkeys
 	AC_DEFINE(DES)
 	AC_DEFINE(PUBKEY, , [Public key?])
     fi

@@ -199,8 +199,8 @@ transmit(
 	 * local clock driver and the driver is not the prefer peer.
 	 */
 	if (peer->hmode != MODE_BROADCAST) {
-		if (peer->hmode != MODE_BCLIENT && !(peer->cast_flags &
-		    MDF_ACAST && sys_survivors >= NTP_MINCLOCK))
+		if (peer->hmode != MODE_BCLIENT && !((peer->cast_flags &
+		    MDF_ACAST) && sys_survivors >= NTP_MINCLOCK))
 			peer_xmit(peer);
 	} else if (sys_peer != NULL && sys_leap != LEAP_NOTINSYNC) {
 		if (!(sys_peer->refclktype == REFCLK_LOCALCLOCK &&
@@ -1964,7 +1964,7 @@ peer_xmit(
 		 * them at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->keynumber == peer->sndauto.seq)
+			if (peer->keynumber == ntohl(peer->sndauto.seq))
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;

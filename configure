@@ -10115,7 +10115,6 @@ case "$ans" in
 	ans=rsaref
 	LIBRSAREF=../librsaref/librsaref.a
 	MAKE_LIBRSAREF=librsaref.a
-	MAKE_NTP_GENKEYS=ntp_genkeys
 	cat >>confdefs.h <<\EOF
 #define DES 1
 EOF
@@ -10141,7 +10140,7 @@ esac
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we want to compile with ElectricFence... $ac_c" 1>&6
-echo "configure:10145: checking if we want to compile with ElectricFence" 1>&5
+echo "configure:10144: checking if we want to compile with ElectricFence" 1>&5
 # Check whether --with-electricfence or --without-electricfence was given.
 if test "${with_electricfence+set}" = set; then
   withval="$with_electricfence"
@@ -10165,7 +10164,7 @@ esac
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we can make dcf parse utilities... $ac_c" 1>&6
-echo "configure:10169: checking if we can make dcf parse utilities" 1>&5
+echo "configure:10168: checking if we can make dcf parse utilities" 1>&5
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$target" in
@@ -10179,7 +10178,7 @@ fi
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we can build kernel streams modules for parse... $ac_c" 1>&6
-echo "configure:10183: checking if we can build kernel streams modules for parse" 1>&5
+echo "configure:10182: checking if we can build kernel streams modules for parse" 1>&5
 ans=no
 case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
  yesyes)
@@ -10206,7 +10205,7 @@ esac
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we need basic refclock support... $ac_c" 1>&6
-echo "configure:10210: checking if we need basic refclock support" 1>&5
+echo "configure:10209: checking if we need basic refclock support" 1>&5
 if test "$ntp_refclock" = "yes"; then
     cat >>confdefs.h <<\EOF
 #define REFCLOCK 1
@@ -10218,7 +10217,7 @@ echo "$ac_t""$ntp_refclock" 1>&6
 			
 
 echo $ac_n "checking if we want HP-UX adjtimed support... $ac_c" 1>&6
-echo "configure:10222: checking if we want HP-UX adjtimed support" 1>&5
+echo "configure:10221: checking if we want HP-UX adjtimed support" 1>&5
 case "$target" in
  *-*-hpux[56789]*)
     ans=yes
@@ -10236,7 +10235,7 @@ fi
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we can read kmem... $ac_c" 1>&6
-echo "configure:10240: checking if we can read kmem" 1>&5
+echo "configure:10239: checking if we can read kmem" 1>&5
 if test "${ac_cv_var_can_kmem+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10288,7 +10287,7 @@ EOF
 esac
 
 echo $ac_n "checking if adjtime is accurate... $ac_c" 1>&6
-echo "configure:10292: checking if adjtime is accurate" 1>&5
+echo "configure:10291: checking if adjtime is accurate" 1>&5
 if test "${ac_cv_var_adjtime_is_accurate+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10339,7 +10338,7 @@ EOF
 esac
 
 echo $ac_n "checking the name of 'tick' in the kernel... $ac_c" 1>&6
-echo "configure:10343: checking the name of 'tick' in the kernel" 1>&5
+echo "configure:10342: checking the name of 'tick' in the kernel" 1>&5
 if test "${ac_cv_var_nlist_tick+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10382,7 +10381,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tick'... $ac_c" 1>&6
-echo "configure:10386: checking for the units of 'tick'" 1>&5
+echo "configure:10385: checking for the units of 'tick'" 1>&5
 if test "${ac_cv_var_tick_nano+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10405,7 +10404,7 @@ EOF
 esac
 #
 echo $ac_n "checking the name of 'tickadj' in the kernel... $ac_c" 1>&6
-echo "configure:10409: checking the name of 'tickadj' in the kernel" 1>&5
+echo "configure:10408: checking the name of 'tickadj' in the kernel" 1>&5
 if test "${ac_cv_var_nlist_tickadj+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10457,7 +10456,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tickadj'... $ac_c" 1>&6
-echo "configure:10461: checking for the units of 'tickadj'" 1>&5
+echo "configure:10460: checking for the units of 'tickadj'" 1>&5
 if test "${ac_cv_var_tickadj_nano+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10480,7 +10479,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'dosynctodr' in the kernel... $ac_c" 1>&6
-echo "configure:10484: checking half-heartedly for 'dosynctodr' in the kernel" 1>&5
+echo "configure:10483: checking half-heartedly for 'dosynctodr' in the kernel" 1>&5
 if test "${ac_cv_var_nlist_dosynctodr+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10532,7 +10531,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'noprintf' in the kernel... $ac_c" 1>&6
-echo "configure:10536: checking half-heartedly for 'noprintf' in the kernel" 1>&5
+echo "configure:10535: checking half-heartedly for 'noprintf' in the kernel" 1>&5
 if test "${ac_cv_var_nlist_noprintf+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10578,7 +10577,7 @@ EOF
 esac
 
 echo $ac_n "checking for a default value for 'tick'... $ac_c" 1>&6
-echo "configure:10582: checking for a default value for 'tick'" 1>&5
+echo "configure:10581: checking for a default value for 'tick'" 1>&5
 if test "${ac_cv_var_tick+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10621,7 +10620,7 @@ EOF
 esac
 
 echo $ac_n "checking for a default value for 'tickadj'... $ac_c" 1>&6
-echo "configure:10625: checking for a default value for 'tickadj'" 1>&5
+echo "configure:10624: checking for a default value for 'tickadj'" 1>&5
 if test "${ac_cv_var_tickadj+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10752,7 +10751,7 @@ case "$target" in
 esac
 
 echo $ac_n "checking if we want and can make the tickadj utility... $ac_c" 1>&6
-echo "configure:10756: checking if we want and can make the tickadj utility" 1>&5
+echo "configure:10755: checking if we want and can make the tickadj utility" 1>&5
 if test "${ac_cv_make_tickadj+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10766,7 +10765,7 @@ case "$ac_cv_make_tickadj" in
 esac
 
 echo $ac_n "checking if we want and can make the ntptime utility... $ac_c" 1>&6
-echo "configure:10770: checking if we want and can make the ntptime utility" 1>&5
+echo "configure:10769: checking if we want and can make the ntptime utility" 1>&5
 if test "${ac_cv_make_ntptime+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10791,7 +10790,7 @@ case "$ac_cv_make_ntptime" in
 esac
 
 echo $ac_n "checking if we want UDP wildcard delivery... $ac_c" 1>&6
-echo "configure:10795: checking if we want UDP wildcard delivery" 1>&5
+echo "configure:10794: checking if we want UDP wildcard delivery" 1>&5
 if test "${ac_cv_var_udp_wildcard_delivery+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10869,7 +10868,7 @@ case "$host" in
 esac
 
 echo $ac_n "checking if we should always slew the time... $ac_c" 1>&6
-echo "configure:10873: checking if we should always slew the time" 1>&5
+echo "configure:10872: checking if we should always slew the time" 1>&5
 if test "${ac_cv_var_slew_always+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10908,7 +10907,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should step and slew the time... $ac_c" 1>&6
-echo "configure:10912: checking if we should step and slew the time" 1>&5
+echo "configure:10911: checking if we should step and slew the time" 1>&5
 if test "${ac_cv_var_step_slew+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10950,7 +10949,7 @@ EOF
 esac
 
 echo $ac_n "checking if ntpdate should step the time... $ac_c" 1>&6
-echo "configure:10954: checking if ntpdate should step the time" 1>&5
+echo "configure:10953: checking if ntpdate should step the time" 1>&5
 if test "${ac_cv_var_ntpdate_step+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10980,7 +10979,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should sync TODR clock every hour... $ac_c" 1>&6
-echo "configure:10984: checking if we should sync TODR clock every hour" 1>&5
+echo "configure:10983: checking if we should sync TODR clock every hour" 1>&5
 if test "${ac_cv_var_sync_todr+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -11012,7 +11011,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should avoid kernel FLL bug... $ac_c" 1>&6
-echo "configure:11016: checking if we should avoid kernel FLL bug" 1>&5
+echo "configure:11015: checking if we should avoid kernel FLL bug" 1>&5
 if test "${ac_cv_var_kernel_fll_bug+set}" = set; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

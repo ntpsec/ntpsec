@@ -286,7 +286,7 @@ local_clock(
 		 * reset or shaken, but never stirred.
 		 */
 		default:
-			if (allow_set_backward | correct_any) {
+			if (allow_set_backward || correct_any) {
 				step_systime(fp_offset);
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE, "time reset %.6f s",

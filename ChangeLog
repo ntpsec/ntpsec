@@ -1,3 +1,25 @@
+2000-07-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Add some parens.
+	(peer_xmit): Add ntohl when grabbing sndauto.seq for broadcast.
+	* ntpd/ntp_peer.c (findpeer): Cleanup
+	* ntpd/ntp_loopfilter.c (local_clock): Typo
+	From Dave Mills
+
+	* include/ntp_config.h: Created
+
+	* util/ntp-genkeys.c: Always build, but realize we may not have
+	RSAREF.  Compile parts appropriately.
+
+	* util/Makefile.am (bin_PROGRAMS): Always make ntp-genkeys
+	(ntp-genkeys_LDADD): Use $LIBRSAREF instead of the "real path"
+	* configure.in: Lose MAKE_NTP_GENKEYS
+
+	* configure.in: 
+	* util/ntp-genkeys.c: 
+	* util/Makefile.am:
+	Renamed ntp_genkeys to ntp-genkeys.
+
 2000-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpdate/ntpdate.c (ntpdatemain): Cleanup error message.

@@ -30,6 +30,7 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
+#include "ntp_config.h"
 
 #ifdef PUBKEY
 #include "ntp_crypto.h"
@@ -49,18 +50,6 @@ extern int priority_done;
  * Lines are considered terminated when a '#' is encountered.  Blank
  * lines are ignored.
  */
-
-/*
- * Configuration file name
- */
-#ifndef CONFIG_FILE
-# ifndef SYS_WINNT
-#  define	CONFIG_FILE "/etc/ntp.conf"
-# else /* SYS_WINNT */
-#  define	CONFIG_FILE	"%windir%\\system32\\drivers\\etc\\ntp.conf"
-#  define	ALT_CONFIG_FILE "%windir%\\ntp.conf"
-# endif /* SYS_WINNT */
-#endif /* not CONFIG_FILE */
 
 /*
  * We understand the following configuration entries and defaults.
