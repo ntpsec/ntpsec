@@ -138,7 +138,6 @@ struct instance {
 	struct	peer *peer;
 
 	int	Bj_day;
-	int	assert;
 
 	long	delay;		/* ns */
 	long	offset; 	/* ns */
@@ -148,11 +147,11 @@ struct instance {
 	double	ss_ht;
 	int	ss_count;
 	u_char	ss_ht_type;
-	int	posn_set;
+	u_char  posn_set;
 
-	int	printed;
+	u_char  printed;
+	u_char  polled;
 	int	pollcnt;
-	int	polled;
 	u_int	ev_serial;
 	int	Rcvptr;
 	u_char	Rcvbuf[500];
@@ -165,6 +164,7 @@ struct instance {
 	u_char	init_type;
 	s_char	saw_tooth;
 	u_char  timeout;        /* flag to retry Cj after Fa reset */
+	s_char  assert;
 };
 
 #define rcvbuf	instance->Rcvbuf
@@ -361,6 +361,10 @@ static u_char oncore_cmd_Fa[] = { 'F', 'a' };
 	/* from buffer, char *buf, result to an int */
 #define buf_w32(buf) (((buf)[0]&0200) ? (-(~w32(buf)+1)) : w32(buf))
 
+extern int pps_assert;
+extern int pps_hardpps;
+
+
 /*
  * oncore_start - initialize data for processing
  */
@@ -438,7 +442,7 @@ oncore_start(
 	instance->ppsfd = fd2;
 
 	instance->Bj_day = -1;
-	instance->assert = 1;
+	instance->assert = pps_assert;
 
 	/* go read any input data in /etc/ntp.oncoreX */
 
@@ -447,10 +451,26 @@ oncore_start(
 #ifdef HAVE_PPSAPI
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		perror("time_pps_create");
-		exit(1);
+		return(0);
 	}
 
-	if (instance->assert) {
+	if (time_pps_getcap(instance->pps_h, &mode) < 0) {
+		msyslog(LOG_ERR,
+		    "refclock_ioctl: time_pps_getcap failed: %m");
+		return (0);
+	}
+
+	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
+		msyslog(LOG_ERR,
+		    "refclock_ioctl: time_pps_getparams failed: %m");
+		return (0);
+	}
+
+	/* nb. only turn things on, if someone else has turned something
+	 *      on before we get here, leave it alone!
+	 */
+
+	if (instance->assert) {         /* nb, default or ON */
 		instance->pps_p.mode = PPS_CAPTUREASSERT | PPS_OFFSETASSERT;
 		instance->pps_p.assert_offset.tv_sec = 0;
 		instance->pps_p.assert_offset.tv_nsec = 0;
@@ -460,16 +480,39 @@ oncore_start(
 		instance->pps_p.clear_offset.tv_nsec = 0;
 	}
 	instance->pps_p.mode |= PPS_TSFMT_TSPEC;
+	instance->pps_p.mode &= mode;           /* only do it if it is legal */
+
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		perror("time_pps_setparams");
 		exit(1);
 	}
-	if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS,
-	    instance->pps_p.mode & (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR),
-	    PPS_TSFMT_TSPEC) < 0) {
-		perror("time_pps_kcbind");
+
+	if (stat(pps_device, &stat1)) {
+		perror("ONCORE: stat pps_device");
+		return(0);
+	}
+
+	/* must have hardpps ON, and fd2 must be the same device as on the pps line */
+
+	if (pps_hardpps && ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))) {
+		int     i;
+
+		if (instance->assert)
+			i = PPS_CAPTUREASSERT;
+		else
+			i = PPS_CAPTURECLEAR;
+
+		if (i&mode) {
+			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
+			    PPS_TSFMT_TSPEC) < 0) {
+				msyslog(LOG_ERR,
+				    "refclock_ioctl: time_pps_kcbind failed: %m");
+				return (0);
+			}
+		}
 	}
 #endif
+
 	instance->pp = pp;
 	instance->peer = peer;
 	instance->o_state = ONCORE_NO_IDEA;
@@ -518,7 +561,6 @@ oncore_start(
 	}
 
 	instance->pollcnt = 2;
-
 	return (1);
 }
 
@@ -1481,10 +1523,8 @@ oncore_msg_At(
 	u_int len
 	)
 {
-
 	if (instance->site_survey != ONCORE_SS_UNKNOWN)
 		return;
-
 
 	if (buf[4] == 2) {
 		record_clock_stats(&(instance->peer->srcadr),
@@ -1492,15 +1532,16 @@ oncore_msg_At(
 		instance->site_survey = ONCORE_SS_HW;
 	} else {
 		char Msg[160];
+		/*
+		 * Probably a VP or an older UT which can't do site-survey.
+		 * We will have to do it ourselves
+		 */
+
 		sprintf(Msg, "Initiating software 3D site survey (%d samples)",
 				POS_HOLD_AVERAGE);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 		instance->site_survey = ONCORE_SS_SW;
 
-		/*
-		 * Probably a VP or an older UT which can't do site-survey.
-		 * We will have to do it ourselves
-		 */
 		oncore_cmd_At[2] = 0;
 		instance->ss_lat = instance->ss_long = instance->ss_ht = 0;
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_At, sizeof oncore_cmd_At);

@@ -1,3 +1,8 @@
+1999-12-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_oncore.c: Cleanup and fixes
+	From: Reg Clemens <reg@dwf.com> and Kamal A Mostafa <kamal@whence.com>
+
 1999-12-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwv.c: Cleanup/checkin of the current state of affairs.
