@@ -1828,6 +1828,15 @@ input_handler(
 	l_fp *cts
 	)
 {
+
+/*
+ * Define the maximum number of 0 byte consecutive reads
+ * allowed before we declare it done
+ */
+#define MAXZEROREADS 20
+
+	int totzeroreads;
+	int buflen;
 	register int i, n;
 	register struct recvbuf *rb;
 	register int doing;
@@ -1875,66 +1884,81 @@ input_handler(
 			if (FD_ISSET(fd, &fds))
 			{
 				n--;
-				if (free_recvbuffs() == 0)
-				{
-					char buf[RX_BUFF_SIZE];
+				totzeroreads = 0;
+				while (totzeroreads < MAXZEROREADS) {
+					if (free_recvbuffs() == 0)
+					{
+						char buf[RX_BUFF_SIZE];
 
-					(void) read(fd, buf, sizeof buf);
-					packets_dropped++;
-					goto select_again;
-				}
+						buflen = read(fd, buf, sizeof buf);
+						if (buflen < 0)
+							break;	/* Done */
+						packets_dropped++;
+						if (buflen == 0)
+							totzeroreads++;
+						else
+							totzeroreads = 0;
+						continue;	/* Keep reading until drained */
+					}
 
-				rb = get_free_recv_buffer();
+					rb = get_free_recv_buffer();
 
-				i = (rp->datalen == 0
-				    || rp->datalen > sizeof(rb->recv_space))
-				    ? sizeof(rb->recv_space) : rp->datalen;
-				rb->recv_length =
-				    read(fd, (char *)&rb->recv_space, (unsigned)i);
+					i = (rp->datalen == 0
+					    || rp->datalen > sizeof(rb->recv_space))
+					    ? sizeof(rb->recv_space) : rp->datalen;
+					buflen =
+					    read(fd, (char *)&rb->recv_space, (unsigned)i);
 
-				if (rb->recv_length <= 0)
-				{
-					if (rb->recv_length < 0 && errno != EINTR)
-						netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
-					freerecvbuf(rb);
-					continue;
-				}
+					if (buflen < 0)
+					{
+						freerecvbuf(rb);
+						if (errno != EINTR) {
+							netsyslog(LOG_ERR, "clock read fd %d, bytes read %d: %m", fd, rb->recv_length);
+							break;
+						}
+					}
+					if(buflen == 0)
+						totzeroreads++;
+					else
+						totzeroreads = 0;
 
-				/*
-				 * Got one.  Mark how and when it got here,
-				 * put it on the full list and do
-				 * bookkeeping.
-				 */
-				rb->recv_srcclock = rp->srcclock;
-				rb->dstadr = 0;
-				rb->fd = fd;
-				rb->recv_time = ts;
-				rb->receiver = rp->clock_recv;
-
-				if (rp->io_input)
-				{
 					/*
-					 * have direct
-					 * input routine
-					 * for refclocks
+					 * Got one.  Mark how and when it got here,
+					 * put it on the full list and do
+					 * bookkeeping.
 					 */
-					if (rp->io_input(rb) == 0)
+					rb->recv_length = buflen;
+					rb->recv_srcclock = rp->srcclock;
+					rb->dstadr = 0;
+					rb->fd = fd;
+					rb->recv_time = ts;
+					rb->receiver = rp->clock_recv;
+	
+					if (rp->io_input)
 					{
 						/*
-						 * data was consumed -
-						 * nothing to pass up
-						 * into block input
-						 * machine
+						 * have direct
+						 * input routine
+						 * for refclocks
 						 */
-						freerecvbuf(rb);
-						continue;
+						if (rp->io_input(rb) == 0)
+						{
+							/*
+							 * data was consumed -
+							 * nothing to pass up
+							 * into block input
+							 * machine
+							 */
+							freerecvbuf(rb);
+							continue;
+						}
 					}
-				}
+	
+					add_full_recv_buffer(rb);
 
-				add_full_recv_buffer(rb);
-
-				rp->recvcount++;
-				packets_received++;
+					rp->recvcount++;
+					packets_received++;
+				} /* End while (totzeroreads < MAXZEROREADS) */
 			}
 		}
 	}
