@@ -1023,7 +1023,7 @@ clock_update(void)
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
 #ifdef AUTOKEY
 		expire_all();
-#endif
+#endif /* AUTOKEY */
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);
