@@ -3597,11 +3597,16 @@ fi
 AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [use IPv6?]))
 
 case "$enable_ipv6" in
-	yes|''|autodetect)
-		AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
-		;;
-	no)
-		;;
+ yes|''|autodetect)
+    case "$host" in
+     powerpc-ibm-aix4*) ;;
+     *)
+	AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
+	;;
+    esac
+    ;;
+ no)
+    ;;
 esac
 
 AC_MSG_CHECKING(for IPv6 structures)
