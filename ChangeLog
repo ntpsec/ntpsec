@@ -1,3 +1,16 @@
+2001-06-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99m-rc1b
+
+	* ntpd/refclock_true.c (true_debug): Bump some buffer sizes to
+	reduce/eliminate chance of buffer overflow.  Use snprintf()
+	instead of sprintf().  Do a better job of opening the debug file.
+	* ntpd/ntp_control.c (ctl_getitem): Count overflow packets as bad
+	and return a BADFMT.
+	* ntpd/ntp_config.c (save_resolve): call fdopen() with the correct
+	mode.
+	From: Bela Lubkin <belal@sco.com>
+
 2001-06-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp.h (RES_ALLFLAGS): Add RES_DEMOBILIZE.

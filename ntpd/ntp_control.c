@@ -1867,6 +1867,8 @@ ctl_getitem(
 					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
 						if (tp >= buf + sizeof(buf)) {
+							ctl_error(CERR_BADFMT);
+							numctlbadpkts++;
 							msyslog(LOG_WARNING,
 		"Possible 'ntpdx' exploit from %s:%d (possibly spoofed)\n",
 		inet_ntoa(rmt_addr->sin_addr), ntohs(rmt_addr->sin_port)

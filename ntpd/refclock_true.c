@@ -212,11 +212,12 @@ true_debug(struct peer *peer, const char *fmt, ...)
 	if (want_debugging != now_debugging)
 	{
 		if (want_debugging) {
-		    char filename[20];
+		    char filename[40];
+		    int fd;
 
-		    sprintf(filename, "/tmp/true%d.debug", up->unit);
-		    up->debug = fopen(filename, "w");
-		    if (up->debug) {
+		    snprintf(filename, sizeof(filename), "/tmp/true%d.debug", up->unit);
+		    fd = open(filename, O_CREAT | O_WRONLY | O_EXCL, 0600);
+		    if (fd >= 0 && (up->debug = fdopen(fd, "r+"))) {
 #ifdef HAVE_SETVBUF
 			    static char buf[BUFSIZ];
 			    setvbuf(up->debug, buf, _IOLBF, BUFSIZ);
@@ -248,13 +249,13 @@ true_start(
 {
 	register struct true_unit *up;
 	struct refclockproc *pp;
-	char device[20];
+	char device[40];
 	int fd;
 
 	/*
 	 * Open serial port
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	(void)snprintf(device, sizeof(device), DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
 	    return (0);
 

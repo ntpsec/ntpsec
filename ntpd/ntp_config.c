@@ -2054,7 +2054,7 @@ save_resolve(
 
 			res_fp = NULL;
 			if ((fd = mkstemp(res_file)) != -1)
-				res_fp = fdopen(fd, "w");
+				res_fp = fdopen(fd, "r+");
 		}
 #else
 		(void) mktemp(res_file);
