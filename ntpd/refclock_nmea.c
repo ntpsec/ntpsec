@@ -177,6 +177,7 @@ nmea_start(
 	 * the assert edge and do not enable the kernel hardpps.
 	 */
 	if (time_pps_create(fd, &up->handle) < 0) {
+		up->handle = 0;
 		msyslog(LOG_ERR,
 		    "refclock_nmea: time_pps_create failed: %m");
 		return (1);
@@ -282,8 +283,8 @@ nmea_ppsapi(
 	if (debug) {
 		time_pps_getparams(up->handle, &up->pps_params);
 		printf(
-		    "refclock_ppsapi: fd %d capability 0x%x version %d mode 0x%x kern %d\n",
-		    up->handle, capability, up->pps_params.api_version,
+		    "refclock_ppsapi: capability 0x%x version %d mode 0x%x kern %d\n",
+		    capability, up->pps_params.api_version,
 		    up->pps_params.mode, enb_hardpps);
 	}
 #endif
@@ -310,7 +311,7 @@ nmea_pps(
 	/*
 	 * Convert the timespec nanoseconds field to ntp l_fp units.
 	 */ 
-	if (up->handle == -1)
+	if (up->handle == 0)
 		return (0);
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
@@ -354,11 +355,14 @@ nmea_receive(
 	register struct nmeaunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
-	l_fp trtmp;
 	int month, day;
 	int i;
 	char *cp, *dp;
 	int cmdtype;
+	/* Use these variables to hold data until we decide its worth keeping */
+	char	rd_lastcode[BMAX];
+	l_fp	rd_tmp;
+	u_short	rd_lencode;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -366,24 +370,74 @@ nmea_receive(
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
+	rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 
 	/*
 	 * There is a case that a <CR><LF> gives back a "blank" line
 	 */
-	if (pp->lencode == 0)
+	if (rd_lencode == 0)
 	    return;
 
+#ifdef DEBUG
+	if (debug)
+	    printf("nmea: gpsread %d %s\n", rd_lencode,
+		   rd_lastcode);
+#endif
+
 	/*
-	 * We get a buffer and timestamp for each <cr>.
+	 * We check the timecode format and decode its contents. The
+	 * we only care about a few of them.  The most important being
+	 * the $GPRMC format
+	 * $GPRMC,hhmmss,a,fddmm.xx,n,dddmmm.xx,w,zz.z,yyy.,ddmmyy,dd,v*CC
+	 * For Magellan (ColorTrak) GLL probably datum (order of sentences)
+	 * also mode (0,1,2,3) select sentence ANY/ALL, RMC, GGA, GLL
+	 * $GPGLL,3513.8385,S,14900.7851,E,232420.594,A*21
+  	 * $GPGGA,232420.59,3513.8385,S,14900.7851,E,1,05,3.4,00519,M,,,,*3F
+	 * $GPRMB,...
+	 * $GPRMC,232418.19,A,3513.8386,S,14900.7853,E,00.0,000.0,121199,12.,E*77
+	 * $GPAPB,...
+	 * $GPGSA,...
+	 * $GPGSV,...
+	 * $GPGSV,...
 	 */
-	pp->lastrec = up->tstamp = trtmp;
+#define GPXXX	0
+#define GPRMC	1
+#define GPGGA	2
+#define GPGLL	4
+	cp = rd_lastcode;
+	cmdtype=0;
+	if(strncmp(cp,"$GPRMC",6)==0) {
+		cmdtype=GPRMC;
+	}
+	else if(strncmp(cp,"$GPGGA",6)==0) {
+		cmdtype=GPGGA;
+	}
+	else if(strncmp(cp,"$GPGLL",6)==0) {
+		cmdtype=GPGLL;
+	}
+	else if(strncmp(cp,"$GPXXX",6)==0) {
+		cmdtype=GPXXX;
+	}
+	else
+	    return;
+
+
+	/* See if I want to process this message type */
+	if ( ((peer->ttlmax == 0) && (cmdtype != GPRMC))
+           || ((peer->ttlmax != 0) && !(cmdtype & peer->ttlmax)) )
+		return;
+
+	pp->lencode = rd_lencode;
+	strcpy(pp->a_lastcode,rd_lastcode);
+	cp = pp->a_lastcode;
+
+	pp->lastrec = up->tstamp = rd_tmp;
 	up->pollcnt = 2;
 
 #ifdef HAVE_PPSAPI
-	/* If the PPSAPI is working, rather use its timestamps. */
-	if (nmea_pps(up, &trtmp) == 1)
-		pp->lastrec = up->tstamp = trtmp;
+      /* If the PPSAPI is working, rather use its timestamps. */
+      if (nmea_pps(up, &rd_tmp) == 1)
+              pp->lastrec = up->tstamp = rd_tmp;
 #endif /* HAVE_PPSAPI */
 
 #ifdef DEBUG
@@ -392,38 +446,65 @@ nmea_receive(
 		   pp->a_lastcode);
 #endif
 
-	/*
-	 * We check the timecode format and decode its contents. The
-	 * we only care about a few of them.  The most important being
-	 * the $GPRMC format
-	 * $GPRMC,hhmmss,a,fddmm.xx,n,dddmmm.xx,w,zz.z,yyy.,ddmmyy,dd,v*CC
-  	 * $GPGGA,162617.0,4548.339,N,00837.719,E,1,07,0.97,00262,M,048,M,,*5D
-	 */
-#define GPRMC	0
-#define GPXXX	1
-#define GPGGA	2
-	cp = pp->a_lastcode;
-	cmdtype=0;
-	if(strncmp(cp,"$GPRMC",6)==0) {
-		cmdtype=GPRMC;
-	}
-	else if(strncmp(cp,"$GPGGA",6)==0) {
-		cmdtype=GPGGA;
-	}
-	else if(strncmp(cp,"$GPXXX",6)==0) {
-		cmdtype=GPXXX;
-	}
-	else
-	    return;
 
+	/* Grab field depending on clock string type */
 	switch( cmdtype ) {
 	    case GPRMC:
+		/*
+		 * Test for synchronization.  Check for quality byte.
+		 */
+		dp = field_parse(cp,2);
+		if( dp[0] != 'A')
+			pp->leap = LEAP_NOTINSYNC;
+		else
+			pp->leap = LEAP_NOWARNING;
+
+		/* Now point at the time field */
+		dp = field_parse(cp,1);
+		break;
+
+
 	    case GPGGA:
+		/*
+		 * Test for synchronization.  Check for quality byte.
+		 */
+		dp = field_parse(cp,6);
+		if( dp[0] == '0')
+			pp->leap = LEAP_NOTINSYNC;
+		else
+			pp->leap = LEAP_NOWARNING;
+
+		/* Now point at the time field */
+		dp = field_parse(cp,1);
+		break;
+
+
+	    case GPGLL:
+		/*
+		 * Test for synchronization.  Check for quality byte.
+		 */
+		dp = field_parse(cp,6);
+		if( dp[0] != 'A')
+			pp->leap = LEAP_NOTINSYNC;
+		else
+			pp->leap = LEAP_NOWARNING;
+
+		/* Now point at the time field */
+		dp = field_parse(cp,5);
+		break;
+
+
+	    case GPXXX:
+		return;
+	    default:
+		return;
+
+	}
+
 		/*
 		 *	Check time code format of NMEA
 		 */
 
-		dp = field_parse(cp,1);
 		if( !isdigit((int)dp[0]) ||
 		    !isdigit((int)dp[1]) ||
 		    !isdigit((int)dp[2]) ||
@@ -435,51 +516,55 @@ nmea_receive(
 			return;
 		}
 
-		/*
-		 * Test for synchronization.  Check for quality byte.
-		 */
-		switch( cmdtype ) {
-		    case GPRMC:
-			dp = field_parse(cp,2);
-			if( dp[0] != 'A')  {
-			    refclock_report(peer, CEVNT_BADREPLY);
-			    return;
-			}
-			break;
-		    case GPGGA:
-			dp = field_parse(cp,6);
-			if( dp[0] == '0')  {
-			    refclock_report(peer, CEVNT_BADREPLY);
-			    return;
-			}
-			break;
-		}
-		break;
-	    case GPXXX:
-		return;
-	    default:
-		return;
 
+	/*
+	 * Convert time and check values.
+	 */
+	pp->hour = ((dp[0] - '0') * 10) + dp[1] - '0';
+	pp->minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
+	pp->second = ((dp[4] - '0') * 10) + dp[5] - '0';
+	/* Default to 0 milliseconds, if decimal convert milliseconds in
+	   one, two or three digits
+	*/
+	pp->msec = 0; 
+	if ( dp[6] == '.' )
+	    if ( isdigit(dp[7]) )
+	    {
+		pp->msec = (dp[7]-'0')*100;
+		if ( isdigit(dp[8]) )
+		{
+		    pp->msec = pp->msec + (dp[8]-'0')*10;
+		    if ( isdigit(dp[9]) )
+		        pp->msec = pp->msec + (dp[9]-'0');
+		}
+	    }
+
+	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59) {
+		refclock_report(peer, CEVNT_BADTIME);
+		return;
 	}
 
-	if (cmdtype ==GPGGA) {
-		/* only time */
-		time_t tt = time(NULL);
-		struct tm * t = gmtime(&tt);
-		day = t->tm_mday;
-		month = t->tm_mon + 1;
-		pp->year= t->tm_year;
-	} else {
-	dp = field_parse(cp,9);
+
+	if (cmdtype==GPRMC)
+	{
 	/*
 	 * Convert date and check values.
 	 */
-	day = dp[0] - '0';
-	day = (day * 10) + dp[1] - '0';
-	month = dp[2] - '0';
-	month = (month * 10) + dp[3] - '0';
-	pp->year = dp[4] - '0';
-	pp->year = (pp->year * 10) + dp[5] - '0';
+	    dp = field_parse(cp,9);
+	    day = dp[0] - '0';
+	    day = (day * 10) + dp[1] - '0';
+	    month = dp[2] - '0';
+	    month = (month * 10) + dp[3] - '0';
+	    pp->year = dp[4] - '0';
+	    pp->year = (pp->year * 10) + dp[5] - '0';
+	}
+	else {
+	/* only time */
+	    time_t tt = time(NULL);
+	    struct tm * t = gmtime(&tt);
+	    day = t->tm_mday;
+	    month = t->tm_mon + 1;
+	    pp->year= t->tm_year;
 	}
 
 	if (month < 1 || month > 12 || day < 1) {
@@ -487,6 +572,9 @@ nmea_receive(
 		return;
 	}
 
+        /* Hmmmm this will be a nono for 2100,2200,2300 but I don't think I'll be here */
+        /* good thing that 2000 is a leap year */
+	/* pp->year will be 00-99 if read from GPS, 00->  (years since 1900) from tm_year */
 	if (pp->year % 4) {
 		if (day > day1tab[month - 1]) {
 			refclock_report(peer, CEVNT_BADTIME);
@@ -504,31 +592,6 @@ nmea_receive(
 	}
 	pp->day = day;
 
-	dp = field_parse(cp,1);
-	/*
-	 * Convert time and check values.
-	 */
-	pp->hour = ((dp[0] - '0') * 10) + dp[1] - '0';
-	pp->minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
-	pp->second = ((dp[4] - '0') * 10) + dp[5] - '0';
-	pp->msec = 0; 
-	if (dp[6] == '.') {
-		if (isdigit((int)dp[7])) {
-			pp->msec += (dp[7] - '0') * 100;
-			if (isdigit((int)dp[8])) {
-				pp->msec += (dp[8] - '0') * 10;
-				if (isdigit((int)dp[9])) {
-					pp->msec += (dp[9] - '0');
-				}
-			}
-		}
-	}
-
-	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59 
-	 || pp->msec > 1000) {
-		refclock_report(peer, CEVNT_BADTIME);
-		return;
-	}
 
 	/*
 	 * Process the new sample in the median filter and determine the
@@ -538,10 +601,13 @@ nmea_receive(
 	 * time, which may cause a paranoid protocol module to chuck out
 	 * the data.
 	 */
+
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
+
+
 
 	/*
 	 * Only go on if we had been polled.
@@ -552,7 +618,11 @@ nmea_receive(
 
 	refclock_receive(peer);
 
+        /* If we get here - what we got from the clock is OK, so say so */
+         refclock_report(peer, CEVNT_NOMINAL);
+
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+
 }
 
 /*

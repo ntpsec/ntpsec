@@ -1,5 +1,10 @@
 2001-04-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_nmea.c:  PPSAPI cleanup, default to RMC sentences,
+	handle milliseconds, multiple sentences, other good stuff.
+	From: John Woolner <vk1et@tpg.com.au>, Marc.Brett@westerngeco.com,
+	John.Hay@icomtek.csir.co.za
+
 	* ntpd/ntp_proto.c (receive): In the AM_NEWBCL case, return in all
 	cases at the end.
 	* ntpd/ntp_peer.c (newpeer): Check cast_flags against MDF_BCLNT,
