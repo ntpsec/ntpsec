@@ -3307,17 +3307,24 @@ esac
 
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 
+AC_SUBST(ARLIB_DIR)
+if test -d $srcdir/arlib
+then
+    ARLIB_DIR=arlib
+    AC_CONFIG_SUBDIRS(arlib)
+fi
+
 # This is necessary so that .o files in LIBOBJS are also built via
 # the ANSI2KNR-filtering rules.
 LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 
 AC_CONFIG_FILES(Makefile adjtimed/Makefile clockstuff/Makefile \
-ElectricFence/Makefile include/Makefile kernel/Makefile kernel/sys/Makefile \
-libntp/Makefile libparse/Makefile ntpd/Makefile ntpdc/Makefile \
-ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
-scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj \
-scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver \
-scripts/plot_summary scripts/summary util/Makefile)
+ ElectricFence/Makefile include/Makefile kernel/Makefile kernel/sys/Makefile \
+ libntp/Makefile libparse/Makefile ntpd/Makefile ntpdc/Makefile \
+ ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
+ scripts/Makefile scripts/calc_tickadj scripts/checktime scripts/freq_adj \
+ scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver \
+ scripts/plot_summary scripts/summary util/Makefile)
 AC_CONFIG_COMMANDS(default, [[chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntpver scripts/plot_summary scripts/summary]], [])
 AC_OUTPUT
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

@@ -5,6 +5,7 @@ SUBDIRS = \
 	scripts \
 	include \
 	ElectricFence	\
+	@ARLIB_DIR@ \
 	libntp	\
 	libparse	\
 	ntpd	\
