@@ -2882,6 +2882,7 @@ key_expire(
  * > never been synchronized
  * > stratum undefined or too high
  * > too long without synchronization
+ * > designated noselect
  */
 static int			/* 0 if no, 1 if yes */
 peer_unfit(
@@ -2891,7 +2892,8 @@ peer_unfit(
 	return (!peer->reach || (peer->stratum > 1 && peer->refid ==
 	    peer->dstadr->addr_refid) || peer->leap == LEAP_NOTINSYNC ||
 	    peer->stratum >= STRATUM_UNSPEC || root_distance(peer) >=
-	    MAXDISTANCE + 2. * clock_phi * ULOGTOD(sys_poll) );
+	    MAXDISTANCE + 2. * clock_phi * ULOGTOD(sys_poll) ||
+	    peer->flags & FLAG_NOSELECT );
 }
 
 
