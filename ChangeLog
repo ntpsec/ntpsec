@@ -1,3 +1,13 @@
+1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp_machine.h (HAVE_TERMIOS): STREAMS does not imply
+	HAVE_TERMIOS !!!
+	* include/parse.h (timercmp): Macro defined if needed.
+	* ntpd/ntp_config.c (SIGCHLD): Macro defined as SIGCLD if needed.
+	(sys/wait.h): File included only if HAVE_SYS_WAIT_H.
+	* configure.in (sys/wait.h): File added to AC_CHECK_HEADERS list.
+	From: Philippe De Muyter  <phdm@macqel.be>
+
 1999-06-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_irig.c (irig_debug): NetBSD patches

@@ -442,12 +442,6 @@ struct servent *getservbyname P((char *name, char *type));
 # endif
 #endif
 
-#ifdef STREAM			/* STREAM implies TERMIOS */
-# ifndef HAVE_TERMIOS
-#  define HAVE_TERMIOS
-# endif
-#endif
-
 #ifndef RETSIGTYPE
 # if defined(NTP_POSIX_SOURCE)
 #  define	RETSIGTYPE	void

@@ -72,6 +72,9 @@ extern unsigned int splclock P((void));
 
 #if defined(timercmp) && defined(__GNUC__)
 #undef timercmp
+#endif
+
+#if !defined(timercmp)
 #define	timercmp(tvp, uvp, cmp)	\
 	((tvp)->tv_sec cmp (uvp)->tv_sec || \
 	 ((tvp)->tv_sec == (uvp)->tv_sec && (tvp)->tv_usec cmp (uvp)->tv_usec))

@@ -780,6 +780,9 @@
 /* Define if you have the <sys/types.h> header file.  */
 #undef HAVE_SYS_TYPES_H
 
+/* Define if you have the <sys/wait.h> header file.  */
+#undef HAVE_SYS_WAIT_H
+
 /* Define if you have the <termio.h> header file.  */
 #undef HAVE_TERMIO_H
 

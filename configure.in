@@ -203,7 +203,7 @@ esac
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h memory.h poll.h sched.h sgtty.h)
-AC_CHECK_HEADERS(stdlib.h string.h termio.h termios.h timepps.h)
+AC_CHECK_HEADERS(stdlib.h string.h sys/wait.h termio.h termios.h timepps.h)
 AC_CHECK_HEADERS(timex.h unistd.h utmp.h utmpx.h)
 AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in.h netinet/ip.h resolv.h)
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)

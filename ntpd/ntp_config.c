@@ -6,8 +6,13 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <signal.h>
+#ifndef SIGCHLD
+#define SIGCHLD SIGCLD
+#endif
 #if !defined(VMS)
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #endif /* VMS */
 #include <sys/time.h>
 
