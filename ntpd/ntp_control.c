@@ -1188,7 +1188,7 @@ ctl_putsys(
 		break;
 
 	case CS_REFID:
-		if (sys_stratum > 1)
+		if (sys_stratum > 1 && sys_stratum < STRATUM_UNSPEC)
 			ctl_putadr(sys_var[CS_REFID].text, sys_refid);
 		else
 			ctl_putid(sys_var[CS_REFID].text,

@@ -391,13 +391,7 @@ crypto_recv(
 		if (((code >> 24) & 0x3f) != CRYPTO_VN || len < 8 ||
 		    (len < VALUE_LEN && (code & CRYPTO_RESP))) {
 			sys_unknownversion++;
-#ifdef DEBUG
-			if (debug)
-				printf(
-				    "crypto_recv: incorrect version or field length\n");
-#endif
-			rval = XEVNT_LEN;
-			break;
+			code |= CRYPTO_ERROR;
 		}
 
 		/*
@@ -445,7 +439,7 @@ crypto_recv(
 
 			/*
 			 * Discard the message if it has already been
-			 * stored or has invalid length.
+			 * stored.
 			 */
 			if (peer->crypto)
 				break;
@@ -458,7 +452,7 @@ crypto_recv(
 			/*
 			 * Check the identity schemes are compatible. If
 			 * no scheme is in use for both server and
-			 * client, the default TC scheme is used. If the
+			 * client, the default TC scheme is used. If
 			 * both server and client have private
 			 * certificates, the server public key and
 			 * identity are presumed valid, so we skip the
@@ -474,12 +468,14 @@ crypto_recv(
 			 * association.
 			 */
 			temp32 = PKT_MODE(rbufp->recv_pkt.li_vn_mode);
-			if (crypto_flags & CRYPTO_FLAG_PRIV) {
-				peer->crypto |= CRYPTO_FLAG_SIGN;
-				if (fstamp & CRYPTO_FLAG_PRIV)
+			if (fstamp & CRYPTO_FLAG_PRIV) {
+				if (!(crypto_flags & CRYPTO_FLAG_PRIV))
+					rval = XEVNT_ID;
+				else
 					fstamp |= CRYPTO_FLAG_VALID |
 					    CRYPTO_FLAG_VRFY;
-				else if (temp32 != MODE_SERVER)
+			} else if (crypto_flags & CRYPTO_FLAG_PRIV &&
+			    temp32 != MODE_SERVER) {
 					rval = XEVNT_ID;
 			} else if (!(temp32 == MODE_SERVER ||
 			    !(crypto_flags & (CRYPTO_FLAG_IFF |
@@ -516,7 +512,9 @@ crypto_recv(
 			 * Save status word, host name and message
 			 * digest/signature type.
 			 */
-			peer->crypto |= fstamp;
+			if (crypto_flags & CRYPTO_FLAG_PRIV)
+				fstamp |= CRYPTO_FLAG_SIGN;
+			peer->crypto = fstamp;
 			peer->digest = dp;
 			peer->subject = emalloc(vallen + 1);
 			memcpy(peer->subject, ep->pkt, vallen);
@@ -1028,29 +1026,31 @@ crypto_recv(
 		 * the transmit side.
 		 */
 		default:
-			if (code & CRYPTO_RESP)
-				break;
-
-			if ((rval = crypto_verify(ep, NULL, peer)) !=
-			    XEVNT_OK)
-				break;
-
-			fp = emalloc(len);
-			memcpy(fp, ep, len);
-			temp32 = CRYPTO_RESP;
-			fp->opcode |= htonl(temp32);
-			peer->cmmd = fp;
+			if (code & (CRYPTO_RESP | CRYPTO_ERROR)) {
+				rval = XEVNT_LEN;
+			} else if ((rval = crypto_verify(ep, NULL,
+			    peer)) == XEVNT_OK) {
+				fp = emalloc(len);
+				memcpy(fp, ep, len);
+				temp32 = CRYPTO_RESP;
+				fp->opcode |= htonl(temp32);
+				peer->cmmd = fp;
+			}
 		}
 
 		/*
-		 * We ignore length/format errors and duplicates. Other
-		 * errors are reported to the log and traps.
+		 * We log everything except length/format errors and
+		 * duplicates, which are log clogging vulnerabilities.
+		 * All errors flash a major error so nothing further
+		 * will be sent.
 		 */
-		if (rval > XEVNT_TSP) {
+		if (rval != XEVNT_OK) {
 			sprintf(statstr,
 			    "error %x opcode %x ts %u fs %u", rval,
 			    code, tstamp, fstamp);
-			record_crypto_stats(&peer->srcadr, statstr);
+			if (rval > XEVNT_TSP)
+				record_crypto_stats(&peer->srcadr,
+				    statstr);
 			report_event(rval, peer);
 			peer->flash |= TEST12;
 #ifdef DEBUG
@@ -1302,12 +1302,23 @@ crypto_xmit(
 
 	/*
 	 * We ignore length/format errors and duplicates. Other errors
-	 * are reported to the log.
+	 * are reported to the log and deny further service. To really
+	 * persistent rascals we toss back a kiss-of-death grenade.
 	 */
 	if (rval > XEVNT_TSP) {
+		struct sockaddr_in mskadr_sin;
+		int	hismode;
+		int	resflag = RES_DONTSERVE | RES_TIMEOUT;
+
 		opcode |= CRYPTO_ERROR;
 		sprintf(statstr, "error %x opcode %x", rval, opcode);
 		record_crypto_stats(srcadr_sin, statstr);
+		mskadr_sin.sin_addr.s_addr = ~(u_int32)0;
+		hismode = PKT_MODE(xpkt->li_vn_mode);
+		if (hismode != MODE_BROADCAST && hismode != MODE_SERVER)
+			resflag |= RES_DEMOBILIZE;
+		hack_restrict(RESTRICT_FLAGS, srcadr_sin, &mskadr_sin,
+		    RESM_NTPONLY, resflag);
 #ifdef DEBUG
 		if (debug)
 			printf("crypto_xmit: %s\n", statstr);
@@ -1894,9 +1905,8 @@ crypto_alice(
 	 * If the IFF parameters are not valid, something awful
 	 * happened.
 	 */
-	if (!CRYPTO_FLAG_IFF) {
-		msyslog(LOG_ERR,
-		    "crypto_alice: missing IFF parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
+		msyslog(LOG_ERR, "crypto_alice: IFF unavailable");
 		return (XEVNT_PUB);
 	}
 	dsa = iff_pkey->pkey.dsa;
@@ -1962,9 +1972,8 @@ crypto_bob(
 	 * If the IFF parameters are not valid, something awful
 	 * happened.
 	 */
-	if (!CRYPTO_FLAG_IFF) {
-		msyslog(LOG_ERR,
-		    "crypto_bob: missing IFF parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
+		msyslog(LOG_ERR, "crypto_bob: IFF unavailable");
 		return (XEVNT_PUB);
 	}
 	dsa = iff_pkey->pkey.dsa;
@@ -2052,8 +2061,8 @@ crypto_iff(
 	 * If the IFF parameters are not valid, something awful
 	 * happened.
 	 */
-	if (!CRYPTO_FLAG_IFF) {
-		msyslog(LOG_ERR, "crypto_iff: missing IFF parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
+		msyslog(LOG_ERR, "crypto_iff: IFF unavailable");
 		return (XEVNT_PUB);
 	}
 	dsa = iff_pkey->pkey.dsa;
@@ -2173,8 +2182,8 @@ crypto_alice2(
 	 * If the GQ parameters are not valid, something awful
 	 * happened.
 	 */
-	if (!CRYPTO_FLAG_GQ) {
-		msyslog(LOG_ERR, "crypto_alice: missing GQ parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
+		msyslog(LOG_ERR, "crypto_alice2: GQ unavailable");
 		return (XEVNT_PUB);
 	}
 	rsapar = gqpar_pkey->pkey.rsa;
@@ -2241,8 +2250,8 @@ crypto_bob2(
 	 * If the GQ parameters are not valid, something awful
 	 * happened.
 	 */
-	if (!CRYPTO_FLAG_GQ) {
-		msyslog(LOG_ERR, "crypto_bob: missing GQ parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
+		msyslog(LOG_ERR, "crypto_bob2: GQ unavailable");
 		return (XEVNT_PUB);
 	}
 	rsapar = gqpar_pkey->pkey.rsa;
@@ -2253,7 +2262,7 @@ crypto_bob2(
 	 */
 	len = ntohl(ep->vallen);
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
-		msyslog(LOG_ERR, "crypto_bob %s\n",
+		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ID);
 	}
@@ -2284,7 +2293,7 @@ crypto_bob2(
 	vp->fstamp = hostval.tstamp;
 	len = i2d_DSA_SIG(sdsa, NULL);
 	if (len <= 0) {
-		msyslog(LOG_ERR, "crypto_bob %s\n",
+		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
 		return (XEVNT_ID);
@@ -2330,14 +2339,13 @@ crypto_gq(
 	/*
 	 * If the GQ parameters are not valid, something awful happened.
 	 */
-	if (!CRYPTO_FLAG_GQ) {
-		msyslog(LOG_ERR, "crypto_gq: missing GQ parameters");
+	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
+		msyslog(LOG_ERR, "crypto_gq: GQ unavailable");
 		return (XEVNT_PUB);
 	}
 	rsapar = gqpar_pkey->pkey.rsa;
 	if (peer->iffval == NULL) {
 		msyslog(LOG_ERR, "crypto_gq: missing GQ challenge");
-		report_event(XEVNT_ID, peer);
 		return (XEVNT_ID);
 	}
 
@@ -2349,8 +2357,7 @@ crypto_gq(
 	ptr = (u_char *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_gq %s\n",
-		    ERR_error_string(ERR_get_error(),
-		    NULL));
+		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ID);
 	}
 

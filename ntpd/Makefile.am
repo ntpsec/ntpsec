@@ -4,16 +4,17 @@ bin_PROGRAMS = ntpd @MAKE_NTPDSIM@
 noinst_LIBRARIES = libntpd.a
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB.
-# If LIBPARSE, we need libntpd.a there twice...
+# If LIBPARSE, we need libntpd.a 2wagain afterwards...
 LDADD =	version.o libntpd.a @LIBPARSE@ libntpd.a
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD)  ../libntp/libntp.a -lm
+ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm
 ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
+check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
 #EXTRA_DIST = ntpd.mak
 ETAGS_ARGS = Makefile.am
