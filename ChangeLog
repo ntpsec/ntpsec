@@ -1,5 +1,10 @@
 2000-01-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/map_vme.c (map_vme): tx.access_result indicates failure on
+	< 0, not <= 0.  A fix that apparently did not get brought over
+	from the ntp3 base.
+	From: Michael Barone <michael.barone@lmco.com>
+
 	* configure.in: Move the ONCORE_SHMEM_STATUS check and definition
 	here.
 
