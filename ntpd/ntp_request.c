@@ -487,8 +487,7 @@ process_private(
 	temp_size = INFO_ITEMSIZE(inpkt->mbz_itemsize);
 	if (temp_size != proc->sizeofitem && temp_size != proc->v6_sizeofitem){
 		if (debug > 2)
-			printf("process_private: wrong item size, received %d, "
-			    "should be %d or %d\n",
+			printf("process_private: wrong item size, received %d, should be %d or %d\n",
 			    temp_size, proc->sizeofitem, proc->v6_sizeofitem);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
@@ -808,7 +807,9 @@ peer_info (
 			addr.ss_family = AF_INET;
 			GET_INADDR(addr) = ipl->addr;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		addr.ss_len = SOCKLEN(&addr);
+#endif
 		ipl++;
 		if ((pp = findexistingpeer(&addr, (struct peer *)0, -1)) == 0)
 		    continue;
@@ -931,7 +932,9 @@ peer_stats (
 			addr.ss_family = AF_INET;
 			GET_INADDR(addr) = ipl->addr;
 		}	
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		addr.ss_len = SOCKLEN(&addr);
+#endif
 		printf("peer_stats: looking for %s, %d, %d\n", stoa(&addr),
 		    ipl->port, ((struct sockaddr_in6 *)&addr)->sin6_port);
 		ipl = (struct info_peer_list *)((char *)ipl +
@@ -1368,7 +1371,9 @@ do_conf(
 
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
 		if (peer_config(&peeraddr, (struct interface *)0,
@@ -1521,7 +1526,9 @@ do_unconf(
 			GET_INADDR(peeraddr) = temp_cp.peeraddr;
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 		found = 0;
 		peer = (struct peer *)0;
 		printf("searching for %s\n", stoa(&peeraddr));
@@ -1561,7 +1568,9 @@ do_unconf(
 			GET_INADDR(peeraddr) = temp_cp.peeraddr;
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 		peer_unconfig(&peeraddr, (struct interface *)0, -1);
 		cp = (struct conf_unpeer *)
 		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
@@ -2041,7 +2050,9 @@ reset_peer(
 			peeraddr.ss_family = AF_INET;
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 		peer = findexistingpeer(&peeraddr, (struct peer *)0, -1);
 		if (peer == (struct peer *)0)
 		    bad++;
@@ -2069,7 +2080,9 @@ reset_peer(
 			GET_INADDR(peeraddr) = cp->peeraddr;
 			peeraddr.ss_family = AF_INET;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 		peer = findexistingpeer(&peeraddr, (struct peer *)0, -1);
 		while (peer != 0) {
 			peer_reset(peer);
@@ -2579,7 +2592,9 @@ get_clock_info(
 
 	memset((char *)&addr, 0, sizeof addr);
 	addr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	addr.ss_len = SOCKLEN(&addr);
+#endif
 	NSRCPORT(&addr) = htons(NTP_PORT);
 	items = INFO_NITEMS(inpkt->err_nitems);
 	clkaddr = (u_int32 *) inpkt->data;
@@ -2652,7 +2667,9 @@ set_clock_fudge(
 		tmp_clock.sin_addr.s_addr = cf->clockadr;
 		*CAST_V4(addr) = tmp_clock;
 		addr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		addr.ss_len = SOCKLEN(&addr);
+#endif
 		NSRCPORT(&addr) = htons(NTP_PORT);
 		if (!ISREFCLOCKADR(&tmp_clock) ||
 		    findexistingpeer(&addr, (struct peer *)0, -1) == 0) {
@@ -2718,7 +2735,9 @@ get_clkbug_info(
 
 	memset((char *)&addr, 0, sizeof addr);
 	addr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	addr.ss_len = SOCKLEN(&addr);
+#endif
 	NSRCPORT(&addr) = htons(NTP_PORT);
 	items = INFO_NITEMS(inpkt->err_nitems);
 	clkaddr = (u_int32 *) inpkt->data;

@@ -319,7 +319,9 @@ again:
 			GET_INADDR(paddr) = plist->addr;
 			paddr.ss_family = AF_INET;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		paddr.ss_len = SOCKLEN(&paddr);
+#endif
 		if ((pcmd->nargs == 0) ||
 		    ((pcmd->argval->ival == 6) && (plist->v6_flag != 0)) ||
 		    ((pcmd->argval->ival == 4) && (plist->v6_flag == 0)))
@@ -445,8 +447,10 @@ again:
 			srcadr.ss_family = AF_INET;
 			dstadr.ss_family = AF_INET;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		srcadr.ss_len = SOCKLEN(&srcadr);
 		dstadr.ss_len = SOCKLEN(&dstadr);
+#endif
 		if ((pcmd->nargs == 0) ||
 		    ((pcmd->argval->ival == 6) && (plist->v6_flag != 0)) ||
 		    ((pcmd->argval->ival == 4) && (plist->v6_flag == 0)))
@@ -491,17 +495,27 @@ printpeer(
 	register int i;
 	const char *str;
 	l_fp tempts;
-	char local[INET6_ADDRSTRLEN], remote[INET6_ADDRSTRLEN];
+	struct sockaddr_storage srcadr, dstadr;
 	
+	memset((char *)&srcadr, 0, sizeof(srcadr));
+	memset((char *)&dstadr, 0, sizeof(dstadr));
 	if (pp->v6_flag != 0) {
-		inet_ntop(AF_INET6, &pp->srcadr6, remote, sizeof(remote));
-		inet_ntop(AF_INET6, &pp->dstadr6, local, sizeof(local));
+		srcadr.ss_family = AF_INET6;
+		dstadr.ss_family = AF_INET6;
+		GET_INADDR6(srcadr) = pp->srcadr6;
+		GET_INADDR6(dstadr) = pp->dstadr6;
 	} else {
-		inet_ntop(AF_INET, &pp->srcadr, remote, sizeof(remote));
-		inet_ntop(AF_INET, &pp->dstadr, local, sizeof(local));
+		srcadr.ss_family = AF_INET;
+		dstadr.ss_family = AF_INET;
+		GET_INADDR(srcadr) = pp->srcadr;
+		GET_INADDR(dstadr) = pp->dstadr;
 	}
-
-	(void) fprintf(fp, "remote %s, local %s\n", remote, local);
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+	srcadr.ss_len = SOCKLEN(&srcadr);
+	dstadr.ss_len = SOCKLEN(&dstadr);
+#endif
+	(void) fprintf(fp, "remote %s, local %s\n",
+		       stoa(&srcadr), stoa(&dstadr));
 	(void) fprintf(fp, "hmode %s, pmode %s, stratum %d, precision %d\n",
 		       modetoa(pp->hmode), modetoa(pp->pmode),
 		       pp->stratum, pp->precision);
@@ -759,8 +773,10 @@ again:
 			src.ss_family = AF_INET;
 			dst.ss_family = AF_INET;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		src.ss_len = SOCKLEN(&src);
 		dst.ss_len = SOCKLEN(&dst);
+#endif
 		(void) fprintf(fp, "remote host:          %s\n",
 			       nntohost(&src));
 		(void) fprintf(fp, "local interface:      %s\n",
@@ -912,7 +928,9 @@ again:
 		GET_INADDR(peeraddr) = is->peer;
 		peeraddr.ss_family = AF_INET;
 	}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	peeraddr.ss_len = SOCKLEN(&peeraddr);
+#endif
 	(void) fprintf(fp, "system peer:          %s\n", nntohost(&peeraddr));
 	(void) fprintf(fp, "system peer mode:     %s\n", modetoa(is->peer_mode));
 	(void) fprintf(fp, "leap indicator:       %c%c\n",
@@ -1609,14 +1627,18 @@ again:
 			GET_INADDR6(maskaddr) = rl->mask6;
 			resaddr.ss_family = AF_INET6;
 			maskaddr.ss_family = AF_INET6;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 			resaddr.ss_len = SOCKLEN(&resaddr);
+#endif
 			addr = nntohost(&resaddr);
 		} else {
 			GET_INADDR(resaddr) = rl->addr;
 			GET_INADDR(maskaddr) = rl->mask;
 			resaddr.ss_family = AF_INET;
 			maskaddr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 			resaddr.ss_len = SOCKLEN(&resaddr);
+#endif
 			if ((rl->mask == (u_int32)0xffffffff))
 		    		addr = nntohost(&resaddr);
 			else
@@ -1882,7 +1904,9 @@ again:
 				GET_INADDR(dstadr) = ml->daddr;
 				dstadr.ss_family = AF_INET;
 			}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 			dstadr.ss_len = SOCKLEN(&dstadr);
+#endif
 			if ((pcmd->nargs == 0) ||
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
@@ -1917,7 +1941,9 @@ again:
 				GET_INADDR(dstadr) = ml->addr;
 				dstadr.ss_family = AF_INET;
 			}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 			dstadr.ss_len = SOCKLEN(&dstadr);
+#endif
 			if ((pcmd->nargs == 0) ||
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
@@ -1949,7 +1975,9 @@ again:
 				GET_INADDR(dstadr) = oml->addr;
 				dstadr.ss_family = AF_INET;
 			}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 			dstadr.ss_len = SOCKLEN(&dstadr);
+#endif
 			(void) fprintf(fp, "%-20.20s %5d %9ld %4d   %3d %9lu %9lu\n",
 				       nntohost(&dstadr),
 				       ntohs(oml->port),
@@ -2300,8 +2328,10 @@ again:
 			trap_addr.ss_family = AF_INET;
 			local_addr.ss_family = AF_INET;
 		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		trap_addr.ss_len = SOCKLEN(&trap_addr);
 		local_addr.ss_len = SOCKLEN(&local_addr);
+#endif
 		(void) fprintf(fp, "address %s, port %d\n",
 				stoa(&trap_addr), 
 				ntohs(it->trap_port));

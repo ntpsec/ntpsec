@@ -402,7 +402,7 @@ openhost(
 	char name[LENHOSTNAME];
 	char service[5];
 
-	bzero(&hints, sizeof(struct addrinfo));
+	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
