@@ -212,7 +212,7 @@ local_clock(
 #endif
 	if (!ntp_enable) {
 		record_loop_stats();
-		return(0);
+		return (0);
 	}
 
 	/*
@@ -255,7 +255,7 @@ local_clock(
 			printf("ntpd: time slew %.6fs\n", fp_offset);
 		}
 		record_loop_stats();
-		exit(0);
+		exit (0);
 	}
 
 	/*
@@ -290,6 +290,10 @@ local_clock(
 	 * these actions interact with the command line options.
 	 */
 	retval = 0;
+	if (sys_poll > peer->maxpoll)
+		sys_poll = peer->maxpoll;
+	else if (sys_poll < peer->minpoll)
+		sys_poll = peer->minpoll;
 	clock_frequency = flladj = plladj = 0;
 	mu = peer->epoch - last_time;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
@@ -403,10 +407,6 @@ local_clock(
 		 * and ignore it.
 		 */
 		default:
-			if (sys_poll > peer->maxpoll)
-				sys_poll = peer->maxpoll;
-			else if (sys_poll < peer->minpoll)
-				sys_poll = peer->minpoll;
 			allow_panic = TRUE;
 			if (fabs(fp_offset - last_offset) >
 			    CLOCK_SGATE * oerror && mu <

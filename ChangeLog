@@ -1,5 +1,13 @@
 2001-05-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k33
+
+	* ntpd/ntp_proto.c (receive): Validate the source port.  Lose
+	NTPv1 support.
+	* ntpd/ntp_loopfilter.c (local_clock): Sanity check sys_poll
+	earlier instead of later.
+	From: Dave Mills.
+
 	* ntpd/refclock_oncore.c (oncore_msg_any): We don't always have
 	GETTIMEOFDAY().
 

@@ -307,8 +307,12 @@ receive(
 		    current_time, ntoa(&rbufp->dstadr->sin),
 		    ntoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
-	if (restrict_mask & RES_IGNORE) {
+	if (restrict_mask & RES_IGNORE)
 		return;				/* no anything */
+	if (!(SRCPORT(&rbufp->recv_srcadr) == NTP_PORT ||
+	    SRCPORT(&rbufp->recv_srcadr) >= IPPORT_RESERVED)) {
+		sys_badlength++;
+		return;				/* invalid port */
 	}
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
@@ -318,7 +322,7 @@ receive(
 		sys_oldversionpkt++;		/* old version */
 	} else {
 		sys_unknownversion++;
-		return;
+		return;				/* invalid version */
 	}
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY)
@@ -335,30 +339,16 @@ receive(
 	}
 	if (rbufp->recv_length < LEN_PKT_NOMAC) {
 		sys_badlength++;
-		return;				/* no runt packets */
+		return;				/* runt packet */
 	}
 
 	/*
-	 * Figure out his mode and validate the packet. This has some
-	 * legacy raunch that probably should be removed. If from NTPv1
-	 * mode zero, The mode is determined from the source port. If
-	 * the port number is zero, it is from a symmetric active
-	 * association; otherwise, it is from a client association. From
-	 * NTPv2 on, all we do is toss out mode zero packets, since
-	 * control and private mode packets have already been handled.
+	 * Validate mode. Note that NTPv1 is no longer supported.
 	 */
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
-	if (PKT_VERSION(pkt->li_vn_mode) == NTP_OLDVERSION && hismode ==
-	    0) {
-		if (SRCPORT(&rbufp->recv_srcadr) == NTP_PORT)
-			hismode = MODE_ACTIVE;
-		else
-			hismode = MODE_CLIENT;
-	} else {
-		if (hismode == MODE_UNSPEC) {
-			sys_badlength++;
-			return;			/* invalid mode */
-		}
+	if (hismode == MODE_UNSPEC) {
+		sys_badlength++;
+		return;				/* invalid mode */
 	}
 
 	/*
