@@ -1166,6 +1166,9 @@ open_socket(
 			msyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed: %m");
 		else if(addr->ss_family == AF_INET6)
 			msyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed: %m");
+		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
+		    errno == EPFNOSUPPORT)
+			return (-1);
 		exit(1);
 		/*NOTREACHED*/
 	}
