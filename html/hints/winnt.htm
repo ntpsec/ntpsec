@@ -3,7 +3,8 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
-   <title>NTP on Windows NT</title>
+   <title>NTP on Windows NT</title><link href="scripts/style.css" type="text/css" rel="stylesheet">
+
 </head>
 <body>
 
@@ -64,16 +65,16 @@ ToDo</h2>
 <ul>
 <li>
 MD5 authentication causes problems with DNS. If you use encryption/authentication,
-you have to use IP numbers in <tt>ntp.conf.</tt></li>
+you have to use IP numbers in <tt>ntp.conf.</tt>
 
 <li>
-NMEA refclock support is in development.</li>
+NMEA refclock support is in development.
 
 <li>
-See if precision can be improved by using CPU cycle counter for tick interpolation.</li>
+See if precision can be improved by using CPU cycle counter for tick interpolation.
 
 <li>
-Make precision time available to applications using NTP_GETTIME API</li>
+Make precision time available to applications using NTP_GETTIME API
 </ul>
 
 <h2>
@@ -81,13 +82,13 @@ Compiling Requirements</h2>
 
 <ul>
 <li>
-<tt>Windows NT 4.0 or 5.0 (2000)</tt></li>
+<tt>Windows NT 4.0 or 5.0 (2000)</tt>
 
 <li>
-<tt>Microsoft Visual C++ 6.0</tt></li>
+<tt>Microsoft Visual C++ 6.0</tt>
 
 <li>
-Some version of the archiving program <tt>ZIP</tt>.</li>
+Some version of the archiving program <tt>ZIP</tt>.
 </ul>
 
 <h2>
@@ -95,13 +96,13 @@ Compiling Instructions</h2>
 
 <ol>
 <li>
-Unpack the NTP-4.x.tar.gz</li>
+Unpack the NTP-4.x.tar.gz
 
 <li>
-Open the .\ports\winnt\ntp.dsw Visual C workspace</li>
+Open the .\ports\winnt\ntp.dsw Visual C workspace
 
 <li>
-Batch build all projects</li>
+Batch build all projects
 </ol>
 
 <h2>
@@ -122,19 +123,19 @@ time. Instsrv is automatically compiled with the rest of the distribution
 if you followed the steps above.
 <ol>
 <li>
-Start a command prompt and enter "instsrv.exe &lt;pathname_for_ntpd.exe>"</li>
+Start a command prompt and enter "instsrv.exe &lt;pathname_for_ntpd.exe>"
 
 <li>
 Clicking on the "Services" icon in the "Control Panel" will display the
 list of currently installed services in a dialog box. The NetworkTimeProtocol
 service should show up in this list. Select it in the list and hit the
-"Start" button in the dialog box. The NTP service should start.</li>
+"Start" button in the dialog box. The NTP service should start.
 
 <li>
 View the event log by clicking on the "Event Viewer" icon in the "Administrative
 Tools" group, there should be several successful startup messages from
 NTP. NTP will keep running and restart automatically when the machine is
-rebooted.</li>
+rebooted.
 </ol>
 You can change the start mode (automatic/manual) and other startup parameters
 correponding to the NTP service (eg. location of conf file) also in the
@@ -170,7 +171,7 @@ Last revision 16 February 1999&nbsp; Version 4.0.99e.</h3>
 <li>
 Perl 5 is no longer needed to compile NTP. The configuration script which
 creates version.c with the current date and time was modified by Frederick
-Czajka [w2k@austin.rr.com] so that Perl is no longer required.</li>
+Czajka [w2k@austin.rr.com] so that Perl is no longer required.
 </ul>
 
 <h3>
@@ -180,20 +181,20 @@ Last revision 15 November 1999&nbsp; Version 4.0.98f.</h3>
 <ul>
 <li>
 Fixed I/O problem delaying packet responses which resulted in no-replys
-to NTPQ and others.</li>
+to NTPQ and others.
 
 <li>
 The default configuration file path is <tt>&lt;WINDIR>\system32\drivers\etc\ntp.conf.
 The old &lt;WINDIR>\ntp.conf </tt>is still supported but you will get a
 log entry reporting that the first file wasn't found. The NTP 3.x legacy
 <tt>ntp.ini</tt>
-file is no longer supported.</li>
+file is no longer supported.
 </ul>
 <b>Known Problems / TODO:</b>
 <ul>
 <li>
 MD5 and name resolution do not yet get along. If you define MD5, you cannot
-use DNS names, only IP numbers.</li>
+use DNS names, only IP numbers.
 </ul>
 
 <h3>

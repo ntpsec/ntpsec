@@ -5,6 +5,7 @@
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
         <title>Pulse-per-second (PPS) Signal Interfacing</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
@@ -21,9 +22,7 @@
         <p>Some Unix system kernels support a PPS signal directly, as described in the <a href="kern.htm">A Kernel Model for Precision Timekeeping</a> page. Specifically, the PPS driver can be used to direct the PPS signal to the kernel for use as a discipline source for both time and frequency. The presence of the kernel support is automatically detected during the NTP build process and supporting code automatically compiled. Note that the PPS driver does not normally enable the PPS kernel code, since performance is generally better without it. However, this code can be enabled by a driver fudge flag if necessary.</p>
         <p>Some configurations may include multiple radio clocks with individual PPS outputs. In some PPSAPI designs multiple PPS signals can be connected to multiple instances of the PPS driver. In such cases the NTP mitigation and grooming algorithms operate with all the radio timecodes and PPS signals to develop the highest degree of redundancy and survivability.</p>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a><br>
-        <br>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

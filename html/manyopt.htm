@@ -5,6 +5,7 @@
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
         <title>Automatic NTP Configuration Options</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
@@ -50,13 +51,11 @@
                 <dt><tt>minsane <i>minsane</i></tt>
                 <dd>This is the minimum number of candidates available to the clock selection algorithm in order to produce one or more truechimers for the clustering algorithm. If fewer than this number are available, the clock is undisciplined and allowed to run free. The default is 1 for legacy purposes. However, according to principles of Byzantine agreement, <i>minsane</i> should be at least 4 in order to detect and discard a single falseticker.
             </dl>
-            
             <dt><tt>ttl <i>hop</i> ...</tt>
             <dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.
         </dl>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

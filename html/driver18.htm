@@ -4,18 +4,19 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
         <meta name="GENERATOR" content="Mozilla/4.01 [en] (Win95; I) [Netscape]">
         <title>NIST Modem Time Service</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
         <h3>NIST Modem Time Service</h3>
         <hr>
         <h4>Synopsis</h4>
-        Address: 127.127.18.<i>u</i><br>
-        Reference ID: <tt>NIST</tt><br>
-        Driver ID: <tt>ACTS_NIST</tt><br>
-        Serial Port: <tt>/dev/acts<i>u</i></tt>; 1200 baud, 8-bits, no parity<br>
-        Features: <tt>tty_clk</tt><br>
-        Requires: <tt>/usr/include/sys/termios.h</tt> header file with modem control
+        <p>Address: 127.127.18.<i>u</i><br>
+            Reference ID: <tt>NIST</tt><br>
+            Driver ID: <tt>ACTS_NIST</tt><br>
+            Serial Port: <tt>/dev/acts<i>u</i></tt>; 1200 baud, 8-bits, no parity<br>
+            Features: <tt>tty_clk</tt><br>
+            Requires: <tt>/usr/include/sys/termios.h</tt> header file with modem control</p>
         <h4>Description</h4>
         <p>This driver supports the NIST Automated Computer Time Service (ACTS). It periodically dials a prespecified telephone number, receives the NIST timecode data and calculates the local clock correction. It designed primarily for use when neither a radio clock nor connectivity to Internet time servers is available. For the best accuracy, the individual telephone line/modem delay needs to be calibrated using outside sources.</p>
         <p>The ACTS is located at NIST Boulder, CO, telephone 303 494 4774. A toll call from Newark, DE, costs between three and four cents, although it is not clear what carrier and time of day discounts apply. The modem dial string will differ depending on local telephone configuration, etc., and is specified by the phone command in the configuration file. The argument to this command is an AT command for a Hayes compatible modem.</p>
@@ -42,7 +43,7 @@ on-time = '*'</pre>
         <p>Unlike other drivers, each ACTS call generates one clock correction and that correction is processed immediately. There is no wait to allow the clock filter to accumulate samples. In addition, the watchdog timeout of the local clock algorithm is disabled, so that a correction received from this driver that exceeds CLOCK_MAX (128 ms) causes an immediate step/slew.</p>
         <p>Since the interval between updates can be much longer than used with ordinary NTP peers, the local clock procedure has been modified to operate in either of two modes, depending on whether the interval between updates is less than or greater than CLOCK_MAXSEC (1200 s). If less than this value, the local clock procedure operates using the standard NTP phase-lock loop as with other NTP peers. If greater than this value, the procedure operates using a modified frequency-lock loop suggested by Judah Levine in his lockclock algorithm designed specifically for ACTS.</p>
         <h4>Call Management</h4>
-        Since ACTS will be a toll call in most areas of the country, it is necessary to carefully manage the call frequency. This can be done in two ways, by specifying the interval between calls, or by setting a flag bit manually or via a cron job. The call interval is determined by a counter initially set to the fudge time2 parameter. At each poll interval, minpoll (usually 64 s) is subtracted from the counter. When the counter is equal to or less than zero, the fudge flag1 is set, which causes up to three call attempts to be made. The fudge flag1 is reset after ten offset samples have been determined in a single call or by a device fault, timeout or manually using ntpdc. Upon successful completion of a call, the eight samples have been shifted into the clock filter, the local clock updated and the counter reset for the next interval. Setting the fudge time2 parameter to zero disables automatic call attempts.
+        <p>Since ACTS will be a toll call in most areas of the country, it is necessary to carefully manage the call frequency. This can be done in two ways, by specifying the interval between calls, or by setting a flag bit manually or via a cron job. The call interval is determined by a counter initially set to the fudge time2 parameter. At each poll interval, minpoll (usually 64 s) is subtracted from the counter. When the counter is equal to or less than zero, the fudge flag1 is set, which causes up to three call attempts to be made. The fudge flag1 is reset after ten offset samples have been determined in a single call or by a device fault, timeout or manually using ntpdc. Upon successful completion of a call, the eight samples have been shifted into the clock filter, the local clock updated and the counter reset for the next interval. Setting the fudge time2 parameter to zero disables automatic call attempts.</p>
         <p>Manual call attempts can be made at any time by setting fudge flag1 using ntpdc. For example, the ntpdc command</p>
         <pre>
 fudge 127.127.18.1 flags 1</pre>
@@ -55,7 +56,7 @@ quit</pre>
         <p>Then, run the following program at specified times as required.</p>
         <pre>/usr/local/bin/ntpdc &lt;file</pre>
         <h4>Monitor Data</h4>
-        When enabled by the <tt>flag4</tt> fudge flag, every received timecode is written as-is to the <tt>clockstats</tt> file.
+        <p>When enabled by the <tt>flag4</tt> fudge flag, every received timecode is written as-is to the <tt>clockstats</tt> file.</p>
         <h4>Fudge Factors</h4>
         <dl>
             <dt><tt>time1 <i>time</i></tt>
@@ -75,11 +76,10 @@ quit</pre>
             <dt><tt>flag4 0 | 1</tt>
             <dd>Not used by this driver.
         </dl>
-        Additional Information
+        <h4>Additional Information</h4>
         <p><a href="refclock.htm">Reference Clock Drivers</a>&nbsp;</p>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

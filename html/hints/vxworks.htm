@@ -1,6 +1,7 @@
 <HTML>
 <HEAD>
-   <TITLE>vxWorks Port of NTP</TITLE>
+   <TITLE>vxWorks Port of NTP</title><link href="scripts/style.css" type="text/css" rel="stylesheet">
+
 </HEAD>
 <BODY LINK="#00008B" VLINK="#8B0000">
 
@@ -58,17 +59,17 @@ The <A HREF="../configure.in">configure.in </A>file needed to be altered
 to allow for a host-target configuration to take place. </P>
 
 <UL>
-<LI>The define SYS_VXWORKS was added to the compilation flags. </LI>
+<LI>The define SYS_VXWORKS was added to the compilation flags. 
 
-<LI>Little endianess is set if the target is of type iX86. </LI>
+<LI>Little endianess is set if the target is of type iX86. 
 
 <LI>The size of char, integer, long values are all set. If Wind River ever
-changes these values they will need to be updated. </LI>
+changes these values they will need to be updated. 
 
-<LI>clock_settime() is defined to be used for setting the clock. </LI>
+<LI>clock_settime() is defined to be used for setting the clock. 
 
 <LI>The Linking flags have -r added to allow for relinking into the vxWorks
-kernel </LI>
+kernel 
 </UL>
 
 <P>Unfortunately I have had to make use of the <A HREF="../include/ntp_machine.h">ntp_machine.h
@@ -77,13 +78,13 @@ by autoconf, a better method should be devised. </P>
 
 <UL>
 <LI>There is now a NO_MAIN_ALLOWED define that simulates command line args,
-this allows the use of the normal startup sysntax. </LI>
+this allows the use of the normal startup sysntax. 
 
-<LI>POSIX timers have been added. </LI>
+<LI>POSIX timers have been added. 
 
 <LI>Structures normally found in netdb.h have been added with, the corresponding
 code is in <A HREF="../libntp/machines.c">machines.c </A>. Where possible
-the defines for these have been kept non-vxWorks specific.</LI>
+the defines for these have been kept non-vxWorks specific.
 </UL>
 
 <P>Unfortunately there are still quite a few SYS_VXWORKS type defines in

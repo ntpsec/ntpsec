@@ -5,6 +5,7 @@
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
         <title>External Clock Discipline and the Local Clock Driver</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
@@ -20,8 +21,7 @@
         <p>The ntp_enable and kern_enable are set by the configuration module. Normally, both switches default on, so the daemon can control the time and the kernel discipline can be used, if available. The pps_update switch is set by the protocol module when it believes the PPS provider source is legitimate and operating within nominals. The ntp_control switch is set during configuration by interrogating the kernel. If both the kern_enable and ntp_control siwitches are set, the daemon disciplines the clock via the kernel and the internal daemon discipline is disabled.</p>
         <p>The external clock driver controls the system time and clock selection in the following way. Normally, the driver adjusts the kernel time using the ntp_adjtime() system call in the same way as the daemon. In the case where the kernel discipline is to be used intact, the clock offset is provided in this call and the loop operates as specified. In the case where the driver steers only the frequency, the offset is specified as zero.</p>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

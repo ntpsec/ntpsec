@@ -4,6 +4,7 @@
 
     <head>
         <title>Mitigation Rules and the prefer Keyword</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
@@ -63,8 +64,7 @@
         <p>When kernel support for the PPS signal is available, the PPS signal is interfaced to the kernel serial driver code via a modem control lead. As the PPS signal is derived from external equipment, cables, etc., which sometimes fail, a good deal of error checking is done in the kernel to detect signal failure and excessive noise. The way in which the mitigation rules affect the kernel discipline is as follows.</p>
         <p>PPS support requires the PPS driver (type 22) and PPSAPI interface described in the <a href="pps.htm">Pulse-per-second (PPS) Signal Interfacing&gt;</a> page. In order to operate, the prefer peer must be designated and the kernel support enabled by the <tt>enable pps</tt> command in the configuration file and the signal must be present and within nominal jitter and wander error tolerances. In the NTP daemon, the PPS discipline is active only when the prefer peer is among the survivors of the clustering algorithm, and its absolute offset is within 128 ms, as determined by the PPS driver. Under these conditions the kernel disregards updates produced by the NTP daemon and uses its internal PPS source instead. The kernel maintains a watchdog timer for the PPS signal; if the signal has not been heard or is out of tolerance for more than some interval, currently two minutes, the kernel discipline is declared inoperable and operation continues as if it were not present.</p>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

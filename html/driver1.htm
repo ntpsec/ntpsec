@@ -4,18 +4,17 @@
 
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
-        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-        <meta name="GENERATOR" content="Mozilla/4.01 [en] (Win95; I) [Netscape]">
         <title>Undisciplined Local Clock</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
         <h3>Undisciplined Local Clock</h3>
         <hr>
         <h4>Synopsis</h4>
-        Address: 127.127.1.<i>u</i><br>
-        Reference ID: <tt>LCL</tt><br>
-        Driver ID: <tt>LOCAL</tt>
+        <p>Address: 127.127.1.<i>u</i><br>
+            Reference ID: <tt>LCL</tt><br>
+            Driver ID: <tt>LOCAL</tt></p>
         <h4>Description</h4>
         <p>This driver is intended for use in an isolated network where no external source of synchronization such as a radio clock or modem is available. It allows a designated time server to act as a primary server to provide synchronization to other clients on the network. Pick a machine that has a good clock oscillator (Digital machines are good, Sun machines are not) and configure it with this driver. Set the clock using the best means available, like eyeball-and-wristwatch. Then, point all the other machines at this one or use broadcast (not multicast) mode to distribute time.</p>
         <p>Another application for this driver is if a particular server clock is to be used as the clock of last resort when all other normal synchronization sources have gone away. This is especially useful if that server has an ovenized oscillator. For this you would configure this driver at a stratum greater than any other likely sources of time (say 3 or 4) to prevent the server taking over when legitimate sources are still available.</p>
@@ -25,7 +24,7 @@
         <p>The stratum for this driver is set at 3 by default, but can be changed by the <tt>fudge</tt> configuration command and/or the <tt>ntpdc</tt> utility. The reference ID is <tt>LCL</tt> by default, but can be changed using the same mechanisms. <b>*NEVER*</b> configure this driver to operate at a stratum which might possibly disrupt a client with access to a bona fide primary server, unless the local clock oscillator is reliably disciplined by another source. <b>*NEVER NEVER*</b> configure a server which might devolve to an undisciplined local clock to use multicast mode.</p>
         <p>This driver provides a mechanism to trim the local clock in both time and frequency, as well as a way to manipulate the leap bits. The <tt>fudge time1</tt> parameter adjusts the time (in seconds) and the <tt>fudge time2</tt> parameter adjusts the frequency (in parts per million). Both parameters are additive and operate only once; that is, each command (as from <tt>ntpdc</tt>) adds signed increments in time or frequency to the nominal local clock time and frequency.</p>
         <h4>Monitor Data</h4>
-        No <tt>filegen clockstats</tt> monitor data are produced by this driver.
+        <p>No <tt>filegen clockstats</tt> monitor data are produced by this driver.</p>
         <h4>Fudge Factors</h4>
         <dl>
             <dt><tt>time1 <i>time</i></tt>
@@ -45,11 +44,10 @@
             <dt><tt>flag4 0 | 1</tt>
             <dd>Not used by this driver.
         </dl>
-        <p>Additional Information</p>
+        <h4>Additional Information</h4>
         <p><a href="refclock.htm">Reference Clock Drivers</a></p>
         <hr>
-        <a href="index.htm"><img src="pic/home.gif" alt="gif" align="left"></a>
-        <address><a href="mailto:mills@udel.edu">David L. Mills &lt;mills@udel.edu&gt;</a></address>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>
