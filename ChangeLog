@@ -1,5 +1,14 @@
 2000-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_pcf.c (pcf_start): 
+	* html/driver35.htm: 
+	The radio clock transmits 69 bits with a period of 2.5
+	milliseconds per bit. Thus the driver now sets the default
+	calibration offset to 0.1725 (69 * 2.5 = 172.5).
+	Its now possible to disable the check of the radio clock's
+	synchronisation status bit. Several users requested this option.
+	From: Andreas Voegele <andreas.voegele@gmx.de>
+
 	* html/refclock.htm:
 	* html/rdebug.htm:
 	* html/prefer.htm:

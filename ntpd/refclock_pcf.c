@@ -99,6 +99,9 @@ pcf_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
+	/* one transmission takes 172.5 milliseconds since the radio clock
+	   transmits 69 bits with a period of 2.5 milliseconds per bit */
+	pp->fudgetime1 = 0.1725;
 	memcpy((char *)&pp->refid, REFID, 4);
 
 	return (1);
@@ -211,7 +214,7 @@ pcf_poll(
 		return;
 	}
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-	if (buf[1] & 1)
+	if ((buf[1] & 1) && !(pp->sloppyclockflag & CLK_FLAG2))
 		pp->leap = LEAP_NOTINSYNC;
 	else
 		pp->leap = LEAP_NOWARNING;
