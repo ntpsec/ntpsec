@@ -759,7 +759,7 @@ changequote(<<, >>)dnl
  *-*-osf[45]*)
 changequote([, ])dnl
     AC_DEFINE(DECL_PLOCK_0)
-    AC_DEFINE(DECL_STIME_0)
+    AC_DEFINE(DECL_STIME_1)
     ;;
  *-*-riscos4*)
     AC_DEFINE(DECL_ADJTIME_0)

@@ -4349,6 +4349,12 @@ struct txbuf
 	u_char *txt;			/* pointer to actual data buffer */
 };
 
+void	sendcmd		P((struct txbuf *buf, int c)); 
+void	sendbyte	P((struct txbuf *buf, int b)); 
+void	sendetx		P((struct txbuf *buf, struct parseunit *parse)); 
+void	sendint		P((struct txbuf *buf, int a)); 
+void	sendflt		P((struct txbuf *buf, double a)); 
+ 
 void
 sendcmd(
 	struct txbuf *buf,

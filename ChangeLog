@@ -1,3 +1,15 @@
+1999-11-30  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/l_stdlib.h: DECL_SYSTIME_1 --- a long *
+	* configure.in: Use it for DEC OSF[45]
+	Reported by: Tom Smith <smith@cag.lkg.dec.com>
+
+	* ntpd/refclock_parse.c: Add missing declarations
+	* ntptrace/ntptrace.c: Ditto
+	* ntpd/ntp_proto.c: Ditto
+	* ntpd/refclock_palisade.c: Ditto
+	From: Jonathan Stone <jonathan@dsg.stanford.edu> 
+
 1999-11-18  Sven Dietrich  <sven_dietrich@trimble.com>
 	* Win NT port updates
 	* ntpd.dsp: makefile only builds supported refclocks

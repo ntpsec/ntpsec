@@ -70,6 +70,7 @@ static	double	clock_combine	P((struct peer **, int));
 static	void	peer_xmit	P((struct peer *));
 static	void	fast_xmit	P((struct recvbuf *, int, u_long));
 static	void	clock_update	P((void));
+int	default_get_precision	P((void));
 #ifdef MD5
 static	void	make_keylist	P((struct peer *));
 #endif /* MD5 */
