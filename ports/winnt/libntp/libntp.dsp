@@ -525,6 +525,10 @@ SOURCE=..\..\..\include\ntp_refclock.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\ntp_rfc2553.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\include\ntp_select.h
 # End Source File
 # Begin Source File

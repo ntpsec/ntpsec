@@ -91,10 +91,6 @@ SOURCE=..\..\..\ntpd\cmd_args.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\map_vme.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\nt_clockstuff.c
 # End Source File
 # Begin Source File
