@@ -98,6 +98,8 @@ struct clktype clktypes[] = {
 	  "GPS_ZYFER" },
 	{ REFCLK_RIPENCC,	"RIPE NCC Trimble driver (43)",
 	  "GPS_RIPENCC" },
+	{ REFCLK_NEOCLOCK4X,	"NeoClock4X DCF77 / TDF receiver (44)",
+	  "NEOCLK4X"},
 	{ -1,			"", "" }
 };
 
