@@ -1,5 +1,16 @@
 2000-12-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_proto.c (transmit): Call clock_select in a few new
+	places.  BURST/IBURST cleanup.  Don't turn off FLAG_BURST at the
+	EOburst.  
+	(receive): Set peer->unreach = 0 before we call process_packet().
+	(process_packet): ditto, before calling poll_update().  Lose some
+	debugging, MODE_BCLIENT/CLIENT cleanup.
+	(poll_update): Bump nextupdate on FLAG_REFCLOC, not _REFCLOCK or
+	_IBURST.
+	(peer_clear): Don't set IBURST on MDF_BCLNT.
+	From: Dave Mills.
+
 	* ntpdate/ntpdate.c (alarming): Appease ansi2knr.
 
 2000-12-10  Harlan Stenn  <stenn@whimsy.udel.edu>

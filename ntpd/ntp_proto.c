@@ -105,8 +105,8 @@ transmit(
 		if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 
 			/*
-			 * In broadcast mode the poll interval and ttl
-			 * is fixed at the minimum.
+			 * In broadcast mode the poll interval is fixed
+			 * at minpoll and the ttl at ttlmax.
 			 */
 			hpoll = peer->minpoll;
 			peer->ttl = peer->ttlmax;
@@ -133,7 +133,7 @@ transmit(
 					peer->ttl++;
 				else
 					hpoll++;
-			} else {	
+			} else {
 				hpoll = peer->maxpoll;
 			}
 #endif /* AUTOKEY */
@@ -146,12 +146,13 @@ transmit(
 			 * If the counter reaches a max, the peer is
 			 * demobilized if not configured and just
 			 * cleared if it is, but in this case the poll
-			 * interval is bumped by one..
+			 * interval is bumped by one.
 			 */
 			if (peer->unreach < NTP_UNREACH) {
 				peer->unreach++;
 			} else if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
+				clock_select();
 				return;
 
 			} else {
@@ -178,6 +179,7 @@ transmit(
 				peer_clear(peer);
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
+					clock_select();
 					return;
 
 				}
@@ -185,8 +187,6 @@ transmit(
 			}
 			if (peer->flags & FLAG_IBURST)
 				peer->burst = NTP_SHIFT;
-			else if (peer->flags & FLAG_BURST)
-				peer->burst = 2;
 		} else {
 
 			/*
@@ -224,7 +224,6 @@ transmit(
 			 * keylist, since no further transmissions will
 			 * be made.
 			 */
-			peer->flags &= ~FLAG_BURST;
 			if (peer->cast_flags & MDF_BCLNT) {
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
@@ -837,7 +836,6 @@ receive(
 	 * association doesn't deserve to live, it will die in the
 	 * transmit routine if not reachable after timeout.
 	 */
-	peer->unreach = 0;
 	process_packet(peer, pkt, &rbufp->recv_time);
 }
 
@@ -960,6 +958,7 @@ process_packet(
 		peer->timereachable = current_time;
 	}
 	peer->reach |= 1;
+	peer->unreach = 0;
 	poll_update(peer, peer->hpoll);
 
 	/*
@@ -985,33 +984,19 @@ process_packet(
 	/*
 	 * If running in a broadcast association, the clock offset is
 	 * (t1 - t0) corrected by the one-way delay, but we can't
-	 * measure that directly; therefore, we start up in
-	 * client/server mode, calculate the clock offset, using the
-	 * engineered refinement algorithms, while also receiving
-	 * broadcasts. When a broadcast is received in client/server
-	 * mode, we calculate a correction factor to use after switching
-	 * back to broadcast mode. We know NTP_SKEWFACTOR == 16, which
-	 * accounts for the simplified ei calculation.
-	 *
-	 * If MDF_BCLNT is set, we are a broadcast/multicast client.
-	 * If FLAG_MCAST is set, we haven't calculated the propagation
-	 * delay. If hmode is MODE_CLIENT, we haven't set the local
-	 * clock in client/server mode. Initially, we come up
-	 * MODE_CLIENT. When the clock is first updated and MDF_BCLNT
-	 * is set, we switch from MODE_CLIENT to MODE_BCLIENT.
+	 * measure that directly. Therefore, we start up in MODE_CLIENT
+	 * mode, set FLAG_MCAST and exchange eight messages to determine
+	 * the clock offset. When the last message is sent, we switch to
+	 * MODE_BCLIENT mode. The next broadcast message after that
+	 * computes the broadcast offset and clears FLAG_MCAST.
 	 */
 	if (pmode == MODE_BROADCAST) {
 		if (peer->flags & FLAG_MCAST) {
 			LFPTOD(&ci, p_offset);
 			peer->estbdelay = peer->offset - p_offset;
-			if (peer->hmode != MODE_BCLIENT) {
-#ifdef DEBUG
-				if (debug)
-					printf("packet: bclient %03x\n",
-					    peer->flash);
-#endif
+			if (peer->hmode == MODE_CLIENT)
 				return;
-			}
+
 			peer->flags &= ~FLAG_MCAST;
 		}
 		DTOLFP(peer->estbdelay, &t10);
@@ -1158,10 +1143,21 @@ poll_update(
 		peer->hpoll = peer->minpoll;
 	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST | MDF_ACAST))
 		peer->ppoll = peer->hpoll;
+
+	/*
+	 * bit of adventure here. If during a burst and not timeout,
+	 * just slink away. If timeout, figure what the next timeout
+	 * should be. If IBURST or a reference clock, use one second. If
+	 * not and the dude was reachable during the previous poll
+	 * interval, randomize over two seconds; otherwise, randomize
+	 * over sixteen seconds. This is to give time for an ISDN
+	 * circuit to complete the call, for example. If not during a
+	 * burst, randomize over the poll interval.
+	 */ 
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
-		if (peer->flags & (FLAG_REFCLOCK | FLAG_IBURST))
+		if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate++;
 		else if (peer->reach & 0x1)
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
@@ -1221,15 +1217,15 @@ peer_clear(
 #endif /* AUTOKEY */
 
 	/*
-	 * If he dies as a multicast client, he comes back to life as
-	 * a multicast client in client mode in order to recover the
+	 * If he dies as a broadcast client, he comes back to life as
+	 * a broadcast client in client mode in order to recover the
 	 * initial autokey values. Note that there is no need to call
 	 * clock_select(), since the perp has already been voted off
 	 * the island at this point.
 	 */
 	peer->flags &= ~FLAG_AUTOKEY;
 	if (peer->cast_flags & MDF_BCLNT) {
-		peer->flags |=  FLAG_MCAST | FLAG_IBURST;
+		peer->flags |=  FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
 	}
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
