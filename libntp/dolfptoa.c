@@ -60,7 +60,7 @@ dolfptoa(
 		do {
 			stmp = swork;
 			swork = (u_short) (swork/sten);
-			stmp -= (swork<<3) + (swork<<1);
+			stmp = (u_short)(stmp - ((swork<<3) + (swork<<1)));
 			*--cp = (u_char)stmp;
 		} while (swork != 0);
 	}
