@@ -206,13 +206,12 @@ static struct ctl_var peer_var[] = {
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
-	{ CP_SESKEY,	RO, "cookie" },		/* 40 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
-	{ CP_DIGEST,	RO, "signature" },	/* 44 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 40 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 41 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 42 */
+	{ CP_DIGEST,	RO, "signature" },	/* 43 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 38/44 */
+	{ 0,		EOV, "" }		/* 38/43 */
 };
 
 
@@ -254,7 +253,6 @@ static u_char def_peer_var[] = {
 	CP_HOST,
 	CP_DIGEST,
 	CP_FLAGS,
-	CP_SESKEY,
 	CP_INITSEQ,
 #endif /* OPENSSL */
 	0
@@ -1635,12 +1633,6 @@ ctl_putpeer(
 		if (peer->subject != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->subject,
 			    strlen(peer->subject));
-		break;
-
-	case CP_SESKEY:
-		if (peer->pcookie != 0)
-			ctl_puthex(peer_var[CP_SESKEY].text,
-			    peer->pcookie);
 		break;
 
 	case CP_INITSEQ:

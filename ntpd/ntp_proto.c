@@ -1041,7 +1041,7 @@ receive(
 				else
 					peer_clear(peer);
 				peer->flash |= TEST4;
-				memcpy(&peer->refid, "DENY", 4);
+				memcpy(&peer->refid, KOD_CRYP, 4);
 				mskadr_sin.sin_addr.s_addr =
 				    ~(u_int32)0;
 				if (hismode != MODE_BROADCAST &&
@@ -1140,28 +1140,28 @@ process_packet(
 	 * A kiss-of-death (kod) packet is returned by a server in case
 	 * the client is denied access. It consists of the client
 	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field the ASCII
-	 * string "DENY". If the packet originate timestamp matches the
-	 * association transmit timestamp the kod is legitimate. If the
-	 * peer leap bits indicate never synchronized, this must be
-	 * access deny and the association is disabled; otherwise this
-	 * must be a limit reject. In either case a naughty message is
-	 * forced to the system log.
+	 * synchronized, stratum zero and reference ID field an ASCII
+	 * string. If the packet originate timestamp matches the
+	 * association transmit timestamp the kod is legitimate and
+	 * should contain the ASCII code CRYP, DENY or LIMT. If DENY or
+	 * CRYP, the TEST4 bit is set and no further messages will be
+	 * sent to the server. In any case a naughty message is semt to
+	 * the system log.
 	 */
-	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC &&
-	    memcmp(&pkt->refid, "DENY", 4) == 0) {
-		if (peer->leap == LEAP_NOTINSYNC) {	/* test 4 */
-			peer->stratum = STRATUM_UNSPEC;
-			peer->refid = pkt->refid;
+	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
+		char code[5];
+
+		memcpy(code, &pkt->refid, 4);
+		code[4] = '\0';
+		if (strcmp(code, KOD_CRYP) != 0 && strcmp(code,
+		    KOD_DENY) != 0 && strcmp(code, KOD_RATE) != 0)
+			return;
+
+		peer->stratum = STRATUM_UNSPEC;
+		peer->refid = pkt->refid;
+		if (strcmp(code, KOD_RATE) != 0)
 			peer->flash |= TEST4;		/* denied */
-			msyslog(LOG_INFO, "access denied");
-		} else {
-			msyslog(LOG_INFO, "limit reject");
-		}
-#if DEBUG
-		if (debug)
-			printf("packet: kiss-of-death received\n");
-#endif
+		msyslog(LOG_INFO, "kiss-of-death received %s", code);
 		return;
 	}
 
@@ -1385,6 +1385,8 @@ clock_update(void)
 		sys_stratum = sys_peer->stratum + 1;
 		if (sys_stratum == 1)
 			sys_refid = sys_peer->refid;
+		if (sys_stratum == 1)
+			sys_refid = sys_peer->refid;;
 		if (sys_stratum == STRATUM_UNSPEC)
 			memcpy(&sys_refid, "UNSP", 4);
 		else
@@ -2697,18 +2699,20 @@ fast_xmit(
 	 * otherwise, just drop it.
 	 */
 	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
+		char	*code;
+
 		if (!(mask & RES_DEMOBILIZE))
 			return;
 
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
-		memcpy(&xpkt.refid, "DENY", 4);
-#if DEBUG
-		if (debug)
-			printf(
-			    "fast_xmit: kiss-of-death sent\n");
-#endif
+		if (mask & RES_DONTSERVE)
+			code = KOD_DENY;
+		else
+			code = KOD_RATE;
+		memcpy(&xpkt.refid, code, 4);
+		msyslog(LOG_INFO, "kiss-of-death sent %s", code);
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);

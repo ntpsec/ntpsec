@@ -66,3 +66,4 @@ arlib/depcomp
 arlib/install-sh
 arlib/missing
 arlib/mkinstalldirs
+compile

@@ -221,11 +221,10 @@ struct ntp_control {
 #ifdef OPENSSL
 #define CP_FLAGS	38
 #define CP_HOST		39
-#define	CP_SESKEY	40
-#define	CP_INITSEQ	41
-#define	CP_INITKEY	42
-#define	CP_INITTSP	43
-#define	CP_DIGEST	44
+#define	CP_INITSEQ	40
+#define	CP_INITKEY	41
+#define	CP_INITTSP	42
+#define	CP_DIGEST	43
 #define	CP_MAXCODE	CP_DIGEST
 #else
 #define	CP_MAXCODE	CP_VARLIST

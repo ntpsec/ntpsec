@@ -28,12 +28,12 @@
 #define CRYPTO_FLAG_LEAP  0x4000 /* leapseconds table verified */
 
 /*
- * The following flags are used for certificate management.
+ * Flags used for certificate management
  */
 #define CERT_SIGN       0x01	/* certificate is signed */
 #define CERT_TRUST      0x02	/* certificate is trusted */
 #define CERT_PRIV	0x04	/* certificate is private */
-#define CERT_ERROR	0x80	/* certificate has identity values */
+#define CERT_ERROR	0x80	/* certificate has errors */
 
 /*
  * Extension field definitions

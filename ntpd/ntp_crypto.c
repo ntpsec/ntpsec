@@ -2808,6 +2808,8 @@ cert_install(
 	 */
 	for (yp = cinfo; yp != NULL; yp = yp->link) {
 		for (xp = cinfo; xp != NULL; xp = xp->link) {
+			if (yp->flags & CERT_ERROR)
+				continue;
 
 			/*
 			 * If issuer Y matches subject X and signature Y
