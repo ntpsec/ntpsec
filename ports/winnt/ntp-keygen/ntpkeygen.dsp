@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /GX /O2 /I "\\" /I "..\..\..\openssl\inc32" /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7b\inc32" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /YX"windows.h" /FD /c
+# ADD CPP /nologo /MD /W4 /GX /O2 /I "\\" /I "." /I "..\include" /I "..\..\..\include" /I "\openssl-0.9.7b\inc32" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /YX"windows.h" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
