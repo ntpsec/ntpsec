@@ -16,7 +16,9 @@
 #include "ntp_string.h"
 #include "ntp_stdlib.h"
 
-/* Disable the openssl md5 includes because it clash with ours. */
+/* Disable the openssl md5 includes, because they'd clash with ours. */
+/* #define NO_MD5 */
+/* #define OPENSSL_NO_MD5 */
 #undef OPENSSL
 
 #include "ntp.h"
