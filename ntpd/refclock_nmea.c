@@ -434,12 +434,6 @@ nmea_receive(
 	pp->lastrec = up->tstamp = rd_tmp;
 	up->pollcnt = 2;
 
-#ifdef HAVE_PPSAPI
-      /* If the PPSAPI is working, rather use its timestamps. */
-      if (nmea_pps(up, &rd_tmp) == 1)
-              pp->lastrec = up->tstamp = rd_tmp;
-#endif /* HAVE_PPSAPI */
-
 #ifdef DEBUG
 	if (debug)
 	    printf("nmea: timecode %d %s\n", pp->lencode,
@@ -527,29 +521,29 @@ nmea_receive(
 	   one, two or three digits
 	*/
 	pp->msec = 0; 
-	if ( dp[6] == '.' )
-	    if ( isdigit(dp[7]) )
-	    {
-		pp->msec = (dp[7]-'0')*100;
-		if ( isdigit(dp[8]) )
-		{
-		    pp->msec = pp->msec + (dp[8]-'0')*10;
-		    if ( isdigit(dp[9]) )
-		        pp->msec = pp->msec + (dp[9]-'0');
+	if (dp[6] == '.') {
+		if (isdigit(dp[7])) {
+			pp->msec = (dp[7] - '0') * 100;
+			if (isdigit(dp[8])) {
+				pp->msec += (dp[8] - '0') * 10;
+				if (isdigit(dp[9])) {
+					pp->msec += (dp[9] - '0');
+				}
+			}
 		}
-	    }
+	}
 
-	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59) {
+	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59
+	  || pp->msec > 1000) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
 
 
-	if (cmdtype==GPRMC)
-	{
 	/*
 	 * Convert date and check values.
 	 */
+	if (cmdtype==GPRMC) {
 	    dp = field_parse(cp,9);
 	    day = dp[0] - '0';
 	    day = (day * 10) + dp[1] - '0';
@@ -592,6 +586,17 @@ nmea_receive(
 	}
 	pp->day = day;
 
+
+#ifdef HAVE_PPSAPI
+	/*
+	 * If the PPSAPI is working, rather use its timestamps.
+	 * assume that the PPS occurs on the second so blow any msec
+	 */
+	if (nmea_pps(up, &rd_tmp) == 1) {
+		pp->lastrec = up->tstamp = rd_tmp;
+		pp->msec = 0;
+	}
+#endif /* HAVE_PPSAPI */
 
 	/*
 	 * Process the new sample in the median filter and determine the

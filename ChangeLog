@@ -1,5 +1,8 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_nmea.c (nmea_receive): Fixes.
+	From: John Woolner <vk1et@tpg.com.au>
+
 	* util/ntp-genkeys.c: Declare check_netinfo, don't define it.
 	From: Jack Bryans <jbryans@csulb.edu>
 
