@@ -450,3 +450,5 @@
 /* tolower()? */
 #undef DECL_TOLOWER_0
 
+/* toupper()? */
+#undef DECL_TOUPPER_0

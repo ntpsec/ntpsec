@@ -1,5 +1,12 @@
 1999-10-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: DECL_STDIO_0 with gcc under solaris.
+
+	* include/l_stdlib.h: DECL_TOUPPER_0
+	DECL_STRERROR_0
+
+	* configure.in: Fix a bunch of implicit declarations for SunOS
+
 	* html/release.htm: cleanup - we still provide MD5.
 	Reported by: Winslowe Lacesso <lacesso@cs.ubc.ca>
 

@@ -169,6 +169,10 @@ extern	int	vsprintf	P((char *, const char *, ...));
 extern	int	stime		P((const time_t *));
 #endif
 
+#ifdef DECL_STRERROR_0
+extern	char *	strerror		P((int errnum));
+#endif
+
 #ifdef DECL_STRTOL_0
 extern	long	strtol		P((const char *, char **, int));
 #endif
@@ -205,6 +209,10 @@ extern	int	settimeofday	P((struct timeval *, void *));
 
 #ifdef DECL_TOLOWER_0
 extern	int	tolower		P((int));
+#endif
+
+#ifdef DECL_TOUPPER_0
+extern	int	toupper		P((int));
 #endif
 
 /*
