@@ -379,6 +379,7 @@ process_private(
 	)
 {
 	struct req_pkt *inpkt;
+	struct req_pkt_tail *tailinpkt;
 	struct sockaddr_in *srcadr;
 	struct interface *inter;
 	struct req_proc *proc;
@@ -410,7 +411,7 @@ process_private(
 	    || (++ec, INFO_ERR(inpkt->err_nitems) != 0)
 	    || (++ec, INFO_MBZ(inpkt->mbz_itemsize) != 0)
 	    || (++ec, rbufp->recv_length > REQ_LEN_MAC)
-	    || (++ec, rbufp->recv_length < REQ_LEN_NOMAC)
+	    || (++ec, rbufp->recv_length < REQ_LEN_HDR)
 		) {
 		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed", ec);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -462,18 +463,27 @@ process_private(
 		l_fp ftmp;
 		double dtemp;
 	
+		if (rbufp->recv_length < (REQ_LEN_HDR +
+		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
+		    INFO_NITEMS(inpkt->err_nitems))
+		    + sizeof(struct req_pkt_tail))) {
+			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
+		}
+		tailinpkt = (struct req_pkt_tail *)((char *)&rbufp->recv_pkt +
+		    rbufp->recv_length - sizeof(struct req_pkt_tail));
+
 		/*
 		 * If this guy is restricted from doing this, don't let him
 		 * If wrong key was used, or packet doesn't have mac, return.
 		 */
 		if (!INFO_IS_AUTH(inpkt->auth_seq) || info_auth_keyid == 0
-		    || ntohl(inpkt->keyid) != info_auth_keyid) {
+		    || ntohl(tailinpkt->keyid) != info_auth_keyid) {
 #ifdef DEBUG
 			if (debug > 4)
 			    printf("failed auth %d info_auth_keyid %lu pkt keyid %lu\n",
 				    INFO_IS_AUTH(inpkt->auth_seq),
 				    (u_long)info_auth_keyid,
-				    (u_long)ntohl(inpkt->keyid));
+				    (u_long)ntohl(tailinpkt->keyid));
 #endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
@@ -502,7 +512,7 @@ process_private(
 		 * calculate absolute time difference between xmit time stamp
 		 * and receive time stamp.  If too large, too bad.
 		 */
-		NTOHL_FP(&inpkt->tstamp, &ftmp);
+		NTOHL_FP(&tailinpkt->tstamp, &ftmp);
 		L_SUB(&ftmp, &rbufp->recv_time);
 		LFPTOD(&ftmp, dtemp);
 		if (fabs(dtemp) >= INFO_TS_MAXSKEW) {
@@ -516,8 +526,16 @@ process_private(
 		/*
 		 * So far so good.  See if decryption works out okay.
 		 */
+		printf("process_private: rbufp->recv_length %d\n",
+		    rbufp->recv_length);
+		printf("process_private: l1 %d, l2 %d, l3 %d, l4 %d\n",
+		    rbufp->recv_length - sizeof(*tailinpkt),
+		    sizeof(struct req_pkt_tail),
+		    REQ_LEN_NOMAC,
+		    (int)(rbufp->recv_length - REQ_LEN_NOMAC));
 		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
-		    REQ_LEN_NOMAC, (int)(rbufp->recv_length - REQ_LEN_NOMAC))) {
+		    rbufp->recv_length - sizeof(struct req_pkt_tail) +
+		    REQ_LEN_HDR, sizeof(struct req_pkt_tail) - REQ_LEN_HDR)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
@@ -526,8 +544,13 @@ process_private(
 	/*
 	 * If we need data, check to see if we have some.  If we
 	 * don't, check to see that there is none (picky, picky).
+	 *
+	 * Handle the exception of REQ_CONFIG. It can have two data sizes.
 	 */
-	if (INFO_ITEMSIZE(inpkt->mbz_itemsize) != proc->sizeofitem) {
+	if (INFO_ITEMSIZE(inpkt->mbz_itemsize) != proc->sizeofitem &&
+	    !(inpkt->implementation == IMPL_XNTPD &&
+	    inpkt->request == REQ_CONFIG &&
+	    INFO_ITEMSIZE(inpkt->mbz_itemsize) == sizeof(struct old_conf_peer))) {
                 msyslog(LOG_ERR, "INFO_ITEMSIZE(inpkt->mbz_itemsize) != proc->sizeofitem: %d != %d",
 			INFO_ITEMSIZE(inpkt->mbz_itemsize), proc->sizeofitem);
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -1135,8 +1158,9 @@ do_conf(
 	)
 {
 	u_int fl;
-	register struct conf_peer *cp;
-	register int items;
+	struct conf_peer *cp;
+	struct old_conf_peer *ocp;
+	int items;
 	struct sockaddr_in peeraddr;
 
 	/*
@@ -1144,6 +1168,9 @@ do_conf(
 	 * okay.  If not, complain about it.  Note we are
 	 * very picky here.
 	 */
+	ocp = NULL;
+	if (INFO_ITEMSIZE(inpkt->mbz_itemsize) == sizeof(struct old_conf_peer))
+		ocp = (struct old_conf_peer *)inpkt->data;
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cp = (struct conf_peer *)inpkt->data;
 
@@ -1160,7 +1187,11 @@ do_conf(
 		    CONF_FLAG_NOSELECT | CONF_FLAG_BURST | CONF_FLAG_IBURST |
 		    CONF_FLAG_SKEY))
 		    fl = 1;
-		cp++;
+		if (ocp) {
+			ocp++;
+			cp = (struct conf_peer *)ocp;
+		} else
+			cp++;
 	}
 
 	if (fl) {
@@ -1174,6 +1205,8 @@ do_conf(
 	 */
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cp = (struct conf_peer *)inpkt->data;
+	if (ocp)
+		ocp = (struct old_conf_peer *)inpkt->data;
 	memset((char *)&peeraddr, 0, sizeof(struct sockaddr_in));
 	peeraddr.sin_family = AF_INET;
 	peeraddr.sin_port = htons(NTP_PORT);
@@ -1213,11 +1246,15 @@ do_conf(
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
 		if (peer_config(&peeraddr, any_interface, cp->hmode,
 		    cp->version, cp->minpoll, cp->maxpoll, fl, cp->ttl,
-		    cp->keyid, cp->keystr) == 0) {
+		    cp->keyid, NULL) == 0) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
-		cp++;
+		if (ocp) {
+			ocp++;
+			cp = (struct conf_peer *)ocp;
+		} else
+			cp++;
 	}
 
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);

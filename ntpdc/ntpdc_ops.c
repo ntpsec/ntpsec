@@ -1174,6 +1174,13 @@ doconfig(
 		      sizeof(struct conf_peer), (char *)&cpeer, &items,
 		      &itemsize, &dummy, 0);
 	
+	if (res == INFO_ERR_FMT) {
+		(void) fprintf(fp,
+		    "***Retrying command with old conf_peer size\n");
+		res = doquery(IMPL_XNTPD, REQ_CONFIG, 1, 1,
+			      sizeof(struct old_conf_peer), (char *)&cpeer,
+			      &items, &itemsize, &dummy, 0);
+	}
 	if (res == 0)
 	    (void) fprintf(fp, "done!\n");
 	return;
