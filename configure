@@ -8596,9 +8596,22 @@ echo "$ac_t""$ans" 1>&6
 
 
 
+echo $ac_n "checking if we need to make and use the RSAREF library""... $ac_c" 1>&6
+echo "configure:8601: checking if we need to make and use the RSAREF library" >&5
+ans=no
+if test -f $srcdir/rsaref2/source/rsa.c
+then
+    ans=yes
+    LIBRSAREF=../librsaref/librsaref.a
+    MAKE_LIBRSAREF=librsaref.a
+fi
+echo "$ac_t""$ans" 1>&6
+
+
+
 
 echo $ac_n "checking if we can make dcf parse utilities""... $ac_c" 1>&6
-echo "configure:8602: checking if we can make dcf parse utilities" >&5
+echo "configure:8615: checking if we can make dcf parse utilities" >&5
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$target" in
@@ -8613,7 +8626,7 @@ echo "$ac_t""$ans" 1>&6
 
 
 echo $ac_n "checking if we can build kernel streams modules for parse""... $ac_c" 1>&6
-echo "configure:8617: checking if we can build kernel streams modules for parse" >&5
+echo "configure:8630: checking if we can build kernel streams modules for parse" >&5
 ans=no
 if test "$ntp_parseutil$ac_cv_header_sys_stropts_h" = "yesyes"; then
     case "$target" in
@@ -8638,7 +8651,7 @@ fi
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we need basic refclock support""... $ac_c" 1>&6
-echo "configure:8642: checking if we need basic refclock support" >&5
+echo "configure:8655: checking if we need basic refclock support" >&5
 if test "$ntp_refclock" = "yes"; then
     cat >> confdefs.h <<\EOF
 #define REFCLOCK 1
@@ -8650,7 +8663,7 @@ echo "$ac_t""$ntp_refclock" 1>&6
 			
 
 echo $ac_n "checking if we want HP-UX adjtimed support""... $ac_c" 1>&6
-echo "configure:8654: checking if we want HP-UX adjtimed support" >&5
+echo "configure:8667: checking if we want HP-UX adjtimed support" >&5
 case "$target" in
  *-*-hpux[56789]*)
     ans=yes
@@ -8668,7 +8681,7 @@ fi
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we can read kmem""... $ac_c" 1>&6
-echo "configure:8672: checking if we can read kmem" >&5
+echo "configure:8685: checking if we can read kmem" >&5
 if eval "test \"\${ac_cv_var_can_kmem+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8721,7 +8734,7 @@ EOF
 esac
 
 echo $ac_n "checking if adjtime is accurate""... $ac_c" 1>&6
-echo "configure:8725: checking if adjtime is accurate" >&5
+echo "configure:8738: checking if adjtime is accurate" >&5
 if eval "test \"\${ac_cv_var_adjtime_is_accurate+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8773,7 +8786,7 @@ EOF
 esac
 
 echo $ac_n "checking the name of 'tick' in the kernel""... $ac_c" 1>&6
-echo "configure:8777: checking the name of 'tick' in the kernel" >&5
+echo "configure:8790: checking the name of 'tick' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_tick+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8817,7 +8830,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tick'""... $ac_c" 1>&6
-echo "configure:8821: checking for the units of 'tick'" >&5
+echo "configure:8834: checking for the units of 'tick'" >&5
 if eval "test \"\${ac_cv_var_tick_nano+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8841,7 +8854,7 @@ EOF
 esac
 #
 echo $ac_n "checking the name of 'tickadj' in the kernel""... $ac_c" 1>&6
-echo "configure:8845: checking the name of 'tickadj' in the kernel" >&5
+echo "configure:8858: checking the name of 'tickadj' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8894,7 +8907,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tickadj'""... $ac_c" 1>&6
-echo "configure:8898: checking for the units of 'tickadj'" >&5
+echo "configure:8911: checking for the units of 'tickadj'" >&5
 if eval "test \"\${ac_cv_var_tickadj_nano+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8918,7 +8931,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'dosynctodr' in the kernel""... $ac_c" 1>&6
-echo "configure:8922: checking half-heartedly for 'dosynctodr' in the kernel" >&5
+echo "configure:8935: checking half-heartedly for 'dosynctodr' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_dosynctodr+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8971,7 +8984,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'noprintf' in the kernel""... $ac_c" 1>&6
-echo "configure:8975: checking half-heartedly for 'noprintf' in the kernel" >&5
+echo "configure:8988: checking half-heartedly for 'noprintf' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_noprintf+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9021,7 +9034,7 @@ esac
 
 
 echo $ac_n "checking for a default value for 'tick'""... $ac_c" 1>&6
-echo "configure:9025: checking for a default value for 'tick'" >&5
+echo "configure:9038: checking for a default value for 'tick'" >&5
 if eval "test \"\${ac_cv_var_tick+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9065,7 +9078,7 @@ EOF
 esac
 
 echo $ac_n "checking for a default value for 'tickadj'""... $ac_c" 1>&6
-echo "configure:9069: checking for a default value for 'tickadj'" >&5
+echo "configure:9082: checking for a default value for 'tickadj'" >&5
 if eval "test \"\${ac_cv_var_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9172,7 +9185,7 @@ esac
 
 
 echo $ac_n "checking if we want and can make the tickadj utility""... $ac_c" 1>&6
-echo "configure:9176: checking if we want and can make the tickadj utility" >&5
+echo "configure:9189: checking if we want and can make the tickadj utility" >&5
 if eval "test \"\${ac_cv_make_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9188,7 +9201,7 @@ esac
 
 
 echo $ac_n "checking if we want and can make the ntptime utility""... $ac_c" 1>&6
-echo "configure:9192: checking if we want and can make the ntptime utility" >&5
+echo "configure:9205: checking if we want and can make the ntptime utility" >&5
 if eval "test \"\${ac_cv_make_ntptime+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9214,7 +9227,7 @@ case "$ac_cv_make_ntptime" in
 esac
 
 echo $ac_n "checking if we want UDP wildcard delivery""... $ac_c" 1>&6
-echo "configure:9218: checking if we want UDP wildcard delivery" >&5
+echo "configure:9231: checking if we want UDP wildcard delivery" >&5
 if eval "test \"\${ac_cv_var_udp_wildcard_delivery+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9293,7 +9306,7 @@ case "$host" in
 esac
 
 echo $ac_n "checking if we should always slew the time""... $ac_c" 1>&6
-echo "configure:9297: checking if we should always slew the time" >&5
+echo "configure:9310: checking if we should always slew the time" >&5
 if eval "test \"\${ac_cv_var_slew_always+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9333,7 +9346,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should step and slew the time""... $ac_c" 1>&6
-echo "configure:9337: checking if we should step and slew the time" >&5
+echo "configure:9350: checking if we should step and slew the time" >&5
 if eval "test \"\${ac_cv_var_step_slew+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9376,7 +9389,7 @@ EOF
 esac
 
 echo $ac_n "checking if ntpdate should step the time""... $ac_c" 1>&6
-echo "configure:9380: checking if ntpdate should step the time" >&5
+echo "configure:9393: checking if ntpdate should step the time" >&5
 if eval "test \"\${ac_cv_var_ntpdate_step+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9407,7 +9420,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should sync TODR clock every hour""... $ac_c" 1>&6
-echo "configure:9411: checking if we should sync TODR clock every hour" >&5
+echo "configure:9424: checking if we should sync TODR clock every hour" >&5
 if eval "test \"\${ac_cv_var_sync_todr+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9440,7 +9453,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should avoid kernel FLL bug""... $ac_c" 1>&6
-echo "configure:9444: checking if we should avoid kernel FLL bug" >&5
+echo "configure:9457: checking if we should avoid kernel FLL bug" >&5
 if eval "test \"\${ac_cv_var_kernel_fll_bug+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9588,8 +9601,9 @@ ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
-libparse/Makefile ntpd/Makefile ntpdc/Makefile ntpdate/Makefile ntpq/Makefile \
-ntptrace/Makefile parseutil/Makefile scripts/ntpver util/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
+ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
+scripts/ntpver util/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -9662,6 +9676,8 @@ s%@DESOBJS@%$DESOBJS%g
 s%@LIBPARSE@%$LIBPARSE%g
 s%@MAKE_LIBPARSE@%$MAKE_LIBPARSE%g
 s%@MAKE_LIBPARSE_KERNEL@%$MAKE_LIBPARSE_KERNEL%g
+s%@LIBRSAREF@%$LIBRSAREF%g
+s%@MAKE_LIBRSAREF@%$MAKE_LIBRSAREF%g
 s%@TESTDCF@%$TESTDCF%g
 s%@DCFD@%$DCFD%g
 s%@MAKE_PARSEKMODULE@%$MAKE_PARSEKMODULE%g
@@ -9714,8 +9730,9 @@ cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
-libparse/Makefile ntpd/Makefile ntpdc/Makefile ntpdate/Makefile ntpq/Makefile \
-ntptrace/Makefile parseutil/Makefile scripts/ntpver util/Makefile"}
+libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
+ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
+scripts/ntpver util/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

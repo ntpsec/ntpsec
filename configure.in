@@ -2070,6 +2070,18 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT($ans)
 
+AC_SUBST(LIBRSAREF)
+AC_SUBST(MAKE_LIBRSAREF)
+AC_MSG_CHECKING(if we need to make and use the RSAREF library)
+ans=no
+if test -f $(srcdir)/rsaref2/source/rsa.c
+then
+    ans=yes
+    LIBRSAREF=../librsaref/librsaref.a
+    MAKE_LIBRSAREF=librsaref.a
+fi
+AC_MSG_RESULT($ans)
+
 AC_SUBST(TESTDCF)
 AC_SUBST(DCFD)
 
@@ -2775,6 +2787,7 @@ LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`
 
 AC_OUTPUT(Makefile adjtimed/Makefile clockstuff/Makefile \
 include/Makefile kernel/Makefile kernel/sys/Makefile libntp/Makefile \
-libparse/Makefile ntpd/Makefile ntpdc/Makefile ntpdate/Makefile ntpq/Makefile \
-ntptrace/Makefile parseutil/Makefile scripts/ntpver util/Makefile, [chmod +x scripts/ntpver])
+libparse/Makefile librsaref/Makefile ntpd/Makefile ntpdc/Makefile \
+ntpdate/Makefile ntpq/Makefile ntptrace/Makefile parseutil/Makefile \
+scripts/ntpver util/Makefile, [chmod +x scripts/ntpver])
 #test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h])

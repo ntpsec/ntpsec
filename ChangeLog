@@ -1,3 +1,8 @@
+1999-07-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (AC_OUTPUT): Added librsaref/Makefile
+	Added tests for making/using librsaref.a
+
 1999-07-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_trak.c (trak_receive): disambiguate expression.
