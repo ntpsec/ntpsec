@@ -542,9 +542,8 @@ refclock_receive(
 	 * the median filter samples and give the data to the clock
 	 * filter.
 	 */
-	peer->received++;
 	pp = peer->procptr;
-	peer->processed++;
+	peer->received++;
 	peer->timereceived = current_time;
 	peer->leap = pp->leap;
 	if (peer->leap == LEAP_NOTINSYNC) {
