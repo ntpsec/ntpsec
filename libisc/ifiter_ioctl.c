@@ -450,11 +450,11 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	if ((ifreq.lifr_flags & IFF_BROADCAST) != 0) {
+	if ((ifreq.ifr_flags & IFF_BROADCAST) != 0) {
 		iter->current.flags |= INTERFACE_F_BROADCAST;
 	}
 
-	if ((ifreq.lifr_flags & IFF_MULTICAST) != 0) {
+	if ((ifreq.ifr_flags & IFF_MULTICAST) != 0) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
 	}
 
@@ -540,7 +540,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 			return (ISC_R_IGNORE);
 		}
 		get_addr(family, &iter->current.broadcast,
-			 (struct sockaddr *)&ifreq.lifr_broadaddr);
+			 (struct sockaddr *)&ifreq.ifr_broadaddr);
 	}
 	/*
 	 * Get the network mask.
@@ -696,7 +696,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 					       ISC_MSG_GETDESTADDR,
 					       "%s: getting "
 					       "broadcast address: %s"),
-					 ifreq.ifr_name, strbuf);
+					 lifreq.lifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
 		get_addr(family, &iter->current.broadcast,
