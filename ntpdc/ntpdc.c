@@ -440,7 +440,7 @@ openhost(
 	hints.ai_flags = AI_NUMERICHOST;
 
 	a_info = getaddrinfo(hname, service, &hints, &ai);
-	if (a_info == EAI_NONAME) {
+	if (a_info == EAI_NONAME || a_info == EAI_NODATA) {
 		hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 		hints.ai_flags |= AI_ADDRCONFIG;
