@@ -181,7 +181,7 @@ main(
 	RSA_print_fp(stdout, pkey->pkey.rsa, 0);
 */
 	/*
-	 * Generate the X509 certificate request. The digest algorithms
+	 * Generate the X509v3 certificate request. The digest algorithms
 	 * that work with RSA are MD2, MD5, SHA, SHA1, MDC2 and
 	 * RIPEMD160.
 	 */
@@ -233,7 +233,7 @@ main(
 	DSA_print_fp(stdout, pkey->pkey.dsa, 0);
 */
 	/*
-	 * Generate the X509 certificate request. The digest algorithms
+	 * Generate the X509v3 certificate request. The digest algorithms
 	 * that work with DSS (DSA) are DSS and DSS1.
 	 */
 	x509("DSA_SHA", pkey, EVP_dss());
@@ -268,7 +268,7 @@ main(
 
 #ifdef OPENSSL
 /*
- * Generate X509 certificate request and X509 self-signed certificate.
+ * Generate X509v3 certificate request and X509v3 self-signed certificate.
  * Note: At present, this works only for RSA signatures; DSA signatures
  * come a segfault. Later.
  *
@@ -309,7 +309,7 @@ x509	(
 	printf("%s certificate request for %s key type %d\n", id,
 	    hostname, EVP_MD_type(pkey));
 	req = X509_REQ_new();
-	X509_REQ_set_version(req, 0L);
+	X509_REQ_set_version(req, 2L);
 	subj = X509_REQ_get_subject_name(req);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
 	    hostname, strlen(hostname), -1, 0);
@@ -340,7 +340,7 @@ x509	(
 	 * one year hence. 
 	 */
 	cert = X509_new();
-	X509_set_version(cert, 0L);
+	X509_set_version(cert, 2L);
 	serial = ASN1_INTEGER_new();
 	ASN1_INTEGER_set(serial, ntptime);
 	X509_set_serialNumber(cert, serial);
