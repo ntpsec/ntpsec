@@ -1,5 +1,9 @@
 2001-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/mkver.in: Use the C locale so  the dates come out in a
+	consistent format.
+	From: ASANO Naoyuki <n_asano@imjp.co.jp>
+
 	* build: Run "config.status" before the "make" because it probably
 	saves time and trouble.  Probably...
 
