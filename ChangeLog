@@ -1,3 +1,14 @@
+2001-04-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/leap.htm: Added.
+	* html/index.htm: Update.
+	* html/driver7.htm: Update.
+	* html/driver6.htm: Update.
+	* html/driver36.htm: Update.
+	* html/audio.htm: Update.
+	* html/y2k.htm: Removed.
+	From Dave Mills.
+
 2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* acconfig.h: Lose extra declarations of PACKAGE and VERSION.
