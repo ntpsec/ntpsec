@@ -527,6 +527,9 @@
 /* Define if you have the `posix4' library (-lposix4). */
 #undef HAVE_LIBPOSIX4
 
+/* Define if you have the `readline' library (-lreadline). */
+#undef HAVE_LIBREADLINE
+
 /* Define if you have the `rt' library (-lrt). */
 #undef HAVE_LIBRT
 

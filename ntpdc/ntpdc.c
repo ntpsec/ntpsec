@@ -10,11 +10,15 @@
 #include <netdb.h>
 
 #ifdef SYS_WINNT
-#include <io.h>
+# include <io.h>
 #else
-#define closesocket close
+# define closesocket close
 #endif /* SYS_WINNT */
 
+#ifdef HAVE_LIBREADLINE
+# include <readline/readline.h>
+# include <readline/history.h>
+#endif /* HAVE_LIBREADLINE */
 
 #include "ntpdc.h"
 #include "ntp_select.h"
@@ -914,6 +918,16 @@ doquery(
 static void
 getcmds(void)
 {
+#ifdef HAVE_LIBREADLINE
+	char *line;
+
+	for (;;) {
+		if ((line = readline(interactive?prompt:"")) == NULL) return;
+		if (*line) add_history(line);
+		docmd(line);
+		free(line);
+	}
+#else /* not HAVE_LIBREADLINE */
 	char line[MAXLINE];
 
 	for (;;) {
@@ -930,6 +944,7 @@ getcmds(void)
 
 		docmd(line);
 	}
+#endif /* not HAVE_LIBREADLINE */
 }
 
 

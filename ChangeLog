@@ -1,5 +1,14 @@
 2000-06-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpdc/ntpdc.c (getcmds): 
+	* configure.in:
+	Readline support.
+	From: Aaron Sherman <ajs@narn.ajs.com>
+
+	* ntpd/refclock_ulink331.c: Added.
+	Sent in by Doug Grosso <dgrosso@mint.net>
+	* ntpd/Makefile.am (ntpd_SOURCES): Added refclock_ulink331.c
+
 	* libntp/snprintf.c: Added stdio.h
 	From: Marc Brett <mbrett@rgs0.london.waii.com>
 

@@ -182,6 +182,7 @@ AC_CHECK_LIB(ld, nlist)
 AC_CHECK_LIB(mld, nlist)
 AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
 AC_CHECK_FUNC(openlog, , AC_CHECK_LIB(gen, openlog))
+AC_CHECK_LIB(readline, readline)
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
