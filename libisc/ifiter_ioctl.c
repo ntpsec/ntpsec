@@ -634,11 +634,19 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 * and is really hard to shut up.
 	 */
 	if (ioctl(iter->socket, SIOCGLIFFLAGS, (char *) &lifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
+
+		/*
+		 * XXX This should be looked at further since it looks strange.
+		 * If we get an ENXIO then we ignore the error and not worrk
+		 * about the flags.
+		 */
+		if (errno != ENXIO) {
+			isc__strerror(errno, strbuf, sizeof(strbuf));
+			UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "%s: getting interface flags: %s",
 				 lifreq.lifr_name, strbuf);
-		return (ISC_R_IGNORE);
+			return (ISC_R_IGNORE);
+		}
 	}
 
 	if ((lifreq.lifr_flags & IFF_UP) != 0)
