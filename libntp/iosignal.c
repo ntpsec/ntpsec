@@ -1,5 +1,5 @@
 /*
- * ntp_io.c - input/output routines for ntpd.	The socket-opening code
+ * iosignal.c - input/output routines for ntpd.	The socket-opening code
  *		   was shamelessly stolen from ntpd.
  */
 
@@ -50,8 +50,8 @@ extern	void	input_handler	P((l_fp *));
  * Some systems (MOST) define SIGPOLL == SIGIO, others SIGIO == SIGPOLL, and
  * a few have separate SIGIO and SIGPOLL signals.  This code checks for the
  * SIGIO == SIGPOLL case at compile time.
- * Do not defined USE_SIGPOLL or USE_SIGIO.
- * these are interal only to ntp_io.c!
+ * Do not define USE_SIGPOLL or USE_SIGIO.
+ * these are interal only to iosignal.c!
  */
 # if defined(USE_SIGPOLL)
 #  undef USE_SIGPOLL
