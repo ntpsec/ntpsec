@@ -1,5 +1,17 @@
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/timetrim.c:
+	* util/Makefile.am:
+	* ntpdc/ntpdc_ops.c:
+	* ntpd/refclock_nmea.c:
+	* libntp/snprintf.c:
+	* configure.in:
+	* configure:
+	* config.h.in:
+	* aclocal.m4:
+	* acconfig.h:
+	Lint cleanup from: Marc Brett <mbrett@rgs0.london.waii.com>
+
 	* ntpd/ntp_config.c: Add "version" support.
 	(getconfig): version support.
 	* include/ntp_config.h (CONF_RES_VERSION): Added.

@@ -1,6 +1,6 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ansi2knr
-bin_PROGRAMS = ntp-genkeys @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@
+bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-genkeys
 EXTRA_PROGRAMS = byteorder hist jitter kern longsize ntptime \
 precision sht testrs6000 tickadj timetrim
 

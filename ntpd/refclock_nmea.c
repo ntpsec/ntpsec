@@ -522,11 +522,11 @@ nmea_receive(
 	*/
 	pp->msec = 0; 
 	if (dp[6] == '.') {
-		if (isdigit(dp[7])) {
+		if (isdigit((int)dp[7])) {
 			pp->msec = (dp[7] - '0') * 100;
-			if (isdigit(dp[8])) {
+			if (isdigit((int)dp[8])) {
 				pp->msec += (dp[8] - '0') * 10;
-				if (isdigit(dp[9])) {
+				if (isdigit((int)dp[9])) {
 					pp->msec += (dp[9] - '0');
 				}
 			}

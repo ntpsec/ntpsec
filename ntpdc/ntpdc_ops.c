@@ -1305,6 +1305,7 @@ static struct resflags resflags[] = {
 	{ "notrap",	RES_NOTRAP },
 	{ "lptrap",	RES_LPTRAP },
 	{ "limited",	RES_LIMITED },
+	{ "version",	RES_VERSION },
 	{ "",		0 }
 };
 

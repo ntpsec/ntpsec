@@ -20,8 +20,10 @@ int snprintf(str, n, fmt, va_alist)
 #endif
 {
 	va_list ap;
-	char *rp;
 	int rval;
+#ifdef VSPRINTF_CHARSTAR
+	char *rp;
+#endif
 #ifdef __STDC__
 	va_start(ap, fmt);
 #else

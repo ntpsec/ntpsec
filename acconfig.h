@@ -473,4 +473,7 @@
 /* toupper()? */
 #undef DECL_TOUPPER_0
 
+/* strerror()? */
+#undef DECL_STRERROR_0
+
 #undef ULONG_CONST
