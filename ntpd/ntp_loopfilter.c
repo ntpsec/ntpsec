@@ -355,7 +355,8 @@ local_clock(
 			    ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
 				if (debug)
-					printf("local_clock: popcorn %.6f %.6f\n",
+					printf(
+					    "local_clock: popcorn %.6f %.6f\n",
 					    fp_offset, last_offset);
 #endif
 				last_offset = fp_offset;
@@ -364,14 +365,17 @@ local_clock(
 
 			/*
 			 * Compute the FLL and PLL frequency adjustments
-			 * conditioned on two weighting factors, one
-			 * which limits the time constant determined
-			 * from the Allan intercept, the other which
-			 * limits the gain factor as a function of
-			 * update interval. The net effect is to favor
-			 * the PLL adjustments at the smaller update
-			 * intervals and the FLL adjustments at the
-			 * larger ones.
+			 * conditioned on intricate weighting factors.
+			 * For the FLL, the averaging interval is
+			 * clamped not to decrease below the Allan
+			 * intercept and the gain is decreased from
+			 * unity for mu above CLOCK_MINSEC (1024 s) to
+			 * zero below CLOCK_MINSEC (256 s). For the PLL,
+			 * the averaging interval is clamped not to
+			 * exceed the sustem poll interval. These
+			 * measures insure stability of the clock
+			 * discipline even when the rules of fair
+			 * engagement are broken.
 			 */
 			dtemp = max(mu, allan_xpt);
 			etemp = min(max(0, mu - CLOCK_MINSEC) /
@@ -379,7 +383,8 @@ local_clock(
 			flladj = fp_offset * etemp / (dtemp *
 			    CLOCK_AVG);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
-			plladj = fp_offset * mu / (dtemp * dtemp);
+			etemp = min(mu, ULOGTOD(sys_poll));
+			plladj = fp_offset * etemp / (dtemp * dtemp);
 			clock_offset = fp_offset;
 			break;
 		}

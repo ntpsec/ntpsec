@@ -36,7 +36,7 @@ extern	struct refclock	refclock_pst;
 #define	refclock_pst	refclock_none
 #endif
 
-#ifdef CLOCK_CHU_AUDIO
+#ifdef CLOCK_CHU
 extern	struct refclock	refclock_chu;
 #else
 #define	refclock_chu	refclock_none

@@ -1,3 +1,56 @@
+1999-12-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: 
+	* ntpd/refclock_conf.c: 
+	* ntpd/refclock_chu.c: 
+	* ntpd/ntp_refclock.c: 
+	* ntpd/ntp_loopfilter.c: 
+	* html/refclock.htm: 
+	* html/pps.htm: 
+	* html/index.htm: 
+	* html/driver7.htm: 
+	* html/driver6.htm: 
+	* html/copyright.htm: 
+
+	I indulged an old agenda to polish up some programs originally
+	written for a DSP evaluation board. The result is a really hot
+	audio driver for the NIST WWV/WWVH time/frequency station plus a
+	makeover for the CHU audio driver. Currently, they and their IRIG
+	audio driver buddy use the SunOS/Solaris audio interface, which is
+	clean and simple. I hook the line in jack to a shortwave radio and
+	these drivers (driver 7 for CHU and driver 36 for WWV) and the
+	drivers do the rest. The WWV/H driver is really hot - I am
+	currently watching the ionosphere move from the doppler that shows
+	up on the tick modulation tracked by the program. During midday
+	when the F2 layer settles down, the program closes in on a few
+	tens of microseconds of spare jitter and wander.  This watch on
+	whichever 15/20 MHz signal sounds the best. At night on 5/10 MHz
+	and even 2.5 HMz where the multipath, interference and noise are
+	much worse, the driver bangs around somewhat more.
+
+	The CHU driver makeover discovered a few broken bones after all
+	these years, but its majority decoder is back in business. For
+	various reasons to icky to reveal here, its 103-modem demodulator
+	is not quite as good as the chip, but it comes close and hey,
+	2025/2125 FSK is just not a good idea for HF radio. This driver is
+	not nearly as sophisitcated as the WWV/H driver, but here a few
+	hundred miles south of Ottawa, it does a passably good job.
+
+	I tell you this in the hopes of getting somebody interested in
+	porting the audio interface to other machines, in particular
+	Linux, FreeBSD and anything else with a sound card. When the
+	ionosphere stays cool, the WWV/H driver is as good as anything
+	else around here and with much less jitter than a serial port. The
+	only downside is all the audio drivers chew up a modest fraction
+	of cycles for the DSP routines - a few percent on the newer
+	silicon, up to half the cycles on an old Sparc IPC. Whattheheck,
+	these old machines aren't doing anything else around here except
+	serving time, and even when sucking cycles for DSP they still mind
+	the PPS microseconds.
+
+	The audio driver documentation had a makeover, too.
+	From: Dave Mills <mills@udel.edu>
+
 1999-12-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98h
