@@ -99,7 +99,7 @@ transmit(
 		/*
 		 * The polling state machine. There are two kinds of
 		 * machines, those that never expect a reply (broadcast
-		 * and anycast modes) and those that do (all other
+		 * and manycast modes) and those that do (all other
 		 * modes). The dance is intricate...
 		 */
 		if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
@@ -114,7 +114,7 @@ transmit(
 		} else if (peer->cast_flags & MDF_ACAST) {
 
 			/*
-			 * In anycast mode we start with minimum poll
+			 * In manycast mode we start with minimum poll
 			 * interval and ttl. If fewer than three servers
 			 * are found, the ttl is increased by one and
 			 * try again. If this continues to the max ttl,
@@ -235,25 +235,26 @@ transmit(
 
 		}
 	}
+	peer->outdate = current_time;
+	poll_update(peer, hpoll);
 
 	/*
 	 * We need to be very careful about honking uncivilized time. If
 	 * in broadcast mode, transmit only if synchronized to a valid
 	 * source and this is not the local clock driver configured as
-	 * the prefer peer. If not in broadcast mode. transmit only if
+	 * the prefer peer. If not in broadcast mode, transmit only if
 	 * not broadcast client mode.
 	 */
 	if (peer->hmode == MODE_BROADCAST) {
-		if (!(sys_leap == LEAP_NOTINSYNC ||
-		    (sys_peer->refclktype == REFCLK_LOCALCLOCK &&
-		    sys_peer->flags & FLAG_PREFER)))
-			peer_xmit(peer);
-	} else {
-		if (peer->hmode != MODE_BCLIENT)
-			peer_xmit(peer);
+		if (sys_peer == NULL)
+			return;
+		else if (sys_peer->refclktype == REFCLK_LOCALCLOCK &&
+		    sys_peer->flags & FLAG_PREFER)
+			return;
+	} else if (peer->hmode == MODE_BCLIENT) {
+		return;
 	}
-	peer->outdate = current_time;
-	poll_update(peer, hpoll);
+	peer_xmit(peer);
 }
 
 /*
@@ -1412,10 +1413,10 @@ clock_select(void)
 	double high, low;
 	double synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
-	struct peer *typeacts = 0;
-	struct peer *typelocal = 0;
-	struct peer *typepps = 0;
-	struct peer *typesystem = 0;
+	struct peer *typeacts = NULL;
+	struct peer *typelocal = NULL;
+	struct peer *typepps = NULL;
+	struct peer *typesystem = NULL;
 
 	static int list_alloc = 0;
 	static struct endpoint *endpoint = NULL;
@@ -1429,7 +1430,9 @@ clock_select(void)
 	 * Initialize. If a prefer peer does not survive this thing,
 	 * the pps stratum will remain unspec.
 	 */
-	sys_prefer = 0;
+	osys_peer = sys_peer;
+	sys_peer = NULL;
+	sys_prefer = NULL;
 	nreach = nlist = 0;
 	low = 1e9;
 	high = -1e9;
@@ -1605,8 +1608,7 @@ clock_select(void)
 			peer_list[0] = typelocal;
 			nlist = 1;
 		} else {
-			if (sys_peer != NULL) {
-				sys_peer = NULL;
+			if (osys_peer != NULL) {
 				sys_poll = NTP_MINDPOLL;
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
@@ -1641,8 +1643,7 @@ clock_select(void)
 		peer = peer_list[i];
 		if (nlist > 1 && (low >= peer->offset ||
 			peer->offset >= high)) {
-			if (!(peer->flags & FLAG_CONFIG) && peer !=
-			    sys_peer)
+			if (!(peer->flags & FLAG_CONFIG))
 				unpeer(peer);
 			continue;
 		}
@@ -1716,8 +1717,7 @@ clock_select(void)
 		if (nlist <= NTP_MINCLOCK || sys_maxd <= d ||
 			peer_list[k]->flags & FLAG_PREFER)
 			break;
-		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
-		    peer_list[k] != sys_peer)
+		if (!(peer_list[k]->flags & FLAG_CONFIG))
 			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];
@@ -1728,9 +1728,9 @@ clock_select(void)
 
 #ifdef AUTOKEY
 	/*
-	 * In anycast client mode we may have spooked a sizeable number
+	 * In manycast client mode we may have spooked a sizeable number
 	 * of servers that we don't need. If there are at least
-	 * NTP_MINCLOCK of them, the anycast message will be turned off.
+	 * NTP_MINCLOCK of them, the manycast message will be turned off.
 	 * By the time we get here we nay be ready to prune some of them
 	 * back, but we want to make sure all the candicates have had a
 	 * chance. If they didn't pass the sanity and intersection
@@ -1774,7 +1774,7 @@ clock_select(void)
 	 * one of a flock of sources is out to lunch and just happens
 	 * to be the first survivor.
 	 */
-	if (sys_peer == NULL && 2 * nlist < min(nreach, NTP_MINCLOCK))
+	if (osys_peer == NULL && 2 * nlist < min(nreach, NTP_MINCLOCK))
 		return;
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
@@ -1787,16 +1787,13 @@ clock_select(void)
 			    REFCLK_ATOM_PPS && peer_list[i]->stratum <
 			    STRATUM_UNSPEC)
 				typepps = peer_list[i];
-			if (peer_list[i] == sys_peer)
+			if (peer_list[i] == osys_peer)
 				typesystem = peer_list[i];
 			if (peer_list[i]->flags & FLAG_PREFER) {
 				sys_prefer = peer_list[i];
 			}
-		} else {
-			if (peer_list[i] == sys_peer) {
-				sys_peer = NULL;
-				sys_poll = NTP_MINDPOLL;
-			}
+		} else if (peer_list[i] == osys_peer) {
+			sys_poll = NTP_MINDPOLL;
 		}
 	}
 
@@ -1812,7 +1809,6 @@ clock_select(void)
 	 * stated. Note that all of these must be at the lowest stratum,
 	 * i.e., the stratum of the head of the survivor list.
 	 */
-	osys_peer = sys_peer;
 	if (sys_prefer)
 		sw = sys_prefer->refclktype == REFCLK_LOCALCLOCK ||
 		    sys_prefer->sstclktype == CTL_SST_TS_TELEPHONE ||
@@ -1845,7 +1841,9 @@ clock_select(void)
 			    sys_offset);
 #endif
 	} else {
-		if (!typesystem)
+		if (typesystem)
+			sys_peer = osys_peer;
+		else
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = clock_combine(peer_list, nlist);

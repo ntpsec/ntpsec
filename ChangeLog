@@ -1,3 +1,12 @@
+2001-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Fix documentation. Set
+	peer->outdate and call poll_update in a new place.  Sanity checks
+	in the MODE_BROADCAST case.
+	(clock_select): Track the old peer.  Use the old peer in
+	subsequent checks, where appropriate.  Clean up unpeer() logic.
+	From Dave Mills.
+
 2001-01-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_chu.c: Start using HAVE_AUDIO.
