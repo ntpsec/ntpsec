@@ -182,7 +182,7 @@ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CF
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES =  $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) \
-libparse_kernel.a.c parsesolaris.c parsestreams.c
+parsesolaris.c parsestreams.c
 DIST_COMMON =  README Makefile.am Makefile.in
 
 
@@ -193,10 +193,10 @@ DEP_FILES =  .deps/clk_computime.P .deps/clk_dcf7000.P \
 .deps/clk_hopf6021.P .deps/clk_meinberg.P .deps/clk_rawdcf.P \
 .deps/clk_rcc8000.P .deps/clk_schmid.P .deps/clk_trimtaip.P \
 .deps/clk_trimtsip.P .deps/clk_varitext.P .deps/clk_wharton.P \
-.deps/data_mbg.P .deps/info_trimble.P .deps/libparse_kernel.a.P \
+.deps/data_mbg.P .deps/info_trimble.P \
 .deps/parse.P .deps/parse_conf.P .deps/parsesolaris.P \
 .deps/parsestreams.P .deps/trim_info.P
-SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) libparse_kernel.a.c parsesolaris.c parsestreams.c
+SOURCES = $(libparse_a_SOURCES) $(libparse_kernel_a_SOURCES) parsesolaris.c parsestreams.c
 OBJECTS = $(am_libparse_a_OBJECTS) $(am_libparse_kernel_a_OBJECTS) libparse_kernel.a$U.o parsesolaris$U.o parsestreams$U.o
 
 all: all-redirect
@@ -315,8 +315,6 @@ data_mbg_.c: data_mbg.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/data_mbg.c; then echo $(srcdir)/data_mbg.c; else echo data_mbg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > data_mbg_.c
 info_trimble_.c: info_trimble.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/info_trimble.c; then echo $(srcdir)/info_trimble.c; else echo info_trimble.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > info_trimble_.c
-libparse_kernel.a_.c: libparse_kernel.a.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/libparse_kernel.a.c; then echo $(srcdir)/libparse_kernel.a.c; else echo libparse_kernel.a.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > libparse_kernel.a_.c
 parse_.c: parse.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/parse.c; then echo $(srcdir)/parse.c; else echo parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > parse_.c
 parse_conf_.c: parse_conf.c $(ANSI2KNR)
