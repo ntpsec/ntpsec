@@ -68,6 +68,12 @@
 #ifndef _NTP_RFC2553_H_
 #define _NTP_RFC2553_H_
 
+/*
+ * Ensure that we include the configuration file before we check
+ * for IPV6
+ */
+#include <config.h>
+
 #ifndef ISC_PLATFORM_HAVEIPV6
 
 #include <sys/types.h>
