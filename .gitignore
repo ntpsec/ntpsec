@@ -21,6 +21,7 @@ Makefile.in
 aclocal.m4
 adjtimed/Makefile.in
 am.log
+autom4te.cache
 br-flock
 clockstuff/Makefile.in
 config.h.in
