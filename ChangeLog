@@ -1,5 +1,7 @@
 2001-05-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k31
+
 	* ntpdc/ntpdc_ops.c (sysstats): That's 'bad packet format'
 	(instead of '... length'), and 'packets rejected' (instead of
 	'limitation rejects'.
