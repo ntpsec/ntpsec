@@ -685,17 +685,19 @@ local_clock(
 	/*
 	 * Update the system time variables.
 	 */
-	dtemp = peer->disp + sys_jitter;
-	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
+	dtemp = peer->disp + (current_time - peer->epoch) * clock_phi +
+	    sys_jitter + fabs(last_offset);
+	if (!(peer->flags & FLAG_REFCLOCK) && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
 	record_loop_stats(last_offset, drift_comp, sys_jitter,
 	    clock_stability, sys_poll);
+
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %lu sysjit %.6f stab %.3f poll %d count %d\n",
-		    mu, sys_jitter, clock_stability * 1e6, sys_poll,
+		    "local_clock: mu %lu rootjit %.6f stab %.3f poll %d count %d\n",
+		    mu, dtemp, clock_stability * 1e6, sys_poll,
 		    tc_counter);
 #endif /* DEBUG */
 	return (retval);

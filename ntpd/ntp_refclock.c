@@ -556,7 +556,7 @@ refclock_receive(
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
 	peer->org = pp->lastrec;
-	peer->rootdispersion = pp->disp + SQRT(pp->jitter);
+	peer->rootdispersion = pp->disp;
 	get_systime(&peer->rec);
 	if (!refclock_sample(pp))
 		return;

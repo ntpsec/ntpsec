@@ -290,7 +290,6 @@ struct peer {
 	 * Ephemeral state variables
 	 */
 	u_char	status;		/* peer status */
-	u_char	pollsw;		/* what it says */
 	u_char	reach;		/* reachability register */
 	u_long	epoch;		/* reference epoch */
 	u_short	filter_nextpt;	/* index into filter shift register */

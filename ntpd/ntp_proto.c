@@ -484,7 +484,8 @@ receive(
 		if (debug)
 			printf("receive: at %ld %s<-%s mode %d code %d\n",
 			    current_time, stoa(&rbufp->dstadr->sin),
-			    stoa(&rbufp->recv_srcadr), hismode, retcode);
+			    stoa(&rbufp->recv_srcadr), hismode,
+			    retcode);
 #endif
 	} else {
 #ifdef OPENSSL
@@ -618,6 +619,14 @@ receive(
 			 * our time is worse than the manycaster or it
 			 * has already synchronized to us.
 			 */
+
+#ifdef DEBUG
+			if (debug)
+				printf("receive: refid %x %x stratum %d %d\n",
+				    rbufp->dstadr->addr_refid,
+				    pkt->refid, sys_stratum,
+				    PKT_TO_STRATUM(pkt->stratum));
+#endif
 			if (sys_peer == NULL ||
 			    PKT_TO_STRATUM(pkt->stratum) <
 			    sys_stratum || (sys_cohort &&
@@ -1252,14 +1261,13 @@ clock_update(void)
 
 	/*
 	 * Reset/adjust the system clock. Do this only if there is a
-	 * system peer and we haven't seen that peer lately. Watch for
-	 * timewarps here.
+	 * system peer and the peer epoch is not older than the last
+	 * update.
 	 */
 	if (sys_peer == NULL)
 		return;
-	if (sys_peer->pollsw == FALSE)
+	if (sys_peer->epoch <= last_time)
 		return;
-	sys_peer->pollsw = FALSE;
 #ifdef DEBUG
 	if (debug)
 		printf("clock_update: at %ld assoc %d \n", current_time,
@@ -1473,7 +1481,6 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->kpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
-	peer->pollsw = FALSE;
 	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 #ifdef REFCLOCK
@@ -1683,10 +1690,9 @@ clock_filter(
 
 	/*
 	 * The mitigated sample statistics are saved for later
-	 * processing, but can be processed only once.
+	 * processing.
 	 */
 	peer->epoch = peer->filter_epoch[k];
-	peer->pollsw = TRUE;
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -2657,8 +2663,6 @@ fast_xmit(
 
 		sys_kod--;
 		memcpy(&xpkt.refid, code, 4);
-		msyslog(LOG_INFO, "kiss-of-death %s to %s",
-		    code, ntoa(&rbufp->recv_srcadr));
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
@@ -2931,7 +2935,7 @@ init_proto(void)
 	sys_stattime = 0;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {
-		sys_ttl[i] = (u_char) ((i + 1) * 256 / MAX_TTL - 1);
+		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
 #ifdef OPENSSL
