@@ -118,6 +118,7 @@ case "$host" in
       case "$CFLAGS" in
        *-n32*) ;;
        *-n64*) ;;
+       *-64*) ;;
        *) case "$iCFLAGS" in
 	   '') CFLAGS="-O2 -g3 -n32" ;;
 	   *)  CFLAGS="$CFLAGS -n32" ;;
@@ -127,11 +128,15 @@ case "$host" in
       case "$LDFLAGS" in
        *-n32*) ;;
        *-n64*) ;;
+       *-64*) ;;
        *) LDFLAGS="$LDFLAGS -n32" ;;
       esac
     fi
     ;;
  *-*-solaris2.5.1)
+    ac_busted_vpath_in_make=yes
+    ;;
+ *-*-unicosmp*)
     ac_busted_vpath_in_make=yes
     ;;
 dnl This is currently commented out by bor. 
@@ -253,8 +258,8 @@ esac
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
 AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
 AC_CHECK_HEADERS(sys/stat.h sys/stream.h)
-AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/termios.h)
-AC_CHECK_HEADERS(sys/time.h sys/signal.h)
+AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/systune.h)
+AC_CHECK_HEADERS(sys/termios.h sys/time.h sys/signal.h)
 AC_EGREP_CPP(yes,
 [#include <sys/timepps.h>
 #ifdef PPS_API_VERS_1
@@ -613,8 +618,8 @@ case "$host" in
  *-*-aix4*)
     # Just a stub.  Idiots.
     ;;
- *-*-irix*)
-    # Just a stub in Irix.  Idiots.
+ *-*-irix[[45]]*)
+    # Just a stub in "old" Irix.  Idiots.
     ;;
  *-*-qnx*)
     # Apparently there but not working in QNX.  Idiots?
@@ -1116,6 +1121,9 @@ case "$ac_cv_hdr_def_sigio" in
      *-*-linux*)
 	ans=no
 	;;
+     *-*-unicosmp*)
+	ans=no
+	;;
     esac
     ;;
 esac
@@ -1178,6 +1186,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-ultrix*)
         ans=no
         ;;
+     *-*-unicosmp*)
+        ans=no
+        ;;
      *) ans=yes
         ;;
     esac
@@ -1224,6 +1235,9 @@ case "$ac_cv_hdr_def_sigpoll" in
         ans=no
         ;;
      *-*-qnx*)
+        ans=no
+        ;;
+     *-*-unicosmp*)
         ans=no
         ;;
      *) ans=yes
@@ -1294,6 +1308,9 @@ case "$host" in
  i?86-*-freebsd[[123]].*)
     ;;
  i?86-*-freebsd*)
+    ans=yes
+    ;;
+ *-*-unicosmp*)
     ans=yes
     ;;
 esac
@@ -2677,6 +2694,9 @@ AC_CACHE_CHECK(if we can read kmem, ac_cv_var_can_kmem,
      *-*-winnt3.5)
 	ans=no
 	;;
+     *-*-unicosmp*)
+	ans=no
+	;;
     esac
     ])
 ac_cv_var_can_kmem=$ans])
@@ -2713,6 +2733,9 @@ AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
 	 ans=no
 	 ;;
       *-*-solaris2*)
+         ans=yes
+         ;;
+      *-*-unicosmp*)
          ans=yes
          ;;
       *) ans=no
@@ -2966,6 +2989,9 @@ AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
       *-*-winnt3.5)
 	 ans='(every / 10)'
 	 ;;
+      *-*-unicosmp*)
+	 ans=10000
+	 ;;
       *)
 	 ans='1000000L/hz'
 	 ;;
@@ -3025,6 +3051,9 @@ AC_CACHE_CHECK(for a default value for 'tickadj', ac_cv_var_tickadj,
       ;;
    *-*-winnt3.5)
       ans=50
+      ;;
+   *-*-unicosmp*)
+      ans=150
       ;;
   esac])
 ac_cv_var_tickadj=$ans])
@@ -3112,6 +3141,9 @@ case "$host" in
      *) ac_cv_make_tickadj=no ;;
     esac
     ;;
+ *-*-unicosmp*)
+    ac_cv_make_tickadj=no
+    ;;
 esac
 AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
 ac_cv_make_tickadj=yes)
@@ -3125,6 +3157,9 @@ AC_SUBST(MAKE_TIMETRIM)
 AC_CACHE_CHECK(if we want and can make the timetrim utility, ac_cv_make_timetrim,
 [case "$host" in
  *-*-irix*)
+    ac_cv_make_timetrim=yes
+    ;;
+ *-*-unicosmp*)
     ac_cv_make_timetrim=yes
     ;;
  *)
@@ -3185,6 +3220,9 @@ AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery
 	 ans=yes
 	 ;;
       *-*-sunos4*)
+	 ans=yes
+	 ;;
+      *-*-unicosmp*)
 	 ans=yes
 	 ;;
      esac])
