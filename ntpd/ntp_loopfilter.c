@@ -276,9 +276,12 @@ local_clock(
 	clock_frequency = flladj = plladj = 0;
 	mu = current_time - last_time;
 
-printf("yyy %f %f %d\n", fabs(fp_offset), mu, state);
+printf("yyy %f %f %f %d\n", fabs(fp_offset), mu, clock_max, state);
 
 	if (fabs(fp_offset) > clock_max) {
+
+printf("zzz %f %f %f %d\n", fabs(fp_offset), mu, clock_minstep, state);
+
 		switch (state) {
 
 		/*
