@@ -134,7 +134,7 @@ adj_systime(
 		adjtv.tv_usec = -adjtv.tv_usec;
 	}
 	if (adjtime(&adjtv, &oadjtv) < 0) {
-		msyslog(LOG_ERR, "adj_systime: error %m");
+		msyslog(LOG_ERR, "adj_systime: %m");
 		return (0);
 	}
 	return (1);
@@ -203,7 +203,7 @@ step_systime(
 		}
 	}
 	if (ntp_set_tod(&timetv, NULL) != 0) {
-		msyslog(LOG_ERR, "Can't set time of day: %m");
+		msyslog(LOG_ERR, "step-systime: %m");
 		return (0);
 	}
 	sys_residual = 0;
@@ -371,7 +371,6 @@ adj_systime(
         )
 {
 	struct timeval adjtv;	/* new adjustment */
-	struct timeval oadjtv;	/* residual adjustment */
 	double	dtemp;
 	long	ticks;
 	int	isneg = 0;
