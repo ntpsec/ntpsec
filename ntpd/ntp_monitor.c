@@ -82,7 +82,8 @@ static	int mon_mem_increments;		/* times called malloc() */
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-int	mon_enabled;
+int	mon_enabled;			/* enable switch */
+u_long	mon_age = 3000;			/* preemption limit */
 static	int mon_have_memory;
 static	void	mon_getmoremem	P((void));
 static	void	remove_from_hash P((struct mon_data *));
@@ -235,9 +236,13 @@ ntp_monitor(
 	if (mon_free == NULL && mon_total_mem >= MAXMONMEM) {
 
 		/*
-		 * Get it from MRU list.
+		 * Preempt from the MRU list if old enough.
 		 */
 		md = mon_mru_list.mru_prev;
+		if (((u_long)RANDOM & 0xffffffff) / FRAC >
+		    (double)(current_time - md->lasttime) / mon_age)
+			return;
+
 		md->mru_prev->mru_next = &mon_mru_list;
 		mon_mru_list.mru_prev = md->mru_prev;
 		remove_from_hash(md);
@@ -252,7 +257,7 @@ ntp_monitor(
 	 * Got one, initialize it
 	 */
 	md->avg_interval = 0;
-	md->lasttime = md->firsttime = current_time;
+	md->lasttime = current_time;
 	md->count = 1;
 	md->drop_count = 0;
 	memset(&md->rmtadr, 0, sizeof(md->rmtadr));
