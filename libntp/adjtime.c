@@ -2,16 +2,6 @@
 # include <config.h>
 #endif
 
-#ifdef __QNXNTO__
-#include <sys/neutrino.h>
-#include <sys/time.h>
-int adjtime( const struct timeval * oldtime, struct timeval * newtime )
-{
-    return ClockAdjust( CLOCK_REALTIME, (struct _clockadjust *) newtime,
-		(struct _clockadjust *) oldtime );
-}// adjtime()
-#endif
-
 #ifdef MPE 
 /*
  * MPE lacks adjtime(), so we define our own.  But note that time slewing has
