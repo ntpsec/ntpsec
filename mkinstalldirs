@@ -4,7 +4,7 @@
 # Created: 1993-05-16
 # Public domain
 
-# $Id: .del-mkinstalldirs~3aed0663 1.5 2001/10/08 01:57:13-04:00 stenn@whimsy.udel.edu $
+# $Id: .del-mkinstalldirs~3aed0663 1.7 2001/10/08 21:17:54-04:00 stenn@whimsy.udel.edu $
 
 errstatus=0
 
