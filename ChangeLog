@@ -1,5 +1,8 @@
 2001-03-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_heath.c: Add support for GC-1000 II.
+	From Dave Mills.
+
 	* ntpd/ntp_proto.c (transmit): Check peer->unreach.
 	(peer_clear): peer->outdate is a f(BURST_INTERVAL1), not
 	NTP_MINPOLL.
