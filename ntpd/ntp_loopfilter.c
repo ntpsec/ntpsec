@@ -589,6 +589,12 @@ local_clock(
 				    "kernel time sync disabled %04x",
 				    ntv.status);
 			ntv.status &= ~(STA_PPSFREQ | STA_PPSTIME);
+		} else {
+			if (ntv.status != pll_status)
+				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+				    msyslog(LOG_NOTICE,
+				    "kernel time sync enabled %04x",
+				    ntv.status);
 		}
 		pll_status = ntv.status;
 		if (pll_nano)
