@@ -497,8 +497,7 @@ local_clock(
 				i = 6;
 			etemp = fll[i];
 			dtemp = max(mu, ULOGTOD(allan_xpt));
-			flladj = ((fp_offset - last_offset) +
-			    (clock_offset - last_offset)) * etemp /
+			flladj = (fp_offset - clock_offset) * etemp /
 			    (dtemp * CLOCK_FLL);
 			dtemp = ULOGTOD(SHIFT_PLL + 2 + sys_poll);
 			etemp = min(mu, ULOGTOD(sys_poll));
