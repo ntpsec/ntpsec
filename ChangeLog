@@ -1,5 +1,7 @@
 2000-05-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99i6
+
 	* ntpd/ntp_proto.c (transmit): Fix up the UNREACH code.
 	(receive): Lose some debug code.
 	(clock_update): expire_all() if LEAP_NOTINSYNC
