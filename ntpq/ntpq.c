@@ -1598,10 +1598,14 @@ getarg(
 				return 0;
 			}
 			if (isneg > numassoc) {
-				(void) fprintf(stderr,
-					       "***Association for `%s' unknown (max &%d)\n",
-					       str, numassoc);
-				return 0;
+				if (numassoc == 0) {
+					(void) fprintf(stderr,
+						       "***Association for `%s' unknown (max &%d)\n",
+						       str, numassoc);
+					return 0;
+				} else {
+					isneg = numassoc;
+				}
 			}
 			argp->uval = assoc_cache[isneg-1].assid;
 			break;
