@@ -659,7 +659,8 @@ ntpdatemain (
 	return clock_adjust();
 }
 
-void stop_timer(void)
+static void
+stop_timer(void)
 {
         struct itimerval itimer;
 
@@ -1668,7 +1669,7 @@ init_io(void)
     	   }
 #ifdef IPV6_V6ONLY
            /* Restricts AF_INET6 socket to IPv6 communications (see RFC 2553bis-03) */
-           if(res->ai_family = AF_INET6)
+           if (res->ai_family == AF_INET6)
                 if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
    		           msyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
    		           exit(1);
@@ -1821,9 +1822,9 @@ input_handler(void)
 	 * Do a poll to see if we have data
 	 */
 	for (;;) {
-		memcpy(&fds, &fdmask, sizeof(fdmask));
 		tvzero.tv_sec = tvzero.tv_usec = 0;
 #ifdef HAVE_POLL_H
+		memcpy(fds, fdmask, sizeof(fdmask));
                 n = poll(fds, (unsigned int)nbsock, tvzero.tv_sec * 1000);
 
                 /*
@@ -1838,6 +1839,7 @@ input_handler(void)
                  }
 
 #else
+		fds = fdmask;
                 n = select(maxfd, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
 
                 /*
