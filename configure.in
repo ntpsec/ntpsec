@@ -331,6 +331,22 @@ dnl #endif
 dnl ], su_cv_have_boot_time=yes, su_cv_have_boot_time=no)])
 dnl AC_MSG_RESULT($su_cv_have_boot_time)
 
+AC_CACHE_CHECK(
+  struct sigaction for sa_sigaction,
+  ac_cv_struct_sigaction_has_sa_sigaction,
+  [
+    AC_TRY_COMPILE(
+      [#include <signal.h>],
+      [struct sigaction act; act.sa_sigaction = 0;],
+      ac_cv_struct_sigaction_has_sa_sigaction=yes,
+      ac_cv_struct_sigaction_has_sa_sigaction=no
+    )
+  ]
+)
+if test $ac_cv_struct_sigaction_has_sa_sigaction = yes; then
+  AC_DEFINE(HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION)
+fi
+
 AC_CACHE_CHECK(for struct ppsclockev, ac_cv_struct_ppsclockev,
 [AC_TRY_COMPILE([
 #include <sys/types.h>

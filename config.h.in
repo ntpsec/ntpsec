@@ -251,6 +251,9 @@
 /* define if struct clockinfo has hz */
 #undef HAVE_HZ_IN_STRUCT_CLOCKINFO
 
+/* define if struct sigaction has sa_sigaction */
+#undef HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION
+
 /* define if struct clockinfo has tickadj */
 #undef HAVE_TICKADJ_IN_STRUCT_CLOCKINFO
 
