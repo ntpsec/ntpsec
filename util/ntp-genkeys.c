@@ -19,6 +19,10 @@
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
+#ifndef GETTIMEOFDAY
+# define GETTIMEOFDAY gettimeofday
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>		/* PATH_MAX */
