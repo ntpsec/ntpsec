@@ -1,5 +1,10 @@
 2000-05-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* build (KEYSUF): 
+	* flock-build: 
+	* configure.in: Lose the "md5" options from the --with-crypto
+	check; Dave hates it.
+
 	* ntpd/ntp_util.c (stats_config): 
 	* ntpd/ntp_loopfilter.c (loop_config): 
 	* libntp/systime.c (adj_systime): 

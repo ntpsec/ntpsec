@@ -2227,12 +2227,12 @@ AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
 AC_SUBST(MAKE_NTP_GENKEYS)
 AC_MSG_CHECKING(for the level of crypto support)
-AC_ARG_WITH(crypto,	[  --with-crypto           + ={md5,autokey,rsaref}],
+AC_ARG_WITH(crypto,	[  --with-crypto           + ={autokey,rsaref}],
 [ans=$withval], [ans=yes])
 case "$ans" in
- no) ans=md5 ;;
+ no) ;;
  yes|rsaref)
-    ans=md5
+    ans=no
     if test -f $srcdir/rsaref2/source/rsa.c
     then
 	ans=rsaref
@@ -2246,7 +2246,7 @@ case "$ans" in
 esac
 AC_SUBST(AUTOKEY)
 case "$ans" in
- md5) ;;
+ no) ;;
  *)
     AC_DEFINE(AUTOKEY, , [Autokey?])
     AUTOKEY=1

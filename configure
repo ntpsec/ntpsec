@@ -143,7 +143,7 @@ ac_arg_enable_help="$ac_arg_enable_help
 ac_arg_enable_help="$ac_arg_enable_help
   --enable-VARITEXT       s VARITEXT clock"
 ac_arg_with_help="$ac_arg_with_help
-  --with-crypto           + ={md5,autokey,rsaref}"
+  --with-crypto           + ={autokey,rsaref}"
 ac_arg_enable_help="$ac_arg_enable_help
   --enable-kmem           s read /dev/kmem for tick and/or tickadj"
 ac_arg_enable_help="$ac_arg_enable_help
@@ -9911,9 +9911,9 @@ else
 fi
 
 case "$ans" in
- no) ans=md5 ;;
+ no) ;;
  yes|rsaref)
-    ans=md5
+    ans=no
     if test -f $srcdir/rsaref2/source/rsa.c
     then
 	ans=rsaref
@@ -9933,7 +9933,7 @@ EOF
 esac
 
 case "$ans" in
- md5) ;;
+ no) ;;
  *)
     cat >>confdefs.h <<\EOF
 #define AUTOKEY 

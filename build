@@ -50,8 +50,8 @@ case "$CONFIG_ARGS" in
  *--with-crypto=autokey*)
     KEYSUF="-autokey"
     ;;
- *--with-crypto=md5*)
-    [ -d rsaref2 ] && KEYSUF="-md5"
+ *--without-crypto*)
+    [ -d rsaref2 ] && KEYSUF="-norsaref"
     ;;
 esac
 
