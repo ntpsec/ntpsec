@@ -22,7 +22,12 @@ AC_STRUCT_TM
 AC_FUNC_MEMCMP
 AC_FUNC_SETVBUF_REVERSED
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm gethostbyaddr gethostbyname gettimeofday inet_ntoa memset socket sqrt strrchr])
+AC_CHECK_FUNCS([alarm])
+AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
+AC_CHECK_FUNCS([gettimeofday inet_ntoa memset])
+AC_CHECK_FUNCS(socket, , AC_CHECK_LIB(socket, socket))
+AC_CHECK_FUNCS(sqrt, , AC_CHECK_LIB(m, sqrt))
+AC_CHECK_FUNCS([strrchr])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
