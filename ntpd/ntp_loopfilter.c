@@ -102,7 +102,9 @@ u_long	pps_control;		/* last pps sample time */
 static void rstclock P((int));	/* state transition function */
 
 #ifdef KERNEL_PLL
-int pll_status;			/* status bits for kernel pll */
+struct timex ntv;		/* kernel API parameters */
+int	pll_status;		/* status bits for kernel pll */
+int	pll_nano;		/* nanosecond kernel switch */
 #endif /* KERNEL_PLL */
 
 /*
@@ -116,10 +118,6 @@ int	pps_update;		/* pps update valid */
 int	allow_set_backward = TRUE; /* step corrections allowed */
 int	correct_any = FALSE;	/* corrections > 1000 s allowed */
 
-#ifdef STA_NANO
-int	pll_nano;		/* nanosecond kernel switch */
-#endif /* STA_NANO */
-
 /*
  * Clock state machine variables
  */
@@ -129,7 +127,6 @@ int	tc_counter;		/* poll-adjust counter */
 u_long	last_time;		/* time of last clock update (s) */
 double	last_offset;		/* last clock offset (s) */
 double	allan_xpt;		/* Allan intercept (s) */
-double	sys_error;		/* system RMS error (s) */
 double	sys_jitter;		/* system RMS jitter (s) */
 
 #if defined(KERNEL_PLL)
@@ -175,10 +172,6 @@ local_clock(
 	double clock_frequency;	/* clock frequency adjustment (ppm) */
 	double dtemp, etemp;	/* double temps */
 	int retval;		/* return value */
-
-#if defined(KERNEL_PLL)
-	struct timex ntv;	/* kernel interface structure */
-#endif /* KERNEL_PLL */
 
 #ifdef DEBUG
 	if (debug)
@@ -423,25 +416,21 @@ local_clock(
 				dtemp = -.5;
 			else
 				dtemp = .5;
-#ifdef STA_NANO
-			if (pll_nano)
+			if (pll_nano) {
 				ntv.offset = (int32)(clock_offset *
 				    1e9 + dtemp);
-			else
-#endif /* STA_NANO */
+				ntv.constant = sys_poll;
+			} else {
 				ntv.offset = (int32)(clock_offset *
 				    1e6 + dtemp);
+				ntv.constant = sys_poll - 4;
+			}
 			if (clock_frequency != 0) {
 				ntv.modes |= MOD_FREQUENCY;
 				ntv.freq = (int32)((clock_frequency +
 				    drift_comp) * 65536e6);
 			}
-#ifdef STA_NANO
-			ntv.constant = sys_poll;
-#else
-			ntv.constant = sys_poll - 4;
-#endif /* STA_NANO */
-			ntv.esterror = (u_int32)(sys_error * 1e6);
+			ntv.esterror = (u_int32)(sys_jitter * 1e6);
 			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
 			    sys_rootdispersion) * 1e6);
 			ntv.status = STA_PLL;
@@ -486,21 +475,17 @@ local_clock(
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
 			if (ntv.status != pll_status)
 				msyslog(LOG_ERR,
-				    "kernel pll status change %x",
+				    "kernel time discipline status change %x",
 				    ntv.status);
 		}
 		pll_status = ntv.status;
-#ifdef STA_NANO
-		if (pll_nano)
+		if (pll_nano) {
 			clock_offset = ntv.offset / 1e9;
-		else
-#endif /* STA_NANO */
+			sys_poll = ntv.constant;
+		} else {
 			clock_offset = ntv.offset / 1e6;
-#ifdef STA_NANO
-		sys_poll = ntv.constant;
-#else
-		sys_poll = ntv.constant + 4;
-#endif /* STA_NANO */
+			sys_poll = ntv.constant + 4;
+		}
 		clock_frequency = ntv.freq / 65536e6 - drift_comp;
 		flladj = plladj = 0;
 
@@ -514,11 +499,9 @@ local_clock(
 				NLOG(NLOG_SYSEVENT)msyslog(LOG_INFO,
 				    "pps sync enabled");
 			pps_control = current_time;
-#ifdef STA_NANO
 			if (pll_nano)
 				sys_jitter = ntv.jitter / 1e9;
 			else
-#endif /* STA_NANO */
 				sys_jitter = ntv.jitter / 1e6;
 			sys_poll = ntv.shift;
 		}
@@ -574,10 +557,7 @@ local_clock(
 	 */
 	last_time = current_time;
 	last_offset = clock_offset;
-	dtemp = SQUARE(sys_error);
-	sys_error = SQRT(dtemp + (SQUARE(last_offset) - dtemp) /
-	    CLOCK_AVG);
-	dtemp = peer->disp + SQRT(peer->variance + SQUARE(sys_jitter));
+	dtemp = peer->disp + SQRT(peer->jitter + SQUARE(sys_jitter));
 	if ((peer->flags & FLAG_REFCLOCK) == 0 && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
@@ -592,9 +572,9 @@ local_clock(
 #ifdef DEBUG
 	if (debug > 1)
 		printf(
-	"local_clock: err %.6f jit %.6f freq %.3f stab %.3f poll %d cnt %d\n",
-		    sys_error, sys_jitter, drift_comp * 1e6,
-		    clock_stability * 1e6, sys_poll, tc_counter);
+		    "local_clock: jit %.6f freq %.3f stab %.3f poll %d cnt %d\n",
+		    sys_jitter, drift_comp * 1e6, clock_stability * 1e6,
+		    sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (retval);
 }
@@ -723,58 +703,38 @@ loop_config(
 	double freq
 	)
 {
-#if defined(KERNEL_PLL)
-	struct timex ntv;
-#endif /* KERNEL_PLL */
 
-#ifdef DEBUG
-	if (debug)
-		printf("loop_config: state %d freq %.3f\n", item, freq *
-		    1e6);
-#endif
 	switch (item) {
-
 	    case LOOP_DRIFTINIT:
-	    case LOOP_DRIFTCOMP:
 
-		/*
-		 * The drift file is present and the initial frequency
-		 * is available, so set the state to S_FSET
-		 */
-		rstclock(S_FSET);
-		drift_comp = freq;
-		if (drift_comp > NTP_MAXFREQ)
-			drift_comp = NTP_MAXFREQ;
-		if (drift_comp < -NTP_MAXFREQ)
-			drift_comp = -NTP_MAXFREQ;
 #ifdef KERNEL_PLL
 		/*
-		 * If the phase-lock code is implemented in the kernel,
-		 * give the time_constant and saved frequency offset to
-		 * the kernel. If not, no harm is done. Note the initial
-		 * time constant is zero, but the first clock update
-		 * will fix that.
+		 * Assume the kernel supports the ntp_adjtime() syscall.
+		 * If that syscall works, initialize the kernel
+		 * variables. Otherwise, continue leaving no harm
+		 * behind. While at it, ask to set nanosecond mode. If
+		 * the kernel agrees, rejoice; othewise, it does only
+		 * microseconds.
 		 */
-		memset((char *)&ntv, 0, sizeof ntv);
 		pll_control = 1;
-#ifdef MOD_NANO
+		memset((char *)&ntv, 0, sizeof ntv);
+#if NTP_API > 3 
 		ntv.modes = MOD_NANO;
-#endif /* MOD_NANO */
+#endif /* NTP_API */
+
 #ifdef SIGSYS
+		/*
+		 * Use sigsetjmp() to save state and then call
+		 * ntp_adjtime(); if it fails, then siglongjmp() is used
+		 * to return control
+		 */
 		newsigsys.sa_handler = pll_trap;
 		newsigsys.sa_flags = 0;
 		if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
 			msyslog(LOG_ERR,
 			    "sigaction() fails to save SIGSYS trap: %m");
 			pll_control = 0;
-			return;
 		}
-
-		/*
-		 * Use sigsetjmp() to save state and then call
-		 * ntp_adjtime(); if it fails, then siglongjmp() is used
-		 * to return control
-		 */
 		if (sigsetjmp(env, 1) == 0)
 			(void)ntp_adjtime(&ntv);
 		if ((sigaction(SIGSYS, &sigsys,
@@ -782,7 +742,6 @@ loop_config(
 			msyslog(LOG_ERR,
 			    "sigaction() fails to restore SIGSYS trap: %m");
 			pll_control = 0;
-			return;
 		}
 #else /* SIGSYS */
 		if (ntp_adjtime(&ntv) < 0) {
@@ -791,42 +750,68 @@ loop_config(
 			pll_control = 0;
 		}
 #endif /* SIGSYS */
-
-		/*
-		 * If the kernel support is available and enabled,
-		 * initialize the parameters, but only if the external
-		 * clock is not present.
-		 */
-		if (pll_control && kern_enable) {
-			msyslog(LOG_NOTICE,
-		 	    "using kernel phase-lock loop %04x",
-			    ntv.status);
-#ifdef STA_NANO
+#if NTP_API > 3
+		if (pll_control) {
 			if (ntv.status & STA_NANO)
 				pll_nano = 1;
-#endif /* STA_NANO */
-#ifdef STA_CLK
-
-			if (ntv.status & STA_CLK) {
+			if (ntv.status & STA_CLK)
 				ext_enable = 1;
-			} else {
-				ntv.modes = MOD_BITS | MOD_FREQUENCY;
+		}
+#endif /* NTP_API */
+#endif /* KERNEL_PLL */
+		break;
+
+	    case LOOP_DRIFTCOMP:
+
+		/*
+		 * Initialize the kernel frequency and clamp to
+		 * reasonable value. Also set the initial state to
+		 * S_FSET to indicated the frequency has been
+		 * initialized from the previously saved drift file.
+		 */
+		rstclock(S_FSET);
+		drift_comp = freq;
+		if (drift_comp > NTP_MAXFREQ)
+			drift_comp = NTP_MAXFREQ;
+		if (drift_comp < -NTP_MAXFREQ)
+			drift_comp = -NTP_MAXFREQ;
+
+#ifdef KERNEL_PLL
+		/*
+		 * If the kernel support is available. initialize the
+		 * parameters. If an external clock is present, it
+		 * should be initialized and the STA_CLK bit set before
+		 * NTP is started. If the kernel has been running for
+		 * awhile and the offset and frequency previously set,
+		 * but the kernel is explicitly disabled, scratch the
+		 * previous offset and frequency values, but leave the
+		 * time constant alone.
+		 */
+		if (pll_control) {
+			memset((char *)&ntv, 0, sizeof ntv);
+			ntv.modes = MOD_BITS | MOD_FREQUENCY;
+			if (kern_enable) {
+				msyslog(LOG_NOTICE,
+		 	 	   "using kernel time discipline %04x",
+				    ntv.status);
 				ntv.freq = (int32)(drift_comp *
 				    65536e6);
-				ntv.maxerror = MAXDISPERSE;
-				ntv.esterror = MAXDISPERSE;
-				ntv.status = STA_UNSYNC | STA_PLL;
-				(void)ntp_adjtime(&ntv);
+			} else {
+				msyslog(LOG_NOTICE,
+		 	 	   "kernel time discipline disabled %04x",
+				    ntv.status);
+				ntv.freq = 0;
 			}
-#else
-			ntv.modes = MOD_BITS | MOD_FREQUENCY;
-			ntv.freq = (int32)(drift_comp * 65536e6);
 			ntv.maxerror = MAXDISPERSE;
 			ntv.esterror = MAXDISPERSE;
 			ntv.status = STA_UNSYNC | STA_PLL;
 			(void)ntp_adjtime(&ntv);
-#endif /* STA_CLK */
+
+		} else {
+			msyslog(LOG_NOTICE,
+			    "using NTP daemon time discipline");
 		}
+		break;
 #endif /* KERNEL_PLL */
 	}
 }

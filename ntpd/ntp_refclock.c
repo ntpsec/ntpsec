@@ -491,18 +491,18 @@ refclock_process(
  *
  * This routine implements a recursive median filter to suppress spikes
  * in the data, as well as determine a performance statistic. It
- * calculates the mean offset and mean-square variance. A time
- * adjustment fudgetime1 can be added to the final offset to compensate
- * for various systematic errors. The routine returns the number of
- * samples processed, which could be 0.
+ * calculates the mean offset and jitter (squares). A time adjustment
+ * fudgetime1 can be added to the final offset to compensate for various
+ * systematic errors. The routine returns the number of samples
+ * processed, which could be zero.
  */
 static int
 refclock_sample(
 	struct refclockproc *pp
 	)
 {
-	int i, j, k, n;
-	double offset, disp;
+	int i, j, k, m, n;
+	double offset, jitter;
 	double off[MAXSTAGE];
 
 	/*
@@ -522,8 +522,8 @@ refclock_sample(
 	 * approximately 60 percent of the samples remain.
 	 */
 	i = 0; j = n;
-	k = n - (n * 2) / NSTAGE;
-	while ((j - i) > k) {
+	m = n - (n * 2) / NSTAGE;
+	while ((j - i) > m) {
 		offset = off[(j + i) / 2];
 		if (off[j - 1] - offset < offset - off[i])
 			i++;	/* reject low end */
@@ -532,21 +532,21 @@ refclock_sample(
 	}
 
 	/*
-	 * Determine the offset and variance.
+	 * Determine the offset and jitter.
 	 */
-	offset = disp = 0;
-	for (; i < j; i++) {
-		offset += off[i];
-		disp += SQUARE(off[i]);
+	offset = jitter = 0;
+	for (k = i; k < j; k++) {
+		offset += off[k];
+		if (k > i)
+			jitter += SQUARE(off[k] - off[k - 1]);
 	}
-	offset /= k;
-	pp->offset = offset;
-	pp->variance = disp / k - SQUARE(offset);
+	pp->offset = offset / m;
+	pp->jitter = jitter / m;
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "refclock_sample: n %d offset %.6f disp %.6f std %.6f\n",
-		    n, pp->offset, pp->disp, SQRT(pp->variance));
+		    "refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
+		    n, pp->offset, pp->disp, SQRT(pp->jitter));
 #endif
 	return (n);
 }
@@ -592,7 +592,7 @@ refclock_receive(
 		report_event(EVNT_REACH, peer);
 	peer->reach |= 1;
 	peer->reftime = peer->org = pp->lastrec;
-	peer->rootdispersion = pp->disp + SQRT(pp->variance);
+	peer->rootdispersion = pp->disp + SQRT(pp->jitter);
 	get_systime(&peer->rec);
 	if (!refclock_sample(pp))
 		return;
@@ -600,7 +600,7 @@ refclock_receive(
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, CLOCK_PHI * (current_time -
-	    peer->epoch), SQRT(peer->variance));
+	    peer->epoch), SQRT(peer->jitter));
 	if (pps_control && pp->sloppyclockflag & CLK_FLAG1)
 		pp->fudgetime1 -= pp->offset * FUDGEFAC;
 }

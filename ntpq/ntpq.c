@@ -107,16 +107,15 @@ struct ctl_var sys_var[] = {
 	{ CS_POLL,	UI,	"poll" },	/* 8 */
 	{ CS_PEERID,	UI,	"peer" },	/* 9 */
 	{ CS_STATE,	UI,	"state" },	/* 10 */
-	{ CS_OFFSET,	FL,	"phase" },	/* 11 */
+	{ CS_OFFSET,	FL,	"offset" },	/* 11 */
 	{ CS_DRIFT,	FS,	"frequency" },	/* 12 */
-	{ CS_COMPLIANCE, FU,	"error" },	/* 13 */
-	{ CS_JITTER,	FU,	"jitter" },	/* 14 */
-	{ CS_CLOCK,	TS,	"clock" },	/* 15 */
-	{ CS_PROCESSOR,	ST,	"processor" },	/* 16 */
-	{ CS_SYSTEM,	ST,	"system" },	/* 17 */
-	{ CS_VERSION,	ST,	"version" },	/* 18 */
-	{ CS_STABIL,	FS,	"stability" },	/* 19 */
-	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 20 */
+	{ CS_JITTER,	FU,	"jitter" },	/* 13 */
+	{ CS_CLOCK,	TS,	"clock" },	/* 14 */
+	{ CS_PROCESSOR,	ST,	"processor" },	/* 15 */
+	{ CS_SYSTEM,	ST,	"system" },	/* 16 */
+	{ CS_VERSION,	ST,	"version" },	/* 17 */
+	{ CS_STABIL,	FS,	"stability" },	/* 18 */
+	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 19 */
 	{ 0,		EOV,	""	}
 };
 

@@ -1390,7 +1390,6 @@ chu_major(
 		return (0);
 	}
 	pp->lastref = offset;
-	pp->variance = 0;
 	for (i = 0; i < up->ntstamp; i++) {
 		toffset = offset;
 		L_SUB(&toffset, &up->tstamp[i]);

@@ -635,7 +635,7 @@ newpeer(
 	peer->ttl = ttl;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->precision = sys_precision;
-	peer->variance = MAXDISPERSE;
+	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 	peer->stratum = STRATUM_UNSPEC;
 	peer_clear(peer);

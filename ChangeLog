@@ -1,3 +1,31 @@
+2000-09-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpq/ntpq.c: report offset as "offset", not "phase".  Lose
+	compliance.
+	* ntpd/refclock_local.c (local_poll): variance -> jitter
+	* ntpd/refclock_chu.c (chu_major): Lose variance.
+	* ntpd/ntp_util.c (hourly_stats): sys_error -> sys_jitter
+	(record_loop_stats): ditto
+	* ntpd/ntp_request.c (peer_info): variance -> jitter
+	* ntpd/ntp_refclock.c (refclock_sample): variance -> jitter
+	(refclock_receive): variance -> jitter
+	* ntpd/ntp_proto.c (process_packet): variance -> jitter
+	(clock_filter): variance -> jitter
+	(clock_select): variance -> jitter
+	(root_distance): variance -> jitter
+	* ntpd/ntp_peer.c (newpeer): variance -> jitter
+	* ntpd/ntp_loopfilter.c: Cleanup pll_nano selection bogon.
+	Centralize the kernel API data.
+	(local_clock): Lose sys_error.
+	(loop_config): Code cleanup.
+	* ntpd/ntp_control.c: Call offset "offset" and not "phase". Lose
+	CS_COMPLIANCE.  Deal with variance/jitter rename.
+	* include/ntp_refclock.h: Rename variance to jitter in struct
+	refclockproc.
+	* include/ntp_control.h (CS_COMPLIANCE): Lose it.
+	* include/ntp.h: Rename variance to jitter in struct peer.
+	From: Dave Mills
+
 2000-09-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_atom.c: Use the new ppsunit.  Cleanup and improve

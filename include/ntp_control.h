@@ -157,22 +157,21 @@ struct ntp_control {
 #define CS_STATE	10
 #define	CS_OFFSET	11
 #define	CS_DRIFT	12
-#define	CS_COMPLIANCE	13
-#define CS_JITTER	14
-#define	CS_CLOCK	15
-#define	CS_PROCESSOR	16
-#define	CS_SYSTEM	17
-#define CS_VERSION	18
-#define	CS_STABIL	19
-#define CS_VARLIST	20
+#define CS_JITTER	13
+#define	CS_CLOCK	14
+#define	CS_PROCESSOR	15
+#define	CS_SYSTEM	16
+#define CS_VERSION	17
+#define	CS_STABIL	18
+#define CS_VARLIST	19
 #ifdef PUBKEY
-#define CS_FLAGS	21
-#define CS_HOST		22
-#define CS_PUBLIC	23
-#define CS_DHPARAMS	24
-#define	CS_REVTIME	25
-#define CS_LEAPTAB	26
-#define CS_TAI		27
+#define CS_FLAGS	20
+#define CS_HOST		21
+#define CS_PUBLIC	22
+#define CS_DHPARAMS	23
+#define	CS_REVTIME	24
+#define CS_LEAPTAB	25
+#define CS_TAI		26
 #define	CS_MAXCODE	CS_TAI
 #else
 #define	CS_MAXCODE	CS_VARLIST

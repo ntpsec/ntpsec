@@ -983,7 +983,7 @@ process_packet(
 	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp,
-	    SQRT(peer->variance));
+	    SQRT(peer->jitter));
 }
 
 
@@ -1176,7 +1176,7 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->minpoll;
 	peer->pollsw = FALSE;
-	peer->variance = MAXDISPERSE;
+	peer->jitter = MAXDISPERSE;
 	peer->epoch = current_time;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -1202,7 +1202,7 @@ clock_filter(
 	register int i, j, k, n;
 	register u_char *ord;
 	double distance[NTP_SHIFT];
-	double off, dly, var, dsp, dtemp, etemp;
+	double off, dly, dsp, jit, dtemp, etemp;
 
 	/*
 	 * Update error bounds and calculate distances. The distance for
@@ -1266,13 +1266,13 @@ clock_filter(
 	} 
 	
 	/*
-	 * Compute the offset, delay, variance (squares) and error
-	 * bound. The offset, delay and variance are weighted by the
+	 * Compute the offset, delay, jitter (squares) and error
+	 * bound. The offset, delay and jitter are weighted by the
 	 * reciprocal of distance and normalized. The error bound is
 	 * weighted exponentially. When no acceptable samples remain in
 	 * the shift register, quietly tiptoe home.
 	 */
-	off = dly = var = dsp = dtemp = 0;
+	off = dly = dsp = jit = dtemp = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		dsp = NTP_FWEIGHT * (dsp + peer->filter_disp[ord[i]]);
 		if (i < n && distance[i] < MAXDISTANCE) {
@@ -1281,7 +1281,7 @@ clock_filter(
 			    distance[i];
 			dly += peer->filter_delay[ord[i]] /
 			    distance[i];
-			var += DIFF(peer->filter_offset[ord[i]],
+			jit += DIFF(peer->filter_offset[ord[i]],
 			    peer->filter_offset[ord[0]]) /
 			    SQUARE(distance[i]);
 		}
@@ -1289,8 +1289,8 @@ clock_filter(
 	if (dtemp == 0)
 		return;
 	peer->delay = dly / dtemp;
-	peer->variance = min(var / SQUARE(dtemp), MAXDISPERSE);
 	peer->disp = min(dsp, MAXDISPERSE);
+	peer->jitter = min(jit / SQUARE(dtemp), MAXDISPERSE);
 	peer->epoch = current_time;
 	etemp = peer->offset;
 	peer->offset = off / dtemp;
@@ -1334,9 +1334,9 @@ clock_filter(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "clock_filter: offset %.6f delay %.6f disp %.6f std %.6f, age %lu\n",
+		    "clock_filter: offset %.6f delay %.6f disp %.6f jit %.6f, age %lu\n",
 		    peer->offset, peer->delay, peer->disp,
-		    SQRT(peer->variance), current_time - peer->epoch);
+		    SQRT(peer->jitter), current_time - peer->epoch);
 #endif
 }
 
@@ -1621,7 +1621,7 @@ clock_select(void)
 	 */
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
-		error[i] = peer->variance;
+		error[i] = peer->jitter;
 		if (i < NTP_CANCLOCK)
 			peer->status = CTL_PST_SEL_SELCAND;
 		else
@@ -1752,7 +1752,7 @@ clock_select(void)
 		sys_peer = typeprefer;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = sys_peer->offset;
-		sys_epsil = sys_peer->variance;
+		sys_epsil = sys_peer->jitter;
 #ifdef DEBUG
 		if (debug > 2)
 			printf("select: prefer offset %.6f\n",
@@ -1762,7 +1762,7 @@ clock_select(void)
 		sys_peer = typepps;
 		sys_peer->status = CTL_PST_SEL_PPS;
 		sys_offset = sys_peer->offset;
-		sys_epsil = sys_peer->variance;
+		sys_epsil = sys_peer->jitter;
 		if (!pps_control)
 			NLOG(NLOG_SYSEVENT) /* conditional syslog */
 				msyslog(LOG_INFO, "pps sync enabled");
@@ -1776,7 +1776,7 @@ clock_select(void)
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = clock_combine(peer_list, nlist);
-		sys_epsil = sys_peer->variance + sys_maxd;
+		sys_epsil = sys_peer->jitter + sys_maxd;
 #ifdef DEBUG
 		if (debug > 2)
 			printf("select: combine offset %.6f\n",
@@ -1818,7 +1818,7 @@ root_distance(
 {
 	return ((fabs(peer->delay) + peer->rootdelay) / 2 +
 		peer->rootdispersion + peer->disp +
-		    SQRT(peer->variance) + CLOCK_PHI * (current_time -
+		    SQRT(peer->jitter) + CLOCK_PHI * (current_time -
 		    peer->update));
 }
 

@@ -117,7 +117,7 @@ typedef char s_char;
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
 
 /*
- * Operations for jitter (variance) calculations (these use doubles).
+ * Operations for jitter calculations (these use doubles).
  *
  * Note that we carefully separate the jitter component from the
  * dispersion component (frequency error plus precision). The frequency
@@ -326,7 +326,7 @@ struct peer {
 	l_fp	xmt;		/* transmit time stamp */
 	double	offset;		/* peer clock offset */
 	double	delay;		/* peer roundtrip delay */
-	double	variance;	/* peer variance (jitter) */
+	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	estbdelay;	/* clock offset to broadcast server */
 

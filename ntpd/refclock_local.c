@@ -213,7 +213,7 @@ local_poll(
 	refclock_process_offset(pp, pp->lastrec, pp->lastrec, pp->fudgetime1);
 	pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
-	pp->variance = 0;
+	pp->jitter = 0;
 #if defined(KERNEL_PLL) && defined(STA_CLK)
 
 	/*
@@ -246,7 +246,7 @@ local_poll(
 				pp->leap = LEAP_NOTINSYNC;
 			}
 			pp->disp = ntv.maxerror / 1e6;
-			pp->variance = SQUARE(ntv.esterror / 1e6);
+			pp->jitter = SQUARE(ntv.esterror / 1e6);
 		}
 	} else {
 		ext_enable = 0;

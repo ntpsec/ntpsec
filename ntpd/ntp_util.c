@@ -225,7 +225,8 @@ hourly_stats(void)
 	NLOG(NLOG_SYSSTATIST)
 		msyslog(LOG_INFO,
 		    "offset %.6f sec freq %.3f ppm error %.6f poll %d",
-		    last_offset, drift_comp * 1e6, sys_error, sys_poll);
+		    last_offset, drift_comp * 1e6, sys_jitter, sys_poll);
+
 	
 	if (stats_drift_file != 0) {
 		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
@@ -513,7 +514,7 @@ record_loop_stats(void)
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %lu.%03lu %.9f %.6f %.9f %.6f %d\n",
 		    day, sec, msec, last_offset, drift_comp * 1e6,
-		    sys_error, clock_stability * 1e6, sys_poll);
+		    sys_jitter, clock_stability * 1e6, sys_poll);
 		fflush(loopstats.fp);
 	}
 }

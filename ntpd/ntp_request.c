@@ -770,7 +770,7 @@ peer_info (
 		HTONL_FP(&ltmp, &ip->offset);
 		ip->delay = HTONS_FP(DTOFP(pp->delay));
 		ip->dispersion = HTONS_FP(DTOUFP(SQRT(pp->disp)));
-		ip->selectdisp = HTONS_FP(DTOUFP(SQRT(pp->variance)));
+		ip->selectdisp = HTONS_FP(DTOUFP(SQRT(pp->jitter)));
 		ip = (struct info_peer *)more_pkt();
 	}
 	flush_pkt();
@@ -880,7 +880,7 @@ sys_info(
 	extern double sys_bdelay;
 	extern l_fp sys_authdelay;
 	extern double clock_stability;
-	extern double sys_error;
+	extern double sys_jitter;
 
 	is = (struct info_sys *)prepare_pkt(srcadr, inter, inpkt,
 	    sizeof(struct info_sys));
@@ -897,7 +897,7 @@ sys_info(
 	is->precision = sys_precision;
 	is->rootdelay = htonl(DTOFP(sys_rootdelay));
 	is->rootdispersion = htonl(DTOUFP(sys_rootdispersion));
-	is->frequency = htonl(DTOFP(sys_error));
+	is->frequency = htonl(DTOFP(sys_jitter));
 	is->stability = htonl(DTOUFP(clock_stability * 1e6));
 	is->refid = sys_refid;
 	HTONL_FP(&sys_reftime, &is->reftime);

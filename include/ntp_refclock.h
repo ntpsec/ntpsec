@@ -195,7 +195,7 @@ struct refclockproc {
 	l_fp	lastrec;	/* local timestamp */
 	double	offset;		/* mean offset */
 	double	disp;		/* sample dispersion */
-	double	variance;	/* sample variance */
+	double	jitter;		/* jitter (mean squares) */
 	double	filter[MAXSTAGE]; /* median filter */
 
 	/*

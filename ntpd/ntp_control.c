@@ -104,24 +104,23 @@ static struct ctl_var sys_var[] = {
 	{ CS_POLL,	RO, "poll" },		/* 8 */
 	{ CS_PEERID,	RO, "peer" },		/* 9 */
 	{ CS_STATE,	RO, "state" },		/* 10 */
-	{ CS_OFFSET,	RO, "phase" },		/* 11 */
+	{ CS_OFFSET,	RO, "offset" },		/* 11 */
 	{ CS_DRIFT,	RO, "frequency" },	/* 12 */
-	{ CS_COMPLIANCE, RO, "error" },		/* 13 */
-	{ CS_JITTER,	RO, "jitter" },		/* 14 */
-	{ CS_CLOCK,	RO, "clock" },		/* 15 */
-	{ CS_PROCESSOR, RO, "processor" },	/* 16 */
-	{ CS_SYSTEM,	RO, "system" },		/* 17 */
-	{ CS_VERSION,	RO, "version" },	/* 18 */
-	{ CS_STABIL,	RO, "stability" },	/* 19 */
-	{ CS_VARLIST,	RO, "sys_var_list" },	/* 20 */
+	{ CS_JITTER,	RO, "jitter" },		/* 13 */
+	{ CS_CLOCK,	RO, "clock" },		/* 14 */
+	{ CS_PROCESSOR, RO, "processor" },	/* 15 */
+	{ CS_SYSTEM,	RO, "system" },		/* 16 */
+	{ CS_VERSION,	RO, "version" },	/* 17 */
+	{ CS_STABIL,	RO, "stability" },	/* 18 */
+	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
 #ifdef PUBKEY
-	{ CS_FLAGS,	RO, "flags" },		/* 21 */
-	{ CS_HOST,	RO, "hostname" },	/* 22 */
-	{ CS_PUBLIC,	RO, "publickey" },	/* 23 */
-	{ CS_DHPARAMS,	RO, "params" },		/* 24 */
-	{ CS_REVTIME,	RO, "refresh"},		/* 25 */
-	{ CS_LEAPTAB,	RO, "leaptable" },	/* 26 */
-	{ CS_TAI,	RO, "tai"},		/* 27 */
+	{ CS_FLAGS,	RO, "flags" },		/* 20 */
+	{ CS_HOST,	RO, "hostname" },	/* 21 */
+	{ CS_PUBLIC,	RO, "publickey" },	/* 22 */
+	{ CS_DHPARAMS,	RO, "params" },		/* 23 */
+	{ CS_REVTIME,	RO, "refresh"},		/* 24 */
+	{ CS_LEAPTAB,	RO, "leaptable" },	/* 25 */
+	{ CS_TAI,	RO, "tai"},		/* 26 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -148,9 +147,8 @@ static	u_char def_sys_var[] = {
 	CS_CLOCK,
 	CS_STATE,
 	CS_OFFSET,
-	CS_COMPLIANCE,
-	CS_JITTER,
 	CS_DRIFT,
+	CS_JITTER,
 	CS_STABIL,
 #ifdef PUBKEY
 	CS_FLAGS,
@@ -234,10 +232,10 @@ static u_char def_peer_var[] = {
 	CP_ROOTDISPERSION,
 	CP_REFID,
 	CP_REFTIME,
-	CP_DELAY,
 	CP_OFFSET,
-	CP_JITTER,
+	CP_DELAY,
 	CP_DISPERSION,
+	CP_JITTER,
 	CP_REACH,
 	CP_VALID,
 	CP_HMODE,
@@ -1217,11 +1215,6 @@ ctl_putsys(
 		ctl_putdbl(sys_var[CS_DRIFT].text, drift_comp * 1e6);
 		break;
 
-	case CS_COMPLIANCE:
-		ctl_putdbl(sys_var[CS_COMPLIANCE].text, sys_error *
-		    1e3);
-		break;
-
 	case CS_JITTER:
 		ctl_putdbl(sys_var[CS_JITTER].text, sys_jitter * 1e3);
 		break;
@@ -1508,7 +1501,7 @@ ctl_putpeer(
 
 	case CP_JITTER:
 		ctl_putdbl(peer_var[CP_JITTER].text,
-		    SQRT(peer->variance) * 1e3);
+		    SQRT(peer->jitter) * 1e3);
 		break;
 
 	case CP_DISPERSION:
