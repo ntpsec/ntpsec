@@ -125,7 +125,7 @@ ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h log.h
 
-EXTRA_DIST = README $(HEADERS) adjtimex.c log.c strerror.c mktime.c random.c
+EXTRA_DIST = README $(HEADERS) adjtimex.c log.c mktime.c random.c snprintf.c strerror.c
 subdir = libntp
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -187,7 +187,7 @@ $(DEPDIR)/mfptoms$U.Po $(DEPDIR)/mktime.Po $(DEPDIR)/modetoa$U.Po \
 $(DEPDIR)/mstolfp$U.Po $(DEPDIR)/msutotsf$U.Po $(DEPDIR)/msyslog$U.Po \
 $(DEPDIR)/netof$U.Po $(DEPDIR)/numtoa$U.Po $(DEPDIR)/numtohost$U.Po \
 $(DEPDIR)/octtoint$U.Po $(DEPDIR)/prettydate$U.Po $(DEPDIR)/ranny$U.Po \
-$(DEPDIR)/recvbuff$U.Po $(DEPDIR)/refnumtoa$U.Po \
+$(DEPDIR)/recvbuff$U.Po $(DEPDIR)/refnumtoa$U.Po $(DEPDIR)/snprintf.Po \
 $(DEPDIR)/statestr$U.Po $(DEPDIR)/strerror.Po $(DEPDIR)/syssignal$U.Po \
 $(DEPDIR)/systime$U.Po $(DEPDIR)/tsftomsu$U.Po $(DEPDIR)/tstotv$U.Po \
 $(DEPDIR)/tvtoa$U.Po $(DEPDIR)/tvtots$U.Po $(DEPDIR)/uglydate$U.Po \
@@ -494,6 +494,7 @@ distdir: $(DISTFILES)
 @AMDEP@include $(DEPDIR)/ranny$U.Po
 @AMDEP@include $(DEPDIR)/recvbuff$U.Po
 @AMDEP@include $(DEPDIR)/refnumtoa$U.Po
+@AMDEP@include $(DEPDIR)/snprintf.Po
 @AMDEP@include $(DEPDIR)/statestr$U.Po
 @AMDEP@include $(DEPDIR)/strerror.Po
 @AMDEP@include $(DEPDIR)/syssignal$U.Po

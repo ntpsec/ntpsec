@@ -23,7 +23,7 @@ noinst_HEADERS = lib_strbuf.h log.h
 ../include/des.h:
 	touch ../include/des.h
 
-EXTRA_DIST = README $(HEADERS) adjtimex.c log.c strerror.c mktime.c random.c
+EXTRA_DIST = README $(HEADERS) adjtimex.c log.c mktime.c random.c snprintf.c strerror.c
 
 #mktime_.c: mktime.c $(ANSI2KNR)
 #	$(ANSI2KNR) $< mktime_.c

@@ -1,5 +1,9 @@
 2000-03-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* libntp/Makefile.am (EXTRA_DIST): Added snprintf.c
+
+	* configure.in: Look for (and provide if it's missing) snprintf()
+
 	* ntpd/ntp_request.c (dns_a): Call crypto_public with the resolved
 	name and the peer pointer.
 	(dns_a): crypto_public() is only available if PUBKEY is #defined.

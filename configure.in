@@ -612,7 +612,7 @@ esac
 AC_CHECK_FUNCS(setlinebuf)
 AC_CHECK_FUNCS(setpgid setpriority setsid settimeofday setvbuf sigaction)
 AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
-AC_REPLACE_FUNCS(strerror)
+AC_REPLACE_FUNCS(snprintf strerror)
 case "$target" in
  *-*-aix4*)
     # Just stubs.  Idiots.

@@ -648,6 +648,9 @@
 /* Define if you have the `sigvec' function. */
 #undef HAVE_SIGVEC
 
+/* Define if you have the `snprintf' function. */
+#undef HAVE_SNPRINTF
+
 /* Define if you have the `srand48' function. */
 #undef HAVE_SRAND48
 
