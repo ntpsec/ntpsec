@@ -111,8 +111,8 @@ u_long io_timereset;		/* time counters were reset */
 /*
  * Interface stuff
  */
-struct interface *any_interface;	/* default ipv4 interface */
-struct interface *any6_interface;	/* default ipv6 interface */
+struct interface *any_interface = NULL;	/* default ipv4 interface */
+struct interface *any6_interface = NULL;/* default ipv6 interface */
 struct interface *loopback_interface;	/* loopback ipv4 interface */
 struct interface *loopback6_interface;	/* loopback ipv6 interface */
 struct interface inter_list[MAXINTERFACES]; /* Interface list */
@@ -149,6 +149,7 @@ static	void	close_file	P((SOCKET));
 #endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
+static	int find_interface_index P((struct sockaddr_storage *, int, int));
 static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, int, struct sockaddr_storage *));
@@ -920,7 +921,6 @@ io_multicast_add(
 	)
 {
 #ifdef MCAST
-	int i = ninterfaces;	/* Use the next interface */
 	u_int32 haddr = ntohl(((struct sockaddr_in*)&addr)->sin_addr.s_addr);
 	struct in_addr iaddr;
 	isc_boolean_t jstatus;
@@ -952,27 +952,6 @@ io_multicast_add(
 #endif
 			return;
 		}
-		ind = -1;
-		for (i = nwilds; i < ninterfaces; i++) {
-			 /* Be sure it's the correct family and can multicast */
-                        if ((inter_list[i].family == AF_INET) &&
-			    !(inter_list[i].flags & INT_LOOPBACK) &&
-			    (inter_list[i].flags & INT_MULTICAST)) {
-				ind = i;
-                                break;
-			}
-		}
-		/*
-		 * We didn't find a slot. Log and return
-		 */
-		if (ind < 0)
-		{
-			netsyslog(LOG_ERR,
-			"No wildcard socket available to use for address %s",
-			inet_ntoa(iaddr));
-			return;
-		}
-		jstatus = socket_multicast_enable(&inter_list[ind], ind, &addr);
 		break;
 
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
@@ -985,26 +964,18 @@ io_multicast_add(
 				stoa(&addr));
 			return;
 		}
-		ind = -1;
-		for (i = nwilds; i < ninterfaces; i++) {
-			/* Be sure it's the correct family */
-			if ((inter_list[i].family == AF_INET6) &&
-			    !(inter_list[i].flags & INT_LOOPBACK) &&
-			    (inter_list[i].flags & INT_MULTICAST)) {
-				ind = i;
-				break;
-			}
-		}
-		if (ind < 0) {
-			netsyslog(LOG_ERR,
-			"No wildcard socket available to use for address %s",
-			stoa(&addr));
-			return;
-		}
-		jstatus = socket_multicast_enable(&inter_list[i], i, &addr);
 		break;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 	}
+
+	ind = find_interface_index(&addr, INT_MULTICAST, nwilds);
+	if (ind < 0) {
+		netsyslog(LOG_ERR,
+		"No wildcard socket available to use for address %s",
+		stoa(&addr));
+		return;
+	}
+	jstatus = socket_multicast_enable(&inter_list[ind], ind, &addr);
 
 #ifdef DEBUG
 	if (debug)
@@ -2219,9 +2190,28 @@ findbcastinter(
 	)
 {	
 	int i;
-	u_int32 amask, imask;
 	int flagtype = INT_BROADCAST;
 
+	i = find_interface_index(addr, flagtype, nwilds);
+	if (i < 0 || i >= ninterfaces)
+		return (NULL);
+	else
+		return (&inter_list[i]);
+}
+
+/*
+ * find_interface_index - find the index of the interface given
+ * the external address, a flag and a start index
+ */
+
+static int
+find_interface_index(
+		     struct sockaddr_storage *addr,
+		     int flagtype,
+		     int startind)
+{
+	int i;
+	u_int32 amask, imask;
 #ifdef DEBUG
 	if (debug > 2)
 	    printf("Finding *cast interface for address: %s\n", stoa(addr));
@@ -2230,7 +2220,7 @@ findbcastinter(
 	 * If we got this far we need to try and match the
 	 * network part of the address
 	 */
-	for (i= nwilds; i < ninterfaces; i++)
+	for (i= startind; i < ninterfaces; i++)
 	{
 		/*
 		 * Skip the loopback. It can't act as an outgoing interface
@@ -2253,7 +2243,7 @@ findbcastinter(
 				if (debug > 2)
 				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-			     return (&inter_list[i]);
+			     return (i);
 			}
 		}
 
@@ -2268,7 +2258,7 @@ findbcastinter(
 				if (debug > 2)
 				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-				return (&inter_list[i]);
+				return (i);
 			}
 
 			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
@@ -2278,7 +2268,7 @@ findbcastinter(
 				if (debug > 2)
 				    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-				return (&inter_list[i]);
+				return (i);
 			}
 		}
 	}
@@ -2287,7 +2277,7 @@ findbcastinter(
 	 * If we got here and failed because it was not a local network
 	 * address, see if we have a PPP interface and use that
 	 */
-	for (i = nwilds; i < ninterfaces; i++)
+	for (i = startind; i < ninterfaces; i++)
 	{
 		/*
 		 * Skip the loopback. It can't act as an outgoing interface
@@ -2302,7 +2292,7 @@ findbcastinter(
 			if (debug > 2)
 			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-			return (&inter_list[i]);
+			return (i);
 		}
 		else if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6 &&
 			 inter_list[i].flags & INT_PPP)
@@ -2311,7 +2301,7 @@ findbcastinter(
 			if (debug > 2)
 				printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-			return (&inter_list[i]);
+			return (i);
 		}
 	}
 
@@ -2320,7 +2310,7 @@ findbcastinter(
 	 * We pick the first one which is not loopback or link/site local
 	 */
 
-	for (i = nwilds; i < ninterfaces; i++)
+	for (i = startind; i < ninterfaces; i++)
 	{
 		/*
 		 * Skip the loopback. It can't act as an outgoing interface
@@ -2335,7 +2325,7 @@ findbcastinter(
 			if (debug > 2)
 			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-			return (&inter_list[i]);
+			return (i);
 		}
 
 		/*
@@ -2351,7 +2341,7 @@ findbcastinter(
 			if (debug > 2)
 			    printf("Found *cast interface %d for address: %s\n", i, stoa(addr));
 #endif
-			return (&inter_list[i]);
+			return (i);
 		}
 
 	}
@@ -2361,10 +2351,10 @@ findbcastinter(
 
 #ifdef DEBUG
 	if (debug > 1)
-	    printf("Having trouble finding interface for address: %s\n", stoa(addr));
+	    printf("Having trouble finding *cast flag: %d interface for address: %s\n", flagtype, stoa(addr));
 #endif
 
-	return (NULL);
+	return (-1);
 
 }
 
