@@ -131,7 +131,7 @@
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
 #define MSGCNT		20	/* max message count */
-#define SMAX		256	/* max clockstats line length */
+#define SMAX		80	/* max clockstats line length */
 
 /*
  * Calling program modes
@@ -167,7 +167,7 @@
  * Q0	return result codes
  * V1	return result codes as English words
  */
-#define MODEM_SETUP	"ATB1&C1&D2E0L1M1Q0V1\r" /* modem setup */
+#define MODEM_SETUP	"ATB1&C0&D2E0L1M1Q0V1\r" /* modem setup */
 #define MODEM_HANGUP	"ATH\r"	/* modem disconnect */
 
 /*
