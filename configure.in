@@ -1225,7 +1225,7 @@ AC_CACHE_CHECK(if sys/timex.h has STA_FLL, ac_cv_var_sta_fll,
 AC_CACHE_CHECK([for struct timespec in struct ntptimeval], ac_cv_struct_ntptimeval_timespec,
 [AC_TRY_COMPILE([#include <sys/time.h>
 #include <sys/timex.h>],
-[struct nntptimeval n; n.time.tv_nsec = 0;],
+[struct ntptimeval n; n.time.tv_nsec = 0;],
 ac_cv_struct_ntptimeval_timespec=yes, ac_cv_struct_ntptimeval_timespec=no)])
 if test $ac_cv_struct_ntptimeval_timespec = yes; then
   AC_DEFINE(TIMESPEC_IN_NTPTIMEVAL, 1, [Does ntptimeval use struct timespec?])

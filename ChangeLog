@@ -1,3 +1,8 @@
+1999-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (ac_cv_var_struct_ntptime_val_timespec): Typo.
+	From: John Hay <jhay@mikom.csir.co.za>
+
 1999-07-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* Makefile.am (EXTRA_DIST): Lose ntpmak; "build" does a better job.

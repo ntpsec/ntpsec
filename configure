@@ -7101,7 +7101,7 @@ else
 #include <sys/time.h>
 #include <sys/timex.h>
 int main() {
-struct nntptimeval n; n.time.tv_nsec = 0;
+struct ntptimeval n; n.time.tv_nsec = 0;
 ; return 0; }
 EOF
 if { (eval echo configure:7108: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
