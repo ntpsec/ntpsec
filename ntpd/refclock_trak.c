@@ -259,8 +259,10 @@ trak_receive(
 		    pp->lastrec.l_i + 1) {
 			pp->lastrec = trtmp;
 			dpt += 9;
-			while (dpt < dpend)
-			    *(dpt - 8) = *dpt++;
+			while (dpt < dpend) {
+				*(dpt - 8) = *dpt;
+				++dpt;
+			}
 		}
 	}
 	if (up->polled == 0) return;

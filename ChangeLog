@@ -1,5 +1,9 @@
 1999-07-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_trak.c (trak_receive): disambiguate expression.
+	At least now it is unambiguous.  It may even still be correct.
+	Reported by: Tom Smith <smith@cag.lkg.dec.com>
+
 	* ntp_update (UPDATE_OPTIONS): Typo.
 
 1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
