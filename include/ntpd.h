@@ -104,7 +104,7 @@ extern	int	leap_actual P((int));
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter P((void));
-extern	int 	local_clock P((struct peer *, double, double));
+extern	int 	local_clock P((struct peer *, double));
 extern	void	adj_host_clock	P((void));
 extern	void	loop_config P((int, double));
 extern	void	huffpuff	P((void));
@@ -315,8 +315,8 @@ extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
 extern double	allan_xpt;		/* Allan intercept (s) */
-extern double	sys_error;		/* system RMS error (s) */
-extern double	sys_jitter;		/* system RMS jitter (s) */
+extern double	sys_error;		/* system error (s) */
+extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
 extern struct mon_data mon_mru_list;

@@ -150,7 +150,7 @@ int	state;			/* clock discipline state */
 int	tc_counter;		/* hysteresis counter */
 u_long	last_time;		/* time of last clock update (s) */
 double	last_offset;		/* last clock offset (s) */
-double	sys_jitter;		/* system RMS jitter (s) */
+double	sys_jitter;		/* system jitter (s) */
 
 /*
  * Huff-n'-puff filter variables
@@ -183,6 +183,7 @@ init_loopfilter(void)
 	 * file, so set the state to S_NSET.
 	 */
 	rstclock(S_NSET, current_time, 0);
+	sys_jitter = LOGTOD(sys_precision);
 }
 
 /*
@@ -195,12 +196,10 @@ init_loopfilter(void)
 int
 local_clock(
 	struct peer *peer,	/* synch source peer structure */
-	double fp_offset,	/* clock offset (s) */
-	double epsil		/* jittter (square s*s) */
+	double fp_offset	/* clock offset (s) */
 	)
 {
 	u_long mu;		/* interval since last update (s) */
-	double oerror;		/* previous error estimate */
 	double flladj;		/* FLL frequency adjustment (ppm) */
 	double plladj;		/* PLL frequency adjustment (ppm) */
 	double clock_frequency;	/* clock frequency adjustment (ppm) */
@@ -214,8 +213,8 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assocID %d offset %.9f jitter %.9f state %d\n",
-		    peer->associd, fp_offset, SQRT(epsil), state);
+		    "local_clock: assocID %d offset %.9f state %d\n",
+		    peer->associd, fp_offset, state);
 #endif
 #ifdef LOCKCLOCK
 	sys_rootdispersion = peer->rootdispersion;
@@ -223,7 +222,7 @@ local_clock(
 
 #else /* LOCKCLOCK */
 	if (!ntp_enable) {
-		record_loop_stats(fp_offset, drift_comp, SQRT(epsil),
+		record_loop_stats(fp_offset, drift_comp, sys_error,
 		    clock_stability, sys_poll);
 		return (0);
 	}
@@ -268,17 +267,17 @@ local_clock(
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
-		record_loop_stats(fp_offset, drift_comp, SQRT(epsil),
+		record_loop_stats(fp_offset, drift_comp, sys_error,
 		    clock_stability, sys_poll);
 		exit (0);
 	}
 
 	/*
-	 * Update the jitter estimate.
-	 */
-	oerror = sys_jitter;
-	dtemp = SQUARE(sys_jitter);
-	sys_jitter = SQRT(dtemp + (epsil - dtemp) / CLOCK_AVG);
+         * Update the jitter estimate.
+         */
+	etemp = SQUARE(sys_jitter);
+	dtemp = SQUARE(fp_offset - last_offset);
+	sys_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
 	 * The huff-n'-puff filter finds the lowest delay in the recent
@@ -439,19 +438,19 @@ local_clock(
 		default:
 			allow_panic = FALSE;
 			dtemp = fabs(fp_offset - last_offset);
-/*
-			if (dtemp > CLOCK_SGATE * oerror && mu <
+
+			if (dtemp > CLOCK_SGATE * sys_error && mu <
 			    (u_long) ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
 				if (debug)
 					printf(
 				    "local_clock: popcorn %.6f %.6f\n",
-					    dtemp, oerror);
+					    dtemp, sys_error);
 #endif
 				last_offset = fp_offset;
 				return (0);
 			}
-*/
+
 
 			/*
 			 * The FLL and PLL frequency gain constants
@@ -530,7 +529,7 @@ local_clock(
 				ntv.freq = (int32)((clock_frequency +
 				    drift_comp) * 65536e6);
 			}
-			ntv.esterror = (u_int32)(sys_jitter * 1e6);
+			ntv.esterror = (u_int32)(sys_error * 1e6);
 			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
 			    sys_rootdispersion) * 1e6);
 			ntv.status = STA_PLL;
@@ -608,9 +607,9 @@ local_clock(
 		if (ntv.status & STA_PPSTIME) {
 			pps_control = current_time;
 			if (pll_nano)
-				sys_jitter = ntv.jitter / 1e9;
+				sys_error = ntv.jitter / 1e9;
 			else
-				sys_jitter = ntv.jitter / 1e6;
+				sys_error = ntv.jitter / 1e6;
 		}
 	}
 #endif /* KERNEL_PLL */
@@ -635,9 +634,8 @@ local_clock(
 		    msyslog(LOG_NOTICE,
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
 		    etemp * 1e6, NTP_MAXFREQ * 1e6);
-
 	etemp = SQUARE(clock_stability);
-	dtemp = SQUARE(dtemp);
+	dtemp = SQUARE(dtemp * ULOGTOD(sys_poll));
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
@@ -650,8 +648,8 @@ local_clock(
 	 * helps calm the dance. Works best using burst mode.
 	 */
 	if (state == S_SYNC) {
-		if (sys_jitter > ULOGTOD(sys_poll) * clock_stability &&
-		    fabs(clock_offset) < CLOCK_PGATE * sys_jitter) {
+		if (sys_jitter > clock_stability && fabs(clock_offset) <
+		    CLOCK_PGATE * sys_jitter) {
 			tc_counter += sys_poll;
 			if (tc_counter > CLOCK_LIMIT) {
 				tc_counter = CLOCK_LIMIT;
@@ -676,11 +674,11 @@ local_clock(
 	 * Update the system time variables.
 	 */
 	dtemp = peer->disp + (current_time - peer->epoch) * clock_phi +
-	    sys_jitter + fabs(last_offset);
+	    sys_error + fabs(last_offset);
 	if (!(peer->flags & FLAG_REFCLOCK) && dtemp < MINDISPERSE)
 		dtemp = MINDISPERSE;
 	sys_rootdispersion = peer->rootdispersion + dtemp;
-	record_loop_stats(last_offset, drift_comp, sys_jitter,
+	record_loop_stats(last_offset, drift_comp, sys_error,
 	    clock_stability, sys_poll);
 
 #ifdef DEBUG

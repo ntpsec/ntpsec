@@ -226,8 +226,9 @@ refclock_newpeer(
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
 	peer->flags |= FLAG_REFCLOCK;
-	peer->maxpoll = peer->minpoll;
 	peer->stratum = STRATUM_REFCLOCK;
+	peer->hpoll = peer->minpoll;
+	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
 	pp->timestarted = current_time;
 
@@ -252,8 +253,6 @@ refclock_newpeer(
 		refclock_unpeer(peer);
 		return (0);
 	}
-	peer->hpoll = peer->minpoll;
-	peer->ppoll = peer->maxpoll;
 	peer->refid = pp->refid;
 	return (1);
 }

@@ -650,7 +650,7 @@ peer_list(
 
 	ip = (struct info_peer_list *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_peer_list));
-	for (i = 0; i < HASH_SIZE && ip != 0; i++) {
+	for (i = 0; i < NTP_HASH_SIZE && ip != 0; i++) {
 		pp = peer_hash[i];
 		while (pp != 0 && ip != 0) {
 			if (pp->srcadr.ss_family == AF_INET6) {
@@ -712,7 +712,7 @@ peer_list_sum(
 #endif
 	ips = (struct info_peer_summary *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_peer_summary));
-	for (i = 0; i < HASH_SIZE && ips != 0; i++) {
+	for (i = 0; i < NTP_HASH_SIZE && ips != 0; i++) {
 		pp = peer_hash[i];
 		while (pp != 0 && ips != 0) {
 #ifdef DEBUG
@@ -776,7 +776,7 @@ peer_list_sum(
 				ips->delay = HTONS_FP(DTOFP(pp->delay));
 				DTOLFP(pp->offset, &ltmp);
 				HTONL_FP(&ltmp, &ips->offset);
-				ips->dispersion = HTONS_FP(DTOUFP(pp->disp));
+				ips->dispersion = HTONS_FP(DTOUFP(SQRT(pp->disp)));
 			}	
 			pp = pp->next; 
 			ips = (struct info_peer_summary *)more_pkt();
@@ -1147,7 +1147,7 @@ mem_stats(
 	/*
 	 * Importations from the peer module
 	 */
-	extern int peer_hash_count[HASH_SIZE];
+	extern int peer_hash_count[NTP_HASH_SIZE];
 	extern int peer_free_count;
 	extern u_long peer_timereset;
 	extern u_long findpeer_calls;
@@ -1165,7 +1165,7 @@ mem_stats(
 	ms->allocations = htonl((u_int32)peer_allocations);
 	ms->demobilizations = htonl((u_int32)peer_demobilizations);
 
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		if (peer_hash_count[i] > 255)
 		    ms->hashcount[i] = 255;
 		else

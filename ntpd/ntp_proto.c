@@ -57,7 +57,7 @@ l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_selerr;	/* select error (squares) */
-static	double sys_syserr;	/* system error (squares) */
+double	sys_error;		/* system error (s) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -637,9 +637,15 @@ receive(
 		 * server response. Otherwise, it must be a client
 		 * request, so send a server response and go home.
 		 */
-		if (sys_manycastserver && (rbufp->dstadr->flags &
-		    INT_MULTICAST)) {
-	
+		if (rbufp->dstadr->flags & INT_MULTICAST) {
+
+			/*
+			 * Do not respond to multicast if not configured
+			 * as a manycast server.
+			 */
+			if (!sys_manycastserver)
+				return;
+
 			/*
 			 * There is no reason to respond to a request if
 			 * our time is worse than the manycaster or it
@@ -1311,7 +1317,7 @@ clock_update(void)
 #endif
 	oleap = sys_leap;
 	ostratum = sys_stratum;
-	switch (local_clock(sys_peer, sys_offset, sys_syserr)) {
+	switch (local_clock(sys_peer, sys_offset)) {
 
 	/*
 	 * Clock is too screwed up. Just exit for now.
@@ -1791,7 +1797,7 @@ clock_select(void)
 	memcpy(&sys_refid, "DOWN", 4);
 #endif /* LOCKCLOCK */
 	nlist = 0;
-	for (n = 0; n < HASH_SIZE; n++)
+	for (n = 0; n < NTP_HASH_SIZE; n++)
 		nlist += peer_hash_count[n];
 	if (nlist > list_alloc) {
 		if (list_alloc > 0) {
@@ -1821,7 +1827,7 @@ clock_select(void)
 	 * bucks and collectively crank the chimes.
 	 */
 	nlist = nl3 = 0;	/* none yet */
-	for (n = 0; n < HASH_SIZE; n++) {
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != NULL; peer =
 		    peer->next) {
 			peer->flags &= ~FLAG_SYSPEER;
@@ -2219,7 +2225,7 @@ clock_select(void)
 		sys_peer = sys_prefer;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = sys_peer->offset;
-		sys_syserr = sys_peer->jitter;
+		sys_error = SQRT(sys_peer->jitter);
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: prefer offset %.6f\n",
@@ -2231,7 +2237,7 @@ clock_select(void)
 		sys_peer = typepps;
 		sys_peer->status = CTL_PST_SEL_PPS;
 		sys_offset = sys_peer->offset;
-		sys_syserr = sys_peer->jitter;
+		sys_error = SQRT(sys_peer->jitter);
 		if (!pps_control)
 			NLOG(NLOG_SYSEVENT)
 			    msyslog(LOG_INFO, "pps sync enabled");
@@ -2249,7 +2255,7 @@ clock_select(void)
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_peer->rank++;
 		sys_offset = clock_combine(peer_list, nlist);
-		sys_syserr = sys_peer->jitter + sys_selerr;
+		sys_error = SQRT(sys_peer->jitter + sys_selerr);
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: combine offset %.6f\n",
@@ -2998,7 +3004,7 @@ init_proto(void)
 	sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
-	sys_jitter = LOGTOD(sys_precision);
+	sys_error = LOGTOD(sys_precision);
 	sys_rootdelay = 0;
 	sys_rootdispersion = 0;
 	L_CLR(&sys_reftime);

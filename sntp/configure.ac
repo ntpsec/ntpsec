@@ -2,7 +2,7 @@
 AC_INIT(main.c)
 AM_INIT_AUTOMAKE([msntp],[1.6])
 AC_CONFIG_SRCDIR([header.h])
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC

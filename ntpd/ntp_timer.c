@@ -276,7 +276,7 @@ timer(void)
 	 * here, since the peer structure might go away as the result of
 	 * the call.
 	 */
-	for (n = 0; n < HASH_SIZE; n++) {
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (peer->action && peer->nextaction <= current_time)

@@ -517,7 +517,7 @@ struct info_mem_stats {
 	u_int32 findpeer_calls;
 	u_int32 allocations;
 	u_int32 demobilizations;
-	u_char hashcount[HASH_SIZE];
+	u_char hashcount[NTP_HASH_SIZE];
 };
 
 

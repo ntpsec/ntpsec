@@ -301,7 +301,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -391,7 +391,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -674,7 +674,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -748,7 +748,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -846,7 +846,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -909,7 +909,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -1006,7 +1006,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -1072,7 +1072,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -1134,7 +1134,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -1157,9 +1157,9 @@ again:
 		       (u_long)ntohl(mem->demobilizations));
 
 	(void) fprintf(fp, "hash table counts:   ");
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		(void) fprintf(fp, "%4d", (int)mem->hashcount[i]);
-		if ((i % 8) == 7 && i != (HASH_SIZE-1)) {
+		if ((i % 8) == 7 && i != (NTP_HASH_SIZE-1)) {
 			(void) fprintf(fp, "\n                     ");
 		}
 	}
@@ -1193,7 +1193,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -1614,7 +1614,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -1899,7 +1899,7 @@ again:
 			  &items, &itemsize, &struct_star, 0, 
 			  sizeof(struct info_monitor));
 	
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -2268,7 +2268,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -2326,7 +2326,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -2567,7 +2567,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!check1item(items, fp))
@@ -2642,7 +2642,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -2815,7 +2815,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 
 	if (!checkitems(items, fp))
@@ -2903,7 +2903,7 @@ again:
 		goto again;
 	}
 
-	if (res != 0 && items == 0)
+	if (res != 0)
 	    return;
 	if (!check1item(items, fp))
 	    return;

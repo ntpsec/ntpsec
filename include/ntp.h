@@ -483,7 +483,7 @@ struct peer {
  	(sizeof(struct sockaddr_in)) : (sizeof(struct sockaddr_in6)))
 
 #define ANYSOCK(sock) \
-	memset(((struct sockaddr_in *)sock), 0, \
+	memset(((struct sockaddr_storage *)sock), 0, \
 	    sizeof(struct sockaddr_storage))
 
 #define ANY_INTERFACE_CHOOSE(sock) \
@@ -656,9 +656,9 @@ struct pkt {
  * To speed lookups, peers are hashed by the low order bits of the
  * remote IP address. These definitions relate to that.
  */
-#define	HASH_SIZE	128
-#define	HASH_MASK	(HASH_SIZE-1)
-#define	HASH_ADDR(src)	sock_hash(src)
+#define	NTP_HASH_SIZE	128
+#define	NTP_HASH_MASK	(NTP_HASH_SIZE-1)
+#define	NTP_HASH_ADDR(src)	sock_hash(src)
 
 /*
  * How we randomize polls.  The poll interval is a power of two.

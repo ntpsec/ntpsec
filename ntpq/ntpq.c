@@ -684,6 +684,7 @@ openhost(
 	{
 		int optionValue = SO_SYNCHRONOUS_NONALERT;
 		int err;
+
 		err = setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE, (char *)&optionValue, sizeof(optionValue));
 		if (err != NO_ERROR) {
 			(void) fprintf(stderr, "cannot open nonoverlapped sockets\n");
@@ -1268,6 +1269,8 @@ doquery(
 			done = 1;
 			goto again;
 		}
+		if (numhosts > 1)
+			(void) fprintf(stderr, "server=%s ", currenthost);
 		switch(res) {
 		    case CERR_BADFMT:
 			(void) fprintf(stderr,
@@ -1666,7 +1669,6 @@ getnetnum(
 	int af
 	)
 {
-	int err;
 	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
@@ -1685,10 +1687,9 @@ getnetnum(
 			getnameinfo((struct sockaddr *)num, sockaddr_len,
 					fullhost, sizeof(fullhost), NULL, 0,
 					NI_NUMERICHOST);
-
 		}
 		return 1;
-	} else if ((err = getaddrinfo(hname, "ntp", &hints, &ai)) == 0) {
+	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
 		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
 		if (ai->ai_canonname != 0)
 		    (void) strcpy(fullhost, ai->ai_canonname);

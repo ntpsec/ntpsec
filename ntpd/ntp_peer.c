@@ -74,10 +74,10 @@ int AM[AM_MODES][AM_MODES] = {
 /*
  * Peer hash tables
  */
-struct peer *peer_hash[HASH_SIZE];	/* peer hash table */
-int peer_hash_count[HASH_SIZE];		/* peers in each bucket */
-struct peer *assoc_hash[HASH_SIZE];	/* association ID hash table */
-int assoc_hash_count[HASH_SIZE];	/* peers in each bucket */
+struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
+int peer_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
+struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
+int assoc_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
 static struct peer *peer_free;		/* peer structures free list */
 int peer_free_count;			/* count of free structures */
 
@@ -121,7 +121,7 @@ init_peer(void)
 	/*
 	 * Clear hash table and counters.
 	 */
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		peer_hash[i] = 0;
 		peer_hash_count[i] = 0;
 		assoc_hash[i] = 0;
@@ -193,7 +193,7 @@ findexistingpeer(
 	 * same peer through different interfaces in the hash table.
 	 */
 	if (start_peer == 0)
-		peer = peer_hash[HASH_ADDR(addr)];
+		peer = peer_hash[NTP_HASH_ADDR(addr)];
 	else
 		peer = start_peer->next;
 	
@@ -227,7 +227,7 @@ findpeer(
 	int hash;
 
 	findpeer_calls++;
-	hash = HASH_ADDR(srcadr);
+	hash = NTP_HASH_ADDR(srcadr);
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
 		if (SOCKCMP(srcadr, &peer->srcadr)
 		    && NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
@@ -286,7 +286,7 @@ findpeerbyassoc(
 
 	assocpeer_calls++;
 
-	hash = assoc & HASH_MASK;
+	hash = assoc & NTP_HASH_MASK;
 	for (peer = assoc_hash[hash]; peer != 0; peer =
 	    peer->ass_next) {
 		if (assoc == peer->associd)
@@ -309,7 +309,7 @@ clear_all(void)
 	 * This routine is called when the clock is stepped, and so all
 	 * previously saved time values are untrusted.
 	 */
-	for (n = 0; n < HASH_SIZE; n++) {
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (peer->flags & FLAG_CONFIG) {
@@ -357,7 +357,7 @@ unpeer(
 		    peer_associations);
 #endif
 	peer_clear(peer_to_remove, "NULL");
-	hash = HASH_ADDR(&peer_to_remove->srcadr);
+	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
 #ifdef REFCLOCK
@@ -389,7 +389,7 @@ unpeer(
 	/*
 	 * Remove him from the association hash as well.
 	 */
-	hash = peer_to_remove->associd & HASH_MASK;
+	hash = peer_to_remove->associd & NTP_HASH_MASK;
 	assoc_hash_count[hash]--;
 	if (assoc_hash[hash] == peer_to_remove)
 		assoc_hash[hash] = peer_to_remove->ass_next;
@@ -644,11 +644,11 @@ newpeer(
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	i = HASH_ADDR(&peer->srcadr);
+	i = NTP_HASH_ADDR(&peer->srcadr);
 	peer->next = peer_hash[i];
 	peer_hash[i] = peer;
 	peer_hash_count[i]++;
-	i = peer->associd & HASH_MASK;
+	i = peer->associd & NTP_HASH_MASK;
 	peer->ass_next = assoc_hash[i];
 	assoc_hash[i] = peer;
 	assoc_hash_count[i]++;
@@ -764,7 +764,7 @@ peer_all_reset(void)
 	struct peer *peer;
 	int hash;
 
-	for (hash = 0; hash < HASH_SIZE; hash++)
+	for (hash = 0; hash < NTP_HASH_SIZE; hash++)
 	    for (peer = peer_hash[hash]; peer != 0; peer = peer->next)
 		peer_reset(peer);
 }
@@ -790,7 +790,7 @@ expire_all(void)
 	 */
 	if (!crypto_flags)
 		return;
-	for (n = 0; n < HASH_SIZE; n++) {
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (!(peer->flags & FLAG_SKEY)) {
@@ -834,7 +834,7 @@ findmanycastpeer(
 	 * for possibly more than one manycast association are unique.
 	 */
 	pkt = &rbufp->recv_pkt;
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		if (peer_hash_count[i] == 0)
 			continue;
 
@@ -865,7 +865,7 @@ resetmanycast(void)
 	 * falls below the minimum. Search the peer list for manycast
 	 * client associations and reset the ttl and poll interval.
 	 */
-	for (i = 0; i < HASH_SIZE; i++) {
+	for (i = 0; i < NTP_HASH_SIZE; i++) {
 		if (peer_hash_count[i] == 0)
 			continue;
 
