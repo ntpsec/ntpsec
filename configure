@@ -11071,7 +11071,7 @@ if test "${ac_cv_func_ctty_for_f_setown+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   case "$target" in
- *-*-bsdi2*)
+ *-*-bsdi23*)
     ans=yes
     ;;
  *-*-freebsd*)
