@@ -1,0 +1,124 @@
+sizeof(struct req_pkt) = 212
+
+sizeof(struct req_pkt_tail) = 28
+
+sizeof(struct resp_pkt) = 508
+
+sizeof(struct info_peer_list) = 32
+
+sizeof(struct info_peer_summary) = 72
+
+sizeof(struct info_peer) = 280
+offsetof(unused8) = 19
+offsetof(unused2) = 212
+offsetof(unused3) = 216
+offsetof(unused4) = 220
+offsetof(unused5) = 224
+offsetof(unused6) = 228
+offsetof(unused7) = 232
+
+sizeof(struct info_peer_stats) = 120
+
+sizeof(struct info_loop) = 24
+offsetof(last_offset) = 0
+offsetof(drift_comp) = 8
+offsetof(compliance) = 16
+offsetof(watchdog_timer) = 20
+
+sizeof(struct info_sys) = 80
+
+sizeof(struct info_sys_stats) = 44
+
+sizeof(struct old_info_sys_stats) = 40
+
+sizeof(struct info_mem_stats) = 148
+offsetof(totalpeermem) = 4
+offsetof(freepeermem) = 6
+offsetof(findpeer_calls) = 8
+offsetof(allocations) = 12
+offsetof(demobilizations) = 16
+offsetof(hashcount) = 20
+
+sizeof(struct info_io_stats) = 40
+
+sizeof(struct info_timer_stats) = 16
+
+sizeof(struct old_conf_peer) = 16
+
+sizeof(struct conf_peer) = 168
+
+sizeof(struct conf_unpeer) = 24
+
+sizeof(struct conf_sys_flags) = 4
+offsetof(flags) = 0
+
+sizeof(struct info_restrict) = 56
+
+sizeof(struct conf_restrict) = 48
+
+
+
+
+sizeof(struct reset_flags) = 4
+offsetof(flags) = 0
+
+sizeof(struct info_auth) = 36
+
+sizeof(struct info_trap) = 64
+
+sizeof(struct conf_trap) = 48
+
+sizeof(struct info_control) = 60
+offsetof(ctltimereset) = 0
+
+sizeof(struct info_clock) = 52
+offsetof(clockadr) = 0
+offsetof(type) = 4
+offsetof(flags) = 5
+offsetof(lastevent) = 6
+offsetof(currentstatus) = 7
+offsetof(polls) = 8
+offsetof(noresponse) = 12
+offsetof(badformat) = 16
+offsetof(baddata) = 20
+offsetof(timestarted) = 24
+offsetof(fudgetime1) = 28
+offsetof(fudgetime2) = 36
+offsetof(fudgeval1) = 44
+offsetof(fudgeval2) = 48
+
+sizeof(struct conf_fudge) = 20
+offsetof(clockadr) = 0
+offsetof(which) = 4
+offsetof(fudgetime) = 8
+offsetof(fudgeval_flags) = 16
+
+sizeof(struct info_clkbug) = 332
+offsetof(clockadr) = 0
+offsetof(nvalues) = 4
+offsetof(ntimes) = 5
+offsetof(svalues) = 6
+offsetof(stimes) = 8
+offsetof(values) = 12
+offsetof(times) = 76
+
+sizeof(struct info_kernel) = 60
+offsetof(offset) = 0
+offsetof(freq) = 4
+offsetof(maxerror) = 8
+offsetof(esterror) = 12
+offsetof(status) = 16
+offsetof(shift) = 18
+offsetof(constant) = 20
+offsetof(precision) = 24
+offsetof(tolerance) = 28
+offsetof(ppsfreq) = 32
+offsetof(jitter) = 36
+offsetof(stabil) = 40
+offsetof(jitcnt) = 44
+offsetof(calcnt) = 48
+offsetof(errcnt) = 52
+offsetof(stbcnt) = 56
+
+sizeof(struct info_dns_assoc) = 32
+

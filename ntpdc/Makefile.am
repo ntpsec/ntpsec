@@ -1,7 +1,8 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpdc
-EXTRA_PROGRAMS = ntpdc-layout
+noinst_PROGRAMS = ntpdc-layout
+noinst_DATA=	check-layout
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD =	version.o ../libntp/libntp.a @READLINE_LIBS@
@@ -9,12 +10,18 @@ LDADD =	version.o ../libntp/libntp.a @READLINE_LIBS@
 ntpdc_layout_LDADD =
 DISTCLEANFILES = .version version.c
 noinst_HEADERS = ntpdc.h
-EXTRA_DIST = nl_in.c nl.pl
+EXTRA_DIST = nl_in.c nl.pl layout.std
 ETAGS_ARGS = Makefile.am
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
 
 ntpdc-layout.o: nl.c
+
+layout.here:
+	ntpdc-layout > $@
+
+check-layout: ntpdc-layout layout.std layout.here
+	cmp $(srcdir)/layout.std layout.here && echo stamp > $@
 
 $(PROGRAMS): $(LDADD)
 
