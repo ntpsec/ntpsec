@@ -66,7 +66,6 @@
 #define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	AUDIO_BUFSIZ	320	/* audio buffer size (50 ms) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
-#define	REFID		"NONE"	/* reference ID */
 #define	DESCRIPTION	"WWV/H Audio Demodulator/Decoder" /* WRU */
 #define SECOND		8000	/* second epoch (sample rate) (Hz) */
 #define MINUTE		(SECOND * 60) /* minute epoch */
@@ -77,13 +76,13 @@
 #define MAXSNR		30.	/* max SNR reference */
 #define DGAIN		20.	/* data channel gain reference */
 #define SGAIN		10.	/* sync channel gain reference */
-#define MAXFREQ		1.	/* freq tolerance (125 PPM) */
+#define MAXFREQ		1.	/* max frequency tolerance (125 PPM) */
 #define PI		3.1415926535 /* the real thing */
 #define DATSIZ		(170 * MS) /* data matched filter size */
 #define SYNSIZ		(800 * MS) /* minute sync matched filter size */
 #define MAXERR		30	/* max data bit errors in minute */
-#define NCHAN		5	/* number of channels */
-#define	AUDIO_PHI	5e-6	/* max frequency error */
+#define NCHAN		5	/* number of radio channels */
+#define	AUDIO_PHI	5e-6	/* dispersion growth factor */
 #ifdef IRIG_SUCKS
 #define	WIGGLE		11	/* wiggle filter length */
 #endif /* IRIG_SUCKS */
@@ -91,32 +90,34 @@
 /*
  * General purpose status bits (status)
  *
- * Notes: SELV and/or SELH are set when WWV or WWVH has been heard and
- * cleared on signal loss. SSYNC is set when the second sync pulse has
- * been acquired and cleared by signal loss or timeout. MSYNC is set
- * when the minute sync pulse has been acquired. DSYNC is set when a
- * digit reaches the threshold and INSYNC is set when all nine digits
- * have reached the threshold. The MSYNC, DSYNC and INSYNC bits are
- * cleared only by timeout, upon which the driver starts over from
- * scratch.
+ * SELV and/or SELH are set when WWV or WWVH has been heard and cleared
+ * on signal loss. SSYNC is set when the second sync pulse has been
+ * acquired and cleared by signal loss. MSYNC is set when the minute
+ * sync pulse has been acquired. DSYNC is set when a digit reaches the
+ * threshold and INSYNC is set when all nine digits have reached the
+ * threshold. The MSYNC, DSYNC and INSYNC bits are cleared only by
+ * timeout, upon which the driver starts over from scratch.
  *
  * DGATE is set if a data bit is invalid and BGATE is set if a BCD digit
  * bit is invalid. SFLAG is set when during seconds 59, 0 and 1 while
- * probing for alternate frequencies. LEPSEC is set when the SECWAR of
- * the timecode is set on the last second of 30 June or 31 December. At
- * the end of this minute the driver inserts second 60 in the seconds
- * state machine and the minute sync slips a second.
+ * probing alternate frequencies. LEPDAY is set when SECWAR of the
+ * timecode is set on 30 June or 31 December. LEPSEC is set during the
+ * last minute of the day when LEPDAY is set. At the end of this minute
+ * the driver inserts second 60 in the seconds state machine and the
+ * minute sync slips a second. The SLOSS and SJITR bits are for monitor
+ * only.
  */
 #define MSYNC		0x0001	/* minute epoch sync */
 #define SSYNC		0x0002	/* second epoch sync */
 #define DSYNC		0x0004	/* minute units sync */
 #define INSYNC		0x0008	/* clock synchronized */
-#define SLOSS		0x0010	/* minute sync signal lost */
-#define SJITR		0x0020	/* minute sync excessive jitter */
+#define SLOSS		0x0010	/* seconds sync signal lost */
+#define SJITR		0x0020	/* seconds sync excessive jitter */
 #define DGATE		0x0040	/* data bit error */
 #define BGATE		0x0080	/* BCD digit bit error */
 #define SFLAG		0x1000	/* probe flag */
-#define LEPSEC		0x2000	/* leap second in progress */
+#define LEPDAY		0x2000	/* leap second day */
+#define LEPSEC		0x4000	/* leap second minute */
 
 /*
  * Station scoreboard bits
@@ -163,10 +164,10 @@
  * developed in future. All these are in minutes.
  */
 #define ACQSN		5	/* station acquisition timeout */
-#define HSPEC		15	/* second sync timeout */
 #define DIGIT		30	/* minute unit digit timeout */
+#define HOLD		30	/* reachable timeout */
 #define PANIC		(2 * 1440) /* panic timeout */
-#define HOLD		30	/* reach hold */
+
 /*
  * Thresholds. These establish the minimum signal level, minimum SNR and
  * maximum jitter thresholds which establish the error and false alarm
@@ -220,8 +221,8 @@
 #define DUT2		0x02	/* 57 DUT .2 */
 #define DUT4		0x04	/* 58 DUT .4 */
 #define DUTS		0x08	/* 50 DUT sign */
-#define DST1		0x10	/* 55 DST1 DST in progress */
-#define DST2		0x20	/* 2 DST2 DST change warning */
+#define DST1		0x10	/* 55 DST1 leap warning */
+#define DST2		0x20	/* 2 DST2 DST1 delayed one day */
 #define SECWAR		0x40	/* 3 leap second warning */
 
 /*
@@ -439,8 +440,8 @@ double bcd2[][4] = {
  */
 char dstcod[] = {
 	'S',			/* 00 standard time */
-	'I',			/* 01 daylight warning */
-	'O',			/* 10 standard warning */
+	'I',			/* 01 set clock ahead at 0200 local */
+	'O',			/* 10 set clock back at 0200 local */
 	'D'			/* 11 daylight time */
 };
 
@@ -510,7 +511,6 @@ struct wwvunit {
 	int	fd_icom;	/* ICOM file descriptor */
 	int	errflg;		/* error flags */
 	int	watch;		/* watchcat */
-	int	swatch;		/* second sync watchcat */
 
 	/*
 	 * Audio codec variables
@@ -684,7 +684,6 @@ wwv_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -1106,18 +1105,7 @@ wwv_rf(
 	 */
 	if (up->mphase == 0) {
 		up->watch++;
-		up->swatch++;
-		if (up->status & LEPSEC) {
-
-			/*
-			 * If the leap bit is set, set the minute epoch
-			 * back one second so the station processes
-			 * don't miss a beat.
-			 */
-			up->mphase -= SECOND;
-			if (up->mphase < 0)
-				up->mphase += MINUTE;
-		} else if (!(up->status & MSYNC)) {
+		if (!(up->status & MSYNC)) {
 
 			/*
 			 * If minute sync has not been acquired before
@@ -1140,17 +1128,15 @@ wwv_rf(
 		} else {
 
 			/*
-			 * If digit sync has not been acquired before
-			 * timeout, game over and restart from scratch.
-			 * If the second sync times out, dim the second
-			 * sync lamp and raise an alarm.
+			 * If the leap bit is set, set the minute epoch
+			 * back one second so the station processes
+			 * don't miss a beat.
 			 */
-			if (up->swatch > HSPEC)
-				up->status &= ~SSYNC;
-			if (!(up->status & SSYNC))
-				up->alarm |= 1 << SYNERR;
-			if (up->watch > DIGIT && !(up->status & DSYNC))
-				wwv_newgame(peer);
+			if (up->status & LEPSEC) {
+				up->mphase -= SECOND;
+				if (up->mphase < 0)
+					up->mphase += MINUTE;
+			}
 		}
 	}
 
@@ -1159,9 +1145,7 @@ wwv_rf(
 	 * threshold and the second counter matches the minute epoch
 	 * within the second, the driver has synchronized to the
 	 * station. The second number is the remaining seconds until the
-	 * next minute epoch, while the second phase is zero. Note that
-	 * the minute search has determined an approximate frequency
-	 * offset as wedll.
+	 * next minute epoch, while the second phase is zero.
 	 */
 	if (up->status & MSYNC) {
 		wwv_epoch(peer);
@@ -1509,7 +1493,9 @@ wwv_endpoc(
 	static int epoch_mf[3]; /* epoch median filter */
  	static int xepoch;	/* last second epoch */
  	static int zepoch;	/* last averaging interval epoch */
-	static int syncnt;	/* second epoch run length counter */
+	static int syncnt;	/* run length counter */
+	static int maxrun;	/* longest run length */
+	static int mepoch;	/* longest run epoch */
 	static int jitcnt;	/* jitter holdoff counter */
 	static int avgcnt;	/* averaging interval counter */
 	static int avginc;	/* averaging ratchet */
@@ -1557,8 +1543,7 @@ wwv_endpoc(
 	 * frequency averaging interval, the new candidate replaces the
 	 * old one anyway. The compare counter is incremented if the new
 	 * candidate is identical to the last one; otherwise, it is
-	 * forced to zero. If the compare counter increments to 10, the
-	 * epoch buffer is reset and the second sync lamp is lit.
+	 * forced to zero.
 	 *
 	 * Careful attention to detail here. If the signal amplitude
 	 * falls below the threshold or if no stations are heard or the
@@ -1570,7 +1555,7 @@ wwv_endpoc(
 	    up->eposnr < SSNR) {
 		up->status |= SLOSS;
 		up->status &= ~SSYNC;
-		jitcnt = syncnt = avgcnt = 0;
+		jitcnt = avgcnt = syncnt = maxrun = 0;
 		return;
 	}
 	avgcnt++;
@@ -1578,21 +1563,23 @@ wwv_endpoc(
 	if (abs(tmp2) <= MS || jitcnt >= up->avgint) {
 		jitcnt = 0;
 		if (tmp2 != 0) {
-			xepoch = up->tepoch;
+			if (syncnt > maxrun) {
+				maxrun = syncnt;
+				mepoch = xepoch;
+			}
 			syncnt = 0;
 		} else {
-			if (syncnt < SCMP) {
-				syncnt++;
-			} else {
-				up->status |= SSYNC;
-				up->swatch = 0;
-				up->yepoch = up->tepoch;
-			}
+			syncnt++;
 		}
+		xepoch = up->tepoch;
 	} else {
-		up->status |= SJITR;
-		jitcnt++;
+		if (syncnt > maxrun) {
+			maxrun = syncnt;
+			mepoch = xepoch;
+		}
 		syncnt = 0;
+		jitcnt++;
+		up->status |= SJITR;
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status & (SSYNC |
 	    MSYNC))) {
@@ -1613,63 +1600,97 @@ wwv_endpoc(
 	 * intercept of typical computer clocks.
 	 *
 	 * The frequency update is calculated from the epoch change in
-	 * 125-us units divided by the averaging interval in seconds. If
-	 * the epoch change over the interval is 1 ms or less, the
-	 * frequency is adjusted, but clamped at +-125 PPM. In this case
-	 * the wiggle counter is incremented; otherwise, it is
-	 * decremented. If the counter increments to +3, the averaging
-	 * interval is doubled; if it decrements to -3, the interval is
-	 * halved.
-	 *
+	 * 125-us units divided by the averaging interval in seconds.
 	 * The averaging interval affects other receiver functions,
 	 * including the the 1000/1200-Hz comb filter and codec clock
 	 * loop. It also affects the 100-Hz subcarrier loop and the bit
 	 * and digit comparison counter thresholds.
+	 *
+	 * The best averaging interval epoches are when the jitter
+	 * counter is zero, but in any case the epoches cannot be more
+	 * than twice the averaging interval. This avoids lockup,
+	 * especially when first starting up when the interval is small.
 	 */
-	if ((avgcnt >= up->avgint && jitcnt == 0) || avgcnt > 2 *
-	    up->avgint) {
-		dtemp = (up->tepoch - zepoch) % SECOND;
-		if (abs(dtemp) < MAXFREQ * MINAVG) {
+	if ((jitcnt == 0 && avgcnt < up->avgint) || (jitcnt != 0 &&
+	    avgcnt < 2 * up->avgint))
+		return;
+	/*
+	 * During the averaging interval the longest run of identical
+	 * epoches is determined. If the longest run is at least 10
+	 * seconds, the SSYNC bit is lit and the value becomes the
+	 * reference epoch for the next interval. If not, the second
+	 * synd lamp is dark and flashers set.
+	 */
+	if (syncnt > maxrun) {
+		maxrun = syncnt;
+		mepoch = xepoch;
+	}
+	if (maxrun > SCMP) {
+		up->yepoch = mepoch;
+		up->status |= SSYNC;
+	} else {
+		up->status &= ~SSYNC;
+	}
+
+	/*
+	 * If the epoch change over the averaging interval is less than
+	 * 1 ms, the frequency is adjusted, but clamped at +-125 PPM. If
+	 * greater than 1 ms, the counter is decremented. If the epoch
+	 * change is less than 0.5 ms, the counter is incremented. If
+	 * the counter increments to +3, the averaging interval is
+	 * doubled and the counter set to zero; if it increments to -3,
+	 * the interval is halved and the counter set to zero.
+	 *
+	 * Here be spooks. From careful observations, the epoch
+	 * sometimes makes a long run of identical samples, then takes a
+	 * lurch due apparently to lost interrupts or spooks. If this
+	 * happens, the epoch change times the maximum run length will
+	 * be greater than the averaging interval, so the lurch should
+	 * be believed but the frequency left alone. Really intricate
+	 * here.
+	 */ 
+	dtemp = (up->tepoch - zepoch) % SECOND;
+	if (abs(dtemp) < MAXFREQ * MINAVG) {
+		if (maxrun * abs(up->tepoch - zepoch) < avgcnt) {
 			up->freq += dtemp / avgcnt;
-			if (up->freq > MAXFREQ) {
+			if (up->freq > MAXFREQ)
 				up->freq = MAXFREQ;
-			} else if (up->freq < -MAXFREQ) {
+			else if (up->freq < -MAXFREQ)
 				up->freq = -MAXFREQ;
-			} else if (abs(dtemp) < MAXFREQ * MINAVG / 2.) {
-				if (avginc < 3) {
-					avginc++;
-				} else {
-					if (up->avgint < MAXAVG) {
-						up->avgint <<= 1;
-						avginc = 0;
-					}
-				}
-			}
-		} else {
-			if (avginc > -3) {
-				avginc--;
+		}
+		if (abs(dtemp) < MAXFREQ * MINAVG / 2.) {
+			if (avginc < 3) {
+				avginc++;
 			} else {
-				if (up->avgint > MINAVG) {
-					up->avgint >>= 1;
+				if (up->avgint < MAXAVG) {
+					up->avgint <<= 1;
 					avginc = 0;
 				}
 			}
 		}
-		if (pp->sloppyclockflag & CLK_FLAG4) {
-			sprintf(tbuf,
-			    "wwv2 %04x %5.0f %4d %4d %4d %4d %4.0f %6.1f",
-			    up->status, up->epomax, up->tepoch, jitcnt,
-			    avginc, avgcnt, dtemp, up->freq * 1e6 /
-			    SECOND);
-			record_clock_stats(&peer->srcadr, tbuf);
-#ifdef DEBUG
-			if (debug)
-				printf("%s\n", tbuf);
-#endif /* DEBUG */
-		zepoch = up->tepoch;
-		avgcnt = 0;
+	} else {
+		if (avginc > -3) {
+			avginc--;
+		} else {
+			if (up->avgint > MINAVG) {
+				up->avgint >>= 1;
+				avginc = 0;
+			}
 		}
 	}
+	if (pp->sloppyclockflag & CLK_FLAG4) {
+		sprintf(tbuf,
+		    "wwv2 %04x %4.0f %4d %4d %4d %+2d %4d %4.0f %6.1f",
+		    up->status, up->epomax, up->tepoch, maxrun, jitcnt,
+		    avginc, avgcnt, dtemp, up->freq * 1e6 / SECOND);
+		record_clock_stats(&peer->srcadr, tbuf);
+#ifdef DEBUG
+		if (debug)
+			printf("%s\n", tbuf);
+#endif /* DEBUG */
+	}
+	zepoch = up->tepoch;
+	avgcnt = syncnt = maxrun = 0;
 }
 
 
@@ -1709,7 +1730,9 @@ wwv_epoch(
 	/*
 	 * Sample the minute sync pulse envelopes at epoch 800 for both
 	 * the WWV and WWVH stations. This will be used later for
-	 * channel and station mitigation.
+	 * channel and station mitigation. Note that the seconds epoch
+	 * is set here well before the end of the second to make sure we
+	 * never seet the epoch backwards.
 	 */
 	if (up->rphase == 800 * MS) {
 		up->repoch = up->yepoch;
@@ -1941,7 +1964,7 @@ wwv_rsec(
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
 			    "wwv5 %2d %04x %3d %4d %d %.0f/%.1f %s %04x %.0f %.0f/%.1f %s %04x %.0f %.0f/%.1f",
-			    up->port, up->status, up->gain, up->tepoch,
+			    up->port, up->status, up->gain, up->yepoch,
 			    up->errcnt, cp->sigamp, cp->datsnr,
 			    sp->refid, sp->reach & 0xffff,
 			    wwv_metric(sp), sp->synmax, sp->synsnr,
@@ -2007,7 +2030,8 @@ wwv_rsec(
 	 * Miscellaneous bits. If above the positive threshold, declare
 	 * 1; if below the negative threshold, declare 0; otherwise
 	 * raise the SYMERR alarm. At the end of second 58, QSY to the
-	 * probe channel.
+	 * probe channel. The design is intended to preserve the bits
+	 * over periods of signal loss.
 	 */
 	case MSC20:			/* 55 */
 		wwv_corr4(peer, &up->decvec[YR + 1], bcddld, bcd9);
@@ -2066,7 +2090,7 @@ wwv_rsec(
 		 * kernel is armed one second before the actual leap is
 		 * scheduled.
 		 */
-		if (up->status & LEPSEC) {
+		if (up->status & LEPDAY) {
 			pp->leap = LEAP_ADDSECOND;
 		} else {
 			pp->leap = LEAP_NOWARNING;
@@ -2098,7 +2122,7 @@ wwv_rsec(
 		break;
 
 	/*
-	 * If SECWAR is set on the last minute of 30 June or 31
+	 * If LEPDAY is set on the last minute of 30 June or 31
 	 * December, the LEPSEC bit is set. At the end of the minute in
 	 * which LEPSEC is set the transmitter and receiver insert an
 	 * extra second (60) in the timescale and the minute sync skips
@@ -2112,15 +2136,28 @@ wwv_rsec(
 	}
 
 	/*
-	 * If all nine digits have been found and compared correctly,
-	 * declare victory.
+	 * If digit sync has not been acquired before timeout, game over
+	 * and restart from scratch.
 	 */
-	if (up->digcnt >= 9)
-		up->status |= INSYNC;
+	if (!(up->status & DSYNC) && up->watch > DIGIT) {
+		wwv_newgame(peer);
+		return;
+	}
+
+	/*
+	 * If tracking second sync and all nine digits have been found
+	 * and compared correctly, declare victory.
+	 */
+	if (up->status & SSYNC) {
+		if (up->digcnt >= 9)
+			up->status |= INSYNC;
+	} else {
+		up->alarm |= 1 << SYNERR;
+	}
 	pp->disp += AUDIO_PHI;
 	up->rsec = nsec;
-#ifdef IRIG_SUCKS
 
+#ifdef IRIG_SUCKS
 	/*
 	 * You really don't wanna know what comes down here. Leave it to
 	 * say Solaris 2.8 broke the nice clean audio stream, apparently
@@ -2166,13 +2203,12 @@ wwv_rsec(
 #endif /* IRIG_SUCKS */
 
 	/*
-	 * If victory has been declared and seconds sync has been lit
-	 * for a couple of minutes, wind the system clock. It should not
-	 * be a surprise, especially if the radio is not tunable, that
-	 * sometimes no stations are above the noise and the reference
-	 * ID set to NONE.
+	 * If victory has been declared and seconds sync is lit, wind
+	 * the system clock. It should not be a surprise, especially if
+	 * the radio is not tunable, that sometimes no stations are
+	 * above the noise and the reference ID set to NONE.
 	 */
-	if (up->status & INSYNC && (up->alarm & (3 << SYNERR)) == 0) {
+	if (up->status & INSYNC && up->status & SSYNC) {
 		pp->second = up->rsec;
 		pp->minute = up->decvec[MN].digit + up->decvec[MN +
 		    1].digit * 10;
@@ -2220,6 +2256,11 @@ wwv_rsec(
  * to zero. Otherwise, the data gate is enabled and the probabilities
  * are calculated. Note that the data matched filter contributes half
  * the pulse width, or 85 ms.
+ *
+ * It's important to observe that there are three conditions to
+ * determine: average to +1 (hit), average to -1 (miss) or average to
+ * zero (erasure). The erasure condition results from insufficient
+ * signal (noise) and has no bias toward either a hit or miss.
  */
 static double
 wwv_data(
@@ -2427,8 +2468,10 @@ wwv_tsec(
 		temp = carry(&up->decvec[HR + 1]);
 
 	/*
-	 * Decode the current minute and day. Set the leap second enable
-	 * bit on the last minute of 30 June and 31 December.
+	 * Decode the current minute and day. Set leap day if the
+	 * timecode leap bit is set on 30 June or 31 December. Set leap
+	 * minute if the last minute on leap day. This code fails in
+	 * 2400 AD.
 	 */
 	minute = up->decvec[MN].digit + up->decvec[MN + 1].digit *
 	    10 + up->decvec[HR].digit * 60 + up->decvec[HR +
@@ -2436,8 +2479,13 @@ wwv_tsec(
 	day = up->decvec[DA].digit + up->decvec[DA + 1].digit * 10 +
 	    up->decvec[DA + 2].digit * 100;
 	isleap = (up->decvec[YR].digit & 0x3) == 0;
-	if (minute == 1439 && (day == (isleap ? 182 : 183) || day ==
-	     (isleap ? 365 : 366)) && up->misc & SECWAR)
+	if (up->misc & SECWAR && (day == (isleap ? 182 : 183) || day ==
+	    (isleap ? 365 : 366)) && up->status & INSYNC && up->status &
+	    SSYNC)
+		up->status |= LEPDAY;
+	else
+		up->status &= ~LEPDAY;
+	if (up->status & LEPDAY && minute == 1439)
 		up->status |= LEPSEC;
 	else
 		up->status &= ~LEPSEC;
@@ -2555,13 +2603,10 @@ wwv_snr(
  * on 25 MHz.
  *
  * This routine selects the best channel using a metric computed from
- * the reachability shift register and minute pulse amplitude. The high
- * order bits of the metric show the number of reachability register 1
- * bits in the last six probes, while the low order bits hold the minute
- * sync pulse amplitude. Normally, the award goes to the the channel
- * with the highest metric; but, case of ties, the award goes to the
- * channel with the highest minute sync pulse amplitude and then to the
- * highest frequency.
+ * the reachability register and minute pulse amplitude. Normally, the
+ * award goes to the the channel with the highest metric; but, in case
+ * of ties, the award goes to the channel with the highest minute sync
+ * pulse amplitude and then to the highest frequency.
  *
  * The routine performs an important squelch function to keep dirty data
  * from polluting the integrators. During acquisition and until the
@@ -2578,7 +2623,7 @@ wwv_newchan(
 	struct refclockproc *pp;
 	struct wwvunit *up;
 	struct sync *sp, *rp;
-	double rank,dtemp;
+	double rank, dtemp;
 	int i, j;
 
 	pp = peer->procptr;
@@ -2586,9 +2631,7 @@ wwv_newchan(
 
 	/*
 	 * Search all five station pairs looking for the channel with
-	 * maximum metric, where the metric is defined as the high order
-	 * bits the bit count and the low order bits the minute sync
-	 * pulse amplitude. If no station is found above thresholds, the
+	 * maximum metric. If no station is found above thresholds, the
 	 * reference ID is set to NONE and we wait for hotter ions.
 	 */
 	j = 0;
@@ -2641,8 +2684,10 @@ wwv_newgame(
 	up = (struct wwvunit *)pp->unitptr;
 
 	/*
-	 * Initialize strategic values.
+	 * Initialize strategic values. Note we set the leap bits
+	 * NOTINSYNC and the refid "NONE".
 	 */
+	peer->leap = LEAP_NOTINSYNC;
 	up->watch = up->status = up->alarm = 0;
 	up->avgint = MINAVG;
 	up->freq = 0;
@@ -2667,6 +2712,10 @@ wwv_newgame(
 
 /*
  * wwv_metric - compute station metric
+ *
+ * The most significant bits represent the number of ones in the
+ * reachability register. The least significant bits represent the
+ * minute sync pulse amplitude. The combined value is scaled 0-100.
  */
 double
 wwv_metric(
@@ -2722,23 +2771,22 @@ wwv_qsy(
  *
  * Prettytime format - similar to Spectracom
  *
- * sq yy ddd hh:mm:ss.fff ld dut lset agc stn comp errs freq avgt
+ * sq yy ddd hh:mm:ss ld dut lset agc iden sig errs freq avgt
  *
  * s	sync indicator ('?' or ' ')
- * q	quality character (hex 0-F)
+ * q	error bits (hex 0-F)
  * yyyy	year of century
  * ddd	day of year
  * hh	hour of day
  * mm	minute of hour
- * ss	minute of hour
- * fff	millisecond of second
- * l	leap second warning ' ' or 'L'
- * d	DST state 'S', 'D', 'I', or 'O'
- * dut	DUT sign and magnitude in deciseconds
+ * ss	second of minute)
+ * l	leap second warning (' ' or 'L')
+ * d	DST state ('S', 'D', 'I', or 'O')
+ * dut	DUT sign and magnitude (0.1 s)
  * lset	minutes since last clock update
  * agc	audio gain (0-255)
  * iden	reference identifier (station and frequency)
- * comp	channel bit counter
+ * sig	signal quality (0-100)
  * errs	bit errors in last minute
  * freq	frequency offset (PPM)
  * avgt	averaging time (s)

@@ -516,8 +516,10 @@ peer_config(
 	/*
 	 * Here no match has been found, so presumably this is a new
 	 * persistent association. Mobilize the thing and initialize its
-	 * variables.
+	 * variables. If emulating ntpdate, force iburst.
 	 */
+	if (mode_ntpdate)
+		flags |= FLAG_IBURST;
 	peer = newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
 	    flags | FLAG_CONFIG, cast_flags, ttl, key);
 	return (peer);
