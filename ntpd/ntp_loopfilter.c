@@ -303,10 +303,9 @@ local_clock(
 	 * relatively small.
 	 */
 	if (sys_huffpuff != NULL) {
-		if (sys_huffpuff[sys_huffptr] == 0 || peer->delay <
-		    sys_huffpuff[sys_huffptr])
+		if (peer->delay < sys_huffpuff[sys_huffptr])
 			sys_huffpuff[sys_huffptr] = peer->delay;
-		if (sys_mindly == 0 || peer->delay < sys_mindly)
+		if (peer->delay < sys_mindly)
 			sys_mindly = peer->delay;
 		if (fp_offset > 0)
 			dtemp = -(peer->delay - sys_mindly) / 2;
@@ -316,7 +315,7 @@ local_clock(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "local_clock: size %d mindly %.6f huffpuff %.6f\n",
+		    "local_clock: size %d mindly %.6f huffpuff %.6f\n",
 			    sys_hufflen, sys_mindly, dtemp);
 #endif
 	}
@@ -776,10 +775,10 @@ huffpuff()
 	if (sys_huffpuff == NULL)
 		return;
 	sys_huffptr = (sys_huffptr + 1) % sys_hufflen;
-	sys_huffpuff[sys_huffptr] = 0;
-	sys_mindly = 0;
+	sys_huffpuff[sys_huffptr] = 1e9;
+	sys_mindly = 1e9;
 	for (i = 0; i < sys_hufflen; i++) {
-		if (sys_mindly == 0 || sys_huffpuff[i] < sys_mindly)
+		if (sys_huffpuff[i] < sys_mindly)
 			sys_mindly = sys_huffpuff[i];
 	}
 }
@@ -794,6 +793,7 @@ loop_config(
 	double freq
 	)
 {
+	int i;
 
 	switch (item) {
 
@@ -931,7 +931,9 @@ loop_config(
 		sys_hufflen = (int)(freq / HUFFPUFF);
 		sys_huffpuff = (double *)emalloc(sizeof(double) *
 		    sys_hufflen);
-		memset(sys_huffpuff, 0, sizeof(double) * sys_hufflen);
+		for (i = 0; i < sys_hufflen; i++)
+			sys_huffpuff[i] = 1e9;
+		sys_mindly = 1e9;
 		break;
 	}
 }

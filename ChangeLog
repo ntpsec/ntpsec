@@ -1,3 +1,12 @@
+2001-05-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99k39
+
+	* ntpd/ntp_loopfilter.c (local_clock): huffpuff cleanup/improvements.
+	(huffpuff): Cleanup/improvements.
+	(loop_config): huffpuff initialization cleanup/improvements.
+	From: Dave Mills, Terje, Mark, and John?
+
 2001-05-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/release.htm:
