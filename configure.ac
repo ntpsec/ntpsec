@@ -11,6 +11,7 @@ AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
+ac_cv_var_parse_ok=no
 ac_cv_var_ripe_ncc_ok=no
 ac_cv_var_jupiter_ok=no
 
@@ -1735,16 +1736,21 @@ ac_cv_var_atom_ok=yes
 
 # The PPSAPI headers need "inline" ($ac_cv_c_inline='inline')
 
-# The PPSAPI needs ATOM
-
 # The PPSAPI needs struct timespec.
+
+# The PPSAPI also needs a timepps header.
 
 case "$ac_cv_c_inline$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
  inlineyes*yes*)
-    AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
-    ac_cv_var_oncore_ok=yes
-    ac_cv_var_ripe_ncc_ok=yes
-    ac_cv_var_jupiter_ok=yes
+    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
+     *yes* | *sunos* | *solaris* | *sco* )
+	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
+	ac_cv_var_jupiter_ok=yes
+	ac_cv_var_oncore_ok=yes
+	ac_cv_var_parse_ok=yes
+	ac_cv_var_ripe_ncc_ok=yes
+	;;
+    esac
     ;;
 esac
 
