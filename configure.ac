@@ -308,6 +308,7 @@ case "$host" in
  *) AC_CHECK_HEADERS(utmp.h utmpx.h) ;;
 esac
 AC_CHECK_HEADERS(arpa/nameser.h)
+AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(net/if.h, [], [],
 [#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -347,6 +348,7 @@ case "$host" in
 esac
 # HMS: Check sys/shm.h after some others
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
+# HMS: Checked sys/socket.h earlier
 case "$host" in
  *-*-netbsd*) ;;
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
