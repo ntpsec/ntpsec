@@ -69,11 +69,9 @@ extern	void	DESauth_des	P((u_int32 *, u_char *));
 extern	int	DESauth_parity	P((u_int32 *));
 #endif	/* DES */
 
-#ifdef	MD5
 extern	int	MD5authdecrypt	P((u_char *, u_int32 *, int, int));
 extern	int	MD5authencrypt	P((u_char *, u_int32 *, int));
 extern	void	MD5auth_setkey	P((keyid_t, const u_char *, const int));
-#endif	/* MD5 */
 
 extern	int	atoint		P((const char *, long *));
 extern	int	atouint		P((const char *, u_long *));

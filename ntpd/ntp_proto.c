@@ -2343,11 +2343,7 @@ init_proto(void)
 	get_systime(&dummy);
 	sys_bclient = 0;
 	sys_bdelay = DEFBROADDELAY;
-#if defined(DES) || defined(MD5)
 	sys_authenticate = 1;
-#else
-	sys_authenticate = 0;
-#endif
 	L_CLR(&sys_authdelay);
 	sys_authdly[0] = sys_authdly[1] = 0;
 	sys_stattime = 0;

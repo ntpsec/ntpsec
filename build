@@ -50,7 +50,7 @@ case "$CONFIG_ARGS" in
  *--without-rsaref*)
     [ -d rsaref2 ] && KEYSUF="-norsa"
     ;;
- *--disable-md5*)
+ *--disable-autokey*)
     KEYSUF="-noautokey"
     ;;
 esac

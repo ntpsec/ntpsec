@@ -14,7 +14,6 @@
 #include <config.h>
 #endif
 
-#ifdef MD5
 #include <stdio.h>
 
 #include "ntp_types.h"
@@ -83,4 +82,3 @@ MD5authdecrypt(
 	return (!memcmp((char *)digest, (char *)pkt + length + 4,
 		BLOCK_OCTETS));
 }
-#endif /* MD5 */

@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99i6)
+AM_INIT_AUTOMAKE(ntp, 4.0.99i7)
 AC_PREREQ(2.14)
 
 ac_cv_var_oncore_ok=no
@@ -1349,16 +1349,15 @@ dnl case "$ac_cv_var_gdt_surveying" in
 dnl  yes) AC_DEFINE(GDT_SURVEYING) ;;
 dnl esac
 
-AC_CACHE_CHECK(if we want to use MD5 authentication, ac_cv_var_use_md5,
-[AC_ARG_ENABLE(md5,          	[  --enable-md5            + include support for MD5 keys],
+AC_CACHE_CHECK(if we want to use autokey, ac_cv_var_use_autokey,
+[AC_ARG_ENABLE(autokey,        	[  --enable-autokey        + include support for AUTOKEY],
     [ans=$enableval], [ans=yes])
-ac_cv_var_use_md5=$ans])
-case "$ac_cv_var_use_md5" in
+ac_cv_var_use_autokey=$ans])
+case "$ac_cv_var_use_autokey" in
  yes)
      AC_DEFINE(AUTOKEY, , [Autokey?])
      AC_SUBST(AUTOKEY)
      AUTOKEY=1
-     AC_DEFINE(MD5)
      ;;
 esac
 

@@ -26,16 +26,12 @@ struct savekey {
 #ifdef	DES
 		u_int32 DES_key[2];	/* DES key */
 #endif
-#ifdef	MD5
 		u_char MD5_key[32];	/* MD5 key */
-#endif
 	} k;
 	keyid_t keyid;		/* key identifier */
 	u_short flags;		/* flags that wave */
 	u_long lifetime;	/* remaining lifetime */
-#ifdef	MD5
 	int keylen;		/* key length */
-#endif
 };
 
 #define	KEY_TRUSTED	0x001	/* this key is trusted */
@@ -167,13 +163,11 @@ authhavekey(
 	}
 	cache_keyid = sk->keyid;
 	cache_flags = sk->flags;
-#ifdef	MD5
 	if (sk->flags & KEY_MD5) {
 		cache_key = sk->k.MD5_key;
 		cache_keylen = sk->keylen;
 		return (1);
 	}
-#endif
 #ifdef	DES
 	if (sk->flags & KEY_DES) {
 		cache_key = (u_char *)sk->k.DES_key;
@@ -368,7 +362,6 @@ DESauth_setkey(
 }
 #endif
 
-#ifdef	MD5
 void
 MD5auth_setkey(
 	keyid_t keyno,
@@ -425,7 +418,6 @@ MD5auth_setkey(
 	authnumkeys++;
 	return;
 }
-#endif
     
 /*
  * auth_delkeys - delete all known keys, in preparation for rereading
@@ -451,9 +443,7 @@ auth_delkeys(void)
 			if (sk->flags & KEY_TRUSTED) {
 				memset(&sk->k, 0, sizeof(sk->k));
 				sk->lifetime = 0;
-#ifdef MD5
 				sk->keylen = 0;
-#endif
 				sk = sk->next;
 			} else {
 				*skp = sk->next;
@@ -527,10 +517,9 @@ authencrypt(
 		return (DESauthencrypt(cache_key, pkt, length));
 #endif
 
-#ifdef	MD5
 	if (cache_flags & KEY_MD5)
 		return (MD5authencrypt(cache_key, pkt, length));
-#endif
+
 	return (0);
 }
 
@@ -565,10 +554,8 @@ authdecrypt(
 		return (DESauthdecrypt(cache_key, pkt, length, size));
 #endif
 
-#ifdef	MD5
 	if (cache_flags & KEY_MD5)
 		return (MD5authdecrypt(cache_key, pkt, length, size));
-#endif
 
 	return (0);
 }
