@@ -9,6 +9,6 @@
 /*
  * Function prototypes
  */
-int	audio_init		P((char *, int, int, int, int));
-int	audio_gain		P((int));
+int	audio_init		P((char *, int, int));
+int	audio_gain		P((int, int, int));
 void	audio_show		P((void));

@@ -308,10 +308,22 @@ irig_start(
 	double	step;		/* codec adjustment */
 
 	/*
+	 * Open audio device
+	 */
+	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
+	if (fd < 0)
+		return (0);
+#ifdef DEBUG
+	if (debug)
+		audio_show();
+#endif
+
+	/*
 	 * Allocate and initialize unit structure
 	 */
 	if (!(up = (struct irigunit *)
 	      emalloc(sizeof(struct irigunit)))) {
+		(void) close(fd);
 		return (0);
 	}
 	memset((char *)up, 0, sizeof(struct irigunit));
@@ -320,6 +332,12 @@ irig_start(
 	pp->io.clock_recv = irig_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
+	pp->io.fd = fd;
+	if (!io_addclock(&pp->io)) {
+		(void)close(fd);
+		free(up);
+		return (0);
+	}
 
 	/*
 	 * Initialize miscellaneous variables
@@ -331,36 +349,6 @@ irig_start(
 	up->decim = 1;
 	up->fdelay = IRIG_B;
 	up->gain = 127;
-
-	if (pp->sloppyclockflag & CLK_FLAG2)
-		up->port = 2;
-	else
-		up->port = 1;
-	if (pp->sloppyclockflag & CLK_FLAG3)
-		up->mongain = MONGAIN;
-	else
-		up->mongain = 0;
-
-	/*
-	 * Open audio device
-	 */
-	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit,
-			up->mongain, up->port);
-	if (fd < 0) {
-		free(up);	  
-		return (0);
-	}
-#ifdef DEBUG
-	if (debug)
-		audio_show();
-#endif
-
-	pp->io.fd = fd;
-	if (!io_addclock(&pp->io)) {
-		(void)close(fd);
-		free(up);
-		return (0);
-	}
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -487,6 +475,18 @@ irig_receive(
 			up->irig_b = up->irig_e = 0;
 		}
 	}
+
+	/*
+	 * Set the input port and monitor gain for the next buffer.
+	 */
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		up->port = 2;
+	else
+		up->port = 1;
+	if (pp->sloppyclockflag & CLK_FLAG3)
+		up->mongain = MONGAIN;
+	else
+		up->mongain = 0;
 }
 
 /*
@@ -969,7 +969,7 @@ irig_gain(
 		if (up->gain < 0)
 			up->gain = 0;
 	}
-	audio_gain(up->gain);
+	audio_gain(up->gain, up->mongain, up->port);
 	up->clipcnt = 0;
 }
 

@@ -42,6 +42,10 @@
 # endif
 #endif
 
+#ifdef PCM_STYLE_SOUND
+# include <ctype.h>
+#endif
+
 /*
  * Global variables
  */
@@ -49,11 +53,146 @@
 static struct audio_device device; /* audio device ident */
 #endif /* HAVE_SYS_AUDIOIO_H */
 #ifdef PCM_STYLE_SOUND
+# define INIT_FILE "/etc/ntp.audio"
+int agc =	SOUND_MIXER_WRITE_RECLEV; /* or IGAIN or LINE */
+int monitor =	SOUND_MIXER_WRITE_VOLUME; /* or OGAIN */
+int devmask = 0;
+int recmask = 0;
+char cf_c_dev[100], cf_i_dev[100], cf_agc[100], cf_monitor[100];
+
+const char *m_names[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
 #else /* not PCM_STYLE_SOUND */
 static struct audio_info info;	/* audio device info */
 #endif /* not PCM_STYLE_SOUND */
 static int ctl_fd;		/* audio control file descriptor */
 
+#ifdef PCM_STYLE_SOUND
+static void audio_config_read P((int, char **, char **));
+static int  mixer_name P((const char *, int));
+
+
+int
+mixer_name(
+	const char *m_name,
+	int m_mask
+	)
+{
+	int i;
+
+	for (i = 0; i < SOUND_MIXER_NRDEVICES; ++i)
+		if (((1 << i) & m_mask)
+		    && !strcmp(m_names[i], m_name))
+			break;
+
+	return (SOUND_MIXER_NRDEVICES == i)
+	    ? -1
+	    : i
+	    ;
+}
+
+
+/*
+ * Check:
+ *
+ * /etc/ntp.audio#	where # is the unit number
+ * /etc/ntp.audio.#	where # is the unit number
+ * /etc/ntp.audio
+ *
+ * for contents of the form:
+ *
+ * idev /dev/input_device
+ * cdev /dev/control_device
+ * agc pcm_input_device {igain,line,line1,...}
+ * monitor pcm_monitor_device {ogain,...}
+ *
+ * The device names for the "agc" and "monitor" keywords
+ * can be found by running either the "mixer" program or the
+ * util/audio-pcm program.
+ *
+ * Great hunks of this subroutine were swiped from refclock_oncore.c
+ */
+static void
+audio_config_read(
+	int unit,
+	char **c_dev,	/* Control device */
+	char **i_dev	/* input device */
+	)
+{
+	FILE *fd;
+	char device[20], line[100], ab[100];
+
+	sprintf(device, "%s%d", INIT_FILE, unit);
+	if ((fd = fopen(device, "r")) == NULL) {
+		printf("audio_config_read: <%s> NO\n", device);
+		sprintf(device, "%s.%d", INIT_FILE, unit);
+		if ((fd = fopen(device, "r")) == NULL) {
+			printf("audio_config_read: <%s> NO\n", device);
+			sprintf(device, "%s", INIT_FILE, unit);
+			if ((fd = fopen(device, "r")) == NULL) {
+				printf("audio_config_read: <%s> NO\n", device);
+				return;
+			}
+		}
+	}
+	printf("audio_config_read: reading <%s>\n", device);
+	while (fgets(line, sizeof line, fd)) {
+		char *cp, *cc, *ca;
+		int i;
+
+		/* Remove comments */
+		if ((cp = strchr(line, '#')))
+			*cp = '\0';
+
+		/* Remove any trailing spaces */
+		for (i = strlen(line);
+		     i > 0 && isascii((int)line[i - 1]) && isspace((int)line[i - 1]);
+			)
+			line[--i] = '\0';
+
+		/* Remove leading space */
+		for (cc = line; *cc && isascii((int)*cc) && isspace((int)*cc); cc++)
+			continue;
+
+		/* Stop if nothing left */
+		if (!*cc)
+			continue;
+
+		/* Uppercase the command and find the arg */
+		for (ca = cc; *ca; ca++) {
+			if (isascii((int)*ca)) {
+				if (islower((int)*ca)) {
+					*ca = toupper(*ca);
+				} else if (isspace((int)*ca) || (*ca == '='))
+					break;
+			}
+		}
+
+		/* Remove space (and possible =) leading the arg */
+		for (; *ca && isascii((int)*ca) && (isspace((int)*ca) || (*ca == '=')); ca++)
+			continue;
+
+		if (!strncmp(cc, "IDEV", (size_t) 4)) {
+			sscanf(ca, "%s", ab);
+			strcpy(cf_i_dev, ab);
+			printf("idev <%s>\n", ab);
+		} else if (!strncmp(cc, "CDEV", (size_t) 4)) {
+			sscanf(ca, "%s", ab);
+			strcpy(cf_c_dev, ab);
+			printf("cdev <%s>\n", ab);
+		} else if (!strncmp(cc, "AGC", (size_t) 3)) {
+			sscanf(ca, "%s", ab);
+			strcpy(cf_agc, ab);
+			printf("agc <%s> %d\n", ab, i);
+		} else if (!strncmp(cc, "MONITOR", (size_t) 7)) {
+			sscanf(ca, "%s", ab);
+			strcpy(cf_monitor, ab);
+			printf("monitor <%s> %d\n", ab, mixer_name(ab, -1));
+		}
+	}
+	fclose(fd);
+	return;
+}
+#endif PCM_STYLE_SOUND
 
 /*
  * audio_init - open and initialize audio device
@@ -65,16 +204,12 @@ static int ctl_fd;		/* audio control file descriptor */
  * codec sample rate (8000 Hz), precision (8 bits), number of channels
  * (1) and encoding (ITU-T G.711 mu-law companded) have been set by
  * default.
- *
- * We also select the I/O port and the mongain.
  */
 int
 audio_init(
 	char	*dname,		/* device name */
 	int	bufsiz,		/* buffer size */
-	int	unit,		/* device unit (0-3) */
-	int	mongain,	/* input to output mix (monitor gain) 0-255 */
-	int	port		/* selected I/O port: 1 mic/2 line in */
+	int	unit		/* device unit (0-3) */
 	)
 {
 #ifdef PCM_STYLE_SOUND
@@ -82,7 +217,6 @@ audio_init(
 	char actl_dev[30];
 	struct snd_size s_size;
 	snd_chan_param s_c_p;
-	int l, r;
 #endif
 	int fd;
 	int rval;
@@ -96,6 +230,13 @@ audio_init(
 
 #ifdef PCM_STYLE_SOUND
 	(void)sprintf(actl_dev, ACTL_DEV, unit);
+
+	audio_config_read(unit, &actl, &dname);
+	/* If we have values for cf_c_dev or cf_i_dev, use them. */
+	if (*cf_c_dev)
+		dname = cf_c_dev;
+	if (*cf_i_dev)
+		actl = cf_i_dev;
 #endif
 
 	/*
@@ -144,45 +285,39 @@ audio_init(
 	    printf("audio_init: play_rate %lu, rec_rate %lu, play_format %#lx, rec_format %#lx\n",
 		s_c_p.play_rate, s_c_p.rec_rate, s_c_p.play_format, s_c_p.rec_format);
 
-	rval = 0;
+	/* Grab the device and record masks */
 
-	r = l = 100 * mongain / 255;	/* Normalize to 0-100 */
-# ifdef DEBUG
-	if (debug > 1)
-	  printf("audio_gain: mongain %d/%d\n", mongain, l);
-# endif
-	l |= r << 8;
-	rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_OGAIN, &l);
-	if (rval == -1) {
-	  printf("SOUND_MIXER_WRITE_OGAIN: %s\n",
-		 strerror(errno));
-	  /* return (rval); */
+	if (ioctl(ctl_fd, SOUND_MIXER_READ_DEVMASK, &devmask) == -1)
+	    printf("SOUND_MIXER_READ_DEVMASK: %s\n", strerror(errno));
+	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECMASK, &recmask) == -1)
+	    printf("SOUND_MIXER_READ_RECMASK: %s\n", strerror(errno));
+
+	/* validate and set any specified config file stuff */
+	if (*cf_agc) {
+		int i;
+
+		i = mixer_name(cf_agc, recmask);
+		if (i >= 0)
+			agc = MIXER_WRITE(i);
+		else
+			printf("input %s not in recmask %#x\n",
+			       cf_agc, recmask);
 	}
 
-# ifdef DEBUG
-	if (debug > 1)
-	  printf("audio_gain: port %d\n", port);
-# endif
-	l = (1 << ((port == 2) ? SOUND_MIXER_LINE : SOUND_MIXER_MIC));
-	rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_RECSRC, &l);
-	if (rval == -1) {
-	  printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
-		 strerror(errno));
-	  return (rval);
+	if (*cf_monitor) {
+		int i;
+
+		/* devmask */
+		i = mixer_name(cf_monitor, devmask);
+		if (i >= 0)
+			monitor = MIXER_WRITE(i);
+		else
+			printf("monitor %s not in devmask %#x\n",
+			       cf_monitor, devmask);
 	}
-# ifdef DEBUG
-	if (debug > 1) {
-	  if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &l) == -1)
-	    printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
-		   strerror(errno));
-	  else
-	    printf("audio_gain: recsrc is %d\n", l);
-	}
-# endif
+
 #else /* not PCM_STYLE_SOUND */
 	AUDIO_INITINFO(&info);
-	info.record.port = port;
-	info.monitor_gain = mongain;
 	info.play.gain = AUDIO_MAX_GAIN;
 	info.play.port = AUDIO_SPEAKER;
 # ifdef HAVE_SYS_AUDIOIO_H
@@ -202,14 +337,18 @@ audio_init(
 
 
 /*
- * audio_gain - adjust codec gain
+ * audio_gain - adjust codec gains and port
  */
 int
 audio_gain(
-	int gain		/* volume level (gain) 0-255 */
+	int gain,		/* volume level (gain) 0-255 */
+	int mongain,		/* input to output mix (monitor gain) 0-255 */
+	int port		/* selected I/O port: 1 mic/2 line in */
 	)
 {
 	int rval;
+	static int o_mongain = -1;
+	static int o_port = -1;
 
 #ifdef PCM_STYLE_SOUND
 	int l, r;
@@ -219,19 +358,62 @@ audio_gain(
 	r = l = 100 * gain / 255;	/* Normalize to 0-100 */
 # ifdef DEBUG
 	if (debug > 1)
-	    printf("audio_gain: gain %d/%d\n", gain, l);
+		printf("audio_gain: gain %d/%d\n", gain, l);
 # endif
 	l |= r << 8;
-	/* or SOUND_MIXER_WRITE_IGAIN */
-	rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_LINE1, &l);
+	rval = ioctl(ctl_fd, agc, &l);
 	if (rval == -1) {
-	    printf("SOUND_MIXER_WRITE_LINE1: %s\n", strerror(errno));
-	    return (rval);
+		printf("audio_gain: agc write: %s\n", strerror(errno));
+		return (rval);
+	}
+
+	if (o_mongain != mongain) {
+		r = l = 100 * mongain / 255;    /* Normalize to 0-100 */
+# ifdef DEBUG
+		if (debug > 1)
+			printf("audio_gain: mongain %d/%d\n", mongain, l);
+# endif
+		l |= r << 8;
+		rval = ioctl(ctl_fd, monitor, &l);
+		if (rval == -1) {
+			printf("audio_gain: mongain write: %s\n",
+			       strerror(errno));
+			return (rval);
+		}
+		o_mongain = mongain;
+	}
+
+	if (o_port != port) {
+# ifdef DEBUG
+		if (debug > 1)
+			printf("audio_gain: port %d\n", port);
+# endif
+		l = (1 << ((port == 2) ? SOUND_MIXER_LINE : SOUND_MIXER_MIC));
+		rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_RECSRC, &l);
+		if (rval == -1) {
+			printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
+			       strerror(errno));
+			return (rval);
+		}
+# ifdef DEBUG
+		if (debug > 1) {
+			if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &l) == -1)
+				printf("SOUND_MIXER_WRITE_RECSRC: %s\n",
+				       strerror(errno));
+			else
+				printf("audio_gain: recsrc is %d\n", l);
+		}
+# endif
+		o_port = port;
 	}
 #else /* not PCM_STYLE_SOUND */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
 	info.record.error = 0;
 	info.record.gain = gain;
+	if (o_mongain != mongain)
+		o_mongain = info.monitor_gain = mongain;
+	if (o_port != port)
+		o_port = info.record.port = port;
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio_gain: %m");
@@ -253,16 +435,11 @@ void
 audio_show(void)
 {
 #ifdef PCM_STYLE_SOUND
-	int devmask = 0, recmask = 0, recsrc = 0, orecsrc;
+	int recsrc = 0;
 
 	printf("audio_show: ctl_fd %d\n", ctl_fd);
-	if (ioctl(ctl_fd, SOUND_MIXER_READ_DEVMASK, &devmask) == -1)
-	    printf("SOUND_MIXER_READ_DEVMASK: %s\n", strerror(errno));
-	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECMASK, &recmask) == -1)
-	    printf("SOUND_MIXER_READ_RECMASK: %s\n", strerror(errno));
 	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &recsrc) == -1)
 	    printf("SOUND_MIXER_READ_RECSRC: %s\n", strerror(errno));
-	orecsrc = recsrc;
 
 #else /* not PCM_STYLE_SOUND */
 # ifdef HAVE_SYS_AUDIOIO_H
