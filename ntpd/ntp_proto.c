@@ -401,15 +401,9 @@ receive(
 				    &rbufp->recv_srcadr,
 				    &rbufp->dstadr->sin, 0, sys_private,
 				    0);
-			} else if (hismode == MODE_CLIENT) {
-				pkeyid = peer->hcookie;
 			} else {
 #ifdef PUBKEY
-				if (crypto_enable)
-					pkeyid = peer->pcookie.key;
-				else
-					pkeyid = peer->pcookie.key;
-					
+				pkeyid = peer->pcookie.key;
 #else
 				if (hismode == MODE_SERVER)
 					pkeyid = peer->pcookie.key;
@@ -704,7 +698,7 @@ receive(
 	 * 4. Check to see that one or more hashes of the current key ID
 	 *    matches the previous key ID or ultimate original key ID
 	 *    obtained from the broadcaster or symmetric peer. If no
-	 *    match, arm for an autokey values update.
+	 *    match, sit the dance and wait for timeout.
 	 */
 	if (peer->flags & FLAG_SKEY) {
 		peer->flash |= TEST10;
@@ -1027,7 +1021,9 @@ clock_update(void)
 	}
 	if (oleap == LEAP_NOTINSYNC) {
 		report_event(EVNT_SYNCCHG, (struct peer *)0);
+#ifdef AUTOKEY
 		expire_all();
+#endif
 	}
 	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, (struct peer *)0);

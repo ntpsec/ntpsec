@@ -1,4 +1,17 @@
+2000-05-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99i9
+
+	* ntpd/ntp_crypto.c: tstamp and autokey cleanup
+	From: Dave Mills
+
+	* ntpd/ntp_proto.c (clock_update): Only call expire_all() if
+	AUTOKEY
+	From many folks, including Reg Clemens <reg@dwf.com>
+
 2000-05-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99i8
 
 	* flock-build: Use new --with-crypto choices
 	* build (KEYSUF): Deal with new --with-crypto

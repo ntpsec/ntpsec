@@ -327,7 +327,8 @@ crypto_recv(
 			temp = public_key.bits / 8;
 			if (!crypto_enable) {
 				rval = 0;
-			} else if (tstamp < peer->recauto.tstamp) {
+			} else if (tstamp == 0 || tstamp <
+			    peer->recauto.tstamp) {
 				break;
 			} else if (peer->pubkey == NULL || temp !=
 			    ntohl(ap->siglen)) {
@@ -350,8 +351,7 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			if (tstamp > 0)
-				peer->flags |= FLAG_AUTOKEY;
+			peer->flags |= FLAG_AUTOKEY;
 #endif /* PUBKEY */
 			peer->flash &= ~TEST10;
 			peer->recauto.tstamp = tstamp;
@@ -372,7 +372,8 @@ crypto_recv(
 			temp = public_key.bits / 8;
 			if (!crypto_enable) {
 				rval = 0;
-			} else if (tstamp < peer->pcookie.tstamp) {
+			} else if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp) {
 				break;
 			} else if (peer->pubkey == NULL || temp !=
 			    ntohl(cp->siglen)) {
@@ -395,7 +396,7 @@ crypto_recv(
 				peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
-			if (!(peer->flags & FLAG_MCAST2) && tstamp > 0)
+			if (!(peer->flags & FLAG_MCAST2))
 				peer->flags |= FLAG_AUTOKEY;
 #else
 			temp = ntohl(cp->key);
@@ -422,7 +423,8 @@ crypto_recv(
 		case CRYPTO_DH | CRYPTO_RESP:
 			temp = ntohl(pkt[i + 3]);
 			j = i + 4 + temp / 4;
-			if (tstamp < peer->pcookie.tstamp) {
+			if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp) {
 				break;
 			} else if (peer->pubkey == NULL ||
 			    ntohl(pkt[j]) != public_key.bits / 8) {
@@ -479,7 +481,8 @@ crypto_recv(
 		case CRYPTO_NAME | CRYPTO_RESP:
 			temp = ntohl(pkt[i + 3]);
 			j = i + 4 + temp / 4;
-			if (tstamp < peer->pcookie.tstamp) {
+			if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp) {
 				break;
 			} else if (ntohl(pkt[j]) != public_key.bits / 8)
 			    {
