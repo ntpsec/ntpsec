@@ -1,5 +1,5 @@
 /*
- * /src/NTP/ntp-4/libparse/kparse_conf.c,v 4.2 1998/07/11 10:05:30 kardel RELEASE_19990228_A
+ * /src/NTP/ntp-4/libparse/kparse_conf.c,v 4.2 1998/07/11 10:05:30 kardel RELEASE_19991128_A
  *
  * $Created: Sat Jun 13 10:05:32 1998 $
  *

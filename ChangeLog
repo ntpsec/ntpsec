@@ -1,5 +1,35 @@
 1999-12-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver8.htm: 
+	* libparse/clk_computime.c: 
+	* libparse/clk_dcf7000.c: 
+	* libparse/clk_hopf6021.c: 
+	* libparse/clk_meinberg.c: 
+	* libparse/clk_rawdcf.c: 
+	* libparse/clk_rcc8000.c: 
+	* libparse/clk_schmid.c: 
+	* libparse/clk_trimtaip.c: 
+	* libparse/clk_trimtsip.c: 
+	* libparse/data_mbg.c: 
+	* libparse/kclk_computime.c: 
+	* libparse/kclk_dcf7000.c: 
+	* libparse/kclk_hopf6021.c: 
+	* libparse/kclk_meinberg.c: 
+	* libparse/kclk_rawdcf.c: 
+	* libparse/kclk_rcc8000.c: 
+	* libparse/kclk_schmid.c: 
+	* libparse/kclk_trimtaip.c: 
+	* libparse/kclk_trimtsip.c: 
+	* libparse/kparse.c: 
+	* libparse/kparse_conf.c: 
+	* libparse/parse.c: 
+	* libparse/parse_conf.c: 
+	* libparse/parsesolaris.c: 
+	* libparse/parsestreams.c: 
+	* ntpd/refclock_parse.c: 
+	Mods and updates
+	From: Frank Kardel <kardel@acm.org>
+	
 	* acconfig.h: PCF refclock
 	* configure.in: 
 	* html/driver35.htm: 

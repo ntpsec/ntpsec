@@ -1,5 +1,5 @@
 /*
- * /src/NTP/ntp-4/libparse/kclk_rawdcf.c,v 4.1 1998/06/13 12:07:55 kardel RELEASE_19990228_A
+ * /src/NTP/ntp-4/libparse/kclk_rawdcf.c,v 4.1 1998/06/13 12:07:55 kardel RELEASE_19991128_A
  *
  * $Created: Sat Jun 13 10:03:35 1998 $
  *
