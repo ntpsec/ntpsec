@@ -49,7 +49,7 @@ const char *prompt = "ntpq> ";	/* prompt to ask him about */
 /*
  * Keyid used for authenticated requests.  Obtained on the fly.
  */
-u_long info_auth_keyid = NTP_MAXKEY;
+u_long info_auth_keyid = 0;
 
 /*
  * Type of key md5
@@ -1176,12 +1176,13 @@ sendrequest(
 		 * Get the keyid and the password if we don't have one.
 		 */
 		if (info_auth_keyid == 0) {
-			maclen = getkeyid("Keyid: ");
-			if (maclen == 0) {
+			int keyid = getkeyid("Keyid: ");
+			if (keyid == 0 || keyid > NTP_MAXKEY) {
 				(void) fprintf(stderr,
 				   "Invalid key identifier\n");
 				return 1;
 			}
+			info_auth_keyid = keyid;
 		}
 		if (!authistrusted(info_auth_keyid)) {
 			pass = getpass("MD5 Password: ");
@@ -1191,7 +1192,6 @@ sendrequest(
 				return (1);
 			}
 		}
-		info_auth_keyid = maclen;
 		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
 		authtrust(info_auth_keyid, 1);
 
@@ -2226,11 +2226,14 @@ keyid(
 	)
 {
 	if (pcmd->nargs == 0) {
-		if (info_auth_keyid > NTP_MAXKEY)
+		if (info_auth_keyid == 0)
 		    (void) fprintf(fp, "no keyid defined\n");
 		else
 		    (void) fprintf(fp, "keyid is %lu\n", (u_long)info_auth_keyid);
 	} else {
+		/* allow zero so that keyid can be cleared. */
+		if(pcmd->argval[0].uval > NTP_MAXKEY)
+		    (void) fprintf(fp, "Invalid key identifier\n");
 		info_auth_keyid = pcmd->argval[0].uval;
 	}
 }
@@ -2273,18 +2276,21 @@ passwd(
 {
 	char *pass;
 
-	if (info_auth_keyid > NTP_MAXKEY) {
-		info_auth_keyid = getkeyid("Keyid: ");
-		if (info_auth_keyid > NTP_MAXKEY) {
-			(void)fprintf(fp, "Keyid must be defined\n");
+	if (info_auth_keyid == 0) {
+		int keyid = getkeyid("Keyid: ");
+		if (keyid == 0 || keyid > NTP_MAXKEY) {
+			(void)fprintf(fp, "Invalid key identifier\n");
 			return;
 		}
+		info_auth_keyid = keyid;
 	}
 	pass = getpass("MD5 Password: ");
 	if (*pass == '\0')
 	    (void) fprintf(fp, "Password unchanged\n");
-	else
+	else {
 	    authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	    authtrust(info_auth_keyid, 1);
+	}
 }
 
 
