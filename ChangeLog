@@ -1,3 +1,8 @@
+2000-01-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c: More improvements
+	From: Dave Mills <mills@udel.edu>
+
 2000-01-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwv.c: Bugfixes/improvements

@@ -1220,7 +1220,7 @@ wwv_rf(
 
 			/*
 			 * If the second sync times out, dim the sync
-			 * lamp and raises an alarm.
+			 * lamp and raise an alarm.
 			 */
 			up->swatch++;
 			if (up->swatch > HSPEC)
@@ -1347,6 +1347,8 @@ wwv_rf(
 		wwv_endpoc(peer, epomax, epopos);
 		up->epomax = epomax;
 		epomax = 0;
+		if (!(up->status & MSYNC))
+			wwv_gain(peer);
 	}
 	dtemp = (epobuf[up->epoch] += (mfsync - epobuf[up->epoch]) /
 	    (MINAVG << up->avgint));
@@ -1517,10 +1519,10 @@ wwv_qrz(
 					break;
 			}
 			sprintf(tbuf,
-			    "wwv8 %-3s %d %5.0f %5.1f %7ld %7ld %7ld",
-			    sp->ident, sp->count, sp->sigmax, snr,
-			    sp->pos, sp->jitter, MOD(sp->pos -
-			    up->nepoch - SYNSIZ, MINUTE));
+			    "wwv8 %d %3d %-3s %d %5.0f %5.1f %7ld %7ld %7ld",
+			    up->port, up->gain, sp->ident, sp->count,
+			    sp->sigmax, snr, sp->pos, sp->jitter,
+			    MOD(sp->pos - up->nepoch - SYNSIZ, MINUTE));
 			if (pp->sloppyclockflag & CLK_FLAG4)
 				record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -2013,11 +2015,11 @@ wwv_rsec(
 
 		cp->errcnt = 0;
 		sprintf(tbuf,
-    "wwv5 %d %s %04x %d %.0f/%.1f/%ld %s %04x %d %.0f/%.1f/%ld",
-		    up->gain, sp->ident, sp->select, sp->count,
-		    sp->synmax, sp->synsnr, sp->jitter, rp->ident,
-		    rp->select, rp->count, rp->synmax,rp->synsnr,
-		    rp->jitter);
+    "wwv5 %d %3d %-3s %04x %d %.0f/%.1f/%ld %s %04x %d %.0f/%.1f/%ld",
+		    up->port, up->gain, sp->ident, sp->select,
+		    sp->count, sp->synmax, sp->synsnr, sp->jitter,
+		    rp->ident, rp->select, rp->count, rp->synmax,
+		    rp->synsnr, rp->jitter);
 		if (pp->sloppyclockflag & CLK_FLAG4)
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
