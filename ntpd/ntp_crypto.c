@@ -768,9 +768,7 @@ crypto_recv(
 			 */
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if (ntp_adjtime(&ntv) == TIME_ERROR)
-				msyslog(LOG_ERR,
-				    "kernel TAI update failed");
+			(void)ntp_adjtime(&ntv);
 #endif /* NTP_API */
 #endif /* KERNEL_PLL */
 			sprintf(statstr, "leap %u ts %u fs %u",
