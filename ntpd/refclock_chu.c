@@ -399,7 +399,7 @@ struct	refclock refclock_chu = {
  */
 static int
 chu_start(
-	int	unit,		/* instance number (used for PCM) */
+	int	unit,		/* instance number (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
 {
@@ -415,47 +415,11 @@ chu_start(
 	int	fd_audio;	/* audio port file descriptor */
 	int	i;		/* index */
 	double	step;		/* codec adjustment */
-#endif /* HAVE_AUDIO */
-
-	/*
-	 * Allocate and initialize unit structure
-	 */
-	if (!(up = (struct chuunit *)
-	      emalloc(sizeof(struct chuunit))))
-		return (0);
-	memset((char *)up, 0, sizeof(struct chuunit));
-	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
-	pp->io.clock_recv = chu_receive;
-	pp->io.srcclock = (caddr_t)peer;
-	pp->io.datalen = 0;
-
-	/*
-	 * Initialize miscellaneous variables
-	 */
-	peer->precision = PRECISION;
-	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
-	DTOLFP(CHAR, &up->charstamp);
-
-#ifdef HAVE_AUDIO
-	/*
-	 * Set the input port and monitor gain for the next buffer.
-	 */
-	if (pp->sloppyclockflag & CLK_FLAG2)
-		up->port = 2;
-	else
-		up->port = 1;
-	if (pp->sloppyclockflag & CLK_FLAG3)
-		up->mongain = MONGAIN;
-	else
-		up->mongain = 0;
 
 	/*
 	 * Open audio device.
 	 */
-	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit,
-			      up->mongain, up->port);
+	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
 #ifdef DEBUG
 	if (fd_audio > 0 && debug)
 		audio_show();
@@ -478,11 +442,23 @@ chu_start(
 	sprintf(device, DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
-	if (fd <= 0) {
-		free(up);
+	if (fd <= 0)
+		return (0);
+
+	/*
+	 * Allocate and initialize unit structure
+	 */
+	if (!(up = (struct chuunit *)
+	      emalloc(sizeof(struct chuunit)))) {
+		close(fd);
 		return (0);
 	}
-
+	memset((char *)up, 0, sizeof(struct chuunit));
+	pp = peer->procptr;
+	pp->unitptr = (caddr_t)up;
+	pp->io.clock_recv = chu_receive;
+	pp->io.srcclock = (caddr_t)peer;
+	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		close(fd);
@@ -490,6 +466,13 @@ chu_start(
 		return (0);
 	}
 
+	/*
+	 * Initialize miscellaneous variables
+	 */
+	peer->precision = PRECISION;
+	pp->clockdesc = DESCRIPTION;
+	memcpy((char *)&pp->refid, REFID, 4);
+	DTOLFP(CHAR, &up->charstamp);
 #ifdef HAVE_AUDIO
 
 	/*
@@ -661,6 +644,18 @@ chu_audio_receive(
 		if (up->seccnt == 0)
 			chu_gain(peer);
 	}
+
+	/*
+	 * Set the input port and monitor gain for the next buffer.
+	 */
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		up->port = 2;
+	else
+		up->port = 1;
+	if (pp->sloppyclockflag & CLK_FLAG3)
+		up->mongain = MONGAIN;
+	else
+		up->mongain = 0;
 }
 
 
@@ -1542,7 +1537,7 @@ chu_gain(
 		if (up->gain < 0)
 			up->gain = 0;
 	}
-	audio_gain(up->gain);
+	audio_gain(up->gain, up->mongain, up->port);
 	up->clipcnt = 0;
 }
 #endif /* HAVE_AUDIO */
