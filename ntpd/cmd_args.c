@@ -161,7 +161,7 @@ getstartup(
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
 		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
 #endif
 		exit(2);
@@ -254,7 +254,8 @@ getCmdOpts(
 			break;
 
 		    case 'i':
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
+			droproot = 1;
 			if (!ntp_optarg)
 				errflg++;
 			else
@@ -317,14 +318,21 @@ getCmdOpts(
 			break;
 			
 		    case 'u':
-#ifdef HAVE_CLOCKCTL
-			user = malloc(strlen(ntp_optarg) + 1);
-			if ((user == NULL) || (ntp_optarg == NULL))
+#ifdef HAVE_DROPROOT
+			droproot = 1;
+			if( ! ntp_optarg ) {
 				errflg++;
-			(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
-			group = rindex(user, ':');
-			if (group)
-				*group++ = '\0'; /* get rid of the ':' */
+			} else {
+				user = malloc(strlen(ntp_optarg) + 1);
+				if (user == NULL) {
+					errflg++;
+				} else {
+					(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
+					group = rindex(user, ':');
+					if (group)
+						*group++ = '\0'; /* get rid of the ':' */
+				}
+			}
 #else
 			errflg++;
 #endif
@@ -409,7 +417,7 @@ getCmdOpts(
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
 		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
 #endif
 		exit(2);

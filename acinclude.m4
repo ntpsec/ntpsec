@@ -1,4 +1,4 @@
-AC_DEFUN(hs_ULONG_CONST,
+AC_DEFUN([hs_ULONG_CONST],
 [ AH_TEMPLATE(ULONG_CONST, [How do we create unsigned long constants?])
 AC_EGREP_CPP(Circus,
  [#define ACAT(a,b)a ## b
@@ -22,10 +22,10 @@ dnl
 dnl    AC_DEFINE_DIR(DATADIR, datadir)
 dnl    AC_DEFINE_DIR(PROG_PATH, bindir, [Location of installed binaries])
 dnl
-dnl @version $Id: .del-acinclude.m4~457f12ef 1.11 2003/01/17 18:07:39-05:00 stenn@whimsy.udel.edu $
+dnl @version $Id: .del-acinclude.m4~457f12ef 1.12 2003/12/24 00:39:20-05:00 stenn@whimsy.udel.edu $
 dnl @author Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 
-AC_DEFUN(AC_DEFINE_DIR, [
+AC_DEFUN([AC_DEFINE_DIR], [
 	ac_expanded=`(
 	    test "x$prefix" = xNONE && prefix="$ac_default_prefix"
 	    test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"

@@ -758,13 +758,20 @@ receive(
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
-		if (!sys_bclient)
+		if (sys_bclient == 0)
 			return;			/* not a client */
 
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
-		    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
+		if (sys_bclient == 1)
+			peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+			    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
+			    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
+			    FLAG_IBURST, MDF_BCLNT, 0, skeyid);
+		else
+			peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+			    MODE_BCLIENT, PKT_VERSION(pkt->li_vn_mode),
+			    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_BCLNT, 0,
+			    skeyid);
+		if (peer == NULL)
 			return;			/* system error */
 #ifdef OPENSSL
 		/*
@@ -1539,16 +1546,6 @@ peer_clear(
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;
 		peer->filter_epoch[i] = current_time;
-	}
-
-	/*
-	 * If he dies as a broadcast client, he comes back to life as
-	 * a broadcast client in client mode in order to recover the
-	 * initial autokey values.
-	 */
-	if (peer->cast_flags & MDF_BCLNT) {
-		peer->flags |= FLAG_MCAST;
-		peer->hmode = MODE_CLIENT;
 	}
 
 	/*
@@ -3092,10 +3089,10 @@ proto_config(
 	 */
 	case PROTO_BROADCLIENT:
 		sys_bclient = (int)value;
-		if (value)
-			io_setbclient();
-		else
+		if (sys_bclient == 0)
 			io_unsetbclient();
+		else
+			io_setbclient();
 		break;
 
 	/*

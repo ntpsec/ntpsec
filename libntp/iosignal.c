@@ -3,12 +3,18 @@
  *		   was shamelessly stolen from ntpd.
  */
 
-#include "ntp_machine.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_if.h"
-#include "ntp_stdlib.h"
-#include "iosignal.h"
+/*
+ * [Bug 158]
+ * Do the #includes differently, as under some versions of Linux
+ * sys/param.h has a #undef CONFIG_PHONE line in it.
+ *
+ * As we have ~40 CONFIG_ variables, I don't feel like renaming them
+ * every time somebody adds a new macro to some system header.
+ */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include <stdio.h>
 #include <signal.h>
@@ -24,6 +30,13 @@
 #if _BSDI_VERSION >= 199510
 # include <ifaddrs.h>
 #endif
+
+#include "ntp_machine.h"
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_if.h"
+#include "ntp_stdlib.h"
+#include "iosignal.h"
 
 #if defined(HAVE_SIGNALED_IO)
 static int sigio_block_count = 0;

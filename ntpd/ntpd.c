@@ -104,10 +104,14 @@
 # include <sys/ci/ciioctl.h>
 #endif
 
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
 # include <ctype.h>
 # include <grp.h>
 # include <pwd.h>
+#ifdef HAVE_LINUX_CAPABILITIES
+# include <sys/capability.h>
+# include <sys/prctl.h>
+#endif
 #endif
 
 /*
@@ -164,7 +168,8 @@ int forground_process = FALSE;
  */
 int nofork;
 
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
+int droproot = 0;
 char *user = NULL;		/* User to switch to */
 char *group = NULL;		/* group to switch to */
 char *chrootdir = NULL;		/* directory to chroot to */
@@ -173,7 +178,7 @@ int sw_gid;
 char *endp;  
 struct group *gr;
 struct passwd *pw; 
-#endif /* HAVE_CLOCKCTL */
+#endif /* HAVE_DROPROOT */
 
 /*
  * Initializing flag.  All async routines watch this and only do their
@@ -834,64 +839,106 @@ service_main(
 # endif  
 #endif
 
-#ifdef HAVE_CLOCKCTL
-	/* 
-	 * Drop super-user privileges and chroot now if the OS supports
-	 * non root clock control (only NetBSD for now).
-	 */
-	if (user != NULL) {
-	        if (isdigit((unsigned char)*user)) {
-	                sw_uid = (uid_t)strtoul(user, &endp, 0);
-	                if (*endp != '\0') 
-	                        goto getuser;
-	        } else {
+#ifdef HAVE_DROPROOT
+	if( droproot ) {
+		/* Drop super-user privileges and chroot now if the OS supports this */
+
+#ifdef HAVE_LINUX_CAPABILITIES
+		/* set flag: keep privileges accross setuid() call (we only really need cap_sys_time): */
+		if( prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1 ) {
+			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
+			exit(-1);
+		}
+#else
+		/* we need a user to switch to */
+		if( user == NULL ) {
+			msyslog(LOG_ERR, "Need user name to drop root privileges (see -u flag!)" );
+			exit(-1);
+		}
+#endif /* HAVE_LINUX_CAPABILITIES */
+	
+		if (user != NULL) {
+			if (isdigit((unsigned char)*user)) {
+				sw_uid = (uid_t)strtoul(user, &endp, 0);
+				if (*endp != '\0') 
+					goto getuser;
+			} else {
 getuser:	
-	                if ((pw = getpwnam(user)) != NULL) {
-	                        sw_uid = pw->pw_uid;
-	                } else {
-	                        errno = 0;
-	                        msyslog(LOG_ERR, "Cannot find user `%s'", user);
-									exit (-1);
-	                }
-	        }
-	}
-	if (group != NULL) {
-	        if (isdigit((unsigned char)*group)) {
-	                sw_gid = (gid_t)strtoul(group, &endp, 0);
-	                if (*endp != '\0') 
-	                        goto getgroup;
-	        } else {
+				if ((pw = getpwnam(user)) != NULL) {
+					sw_uid = pw->pw_uid;
+				} else {
+					errno = 0;
+					msyslog(LOG_ERR, "Cannot find user `%s'", user);
+					exit (-1);
+				}
+			}
+		}
+		if (group != NULL) {
+			if (isdigit((unsigned char)*group)) {
+				sw_gid = (gid_t)strtoul(group, &endp, 0);
+				if (*endp != '\0') 
+					goto getgroup;
+			} else {
 getgroup:	
-	                if ((gr = getgrnam(group)) != NULL) {
-	                        sw_gid = pw->pw_gid;
-	                } else {
-	                        errno = 0;
-	                        msyslog(LOG_ERR, "Cannot find group `%s'", group);
-									exit (-1);
-	                }
-	        }
-	}
-	if (chrootdir && chroot(chrootdir)) {
-		msyslog(LOG_ERR, "Cannot chroot to `%s': %m", chrootdir);
-		exit (-1);
-	}
-	if (group && setgid(sw_gid)) {
-		msyslog(LOG_ERR, "Cannot setgid() to group `%s': %m", group);
-		exit (-1);
-	}
-	if (group && setegid(sw_gid)) {
-		msyslog(LOG_ERR, "Cannot setegid() to group `%s': %m", group);
-		exit (-1);
-	}
-	if (user && setuid(sw_uid)) {
-		msyslog(LOG_ERR, "Cannot setuid() to user `%s': %m", user);
-		exit (-1);
-	}
-	if (user && seteuid(sw_uid)) {
-		msyslog(LOG_ERR, "Cannot seteuid() to user `%s': %m", user);
-		exit (-1);
-	}
-#endif
+				if ((gr = getgrnam(group)) != NULL) {
+					sw_gid = pw->pw_gid;
+				} else {
+					errno = 0;
+					msyslog(LOG_ERR, "Cannot find group `%s'", group);
+					exit (-1);
+				}
+			}
+		}
+		
+		if( chrootdir ) {
+			/* make sure cwd is inside the jail: */
+			if( chdir(chrootdir) ) {
+				msyslog(LOG_ERR, "Cannot chdir() to `%s': %m", chrootdir);
+				exit (-1);
+			}
+			if( chroot(chrootdir) ) {
+				msyslog(LOG_ERR, "Cannot chroot() to `%s': %m", chrootdir);
+				exit (-1);
+			}
+		}
+		if (group && setgid(sw_gid)) {
+			msyslog(LOG_ERR, "Cannot setgid() to group `%s': %m", group);
+			exit (-1);
+		}
+		if (group && setegid(sw_gid)) {
+			msyslog(LOG_ERR, "Cannot setegid() to group `%s': %m", group);
+			exit (-1);
+		}
+		if (user && setuid(sw_uid)) {
+			msyslog(LOG_ERR, "Cannot setuid() to user `%s': %m", user);
+			exit (-1);
+		}
+		if (user && seteuid(sw_uid)) {
+			msyslog(LOG_ERR, "Cannot seteuid() to user `%s': %m", user);
+			exit (-1);
+		}
+	
+#ifdef HAVE_LINUX_CAPABILITIES
+		do {
+			/*  We may be running under non-root uid now, but we still hold full root privileges!
+			 *  We drop all of them, except for the crucial one: cap_sys_time:
+			 */
+			cap_t caps;
+			if( ! ( caps = cap_from_text( "cap_sys_time=ipe" ) ) ) {
+				msyslog( LOG_ERR, "cap_from_text() failed: %m" );
+				exit(-1);
+			}
+			if( cap_set_proc( caps ) == -1 ) {
+				msyslog( LOG_ERR, "cap_set_proc() failed to drop root privileges: %m" );
+				exit(-1);
+			}
+			cap_free( caps );
+		} while(0);
+#endif /* HAVE_LINUX_CAPABILITIES */
+
+	}    /* if( droproot ) */
+#endif /* HAVE_DROPROOT */
+	
 	/*
 	 * Report that we're up to any trappers
 	 */
