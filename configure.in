@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.1.0a1)
+AM_INIT_AUTOMAKE(ntp, 4.1.0a2)
 AC_PREREQ(2.49)
 
 ac_cv_var_oncore_ok=no
@@ -26,7 +26,7 @@ case "$target" in
  i386-sequent-sysv4)
     case "$CC" in
      cc)
-	CFLAGS="$CFLAGS -Wc,+Abi-socket"
+	CFLAGS="$CFLAGS -Wc,+abi-socket"
 	;;
     esac
     ;;
