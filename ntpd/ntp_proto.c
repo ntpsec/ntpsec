@@ -312,13 +312,14 @@ receive(
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
 	int	is_authentic;		/* cryptosum ok */
-	keyid_t	skeyid;			/* cryptographic keys */
-	struct sockaddr_storage *dstadr_sin;	/* active runway */
+	keyid_t	skeyid = 0;		/* key ID */
+	struct sockaddr_storage *dstadr_sin; /* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
 	l_fp	p_org;			/* originate timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef OPENSSL
-	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
+	keyid_t tkeyid = 0;		/* temporary key ID */
+	keyid_t	pkeyid = 0;		/* previous key ID */
 	struct autokey *ap;		/* autokey structure pointer */
 	int	rval;			/* cookie snatcher */
 #endif /* OPENSSL */
@@ -424,11 +425,9 @@ receive(
 	 * an extension field is present. If 2 or 4, the packet is a
 	 * runt and goes poof! with a brilliant flash.
 	 */
-	skeyid = 0;
 	authlen = LEN_PKT_NOMAC;
-#ifdef OPENSSL
-	pkeyid = tkeyid = 0;
-	while ((has_mac = rbufp->recv_length - authlen) > 0) {
+	has_mac = rbufp->recv_length - authlen;
+	while (has_mac > 0) {
 		int temp;
 
 		if (has_mac % 4 != 0 || has_mac < 0) {
@@ -449,13 +448,14 @@ receive(
 				return;
 			}
 			authlen += temp;
+			has_mac -= temp;
 		} else {
 			sys_badlength++;
 			return;
 		}
 	}
-#else /* OPENSSL */
-	has_mac = rbufp->recv_length - authlen;
+#ifdef OPENSSL
+	pkeyid = tkeyid = 0;
 #endif /* OPENSSL */
 
 	/*
