@@ -116,7 +116,7 @@ static struct ctl_var sys_var[] = {
 #ifdef PUBKEY
 	{ CS_HOST,	RO, "hostname" },	/* 20 */
 	{ CS_PUBLIC,	RO, "publickey" },	/* 21 */
-	{ CS_DHPARAMS,	RO, "agree" },		/* 22 */
+	{ CS_DHPARAMS,	RO, "params" },		/* 22 */
 	{ CS_REVTIME,	RO, "refresh"},		/* 23 */
 	{ CS_LEAPTAB,	RO, "leaptable" },	/* 24 */
 	{ CS_TAI,	RO, "tai"},		/* 25 */
@@ -154,7 +154,6 @@ static	u_char def_sys_var[] = {
 	CS_DHPARAMS,
 	CS_REVTIME,
 	CS_LEAPTAB,
-	CS_TAI,
 #endif /* PUBKEY */
 	0
 };
@@ -1320,33 +1319,29 @@ ctl_putsys(
 	case CS_HOST:
 		ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
 			strlen(sys_hostname));
-		if (host.fstamp == 0)
-			break;
-		ctl_putuint(sys_var[CS_PUBLIC].text, host.fstamp);
+		if (host.fstamp != 0)
+			ctl_putuint(sys_var[CS_PUBLIC].text,
+			    ntohl(host.fstamp));
 		break;
 
 	case CS_DHPARAMS:
-		if (dhparam.fstamp == 0)
-			break;
-		ctl_putuint(sys_var[CS_DHPARAMS].text, dhparam.fstamp);
+		if (dhparam.fstamp != 0)
+			ctl_putuint(sys_var[CS_DHPARAMS].text,
+			    ntohl(dhparam.fstamp));
 		break;
 
 	case CS_REVTIME:
-		if (dhpub.fstamp == 0)
-			break;
-		ctl_putuint(sys_var[CS_REVTIME].text, dhpub.fstamp);
+		if (host.tstamp != 0)
+			ctl_putuint(sys_var[CS_REVTIME].text,
+			    ntohl(host.tstamp));
 		break;
 
 	case CS_LEAPTAB:
-		if (tai_leap.fstamp == 0)
-			break;
-		ctl_putuint(sys_var[CS_LEAPTAB].text, tai_leap.fstamp);
-		break;
-
-	case CS_TAI:
-		if (sys_tai == 0)
-			break;
-		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
+		if (tai_leap.fstamp != 0)
+			ctl_putuint(sys_var[CS_LEAPTAB].text,
+			    ntohl(tai_leap.fstamp));
+		if (sys_tai != 0)
+			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
 #endif /* PUBKEY */
 	}

@@ -408,12 +408,8 @@ expire_all(void)
 		}
 	}
 	sys_private = (u_int32)RANDOM & 0xffffffff;
-	L_CLR(&sys_revoketime);
-	if (sys_leap != LEAP_NOTINSYNC)
-		get_systime(&sys_revoketime);
 #ifdef PUBKEY
-	if (crypto_flags)
-		crypto_agree();
+	crypto_agree();
 #endif /* PUBKEY */
 #ifdef DEBUG
 	if (debug)

@@ -161,6 +161,7 @@ struct autokey {		/* network byte order */
 	keyid_t	key;		/* key ID */
 	int32	seq;		/* key number */
 	u_int32	siglen;		/* signature length */
+	u_int32	pkt[1];		/* start of signature field */
 	u_char	*sig;		/* signature */
 };
 
@@ -172,6 +173,7 @@ struct cookie {			/* network byte order */
 	u_int32	tstamp;		/* timestamp */
 	keyid_t	key;		/* key ID */
 	u_int32	siglen;		/* signature length */
+	u_int32	pkt[1];		/* start of signature field */
 	u_char	*sig;		/* signature */
 };
 
@@ -183,7 +185,8 @@ struct value {			/* network byte order */
 	u_int32	tstamp;		/* timestamp */
 	u_int32	fstamp;		/* filestamp */
 	u_int32	vallen;		/* value length */
-	u_char	*val;		/* value */
+	u_int32	pkt[1];		/* start of value field */
+	u_char	*ptr;		/* data pointer */
 	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
@@ -532,13 +535,15 @@ struct pkt {
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64
-	 * with an RSA modulus and Diffie-Hellman prime of 64 octets,
-	 * the maximum extension field size is 368 + 152 = 520 octets.
-	 * or 130 words. We give an extra 10 words to allow the plants
-	 * to grow if additional sunlight is available.
+	 * with an RSA modulus and Diffie-Hellman prime of 64 octets
+	 * and maximum host name of 128 octets, the maximum autokey
+	 * command is 152 octets and maximum autokey response is 460
+	 * octets. A packet can contain no more than one command and one
+	 * response, so the maximum total extension field length is 672
+	 * octets.
 	 */
 #ifdef AUTOKEY
-	u_int32 exten[140];	/* extension field */
+	u_int32 exten[672 / 4];	/* extension field */
 #else
 	u_int32	exten[1];	/* misused */
 #endif /* AUTOKEY */

@@ -41,7 +41,8 @@
 #define CRYPTO_CONF_PRIV  2	/* load private key from file */
 #define CRYPTO_CONF_PUBL  3	/* load public key from file */
 #define CRYPTO_CONF_DH    4	/* load Diffie_Hellman pars from file */
-#define CRYPTO_CONF_KEYS  5 	/* set keys directory path */
+#define CRYPTO_CONF_LEAP  5	/* load leapsecond table */
+#define CRYPTO_CONF_KEYS  6	/* set keys directory path */
 #endif /* PUBKEY */
 
 /*

@@ -712,9 +712,9 @@ chu_rf(
 	up->disc[up->discptr] = limit;
 	up->discptr = (up->discptr + 1 ) % LAG;
 	if (disc >= 0)
-		disc = sqrt(disc);
+		disc = SQRT(disc);
 	else
-		disc = -sqrt(-disc);
+		disc = -SQRT(-disc);
 
 	/*
 	 * Lowpass filter. Raised cosine, Ts = 1 / 300, beta = 0.1.

@@ -426,15 +426,7 @@ receive(
 				    &rbufp->dstadr->sin, 0, sys_private,
 				    0);
 			} else {
-#ifdef PUBKEY
 				pkeyid = peer->pcookie.key;
-#else
-				if (hismode == MODE_SERVER)
-					pkeyid = peer->pcookie.key;
-				else
-					pkeyid = peer->hcookie ^
-					    peer->pcookie.key;
-#endif /* PUBKEY */
 			}
 
 			/*
@@ -701,7 +693,7 @@ receive(
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("receive: bad packet %03x\n",
+			printf("receive: bad auth %03x\n",
 			    peer->flash);
 #endif
 		return;
@@ -767,6 +759,23 @@ receive(
 		}
 		if (!(peer->flags & FLAG_AUTOKEY))
 			peer->flash |= TEST11;
+
+		/*
+		 * This is delicious. Ordinarily, we kick out all errors
+		 * at this point; however, in symmetric mode and just
+		 * warming up, an unsynchronized peer must inject the
+		 * timestamps, even if it fails further up the road. So,
+		 * let the dude by here, but only if the jerk is not yet
+		 * reachable. After that, he's on his own.
+		 */
+		if (peer->flash && peer->reach != 0) {
+#ifdef DEBUG
+			if (debug)
+				printf("packet: bad autokey %03x\n",
+				    peer->flash);
+#endif
+			return;
+		}
 #endif /* PUBKEY */
 	}
 #endif /* AUTOKEY */
@@ -819,55 +828,61 @@ process_packet(
 		NTOHL_FP(&pkt->org, &p_org);
 	else
 		p_org = peer->rec;
+
+	/*
+	 * Test for old, duplicate or unsynch packets (tests 1-3).
+	 */
 	peer->rec = *recv_ts;
 	peer->ppoll = pkt->ppoll;
 	pmode = PKT_MODE(pkt->li_vn_mode);
-
-	/*
-	 * Test for old, duplicate or unsynchronized packets (tests 1
-	 * through 3).
-	 */
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
 		peer->oldpkt++;
-	if (L_ISEQU(&peer->org, &p_xmt))	/* test 1 */
-		peer->flash |= TEST1;		/* duplicate packet */
+	if (L_ISEQU(&peer->org, &p_xmt))	/* 1 */
+		peer->flash |= TEST1;		/* dupe */
 	if (PKT_MODE(pkt->li_vn_mode) != MODE_BROADCAST) {
-		if (!L_ISEQU(&peer->xmt, &p_org)) /* test 2 */
-			peer->flash |= TEST2;	/* bogus packet */
+		if (!L_ISEQU(&peer->xmt, &p_org)) /* 2 */
+			peer->flash |= TEST2;	/* bogus */
 		if (L_ISZERO(&p_rec) || L_ISZERO(&p_org)) /* test 3 */
-			peer->flash |= TEST3;	/* unsynchronized */
+			peer->flash |= TEST3;	/* unsynch */
 	}
-	if (L_ISZERO(&p_xmt))			/* test 3 */
-		peer->flash |= TEST3;		/* unsynchronized */
+	if (L_ISZERO(&p_xmt))			/* 3 */
+		peer->flash |= TEST3;		/* unsynch */
 	peer->org = p_xmt;
 
 	/*
-	 * Test for valid peer data (tests 6 through 8)
+	 * If tests 1-3 fail, the packet is discarded leaving only the
+	 * receive and origin timestamps and poll interval, which is
+	 * enough to get the protocol started.
+	 */
+	if (peer->flash) {
+#ifdef DEBUG
+		if (debug)
+			printf("packet: bad data %03x\n",
+			    peer->flash);
+#endif
+		return;
+	}
+
+	/*
+	 * Test for valid peer data (tests 6-8)
 	 */
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
 	LFPTOD(&ci, dtemp);
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC || /* test 6 */
+	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC || /* 6 */
 	    PKT_TO_STRATUM(pkt->stratum) >= NTP_MAXSTRATUM ||
 	    dtemp < 0)
-		peer->flash |= TEST6;	/* peer clock unsynchronized */
-	if (!(peer->flags & FLAG_CONFIG) && sys_peer != 0) { /* test 7 */
+		peer->flash |= TEST6;		/* bad synch */
+	if (!(peer->flags & FLAG_CONFIG) && sys_peer != 0) { /* 7 */
 		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
-			peer->flash |= TEST7; /* peer stratum too high */
+			peer->flash |= TEST7; /* bad stratum */
 			sys_badstratum++;
 		}
 	}
-	if (fabs(p_del) >= MAXDISPERSE		/* test 8 */
+	if (fabs(p_del) >= MAXDISPERSE		/* 8 */
 	    || p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;		/* root data */
-
-	/*
-	 * If the packet is denied access, declared not authentic or has
-	 * invalid timestamps, stuff it in the compactor. Otherwise,
-	 * capture the header data.
-	 */
-	if (peer->flash & ~(u_int)(TEST1 | TEST2 | TEST3 | TEST4 |
-	    TEST5 | TEST10 | TEST11)) {
+		peer->flash |= TEST8;		/* bad root data */
+	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
 			printf("packet: bad header %03x\n",
@@ -959,17 +974,17 @@ process_packet(
 		LFPTOD(&t23, p_del);
 	}
 	LFPTOD(&ci, p_offset);
-	if (fabs(p_del) >= MAXDISPERSE || p_disp >= MAXDISPERSE) /* test 9 */
-		peer->flash |= TEST9;	/* delay/dispersion too big */
+	if (fabs(p_del) >= MAXDISPERSE || p_disp >= MAXDISPERSE) /* 9 */
+		peer->flash |= TEST9;	/* bad delay/dispersion */
 
 	/*
-	 * If the packet data are invalid (tests 6 through 9), abandon
-	 * ship. Otherwise, forward to the clock filter.
+	 * If the peer delay or dispersion is too high, abandon ship.
+	 * Otherwise, forward to the clock filter.
 	 */
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("packet: bad data %03x\n",
+			printf("packet: bad packet data %03x\n",
 			    peer->flash);
 #endif
 		return;
@@ -1911,9 +1926,10 @@ peer_xmit(
 		switch (peer->hmode) {
 
 		/*
-		 * In broadcast mode and a new keylist; otherwise, send
-		 * the association ID so the client can request the
-		 * values at other times.
+		 * In broadcast mode the autokey values are required.
+		 * Send them when a new keylist is generated; otherwise,
+		 * send the association ID so the client can request
+		 * them at other times.
 		 */
 		case MODE_BROADCAST:
 			if (peer->keynumber == peer->sndauto.seq)
@@ -1925,82 +1941,80 @@ peer_xmit(
 			break;
 
 		/*
-		 * In symmetric modes the public key, Diffie-Hellman
-		 * values and autokey values are required. In principle,
-		 * these values can be provided in any order; however,
-		 * the protocol is most efficient if the values are
-		 * provided in the order listed. This happens with the
-		 * following rules:
+		 * In symmetric modes the public key, leapsecond table,
+		 * agreement parameters and autokey values are required. 		 *
+		 * 1. If a response is pending, always send it first.
 		 *
-		 * 1. Don't send anything except a public-key request or
-		 *    a public-key response until the public key has
-		 *    been stored. 
-		 *
-		 * 2. If a public-key response is pending, always send
-		 *    it first before any other command or response.
+		 * 2. Don't send anything except a public-key request
+		 *    until the public key has been stored. 
 		 *
 		 * 3. Once the public key has been stored, don't send
-		 *    anything except Diffie-Hellman commands or
-		 *    responses until the agreed key has been stored.
+		 *    anything except an agreement parameter request
+		 *    until the agreement parameters have been stored.
 		 *
-		 * 4. If a Diffie-Hellman response is pending, always
-		 *    send it last after any other command or response.
+		 * 4. Once the argeement parameters have been stored,
+		 *    don't send anything except a public value request
+		 *    until the agreed key has been stored.
 		 *
 		 * 5. When the agreed key has been stored and the key
 		 *    list is regenerated, send the autokey values
-		 *    gratis unless it has already been sent.
+		 *    gratis unless they have already been sent.
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
 #ifdef PUBKEY
-			if (crypto_flags && peer->cmmd != 0)
+			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->pcookie.key,
+				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-			if (crypto_flags && peer->pubkey == NULL)
+			if (!crypto_flags && peer->pcookie.tstamp ==
+			    0 && peer->recauto.tstamp != 0 &&
+			    sys_leap != LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_NAME,
-				    peer->pcookie.key, peer->assoc);
-			else if (crypto_flags & CRYPTO_FLAG_TAI &&
-			    sys_tai == 0)
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
+				    peer->assoc);
+			else if (crypto_flags && peer->pubkey == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_TAI,
-				    peer->pcookie.key, peer->assoc);
-			else if (crypto_flags && dh_params.prime ==
-			    NULL)
+				    sendlen, CRYPTO_NAME, peer->hcookie,
+				    peer->assoc);
+			else if (crypto_flags && dhparam.vallen == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DHPAR,
-				    peer->pcookie.key, peer->assoc);
-			else if (peer->pcookie.tstamp == 0 &&
-			    peer->assoc != 0)
+				    peer->hcookie, peer->assoc);
+			else if (crypto_flags && peer->pcookie.tstamp ==
+			    0 && peer->recauto.tstamp != 0 &&
+			    sys_leap != LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_DH,
-				    peer->pcookie.key, peer->assoc);
-			else if (!(peer->flags & FLAG_AUTOKEY))
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_AUTO,
-				    peer->pcookie.key, peer->assoc);
+				    sendlen, CRYPTO_DH, peer->hcookie,
+				    peer->assoc);
 #else
 			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->pcookie.key,
+				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-			if (peer->pcookie.tstamp == 0)
+			if (peer->pcookie.tstamp == 0 &&
+			    peer->recauto.tstamp != 0 && sys_leap !=
+			    LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
+#endif /* PUBKEY */
 			else if (!(peer->flags & FLAG_AUTOKEY))
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_AUTO,
-				    peer->pcookie.key, peer->assoc);
-#endif /* PUBKEY */
+				    sendlen, CRYPTO_AUTO, peer->hcookie,
+				    peer->assoc);
 			else if (peer->keynumber == peer->sndauto.seq &&
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
-				    peer->pcookie.key, peer->associd);
+				    peer->hcookie, peer->associd);
+			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			    sys_tai == 0)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_TAI, peer->hcookie,
+				    peer->assoc);
 			peer->cmmd = 0;
 			break;
 
@@ -2018,18 +2032,13 @@ peer_xmit(
 			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
-				    CRYPTO_RESP, peer->pcookie.key,
+				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
 #ifdef PUBKEY
 			if (crypto_flags && peer->pubkey == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_NAME,
-				    peer->pcookie.key, peer->assoc);
-			else if (crypto_flags & CRYPTO_FLAG_TAI &&
-			    sys_tai == 0)
-				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_TAI,
-				    peer->pcookie.key, peer->assoc);
+				    sendlen, CRYPTO_NAME, peer->hcookie,
+				    peer->assoc);
 			else
 #endif /* PUBKEY */
 			if (peer->pcookie.tstamp == 0)
@@ -2039,8 +2048,13 @@ peer_xmit(
 			else if (!(peer->flags & FLAG_AUTOKEY) &&
 			    peer->flags & FLAG_MCAST2)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
-				    sendlen, CRYPTO_AUTO,
-				    peer->pcookie.key, peer->assoc);
+				    sendlen, CRYPTO_AUTO, peer->hcookie,
+				    peer->assoc);
+			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			    sys_tai == 0)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_TAI, peer->hcookie,
+				    peer->assoc);
 			peer->cmmd = 0;
 			break;
 		}
@@ -2067,6 +2081,10 @@ peer_xmit(
 		authtrust(xkeyid, 0);
 #endif /* AUTOKEY */
 	get_systime(&xmt_tx);
+	if (pktlen > sizeof(xpkt)) {
+		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
+		exit(-1);
+	}
 	sendpkt(&peer->srcadr, find_rtt ? any_interface : peer->dstadr,
 	    ((peer->cast_flags & MDF_MCAST) && !find_rtt) ?
 	    ((peer->cast_flags & MDF_ACAST) ? -7 : peer->ttl) : -7,
@@ -2192,7 +2210,7 @@ fast_xmit(
 			    CRYPTO_RESP;
 			sendlen += crypto_xmit((u_int32 *)&xpkt,
 			    sendlen, code, cookie,
-			    (int)htonl(rpkt->exten[1]));
+			    (u_int)htonl(rpkt->exten[1]));
 		} else {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
@@ -2209,6 +2227,10 @@ fast_xmit(
 		authtrust(xkeyid, 0);
 #endif /* AUTOKEY */
 	get_systime(&xmt_tx);
+	if (pktlen > sizeof(xpkt)) {
+		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
+		exit(-1);
+	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, -9, &xpkt, pktlen);
 
 	/*

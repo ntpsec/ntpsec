@@ -43,14 +43,14 @@
  *                                           CRYPTO_NAME rsp
  *                                           CRYPTO_TAI rsp
  *                                           
- *   CRYPTO_PUBL  1  public key (deprecated)
- *   CRYPTO_ASSOC 2  association ID
- *   CRYPTO_AUTO  3  autokey values
- *   CRYPTO_PRIV  4  cookie values
- *   CRYPTO_DHPAR 5  DH parameters
- *   CRYPTO_DH    6  DH public value
- *   CRYPTO_NAME  7  host name/public key
- *   CRYPTO_TAI   8  TAI leapsecond table
+ *   CRYPTO_PUBL  1  -    offer/select
+ *   CRYPTO_ASSOC 2  8    association ID
+ *   CRYPTO_AUTO  3  88   autokey values
+ *   CRYPTO_PRIV  4  84   cookie values
+ *   CRYPTO_DHPAR 5  220  DH parameters
+ *   CRYPTO_DH    6  152  DH public value
+ *   CRYPTO_NAME  7  460  host name/public key
+ *   CRYPTO_TAI   8  144  TAI leapsecond table
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
@@ -84,6 +84,7 @@
  */
 static R_RSA_PRIVATE_KEY private_key; /* RSA private key */
 static R_RSA_PUBLIC_KEY public_key; /* RSA public key */
+static R_DH_PARAMS dh_params;	/* Diffie-Hellman parameters */
 static u_char *dh_private;	/* DH private value */
 static u_int dh_keyLen;		/* DH private value length */
 static char *keysdir = "/usr/local/etc/"; /* crypto keys directory */
@@ -105,7 +106,6 @@ struct value tai_leap;		/* TAI leapseconds table */
  * Global cryptodata in host byte order.
  */
 int	crypto_flags;		/* flags that wave cryptically */
-R_DH_PARAMS dh_params;		/* Diffie-Hellman parameters */
 u_int	sys_tai;		/* current UTC offset from TAI */
 
 /*
@@ -226,18 +226,10 @@ make_keylist(
 	ltemp = sys_automax;
 	peer->hcookie = session_key(&peer->dstadr->sin, &peer->srcadr,
 	    0, sys_private, 0);
-	if (peer->hmode == MODE_BROADCAST) {
+	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
-	} else {
-#ifdef PUBKEY
+	else
 		cookie = peer->pcookie.key;
-#else
-		if (peer->hmode == MODE_CLIENT)
-			cookie = peer->pcookie.key;
-		else
-			cookie = peer->hcookie ^ peer->pcookie.key;
-#endif /* PUBKEY */
-	}
 	for (i = 0; i < NTP_MAXSESSION; i++) {
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
@@ -288,8 +280,9 @@ make_keylist(
  *
  * This routine is called when the packet has been matched to an
  * association and passed sanity, format and authentication checks. We
- * believe the extension field values only if the public key is valid
- * and the signature has valid length and is verified.
+ * believe the extension field values only if the field has proper
+ * format and length, the public key is valid, and the signature has
+ * valid length and is verified.
  */
 void
 crypto_recv(
@@ -306,7 +299,7 @@ crypto_recv(
 	int len;		/* extension field length */
 	u_int code;		/* extension field opcode */
 	u_int tstamp;		/* extension field timestamp */
-	int i;
+	int i, rval;
 	u_int temp;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
@@ -315,13 +308,14 @@ crypto_recv(
 	u_int32 *pp;		/* packet pointer */
 	u_int rsalen = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
 	u_int bits;
-	int rval;
 	int j;
 #endif /* PUBKEY */
 
 	/*
 	 * Initialize. Note that the packet has already been checked for
-	 * valid format and extension field lengths.
+	 * valid format and extension field lengths. We first extract
+	 * the field length, command code and timestamp in host byte
+	 * order. These are used with all commands and modes.
 	 */
 	pkt = (u_int32 *)&rbufp->recv_pkt;
 	authlen = LEN_PKT_NOMAC;
@@ -341,7 +335,7 @@ crypto_recv(
 
 		/*
 		 * Install association ID. This is used in multicast
-		 * client mode only only
+		 * client mode only only.
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
 			if (ntohl(pkt[i + 1]) != 0 && peer->flags &
@@ -358,10 +352,10 @@ crypto_recv(
 #ifdef PUBKEY
 			temp = ntohl(ap->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
-			if (!crypto_flags) {
-				rval = RV_OK;
-			} else if (tstamp <= peer->recauto.tstamp) {
+			if (tstamp <= peer->recauto.tstamp) {
 				rval = RV_TSP;
+			} else if (!crypto_flags) {
+				rval = RV_OK;
 			} else if (kp == NULL) {
 				rval = RV_PUB;
 			} else if (temp != kp->bits / 8) {
@@ -370,8 +364,14 @@ crypto_recv(
 				R_VerifyInit(&ctx, DA_MD5);
 				R_VerifyUpdate(&ctx, (u_char *)ap, 12);
 				rval = R_VerifyFinal(&ctx,
-				    (u_char *)&ap->sig, temp, kp);
+				    (u_char *)ap->pkt, temp, kp);
 			}
+#else /* PUBKEY */
+			if (tstamp <= peer->recauto.tstamp)
+				rval = RV_TSP;
+			else
+				rval = RV_OK;
+#endif /* PUBKEY */
 #ifdef DEBUG
 			if (debug)
 				printf(
@@ -383,7 +383,6 @@ crypto_recv(
 			if (rval != RV_OK)
 				break;
 			peer->flags |= FLAG_AUTOKEY;
-#endif /* PUBKEY */
 			peer->flash &= ~TEST10;
 			peer->assoc = ntohl(pkt[i + 1]);
 			peer->recauto.tstamp = tstamp;
@@ -393,20 +392,21 @@ crypto_recv(
 			break;
 
 		/*
-		 * Install session cookie in client mode. We believe the
-		 * value only if the public key is valid and the
-		 * signature has valid length and is verified. However,
-		 * we mark as authentic only if the value is nonzero.
+		 * Install session cookie in client and symmetric modes.
 		 */
+		case CRYPTO_PRIV:
+			peer->cmmd = ntohl(pkt[i]);
+			/* fall through */
+
 		case CRYPTO_PRIV | CRYPTO_RESP:
 			cp = (struct cookie *)&pkt[i + 2];
 #ifdef PUBKEY
 			temp = ntohl(cp->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
-			if (!crypto_flags) {
-				rval = RV_OK;
-			} else if (tstamp <= peer->pcookie.tstamp) {
+			if (tstamp <= peer->pcookie.tstamp) {
 				rval = RV_TSP;
+			} else if (!crypto_flags) {
+				rval = RV_OK;
 			} else if (kp == NULL) {
 				rval = RV_PUB;
 			} else if (temp != kp->bits / 8) {
@@ -415,9 +415,25 @@ crypto_recv(
 				R_VerifyInit(&ctx, DA_MD5);
 				R_VerifyUpdate(&ctx, (u_char *)cp, 8);
 				rval = R_VerifyFinal(&ctx,
-				    (u_char *)&cp->sig, temp, kp);
+				    (u_char *)cp->pkt, temp, kp);
 			}
-			temp = ntohl(cp->key);
+#else /* PUBKEY */
+			if (tstamp <= peer->pcookie.tstamp)
+				rval = RV_TSP;
+			else
+				rval = RV_OK;
+#endif /* PUBKEY */
+
+			/*
+			 * Tricky here. If in client mode, use the
+			 * server cookie; otherwise, use EXOR of both
+			 * peer cookies. We call this Daffy-Hooligan
+			 * agreement.
+			 */
+			if (peer->hmode == MODE_CLIENT)
+				temp = ntohl(cp->key);
+			else
+				temp = ntohl(cp->key) ^ peer->hcookie;
 #ifdef DEBUG
 			if (debug)
 				printf(
@@ -429,9 +445,6 @@ crypto_recv(
 				break;
 			if (!(peer->flags & FLAG_MCAST2))
 				peer->flags |= FLAG_AUTOKEY;
-#else
-			temp = ntohl(cp->key);
-#endif /* PUBKEY */
 			peer->flash &= ~TEST10;
 			peer->assoc = ntohl(pkt[i + 1]);
 			peer->pcookie.tstamp = tstamp;
@@ -441,11 +454,19 @@ crypto_recv(
 			}
 			break;
 
+		/*
+		 * The following commands and responses work only when
+		 * public-key cryptography has been configured. If
+		 * configured, but disabled due to no crypto command in
+		 * the configuration file, they are ignored.
+		 */
 #ifdef PUBKEY
 		/*
-		 * Install Diffie-Hellman parameters.
+		 * Install Diffie-Hellman parameters in symmetric modes.
 		 */
 		case CRYPTO_DHPAR | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
 			vp = (struct value *)&pkt[i + 2];
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
@@ -482,14 +503,14 @@ crypto_recv(
 			 */
 			dhparam.fstamp = vp->fstamp;
 			dhparam.vallen = vp->vallen;
-			if (dhparam.val != NULL)
-				free(dhparam.val);
-			dhparam.val = emalloc(temp);
+			if (dhparam.ptr != NULL)
+				free(dhparam.ptr);
 			if (dhparam.sig == NULL)
 				dhparam.sig = emalloc(private_key.bits /
 				    8);
-			pp = (u_int32 *)dhparam.val;
-			memcpy(pp, &vp->val, temp);
+			pp = emalloc(temp);
+			dhparam.ptr = (u_char *)pp;
+			memcpy(pp, vp->pkt, temp);
 			dh_params.primeLen = ntohl(*pp++);
 			dh_params.prime = (u_char *)pp;
 			pp += dh_params.primeLen / 4;
@@ -506,9 +527,9 @@ crypto_recv(
 			 */
 			dhpub.fstamp = vp->fstamp;
 			dhpub.vallen = htonl(dh_params.primeLen);
-			if (dhpub.val != NULL)
-				free(dhpub.val);
-			dhpub.val = emalloc(dh_params.primeLen);
+			if (dhpub.ptr != NULL)
+				free(dhpub.ptr);
+			dhpub.ptr = emalloc(dh_params.primeLen);
 			if (dhpub.sig == NULL)
 				dhpub.sig = emalloc(private_key.bits /
 				    8);
@@ -523,9 +544,13 @@ crypto_recv(
 		 */
 		case CRYPTO_DH:
 			peer->cmmd = ntohl(pkt[i]);
+			if (!crypto_flags)
+				peer->cmmd |= CRYPTO_ERROR;
 			/* fall through */
 
 		case CRYPTO_DH | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
 			vp = (struct value *)&pkt[i + 2];
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
@@ -550,9 +575,12 @@ crypto_recv(
 			/*
 			 * Run the agreement algorithm and stash the key
 			 * value. We use only the first u_int32 for the
-			 * host cookie. Wasteful.
+			 * host cookie. Wasteful. If the association ID
+			 * is zero, the other guy hasn't seen us as
+			 * synchronized, in which case both of us should
+			 * be using a zero cookie.
 			 */
-			if (rval != RV_OK || temp == 0) {
+			if (rval != RV_OK) {
 				temp = 0;
 			} else {
 				rval = R_ComputeDHAgreedKey(dh_key,
@@ -563,8 +591,9 @@ crypto_recv(
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: verify %x DH agree %08x ts %u fs %u\n",
+				    "crypto_recv: verify %x DH agree %08x ts %u (%u) fs %u\n",
 				    rval, temp, tstamp,
+				    peer->pcookie.tstamp,
 				    ntohl(vp->fstamp));
 #endif
 			if (rval != RV_OK) {
@@ -585,6 +614,8 @@ crypto_recv(
 		 * Install public key and host name.
 		 */
 		case CRYPTO_NAME | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
 			vp = (struct value *)&pkt[i + 2];
 			temp = ntohl(vp->vallen);
 			j = i + 5 + ntohl(vp->vallen) / 4;
@@ -603,7 +634,7 @@ crypto_recv(
 				    temp + 12);
 				kp = emalloc(sizeof(R_RSA_PUBLIC_KEY));
 				kp->bits = bits;
-				memcpy(&kp->modulus, &pkt[i + 6],
+				memcpy(kp->modulus, &pkt[i + 6],
 				    rsalen - 4);
 				rval = R_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
@@ -635,6 +666,8 @@ crypto_recv(
 		 * Install TAI leapsecond table.
 		 */
 		case CRYPTO_TAI | CRYPTO_RESP:
+			if (!crypto_flags)
+				break;
 			vp = (struct value *)&pkt[i + 2];
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
@@ -669,15 +702,14 @@ crypto_recv(
 			 */
 			tai_leap.fstamp = vp->fstamp;
 			tai_leap.vallen = vp->vallen;
-			if (tai_leap.val == NULL)
-				free(tai_leap.val);
-			tai_leap.val = emalloc(temp);
+			if (tai_leap.ptr == NULL)
+				free(tai_leap.ptr);
+			tai_leap.ptr = emalloc(temp);
 			if (tai_leap.sig == NULL)
 				tai_leap.sig =
 				    emalloc(private_key.bits / 8);
-			pp = (u_int32 *)tai_leap.val;
-			memcpy(pp, &vp->val, temp);
-			sys_tai = temp / 4 + TAI_1972;
+			memcpy(tai_leap.ptr, vp->pkt, temp);
+			sys_tai = temp / 4 + TAI_1972 - 1;
 			crypto_agree();
 			break;
 #endif /* PUBKEY */
@@ -731,7 +763,10 @@ crypto_xmit(
 
 	/*
 	 * Generate the requested extension field request code, length
-	 * and association ID.
+	 * and association ID. Note that several extension fields are
+	 * used with and without public-key cryptography. If public-key
+	 * cryptography has not been configured, we do the same thing,
+	 * but leave off the signature.
 	 */
 	i = start / 4;
 	opcode = code;
@@ -741,14 +776,16 @@ crypto_xmit(
 
 	/*
 	 * Exchange association IDs. This is used in multicast server
-	 * mode and is a NOP here.
+	 * mode and is a no-op here.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
 		break;
 
 	/*
 	 * Find peer and send autokey data and signature in broadcast
-	 * server and symmetric modes.
+	 * server and symmetric modes. If no association is found,
+	 * either the server has restarted with new associations or some
+	 * perp has replayed an old message.
 	 */
 	case CRYPTO_AUTO | CRYPTO_RESP:
 		peer = findpeerbyassoc(associd);
@@ -767,7 +804,7 @@ crypto_xmit(
 			break;
 		temp = ntohl(ap->siglen);
 		if (temp != 0)
-			memcpy(&ap->sig, peer->sndauto.sig, temp);
+			memcpy(ap->pkt, peer->sndauto.sig, temp);
 		len += temp;
 #endif /* PUBKEY */
 		break;
@@ -775,9 +812,10 @@ crypto_xmit(
 	/*
 	 * Send peer cookie and signature in server mode.
 	 */
+	case CRYPTO_PRIV:
 	case CRYPTO_PRIV | CRYPTO_RESP:
 		cp = (struct cookie *)&xpkt[i + 2];
-		cp->tstamp = htonl(sys_revoketime.l_ui);
+		cp->tstamp = htonl(host.tstamp);
 		cp->key = htonl(cookie);
 		cp->siglen = 0;
 		len += 12;
@@ -786,7 +824,7 @@ crypto_xmit(
 			break;
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)cp, 8);
-		rval = R_SignFinal(&ctx, (u_char *)&cp->sig, &temp,
+		rval = R_SignFinal(&ctx, (u_char *)cp->pkt, &temp,
 		    &private_key);
 		if (rval != RV_OK) {
 			msyslog(LOG_ERR, "cookie signature fails %x",
@@ -798,11 +836,22 @@ crypto_xmit(
 #endif /* PUBKEY */
 		break;
 
+
+	/*
+	 * The following commands and responses work only when public-
+	 * key cryptography has been configured. If configured, but
+	 * disabled due to no crypto command in the configuration file,
+	 * they are ignored and an error response is returned.
+	 */
 #ifdef PUBKEY
 	/*
 	 * Send Diffie-Hellman parameters, timestamp and signature.
 	 */
 	case CRYPTO_DHPAR | CRYPTO_RESP:
+		if (!crypto_flags) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
 		vp = (struct value *)&xpkt[i + 2];
 		vp->tstamp = dhparam.tstamp;
 		vp->fstamp = dhparam.fstamp;
@@ -812,7 +861,7 @@ crypto_xmit(
 		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
-		memcpy(&vp->val, dhparam.val, temp);
+		memcpy(vp->pkt, dhparam.ptr, temp);
 		len += temp;
 		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
@@ -826,6 +875,10 @@ crypto_xmit(
 	 */
 	case CRYPTO_DH:
 	case CRYPTO_DH | CRYPTO_RESP:
+		if (!crypto_flags) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
 		vp = (struct value *)&xpkt[i + 2];
 		vp->tstamp = dhpub.tstamp;
 		vp->fstamp = dhpub.fstamp;
@@ -835,7 +888,7 @@ crypto_xmit(
 		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
-		memcpy(&vp->val, dhpub.val, temp);
+		memcpy(vp->pkt, dhpub.ptr, temp);
 		len += temp;
 		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
@@ -848,6 +901,10 @@ crypto_xmit(
 	 * Send public key, host name, timestamp and signature.
 	 */
 	case CRYPTO_NAME | CRYPTO_RESP:
+		if (!crypto_flags) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
 		vp = (struct value *)&xpkt[i + 2];
 		vp->tstamp = host.tstamp;
 		vp->fstamp = host.fstamp;
@@ -857,7 +914,7 @@ crypto_xmit(
 		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
-		memcpy(&vp->val, host.val, temp);
+		memcpy(vp->pkt, host.ptr, temp);
 		len += temp;
 		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
@@ -869,6 +926,10 @@ crypto_xmit(
 	 * Send TAI leapsecond table, timestamp and signature.
 	 */
 	case CRYPTO_TAI | CRYPTO_RESP:
+		if (!crypto_flags) {
+			opcode |= CRYPTO_ERROR;
+			break;
+		}
 		vp = (struct value *)&xpkt[i + 2];
 		vp->tstamp = tai_leap.tstamp;
 		vp->fstamp = tai_leap.fstamp;
@@ -878,7 +939,7 @@ crypto_xmit(
 		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
-		memcpy(&vp->val, tai_leap.val, temp);
+		memcpy(vp->pkt, tai_leap.ptr, temp);
 		len += temp;
 		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
@@ -938,6 +999,8 @@ crypto_setup(void)
 	memset(&dhparam, 0, sizeof(dhparam));
 	memset(&dhpub, 0, sizeof(dhpub));
 	memset(&tai_leap, 0, sizeof(tai_leap));
+	if (!crypto_flags)
+		return;
 
 	/*
 	 * Load required RSA private key from file, default "ntpkey".
@@ -979,31 +1042,30 @@ crypto_setup(void)
 		filename[len - 1] = 0;
 	temp = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
 	host.vallen = htonl(temp + len);
-	host.val = emalloc(temp + len);
-	pp = (u_int32 *)host.val;
+	pp = emalloc(temp + len);
+	host.ptr = (u_char *)pp;
 	*pp++ = htonl(public_key.bits);
-	memcpy(pp, &public_key.modulus, temp - 4);
-	memcpy(&host.val[temp], filename, len);
+	memcpy(pp--, public_key.modulus, temp - 4);
+	pp += temp / 4;
+	memcpy(pp, filename, len);
 	host.sig = emalloc(private_key.bits / 8);
 
 	/*
 	 * Load optional Diffie-Hellman key agreement parameters from
 	 * file, default "ntpkey_dh". If the file is missing or
-	 * defective, the values can later be retrieved from a
-	 * server.
+	 * defective, the values can later be retrieved from a server.
 	 */
 	if (dh_params_file == NULL)
 		dh_params_file = "ntpkey_dh";
 	crypto_dh(dh_params_file);
 
 	/*
-	 * Load optional TAI leapseconds file, default "leap-second". If
-	 * the file is missing or defective, the values can later be
-	 * retrieved from a
-	 * server.
+	 * Load optional TAI leapseconds from file, default
+	 * "ntpkey_leap". If the file is missing or defective, the
+	 * values can later be retrieved from a server.
 	 */
 	if (tai_leap_file == NULL)
-		tai_leap_file = "leap-seconds";
+		tai_leap_file = "ntpkey_leap";
 	crypto_tai(tai_leap_file);
 }
 
@@ -1016,16 +1078,26 @@ crypto_agree(void)
 {
 	R_RANDOM_STRUCT randomstr;	/* wiggle bits */
 	R_SIGNATURE_CTX ctx;		/* signature context */
+	l_fp lstamp;			/* NTP time */
+	u_int tstamp;			/* seconds timestamp */
 	u_int len, temp;
 	int rval, i;
 
 	/*
 	 * Sign host name and timestamps.
 	 */
-	host.tstamp = htonl(sys_revoketime.l_ui);
+	if (sys_leap == LEAP_NOTINSYNC) {
+		tstamp = 0;
+	} else {
+		get_systime(&lstamp);
+		tstamp = lstamp.l_ui;
+	}
+	host.tstamp = htonl(tstamp);
+	if (!crypto_flags)
+		return;
 	R_SignInit(&ctx, DA_MD5);
 	R_SignUpdate(&ctx, (u_char *)&host, 12);
-	R_SignUpdate(&ctx, host.val, ntohl(host.vallen));
+	R_SignUpdate(&ctx, host.ptr, ntohl(host.vallen));
 	rval = R_SignFinal(&ctx, host.sig, &len, &private_key);
 	if (rval != RV_OK || len != private_key.bits / 8) {
 		msyslog(LOG_ERR, "host signature fails %x", rval);
@@ -1037,10 +1109,10 @@ crypto_agree(void)
 	 * Sign Diffie-Hellman parameters and timestamps.
 	 */
 	if (dhparam.vallen != 0) {
-		dhparam.tstamp = htonl(sys_revoketime.l_ui);
+		dhparam.tstamp = htonl(tstamp);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
-		R_SignUpdate(&ctx, dhparam.val, ntohl(dhparam.vallen));
+		R_SignUpdate(&ctx, dhparam.ptr, ntohl(dhparam.vallen));
 		rval = R_SignFinal(&ctx, dhparam.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
@@ -1059,7 +1131,7 @@ crypto_agree(void)
 			temp = RANDOM;
 			R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
 		}
-		rval = R_SetupDHAgreement(dhpub.val, dh_private,
+		rval = R_SetupDHAgreement(dhpub.ptr, dh_private,
 		    dh_keyLen, &dh_params, &randomstr);
 		if (rval != RV_OK) {
 			msyslog(LOG_ERR, "invalid DH parameters");
@@ -1069,10 +1141,10 @@ crypto_agree(void)
 		/*
 		 * Sign Diffie-Hellman public value and timestamps.
 		 */
-		dhpub.tstamp = htonl(sys_revoketime.l_ui);
+		dhpub.tstamp = htonl(tstamp);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
-		R_SignUpdate(&ctx, dhpub.val, ntohl(dhpub.vallen));
+		R_SignUpdate(&ctx, dhpub.ptr, ntohl(dhpub.vallen));
 		rval = R_SignFinal(&ctx, dhpub.sig, &len,
 		    &private_key);
 		if (rval != RV_OK || len != private_key.bits / 8) {
@@ -1087,10 +1159,10 @@ crypto_agree(void)
 	 * Sign TAI leapsecond table and timestamps.
 	 */
 	if (tai_leap.vallen != 0) {
-		tai_leap.tstamp = htonl(sys_revoketime.l_ui);
+		tai_leap.tstamp = htonl(tstamp);
 		R_SignInit(&ctx, DA_MD5);
 		R_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
-		R_SignUpdate(&ctx, tai_leap.val,
+		R_SignUpdate(&ctx, tai_leap.ptr,
 		    ntohl(tai_leap.vallen));
 		rval = R_SignFinal(&ctx, tai_leap.sig, &len,
 		    &private_key);
@@ -1104,9 +1176,9 @@ crypto_agree(void)
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "cypto_agree: host %s ts %u pubval %d\n",
-		    sys_hostname, sys_revoketime.l_ui,
-		    ntohl(dhpub.vallen));
+		    "cypto_agree: ts %u pub %u dh %u pv %u tai %u\n",
+		    tstamp, ntohl(host.fstamp), ntohl(dhparam.fstamp),
+		    ntohl(dhpub.fstamp), ntohl(tai_leap.fstamp));
 #endif
 }
 
@@ -1114,7 +1186,7 @@ crypto_agree(void)
 /*
  * crypto_rsa - read RSA key, decode and check for errors.
  */
-u_int
+static u_int
 crypto_rsa(
 	char *cp,		/* file name */
 	u_char *key,		/* key pointer */
@@ -1214,7 +1286,7 @@ crypto_rsa(
 /*
  * crypto_dh - read DH parameters, decode and check for errors.
  */
-void
+static void
 crypto_dh(
 	char *cp		/* file name */
 	)
@@ -1237,7 +1309,9 @@ crypto_dh(
 	/*
 	 * Open the key file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
-	 * directory string. 
+	 * directory string. If the file is not found, not to worry; it
+	 * can be retrieved over the net. But, if it is found with
+	 * errors, we crash and burn.
 	 */
 	if (*cp == '/')
 		strcpy(filename, cp);
@@ -1245,8 +1319,8 @@ crypto_dh(
 		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_dh: DH file %s not found", filename);
+		msyslog(LOG_INFO, "DH parameters file %s not found",
+		    filename);
 		return;
 	}
 
@@ -1263,9 +1337,10 @@ crypto_dh(
 
 	/*
 	 * We are rather paranoid here, since an intruder might cause a
-	 * coredump by infiltrating a naughty key. The line must contain
-	 * a single integer followed by a PEM encoded, null-terminated
-	 * string.
+	 * coredump by infiltrating a naughty key. There must be two
+	 * lines; the first contains the prime, the second the
+	 * generator. Each line must contain a single integer followed
+	 * by a PEM encoded, null-terminated string.
 	 */
 	if (rptr == NULL)
 		rval = RV_DAT;
@@ -1279,19 +1354,7 @@ crypto_dh(
 	else if (primelen != len || primelen >
 	    DECODED_CONTENT_LEN(strlen(encoded_key)))
 		rval = RV_DAT;
-	else
-		rval = RV_OK;
-	if (rval != RV_OK) {
-		fclose(str);
-		msyslog(LOG_ERR,
-		    "crypto_dh: DH file %s prime error %x", cp, rval);
-		return;
-	}
-
-	/*
-	 * Load and check generator.
-	 */
-	if (fscanf(str, "%u %s", &generatorlen, encoded_key) != 2)
+	else if (fscanf(str, "%u %s", &generatorlen, encoded_key) != 2)
 		rval = RV_DAT;
 	else if (generatorlen > MAX_KEYLEN)
 		rval = RV_KEY;
@@ -1305,9 +1368,9 @@ crypto_dh(
 		rval = RV_OK;
 	if (rval != RV_OK) {
 		msyslog(LOG_ERR,
-		    "crypto_dh: DH file %s generator error %x", cp,
+		    "crypto_dh: DH parameter file %s error %x", cp,
 		    rval);
-		return;
+		exit (-1);
 	}
 	fclose(str);
 
@@ -1318,26 +1381,27 @@ crypto_dh(
 	 */
 	len = 4 + primelen + 4 + generatorlen;
 	dhparam.vallen = htonl(len);
-	dhparam.val = emalloc(len);
-	dhparam.sig = emalloc(private_key.bits / 8);
-	pp = (u_int32 *)dhparam.val;
+	pp = emalloc(len);
+	dhparam.ptr = (u_char *)pp;
 	*pp++ = htonl(primelen);
-	dh_params.primeLen = primelen;
-	memcpy(pp, &prime, primelen);
+	memcpy(pp, prime, primelen);
 	dh_params.prime = (u_char *)pp;
 	pp += primelen / 4;
 	*pp++ = htonl(generatorlen);
-	dh_params.generatorLen = generatorlen;
 	memcpy(pp, &generator, generatorlen);
 	dh_params.generator = (u_char *)pp;
+
+	dh_params.primeLen = primelen;
+	dh_params.generatorLen = generatorlen;
 	dh_keyLen = primelen / 2;
 	dh_private = emalloc(dh_keyLen);
+	dhparam.sig = emalloc(private_key.bits / 8);
 
 	/*
 	 * Initialize Diffie-Hellman public value extension field.
 	 */
 	dhpub.vallen = htonl(dh_params.primeLen);
-	dhpub.val = emalloc(dh_params.primeLen);
+	dhpub.ptr = emalloc(dh_params.primeLen);
 	dhpub.sig = emalloc(private_key.bits / 8);
 
 	/*
@@ -1369,7 +1433,7 @@ crypto_dh(
 /*
  * crypto_tai - read TAI offset table and check for errors.
  */
-void
+static void
 crypto_tai(
 	char *cp		/* file name */
 	)
@@ -1389,7 +1453,9 @@ crypto_tai(
 	/*
 	 * Open the key file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
-	 * directory string. 
+	 * directory string. If the file is not found, not to worry; it
+	 * can be retrieved over the net. But, if it is found with
+	 * errors, we crash and burn.
 	 */
 	if (*cp == '/')
 		strcpy(filename, cp);
@@ -1397,15 +1463,19 @@ crypto_tai(
 		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
-		msyslog(LOG_ERR, "TAI file %s not found", filename);
+		msyslog(LOG_INFO, "TAI file %s not found", filename);
 		return;
 	}
 
 	/*
 	 * We are rather paranoid here, since an intruder might cause a
-	 * coredump by infiltrating a naughty key. The line must contain
-	 * a single integer followed by a PEM encoded, null-terminated
-	 * string.
+	 * coredump by infiltrating naughty values. Empty lines and
+	 * comments are ignored. Other lines must begin with two
+	 * integers followed by junk or comments. The first integer is
+	 * the NTP seconds of leap insertion, the second is the offset
+	 * of TAI relative to UTC after that insertion. The second word
+	 * must equal the initial insertion of ten seconds on 1 January
+	 * 1972 plus one second for each succeeding insertion.
 	 */
 	i = 0;
 	rval = RV_OK;
@@ -1428,18 +1498,24 @@ crypto_tai(
 	fclose(str);
 	if (rval != RV_OK || i == 0) {
 		msyslog(LOG_ERR, "TAI file %s error %d", cp, rval);
-		return;
+		exit (-1);
 	}
-	len = --i * sizeof(u_int32);
+
+	/*
+	 * The extension field table entries consists of the NTP seconds
+	 * of leap insertion in reverse order, so that the most recent
+	 * insertion is the first entry in the table.
+	 */
+	len = i * 4;
 	tai_leap.vallen = htonl(len);
-	tai_leap.val = emalloc(len);
-	tai_leap.sig = emalloc(private_key.bits / 8);
-	pp = (u_int32 *)tai_leap.val;
-	sys_tai = len / 4 + TAI_1972;
+	pp = emalloc(len);
+	tai_leap.ptr = (u_char *)pp;
 	for (; i >= 0; i--) {
 		*pp++ = htonl(leapsec[i]);
 	}
 	tai_leap.sig = emalloc(private_key.bits / 8);
+	sys_tai = len / 4 + TAI_1972 - 1;
+
 
 	/*
 	 * Extract filestamp if present.
@@ -1553,6 +1629,14 @@ crypto_config(
 	case CRYPTO_CONF_DH:
 		dh_params_file = emalloc(strlen(cp) + 1);
 		strcpy(dh_params_file, cp);
+		break;
+
+	/*
+	 * Set leapseconds table file name.
+	 */
+	case CRYPTO_CONF_LEAP:
+		tai_leap_file = emalloc(strlen(cp) + 1);
+		strcpy(tai_leap_file, cp);
 		break;
 
 	/*

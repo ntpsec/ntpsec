@@ -1443,8 +1443,8 @@ wwv_qrz(
 		sp->select &= ~JITRNG;
 		if (abs(sp->jitter) > AWND * MS)
 			sp->select |= JITRNG;
-		sp->sigmax = sqrt(sp->sigmax);
-		sp->noise = sqrt(sp->noise);
+		sp->sigmax = SQRT(sp->sigmax);
+		sp->noise = SQRT(sp->noise);
 		if (up->status & MSYNC) {
 
 			/*
@@ -1769,9 +1769,9 @@ wwv_epoch(
 	cp = &up->mitig[up->achan];
 	if (up->rphase == 800 * MS) {
 		sp = &cp->wwv;
-		sp->synamp = sqrt(sp->amp);
+		sp->synamp = SQRT(sp->amp);
 		sp = &cp->wwvh;
-		sp->synamp = sqrt(sp->amp);
+		sp->synamp = SQRT(sp->amp);
 	}
 
 	if (up->rsec == 0) {
@@ -1787,7 +1787,7 @@ wwv_epoch(
 				up->noiamp += (up->irig - up->noiamp) /
 				    (MINAVG << up->avgint);
 			else
-				cp->noiamp += (sqrt(up->irig *
+				cp->noiamp += (SQRT(up->irig *
 				    up->irig + up->qrig * up->qrig) -
 				    cp->noiamp) / 8;
 
@@ -1817,7 +1817,7 @@ wwv_epoch(
 						up->datapt += 80;
 				}
 			} else {
-				up->sigamp = sqrt(up->irig * up->irig +
+				up->sigamp = SQRT(up->irig * up->irig +
 				    up->qrig * up->qrig);
 				up->datsnr = wwv_snr(up->sigamp,
 				    cp->noiamp);

@@ -50,7 +50,6 @@ static	u_long hourly_timer;		/* hour timer */
 #ifdef AUTOKEY
 static	u_long revoke_timer;		/* keys revoke timer */
 u_long	sys_revoke = 1 << KEY_REVOKE;	/* keys revoke timeout */
-l_fp	sys_revoketime;			/* last key revoke time */
 #endif /* AUTOKEY */
 
 /*

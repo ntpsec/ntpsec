@@ -216,7 +216,8 @@ extern HANDLE ResolverThreadHandle;
 #define CONF_CRYPTO_DH		1
 #define	CONF_CRYPTO_PRIVATEKEY	2
 #define	CONF_CRYPTO_PUBLICKEY	3
-#define CONF_CRYPTO_FLAGS	4
+#define CONF_CRYPTO_LEAP	4
+#define CONF_CRYPTO_FLAGS	5
 #endif /* PUBKEY */
 
 /*
@@ -392,6 +393,7 @@ static struct keyword pps_keywords[] = {
 static struct keyword crypto_keywords[] = {
 	{ "dh",			CONF_CRYPTO_DH },
 	{ "flags",		CONF_CRYPTO_FLAGS },
+	{ "leap",		CONF_CRYPTO_LEAP },
 	{ "privatekey",		CONF_CRYPTO_PRIVATEKEY },
 	{ "publickey",		CONF_CRYPTO_PUBLICKEY },
 	{ "",			CONFIG_UNKNOWN }
@@ -1321,28 +1323,27 @@ getconfig(
 			    }
 			    switch(temp) {
 			    case CONF_CRYPTO_FLAGS:
-				    crypto_config(CRYPTO_CONF_FLAGS,
-					tokens[i]);
-				    break;
+				crypto_config(CRYPTO_CONF_FLAGS, tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_LEAP:
+				crypto_config(CRYPTO_CONF_LEAP, tokens[i]);
+				break;
 
 			    case CONF_CRYPTO_DH:
-				    crypto_config(CRYPTO_CONF_DH,
-					tokens[i]);
-				    break;
+				crypto_config(CRYPTO_CONF_DH, tokens[i]);
+				break;
 
 			    case CONF_CRYPTO_PRIVATEKEY:
-				    crypto_config(CRYPTO_CONF_PRIV,
-					tokens[i]);
-				    break;
+				crypto_config(CRYPTO_CONF_PRIV, tokens[i]);
+				break;
 
 			    case CONF_CRYPTO_PUBLICKEY:
-				    crypto_config(CRYPTO_CONF_PUBL,
-					tokens[i]);
-				    break;
+				crypto_config(CRYPTO_CONF_PUBL, tokens[i]);
+				break;
 			    default:
-				    msyslog(LOG_ERR,
-					"crypto: unknown keyword");
-				    break;
+				msyslog(LOG_ERR, "crypto: unknown keyword");
+				break;
 			    }
 			}
 			break;

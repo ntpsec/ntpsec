@@ -175,7 +175,7 @@ main(
 	fprintf(str, "# RSA private key file %s\n# %s", filename,
 	    ctime(&tv.tv_sec));
 	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)&rsaref_private.modulus, len);
+	    (u_char *)rsaref_private.modulus, len);
 	encoded_key[temp] = '\0';
 	fprintf(str, "%d %s\n", modulus, encoded_key);
 	fclose(str);
@@ -195,7 +195,7 @@ main(
 	fprintf(str, "# RSA public key file %s\n# %s", filename,
 	    ctime(&tv.tv_sec));
 	R_EncodePEMBlock(encoded_key, &temp,
-	    (u_char *)&rsaref_public.modulus, len);
+	    (u_char *)rsaref_public.modulus, len);
 	encoded_key[temp] = '\0';
 	fprintf(str, "%d %s\n", modulus, encoded_key);
 	fclose(str);

@@ -227,7 +227,7 @@ catch_danger(int signo)
 static void
 set_process_priority(void)
 {
-	int done = 0;
+	int done = 1;
 
 #ifdef SYS_WINNT
 	DWORD  SingleCPUMask = 0;
@@ -748,8 +748,7 @@ service_main(
 	sys_hostname = emalloc(n);
 	memcpy(sys_hostname, hostname, n);
 #ifdef PUBKEY
-	if (crypto_flags)
-		crypto_setup();
+	crypto_setup();
 #endif /* PUBKEY */
 #endif /* AUTOKEY */
 	initializing = 0;
