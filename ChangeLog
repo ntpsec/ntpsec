@@ -1,3 +1,9 @@
+2000-04-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_acts.c (acts_receive): Do a better job with year
+	conversions and leap-year checks.  The PTB stuff caught this.
+	Reported by: Daniel.Aeby@eam.admin.ch
+
 2000-04-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_atom.c (atom_pps): Bugfix
