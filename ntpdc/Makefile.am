@@ -17,7 +17,7 @@ ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
 
 ntpdc-layout.o: nl.c
 
-layout.here:
+layout.here: ntpdc-layout
 	ntpdc-layout > $@
 
 check-layout: ntpdc-layout layout.std layout.here
