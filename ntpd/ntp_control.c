@@ -42,7 +42,9 @@ struct ctl_proc {
  * Request processing routines
  */
 static	void	ctl_error	P((int));
+#ifdef REFCLOCK
 static	u_short ctlclkstatus	P((struct refclockstat *));
+#endif
 static	void	ctl_flushpkt	P((int));
 static	void	ctl_putdata	P((const char *, unsigned int, int));
 static	void	ctl_putstr	P((const char *, const char *,
@@ -729,6 +731,7 @@ ctlpeerstatus(
 /*
  * ctlclkstatus - return a status word for this clock
  */
+#ifdef REFCLOCK
 static u_short
 ctlclkstatus(
 	struct refclockstat *this_clock
@@ -737,6 +740,7 @@ ctlclkstatus(
 	return ((u_short)(((this_clock->currentstatus) << 8) |
 	    (this_clock->lastevent)));
 }
+#endif
 
 
 /*

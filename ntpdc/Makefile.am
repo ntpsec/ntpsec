@@ -1,20 +1,26 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
-bin_PROGRAMS = ntpdc
-noinst_PROGRAMS = ntpdc-layout
-noinst_DATA=	check-layout
-INCLUDES = -I$(top_srcdir)/include
+bin_PROGRAMS=	ntpdc
+EXTRA_PROGRAMS=	ntpdc-layout
+EXTRA_DATA=	check-layout
+BUILT_SOURCES=	maybe-layout
+INCLUDES=	-I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD = version.o ../libntp/libntp.a @READLINE_LIBS@
+ntpdc_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
-DISTCLEANFILES = .version version.c
-CLEANFILES=	check-layout layout.here nl.c
-noinst_HEADERS = ntpdc.h
-EXTRA_DIST = nl_in.c nl.pl layout.std
-ETAGS_ARGS = Makefile.am
+DISTCLEANFILES=	.version version.c
+CLEANFILES=	check-layout layout.here nl.c ntpdc-layout
+noinst_HEADERS=	ntpdc.h
+EXTRA_DIST=	nl_in.c nl.pl layout.std
+ETAGS_ARGS= 	Makefile.am
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
+
+maybe-layout:
+	@case "${PATH_PERL}" in \
+	    /*) ${MAKE} check-layout ;;	\
+	esac
 
 ntpdc-layout.o: nl.c
 

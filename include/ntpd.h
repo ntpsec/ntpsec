@@ -402,6 +402,7 @@ extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
 extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
 extern u_long	res_min_interval;
 extern u_long	res_avg_interval;
+extern u_long	mon_age;		/* monitor preempt age */
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */

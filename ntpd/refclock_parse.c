@@ -3728,11 +3728,11 @@ gps16x_message(
 			case GPS_ANT_INFO:
 				{
 					ANT_INFO antinfo;
-					char buffer[512];
-					char *p;
+					u_char buffer[512];
+					u_char *p;
 					
 					get_mbg_antinfo(&bufp, &antinfo);
-					sprintf((char *)buffer, "meinberg_antenna_status=\"");
+					sprintf(buffer, "meinberg_antenna_status=\"");
 					p = buffer + strlen(buffer);
 					
 					switch (antinfo.status)
@@ -3750,20 +3750,20 @@ gps16x_message(
 								CLK_UNIT(parse->peer), p);
 						
 						p += strlen(p);
-						mbg_tm_str((unsigned char **)&p, &antinfo.tm_disconn);
+						mbg_tm_str(&p, &antinfo.tm_disconn);
 						*p = '\0';
 						break;
 		    
 					case ANT_RECONN:
 						strcat(p, "RECONNECTED on ");
 						p += strlen(p);
-						mbg_tm_str((unsigned char **)&p, &antinfo.tm_reconn);
+						mbg_tm_str(&p, &antinfo.tm_reconn);
 						sprintf(p, ", reconnect clockoffset %c%ld.%07ld s, disconnect time ",
 							(antinfo.delta_t < 0) ? '-' : '+',
 							ABS(antinfo.delta_t) / 10000,
 							ABS(antinfo.delta_t) % 10000);
 						p += strlen(p);
-						mbg_tm_str((unsigned char **)&p, &antinfo.tm_disconn);
+						mbg_tm_str(&p, &antinfo.tm_disconn);
 						*p = '\0';
 						break;
 		    
@@ -3786,8 +3786,8 @@ gps16x_message(
 			case GPS_CFGH:
 				{
 					CFGH cfgh;
-					char buffer[512];
-					char *p;
+					u_char buffer[512];
+					u_char *p;
 					
 					get_mbg_cfgh(&bufp, &cfgh);
 					if (cfgh.valid)
@@ -3797,7 +3797,7 @@ gps16x_message(
 						p = buffer;
 						strcpy(buffer, "gps_tot_51=\"");
 						p += strlen(p);
-						mbg_tgps_str((unsigned char **)&p, &cfgh.tot_51);
+						mbg_tgps_str(&p, &cfgh.tot_51);
 						*p++ = '"';
 						*p   = '\0';
 						set_var(&parse->kv, buffer, sizeof(buffer), RO);
@@ -3805,7 +3805,7 @@ gps16x_message(
 						p = buffer;
 						strcpy(buffer, "gps_tot_63=\"");
 						p += strlen(p);
-						mbg_tgps_str((unsigned char **)&p, &cfgh.tot_63);
+						mbg_tgps_str(&p, &cfgh.tot_63);
 						*p++ = '"';
 						*p   = '\0';
 						set_var(&parse->kv, buffer, sizeof(buffer), RO);
@@ -3813,7 +3813,7 @@ gps16x_message(
 						p = buffer;
 						strcpy(buffer, "gps_t0a=\"");
 						p += strlen(p);
-						mbg_tgps_str((unsigned char **)&p, &cfgh.t0a);
+						mbg_tgps_str(&p, &cfgh.t0a);
 						*p++ = '"';
 						*p   = '\0';
 						set_var(&parse->kv, buffer, sizeof(buffer), RO);
@@ -5176,7 +5176,7 @@ rawdcf_init_1(
 }
 #else
 static int
-rawdcfdtr_init(
+rawdcfdtr_init_1(
 	struct parseunit *parse
 	)
 {

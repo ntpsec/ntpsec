@@ -19,7 +19,24 @@ SUBDIRS = \
 	@MAKE_SNTP@	\
 	util
 
-DIST_SUBDIRS = $(SUBDIRS) sntp
+DIST_SUBDIRS= \
+	scripts \
+	include \
+	ElectricFence	\
+	arlib \
+	libntp	\
+	libparse	\
+	ntpd	\
+	ntpdate	\
+	ntpdc	\
+	ntpq	\
+	parseutil	\
+	adjtimed	\
+	clockstuff	\
+	kernel	\
+	sntp	\
+	util
+DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --with-sntp
 
 EXTRA_DIST = \
 	COPYRIGHT \

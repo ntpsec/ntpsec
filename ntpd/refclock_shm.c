@@ -87,6 +87,9 @@ struct shmTime {
 	int    valid;
 	int    dummy[10]; 
 };
+
+struct shmTime *getShmTime(int);
+
 struct shmTime *getShmTime (int unit) {
 #ifndef SYS_WINNT
 	int shmid=0;

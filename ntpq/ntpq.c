@@ -1598,10 +1598,14 @@ getarg(
 				return 0;
 			}
 			if (isneg > numassoc) {
-				(void) fprintf(stderr,
-					       "***Association for `%s' unknown (max &%d)\n",
-					       str, numassoc);
-				return 0;
+				if (numassoc == 0) {
+					(void) fprintf(stderr,
+						       "***Association for `%s' unknown (max &%d)\n",
+						       str, numassoc);
+					return 0;
+				} else {
+					isneg = numassoc;
+				}
 			}
 			argp->uval = assoc_cache[isneg-1].assid;
 			break;
@@ -1911,8 +1915,8 @@ decodeint(
 {
 	if (*str == '0') {
 		if (*(str+1) == 'x' || *(str+1) == 'X')
-		    return hextoint(str+2, (u_long *)&val);
-		return octtoint(str, (u_long *)&val);
+		    return hextoint(str+2, (void *)&val);
+		return octtoint(str, (void *)&val);
 	}
 	return atoint(str, val);
 }

@@ -133,6 +133,7 @@
  */
 #define CONF_DISCARD_AVERAGE	1
 #define CONF_DISCARD_MINIMUM	2
+#define	CONF_DISCARD_MONITOR	3
 
 /*
  * "tinker" modifier keywords

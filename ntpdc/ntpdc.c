@@ -788,7 +788,7 @@ getresponse(
 	/*
 	 * So far, so good.  Copy this data into the output array.
 	 */
-	if ((datap + datasize) > (pktdata + pktdatasize)) {
+	if ((datap + datasize + (pad * items)) > (pktdata + pktdatasize)) {
 		int offset = datap - pktdata;
 		growpktdata();
 	        *rdata = pktdata; /* might have been realloced ! */
