@@ -456,16 +456,17 @@ receive(
 	NTOHL_FP(&pkt->xmt, &p_xmt);
 
 	/*
-	 * Check authentication. There are five outcomes:
+	 * Check authentication. There are four outcomes:
 	 *
-	 * NONE    authentication is not required unless the key
-	 *         identifier is nonzero
-	 * OK      authentication succeeds
-	 * ERROR   the packet has a MAC and authentication fails
-	 * CRYPTO  crypto-NAK
+	 * NONE    The packet has no MAC.
+	 * OK      the packet has a MAC and authentication succeeds
+	 * ERROR   the packet has a MAC and authentication fails.
+	 * CRYPTO  crypto-NAK. The MAC has four octets only.
 	 *
-	 * Later on if an association is present and the key identifier
-	 * is nonzero, the authentication code must not be NONE.
+	 * Note: The AUTH(x, y) macro is used to filter outcomes. If x
+	 * is zero, acceptable outcomes of y are NONE and OK. If x is
+	 * one, the only acceptable outcome of y is OK. If the notrust
+	 * restrict bit is lit, a NONE is mapped to a ERROR.
 	 */
 	if (has_mac == 0) {
 		if (restrict_mask & RES_DONTTRUST)
@@ -475,18 +476,19 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf("receive: at %ld %s<-%s mode %d code %d auth %d\n",
-			    current_time, stoa(&rbufp->dstadr->sin),
-			    stoa(&rbufp->recv_srcadr), hismode,
-			    retcode, is_authentic);
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode, retcode,
+			    is_authentic);
 #endif
 	} else if (has_mac == 4) {
 			is_authentic = AUTH_CRYPTO; /* crypto-NAK */
 #ifdef DEBUG
 		if (debug)
-			printf("receive: at %ld %s<-%s mode %d code %d auth %d\n",
-			    current_time, stoa(&rbufp->dstadr->sin),
-			    stoa(&rbufp->recv_srcadr), hismode,
-			    retcode, is_authentic);
+			printf(
+			    "receive: at %ld %s<-%s mode %d code %d keyid %08x len %d mac %d auth %d\n",
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode, retcode,
+			    skeyid, authlen, has_mac, is_authentic);
 #endif
 	} else {
 #ifdef OPENSSL
@@ -620,13 +622,14 @@ receive(
 		/*
 		 * The vanilla case is when this is not a multicast
 		 * interface. If authentication succeeds, return a
-		 * server mode packet; if not, return a crypto-NAK.
+		 * server mode packet; if not and the key ID is nonzero,
+		 * return a crypto-NAK.
 		 */
 		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
 			if (AUTH(0, is_authentic))
 				fast_xmit(rbufp, MODE_SERVER, skeyid,
 				    restrict_mask);
-			else
+			else if (skeyid)
 				fast_xmit(rbufp, MODE_SERVER, 0,
 				    restrict_mask);
 			return;			/* hooray */
@@ -654,7 +657,7 @@ receive(
 		 * Respond only if authentication succeeds. Don't do a
 		 * crypto-NAK, as that would not be useful.
 		 */
-		} else if (AUTH(sys_authenticate, is_authentic)) {
+		} else if (AUTH(0, is_authentic)) {
 			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
 		}
@@ -678,12 +681,12 @@ receive(
 	 * the guy is already here, don't fire up a duplicate.
 	 */
 	case AM_MANYCAST:
-		if (restrict_mask & RES_NOPEER) {
+		if (!AUTH(sys_authenticate, is_authentic)) {
+			return;			/* bad auth */
+
+		} else if (restrict_mask & RES_NOPEER) {
 			sys_restricted++;
 			return;			/* not enabled */
-
-		} else if (!AUTH(sys_authenticate, is_authentic)) {
-			return;			/* bad auth */
 
 		} else if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			return;			/* no assoc match */
@@ -727,12 +730,12 @@ receive(
 	 * kiss any frogs here.
 	 */
 	case AM_NEWBCL:
-		if (restrict_mask & RES_NOPEER || sys_bclient == 0) {
+		if (!AUTH(sys_authenticate, is_authentic)) {
+			return;			/* bad auth */
+
+		} else if (restrict_mask & RES_NOPEER || !sys_bclient) {
 			sys_restricted++;
 			return;			/* not enabled */
-
-		} else if (!AUTH(sys_authenticate, is_authentic)) {
-			return;			/* bad auth */
 
 		/*
 		 * If the sys_bclient switch is 1, execute the inital
@@ -790,9 +793,6 @@ receive(
 	 * mobilize a passive association. If not, kiss the frog.
 	 */
 	case AM_NEWPASS:
-		if (restrict_mask & RES_NOPEER) {
-			sys_restricted++;
-			return; 		/* not enabled */
 
 		/*
 		 * Pay close attention, as the following test has
@@ -808,11 +808,19 @@ receive(
 		 * fails. The reason this works is that a crypto-NAK
 		 * without a MAC looks like an ordinary packet.
 		 */
-		} else if (!AUTH(sys_authenticate, is_authentic) ||
-		     (sys_authenticate && !L_ISZERO(&p_org))) {
-			fast_xmit(rbufp, MODE_PASSIVE, 0,
-			    restrict_mask);
+		if (!AUTH(sys_authenticate, is_authentic)) {
+			if (AUTH(0, is_authentic) || skeyid)
+				fast_xmit(rbufp, MODE_ACTIVE, 0,
+				    restrict_mask);
 			return;			/* bad auth */
+
+		/*
+		 * If nopeer there is a shortcut available.
+		 */
+		} else if (restrict_mask & RES_NOPEER) {
+			fast_xmit(rbufp, MODE_ACTIVE, skeyid,
+			    restrict_mask);
+			return; 		/* shortcut */
 
 		} else if ((peer = newpeer(&rbufp->recv_srcadr,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion,
@@ -830,6 +838,11 @@ receive(
 	 * scarf the origin and receive timestamps to send back to him.
 	 */
 	case AM_PROCPKT:
+		if (!AUTH(0, is_authentic)) {
+			if (skeyid)
+				fast_xmit(rbufp, MODE_ACTIVE, 0,
+				    restrict_mask);
+		}
 		peer->flash = 0;
 		if (L_ISZERO(&p_org))
 			peer->flash |= TEST3;	/* unsynch */
@@ -2693,16 +2706,7 @@ fast_xmit(
 	 * If the packet has picked up a restriction due to either
 	 * access denied or rate exceeded, decide what to do with it.
 	 */
-	if (mask & (RES_DONTTRUST | RES_LIMITED)) {
-		char	*code = "????";
-
-		if (mask & RES_LIMITED) {
-			sys_limitrejected++;
-			code = "RATE";
-		} else if (mask & RES_DONTTRUST) {
-			sys_restricted++;
-			code = "DENY";
-		}
+	if (mask & RES_LIMITED) {
 
 		/*
 		 * Here we light up a kiss-of-death (KoD) packet. KoD
@@ -2717,7 +2721,7 @@ fast_xmit(
 			return;
 
 		sys_kod--;
-		memcpy(&xpkt.refid, code, 4);
+		memcpy(&xpkt.refid, "RATE", 4);
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
