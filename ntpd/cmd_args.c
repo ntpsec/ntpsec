@@ -18,8 +18,9 @@
  */
 extern char const *progname;
 int	listen_to_virtual_ips = 1;
+char 	*specific_interface = NULL;        /* interface name or IP address to bind to */
 
-static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:LnNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
+static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -81,6 +82,8 @@ getstartup(
 #endif
 		case 'L':
 		    listen_to_virtual_ips = 0;
+		    if(ntp_optarg)
+			specific_interface = ntp_optarg; 
 		    break;
 		case 'l':
 			{
@@ -150,6 +153,7 @@ getstartup(
 		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
+		(void) fprintf(stderr, "\t\t[ -L interface ]\n");
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif
@@ -397,6 +401,7 @@ getCmdOpts(
 		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
+		(void) fprintf(stderr, "\t\t[ -L interface ]\n");
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif

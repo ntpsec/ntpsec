@@ -44,6 +44,7 @@
 */
 
 extern int listen_to_virtual_ips;
+extern const char *specific_interface;
 
 #if defined(SYS_WINNT)
 #include <transmitbuff.h>
@@ -404,9 +405,24 @@ address_okay(isc_interface_t *isc_if) {
 	    printf("address_okay: listen Virtual: %d, IF name: %s, Up Flag: %d\n", 
 		    listen_to_virtual_ips, isc_if->name, (isc_if->flags & INTERFACE_F_UP));
 #endif
+	/*
+	 * Always allow the loopback
+	 */
+	if((isc_if->flags & INTERFACE_F_LOOPBACK) != 0)
+		return (ISC_TRUE);
 
-	if (listen_to_virtual_ips == 0  && (strchr(isc_if->name, (int)':') != NULL))
-		return (ISC_FALSE);
+	/*
+	 * Check if the interface is specified
+	 */
+	if (specific_interface != NULL) {
+		if (stricmp(isc_if->name, specific_interface) == 0)
+			return (ISC_TRUE);
+	}
+	else {
+		if (listen_to_virtual_ips == 0  && 
+		   (strchr(isc_if->name, (int)':') != NULL))
+			return (ISC_FALSE);
+	}
 
 	/* XXXPDM This should be fixed later, but since we may not have set
 	 * the UP flag, we at least get to use the interface.
@@ -536,8 +552,10 @@ create_sockets(
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
 #ifdef UDP_WILDCARD_DELIVERY
-	nwilds = create_wildcards(port);
-	idx = nwilds; 
+	if (specific_interface == NULL) {
+		nwilds = create_wildcards(port);
+		idx = nwilds;
+	}
 #endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
