@@ -1,3 +1,7 @@
+2000-12-11  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpdate/ntpdate.c (alarming): Appease ansi2knr.
+
 2000-12-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_control.c (ctl_putpeer): CP_TTL and CP_TTLMAX

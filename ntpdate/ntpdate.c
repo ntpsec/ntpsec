@@ -1375,6 +1375,11 @@ timer(void)
 }
 
 
+/*
+ * The code duplication in the following subroutine sucks, but
+ * we need to appease ansi2knr.
+ */
+
 #ifndef SYS_WINNT
 /*
  * alarming - record the occurance of an alarm interrupt
@@ -1383,13 +1388,16 @@ static RETSIGTYPE
 alarming(
 	int sig
 	)
-#else
-void CALLBACK 
-alarming(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
-#endif /* SYS_WINNT */
 {
 	alarm_flag++;
 }
+#else
+void CALLBACK 
+alarming(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
+{
+	alarm_flag++;
+}
+#endif /* SYS_WINNT */
 
 
 /*
