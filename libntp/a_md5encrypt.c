@@ -26,7 +26,7 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 #include "global.h"
-#include "md5.h"
+#include "rsa_md5.h"
 
 /*
  * MD5authencrypt - generate MD5 message authenticator

@@ -19,7 +19,6 @@ noinst_HEADERS = \
 	iosignal.h \
 	l_stdlib.h \
 	mbg_gps166.h \
-	md5.h \
 	mx4200.h \
 	ntif.h \
 	ntp.h \
@@ -53,5 +52,6 @@ noinst_HEADERS = \
 	parse.h \
 	parse_conf.h \
 	recvbuff.h \
+	rsa_md5.h \
 	trimble.h
 
