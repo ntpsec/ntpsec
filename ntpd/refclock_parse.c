@@ -802,7 +802,7 @@ static struct parse_clockinfo
 	const char *cl_description;		/* device name */
 	const char *cl_format;		/* fixed format */
 	u_char  cl_type;		/* clock type (ntp control) */
-	u_long  cl_maxunsync;		/* time to trust oscillator after loosing synch */
+	u_long  cl_maxunsync;		/* time to trust oscillator after losing synch */
 	u_long  cl_speed;		/* terminal input & output baudrate */
 	u_long  cl_cflag;             /* terminal control flags */
 	u_long  cl_iflag;             /* terminal input flags */
@@ -1181,7 +1181,7 @@ static struct parse_clockinfo
 		"WHARTON 400A Series clock Output Format 1",	/* fixed format */
 			/* Must match a format-name in a libparse/clk_xxx.c file */
 		DCF_TYPE,			/* clock type (ntp control) */
-		(1*60*60),		        /* time to trust oscillator after loosing synch */
+		(1*60*60),		        /* time to trust oscillator after losing synch */
 		B9600,				/* terminal input & output baudrate */
 		(CS8|CREAD|PARENB|CLOCAL|HUPCL),/* terminal control flags */
 		0,				/* terminal input flags */

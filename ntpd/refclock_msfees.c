@@ -99,7 +99,7 @@
  * On the next minute it steps forward again :-(
  * This is typically 16.5uS/S then 3975uS at the 4min re-sync,
  * or 9.5uS/S then 3990.5uS at a 7min re-sync,
- * at which point it may loose the "00" second time stamp.
+ * at which point it may lose the "00" second time stamp.
  * I assume that the most accurate time is just AFTER the re-sync.
  * Hence remember the last cycle interval,
  *

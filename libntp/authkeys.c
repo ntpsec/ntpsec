@@ -374,7 +374,7 @@ auth_delkeys(void)
 		 */
 		while (sk != 0 && sk->keyid <= NTP_MAXKEY) {
 			/*
-			 * Don't loose info which keys are trusted.
+			 * Don't lose info as to which keys are trusted.
 			 */
 			if (sk->flags & KEY_TRUSTED) {
 				memset(&sk->k, 0, sizeof(sk->k));

@@ -214,7 +214,7 @@ filegen_open(
 		 *
 		 * If the file was open before keep the previous generation.
 		 * This will cause output to end up in the 'wrong' file,
-		 * but I think this is still better than loosing output
+		 * but I think this is still better than losing output
 		 *
 		 * ignore errors due to missing directories
 		 */

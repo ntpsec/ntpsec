@@ -860,7 +860,7 @@ wwv_receive(
  *
  * This routine keeps track of status. If no offset samples have been
  * processed during a poll interval, a timeout event is declared. If
- * errors have have occured during the interval, they are reported as
+ * errors have have occurred during the interval, they are reported as
  * well. Once the clock is set, it always appears reachable, unless
  * reset by watchdog timeout.
  */
@@ -2501,7 +2501,7 @@ wwv_tsec(
  *
  * This routine rotates a likelihood vector one position and increments
  * the clock digit modulo the radix. It returns the new clock digit or
- * zero if a carry occured. Once synchronized, the clock digit will
+ * zero if a carry occurred. Once synchronized, the clock digit will
  * match the maximum likelihood digit corresponding to that position.
  */
 static int

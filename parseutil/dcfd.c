@@ -1564,7 +1564,7 @@ main(
 		}
 
 		/*
-		 * loose terminal if in daemon operation
+		 * lose terminal if in daemon operation
 		 */
 		if (!interactive)
 		    detach();

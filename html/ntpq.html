@@ -251,7 +251,7 @@
             <dt><tt>0x400 TEST11</tt>
             <dd>The autokey protocol has not verified the server or peer is proventic and has valid public key credentials. See the <a href="authopt.html">Authentication Options</a> page.
             <dt><tt>0x800 TEST12</tt>
-            <dd>A protocol or configuration error has occured in the public key algorithms or a possible intrusion event has been detected. See the <a href="authopt.html">Authentication Options</a> page.
+            <dd>A protocol or configuration error has occurred in the public key algorithms or a possible intrusion event has been detected. See the <a href="authopt.html">Authentication Options</a> page.
         </dl>
         <h4>Bugs</h4>
         <p>The peers command is non-atomic and may occasionally result in spurious error messages about invalid associations occurring and terminating the command. The timeout time is a fixed constant, which means you wait a long time for timeouts since it assumes sort of a worst case. The program should improve the timeout estimate as it sends queries to a particular host, but doesn't.</p>

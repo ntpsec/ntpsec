@@ -877,7 +877,7 @@ oncore_init_shmem(
        /*
 	* The first thing we do is see if there is an instance->shmem_fname file (still)
 	* out there from a previous run.  If so, we copy it in and use it to initialize
-	* shmem (so we won't loose our almanac if we need it).
+	* shmem (so we won't lose our almanac if we need it).
 	*/
 
 	shmem_old = 0;
@@ -2705,8 +2705,8 @@ oncore_msg_Cj_init(
 	int	mode;
 
 
-	/* The M12 with 1.3 or 2.0 Firmware, looses track of all Satellites and has to
-	 * start again if we go from 0D -> 3D, then looses them again when we
+	/* The M12 with 1.3 or 2.0 Firmware, loses track of all Satellites and has to
+	 * start again if we go from 0D -> 3D, then loses them again when we
 	 * go from 3D -> 0D.  We do this to get a @@Ea message for SHMEM.
 	 * For NOW we will turn this aspect of filling SHMEM off for the M12
 	 */
