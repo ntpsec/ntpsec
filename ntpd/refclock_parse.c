@@ -3095,7 +3095,7 @@ parse_event(
 			NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
 				ERR(ERR_BADEVENT)
 				msyslog(LOG_ERR,
-					"clock %s fault '%s' (0x%02x)", refnumtoa(parse->peer->srcadr.sin_addr.s_addr), ceventstr(event),
+					"clock %s fault '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
 					(u_int)event);
 		}
 		else
@@ -3103,7 +3103,7 @@ parse_event(
 			NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
 				if (event == CEVNT_NOMINAL || list_err(parse, ERR_BADEVENT))
 				    msyslog(LOG_INFO,
-					    "clock %s event '%s' (0x%02x)", refnumtoa(parse->peer->srcadr.sin_addr.s_addr), ceventstr(event),
+					    "clock %s event '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
 					    (u_int)event);
 		}
 
