@@ -1,5 +1,7 @@
 1999-08-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.96
+
 	* parseutil/dcfd.c (main): Replace SA_ONSTACK and SV_ONSTACK with
 	HAVE_SIGACTION and HAVE_SIGVEC, respectively.  HP-UX provides both 
 	of the former but only one of the latter...

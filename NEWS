@@ -1,3 +1,4 @@
+(4.0.96)
 * -lnsl, -lsocket, -lgen configuration patches
 * Y2K patches from AT&T
 * Linux portability cruft
