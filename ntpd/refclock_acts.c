@@ -37,13 +37,14 @@
  *
  * The calling program is initiated by setting fudge flag1, either
  * manually or automatically. When flag1 is set, the calling program
- * dials each number listed in the phones command of the configuration
- * file in turn. The number is specified by the Hayes ATDT prefix
- * followed by the number itself, including the prefix and long-distance
- * digits and delay code, if necessary. The flag1 is reset and the
- * calling program terminated if (a) a valid clock update has been
- * determined, (b) no more numbers remain in the list, (c) a device
- * fault or timeout occurs or (d) fudge flag1 is reset manually.
+ * dials the first number in the phone command of the configuration
+ * file. If that call fails, the calling program dials the second number
+ * and so on. The number is specified by the Hayes ATDT prefix followed
+ * by the number itself, including the prefix and long-distance digits
+ * and delay code, if necessary. The flag1 is reset and the calling
+ * program terminated if (a) a valid clock update has been determined,
+ * (b) no more numbers remain in the list, (c) a device fault or timeout
+ * occurs or (d) fudge flag1 is reset manually.
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom radios. It selects the parsing algorithm depending on the
@@ -385,7 +386,7 @@ acts_message(
 
 	/*
 	 * We are waiting for the OK response to the modem setup
-	 * command. When this happens dial the number.
+	 * command. When this happens dial the number followed by a \r.
 	 */
 	case S_OK:
 		if (strcmp(pp->a_lastcode, "OK") != 0) {
@@ -406,6 +407,7 @@ acts_message(
 			acts_disc(peer);
 			return;
 		}
+		write(pp->io.fd, "\r", 1);
 		up->state = S_CONNECT;
 		up->timer = ANSWER;
 		return;
@@ -437,7 +439,7 @@ acts_message(
 
 	/*
 	 * For USNO format on-time character '*', which is on a line by
-	 * itself. By sure a timecode has been received.
+	 * itself. Be sure a timecode has been received.
 	 */
 	case 1:
 		if (*pp->a_lastcode == '*' && up->state == S_MSG) 
