@@ -6,6 +6,7 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+#include "ntp_machine.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,11 +33,11 @@
 /*
  * Prototypes
  */
-FILE	*fheader(u_char *);	/* construct file header */
+FILE	*fheader P((u_char *));	/* construct file header */
 #ifdef OPENSSL
-int	x509(u_char *, EVP_PKEY *, EVP_MD *); /* generate req/cert */
-void	cb(int, int, void *);	/* callback routine */
-u_long	asn2ntp(ASN1_TIME *);	/* ASN.1 time format to NTP seconds */
+int	x509	 P((u_char *, EVP_PKEY *, EVP_MD *)); /* generate req/cert */
+void	cb	 P((int, int, void *));	/* callback routine */
+u_long	asn2ntp	 P((ASN1_TIME *));	/* ASN.1 time format to NTP seconds */
 #endif /* OPENSSL */
 
 /*
