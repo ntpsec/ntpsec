@@ -30,6 +30,12 @@ static struct sockaddr_storage here[MAX_SOCKETS], there[MAX_SOCKETS];
 static struct sockaddr_in here[MAX_SOCKETS], there[MAX_SOCKETS];
 #endif
 
+void display_in_hex(const void *, int);
+#ifdef HAVE_IPV6
+void display_sock_in_hex(struct sockaddr_storage *);
+#else
+void display_sock_in_hex (struct sockaddr_in *);
+#endif
 
 /* There needs to be some disgusting grobble for handling timeouts, that is
 identical to the grobble in internet.c. */
@@ -63,7 +69,7 @@ void display_in_hex (const void *data, int length) {
 #ifdef HAVE_IPV6
 
 void display_sock_in_hex (struct sockaddr_storage *sock) {
-    int family, len;
+    int family;
     struct sockaddr_in *sin;
     struct sockaddr_in6 *sin6;
 
