@@ -3,20 +3,19 @@
 
 This includes code that really should have been part of ANSI/ISO C, but was
 left out for historical reasons (despite requests to define ftty), plus
-the get_lock() and log_message() functions. */
-
-
+the get_lock() and log_message() functions.
+*/
 
 #include "header.h"
 
 #include <sys/types.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <signal.h>
 
 #define UNIX
 #include "kludges.h"
 #undef UNIX
-
 
 
 void do_nothing (int seconds) {
