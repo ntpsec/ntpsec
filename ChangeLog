@@ -1,3 +1,8 @@
+2001-04-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in (OPENSSL): Just use -lcrypto.
+	Reported by Dave Mills.
+
 2001-03-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k20

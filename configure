@@ -13371,7 +13371,7 @@ case "$ans" in
 	    ans=openssl
 	    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	    LIBS="$LIBS -lcrypto -lssl"
+	    LIBS="$LIBS -lcrypto"
 	    cat >>confdefs.h <<\EOF
 #define DES 1
 EOF

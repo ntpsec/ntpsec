@@ -2305,7 +2305,7 @@ case "$ans" in
 	    ans=openssl
 	    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	    LIBS="$LIBS -lcrypto -lssl"
+	    LIBS="$LIBS -lcrypto"
 	    AC_DEFINE(DES)
 	    AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	    AC_DEFINE(PUBKEY, , [Public key?])
