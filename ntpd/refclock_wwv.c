@@ -2493,7 +2493,7 @@ wwv_snr(
  * rotation, this routine mitigates over all channels and chooses the
  * best frequency and station.
  */
-void
+static void
 wwv_newchan(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -2606,7 +2606,7 @@ wwv_qsy(
  * stn	station identifier (station and frequency)
  * comp	minute sync compare counter
  * errs	bit errors in last minute * freq	frequency offset (PPM) * avgt	averaging time (s) */
-int
+static int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */
 	char *ptr		/* target string */
