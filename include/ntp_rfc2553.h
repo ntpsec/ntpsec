@@ -82,7 +82,6 @@
 
 #ifndef HAVE_TYPE_U_INT8_T
 typedef u_char		u_int8_t;
-typedef u_char		uint8_t;
 typedef u_short		u_int16_t;
 typedef u_int32		u_int32_t;
 typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;

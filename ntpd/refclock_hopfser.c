@@ -216,7 +216,7 @@ hopfserial_receive (
 	struct refclockproc *pp;
 	struct peer *peer;
 
-	int		sync;	/* synchronization indicator */
+	int		synci;	/* synchronization indicator */
 	int		DoW;	/* Dow */
 
 	int	day, month;	/* ddd conversion */
@@ -245,7 +245,7 @@ hopfserial_receive (
 #else
 	       "%*c%1x%1x%2d%2d%2d%2d%2d%2d", /* stx...cr,lf,etx */
 #endif
-	       &sync,
+	       &synci,
 	       &DoW,
 	       &pp->hour,
 	       &pp->minute,
@@ -286,7 +286,7 @@ hopfserial_receive (
 #if 0
 	wsprintf(pp->a_lastcode,
 		 "STATUS: %1X%1X, DATE: %02d.%02d.%04d  TIME: %02d:%02d:%02d",
-		 sync,
+		 synci,
 		 DoW,
 		 day,
 		 month,
@@ -296,7 +296,7 @@ hopfserial_receive (
 		 pp->second);
 
 	pp->lencode = strlen(pp->a_lastcode);
-	if ((sync && 0xc) == 0 ){  /* time ok? */
+	if ((synci && 0xc) == 0 ){  /* time ok? */
 		refclock_report(peer, CEVNT_BADTIME);
 		pp->leap = LEAP_NOTINSYNC;
 		return;
@@ -305,7 +305,7 @@ hopfserial_receive (
 	/*
 	 * If clock has no valid status then report error and exit
 	 */
-	if ((sync & HOPF_OPMODE) == HOPF_INVALID ){  /* time ok? */
+	if ((synci & HOPF_OPMODE) == HOPF_INVALID ){  /* time ok? */
 		refclock_report(peer, CEVNT_BADTIME);
 		pp->leap = LEAP_NOTINSYNC;
 		return;
@@ -316,7 +316,7 @@ hopfserial_receive (
 	 * if CLK_FLAG1 is set, sychronize even if no radio operation
 	 */
 
-	if ((sync & HOPF_OPMODE) == HOPF_INTERNAL){
+	if ((synci & HOPF_OPMODE) == HOPF_INTERNAL){
 		if ((pp->sloppyclockflag & CLK_FLAG1) == 0) {
 			refclock_report(peer, CEVNT_BADTIME);
 			pp->leap = LEAP_NOTINSYNC;
@@ -333,7 +333,7 @@ hopfserial_receive (
 	refclock_receive(peer);
 
 #if 0
-	msyslog(LOG_ERR, " D:%x  D:%d D:%d",sync,pp->minute,pp->second);
+	msyslog(LOG_ERR, " D:%x  D:%d D:%d",synci,pp->minute,pp->second);
 #endif
 
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);

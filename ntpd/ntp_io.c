@@ -856,7 +856,7 @@ io_multicast_add(
 
 #ifdef HAVE_IPV6
 	struct ipv6_mreq mreq6;
-	uint8_t haddr6[16];
+	u_int8_t haddr6[16];
 	struct in6_addr iaddr6;
 	struct sockaddr_in6 *sin6p;
 #endif /* HAVE_IPV6 */

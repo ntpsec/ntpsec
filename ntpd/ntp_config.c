@@ -1313,7 +1313,7 @@ getconfig(
                         if (ntokens >= 2) {
                                 u_long ui;
 
-				if (sscanf(tokens[1], "%d", &ui) != 1)
+				if (sscanf(tokens[1], "%ld", &ui) != 1)
 					msyslog(LOG_ERR,
 					    "illegal value - line ignored");
 				else

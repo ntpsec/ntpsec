@@ -205,7 +205,8 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 
 	if (sa->sa_family != AF_INET)
 		return (EAI_FAMILY);
-	hp = gethostbyaddr((const char *)&((struct sockaddr_in *)sa)->sin_addr,
+	hp = gethostbyaddr(
+	    (const char *)&((const struct sockaddr_in *)sa)->sin_addr,
 	    4, AF_INET);
 	if (hp == NULL) {
 		if (h_errno == TRY_AGAIN)

@@ -2038,8 +2038,8 @@ helpsort(
 	const void *t2
 	)
 {
-	const char **name1 = (const char **)t1;
-	const char **name2 = (const char **)t2;
+	char const * const * name1 = (char const * const *)t1;
+	char const * const * name2 = (char const * const *)t2;
 
 	return strcmp(*name1, *name2);
 }

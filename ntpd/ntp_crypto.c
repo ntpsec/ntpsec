@@ -2539,8 +2539,6 @@ cert_parse(
 			memcpy(ret->grpkey, &ext->value->data[2],
 			    ret->grplen);
 			break;
-
-		default:
 		}
 	}
 

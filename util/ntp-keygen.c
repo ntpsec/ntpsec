@@ -90,7 +90,7 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
-#include <strings.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -100,6 +100,7 @@
 # include <sys/types.h>
 #endif
 #include "ntp_types.h"
+#include "l_stdlib.h"
 
 #ifdef OPENSSL
 #include "openssl/bn.h"

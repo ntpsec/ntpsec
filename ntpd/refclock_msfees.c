@@ -720,7 +720,7 @@ ees_receive(
 			/* Incomplete.  Wait for more. */
 			if (debug & DB_LOG_AWAITMORE)
 			    msyslog(LOG_INFO,
-				    "I: ees clock %d: %x == %x: await more",
+				    "I: ees clock %d: %p == %p: await more",
 				    ees->unit, dpt, dpend);
 			return;
 		}

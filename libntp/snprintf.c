@@ -10,6 +10,8 @@
 #endif
 #include <stdio.h>
 
+#include "l_stdlib.h"
+
 #ifdef __STDC__
 int snprintf(char *str, size_t n, const char *fmt, ...)
 #else

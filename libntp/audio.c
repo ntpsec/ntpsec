@@ -127,7 +127,7 @@ audio_config_read(
 		sprintf(device, "%s.%d", INIT_FILE, unit);
 		if ((fd = fopen(device, "r")) == NULL) {
 			printf("audio_config_read: <%s> NO\n", device);
-			sprintf(device, "%s", INIT_FILE, unit);
+			sprintf(device, "%s.%d", INIT_FILE, unit);
 			if ((fd = fopen(device, "r")) == NULL) {
 				printf("audio_config_read: <%s> NO\n", device);
 				return;
@@ -192,7 +192,7 @@ audio_config_read(
 	fclose(fd);
 	return;
 }
-#endif PCM_STYLE_SOUND
+#endif /* PCM_STYLE_SOUND */
 
 /*
  * audio_init - open and initialize audio device
@@ -331,7 +331,7 @@ audio_init(
 # ifdef HAVE_SYS_AUDIOIO_H
 	info.record.buffer_size = bufsiz;
 # endif /* HAVE_SYS_AUDIOIO_H */
-	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
+	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, (char *)&info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio: invalid control device parameters\n");
 		close(ctl_fd);
@@ -415,14 +415,14 @@ audio_gain(
 		o_port = port;
 	}
 #else /* not PCM_STYLE_SOUND */
-	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
+	ioctl(ctl_fd, (int)AUDIO_GETINFO, (char *)&info);
 	info.record.error = 0;
 	info.record.gain = gain;
 	if (o_mongain != mongain)
 		o_mongain = info.monitor_gain = mongain;
 	if (o_port != port)
 		o_port = info.record.port = port;
-	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
+	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, (char *)&info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio_gain: %m");
 		return (rval);
@@ -455,7 +455,7 @@ audio_show(void)
 	printf("audio: name %s, version %s, config %s\n",
 	    device.name, device.version, device.config);
 # endif /* HAVE_SYS_AUDIOIO_H */
-	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
+	ioctl(ctl_fd, (int)AUDIO_GETINFO, (char *)&info);
 	printf(
 	    "audio: rate %d, chan %d, prec %d, code %d, gain %d, mon %d, port %d\n",
 	    info.record.sample_rate, info.record.channels,

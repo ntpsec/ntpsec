@@ -2610,7 +2610,9 @@ fast_xmit(
 	l_fp	xmt_ts;			/* timestamp */
 	l_fp	xmt_tx;			/* timestamp after authent */
 	int	sendlen, authlen;
+#ifdef OPENSSL
 	u_int32	temp32;
+#endif
 
 	/*
 	 * Initialize transmit packet header fields from the receive

@@ -305,7 +305,7 @@ main(
 		    (int) ntv.time.tv_sec, fdigits, (int) time_frac,
 		    ctime((const time_t *) &ntv.time.tv_sec));
 #if NTP_API > 3
-		printf(", TAI offset %d\n", ntv.tai);
+		printf(", TAI offset %ld\n", ntv.tai);
 #else
 		printf("\n");
 #endif /* NTP_API */

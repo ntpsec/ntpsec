@@ -228,7 +228,7 @@ hopfpci_poll(
 	else
 		pp->leap = LEAP_NOWARNING;
 
-	sprintf(pp->a_lastcode,"ST: %02X T: %02d:%02d:%02d.%03d D: %02d.%02d.%04d",
+	sprintf(pp->a_lastcode,"ST: %02X T: %02d:%02d:%02d.%03ld D: %02d.%02d.%04d",
 		m_time.wStatus, pp->hour, pp->minute, pp->second,
 		pp->nsec / 1000000, m_time.wDay, m_time.wMonth, m_time.wYear);
 	pp->lencode = strlen(pp->a_lastcode);
