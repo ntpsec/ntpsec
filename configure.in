@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99k20)
+AM_INIT_AUTOMAKE(ntp, 4.0.99k21)
 AC_PREREQ(2.49)
 
 ac_cv_var_oncore_ok=no
@@ -2287,13 +2287,16 @@ esac
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(for the level of crypto support)
-AC_ARG_WITH(crypto,	[  --with-crypto           + ={autokey,openssl,rsaref}],
+AC_ARG_WITH(crypto,
+	dnl	AC_HELP_STRING([--with-crypto], [+ ={autokey,openssl,rsaref}]),
+	AC_HELP_STRING([--with-crypto], [+ ={autokey,rsaref}]),
+
 [ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
  yes|rsaref|openssl)
     case "$ans" in
-     rsaref)
+     yes|rsaref) # Just "rsaref" when OpenSSL is ready
 	ans=no
 	;;
      *)

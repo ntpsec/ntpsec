@@ -34,7 +34,7 @@ dnl
 dnl    AC_DEFINE_DIR(DATADIR, datadir)
 dnl    AC_DEFINE_DIR(PROG_PATH, bindir, [Location of installed binaries])
 dnl
-dnl @version $Id: .del-aclocal.m4~3aed0663 1.40 2001/04/01 06:51:26-00:00 stenn@whimsy.udel.edu $
+dnl @version $Id: .del-aclocal.m4~3aed0663 1.41 2001/04/03 04:12:39-00:00 stenn@whimsy.udel.edu $
 dnl @author Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 
 AC_DEFUN(AC_DEFINE_DIR, [

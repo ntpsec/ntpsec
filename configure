@@ -789,7 +789,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-openssl-libdir   + =/something/reasonable
   --with-openssl-incdir   + =/something/reasonable
-  --with-crypto           + ={autokey,openssl,rsaref}
+	  --with-crypto           + ={autokey,rsaref}
   --with-electricfence    -
 
 Some influential environment variables:
@@ -1395,7 +1395,7 @@ fi
 
 # Define the identity of the package.
 PACKAGE=ntp
-VERSION=4.0.99k20
+VERSION=4.0.99k21
 
 cat >>confdefs.h <<EOF
 #define PACKAGE "$PACKAGE"
@@ -13359,7 +13359,7 @@ case "$ans" in
  no) ;;
  yes|rsaref|openssl)
     case "$ans" in
-     rsaref)
+     yes|rsaref) # Just "rsaref" when OpenSSL is ready
 	ans=no
 	;;
      *)
