@@ -96,6 +96,12 @@ typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
 #ifdef SYS_WINNT
 #define in6_addr in_addr6
 #else
+/*
+ * Don't include any additional IPv6 definitions
+ * We are defining our own here.
+ */
+#define ISC_IPV6_H 1
+
 struct in6_addr {
 	union {
 		u_int8_t   __u6_addr8[16];

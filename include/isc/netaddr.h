@@ -23,6 +23,9 @@
 #include <isc/lang.h>
 #include <isc/net.h>
 #include <isc/types.h>
+#include "ntp_rfc2553.h"
+
+
 
 ISC_LANG_BEGINDECLS
 
