@@ -1,4 +1,3 @@
-
 /*
  * refclock_atom - clock driver for 1-pps signals
  */
@@ -167,16 +166,11 @@ atom_start(
 	pp->unitptr = (caddr_t)up;
 
 	/*
-	 * Open PPS device. If this fails and some driver has already
-	 * opened the associated radio device, fdpps has the file
-	 * descriptor for it.
+	 * Open PPS device. This can be any serial or parallel port and
+	 * not necessarily the port used for the associated radio.
 	 */
 	sprintf(device, DEVICE, unit);
 	up->fddev = open(device, O_RDWR, 0777);
-	if (up->fddev <= 0 && fdpps > 0) {
-		strcpy(device, pps_device);
-		up->fddev = fdpps;
-	}
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: %s: %m", device);
@@ -184,9 +178,7 @@ atom_start(
 	}
 
 	/*
-	 * Light off the PPSAPI interface. If this PPS device is shared
-	 * with the radio device, take the default options from the pps
-	 * command. This is for legacy purposes.
+	 * Light off the PPSAPI interface.
 	 */
 	if (time_pps_create(up->fddev, &up->handle) < 0) {
 		msyslog(LOG_ERR,
@@ -335,21 +327,25 @@ atom_pps(
 	up = (struct ppsunit *)pp->unitptr;
 	if (up->handle == 0)
 		return (-1);
+
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
 	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
 	    &timeout) < 0)
 		return (-1);
+
 	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
 		if (pps_info.assert_sequence ==
 		    up->pps_info.assert_sequence)
 			return (1);
+
 		ts = up->pps_info.assert_timestamp;
 	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
 		if (pps_info.clear_sequence ==
 		    up->pps_info.clear_sequence)
 			return (1);
+
 		ts = up->pps_info.clear_timestamp;
 	} else {
 		return (-1);
@@ -401,6 +397,7 @@ pps_sample(
 	peer = pps_peer;
 	if (peer == 0)		/* nobody home */
 		return (1);
+
 	pp = peer->procptr;
 
 	/*
@@ -453,7 +450,7 @@ atom_poll(
 
 	/*
 	 * Valid time is returned only if the prefer peer has survived
-	 * the intersection algorithm and within clock_max of local time
+	 * the intersection algorithm and within 0.5 s of local time
 	 * and not too long ago. This ensures the PPS time is within
 	 * +-0.5 s of the local time and the seconds numbering is
 	 * unambiguous. Note that the leap bits are set no-warning on
@@ -462,6 +459,7 @@ atom_poll(
 	 */
 	if (peer->burst > 0)
 		return;
+
 	peer->leap = LEAP_NOTINSYNC;
 	if (pp->codeproc == pp->coderecv) {
 		refclock_report(peer, CEVNT_TIMEOUT);
@@ -473,7 +471,7 @@ atom_poll(
 		peer->burst = ASTAGE;
 		return;
 
-	} else if (fabs(sys_prefer->offset) > clock_max) {
+	} else if (fabs(sys_prefer->offset) > 0.5) {
 		pp->codeproc = pp->coderecv;
 		peer->burst = ASTAGE;
 		return;

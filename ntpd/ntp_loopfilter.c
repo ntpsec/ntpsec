@@ -477,8 +477,15 @@ local_clock(
 	 * DECstation 5000/240 and Alpha AXP, additional kernel
 	 * modifications provide a true microsecond clock and nanosecond
 	 * clock, respectively.
+	 *
+	 * Important note: The kernel discipline is used only if the
+	 * offset is less than 0.5 s, as anything higher can lead to
+	 * overflow problems. This might occur if some misguided lad set
+	 * the step threshold to something ridiculous. No problem; use
+	 * the ntp discipline until the residual offset sinks beneath
+	 * the waves.
 	 */
-	if (pll_control && kern_enable) {
+	if (pll_control && kern_enable && fabs(clock_offset) < .5) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
