@@ -586,7 +586,7 @@ case "$target" in
  *) AC_CHECK_FUNCS(mlockall)
     ;;
 esac
-AC_CHECK_FUNCS(nice nlist)
+AC_CHECK_FUNCS(mrand48 srand48 nice nlist)
 case "$target" in
  *-*-solaris2.6)
     # Broken...
@@ -595,7 +595,10 @@ case "$target" in
     ;;
 esac
 AC_CHECK_FUNCS(plock pututline pututxline rtprio)
-AC_CHECK_FUNCS(random srandom mrand48 srand48)
+case "$ac_cv_func_mrand48" in
+ yes) ;;
+ *) AC_REPLACE_FUNCS(random) ;;
+esac
 case "$target" in
  *-*-aix4*)
     # Just a stub in AIX 4.  Idiots.

@@ -124,7 +124,7 @@ ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h log.h
 
-EXTRA_DIST = README $(HEADERS) adjtimex.c log.c strerror.c mktime.c
+EXTRA_DIST = README $(HEADERS) adjtimex.c log.c strerror.c mktime.c random.c
 subdir = libntp
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -166,16 +166,16 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 GZIP_ENV = --best
 depcomp = $(SHELL) $(top_srcdir)/depcomp
-DEP_FILES =  @AMDEP@ $(DEPDIR)/a_md5encrypt$U.Po $(DEPDIR)/adjtime$U.Po \
-$(DEPDIR)/atoint$U.Po $(DEPDIR)/atolfp$U.Po $(DEPDIR)/atouint$U.Po \
-$(DEPDIR)/audio$U.Po $(DEPDIR)/authencrypt$U.Po $(DEPDIR)/authkeys$U.Po \
-$(DEPDIR)/authparity$U.Po $(DEPDIR)/authreadkeys$U.Po \
-$(DEPDIR)/authusekey$U.Po $(DEPDIR)/binio$U.Po $(DEPDIR)/buftvtots$U.Po \
-$(DEPDIR)/caljulian$U.Po $(DEPDIR)/calleapwhen$U.Po \
-$(DEPDIR)/caltontp$U.Po $(DEPDIR)/calyearstart$U.Po \
-$(DEPDIR)/clocktime$U.Po $(DEPDIR)/clocktypes$U.Po \
-$(DEPDIR)/decodenetnum$U.Po $(DEPDIR)/dofptoa$U.Po \
-$(DEPDIR)/dolfptoa$U.Po $(DEPDIR)/emalloc$U.Po \
+DEP_FILES =  @AMDEP@ $(DEPDIR)/*.Po $(DEPDIR)/a_md5encrypt$U.Po \
+$(DEPDIR)/adjtime$U.Po $(DEPDIR)/atoint$U.Po $(DEPDIR)/atolfp$U.Po \
+$(DEPDIR)/atouint$U.Po $(DEPDIR)/audio$U.Po $(DEPDIR)/authencrypt$U.Po \
+$(DEPDIR)/authkeys$U.Po $(DEPDIR)/authparity$U.Po \
+$(DEPDIR)/authreadkeys$U.Po $(DEPDIR)/authusekey$U.Po \
+$(DEPDIR)/binio$U.Po $(DEPDIR)/buftvtots$U.Po $(DEPDIR)/caljulian$U.Po \
+$(DEPDIR)/calleapwhen$U.Po $(DEPDIR)/caltontp$U.Po \
+$(DEPDIR)/calyearstart$U.Po $(DEPDIR)/clocktime$U.Po \
+$(DEPDIR)/clocktypes$U.Po $(DEPDIR)/decodenetnum$U.Po \
+$(DEPDIR)/dofptoa$U.Po $(DEPDIR)/dolfptoa$U.Po $(DEPDIR)/emalloc$U.Po \
 $(DEPDIR)/findconfig$U.Po $(DEPDIR)/fptoa$U.Po $(DEPDIR)/fptoms$U.Po \
 $(DEPDIR)/getopt$U.Po $(DEPDIR)/gpstolfp$U.Po $(DEPDIR)/hextoint$U.Po \
 $(DEPDIR)/hextolfp$U.Po $(DEPDIR)/humandate$U.Po $(DEPDIR)/icom$U.Po \
@@ -437,6 +437,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 
+@AMDEP@include $(DEPDIR)/*.Po
 @AMDEP@include $(DEPDIR)/a_md5encrypt$U.Po
 @AMDEP@include $(DEPDIR)/adjtime$U.Po
 @AMDEP@include $(DEPDIR)/atoint$U.Po

@@ -538,14 +538,11 @@ struct pkt {
  * is shifted by EVENT_TIMEOUT and added to the base value.
  */
 #if defined(HAVE_MRAND48)
-#define RANDOM		(mrand48())
-#define SRANDOM(x)	(srand48(x))
-#elif defined(HAVE_RANDOM)
-#define RANDOM		(random())
-#define SRANDOM(x)	(srandom(x))
+# define RANDOM		(mrand48())
+# define SRANDOM(x)	(srand48(x))
 #else
-#define RANDOM		(0)
-#define SRANDOM(x)	(0)
+# define RANDOM		(random())
+# define SRANDOM(x)	(srandom(x))
 #endif
 
 #define RANDPOLL(x)	((1 << (x)) - 1 + (RANDOM & 0x3))

@@ -645,9 +645,6 @@
 /* Define if you have the `srand48' function. */
 #undef HAVE_SRAND48
 
-/* Define if you have the `srandom' function. */
-#undef HAVE_SRANDOM
-
 /* Define if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 

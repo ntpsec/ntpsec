@@ -1,3 +1,15 @@
+2000-02-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_config.c (do_resolve_internal): Try Real Hard to
+	generate a full random key.
+	From: Carl Byington <carl@five-ten-sg.com>
+
+	* include/ntp.h: Now we know we have either mrand48() or random().
+	* configure.in: If we have mrand48, use it.  Otherwise, use (and
+	provide if necessary) random().
+	* libntp/Makefile.am (EXTRA_DIST): random.c
+	* libntp/random.c: Added.
+
 2000-02-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* librsaref/Makefile.am (stamp-rsaref): Typo

@@ -2262,7 +2262,7 @@ do_resolve_internal(void)
 	if (res_fp == NULL) {
 		/* belch */
 		msyslog(LOG_ERR,
-			"internal error in do_resolve_internal: res_fp == NULL");
+			"do_resolve_internal: Fatal: res_fp == NULL");
 		exit(1);
 	}
 
@@ -2279,12 +2279,21 @@ do_resolve_internal(void)
 
 	/* if doesn't exist, make up one at random */
 	if (!authhavekey(req_keyid)) {
-		char rankey[8];
+		char rankey[9];
+		int j;
 
 		for (i = 0; i < 8; i++)
-			rankey[i] = RANDOM & 0xff;
+			for (j = 1; j < 100; ++j) {
+				rankey[i] = RANDOM & 0xff;
+				if (rankey[i] != 0) break;
+			}
+		rankey[8] = 0;
 		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
 		authtrust(req_keyid, 1);
+		if (!authhavekey(req_keyid)) {
+			msyslog(LOG_ERR, "do_resolve_internal: Couldn't generate a valid random key!");
+			/* HMS: Should this be fatal? */
+		}
 	}
 
 	/* save keyid so we will accept config requests with it */
