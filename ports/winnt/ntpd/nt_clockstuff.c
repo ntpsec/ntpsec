@@ -3,6 +3,15 @@
  *
  * Revision History:
  * $Log: <Not implemented> $
+ * Revision 1.9  2000/11/19 09:02:12  dietrich
+ * From: Ron Thornton [rthornto@pictel.com]
+ * Sent: Thu 11/16/00 8:51 AM
+ * On Windows 2000 it requires a privilege on the current process token
+ * that is disabled by default on Windows 2000.
+ *
+ * I set the token by adding the following code at the beginning of the
+ * init_winnt_time() function in nt_clockstuff.c.
+ *
  * Revision 1.8  2000/11/19 08:03:20  dietrich
  * From: "Colin Dancer" <colin.dancer@pyrochrome.net>
  * To: <bugs@ntp.org>
@@ -133,12 +142,41 @@ adj_systime(
 
 void init_winnt_time(void) {
 	BOOL noslew;
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tkp;
+	/*
+	 * Get privileges needed for fiddling with the clock
+	  */
 
-		/* Reset the Clock to a reasonable increment */
-	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every, &noslew))	{
+	  /* get the current process token handle */
+	if (!OpenProcessToken(GetCurrentProcess(),
+	  TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
+		  msyslog(LOG_ERR, "OpenProcessToken failed: %m");
+		  exit(-1);
+		  }
+	  /* get the LUID for system-time privilege. */
+	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
+	tkp.PrivilegeCount = 1;  /* one privilege to set */
+	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+	/* get set-time privilege for this process. */
+	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,
+	 	(PTOKEN_PRIVILEGES) NULL, 0);
+
+	/* cannot use return value of AdjustTokenPrivileges. */
+	/* (success does not indicate all privileges were set) */
+	if (GetLastError() != ERROR_SUCCESS) 
+		{
+	  	msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
+	 	/* later set time call will probably fail */
+	  	}
+
+	/* Reset the Clock to a reasonable increment */
+	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every,&noslew))
+		{
 		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
 		exit (-1);
-	}
+		}
 
 	units_per_tick = initial_units_per_tick;
 
