@@ -208,9 +208,6 @@ void init_winnt_time(void) {
 void reset_winnt_time(void) {
 
 	/* restore the clock frequency back to its original value */
-	if (!SetSystemTimeAdjustment(initial_units_per_tick, FALSE)) {
-		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
-	}
 	if (!SetSystemTimeAdjustment(0, TRUE)) {
 		msyslog(LOG_ERR, "Failed to reset clock state, SetSystemTimeAdjustment(): %m");
 	}
