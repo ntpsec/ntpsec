@@ -182,7 +182,9 @@ transmit(
 				if (peer->unreach < NTP_UNREACH) {
 					peer->unreach++;
 					if (peer->flags & FLAG_IBURST &&
-					    !(peer->flash & TEST5))
+					    !(peer->flash & TEST5) &&
+					    !memcmp(&peer->refid, "INIT",
+					    4))
 						peer->burst = NTP_BURST;
 				} else if (!(peer->flags &
 				    FLAG_CONFIG)) {
@@ -221,29 +223,22 @@ transmit(
 						hpoll = peer->maxpoll;
 					else if (hpoll < peer->minpoll)
 						hpoll = peer->minpoll;
-					if (peer->flags & FLAG_BURST)
+					if (peer->flags & FLAG_BURST &&
+					    !memcmp(&peer->refid, "INIT",
+					    4))
 						peer->burst = NTP_BURST;
 				}
 			}
 		} else {
+			peer->burst--;
 
 			/*
-			 * Call-gap control. If we are restrained, each
-			 * burst consists of only one packet.
+			 * If a broadcast client at this point, the burst
+			 * has concluded, so we switch to client mode and
+			 * purge the keylist, since no further
+			 * transmissions will be made.
 			 */
-			if (memcmp(&peer->refid, "RSTR", 4) == 0)
-				peer->burst = 0;
-			else
-				peer->burst--;
 			if (peer->burst == 0) {
-
-				/*
-				 * If a broadcast client at this point,
-				 * the burst has concluded, so we switch
-				 * to client mode and purge the keylist,
-				 * since no further transmissions will
-				 * be made.
-				 */
 				if (peer->cast_flags & MDF_BCLNT) {
 					peer->hmode = MODE_BCLIENT;
 #ifdef OPENSSL
@@ -621,6 +616,16 @@ receive(
 	}
 
 	/*
+	 * If access control specifically rejects packets which are not
+	 * cryptographically authenticated or not authenticated at all,
+	 * drop those buggers here.
+	 */
+	if (restrict_mask & RES_DONTTRUST) {
+		sys_restricted++;
+		return;
+	}
+
+	/*
 	 * The association matching rules are implemented by a set of
 	 * routines and a table in ntp_peer.c. A packet matching an
 	 * association is processed by that association. If not and
@@ -698,10 +703,6 @@ receive(
 		 * immediately. If the guy is already here, don't fire
 		 * up a duplicate.
 		 */
-		if (restrict_mask & RES_DONTTRUST) {
-			sys_restricted++;
-			return;			/* no trust */
-		}
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
@@ -729,10 +730,6 @@ receive(
 		 * If authentication fails send a crypto-NAK; otherwise,
 		 * kiss the frog.
 		 */
-		if (restrict_mask & RES_DONTTRUST) {
-			sys_restricted++;
-			return;			/* no trust */
-		}
 		if (sys_authenticate && !is_authentic) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0,
 			    restrict_mask);
@@ -755,10 +752,6 @@ receive(
 		 * mobilize a broadcast client association. We don't
 		 * kiss any frogs here.
 		 */
-		if (restrict_mask & RES_DONTTRUST) {
-			sys_restricted++;
-			return;			/* no trust */
-		}
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
@@ -826,8 +819,7 @@ receive(
 		 * Seattle. If not authentic, leave a light on and
 		 * continue.
 		 */
-		if (restrict_mask & RES_DONTTRUST) {
-			sys_restricted++;
+ 		if (has_mac && !is_authentic) {
 			if (peer->flags & FLAG_CONFIG)
 				peer_clear(peer, "RSTR");
 			else
@@ -1536,7 +1528,7 @@ peer_clear(
 	char	*ident			/* tally lights */
 	)
 {
-	u_char	oreach, i;
+	u_char	i;
 
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1547,7 +1539,6 @@ peer_clear(
 	 * purged, too. This makes it much harder to sneak in some
 	 * unauthenticated data in the clock filter.
 	 */
-	oreach = peer->reach;
 #ifdef OPENSSL
 	key_expire(peer);
 	if (peer->pkey != NULL)
@@ -1606,7 +1597,7 @@ peer_clear(
 	 * intervals.
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
-	if (oreach)
+	if (strcmp(ident, "INIT"))
 		poll_update(peer, peer->minpoll);
 	else if (initializing)
 		peer->nextdate = current_time + peer_associations;
