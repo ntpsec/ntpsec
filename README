@@ -47,9 +47,6 @@ Makefile.am	Automake file configuration file. Edit only if you have the
 
 Makefile.in	Autoconf make file template for Unix.
 
-acconfig.h	Autoconf template header file. Edit only if you
-		have the GNU automake and autoconf utilities installed.
-
 adjtimed        Directory containing the sources for the adjtime daemon
 		for HP/UX systems prior to HP-UX 10.0.
 
