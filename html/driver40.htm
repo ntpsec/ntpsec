@@ -26,44 +26,79 @@ Japan.</p>
 <p>Tristate Ltd. JJY01 <a href=
 "http://www.tristate.ne.jp/rf-clock.htm">
 http://www.tristate.ne.jp/rf-clock.htm</a> (Japanese only)<br>
-Time code format<br>
 </p>
+
+<dl>
+
+<dt>Time code format</dt>
+<dd>
+<br>
 
 <table>
 <tr>
 <td>Command</td>
+<td>&nbsp;</td>
 <td>Reply</td>
 </tr>
 
 <tr>
 <td><tt>date&lt;CR&gt;&lt;LF&gt;</tt></td>
+<td>&nbsp;</td>
 <td><tt>YYYY/MM/DD WWW&lt;CR&gt;&lt;LF&gt;</tt></td>
 </tr>
 
 <tr>
 <td><tt>stim&lt;CR&gt;&lt;LF&gt;</tt></td>
+<td>&nbsp;</td>
 <td><tt>HH:MM:SS&lt;CR&gt;&lt;LF&gt;</tt></td>
 </tr>
 </table>
+
+<br>
+</dd>
+
+<dt>NTP configuration ( ntp.conf )</dt>
+<dd>
+<p>server 127.127.40.X mode 1</p>
+</dd>
+
+</dl>
 </li>
 
 <li>
 <p>C-DEX Co.,Ltd. JST2000 <a href="http://www.c-dex.co.jp/">
 http://www.c-dex.co.jp/</a> (Japanese only)<br>
-Time code format<br>
 </p>
+
+<dl>
+
+<dt>Time code format</dt>
+<dd>
+<br>
 
 <table>
 <tr>
 <td>Command</td>
+<td>&nbsp;</td>
 <td>Reply</td>
 </tr>
 
 <tr>
 <td><tt>&lt;ENQ&gt;1J&lt;ETX&gt;</tt></td>
+<td>&nbsp;</td>
 <td><tt>&lt;STX&gt;JYYMMDD HHMMSSS&lt;ETX&gt;</tt></td>
 </tr>
 </table>
+
+<br>
+</dd>
+
+<dt>NTP configuration ( ntp.conf )</dt>
+<dd>
+<p>server 127.127.40.X mode 2</p>
+</dd>
+
+</dl>
 </li>
 </ul>
 
@@ -72,8 +107,8 @@ Standard Time) in long wave radio. The station JJY is operated by
 the Communication Research Laboratory. An operating announcement
 and some information are avaiable from <a href=
 "http://www.crl.go.jp/">http://www.crl.go.jp/</a> (English and
-Japanese)<a href="http://jjy.crl.go.jp/">http://jjy.crl.go.jp/</a>
-(Written in Japanese only</p>
+Japanese) and <a href="http://jjy.crl.go.jp/">http://jjy.crl.go.jp/</a>
+(Written in Japanese only)</p>
 
 <p>The user is expected to provide a symbolic link to an available
 serial port device. This is typically performed by a command such
