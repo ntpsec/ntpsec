@@ -55,6 +55,7 @@
 #define CONFIG_CRYPTO		34
 #define CONFIG_KEYSDIR		35
 #endif /* PUBKEY */
+#define CONFIG_INCLUDEFILE	36
 
 /*
  * "peer", "server", "broadcast" modifier keywords

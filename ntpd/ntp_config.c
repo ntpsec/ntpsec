@@ -114,6 +114,7 @@ static	struct keyword keywords[] = {
 	{ "enable",		CONFIG_ENABLE },
 	{ "filegen",		CONFIG_FILEGEN },
 	{ "fudge",		CONFIG_FUDGE },
+	{ "includefile",	CONFIG_INCLUDEFILE },
 	{ "keys",		CONFIG_KEYS },
 #ifdef PUBKEY
 	{ "keysdir",		CONFIG_KEYSDIR },
@@ -326,6 +327,7 @@ static struct masks logcfg_item[] = {
 #define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	5	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
+#define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
 /*
  * Miscellaneous macros
@@ -499,7 +501,9 @@ getconfig(
 	int hmode;
 	struct sockaddr_in peeraddr;
 	struct sockaddr_in maskaddr;
-	FILE *fp;
+	FILE *fp[MAXINCLUDELEVEL+1];
+	FILE *includefile;
+	int includelevel = 0;
 	char line[MAXLINE];
 	char *(tokens[MAXTOKENS]);
 	int ntokens;
@@ -556,7 +560,7 @@ getconfig(
 	getCmdOpts(argc, argv);
 
 	if (
-	    (fp = fopen(FindConfig(config_file), "r")) == NULL
+	    (fp[0] = fopen(FindConfig(config_file), "r")) == NULL
 #ifdef HAVE_NETINFO
 	    /* If there is no config_file, try NetInfo. */
 	    && check_netinfo && !(config_netinfo = get_netinfo_config())
@@ -567,7 +571,7 @@ getconfig(
 #ifdef SYS_WINNT
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
 
-		if ((fp = fopen(FindConfig(alt_config_file), "r")) == NULL) {
+		if ((fp[0] = fopen(FindConfig(alt_config_file), "r")) == NULL) {
 
 			/*
 			 * Broadcast clients can sometimes run without
@@ -584,14 +588,21 @@ getconfig(
 	}
 
 	for (;;) {
-		if (fp)
-			tok = gettokens(fp, line, tokens, &ntokens);
+		if (fp[includelevel])
+			tok = gettokens(fp[includelevel], line, tokens, &ntokens);
 #ifdef HAVE_NETINFO
 		else
 			tok = gettokens_netinfo(config_netinfo, tokens, &ntokens);
 #endif /* HAVE_NETINFO */
 
-		if (tok == CONFIG_UNKNOWN) break;
+		if (tok == CONFIG_UNKNOWN) {
+		    if (includelevel > 0) {
+			fclose(fp[includelevel--]);
+			continue;
+		    } else {
+			break;
+		    }
+		}
 
 		switch(tok) {
 		    case CONFIG_PEER:
@@ -816,6 +827,25 @@ getconfig(
 			    stats_config(STATS_PID_FILE, tokens[1]);
 			else
 			    stats_config(STATS_PID_FILE, (char *)0);
+			break;
+
+		    case CONFIG_INCLUDEFILE:
+			if (ntokens < 2) {
+			    msyslog(LOG_ERR, "includefile needs one argument");
+			    break;
+			}
+			if (includelevel >= MAXINCLUDELEVEL) {
+			    fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
+			    msyslog(LOG_INFO, "getconfig: Maximum include file level exceeded.");
+			    break;
+			}
+			includefile = fopen(FindConfig(tokens[1]), "r");
+			if (includefile == NULL) {
+			    fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(tokens[1]));
+			    msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(tokens[1]));
+			    break;
+			}
+			fp[++includelevel] = includefile;
 			break;
 
 		    case CONFIG_LOGFILE:
@@ -1626,8 +1656,8 @@ getconfig(
 			break;
 		}
 	}
-	if (fp)
-		(void)fclose(fp);
+	if (fp[0])
+		(void)fclose(fp[0]);
 
 #ifdef HAVE_NETINFO
 	if (config_netinfo)
