@@ -1477,7 +1477,8 @@ ctl_putpeer(
 
 	case CP_REFID:
 		if (peer->flags & FLAG_REFCLOCK) {
-			if (peer->stratum > 0)
+			if (peer->stratum > 0 && peer->stratum <
+			    STRATUM_UNSPEC)
 				ctl_putadr(peer_var[CP_REFID].text,
 				    peer->refid, NULL);
 			else

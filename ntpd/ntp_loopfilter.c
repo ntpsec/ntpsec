@@ -186,6 +186,9 @@ init_loopfilter(void)
 /*
  * local_clock - the NTP logical clock loop filter. Returns 1 if the
  * clock was stepped, 0 if it was slewed and -1 if it is hopeless.
+ *
+ * LOCKCLOCK: The only thing this routine does is set the
+ * sys_rootdispersion variable equal to the peer dispersion.
  */
 int
 local_clock(
@@ -212,6 +215,11 @@ local_clock(
 		    "local_clock: assocID %d offset %.6f jitter %.6f state %d\n",
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
+#ifdef LOCKCLOCK
+	sys_rootdispersion = peer->rootdispersion;
+		return (0);
+
+#else /* LOCKCLOCK */
 	if (!ntp_enable) {
 		record_loop_stats(fp_offset, drift_comp, SQRT(epsil),
 		    clock_stability, sys_poll);
@@ -474,7 +482,7 @@ local_clock(
 		}
 	}
 
-#if defined(KERNEL_PLL)
+#ifdef KERNEL_PLL
 	/*
 	 * This code segment works when clock adjustments are made using
 	 * precision time kernel support and the ntp_adjtime() system
@@ -673,11 +681,15 @@ local_clock(
 		    tc_counter);
 #endif /* DEBUG */
 	return (retval);
+#endif /* LOCKCLOCK */
 }
 
 
 /*
  * adj_host_clock - Called once every second to update the local clock.
+ *
+ * LOCKCLOCK: The only thing this routine does is increment the
+ * sys_rootdispersion variable.
  */
 void
 adj_host_clock(
@@ -699,6 +711,7 @@ adj_host_clock(
 	 */
 	sys_rootdispersion += clock_phi;
 
+#ifndef LOCKCLOCK
 	/*
 	 * Declare PPS kernel unsync if the pps signal has not been
 	 * heard for a few minutes.
@@ -743,6 +756,7 @@ adj_host_clock(
 	adjustment = clock_offset / (CLOCK_PLL * pow(2, dtemp));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
+#endif /* LOCKCLOCK */
 }
 
 
@@ -791,6 +805,8 @@ huffpuff()
 
 /*
  * loop_config - configure the loop filter
+ *
+ * LOCKCLOCK: The LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
  */
 void
 loop_config(
@@ -804,6 +820,7 @@ loop_config(
 
 	case LOOP_DRIFTINIT:
 
+#ifndef LOCKCLOCK
 #ifdef KERNEL_PLL
 		/*
 		 * Assume the kernel supports the ntp_adjtime() syscall.
@@ -869,10 +886,12 @@ loop_config(
 			    pll_status);
 		}
 #endif /* KERNEL_PLL */
+#endif /* LOCKCLOCK */
 		break;
 
 	case LOOP_DRIFTCOMP:
 
+#ifndef LOCKCLOCK
 		/*
 		 * If the frequency value is reasonable, set the initial
 		 * frequency to the given value and the state to S_FSET.
@@ -907,6 +926,7 @@ loop_config(
 			(void)ntp_adjtime(&ntv);
 		}
 #endif /* KERNEL_PLL */
+#endif LOCKCLOCK
 		break;
 
 	/*
