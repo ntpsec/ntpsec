@@ -1,5 +1,7 @@
 2001-04-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99k27
+
 	* ntpd/ntp_loopfilter.c (local_clock): Check clock_panic > 0.
 	Check clock_max > 0.
 	* html/ntpd.htm: Cleanup.
