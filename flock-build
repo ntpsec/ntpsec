@@ -1,5 +1,7 @@
 #! /bin/sh
 
+BUILD_ARGS="$@"
+
 #  bridgeport      sparc-sun-solaris2.6
 #  bunnylou        alpha-dec-osf4.0
 #  churchy         alpha-dec-osf4.0
@@ -24,5 +26,5 @@ for i in  churchy hepzibah pogo porkypine snavely
 do
     echo $i
     # Perhaps we should call build with --enable-parse-clocks
-    ssh $i "cd $c_d ; ./build" &
+    ssh $i "cd $c_d ; ./build $BUILD_ARGS" &
 done
