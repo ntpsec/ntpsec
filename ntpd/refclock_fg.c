@@ -211,12 +211,11 @@ fg_receive(
 	 * sometime you can find it with some offset.
 	 */
 
-	bpt=rbufp->recv_space.X_recv_buffer;
+	bpt = (char *)rbufp->recv_space.X_recv_buffer;
 	while(*bpt != '')
 		bpt++;
 
       	memcpy(buf, bpt, LENFG);
-
 
 #define BP2(x) ( buf[x] & 15 )
 #define BP1(x) (( buf[x] & 240 ) >> 4)
@@ -251,7 +250,6 @@ fg_receive(
                          pp->year, pp->day, pp->hour, pp->minute, pp->second);
 #endif
 
-
         if (peer->stratum <= 1)
                 peer->refid = pp->refid;
         pp->disp =  (10e-6);
@@ -264,6 +262,7 @@ fg_receive(
         if (!refclock_process(pp))
                 refclock_report(peer, CEVNT_BADTIME);
         
+	return;
 }
 
 

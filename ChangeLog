@@ -1,5 +1,8 @@
 2000-01-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_fg.c (fg_receive): Cast.
+	From: Tom Smith <smith@cag.lkg.dec.com>
+
 	* ntpd/map_vme.c (map_vme): tx.access_result indicates failure on
 	< 0, not <= 0.  A fix that apparently did not get brought over
 	from the ntp3 base.
