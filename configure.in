@@ -226,6 +226,9 @@ AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
 AC_CHECK_FUNC(openlog, , 
   AC_CHECK_LIB(gen, openlog, , 
   AC_CHECK_LIB(syslog, openlog, , , -lsocket)))
+AC_CHECK_LIB(md5, MD5Init, , 
+  AC_CHECK_LIB(md, MD5Init))
+AC_CHECK_FUNCS(MD5Init)
 dnl HMS: What a hack...
 AC_CHECK_HEADERS(readline/history.h readline/readline.h)
 case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
@@ -258,8 +261,9 @@ esac
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
-AC_CHECK_HEADERS(poll.h)
+AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h)
+AC_CHECK_HEADERS(md5.h)
+AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h)
 case "$host" in

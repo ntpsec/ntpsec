@@ -33,4 +33,3 @@ noinst_HEADERS = lib_strbuf.h log.h
 
 EXTRA_DIST = README
 
-

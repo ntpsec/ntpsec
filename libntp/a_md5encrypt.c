@@ -26,7 +26,7 @@
 #include "ntp_stdlib.h"
 #include "ntp.h"
 #include "global.h"
-#include "rsa_md5.h"
+#include "ntp_md5.h"
 
 /*
  * MD5authencrypt - generate MD5 message authenticator
@@ -40,7 +40,7 @@ MD5authencrypt(
 	int length		/* packet length */
 	)
 {
-	ntp_MD5_CTX md5;
+	MD5_CTX md5;
 	u_char digest[16];
 
 	/*
@@ -68,7 +68,7 @@ MD5authdecrypt(
 	int size		/* MAC size */
 	)
 {
-	ntp_MD5_CTX md5;
+	MD5_CTX md5;
 	u_char digest[16];
 
 	/*
@@ -91,7 +91,7 @@ MD5authdecrypt(
 u_int32
 addr2refid(struct sockaddr_storage *addr)
 {
-	ntp_MD5_CTX md5;
+	MD5_CTX md5;
 	u_char digest[16];
 	u_int32 addr_refid;
 

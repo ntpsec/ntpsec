@@ -34,6 +34,7 @@ noinst_HEADERS = \
 	ntp_io.h \
 	ntp_machine.h \
 	ntp_malloc.h \
+	ntp_md5.h \
 	ntp_proto.h \
 	ntp_refclock.h \
 	ntp_request.h \

@@ -24,7 +24,8 @@
  */
 
 #include "global.h"
-#include "rsa_md5.h"
+#ifndef HAVE_MD5INIT
+#include "ntp_md5.h"
 
 /* Constants for MD5Transform routine.
  */
@@ -98,7 +99,7 @@ static unsigned char PADDING[64] = {
  */
 void
 MD5Init(
-	ntp_MD5_CTX *context                             /* context */
+	MD5_CTX *context                             /* context */
 	)
 {
   context->count[0] = context->count[1] = 0;
@@ -117,7 +118,7 @@ MD5Init(
  */
 void
 MD5Update (
-	ntp_MD5_CTX *context,                               /* context */
+	MD5_CTX *context,                               /* context */
 	unsigned char *input,                       /* input block */
 	unsigned int inputLen             /* length of input block */
 	)
@@ -162,7 +163,7 @@ MD5Update (
 void
 MD5Final (
 	unsigned char digest[16],                /* message digest */
-	ntp_MD5_CTX *context                                /* context */
+	MD5_CTX *context                                /* context */
 	)
 {
   unsigned char bits[8];
@@ -348,3 +349,6 @@ MD5_memset (
   for (i = 0; i < len; i++)
     ((char *)output)[i] = (char)value;
 }
+#else
+int md5_bs;
+#endif
