@@ -440,9 +440,9 @@ unpeer(
 		    peer_associations);
 #endif
 	peer_clear(peer_to_remove);
+#ifdef PUBKEY
 	if (peer_to_remove->keystr != NULL)
 		free(peer_to_remove->keystr);
-#ifdef PUBKEY
 	if (peer_to_remove->pubkey != NULL)
 		free(peer_to_remove->pubkey);
 #endif /* PUBKEY */
