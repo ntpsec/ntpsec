@@ -98,7 +98,8 @@ VERSION = @VERSION@
 
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
-bin_PROGRAMS = ntpdate
+bin_PROGRAMS = ntpdate ntptimeset
+ntptimeset_SOURCES = ntptimeset.c ntptime_config.c
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD = version.o ../libntp/libntp.a @LIBRSAREF@
@@ -122,10 +123,15 @@ ntpdate_OBJECTS =  ntpdate$U.o
 ntpdate_LDADD = $(LDADD)
 ntpdate_DEPENDENCIES =  version.o ../libntp/libntp.a
 ntpdate_LDFLAGS = 
+am_ntptimeset_OBJECTS =  ntptimeset$U.o ntptime_config$U.o
+ntptimeset_OBJECTS =  $(am_ntptimeset_OBJECTS)
+ntptimeset_LDADD = $(LDADD)
+ntptimeset_DEPENDENCIES =  version.o ../libntp/libntp.a
+ntptimeset_LDFLAGS = 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES =  ntpdate.c
+DIST_SOURCES =  ntpdate.c $(ntptimeset_SOURCES)
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  README $(noinst_HEADERS) Makefile.am Makefile.in
@@ -134,9 +140,9 @@ DIST_COMMON =  README $(noinst_HEADERS) Makefile.am Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 GZIP_ENV = --best
-DEP_FILES =  .deps/ntpdate.P
-SOURCES = ntpdate.c
-OBJECTS = ntpdate$U.o
+DEP_FILES =  .deps/ntpdate.P .deps/ntptime_config.P .deps/ntptimeset.P
+SOURCES = ntpdate.c $(ntptimeset_SOURCES)
+OBJECTS = ntpdate$U.o $(am_ntptimeset_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -206,9 +212,19 @@ ntpdate$U.o:
 ntpdate: $(ntpdate_OBJECTS) $(ntpdate_DEPENDENCIES)
 	@rm -f ntpdate
 	$(LINK) $(ntpdate_LDFLAGS) $(ntpdate_OBJECTS) $(ntpdate_LDADD) $(LIBS)
+ntptimeset$U.o:
+ntptime_config$U.o:
+
+ntptimeset: $(ntptimeset_OBJECTS) $(ntptimeset_DEPENDENCIES)
+	@rm -f ntptimeset
+	$(LINK) $(ntptimeset_LDFLAGS) $(ntptimeset_OBJECTS) $(ntptimeset_LDADD) $(LIBS)
 ntpdate_.c: ntpdate.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpdate.c; then echo $(srcdir)/ntpdate.c; else echo ntpdate.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpdate_.c
-ntpdate_.o : $(ANSI2KNR)
+ntptime_config_.c: ntptime_config.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntptime_config.c; then echo $(srcdir)/ntptime_config.c; else echo ntptime_config.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntptime_config_.c
+ntptimeset_.c: ntptimeset.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntptimeset.c; then echo $(srcdir)/ntptimeset.c; else echo ntptimeset.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntptimeset_.c
+ntpdate_.o ntptime_config_.o ntptimeset_.o : $(ANSI2KNR)
 
 tags: TAGS
 

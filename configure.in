@@ -767,6 +767,7 @@ case "$target" in
     AC_DEFINE(DECL_SIGVEC_0)
     case "`basename $ac_cv_prog_CC`" in
      acc*) ;;
+     gcc*) ;;
      *) AC_DEFINE(DECL_STDIO_0)
 	;;
     esac

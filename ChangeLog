@@ -1,5 +1,17 @@
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp_stdlib.h: NeXT portability patch
+	From: Jack Bryans <jbryans@csulb.edu>
+
+	* configure.in:
+	* dot.emacs: (cleanup)
+	* ntpdate/Makefile.am:
+	* ntpdate/ntpdate.h:
+	* ntpdate/ntptime_config.c:
+	* ntpdate/ntptimeset.c:
+	ntptimeset patches.
+	From: Jeffrey Hutzelman <jhutz@cmu.edu>
+	
 	* ntpd/refclock_parse.c (local_input): ts.l_ui -> ts.fp.l_ui
 
 1999-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>

@@ -1,3 +1,5 @@
+* NeXT portability
+* ntptimeset utility added
 * cygwin portability patches
 (4.0.96)
 * -lnsl, -lsocket, -lgen configuration patches
