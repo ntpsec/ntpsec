@@ -2510,7 +2510,12 @@ case "$ans" in
  *) # Look for libcrypto.a and libssl.a:
     for i in $ans no
     do
-	test -f $i/libcrypto.a -a -f $i/libssl.a && break
+	case "$host" in
+	 *-*-darwin*)
+	    test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
+	 *)
+	    test -f $i/libcrypto.a -a -f $i/libssl.a && break
+	    ;;
     done
     case "$i" in
      no)
