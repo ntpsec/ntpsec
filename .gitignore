@@ -61,3 +61,8 @@ scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
 version
+ChangeLog.new
+arlib/depcomp
+arlib/install-sh
+arlib/missing
+arlib/mkinstalldirs
