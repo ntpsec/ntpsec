@@ -2167,6 +2167,12 @@ findinterface(
 	if (rtn == SOCKET_ERROR)
 #endif
 	{
+#ifdef DEBUG
+		if (debug > 2)
+		{
+			msyslog(LOG_ERR, "Failed to connect to remote address, error: %m");
+		}
+#endif
 		closesocket(s);
 		return ANY_INTERFACE_CHOOSE(addr);
 	}
