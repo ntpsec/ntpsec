@@ -61,6 +61,7 @@ $(srcdir)/COPYRIGHT: html/copyright.htm
 
 dist-hook:
 	@find $(distdir) -type d -name CVS -print | xargs rm -rf
+	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 
 Makefile: .warning
 
