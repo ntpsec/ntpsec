@@ -1,5 +1,8 @@
 2001-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* config.sub (Repository): Updated.
+	* config.guess (Repository): Updated.
+
 	* ntpd/ntp_loopfilter.c (local_clock): Just use sys_jitter in the
 	calculation for rootdispersion.
 	From Dave Mills.
