@@ -1,5 +1,8 @@
 2000-03-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_crypto.c (crypto_line): Fix definition
+	(crypto_read): Ditto.
+
 	* ntpd/ntp_config.c (getconfig): Move req_keyid generation here.
 
 	* librsaref/Makefile.am (BUILT_SOURCES): Cleanup more nodist_ stuff.

@@ -706,7 +706,7 @@ crypto_xmit(
 /*
  * crypto_read - read RSA key, decode and check for errors
  */
-int
+static int
 crypto_read(
 	u_char *cp,		/* file name */
 	u_char *key,		/* key pointer */
@@ -839,7 +839,7 @@ crypto_public(
  * generator. Be very parannoyed here if every little thing is not
  * exactly right.
  */
-void
+static void
 crypto_line(
 	FILE *str,		/* file handle */
 	u_char **key,		/* decoded string pointer */
