@@ -776,7 +776,7 @@ peer_list_sum(
 				ips->delay = HTONS_FP(DTOFP(pp->delay));
 				DTOLFP(pp->offset, &ltmp);
 				HTONL_FP(&ltmp, &ips->offset);
-				ips->dispersion = HTONS_FP(DTOUFP(pp->disp));
+				ips->dispersion = HTONS_FP(DTOUFP(SQRT(pp->disp)));
 			}	
 			pp = pp->next; 
 			ips = (struct info_peer_summary *)more_pkt();
