@@ -99,7 +99,7 @@ typedef char s_char;
 /*
  * Poll interval parameters
  */
-#define NTP_UNREACH	16	/* poll interval backoff count */
+#define NTP_UNREACH	12	/* poll unreach threshold */
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
@@ -205,13 +205,13 @@ struct interface {
 #define TEST2		0x0002	/* bogus packet received */
 #define TEST3		0x0004	/* protocol unsynchronized */
 #define TEST4		0x0008	/* access denied */
-#define TEST5		0x0010	/* authentication failed */
+#define TEST5		0x0010	/* MAC error */
 #define TEST6		0x0020	/* peer clock unsynchronized */
 #define TEST7		0x0040	/* peer stratum out of bounds */
 #define TEST8		0x0080  /* root delay/dispersion bounds check */
 #define TEST9		0x0100	/* peer delay/dispersion bounds check */
-#define TEST10		0x0200	/* autokey failed */
-#define	TEST11		0x0400	/* proventic not confirmed */
+#define TEST10		0x0200	/* autokey error */
+#define	TEST11		0x0400	/* protocol error */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -230,7 +230,6 @@ struct peer {
 	u_char	kpoll;		/* last poll interval */
 	u_char	minpoll;	/* min poll interval */
 	u_char	maxpoll;	/* max poll interval */
-	u_char	burst;		/* packets remaining in burst */
 	u_int	flags;		/* association flags */
 	u_char	cast_flags;	/* additional flags */
 	u_int	flash;		/* protocol error test tally bits */
@@ -241,10 +240,12 @@ struct peer {
 	/*
 	 * Variables used by reference clock support
 	 */
+#ifdef REFCLOCK
 	struct refclockproc *procptr; /* refclock structure pointer */
 	u_char	refclktype;	/* reference clock type */
 	u_char	refclkunit;	/* reference clock unit number */
 	u_char	sstclktype;	/* clock type for system status word */
+#endif /* REFCLOCK */
 
 	/*
 	 * Variables set by received packet
@@ -297,6 +298,7 @@ struct peer {
 	u_char	status;		/* peer status */
 	u_char	reach;		/* reachability register */
 	u_long	epoch;		/* reference epoch */
+	u_int	burst;		/* packets remaining in burst */
 	u_short	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
