@@ -36,17 +36,15 @@
  * others as well...
  */
 #ifndef FNDELAY
-# ifndef O_NONBLOCK
-#  error Both FNDELAY and O_NONBLOCK are undefined on this system
+# ifdef O_NONBLOCK
+#  define FNDELAY O_NONBLOCK
 # endif
-# define FNDELAY O_NONBLOCK
 #endif
 
 #ifndef FASYNC
-# ifndef O_ASYNC
-#  error Both FASYNC and O_ASYNC are undefined on this system
+# ifdef O_ASYNC
+#  define FASYNC O_ASYNC
 # endif
-# define FASYNC O_ASYNC
 #endif
 
 #endif
