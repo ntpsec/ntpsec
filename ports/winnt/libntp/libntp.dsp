@@ -306,7 +306,15 @@ SOURCE=..\libisc\net.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libisc\netaddr.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\netof.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libisc\netscope.c
 # End Source File
 # Begin Source File
 
@@ -351,6 +359,10 @@ SOURCE=..\..\..\libntp\refnumtoa.c
 # Begin Source File
 
 SOURCE=.\SetSystemTime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libisc\sockaddr.c
 # End Source File
 # Begin Source File
 
@@ -486,7 +498,15 @@ SOURCE=..\include\isc\net.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\isc\netaddr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\netdb.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\isc\netscope.h
 # End Source File
 # Begin Source File
 

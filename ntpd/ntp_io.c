@@ -12,7 +12,6 @@
 #include "ntp_io.h"
 #include "iosignal.h"
 #include "ntp_refclock.h"
-#include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
 
@@ -31,26 +30,18 @@
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif /* HAVE_SYS_PARAM_H */
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-# include <netinet/in_systm.h>
-#else /* Some old linux systems at least have in_system.h instead. */
-# ifdef HAVE_NETINET_IN_SYSTEM_H
-#  include <netinet/in_system.h>
-# endif
-#endif /* HAVE_NETINET_IN_SYSTM_H */
-#ifdef HAVE_NETINET_IP_H
-# include <netinet/ip.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
 # include <sys/sockio.h>
 #endif
-#include <arpa/inet.h>
+
+/*
+ * Don't allow wildcard delivery
+ *
+#undef UDP_WILDCARD_DELIVERY
+*/
 
 extern int listen_to_virtual_ips;
 
@@ -157,12 +148,16 @@ static	void	close_file	P((SOCKET));
 #endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
-static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+/*
+ * Not all platforms support multicast
+ */
+#ifdef MCAST
 static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
-
+static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
+#endif
 
 typedef struct vsock vsock_t;
 
@@ -827,7 +822,8 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
-			"setsockopt IP_ADD_MEMBERSHIP failure: %m for %x / %x (%s)",
+			"setsockopt IP_ADD_MEMBERSHIP failure: %m on socket %d, addr %s for %x / %x (%s)",
+			iface->fd, stoa(&iface->sin),
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
@@ -854,8 +850,9 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
-			 "setsockopt IPV6_JOIN_GROUP failure: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(maddr));
+			 "setsockopt IPV6_JOIN_GROUP failure: %m on socket %d, addr %s for interface %d(%s)",
+			iface->fd, stoa(&iface->sin),
+			mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
 		break;
@@ -892,7 +889,8 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
-			"setsockopt IP_DROP_MEMBERSHIP failure: %m for %x / %x (%s)",
+			"setsockopt IP_DROP_MEMBERSHIP failure: %m on socket %d, addr %s for %x / %x (%s)",
+			iface->fd, stoa(&iface->sin),
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
@@ -919,8 +917,9 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 			(char *)&mreq6, sizeof(mreq6)) == -1) {
 			netsyslog(LOG_ERR,
-			 "setsockopt IPV6_LEAVE_GROUP failure: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(maddr));
+			"setsockopt IPV6_LEAVE_GROUP failure: %m on socket %d, addr %s for %d(%s)",
+			iface->fd, stoa(&iface->sin),
+			mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
 		break;
@@ -2470,7 +2469,7 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 int
 modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
-	int index;
+	int idx;
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 #ifdef DEBUG
@@ -2479,18 +2478,18 @@ modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 		   stoa(addr));
 #endif
 
-	index = -1;
+	idx = -1;
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
 			laddr->flags = flag;
-			index = laddr->if_index;
+			idx = laddr->if_index;
 			break;
 		}
 		else
 			laddr = next;
 	}
-	return (index); /* Not found */
+	return (idx); /* Not found */
 }
 
 void

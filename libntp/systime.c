@@ -89,7 +89,7 @@ get_systime(
 	if (dtemp >= 1) {
 		dtemp -= 1;
 		now->l_i++;
-	} else if (dtemp < -1) {
+	} else if (dtemp < 0) {
 		dtemp += 1;
 		now->l_i--;
 	}
