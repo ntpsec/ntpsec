@@ -147,7 +147,7 @@
 #define REFUSNO		"USNO"	/* USNO reference ID */
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
-#define LENPTB		40	/* PTB/NPL format */
+#define LENPTB		78	/* PTB/NPL format */
 #define REFWWVB		"WWVB"	/* WWVB reference ID */
 #define	LENWWVB0	22	/* WWVB format 0 */
 #define	LENWWVB2	24	/* WWVB format 2 */
