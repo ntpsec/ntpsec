@@ -496,8 +496,8 @@ crypto_recv(
 					fstamp |= CRYPTO_FLAG_VALID |
 					    CRYPTO_FLAG_VRFY;
 			} else if (crypto_flags & CRYPTO_FLAG_MASK &&
-			    !(crypto_flags & fstamp &
-			    CRYPTO_FLAG_MASK)) {
+			    !(crypto_flags & fstamp & CRYPTO_FLAG_MASK))
+			    {
 				rval = XEVNT_KEY;
 			}
 
@@ -1094,7 +1094,7 @@ crypto_recv(
 		 */
 		default:
 			if (code & (CRYPTO_RESP | CRYPTO_ERROR)) {
-				rval = XEVNT_LEN;
+				rval = XEVNT_ERR;
 			} else if ((rval = crypto_verify(ep, NULL,
 			    peer)) == XEVNT_OK) {
 				fp = emalloc(len);
@@ -1431,6 +1431,7 @@ crypto_xmit(
  * XEVNT_SGL	bad signature length
  * XEVNT_SIG	signature not verified
  * XEVNT_PER	certificate expired
+ * XEVNT_ERR	protocol error
  */
 static int
 crypto_verify(
@@ -1441,8 +1442,8 @@ crypto_verify(
 {
 	EVP_PKEY *pkey;		/* server public key */
 	EVP_MD_CTX ctx;		/* signature context */
-	tstamp_t tstamp;	/* timestamp */
-	tstamp_t fstamp;	/* filestamp */
+	tstamp_t tstamp, tstamp1 = 0; /* timestamp */
+	tstamp_t fstamp, fstamp1 = 0; /* filestamp */
 	u_int	vallen;		/* value length */
 	u_int	siglen;		/* signature length */
 	u_int	opcode, len;
@@ -1465,7 +1466,7 @@ crypto_verify(
 	 * header, no need for further checking.
 	 */
 	if (opcode & CRYPTO_ERROR)
-		return (XEVNT_LEN);
+		return (XEVNT_ERR);
 
  	if (opcode & CRYPTO_RESP) {
  		if (len < VALUE_LEN)
@@ -1522,14 +1523,17 @@ crypto_verify(
 		pkey = peer->pkey;
 	tstamp = ntohl(ep->tstamp);
 	fstamp = ntohl(ep->fstamp);
+	if (vp != NULL) {
+		tstamp1 = ntohl(vp->tstamp);
+		fstamp1 = ntohl(vp->fstamp);
+	}
 	if (tstamp == 0 || tstamp < fstamp) {
 		rval = XEVNT_TSP;
-	} else if (vp != NULL && (tstamp < ntohl(vp->tstamp) ||
-	    (tstamp == ntohl(vp->tstamp) && (peer->crypto &
-	    CRYPTO_FLAG_AUTO)))) {
+	} else if (vp != NULL && (tstamp < tstamp1 || (tstamp ==
+	    tstamp1 && (peer->crypto & CRYPTO_FLAG_AUTO)))) {
 		rval = XEVNT_TSP;
-	} else if (vp != NULL && (tstamp < ntohl(vp->fstamp) || fstamp <
-	    ntohl(vp->fstamp))) {
+	} else if (vp != NULL && (tstamp < fstamp1 || fstamp <
+	    fstamp1)) {
 		rval = XEVNT_FSP;
 
 	/*
@@ -1540,6 +1544,7 @@ crypto_verify(
 	 */
 	} else if (pkey == NULL || peer->digest == NULL) {
 		/* fall through */
+
 	} else if (siglen != (u_int)EVP_PKEY_size(pkey)) {
 		rval = XEVNT_SGL;
 	} else if (tstamp < peer->first || tstamp > peer->last){
@@ -2047,7 +2052,7 @@ bighash(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
- * XEVNT_ID	bad or missing identity parameters
+ * XEVNT_ID	bad or missing group key
  */
 static int
 crypto_alice(
@@ -2114,7 +2119,8 @@ crypto_alice(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing group key
+ * XEVNT_ERR	protocol error
  */
 static int
 crypto_bob(
@@ -2137,7 +2143,7 @@ crypto_bob(
 	 */
 	if (!(crypto_flags & CRYPTO_FLAG_IFF)) {
 		msyslog(LOG_INFO, "crypto_bob: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	dsa = iffpar_pkey->pkey.dsa;
 
@@ -2148,7 +2154,7 @@ crypto_bob(
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*
@@ -2180,7 +2186,7 @@ crypto_bob(
 		msyslog(LOG_ERR, "crypto_bob %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 	vp->vallen = htonl(len);
 	ptr = emalloc(len);
@@ -2207,8 +2213,8 @@ crypto_bob(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing group key
  * XEVNT_FSP	bad filestamp
- * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_iff(
@@ -2230,7 +2236,7 @@ crypto_iff(
 	 */
 	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_INFO, "crypto_iff: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
 		msyslog(LOG_INFO, "crypto_iff: invalid filestamp %u",
@@ -2243,7 +2249,7 @@ crypto_iff(
 	}
 	if (peer->iffval == NULL) {
 		msyslog(LOG_INFO, "crypto_iff: missing challenge");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 
 	/*
@@ -2255,7 +2261,7 @@ crypto_iff(
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_iff %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*
@@ -2340,7 +2346,7 @@ crypto_iff(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
- * XEVNT_ID	bad or missing identity parameters
+ * XEVNT_ID	bad or missing group key
  */
 static int
 crypto_alice2(
@@ -2407,7 +2413,8 @@ crypto_alice2(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing group key
+ * XEVNT_ERR	protocol error
  */
 static int
 crypto_bob2(
@@ -2430,7 +2437,7 @@ crypto_bob2(
 	 */
 	if (!(crypto_flags & CRYPTO_FLAG_GQ)) {
 		msyslog(LOG_INFO, "crypto_bob2: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	rsa = gqpar_pkey->pkey.rsa;
 
@@ -2441,7 +2448,7 @@ crypto_bob2(
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*
@@ -2473,7 +2480,7 @@ crypto_bob2(
 		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 	vp->vallen = htonl(len);
 	ptr = emalloc(len);
@@ -2500,8 +2507,9 @@ crypto_bob2(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing group keys
+ * XEVNT_ERR	protocol error
  * XEVNT_FSP	bad filestamp
- * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_gq(
@@ -2523,7 +2531,7 @@ crypto_gq(
 	 */
 	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_INFO, "crypto_gq: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
 		msyslog(LOG_INFO, "crypto_gq: invalid filestamp %u",
@@ -2536,7 +2544,7 @@ crypto_gq(
 	}
 	if (peer->iffval == NULL) {
 		msyslog(LOG_INFO, "crypto_gq: missing challenge");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 
 	/*
@@ -2549,7 +2557,7 @@ crypto_gq(
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_gq %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*
@@ -2656,7 +2664,7 @@ crypto_gq(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
- * XEVNT_ID	bad or missing identity parameters
+ * XEVNT_ID	bad or missing group key
  */
 static int
 crypto_alice3(
@@ -2723,7 +2731,7 @@ crypto_alice3(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_PUB	bad or missing public key
+ * XEVNT_ERR	protocol error
  */
 static int
 crypto_bob3(
@@ -2746,7 +2754,7 @@ crypto_bob3(
 	 */
 	if (!(crypto_flags & CRYPTO_FLAG_MV)) {
 		msyslog(LOG_INFO, "crypto_bob3: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	dsa = mvpar_pkey->pkey.dsa;
 
@@ -2757,7 +2765,7 @@ crypto_bob3(
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob3 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*
@@ -2794,7 +2802,7 @@ crypto_bob3(
 		msyslog(LOG_ERR, "crypto_bob3 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_free(sdsa);
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 	vp->vallen = htonl(len);
 	ptr = emalloc(len);
@@ -2821,8 +2829,9 @@ crypto_bob3(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing group key
+ * XEVNT_ERR	protocol error
  * XEVNT_FSP	bad filestamp
- * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_mv(
@@ -2844,7 +2853,7 @@ crypto_mv(
 	 */
 	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_INFO, "crypto_mv: scheme unavailable");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) != peer->fstamp) {
 		msyslog(LOG_INFO, "crypto_mv: invalid filestamp %u",
@@ -2857,7 +2866,7 @@ crypto_mv(
 	}
 	if (peer->iffval == NULL) {
 		msyslog(LOG_INFO, "crypto_mv: missing challenge");
-		return (XEVNT_PUB);
+		return (XEVNT_ID);
 	}
 
 	/*
@@ -2869,7 +2878,7 @@ crypto_mv(
 	if ((sdsa = d2i_DSAparams(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_mv %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_PUB);
+		return (XEVNT_ERR);
 	}
 
 	/*

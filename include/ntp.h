@@ -10,6 +10,8 @@
 #include "ntp_crypto.h"
 #endif /* OPENSSL */
 
+#include <isc/boolean.h>
+
 /*
  * Calendar arithmetic - contributed by G. Healton
  */
@@ -185,6 +187,7 @@ struct interface {
 	long notsent;			/* number of send failures */
 	u_int ifindex;			/* Interface index */
 	u_int scopeid;			/* Scope used for Multicasting */
+	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
 };
 
 /*
@@ -220,9 +223,17 @@ struct interface {
  * Peer errors
  */
 #define TEST10		0x0200	/* peer stratum exceeded */
-#define	TEST11		0x0400	/* peeer distance exceeded */
+#define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unfit for synchronization */
+
+/*
+ * Authentication codes
+ */
+#define	AUTH_NONE	0	/* no authentication */
+#define	AUTH_OK		1	/* authentication OK */
+#define	AUTH_ERROR	2	/* authentication error */
+#define	AUTH_CRYPTO	3	/* crypto-NAK */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -263,8 +274,10 @@ struct peer {
 	u_char	leap;		/* local leap indicator */
 	u_char	pmode;		/* remote association mode */
 	u_char	stratum;	/* remote stratum */
-	s_char	precision;	/* remote clock precision */
 	u_char	ppoll;		/* remote poll interval */
+	s_char	precision;	/* remote clock precision */
+	double	rootdelay;	/* roundtrip delay to primary clock */
+	double	rootdispersion;	/* dispersion to primary clock */
 	u_int32	refid;		/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
@@ -328,12 +341,6 @@ struct peer {
 	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
-	 * Variables set by received packet
-	 */
-	double	rootdelay;	/* roundtrip delay to primary clock */
-	double	rootdispersion;	/* dispersion to primary clock */
-
-	/*
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
@@ -343,6 +350,7 @@ struct peer {
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
 	void (*action) P((struct peer *)); /* action timeout function */
+
 	/*
 	 * Statistic counters
 	 */
@@ -875,13 +883,15 @@ struct endpoint {
 /*
  * Association matching AM[] return codes
  */
-#define AM_ERR		-1
-#define AM_NOMATCH	 0
-#define AM_PROCPKT	 1
-#define AM_FXMIT	 2
-#define AM_MANYCAST	 3
-#define AM_NEWPASS	 4
-#define AM_NEWBCL	 5
+#define AM_ERR		-1		/* error */
+#define AM_NOMATCH	0		/* no match */
+#define AM_PROCPKT	1		/* server/symmetric packet */	
+#define AM_BCST		2		/* broadcast packet */	
+#define AM_FXMIT	3		/* client packet */
+#define AM_MANYCAST	4		/* manycast packet */
+#define AM_NEWPASS	5		/* new passive */
+#define AM_NEWBCL	6		/* new broadcast */
+#define	AM_POSSBCL	7		/* discard broadcast */
 
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO

@@ -48,7 +48,7 @@ int AM[AM_MODES][AM_MODES] = {
 
 /*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
+/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_POSSBCL},
 
 /*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
@@ -214,9 +214,10 @@ struct peer *
 findpeer(
 	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
-	int fd,
-	int pkt_mode,
-	int *action
+	int	fd,
+	int	pkt_version,
+	int	pkt_mode,
+	int	*action
 	)
 {
 	register struct peer *peer;
@@ -225,8 +226,10 @@ findpeer(
 	findpeer_calls++;
 	hash = NTP_HASH_ADDR(srcadr);
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
-		if (SOCKCMP(srcadr, &peer->srcadr)
-		    && NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+		if (SOCKCMP(srcadr, &peer->srcadr) &&
+		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+			if (peer->version != pkt_version)
+				continue;
 
 			/*
 			 * if the association matching rules determine
@@ -300,12 +303,12 @@ clear_all(void)
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (peer->flags & FLAG_CONFIG) {
-				if (!(peer->cast_flags & (MDF_ACAST |
-				     MDF_MCAST | MDF_BCAST)))
-					peer_clear(peer, "STEP");
-			} else {
-				unpeer(peer);
+			if (!(peer->cast_flags & (MDF_ACAST | MDF_MCAST |
+			    MDF_BCAST))) {
+				peer->hpoll = peer->minpoll;
+				peer_clear(peer, "STEP");
+				if (peer->flags & FLAG_CONFIG)
+					unpeer(peer);
 			}
 		}
 	}
@@ -344,7 +347,6 @@ unpeer(
 		printf("demobilize %u %d\n", peer_to_remove->associd,
 		    peer_associations);
 #endif
-	peer_clear(peer_to_remove, "NULL");
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
@@ -617,6 +619,7 @@ newpeer(
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
+	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)
 		peer_clear(peer, "ACST");
 	else if (cast_flags & MDF_MCAST)

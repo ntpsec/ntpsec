@@ -280,8 +280,11 @@ local_clock(
          * Update the jitter estimate.
          */
 	etemp = SQUARE(clock_jitter);
+	dtemp = max(abs(fp_offset - last_offset),
+	    LOGTOD(sys_precision));
 	dtemp = SQUARE(fp_offset - last_offset);
-	clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
+	clock_jitter = SQRT(etemp + (SQUARE(dtemp) - etemp) /
+	    CLOCK_AVG);
 
 	/*
 	 * The huff-n'-puff filter finds the lowest delay in the recent
@@ -390,7 +393,6 @@ local_clock(
 			    fp_offset);
 			reinit_timer();
 			tc_counter = 0;
-			sys_poll = NTP_MINPOLL;
 			rval = 2;
 			if (state == S_NSET) {
 				rstclock(S_FREQ, peer->epoch, 0);
@@ -648,7 +650,7 @@ local_clock(
 			tc_counter = CLOCK_LIMIT;
 			if (sys_poll < peer->maxpoll) {
 				tc_counter = 0;
-					sys_poll++;
+				sys_poll++;
 			}
 		}
 	} else {
