@@ -1,3 +1,11 @@
+2000-04-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* build: deal with optional 1st argument (SIG), which must match
+	the contents of .buildkey
+
+	* flock-build: Generalize, implement SIG and .buildkey, and drive
+	list from LIST, which the user can override.
+
 2000-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99i1

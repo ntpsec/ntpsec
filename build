@@ -2,7 +2,24 @@
 
 LOGF=make.log
 
-CONFIG_ARGS="$@"
+case "$1" in
+ 0.*)
+    SIG=$1
+    shift
+    CONFIG_ARGS="$@"
+    KEY=`sed -e q < .buildkey`
+    case "$SIG" in
+     $KEY) ;;
+     *)
+	echo "Wrong directory for build!"
+        exit 1
+        ;;
+    esac
+    ;;
+ *)
+    CONFIG_ARGS="$@"
+    ;;
+esac
 
 IAM=`hostname || uname -n`
 

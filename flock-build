@@ -17,16 +17,16 @@ BUILD_ARGS="$@"
 
 c_d=`pwd`
 
-case "$c_d" in
- /pogo/*) ;;
- *) echo "This script needs to be run from /pogo/somewhere"
-    exit 1
-    ;;
+SIG=`perl -e 'print rand'`
+echo $SIG > .buildkey
+
+case "$LIST" in
+ '') LIST="churchy hepzibah malarky pogo porkypine rackety snavely" ;;
 esac
 
-for i in  churchy hepzibah malarky pogo porkypine rackety snavely
+for i in $LIST
 do
     echo $i
-    ssh $i "cd $c_d ; ./build --enable-parse-clocks $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build --enable-parse-clocks --without-rsaref $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-rsaref $BUILD_ARGS" &
 done
