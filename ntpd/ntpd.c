@@ -893,7 +893,7 @@ getgroup:
 		WaitHandles[2] = get_io_event();
 
 		for (;;) {
-			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, MWMO_ALERTABLE);
+			DWORD Index = WaitForMultipleObjectsEx(sizeof(WaitHandles)/sizeof(WaitHandles[0]), WaitHandles, FALSE, 1000, TRUE);
 			switch (Index) {
 				case WAIT_OBJECT_0 + 0 : /* exit request */
 					exit(0);
@@ -912,30 +912,16 @@ getgroup:
 # endif
 				break;
 
-# if 1
-				/*
-				 * FIXME: According to the documentation for WaitForMultipleObjectsEx
-				 *        this is not possible. This may be a vestigial from when this was
-				 *        MsgWaitForMultipleObjects, maybe it should be removed?
-				 */
-				case WAIT_OBJECT_0 + 3 : /* windows message */
-				{
-					MSG msg;
-					while ( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
-					{
-						if ( msg.message == WM_QUIT )
-						{
-							exit( 0 );
-						}
-						DispatchMessage( &msg );
-					}
-				}
-				break;
-# endif
-
 				case WAIT_IO_COMPLETION : /* loop */
 				case WAIT_TIMEOUT :
 				break;
+				case WAIT_FAILED:
+					msyslog(LOG_ERR, "ntpdc: WaitForMultipleObjectsEx Failed: Error: %m");
+					break;
+
+				/* For now do nothing if not expected */
+				default:
+					break;		
 				
 			} /* switch */
 			rbuflist = getrecvbufs();	/* get received buffers */
