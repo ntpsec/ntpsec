@@ -856,7 +856,7 @@ case "$host" in
  *) AC_CHECK_FUNCS(ntp_adjtime ntp_gettime)
     ;;
 esac
-AC_CHECK_FUNCS(plock pututline pututxline readlink rtprio)
+AC_CHECK_FUNCS(plock pututline pututxline readlink recvmsg rtprio)
 case "$ac_cv_func_mrand48" in
  yes) ;;
  *) AC_REPLACE_FUNCS(random) ;;
