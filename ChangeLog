@@ -1,3 +1,7 @@
+2000-03-16  Harlan Stenn  <harlan@pfcs.com>
+
+	* ntpd/ntp_request.c (dns_a): Start cracking the returned information.
+
 2000-03-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_resolver.c (ntp_res): Authenticate the keyid.

@@ -1234,7 +1234,6 @@ dns_a(
 	struct sockaddr_in peeraddr;
 	int fl;
 
-	msyslog(LOG_INFO, "dns_a: We're here...");
 	/*
 	 * Do a check of everything to see that it looks
 	 * okay.  If not, complain about it.  Note we are
@@ -1273,25 +1272,34 @@ dns_a(
 		u_short associd;
 		size_t hnl;
 		char *cp;
+		struct peer *peer;
+		int bogon = 0;
 
-		associd = dp->associd; /* Validate this value? */
+		associd = dp->associd;
+		peer = findpeerbyassoc((int)associd);
+		if (peer == 0 || peer->flags & FLAG_REFCLOCK) {
+			++bogon;
+		}
 		peeraddr.sin_addr.s_addr = dp->peeraddr;
 		for (hnl = 0; *dp->hostname && hnl < sizeof dp->hostname; ++hnl) ;
 		if (hnl >= sizeof dp->hostname) {
-			/* Squawk bad data */
+			++bogon;
 		}
-		cp = emalloc(hnl + 1);
-		strncpy(cp, dp->hostname, hnl);
+		
+		if (!bogon) {
+			cp = emalloc(hnl + 1);
+			strncpy(cp, dp->hostname, hnl);
 
-		msyslog(LOG_INFO, "dns_a: <%s> for %s, AssocID %d",
-			cp, inet_ntoa(peeraddr.sin_addr), associd);
+			msyslog(LOG_INFO, "dns_a: <%s> for %s, AssocID %d",
+				cp, inet_ntoa(peeraddr.sin_addr), associd);
+		}
 
-		/* Do Something in the "if" line to use the info we got */
-		if (0) {
+		if (bogon) {
 			/* If it didn't work */
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
+		
 		dp++;
 	}
 
