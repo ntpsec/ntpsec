@@ -641,7 +641,7 @@ refclock_gtlin(
 	if (dpend - dpt > bmax - 1)
 		dpend = dpt + bmax - 1;
 	for (dp = lineptr; dpt < dpend; dpt++) {
-		c = *dpt & 0x7f;
+		c = (char) (*dpt & 0x7f);
 		if (c >= ' ')
 			*dp++ = c;
 	}

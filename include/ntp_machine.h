@@ -9,10 +9,6 @@
 # include <config.h>
 #endif
 
-# include <windows.h>
-# include <ws2tcpip.h>
-# include <winsock2.h>
-
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -245,6 +241,9 @@ typedef unsigned long u_long;
 # if !defined(HAVE_CONFIG_H)  || !defined(__config)
     error "NT requires config.h to be included"
 # endif /* HAVE_CONFIG_H) */
+# include <windows.h>
+# include <ws2tcpip.h>
+# include <winsock2.h>
 
 # define ifreq _INTERFACE_INFO
 # define ifr_flags iiFlags
@@ -270,7 +269,9 @@ typedef unsigned long u_long;
  * Defining registers are not a good idea on Windows
  * This gets rid of the usage
  */
+#ifndef register
 # define register
+#endif
  typedef char *caddr_t;
 #endif /* SYS_WINNT */
 

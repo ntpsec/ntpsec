@@ -53,7 +53,7 @@ dofptoa(
 
 		do {
 			tmp = sv;
-			sv = sv/ten;
+			sv = (u_short) (sv/ten);
 			*(--cp) = tmp - ((sv<<3) + (sv<<1));
 		} while (sv != 0);
 	}
