@@ -252,8 +252,9 @@ transmit(
 
 	/*
 	 * We need to be very careful about honking uncivilized time.
-	 * Never transmit if in broadcast client mode. If in broadcast
-	 * mode, transmit only if synchronized to a valid source. 
+	 * Never transmit if in broadcast client mode or access denied.
+	 * If in broadcast mode, transmit only if synchronized to a
+	 * valid source. 
 	 */
 	if (peer->hmode == MODE_BCLIENT || peer->flash & TEST4) {
 		return;
@@ -297,7 +298,7 @@ receive(
 	 * the restriction routine. Note the careful distinctions here
 	 * between a packet with a format error and a packet that is
 	 * simply discarded without prejudice. Some restrictions have to
-	 * be handled later in order to generate a Kiss-of-Death packet.
+	 * be handled later in order to generate a kiss-of-death packet.
 	 */
 	ntp_monitor(rbufp);
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
@@ -308,7 +309,7 @@ receive(
 		    ntoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
 	if (restrict_mask & RES_IGNORE) {
-		return;				/* no amything */
+		return;				/* no anything */
 	}
 	pkt = &rbufp->recv_pkt;
 	if (PKT_VERSION(pkt->li_vn_mode) == NTP_VERSION) {
@@ -432,39 +433,6 @@ receive(
 	 */
 	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
 	    hismode, &retcode);
-
-	/*
-	 * A Kiss-of-Death (KoD) packet is returned by a server in case
-	 * the client is denied access. It consists of the client
-	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field the ASCII
-	 * string "DENY". If the KoD packet matches an association and
-	 * the packet originate timestamp matches the association
-	 * transmit timestamp the KoD is legitimate and the association
-	 * disabled.
-	 */
-	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
-	    pkt->stratum == 0 && memcmp(&pkt->refid, "DENY", 4) == 0) {
-		if (peer != NULL) {
-			NTOHL_FP(&pkt->org, &p_org);
-			if (peer->leap == LEAP_NOTINSYNC &&
-			    L_ISEQU(&peer->xmt, &p_org)) {
-				peer->stratum = 0;
-				peer->flash = TEST4;
-				memcpy(&peer->refid, &pkt->refid, 4);
-				msyslog(LOG_INFO, "access denied %s\n",
-				    ntoa(&rbufp->recv_srcadr));
-#ifdef DEBUG
-				if (debug)
-					printf(
-					  "receive: access denied %s\n",
-				    	    ntoa(&rbufp->recv_srcadr));
-#endif
-
-			}
-		}
-		return;
-	}
 	is_authentic = 0;
 	dstadr_sin = &rbufp->dstadr->sin;
 	if (has_mac == 0) {
@@ -717,11 +685,8 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * Happiness and nothing broke. Earn some revenue, but
-		 * only if unrestricted.
+		 * Happiness and nothing broke. Earn some revenue.
 		 */
-		if (restrict_mask & (RES_DONTSERVE | RES_LIMITED))
-			return;
 		break;
 
 	default:
@@ -780,10 +745,39 @@ receive(
 		else if (!(oflags & FLAG_AUTHENABLE))
 			report_event(EVNT_PEERAUTH, peer);
 	}
+
+	/*
+	 * A kiss-of-death (kod) packet is returned by a server in case
+	 * the client is denied access. It consists of the client
+	 * request packet with the leap bits indicating never
+	 * synchronized, stratum zero and reference ID field the ASCII
+	 * string "DENY". If the packet originate timestamp matches the
+	 * association transmit timestamp the kod is legitimate. If the
+	 * peer leap bits indicate never synchronized, this must be
+	 * access deny and the association is disabled; otherwise this
+	 * must be a limit reject. In either case a naughty message is
+	 * forced to the system log.
+	 */
+	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC &&
+	    pkt->stratum == 0 && memcmp(&pkt->refid, "DENY", 4) == 0) {
+		NTOHL_FP(&pkt->org, &p_org);
+		if (L_ISEQU(&peer->xmt, &p_org)) {
+			if (peer->leap == LEAP_NOTINSYNC) {
+				peer->stratum = 0;
+				peer->flash |= TEST4;
+				memcpy(&peer->refid, &pkt->refid, 4);
+				msyslog(LOG_INFO, "access denied %s\n",
+				    ntoa(&rbufp->recv_srcadr));
+			} else {
+				msyslog(LOG_INFO, "limit reject %s\n",
+				    ntoa(&rbufp->recv_srcadr));
+			}
+		}
+	}
 	if (peer->flash) {
 #ifdef DEBUG
 		if (debug)
-			printf("receive: bad auth %03x\n",
+			printf("receive: bad auth/deny %03x\n",
 			    peer->flash);
 #endif
 		return;
@@ -2002,7 +1996,7 @@ peer_xmit(
 	)
 {
 	struct pkt xpkt;	/* transmit packet */
-	int sendlen, pktlen;
+	int sendlen, authlen;
 	keyid_t xkeyid;		/* transmit key ID */
 	l_fp xmt_tx;
 
@@ -2281,18 +2275,24 @@ peer_xmit(
 	get_systime(&peer->xmt);
 	L_ADD(&peer->xmt, &sys_authdelay);
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
-	pktlen = sendlen + authencrypt(xkeyid, (u_int32 *)&xpkt,
-	    sendlen);
+	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
+	if (authlen == 0) {
+		msyslog(LOG_NOTICE,
+			"transmit: no encryption key found");
+		peer->flash |= TEST4 | TEST5;
+		return;
+	}
+	sendlen += authlen;
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif /* AUTOKEY */
 	get_systime(&xmt_tx);
-	if (pktlen > sizeof(xpkt)) {
-		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
+	if (sendlen > sizeof(xpkt)) {
+		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
 		exit(-1);
 	}
-	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, pktlen);
+	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, sendlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2314,7 +2314,7 @@ peer_xmit(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d index %d\n",
 		    current_time, ntoa(&peer->dstadr->sin),
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
-		    pktlen - sendlen, peer->keynumber);
+		    authlen, peer->keynumber);
 #endif
 #else
 #ifdef DEBUG
@@ -2323,7 +2323,7 @@ peer_xmit(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
 		    current_time, ntoa(&peer->dstadr->sin),
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
-		    pktlen - sendlen);
+		    authlen);
 #endif
 #endif /* AUTOKEY */
 }
@@ -2345,7 +2345,7 @@ fast_xmit(
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp xmt_ts;		/* transmit timestamp */
 	l_fp xmt_tx;		/* transmit timestamp after authent */
-	int sendlen, pktlen;
+	int sendlen, authlen;
 
 	/*
 	 * Initialize transmit packet header fields from the receive
@@ -2358,7 +2358,7 @@ fast_xmit(
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
-	 * If the caller is restricted, return a Kiss-of-Death packet;
+	 * If the caller is restricted, return a kiss-of-death packet;
 	 * otherwise, smooch politely.
 	 */
 	if (mask & (RES_DONTSERVE | RES_LIMITED)) {
@@ -2389,9 +2389,7 @@ fast_xmit(
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
 	 * is authenticated and contains a MAC. If not, the transmitted
-	 * packet is not authenticated. If the packet came in a
-	 * multicast interface, make sure it goes out the wildcard
-	 * interface.
+	 * packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
@@ -2449,18 +2447,18 @@ fast_xmit(
 	get_systime(&xmt_ts);
 	L_ADD(&xmt_ts, &sys_authdelay);
 	HTONL_FP(&xmt_ts, &xpkt.xmt);
-	pktlen = sendlen + authencrypt(xkeyid, (u_int32 *)&xpkt,
-	    sendlen);
+	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
+	sendlen += authlen;
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif /* AUTOKEY */
 	get_systime(&xmt_tx);
-	if (pktlen > sizeof(xpkt)) {
-		msyslog(LOG_ERR, "buffer overflow %u", pktlen);
+	if (sendlen > sizeof(xpkt)) {
+		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
 		exit(-1);
 	}
-	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, pktlen);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over the
@@ -2480,7 +2478,7 @@ fast_xmit(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
 		    current_time, ntoa(&rbufp->dstadr->sin),
 		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen,
-		    pktlen - sendlen);
+		    authlen);
 #endif
 }
 

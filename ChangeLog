@@ -1,3 +1,14 @@
+2001-04-29  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpq/ntpq.c (tstflags): 11 now.
+	From: John Cochran <jdc@fiawol.org>
+
+	* ntpd/ntp_proto.c (receive): KoD updates.  Improve the comments.
+	Lose the AM_PROCPKT restrictions test.
+	(peer_xmit): Check/report on no encryption key in packet.
+	(fast_xmit): Use peer_xmit's new packet length check code.
+	From  Dave Mills.
+
 2001-04-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k30

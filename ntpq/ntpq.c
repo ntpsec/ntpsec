@@ -2841,7 +2841,7 @@ tstflags(
 		cb += strlen(cb);
 	} else {
 		*cb++ = ' ';
-		for (i = 0; i < 10; i++) {
+		for (i = 0; i < 11; i++) {
 			if (val & 0x1) {
 				sprintf(cb, "%s%s", sep, tstflagnames[i]);
 				sep = ", ";
