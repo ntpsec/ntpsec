@@ -700,6 +700,7 @@ peer_all_reset(void)
 }
 
 
+#ifdef AUTOKEY
 /*
  * expire_all - flush all crypto data and update timestamps.
  */
@@ -740,6 +741,7 @@ expire_all(void)
 		printf("expire_all: at %lu\n", current_time);
 #endif
 }
+#endif /* AUTOKEY */
 
 
 /*

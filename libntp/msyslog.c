@@ -60,7 +60,7 @@ void msyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
-#if !defined(VMS)
+#if defined(SYS_WINNT)
 	char xerr[50];
 #endif
 	register int c;

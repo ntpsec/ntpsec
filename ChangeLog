@@ -1,5 +1,13 @@
 2001-04-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c:
+	* ntpd/refclock_oncore.c:
+	* ntpd/ntp_peer.c:
+	* libntp/msyslog.c:
+	* libntp/audio.c:
+	Lint cleanup.
+	From: Simon Burge <simonb@wasabisystems.com>
+
 	* ntpd/ntp_loopfilter.c (local_clock): debug message improvements
 	from Dave Mills.
 

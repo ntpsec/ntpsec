@@ -12,6 +12,7 @@
 #include "ntp_filegen.h"
 #include "ntp_unixtime.h"
 #include "ntp_config.h"
+#include "ntp_cmdargs.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -177,6 +178,11 @@ l_fp	sys_revoketime;
 u_long	sys_revoke;		/* keys revoke timeout */
 volatile int debug = 0;		/* debugging flag */
 u_char	sys_minpoll;		/* min poll interval (log2 s) */
+
+void snifflink P((const char *, char **));
+int filep P((const char *));
+FILE *newfile P((const char *, const char *, const char *));
+void cleanlinks P((const char *, const char *, const char *));
 
 struct peer *
 peer_config(
@@ -875,7 +881,7 @@ main(
 		if (!memorex) {
 			srandom((u_int)tv.tv_usec);
 			fprintf(str, "# MD5 key file %s\n# %s", f2_keys,
-				ctime(&tv.tv_sec));
+				ctime((const time_t *) &tv.tv_sec));
 			for (i = 1; i <= 16; i++) {
 				for (j = 0; j < 16; j++) {
 					while (1) {

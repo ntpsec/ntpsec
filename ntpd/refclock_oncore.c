@@ -2316,10 +2316,10 @@ oncore_get_timestamp(
 			i = (u_long) pps_i.clear_sequence;
 #ifdef HAVE_STRUCT_TIMESPEC
 			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%09ld\n",
-			    instance->unit, i, j, tsp->tv_sec, tsp->tv_nsec);
+			    instance->unit, i, j, (long)tsp->tv_sec, (long)tsp->tv_nsec);
 #else
 			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%06ld\n",
-			    instance->unit, i, j, tsp->tv_sec, tsp->tv_usec);
+			    instance->unit, i, j, (long)tsp->tv_sec, (long)tsp->tv_usec);
 #endif
 		}
 

@@ -54,7 +54,7 @@ static int ctl_fd;		/* audio control file descriptor */
  */
 int
 audio_init(
-	char *devname		/* device name */
+	char *dname		/* device name */
 	)
 {
 	int fd;
@@ -63,7 +63,7 @@ audio_init(
 	/*
 	 * Open audio device. Do not complain if not there.
 	 */
-	fd = open(devname, O_RDWR | O_NONBLOCK, 0777);
+	fd = open(dname, O_RDWR | O_NONBLOCK, 0777);
 	if (fd < 0)
 		return (fd);
 
