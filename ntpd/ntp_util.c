@@ -76,6 +76,9 @@ static FILEGEN peerstats;
 static FILEGEN loopstats;
 static FILEGEN clockstats;
 static FILEGEN rawstats;
+#ifdef OPENSSL
+static FILEGEN cryptostats;
+#endif /* OPENSSL */
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -97,6 +100,10 @@ init_util(void)
 #define LOOPNAME "loopstats"
 #define CLOCKNAME "clockstats"
 #define RAWNAME "rawstats"
+#ifdef OPENSSL
+#define CRYPTONAME "cryptostats"
+#endif /* OPENSSL */
+
 	peerstats.fp       = NULL;
 	peerstats.prefix   = &statsdir[0];
 	peerstats.basename = (char*)emalloc(strlen(PEERNAME)+1);
@@ -133,11 +140,24 @@ init_util(void)
 	rawstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
 	filegen_register("rawstats", &rawstats);
 
+#ifdef OPENSSL
+	cryptostats.fp	 = NULL;
+	cryptostats.prefix = &statsdir[0];
+	cryptostats.basename = (char*)emalloc(strlen(CRYPTONAME)+1);
+	strcpy(cryptostats.basename, CRYPTONAME);
+	cryptostats.id	 = 0;
+	cryptostats.type = FILEGEN_DAY;
+	cryptostats.flag = FGEN_FLAG_LINK; /* not yet enabled !!*/
+	filegen_register("cryptostats", &cryptostats);
+#endif /* OPENSSL */
+
 #undef PEERNAME
 #undef LOOPNAME
 #undef CLOCKNAME
 #undef RAWNAME
-
+#ifdef OPENSSL
+#undef CRYPTONAME
+#endif /* OPENSSL */
 }
 
 
@@ -494,7 +514,7 @@ record_loop_stats(
 	double freq,
 	double jitter,
 	double stability,
-	int poll
+	int spoll
 	)
 {
 	struct timeval tv;
@@ -520,7 +540,7 @@ record_loop_stats(
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %lu.%03lu %.9f %.6f %.9f %.6f %d\n",
 		    day, sec, msec, offset, freq * 1e6, jitter,
-		    stability * 1e6, poll);
+		    stability * 1e6, spoll);
 		fflush(loopstats.fp);
 	}
 }
@@ -615,6 +635,55 @@ record_raw_stats(
 		fflush(rawstats.fp);
 	}
 }
+
+#ifdef OPENSSL
+/*
+ * record_crypto_stats - write crypto statistics to file
+ *
+ * file format:
+ * day (mjd)
+ * time (s past midnight)
+ * peer (ip address)
+ * text message
+ */
+void
+record_crypto_stats(
+	struct sockaddr_in *addr,
+	const char *text
+	)
+{
+	struct timeval tv;
+#ifdef HAVE_GETCLOCK
+        struct timespec ts;
+#endif
+	u_long day, sec, msec;
+
+	if (!stats_control)
+		return;
+#ifdef HAVE_GETCLOCK
+        (void) getclock(TIMEOFDAY, &ts);
+        tv.tv_sec = ts.tv_sec;
+        tv.tv_usec = ts.tv_nsec / 1000;
+#else /*  not HAVE_GETCLOCK */
+	GETTIMEOFDAY(&tv, (struct timezone *)NULL);
+#endif /* not HAVE_GETCLOCK */
+	day = tv.tv_sec / 86400 + MJD_1970;
+	sec = tv.tv_sec % 86400;
+	msec = tv.tv_usec / 1000;
+
+	filegen_setup(&cryptostats, (u_long)(tv.tv_sec + JAN_1970));
+	if (cryptostats.fp != NULL) {
+		if (addr == NULL)
+			fprintf(cryptostats.fp, "%lu %lu.%03lu %s\n",
+			    day, sec, msec, text);
+		else
+			fprintf(cryptostats.fp, "%lu %lu.%03lu %s %s\n",
+			    day, sec, msec, ntoa(addr), text);
+		fflush(cryptostats.fp);
+	}
+}
+#endif /* OPENSSL */
+
 
 /*
  * getauthkeys - read the authentication keys from the specified file

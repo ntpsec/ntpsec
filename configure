@@ -726,7 +726,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-openssl-libdir   + =/something/reasonable
   --with-openssl-incdir   + =/something/reasonable
-  --with-crypto           + ={autokey,rsaref}
+  --with-crypto           + ={autokey,openssl,rsaref}
   --with-electricfence    - compile with ElectricFence malloc debugger
 
 Some influential environment variables:
@@ -1377,7 +1377,7 @@ fi
 
 # Define the identity of the package.
 PACKAGE=ntp
-VERSION=4.1.0
+VERSION=4.1.70
 
 cat >>confdefs.h <<EOF
 #define PACKAGE "$PACKAGE"
@@ -13446,7 +13446,7 @@ case "$ans" in
  no) ;;
  yes|rsaref|openssl)
     case "$ans" in
-     yes|rsaref) # Just "rsaref" when OpenSSL is ready
+     rsaref)
 	ans=no
 	;;
      *)

@@ -1303,9 +1303,9 @@ dns_a(
 			return;
 		} else {
 #if 0
-#ifdef PUBKEY
+#ifdef OPENSSL
 			crypto_public(peer, dp->hostname);
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 #endif
 		}
 		

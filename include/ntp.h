@@ -103,6 +103,7 @@ typedef char s_char;
 #define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
+#define NTP_MAXEXTEN	1024	/* maximum extension field size */
 #define NTP_AUTOMAX	13	/* log2 default max session key lifetime */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
@@ -135,31 +136,15 @@ typedef char s_char;
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
 
-#ifdef AUTOKEY
+#ifdef OPENSSL
 /*
  * The following structures are used in the autokey protocol.
  *
  * The autokey structure holds the values used to authenticate key IDs.
  */
 struct autokey {		/* network byte order */
-	tstamp_t tstamp;	/* timestamp */
 	keyid_t	key;		/* key ID */
 	int32	seq;		/* key number */
-	u_int32	siglen;		/* signature length */
-	u_int32	pkt[1];		/* start of signature field */
-	u_char	*sig;		/* signature */
-};
-
-/*
- * The cookie structure holds the current private value used to
- * construct session keys.
- */
-struct cookie {			/* network byte order */
-	tstamp_t tstamp;	/* timestamp */
-	keyid_t	key;		/* key ID */
-	u_int32	siglen;		/* signature length */
-	u_int32	pkt[1];		/* start of signature field */
-	u_char	*sig;		/* signature */
 };
 
 /*
@@ -171,11 +156,11 @@ struct value {			/* network byte order */
 	tstamp_t fstamp;	/* filestamp */
 	u_int32	vallen;		/* value length */
 	u_int32	pkt[1];		/* start of value field */
-	u_char	*ptr;		/* data pointer */
+	u_char	*ptr;		/* data pointer (various) */
 	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 /*
  * The interface structure is used to hold the addresses and socket
@@ -220,6 +205,7 @@ struct interface {
 #define TEST9		0x0100	/* peer delay/dispersion bounds check */
 #define TEST10		0x0200	/* autokey failed */
 #define	TEST11		0x0400	/* proventic not confirmed */
+#define TEST12		0x0800	/* autokey error */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -269,29 +255,31 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 	keyid_t keyid;		/* current key ID */
-#ifdef AUTOKEY
+#ifdef OPENSSL
 #define clear_to_zero assoc
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
-#ifdef PUBKEY
-	struct	value pubkey;	/* public key */
-	struct	value certif;	/* certificate */
+	struct	value cinfo;	/* certificate information */
 	u_char	*keystr;	/* host name */
-#endif /* PUBKEY */
+	u_char	*digest;	/* message digest (EVP_MD) */
 	keyid_t	pkeyid;		/* previous key ID */
+	keyid_t	pcookie;	/* peer cookie */
 	keyid_t	hcookie;	/* host cookie */
-	struct cookie pcookie;	/* peer cookie */
-	struct autokey recauto;	/* autokey */
-	u_int32	cmmd;		/* peer command */
+	struct value cookval;	/* cookie values */
+	struct value recval;	/* receive autokey values */
+	struct value tai_leap;	/* leapseconds values */
+	u_int32	*cmmd;		/* extension field pointer */
+
 	/*
 	 * Variables used by authenticated server
 	 */
 	keyid_t	*keylist;	/* session key ID list */
 	int	keynumber;	/* current key number */
-	struct autokey sndauto;	/* autokey */
-#else /* AUTOKEY */
+	struct value encrypt;	/* send encrypt values */
+	struct value sndval;	/* send autokey values */
+#else /* OPENSSL */
 #define clear_to_zero status
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 
 	/*
 	 * Ephemeral state variables
@@ -392,9 +380,8 @@ struct peer {
 #define FLAG_BURST	0x0100	/* burst mode */
 #define FLAG_IBURST	0x0200	/* initial burst mode */
 #define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
-#define FLAG_AUTOKEY	0x0800	/* autokey confirmed */
-#define FLAG_ASSOC	0x1000	/* autokey reqeust */
-#define FLAG_PROVEN	0x2000	/* proventic confirmed */
+#define FLAG_ASSOC	0x0800	/* autokey reqeust */
+#define FLAG_CLUST	0x1000	/* >= 8 samples in the can */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -528,15 +515,11 @@ struct pkt {
 	 * octets. But, to handle humungus certificates, the bank must
 	 * be broke.
 	 */
-#ifdef AUTOKEY
-#ifdef PUBKEY
-	u_int32	exten[5000 / 4]; /* max extension field */
-#else
-	u_int32	exten[672 / 4];	/* max extension field */
-#endif /* PUBKEY */
-#else /* AUTOKEY */
+#ifdef OPENSSL
+	u_int32	exten[1000 / 4]; /* max extension field */
+#else /* OPENSSL */
 	u_int32	exten[1];	/* misused */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */
 	u_char	mac[MAX_MAC_LEN]; /* mac */
 };
 
@@ -567,7 +550,8 @@ struct pkt {
 /*
  * Event codes. Used for reporting errors/events to the control module
  */
-#define	PEER_EVENT	0x80	/* this is a peer event */
+#define	PEER_EVENT	0x080	/* this is a peer event */
+#define CRPT_EVENT	0x100	/* this is a crypto event */
 
 /*
  * System event codes

@@ -51,10 +51,10 @@
 #define CONFIG_LOGCONFIG	31
 #define CONFIG_MANYCASTCLIENT	32
 #define CONFIG_MANYCASTSERVER	33
-#ifdef PUBKEY
+#ifdef OPENSSL
 #define CONFIG_CRYPTO		34
 #define CONFIG_KEYSDIR		35
-#endif /* PUBKEY */
+#endif /* OPENSSL */
 #define CONFIG_INCLUDEFILE	36
 
 /*
@@ -71,9 +71,9 @@
 #define CONF_MOD_TTL		9
 #define CONF_MOD_MODE		10
 #define CONF_MOD_NOSELECT 	11
-#ifdef PUBKEY
-#define CONF_MOD_PUBLICKEY	12
-#endif /* PUBKEY */
+#ifdef OPENSSL
+#define CONF_MOD_CERT		12
+#endif /* OPENSSL */
 
 /*
  * "restrict" modifier keywords
@@ -138,14 +138,14 @@
 #define CONF_CLOCK_ALLAN	6
 #define CONF_CLOCK_HUFFPUFF	7
 
-#ifdef PUBKEY
+#ifdef OPENSSL
 /*
  * "crypto" modifier keywords
  */
-#define CONF_CRYPTO_DH		1
-#define	CONF_CRYPTO_PRIVATEKEY	2
-#define	CONF_CRYPTO_PUBLICKEY	3
-#define CONF_CRYPTO_LEAP	4
-#define CONF_CRYPTO_FLAGS	5
-#define CONF_CRYPTO_CERT	6
-#endif /* PUBKEY */
+#define CONF_CRYPTO_NONE	0
+#define	CONF_CRYPTO_RSA		1	
+#define	CONF_CRYPTO_SIGN	2
+#define CONF_CRYPTO_LEAP	3
+#define CONF_CRYPTO_CERT	4
+#define CONF_CRYPTO_RAND	5
+#endif /* OPENSSL */

@@ -1,93 +1,98 @@
 /*
  * ntp_crypto.h - definitions for cryptographic operations
  */
-#ifdef AUTOKEY
-#include "global.h"
-#include "md5.h"
-#ifdef RSAREF
-#include "rsaref.h"
-#include "rsa.h"
-
-#define EVP_SignInit(a, b)	R_SignInit(a, b)
-#define EVP_SignUpdate(a, b, c)	R_SignUpdate(a, b, c);
-#define EVP_SignFinal(a, b, c, d) R_SignFinal(a, b, c, d);
-#define EVP_VerifyInit(a, b)	R_VerifyInit(a, b)
-#define EVP_VerifyUpdate(a, b, c) R_VerifyUpdate(a, b, c);
-#define EVP_VerifyFinal(a, b, c, d) R_VerifyFinal(a, b, c, d);
-
-#endif /* RSAREF */
+#ifdef OPENSSL
+#include "openssl/evp.h"
 
 /*
- * Cryptostatus word
+ * The following bits are set by the CRYPTO_ASSOC message from
+ * the server and are not modified by the client.
  */
-#define CRYPTO_FLAG_ENAB  0x01	/* crypto enable */
-#define CRYPTO_FLAG_RSA	  0x02	/* public/private keys */
-#define CRYPTO_FLAG_CERT  0x04	/* certificate */
-#define CRYPTO_FLAG_DH	  0x08	/* agreement parameters */
-#define CRYPTO_FLAG_TAI	  0x10	/* leapseconds table */
+#define CRYPTO_FLAG_ENAB  0x0001 /* crypto enable */
+#define CRYPTO_FLAG_KEY	  0x0002 /* host keys */
+#define CRYPTO_FLAG_SIGN  0x0004 /* signature keys */
+#define CRYPTO_FLAG_TAI	  0x0008 /* leapseconds table */
+#define CRYPTO_FLAG_HOST  (CRYPTO_FLAG_ENAB | CRYPTO_FLAG_KEY |\
+			  CRYPTO_FLAG_SIGN | CRYPTO_FLAG_TAI)
+
+/*
+ * The following bits are used by the client during the protocol
+ * exchange.
+ */
+#define CRYPTO_FLAG_PROV  0x0010 /* certificate verified */
+#define CRYPTO_FLAG_AGREE 0x0020 /* cookie verifed */
+#define CRYPTO_FLAG_AUTO  0x0040 /* autokey verified */
+#define CRYPTO_FLAG_LEAP  0x0080 /* leapseconds table verified */
 
 /*
  * Extension field definitions
  */
-#define CRYPTO_VN	1	/* current protocol version number */
+#define	CRYPTO_MAXLEN	1024	/* max extension field length */
+#define CRYPTO_VN	2	/* current protocol version number */
+#define CRYPTO_CMD(x)	(((CRYPTO_VN << 8) | (x)) << 16)
+#define CRYPTO_NULL	CRYPTO_CMD(0) /* no operation */
+#define CRYPTO_ASSOC	CRYPTO_CMD(1) /* association */
+#define CRYPTO_CERT	CRYPTO_CMD(2) /* certificate */
+#define CRYPTO_COOK	CRYPTO_CMD(3) /* cookie value */
+#define CRYPTO_AUTO	CRYPTO_CMD(4) /* autokey values */
+#define CRYPTO_TAI	CRYPTO_CMD(5) /* leapseconds table */
+#define CRYPTO_RESP	0x80000000 /* response */
+#define CRYPTO_ERROR	0x40000000 /* error */
 
-#define CRYPTO_NULL	((CRYPTO_VN << 8) | 0) /* no operation */
-#define CRYPTO_STAT	((CRYPTO_VN << 8) | 1) /* status */
-#define CRYPTO_ASSOC	((CRYPTO_VN << 8) | 2) /* association ID */
-#define CRYPTO_AUTO	((CRYPTO_VN << 8) | 3) /* autokey values */
-#define CRYPTO_PRIV	((CRYPTO_VN << 8) | 4) /* cookie value */
-#define CRYPTO_DHPAR	((CRYPTO_VN << 8) | 5) /* agreement params */
-#define CRYPTO_DH	((CRYPTO_VN << 8) | 6) /* public value */
-#define CRYPTO_NAME	((CRYPTO_VN << 8) | 7) /* host name/pub key */
-#define CRYPTO_CERT	((CRYPTO_VN << 8) | 8) /* PKI certificate */
-#define CRYPTO_TAI	((CRYPTO_VN << 8) | 9) /* leapseconds table */
-#define CRYPTO_RESP	0x8000			/* response */
-#define CRYPTO_ERROR	0x4000			/* error */
+/*
+ * Autokey event codes
+ */
+#define XEVNT_CMD(x)	(CRPT_EVENT | (x))
+#define XEVNT_OK	XEVNT_CMD(0) /* success */
+#define XEVNT_LEN	XEVNT_CMD(1) /* bad field length */
+#define XEVNT_TSP	XEVNT_CMD(2) /* bad timestamp */
+#define XEVNT_FSP	XEVNT_CMD(3) /* bad filestamp */
+#define XEVNT_PUB	XEVNT_CMD(4) /* bad public key */
+#define XEVNT_MD	XEVNT_CMD(5) /* unsupported digest type */
+#define XEVNT_KEY	XEVNT_CMD(6) /* mismatched digest types */
+#define XEVNT_SGL	XEVNT_CMD(7) /* bad signature length */
+#define XEVNT_SIG	XEVNT_CMD(8) /* signature not verified */
+#define XEVNT_SBJ	XEVNT_CMD(9) /* subject hostname mismatch */
+#define XEVNT_PER	XEVNT_CMD(10) /* time not verified */
+#define XEVNT_CRYPT	XEVNT_CMD(11) /* bad cookie encrypt */
+#define XEVNT_DAT	XEVNT_CMD(12) /* bad TAI data */
 
-#ifdef PUBKEY
 /*
  * Configuration codes
  */
 #define CRYPTO_CONF_NONE  0	/* nothing doing */
-#define CRYPTO_CONF_FLAGS 1	/* initialize flags */
-#define CRYPTO_CONF_PRIV  2	/* load private key from file */
-#define CRYPTO_CONF_PUBL  3	/* load public key from file */
-#define CRYPTO_CONF_DH    4	/* load Diffie_Hellman pars from file */
-#define CRYPTO_CONF_LEAP  5	/* load leapsecond table */
-#define CRYPTO_CONF_KEYS  6	/* set keys directory path */
-#define CRYPTO_CONF_CERT  7	/* load PKI certificate from file */
-#endif /* PUBKEY */
+#define CRYPTO_CONF_PRIV  1	/* host keys file name */
+#define CRYPTO_CONF_SIGN  2	/* signature keys file name */
+#define CRYPTO_CONF_LEAP  3	/* leapseconds table file name */
+#define CRYPTO_CONF_KEYS  4	/* keys directory path */
+#define CRYPTO_CONF_CERT  5	/* certificate file name */
+#define CRYPTO_CONF_RAND  6	/* random seed file name */
 
 /*
- * Function prototypes
+ * The certificate information structure holds X.509 data
  */
-extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
-extern	int	crypto_xmit	P((u_int32 *, int, u_int, keyid_t,
-				    u_int));
-extern	keyid_t	session_key	P((struct sockaddr_in *, struct
-				    sockaddr_in *, keyid_t, keyid_t,
-				    u_long));
-extern	void	make_keylist	P((struct peer *, struct interface *));
-extern	void	key_expire	P((struct peer *));
-extern	void	crypto_agree	P((void));
-#ifdef PUBKEY
-extern	void	crypto_config	P((int, char *));
-extern	void	crypto_setup	P((void));
-extern	int	crypto_public	P((struct peer *, u_char *, u_int));
-#endif /* PUBKEY */
+struct cert_info {
+	EVP_PKEY *pkey;		/* generic key */
+	long	cert_version;	/* X509 version */
+	int	nid;		/* digest/signature NID */
+	u_long	serial;		/* serial number */
+	u_long	first;		/* valid not before */
+	u_long	last;		/* valid not after */
+	u_char	*subject;	/* subject common name */
+	u_char	*issuer;	/* issuer common name */
+	u_char	*cert;		/* ASN.1 certificate */
+	u_int	cert_len;	/* certificate length */
+	u_long	fstamp;		/* filestamp */
+};
 
 /*
  * Cryptographic values
  */
 extern	u_int	crypto_flags;	/* status word */
-#ifdef PUBKEY
-extern	R_DH_PARAMS dh_params;
 extern	struct value host;	/* host name/public key */
-extern	struct value certif;	/* certificate */
+extern	struct value cinfo;	/* host certificate information */
 extern	struct value dhparam;	/* agreement parameters */
 extern	struct value dhpub;	/* public value */
 extern	struct value tai_leap;	/* leapseconds table */
-extern	u_int	crypto_flags;	/* status word */	
 extern	u_int	sys_tai;	/* current UTC offset from TAI */
-#endif /* PUBKEY */
-#endif /* AUTOKEY */
+#endif /* OPENSSL */

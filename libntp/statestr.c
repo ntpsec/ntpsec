@@ -12,6 +12,9 @@
 #include "ntp_refclock.h"
 #include "ntp_control.h"
 #include "ntp_string.h"
+#ifdef OPENSSL
+#include "ntp_crypto.h"
+#endif /* OPENSSL */
 
 /*
  * Structure for turning various constants into a readable string.
@@ -102,7 +105,7 @@ struct codestring sys_codes[] = {
 };
 
 /*
- * Peer Events
+ * Peer events
  */
 static
 struct codestring peer_codes[] = {
@@ -117,6 +120,29 @@ struct codestring peer_codes[] = {
 #endif
 	{ -1,				"event" }
 };
+
+#ifdef OPENSSL
+/*
+ * Crypto events
+ */
+static
+struct codestring crypto_codes[] = {
+	{ XEVNT_OK & ~CRPT_EVENT,	"success" },
+	{ XEVNT_LEN & ~CRPT_EVENT,	"bad_field_length" },
+	{ XEVNT_TSP & ~CRPT_EVENT,	"bad_timestamp" },
+	{ XEVNT_FSP & ~CRPT_EVENT,	"bad_filestamp" },
+	{ XEVNT_PUB & ~CRPT_EVENT,	"bad_public_key" },
+	{ XEVNT_MD & ~CRPT_EVENT,	"unsupported_digest_type" },
+	{ XEVNT_KEY & ~CRPT_EVENT,	"mismatched_digest_types" },
+	{ XEVNT_SGL & ~CRPT_EVENT,	"bad_signature_length" },
+	{ XEVNT_SIG & ~CRPT_EVENT,	"signature_not_verified" },
+	{ XEVNT_SBJ & ~CRPT_EVENT,	"subject_hostname_mismatch" },
+	{ XEVNT_PER & ~CRPT_EVENT,	"time_not_verified" },
+	{ XEVNT_CRYPT & ~CRPT_EVENT,	"bad_cookie_encrypt" },
+	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_TAI_data" },
+	{ -1,				"crypto" }
+};
+#endif /* OPENSSL */
 
 /* Forwards */
 static const char *getcode P((int, struct codestring *));
@@ -235,7 +261,14 @@ eventstr(
 	int num
 	)
 {
-	return getcode(num & ~PEER_EVENT, (num & PEER_EVENT) ? peer_codes : sys_codes);
+	if (num & PEER_EVENT)
+		return (getcode(num & ~PEER_EVENT, peer_codes));
+#ifdef OPENSSL
+	else if (num & CRPT_EVENT)
+		return (getcode(num & ~CRPT_EVENT, crypto_codes));
+#endif /* OPENSSL */
+	else
+		return (getcode(num, sys_codes));
 }
 
 const char *
