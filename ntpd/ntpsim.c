@@ -5,11 +5,11 @@
 #include "ntpsim.h"
 
 /* Defines... */
-#define MAXTIME 3600*24         /* Time to run simulation       */
+#define SIM_TIME 86400		/* Simulation Time		*/
 #define NET_DLY 1000            /* Base Propagation Delay       */
-#define PROC_DELAY 10           /* Base Processing Delay        */
-#define SERVER_ACCURACY 10	/* Server Accuracy		*/
-#define BEEP_TIME 3600          /* Beep Delay                   */
+#define PROC_DLY 10             /* Base Processing Delay        */
+#define SRVR_ACRY 10	        /* Server Accuracy		*/
+#define BEEP_DLY 3600           /* Beep Delay                   */
 #define TCK 10000               /* Tick = 1/frequency           */
 #define TCKADJ 5                /* Tickadj                      */
 
@@ -62,6 +62,7 @@ Node node()
 	n.time = 0.0;
 	n.ntp_time = n.time;
 	n.clk_time = n.time;
+	n.sim_time = SIM_TIME;
 	n.adj = 0.0;
 	n.tick = TCK;
 	n.tickadj = TCKADJ;
@@ -69,7 +70,11 @@ Node node()
 	n.ferr = 0;
 	n.fnse = 0;
 	n.ndly = NET_DLY;
-	n.nnse = 0;
+	n.pdly = PROC_DLY;
+	n.bdly = BEEP_DLY;
+	n.nnse1 = 0;
+	n.nnse2 = 0;
+	n.snse = SRVR_ACRY;
 	n.events = NULL;
 	n.rbuflist = (struct recvbuf *)0;
 	push(event(0, BEEP), &(n.events));
@@ -139,7 +144,7 @@ void run(Node *n)
 	Event e;
 	double maxtime;
 
-	maxtime = n->time + MAXTIME;
+	maxtime = n->time + n->sim_time;
 	while( n->time <= maxtime && n->events != NULL ) {
 		e = pop(&(n->events));
 		ndeclk(n, e);
@@ -193,7 +198,7 @@ void netpkt(Node *n, Event e)
 int srvr_rply(Node *n, struct sockaddr_in *dest,
 		struct interface *inter, struct pkt *rpkt)
 {
-	double  srvr_time = (guassian(n->time*1e6, SERVER_ACCURACY))/1e6;
+	double  srvr_time = (guassian(n->time*1e6, n->snse))/1e6;
 	struct  pkt xpkt;
 	struct recvbuf rbuf;
 
@@ -222,7 +227,7 @@ int srvr_rply(Node *n, struct sockaddr_in *dest,
         HTONL_FP(&srvr_reftime, &xpkt.reftime);
         xpkt.org = rpkt->xmt;
 	recv_time.l_i = (int)srvr_time;
-	prop_delay = guassian(n->ndly, n->nnse);
+	prop_delay = guassian(n->ndly, n->nnse1);
 	recv_time.l_f = (srvr_time-(int)srvr_time)*1e6+prop_delay;
 	if(recv_time.l_f >= 1e6) {
 		recv_time.l_i++;
@@ -230,7 +235,7 @@ int srvr_rply(Node *n, struct sockaddr_in *dest,
 	}
         HTONL_FP(&recv_time, &xpkt.rec);
 	xmt_ts.l_i = (int)srvr_time;
-	proc_delay = guassian(PROC_DELAY, sqrt(PROC_DELAY/1000));
+	proc_delay = guassian(n->pdly, sqrt(n->pdly/1000));
         xmt_ts.l_f = (srvr_time-(int)srvr_time)*1e6+prop_delay+proc_delay;
 	if(xmt_ts.l_f >= 1e6) {
                 xmt_ts.l_i++; 
@@ -248,7 +253,7 @@ int srvr_rply(Node *n, struct sockaddr_in *dest,
                 abortsim("server-malloc");
         memcpy(rbuf.dstadr, inter, sizeof(struct interface));
         rbuf.next = (struct recvbuf *)0;
-	prop_delay += guassian(n->ndly, n->nnse);
+	prop_delay += guassian(n->ndly, n->nnse2);
 	xvnt = event((srvr_time*1e6+prop_delay+proc_delay)/1e6, PACKET);
 	xvnt.rcv_buf = rbuf;
 	push(xvnt, &(n->events));
@@ -260,14 +265,21 @@ void ndbeep(Node *n, Event e)
 	static int first_time = 1;
 	char *dash = "-----------------";
 
-	if(first_time) {
-		printf("\t%4cNODE TIME%4c\t%4cCLOCK TIME%3c\t%5cNTP TIME\n", ' ', ' ', ' ', ' ',' ');
-		printf("\t%s\t%s\t%s\n", dash, dash, dash);
-		first_time = 0;
+	if(n->bdly>0) {
+		if(first_time) {
+			printf("\t%4c    T    %4c\t%4c  T+ERR  %3c\t%5cT+ERR+NTP\n", ' ', ' ', ' ', ' ',' ');
+			printf("\t%s\t%s\t%s\n", dash, dash, dash);
+			first_time = 0;
+			push(event(n->bdly, BEEP), &(n->events));  
+        		push(event(n->sim_time, BEEP), &(n->events));
+			printf("\t%16.6f\t%16.6f\t%16.6f\n",
+                        	n->time, n->clk_time, n->ntp_time);
+			return;
+		}
+		printf("\t%16.6f\t%16.6f\t%16.6f\n",
+			n->time, n->clk_time, n->ntp_time);
+		push(event(e.time+n->bdly, BEEP), &(n->events));
 	}
-	printf("\t%16.6f\t%16.6f\t%16.6f\n",
-		n->time, n->clk_time, n->ntp_time);
-	push(event(e.time+BEEP_TIME, BEEP), &(n->events));
 }
 
 /* aborts the simulator */
