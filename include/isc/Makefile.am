@@ -29,6 +29,7 @@ noinst_HEADERS = \
 	platform.h \
 	print.h \
 	result.h \
+	region.h \
 	sockaddr.h \
 	strerror.h \
 	string.h \
