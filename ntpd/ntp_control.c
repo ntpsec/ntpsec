@@ -1474,14 +1474,14 @@ ctl_putpeer(
 		if (peer->flags & FLAG_REFCLOCK) {
 			if (peer->stratum > 0)
 			    ctl_putadr(peer_var[CP_REFID].text,
-			        peer->refid);
+			        peer->refid, NULL);
 			else
 			    ctl_putid(peer_var[CP_REFID].text,
 			        (char *)&peer->refid);
 		} else {
 			if (peer->stratum > 1)
 			    ctl_putadr(peer_var[CP_REFID].text,
-				peer->refid);
+				peer->refid, NULL);
 			else
 			    ctl_putid(peer_var[CP_REFID].text,
 				(char *)&peer->refid);
