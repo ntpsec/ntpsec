@@ -39,14 +39,15 @@
  *                                           =   signature   =
  *                                           |               |
  *                                           +---------------+
+ *                                           CRYPTO_DHPAR rsp
  *                                           CRYPTO_DH rsp
  *                                           CRYPTO_NAME rsp
  *                                           CRYPTO_TAI rsp
  *                                           
- *   CRYPTO_PUBL  1  -    offer/select
+ *   CRYPTO_STAT  1  -    offer/select
  *   CRYPTO_ASSOC 2  8    association ID
  *   CRYPTO_AUTO  3  88   autokey values
- *   CRYPTO_PRIV  4  84   cookie values
+ *   CRYPTO_PRIV  4  84   cookie value
  *   CRYPTO_DHPAR 5  220  agreement parameters
  *   CRYPTO_DH    6  152  public value
  *   CRYPTO_NAME  7  460  host name/public key
@@ -55,6 +56,12 @@
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
  */
+
+/*
+ * Global cryptodata in host byte order.
+ */
+u_int	crypto_flags;		/* status word */
+u_int	sys_tai;		/* current UTC offset from TAI */
 
 #ifdef PUBKEY
 /*
@@ -87,12 +94,6 @@ struct value host;		/* host name/public key */
 struct value dhparam;		/* agreement parameters */
 struct value dhpub;		/* public value */
 struct value tai_leap;		/* leapseconds table */
-
-/*
- * Global cryptodata in host byte order.
- */
-int	crypto_flags;		/* flags that wave cryptically */
-u_int	sys_tai;		/* current UTC offset from TAI */
 
 /*
  * Cryptotypes
@@ -338,13 +339,20 @@ crypto_recv(
 		switch (code) {
 
 		/*
-		 * Install association ID. This is used in broadcast
-		 * client mode only.
+		 * Install association ID and status word.
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
-			if (!(peer->flags & FLAG_AUTOKEY) &&
-			    ntohl(pkt[i + 1]) != 0)
+			if (peer->flags & FLAG_AUTOKEY)
+				break;
+			if (ntohl(pkt[i + 1]) != 0)
 				peer->assoc = ntohl(pkt[i + 1]);
+			peer->crypto = ntohl(pkt[i + 2]);
+#ifdef DEBUG
+			if (debug)
+				printf(
+				    "crypto_recv: flags %x\n",
+				    peer->crypto);
+#endif
 			break;
 
 		/*
@@ -538,6 +546,7 @@ crypto_recv(
 				break;
 			}
 			peer->flash &= ~TEST10;
+			crypto_flags |= CRYPTO_FLAG_DH;
 
 			/*
 			 * Initialize agreement parameters and extension
@@ -550,9 +559,6 @@ crypto_recv(
 			dhparam.vallen = vp->vallen;
 			if (dhparam.ptr != NULL)
 				free(dhparam.ptr);
-			if (dhparam.sig == NULL)
-				dhparam.sig = emalloc(private_key.bits /
-				    8);
 			pp = emalloc(temp);
 			dhparam.ptr = (u_char *)pp;
 			memcpy(pp, vp->pkt, temp);
@@ -565,6 +571,9 @@ crypto_recv(
 			if (dh_private != NULL)
 				free(dh_private);
 			dh_private = emalloc(dh_keyLen);
+			if (dhparam.sig == NULL)
+				dhparam.sig = emalloc(private_key.bits /
+				    8);
 
 			/*
 			 * Initialize public value extension field.
@@ -583,7 +592,9 @@ crypto_recv(
 
 		/*
 		 * Verify public value and compute agreed key in
-		 * symmetric modes. 
+		 * symmetric modes. If the filestamp is later than the
+		 * current value, we abandon and refill the agreement
+		 * parameters.
 		 */
 		case CRYPTO_DH:
 			peer->cmmd = ntohl(pkt[i]);
@@ -627,6 +638,9 @@ crypto_recv(
 			 */
 			if (rval != RV_OK) {
 				temp = 0;
+			} else if (ntohl(vp->fstamp) > dhparam.fstamp) {
+				rval = RV_FSP;
+				crypto_flags &= ~CRYPTO_FLAG_DH;
 			} else {
 				rval = R_ComputeDHAgreedKey(dh_key,
 				    (u_char *)&pkt[i + 5], dh_private,
@@ -772,6 +786,8 @@ crypto_recv(
 				break;
 			}
 			peer->flash &= ~TEST10;
+			crypto_flags |= CRYPTO_FLAG_TAI;
+			sys_tai = temp / 4 + TAI_1972 - 1;
 
 			/*
 			 * Initialize leapseconds table and extension
@@ -787,7 +803,6 @@ crypto_recv(
 				tai_leap.sig =
 				    emalloc(private_key.bits / 8);
 			memcpy(tai_leap.ptr, vp->pkt, temp);
-			sys_tai = temp / 4 + TAI_1972 - 1;
 			crypto_agree();
 			break;
 #endif /* PUBKEY */
@@ -853,10 +868,11 @@ crypto_xmit(
 	switch (opcode) {
 
 	/*
-	 * Exchange association IDs. This is used in broadcast server
-	 * mode and is a no-op here.
+	 * Send association ID and status word.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
+		xpkt[i + 2] = htonl(crypto_flags);
+		len += 4;
 		break;
 
 	/*
@@ -915,15 +931,15 @@ crypto_xmit(
 		break;
 
 
+#ifdef PUBKEY
 	/*
 	 * The following commands and responses work only when public-
 	 * key cryptography has been configured. If configured, but
 	 * disabled due to no crypto command in the configuration file,
 	 * they are ignored and an error response is returned.
 	 */
-#ifdef PUBKEY
 	/*
-	 * Send agreenebt parameters, timestamp and signature.
+	 * Send agreement parameters, timestamp and signature.
 	 */
 	case CRYPTO_DHPAR | CRYPTO_RESP:
 		if (!crypto_flags) {
@@ -1108,6 +1124,7 @@ crypto_setup(void)
 		    "crypto: public/private key files mismatch");
 		exit (-1);
 	}
+	crypto_flags |= CRYPTO_FLAG_RSA;
 
 	/*
 	 * Assemble public key and host name in network byte order.
@@ -1482,6 +1499,7 @@ crypto_dh(
 	dh_keyLen = primelen / 2;
 	dh_private = emalloc(dh_keyLen);
 	dhparam.sig = emalloc(private_key.bits / 8);
+	crypto_flags |= CRYPTO_FLAG_DH;
 
 	/*
 	 * Initialize public value extension field.
@@ -1604,6 +1622,7 @@ crypto_tai(
 		*pp++ = htonl(leapsec[i]);
 	}
 	tai_leap.sig = emalloc(private_key.bits / 8);
+	crypto_flags |= CRYPTO_FLAG_TAI;
 	sys_tai = len / 4 + TAI_1972 - 1;
 
 
@@ -1737,6 +1756,7 @@ crypto_config(
 		strcpy(keysdir, cp);
 		break;
 	}
+	crypto_flags |= CRYPTO_FLAG_ENAB;
 }
 # else
 int ntp_crypto_bs_pubkey;

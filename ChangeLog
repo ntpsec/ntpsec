@@ -1,3 +1,15 @@
+2000-08-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (peer_xmit): Crypto cleanup
+	* ntpd/ntp_crypto.c: Cleanup
+	* ntpd/ntp_control.c: Join the club
+	* ntpd/ntp_config.c: Call crypto_config() instead; we got rid of
+	crypto_flags.
+	* include/ntp_crypto.h (CRYPTO_FLAG_ENAB): New crypto flags, rework
+	* include/ntp_control.h (CS_FLAGS): Wiggle in.
+	* include/ntp.h: Added crypto peer status to struct peer
+	From Dave Mills
+
 2000-08-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/ntp-genkeys.c: Initialize path_keysdir to NTP_KEYSDIR.

@@ -2000,8 +2000,13 @@ peer_xmit(
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-			if (!crypto_flags && peer->pcookie.tstamp ==
-			    0 && sys_leap != LEAP_NOTINSYNC)
+			if (!peer->crypto)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_ASSOC,
+				    peer->hcookie, peer->assoc);
+			else if (!crypto_flags &&
+			    peer->pcookie.tstamp == 0 && sys_leap !=
+			    LEAP_NOTINSYNC)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
@@ -2010,7 +2015,8 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			else if (crypto_flags && dhparam.vallen == 0)
+			else if (crypto_flags && !(crypto_flags &
+			    CRYPTO_FLAG_DH))
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DHPAR,
 				    peer->hcookie, peer->assoc);
@@ -2042,7 +2048,7 @@ peer_xmit(
 				    peer->hcookie,
 				    peer->associd);
 #ifdef PUBKEY
-			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			else if (peer->crypto & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,
@@ -2067,14 +2073,18 @@ peer_xmit(
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
+			if (!peer->crypto)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_ASSOC,
+				    peer->hcookie, peer->assoc);
 #ifdef PUBKEY
-			if (crypto_flags && peer->pubkey.ptr == NULL)
+			else if (crypto_flags && peer->pubkey.ptr ==
+			    NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			else
 #endif /* PUBKEY */
-			if (peer->pcookie.tstamp == 0)
+			else if (peer->pcookie.tstamp == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
@@ -2084,7 +2094,7 @@ peer_xmit(
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
 #ifdef PUBKEY
-			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			else if (peer->crypto & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,

@@ -283,7 +283,8 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 #ifdef AUTOKEY
-	associd_t assoc;	/* association ID of peer */
+	associd_t assoc;	/* peer association ID */
+	u_int32	crypto;		/* peer status word */
 #ifdef PUBKEY
 	struct value pubkey;	/* public key */
 	u_char	*keystr;	/* public key file name */

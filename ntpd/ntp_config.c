@@ -919,14 +919,17 @@ getconfig(
 			break;
 
 		    case CONFIG_CRYPTO:
-			crypto_flags |= CRYPTO_FLAG_ENAB;
+			if (ntokens == 1) {
+				crypto_config(CRYPTO_CONF_FLAGS	, "0");
+				break;
+			}
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
 
 			    temp = matchkey(tokens[i++], crypto_keywords);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
-				    "crypto: missing file name");
+				    "crypto: missing argument");
 				errflg++;
 				break;
 			    }

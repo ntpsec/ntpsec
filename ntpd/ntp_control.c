@@ -114,12 +114,13 @@ static struct ctl_var sys_var[] = {
 	{ CS_STABIL,	RO, "stability" },	/* 18 */
 	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
 #ifdef PUBKEY
-	{ CS_HOST,	RO, "hostname" },	/* 20 */
-	{ CS_PUBLIC,	RO, "publickey" },	/* 21 */
-	{ CS_DHPARAMS,	RO, "params" },		/* 22 */
-	{ CS_REVTIME,	RO, "refresh"},		/* 23 */
-	{ CS_LEAPTAB,	RO, "leaptable" },	/* 24 */
-	{ CS_TAI,	RO, "tai"},		/* 25 */
+	{ CS_FLAGS,	RO, "flags" },		/* 20 */
+	{ CS_HOST,	RO, "hostname" },	/* 21 */
+	{ CS_PUBLIC,	RO, "publickey" },	/* 22 */
+	{ CS_DHPARAMS,	RO, "params" },		/* 23 */
+	{ CS_REVTIME,	RO, "refresh"},		/* 24 */
+	{ CS_LEAPTAB,	RO, "leaptable" },	/* 25 */
+	{ CS_TAI,	RO, "tai"},		/* 26 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -150,6 +151,7 @@ static	u_char def_sys_var[] = {
 	CS_COMPLIANCE,
 	CS_STABIL,
 #ifdef PUBKEY
+	CS_FLAGS,
 	CS_HOST,
 	CS_DHPARAMS,
 	CS_REVTIME,
@@ -202,13 +204,14 @@ static struct ctl_var peer_var[] = {
 	{ CP_DISP,	PADDING,"" },       /* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" }, /* 37 */
 #ifdef PUBKEY
-	{ CP_HOST,	RO, "hostname" },	/* 38 */
-	{ CP_PUBLIC,	RO, "publickey" },	/* 39 */
-	{ CP_SESKEY,	RO, "pcookie" },	/* 40 */
-	{ CP_SASKEY,	RO, "hcookie" },	/* 41 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
+	{ CP_FLAGS,	RO, "flags" },		/* 38 */
+	{ CP_HOST,	RO, "hostname" },	/* 39 */
+	{ CP_PUBLIC,	RO, "publickey" },	/* 40 */
+	{ CP_SESKEY,	RO, "pcookie" },	/* 41 */
+	{ CP_SASKEY,	RO, "hcookie" },	/* 42 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -248,6 +251,7 @@ static u_char def_peer_var[] = {
 	CP_FILTOFFSET,
 	CP_FILTERROR,
 #ifdef PUBKEY
+	CP_FLAGS,
 	CP_HOST,
 	CP_SESKEY,
 	CP_INITSEQ,
@@ -272,7 +276,7 @@ static struct ctl_var clock_var[] = {
 	{ CC_FUDGETIME2, RO,	"fudgetime2" }, /* 8 */
 	{ CC_FUDGEVAL1, RO, "stratum" },    /* 9 */
 	{ CC_FUDGEVAL2, RO, "refid" },  /* 10 */
-	{ CC_FLAGS, RO, "flags" },  /* 11 */
+	{ CC_FLAGS,	RO, "flags" },  /* 11 */
 	{ CC_DEVICE,	RO, "device" }, /* 12 */
 	{ CC_VARLIST,	RO, "clock_var_list" },/* 13 */
 	{ 0,		EOV,	""  }
@@ -1316,6 +1320,12 @@ ctl_putsys(
 		break;
 
 #ifdef PUBKEY
+	case CS_FLAGS:
+		if (crypto_flags)
+			ctl_puthex(sys_var[CS_FLAGS].text,
+			    crypto_flags);
+		break;
+
 	case CS_HOST:
 		ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
 			strlen(sys_hostname));
@@ -1570,6 +1580,11 @@ ctl_putpeer(
 		}
 		break;
 #ifdef PUBKEY
+	case CP_FLAGS:
+		if (peer->crypto)
+			ctl_puthex(peer_var[CP_FLAGS].text, peer->crypto);
+		break;
+
 	case CP_HOST:
 		if (peer->keystr != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->keystr,
