@@ -10,6 +10,8 @@
 #include "ntp_crypto.h"
 #endif /* OPENSSL */
 
+#include <isc/boolean.h>
+
 /*
  * Calendar arithmetic - contributed by G. Healton
  */
@@ -185,6 +187,7 @@ struct interface {
 	long notsent;			/* number of send failures */
 	u_int ifindex;			/* Interface index */
 	u_int scopeid;			/* Scope used for Multicasting */
+	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
 };
 
 /*
