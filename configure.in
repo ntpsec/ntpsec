@@ -3454,7 +3454,7 @@ esac
 #
 
 if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[[ISC: struct sockaddr as sa_len?]])
+    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[ISC: struct sockaddr as sa_len?])
 fi
 
 AC_MSG_CHECKING(for IPv6 structures)
@@ -3475,7 +3475,7 @@ AC_TRY_LINK([
 ],[ struct if_laddrconf a; ],
 	[AC_MSG_RESULT(yes)
 	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, ,
-		[[ISC: have struct if_laddrconf?]])],
+		[ISC: have struct if_laddrconf?])],
 	[AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([for struct if_laddrreq])
@@ -3485,12 +3485,13 @@ AC_TRY_LINK([
 ],[ struct if_laddrreq a; ],
 	[AC_MSG_RESULT(yes)
 	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, ,
-		[[ISC: have struct if_laddrreq?]])],
+		[ISC: have struct if_laddrreq?])],
 	[AC_MSG_RESULT(no)])
 
 case "$found_ipv6" in
  yes)
-    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[[ISC: Have IPv6?]])
+    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
+    AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
 
     AC_MSG_CHECKING(for in6_pktinfo)
     AC_TRY_COMPILE([
@@ -3503,7 +3504,7 @@ $isc_netinet6in6_hack
 	[struct in6_pktinfo xyzzy; return (0);],
 	[AC_MSG_RESULT(yes)
 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
-		[[ISC: Have struct in6_pktinfo?]])],
+		[ISC: Have struct in6_pktinfo?])],
 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
 
     AC_MSG_CHECKING(for in6addr_any)
@@ -3519,14 +3520,14 @@ $isc_in_addr6_hack
 	[AC_MSG_RESULT(yes)],
 	[AC_MSG_RESULT(no)
 	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
-		[[ISC: Need in6addr_any?]])]
+		[ISC: Need in6addr_any?])]
 	)
     ;;
 esac
 
 case "$ac_cv_header_sys_sysctl_h" in
  yes)
-    AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[[ISC: sys/sysctl.h implies iflist_sysctl]])
+    AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[ISC: sys/sysctl.h implies iflist_sysctl])
     ;;
 esac
 
