@@ -590,6 +590,14 @@ newpeer(
 		peer->dstadr = dstadr;
 	else
 		peer->dstadr = findinterface(srcadr);
+
+	/*
+	 * Broadcast needs the socket enabled for broadcast
+	 */
+	if (cast_flags & (MDF_BCLNT | MDF_BCAST)) {
+		enable_broadcast(peer->dstadr, srcadr);
+	}
+
 	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
