@@ -1,3 +1,37 @@
+/* Windows NT Clock Routines
+ *
+ *
+ * Revision History:
+ * $Log: <Not implemented> $
+ * Revision 1.8  2000/11/19 08:03:20  dietrich
+ * From: "Colin Dancer" <colin.dancer@pyrochrome.net>
+ * To: <bugs@ntp.org>
+ * Sent: 10 November 2000 12:59
+ * Subject: NT bug in NTP 4.0.99j
+ *
+ * I've found a bug in (and produced a fix for) the NT clock interpolation
+ * code in NTP 4.0.99j.
+ *
+ * The symptoms of the problem are that gettimeofday() function on NT
+ * can be wrong by hundreds of seconds if, while a gettimeofday() call
+ * is being processed, an APC completes after the query of the performance
+ * counter but before the lock is grabbed.  The most obvious fix is to move
+ * the lock to include the querying of the performance counter, but this
+ * could affect the predictability of the timestamp so I have instead
+ * tweaked the code to detect and sidestep the duff calculation.
+ *
+ * I've also found that on a loaded system the execution of the APC can be
+ * delayed, leading to errors of upto 10ms.  There is no easy fix to this,
+ * but I do have code for an alternative interpolation scheme which avoids
+ * the problem on single processor systems. I'm currently integrating this
+ * along with code for deciding which algorithm to use based on whether
+ * the system is SP or MP.
+ *
+ * Created by Sven Dietrich  sven@inter-yacht.com
+ *
+ */
+
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -62,8 +96,8 @@ adj_systime(
 
 	/* dtemp is in micro seconds. NT uses 100 ns units,
 	 * so a unit change in dwTimeAdjustment corresponds
-	 * to slewing 10 ppm on a 100 Hz system. 
-	 * Calculate the number of 100ns units to add, 
+	 * to slewing 10 ppm on a 100 Hz system.
+	 * Calculate the number of 100ns units to add,
 	 * using OS tick frequency as per suggestion from Harry Pyle,
 	 * and leave the remainder in dtemp */
 	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5)) ;
@@ -71,9 +105,9 @@ adj_systime(
 
 	/* only adjust the clock if adjustment changes */
 	if (last_Adj != dwTimeAdjustment) { 	
-			last_Adj = dwTimeAdjustment;  
+			last_Adj = dwTimeAdjustment;
 # ifdef DEBUG
-		if (debug > 1) 
+		if (debug > 1)
 			printf("SetSystemTimeAdjustment( %ld) + (%ld)\n", dwTimeAdjustment, units_per_tick);			
 # endif
 			dwTimeAdjustment += units_per_tick;
@@ -84,7 +118,7 @@ adj_systime(
 	{
 		msyslog(LOG_ERR, "Can't adjust time: %m");
 		return 0;
-	} 
+	}
 	else {
 		sys_residual = dtemp / 1000000.0;
 	}
@@ -108,7 +142,7 @@ void init_winnt_time(void) {
 
 	units_per_tick = initial_units_per_tick;
 
-	/* Calculate the time adjustment resulting from incrementing 
+	/* Calculate the time adjustment resulting from incrementing
 	 * units per tick by 1 unit for 1 second */
 	ppm_per_adjust_unit = 1000000.0 / (double) every;
 
@@ -132,6 +166,7 @@ void reset_winnt_time(void) {
 }
 
 
+
 int
 gettimeofday(
 	struct timeval *tv
@@ -145,12 +180,16 @@ gettimeofday(
 	LARGE_INTEGER LargeIntNowCount;
 	ULONGLONG Time;
 	ULONGLONG NowCount;
+   ULONGLONG PreCount;                                                  /*FIX*/
 	LONGLONG TicksElapsed;
 	LONG time_adjustment;
 
-	/*  Mark a mark ASAP. The latency to here should 
+	/*  Mark a mark ASAP. The latency to here should
 	 *  be reasonably deterministic
 	 */
+
+   PreCount = LastTimerCount;                                           /*FIX*/
+
 	if (!QueryPerformanceCounter(&LargeIntNowCount)) {
 		msyslog(LOG_ERR, "QueryPeformanceCounter failed: %m");
 		exit(1);
@@ -160,19 +199,35 @@ gettimeofday(
 
 	/*  Get base time we are going to extrapolate from
 	 */	
-	EnterCriticalSection(&TimerCritialSection); 
+	EnterCriticalSection(&TimerCritialSection);
 		Count = LastTimerCount;
 		Time = LastTimerTime;
 	LeaveCriticalSection(&TimerCritialSection);
 
 	/*  Calculate when now is.
-	 *  
+	 *
 	 *  Result = LastTimerTime +  (NowCount - LastTimerCount) / PerfFrequency
 	 */
-	if (NowCount >= Count) 
-	  TicksElapsed = NowCount - Count; /* linear progression of ticks */
-	else 
-		TicksElapsed = NowCount + (RollOverCount - Count);
+
+	if (NowCount >= Count)
+   {
+	    TicksElapsed = NowCount - Count; /* linear progression of ticks */
+   }
+	else
+   {
+     /************************************************************************/
+     /* Differentiate between real rollover and the case of taking a         */
+     /* perfcount then the APC coming in.                                    */
+     /************************************************************************/
+     if (Count > PreCount)                                              /*FIX*/
+     {                                                                  /*FIX*/
+       TicksElapsed = 0;                                                /*FIX*/
+     }                                                                  /*FIX*/
+     else                                                               /*FIX*/
+     {                                                                  /*FIX*/
+       TicksElapsed = NowCount + (RollOverCount - Count);               /*FIX*/
+     }                                                                  /*FIX*/
+   }
 
 	/*  Calculate the new time (in 100's of nano-seconds)
 	 */
@@ -188,11 +243,10 @@ gettimeofday(
 	return 0;
 }
 
-
 static void CALLBACK
 TimerApcFunction(
-	LPVOID lpArgToCompletionRoutine,   
-	DWORD dwTimerLowValue,           
+	LPVOID lpArgToCompletionRoutine,
+	DWORD dwTimerLowValue,
 	DWORD dwTimerHighValue
 	)
 {
@@ -210,21 +264,21 @@ TimerApcFunction(
 	/* Check to see if the counter has rolled. This happens
 	   more often on Multi-CPU systems */
 
-	if ((ULONGLONG) LargeIntNowCount.QuadPart < LastTimerCount) {  
+	if ((ULONGLONG) LargeIntNowCount.QuadPart < LastTimerCount) {
 		/* Counter Rolled - try and estimate the rollover point using
 		  the nominal counter frequency divided by an estimate of the
-		  OS frequency */ 
-		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS - 
+		  OS frequency */
+		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS -
 			(ULONGLONG) LargeIntNowCount.QuadPart;
 #ifdef DEBUG
-		msyslog(LOG_INFO, 
-			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
+		msyslog(LOG_INFO,
+			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u",
 				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
 #endif
 	}
 
 	/* Now we can hang out and wait for the critical section to free up;
-	   we will get the CPU this timeslice. Meanwhile other tasks can use 
+	   we will get the CPU this timeslice. Meanwhile other tasks can use
 	   the last value of LastTimerCount */
 		
 	EnterCriticalSection(&TimerCritialSection);
@@ -267,7 +321,7 @@ static void StartClockThread(void)
 	LARGE_INTEGER Freq = { 0, 0 };
 	
 	/* get the performance counter freq*/
-    if (!QueryPerformanceFrequency(&Freq)) { 
+    if (!QueryPerformanceFrequency(&Freq)) {
 		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
 		exit (-1);
 	}
@@ -276,7 +330,7 @@ static void StartClockThread(void)
 
 	/* init variables with the time now */
 	GetSystemTimeAsFileTime(&StartTime);
-	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) + 
+	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) +
 		(ULONGLONG) StartTime.dwLowDateTime;
 
 	/* init sync objects */
@@ -306,8 +360,8 @@ static void StopClockThread(void)
 
 		DeleteCriticalSection(&TimerCritialSection);
 		msyslog(LOG_INFO, "The Network Time Protocol Service has stopped.");
-	} 
-	else 
+	}
+	else
 		msyslog(LOG_ERR, "Network Time Protocol Service Failed to Stop");
 }
 
