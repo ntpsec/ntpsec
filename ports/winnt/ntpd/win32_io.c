@@ -1,3 +1,4 @@
+/* This file implementes system calls that are not compatible with UNIX */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -13,6 +14,39 @@
 #include "ntp_refclock.h"
 #include "win32_io.h"
 
+
+int NT_set_process_priority(void)
+{
+	DWORD  SingleCPUMask = 0;
+	DWORD ProcessAffinityMask, SystemAffinityMask;
+	if (!GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &
+		 SystemAffinityMask))
+		msyslog(LOG_ERR, "GetProcessAffinityMask: %m");
+	else {
+		SingleCPUMask = 1; 
+# ifdef DEBUG 
+	msyslog(LOG_INFO, "System AffinityMask = %x", SystemAffinityMask); 
+# endif 
+		}
+
+	while (SingleCPUMask && !(SingleCPUMask & SystemAffinityMask)) 
+		SingleCPUMask = SingleCPUMask << 1; 
+		
+	if (!SingleCPUMask) 
+		msyslog(LOG_ERR, "Can't set Processor Affinity Mask"); 
+	else if (!SetProcessAffinityMask(GetCurrentProcess(), SingleCPUMask)) 
+		msyslog(LOG_ERR, "SetProcessAffinityMask: %m"); 
+# ifdef DEBUG 
+	else msyslog(LOG_INFO,"ProcessorAffinity Mask: %x", SingleCPUMask ); 
+# endif 
+	if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) 
+		{
+		msyslog(LOG_ERR, "SetPriorityClass: %m"); 
+		return 0;
+		}
+	else 
+		return 1;
+}
 
 /*
  * refclock_open - open serial port for reference clock
