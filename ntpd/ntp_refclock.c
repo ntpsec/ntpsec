@@ -34,21 +34,9 @@
 #include <sys/ppsclock.h>
 #endif /* HAVE_PPSCLOCK_H */
 
-#ifdef HAVE_PPSAPI
-# ifdef HAVE_TIMEPPS_H
-#  include <timepps.h>
-# else
-#  ifdef HAVE_SYS_TIMEPPS_H
-#   include <sys/timepps.h>
-#  endif
-# endif
-#endif /* HAVE_PPSAPI */
-
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
-
-#undef HAVE_PPSAPI      /* !!! !!! !!! !!! fix me */
 
 /*
  * Reference clock support is provided here by maintaining the fiction
@@ -103,11 +91,6 @@ static int refclock_cmpl_fp P((const void *, const void *));
 static int refclock_cmpl_fp P((const double *, const double *));
 #endif /* QSORT_USES_VOID_P */
 static int refclock_sample P((struct refclockproc *));
-
-#ifdef HAVE_PPSAPI
-extern int pps_assert;		/* capture edge 1:assert, 0:clear */
-extern int pps_hardpps;		/* PPS kernel 1:on, 0:off */
-#endif /* HAVE_PPSAPI */
 
 /*
  * refclock_report - note the occurance of an event
@@ -617,14 +600,6 @@ refclock_gtlin(
 	int i;
 	l_fp trtmp, tstmp;
 	char c;
-#ifdef TIOCDCDTIMESTAMP
-	struct timeval dcd_time;
-#endif /* TIOCDCDTIMESTAMP */
-#ifdef HAVE_PPSAPI
-	pps_info_t pi;
-	struct timespec timeout, *tsp;
-	double a;
-#endif /* HAVE_PPSAPI */
 
 	/*
 	 * Check for the presence of a timestamp left by the tty_clock
@@ -637,58 +612,6 @@ refclock_gtlin(
 	dpend = dpt + rbufp->recv_length;
 	trtmp = rbufp->recv_time;
 
-#ifdef HAVE_PPSAPI
-	timeout.tv_sec = 0;
-	timeout.tv_nsec = 0;
-	if ((rbufp->fd == fdpps) &&
-	    (time_pps_fetch(fdpps, PPS_TSFMT_TSPEC, &pi, &timeout) >= 0)) {
-		if(pps_assert)
-			tsp = &pi.assert_timestamp;
-		else
-			tsp = &pi.clear_timestamp;
-		a = tsp->tv_nsec;
-		a /= 1e9;
-		tstmp.l_uf =  a * 4294967296.0;
-		tstmp.l_ui = tsp->tv_sec;
-		tstmp.l_ui += JAN_1970;
-		L_SUB(&trtmp, &tstmp);
-		if (trtmp.l_ui == 0) {
-#ifdef DEBUG
-			if (debug > 1) {
-				printf(
-				    "refclock_gtlin: fd %d time_pps_fetch %s",
-				    fdpps, lfptoa(&tstmp, 6));
-				printf(" sigio %s\n", lfptoa(&trtmp, 6));
-			}
-#endif
-			trtmp = tstmp;
-			goto gotit;
-		} else
-			trtmp = rbufp->recv_time;
-	}
-#endif /* HAVE_PPSAPI */
-#ifdef TIOCDCDTIMESTAMP
-	if(ioctl(rbufp->fd, TIOCDCDTIMESTAMP, &dcd_time) != -1) {
-		TVTOTS(&dcd_time, &tstmp);
-		tstmp.l_ui += JAN_1970;
-		L_SUB(&trtmp, &tstmp);
-		if (trtmp.l_ui == 0) {
-#ifdef DEBUG
-			if (debug > 1) {
-				printf(
-				    "refclock_gtlin: fd %d DCDTIMESTAMP %s",
-				    rbufp->fd, lfptoa(&tstmp, 6));
-				printf(" sigio %s\n", lfptoa(&trtmp, 6));
-			}
-#endif
-			trtmp = tstmp;
-			goto gotit;
-		} else
-			trtmp = rbufp->recv_time;
-	}
-	else
-	/* XXX fallback to old method if kernel refuses TIOCDCDTIMESTAMP */
-#endif  /* TIOCDCDTIMESTAMP */
 	if (dpend >= dpt + 8) {
 		if (buftvtots(dpend - 8, &tstmp)) {
 			L_SUB(&trtmp, &tstmp);
@@ -710,9 +633,6 @@ refclock_gtlin(
 		}
 	}
 
-#if defined(HAVE_PPSAPI) || defined(TIOCDCDTIMESTAMP)
-gotit:
-#endif
 	/*
 	 * Edit timecode to remove control chars. Don't monkey with the
 	 * line buffer if the input buffer contains no ASCII printing

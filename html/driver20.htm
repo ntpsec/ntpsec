@@ -30,6 +30,8 @@ or better relative to the broadcast signal. However, in most cases the
 actual accuracy is limited by the precision of the timecode and the latencies
 of the serial interface and operating system.
 
+<P>If the Operating System supports the PPSAPI, RFC-2783, it will be used.
+
 <P>The $GPRMC message that the GPS transmits look like this:
 <PRE>$GPRMC,POS_UTC,POS_STAT,LAT,LAT_REF,LON,LON_REF,SPD,HDG,DATE,MAG_VAR,MAG_REF*CC&lt;cr>&lt;lf>
 
@@ -104,13 +106,15 @@ Not used by this driver.</DD>
 <TT>flag2 0 | 1</TT></DT>
 
 <DD>
-Not used by this driver.</DD>
+Specifies the PPS signal on-time edge: 0 for assert (default),
+1 for clear.</DD>
 
 <DT>
 <TT>flag3 0 | 1</TT></DT>
 
 <DD>
-Not used by this driver.</DD>
+Controls the kernel PPS discipline: 0 for disable (default), 1
+for enable.</DD>
 
 <DT>
 <TT>flag4 0 | 1</TT></DT>

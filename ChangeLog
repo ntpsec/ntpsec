@@ -1,5 +1,11 @@
 2001-04-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_nmea.c:
+	* ntpd/ntp_refclock.c:
+	* html/driver20.htm:
+	PPSAPI patches for NMEA driver.
+	From: John.Hay@icomtek.csir.co.za
+
         * README.rsa: Describe RSAEuro support, provide alternate rsa.c 
 	patch. 
 	* configure.in: Check for rsaeuro1, RSAOBJS, RSADIR respectively. 
