@@ -1006,11 +1006,12 @@ refclock_control(
 		if (in->haveflags & CLK_HAVEVAL2)
 			pp->refid = in->fudgeval2;
 		peer->stratum = pp->stratum;
-		if (peer->stratum == 0)
+		if (peer->stratum == STRATUM_REFCLOCK || peer->stratum ==
+		    STRATUM_UNSPEC)
 			peer->refid = pp->refid;
 		else
-			/* Here it is IPv4 address, so we don't have problem with REFID case */
-			peer->refid = ((struct sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
+			peer->refid = ((struct
+			    sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
 		if (in->haveflags & CLK_HAVEFLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
 			pp->sloppyclockflag |= in->flags & CLK_FLAG1;

@@ -483,7 +483,8 @@ atom_poll(
 		peer->stratum = sys_prefer->stratum;
 	else
 		peer->stratum = pp->stratum;
-	if (peer->stratum == 0)
+	if (peer->stratum == STRATUM_REFCLOCK || peer->stratum ==
+	    STRATUM_UNSPEC)
 		peer->refid = pp->refid;
 	else
 		peer->refid = addr2refid(&sys_prefer->srcadr);
