@@ -205,7 +205,7 @@ struct interface {
 #define TEST1		0x0001	/* duplicate packet received */
 #define TEST2		0x0002	/* bogus packet received */
 #define TEST3		0x0004	/* protocol unsynchronized */
-#define TEST4		0x0008	/* access denied */
+#define TEST4		0x0008	/* access denied or crypto failure */
 #define TEST5		0x0010	/* MAC error */
 #define TEST6		0x0020	/* peer clock unsynchronized */
 #define TEST7		0x0040	/* peer stratum out of bounds */
@@ -436,13 +436,13 @@ struct peer {
 #define	REFCLK_GPSTM_TRUE	15	/* OLD TrueTime GPS/TM-TMD Receiver */
 #define REFCLK_IRIG_BANCOMM	16	/* Bancomm GPS/IRIG Interface */
 #define REFCLK_GPS_DATUM	17	/* Datum Programmable Time System */
-#define REFCLK_NIST_ACTS	18	/* NIST Auto Computer Time Service */
+#define REFCLK_ACTS		18	/* Generic Auto Computer Time Service */
 #define REFCLK_WWV_HEATH	19	/* Heath GC1000 WWV/WWVH Receiver */
 #define REFCLK_GPS_NMEA		20	/* NMEA based GPS clock */
 #define REFCLK_GPS_VME		21	/* TrueTime GPS-VME Interface */
 #define REFCLK_ATOM_PPS		22	/* 1-PPS Clock Discipline */
-#define REFCLK_PTB_ACTS		23	/* PTB Auto Computer Time Service */
-#define REFCLK_USNO		24	/* Naval Observatory dialup */
+#define REFCLK_PTB_ACTS		23	/* replaced by REFCLK_ACTS */
+#define REFCLK_USNO		24	/* replaced by REFCLK_ACTS */
 #define REFCLK_GPS_HP		26	/* HP 58503A Time/Frequency Receiver */
 #define REFCLK_ARCRON_MSF	27	/* ARCRON MSF radio clock. */
 #define REFCLK_SHM		28	/* clock attached thru shared memory */
@@ -667,12 +667,8 @@ struct pkt {
 #define	NTP_HASH_ADDR(src)	sock_hash(src)
 
 /*
- * How we randomize polls.  The poll interval is a power of two.
- * We chose a random value which is between 1/4 and 3/4 of the
- * poll interval we would normally use and which is an even multiple
- * of the EVENT_TIMEOUT.  The random number routine, given an argument
- * spread value of n, returns an integer between 0 and (1<<n)-1.  This
- * is shifted by EVENT_TIMEOUT and added to the base value.
+ * How we randomize polls.  The poll interval is a power of two. We chose
+ * a random interval which is this value plus-minus one second.
  */
 #if defined(HAVE_MRAND48)
 # define RANDOM		(mrand48())
@@ -683,8 +679,6 @@ struct pkt {
 #endif
 
 #define RANDPOLL(x)	((1 << (x)) - 1 + (RANDOM & 0x3))
-#define	RANDOM_SPREAD(poll)	((poll) - (EVENT_TIMEOUT+1))
-#define	RANDOM_POLL(poll, rval)	((((rval)+1)<<EVENT_TIMEOUT) + (1<<((poll)-2)))
 
 /*
  * min, min3 and max.  Makes it easier to transliterate the spec without

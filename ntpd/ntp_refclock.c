@@ -286,6 +286,24 @@ refclock_unpeer(
 
 
 /*
+ * refclock_timer - called once per second for housekeeping.
+ */
+void
+refclock_timer(
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	u_char clktype;
+	int unit;
+
+	clktype = peer->refclktype;
+	unit = peer->refclkunit;
+	if (refclock_conf[clktype]->clock_timer != noentry)
+		(refclock_conf[clktype]->clock_timer)(unit, peer);
+}
+	
+
+/*
  * refclock_transmit - simulate the transmit procedure
  *
  * This routine implements the NTP transmit procedure for a reference
