@@ -1862,6 +1862,7 @@ AC_ARG_ENABLE(all-clocks,
     [ntp_eac=$enableval], [ntp_eac=yes])
 AC_MSG_RESULT($ntp_eac)
 
+# HMS: Should we also require ac_cv_var_parse_ok?
 AC_MSG_CHECKING(if we have support for PARSE clocks)
 case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  yes*yes*)
