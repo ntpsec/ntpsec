@@ -135,11 +135,11 @@ static	struct refclockio *refio;
  * File descriptor masks etc. for call to select
  */
 fd_set activefds;
-int maxactivefd;
+SOCKET maxactivefd;
 
 static	int create_sockets	P((u_int));
-static	int open_socket		P((struct sockaddr_in *, int, int));
-static	void	close_socket	P((int));
+static	SOCKET	open_socket	P((struct sockaddr_in *, int, int));
+static	void	close_socket	P((SOCKET));
 static	void	close_file	P((int));
 static	char *	fdbits		P((int, fd_set *));
 
@@ -221,7 +221,8 @@ create_sockets(
 	char	buf[MAXINTERFACES*sizeof(struct ifreq)];
 	struct	ifconf	ifc;
 	struct	ifreq	ifreq, *ifr;
-	int n, i, j, vs, size = 0;
+	SOCKET	vs;
+	int n, i, j, size = 0;
 	struct sockaddr_in resmask;
 #endif	/* _BSDI_VERSION >= 199510 */
 
@@ -758,7 +759,7 @@ io_multicast_add(
 		    inet_ntoa(iaddr));
 	} else {
 		inter_list[i].fd = s;
-		inter_list[i].bfd = -1;
+		inter_list[i].bfd = INVALID_SOCKET;
 		(void) strncpy(inter_list[i].name, "multicast",
 		    sizeof(inter_list[i].name));
 		inter_list[i].mask.sin_addr.s_addr = htonl(~(u_int32)0);
@@ -805,7 +806,7 @@ io_unsetbclient(void)
 		if (!(inter_list[i].flags & INT_BCASTOPEN))
 		    continue;
 		close_socket(inter_list[i].bfd);
-		inter_list[i].bfd = -1;
+		inter_list[i].bfd = INVALID_SOCKET;
 		inter_list[i].flags &= ~INT_BCASTOPEN;
 	}
 }
@@ -851,8 +852,8 @@ io_multicast_del(
 			/* we have an explicit fd, so we can close it */
 			close_socket(inter_list[i].fd);
 			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
-			inter_list[i].fd = -1;
-			inter_list[i].bfd = -1;
+			inter_list[i].fd = INVALID_SOCKET;
+			inter_list[i].bfd = INVALID_SOCKET;
 		}
 		else
 		{
@@ -874,14 +875,15 @@ io_multicast_del(
 /*
  * open_socket - open a socket, returning the file descriptor
  */
-static int
+
+static SOCKET
 open_socket(
 	struct sockaddr_in *addr,
 	int flags,
 	int turn_off_reuse
 	)
 {
-	int fd;
+	SOCKET fd;
 	int on = 1, off = 0;
 #if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
 	int tos;
@@ -935,11 +937,11 @@ open_socket(
 		 * soft fail if opening a class D address
 		 */
 		if (IN_CLASSD(ntohl(addr->sin_addr.s_addr)))
-		    return -1;
+		    return INVALID_SOCKET;
 #if 0
 		exit(1);
 #else
-		return -1;
+		return INVALID_SOCKET;
 #endif
 	}
 #ifdef DEBUG
@@ -1061,10 +1063,10 @@ open_socket(
  */
 static void
 close_socket(
-	int fd
+	     SOCKET fd
 	)
 {
-	int i, newmax;
+	SOCKET i, newmax;
 
 	(void) closesocket(fd);
 	FD_CLR( (u_int) fd, &activefds);
@@ -1253,7 +1255,7 @@ input_handler(
 	register int i, n;
 	register struct recvbuf *rb;
 	register int doing;
-	register int fd;
+	register SOCKET fd;
 	struct timeval tvzero;
 	int fromlen;
 	l_fp ts;			/* Timestamp at BOselect() gob */
@@ -1758,7 +1760,7 @@ io_closeclock(
 void
 kill_asyncio(void)
 {
-	int i;
+	SOCKET i;
 
 	BLOCKIO();
 	for (i = 0; i <= maxactivefd; i++)

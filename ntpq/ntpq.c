@@ -363,7 +363,11 @@ char currenthost[LENHOSTNAME];			/* current host name */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
+#ifndef SYS_WINNT
 int sockfd;					/* fd socket is opened on */
+#else
+SOCKET sockfd;					/* fd socket is opened on */
+#endif
 int havehost = 0;				/* set to 1 when host open */
 struct servent *server_entry = NULL;		/* server entry for ntp */
 

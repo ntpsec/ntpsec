@@ -63,7 +63,11 @@ struct recvbuf {
 	struct sockaddr_in srcadr;	/* where packet came from */
 #endif
 	struct interface *dstadr;	/* interface datagram arrived thru */
-	int fd;				/* fd on which it was received */
+#ifndef SYS_WINNT
+	int	fd;			/* fd on which it was received */
+#else
+	SOCKET	fd;			/* fd on which it was received */
+#endif
 	l_fp recv_time;			/* time of arrival */
 	void (*receiver) P((struct recvbuf *)); /* routine to receive buffer */
 	int recv_length;		/* number of octets received */

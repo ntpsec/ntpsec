@@ -308,12 +308,12 @@ return 0;
 
 extern int cfsetispeed(struct termios *tio, int speed) {
 		
-		
+return 0;		
 };	
 
 
 extern int cfsetospeed(struct termios *tio, int speed) {
 		
-		
+return 0;		
 };	
 

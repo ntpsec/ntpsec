@@ -22,6 +22,8 @@ void	service_ctrl	(DWORD);
 void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 #else
+#define SOCKET	int
+#define INVALID_SOCKET	-1
 #define closesocket close
 #endif /* SYS_WINNT */
 
@@ -277,7 +279,7 @@ extern struct interface *loopback_interface; /* loopback interface */
  * File descriptor masks etc. for call to select
  */
 extern fd_set	activefds;
-extern int	maxactivefd;
+extern SOCKET	maxactivefd;
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */

@@ -239,7 +239,7 @@ typedef unsigned long u_long;
  */
 #if defined(SYS_WINNT)
 # if !defined(HAVE_CONFIG_H)  || !defined(__config)
-    error "NT requires config.h to be included"
+# include <config.h>
 # endif /* HAVE_CONFIG_H) */
 # include <windows.h>
 # include <ws2tcpip.h>

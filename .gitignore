@@ -12,6 +12,17 @@
 #*
 .#*
 # Simulated bk default ignores end here
+ports/winnt/bin/*/*
+ports/winnt/*/Debug/*
+ports/winnt/*/Release/*
+ports/winnt/*/.version
+ports/winnt/*/version.c
+ports/winnt/libntp/messages.h
+ports/winnt/libntp/messages.rc
+ports/winnt/libntp/*.bin
+ports/winnt/*/*.plg
+ports/winnt/*.opt
+ports/winnt/*.ncb
 *~
 .buildkey
 A.*

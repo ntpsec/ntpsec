@@ -28,11 +28,14 @@
  */
 #define __STDC__ 1
 
-#ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
-#endif
+/* Skip asynch rpc inclusion */
 #ifndef __RPCASYNC_H__
-#define __RPCASYNC_H__	/* Skip asynch rpc inclusion */
+#define __RPCASYNC_H__
+#endif
+
+/* Prevent inclusion of winsock.h in windows.h */
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_  
 #endif
 
 # undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 													

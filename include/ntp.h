@@ -205,8 +205,13 @@ struct cert_info {
  * numbers of each of the interfaces we are using.
  */
 struct interface {
+#ifndef SYS_WINNT
 	int fd;			/* socket this is opened on */
 	int bfd;		/* socket for receiving broadcasts */
+#else
+	SOCKET fd;			/* socket this is opened on */
+	SOCKET bfd;		/* socket for receiving broadcasts */
+#endif
 	struct sockaddr_in sin;	/* interface address */
 	struct sockaddr_in bcast; /* broadcast address */
 	struct sockaddr_in mask; /* interface mask */

@@ -102,7 +102,12 @@ volatile int debug = 0;
 /*
  * File descriptor masks etc. for call to select
  */
+
+#ifndef SYS_WINNT
 int fd;
+#else
+socket FD;
+#endif
 #ifdef HAVE_POLL_H
 struct pollfd fdmask;
 #else

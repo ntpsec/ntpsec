@@ -105,15 +105,7 @@ SOURCE=..\..\..\libntp\atouint.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\authencrypt.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\authkeys.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\libntp\authparity.c
 # End Source File
 # Begin Source File
 

@@ -162,7 +162,11 @@ static	char currenthost[LENHOSTNAME];			/* current host name */
 static	struct sockaddr_in hostaddr = { 0 };		/* host address */
 static	int showhostnames = 1;				/* show host names by default */
 
+#ifndef SYS_WINNT
 static	int sockfd;					/* fd socket is openned on */
+#else
+static	SOCKET sockfd;					/* fd socket is openned on */
+#endif
 static	int havehost = 0;				/* set to 1 when host open */
 struct servent *server_entry = NULL;		/* server entry for ntp */
 

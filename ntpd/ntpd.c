@@ -842,7 +842,7 @@ service_main(
 	{
 # if !defined(HAVE_SIGNALED_IO) 
 		extern fd_set activefds;
-		extern int maxactivefd;
+		extern SOCKET maxactivefd;
 
 		fd_set rdfdes;
 		int nfound;
