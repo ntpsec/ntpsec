@@ -1,6 +1,7 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
+EXTRA_LIBRARIES = libntpsim.a
 libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	audio.c authkeys.c authreadkeys.c authusekey.c binio.c buftvtots.c \
 	caljulian.c calleapwhen.c caltontp.c calyearstart.c clocktime.c \

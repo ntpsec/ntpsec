@@ -9,13 +9,18 @@
 #include "ntp_stdlib.h"
 #include "ntp_cmdargs.h"
 
+#ifdef SIM
+#include "ntpsim.h"
+#endif /* SIM */
+
 /*
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
 int	listen_to_virtual_ips = 0;
 
-static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:qr:s:t:v:V:x";
+
+static const char *ntp_options = "aAbc:dD:f:gJ:k:l:LmnN:O:p:P:qr:s:t:T:W:v:V:x";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -292,7 +297,23 @@ getCmdOpts(
 		    case 'x':
 			allow_step = FALSE;
 			break;
-
+#ifdef SIM
+                case 'T':
+                        ntp_node.ferr = (double)atof(ntp_optarg);
+                        break;
+                case 'O':
+			ntp_node.clk_time =
+				ntp_node.time+((double)atof(ntp_optarg)/1e6);
+                        ntp_node.ntp_time =
+				ntp_node.time+((double)atof(ntp_optarg)/1e6);
+                        break;
+                case 'W':
+                        ntp_node.fnse = (double)atof(ntp_optarg);
+                        break;
+                case 'J':
+                        ntp_node.nnse = (double)atof(ntp_optarg);
+                        break;
+#endif /* SIM */
 		    default:
 			errflg++;
 			break;
