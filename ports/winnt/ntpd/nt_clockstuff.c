@@ -7,7 +7,6 @@
 #include "ntp_timer.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
-extern double sys_maxfreq;
 
 static long last_Adj = 0;
 
@@ -53,8 +52,8 @@ adj_systime(
 		dtemp = -dtemp;
 	}
 
-	if (dtemp > sys_maxfreq)
-		dtemp = sys_maxfreq;
+	if (dtemp > MAXFREQ)
+		dtemp = MAXFREQ;
 
 	dtemp = dtemp * 1e6;
 

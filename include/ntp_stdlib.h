@@ -153,7 +153,5 @@ extern HANDLE	hServDoneEvent;
 /* systime.c */
 extern int	systime_10ms_ticks;	/* adj sysclock in 10ms increments */
 
-extern double	sys_maxfreq;		/* max frequency correction */
-
 /* version.c */
 extern const char *Version;		/* version declaration */

@@ -36,7 +36,6 @@ int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
  * clock.
  */
 double sys_residual = 0;	/* residual from previous adjustment */
-double sys_maxfreq = MAXFREQ;	/* max frequency correction */
 
 
 /*
@@ -140,8 +139,8 @@ adj_systime(
 		}
 	} else 
 #endif
-		if (dtemp > sys_maxfreq)
-			dtemp = sys_maxfreq;
+		if (dtemp > MAXFREQ)
+			dtemp = MAXFREQ;
 
 	dtemp = dtemp * 1e6 + .5;
 
