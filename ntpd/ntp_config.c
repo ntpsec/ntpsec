@@ -426,7 +426,7 @@ static	void free_netinfo_config P((struct netinfo_config_state *));
 static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
 #endif
 static	int gettokens P((FILE *, char *, char **, int *));
-static	int matchkey P((char *, struct keyword *));
+static	int matchkey P((char *, struct keyword *, int));
 static	int getnetnum P((const char *, struct sockaddr_storage *, int));
 static	void save_resolve P((char *, int, int, int, int, u_int, int,
     keyid_t, u_char *));
@@ -653,7 +653,7 @@ getconfig(
 
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			switch (matchkey(tokens[istart], addr_type)) {
+			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
 				istart++;
@@ -735,7 +735,7 @@ getconfig(
 			ttl = 0;
 			istart++;
 			for (i = istart; i < ntokens; i++)
-			    switch (matchkey(tokens[i], mod_keywords)) {
+			    switch (matchkey(tokens[i], mod_keywords, 1)) {
 				case CONF_MOD_VERSION:
 				    if (i >= ntokens-1) {
 					    msyslog(LOG_ERR,
@@ -974,7 +974,8 @@ getconfig(
 			if (ntokens > 1) {
 				istart = 1;
 				memset((char *)&peeraddr, 0, sizeof(peeraddr));
-				switch (matchkey(tokens[istart], addr_type)) {
+				switch (matchkey(tokens[istart],
+				    addr_type, 0)) {
 				case CONF_ADDR_IPV4:
 					peeraddr.ss_family = AF_INET;
 					istart++;
@@ -1029,8 +1030,7 @@ getconfig(
 			    int temp;
 			    double ftemp;
 
-			    temp = matchkey(tokens[i++],
-				 tinker_keywords);
+			    temp = matchkey(tokens[i++], tinker_keywords, 1);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
 				    "tinker: missing argument");
@@ -1076,8 +1076,7 @@ getconfig(
 			    int temp;
 			    double ftemp;
 
-			    temp = matchkey(tokens[i++],
-				tos_keywords);
+			    temp = matchkey(tokens[i++], tos_keywords, 1);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
 				    "tinker: missing argument");
@@ -1136,7 +1135,7 @@ getconfig(
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
 
-			    temp = matchkey(tokens[i++], crypto_keywords);
+			    temp = matchkey(tokens[i++], crypto_keywords, 1);
 			    if (i > ntokens - 1) {
 				msyslog(LOG_ERR,
 				    "crypto: missing argument");
@@ -1192,7 +1191,7 @@ getconfig(
 			}
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			switch (matchkey(tokens[istart], addr_type)) {
+			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
 				istart++;
@@ -1222,7 +1221,7 @@ getconfig(
 			SET_HOSTMASK(&maskaddr, peeraddr.ss_family);
 			istart++;
 			for (i = istart; i < ntokens; i++) {
-				switch (matchkey(tokens[i], res_keywords)) {
+				switch (matchkey(tokens[i], res_keywords, 1)) {
 				    case CONF_RES_MASK:
 					if (i >= ntokens-1) {
 						msyslog(LOG_ERR,
@@ -1368,7 +1367,7 @@ getconfig(
 			}
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			switch (matchkey(tokens[istart], addr_type)) {
+			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
 				istart++;
@@ -1390,7 +1389,7 @@ getconfig(
 			localaddr = 0;
 			istart++;
 			for (i = istart; i < ntokens-1; i++)
-			    switch (matchkey(tokens[i], trap_keywords)) {
+			    switch (matchkey(tokens[i], trap_keywords, 1)) {
 				case CONF_TRAP_PORT:
 				    if (i >= ntokens-1) {
 					    msyslog(LOG_ERR,
@@ -1476,7 +1475,7 @@ getconfig(
 			errflg = 0;
 			for (i = 2; i < ntokens-1; i++) {
 				switch (c = matchkey(tokens[i],
-						     fudge_keywords)) {
+				    fudge_keywords, 1)) {
 				    case CONF_FDG_TIME1:
 					if (sscanf(tokens[++i], "%lf",
 						   &clock_stat.fudgetime1) != 1) {
@@ -1627,7 +1626,8 @@ getconfig(
 			errflg = 0;
 
 			for (i = 2; i < ntokens; i++) {
-				switch (matchkey(tokens[i], filegen_keywords)) {
+				switch (matchkey(tokens[i],
+				    filegen_keywords, 1)) {
 				    case CONF_FGEN_FILE:
 					if (i >= ntokens - 1) {
 						msyslog(LOG_ERR,
@@ -1646,7 +1646,8 @@ getconfig(
 						errflg = i;
 						break;
 					}
-					peerkey = matchkey(tokens[++i], fgen_types);
+					peerkey = matchkey(tokens[++i],
+					    fgen_types, 1);
 					if (peerkey == CONFIG_UNKNOWN) {
 						msyslog(LOG_ERR,
 							"filegen %s unknown type \"%s\"",
@@ -1740,7 +1741,7 @@ getconfig(
 			for (i = 1; i < ntokens; i++) {
 				int flag;
 
-				flag = matchkey(tokens[i], flags_keywords);
+				flag = matchkey(tokens[i], flags_keywords, 1);
 				if (flag == CONFIG_UNKNOWN) {
 					msyslog(LOG_ERR,
 						"enable unknown flag %s",
@@ -1756,7 +1757,7 @@ getconfig(
 			for (i = 1; i < ntokens; i++) {
 				int flag;
 
-				flag = matchkey(tokens[i], flags_keywords);
+				flag = matchkey(tokens[i], flags_keywords, 1);
 				if (flag == CONFIG_UNKNOWN) {
 					msyslog(LOG_ERR,
 						"disable unknown flag %s",
@@ -1786,7 +1787,7 @@ getconfig(
 			for (i = 2; i < ntokens; i++) {
 				int flag;
 
-				flag = matchkey(tokens[i], pps_keywords);
+				flag = matchkey(tokens[i], pps_keywords, 1);
 				switch(flag) {
 				    case CONF_PPS_ASSERT:
 					pps_assert = 0;
@@ -2075,7 +2076,7 @@ gettokens (
 	 * Return the match
 	 */
 	*ntokens = ntok + 1;
-	ntok = matchkey(tokenlist[0], keywords);
+	ntok = matchkey(tokenlist[0], keywords, 1);
 	if (ntok == CONFIG_UNKNOWN)
 		goto again;
 	return ntok;
@@ -2089,14 +2090,16 @@ gettokens (
 static int
 matchkey(
 	register char *word,
-	register struct keyword *keys
+	register struct keyword *keys,
+	int complain
 	)
 {
 	for (;;) {
 		if (keys->keytype == CONFIG_UNKNOWN) {
-			msyslog(LOG_ERR,
-				"configure: keyword \"%s\" unknown, line ignored",
-				word);
+			if (complain)
+				msyslog(LOG_ERR,
+				    "configure: keyword \"%s\" unknown, line ignored",
+				    word);
 			return CONFIG_UNKNOWN;
 		}
 		if (STRSAME(word, keys->text))
