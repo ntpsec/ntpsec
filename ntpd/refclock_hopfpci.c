@@ -48,6 +48,7 @@
 
 #ifndef SYS_WINNT
 # include <sys/ipc.h>
+# include <sys/ioctl.h>
 # include <assert.h>
 # include <unistd.h>
 # include <stdio.h>
@@ -212,7 +213,7 @@ hopfpci_poll(
 	up = (struct hopfpciTime *)pp->unitptr;
 
 #ifndef SYS_WINNT
-  	ioctl(fd,HOPF_CLOCK_GET_UTC,&m_time);
+	ioctl(fd,HOPF_CLOCK_GET_UTC,&m_time);
 #else
 	GetHopfSystemTime(&m_time);
 #endif

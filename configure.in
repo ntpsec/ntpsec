@@ -15,6 +15,10 @@ ac_cv_var_ripe_ncc_ok=no
 dnl Grab any initial CFLAGS so we can pick better defaults.
 iCFLAGS="$CFLAGS"
 
+dnl check these early to avoid autoconf warnings
+AC_AIX
+AC_MINIX
+
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
 AC_PROG_CC_STDC
@@ -171,8 +175,7 @@ AC_SUBST(LDFLAGS)dnl
 
 AC_PROG_LN_S
 AC_PROG_GCC_TRADITIONAL
-AC_AIX
-AC_MINIX
+AC_C_VOLATILE
 AC_ISC_POSIX
 AC_PROG_RANLIB
 AC_PATH_PROG(PATH_SH, sh)

@@ -671,7 +671,7 @@ getconfig(
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
-			peerkeystr = "*";
+			peerkeystr = (u_char *)"*";
 			peerflags = 0;
 			ttl = 0;
 			for (i = 2; i < ntokens; i++)
