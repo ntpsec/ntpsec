@@ -2,7 +2,8 @@
 
 	* configure.in: Use AC_CHECK_TYPES((s_char)) instead of
 	AC_CHECK_TYPE.
-	
+	(ac_cv_var_kernel_fll_bug): Generic_106541-08 is apparently OK, too.
+
 	* scripts/Makefile.am (EXTRA_DIST): Need to explicitly distribute
 	mkver.in and ntpver.in now, apparently.
 	* configure.in: Search for the various audio_info members so the

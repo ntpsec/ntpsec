@@ -2951,6 +2951,9 @@ AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
 	  Generic_106541-07)
 	     ans=no
 	     ;;
+	  Generic_106541-08)
+	     ans=no
+	     ;;
 	  *) ans=yes
 	     ;;
 	 esac

@@ -10721,6 +10721,9 @@ else
 	  Generic_106541-07)
 	     ans=no
 	     ;;
+	  Generic_106541-08)
+	     ans=no
+	     ;;
 	  *) ans=yes
 	     ;;
 	 esac
