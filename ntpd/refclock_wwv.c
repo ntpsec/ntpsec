@@ -111,8 +111,10 @@
 #define SSYNC		0x0002	/* second epoch sync */
 #define DSYNC		0x0004	/* minute units sync */
 #define INSYNC		0x0008	/* clock synchronized */
-#define DGATE		0x0010	/* data bit error */
-#define BGATE		0x0020	/* BCD digit bit error */
+#define SLOSS		0x0010	/* minute sync signal lost */
+#define SJITR		0x0020	/* minute sync excessive jitter */
+#define DGATE		0x0040	/* data bit error */
+#define BGATE		0x0080	/* BCD digit bit error */
 #define SFLAG		0x1000	/* probe flag */
 #define LEPSEC		0x2000	/* leap second in progress */
 
@@ -1563,8 +1565,10 @@ wwv_endpoc(
 	 * jitter is too high for too long a time, we dim the second
 	 * sync lamp and start over.
 	 */
+	up->status &= ~(SLOSS | SJITR);
 	if (!(up->status & (SELV | SELH)) || up->epomax < STHR ||
 	    up->eposnr < SSNR) {
+		up->status |= SLOSS;
 		up->status &= ~SSYNC;
 		jitcnt = syncnt = avgcnt = 0;
 		return;
@@ -1586,6 +1590,7 @@ wwv_endpoc(
 			}
 		}
 	} else {
+		up->status |= SJITR;
 		jitcnt++;
 		syncnt = 0;
 	}
