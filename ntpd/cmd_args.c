@@ -72,7 +72,7 @@ getstartup(
 		case 'd':
 		case 'D':
 		    msyslog(LOG_ERR, "ntpd not compiled with -DDEBUG option - no DEBUG support");
-		    fprintf(stderr, "ntpd not compiled with -DDEBUG option - no DEBUG support");
+		    fprintf(stderr, "ntpd not compiled with -DDEBUG option - no DEBUG support\n");
 		    ++errflg;
 		    break;
 #endif
