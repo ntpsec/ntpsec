@@ -222,7 +222,6 @@ refclock_newpeer(
 			clktype);
 		return (0);
 	}
-	refclock_unpeer(peer);
 
 	/*
 	 * Allocate and initialize interface structure
@@ -273,6 +272,7 @@ refclock_newpeer(
 	 * can be wiggled, then finish up for consistency.
 	 */
 	if (!((refclock_conf[clktype]->clock_start)(unit, peer))) {
+		refclock_unpeer(peer);
 		free(pp);
 		return (0);
 	}

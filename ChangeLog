@@ -1,3 +1,10 @@
+2000-08-31  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_atom.c: Header cleanup Comment cleanup.  Lose the
+	TTYCLK stuff.  Convert to PPSAPI.
+	* ntpd/ntp_refclock.c (refclock_newpeer): Move refclock_unpeer().
+	From: Dave Mills
+
 2000-08-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure: Fix the autoconf problem...

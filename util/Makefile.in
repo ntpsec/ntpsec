@@ -1,6 +1,6 @@
 # Makefile.in generated automatically by automake 1.4a from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-9, 2000 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -30,8 +30,6 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
-
-DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -198,18 +196,18 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES =  byteorder.c hist.c jitter.c kern.c longsize.c \
 ntp-genkeys.c ntptime.c precision.c sht.c testrs6000.c tickadj.c \
 timetrim.c
-DIST_COMMON =  README Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
-
-
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-
-GZIP_ENV = --best
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 DEP_FILES =  @AMDEP@ $(DEPDIR)/byteorder$U.Po $(DEPDIR)/hist$U.Po \
 $(DEPDIR)/jitter$U.Po $(DEPDIR)/kern$U.Po $(DEPDIR)/longsize$U.Po \
 $(DEPDIR)/ntp-genkeys$U.Po $(DEPDIR)/ntptime$U.Po \
 $(DEPDIR)/precision$U.Po $(DEPDIR)/sht$U.Po $(DEPDIR)/testrs6000$U.Po \
 $(DEPDIR)/tickadj$U.Po $(DEPDIR)/timetrim$U.Po
+DIST_COMMON =  README Makefile.am Makefile.in ansi2knr.1 ansi2knr.c
+
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+GZIP_ENV = --best
 SOURCES = byteorder.c hist.c jitter.c kern.c longsize.c ntp-genkeys.c ntptime.c precision.c sht.c testrs6000.c tickadj.c timetrim.c
 OBJECTS = byteorder$U.o hist$U.o jitter$U.o kern$U.o longsize$U.o ntp-genkeys$U.o ntptime$U.o precision$U.o sht$U.o testrs6000$U.o tickadj$U.o timetrim$U.o
 
@@ -219,7 +217,7 @@ all: all-redirect
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu util/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
@@ -392,20 +390,6 @@ distclean-tags:
 
 maintainer-clean-tags:
 
-distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
-
-distdir: $(DISTFILES)
-	@for file in $(DISTFILES); do \
-	  d=$(srcdir); \
-	  if test -d $$d/$$file; then \
-	    cp -pR $$d/$$file $(distdir); \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file || :; \
-	  fi; \
-	done
-
 @AMDEP@include $(DEPDIR)/byteorder$U.Po
 @AMDEP@include $(DEPDIR)/hist$U.Po
 @AMDEP@include $(DEPDIR)/jitter$U.Po
@@ -436,6 +420,21 @@ maintainer-clean-depend:
 @AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(COMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
 info-am:
 info: info-am
 dvi-am:
@@ -506,9 +505,9 @@ mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile mostlyclean-krextra distclean-krextra \
 clean-krextra maintainer-clean-krextra mostlyclean-kr distclean-kr \
 clean-kr maintainer-clean-kr tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend info-am info \
-dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+clean-tags maintainer-clean-tags mostlyclean-depend distclean-depend \
+clean-depend maintainer-clean-depend distdir info-am info dvi-am dvi \
+check check-am installcheck-am installcheck install-exec-am \
 install-exec install-data-am install-data install-am install \
 uninstall-am uninstall all-redirect all-am all install-strip \
 installdirs mostlyclean-generic distclean-generic clean-generic \
