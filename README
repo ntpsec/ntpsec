@@ -27,6 +27,9 @@ NEWS		What's new in this release.
 
 README		This file.
 
+README.cvs	Instructions for folks who use the CVS-repository
+		version of NTP.
+
 README.des	If you *need* DES support.
 
 README.hackers	Notes to folks who want to hack on the code.

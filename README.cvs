@@ -1,0 +1,9 @@
+If you get NTP via CVS, you will need to build the release using GNU make
+and gcc.
+
+You can then "make dist" to build a release tarball that does not require
+GNU make or gcc.
+
+The reason GNU make and gcc are required is because the repository version
+of NTP does not have the make dependencies built-in.  These dependencies
+are created dynamically, and this dynamic process requires GNU make and gcc.

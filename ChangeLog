@@ -1,5 +1,7 @@
 1999-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* README: Add README.cvs
+
 	* configure.in (ac_cv_var_struct_ntptime_val_timespec): Typo.
 	From: John Hay <jhay@mikom.csir.co.za>
 
