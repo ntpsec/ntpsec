@@ -3346,6 +3346,23 @@ case "$ac_cv_var_kernel_fll_bug" in
  yes) AC_DEFINE(KERNEL_FLL_BUG, 1, [Does the kernel have an FLL bug?]) ;;
 esac
 
+AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
+[AC_ARG_ENABLE(irig-sawtooth, 
+	AC_HELP_STRING([--enable-irig-sawtooth], [s if we should enable the IRIG sawtooth filter]),
+    [ans=$enableval],
+    [case "$host" in
+     *-*-solaris2.[[89]])
+	ans=yes
+	;;
+     *) ans=no
+	;;
+    esac
+    ])
+ac_cv_var_irig_sucks=$ans])
+case "$ac_cv_var_irig_sucks" in
+ yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
+esac
+
 case "$build" in
  $host)
     ;;
