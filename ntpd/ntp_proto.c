@@ -1262,7 +1262,7 @@ clock_update(void)
 	 */
 	if (sys_peer == NULL)
 		return;
-	if (sys_peer->pollsw == FALSE || sys_peer->burst > 0)
+	if (sys_peer->pollsw == FALSE)
 		return;
 	sys_peer->pollsw = FALSE;
 #ifdef DEBUG

@@ -1646,7 +1646,7 @@ ctl_putpeer(
 		ctl_putint(peer_var[CP_INITSEQ].text, ap->seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, ap->key);
 		ctl_putuint(peer_var[CP_INITTSP].text,
-		    peer->recval.tstamp);
+		    ntohl(peer->recval.tstamp));
 		break;
 #endif /* OPENSSL */
 	}
