@@ -1,5 +1,11 @@
 2000-01-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (ac_refclock_chu): Provide the CHU driver by
+	default, and by default prefer the AUDIO version.  We used to
+	limit this to SunOS or Solaris; now we drive by the availability
+	of the audioio header file.
+	Select the IRIG and WWV audio drivers the same way.
+
 	* flock-build: build ignores the -l flag; lose it.
 	(BUILD_ARGS): added.
 	* build: Remove unused -l stuff (LOG variable).
