@@ -27,6 +27,8 @@ README		This file.
 
 README.des	If you *need* DES support.
 
+README.hackers	Notes to folks who want to hack on the code.
+
 TODO            List of items the NTP developers are working on.
 
 WHERE-TO-START	Hints on what to read in order to get a working
@@ -51,6 +53,9 @@ authstuff       Directory containing sources for miscellaneous programs
 		mechanisms for DES and MD5 based authentication. These
 		programs do not include the cryptographic routines
 		themselves, so are free of U.S. export restrictions.
+
+build		A script to build the distribution in A.`config.guess`
+		subdirectory (more or less).
 
 clockstuff	Directory containing sources for miscellaneous programs
 		to test certain auxiliary programs used with some kernel

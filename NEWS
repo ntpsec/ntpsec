@@ -1,3 +1,4 @@
+* Lose the old DES stuff in favor of the (optional) RSAREF stuff
 (4.0.93)
 * Oncore refclock needs PPS or one of two ioctls.
 * Don't make ntptime under Linux.  It doesn't compile for too many folks.
