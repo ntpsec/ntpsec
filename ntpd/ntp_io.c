@@ -669,10 +669,11 @@ set_reuseaddr(int flag) {
 	}
 }
 
+#ifdef OPEN_BCAST_SOCKET 
 /*
- * Add a multicast address to a given socket
+ * Enable a broadcast address to a given socket
  * The socket is in the inter_list all we need to do is enable
- * multicasting. It is not this function's job to select the socket
+ * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
 socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
@@ -699,9 +700,9 @@ socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storag
 }
 
 /*
- * Remove a multicast address from a given socket
+ * Remove a broadcast address from a given socket
  * The socket is in the inter_list all we need to do is disable
- * multicasting. It is not this function's job to select the socket
+ * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
 socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
@@ -726,6 +727,7 @@ socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_stora
 #endif /* SO_BROADCAST */
 }
 
+#endif /* OPEN_BCAST_SOCKET */
 /*
  * NOTE: Not all platforms support multicast
  */
