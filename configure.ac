@@ -1742,8 +1742,8 @@ ac_cv_var_atom_ok=yes
 
 # The PPSAPI also needs a timepps header.
 
-case "$ac_cv_c_inline$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
- inlineyes*yes*)
+case "$ac_cv_c_inline$ac_cv_struct_timespec" in
+ inlineyes)
     case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
      *yes* | *sunos* | *solaris* | *sco* )
 	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
