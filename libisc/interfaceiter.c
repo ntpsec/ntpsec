@@ -106,12 +106,17 @@ get_scopeid(unsigned int family, struct sockaddr *src) {
 		break;
 	case AF_INET6:
 #ifdef __KAME__
-	if (IN6_IS_ADDR_MC_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)) {
+	if (IN6_IS_ADDR_LINKLOCAL( &((struct sockaddr_in6 *)src)->sin6_addr)
+		&& ((struct sockaddr_in6 *)src)->sin6_scope_id == 0) {
 		u_int8_t *p;
 		p = &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[0];
 		scopeid = ((u_int16_t)p[2] << 8) | p[3];
 	} else
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+		scopeid = ((struct sockaddr_in6 *)src)->sin6_scope_id;
+#else
 		scopeid = 0;
+#endif
 #else
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	scopeid = ((struct sockaddr_in6 *)src)->sin6_scope_id;

@@ -396,6 +396,7 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       &(isc_if->address.type.in6),
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
+		((struct sockaddr_in6 *)&itf->sin)->sin6_scope_id = isc_if->scopeid;
 
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
@@ -740,7 +741,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = iface->scopeid;
+			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -805,7 +806,7 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = iface->scopeid;
+			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)maddr)->sin6_scope_id;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
