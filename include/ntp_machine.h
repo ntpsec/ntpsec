@@ -518,6 +518,10 @@ extern char *strdup(const char *);
 # undef HAVE_SYSV_TTYS
 #endif
 
+#ifndef HAVE_TIMEGM
+extern	time_t	timegm		P((struct tm *));
+#endif
+
 #ifdef HAVE_SYSV_TTYS
 # undef HAVE_BSD_TTYS
 #endif
