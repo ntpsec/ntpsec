@@ -102,12 +102,13 @@ struct sockaddr_in6 {
 /*
  * Unspecified
  */
+#ifndef IN6_IS_ADDR_UNSPECIFIED
 #define IN6_IS_ADDR_UNSPECIFIED(a)      \
         (((a)->s6_addr32[0] == 0) &&    \
          ((a)->s6_addr32[1] == 0) &&    \
          ((a)->s6_addr32[2] == 0) &&    \
          ((a)->s6_addr32[3] == 0))
-
+#endif
 /*
  * Loopback
  */
@@ -138,9 +139,10 @@ struct sockaddr_in6 {
 /*
  * Multicast
  */
+#ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	\
 	((a)->s6_addr8[0] == 0xffU)
-
+#endif
 /*
  * Unicast link / site local.
  */

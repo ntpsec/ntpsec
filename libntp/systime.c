@@ -424,7 +424,12 @@ step_systime(
         double now		/* step adjustment (s) */
         )
 {
-	ntp_node.adj = now;
+#ifdef DEBUG
+	if (debug)
+		printf("step_systime: time %.6f adj %.6f\n",
+		   ntp_node.ntp_time, now);
+#endif
+	ntp_node.ntp_time += now;
 	return (1);
 }
 

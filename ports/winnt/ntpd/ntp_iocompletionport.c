@@ -234,13 +234,13 @@ static unsigned long QueueSocketRecv(SOCKET s) {
 				break ;
 
 				case WSAENOTSOCK :
-					msyslog(LOG_ERR, "Can't read from socket, because it isn't a socket: %m");
+					netsyslog(LOG_ERR, "Can't read from socket, because it isn't a socket: %m");
 					freerecvbuf(buff);
 					return 0;
 					break;
 
 				case WSAEFAULT :
-					msyslog(LOG_ERR, "The buffers parameter is incorrect: %m");
+					netsyslog(LOG_ERR, "The buffers parameter is incorrect: %m");
 					freerecvbuf(buff);
 					return 0;
 				break;
@@ -367,12 +367,18 @@ io_completion_port_sendto(
 
 			buff->iocompletioninfo.iofunction = OnSendToComplete;
 			Result = WSASendTo(inter->fd, &buff->wsabuf, 1, &BytesSent, Flags, (struct sockaddr *) dest, sizeof(struct sockaddr_in), &buff->iocompletioninfo.overlapped, NULL);
+			if ((Result == SOCKET_ERROR) && (WSAGetLastError() == WSA_IO_PENDING)) {
+				Result = ERROR_SUCCESS;
+			}
+			else if (Result != ERROR_SUCCESS) {
+				netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+			}
 #ifdef DEBUG
 			if (debug > 2) {
 				char  strbuffer[256];
 				DWORD strlength = sizeof(strbuffer);
 				if (0 == WSAAddressToString((LPSOCKADDR) dest, sizeof(*dest), NULL, strbuffer, &strlength)) 
-  					printf("SendTo - %d bytes to %s : %d\n", len, strbuffer, Result);
+  					printf("WSASendTo - %d bytes to %s : %d\n", len, strbuffer, Result);
 			}
 #endif
 		}

@@ -29,7 +29,7 @@ check-local: @MAKE_CHECK_Y2K@
 # ntp_resolver.c is presently unused...
 ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntpd.c
 ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c
-libntpd_a_SOURCES = jupiter.h map_vme.c ntp_control.c \
+libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \
 	ntp_intres.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
 	ntp_proto.c ntp_refclock.c ntp_request.c \

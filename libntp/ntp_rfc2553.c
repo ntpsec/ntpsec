@@ -83,7 +83,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
 
-#ifndef HAVE_IPV6
+#ifndef ISC_PLATFORM_HAVEIPV6
 
 #if defined(SYS_WINNT)
 /* XXX This is the preferred way, but for some reason the SunOS compiler
@@ -328,4 +328,4 @@ ipv4_aton(
 #endif
 	return (1);
 }
-#endif /* !HAVE_IPV6 */
+#endif /* !ISC_PLATFORM_HAVEIPV6 */
