@@ -65,6 +65,16 @@ typedef unsigned int u_int;
 # include "Bletch: what's 32 bits on this machine?"
 #endif /* not sizeof(int) == 4 */
 
+#ifndef HAVE_TYPE_U_INT8_T
+typedef u_char		u_int8_t;
+typedef u_short		u_int16_t;
+typedef u_int32		u_int32_t;
+#endif /* HAVE_TYPE_U_INT8_T */
+
+#ifndef HAVE_TYPE_U_INT64_T
+typedef struct u_int64_t { u_int32 val[2]; } u_int64_t;
+#endif /* HAVE_TYPE_U_INT64_T */
+
 typedef unsigned short associd_t; /* association ID */
 typedef u_int32 keyid_t;	/* cryptographic key ID */
 typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
