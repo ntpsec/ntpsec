@@ -520,6 +520,11 @@ main(
 	}
 	snifflink(path_keysdir, &link_keysdir);
 
+	if (!link_keys) {
+		snprintf(pathbuf, sizeof pathbuf, "ntp.keys.%lu",
+			 ntptime);
+		link_keys = strdup(pathbuf);
+	}
 	if (!path_keys) {
 		snprintf(pathbuf, sizeof pathbuf, "%s/ntp.keys",
 			 NTP_KEYSDIR);
