@@ -294,8 +294,7 @@ ipv4_aton(
 	addr->sin_addr.s_addr = htonl(netnum);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("ipv4_aton given %s, got %s (%lx)\n",
-		   num, ntoa(saddr), (u_long)netnum);
+		printf("ipv4_aton given %s, got %s.\n", num, ntoa(saddr));
 #endif
 	return (1);
 }
