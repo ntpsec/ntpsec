@@ -98,6 +98,12 @@
 #include "ntp_types.h"
 #include "l_stdlib.h"
 
+#ifdef SYS_WINNT
+extern	int	ntp_getopt	P((int, char **, const char *));
+#define getopt ntp_getopt
+#define optarg ntp_optarg
+#endif
+
 #ifdef OPENSSL
 #include "openssl/bn.h"
 #include "openssl/evp.h"
@@ -165,6 +171,39 @@ char	*passwd2 = NULL;	/* output private key password */
 long	d0, d1, d2, d3;		/* callback counters */
 #endif /* OPENSSL */
 
+#ifdef SYS_WINNT
+BOOL init_randfile();
+
+/*
+ * Don't try to follow symbolic links
+ */
+int
+readlink(char * link, char * file, int len) {
+	return (-1);
+}
+/*
+ * Don't try to create a symbolic link for now.
+ * Just move the file to the name you need.
+ */
+int
+symlink(char *filename, char *linkname) {
+	DeleteFile(linkname);
+	MoveFile(filename, linkname);
+	return 0;
+}
+void
+InitWin32Sockets() {
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	wVersionRequested = MAKEWORD(2,0);
+	if (WSAStartup(wVersionRequested, &wsaData))
+	{
+		fprintf(stderr, "No useable winsock.dll");
+		exit(1);
+	}
+}
+#endif /* SYS_WINNT */
+
 /*
  * Main program
  */
@@ -203,6 +242,13 @@ main(
 #endif /* OPENSSL */
 	u_int	temp;
 
+#ifdef SYS_WINNT
+	/* Initialize before OpenSSL checks */
+	InitWin32Sockets();
+	if(!init_randfile())
+		fprintf(stderr, "Unable to initialize .rnd file\n");
+#endif
+
 #ifdef OPENSSL
 	if (SSLeay() != OPENSSL_VERSION_NUMBER) {
 		fprintf(stderr,
@@ -216,7 +262,6 @@ main(
 	}
 #endif /* OPENSSL */
 
-
 	/*
 	 * Process options, initialize host name and timestamp.
 	 */
@@ -224,7 +269,11 @@ main(
 	hostname = hostbuf;
 	trustname = hostbuf;
 	passwd1 = hostbuf;
+#ifndef SYS_WINNT
 	gettimeofday(&tv, 0);
+#else
+	gettimeofday(&tv);
+#endif
 	epoch = tv.tv_sec;
 	rval = 0;
 	while ((temp = getopt(argc, argv,
@@ -648,7 +697,7 @@ gen_md5(
 {
 	u_char	md5key[16];	/* MD5 key */
 	FILE	*str;
-	u_int	temp;
+	u_int	temp = 0;	/* Initialize to prevent warnings during compile */
 	int	i, j;
 
 	fprintf(stderr, "Generating MD5 keys...\n");
@@ -1630,7 +1679,7 @@ x509	(
 	FILE	*str;		/* file handle */
 	ASN1_INTEGER *serial;	/* serial number */
 	const char *id;		/* digest/signature scheme name */
-	u_char	pathbuf[MAXFILENAME + 1];
+	char	pathbuf[MAXFILENAME + 1];
 
 	/*
 	 * Generate X509 self-signed certificate.
@@ -1652,10 +1701,10 @@ x509	(
 	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
 	subj = X509_get_subject_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    hostname, strlen(hostname), -1, 0);
+	    (unsigned char *) hostname, strlen(hostname), -1, 0);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    trustname, strlen(trustname), -1, 0);
+	    (unsigned char *) trustname, strlen(trustname), -1, 0);
 	if (!X509_set_pubkey(cert, pkey)) {
 		fprintf(stderr, "Assign key fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1764,7 +1813,7 @@ x509	(
 	return (1);
 }
 
-
+#if 0	/* asn2ntp is not used */
 /*
  * asn2ntp - convert ASN1_TIME time structure to NTP time
  */
@@ -1799,7 +1848,7 @@ asn2ntp	(
 	tm.tm_isdst = 0;
 	return (mktime(&tm) + JAN_1970);
 }
-
+#endif
 
 /*
  * Callback routine

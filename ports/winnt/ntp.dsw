@@ -72,6 +72,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ntpkeygen"=".\ntp-keygen\ntpkeygen.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "ntpq"=".\ntpq\ntpq.dsp" - Package Owner=<4>
 
 Package=<5>
