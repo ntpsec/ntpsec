@@ -54,7 +54,8 @@ static int ctl_fd;		/* audio control file descriptor */
  */
 int
 audio_init(
-	char *dname		/* device name */
+	char	*dname,		/* device name */
+	int	bufsiz		/* buffer size */
 	)
 {
 	int fd;
@@ -80,8 +81,9 @@ audio_init(
 	/*
 	 * Set audio device parameters.
 	 */
-	rval = audio_gain((AUDIO_MAX_GAIN - AUDIO_MIN_GAIN) / 2,
-	    AUDIO_MICROPHONE);
+	AUDIO_INITINFO(&info);
+	info.record.buffer_size = bufsiz;
+	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio: invalid control device parameters\n");
 		close(ctl_fd);
@@ -93,23 +95,24 @@ audio_init(
 
 
 /*
- * audio_gain - adjust codec gain and port
+ * audio_gain - adjust codec gains and port
  */
 int
 audio_gain(
 	int gain,		/* gain 0-255 */
+	int mongain,		/* monitor gain 0-255 */
 	int port		/* port */
 	)
 {
 	int rval;
 
-	AUDIO_INITINFO(&info);
-#ifdef HAVE_SYS_AUDIOIO_H
-	info.record.buffer_size = AUDIO_BUFSIZ;
-#endif /* HAVE_SYS_AUDIOIO_H */
+	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
+	info.monitor_gain = mongain;
 	info.record.gain = gain;
 	info.record.port = port;
 	info.record.error = 0;
+	info.play.gain = AUDIO_MAX_GAIN;
+	info.play.port = AUDIO_SPEAKER;
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, &info);
 	if (rval < 0) {
 		msyslog(LOG_ERR, "audio_gain: %m");
@@ -135,10 +138,11 @@ audio_show(void)
 #endif /* HAVE_SYS_AUDIOIO_H */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, &info);
 	printf(
-	    "audio: samples %d, channels %d, precision %d, encoding %d, gain %d, port %d\n",
-	    info.record.sample_rate, info.record.channels,
-	    info.record.precision, info.record.encoding,
-	    info.record.gain, info.record.port);
+	    "audio: rate %d, size %d, chan %d, prec %d, code %d, gain %d, mon %d, port %d\n",
+	    info.record.sample_rate, info.record.buffer_size,
+	    info.record.channels, info.record.precision,
+	    info.record.encoding, info.record.gain,
+	    info.monitor_gain, info.record.port);
 	printf(
 	    "audio: samples %d, eof %d, pause %d, error %d, waiting %d, balance %d\n",
 	    info.record.samples, info.record.eof,

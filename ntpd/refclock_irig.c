@@ -127,16 +127,14 @@
  *
  * Fudge factors
  *
- * Fudge flag2 selects the audio input port, where 0 is the mike port
+ * Fudge flag4 causes the dubugging output described above to be
+ * recorded in the clockstats file. When the audio driver is compiled,
+ * fudge flag2 selects the audio input port, where 0 is the mike port
  * (default) and 1 is the line-in port. It does not seem useful to
  * select the compact disc player port. Fudge flag3 enables audio
- * monitoring of the input signal. For this purpose, the speaker volume
- * must be set before the driver is started. Fudge flag4 causes the
- * debugging output described above to be recorded in the clockstats
- * file. Any of these flags can be changed during operation with the
- * ntpdc program.
+ * monitoring of the input signal. For this purpose, the monitor gain is
+ * set to a default value.
  */
-
 /*
  * Interface definitions
  */
@@ -144,7 +142,7 @@
 #define	PRECISION	(-17)	/* precision assumed (about 10 us) */
 #define	REFID		"IRIG"	/* reference ID */
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
-
+#define	AUDIO_BUFSIZ	160	/* audio buffer size (20 ms) */
 #define SECOND		8000	/* nominal sample rate (Hz) */
 #define BAUD		80	/* samples per baud interval */
 #define OFFSET		128	/* companded sample offset */
@@ -155,6 +153,7 @@
 #define MINTC		2	/* min PLL time constant */
 #define MAXTC		20	/* max PLL time constant max */
 #define	MAXSIG		6000.	/* maximum signal level */
+#define	MAXCLP		100	/* max clips above reference per s */
 #define DRPOUT		100.	/* dropout signal level */
 #define MODMIN		0.5	/* minimum modulation index */
 #define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
@@ -205,6 +204,7 @@ struct irigunit {
 	int	pollcnt;	/* poll counter */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
+	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clipped count */
 	int	seccnt;		/* second interval counter */
 	int	decim;		/* sample decimation factor */
@@ -311,7 +311,7 @@ irig_start(
 	/*
 	 * Open audio device
 	 */
-	fd = audio_init(DEVICE_AUDIO);
+	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ);
 	if (fd < 0)
 		return (0);
 #ifdef DEBUG
@@ -444,9 +444,12 @@ irig_receive(
 		}
 
 		/*
-		 * Variable frequency oscillator. A phase change of one
-		 * unit produces a change of 360 degrees; a frequency
-		 * change of one unit produces a change of 1 Hz.
+		 * Variable frequency oscillator. The codec oscillator
+		 * runs at the nominal rate of 8000 samples per second,
+		 * or 125 us per sample. A frequency change of one unit
+		 * results in either duplicating or deleting one sample
+		 * per second, which results in a frequency change of
+		 * 125 PPM.
 		 */
 		up->phase += up->freq / SECOND;
 		if (up->phase >= .5) {
@@ -461,8 +464,7 @@ irig_receive(
 		L_ADD(&up->timestamp, &up->tick);
 
 		/*
-		 * Once each second, determine the IRIG format, codec
-		 * port and gain.
+		 * Once each second, determine the IRIG format and gain.
 		 */
 		up->seccnt = (up->seccnt + 1) % SECOND;
 		if (up->seccnt == 0) {
@@ -473,22 +475,22 @@ irig_receive(
 				up->decim = 10;
 				up->fdelay = IRIG_E;
 			}
-			if (pp->sloppyclockflag & CLK_FLAG2)
-			    up->port = 2;
-			else
-			    up->port = 1;
 			irig_gain(peer);
 			up->irig_b = up->irig_e = 0;
 		}
 	}
 
 	/*
-	 * Squawk to the monitor speaker if enabled.
+	 * Set the input port and monitor gain for the next buffer.
 	 */
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		up->port = 2;
+	else
+		up->port = 1;
 	if (pp->sloppyclockflag & CLK_FLAG3)
-	    if (write(pp->io.fd, (u_char *)&rbufp->recv_space,
-		      (u_int)up->bufcnt) < 0)
-		perror("irig:");
+		up->mongain = MONGAIN;
+	else
+		up->mongain = 0;
 }
 
 /*
@@ -953,14 +955,14 @@ irig_gain(
 	 */
 	if (up->clipcnt == 0) {
 		up->gain += 4;
-		if (up->gain > 255)
-			up->gain = 255;
-	} else if (up->clipcnt > SECOND / 100) {
+		if (up->gain > MAXGAIN)
+			up->gain = MAXGAIN;
+	} else if (up->clipcnt > MAXCLP) {
 		up->gain -= 4;
 		if (up->gain < 0)
 			up->gain = 0;
 	}
-	audio_gain(up->gain, up->port);
+	audio_gain(up->gain, up->mongain, up->port);
 	up->clipcnt = 0;
 }
 
