@@ -18,6 +18,8 @@ SUBDIRS = \
 	kernel	\
 	util
 
+DIST_SUBDIRS = $(SUBDIRS) ntptrace
+
 EXTRA_DIST = \
 	COPYRIGHT \
 	ChangeLog \
