@@ -1,3 +1,7 @@
+2000-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c (main): Don't call fclose if stream is NULL.
+
 2000-08-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver35.htm: 

@@ -887,7 +887,7 @@ main(
 					i, md5key);
 			}
 		}
-		fclose(str);
+		if (str) fclose(str);
 		cleanlinks(f1_keys, f2_keys, f3_keys);
 	}
 
@@ -934,7 +934,7 @@ main(
 			encoded_key[temp] = '\0';
 			fprintf(str, "%d %s\n", modulus, encoded_key);
 		}
-		fclose(str);
+		if (str) fclose(str);
 		cleanlinks(f1_privatekey, f2_privatekey, f3_privatekey);
 
 		/*
@@ -953,7 +953,7 @@ main(
 			encoded_key[temp] = '\0';
 			fprintf(str, "%d %s\n", modulus, encoded_key);
 		}
-		fclose(str);
+		if (str) fclose(str);
 		cleanlinks(f1_publickey, f2_publickey, f3_publickey);
 	}
 #endif /* PUBKEY */
@@ -1007,7 +1007,7 @@ main(
 			fprintf(str, "%d %s\n", dh_params.generatorLen,
 				encoded_key);
 		}
-		fclose(str);
+		if (str) fclose(str);
 		cleanlinks(f1_dhparms, f2_dhparms, f3_dhparms);
 	}
 #endif /* PUBKEY */
