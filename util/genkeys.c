@@ -27,7 +27,7 @@
 #define	PRIMELEN	512	/* length of DH prime */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
 #define	PATH_MAX	255	/* max file name length */
-#define	JAN_1970	2208988800UL /* NTP seconds at the epoch */
+#define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds at the epoch */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
 /*
  * Prototypes
@@ -174,7 +174,9 @@ main(
 	x509("RSA_MD5", pkey, EVP_md5());
 	x509("RSA_SHA", pkey, EVP_sha());
 	x509("RSA_SHA1", pkey, EVP_sha1());
+#ifdef HAVE_EVP_MDC2
 	x509("RSA_MDC2", pkey, EVP_mdc2());
+#endif
 	x509("RSA_RIPEMD160", pkey, EVP_ripemd160());
 	free(pkey);
 
