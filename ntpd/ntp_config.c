@@ -2085,7 +2085,10 @@ getnetnum(
 #ifdef DEBUG
 		if (debug > 3)
 			printf(
-				"getaddrinfo: \"%s\" invalid host address, line ignored\n",
+				"getaddrinfo: \"%s\" invalid host address%s.\n",
+				(complain)
+				? ", line ignored"
+				: "",
 				num);
 #endif
 		return 0;
