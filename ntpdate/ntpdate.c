@@ -1715,7 +1715,7 @@ init_io(void)
 	 * bind the socket to the NTP port
 	 */
 	if (!debug && !simple_query && !unpriv_port) {
-		    if (bind(fd[nbsock], res->ai_addr, res->ai_addrlen) < 0) {
+		if (bind(fd[nbsock], res->ai_addr, SOCKLEN(res->ai_addr)) < 0) {
 #ifndef SYS_WINNT
 			if (errno == EADDRINUSE)
 #else

@@ -85,8 +85,6 @@
 
 #ifndef HAVE_IPV6
 
-#define	LOCALHOST	0x7f000001	/* 127.0.0.1, in hex, of course */
-
 #if 0
 /* XXX This is the preferred way, but for some reason the SunOS compiler
  * does not like it.
@@ -171,9 +169,10 @@ getaddrinfo (const char *nodename, const char *servname,
 		ai->ai_family = AF_INET;
 		ai->ai_addrlen = sizeof(struct sockaddr_storage);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
-		sockin->sin_addr.s_addr = htonl(LOCALHOST);
+		sockin->sin_family = AF_INET;
+		sockin->sin_addr.s_addr = htonl(INADDR_ANY);
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		ai->ai_addr->sa_len = sizeof(struct sockaddr);
+		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
 #endif
 	}
 	if (servname != NULL) {
