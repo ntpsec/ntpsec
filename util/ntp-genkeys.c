@@ -752,7 +752,7 @@ genkeys(
 		}
 	}
 	if (!gotsignkey && *f1_signkey)	{ /* Use sign key from ntp.conf */
-		cp = getpath(keysdir, f1_signkey, f2_signkey);
+		cp = getpath(keysdir, f1_signkey, NULL);
 		if (!cp)
 			exit(-1);
 		strcpy(f3_signkey, cp);
@@ -785,7 +785,7 @@ genkeys(
 		}
 	}
 	if (!gotsignkey && *f1_privatekey) { /* Use rsakey from ntp.conf */
-		cp = getpath(keysdir, f1_privatekey, f2_privatekey);
+		cp = getpath(keysdir, f1_privatekey, NULL);
 		if (!cp)
 			exit(-1);
 		strcpy(f3_signkey, cp);
@@ -797,6 +797,9 @@ genkeys(
 		if (debug > 1)
 			printf("f3: DR: <%s>\n", f3_signkey);
 	}
+
+	if (!gotsignkey)
+		printf("No key found - no certs can be generated.\n");
 #endif /* OPENSSL */
 
 	return (0);
