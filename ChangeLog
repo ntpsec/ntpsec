@@ -1,5 +1,7 @@
 1999-10-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98b
+
 	* ntpd/refclock_atom.c: AIOCTIMESTAMP patch
 	* ntpd/ntpd.c: SCO clock patch
 	* ntpd/ntp_request.c: noselect patch
