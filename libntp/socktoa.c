@@ -31,9 +31,12 @@ socktoa(
 
 	LIB_GETBUF(buffer);
 
-	if (sock == NULL) printf("null");
+	if (sock == NULL)
+		strcpy(buffer, "null");
+	else
+	{
 
-	switch(sock->ss_family) {
+		switch(sock->ss_family) {
 
 		case AF_INET :
 			inet_ntop(AF_INET, &GET_INADDR(*sock), buffer,
@@ -43,6 +46,9 @@ socktoa(
 		case AF_INET6 :
 			inet_ntop(AF_INET6, &GET_INADDR6(*sock), buffer,
 			    LIB_BUFLENGTH);
+		default:
+			strcpy(buffer, "unknown");
+		}
 	}
   	return buffer;
 }
