@@ -17,7 +17,7 @@
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
-int	listen_to_virtual_ips = 0;
+int	listen_to_virtual_ips = 1;
 
 
 #ifndef HAVE_CLOCKCTL 
@@ -86,7 +86,7 @@ getstartup(
 		    break;
 #endif
 		case 'L':
-		    listen_to_virtual_ips = 1;
+		    listen_to_virtual_ips = 0;
 		    break;
 		case 'l':
 			{
