@@ -323,8 +323,8 @@ struct peer {
 	u_int	unreach;	/* unreachable count */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
-        u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
-        void (*action) P((struct peer *)); /* action timeout function */
+	u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
+	void (*action) P((struct peer *)); /* action timeout function */
 	/*
 	 * Statistic counters
 	 */
@@ -396,9 +396,9 @@ struct peer {
 #define	END_CLEAR_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define	LEN_CLEAR_TO_ZERO	(END_CLEAR_TO_ZERO((struct peer *)0) \
 				    - CLEAR_TO_ZERO((struct peer *)0))
-#define CRYPTO_TO_ZERO(p)        ((char *)&((p)->clear_to_zero))
-#define END_CRYPTO_TO_ZERO(p)    ((char *)&((p)->end_clear_to_zero))
-#define LEN_CRYPTO_TO_ZERO       (END_CRYPTO_TO_ZERO((struct peer *)0) \
+#define CRYPTO_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
+#define END_CRYPTO_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
+#define LEN_CRYPTO_TO_ZERO	(END_CRYPTO_TO_ZERO((struct peer *)0) \
 				    - CRYPTO_TO_ZERO((struct peer *)0))
 
 /*
@@ -415,7 +415,7 @@ struct peer {
 #define	REFCLK_WWV_PST		3	/* PST/Traconex 1020 WWV/H */
 #define	REFCLK_SPECTRACOM	4	/* Spectracom (generic) Receivers */
 #define	REFCLK_TRUETIME		5	/* TrueTime (generic) Receivers */
-#define REFCLK_IRIG_AUDIO	6       /* IRIG-B/W audio decoder */
+#define REFCLK_IRIG_AUDIO	6	/* IRIG-B/W audio decoder */
 #define	REFCLK_CHU_AUDIO	7	/* CHU audio demodulator/decoder */
 #define REFCLK_PARSE		8	/* generic driver (usually DCF77,GPS,MSF) */
 #define	REFCLK_GPS_MX4200	9	/* Magnavox MX4200 GPS */
@@ -435,14 +435,14 @@ struct peer {
 #define REFCLK_PTB_ACTS		23	/* PTB Auto Computer Time Service */
 #define REFCLK_USNO		24	/* Naval Observatory dialup */
 #define REFCLK_GPS_HP		26	/* HP 58503A Time/Frequency Receiver */
-#define REFCLK_ARCRON_MSF       27      /* ARCRON MSF radio clock. */
+#define REFCLK_ARCRON_MSF	27	/* ARCRON MSF radio clock. */
 #define REFCLK_SHM		28	/* clock attached thru shared memory */
 #define REFCLK_PALISADE		29	/* Trimble Navigation Palisade GPS */
 #define REFCLK_ONCORE		30	/* Motorola UT Oncore GPS */
 #define REFCLK_GPS_JUPITER	31	/* Rockwell Jupiter GPS receiver */
-#define REFCLK_CHRONOLOG        32	/* Chrono-log K WWVB receiver */
-#define REFCLK_DUMBCLOCK        33	/* Dumb localtime clock */
-#define REFCLK_ULINK            34      /* Ultralink M320 WWVB receiver */
+#define REFCLK_CHRONOLOG	32	/* Chrono-log K WWVB receiver */
+#define REFCLK_DUMBCLOCK	33	/* Dumb localtime clock */
+#define REFCLK_ULINK		34	/* Ultralink M320 WWVB receiver */
 #define REFCLK_PCF		35	/* Conrad parallel port radio clock */
 #define REFCLK_WWV_AUDIO	36	/* WWV/H audio demodulator/decoder */
 #define REFCLK_FG		37	/* Forum Graphic GPS */
@@ -452,7 +452,8 @@ struct peer {
 #define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder */
 #define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
 #define REFCLK_RIPENCC		43	/* RIPE NCC Trimble driver */
-#define REFCLK_NEOCLOCK4X       44      /* NeoClock4X DCF77 or TDF receiver */
+#define REFCLK_NEOCLOCK4X	44	/* NeoClock4X DCF77 or TDF receiver */
+#define REFCLK_MAX		44	/* NeoClock4X DCF77 or TDF receiver */
 
  /*
  * Macro for sockaddr_storage structures operations
@@ -778,8 +779,8 @@ struct mon_data {
  */
 struct restrictlist {
 	struct restrictlist *next;	/* link to next entry */
-	u_int32 addr;                   /* Ipv4 host address (host byte order) */
-	u_int32 mask;                   /* Ipv4 mask for address (host byte order) */
+	u_int32 addr;			/* Ipv4 host address (host byte order) */
+	u_int32 mask;			/* Ipv4 mask for address (host byte order) */
 	u_long count;			/* number of packets matched */
 	u_short flags;			/* accesslist flags */
 	u_short mflags;			/* match flags */
@@ -806,7 +807,7 @@ struct restrictlist6 {
 #define	RES_NOPEER		0x020	/* don't allocate memory resources */
 #define	RES_NOTRAP		0x040	/* don't allow him to set traps */
 #define	RES_LPTRAP		0x080	/* traps set by him are low priority */
-#define RES_LIMITED		0x100   /* limit per net number of clients */
+#define RES_LIMITED		0x100	/* limit per net number of clients */
 #define	RES_VERSION		0x200	/* serve only current version */
 #define RES_DEMOBILIZE		0x400	/* demobilize association */
 #define RES_TIMEOUT		0x800	/* timeout this entry */
