@@ -13,7 +13,8 @@
 #define CRYPTO_FLAG_PRIV  0x0010 /* PC identity scheme */
 #define CRYPTO_FLAG_IFF   0x0020 /* IFF identity scheme */
 #define CRYPTO_FLAG_GQ	  0x0040 /* GQ identity scheme */
-
+#define CRYPTO_FLAG_MASK  0x00f0 /* identity scheme mask */
+	
 /*
  * The following bits are used by the client during the protocol
  * exchange.
@@ -60,9 +61,9 @@
 #define XEVNT_LEN	XEVNT_CMD(1) /* bad field format or length */
 #define XEVNT_TSP	XEVNT_CMD(2) /* bad timestamp */
 #define XEVNT_FSP	XEVNT_CMD(3) /* bad filestamp */
-#define XEVNT_PUB	XEVNT_CMD(4) /* bad or missing public key */
+#define XEVNT_PUB	XEVNT_CMD(4) /* bad procedure or data */
 #define XEVNT_MD	XEVNT_CMD(5) /* unsupported digest type */
-#define XEVNT_KEY	XEVNT_CMD(6) /* mismatched digest types */
+#define XEVNT_KEY	XEVNT_CMD(6) /* unsupported identity type */
 #define XEVNT_SGL	XEVNT_CMD(7) /* bad signature length */
 #define XEVNT_SIG	XEVNT_CMD(8) /* signature not verified */
 #define XEVNT_VFY	XEVNT_CMD(9) /* certificate not verified */
