@@ -1,5 +1,15 @@
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
+#endif
+
+#ifdef __QNXNTO__
+#include <sys/neutrino.h>
+#include <sys/time.h>
+int adjtime( const struct timeval * oldtime, struct timeval * newtime )
+{
+    return ClockAdjust( CLOCK_REALTIME, (struct _clockadjust *) newtime,
+		(struct _clockadjust *) oldtime );
+}// adjtime()
 #endif
 
 #ifdef MPE 

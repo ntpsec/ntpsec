@@ -68,6 +68,12 @@ extern	void	input_handler	P((l_fp *));
 #  define USE_SIGIO
 # endif
 
+# ifdef __QNXNTO__
+#  include <fcntl.h>
+#  include <unix.h>
+#  define FNDELAY O_NDELAY
+# endif
+
 # if defined(USE_SIGIO) && defined(USE_SIGPOLL)
 #  if SIGIO == SIGPOLL
 #	define USE_SIGIO

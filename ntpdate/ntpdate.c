@@ -46,6 +46,10 @@
 # include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
 
+#ifdef __QNXNTO__
+# include "adjtime.h"
+#endif
+
 #ifdef SYS_VXWORKS
 # include "ioLib.h"
 # include "sockLib.h"
