@@ -782,7 +782,7 @@ receive(
 	 * legitimate sender may have just changed keys, or it could be
 	 * an intruder attempting to disrupt legitimate activities. We
 	 * have to be careful here.
-	/*
+	 */
 	NTOHL_FP(&pkt->org, &p_org);		/* test 2 */
 	if (hismode != MODE_BROADCAST && !L_ISEQU(&peer->xmt, &p_org))
 		peer->flash |= TEST2;		/* bogus */
