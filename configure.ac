@@ -2229,26 +2229,6 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-# Requires modem control
-AC_MSG_CHECKING(PTB modem service)
-AC_ARG_ENABLE(PTBACTS,
-    AC_HELP_STRING([--enable-PTBACTS], [s PTB modem service]),
-    [ntp_ok=$enableval],
-    [AC_EGREP_CPP(yes,
-        [#include <termios.h>
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#ifdef TIOCMBIS
-         yes
-#endif
-         ], ntp_ok=$ntp_eac, ntp_ok=no)])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_PTBACTS, 1, [PTB modem service])
-fi
-AC_MSG_RESULT($ntp_ok)
-
 AC_MSG_CHECKING(RIPENCC specific Trimble driver)
 AC_ARG_ENABLE(RIPENCC,
     AC_HELP_STRING([--enable-RIPENCC], [- RIPENCC specific Trimble driver]),
@@ -2358,26 +2338,6 @@ AC_ARG_ENABLE(ULINK,
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_ULINK, 1, [Ultralink M320 WWVB receiver?])
-fi
-AC_MSG_RESULT($ntp_ok)
-
-# Requires modem control
-AC_MSG_CHECKING(USNO modem service)
-AC_ARG_ENABLE(USNO,
-    AC_HELP_STRING([--enable-USNO], [s USNO modem service]),
-    [ntp_ok=$enableval],
-    [AC_EGREP_CPP(yes,
-        [#include <termios.h>
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#ifdef TIOCMBIS
-         yes
-#endif
-         ], ntp_ok=$ntp_eac, ntp_ok=no)])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_USNO, 1, [USNO modem service])
 fi
 AC_MSG_RESULT($ntp_ok)
 
