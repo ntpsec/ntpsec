@@ -554,10 +554,17 @@ create_sockets(
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
 #ifdef UDP_WILDCARD_DELIVERY
+		/*
+		 * Do not allow creation of wildcard address
+		 * sockets since it appears that it could
+		 * allow it to receive broadcast packets
+		 * Further fix will be more comprehensive.
+		 * PDMXXX
+
 	if (specific_interface == NULL) {
 		nwilds = create_wildcards(port);
 		idx = nwilds;
-	}
+	} */
 #endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
