@@ -320,7 +320,7 @@ struct chuunit {
 	int	fd_audio;	/* audio port file descriptor */
 	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
-	int	gain;		/* codec input gain */
+	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clip count */
 	int	seccnt;		/* second interval counter */
@@ -1317,8 +1317,8 @@ chu_poll(
 	 * correct and can be selected to discipline the clock.
 	 */
 	if (temp > 0) {
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 		refclock_receive(peer);
+		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	} else if (pp->sloppyclockflag & CLK_FLAG4) {
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	}
@@ -1424,15 +1424,16 @@ chu_major(
 		up->errflg = CEVNT_BADREPLY;
 		return (0);
 	}
-	L_CLR(&offset);
 	if (!clocktime(pp->day, pp->hour, pp->minute, 0, GMT,
 	    up->tstamp[0].l_ui, &pp->yearstart, &offset.l_ui)) {
 		up->errflg = CEVNT_BADTIME;
 		return (0);
 	}
+	offset.l_uf = 0;
 	for (i = 0; i < up->ntstamp; i++)
-		refclock_process_offset(pp, offset, up->tstamp[i], FUDGE +
-		    pp->fudgetime1);
+		refclock_process_offset(pp, offset, up->tstamp[i],
+		    FUDGE + pp->fudgetime1);
+	pp->lastref = up->timestamp;
 	return (i);
 }
 

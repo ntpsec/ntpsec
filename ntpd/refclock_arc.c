@@ -1034,11 +1034,6 @@ arc_receive(
 				       '6' : ('0' + up->quality));
 	pp->a_lastcode[pp->lencode + 1] = '\0'; /* Terminate for printf(). */
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
-	/* We don't use the micro-/milli- second part... */
-	pp->usec = 0;
-	pp->msec = 0;
-
 	n = sscanf(pp->a_lastcode, "o%2d%2d%2d%1d%2d%2d%2d%1d%1d",
 		   &pp->hour, &pp->minute, &pp->second,
 		   &wday, &pp->day, &month, &pp->year, &bst, &status);
@@ -1188,6 +1183,7 @@ arc_receive(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
 

@@ -387,18 +387,19 @@ refclock_cmpl_fp(
  */
 void
 refclock_process_offset(
-	struct refclockproc *pp,
-	l_fp offset,
-	l_fp lastrec,
+	struct refclockproc *pp,	/* refclock structure pointer */
+	l_fp lasttim,			/* last timecode timestamp */
+	l_fp lastrec,			/* last receive timestamp */
 	double fudge
 	)
 {
+	l_fp lftemp;
 	double doffset;
 
-	pp->lastref = offset;
 	pp->lastrec = lastrec;
-	L_SUB(&offset, &lastrec);
-	LFPTOD(&offset, doffset);
+	lftemp = lasttim;
+	L_SUB(&lftemp, &lastrec);
+	LFPTOD(&lftemp, doffset);
 	SAMPLE(doffset + fudge);
 }
 
@@ -413,10 +414,10 @@ refclock_process_offset(
 */
 int
 refclock_process(
-	struct refclockproc *pp
+	struct refclockproc *pp		/* refclock structure pointer */
 	)
 {
-	l_fp offset;
+	l_fp offset, ltemp;
 
 	/*
 	 * Compute the timecode timestamp from the days, hours, minutes,
@@ -429,11 +430,9 @@ refclock_process(
 	if (!clocktime(pp->day, pp->hour, pp->minute, pp->second, GMT,
 		pp->lastrec.l_ui, &pp->yearstart, &offset.l_ui))
 		return (0);
-	if (pp->usec) {
-		TVUTOTSF(pp->usec, offset.l_uf);
-	} else {
-		MSUTOTSF(pp->msec, offset.l_uf);
-	}
+	offset.l_uf = 0;
+	DTOLFP(pp->nsec / 1e9, &ltemp);
+	L_ADD(&offset, &ltemp);
 	refclock_process_offset(pp, offset, pp->lastrec,
 	    pp->fudgetime1);
 	return (1);
@@ -451,7 +450,7 @@ refclock_process(
  */
 static int
 refclock_sample(
-	struct refclockproc *pp
+	struct refclockproc *pp		/* refclock structure pointer */
 	)
 {
 	int i, j, k, m, n;
@@ -465,8 +464,10 @@ refclock_sample(
 	if (pp->codeproc == pp->coderecv)
 		return (0);
 	n = 0;
-	while (pp->codeproc != pp->coderecv)
-		off[n++] = pp->filter[pp->codeproc++ % MAXSTAGE];
+	while (pp->codeproc != pp->coderecv) {
+		off[n++] = pp->filter[pp->codeproc];
+		pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
+	}
 	if (n > 1)
 		qsort((char *)off, (size_t)n, sizeof(double), refclock_cmpl_fp);
 
@@ -544,7 +545,8 @@ refclock_receive(
 	if (!peer->reach)
 		report_event(EVNT_REACH, peer);
 	peer->reach |= 1;
-	peer->reftime = peer->org = pp->lastrec;
+	peer->reftime = pp->lastref;
+	peer->org = pp->lastrec;
 	peer->rootdispersion = pp->disp + SQRT(pp->jitter);
 	get_systime(&peer->rec);
 	if (!refclock_sample(pp))
@@ -596,7 +598,7 @@ refclock_gtlin(
 	 * timestamp by noting its value is earlier than the buffer
 	 * timestamp, but not more than one second earlier.
 	 */
-	dpt = (char *)&rbufp->recv_space;
+	dpt = rbufp->recv_buffer;
 	dpend = dpt + rbufp->recv_length;
 	trtmp = rbufp->recv_time;
 
@@ -637,9 +639,14 @@ refclock_gtlin(
 	if (i > 0)
 		*dp = '\0';
 #ifdef DEBUG
-	if (debug > 1 && i > 0)
-		printf("refclock_gtlin: fd %d time %s timecode %d %s\n",
-		    rbufp->fd, ulfptoa(&trtmp, 6), i, lineptr);
+	if (debug > 1) {
+		if (i > 0)
+			printf("refclock_gtlin: fd %d time %s timecode %d %s\n",
+			    rbufp->fd, ulfptoa(&trtmp, 6), i, lineptr);
+		else
+			printf("refclock_gtlin: fd %d time %s\n",
+			    rbufp->fd, ulfptoa(&trtmp, 6));
+	}
 #endif
 	*tsptr = trtmp;
 	return (i);
@@ -1085,7 +1092,7 @@ refclock_buginfo(
 	bug->values[2] = pp->hour;
 	bug->values[3] = pp->minute;
 	bug->values[4] = pp->second;
-	bug->values[5] = pp->msec;
+	bug->values[5] = pp->nsec;
 	bug->values[6] = pp->yearstart;
 	bug->values[7] = pp->coderecv;
 	bug->stimes = 0xfffffffc;

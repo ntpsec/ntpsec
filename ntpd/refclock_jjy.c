@@ -423,8 +423,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	pp->hour   = up->hour ;
 	pp->minute = up->minute ;
 	pp->second = up->second ;
-	pp->msec   = up->msecond ;
-	pp->usec   = 0;
+	pp->nsec   = up->msecond * 1000000;
 
 	/* 
 	 * JST to UTC 
@@ -461,10 +460,9 @@ jjy_receive ( struct recvbuf *rbufp )
 
 	sprintf ( sLogText, "%04d/%02d/%02d %02d:%02d:%02d JST",
 	          up->year, up->month, up->day, up->hour, up->minute, up->second ) ;
-	record_clock_stats ( &peer->srcadr, sLogText ) ;
-
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-
+	record_clock_stats ( &peer->srcadr, sLogText ) ;
 }
 
 /**************************************************************************************************/

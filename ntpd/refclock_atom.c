@@ -489,6 +489,7 @@ atom_poll(
 		peer->refid = pp->refid;
 	else
 		peer->refid = sys_prefer->srcadr.sin_addr.s_addr;
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	peer->burst = ASTAGE;
 }
