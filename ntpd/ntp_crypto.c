@@ -491,7 +491,7 @@ crypto_recv(
 					peer->cmmd |= CRYPTO_ERROR;
 				break;
 			}
-			if (!(peer->flags & FLAG_MCAST2))
+			if (!(peer->cast_flags & MDF_BCLNT))
 				peer->flags |= FLAG_AUTOKEY;
 			peer->flash &= ~TEST10;
 			peer->assoc = ntohl(pkt[i + 1]);

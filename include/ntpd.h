@@ -77,6 +77,7 @@ extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
 extern	struct interface *findinterface P((struct sockaddr_in *));
+extern  struct interface *findbcastinter P((struct sockaddr_in *));
 
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));
@@ -131,7 +132,9 @@ extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
+#ifdef AUTOKEY
 extern	void	expire_all	P((void));
+#endif /* AUTOKEY */
 extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
 extern	void	resetmanycast	P((void));
 

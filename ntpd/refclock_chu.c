@@ -478,8 +478,8 @@ chu_start(
 	if (debug > 1)
 		temp = P_TRACE;
 #endif
-	if (peer->ttl > 0) {
-		if (peer->ttl & 0x80)
+	if (peer->ttlmax > 0) {
+		if (peer->ttlmax & 0x80)
 			up->fd_icom = icom_init("/dev/icom", B1200,
 			    temp);
 		else
@@ -487,7 +487,7 @@ chu_start(
 			    temp);
 	}
 	if (up->fd_icom > 0) {
-		if (icom_freq(up->fd_icom, peer->ttl & 0x7f,
+		if (icom_freq(up->fd_icom, peer->ttlmax & 0x7f,
 		    qsy[up->chan]) < 0) {
 			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 			    msyslog(LOG_ERR,
@@ -1221,7 +1221,7 @@ chu_poll(
 	} else if (up->fd_icom > 0) {
 		up->dwell = 0;
 		up->chan = (up->chan + 1) % NCHAN;
-		icom_freq(up->fd_icom, peer->ttl & 0x7f, qsy[up->chan]);
+		icom_freq(up->fd_icom, peer->ttlmax & 0x7f, qsy[up->chan]);
 		sprintf(up->ident, "%.3f", qsy[up->chan]); 
 		sprintf(tbuf, "chu: QSY to %s MHz", up->ident);
 		record_clock_stats(&peer->srcadr, tbuf);

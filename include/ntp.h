@@ -257,8 +257,7 @@ struct peer {
 	u_int	flash;		/* protocol error test tally bits */
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
-	u_char	ttl;		/* m'cast time to live/refclock mode */
-	u_char	ttlmax;		/* max ttl */
+	u_char	ttlmax;		/* max ttl/refclock mode */
 
 	/*
 	 * Variables used by reference clock support
@@ -312,6 +311,7 @@ struct peer {
 	u_int	valid;		/* valid update counter */
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
+	u_char	ttl;            /* ttl for manycast mode */
 	u_char	reach;		/* reachability register */
 	u_char	unreach;	/* unreachable count */
 	u_long	epoch;		/* reference epoch */
@@ -381,9 +381,7 @@ struct peer {
 #define	MODE_BROADCAST	5	/* broadcast mode */
 #define	MODE_CONTROL	6	/* control mode packet */
 #define	MODE_PRIVATE	7	/* implementation defined function */
-
-#define	MODE_BCLIENT	8	/* a pseudo mode, used internally */
-#define MODE_MCLIENT	9	/* multicast mode, used internally */
+#define	MODE_BCLIENT	8	/* broadcast client mode */
 
 /*
  * Values for peer.stratum, sys_stratum
@@ -398,17 +396,16 @@ struct peer {
  */
 #define	FLAG_CONFIG	0x0001	/* association was configured */
 #define	FLAG_AUTHENABLE	0x0002	/* authentication required */
-#define	FLAG_MCAST1	0x0004	/* multicast client/server mode */
-#define	FLAG_MCAST2	0x0008	/* multicast client mode */
-#define	FLAG_AUTHENTIC	0x0010	/* last message was authentic */
+#define	FLAG_AUTHENTIC	0x0004	/* last message was authentic */
+#define FLAG_SKEY	0x0008  /* autokey authentication */
+#define FLAG_MCAST	0x0010  /* multicast client mode */
 #define	FLAG_REFCLOCK	0x0020	/* this is actually a reference clock */
 #define	FLAG_SYSPEER	0x0040	/* this is one of the selected peers */
 #define FLAG_PREFER	0x0080	/* this is the preferred peer */
 #define FLAG_BURST	0x0100	/* burst mode */
 #define FLAG_IBURST	0x0200	/* initial burst mode */
-#define FLAG_SKEY	0x0400	/* autokey authentication */
-#define FLAG_NOSELECT	0x0800	/* this is a "noselect" peer */
-#define FLAG_AUTOKEY	0x1000	/* autokey confirmed */
+#define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
+#define FLAG_AUTOKEY	0x0800	/* autokey confirmed */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -713,11 +710,15 @@ struct mon_data {
 	u_char cast_flags;		/* flags MDF_?CAST */
 };
 
-#define	MDF_UCAST	0x1		/* unicast packet */
-#define	MDF_MCAST	0x2		/* multicast packet */
-#define	MDF_BCAST	0x4		/* broadcast packet */
-#define	MDF_LCAST	0x8		/* local packet */
-#define MDF_ACAST	0x10		/* manycast packet */
+/*
+ * Values for cast_flags
+ */
+#define	MDF_UCAST	0x01		/* unicast */
+#define	MDF_MCAST	0x02		/* multicast */
+#define	MDF_BCAST	0x04		/* broadcast */
+#define	MDF_LCAST	0x08		/* localcast */
+#define MDF_ACAST	0x10		/* manycast */
+#define	MDF_BCLNT	0x20		/* broadcast client */
 
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring

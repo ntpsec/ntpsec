@@ -438,7 +438,7 @@ usno_timeout(
 		peer->nextdate = current_time + ANSWER;
 		return;
 	}
-	switch (peer->ttl) {
+	switch (peer->ttlmax) {
 
 		/*
 		 * In manual mode the calling program is activated

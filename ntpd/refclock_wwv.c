@@ -739,8 +739,8 @@ wwv_start(
 	if (debug > 1)
 		temp = P_TRACE;
 #endif
-	if (peer->ttl != 0) {
-		if (peer->ttl & 0x80)
+	if (peer->ttlmax != 0) {
+		if (peer->ttlmax & 0x80)
 			up->fd_icom = icom_init("/dev/icom", B1200,
 			    temp);
 		else
@@ -2615,7 +2615,7 @@ wwv_qsy(
 	up->mitig[up->achan].gain = up->gain;
 #ifdef ICOM
 	if (up->fd_icom > 0)
-		rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
+		rval = icom_freq(up->fd_icom, peer->ttlmax & 0x7f,
 		    qsy[chan]);
 #endif /* ICOM */
 	up->achan = chan;

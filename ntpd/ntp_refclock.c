@@ -242,14 +242,6 @@ refclock_newpeer(
 	pp->timestarted = current_time;
 
 	/*
-	 * If the interface has been set to any_interface, set it to the
-	 * loopback address if we have one. This is so that peers which
-	 * are unreachable are easy to see in the peer display.
-	 */
-	if (peer->dstadr == any_interface && loopback_interface != 0)
-		peer->dstadr = loopback_interface;
-
-	/*
 	 * Set peer.pmode based on the hmode. For appearances only.
 	 */
 	switch (peer->hmode) {

@@ -30,15 +30,13 @@
  * CONTROL	   |   e       0       0       0       0       0
  * PRIVATE	   |   e       0       0       0       0       0
  * BCLIENT         |   e       0       0       0       e       1
- * MCLIENT	   |   e       0       0       0       0       0
  *
- * One point to note here:  
- *      a packet in BCAST mode can potentially match a peer in CLIENT
- *      mode, but we that is a special case and we check for that early
- *      in the decision process.  This avoids having to keep track of 
- *      what kind of associations are possible etc...  We actually 
- *      circumvent that problem by requiring that the first b(m)roadcast 
- *      received after the change back to BCLIENT mode sets the clock.
+ * One point to note here: a packet in BCAST mode can potentially match
+ * a peer in CLIENT mode, but we that is a special case and we check for
+ * that early in the decision process.  This avoids having to keep track
+ * of what kind of associations are possible etc...  We actually
+ * circumvent that problem by requiring that the first b(m)roadcast
+ * received after the change back to BCLIENT mode sets the clock.
  */
 
 int AM[AM_MODES][AM_MODES] = {
@@ -61,86 +59,59 @@ int AM[AM_MODES][AM_MODES] = {
 /*PRIV*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
 /*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_ERR,      AM_PROCPKT},
-
-/*MCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH}
 };
 
 #define MATCH_ASSOC(x,y)	AM[(x)][(y)]
 
 /*
  * These routines manage the allocation of memory to peer structures
- * and the maintenance of the peer hash table.  The two main entry
- * points are findpeer(), which looks for corresponding peer data
- * in the peer list, newpeer(), which allocates a new peer structure
- * and adds it to the list, and unpeer(), which demobilizes the
- * association and deallocates the structure.
+ * and the maintenance of the peer hash table. The two main entry
+ * points are findpeer(), which looks for matching peer sturctures in
+ * the peer list, newpeer(), which allocates a new peer structure and
+ * adds it to the list, and unpeer(), which demobilizes the association
+ * and deallocates the structure.
  */
 /*
- * Interface list for broadcast
+ * Peer hash tables
  */
-extern struct interface inter_list[];
-extern int ninterfaces;
+struct peer *peer_hash[HASH_SIZE];	/* peer hash table */
+int peer_hash_count[HASH_SIZE];		/* peers in each bucket */
+struct peer *assoc_hash[HASH_SIZE];	/* association ID hash table */
+int assoc_hash_count[HASH_SIZE];	/* peers in each bucket */
+static struct peer *peer_free;		/* peer structures free list */
+int peer_free_count;			/* count of free structures */
 
 /*
- * The peer hash table (imported by the protocol module).
- */
-struct peer *peer_hash[HASH_SIZE];
-int peer_hash_count[HASH_SIZE];		/* count of peers in each bucket */
-
-/*
- * The association ID hash table.  Used for lookups by association ID
- */
-struct peer *assoc_hash[HASH_SIZE];
-int assoc_hash_count[HASH_SIZE];
-
-/*
- * The free list.  Clean structures only, please.
- */
-static struct peer *peer_free;
-int peer_free_count;
-
-/*
- * Association ID.  We initialize this value randomly, the assign a new
+ * Association ID.  We initialize this value randomly, then assign a new
  * value every time the peer structure is incremented.
  */
-static associd_t current_association_ID;
+static associd_t current_association_ID; /* association ID */
 
 /*
  * Memory allocation watermarks.
  */
-#define	INIT_PEER_ALLOC		15	/* initialize space for 15 peers */
-#define	INC_PEER_ALLOC		5	/* when we run out, add 5 more */
+#define	INIT_PEER_ALLOC		15	/* initialize for 15 peers */
+#define	INC_PEER_ALLOC		5	/* when run out, add 5 more */
 
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-u_long peer_timereset;		/* time stat counters were zeroed */
-u_long findpeer_calls;		/* number of calls to findpeer */
-u_long assocpeer_calls;		/* number of calls to findpeerbyassoc */
-u_long peer_allocations;	/* number of allocations from the free list */
-u_long peer_demobilizations;	/* number of structs freed to free list */
-int total_peer_structs;		/* number of peer structs in circulation */
-int peer_associations;		/* number of active associations */
-
-/*
- * Our initial allocation of peer space
- */
-static struct peer init_peer_alloc[INIT_PEER_ALLOC];
-
-/*
- * Initialization data.  When configuring peers at initialization time,
- * we try to get their poll update timers initialized to different values
- * to prevent us from sending big clumps of data all at once.
- */
-/* static u_long init_peer_starttime; */
+u_long peer_timereset;			/* time stat counters zeroed */
+u_long findpeer_calls;			/* calls to findpeer */
+u_long assocpeer_calls;			/* calls to findpeerbyassoc */
+u_long peer_allocations;		/* allocations from free list */
+u_long peer_demobilizations;		/* structs freed to free list */
+int total_peer_structs;			/* peer structs */
+int peer_associations;			/* active associations */
+static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static	void	getmorepeermem	P((void));
 
 /*
  * init_peer - initialize peer data structures and counters
  *
- * N.B. We use the random number routine in here.  It had better be
- *      initialized prior to getting here.
+ * N.B. We use the random number routine in here. It had better be
+ * initialized prior to getting here.
  */
 void
 init_peer(void)
@@ -162,11 +133,6 @@ init_peer(void)
 	 */
 	findpeer_calls = peer_allocations = 0;
 	assocpeer_calls = peer_demobilizations = 0;
-
-	/*
-	 * Initialization counter.
-	 */
-	/* init_peer_starttime = 0; */
 
 	/*
 	 * Initialize peer memory.
@@ -197,7 +163,8 @@ getmorepeermem(void)
 	register int i;
 	register struct peer *peer;
 
-	peer = (struct peer *)emalloc(INC_PEER_ALLOC*sizeof(struct peer));
+	peer = (struct peer *)emalloc(INC_PEER_ALLOC *
+	    sizeof(struct peer));
 	for (i = 0; i < INC_PEER_ALLOC; i++) {
 		peer->next = peer_free;
 		peer_free = peer;
@@ -207,7 +174,6 @@ getmorepeermem(void)
 	total_peer_structs += INC_PEER_ALLOC;
 	peer_free_count += INC_PEER_ALLOC;
 }
-
 
 
 /*
@@ -227,9 +193,9 @@ findexistingpeer(
 	 * same peer through different interfaces in the hash table.
 	 */
 	if (start_peer == 0)
-	    peer = peer_hash[HASH_ADDR(addr)];
+		peer = peer_hash[HASH_ADDR(addr)];
 	else
-	    peer = start_peer->next;
+		peer = start_peer->next;
 	
 	while (peer != 0) {
 		if (NSRCADR(addr) == NSRCADR(&peer->srcadr)
@@ -241,7 +207,6 @@ findexistingpeer(
 		}
 		peer = peer->next;
 	}
-
 	return (peer);
 }
 
@@ -279,7 +244,7 @@ findpeer(
 			 * server mode, else return error.
 			 */
 			if ((*action == AM_POSSBCL) && !(peer->flags &
-			    FLAG_MCAST1))
+			    FLAG_MCAST))
 				*action = AM_ERR;
 
 			/*
@@ -322,78 +287,17 @@ findpeerbyassoc(
 	assocpeer_calls++;
 
 	hash = assoc & HASH_MASK;
-	for (peer = assoc_hash[hash]; peer != 0; peer = peer->ass_next) {
+	for (peer = assoc_hash[hash]; peer != 0; peer =
+	    peer->ass_next) {
 		if (assoc == peer->associd)
-		    return (peer);	/* got it! */
+		    return (peer);
 	}
-
-	/*
-	 * Out of luck.  Return 0.
-	 */
-	return ((struct peer *)0);
-}
-
-/*
- * findmanycastpeer - find and return a manycast peer
- *
- * We search the peer list for unique associations that match the
- * originate timestamp.
- */
-struct peer *
-findmanycastpeer(
-	struct recvbuf *rbufp
-	)
-{
-	register struct peer *peer;
-	struct pkt *pkt;
-	l_fp p_org;
-	int i;
-
-	pkt = &rbufp->recv_pkt;
-	for (i = 0; i < HASH_SIZE; i++) {
-		if (peer_hash_count[i] == 0)
-			continue;
-
-		for (peer = peer_hash[i]; peer != 0; peer =
-		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST) {
-				NTOHL_FP(&pkt->org, &p_org);
-				if (L_ISEQU(&peer->xmt, &p_org))
-					return(peer);
-			}
-		}
-	}
-	return (0);
+	return (NULL);
 }
 
 
 /*
- * resetmanycast - reset manycast client poll interval
- */
-void
-resetmanycast(void)
-{
-	register struct peer *peer;
-	int i;
-
-	for (i = 0; i < HASH_SIZE; i++) {
-		if (peer_hash_count[i] == 0)
-			continue;
-
-		for (peer = peer_hash[i]; peer != 0; peer =
-		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST) {
-				peer->ttl = 0;
-				poll_update(peer, peer->minpoll);
-			}
-		}
-	}
-}
-
-
-/*
- * clear_all - flush all time values and refresh Diffie-Hellman public
- * value.
+ * clear_all - flush all time values for all associations
  */
 void
 clear_all(void)
@@ -401,6 +305,10 @@ clear_all(void)
 	struct peer *peer, *next_peer;
 	int n;
 
+	/*
+	 * This routine is called when the clock is stepped, and so all
+	 * previously saved time values are untrusted.
+	 */
 	for (n = 0; n < HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
@@ -412,35 +320,6 @@ clear_all(void)
 		printf("clear_all: at %lu\n", current_time);
 #endif
 }
-
-
-#ifdef AUTOKEY
-/*
- * expire_all - flush all crypto data and update timestamp
- */
-void
-expire_all(void)
-{
-	struct peer *peer, *next_peer;
-	int n;
-
-	for (n = 0; n < HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
-			next_peer = peer->next;
-			key_expire(peer);
-			peer->pcookie.tstamp = 0;
-		}
-	}
-	sys_private = (u_int32)RANDOM & 0xffffffff;
-#ifdef PUBKEY
-	crypto_agree();
-#endif /* PUBKEY */
-#ifdef DEBUG
-	if (debug)
-		printf("expire_all: at %lu\n", current_time);
-#endif
-}
-#endif /* AUTOKEY */
 
 
 /*
@@ -525,11 +404,7 @@ unpeer(
 
 
 /*
- * peer_config - configure a new peer
- *
- * This routine mobilizes and configures an association. In case of
- * broadcast, mulitcast or anycast, an association is mobilized for each
- * interface. In case of virtual interfaces, this thing could go nuts.
+ * peer_config - configure a new association
  */
 struct peer *
 peer_config(
@@ -549,8 +424,8 @@ peer_config(
 	u_int cast_flags;
 
 	/*
-	 * We first search from the beginning for an association with
-	 * given remote address and mode. If an interface given, search
+	 * First search from the beginning for an association with given
+	 * remote address and mode. If an interface is given, search
 	 * from there to find the association which matches that
 	 * destination.
 	 */
@@ -566,7 +441,7 @@ peer_config(
 	/*
 	 * We do a dirty little jig to figure the cast flags. This is
 	 * probably not the best place to do this, at least until the
-	 * configure code is rebuilt.
+	 * configure code is rebuilt. Note only one flag can be set.
 	 */
 	switch (hmode) {
 
@@ -609,12 +484,13 @@ peer_config(
 	}
 
 	/*
-	 * If we're here this guy is unknown to us. Make a new
-	 * persistent association and initialize its variables.
+	 * Here no match has been found, so presumably this is a new
+	 * persistent association. Mobilize the thing and initialize its
+	 * variables.
 	 */
 	peer = newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
 	    flags | FLAG_CONFIG, cast_flags, ttl, key);
-	return(peer);
+	return (peer);
 }
 
 
@@ -639,39 +515,41 @@ newpeer(
 	register int i;
 
 	/*
-	 * Some dirt here.  Some of the initialization requires
-	 * knowlege of our system state.
+	 * Allocate a new peer structure. Some dirt here, since some of
+	 * the initialization requires knowlege of our system state.
 	 */
 	if (peer_free_count == 0)
 		getmorepeermem();
-
 	peer = peer_free;
 	peer_free = peer->next;
 	peer_free_count--;
 	peer_associations++;
+	memset((char *)peer, 0, sizeof(struct peer));
 
 	/*
-	 * Initialize the structure.  This stuff is sort of part of
-	 * the receive procedure and part of the clear procedure rolled
-	 * into one.
-	 *
-	 * Zero the whole thing for now.  We might be pickier later.
+	 * Initialize the peer structure and dance the interface jig.
+	 * Reference clocks step the loopback waltz, the others
+	 * squaredance around the interface list looking for a buddy. If
+	 * the dance peters out, there is always the wildcard interface.
+	 * This might happen in some systems and would preclude proper
+	 * operation with public key cryptography.
 	 */
-	memset((char *)peer, 0, sizeof(struct peer));
-	peer->srcadr = *srcadr;
-/*
-	if (dstadr == any_interface)
-		peer->dstadr = findinterface(srcadr);
-	else
-*/
+	if (ISREFCLOCKADR(srcadr))
+		peer->dstadr = loopback_interface;
+	else if (dstadr != any_interface)
 		peer->dstadr = dstadr;
+	else if (cast_flags & MDF_BCAST)
+		peer->dstadr = findbcastinter(srcadr);
+	else
+		peer->dstadr = findinterface(srcadr);
+	peer->srcadr = *srcadr;
 	peer->cast_flags = cast_flags;
 	peer->hmode = (u_char)hmode;
 	peer->keyid = key;
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)minpoll;
 	peer->maxpoll = (u_char)maxpoll;
-	peer->flags = flags;
+	peer->flags = flags | (key > NTP_MAXKEY ? FLAG_SKEY : 0);
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->minpoll;
 	peer->ttlmax = ttl;
@@ -686,8 +564,7 @@ newpeer(
 	    1));
 
 	/*
-	 * Assign him an association ID and increment the system
-	 * variable.
+	 * Assign an association ID and increment the system variable.
 	 */
 	peer->associd = current_association_ID;
 	if (++current_association_ID == 0)
@@ -714,13 +591,13 @@ newpeer(
 			peer->next = peer_free;
 			peer_free = peer;
 			peer_free_count++;
-			return (0);
+			return (NULL);
 		}
 	}
 #endif
 
 	/*
-	 * Put him in the hash tables.
+	 * Put the new peer in the hash tables.
 	 */
 	i = HASH_ADDR(&peer->srcadr);
 	peer->next = peer_hash[i];
@@ -737,7 +614,7 @@ newpeer(
 		    ntoa(&peer->dstadr->sin), ntoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
-		    peer->ttl, peer->keyid);
+		    peer->ttlmax, peer->keyid);
 #endif
 	return (peer);
 }
@@ -833,4 +710,113 @@ peer_all_reset(void)
 	for (hash = 0; hash < HASH_SIZE; hash++)
 	    for (peer = peer_hash[hash]; peer != 0; peer = peer->next)
 		peer_reset(peer);
+}
+
+
+/*
+ * expire_all - flush all crypto data and update timestamps.
+ */
+void
+expire_all(void)
+{
+	struct peer *peer, *next_peer;
+	int n;
+
+	/*
+	 * This routine is called about once per day from the timer
+	 * routine and when the client is first synchronized. Search the
+	 * peer list for all associations and flush only the key list
+	 * and cookie. If a manycast client association, flush
+	 * everything. Then, recompute and sign the agreement public
+	 * value, if present.
+	 */
+	for (n = 0; n < HASH_SIZE; n++) {
+		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
+			next_peer = peer->next;
+			if (peer->cast_flags & MDF_ACAST) {
+				peer_clear(peer);
+#ifdef AUTOKEY
+			} else {
+				key_expire(peer);
+				peer->pcookie.tstamp = 0;
+#endif /* AUTOKEY */
+			}
+				
+		}
+	}
+	sys_private = (u_int32)RANDOM & 0xffffffff;
+#ifdef PUBKEY
+	crypto_agree();
+#endif /* PUBKEY */
+#ifdef DEBUG
+	if (debug)
+		printf("expire_all: at %lu\n", current_time);
+#endif
+}
+
+
+/*
+ * findmanycastpeer - find and return a manycast peer
+ */
+struct peer *
+findmanycastpeer(
+	struct recvbuf *rbufp
+	)
+{
+	register struct peer *peer;
+	struct pkt *pkt;
+	l_fp p_org;
+	int i;
+
+ 	/*
+ 	 * This routine is called upon arrival of a client-mode message
+	 * from a manycast server. Search the peer list for a manycast
+	 * client association where the last transmit timestamp matches
+	 * the originate timestamp. This assumes the transmit timestamps
+	 * for possibly more than one manycast association are unique.
+	 */
+	pkt = &rbufp->recv_pkt;
+	for (i = 0; i < HASH_SIZE; i++) {
+		if (peer_hash_count[i] == 0)
+			continue;
+
+		for (peer = peer_hash[i]; peer != 0; peer =
+		    peer->next) {
+			if (peer->cast_flags & MDF_ACAST) {
+				NTOHL_FP(&pkt->org, &p_org);
+				if (L_ISEQU(&peer->xmt, &p_org))
+					return (peer);
+			}
+		}
+	}
+	return (NULL);
+}
+
+
+/*
+ * resetmanycast - reset all manycast clients
+ */
+void
+resetmanycast(void)
+{
+	register struct peer *peer;
+	int i;
+
+	/*
+	 * This routine is called when the number of client associations
+	 * falls below the minimum. Search the peer list for manycast
+	 * client associations and reset the ttl and poll interval.
+	 */
+	for (i = 0; i < HASH_SIZE; i++) {
+		if (peer_hash_count[i] == 0)
+			continue;
+
+		for (peer = peer_hash[i]; peer != 0; peer =
+		    peer->next) {
+			if (peer->cast_flags & MDF_ACAST) {
+				peer->ttl = 0;
+				peer_clear(peer);
+			}
+		}
+	}
 }

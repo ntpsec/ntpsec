@@ -1,3 +1,22 @@
+2000-12-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_wwv.c (wwv_start): ttlmax/ttl cleanup.
+	* ntpd/refclock_usno.c (usno_timeout): ttlmax/ttl cleanup.
+	* ntpd/refclock_parse.c (CLK_REALTYPE): ttlmax/ttl cleanup.
+	* ntpd/refclock_chu.c (chu_start): ttlmax/ttl cleanup.
+	* ntpd/refclock_acts.c (acts_timeout): ttlmax/ttl cleanup.
+	* ntpd/ntp_refclock.c (refclock_newpeer): Don't do the
+	any_interface -> loopback_interface trick.
+	* ntpd/ntp_proto.c (transmit): Broadcast/manycast cleanup.
+	* ntpd/ntp_peer.c: Cleanup.
+	* ntpd/ntp_io.c: Cleanup.
+	* ntpd/ntp_crypto.c (crypto_recv): AUTOKEY based on BCLNT, not MCAST2.
+	* include/ntpd.h: Declare findbcastinter().
+	* include/ntp.h: struct peer's ttlmax is now max ttl/refclock
+	mode.  ttl is now ttl for manycast mode.
+	(FLAG_MCAST): Reworked several FLAG_ bits.
+	From Dave Mills.
+
 2000-12-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpq/ntpq.c: CP_TTLMAX support.

@@ -97,40 +97,68 @@ transmit(
 		u_char oreach;
 
 		/*
-		 * Determine reachability and diddle things if we
-		 * haven't heard from the host for a while. If the peer
-		 * is not configured and not likely to stay around,
-		 * we exhaust it. If an anycast client and at least 3
-		 * clocks are around, bump the poll to the max.
-		 * Otherwise, it will ramp up just like in the
-		 * unreachable case.
+		 * The polling state machine. There are two kinds of
+		 * machines, those that never expect a reply (broadcast
+		 * and anycast modes) and those that do (all other
+		 * modes). The dance is intricate...
 		 */
-		if (peer->hmode == MODE_BROADCAST) {
+		if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
+
+			/*
+			 * In broadcast mode the poll interval and ttl
+			 * is fixed at the minimum.
+			 */
 			hpoll = peer->minpoll;
-			peer->unreach = 0;
-		} else {
-			if (peer->cast_flags & MDF_ACAST) {
-				if (sys_survivors < NTP_MINCLOCK) {
+			peer->ttl = peer->ttlmax;
+#ifdef AUTOKEY
+		} else if (peer->cast_flags & MDF_ACAST) {
+
+			/*
+			 * In anycast mode we start with minimum poll
+			 * interval and ttl. If fewer than three servers
+			 * are found, the ttl is increased by one and
+			 * try again. If this continues to the max ttl,
+			 * the poll interval is bumped by one and try
+			 * again. If at least three servers are found,
+			 * the poll interval is set to the max and we
+			 * continue indefinately. However, about once
+			 * per day when the agreement parameters are
+			 * refreshed, the manycast clients are reset and
+			 * start from the beginning. This is to catch
+			 * and clamp the ttl to the lowest practical
+			 * value and avoid knocking on spurious doors.
+			 */
+			if (sys_survivors < NTP_MINCLOCK) {
+				if (peer->ttl < peer->ttlmax)
 					peer->ttl++;
-					if (peer->ttl > peer->ttlmax)
-						peer->ttl = peer->ttlmax;
-				} else {	
-					hpoll = peer->maxpoll;
-					peer->unreach = 0;
-				}
-			} else {
-				peer->unreach++;
+				else
+					hpoll++;
+			} else {	
+				hpoll = peer->maxpoll;
 			}
-		}
-		if (peer->unreach > NTP_UNREACH) {
-			peer_clear(peer);
-			if (!(peer->flags & FLAG_CONFIG)) {
+#endif /* AUTOKEY */
+		} else {
+
+			/*
+			 * For associations expecting a reply, the
+			 * watchdog counter is bumped by one if the peer
+			 * has not been heard since the previous poll.
+			 * If the counter reaches a max, the peer is
+			 * demobilized if not configured and just
+			 * cleared if it is, but in this case the poll
+			 * interval is bumped by one..
+			 */
+			if (peer->unreach < NTP_UNREACH) {
+				peer->unreach++;
+			} else if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
 				return;
+
+			} else {
+				peer_clear(peer);
+				peer->ppoll = peer->maxpoll;
+				hpoll++;
 			}
-			peer->unreach = 0;
-			peer->ppoll = peer->maxpoll;
-			hpoll++;
 		}
 		oreach = peer->reach;
 		if (oreach & 0x01)
@@ -151,6 +179,7 @@ transmit(
 				if (!(peer->flags & FLAG_CONFIG)) {
 					unpeer(peer);
 					return;
+
 				}
 				hpoll = peer->minpoll;
 			}
@@ -196,7 +225,7 @@ transmit(
 			 * be made.
 			 */
 			peer->flags &= ~FLAG_BURST;
-			if (peer->flags & FLAG_MCAST2) {
+			if (peer->cast_flags & MDF_BCLNT) {
 				peer->hmode = MODE_BCLIENT;
 #ifdef AUTOKEY
 				key_expire(peer);
@@ -205,6 +234,7 @@ transmit(
 			clock_select();
 			poll_update(peer, hpoll);
 			return;
+
 		}
 	}
 
@@ -244,7 +274,6 @@ receive(
 	int has_mac;			/* length of MAC field */
 	int authlen;			/* offset of MAC field */
 	int is_authentic;		/* cryptosum ok */
-	int is_error;			/* parse error */
 	keyid_t skeyid;			/* cryptographic keys */
 	struct sockaddr_in *dstadr_sin;	/* active runway */
 #ifdef AUTOKEY
@@ -327,7 +356,13 @@ receive(
 			return;			/* invalid mode */
 		}
 	}
-	if ((PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST && !sys_bclient))
+
+	/*
+	 * Discard broadcast packets received on the wildcard interface
+	 * or if not enabled as broadcast client.
+	 */
+	if (PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
+	    (rbufp->dstadr == any_interface || !sys_bclient))
 		return;
 
 	/*
@@ -380,11 +415,16 @@ receive(
 	 * MD5 or DES cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
 	 *
-	 * More on the autokey mambo. Normally the local interface
-	 * address is the unicast one. However, if the sender is a
-	 * broadcaster, the broadcast address is used. Notwithstanding
-	 * that, if the sender is a multicaster, the broadcast address
-	 * is null, so use the unicast address anyway. Don't ask.
+	 * More on the autokey mambo. Normally the local interface is
+	 * found when the association was mobilized with respect to a
+	 * designated remote address. We assume packets arriving from
+	 * the remote address arrive via this interface and the local
+	 * address used to construct the autokey is the unicast address
+	 * of the interface. However, if the sender is a broadcaster,
+	 * the interface broadcast address is used instead.
+	 * Notwithstanding this technobabble, if the sender is a
+	 * multicaster, the broadcast address is null, so we use the
+	 * unicast address anyway. Don't ask.
 	 */
 	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
 	    hismode, &retcode);
@@ -402,9 +442,7 @@ receive(
 		/*
 		 * For autokey modes, generate the session key
 		 * and install in the key cache. Use the socket
-		 * multicast or unicast address as appropriate.
-		 * Remember, we don't know these addresses until
-		 * the first packet has been received. Bummer.
+		 * broadcast or unicast address as appropriate.
 		 */
 		if (skeyid > NTP_MAXKEY) {
 		
@@ -434,12 +472,20 @@ receive(
 			 * % can't happen
 			 */
 			if (hismode == MODE_BROADCAST) {
+
+				/*
+				 * For broadcaster, use the interface
+				 * broadcast address when available;
+				 * otherwise, use the unicast address
+				 * found when the association was
+				 * mobilized.
+				 */
 				pkeyid = 0;
 				if (rbufp->dstadr->bcast.sin_addr.s_addr
 				    != 0)
 					dstadr_sin =
 					    &rbufp->dstadr->bcast;
-			} else if (peer == 0) {
+			} else if (peer == NULL) {
 				pkeyid = session_key(
 				    &rbufp->recv_srcadr, dstadr_sin, 0,
 				    sys_private, 0);
@@ -488,7 +534,7 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d code %d keyid %08x len %d mac %d auth %d\n",
-			    current_time, ntoa(&rbufp->dstadr->sin),
+			    current_time, ntoa(dstadr_sin),
 			    ntoa(&rbufp->recv_srcadr), hismode, retcode,
 			    skeyid, authlen, has_mac,
 			    is_authentic);
@@ -496,30 +542,51 @@ receive(
 	}
 
 	/*
-	 * The new association matching rules are driven by a table
-	 * specified in ntp.h. We have replaced the *default* behaviour
-	 * of replying to bogus packets in server mode in this version.
-	 * A packet must now match an association in order to be
-	 * processed. In the event that no association exists, then an
-	 * association is mobilized if need be. Two different
-	 * associations can be mobilized a) passive associations b)
-	 * client associations due to broadcasts or manycasts.
+	 * The association matching rules are implemented by a set of
+	 * routines and a table in ntp_peer.c. A packet matching an
+	 * association is processed by that association. If not and
+	 * certain conditions prevail, then an ephemeral association is
+	 * mobilized: a broadcast packet mobilizes a broadcast client
+	 * aassociation; a server packet mobilizes a client association;
+	 * a symmetric active packet mobilizes a symmetric passive
+	 * association. And, the adventure continues...
 	 */
-	is_error = 0;
 	switch (retcode) {
 	case AM_FXMIT:
 
 		/*
-		 * If from a manycast client and we are not
-		 * synchronized, poof the packet. Otherwise, send a
-		 * MODE_SERVER response and go home. Note that we don't
-		 * require authentication check here, since we can't set
-		 * the system clock; but, we do set the key ID to zero
-		 * to tell the caller about this.
+		 * This is a client mode packet not matching a known
+		 * association. If from a manycast client we run a few
+		 * sanity checks before deciding to send a unicast
+		 * server response. Otherwise, it must be a client
+		 * request, so send a server response and go home.
 		 */
 		if (sys_manycastserver && (rbufp->dstadr->flags &
-		    INT_MULTICAST) && sys_peer == NULL)
-			return;
+		    INT_MULTICAST)) {
+	
+			/*
+			 * We are picky about responding to a
+			 * manycaster. There is no reason to respond to
+			 * a request if our time is worse than the
+			 * manycaster. We certainly don't reply if not
+			 * synchronized to proventic time.
+			 */
+			if (sys_peer == NULL)
+				return;
+
+			/*
+			 * We don't reply if the our stratum is greater
+			 * than the manycaster.
+			 */ 
+			if (PKT_TO_STRATUM(pkt->stratum) < sys_stratum)
+				return;
+		}
+
+		/*
+		 * Note that we don't require an authentication check
+		 * here, since we can't set the system clock; but, we do
+		 * set the key ID to zero to tell the caller about this.
+		 */
 		if (is_authentic)
 			fast_xmit(rbufp, MODE_SERVER, skeyid);
 		else
@@ -529,19 +596,26 @@ receive(
 	case AM_MANYCAST:
 
 		/*
-		 * This could be in response to a multicast packet sent
-		 * by the "manycast" mode association. Note that we
-		 * don't require cryptographic authentication at this
-		 * point, since the server used the wildcard interface
-		 * and can't construct the correct cryptosum. Not to
-		 * worry; the originate timestamp is a good nonce to
+		 * This is a server mode packet returned in response to
+		 * a client mode packet sent to a multicast group
+		 * address. The originate timestamp is a good nonce to
 		 * reliably associate the reply with what was sent. If
-		 * there is no match, that's curious but nonfatal. Just
-		 * ignore it. Bad manners to respond if we are not
-		 * synchronized to something.
+		 * there is no match, that's curious and could be an
+		 * intruder attempting to clog, so we just ignore it.
 		 *
-		 * There is an implosion hazard at the sender.
+		 * First, make sure the packet is authentic. If so and
+		 * the manycast association is found, we mobilize a
+		 * client mode association, copy pertinent variables
+		 * from the manycast to the client mode association and
+		 * wind up the spring.
+		 *
+		 * There is an implosion hazard at the manycast client,
+		 * since the manycast servers send the server packet
+		 * immediately.
 		 */
+		if (sys_authenticate && !is_authentic)
+			return;
+
 		peer2 = findmanycastpeer(rbufp);
 		if (peer2 == 0)
 			return;
@@ -551,39 +625,31 @@ receive(
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST |
 		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
 		    MDF_UCAST, 0, skeyid);
-		if (peer == 0)
+		if (peer == NULL)
 			return;
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
 			    peer->associd);
 #endif /* PUBKEY */
-		return;
-
-	case AM_ERR:
-
-		/*
-		 * Something bad happened. Dirty floor will be mopped by
-		 * the code at the end of this adventure.
-		 */
-		is_error = 1;
 		break;
 
 	case AM_NEWPASS:
 
 		/*
-		 * Okay, we're going to keep him around.  Allocate him
-		 * some memory. But, don't do that unless the packet is
-		 * properly authenticated.
+		 * This is the first packet received from a symmetric
+		 * active peer. First, make sure the packet is
+		 * authentic. If so, mobilize a symmetric passive
+		 * association.
 		 */
-		if ((sys_authenticate && !is_authentic)) {
+		if (sys_authenticate && !is_authentic) {
 			fast_xmit(rbufp, MODE_PASSIVE, 0);
 			return;
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
-		    skeyid);
+	 	    NTP_MINDPOLL, NTP_MAXDPOLL, sys_authenticate ?
+		    FLAG_AUTHENABLE : 0, MDF_UCAST, 0, skeyid);
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
@@ -594,30 +660,24 @@ receive(
 	case AM_NEWBCL:
 
 		/*
-		 * We have received a broadcast and are about to set
-		 * up a broadcast client association. But, we don't
-		 * know if the broadcaster knows its own interface
-		 * address and can properly construct the cryptosum.
-		 * Therefore, there could be an authentication
-		 * failure from a legitimate 'caster. Being as devlishly
-		 * clever as we are, we just toss back a client mode
-		 * packet to cause the 'caster to bind its own interface.
-		 * I did not admit this. I was never there.
-		 *
-		 * There is a sender implosion hazard here.
+		 * This is the first packet received from a broadcast
+		 * server. First, make sure the packet is authentic, not
+		 * restricted and that we are a broadcast or multicast
+		 * client. If so, mobilize a broadcast client
+		 * association.
 		 */
 		if ((restrict_mask & RES_NOPEER) || !sys_bclient ||
-		    (sys_authenticate && !is_authentic)) {
-			fast_xmit(rbufp, MODE_CLIENT, 0);
+		    (sys_authenticate && !is_authentic))
 			return;
-		}
+
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_MCLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST1 | FLAG_MCAST2 |
-		    FLAG_BURST, MDF_UCAST, 0, skeyid);
-		if (peer == 0)
-			break;
-		peer->hmode = MODE_CLIENT;
+		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
+		    FLAG_IBURST | (sys_authenticate ?
+		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
+		if (peer == NULL)
+			return;
+
 #if defined(PUBKEY) && 0
 		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
@@ -629,21 +689,15 @@ receive(
 	case AM_PROCPKT:
 
 		/*
-		 * It seems like it is okay to process the packet now
+		 * Happiness and nothing broke. Earn some revenue.
 		 */
 		break;
 
 	default:
 
 		/*
-		 * shouldn't be getting here, but simply return anyway!
-		 */
-		is_error = 1;
-	}
-	if (is_error) {
-
-		/*
-		 * Error stub. If we get here, something broke.
+		 * Invalid mode combination. Leave the island
+		 * immediately.
 		 */
 #ifdef DEBUG
 		if (debug)
@@ -939,15 +993,15 @@ process_packet(
 	 * back to broadcast mode. We know NTP_SKEWFACTOR == 16, which
 	 * accounts for the simplified ei calculation.
 	 *
-	 * If FLAG_MCAST2 is set, we are a broadcast/multicast client.
-	 * If FLAG_MCAST1 is set, we haven't calculated the propagation
+	 * If MDF_BCLNT is set, we are a broadcast/multicast client.
+	 * If FLAG_MCAST is set, we haven't calculated the propagation
 	 * delay. If hmode is MODE_CLIENT, we haven't set the local
 	 * clock in client/server mode. Initially, we come up
-	 * MODE_CLIENT. When the clock is first updated and FLAG_MCAST2
+	 * MODE_CLIENT. When the clock is first updated and MDF_BCLNT
 	 * is set, we switch from MODE_CLIENT to MODE_BCLIENT.
 	 */
 	if (pmode == MODE_BROADCAST) {
-		if (peer->flags & FLAG_MCAST1) {
+		if (peer->flags & FLAG_MCAST) {
 			LFPTOD(&ci, p_offset);
 			peer->estbdelay = peer->offset - p_offset;
 			if (peer->hmode != MODE_BCLIENT) {
@@ -958,7 +1012,7 @@ process_packet(
 #endif
 				return;
 			}
-			peer->flags &= ~FLAG_MCAST1;
+			peer->flags &= ~FLAG_MCAST;
 		}
 		DTOLFP(peer->estbdelay, &t10);
 		L_ADD(&ci, &t10);
@@ -1071,8 +1125,7 @@ clock_update(void)
 
 
 /*
- * poll_update - update peer poll interval. See Section 3.4.9 of the
- *	   spec.
+ * poll_update - update peer poll interval
  */
 void
 poll_update(
@@ -1085,27 +1138,26 @@ poll_update(
 #endif /* AUTOKEY */
 
 	/*
-	 * The wiggle-the-poll-interval dance. Broadcasters and anycasters
-	 * dance the band. Reference clock partners sit this one out.
-	 * Dancers surviving the clustering algorithm beat to the system
-	 * poll. Broadcast clients are usually lead by their broadcast
+	 * The wiggle-the-poll-interval dance. Broadcasters and
+	 * manycasters dance the band. Reference clock partners sit this
+	 * one out. Dancers surviving the clustering algorithm beat
+	 * system rythms. Broadcast clients are led by their broadcast
 	 * partner, but faster in the initial mating dance.
 	 */
 
 #ifdef AUTOKEY
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
-
 	if (peer->flags & FLAG_SYSPEER)
 		peer->hpoll = sys_poll;
 	else
 		peer->hpoll = hpoll;
-	if (peer->cast_flags & (MDF_BCAST | MDF_ACAST))
-		peer->ppoll = peer->hpoll;
 	if (peer->hpoll > peer->maxpoll)
 		peer->hpoll = peer->maxpoll;
 	else if (peer->hpoll < peer->minpoll)
 		peer->hpoll = peer->minpoll;
+	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST | MDF_ACAST))
+		peer->ppoll = peer->hpoll;
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
@@ -1176,8 +1228,8 @@ peer_clear(
 	 * the island at this point.
 	 */
 	peer->flags &= ~FLAG_AUTOKEY;
-	if (peer->flags & FLAG_MCAST2) {
-		peer->flags |= FLAG_MCAST1 | FLAG_IBURST;
+	if (peer->cast_flags & MDF_BCLNT) {
+		peer->flags |=  FLAG_MCAST | FLAG_IBURST;
 		peer->hmode = MODE_CLIENT;
 	}
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
@@ -1566,7 +1618,9 @@ clock_select(void)
 				    "synchronisation lost");
 			}
 			sys_survivors = 0;
+#ifdef AUTOKEY
 			resetmanycast();
+#endif /* AUTOKEY */
 			return;
 		}
 	}
@@ -1672,6 +1726,7 @@ clock_select(void)
 		nlist--;
 	}
 
+#ifdef AUTOKEY
 	/*
 	 * In anycast client mode we may have spooked a sizeable number
 	 * of servers that we don't need. If there are at least
@@ -1681,8 +1736,9 @@ clock_select(void)
 	 * chance. If they didn't pass the sanity and intersection
 	 * tests, they have already been voted off the island.
 	 */
-	if (nlist < NTP_MINCLOCK && nlist < sys_survivors)
+	if (sys_survivors >= NTP_MINCLOCK && nlist < NTP_MINCLOCK)
 		resetmanycast();
+#endif /* AUTOKEY */
 	sys_survivors = nlist;
 
 #ifdef DEBUG
@@ -2093,7 +2149,7 @@ peer_xmit(
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 			else if (!(peer->flags & FLAG_AUTOKEY) &&
-			    peer->flags & FLAG_MCAST2)
+			    peer->cast_flags & MDF_BCLNT)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
@@ -2188,9 +2244,13 @@ fast_xmit(
 
 	/*
 	 * Initialize transmit packet header fields from the receive
-	 * buffer provided. We leave some fields intact as received.
+	 * buffer provided. We leave some fields intact as received. If
+	 * the gazinta was from a multicast address, the gazouta must go
+	 * out another way.
 	 */
 	rpkt = &rbufp->recv_pkt;
+	if (rbufp->dstadr->flags & INT_MULTICAST)
+		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 	    PKT_VERSION(rpkt->li_vn_mode), xmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
@@ -2211,8 +2271,6 @@ fast_xmit(
 	 * multicast interface, make sure it goes out the wildcard
 	 * interface.
 	 */
-	if (rbufp->dstadr->flags & INT_MULTICAST)
-		rbufp->dstadr = any_interface;
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
 		get_systime(&xmt_ts);
@@ -2239,7 +2297,7 @@ fast_xmit(
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY) {
 		keyid_t cookie;
-		u_int code;
+		u_int code, associd;
 
 		/*
 		 * The only way to get here is a reply to a legitimate
@@ -2250,17 +2308,16 @@ fast_xmit(
 		 * jerk can decode it. If no extension field is present,
 		 * use the cookie to generate the session key.
 		 */
+		code = (htonl(rpkt->exten[0]) >> 16) | CRYPTO_RESP;
 		cookie = session_key(&rbufp->recv_srcadr,
 		    &rbufp->dstadr->sin, 0, sys_private, 0);
+		associd = htonl(rpkt->exten[1]);
 		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
 		    sizeof(u_int32)) {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
-			code = (htonl(rpkt->exten[0]) >> 16) |
-			    CRYPTO_RESP;
 			sendlen += crypto_xmit((u_int32 *)&xpkt,
-			    sendlen, code, cookie,
-			    htonl(rpkt->exten[1]));
+			    sendlen, code, cookie, associd);
 		} else {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
@@ -2481,7 +2538,8 @@ init_proto(void)
 	stats_control = 1;
 
 	/*
-	 * Some system clocks should only be adjusted in 10ms increments.
+	 * Some system clocks should only be adjusted in 10ms
+	 * increments.
 	 */
 #if defined RELIANTUNIX_CLOCK
 	systime_10ms_ticks = 1;		  /* Reliant UNIX */

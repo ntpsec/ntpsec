@@ -801,7 +801,7 @@ acts_timeout (
 		acts_disc(peer);
 		return;
 	}
-	switch (peer->ttl) {
+	switch (peer->ttlmax) {
 
 		/*
 		 * In manual mode the ACTS calling program is activated
