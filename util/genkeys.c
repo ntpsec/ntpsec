@@ -86,6 +86,16 @@ main(
 	u_int	temp;
 	int	i, j;
 
+#ifdef OPENSSL
+	if (SSLeay() != OPENSSL_VERSION_NUMBER) {
+		printf("OpenSSL version mismatch. Built against %lx, you have %lx\n",
+			OPENSSL_VERSION_NUMBER, SSLeay());
+		exit(1);
+	} else {
+		printf("OpenSSL version %lx\n", SSLeay());
+	}
+#endif
+
 	/*
 	 * Initialize host name and timestamp.
 	 */
@@ -127,7 +137,8 @@ main(
 	}
 	temp = RAND_load_file(pathbuf, -1);
 	if (temp == 0) {
-		printf("RAND_load_file %s\n",
+		printf("RAND_load_file <%s>: \n\t%s\n",
+		    pathbuf,
 		    ERR_error_string(ERR_get_error(), NULL));
 		exit (-1);
 	}
