@@ -366,6 +366,7 @@ stats_config(
 		 * Open drift file and read frequency
 		 */
 		if ((fp = fopen(stats_drift_file, "r")) == NULL) {
+			loop_config(LOOP_DRIFTCOMP, 0);
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {

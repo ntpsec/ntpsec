@@ -255,7 +255,6 @@ static struct keyword tinker_keywords[] = {
 	{ "panic",		CONF_CLOCK_PANIC },
 	{ "dispersion",		CONF_CLOCK_PHI },
 	{ "stepout",		CONF_CLOCK_MINSTEP },
-	{ "minpoll",		CONF_CLOCK_MINPOLL },
 	{ "allan",		CONF_CLOCK_ALLAN },
 	{ "huffpuff",		CONF_CLOCK_HUFFPUFF },
 	{ "",			CONFIG_UNKNOWN }
@@ -1044,10 +1043,6 @@ getconfig(
 
 			    case CONF_CLOCK_MINSTEP:
 				loop_config(LOOP_MINSTEP, ftemp);
-				break;
-
-			    case CONF_CLOCK_MINPOLL:
-				loop_config(LOOP_MINPOLL, ftemp);
 				break;
 
 			    case CONF_CLOCK_ALLAN:

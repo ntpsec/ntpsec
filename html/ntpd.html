@@ -12,7 +12,7 @@
         <h3><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</h3>
         <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The mushroom knows all the command line options.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:22</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">16:30</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="262">Tuesday, December 24, 2002</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -33,7 +33,7 @@
         </ul>
         <hr>
         <h4 id="#synop">Synopsis</h4>
-        <tt>ntpd [ -aAbdgLmNPqx ] [ -c <i>conffile</i> ] [ -f <i>driftfile</i> ] [ -g ] [ -k <i>keyfile</i> ] [ -l <i>logfile</i> ] [ -N high ] [ -p <i>pidfile</i> ] [ -r <i>broadcastdelay</i> ] [ -s <i>statsdir</i> ] [ -t <i>key</i> ] [ -v <i>variable</i> ] [ -V <i>variable</i> ] [ -x ]</tt>
+        <tt>ntpd [ -46aAbdDgLmnNPqx ] [ -c <i>conffile</i> ] [ -f <i>driftfile</i> ] [ -k <i>keyfile</i> ] [ -l <i>logfile</i> ] [ -p <i>pidfile</i> ] [ -r <i>broadcastdelay</i> ] [ -s <i>statsdir</i> ] [ -t <i>key</i> ] [ -v <i>variable</i> ] [ -V <i>variable</i> ]</tt>
         <h4 id="#descr">Description</h4>
         <p>The <tt>ntpd</tt> program is an operating system daemon which sets and maintains the system time of day in synchronism with Internet standard time servers. It is a complete implementation of the Network Time Protocol (NTP) version 4, but also retains compatibility with version 3, as defined by RFC-1305, and version 1 and 2, as defined by RFC-1059 and RFC-1119, respectively. <tt>ntpd</tt> does most computations in 64-bit floating point arithmetic and does relatively clumsy 64-bit fixed point operations only when necessary to preserve the ultimate precision, about 232 picoseconds. While the ultimate precision is not achievable with ordinary workstations and networks of today, it may be required with future gigahertz CPU clocks and gigabit LANs.</p>
         <h4 id="#op">How NTP Operates</h4>
@@ -89,8 +89,7 @@
             <dt><tt>-l <i>logfile</i></tt>
             <dd>Specify the name and path of the log file. The default is the system log facility.
             <dt><tt>-L</tt>
-            <dd>Listen to virtual IPs.
-            <dt><tt>-m</tt>
+            <dd>Do not listen to virtual IPs. (The default is to listen).            <dt><tt>-m</tt>
             <dd>Synchronize using NTP multicast messages on the IP multicast group address 224.0.1.1 (requires multicast kernel).
             <dt><tt>-n</tt>
             <dd>Don't fork.

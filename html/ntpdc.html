@@ -12,7 +12,7 @@
         <h3><tt>ntpdc</tt> - special NTP query program</h3>
         <img src="pic/alice31.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>This program is a big puppy.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:21</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">01:18</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="252">Sunday, December 22, 2002</csobj></p>
         <br clear="left">
         <hr>
         <h4>Synopsis</h4>
@@ -20,7 +20,7 @@
         <h4>Description</h4>
         <tt>ntpdc</tt> is used to query the <tt>ntpd</tt> daemon about its current state and to request changes in that state. The program may be run either in interactive mode or controlled using command line arguments. Extensive state and statistics information is available through the <tt>ntpdc</tt> interface. In addition, nearly all the configuration options which can be specified at startup using ntpd's configuration file may also be specified at run time using <tt>ntpdc</tt>.
         <p>If one or more request options are included on the command line when <tt>ntpdc</tt> is executed, each of the requests will be sent to the NTP servers running on each of the hosts given as command line arguments, or on localhost by default. If no request options are given, <tt>ntpdc</tt> will attempt to read commands from the standard input and execute these on the NTP server running on the first host given on the command line, again defaulting to localhost when no other host is specified. <tt>ntpdc</tt> will prompt for commands if the standard input is a terminal device.</p>
-        <p><tt>ntpdc</tt> uses NTP mode 7 packets to communicate with the NTP server, and hence can be used to query any compatable server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. <tt>ntpdc</tt> makes no attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.</p>
+        <p><tt>ntpdc</tt> uses NTP mode 7 packets to communicate with the NTP server, and hence can be used to query any compatible server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. <tt>ntpdc</tt> makes no attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.</p>
         <p>The operation of <tt>ntpdc</tt> are specific to the particular implementation of the <tt>ntpd</tt> daemon and can be expected to work only with this and maybe some previous versions of the daemon. Requests from a remote <tt>ntpdc</tt> program which affect the state of the local server must be authenticated, which requires both the remote program and local server share a common key and key identifier.</p>
         <p>Note that in contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
         <h4>Command Line Options</h4>
@@ -49,7 +49,7 @@
         <dl>
             <dt><tt>? [ <i>command_keyword</i> ]</tt><br>
                 <tt>help [ <i>command_keyword</i> ]</tt>
-            <dd>A <tt>?</tt> by itself will print a list of all the command keywords known to this incarnation of <tt>ntpq</tt>. A <tt>?</tt> followed by a command keyword will print funcation and usage information about the command. This command is probably a better source of information about <tt>ntpq</tt> than this manual page.
+            <dd>A <tt>?</tt> by itself will print a list of all the command keywords known to this incarnation of <tt>ntpq</tt>. A <tt>?</tt> followed by a command keyword will print funcFtion and usage information about the command. This command is probably a better source of information about <tt>ntpq</tt> than this manual page.
             <dt><tt>delay <i>milliseconds</i></tt>
             <dd>Specify a time interval to be added to timestamps included in requests which require authentication. This is used to enable (unreliable) server reconfiguration over long delay network paths or between machines whose clocks are unsynchronized. Actually the server does not now require timestamps in authenticated requests, so this command may be obsolete.
             <dt><tt>host <i>hostname</i></tt>
@@ -69,7 +69,7 @@
         <p>Query commands result in NTP mode 7 packets containing requests for information being sent to the server. These are read-only commands in that they make no modification of the server configuration state.</p>
         <dl>
             <dt><tt>listpeers</tt>
-            <dd>Obtains and prints a brief list of the peers for which the server is maintaining state. These should include all configured peer associations as well as those peers whose stratum is such that they are considered by the server to be possible future synchonization candidates.
+            <dd>Obtains and prints a brief list of the peers for which the server is maintaining state. These should include all configured peer associations as well as those peers whose stratum is such that they are considered by the server to be possible future synchronization candidates.
             <dt><tt>peers</tt>
             <dd>Obtains a list of peers for which the server is maintaining state, along with a summary of that state. Summary information includes the address of the remote peer, the local interface address (0.0.0.0 if a local address has yet to be determined), the stratum of the remote peer (a stratum of 16 indicates the remote peer is unsynchronized), the polling interval, in seconds, the reachability register, in octal, and the current estimated delay, offset and dispersion of the peer, all in seconds.
             <p>The character in the left margin indicates the mode this peer entry is operating in. A <tt>+</tt> denotes symmetric active, a <tt>-</tt> indicates symmetric passive, a <tt>=</tt> means the remote server is being polled in client mode, a <tt>^</tt> indicates that the server is broadcasting to this address, a <tt>~</tt> denotes that the remote peer is sending broadcasts and a <tt>*</tt> marks the peer the server is currently synchonizing to.</p>

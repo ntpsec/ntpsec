@@ -682,7 +682,7 @@ receive(
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
 		    MDF_ACLNT, 0, skeyid)) == NULL)
 			return;
 
@@ -712,7 +712,7 @@ receive(
 		}
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
+		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
 		    skeyid)) == NULL)
 			return;
 
@@ -737,7 +737,7 @@ receive(
 
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
 			return;
 #ifdef OPENSSL
@@ -1143,7 +1143,7 @@ process_packet(
 	}
 	if (p_del < 0 || p_disp < 0 || p_del /	/* test 8 */
 	    2 + p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;		/* bad peer distance */
+		peer->flash |= TEST8;		/* bad peer values */
 
 	/*
 	 * If any tests fail at this point, the packet is discarded.
@@ -1228,7 +1228,7 @@ process_packet(
 	LFPTOD(&ci, p_offset);
 	if ((peer->rootdelay + p_del) / 2. + peer->rootdispersion +
 	    p_disp >= MAXDISPERSE)		/* test 9 */
-		peer->flash |= TEST9;		/* bad peer distance */
+		peer->flash |= TEST9;		/* bad root distance */
 
 	/*
 	 * If any flasher bits remain set at this point, abandon ship.
@@ -1582,7 +1582,7 @@ clock_filter(
 		if (peer->filter_disp[j] >= MAXDISPERSE)
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
-		    ULOGTOD(allan_xpt))
+		    allan_xpt)
 			dst[i] = MAXDISTANCE + peer->filter_disp[j];
 		else
  			dst[i] = peer->filter_delay[j];
@@ -1590,6 +1590,7 @@ clock_filter(
 		j++; j %= NTP_SHIFT;
 	}
 
+#ifndef SIM
         /*
 	 * Sort the samples in both lists by distance.
 	 */
@@ -1605,6 +1606,7 @@ clock_filter(
 			}
 		}
 	}
+#endif /* SIM */
 
 	/*
 	 * Copy the index list to the association structure so ntpq
@@ -2884,7 +2886,7 @@ default_get_precision(void)
 	NLOG(NLOG_SYSINFO)
 	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
-		tick *= 2;;
+		tick *= 2;
 	if (tick - 1. > 1. - tick / 2)
 		i--;
 	return (-i);
