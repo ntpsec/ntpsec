@@ -1,8 +1,10 @@
+(4.2.0)
+* More stuff than I have time to document
 * Bugfixes
 * call-gap filtering
 * wwv and chu refclock improvements
 * OpenSSL integration
---
+
 (4.1.2)
 * clock state machine bugfix
 * Lose the source port check on incoming packets
