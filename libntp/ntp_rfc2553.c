@@ -140,6 +140,9 @@ getaddrinfo (const char *nodename, const char *servname,
 				if (ipv4_aton(nodename,
 				    (struct sockaddr_storage *)ai->ai_addr)
 				    == 1) {
+					ai->ai_family = AF_INET;
+					ai->ai_addrlen =
+					    sizeof(struct sockaddr_in);
 					*res = ai;
 					return (0);
 				}
