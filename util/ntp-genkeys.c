@@ -97,6 +97,7 @@ char tmp_name[PATH_MAX];
 /* Stubs and hacks so we can link with ntp_config.o */
 
 struct interface *any_interface; /* default interface */
+struct interface *any6_interface; /* default interface */
 u_long  client_limit;
 u_long  client_limit_period;
 keyid_t ctl_auth_keyid;		/* keyid used to authenticate write requests */
@@ -118,7 +119,7 @@ const char *Version = "";	/* version declaration */
 
 struct peer *
 peer_config(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
 	int hmode,
 	int version,
@@ -159,7 +160,7 @@ ntp_intres (void)
 
 int
 ctlsettrap(
-	struct sockaddr_in *raddr,
+	struct sockaddr_storage *raddr,
 	struct interface *linter,
 	int traptype,
 	int version
@@ -212,7 +213,7 @@ crypto_config(
 
 struct interface *
 findinterface(
-	struct sockaddr_in *addr
+	struct sockaddr_storage *addr
 	)
 {
  	if (debug > 1) printf("findinterface...\n");
@@ -222,7 +223,7 @@ findinterface(
 
 void
 refclock_control(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct refclockstat *in,
 	struct refclockstat *out
 	)
@@ -270,8 +271,8 @@ stats_config(
 void
 hack_restrict(
 	int op,
-	struct sockaddr_in *resaddr,
-	struct sockaddr_in *resmask,
+	struct sockaddr_storage *resaddr,
+	struct sockaddr_storage *resmask,
 	int mflags,
 	int flags
 	)
@@ -293,7 +294,8 @@ void
 proto_config(
 	int item,
 	u_long value,
-	double dvalue
+	double dvalue,
+	struct sockaddr_storage *svalue
 	)
 {
 	if (debug > 1) printf("proto_config...\n");

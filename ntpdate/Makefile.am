@@ -1,6 +1,8 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
-bin_PROGRAMS = ntpdate ntptimeset
+#bin_PROGRAMS = ntpdate ntptimeset
+bin_PROGRAMS = ntpdate
+EXTRA_PROGRAMS = ntptimeset
 ntptimeset_SOURCES = ntptimeset.c ntptime_config.c
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
