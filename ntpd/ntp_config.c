@@ -980,7 +980,7 @@ getconfig(
 			    proto_config(PROTO_MULTICAST_ADD,
 					 0, 0., NULL);
 			if (tok == CONFIG_MULTICASTCLIENT)
-				sys_bclient = 1;
+				proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
 			else if (tok == CONFIG_MANYCASTSERVER)
 				sys_manycastserver = 1;
 			break;

@@ -703,10 +703,11 @@ receive(
 		if ((peer2 = findmanycastpeer(rbufp)) == NULL)
 			return;			/* no assoc match */
 
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST, MDF_UCAST |
-		    MDF_ACLNT, 0, skeyid)) == NULL)
+		    MDF_ACLNT, 0, skeyid);
+		if (peer == NULL)
 			return;			/* system error */
 
 		/*
@@ -727,10 +728,11 @@ receive(
 			    restrict_mask);
 			return;			/* bad auth */
 		}
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
-		    skeyid)) == NULL)
+		    skeyid);
+		if (peer == NULL)
 			return;			/* system error */
 
 		break;
@@ -746,6 +748,7 @@ receive(
 		if (sys_authenticate && !is_authentic)
 			return;			/* bad auth */
 
+
 		/*
 		 * If the sys_bclient switch is 1, execute the inital
 		 * volley; if 2, go directly to broadcast client mode.
@@ -754,43 +757,21 @@ receive(
 			peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_CLIENT,
 			    PKT_VERSION(pkt->li_vn_mode), NTP_MINDPOLL,
-			    NTP_MAXDPOLL, FLAG_MCAST | FLAG_BURST,
+			    NTP_MAXDPOLL, FLAG_MCAST | FLAG_IBURST,
 			    MDF_BCLNT, 0, skeyid);
 		else
 			peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_BCLIENT,
 			    PKT_VERSION(pkt->li_vn_mode), NTP_MINDPOLL,
 			    NTP_MAXDPOLL, 0, MDF_BCLNT, 0, skeyid);
+#ifdef OPENSSL
 		if (peer == NULL)
 			return;			/* system error */
-#ifdef OPENSSL
-		/*
-		 * Danger looms. If this is autokey, go process the
-		 * extension fields. If something goes wrong, abandon
-		 * ship and don't trust subsequent packets.
-		 */
-		if (crypto_flags) {
-			if ((rval = crypto_recv(peer, rbufp)) !=
-			    XEVNT_OK) {
-				struct sockaddr_storage mskadr_sin;
 
-				unpeer(peer);
-				sys_restricted++;
-				SET_HOSTMASK(&mskadr_sin,
-				    rbufp->recv_srcadr.ss_family);
-				hack_restrict(RESTRICT_FLAGS,
-				    &rbufp->recv_srcadr, &mskadr_sin,
-				    0, RES_DONTTRUST | RES_TIMEOUT);
-#ifdef DEBUG
-				if (debug)
-					printf(
-					    "packet: bad exten %x\n",
-					    rval);
+		if (peer->flags & FLAG_SKEY)
+			crypto_recv(peer, rbufp);
 #endif
-			}
-		}
-#endif /* OPENSSL */
-		break;
+		return;
 
 	case AM_POSSBCL:
 
@@ -798,8 +779,10 @@ receive(
 		 * This is a broadcast packet received in client mode.
 		 * It could happen if the initial client/server volley
 		 * is not complete before the next broadcast packet is
-		 * received. Be liberal in what we accept.
-		 */ 
+		 * received. We just ignore it.
+		 */
+		return;
+
 	case AM_PROCPKT:
 
 		/*
@@ -1561,8 +1544,10 @@ peer_clear(
 		BN_free(peer->iffval);
 	if (peer->grpkey != NULL)
 		BN_free(peer->grpkey);
-	if (peer->cmmd != NULL)
+	if (peer->cmmd != NULL) {
 		free(peer->cmmd);
+		peer->cmmd = NULL;
+	}
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
 	value_free(&peer->tai_leap);
@@ -1609,7 +1594,8 @@ peer_clear(
 	if (initializing)
 		peer->nextdate = current_time + peer_associations;
 	else
-		poll_update(peer, peer->minpoll);
+		peer->nextdate = current_time + (RANDOM % (1 <<
+		    NTP_MINPOLL));
 #ifdef DEBUG
 	if (debug)
 		printf("peer_clear: at %ld assoc ID %d refid %s\n",
@@ -1648,7 +1634,8 @@ clock_filter(
 	peer->filter_offset[j] = sample_offset;
 	peer->filter_delay[j] = max(0, sample_delay);
 	peer->filter_disp[j] = sample_disp;
-	j++; j %= NTP_SHIFT;
+	peer->filter_epoch[j] = current_time;
+	j = (j + 1) % NTP_SHIFT;
 	peer->filter_nextpt = j;
 
 	/*
@@ -1675,7 +1662,6 @@ clock_filter(
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
-	peer->filter_epoch[j] = current_time;
 
         /*
 	 * Sort the samples in both lists by distance.
@@ -1784,7 +1770,7 @@ clock_filter(
 		printf(
 		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f, age %lu\n",
 		    m, peer->offset, peer->delay, peer->disp,
-		    peer->jitter, peer->update - peer->epoch);
+		    peer->jitter, k);
 #endif
 	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
 		clock_select();

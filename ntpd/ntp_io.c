@@ -1829,13 +1829,16 @@ input_handler(
 	)
 {
 
-/*
- * Define the maximum number of 0 byte consecutive reads
- * allowed before we declare it done
- */
-#define MAXZEROREADS 1
-
-	int totzeroreads;
+	/*
+	 * List of fd's to skip the read
+	 * We don't really expect to have this many
+	 * refclocks on a system
+	 */
+#define MAXSKIPS  20
+	int skiplist[MAXSKIPS];
+	int totskips;
+	isc_boolean_t skip;
+	int nonzeroreads;
 	int buflen;
 	register int i, n;
 	register struct recvbuf *rb;
@@ -1849,10 +1852,24 @@ input_handler(
 	int select_count = 0;
 	static int handler_count = 0;
 
+	/*
+	 * Initialize the skip list
+	 */
+	for (i = 0; i<MAXSKIPS; i++)
+	{
+		skiplist[i] = 0;
+	}
+	totskips = 0;
+
 	++handler_count;
 	if (handler_count != 1)
 	    msyslog(LOG_ERR, "input_handler: handler_count is %d!", handler_count);
 	handler_calls++;
+
+	/*
+	 * If we have something to do, freeze a timestamp.
+	 * See below for the other cases (nothing (left) to do or error)
+	 */
 	ts = *cts;
 
 	/*
@@ -1862,42 +1879,56 @@ input_handler(
 	fds = activefds;
 	tvzero.tv_sec = tvzero.tv_usec = 0;
 
-	/*
-	 * If we have something to do, freeze a timestamp.
-	 * See below for the other cases (nothing (left) to do or error)
-	 */
-	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
-	++select_count;
-	++handler_pkts;
-
 #ifdef REFCLOCK
 	/*
 	 * Check out the reference clocks first, if any
 	 */
-	if (refio != 0)
-	{
-		register struct refclockio *rp;
 
-		for (rp = refio; rp != NULL && n > 0; rp = rp->next)
+	nonzeroreads = 1;
+	while (nonzeroreads > 0)
+	{
+		nonzeroreads = 0;
+		n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
+		++select_count;
+		++handler_pkts;
+
+		if (refio != 0)
 		{
-			fd = rp->fd;
-			if (FD_ISSET(fd, &fds))
+			register struct refclockio *rp;
+
+			for (rp = refio; rp != 0; rp = rp->next)
 			{
-				n--;
-				totzeroreads = 0;
-				while (totzeroreads < MAXZEROREADS) {
+				fd = rp->fd;
+				skip = ISC_FALSE;
+				/* Check for skips */
+				for (i = 0; i < totskips; i++)
+				{
+					if (fd == skiplist[i])
+					{
+						skip = ISC_TRUE;
+						break;
+					}
+				}
+				/* fd was on skip list */
+				if (skip == ISC_TRUE)
+					continue;
+
+				if (FD_ISSET(fd, &fds))
+				{
+					n--;
 					if (free_recvbuffs() == 0)
 					{
 						char buf[RX_BUFF_SIZE];
 
 						buflen = read(fd, buf, sizeof buf);
-						if (buflen <= 0)
-							break;	/* Done */
 						packets_dropped++;
-						if (buflen == 0)
-							totzeroreads++;
+						if (buflen > 0)
+							nonzeroreads++;
 						else
-							totzeroreads = 0;
+						{
+							skiplist[totskips] = fd;
+							totskips++;
+						}
 						continue;	/* Keep reading until drained */
 					}
 
@@ -1911,17 +1942,21 @@ input_handler(
 
 					if (buflen < 0)
 					{
-						freerecvbuf(rb);
 						if (errno != EINTR && errno != EAGAIN) {
 							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 						}
-						break;
+						freerecvbuf(rb);
+						skiplist[totskips] = fd;
+						totskips++;
+						continue;
 					}
-					if(buflen == 0)
-						totzeroreads++;
+					if(buflen > 0)
+						nonzeroreads++;
 					else
-						totzeroreads = 0;
-
+					{
+						skiplist[totskips] = fd;
+						totskips++;
+					}
 					/*
 					 * Got one.  Mark how and when it got here,
 					 * put it on the full list and do
@@ -1958,10 +1993,10 @@ input_handler(
 
 					rp->recvcount++;
 					packets_received++;
-				} /* End while (totzeroreads < MAXZEROREADS) */
-			} /* End if (FD_ISSET(fd, &fds)) */
-		} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
-	} /* End if (refio != 0) */
+				} /* End if (FD_ISSET(fd, &fds)) */
+			} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
+		} /* End if (refio != 0) */
+	} /* End while (nonzeroreads > 0) */
 
 #endif /* REFCLOCK */
 
@@ -1969,9 +2004,9 @@ input_handler(
 	 * Loop through the interfaces looking for data
 	 * to read.
 	 */
-	for (i = ninterfaces - 1; (i >= 0) && (n > 0); i--)
+	for (i = ninterfaces - 1; (i >= 0) ; i--)
 	{
-		for (doing = 0; (doing < 2) && (n > 0); doing++)
+		for (doing = 0; (doing < 2); doing++)
 		{
 			if (doing == 0)
 			{
@@ -2237,8 +2272,21 @@ findbcastinter(
 #endif
 
 	i = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
-	if(i >= 0)
-	     return (&inter_list[i]);
+#ifdef DEBUG
+	if (debug > 1)
+		printf("Found bcastinter index %d\n", i);
+#endif
+		/*
+		 * Do nothing right now
+		 * Eventually we will find the interface this
+		 * way, but until it works properly we just see
+		 * which one we got
+		 */
+/*	if(i >= 0)
+	{
+		return (&inter_list[i]);
+	}
+*/
 
 	for (i = nwilds; i < ninterfaces; i++) {
 		/*
