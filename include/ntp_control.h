@@ -9,7 +9,7 @@ struct ntp_control {
 	u_char r_m_e_op;		/* response, more, error, opcode */
 	u_short sequence;		/* sequence number of request */
 	u_short status;			/* status word for association */
-	u_short associd;		/* association ID */
+	associd_t associd;		/* association ID */
 	u_short offset;			/* offset of this batch of data */
 	u_short count;			/* count of data in this packet */
 	u_char data[(480 + MAX_MAC_LEN)]; /* data + auth */

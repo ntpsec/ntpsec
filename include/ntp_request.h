@@ -340,7 +340,7 @@ struct info_peer {
 	u_char flash;		/* old peer.flash */
 	u_char ttl;		/* peer.ttl */
 	u_short flash2;		/* new peer.flash */
-	u_short associd;	/* association ID */
+	associd_t associd;	/* association ID */
 	keyid_t keyid;		/* peer.keyid */
 	u_int32 pkeyid;		/* unused */
 	u_int32 refid;		/* peer.refid */
@@ -800,6 +800,6 @@ struct info_kernel {
 #define NTP_MAXHOSTNAME (144 - sizeof(u_int32) - sizeof(u_short))
 struct info_dns_assoc {
 	u_int32 peeraddr;	/* peer address (HMS: being careful...) */
-	u_short associd;	/* association ID */
+	associd_t associd;	/* association ID */
 	char hostname[NTP_MAXHOSTNAME];	/* hostname */
 };

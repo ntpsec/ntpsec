@@ -1574,9 +1574,9 @@ ctl_putpeer(
 		if (peer->keystr != NULL)
 			ctl_putstr(peer_var[CP_HOST].text, peer->keystr,
 			    strlen(peer->keystr));
-		if (peer->fstamp != 0)
+		if (peer->pubkey.fstamp != 0)
 			ctl_putuint(peer_var[CP_PUBLIC].text,
-			    peer->fstamp);
+			    peer->pubkey.fstamp);
 		break;
 
 	case CP_SESKEY:

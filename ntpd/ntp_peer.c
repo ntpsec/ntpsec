@@ -98,7 +98,7 @@ int peer_free_count;
  * Association ID.  We initialize this value randomly, the assign a new
  * value every time the peer structure is incremented.
  */
-static u_short current_association_ID;
+static associd_t current_association_ID;
 
 /*
  * Memory allocation watermarks.
@@ -177,7 +177,7 @@ init_peer(void)
 	/*
 	 * Initialize our first association ID
 	 */
-	current_association_ID = (u_short)ranp2(16);
+	current_association_ID = (associd_t)ranp2(16);
 	if (current_association_ID == 0)
 	    current_association_ID = 1;
 }
@@ -308,7 +308,7 @@ findpeer(
  */
 struct peer *
 findpeerbyassoc(
-	int assoc
+	associd_t assoc
 	)
 {
 	register struct peer *peer;
@@ -318,7 +318,7 @@ findpeerbyassoc(
 
 	hash = assoc & HASH_MASK;
 	for (peer = assoc_hash[hash]; peer != 0; peer = peer->ass_next) {
-		if ((u_short)assoc == peer->associd)
+		if (assoc == peer->associd)
 		    return peer;	/* got it! */
 	}
 
@@ -439,8 +439,8 @@ unpeer(
 #ifdef PUBKEY
 	if (peer_to_remove->keystr != NULL)
 		free(peer_to_remove->keystr);
-	if (peer_to_remove->pubkey != NULL)
-		free(peer_to_remove->pubkey);
+	if (peer_to_remove->pubkey.ptr != NULL)
+		free(peer_to_remove->pubkey.ptr);
 #endif /* PUBKEY */
 	hash = HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;

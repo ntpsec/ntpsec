@@ -153,11 +153,10 @@ typedef char s_char;
 /*
  * The following structures are used in the autokey protocol.
  *
- * The autokey structure holds the data necessary to authenticate
- * the key IDs.
+ * The autokey structure holds the values used to authenticate key IDs.
  */
 struct autokey {		/* network byte order */
-	u_int32	tstamp;		/* timestamp */
+	tstamp_t tstamp;	/* timestamp */
 	keyid_t	key;		/* key ID */
 	int32	seq;		/* key number */
 	u_int32	siglen;		/* signature length */
@@ -170,7 +169,7 @@ struct autokey {		/* network byte order */
  * construct session keys.
  */
 struct cookie {			/* network byte order */
-	u_int32	tstamp;		/* timestamp */
+	tstamp_t tstamp;	/* timestamp */
 	keyid_t	key;		/* key ID */
 	u_int32	siglen;		/* signature length */
 	u_int32	pkt[1];		/* start of signature field */
@@ -178,12 +177,12 @@ struct cookie {			/* network byte order */
 };
 
 /*
- * The value structure holds variable length data such as host
- * name and public value and TAI.
+ * The value structure holds variable length data such as public
+ * key, agreement parameters, public valule and leapsecond table.
  */
 struct value {			/* network byte order */
-	u_int32	tstamp;		/* timestamp */
-	u_int32	fstamp;		/* filestamp */
+	tstamp_t tstamp;	/* timestamp */
+	tstamp_t fstamp;	/* filestamp */
 	u_int32	vallen;		/* value length */
 	u_int32	pkt[1];		/* start of value field */
 	u_char	*ptr;		/* data pointer */
@@ -246,7 +245,7 @@ struct peer {
 	struct peer *ass_next;	/* link pointer in associd hash */
 	struct sockaddr_in srcadr; /* address of remote host */
 	struct interface *dstadr; /* pointer to address on local host */
-	u_short	associd;	/* association ID, a unique integer */
+	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */
 	u_char	hpoll;		/* local poll interval */
@@ -254,7 +253,7 @@ struct peer {
 	u_char	minpoll;	/* min poll interval */
 	u_char	maxpoll;	/* max poll interval */
 	u_char	burst;		/* packets remaining in burst */
-	u_int	flags;		/* peer association flags */
+	u_int	flags;		/* association flags */
 	u_char	cast_flags;	/* additional flags */
 	u_int	flash;		/* protocol error test tally bits */
 	u_char	last_event;	/* last peer error code */
@@ -284,11 +283,10 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 #ifdef AUTOKEY
-	u_short	assoc;		/* association ID of peer */
+	associd_t assoc;	/* association ID of peer */
 #ifdef PUBKEY
-	u_char	*pubkey;	/* public key */
+	struct value pubkey;	/* public key */
 	u_char	*keystr;	/* public key file name */
-	u_int	fstamp;		/* public key filestamp */
 #endif /* PUBKEY */
 #endif /* AUTOKEY */
 	keyid_t	keyid;		/* current key ID */

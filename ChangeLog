@@ -1,3 +1,17 @@
+2000-07-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_crypto.c: Crypto key stuff
+	* ntpd/ntp_proto.c: pubkey -> pubkey.ptr
+	* ntpd/ntp_control.c (ctl_putpeer): fstamp -> pubkey.fstamp
+	* ntpd/ntp_peer.c: 
+	* include/ntpd.h: 
+	* include/ntp_types.h: 
+	* include/ntp_request.h: 
+	* include/ntp_crypto.h: 
+	* include/ntp_control.h: 
+	* include/ntp.h: Type cleanup
+	From: Dave Mills
+
 2000-07-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ElectricFence/Makefile.am (check-local): Don't run the tests if

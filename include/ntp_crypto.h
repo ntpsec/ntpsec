@@ -50,7 +50,7 @@
  */
 extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
 extern	int	crypto_xmit	P((u_int32 *, int, u_int, keyid_t,
-				    int));
+				    associd_t));
 extern	keyid_t	session_key	P((struct sockaddr_in *, struct
 				    sockaddr_in *, keyid_t, keyid_t,
 				    u_long));

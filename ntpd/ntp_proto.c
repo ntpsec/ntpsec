@@ -1978,7 +1978,8 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-			else if (crypto_flags && peer->pubkey == NULL)
+			else if (crypto_flags && peer->pubkey.ptr ==
+			    NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
@@ -2037,7 +2038,7 @@ peer_xmit(
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
 #ifdef PUBKEY
-			if (crypto_flags && peer->pubkey == NULL)
+			if (crypto_flags && peer->pubkey.ptr == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);

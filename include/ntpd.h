@@ -124,7 +124,7 @@ extern	void	ntp_monitor P((struct recvbuf *));
 extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_in *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_in *, struct interface *, int, int, int *));
-extern	struct peer *findpeerbyassoc P((int));
+extern	struct peer *findpeerbyassoc P((associd_t));
 extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, int, u_long));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
