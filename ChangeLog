@@ -1,5 +1,7 @@
 2001-03-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: '99k19
+
 	* ntpd/refclock_atom.c (atom_ppsapi): PPS API RFC alignment patches.
 	From: Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de>
 

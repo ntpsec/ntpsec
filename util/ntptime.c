@@ -170,25 +170,24 @@ main(
 -t timeconstant	log2 of PLL time constant (0 .. %d)\n",
 			       progname, optargs,
 #ifdef MOD_MICRO
-"-M		switch to microsecond mode\n"
+"-M		switch to microsecond mode\n",
 #else
-""
+"",
 #endif
 #ifdef MOD_NANO
-"-N		switch to nanosecond mode\n"
+"-N		switch to nanosecond mode\n",
 #else
-""
+"",
 #endif
 #ifdef NTP_API
 # if NTP_API > 3
-"-T tai_offset	set TAI offset\n"
+"-T tai_offset	set TAI offset\n",
 # else
-""
+"",
 # endif
 #else
-""
+"",
 #endif
-
 			       MAXTC);
 		exit(2);
 	}
