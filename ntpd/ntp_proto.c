@@ -623,7 +623,8 @@ receive(
 		 * The vanilla case is when this is not a multicast
 		 * interface. If authentication succeeds, return a
 		 * server mode packet; if not and the key ID is nonzero,
-		 * return a crypto-NAK.
+		 * return a crypto-NAK. A crypto-NAK is possible only if
+		 * the inbound packet has a MAC with nonzero key ID.
 		 */
 		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
 			if (AUTH(0, is_authentic))
@@ -702,26 +703,7 @@ receive(
 		 * We don't need these, but it warms the billboards.
 		 */
 		peer->ttl = peer2->ttl;
-		/* fall through */
-
-	/*
-	 * This is a server mode packet sent in response to a client
-	 * mode packet. If the origin timestamp is zero, somebody is
-	 * spoofing us. Otherise, if the origin timestamp does not match
-	 * the transmit timestamp, the packet is bogus. In either case,
-	 * drop the packet and wait for the next opportunity.
-	 */
-	case AM_SERV:
-		peer->flash = 0;
-		if (L_ISZERO(&p_org)) {
-			peer->flash |= TEST3;
-			return;			/* unsynch */
-			
-		} else if (!L_ISEQU(&p_org, &peer->xmt)) {
-			peer->flash |= TEST2;
-			return;			/* bogus */
-		}
-		break;				/* continue */
+		break;
 
 	/*
 	 * This is the first packet received from a broadcast server. If
@@ -778,13 +760,6 @@ receive(
 		    skeyid)) == NULL) {
 			return;			/* system error */
 		}
-		/* fall through */
-
-	/*
-	 * Broadcast packet. Nothing much to check here.
-	 */
-	case AM_BCST:
-		peer->flash = 0;
 		break;
 
 	/*
@@ -828,27 +803,12 @@ receive(
 		    skeyid)) == NULL) {
 			return;			/* system error */
 		}
-		/* fall through */
+		break;
 
 	/*
-	 * This is a symmetric (active or passive) mode packet. If the
-	 * origin timestamp is zero, the sender has not yet heard from
-	 * us. Otherwise, if the origin timestamp does not match the
-	 * transmit timestamp, the packet is bogus. In either case,
-	 * scarf the origin and receive timestamps to send back to him.
+	 * Process regular packet. Nothing special.
 	 */
 	case AM_PROCPKT:
-		if (!AUTH(0, is_authentic)) {
-			if (skeyid)
-				fast_xmit(rbufp, MODE_ACTIVE, 0,
-				    restrict_mask);
-		}
-		peer->flash = 0;
-		if (L_ISZERO(&p_org))
-			peer->flash |= TEST3;	/* unsynch */
-			
-		else if (!L_ISEQU(&p_org, &peer->xmt))
-			peer->flash |= TEST2;	/* bogus */
 		break;
 
 	/*
@@ -870,10 +830,11 @@ receive(
 #endif
 		return;
 	}
+	peer->flash = 0;
 
 	/*
-	 * Comes now an exhaustive set of sanity checks. If the transmit
-	 * timestamp is zero, the server is broken.
+	 * Next comes a rigorous schedule of timestamp checking. If the
+	 * transmit timestamp is zero, the server is horribly broken.
 	 */
 	if (L_ISZERO(&p_xmt)) {
 		return;				/* read rfc1305 */
@@ -889,12 +850,39 @@ receive(
 		return;				/* dupe */
 
 	/*
+	 * If this is a broadcast mode packet, skip further checking.
+	 */
+	} else if (hismode == MODE_BROADCAST) {
+		/* fall through */
+
+	/*
+	 * If the origin timestamp is zero, the sender has not yet heard
+	 * from us. Otherwise, if the origin timestamp does not match
+	 * the transmit timestamp, the packet is bogus.
+	 */
+	} else if (L_ISZERO(&p_org)) {
+		peer->flash |= TEST3;		/* unsynch */
+			
+	} else if (!L_ISEQU(&p_org, &peer->xmt)) {
+		peer->flash |= TEST2;		/* bogus */
+	}
+
+	/*
+	 * Update the origin and destination timestamps. If
+	 * unsynchronized or bogus abandon ship.
+	 */
+	peer->org = p_xmt;
+	peer->rec = rbufp->recv_time;
+	if (peer->flash)
+		return;
+
+	/*
 	 * The timestamps are valid and the receive packet matches the
 	 * last one sent. If the packet is a crypto-NAK, the server
 	 * might have just changed keys. We demobilize the association
 	 * and wait for better times.
 	 */
-	} else if (is_authentic == AUTH_CRYPTO) {
+	if (is_authentic == AUTH_CRYPTO) {
 		peer_clear(peer, "AUTH");
 		if (!(peer->flags & FLAG_CONFIG))
 			unpeer(peer);
@@ -994,7 +982,7 @@ receive(
 	 * the packet over the fence for processing, which may light up
 	 * more flashers.
 	 */
-	process_packet(peer, pkt, &rbufp->recv_time);
+	process_packet(peer, pkt);
 
 	/*
 	 * Well, that was nice. If TEST4 is lit, either the crypto
@@ -1038,8 +1026,7 @@ receive(
 void
 process_packet(
 	register struct peer *peer,
-	register struct pkt *pkt,
-	l_fp	*recv_ts
+	register struct pkt *pkt
 	)
 {
 	double	t34, t21;
@@ -1064,7 +1051,7 @@ process_packet(
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
-	 * Test for kiss-o'death packet (DENY or CRYP)
+	 * Test for kiss-o'death packet)
 	 */
 	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
@@ -1074,32 +1061,7 @@ process_packet(
 				unpeer(peer);
 				return;
 			}
-		} else if (memcmp(&pkt->refid, "CRYP", 4) == 0) {
-			peer_clear(peer, "CRYP");
-			peer->flash |= TEST9;	/* crypto error */
-			if (!(peer->flags & FLAG_CONFIG)) {
-				unpeer(peer);
-				return;
-			}
 		}
-	}
-
-	/*
-	 * Save the transmit and receive timestamps. Note that some
-	 * flash bits can be set by the receive() routine, in which case
-	 * save the transmit and receive timestamps and wait for the
-	 * next round.
-	 */
-	peer->org = p_xmt;
-	peer->rec = *recv_ts;
-	peer->ppoll = pkt->ppoll;
-	if (peer->flash) {
-#ifdef DEBUG
-		if (debug)
-			printf("packet: flash packet %04x from %s\n",
-			    peer->flash, stoa(&peer->srcadr));
-#endif
-		return;
 	}
 
 	/*
@@ -1140,6 +1102,7 @@ process_packet(
 	peer->leap = pleap;
 	peer->stratum = pstratum;
 	peer->pmode = pmode;
+	peer->ppoll = pkt->ppoll;
 	peer->precision = pkt->precision;
 	peer->rootdelay = p_del;
 	peer->rootdispersion = p_disp;
@@ -1508,6 +1471,7 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->ppoll = peer->maxpoll;
 	peer->disp = MAXDISPERSE;
+	peer->jitter = sys_mindist;
 	peer->epoch = current_time;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
@@ -2877,20 +2841,24 @@ peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
+	int	rval = 0;
+
+	peer->flash &= ~(TEST11 | TEST12 | TEST13);
 	if (!peer->reach || peer->leap == LEAP_NOTINSYNC ||
 	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
 	    FLAG_NOSELECT)
-		return (TEST13);	/* unfit */
+		rval |= TEST13;		/* unfit */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
-		return (TEST11);	/* distance exceeded */
+		rval |= TEST11;		/* distance exceeded */
 
 	if (peer->stratum > 1 && peer->dstadr->addr_refid ==
 	    peer->refid)
-		return (TEST12);	/* synch loop */
+		rval |= TEST12;		/* synch loop */
 
-	return (0);
+	peer->flash |= rval;
+	return (rval);
 }
 
 
