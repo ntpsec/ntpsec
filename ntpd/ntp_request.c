@@ -1296,15 +1296,12 @@ dns_a(
 			dp->hostname, inet_ntoa(peeraddr.sin_addr), associd,
 			bogon);
 		
-		if (!bogon) {
-			cp = emalloc(hnl + 1);
-			strncpy(cp, dp->hostname, hnl);
-		}
-
 		if (bogon) {
 			/* If it didn't work */
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
+		} else {
+			crypto_public(peer, dp->hostname);
 		}
 		
 		dp++;

@@ -732,7 +732,7 @@ crypto_read(
 	} else if (*cp == '/') {
 		strcpy(filename, cp);
 	} else {
-		sprintf(filename, "%s%s", keysdir, cp);
+		snprintf(filename, sizeof filename, "%s%s", keysdir, cp);
 	}
 	str = fopen(filename, "r");
 	if (str == NULL) {
@@ -814,14 +814,14 @@ crypto_read(
 void
 crypto_public(
 	struct peer *peer,	/* peer structure pointer */
-	u_char *cp		/* file name */
+	u_char *cp		/* canonical host name */
 	)
 {
 	R_RSA_PUBLIC_KEY keybuf;
 	u_int keylen = sizeof(R_RSA_PUBLIC_KEY);
 	char filename[MAXFILENAME];
 
-	sprintf(filename, "ntpkey_%s", cp);
+	snprintf(filename, sizeof filename, "ntpkey_%s", cp);
 	if (!crypto_read(filename, (u_char *)&keybuf, keylen))
 		return;
 	if (peer->keystr != NULL)
@@ -904,7 +904,8 @@ crypto_setup(void)
 	 */
 	if (public_key_file == NULL) {
 		uname(&utsnamebuf);
-		sprintf(filename, "ntpkey_%s", utsnamebuf.nodename);
+		snprintf(filename, sizeof filename, "ntpkey_%s",
+			 utsnamebuf.nodename);
 		public_key_file = emalloc(strlen(filename) + 1);
 		strcpy(public_key_file, filename);
 	}
@@ -919,7 +920,8 @@ crypto_setup(void)
 	if (*dh_params_file == '/')
 		strcpy(filename, dh_params_file);
 	else
-		sprintf(filename, "%s%s", keysdir, dh_params_file);
+		snprintf(filename, sizeof filename, "%s%s", keysdir,
+			 dh_params_file);
 
 	str = fopen(filename, "r");
 	if (str == NULL) {

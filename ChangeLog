@@ -1,5 +1,12 @@
 2000-03-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_request.c (dns_a): Call crypto_public with the resolved
+	name and the peer pointer.
+
+	* ntpd/ntp_crypto.c (crypto_public): sprintf is Evil.  Use snprintf.
+	(crypto_setup): Ditto
+	(crypto_read): Ditto
+
 	* ntpd/ntp_resolver.c (ntp_res_send): Lose some debugging noise.
 
 	* ntpd/ntp_config.c (getconfig): Lose testing code.
