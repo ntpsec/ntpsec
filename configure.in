@@ -762,6 +762,12 @@ case "$host" in
 esac
 AC_CHECK_FUNCS(uname updwtmp updwtmpx vsprintf)
 
+case "$host" in
+ *-*-sunos4*)
+    AC_DEFINE(SPRINTF_CHAR, 1, [*s*printf() functions are char*])
+    ;;
+esac
+
 AC_CACHE_CHECK(number of arguments to gettimeofday(), ac_cv_func_Xettimeofday_nargs,
 [AC_TRY_COMPILE([#include <sys/time.h>],[
 gettimeofday((struct timeval*)0,(struct timezone*)0);

@@ -28,6 +28,8 @@ static char rcsid[] =
 
 #include <isc/net.h>
 
+#include "ntp_sprintf.h"
+
 #define NS_INT16SZ	 2
 #define NS_IN6ADDRSZ	16
 
@@ -175,7 +177,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 			tp += strlen(tp);
 			break;
 		}
-		tp += sprintf(tp, "%x", words[i]);
+		tp += SPRINTF((tp, "%x", words[i]));
 	}
 	/* Was it a trailing run of 0x00's? */
 	if (best.base != -1 && (best.base + best.len) ==

@@ -67,6 +67,8 @@
 # include <sys/ppsclock.h>
 #endif
 
+#include "ntp_sprintf.h"
+
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
 # ifdef HAVE_STRUCT_TIMESPEC
@@ -1634,25 +1636,11 @@ mx4200_send(peer, fmt, va_alist)
 
 	cp = buf;
 	*cp++ = '$';
-#ifdef notdef
-	/* BSD is rational */
-	n = vsnprintf(cp, sizeof(buf) - 1, fmt, ap);
-#else
-	/* SunOS sucks */
-	(void)vsprintf(cp, fmt, ap);
-	n = strlen(cp);
-#endif /* notdef */
+	n = VSNPRINTF((cp, sizeof(buf) - 1, fmt, ap));
 	ck = mx4200_cksum(cp, n);
 	cp += n;
 	++n;
-#ifdef notdef
-	/* BSD is rational */
-	n += snprintf(cp, sizeof(buf) - n - 5, "*%02X\r\n", ck);
-#else
-	/* SunOS sucks */
-	sprintf(cp, "*%02X\r\n", ck);
-	n += strlen(cp);
-#endif /* notdef */
+	n += SNPRINTF((cp, sizeof(buf) - n - 5, "*%02X\r\n", ck));
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)

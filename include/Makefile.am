@@ -40,6 +40,7 @@ noinst_HEADERS = \
 	ntp_request.h \
 	ntp_rfc2553.h \
 	ntp_select.h \
+	ntp_sprintf.h \
 	ntp_stdlib.h \
 	ntp_string.h \
 	ntp_syscall.h \
