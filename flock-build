@@ -2,6 +2,7 @@
 
 BUILD_ARGS="$@"
 
+# * baldwin        sparc-sun-solaris2.7
 #   bridgeport     sparc-sun-solaris2.6
 #   bunnylou       alpha-dec-osf4.0
 # * churchy        alpha-dec-osf4.0
@@ -21,7 +22,7 @@ SIG=`perl -e 'print rand'`
 echo $SIG > .buildkey
 
 case "$LIST" in
- '') LIST="churchy hepzibah pogo porkypine rackety snavely" ;;
+ '') LIST="baldwin churchy hepzibah pogo porkypine rackety snavely" ;;
 esac
 
 for i in $LIST

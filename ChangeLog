@@ -1,5 +1,7 @@
 2000-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* flock-build: Added baldwin
+
 	* ntpd/ntp_request.c: 
 	* ntpd/ntp_proto.c: 
 	* ntpd/ntp_peer.c: 
