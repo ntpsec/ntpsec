@@ -1,5 +1,7 @@
 2000-02-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* librsaref/Makefile.am: Fix stamp-rsaref dependency order.
+
 	* configure.in: 4.0.99f
 
 2000-02-17  Harlan Stenn  <stenn@whimsy.udel.edu>

@@ -38,6 +38,10 @@ ETAGS_ARGS = Makefile.am
 #EXTRA_DIST = 
 
 $(librsaref_a_SOURCES): stamp-rsaref
+
+stamp-rsaref:
+	@rm -f stamp-rsaref stamp-rsarefT
+	@echo timestamp > stamp-hT 2> /dev/null
 	for i in $(librsaref_a_SOURCES); do \
 	    case "@MAKE_LIBRSAREF@" in \
 	     '') touch $$i ;; \
@@ -45,6 +49,4 @@ $(librsaref_a_SOURCES): stamp-rsaref
 		|| cp $(srcdir)/../rsaref2/source/$$i $(srcdir)/$$i ;; \
 	    esac ; \
 	done
-
-stamp-rsaref:
-	touch stamp-rsaref
+	@mv stamp-rsarefT stamp-rsaref
