@@ -527,6 +527,44 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR, 1, [Should be obvious...])
 fi
 
+AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
+		ac_cv_have_ss_family_in_struct_ss, [
+	AC_TRY_COMPILE(
+		[
+#include <sys/types.h>
+#include <sys/socket.h>
+		],
+		[ struct sockaddr_storage s; s.ss_family = 1; ],
+		[ ac_cv_have_ss_family_in_struct_ss="yes" ],
+		[ ac_cv_have_ss_family_in_struct_ss="no" ],
+	)
+])
+if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
+	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
+fi
+
+AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
+		ac_cv_have___ss_family_in_struct_ss, [
+	AC_TRY_COMPILE(
+		[
+#include <sys/types.h>
+#include <sys/socket.h>
+		],
+		[ struct sockaddr_storage s; s.__ss_family = 1; ],
+		[ ac_cv_have___ss_family_in_struct_ss="yes" ],
+		[ ac_cv_have___ss_family_in_struct_ss="no" ]
+	)
+])
+if test "x$ac_cv_have___ss_family_in_struct_ss" = "xyes" ; then
+	AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
+fi
+
+AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
+[/* Handle ss_family */
+#if !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE___SS_FAMILY_IN_SS)
+# define ss_family __ss_family
+#endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
+
 case "$ac_cv_header_machine_soundcard_h$ac_cv_header_sys_soundcard_h" in
   *yes*)
     AC_CACHE_CHECK([for struct snd_size], ac_cv_struct_snd_size,
