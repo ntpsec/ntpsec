@@ -1,5 +1,8 @@
 2000-02-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/ntp-wait.in: Intensify, including some suggestions from
+	Ulrich.
+
 	* configure.in: 4.0.99e
 
 	* scripts/ntp-wait.in: Lose cruft, sleep after each try.
