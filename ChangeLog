@@ -1,3 +1,8 @@
+2000-08-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure: Manual hack to the ntptimeval.time.tv_nsec stuff
+	because we're running an old autoconf.
+
 2000-08-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/ntptime.c: Use: HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC, it's
