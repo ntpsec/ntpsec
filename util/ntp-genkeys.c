@@ -181,7 +181,7 @@ u_char	sys_minpoll;		/* min poll interval (log2 s) */
 
 void snifflink P((const char *, char **));
 int filep P((const char *));
-FILE *newfile P((const char *, const char *, const char *));
+FILE *newfile P((const char *, const char *, mode_t, const char *));
 void cleanlinks P((const char *, const char *, const char *));
 
 struct peer *
@@ -530,6 +530,7 @@ FILE *
 newfile(
 	const char *f1,		/* Visible file */
 	const char *f2,		/* New timestamped file name */
+	mode_t fmask,		/* umask for new timestamped file */
 	const char *f3		/* Previous symlink target */
 	)
 {
@@ -537,7 +538,8 @@ newfile(
 	char fb[PATH_MAX];
 	char *cp;
 
-	if (debug > 1) printf("newfile(%s,%s,%s)\n", f1, f2, f3?f3:"NULL");
+	if (debug > 1) printf("newfile(%s,%s,%0o,%s)\n", f1, f2,
+			      (unsigned)fmask, f3 ? f3 : "NULL");
 	/*
 	   If:
 	   - no symlink support, or
@@ -609,7 +611,11 @@ newfile(
 		printf("Would write file <%s>\n", fb);
 		fp = NULL;
 	} else {
+		mode_t omask;
+
+		omask = umask(fmask);
 		fp = fopen(fb, "w");
+		(void) umask(omask);
 		if (fp == NULL) {
 			perror(fb);
 			exit(1);
@@ -877,7 +883,7 @@ main(
 		 * Generate 16 random MD5 keys.
 		 */
 		printf("Generating MD5 key file...\n");
-		str = newfile(f1_keys, f2_keys, f3_keys);
+		str = newfile(f1_keys, f2_keys, sec_mask, f3_keys);
 		if (!memorex) {
 			srandom((u_int)tv.tv_usec);
 			fprintf(str, "# MD5 key file %s\n# %s", f2_keys,
@@ -938,7 +944,8 @@ main(
 		 * Generate the file "ntpkey.*" containing the RSA
 		 * private key in printable ASCII format.
 		 */
-		str = newfile(f1_privatekey, f2_privatekey, f3_privatekey);
+		str = newfile(f1_privatekey, f2_privatekey, sec_mask,
+			      f3_privatekey);
 		if (!memorex) {
 			len = sizeof(rsaref_private)
 			    - sizeof(rsaref_private.bits);
@@ -958,7 +965,8 @@ main(
 		 * Generate the file "ntpkey_host.*" containing the RSA
 		 * public key in printable ASCII format.
 		 */
-		str = newfile(f1_publickey, f2_publickey, f3_publickey);
+		str = newfile(f1_publickey, f2_publickey, std_mask,
+			      f3_publickey);
 		if (!memorex) {
 			len = sizeof(rsaref_public)
 			    - sizeof(rsaref_public.bits);
@@ -983,7 +991,7 @@ main(
 		 */
 		printf("Generating Diffie-Hellman parameters (%d bits)...\n",
 		       PRIMELEN);
-		str = newfile(f1_dhparms, f2_dhparms, f3_dhparms);
+		str = newfile(f1_dhparms, f2_dhparms, std_mask, f3_dhparms);
 
 		if (!memorex) {
 			R_RandomInit(&randomstr);

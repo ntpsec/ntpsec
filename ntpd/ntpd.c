@@ -344,7 +344,7 @@ ntpdmain(
 
 #ifdef HAVE_UMASK
 	{
-		unsigned int uv;
+		mode_t uv;
 
 		uv = umask(0);
 		if(uv)
