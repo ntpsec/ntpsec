@@ -1,3 +1,13 @@
+2000-05-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp_stdlib.h: 
+	* libntp/systime.c (adj_systime): 
+	* ntpd/ntp_loopfilter.c (loop_config): 
+	* ntpd/ntp_util.c (stats_config): 
+	* ports/winnt/ntpd/nt_clockstuff.c (adj_systime): 
+	MAXFREQ -> MAX_FREQ
+	* include/ntp_proto.h: Define MAX_FREQ
+
 2000-05-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_stdlib.h: 

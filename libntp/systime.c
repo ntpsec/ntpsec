@@ -19,6 +19,7 @@
 # include <utmpx.h>
 #endif /* HAVE_UTMPX_H */
 
+#include "ntp_proto.h"		/* for MAX_FREQ */
 #include "ntp_machine.h"
 #include "ntp_fp.h"
 #include "ntp_syslog.h"
@@ -26,8 +27,6 @@
 #include "ntp_stdlib.h"
 
 int	systime_10ms_ticks = 0;	/* adj sysclock in 10ms increments */
-
-#define MAXFREQ 500e-6
 
 /*
  * These routines (init_systime, get_systime, step_systime, adj_systime)
@@ -139,8 +138,8 @@ adj_systime(
 		}
 	} else 
 #endif
-		if (dtemp > MAXFREQ)
-			dtemp = MAXFREQ;
+		if (dtemp > MAX_FREQ)
+			dtemp = MAX_FREQ;
 
 	dtemp = dtemp * 1e6 + .5;
 

@@ -537,10 +537,10 @@ local_clock(
 	 */
 	etemp = clock_frequency + flladj + plladj;
 	drift_comp += etemp;
-	if (drift_comp > MAXFREQ)
-		drift_comp = MAXFREQ;
-	else if (drift_comp <= -MAXFREQ)
-		drift_comp = -MAXFREQ;
+	if (drift_comp > MAX_FREQ)
+		drift_comp = MAX_FREQ;
+	else if (drift_comp <= -MAX_FREQ)
+		drift_comp = -MAX_FREQ;
 	dtemp = SQUARE(clock_stability);
 	etemp = SQUARE(etemp) - dtemp;
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
@@ -743,10 +743,10 @@ loop_config(
 		 */
 		rstclock(S_FSET);
 		drift_comp = freq;
-		if (drift_comp > MAXFREQ)
-			drift_comp = MAXFREQ;
-		if (drift_comp < -MAXFREQ)
-			drift_comp = -MAXFREQ;
+		if (drift_comp > MAX_FREQ)
+			drift_comp = MAX_FREQ;
+		if (drift_comp < -MAX_FREQ)
+			drift_comp = -MAX_FREQ;
 #ifdef KERNEL_PLL
 		/*
 		 * If the phase-lock code is implemented in the kernel,

@@ -52,8 +52,8 @@ adj_systime(
 		dtemp = -dtemp;
 	}
 
-	if (dtemp > MAXFREQ)
-		dtemp = MAXFREQ;
+	if (dtemp > MAX_FREQ)
+		dtemp = MAX_FREQ;
 
 	dtemp = dtemp * 1e6;
 

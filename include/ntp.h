@@ -115,7 +115,7 @@ typedef char s_char;
 #define CLOCK_SGATE	10.	/* popcorn spike gate */
 #define BURST_INTERVAL1	4	/* first interburst interval (log2) */
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
- 
+
 /*
  * Operations for jitter (variance) calculations (these use doubles).
  *

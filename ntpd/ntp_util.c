@@ -352,7 +352,7 @@ stats_config(
 		}
 		(void) fclose(fp);
 		if (   !finite(old_drift)
-		    || (fabs(old_drift) > (MAXFREQ * 1e6))) {
+		    || (fabs(old_drift) > (MAX_FREQ * 1e6))) {
 			msyslog(LOG_ERR, "invalid frequency (%f) in %s", 
 			    old_drift, stats_drift_file);
 			exit(1);
