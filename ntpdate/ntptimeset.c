@@ -332,6 +332,12 @@ static	void	printserver	P((register struct server *pp, FILE *fp));
 int	vsprintf	P((char *str, const char *fmt, va_list ap));
 #endif
 
+#ifdef HAVE_SIGNALED_IO
+extern  void    wait_for_signal P((void));
+extern  void    unblock_io_and_alarm P((void));
+extern  void    block_io_and_alarm P((void));
+#endif
+
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntptimeset,"ntptimeset",ntptimesetmain);
@@ -755,7 +761,7 @@ ntptimesetmain(
 	/*
 	 * if we get here then we are in trouble
 	 */
-	exit(1);
+	return(1);
 }
 
 
@@ -1999,8 +2005,9 @@ input_handler(l_fp *xts)
 	register struct recvbuf *rb;
 	struct timeval tvzero;
 	int fromlen;
-	l_fp ts = *xts; /* we ignore xts, but make the compiler happy */
 	fd_set fds;
+	l_fp ts;
+	ts = *xts; /* we ignore xts, but make the compiler happy */
 
 	/*
 	 * Do a poll to see if we have data

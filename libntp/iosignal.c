@@ -516,5 +516,5 @@ wait_for_signal(void)
 
 # endif /* HAVE_SIGACTION */
 #else
-static int  NotAnEmptyCompilationUnit;
+int  NotAnEmptyCompilationUnit;
 #endif 

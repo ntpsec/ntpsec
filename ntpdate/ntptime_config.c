@@ -154,9 +154,9 @@ loadservers(
 	int peerversion;
 	int minpoll;
 	int maxpoll;
-	int ttl;
+	/* int ttl; */
 	int srvcnt;
-	u_long peerkey;
+	/* u_long peerkey; */
 	int peerflags;
 	struct sockaddr_in peeraddr;
 	FILE *fp;
@@ -260,9 +260,9 @@ M
 			peerversion = NTP_VERSION;
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
-			peerkey = 0;
+			/* peerkey = 0; */
 			peerflags = 0;
-			ttl = 0;
+			/* ttl = 0; */
 			for (i = 2; i < ntokens; i++)
 			    switch (matchkey(tokens[i], mod_keywords)) {
 				case CONF_MOD_VERSION:
@@ -289,7 +289,8 @@ M
 					    errflg = 1;
 					    break;
 				    }
-				    peerkey = (int)atol(tokens[++i]);
+				    ++i;
+				    /* peerkey = (int)atol(tokens[i]); */
 				    peerflags |= FLAG_AUTHENABLE;
 				    break;
 
@@ -337,7 +338,8 @@ M
 					    errflg = 1;
 					    break;
 				    }
-				    ttl = atoi(tokens[++i]);
+				    ++i;
+				    /* ttl = atoi(tokens[i]); */
 				    break;
 
 				case CONF_MOD_MODE:
@@ -347,7 +349,8 @@ M
 					    errflg = 1;
 					    break;
 				    }
-				    ttl = atoi(tokens[++i]);
+				    ++i;
+				    /* ttl = atoi(tokens[i]); */
 				    break;
 
 				case CONFIG_UNKNOWN:
@@ -372,7 +375,7 @@ M
 			
 			case CONFIG_KEYS:
 			if (ntokens >= 2) {
-				key_file = emalloc(strlen(tokens[1]) + 1);
+				key_file = (char *) emalloc(strlen(tokens[1]) + 1);
 				strcpy(key_file, tokens[1]);
 			}
 			break;

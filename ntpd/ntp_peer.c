@@ -108,7 +108,7 @@ static u_short current_association_ID;
  */
 u_long peer_timereset;		/* time stat counters were zeroed */
 u_long findpeer_calls;		/* number of calls to findpeer */
-static u_long assocpeer_calls;	/* number of calls to findpeerbyassoc */
+u_long assocpeer_calls;		/* number of calls to findpeerbyassoc */
 u_long peer_allocations;	/* number of allocations from the free list */
 u_long peer_demobilizations;	/* number of structs freed to free list */
 int total_peer_structs;		/* number of peer structs in circulation */

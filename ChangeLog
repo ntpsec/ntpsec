@@ -1,3 +1,13 @@
+1999-08-26  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/iosignal.c:
+	* ntpd/ntp_peer.c:
+	* ntpd/refclock_nmea.c:
+	* ntpdate/ntptime_config.c:
+	* ntpdate/ntptimeset.c:
+	AIX, Irix, and SunOS lint cleanup
+	From: Marc.Brett@westgeo.com
+
 1999-08-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in 4.0.97a
