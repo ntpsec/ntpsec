@@ -1,3 +1,8 @@
+1999-10-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/release.htm: cleanup - we still provide MD5.
+	Reported by: Winslowe Lacesso <lacesso@cs.ubc.ca>
+
 1999-10-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_oncore.c: 
