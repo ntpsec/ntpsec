@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a #-lm
+LDADD =	version.o @LIBPARSE@ ../libntp/libntp.a @LIBRSAREF@
 ntpd_LDADD = $(LDADD) -lm
 DISTCLEANFILES = .version version.c
 #EXTRA_DIST = ntpd.mak

@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpdate
 INCLUDES = -I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
-LDADD =	version.o ../libntp/libntp.a
+LDADD =	version.o ../libntp/libntp.a @LIBRSAREF@
 DISTCLEANFILES = .version stamp-v
 noinst_HEADERS = ntpdate.h
 #EXTRA_DIST = ntpdate.mak

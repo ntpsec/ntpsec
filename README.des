@@ -7,10 +7,10 @@ If you *need* DES support:
 
 - first see if you can simply "want" DES support instead
 - Get RSAREF or RSAEURO (or a reasonable facsimile thereof)
-- - From the distribution, copy:
-- - desc.c to libntp
-- - rsaref.h, des.h, and md2.h to include
-- - DO NOT copy global.h or md5.h into include.  We've patched these.
+- - Unpack it in the top-level source directory of the NTP distribution
+    (You should see directories lile ports, rsaref2, scripts)
+
+When you run configure, the Right Thing will happen.
 
 Be advised that the RSA DES code is not quite as portable os one might
 wish for.  In particular, DES under NTP will only work between machines

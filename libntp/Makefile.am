@@ -12,8 +12,8 @@ libntp_a_SOURCES = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	ranny.c refnumtoa.c statestr.c syssignal.c systime.c tsftomsu.c \
 	tstotv.c tvtoa.c tvtots.c uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
 	mfp_mul.c binio.c ieee754io.c gpstolfp.c
-libntp_a_LIBADD = @LIBOBJS@ @DESOBJS@
-libntp_a_DEPENDENCIES = @LIBOBJS@ @DESOBJS@
+libntp_a_LIBADD = @LIBOBJS@
+libntp_a_DEPENDENCIES = @LIBOBJS@
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 

@@ -1231,14 +1231,6 @@ if test $ac_cv_struct_ntptimeval_timespec = yes; then
   AC_DEFINE(TIMESPEC_IN_NTPTIMEVAL, 1, [Does ntptimeval use struct timespec?])
 fi
 
-dnl HMS: It would be Nice if we also checked for the header files...
-AC_CACHE_CHECK(if we have desc.c for DES support, ac_cv_var_desc_c,
-[if test -f $srcdir/libntp/desc.c; then
-  ac_cv_var_desc_c=yes
-else
-  ac_cv_var_desc_c=no
-fi])
-
 AC_CACHE_CHECK(if we have kernel PLL support, ac_cv_var_kernel_pll,
 [dnl ac_cv_var_ntp_syscalls is {no,libc,kernel}
 case "$ac_cv_header_sys_timex_h$ac_cv_var_sta_fll$ac_cv_var_ntp_syscalls" in
@@ -1286,20 +1278,6 @@ AC_CACHE_CHECK(if we want to use MD5 authentication, ac_cv_var_use_md5,
 ac_cv_var_use_md5=$ans])
 case "$ac_cv_var_use_md5" in
  yes) AC_DEFINE(MD5) ;;
-esac
-
-AC_CACHE_CHECK(if we want to use DES authentication, ac_cv_var_use_des,
-[AC_ARG_ENABLE(des,          	[  --enable-des            s include support for DES keys],
-    [ans=$enableval], [ans=yes])
-ac_cv_var_use_des=$ans])
-AC_SUBST(DESOBJS)
-case "$ac_cv_var_use_des$ac_cv_var_desc_c" in
- *no*)
-    DESOBJS=''
-    ;;
- *) AC_DEFINE(DES)
-    DESOBJS=desc.o
-    ;;
 esac
 
 # Check for ioctls TIOCGPPSEV
@@ -2074,11 +2052,12 @@ AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
 AC_MSG_CHECKING(if we need to make and use the RSAREF library)
 ans=no
-if test -f $(srcdir)/rsaref2/source/rsa.c
+if test -f $srcdir/rsaref2/source/rsa.c
 then
     ans=yes
     LIBRSAREF=../librsaref/librsaref.a
     MAKE_LIBRSAREF=librsaref.a
+    AC_DEFINE(DES)
 fi
 AC_MSG_RESULT($ans)
 

@@ -1,7 +1,18 @@
 1999-07-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* README.des: Updated.
+
+	* ntpq/Makefile.am (LDADD): Add LIBRSAREF
+
+	* ntpdc/Makefile.am (LDADD): Add LIBRSAREF
+
+	* ntpdate/Makefile.am (LDADD): Add LIBRSAREF
+
+	* ntpd/Makefile.am (LDADD): Add LIBRSAREF
+
 	* configure.in (AC_OUTPUT): Added librsaref/Makefile
 	Added tests for making/using librsaref.a
+	Lose old DES stuff; AC_DEFINE(DES) if we find the rsaref stuff.
 
 1999-07-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
