@@ -1,5 +1,8 @@
 2000-09-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/ntp-close: Find "close" ntp servers.
+	From: Neal McBurnett <neal@bcn.boulder.co.us>
+
 	* ntpd/refclock_conf.c: 
 	* ntpd/refclock_oncore.c: Re-enabled oncore driver for HAVE_PPSAPI
 	case only.
