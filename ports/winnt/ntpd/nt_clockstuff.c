@@ -53,6 +53,10 @@ extern double sys_residual;	/* residual from previous adjustment */
 
 static long last_Adj = 0;
 
+static void StartClockThread(void);
+static void StopClockThread(void);
+
+
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
 
 static ULONGLONG RollOverCount = 0;
@@ -202,6 +206,8 @@ void init_winnt_time(void) {
 
     /*---- Gerhard Junker */
 
+    StartClockThread();
+
 }
 
 
@@ -236,7 +242,7 @@ gettimeofday(
 	LARGE_INTEGER LargeIntNowCount;
 	ULONGLONG Time;
 	ULONGLONG NowCount;
-   ULONGLONG PreCount;                                                  /*FIX*/
+	ULONGLONG PreCount;                                                  /*FIX*/
 	LONGLONG TicksElapsed;
 	LONG time_adjustment;
 
@@ -244,7 +250,7 @@ gettimeofday(
 	 *  be reasonably deterministic
 	 */
 
-   PreCount = LastTimerCount;                                           /*FIX*/
+	PreCount = LastTimerCount;                                           /*FIX*/
 
 	if (!QueryPerformanceCounter(&LargeIntNowCount)) {
 		msyslog(LOG_ERR, "QueryPeformanceCounter failed: %m");
@@ -266,28 +272,28 @@ gettimeofday(
 	 */
 
 	if (NowCount >= Count)
-   {
+	{
 	    TicksElapsed = NowCount - Count; /* linear progression of ticks */
-   }
+	}
 	else
-   {
-     /************************************************************************/
-     /* Differentiate between real rollover and the case of taking a         */
-     /* perfcount then the APC coming in.                                    */
-     /************************************************************************/
-     if (Count > PreCount)                                              /*FIX*/
-     {                                                                  /*FIX*/
-       TicksElapsed = 0;                                                /*FIX*/
-     }                                                                  /*FIX*/
-     else                                                               /*FIX*/
-     {                                                                  /*FIX*/
-       TicksElapsed = NowCount + (RollOverCount - Count);               /*FIX*/
-     }                                                                  /*FIX*/
-   }
+	{
+	/************************************************************************/
+	/* Differentiate between real rollover and the case of taking a         */
+	/* perfcount then the APC coming in.                                    */
+	/************************************************************************/
+		if (Count > PreCount)                                           /*FIX*/
+		{								/*FIX*/
+			TicksElapsed = 0;                                       /*FIX*/
+		}                                                               /*FIX*/
+		else                                                            /*FIX*/
+		{                                                               /*FIX*/
+			TicksElapsed = NowCount + (RollOverCount - Count);	/*FIX*/
+		}                                                               /*FIX*/
+	}
 
 	/*  Calculate the new time (in 100's of nano-seconds)
 	 */
-    time_adjustment = (long) ((TicksElapsed * HECTONANOSECONDS) / PerfFrequency);
+	time_adjustment = (long) ((TicksElapsed * HECTONANOSECONDS) / PerfFrequency);
 	Time += time_adjustment;
 
 	/* Convert the hecto-nano second time to tv format
@@ -420,11 +426,3 @@ static void StopClockThread(void)
 	else
 		msyslog(LOG_ERR, "Network Time Protocol Service Failed to Stop");
 }
-
-typedef void (__cdecl *CRuntimeFunction)(void);
-
-#pragma data_seg(".CRT$XIY")
-	CRuntimeFunction _StartClockThread = StartClockThread;
-#pragma data_seg(".CRT$XTY")
-	CRuntimeFunction _StopClockThread = StopClockThread;
-#pragma data_seg()  /* reset */
