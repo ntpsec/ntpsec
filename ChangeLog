@@ -1,3 +1,8 @@
+2000-07-26  Sven Dietrich  <sven_dietrich@trimble.com>
+
+	* ntpd/ntpd.c: remove WINNT priority adjustment to the ports/winnt area
+	where it does not clutter up the main distribution.
+
 2000-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (receive): dstadr_sin needs  higher visibility
