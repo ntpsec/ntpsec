@@ -40,6 +40,7 @@
 #define lifr_dstaddr iflr_dstaddr
 #define lifr_broadaddr iflr_broadaddr
 #define lifr_flags iflr_flags
+#define lifr_index iflr_index
 #define ss_family sa_family
 #define LIFREQ if_laddrreq
 #else
