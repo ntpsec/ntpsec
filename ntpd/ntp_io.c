@@ -71,6 +71,13 @@ extern int listen_to_virtual_ips;
 #endif
 
 /*
+#define ISC_PLATFORM_HAVEIPV6
+ struct ipv6_mreq {  struct in6_addr ipv6mr_multiaddr;
+				  unsigned int ipv6mr_interface;
+} ipv6_mreq;
+*/
+
+/*
  * We do asynchronous input using the SIGIO facility.  A number of
  * recvbuf buffers are preallocated for input.	In the signal
  * handler we poll to see which sockets are ready and read the
@@ -143,13 +150,18 @@ fd_set activefds;
 int maxactivefd;
 
 static	int create_sockets	P((u_short));
-static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
+static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *, int));
 static	void	close_socket	P((SOCKET));
 #ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
 #endif
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
+static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+
 
 typedef struct vsock vsock_t;
 
@@ -174,8 +186,10 @@ ISC_LIST(remaddr_t)       remoteaddr_list;
 void	add_socket_to_list	P((SOCKET));
 void	delete_socket_from_list	P((SOCKET));
 void	add_addr_to_list	P((struct sockaddr_storage *, int, int));
+int     modify_addr_in_list	P((struct sockaddr_storage *, int));
 void	delete_addr_from_list	P((struct sockaddr_storage *));
-int     find_addr_in_list P((struct sockaddr_storage *));
+int     find_addr_in_list	P((struct sockaddr_storage *));
+int     find_flagged_addr_in_list P((struct sockaddr_storage *, int));
 int	create_wildcards	P((u_short));
 isc_boolean_t address_okay	P((isc_interface_t *));
 void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
@@ -457,9 +471,10 @@ create_sockets(
 		if(debug)
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
-
+#ifdef UDP_WILDCARD_DELIVERY
 	nwilds = create_wildcards(port);
 	idx = nwilds;
+#endif
 
 	result = isc_interfaceiter_create(mctx, &iter);
 	if (result != ISC_R_SUCCESS)
@@ -509,7 +524,7 @@ create_sockets(
 #endif
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
-		    inter_list[i].flags & INT_BROADCAST, 0, &inter_list[i]);
+		    inter_list[i].flags & INT_BROADCAST, 0, &inter_list[i], i);
 		if (inter_list[i].fd != INVALID_SOCKET)
 			msyslog(LOG_INFO, "Listening on interface %s, %s#%d",
 				inter_list[i].name,
@@ -581,6 +596,7 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET 
 	int i;
 	int nif = 0;
+	isc_boolean_t jstatus; 
 
 	set_reuseaddr(1);
 
@@ -601,17 +617,15 @@ io_setbclient(void)
 		if (inter_list[i].flags & INT_BCASTOPEN)
 			continue;
 
-		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
-		    INT_BROADCAST, 1, &inter_list[i]);
-		if (inter_list[i].bfd != INVALID_SOCKET) {
-			inter_list[i].flags |= INT_BCASTOPEN;
+		/* Enable Broadcast on socket */
+		jstatus = socket_broadcast_enable(&inter_list[i], i, &inter_list[i].sin);
+		if (jstatus == ISC_TRUE)
 			nif++;
-		}
 #ifdef DEBUG
 		if (debug) {
-			if (inter_list[i].bfd != INVALID_SOCKET)
+			if (jstatus == ISC_TRUE)
 				printf("io_setbclient: Opened broadcast client on interface %d, socket: %d\n",
-				i, inter_list[i].bfd);
+				i, inter_list[i].fd);
 			else
 				printf("io_setbclient: Unable to Open broadcast client on interface %d\n",
 				i);
@@ -655,7 +669,194 @@ set_reuseaddr(int flag) {
 	}
 }
 
+/*
+ * Add a multicast address to a given socket
+ * The socket is in the inter_list all we need to do is enable
+ * multicasting. It is not this function's job to select the socket
+ */
+static isc_boolean_t
+socket_broadcast_enable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+{
+#ifdef SO_BROADCAST
+	int on = 1;
 
+	if (maddr->ss_family == AF_INET)
+	{
+		/* if this interface can support broadcast, set SO_BROADCAST */
+		if (setsockopt(iface->fd, SOL_SOCKET, SO_BROADCAST,
+			       (char *)&on, sizeof(on)))
+		{
+			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) enable on address %s: %m",
+				stoa(maddr));
+		}
+	}
+	iface->flags |= INT_BCASTOPEN;
+	modify_addr_in_list(maddr, iface->flags);
+	return ISC_TRUE;
+#else
+	return ISC_FALSE;
+#endif /* SO_BROADCAST */
+}
+
+/*
+ * Remove a multicast address from a given socket
+ * The socket is in the inter_list all we need to do is disable
+ * multicasting. It is not this function's job to select the socket
+ */
+static isc_boolean_t
+socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+{
+#ifdef SO_BROADCAST
+	int off = 0;
+
+	if (maddr->ss_family == AF_INET)
+	{
+		if (setsockopt(iface->fd, SOL_SOCKET, SO_BROADCAST,
+			       (char *)&off, sizeof(off)))
+		{
+			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) disable on address %s: %m",
+				stoa(maddr));
+		}
+	}
+	iface->flags &= ~INT_BCASTOPEN;
+	modify_addr_in_list(maddr, iface->flags);
+	return ISC_TRUE;
+#else
+	return ISC_FALSE;
+#endif /* SO_BROADCAST */
+}
+/*
+ * Add a multicast address to a given socket
+ * The socket is in the inter_list all we need to do is enable
+ * multicasting. It is not this function's job to select the socket
+ */
+static isc_boolean_t
+socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+{
+#ifdef ISC_PLATFORM_HAVEIPV6
+	struct ipv6_mreq mreq6;
+	struct in6_addr iaddr6;
+#endif /* ISC_PLATFORM_HAVEIPV6 */
+	struct ip_mreq mreq;
+	memset((char *)&mreq, 0, sizeof(mreq));
+
+	switch (maddr->ss_family)
+	{
+	case AF_INET:
+		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
+/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;*/
+		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+			(char *)&mreq, sizeof(mreq)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_ADD_MEMBERSHIP fails: %m for %x / %x (%s)",
+			mreq.imr_multiaddr.s_addr,
+			mreq.imr_interface.s_addr, stoa(maddr));
+			return ISC_FALSE;
+		}
+		break;
+	case AF_INET6:
+#ifdef ISC_PLATFORM_HAVEIPV6
+
+		/*
+		 * Enable reception of multicast packets
+		 * If the address is link-local we can get the interface index
+		 * from the scope id. Don't do this for other types of multicast
+		 * addresses. For now let the kernel figure it out.
+		 */
+		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
+		mreq6.ipv6mr_multiaddr = iaddr6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
+		else
+#endif
+			mreq6.ipv6mr_interface = 0;
+
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
+			(char *)&mreq6, sizeof(mreq6)) == -1) {
+			netsyslog(LOG_ERR,
+			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s)",
+			 mreq6.ipv6mr_interface, stoa(maddr));
+			return ISC_FALSE;
+		}
+		break;
+#else
+		return ISC_FALSE;
+#endif	/* ISC_PLATFORM_HAVEIPV6 */
+	}
+	iface->flags |= INT_MCASTOPEN;
+	iface->num_mcast++;
+	add_addr_to_list(maddr, ind, iface->flags);
+	return ISC_TRUE;
+}
+
+/*
+ * Remove a multicast address from a given socket
+ * The socket is in the inter_list all we need to do is disable
+ * multicasting. It is not this function's job to select the socket
+ */
+static isc_boolean_t
+socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
+{
+#ifdef ISC_PLATFORM_HAVEIPV6
+	struct ipv6_mreq mreq6;
+	struct in6_addr iaddr6;
+#endif /* ISC_PLATFORM_HAVEIPV6 */
+	struct ip_mreq mreq;
+	memset((char *)&mreq, 0, sizeof(mreq));
+
+	switch (maddr->ss_family)
+	{
+	case AF_INET:
+		mreq.imr_multiaddr = (((struct sockaddr_in*)&maddr)->sin_addr);
+		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+			(char *)&mreq, sizeof(mreq)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_DROP_MEMBERSHIP fails: %m for %x / %x (%s)",
+			mreq.imr_multiaddr.s_addr,
+			mreq.imr_interface.s_addr, stoa(maddr));
+			return ISC_FALSE;
+		}
+		break;
+	case AF_INET6:
+#ifdef ISC_PLATFORM_HAVEIPV6
+
+		/*
+		 * Disable reception of multicast packets
+		 * If the address is link-local we can get the interface index
+		 * from the scope id. Don't do this for other types of multicast
+		 * addresses. For now let the kernel figure it out.
+		 */
+		iaddr6 = ((struct sockaddr_in6*)&maddr)->sin6_addr;
+		mreq6.ipv6mr_multiaddr = iaddr6;
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
+		else
+#endif
+			mreq6.ipv6mr_interface = 0;
+
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
+			(char *)&mreq6, sizeof(mreq6)) == -1) {
+			netsyslog(LOG_ERR,
+			 "setsockopt IPV6_LEAVE_GROUP fails: %m on interface %d(%s)",
+			 mreq6.ipv6mr_interface, stoa(maddr));
+			return ISC_FALSE;
+		}
+		break;
+#else
+		return ISC_FALSE;
+#endif	/* ISC_PLATFORM_HAVEIPV6 */
+	}
+	iface->num_mcast--;
+	if (iface->num_mcast <= 0) {
+		iface->flags &= ~INT_MCASTOPEN;
+		modify_addr_in_list(maddr, iface->flags);
+	}
+	return ISC_TRUE;
+}
 /*
  * io_multicast_add() - add multicast group address
  */
@@ -665,18 +866,26 @@ io_multicast_add(
 	)
 {
 #ifdef MCAST
-	struct ip_mreq mreq;
 	int i = ninterfaces;	/* Use the next interface */
 	u_int32 haddr = ntohl(((struct sockaddr_in*)&addr)->sin_addr.s_addr);
 	struct in_addr iaddr;
 	SOCKET s;
 	struct sockaddr_in *sinp;
+	isc_boolean_t jstatus;
+	int ind;
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-	struct ipv6_mreq mreq6;
 	struct in6_addr iaddr6;
 	struct sockaddr_in6 *sin6p;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
+
+	/* If we already have it we can just return */
+	if (find_flagged_addr_in_list(&addr, INT_MCASTOPEN) >= 0)
+	{
+		netsyslog(LOG_INFO, "Duplicate request found for multicast address %s",
+			stoa(&addr));
+		return;
+	}
 
 	switch (addr.ss_family)
 	{
@@ -692,75 +901,27 @@ io_multicast_add(
 #endif
 			return;
 		}
+		ind = -1;
 		for (i = nwilds; i < ninterfaces; i++) {
 			 /* Be sure it's the correct family and can multicast */
-                        if ((inter_list[i].sin.ss_family != AF_INET) ||
-			    (inter_list[i].flags & INT_LOOPBACK) ||
-			    !(inter_list[i].flags & INT_MULTICAST))
-                                continue;
-			/* Already have this address */
-			if (SOCKCMP(&inter_list[i].sin, &addr))
-				return;
-			/* found a free slot */
-			if (SOCKNUL(&inter_list[i].sin) &&
-			inter_list[i].fd <= 0 && inter_list[i].bfd <= 0 &&
-			inter_list[i].flags == 0)
-			break;
-		}
-		sinp = (struct sockaddr_in*)&(inter_list[i].sin);
-		memset((char *)&mreq, 0, sizeof(mreq));
-		memset((char *)&inter_list[i], 0, sizeof(struct interface));
-		sinp->sin_family = AF_INET;
-		sinp->sin_addr = iaddr;
-		sinp->sin_port = htons(NTP_PORT);
-
-		/*
-		* Try opening a socket for the specified class D address. This
-		* works under SunOS 4.x, but not OSF1 .. :-(
-		*/
-		set_reuseaddr(1);
-		s = open_socket((struct sockaddr_storage*)sinp, 0, 1, &inter_list[i]);
-		set_reuseaddr(0);
-		if (s == INVALID_SOCKET) {
-			memset((char *)&inter_list[i], 0, sizeof(struct interface));
-			if (wildipv4 >= 0) {
-				i = wildipv4;
-				/* HACK ! -- stuff in an address */
-				inter_list[i].bcast = addr;
-				netsyslog(LOG_ERR,
-				"...multicast address %s using wildcard socket",
-				inet_ntoa(iaddr));
-			} else {
-				netsyslog(LOG_ERR,
-				"No wildcard socket available to use for address %s",
-				inet_ntoa(iaddr));
-				return;
+                        if ((inter_list[i].sin.ss_family == AF_INET) &&
+			    !(inter_list[i].flags & INT_LOOPBACK) &&
+			    (inter_list[i].flags & INT_MULTICAST)) {
+				ind = i;
+                                break;
 			}
-		} else {
-			inter_list[i].fd = s;
-			inter_list[i].bfd = INVALID_SOCKET;
-			(void) strncpy(inter_list[i].name, "multicast",
-			sizeof(inter_list[i].name));
-			((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
 		}
-
 		/*
-		* enable reception of multicast packets
-		*/
-		mreq.imr_multiaddr = iaddr;
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-		if (setsockopt(inter_list[i].fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		(char *)&mreq, sizeof(mreq)) == -1)
+		 * We didn't find a slot. Log and return
+		 */
+		if (ind < 0)
+		{
 			netsyslog(LOG_ERR,
-			"setsockopt IP_ADD_MEMBERSHIP fails: %m for %x / %x (%s)",
-			mreq.imr_multiaddr.s_addr,
-			mreq.imr_interface.s_addr, inet_ntoa(iaddr));
-		inter_list[i].flags |= INT_MCASTOPEN;
-		inter_list[i].num_mcast++;
-		if (i >= ninterfaces)
-			ninterfaces = i+1;
-
-                add_addr_to_list(&addr, i, INT_MULTICAST);
+			"No wildcard socket available to use for address %s",
+			inet_ntoa(iaddr));
+			return;
+		}
+		jstatus = socket_multicast_enable(&inter_list[ind], ind, &addr);
 		break;
 
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
@@ -773,86 +934,23 @@ io_multicast_add(
 				stoa(&addr));
 			return;
 		}
+		in = -1;
 		for (i = nwilds; i < ninterfaces; i++) {
 			/* Be sure it's the correct family */
-			if ((inter_list[i].sin.ss_family != AF_INET6) ||
-			    (inter_list[i].flags & INT_LOOPBACK) ||
-			    !(inter_list[i].flags & INT_MULTICAST))
-				continue;
-			/* Already have this address */
-			if (SOCKCMP(&inter_list[i].sin, &addr))
-				return;
-			/* found a free slot */
-			if (SOCKNUL(&inter_list[i].sin) &&
-			    inter_list[i].fd <= 0 && inter_list[i].bfd <= 0 &&
-			    inter_list[i].flags == 0)
-			break;
-		}
-		sin6p = (struct sockaddr_in6*)&inter_list[i].sin;
-		memset((char *)&mreq6, 0, sizeof(mreq6));
-		memset((char *)&inter_list[i], 0, sizeof(struct interface));
-		sin6p->sin6_family = AF_INET6;
-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		sin6p->sin6_scope_id = inter_list[i].scopeid;
-#endif
-		sin6p->sin6_addr = iaddr6;
-		sin6p->sin6_port = htons(NTP_PORT);
-
-		/*
-		 * Try opening a socket for the specified class D address. This
-		 * works under SunOS 4.x, but not OSF1 .. :-(
-		 */
-		set_reuseaddr(1);
-		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1, &inter_list[i]);
-		set_reuseaddr(0);
-		if(s == INVALID_SOCKET){
-			memset((char *)&inter_list[i], 0, sizeof(struct interface));
-			if (wildipv6 >= 0) {
-				i = wildipv6;
-				/* HACK ! -- stuff in an address */
-				inter_list[i].bcast = addr;
-				netsyslog(LOG_ERR,
-				 "...multicast address %s using wildcard socket",
-				 stoa(&addr));
-			} else {
-				netsyslog(LOG_ERR,
-				"No wildcard socket available to use for address %s",
-				stoa(&addr));
-				return;
+			if ((inter_list[i].sin.ss_family == AF_INET6) &&
+			    !(inter_list[i].flags & INT_LOOPBACK) &&
+			    (inter_list[i].flags & INT_MULTICAST)) {
+				ind = i;
+				break;
 			}
-		} else {
-			inter_list[i].fd = s;
-			inter_list[i].bfd = INVALID_SOCKET;
-			(void)strncpy(inter_list[i].name, "multicast",
-			   sizeof(inter_list[i].name));
-			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
 		}
-
-		/*
-		 * Enable reception of multicast packets
-		 * If the address is link-local we can get the interface index
-		 * from the scope id. Don't do this for other types of multicast
-		 * addresses. For now let the kernel figure it out.
-		 */
-		mreq6.ipv6mr_multiaddr = iaddr6;
-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
-		else
-#endif
-			mreq6.ipv6mr_interface = 0;
-
-		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-		   (char *)&mreq6, sizeof(mreq6)) == -1)
+		if (ind < 0) {
 			netsyslog(LOG_ERR,
-			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s)",
-			 mreq6.ipv6mr_interface, stoa(&addr));
-		inter_list[i].flags |= INT_MCASTOPEN;
-		inter_list[i].num_mcast++;
-		if(i >= ninterfaces)
-			ninterfaces = i+1;
-
-                add_addr_to_list(&addr, i, INT_MULTICAST);
+			"No wildcard socket available to use for address %s",
+			stoa(&addr));
+			return;
+		}
+		jstatus = socket_multicast_enable(&inter_list[i], i, &addr);
 		break;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 	}
@@ -875,14 +973,13 @@ void
 io_unsetbclient(void)
 {
 	int i;
+	isc_boolean_t lstatus;
 
 	for (i = nwilds; i < ninterfaces; i++)
 	{
 		if (!(inter_list[i].flags & INT_BCASTOPEN))
 		    continue;
-		close_socket(inter_list[i].bfd);
-		inter_list[i].bfd = INVALID_SOCKET;
-		inter_list[i].flags &= ~INT_BCASTOPEN;
+		lstatus = socket_broadcast_disable(&inter_list[i], i, &inter_list[i].sin);
 	}
 }
 
@@ -897,11 +994,10 @@ io_multicast_del(
 {
 #ifdef MCAST
 	int i;
-	struct ip_mreq mreq;
 	u_int32 haddr;
+	isc_boolean_t lstatus;
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-	struct ipv6_mreq mreq6;
 	struct in6_addr haddr6;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
@@ -919,41 +1015,12 @@ io_multicast_del(
 		}
 
 		/*
-		* Disable reception of multicast packets
-		*/
-		mreq.imr_multiaddr = ((struct sockaddr_in*)&addr)->sin_addr;
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-		for (i = 0; i < ninterfaces; i++)
-		{
-			/* Be sure it's the correct family */
-			if (inter_list[i].sin.ss_family != AF_INET)
-				continue;
-			if (!(inter_list[i].flags & INT_MCASTOPEN))
-				continue;
-			if (!(inter_list[i].fd < 0))
-				continue;
-			if (!SOCKCMP(&addr, &inter_list[i].sin))
-				continue;
-			if (i != wildipv4)
-			{
-				/* we have an explicit fd, so we can close it */
-				close_socket(inter_list[i].fd);
-				memset((char *)&inter_list[i], 0, sizeof(struct interface));
-				inter_list[i].fd = INVALID_SOCKET;
-				inter_list[i].bfd = INVALID_SOCKET;
-			}
-			else
-			{
-				/* We are sharing "any address" port :-(  Don't close it! */
-				if (setsockopt(inter_list[i].fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-					(char *)&mreq, sizeof(mreq)) == -1)
-				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address: %s %m",
-					stoa(&addr));
-				inter_list[i].num_mcast--;
-				/* If there are none left negate the Multicast flag */
-				if(inter_list[i].num_mcast == 0)
-					inter_list[i].flags &= ~INT_MCASTOPEN;
-			}
+		 * Disable reception of multicast packets
+		 */
+		i = find_flagged_addr_in_list(&addr, INT_MCASTOPEN);
+		while ( i > 0) {
+			lstatus = socket_multicast_disable(&inter_list[i], i, &addr);
+			i = find_flagged_addr_in_list(&addr, INT_MCASTOPEN);
 		}
 		break;
 
@@ -971,8 +1038,6 @@ io_multicast_del(
 		/*
 		* Disable reception of multicast packets
 		*/
-		mreq6.ipv6mr_multiaddr = ((struct sockaddr_in6*)&addr)->sin6_addr;
-		mreq6.ipv6mr_interface = 0;
 		for (i = 0; i < ninterfaces; i++)
 		{
 			/* Be sure it's the correct family */
@@ -984,25 +1049,7 @@ io_multicast_del(
 				continue;
 			if (!SOCKCMP(&addr, &inter_list[i].sin))
 				continue;
-			if (i != wildipv6)
-			{
-				/* we have an explicit fd, so we can close it */
-				close_socket(inter_list[i].fd);
-				memset((char *)&inter_list[i], 0, sizeof(struct interface));
-				inter_list[i].fd = INVALID_SOCKET;
-				inter_list[i].bfd = INVALID_SOCKET;
-			}
-			else
-			{
-				/* We are sharing "any address" port :-(  Don't close it! */
-				if (setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
-					(char *)&mreq6, sizeof(mreq6)) == -1)
-				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address %s: %m",
-					stoa(&addr));
-				/* If there are none left negate the Multicast flag */
-				if(inter_list[i].num_mcast == 0)
-					inter_list[i].flags &= ~INT_MCASTOPEN;
-			}
+			lstatus = socket_multicast_disable(&inter_list[i], i, &addr);
 		}
 		break;
 #endif /* ISC_PLATFORM_HAVEIPV6 */
@@ -1024,7 +1071,8 @@ open_socket(
 	struct sockaddr_storage *addr,
 	int flags,
 	int turn_off_reuse,
-	struct interface *interf
+	struct interface *interf,
+	int ind
 	)
 {
 	int errval;
@@ -1041,38 +1089,32 @@ open_socket(
 #ifndef SYS_WINNT
 	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) < 0) {
 		errval = errno;
-		if(addr->ss_family == AF_INET)
-			netsyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed on address %s: %m",
-				stoa(addr));
-		else if(addr->ss_family == AF_INET6)
-			netsyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed on address %s: %m",
-				stoa(addr));
-		if (errval == EPROTONOSUPPORT || errval == EAFNOSUPPORT ||
-		    errval == EPFNOSUPPORT)
-			return (INVALID_SOCKET);
-		exit(1);
-		/*NOTREACHED*/
-	}
 #else
 	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
 		errval = WSAGetLastError();
+#endif
 		if(addr->ss_family == AF_INET)
 			netsyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed on address %s: %m",
 				stoa(addr));
 		else if(addr->ss_family == AF_INET6)
 			netsyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed on address %s: %m",
 				stoa(addr));
+#ifndef SYS_WINNT
+		if (errval == EPROTONOSUPPORT || errval == EAFNOSUPPORT ||
+		    errval == EPFNOSUPPORT)
+#else
 		if (errval == WSAEPROTONOSUPPORT || errval == WSAEAFNOSUPPORT ||
 		    errval == WSAEPFNOSUPPORT)
+#endif
 			return (INVALID_SOCKET);
 		exit(1);
 		/*NOTREACHED*/
 	}
+#ifdef SYS_WINNT
 	if (connection_reset_fix(fd) != ISC_R_SUCCESS) {
 		netsyslog(LOG_ERR, "connection_reset_fix(fd) failed on address %s: %m",
 			stoa(addr));
 	}
-
 #endif /* SYS_WINNT */
 
 	/* set SO_REUSEADDR since we will be binding the same port
@@ -1182,6 +1224,7 @@ open_socket(
 	FD_SET(fd, &activefds);
 #endif
 	add_socket_to_list(fd);
+	add_addr_to_list(addr, ind, flags);
 	/*
 	 * set non-blocking,
 	 */
@@ -1260,19 +1303,6 @@ open_socket(
 		    netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR off fails on address %s: %m",
 			    stoa(addr));
 	    }
-
-#ifdef SO_BROADCAST
-	/* if this interface can support broadcast, set SO_BROADCAST */
-	if (flags & INT_BROADCAST)
-	{
-		if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST,
-			       (char *)&on, sizeof(on)))
-		{
-			netsyslog(LOG_ERR, "setsockopt(SO_BROADCAST) on address %s: %m",
-				stoa(addr));
-		}
-	}
-#endif /* SO_BROADCAST */
 
 #if !defined(SYS_WINNT) && !defined(VMS)
 # ifdef DEBUG
@@ -1762,18 +1792,16 @@ input_handler(
 						 * socket, just dump the
 						 * packet.
 						 */
-						if (
 #ifdef UDP_WILDCARD_DELIVERY
 				/*
 				 * these guys manage to put properly addressed
 				 * packets into the wildcard queue
 				 */
-							(free_recvbuffs() == 0)
+						if (free_recvbuffs() == 0)
 #else
-							((i == wildipv4) || (i == wildipv6)||
-							(free_recvbuffs() == 0))
+						if((i == wildipv4) || (i == wildipv6)||
+						   (free_recvbuffs() == 0))
 #endif
-							)
 	{
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
@@ -2244,7 +2272,7 @@ delete_socket_from_list(SOCKET fd) {
 void
 add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 	remaddr_t *laddr = (remaddr_t *)malloc(sizeof(remaddr_t));
-	memcpy(&laddr->addr, addr, sizeof(addr));
+	memcpy(&laddr->addr, addr, sizeof(struct sockaddr_storage));
 	laddr->if_index = if_index;
 	laddr->flags = flags;
 
@@ -2257,6 +2285,35 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 
 
 }
+/*
+ * Find the given address and modify the associated flags
+ */
+int
+modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
+
+	int index;
+	remaddr_t *next;
+	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
+#ifdef DEBUG
+	if (debug)
+	    printf("Modifying addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+	index = -1;
+	while(laddr != NULL) {
+		next = ISC_LIST_NEXT(laddr, link);
+		if(SOCKCMP(&laddr->addr, addr)) {
+			laddr->flags = flag;
+			index = laddr->if_index;
+			break;
+		}
+		else
+			laddr = next;
+	}
+	return (index); /* Not found */
+}
+
 void
 delete_addr_from_list(struct sockaddr_storage *addr) {
 
@@ -2293,6 +2350,32 @@ find_addr_in_list(struct sockaddr_storage *addr) {
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
+			return (laddr->if_index);
+			break;
+		}
+		else
+			laddr = next;
+	}
+	return (-1); /* Not found */
+}
+
+/*
+ * Find the given address with the associated flag in the list
+ */
+int
+find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
+
+	remaddr_t *next;
+	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
+#ifdef DEBUG
+	if (debug)
+	    printf("Finding addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+	while(laddr != NULL) {
+		next = ISC_LIST_NEXT(laddr, link);
+		if(SOCKCMP(&laddr->addr, addr) && (laddr->flags & flag)) {
 			return (laddr->if_index);
 			break;
 		}
