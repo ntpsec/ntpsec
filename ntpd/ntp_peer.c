@@ -412,7 +412,7 @@ expire_all(void)
 	if (sys_leap != LEAP_NOTINSYNC)
 		get_systime(&sys_revoketime);
 #ifdef PUBKEY
-	if (crypto_enable)
+	if (crypto_flags)
 		crypto_agree();
 #endif /* PUBKEY */
 #ifdef DEBUG
@@ -576,7 +576,9 @@ peer_config(
 #ifdef PUBKEY
 	if (!(peer->flags & FLAG_SKEY) || peer->hmode == MODE_BROADCAST)
 		return (peer);
-	crypto_public(peer, keystr);
+/* following line commented out until resolver is fixed
+	crypto_public(peer, keystr, 0);
+*/
 #endif /* PUBKEY */
 	return (peer);
 }

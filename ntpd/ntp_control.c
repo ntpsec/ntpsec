@@ -1145,8 +1145,12 @@ ctl_putsys(
 {
 	l_fp tmp;
 #ifdef HAVE_UNAME
-	char str[50];
+	char str[256];
 #endif
+#ifdef PUBKEY
+	char str1[256];
+#endif ?* PUBKEY */
+
 	switch (varid) {
 
 	case CS_LEAP:
@@ -1308,27 +1312,37 @@ ctl_putsys(
 
 #ifdef PUBKEY
 	case CS_PRIVATE:
-		if (private_key_file != NULL)
-			ctl_putstr(sys_var[CS_PRIVATE].text,
-			    private_key_file, strlen(private_key_file));
+		if (private_key_file == NULL)
+			break;
+		strcpy(str1, private_key_file);
+		if (private_key_fstamp != 0)
+			sprintf(str1, "%s.%u", str1, private_key_fstamp);
+		ctl_putstr(sys_var[CS_PRIVATE].text, str1, strlen(str1));
 		break;
 
 	case CS_PUBLIC:
-		if (public_key_file != NULL)
-			ctl_putstr(sys_var[CS_PUBLIC].text,
-			    public_key_file, strlen(public_key_file));
+		if (public_key_file == NULL)
+			break;
+		strcpy(str1, public_key_file);
+		if (public_key_fstamp != 0)
+			sprintf(str1, "%s.%u", str1, public_key_fstamp);
+		ctl_putstr(sys_var[CS_PUBLIC].text, str1, strlen(str1));
 		break;
 
 	case CS_DHPARAMS:
-		if (dh_params_file != NULL)
-			ctl_putstr(sys_var[CS_DHPARAMS].text,
-			    dh_params_file, strlen(dh_params_file));
+		if (dh_params_file == NULL)
+			break;
+		strcpy(str1, dh_params_file);
+		if (dh_params_fstamp != 0)
+			sprintf(str1, "%s.%u", str1, dh_params_fstamp);
+		ctl_putstr(sys_var[CS_DHPARAMS].text, str1, strlen(str1));
 		break;
 
 	case CS_HOSTNAM:
-		if (sys_hostname != NULL)
-			ctl_putstr(sys_var[CS_HOSTNAM].text,
-			    sys_hostname, strlen(sys_hostname));
+		if (sys_hostname == NULL)
+			break;
+		ctl_putstr(sys_var[CS_HOSTNAM].text, sys_hostname,
+		    strlen(sys_hostname));
 		break;
 
 	case CS_REVTIME:

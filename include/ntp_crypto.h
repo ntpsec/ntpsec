@@ -12,21 +12,25 @@
 /*
  * Extension field definitions
  */
-#define CRYPTO_NULL	0	/* no operation */
-#define CRYPTO_PUBL	1	/* public key */
-#define CRYPTO_ASSOC	2	/* association ID */
-#define CRYPTO_AUTO	3	/* autokey values */
-#define CRYPTO_PRIV	4	/* cookie value (client/server) */
-#define CRYPTO_DH	5	/* Diffie-Hellman value (symmetric) */
-#define CRYPTO_NAME	6	/* host name */
-#define CRYPTO_RESP	0x80	/* response */
-#define CRYPTO_ERROR	0x40	/* error */
+#define CRYPTO_VN	1	/* current protocol version number */
+
+#define CRYPTO_NULL	((CRYPTO_VN << 8) | 0) /* no operation */
+#define CRYPTO_PUBL	((CRYPTO_VN << 8) | 1) /* public key */
+#define CRYPTO_ASSOC	((CRYPTO_VN << 8) | 2) /* association ID */
+#define CRYPTO_AUTO	((CRYPTO_VN << 8) | 3) /* autokey values */
+#define CRYPTO_PRIV	((CRYPTO_VN << 8) | 4) /* cookie value */
+#define CRYPTO_DHPAR	((CRYPTO_VN << 8) | 5) /* DH parameters */
+#define CRYPTO_DH	((CRYPTO_VN << 8) | 6) /* DH public value */
+#define CRYPTO_NAME	((CRYPTO_VN << 8) | 7) /* host name */
+#define CRYPTO_TAI	((CRYPTO_VN << 8) | 8) /* TAI offset */
+#define CRYPTO_RESP	0x8000	/* response */
+#define CRYPTO_ERROR	0x4000	/* error */
 
 /*
  * Cryptoflags
  */
-#define CRYPTO_FLAG_NONE  0x00	/* nothing happening */
-#define CRYPTO_FLAG_PUBL  0x01	/* read peer public key from file */
+#define CRYPTO_FLAG_ENAB  0x01	/* enable public key */
+#define CRYPTO_FLAG_PUBL  0x02	/* fetch peer public key from server */
 
 #ifdef PUBKEY
 
@@ -56,18 +60,19 @@ extern	void	make_keylist	P((struct peer *));
 extern	void	key_expire	P((struct peer *));
 extern	void	crypto_agree	P((void));
 #ifdef PUBKEY
-extern	void	crypto_init	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
-extern	int	crypto_public	P((struct peer *, u_char *));
+extern	int	crypto_public	P((struct peer *, u_char *, u_int));
 
 /*
  * Cryptographic values
  */
-extern	int			crypto_enable;
-extern	int			crypto_flags;
-extern	char *			private_key_file;
-extern	char *			public_key_file;
-extern	char *			dh_params_file;
+extern	int	crypto_flags;
+extern	char *	private_key_file;
+extern	u_int	private_key_fstamp;
+extern	char *	public_key_file;
+extern	u_int	public_key_fstamp;
+extern	char *	dh_params_file;
+extern	u_int	dh_params_fstamp;
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

@@ -17,7 +17,6 @@
 #define MAXKEYLEN	1024	/* maximum encoded key length */
 #define MODULUSLEN	512	/* length of RSA modulus */
 #define PRIMELEN	512	/* length of D_H prime, generator */
-#define GENLEN		256	/* length of D-H key and subprime */
 
 /*
  * This program generates four files: ntp.keys containing the DES/MD5
@@ -221,7 +220,7 @@ main(
 	len = DH_PRIME_LEN(PRIMELEN);
 	dh_params.prime = (u_char *)malloc(len);
 	dh_params.generator = (u_char *)malloc(len);
-	rval = R_GenerateDHParams(&dh_params, PRIMELEN, GENLEN,
+	rval = R_GenerateDHParams(&dh_params, PRIMELEN, PRIMELEN / 2,
 	    &randomstr);
 	if (rval) {
 		printf("R_GenerateDHParams error %x\n", rval);

@@ -709,7 +709,7 @@ getconfig(
 	unsigned long ul;
 	keyid_t peerkey;
 	u_char *peerkeystr;
-	keyid_t lpeerkey = 0;
+	u_long fudgeflag;
 	int peerflags;
 	int hmode;
 	struct sockaddr_in peeraddr;
@@ -1308,7 +1308,7 @@ getconfig(
 			break;
 
 		    case CONFIG_CRYPTO:
-			crypto_enable = 1;
+			crypto_flags |= CRYPTO_FLAG_ENAB;
 			for (i = 1; i < ntokens; i++) {
 			    int temp;
 
@@ -1591,6 +1591,7 @@ getconfig(
 			}
 
 			memset((void *)&clock_stat, 0, sizeof clock_stat);
+			fudgeflag = 0;
 			errflg = 0;
 			for (i = 2; i < ntokens-1; i++) {
 				switch (c = matchkey(tokens[i],
@@ -1646,17 +1647,14 @@ getconfig(
 				    case CONF_FDG_FLAG2:
 				    case CONF_FDG_FLAG3:
 				    case CONF_FDG_FLAG4:
-					if (!atouint(tokens[++i], &ul)
+					if (!atouint(tokens[++i], &fudgeflag)
 					    || ul > 1) {
 						msyslog(LOG_ERR,
 							"fudge %s flag value in error",
 							ntoa(&peeraddr));
-						lpeerkey = (keyid_t)ul;
-						peerkey = lpeerkey;
 						errflg = i;
 						break;
 					}
-					peerkey = lpeerkey;
 					switch(c) {
 					    case CONF_FDG_FLAG1:
 						c = CLK_FLAG1;
@@ -1675,7 +1673,7 @@ getconfig(
 						clock_stat.haveflags|=CLK_HAVEFLAG4;
 						break;
 					}
-					if (peerkey == 0)
+					if (fudgeflag == 0)
 					    clock_stat.flags &= ~c;
 					else
 					    clock_stat.flags |= c;

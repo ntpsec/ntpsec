@@ -541,8 +541,8 @@ receive(
 			break;
 		}
 		peer_config_manycast(peer2, peer);
-#ifdef PUBKEY
-		if (crypto_enable)
+#if defined(PUBKEY) && 0
+		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
 			    peer->associd);
 #endif /* PUBKEY */
@@ -571,8 +571,8 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
 	 	    NTP_MINDPOLL, NTP_MAXDPOLL, 0, skeyid);
-#ifdef PUBKEY
-		if (crypto_enable)
+#if defined(PUBKEY) && 0
+		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
 			    peer->associd);
 #endif /* PUBKEY */
@@ -596,8 +596,8 @@ receive(
 			break;
 		peer->flags |= FLAG_MCAST1 | FLAG_MCAST2 | FLAG_BURST;
 		peer->hmode = MODE_CLIENT;
-#ifdef PUBKEY
-		if (crypto_enable)
+#if defined(PUBKEY) && 0
+		if (crypto_flags)
 			ntp_res_name(peer->srcadr.sin_addr.s_addr,
 			     peer->associd);
 #endif /* PUBKEY */
@@ -716,6 +716,8 @@ receive(
 			peer->pkeyid = skeyid;
 		} else {
 			int i;
+
+printf("xxx %08x %08x\n", tkeyid, peer->pkeyid);
 
 			for (i = 0; ; i++) {
 				if (tkeyid == peer->pkeyid ||
@@ -858,8 +860,10 @@ process_packet(
 	 * The header is valid. Capture the remaining header values and
 	 * mark as reachable.
 	 */
+/*
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin,
 	    &p_org, &p_rec, &p_xmt, &peer->rec);
+*/
 	peer->leap = PKT_LEAP(pkt->li_vn_mode);
 	peer->pmode = pmode;		/* unspec */
 	peer->stratum = PKT_TO_STRATUM(pkt->stratum);
@@ -1931,50 +1935,46 @@ peer_xmit(
 		 *
 		 * 5. When the agreed key has been stored and the key
 		 *    list is regenerated, send the autokey values
-		 *    gratis.
+		 *    gratis unless it has already been sent.
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
 #ifdef PUBKEY
-			if (crypto_enable && peer->cmmd != 0) {
+			if (crypto_flags && peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-				peer->cmmd = 0;
-			}
-			if (crypto_enable && !(crypto_flags &
-			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0) {
+			if (crypto_flags && !(crypto_flags &
+			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->pcookie.tstamp == 0) {
+			else if (peer->pcookie.tstamp == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DH, peer->hcookie,
 				    peer->assoc);
 #else
-			if (peer->cmmd != 0) {
+			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-				peer->cmmd = 0;
-			}
-			if (peer->pcookie.tstamp == 0) {
+			if (peer->pcookie.tstamp == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 #endif /* PUBKEY */
-			} else if (!(peer->flags & FLAG_AUTOKEY)) {
+			else if (!(peer->flags & FLAG_AUTOKEY))
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->keynumber == peer->sndauto.seq)
-			    {
+			else if (peer->keynumber == peer->sndauto.seq &&
+			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
-			}
+			peer->cmmd = 0;
 			break;
 
 		/*
@@ -1988,31 +1988,29 @@ peer_xmit(
 		 * for the cookie at each key list regeneration anyway.
 		 */
 		case MODE_CLIENT:
-			if (peer->cmmd != 0) {
+			if (peer->cmmd != 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->hcookie,
 				    peer->associd);
-				peer->cmmd = 0;
-			}
 #ifdef PUBKEY
-			if (crypto_enable && !(crypto_flags &
-			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0) {
+			if (crypto_flags && !(crypto_flags &
+			    CRYPTO_FLAG_PUBL) && peer->pubkey == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME, peer->hcookie,
 				    peer->assoc);
-			} else
+			else
 #endif /* PUBKEY */
-			if (peer->pcookie.tstamp == 0) {
+			if (peer->pcookie.tstamp == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-			} else if (!(peer->flags & FLAG_AUTOKEY) &&
-			    peer->flags & FLAG_MCAST2) {
+			else if (!(peer->flags & FLAG_AUTOKEY) &&
+			    peer->flags & FLAG_MCAST2)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			}
+			peer->cmmd = 0;
 			break;
 		}
 

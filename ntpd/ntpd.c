@@ -728,9 +728,6 @@ service_main(
 #ifdef REFCLOCK
 	init_refclock();
 #endif
-#ifdef PUBKEY
-	crypto_init();		/* Call *before* going to high-priority */
-#endif /* PUBKEY */
 	set_process_priority();
 	init_proto();		/* Call at high priority */
 	init_io();
@@ -751,7 +748,7 @@ service_main(
 	sys_hostname = emalloc(n);
 	memcpy(sys_hostname, hostname, n);
 #ifdef PUBKEY
-	if (crypto_enable)
+	if (crypto_flags)
 		crypto_setup();
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

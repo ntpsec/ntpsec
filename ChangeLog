@@ -1,3 +1,36 @@
+2000-06-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* include/ntp.h: struct autokey's siglen is u_int32.  So is the
+	siglen in struct cookie.  So is siglen and value length in struct
+	value. Add fstamp to struct peer.  Resize the exten AUTOKEY field
+	in struct pkt.
+	* include/ntp_crypto.h: crypto_enable -> crypto_flags and a
+	variety of other cleanups.
+	* ntpd/ntp_config.c: crypto_enable -> crypto_flags, and some
+	key/fudge cleanup.
+	* ntpd/ntp_control.c: Much cleanup.
+	* ntpd/ntp_crypto.c: Many changes that Harlan is too tired to
+	properly document.
+	* ntpd/ntp_peer.c: crypto_enable -> crypto_flags
+	(peer_config): Hold off on crypto_public() until some resolver
+	issue is fixed.
+	* ntpd/ntp_proto.c (receive): Disable the reverse DNS lookup for now.
+	(process_packet): Don't record_raw_stats() for now.
+	crypto_enable was renamed to crypto_flags.
+	(peer_xmit): In MODE_ACTIVE or MODE_PASSIVE, only call
+	crypto_xmit() if the peer->cmmd is not CRYPTO_AUTO.  Reset
+	peer->cmmd to 0 when we're thru. 
+	Don't reset peer->cmmd to 0 until the end of MODE_CLIENT.
+	* ntpd/ntpd.c: Lose the call to crypto_init().  Instead, call
+	crypto_setup() later on if we have crypto_flags.
+	* util/ntp_genkeys.c: Lose GENLEN; use PRIMELEN/2 .
+	From Dave Mills.
+
+	* ntpd/ntp_crypto.c (crypto_rsa): 
+	(crypto_dh): 
+	Do some debug logging if readlink() fails with something other
+	than EINVAL (file isn't a symlink).
+
 2000-05-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_timer.c: Protect <unistd.h>

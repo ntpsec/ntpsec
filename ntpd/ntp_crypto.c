@@ -25,20 +25,23 @@
  *   +---------------+   +---------------+   +---------------+
  * 2 |   timestamp   |   |   timestamp   |   |   timestamp   |
  *   +---------------+   +---------------+   +---------------+
- * 3 |   final seq   |   |     cookie    |   |   value len   |
+ * 3 |   final seq   |   |     cookie    |   |   filestamp   |
  *   +---------------+   +---------------+   +---------------+
- * 4 |   final key   |   | signature len |   |               |
- *   +---------------+   +---------------+   =     value     =
+ * 4 |   final key   |   | signature len |   |   value len   |
+ *   +---------------+   +---------------+   +---------------+
  * 5 | signature len |   |               |   |               |
- *   +---------------+   =   signature   =   +---------------+
- * 6 |               |   |               |   | signature len |
+ *   +---------------+   =   signature   =   =     value     =
+ * 6 |               |   |               |   |               |
  *   =   signature   =   +---------------+   +---------------+
- * 7 |               |   CRYPTO_PRIV rsp     |               |
- *   +---------------+                       =   signature   =
+ * 7 |               |   CRYPTO_PRIV rsp     | signature len |
+ *   +---------------+                       +---------------+
  *   CRYPTO_AUTO rsp                         |               |
+ *                                           =   signature   =
+ *                                           |               |
  *                                           +---------------+
  *                                           CRYPTO_DH rsp
  *                                           CRYPTO_NAME rsp
+ *                                           CRYPTO_TAI rsp
  *                                           
  *   CRYPTO_PUBL  1  request/respond for public key
  *   CRYPTO_ASSOC 2  request/respond association ID
@@ -46,6 +49,7 @@
  *   CRYPTO_PRIV  4  request/respond cookie
  *   CRYPTO_DH    5  request public value/respond signature
  *   CRYPTO_NAME  6  request/respond host name
+ *   CRYPTO_TAI   6  request/respond TAI offset
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
@@ -58,29 +62,47 @@
 #define MAX_KEYLEN	1024	/* maximum key length */
 
 /*
- * Cryptodata
+ * Autokey protocol status codes
  */
-static R_DH_PARAMS dh_params;	/* Diffie-Hellman parameters */
-static u_int dh_keyLen;		/* Diffie-Hellman key length */
-static u_char *dh_public;	/* Diffie-Hellman public value */
-static u_char *dh_private;	/* Diffie-Hellman private value */
+#define RV_OK		0x0	/* success */
+#define RV_TSP		0x1	/* timestamp replay */
+#define RV_PUB		0x2	/* no public key */
+#define RV_KEY		0x3	/* invalid RSA modulus */
+#define RV_SIG		0x4	/* invalid signature length */
+#define RV_DH		0x5	/* invalid DH prime or generator */
+#define RV_FIL		0x6	/* missing or corrupted key file */
+#define RV_DAT		0x7	/* missing or corrupted data */
+#define RV_DEC		0x8	/* PEM decoding error */
+
+/*
+ * Private cryptodata in networ byte order.
+ */
 static R_RSA_PRIVATE_KEY private_key; /* RSA private key */
 static R_RSA_PUBLIC_KEY public_key; /* RSA public key */
-static u_char *dh_sign = NULL;	/* Diffie-Hellman public signature */
-static struct value host;	/* host name, timestamp and signature */
+static R_DH_PARAMS dh_params;	/* Diffie-Hellman parameters */
+static struct value host;	/* host name/public key */
+static struct value dhparam;	/* Diffie_Hellman parameters */
+static struct value dhpub;	/* Diffie_Hellman public value */
+static u_char *dh_private;	/* DH private value */
+static u_int dh_keyLen;		/* DH private value length */
 
-int	crypto_enable;		/* master switch */
+/*
+ * Global cryptodata in host byte order.
+ */
 int	crypto_flags;		/* flags that wave cryptically */
 char	*private_key_file = NULL; /* private key file */
+u_int	private_key_fstamp;	/* RSA private key filestamp */
 char	*public_key_file = NULL; /* public key file */
-char	*dh_params_file = NULL;	/* D-H parameters file */
+u_int	public_key_fstamp;	/* RSA public key filestamp */
+char	*dh_params_file = NULL;	/* DH parameters file */
+u_int	dh_params_fstamp;	/* DH parameters filestamp */
 char	*keysdir = "/usr/local/etc/"; /* crypto keys directory */
 
 /*
  * Cryptotypes
  */
-static	int	crypto_read	P((u_char *, u_char *, u_int));
-static	void	crypto_line	P((FILE *, u_char **, u_int *));
+static	void	crypto_rsa	P((char *, u_int *, u_char *, u_int));
+static	void	crypto_dh	P((char *, u_int *));
 #endif /* PUBKEY */
 
 
@@ -229,26 +251,23 @@ make_keylist(
 	ap->siglen = 0;
 #if DEBUG
 	if (debug)
-		printf("make_keys: %d %08x %08x ts %u\n", ntohl(ap->seq),
-		    ntohl(ap->key), cookie, ntohl(ap->tstamp));
+		printf("make_keys: %d %08x %08x ts %u\n",
+		    ntohl(ap->seq), ntohl(ap->key), cookie,
+		    ntohl(ap->tstamp));
 #endif
 #ifdef PUBKEY
-	if(!crypto_enable)
+	if(!crypto_flags)
 		return;
-	if (private_key.bits < MIN_RSA_MODULUS_BITS ||
-	    private_key.bits > MAX_RSA_MODULUS_BITS) {
-		rval = -1;
-	} else {
-		if (ap->sig == NULL)
-			ap->sig = emalloc(MAX_SIGNATURE_LEN);
-		R_SignInit(&ctx, DA_MD5);
-		R_SignUpdate(&ctx, (u_char *)ap, 12);
-		rval = R_SignFinal(&ctx, ap->sig, &len, &private_key);
-		ap->siglen = htonl(len);
-	}
+	if (ap->sig == NULL)
+		ap->sig = emalloc(private_key.bits / 8);
+	R_SignInit(&ctx, DA_MD5);
+	R_SignUpdate(&ctx, (u_char *)ap, 12);
+	rval = R_SignFinal(&ctx, ap->sig, &len, &private_key);
 	if (rval != 0)
 		msyslog(LOG_ERR, "make_keylist: signature fails %x",
 		    rval);
+	else
+		ap->siglen = htonl(len);
 #endif /* PUBKEY */
 }
 
@@ -270,6 +289,7 @@ crypto_recv(
 	u_int32 *pkt;		/* packet pointer */
 	struct autokey *ap;	/* autokey pointer */
 	struct cookie *cp;	/* cookie pointer */
+	struct value *vp;	/* value pointer */
 	int has_mac;		/* length of MAC field */
 	int authlen;		/* offset of MAC field */
 	int len;		/* extension field length */
@@ -280,7 +300,9 @@ crypto_recv(
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
 	u_char dh_key[MAX_DH_LEN]; /* Diffie-Hellman agreed key */
-	u_int modulus;
+	R_RSA_PUBLIC_KEY *kp;	/* temporary public key pointer */
+	u_int rsalen = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
+	u_int bits;
 	int rval;
 	int j;
 #endif /* PUBKEY */
@@ -316,29 +338,27 @@ crypto_recv(
 
 		/*
 		 * Install autokey values in broadcast client and
-		 * symmetric modes. We believe the values only if the
-		 * public key is valid and the signature has valid
-		 * length and is verified. However, we mark as authentic
-		 * only if the timestamp is nonzero.
+		 * symmetric modes.
 		 */
 		case CRYPTO_AUTO | CRYPTO_RESP:
 			ap = (struct autokey *)&pkt[i + 2];
 #ifdef PUBKEY
-			temp = public_key.bits / 8;
-			if (!crypto_enable) {
+			temp = ntohl(ap->siglen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
+			if (!crypto_flags) {
 				rval = 0;
 			} else if (tstamp == 0 || tstamp <
 			    peer->recauto.tstamp) {
-				break;
-			} else if (peer->pubkey == NULL || temp !=
-			    ntohl(ap->siglen)) {
-				rval = -1;
+				rval = RV_TSP;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (temp != kp->bits / 8) {
+				rval = RV_SIG;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
 				R_VerifyUpdate(&ctx, (u_char *)ap, 12);
 				rval = R_VerifyFinal(&ctx,
-				    (u_char *)&ap->sig, temp,
-				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
+				    (u_char *)&ap->sig, temp, kp);
 			}
 #ifdef DEBUG
 			if (debug)
@@ -348,7 +368,8 @@ crypto_recv(
 				    ntohl(ap->key), tstamp);
 #endif
 			if (rval != 0) {
-				peer->flags &= ~FLAG_AUTOKEY;
+				if (rval != RV_TSP)
+					peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
 			peer->flags |= FLAG_AUTOKEY;
@@ -369,21 +390,22 @@ crypto_recv(
 		case CRYPTO_PRIV | CRYPTO_RESP:
 			cp = (struct cookie *)&pkt[i + 2];
 #ifdef PUBKEY
-			temp = public_key.bits / 8;
-			if (!crypto_enable) {
+			temp = ntohl(cp->siglen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
+			if (!crypto_flags) {
 				rval = 0;
 			} else if (tstamp == 0 || tstamp <
 			    peer->pcookie.tstamp) {
-				break;
-			} else if (peer->pubkey == NULL || temp !=
-			    ntohl(cp->siglen)) {
-				rval = -1;
+				rval = RV_TSP;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (temp != kp->bits / 8) {
+				rval = RV_SIG;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
 				R_VerifyUpdate(&ctx, (u_char *)cp, 8);
 				rval = R_VerifyFinal(&ctx,
-				    (u_char *)&cp->sig, temp,
-				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
+				    (u_char *)&cp->sig, temp, kp);
 			}
 			temp = ntohl(cp->key);
 #ifdef DEBUG
@@ -393,7 +415,8 @@ crypto_recv(
 				    rval, temp, tstamp);
 #endif
 			if (rval != 0) {
-				peer->flags &= ~FLAG_AUTOKEY;
+				if (rval != RV_TSP)
+					peer->flags &= ~FLAG_AUTOKEY;
 				break;
 			}
 			if (!(peer->flags & FLAG_MCAST2))
@@ -416,30 +439,76 @@ crypto_recv(
 		 * value only if the public key is valid and the
 		 * signature has valid length and is verified. 
 		 */
+		case CRYPTO_DHPAR | CRYPTO_RESP:
+			vp = (struct value *)&pkt[i + 2];
+			temp = ntohl(vp->vallen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
+			j = i + 5 + temp / 4;
+			if (tstamp == 0 || tstamp <
+			    peer->pcookie.tstamp) {
+				rval = RV_TSP;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (ntohl(pkt[j]) != kp->bits / 8) {
+				rval = RV_SIG;
+			} else if (temp != dh_params.primeLen ||
+			    dhpub.val == 0) {
+				rval = RV_DH;
+			} else {
+				R_VerifyInit(&ctx, DA_MD5);
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
+				rval = R_VerifyFinal(&ctx,
+				    (u_char *)&pkt[j + 1],
+				    ntohl(pkt[j]), kp);
+			}
+
+			/*
+			 * Stash the parameters in safe places.
+			 */
+			j = 5;
+			temp = htonl(pkt[j]);
+			dh_params.primeLen = temp;
+			dh_params.prime = emalloc(temp);
+			memcpy(dh_params.prime, &pkt[j + 1], temp);
+			j += temp / 4;
+			temp = htonl(pkt[j]);
+			dh_params.generatorLen = temp;
+			dh_params.generator = emalloc(temp);
+			memcpy(dh_params.generator, &pkt[j + 1], temp);
+			break;
+
+		/*
+		 * Verify Diffie-Hellman public value and compute key
+		 * agreement in symmetric modes. We believe the
+		 * value only if the public key is valid and the
+		 * signature has valid length and is verified. 
+		 */
 		case CRYPTO_DH:
 			peer->cmmd = ntohl(pkt[i]);
 			/* fall through */
 
 		case CRYPTO_DH | CRYPTO_RESP:
-			temp = ntohl(pkt[i + 3]);
-			j = i + 4 + temp / 4;
+			vp = (struct value *)&pkt[i + 2];
+			temp = ntohl(vp->vallen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
+			j = i + 5 + temp / 4;
 			if (tstamp == 0 || tstamp <
 			    peer->pcookie.tstamp) {
-				break;
-			} else if (peer->pubkey == NULL ||
-			    ntohl(pkt[j]) != public_key.bits / 8) {
-				rval = -1;
-			} else if (temp != dh_params.primeLen ||
-			    dh_public == NULL) {
-				rval = -2;
+				rval = RV_TSP;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (ntohl(pkt[j]) != kp->bits / 8) {
+				rval = RV_SIG;
+			} else if (temp != dh_params.primeLen) {
+				rval = RV_DH;
 			} else {
 				R_VerifyInit(&ctx, DA_MD5);
-				R_VerifyUpdate(&ctx, (u_char *)&pkt[i +
-				    2], temp + 8);
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
 				rval = R_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
-				    public_key.bits / 8,
-				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
+				    ntohl(pkt[j]), kp);
 			}
 
 			/*
@@ -451,19 +520,22 @@ crypto_recv(
 				temp = 0;
 			} else {
 				rval = R_ComputeDHAgreedKey(dh_key,
-				    (u_char *)&pkt[i + 4], dh_private,
+				    (u_char *)&pkt[i + 5], dh_private,
 				    dh_keyLen, &dh_params);
 				temp = ntohl(*(u_int32 *)dh_key);
 			}
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: verify %x d-h %08x ts %u\n",
-				    rval, temp, tstamp);
+				    "crypto_recv: verify %x DH %08x ts %u fs %u\n",
+				    rval, temp, tstamp,
+				    ntohl(vp->fstamp));
 #endif
 			if (rval != 0) {
-				peer->flags &= ~FLAG_AUTOKEY;
-				peer->cmmd = 0;
+				if (rval != RV_TSP) {
+					peer->flags &= ~FLAG_AUTOKEY;
+					peer->cmmd = 0;
+				}
 				break;
 			}
 			peer->flash &= ~TEST10;
@@ -475,70 +547,50 @@ crypto_recv(
 			break;
 
 		/*
-		 * Receive remote host name and install public key from
-		 * file.
+		 * Receive and install public key and host name.
 		 */
 		case CRYPTO_NAME | CRYPTO_RESP:
-			temp = ntohl(pkt[i + 3]);
-			j = i + 4 + temp / 4;
+			vp = (struct value *)&pkt[i + 2];
+			temp = ntohl(vp->vallen);
+			j = i + 5 + ntohl(vp->vallen) / 4;
+			bits = ntohl(pkt[i + 5]);
 			if (tstamp == 0 || tstamp <
 			    peer->pcookie.tstamp) {
-				break;
-			} else if (ntohl(pkt[j]) != public_key.bits / 8)
-			    {
-				rval = -1;
-			} else if (crypto_public(peer, (char *)&pkt[i +
-			    4])) {
+				rval = RV_TSP;
+			} else if (temp < rsalen ||
+			    bits < MIN_RSA_MODULUS_BITS ||
+			    bits > MAX_RSA_MODULUS_BITS) {
+				rval = RV_KEY;
+			} else if (ntohl(pkt[j]) != bits / 8) {
+				rval = RV_SIG;
+			} else {
 				R_VerifyInit(&ctx, DA_MD5);
-
-				R_VerifyUpdate(&ctx, (char *)&pkt[i +
-				    2], 8 + temp);
-
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
+				kp = emalloc(sizeof(R_RSA_PUBLIC_KEY));
+				kp->bits = bits;
+				memcpy(&kp->modulus, &pkt[i + 6], rsalen - 4);
 				rval = R_VerifyFinal(&ctx,
 				    (u_char *)&pkt[j + 1],
-				    public_key.bits / 8,
-				    (R_RSA_PUBLIC_KEY *)peer->pubkey);
+				    ntohl(pkt[j]), kp);
 				if (rval != 0) {
-					free(peer->pubkey);
-					peer->pubkey = NULL;
+					free(kp);
+				} else {
+					j = i + 5 + rsalen / 4;
+					peer->pubkey = (u_char *)kp;
+					temp = strlen((char *)&pkt[j]);
+					peer->keystr = emalloc(temp);
+					strcpy(peer->keystr, (char *)&pkt[j]);
 				}
-			} else {
-				rval = -2;
 			}
 #ifdef DEBUG
 			if (debug)
 
 				printf(
-				    "crypto_recv: verify %x host %s ts %u\n",
-				    rval, (char *)&pkt[i + 4], tstamp); 
+				    "crypto_recv: verify %x host %s ts %u fs %u\n",
+				    rval, (char *)&pkt[j], tstamp,
+				    ntohl(vp->fstamp));
 #endif
-			break;
-
-		/*
-		 * Install peer public key. This is rather raucus, since
-		 * the extension field is in network order and the first
-		 * word is a u_int32; however, the corresponding word of
-		 * the key is a u_int, which can be 32 or 64 bits
-		 * depending on architecture. We don't do anything
-		 * unless the length and modulus are valid. Picky,
-		 * picky.
-		 */
-		case CRYPTO_PUBL | CRYPTO_RESP:
-			temp = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int);
-			if (ntohl(pkt[i + 2]) != temp + 4)
-				break;
-			modulus = ntohl(pkt[i + 3]);
-			if ( modulus < MIN_RSA_MODULUS_BITS ||
-			    modulus > MAX_RSA_MODULUS_BITS)
-				break;
-			if (peer->pubkey == NULL)
-				peer->pubkey =
-				    emalloc(sizeof(R_RSA_PUBLIC_KEY));
-			((R_RSA_PUBLIC_KEY *)peer->pubkey)->bits =
-			    modulus;
-			memcpy(
-			    ((R_RSA_PUBLIC_KEY *)peer->pubkey)->modulus,
-			    (u_char *)&(pkt[i + 4]), temp);
 			break;
 #endif /* PUBKEY */
 
@@ -578,12 +630,12 @@ crypto_xmit(
 	struct peer *peer;	/* peer structure pointer */
 	struct autokey *ap;	/* autokey pointer */
 	struct cookie *cp;	/* cookie pointer */
+	struct value *vp;	/* value pointer */
 	int len;		/* extension field length */
 	u_int opcode;		/* extension field opcode */
 	int i;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
-	struct value *vp;	/* value pointer */
 	int rval;		/* return value */
 	u_int temp;
 	int j;
@@ -620,14 +672,13 @@ crypto_xmit(
 		ap->tstamp = peer->sndauto.tstamp;
 		ap->seq = peer->sndauto.seq;
 		ap->key = peer->sndauto.key;
-		ap->siglen = 0;
+		ap->siglen = peer->sndauto.siglen;
 		len += 16;
 #ifdef PUBKEY
-		if (!crypto_enable)
+		if (!crypto_flags)
 			break;
-		ap->siglen = peer->sndauto.siglen;
-		temp = ntohl(peer->sndauto.siglen);
-		if (temp > 0)
+		temp = ntohl(ap->siglen);
+		if (temp != 0)
 			memcpy(&ap->sig, peer->sndauto.sig, temp);
 		len += temp;
 #endif /* PUBKEY */
@@ -643,87 +694,88 @@ crypto_xmit(
 		cp->siglen = 0;
 		len += 12;
 #ifdef PUBKEY
-		if (!crypto_enable)
+		if (!crypto_flags)
 			break;
-		cp->siglen = htonl(public_key.bits / 8);
-		if (private_key.bits < MIN_RSA_MODULUS_BITS ||
-		    private_key.bits > MAX_RSA_MODULUS_BITS) {
-			rval = -1;
-		} else {
-			R_SignInit(&ctx, DA_MD5);
-			R_SignUpdate(&ctx, (u_char *)cp, 8);
-			rval = R_SignFinal(&ctx, (u_char *)&cp->sig,
-			    &temp, &private_key);
-		}
+		R_SignInit(&ctx, DA_MD5);
+		R_SignUpdate(&ctx, (u_char *)cp, 8);
+		rval = R_SignFinal(&ctx, (u_char *)&cp->sig, &temp,
+		    &private_key);
 		if (rval != 0) {
-			cp->siglen = 0;
 			msyslog(LOG_ERR,
 			    "crypto_xmit: cookie signature fails %x",
 			    rval);
 			break;
 		}
+		cp->siglen = htonl(temp);
 		len += temp;
 #endif /* PUBKEY */
 		break;
 
 #ifdef PUBKEY
 	/*
+	 * Send Diffie-Hellman parameters, timestamp and signature.
+	 */
+	case CRYPTO_DHPAR | CRYPTO_RESP:
+		vp = (struct value *)&xpkt[i + 2];
+		vp->tstamp = dhparam.tstamp;
+		vp->fstamp = dhparam.fstamp;
+		vp->vallen = 0;
+		len += 12;
+		temp = ntohl(dhparam.vallen);
+		if (dhparam.val == NULL)
+			break;
+		vp->vallen = htonl(temp);
+		memcpy(&vp->val, dhparam.val, temp);
+		len += temp;
+		j = i + 5 + temp / 4;
+		temp = public_key.bits / 8;
+		xpkt[j++] = htonl(temp);
+		memcpy(&xpkt[j], dhparam.sig, temp);
+		len += temp + 4;
+		break;
+
+	/*
 	 * Send Diffie-Hellman public value, timestamp and signature.
 	 */
 	case CRYPTO_DH:
 	case CRYPTO_DH | CRYPTO_RESP:
 		vp = (struct value *)&xpkt[i + 2];
-		vp->tstamp = htonl(sys_revoketime.l_ui);
+		vp->tstamp = dhpub.tstamp;
+		vp->fstamp = dhpub.fstamp;
 		vp->vallen = 0;
-		len += 8;
-		temp = dh_params.primeLen;
-		if (dh_sign == NULL)
+		len += 12;
+		temp = ntohl(dhpub.vallen);
+		if (dhpub.val == NULL)
 			break;
 		vp->vallen = htonl(temp);
-		memcpy((u_char *)&vp->val, dh_public, temp);
+		memcpy(&vp->val, dhpub.val, temp);
 		len += temp;
-		j = i + 4 + temp / 4;
+		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
 		xpkt[j++] = htonl(temp);
-		memcpy((u_char *)&xpkt[j], dh_sign, temp);
+		memcpy(&xpkt[j], dhpub.sig, temp);
 		len += temp + 4;
 		break;
 
 	/*
-	 * Send host name, timestamp and signature.
+	 * Send public key, host name, timestamp and signature.
 	 */
 	case CRYPTO_NAME | CRYPTO_RESP:
 		vp = (struct value *)&xpkt[i + 2];
-		vp->tstamp = htonl(sys_revoketime.l_ui);
-		vp->vallen = host.vallen;
-		len += 8;
+		vp->tstamp = host.tstamp;
+		vp->fstamp = host.fstamp;
+		vp->vallen = 0;
+		len += 12;
 		temp = ntohl(host.vallen);
-		if (temp == 0)
+		if (host.val == NULL)
 			break;
-		memcpy((u_char *)&vp->val, host.val, temp);
+		vp->vallen = htonl(temp);
+		memcpy(&vp->val, host.val, temp);
 		len += temp;
-		j = i + 4 + temp / 4;
+		j = i + 5 + temp / 4;
 		temp = public_key.bits / 8;
 		xpkt[j++] = htonl(temp);
-		memcpy((u_char *)&xpkt[j], host.sig, temp);
-		len += temp + 4;
-		break;
-
-	/*
-	 * Send public key. We send the public key only if it exists and
-	 * is valid. This is used primarily for testing.
-	 */
-	case CRYPTO_PUBL | CRYPTO_RESP:
-		xpkt[i + 2] = 0;
-		len += 4;
-		if (public_key.bits < MIN_RSA_MODULUS_BITS ||
-		    public_key.bits > MAX_RSA_MODULUS_BITS)
-			break;
-		temp = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int);
-		xpkt[i + 2] = htonl(temp + 4);
-		xpkt[i + 3] = htonl(public_key.bits);
-		memcpy((u_char *)&xpkt[i + 4],
-		    (u_char *)&public_key.modulus, temp);
+		memcpy(&xpkt[j], host.sig, temp);
 		len += temp + 4;
 		break;
 #endif /* PUBKEY */
@@ -755,150 +807,236 @@ crypto_xmit(
 	return (len);
 }
 
-
 #ifdef PUBKEY
 /*
- * crypto_agree - compute public and private Diffie-Hellman values from
- * given prime and generator, then sign with private key.
+ * crypto_setup - read RSA private key, RSA public key and Diffie-
+ * Hellman parameter files and initialize cryptographic data.
+ */
+void
+crypto_setup(void)
+{
+	char filename[MAXFILENAME];
+	u_int len, temp;
+	u_int32 *pp;
+
+	/*
+	 * Initialize structures.
+	 */
+	memset(&private_key, 0, sizeof(private_key));
+	memset(&public_key, 0, sizeof(public_key));
+	memset(&dh_params, 0, sizeof(dh_params));
+	memset(&host, 0, sizeof(host));
+	memset(&dhparam, 0, sizeof(dhparam));
+	memset(&dhpub, 0, sizeof(dhpub));
+
+	/*
+	 * Load required RSA private key from file, default "ntpkey".
+	 */
+	if (private_key_file == NULL)
+		private_key_file = "ntpkey";
+	crypto_rsa(private_key_file, &private_key_fstamp,
+	    (u_char *)&private_key, sizeof(R_RSA_PRIVATE_KEY));
+	if (private_key.bits == 0) {
+		msyslog(LOG_ERR,
+		    "crypto_setup: required RSA private key missing or corrupted");
+		exit;
+	}
+
+	/*
+	 * Load required RSA public key from file, default
+	 * "ntpkey_host", where "host" is the canonical name of this
+	 * machine.
+	 */
+	if (public_key_file == NULL) {
+		snprintf(filename, MAXFILENAME, "ntpkey_%s",
+		    sys_hostname);
+		public_key_file = emalloc(strlen(filename) + 1);
+		strcpy(public_key_file, filename);
+	}
+	crypto_rsa(public_key_file, &public_key_fstamp,
+	    (u_char *)&public_key, sizeof(R_RSA_PUBLIC_KEY));
+	if (public_key.bits == 0) {
+		msyslog(LOG_ERR,
+		    "crypto_setup: required RSA public key missing or corrupted");
+		exit;
+	}
+	if (strstr(public_key_file, sys_hostname) == NULL) {
+		msyslog(LOG_ERR,
+		    "crypto_setup: RSA public key file %s not generated by this host",
+		    public_key_file);
+		exit;
+	}
+
+	/*
+	 * Assemble public key and host name in network byte order.
+	 * These data will later be signed and sent in response to
+	 * a client request. Note that the modulus must be a u_int32 in
+	 * network byte order independent of the host order or u_int
+	 * size.
+	 */
+	strcpy(filename, sys_hostname);
+	for (len = strlen(filename) + 1; len % 4 != 0; len++)
+		filename[len - 1] = 0;
+	host.fstamp = htonl(public_key_fstamp);
+	temp = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
+	host.vallen = htonl(temp + len);
+	host.val = emalloc(temp + len);
+	pp = (u_int32 *)host.val;
+	*pp++ = htonl(public_key.bits);
+	memcpy(pp, &public_key.modulus, temp - 4);
+	memcpy(&host.val[temp], filename, len);
+	temp = private_key.bits / 8;
+	host.sig = emalloc(private_key.bits / 8);
+
+	/*
+	 * Load optional Diffie-Hellman key agreement parameters from
+	 * file, default "ntpkey_dh". If the file is missing or
+	 * defective, the parameters can later be retrieved from a
+	 * server.
+	 */
+	if (dh_params_file == NULL)
+		dh_params_file = "ntpkey_dh";
+	crypto_dh(dh_params_file, &dh_params_fstamp);
+	dhpub.fstamp = htonl(dh_params_fstamp);
+	temp = dh_params.primeLen;
+	if (temp == 0)
+		return;
+	dhpub.vallen = htonl(temp);
+	dhpub.val = emalloc(temp);
+	dhpub.sig = emalloc(private_key.bits / 8);
+}
+
+
+/*
+ * crypto_agree - compute and sign host name and Diffie-Hellman values
  */
 void
 crypto_agree(void)
 {
-	char filename[MAXFILENAME];
-	R_RANDOM_STRUCT randomstr;
-	R_SIGNATURE_CTX ctx;	/* signature context */
+	R_RANDOM_STRUCT randomstr;	/* wiggle bits */
+	R_SIGNATURE_CTX ctx;		/* signature context */
 	u_int len, temp;
 	int rval;
 	int i;
-	char *sptr;
 
 	/*
-	 * Sign public key file name and timestamp.
+	 * Sign host name and timestamps.
 	 */
 	host.tstamp = htonl(sys_revoketime.l_ui);
-	if (public_key_file == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: public key file unavailable");
-		return;
-	}
-	if ((sptr = strstr(public_key_file, sys_hostname)) == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: public key file %s not generated by this host",
-		    public_key_file);
-		return;
-	}
-	strcpy(filename, sptr);
-	for (len = strlen(filename) + 1; len % 4 != 0; len++)
-		filename[len] = 0;
-	host.vallen = htonl(len);
-	host.val = emalloc(len);
-	memcpy(host.val, filename, len);
-	host.siglen = dh_params.primeLen;
-	if (host.sig == NULL)
-		host.sig = emalloc(dh_params.primeLen);
 	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (u_char *)&host, 8);
-	R_SignUpdate(&ctx, host.val, len);
+	R_SignUpdate(&ctx, (u_char *)&host, 12);
+	R_SignUpdate(&ctx, host.val, ntohl(host.vallen));
 	rval = R_SignFinal(&ctx, host.sig, &temp, &private_key);
 	if (rval != 0) {
 		msyslog(LOG_ERR,
 		    "crypto_agree: host signature fails %x", rval);
-		return;
+		exit(1);
 	}
+	host.siglen = ntohl(temp);
 
 	/*
-	 * Compute Diffie-Hellman public value. Note that the length of
-	 * the private value is set arbitrarily to half the prime
-	 * length.
+	 * Sign Diffie-Hellman parameters and timestamps.
 	 */
 	if (dh_params.primeLen == 0) {
 		msyslog(LOG_ERR,
-		    "unavailable d-h parameters");
+		    "crypto_agree: unavailable DH parameters");
 		return;
 	}
+	dhparam.tstamp = htonl(sys_revoketime.l_ui);
+	R_SignInit(&ctx, DA_MD5);
+	R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
+	R_SignUpdate(&ctx, dhparam.val, ntohl(dhparam.vallen));
+	rval = R_SignFinal(&ctx, dhparam.sig, &temp, &private_key);
+	if (rval != 0) {
+		msyslog(LOG_ERR,
+		    "crypto_agree: DH parameters signature fails %x",
+		    rval);
+		exit(1);
+	}
+	dhparam.siglen = ntohl(temp);
+
+	/*
+	 * Compute Diffie-Hellman public value.
+	 */
 	R_RandomInit(&randomstr);
 	R_GetRandomBytesNeeded(&len, &randomstr);
 	for (i = 0; i < len; i++) {
-		temp = random();
+		temp = RANDOM;
 		R_RandomUpdate(&randomstr, (u_char *)&temp, 1);
 	}
-	if (dh_private == NULL)
-		dh_private = (u_char *)emalloc(dh_keyLen);
-	if (dh_public == NULL)
-		dh_public = (u_char *)emalloc(dh_params.primeLen);
-	rval = R_SetupDHAgreement(dh_public, dh_private, dh_keyLen,
+	rval = R_SetupDHAgreement(dhpub.val, dh_private, dh_keyLen,
 	    &dh_params, &randomstr);
 	if (rval != 0) {
-		msyslog(LOG_ERR, "invalid d-h parameters");
-		return;
+		msyslog(LOG_ERR, "crypto_agree: invalid DH parameters");
+		exit(1);
 	}
 
 	/*
-	 * Sign Diffie-Hellman public value.
+	 * Sign Diffie-Hellman public value and timestamps.
 	 */
-	if (dh_sign == NULL)
-		dh_sign = emalloc(dh_params.primeLen);
+	dhpub.tstamp = htonl(sys_revoketime.l_ui);
 	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (char *)&host.tstamp, 4);
-	temp = htonl(dh_params.primeLen);
-	R_SignUpdate(&ctx, (char *)&temp, 4);
-	R_SignUpdate(&ctx, dh_public, dh_params.primeLen);
-	rval = R_SignFinal(&ctx, dh_sign, &temp, &private_key);
+	R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
+	R_SignUpdate(&ctx, dhpub.val, ntohl(dhpub.vallen));
+	rval = R_SignFinal(&ctx, dhpub.sig, &temp, &private_key);
 	if (rval != 0) {
 		msyslog(LOG_ERR,
-		    "crypto_agree: d-h signature fails %x", rval);
-		return;
+		    "crypto_agree: DH public value signature fails %x",
+		    rval);
+		exit(1);
 	}
+	dhpub.siglen = ntohl(temp);
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "cypto_agree: host %s d-h prime %d gen %d\n",
-		    host.val, dh_params.primeLen,
-		    dh_params.generatorLen);
+		    "cypto_agree: host %s ts %u pubval %d\n",
+		    sys_hostname, ntohl(host.tstamp),
+		    ntohl(dhpub.vallen));
 #endif
 }
 
 
 /*
- * crypto_read - read RSA key, decode and check for errors
+ * crypto_rsa - read RSA key, decode and check for errors.
  */
-static int
-crypto_read(
-	u_char *cp,		/* file name */
+static void
+crypto_rsa(
+	char *cp,		/* file name */
+	u_int *fstamp,		/* filestamp */
 	u_char *key,		/* key pointer */
 	u_int keylen		/* key length */
 	)
 {
-	FILE *str;
-	u_char buf[MAX_KEYLEN];
-	u_char encoded_key[MAX_KEYLEN];
-	char filename[MAXFILENAME];
-	u_int modulus;
-	u_int buflen;
+	FILE *str;		/* file handle */
+	u_char buf[MAX_KEYLEN];	/* file line buffer */
+	u_char encoded_key[MAX_KEYLEN]; /* encoded key buffer */
+	char filename[MAXFILENAME]; /* name of parameter file */
+	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int bits, len;
 	char *rptr;
 	int rval;
 
 	/*
-	 * Open the key file and discard comment lines.
+	 * Open the key file and discard comment lines. If the first
+	 * character of the file name is not '/', prepend the keys
+	 * directory string. 
 	 */
-	if (strlen(cp) == 0 || strlen(cp) >= MAXFILENAME - 1) {
-		msyslog(LOG_ERR, "invalid key file name length %d",
-		    strlen(filename));
-		return (0);
-	} else if (*cp == '/') {
+	if (*cp == '/')
 		strcpy(filename, cp);
-	} else {
-		snprintf(filename, MAXFILENAME - 1, "%s%s", keysdir,
-		    cp);
-	}
+	else
+		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
-		msyslog(LOG_ERR, "key file %s not found", filename);
-		return (0);
+		msyslog(LOG_ERR, "RSA key file %s not found", filename);
+		return;
 	}
+
+	/*
+	 * Ignore initial comments and empty lines.
+	 */
 	while ((rptr = fgets(buf, MAX_KEYLEN - 1, str)) != NULL) {
-		buflen = strlen(buf);
-		if (buflen < 1)
+		len = strlen(buf);
+		if (len < 1)
 			continue;
 		if (*buf == '#' || *buf == '\r' || *buf == '\0')
 			continue;
@@ -906,58 +1044,224 @@ crypto_read(
 	}
 
 	/*
-	 * We are rather paranoid here, since an intruder can cause a
+	 * We are rather paranoid here, since an intruder might cause a
 	 * coredump by infiltrating a naughty key. The line must contain
 	 * a single integer followed by a PEM encoded, null-terminated
 	 * string.
 	 */
-	if (rptr == NULL) {
-		msyslog(LOG_ERR, "invalid key file %s", filename);
-		return (0);
+	rval = RV_OK;
+	if (rptr == NULL)
+		rval = RV_DAT;
+	else if (sscanf(buf, "%d %s", &bits, encoded_key) != 2)
+		rval = RV_DAT;
+	else if (R_DecodePEMBlock(&buf[sizeof(u_int)], &len,
+		    encoded_key, strlen(encoded_key)))
+		rval = RV_DEC;
+	else if ((len += sizeof(u_int)) != keylen)
+		rval = RV_KEY;
+	else if (bits < MIN_RSA_MODULUS_BITS || bits >
+	    MAX_RSA_MODULUS_BITS)
+		rval = RV_KEY;
+	if (rval != RV_OK) {
+		fclose(str);
+		msyslog(LOG_ERR,
+		    "crypto_dh: RSA key file %s error %x",
+		    cp, rval);
+		return;
 	}
-	if (sscanf(buf, "%d %s", &modulus, encoded_key) != 2) {
-		msyslog(LOG_ERR, "invalid key format %s", filename);
-		return (0);
-	}
+	fclose(str);
+	*(u_int *)buf = bits;
+	memcpy(key, buf, keylen);
 
 	/*
-	 * Initialize the key with the decoded PEM string, but leave
-	 * room for the modulus length in the key structure.
+	 * Extract filestamp if present.
 	 */
-	rval = R_DecodePEMBlock(&key[sizeof(u_int)], &buflen,
-	    encoded_key, strlen(encoded_key));
-	if (rval != 0) {
-		msyslog(LOG_ERR, "invalid key %s %x", filename, rval);
-		return (0);
+	len = readlink(filename, linkname, MAXFILENAME - 1);
+	if (len > 0) {
+		linkname[len] = '\0';
+		rptr = strrchr(linkname, '.');
+	} else {
+#ifdef DEBUG
+		if (len == -1 && errno != EINVAL)
+			msyslog(LOG_INFO,
+				"crypto_rsa: readlink(%s) returned %m",
+				filename);
+#endif /* DEBUG */
+		rptr = strrchr(filename, '.');
 	}
-
-	/*
-	 * Make sure the structure has the required length.
-	 */
-	buflen += sizeof(u_int);
-	if (buflen != keylen) {
-		msyslog(LOG_ERR, "invalid key length %s %d", filename,
-		    buflen);
-		return (0);
-	}
-
-	/*
-	 * Make sure the modulus length is within limits.
-	 */
-	if (modulus < MIN_RSA_MODULUS_BITS || modulus >
-	    MAX_RSA_MODULUS_BITS) {
-		msyslog(LOG_ERR, "invalid key modulus %s %d", filename,
-		    modulus);
-		return (0);
-	}
-	((u_int *)key)[0] = modulus;
+	if (rptr != NULL)
+		sscanf(++rptr, "%u", fstamp);
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_read: RSA key file %s length %d modulus %d\n",
-		    cp, keylen, modulus);
+		    "crypto_rsa: RSA key file %s fs %u modulus %d\n",
+		    cp, *fstamp, bits);
 #endif
-	return (1);
+	return;
+}
+
+
+/*
+ * crypto_dh - read DH parameters, decode and check for errors.
+ */
+static void
+crypto_dh(
+	char *cp,		/* file name */
+	u_int *fstamp		/* filestamp */
+	)
+{
+	FILE *str;		/* file handle */
+	u_char buf[MAX_KEYLEN];	/* file line buffer */
+	u_char encoded_key[MAX_KEYLEN]; /* encoded key buffer */
+	u_char prime[MAX_KEYLEN]; /* decoded prime */
+	u_char generator[MAX_KEYLEN]; /* decode generator */
+	u_int primelen;		/* prime length (octets) */
+	u_int generatorlen;	/* generator length (octets) */
+	char filename[MAXFILENAME]; /* name of parameter file */
+	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int32 *pp;
+	u_int len;
+	char *rptr;
+	int rval;
+
+	/*
+	 * Open the key file and discard comment lines. If the first
+	 * character of the file name is not '/', prepend the keys
+	 * directory string. 
+	 */
+	*fstamp = 0;
+	if (*cp == '/')
+		strcpy(filename, cp);
+	else
+		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
+	str = fopen(filename, "r");
+	if (str == NULL) {
+		msyslog(LOG_ERR,
+		    "crypto_dh: DH parameter file %s not found",
+		    filename);
+		return;
+	}
+
+	/*
+	 * Ignore initial comments and empty lines.
+	 */
+	while ((rptr = fgets(buf, MAX_KEYLEN - 1, str)) != NULL) {
+		if (strlen(buf) < 1)
+			continue;
+		if (*buf == '#' || *buf == '\r' || *buf == '\0')
+			continue;
+		break;
+	}
+
+	/*
+	 * We are rather paranoid here, since an intruder might cause a
+	 * coredump by infiltrating a naughty key. The line must contain
+	 * a single integer followed by a PEM encoded, null-terminated
+	 * string.
+	 */
+	rval = RV_OK;
+	if (rptr == NULL)
+		rval = RV_DAT;
+	else if (sscanf(buf, "%u %s", &primelen, encoded_key) != 2)
+		rval = RV_DAT;
+	else if (primelen > MAX_DH_LEN)
+		rval = RV_KEY;
+	else if (R_DecodePEMBlock(prime, &len, encoded_key,
+	    strlen(encoded_key)))
+		rval = RV_DEC;
+	else if (primelen != len || primelen >
+	    DECODED_CONTENT_LEN(strlen(encoded_key)))
+		rval = RV_DAT;
+	if (rval != RV_OK) {
+		fclose(str);
+		msyslog(LOG_ERR,
+		    "crypto_dh: DH parameter file %s prime error %x",
+		    cp, rval);
+		return;
+	}
+
+	/*
+	 * Load and check generator.
+	 */
+	rval = RV_OK;
+	if (fscanf(str, "%u %s", &generatorlen, encoded_key) != 2)
+		rval = RV_DAT;
+	else if (generatorlen > MAX_DH_LEN)
+		rval = RV_KEY;
+	else if (R_DecodePEMBlock(generator, &len, encoded_key,
+	    strlen(encoded_key)))
+		rval = RV_DEC;
+	else if (generatorlen != len || generatorlen >
+	    DECODED_CONTENT_LEN(strlen(encoded_key)))
+		rval = RV_DAT;
+	if (rval != RV_OK) {
+		msyslog(LOG_ERR,
+		    "crypto_dh: DH parameter file %s generator error %x",
+		    cp, rval);
+		return;
+	}
+	fclose(str);
+
+	/*
+	 * Initialize Diffie-Hellman parameters extension field in
+	 * network byte order. Note the private key length is set
+	 * arbitrarily at half the prime length.
+	 */
+	dhparam.fstamp = htonl(dh_params_fstamp);
+	len = 4 + primelen + 4 + generatorlen;
+	dhparam.vallen = htonl(len);
+	dhparam.val = emalloc(len);
+	pp = (u_int32 *)dhparam.val;
+	*pp++ = htonl(primelen);
+	dh_params.prime = (u_char *)pp;
+	memcpy(pp, &prime, primelen);
+	pp += primelen / 4;
+	*pp++ = htonl(generatorlen);
+	dh_params.generator = (u_char *)pp;
+	memcpy(pp, &generator, generatorlen);
+	dhparam.sig = emalloc(private_key.bits / 8);
+
+	/*
+	 * Initialize parameters used by the agreement algorithm
+	 */
+	dh_params.primeLen = primelen;
+	dh_params.generatorLen = generatorlen;
+	dh_keyLen = primelen / 2;
+	dh_private = emalloc(dh_keyLen);
+
+	/*
+	 * Initialize Diffie-Hellman public value extension field.
+	 */
+	dhpub.fstamp = htonl(dh_params_fstamp);
+	dhpub.vallen = htonl(dh_params.primeLen);
+	dhpub.val = emalloc(dh_params.primeLen);
+	dhpub.sig = emalloc(private_key.bits / 8);
+
+	/*
+	 * Extract filestamp if present.
+	 */
+	len = readlink(filename, linkname, MAXFILENAME - 1);
+	if (len > 0) {
+		linkname[len] = '\0';
+		rptr = strrchr(linkname, '.');
+	} else {
+#ifdef DEBUG
+		if (len == -1 && errno != EINVAL)
+			msyslog(LOG_INFO,
+				"crypto_dh: readlink(%s) returned %m",
+				filename);
+#endif /* DEBUG */
+		rptr = strrchr(filename, '.');
+	}
+	if (rptr != NULL)
+		sscanf(++rptr, "%u", fstamp);
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "crypto_dh: DH parameter file %s fs %u prime %u gen %u\n",
+		    dh_params_file, dh_params_fstamp,
+		    dh_params.primeLen, dh_params.generatorLen);
+#endif
 }
 
 
@@ -971,16 +1275,30 @@ crypto_read(
 int
 crypto_public(
 	struct peer *peer,	/* peer structure pointer */
-	u_char *cp		/* canonical host name */
+	u_char *cp,		/* canonical host name */
+	u_int fstamp		/* filestamp */
 	)
 {
 	R_RSA_PUBLIC_KEY keybuf;
 	u_int keylen = sizeof(R_RSA_PUBLIC_KEY);
 	char filename[MAXFILENAME];
+	u_int temp;
 
-	snprintf(filename, MAXFILENAME - 1, "ntpkey_%s", cp);
-	if (!crypto_read(filename, (u_char *)&keybuf, keylen))
+	/*
+	 * If the filestamp is nonzero, append it as the file name
+	 * extension. If not and a link name has a filestamp, append
+	 * that for looks.
+	 */
+	if (fstamp == 0)
+		snprintf(filename, MAXFILENAME, "ntpkey_%s", cp);
+	else
+		snprintf(filename, MAXFILENAME, "ntpkey_%s.%u", cp,
+		    fstamp);
+	crypto_rsa(filename, &temp, (u_char *)&keybuf, keylen);
+	if (keybuf.bits == 0)
 		return (0);
+	if (fstamp == 0 && temp != 0)
+		sprintf(filename, "%s.%u", filename, temp);
 	if (peer->keystr != NULL)
 		free(peer->keystr);
 	peer->keystr = emalloc(strlen(filename) + 1);
@@ -993,120 +1311,8 @@ crypto_public(
 
 
 /*
- * crypto_line - read, decode and install Diffie-Hellman prime and
- * generator. Be very parannoyed here if every little thing is not
- * exactly right.
- */
-static void
-crypto_line(
-	FILE *str,		/* file handle */
-	u_char **key,		/* decoded string pointer */
-	u_int *len		/* length */
-	)
-{
-	u_char buf[MAX_KEYLEN];
-	u_char encoded_key[MAX_KEYLEN];
-	u_int temp, temp1, temp2;
-	char *rptr;
-
-	/*
-	 * Read key and length. Bail out if the length word doesn't
-	 * match the decoded string length and in other cases.
-	 */
-	*key = NULL;
-	*len = 0;
-	while ((rptr = fgets(buf, MAX_KEYLEN - 1, str)) != NULL) {
-		if (strlen(buf) < 1)
-			continue;
-		if (*buf == '#' || *buf == '\r' || *buf == '\0')
-			continue;
-		break;
-	}
-	if (sscanf(buf, "%d %s", &temp, encoded_key) != 2)
-		return;
-	if (temp > MAX_DH_LEN)
-		return;
-	temp2 = DECODED_CONTENT_LEN(strlen(encoded_key));
-	if (R_DecodePEMBlock(buf, &temp1, encoded_key,
-	    strlen(encoded_key)))
-		return;
-	if (temp != temp1 || temp > temp2)
-		return;
-	*key = (u_char *)emalloc(temp2);
-	memcpy(*key, buf, temp2);
-	*len = temp;
-	return;
-}
-
-
-/*
- * crypto_setup - read RSA private key, RSA public key and Diffie-
- * Hellman parameter files and initialize cryptographic data.
- */
-void
-crypto_setup(void)
-{
-	FILE *str;
-	char hostname[MAXFILENAME];
-	char filename[MAXFILENAME];
-
-	/*
-	 * Load RSA private key from file.
-	 */
-	if (private_key_file == NULL)
-		private_key_file = "ntpkey";
-	crypto_read(private_key_file, (u_char *)&private_key,
-	    sizeof(R_RSA_PRIVATE_KEY));
-
-	/*
-	 * Load RSA public key from file, default "ntpkey_host", where
-	 * host is the DNS name of this machine.
-	 */
-	if (public_key_file == NULL) {
-		gethostname(hostname, MAXFILENAME);
-		snprintf(filename, MAXFILENAME - 1, "ntpkey_%s",
-		    hostname);
-		public_key_file = emalloc(strlen(filename) + 1);
-		strcpy(public_key_file, filename);
-	}
-	crypto_read(public_key_file, (u_char *)&public_key,
-	    sizeof(R_RSA_PUBLIC_KEY));
-
-	/*
-	 * Load Diffie-Hellman key agreement parameters from file.
-	 */
-	if (dh_params_file == NULL)
-		dh_params_file = "ntpkey_dh";
-	if (*dh_params_file == '/')
-		strcpy(filename, dh_params_file);
-	else
-		snprintf(filename, MAXFILENAME - 1, "%s%s", keysdir,
-		    dh_params_file);
-
-	str = fopen(filename, "r");
-	if (str == NULL) {
-		msyslog(LOG_ERR, "key file %s not found",
-		    filename);
-		return;
-	}
-
-	/*
-	 * Read prime and generator. Note that the private value length
-	 * is set arbitrarily at half the prime length.
-	 */
-	crypto_line(str, &dh_params.prime, &dh_params.primeLen);
-	crypto_line(str, &dh_params.generator, &dh_params.generatorLen);
-	if (dh_params.primeLen == 0|| dh_params.generatorLen == 0) {
-		msyslog(LOG_ERR,
-		    "invalid Diffie-Hellman file format or value");
-		return;
-	}
-	dh_keyLen = dh_params.primeLen / 2;
-}
-
-
-/*
- * crypto_config - configure crypto data.
+ * crypto_config - configure crypto data from crypto configuration
+ * command.
  */
 void
 crypto_config(
@@ -1120,18 +1326,11 @@ crypto_config(
 	 * Initialize flags
 	 */
 	case CRYPTO_CONF_FLAGS:
-		crypto_flags = atoi(cp);
-		break;
-	/*
-	 * Override the default Diffie-Hellman parameter file name.
-	 */
-	case CRYPTO_CONF_DH:
-		dh_params_file = emalloc(strlen(cp) + 1);
-		strcpy(dh_params_file, cp);
+		sscanf(cp, "%x", &crypto_flags);
 		break;
 
 	/*
-	 * Override the default RSA private key file name.
+	 * Set RSA private key file name.
 	 */
 	case CRYPTO_CONF_PRIV:
 		private_key_file = emalloc(strlen(cp) + 1);
@@ -1139,7 +1338,7 @@ crypto_config(
 		break;
 
 	/*
-	 * Override the default RSA public key file name.
+	 * Set RSA public key file name.
 	 */
 	case CRYPTO_CONF_PUBL:
 		public_key_file = emalloc(strlen(cp) + 1);
@@ -1147,29 +1346,21 @@ crypto_config(
 		break;
 
 	/*
-	 * Override the default crypto keys directory.
+	 * Set Diffie-Hellman parameter file name.
+	 */
+	case CRYPTO_CONF_DH:
+		dh_params_file = emalloc(strlen(cp) + 1);
+		strcpy(dh_params_file, cp);
+		break;
+
+	/*
+	 * Set crypto keys directory.
 	 */
 	case CRYPTO_CONF_KEYS:
 		keysdir = emalloc(strlen(cp) + 1);
 		strcpy(keysdir, cp);
 		break;
 	}
-}
-
-
-/*
- * crypto_init () - initialize things.
- */
-void
-crypto_init(void)
-{
-	/*
-	 * Zeroize sensitive crypto data.
-	 */
-	memset((char *)&private_key, 0, sizeof(private_key));
-	memset((char *)&public_key, 0, sizeof(public_key));
-	memset((char *)&dh_params, 0, sizeof(dh_params));
-	memset((char *)&host, 0, sizeof(host));
 }
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

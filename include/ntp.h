@@ -151,14 +151,16 @@ typedef char s_char;
 
 #ifdef AUTOKEY
 /*
+ * The following structures are used in the autokey protocol.
+ *
  * The autokey structure holds the data necessary to authenticate
  * the key IDs.
  */
 struct autokey {		/* network byte order */
 	u_int32	tstamp;		/* timestamp */
 	keyid_t	key;		/* key ID */
-	int	seq;		/* key number */
-	u_int	siglen;		/* signature length */
+	int32	seq;		/* key number */
+	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
 
@@ -169,19 +171,20 @@ struct autokey {		/* network byte order */
 struct cookie {			/* network byte order */
 	u_int32	tstamp;		/* timestamp */
 	keyid_t	key;		/* key ID */
-	u_int	siglen;		/* signature length */
+	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
 
 /*
  * The value structure holds variable length data such as host
- * name and public value.
+ * name and public value and TAI.
  */
-struct	value {			/* network byte order */
+struct value {			/* network byte order */
 	u_int32	tstamp;		/* timestamp */
-	u_int	vallen;		/* value length */
+	u_int32	fstamp;		/* filestamp */
+	u_int32	vallen;		/* value length */
 	u_char	*val;		/* value */
-	u_int	siglen;		/* signature length */
+	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
 #endif /* AUTOKEY */
@@ -282,6 +285,7 @@ struct peer {
 #endif /* AUTOKEY */
 	keyid_t	keyid;		/* current key ID */
 	u_char	*keystr;	/* public key file name */
+	u_int	fstamp;		/* public key filestamp */
 	keyid_t	pkeyid;		/* previous key ID */
 #define clear_to_zero pkeyid
 #ifdef AUTOKEY
@@ -528,13 +532,13 @@ struct pkt {
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64
-	 * bits. The maximum length of an extension data field is 272
-	 * octets. The next longest is 80 octets. There can only be
-	 * two extension fields in a message, so the maximum lenth
-	 * is 352 octets or 88 words, so we cheat and call it 100.
+	 * with an RSA modulus and Diffie-Hellman prime of 64 octets,
+	 * the maximum extension field size is 368 + 152 = 520 octets.
+	 * or 130 words. We give an extra 10 words to allow the plants
+	 * to grow if additional sunlight is available.
 	 */
 #ifdef AUTOKEY
-	u_int32 exten[100];	/* extension field */
+	u_int32 exten[140];	/* extension field */
 #else
 	u_int32	exten[1];	/* misused */
 #endif /* AUTOKEY */
