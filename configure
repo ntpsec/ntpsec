@@ -1088,7 +1088,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.99b
+VERSION=4.0.99b1
 
 if test "`CDPATH=: && cd $srcdir && pwd`" != "`pwd`" &&
    test -f $srcdir/config.status; then
@@ -10979,6 +10979,7 @@ cat >>$CONFIG_STATUS <<EOF
 
 AMDEP="$AMDEP"
 ac_aux_dir="$ac_aux_dir"
+
 EOF
 
 cat >>$CONFIG_STATUS <<EOF
