@@ -435,6 +435,11 @@ create_sockets(
 			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
 				stoa((&inter_list[i].bcast)),
 				NTP_PORT);
+#if defined (HAVE_IO_COMPLETION_PORT)
+		if (inter_list[i].fd != INVALID_SOCKET) {
+			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
+		}
+#endif
 	}
 
 	/*
@@ -483,12 +488,6 @@ create_sockets(
 		}
 	}
 #endif
-#if defined (HAVE_IO_COMPLETION_PORT)
-	for (i = 0; i < ninterfaces; i++) {
-		io_completion_port_add_socket(&inter_list[i]);
-		add_socket_to_list(inter_list[i].fd);
-	}
-#endif
 	return ninterfaces;
 }
 
@@ -522,8 +521,12 @@ io_setbclient(void)
 #ifdef OPEN_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
 		inter_list[i].bfd = open_socket(&inter_list[i].bcast,
 		    INT_BROADCAST, 1);
-		if (inter_list[i].bfd != INVALID_SOCKET)
+		if (inter_list[i].bfd != INVALID_SOCKET) {
 			inter_list[i].flags |= INT_BCASTOPEN;
+#if defined (HAVE_IO_COMPLETION_PORT)
+			io_completion_port_add_socket(inter_list[i].bfd, &inter_list[i]);
+#endif
+		}
 #ifdef DEBUG
 		if (debug) {
 			if (inter_list[i].bfd != INVALID_SOCKET)
@@ -650,6 +653,9 @@ io_multicast_add(
 			(void) strncpy(inter_list[i].name, "multicast",
 			sizeof(inter_list[i].name));
 			((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
+#if defined (HAVE_IO_COMPLETION_PORT)
+			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
+#endif
 		}
 
 		/*
@@ -728,6 +734,9 @@ io_multicast_add(
 			(void)strncpy(inter_list[i].name, "multicast",
 			   sizeof(inter_list[i].name));
 			memset(&(((struct sockaddr_in6*)&inter_list[i].mask)->sin6_addr), 1, sizeof(struct in6_addr));
+#if defined (HAVE_IO_COMPLETION_PORT)
+			io_completion_port_add_socket(inter_list[i].fd, &inter_list[i]);
+#endif
 		}
 
 		/*
@@ -1063,7 +1072,7 @@ open_socket(
 	    maxactivefd = fd;
 	FD_SET(fd, &activefds);
 #endif
-
+	add_socket_to_list(fd);
 	/*
 	 * set non-blocking,
 	 */
@@ -1195,9 +1204,9 @@ close_socket(
 				newmax = i;
 		maxactivefd = newmax;
 	}
-#else
-	delete_socket_from_list(fd);
 #endif
+	delete_socket_from_list(fd);
+
 }
 
 
@@ -1226,9 +1235,9 @@ close_file(
 				newmax = i;
 		maxactivefd = newmax;
 	}
-#else
-	delete_socket_from_list(fd);
 #endif
+	delete_socket_from_list(fd);
+
 }
 
 

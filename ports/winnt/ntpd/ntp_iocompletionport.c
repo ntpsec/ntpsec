@@ -207,7 +207,7 @@ io_completion_port_add_clock_io(
 	return 0;
 }
 
-/* Queue a receiver on a socket. Returns 0 if no buffer can be queud */
+/* Queue a receiver on a socket. Returns 0 if no buffer can be queued */
 
 static unsigned long QueueSocketRecv(SOCKET s) {
 	
@@ -305,12 +305,15 @@ OnSocketRecv(DWORD i, struct IoCompletionInfo *Info, DWORD Bytes)
  *        ReadFile() is less efficient.
  */
 extern void
-io_completion_port_add_socket(struct interface *inter)
+io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 {
-	if (NULL == CreateIoCompletionPort((HANDLE) inter->fd, hIoCompletionPort, (DWORD) inter, 0)) {
-		msyslog(LOG_ERR, "Can't add socket to i/o completion port: %m");
+	if (fd != INVALID_SOCKET) {
+		if (NULL == CreateIoCompletionPort((HANDLE) fd, hIoCompletionPort,
+						   (DWORD) inter, 0)) {
+			msyslog(LOG_ERR, "Can't add socket to i/o completion port: %m");
+		}
+		else QueueSocketRecv(fd);
 	}
-	else QueueSocketRecv(inter->fd);
 }
 
 
