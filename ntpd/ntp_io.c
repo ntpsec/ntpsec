@@ -502,7 +502,7 @@ create_sockets(
 	for (i = 0; i < ninterfaces; i++) {
 		inter_list[i].fd = open_socket(&inter_list[i].sin,
 		    inter_list[i].flags & INT_BROADCAST, 0);
-		if (inter_list[i].bfd != INVALID_SOCKET)
+		if (inter_list[i].fd != INVALID_SOCKET)
 			msyslog(LOG_INFO, "Listening on interface %s, %s#%d",
 				inter_list[i].name,
 				stoa((&inter_list[i].sin)),
@@ -1072,19 +1072,26 @@ open_socket(
 			stoa(addr));
 	}
 
+	/*
+	 * IPv4 specific options go here
+	 */
+	if (addr->ss_family == AF_INET) {
 #if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
 	/* set IP_TOS to minimize packet delay */
-	tos = IPTOS_LOWDELAY;
-	if (addr->ss_family == AF_INET)
+		tos = IPTOS_LOWDELAY;
 		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &tos, sizeof(tos)) < 0)
 		{
 			netsyslog(LOG_ERR, "setsockopt IPTOS_LOWDELAY on fails on address %s: %m",
 				stoa(addr));
 		}
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
+	}
 
+	/*
+	 * IPv6 specific options go here
+	 */
+        if (addr->ss_family == AF_INET6) {
 #if defined(IPV6_V6ONLY)
-        if (addr->ss_family == AF_INET6)
                 if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
                 	(char*)&on, sizeof(on)))
                 {
@@ -1093,7 +1100,6 @@ open_socket(
 		}
 #else /* IPV6_V6ONLY */
 #if defined(IPV6_BINDV6ONLY)
-        if (addr->ss_family == AF_INET6)
                 if (setsockopt(fd, IPPROTO_IPV6, IPV6_BINDV6ONLY,
                 	(char*)&on, sizeof(on)))
                 {
@@ -1103,6 +1109,7 @@ open_socket(
 		}
 #endif /* IPV6_BINDV6ONLY */
 #endif /* IPV6_V6ONLY */
+	}
 
 	/*
 	 * bind the local address.
@@ -1201,9 +1208,7 @@ open_socket(
 		/*NOTREACHED*/
 	}
 #elif defined(FIONBIO)
-# if defined(VMS)
-		if (ioctl(fd,FIONBIO,&on) < 0)
-# elif defined(SYS_WINNT)
+# if defined(SYS_WINNT)
 		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
 # else
 		if (ioctl(fd,FIONBIO,&on) < 0)
