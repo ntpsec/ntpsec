@@ -1,9 +1,8 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS=	ansi2knr
 
-NULL=
 bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
-		@MAKE_NTP_KEYGEN@ $(NULL)
+		@MAKE_NTP_KEYGEN@
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
 	ntp-keygen ntptime pps-api precision sht testrs6000 tickadj timetrim
 
