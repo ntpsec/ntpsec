@@ -632,11 +632,12 @@ record_sys_stats(void)
 	now.l_ui %= 86400;
 	if (sysstats.fp != NULL) {
                 fprintf(sysstats.fp,
-		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(&now, 3), sys_stattime, sys_received,
-		    sys_processed, sys_newversionpkt,
+		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    day, ulfptoa(&now, 3), sys_stattime / 3600,
+		    sys_received, sys_processed, sys_newversionpkt,
 		    sys_oldversionpkt, sys_unknownversion,
-		    sys_badlength, sys_badauth, sys_limitrejected);
+		    sys_restricted, sys_badlength, sys_badauth,
+		    sys_limitrejected);
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}
@@ -759,12 +760,10 @@ sock_hash(
 		ch++;
 		hashVal = 37 * hashVal + (int)*ch;
 	}
-#if 0			/* monitor does not want port */
 	ch = (char *)&((struct sockaddr_in *)addr)->sin_port;
 	hashVal = 37 * hashVal + (int)*ch;
 	ch++;
 	hashVal = 37 * hashVal + (int)*ch;
-#endif
 	switch(addr->ss_family) {
 	case AF_INET:
 		ch = (char *)&((struct sockaddr_in *)addr)->sin_addr;

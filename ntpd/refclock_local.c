@@ -164,10 +164,11 @@ local_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = sys_precision;
+	pp->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM;
 	pp->stratum = STRATUM;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy(&pp->refid, "INIT", 4);
 	poll_time = current_time;
 	return (1);
 }
@@ -175,6 +176,15 @@ local_start(
 
 /*
  * local_poll - called by the transmit procedure
+ *
+ * LOCKCLOCK: If the kernel supports the nanokernel or microkernel
+ * system calls, the leap bits are extracted from the kernel. If there
+ * is a kernel error or the kernel leap bits are set to 11, the NTP leap
+ * bits are set to 11 and the stratum is set to infinity. Otherwise, the
+ * NTP leap bits are set to the kernel leap bits and the stratum is set
+ * as fudged. This behavior does not faithfully follow the
+ * specification, but is probably more appropriate in a multiple-server
+ * national laboratory network.
  */
 static void
 local_poll(
@@ -217,25 +227,29 @@ local_poll(
 	 * the leap bits and quality indicators from the kernel.
 	 */
 #if defined(KERNEL_PLL) && defined(LOCKCLOCK)
-	memset((char *)&ntv,  0, sizeof ntv);
+	memset(&ntv,  0, sizeof ntv);
 	switch (ntp_adjtime(&ntv)) {
 	case TIME_OK:
 		pp->leap = LEAP_NOWARNING;
+		peer->stratum = pp->stratum;
 		break;
 
 	case TIME_INS:
 		pp->leap = LEAP_ADDSECOND;
+		peer->stratum = pp->stratum;
 		break;
 
 	case TIME_DEL:
 		pp->leap = LEAP_DELSECOND;
+		peer->stratum = pp->stratum;
 		break;
 
 	default:
 		pp->leap = LEAP_NOTINSYNC;
+		peer->stratum = STRATUM_UNSPEC;
 	}
-	pp->disp = ntv.maxerror / 1e6;
-	pp->jitter = SQUARE(ntv.esterror / 1e6);
+	pp->disp = 0;
+	pp->jitter = 0;
 #else /* KERNEL_PLL LOCKCLOCK */
 	pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;

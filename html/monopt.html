@@ -12,12 +12,12 @@
         <h3>Monitoring Options</h3>
         <img src="pic/pogo8.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>The pig watches the logs.</p>
-        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:24</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">17:22</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="230">Friday, February 07, 2003</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
         <hr>
-        <tt>ntpd</tt> includes a comprehensive monitoring facility suitable for continuous, long term recording of server and client timekeeping performance. See the <tt>statistics</tt> command below for a listing and example of each type of statistics currently supported. Statistic files are managed using file generation sets and scripts in the ./scripts directory of this distribution. Using these facilities and Unix <tt>cron</tt> jobs, the datacan be automatically summarized and archived for retrospective analysis.
+        <tt>ntpd</tt> includes a comprehensive monitoring facility suitable for continuous, long term recording of server and client timekeeping performance. See the <tt>statistics</tt> command below for a listing and example of each type of statistics currently supported. Statistic files are managed using file generation sets and scripts in the <tt>./scripts</tt> directory of this distribution. Using these facilities and Unix <tt>cron</tt> jobs, the datacan be automatically summarized and archived for retrospective analysis.
         <h4>Monitoring Commands</h4>
         <dl>
             <dt><tt>statistics <i>name</i> [...]</tt>
@@ -37,12 +37,34 @@
                 <dd>The first two fields show the date (Modified Julian Day) and time (seconds and fraction past UTC midnight). The next five fields show time offset (seconds), frequency offset (parts per million - PPM), RMS jitter (seconds), Allan deviation (PPM) and clock discipline time constant.
                 <dt><tt>peerstats</tt>
                 <dd>Enables recording of peer statistics information. This includes statistics records of all peers of a NTP server and of special signals, where present and configured. Each valid update appends a line of the following form to the current element of a file generation set named <tt>peerstats</tt>:
-                <dd><tt>48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.001424877 0.000958674</tt>
+                <dt><tt>48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.001424877 0.000958674</tt>
                 <dd>The first two fields show the date (Modified Julian Day) and time (seconds and fraction past UTC midnight). The next two fields show the peer address in dotted-quad notation and status, respectively. The status field is encoded in hex in the format described in Appendix A of the NTP specification RFC 1305. The final four fields show the offset, delay, dispersion and RMS jitter, all in seconds.
                 <dt><tt>rawstats</tt>
                 <dd>Enables recording of raw-timestamp statistics information. This includes statistics records of all peers of a NTP server and of special signals, where present and configured. Each NTP message received from a peer or clock driver appends a line of the following form to the file generation set named <tt>rawstats</tt>:
-                <dd><tt>50928 2132.543 128.4.1.1 128.4.1.20 3102453281.584327000 3102453281.58622800031 02453332.540806000 3102453332.541458000</tt>
+                <dt><tt>50928 2132.543 128.4.1.1 128.4.1.20 3102453281.584327000 3102453281.58622800031 02453332.540806000 3102453332.541458000</tt>
                 <dd>The first two fields show the date (Modified Julian Day) and time (seconds and fraction past UTC midnight). The next two fields show the remote peer or clock address followed by the local address in dotted-quad notation, The final four fields show the originate, receive, transmit and final NTP timestamps in order. The timestamp values are as received and before processing by the various data smoothing and mitigation algorithms.
+
+                <dt><tt>sysstats</tt>
+                <dd>Enables recording of <tt>ntpd</tt> statistics counters on a periodic basis. Each hour a line of the following form is appended to the file generation set named <tt>sysstats</tt>:
+
+                <dd><tt>50928 2132.543 36000 81965 0 9546 56 71793 512 540 10 147</tt>
+                <dd>The first two fields show the date (Modified Julian Day) and time (seconds and fraction past UTC midnight). The remaining ten fields show the statistics counter values accumulated since the last generated line.                <dl>
+                <dt>Time since restart <tt>36000</tt>
+                <dd>Time in hours since the system was last rebooted.                <dt>Packets received <tt>81965</tt>
+                <dd>Total number of packets received.
+                <dt>Packets processed <tt>0</tt>
+                <dd>Number of packets received in response to previous packets sent 
+                <dt>Current version <tt>9546</tt>
+                <dd>Number of packets matching the current NTP version.
+                <dt>Previous version <tt>56</tt>
+                <dd>Number of packets matching the previous NTP version.                <dt>Bad version <tt>71793</tt>
+                <dd>Number of packets matching neither NTP version.                <dt>Access denied <tt>512</tt>
+                <dd>Number of packets denied access for any reason.
+                <dt>Bad length or format <tt>540</tt>
+                <dd>Number of packets with invalid length, format or port number.
+                <dt>Bad authentication  <tt>10</tt>
+                <dd>Number of packets not verified as authentic.                <dt>Rate exceeded <tt>147</tt>
+                <dd>Number of packets discarded due to rate limitation.
             </dl>
             <dt><tt>statsdir <i>directory_path</i></tt>
             <dd>Indicates the full path of a directory where statistics files should be created (see below). This keyword allows the (otherwise constant) <tt>filegen</tt> filename prefix to be modified for file generation sets, which is useful for handling statistics logs.

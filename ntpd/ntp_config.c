@@ -49,44 +49,6 @@ extern int priority_done;
  * Lines are considered terminated when a '#' is encountered.  Blank
  * lines are ignored.
  */
-
-/*
- * We understand the following configuration entries and defaults.
- *
- * peer [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * server [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * broadcast [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ ttl 1 ]
- * broadcastclient
- * multicastclient [ -4 | -6 ] [ 224.0.1.1 ]
- * manycastclient [ -4 | -6 ] [ addr ] [ version 3 ] [ key 0 ] [ minpoll 6 ] [ maxpoll 10 ]
- * manycastserver [ -4 | -6 ] [ 224.0.1.1 ]
- * broadcastdelay 0.0102
- * restrict [ -4 | -6 ] [ addr ] [ mask 255.255.255.0 ] ignore|noserve|notrust|noquery
- * driftfile file_name
- * keys file_name
- * publickey file_name
- * privatekey file_name
- * statsdir /var/NTP/
- * filegen peerstats [ file peerstats ] [ type day ] [ link ]
- * police [ min n ] [ avg n ]
- * trustedkey [ key ]
- * requestkey [ key ]
- * controlkey [ key ]
- * trap [ -4 | -6 ] [ addr ]
- * fudge [ addr ] [ stratum ] [ refid ] ...
- * pidfile [ ]
- * setvar [ ]
- * logfile logfile
- * logconfig [+|-|=][{sync|sys|peer|clock}{{,all}{info|statistics|events|status}}]...
- * enable auth|bclient|pll|kernel|monitor|stats|calibrate
- * disable auth|bclient|pll|kernel|monitor|stats|calibrate
- * phone ...
- * pps device [assert|clear] [hardpps]
- * priority high|normal
- * tinker [keyword value] ...
- * tos [keyword value] ...
- */
-
 /*
  * Translation table - keywords to function index
  */
@@ -202,7 +164,6 @@ static	struct keyword fudge_keywords[] = {
 	{ "time2",		CONF_FDG_TIME2 },
 	{ "",			CONFIG_UNKNOWN }
 };
-
 
 /*
  * "filegen" modifier keywords
