@@ -202,15 +202,12 @@ transmit(
 		} else {
 
 			/*
-			 * Here the peer is reachable. If it has
-			 * not been heard for three consecutive
-			 * polls, stuff infinity in the clock
-			 * filter. Next, determine the poll
-			 * interval. If the peer is unfit for
-			 * synchronization, double the interval;
-			 * else, use the system poll interval.
-			 * Send a burst only if enabled and
-			 * nothing is wrong.
+			 * Here the peer is reachable. If it has not
+			 * been heard for three consecutive polls, stuff
+			 * infinity in the clock filter dispersion.
+			 * Next, set the host poll interval to the
+			 * system poll interval. Send a burst only if
+			 * enabled and the peer is fit.
 			 */
 			peer->unreach = 0;
 			if (!(peer->reach & 0x07))
@@ -1974,6 +1971,14 @@ clock_select(void)
 			continue;
 		}
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
+
+		/*
+		 * The order metric is formed from the stratum times
+		 * MAXDISTANCE (1.) plus the root distance. It strongly
+		 * favors the lowest stratum, but a higher stratum peer
+		 * can capture the clock if the low stratum dominant
+		 * hasn't been heard for awhile.
+		 */
 		d = peer->stratum;
 		if (d < sys_floor)
 			d += sys_floor;
@@ -2859,7 +2864,6 @@ key_expire(
  *
  * A peer is unfit for synchronization if
  * > unreachable or bad leap or bad stratum or noselect
- * > peer stratum is greater than system stratum
  * > root distance exceeded
  * > a synchronization loop would form
  */
@@ -2872,10 +2876,6 @@ peer_unfit(
 	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
 	    FLAG_NOSELECT)
 		return (TEST13);	/* unfit */
-
- 	if (peer->stratum >= sys_stratum && !(peer->hmode ==
-	    MODE_ACTIVE || peer->hmode == MODE_PASSIVE))
-		return (TEST10);	/* stratum exceeded */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
@@ -2898,7 +2898,7 @@ peer_unfit(
 
 /*
  * This routine calculates the system precision, defined as the minimum
- * of a sequency of differences between successive readings of the
+ * of a sequence of differences between successive readings of the
  * system clock. However, if the system clock can be read more than once
  * during a tick interval, the difference can be zero or one LSB unit,
  * where the LSB corresponds to one nanosecond or one microsecond.
@@ -3075,9 +3075,10 @@ proto_config(
 		break;
 
 	/*
-	 * Add muliticast group address.
+	 * Add multicast group address.
 	 */
 	case PROTO_MULTICAST_ADD:
+		sys_bclient = (int)value;
 		if (svalue)
 		    io_multicast_add(*svalue);
 		break;
