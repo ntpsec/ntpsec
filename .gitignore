@@ -31,8 +31,12 @@ autom4te.cache
 br-flock
 clockstuff/Makefile.in
 compile
+config.guess
 config.h.in
+config.sub
 configure
+depcomp
+install-sh
 html/man/*
 html/pic/thumbs.db
 html/thumbs.db
@@ -43,6 +47,8 @@ libntp/Makefile.in
 libparse/Makefile.in
 librsaref/*.h
 librsaref/Makefile.in
+missing
+mkinstalldirs
 ntpd/Makefile.in
 ntpd/atom.bak
 ntpd/atom.c
