@@ -215,6 +215,7 @@ main(
 	char	**argv
 	)
 {
+	int	errflg = 0;
 	struct timeval tv;	/* initialization vector */
 #ifdef OPENSSL
 	X509	*cert = NULL;	/* X509 certificate */
@@ -373,9 +374,11 @@ main(
 		 * -m select modulus (256-2048)
 		 */
 		case 'm':
-			if (sscanf(optarg, "%d", &modulus) != 1)
+			if (sscanf(optarg, "%d", &modulus) != 1) {
 				fprintf(stderr,
 				    "invalid option -m %s\n", optarg);	
+				++errflg;
+			}
 			continue;
 #endif
 
@@ -439,9 +442,11 @@ main(
 		 */
 		case 'V':
 			mvpar++;
-			if (sscanf(optarg, "%d", &nkeys) != 1)
+			if (sscanf(optarg, "%d", &nkeys) != 1) {
 				fprintf(stderr,
 				    "invalid option -V %s\n", optarg);
+				++errflg;
+			}
 			continue;
 #endif
 
@@ -451,9 +456,11 @@ main(
 		 */
 		case 'v':
 			mvkey++;
-			if (sscanf(optarg, "%d", &nkeys) != 1)
+			if (sscanf(optarg, "%d", &nkeys) != 1) {
 				fprintf(stderr,
 				    "invalid option -v %s\n", optarg);
+				++errflg;
+			}
 			continue;
 #endif
 
@@ -461,9 +468,42 @@ main(
 		 * None of the above.
 		 */
 		default:
-			fprintf(stderr, "Option ignored\n");
+			++errflg;
 			continue;
 		}
+	}
+
+	if (errflg) {
+		printf("Usage:  ntp-keygen [options]\n");
+		printf("where options are:\n");
+#ifdef OPENSSL
+		printf("   -c cert_scheme\n");
+#endif
+		printf("   -d			increase debug level\n");
+#ifdef OPENSSL
+		printf("   -e			Write identity keys\n");
+		printf("   -G			Generate GQ parameters and keys\n");
+		printf("   -g			Update GQ keys\n");
+		printf("   -H			Generate RSA Host key\n");
+		printf("   -I			Generate IFF parameters\n");
+		printf("   -i issuer_name\n");
+#endif
+		printf("   -M			Generate MD5 keys\n");
+#ifdef OPENSSL
+		printf("   -m modulus		256 - 2048\n");
+		printf("   -P			generate PC private certificate\n");
+		printf("   -p output_pass	output private password\n");
+		printf("   -q input_pass	input private password\n");
+		printf("   -S sign-key		generate sign key (RSA or DSA)\n");
+		printf("   -s set-subj-name\n");
+		printf("   -T			Trusted certificate (TC scheme)\n");
+		printf("   -V #keys		generate MV parameters\n");
+		printf("   -v #keys		update MV parameters\n");
+		printf("\n");
+		printf("If there is no new host key, look for an existing one.\n");
+		printf("If one is not found, create it.\n");
+#endif
+		exit(2);
 	}
 
 	if (passwd1 != NULL && passwd2 == NULL)
