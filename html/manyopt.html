@@ -12,7 +12,7 @@
         <h3>Automatic NTP Configuration Options</h3>
         <img src="pic/alice51.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>Make sure who your friends are.</p>
-        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">03:13 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 13, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">04:09 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="296">Saturday, February 12, 2005</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links9.txt"></script>
@@ -45,22 +45,27 @@
         <p>About once an hour or less often if the poll interval exceeds this, the client regenerates the Autokey key list. This is in general transparent in client/server mode. However, about once per day the server private value used to generate cookies is refreshed along with all manycast client associations. In this case all cryptographic values including certificates is refreshed. If a new certificate has been generated since the last refresh epoch, it will automatically revoke all prior certificates that happen to be in the certificate cache. At the same time, the manycast scheme starts all over from the beginning and the expanding ring shrinks to the minimum and increments from there while collecting all servers in scope.</p>
         <h4 id="opt">Manycast Options</h4>
         <dl>
-            <dt><tt>tos [ ceiling <i>ceiling</i> | cohort {0 | 1} |floor <i>floor</i> | minclock <i>minclock</i> | minsane <i>minsane</i> ]</tt>
-            <dd>This command affects the clock selection and clustering algorithms. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in manycast mode. The variables operate as follows:
-            <dl>
-                <dt><tt>ceiling <i>ceiling</i></tt>
-                <dd>Peers with strata above <i>ceiling</i> will be discarded if there are at least <i>minclock</i> peers remaining. This value defaults to 15, but can be changed to any number from 1 to 15.
-                <dt><tt>cohort { 0 | 1 }</tt>
-                <dd>This is a binary flag which enables (0) or disables (1) manycast server replies to manycast clients with the same stratum level. This is useful to reduce implosions where large numbers of clients with the same stratum level are present. The default is to enable these replies.
-                <dt><tt>floor <i>floor</i></tt>
-                <dd>Peers with strata below <i>floor</i> will be discarded if there are at least <i>minclock</i> peers remaining. This value defaults to 1, but can be changed to any number from 1 to 15.
-                <dt><tt>minclock <i>minclock</i></tt>
-                <dd>The clustering algorithm repeatedly casts out outlyer associations until no more than <i>minclock</i> associations remain. This value defaults to 3, but can be changed to any number from 1 to the number of configured sources.
-                <dt><tt>minsane <i>minsane</i></tt>
-                <dd>This is the minimum number of candidates available to the clock selection algorithm in order to produce one or more truechimers for the clustering algorithm. If fewer than this number are available, the clock is undisciplined and allowed to run free. The default is 1 for legacy purposes. However, according to principles of Byzantine agreement, <i>minsane</i> should be at least 4 in order to detect and discard a single falseticker.
-            </dl>
-            <dt><tt>ttl <i>hop</i> ...</tt>
-            <dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.
+            <dt><tt>tos [ ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxdistance <i>maxdistance</i> | minclock <i>minclock</i> | minsane <i>minsane</i> ]</tt>
+			<dd>This command affects the clock selection and clustering algorithms. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in manycast mode. The variables operate as follows:
+				<dl>
+					<dt><tt>ceiling <i>ceiling</i></tt>
+					<dd>Peers with strata above <i>ceiling</i> will be discarded if there are at least <i>minclock</i> peers remaining. This value defaults to 15, but can be changed to any number from 1 to 15.
+					<dt><tt>cohort { 0 | 1 }</tt>
+					<dd>This is a binary flag which enables (0) or disables (1) manycast server replies to manycast clients with the same stratum level. This is useful to reduce implosions where large numbers of clients with the same stratum level are present. The default is to enable these replies.
+					<dt><tt>floor <i>floor</i></tt>
+					<dd>Peers with strata below <i>floor</i> will be discarded if there are at least <i>minclock</i> peers remaining. This value defaults to 1, but can be changed to any number from 1 to 15.
+					<dt><tt>mindist <i>mindistance</i></tt>
+					<dd>The slection algorithm normally pads each intersection a minimum of one millisecond to avoid needless classification. In some cases, such as reference clocks with high jitter and a PPS signal, it is useful to increase the padding. This command can be used for that purpose. As a general rule, set the mindistance to the maximum expected offset plus the maxiumum expected jitter, in seconds.
+					<dt><tt>maxdist <i>maxdistance</i></tt>
+					<dd>The selection algorithm accumulates a number of packets before setting the clock in order to use the best data available. The number is determined by the synchronization distance for each association and a limit called the distance threshold. The synchronization distance starts at 16, then drops by a factor of about two as each packet is received. The default distance threshold is 1.0, which usually results in four packets. Setting maxdistance to some value between 1 and 16 can be used to change the number of packets required. For instance, setting it to 16 will set the clock on the first packet received; howver, setting it to this value essentially disables the mitigation and grooming algorithms.
+					<dt><tt>minclock <i>minclock</i></tt>
+					<dd>The clustering algorithm repeatedly casts out outlyer associations until no more than <i>minclock</i> associations remain. This value defaults to 3, but can be changed to any number from 1 to the number of configured sources.
+					<dt><tt>minsane <i>minsane</i></tt>
+					<dd>This is the minimum number of candidates available to the clock selection algorithm in order to produce one or more truechimers for the clustering algorithm. If fewer than this number are available, the clock is undisciplined and allowed to run free. The default is 1 for legacy purposes. However, according to principles of Byzantine agreement, <i>minsane</i> should be at least 4 in order to detect and discard a single falseticker.
+				</dl>
+			
+			<dt><tt>ttl <i>hop</i> ...</tt>
+			<dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.
         </dl>
         <hr>
         <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>

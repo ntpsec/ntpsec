@@ -12,7 +12,7 @@
         <h3>Miscellaneous Options</h3>
         <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>We have three, now looking for more.</p>
-        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=97>11:51 PM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=290>Sunday, December 05, 2004</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=99>03:39 AM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=296>Saturday, February 12, 2005</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -60,7 +60,7 @@
 			<dt><tt>phone <i>dial</i>1 <i>dial</i>2 ...</tt>
 			<dd>This command is used in conjunction with the ACTS modem driver (type 18). The arguments consist of a maximum of 10 telephone numbers used to dial USNO, NIST or European time services. The Hayes command ATDT&nbsp;is normally prepended to the number, which can contain other modem control codes as well.<dt><tt>setvar <i>variable</i> [default]</tt>
             <dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.
-            <dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff | <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt>
+            <dt><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt>
             <dd>This command can be used to alter several system variables in very exceptional circumstances. It should occur in the configuration file before any other configuration options. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. In general, they interact in intricate ways that are hard to predict and some combinations can result in some very nasty behavior. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs anyway and this command is for them. Emphasis added: twisters are on their own and can expect no help from the support group.
             <p>The variables operate as follows:</p>
             <dl>
@@ -73,12 +73,9 @@
                 <dt><tt>huffpuff <i>huffpuff</i></tt>
                 <dd>The argument becomes the new value for the experimental huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours). There is no default, since the filter is not enabled unless this command is given.
                 <dt><tt>panic <i>panic</i></tt>
-                <dd>The argument is the panic threshold, normally 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.
-                <dt><tt>step <i>step</i></tt>
-                <dd>The argument is the step threshold, which by default is 0.128 s. It can be set to any positive number in seconds. If set to zero, step adjustments will never occur. Note:&nbsp;The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.
-                <dt><tt>stepout <i>stepout</i></tt>
-                <dd>The argument is the stepout timeout, which by default is 900 s. It can be set to any positive number in seconds. If set to zero, the stepout pulses will not be suppressed.
-            </dl>
+                <dd>The argument is the panic threshold, by default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.<dt><tt>step <i>step</i></tt>
+                <dd>The argument is the step threshold, by default 0.128 s. It can be set to any positive number in seconds. If set to zero, step adjustments will never occur. Note:&nbsp;The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.<dt><tt>stepout <i>stepout</i></tt>
+                <dd>The argument is the stepout timeout, by default 900 s. It can be set to any positive number in seconds. If set to zero, the stepout pulses will not be suppressed.</dl>
             <dt><tt>trap <i>host_address</i> [port <i>port_number</i>] [interface <i>interface_address</i>]</tt>
             <dd>This command configures a trap receiver at the given host address and port number for sending messages with the specified local interface address. If the port number is unspecified, a value of 18447 is used. If the interface address is not specified, the message is sent with a source address of the local interface the message is sent through. Note that on a multihomed host the interface used may vary from time to time with routing changes.
             <p>The trap receiver will generally log event messages and other information from the server in a log file. While such monitor programs may also request their own trap dynamically, configuring a trap receiver will ensure that no messages are lost when the server is started.</p>
