@@ -158,4 +158,5 @@
 #define CONF_CRYPTO_LEAP	3
 #define CONF_CRYPTO_CERT	4
 #define CONF_CRYPTO_RAND	5
+#define CONF_CRYPTO_TRUST	6
 #endif /* OPENSSL */

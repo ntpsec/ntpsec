@@ -18,10 +18,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#ifdef OPENSSL
-#include "ntp_crypto.h"
-#endif /* OPENSSL */
-
 /*
  * Structure to hold request procedure information
  */
@@ -118,7 +114,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_FLAGS,	RO, "flags" },		/* 20 */
 	{ CS_HOST,	RO, "hostname" },	/* 21 */
 	{ CS_PUBLIC,	RO, "hostkey" },	/* 22 */
-	{ CS_CERTIF,	RO, "certificate" },	/* 23 */
+	{ CS_CERTIF,	RO, "cert" },		/* 23 */
 	{ CS_REVTIME,	RO, "refresh" },	/* 24 */
 	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 25 */
 	{ CS_TAI,	RO, "tai" },		/* 26 */
@@ -156,10 +152,10 @@ static	u_char def_sys_var[] = {
 	CS_HOST,
 	CS_DIGEST,
 	CS_FLAGS,
-	CS_CERTIF,
 	CS_PUBLIC,
 	CS_REVTIME,
 	CS_LEAPTAB,
+	CS_CERTIF,
 #endif /* OPENSSL */
 	0
 };
@@ -210,14 +206,13 @@ static struct ctl_var peer_var[] = {
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 38 */
 	{ CP_HOST,	RO, "hostname" },	/* 39 */
-	{ CP_CERTIF,	RO, "certificate" },	/* 40 */
-	{ CP_SESKEY,	RO, "cookie" },		/* 41 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 42 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 43 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 44 */
-	{ CP_DIGEST,	RO, "signature" },	/* 45 */
+	{ CP_SESKEY,	RO, "cookie" },		/* 40 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
+	{ CP_DIGEST,	RO, "signature" },	/* 44 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 38/46 */
+	{ 0,		EOV, "" }		/* 38/44 */
 };
 
 
@@ -259,7 +254,6 @@ static u_char def_peer_var[] = {
 	CP_HOST,
 	CP_DIGEST,
 	CP_FLAGS,
-	CP_CERTIF,
 	CP_SESKEY,
 	CP_INITSEQ,
 #endif /* OPENSSL */
@@ -1135,7 +1129,6 @@ ctl_putarray(
 	register const char *cq;
 	char buffer[200];
 	int i;
-
 	cp = buffer;
 	cq = tag;
 	while (*cq != '\0')
@@ -1163,6 +1156,10 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
+#ifdef OPENSSL
+	struct cert_info *cp;
+	char cbuf[256];
+#endif /* OPENSSL */
 
 	switch (varid) {
 
@@ -1351,19 +1348,24 @@ ctl_putsys(
 		break;
 
 	case CS_CERTIF:
-		if (cinfo.fstamp != 0)
-			ctl_putuint(sys_var[CS_CERTIF].text, cinfo.fstamp);
+		for (cp = cinfo; cp != NULL; cp = cp->link) {
+			sprintf(cbuf, "%s %s %c %u", cp->subject,
+			    cp->issuer, cp->flags & CERT_VALID ? 'T' : 'U',
+			    ntohl(cp->cert.fstamp));
+			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
+			    strlen(cbuf));
+		}
 		break;
 
 	case CS_PUBLIC:
-		if (host.fstamp != 0)
-			ctl_putuint(sys_var[CS_PUBLIC].text, host.fstamp);
+		if (hostval.fstamp != 0)
+			ctl_putuint(sys_var[CS_PUBLIC].text, hostval.fstamp);
 		break;
 
 	case CS_REVTIME:
-		if (host.tstamp != 0)
+		if (hostval.tstamp != 0)
 			ctl_putuint(sys_var[CS_REVTIME].text,
-			    ntohl(host.tstamp));
+			    ntohl(hostval.tstamp));
 		break;
 
 	case CS_LEAPTAB:
@@ -1626,15 +1628,9 @@ ctl_putpeer(
 		break;
 
 	case CP_HOST:
-		if (peer->keystr != NULL)
-			ctl_putstr(peer_var[CP_HOST].text, peer->keystr,
-			    strlen(peer->keystr));
-		break;
-
-	case CP_CERTIF:
-		if (peer->cinfo.fstamp != 0)
-			ctl_putuint(peer_var[CP_CERTIF].text,
-			    peer->cinfo.fstamp);
+		if (peer->subject != NULL)
+			ctl_putstr(peer_var[CP_HOST].text, peer->subject,
+			    strlen(peer->subject));
 		break;
 
 	case CP_SESKEY:

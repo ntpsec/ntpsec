@@ -279,7 +279,7 @@ timer(void)
 	if (revoke_timer <= current_time) {
 		revoke_timer += RANDPOLL(sys_revoke);
 		expire_all();
-		sprintf(statstr, "refresh ts %u", ntohl(host.tstamp));
+		sprintf(statstr, "refresh ts %u", ntohl(hostval.tstamp));
 		record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 		if (debug)
