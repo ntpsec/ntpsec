@@ -83,7 +83,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
+#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI)
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -1328,19 +1328,11 @@ oncore_msg_any(
 	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
-#ifdef HAVE_STRUCT_TIMESPEC
-	struct timespec tv;
-#else
 	struct timeval tv;
-#endif
 
 	if (debug > 3) {
 		GETTIMEOFDAY(&tv, 0);
-#ifdef HAVE_STRUCT_TIMESPEC
-		printf("ONCORE[%d]: %ld.%09ld\n", instance->unit, (long) tv.tv_sec, (long) tv.tv_nsec);
-#else
 		printf("ONCORE[%d]: %ld.%06ld\n", instance->unit, (long) tv.tv_sec, (long) tv.tv_usec);
-#endif
 
 		if (!*fmt) {
 			printf(">>@@%c%c ", buf[2], buf[3]);
@@ -2250,7 +2242,8 @@ oncore_get_timestamp(
 	long dt2	/* tick offset NEXT time step */
 	)
 {
-	int	j, Rsm;
+	int     Rsm;
+	u_long  i, j;
 	l_fp ts, ts_tmp;
 	double dmy;
 #ifdef HAVE_STRUCT_TIMESPEC
@@ -2298,18 +2291,18 @@ oncore_get_timestamp(
 	if (instance->assert) {
 		tsp = &pps_i.assert_timestamp;
 
-		if (debug > 2)
+		if (debug > 2) {
+			i = (u_long) pps_i.assert_sequence;
 #ifdef HAVE_STRUCT_TIMESPEC
-			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%09ld\n",
-			    instance->unit,
-			    (long)pps_i.assert_sequence, j,
+			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%09ld\n",
+			    instance->unit, i, j,
 			    (long)tsp->tv_sec, (long)tsp->tv_nsec);
 #else
-			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%06ld\n",
-			    instance->unit,
-			    (long)pps_i.assert_sequence, j,
+			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%06ld\n",
+			    instance->unit, i, j,
 			    (long)tsp->tv_sec, (long)tsp->tv_usec);
 #endif
+		}
 
 		if (pps_i.assert_sequence == j) {
 			printf("ONCORE: oncore_get_timestamp, error serial pps\n");
@@ -2319,16 +2312,16 @@ oncore_get_timestamp(
 	} else {
 		tsp = &pps_i.clear_timestamp;
 
-		if (debug > 2)
+		if (debug > 2) {
+			i = (u_long) pps_i.clear_sequence;
 #ifdef HAVE_STRUCT_TIMESPEC
-			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%09ld\n",
-			    instance->unit,
-			    pps_i.clear_sequence, j, tsp->tv_sec, tsp->tv_nsec);
+			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%09ld\n",
+			    instance->unit, i, j, tsp->tv_sec, tsp->tv_nsec);
 #else
-			printf("ONCORE[%d]: serial/j (%lu, %d) %ld.%06ld\n",
-			    instance->unit,
-			    pps_i.clear_sequence, j, tsp->tv_sec, tsp->tv_usec);
+			printf("ONCORE[%d]: serial/j (%lu, %lu) %ld.%06ld\n",
+			    instance->unit, i, j, tsp->tv_sec, tsp->tv_usec);
 #endif
+		}
 
 		if (pps_i.clear_sequence == j) {
 			printf("ONCORE: oncore_get_timestamp, error serial pps\n");
@@ -2430,13 +2423,13 @@ oncore_get_timestamp(
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_ioctl: time_pps_getcap failed: %m");
-		return (0);
+		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_ioctl: time_pps_getparams failed: %m");
-		return (0);
+		return;
 	}
 
 		/* or current and mine */
@@ -2480,7 +2473,7 @@ oncore_get_timestamp(
 
 	if (instance->chan == 6 || instance->chan == 8) {
 		sprintf(instance->pp->a_lastcode,	/* MAX length 128, currently at 117 */
-		    "%u.%09u %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d sigma %d neg-sawtooth %3d sat %d%d%d%d%d%d%d%d",
+		    "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d sigma %d neg-sawtooth %3d sat %d%d%d%d%d%d%d%d",
 		    ts.l_ui, j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
@@ -2496,7 +2489,7 @@ oncore_get_timestamp(
 		    );					/* will be 0 for 6 chan */
 	} else if (instance->chan == 12) {
 		sprintf(instance->pp->a_lastcode,
-		    "%u.%09u %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d sat %d%d%d%d%d%d%d%d%d%d%d%d",
+		    "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d sat %d%d%d%d%d%d%d%d%d%d%d%d",
 		    ts.l_ui, j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
@@ -2512,9 +2505,9 @@ oncore_get_timestamp(
 	}
 
 	if (debug > 2) {
-		int i;
-		i = strlen(instance->pp->a_lastcode);
-		printf("ONCORE[%d]: len = %d %s\n", instance->unit, i, instance->pp->a_lastcode);
+		int n;
+		n = strlen(instance->pp->a_lastcode);
+		printf("ONCORE[%d]: len = %d %s\n", instance->unit, n, instance->pp->a_lastcode);
 	}
 
 	if (!refclock_process(instance->pp)) {
