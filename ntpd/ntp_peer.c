@@ -592,6 +592,14 @@ newpeer(
 		peer->dstadr = findinterface(srcadr);
 
 	/*
+	 * If we can't find an interface to use we return a NULL
+	 */
+	if (peer->dstadr == NULL)
+	{
+		msyslog(LOG_ERR, "Cannot find suitable interface for address %s", stoa(srcadr));
+		return (NULL);
+	}
+	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
 	if (cast_flags & (MDF_BCLNT | MDF_BCAST)) {
