@@ -1,5 +1,8 @@
 2001-06-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp.h (RES_ALLFLAGS): Add RES_DEMOBILIZE.
+	From: Dean Gibson <timekeeper@tcp-udp.net>
+
 	* configure.in: 4.0.99m-rc1a
 
 2001-06-02  Harlan Stenn  <stenn@whimsy.udel.edu>
