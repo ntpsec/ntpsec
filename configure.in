@@ -50,7 +50,7 @@ esac
 
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
-   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non root time control]),
+   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root time control]),
     [ans=$enableval],
     [case "$target" in
       *-*-netbsd*)
@@ -61,10 +61,11 @@ AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
      esac
      ])
 ac_clockctl=$ans])
-case "$ac_clockctl" in
- yes)
-    AC_CHECK_HEADERS(sys/clockctl.h,
-		     [AC_DEFINE(HAVE_CLOCKCTL, ,[Use /dev/clockctl?])])
+# End of AC_CACHE_CHECK for clockctl
+AC_CHECK_HEADERS(sys/clockctl.h)
+case "$ac_clockctl$ac_cv_header_sys_clockctl_h" in
+ yesyes)
+    AC_DEFINE(HAVE_CLOCKCTL, ,[[Use /dev/clockctl?]])
     ;;
 esac
 
@@ -250,10 +251,16 @@ AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
-AC_CHECK_HEADERS(poll.h resolv.h sched.h sgtty.h stdlib.h string.h termio.h)
+AC_CHECK_HEADERS(poll.h)
+AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
-AC_CHECK_HEADERS(arpa/nameser.h net/if.h netinet/in_system.h)
-AC_CHECK_HEADERS(netinet/in_systm.h netinet/in.h netinet/ip.h)
+AC_CHECK_HEADERS(arpa/nameser.h)
+#HMS
+AC_CHECK_HEADERS(net/if.h)
+AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
+AC_CHECK_HEADERS(netinet/in.h)
+#HMS
+AC_CHECK_HEADERS(netinet/ip.h)
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO, 1, [NetInfo support?])])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)
@@ -302,6 +309,18 @@ if test $ac_cv_struct_nlist_n_un = yes; then
   AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
 fi
 ])dnl
+
+AC_CHECK_HEADERS(resolv.h, [], [],
+[#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_NAMESER_H>
+#include <arpa/nameser.h>
+#endif
+])
 
 AC_CACHE_CHECK(for basic volatile support, ac_cv_c_volatile,
 [AC_TRY_COMPILE([],[
