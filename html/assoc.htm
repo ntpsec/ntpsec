@@ -1,10 +1,11 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html><title>
 Association Management
 </title></head><body><h3>
 Association Management
 </h3>
 
-<img align=left src=pic/alice51.gif><a href=http://www.eecis.udel.edu/~mills/pictures.htm>
+<img align=left src=pic/alice51.gif alt="gif"><a href=http://www.eecis.udel.edu/~mills/pictures.htm>
 from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 
 <p>Make sure who your friends are.
@@ -40,7 +41,7 @@ from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 
 <p>Broadcast mode in both NTPv3 and NTPv4 is limited to directly connected subnets such as Ethernets which support broadcast technology. Ordinarily, this technology does not operate beyond the first hop router or gateway. Where service is intended beyond the local subnet, IP multicasting can be used where supported by the operating system and the routers support the Internet Group Management Protocol (IGMP). Most current kernels and available routers do support IP multicast technology, although service providers are sometimes reluctant to deploy it.
 
-<p>A general discussion of IP multicast technology is beyond the scope here. In simple terms a host or router sending to a IP multicast group (class D) address expects all hosts or routers listening on this address to receive the message. There is no intrinsic limit on the number of senders or receivers and senders can be receivers and vice versa. The IANA has assigned multicast group address 224.0.1.1 to NTP, but this address should be used only where the multicast span can be reliably constrained to protect neighbor networks. In general, administratively scoped group addresses should be used as described in RFC-2365.
+<p>A general discussion of IP multicast technology is beyond the scope here. In simple terms a host or router sending to a IP multicast group (class D) address expects all hosts or routers listening on this address to receive the message. There is no intrinsic limit on the number of senders or receivers and senders can be receivers and vice versa. The IANA has assigned multicast group address 224.0.1.1 to NTP, but this address should be used only where the multicast span can be reliably constrained to protect neighbor networks. In general, administratively scoped group addresses should be used, as described in RFC-2365, or GLOP group addresses, as described in RFC-2770.
 
 <h4>Multicasting</h4>
 
@@ -60,9 +61,9 @@ from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 
 <p>The manycast client receiving this message mobilizes an ephemeral client association as in ordinary client/server mode according to the matching manycast client template. Then, the client polls the server at its unicast address in burst mode in order to reliably set the host clock and validate the source. This normally results in a volley of eight client/server cycles over a 30-s interval during which both the synchronization and cryptographic protocols run concurrently. Following the volley, the client runs the NTP intersection and clustering algorithms, which act to discard all but the best three associations. The surviving associations then continue in ordinary client/server mode.
 
-<p>The manycast client polling program is designed to reduce as much as possible the volume of messages and the effects of implosion due to near-simultaneous arrival of manycast server messages. The program starts with the poll interval specified by the <tt>minpoll</tt> keyword and a time-to-live of one hop. At each transmission the time-to-live is incremented by one until at least three manycast servers are found, at which point the poll interval is clamped at the value specified by the <tt>maxpoll</tt> keyword. Further transmissions use the same poll interval and time-to-live values.
+<p>The manycast client polling program is designed to reduce as much as possible the volume of messages and the effects of implosion due to near-simultaneous arrival of manycast server messages. The program uses a poll interval eight times the system poll interval, which starts out at the <tt>minpoll</tt> value and under normal circumstances increases gradually to the <tt>maxpolll</tt> value. Initially, the time-to-live is set at one hop. At each retransmission the time-to-live is incremented by one until at least three manycast servers are found. Further retransmissions use the same time-to-live value.
 
-<p>If less than three servers are found when the time-to-live has reached the maximum specified by the <tt>ttl</tt> keyword, the poll interval is doubled. For each transmission after that, the poll interval is doubled again until reaching the maximum specified by the <tt>maxpoll</tt> keyword. Further transmissions use the same poll interval and time-to-live values.
+<p>If less than three servers are found when the time-to-live has reached the maximum specified by the <tt>ttl</tt> keyword, the poll interval is doubled. For each transmission after that, the poll interval is doubled again until reaching the maximum of eight times the value specified by the <tt>maxpoll</tt> keyword. Further transmissions use the same poll interval and time-to-live values.
 
 <p>The above scenario happens for each manycast client message, which repeats at the designated poll interval. However, once the ephemeral client association is mobilized, subsequent manycast server replies are discarded, since they will fail the message digest test. If during a poll interval the number of client associations falls below three, all manycast client prototype associations are reset to the initial poll interval and time-to-live values and operation resumes from the beginning. It is important in manycast mode to avoid frequent manycast client messages, since each one requires all manycast servers in range to respond. The result could well be an implosion, either minor or major, depending on the number of servers in range. The recommended value for <tt>maxpoll</tt> is 12 (4,096 s) and for <tt>ttl</tt> is 7.
 
@@ -78,4 +79,11 @@ Once operations have stabilized in this scenario, the primary servers will affil
 
 <p>The <tt>burst</tt> keyword can be configured in cases of excessive network jitter or when the network attachment requires an initial calling or training procedure. The burst is initiated at each poll interval when the server is reachable. The burst does produce additional network overhead and can cause trouble if used indiscriminately. It should only be used where the poll interval is expected to settle to values at or above 1024 s.
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a></address></a></body></html>
+<hr>
+<a href="index.htm"><img align="left" src="pic/home.gif" alt=
+"gif"></a> 
+
+<address><a href="mailto:mills@udel.edu">David L. Mills
+&lt;mills@udel.edu&gt;</a></address>
+</body>
+</html>

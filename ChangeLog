@@ -1,3 +1,30 @@
+2001-04-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/y2k.htm:
+	* html/tickadj.htm:
+	* html/release.htm:
+	* html/refclock.htm:
+	* html/quick.htm:
+	* html/pps.htm:
+	* html/ntptrace.htm:
+	* html/ntptime.htm:
+	* html/ntpq.htm:
+	* html/ntpdc.htm:
+	* html/ntpdate.htm:
+	* html/ntpd.htm:
+	* html/miscopt.htm:
+	* html/index.htm:
+	* html/genkeys.htm:
+	* html/exec.htm:
+	* html/driver7.htm:
+	* html/driver22.htm:
+	* html/copyright.htm:
+	* html/confopt.htm:
+	* html/build.htm:
+	* html/authopt.htm:
+	* html/assoc.htm:
+	Updates from Dave Mills.
+	
 2001-04-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in (OPENSSL): Just use -lcrypto.

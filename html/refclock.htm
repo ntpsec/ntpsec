@@ -17,6 +17,8 @@ Support for most of the commonly available radio and modem reference clocks is i
 <p>The audio drivers are a special case. These include support for the NIST time/frequency stations WWV and WWVH, the Canadian time/frequency station CHU and generic IRIG signals. Currently, support for the Solaris and SunOS audio API is included in the distribution. It is left to the volunteer corps to extend this support to other systems. Further information on hookup, debugging and monitoring is given in the <a
 href=audio.htm>Audio Drivers</a> page.
 
+<p>The local clock driver is also a special case. A server configured with this driver can operate as a primary server to synchronize other clients when no other external synchronization sources are available. If the server is connected directly or indirectly to the public Internet, there is some danger that it can adversely affect the operation of unrelated clients. Carefully read the <a href=driver1.htm>Undisciplined Local Clock</a> page and respect the stratum limit.
+
 <h4>Driver Calibration</h4>
 
 <p>Some drivers depending on longwave and shortwave radio services need to know the radio propagation time from the transmitter to the receiver, which can amount to some tens of milliseconds. This must be calculated for each specific receiver location and requires the geographic coordinates of both the transmitter and receiver. The transmitter coordinates for various radio services are given in the <a href=qth.htm>Stations, Frequencies and Geographic Coordinates</a> page. Receiver coordinates can be obtained or estimated from various sources. The actual calculations are beyond the scope of this document.
