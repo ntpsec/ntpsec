@@ -144,7 +144,6 @@ extern int priority_done;
 #ifdef PUBKEY
 #define CONFIG_CRYPTO		34
 #endif /* PUBKEY */
-#define CONFIG_PRIORITY		35
 
 /*
  * "peer", "server", "broadcast" modifier keywords
@@ -265,7 +264,6 @@ static	struct keyword keywords[] = {
 	{ "phone",		CONFIG_PHONE },
 	{ "pidfile",		CONFIG_PIDFILE },
 	{ "pps",		CONFIG_PPS },
-	{ "priority",		CONFIG_PRIORITY },
 	{ "requestkey",		CONFIG_REQUESTKEY },
 	{ "restrict",		CONFIG_RESTRICT },
 	{ "revoke",		CONFIG_REVOKE },
@@ -482,7 +480,7 @@ int	config_priority_override = 0;
 int	config_priority;
 #endif
 
-static const char *ntp_options = "aAbc:dD:f:gk:l:Lmnp:P:r:s:t:v:V:x";
+static const char *ntp_options = "aAbc:dD:f:gk:l:LmnN:p:P:r:s:t:v:V:x";
 
 #ifdef HAVE_NETINFO
 /*
@@ -853,6 +851,10 @@ getconfig(
 		    case 'n':	/* already done at pre-scan */
 			break;
 
+		    case 'N':
+			priority_done = strcmp(ntp_optarg, "high");
+			break;
+
 		    case 'p':
 			stats_config(STATS_PID_FILE, ntp_optarg);
 			break;
@@ -1177,13 +1179,6 @@ getconfig(
 			    stats_config(STATS_PID_FILE, tokens[1]);
 			else
 			    stats_config(STATS_PID_FILE, (char *)0);
-			break;
-
-		    case CONFIG_PRIORITY:
-			if (ntokens >= 1)
-				priority_done = strcmp(tokens[1], "high");
-			else
-				priority_done = 1;
 			break;
 
 		    case CONFIG_LOGFILE:

@@ -7,9 +7,10 @@
 <H4>Synopsis</H4>
 
 <TT>ntpd [ -aAbdm ] [ -c <I>conffile</I> ] [ -f <I>driftfile</I> ] [ -g
-] [ -k <I>keyfile</I> ] [ -l <I>logfile</I> ] [ -p <I>pidfile</I> ] [ -r
-<I>broadcastdelay</I> ] [ -s <I>statsdir</I> ] [ -t <I>key</I> ] [ -v
-<I>variable</I> ] [ -V <I>variable</I> ] [ -x ]</TT>
+] [ -k <I>keyfile</I> ] [ -l <I>logfile</I> ] [ -N high ] [ -p
+<I>pidfile</I> ] [ -r <I>broadcastdelay</I> ] [ -s <I>statsdir</I> ] [
+-t <I>key</I> ] [ -v <I>variable</I> ] [ -V <I>variable</I> ] [ -x
+]</TT>
 
 <H4>Description</H4>
 
@@ -70,7 +71,8 @@ and if it's zero <TT>ntpd</TT> will set the <TT>umask</TT> to
 <DD>Synchronize using NTP broadcast messages.</DD>
 
 <DT><TT>-c <I>conffile</I></TT></DT>
-<DD>Specify the name and path of the configuration file.</DD>
+<DD>Specify the name and path of the configuration file.
+(Disable netinfo?)</DD>
 
 <DT><TT>-d</TT></DT>
 <DD>Specify debugging mode. This flag may occur multiple times, with
@@ -96,9 +98,19 @@ authentication keys.</DD>
 <DD>Specify the name and path of the log file. The default is the system
 log facility.</DD>
 
+<DT><TT>-L</TT></DT>
+<DD>Listen to virtual IPs.</DD>
+
 <DT><TT>-m</TT></DT>
 <DD>Synchronize using NTP multicast messages on the IP multicast group
 address 224.0.1.1 (requires multicast kernel).</DD>
+
+<DT><TT>-n</TT></DT>
+<DD>Don't fork.</DD>
+
+<DT><TT>-N high</TT></DT>
+<DD>To the extent permitted by the operating system, run the daemon at a
+high priority.</DD>
 
 <DT><TT>-p <I>pidfile</I></TT></DT>
 <DD>Specify the name and path to record the daemon's process ID.</DD>
