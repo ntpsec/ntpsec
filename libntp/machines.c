@@ -435,25 +435,25 @@ ntp_set_tod(
 
 		errno = 0;
 		rc = clock_settime(CLOCK_REALTIME, &ts);
-	}
 #ifdef DEBUG
-	if (debug) {
-		printf("ntp_set_tod: %s: %d: %s\n",
-			set_tod_using, rc, strerror(errno));
-	}
+		if (debug) {
+			printf("ntp_set_tod: %s: %d: %s\n",
+			       set_tod_using, rc, strerror(errno));
+		}
 #endif
+	}
 #endif /* HAVE_CLOCK_SETTIME */
 #ifdef HAVE_SETTIMEOFDAY
 	if (rc) {
 		set_tod_using = "settimeofday";
 		rc = SETTIMEOFDAY(tvp, tzp);
-	}
 #ifdef DEBUG
-	if (debug) {
-		printf("ntp_set_tod: %s: %d: %s\n",
-			set_tod_using, rc, strerror(errno));
-	}
+		if (debug) {
+			printf("ntp_set_tod: %s: %d: %s\n",
+			       set_tod_using, rc, strerror(errno));
+		}
 #endif
+	}
 #endif /* HAVE_SETTIMEOFDAY */
 #ifdef HAVE_STIME
 	if (rc) {
@@ -461,19 +461,19 @@ ntp_set_tod(
 
 		set_tod_using = "stime";
 		rc = stime(&tp); /* lie as bad as SysVR4 */
-	}
 #ifdef DEBUG
-	if (debug) {
-		printf("ntp_set_tod: %s: %d: %s\n",
-			set_tod_using, rc, strerror(errno));
-	}
+		if (debug) {
+			printf("ntp_set_tod: %s: %d: %s\n",
+			       set_tod_using, rc, strerror(errno));
+		}
 #endif
+	}
 #endif /* HAVE_STIME */
 	if (rc)
 	    set_tod_using = "Failed!";
 #ifdef DEBUG
 	if (debug) {
-		printf("ntp_set_tod: Final: %s: %d: %s\n",
+		printf("ntp_set_tod: Final result: %s: %d: %s\n",
 			set_tod_using, rc, strerror(errno));
 	}
 #endif
