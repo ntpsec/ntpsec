@@ -16,24 +16,24 @@
 #if !defined _WIN32_WINNT || _WIN32_WINNT < 0x0400
 # error Please define _WIN32_WINNT in the project settings/makefile
 #endif
-# define MCAST				/* Enable Multicast Support */															/*	98/06/01  */
-# undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 																	/*	98/06/01  *//*	98/06/03  */
-# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 	
-																/*	98/06/01  */
+# define MCAST				/* Enable Multicast Support */												
+# undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 													
+# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
 # define REFCLOCK				/* from ntpd.mak */
 # define CLOCK_LOCAL			/* from ntpd.mak */
-/*# define CLOCK_PARSE */
-/* # define CLOCK_SHM	*/		 /* from ntpd.mak */																	/*	98/06/01  */
+/* # define CLOCK_PARSE */ 
+# define HAVE_TERMIOS_H
+/* # define CLOCK_SHM	*/		 /* from ntpd.mak */																
 # define CLOCK_NMEA
-# define CLOCK_PALISADE		 * from ntpd.mak */																	/*	98/06/26  */
+# define CLOCK_PALISADE		 * from ntpd.mak */																
 # define CLOCK_DUMBCLOCK
 # define CLOCK_TRIMBLEDC
-# undef  DES				/* from libntp.mak */																	/*	98/05/28  */
-# undef  MD5				/* from libntp.mak */																	/*	98/05/28  */
+# undef  DES				/* from libntp.mak */																
+# undef  MD5				/* from libntp.mak */														
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define SYSLOG_FILE			/* from libntp.mak */
 # define HAVE_PROTOTYPES		/* from ntpq.mak */
-# define USE_PROTOTYPES 		/* for ntp_types.h */																	/*	98/05/29  */
+# define USE_PROTOTYPES 		/* for ntp_types.h */														
 # define SIZEOF_INT 4			/* for ntp_types.h */
 # define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
 //# define HAVE_NET_IF_H
@@ -45,7 +45,7 @@
 # define SIZEOF_SIGNED_CHAR 1
 # define HAVE_NO_NICE
 # define NOKMEM
-# define PRESET_TICK 100159
+# define HAVE_ERRNO_H
 # define PRESET_TICKADJ 50
 # define RETSIGTYPE void
 # define NTP_POSIX_SOURCE

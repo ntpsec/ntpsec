@@ -2,40 +2,56 @@
 #include "config.h"
 #endif
 
-#include "ntp_machine.h"
-#include "ntp_syslog.h"
+#include "clockstuff.h"
 
-#include <time.h>
-#include <sys\timeb.h>
-#include "ntp_syslog.h"
-
-char *	set_tod_using = "SetSystemTime";
-extern double drift_comp;
-DWORD units_per_tick;
-static DWORD initial_units_per_tick;
-
-/* Windows NT versions of gettimeofday and settimeofday
- *
- * ftime() has internal DayLightSavings related BUGS
- * therefore switched to GetSystemTimeAsFileTime()
- */
-
-/* 100ns intervals between 1/1/1601 and 1/1/1970 as reported by
- * SystemTimeToFileTime()
- */
-
-#define FILETIME_1970     0x019db1ded53e8000
-#define HECTONANOSECONDS  10000000ui64
-
-LONGLONG PerfFrequency = 0;
-static LONGLONG LastTimerCount = 0;
-static ULONGLONG LastTimerTime = 0;
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
+
+static ULONGLONG RollOverCount = 0;
+static ULONGLONG LastTimerCount = 0;
+static ULONGLONG LastTimerTime = 0;
+
 static HANDLE ClockThreadHandle = NULL;
 static HANDLE TimerThreadExitRequest = NULL;
-LONGLONG sys_ticks = 0; /* Diagnostics */
 
-extern int debug;
+static DWORD every = 0;
+static DWORD initial_units_per_tick = 0;
+static DWORD lastLowTimer = 0;
+
+ULONGLONG PerfFrequency = 0;
+
+DWORD units_per_tick = 0;
+
+void init_winnt_time(void) {
+	BOOL noslew;
+
+		/* Reset the Clock to a reasonable increment */
+	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every, &noslew))	{
+		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
+		exit (-1);
+	}
+
+	units_per_tick = initial_units_per_tick;
+
+#ifdef DEBUG
+	msyslog(LOG_INFO, "Initial Clock increment %7.1f us\n",
+			(float) (units_per_tick / 10));
+#endif
+
+}
+
+
+void reset_winnt_time(void) {
+
+	/* restore the clock frequency back to its original value */
+	if (!SetSystemTimeAdjustment(initial_units_per_tick, FALSE)) {
+		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
+	}
+	if (!SetSystemTimeAdjustment(0, TRUE)) {
+		msyslog(LOG_ERR, "Failed to reset clock state, SetSystemTimeAdjustment(): %m");
+	}
+}
+
+
 int
 gettimeofday(
 	struct timeval *tv
@@ -51,6 +67,7 @@ gettimeofday(
 	ULONGLONG NowCount;
 	LONGLONG TicksElapsed;
 	LONG time_adjustment;
+
 	/*  Mark a mark ASAP. The latency to here should 
 	 *  be reasonably deterministic
 	 */
@@ -58,11 +75,11 @@ gettimeofday(
 		msyslog(LOG_ERR, "QueryPeformanceCounter failed: %m");
 		exit(1);
 	}
+
 	NowCount = LargeIntNowCount.QuadPart;
 
 	/*  Get base time we are going to extrapolate from
-	 */
-	
+	 */	
 	EnterCriticalSection(&TimerCritialSection); 
 		Count = LastTimerCount;
 		Time = LastTimerTime;
@@ -72,30 +89,22 @@ gettimeofday(
 	 *  
 	 *  Result = LastTimerTime +  (NowCount - LastTimerCount) / PerfFrequency
 	 */
-	if (NowCount >= Count) {
+	if (NowCount >= Count) 
 	  TicksElapsed = NowCount - Count; /* linear progression of ticks */
-	}
-	else {
-	  TicksElapsed = NowCount + 1 + ~Count; /* tick counter has wrapped around - I don't think this will ever happen*/
-		msyslog(LOG_INFO, "Wraparound %d -> %d%m", Count, NowCount);
+	else 
+		TicksElapsed = NowCount + (RollOverCount - Count);
 
-	}
-
-	if (TicksElapsed < 0) {
-		TicksElapsed = 5000; // go for the middle for now
-		msyslog(LOG_INFO, "Negtix %m");
-
-	}
 	/*  Calculate the new time (in 100's of nano-seconds)
 	 */
-        time_adjustment = (long) ((TicksElapsed * HECTONANOSECONDS) / PerfFrequency);
-		Time += time_adjustment;
+    time_adjustment = (long) ((TicksElapsed * HECTONANOSECONDS) / PerfFrequency);
+	Time += time_adjustment;
 
 	/* Convert the hecto-nano second time to tv format
 	 */
 	Time -= FILETIME_1970;
 	tv->tv_sec = (LONG) ( Time / 10000000ui64);
 	tv->tv_usec = (LONG) (( Time % 10000000ui64) / 10);
+
 	return 0;
 }
 
@@ -107,15 +116,40 @@ TimerApcFunction(
 	DWORD dwTimerHighValue
 	)
 {
+	LARGE_INTEGER LargeIntNowCount;
 	(void) lpArgToCompletionRoutine; /* not used */
-	sys_ticks++;
-	if (TryEnterCriticalSection(&TimerCritialSection)) {
-		  QueryPerformanceCounter((LARGE_INTEGER *) &LastTimerCount);
-		  LastTimerTime = ((ULONGLONG) dwTimerHighValue << 32) +
-			  (ULONGLONG) dwTimerLowValue;
-  		  LeaveCriticalSection(&TimerCritialSection);
+
+	if (dwTimerLowValue == lastLowTimer) return;
+	lastLowTimer = dwTimerLowValue;
+	
+	/* Grab the counter first of all */
+	QueryPerformanceCounter(&LargeIntNowCount);
+
+	/* Check to see if the counter has rolled. This happens
+	   more often on Multi-CPU systems */
+
+	if ((ULONGLONG) LargeIntNowCount.QuadPart < LastTimerCount) {  
+		/* Counter Rolled - try and estimate the rollover point using
+		  the nominal counter frequency divided by an estimate of the
+		  OS frequency */ 
+		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS - 
+			(ULONGLONG) LargeIntNowCount.QuadPart;
+		msyslog(LOG_INFO, 
+			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u", 
+				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
 	}
+
+	/* Now we can hang out and wait for the critical section to free up;
+	   we will get the CPU this timeslice. Meanwhile other tasks can use 
+	   the last value of LastTimerCount */
+		
+	EnterCriticalSection(&TimerCritialSection);
+	LastTimerCount = (ULONGLONG) LargeIntNowCount.QuadPart;
+	LastTimerTime = ((ULONGLONG) dwTimerHighValue << 32) +
+				(ULONGLONG) dwTimerLowValue;
+	LeaveCriticalSection(&TimerCritialSection);
 }
+
 
 
 DWORD WINAPI ClockThread(void *arg)
@@ -128,7 +162,7 @@ DWORD WINAPI ClockThread(void *arg)
 
 	if (WaitableTimerHandle != NULL) {
 		DueTime.QuadPart = 0i64;
-		if (SetWaitableTimer(WaitableTimerHandle, &DueTime, 5L /* ms */, TimerApcFunction, &WaitableTimerHandle, FALSE) != NO_ERROR) {
+		if (SetWaitableTimer(WaitableTimerHandle, &DueTime, 1L /* ms */, TimerApcFunction, &WaitableTimerHandle, FALSE) != NO_ERROR) {
 			for(;;) {
 				if (WaitForSingleObjectEx(TimerThreadExitRequest, INFINITE, TRUE) == WAIT_OBJECT_0) {
 					break; /* we've been asked to exit */
@@ -141,23 +175,12 @@ DWORD WINAPI ClockThread(void *arg)
 	return 0;
 }
 
+
 static void StartClockThread(void)
 {
 	DWORD tid;
 	FILETIME StartTime;
 	LARGE_INTEGER Freq = { 0, 0 };
-	DWORD every;
-	BOOL noslew;
-	/* Reset the Clock to a reasonable increment */
-	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every, &noslew))	{
-		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
-		exit (-1);
-	}
-
-    units_per_tick = initial_units_per_tick;
-
-	msyslog(LOG_INFO, "Initial Clock increment %d\n",
-			units_per_tick);
 	
 	/* get the performance counter freq*/
     if (!QueryPerformanceFrequency(&Freq)) { 
@@ -169,16 +192,20 @@ static void StartClockThread(void)
 
 	/* init variables with the time now */
 	GetSystemTimeAsFileTime(&StartTime);
-	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) + (ULONGLONG) StartTime.dwLowDateTime;
+	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) + 
+		(ULONGLONG) StartTime.dwLowDateTime;
 
 	/* init sync objects */
 	InitializeCriticalSection(&TimerCritialSection);
 	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
+
 	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 0, &tid);
 	if (ClockThreadHandle != NULL) {
-		/* remober the thread priority is only within the process class */
+		/* remember the thread priority is only within the process class */
 		  if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) {
+#ifdef DEBUG
 			printf("Error setting thread priority\n");
+#endif
 		  }
 	}
 }
@@ -194,12 +221,10 @@ static void StopClockThread(void)
 		ClockThreadHandle = NULL;
 
 		DeleteCriticalSection(&TimerCritialSection);
+		msyslog(LOG_INFO, "The Network Time Protocol Service has stopped.");
 	} 
-	
-	/* restore the clock frequency back to its original value */
-	if (!SetSystemTimeAdjustment(initial_units_per_tick, TRUE)) {
-		msyslog(LOG_ERR, "Failed to reset clock frequency, SetSystemTimeAdjustment(): %m");
-	}
+	else 
+		msyslog(LOG_ERR, "Network Time Protocol Service Failed to Stop");
 }
 
 typedef void (__cdecl *CRuntimeFunction)(void);
@@ -209,34 +234,3 @@ typedef void (__cdecl *CRuntimeFunction)(void);
 #pragma data_seg(".CRT$XTY")
 	CRuntimeFunction _StopClockThread = StopClockThread;
 #pragma data_seg()  /* reset */
-
-
-int
-ntp_set_tod(
-	struct timeval *tv,
-	void *tzp
-	)
-{
-	SYSTEMTIME st;
-	struct tm *gmtm;
-	long x = tv->tv_sec;
-	long y = tv->tv_usec;
-	(void) tzp;
-
-	gmtm = gmtime((const time_t *) &x);
-	st.wSecond		= (WORD) gmtm->tm_sec;
-	st.wMinute		= (WORD) gmtm->tm_min;
-	st.wHour		= (WORD) gmtm->tm_hour;
-	st.wDay 		= (WORD) gmtm->tm_mday;
-	st.wMonth		= (WORD) (gmtm->tm_mon	+ 1);
-	st.wYear		= (WORD) (gmtm->tm_year + 1900);
-	st.wDayOfWeek		= (WORD) gmtm->tm_wday;
-	st.wMilliseconds	= (WORD) (y / 1000);
-
-	if (!SetSystemTime(&st)) {
-		msyslog(LOG_ERR, "SetSystemTime failed: %m\n");
-		return -1;
-	}
-	return 0;
-}
-

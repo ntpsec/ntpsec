@@ -760,10 +760,8 @@ HW_poll (
 	}
   
 	x |= TIOCM_RTS;        /* turn on RTS  */
-	/* poll timestamp */
-	get_systime(&pp->lastrec);
 
-	/* Leading edge trigger */
+	/* Edge trigger */
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
 #ifdef DEBUG
 	if (debug)
@@ -776,6 +774,10 @@ HW_poll (
 	}
 
 	x &= ~TIOCM_RTS;        /* turn off RTS  */
+	
+	/* poll timestamp */
+	get_systime(&pp->lastrec);
+
 	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
 #ifdef DEBUG
 	if (debug)

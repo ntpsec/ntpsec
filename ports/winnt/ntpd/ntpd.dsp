@@ -91,6 +91,10 @@ SOURCE=..\..\..\ntpd\map_vme.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\nt_clockstuff.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\ntp_config.c
 # End Source File
 # Begin Source File
@@ -268,10 +272,6 @@ SOURCE=..\..\..\include\ntp_string.h
 # Begin Source File
 
 SOURCE=..\..\..\include\ntp_syslog.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\include\ntp_timer.h
 # End Source File
 # Begin Source File
 

@@ -172,6 +172,7 @@ trimbledc_decode (
 	refclock_report(peer, CEVNT_BADREPLY);
 	up->polled = -1;
 #ifdef DEBUG
+	if (debug)
 	printf("TRIMBLEDC_decode: unit %d: bad packet %02x-%02x event %d len %d\n", 
 		   up->unit, up->rpt_buf[0] & 0xff, mb(0) & 0xff, 
 			event, up->rpt_cnt);
@@ -215,6 +216,7 @@ trimbledc_receive (
 			refclock_report(peer, CEVNT_BADTIME);
 
 #ifdef DEBUG
+			if (debug)
 			printf("trimbledc_receive: unit %d: refclock_process failed!\n",
 				up->unit);
 #endif
@@ -225,7 +227,8 @@ trimbledc_receive (
 
 #ifdef DEBUG
 		if (debug)
-		    printf("trimbledc_receive: unit %d: %s\n",
+			if (debug)
+			printf("trimbledc_receive: unit %d: %s\n",
 			   up->unit, prettydate(&pp->lastrec));
 #endif
 

@@ -24,8 +24,11 @@
 #include "ntp_syslog.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+
 #if defined SYS_WINNT
 #include "ntp_timer.h"
+extern DWORD units_per_tick;
+static long last_Adj = 0;
 #endif
 
 #if defined SCO5_CLOCK
@@ -42,12 +45,6 @@ int sco5_oldclock;	/* runtime detection of new clock */
  */
 double sys_residual = 0;	/* residual from previous adjustment */
 double sys_maxfreq = MAXFREQ;	/* max frequency correction */
-
-#if defined SYS_WINNT || defined SYS_CYGWIN32
-static long last_Adj = 0;
-extern DWORD units_per_tick;
-/*long	adj_precision = (long)(HZ * 0.1); */ /* adj precision in usec (tickadj) */
-#endif /* SYS_WINNT */
 
 
 /*

@@ -1,3 +1,32 @@
+1999-10-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ports/winnt/ntptrace/ntptrace.dsp: 
+	* ports/winnt/ntpq/ntpq.dsp: 
+	* ports/winnt/ntpdc/ntpdc.dsp: 
+	* ports/winnt/ntpdate/ntpdate.dsp: 
+	* ports/winnt/ntpd/refclock_trimbledc.c: 
+	* ports/winnt/ntpd/ntpd.dsp: 
+	* ports/winnt/ntpd/ntp_iocompletionport.c: 
+	* ports/winnt/ntpd/nt_clockstuff.c: 
+	* ports/winnt/libntp/util_clockstuff.c: 
+	* ports/winnt/libntp/libntp.dsp: 
+	* ports/winnt/libntp/SetSystemTime.c: 
+	* ports/winnt/instsrv/instsrv.c: 
+	* ports/winnt/include/sys/ioctl.h: 
+	* ports/winnt/include/termios.h: 
+	* ports/winnt/include/config.h: 
+	* ports/winnt/include/clockstuff.h: 
+	* ports/winnt/ntp.dsw: 
+	* ntpd/refclock_shm.c: 
+	* ntpd/refclock_palisade.c: 
+	* ntpd/ntpd.c: 
+	* ntpd/ntp_timer.c: 
+	* ntpd/ntp_refclock.c: 
+	* libntp/systime.c: 
+	* libntp/machines.c: 
+	NT patches
+	From: Sven Dietrich <Sven_Dietrich@trimble.com>
+
 1999-10-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_wwvb.c: 

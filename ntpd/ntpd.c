@@ -646,6 +646,7 @@ service_main(
 	 */
 #if defined (HAVE_IO_COMPLETION_PORT)
 	init_io_completion_port();
+	init_winnt_time();
 #endif
 	init_auth();
 	init_util();
@@ -1070,6 +1071,7 @@ service_exit(
 
 	}
 	uninit_io_completion_port();
+	reset_winnt_time();
 
 # if defined _MSC_VER
 	_CrtDumpMemoryLeaks();

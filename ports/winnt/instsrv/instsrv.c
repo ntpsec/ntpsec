@@ -295,9 +295,7 @@ int addKeysToRegistry()
   strcpy(lpmyarray,"Afd");
   lpmyarray = lpmyarray + 4;
   arsize = arsize + 4;
-  strcpy(lpmyarray,"LanManWorkstation");
-  lpmyarray = lpmyarray + 18;
-  arsize = arsize + 20;
+  arsize = arsize + 2;
   strcpy(lpmyarray,"\0\0");
   
   bSuccess = RegSetValueEx(hk,  /* subkey handle         */

@@ -736,7 +736,7 @@ gotit:
 /*
  * The following code does not apply to WINNT & VMS ...
  */
-#ifndef SYS_VXWORKS
+#if !defined SYS_VXWORKS && !defined SYS_WINNT
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 /*

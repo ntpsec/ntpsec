@@ -20,7 +20,6 @@
 
 
 static HANDLE hIoCompletionPort = NULL;
-extern int debug;
 
 static int 
 OnExitRequest(DWORD Key, struct IoCompletionInfo *Info, DWORD Bytes)
@@ -88,13 +87,10 @@ init_io_completion_port(
 		msyslog(LOG_ERR, "Can't create I/O completion port: %m");
 		exit(1);
 	}
-
 	
-	/* Have up to 4 threads servicing I/O
-	*/
-	_beginthread(iocompletionthread, 0, NULL);
-	_beginthread(iocompletionthread, 0, NULL);
-	_beginthread(iocompletionthread, 0, NULL);
+	/* Have one thread servicing I/O - there were 4, but this would 
+	 * somehow cause NTP to stop replying to ntpq requests; TODO
+ 	 */
 	_beginthread(iocompletionthread, 0, NULL);
 }
 	
@@ -107,9 +103,6 @@ uninit_io_completion_port(
 	if (hIoCompletionPort != NULL) {
 		/*  Get each of the service threads to exit
 		*/
-		signal_io_completion_port_exit();
-		signal_io_completion_port_exit();
-		signal_io_completion_port_exit();
 		signal_io_completion_port_exit();
 	}
 }
@@ -210,6 +203,7 @@ OnSocketRecv(DWORD i, struct IoCompletionInfo *Info, DWORD Bytes)
 		DWORD strlength = sizeof(strbuffer);
 		if (0 == WSAAddressToString((struct sockaddr *) &buff->recv_srcadr, buff->AddressLength, NULL, strbuffer, &strlength)) {
 #ifdef DEBUG
+			if (debug)
   			printf("Received %d bytes from %s\n", Bytes, strbuffer);
 #endif
 		}
@@ -356,6 +350,7 @@ io_completion_port_sendto(
 				DWORD strlength = sizeof(strbuffer);
 				if (0 == WSAAddressToString((LPSOCKADDR) dest, sizeof(*dest), NULL, strbuffer, &strlength)) {
 #ifdef DEBUG
+					if (debug)
   					printf("SendTo - %d bytes to %s : %d\n", len, strbuffer, Result);
 #endif
 				}
@@ -364,13 +359,14 @@ io_completion_port_sendto(
 		}
 		else {
 #ifdef DEBUG
+			if (debug)
 			printf("No more transmit buffers left - data discarded\n");
 #endif
 		}
 	}
 	else {
 #ifdef DEBUG
-		printf("Packet too large\n");
+		if (debug) printf("Packet too large\n");
 #endif
 		exit(1);
 	}

@@ -21,7 +21,9 @@
 #include <unistd.h>
 #endif
 
-#ifndef SYS_WINNT
+#ifdef SYS_WINNT
+# include <conio.h>
+#else
 
 #ifdef SYS_VXWORKS
 #include "taskLib.h"
@@ -177,37 +179,6 @@ ntp_set_tod(
 	return -1;
 }
 
-#ifdef SYS_CYGWIN32
-#include <stdio.h>
-#include <time.h>
-int
-settimeofday_NT(
-	struct timeval *tv
-	)
-{
-	SYSTEMTIME st;
-	struct tm *gmtm;
-	long x = tv->tv_sec;
-	long y = tv->tv_usec;
-	printf("NT Set: %d %d\n",x,y);
-	gmtm = gmtime((const time_t *) &x);
-	st.wSecond		= (WORD) gmtm->tm_sec;
-	st.wMinute		= (WORD) gmtm->tm_min;
-	st.wHour		= (WORD) gmtm->tm_hour;
-	st.wDay 		= (WORD) gmtm->tm_mday;
-	st.wMonth		= (WORD) (gmtm->tm_mon	+ 1);
-	st.wYear		= (WORD) (gmtm->tm_year + 1900);
-	st.wDayOfWeek		= (WORD) gmtm->tm_wday;
-	st.wMilliseconds	= (WORD) (y / 1000);
-
-	if (!SetSystemTime(&st)) {
-		msyslog(LOG_ERR, "SetSystemTime failed: %m\n");
-		return -1;
-	}
-	return 0;
-}
-#endif /* SYS_CYGWIN32 */
-
 #endif /* not SYS_WINNT */
 
 #if defined (SYS_WINNT) || defined (SYS_VXWORKS)
@@ -223,13 +194,12 @@ getpass(const char * prompt)
 	fflush(stderr);
 #endif
 	for (i=0; i<sizeof(password)-1 && ((c=_getch())!='\n'); i++) {
-		password[i] = c;
+		password[i] = (char) c;
 	}
 	password[i] = '\0';
 
 	return password;
 }
-
 #endif /* SYS_WINNT */
 
 #if !defined(HAVE_MEMSET)
@@ -241,6 +211,6 @@ ntp_memset(
 	)
 {
 	while (c-- > 0)
-		*a++ = x;
+		*a++ = (char) x;
 }
 #endif /*POSIX*/

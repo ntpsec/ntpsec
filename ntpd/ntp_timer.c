@@ -61,10 +61,6 @@ u_long timer_timereset;
 u_long timer_overflows;
 u_long timer_xmtcalls;
 
-#ifndef SYS_WINNT
-static	RETSIGTYPE alarming P((int));
-#endif /* SYS_WINNT */
-
 #if defined(VMS)
 static int vmstimer[2]; 	/* time for next timer AST */
 static int vmsinc[2];		/* timer increment */
@@ -72,6 +68,8 @@ static int vmsinc[2];		/* timer increment */
 
 #if defined SYS_WINNT
 static HANDLE WaitableTimerHandle = NULL;
+#else
+static	RETSIGTYPE alarming P((int));
 #endif /* SYS_WINNT */
 
 
@@ -147,26 +145,6 @@ init_timer(void)
 	lib$addx(&vmsinc, &vmstimer, &vmstimer);
 	sys$setimr(0, &vmstimer, alarming, alarming, 0);
 # endif /* VMS */
-# ifdef SYS_CYGWIN32
-	/*
-	 * Get privileges needed for fiddling with the clock
-	 */
-
-	/* get the current process token handle */
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
-		exit(1);
-	}
-	/* get the LUID for system-time privilege. */
-	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
-	tkp.PrivilegeCount = 1;  /* one privilege to set */
-	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	/* get set-time privilege for this process. */
-	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, (PTOKEN_PRIVILEGES) NULL, 0);
-	/* cannot test return value of AdjustTokenPrivileges. */
-	if (GetLastError() != ERROR_SUCCESS)
-		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
-# endif /* SYS_CYGWIN32 */
 #else /* SYS_WINNT */
 	_tzset();
 

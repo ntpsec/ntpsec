@@ -286,7 +286,7 @@ shm_poll(
 		up->valid=0;
 		if (ok) {
 			TVTOTS(&tvr,&pp->lastrec);
-			pp->lasttime = current_time;
+			/* pp->lasttime = current_time; */
 			pp->polls++;
 			t=gmtime (&tvt.tv_sec);
 			pp->day=t->tm_yday;/*+2; */

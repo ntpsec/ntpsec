@@ -8,8 +8,8 @@ Project: "instsrv"=".\instsrv\Instsrv.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/instsrv", ASCAAAAA
-    ..\..\..\ntp-4.0.94\ports\winnt\instsrv
+    "$/ntp/ports/winnt/instsrv", ASCAAAAA
+    .\instsrv
     end source code control
 }}}
 
@@ -24,7 +24,7 @@ Project: "libntp"=".\libntp\libntp.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/libntp", UJHAAAAA
+    "$/ntp/ports/winnt/libntp", UJHAAAAA
     .\libntp
     end source code control
 }}}
@@ -40,7 +40,7 @@ Project: "ntpd"=".\ntpd\ntpd.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/ntpd", DKHAAAAA
+    "$/ntp/ports/winnt/ntpd", DKHAAAAA
     .\ntpd
     end source code control
 }}}
@@ -59,7 +59,7 @@ Project: "ntpdate"=".\ntpdate\ntpdate.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/ntpdate", JKHAAAAA
+    "$/ntp/ports/winnt/ntpdate", JKHAAAAA
     .\ntpdate
     end source code control
 }}}
@@ -78,7 +78,7 @@ Project: "ntpdc"=".\ntpdc\ntpdc.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/ntpdc", LKHAAAAA
+    "$/ntp/ports/winnt/ntpdc", LKHAAAAA
     .\ntpdc
     end source code control
 }}}
@@ -97,7 +97,7 @@ Project: "ntpq"=".\ntpq\ntpq.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/ntpq", NKHAAAAA
+    "$/ntp/ports/winnt/ntpq", NKHAAAAA
     .\ntpq
     end source code control
 }}}
@@ -116,7 +116,7 @@ Project: "ntptrace"=".\ntptrace\ntptrace.dsp" - Package Owner=<4>
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt/ntptrace", PKHAAAAA
+    "$/ntp/ports/winnt/ntptrace", PKHAAAAA
     .\ntptrace
     end source code control
 }}}
@@ -135,7 +135,7 @@ Global:
 Package=<5>
 {{{
     begin source code control
-    "$/ntp-4.0.94b/ports/winnt", WIHAAAAA
+    "$/ntp/ports/winnt", WIHAAAAA
     .
     end source code control
 }}}

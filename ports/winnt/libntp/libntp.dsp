@@ -273,10 +273,6 @@ SOURCE=..\..\..\libntp\netof.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\nt_clockstuff.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\numtoa.c
 # End Source File
 # Begin Source File
@@ -302,6 +298,10 @@ SOURCE=..\..\..\libntp\recvbuff.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\refnumtoa.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\SetSystemTime.c
 # End Source File
 # Begin Source File
 
