@@ -65,6 +65,7 @@ target_alias = @target_alias@
 target_triplet = @target@
 
 @SET_MAKE@
+AMDEP = @AMDEP@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -111,7 +112,6 @@ TESTDCF = @TESTDCF@
 U = @U@
 VERSION = @VERSION@
 _am_include = @_am_include@
-_am_quote = @_am_quote@
 install_sh = @install_sh@
 
 #AUTOMAKE_OPTIONS = ../../util/ansi2knr no-dependencies
