@@ -28,6 +28,8 @@
 #include <isc/strerror.h>
 #include <isc/util.h>
 
+#include "l_stdlib.h"
+
 #ifdef HAVE_STRERROR
 /*
  * We need to do this this way for profiled locks.

@@ -207,6 +207,7 @@ static struct keyword flags_keywords[] = {
 	{ "",			CONFIG_UNKNOWN }
 };
 
+#ifdef OPENSSL
 /*
  * "discard" modifier keywords
  */
@@ -215,6 +216,7 @@ static struct keyword discard_keywords[] = {
 	{ "minimum",		CONF_DISCARD_MINIMUM },
 	{ "",			CONFIG_UNKNOWN }
 };
+#endif /* OPENSSL */
 
 /*
  * "tinker" modifier keywords

@@ -14,6 +14,10 @@
 # include <stdlib.h>
 #endif
 
+#if defined(__STDC__) || defined(HAVE_STDARG_H)
+# include <stdarg.h>
+#endif
+
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -144,6 +148,9 @@ extern	int	sigvec		P((int, struct sigvec *, struct sigvec *));
 /* PRINTFLIKE3 */
 extern	int	snprintf	P((char *, size_t, const char *, ...));
 #endif
+
+/* HMS: does this need further protection? */
+extern	int	vsnprintf	P((char *, size_t, const char *, va_list));
 
 #ifdef DECL_SRAND48_0
 extern	void	srand48		P((long));

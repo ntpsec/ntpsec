@@ -830,12 +830,10 @@ io_multicast_del(
 	int i;
 	struct ip_mreq mreq;
 	u_int32 haddr;
-	struct sockaddr_in sinaddr;
 
 #ifdef HAVE_IPV6
 	struct ipv6_mreq mreq6;
 	struct in6_addr haddr6;
-	struct sockaddr_in6 sin6addr;
 #endif /* HAVE_IPV6 */
 
 	switch (addr.ss_family)
@@ -846,7 +844,6 @@ io_multicast_del(
 
 		if (!IN_CLASSD(haddr))
 		{
-			sinaddr.sin_addr.s_addr = ((struct sockaddr_in*)&addr)->sin_addr.s_addr;
 			netsyslog(LOG_ERR,
 				 "invalid multicast address %s", stoa(&addr));
 			return;
@@ -897,7 +894,6 @@ io_multicast_del(
 
 		if (!IN6_IS_ADDR_MULTICAST(&haddr6))
 		{
-			sin6addr.sin6_addr = ((struct sockaddr_in6*)&addr)->sin6_addr;
 			netsyslog(LOG_ERR,
 				"invalid multicast address %s", stoa(&addr));
 			return;

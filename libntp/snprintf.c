@@ -44,11 +44,12 @@ int snprintf(str, n, fmt, va_alist)
 }
 
 int
-vsnprintf(str, n, fmt, ap)
-	char *str;
-	size_t n;
-	const char *fmt;
-	va_list ap;
+vsnprintf(
+	char *str,
+	size_t n,
+	const char *fmt,
+	va_list ap
+	)
 {
 #ifdef VSPRINTF_CHARSTAR
 	return (strlen(vsprintf(str, fmt, ap)));

@@ -933,7 +933,7 @@ loop_config(
 			(void)ntp_adjtime(&ntv);
 		}
 #endif /* KERNEL_PLL */
-#endif LOCKCLOCK
+#endif /* LOCKCLOCK */
 		break;
 
 	/*
