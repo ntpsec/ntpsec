@@ -550,6 +550,23 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR, 1, [Should be obvious...])
 fi
 
+AC_CACHE_CHECK(for struct sockaddr_storage, ac_cv_struct_sockaddr_storage,
+[AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+],[
+extern struct sockaddr_storage *ss;
+return 0;],
+	ac_cv_struct_sockaddr_storage=yes,
+	ac_cv_struct_sockaddr_storage=no)
+])
+# HMS: Override this for now.
+ac_cv_struct_sockaddr_storage=no
+if test $ac_cv_struct_sockaddr_storage = yes; then
+    AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?])
+fi
+
 AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
 		ac_cv_have_ss_family_in_struct_ss, [
 	AC_TRY_COMPILE(
@@ -3579,6 +3596,16 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[ISC: struct sockaddr as sa_len?])
 fi
 
+AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [use IPv6?]))
+
+case "$enable_ipv6" in
+	yes|''|autodetect)
+		AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
+		;;
+	no)
+		;;
+esac
+
 AC_MSG_CHECKING(for IPv6 structures)
 AC_TRY_COMPILE([
 #include <sys/types.h>
@@ -3589,6 +3616,66 @@ AC_TRY_COMPILE([
 	 found_ipv6=yes],
 	[AC_MSG_RESULT(no)
 	 found_ipv6=no])
+
+#
+# See whether IPv6 support is provided via a Kame add-on.
+# This is done before other IPv6 linking tests so LIBS is properly set.
+#
+AC_MSG_CHECKING(for Kame IPv6 support)
+AC_ARG_WITH(kame,
+	[  --with-kame[=PATH]	use Kame IPv6 [default path /usr/local/v6]],
+	use_kame="$withval", use_kame="no")
+
+case "$use_kame" in
+	no)
+		;;
+	yes)
+		kame_path=/usr/local/v6
+		;;
+	*)
+		kame_path="$use_kame"
+		;;
+esac
+
+case "$use_kame" in
+	no)
+		AC_MSG_RESULT(no)
+		;;
+	*)
+		if test -f $kame_path/lib/libinet6.a; then
+			AC_MSG_RESULT($kame_path/lib/libinet6.a)
+			LIBS="-L$kame_path/lib -linet6 $LIBS"
+		else
+			AC_MSG_ERROR([$kame_path/lib/libinet6.a not found.
+
+Please choose the proper path with the following command:
+
+    configure --with-kame=PATH
+])
+		fi
+		;;
+esac
+
+#
+# Whether netinet6/in6.h is needed has to be defined in isc/platform.h.
+# Including it on Kame-using platforms is very bad, though, because
+# Kame uses #error against direct inclusion.   So include it on only
+# the platform that is otherwise broken without it -- BSD/OS 4.0 through 4.1.
+# This is done before the in6_pktinfo check because that's what
+# netinet6/in6.h is needed for.
+#
+case "$host" in
+*-bsdi4.[[01]]*)
+	ISC_PLATFORM_NEEDNETINET6IN6H="#define ISC_PLATFORM_NEEDNETINET6IN6H 1"
+	LWRES_PLATFORM_NEEDNETINET6IN6H="#define LWRES_PLATFORM_NEEDNETINET6IN6H 1"
+	isc_netinet6in6_hack="#include <netinet6/in6.h>"
+	;;
+*)
+	ISC_PLATFORM_NEEDNETINET6IN6H="#undef ISC_PLATFORM_NEEDNETINET6IN6H"
+	LWRES_PLATFORM_NEEDNETINET6IN6H="#undef LWRES_PLATFORM_NEEDNETINET6IN6H"
+	isc_netinet6in6_hack=""
+	;;
+esac
 
 AC_MSG_CHECKING([for struct if_laddrconf])
 AC_TRY_LINK([
@@ -3613,7 +3700,6 @@ AC_TRY_LINK([
 case "$found_ipv6" in
  yes)
     AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
-    AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
 
     AC_MSG_CHECKING(for in6_pktinfo)
     AC_TRY_COMPILE([
@@ -3662,6 +3748,8 @@ found_rt_iflist
         [AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[ISC: Use iflist_sysctl?])],
         [AC_MSG_RESULT(no)])
+
+###
 
 case "$build" in
  $host)

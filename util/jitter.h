@@ -1,16 +1,58 @@
 /*
- * ntp_fp.h - definitions for NTP fixed/floating-point arithmetic
+ *  ntp_types.h - defines how int32 and u_int32 are treated.
+ *  For 64 bit systems like the DEC Alpha, they have to be defined
+ *  as int and u_int.
+ *  For 32 bit systems, define them as long and u_long
  */
+#define SIZEOF_INT 4
 
-#ifndef NTP_FP_H
-#define NTP_FP_H
+/*
+ * Set up for prototyping
+ */
+#ifndef P
+#if defined(__STDC__) || defined(HAVE_PROTOTYPES)
+#define P(x)    x
+#else /* not __STDC__ and not HAVE_PROTOTYPES */
+#define P(x)    ()
+#endif /* not __STDC__ and HAVE_PROTOTYPES */
+#endif /* P */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "ntp_rfc2553.h"
-#include <netinet/in.h>
+/*
+ * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
+ *                      and u_int isn't defined anywhere
+ */
+#if defined(VMS)
+#include <socket.h>
+typedef unsigned int u_int;
+/*
+ * Note: VMS DECC has  long == int  (even on __alpha),
+ *       so the distinction below doesn't matter
+ */
+#endif /* VMS */
 
-#include "ntp_types.h"
+#if (SIZEOF_INT == 4)
+# ifndef int32
+#  define int32 int
+# endif
+# ifndef u_int32
+#  define u_int32 unsigned int
+# endif
+#else /* not sizeof(int) == 4 */
+# if (SIZEOF_LONG == 4)
+# else /* not sizeof(long) == 4 */
+#  ifndef int32
+#   define int32 long
+#  endif
+#  ifndef u_int32
+#   define u_int32 unsigned long
+#  endif
+# endif /* not sizeof(long) == 4 */
+# include "Bletch: what's 32 bits on this machine?"
+#endif /* not sizeof(int) == 4 */
+
+typedef unsigned short associd_t; /* association ID */
+typedef u_int32 keyid_t;        /* cryptographic key ID */
+typedef u_int32 tstamp_t;       /* NTP seconds timestamp */
 
 /*
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"
@@ -281,7 +323,7 @@ typedef u_int32 u_fp;
 #define L_SUBUF(r, uf)	M_SUBUF((r)->l_ui, (r)->l_uf, (uf))
 #define	L_ADDF(r, f)	M_ADDF((r)->l_ui, (r)->l_uf, (f))
 #define	L_RSHIFT(v)	M_RSHIFT((v)->l_i, (v)->l_uf)
-#define	L_RSHIFTU(v)	M_RSHIFTU((v)->l_ui, (v)->l_uf)
+#define	L_RSHIFTU(v)	M_RSHIFT((v)->l_ui, (v)->l_uf)
 #define	L_LSHIFT(v)	M_LSHIFT((v)->l_ui, (v)->l_uf)
 #define	L_CLR(v)	((v)->l_ui = (v)->l_uf = 0)
 
@@ -339,8 +381,10 @@ typedef u_int32 u_fp;
 /*
  * Prototypes
  */
+#if 0
 extern	char *	dofptoa		P((u_fp, int, short, int));
 extern	char *	dolfptoa	P((u_long, u_long, int, short, int));
+#endif
 
 extern	int	atolfp		P((const char *, l_fp *));
 extern	int	buftvtots	P((const char *, l_fp *));
@@ -361,16 +405,8 @@ extern	int	adj_systime	P((double));
 #define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 #define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 
-#define stoa(_sin)	socktoa((_sin))
-#define stohost(_sin)	socktohost((_sin))
-
-#define	ntoa(_sin)	stoa(_sin)
-#define	ntohost(_sin)	stohost(_sin)
-
 #define	ufptoa(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 0)
 #define	ufptoms(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 1)
 #define	ulfptoa(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 0)
 #define	ulfptoms(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 1)
 #define	umfptoa(_fpi, _fpf, _ndec) dolfptoa((_fpi), (_fpf), 0, (_ndec), 0)
-
-#endif /* NTP_FP_H */
