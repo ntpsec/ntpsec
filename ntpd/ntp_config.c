@@ -651,7 +651,7 @@ getconfig(
 			}
 			
 			peerversion = NTP_VERSION;
-			minpoll = sys_minpoll;
+			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
 			peerkeystr = "*";
@@ -695,11 +695,11 @@ getconfig(
 					    break;
 				    }
 				    minpoll = atoi(tokens[++i]);
-				    if (minpoll < sys_minpoll) {
+				    if (minpoll < NTP_MINPOLL) {
 					    msyslog(LOG_INFO,
 						    "minpoll: provided value (%d) is below minimum (%d)",
-						    minpoll, sys_minpoll);
-					minpoll = sys_minpoll;
+						    minpoll, NTP_MINPOLL);
+					minpoll = NTP_MINPOLL;
 				    }
 				    break;
 

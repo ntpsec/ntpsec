@@ -1,3 +1,13 @@
+2001-04-18  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (clock_update): minpoll cleanup.
+	(clock_select): minpoll cleanup.
+	(clock_filter): Bugfixes from Mark Martinec <Mark.Martinec@ijs.si>
+	* ntpd/ntp_loopfilter.c (rstclock): minpoll cleanup.  Debug cleanup.
+	* ntpd/ntp_config.c (getconfig): Initialize/bounds check minpoll
+	using NTP_MINDPOLL insted of sys_minpoll.
+	From: Dave Mills.
+
 2001-04-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* libntp/msyslog.c:

@@ -1067,7 +1067,7 @@ clock_update(void)
 		clear_all();
 		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
-		sys_poll = sys_minpoll;
+		sys_poll = NTP_MINPOLL;
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronisation lost");
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
@@ -1274,24 +1274,25 @@ peer_clear(
  */
 void
 clock_filter(
-	register struct peer *peer,
-	double sample_offset,
-	double sample_delay,
-	double sample_disp
+	register struct peer *peer,	/* peer structure pointer */
+	double sample_offset,		/* clock offset */
+	double sample_delay,		/* roundtrip delay */
+	double sample_disp		/* dispersion */
 	)
 {
+	double dst[NTP_SHIFT];		/* distance vector */
+	int ord[NTP_SHIFT];		/* index vector */
 	register int i, j, k, m;
-	int ord[NTP_SHIFT];
-	double dst[NTP_SHIFT];
 	double off, dly, dsp, jit, dtemp, etemp, ftemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
-	 * one. The new offset and delay come directly from the caller.
-	 * The caller delay can sometimes swing negative due to
-	 * frequency skew, so it is clamped non-negative. The dispersion
-	 * from the caller is increased by the sum of the peer precision
-	 * and the system precision.
+	 * one. The new offset and delay come directly from the
+	 * timestamp calculations. The dispersion grows from the last
+	 * outbound packet or reference clock update to the present time
+	 * and increased by the sum of the peer precision and the system
+	 * precision. The delay can sometimes swing negative due to
+	 * frequency skew, so it is clamped non-negative.
 	 */
 	dsp = min(LOGTOD(peer->precision) + LOGTOD(sys_precision) +
 	    sample_disp, MAXDISPERSE);
@@ -1307,13 +1308,13 @@ clock_filter(
 	 * Update dispersions since the last update and at the same
 	 * time initialize the distance and index vectors. The distance
 	 * is a compound metric: If the sample dispersion is less than
-	 * MAXDISTANCE younger than the Allan intercept, use delay.
+	 * MAXDISTANCE and younger than the Allan intercept, use delay.
 	 * Otherwise, use MAXDISTANCE plus conventional distance.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
 	etemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
 	peer->update = current_time;
-	for (i = 0; i < NTP_SHIFT; i++) {
+	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		if (i != 0) {
 			peer->filter_disp[j] += dtemp;
 			if (peer->filter_disp[j] > MAXDISPERSE)
@@ -1321,8 +1322,8 @@ clock_filter(
 		}
 		ftemp = peer->filter_delay[j] / 2. +
 		    peer->filter_disp[j];
-		if (ftemp < MAXDISTANCE || current_time -
-		    peer->filter_epoch[j] < dtemp)
+		if (ftemp < MAXDISTANCE && current_time -
+		    peer->filter_epoch[j] < etemp)
 			dst[i] = peer->filter_delay[j];
 		else
 			dst[i] = MAXDISTANCE + ftemp;
@@ -1331,7 +1332,7 @@ clock_filter(
 	}
 
         /*
-	 * Sort the samples in the register by the compound metric.
+	 * Sort the sampsamples in the register by the compound metric.
 	 */
 	for (i = 1; i < NTP_SHIFT; i++) {
 		for (j = 0; j < i; j++) {
@@ -1355,7 +1356,7 @@ clock_filter(
 #if DEBUG
 		if (debug > 1) {
 			j = ord[i];
-			printf("clock_filter: %d %d %f %f %f %f\n", i,
+			printf("cfilter: %d %d %f %f %f %f\n", i,
 			    j, dst[i], peer->filter_offset[j],
 			    peer->filter_delay[j],
 			    peer->filter_disp[j]);
@@ -1672,7 +1673,7 @@ clock_select(void)
 			nlist = 1;
 		} else {
 			if (osys_peer != NULL) {
-				sys_poll = sys_minpoll;
+				sys_poll = NTP_MINPOLL;
 				NLOG(NLOG_SYNCSTATUS)
 				    msyslog(LOG_INFO,
 				    "synchronisation lost");

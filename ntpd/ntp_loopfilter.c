@@ -439,8 +439,6 @@ local_clock(
 		}
 	}
 
-printf("uuu\n");
-
 #if defined(KERNEL_PLL)
 	/*
 	 * This code segment works when clock adjustments are made using
@@ -587,6 +585,9 @@ printf("uuu\n");
 	clock_stability = SQRT(dtemp + etemp / CLOCK_AVG);
 	allan_xpt = max(CLOCK_ALLAN, clock_stability * CLOCK_ADF);
 
+printf("xxx %.3f %.3f\n", sys_jitter / ULOGTOD(sys_poll + 1),
+clock_stability * 1.5);
+
 	/*
 	 * In SYNC state, adjust the poll interval.
 	 */
@@ -719,7 +720,7 @@ rstclock(
 	 * measurements.
 	 */ 
 	case S_FREQ:
-		sys_poll = sys_minpoll;
+		sys_poll = NTP_MINPOLL;
 		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		break;
@@ -728,7 +729,7 @@ rstclock(
 	 * Synchronized mode. Discipline the poll interval.
 	 */
 	case S_SYNC:
-		sys_poll = sys_minpoll;
+		sys_poll = NTP_MINPOLL;
 		allan_xpt = CLOCK_ALLAN;
 		tc_counter = 0;
 		break;
@@ -745,7 +746,7 @@ rstclock(
 	 * the time reference for future frequency updates.
 	 */
 	default:
-		sys_poll = sys_minpoll;
+		sys_poll = NTP_MINPOLL;
 		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		last_offset = clock_offset = 0;
