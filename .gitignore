@@ -58,3 +58,11 @@ stamp-h.in
 util/Makefile.in
 ChangeLog
 version
+ansi2knr.1
+ansi2knr.c
+config.guess
+config.sub
+depcomp
+install-sh
+missing
+mkinstalldirs
