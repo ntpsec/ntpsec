@@ -1223,11 +1223,10 @@ wwv_rf(
 			 * lamp and raises an alarm.
 			 */
 			up->swatch++;
-			if (up->swatch > HSPEC) {
+			if (up->swatch > HSPEC)
 				up->status &= ~SSYNC;
+			if (!(up->status & SSYNC))
 				up->alarm |= 1 << SYNERR;
-				up->swatch = 0;
-			}
 		}
 	}
 
@@ -1623,9 +1622,14 @@ wwv_endpoc(
 	 * candidate is identical to the last one; otherwise, it is
 	 * forced to zero. If the compare counter increments to 10, the
 	 * epoch is reset and the receiver second epoch is set.
+	 *
+	 * Careful attention to detail here. If the signal amplitude
+	 * falls below the threshold or if no stations are heard, we
+	 * certainly cannot be in sync.
 	 */
 	tmp2 = MOD(tepoch - xepoch, SECOND);
-	if (up->epomax < STHR) {
+	if (up->epomax < STHR || !(up->status & (SELV | SELH))) {
+		up->status &= ~SSYNC;
 		jitcnt = syncnt = avgcnt = 0;
 	} else if (abs(tmp2) <= MS || jitcnt >= (MINAVG << up->avgint))
 	    {

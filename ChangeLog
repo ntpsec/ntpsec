@@ -1,5 +1,8 @@
 2000-01-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_wwv.c: Bugfixes/improvements
+	From: Dave Mills <mills@udel.edu>
+
 	* configure.in: Get the quoting right on the sys_errlist check.
 	From documentation by: Akim Demaille <akim@epita.fr>
 
