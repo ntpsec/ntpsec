@@ -4,8 +4,8 @@
 
     <head>
         <meta name="generator" content="HTML Tidy, see www.w3.org">
-        <title>Radio CHU Audio Demodulator/Decoder</title><link href="scripts/style.css" type="text/css" rel="stylesheet">
-
+        <title>Radio CHU Audio Demodulator/Decoder</title>
+        <link href="scripts/style.css" type="text/css" rel="stylesheet">
     </head>
 
     <body>
@@ -23,7 +23,7 @@
         <h4>Description</h4>
         <p>This driver synchronizes the computer time using data encoded in radio transmissions from Canadian time/frequency station CHU in Ottawa, Ontario. It replaces an earlier one, built by Dennis Ferguson in 1988, which required a special line discipline to preprocessed the signal. The new driver includes more powerful algorithms implemented directly in the driver and requires no preprocessing.</p>
         <p>CHU transmissions are made continuously on 3330 kHz, 7335 kHz and 14670 kHz in upper sideband, compatible AM mode. An ordinary shortwave receiver can be tuned manually to one of these frequencies or, in the case of ICOM receivers, the receiver can be tuned automatically as propagation conditions change throughout the day and night. The performance of this driver when tracking the station is ordinarily better than 1 ms in time with frequency drift less than 0.5 PPM when not tracking the station.</p>
-        <p>While there are currently no known commercial CHU receivers, a simple but effective receiver/demodulator can be constructed from an ordinary shortwave receiver and Bell 103 compatible, 300-b/s modem or modem chip, as described in the <a href="gadget.html">Gadget Box PPS Level Converter and CHU Modem</a> page. The driver can use the modem to receive the radio signal and demodulate the data or, if available, the driver can use the audio codec of the Sun workstation or another with compatible audio interface. In the latter case, the driver implements the modem using DSP routines, so the radio can be connected directly to either the microphone on line input port.</p>
+        <p>While there are currently no known commercial CHU receivers, a simple but effective receiver/demodulator can be constructed from an ordinary shortwave receiver and Bell 103 compatible, 300-b/s modem or modem chip, as described on the <a href="pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page. The driver can use the modem to receive the radio signal and demodulate the data or, if available, the driver can use the audio codec of the Sun workstation or another with compatible audio interface. In the latter case, the driver implements the modem using DSP routines, so the radio can be connected directly to either the microphone on line input port.</p>
         <p>This driver incorporates several features in common with other audio drivers such as described in the <a href="driver36.html">Radio WWV/H Audio Demodulator/Decoder</a> and the <a href="driver6.html">IRIG Audio Decoder</a> pages. They include automatic gain control (AGC), selectable audio codec port and signal monitoring capabilities. For a discussion of these common features, as well as a guide to hookup, debugging and monitoring, see the <a href="audio.html">Reference Clock Audio Drivers</a> page.</p>
         <p>Ordinarily, the driver poll interval is set to 14 (about 4.5 h), although this can be changed with configuration commands. As long as the clock is set or verified at least once during this interval, the NTP algorithms will consider the source reachable and selectable to discipline the system clock. However, if this does not happen for eight poll intervals, the algorithms will consider the source unreachable and some other source will be chosen (if available) to discipline the system clock.</p>
         <p>The decoding algorithms process the data using maximum-likelihood techniques which exploit the considerable degree of redundancy available in each broadcast message or burst. As described below, every character is sent twice and, in the case of format A bursts, the burst is sent eight times every minute. In the case of format B bursts, which are sent once each minute, the burst is considered correct only if every character matches its repetition in the burst. In the case of format A messages, a majority decoder requires at least six repetitions for each digit in the timecode and more than half of the repetitions decode to the same digit. Every character in every burst provides an independent timestamp upon arrival with a potential total of over 60 timestamps for each minute.</p>
@@ -232,7 +232,7 @@
         <a href="refclock.html">Reference Clock Drivers</a><br>
         <a href="audio.html">Reference Clock Audio Drivers</a>
         <hr>
-        <script language="javascript" type="text/javascript" src="scripts/footer.txt"></script>
+        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>

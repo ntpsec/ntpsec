@@ -24,7 +24,7 @@
         <p>This code has been significantly slimmed down since the V1.0 version, roughly halving the memory footprint of its code and data.</p>
         <p>This driver is designed to allow the unit to run from batteries as designed, for something approaching the 2.5 years expected in the usual stand-alone mode, but no battery-life measurements have been taken.</p>
         <p>Much of this code is originally from the other refclock driver files with thanks. The code was originally made to work with the clock by <a href="mailto:derek@toybox.demon.co.uk">Derek Mulcahy</a>, with modifications by <a href="mailto:d@hd.org">Damon Hart-Davis</a>. Thanks also to <a href="mailto:lyndond@sentinet.co.uk">Lyndon David</a> for some of the specifications of the clock.</p>
-        <p>There is support for a Tcl/Tk monitor written by Derek Mulcahy that examines the output stats; see the <a href="http://www2.exnet.com/NTP/ARC/ARC.htm">ARC Rugby MSF Receiver</a> page for more details and the code.</p>
+        <p>There is support for a Tcl/Tk monitor written by Derek Mulcahy that examines the output stats; see the <a href="http://www2.exnet.com/NTP/ARC/ARC.html">ARC Rugby MSF Receiver</a> page for more details and the code.</p>
         <p>Look at the notes at the start of the code for further information; some of the more important details follow.</p>
         <p>The driver interrogates the clock at each poll (ie every 64s by default) for a timestamp. The clock responds at the start of the next second (with the start bit of the first byte being on-time). The time is in `local' format, including the daylight savings adjustment when it is in effect. The driver code converts the time back to UTC.</p>
         <p>The clock claims to be accurate to within about 20ms of the MSF-broadcast time, and given the low data transmission speed from clock to host, and the fact that the clock is not in continuous sync with MSF, it seems sensible to set the `precision' of this clock to -5 or -4, -4 being used in this code, which builds in a reported dispersion of over 63ms (ie says ``This clock is not very good.''). You can improve the reported precision to -4 (and thus reduce the base dispersion to about 31ms) by setting the fudge <tt>flag3</tt> to <tt>1</tt>.</p>
@@ -227,7 +227,7 @@ May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, w
         </dl>
         <h4>Additional Information</h4>
         <p><a href="refclock.html">Reference Clock Drivers</a><br>
-            <a href="http://www2.exnet.com/NTP/ARC/ARC.htm">ARC Rugby MSF Receiver</a></p>
+            <a href="http://www2.exnet.com/NTP/ARC/ARC.html">ARC Rugby MSF Receiver</a></p>
         <hr>
         <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
