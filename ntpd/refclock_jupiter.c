@@ -954,8 +954,8 @@ static struct {
 } reqmsg = {
 	{ putshort(JUPITER_SYNC), 0,
 	    putshort((sizeof(struct jrequest) / sizeof(u_short)) - 1),
-	    0, (u_char)putshort(JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK |
-	    JUPITER_FLAG_CONN | JUPITER_FLAG_LOG), 0 },
+	    0, JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK |
+	    JUPITER_FLAG_CONN | JUPITER_FLAG_LOG, 0 },
 	{ 0, 0, 0, 0 }
 };
 
@@ -980,7 +980,7 @@ jupiter_reqmsg(struct instance *instance, u_int id,
 /* Cancel periodic message output */
 static struct jheader canmsg = {
 	putshort(JUPITER_SYNC), 0, 0, 0,
-	(u_char)putshort(JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK | JUPITER_FLAG_DISC),
+	JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK | JUPITER_FLAG_DISC,
 	0
 };
 
@@ -999,7 +999,7 @@ jupiter_canmsg(struct instance *instance, u_int id)
 /* Request a single message output */
 static struct jheader reqonemsg = {
 	putshort(JUPITER_SYNC), 0, 0, 0,
-	(u_char)putshort(JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK | JUPITER_FLAG_QUERY),
+	JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK | JUPITER_FLAG_QUERY,
 	0
 };
 
@@ -1022,7 +1022,7 @@ static struct {
 } platmsg = {
 	{ putshort(JUPITER_SYNC), putshort(JUPITER_I_PLAT),
 	    putshort((sizeof(struct jplat) / sizeof(u_short)) - 1), 0,
-	    (u_char)putshort(JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK), 0 },
+	    JUPITER_FLAG_REQUEST | JUPITER_FLAG_NAK, 0 },
 	{ 0, 0, 0 }
 };
 
