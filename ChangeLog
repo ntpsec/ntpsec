@@ -1,5 +1,7 @@
 2000-05-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* scripts/ntp-wait.in: Fun things with backspaces
+
 	* configure.in: 4.0.99i5
 
 	* ntptrace/ntptrace.c: Protect sys/ioctl.h; grab config.h
