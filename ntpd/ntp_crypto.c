@@ -67,20 +67,6 @@
 #define MAX_ENCLEN	(ENCODED_CONTENT_LEN(1024)) /* max enc key */
 
 /*
- * Autokey protocol status codes
- */
-#define RV_OK		0x0	/* success */
-#define RV_TSP		0x1	/* invalid timestamp */
-#define RV_FSP		0x2	/* invalid filestamp */
-#define RV_PUB		0x3	/* missing public key */
-#define RV_KEY		0x4	/* invalid RSA modulus */
-#define RV_SIG		0x5	/* invalid signature length */
-#define RV_DH		0x6	/* invalid agreement parameters */
-#define RV_FIL		0x7	/* missing or corrupted key file */
-#define RV_DAT		0x8	/* missing or corrupted data */
-#define RV_DEC		0x9	/* PEM decoding error */
-
-/*
  * Private cryptodata in networ byte order.
  */
 static R_RSA_PRIVATE_KEY private_key; /* private key */
@@ -115,6 +101,20 @@ static	u_int	crypto_rsa	P((char *, u_char *, u_int));
 static	void	crypto_dh	P((char *));
 static	void	crypto_tai	P((char *));
 #endif /* PUBKEY */
+
+/*
+ * Autokey protocol status codes
+ */
+#define RV_OK		0x0	/* success */
+#define RV_TSP		0x1	/* invalid timestamp */
+#define RV_FSP		0x2	/* invalid filestamp */
+#define RV_PUB		0x3	/* missing public key */
+#define RV_KEY		0x4	/* invalid RSA modulus */
+#define RV_SIG		0x5	/* invalid signature length */
+#define RV_DH		0x6	/* invalid agreement parameters */
+#define RV_FIL		0x7	/* missing or corrupted key file */
+#define RV_DAT		0x8	/* missing or corrupted data */
+#define RV_DEC		0x9	/* PEM decoding error */
 
 
 /*
@@ -293,7 +293,6 @@ crypto_recv(
 	u_int32 *pkt;		/* packet pointer */
 	struct autokey *ap;	/* autokey pointer */
 	struct cookie *cp;	/* cookie pointer */
-	struct value *vp;	/* value pointer */
 	int has_mac;		/* length of MAC field */
 	int authlen;		/* offset of MAC field */
 	int len;		/* extension field length */
@@ -303,6 +302,7 @@ crypto_recv(
 	u_int temp;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
+	struct value *vp;	/* value pointer */
 	u_char dh_key[MAX_KEYLEN]; /* agreed key */
 	R_RSA_PUBLIC_KEY *kp;	/* temporary public key pointer */
 	u_int32 *pp;		/* packet pointer */
@@ -823,12 +823,12 @@ crypto_xmit(
 	struct peer *peer;	/* peer structure pointer */
 	struct autokey *ap;	/* autokey pointer */
 	struct cookie *cp;	/* cookie pointer */
-	struct value *vp;	/* value pointer */
 	int len;		/* extension field length */
 	u_int opcode;		/* extension field opcode */
 	int i;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
+	struct value *vp;	/* value pointer */
 	int rval;		/* return value */
 	u_int temp;
 	int j;
@@ -888,11 +888,11 @@ crypto_xmit(
 	case CRYPTO_PRIV:
 	case CRYPTO_PRIV | CRYPTO_RESP:
 		cp = (struct cookie *)&xpkt[i + 2];
-		cp->tstamp = host.tstamp;
 		cp->key = htonl(cookie);
 		cp->siglen = 0;
 		len += 12;
 #ifdef PUBKEY
+		cp->tstamp = host.tstamp;
 		if (!crypto_flags)
 			break;
 		R_SignInit(&ctx, DA_MD5);
