@@ -61,6 +61,7 @@ static struct audio_info info;	/* audio device info */
 #endif /* not PCM_STYLE_SOUND */
 static int ctl_fd;		/* audio control file descriptor */
 
+#ifdef PCM_STYLE_SOUND
 static void audio_config_read P((int, char **, char **));
 
 /*
@@ -160,6 +161,7 @@ audio_config_read(
 	fclose(fd);
 	return;
 }
+#endif PCM_STYLE_SOUND
 
 /*
  * audio_init - open and initialize audio device
