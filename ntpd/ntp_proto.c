@@ -1066,6 +1066,7 @@ receive(
 		return;
 	}
 
+#ifdef OPENSSL
 	/*
 	 * If TEST10 is lit, the autokey sequence has broken, which
 	 * probably means the server has refreshed its private value.
@@ -1082,6 +1083,7 @@ receive(
 		else
 			unpeer(peer);
 	}
+#endif /* OPENSSL */
 }
 
 
