@@ -96,6 +96,8 @@ struct clktype clktypes[] = {
 	  "TT_IRIG"},
 	{ REFCLK_ZYFER,	"Zyfer GPStarplus receiver (42)",
 	  "GPS_ZYFER" },
+	{ REFCLK_RIPENCC,	"RIPE NCC Trimble driver (43)",
+	  "GPS_RIPENCC" },
 	{ -1,			"", "" }
 };
 
