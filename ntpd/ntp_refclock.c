@@ -63,8 +63,9 @@
  * which is used for all peer-specific processing and contains a pointer
  * to the refclockproc structure, which in turn containes a pointer to
  * the unit structure, if used. The peer structure is identified by an
- * interface address in the dotted quad form 127.127.t.u, where t is the
- * clock type and u the unit. Some legacy drivers derive the
+ * interface address in the dotted quad form 127.127.t.u (for now only IPv4
+ * addresses are used, so we need to be sure the address is it), where t is
+ * the clock type and u the unit. Some legacy drivers derive the
  * refclockproc structure pointer from the table typeunit[type][unit].
  * This interface is strongly discouraged and may be abandoned in
  * future.
@@ -121,20 +122,20 @@ refclock_report(
 		if (code == CEVNT_FAULT)
 			msyslog(LOG_ERR,
 				"clock %s event '%s' (0x%02x)",
-				refnumtoa(peer->srcadr.sin_addr.s_addr),
+				refnumtoa(&peer->srcadr),
 				ceventstr(code), code);
 		else {
 			NLOG(NLOG_CLOCKEVENT)
 				msyslog(LOG_INFO,
 				"clock %s event '%s' (0x%02x)",
-				refnumtoa(peer->srcadr.sin_addr.s_addr),
+				refnumtoa(&peer->srcadr),
 				ceventstr(code), code);
 		}
 	}
 #ifdef DEBUG
 	if (debug)
 		printf("clock %s event '%s' (0x%02x)\n",
-			refnumtoa(peer->srcadr.sin_addr.s_addr),
+			refnumtoa(&peer->srcadr),
 			ceventstr(code), code);
 #endif
 }
@@ -186,10 +187,16 @@ refclock_newpeer(
 	 * Check for valid clock address. If already running, shut it
 	 * down first.
 	 */
+	if (peer->srcadr.ss_family != AF_INET) {
+		msyslog(LOG_ERR,
+		       "refclock_newpeer: clock address %s invalid, address family not implemented for refclock",
+                        stoa(&peer->srcadr));
+                return (0);
+        }
 	if (!ISREFCLOCKADR(&peer->srcadr)) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
-			ntoa(&peer->srcadr));
+			stoa(&peer->srcadr));
 		return (0);
 	}
 	clktype = (u_char)REFCLOCKTYPE(&peer->srcadr);
@@ -218,7 +225,8 @@ refclock_newpeer(
 	peer->refclkunit = unit;
 	peer->flags |= FLAG_REFCLOCK;
 	peer->stratum = STRATUM_REFCLOCK;
-	peer->refid = peer->srcadr.sin_addr.s_addr;
+	/* peer->refid = peer->srcadr.sin_addr.s_addr;*/
+	peer->refid = 0;				/* REFID case to solve */
 	peer->maxpoll = peer->minpoll;
 
 	pp->type = clktype;
@@ -251,7 +259,8 @@ refclock_newpeer(
 	if (peer->stratum <= 1)
 		peer->refid = pp->refid;
 	else
-		peer->refid = peer->srcadr.sin_addr.s_addr;
+		/* Here it is IPv4 address, so we don't have problem with REDIF case */
+		peer->refid = ((struct sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
 	return (1);
 }
 
@@ -316,7 +325,7 @@ refclock_transmit(
 #ifdef DEBUG
 		if (debug)
 			printf("refclock_transmit: at %ld %s\n",
-			    current_time, ntoa(&(peer->srcadr)));
+			    current_time, stoa(&(peer->srcadr)));
 #endif
 
 		/*
@@ -536,7 +545,7 @@ refclock_receive(
 #ifdef DEBUG
 	if (debug)
 		printf("refclock_receive: at %lu %s\n",
-		    current_time, ntoa(&peer->srcadr));
+		    current_time, stoa(&peer->srcadr));
 #endif
 
 	/*
@@ -961,7 +970,7 @@ refclock_ioctl(
  */
 void
 refclock_control(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct refclockstat *in,
 	struct refclockstat *out
 	)
@@ -974,6 +983,8 @@ refclock_control(
 	/*
 	 * Check for valid address and running peer
 	 */
+	if (srcadr->ss_family != AF_INET)
+		return;
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 	clktype = (u_char)REFCLOCKTYPE(srcadr);
@@ -1001,7 +1012,8 @@ refclock_control(
 		if (peer->stratum <= 1)
 			peer->refid = pp->refid;
 		else
-			peer->refid = peer->srcadr.sin_addr.s_addr;
+			/* Here it is IPv4 address, so we don't have problem with REFID case */
+			peer->refid = ((struct sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
 		if (in->haveflags & CLK_HAVEFLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
 			pp->sloppyclockflag |= in->flags & CLK_FLAG1;
@@ -1063,7 +1075,7 @@ refclock_control(
  */
 void
 refclock_buginfo(
-	struct sockaddr_in *srcadr, /* clock address */
+	struct sockaddr_storage *srcadr, /* clock address */
 	struct refclockbug *bug /* output structure */
 	)
 {
@@ -1076,6 +1088,8 @@ refclock_buginfo(
 	/*
 	 * Check for valid address and peer structure
 	 */
+	if (srcadr->ss_family != AF_INET)
+		return;
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 	clktype = (u_char) REFCLOCKTYPE(srcadr);

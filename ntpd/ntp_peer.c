@@ -181,7 +181,7 @@ getmorepeermem(void)
  */
 struct peer *
 findexistingpeer(
-	struct sockaddr_in *addr,
+	struct sockaddr_storage *addr,
 	struct peer *start_peer,
 	int mode
 	)
@@ -198,7 +198,7 @@ findexistingpeer(
 		peer = start_peer->next;
 	
 	while (peer != 0) {
-		if (NSRCADR(addr) == NSRCADR(&peer->srcadr)
+		if (SOCKCMP(addr, &peer->srcadr)
 		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)) {
 			if (mode == -1)
 				return (peer);
@@ -216,7 +216,7 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
 	int fd,
 	int pkt_mode,
@@ -228,11 +228,11 @@ findpeer(
 
 	findpeer_calls++;
 	hash = HASH_ADDR(srcadr);
-	for (peer = peer_hash[hash]; peer != 0; peer = peer->next) {
-		if (NSRCADR(srcadr) == NSRCADR(&peer->srcadr)
+	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
+		if (SOCKCMP(srcadr, &peer->srcadr)
 		    && NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
 
-			/* 
+			/*
 			 * if the association matching rules determine
 			 * that this is not a valid combination, then
 			 * look for the next valid peer association.
@@ -362,7 +362,7 @@ unpeer(
 		if (peer == 0) {
 			peer_hash_count[hash]++;
 			msyslog(LOG_ERR, "peer struct for %s not in table!",
-				ntoa(&peer->srcadr));
+				stoa(&peer->srcadr));
 		} else {
 			peer->next = peer_to_remove->next;
 		}
@@ -386,7 +386,7 @@ unpeer(
 			assoc_hash_count[hash]++;
 			msyslog(LOG_ERR,
 				"peer struct for %s not in association table!",
-				ntoa(&peer->srcadr));
+				stoa(&peer->srcadr));
 		} else {
 			peer->ass_next = peer_to_remove->ass_next;
 		}
@@ -402,7 +402,7 @@ unpeer(
  */
 struct peer *
 peer_config(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
 	int hmode,
 	int version,
@@ -440,18 +440,36 @@ peer_config(
 	switch (hmode) {
 
 	case MODE_BROADCAST:
-		if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)))
-			cast_flags = MDF_MCAST;
-		else
-			cast_flags = MDF_BCAST;
-		break;
+		if(srcadr->ss_family == AF_INET) {
+			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
+				cast_flags = MDF_MCAST;
+			else
+				cast_flags = MDF_BCAST;
+			break;
+		}
+		else {
+                        if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
+        	                cast_flags = MDF_MCAST;
+	        	else
+                        	cast_flags = MDF_BCAST;
+                	break;
+                }
 
 	case MODE_CLIENT:
-		if (IN_CLASSD(ntohl(srcadr->sin_addr.s_addr)))
-			cast_flags = MDF_ACAST;
-		else
-			cast_flags = MDF_UCAST;
-		break;
+		if(srcadr->ss_family == AF_INET) {
+			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
+				cast_flags = MDF_ACAST;
+			else
+				cast_flags = MDF_UCAST;
+			break;
+		}
+		else {
+			if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
+				cast_flags = MDF_ACAST;
+			else
+				cast_flags = MDF_UCAST;
+			break;
+		}
 
 	default:
 		cast_flags = MDF_UCAST;
@@ -493,7 +511,7 @@ peer_config(
  */
 struct peer *
 newpeer(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
 	int hmode,
 	int version,
@@ -532,7 +550,7 @@ newpeer(
 		peer->dstadr = loopback_interface;
 	else if (cast_flags & MDF_BCLNT)
 		peer->dstadr = findbcastinter(srcadr);
-	else if (dstadr != any_interface)
+	else if (dstadr != ANY_INTERFACE_CHOOSE(srcadr))
 		peer->dstadr = dstadr;
 	else
 		peer->dstadr = findinterface(srcadr);
@@ -598,7 +616,7 @@ newpeer(
 	if (debug)
 		printf(
 		    "newpeer: %s->%s mode %d vers %d poll %d %d flags %x %x ttl %d key %08x\n",
-		    ntoa(&peer->dstadr->sin), ntoa(&peer->srcadr),
+		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
 		    peer->ttlmax, peer->keyid);
@@ -612,7 +630,7 @@ newpeer(
  */
 int
 peer_unconfig(
-	struct sockaddr_in *srcadr,
+	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
 	int mode
 	)

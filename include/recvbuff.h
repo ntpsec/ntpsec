@@ -48,7 +48,7 @@ extern HANDLE	get_recv_buff_event P((void));
 struct recvbuf {
 	struct recvbuf *next;		/* next buffer in chain */
 	union {
-		struct sockaddr_in X_recv_srcadr;
+		struct sockaddr_storage X_recv_srcadr;
 		caddr_t X_recv_srcclock;
 		struct peer *X_recv_peer;
 	} X_from_where;
@@ -60,7 +60,7 @@ struct recvbuf {
 	WSABUF		wsabuff;
 	DWORD		AddressLength;
 #else
-	struct sockaddr_in srcadr;	/* where packet came from */
+	struct sockaddr_storage srcadr;	/* where packet came from */
 #endif
 	struct interface *dstadr;	/* interface datagram arrived thru */
 	int fd;				/* fd on which it was received */

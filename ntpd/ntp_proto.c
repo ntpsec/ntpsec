@@ -32,6 +32,7 @@ s_char	sys_precision;		/* local clock precision */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdispersion;	/* dispersion to primary source */
 u_int32 sys_refid;		/* reference source for local clock */
+struct sockaddr_storage sock_sys_refid; /* socket structure for reference source for local clock */
 static	double sys_offset;	/* current local clock offset */
 l_fp	sys_reftime;		/* time we were last updated */
 struct	peer *sys_peer; 	/* our current peer */
@@ -200,7 +201,7 @@ transmit(
 				clock_select();
 			}
 			if ((peer->stratum > 1 && peer->refid ==
-			    peer->dstadr->sin.sin_addr.s_addr) ||
+			    ((struct sockaddr_in*)&peer->dstadr->sin)->sin_addr.s_addr) ||
 			    peer->stratum >= STRATUM_UNSPEC)
 				hpoll++;
 			else
@@ -254,7 +255,7 @@ transmit(
 	 * We need to be very careful about honking uncivilized time.
 	 * Never transmit if in broadcast client mode or access denied.
 	 * If in broadcast mode, transmit only if synchronized to a
-	 * valid source. 
+	 * valid source.
 	 */
 	if (peer->hmode == MODE_BCLIENT || peer->flash & TEST4) {
 		return;
@@ -282,7 +283,7 @@ receive(
 	int authlen;			/* offset of MAC field */
 	int is_authentic;		/* cryptosum ok */
 	keyid_t skeyid;			/* cryptographic keys */
-	struct sockaddr_in *dstadr_sin;	/* active runway */
+	struct sockaddr_storage *dstadr_sin;	/* active runway */
 #ifdef AUTOKEY
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
 #endif /* AUTOKEY */
@@ -304,8 +305,8 @@ receive(
 #ifdef DEBUG
 	if (debug > 2)
 		printf("receive: at %ld %s<-%s restrict %02x\n",
-		    current_time, ntoa(&rbufp->dstadr->sin),
-		    ntoa(&rbufp->recv_srcadr), restrict_mask);
+		    current_time, stoa(&rbufp->dstadr->sin),
+		    stoa(&rbufp->recv_srcadr), restrict_mask);
 #endif
 	if (restrict_mask & RES_IGNORE)
 		return;				/* no anything */
@@ -356,7 +357,7 @@ receive(
 	 * or if not enabled as broadcast client.
 	 */
 	if (PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST &&
-	    (rbufp->dstadr == any_interface || !sys_bclient))
+	    (rbufp->dstadr == ANY_INTERFACE_CHOOSE(&rbufp->dstadr->sin) || !sys_bclient))
 		return;
 
 	/*
@@ -428,8 +429,8 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf("receive: at %ld %s<-%s mode %d code %d\n",
-			    current_time, ntoa(&rbufp->dstadr->sin),
-			    ntoa(&rbufp->recv_srcadr), hismode, retcode);
+			    current_time, stoa(&rbufp->dstadr->sin),
+			    stoa(&rbufp->recv_srcadr), hismode, retcode);
 #endif
 	} else {
 #ifdef AUTOKEY
@@ -475,8 +476,7 @@ receive(
 				 * mobilized.
 				 */
 				pkeyid = 0;
-				if (rbufp->dstadr->bcast.sin_addr.s_addr
-				    != 0)
+				if (!SOCKNUL(rbufp->dstadr->bcast))
 					dstadr_sin =
 					    &rbufp->dstadr->bcast;
 			} else if (peer == NULL) {
@@ -528,8 +528,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d code %d keyid %08x len %d mac %d auth %d\n",
-			    current_time, ntoa(dstadr_sin),
-			    ntoa(&rbufp->recv_srcadr), hismode, retcode,
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode, retcode,
 			    skeyid, authlen, has_mac,
 			    is_authentic);
 #endif
@@ -1108,7 +1108,7 @@ clock_update(void)
 		if (sys_stratum == 1)
 			sys_refid = sys_peer->refid;
 		else
-			sys_refid = sys_peer->srcadr.sin_addr.s_addr;
+			sys_refid = 0;  /* <**** REFID case to solve *****> */
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
@@ -1547,10 +1547,11 @@ clock_select(void)
 			 * excessive root distance. Careful with the
 			 * root distance, since the poll interval can
 			 * increase to a day and a half.
-			 */ 
-			if (!peer->reach || (peer->stratum > 1 &&
+			 */
+					/* <**** REFID case to solve ***> */
+			if (!peer->reach || /* (peer->stratum > 1 &&
 			    peer->refid ==
-			    peer->dstadr->sin.sin_addr.s_addr) ||
+			    peer->dstadr->sin.sin_addr.s_addr) || */
 			    peer->stratum >= STRATUM_UNSPEC ||
 			    (root_distance(peer) >= MAXDISTANCE + 2 *
 			    clock_phi * ULOGTOD(sys_poll)))
@@ -1739,7 +1740,7 @@ clock_select(void)
 #ifdef DEBUG
 		if (debug > 2)
 			printf("select: %s distance %.6f\n",
-			    ntoa(&peer_list[i]->srcadr), synch[i]);
+			    stoa(&peer_list[i]->srcadr), synch[i]);
 #endif
 	}
 
@@ -1812,7 +1813,7 @@ clock_select(void)
 		for (i = 0; i < nlist; i++)
 			printf(
 			    "select: %s offset %.6f, distance %.6f poll %d\n",
-			    ntoa(&peer_list[i]->srcadr),
+			    stoa(&peer_list[i]->srcadr),
 			    peer_list[i]->offset, synch[i],
 			    peer_list[i]->pollsw);
 	}
@@ -2008,8 +2009,8 @@ peer_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d\n",
-			    current_time, ntoa(&peer->dstadr->sin),
-			    ntoa(&peer->srcadr), peer->hmode);
+			    current_time, stoa(&peer->dstadr->sin),
+			    stoa(&peer->srcadr), peer->hmode);
 #endif
 		return;
 	}
@@ -2285,8 +2286,8 @@ peer_xmit(
 	if (debug)
 		printf(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d index %d\n",
-		    current_time, ntoa(&peer->dstadr->sin),
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
+		    current_time, stoa(&peer->dstadr->sin),
+		    stoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
 		    authlen, peer->keynumber);
 #endif
 #else
@@ -2294,8 +2295,8 @@ peer_xmit(
 	if (debug)
 		printf(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
-		    current_time, ntoa(&peer->dstadr->sin),
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
+		    current_time, stoa(&peer->dstadr->sin),
+		    stoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
 		    authlen);
 #endif
 #endif /* AUTOKEY */
@@ -2373,8 +2374,8 @@ fast_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d\n",
-			    current_time, ntoa(&rbufp->dstadr->sin),
-			    ntoa(&rbufp->recv_srcadr), xmode);
+			    current_time, stoa(&rbufp->dstadr->sin),
+			    stoa(&rbufp->recv_srcadr), xmode);
 #endif
 		return;
 	}
@@ -2449,8 +2450,8 @@ fast_xmit(
 	if (debug)
 		printf(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
-		    current_time, ntoa(&rbufp->dstadr->sin),
-		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen,
+		    current_time, stoa(&rbufp->dstadr->sin),
+		    stoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen,
 		    authlen);
 #endif
 }
@@ -2657,7 +2658,8 @@ void
 proto_config(
 	int item,
 	u_long value,
-	double dvalue
+	double dvalue,
+	struct sockaddr_storage* svalue
 	)
 {
 	/*
@@ -2716,7 +2718,7 @@ proto_config(
 		/*
 		 * Add muliticast group address
 		 */
-		io_multicast_add(value);
+		io_multicast_add(*svalue);
 		break;
 
 	case PROTO_MULTICAST_DEL:
@@ -2724,7 +2726,7 @@ proto_config(
 		/*
 		 * Delete multicast group address
 		 */
-		io_multicast_del(value);
+		io_multicast_del(*svalue);
 		break;
 
 	case PROTO_BROADDELAY:

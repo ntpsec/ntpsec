@@ -483,7 +483,7 @@ atom_poll(
 	if (peer->stratum <= 1)
 		peer->refid = pp->refid;
 	else
-		peer->refid = peer->srcadr.sin_addr.s_addr;
+		peer->refid = 0;   /* REFID case to solve */
 	pp->leap = LEAP_NOWARNING;
 	refclock_receive(peer);
 	peer->burst = ASTAGE;

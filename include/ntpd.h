@@ -30,9 +30,9 @@ extern	void	getconfig	P((int, char **));
 
 /* ntp_config.c */
 extern	void	ctl_clr_stats	P((void));
-extern	int	ctlclrtrap	P((struct sockaddr_in *, struct interface *, int));
+extern	int	ctlclrtrap	P((struct sockaddr_storage *, struct interface *, int));
 extern	u_short ctlpeerstatus	P((struct peer *));
-extern	int	ctlsettrap	P((struct sockaddr_in *, struct interface *, int, int));
+extern	int	ctlsettrap	P((struct sockaddr_storage *, struct interface *, int, int));
 extern	u_short ctlsysstatus	P((void));
 extern	void	init_control	P((void));
 extern	void	process_control P((struct recvbuf *, int));
@@ -71,24 +71,24 @@ extern  void    set_var P((struct ctl_var **, const char *, unsigned long, int))
 extern  void    set_sys_var P((char *, unsigned long, int));
 
 /* ntp_intres.c */
-extern	void	ntp_res_name	P((u_int32, u_short));
+extern	void	ntp_res_name	P((struct sockaddr_storage, u_short));
 extern	void	ntp_res_recv	P((void));
 extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
-extern	struct interface *findinterface P((struct sockaddr_in *));
-extern  struct interface *findbcastinter P((struct sockaddr_in *));
+extern	struct interface *findinterface P((struct sockaddr_storage *));
+extern  struct interface *findbcastinter P((struct sockaddr_storage *));
 
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));
 extern	void	io_clr_stats	P((void));
 extern	void	io_setbclient	P((void));
 extern	void	io_unsetbclient P((void));
-extern	void	io_multicast_add P((u_int32));
-extern	void	io_multicast_del P((u_int32));
+extern	void	io_multicast_add P((struct sockaddr_storage));
+extern	void	io_multicast_del P((struct sockaddr_storage));
 extern	void	kill_asyncio	 P((void));
 
-extern	void	sendpkt 	P((struct sockaddr_in *, struct interface *, int, struct pkt *, int));
+extern	void	sendpkt 	P((struct sockaddr_storage *, struct interface *, int, struct pkt *, int));
 #ifdef HAVE_SIGNALED_IO
 extern	void	wait_for_signal P((void));
 extern	void	unblock_io_and_alarm P((void));
@@ -122,15 +122,15 @@ extern	void	ntp_monitor P((struct recvbuf *));
 
 /* ntp_peer.c */
 extern	void	init_peer	P((void));
-extern	struct peer *findexistingpeer P((struct sockaddr_in *, struct peer *, int));
-extern	struct peer *findpeer	P((struct sockaddr_in *, struct interface *, int, int, int *));
+extern	struct peer *findexistingpeer P((struct sockaddr_storage *, struct peer *, int));
+extern	struct peer *findpeer	P((struct sockaddr_storage *, struct interface *, int, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
-extern	struct peer *newpeer	P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, u_int, int, keyid_t));
+extern	struct peer *newpeer	P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_int, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
-extern	struct peer *peer_config P((struct sockaddr_in *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
+extern	struct peer *peer_config P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
 extern	void	peer_reset	P((struct peer *));
-extern	int 	peer_unconfig	P((struct sockaddr_in *, struct interface *, int));
+extern	int 	peer_unconfig	P((struct sockaddr_storage *, struct interface *, int));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
 #ifdef AUTOKEY
@@ -157,7 +157,7 @@ extern	void	poll_update P((struct peer *, int));
 extern	void	clear		P((struct peer *));
 extern	void	clock_filter	P((struct peer *, double, double, double));
 extern	void	init_proto	P((void));
-extern	void	proto_config	P((int, u_long, double));
+extern	void	proto_config	P((int, u_long, double, struct sockaddr_storage*));
 extern	void	proto_clr_stats P((void));
 
 #ifdef	REFCLOCK
@@ -175,8 +175,8 @@ extern	void	process_private P((struct recvbuf *, int));
 
 /* ntp_restrict.c */
 extern	void	init_restrict	P((void));
-extern	int 	restrictions	P((struct sockaddr_in *));
-extern	void	hack_restrict	P((int, struct sockaddr_in *, struct sockaddr_in *, int, int));
+extern	int 	restrictions	P((struct sockaddr_storage *));
+extern	void	hack_restrict	P((int, struct sockaddr_storage *, struct sockaddr_storage *, int, int));
 
 /* ntp_timer.c */
 extern	void	init_timer	P((void));
@@ -191,10 +191,11 @@ extern	l_fp	sys_revoketime;
 extern	void	init_util	P((void));
 extern	void	hourly_stats	P((void));
 extern	void	stats_config	P((int, char *));
-extern	void	record_peer_stats P((struct sockaddr_in *, int, double, double, double, double));
+extern	void	record_peer_stats P((struct sockaddr_storage *, int, double, double, double, double));
 extern	void	record_loop_stats P((double, double, double, double, int));
-extern	void	record_clock_stats P((struct sockaddr_in *, const char *));
-extern	void	record_raw_stats P((struct sockaddr_in *, struct sockaddr_in *, l_fp *, l_fp *, l_fp *, l_fp *));
+extern	void	record_clock_stats P((struct sockaddr_storage *, const char *));
+extern	void	record_raw_stats P((struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *));
+extern  int	sock_hash P((struct sockaddr_storage *));
 
 /*
  * Variable declarations for ntpd.
@@ -254,7 +255,8 @@ extern u_long	io_timereset;		/* time counters were reset */
 /*
  * Interface stuff
  */
-extern struct interface *any_interface;	/* default interface */
+extern struct interface *any_interface;	/* default ipv4 interface */
+extern struct interface *any6_interface;/* default ipv6 interface */
 extern struct interface *loopback_interface; /* loopback interface */
 
 /*
@@ -336,6 +338,7 @@ extern s_char	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* distance to current sync source */
 extern double	sys_rootdispersion;	/* dispersion of system clock */
 extern u_int32	sys_refid;		/* reference source for local clock */
+extern struct sockaddr_storage sock_sys_refid;	/* socket structure for reference source for local clock */
 extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */
 extern struct peer *sys_prefer;		/* our cherished peer */

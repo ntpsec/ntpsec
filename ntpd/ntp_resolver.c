@@ -136,7 +136,7 @@ void		ntp_res		P((void));
 static	RETSIGTYPE bong		P((int));
 static	void	checkparent	P((void));
 static	void	removeentry	P((struct dns_entry *));
-static	void	addentry	P((char *, u_int32, u_short));
+static	void	addentry	P((char *, struct sockaddr_storage, u_short));
 static	void	findhostaddr	P((struct dns_entry *));
 static	void	openntp		P((void));
 static	int	tell_ntpd	P((struct info_dns_assoc *));
@@ -167,7 +167,7 @@ struct ntp_res_c_pkt {		/* Control packet: */
 
 void
 ntp_res_name(
-	u_int32 paddr,		/* Address to resolve */
+	struct sockaddr_storage paddr,	/* Address to resolve */
 	u_short associd		/* Association ID */
 	)
 {
@@ -397,7 +397,7 @@ removeentry(
 static void
 addentry(
 	char *name,
-	u_int32 paddr,
+	struct sockaddr_storage paddr,
 	u_short associd
 	)
 {
@@ -405,12 +405,9 @@ addentry(
 
 #ifdef DEBUG
 	if (debug > 1) {
-		struct in_addr si;
-
-		si.s_addr = paddr;
-		msyslog(LOG_INFO, 
+		msyslog(LOG_INFO,
 			"ntp_res_name: <%s> %s associd %d\n",
-			(name) ? name : "", inet_ntoa(si), associd);
+			(name) ? name : "", stoa(&paddr), associd);
 	}
 #endif
 
@@ -460,19 +457,17 @@ findhostaddr(
 	 * The following should never trip - this subroutine isn't
 	 * called if hostname and peeraddr are "filled".
 	 */
-	if (entry->de_hostname[0] && entry->de_peeraddr) {
-		struct in_addr si;
+ 	if (entry->de_hostname[0] && !SOCKNUL(&entry->de_peeraddr)) {
 
-		si.s_addr = entry->de_peeraddr;
 		msyslog(LOG_ERR, "findhostaddr: both de_hostname and de_peeraddr are defined: <%s>/%s: state %#x",
-			&entry->de_hostname[0], inet_ntoa(si), entry->de_done);
+			&entry->de_hostname[0], stoa(&entry->de_peeraddr), entry->de_done);
 		return;
 	}
 
 	/*
 	 * The following should never trip.
 	 */
-	if (!entry->de_hostname[0] && !entry->de_peeraddr) {
+	if (!entry->de_hostname[0] && SOCKNUL(&entry->de_peeraddr)) {
 		msyslog(LOG_ERR, "findhostaddr: both de_hostname and de_peeraddr are undefined!");
 		entry->de_done |= DE_FAIL;
 		return;
@@ -488,11 +483,8 @@ findhostaddr(
 	} else {
 #ifdef DEBUG
 		if (debug > 2) {
-			struct in_addr si;
-
-			si.s_addr = entry->de_peeraddr;
 			msyslog(LOG_INFO, "findhostaddr: Resolving %s",
-				inet_ntoa(si));
+				stoa(&entry->de_peeraddr));
 		}
 #endif
 		hp = gethostbyaddr((const char *)&entry->de_peeraddr,
@@ -546,11 +538,10 @@ findhostaddr(
 	} else {
 #ifdef DEBUG
 		if (debug > 2) {
-			struct in_addr si;
 			const char *hes;
 #ifndef HAVE_HSTRERROR
 			char hnum[20];
-			
+
 			switch (h_errno) {
 			    case HOST_NOT_FOUND:
 				hes = "Authoritive Answer Host not found";
@@ -573,10 +564,9 @@ findhostaddr(
 			hes = hstrerror(h_errno);
 #endif
 
-			si.s_addr = entry->de_peeraddr;
 			msyslog(LOG_INFO,
 				"findhostaddr: Failed resolution on <%s>/%s: %s",
-				entry->de_hostname, inet_ntoa(si), hes);
+				entry->de_hostname, stoa(&entry->de_peeraddr), hes);
 		}
 #endif
 		/* Send a NAK message back to the daemon */
@@ -936,15 +926,12 @@ doconfigure(
 	while (de != NULL) {
 #ifdef DEBUG
 		if (debug > 1) {
-			struct in_addr si;
-
-			si.s_addr = de->de_peeraddr;
 			msyslog(LOG_INFO,
 			    "doconfigure: name: <%s> peeraddr: %s",
-			    de->de_hostname, inet_ntoa(si));
+			    de->de_hostname, stoa(&de->de_peeraddr));
 		}
 #endif
-		if (dores && (de->de_hostname[0] == 0 || de->de_peeraddr == 0)) {
+		if (dores && (de->de_hostname[0] == 0 || SOCKNUL(&de->de_peeraddr))) {
 			findhostaddr(de);
 		}
 
@@ -965,14 +952,11 @@ doconfigure(
 		if (done_msg[0]) {
 			/* Send the answer */
 			if (tell_ntpd(&de->de_info)) {
-				struct in_addr si;
-
-				si.s_addr = de->de_peeraddr;
 #ifdef DEBUG
 				if (debug > 1) {
 					msyslog(LOG_INFO,
 						"DNS resolution on <%s>/%s %s",
-						de->de_hostname, inet_ntoa(si),
+						de->de_hostname, stoa(&de->de_peeraddr),
 						done_msg);
 				}
 #endif
