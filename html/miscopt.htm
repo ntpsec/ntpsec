@@ -49,65 +49,66 @@ file is located in, and that file system links, symbolic or
 otherwise, should be avoided.</p>
 </dd>
 
-<dt><tt>enable [auth | bclient | calibrate | kernel | monitor | ntp
-| stats]</tt><br>
-<tt>disable [auth | bclient | calibrate | kernel | monitor | ntp |
-stats</tt></dt>
+<dt><tt>enable [ auth | bclient | calibrate | kernel | monitor |
+ntp | pps | stats]</tt><br>
+<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp |
+pps | stats ]</tt></dt>
 
-<dd>Provides a way to enable or disable various server options.
+<dd>Provides a way to enable or disable various system options.
 Flags not mentioned are unaffected. Note that all of these flags
 can be controlled remotely using the <a href="ntpdc.htm"><tt>
 ntpdc</tt></a> utility program.</dd>
 
 <dd>
 <dl>
+<dt><tt>auth</tt></dt>
+
+<dd>Enables the server to synchronize with unconfigured peers only
+if the peer has been correctly authenticated using a trusted key
+and key identifier. The default for this flag is enable.</dd>
+
 <dt><tt>bclient</tt></dt>
 
-<dd>When enabled, this is identical to the <tt>broadcastclient</tt>
-command. The default for this flag is <tt>disable</tt>.</dd>
+<dd>Enables the server to listen for a message from a broadcast or
+multicast server, as in the <tt>multicastclient</tt> command with
+default address. The default for this flag is disable.</dd>
 
 <dt><tt>calibrate</tt></dt>
 
-<dd>Enables the calibration facility, which automatically adjusts
-the <tt>time1</tt> values for each clock driver to display the same
-offset as the currently selected source or kernel discipline
-signal. See the <a href="refclock.htm">Reference Clock Drivers</a>
-for further information. The default for this flag is <tt>
-disable</tt>.</dd>
+<dd>Enables the calibrate feature for reference clocks. The default
+for this flag is disable.</dd>
 
 <dt><tt>kernel</tt></dt>
 
-<dd>Enables the precision-time kernel support for the <tt>
-ntp_adjtime()</tt> system call, if implemented. Ordinarily, support
-for this routine is detected automatically when the NTP daemon is
-compiled, so it is not necessary for the user to worry about this
-flag. It flag is provided primarily so that this support can be
-disabled during kernel development. The default for this flag is
-<tt>enable</tt>.</dd>
+<dd>Enables the kernel time discipline, if available. The default
+for this flag is enable if support is available, otherwise
+disable.</dd>
 
 <dt><tt>monitor</tt></dt>
 
 <dd>Enables the monitoring facility. See the <tt>ntpdc</tt> program
 and the <tt>monlist</tt> command or further information. The
-default for this flag is <tt>enable</tt>.</dd>
+default for this flag is enable.</dd>
 
 <dt><tt>ntp</tt></dt>
 
-<dd>Enables the server to adjust its local clock by means of NTP.
-If disabled, the local clock free-runs at its intrinsic time and
-frequency offset. This flag is useful in case the local clock is
-controlled by some other device or protocol and NTP is used only to
-provide synchronization to other clients. In this case, the local
-clock driver can be used to provide this function and also certain
-time variables for error estimates and leap-indicators. See the <a
-href="refclock.htm">Reference Clock Drivers</a> page for further
-information. The default for this flag is <tt>enable</tt>.</dd>
+<dd>Enables time and frequency discipline. In effect, this switch
+opens and closes the feedback loop, which is useful for testing.
+The default for this flag is enable.</dd>
+
+<dt><tt>pps</tt></dt>
+
+<dd>Enables the pulse-per-second (PPS) signal when frequency and
+time is disciplined by the precision time kernel modifications. See
+the <a href="kern.htm">A Kernel Model for Precision Timekeeping</a>
+page for further information. The default for this flag is
+disable.</dd>
 
 <dt><tt>stats</tt></dt>
 
 <dd>Enables the statistics facility. See the <a href="monopt.htm">
-Monitoring Options</a> page for further information. The default
-for this flag is <tt>enable</tt>.</dd>
+Monitoring Options</a> page for further information. The
+default</dd>
 </dl>
 </dd>
 
