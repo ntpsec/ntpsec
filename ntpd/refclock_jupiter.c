@@ -621,10 +621,10 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			if (!refclock_process(pp)) {
-				refclock_report(peer, CEVNT_BADTIME);
-				break;
-			}
+			tstamp.l_ui = JAN_1970 + last_timecode;
+			tstamp.l_uf = 0;
+
+			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
 
 			/*
 			 * The clock will blurt a timecode every second
