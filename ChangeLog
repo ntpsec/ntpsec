@@ -1,5 +1,8 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c (main): Reset the standard mask so the
+	symlinks are created with the standard mask.
+
 	* configure.in: 4.0.99k28
 
 	* ntpd/ntpd.c (ntpdmain): Use mode_t for umask value.

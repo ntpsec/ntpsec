@@ -877,6 +877,7 @@ main(
 	*/
 
 	std_mask = umask(sec_mask); /* Get the standard mask */
+	(void) umask(std_mask);
 
 	if (make_md5 && (force || !filep(f1_keys))) {
 		/*
