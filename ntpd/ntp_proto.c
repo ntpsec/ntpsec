@@ -166,10 +166,10 @@ transmit(
 				    "DENY") == 0 ||
 				    strcmp((char *)&peer->refid,
 				    "CRYP") == 0) {
-					struct sockaddr_in mskadr_sin;
+					struct sockaddr_storage mskadr_sin;
 
-					mskadr_sin.sin_addr.s_addr =
-					    0xffffffff;
+					SET_HOSTMASK(&mskadr_sin,
+					    peer->srcadr.ss_family);
 					hack_restrict(RESTRICT_FLAGS,
 					    &peer->srcadr, &mskadr_sin,
 					    0, RES_DONTTRUST |
@@ -316,7 +316,6 @@ receive(
 	int	is_authentic;		/* cryptosum ok */
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_storage *dstadr_sin;	/* active runway */
-	struct sockaddr_storage mskadr_sin;	/* mask for restrict */
 	l_fp	p_org;			/* originate timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 	int	rval;			/* cookie snatcher */
@@ -746,19 +745,12 @@ receive(
 		if (crypto_flags) {
 			if ((rval = crypto_recv(peer, rbufp)) !=
 			    XEVNT_OK) {
-				struct sockaddr_in mskadr_sin;
+				struct sockaddr_storage mskadr_sin;
 
 				unpeer(peer);
 				sys_restricted++;
-				memset((char *)&mskadr_sin, 0,
-				    sizeof(struct sockaddr_storage));
-				mskadr_sin.ss_family =
-				    rbufp->recv_srcadr.ss_family;
-				if (mskadr_sin.ss_family == AF_INET)
-					GET_INADDR(mskadr_sin) = 0xffffffff;
-				else
-					memset(&GET_INADDR6(mskadr_sin), 0xff,
-					    sizeof(struct in6_addr));
+				SET_HOSTMASK(&mskadr_sin,
+				    rbufp->recv_srcadr.ss_family);
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin,
 				    0, RES_DONTTRUST | RES_TIMEOUT);

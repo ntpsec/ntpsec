@@ -514,6 +514,17 @@ struct peer {
 #define GET_INADDR(src)  (CAST_V4(src)->sin_addr.s_addr)
 #define GET_INADDR6(src) (CAST_V6(src)->sin6_addr)
 
+#define SET_HOSTMASK(addr, family)	\
+	do { \
+		memset((char *)(addr), 0, sizeof(struct sockaddr_storage)); \
+		(addr)->ss_family = (family); \
+		if ((family) == AF_INET) \
+			GET_INADDR(*(addr)) = 0xffffffff; \
+		else \
+			memset(&GET_INADDR6(*(addr)), 0xff, \
+			    sizeof(struct in6_addr)); \
+	} while(0)
+
 /*
  * NTP packet format.  The mac field is optional.  It isn't really
  * an l_fp either, but for now declaring it that way is convenient.
