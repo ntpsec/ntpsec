@@ -10,16 +10,15 @@
 
     <body>
         <h3>Kernel Model for Precision Timekeeping</h3>
-        <p><img src="pic/alice61.gif" alt="gif" align="left"> <a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Pogo</i>, Walt Kelly</a></p>
+        <p><img src="pic/alice61.gif" alt="gif" align="left"> <a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a></p>
         <p>Alice touched the kernel and it exploded.</p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:26</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <br clear="left">
         <h4>Related Links</h4>
-        <p>
-            <script type="text/javascript" language="javascript" src="scripts/links11.txt"></script>
-            <br clear="left">
-        </p>
+        <script type="text/javascript" language="javascript" src="scripts/links11.txt"></script>
         <hr>
         <p>The technical report [2], which is a major revision and update of RFC-1589 [3], describes an engineering model for a precision time-of-day function for a generic operating system. The model is based on the principles of disciplined oscillators using phase-lock loops (PLL) and frequency-lock loops (FLL) often found in the engineering literature. The model uses a hybrid PLL/FLL discipline algorithm implemented in the kernel. The algorithm, which is very similar to the algorithm implemented in the NTP daemon, provides automatic time and frequency steering with update intervals from a few seconds to tens of minutes.</p>
-        <p>The hybrid PLL/FLL code described in [2] is included in Solaris  and Digital/Compaq/HP Tru64. It includes two system calls <tt>ntp_gettime()</tt> and <tt>ntp_adjtime()</tt> and can discipline the system clock with microsecond resolution. However, newer hardware and kernels with the same system calls can discipline the clock with nanosecond resolution. The new code described in [1] is available for Linux, FreeBSD, SunOS and Tru64; however, only the Linux and FreeBSD implementations, which do not include licensed code, are readily available. The software and documentation, including a simulator used to verify correct behavior, but not involving licensed code, is available at <a href=ftp://ftp.udel.edu/pub/ntp/software/nanokernel.tar.gz>nanokernel.tar.gz</a>.</p>
+        <p>The hybrid PLL/FLL code described in [2] is included in Solaris and Digital/Compaq/HP Tru64. It includes two system calls <tt>ntp_gettime()</tt> and <tt>ntp_adjtime()</tt> and can discipline the system clock with microsecond resolution. However, newer hardware and kernels with the same system calls can discipline the clock with nanosecond resolution. The new code described in [1] is available for Linux, FreeBSD, SunOS and Tru64; however, only the Linux and FreeBSD implementations, which do not include licensed code, are readily available. The software and documentation, including a simulator used to verify correct behavior, but not involving licensed code, is available at <a href="ftp://ftp.udel.edu/pub/ntp/software/nanokernel.tar.gz">nanokernel.tar.gz</a>.</p>
         <p>The model also changes the way the system clock is adjusted in time and frequency relative to an external precision timing source, such as described in the <a href="pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page. The NTP software daemon uses the PPS to provide synchronization limited in principle only by the accuracy and stability of the external timing source.</p>
         <h4>References</h4>
         <ol>

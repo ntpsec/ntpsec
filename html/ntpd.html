@@ -10,26 +10,28 @@
 
     <body>
         <h3><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</h3>
-        <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
+        <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
         <p>The mushroom knows all the command line options.</p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:22</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <br clear="left">
         <h4>Related Links</h4>
-        <p>
-            <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
-            <br clear="left">
-        </p>
+        <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
+        <h4>Table of Contents</h4>
+        <ul>
+            <li class="inline"><a href="#synop">Synopsis</a><br>
+            <li class="inline"><a href="#descr">Description</a><br>
+            <li class="inline"><a href="#op">How NTP Operates</a><br>
+            <li class="inline"><a href="#freq">Frequency Discipline</a><br>
+            <li class="inline"><a href="#modes">Operating Modes</a><br>
+            <li class="inline"><a href="#poll">Poll Interval Control</a><br>
+            <li class="inline"><a href="#poll">Poll Interval Control</a><br>
+            <li class="inline"><a href="#notes">Notes</a><br>
+            <li class="inline"><a href="#cmd">Command Line Options</a><br>
+            <li class="inline"><a href="#cfg">The Configuration File</a><br>
+            <li class="inline"><a href="#opt">Configuration Options</a><br>
+            <li class="inline"><a href="#files">Files</a>
+        </ul>
         <hr>
-        <p><a href="#synop">Synopsis</a><br>
-            <a href="#descr">Description</a><br>
-            <a href="#op">How NTP Operates</a><br>
-            <a href="#freq">Frequency Discipline</a><br>
-            <a href="#modes">Operating Modes</a><br>
-            <a href="#poll">Poll Interval Control</a><br>
-            <a href="#poll">Poll Interval Control</a><br>
-            <a href="#notes">Notes</a><br>
-            <a href="#cmd">Command Line Options</a><br>
-            <a href="#cfg">The Configuration File</a><br>
-            <a href="#opt">Configuration Options</a><br>
-            <a href="#files">Files</a></p>
         <h4 id="#synop">Synopsis</h4>
         <tt>ntpd [ -aAbdgLmNPqx ] [ -c <i>conffile</i> ] [ -f <i>driftfile</i> ] [ -g ] [ -k <i>keyfile</i> ] [ -l <i>logfile</i> ] [ -N high ] [ -p <i>pidfile</i> ] [ -r <i>broadcastdelay</i> ] [ -s <i>statsdir</i> ] [ -t <i>key</i> ] [ -v <i>variable</i> ] [ -V <i>variable</i> ] [ -x ]</tt>
         <h4 id="#descr">Description</h4>
