@@ -41,10 +41,10 @@ cases the algorithms are further analyzed, modelled and evaluated
 in a technical report.</p>
 
 <p>Currently, the audio drivers are compatible with Sun operating
-systems, including Solaris and SunOS, and the native audio codec
-interface supported by these systems. In fact, the interface is
-quite generic and support for other systems, in particular the
-various Unix generics, should not be difficult. Volunteers are
+systems and audio codecs, including SunOS 4.1.3 and Solaris 2.8 and
+probably all others in between. In fact, the interface is quite
+generic and support for other systems, in particular the various
+Unix generics, should not be difficult. Volunteers are
 solicited.</p>
 
 <p>The audio drivers include a number of common features designed
@@ -101,7 +101,7 @@ computers and other electromagnetic noisemakers. It can be in the
 elevator penthouse connected by house wiring, which can also be
 used to power the radio. A couple of center-tapped audio
 transformers will minimize noise pickup and provide phantom power
-to the radio with return via the AC neutral wire.</p>
+to the radio with return via the building ground.</p>
 
 <p>The WWV/H and CHU transmitters operate on several frequencies
 simultaneously, so that in most parts of North America at least one
@@ -149,20 +149,60 @@ will work. For instance, on the east coast the best compromise CHU
 frequency is probably 7335 kHz and the best WWV frequency is
 probably 15 MHz. 
 
-<h4>Debugging Aids</h4>
+<h4>Setup and Debugging Aids</h4>
 
-<p>The audio drivers include extensive debugging support to help
-hook up the audio signals and monitor the driver operations. The
-documentation page for each driver describes the various messages
-that can be produced either in real-time or written to the <tt>
-clockstats</tt> file for later analysis. Of particular help in
-verifying signal connections and compatibility is a provision to
-monitor the signal via headphones or speaker.</p>
+<p>The audio drivers include extensive setup and debugging support
+to help hook up the audio signals and monitor the driver
+operations. The documentation page for each driver describes the
+various messages that can be produced either in real time or
+written to the <tt>clockstats</tt> file for later analysis. Of
+particular help in verifying signal connections and compatibility
+is a provision to monitor the signal via headphones or speaker.</p>
+
+<p>Connecting radios and IRIG devices to the computer and verifying
+correct configuration is somewhat of a black art for some. The
+signals have to be connected to the correct ports and the signal
+level maintained within tolerances. Some radios have recorder
+outputs which produce a line level signal not affected by the
+volume control. These signals can be connected to the line-in port
+on the computer. If the level is too low, connect to the
+microphone-in port instead. The drivers use the <tt>fudge
+flag2</tt> command to set the input port; 0 (default) selects the
+microphone-in, 1 selects the line-in port. The carrier level
+indicated by the driver should be comfortably above the minimum
+specified and the AGC level somewhere in the middle of the range
+0-255. If the radio does not have a recorder output, connect the
+headphone or speaker output to the line-in port and adjust the
+volume control so the driver indicates comfortably above the
+minimum specified and the AGC level somewhere in the middle of the
+range 0-255.</p>
+
+<p>IRIG signals are usually much larger in the range several volts
+and may even overload the line-in port. In such cases an attenuator
+must be used to reduce the signal level below the overload
+point.</p>
+
+<p>It is very easy to underdrive or overdrive the audio codec, in
+which case the drivers will not synchronize to the signal. The most
+useful drive indicator is the AGC level provided in the driver
+debug display. A value of zero indicates either the signal is
+absent, connected to the wrong port or below the minimum threshold.
+A value of 255 indicates an overdriven condition and the signal
+level must be reduced. Usually this happens when the signal is
+connected to the microphone-in port and is easily corrected by
+connecting to the line-in port instead.</p>
+
+<p>The drivers use <tt>fudge flag2</tt> to enable audio monitoring
+of the input signal. This is useful during setup to confirm the
+signal is actually reaching the audio codec and generally free of
+hum and interference. This feature is not intended for regular use,
+since it does increase the processor load on the system. Note that
+the speaker volume must be set before the driver is started.</p>
 
 <p>The drivers write a synthesized timecode to the <tt>
 clockstats</tt> file each time the clock is set or verified and at
 other times if verbose monitoring is enabled. The format includes
-several fixed-length fields defining the Gregorian time to the
+several fixed-length fields defining the UTC time to the
 millisecond, together with additional variable-length fields
 specific to each driver. The data include the intervals since the
 clock was last set or verified, the audio gain and various state
