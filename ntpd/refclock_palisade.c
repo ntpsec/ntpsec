@@ -674,7 +674,7 @@ praecis_parse(struct recvbuf *rbufp, struct peer *peer)
 	p += rbufp->recv_length;
 
 	if(buf[p-2] == '\r' && buf[p-1] == '\n') {
-		buf[p-2] = NULL;
+		buf[p-2] = '\0';
 		record_clock_stats(&peer->srcadr, buf);
 
 		p = 0;

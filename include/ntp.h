@@ -174,7 +174,7 @@ struct interface {
 	struct sockaddr_storage sin;	/* interface address */
 	struct sockaddr_storage bcast; /* broadcast address */
 	struct sockaddr_storage mask; /* interface mask */
-	char name[8];		/* name of interface */
+	char name[32];		/* name of interface */
 	int flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */
 	u_int addr_refid;	/* IPv4 addr or IPv6 hash */
@@ -186,10 +186,12 @@ struct interface {
 /*
  * Flags for interfaces
  */
-#define	INT_BROADCAST	1	/* can broadcast out this interface */
-#define	INT_BCASTOPEN	2	/* broadcast socket is open */
-#define	INT_LOOPBACK	4	/* the loopback interface */
-#define INT_MULTICAST	8	/* multicasting enabled */
+#define INT_UP		 1	/* Interface is up */
+#define	INT_PPP		 2	/* Point-to-point interface */
+#define	INT_LOOPBACK	 4	/* the loopback interface */
+#define	INT_BROADCAST	 8	/* can broadcast out this interface */
+#define INT_MULTICAST	16	/* multicasting enabled */
+#define	INT_BCASTOPEN	32	/* broadcast socket is open */
 
 /*
  * Define flasher bits (tests 1 through 11 in packet procedure)
