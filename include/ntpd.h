@@ -350,6 +350,7 @@ extern u_char	sys_stratum;		/* stratum of system */
 extern s_char	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* distance to current sync source */
 extern double	sys_rootdispersion;	/* dispersion of system clock */
+extern u_long	sys_clocktime;		/* last system clock update */
 extern u_int32	sys_refid;		/* reference source for local clock */
 extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */

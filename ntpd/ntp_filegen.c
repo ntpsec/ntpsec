@@ -335,6 +335,11 @@ filegen_setup(
 	 * reopen new file generation file on change of generation id
 	 */
 	if (gen->fp == NULL || gen->id != new_gen) {
+#if DEBUG
+	if (debug)
+		printf("filegen  %0x %lu %lu %lu\n", gen->type, now,
+		    gen->id, new_gen); 
+#endif
 		filegen_open(gen, new_gen);
 	}
 }

@@ -321,7 +321,7 @@ local_clock(
 	 * stepped. 
 	 */
 	clock_frequency = flladj = plladj = 0;
-	mu = current_time - last_time;
+	mu = sys_clocktime - last_time;
 	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
@@ -733,7 +733,9 @@ adj_host_clock(
 
 
 /*
- * Clock state machine. Enter new state and set state variables.
+ * Clock state machine. Enter new state and set state variables. Note we
+ * use the time of the last clock filter sample, which may be earlier
+ * than the current time.
  */
 static void
 rstclock(
@@ -742,7 +744,7 @@ rstclock(
 	)
 {
 	state = trans;
-	last_time = current_time;
+	last_time = sys_clocktime;
 	last_base = offset - clock_offset;
 	last_offset = clock_offset = offset;
 #ifdef DEBUG
