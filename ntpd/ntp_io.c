@@ -1841,7 +1841,6 @@ input_handler(
 }
 
 #endif
-
 /*
  * findinterface - find interface corresponding to address
  */
@@ -1850,8 +1849,12 @@ findinterface(
 	struct sockaddr_storage *addr
 	)
 {
-	int i;
+	SOCKET s;
+	int rtn, i;
+	struct sockaddr_storage saddr;
+	int saddrlen = SOCKLEN(addr);
 
+	/* Try the local interface addresses first */
 	for (i = nwilds; i < ninterfaces; i++) {
 		/*
 		* First look if is the the correct family
@@ -1864,9 +1867,57 @@ findinterface(
 		if (SOCKCMP(&inter_list[i].sin, addr))
 			return (&inter_list[i]);
 	}
+	/*
+	 * This is considerably hoke. We open a socket, connect to it
+	 * and slap a getsockname() on it. If anything breaks, as it
+	 * probably will in some j-random knockoff, we just return the
+	 * wildcard interface.
+	 */
+	memset(&saddr, 0, sizeof(saddr));
+	saddr.ss_family = addr->ss_family;
+	if(addr->ss_family == AF_INET)
+		memcpy(&((struct sockaddr_in*)&saddr)->sin_addr, &((struct sockaddr_in*)addr)->sin_addr, sizeof(struct in_addr));
+	else if(addr->ss_family == AF_INET6)
+		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
+	((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
+	s = socket(addr->ss_family, SOCK_DGRAM, 0);
+	if (s == INVALID_SOCKET)
+		return ANY_INTERFACE_CHOOSE(addr);
+
+	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
+#ifndef SYS_WINNT
+	if (rtn < 0)
+#else
+	if (rtn == SOCKET_ERROR)
+#endif
+	{
+		closesocket(s);
+		return ANY_INTERFACE_CHOOSE(addr);
+	}
+
+	rtn = getsockname(s, (struct sockaddr *)&saddr, &saddrlen);
+	closesocket(s);
+#ifndef SYS_WINNT
+	if (rtn < 0)
+#else
+	if (rtn == SOCKET_ERROR)
+#endif
+		return ANY_INTERFACE_CHOOSE(addr);
+
+	for (i = nwilds; i < ninterfaces; i++) {
+		/*
+		* First look if is the the correct family
+		*/
+		if(inter_list[i].sin.ss_family != saddr.ss_family)
+	  		continue;
+		/*
+		 * We match the unicast address only.
+		 */
+		if (SOCKCMP(&inter_list[i].sin, &saddr))
+			return (&inter_list[i]);
+	}
 	return ANY_INTERFACE_CHOOSE(addr);
 }
-
 
 /*
  * findbcastinter - find broadcast interface corresponding to address
