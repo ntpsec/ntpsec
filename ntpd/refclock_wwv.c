@@ -2645,7 +2645,10 @@ wwv_qsy(
  * agc	audio gain (0-255)
  * iden	station identifier (station and frequency)
  * comp	minute sync compare counter
- * errs	bit errors in last minute * freq	frequency offset (PPM) * avgt	averaging time (s) */
+ * errs	bit errors in last minute
+ * freq	frequency offset (PPM)
+ * avgt	averaging time (s)
+ */
 static int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */

@@ -1,5 +1,8 @@
 2000-04-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* flock-build: Add malarky.  By default, --enable-parse-clocks.
+	Start 2 builds, one with and the other without rsaref.
+
 	* configure.in: 4.0.99h6
 	Dave improved the crypto stuff some more.
 
