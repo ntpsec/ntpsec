@@ -3,7 +3,7 @@
  * Refclock_neoclock4x.c
  * - NeoClock4X driver for DCF77 or FIA Timecode
  *
- * Date: 2003-01-08 v1.11
+ * Date: 2003-01-10 v1.12
  *
  * see http://www.linum.com/redir/jump/id=neoclock4x&action=redir
  * for details about the NeoClock4X device
@@ -95,7 +95,7 @@
 #define NEOCLOCK4X_OFFSET_ANTENNA2         33
 #define NEOCLOCK4X_OFFSET_CRC              35
 
-#define NEOCLOCK4X_DRIVER_VERSION          "1.11 (2003-01-08)"
+#define NEOCLOCK4X_DRIVER_VERSION          "1.12 (2003-01-10)"
 
 struct neoclock4x_unit {
   l_fp	laststamp;	/* last receive timestamp */
@@ -160,7 +160,9 @@ neoclock4x_start(int unit,
   int fd;
   char dev[20];
   int sl232;
+#if defined(HAVE_TERMIOS)
   struct termios termsettings;
+#endif
 #if !defined(NEOCLOCK4X_FIRMWARE)
   int tries;
 #endif
@@ -175,6 +177,52 @@ neoclock4x_start(int unit,
     {
       return (0);
     }
+
+#if defined(HAVE_TERMIOS)
+  if(tcgetattr(fd, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+
+  /* 2400 Baud 8N2 */
+  termsettings.c_cflag &= ~PARENB;
+  termsettings.c_cflag |= CSTOPB;
+  termsettings.c_cflag &= ~CSIZE;
+  termsettings.c_cflag |= CS8;
+
+  if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+#elif defined(HAVE_SYSV_TTYS)
+  if(ioctl(fd, TCGETA, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (TCGETA) can't query serial port settings: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+  
+  /* 2400 Baud 8N2 */
+  termsettings.c_cflag &= ~PARENB;
+  termsettings.c_cflag |= CSTOPB;
+  termsettings.c_cflag &= ~CSIZE;
+  termsettings.c_cflag |= CS8;
+  
+  if(ioctl(fd, TCSETA, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (TSGETA) can't set serial port 2400 8N2: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+#else
+  msyslog(LOG_EMERG, "NeoClock4X(%d): don't know how to set port to 2400 8N2 with this OS!", unit);
+  (void) close(fd);
+  return (0);
+#endif
   
 #if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
   /* turn on RTS, and DTR for power supply */
@@ -182,6 +230,8 @@ neoclock4x_start(int unit,
   if(ioctl(fd, TIOCMGET, (caddr_t)&sl232) == -1)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
+      (void) close(fd);
+      return (0);
     }
 #ifdef TIOCM_RTS
   sl232 = sl232 | TIOCM_DTR | TIOCM_RTS;	/* turn on RTS, and DTR for power supply */
@@ -191,28 +241,16 @@ neoclock4x_start(int unit,
   if(ioctl(fd, TIOCMSET, (caddr_t)&sl232) == -1)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
-    }
-  
-  if(ioctl(fd, TCGETS, (caddr_t)&termsettings) == -1)
-    {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): can't query serial port settings: %m", unit);
-    }
-  
-  /* 2400 Baud mit 8N2 */
-  termsettings.c_cflag &= ~PARENB;
-  termsettings.c_cflag |= CSTOPB;
-  termsettings.c_cflag &= ~CSIZE;
-  termsettings.c_cflag |= CS8;
-  
-  if(ioctl(fd, TCSETS, &termsettings) == -1)
-    {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): can't set serial port to 2400 8N2: %m", unit);
+      (void) close(fd);
+      return (0);
     }
 #else
-  msyslog(LOG_EMERG, "NeoClock4X(%d): OS interface is incapable of setting DTR/RTS to power NeoClock4X",
+  msyslog(LOG_EMERG, "NeoClock4X(%d): don't know how to set DTR/RTS to power NeoClock4X with this OS!",
 	  unit);
+  (void) close(fd);
+  return (0);
 #endif
-  
+
   up = (struct neoclock4x_unit *) emalloc(sizeof(struct neoclock4x_unit));
   if(!(up))
     {
@@ -762,25 +800,18 @@ static void neol_localtime(unsigned long utc,
 			   int* month,
 			   int* day,
 			   int* hour,
-			   int* minute,
-			   int* second)
+			   int* min,
+			   int* sec)
 {
-  ldiv_t d;
-  
-  /* Sekunden */
-  d  = ldiv(utc, 60);
-  *second = d.rem;
-  
-  /* Minute */
-  d  = ldiv(d.quot, 60);
-  *minute = d.rem;
-  
-  /* Stunden */
-  d  = ldiv(d.quot, 24);
-  *hour = d.rem;
+  *sec = utc % 60;
+  utc /= 60;
+  *min = utc % 60;
+  utc /= 60;
+  *hour = utc % 24;
+  utc /= 24;
   
   /*             JDN Date 1/1/1970 */
-  neol_jdn_to_ymd(d.quot + 2440588L, year, month, day);
+  neol_jdn_to_ymd(utc + 2440588L, year, month, day);
 }
 
 static void neol_jdn_to_ymd(unsigned long jdn, 
@@ -1010,5 +1041,10 @@ int refclock_neoclock4x_bs;
  * - changing xprinf to xnprinf to avoid buffer overflows
  * - change some logic
  * - fixed memory leaks if drivers can't initialize
+ *
+ * 2003/01/10 cjh
+ * Revision 1.12
+ * - replaced ldiv
+ * - add code to support FreeBSD
  *
  */
