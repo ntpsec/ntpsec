@@ -134,6 +134,7 @@ static	struct keyword keywords[] = {
 	{ "setvar",		CONFIG_SETVAR },
 	{ "statistics",		CONFIG_STATISTICS },
 	{ "statsdir",		CONFIG_STATSDIR },
+	{ "tinker",		CONFIG_TINKER },
 	{ "trap",		CONFIG_TRAP },
 	{ "trustedkey",		CONFIG_TRUSTEDKEY },
 	{ "",			CONFIG_UNKNOWN }
@@ -263,6 +264,7 @@ static struct keyword tinker_keywords[] = {
 	{ "panic",		CONF_CLOCK_PANIC },
 	{ "dispersion",		CONF_CLOCK_PHI },
 	{ "stepout",		CONF_CLOCK_MINSTEP },
+	{ "minpoll",		CONF_CLOCK_MINPOLL },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -648,7 +650,7 @@ getconfig(
 			}
 			
 			peerversion = NTP_VERSION;
-			minpoll = NTP_MINDPOLL;
+			minpoll = sys_minpoll;
 			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
 			peerkeystr = "*";
@@ -692,8 +694,8 @@ getconfig(
 					    break;
 				    }
 				    minpoll = atoi(tokens[++i]);
-				    if (minpoll < NTP_MINPOLL)
-					minpoll = NTP_MINPOLL;
+				    if (minpoll < sys_minpoll)
+					minpoll = sys_minpoll;
 				    break;
 
 				case CONF_MOD_MAXPOLL:
@@ -947,6 +949,10 @@ getconfig(
 
 			    case CONF_CLOCK_MINSTEP:
 				loop_config(LOOP_MINSTEP, ftemp);
+				break;
+
+			    case CONF_CLOCK_MINPOLL:
+				loop_config(LOOP_MINPOLL, ftemp);
 				break;
 			    }
 			}
@@ -2037,7 +2043,7 @@ save_resolve(
 	}
 #endif
 
-	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %08x %s\n", name,
+	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %d %s\n", name,
 	    mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #ifdef DEBUG
 	if (debug > 1)

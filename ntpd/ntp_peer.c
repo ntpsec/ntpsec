@@ -547,6 +547,8 @@ newpeer(
 	peer->keyid = key;
 	peer->precision = sys_precision;
 	peer_clear(peer);
+	if (mode_ntpdate)
+		peer_ntpdate++;
 
 	/*
 	 * Assign an association ID and increment the system variable.

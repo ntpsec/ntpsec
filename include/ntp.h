@@ -267,6 +267,7 @@ struct peer {
 	/*
 	 * Variables used by authenticated client
 	 */
+	keyid_t keyid;		/* current key ID */
 #ifdef AUTOKEY
 #define clear_to_zero assoc
 	associd_t assoc;	/* peer association ID */
@@ -276,12 +277,7 @@ struct peer {
 	struct	value certif;	/* certificate */
 	u_char	*keystr;	/* host name */
 #endif /* PUBKEY */
-#else /* AUTOKEY */
-#define clear_to_zero keyid
-#endif /* AUTOKEY */
-	keyid_t	keyid;		/* current key ID */
 	keyid_t	pkeyid;		/* previous key ID */
-#ifdef AUTOKEY
 	keyid_t	hcookie;	/* host cookie */
 	struct cookie pcookie;	/* peer cookie */
 	struct autokey recauto;	/* autokey */
@@ -292,6 +288,8 @@ struct peer {
 	keyid_t	*keylist;	/* session key ID list */
 	int	keynumber;	/* current key number */
 	struct autokey sndauto;	/* autokey */
+#else /* AUTOKEY */
+#define clear_to_zero status
 #endif /* AUTOKEY */
 
 	/*
@@ -668,12 +666,11 @@ struct pkt {
  */
 #define	LOOP_DRIFTINIT		1	/* set initial frequency offset */
 #define LOOP_DRIFTCOMP		2	/* set frequency offset */
-#define LOOP_PPSDELAY		3	/* set pps delay */
-#define LOOP_PPSBAUD		4	/* set pps baud rate */
-#define LOOP_MAX		5	/* set step offset */
-#define LOOP_PANIC		6	/* set panic offseet */
-#define LOOP_PHI		7	/* set dispersion rate */
-#define LOOP_MINSTEP		8	/* set step timeout */
+#define LOOP_MAX		3	/* set step offset */
+#define LOOP_PANIC		4	/* set panic offseet */
+#define LOOP_PHI		5	/* set dispersion rate */
+#define LOOP_MINSTEP		6	/* set step timeout */
+#define LOOP_MINPOLL		7	/* set min poll interval (log2 s) */
 
 /*
  * Configuration items for the stats printer

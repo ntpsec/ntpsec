@@ -286,11 +286,13 @@ extern int	cal_enable;		/* refclock calibrate enable */
 extern int	allow_step;		/* allow step correction */
 extern int	allow_panic;		/* allow panic correction */
 extern int	mode_ntpdate;		/* exit on first clock set */
+extern int	peer_ntpdate;		/* count of ntpdate peers */
 
 /*
  * Clock state machine variables
  */
-extern u_char	sys_poll;		/* log2 of system poll interval */
+extern u_char	sys_poll;		/* system poll interval (log2 s) */
+extern u_char	sys_minpoll;		/* min system poll interval (log2 s) */
 extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */

@@ -50,7 +50,26 @@
 /*
  * Clock discipline state machine. This is used to control the
  * synchronization behavior during initialization and following a
- * timewarp. 
+ * timewarp.
+ *
+ *	State	< max	> max			Comments
+ *	====================================================
+ *	NSET	FREQ	FREQ			no ntp.drift
+ *
+ *	FSET	TSET	if (allow) TSET,	ntp.drift
+ *			else FREQ
+ *
+ *	TSET	SYNC	FREQ			time set
+ *
+ *	FREQ	SYNC	if (mu < 900) FREQ	calculate frequency
+ *			else if (allow) TSET
+ *			else FREQ
+ *
+ *	SYNC	SYNC	if (mu < 900) SYNC	normal state
+ *			else SPIK
+ *
+ *	SPIK	SYNC	if (allow) TSET		spike detector
+ *			else FREQ
  */
 #define S_NSET	0		/* clock never set */
 #define S_FSET	1		/* frequency set from the drift file */
@@ -124,7 +143,8 @@ int	mode_ntpdate = FALSE;	/* exit on first clock set */
 /*
  * Clock state machine variables
  */
-u_char	sys_poll;		/* log2 of system poll interval */
+u_char	sys_minpoll = NTP_MINDPOLL; /* min sys poll interval (log2 s) */
+u_char	sys_poll = NTP_MINDPOLL; /* system poll interval (log2 s) */
 int	state;			/* clock discipline state */
 int	tc_counter;		/* poll-adjust counter */
 u_long	last_time;		/* time of last clock update (s) */
@@ -210,13 +230,13 @@ local_clock(
 			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 			    msyslog(LOG_NOTICE, "time reset %.6f s",
 	   		    fp_offset);
-			printf("ntpd: time reset %.6f s\n", fp_offset);
+			printf("ntpd: time reset %.6fs\n", fp_offset);
 		} else {
 			adj_systime(fp_offset);
 			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 			    msyslog(LOG_NOTICE, "time slew %.6f s",
 			    fp_offset);
-			printf("ntpd: time slew %.6f s\n", fp_offset);
+			printf("ntpd: time slew %.6fs\n", fp_offset);
 		}
 		record_loop_stats();
 		exit(0);
@@ -255,6 +275,9 @@ local_clock(
 	retval = 0;
 	clock_frequency = flladj = plladj = 0;
 	mu = current_time - last_time;
+
+printf("yyy %f %f %d\n", fabs(fp_offset), mu, state);
+
 	if (fabs(fp_offset) > clock_max) {
 		switch (state) {
 
@@ -283,8 +306,8 @@ local_clock(
 
 		/*
 		 * In S_FREQ state we ignore outlyers. At the first
-		 * outlyer after 900 s, compute the * apparent phase
-		 * and frequency correction.
+		 * outlyer after 900 s, compute the apparent phase and
+		 * frequency correction.
 		 */
 		case S_FREQ:
 			if (mu < clock_minstep)
@@ -326,6 +349,9 @@ local_clock(
 			break;
 		}
 	} else {
+
+printf("xxx %f %f %d\n", mu, clock_minstep, state);
+
 		switch (state) {
 
 		/*
@@ -341,7 +367,7 @@ local_clock(
 
 		/*
 		 * In S_FREQ state we ignore updates until 900 s. After
-		 * that, correct the phase and frequency * and switch to
+		 * that, correct the phase and frequency and switch to
 		 * S_SYNC state.
 		 */
 		case S_FREQ:
@@ -697,7 +723,7 @@ rstclock(
 	 * measurements.
 	 */ 
 	case S_FREQ:
-		sys_poll = NTP_MINDPOLL;
+		sys_poll = sys_minpoll;
 		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		break;
@@ -706,7 +732,7 @@ rstclock(
 	 * Synchronized mode. Discipline the poll interval.
 	 */
 	case S_SYNC:
-		sys_poll = NTP_MINDPOLL;
+		sys_poll = sys_minpoll;
 		allan_xpt = CLOCK_ALLAN;
 		tc_counter = 0;
 		break;
@@ -723,7 +749,7 @@ rstclock(
 	 * the time reference for future frequency updates.
 	 */
 	default:
-		sys_poll = NTP_MINDPOLL;
+		sys_poll = sys_minpoll;
 		allan_xpt = CLOCK_ALLAN;
 		last_time = current_time;
 		last_offset = clock_offset = 0;
@@ -819,12 +845,22 @@ loop_config(
 			drift_comp = -NTP_MAXFREQ;
 
 #ifdef KERNEL_PLL
+		/*
+		 * Sanity check. If the kernel is enabled, load the
+		 * frequency and light up the loop. If not, set the
+		 * kernel frequency to zero and leave the loop dark. In
+		 * either case set the time to zero to cancel any
+		 * previous nonsense.
+		 */
 		if (pll_control) {
 			memset((char *)&ntv, 0, sizeof ntv);
-			ntv.modes = MOD_FREQUENCY;
-			if (kern_enable)
+			ntv.modes = MOD_OFFSET | MOD_FREQUENCY;
+			if (kern_enable) {
+				ntv.modes |= MOD_STATUS;
+				ntv.status = STA_PLL;
 				ntv.freq = (int32)(drift_comp *
 				    65536e6);
+			}
 			(void)ntp_adjtime(&ntv);
 		}
 		break;
@@ -845,6 +881,11 @@ loop_config(
 		case LOOP_MINSTEP:
 			clock_minstep = freq; 
 			break;
+
+		case LOOP_MINPOLL:
+			if (freq < NTP_MINPOLL)
+				freq = NTP_MINPOLL;
+			sys_minpoll = (u_char)freq;
 	}
 }
 

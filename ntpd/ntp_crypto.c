@@ -881,6 +881,7 @@ crypto_recv(
 				break;
 			}
 			peer->flash &= ~TEST10;
+			peer->flags &= ~FLAG_AUTOKEY;
 			peer->assoc = ntohl(pkt[i + 1]);
 			peer->pcookie.tstamp = tstamp;
 			if (temp != peer->pcookie.key) {

@@ -131,6 +131,7 @@
 #define CONF_CLOCK_PANIC	2
 #define CONF_CLOCK_PHI		3
 #define CONF_CLOCK_MINSTEP	4
+#define CONF_CLOCK_MINPOLL	5
 
 #ifdef PUBKEY
 /*

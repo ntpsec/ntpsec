@@ -54,6 +54,8 @@ static	double sys_syserr;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 u_int sys_survivors;		/* truest of the truechimers */
+int	mode_ntpdate;		/* simulate ntpdate */
+int	peer_ntpdate;		/* active peers in ntpdate mode */
 #ifdef AUTOKEY
 char	*sys_hostname;		/* gethostname() name */
 #endif /* AUTOKEY */
@@ -184,7 +186,7 @@ transmit(
 
 			/*
 			 * Here the peer is reachable. If it has not
-			 * been heard for two consecutive polls, stuff
+			 * been heard for three consecutive polls, stuff
 			 * the clock filter. Next, determine the poll
 			 * interval. If the peer is a synchronization
 			 * candidate, use the system poll interval. If
@@ -194,17 +196,16 @@ transmit(
 			 * minimum. This is to quickly recover the time
 			 * variables when a noisy peer shows life.
 			 */
-			if (!(peer->reach & 0x03)) {
+			if (!(peer->reach & 0x07)) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (peer->unreach == NTP_UNREACH &&
-			    ((peer->stratum > 1 && peer->refid ==
+			if ((peer->stratum > 1 && peer->refid ==
 			    peer->dstadr->sin.sin_addr.s_addr) ||
-			    peer->stratum >= STRATUM_UNSPEC ||
-			    (root_distance(peer) >= MAXDISTANCE + 2 *
-			    clock_phi * ULOGTOD(sys_poll))))
+			    peer->stratum >= STRATUM_UNSPEC)
 				hpoll++;
+			else
+				hpoll = sys_poll;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
 		}
@@ -226,7 +227,16 @@ transmit(
 			}
 			poll_update(peer, hpoll);
 			clock_select();
+
+			/*
+			 * If ntpdate mode and the clock has not been
+			 * set and all peers have completed the burst,
+			 * we declare a successful failure.
+			 */
 			if (mode_ntpdate) {
+				peer_ntpdate--;
+				if (peer_ntpdate > 0)
+					return;
 				NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE,
 				    "no reply; clock not set");
@@ -619,7 +629,7 @@ receive(
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    pkt->ppoll, NTP_MAXDPOLL, FLAG_IBURST |
+		    sys_minpoll, NTP_MAXDPOLL, FLAG_IBURST |
 		    (peer2->flags & (FLAG_AUTHENABLE | FLAG_SKEY)),
 		    MDF_UCAST, 0, skeyid);
 		if (peer == NULL)
@@ -640,7 +650,7 @@ receive(
 		}
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_PASSIVE, PKT_VERSION(pkt->li_vn_mode),
-	 	    pkt->ppoll, NTP_MAXDPOLL, sys_authenticate ?
+	 	    sys_minpoll, NTP_MAXDPOLL, sys_authenticate ?
 		    FLAG_AUTHENABLE : 0, MDF_UCAST, 0, skeyid);
 		if (peer == NULL)
 			return;
@@ -661,7 +671,7 @@ receive(
 
 		peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
 		    MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
-		    pkt->ppoll, NTP_MAXDPOLL, FLAG_MCAST |
+		    sys_minpoll, NTP_MAXDPOLL, FLAG_MCAST |
 		    FLAG_IBURST | (sys_authenticate ?
 		    FLAG_AUTHENABLE : 0), MDF_BCLNT, 0, skeyid);
 		if (peer == NULL)
@@ -1055,20 +1065,13 @@ clock_update(void)
 	 */
 	case 1:
 		clear_all();
-		NLOG(NLOG_SYNCSTATUS)
-			msyslog(LOG_INFO, "synchronisation lost");
 		sys_peer = NULL;
-		sys_poll = NTP_MINDPOLL;
 		sys_stratum = STRATUM_UNSPEC;
+		sys_poll = sys_minpoll;
+		NLOG(NLOG_SYNCSTATUS)
+		    msyslog(LOG_INFO, "synchronisation lost");
 		report_event(EVNT_CLOCKRESET, (struct peer *)0);
 		break;
-
-	/*
-	 * Clock was set; emulating ntpdate
-	 */
-	case 2:
-		exit(0);
-		/*NOTREACHED*/;
 
 	/*
 	 * Update the system stratum, leap bits, root delay, root
@@ -1106,39 +1109,27 @@ poll_update(
 	int hpoll
 	)
 {
-	int xpoll;
 #ifdef AUTOKEY
 	int oldpoll;
 #endif /* AUTOKEY */
 
-#ifdef AUTOKEY
-	oldpoll = peer->kpoll;
-#endif /* AUTOKEY */
-
 	/*
 	 * A little foxtrot to determine what controls the poll
-	 * interval. If the peer is reachable, but but the last four
-	 * polls have not been answered, use the minimum. If declared
+	 * interval. If the peer is reachable, but the last four polls
+	 * have not been answered, use the minimum. If declared
 	 * truechimer, use the system poll interval. This allows each
 	 * association to ramp up the poll interval for useless sources
 	 * and to clamp it to the minimum when first starting up.
 	 */
-	xpoll = hpoll;
-	if (peer->reach) {
-		if (!(peer->reach & 0x0f))
-			xpoll = peer->minpoll;
-		else if (peer->flags & FLAG_SYSPEER)
-			xpoll = sys_poll;
-#ifdef PUBKEY
-	} else if (peer->crypto && !(peer->flags & FLAG_AUTOKEY)) {
-		xpoll = peer->minpoll;
-#endif /* PUBKEY */
-	}
-	if (xpoll > peer->maxpoll)
-		xpoll = peer->maxpoll;
-	else if (xpoll < peer->minpoll)
-		xpoll = peer->minpoll;
-	peer->hpoll = xpoll;
+#ifdef AUTOKEY
+	oldpoll = peer->kpoll;
+#endif /* AUTOKEY */
+	if (hpoll > peer->maxpoll)
+		peer->hpoll = peer->maxpoll;
+	else if (hpoll < peer->minpoll)
+		peer->hpoll = peer->minpoll;
+	else
+		peer->hpoll = hpoll;
 
 	/*
 	 * Bit of adventure here. If during a burst and not timeout,
@@ -1158,7 +1149,7 @@ poll_update(
 	if (peer->burst > 0) {
 		if (peer->nextdate != current_time)
 			return;
-		if (peer->flags & FLAG_REFCLOCK)
+		else if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate++;
 		else if (peer->reach & 0x1)
 			peer->nextdate += RANDPOLL(BURST_INTERVAL2);
@@ -1206,6 +1197,7 @@ peer_clear(
 	)
 {
 	register int i;
+	u_long u_rand;
 
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1241,11 +1233,11 @@ peer_clear(
 	 * clock_select(), since the perp has already been voted off
 	 * the island at this point.
 	 */
-	peer->flags &= ~(FLAG_AUTOKEY | FLAG_ASSOC);
 	if (peer->cast_flags & MDF_BCLNT) {
 		peer->flags |= FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
 	}
+	peer->flags &= ~(FLAG_AUTOKEY | FLAG_ASSOC);
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->kpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
@@ -1259,9 +1251,14 @@ peer_clear(
 		peer->filter_disp[i] = MAXDISPERSE;
 		peer->filter_epoch[i] = current_time;
 	}
+
+	/*
+	 * Randomize the first poll over 1-16s to avoid bunching.
+	 */
 	peer->update = peer->outdate = current_time;
-	peer->nextdate = peer->outdate + (RANDOM & (1 <<
-	    BURST_INTERVAL1));
+	u_rand = RANDOM;
+	peer->nextdate = current_time + (u_rand & ((1 <<
+	    BURST_INTERVAL1) - 1)) + 1;
 }
 
 
@@ -1277,35 +1274,32 @@ clock_filter(
 	double sample_disp
 	)
 {
-	register int i, j, k, n, imin;
+	register int i, j, k, m, n;
 	register u_char *ord;
-	double distance[NTP_SHIFT];
-	double off, dly, dsp, jit, dmin, dtemp, etemp;
+	double off, dly, dsp, jit, dtemp, etemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
 	 * one. The new offset and delay come directly from the caller.
-	 * The dispersion from the caller is increased by the sum of the
-	 * peer precision and the system precision.
+	 * The caller delay can sometimes swing negative due to
+	 * frequency skew, so it is clamped non-negative. The dispersion
+	 * from the caller is increased by the sum of the peer precision
+	 * and the system precision.
 	 */
-	dsp = LOGTOD(peer->precision) + LOGTOD(sys_precision) +
-	    sample_disp;
+	dsp = min(LOGTOD(peer->precision) + LOGTOD(sys_precision) +
+	    sample_disp, MAXDISPERSE);
 	j = peer->filter_nextpt;
 	peer->filter_offset[j] = sample_offset;
 	peer->filter_delay[j] = max(0, sample_delay);
-	peer->filter_disp[j] = min(dsp, MAXDISPERSE);
+	peer->filter_disp[j] = dsp;
 	peer->filter_epoch[j] = current_time;
 	j++; j %=NTP_SHIFT;
 	peer->filter_nextpt = j;
 
 	/*
-	 * Update dispersions and calculate distances. The distance for
-	 * each sample is equal to the sample dispersion plus one-half
-	 * the sample delay. Also initialize the sort index vector.
+	 * Update dispersions since the last update.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
-	dmin = 1e9;
-	imin = 0;
 	peer->update = current_time;
 	ord = peer->filter_order;
 	for (i = 0; i < NTP_SHIFT; i++) {
@@ -1314,21 +1308,15 @@ clock_filter(
 			if (peer->filter_disp[j] > MAXDISPERSE)
 				peer->filter_disp[j] = MAXDISPERSE;
 		}
-		if (peer->filter_delay[j] < dmin) {
-			dmin = peer->filter_delay[j];
-			imin = j;
-		}
-		distance[i] = peer->filter_delay[j] / 2 +
-		    peer->filter_disp[j];
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
 
 	/*
-	 * Sort the samples in the register by distance. The winning
-	 * sample will be in ord[0]. Sort the samples only if they
-	 * are younger than the Allen intercept; however, keep a minimum
-	 * of two samples so that we can compute jitter.
+	 * Sort the samples in the register by delay. The winning sample
+	 * will be in ord[0]. Sort the samples only if they are younger
+	 * than the Allen intercept; however, keep a minimum of two
+	 * samples so that we can compute jitter.
 	 */
 	dtemp = min(allan_xpt, NTP_SHIFT * ULOGTOD(sys_poll));
 	for (n = 0; n < NTP_SHIFT; n++) {
@@ -1336,12 +1324,11 @@ clock_filter(
 		    dtemp)
 			break;
 		for (j = 0; j < n; j++) {
-			if (distance[j] > distance[n]) {
-				etemp = distance[j];
+			if (peer->filter_delay[ord[j]] >
+			    peer->filter_delay[ord[n]] ||
+			    peer->filter_disp[ord[j]] >= MAXDISPERSE) {
 				k = ord[j];
-				distance[j] = distance[n];
 				ord[j] = ord[n];
-				distance[n] = etemp;
 				ord[n] = k;
 			}
 		}
@@ -1349,56 +1336,71 @@ clock_filter(
 	
 	/*
 	 * Compute the offset, delay, dispersion and jitter squares
-	 * weighted by the reciprocal of distance and normalized. The
-	 * dispersion is weighted exponentially by NTP_FWEIGHT (0.5) so
-	 * to normalize close to 1.0. If no acceptable samples remain in
+	 * weighted by the sample metric and normalized. The sample
+	 * metric is the distance from the limb line with slope 0.5
+	 * centered on the minimum delay sample offset. The dispersion
+	 * is weighted exponentially by NTP_FWEIGHT (0.5) so to
+	 * normalize close to 1.0. If no acceptable samples remain in
 	 * the shift register, quietly tiptoe home leaving only the
 	 * dispersion.
 	 */
 	off = dly = jit = dtemp = 0;
 	peer->disp = 0;
+	k = ord[0];
+	m = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
+		double xtemp, ytemp;
+
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
-		if (i >= n || distance[i] >= MAXDISTANCE)
+		etemp = peer->filter_delay[j] / 2. +
+		    peer->filter_disp[j];
+		if (i >= n || etemp >= MAXDISTANCE)
 			continue;
-		etemp = 2 * fabs(peer->filter_offset[j] -
-		    peer->filter_offset[imin]);
-		etemp /= max(peer->filter_delay[j] - dmin, dsp);
-		etemp = max(0, 1. - etemp);
+		m++;
+		xtemp = 2 * fabs(peer->filter_offset[j] -
+		    peer->filter_offset[k]);
+		ytemp = max(peer->filter_delay[j] -
+		    peer->filter_delay[k], dsp);
+		etemp = max(dsp, 1. - xtemp / ytemp);
 		dtemp += etemp;
 		off += peer->filter_offset[j] * etemp;
 		dly += peer->filter_delay[j] * etemp;
 		jit += DIFF(peer->filter_offset[j],
-		    peer->filter_offset[ord[0]]);
+		    peer->filter_offset[k]);
+#ifdef DEBUG
+		if (debug > 1)
+			printf("clock_filter: %d %.6f %.6f %.6f\n",
+			    j, xtemp, ytemp, etemp);
+#endif
 	}
 
 	/*
 	 * If no acceptable samples remain in the shift register,
 	 * quietly tiptoe home leaving only the dispersion. Otherwise
 	 * normalize the offset, delay and jitter averages. Note the
-	 * jitter must be at least the clock precision.
+	 * jitter must not be less than the system precision.
 	 */
-	if (n == 0)
+	if (m == 0)
 		return;
 	peer->epoch = current_time;
 	etemp = peer->offset;
 	peer->offset = off / dtemp;
 	peer->delay = dly / dtemp;
-	if (n > 1)
-		jit /= n - 1;
+	if (m > 1)
+		jit /= m - 1;
 	peer->jitter = max(jit, SQUARE(LOGTOD(sys_precision)));
 
 	/*
 	 * A new sample is useful only if it is younger than the last
 	 * one used.
 	 */
-	if (peer->filter_epoch[ord[0]] > peer->epoch) {
+	if (peer->filter_epoch[k] > peer->epoch) {
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: discard %lu\n",
-			    peer->filter_epoch[ord[0]] - peer->epoch);
+			    peer->filter_epoch[k] - peer->epoch);
 #endif
 		return;
 	}
@@ -1409,13 +1411,13 @@ clock_filter(
 	 * the last update is less than twice the system poll interval,
 	 * consider the update a popcorn spike and ignore it.
 	 */
-	if (fabs(peer->offset - etemp) > SQRT(peer->jitter) *
-	    CLOCK_SGATE && peer->filter_epoch[ord[0]] - peer->epoch <
+	if (m > 1 && fabs(peer->offset - etemp) > SQRT(peer->jitter) *
+	    CLOCK_SGATE && peer->filter_epoch[k] - peer->epoch <
 	    (1 << (sys_poll + 1))) {
 #ifdef DEBUG
 		if (debug)
-			printf("clock_filter: popcorn spike %.6f jitter %.6f\n",
-			    peer->offset, SQRT(peer->jitter));
+			printf("clock_filter: samples %d popcorn spike %.6f jitter %.6f\n",
+			    m, peer->offset, SQRT(peer->jitter));
 #endif
 		return;
 	}
@@ -1424,7 +1426,7 @@ clock_filter(
 	 * The mitigated sample statistics are saved for later
 	 * processing, but can be processed only once.
 	 */
-	peer->epoch = peer->filter_epoch[ord[0]];
+	peer->epoch = peer->filter_epoch[k];
 	peer->pollsw = TRUE;
 #ifdef DEBUG
 	if (debug)
@@ -1643,12 +1645,12 @@ clock_select(void)
 			nlist = 1;
 		} else {
 			if (osys_peer != NULL) {
-				sys_poll = NTP_MINDPOLL;
+				sys_poll = sys_minpoll;
+				NLOG(NLOG_SYNCSTATUS)
+				    msyslog(LOG_INFO,
+				    "synchronisation lost");
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
-				NLOG(NLOG_SYNCSTATUS)
-				msyslog(LOG_INFO,
-				    "synchronisation lost");
 			}
 			sys_survivors = 0;
 #ifdef AUTOKEY

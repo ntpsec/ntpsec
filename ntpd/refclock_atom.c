@@ -40,7 +40,7 @@
  * pin 8 (DCD) of a serial port. This requires a level converter and
  * may require a one-shot flipflop to lengthen the pulse. The other is
  * to connect the PPS signal directly to pin 10 (ACK) of a PC paralell
- * port.
+ * port. These methods are architecture dependent.
  *
  * Both methods require a modified device driver and kernel interface
  * compatible with the Pulse-per-Second API for Unix-like Operating
@@ -59,11 +59,17 @@
  * device(s) must be placed before the PPS driver(s) in the
  * configuration file.
  *
+ * This driver normally uses the PLL/FLL clock discipline implemented in
+ * the ntpd code. If kernel support is available, the kernel PLL/FLL
+ * clock discipline is used instead. The default configuration is not to
+ * use the kernel PPS discipline, if present. The kernel PPS discipline
+ * can be enabled using the pps command.
+ *
  * Fudge Factors
  *
  * There are no special fudge factors other than the generic. The fudge
  * time1 parameter can be used to compensate for miscellaneous device
- * driver and OS delays. 
+ * driver and OS delays.
  */
 /*
  * Interface definitions
@@ -188,7 +194,7 @@ atom_start(
 		    "refclock_atom: time_pps_create failed: %m");
 		return (0);
 	}
-	return(atom_ppsapi(peer, pps_assert, pps_hardpps));
+	return (atom_ppsapi(peer, pps_assert, pps_hardpps));
 #else /* HAVE_PPSAPI */
 	return (1);
 #endif /* HAVE_PPSAPI */
@@ -394,7 +400,7 @@ pps_sample(
 
 	peer = pps_peer;
 	if (peer == 0)		/* nobody home */
-		return 1;
+		return (1);
 	pp = peer->procptr;
 
 	/*

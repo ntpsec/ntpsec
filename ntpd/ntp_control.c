@@ -1859,17 +1859,21 @@ ctl_getitem(
 				if (*cp == '=') {
 					cp++;
 					tp = buf;
-					while (cp < reqend &&
-					    isspace((int)*cp))
+					while (cp < reqend && isspace((int)*cp))
 						cp++;
-					while (cp < reqend && *cp !=
-					    ',')
+					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
+						if (tp >= buf + sizeof(buf))
+							return (0);
+					}
 					if (cp < reqend)
 						cp++;
-					*tp = '\0';
-					while (isspace((int)(*(tp-1))))
-						*(--tp) = '\0';
+					*tp-- = '\0';
+					while (tp > buf) {
+						*tp-- = '\0';
+						if (!isspace((int)(*tp)))
+							break;
+					}
 					reqpt = cp;
 					*data = buf;
 					return (v);

@@ -1,3 +1,35 @@
+2001-04-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* util/ntp-genkeys.c: sys_minpoll.
+	* ntpd/refclock_atom.c: Comment additions.
+	* ntpd/ntp_proto.c: mode_ntpdate and peer_ntpdate added.
+	(transmit): We want 3, not 2, consecutive polls.  hpoll logic
+	cleanup.  mode_ntpdate changes.
+	(receive): When setting up a newpeer, use our sys_minpoll, not the
+	peer->ppoll.
+	(clock_update): sys_minpoll changes.  Reorder some case 1 code.
+	Don't exit in case 2.
+	(poll_update): hpoll cleanup.
+	(peer_clear): u_rand.  Use u_rand to randomize the initial poll.
+	* ntpd/ntp_peer.c (newpeer): Bump peer_ntpdate if we're in
+	mode_ntpdate.
+	* ntpd/ntp_loopfilter.c: Initialize sys_poll and sys_minpoll to
+	NTP_MINDPOLL.
+	(local_clock): Clean up some debug/info messages.
+	(rstclock): Use sys_minpoll.
+	(loop_config): KERNEL_PLL sanity checks.  LOOP_MINPOLL support.
+	* ntpd/ntp_crypto.c (crypto_recv): Turn off FLAG_AUTOKEY when we
+	turn off TEST10.
+	* ntpd/ntp_control.c (ctl_getitem): Buffer overflow check.  Clean
+	up some loop logic.
+	* ntpd/ntp_config.c: Added "tinker" and "minpoll".  Use
+	sys_minpoll now, instead of old manifest constant.
+	(save_resolve): Print keyid using decimal, not hex.
+	* include/ntpd.h: Added peer_ntpdate and sys_minpoll.
+	* include/ntp_config.h (CONF_CLOCK_MINPOLL): Added.
+	* include/ntp.h: keyid cleanup.  LOOP_* cleanup.
+	From Dave Mills.
+
 2001-04-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (clock_filter): Swell stuff.

@@ -176,6 +176,7 @@ u_long	client_limit_period;
 l_fp	sys_revoketime;
 u_long	sys_revoke;		/* keys revoke timeout */
 volatile int debug = 0;		/* debugging flag */
+u_char	sys_minpoll;		/* min poll interval (log2 s) */
 
 struct peer *
 peer_config(
