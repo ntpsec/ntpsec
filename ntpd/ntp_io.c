@@ -2212,10 +2212,29 @@ find_interface_index(
 {
 	int i;
 	u_int32 amask, imask;
+	isc_boolean_t is_sitelocal = ISC_FALSE;
+	isc_boolean_t is_linklocal = ISC_FALSE;
 #ifdef DEBUG
 	if (debug > 2)
 	    printf("Finding *cast interface for address: %s\n", stoa(addr));
 #endif
+
+#ifdef ISC_PLATFORM_HAVEIPV6
+	/*
+	 * For IPv6, if the remote address is a multicast address we need
+	 * we need to take account of that
+	 */
+	if (addr->ss_family == AF_INET6) {
+		if (flagtype == INT_BROADCAST) {
+			is_sitelocal = IN6_IS_ADDR_MC_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+			is_linklocal = IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+		}
+		else {
+			is_sitelocal = IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+			is_linklocal = IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr);
+		}
+	}
+#endif /* ISC_PLATFORM_HAVEIPV6 */
 	/*
 	 * If we got this far we need to try and match the
 	 * network part of the address
@@ -2251,7 +2270,7 @@ find_interface_index(
 		 * See if the IPv6 address is Link-Local or Site Local
 		 */
 		if (addr->ss_family == AF_INET6 && inter_list[i].family == AF_INET6) {
-			if (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			if (is_linklocal &&
 			    IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
 			{
 #ifdef DEBUG
@@ -2261,7 +2280,7 @@ find_interface_index(
 				return (i);
 			}
 
-			if (IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+			if (is_sitelocal &&
 			    IN6_IS_ADDR_SITELOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr))
 			{
 #ifdef DEBUG
