@@ -20,8 +20,8 @@ void	worker_thread	(void *);
 #define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy.
 							  * used in ntp_timer.c
 							  */
-extern DWORD units_per_tick;																							/*	98/05/28  *//*	98/05/29  */
-extern long  adj_precision; 																							/*	98/05/28  *//*	98/05/29  */
+extern DWORD units_per_tick;
+extern long  adj_precision;
 #else
 #define closesocket close
 #endif /* SYS_WINNT */

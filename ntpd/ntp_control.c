@@ -1148,9 +1148,9 @@ ctl_putsys(
 	)
 {
 	l_fp tmp;
-#ifdef HAVE_UNAME																										/*	98/06/04  */
+#ifdef HAVE_UNAME
 	char str[50];
-#endif																													/*	98/06/04  */
+#endif
 
 	switch (varid) {
 		case CS_LEAP:

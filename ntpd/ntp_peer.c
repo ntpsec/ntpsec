@@ -302,11 +302,17 @@ findpeer(
 		}
 	}
 
-printf("pkt_mode %d action %d\n", pkt_mode, *action);
+#ifdef DEBUG
+	if (debug)
+		printf("pkt_mode %d action %d\n", pkt_mode, *action);
+#endif
 	/* if no matching association is found */
 	if (peer == 0) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-printf("pkt_mode %d action %d\n", pkt_mode, *action);
+#ifdef DEBUG
+		if (debug)
+			printf("pkt_mode %d action %d\n", pkt_mode, *action);
+#endif
 		return (struct peer *)0;
 	}
 

@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <sys/signal.h>
 
-#include "ntp_machine.h"                                                                                                /*  98/06/03  */
+#include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 
@@ -92,7 +92,7 @@ init_timer(void)
 	extern HANDLE hMutex;
 	UINT wTimerRes, wTimerID;
 # endif /* SYS_WINNT */
-#if defined(SYS_CYGWIN32) || defined(SYS_WINNT) 																		/*	98/06/03  */
+#if defined(SYS_CYGWIN32) || defined(SYS_WINNT)
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
 #endif
@@ -239,24 +239,24 @@ timer(void)
 {
 	register struct peer *peer, *next_peer;
 	int n;
-#ifdef SYS_WINNT																										/*	98/05/29  */
-	extern HANDLE hMutex;																								/*	98/06/03  */
-	DWORD dwWaitResult; 																								/*	98/06/03  */
-																														/*	98/06/03  */
-	dwWaitResult = WaitForSingleObject( 																				/*	98/06/03  */
-		hMutex, 	/* handle of mutex */																				/*	98/06/03  */
-		5000L); /* five-second time-out interval */ 																	/*	98/06/03  */
-																														/*	98/06/03  */
-	switch (dwWaitResult) { 																							/*	98/06/03  */
-		case WAIT_OBJECT_0: 																							/*	98/06/03  */
-			/* The thread got mutex ownership. */																		/*	98/06/03  */
-			break;																										/*	98/06/03  */
-		default:																										/*	98/06/03  */
-			/* Cannot get mutex ownership due to time-out. */															/*	98/06/03  */
-			msyslog(LOG_ERR, "timer() cannot obtain mutex: %m\n");                                                      /*  98/06/03  */
-			exit(1);																									/*	98/06/03  */
-	}																													/*	98/06/03  */
-#endif																													/*	98/05/29  */
+#ifdef SYS_WINNT
+	extern HANDLE hMutex;
+	DWORD dwWaitResult;
+
+	dwWaitResult = WaitForSingleObject(
+		hMutex, 	/* handle of mutex */
+		5000L); /* five-second time-out interval */
+
+	switch (dwWaitResult) {
+		case WAIT_OBJECT_0:
+			/* The thread got mutex ownership. */
+			break;
+		default:
+			/* Cannot get mutex ownership due to time-out. */
+			msyslog(LOG_ERR, "timer() cannot obtain mutex: %m\n");
+			exit(1);
+	}
+#endif
 
 	current_time += (1<<EVENT_TIMEOUT);
 
@@ -267,12 +267,12 @@ timer(void)
 		adjust_timer += 1;
 		adj_host_clock();
 	}
-																														/*	98/05/29  */
-#ifdef SYS_WINNT																										/*	98/05/29  */
-	if (!ReleaseMutex(hMutex)) {																						/*	98/05/29  */
-		msyslog(LOG_ERR, "timer() cannot release mutex: %m\n");                                                         /*  98/05/29  *//*  98/06/03  */
-		exit(1);																										/*	98/05/29  */
-	}																													/*	98/05/29  */
+
+#ifdef SYS_WINNT
+	if (!ReleaseMutex(hMutex)) {
+		msyslog(LOG_ERR, "timer() cannot release mutex: %m\n");
+		exit(1);
+	}
 #endif /* SYS_WINNT */
 
 	/*

@@ -1,5 +1,25 @@
 1999-06-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* include/ntp_machine.h: Removed superfluous yy/mm/dd comments.
+	* include/ntpd.h: Likewise.
+	* libntp/authencrypt.c: Likewise.
+	* libntp/a_md5encrypt.c: Likewise.
+	* libntp/caljulian.c: Likewise.
+	* libntp/ymd2yd.c: Likewise.
+	* libntp/syssignal.c: Likewise.
+	* libntp/ymd2yd.c: Likewise.
+	* ntpd/ntp_control.c: Likewise.
+	* ntpd/ntp_io.c: Likewise.
+	* ntpd/ntp_timer.c: Likewise.
+	* ntpdate/ntpdate.c: Likewise.
+	* ntpq/ntpq_ops.c: Likewise.
+	* ntpd/ntp_peer.c (findpeer): Wrap debug output in DEBUG/debug.
+	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
+
+	* dot.emacs: Removed wrong indentation of substatements.
+	Wrap in c-style.
+	From: Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
+
 	* ntpd/refclock_palisade.c: Patches from Marc Brett
 	* ntpd/refclock_palisade.h: Ditto.
 	* util/hist.c: Ditto.

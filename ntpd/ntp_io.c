@@ -32,8 +32,8 @@
 #if _BSDI_VERSION >= 199510
 # include <ifaddrs.h>
 #endif
-/*	98/06/01  */
-#include "ntp_machine.h"	/*  98/06/01  */
+
+#include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_select.h"
 #include "ntp_io.h"
@@ -491,11 +491,10 @@ create_sockets(
 	    (ifr->ifr_addr.sa_family != AF_INET)
 # endif /* VMS+UCX */
 	    continue;
-		/*	98/06/02  */
 		ifreq = *ifr;
-		inter_list[i].flags = 0; /*	98/06/02  */
+		inter_list[i].flags = 0;
 		/* is it broadcast capable? */
-# ifndef SYS_WINNT		/*	98/06/03  */
+# ifndef SYS_WINNT
 #  ifdef STREAMS_TLI
 		ioc.ic_cmd = SIOCGIFFLAGS;
 		ioc.ic_timout = 0;
@@ -640,7 +639,6 @@ create_sockets(
 		inter_list[i].mask.sin_addr.s_addr = inet_addr(ifreq.ifr_mask);
 # endif /* not SYS_WINNT */
 
-		/*	98/06/03  */
 		/*
 		 * look for an already existing source interface address.  If
 		 * the machine has multiple point to point interfaces, then
@@ -659,8 +657,7 @@ create_sockets(
 	}
 	closesocket(vs);
 #endif	/* _BSDI_VERSION >= 199510 */
-	/*	98/06/03  */
-	/*	98/06/03  */
+
 	ninterfaces = i;
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
@@ -757,7 +754,7 @@ io_setbclient(void)
 		inter_list[i].bcast.sin_addr.s_addr = htonl(INADDR_ANY);
 #endif
 #ifdef OPEN_BCAST_SOCKET /* Was: !SYS_DOMAINOS && !SYS_LINUX */
-		inter_list[i].bfd = open_socket(&inter_list[i].bcast, INT_BROADCAST, 1);										/*	98/06/01  */
+		inter_list[i].bfd = open_socket(&inter_list[i].bcast, INT_BROADCAST, 1);
 		inter_list[i].flags |= INT_BCASTOPEN;
 #endif
 	}
@@ -1160,7 +1157,7 @@ findbcastinter(
 	struct sockaddr_in *addr
 	)
 {
-#if defined(SIOCGIFCONF) || defined(SYS_WINNT) /*	98/06/03  */
+#if defined(SIOCGIFCONF) || defined(SYS_WINNT)
 	register int i;
 	register u_int32 netnum;
 
@@ -1315,7 +1312,7 @@ sendpkt(
 	    inter = any_interface;
 #ifdef DEBUG
 	if (debug > 1)
-	    printf("%ssendpkt(fd=%d dst=%s, src=%s, ttl=%d, len=%d)\n",                                                     /*  98/06/03  */
+	    printf("%ssendpkt(fd=%d dst=%s, src=%s, ttl=%d, len=%d)\n",
 		   (ttl >= 0) ? "\tMCAST\t*****" : "",
 		   inter->fd, ntoa(dest),
 		   ntoa(&inter->sin), ttl, len);
@@ -1585,7 +1582,7 @@ input_handler(
 						 * on the wild card socket, just dump the
 						 * packet.
 						 */
-						if ( /*	98/06/02  */
+						if (
 #ifdef UDP_WILDCARD_DELIVERY
 				/*
 				 * these guys manage to put properly addressed
@@ -1599,7 +1596,7 @@ input_handler(
 	{
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr from;
-		/*	98/06/02  */
+
 		fromlen = sizeof from;
 		(void) recvfrom(fd, buf, sizeof(buf), 0, &from, &fromlen);
 #ifdef DEBUG
@@ -2426,11 +2423,11 @@ get_winnt_interfaces(
 	DWORD sizeofsubnetmasks = 10000;
 	char bindservicenames[1000];
 	DWORD sizeofbindnames = 1000;
-	DWORD enableDhcp;																									/*	98/06/01  */
-	DWORD sizeofenable = sizeof(DWORD); 																				/*	98/06/01  */
-	char *ipkeyname;																									/*	98/06/01  */
-	char *maskkeyname;																									/*	98/06/01  */
-	long ip, broad; 																									/*	98/06/02  */
+	DWORD enableDhcp;
+	DWORD sizeofenable = sizeof(DWORD);
+	char *ipkeyname;
+	char *maskkeyname;
+	long ip, broad;
 
 	char oneIpAddress[16];
 	char oneSubNetMask[16];
@@ -2474,7 +2471,7 @@ get_winnt_interfaces(
 	onenetcard = bindservicenames;
 	while(1)
 	{
-		onenetcard = onenetcard + 8;	/* skip /Device/ prefix on the service name */									/*	98/06/01  */
+		onenetcard = onenetcard + 8;	/* skip /Device/ prefix on the service name */
 		if	((onenetcard < (bindservicenames + sizeofbindnames)) &&
 			 (sscanf(onenetcard,"%s",servicename) != EOF))
 		{
@@ -2521,55 +2518,55 @@ get_winnt_interfaces(
 			}
 			else
 			{ /* ok it is a network card */
-				/* check for DHCP */																					/*	98/06/01  */
-				sizeofenable = sizeof(DWORD);																			/*	98/06/01  */
-				bSuccess =																								/*	98/06/01  */
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */										/*	98/06/01  */
-						    "EnableDHCP",         /* value name               */                                        /*  98/06/01  */
-						    NULL,				  /* must be zero			  */										/*	98/06/01  */
-						    NULL,				  /* value type not required  */										/*	98/06/01  */
-						    (LPBYTE)&enableDhcp,  /* address of value data	  */										/*	98/06/01  */
-						    &sizeofenable); 	  /* length of value data	  */										/*	98/06/01  */
-				if(bSuccess != ERROR_SUCCESS)																			/*	98/06/01  */
-				{																										/*	98/06/01  */
-					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching EnableDHCP parameter: %m");                     /*  98/06/01  */
-					RegCloseKey(hksub); 																				/*	98/06/01  */
-					return -1;																							/*	98/06/01  */
-				}																										/*	98/06/01  */
-				/*	98/06/01  */
-				if (enableDhcp) {																						/*	98/06/01  */
-					ipkeyname	= "DhcpIpAddress";                                                                      /*  98/06/01  */
-					maskkeyname = "DhcpSubNetMask";                                                                     /*  98/06/01  */
-				}																										/*	98/06/01  */
-				else {																									/*	98/06/01  */
-					ipkeyname	= "IpAddress";                                                                          /*  98/06/01  */
-					maskkeyname = "SubNetMask";                                                                         /*  98/06/01  */
-				}																										/*	98/06/01  */
-				/* ok now get the ipaddress */																			/*	98/06/01  */
+				/* check for DHCP */
+				sizeofenable = sizeof(DWORD);
+				bSuccess =
+				    RegQueryValueEx(hksub,		  /* subkey handle			  */
+						    "EnableDHCP",         /* value name               */
+						    NULL,				  /* must be zero			  */
+						    NULL,				  /* value type not required  */
+						    (LPBYTE)&enableDhcp,  /* address of value data	  */
+						    &sizeofenable); 	  /* length of value data	  */
+				if(bSuccess != ERROR_SUCCESS)
+				{
+					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching EnableDHCP parameter: %m");
+					RegCloseKey(hksub);
+					return -1;
+				}
+
+				if (enableDhcp) {
+					ipkeyname	= "DhcpIpAddress";
+					maskkeyname = "DhcpSubNetMask";
+				}
+				else {
+					ipkeyname	= "IpAddress";
+					maskkeyname = "SubNetMask";
+				}
+				/* ok now get the ipaddress */
 				sizeofipaddresses = 10000;
 				bSuccess =
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */										/*	98/06/01  */
-						    ipkeyname,			  /* value name 			  */										/*	98/06/01  */
-						    NULL,				  /* must be zero			  */										/*	98/06/01  */
-						    NULL,				  /* value type not required  */										/*	98/06/01  */
-						    (LPBYTE)&IpAddresses, /* address of value data	  */										/*	98/06/01  */
-						    &sizeofipaddresses);  /* length of value data	  */										/*	98/06/01  */
+				    RegQueryValueEx(hksub,		  /* subkey handle			  */
+						    ipkeyname,			  /* value name 			  */
+						    NULL,				  /* must be zero			  */
+						    NULL,				  /* value type not required  */
+						    (LPBYTE)&IpAddresses, /* address of value data	  */
+						    &sizeofipaddresses);  /* length of value data	  */
 				if(bSuccess != ERROR_SUCCESS)
 				{
 					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching IpAddress parameter: %m");
 					RegCloseKey(hksub);
 					return -1;
 				}
-				/*	98/06/01  */
-				/* ok now get the subnetmask */ 																		/*	98/06/01  */
+
+				/* ok now get the subnetmask */
 				sizeofsubnetmasks = 10000;
 				bSuccess =
-				    RegQueryValueEx(hksub,		  /* subkey handle			  */										/*	98/06/01  */
-						    maskkeyname,		  /* value name 			  */										/*	98/06/01  */
-						    NULL,				  /* must be zero			  */										/*	98/06/01  */
-						    NULL,				  /* value type not required  */										/*	98/06/01  */
-						    (LPBYTE)&SubNetMasks, /* address of value data	  */										/*	98/06/01  */
-						    &sizeofsubnetmasks);  /* length of value data	  */										/*	98/06/01  */
+				    RegQueryValueEx(hksub,		  /* subkey handle			  */
+						    maskkeyname,		  /* value name 			  */
+						    NULL,				  /* must be zero			  */
+						    NULL,				  /* value type not required  */
+						    (LPBYTE)&SubNetMasks, /* address of value data	  */
+						    &sizeofsubnetmasks);  /* length of value data	  */
 				if(bSuccess != ERROR_SUCCESS)
 				{
 					msyslog(LOG_ERR, "Error in RegQueryValueEx fetching SubNetMask parameter: %m");
@@ -2580,7 +2577,7 @@ get_winnt_interfaces(
 				RegCloseKey(hksub);
 				/* ok now that we have some addresses and subnet masks go through each one and add to our structure... */
 				/* multi_sz strings are terminated by two \0 in a row */
-				/* however, the dhcp strings are not multi_sz, they are just plain strings */							/*	98/06/01  */
+				/* however, the dhcp strings are not multi_sz, they are just plain strings */
 
 				ipptr = IpAddresses;
 				subptr = SubNetMasks;
@@ -2598,13 +2595,13 @@ get_winnt_interfaces(
 					/* now add to interface structure */
 					if (!Done)
 					{
-						ifr   = (struct ifreq *)ifc_buffer; 															/*	98/06/02  */
-						ip	  = inet_addr(oneIpAddress);																/*	98/06/01  *//*	98/06/02  */
-						broad = ~inet_addr(oneSubNetMask) | ip; 														/*	98/06/01  *//*	98/06/02  */
+						ifr   = (struct ifreq *)ifc_buffer;
+						ip	  = inet_addr(oneIpAddress);
+						broad = ~inet_addr(oneSubNetMask) | ip;
 						ifr->ifr_addr.sa_family = AF_INET;
-						((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;									/*	98/06/01  */
-						ifr->ifr_broadaddr.sa_family = AF_INET; 														/*	98/06/01  */
-						((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;							/*	98/06/01  */
+						((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;
+						ifr->ifr_broadaddr.sa_family = AF_INET;
+						((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;
 						strcpy(ifr->ifr_mask,oneSubNetMask);
 
 						if (strlen(servicename) > 15)
@@ -2612,9 +2609,9 @@ get_winnt_interfaces(
 						else strcpy(ifr->ifr_name,servicename);
 
 						/* now increment pointer */
-						ifc_buffer += sizeof(struct ifreq); 															/*	98/06/02  */
+						ifc_buffer += sizeof(struct ifreq);
 						++count;
-						if (((char *)ipptr == '\0') || ((char *)subptr == '\0') || (enableDhcp))                        /*  98/06/01  */
+						if (((char *)ipptr == '\0') || ((char *)subptr == '\0') || (enableDhcp))
 						    Done = 1;
 					}
 				}
@@ -2622,24 +2619,23 @@ get_winnt_interfaces(
 		} /* it is/not a temporary ndiswan name */
 	} /* end of loop  */
 
-	/*	98/06/02  */
-	/* add the loopback interface */																					/*	98/06/02  */
-	ifr   = (struct ifreq *)ifc_buffer; 																				/*	98/06/02  */
-	ip	  = inet_addr("127.0.0.1");                                                                                     /*  98/06/01  *//*  98/06/02  */
-	broad = ~inet_addr("255.0.0.0") | ip;                                                                               /*  98/06/01  *//*  98/06/02  */
-	ifr->ifr_addr.sa_family = AF_INET;																					/*	98/06/02  */
-	((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;														/*	98/06/01  *//*	98/06/02  */
-	ifr->ifr_broadaddr.sa_family = AF_INET; 																			/*	98/06/01  *//*	98/06/02  */
-	((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;												/*	98/06/01  *//*	98/06/02  */
-	strcpy(ifr->ifr_mask,"255.0.0.0");                                                                                  /*  98/06/02  */
-	strcpy(ifr->ifr_name,"loopback");                                                                                   /*  98/06/02  */
-	/*	98/06/02  */
-	/* now increment pointer */ 																						/*	98/06/02  */
-	ifc_buffer += sizeof(struct ifreq); 																				/*	98/06/02  */
-	++count;																											/*	98/06/02  */
-	/*	98/06/02  */
+	/* add the loopback interface */
+	ifr   = (struct ifreq *)ifc_buffer;
+	ip	  = inet_addr("127.0.0.1");
+	broad = ~inet_addr("255.0.0.0") | ip;
+	ifr->ifr_addr.sa_family = AF_INET;
+	((struct sockaddr_in *)&ifr->ifr_addr)->sin_addr.s_addr = ip;
+	ifr->ifr_broadaddr.sa_family = AF_INET;
+	((struct sockaddr_in *)&ifr->ifr_broadaddr)->sin_addr.s_addr = broad;
+	strcpy(ifr->ifr_mask,"255.0.0.0");
+	strcpy(ifr->ifr_name,"loopback");
+
+	/* now increment pointer */
+	ifc_buffer += sizeof(struct ifreq);
+	++count;
+
 	/* now reset the length */
-	ifc->ifc_len = count * (sizeof(struct ifreq));																		/*	98/06/02  */
+	ifc->ifc_len = count * (sizeof(struct ifreq));
 	return 0;
 }
 

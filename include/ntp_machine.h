@@ -232,15 +232,15 @@ typedef unsigned long u_long;
  */
 #if defined(SYS_WINNT)
 #if !defined(HAVE_CONFIG_H)
-# define MCAST					/* Enable Multicast Support */															/*	98/06/01  */
-# undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 																	/*	98/06/01  *//*	98/06/03  */
-# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 																	/*	98/06/01  */
+# define MCAST					/* Enable Multicast Support */
+# undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */
+# undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */
 # define REFCLOCK				/* from ntpd.mak */
 # define CLOCK_LOCAL			/* from ntpd.mak */
-# define CLOCK_SHM				/* from ntpd.mak */																	/*	98/06/01  */
-# define CLOCK_PALISADE				/* from ntpd.mak */																	/*	98/06/26  */
-# undef  DES					/* from libntp.mak */																	/*	98/05/28  */
-# undef  MD5					/* from libntp.mak */																	/*	98/05/28  */
+# define CLOCK_SHM				/* from ntpd.mak */
+# define CLOCK_PALISADE				/* from ntpd.mak */
+# undef  DES					/* from libntp.mak */
+# undef  MD5					/* from libntp.mak */
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define SYSLOG_FILE			/* from libntp.mak */
 # define HAVE_PROTOTYPES		/* from ntpq.mak */
@@ -282,7 +282,7 @@ typedef unsigned long u_long;
 # include <winbase.h>
 # undef interface
 typedef char *caddr_t;
-void PASCAL alarming P((UINT,UINT,DWORD,DWORD,DWORD)); 																	/*	98/06/03  */
+void PASCAL alarming P((UINT,UINT,DWORD,DWORD,DWORD));
 #endif /* SYS_WINNT */
 
 int ntp_set_tod P((struct timeval *tvp, void *tzp));

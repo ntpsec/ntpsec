@@ -25,10 +25,10 @@ ymd2yd(
 	if (m < 1 || m > 12 || d < 1)
 		return (-1);
 
-	if (((y%4 == 0) && (y%100 != 0)) || (y%400 == 0))																	/*	98/06/04  */
-		t = day2tab;	/* leap year */ 																				/*	98/06/04  */
+	if (((y%4 == 0) && (y%100 != 0)) || (y%400 == 0))
+		t = day2tab;	/* leap year */
 	else
-		t = day1tab;	/* not a leap year */																			/*	98/06/04  */
+		t = day1tab;	/* not a leap year */
 	if (d > t[m - 1])
 		return (-1);
 	for (i = 0; i < m - 1; i++)

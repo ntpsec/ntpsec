@@ -103,13 +103,13 @@ signal_no_reset(
 	RETSIGTYPE (*func) (int)
 	)
 {
-#ifdef SIG_ERR																											/*	98/06/04  */
-	if (SIG_ERR == signal(sig, func)) { 																				/*	98/06/04  */
-#else																													/*	98/06/04  */
-	int n;																												/*	98/06/04  */
-	n = signal(sig, func);																								/*	98/06/04  */
-	if (n == -1) {																										/*	98/06/04  */
-#endif																													/*	98/06/04  */
+#ifdef SIG_ERR
+	if (SIG_ERR == signal(sig, func)) {
+#else
+	int n;
+	n = signal(sig, func);
+	if (n == -1) {
+#endif
 		perror("signal");
 		exit(1);
 	}

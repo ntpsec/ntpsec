@@ -1,9 +1,18 @@
 ;; This is how Dave Mills likes to see the code formatted.
-(setq c-basic-offset	8)
-(c-set-offset 'arglist-intro	+)
-(c-set-offset 'case-label	*)
-(c-set-offset 'statement-case-intro *)
-(c-set-offset 'statement-cont	*)
-(c-set-offset 'substatement	*)
-(c-set-offset 'substatement-open 0)
+
+(defconst ntp-c-style
+  '((c-basic-offset . 8)
+    (c-offsets-alist . ((arglist-intro	+)
+			(case-label	*)
+			(statement-case-intro *)
+			(statement-cont	*)
+			(substatement-open 0))))
+  "Dave L. Mills; programming style for use with ntp")
+
+(defun ntp-c-mode-common-hook ()
+  ;; add ntp c style
+  (c-add-style "ntp" ntp-c-style nil))
+
+(add-hook 'c-mode-common-hook 'ntp-c-mode-common-hook)
+
 ;; 1997112600

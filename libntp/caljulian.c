@@ -51,10 +51,10 @@ caljulian(
 	 * Do the easy stuff first: take care of hh:mm:ss, ignoring leap
 	 * seconds
 	 */
-	jt->second = (u_char)(ntptime % SECSPERMIN);																		/*	98/06/04  */
+	jt->second = (u_char)(ntptime % SECSPERMIN);
 	minutes    = ntptime / SECSPERMIN;
-	jt->minute = (u_char)(minutes % MINSPERHR); 																		/*	98/06/04  */
-	jt->hour   = (u_char)((minutes / MINSPERHR) % HRSPERDAY);															/*	98/06/04  */
+	jt->minute = (u_char)(minutes % MINSPERHR);
+	jt->hour   = (u_char)((minutes / MINSPERHR) % HRSPERDAY);
 
 	/*
 	 * Find the day past 1900/01/01 00:00 UTC
@@ -72,8 +72,8 @@ caljulian(
 	/*
 	 * Calculate the year and year-of-day
 	 */
-	jt->yearday = (u_short)(1 + d4%DAYSPERYEAR);																		/*	98/06/04  */
-	jt->year	= (u_short)(400*n400 + 100*n100 + n4*4 + n1);															/*	98/06/04  */
+	jt->yearday = (u_short)(1 + d4%DAYSPERYEAR);
+	jt->year	= (u_short)(400*n400 + 100*n100 + n4*4 + n1);
 
 	if (n100 == 4 || n1 == 4)
 	{

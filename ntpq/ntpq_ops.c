@@ -179,7 +179,7 @@ char flash2[] = " .+*    "; /* flash decode for version 2 */
 char flash3[] = " x.-+#*o"; /* flash decode for peer status version 3 */
 
 struct varlist {
-	const char *name; 																										/*	98/06/04  */
+	const char *name;
 	char *value;
 } varlist[MAXLIST] = { { 0, 0 } };
 

@@ -27,8 +27,8 @@
 # include <sys/time.h>
 # include <sys/resource.h>
 
-#else																													/*	98/05/28  */
-# include <sys/time.h>																									/*	98/05/28  */
+#else
+# include <sys/time.h>
 #endif /* SYS_WINNT */
 
 #ifdef SYS_VXWORKS
@@ -195,7 +195,7 @@ static	struct server *clock_select P((void));
 static	int clock_adjust	P((void));
 static	void	addserver	P((char *));
 static	struct server *findserver P((struct sockaddr_in *));
-		void	timer		P((void));																					/*	98/06/03  */
+		void	timer		P((void));
 static	void	init_alarm	P((void));
 #ifndef SYS_WINNT
 static	RETSIGTYPE alarming P((int));
@@ -213,10 +213,10 @@ static	int getnetnum	P((const char *, u_int32 *));
 static	void	printserver P((struct server *, FILE *));
 
 #ifdef SYS_WINNT
-int 	on = 1; 																										/*	98/06/03  */
-WORD	wVersionRequested;																								/*	98/06/03  */
-WSADATA wsaData;																										/*	98/06/03  */
-HANDLE	TimerThreadHandle = NULL;																						/*	98/06/03  */
+int 	on = 1;
+WORD	wVersionRequested;
+WSADATA wsaData;
+HANDLE	TimerThreadHandle = NULL;
 #endif /* SYS_WINNT */
 
 #ifdef NO_MAIN_ALLOWED
@@ -1358,7 +1358,7 @@ init_alarm(void)
 #if defined SYS_CYGWIN32 || defined SYS_WINNT
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
-	DWORD dwUser = 0;																									/*	98/05/28  */
+	DWORD dwUser = 0;
 #endif /* SYS_WINNT */
 
 	alarm_flag = 0;

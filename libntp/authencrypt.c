@@ -7,9 +7,9 @@
  * included in the rsaref2.0 package available from RSA in the US and
  * foreign countries. Further information is available at www.rsa.com.
  */
-																														/*	98/05/28  */
-#include "ntp_machine.h"                                                                                                /*  98/05/28  */
-																														/*	98/05/28  */
+
+#include "ntp_machine.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
