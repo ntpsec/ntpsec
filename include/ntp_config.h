@@ -28,7 +28,7 @@
 #define CONFIG_AUTHENTICATE	7
 #define CONFIG_KEYS		8
 #define CONFIG_REVOKE		9
-#define CONFIG_PPS		10
+#define CONFIG_CDELAY		10
 #define CONFIG_RESTRICT		11
 #define CONFIG_BDELAY		12
 #define CONFIG_TRUSTEDKEY	13
@@ -120,13 +120,6 @@
 #define CONF_FGEN_FLAG_NOLINK	4
 #define CONF_FGEN_FLAG_ENABLE	5
 #define CONF_FGEN_FLAG_DISABLE	6
-
-/*
- * "pps" modifier keywords
- */
-#define CONF_PPS_ASSERT		1
-#define CONF_PPS_CLEAR		2
-#define CONF_PPS_HARDPPS	3
 
 /*
  * "discard" modifier keywords

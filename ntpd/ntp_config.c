@@ -202,7 +202,6 @@ static struct keyword flags_keywords[] = {
 	{ "kernel",		PROTO_KERNEL },
 	{ "monitor",		PROTO_MONITOR },
 	{ "ntp",		PROTO_NTP },
-	{ "pps",		PROTO_PPS },
 	{ "stats",		PROTO_FILEGEN },
 	{ "",			CONFIG_UNKNOWN }
 };
