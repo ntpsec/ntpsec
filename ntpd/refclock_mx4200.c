@@ -246,7 +246,7 @@ mx4200_start(
 	 * Open serial port
 	 */
 	(void)sprintf(gpsdev, DEVICE, unit);
-	if (!(fd = refclock_open(gpsdev, SPEED232))) {
+	if (!(fd = refclock_open(gpsdev, SPEED232, 0))) {
 	    return (0);
 	}
 #ifdef HAVE_TIOCGPPSEV

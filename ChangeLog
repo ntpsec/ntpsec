@@ -1,3 +1,8 @@
+1999-12-05  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_mx4200.c (mx4200_start): make missing 3rd
+	parameter a 0.
+
 1999-12-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_refclock.c (refclock_open): "flags" processing cleanup
