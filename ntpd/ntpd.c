@@ -1050,10 +1050,10 @@ getgroup:
 				(void)input_handler(&ts);
 			}
 			else if (nfound == -1 && errno != EINTR)
-				msyslog(LOG_ERR, "select() error: %m");
+				netsyslog(LOG_ERR, "select() error: %m");
 #  ifdef DEBUG
-			else if (debug > 2)
-				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
+			else if (debug > 5)
+				netsyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #  endif /* DEBUG */
 # else /* HAVE_SIGNALED_IO */
                         
