@@ -849,13 +849,13 @@ getconfig(
 		exit(2);
 	}
 
+	if (
+	    (fp = fopen(FindConfig(config_file), "r")) == NULL
 #ifdef HAVE_NETINFO
-	/* If there is no config_file, try NetInfo. */
-	if ((fp = fopen(FindConfig(config_file), "r")) == NULL && check_netinfo && !(config_netinfo = get_netinfo_config()))
-#else
-	if ((fp = fopen(FindConfig(config_file), "r")))
-#endif /* !HAVE_NETINFO */
-	{
+	    /* If there is no config_file, try NetInfo. */
+	    && check_netinfo && !(config_netinfo = get_netinfo_config())
+#endif /* HAVE_NETINFO */
+	    ) {
 		fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(config_file));
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
 #ifdef SYS_WINNT

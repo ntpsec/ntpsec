@@ -1,3 +1,12 @@
+1999-09-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.98a
+
+	* ntpd/ntp_config.c (getconfig): Fix typo.
+	From: "David E. Myers" <dem@skyline.rtp.nc.us> 
+	From: David Godfrey <dave@delta.demon.co.uk>
+	From: Geoffrey Sisson <geoff@nominet.org.uk>
+
 1999-09-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98
