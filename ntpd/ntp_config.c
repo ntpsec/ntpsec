@@ -1951,9 +1951,17 @@ gettokens_netinfo (
 				if (ISEOL(*tokens)) break;
 			}
 		}
-		*ntokens = ntok + 1;
-		
-		config->val_index++;
+
+		if (ntok == MAXTOKENS) {
+			/* HMS: chomp it to lose the EOL? */
+			msyslog(LOG_ERR,
+			    "gettokens_netinfo: too many tokens.  Ignoring: %s",
+			    tokens);
+		} else {
+			*ntokens = ntok + 1;
+		}
+
+		config->val_index++;	/* HMS: Should this be in the 'else'? */
 
 		return keywords[prop_index].keytype;
 	}
@@ -2023,13 +2031,22 @@ gettokens (
 		}
 	}
 
-	/*
-	 * Return the match
-	 */
-	*ntokens = ntok + 1;
-	ntok = matchkey(tokenlist[0], keywords, 1);
-	if (ntok == CONFIG_UNKNOWN)
-		goto again;
+	if (ntok == MAXTOKENS) {
+		--ntok;
+		/* HMS: chomp it to lose the EOL? */
+		msyslog(LOG_ERR,
+		    "gettokens: too many tokens on the line. Ignoring %s",
+		    cp);
+	} else {
+		/*
+		 * Return the match
+		 */
+		*ntokens = ntok + 1;
+		ntok = matchkey(tokenlist[0], keywords, 1);
+		if (ntok == CONFIG_UNKNOWN)
+			goto again;
+	}
+
 	return ntok;
 }
 

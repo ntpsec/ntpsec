@@ -1866,7 +1866,7 @@ ctl_getitem(
 	 * Delete leading commas and white space
 	 */
 	while (reqpt < reqend && (*reqpt == ',' ||
-	    isspace((int)*reqpt)))
+	    isspace((unsigned char)*reqpt)))
 		reqpt++;
 	if (reqpt >= reqend)
 		return (0);
@@ -1889,7 +1889,7 @@ ctl_getitem(
 				tp++;
 			}
 			if ((*tp == '\0') || (*tp == '=')) {
-				while (cp < reqend && isspace((int)*cp))
+				while (cp < reqend && isspace((unsigned char)*cp))
 					cp++;
 				if (cp == reqend || *cp == ',') {
 					buf[0] = '\0';
@@ -1902,17 +1902,20 @@ ctl_getitem(
 				if (*cp == '=') {
 					cp++;
 					tp = buf;
-					while (cp < reqend && isspace((int)*cp))
+					while (cp < reqend && isspace((unsigned char)*cp))
 						cp++;
 					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
 						if (tp >= buf + sizeof(buf)) {
 							ctl_error(CERR_BADFMT);
 							numctlbadpkts++;
+#if 0	/* Avoid possible DOS attack */
+/* If we get a smarter msyslog we can re-enable this */
 							msyslog(LOG_WARNING,
 		"Possible 'ntpdx' exploit from %s:%d (possibly spoofed)\n",
 		stoa(rmt_addr), SRCPORT(rmt_addr)
 								);
+#endif
 							return (0);
 						}
 					}
@@ -1920,7 +1923,7 @@ ctl_getitem(
 						cp++;
 					*tp-- = '\0';
 					while (tp >= buf) {
-						if (!isspace((int)(*tp)))
+						if (!isspace((unsigned int)(*tp)))
 							break;
 						*tp-- = '\0';
 					}
