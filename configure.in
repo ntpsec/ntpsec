@@ -82,21 +82,6 @@ case "$GCC" in
     # CFLAGS="$CFLAGS -Wtraditional"
     # CFLAGS="$CFLAGS -Wwrite-strings"
 
-    AC_CACHE_CHECK(whether ${CC-cc} -pipe works, ac_cv_prog_cc_pipe,
-    [echo 'void f(){}' > conftest.c
-    if test -z "`${CC-cc} -pipe -c conftest.c 2>&1`" -a -s conftest.o; then
-      ac_cv_prog_cc_pipe=yes
-    else
-      ac_cv_prog_cc_pipe=no
-    fi
-    rm -f conftest*
-    ])
-
-    case "$ac_cv_prog_cc_pipe" in
-     yes)
-	CFLAGS="$CFLAGS -pipe"
-	;;
-    esac
     ;;
 esac
 
