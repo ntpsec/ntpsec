@@ -243,6 +243,8 @@ static u_char def_peer_var[] = {
 	CP_FILTERROR,
 #ifdef PUBKEY
 	CP_PUBLIC,
+	CP_SESKEY,
+	CP_AUTOSEQ,
 #endif /* PUBKEY */
 	0
 };
@@ -1551,25 +1553,27 @@ ctl_putpeer(
 		break;
 #ifdef PUBKEY
 	case CP_PUBLIC:
-		if (peer->keystr == 0)
+		if (peer->keystr == NULL)
 			break;
 		len = strlen(peer->keystr);
 		ctl_putstr(peer_var[CP_PUBLIC].text, peer->keystr, len);
+		break;
 
 	case CP_SESKEY:
-		if (peer->pcookie != 0)
+		if (peer->pcookie != NULL)
 			ctl_puthex(peer_var[CP_SESKEY].text, peer->pcookie);
-		if (peer->hcookie != 0)
+		if (peer->hcookie != NULL)
 			ctl_puthex(peer_var[CP_SASKEY].text, peer->hcookie);
 		break;
 
 	case CP_AUTOSEQ:
-		if (peer->keylist != NULL)
+		if (peer->keylist == NULL)
 			break;
 		ctl_putint(peer_var[CP_AUTOSEQ].text, peer->recseq);
 		ctl_putint(peer_var[CP_INITSEQ].text, peer->recauto.seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, peer->recauto.key);
 		ctl_putuint(peer_var[CP_INITTSP].text, peer->recauto.tstamp);
+		break;
 #endif /* PUBKEY */
 	}
 }

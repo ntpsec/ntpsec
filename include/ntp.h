@@ -107,7 +107,6 @@ typedef char s_char;
 #define	NTP_WINDOW	8	/* reachability register size */
 #define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
-#define NTP_MINSESSION	10	/* minimum session key list entries */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
 #define NTP_AUTOMAX	12	/* log2 default max session key lifetime */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */

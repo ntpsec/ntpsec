@@ -147,7 +147,7 @@ make_keylist(
 	keyid_t cookie;		/* private value */
 	l_fp tstamp;		/* NTP timestamp */
 	u_long ltemp;
-	int i, n;
+	int i;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
 	int rval;		/* return value */
@@ -187,18 +187,15 @@ make_keylist(
 	ltemp = sys_automax;
 	peer->hcookie = session_key(&peer->dstadr->sin, &peer->srcadr,
 	    0, sys_private, 0);
-	n = NTP_MINSESSION;
-	if (peer->hmode == MODE_BROADCAST) {
+	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
-		n = NTP_MAXSESSION;
-/*
-	} else if (peer->hmode == MODE_SERVER) {
-		cookie = peer->hcookie;
-*/
-	} else {
+	else
+#ifdef PUBKEY
 		cookie = peer->pcookie;
-	}
-	for (i = 0; i < n; i++) {
+#else
+		cookie = peer->hcookie ^ peer->pcookie;
+#endif /* PUBKEY */
+	for (i = 0; i < NTP_MAXSESSION; i++) {
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
 		keyid = session_key(&peer->dstadr->sin, (peer->hmode ==
@@ -325,8 +322,9 @@ crypto_recv(
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: verify %x autokey %d %08x %u (%u)\n",
-				    rval, (u_int32)ntohl(pkt[i + 3]),
+				    "crypto_recv: verify %x autokey %d %d %08x %u (%u)\n",
+				    rval, (u_int32)ntohl(pkt[i + 2]),
+				    (u_int32)ntohl(pkt[i + 3]),
 				    (u_int32)ntohl(pkt[i + 4]),
 				    (u_int32)ntohl(pkt[i + 5]),
 				    peer->recauto.tstamp);
@@ -443,7 +441,7 @@ crypto_recv(
 		 * symmetric modes. The verification fails if the
 		 * signature length does not match the modulus length or
 		 * any of the public values or the agreed key is not
-		 *valid.
+		 * valid.
 		 */
 		case CRYPTO_DH | CRYPTO_RESP:
 			temp = ntohl(pkt[i + 2]);

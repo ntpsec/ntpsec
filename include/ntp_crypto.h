@@ -18,6 +18,7 @@
 #define CRYPTO_AUTO	3	/* autokey values */
 #define CRYPTO_PRIV	4	/* cookie value (client/server) */
 #define CRYPTO_DH	5	/* Diffie-Hellman value (symmetric) */
+#define CRYPTO_NAME	6	/* host name */
 #define CRYPTO_RESP	0x80	/* response */
 #define CRYPTO_ERROR	0x40	/* error */
 

@@ -417,7 +417,11 @@ receive(
 			else if (hismode == MODE_CLIENT)
 				pkeyid = peer->hcookie;
 			else
+#ifdef PUBKEY
 				pkeyid = peer->pcookie;
+#else
+				pkeyid = peer->hcookie ^ peer->pcookie;
+#endif /* PUBKEY */
 
 			/*
 			 * The session key includes both the public
@@ -1968,10 +1972,17 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
+#ifdef PUBKEY
 			} else if (peer->pcookie == 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_DH, peer->hcookie,
 				    peer->assoc);
+#else
+			} else if (peer->pcookie == 0) {
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_PRIV, peer->hcookie,
+				    peer->assoc);
+#endif /* PUBKEY */
 			}
 			if (peer->cmmd != 0) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
@@ -2011,8 +2022,8 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
-			} else if (peer->recauto.seq == 0 && peer->flags &
-			    FLAG_MCAST2) {
+			} else if (peer->recauto.seq == 0 &&
+			    peer->flags & FLAG_MCAST2) {
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
