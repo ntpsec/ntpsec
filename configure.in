@@ -3310,8 +3310,16 @@ AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 AC_SUBST(ARLIB_DIR)
 if test -d $srcdir/arlib
 then
-    ARLIB_DIR=arlib
-    AC_CONFIG_SUBDIRS(arlib)
+    AC_ARG_WITH(arlib,
+	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
+    [ans=$withval], [ans=no])
+
+    case "$ans" in
+     yes)
+	ARLIB_DIR=arlib
+	AC_CONFIG_SUBDIRS(arlib)
+	;;
+    esac
 fi
 
 # This is necessary so that .o files in LIBOBJS are also built via
