@@ -1253,6 +1253,16 @@ open_socket(
                 {
                 	msyslog(LOG_ERR, "setsockopt IPV6_V6ONLY on fails: %m");
 		}
+#else /* IPV6_V6ONLY */
+#if defined(IPV6_BINDV6ONLY)
+        if (addr->ss_family == AF_INET6)
+                if (setsockopt(fd, IPPROTO_IPV6, IPV6_BINDV6ONLY,
+                	(char*)&on, sizeof(on)))
+                {
+                	msyslog(LOG_ERR,
+			    "setsockopt IPV6_BINDV6ONLY on fails: %m");
+		}
+#endif /* IPV6_BINDV6ONLY */
 #endif /* IPV6_V6ONLY */
 
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
