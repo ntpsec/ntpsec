@@ -270,7 +270,8 @@ ntp_intres(void)
 			    resolve_value <<= 1;
 			resolve_timer = resolve_value;
 #ifdef DEBUG
-			msyslog(LOG_INFO, "resolve_timer: 0->%d", resolve_timer);
+			if (debug > 2)
+				msyslog(LOG_INFO, "resolve_timer: 0->%d", resolve_timer);
 #endif
 			config_timer = CONFIG_TIME;
 			doconfigure(1);
@@ -278,7 +279,8 @@ ntp_intres(void)
 		} else if (config_timer == 0) {
 			config_timer = CONFIG_TIME;
 #ifdef DEBUG
-			msyslog(LOG_INFO, "config_timer: 0->%d", config_timer);
+			if (debug > 2)
+				msyslog(LOG_INFO, "config_timer: 0->%d", config_timer);
 #endif
 			doconfigure(0);
 			continue;

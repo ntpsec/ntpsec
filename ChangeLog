@@ -1,3 +1,8 @@
+2000-05-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_intres.c (ntp_intres): Quiet some debug messages
+	Reported by: Brian Bergstrand <brianb@mac.com>
+
 2000-05-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* scripts/mkver.in (ConfStr): Use -r if we're using RSAREF,
