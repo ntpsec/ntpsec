@@ -179,6 +179,7 @@ static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int));
 static	void	close_socket	P((SOCKET));
 static	void	close_file	P((int));
 static	char *	fdbits		P((int, fd_set *));
+static	void	set_reuseaddr	P((int));
 
 /*
  * init_io - initialize I/O data structures and call socket creation routine
@@ -746,21 +747,7 @@ create_sockets(
 	 * Now that we have opened all the sockets, turn off the reuse
 	 * flag for security.
 	 */
-	for (i = 0; i < ninterfaces; i++) {
-		int off = 0;
-
-		/*
-		 * if inter_list[ n ].fd  is -1, we might have a adapter
-		 * configured but not present
-		 */
-		if ( inter_list[ i ].fd != -1 ) {
-			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
-				       SO_REUSEADDR, (char *)&off,
-				       sizeof(off))) {
-				msyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR,off) failed: %m");
-			}
-		}
-	}
+	set_reuseaddr(0);
 
 #if defined(MCAST)
 	/*
@@ -823,6 +810,10 @@ io_setbclient(void)
 {
 	int i;
 
+#ifdef OPEN_BCAST_SOCKET
+	set_reuseaddr(1);
+#endif
+
 	for (i = 1; i < ninterfaces; i++) {
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
@@ -838,6 +829,34 @@ io_setbclient(void)
 		    INT_BROADCAST, 1);
 		inter_list[i].flags |= INT_BCASTOPEN;
 #endif
+	}
+
+#ifdef OPEN_BCAST_SOCKET
+	set_reuseaddr(0);
+#endif
+}
+
+/*
+ * set_reuseaddr() - set/clear REUSEADDR on all sockets
+ *		NB possible hole - should we be doing this on broadcast
+ *			fd's also?
+ */
+static void
+set_reuseaddr(int flag) {
+	int i;
+
+	for (i = 0; i < ninterfaces; i++) {
+		/*
+		 * if inter_list[ n ].fd  is -1, we might have a adapter
+		 * configured but not present
+		 */
+		if ( inter_list[ i ].fd != -1 ) {
+			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
+				       SO_REUSEADDR, (char *)&flag,
+				       sizeof(flag))) {
+				msyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR,%s) failed: %m", flag ? "on" : "off");
+			}
+		}
 	}
 }
 
@@ -898,7 +917,9 @@ io_multicast_add(
 		* Try opening a socket for the specified class D address. This
 		* works under SunOS 4.x, but not OSF1 .. :-(
 		*/
+		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sinp, 0, 1);
+		set_reuseaddr(0);
 		if (s < 0) {
 			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 			i = 0;
@@ -966,7 +987,9 @@ io_multicast_add(
 		 * Try opening a socket for the specified class D address. This
 		 * works under SunOS 4.x, but not OSF1 .. :-(
 		 */
+		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
+		set_reuseaddr(0);
 		if(s < 0){
 			memset((char *)&inter_list[i], 0, sizeof inter_list[0]);
 			i = 0;

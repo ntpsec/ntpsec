@@ -7,7 +7,6 @@ AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 AM_INIT_AUTOMAKE(ntp, 4.1.72c)
 AC_PREREQ(2.52)		# We need the cross-compile-aware SIZEOF stuff.
-AH_TEMPLATE(ULONG_CONST, [How do we create unsigned long constants?])
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
@@ -1000,9 +999,6 @@ AC_CACHE_CHECK(if we will open the broadcast socket, ac_cv_var_open_bcast_socket
 [ans=yes
 case "$host" in
  *-*-domainos)
-    ans=no
-    ;;
- *-*-linux*)
     ans=no
     ;;
 esac
@@ -2009,7 +2005,7 @@ esac
 AC_MSG_CHECKING(for NeoClock4X receiver)
 AC_ARG_ENABLE(NEOCLOCK4X,
     AC_HELP_STRING([--enable-NEOCLOCK4X], [- NeoClock4X DCF77 / TDF receiver]),
-    [ntp_ok=$enableval], [ntp_ok=no])
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_NEOCLOCK4X, 1, [NeoClock4X])
