@@ -1284,11 +1284,11 @@ clock_update(void)
 		    fabs(sys_peer->offset);
 #ifdef REFCLOCK
 		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
-		    MINDISPERSE)
-			dtemp = MINDISPERSE;
+		    sys_mindist)
+			dtemp = sys_mindist;
 #else
-		if (dtemp < MINDISPERSE)
-			dtemp = MINDISPERSE;
+		if (dtemp < sys_mindist)
+			dtemp = sys_mindist;
 #endif /* REFCLOCK */
 		sys_rootdispersion = sys_peer->rootdispersion + dtemp;
 		sys_leap = leap_consensus;
@@ -2278,9 +2278,9 @@ root_distance(
 	 * the minimum root distance in order to avoid clockhop with
 	 * highly precise reference clocks.
 	 */
-	return (max((peer->rootdelay + peer->delay) / 2 +
+	return ((peer->rootdelay + peer->delay) / 2 +
 	    peer->rootdispersion + peer->disp + clock_phi *
-	    (current_time - peer->update) + peer->jitter, sys_mindist));
+	    (current_time - peer->update) + peer->jitter);
 }
 
 /*
