@@ -48,13 +48,13 @@ int AM[AM_MODES][AM_MODES] = {
 
 /*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
+/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_SERV,     AM_NOMATCH},
 
 /*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
 /*BCST*/{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_PROCPKT},
+/*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_BCST},
 };
 
 #define MATCH_ASSOC(x,y)	AM[(x)][(y)]
@@ -300,13 +300,13 @@ clear_all(void)
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (peer->flags & FLAG_CONFIG) {
-				if (!(peer->cast_flags & (MDF_ACAST |
-				     MDF_MCAST | MDF_BCAST)))
-					peer_clear(peer, "STEP");
-			} else {
-				unpeer(peer);
+			if (!(peer->cast_flags & (MDF_ACAST | MDF_MCAST |
+			    MDF_BCAST))) {
+				peer->hpoll = peer->minpoll;
+				peer_clear(peer, "STEP");
 			}
+			if (peer->flags & FLAG_CONFIG)
+				unpeer(peer);
 		}
 	}
 #ifdef DEBUG
@@ -617,6 +617,7 @@ newpeer(
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
+	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)
 		peer_clear(peer, "ACST");
 	else if (cast_flags & MDF_MCAST)
