@@ -1507,7 +1507,7 @@ chu_clear(
  * chu_newchan - called once per minute to find the best channel;
  * returns zero on success, nonzero if ICOM error.
  */
-int
+static int
 chu_newchan(
 	struct peer *peer,
 	double	met
