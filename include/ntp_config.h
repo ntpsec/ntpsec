@@ -74,6 +74,7 @@
 #define CONF_MOD_TTL		9
 #define CONF_MOD_MODE		10
 #define CONF_MOD_NOSELECT 	11
+#define CONF_MOD_TRUE		12
 
 /*
  * "restrict" modifier keywords
@@ -146,7 +147,8 @@
 #define CONF_TOS_FLOOR		3
 #define CONF_TOS_CEILING	4
 #define CONF_TOS_COHORT		5
-#define CONF_TOS_MAXDIST	6
+#define CONF_TOS_MINDIST	6
+#define CONF_TOS_MAXDIST	7
 
 #ifdef OPENSSL
 /*

@@ -57,7 +57,8 @@ l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_selerr;	/* select jitter (s) */
-static	double sys_maxdist = MAXDISTANCE; /* selection thresh (s) */
+static	double sys_mindist = MINDISTANCE; /* selection floor (s) */
+static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
 double	sys_jitter;		/* system jitter (s) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
@@ -1829,9 +1830,9 @@ clock_select(void)
 	osys_peer = sys_peer;
 	sys_peer = NULL;
 	sys_pps = NULL;
+	sys_prefer = NULL;
 	osurv = sys_survivors;
 	sys_survivors = 0;
-	sys_prefer = NULL;
 #ifdef LOCKCLOCK
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
@@ -1981,7 +1982,9 @@ clock_select(void)
 	 * correct synchronization is not possible.
 	 *
 	 * Here, nlist is the number of candidates and allow is the
-	 * number of falsetickers.
+	 * number of falsetickers. Upon exit, the truechimers are the
+	 * susvivors with offsets not less than low and not greater than
+	 * high. There may be none of them.
 	 */
 	low = 1e9;
 	high = -1e9;
@@ -2032,12 +2035,64 @@ clock_select(void)
 	}
 
 	/*
+	 * Clustering algorithm. Construct candidate list in order first
+	 * by stratum then by root distance, but keep only the best
+	 * NTP_MAXCLOCK of them. Scan the list to find falsetickers, who
+	 * leave the island immediately. If a falseticker is not
+	 * configured, his association raft is drowned as well, but only
+	 * if at at least eight poll intervals have gone. We must leave
+	 * at least one peer to collect the million bucks.
+	 *
+	 * Note the hysteresis gimmick that increases the effective
+	 * distance for those rascals that have not made the final cut.
+	 * This is to discourage clockhopping. Note also the prejudice
+	 * against lower stratum peers if the floor is elevated.
+	 */
+	j = 0;
+	for (i = 0; i < nlist; i++) {
+		peer = peer_list[i];
+		if (nlist > 1 && (peer->offset <= low || peer->offset >=
+		    high) && !(peer->flags & (FLAG_TRUE |
+		    FLAG_PREFER))) {
+			if (!(peer->flags & FLAG_CONFIG))
+				unpeer(peer);
+			continue;
+		}
+		peer->status = CTL_PST_SEL_DISTSYSPEER;
+		d = peer->stratum;
+		if (d < sys_floor)
+			d += sys_floor;
+		if (d > sys_ceiling)
+			d = STRATUM_UNSPEC;
+		d = root_distance(peer) + d * MAXDISTANCE;
+		d *= 1. - peer->hyst;
+		if (j >= NTP_MAXCLOCK) {
+			if (d >= synch[j - 1])
+				continue;
+			else
+				j--;
+		}
+		for (k = j; k > 0; k--) {
+			if (d >= synch[k - 1])
+				break;
+			peer_list[k] = peer_list[k - 1];
+			error[k] = error[k - 1];
+			synch[k] = synch[k - 1];
+		}
+		peer_list[k] = peer;
+		error[k] = peer->jitter;
+		synch[k] = d;
+		j++;
+	}
+	nlist = j;
+
+	/*
 	 * If no survivors remain at this point, check if the local
 	 * clock or modem drivers have been found. If so, nominate one
 	 * of them as the only survivor. Otherwise, give up and leave
 	 * the island to the rats.
 	 */
-	if (high <= low) {
+	if (nlist == 0) {
 		if (typeacts != 0) {
 			typeacts->status = CTL_PST_SEL_SANE;
 			peer_list[0] = typeacts;
@@ -2072,63 +2127,6 @@ clock_select(void)
 	if (nlist < sys_minsane)
 		return;
 
-	/*
-	 * Clustering algorithm. Construct candidate list in order first
-	 * by stratum then by root distance, but keep only the best
-	 * NTP_MAXCLOCK of them. Scan the list to find falsetickers, who
-	 * leave the island immediately. If a falseticker is not
-	 * configured, his association raft is drowned as well, but only
-	 * if at at least eight poll intervals have gone. We must leave
-	 * at least one peer to collect the million bucks.
-	 *
-	 * Note the hysteresis gimmick that increases the effective
-	 * distance for those rascals that have not made the final cut.
-	 * This is to discourage clockhopping. Note also the prejudice
-	 * against lower stratum peers if the floor is elevated.
-	 */
-	j = 0;
-	for (i = 0; i < nlist; i++) {
-		peer = peer_list[i];
-		if (nlist > 1 && (peer->offset <= low || peer->offset >=
-		    high)) {
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
-			continue;
-		}
-		peer->status = CTL_PST_SEL_DISTSYSPEER;
-		d = peer->stratum;
-		if (d < sys_floor)
-			d += sys_floor;
-		if (d > sys_ceiling)
-			d = STRATUM_UNSPEC;
-		d = root_distance(peer) + d * MAXDISTANCE;
-		d *= 1. - peer->hyst;
-		if (j >= NTP_MAXCLOCK) {
-			if (d >= synch[j - 1])
-				continue;
-			else
-				j--;
-		}
-		for (k = j; k > 0; k--) {
-			if (d >= synch[k - 1])
-				break;
-			peer_list[k] = peer_list[k - 1];
-			error[k] = error[k - 1];
-			synch[k] = synch[k - 1];
-		}
-		peer_list[k] = peer;
-		error[k] = peer->jitter;
-		synch[k] = d;
-		j++;
-	}
-	nlist = j;
-	if (nlist == 0) {
-#ifdef DEBUG
-		if (debug)
-			printf("clock_select: empty intersection interval\n");
-#endif
-		return;
-	}
 	for (i = 0; i < nlist; i++) {
 		peer_list[i]->status = CTL_PST_SEL_SELCAND;
 
@@ -2170,7 +2168,7 @@ clock_select(void)
 		}
 		f = max(f, LOGTOD(sys_precision));
 		if (nlist <= sys_minclock || f <= d ||
-		    peer_list[k]->flags & FLAG_PREFER)
+		    peer_list[k]->flags & FLAG_TRUE)
 			break;
 #ifdef DEBUG
 		if (debug > 2)
@@ -2362,12 +2360,12 @@ root_distance(
 {
 	/*
 	 * Careful squeak here. The value returned must be greater than
-	 * zero blamed on the peer jitter, which is not be less then
-	 * sys_precision.
+	 * the minimum root distance in order to avoid clockhop with
+	 * highly precise reference clocks.
 	 */
-	return ((peer->rootdelay + peer->delay) / 2 +
+	return (max((peer->rootdelay + peer->delay) / 2 +
 	    peer->rootdispersion + peer->disp + clock_phi *
-	    (current_time - peer->update) + peer->jitter);
+	    (current_time - peer->update) + peer->jitter, sys_mindist));
 }
 
 /*
@@ -2945,13 +2943,13 @@ key_expire(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > not reachable
+ * > unreachable
  * > a synchronization loop would form
  * > never been synchronized
  * > stratum undefined or too high
  * > designated noselect
  */
-static int			/* 0 if no, 1 if yes */
+static int			/* FALSE if fit, TRUE if unfit */
 peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -2960,8 +2958,8 @@ peer_unfit(
 	    (peer->stratum > 1 && peer->dstadr->addr_refid ==
 	    peer->refid) ||		/* timing loop */
 	    peer->leap == LEAP_NOTINSYNC || /* never synchronized */
-	    peer->stratum >= STRATUM_UNSPEC || /* no source */
-	    peer->flags & FLAG_NOSELECT); /* unselected */
+	    peer->stratum >= STRATUM_UNSPEC || /* bad stratum */
+	    peer->flags & FLAG_NOSELECT); /* noselect */
 }
 
 
@@ -3220,6 +3218,13 @@ proto_config(
 	 */
 	case PROTO_CEILING:
 		sys_ceiling = (int)dvalue;
+		break;
+
+	/*
+	 * Set the select threshold.
+	 */
+	case PROTO_MINDIST:
+		sys_mindist = dvalue;
 		break;
 
 	/*

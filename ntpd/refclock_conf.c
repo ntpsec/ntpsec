@@ -280,7 +280,7 @@ struct refclock *refclock_conf[] = {
 	&refclock_tpro,		/* 12 REFCLK_IRIG_TPRO */
 	&refclock_leitch,	/* 13 REFCLK_ATOM_LEITCH */
 	&refclock_msfees,	/* 14 REFCLK_MSF_EES */
-	&refclock_true,		/* 15 alias for REFCLK_TRUETIME */
+	&refclock_none,		/* 15 not used */
 	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
 	&refclock_datum,	/* 17 REFCLK_GPS_DATUM */
 	&refclock_acts,		/* 18 REFCLK_ACTS */
@@ -288,9 +288,9 @@ struct refclock *refclock_conf[] = {
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
 	&refclock_gpsvme,	/* 21 REFCLK_GPS_VME */
 	&refclock_atom,		/* 22 REFCLK_ATOM_PPS */
-	&refclock_acts,		/* 23 alias for REFCLK_ACTS */
-	&refclock_acts,		/* 24 alias for REFCLK_ACTS */
-	&refclock_true,		/* 25 alias for REFCLK_TRUETIME */
+	&refclock_none,		/* 23 not used */
+	&refclock_none,		/* 24 not used */
+	&refclock_none,		/* 25 not used */
 	&refclock_hpgps,	/* 26 REFCLK_GPS_HP */
 	&refclock_arc, 		/* 27 REFCLK_ARCRON_MSF */
 	&refclock_shm,		/* 28 REFCLK_SHM */

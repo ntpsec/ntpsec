@@ -388,23 +388,12 @@ atom_timer(
 		sec++;
 		nsec -= NANOSECOND;
 	}
-	switch (sec) {
-	case 0:
+	if (sec * NANOSECOND + nsec > NANOSECOND + RANGEGATE)
 		return;
 
-	case 1:
-		if (abs(nsec) > RANGEGATE)
-			return;
-		break;
-
-	case 2:
-		if (abs(nsec) > 2 * RANGEGATE)
-			return;
-		break;
-
-	default:
+	else if (sec * NANOSECOND + nsec < NANOSECOND - RANGEGATE)
 		return;
-	}
+
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	if (dtemp >= FRAC)
@@ -416,7 +405,8 @@ atom_timer(
 	SAMPLE(dtemp + pp->fudgetime1);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("atom_timer %f %f\n", dtemp, pp->fudgetime1);
+		printf("atom_timer: %lu %f %f\n", current_time,
+		    dtemp, pp->fudgetime1);
 #endif
 	return;
 }
@@ -480,14 +470,13 @@ atom_poll(
 
 	/*
 	 * Valid time is returned only if the prefer peer has survived
-	 * the intersection algorithm and within 0.5 s of local time
+	 * the intersection algorithm and within 0.4 s of local time
 	 * and not too long ago. This ensures the PPS time is within
 	 * 0.5 s of the local time and the seconds numbering is
-	 * unambiguous. Note that the leap bits are set no-warning on
-	 * the first valid update and the stratum is set at the prefer
-	 * peer, unless overriden by a fudge command.
+	 * unambiguous. Note that the leap bits, stratum and refid are
+	 * set from the prefer peer, unless overriden by a fudge
+	 * command.
 	 */
-	peer->leap = LEAP_NOTINSYNC;
 	if (pp->codeproc == pp->coderecv) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
@@ -496,16 +485,16 @@ atom_poll(
 		pp->codeproc = pp->coderecv;
 		return;
 
-	} else if (fabs(sys_prefer->offset) >= 0.5) {
+	} else if (fabs(sys_prefer->offset) >= 0.4) {
 		pp->codeproc = pp->coderecv;
 		return;
 	}
-	pp->leap = LEAP_NOWARNING;
+	pp->leap = sys_prefer->leap;
 	if (pp->stratum >= STRATUM_UNSPEC)
 		peer->stratum = sys_prefer->stratum;
 	else
 		peer->stratum = pp->stratum;
-	if (peer->stratum == STRATUM_REFCLOCK || peer->stratum ==
+	if (peer->stratum == STRATUM_REFCLOCK || peer->stratum >=
 	    STRATUM_UNSPEC)
 		peer->refid = pp->refid;
 	else

@@ -115,6 +115,7 @@ static	struct keyword mod_keywords[] = {
 	{ "minpoll",		CONF_MOD_MINPOLL },
 	{ "mode",		CONF_MOD_MODE },    /* refclocks */
 	{ "noselect",		CONF_MOD_NOSELECT },
+	{ "true",		CONF_MOD_TRUE },
 	{ "prefer",		CONF_MOD_PREFER },
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
 	{ "version",		CONF_MOD_VERSION },
@@ -239,6 +240,7 @@ static struct keyword tos_keywords[] = {
 	{ "floor",		CONF_TOS_FLOOR },
 	{ "ceiling",		CONF_TOS_CEILING },
 	{ "cohort",		CONF_TOS_COHORT },
+	{ "mindist",		CONF_TOS_MINDIST },
 	{ "maxdist",		CONF_TOS_MAXDIST },
 	{ "",			CONFIG_UNKNOWN }
 };
@@ -775,6 +777,9 @@ getconfig(
 				    peerflags |= FLAG_NOSELECT;
 				    break;
 
+				case CONF_MOD_TRUE:
+				    peerflags |= FLAG_TRUE;
+
 				case CONF_MOD_BURST:
 				    peerflags |= FLAG_BURST;
 				    break;
@@ -1075,6 +1080,10 @@ getconfig(
 
 			    case CONF_TOS_COHORT:
 				proto_config(PROTO_COHORT, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MINDIST:
+				proto_config(PROTO_MINDIST, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_MAXDIST:
