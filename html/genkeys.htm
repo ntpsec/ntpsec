@@ -58,20 +58,83 @@ location specified by the <tt>dhparams</tt> argument of the
 by insecure means to other servers and clients sharing the same key
 agreement compartment, since the data are public values.
 
-<p>The file formats all begin with two lines, the first containing the
+<p>The file formats begin with two lines, the first containing the
 generating system DNS name and the second the datestamp. Lines beginning
 with <tt>#</tt> are considered comments and ignored by the daemon. In
 the <tt>ntp.keys</tt> file, the next 16 lines contain the MD5 keys in
-order. In the <tt>ntpkey</tt> and <tt>ntpkey_<i>host</i></tt> files, the
-next line contains the modulus length in bits followed by the key as a
-PEM encoded string. In the <tt>ntpkey_dh</tt> file, the next line
-contains the prime length in bytes followed by the prime as a PEM
-encoded string, and the next and final line contains the generator
-length in bytes followed by the generator as a PEM encoded string.
+order. If necessary, this file can be further customized by an ordinary
+text editor. The format is described in the following section. In the
+<tt>ntpkey</tt> and <tt>ntpkey_<i>host</i></tt> files, the next line
+contains the modulus length in bits followed by the key as a PEM encoded
+string. In the <tt>ntpkey_dh</tt> file, the next line contains the prime
+length in bytes followed by the prime as a PEM encoded string, and the
+next and final line contains the generator length in bytes followed by
+the generator as a PEM encoded string.
 
 <p>Note: See the file <tt>./source/rsaref.h</tt> in the
 <tt>rsaref20</tt> package for explanation of return values, if
 necessary.
+
+<H4>Private Key File Format</H4>
+
+In the case of DES, the keys are 56 bits long with, depending on type,
+a parity check on each byte. In the case of MD5, the keys are 64 bits (8
+bytes). <TT>ntpd</TT> reads its keys from a file specified using the
+<TT>-k</TT> command line option or the <TT>keys</TT> statement in the
+configuration file. While key number 0 is fixed by the NTP standard (as
+56 zero bits) and may not be changed, one or more of the keys numbered 1
+through 15 may be arbitrarily set in the keys file.
+
+<P>The key file uses the same comment conventions as the configuration
+file. Key entries use a fixed format of the form
+
+<P><I><TT>keyno type key</TT></I>
+
+<P>where <I><TT>keyno</TT></I> is a positive integer,
+<I><TT>type</TT></I> is a single character which defines the key format,
+and <I><TT>key</TT></I> is the key itself.
+
+<P>The key may be given in one of three different formats, controlled by
+the <I><TT>type</TT></I> character. The three key types, and
+corresponding formats, are listed following.
+<DL>
+
+<DT><TT>S</TT></DT>
+<DD>The key is a 64-bit hexadecimal number in the format specified in
+the DES specification; that is, the high order seven bits of each octet
+are used to form the 56-bit key while the low order bit of each octet is
+given a value such that odd parity is maintained for the octet. Leading
+zeroes must be specified (i.e., the key must be exactly 16 hex digits
+long) and odd parity must be maintained. Hence a zero key, in standard
+format, would be given as <TT>0101010101010101</TT>.</DD>
+
+<DT><TT>N</TT></DT>
+<DD>The key is a 64-bit hexadecimal number in the format specified in
+the NTP standard. This is the same as the DES format, except the bits in
+each octet have been rotated one bit right so that the parity bit is now
+the high order bit of the octet. Leading zeroes must be specified and
+odd parity must be maintained. A zero key in NTP format would be
+specified as <TT>8080808080808080</TT>.</DD>
+
+<DT><TT>A</TT></DT>
+<DD>The key is a 1-to-8 character ASCII string. A key is formed from
+this by using the low order 7 bits of each ASCII character in the
+string, with zeroes added on the right when necessary to form a full
+width 56-bit key, in the same way that encryption keys are formed from
+Unix passwords.</DD>
+
+<DT><TT>M</TT></DT>
+<DD>The key is a 1-to-8 character ASCII string, using the MD5
+authentication scheme. Note that both the keys and the authentication
+schemes (DES or MD5) must be identical between a set of peers sharing
+the same key number.</DD>
+
+</DL>
+
+<p>Note that the keys used by the <TT>ntpq</TT> and <TT>ntpdc</TT>
+programs are checked against passwords requested by the programs and
+entered by hand, so it is generally appropriate to specify these keys in
+ASCII format.
 
 <h4>Files</h4>
 
