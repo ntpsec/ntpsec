@@ -1633,14 +1633,16 @@ clock_select(void)
 	 * falsetickers, who leave the island immediately. If a
 	 * falseticker is not configured, his association is drowned as
 	 * well. We must leave at least one peer to collect the million
-	 * bucks. 
+	 * bucks. If about to discard an ephemeral association, do it
+	 * only if not the system peer.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		if (nlist > 1 && (low >= peer->offset ||
 			peer->offset >= high)) {
-			if (!(peer->flags & FLAG_CONFIG))
+			if (!(peer->flags & FLAG_CONFIG) && peer !=
+			    sys_peer)
 				unpeer(peer);
 			continue;
 		}
@@ -1714,7 +1716,8 @@ clock_select(void)
 		if (nlist <= NTP_MINCLOCK || sys_maxd <= d ||
 			peer_list[k]->flags & FLAG_PREFER)
 			break;
-		if (!(peer_list[k]->flags & FLAG_CONFIG))
+		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
+		    peer_list[k] != sys_peer)
 			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];

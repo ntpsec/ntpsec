@@ -1,5 +1,10 @@
 2001-01-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_chu.c: Start using HAVE_AUDIO.
+	* ntpd/ntp_proto.c (clock_select): If about to discard an
+	ephemeral association, do it only if not the system peer.
+	From Dave Mills.
+
 	* html/pic/wingdorothy.gif:
 	* html/pic/bustardfly.gif:
 	* html/pic/boom3a.gif:

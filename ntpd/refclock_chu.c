@@ -18,9 +18,9 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 #include "audio.h"
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 
 #define ICOM 	1		/* undefine to suppress ICOM code */
 
@@ -174,7 +174,7 @@
  * purpose, the speaker volume must be set before the driver is started.
  *
  * The audio codec code is normally compiled in the driver if the
- * architecture supports it (AUDIO_CHU defined), but is used only if the
+ * architecture supports it (HAVE_AUDIO defined), but is used only if the
  * link /dev/chu_audio is defined and valid. The serial port
  * code is alwasy compiled in the driver, but is used only if the autdio
  * codec is not available and the link /dev/chu%d is defined and valid.
@@ -198,7 +198,7 @@
 #define DWELL		5	/* minutes before qsy */
 #define NCHAN		3	/* number of channels */
 #endif /* ICOM */
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 
 /*
  * Audio demodulator definitions
@@ -215,7 +215,7 @@
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
 #else
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 
 /*
  * Decoder definitions
@@ -264,14 +264,14 @@
 #define DECERR		0x04	/* data decoding error */
 #define TSPERR		0x08	/* insufficient data */
 
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 struct surv {
 	double	shift[12];	/* mark register */
 	double	es_max, es_min;	/* max/min envelope signals */
 	double	dist;		/* sample distance */
 	int	uart;		/* decoded character */
 };
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 
 /*
  * CHU unit control structure
@@ -313,7 +313,7 @@ struct chuunit {
 	int	tai;		/* TAI - UTC correction */
 	int	dst;		/* Canadian DST code */
 
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 	/*
 	 * Audio codec variables
 	 */
@@ -343,7 +343,7 @@ struct chuunit {
 	struct surv surv[8];	/* UART survivor structures */
 	int	decptr;		/* decode pointer */
 	int	dbrk;		/* holdoff counter */
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 };
 
 /*
@@ -364,12 +364,12 @@ static	void	chu_a		P((struct peer *, int));
 static	void	chu_b		P((struct peer *, int));
 static	int	chu_dist	P((int, int));
 static	int	chu_major	P((struct peer *));
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 static	void	chu_uart	P((struct surv *, double));
 static	void	chu_rf		P((struct peer *, double));
 static	void	chu_gain	P((struct peer *));
 static	void	chu_audio_receive P((struct recvbuf *rbufp));
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 static	void	chu_serial_receive P((struct recvbuf *rbufp));
 
 /*
@@ -411,7 +411,7 @@ chu_start(
 	char	tbuf[80];	/* trace buffer */
 	int	temp;
 #endif /* ICOM */
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 	int	fd_audio;	/* audio port file descriptor */
 	int	i;		/* index */
 	double	step;		/* codec adjustment */
@@ -434,14 +434,14 @@ chu_start(
 		sprintf(device, DEVICE, unit);
 		fd = refclock_open(device, SPEED232, LDISC_RAW);
 	}
-#else /* AUDIO_CHU */
+#else /* HAVE_AUDIO */
 
 	/*
 	 * Open serial port in raw mode.
 	 */
 	sprintf(device, DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 	if (fd <= 0)
 		return (0);
 
@@ -473,7 +473,7 @@ chu_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	DTOLFP(CHAR, &up->charstamp);
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -493,7 +493,7 @@ chu_start(
                 	step *= 2.;
 	}
 	DTOLFP(1. / SECOND, &up->tick);
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 	strcpy(up->ident, "X");
 #ifdef ICOM
 	temp = 0;
@@ -579,17 +579,17 @@ chu_receive(
 	 * UART is bypassed. In this case the CPU will probably run a
 	 * few degrees cooler.
 	 */
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 	if (up->fd_audio > 0)
 		chu_audio_receive(rbufp);
 	else
 		chu_serial_receive(rbufp);
 #else
 	chu_serial_receive(rbufp);
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 }
 
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 
 /*
  * chu_audio_receive - receive data from the audio device
@@ -908,7 +908,7 @@ chu_uart(
 	sp->es_min = es_min;
 	sp->dist = dist / (11 * (es_max - es_min));
 }
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 
 
 /*
@@ -1166,7 +1166,7 @@ chu_a(
 	if (temp > 9 || k + 9 >= nchar || temp != ((up->cbuf[k + 9] >>
 	    4) & 0xf))
 		temp = 0;
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 	if (up->fd_audio)
 		sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
 		    up->status, up->maxsignal, nchar, up->burdist, k,
@@ -1179,7 +1179,7 @@ chu_a(
 #else
 	sprintf(tbuf, "chuA %04x %2d %2d %2d %2d %1d ", up->status,
 	    nchar, up->burdist, k, up->syndist, temp);
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 	for (i = 0; i < nchar; i++)
 		sprintf(&tbuf[strlen(tbuf)], "%02x",
 		    up->cbuf[i]);
@@ -1319,7 +1319,7 @@ chu_poll(
 	} else {
 		pp->leap = LEAP_NOWARNING;
 	}
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 	if (up->fd_audio)
 		sprintf(pp->a_lastcode,
 		    "%c%1X %4d %3d %02d:%02d:%02d.000 %c%x %+d %d %d %s %d %d %d %d",
@@ -1340,7 +1340,7 @@ chu_poll(
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
 	    pp->second, leapchar, up->dst, up->dut, minset,
 	    up->ident, up->tai, up->burstcnt, up->mindist, up->ntstamp);
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 	pp->lencode = strlen(pp->a_lastcode);
 
 	/*
@@ -1534,7 +1534,7 @@ chu_dist(
 }
 
 
-#ifdef AUDIO_CHU
+#ifdef HAVE_AUDIO
 /*
  * chu_gain - adjust codec gain
  *
@@ -1572,7 +1572,7 @@ chu_gain(
 	audio_gain(up->gain, up->port);
 	up->clipcnt = 0;
 }
-#endif /* AUDIO_CHU */
+#endif /* HAVE_AUDIO */
 
 
 #else
