@@ -224,9 +224,6 @@ refclock_newpeer(
 	peer->refclktype = clktype;
 	peer->refclkunit = unit;
 	peer->flags |= FLAG_REFCLOCK;
-	peer->stratum = STRATUM_REFCLOCK;
-	/* peer->refid = peer->srcadr.sin_addr.s_addr;*/
-	peer->refid = 0;				/* REFID case to solve */
 	peer->maxpoll = peer->minpoll;
 	peer->stratum = STRATUM_REFCLOCK;
 	pp->type = clktype;
@@ -255,11 +252,7 @@ refclock_newpeer(
 	}
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
-	if (peer->stratum <= 1)
-		peer->refid = pp->refid;
-	else
-		/* Here it is IPv4 address, so we don't have problem with REDIF case */
-		peer->refid = ((struct sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
+	peer->refid = pp->refid;
 	return (1);
 }
 

@@ -26,7 +26,7 @@ decodenetnum(
 		cp++;
 		for (i = 0; *cp != ']'; cp++, i++)
 			name[i] = *cp;
-	name[i] = '/0';
+	name[i] = '\0';
 	num = name; 
 	}
 	bzero(&hints, sizeof(struct addrinfo));
