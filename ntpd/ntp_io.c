@@ -798,7 +798,7 @@ io_multicast_add(
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
 
-                add_addr_to_list(addr, i);
+                add_addr_to_list(&addr, i);
 		break;
 #endif /* HAVE_IPV6 */
 	}
