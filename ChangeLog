@@ -1,3 +1,10 @@
+2000-03-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99h3
+
+	* ntpd/ntp_intres.c: Use LOG_INFO instead of LOG_DEBUG.
+	* ntpd/ntp_resolver.c: Ditto.
+
 2000-03-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* util/Makefile.am (ntp_genkeys_LDADD): Might need snprintf (-lntp)

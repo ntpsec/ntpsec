@@ -463,14 +463,14 @@ findhostaddr(
 	if (entry->ce_name) {
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: Resolving <%s>",
+			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
 				entry->ce_name);
 #endif DEBUG
 		hp = gethostbyname(entry->ce_name);
 	} else {
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: Resolving %x>",
+			msyslog(LOG_INFO, "findhostaddr: Resolving %x>",
 				entry->ce_peeraddr);
 #endif
 		hp = gethostbyaddr((const char *)entry->ce_peeraddr,
@@ -491,7 +491,7 @@ findhostaddr(
 	if (entry->ce_name) {
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: name resolved.");
+			msyslog(LOG_INFO, "findhostaddr: name resolved.");
 #endif
 		/*
 		 * Use the first address.  We don't have any way to tell
@@ -510,7 +510,7 @@ findhostaddr(
 
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: address resolved.");
+			msyslog(LOG_INFO, "findhostaddr: address resolved.");
 #endif
 		s = strlen(hp->h_name) + 1;
 		cp = emalloc(s);
@@ -708,8 +708,8 @@ request(
 		}
 		else if (n == 0)
 		{
-			if(debug)
-			    msyslog(LOG_DEBUG, "select() returned 0.");
+			if (debug)
+			    msyslog(LOG_INFO, "select() returned 0.");
 			return 0;
 		}
 

@@ -196,7 +196,7 @@ ntp_res_name(
 	}
 	switch (pid) {
 	    case -1:	/* Error */
-		msyslog(LOG_DEBUG, "ntp_res_name: error...");
+		msyslog(LOG_INFO, "ntp_res_name: error...");
 		/* Can't happen */
 		break;
 
@@ -485,7 +485,7 @@ findhostaddr(
 	if (entry->de_hostname[0]) {
 #ifdef DEBUG
 		if (debug > 2)
-			msyslog(LOG_DEBUG, "findhostaddr: Resolving <%s>",
+			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
 				&entry->de_hostname[0]);
 #endif DEBUG
 		hp = gethostbyname(&entry->de_hostname[0]);
@@ -495,7 +495,7 @@ findhostaddr(
 			struct in_addr si;
 
 			si.s_addr = entry->de_peeraddr;
-			msyslog(LOG_DEBUG, "findhostaddr: Resolving %s",
+			msyslog(LOG_INFO, "findhostaddr: Resolving %s",
 				inet_ntoa(si));
 		}
 #endif
@@ -521,7 +521,7 @@ findhostaddr(
 		    case DE_NAME:
 #ifdef DEBUG
 			if (debug > 2)
-				msyslog(LOG_DEBUG,
+				msyslog(LOG_INFO,
 					"findhostaddr: name resolved.");
 #endif
 			/*
@@ -536,7 +536,7 @@ findhostaddr(
 		    case DE_ADDR:
 #ifdef DEBUG
 			if (debug > 2)
-				msyslog(LOG_DEBUG,
+				msyslog(LOG_INFO,
 					"findhostaddr: address resolved.");
 #endif
 			strncpy(&entry->de_hostname[0], hp->h_name,
@@ -578,7 +578,7 @@ findhostaddr(
 #endif
 
 			si.s_addr = entry->de_peeraddr;
-			msyslog(LOG_DEBUG,
+			msyslog(LOG_INFO,
 				"findhostaddr: Failed resolution on <%s>/%s: %s",
 				entry->de_hostname, inet_ntoa(si), hes);
 		}
@@ -775,7 +775,7 @@ tell_ntpd(
 		else if (n == 0)
 		{
 			if(debug)
-			    msyslog(LOG_DEBUG, "select() returned 0.");
+			    msyslog(LOG_INFO, "select() returned 0.");
 			return 0;
 		}
 
