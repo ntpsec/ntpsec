@@ -516,7 +516,7 @@ findhostaddr(
 			msyslog(LOG_INFO, "findhostaddr: address resolved.");
 #endif
 		s = strlen(hp->h_name) + 1;
-		cp = emalloc(s);
+		cp = (char *)emalloc(s);
 		strcpy(cp, hp->h_name);
 		entry->ce_name = cp;
 	}

@@ -171,7 +171,6 @@ char *f3_dhparms;
 u_long	sys_automax;		/* maximum session key lifetime */
 int	sys_bclient;		/* we set our time to broadcasts */
 int	sys_manycastserver;	/* 1 => respond to manycast client pkts */
-u_long	client_limit_period;
 char *	req_file;		/* name of the file with configuration info */
 keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
 struct interface *any_interface;	/* default interface */
