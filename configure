@@ -7510,48 +7510,8 @@ EOF
  ;;
 esac
 
-echo $ac_n "checking for AIOCTIMESTAMPCTL""... $ac_c" 1>&6
-echo "configure:7515: checking for AIOCTIMESTAMPCTL" >&5
-if eval "test \"\${ac_cv_var_aioctimestamp+set}\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 7520 "configure"
-#include "confdefs.h"
-#include <sys/sio.h>
-#ifdef AIOCTIMESTAMPCTL
- yes
-#endif
- 
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  ac_cv_var_aioctimestamp=yes
-else
-  rm -rf conftest*
-  ac_cv_var_aioctimestamp=no
-fi
-rm -f conftest*
-
-fi
-
-echo "$ac_t""$ac_cv_var_aioctimestamp" 1>&6
-case "$ac_cv_var_aioctimestamp" in
- yes)
-    cat >> confdefs.h <<\EOF
-#define TTYCLK_AIOCTIMESTAMP 1
-EOF
-
-    cat >> confdefs.h <<\EOF
-#define TTYCLK 1
-EOF
-
-    ;;
-esac
-
 echo $ac_n "checking for the ppsclock streams module""... $ac_c" 1>&6
-echo "configure:7555: checking for the ppsclock streams module" >&5
+echo "configure:7515: checking for the ppsclock streams module" >&5
 if eval "test \"\${ac_cv_var_ppsclock+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7567,7 +7527,7 @@ EOF
 esac
 
 echo $ac_n "checking for kernel multicast support""... $ac_c" 1>&6
-echo "configure:7571: checking for kernel multicast support" >&5
+echo "configure:7531: checking for kernel multicast support" >&5
 if eval "test \"\${ac_cv_var_mcast+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7575,7 +7535,7 @@ else
   case "$target" in
    i386-sequent-sysv4) ;;
    *) cat > conftest.$ac_ext <<EOF
-#line 7579 "configure"
+#line 7539 "configure"
 #include "confdefs.h"
 #include <netinet/in.h>
 #ifdef IP_ADD_MEMBERSHIP
@@ -7602,7 +7562,7 @@ EOF
 esac
 
 echo $ac_n "checking availability of ntp_{adj,get}time()""... $ac_c" 1>&6
-echo "configure:7606: checking availability of ntp_{adj,get}time()" >&5
+echo "configure:7566: checking availability of ntp_{adj,get}time()" >&5
 if eval "test \"\${ac_cv_var_ntp_syscalls+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7616,7 +7576,7 @@ else
         ac_cv_var_ntp_syscalls=libc
         ;;
       *) cat > conftest.$ac_ext <<EOF
-#line 7620 "configure"
+#line 7580 "configure"
 #include "confdefs.h"
 #include <sys/syscall.h>
 #if defined(SYS_ntp_gettime) && defined(SYS_ntp_adjtime)
@@ -7656,12 +7616,12 @@ EOF
 esac
 
 echo $ac_n "checking if sys/timex.h has STA_FLL""... $ac_c" 1>&6
-echo "configure:7660: checking if sys/timex.h has STA_FLL" >&5
+echo "configure:7620: checking if sys/timex.h has STA_FLL" >&5
 if eval "test \"\${ac_cv_var_sta_fll+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7665 "configure"
+#line 7625 "configure"
 #include "confdefs.h"
 #include <sys/timex.h>
 #ifdef STA_FLL
@@ -7684,7 +7644,7 @@ fi
 echo "$ac_t""$ac_cv_var_sta_fll" 1>&6
 
 echo $ac_n "checking if we have kernel PLL support""... $ac_c" 1>&6
-echo "configure:7688: checking if we have kernel PLL support" >&5
+echo "configure:7648: checking if we have kernel PLL support" >&5
 if eval "test \"\${ac_cv_var_kernel_pll+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7708,7 +7668,7 @@ EOF
 esac
 
 echo $ac_n "checking if SIOCGIFCONF returns buffer size in the buffer""... $ac_c" 1>&6
-echo "configure:7712: checking if SIOCGIFCONF returns buffer size in the buffer" >&5
+echo "configure:7672: checking if SIOCGIFCONF returns buffer size in the buffer" >&5
 if eval "test \"\${ac_cv_var_size_returned_in_buffer+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7737,7 +7697,7 @@ esac
 
 
 echo $ac_n "checking if we want to use MD5 authentication""... $ac_c" 1>&6
-echo "configure:7741: checking if we want to use MD5 authentication" >&5
+echo "configure:7701: checking if we want to use MD5 authentication" >&5
 if eval "test \"\${ac_cv_var_use_md5+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7762,10 +7722,10 @@ esac
 
 # Check for ioctls TIOCGPPSEV
 echo $ac_n "checking ioctl TIOCGPPSEV""... $ac_c" 1>&6
-echo "configure:7766: checking ioctl TIOCGPPSEV" >&5
+echo "configure:7726: checking ioctl TIOCGPPSEV" >&5
 if test "$ac_cv_header_termios_h" = "yes"; then
     cat > conftest.$ac_ext <<EOF
-#line 7769 "configure"
+#line 7729 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef TIOCGPPSEV
@@ -7798,10 +7758,10 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Check for ioctls TIOCSPPS
 echo $ac_n "checking ioctl TIOCSPPS""... $ac_c" 1>&6
-echo "configure:7802: checking ioctl TIOCSPPS" >&5
+echo "configure:7762: checking ioctl TIOCSPPS" >&5
 if test "$ac_cv_header_termios_h" = "yes"; then
     cat > conftest.$ac_ext <<EOF
-#line 7805 "configure"
+#line 7765 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef TIOCSPPS
@@ -7833,10 +7793,10 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Check for ioctls CIOGETEV
 echo $ac_n "checking ioctl CIOGETEV""... $ac_c" 1>&6
-echo "configure:7837: checking ioctl CIOGETEV" >&5
+echo "configure:7797: checking ioctl CIOGETEV" >&5
 if test "$ac_cv_header_sys_ppsclock_h" = "yes"; then
     cat > conftest.$ac_ext <<EOF
-#line 7840 "configure"
+#line 7800 "configure"
 #include "confdefs.h"
 #include <sys/ppsclock.h>
 #ifdef CIOGETEV
@@ -7888,17 +7848,17 @@ esac
 # Check for ioctls TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, ASYNC_PPS_CD_NEG
 ac_safe=`echo "linux/serial.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for linux/serial.h""... $ac_c" 1>&6
-echo "configure:7892: checking for linux/serial.h" >&5
+echo "configure:7852: checking for linux/serial.h" >&5
 if eval "test \"\${ac_cv_header_$ac_safe+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7897 "configure"
+#line 7857 "configure"
 #include "confdefs.h"
 #include <linux/serial.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:7902: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:7862: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -7920,11 +7880,11 @@ else
 fi
 
 echo $ac_n "checking ioctl TIOCGSERIAL""... $ac_c" 1>&6
-echo "configure:7924: checking ioctl TIOCGSERIAL" >&5
+echo "configure:7884: checking ioctl TIOCGSERIAL" >&5
 case "$ac_cv_header_sys_ppsclock_h$ac_cv_header_linux_serial_h" in
   yesyes)
     cat > conftest.$ac_ext <<EOF
-#line 7928 "configure"
+#line 7888 "configure"
 #include "confdefs.h"
 #include <sys/time.h>
 typedef int u_int;
@@ -7971,7 +7931,7 @@ ntp_refclock=no
 
 # HPUX only, and by explicit request
 echo $ac_n "checking Datum/Bancomm bc635/VME interface""... $ac_c" 1>&6
-echo "configure:7975: checking Datum/Bancomm bc635/VME interface" >&5
+echo "configure:7935: checking Datum/Bancomm bc635/VME interface" >&5
 # Check whether --enable-BANCOMM or --disable-BANCOMM was given.
 if test "${enable_BANCOMM+set}" = set; then
   enableval="$enable_BANCOMM"
@@ -7995,7 +7955,7 @@ esac
 
 #HPUX only, and only by explicit request
 echo $ac_n "checking TrueTime GPS receiver/VME interface""... $ac_c" 1>&6
-echo "configure:7999: checking TrueTime GPS receiver/VME interface" >&5
+echo "configure:7959: checking TrueTime GPS receiver/VME interface" >&5
 # Check whether --enable-GPSVME or --disable-GPSVME was given.
 if test "${enable_GPSVME+set}" = set; then
   enableval="$enable_GPSVME"
@@ -8018,7 +7978,7 @@ case "$ntp_ok$target" in
 esac
 
 echo $ac_n "checking for PCL720 clock support""... $ac_c" 1>&6
-echo "configure:8022: checking for PCL720 clock support" >&5
+echo "configure:7982: checking for PCL720 clock support" >&5
 case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_i8253_h" in
  yesyesyes)
     cat >> confdefs.h <<\EOF
@@ -8034,7 +7994,7 @@ esac
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking for SHM clock attached thru shared memory""... $ac_c" 1>&6
-echo "configure:8038: checking for SHM clock attached thru shared memory" >&5
+echo "configure:7998: checking for SHM clock attached thru shared memory" >&5
 # Check whether --enable-SHM or --disable-SHM was given.
 if test "${enable_SHM+set}" = set; then
   enableval="$enable_SHM"
@@ -8053,7 +8013,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking for default inclusion of all suitable non-PARSE clocks""... $ac_c" 1>&6
-echo "configure:8057: checking for default inclusion of all suitable non-PARSE clocks" >&5
+echo "configure:8017: checking for default inclusion of all suitable non-PARSE clocks" >&5
 # Check whether --enable-all-clocks or --disable-all-clocks was given.
 if test "${enable_all_clocks+set}" = set; then
   enableval="$enable_all_clocks"
@@ -8065,7 +8025,7 @@ fi
 echo "$ac_t""$ntp_eac" 1>&6
 
 echo $ac_n "checking if we have support for PARSE clocks""... $ac_c" 1>&6
-echo "configure:8069: checking if we have support for PARSE clocks" >&5
+echo "configure:8029: checking if we have support for PARSE clocks" >&5
 case "$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  *yes*)
     ntp_canparse=yes
@@ -8077,14 +8037,14 @@ echo "$ac_t""$ntp_canparse" 1>&6
 
 # Requires modem control
 echo $ac_n "checking ACTS modem service""... $ac_c" 1>&6
-echo "configure:8081: checking ACTS modem service" >&5
+echo "configure:8041: checking ACTS modem service" >&5
 # Check whether --enable-ACTS or --disable-ACTS was given.
 if test "${enable_ACTS+set}" = set; then
   enableval="$enable_ACTS"
   ntp_ok=$enableval
 else
   cat > conftest.$ac_ext <<EOF
-#line 8088 "configure"
+#line 8048 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -8117,7 +8077,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Arbiter 1088A/B GPS receiver""... $ac_c" 1>&6
-echo "configure:8121: checking Arbiter 1088A/B GPS receiver" >&5
+echo "configure:8081: checking Arbiter 1088A/B GPS receiver" >&5
 # Check whether --enable-ARBITER or --disable-ARBITER was given.
 if test "${enable_ARBITER+set}" = set; then
   enableval="$enable_ARBITER"
@@ -8136,7 +8096,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Arcron MSF receiver""... $ac_c" 1>&6
-echo "configure:8140: checking Arcron MSF receiver" >&5
+echo "configure:8100: checking Arcron MSF receiver" >&5
 # Check whether --enable-ARCRON_MSF or --disable-ARCRON_MSF was given.
 if test "${enable_ARCRON_MSF+set}" = set; then
   enableval="$enable_ARCRON_MSF"
@@ -8155,7 +8115,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Austron 2200A/2201A GPS receiver""... $ac_c" 1>&6
-echo "configure:8159: checking Austron 2200A/2201A GPS receiver" >&5
+echo "configure:8119: checking Austron 2200A/2201A GPS receiver" >&5
 # Check whether --enable-AS2201 or --disable-AS2201 was given.
 if test "${enable_AS2201+set}" = set; then
   enableval="$enable_AS2201"
@@ -8174,7 +8134,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking PPS interface""... $ac_c" 1>&6
-echo "configure:8178: checking PPS interface" >&5
+echo "configure:8138: checking PPS interface" >&5
 # Check whether --enable-ATOM or --disable-ATOM was given.
 if test "${enable_ATOM+set}" = set; then
   enableval="$enable_ATOM"
@@ -8193,7 +8153,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking CHU modem/decoder""... $ac_c" 1>&6
-echo "configure:8197: checking CHU modem/decoder" >&5
+echo "configure:8157: checking CHU modem/decoder" >&5
 # Check whether --enable-CHU or --disable-CHU was given.
 if test "${enable_CHU+set}" = set; then
   enableval="$enable_CHU"
@@ -8213,7 +8173,7 @@ echo "$ac_t""$ntp_ok" 1>&6
 ac_refclock_chu=$ntp_ok
 
 echo $ac_n "checking CHU audio/decoder""... $ac_c" 1>&6
-echo "configure:8217: checking CHU audio/decoder" >&5
+echo "configure:8177: checking CHU audio/decoder" >&5
 # Check whether --enable-AUDIO-CHU or --disable-AUDIO-CHU was given.
 if test "${enable_AUDIO_CHU+set}" = set; then
   enableval="$enable_AUDIO_CHU"
@@ -8237,7 +8197,7 @@ esac
 
 # Not under HP-UX
 echo $ac_n "checking Datum Programmable Time System""... $ac_c" 1>&6
-echo "configure:8241: checking Datum Programmable Time System" >&5
+echo "configure:8201: checking Datum Programmable Time System" >&5
 # Check whether --enable-DATUM or --disable-DATUM was given.
 if test "${enable_DATUM+set}" = set; then
   enableval="$enable_DATUM"
@@ -8263,14 +8223,14 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Requires modem control
 echo $ac_n "checking Heath GC-1000 WWV/WWVH receiver""... $ac_c" 1>&6
-echo "configure:8267: checking Heath GC-1000 WWV/WWVH receiver" >&5
+echo "configure:8227: checking Heath GC-1000 WWV/WWVH receiver" >&5
 # Check whether --enable-HEATH or --disable-HEATH was given.
 if test "${enable_HEATH+set}" = set; then
   enableval="$enable_HEATH"
   ntp_ok=$enableval
 else
   cat > conftest.$ac_ext <<EOF
-#line 8274 "configure"
+#line 8234 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -8303,7 +8263,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking HP 58503A GPS receiver""... $ac_c" 1>&6
-echo "configure:8307: checking HP 58503A GPS receiver" >&5
+echo "configure:8267: checking HP 58503A GPS receiver" >&5
 # Check whether --enable-HPGPS or --disable-HPGPS was given.
 if test "${enable_HPGPS+set}" = set; then
   enableval="$enable_HPGPS"
@@ -8322,7 +8282,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Sun IRIG audio decoder""... $ac_c" 1>&6
-echo "configure:8326: checking Sun IRIG audio decoder" >&5
+echo "configure:8286: checking Sun IRIG audio decoder" >&5
 # Check whether --enable-IRIG or --disable-IRIG was given.
 if test "${enable_IRIG+set}" = set; then
   enableval="$enable_IRIG"
@@ -8350,7 +8310,7 @@ case "$ntp_ok$ac_cv_header_sun_audioio_h$ac_cv_header_sys_audioio_h" in
 esac
 
 echo $ac_n "checking Leitch CSD 5300 Master Clock System Driver""... $ac_c" 1>&6
-echo "configure:8354: checking Leitch CSD 5300 Master Clock System Driver" >&5
+echo "configure:8314: checking Leitch CSD 5300 Master Clock System Driver" >&5
 # Check whether --enable-LEITCH or --disable-LEITCH was given.
 if test "${enable_LEITCH+set}" = set; then
   enableval="$enable_LEITCH"
@@ -8369,7 +8329,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking local clock reference""... $ac_c" 1>&6
-echo "configure:8373: checking local clock reference" >&5
+echo "configure:8333: checking local clock reference" >&5
 # Check whether --enable-LOCAL-CLOCK or --disable-LOCAL-CLOCK was given.
 if test "${enable_LOCAL_CLOCK+set}" = set; then
   enableval="$enable_LOCAL_CLOCK"
@@ -8388,7 +8348,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking EES M201 MSF receiver""... $ac_c" 1>&6
-echo "configure:8392: checking EES M201 MSF receiver" >&5
+echo "configure:8352: checking EES M201 MSF receiver" >&5
 # Check whether --enable-MSFEES or --disable-MSFEES was given.
 if test "${enable_MSFEES+set}" = set; then
   enableval="$enable_MSFEES"
@@ -8408,7 +8368,7 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Not Ultrix
 echo $ac_n "checking Magnavox MX4200 GPS receiver""... $ac_c" 1>&6
-echo "configure:8412: checking Magnavox MX4200 GPS receiver" >&5
+echo "configure:8372: checking Magnavox MX4200 GPS receiver" >&5
 # Check whether --enable-MX4200 or --disable-MX4200 was given.
 if test "${enable_MX4200+set}" = set; then
   enableval="$enable_MX4200"
@@ -8435,7 +8395,7 @@ case "$ntp_ok$target" in
 esac
 
 echo $ac_n "checking NMEA GPS receiver""... $ac_c" 1>&6
-echo "configure:8439: checking NMEA GPS receiver" >&5
+echo "configure:8399: checking NMEA GPS receiver" >&5
 # Check whether --enable-NMEA or --disable-NMEA was given.
 if test "${enable_NMEA+set}" = set; then
   enableval="$enable_NMEA"
@@ -8454,7 +8414,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking for ONCORE Motorola VP/UT Oncore GPS""... $ac_c" 1>&6
-echo "configure:8458: checking for ONCORE Motorola VP/UT Oncore GPS" >&5
+echo "configure:8418: checking for ONCORE Motorola VP/UT Oncore GPS" >&5
 # Check whether --enable-ONCORE or --disable-ONCORE was given.
 if test "${enable_ONCORE+set}" = set; then
   enableval="$enable_ONCORE"
@@ -8476,7 +8436,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking for Palisade clock""... $ac_c" 1>&6
-echo "configure:8480: checking for Palisade clock" >&5
+echo "configure:8440: checking for Palisade clock" >&5
 # Check whether --enable-PALISADE or --disable-PALISADE was given.
 if test "${enable_PALISADE+set}" = set; then
   enableval="$enable_PALISADE"
@@ -8502,7 +8462,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking PST/Traconex 1020 WWV/WWVH receiver""... $ac_c" 1>&6
-echo "configure:8506: checking PST/Traconex 1020 WWV/WWVH receiver" >&5
+echo "configure:8466: checking PST/Traconex 1020 WWV/WWVH receiver" >&5
 # Check whether --enable-PST or --disable-PST was given.
 if test "${enable_PST+set}" = set; then
   enableval="$enable_PST"
@@ -8522,7 +8482,7 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Not Ultrix
 echo $ac_n "checking Rockwell Jupiter GPS receiver""... $ac_c" 1>&6
-echo "configure:8526: checking Rockwell Jupiter GPS receiver" >&5
+echo "configure:8486: checking Rockwell Jupiter GPS receiver" >&5
 # Check whether --enable-JUPITER or --disable-JUPITER was given.
 if test "${enable_JUPITER+set}" = set; then
   enableval="$enable_JUPITER"
@@ -8550,14 +8510,14 @@ esac
 
 # Requires modem control
 echo $ac_n "checking PTB modem service""... $ac_c" 1>&6
-echo "configure:8554: checking PTB modem service" >&5
+echo "configure:8514: checking PTB modem service" >&5
 # Check whether --enable-PTBACTS or --disable-PTBACTS was given.
 if test "${enable_PTBACTS+set}" = set; then
   enableval="$enable_PTBACTS"
   ntp_ok=$enableval
 else
   cat > conftest.$ac_ext <<EOF
-#line 8561 "configure"
+#line 8521 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -8590,7 +8550,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking KSI/Odetics TPRO/S GPS receiver/IRIG interface""... $ac_c" 1>&6
-echo "configure:8594: checking KSI/Odetics TPRO/S GPS receiver/IRIG interface" >&5
+echo "configure:8554: checking KSI/Odetics TPRO/S GPS receiver/IRIG interface" >&5
 # Check whether --enable-TPRO or --disable-TPRO was given.
 if test "${enable_TPRO+set}" = set; then
   enableval="$enable_TPRO"
@@ -8618,7 +8578,7 @@ case "$ntp_ok$ac_cv_header_sys_tpro" in
 esac
 
 echo $ac_n "checking TRAK 8810 GPS receiver""... $ac_c" 1>&6
-echo "configure:8622: checking TRAK 8810 GPS receiver" >&5
+echo "configure:8582: checking TRAK 8810 GPS receiver" >&5
 # Check whether --enable-TRAK or --disable-TRAK was given.
 if test "${enable_TRAK+set}" = set; then
   enableval="$enable_TRAK"
@@ -8637,7 +8597,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Chrono-log K-series WWVB receiver""... $ac_c" 1>&6
-echo "configure:8641: checking Chrono-log K-series WWVB receiver" >&5
+echo "configure:8601: checking Chrono-log K-series WWVB receiver" >&5
 # Check whether --enable-CHRONOLOG or --disable-CHRONOLOG was given.
 if test "${enable_CHRONOLOG+set}" = set; then
   enableval="$enable_CHRONOLOG"
@@ -8656,7 +8616,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Dumb generic hh:mm:ss local clock""... $ac_c" 1>&6
-echo "configure:8660: checking Dumb generic hh:mm:ss local clock" >&5
+echo "configure:8620: checking Dumb generic hh:mm:ss local clock" >&5
 # Check whether --enable-DUMBCLOCK or --disable-DUMBCLOCK was given.
 if test "${enable_DUMBCLOCK+set}" = set; then
   enableval="$enable_DUMBCLOCK"
@@ -8676,7 +8636,7 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Not on a vax-dec-bsd
 echo $ac_n "checking Kinemetrics/TrueTime receivers""... $ac_c" 1>&6
-echo "configure:8680: checking Kinemetrics/TrueTime receivers" >&5
+echo "configure:8640: checking Kinemetrics/TrueTime receivers" >&5
 # Check whether --enable-TRUETIME or --disable-TRUETIME was given.
 if test "${enable_TRUETIME+set}" = set; then
   enableval="$enable_TRUETIME"
@@ -8705,7 +8665,7 @@ case "$ntp_ok$target" in
 esac
 
 echo $ac_n "checking Spectracom 8170/Netclock/2 WWVB receiver""... $ac_c" 1>&6
-echo "configure:8709: checking Spectracom 8170/Netclock/2 WWVB receiver" >&5
+echo "configure:8669: checking Spectracom 8170/Netclock/2 WWVB receiver" >&5
 # Check whether --enable-WWVB or --disable-WWVB was given.
 if test "${enable_WWVB+set}" = set; then
   enableval="$enable_WWVB"
@@ -8724,7 +8684,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking Ultralink M320 WWVB receiver""... $ac_c" 1>&6
-echo "configure:8728: checking Ultralink M320 WWVB receiver" >&5
+echo "configure:8688: checking Ultralink M320 WWVB receiver" >&5
 # Check whether --enable-ULINK or --disable-ULINK was given.
 if test "${enable_ULINK+set}" = set; then
   enableval="$enable_ULINK"
@@ -8744,14 +8704,14 @@ echo "$ac_t""$ntp_ok" 1>&6
 
 # Requires modem control
 echo $ac_n "checking USNO modem service""... $ac_c" 1>&6
-echo "configure:8748: checking USNO modem service" >&5
+echo "configure:8708: checking USNO modem service" >&5
 # Check whether --enable-USNO or --disable-USNO was given.
 if test "${enable_USNO+set}" = set; then
   enableval="$enable_USNO"
   ntp_ok=$enableval
 else
   cat > conftest.$ac_ext <<EOF
-#line 8755 "configure"
+#line 8715 "configure"
 #include "confdefs.h"
 #include <termios.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -8784,7 +8744,7 @@ fi
 echo "$ac_t""$ntp_ok" 1>&6
 
 echo $ac_n "checking for default inclusion of all suitable PARSE clocks""... $ac_c" 1>&6
-echo "configure:8788: checking for default inclusion of all suitable PARSE clocks" >&5
+echo "configure:8748: checking for default inclusion of all suitable PARSE clocks" >&5
 # Check whether --enable-parse-clocks or --disable-parse-clocks was given.
 if test "${enable_parse_clocks+set}" = set; then
   enableval="$enable_parse_clocks"
@@ -8814,7 +8774,7 @@ ntp_parseutil=no
 ntp_rawdcf=no
 
 echo $ac_n "checking Diem Computime Radio Clock""... $ac_c" 1>&6
-echo "configure:8818: checking Diem Computime Radio Clock" >&5
+echo "configure:8778: checking Diem Computime Radio Clock" >&5
 # Check whether --enable-COMPUTIME or --disable-COMPUTIME was given.
 if test "${enable_COMPUTIME+set}" = set; then
   enableval="$enable_COMPUTIME"
@@ -8839,7 +8799,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking ELV/DCF7000 clock""... $ac_c" 1>&6
-echo "configure:8843: checking ELV/DCF7000 clock" >&5
+echo "configure:8803: checking ELV/DCF7000 clock" >&5
 # Check whether --enable-DCF7000 or --disable-DCF7000 was given.
 if test "${enable_DCF7000+set}" = set; then
   enableval="$enable_DCF7000"
@@ -8864,7 +8824,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking HOPF 6021 clock""... $ac_c" 1>&6
-echo "configure:8868: checking HOPF 6021 clock" >&5
+echo "configure:8828: checking HOPF 6021 clock" >&5
 # Check whether --enable-HOPF6021 or --disable-HOPF6021 was given.
 if test "${enable_HOPF6021+set}" = set; then
   enableval="$enable_HOPF6021"
@@ -8889,7 +8849,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking Meinberg clocks""... $ac_c" 1>&6
-echo "configure:8893: checking Meinberg clocks" >&5
+echo "configure:8853: checking Meinberg clocks" >&5
 # Check whether --enable-MEINBERG or --disable-MEINBERG was given.
 if test "${enable_MEINBERG+set}" = set; then
   enableval="$enable_MEINBERG"
@@ -8914,7 +8874,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking DCF77 raw time code""... $ac_c" 1>&6
-echo "configure:8918: checking DCF77 raw time code" >&5
+echo "configure:8878: checking DCF77 raw time code" >&5
 # Check whether --enable-RAWDCF or --disable-RAWDCF was given.
 if test "${enable_RAWDCF+set}" = set; then
   enableval="$enable_RAWDCF"
@@ -8943,7 +8903,7 @@ esac
 case "$ntp_rawdcf" in
  yes)
     echo $ac_n "checking if we must enable parity for RAWDCF""... $ac_c" 1>&6
-echo "configure:8947: checking if we must enable parity for RAWDCF" >&5
+echo "configure:8907: checking if we must enable parity for RAWDCF" >&5
 if eval "test \"\${ac_cv_var_rawdcf_parity+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8971,7 +8931,7 @@ EOF
 esac
 
 echo $ac_n "checking RCC 8000 clock""... $ac_c" 1>&6
-echo "configure:8975: checking RCC 8000 clock" >&5
+echo "configure:8935: checking RCC 8000 clock" >&5
 # Check whether --enable-RCC8000 or --disable-RCC8000 was given.
 if test "${enable_RCC8000+set}" = set; then
   enableval="$enable_RCC8000"
@@ -8996,7 +8956,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking Schmid DCF77 clock""... $ac_c" 1>&6
-echo "configure:9000: checking Schmid DCF77 clock" >&5
+echo "configure:8960: checking Schmid DCF77 clock" >&5
 # Check whether --enable-SCHMID or --disable-SCHMID was given.
 if test "${enable_SCHMID+set}" = set; then
   enableval="$enable_SCHMID"
@@ -9021,7 +8981,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking Trimble GPS receiver/TAIP protocol""... $ac_c" 1>&6
-echo "configure:9025: checking Trimble GPS receiver/TAIP protocol" >&5
+echo "configure:8985: checking Trimble GPS receiver/TAIP protocol" >&5
 # Check whether --enable-TRIMTAIP or --disable-TRIMTAIP was given.
 if test "${enable_TRIMTAIP+set}" = set; then
   enableval="$enable_TRIMTAIP"
@@ -9046,7 +9006,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking Trimble GPS receiver/TSIP protocol""... $ac_c" 1>&6
-echo "configure:9050: checking Trimble GPS receiver/TSIP protocol" >&5
+echo "configure:9010: checking Trimble GPS receiver/TSIP protocol" >&5
 # Check whether --enable-TRIMTSIP or --disable-TRIMTSIP was given.
 if test "${enable_TRIMTSIP+set}" = set; then
   enableval="$enable_TRIMTSIP"
@@ -9071,7 +9031,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking WHARTON 400A Series clock""... $ac_c" 1>&6
-echo "configure:9075: checking WHARTON 400A Series clock" >&5
+echo "configure:9035: checking WHARTON 400A Series clock" >&5
 # Check whether --enable-WHARTON or --disable-WHARTON was given.
 if test "${enable_WHARTON+set}" = set; then
   enableval="$enable_WHARTON"
@@ -9096,7 +9056,7 @@ case "$ntp_ok$ntp_canparse" in
 esac
 
 echo $ac_n "checking VARITEXT clock""... $ac_c" 1>&6
-echo "configure:9100: checking VARITEXT clock" >&5
+echo "configure:9060: checking VARITEXT clock" >&5
 # Check whether --enable-VARITEXT or --disable-VARITEXT was given.
 if test "${enable_VARITEXT+set}" = set; then
   enableval="$enable_VARITEXT"
@@ -9124,7 +9084,7 @@ esac
 
 
 echo $ac_n "checking if we need to make and use the parse libraries""... $ac_c" 1>&6
-echo "configure:9128: checking if we need to make and use the parse libraries" >&5
+echo "configure:9088: checking if we need to make and use the parse libraries" >&5
 ans=no
 case "$ntp_libparse" in
  yes)
@@ -9152,7 +9112,7 @@ echo "$ac_t""$ans" 1>&6
 
 
 echo $ac_n "checking if we need to make and use the RSAREF library""... $ac_c" 1>&6
-echo "configure:9156: checking if we need to make and use the RSAREF library" >&5
+echo "configure:9116: checking if we need to make and use the RSAREF library" >&5
 ans=no
 if test -f $srcdir/rsaref2/source/rsa.c
 then
@@ -9170,7 +9130,7 @@ echo "$ac_t""$ans" 1>&6
 
 
 echo $ac_n "checking if we can make dcf parse utilities""... $ac_c" 1>&6
-echo "configure:9174: checking if we can make dcf parse utilities" >&5
+echo "configure:9134: checking if we can make dcf parse utilities" >&5
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$target" in
@@ -9185,7 +9145,7 @@ echo "$ac_t""$ans" 1>&6
 
 
 echo $ac_n "checking if we can build kernel streams modules for parse""... $ac_c" 1>&6
-echo "configure:9189: checking if we can build kernel streams modules for parse" >&5
+echo "configure:9149: checking if we can build kernel streams modules for parse" >&5
 ans=no
 case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
  yesyes)
@@ -9212,7 +9172,7 @@ esac
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we need basic refclock support""... $ac_c" 1>&6
-echo "configure:9216: checking if we need basic refclock support" >&5
+echo "configure:9176: checking if we need basic refclock support" >&5
 if test "$ntp_refclock" = "yes"; then
     cat >> confdefs.h <<\EOF
 #define REFCLOCK 1
@@ -9224,7 +9184,7 @@ echo "$ac_t""$ntp_refclock" 1>&6
 			
 
 echo $ac_n "checking if we want HP-UX adjtimed support""... $ac_c" 1>&6
-echo "configure:9228: checking if we want HP-UX adjtimed support" >&5
+echo "configure:9188: checking if we want HP-UX adjtimed support" >&5
 case "$target" in
  *-*-hpux[56789]*)
     ans=yes
@@ -9242,7 +9202,7 @@ fi
 echo "$ac_t""$ans" 1>&6
 
 echo $ac_n "checking if we can read kmem""... $ac_c" 1>&6
-echo "configure:9246: checking if we can read kmem" >&5
+echo "configure:9206: checking if we can read kmem" >&5
 if eval "test \"\${ac_cv_var_can_kmem+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9295,7 +9255,7 @@ EOF
 esac
 
 echo $ac_n "checking if adjtime is accurate""... $ac_c" 1>&6
-echo "configure:9299: checking if adjtime is accurate" >&5
+echo "configure:9259: checking if adjtime is accurate" >&5
 if eval "test \"\${ac_cv_var_adjtime_is_accurate+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9347,7 +9307,7 @@ EOF
 esac
 
 echo $ac_n "checking the name of 'tick' in the kernel""... $ac_c" 1>&6
-echo "configure:9351: checking the name of 'tick' in the kernel" >&5
+echo "configure:9311: checking the name of 'tick' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_tick+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9391,7 +9351,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tick'""... $ac_c" 1>&6
-echo "configure:9395: checking for the units of 'tick'" >&5
+echo "configure:9355: checking for the units of 'tick'" >&5
 if eval "test \"\${ac_cv_var_tick_nano+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9415,7 +9375,7 @@ EOF
 esac
 #
 echo $ac_n "checking the name of 'tickadj' in the kernel""... $ac_c" 1>&6
-echo "configure:9419: checking the name of 'tickadj' in the kernel" >&5
+echo "configure:9379: checking the name of 'tickadj' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9468,7 +9428,7 @@ EOF
 esac
 #
 echo $ac_n "checking for the units of 'tickadj'""... $ac_c" 1>&6
-echo "configure:9472: checking for the units of 'tickadj'" >&5
+echo "configure:9432: checking for the units of 'tickadj'" >&5
 if eval "test \"\${ac_cv_var_tickadj_nano+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9492,7 +9452,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'dosynctodr' in the kernel""... $ac_c" 1>&6
-echo "configure:9496: checking half-heartedly for 'dosynctodr' in the kernel" >&5
+echo "configure:9456: checking half-heartedly for 'dosynctodr' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_dosynctodr+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9545,7 +9505,7 @@ EOF
 esac
 #
 echo $ac_n "checking half-heartedly for 'noprintf' in the kernel""... $ac_c" 1>&6
-echo "configure:9549: checking half-heartedly for 'noprintf' in the kernel" >&5
+echo "configure:9509: checking half-heartedly for 'noprintf' in the kernel" >&5
 if eval "test \"\${ac_cv_var_nlist_noprintf+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9595,7 +9555,7 @@ esac
 
 
 echo $ac_n "checking for a default value for 'tick'""... $ac_c" 1>&6
-echo "configure:9599: checking for a default value for 'tick'" >&5
+echo "configure:9559: checking for a default value for 'tick'" >&5
 if eval "test \"\${ac_cv_var_tick+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9639,7 +9599,7 @@ EOF
 esac
 
 echo $ac_n "checking for a default value for 'tickadj'""... $ac_c" 1>&6
-echo "configure:9643: checking for a default value for 'tickadj'" >&5
+echo "configure:9603: checking for a default value for 'tickadj'" >&5
 if eval "test \"\${ac_cv_var_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9772,7 +9732,7 @@ esac
 
 
 echo $ac_n "checking if we want and can make the tickadj utility""... $ac_c" 1>&6
-echo "configure:9776: checking if we want and can make the tickadj utility" >&5
+echo "configure:9736: checking if we want and can make the tickadj utility" >&5
 if eval "test \"\${ac_cv_make_tickadj+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9788,7 +9748,7 @@ esac
 
 
 echo $ac_n "checking if we want and can make the ntptime utility""... $ac_c" 1>&6
-echo "configure:9792: checking if we want and can make the ntptime utility" >&5
+echo "configure:9752: checking if we want and can make the ntptime utility" >&5
 if eval "test \"\${ac_cv_make_ntptime+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9814,7 +9774,7 @@ case "$ac_cv_make_ntptime" in
 esac
 
 echo $ac_n "checking if we want UDP wildcard delivery""... $ac_c" 1>&6
-echo "configure:9818: checking if we want UDP wildcard delivery" >&5
+echo "configure:9778: checking if we want UDP wildcard delivery" >&5
 if eval "test \"\${ac_cv_var_udp_wildcard_delivery+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9893,7 +9853,7 @@ case "$host" in
 esac
 
 echo $ac_n "checking if we should always slew the time""... $ac_c" 1>&6
-echo "configure:9897: checking if we should always slew the time" >&5
+echo "configure:9857: checking if we should always slew the time" >&5
 if eval "test \"\${ac_cv_var_slew_always+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9933,7 +9893,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should step and slew the time""... $ac_c" 1>&6
-echo "configure:9937: checking if we should step and slew the time" >&5
+echo "configure:9897: checking if we should step and slew the time" >&5
 if eval "test \"\${ac_cv_var_step_slew+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -9976,7 +9936,7 @@ EOF
 esac
 
 echo $ac_n "checking if ntpdate should step the time""... $ac_c" 1>&6
-echo "configure:9980: checking if ntpdate should step the time" >&5
+echo "configure:9940: checking if ntpdate should step the time" >&5
 if eval "test \"\${ac_cv_var_ntpdate_step+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10007,7 +9967,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should sync TODR clock every hour""... $ac_c" 1>&6
-echo "configure:10011: checking if we should sync TODR clock every hour" >&5
+echo "configure:9971: checking if we should sync TODR clock every hour" >&5
 if eval "test \"\${ac_cv_var_sync_todr+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -10040,7 +10000,7 @@ EOF
 esac
 
 echo $ac_n "checking if we should avoid kernel FLL bug""... $ac_c" 1>&6
-echo "configure:10044: checking if we should avoid kernel FLL bug" >&5
+echo "configure:10004: checking if we should avoid kernel FLL bug" >&5
 if eval "test \"\${ac_cv_var_kernel_fll_bug+set}\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

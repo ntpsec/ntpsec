@@ -166,25 +166,26 @@ atom_start(
 #ifdef TTYCLK
 	int fd = 0;
 	char device[20];
+	int ldisc = LDISC_CLKPPS;
 #endif /* TTYCLK */
 
 	pps_peer = peer;
 	flags = 0;
 
 #ifdef TTYCLK
+# if defined(SCO5_CLOCK)
+	ldisc = LDISC_RAW;   /* DCD timestamps without any line discipline */
+# endif
 	/*
 	 * Open serial port. Use LDISC_CLKPPS line discipline only
 	 * if the LDISC_PPS line discipline is not availble,
 	 */
-	if (fdpps <= 0) {
+# if defined(PPS) || defined(HAVE_PPSAPI)
+	if (fdpps <= 0)
+# endif
+	{
 		(void)sprintf(device, DEVICE, unit);
-		if ((fd = refclock_open(device, SPEED232,
-#ifdef TTYCLK_AIOCTIMESTAMP
-		    LDISC_RAW
-#else
-		    LDISC_CLKPPS
-#endif
-		    )) != 0)
+		if ((fd = refclock_open(device, SPEED232, ldisc)) != 0)
 			flags |= FLAG_TTY;
 	}
 #endif /* TTYCLK */

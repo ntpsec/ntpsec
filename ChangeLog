@@ -1,5 +1,14 @@
 1999-11-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: Lose AIOCTIMESTAMP tests
+
+	* ntpd/ntpd.c: lose select() EINTR debug warning
+	* ntpd/ntp_refclock.c: AIOCTIMESTAMP -> TIOCDCDTIMESTAMP.  Watch
+	CLK_SETSTR.
+	* ntpd/refclock_atom.c: fdpps is only there for PPS or PPSAPI.
+	AIOCTIMESTAMP is gone now.
+	From: Kamal A Mostafa <kamal@whence.com>
+	
 	* configure.in (HAVE_MLOCKALL): Deal with dec-osf5 realities
 	* ntpd/refclock_ulink.c (ulink_poll): Fix cast.
 	* libntp/machines.c (ntp_set_tod): Use a long* for the argument to

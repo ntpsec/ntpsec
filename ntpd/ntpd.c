@@ -863,7 +863,7 @@ service_main(
 			else if (nfound == -1 && errno != EINTR)
 				msyslog(LOG_ERR, "select() error: %m");
 			else if (debug) {
-#   if !defined SYS_VXWORKS && !defined SYS_CYGWIN32 /* to unclutter log */
+#   if !defined SYS_VXWORKS && !defined SYS_CYGWIN32 && !defined SCO5_CLOCK /* to unclutter log */
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #   endif
 			}

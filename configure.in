@@ -1222,20 +1222,6 @@ case "$ac_cv_var_tty_clk" in
  yes) AC_DEFINE(TTYCLK) ;;
 esac
 
-AC_CACHE_CHECK(for AIOCTIMESTAMPCTL, ac_cv_var_aioctimestamp,
- AC_EGREP_CPP(yes,
- [#include <sys/sio.h>
-#ifdef AIOCTIMESTAMPCTL
- yes
-#endif
- ], ac_cv_var_aioctimestamp=yes, ac_cv_var_aioctimestamp=no))
-case "$ac_cv_var_aioctimestamp" in
- yes)
-    AC_DEFINE(TTYCLK_AIOCTIMESTAMP)
-    AC_DEFINE(TTYCLK)
-    ;;
-esac
-
 AC_CACHE_CHECK(for the ppsclock streams module,
  ac_cv_var_ppsclock,
  ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev)
