@@ -1,3 +1,10 @@
+1999-08-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.97c
+
+	* configure.in (ac_cv_make_ntptime):  Typo.
+	From: Ulrich Windl <ulrich.windl@rz.uni-regensburg.de>
+
 1999-08-26  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.97b

@@ -966,7 +966,7 @@ fi
 
 PACKAGE=ntp
 
-VERSION=4.0.97b
+VERSION=4.0.97c
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -9447,7 +9447,7 @@ else
  *linux*)
     ans=no
     ;;
- *) case "$ac_cv_struct_ntptimeval_timespec$ac_cv_struct_ntptimeval_tv_nsc$ac_cv_var_kernel_pll" in
+ *) case "$ac_cv_struct_ntptimeval_timespec$ac_cv_struct_ntptimeval_tv_nsec$ac_cv_var_kernel_pll" in
      *yes*yes)
 	ans=yes
 	;;
