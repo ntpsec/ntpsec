@@ -418,7 +418,7 @@ addentry(
 	ce->ce_flags = (u_char)flags;
 	ce->ce_ttl = (u_char)ttl;
 	ce->ce_keyid = keyid;
-	strncpy(ce->ce_keystr, keystr, MAXFILENAME);
+	strncpy((char *)ce->ce_keystr, keystr, MAXFILENAME);
 	ce->ce_next = NULL;
 
 	if (confentries == NULL) {

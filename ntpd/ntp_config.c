@@ -708,8 +708,8 @@ getconfig(
 	int ttl;
 	unsigned long ul;
 	keyid_t peerkey;
-	char *peerkeystr;
-	keyid_t lpeerkey;
+	u_char *peerkeystr;
+	keyid_t lpeerkey = 0;
 	int peerflags;
 	int hmode;
 	struct sockaddr_in peeraddr;

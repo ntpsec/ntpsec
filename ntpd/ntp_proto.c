@@ -230,7 +230,10 @@ receive(
 	int authlen;			/* offset of MAC field */
 	int is_authentic;		/* cryptosum ok */
 	int is_error;			/* parse error */
-	keyid_t pkeyid, skeyid, tkeyid;	/* cryptographic keys */
+	keyid_t skeyid;			/* cryptographic keys */
+#ifdef AUTOKEY
+	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
+#endif /* AUTOKEY */
 	struct peer *peer2;
 	int retcode = AM_NOMATCH;
 
@@ -323,7 +326,10 @@ receive(
 	 * an extension field is present. If 2 or 4, the packet is a
 	 * runt and thus discarded.
 	 */
-	pkeyid = skeyid = tkeyid = 0;
+	skeyid = 0;
+#ifdef AUTOKEY
+	pkeyid = tkeyid = 0;
+#endif /* AUTOKEY */
 	authlen = LEN_PKT_NOMAC;
 	while ((has_mac = rbufp->recv_length - authlen) > 0) {
 		int temp;
@@ -1040,7 +1046,9 @@ poll_update(
 	int hpoll
 	)
 {
+#ifdef AUTOKEY
 	long oldpoll;
+#endif /* AUTOKEY */
 
 	/*
 	 * The wiggle-the-poll-interval dance. Broadcasters dance only
@@ -1049,7 +1057,11 @@ poll_update(
 	 * clock. Broadcast clients are usually lead by their broadcast
 	 * partner, but faster in the initial mating dance.
 	 */
+
+#ifdef AUTOKEY
 	oldpoll = peer->kpoll;
+#endif /* AUTOKEY */
+
 	if (peer->hmode == MODE_BROADCAST) {
 		peer->hpoll = peer->minpoll;
 	} else if (peer->flags & FLAG_SYSPEER) {

@@ -339,8 +339,8 @@ ntpdmain(
 {
 	l_fp now;
 	char *cp;
-	u_int n;
 #ifdef AUTOKEY
+	u_int n;
 	char hostname[MAXFILENAME];
 #endif /* AUTOKEY */
 	struct recvbuf *rbuflist;

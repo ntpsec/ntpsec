@@ -1,5 +1,19 @@
 2000-05-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_util.c (stats_config): 
+	* ntpd/ntp_loopfilter.c (loop_config): 
+	* libntp/systime.c (adj_systime): 
+	* include/ntp_proto.h (NTP_MAXFREQ):
+	Renamed MAX_FREQ to NTP_MAXFREQ
+
+	* ntpd/ntpd.c (ntpdmain): 
+	* ntpd/ntp_proto.c (receive): 
+	(poll_update): 
+	* ntpd/ntp_intres.c (addentry): 
+	* ntpd/ntp_config.c (getconfig): 
+	Lint cleanup
+	From: Marc Brett <mbrett@rgs0.london.waii.com>
+
 	* include/ntp_stdlib.h: 
 	* libntp/systime.c (adj_systime): 
 	* ntpd/ntp_loopfilter.c (loop_config): 
