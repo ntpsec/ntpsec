@@ -19,6 +19,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
+#include <isc/net.h>
+#include <isc/result.h>
 
 #include <stdio.h>
 #include <ctype.h>
@@ -477,6 +479,7 @@ getconfig(
 	register int i;
 	int c;
 	int errflg;
+	int status;
 	int istart;
 	int peerversion;
 	int minpoll;
@@ -628,7 +631,10 @@ getconfig(
 				break;
 			}
 
-			if (!getnetnum(tokens[istart], &peeraddr, 0, t_UNK)) {
+			status = getnetnum(tokens[istart], &peeraddr, 0, t_UNK);
+			if (status == -1)
+				break;		/* Found IPv6 address */
+			if(status != 1) {
 				errflg = -1;
 			} else {
 				errflg = 0;
@@ -689,13 +695,13 @@ getconfig(
 					}
 				}
 			}
-			
+			if (peeraddr.ss_family == AF_INET6 &&
+			    isc_net_probeipv6() != ISC_R_SUCCESS)
+				break;
+
 			peerversion = NTP_VERSION;
 			minpoll = NTP_MINDPOLL;
-			if (!ISREFCLOCKADR(&peeraddr))
-				maxpoll = NTP_MAXDPOLL;
-			else
-				maxpoll = minpoll;
+			maxpoll = NTP_MAXDPOLL;
 			peerkey = 0;
 			peerkeystr = (u_char *)"*";
 			peerflags = 0;
@@ -964,7 +970,7 @@ getconfig(
 					    sizeof(peeraddr));
 					peeraddr.ss_family = maskaddr.ss_family;
 					if (getnetnum(tokens[i], &peeraddr, 1,
-						      t_UNK))
+						      t_UNK)  == 1)
 					    proto_config(PROTO_MULTICAST_ADD,
 							 0, 0., &peeraddr);
 				}
@@ -1225,8 +1231,8 @@ getconfig(
 			if (STREQ(tokens[istart], "default")) {
 				if (peeraddr.ss_family == 0)
 					peeraddr.ss_family = AF_INET;
-			} else if (!getnetnum(tokens[istart], &peeraddr, 1,
-					      t_UNK))
+			} else if (getnetnum(tokens[istart], &peeraddr, 1,
+					      t_UNK) != 1)
 				break;
 
 			/*
@@ -1247,8 +1253,8 @@ getconfig(
 						break;
 					}
 					i++;
-					if (!getnetnum(tokens[i], &maskaddr, 1,
-						       t_MSK))
+					if (getnetnum(tokens[i], &maskaddr, 1,
+						       t_MSK) != 1)
 					    errflg++;
 					break;
 
@@ -1408,7 +1414,7 @@ getconfig(
 				break;
 			}
 
-			if (!getnetnum(tokens[istart], &peeraddr, 1, t_UNK))
+			if (getnetnum(tokens[istart], &peeraddr, 1, t_UNK) != 1)
 			    break;
 
 			/*
@@ -1448,8 +1454,8 @@ getconfig(
 				    memset((char *)&maskaddr, 0,
 					sizeof(maskaddr));
 				    maskaddr.ss_family = peeraddr.ss_family;
-				    if (!getnetnum(tokens[++i],
-						   &maskaddr, 1, t_UNK)) {
+				    if (getnetnum(tokens[++i],
+						   &maskaddr, 1, t_UNK) != 1) {
 					    errflg = 1;
 					    break;
 				    }
@@ -1490,7 +1496,7 @@ getconfig(
 				break;
 			}
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			if (!getnetnum(tokens[1], &peeraddr, 1, t_REF))
+			if (getnetnum(tokens[1], &peeraddr, 1, t_REF) != 1)
 			    break;
 
 			if (!ISREFCLOCKADR(&peeraddr)) {
@@ -1759,8 +1765,7 @@ getconfig(
 		    case CONFIG_PHONE:
 			for (i = 1; i < ntokens && i < MAXPHONE; i++) {
 				(void)strncpy(sys_phone[i - 1],
-				    tokens[i], MAXDIAL);
-				strcat(sys_phone[i - 1], "\r");
+					      tokens[i], MAXDIAL);
 			}
 			sys_phone[i - 1][0] = '\0';
 			break;
@@ -2103,6 +2108,7 @@ getnetnum(
 {
 	struct addrinfo hints;
 	struct addrinfo *ptr;
+	int retval;
 
 	/* Get host address. Looking for UDP datagram connection */
  	memset(&hints, 0, sizeof (hints));
@@ -2110,26 +2116,41 @@ getnetnum(
 	    hints.ai_family = addr->ss_family;
 	else
 	    hints.ai_family = AF_UNSPEC;
+	/*
+	 * If we don't have an IPv6 stack, just look up IPv4 addresses
+	 */
+	if (isc_net_probeipv6() != ISC_R_SUCCESS)
+		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
 #ifdef DEBUG
 		if (debug > 3)
 			printf("getaddrinfo %s\n", num);
 #endif
-	if (getaddrinfo(num, "ntp", &hints, &ptr)!=0) {
+	retval = getaddrinfo(num, "ntp", &hints, &ptr);
+	if (retval != 0 ||
+	   (ptr->ai_family == AF_INET6 && isc_net_probeipv6() != ISC_R_SUCCESS)) {
 		if (complain)
 			msyslog(LOG_ERR,
 				"getaddrinfo: \"%s\" invalid host address, ignored",
 				num);
 #ifdef DEBUG
-		if (debug > 3)
+		if (debug > 0)
 			printf(
 				"getaddrinfo: \"%s\" invalid host address%s.\n",
 				num, (complain)
 				? ", ignored"
 				: "");
 #endif
-		return 0;
+		if (retval == 0 && 
+		    ptr->ai_family == AF_INET6 && 
+		    isc_net_probeipv6() != ISC_R_SUCCESS) 
+		{
+			return -1;
+		}
+		else {
+			return 0;
+		}
 	}
 
 	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
