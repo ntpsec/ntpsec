@@ -1,7 +1,9 @@
 2000-08-31  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver22.htm: Update the docs.
 	* ntpd/refclock_atom.c (atom_start): Open the device if it hasn't
 	been opened already.
+	(pps_sample): Make it more visible.
 	From Dave Mills.
 
 	* configure.in: 4.0.99k8

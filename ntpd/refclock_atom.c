@@ -268,7 +268,7 @@ atom_pps(
 	SAMPLE(-doffset + pp->fudgetime1);
 	return (0);
 }
-#else /* HAVE_PPSAPI */
+#endif /* HAVE_PPSAPI */
 
 /*
  * pps_sample - receive PPS data from some other clock driver
@@ -306,7 +306,6 @@ pps_sample(
 	SAMPLE(-doffset + pp->fudgetime1);
 	return (0);
 }
-#endif /* HAVE_PPSAPI */
 
 /*
  * atom_poll - called by the transmit procedure
