@@ -6,7 +6,7 @@ AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
 AM_INIT_AUTOMAKE(ntp, 4.1.72b)
-AC_PREREQ(2.49)
+AC_PREREQ(2.52)		# We need the cross-compile-aware SIZEOF stuff.
 
 ac_cv_var_oncore_ok=no
 ac_cv_var_atom_ok=no
@@ -303,7 +303,7 @@ case "$build" in
     AC_C_BIGENDIAN
     ;;
  *) case "$host" in
-     i*86-*-vxworks*)
+     i*86-*-*)	# Was i*86-*-vxworks*
 	# LITTLEENDIAN
 	;;
      *-*-vxworks*)
@@ -516,47 +516,9 @@ AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,
 
 AC_C_INLINE
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
-case "$build" in
- $host)
-    AC_CHECK_SIZEOF(signed char)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-	AC_CHECK_SIZEOF(signed char, 1)
-	;;
-     *) AC_MSG_ERROR(Cross-compiling needs explicit SIZEOF_SIGNED_LONG)
-        ;;
-    esac
-    ;;
-esac
-
-case "$build" in
- $host)
-    AC_CHECK_SIZEOF(int)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-	AC_CHECK_SIZEOF(int, 4)
-        ;;
-     *) AC_MSG_ERROR(Cross-compiling needs explicit SIZEOF_INT)
-	;;
-    esac
-    ;;
-esac
-
-case "$build" in
- $host)
-    AC_CHECK_SIZEOF(long)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-	AC_CHECK_SIZEOF(long, 4)
-        ;;
-     *) AC_MSG_ERROR(Cross-compiling needs explicit SIZEOF_LONG)
-	;;
-    esac
-    ;;
-esac
+AC_CHECK_SIZEOF(signed char)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
 
 AC_CHECK_TYPES([s_char])
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
