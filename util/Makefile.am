@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = ansi2knr
 bin_PROGRAMS = @MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ ntp-genkeys
 noinst_PROGRAMS = genkeys
 EXTRA_PROGRAMS = audio-pcm byteorder hist jitter kern longsize ntptime \
-precision sht testrs6000 tickadj timetrim
+pps-api precision sht testrs6000 tickadj timetrim
 
 ntp_genkeys_LDADD = ../ntpd/ntp_config$U.o ../libntp/libntp.a
 ntp_genkeys_DEPENDENCIES = ../ntpd/ntp_config$U.o ../libntp/libntp.a
