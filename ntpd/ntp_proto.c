@@ -262,13 +262,9 @@ transmit(
 					if (peer_ntpdate > 0)
 						return;
 
-					NLOG(NLOG_SYNCEVENT |
-					    NLOG_SYSEVENT)
-					    msyslog(LOG_NOTICE,
+					msyslog(LOG_NOTICE,
 				 	    "no reply; clock not set");
-					printf(
-					    "ntpd: no reply; clock not set\n");
-					exit(0);
+					exit (0);
 				}
 				return;
 			}
@@ -1290,8 +1286,8 @@ clock_update(void)
 	 * Clock is too screwed up. Just exit for now.
 	 */
 	case -1:
-		report_event(EVNT_SYSFAULT, (struct peer *)0);
-		exit(1);
+		report_event(EVNT_SYSFAULT, NULL);
+		exit (-1);
 		/*NOTREACHED*/
 
 	/*
@@ -1303,9 +1299,7 @@ clock_update(void)
 		sys_stratum = STRATUM_UNSPEC;
 			memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
-		NLOG(NLOG_SYNCSTATUS)
-		    msyslog(LOG_INFO, "synchronisation lost");
-		report_event(EVNT_CLOCKRESET, (struct peer *)0);
+		report_event(EVNT_CLOCKRESET, NULL);
 #ifdef OPENSSL
 		if (oleap != LEAP_NOTINSYNC)
 			expire_all();
@@ -1328,14 +1322,14 @@ clock_update(void)
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		sys_leap = leap_consensus;
 		if (oleap == LEAP_NOTINSYNC) {
-			report_event(EVNT_SYNCCHG, (struct peer *)0);
+			report_event(EVNT_SYNCCHG, NULL);
 #ifdef OPENSSL
 			expire_all();
 #endif /* OPENSSL */
 		}
 	}
 	if (ostratum != sys_stratum)
-		report_event(EVNT_PEERSTCHG, (struct peer *)0);
+		report_event(EVNT_PEERSTCHG, NULL);
 }
 
 
@@ -1765,9 +1759,9 @@ clock_select(void)
 			indx_size += 5 * 3 * sizeof(*indx);
 			peer_list_size += 5 * sizeof(*peer_list);
 		}
-		endpoint = (struct endpoint *)emalloc(endpoint_size);
-		indx = (int *)emalloc(indx_size);
-		peer_list = (struct peer **)emalloc(peer_list_size);
+		endpoint = emalloc(endpoint_size);
+		indx = emalloc(indx_size);
+		peer_list = emalloc(peer_list_size);
 	}
 
 	/*
@@ -1957,9 +1951,8 @@ clock_select(void)
 				sys_poll = NTP_MINPOLL;
 				NLOG(NLOG_SYNCSTATUS)
 				    msyslog(LOG_INFO,
-				    "synchronisation lost");
-				report_event(EVNT_PEERSTCHG,
-				    (struct peer *)0);
+				    "no servers reachable");
+				report_event(EVNT_PEERSTCHG, NULL);
 			}
 			if (osurv > 0)
 				resetmanycast();
@@ -2178,8 +2171,7 @@ clock_select(void)
 		sys_syserr = sys_peer->jitter;
 		if (!pps_control)
 			NLOG(NLOG_SYSEVENT)
-			    msyslog(LOG_INFO,
-			    "pps sync enabled");
+			    msyslog(LOG_INFO, "pps sync enabled");
 		pps_control = current_time;
 #ifdef DEBUG
 		if (debug > 1)
@@ -2205,7 +2197,7 @@ clock_select(void)
 			sys_peer_refid = 0;
 		else
 			sys_peer_refid = addr2refid(&sys_peer->srcadr);
-		report_event(EVNT_PEERSTCHG, (struct peer *)0);
+		report_event(EVNT_PEERSTCHG, NULL);
 	}
 	clock_update();
 }
@@ -2559,7 +2551,7 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
-		msyslog(LOG_NOTICE,
+		msyslog(LOG_INFO,
 		    "transmit: encryption key %d not found", xkeyid);
 		if (peer->flags & FLAG_CONFIG)
 			peer_clear(peer, "NKEY");
@@ -2575,7 +2567,7 @@ peer_xmit(
 	get_systime(&xmt_tx);
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
-		exit(-1);
+		exit (-1);
 	}
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
@@ -2761,7 +2753,7 @@ fast_xmit(
 	get_systime(&xmt_tx);
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "buffer overflow %u", sendlen);
-		exit(-1);
+		exit (-1);
 	}
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 
@@ -2891,7 +2883,7 @@ default_get_precision(void)
 	/*
 	 * Find the nearest power of two.
 	 */
-	NLOG(NLOG_SYSINFO)
+	NLOG(NLOG_SYSEVENT)
 	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
 		tick *= 2;
@@ -2973,7 +2965,8 @@ init_proto(void)
 		systime_10ms_ticks = 1;
 #endif
 	if (systime_10ms_ticks)
-		msyslog(LOG_INFO, "using 10ms tick adjustments");
+		NLOG(NLOG_SYSEVENT)
+		    msyslog(LOG_INFO, "using 10ms tick adjustments");
 }
 
 
@@ -3125,7 +3118,7 @@ proto_config(
 		/*
 		 * Log this error.
 		 */
-		msyslog(LOG_ERR,
+		msyslog(LOG_INFO,
 		    "proto_config: illegal item %d, value %ld",
 			item, value);
 	}

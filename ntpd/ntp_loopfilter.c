@@ -249,14 +249,12 @@ local_clock(
 	if (mode_ntpdate) {
 		if (fabs(fp_offset) > clock_max && clock_max > 0) {
 			step_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE, "time reset %+.6f s",
+			msyslog(LOG_NOTICE, "time reset %+.6f s",
 	   		    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
 			adj_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE, "time slew %+.6f s",
+			msyslog(LOG_NOTICE, "time slew %+.6f s",
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
@@ -275,7 +273,7 @@ local_clock(
 	if (state == S_NSET) {
 		if (fabs(fp_offset) > clock_max && clock_max > 0) {
 			step_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 			    msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
 		}
@@ -384,7 +382,7 @@ local_clock(
 		 */
 		default:
 			step_systime(fp_offset);
-			NLOG(NLOG_SYNCEVENT|NLOG_SYSEVENT)
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 			    msyslog(LOG_NOTICE, "time reset %+.6f s",
 			    fp_offset);
 			rstclock(S_TSET, peer->epoch, 0);
@@ -575,8 +573,9 @@ local_clock(
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
 			if (ntv.status != pll_status)
-				msyslog(LOG_ERR,
-				    "kernel time discipline status change %x",
+				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+				    msyslog(LOG_NOTICE,
+				    "kernel time sync disabled %04x",
 				    ntv.status);
 			ntv.status &= ~(STA_PPSFREQ | STA_PPSTIME);
 		}
@@ -701,8 +700,8 @@ adj_host_clock(
 	 */
 	if (pps_control && current_time - pps_control > PPS_MAXAGE) {
 		if (pps_control)
-			NLOG(NLOG_SYSEVENT) /* conditional if clause */
-			    msyslog(LOG_INFO, "pps sync disabled");
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_NOTICE, "pps sync disabled");
 		pps_control = 0;
 	}
 
@@ -859,8 +858,9 @@ loop_config(
 			if (pll_status & STA_CLK)
 				ext_enable = 1;
 #endif /* STA_NANO */
-			msyslog(LOG_NOTICE,
-		  	   "kernel time discipline status %04x",
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_INFO,
+		  	    "kernel time sync status %04x",
 			    pll_status);
 		}
 #endif /* KERNEL_PLL */

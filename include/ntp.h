@@ -268,6 +268,7 @@ struct peer {
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
 	EVP_PKEY *ident_pkey;	/* identity key */
+	tstamp_t fstamp;	/* identity filestamp */
 	BIGNUM	*iffval;	/* IFF/GQ challenge */
 	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cookval;	/* cookie values */
