@@ -10,8 +10,12 @@
 
     <body>
         <h3>Miscellaneous Options</h3>
-        <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.htm">from <i>Pogo</i>, Walt Kelly</a>
-        <p>We have three, now looking for more.<br clear="left">
+        <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.htm">from <i>Pogo</i>, Walt Kelly</a>
+        <p>We have three, now looking for more.</p>
+        <h4>Related Links</h4>
+        <p>
+            <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
+            <br clear="left">
         </p>
         <hr>
         <dl>
@@ -24,7 +28,7 @@
             <p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
             <dt><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
                 <tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt>
-            <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.htm"><tt>ntpdc</tt></a> utility program.
+            <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
             <dd>
             <dl>
                 <dt><tt>auth</tt>
@@ -40,9 +44,9 @@
                 <dt><tt>ntp</tt>
                 <dd>Enables time and frequency discipline. In effect, this switch opens and closes the feedback loop, which is useful for testing. The default for this flag is enable.
                 <dt><tt>pps</tt>
-                <dd>Enables the pulse-per-second (PPS) signal when frequency and time is disciplined by the precision time kernel modifications. See the <a href="kern.htm">A Kernel Model for Precision Timekeeping</a> page for further information. The default for this flag is disable.
+                <dd>Enables the pulse-per-second (PPS) signal when frequency and time is disciplined by the precision time kernel modifications. See the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page for further information. The default for this flag is disable.
                 <dt><tt>stats</tt>
-                <dd>Enables the statistics facility. See the <a href="monopt.htm">Monitoring Options</a> page for further information. The default for this flag is disable
+                <dd>Enables the statistics facility. See the <a href="monopt.html">Monitoring Options</a> page for further information. The default for this flag is disable
             </dl>
             <dt><tt>includefile <i>includefile</i></tt>
             <dd>This command allows additional configuration commands to be included from a separate file. Include files may be nested to a depth of five; upon reaching the end of any include file, command processing resumes in the previous configuration file. This option is useful for sites that run <tt>ntpd</tt> on multiple hosts, with (mostly) common options (e.g., a restriction list).

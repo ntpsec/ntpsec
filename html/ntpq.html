@@ -10,7 +10,7 @@
 
     <body>
         <h3><tt>ntpq</tt> - standard NTP query program</h3>
-        <img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.htm">from <i>Pogo</i>, Walt Kelly</a>
+        <img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.htm">from <i>Pogo</i>, Walt Kelly</a>
         <p>A typical NTP monitoring packet.<br clear="left">
         </p>
         <hr>
@@ -22,7 +22,7 @@
         <p>If one or more request options is included on the command line when <tt>ntpq</tt> is executed, each of the requests will be sent to the NTP servers running on each of the hosts given as command line arguments, or on localhost by default. If no request options are given, <tt>ntpq</tt> will attempt to read commands from the standard input and execute these on the NTP server running on the first host given on the command line, again defaulting to localhost when no other host is specified. <tt>ntpq</tt>will prompt for commands if the standard input is a terminal device.</p>
         <p><tt>ntpq</tt> uses NTP mode 6 packets to communicate with the NTP server, and hence can be used to query any compatible server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. <tt>ntpq</tt> makes one attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.</p>
         <p>Note that in contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
-        <p>For examples and usage, see the <a href="debug.htm">NTP Debugging Techniques</a> page.</p>
+        <p>For examples and usage, see the <a href="debug.html">NTP Debugging Techniques</a> page.</p>
         <p>Command line options are described following. Specifying a command line option other than <tt>-i</tt> or <tt>-n</tt> will cause the specified query (queries) to be sent to the indicated host(s) immediately. Otherwise, <tt>ntpq</tt> will attempt to read interactive format commands from the standard input.</p>
         <dl>
             <dt><tt>-4</tt>
@@ -223,7 +223,7 @@
         <p>The <tt>flash</tt> code is a valuable debugging aid displayed in the peer variables list. It shows the results of the original sanity checks defined in the NTP specification RFC-1305 and additional ones added in NTPv4. There are 12 tests designated <tt>TEST1</tt> through <tt>TEST12</tt>. The tests are performed in a certain order designed to gain maximum diagnostic information while protecting against accidental or malicious errors. The <tt>flash</tt> variable is initialized to zero as each packet is received. If after each set of tests one or more bits are set, the packet is discarded.</p>
         <p>Tests <tt>TEST1</tt> through <tt>TEST3</tt> check the packet timestamps from which the offset and delay are calculated. If any bits are set, the packet is discarded; otherwise, the packet header variables are saved. <tt>TEST4</tt> and <tt>TEST5</tt> are associated with access control and cryptographic authentication. If any bits are set, the packet is discarded immediately with nothing changed.</p>
         <p>Tests <tt>TEST6</tt> through <tt>TEST8</tt> check the health of the server. If any bits are set, the packet is discarded; otherwise, the offset and delay relative to the server are calculated and saved. <tt>TEST9</tt> checks the health of the association itself. If any bits are set, the packet is discarded; otherwise, the saved variables are passed to the clock filter and mitigation algorithms.</p>
-        <p>Tests <tt>TEST10</tt> through <tt>TEST12</tt> check the authentication state using Autokey public-key cryptography, as described in the <a href="authopt.htm">Authentication Options</a> page. If any bits are set and the association has previously been marked reachable, the packet is discarded; otherwise, the originate and receive timestamps are saved, as required by the NTP protocol, and processing continues.</p>
+        <p>Tests <tt>TEST10</tt> through <tt>TEST12</tt> check the authentication state using Autokey public-key cryptography, as described in the <a href="authopt.html">Authentication Options</a> page. If any bits are set and the association has previously been marked reachable, the packet is discarded; otherwise, the originate and receive timestamps are saved, as required by the NTP protocol, and processing continues.</p>
         <p>The <tt>flash</tt> bits for each test are defined as follows.</p>
         <dl>
             <dt><tt>0x001 TEST1</tt>
@@ -233,9 +233,9 @@
             <dt><tt>0x004 TEST3</tt>
             <dd>Unsynchronized. One or more timestamp fields are invalid. This normally happens when the first packet from a peer is received.
             <dt><tt>0x008 TEST4</tt>
-            <dd>Access is denied. See the <a href="accopt.htm">Access Control Options</a> page.
+            <dd>Access is denied. See the <a href="accopt.html">Access Control Options</a> page.
             <dt><tt>0x010 TEST5</tt>
-            <dd>Cryptographic authentication fails. See the <a href="authopt.htm">Authentication Options</a> page.
+            <dd>Cryptographic authentication fails. See the <a href="authopt.html">Authentication Options</a> page.
             <dt><tt>0x020TEST6</tt>
             <dd>The server is unsynchronized. Wind up its clock first.
             <dt><tt>0x040 TEST7</tt>
@@ -245,11 +245,11 @@
             <dt><tt>0x100 TEST9</tt>
             <dd>Either the peer delay or dispersion is greater than one second, which is higly unlikely unless the peer is on Mars.
             <dt><tt>0x200 TEST10</tt>
-            <dd>The autokey protocol has detected an authentication failure. See the <a href="authopt.htm">Authentication Options</a> page.
+            <dd>The autokey protocol has detected an authentication failure. See the <a href="authopt.html">Authentication Options</a> page.
             <dt><tt>0x400 TEST11</tt>
-            <dd>The autokey protocol has not verified the server or peer is proventic and has valid public key credentials. See the <a href="authopt.htm">Authentication Options</a> page.
+            <dd>The autokey protocol has not verified the server or peer is proventic and has valid public key credentials. See the <a href="authopt.html">Authentication Options</a> page.
             <dt><tt>0x800 TEST12</tt>
-            <dd>A protocol or configuration error has occured in the public key algorithms or a possible intrusion event has been detected. See the <a href="authopt.htm">Authentication Options</a> page.
+            <dd>A protocol or configuration error has occured in the public key algorithms or a possible intrusion event has been detected. See the <a href="authopt.html">Authentication Options</a> page.
         </dl>
         <h4>Bugs</h4>
         <p>The peers command is non-atomic and may occasionally result in spurious error messages about invalid associations occurring and terminating the command. The timeout time is a fixed constant, which means you wait a long time for timeouts since it assumes sort of a worst case. The program should improve the timeout estimate as it sends queries to a particular host, but doesn't.</p>

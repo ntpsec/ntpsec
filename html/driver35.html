@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
 <html>
 
@@ -17,7 +17,7 @@
             Parallel Port: <tt>/dev/pcfclocks/<i>u</i></tt> or <tt>/dev/pcfclock<i>u</i></tt></p>
         <h4>Description</h4>
         <p>This driver supports the parallel port radio clock sold by <a href="http://www.conrad-electronic.com/">Conrad Electronic</a> under order numbers 967602 and 642002. This clock is put between a parallel port and your printer. It receives the legal German time, which is either CET or CEST, from the DCF77 transmitter and uses it to set its internal quartz clock. The DCF77 transmitter is located near to Frankfurt/Main and covers a radius of more than 1500 kilometers.</p>
-        <p>The pcfclock device driver is required in order to use this reference clock driver. Currently device drivers for <a href="http://home.pages.de/~voegele/pcf.html">Linux</a> and <a href="http://schumann.cx/pcfclock/">FreeBSD</a> are available.</p>
+        <p>The pcfclock device driver is required in order to use this reference clock driver. Currently device drivers for <a href="http://home.pages.de/%7evoegele/pcf.html">Linux</a> and <a href="http://schumann.cx/pcfclock/">FreeBSD</a> are available.</p>
         <p>This driver uses C library functions to convert the received timecode to UTC and thus requires that the local timezone be CET or CEST. If your server is not located in Central Europe you have to set the environment variable TZ to CET before starting <tt>ntpd</tt>.</p>
         <h4>Monitor Data</h4>
         <p>Each timecode is written to the <tt>clockstats</tt> file in the format <tt>YYYY MM DD HH MI SS</tt>.</p>

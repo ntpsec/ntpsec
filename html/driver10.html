@@ -19,7 +19,7 @@
             Serial Port: <tt>/dev/gps<i>u</i></tt>; 9600 baud, 8-bits, no parity<br>
             Features: <tt>tty_clk</tt></p>
         <h4>Description</h4>
-        <p>This driver supports the Austron 2200A/2201A GPS/LORAN Synchronized Clock and Timing Receiver connected via a serial port. It supports several special features of the clock, including the Input Buffer Module, Output Buffer Module, IRIG-B Interface Module and LORAN Assist Module. It requires the RS232 Buffered Serial Interface module for communication with the driver. For operation with multiple computers, it requires the <tt>ppsclock</tt> streams module described in the <a href="ldisc.htm">Line Disciplines and Streams Modules</a> page. The streams module requires a gadget box and 1-PPS level converter, such as described in the <a href="pps.htm">Pulse-per-second (PPS) Signal Interfacing</a> page.</p>
+        <p>This driver supports the Austron 2200A/2201A GPS/LORAN Synchronized Clock and Timing Receiver connected via a serial port. It supports several special features of the clock, including the Input Buffer Module, Output Buffer Module, IRIG-B Interface Module and LORAN Assist Module. It requires the RS232 Buffered Serial Interface module for communication with the driver. For operation with multiple computers, it requires the <tt>ppsclock</tt> streams module described in the <a href="ldisc.html">Line Disciplines and Streams Modules</a> page. The streams module requires a gadget box and 1-PPS level converter, such as described in the <a href="pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page.</p>
         <p>For use with a single computer, the receiver can be connected directly to the receiver. For use with multiple computers, one of them is connected directly to the receiver and generates the polling messages. The other computers just listen to the receiver output directly or through a buffer amplifier. For computers that just listen, <tt>fudge flag2</tt> must be set and the <tt>ppsclock </tt>streams module configured on each of them.</p>
         <p>This receiver is capable of a comprehensive and large volume of statistics and operational data. The specific data collection commands and attributes are embedded in the driver source code; however, the collection process can be enabled or disabled using the flag4 flag. If set, collection is enabled; if not, which is the default, it is disabled. A comprehensive suite of data reduction and summary scripts is in the ./scripts/stats directory</p>
         of the ntp3 distribution.
@@ -45,7 +45,7 @@
             <dd>Enable verbose <tt>clockstats</tt> recording if set.
         </dl>
         <h4>Additional Information</h4>
-        <p><a href="refclock.htm">Reference Clock Drivers</a></p>
+        <p><a href="refclock.html">Reference Clock Drivers</a></p>
         <hr>
         <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>

@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
 <html>
 
@@ -10,6 +10,8 @@
 
     <body>
         <h3>Radio WWV/H Audio Demodulator/Decoder</h3>
+        <h4>Related Links</h4>
+        <script type="text/javascript" language="javascript" src="scripts/links8.txt"></script>
         <hr>
         <h4>Synopsis</h4>
         Address: 127.127.36.<i>u</i><br>
@@ -19,8 +21,8 @@
         Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
         <h4>Description</h4>
         This driver synchronizes the computer time using data encoded in shortwave radio transmissions from NIST time/frequency stations WWV in Ft. Collins, CO, and WWVH in Kauai, HI. Transmissions are made continuously on 2.5, 5, 10, 15 and 20 MHz. An ordinary shortwave receiver can be tuned manually to one of these frequencies or, in the case of ICOM receivers, the receiver can be tuned automatically by the driver as propagation conditions change throughout the day and night. The performance of this driver when tracking one of the stations is ordinarily better than 1 ms in time with frequency drift less than 0.5 PPM when not tracking either station.
-        <p>The demodulation and decoding algorithms used by this driver are based on a machine language program developed for the TAPR DSP93 DSP unit, which uses the TI 320C25 DSP chip. The analysis, design and performance of the program running on this unit is described in: Mills, D.L. A precision radio clock for WWV transmissions. Electrical Engineering Report 97-8-1, University of Delaware, August 1997, 25 pp. Available from <a href="http://www.eecis.udel.edu/~mills/reports.htm">www.eecis.udel.edu/~mills/reports.htm</a>. For use in this driver, the original program was rebuilt in the C language and adapted to the NTP driver interface. The algorithms have been modified somewhat to improve performance under weak signal conditions and to provide an automatic station identification feature.</p>
-        <p>This driver incorporates several features in common with other audio drivers such as described in the <a href="driver7.htm">Radio CHU Audio Demodulator/Decoder</a> and the <a href="driver6.htm">IRIG Audio Decoder</a> pages. They include automatic gain control (AGC), selectable audio codec port and signal monitoring capabilities. For a discussion of these common features, as well as a guide to hookup, debugging and monitoring, see the <a href="audio.htm">Reference Clock Audio Drivers</a> page.</p>
+        <p>The demodulation and decoding algorithms used by this driver are based on a machine language program developed for the TAPR DSP93 DSP unit, which uses the TI 320C25 DSP chip. The analysis, design and performance of the program running on this unit is described in: Mills, D.L. A precision radio clock for WWV transmissions. Electrical Engineering Report 97-8-1, University of Delaware, August 1997, 25 pp. Available from <a href="http://www.eecis.udel.edu/%7emills/reports.htm">www.eecis.udel.edu/~mills/reports.htm</a>. For use in this driver, the original program was rebuilt in the C language and adapted to the NTP driver interface. The algorithms have been modified somewhat to improve performance under weak signal conditions and to provide an automatic station identification feature.</p>
+        <p>This driver incorporates several features in common with other audio drivers such as described in the <a href="driver7.html">Radio CHU Audio Demodulator/Decoder</a> and the <a href="driver6.html">IRIG Audio Decoder</a> pages. They include automatic gain control (AGC), selectable audio codec port and signal monitoring capabilities. For a discussion of these common features, as well as a guide to hookup, debugging and monitoring, see the <a href="audio.html">Reference Clock Audio Drivers</a> page.</p>
         <p>The WWV signal format is described in NIST Special Publication 432 (Revised 1990). It consists of three elements, a 5-ms, 1000-Hz pulse, which occurs at the beginning of each second, a 800-ms, 1000-Hz pulse, which occurs at the beginning of each minute, and a pulse-width modulated 100-Hz subcarrier for the data bits, one bit per second. The WWVH format is identical, except that the 1000-Hz pulses are sent at 1200 Hz. Each minute encodes nine BCD digits for the time of century plus seven bits for the daylight savings time (DST) indicator, leap warning indicator and DUT1 correction.</p>
         <h4>Program Architecture</h4>
         <p>As in the original program, the clock discipline is modelled as a Markov process, with probabilistic state transitions corresponding to a conventional clock and the probabilities of received decimal digits. The result is a performance level which results in very high accuracy and reliability, even under conditions when the minute beep of the signal, normally its most prominent feature, can barely be detected by ear with a shortwave receiver.</p>
@@ -261,8 +263,8 @@
             <dd>Enable verbose <tt>clockstats</tt> recording if set.
         </dl>
         <h4>Additional Information</h4>
-        <p><a href="refclock.htm">Reference Clock Drivers</a><br>
-            <a href="audio.htm">Reference Clock Audio Drivers</a></p>
+        <p><a href="refclock.html">Reference Clock Drivers</a><br>
+            <a href="audio.html">Reference Clock Audio Drivers</a></p>
         <hr>
         <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
