@@ -1191,9 +1191,6 @@ process_packet(
 		if (debug)
 			printf("packet: bad header %03x\n",
 			    peer->flash);
-		if (debug >2)
-			printf("pstratum = %d, sys_stratum = %d, pmode = %d\n",
-				pstratum, sys_stratum, pmode);
 #endif
 		return;
 	}
@@ -1503,7 +1500,8 @@ poll_update(
 	if (hpoll != peer->hpoll)
 		key_expire(peer);
 #endif /* OPENSSL */
-	peer->hpoll = hpoll;
+	if (!(peer->flags & FLAG_FIXPOLL))
+		peer->hpoll = hpoll;
 #ifdef DEBUG
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
@@ -1585,8 +1583,6 @@ peer_clear(
 		peer->filter_disp[i] = MAXDISPERSE;
 		peer->filter_epoch[i] = current_time;
 	}
-	if (peer->cast_flags & MDF_BCLNT)
-		peer->burst = NTP_BURST;
 
 	/*
 	 * During initialization use the association count to spread out

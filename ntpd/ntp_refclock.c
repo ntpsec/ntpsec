@@ -220,7 +220,7 @@ refclock_newpeer(
 	 */
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
-	peer->flags |= FLAG_REFCLOCK;
+	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;

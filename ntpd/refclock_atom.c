@@ -83,7 +83,6 @@
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
 #define NANOSECOND	1000000000 /* one second (ns) */
 #define RANGEGATE	500000	/* range gate (ns) */
-#define ASTAGE		8	/* filter stages */
 
 static struct peer *pps_peer;	/* atom driver for PPS sources */
 
@@ -109,30 +108,34 @@ static	void	atom_poll	P((int, struct peer *));
 static	void	atom_shutdown	P((int, struct peer *));
 static	void	atom_control	P((int, struct refclockstat *, struct
 				    refclockstat *, struct peer *));
-static	int	atom_pps	P((struct peer *));
+static	void	atom_timer	P((int, struct peer *));
 static	int	atom_ppsapi	P((struct peer *, int, int));
 #endif /* HAVE_PPSAPI */
 
 /*
  * Transfer vector
  */
+#ifdef HAVE_PPSAPI
 struct	refclock refclock_atom = {
 	atom_start,		/* start up driver */
-#ifdef HAVE_PPSAPI
 	atom_shutdown,		/* shut down driver */
-#else
-	noentry,		/* shut down driver */
-#endif /* HAVE_PPSAPI */
 	atom_poll,		/* transmit poll message */
-#ifdef HAVE_PPSAPI
 	atom_control,		/* fudge control */
-#else
-	noentry,		/* fudge control */
-#endif /* HAVE_PPSAPI */
-	noentry,		/* initialize driver */
-	noentry,		/* not used (old atom_buginfo) */
+	noentry,		/* initialize driver (not used) */
+	noentry,		/* buginfo (not used) */
+	atom_timer,		/* called once per second */
+};
+#else /* HAVE_PPSAPI */
+struct	refclock refclock_atom = {
+	atom_start,		/* start up driver */
+	noentry,		/* shut down driver */
+	atom_poll,		/* transmit poll message */
+	noentry,		/* fudge control (not used) */
+	noentry,		/* initialize driver (not used) */
+	noentry,		/* buginfo (not used) */
 	NOFLAGS			/* not used */
 };
+#endif /* HAVE_PPPSAPI */
 
 
 /*
@@ -159,7 +162,6 @@ atom_start(
 	pp->clockdesc = DESCRIPTION;
 	pp->stratum = STRATUM_UNSPEC;
 	memcpy((char *)&pp->refid, REFID, 4);
-	peer->burst = ASTAGE;
 #ifdef HAVE_PPSAPI
 	up = emalloc(sizeof(struct ppsunit));
 	memset(up, 0, sizeof(struct ppsunit));
@@ -228,6 +230,9 @@ atom_ppsapi(
 
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
+	if (up->handle == 0)
+		return (0);
+
 	if (time_pps_getcap(up->handle, &capability) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_getcap failed: %m");
@@ -293,21 +298,22 @@ atom_shutdown(
 	if (up->handle != 0)
 		time_pps_destroy(up->handle);
 	if (pps_peer == peer)
-		pps_peer = 0;
+		pps_peer = NULL;
 	free(up);
 }
 
 
 /*
- * atom_pps - receive data from the PPSAPI interface
+ * atom_timer - called once per second
  *
  * This routine is called once per second when the PPSAPI interface is
  * present. It snatches the PPS timestamp from the kernel and saves the
  * sign-extended fraction in a circular buffer for processing at the
  * next poll event.
  */
-static int
-atom_pps(
+static void
+atom_timer(
+	int	unit,		/* unit number (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
 {
@@ -327,36 +333,38 @@ atom_pps(
 	pp = peer->procptr;
 	up = (struct ppsunit *)pp->unitptr;
 	if (up->handle == 0)
-		return (0);	/* do nothing - data could also be injected by pps_sample */
+		return;
 
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
 	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
-	    &timeout) < 0)
-		return (-1);
-
+	    &timeout) < 0) {
+		refclock_report(peer, CEVNT_FAULT);
+		return;
+	}
 	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
 		if (pps_info.assert_sequence ==
 		    up->pps_info.assert_sequence)
-			return (1);
+			return;
 
 		ts = up->pps_info.assert_timestamp;
 	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
 		if (pps_info.clear_sequence ==
 		    up->pps_info.clear_sequence)
-			return (1);
+			return;
 
 		ts = up->pps_info.clear_timestamp;
 	} else {
-		return (-1);
+		refclock_report(peer, CEVNT_FAULT);
+		return;
 	}
 	if (!((ts.tv_sec == up->ts.tv_sec && ts.tv_nsec -
 	    up->ts.tv_nsec > NANOSECOND - RANGEGATE) ||
 	    (ts.tv_sec - up->ts.tv_sec == 1 && ts.tv_nsec -
 	    up->ts.tv_nsec < RANGEGATE))) {
 		up->ts = ts;
-		return (1);
+		return;
 	}
 	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
@@ -370,9 +378,9 @@ atom_pps(
 	SAMPLE(dtemp + pp->fudgetime1);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("atom_pps %f %f\n", dtemp, pp->fudgetime1);
+		printf("atom_timer %f %f\n", dtemp, pp->fudgetime1);
 #endif
-	return (0);
+	return;
 }
 #endif /* HAVE_PPSAPI */
 
@@ -396,9 +404,6 @@ pps_sample(
 	double doffset;
 
 	peer = pps_peer;
-	if (peer == 0)		/* nobody home */
-		return (1);
-
 	pp = peer->procptr;
 
 	/*
@@ -415,12 +420,9 @@ pps_sample(
 	return (0);
 }
 
+
 /*
  * atom_poll - called by the transmit procedure
- *
- * This routine is called once per second when in burst mode to save PPS
- * sample offsets in the median filter. At the end of the burst period
- * the samples are processed as a heap and the clock filter updated.
  */
 static void
 atom_poll(
@@ -429,25 +431,8 @@ atom_poll(
 	)
 {
 	struct refclockproc *pp;
-#ifdef HAVE_PPSAPI
-	int err;
-#endif /* HAVE_PPSAPI */
-
-	/*
-	 * Accumulate samples in the median filter. If a noise sample,
-	 * return with no prejudice; if a protocol error, get mean;
-	 * otherwise, cool. At the end of each poll interval, do a
-	 * little bookeeping and process the surviving samples.
-	 */
 	pp = peer->procptr;
 	pp->polls++;
-#ifdef HAVE_PPSAPI
-	err = atom_pps(peer);
-	if (err < 0) {
-		refclock_report(peer, CEVNT_FAULT);
-		return;
-	}
-#endif /* HAVE_PPSAPI */
 
 	/*
 	 * Valid time is returned only if the prefer peer has survived
@@ -458,23 +443,17 @@ atom_poll(
 	 * the first valid update and the stratum is set at the prefer
 	 * peer, unless overriden by a fudge command.
 	 */
-	if (peer->burst > 0)
-		return;
-
 	peer->leap = LEAP_NOTINSYNC;
 	if (pp->codeproc == pp->coderecv) {
 		refclock_report(peer, CEVNT_TIMEOUT);
-		peer->burst = ASTAGE;
 		return;
 
 	} else if (sys_prefer == NULL) {
 		pp->codeproc = pp->coderecv;
-		peer->burst = ASTAGE;
 		return;
 
 	} else if (fabs(sys_prefer->offset) > 0.5) {
 		pp->codeproc = pp->coderecv;
-		peer->burst = ASTAGE;
 		return;
 	}
 	pp->leap = LEAP_NOWARNING;
@@ -489,7 +468,6 @@ atom_poll(
 		peer->refid = addr2refid(&sys_prefer->srcadr);
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-	peer->burst = ASTAGE;
 }
 #else
 int refclock_atom_bs;
