@@ -75,6 +75,7 @@ ntpsim(
         mon_start(MON_OFF);
 	getconfig(argc, argv);
         initializing = 0;
+	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 
 	/*
 	 * Watch out here, we want the real time, not the silly stuff.

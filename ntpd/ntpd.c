@@ -711,6 +711,7 @@ ntpdmain(
 	debug = 0;
 #endif
 	getconfig(argc, argv);
+	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 #ifdef OPENSSL
 	crypto_setup();
 #endif /* OPENSSL */
@@ -759,7 +760,7 @@ getuser:
 			} else {
 getgroup:	
 				if ((gr = getgrnam(group)) != NULL) {
-					sw_gid = gr->pr_gid;
+					sw_gid = gr->pw_gid;
 				} else {
 					errno = 0;
 					msyslog(LOG_ERR, "Cannot find group `%s'", group);

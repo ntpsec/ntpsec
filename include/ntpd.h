@@ -213,6 +213,7 @@ extern	void	record_raw_stats P((struct sockaddr_storage *, struct sockaddr_stora
 extern	void	record_sys_stats P((void));
 extern	void	record_crypto_stats P((struct sockaddr_storage *, const char *));
 extern  int	sock_hash P((struct sockaddr_storage *));
+extern	double	old_drift;
 
 /*
  * Variable declarations for ntpd.

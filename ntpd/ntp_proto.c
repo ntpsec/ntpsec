@@ -1544,8 +1544,10 @@ peer_clear(
 		BN_free(peer->iffval);
 	if (peer->grpkey != NULL)
 		BN_free(peer->grpkey);
-	if (peer->cmmd != NULL)
+	if (peer->cmmd != NULL) {
 		free(peer->cmmd);
+		peer->cmmd = NULL;
+	}
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
 	value_free(&peer->tai_leap);
