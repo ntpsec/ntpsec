@@ -17,13 +17,7 @@
 #if defined(REFCLOCK) && defined(CLOCK_ATOM)
 
 #ifdef HAVE_PPSAPI
-# ifdef HAVE_TIMEPPS_H
-#  include <timepps.h>
-# else
-#  ifdef HAVE_SYS_TIMEPPS_H
-#   include <sys/timepps.h>
-#  endif
-# endif
+# include "ppsapi_timepps.h"
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -47,7 +41,12 @@
  * Systems, Version 1.0, RFC-2783 (PPSAPI). Implementations are
  * available for FreeBSD, Linux, SunOS, Solaris and Alpha. However, at
  * present only the Alpha implementation provides the full generality of
- * the API with multiple PPS drivers and multiple handles per driver.
+ * the API with multiple PPS drivers and multiple handles per driver. If
+ * the PPSAPI is normally implemented in the /usr/include/sys/timepps.h
+ * header file and kernel support specific to each operating system.
+ * However, this driver can operate without this interface if means are
+ * proviced to call the pps_sample() routine from another driver. Please
+ * note; if the PPSAPI interface is present, it must be used.
  *
  * In many configurations a single port is used for the radio timecode
  * and PPS signal. In order to provide for this configuration and others
@@ -60,16 +59,20 @@
  * configuration file.
  *
  * This driver normally uses the PLL/FLL clock discipline implemented in
- * the ntpd code. If kernel support is available, the kernel PLL/FLL
- * clock discipline is used instead. The default configuration is not to
- * use the kernel PPS discipline, if present. The kernel PPS discipline
- * can be enabled using the pps command.
+ * the ntpd code. Ordinarily, this is the most accurate means, as the
+ * median filter in the driver interface is much larger than in the
+ * kernel. However, if the systemic clock frequency error is large (tens
+ * to hundreds of PPM), it's better to used the kernel support, if
+ * available.
  *
  * Fudge Factors
  *
- * There are no special fudge factors other than the generic. The fudge
- * time1 parameter can be used to compensate for miscellaneous device
- * driver and OS delays.
+ * If flag2 is dim (default), the on-time epoch is the assert edge of
+ * the PPS signal; if lit, the on-time epoch is the clear edge. If flag2
+ * is lit, the assert edge is used; if flag3 is dim (default), the
+ * kernel PPS support is disabled; if lit it is enabled. The time1
+ * parameter can be used to compensate for miscellaneous device driver
+ * and OS delays.
  */
 /*
  * Interface definitions
@@ -104,12 +107,12 @@ struct ppsunit {
  */
 static	int	atom_start	P((int, struct peer *));
 static	void	atom_poll	P((int, struct peer *));
-#ifdef HAVE_PPSAPI
 static	void	atom_shutdown	P((int, struct peer *));
+#ifdef HAVE_PPSAPI
 static	void	atom_control	P((int, struct refclockstat *, struct
 				    refclockstat *, struct peer *));
 static	void	atom_timer	P((int, struct peer *));
-static	int	atom_ppsapi	P((struct peer *, int, int));
+static	int	atom_ppsapi	P((struct peer *, int));
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -128,7 +131,7 @@ struct	refclock refclock_atom = {
 #else /* HAVE_PPSAPI */
 struct	refclock refclock_atom = {
 	atom_start,		/* start up driver */
-	noentry,		/* shut down driver */
+	atom_shutdown,		/* shut down driver */
 	atom_poll,		/* transmit poll message */
 	noentry,		/* fudge control (not used) */
 	noentry,		/* initialize driver (not used) */
@@ -150,7 +153,8 @@ atom_start(
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
 	register struct ppsunit *up;
-	char device[80];
+	char	device[80];
+	int	mode;
 #endif /* HAVE_PPSAPI */
 
 	/*
@@ -187,10 +191,45 @@ atom_start(
 		    "refclock_atom: time_pps_create failed: %m");
 		return (0);
 	}
-	return (atom_ppsapi(peer, 0, 0));
+
+	/*
+	 * If the mode is nonzero, use that for the time_pps_setparams()
+	 * mode; otherwise, PPS_CAPTUREASSERT. Enable kernel PPS if
+	 * flag3 is lit.
+	 */
+	mode = peer->ttl;
+	if (mode == 0)
+		mode = PPS_CAPTUREASSERT;
+	return (atom_ppsapi(peer, mode));
 #else /* HAVE_PPSAPI */
 	return (1);
 #endif /* HAVE_PPSAPI */
+}
+
+
+/*
+ * atom_shutdown - shut down the clock
+ */
+static void
+atom_shutdown(
+	int unit,		/* unit number (not used) */
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	struct refclockproc *pp;
+	register struct ppsunit *up;
+
+	pp = peer->procptr;
+	up = (struct ppsunit *)pp->unitptr;
+#ifdef HAVE_PPSAPI
+	if (up->fddev > 0)
+		close(up->fddev);
+	if (up->handle != 0)
+		time_pps_destroy(up->handle);
+#endif /* HAVE_PPSAPI */
+	if (pps_peer == peer)
+		pps_peer = NULL;
+	free(up);
 }
 
 
@@ -207,10 +246,17 @@ atom_control(
 	)
 {
 	struct refclockproc *pp;
+	int	mode;
 
 	pp = peer->procptr;
-	atom_ppsapi(peer, pp->sloppyclockflag & CLK_FLAG2,
-	    pp->sloppyclockflag & CLK_FLAG3);
+	if (peer->ttl != 0)	/* all legal modes must be nonzero */
+		return;
+
+	if (pp->sloppyclockflag & CLK_FLAG2)
+		mode = PPS_CAPTURECLEAR;
+	else
+		mode = PPS_CAPTUREASSERT;
+	atom_ppsapi(peer, mode);
 }
 
 
@@ -220,8 +266,7 @@ atom_control(
 int
 atom_ppsapi(
 	struct peer *peer,	/* peer structure pointer */
-	int enb_clear,		/* clear enable */
-	int enb_hardpps		/* hardpps enable */
+	int mode		/* mode */
 	)
 {
 	struct refclockproc *pp;
@@ -240,23 +285,13 @@ atom_ppsapi(
 	}
 	memset(&up->pps_params, 0, sizeof(pps_params_t));
 	up->pps_params.api_version = PPS_API_VERS_1;
-	if (enb_clear)
-		up->pps_params.mode = capability & PPS_CAPTURECLEAR;
-	else
-		up->pps_params.mode = capability & PPS_CAPTUREASSERT;
-	if (!up->pps_params.mode) {
-		msyslog(LOG_ERR,
-		    "refclock_atom: invalid capture edge %d",
-		    enb_clear);
-		return (0);
-	}
-	up->pps_params.mode |= PPS_TSFMT_TSPEC;
+	up->pps_params.mode = mode | PPS_TSFMT_TSPEC;
 	if (time_pps_setparams(up->handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
 		return (0);
 	}
-	if (enb_hardpps) {
+	if (pp->sloppyclockflag & CLK_FLAG3) {
 		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
 		    up->pps_params.mode & ~PPS_TSFMT_TSPEC,
 		    PPS_TSFMT_TSPEC) < 0) {
@@ -270,36 +305,12 @@ atom_ppsapi(
 	if (debug) {
 		time_pps_getparams(up->handle, &up->pps_params);
 		printf(
-		    "refclock_ppsapi: fd %d capability 0x%x version %d mode 0x%x kern %d\n",
+		    "refclock_ppsapi: fd %d capability 0x%x version %d mode 0x%x\n",
 		    up->fddev, capability, up->pps_params.api_version,
-		    up->pps_params.mode, enb_hardpps);
+		    up->pps_params.mode);
 	}
 #endif
 	return (1);
-}
-
-
-/*
- * atom_shutdown - shut down the clock
- */
-static void
-atom_shutdown(
-	int unit,		/* unit number (not used) */
-	struct peer *peer	/* peer structure pointer */
-	)
-{
-	struct refclockproc *pp;
-	register struct ppsunit *up;
-
-	pp = peer->procptr;
-	up = (struct ppsunit *)pp->unitptr;
-	if (up->fddev > 0)
-		close(up->fddev);
-	if (up->handle != 0)
-		time_pps_destroy(up->handle);
-	if (pps_peer == peer)
-		pps_peer = NULL;
-	free(up);
 }
 
 
@@ -321,7 +332,8 @@ atom_timer(
 	struct refclockproc *pp;
 	pps_info_t pps_info;
 	struct timespec timeout, ts;
-	double dtemp;
+	long	sec, nsec;
+	double	dtemp;
 
 	/*
 	 * Convert the timespec nanoseconds field to signed double and
@@ -344,29 +356,55 @@ atom_timer(
 		return;
 	}
 	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
-		if (pps_info.assert_sequence ==
-		    up->pps_info.assert_sequence)
-			return;
-
 		ts = up->pps_info.assert_timestamp;
 	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
-		if (pps_info.clear_sequence ==
-		    up->pps_info.clear_sequence)
-			return;
-
 		ts = up->pps_info.clear_timestamp;
 	} else {
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
-	if (!((ts.tv_sec == up->ts.tv_sec && ts.tv_nsec -
-	    up->ts.tv_nsec > NANOSECOND - RANGEGATE) ||
-	    (ts.tv_sec - up->ts.tv_sec == 1 && ts.tv_nsec -
-	    up->ts.tv_nsec < RANGEGATE))) {
-		up->ts = ts;
+
+	/*
+	 * There can be zero, one or two PPS seconds between polls. If
+	 * zero, either the poll clock is slightly faster than the PPS
+	 * clock or the PPS clock has died. If the PPS clock advanced
+	 * once between polls, we make sure the fraction time difference
+	 * since the last sample is within the range gate of 5 ms (500
+	 * PPM). If the PPS clock advanced twice since the last poll,
+	 * the poll bracketed more than one second and the first second
+	 * was lost to a slip. Since the interval since the last sample
+	 * found is now two seconds, just widen the range gate. If the
+	 * PPS clock advanced three or more times, either the signal has
+	 * failed for a number of seconds or we have runts, in which
+	 * case just ignore them.
+	 */
+	sec = ts.tv_sec - up->ts.tv_sec;
+	nsec = ts.tv_nsec - up->ts.tv_nsec;
+	up->ts = ts;
+	if (nsec < 0) {
+		sec --;
+		nsec += NANOSECOND;
+	} else if (nsec >= NANOSECOND) {
+		sec++;
+		nsec -= NANOSECOND;
+	}
+	switch (sec) {
+	case 0:
+		return;
+
+	case 1:
+		if (abs(nsec) > RANGEGATE)
+			return;
+		break;
+
+	case 2:
+		if (abs(nsec) > 2 * RANGEGATE)
+			return;
+		break;
+
+	default:
 		return;
 	}
-	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	if (dtemp >= FRAC)
@@ -392,6 +430,9 @@ atom_timer(
  * processes PPS information. It processes the PPS timestamp and saves
  * the sign-extended fraction in a circular buffer for processing at the
  * next poll event. This works only for a single PPS device.
+ *
+ * The routine should be used by another configured driver ONLY when
+ * this driver is configured as well and the PPSAPI is NOT in use.
  */
 int
 pps_sample(
@@ -404,6 +445,9 @@ pps_sample(
 	double doffset;
 
 	peer = pps_peer;
+	if (peer == NULL)
+		return (1);
+
 	pp = peer->procptr;
 
 	/*
@@ -476,6 +520,6 @@ pps_sample(
 	   l_fp *offset		/* PPS offset */
 	   )
 {
-	return 1;
+	return (1);
 }
 #endif /* REFCLOCK */

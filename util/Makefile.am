@@ -14,6 +14,9 @@ ntp_keygen_LDADD=	@LCRYPTO@
 EXTRA_DIST=
 ETAGS_ARGS=	Makefile.am
 
+jitter_SOURCES=	jitter.c jitter.h
+jitter_LDADD=
+
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)
 

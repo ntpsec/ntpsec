@@ -80,13 +80,9 @@ struct ppsclockev {
 };
 #endif /* ! HAVE_STRUCT_PPSCLOCKEV */
 
-#ifdef HAVE_TIMEPPS_H
-#   include <timepps.h>
-#else
-# ifdef HAVE_SYS_TIMEPPS_H
-#   include <sys/timepps.h>
-# endif
-#endif
+#ifdef HAVE_PPSAPI
+# include "ppsapi_timepps.h"
+#endif /* HAVE_PPSAPI */
 
 /*
  * This driver supports the Magnavox Model MX 4200 GPS Receiver

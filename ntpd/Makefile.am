@@ -39,6 +39,7 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_intres.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
 	ntp_proto.c ntp_refclock.c ntp_request.c \
 	ntp_restrict.c ntp_timer.c ntp_util.c \
+	ppsapi_timepps.h \
 	refclock_acts.c refclock_arbiter.c refclock_arc.c refclock_as2201.c \
 	refclock_atom.c refclock_bancomm.c refclock_chronolog.c \
 	refclock_chu.c refclock_conf.c refclock_datum.c refclock_dumbclock.c \

@@ -7,8 +7,13 @@
  * clock ever runs backwards.
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <sys/time.h>
+#include <stdlib.h>
 #include "jitter.h"
 
 #define NBUF	20002
@@ -52,7 +57,7 @@ main(
 	average = 0;
 	for (i = 0; i < NBUF - 2; i++) {
 		gtod[i] = gtod[i + 1] - gtod[i];
-		printf("%13.9lf\n", gtod[i]);
+		printf("%13.9f\n", gtod[i]);
 		average += gtod[i];
 	}
 
@@ -69,13 +74,13 @@ main(
 		}
 	}
 	average = average / (NBUF - 2);
-	fprintf(stderr, "Average %13.9lf\n", average);
+	fprintf(stderr, "Average %13.9f\n", average);
 	fprintf(stderr, "First rank\n");
 	for (i = 0; i < 10; i++)
-		fprintf(stderr, "%2d %13.9lf\n", i, gtod[i]);
+		fprintf(stderr, "%2d %13.9f\n", i, gtod[i]);
 	fprintf(stderr, "Last rank\n");
 	for (i = NBUF - 12; i < NBUF - 2; i++)
-		fprintf(stderr, "%2d %13.9lf\n", i, gtod[i]);
+		fprintf(stderr, "%2d %13.9f\n", i, gtod[i]);
 	exit(0);
 }
 

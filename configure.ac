@@ -11,6 +11,7 @@ AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
+ac_cv_var_parse_ok=no
 ac_cv_var_ripe_ncc_ok=no
 ac_cv_var_jupiter_ok=no
 
@@ -307,6 +308,7 @@ case "$host" in
  *) AC_CHECK_HEADERS(utmp.h utmpx.h) ;;
 esac
 AC_CHECK_HEADERS(arpa/nameser.h)
+AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(net/if.h, [], [],
 [#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -346,6 +348,7 @@ case "$host" in
 esac
 # HMS: Check sys/shm.h after some others
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
+# HMS: Checked sys/socket.h earlier
 case "$host" in
  *-*-netbsd*) ;;
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
@@ -802,7 +805,48 @@ AC_CHECK_FUNCS(finite, ,
       AC_DEFINE(HAVE_ISFINITE)],
       AC_MSG_RESULT(no))
     LIBS=$_libs])])
-AC_CHECK_FUNCS(getbootfile getclock getdtablesize getrusage)
+AC_CHECK_FUNCS(getbootfile getclock getdtablesize)
+
+AC_ARG_ENABLE(getifaddrs,
+    AC_HELP_STRING([--enable-getifaddrs],
+	[s Enable the use of getifaddrs() [[yes|no|glibc]].
+glibc: Use getifaddrs() in glibc if you know it supports IPv6.]),
+    want_getifaddrs="$enableval",  want_getifaddrs="yes")
+
+case $want_getifaddrs in
+yes|glibc)
+#
+# Do we have getifaddrs() ?
+#
+case $host in
+*-linux*)
+	# Some recent versions of glibc support getifaddrs() which does not
+	# provide AF_INET6 addresses while the function provided by the USAGI
+	# project handles the AF_INET6 case correctly.  We need to avoid
+	# using the former but prefer the latter unless overridden by
+	# --enable-getifaddrs=glibc.
+	if test $use_getifaddrs = glibc
+	then
+		AC_CHECK_FUNCS(getifaddrs)
+	else
+		save_LIBS="$LIBS"
+		LIBS="-L/usr/local/v6/lib $LIBS"
+		AC_CHECK_LIB(inet6, getifaddrs,
+			LIBS="$LIBS -linet6"
+			AC_DEFINE(HAVE_GETIFADDRS),
+			LIBS=${save_LIBS})
+	fi
+	;;
+*)
+	AC_CHECK_FUNCS(getifaddrs)
+	;;
+esac
+;;
+no)
+;;
+esac
+
+AC_CHECK_FUNCS(getrusage)
 AC_CHECK_FUNC(gettimeofday, ,[
 case "$host" in
   *-*-mpeix*) ac_cv_func_gettimeofday=yes
@@ -815,6 +859,28 @@ case "$host" in
     ;;
 esac
 AC_CHECK_FUNCS(hstrerror)
+
+#
+# Check for if_nametoindex() for IPv6 scoped addresses support
+#
+AC_CHECK_FUNC(if_nametoindex, ac_cv_have_if_nametoindex=yes,
+		ac_cv_have_if_nametoindex=no)
+case $ac_cv_have_if_nametoindex in
+ no)
+	case "$host" in
+  	*-hp-hpux*)
+  		AC_CHECK_LIB(ipv6, if_nametoindex,
+				ac_cv_have_if_nametoindex=yes
+				LIBS="-lipv6 $LIBS",)
+  	;;
+	esac
+esac
+case $ac_cv_have_if_nametoindex in
+ yes)
+	AC_DEFINE(ISC_PLATFORM_HAVEIFNAMETOINDEX, 1, [ISC: do we have if_nametoindex()?])
+	;;
+esac
+
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 AC_CHECK_FUNC(inet_aton, [], [AC_DEFINE(ISC_PLATFORM_NEEDATON, 1, [ISC: provide inet_aton()])])
@@ -1735,16 +1801,21 @@ ac_cv_var_atom_ok=yes
 
 # The PPSAPI headers need "inline" ($ac_cv_c_inline='inline')
 
-# The PPSAPI needs ATOM
-
 # The PPSAPI needs struct timespec.
 
-case "$ac_cv_c_inline$ac_cv_struct_timespec$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h" in
- inlineyes*yes*)
-    AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
-    ac_cv_var_oncore_ok=yes
-    ac_cv_var_ripe_ncc_ok=yes
-    ac_cv_var_jupiter_ok=yes
+# The PPSAPI also needs a timepps header.
+
+case "$ac_cv_c_inline$ac_cv_struct_timespec" in
+ inlineyes)
+    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
+     *yes* | *sunos* | *solaris* | *sco* )
+	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
+	ac_cv_var_jupiter_ok=yes
+	ac_cv_var_oncore_ok=yes
+	ac_cv_var_parse_ok=yes
+	ac_cv_var_ripe_ncc_ok=yes
+	;;
+    esac
     ;;
 esac
 
@@ -1856,6 +1927,7 @@ AC_ARG_ENABLE(all-clocks,
     [ntp_eac=$enableval], [ntp_eac=yes])
 AC_MSG_RESULT($ntp_eac)
 
+# HMS: Should we also require ac_cv_var_parse_ok?
 AC_MSG_CHECKING(if we have support for PARSE clocks)
 case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  yes*yes*)
@@ -3755,6 +3827,26 @@ $isc_netinet6in6_hack
 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
 		[ISC: Have struct in6_pktinfo?])],
 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
+
+    # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
+    AC_MSG_CHECKING(for sin6_scope_id in struct sockaddr_in6)
+    AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+],
+	[struct sockaddr_in6 xyzzy; xyzzy.sin6_scope_id = 0; return (0);],
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, ,
+		[ISC: Have sin6_scope_id?])],
+	 result="#define LWRES_HAVE_SIN6_SCOPE_ID 1"],
+	[AC_MSG_RESULT(no)
+	 ISC_PLATFORM_HAVESCOPEID="#undef ISC_PLATFORM_HAVESCOPEID"
+	 result="#undef LWRES_HAVE_SIN6_SCOPE_ID"])
+    LWRES_HAVE_SIN6_SCOPE_ID="$result"
+
     ;;
 esac
 

@@ -41,13 +41,13 @@
         <p>The measured propagation delay from the WWV transmitter at Boulder, CO, to the receiver at Newark, DE, is 23.5&plusmn;0.1 ms. This is measured to the peak of the pulse after the second sync comb filter and includes components due to the ionospheric propagation delay, nominally 8.9 ms, communications receiver delay and program delay. The propagation delay can be expected to change about 0.2 ms over the day, as the result of changing ionosphere height. The DSP93 program delay was measured at 5.5 ms, most of which is due to the 400-Hz bandpass filter and 5-ms matched filter. Similar delays can be expected of this driver.</p>
         <h4>Program Operation</h4>
         The driver begins operation immediately upon startup. It first searches for one or both of the stations WWV and WWVH and attempts to acquire minute sync. This may take some fits and starts, as the driver expects to see three consecutive minutes with good signals and low jitter. If the autotune function is active, the driver will rotate over all five frequencies and both WWV and WWVH stations until three good minutes are found.
-        <p>When a minute sync candidate has been found, the driver acquires second sync, which can take up to several minutes, depending on signal quality. At the same time the driver accumulates likelihood values for each of the nine digits of the clock, plus the seven miscellaneous bits included in the WWV/H transmission format. When five repetitions of all nine digits have decoded correctly, which normally takes 15 minutes with good signals and up to an hour when buried in noise, and the second sync alarm has not been raised for two minutes, the clock is set (or verified) and is selectable to discipline the system clock.</p>
-        <p>As long as the clock is set or verified, the system clock offsets are provided once each second to the reference clock interface, where they are saved in a buffer. At the end of each minute the buffer samples are groomed by the median filter and trimmed-mean averaging functions. Using these functions, the system clock can in principle be disciplined to a much finer resolution than the 125-<font face="Symbol">m</font>s sample interval would suggest, although the ultimate accuracy is probably limited by propagation delay variations as the ionspheric height varies throughout the day and night.</p>
+        <p>When a minute sync candidate has been found, the driver acquires second sync, which can take up to several minutes, depending on signal quality. At the same time the driver accumulates likelihood values for each of the nine digits of the clock, plus the seven miscellaneous bits included in the WWV/H transmission format. When five repetitions of all nine digits have decoded correctly, which normally takes 15 minutes with good signals and up to an hour when buried in noise, and the second sync has been acquired, the clock is set (or verified) and is selectable to discipline the system clock.</p>
+        <p>As long as the clock is set or verified, the system clock offsets are provided once each second to the reference clock interface, where they are saved in a buffer. At the end of each minute the buffer samples are groomed by the median-filter and trimmed-mean functions. Using these functions, the system clock can in principle be disciplined to a much finer resolution than the 125-<font face="Symbol">m</font>s sample interval would suggest, although the ultimate accuracy is probably limited by propagation delay variations as the ionspheric height varies throughout the day and night.</p>
         <p>The codec clock frequency is disciplined during times when WWV/H signals are available. The algorithm refines the frequency offset using increasingly longer averaging intervals to 1024 s, where the precision is about 0.1 PPM. With good signals, it takes well over two hours to reach this degree of precision; however, it can take many more hours than this in case of marginal signals. Once reaching the limit, the algorithm will follow frequency variations due to temperature fluctuations and ionospheric height variations.</p>
         <p>It may happen as the hours progress around the clock that WWV and WWVH signals may appear alone, together or not at all. When the driver is first started, the NTP reference identifier appears as <tt>NONE</tt>. When the driver has mitigated which station and frequency is best, it sets the reference identifier to the string WV<i>f</i> for WWV and WH<i>f</i> for WWVH, where <i>f</i> is the frequency in megahertz. If the propagation delays have been properly set with the <tt>fudge time1</tt> (WWV) and <tt>fudge time2</tt> (WWVH) commands in the configuration file, handover from one station to the other is seamless.</p>
-        <p>Once the clock has been set for the first time, it will appear reachable and selectable to discipline the system clock. Operation continues as long as the signal quality from at least one station on at least one frequency is acceptable and for a holdover interval of about 30 minutes after signal loss on both stations on all frequencies. A consequence of this design is that, once the clock is set, the time and frequency are disciplined only by the second sync pulse and the clock digits themselves are driven by the clock state machine. If for some reason the state machine drifts to the wrong second, it would never reresynchronize. To protect against this most unlikely situation, if after two days with no signals, the clock is considered unset and resumes the synchronization procedure from the beginning.</p>
+        <p>Once the clock has been set for the first time, it will appear reachable and selectable to discipline the system clock. Operation continues as long as the signal quality from at least one station on at least one frequency is acceptable and for a holdover interval of about 30 minutes after signal loss for both stations on all frequencies. A consequence of this design is that, once the clock is set, the time and frequency are disciplined only by the second sync pulse and the clock digits themselves are driven by the clock state machine. If for some reason the state machine drifts to the wrong second, it would never reresynchronize. To protect against this most unlikely situation, if after two days with no signals, the clock is considered unset and resumes the synchronization procedure from the beginning.</p>
         <p>However, as long as the clock has once been set correctly and allowed to converge to the intrinsic codec clock frequency, it will continue to read correctly even during the holdover interval, but will appear unreachable for synchronization purposes after the holdover intervall. The local clock driver can be used to extend the holdover interval if required.</p>
-		<p>Assuming the clock frequency can be disciplined within 1 PPM, it can coast without signals for several days without exceeding the NTP step threshold of 128 ms. During such periods the root dispersion increases at 5 <font face="Symbol">m</font>s per second, which makes the driver appears less likely for selection as time goes on. Eventually, when the dispersion due all causes exceeds 1 s, it is no longer suitable for synchronization at all.</p>
+		<p>Assuming the clock frequency can be disciplined within 1 PPM, it can coast without signals for several days without exceeding the NTP step threshold of 128 ms. During such periods the root dispersion increases at 5 <font face="Symbol">m</font>s per second, which makes the driver appears less likely for selection as time goes on. Eventually, when the dispersion due all causes exceeds 1 s, it is no longer suitable for synchronization.</p>
 		<p>To work well, the driver needs a shortwave receiver with good audio response at 100 Hz. Most shortwave and communications receivers roll off the audio response below 250 Hz, so this can be a problem, especially with receivers using DSP technology, since DSP filters can have very fast rolloff outside the passband. Some DSP transceivers, in particular the ICOM 775, have a programmable low frequency cutoff which can be set as low as 80 Hz. However, this particular radio has a strong low frequency buzz at about 10 Hz which appears in the audio output and can affect data recovery under marginal conditions. Although not tested, it would seem very likely that a cheap shortwave receiver could function just as well as an expensive communications receiver.</p>
         <h4>Autotune</h4>
         <p>The driver includes provisions to automatically tune the radio in response to changing radio propagation conditions throughout the day and night. The radio interface is compatible with the ICOM CI-V standard, which is a bidirectional serial bus operating at TTL levels. The bus can be connected to a serial port using a level converter such as the CT-17.</p>
@@ -55,18 +55,16 @@
         <p>If specified, the driver will attempt to open the device <tt>/dev/icom</tt> and, if successful will activate the autotune function and tune the radio to each operating frequency in turn while attempting to acquire minute sync from either WWV or WWVH. However, the driver is liberal in what it assumes of the configuration. If the <tt>/dev/icom</tt> link is not present or the open fails or the CI-V bus or radio is inoperative, the driver quietly gives up with no harm done.</p>
         <p>Once acquiring minute sync, the driver operates as described above to set the clock. However, during seconds 59, 0 and 1 of each minute it tunes the radio to one of the five broadcast frequencies to measure the sync pulse and data pulse amplitudes and SNR and update the signal metric. Each of the five frequencies are probed in a five-minute rotation to build a database of current propagation conditions for all signals that can be heard at the time. At the end of each probe a mitigation procedure scans the database and retunes the radio to the best frequency and station found. For this to work well, the radio should be set for a fast AGC recovery time. This is most important while tracking a strong signal, which is normally the case, and then probing another frequency, which may have much weaker signals.</p>
         <p>Reception conditions for each frequency and station are evaluated according to the signal metric, which uses the minute sync pulse amplitude and SNR and data subcarrier amplitude and SNR. The minute pulse is evaluated at second 0, while the data pulse is evaluated at second 1. In principle, the data pulse in second 58 is usable, but the AGC in most radios is not fast enough for a reliable measurement.</p>
-        <p>The results are summarized in a scoreboard which drives the mitigation function.</p>
-        <dl>
-            <dt><tt>0x0001</tt>
-            <dd>Minute pulse error. For the minute sync pulse in second 0, either the amplitude or SNR is below threshold (2000 and 20 dB, respectively).
-            <dt><tt>0x0002</tt>
-            <dd>Data pulse error. For the data pulse in second 1, either the amplitude or SNR is below threshold (1000 and 10 dB, respectively).
-            <dt><tt>0x0004</tt>
-            <dd>Probe pulse error. Two or more decoding errors have occurred for the data pulses in seconds 58, 59 and 1.
-        </dl>
-        <p>If none of the scoreboard bits are set, a hit is declared, otherwise a miss. At the end of each probe, the frequency and station with the maximum metric is chosen, with ties going first to the highest frequency and then to WWV in order. During the acquisition phase a station is considered valid only if the metric is above 13; after the clock is synchronized a station is valid only if the metric is above 50. If no stations are valid, the driver ignores all signals and sets the reference ID field to NONE.</p>
-        <h4>Diagnostics</h4>
-        <p>The autotune process produces diagnostic information along with the timecode. This is very useful for evaluating the performance of the algorithms, as well as radio propagation conditions in general. The message is produced once each minute for each frequency in turn after minute sync has been acquired.</p>
+		<p>The results are summarized in a metric which drives the mitigation function. First, determine a score as 1 if:</p>
+		<ul>
+			<li>For the minute sync pulse in second 0,  the amplitude and SNR are above  thresholds (2000 and 20 dB, respectively).
+			<li>For the data pulse in second 1, the amplitude and SNR are above threshold (1000 and 10 dB, respectively).
+		</ul>
+		<dl>
+			<dt>and 0 otherwise. The scoreboard is a shift register of 32 bits. Each time a frequency is probed the register is shifted left by one bit with the score replacing the rightmost bit. The metric is computed as the number of 1 bits in the rightmost six bits of the scoreboard. At the end of each probe, the frequency and station with the maximum metric is chosen, with ties going first to the highest frequency and then to WWV in order. During the acquisition phase a station is considered valid only if the metric is above 13; after the clock is synchronized a station is valid only if the metric is above 50. If no stations are valid, the driver ignores all signals and sets the reference ID field to NONE.
+		</dl>
+		<h4>Diagnostics</h4>
+		<p>The autotune process produces diagnostic information along with the timecode. This is very useful for evaluating the performance of the algorithms, as well as radio propagation conditions in general. The message is produced once each minute for each frequency in turn after minute sync has been acquired.</p>
         <p><tt>wwv5 port status agc epoch count wwv wwvh</tt></p>
         <p>where <tt>port</tt> and <tt>agc</tt> are the audio port and gain, respectively, for this frequency and <tt>wwv</tt> and <tt>wwvh</tt> are two sets of fields, one each for WWV and WWVH. Each of the two fields has the format</p>
         <p><tt>ident score metric sync/snr</tt></p>
@@ -153,8 +151,7 @@
             <dd>The DUT sign and magnitude shows the current UT1 offset relative to the displayed UTC time, in deciseconds.
             <dt><tt>lset</tt>
             <dd>Before the clock is set, the interval since last set is the number of minutes since the driver was started; after the clock is set, this is number of minutes since the decoder was last synchronized to the station within 125 <font face="Symbol">m</font>s.            <dt><tt>agc</tt>
-            <dd>The audio gain shows the current codec gain setting in the range 0 to 255. Ordinarily, the receiver audio gain control or IRIG level control should be set for a value midway in this range.
-            <dt><tt>ident</tt>
+            <dd>The audio gain shows the current codec gain setting in the range 0 to 255. Ordinarily, the receiver audio gain control should be set for a value midway in this range.<dt><tt>ident</tt>
             <dd>The station identifier shows the station, <tt>C</tt> for WWV or <tt>H</tt> for WWVH, and frequency being tracked. If neither station is heard on any frequency, the reference identifier shows <tt>NONE</tt>.
             <dt><tt>metric</tt>
             <dd>The signal metric described above from 0 (no signal) to 100 (best).
@@ -178,63 +175,79 @@
                 <td>Hex</td>
                 <td>Decimal</td>
             </tr>
-            <tr>
-                <td>IC725</td>
+			<tr>
+				<td>706</td>
+				<td>0x4e</td>
+				<td>78</td>
+				<td>775</td>
+				<td>0x46</td>
+				<td>68</td>
+			</tr>
+			<tr>
+				<td>706MKIIG</td>
+				<td>0x58</td>
+				<td>88</td>
+				<td>781</td>
+				<td>0x26</td>
+				<td>38</td>
+			</tr>
+			<tr>
+                <td>725</td>
                 <td>0x28</td>
-                <td>40</td>
-                <td>IC781</td>
-                <td>0x26</td>
-                <td>38</td>
-            </tr>
+				<td>40</td>
+				<td>970</td>
+				<td>0x2e</td>
+				<td>46</td>
+			</tr>
             <tr>
-                <td>IC726</td>
+                <td>726</td>
                 <td>0x30</td>
-                <td>48</td>
-                <td>R7000</td>
-                <td>0x08</td>
-                <td>8</td>
-            </tr>
+				<td>48</td>
+				<td>R71</td>
+				<td>0x1A</td>
+				<td>26</td>
+			</tr>
             <tr>
-                <td>IC735</td>
+                <td>735</td>
                 <td>0x04</td>
-                <td>4</td>
-                <td>R71</td>
-                <td>0x1A</td>
-                <td>26</td>
-            </tr>
-            <tr>
-                <td>IC751</td>
+				<td>4</td>
+				<td>R72</td>
+				<td>0x32</td>
+				<td>50</td>
+			</tr>
+			<tr>
+                <td>751</td>
                 <td>0x1c</td>
-                <td>28</td>
-                <td>R7100</td>
-                <td>0x34</td>
-                <td>52</td>
-            </tr>
-            <tr>
-                <td>IC761</td>
+				<td>28</td>
+				<td>R7000</td>
+				<td>0x08</td>
+				<td>8</td>
+			</tr>
+			<tr>
+				<td>756PROII</td>
+				<td>0x64</td>
+				<td>100</td>
+				<td>R8500</td>
+				<td>0x4a</td>
+				<td>74</td>
+			</tr>
+			<tr>
+                <td>761</td>
                 <td>0x1e</td>
-                <td>30</td>
-                <td>R72</td>
-                <td>0x32</td>
-                <td>50</td>
-            </tr>
-            <tr>
-                <td>IC765</td>
+				<td>30</td>
+				<td>R9000</td>
+				<td>0x2a</td>
+				<td>42</td>
+			</tr>
+			<tr>
+                <td>765</td>
                 <td>0x2c</td>
-                <td>44</td>
-                <td>R8500</td>
-                <td>0x4a</td>
-                <td>74</td>
-            </tr>
-            <tr>
-                <td>IC775</td>
-                <td>0x46</td>
-                <td>68</td>
-                <td>R9000</td>
-                <td>0x2a</td>
-                <td>42</td>
-            </tr>
-        </table>
+				<td>44</td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
         <h4>Fudge Factors</h4>
         <dl>
             <dt><tt>time1 <i>time</i></tt>
