@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <winsock2.h>
+#include <windows.h>
 
 /*
  * Forward declarations

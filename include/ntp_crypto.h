@@ -147,8 +147,8 @@ struct cert_info {
 	u_long	serial;		/* serial number */
 	tstamp_t first;		/* valid not before */
 	tstamp_t last;		/* valid not after */
-	u_char	*subject;	/* subject common name */
-	u_char	*issuer;	/* issuer common name */
+	char	*subject;	/* subject common name */
+	char	*issuer;	/* issuer common name */
 	u_char	*grpkey;	/* GQ group key */
 	u_int	grplen;		/* GQ group key length */
 	struct value cert;	/* certificate/value */

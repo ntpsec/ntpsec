@@ -215,7 +215,7 @@ timer(void)
 {
 	register struct peer *peer, *next_peer;
 #ifdef OPENSSL
-	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 #endif /* OPENSSL */
 	u_int n;
 

@@ -265,8 +265,8 @@ struct peer {
 	u_int32	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
 	const EVP_MD *digest;	/* message digest algorithm */
-	u_char	*subject;	/* certificate subject name */
-	u_char	*issuer;	/* certificate issuer name */
+	char	*subject;	/* certificate subject name */
+	char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
 	EVP_PKEY *ident_pkey;	/* identity key */

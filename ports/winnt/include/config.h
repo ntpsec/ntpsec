@@ -27,6 +27,8 @@
  * ANSI C compliance enabled
  */
 #define __STDC__ 1
+/* Define if you have the ANSI C header files.  */
+#define STDC_HEADERS 1
 
 /* Skip asynch rpc inclusion */
 #ifndef __RPCASYNC_H__
@@ -43,6 +45,9 @@
 # define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
+
+/* Enable OpenSSL */
+#define OPENSSL 1
 
 #define finite _finite
 # define random      rand
@@ -86,8 +91,6 @@ int NT_set_process_priority(void);	/* Define this function */
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 # define HAVE_SOCKADDR_IN6
-//# define volatile
-# define STDC_HEADERS
 
 # define NEED_S_CHAR_TYPEDEF
 

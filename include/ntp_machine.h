@@ -273,6 +273,7 @@ typedef unsigned long u_long;
 # define fileno _fileno
 # define write _write
 # define vsnprintf _vsnprintf
+# define snprintf _snprintf
 #ifndef close
 # define close _close
 #endif
