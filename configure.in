@@ -2217,22 +2217,114 @@ AC_MSG_RESULT($ans)
 AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
+
+AC_SUBST(OPENSSL)
+AC_SUBST(OPENSSL_INC)
+AC_SUBST(OPENSSL_LIB)
+
 AC_SUBST(MAKE_NTP_GENKEYS)
-AC_MSG_CHECKING(for the level of crypto support)
-AC_ARG_WITH(crypto,	[  --with-crypto           + ={autokey,rsaref}],
+
+AC_MSG_CHECKING(for openssl library directory)
+AC_ARG_WITH(openssl-libdir,
+	AC_HELP_STRING([--with-openssl-libdir], [+ =/something/reasonable]),
 [ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
- yes|rsaref)
-    ans=no
-    if test -f $srcdir/rsaref2/source/rsa.c
-    then
-	ans=rsaref
-	LIBRSAREF=../librsaref/librsaref.a
-	MAKE_LIBRSAREF=librsaref.a
-	AC_DEFINE(DES)
-	AC_DEFINE(PUBKEY, , [Public key?])
-    fi
+ yes) # Look in:
+    ans="/usr/lib /usr/local/lib /usr/local/ssl/lib"
+    ;;
+ *) # Look where they said
+    ;;
+esac
+case "$ans" in
+ no) ;;
+ *) # Look for libcrypto.a and libssl.a:
+    for i in $ans no
+    do
+	test -f $i/libcrypto.a -a -f $i/libssl.a && break
+    done
+    case "$i" in
+     no)
+	OPENSSL_LIB=
+	;;
+     *) ans=$i
+	OPENSSL_LIB=$ans
+	;;
+    esac
+    ;;
+esac
+AC_MSG_RESULT($ans)
+
+AC_MSG_CHECKING(for openssl include directory)
+AC_ARG_WITH(openssl-incdir,
+	AC_HELP_STRING([--with-openssl-incdir], [+ =/something/reasonable]),
+[ans=$withval], [ans=yes])
+case "$ans" in
+ no) ;;
+ yes) # look in:
+    ans="/usr/include /usr/local/include /usr/local/ssl/include"
+    ;;
+ *) # Look where they said
+    ;;
+esac
+case "$ans" in
+ no) ;;
+ *) # look for openssl/opensslconf.h:
+    for i in $ans no
+    do
+	test -f $i/openssl/opensslconf.h && break
+    done
+    case "$i" in
+     no)
+	OPENSSL_INC=
+	;;
+     *) ans=$i
+	OPENSSL_INC=$ans
+	;;
+    esac
+    ;;
+esac
+AC_MSG_RESULT($ans)
+
+AC_MSG_CHECKING(for the level of crypto support)
+AC_ARG_WITH(crypto,	[  --with-crypto           + ={autokey,openssl,rsaref}],
+[ans=$withval], [ans=yes])
+case "$ans" in
+ no) ;;
+ yes|rsaref|openssl)
+    case "$ans" in
+     rsaref)
+	;;
+     *)
+	if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
+	then
+	    ans=no
+	else
+	    # We have OpenSSL inc/lib - use them.
+	    ans=openssl
+	    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+	    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+	    LIBS="$LIBS -lcrypto -lssl"
+	    AC_DEFINE(DES)
+	    AC_DEFINE(OPENSSL, , [Use OpenSSL?])
+	    AC_DEFINE(PUBKEY, , [Public key?])
+	fi
+	;;
+    esac
+
+    case "$ans" in
+     no)
+	if test -f $srcdir/rsaref2/source/rsa.c
+	then
+	    ans=rsaref
+	    LIBRSAREF=../librsaref/librsaref.a
+	    MAKE_LIBRSAREF=librsaref.a
+	    AC_DEFINE(DES)
+	    AC_DEFINE(PUBKEY)
+	    AC_DEFINE(RSAREF, , [Use RSAREF?])
+	fi
+	;;
+    esac
     ;;
 esac
 AC_SUBST(AUTOKEY)

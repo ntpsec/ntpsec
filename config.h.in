@@ -887,6 +887,9 @@
 /* Default location of crypto key info */
 #undef NTP_KEYSDIR
 
+/* Use OpenSSL? */
+#undef OPENSSL
+
 /* Name of package */
 #undef PACKAGE
 
@@ -898,6 +901,9 @@
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
+
+/* Use RSAREF? */
+#undef RSAREF
 
 /* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT
