@@ -41,7 +41,12 @@
  * Systems, Version 1.0, RFC-2783 (PPSAPI). Implementations are
  * available for FreeBSD, Linux, SunOS, Solaris and Alpha. However, at
  * present only the Alpha implementation provides the full generality of
- * the API with multiple PPS drivers and multiple handles per driver.
+ * the API with multiple PPS drivers and multiple handles per driver. If
+ * the PPSAPI is normally implemented in the /usr/include/sys/timepps.h
+ * header file and kernel support specific to each operating system.
+ * However, this driver can operate without this interface if means are
+ * proviced to call the pps_sample() routine from another driver. Please
+ * note; if the PPSAPI interface is present, it must be used.
  *
  * In many configurations a single port is used for the radio timecode
  * and PPS signal. In order to provide for this configuration and others
@@ -244,11 +249,13 @@ atom_control(
 	int	mode;
 
 	pp = peer->procptr;
+	if (peer->ttl != 0)	/* all legal modes must be nonzero */
+		return;
+
 	if (pp->sloppyclockflag & CLK_FLAG2)
 		mode = PPS_CAPTURECLEAR;
 	else
 		mode = PPS_CAPTUREASSERT;
-	pp = peer->procptr;
 	atom_ppsapi(peer, mode);
 }
 
@@ -325,7 +332,8 @@ atom_timer(
 	struct refclockproc *pp;
 	pps_info_t pps_info;
 	struct timespec timeout, ts;
-	double dtemp;
+	long	sec, nsec;
+	double	dtemp;
 
 	/*
 	 * Convert the timespec nanoseconds field to signed double and
@@ -348,29 +356,55 @@ atom_timer(
 		return;
 	}
 	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
-		if (pps_info.assert_sequence ==
-		    up->pps_info.assert_sequence)
-			return;
-
 		ts = up->pps_info.assert_timestamp;
 	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
-		if (pps_info.clear_sequence ==
-		    up->pps_info.clear_sequence)
-			return;
-
 		ts = up->pps_info.clear_timestamp;
 	} else {
 		refclock_report(peer, CEVNT_FAULT);
 		return;
 	}
-	if (!((ts.tv_sec == up->ts.tv_sec && ts.tv_nsec -
-	    up->ts.tv_nsec > NANOSECOND - RANGEGATE) ||
-	    (ts.tv_sec - up->ts.tv_sec == 1 && ts.tv_nsec -
-	    up->ts.tv_nsec < RANGEGATE))) {
-		up->ts = ts;
+
+	/*
+	 * There can be zero, one or two PPS seconds between polls. If
+	 * zero, either the poll clock is slightly faster than the PPS
+	 * clock or the PPS clock has died. If the PPS clock advanced
+	 * once between polls, we make sure the fraction time difference
+	 * since the last sample is within the range gate of 5 ms (500
+	 * PPM). If the PPS clock advanced twice since the last poll,
+	 * the poll bracketed more than one second and the first second
+	 * was lost to a slip. Since the interval since the last sample
+	 * found is now two seconds, just widen the range gate. If the
+	 * PPS clock advanced three or more times, either the signal has
+	 * failed for a number of seconds or we have runts, in which
+	 * case just ignore them.
+	 */
+	sec = ts.tv_sec - up->ts.tv_sec;
+	nsec = ts.tv_nsec - up->ts.tv_nsec;
+	up->ts = ts;
+	if (nsec < 0) {
+		sec --;
+		nsec += NANOSECOND;
+	} else if (nsec >= NANOSECOND) {
+		sec++;
+		nsec -= NANOSECOND;
+	}
+	switch (sec) {
+	case 0:
+		return;
+
+	case 1:
+		if (abs(nsec) > RANGEGATE)
+			return;
+		break;
+
+	case 2:
+		if (abs(nsec) > 2 * RANGEGATE)
+			return;
+		break;
+
+	default:
 		return;
 	}
-	up->ts = ts;
 	pp->lastrec.l_ui = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	if (dtemp >= FRAC)
@@ -486,6 +520,6 @@ pps_sample(
 	   l_fp *offset		/* PPS offset */
 	   )
 {
-	return 1;
+	return (1);
 }
 #endif /* REFCLOCK */
