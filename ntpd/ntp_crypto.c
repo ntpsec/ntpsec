@@ -90,6 +90,7 @@
 #define MAX_HOSTLEN	256	/* max host name length */
 #define VALUE_LEN	(6 * 4) /* min response field length */
 #define YEAR		(60 * 60 * 24 * 365) /* seconds in year */
+#define NTP_RANDFILE	"/.rnd"	/* OpenSSL random seed file */
 
 /*
  * Global cryptodata in host byte order
@@ -100,8 +101,8 @@ u_int	sys_tai;		/* current UTC offset from TAI */
 /*
  * Global cryptodata in network byte order
  */
-struct value hostval;		/* host value */
 struct cert_info *cinfo = NULL;	/* certificate info/value */
+struct value hostval;		/* host value */
 struct value pubkey;		/* public key */
 struct value tai_leap;		/* leapseconds table */
 
@@ -110,10 +111,10 @@ struct value tai_leap;		/* leapseconds table */
  */
 static EVP_PKEY *rsa_pkey = NULL; /* host key */
 static EVP_PKEY *sign_pkey = NULL; /* sign key */
-static EVP_MD	*sign_digest = NULL; /* sign digest */
+static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
 static char *keysdir = NTP_KEYSDIR; /* crypto keys directory */
-static char *rand_file = NULL;	/* random seed file */
+static char *rand_file = NTP_RANDFILE; /* random seed file */
 static char *rsa_file = NULL;	/* rsa key file */
 static char *sign_file = NULL;	/* sign key file */
 static char *cert_file = NULL;	/* certificate file */
@@ -313,7 +314,7 @@ crypto_recv(
 	struct recvbuf *rbufp	/* packet buffer pointer */
 	)
 {
-	EVP_MD *dp;		/* message digest algorithm */
+	const EVP_MD *dp;	/* message digest algorithm */
 	u_int32	*pkt;		/* receive packet pointer */
 	struct autokey *ap, *bp; /* autokey pointer */
 	struct exten *ep, *fp;	/* extension pointers */
@@ -406,8 +407,7 @@ crypto_recv(
 			 * it has invalid length or does not match the
 			 * request.
 			 */
-			if (peer->crypto || len < VALUE_LEN + vallen ||
-			    peer->flash & TEST2)
+			if (peer->crypto || len < VALUE_LEN + vallen)
 				break;
 
 			/*
@@ -416,7 +416,8 @@ crypto_recv(
 			 * signature digest NID is not supported.
 			 */
 			temp32 = fstamp >> 16;
-			dp = (EVP_MD *)EVP_get_digestbynid(temp32);
+			dp =
+			    (const EVP_MD *)EVP_get_digestbynid(temp32);
 			if (vallen < MIN_HOSTLEN || vallen >
 			    MAX_HOSTLEN)
 				rval = XEVNT_LEN;
@@ -1136,8 +1137,6 @@ crypto_verify(
 	 */
 	if (!peer->crypto || opcode & CRYPTO_ERROR)
 		return (XEVNT_LEN);
-	else if (opcode & CRYPTO_RESP && peer->flash & TEST2)
-		return (XEVNT_LEN);
 	else if (!(opcode & CRYPTO_RESP) && peer->cmmd != NULL)
 		return (XEVNT_LEN);
 	else if (len < VALUE_LEN)
@@ -1621,7 +1620,7 @@ cert_parse(
 	 * when the time is valid but not yet certificated.
 	 */
 	ret->nid = OBJ_obj2nid(cert->cert_info->signature->algorithm);
-	ret->digest = (EVP_MD *)EVP_get_digestbynid(ret->nid);
+	ret->digest = (const EVP_MD *)EVP_get_digestbynid(ret->nid);
 	ret->serial =
 	    (u_long)ASN1_INTEGER_get(X509_get_serialNumber(cert));
 	X509_NAME_oneline(X509_get_issuer_name(cert), pathbuf,
