@@ -1808,7 +1808,7 @@ sendpkt(
 {
 	int i;
 	int cc;
-	SOCKET sock = 0;
+	SOCKET sock = -1;
 
 #ifdef SYS_WINNT
 	DWORD err;
@@ -1822,7 +1822,7 @@ sendpkt(
 		}
 	}
 
-	if ( sock == 0 ) {
+	if ( sock == -1 ) {
 		netsyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
 		exit(1);
 		/*NOTREACHED*/
