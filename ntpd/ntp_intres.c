@@ -547,7 +547,7 @@ request(
 	 * Done.  Send it.
 	 */
 #ifndef SYS_WINNT
-	n = send(sockfd, (char *)&reqpkt, (int)(REQ_LEN_NOMAC + n), 0);
+	n = send(sockfd, (char *)&reqpkt, (unsigned)(REQ_LEN_NOMAC + n), 0);
 	if (n < 0) {
 		msyslog(LOG_ERR, "send to NTP server failed: %m");
 		return 0;	/* maybe should exit */

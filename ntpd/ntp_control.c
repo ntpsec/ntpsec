@@ -1464,7 +1464,7 @@ ctl_putclock(
 		break;
 		case CC_TIMECODE:
 		ctl_putstr(clock_var[CC_TIMECODE].text, clock_stat->p_lastcode,
-			   (int)clock_stat->lencode);
+			   (unsigned)clock_stat->lencode);
 		break;
 		case CC_POLL:
 		ctl_putuint(clock_var[CC_POLL].text, clock_stat->polls);

@@ -1,3 +1,11 @@
+1999-08-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_intres.c (request): Lint cleanup
+	* ntpd/ntp_control.c (ctl_putclock): Ditto
+	* libntp/recvbuff.c (getrecvbufs): Ditto
+	(get_free_recv_buffer): Ditto
+	* libntp/systime.c (adj_systime): Ditto
+
 1999-08-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.97

@@ -220,7 +220,7 @@ adj_systime(
 	}
 #ifdef DEBUG
 	if (debug > 6)
-		printf("adj_systime: adj %.9lf -> remaining residual %.9lf\n", now, sys_residual);
+		printf("adj_systime: adj %.9f -> remaining residual %.9f\n", now, sys_residual);
 #endif
 	return 1;
 }

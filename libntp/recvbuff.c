@@ -171,7 +171,7 @@ getrecvbufs(void)
 		if (free_recvbufs <= RECV_LOWAT)
 		{
 			if (total_recvbufs >= RECV_TOOMANY)
-			    msyslog(LOG_ERR, "too many recvbufs allocated (%d)",
+			    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
 				    total_recvbufs);
 			else
 			{
@@ -240,7 +240,7 @@ get_free_recv_buffer(void)
 	if (free_recvbufs <= RECV_LOWAT)
 		{
 			if (total_recvbufs >= RECV_TOOMANY) {
-			    msyslog(LOG_ERR, "too many recvbufs allocated (%d)",
+			    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
 				    total_recvbufs);
 			}
 			else
