@@ -61,7 +61,11 @@
  * debug level is greater than one.
  */
 /*
- * Interface definitions
+ * General definitions. Note the DGAIN parameter might need to be
+ * changed to fit the audio response of the radio at 100 Hz. The
+ * WWV/WWVH data subcarrier is transmitted at 10 dB down from 100
+ * percent modulation, so DGAIN should be at least 10 and more if the
+ * radio response droops at 100 Hz.
  */
 #define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	AUDIO_BUFSIZ	320	/* audio buffer size (50 ms) */
@@ -81,9 +85,12 @@
 #define DATSIZ		(DATCYC * MS) /* data filter size */
 #define SYNCYC		800	/* minute filter cycles */
 #define SYNSIZ		(SYNCYC * MS) /* minute filter size */
+#define TCKCYC		5	/* tick filter cycles */
+#define TCKSIZ		(TCKCYC * MS) /* tick filter size */
 #define NCHAN		5	/* number of radio channels */
 #define DCHAN		3	/* default radio channel (15 Mhz) */
 #define	AUDIO_PHI	5e-6	/* dispersion growth factor */
+#define DGAIN		10.	/* subcarrier gain */
 #ifdef IRIG_SUCKS
 #define	WIGGLE		11	/* wiggle filter length */
 #endif /* IRIG_SUCKS */
@@ -169,10 +176,9 @@
 #define ASNR		20.	/* QRZ minute sync SNR threshold (dB) */
 #define QTHR		2000.	/* QSY minute sync threshold */
 #define QSNR		20.	/* QSY minute sync SNR threshold (dB) */
-#define STHR		1000.	/* second sync threshold */
-#define	SSNR		20.	/* second sync SNR threshold (dB) */
+#define STHR		2000.	/* second sync threshold */
+#define	SSNR		15.	/* second sync SNR threshold (dB) */
 #define SCMP		10 	/* second sync compare threshold */
-#define DGAIN		10.	/* subcarrier gain */
 #define DTHR		1000.	/* bit threshold */
 #define DSNR		10.	/* bit SNR threshold (dB) */
 #define AMIN		3	/* min bit count */
@@ -939,16 +945,29 @@ wwv_rf(
 	static double qbuf[DATSIZ]; /* data Q channel delay line */
 
 	static int jptr;	/* sync channel pointer */
+	static int kptr;	/* tick channel pointer */
+
+	static int csinptr;	/* wwv channel phase */
 	static double cibuf[SYNSIZ]; /* wwv I channel delay line */
 	static double cqbuf[SYNSIZ]; /* wwv Q channel delay line */
 	static double ciamp;	/* wwv I channel amplitude */
 	static double cqamp;	/* wwv Q channel amplitude */
-	static int csinptr;	/* wwv channel phase */
+
+	static double csibuf[TCKSIZ]; /* wwv I tick delay line */
+	static double csqbuf[TCKSIZ]; /* wwv Q tick delay line */
+	static double csiamp;	/* wwv I tick amplitude */
+	static double csqamp;	/* wwv Q tick amplitude */
+
+	static int hsinptr;	/* wwvh channels phase */
 	static double hibuf[SYNSIZ]; /* wwvh I channel delay line */
 	static double hqbuf[SYNSIZ]; /* wwvh Q channel delay line */
 	static double hiamp;	/* wwvh I channel amplitude */
 	static double hqamp;	/* wwvh Q channel amplitude */
-	static int hsinptr;	/* wwvh channels phase */
+
+	static double hsibuf[TCKSIZ]; /* wwvh I tick delay line */
+	static double hsqbuf[TCKSIZ]; /* wwvh Q tick delay line */
+	static double hsiamp;	/* wwvh I tick amplitude */
+	static double hsqamp;	/* wwvh Q tick amplitude */
 
 	static double epobuf[SECOND]; /* epoch sync comb filter */
 	static double epomax;	/* epoch sync amplitude buffer */
@@ -972,8 +991,12 @@ wwv_rf(
 		memset((char *)qbuf, 0, sizeof(qbuf));
 		memset((char *)cibuf, 0, sizeof(cibuf));
 		memset((char *)cqbuf, 0, sizeof(cqbuf));
+		memset((char *)csibuf, 0, sizeof(csibuf));
+		memset((char *)csqbuf, 0, sizeof(csqbuf));
 		memset((char *)hibuf, 0, sizeof(hibuf));
 		memset((char *)hqbuf, 0, sizeof(hqbuf));
+		memset((char *)hsibuf, 0, sizeof(hsibuf));
+		memset((char *)hsqbuf, 0, sizeof(hsqbuf));
 		memset((char *)epobuf, 0, sizeof(epobuf));
 	}
 
@@ -1003,22 +1026,24 @@ wwv_rf(
 	    + lpf[4] * 3.281435e-03;
 
 	/*
-	 * The I and Q quadrature data signals are produced by
+	 * The 100-Hz data signal is demodulated using a pair of
+	 * quadrature multipliers, matched filters and a phase lock
+	 * loop. The I and Q quadrature data signals are produced by
 	 * multiplying the filtered signal by 100-Hz sine and cosine
-	 * signals, respectively. The data signals are processed by
-	 * 170-ms synchronous matched filters to produce the amplitude
-	 * and phase signals used by the decoder. The signals are scaled
+	 * signals, respectively. The signals are processed by 170-ms
+	 * synchronous matched filters to produce the amplitude and
+	 * phase signals used by the demodulator. The signals are scaled
 	 * to produce unit energy at the maximum value.
 	 */
 	i = up->datapt;
 	up->datapt = (up->datapt + IN100) % 80;
-	dtemp = sintab[i] * data / 4. / DATCYC;
+	dtemp = sintab[i] * data / (MS / 2. * DATCYC);
 	up->irig -= ibuf[iptr];
 	ibuf[iptr] = dtemp;
 	up->irig += dtemp;
 
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * data / 4. / DATCYC;
+	dtemp = sintab[i] * data / (MS / 2. * DATCYC);
 	up->qrig -= qbuf[iptr];
 	qbuf[iptr] = dtemp;
 	up->qrig += dtemp;
@@ -1053,14 +1078,19 @@ wwv_rf(
 	    + bpf[8] * 8.203628e-03;
 
 	/*
-	 * The I and Q quadrature minute sync signals are produced by
-	 * multiplying the filtered signal by 1000-Hz (WWV) and 1200-Hz
-	 * (WWVH) sine and cosine signals, respectively. The resulting
-	 * signals are processed by 800-ms synchronous matched filters
-	 * and combined to produce the minute sync signal and detect
-	 * which one (or both) the WWV or WWVH signal is present. The
-	 * signals are scaled to produce unit energy at the maximum
-	 * value.
+	 * The 1000/1200 sync signals are demodulated using a pair of
+	 * quadrature multipliers and matched filters. However,
+	 * synchronous demodulation at these frequencies is impractical,
+	 * so only the signal amplitude is used. The I and Q quadrature
+	 * sync signals are produced by multiplying the filtered signal
+	 * by 1000-Hz (WWV) and 1200-Hz (WWVH) sine and cosine signals,
+	 * respectively. The WWV and WWVH signals are processed by 800-
+	 * ms synchronous matched filters and combined to produce the
+	 * minute sync signal and detect which one (or both) the WWV or
+	 * WWVH signal is present. The WWV and WWVH signals are also
+	 * processed by 5-ms synchronous matched filters and combined to
+	 * produce the second sync signal. The signals are scaled to
+	 * produce unit energy at the maximum value.
 	 *
 	 * Note the master timing ramps, which run continuously. The
 	 * minute counter (mphase) counts the samples in the minute,
@@ -1075,16 +1105,23 @@ wwv_rf(
 	 */
 	i = csinptr;
 	csinptr = (csinptr + IN1000) % 80;
-	dtemp = sintab[i] * syncx / 4.;
+
+	dtemp = sintab[i] * syncx / (MS / 2.);
 	ciamp -= cibuf[jptr];
 	cibuf[jptr] = dtemp;
 	ciamp += dtemp;
+	csiamp -= csibuf[kptr];
+	csibuf[kptr] = dtemp;
+	csiamp += dtemp;
 
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * syncx / 4.;
+	dtemp = sintab[i] * syncx / (MS / 2.);
 	cqamp -= cqbuf[jptr];
 	cqbuf[jptr] = dtemp;
 	cqamp += dtemp;
+	csqamp -= csqbuf[kptr];
+	csqbuf[kptr] = dtemp;
+	csqamp += dtemp;
 
 	sp = &up->mitig[up->achan].wwv;
 	sp->amp = sqrt(ciamp * ciamp + cqamp * cqamp) / SYNCYC;
@@ -1096,22 +1133,30 @@ wwv_rf(
 	 */
 	i = hsinptr;
 	hsinptr = (hsinptr + IN1200) % 80;
-	dtemp = sintab[i] * syncx / 4.;
+
+	dtemp = sintab[i] * syncx / (MS / 2.);
 	hiamp -= hibuf[jptr];
 	hibuf[jptr] = dtemp;
 	hiamp += dtemp;
+	hsiamp -= hsibuf[kptr];
+	hsibuf[kptr] = dtemp;
+	hsiamp += dtemp;
 
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * syncx / 4.;
+	dtemp = sintab[i] * syncx / (MS / 2.);
 	hqamp -= hqbuf[jptr];
 	hqbuf[jptr] = dtemp;
 	hqamp += dtemp;
+	hsqamp -= hsqbuf[kptr];
+	hsqbuf[kptr] = dtemp;
+	hsqamp += dtemp;
 
 	rp = &up->mitig[up->achan].wwvh;
 	rp->amp = sqrt(hiamp * hiamp + hqamp * hqamp) / SYNCYC;
 	if (!(up->status & MSYNC))
 		wwv_qrz(peer, rp, (int)(pp->fudgetime2 * SECOND));
 	jptr = (jptr + 1) % SYNSIZ;
+	kptr = (kptr + 1) % TCKSIZ;
 
 	/*
 	 * The following section is called once per minute. It does
@@ -1199,103 +1244,15 @@ wwv_rf(
 	 */
 	if (up->status & SELV) {
 		pdelay = (int)(pp->fudgetime1 * SECOND);
-
-		/*
-		 * WWV FIR matched filter, five cycles of 1000-Hz
-		 * sinewave normalized for unit energy per cycle..
-		 */
-		mf[40] = mf[39];
-		mfsync = (mf[39] = mf[38]) * 1.767767e-01;
-		mfsync += (mf[38] = mf[37]) * 2.500000e-01;
-		mfsync += (mf[37] = mf[36]) * 1.767767e-01;
-		mf[36] = mf[35];
-		mfsync += (mf[35] = mf[34]) * -1.767767e-01;
-		mfsync += (mf[34] = mf[33]) * -2.500000e-01;
-		mfsync += (mf[33] = mf[32]) * -1.767767e-01;
-		mf[32] = mf[31];
-		mfsync += (mf[31] = mf[30]) * 1.767767e-01;
-		mfsync += (mf[30] = mf[29]) * 2.500000e-01;
-		mfsync += (mf[29] = mf[28]) * 1.767767e-01;
-		mf[28] = mf[27];
-		mfsync += (mf[27] = mf[26]) * -1.767767e-01;
-		mfsync += (mf[26] = mf[25]) * -2.500000e-01;
-		mfsync += (mf[25] = mf[24]) * -1.767767e-01;
-		mf[24] = mf[23];
-		mfsync += (mf[23] = mf[22]) * 1.767767e-01;
-		mfsync += (mf[22] = mf[21]) * 2.500000e-01;
-		mfsync += (mf[21] = mf[20]) * 1.767767e-01;
-		mf[20] = mf[19];
-		mfsync += (mf[19] = mf[18]) * -1.767767e-01;
-		mfsync += (mf[18] = mf[17]) * -2.500000e-01;
-		mfsync += (mf[17] = mf[16]) * -1.767767e-01;
-		mf[16] = mf[15];
-		mfsync += (mf[15] = mf[14]) * 1.767767e-01;
-		mfsync += (mf[14] = mf[13]) * 2.500000e-01;
-		mfsync += (mf[13] = mf[12]) * 1.767767e-01;
-		mf[12] = mf[11];
-		mfsync += (mf[11] = mf[10]) * -1.767767e-01;
-		mfsync += (mf[10] = mf[9]) * -2.500000e-01;
-		mfsync += (mf[9] = mf[8]) * -1.767767e-01;
-		mf[8] = mf[7];
-		mfsync += (mf[7] = mf[6]) * 1.767767e-01;
-		mfsync += (mf[6] = mf[5]) * 2.500000e-01;
-		mfsync += (mf[5] = mf[4]) * 1.767767e-01;
-		mf[4] = mf[3];
-		mfsync += (mf[3] = mf[2]) * -1.767767e-01;
-		mfsync += (mf[2] = mf[1]) * -2.500000e-01;
-		mfsync += (mf[1] = mf[0]) * -1.767767e-01;
-		mf[0] = syncx;
+		mfsync = sqrt(csiamp * csiamp + csqamp * csqamp) /
+		    TCKCYC;
 	} else if (up->status & SELH) {
 		pdelay = (int)(pp->fudgetime2 * SECOND);
-
-		/*
-		 * WWVH FIR matched filter, six cycles of 1200-Hz
-		 * sinewave normalized for unit energy per cycle.
-		 */
-		mf[40] = mf[39];
-		mfsync = (mf[39] = mf[38]) * 2.022542e-01;
-		mfsync += (mf[38] = mf[37]) * 2.377641e-01;
-		mfsync += (mf[37] = mf[36]) * 7.725425e-02;
-		mfsync += (mf[36] = mf[35]) * -1.469463e-01;
-		mfsync += (mf[35] = mf[34]) * -2.500000e-01;
-		mfsync += (mf[34] = mf[33]) * -1.469463e-01;
-		mfsync += (mf[33] = mf[32]) * 7.725425e-02;
-		mfsync += (mf[32] = mf[31]) * 2.377641e-01;
-		mfsync += (mf[31] = mf[30]) * 2.022542e-01;
-		mf[30] = mf[29];
-		mfsync += (mf[29] = mf[28]) * -2.022542e-01;
-		mfsync += (mf[28] = mf[27]) * -2.377641e-01;
-		mfsync += (mf[27] = mf[26]) * -7.725425e-02;
-		mfsync += (mf[26] = mf[25]) * 1.469463e-01;
-		mfsync += (mf[25] = mf[24]) * 2.500000e-01;
-		mfsync += (mf[24] = mf[23]) * 1.469463e-01;
-		mfsync += (mf[23] = mf[22]) * -7.725425e-02;
-		mfsync += (mf[22] = mf[21]) * -2.377641e-01;
-		mfsync += (mf[21] = mf[20]) * -2.022542e-01;
-		mf[20] = mf[19];
-		mfsync += (mf[19] = mf[18]) * 2.022542e-01;
-		mfsync += (mf[18] = mf[17]) * 2.377641e-01;
-		mfsync += (mf[17] = mf[16]) * 7.725425e-02;
-		mfsync += (mf[16] = mf[15]) * -1.469463e-01;
-		mfsync += (mf[15] = mf[14]) * -2.500000e-01;
-		mfsync += (mf[14] = mf[13]) * -1.469463e-01;
-		mfsync += (mf[13] = mf[12]) * 7.725425e-02;
-		mfsync += (mf[12] = mf[11]) * 2.377641e-01;
-		mfsync += (mf[11] = mf[10]) * 2.022542e-01;
-		mf[10] = mf[9];
-		mfsync += (mf[9] = mf[8]) * -2.022542e-01;
-		mfsync += (mf[8] = mf[7]) * -2.377641e-01;
-		mfsync += (mf[7] = mf[6]) * -7.725425e-02;
-		mfsync += (mf[6] = mf[5]) * 1.469463e-01;
-		mfsync += (mf[5] = mf[4]) * 2.500000e-01;
-		mfsync += (mf[4] = mf[3]) * 1.469463e-01;
-		mfsync += (mf[3] = mf[2]) * -7.725425e-02;
-		mfsync += (mf[2] = mf[1]) * -2.377641e-01;
-		mfsync += (mf[1] = mf[0]) * -2.022542e-01;
-		mf[0] = syncx;
+		mfsync = sqrt(hsiamp * hsiamp + hsqamp * hsqamp) /
+		    TCKCYC;
 	} else {
-		mfsync = 0;
 		pdelay = 0;
+		mfsync = 0;
 	}
 
 	/*
@@ -1307,8 +1264,7 @@ wwv_rf(
 	 * computed from the maximum sample and the envelope of the
 	 * sample 6 ms before it, so if we slip more than a cycle the
 	 * SNR should plummet. The signal is scaled to produce unit
-	 * energy at the maximum value. The noise is measured as the
-	 * energy of the sixth cycle before the peak.
+	 * energy at the maximum value.
 	 */
 	dtemp = (epobuf[epoch] += (mfsync - epobuf[epoch]) /
 	    up->avgint);
@@ -1319,9 +1275,9 @@ wwv_rf(
 	if (epoch == 0) {
 		int k, j;
 
-		up->epomax = epomax / 5.;
+		up->epomax = epomax;
 		dtemp = 0;
-		k = epopos - 6 * MS;
+		k = epopos - 7 * MS;
 		for (j = 0; j < MS; j++) {
 			if (k < 0)
 				k += SECOND;
@@ -1331,7 +1287,7 @@ wwv_rf(
 			k++;
  		} 
 		up->eposnr = wwv_snr(epomax, sqrt(dtemp / MS));
-		epopos -= pdelay + 5 * MS;
+		epopos -= pdelay + TCKCYC * MS;
 		if (epopos < 0)
 			epopos += SECOND;
 		wwv_endpoc(peer, epopos);
@@ -1567,8 +1523,9 @@ wwv_endpoc(
 
 	/*
 	 * If the signal amplitude or SNR fall below thresholds, dim the
-	 * second sync lamp and start over. If no stations are heard, go
-	 * no further. 
+	 * second sync lamp and start over. If no stations are heard we
+	 * are either in a probe cycle or the ions are dim. In that case
+	 * allow the amplitude and SNR to discharge and go no further. 
 	 */
 	if (up->epomax < STHR || up->eposnr < SSNR) {
 		up->status &= ~(SSYNC | FGATE);
@@ -1632,7 +1589,7 @@ wwv_endpoc(
 	 * epoches is determined. If the longest run is at least 10
 	 * seconds, the SSYNC bit is lit and the value becomes the
 	 * reference epoch for the next interval. If not, the second
-	 * synd lamp is dark and flashers set.
+	 * sync lamp is dark and flashers set.
 	 */
 	if (maxrun > 0 && mepoch == xepoch) {
 		maxrun += syncnt;
@@ -1654,7 +1611,7 @@ wwv_endpoc(
 	 * greater than 1 ms, the counter is decremented. If the epoch
 	 * change is less than 0.5 ms, the counter is incremented. If
 	 * the counter increments to +3, the averaging interval is
-	 * doubled and the counter set to zero; if it increments to -3,
+	 * doubled and the counter set to zero; if it decrements to -3,
 	 * the interval is halved and the counter set to zero.
 	 *
 	 * Here be spooks. From careful observations, the epoch
@@ -1670,15 +1627,14 @@ wwv_endpoc(
 	dtemp = (mepoch - zepoch) % SECOND;
 	if (up->status & FGATE) {
 		if (abs(dtemp) < MAXFREQ * MINAVG) {
-			if (maxrun * abs(mepoch - zepoch) <
-			    avgcnt) {
+			if (maxrun * abs(dtemp) < avgcnt) {
 				up->freq += dtemp / avgcnt;
 				if (up->freq > MAXFREQ)
 					up->freq = MAXFREQ;
 				else if (up->freq < -MAXFREQ)
 					up->freq = -MAXFREQ;
 			}
-			if (abs(dtemp) < MAXFREQ * MINAVG / 2) {
+			if (abs(dtemp) < MAXFREQ * MINAVG / 2.) {
 				if (avginc < 3) {
 					avginc++;
 				} else {
