@@ -223,9 +223,17 @@ struct interface {
  * Peer errors
  */
 #define TEST10		0x0200	/* peer stratum exceeded */
-#define	TEST11		0x0400	/* peeer distance exceeded */
+#define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unfit for synchronization */
+
+/*
+ * Authentication codes
+ */
+#define	AUTH_NONE	0	/* no authentication */
+#define	AUTH_OK		1	/* authentication OK */
+#define	AUTH_ERROR	2	/* authentication error */
+#define	AUTH_CRYPTO	3	/* crypto-NAK */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -878,13 +886,15 @@ struct endpoint {
 /*
  * Association matching AM[] return codes
  */
-#define AM_ERR		-1
-#define AM_NOMATCH	 0
-#define AM_PROCPKT	 1
-#define AM_FXMIT	 2
-#define AM_MANYCAST	 3
-#define AM_NEWPASS	 4
-#define AM_NEWBCL	 5
+#define AM_ERR		-1		/* error */
+#define AM_NOMATCH	0		/* no match */
+#define	AM_SERV		1		/* server packet */
+#define AM_PROCPKT	2		/* symmetric packet */	
+#define AM_BCST		3		/* broadcast packet */	
+#define AM_FXMIT	4		/* client packet */
+#define AM_MANYCAST	5		/* manycast packet */
+#define AM_NEWPASS	6		/* new passive */
+#define AM_NEWBCL	7		/* new broadcast */
 
 /* NetInfo configuration locations */
 #ifdef HAVE_NETINFO
