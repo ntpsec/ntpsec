@@ -654,9 +654,11 @@ internal_current6(isc_interfaceiter_t *iter) {
 		iter->current.flags |= INTERFACE_F_BROADCAST;
 	}
 
+#ifdef IFF_MULTICAST
 	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
 		iter->current.flags |= INTERFACE_F_MULTICAST;
 	}
+#endif
 
 	/*
 	 * If the interface is point-to-point, get the destination address.
