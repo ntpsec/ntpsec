@@ -437,8 +437,7 @@ if test $ac_cv_struct_ntptimeval = yes; then
   AC_DEFINE(HAVE_STRUCT_NTPTIMEVAL, 1, [Do we have struct ntptimeval?])
 fi
 
-AC_CACHE_CHECK(struct ntptimeval for time.tv_nsec, ac_cv_struct_ntptimeval_tv_nsec,
-[AC_TRY_COMPILE([
+AC_CHECK_MEMBERS((struct ntptimeval.time.tv_nsec, struct ntptimeval.tai), , ,[
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
@@ -452,24 +451,20 @@ AC_CACHE_CHECK(struct ntptimeval for time.tv_nsec, ac_cv_struct_ntptimeval_tv_ns
 # ifdef HAVE_TIMEX_H
 # include <timex.h>
 # endif
-#endif],[
-extern struct ntptimeval *ntv;
-return ntv->time.tv_nsec;],
-	ac_cv_struct_ntptimeval_tv_nsec=yes,
-	ac_cv_struct_ntptimeval_tv_nsec=no)
-])
-if test "$ac_cv_struct_ntptimeval_tv_nsec" = "yes"; then
-	AC_DEFINE(HAVE_TV_NSEC_IN_NTPTIMEVAL)
-fi
+#endif])
 
-AC_CACHE_CHECK([for struct timespec in struct ntptimeval], ac_cv_struct_ntptimeval_timespec,
-[AC_TRY_COMPILE([#include <sys/time.h>
-#include <sys/timex.h>],
-[struct ntptimeval n; n.time.tv_nsec = 0;],
-ac_cv_struct_ntptimeval_timespec=yes, ac_cv_struct_ntptimeval_timespec=no)])
-if test $ac_cv_struct_ntptimeval_timespec = yes; then
-  AC_DEFINE(TIMESPEC_IN_NTPTIMEVAL, 1, [Does ntptimeval use struct timespec?])
-fi
+AC_CHECK_MEMBERS((struct audio_info.monitor_gain,
+    struct audio_info.output_muted,
+    struct audio_info.blocksize,
+    struct audio_info.hiwat,
+    struct audio_info.lowat,
+    struct audio_info.mode), , ,
+[#ifdef HAVE_SUN_AUDIO_H
+#include <sun/audio.h>
+#endif
+#ifdef HAVE_SYS_AUDIOIO_H
+#include <sys/audioio.h>
+#endif])
 
 AC_C_INLINE
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
@@ -1575,22 +1570,6 @@ dnl  *) ans=no ;;
 dnl esac
 dnl AC_MSG_RESULT($ans)
 
-dnl  AC_CHECK_MEMBERS ((AGGREGATE.MEMBER, ...), [ACTION-IF-FOUND],
-dnl           [ACTION-IF-NOT-FOUND], [INCLUDES])
-
-AC_CHECK_MEMBERS((struct audio_info.monitor_gain,
-    struct audio_info.output_muted,
-    struct audio_info.blocksize,
-    struct audio_info.hiwat,
-    struct audio_info.lowat,
-    struct audio_info.mode), , ,
-[#ifdef HAVE_SUN_AUDIO_H
-#include <sun/audio.h>
-#endif
-#ifdef HAVE_SYS_AUDIOIO_H
-#include <sys/audioio.h>
-#endif])
-
 # Requires modem control
 AC_MSG_CHECKING(ACTS modem service)
 AC_ARG_ENABLE(ACTS,		[  --enable-ACTS           + ACTS modem service],
@@ -2266,7 +2245,6 @@ AC_MSG_RESULT($ans)
 AC_MSG_CHECKING(if we want to compile with ElectricFence)
 AC_ARG_WITH(electricfence,	[  --with-electricfence    -],
 [ans=$withval], [ans=no])
-echo "ElectricFence: withval is <$withval>, ans is <$ans>"
 case "$ans" in
  no) ;;
  *)

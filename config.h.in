@@ -207,9 +207,6 @@
 /* define if struct clockinfo has tickadj */
 #undef HAVE_TICKADJ_IN_STRUCT_CLOCKINFO
 
-/* define if struct ntptimeval uses time.tv_nsec instead of time.tv_usec */ 
-#undef HAVE_TV_NSEC_IN_NTPTIMEVAL 
-
 /* Does a system header defind struct ppsclockev? */
 #undef HAVE_STRUCT_PPSCLOCKEV
 
@@ -710,6 +707,12 @@
 /* Do we have struct ntptimeval? */
 #undef HAVE_STRUCT_NTPTIMEVAL
 
+/* Define if `tai' is member of `struct ntptimeval'. */
+#undef HAVE_STRUCT_NTPTIMEVAL_TAI
+
+/* Define if `tv_nsec' is member of `struct ntptimeval'. */
+#undef HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
+
 /* Define if you have the <sun/audioio.h> header file. */
 #undef HAVE_SUN_AUDIOIO_H
 
@@ -895,9 +898,6 @@
 
 /* Define if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* Does ntptimeval use struct timespec? */
-#undef TIMESPEC_IN_NTPTIMEVAL
 
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME

@@ -30,7 +30,7 @@
 # endif /* SYS_DECOSF1 */
 #endif
 
-#ifdef HAVE_TV_NSEC_IN_NTPTIMEVAL
+#ifdef HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
 #define tv_frac_sec tv_nsec
 #else
 #define tv_frac_sec tv_usec

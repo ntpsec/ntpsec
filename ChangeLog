@@ -1,5 +1,11 @@
 2000-08-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntptime.c: Use: HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC, it's
+	the standard name.
+
+	* configure.in: Look for struct ntptimeval.tai in sys/timex.h
+	Cleanup struct tptimeval member tests.
+
 	* util/ntp-genkeys.c: New command-line arguments
 
 2000-08-14  Harlan Stenn  <stenn@whimsy.udel.edu>
