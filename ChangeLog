@@ -1,5 +1,8 @@
 2001-04-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/accopt.htm: Document the "version" parameter
+	From Dave Mills.
+
 	* ntpd/ntp_proto.c (fast_xmit): Implement DENY mode.
 	From Dave Mills.
 

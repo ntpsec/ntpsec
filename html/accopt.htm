@@ -1,10 +1,11 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML><HEAD><TITLE>
 Access Control Options
 </TITLE></HEAD><BODY><H3>
 Access Control Options
 </H3>
 
-<img align=left src=pic/pogo6.gif><a href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>Pogo</i>, Walt Kelly</a>
+<img align=left src=pic/pogo6.gif alt="gif"><a href=http://www.eecis.udel.edu/~mills/pictures.htm>from <i>Pogo</i>, Walt Kelly</a>
 
 <p>The skunk watches for intruders and sprays.
 <br clear=left><hr>
@@ -121,15 +122,12 @@ port (123). Both <TT>ntpport</TT> and <TT>non-ntpport</TT> may be
 specified. The <TT>ntpport</TT> is considered more specific and is
 sorted later in the list.</DD>
 
+<DT><TT>version</TT></DT>
+<DD>Ignore these hosts if not the current NTP version.</DD>
+
 </DL>
 
-<DD>Default restriction list entries, with the flags <TT>ignore,
-ntpport</TT>, for each of the local host's interface addresses are
-inserted into the table at startup to prevent the server from attempting
-to synchronize to its own time. A default entry is also always present,
-though if it is otherwise unconfigured; no flags are associated with the
-default entry (i.e., everything besides your own NTP server is
-unrestricted).</DD>
+<DD>Default restriction list entries, with the flags <TT>ignore, interface, ntpport</TT>, for each of the local host's interface addresses are inserted into the table at startup to prevent the server from attempting to synchronize to its own time. A default entry is also always present, though if it is otherwise unconfigured; no flags are associated with the default entry (i.e., everything besides your own NTP server is unrestricted).</DD>
 
 <DT><TT>clientlimit <I>limit</I></TT></DT>
 <DD>Set the <TT>client_limit</TT> variable, which limits the number of
@@ -144,6 +142,11 @@ this variable is 3600 seconds.</DD>
 
 </DL>
 
-<hr><a href=index.htm><img align=left src=pic/home.gif></a><address><a
-href=mailto:mills@udel.edu> David L. Mills &lt;mills@udel.edu&gt;</a>
-</address></a></body></html>
+<hr>
+<a href="index.htm"><img align="left" src="pic/home.gif" alt=
+"gif"></a> 
+
+<address><a href="mailto:mills@udel.edu">David L. Mills
+&lt;mills@udel.edu&gt;</a></address>
+</body>
+</html>
