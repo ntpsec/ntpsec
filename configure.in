@@ -3708,6 +3708,15 @@ case "$found_ipv6" in
  yes)
     AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
 
+    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], , ,
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+])
+
     AC_MSG_CHECKING(for in6_pktinfo)
     AC_TRY_COMPILE([
 #include <sys/types.h>
