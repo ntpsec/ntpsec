@@ -568,6 +568,11 @@ newpeer(
 	if (++current_association_ID == 0)
 		++current_association_ID;
 
+#ifdef DEBUG
+	if (debug >2)
+		printf("newpeer: cast flags: 0x%x for address: %s\n",
+			cast_flags, stoa(srcadr));
+#endif
 	/*
 	 * Initialize the peer structure and dance the interface jig.
 	 * Reference clocks step the loopback waltz, the others
