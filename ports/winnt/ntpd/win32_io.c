@@ -101,7 +101,7 @@ refclock_open(
 	  case B2400 :  dcb.BaudRate = 2400; break;
 	  case B4800 :  dcb.BaudRate = 4800; break;
 	  case B9600 :  dcb.BaudRate = 9600; break;
-	  case B19200 : dcb.BaudRate = 9600; break;
+	  case B19200 : dcb.BaudRate = 19200; break;
 	  case B38400 : dcb.BaudRate = 38400; break;
 	  default :
 		msyslog(LOG_ERR, "NT_COM: Device %s: unsupported baud rate", dev);
@@ -187,10 +187,10 @@ tcsetattr(
 	switch (max(s->c_ospeed, s->c_ispeed)) {
 		case B300 :   dcb.BaudRate = 300; break;
 		case B1200 :  dcb.BaudRate = 1200; break;
-		case B2400 :  dcb.BaudRate = 9600; break;
+		case B2400 :  dcb.BaudRate = 2400; break;
 		case B4800 :  dcb.BaudRate = 4800; break;
 		case B9600 :  dcb.BaudRate = 9600; break;
-		case B19200 : dcb.BaudRate = 9600; break;
+		case B19200 : dcb.BaudRate = 19200; break;
 		case B38400 : dcb.BaudRate = 38400; break;
 		default :
 			msyslog(LOG_ERR, "NT_COM: unsupported baud rate");
