@@ -137,7 +137,7 @@ been extended to all drivers as an intrinsic function. Most of the
 drivers in NTPv3 have been converted to this interface, but some,
 including the PARSE subinterface, have yet to be overhauled. New
 drivers have been added for several GPS receivers now on the market
-for a total of 37 drivers. Drivers for the Canadian standard time
+for a total of 39 drivers. Drivers for the Canadian standard time
 and frequency station CHU, the US standard time and frequency
 stations WWV/H and for IRIG signals have been updated and
 capabilities added to allow direct connection of these signals to
@@ -203,7 +203,9 @@ Options</a> page for details.</p>
 <p>The <tt>ppsclock</tt> line discipline/streams module is no
 longer supported. This function is now handled by the <a href=
 "driver22.htm">PPS Clock Discipline</a> driver, which uses the new
-PPSAPI application program interface proposed by the IETF.</p>
+PPSAPI application program interface proposed by the IETF. Note
+that the <tt>pps</tt> configuration file command has been obsoleted by  the driver. See the <a href="pps.htm">Pulse-per-second (PPS) Signal
+Interfacing</a> page for further information.</p>
 </li>
 
 <li>
@@ -212,7 +214,8 @@ command line. For the inveterate knob twiddlers several of the more
 important performance variables can be changed to fit actual or
 perceived special conditions. It is possible to operate the daemon
 in a one-time mode similar to <tt>ntpdate</tt>, which program is
-headed for retirement. See the documentation page for the new
+headed for retirement. See the <a href="ntpd.htm"><tt>ntpd</tt> -
+Network Time Protocol (NTP) daemon</a> page for the new
 features.</p>
 </li>
 </ol>

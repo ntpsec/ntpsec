@@ -1,5 +1,15 @@
 2001-04-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/pic/radio2.jpg:
+	* html/release.htm:
+	* html/refclock.htm:
+	* html/pps.htm:
+	* html/ntpd.htm:
+	* html/miscopt.htm:
+	* html/driver22.htm:
+	* html/confopt.htm:
+	Updated documentation from Dave Mills.
+
 	* util/ntp-genkeys.c: sys_minpoll.
 	* ntpd/refclock_atom.c: Comment additions.
 	* ntpd/ntp_proto.c: mode_ntpdate and peer_ntpdate added.

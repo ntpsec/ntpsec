@@ -182,10 +182,11 @@ the names of all peer variables and the <tt>clock_var_list</tt>
 holds the names of the reference clock variables.</dd>
 
 <dt><tt>tinker [ step <i>step</i> | panic <i>panic</i> | dispersion
-<i>dispersion</i> | stepout <i>stepout</i> ]</tt></dt>
+<i>dispersion</i> | stepout <i>stepout</i> | minpoll <i>minpoll</i>
+]</tt></dt>
 
 <dd>This command can be used to alter several system variables in
-very exceptional circumstances. The default values of these
+very exceptional circumstances. It should occur in the configuration file before any other configuration options. The default values of these
 variables have been carefully optimized for a wide range of network
 speeds and reliability expectations. In general, they interact in
 intricate ways that are hard to predict and some combinations can
@@ -196,7 +197,7 @@ twisters are on their own and can expect no help from the support
 group. 
 
 <p>All arguments are in floating point seconds or seconds per
-second. The variables operate as follows:</p>
+second. The <tt>minpoll</tt> argument is an integer in seconds to the power of two. The variables operate as follows:</p>
 </dd>
 
 <dd>
@@ -220,6 +221,12 @@ rate, normally .000015.</dd>
 
 <dd>The argument becomes the new value for the watchdog timeout,
 normally 900 s.</dd>
+
+<dt><tt>minpoll <i>minpoll</i></tt></dt>
+
+<dd>The argument becomes the new value for the default minimum poll
+interval, normally 6 (64 s). The value may not be less than 4 (16
+s).</dd>
 </dl>
 </dd>
 

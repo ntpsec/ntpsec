@@ -20,7 +20,8 @@ Requires: PPSAPI interface
 older driver operated with several somewhat archaic signal
 interface devices, required intricate configuration and was poorly
 documented. This driver operates only with the PPSAPI interface
-proposed as an IETF standard.</p>
+proposed as an IETF standard. Note also that the <tt>pps</tt>
+configuration command has been obsoleted by this driver.</p>
 
 <h4>Description</h4>
 
@@ -55,7 +56,7 @@ for this interface is included in current versions of FreeBSD and
 Linux and proprietary versions for Digital/Compaq Tru64 (Alpha),
 Sun Solaris and Sun SunOS. See the <a href="pps.htm">
 Pulse-per-second (PPS) Signal Interfacing</a> page for further
-information</p>
+information.</p>
 
 <p>The PPS source can be connected via a serial or parallel port,
 depending on the hardware and operating system. The port can be
@@ -68,8 +69,20 @@ signal can be connected directly to the ACK pin (pin 10) of the
 connector. Whether the PPS signal is connected via a dedicated port
 or shared with another device, the driver opens the device <tt>
 /dev/pps%d</tt>, where <tt>%d</tt> is the unit number. As with
-other drivers, links can be used to redirect the logical name can
-be redirected to the actual physical device.</p>
+other drivers, links can be used to redirect the logical name to
+the actual physical device.</p>
+
+<p>The driver normally operates like any other driver and uses the
+same mitigation algorithms and PLL/FLL clock discipline
+incorporated in the daemon. If kernel PLL/FLL support is available,
+the kernel PLL/FLL clock discipline is used instead. The default
+behavior is not to use the kernel PPS clock discipline, even if
+present. This driver incorporates a good deal of signal processing
+to reduce jitter using the median filter and trimmed average
+algorithms in the driver interface. As the result, performance with
+minpoll and maxpoll configured at the minimum 4 (16s) is generally
+better than the kernel PPS clock discipline. However, fudge flag 3
+can be used to enable this discipline if necessary.</p>
 
 <p>Note that the PPS source is considered reachable only if the
 auxiliary source is the prefer peer, is reachable and is selected

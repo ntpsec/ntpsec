@@ -193,6 +193,40 @@ stopped and run in one-time mode as required. At each startup, the
 frequency is read from the file and initializes the kernel
 frequency.</p>
 
+<h4>Poll Interval Control</h4>
+
+<p>This version of NTP includes an intricate state machine to
+reduce the network load while maintaining a quality of
+synchronization consistent with the observed jitter and wander.
+There are a number of ways to tailor the operation in order enhance
+accuracy by reducing the interval or to reduce network overhead by
+increasing it. However, the user is advised to carefully consider
+the consequenses of changing the poll adjustment range from the
+default minimum of 64 s to the default maximum of 1,024 s. The
+default minimum can be changed with the <tt>tinker minpoll</tt>
+command to a value not less than 16 s. This value is used for all
+configured associations, unless overriden by the <tt>minpoll</tt>
+option on the configuration command. Note that most device drivers
+will not operate properly if the poll interval is less than 64 s
+and that the broadcast server and manycast client associations will
+also use the default, unless overriden.</p>
+
+<p>In some cases involving dial up or toll services, it may be
+useful to increase the minimum interval to a few tens of minutes
+and maximum interval to a day or so. Under normal operation
+conditions, once the clock discipline loop has stabilized the
+interval will be increased in steps from the minumum to the
+maximum. However, this assumes the intrinsic clock frequency error
+is small enough for the discipline loop correct it. The capture
+range of the loop is 500 PPM at an interval of 64s decreasing by a
+factor of two for each doubling of interval. At a minimum of 1,024
+s, for example, the capture range is only 31 PPM. If the intrinsic
+error is greater than this, the drift file <tt>ntp.drift</tt> will
+have to be specially tailored to reduce the residual error below
+this limit. Once this is done, the drift file is automatically
+updated once per hour and is available to initialize the frequency
+on subsequent daemon restarts.</p>
+
 <h4>Notes</h4>
 
 <p>If NetInfo support is built into <tt>ntpd</tt>, then <tt>

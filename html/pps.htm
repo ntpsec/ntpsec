@@ -34,7 +34,7 @@ connection via the data leads of a serial port.</p>
 system support, which is available in only a few operating systems,
 including Linux, FreeBSD and latest Solaris beginning with 2.7.
 Support on an experimental basis is available for several older
-systems, including SunOS, Digital RISC and HP-UX, and in current
+systems, including SunOS, Digital Ultrix and HP-UX, and in current
 Digital Tru64 (Alpha). The PPS application program interface
 defined in RFC-2783 (PPSAPI) is the only interface currently
 supported. Older PPS interfaces based on the <tt>ppsclock</tt> and
@@ -42,16 +42,17 @@ supported. Older PPS interfaces based on the <tt>ppsclock</tt> and
 PPSAPI is expected to become an IETF cross-platform standard, it
 should be used by new applications.</p>
 
-<p>The PPSAPI inerface requires a <tt>/usr/include/ppstime.h</tt>
-header file. This file is included in Linux and FreeBSD
-distributions, but not in other distributions or standard
-workstation products at this time. Header files for other systems,
-including Solaris, can be found in the <tt>nanokernel.tar.gz</tt>
-distribution, which can be found via the Collaboration Resources
-link at www.ntp.org. The top level directory contains a number of
-subdirectories for each architecture, including Solaris. The <tt>
-ppstime.h</tt> file for each architecture can be found in the
-subdirectory of the same name.</p>
+<p>The PPSAPI inerface requires a <tt>
+/usr/include/sys/ppstime.h</tt> header file. This file is included
+in Linux and FreeBSD distributions, but not in other distributions
+or standard workstation products at this time. Header files for
+other systems, including Solaris, can be found in the <tt>
+nanokernel.tar.gz</tt> distribution, which can be found via the
+Collaboration Resources link at www.ntp.org. The top level
+directory contains a number of subdirectories for each
+architecture, including Solaris. The <tt>ppstime.h</tt> file for
+each architecture can be found in the subdirectory of the same
+name.</p>
 
 <p>In the preferred mode of operation, PPS signals are processed by
 the <a href="driver22.htm">PPS Clock Discipline</a> driver and
@@ -59,7 +60,9 @@ other clock drivers which might be involved need not know or care
 about them. In some cases where there is no other driver, time
 might be obtained from remote NTP servers via the network and local
 PPS signals, for instance from a calibrated cesium oscillator, used
-to stabilize the frequency and remove network jitter.</p>
+to stabilize the frequency and remove network jitter. Note that the
+<tt>pps</tt> configuration command has been obsoleted by this
+driver.</p>
 
 <p>The PPS driver operates in conjunction with a preferred peer, as
 described in the <a href="prefer.htm">Mitigation Rules and the <tt>
@@ -72,13 +75,16 @@ as described in that page in order to provide the most accurate
 time, while respecting the various types of equipment failures that
 could happen.</p>
 
-<p>For the utmost time quality, some Unix system kernels support a
-PPS signal directly, as described in the <a href="kern.htm">A
-Kernel Model for Precision Timekeeping</a> page. Specifically, the
-PPS driver can be used to direct the PPS signal to the kernel for
-use as a discipline source for both time and frequency. The
-presence of the kernel support is automatically detected during the
-NTP build process and supporting code automatically compiled.</p>
+<p>Some Unix system kernels support a PPS signal directly, as
+described in the <a href="kern.htm">A Kernel Model for Precision
+Timekeeping</a> page. Specifically, the PPS driver can be used to
+direct the PPS signal to the kernel for use as a discipline source
+for both time and frequency. The presence of the kernel support is
+automatically detected during the NTP build process and supporting
+code automatically compiled. Note that the PPS driver does not
+normally enable the PPS kernel code, since performance is generally
+better without it. However, this code can be enabled by a driver
+fudge flag if necessary.</p>
 
 <p>Some configurations may include multiple radio clocks with
 individual PPS outputs. In some PPSAPI designs multiple PPS signals
