@@ -17,12 +17,14 @@
 #include <signal.h>
 #include <ctype.h>
 #ifdef HAVE_POLL_H
-#include <poll.h>
+# include <poll.h>
 #endif
 #ifndef SYS_WINNT
 # include <netdb.h>
 # include <sys/signal.h>
-# include <sys/ioctl.h>
+# ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+# endif
 #endif /* SYS_WINNT */
 #include <sys/time.h>
 #ifdef HAVE_SYS_RESOURCE_H
