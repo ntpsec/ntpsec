@@ -2883,7 +2883,7 @@ key_expire(
  * > stratum undefined or too high
  * > too long without synchronization
  */
-int				/* 0 if no, 1 if yes */
+static int			/* 0 if no, 1 if yes */
 peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)

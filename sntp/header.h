@@ -68,7 +68,7 @@ extern void preferred_family(int);
 
 /* Defined in socket.c */
 
-extern void open_sockets (int which, char *hostnames, int timespan);
+extern void open_socket (int which, char *hostnames, int timespan);
 
 extern void write_socket (int which, void *packet, int length);
 
