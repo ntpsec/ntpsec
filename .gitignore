@@ -112,3 +112,10 @@ ntpd/ntp_peer.patch
 ntpd/ntp_proto.patch
 ntpd/ntp_request.patch
 ntpq/ntpq.patch
+ntpd/ntp_io.c.$$$
+ports/winnt/libntp/libntp.dsp.$$$
+ports/winnt/ntp-keygen/ntpkeygen.dsp.$$$
+ports/winnt/ntpd/ntpd.dsp.$$$
+ports/winnt/ntpdate/ntpdate.dsp.$$$
+ports/winnt/ntpdc/ntpdc.dsp.$$$
+ports/winnt/ntpq/ntpq.dsp.$$$

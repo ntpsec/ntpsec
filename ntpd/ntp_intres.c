@@ -678,7 +678,7 @@ request(
 	overlap.Offset = overlap.OffsetHigh = (DWORD)0;
 	overlap.hEvent = hReadWriteEvent;
 	ret = WriteFile((HANDLE)sockfd, (char *)&reqpkt, REQ_LEN_NOMAC + n,
-			(LPDWORD)&NumberOfBytesWritten, (LPOVERLAPPED)&overlap);
+			NULL, (LPOVERLAPPED)&overlap);
 	if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
 		msyslog(LOG_ERR, "send to NTP server failed: %m");
 		return 0;
@@ -687,6 +687,11 @@ request(
 	if ((dwWait == WAIT_FAILED) || (dwWait == WAIT_TIMEOUT)) {
 		if (dwWait == WAIT_FAILED)
 		    msyslog(LOG_ERR, "WaitForSingleObject failed: %m");
+		return 0;
+	}
+	if (!GetOverlappedResult((HANDLE)sockfd, (LPOVERLAPPED)&overlap,
+				(LPDWORD)&NumberOfBytesWritten, FALSE)) {
+		msyslog(LOG_ERR, "GetOverlappedResult for WriteFile fails: %m");
 		return 0;
 	}
 #endif /* SYS_WINNT */
@@ -734,7 +739,7 @@ request(
 		}
 #else /* Overlapped I/O used on non-blocking sockets on Windows NT */
 		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, (DWORD)REQ_LEN_MAC,
-			       (LPDWORD)&NumberOfBytesRead, (LPOVERLAPPED)&overlap);
+			       NULL, (LPOVERLAPPED)&overlap);
 		if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
 			msyslog(LOG_ERR, "ReadFile() fails: %m");
 			return 0;
@@ -742,10 +747,15 @@ request(
 		dwWait = WaitForSingleObject(hReadWriteEvent, (DWORD) TIMEOUT_SEC * 1000);
 		if ((dwWait == WAIT_FAILED) || (dwWait == WAIT_TIMEOUT)) {
 			if (dwWait == WAIT_FAILED) {
-				msyslog(LOG_ERR, "WaitForSingleObject fails: %m");
+				msyslog(LOG_ERR, "WaitForSingleObject for ReadFile fails: %m");
 				return 0;
 			}
 			continue;
+		}
+		if (!GetOverlappedResult((HANDLE)sockfd, (LPOVERLAPPED)&overlap,
+					(LPDWORD)&NumberOfBytesRead, FALSE)) {
+			msyslog(LOG_ERR, "GetOverlappedResult fails: %m");
+			return 0;
 		}
 		n = NumberOfBytesRead;
 #endif /* SYS_WINNT */
