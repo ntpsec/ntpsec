@@ -273,7 +273,6 @@ struct instance {
 	u_char	count;		/* cycles thru Ea before starting */
 	s_char	assert;
 	u_char	hardpps;
-	u_char	same_file;
 	u_int	saw_At;
 };
 
@@ -575,10 +574,8 @@ oncore_start(
 	}
 	memset((char *) instance, 0, sizeof *instance);
 
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))
-		instance->same_file = 1;
-
-	if (instance->same_file) {	/* same device here */
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {
+		/* same device here */
 		if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW
 #if !defined(HAVE_PPSAPI) && !defined(TIOCDCDTIMESTAMP)
 		      | LDISC_PPS
@@ -628,7 +625,7 @@ oncore_start(
 	pp->clockdesc = "Motorola Oncore GPS Receiver";
 	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
 
-	/* go read any input data in /etc/ntp.oncoreX */
+	/* go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X */
 
 	oncore_read_config(instance);
 
@@ -761,7 +758,7 @@ oncore_ppsapi(
 
 	/* must have hardpps ON */
 
-	if (instance->hardpps && instance->same_file) {
+	if (instance->hardpps) {
 		int	i;
 
 		if (instance->assert)
