@@ -22,6 +22,8 @@
 #include "isc/net.h"
 #include "isc/result.h"
 
+#include "ntpq-opts.h"
+
 #ifdef SYS_WINNT
 # include <io.h>
 #else
@@ -458,10 +460,8 @@ CALL(ntpq,"ntpq",ntpqmain);
 void clear_globals(void)
 {
     extern int ntp_optind;
-    extern char *ntp_optarg;
     showhostnames = 0;				/* don'tshow host names by default */
     ntp_optind = 0;
-    ntp_optarg = 0;
     server_entry = NULL;            /* server entry for ntp */
     havehost = 0;				/* set to 1 when host open */
     numassoc = 0;		/* number of cached associations */
@@ -490,14 +490,11 @@ ntpqmain(
 	char *argv[]
 	)
 {
-	int c;
-	int errflg = 0;
 	extern int ntp_optind;
-	extern char *ntp_optarg;
 
 #ifdef NO_MAIN_ALLOWED
-    clear_globals();
-    taskPrioritySet(taskIdSelf(), 100 );
+	clear_globals();
+	taskPrioritySet(taskIdSelf(), 100 );
 #endif
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
@@ -516,7 +513,49 @@ ntpqmain(
 	}
 
 	progname = argv[0];
-	ai_fam_templ = ai_fam_default;
+
+	{
+		int optct = optionProcess(&ntpqOptions, argc, argv);
+		argc -= optct;
+		argv += optct;
+	}
+
+	switch (WHICH_IDX_IPV4) {
+	    case INDEX_OPT_IPV4:
+		ai_fam_templ = AF_INET;
+		break;
+	    case INDEX_OPT_IPV6:
+		ai_fam_templ = AF_INET6;
+		break;
+	    default:
+		ai_fam_templ = ai_fam_default;
+		break;
+	}
+
+	if (HAVE_OPT(COMMAND)) {
+		int	cmdct = STACKCT_OPT( COMMAND );
+		char**	cmds  = STACKLST_OPT( COMMAND );
+
+		while (cmdct-- > 0) {
+			ADDCMD(*cmds++);
+		}
+	}
+
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+
+	if (HAVE_OPT(INTERACTIVE)) {
+		interactive = 1;
+	}
+
+	if (HAVE_OPT(NUMERIC)) {
+		showhostnames = 0;
+	}
+
+	if (HAVE_OPT(PEERS)) {
+		ADDCMD("peers");
+	}
+
+#if 0
 	while ((c = ntp_getopt(argc, argv, "46c:dinp")) != EOF)
 	    switch (c) {
 		case '4':
@@ -550,6 +589,7 @@ ntpqmain(
 			       progname);
 		exit(2);
 	}
+#endif
 	if (ntp_optind == argc) {
 		ADDHOST(DEFHOST);
 	} else {

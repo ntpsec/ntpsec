@@ -1,15 +1,29 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
+
 bin_PROGRAMS = ntpq
-INCLUDES = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD = version.o ../libntp/libntp.a @READLINE_LIBS@
+ntpq_LDADD = version.o ../libntp/libntp.a @READLINE_LIBS@ $(LIBOPTS_LDADD)
 DISTCLEANFILES = .version version.c
 noinst_HEADERS = ntpq.h
-#EXTRA_DIST = ntpq.mak
 ETAGS_ARGS = Makefile.am
+EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
+BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h ntpq.1 ntpq-opts.texi ntpq-opts.menu
+man_MANS=	ntpq.1
 
-ntpq_SOURCES = ntpq.c ntpq_ops.c
+ntpq_SOURCES = ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
+
+ntpq-opts.h: ntpq-opts.c
+ntpq-opts.c: ntpq-opts.def
+	cd $(srcdir) && autogen ntpq-opts.def
+
+ntpq.1: ntpq-opts.def
+	cd $(srcdir) && autogen -Tagman1.tpl -bntpq ntpq-opts.def
+
+ntpq.texi ntpq.menu: ntpq-opts.def
+	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
+		-Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)
 

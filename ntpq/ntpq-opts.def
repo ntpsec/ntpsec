@@ -1,0 +1,156 @@
+/* -*- Mode: Text -*- */
+
+autogen definitions options;
+
+/*
+ *   $Id: opts.def,v 3.34 2004/10/15 01:48:34 bkorb Exp $
+ *
+ *  NTP copyright 1970-2004 Someone
+ *
+ *  NTP is free software.
+ *  You may redistribute it and/or modify it under the terms of the
+ *  GNU General Public License, as published by the Free Software
+ *  Foundation; either version 2, or (at your option) any later version.
+ *
+ *  AutoGen is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with AutoGen.  See the file "COPYING".  If not,
+ *  write to:  The Free Software Foundation, Inc.,
+ *             59 Temple Place - Suite 330,
+ *             Boston,  MA  02111-1307, USA.
+ */
+
+copyright = {
+    date  = "1970-2004";
+    owner = "ntp.org";
+    eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
+    type  = bsd;
+};
+
+
+prog-name      = "ntpq";
+prog-title     = "standard NTP query program";
+homerc         =  $HOME, ".";
+long-opts;
+
+#ifndef __windows__
+rcfile         = ".ntprc";
+#else
+rcfile         = "ntp.ini";
+#endif
+
+environrc;
+
+version         = `
+eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
+[ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
+echo $VERSION`;
+
+test-main;
+
+flag = {
+    name      = ipv4;
+    value     = 4;
+    equivalence = ipv4;
+    descrip   = "Force IPv4 DNS name resolution";
+    doc = <<-  _EndOfDoc_
+	Force DNS resolution of following host names on the command line
+	to the IPv4 namespace.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = ipv6;
+    value     = 6;
+    equivalence = ipv4;
+    descrip   = "Force IPv6 DNS name resolution";
+    doc = <<-  _EndOfDoc_
+	Force DNS resolution of following host names on the command line
+	to the IPv6 namespace.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = command;
+    value     = c;
+    arg-type  = string;
+    descrip   = "run a command and exit";
+    max       = NOLIMIT;
+    arg-name  = cmd;
+    stack-arg;
+    doc = <<-  _EndOfDoc_
+	The following argument is interpreted as an interactive format command
+	and is added to the list of commands to be executed on the specified
+	host(s).
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = peers;
+    value     = p;
+    descrip   = "Print a list of the peers";
+    flags-cant = command;
+    doc = <<-  _EndOfDoc_
+	Print a list of the peers known to the server as well as a summary
+	of their state. This is equivalent to the peers interactive command.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = interactive;
+    value     = i;
+    flags-cant = command, peers;
+    descrip   = "Force ntpq to operate in interactive mode";
+    doc = <<-  _EndOfDoc_
+	Force ntpq to operate in interactive mode.  Prompts will be written
+	to the standard output and commands read from the standard input.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = debug-level;
+    value     = d;
+    max       = NOLIMIT;
+    descrip   = "Increase output debug message level";
+    doc = <<-  _EndOfDoc_
+	Increase the debugging message output level.  Can be supplied multiple times.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = set-debug-level;
+    value     = D;
+    max       = NOLIMIT;
+    descrip   = "Set the output debug message level";
+    arg-type  = string;
+    flag-code = <<- _EOS_
+	DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+	_EOS_;
+    doc = <<-  _EndOfDoc_
+	Set the output debugging level.  Can be supplied multiple times,
+	but each overrides the previous value(s).
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = numeric;
+    value     = n;
+    descrip   = "numeric host addresses";
+    doc = <<-  _EndOfDoc_
+	Output all host addresses in dotted-quad numeric format rather than
+	converting to the canonical host names. 
+	_EndOfDoc_;
+};
+
+detail = <<-  _END_DETAIL
+	The ntpq utility program is used to monitor NTP daemon ntpd operations
+	and determine performance. It uses the standard NTP mode 6 control
+	message formats defined in Appendix B of the NTPv3 specification
+	RFC1305. The same formats are used in NTPv4, although some of the
+	variables have changed and new ones added. The description on this
+	page is for the NTPv4 variables.
+	_END_DETAIL;

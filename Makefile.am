@@ -2,7 +2,13 @@
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
 ACLOCAL_AMFLAGS= -I m4
 
-SUBDIRS = \
+include $(srcdir)/libopts/MakeDefs.inc
+
+SUBDIR=
+if NEED_LIBOPTS
+SUBDIR+= libopts
+endif
+SUBDIR+= \
 	scripts \
 	include \
 	ElectricFence	\
@@ -26,6 +32,7 @@ DIST_SUBDIRS= \
 	ElectricFence	\
 	arlib \
 	libntp	\
+	libopts \
 	libparse	\
 	ntpd	\
 	ntpdate	\
