@@ -142,7 +142,7 @@ extern	void	resetmanycast	P((void));
 /* ntp_crypto.c */
 #ifdef OPENSSL
 extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
-extern	int	crypto_xmit	P((struct pkt *, int, struct exten *, keyid_t));
+extern	int	crypto_xmit	P((struct pkt *, struct sockaddr_in *, int, struct exten *, keyid_t));
 extern	keyid_t	session_key	P((struct sockaddr_in *, struct sockaddr_in *, keyid_t, keyid_t, u_long));
 extern	void	make_keylist	P((struct peer *, struct interface *));
 extern	void	key_expire	P((struct peer *));
@@ -150,7 +150,6 @@ extern	void	crypto_update	P((void));
 extern	void	crypto_config	P((int, char *));
 extern	void	crypto_setup	P((void));
 extern	struct exten *crypto_args P((struct peer *, u_int, u_char *));
-extern	int	crypto_check	P((struct recvbuf *));
 extern	int	crypto_public	P((struct peer *, u_char *, u_int));
 extern	void	value_free	P((struct value *));
 extern	time_t	timegm		P((struct tm *));

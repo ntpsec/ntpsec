@@ -375,6 +375,7 @@ crypto_recv(
 		code = ntohl(ep->opcode) & 0xffff0000;
 		len = ntohl(ep->opcode) & 0x0000ffff;
 		associd = ntohl(pkt[1]);
+		rval = XEVNT_OK;
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -384,7 +385,8 @@ crypto_recv(
 #endif
 
 		/*
-		 * Check version number and field length.
+		 * Check version number and field length. If bad,
+		 * quietly ignore the packet.
 		 */
 		if (((code >> 24) & 0x3f) != CRYPTO_VN || len < 8 ||
 		    (len < VALUE_LEN && (code & CRYPTO_RESP))) {
@@ -394,8 +396,8 @@ crypto_recv(
 				printf(
 				    "crypto_recv: incorrect version or field length\n");
 #endif
-			peer->flash |= TEST12;
-			code |= CRYPTO_ERROR;;
+			rval = XEVNT_LEN;
+			break;
 		}
 
 		/*
@@ -413,11 +415,7 @@ crypto_recv(
 			tstamp = ntohl(ep->tstamp);
 			fstamp = ntohl(ep->fstamp);
 			vallen = ntohl(ep->vallen);
-		} else {
-			tstamp = fstamp = 0;
-			vallen = 0;
 		}
-		rval = XEVNT_OK;
 		switch (code) {
 
 		/*
@@ -446,16 +444,62 @@ crypto_recv(
 		case CRYPTO_ASSOC | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if it has invalid length
-			 * or the status word has already been stored.
+			 * Discard the message if it has already been
+			 * stored or has invalid length.
 			 */
-			if (peer->crypto || len < VALUE_LEN + vallen)
+			if (peer->crypto)
+				break;
+
+			if (len < VALUE_LEN + vallen) {
+				rval = XEVNT_LEN;
+				break;
+			}
+
+			/*
+			 * Check the identity schemes are compatible. If
+			 * no scheme is in use for both server and
+			 * client, the default TC scheme is used. If the
+			 * both server and client have private
+			 * certificates, the server public key and
+			 * identity are presumed valid, so we skip the
+			 * certificate and identity stages and move
+			 * immediately to the cookie stage which
+			 * confirms the server signature. If either both
+			 * server and client agree on either IFF or GQ
+			 * schemes, that survives. If this is a server
+			 * reply from a configured client, we use either
+			 * the IFF or GQ schemes if both agree, or the
+			 * default scheme if not. If none of the above,
+			 * raise blow the whistle and dump the
+			 * association.
+			 */
+			temp32 = PKT_MODE(rbufp->recv_pkt.li_vn_mode);
+			if (crypto_flags & CRYPTO_FLAG_PRIV) {
+				peer->crypto |= CRYPTO_FLAG_SIGN;
+				if (fstamp & CRYPTO_FLAG_PRIV)
+					fstamp |= CRYPTO_FLAG_VALID |
+					    CRYPTO_FLAG_VRFY;
+				else if (temp32 != MODE_SERVER)
+					rval = XEVNT_ID;
+			} else if (!(temp32 == MODE_SERVER ||
+			    !(crypto_flags & (CRYPTO_FLAG_IFF |
+			    CRYPTO_FLAG_GQ)) || (crypto_flags & fstamp &
+			    CRYPTO_FLAG_IFF) || (crypto_flags & fstamp &
+			    CRYPTO_FLAG_GQ))) {
+				rval = XEVNT_ID;
+			}
+
+			/*
+			 * Discard the message if identity error or from
+			 * unsynchronized host.
+			 */
+			if (rval != XEVNT_OK || !fstamp)
 				break;
 
 			/*
-			 * Discard the message and report an error if
-			 * the host name length is unreasonable or the
-			 * signature digest NID is not supported.
+			 * Discard the message if the host name length
+			 * is unreasonable or the signature digest NID
+			 * is not supported.
 			 */
 			temp32 = (fstamp >> 16) & 0xffff;
 			dp =
@@ -465,44 +509,22 @@ crypto_recv(
 				rval = XEVNT_LEN;
 			else if (dp == NULL)
 				rval = XEVNT_MD;
-			if (rval != XEVNT_OK) {
-				report_event(rval, peer);
-				peer->flash |= TEST12;
+			if (rval != XEVNT_OK)
 				break;
-			}
 
 			/*
 			 * Save status word, host name and message
 			 * digest/signature type.
 			 */
-			peer->crypto = fstamp;
+			peer->crypto |= fstamp;
 			peer->digest = dp;
 			peer->subject = emalloc(vallen + 1);
 			memcpy(peer->subject, ep->pkt, vallen);
 			peer->subject[vallen] = '\0';
-
-			/*
-			 * If the certificates of both server and client
-			 * are private, the server public key and
-			 * identity are presumed valid. We skip the
-			 * certificate and identity stages and move
-			 * immediately to the cookie stage, which
-			 * confirms the server signature. If server and
-			 * client do not have identical public key and
-			 * identity values, nothing further will work.
-			 * Note we have not verified the server
-		 	 * signature yet.
-			 */
-			if (crypto_flags & CRYPTO_FLAG_PRIV) {
-				peer->crypto |= CRYPTO_FLAG_SIGN;
-				if (peer->crypto & CRYPTO_FLAG_PRIV) {
-					peer->crypto |=
-					    CRYPTO_FLAG_VALID |
-					    CRYPTO_FLAG_VRFY;
-				}
-			}
-			sprintf(statstr, "host %s %s (%u)",
-			    peer->subject, OBJ_nid2ln(temp32), temp32);
+			temp32 = (fstamp >> 16) & 0xffff;
+			sprintf(statstr,
+			    "flags 0x%x host %s signature %s", fstamp,
+			    peer->subject, OBJ_nid2ln(temp32));
 			record_crypto_stats(&peer->srcadr, statstr);
 #ifdef DEBUG
 			if (debug)
@@ -522,7 +544,8 @@ crypto_recv(
 			/*
 			 * Discard the message if invalid.
 			 */
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			/*
@@ -530,14 +553,8 @@ crypto_recv(
 			 * versions and link the newest version first on
 			 * the list.
 			 */
-			rval = cert_install(ep, peer);
-			if (rval != XEVNT_OK) {
-				if (rval != XEVNT_TSP) {
-					report_event(rval, peer);
-					peer->flash |= TEST12;
-				}
+			if ((rval = cert_install(ep, peer)) != XEVNT_OK)
 				break;
-			}
 
 			/*
 			 * If we snatch the certificate before the
@@ -601,7 +618,8 @@ crypto_recv(
 			/*
 			 * Discard the message if invalid.
 			 */
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			/*
@@ -613,14 +631,9 @@ crypto_recv(
 			 * certificate stages and move immediately to
 			 * the cookie stage.
 			 */
-			rval = crypto_iff(ep, peer);
-			if (rval != XEVNT_OK) {
-				if (rval != XEVNT_TSP) {
-					report_event(rval, peer);
-					peer->flash |= TEST12;
-				}
+			if ((rval = crypto_iff(ep, peer)) != XEVNT_OK)
 				break;
-			}
+
 			peer->crypto |= CRYPTO_FLAG_VRFY |
 			    CRYPTO_FLAG_PROV;
 			peer->flash &= ~TEST10;
@@ -648,7 +661,8 @@ crypto_recv(
 			/*
 			 * Discard the message if invalid.
 			 */
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			/*
@@ -660,14 +674,9 @@ crypto_recv(
 			 * certificate stages and move immediately to
 			 * the cookie stage.
 			 */
-			rval = crypto_gq(ep, peer);
-			if (rval != XEVNT_OK) {
-				if (rval != XEVNT_TSP) {
-					report_event(rval, peer);
-					peer->flash |= TEST12;
-				}
+			if ((rval = crypto_gq(ep, peer)) != XEVNT_OK)
 				break;
-			}
+
 			peer->crypto |= CRYPTO_FLAG_VRFY |
 			    CRYPTO_FLAG_PROV;
 			peer->flash &= ~TEST10;
@@ -697,7 +706,7 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if (crypto_verify(ep, &pubkey, peer) !=
+			if ((rval = crypto_verify(ep, &pubkey, peer)) !=
 			    XEVNT_OK)
 				break;
 
@@ -706,14 +715,8 @@ crypto_recv(
 			 * versions and link the newest version first on
 			 * the list.
 			 */
-			rval = cert_install(ep, peer);
-			if (rval != XEVNT_OK) {
-				if (rval != XEVNT_TSP) {
-					report_event(rval, peer);
-					peer->flash |= TEST12;
-				}
-				break;
-			}
+			if ((rval = cert_install(ep, peer)) != XEVNT_OK) 				break;
+
 			peer->crypto |= CRYPTO_FLAG_SIGN;
 			peer->flash &= ~TEST10;
 			temp32 = cinfo->nid;
@@ -742,12 +745,13 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			/*
 			 * Pass the extension field to the transmit
-			 * side.
+			 * side. If already agreed, walk away.
 			 */
 			fp = emalloc(len);
 			memcpy(fp, ep, len);
@@ -796,8 +800,8 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			else if (crypto_verify(ep, &peer->cookval,
-			    peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, &peer->cookval,
+			    peer)) != XEVNT_OK)
 				break;
 
 			/*
@@ -812,8 +816,7 @@ crypto_recv(
 				    RSA_PKCS1_OAEP_PADDING);
 				cookie = ntohl(temp32);
 			} else {
-				report_event(XEVNT_CKY, peer);
-				peer->flash |= TEST12;
+				rval = XEVNT_CKY;
 				break;
 			}
 
@@ -866,13 +869,13 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if (crypto_verify(ep, &peer->recval, peer) !=
-			    XEVNT_OK)
+			if ((rval = crypto_verify(ep, &peer->recval,
+			    peer)) != XEVNT_OK)
 				break;
 
 			/*
 			 * Install autokey values and light the
-			 * autokey bit.This is not hard.
+			 * autokey bit. This is not hard.
 			 */
 			if (peer->recval.ptr == NULL)
 				peer->recval.ptr =
@@ -915,7 +918,8 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			/*
@@ -944,8 +948,8 @@ crypto_recv(
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if (crypto_verify(ep, &peer->tai_leap, peer) !=
-			    XEVNT_OK)
+			if ((rval = crypto_verify(ep, &peer->tai_leap,
+			    peer)) != XEVNT_OK)
 				break;
 
 			/*
@@ -1009,8 +1013,10 @@ crypto_recv(
 		case CRYPTO_IFF:
 		case CRYPTO_GQ:
 		case CRYPTO_SIGN:
-			if (len < VALUE_LEN)
+			if (len < VALUE_LEN) {
+				rval = XEVNT_LEN;
 				break;
+			}
 
 			/* fall through */
 
@@ -1025,7 +1031,8 @@ crypto_recv(
 			if (code & CRYPTO_RESP)
 				break;
 
-			if (crypto_verify(ep, NULL, peer) != XEVNT_OK)
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
 				break;
 
 			fp = emalloc(len);
@@ -1033,6 +1040,23 @@ crypto_recv(
 			temp32 = CRYPTO_RESP;
 			fp->opcode |= htonl(temp32);
 			peer->cmmd = fp;
+		}
+
+		/*
+		 * We ignore length/format errors and duplicates. Other
+		 * errors are reported to the log and traps.
+		 */
+		if (rval > XEVNT_TSP) {
+			sprintf(statstr,
+			    "error %x opcode %x ts %u fs %u", rval,
+			    code, tstamp, fstamp);
+			record_crypto_stats(&peer->srcadr, statstr);
+			report_event(rval, peer);
+			peer->flash |= TEST12;
+#ifdef DEBUG
+			if (debug)
+				printf("crypto_recv: %s\n", statstr);
+#endif
 		}
 		authlen += len;
 	}
@@ -1053,6 +1077,7 @@ crypto_recv(
 int
 crypto_xmit(
 	struct pkt *xpkt,	/* transmit packet pointer */
+	struct sockaddr_in *srcadr_sin,	/* active runway */
 	int	start,		/* offset to extension field */
 	struct exten *ep,	/* extension pointer */
 	keyid_t cookie		/* session cookie */
@@ -1064,10 +1089,13 @@ crypto_xmit(
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp;	/* certificate info/value pointer */
 	char	certname[MAX_HOSTLEN + 1]; /* subject name buffer */
+	u_char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int	vallen;
 	struct value vtemp;
 	associd_t associd;
+	int	rval;
 	u_int	len;
+	u_int32	temp32;
 	keyid_t tcookie;
 
 	/*
@@ -1081,17 +1109,33 @@ crypto_xmit(
 	associd = ntohl(ep->associd);
 	fp->associd = htonl(associd);
 	len = 8;
+	rval = XEVNT_OK;
 	switch (opcode & 0xffff0000) {
 
 	/*
 	 * Send association request and response with status word and
 	 * host name. Note, this message is not signed and the filestamp
-	 * contains only the status word.
+	 * contains only the status word. We check at this point whether
+	 * the identity schemes are compatible to save tears later on.
 	 */
-	case CRYPTO_ASSOC:
 	case CRYPTO_ASSOC | CRYPTO_RESP:
+		temp32 = ntohl(fp->fstamp);
+
+printf("xxx %x %x\n", temp32, crypto_flags);
+
+		if (!((crypto_flags & temp32 & CRYPTO_FLAG_PRIV) ||
+		    (crypto_flags & temp32 & CRYPTO_FLAG_IFF) ||
+		    (crypto_flags & temp32 & CRYPTO_FLAG_GQ) ||
+		    !(crypto_flags & (CRYPTO_FLAG_PRIV |
+		    CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ))))
+			rval = XEVNT_ID;
+
+	case CRYPTO_ASSOC:
 		len += crypto_send(fp, &hostval);
-		fp->fstamp = htonl(crypto_flags);
+		if (crypto_time() == 0)
+			fp->fstamp = 0;
+		else
+			fp->fstamp = htonl(crypto_flags);
 		break;
 
 	/*
@@ -1149,10 +1193,8 @@ crypto_xmit(
 			opcode |= CRYPTO_ERROR;
 			break;
 		}
-		if (crypto_alice(peer, &vtemp) == XEVNT_OK)
+		if ((rval = crypto_alice(peer, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1160,10 +1202,8 @@ crypto_xmit(
 	 * Send response in Schnorr (IFF) identity scheme.
 	 */
 	case CRYPTO_IFF | CRYPTO_RESP:
-		if (crypto_bob(ep, &vtemp) == XEVNT_OK)
+		if ((rval = crypto_bob(ep, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1175,10 +1215,8 @@ crypto_xmit(
 			opcode |= CRYPTO_ERROR;
 			break;
 		}
-		if (crypto_alice2(peer, &vtemp) == XEVNT_OK)
+		if ((rval = crypto_alice2(peer, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1186,10 +1224,8 @@ crypto_xmit(
 	 * Send response in Guillou-Quisquater (GQ) identity scheme.
 	 */
 	case CRYPTO_GQ | CRYPTO_RESP:
-		if (crypto_bob2(ep, &vtemp) == XEVNT_OK)
+		if ((rval = crypto_bob2(ep, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1202,10 +1238,8 @@ crypto_xmit(
 	 * invalid or contains an unverified signature.
 	 */
 	case CRYPTO_SIGN | CRYPTO_RESP:
-		if (cert_sign(ep, &vtemp) == XEVNT_OK)
+		if ((rval = cert_sign(ep, &vtemp)) == XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1235,10 +1269,9 @@ crypto_xmit(
 			}
 			tcookie = peer->pcookie;
 		}
-		if (crypto_encrypt(ep, &vtemp, &tcookie) == XEVNT_OK)
+		if ((rval = crypto_encrypt(ep, &vtemp, &tcookie)) ==
+		    XEVNT_OK)
 			len += crypto_send(fp, &vtemp);
-		else
-			opcode |= CRYPTO_ERROR;
 		value_free(&vtemp);
 		break;
 
@@ -1277,6 +1310,20 @@ crypto_xmit(
 		if (opcode & CRYPTO_RESP)
 			opcode |= CRYPTO_ERROR;
 		break;
+	}
+
+	/*
+	 * We ignore length/format errors and duplicates. Other errors
+	 * are reported to the log.
+	 */
+	if (rval > XEVNT_TSP) {
+		opcode |= CRYPTO_ERROR;
+		sprintf(statstr, "error %x opcode %x", rval, opcode);
+		record_crypto_stats(srcadr_sin, statstr);
+#ifdef DEBUG
+		if (debug)
+			printf("crypto_xmit: %s\n", statstr);
+#endif
 	}
 
 	/*
@@ -1320,7 +1367,6 @@ crypto_verify(
 	tstamp_t fstamp;	/* filestamp */
 	u_int	vallen;		/* value length */
 	u_int	siglen;		/* signature length */
-	u_char	statstr[NTP_MAXSTRLEN];
 	u_int	opcode, len;
 	int	rval;
 	int	i;
@@ -1433,22 +1479,6 @@ crypto_verify(
 		    "crypto_recv: verify %x vallen %u siglen %u ts %u fs %u\n",
 		    rval, vallen, siglen, tstamp, fstamp);
 #endif
-
-	/*
-	 * We don't log opcode, length and timestamp errors, mostly to
-	 * crisp the logs and reduce clogging hazards.
-	 */
-	if (rval > XEVNT_TSP) {
-		sprintf(statstr, "error %x code %x ts %u fs %u", rval,
-		    opcode, tstamp, fstamp);
-		record_crypto_stats(&peer->srcadr, statstr);
-		report_event(rval, peer);
-		peer->flash |= TEST12;
-#ifdef DEBUG
-		if (debug)
-			printf("crypto_verify: %s\n", statstr);
-#endif
-	}
 	return (rval);
 }
 
@@ -1567,38 +1597,6 @@ crypto_args(
 		ep->pkt[0] = peer->associd;
 	}
 	return (ep);
-}
-
-/*
- * crypto_check - check for compatible identity scheme before an
- * association is mobilized.
- *
- * This is called for the first packet received that may mobilize a new
- * association in broadcast, symmetric passive and manycast modes. It
- * requires the first packet to be an ASSOC request and the status word
- * to be compatible with the host status word.
- */
-int
-crypto_check(
-	struct recvbuf *rbufp	/* packet buffer pointer */
-	)
-{
-	u_int32	*pkt;		/* receive packet pointer */
-	struct exten *ep;	/* extension pointer */
-	int	authlen;	/* offset of MAC field */
-	u_int	code;		/* extension field opcode */
-	u_int	len;		/* extension field length */
-	tstamp_t fstamp;	/* filestamp */
-
-	authlen = LEN_PKT_NOMAC;
-	pkt = (u_int32 *)&rbufp->recv_pkt + authlen / 4;
-	ep = (struct exten *)pkt;
-	code = ntohl(ep->opcode) & 0xffff0000;
-	len = ntohl(ep->opcode) & 0x0000ffff;
-	if (len < VALUE_LEN)
-		return (0);
-	fstamp = ntohl(ep->fstamp);
-	return (1);
 }
 
 
@@ -2830,7 +2828,15 @@ cert_install(
 			xp->flags |= CERT_SIGN;
 
 			/*
-			 * If X is trusted, then Y is trusted.
+			 * If X is trusted, then Y is trusted. Note that
+			 * we might stumble over a self signed
+			 * certificate that is not trusted, at least
+			 * temporarily. This can happen when a dude
+			 * first comes up, but has not synchronized the
+			 * clock and had its certificate signed by its
+			 * server. In case of broken certificate trail,
+			 * this might result in a loop that could
+			 * persist until timeout.
 			 */
 			if (!(xp->flags & CERT_TRUST))
 				continue;
@@ -2839,8 +2845,7 @@ cert_install(
 
 			/*
 			 * If subject Y matches the server subject name,
-			 * then Y has completed the certificate trail
-			 * and the server is declared valid.
+			 * then Y has completed the certificate trail.
 			 */
 			if (strcmp(yp->subject, peer->subject) != 0)
 				continue;
@@ -3458,8 +3463,9 @@ crypto_setup(void)
 	crypto_tai(leap_file);
 #ifdef DEBUG
 	if (debug)
-		printf("crypto_setup: flags 0x%x signature scheme %s\n",
-		    crypto_flags, OBJ_nid2ln(cinfo->nid));
+		printf(
+		    "crypto_setup: flags 0x%x host %s signature %s\n",
+		    crypto_flags, sys_hostname, OBJ_nid2ln(cinfo->nid));
 #endif
 }
 
