@@ -1272,7 +1272,7 @@ open_socket(
 		else return INVALID_SOCKET;
 
 		msyslog(LOG_ERR, buff);
-		close_socket(fd);
+		closesocket(fd);
 
 		/*
 		 * soft fail if opening a multicast address

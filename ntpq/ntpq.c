@@ -365,7 +365,7 @@ char currenthost[LENHOSTNAME];			/* current host name */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
-int ai_fam_templ;			/* address family */
+int ai_fam_templ;				/* address family */
 SOCKET sockfd;					/* fd socket is opened on */
 int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
@@ -490,7 +490,6 @@ ntpqmain(
 	int errflg = 0;
 	extern int ntp_optind;
 	extern char *ntp_optarg;
-	int ai_fam_templ;
 
 #ifdef NO_MAIN_ALLOWED
     clear_globals();

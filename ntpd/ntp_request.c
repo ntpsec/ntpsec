@@ -436,7 +436,7 @@ process_private(
 	    || (++ec, INFO_MBZ(inpkt->mbz_itemsize) != 0)
 	    || (++ec, rbufp->recv_length < REQ_LEN_HDR)
 		) {
-		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed, pkt from %s", ec, stoa(&srcadr));
+		msyslog(LOG_ERR, "process_private: INFO_ERR_FMT: test %d failed, pkt from %s", ec, stoa(srcadr));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
