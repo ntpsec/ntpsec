@@ -1,5 +1,8 @@
 2000-03-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* librsaref/Makefile.am (stamp-rsaref): nodist_HEADERS are not
+	supoprted yet.  Hack around it.
+
 	* ntpd/ntp_resolver.c (findhostaddr): hstrerror isn't always available.
 
 	* configure.in: Look for hstrerror.
