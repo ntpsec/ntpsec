@@ -111,6 +111,8 @@ typedef char s_char;
 #define BURST_INTERVAL1	4	/* first interburst interval (log2) */
 #define BURST_INTERVAL2	1	/* succeeding interburst intervals (log2) */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
+#define HYST		.5	/* anti-clockhop hysteresis */
+#define HYST_TC		.5	/* anti-clockhop hysteresis decay factor */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -304,6 +306,7 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	estbdelay;	/* clock offset to broadcast server */
+	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
 	 * Variables set by received packet

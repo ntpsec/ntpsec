@@ -163,6 +163,7 @@ transmit(
 			peer->flags |= FLAG_CLUST;
 		oreach = peer->reach;
 		peer->reach <<= 1;
+		peer->hyst *= HYST_TC;
 		if (peer->reach == 0) {
 
 			/*
@@ -1809,6 +1810,10 @@ clock_select(void)
 	 * drowned as well, but only if at at least eight poll intervals
 	 * have gone by. We must leave at least one peer to collect the
 	 * million bucks.
+	 *
+	 * Note the hysteresis gimmick that decreases the effective
+	 * distance for those rascals that previously have made the
+	 * final cut. This to discourage clockhopping.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1821,7 +1826,8 @@ clock_select(void)
 			continue;
 		}
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
-		d = root_distance(peer) + peer->stratum * MAXDISPERSE;
+		d = (1. - peer->hyst) * root_distance(peer) +
+		    peer->stratum * MAXDISPERSE;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
 				continue;
@@ -1955,6 +1961,7 @@ clock_select(void)
 		peer = peer_list[i];
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		peer->flags |= FLAG_SYSPEER;
+		peer->hyst = HYST;
 		poll_update(peer, peer->hpoll);
 		if (peer->stratum == peer_list[0]->stratum) {
 			leap_consensus |= peer->leap;
