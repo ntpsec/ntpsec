@@ -135,7 +135,6 @@
  * Interface definitions
  */
 #define	DEVICE		"/dev/acts%d" /* device name and unit */
-#define	SPEED232	B1200	/* uart speed (1200 cowardly baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define LOCKFILE	"/var/spool/locks/LCK..cua%d"
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
@@ -690,12 +689,18 @@ acts_timeout(
 		}
 
 		/*
-		 * Open device and light up a discipline if present.
+		 * Open device and light up a discipline if present. We
+		 * use 1200 baud for modem, 9600 baud for direct
+		 * connect.
 		 */
 		if (!pp->io.fd) {
 			sprintf(device, DEVICE, up->unit);
-			fd = refclock_open(device, SPEED232,
-			    LDISC_ACTS);
+			if (pp->sloppyclockflag & CLK_FLAG3)
+				fd = refclock_open(device, B9600,
+				    LDISC_ACTS);
+			else
+				fd = refclock_open(device, B1200,
+				    LDISC_ACTS);
 			if (fd < 0) {
 				msyslog(LOG_ERR,
 				    "acts: device open fails");
