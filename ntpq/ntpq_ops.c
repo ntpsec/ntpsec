@@ -876,7 +876,7 @@ dogetassoc(
 	u_short rstatus;
 
 	res = doquery(CTL_OP_READSTAT, 0, 0, 0, (char *)0, &rstatus,
-			  &dsize, (void *)&datap);
+			  &dsize, (char **)&datap);
 
 	if (res != 0)
 		return 0;

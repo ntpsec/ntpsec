@@ -2212,7 +2212,7 @@ kill_asyncio(int startfd)
  */
 void
 add_socket_to_list(SOCKET fd){
-	vsock_t *lsock = malloc(sizeof(vsock_t));
+	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
 	lsock->fd = fd;
 
 	ISC_LIST_APPEND(sockets_list, lsock, link);
@@ -2226,7 +2226,7 @@ delete_socket_from_list(SOCKET fd) {
 	while(lsock != NULL) {
 		next = ISC_LIST_NEXT(lsock, link);
 		if(lsock->fd == fd) {
-			ISC_LIST_DEQUEUE(sockets_list, lsock, link);
+			ISC_LIST_DEQUEUE_TYPE(sockets_list, lsock, link, vsock_t);
 			free(lsock);
 			break;
 		}
@@ -2236,7 +2236,7 @@ delete_socket_from_list(SOCKET fd) {
 }
 void
 add_addr_to_list(struct sockaddr_storage *addr, int if_index){
-	remaddr_t *laddr = malloc(sizeof(remaddr_t));
+	remaddr_t *laddr = (remaddr_t *)malloc(sizeof(remaddr_t));
 	memcpy(&laddr->addr, addr, sizeof(addr));
 	laddr->if_index = if_index;
 
@@ -2258,7 +2258,7 @@ delete_addr_from_list(struct sockaddr_storage *addr) {
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
-			ISC_LIST_DEQUEUE(remoteaddr_list, laddr, link);
+			ISC_LIST_DEQUEUE_TYPE(remoteaddr_list, laddr, link, remaddr_t);
 			free(laddr);
 			break;
 		}

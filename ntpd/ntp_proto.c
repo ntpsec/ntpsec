@@ -1856,9 +1856,9 @@ clock_select(void)
 			indx_size += 5 * 3 * sizeof(*indx);
 			peer_list_size += 5 * sizeof(*peer_list);
 		}
-		endpoint = emalloc(endpoint_size);
-		indx = emalloc(indx_size);
-		peer_list = emalloc(peer_list_size);
+		endpoint = (struct endpoint *)emalloc(endpoint_size);
+		indx = (int *)emalloc(indx_size);
+		peer_list = (struct peer **)emalloc(peer_list_size);
 	}
 
 	/*
