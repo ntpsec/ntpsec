@@ -1,3 +1,4 @@
+
 /*
  * refclock_atom - clock driver for 1-pps signals
  */
@@ -159,9 +160,9 @@ atom_start(
 	pp = peer->procptr;
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
+	pp->stratum = STRATUM_UNSPEC;
 	memcpy((char *)&pp->refid, REFID, 4);
 	peer->burst = ASTAGE;
-	peer->stratum = STRATUM_UNSPEC; 
 #ifdef HAVE_PPSAPI
 	up = emalloc(sizeof(struct ppsunit));
 	memset(up, 0, sizeof(struct ppsunit));
@@ -459,17 +460,17 @@ atom_poll(
 	 * +-0.5 s of the local time and the seconds numbering is
 	 * unambiguous. Note that the leap bits are set no-warning on
 	 * the first valid update and the stratum is set at the prefer
-	 * peer.
+	 * peer, unless overriden by a fudge command.
 	 */
 	if (peer->burst > 0)
 		return;
-	peer->stratum = STRATUM_UNSPEC;
+	peer->leap = LEAP_NOTINSYNC;
 	if (pp->codeproc == pp->coderecv) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		peer->burst = ASTAGE;
 		return;
 
-	} else if (!sys_prefer) {
+	} else if (sys_prefer == NULL) {
 		pp->codeproc = pp->coderecv;
 		peer->burst = ASTAGE;
 		return;
@@ -479,8 +480,12 @@ atom_poll(
 		peer->burst = ASTAGE;
 		return;
 	}
-	peer->stratum = sys_prefer->stratum;
-	if (peer->stratum <= 1)
+	pp->leap = LEAP_NOWARNING;
+	if (pp->stratum >= STRATUM_UNSPEC)
+		peer->stratum = sys_prefer->stratum;
+	else
+		peer->stratum = pp->stratum;
+	if (peer->stratum == 0)
 		peer->refid = pp->refid;
 	else
 		peer->refid = 0;   /* REFID case to solve */

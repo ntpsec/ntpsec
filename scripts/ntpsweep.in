@@ -1,6 +1,6 @@
 #! @PATH_PERL@ -w
 #
-# $Id: ntpsweep.in 1.1 2000/02/10 08:13:40-00:00 stenn@whimsy.udel.edu $
+# $Id: ntpsweep.in 1.2 2001/10/08 21:18:32-04:00 stenn@whimsy.udel.edu $
 #
 # DISCLAIMER
 # 

@@ -228,7 +228,7 @@ refclock_newpeer(
 	/* peer->refid = peer->srcadr.sin_addr.s_addr;*/
 	peer->refid = 0;				/* REFID case to solve */
 	peer->maxpoll = peer->minpoll;
-
+	peer->stratum = STRATUM_REFCLOCK;
 	pp->type = clktype;
 	pp->timestarted = current_time;
 
@@ -236,12 +236,11 @@ refclock_newpeer(
 	 * Set peer.pmode based on the hmode. For appearances only.
 	 */
 	switch (peer->hmode) {
-
-		case MODE_ACTIVE:
+	case MODE_ACTIVE:
 		peer->pmode = MODE_PASSIVE;
 		break;
 
-		default:
+	default:
 		peer->pmode = MODE_SERVER;
 		break;
 	}
@@ -1000,10 +999,11 @@ refclock_control(
 		if (in->haveflags & CLK_HAVETIME2)
 			pp->fudgetime2 = in->fudgetime2;
 		if (in->haveflags & CLK_HAVEVAL1)
-			peer->stratum = (u_char) in->fudgeval1;
+			pp->stratum = (u_char) in->fudgeval1;
 		if (in->haveflags & CLK_HAVEVAL2)
 			pp->refid = in->fudgeval2;
-		if (peer->stratum <= 1)
+		peer->stratum = pp->stratum;
+		if (peer->stratum == 0)
 			peer->refid = pp->refid;
 		else
 			/* Here it is IPv4 address, so we don't have problem with REFID case */
@@ -1034,7 +1034,7 @@ refclock_control(
 			CLK_HAVEVAL2 | CLK_HAVEFLAG4;
 		out->fudgetime1 = pp->fudgetime1;
 		out->fudgetime2 = pp->fudgetime2;
-		out->fudgeval1 = peer->stratum;
+		out->fudgeval1 = pp->stratum;
 		out->fudgeval2 = pp->refid;
 		out->flags = (u_char) pp->sloppyclockflag;
 
