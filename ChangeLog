@@ -1,8 +1,10 @@
 1999-07-20  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 
+	* acconfig.h: 
 	* util/ntptime.c: FreeBSD nano patches
-	From: Per Hedeland <per@erix.ericsson.se>
-	(similar patch from Allen Smith <easmith@beatrice.rutgers.edu>)
+	From: Per Hedeland <per@erix.ericsson.se> and
+	Allen Smith <easmith@beatrice.rutgers.edu>
 
 	* include/ntp.h:
 	include/ntp_fp.h:

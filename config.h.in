@@ -248,6 +248,9 @@
 /* define if struct clockinfo has tickadj */
 #undef HAVE_TICKADJ_IN_STRUCT_CLOCKINFO
 
+/* define if struct ntptimeval uses time.tv_nsec instead of time.tv_usec */ 
+#undef HAVE_TV_NSEC_IN_NTPTIMEVAL 
+
 /* Does a system header defind struct ppsclockev? */
 #undef HAVE_STRUCT_PPSCLOCKEV
 

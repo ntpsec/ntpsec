@@ -30,11 +30,7 @@
 # endif /* SYS_DECOSF1 */
 #endif
 
-/* FIXME? On FreeBSD 3.2(+), the 'time' element of a struct ntptimeval
-   is a struct timespec (s/ns), not a struct timeval (s/us) - which
-   seems intimately related to the fact that <sys/timex.h> also #defines
-   STA_NANO - which doesn't mean that this is the right thing to do... */
-#ifdef STA_NANO
+#ifdef HAVE_TV_NSEC_IN_NTPTIMEVAL
 #define tv_frac_sec tv_nsec
 #else
 #define tv_frac_sec tv_usec
