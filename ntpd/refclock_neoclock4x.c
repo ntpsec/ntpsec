@@ -869,7 +869,7 @@ neol_query_firmware(int fd,
 		    char *firmware,
 		    int maxlen)
 {
-  unsigned char tmpbuf[256];
+  char tmpbuf[256];
   int len;
   int lastsearch;
   unsigned char c;
@@ -967,7 +967,7 @@ neol_query_firmware(int fd,
 	    {
 	      last_c_was_crlf = 0;
 	      if(0x00 != c)
-		tmpbuf[len++] = c;
+		tmpbuf[len++] = (char) c;
 	    }
 	  tmpbuf[len] = '\0';
 	  if(len > sizeof(tmpbuf)-5)
