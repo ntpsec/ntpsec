@@ -1,5 +1,7 @@
 1999-08-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.97d
+
 	* include/ntp_stdlib.h: Clean up previous NeXT patch.
 	From: Jack Bryans <jbryans@csulb.edu>
 
