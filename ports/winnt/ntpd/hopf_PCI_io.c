@@ -13,6 +13,7 @@
  * This happens when including winioctl.h
  */
 #pragma warning( disable : 4201)
+#define _FILESYSTEMFSCTL_
 
 #include <config.h>
 #include <windows.h>
@@ -23,12 +24,12 @@
 
 #include <stddef.h>
 
-#define ATL_PASSTHROUGH_READ_TOSIZE		3*sizeof(ULONG)		
+#define ATL_PASSTHROUGH_READ_TOSIZE	3*sizeof(ULONG)		
 #define ATL_PASSTHROUGH_READ_FROMSIZE	0				
 #define IOCTL_ATLSOFT_PASSTHROUGH_READ	CTL_CODE(	\
-						FILE_DEVICE_UNKNOWN,		\
-						0x805,						\
-						METHOD_BUFFERED,			\
+						FILE_DEVICE_UNKNOWN,	\
+						0x805,			\
+						METHOD_BUFFERED,	\
 						FILE_ANY_ACCESS)
 
 
