@@ -517,13 +517,13 @@ local_clock(
 				record_peer_stats(
 				    &loopback_interface->sin,
 				    ctlsysstatus(), ntv.offset / 1e9,
-				    0., ntv.jitter / 1e9, 0.);
+				    0, ntv.jitter / 1e9, 0);
 			else
 #endif /* STA_NANO */
 				record_peer_stats(
 				    &loopback_interface->sin,
 				    ctlsysstatus(), ntv.offset / 1e6,
-				    0., ntv.jitter / 1e6, 0.);
+				    0, ntv.jitter / 1e6, 0);
 		}
 	}
 #endif /* KERNEL_PLL */

@@ -1,6 +1,13 @@
 2000-08-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* include/ntp_request.h: Make data[] member of req_pkt 32 again
+	* configure.in: 99k5
+
+	* include/ntp_request.h: Make data[] member of req_pkt 32 again.
+	Bump the version number...
+
+	* ntpd/ntp_loopfilter.c (local_clock): Change 0. to 0 in a couple
+	of places.
+	From Dave Mills
 
 2000-08-11  Harlan Stenn  <stenn@whimsy.udel.edu>
 
