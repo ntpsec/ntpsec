@@ -17,7 +17,7 @@
  * Tested with:
  *
  *		(UT)				   (VP)
- *   COPYRIGHT 1991-1997 MOTOROLA INC.	COPYRIGHT 1991-1996 MOTOROLA INC.
+ *   COPYRIGHT 1991-1997 MOTOROLA INC.  COPYRIGHT 1991-1996 MOTOROLA INC.
  *   SFTW P/N #     98-P36848P		SFTW P/N # 98-P36830P
  *   SOFTWARE VER # 2			SOFTWARE VER # 8
  *   SOFTWARE REV # 2			SOFTWARE REV # 8
@@ -84,7 +84,11 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI)
+#if defined(REFCLOCK) && defined(CLOCK_ONCORE)
+
+#if defined(HAVE_PPSAPI) + defined(HAVE_CIOGETEV) + defined(HAVE_TIOCGPPSEV) + defined(TIOCDCDTIMESTAMP) > 1
+#error More than one timestamp method defined.
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -100,7 +104,7 @@
 #  include <sys/mman.h>
 #  ifndef MAP_FAILED
 #   define MAP_FAILED ((u_char *) -1)
-#  endif  /* not MAP_FAILED */
+#  endif  /* MAP_FAILED */
 # endif /* HAVE_SYS_MMAN_H */
 #endif /* ONCORE_SHMEM_STATUS */
 
@@ -128,14 +132,10 @@
 
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
-# ifdef HAVE_STRUCT_TIMESPEC
-	struct timespec tv;
-# else
 	struct timeval tv;
-# endif
 	u_int serial;
 };
-#endif /* not HAVE_STRUCT_PPSCLOCKEV */
+#endif /* HAVE_STRUCT_PPSCLOCKEV */
 
 enum receive_state {
 	ONCORE_NO_IDEA,
@@ -253,8 +253,7 @@ struct instance {
 	u_int	revision;
 
 	u_char	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
-	s_char	traim;		/* do we have traim? yes UT/VP, no BASIC, GT, M12+T, -1 unknown, 0 no, +1 yes */
-
+	s_char  traim;          /* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
 				/* the following 7 are all timing counters */
 	u_char	traim_delay;	/* seconds counter, waiting for reply */
 	u_char	count;		/* cycles thru Ea before starting */
@@ -285,7 +284,7 @@ struct instance {
 	s_char	chan_in;	/* chan number from INPUT, will always use it */
 	u_char	chan_id;	/* chan number determined from part number */
 	u_char	chan_ck;	/* chan number determined by sending commands to hardware */
-	s_char	traim_in;	/* TRAIM from INPUT, will always use it */
+	s_char  traim_in;       /* TRAIM from INPUT, will always use ON/OFF specified */
 	s_char	traim_id;	/* TRAIM determined from part number */
 	u_char	traim_ck;	/* TRAIM determined by sending commands to hardware */
 	u_char	once;		/* one pass code at top of BaEaHa */
@@ -302,7 +301,9 @@ static	void	oncore_shutdown       P((int, struct peer *));
 static	void	oncore_consume	      P((struct instance *));
 static	void	oncore_read_config    P((struct instance *));
 static	void	oncore_receive	      P((struct recvbuf *));
+#ifdef HAVE_PPSAPI
 static	int	oncore_ppsapi	      P((struct instance *));
+#endif
 static	void	oncore_get_timestamp  P((struct instance *, long, long));
 static	void	oncore_init_shmem     P((struct instance *));
 
@@ -444,8 +445,8 @@ static u_char oncore_cmd_Bd[]  = { 'B', 'd', 1 };				    /* 6/8/12?	Almanac Stat
 static u_char oncore_cmd_Be[]  = { 'B', 'e', 1 };				    /* 6/8/12	Request Almanac Data			*/
 static u_char oncore_cmd_Bj[]  = { 'B', 'j', 0 };				    /* 6/8	Leap Second Pending			*/
 static u_char oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on traim on	*/
-static u_char oncore_cmd_Bnx[] = { 'B', 'n', 1, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on traim off	*/
+static u_char oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6        TRAIM setup/status: msg on,  traim on   */
+static u_char oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6        TRAIM setup/status: msg off, traim off  */
 static u_char oncore_cmd_Ca[]  = { 'C', 'a' };					    /* 6	Self Test				*/
 static u_char oncore_cmd_Cf[]  = { 'C', 'f' };					    /* 6/8/12	Set to Defaults 			*/
 static u_char oncore_cmd_Cg[]  = { 'C', 'g', 1 };				    /* VP	Posn Fix/Idle Mode			*/
@@ -454,8 +455,8 @@ static u_char oncore_cmd_Ea0[] = { 'E', 'a', 0 };				    /* 8	Position/Data/Stat
 static u_char oncore_cmd_Ea[]  = { 'E', 'a', 1 };				    /* 8	Position/Data/Status: on		*/
 static u_char oncore_cmd_Ek[]  = { 'E', 'k', 0 }; /* just turn off */		    /* 8	Posn/Status/Data - extension		*/
 static u_char oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on traim on	*/
-static u_char oncore_cmd_Enx[] = { 'E', 'n', 1, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on traim off	*/
+static u_char oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT     TRAIM setup/status: msg on,  traim on   */
+static u_char oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT     TRAIM setup/status: msg off, traim off  */
 static u_char oncore_cmd_Fa[]  = { 'F', 'a' };					    /* 8	Self Test				*/
 static u_char oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 12	Position Set				*/
 static u_char oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	Position Set: Read			*/
@@ -528,6 +529,9 @@ oncore_start(
 	register struct instance *instance;
 	struct refclockproc *pp;
 	int fd1, fd2;
+#ifndef HAVE_PPSAPI
+	int one = 1;
+#endif
 	char device1[30], device2[30];
 	const char *cp;
 	struct stat stat1, stat2;
@@ -564,22 +568,14 @@ oncore_start(
 	}
 	memset((char *) instance, 0, sizeof *instance);
 
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {
-		/* same device here */
-		if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW
-#if !defined(HAVE_PPSAPI) && !defined(TIOCDCDTIMESTAMP)
-		      | LDISC_PPS
-#endif
-		   ))) {
-			perror("ONCORE: fd1");
-			exit(1);
-		}
+	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
+		perror("ONCORE: fd1");
+		exit(1);
+	}
+
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
 		fd2 = fd1;
-	} else {			/* different devices here */
-		if (!(fd1=refclock_open(device1, SPEED, LDISC_RAW))) {
-			perror("ONCORE: fd1");
-			exit(1);
-		}
+	else {	/* different devices here */
 		if ((fd2=open(device2, O_RDWR)) < 0) {
 			perror("ONCORE: fd2");
 			exit(1);
@@ -646,6 +642,18 @@ oncore_start(
 
 	if (!oncore_ppsapi(instance))
 		return(0);
+#else
+# ifdef HAVE_TIOCSPPS	/* Solaris */
+	if (ioctl(fd2, TIOCSPPS, &one) < 0) {
+		msyslog(LOG_NOTICE, "oncore_start: TIOCSPPS failed: %m");
+		return (0);
+	}
+# else
+	if (ioctl(fd2, I_PUSH, "ppsclock") < 0) {
+		msyslog(LOG_NOTICE, "oncore_start: I_PUSH ppsclock failed: %m");
+		return (0);
+	}
+# endif /* HAVE_TIOCSPPS */
 #endif
 
 	pp->io.clock_recv = oncore_receive;
@@ -1423,20 +1431,22 @@ oncore_get_timestamp(
 	)
 {
 	int	Rsm;
-	u_long	i, j;
+	u_long	j;
 	l_fp ts, ts_tmp;
 	double dmy;
+#ifdef HAVE_PPSAPI
 #ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec *tsp = 0;
 #else
 	struct timeval	*tsp = 0;
 #endif
-#ifdef HAVE_PPSAPI
 	int	current_mode;
+	u_long	i;
 	pps_params_t current_params;
 	struct timespec timeout;
 	pps_info_t pps_i;
 #else  /* ! HAVE_PPSAPI */
+	struct timeval	*tsp = 0;
 #ifdef HAVE_CIOGETEV
 	struct ppsclockev ev;
 	int r = CIOGETEV;
@@ -1526,7 +1536,7 @@ oncore_get_timestamp(
 
 	dmy = tsp->tv_nsec;
 	dmy /= 1e9;
-	ts.l_uf =  dmy * 4294967296.0;
+	ts.l_uf = dmy * 4294967296.0;
 	ts.l_ui = tsp->tv_sec;
 #if 0
      alternate code for previous 4 lines is
@@ -1540,8 +1550,11 @@ oncore_get_timestamp(
 	DTOLFP(dmy, &ts);
 	ts.l_ui = tsp->tv_sec;
 #endif	/* 0 */
-#else
+#else	/* ! HAVE_PPSAPI */
 # if defined(HAVE_TIOCGPPSEV) || defined(HAVE_CIOGETEV)
+	/* this code assumes that the ioctl returns a timeval, independent
+	   of whether HAVE_STRUCT_TIMESPEC is set or not */
+
 	j = instance->ev_serial;
 	if (ioctl(instance->ppsfd, r, (caddr_t) &ev) < 0) {
 		perror("ONCORE: IOCTL:");
@@ -1551,13 +1564,8 @@ oncore_get_timestamp(
 	tsp = &ev.tv;
 
 	if (debug > 2)
-#ifdef HAVE_STRUCT_TIMESPEC
-		printf("ONCORE: serial/j (%d, %d) %ld.%09ld\n",
-			ev.serial, j, tsp->tv_sec, tsp->tv_nsec);
-#else
-		printf("ONCORE: serial/j (%d, %d) %ld.%06ld\n",
+		printf("ONCORE: serial/j (%u, %lu) %ld.%06ld\n",
 			ev.serial, j, tsp->tv_sec, tsp->tv_usec);
-#endif
 
 	if (ev.serial == j) {
 		printf("ONCORE: oncore_get_timestamp, error serial pps\n");
@@ -1663,34 +1671,58 @@ oncore_get_timestamp(
 		Rsm = ((instance->BEHa[129]<<8) | instance->BEHa[130]);
 
 	if (instance->chan == 6 || instance->chan == 8) {
-		sprintf(instance->pp->a_lastcode,	/* MAX length 128, currently at 117 */
-	"%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d sigma %2d neg-sawtooth %3d sat %d%d%d%d%d%d%d%d",
+		char    f1[5], f2[5], f3[5], f4[5];
+		if (instance->traim) {
+			sprintf(f1, "%d", instance->BEHn[21]);
+			sprintf(f2, "%d", instance->BEHn[22]);
+			sprintf(f3, "%2d", instance->BEHn[23]*256+instance->BEHn[24]);
+			sprintf(f4, "%3d", (s_char) instance->BEHn[25]);
+		} else {
+			strcpy(f1, "x");
+			strcpy(f2, "x");
+			strcpy(f3, "xx");
+			strcpy(f4, "xxx");
+		}
+		sprintf(instance->pp->a_lastcode,       /* MAX length 128, currently at 121 */
+ "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
 		    ts.l_ui, j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
 		    (long) tsp->tv_sec % 60,
 		    Rsm, 0.1*(256*instance->BEHa[35]+instance->BEHa[36]),
 		    /*rsat	dop */
-		    instance->BEHa[38], instance->BEHa[39], instance->BEHn[21],
-		    /*	nsat visible,	  nsat tracked,     traim */
-		    instance->BEHn[23]*256+instance->BEHn[24], (s_char) instance->BEHn[25],
-		    /* sigma				   neg-sawtooth */
+		    instance->BEHa[38], instance->BEHa[39], instance->traim, f1, f2,
+		    /*  nsat visible,     nsat tracked,     traim,traim,traim */
+		    f3, f4,
+		    /* sigma neg-sawtooth */
 	  /*sat*/   instance->BEHa[41], instance->BEHa[45], instance->BEHa[49], instance->BEHa[53],
 		    instance->BEHa[57], instance->BEHa[61], instance->BEHa[65], instance->BEHa[69]
 		    );					/* will be 0 for 6 chan */
 	} else if (instance->chan == 12) {
+		char    f1[5], f2[5], f3[5], f4[5];
+		if (instance->traim) {
+			sprintf(f1, "%d", instance->BEHn[6]);
+			sprintf(f2, "%d", instance->BEHn[7]);
+			sprintf(f3, "%d", instance->BEHn[12]*256+instance->BEHn[13]);
+			sprintf(f4, "%3d", (s_char) instance->BEHn[14]);
+		} else {
+			strcpy(f1, "x");
+			strcpy(f2, "x");
+			strcpy(f3, "x");
+			strcpy(f4, "xxx");
+		}
 		sprintf(instance->pp->a_lastcode,
- "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d sigma %d neg-sawtooth %3d sat %d%d%d%d%d%d%d%d%d%d%d%d",
+ "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
 		    ts.l_ui, j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
 		    (long) tsp->tv_sec % 60,
 		    Rsm, 0.1*(256*instance->BEHa[53]+instance->BEHa[54]),
 		    /*rsat	dop */
-		    instance->BEHa[55], instance->BEHa[56], instance->BEHn[6],
-		    /*	nsat visible,	  nsat tracked	 traim */
-		    instance->BEHn[12]*256+instance->BEHn[13], (s_char) instance->BEHn[14],
-		    /* sigma				   neg-sawtooth */
+		    instance->BEHa[55], instance->BEHa[56], instance->traim, f1, f2,
+		    /*  nsat visible,     nsat tracked   traim,traim,traim */
+		    f3, f4,
+		    /* sigma neg-sawtooth */
 	  /*sat*/   instance->BEHa[58], instance->BEHa[64], instance->BEHa[70], instance->BEHa[76],
 		    instance->BEHa[82], instance->BEHa[88], instance->BEHa[94], instance->BEHa[100],
 		    instance->BEHa[106], instance->BEHa[112], instance->BEHa[118], instance->BEHa[124]
@@ -2336,6 +2368,9 @@ oncore_msg_BnEnHn(
 	}
 
 	memcpy(instance->BEHn, buf, (size_t) len);	/* Bn or En or Hn */
+
+	if (!instance->traim)   /* BnEnHn will be turned off in any case */
+		return;
 
 	/* If Time RAIM doesn't like it, don't trust it */
 
@@ -3255,7 +3290,7 @@ record_clock_stats(&(instance->peer->srcadr), Msg);
 #endif
 	if (instance->chan == 12) {
 		memcpy(Cmd, oncore_cmd_Gb, (size_t) sizeof(oncore_cmd_Gb));
-		Cmd[-2+4]  = tm->tm_mon;
+		Cmd[-2+4]  = tm->tm_mon + 1;
 		Cmd[-2+5]  = tm->tm_mday;
 		Cmd[-2+6]  = (1900+tm->tm_year)/256;
 		Cmd[-2+7]  = (1900+tm->tm_year)%256;
@@ -3272,7 +3307,7 @@ record_clock_stats(&(instance->peer->srcadr), Msg);
 		oncore_sendmsg(instance->ttyfd, oncore_cmd_Ab,	sizeof(oncore_cmd_Ab));
 
 		memcpy(Cmd, oncore_cmd_Ac, (size_t) sizeof(oncore_cmd_Ac));
-		Cmd[-2+4] = tm->tm_mon;
+		Cmd[-2+4] = tm->tm_mon + 1;
 		Cmd[-2+5] = tm->tm_mday;
 		Cmd[-2+6] = (1900+tm->tm_year)/256;
 		Cmd[-2+7] = (1900+tm->tm_year)%256;
@@ -3516,6 +3551,7 @@ oncore_set_traim(
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_Enx, sizeof(oncore_cmd_Enx));
 		else	/* chan == 12 */
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_Ge0, sizeof(oncore_cmd_Ge0));
+			oncore_sendmsg(instance->ttyfd, oncore_cmd_Hn0, sizeof(oncore_cmd_Hn0));
 	}
 }
 
