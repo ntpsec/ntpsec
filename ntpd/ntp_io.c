@@ -90,6 +90,32 @@ struct ifconf {
 # include <stropts.h>
 #endif
 
+#ifndef SIOCGLIFCONF
+#define SIOCGLIFCONF SIOCGIFCONF
+#define lifc_len ifc_len
+#define lifc_buf ifc_buf
+#define lifc_req ifc_req
+#define lifconf ifconf
+#else
+#define HAVE_LIFC_FAMILY 1
+#define HAVE_LIFC_FLAGS 1
+#endif
+#ifndef SIOCGLIFFLAGS
+#define SIOCGLIFFLAGS SIOCGIFFLAGS
+#define SIOCGLIFDSTADDR SIOCGIFDSTADDR
+#define SIOCGLIFBRDADDR SIOCGIFBRDADDR
+#define SIOCGLIFNETMASK SIOCGIFNETMASK
+#define lifr_addr ifr_addr
+#define lifr_name ifr_name
+#define lifr_dstaddr ifr_dstaddr
+#define lifr_broadaddr ifr_broadaddr
+#define lifr_flags ifr_flags
+#define zz_family sa_family
+#define lifreq ifreq
+#else
+#define zz_family ss_family
+#endif
+
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
  * recvbuf buffers are preallocated for input.	In the signal
@@ -224,10 +250,10 @@ create_sockets(
 # ifdef STREAMS_TLI
 	struct strioctl ioc;
 # endif /* STREAMS_TLI */
-	char	buf[MAXINTERFACES*sizeof(struct ifreq)];
-	struct	ifconf	ifc;
-	struct	ifreq	ifreq, *ifr;
-	int n, i, j, vs, len, size = 0;
+	char	buf[MAXINTERFACES*sizeof(struct lifreq)];
+	struct	lifconf	lifc;
+	struct	lifreq	lifreq, *lifr;
+	int af, n, i, j, vs, len, size = 0;
 	struct sockaddr_storage resmask;
 #endif	/* _BSDI_VERSION >= 199510 */
 
@@ -428,68 +454,63 @@ create_sockets(
 
 	i = 2;
 # if !defined(SYS_WINNT)
-	ifc.ifc_len = sizeof(buf);
+	lifc.lifc_len = sizeof(buf);
 # endif
 # ifdef STREAMS_TLI
-	ioc.ic_cmd = SIOCGIFCONF;
+	ioc.ic_cmd = SIOCGLIFCONF;
 	ioc.ic_timout = 0;
 	ioc.ic_dp = (caddr_t)buf;
 	ioc.ic_len = sizeof(buf);
 	if(ioctl(vs, I_STR, &ioc) < 0 ||
-	   ioc.ic_len < sizeof(struct ifreq))
+	   ioc.ic_len < sizeof(struct lifreq))
 	{
-		msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFCONF) failed: %m - exiting");
+		msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFCONF) failed: %m - exiting");
 		exit(1);
 	}
 #  ifdef SIZE_RETURNED_IN_BUFFER
-	ifc.ifc_len = ioc.ic_len - sizeof(int);
-	ifc.ifc_buf = buf + sizeof(int);
+	lifc.lifc_len = ioc.ic_len - sizeof(int);
+	lifc.lifc_buf = buf + sizeof(int);
 #  else /* not SIZE_RETURNED_IN_BUFFER */
-	ifc.ifc_len = ioc.ic_len;
-	ifc.ifc_buf = buf;
+	lifc.lifc_len = ioc.ic_len;
+	lifc.lifc_buf = buf;
 #  endif /* not SIZE_RETURNED_IN_BUFFER */
 
 # else /* not STREAMS_TLI */
-	ifc.ifc_len = sizeof(buf);
-	ifc.ifc_buf = buf;
+	/* The real struct lifconf has more elements than what we fill in. */
+	memset(&lifc, 0, sizeof(lifc));
+	lifc.lifc_len = sizeof(buf);
+	lifc.lifc_buf = buf;
 #  ifndef SYS_WINNT
-	if (ioctl(vs, SIOCGIFCONF, (char *)&ifc) < 0)
+	if (ioctl(vs, SIOCGLIFCONF, (char *)&lifc) < 0)
 #  else
- 	if (WSAIoctl(vs, SIO_GET_INTERFACE_LIST, 0, 0, ifc.ifc_buf, ifc.ifc_len, &ifc.ifc_len, 0, 0) == SOCKET_ERROR) 
+ 	if (WSAIoctl(vs, SIO_GET_INTERFACE_LIST, 0, 0, lifc.lifc_buf, lifc.lifc_len, &lifc.lifc_len, 0, 0) == SOCKET_ERROR) 
 #  endif /* SYS_WINNT */
 {
-		msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFCONF) failed: %m - exiting");
+		msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFCONF) failed: %m - exiting");
 		exit(1);
 }
 
 # endif /* not STREAMS_TLI */
 
-	for(n = ifc.ifc_len, ifr = ifc.ifc_req; n > 0;
-	    ifr = (struct ifreq *)((char *)ifr + size))
+	for(n = lifc.lifc_len, lifr = lifc.lifc_req; n > 0;
+	    lifr = (struct lifreq *)((char *)lifr + size))
 	{
-		size = sizeof(*ifr);
-
 # ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		len = max(sizeof(struct sockaddr), ifr->ifr_addr.sa_len);
+		len = max(sizeof(struct sockaddr), lifr->lifr_addr.sa_len);
 # else
-		switch (ifr->ifr_addr.sa_family) {
-		case AF_INET6 :
-			len = sizeof(struct sockaddr_in6);
-			break;
-		case AF_INET :
-		default :
-			len = sizeof(struct sockaddr_in);
-		}
+		len = SOCKLEN(&lifr->lifr_addr);
 # endif
-		size = sizeof(ifr->ifr_name) + len;
+		size = sizeof(*lifr);
+		if (size < sizeof(lifr->lifr_name) + len)
+			size = sizeof(lifr->lifr_name) + len;
 		n -= size;
 
 # if !defined(SYS_WINNT)
 		/* Exclude logical interfaces (indicated by ':' in the interface name)	*/
 		if (debug)
-			printf("interface <%s> ", ifr->ifr_name);
+			printf("interface <%s> ", lifr->lifr_name);
 		if ((listen_to_virtual_ips == 0)
-		    && (strchr(ifr->ifr_name, (int)':') != NULL)) {
+		    && (strchr(lifr->lifr_name, (int)':') != NULL)) {
 			if (debug)
 			    printf("ignored\n");
 			continue;
@@ -499,60 +520,81 @@ create_sockets(
 
 		if (
 #  ifdef VMS /* VMS+UCX */
-			(((struct sockaddr *)&(ifr->ifr_addr))->sa_family != AF_INET &&
-			 ((struct sockaddr *)&(ifr->ifr_addr))->sa_family != AF_INET6 )
+			(((struct sockaddr *)&(lifr->lifr_addr))->sa_family != AF_INET &&
+			 ((struct sockaddr *)&(lifr->lifr_addr))->sa_family != AF_INET6 )
 #  else
-			(ifr->ifr_addr.sa_family != AF_INET &&
-			 ifr->ifr_addr.sa_family != AF_INET6 )
+			(lifr->lifr_addr.zz_family != AF_INET &&
+			 lifr->lifr_addr.zz_family != AF_INET6 )
 #  endif /* VMS+UCX */
 			) {
 			if (debug)
 			    printf("ignoring %s - not AF_INET or AF_INET6\n",
-				   ifr->ifr_name);
+				   lifr->lifr_name);
 			continue;
 		}
 # endif /* SYS_WINNT */
-		ifreq = *ifr;
+		lifreq = *lifr;
 		inter_list[i].flags = 0;
+
+# ifndef USE_STREAMS_DEVICE_FOR_IF_CONFIG
+		af = lifr->lifr_addr.zz_family;
+		close(vs);
+
+		if (
+			(vs = socket(af, SOCK_DGRAM, 0))
+#  ifndef SYS_WINNT
+			< 0
+#  else /* SYS_WINNT */
+			== INVALID_SOCKET
+#  endif /* SYS_WINNT */
+			) {
+			msyslog(LOG_ERR,
+			    "create_sockets: socket(%s, SOCK_DGRAM) failed: %m",
+			    af == AF_INET ? "AF_INET" : "AF_INET6");
+			exit(1);
+		}
+# endif /* not USE_STREAMS_DEVICE_FOR_IF_CONFIG */
+
 		/* is it broadcast capable? */
 # ifndef SYS_WINNT
 #  ifdef STREAMS_TLI
-		ioc.ic_cmd = SIOCGIFFLAGS;
+		ioc.ic_cmd = SIOCGLIFFLAGS;
 		ioc.ic_timout = 0;
-		ioc.ic_dp = (caddr_t)&ifreq;
-		ioc.ic_len = sizeof(struct ifreq);
+		ioc.ic_dp = (caddr_t)&lifreq;
+		ioc.ic_len = sizeof(struct lifreq);
 		if(ioctl(vs, I_STR, &ioc)) {
-			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFFLAGS) failed: %m");
+			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFFLAGS) failed: %m");
 			continue;
 		}
 #  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGIFFLAGS, (char *)&ifreq) < 0) {
+
+		if (ioctl(vs, SIOCGLIFFLAGS, (char *)&lifreq) < 0) {
 			if (errno != ENXIO)
-			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFFLAGS) failed: %m");
+			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFFLAGS) failed: %m");
 			continue;
 		}
 #  endif /* not STREAMS_TLI */
-		if ((ifreq.ifr_flags & IFF_UP) == 0) {
+		if ((lifreq.lifr_flags & IFF_UP) == 0) {
 			if (debug)
 			    printf("ignoring %s - interface not UP\n",
-				   ifr->ifr_name);
+				   lifr->lifr_name);
 			continue;
 		}
 		inter_list[i].flags = 0;
-		if ((ifreq.ifr_flags & IFF_BROADCAST) && ifr->ifr_addr.sa_family == AF_INET)
+		if ((lifreq.lifr_flags & IFF_BROADCAST) && lifr->lifr_addr.zz_family == AF_INET)
 		    inter_list[i].flags |= INT_BROADCAST;
 # endif /* not SYS_WINNT */
 # if !defined(SUN_3_3_STINKS)
-		switch (ifr->ifr_addr.sa_family) {
+		switch (lifr->lifr_addr.zz_family) {
 		case AF_INET :
 			if (
 #  if defined(IFF_LOCAL_LOOPBACK) /* defined(SYS_HPUX) && (SYS_HPUX < 8) */
-				(ifreq.ifr_flags & IFF_LOCAL_LOOPBACK)
+				(lifreq.lifr_flags & IFF_LOCAL_LOOPBACK)
 #  elif defined(IFF_LOOPBACK)
-				(ifreq.ifr_flags & IFF_LOOPBACK)
+				(lifreq.lifr_flags & IFF_LOOPBACK)
 #  else /* not IFF_LOCAL_LOOPBACK and not IFF_LOOPBACK */
 			/* test against 127.0.0.1 (yuck!!) */
-			((*(struct sockaddr_in *)&ifr->ifr_addr).sin_addr.s_addr == inet_addr("127.0.0.1"))
+			((*(struct sockaddr_in *)&lifr->lifr_addr).sin_addr.s_addr == inet_addr("127.0.0.1"))
 #  endif /* not IFF_LOCAL_LOOPBACK and not IFF_LOOPBACK */
 				)
 			{
@@ -569,9 +611,9 @@ create_sockets(
 		case AF_INET6 :
 	  		if (
 #  if defined(IFF_LOCAL_LOOPBACK) /* defined(SYS_HPUX) && (SYS_HPUX < 8) */
-        	                (ifreq.ifr_flags & IFF_LOCAL_LOOPBACK)
+        	                (lifreq.lifr_flags & IFF_LOCAL_LOOPBACK)
 #  elif defined(IFF_LOOPBACK)
-                	        (ifreq.ifr_flags & IFF_LOOPBACK)
+                	        (lifreq.lifr_flags & IFF_LOOPBACK)
 #  else /* not IFF_LOCAL_LOOPBACK and not IFF_LOOPBACK */
 	                        /* test against ::1 */
         	                (IN6_IS_ADDR_LOOPBACK(&((struct sockaddr_in6*)(&inter_list[i].sin)->sin6_addr)))
@@ -596,20 +638,20 @@ create_sockets(
 #if 0
 # ifndef SYS_WINNT
 #  ifdef STREAMS_TLI
-		ioc.ic_cmd = SIOCGIFADDR;
+		ioc.ic_cmd = SIOCGLIFADDR;
 		ioc.ic_timout = 0;
-		ioc.ic_dp = (caddr_t)&ifreq;
-		ioc.ic_len = sizeof(struct ifreq);
+		ioc.ic_dp = (caddr_t)&lifreq;
+		ioc.ic_len = sizeof(struct lifreq);
 		if (ioctl(vs, I_STR, &ioc))
 		{
-			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFADDR) failed: %m");
+			msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFADDR) failed: %m");
 			continue;
 		}
 #  else /* not STREAMS_TLI */
-		if (ioctl(vs, SIOCGIFADDR, (char *)&ifreq) < 0)
+		if (ioctl(vs, SIOCGLIFADDR, (char *)&lifreq) < 0)
 		{
 			if (errno != ENXIO)
-			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFADDR) failed: %m");
+			    msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFADDR) failed: %m");
 			continue;
 		}
 #  endif /* not STREAMS_TLI */
@@ -618,16 +660,16 @@ create_sockets(
 # if defined(SYS_WINNT)
 		{int TODO_FillInTheNameWithSomeThingReasonble;}
 # else
-  		(void)strncpy(inter_list[i].name, ifreq.ifr_name,
+  		(void)strncpy(inter_list[i].name, lifreq.lifr_name,
   			      sizeof(inter_list[i].name));
 # endif
-		memcpy(&inter_list[i].sin, &ifr->ifr_addr, SOCKLEN(&ifr->ifr_addr));
+		memcpy(&inter_list[i].sin, &lifr->lifr_addr, SOCKLEN(&lifr->lifr_addr));
 		((struct sockaddr_in*)&inter_list[i].sin)->sin_port = port;
 # if defined(SUN_3_3_STINKS)
 		/*
 		 * Oh, barf!  I'm too disgusted to even explain this
 		 */
-		switch (ifr->ifr_addr.sa_family) {
+		switch (lifr->lifr_addr.sa_family) {
 
 		CASE AF_INET :
 			if (SRCADR(&inter_list[i].sin) == 0x7f000001)
@@ -653,53 +695,53 @@ create_sockets(
 # if !defined SYS_WINNT && !defined SYS_CYGWIN32 /* no interface flags on NT */
 		if (inter_list[i].flags & INT_BROADCAST) {
 #  ifdef STREAMS_TLI
-			ioc.ic_cmd = SIOCGIFBRDADDR;
+			ioc.ic_cmd = SIOCGLIFBRDADDR;
 			ioc.ic_timout = 0;
-			ioc.ic_dp = (caddr_t)&ifreq;
-			ioc.ic_len = sizeof(struct ifreq);
+			ioc.ic_dp = (caddr_t)&lifreq;
+			ioc.ic_len = sizeof(struct lifreq);
 			if(ioctl(vs, I_STR, &ioc)) {
-				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFBRDADDR) failed: %m");
+				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFBRDADDR) failed: %m");
 				exit(1);
 			}
 #  else /* not STREAMS_TLI */
-			if (ioctl(vs, SIOCGIFBRDADDR, (char *)&ifreq) < 0) {
-				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFBRDADDR) failed: %m");
+			if (ioctl(vs, SIOCGLIFBRDADDR, (char *)&lifreq) < 0) {
+				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFBRDADDR) failed: %m");
 				exit(1);
 			}
 #  endif /* not STREAMS_TLI */
 
-#  ifndef ifr_broadaddr
+#  ifndef lifr_broadaddr
 			inter_list[i].bcast =
-			    *(struct sockaddr_storage *)&ifreq.ifr_addr;
+			    *(struct sockaddr_storage *)&lifreq.lifr_addr;
 #  else
 			inter_list[i].bcast =
-			    *(struct sockaddr_storage *)&ifreq.ifr_broadaddr;
-#  endif /* ifr_broadaddr */
+			    *(struct sockaddr_storage *)&lifreq.lifr_broadaddr;
+#  endif /* lifr_broadaddr */
 			((struct sockaddr_in*)&inter_list[i].bcast)->sin_port = port;
 		}
 
 		if (inter_list[i].sin.ss_family == AF_INET) {
 #  ifdef STREAMS_TLI
-			ioc.ic_cmd = SIOCGIFNETMASK;
+			ioc.ic_cmd = SIOCGLIFNETMASK;
 			ioc.ic_timout = 0;
-			ioc.ic_dp = (caddr_t)&ifreq;
-			ioc.ic_len = sizeof(struct ifreq);
+			ioc.ic_dp = (caddr_t)&lifreq;
+			ioc.ic_len = sizeof(struct lifreq);
 			if(ioctl(vs, I_STR, &ioc)) {
-				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGIFNETMASK) failed: %m");
+				msyslog(LOG_ERR, "create_sockets: ioctl(I_STR:SIOCGLIFNETMASK) failed: %m");
 				exit(1);
 			}
 #  else /* not STREAMS_TLI */
-			if (ioctl(vs, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
-				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGIFNETMASK) failed: %m");
+			if (ioctl(vs, SIOCGLIFNETMASK, (char *)&lifreq) < 0) {
+				msyslog(LOG_ERR, "create_sockets: ioctl(SIOCGLIFNETMASK) failed: %m");
 				exit(1);
 			}
 #  endif /* not STREAMS_TLI */
-			inter_list[i].mask = *(struct sockaddr_storage *)&ifreq.ifr_addr;
+			inter_list[i].mask = *(struct sockaddr_storage *)&lifreq.lifr_addr;
 		}
 		inter_list[i].mask.ss_family = inter_list[i].sin.ss_family;
 # else
 		/* winnt here */
-		inter_list[i].bcast                = *(struct sockaddr_storage*)&ifreq.ifr_broadaddr;
+		inter_list[i].bcast                = *(struct sockaddr_storage*)&lifreq.lifr_broadaddr;
 		inter_list[i].bcast.ss_family = inter_list[i].sin.ss_family;
 		(struct sockaddr_in*)&inter_list[i].bcast->sin_port = port;
 		inter_list[i].mask                 = *(struct sockaddr_storage*)&ifreq.ifr_mask;
