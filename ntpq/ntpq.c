@@ -623,8 +623,8 @@ openhost(
 		a_info = getaddrinfo(hname, service, &hints, &ai);	
 	}
 	if (a_info != 0) {
-		printf("%s\n", gai_strerror(a_info));
-		exit(-1);
+		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
+		return 0;
 	}
 
 	if (ai->ai_canonname == NULL) {
