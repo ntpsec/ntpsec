@@ -1,8 +1,8 @@
 In order to use the BitKeeper repository version of NTP you will have
 to have the following tools installed:
 
-	autoconf	2.50 or later (we use 2.52)
-	automake	(we use 1.5)
+	autoconf	2.52 or later
+	automake	1.5 or later
 	lynx
 
 Lynx is used to generate the COPYRIGHT file.  Don't ask.
