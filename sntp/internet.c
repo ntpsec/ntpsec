@@ -71,8 +71,6 @@ number. */
     int family, rval;
     struct addrinfo hints;
     struct addrinfo *res;
-    struct sockaddr_in *sin;
-    struct sockaddr_in6 *sin6;
 
     res = NULL;
     memset(address, 0, sizeof(struct sockaddr_storage));

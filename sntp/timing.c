@@ -94,6 +94,8 @@ negative, unsigned values. */
       /*  if (settimeofday(&new,NULL))
             fatal(1,"unable to reset current system time",NULL);*/
     } else {
+	previous.tv_sec  = 0;
+	previous.tv_usec = 0;
         errno = 0;
        /* if (adjtime(&adjust,&previous))
             fatal(1,"unable to adjust current system time",NULL);*/
