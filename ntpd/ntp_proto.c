@@ -1585,6 +1585,8 @@ peer_clear(
 		peer->filter_disp[i] = MAXDISPERSE;
 		peer->filter_epoch[i] = current_time;
 	}
+	if (peer->cast_flags & MDF_BCLNT)
+		peer->burst = NTP_BURST;
 
 	/*
 	 * During initialization use the association count to spread out
