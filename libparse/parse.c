@@ -21,20 +21,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#if 0 
-#ifdef NeXT
-/*
- * This is lame, but gets us a symbol for the libparse library so the NeXTstep
- * ranlib doesn't stop the compile.
- */
-void
-token_libparse_symbol(void)
-{
-}
-#endif
+# include <config.h>
 #endif
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
@@ -45,26 +32,21 @@ static char rcsid[] = "parse.c,v 4.13 1999/02/28 11:50:20 kardel RELEASE_1999022
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <errno.h>
 
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
-
+#include "ntp_stdlib.h"
 #include "ntp_machine.h"
+#include "ntp.h"		/* (get Y2KFixes definitions) 	Y2KFixes */
 
 #include "parse.h"
-#include "ntp.h"		/* (get Y2KFixes definitions) 	Y2KFixes */
 
 #ifndef PARSESTREAM
 #include <stdio.h>
 #else
 #include "sys/parsestreams.h"
 #endif
-
-#include "ntp_stdlib.h"
-
-#include "ntp_stdlib.h"
 
 extern clockformat_t *clockformats[];
 extern unsigned short nformats;

@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"

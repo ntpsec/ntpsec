@@ -6,7 +6,6 @@
 #endif
 
 #include <stdio.h>
-#include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
 # ifdef HAVE_SYS_IOCTL_H

@@ -23,6 +23,10 @@
 # include <termios.h>
 #endif
 
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
+
 #include "ntp_types.h"
 #include "ntp_proto.h"
 

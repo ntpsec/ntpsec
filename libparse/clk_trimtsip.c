@@ -7,14 +7,13 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_TRIMTSIP)
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/errno.h>
 
 #include "ntp_syslog.h"
 #include "ntp_types.h"
@@ -22,6 +21,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
 #include "ntp_machine.h"
+#include "ntp_stdlib.h"
 
 #include "parse.h"
 
@@ -30,10 +30,6 @@
 #else
 #include "sys/parsestreams.h"
 # endif
-
-#include "ntp_stdlib.h"
-
-#include "ntp_stdlib.h"
 
 #include "ascii.h"
 #include "binio.h"

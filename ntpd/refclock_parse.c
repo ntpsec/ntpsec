@@ -86,9 +86,6 @@
 # include <time.h>
 #endif
 
-#include <sys/errno.h>
-extern int errno;
-
 #if !defined(STREAM) && !defined(HAVE_SYSV_TTYS) && !defined(HAVE_BSD_TTYS) && !defined(HAVE_TERMIOS)
 # include "Bletch:  Define one of {STREAM,HAVE_SYSV_TTYS,HAVE_TERMIOS}"
 #endif

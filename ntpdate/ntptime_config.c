@@ -18,9 +18,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
-#include <errno.h>
 #include <sys/time.h>
-
 
 #include "ntp_fp.h"
 #include "ntp.h"

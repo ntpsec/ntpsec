@@ -17,8 +17,8 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <errno.h>
 #include <setjmp.h>
+
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_syscall.h"

@@ -36,9 +36,11 @@ static char RCSid[] = "adjtimed.c,v 3.1 1993/07/06 01:04:45 jbj Exp";
 #include <nlist.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <errno.h>
 #include <unistd.h>
+
 #include "ntp_syslog.h"
+#include "ntp_stdlib.h"
+
 #include "adjtime.h"
 
 double atof (const char *);

@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
-#include <errno.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/signal.h>

@@ -131,7 +131,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
-#include <errno.h>
 #ifndef SYS_WINNT
 # include <netdb.h>
 # include <sys/signal.h>

@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>
-#include <errno.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"

@@ -13,7 +13,6 @@
 # include <sys/stat.h>
 #endif
 #include <stdio.h>
-#include <errno.h>
 #ifndef SYS_WINNT
 # if !defined(VMS)	/*wjm*/
 #  include <sys/param.h>

@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <signal.h>
-#include <errno.h>
 #include <sys/time.h>
 
 #include "ntpd.h"

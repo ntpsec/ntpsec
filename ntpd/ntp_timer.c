@@ -6,7 +6,6 @@
 #endif
 
 #include <stdio.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <signal.h>

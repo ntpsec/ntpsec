@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -6,9 +10,6 @@
 #include "ntp_stdlib.h"
 
 #ifdef HAVE_SIGACTION
-#include <errno.h>
-
-extern int errno;
 
 void
 signal_no_reset(

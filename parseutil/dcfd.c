@@ -25,18 +25,17 @@
  * written consent of the author.
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <errno.h>
 #include <syslog.h>
-
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
 
 /*
  * NTP compilation environment

@@ -2,14 +2,13 @@
  * ntp_refclock - processing support for reference clocks
  */
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
 #include <stdio.h>
-#include <errno.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+# include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
 #include "ntpd.h"

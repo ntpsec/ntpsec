@@ -4,8 +4,9 @@
  *
  * Converted to use varargs, much better ... jks
  */
+
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -16,7 +17,6 @@
 #endif
 
 #include <stdio.h>
-#include <errno.h>
 
 #include "ntp_types.h"
 #include "ntp_string.h"

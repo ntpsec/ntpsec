@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
-#include <errno.h>
 #ifdef HAVE_POLL_H
 #include <poll.h>
 #endif

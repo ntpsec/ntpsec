@@ -26,7 +26,6 @@
 #include <sys/time.h>
 #include <netdb.h>
 #include <signal.h>
-#include <errno.h>
 
 #include "ntpd.h"
 #include "ntp_select.h"

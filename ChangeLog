@@ -1,3 +1,49 @@
+1999-09-02  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntptrace/ntptrace.c:
+	* ntpdate/ntptimeset.c:
+	* ntpdate/ntptime_config.c:
+	* ntpdate/ntpdate.c:
+	* util/ntptime.c:
+	* parseutil/dcfd.c:
+	* libparse/parsestreams.c:
+	* libparse/parse_conf.c:
+	* libparse/parse.c:
+	* libparse/clk_varitext.c:
+	* libparse/clk_trimtsip.c:
+	* libparse/clk_trimtaip.c:
+	* libparse/clk_schmid.c:
+	* libparse/clk_rcc8000.c:
+	* libparse/clk_rawdcf.c:
+	* libparse/clk_meinberg.c:
+	* libparse/clk_hopf6021.c:
+	* libparse/clk_dcf7000.c:
+	* libparse/clk_computime.c:
+	* libntp/msyslog.c:
+	* libntp/iosignal.c:
+	* libntp/syssignal.c:
+	* adjtimed/adjtimed.c:
+	* ntpd/refclock_shm.c:
+	* ntpd/refclock_parse.c:
+	* ntpd/refclock_palisade.c:
+	* ntpd/refclock_mx4200.c:
+	* ntpd/refclock_jupiter.c:
+	* ntpd/refclock_datum.c:
+	* ntpd/ntpd.c:
+	* ntpd/ntp_util.c:
+	* ntpd/ntp_timer.c:
+	* ntpd/ntp_request.c:
+	* ntpd/ntp_refclock.c:
+	* ntpd/ntp_monitor.c:
+	* ntpd/ntp_loopfilter.c:
+	* ntpd/ntp_io.c:
+	* ntpd/ntp_intres.c:
+	* ntpd/ntp_filegen.c:
+	* include/l_stdlib.h:
+	<errno.h> and errno declaration cleanup.
+
+	* ntpd/map_vme.c: cleanup some spacing.
+
 1999-09-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.97e

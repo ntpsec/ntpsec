@@ -96,7 +96,6 @@ struct shmTime *getShmTime (int unit) {
 #ifndef SYS_WINNT
 	extern char *sys_errlist[ ];
 	extern int sys_nerr;
-	extern int errno;
 	int shmid=0;
 
 	assert (unit<10); /* MAXUNIT is 4, so should never happen */

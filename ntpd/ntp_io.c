@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <errno.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>

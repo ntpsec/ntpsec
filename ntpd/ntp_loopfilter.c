@@ -12,8 +12,8 @@
 
 
 #include <signal.h>
-#include <errno.h>
 #include <setjmp.h>
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"

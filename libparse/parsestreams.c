@@ -19,7 +19,7 @@
 #define VDDRV			/* SHOULD */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif
 
 #ifndef lint
@@ -35,7 +35,6 @@ static char rcsid[] = "parsestreams.c,v 4.6 1998/12/20 23:45:31 kardel RELEASE_1
 #include <sys/buf.h>
 #include <sys/param.h>
 #include <sys/sysmacros.h>
-#include <sys/errno.h>
 #include <sys/time.h>
 #include <sundev/mbvar.h>
 #include <sun/autoconf.h>
@@ -47,7 +46,6 @@ static char rcsid[] = "parsestreams.c,v 4.6 1998/12/20 23:45:31 kardel RELEASE_1
 #include <sys/termio.h>
 #include <sys/ttold.h>
 #include <sys/user.h>
-#include <sys/errno.h>
 #include <sys/tty.h>
 
 #ifdef VDDRV
