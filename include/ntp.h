@@ -456,7 +456,9 @@ struct peer {
 #define REFCLK_PCF		35	/* Conrad parallel port radio clock */
 #define REFCLK_WWV_AUDIO	36	/* WWV/H audio demodulator/decoder */
 #define REFCLK_FG		37	/* Forum Graphic GPS */
-#define REFCLK_MAX		37	/* Grow as needed... */
+#define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial line receiver  */
+#define REFCLK_HOPF_PCI		39	/* hopf DCF77/GPS PCI receiver  */
+#define REFCLK_MAX		39	/* Grow as needed... */
 
 /*
  * We tell reference clocks from real peers by giving the reference

@@ -1,5 +1,29 @@
 2001-04-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ports/winnt/ntpd/ntpd.dsp:
+	* ports/winnt/ntpd/hopf_PCI_io.c:
+	* ports/winnt/include/hopf_PCI_io.h:
+	* ports/winnt/include/config.h:
+	* ntpd/refclock_hopfser.c:
+	* ntpd/refclock_hopfpci.c:
+	* ntpd/refclock_conf.c:
+	* ntpd/ntp_control.c:
+	* ntpd/Makefile.am:
+	* libntp/clocktypes.c:
+	* include/ntp.h:
+	* include/hopf6039.h:
+	* include/Makefile.in:
+	* include/Makefile.am:
+	* html/pic/fg6039.jpg:
+	* html/refclock.htm:
+	* html/driver39.htm:
+	* html/driver38.htm:
+	* html/copyright.htm:
+	* configure.in:
+	HOPF drivers and documentation.
+	From: Bernd Altmeier <altmeier@atlsoft.de> (with some light
+	hacking from Harlan to clean up indentation and lose the // comments)
+
 	* ntpd/refclock_oncore.c: 
 	* ntpd/refclock_conf.c: Make it go.
 	From: Reg Clemens <reg@dwf.com>

@@ -29,6 +29,7 @@ ntpd_SOURCES = cmd_args.c jupiter.h map_vme.c ntp_config.c ntp_control.c \
 	refclock_as2201.c refclock_atom.c refclock_bancomm.c \
 	refclock_chronolog.c refclock_chu.c refclock_conf.c refclock_datum.c \
 	refclock_dumbclock.c refclock_fg.c refclock_gpsvme.c refclock_heath.c \
+	refclock_hopfser.c refclock_hopfpci.c hopf6039.h \
 	refclock_hpgps.c refclock_irig.c refclock_jupiter.c refclock_leitch.c \
 	refclock_local.c refclock_msfees.c refclock_mx4200.c refclock_nmea.c \
 	refclock_oncore.c refclock_palisade.c refclock_palisade.h \

@@ -11,6 +11,7 @@ noinst_HEADERS = \
 	binio.h \
 	global.h \
 	gps.h \
+	hopf6039.h \
 	icom.h \
 	ieee754io.h \
 	iosignal.h \
@@ -48,4 +49,5 @@ noinst_HEADERS = \
 	parse_conf.h \
 	recvbuff.h \
 	trimble.h
+
 

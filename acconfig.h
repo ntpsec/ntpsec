@@ -76,6 +76,12 @@
 /* HOPF 6021 clock */
 #undef CLOCK_HOPF6021
 
+/* HOPF PCI clock device */
+#undef CLOCK_HOPF_PCI
+
+/* HOPF serial clock device*/
+#undef CLOCK_HOPF_SERIAL
+
 /* HP 58503A GPS receiver */
 #undef CLOCK_HPGPS
 

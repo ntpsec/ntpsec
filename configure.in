@@ -1496,6 +1496,25 @@ dnl AC_SUBST(UNIXCERT)
 
 ntp_refclock=no
 
+AC_MSG_CHECKING(for hopf serial clock device)
+AC_ARG_ENABLE(HOPFSERIAL,		[  --enable-HOPFSERIAL       +  hopf serial clock device],
+      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+  if test "$ntp_ok" = "yes"; then
+      ntp_refclock=yes
+      AC_DEFINE(CLOCK_HOPF_SERIAL)
+  fi
+  AC_MSG_RESULT($ntp_ok)
+
+
+AC_MSG_CHECKING(for hopf PCI clock 6039)
+AC_ARG_ENABLE(HOPFPCI,		[  --enable-HOPFPCI       + hopf 6039 PCI board],
+      [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_HOPF_PCI)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 # HPUX only, and by explicit request
 AC_MSG_CHECKING(Datum/Bancomm bc635/VME interface)
 AC_ARG_ENABLE(BANCOMM,		[  --enable-BANCOMM        - Datum/Bancomm bc635/VME interface],

@@ -35,6 +35,8 @@
 //# define CLOCK_PARSE 
 /* # define CLOCK_ATOM */
 /* # define CLOCK_SHM	*/		 /* from ntpd.mak */
+# define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
+# define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
 # define CLOCK_NMEA
 # define CLOCK_PALISADE		 /* from ntpd.mak */
 # define CLOCK_DUMBCLOCK
