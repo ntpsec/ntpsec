@@ -728,7 +728,7 @@ peer_list_sum(
 				ips->srcadr = GET_INADDR(pp->srcadr);
 				if (client_v6_capable)
 					ips->v6_flag = 0;
-/* XXX This code is buggy. Replaced with a straightforward assignment
+/* XXX PDM This code is buggy. Need to replace with a straightforward assignment */
 				ips->dstadr = (pp->processed) ?
 					pp->cast_flags == MDF_BCAST ?
 					GET_INADDR(pp->dstadr->bcast):
@@ -736,9 +736,8 @@ peer_list_sum(
 					GET_INADDR(pp->dstadr->sin) ?
 					GET_INADDR(pp->dstadr->sin):
 					GET_INADDR(pp->dstadr->bcast):
-					1 : 5;
-*/
-				ips->dstadr = GET_INADDR(pp->dstadr->sin);
+					1 : GET_INADDR(pp->dstadr->sin);
+
 				skip = 0;
 			}
 			if (!skip){ 
@@ -831,7 +830,7 @@ peer_info (
 			ip->srcadr6 = GET_INADDR6(pp->srcadr);
 			ip->v6_flag = 1;
 		} else {
-/* XXX This code is buggy. Replaced with a straightforward assignment
+/* XXX PDM This code is buggy. Need to replace with a straightforward assignment */
 			ip->dstadr = (pp->processed) ?
 				pp->cast_flags == MDF_BCAST ?
 				GET_INADDR(pp->dstadr->bcast):
@@ -839,9 +838,8 @@ peer_info (
 				GET_INADDR(pp->dstadr->sin) ?
 				GET_INADDR(pp->dstadr->sin):
 				GET_INADDR(pp->dstadr->bcast):
-				2 : 6;
-*/
-			ip->dstadr = GET_INADDR(pp->dstadr->sin);
+				2 : GET_INADDR(pp->dstadr->sin);
+
 			ip->srcadr = GET_INADDR(pp->srcadr);
 			if (client_v6_capable)
 				ip->v6_flag = 0;
