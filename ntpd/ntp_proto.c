@@ -103,153 +103,178 @@ transmit(
 {
 	int	hpoll;
 
+
+	/*
+	 * The polling state machine. There are two kinds of machines,
+	 * those that never expect a reply (broadcast and manycast
+	 * server modes) and those that do (all other modes). The dance
+	 * is intricate...
+	 */
 	hpoll = peer->hpoll;
-	if (peer->burst == 0) {
-		u_char oreach;
+	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 
 		/*
-		 * The polling state machine. There are two kinds of
-		 * machines, those that never expect a reply (broadcast
-		 * and manycast server modes) and those that do (all
-		 * other modes). The dance is intricate...
+		 * In broadcast mode the poll interval is fixed
+		 * at minpoll.
 		 */
-		if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
+		hpoll = peer->minpoll;
+	} else if (peer->cast_flags & MDF_ACAST) {
 
-			/*
-			 * In broadcast mode the poll interval is fixed
-			 * at minpoll.
-			 */
-			hpoll = peer->minpoll;
-#ifdef OPENSSL
-		} else if (peer->cast_flags & MDF_ACAST) {
+		/*
+		 * In manycast mode we start with the minpoll interval
+		 * and ttl. However, the actual poll interval is eight
+		 * times the nominal poll interval shown here. If fewer
+		 * than sys_minclock servers are found, the ttl is
+		 * increased by one and we try again. If this continues
+		 * to the max ttl, the poll interval is bumped by one
+		 * and we try again. If at least sys_minclock servers
+		 * are found, the poll interval increases with the
+		 * system poll interval to the max and we continue
+		 * indefinately. However, about once per day when the
+		 * agreement parameters are refreshed, the manycast
+		 * clients are reset and we start from the beginning.
+		 * This is to catch and clamp the ttl to the lowest
+		 * practical value and avoid knocking on spurious doors.
+		 */
+		if (sys_survivors < sys_minclock && peer->ttl <
+		    sys_ttlmax)
+			peer->ttl++;
+		hpoll = sys_poll;
+	} else {
 
-			/*
-			 * In manycast mode we start with the minpoll
-			 * interval and ttl. However, the actual poll
-			 * interval is eight times the nominal poll
-			 * interval shown here. If fewer than
-			 * sys_minclock servers are found, the ttl is
-			 * increased by one and we try again. If this
-			 * continues to the max ttl, the poll interval
-			 * is bumped by one and we try again. If at
-			 * least sys_minclock servers are found, the
-			 * poll interval increases with the system poll
-			 * interval to the max and we continue
-			 * indefinately. However, about once per day
-			 * when the agreement parameters are refreshed,
-			 * the manycast clients are reset and we start
-			 * from the beginning. This is to catch and
-			 * clamp the ttl to the lowest practical value
-			 * and avoid knocking on spurious doors.
-			 */
-			if (sys_survivors < sys_minclock && peer->ttl <
-			    sys_ttlmax)
-				peer->ttl++;
-			hpoll = sys_poll;
-#endif /* OPENSSL */
-		} else {
+		/*
+		 * For associations expecting a reply, the watchdog
+		 * counter is bumped by one if the peer has not been
+		 * heard since the previous poll. If the counter reaches
+		 * the max, the poll interval is doubled and the peer is
+		 * demobilized if not configured.
+		 */
+		peer->unreach++;
+		if (peer->unreach >= NTP_UNREACH) {
+			hpoll++;
+			if (peer->flags & FLAG_CONFIG) {
 
-			/*
-			 * For associations expecting a reply, the
-			 * watchdog counter is bumped by one if the peer
-			 * has not been heard since the previous poll.
-			 * If the counter reaches the max, the peer is
-			 * demobilized if not configured and just
-			 * cleared if it is, but in this case the poll
-			 * interval is bumped by one.
-			 */
-			if (peer->unreach < NTP_UNREACH) {
-				peer->unreach++;
-			} else if (peer->flags & FLAG_CONFIG) {
-				peer_clear(peer, "IDLE");
-				hpoll++;
+				/*
+				 * If nothing is likely to change in
+				 * future, slap a restrict bit so we
+				 * won't bother the dude again.
+				 */
+				if (strcmp((char *)&peer->refid,
+				    "RSTR") == 0 ||
+				    strcmp((char *)&peer->refid,
+				    "DENY") == 0 ||
+				    strcmp((char *)&peer->refid,
+				    "CRYP") == 0) {
+					struct sockaddr_in mskadr_sin;
+
+					mskadr_sin.sin_addr.s_addr =
+					    0xffffffff;
+					hack_restrict(RESTRICT_FLAGS,
+					    &peer->srcadr, &mskadr_sin,
+					    0, RES_DONTTRUST |
+					    RES_TIMEOUT);
+					peer->flash |= TEST4;
+				}
 			} else {
 				unpeer(peer);
 				return;
 			}
 		}
-		oreach = peer->reach;
-		peer->reach <<= 1;
-		peer->hyst *= HYST_TC;
-		if (peer->reach == 0) {
-
-			/*
-			 * If this association has become unreachable,
-			 * clear it and raise a trap.
-			 */
-			if (oreach != 0) {
-				report_event(EVNT_UNREACH, peer);
-				peer->timereachable = current_time;
-				if (peer->flags & FLAG_CONFIG) {
-					peer_clear(peer, "IDLE");
-				} else {
-					unpeer(peer);
-					return;
-				}
-			}
-			if (peer->flags & FLAG_IBURST)
-				peer->burst = NTP_BURST;
-		} else {
-
-			/*
-			 * Here the peer is reachable. If it has not
-			 * been heard for three consecutive polls, stuff
-			 * the clock filter. Next, determine the poll
-			 * interval. If the peer is a synchronization
-			 * candidate, use the system poll interval. If
-			 * we cannot synchronize to the peer increase it
-			 * by one. 
-			 */
-			if (!(peer->reach & 0x07)) {
-				clock_filter(peer, 0., 0., MAXDISPERSE);
-				clock_select();
-			}
-			if ((peer->stratum > 1 && peer->refid ==
-			    peer->dstadr->sin.sin_addr.s_addr) ||
-			    peer->stratum == STRATUM_UNSPEC)
-				hpoll++;
-			else
-				hpoll = sys_poll;
-			if (peer->flags & FLAG_BURST)
-				peer->burst = NTP_BURST;
-		}
-	} else {
-		peer->burst--;
 		if (peer->burst == 0) {
+			u_char oreach;
 
-			/*
-			 * If a broadcast client at this point, the
-			 * burst has concluded, so we switch to client
-			 * mode and purge the keylist, since no further
-			 * transmissions will be made.
-			 */
-			if (peer->cast_flags & MDF_BCLNT) {
-				peer->hmode = MODE_BCLIENT;
+			oreach = peer->reach;
+			peer->reach <<= 1;
+			peer->hyst *= HYST_TC;
+			if (peer->reach == 0) {
+
+				/*
+				 * If this association has become
+				 * unreachable, clear it and raise a
+				 * trap.
+				 */
+				if (oreach != 0) {
+					report_event(EVNT_UNREACH,
+					    peer);
+					peer->timereachable =
+					    current_time;
+					if (peer->flags & FLAG_CONFIG) {
+						peer_clear(peer,
+						    "INIT");
+					} else {
+						unpeer(peer);
+						return;
+					}
+				}
+				if (peer->flags & FLAG_IBURST)
+					peer->burst = NTP_BURST;
+			} else {
+
+				/*
+				 * Here the peer is reachable. If it has
+				 * not been heard for three consecutive
+				 * polls, stuff the clock filter. Next,
+				 * determine the poll interval. If the
+				 * peer is a synchronization candidate,
+				 * use the system poll interval. If we
+				 * cannot synchronize to the peer
+				 * increase it by one. 
+				 */
+				if (!(peer->reach & 0x07)) {
+					clock_filter(peer, 0., 0.,
+					    MAXDISPERSE);
+					clock_select();
+				}
+				if ((peer->stratum > 1 && peer->refid ==
+				    peer->dstadr->sin.sin_addr.s_addr)
+				    || peer->stratum == STRATUM_UNSPEC)
+					hpoll++;
+				else
+					hpoll = sys_poll;
+				if (peer->flags & FLAG_BURST)
+					peer->burst = NTP_BURST;
+				}
+		} else {
+			peer->burst--;
+			if (peer->burst == 0) {
+
+				/*
+				 * If a broadcast client at this point,
+				 * the burst has concluded, so we switch
+				 * to client mode and purge the keylist,
+				 * since no further transmissions will
+				 * be made.
+				 */
+				if (peer->cast_flags & MDF_BCLNT) {
+					peer->hmode = MODE_BCLIENT;
 #ifdef OPENSSL
-				key_expire(peer);
+					key_expire(peer);
 #endif /* OPENSSL */
-			}
-			poll_update(peer, hpoll);
-			clock_select();
+				}
+				poll_update(peer, hpoll);
+				clock_select();
 
-			/*
-			 * If ntpdate mode and the clock has not been
-			 * set and all peers have completed the burst,
-			 * we declare a successful failure.
-			 */
-			if (mode_ntpdate) {
-				peer_ntpdate--;
-				if (peer_ntpdate > 0)
-					return;
-				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-				    msyslog(LOG_NOTICE,
-				    "no reply; clock not set");
-				printf(
-				    "ntpd: no reply; clock not set\n");
-				exit(0);
-			}
-			return;
+				/*
+				 * If ntpdate mode and the clock has not
+				 * been set and all peers have completed
+				 * the burst, we declare a successful
+				 * failure.
+				 */
+				if (mode_ntpdate) {
+					peer_ntpdate--;
+					if (peer_ntpdate > 0)
+						return;
 
+					NLOG(NLOG_SYNCEVENT |
+					    NLOG_SYSEVENT)
+					    msyslog(LOG_NOTICE,
+				 	    "no reply; clock not set");
+					printf(
+					    "ntpd: no reply; clock not set\n");
+					exit(0);
+				}
+				return;
+			}
 		}
 	}
 	peer->outdate = current_time;
@@ -290,7 +315,6 @@ receive(
 	int	is_authentic;		/* cryptosum ok */
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_in *dstadr_sin;	/* active runway */
-	struct sockaddr_in mskadr_sin;	/* mask for restrict */
 	l_fp	p_org;			/* originate timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 	int	rval;			/* cookie snatcher */
@@ -621,7 +645,6 @@ receive(
 			    restrict_mask);
 		return;
 
-#ifdef OPENSSL
 	case AM_MANYCAST:
 
 		/*
@@ -666,7 +689,6 @@ receive(
 		peer->ttl = peer2->ttl;
 		break;
 
-#endif /* OPENSSL */
 	case AM_NEWPASS:
 
 		/*
@@ -723,12 +745,14 @@ receive(
 		if (crypto_flags) {
 			if ((rval = crypto_recv(peer, rbufp)) !=
 			    XEVNT_OK) {
+				struct sockaddr_in mskadr_sin;
+
 				unpeer(peer);
+				sys_restricted++;
 				mskadr_sin.sin_addr.s_addr = 0xffffffff;
 				hack_restrict(RESTRICT_FLAGS,
 				    &rbufp->recv_srcadr, &mskadr_sin,
 				    0, RES_DONTTRUST | RES_TIMEOUT);
-				sys_restricted++;
 #ifdef DEBUG
 				if (debug)
 					printf(
@@ -746,13 +770,16 @@ receive(
 		/*
 		 * This packet is received from a server broadcast
 		 * server or symmetric peer. If it is restricted, flash
-		 * the bit and skedattle to Seattle. If not authentic,
+		 * the bit and skedaddle to Seattle. If not authentic,
 		 * leave a light on and continue.
 		 */
 		peer->flash = 0;
 		if (restrict_mask & RES_DONTTRUST) {
-			peer->flash |= TEST4;		/* denied */
 			sys_restricted++;
+			if (peer->flags & FLAG_CONFIG)
+				peer_clear(peer, "RSTR");
+			else
+				unpeer(peer);
 			return;
 		}
 		if (has_mac && !is_authentic)
@@ -817,7 +844,7 @@ receive(
 		/* fall through */
 
 	/*
-	 * For server and symmetric modes, if the associatino transmit
+	 * For server and symmetric modes, if the association transmit
 	 * timestamp matches the packet originate timestamp, loopback is
 	 * confirmed. Note in symmetric modes this also happens when the
 	 * first packet from the active peer arrives at the newly
@@ -968,7 +995,6 @@ receive(
 		 * not okay, we scrub the association and start over.
 		 */
 		if (rval != XEVNT_OK) {
-			poll_update(peer, peer->minpoll);
 
 			/*
 			 * If the return code is bad, the crypto machine
@@ -976,33 +1002,14 @@ receive(
 			 * we demobilize the association, then see if
 			 * the error is recoverable.
 			 */
-			if (peer->flags & FLAG_CONFIG) {
+			if (peer->flags & FLAG_CONFIG)
 				peer_clear(peer, "CRYP");
-				peer->flash |= TEST4;
-			} else {
+			else
 				unpeer(peer);
-			}
-
-			/*
-			 * A signature failure might very well mean the
-			 * server has refreshed keys, and the strategic
-			 * course is to wait and try again. If not, the
-			 * error is probably not recoverable, so don't
-			 * trust subsequent packets.
-			 */
-			if (rval != XEVNT_SIG) {
-				mskadr_sin.sin_addr.s_addr = 0xffffffff;
-				hack_restrict(RESTRICT_FLAGS,
-				    &rbufp->recv_srcadr, &mskadr_sin, 0,
-				    RES_DONTTRUST | RES_TIMEOUT);
-				sys_restricted++;
 #ifdef DEBUG
-				if (debug)
-					printf(
-					    "packet: bad exten %x\n",
-					    rval);
+			if (debug)
+				printf("packet: bad exten %x\n", rval);
 #endif
-			}
 			return;
 		}
 
@@ -1021,12 +1028,10 @@ receive(
 				    "packet: bad auto %03x\n",
 				    peer->flash);
 #endif
-			if (peer->flags & FLAG_CONFIG) {
-				peer_clear(peer, "CRYP");
-				peer->flash |= TEST4;
-			} else {
+			if (peer->flags & FLAG_CONFIG)
+				peer_clear(peer, "AUTO");
+			else
 				unpeer(peer);
-			}
 			return;
 		}
 	}
@@ -1086,35 +1091,6 @@ process_packet(
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
-	 * A kiss-of-death (kod) packet is returned by a server in case
-	 * the client is denied access. It consists of the client
-	 * request packet with the leap bits indicating never
-	 * synchronized, stratum zero and reference ID field an ASCII
-	 * string. If the packet originate timestamp matches the
-	 * association transmit timestamp the kod is legitimate and
-	 * should contain the ASCII code CRYP, DENY or RATE. If DENY or
-	 * CRYP, the TEST4 bit is set and no further messages will be
-	 * sent to the server. In any case a naughty message is semt to
-	 * the system log.
-	 */
-	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
-		char code[5];
-
-		memcpy(code, &pkt->refid, 4);
-		code[4] = '\0';
-		if (strcmp(code, "CRYP") == 0 || strcmp(code,
-		    "DENY") == 0 || strcmp(code, "RATE") == 0) {
-			peer->stratum = STRATUM_UNSPEC;
-			peer->refid = pkt->refid;
-			if (strcmp(code, "RATE") != 0)
-				peer->flash |= TEST4;	/* denied */
-			msyslog(LOG_INFO,
-			    "kiss-of-death %s", code);
-			return;
-		}
-	}
-
-	/*
 	 * Test for unsynchronized server.
 	 */
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
@@ -1130,7 +1106,8 @@ process_packet(
 	 * timestamps, which are enough to get the protocol started. The
 	 * originate timestamp is copied from the packet transmit
 	 * timestamp and the receive timestamp is copied from the
-	 * packet receive timestamp.
+	 * packet receive timestamp. If okay so far, we save the leap,
+	 * stratum and refid for billboards.
 	 */
 	peer->org = p_xmt;
 	peer->rec = *recv_ts;
@@ -1142,6 +1119,9 @@ process_packet(
 #endif
 		return;
 	}
+	peer->leap = pleap;
+	peer->stratum = pstratum;
+	peer->refid = pkt->refid;
 
 	/*
 	 * Test for valid peer data (tests 6-8)
@@ -1178,14 +1158,11 @@ process_packet(
 	 */
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
 	    &p_rec, &p_xmt, &peer->rec);
-	peer->leap = pleap;
 	peer->pmode = pmode;
-	peer->stratum = pstratum;
 	peer->ppoll = pkt->ppoll;
 	peer->precision = pkt->precision;
 	peer->rootdelay = p_del;
 	peer->rootdispersion = p_disp;
-	peer->refid = pkt->refid;
 	peer->reftime = p_reftime;
 	if (!(peer->reach)) {
 		report_event(EVNT_REACH, peer);
@@ -1311,6 +1288,7 @@ clock_update(void)
 		clear_all();
 		sys_peer = NULL;
 		sys_stratum = STRATUM_UNSPEC;
+			memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
 		NLOG(NLOG_SYNCSTATUS)
 		    msyslog(LOG_INFO, "synchronisation lost");
@@ -1329,10 +1307,8 @@ clock_update(void)
 	 */
 	default:
 		sys_stratum = sys_peer->stratum + 1;
-		if (sys_stratum == 1)
+		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
-		else if (sys_stratum == STRATUM_UNSPEC)
-			memcpy(&sys_refid, "UNSP", 4);
 		else
 			sys_refid = sys_peer->srcadr.sin_addr.s_addr;
 		sys_reftime = sys_peer->rec;
@@ -1936,10 +1912,8 @@ clock_select(void)
 				report_event(EVNT_PEERSTCHG,
 				    (struct peer *)0);
 			}
-#ifdef OPENSSL
 			if (osurv > 0)
 				resetmanycast();
-#endif /* OPENSSL */
 			return;
 		}
 	}
@@ -2109,7 +2083,6 @@ clock_select(void)
 			typesystem = peer;
 	}
 
-#ifdef OPENSSL
 	/*
 	 * In manycast client mode we may have spooked a sizeable number
 	 * of peers that we don't need. If there are at least
@@ -2121,7 +2094,6 @@ clock_select(void)
 	 */
 	if (sys_survivors < sys_minclock && osurv >= sys_minclock)
 		resetmanycast();
-#endif /* OPENSSL */
 
 	/*
 	 * Mitigation rules of the game. There are several types of
@@ -2547,9 +2519,11 @@ peer_xmit(
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
 		msyslog(LOG_NOTICE,
-			"transmit: encryption key %d not found",
-			    xkeyid);
-		peer->flash |= TEST4 | TEST5;
+		    "transmit: encryption key %d not found", xkeyid);
+		if (peer->flags & FLAG_CONFIG)
+			peer_clear(peer, "NKEY");
+		else
+			unpeer(peer);
 		return;
 	}
 	sendlen += authlen;

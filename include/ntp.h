@@ -292,7 +292,6 @@ struct peer {
 	u_char	status;		/* peer status */
 	u_char	pollsw;		/* what it says */
 	u_char	reach;		/* reachability register */
-	u_char	unreach;	/* unreachable count */
 	u_long	epoch;		/* reference epoch */
 	u_short	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
@@ -321,6 +320,7 @@ struct peer {
 	 */
 	u_long	update;		/* receive epoch */
 #define end_clear_to_zero update
+	u_int	unreach;	/* unreachable count */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
         u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */

@@ -312,10 +312,13 @@ clear_all(void)
 	for (n = 0; n < HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (peer->flags & FLAG_CONFIG)
-				peer_clear(peer, "STEP");
-			else
+			if (peer->flags & FLAG_CONFIG) {
+				if (!(peer->cast_flags & (MDF_ACAST |
+				     MDF_MCAST | MDF_BCAST)))
+					peer_clear(peer, "STEP");
+			} else {
 				unpeer(peer);
+			}
 		}
 	}
 #ifdef DEBUG
@@ -539,6 +542,13 @@ newpeer(
 	memset((char *)peer, 0, sizeof(struct peer));
 
 	/*
+	 * Assign an association ID and increment the system variable.
+	 */
+	peer->associd = current_association_ID;
+	if (++current_association_ID == 0)
+		++current_association_ID;
+
+	/*
 	 * Initialize the peer structure and dance the interface jig.
 	 * Reference clocks step the loopback waltz, the others
 	 * squaredance around the interface list looking for a buddy. If
@@ -584,13 +594,6 @@ newpeer(
 		peer_clear(peer, "INIT");
 	if (mode_ntpdate)
 		peer_ntpdate++;
-
-	/*
-	 * Assign an association ID and increment the system variable.
-	 */
-	peer->associd = current_association_ID;
-	if (++current_association_ID == 0)
-		++current_association_ID;
 
 	/*
 	 * Note time on statistics timers.

@@ -451,38 +451,26 @@ crypto_recv(
 
 			/*
 			 * Check the identity schemes are compatible. If
-			 * no scheme is in use for both server and
-			 * client, the default TC scheme is used. If
-			 * both server and client have private
-			 * certificates, the server public key and
+			 * the client has PC, the server must have PC,
+			 * in which case the server public key and
 			 * identity are presumed valid, so we skip the
-			 * certificate and identity stages and move
-			 * immediately to the cookie stage which
-			 * confirms the server signature. If either both
-			 * server and client agree on either IFF or GQ
-			 * schemes, that survives. If this is a server
-			 * reply from a configured client, we use either
-			 * the IFF or GQ schemes if both agree, or the
-			 * default scheme if not. If none of the above,
-			 * raise blow the whistle and dump the
-			 * association.
+			 * certificate and identity exchanges and move
+			 * immediately to the cookie exchange which
+			 * confirms the server signature. If the client
+			 * has IFF or GC or both, the server must have
+			 * the same one or both. Otherwise, the default
+			 * TC scheme is used.
 			 */
-			temp32 = PKT_MODE(rbufp->recv_pkt.li_vn_mode);
-			if (fstamp & CRYPTO_FLAG_PRIV) {
-				if (!(crypto_flags & CRYPTO_FLAG_PRIV))
-					rval = XEVNT_ID;
+			if (crypto_flags & CRYPTO_FLAG_PRIV) {
+				if (!(fstamp & CRYPTO_FLAG_PRIV))
+					rval = XEVNT_KEY;
 				else
 					fstamp |= CRYPTO_FLAG_VALID |
 					    CRYPTO_FLAG_VRFY;
-			} else if (crypto_flags & CRYPTO_FLAG_PRIV &&
-			    temp32 != MODE_SERVER) {
-					rval = XEVNT_ID;
-			} else if (!(temp32 == MODE_SERVER ||
-			    !(crypto_flags & (CRYPTO_FLAG_IFF |
-			    CRYPTO_FLAG_GQ)) || (crypto_flags & fstamp &
-			    CRYPTO_FLAG_IFF) || (crypto_flags & fstamp &
-			    CRYPTO_FLAG_GQ))) {
-				rval = XEVNT_ID;
+			} else if (crypto_flags & CRYPTO_FLAG_MASK &&
+			    !(crypto_flags & fstamp &
+			    CRYPTO_FLAG_MASK)) {
+				rval = XEVNT_KEY;
 			}
 
 			/*
@@ -698,13 +686,12 @@ crypto_recv(
 
 			/*
 			 * Discard the message if invalid or identity
-			 * not confirmed or signature not verified with
-			 * respect to the host public key values.
+			 * not confirmed.
 			 */
 			if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				break;
 
-			if ((rval = crypto_verify(ep, &pubkey, peer)) !=
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
 				break;
 
@@ -1877,6 +1864,7 @@ bighash(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
  */
 static int
 crypto_alice(
@@ -1941,7 +1929,7 @@ crypto_alice(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_ID	bad or missing identification
+ * XEVNT_PUB	bad or missing public key
  */
 static int
 crypto_bob(
@@ -1974,7 +1962,7 @@ crypto_bob(
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2006,7 +1994,7 @@ crypto_bob(
 		msyslog(LOG_ERR, "crypto_bob %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
@@ -2030,6 +2018,7 @@ crypto_bob(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_PUB	bad or missint public key
  * XEVNT_ID	bad or missing identification
  */
 int
@@ -2057,7 +2046,7 @@ crypto_iff(
 	dsa = iff_pkey->pkey.dsa;
 	if (peer->iffval == NULL) {
 		msyslog(LOG_ERR, "crypto_iff: missing IFF challenge");
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2070,7 +2059,7 @@ crypto_iff(
 		msyslog(LOG_ERR, "crypto_iff %s\n",
 		    ERR_error_string(ERR_get_error(),
 		    NULL));
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2089,6 +2078,7 @@ crypto_iff(
 	temp = BN_cmp(bn, sdsa->s);
 	BN_free(bn); BN_free(bk); BN_CTX_free(bctx);
 	BN_free(peer->iffval);
+	peer->iffval = NULL;
 	DSA_SIG_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
@@ -2154,6 +2144,7 @@ crypto_iff(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
  */
 static int
 crypto_alice2(
@@ -2218,7 +2209,7 @@ crypto_alice2(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_ID	bad or missing identification
+ * XEVNT_PUB	bad or missing public key
  */
 static int
 crypto_bob2(
@@ -2253,7 +2244,7 @@ crypto_bob2(
 	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2285,7 +2276,7 @@ crypto_bob2(
 		msyslog(LOG_ERR, "crypto_bob2 %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
@@ -2309,6 +2300,7 @@ crypto_bob2(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
  * XEVNT_ID	bad or missing identification
  */
 int
@@ -2335,7 +2327,7 @@ crypto_gq(
 	rsapar = gqpar_pkey->pkey.rsa;
 	if (peer->iffval == NULL) {
 		msyslog(LOG_ERR, "crypto_gq: missing GQ challenge");
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2347,7 +2339,7 @@ crypto_gq(
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_gq %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (XEVNT_ID);
+		return (XEVNT_PUB);
 	}
 
 	/*
@@ -2366,6 +2358,7 @@ crypto_gq(
 	temp = BN_cmp(y, sdsa->s);
 	BN_CTX_free(bctx); BN_free(y); BN_free(v);
 	BN_free(peer->iffval);
+	peer->iffval = NULL;
 	DSA_SIG_free(sdsa);
 	if (temp == 0)
 		return (XEVNT_OK);
@@ -2580,8 +2573,9 @@ cert_parse(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_PUB	bad or missing public key
  * XEVNT_CRT	bad or missing certificate
- * XEVNT_SIG	signature not verified
+ * XEVNT_VFY	certificate not verified
  */
 static int
 cert_sign(
@@ -2658,7 +2652,7 @@ cert_sign(
 		printf("cert_sign\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
-		return (XEVNT_SIG);
+		return (XEVNT_VFY);
 	}
 	len = i2d_X509(cert, NULL);
 
@@ -2699,7 +2693,7 @@ cert_sign(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_SIG	signature not verified
+ * XEVNT_VFY	certificate not verified
  */
 int
 cert_valid(
@@ -2715,7 +2709,7 @@ cert_valid(
 	ptr = (u_char *)cinf->cert.ptr;
 	cert = d2i_X509(NULL, &ptr, ntohl(cinf->cert.vallen));
 	if (!X509_verify(cert, pkey))
-		return (XEVNT_SIG);
+		return (XEVNT_VFY);
 	cinf->flags |= CERT_SIGN;
 	X509_free(cert);
 	return (XEVNT_OK);
@@ -2733,7 +2727,6 @@ cert_valid(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_SIG	signature not verified
  * XEVNT_PER	certificate expired
  * XEVNT_CRT	bad or missing certificate 
  */
