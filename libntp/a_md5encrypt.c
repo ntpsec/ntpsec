@@ -99,12 +99,6 @@ addr2refid(struct sockaddr_storage *addr)
 	MD5Update(&md5, (u_char *)&GET_INADDR6(*addr),
 	    sizeof(struct in6_addr));
 	MD5Final(digest, &md5);
-	addr_refid = digest[0];
-	addr_refid <<= 8;
-	addr_refid |= digest[1];
-	addr_refid <<= 8;
-	addr_refid |= digest[2];
-	addr_refid <<= 8;
-	addr_refid |= digest[3];
+	memcpy(&addr_refid, digest, 4);
 	return (htonl(addr_refid));
 }
