@@ -28,6 +28,6 @@ for i in $LIST
 do
     echo $i
     ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-rsaref $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --without-rsaref --disable-autokey $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --with-crypto=autokey $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG --enable-parse-clocks --with-crypto=md5 $BUILD_ARGS" &
 done

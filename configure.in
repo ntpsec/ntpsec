@@ -1349,18 +1349,6 @@ dnl case "$ac_cv_var_gdt_surveying" in
 dnl  yes) AC_DEFINE(GDT_SURVEYING) ;;
 dnl esac
 
-AC_CACHE_CHECK(if we want to use autokey, ac_cv_var_use_autokey,
-[AC_ARG_ENABLE(autokey,        	[  --enable-autokey        + include support for AUTOKEY],
-    [ans=$enableval], [ans=yes])
-ac_cv_var_use_autokey=$ans])
-case "$ac_cv_var_use_autokey" in
- yes)
-     AC_DEFINE(AUTOKEY, , [Autokey?])
-     AC_SUBST(AUTOKEY)
-     AUTOKEY=1
-     ;;
-esac
-
 # Check for ioctls TIOCGPPSEV
 AC_MSG_CHECKING(ioctl TIOCGPPSEV)
 if test "$ac_cv_header_termios_h" = "yes"; then
@@ -2236,24 +2224,26 @@ AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
 AC_SUBST(MAKE_NTP_GENKEYS)
-AC_MSG_CHECKING(if we need to make and use the RSAREF library)
-AC_ARG_WITH(rsaref,	[  --with-rsaref           + Use rsaref if possible],
-[ans=yes
-case "$withval" in
- no) ans=no ;;
-esac], [ans=yes])
+AC_MSG_CHECKING(for the level of crypto support)
+AC_ARG_WITH(crypto,	[  --with-crypto           + ={md5,autokey,rsaref}],
+[ans=$withval], [ans=yes])
 case "$ans" in
- yes)
-    ans=no
+ yes|rsaref)
+    ans=md5
     if test -f $srcdir/rsaref2/source/rsa.c
     then
-	ans=yes
+	ans=rsaref
 	LIBRSAREF=../librsaref/librsaref.a
 	MAKE_LIBRSAREF=librsaref.a
 	MAKE_NTP_GENKEYS=ntp_genkeys
 	AC_DEFINE(DES)
 	AC_DEFINE(PUBKEY, , [Public key?])
     fi
+    ;;
+ autokey)
+    AC_DEFINE(AUTOKEY, , [Autokey?])
+    AC_SUBST(AUTOKEY)
+    AUTOKEY=1
     ;;
 esac
 AC_MSG_RESULT($ans)

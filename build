@@ -47,11 +47,11 @@ esac
 KEYSUF=""
 
 case "$CONFIG_ARGS" in
- *--disable-autokey*)
-    KEYSUF="-noautokey"
+ *--with-crypto=autokey*)
+    KEYSUF="-autokey"
     ;;
- *--without-rsaref*)
-    [ -d rsaref2 ] && KEYSUF="-norsa"
+ *--with-crypto=md5*)
+    [ -d rsaref2 ] && KEYSUF="-md5"
     ;;
 esac
 

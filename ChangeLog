@@ -1,3 +1,10 @@
+2000-05-07  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* flock-build: Use new --with-crypto choices
+	* build (KEYSUF): Deal with new --with-crypto
+	* configure.in: --with-crypto={md5,autokey,rsaref};
+	lose --enable-autokey
+
 2000-05-06  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* build (KEYSUF): Catch --disable-autokey first.
