@@ -131,7 +131,7 @@
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
 #define MSGCNT		20	/* max message count */
-#define SMAX		80	/* max clockstats line length */
+#define SMAX		256	/* max clockstats line length */
 
 /*
  * Calling program modes

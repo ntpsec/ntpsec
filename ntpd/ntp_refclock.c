@@ -352,14 +352,11 @@ refclock_transmit(
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NSTAGE;
 		}
-		if (refclock_conf[clktype]->clock_poll != noentry)
-		    (refclock_conf[clktype]->clock_poll)(unit, peer);
-		clock_select();
 	} else {
-		if (refclock_conf[clktype]->clock_poll != noentry)
-		    (refclock_conf[clktype]->clock_poll)(unit, peer);
 		peer->burst--;
 	}
+	if (refclock_conf[clktype]->clock_poll != noentry)
+		(refclock_conf[clktype]->clock_poll)(unit, peer);
 	poll_update(peer, peer->hpoll);
 }
 
@@ -595,7 +592,6 @@ refclock_receive(
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
-	clock_select();
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, clock_phi * (current_time -
 	    peer->epoch), peer->jitter);

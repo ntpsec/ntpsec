@@ -93,11 +93,11 @@
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS " /* reference ID */
 #define	DESCRIPTION	"Arbiter 1088A/B GPS Receiver" /* WRU */
-#define ARBSTAGE	32	/* median filter stages */
+#define ARBSTAGE	40	/* median filter stages */
 
 #define	LENARB		24	/* format B5 timecode length */
-#define MAXSTA		30	/* max length of status string */
-#define MAXPOS		70	/* max length of position string */
+#define MAXSTA		40	/* max length of status string */
+#define MAXPOS		80	/* max length of position string */
 
 /*
  * ARB unit control structure
@@ -249,6 +249,8 @@ arb_receive(
 	if (temp < 3)
 		return;
 
+printf("xxx %d %s\n", temp, tbuf);
+
 	if (up->tcswitch == 0) {
 
 		/*
@@ -263,33 +265,43 @@ arb_receive(
 		if (!strncmp(tbuf, "TQ", 2)) {
 			up->qualchar = tbuf[2];
 			write(pp->io.fd, "SR", 2);
+			return;
+
 		} else if (!strncmp(tbuf, "SR", 2)) {
 			strcpy(up->status, tbuf + 2);
-			if (pp->sloppyclockflag & CLK_FLAG4)
+			if (pp->sloppyclockflag & CLK_FLAG4) {
 				write(pp->io.fd, "LA", 2);
-			else {
+				return;
+			} else {
 				write(pp->io.fd, "B5", 2);
-				up->tcswitch++;
 			}
 		} else if (!strncmp(tbuf, "LA", 2)) {
 			strcpy(up->latlon, tbuf + 2);
 			write(pp->io.fd, "LO", 2);
+			return;
+
 		} else if (!strncmp(tbuf, "LO", 2)) {
 			strcat(up->latlon, " ");
 			strcat(up->latlon, tbuf + 2);
 			write(pp->io.fd, "LH", 2);
+			return;
+
 		} else if (!strncmp(tbuf, "LH", 2)) {
 			strcat(up->latlon, " ");
 			strcat(up->latlon, tbuf + 2);
 			write(pp->io.fd, "DB", 2);
+			return;
+
 		} else if (!strncmp(tbuf, "DB", 2)) {
 			strcat(up->latlon, " ");
 			strcat(up->latlon, tbuf + 2);
 			record_clock_stats(&peer->srcadr, up->latlon);
+#ifdef DEBUG
+			if (debug)
+				printf("arbiter: %s\n", up->latlon);
+#endif
 			write(pp->io.fd, "B5", 2);
-			up->tcswitch++;
 		}
-		return;
 	}
 
 	/*
@@ -301,28 +313,25 @@ arb_receive(
 	 * that the time quality character and receiver status string is
 	 * tacked on the end for clockstats display. 
 	 */
-	if (temp == LENARB) {
+	up->tcswitch++;
+	if (temp < LENARB)
+		return;
 
-		/*
-		 * Timecode format B5: "i yy ddd hh:mm:ss.000   "
-		 */
-		strncpy(pp->a_lastcode, tbuf, BMAX);
-		pp->a_lastcode[LENARB - 2] = up->qualchar;
-		strcat(pp->a_lastcode, up->status);
-		pp->lencode = strlen(pp->a_lastcode);
-		syncchar = ' ';
-		if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",
-		    &syncchar, &pp->year, &pp->day, &pp->hour,
-		    &pp->minute, &pp->second) != 6) {
-			refclock_report(peer, CEVNT_BADREPLY);
-			write(pp->io.fd, "B0", 2);
-			return;
-		}
-	} else  {
+	/*
+	 * Timecode format B5: "i yy ddd hh:mm:ss.000   "
+	 */
+	strncpy(pp->a_lastcode, tbuf, BMAX);
+	pp->a_lastcode[LENARB - 2] = up->qualchar;
+	strcat(pp->a_lastcode, up->status);
+	pp->lencode = strlen(pp->a_lastcode);
+	syncchar = ' ';
+	if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",
+	    &syncchar, &pp->year, &pp->day, &pp->hour,
+	    &pp->minute, &pp->second) != 6) {
+		refclock_report(peer, CEVNT_BADREPLY);
 		write(pp->io.fd, "B0", 2);
 		return;
 	}
-	up->tcswitch++;
 
 	/*
 	 * We decode the clock dispersion from the time quality
