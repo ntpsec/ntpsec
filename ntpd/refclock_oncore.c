@@ -34,7 +34,8 @@
  *  or	/etc/ntp.oncore
  * --------------------------------------------------------------------------
  * Reg.Clemens <reg@dwf.com> Sep98.
- *  With these mods it works on SunOS, Solaris and Linux
+ *  Original code written for FreeBSD.
+ *  With these mods it works on FreeBSD, SunOS, Solaris and Linux
  *    (SunOS 4.1.3 + ppsclock)
  *    (Solaris7 + MU4)
  *    (RedHat 5.1 2.0.35 + PPSKit, 2.1.126 + or later).
