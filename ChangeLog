@@ -1,3 +1,9 @@
+2000-01-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* scripts/ntpsweep: New version
+	* html/copyright.htm: Added Hans Lambermont
+	From: Hans Lambermont <Hans.Lambermont@nl.origin-it.com>
+
 2000-01-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_oncore.c (oncore_start): Only dance with the

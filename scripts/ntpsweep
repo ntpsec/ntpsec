@@ -1,10 +1,10 @@
 #!/usr/local/bin/perl -w
 #
-# $Id: .del-ntpsweep~dff61aa1 1.2 2000/01/13 23:20:48-00:00 stenn@whimsy.udel.edu $
+# $Id: .del-ntpsweep~dff61aa1 1.3 2000/01/15 07:37:52-00:00 stenn@whimsy.udel.edu $
 #
 # DISCLAIMER
 # 
-# Copyright (C) 1999 Hans Lambermont and Origin B.V.
+# Copyright (C) 1999,2000 Hans Lambermont and Origin B.V.
 # 
 # Permission to use, copy, modify and distribute this software and its
 # documentation for any purpose and without fee is hereby granted,
@@ -16,10 +16,14 @@
 # purpose. The name Origin B.V. must not be used to endorse or promote
 # products derived from this software without prior written permission.
 #
+# Hans Lambermont <Hans.Lambermont@nl.origin-it.com>/<H.Lambermont@chello.nl>
+# 14 Jan 2000
 
+require 5.0;		# But actually tested on 5.004 ;)
 use Getopt::Long;       # GetOptions()
 use strict;
 
+my $version = 1.3;
 (my $program = $0) =~ s%.*/(.+?)(.pl)?$%$1%;
 
 # Hardcoded paths/program names
@@ -29,17 +33,26 @@ my $ntpq = "ntpq";
 # no STDOUT buffering
 $| = 1;
 
-my ($help, $single_host, $showpeers, $maxlevel, $strip);
+my ($help, $single_host, $showpeers, $maxlevel, $strip, $askversion);
 my $res = GetOptions("help!"      => \$help,
 		     "host=s"     => \$single_host,
 		     "peers!"     => \$showpeers,
 		     "maxlevel=s" => \$maxlevel,
-		     "strip=s"    => \$strip);
+		     "strip=s"    => \$strip,
+		     "version!"   => \$askversion);
+
+if ($askversion) {
+    print("$version\n");
+    exit 0;
+}
 
 if ($help || ((@ARGV != 1) && !$single_host)) {
     warn <<EOF;
+This is $program, version $version
+Copyright (C) 1999,2000 Hans Lambermont and Origin B.V.  Disclaimer inside.
+
 Usage:
-  $program [--help|--peers|--strip <string>|--maxlevel <level>] \\
+  $program [--help|--peers|--strip <string>|--maxlevel <level>|--version] \\
     <file>|[--host <hostname>]
 
 Description:
@@ -50,14 +63,16 @@ Description:
 Options:
 --help
     Print this short help text and exit.
+--version
+    Print version ($version) and exit.
 <file>
-    Specify the hosts file. File format is one hostname or ip number per
-    line. Lines beginning with # are considered as comment.
+    Specify hosts file. File format is one hostname or ip number per line.
+    Lines beginning with # are considered as comment.
 --host <hostname>
     Speficy a single host, bypassing the need for a hosts file.
 --peers
-    Recursively list all peers a host synchronizes to. An '=' before a
-    peer means a loop. Recursion stops here.
+    Recursively list all peers a host synchronizes to.
+    An '= ' before a peer means a loop. Recursion stops here.
 --maxlevel <level>
     Traverse peers up to this level (4 is a reasonable number).
 --strip <string>
@@ -65,7 +80,7 @@ Options:
 
 Examples:
     $program myhosts.txt --strip .foo.com
-    $program --host some.host --peers --maxlevel 5
+    $program --host some.host --peers --maxlevel 4
 EOF
     exit 1;
 }
@@ -284,7 +299,3 @@ EOF
 &scan_hosts();
 
 exit 0;
-
-# ir. Hans Lambermont, Architect/Developer, Hans.Lambermont@nl.origin-it.com
-# Origin Managed Services, IntraNet Services, tel: +31402785376 +31653252172
-#       ==>> Internet Proxies * IntraConnect * Internet Services <<==   
