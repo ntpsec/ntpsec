@@ -54,7 +54,6 @@
  */
 char *sprintb		P((u_int, const char *));
 const char *timex_state	P((int));
-volatile int debug = 0;
 
 #ifdef SIGSYS
 void pll_trap		P((int));
@@ -121,9 +120,6 @@ main(
 	    case 'c':
 		cost++;
 		break;
-	    case 'd':
-		debug++;
-		break;
 	    case 'e':
 		ntx.modes |= MOD_ESTERROR;
 		ntx.esterror = atoi(ntp_optarg);
@@ -166,7 +162,7 @@ main(
 -m maxerror	max possible error (us)\n\
 -o offset	current offset (ms)\n\
 -r		print the unix and NTP time raw\n\
--l leap		Set the leap bits\n\
+-s status	Set the status bits\n\
 -t timeconstant	log2 of PLL time constant (0 .. %d)\n",
 			       progname, optargs,
 #ifdef MOD_MICRO
