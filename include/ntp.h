@@ -461,7 +461,8 @@ struct peer {
 #define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder */
 #define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
 #define REFCLK_RIPENCC		43	/* RIPE NCC Trimble driver */
-#define REFCLK_MAX		43	/* Grow as needed... */
+#define REFCLK_NEOCLOCK4X       44      /* NeoClock4X DCF77 or TDF receiver */
+#define REFCLK_MAX		44	/* Grow as needed... */
 
 /*
  * We tell reference clocks from real peers by giving the reference
