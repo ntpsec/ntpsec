@@ -354,6 +354,7 @@ io_completion_port_sendto(
 {
 	transmitbuf *buff = NULL;
 	DWORD Result = ERROR_SUCCESS;
+	int errval;
 
 	if (len <= sizeof(buff->pkt)) {
 		buff = get_free_transmit_buffer();
@@ -367,11 +368,23 @@ io_completion_port_sendto(
 
 			buff->iocompletioninfo.iofunction = OnSendToComplete;
 			Result = WSASendTo(inter->fd, &buff->wsabuf, 1, &BytesSent, Flags, (struct sockaddr *) dest, sizeof(struct sockaddr_in), &buff->iocompletioninfo.overlapped, NULL);
-			if ((Result == SOCKET_ERROR) && (WSAGetLastError() == WSA_IO_PENDING)) {
-				Result = ERROR_SUCCESS;
-			}
-			else if (Result != ERROR_SUCCESS) {
-				netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+
+			if(Result == SOCKET_ERROR)
+			{
+				errval = WSAGetLastError();
+				switch (errval) {
+
+				case NO_ERROR :
+				case WSA_IO_INCOMPLETE :
+				case WSA_WAIT_IO_COMPLETION :
+				case WSA_IO_PENDING :
+					Result = ERROR_SUCCESS;
+					break ;
+
+				default :
+					netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+					break;
+				}
 			}
 #ifdef DEBUG
 			if (debug > 2) {
@@ -381,13 +394,14 @@ io_completion_port_sendto(
   					printf("WSASendTo - %d bytes to %s : %d\n", len, strbuffer, Result);
 			}
 #endif
+			return (Result);
 		}
 		else {
 #ifdef DEBUG
 			if (debug)
 			printf("No more transmit buffers left - data discarded\n");
 #endif
-		return ERROR_OUTOFMEMORY;
+			return ERROR_OUTOFMEMORY;
 		}
 	}
 	else {
