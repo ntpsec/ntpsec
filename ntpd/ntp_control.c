@@ -15,6 +15,12 @@
 #include <ctype.h>
 #include <signal.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
+
 #ifdef PUBKEY
 #include "ntp_crypto.h"
 #endif /* PUBKEY */
@@ -1863,8 +1869,13 @@ ctl_getitem(
 						cp++;
 					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
-						if (tp >= buf + sizeof(buf))
+						if (tp >= buf + sizeof(buf)) {
+							msyslog(LOG_WARNING,
+		"Possible 'ntpdx' exploit from %s:%d (possibly spoofed)\n",
+		inet_ntoa(rmt_addr->sin_addr), ntohs(rmt_addr->sin_port)
+								);
 							return (0);
+						}
 					}
 					if (cp < reqend)
 						cp++;

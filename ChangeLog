@@ -1,5 +1,8 @@
 2001-04-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/ntp_control.c (ctl_getitem): msyslog() possible buffer
+	overflow exploit.
+
 	* configure.in: 4.0.99k24
 
 	* html/pic/radio2.jpg:
@@ -36,7 +39,8 @@
 	up some loop logic.
 	* ntpd/ntp_config.c: Added "tinker" and "minpoll".  Use
 	sys_minpoll now, instead of old manifest constant.
-	(save_resolve): Print keyid using decimal, not hex.
+	(save_resolve): Print keyid using decimal, not hex.  From Lars-Owe
+	Ivarsson <larsowe@paradisaea.its.uu.se>
 	* include/ntpd.h: Added peer_ntpdate and sys_minpoll.
 	* include/ntp_config.h (CONF_CLOCK_MINPOLL): Added.
 	* include/ntp.h: keyid cleanup.  LOOP_* cleanup.
