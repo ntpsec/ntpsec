@@ -266,7 +266,7 @@ timer(void)
 		expire_all();
 #ifdef DEBUG
 		if (debug)
-			printf("key expire: at %lu  next %lu\n",
+			printf("key expire: at %lu next %lu\n",
 			    current_time, revoke_timer);
 #endif
 	}

@@ -23,13 +23,13 @@
  * Extension field message formats
  *
  *   +-------+-------+   +-------+-------+   +-------+-------+
- * 0 |   3   |  len  |   |   4   |  len  |   |   5   |  len  |
+ * 0 |   3   |  len  |   |  4,2  |  len  |   |   5   |  len  |
  *   +-------+-------+   +-------+-------+   +-------+-------+
- * 1 |    assoc ID   |   |    assoc ID   |   |    assoc ID   |
+ * 1 |    assocID    |   |    assocID    |   |    assocID    |
  *   +---------------+   +---------------+   +---------------+
  * 2 |   timestamp   |   |   timestamp   |   |   timestamp   |
  *   +---------------+   +---------------+   +---------------+
- * 3 |   final seq   |   |     cookie    |   |   filestamp   |
+ * 3 |   final seq   |   |  cookie/flags |   |   filestamp   |
  *   +---------------+   +---------------+   +---------------+
  * 4 |   final key   |   | signature len |   |   value len   |
  *   +---------------+   +---------------+   +---------------+
@@ -37,8 +37,8 @@
  *   +---------------+   =   signature   =   =     value     =
  * 6 |               |   |               |   |               |
  *   =   signature   =   +---------------+   +---------------+
- * 7 |               |   CRYPTO_PRIV rsp     | signature len |
- *   +---------------+                       +---------------+
+ * 7 |               |   CRYPTO_ASSOC rsp    | signature len |
+ *   +---------------+   CRYPTO_PRIV rsp     +---------------+
  *   CRYPTO_AUTO rsp                         |               |
  *                                           =   signature   =
  *                                           |               |
@@ -47,9 +47,9 @@
  *                                           CRYPTO_DH rsp
  *                                           CRYPTO_NAME rsp
  *                                           CRYPTO_TAI rsp
- *                                           
+ *
  *   CRYPTO_STAT  1  -    offer/select
- *   CRYPTO_ASSOC 2  8    association ID
+ *   CRYPTO_ASSOC 2  20   association ID
  *   CRYPTO_AUTO  3  88   autokey values
  *   CRYPTO_PRIV  4  84   cookie value
  *   CRYPTO_DHPAR 5  220  agreement parameters
@@ -60,6 +60,13 @@
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
  */
+
+/*
+ * Minimum sizes of fields
+ */
+#define COOKIE_LEN	(5 * 4)
+#define AUTOKEY_LEN	(6 * 4)
+#define VALUE_LEN	(6 * 4)
 
 /*
  * Global cryptodata in host byte order.
@@ -110,17 +117,18 @@ static	void	crypto_tai	P((char *));
 /*
  * Autokey protocol status codes
  */
-#define RV_OK		0x0	/* success */
-#define RV_TSP		0x1	/* invalid timestamp */
-#define RV_FSP		0x2	/* invalid filestamp */
-#define RV_PUB		0x3	/* missing public key */
-#define RV_KEY		0x4	/* invalid RSA modulus */
-#define RV_SIG		0x5	/* invalid signature length */
-#define RV_DH		0x6	/* invalid agreement parameters */
-#define RV_FIL		0x7	/* missing or corrupted key file */
-#define RV_DAT		0x8	/* missing or corrupted data */
-#define RV_DEC		0x9	/* PEM decoding error */
-
+#define RV_OK		0	/* success */
+#define RV_LEN		1	/* invalid field length */
+#define RV_TSP		2	/* invalid timestamp */
+#define RV_FSP		3	/* invalid filestamp */
+#define RV_PUB		4	/* missing public key */
+#define RV_KEY		5	/* invalid RSA modulus */
+#define RV_SIG		6	/* invalid signature length */
+#define RV_DH		7	/* invalid agreement parameters */
+#define RV_FIL		8	/* missing or corrupted key file */
+#define RV_DAT		9	/* missing or corrupted data */
+#define RV_DEC		10	/* PEM decoding error */
+#define RV_DUP		11	/* duplicate flags */
 
 /*
  * session_key - generate session key
@@ -259,9 +267,9 @@ make_keylist(
 	ap->siglen = 0;
 #if DEBUG
 	if (debug)
-		printf("make_keys: %d %08x %08x ts %u\n",
+		printf("make_keys: %d %08x %08x ts %u poll %d\n",
 		    ntohl(ap->seq), ntohl(ap->key), cookie,
-		    ntohl(ap->tstamp));
+		    ntohl(ap->tstamp), peer->kpoll);
 #endif
 #ifdef PUBKEY
 	if(!crypto_flags)
@@ -276,7 +284,7 @@ make_keylist(
 		    rval);
 	else
 		ap->siglen = htonl(len);
-	peer->flags |= CRYPTO_FLAG_AUTO;
+	peer->flags |= FLAG_ASSOC;
 #endif /* PUBKEY */
 }
 
@@ -343,7 +351,7 @@ crypto_recv(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "crypto_recv: ext offset %d len %d code %x assoc ID %d\n",
+			    "crypto_recv: ext offset %d len %d code %x assocID %d\n",
 			    authlen, len, code, (u_int32)ntohl(pkt[i +
 			    1]));
 #endif
@@ -353,16 +361,25 @@ crypto_recv(
 		 * Install association ID and status word.
 		 */
 		case CRYPTO_ASSOC | CRYPTO_RESP:
-			if (peer->flags & FLAG_AUTOKEY)
-				break;
-			if (ntohl(pkt[i + 1]) != 0)
-				peer->assoc = ntohl(pkt[i + 1]);
-			peer->crypto = ntohl(pkt[i + 2]);
+			cp = (struct cookie *)&pkt[i + 2];
+			temp = ntohl(cp->key);
+			if (len < COOKIE_LEN) {
+				rval = RV_LEN;
+			} else if (tstamp == 0) {
+				rval = RV_TSP;
+			} else if (peer->crypto) {
+				rval = RV_DUP;
+			} else {
+				peer->crypto = temp;
+				if (ntohl(pkt[i + 1]) != 0)
+					peer->assoc = ntohl(pkt[i + 1]);
+				rval = RV_OK;
+			}
 #ifdef DEBUG
 			if (debug)
 				printf(
-				    "crypto_recv: flags %x\n",
-				    peer->crypto);
+				    "crypto_recv: verify %d flags 0x%x ts %u\n",
+				    rval, temp, tstamp);
 #endif
 			break;
 
@@ -378,7 +395,9 @@ crypto_recv(
 #ifdef PUBKEY
 			temp = ntohl(ap->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
-			if (tstamp == 0 || tstamp <
+			if (len < AUTOKEY_LEN) {
+				rval = RV_LEN;
+			} else if (tstamp == 0 || tstamp <
 			    peer->recauto.tstamp || (tstamp ==
 			    peer->recauto.tstamp && (peer->flags &
 			    FLAG_AUTOKEY))) {
@@ -444,7 +463,9 @@ crypto_recv(
 #ifdef PUBKEY
 			temp = ntohl(cp->siglen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
-			if (tstamp == 0 || tstamp <
+			if (len < COOKIE_LEN) {
+				rval = RV_LEN;
+			} else if (tstamp == 0 || tstamp <
 			    peer->pcookie.tstamp || (tstamp ==
 			    peer->pcookie.tstamp && (peer->flags &
 			    FLAG_AUTOKEY))) {
@@ -525,7 +546,9 @@ crypto_recv(
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
-			if (kp == NULL) {
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} else if (kp == NULL) {
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
@@ -632,7 +655,9 @@ crypto_recv(
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
-			if (temp != dh_params.primeLen) {
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} else if (temp != dh_params.primeLen) {
 				rval = RV_DH;
 			} else if (kp == NULL) {
 				rval = RV_PUB;
@@ -708,7 +733,9 @@ crypto_recv(
 			temp = ntohl(vp->vallen);
 			j = i + 5 + ntohl(vp->vallen) / 4;
 			bits = ntohl(pkt[i + 5]);
-			if (temp < rsalen || bits <
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} else if (temp < rsalen || bits <
 			    MIN_RSA_MODULUS_BITS || bits >
 			    MAX_RSA_MODULUS_BITS) {
 				rval = RV_KEY;
@@ -779,7 +806,9 @@ crypto_recv(
 			temp = ntohl(vp->vallen);
 			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey.ptr;
 			j = i + 5 + temp / 4;
-			if (kp == NULL) {
+			if (len < VALUE_LEN) {
+				rval = RV_LEN;
+			} if (kp == NULL) {
 				rval = RV_PUB;
 			} else if (ntohl(pkt[j]) != kp->bits / 8) {
 				rval = RV_SIG;
@@ -913,11 +942,14 @@ crypto_xmit(
 	switch (opcode) {
 
 	/*
-	 * Send association ID and status word.
+	 * Send association ID, timestamp and status word.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
-		xpkt[i + 2] = htonl(crypto_flags);
-		len += 4;
+		cp = (struct cookie *)&xpkt[i + 2];
+		cp->tstamp = host.tstamp;
+		cp->key = htonl(crypto_flags);
+		cp->siglen = 0;
+		len += 12;
 		break;
 
 	/*
@@ -932,7 +964,7 @@ crypto_xmit(
 			opcode |= CRYPTO_ERROR;
 			break;
 		}
-		peer->flags &= ~CRYPTO_FLAG_AUTO;
+		peer->flags &= ~FLAG_ASSOC;
 		ap = (struct autokey *)&xpkt[i + 2];
 		ap->tstamp = peer->sndauto.tstamp;
 		ap->seq = peer->sndauto.seq;
@@ -1109,7 +1141,7 @@ crypto_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "crypto_xmit: ext offset %d len %d code %x assoc ID %d\n",
+			    "crypto_xmit: ext offset %d len %d code %x assocID %d\n",
 			    start, len, code, associd);
 #endif
 	}

@@ -1,3 +1,32 @@
+2001-02-28  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (transmit): Documentation/code update.
+	(poll_update): Sanity check peer->hpoll.  Improve debug info.
+	(peer_clear): Improve debug info.  Turn off FLAG_ASSOC in addition
+	to FLAG_AUTOKEY.
+	(clock_select): peer->status is CTL_PST_SEL_DISTSYSPEER, and don't
+	call poll_update().  Make each entry in the peer_list a
+	CTL_PST_SEL_SELCAND sooner, too.  Rework similar logic later on.
+	Change debug level on some info.
+	(peer_xmit): Check peer->flags using FLAG_ASSOC, not
+	CRYPTO_FLAG_AUTO in a couple places.  Don't call poll_update() if
+	sendlen > LEN_PKT_NOMAC.
+	* ntpd/ntp_loopfilter.c (local_clock): Improve debug info.
+	Sanity-check sys_poll sooner.
+	* ntpd/ntp_crypto.c: New artwork.
+	(COOKIE_LEN,AUTOKEY_LEN,VALUE_LEN): New.
+	(make_keylist): More debug info.  Use FLAG_ASSOC, not
+	CRYPTO_FLAG_ASSOC. 
+	(crypto_recv): More debug info.  Clean up/improve sanity checks on
+	CRYPTO_ASSOC and CRYPTO_RESP packets, and in other places.
+	(crypto_xmit): Clean up/improve sanity checks on CRYPTO_ASSOC and
+	CRYPTO_RESP packets.  Use FLAG_ASSOC, not CRYPTO_FLAG_ASSOC.  More
+	debug info.
+	* include/ntp.h (NTP_CANLOCK): Lose it.
+	(clear_to_zero): is now "assoc".
+	(FLAG_ASSOC): Added.
+	From: Dave Mills
+
 2001-02-23  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpdate/ntpdate.h (NTP_MAXAGE): Added.

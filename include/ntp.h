@@ -99,7 +99,6 @@ typedef char s_char;
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~4.5 h) */
 #define	NTP_MINCLOCK	3	/* minimum survivors */
-#define NTP_CANCLOCK	6	/* minimum candidates */
 #define	NTP_MAXCLOCK	10	/* maximum candidates */
 #define	NTP_SHIFT	8	/* 8 suitable for crystal time base */
 #define	NTP_MAXKEY	65535	/* maximum authentication key number */
@@ -268,7 +267,7 @@ struct peer {
 	/*
 	 * Variables used by authenticated client
 	 */
-#define clear_to_zero pkeyid
+#define clear_to_zero assoc
 #ifdef AUTOKEY
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
@@ -393,6 +392,7 @@ struct peer {
 #define FLAG_IBURST	0x0200	/* initial burst mode */
 #define FLAG_NOSELECT	0x0400	/* this is a "noselect" peer */
 #define FLAG_AUTOKEY	0x0800	/* autokey confirmed */
+#define FLAG_ASSOC	0x1000	/* autokey reqeust */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear

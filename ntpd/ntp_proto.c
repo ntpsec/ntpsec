@@ -189,25 +189,31 @@ transmit(
 		} else {
 
 			/*
-			 * Here the peer is reachable. If there is no
-			 * system peer or if the stratum of the system
-			 * peer is greater than this peer or if less
-			 * than five samples are in the reachability
-			 * register, clamp the interval to the minimum.
-			 * If more than six samples are in the register,
-			 * increase the interval by one.
+			 * Here the peer is reachable. If it has not
+			 * been heard for two consecutive polls, stuff
+			 * the clock filter. Next, determine the poll
+			 * interval. If the peer is a synchronization
+			 * candidate, use the system poll interval. If
+			 * the peer is not sane, increase it by one. If
+			 * the number of valid updates is not greater
+			 * than half the register size, clamp it to the
+			 * minimum.
 			 */
 			if ((peer->reach & 0x03) == 0) {
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 				clock_select();
 			}
-			if (sys_peer == NULL)
-				hpoll = peer->minpoll;
-			else if (sys_peer->stratum > peer->stratum ||
-			    peer->valid < 5)
-				hpoll = peer->minpoll;
-			else if (peer->valid >= NTP_SHIFT - 2)
+			if (sys_peer == NULL || (peer->flags &
+			    FLAG_SYSPEER))
+				hpoll = sys_poll;
+			else if ((peer->stratum > 1 && peer->refid ==
+			    peer->dstadr->sin.sin_addr.s_addr) ||
+			    peer->stratum >= STRATUM_UNSPEC ||
+			    (root_distance(peer) >= MAXDISTANCE + 2 *
+			    clock_phi * ULOGTOD(sys_poll)))
 				hpoll++;
+			else if (peer->valid <= NTP_SHIFT / 2)
+				hpoll = peer->minpoll;
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NTP_SHIFT;
 		}
@@ -1128,14 +1134,12 @@ poll_update(
 #ifdef AUTOKEY
 	oldpoll = peer->kpoll;
 #endif /* AUTOKEY */
-	if (peer->status == CTL_PST_SEL_CORRECT)
-		peer->hpoll = sys_poll;
+	if (hpoll > peer->maxpoll)
+		peer->hpoll = peer->maxpoll;
+	else if (hpoll < peer->minpoll)
+		peer->hpoll = peer->minpoll;
 	else
 		peer->hpoll = hpoll;
-	if (peer->hpoll > peer->maxpoll)
-		peer->hpoll = peer->maxpoll;
-	else if (peer->hpoll < peer->minpoll)
-		peer->hpoll = peer->minpoll;
 
 	/*
 	 * bit of adventure here. If during a burst and not timeout,
@@ -1177,7 +1181,8 @@ poll_update(
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
 		    current_time, ntoa(&peer->srcadr), peer->flags,
-		    hpoll, peer->burst, peer->outdate, peer->nextdate);
+		    peer->kpoll, peer->burst, peer->outdate,
+		    peer->nextdate);
 #endif
 }
 
@@ -1203,7 +1208,8 @@ peer_clear(
 	 */
 #ifdef DEBUG
 	if (debug)
-		printf("peer_clear: at %ld\n", current_time);
+		printf("peer_clear: at %ld assoc ID %d\n", current_time,
+		    peer->associd);
 #endif
 #ifdef AUTOKEY
 	key_expire(peer);
@@ -1223,9 +1229,9 @@ peer_clear(
 	 * clock_select(), since the perp has already been voted off
 	 * the island at this point.
 	 */
-	peer->flags &= ~FLAG_AUTOKEY;
+	peer->flags &= ~(FLAG_AUTOKEY | FLAG_ASSOC);
 	if (peer->cast_flags & MDF_BCLNT) {
-		peer->flags |=  FLAG_MCAST;
+		peer->flags |= FLAG_MCAST;
 		peer->hmode = MODE_CLIENT;
 	}
 	peer->estbdelay = sys_bdelay;
@@ -1439,8 +1445,8 @@ clock_select(void)
 	static u_int peer_list_size = 0;
 
 	/*
-	 * Initialize. If a prefer peer does not survive this thing,
-	 * the pps stratum will remain unspec.
+	 * Initialize and create endpoint, index and peer lists big
+	 * enough to handle all associations.
 	 */
 	osys_peer = sys_peer;
 	sys_peer = NULL;
@@ -1458,9 +1464,9 @@ clock_select(void)
 		}
 		while (list_alloc < nlist) {
 			list_alloc += 5;
-			endpoint_size += 5 * 3 * sizeof *endpoint;
-			indx_size += 5 * 3 * sizeof *indx;
-			peer_list_size += 5 * sizeof *peer_list;
+			endpoint_size += 5 * 3 * sizeof(*endpoint);
+			indx_size += 5 * 3 * sizeof(*indx);
+			peer_list_size += 5 * sizeof(*peer_list);
 		}
 		endpoint = (struct endpoint *)emalloc(endpoint_size);
 		indx = (int *)emalloc(indx_size);
@@ -1468,11 +1474,6 @@ clock_select(void)
 	}
 
 	/*
-	 * This first chunk of code is supposed to go through all
-	 * peers we know about to find the peers which are most likely
-	 * to succeed. We run through the list doing the sanity checks
-	 * and trying to insert anyone who looks okay.
-	 *
 	 * Initially, we populate the island with all the rifraff peers
 	 * that happen to be lying around. Those with seriously
 	 * defective clocks are immediately booted off the island. Then,
@@ -1660,8 +1661,7 @@ clock_select(void)
 				unpeer(peer);
 			continue;
 		}
-		peer->status = CTL_PST_SEL_CORRECT;
-		poll_update(peer, peer->hpoll);
+		peer->status = CTL_PST_SEL_DISTSYSPEER;
 		d = root_distance(peer) + peer->stratum * MAXDISPERSE;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
@@ -1682,13 +1682,15 @@ clock_select(void)
 		j++;
 	}
 	nlist = j;
+	for (i = 0; i < nlist; i++) {
+		peer_list[i]->status = CTL_PST_SEL_SELCAND;
 
 #ifdef DEBUG
-	if (debug > 2)
-		for (i = 0; i < nlist; i++)
+		if (debug > 2)
 			printf("select: %s distance %.6f\n",
 			    ntoa(&peer_list[i]->srcadr), synch[i]);
 #endif
+	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
@@ -1698,13 +1700,6 @@ clock_select(void)
 	 * if we are about to discard a prefer peer, who of course has
 	 * the immunity idol.
 	 */
-	for (i = 0; i < nlist; i++) {
-		peer = peer_list[i];
-		if (i < NTP_CANCLOCK)
-			peer->status = CTL_PST_SEL_SELCAND;
-		else
-			peer->status = CTL_PST_SEL_DISTSYSPEER;
-	}
 	while (1) {
 		d = 1e9;
 		e = -1e9;
@@ -1798,21 +1793,19 @@ clock_select(void)
 		return;
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
-		peer_list[i]->status = CTL_PST_SEL_SYNCCAND;
-		peer_list[i]->flags |= FLAG_SYSPEER;
-		if (peer_list[i]->stratum == peer_list[0]->stratum) {
-			leap_consensus |= peer_list[i]->leap;
-			if (peer_list[i]->refclktype ==
-			    REFCLK_ATOM_PPS && peer_list[i]->stratum <
-			    STRATUM_UNSPEC)
-				typepps = peer_list[i];
-			if (peer_list[i] == osys_peer)
-				typesystem = peer_list[i];
-			if (peer_list[i]->flags & FLAG_PREFER) {
-				sys_prefer = peer_list[i];
-			}
-		} else if (peer_list[i] == osys_peer) {
-			sys_poll = NTP_MINDPOLL;
+		peer = peer_list[i];
+		peer->status = CTL_PST_SEL_SYNCCAND;
+		peer->flags |= FLAG_SYSPEER;
+		poll_update(peer, sys_poll);
+		if (peer->stratum == peer_list[0]->stratum) {
+			leap_consensus |= peer->leap;
+			if (peer->refclktype == REFCLK_ATOM_PPS &&
+			    peer->stratum < STRATUM_UNSPEC)
+				typepps = peer;
+			if (peer == osys_peer)
+				typesystem = peer;
+			if (peer->flags & FLAG_PREFER)
+				sys_prefer = peer;
 		}
 	}
 
@@ -1840,7 +1833,7 @@ clock_select(void)
 		sys_offset = sys_peer->offset;
 		sys_syserr = sys_peer->jitter;
 #ifdef DEBUG
-		if (debug > 2)
+		if (debug > 1)
 			printf("select: prefer offset %.6f\n",
 			    sys_offset);
 #endif
@@ -1855,7 +1848,7 @@ clock_select(void)
 			    "pps sync enabled");
 		pps_control = current_time;
 #ifdef DEBUG
-		if (debug > 2)
+		if (debug > 1)
 			printf("select: pps offset %.6f\n",
 			    sys_offset);
 #endif
@@ -1868,7 +1861,7 @@ clock_select(void)
 		sys_offset = clock_combine(peer_list, nlist);
 		sys_syserr = sys_peer->jitter + sys_selerr;
 #ifdef DEBUG
-		if (debug > 2)
+		if (debug > 1)
 			printf("select: combine offset %.6f\n",
 			   sys_offset);
 #endif
@@ -2043,7 +2036,7 @@ peer_xmit(
 		 * them at other times.
 		 */
 		case MODE_BROADCAST:
-			if (peer->flags & CRYPTO_FLAG_AUTO)
+			if (peer->flags & FLAG_ASSOC)
 				cmmd = CRYPTO_AUTO | CRYPTO_RESP;
 			else
 				cmmd = CRYPTO_ASSOC | CRYPTO_RESP;
@@ -2122,7 +2115,7 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
-			else if ((peer->flags & CRYPTO_FLAG_AUTO) &&
+			else if ((peer->flags & FLAG_ASSOC) &&
 			    (peer->cmmd >> 16) != CRYPTO_AUTO)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
@@ -2168,7 +2161,7 @@ peer_xmit(
 				    sendlen, CRYPTO_PRIV, peer->hcookie,
 				    peer->assoc);
 			else if (!(peer->flags & FLAG_AUTOKEY) &&
-			    peer->cast_flags & MDF_BCLNT)
+			    (peer->cast_flags & MDF_BCLNT))
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
@@ -2184,7 +2177,7 @@ peer_xmit(
 
 		/*
 		 * If extension fields are present, we must use a
-		 * private value of zero and force min poll interval.
+		 * private value of zero and force min poll interval.  
 		 * Most intricate.
 		 */
 		if (sendlen > LEN_PKT_NOMAC)
@@ -2208,8 +2201,6 @@ peer_xmit(
 		exit(-1);
 	}
 	sendpkt(&peer->srcadr, peer->dstadr, peer->ttl, &xpkt, pktlen);
-	if (sendlen > LEN_PKT_NOMAC)
-		poll_update(peer, peer->minpoll);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over

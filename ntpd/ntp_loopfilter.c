@@ -184,7 +184,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assid %d offset %.6f jitter %.6f state %d\n",
+		    "local_clock: assocID %d offset %.6f jitter %.6f state %d\n",
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 	if (!ntp_enable) {
@@ -352,20 +352,26 @@ local_clock(
 		 * and ignore it.
 		 */
 		default:
+			if (sys_poll > peer->maxpoll)
+				sys_poll = peer->maxpoll;
+			else if (sys_poll < peer->minpoll)
+				sys_poll = peer->minpoll;
+
+			allow_panic = TRUE;
 			if (fabs(fp_offset - last_offset) >
 			    CLOCK_SGATE * oerror && mu <
 			    ULOGTOD(sys_poll + 1)) {
 #ifdef DEBUG
 				if (debug)
 					printf(
-					    "local_clock: popcorn %.6f %.6f\n",
-					    fabs(fp_offset - last_offset),
-					    CLOCK_SGATE * oerror);
+				    "local_clock: popcorn %.6f %.6f\n",
+					    fabs(fp_offset -
+					    last_offset), CLOCK_SGATE *
+					    oerror);
 #endif
 				last_offset = fp_offset;
 				return (0);
 			}
-			allow_panic = TRUE;
 
 			/*
 			 * Compute the FLL and PLL frequency adjustments
@@ -393,15 +399,6 @@ local_clock(
 			break;
 		}
 	}
-
-	/*
-	 * Clamp the poll interval if the system peer has changed.
-	 */
-	if (sys_poll > peer->maxpoll)
-		sys_poll = peer->maxpoll;
-	else if (sys_poll < peer->minpoll)
-		sys_poll = peer->minpoll;
-
 #if defined(KERNEL_PLL)
 	/*
 	 * This code segment works when clock adjustments are made using
