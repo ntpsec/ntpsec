@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$target")
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.0.99m-rc2)
+AM_INIT_AUTOMAKE(ntp, 4.0.99m-rc2a)
 AC_PREREQ(2.49)
 
 ac_cv_var_oncore_ok=no
@@ -190,9 +190,18 @@ AC_CHECK_LIB(readline, readline)
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
-dnl so only use one of them
-AC_CHECK_LIB(rt, sched_setscheduler, ,
+dnl so only use one of them.  Linux (glibc-2.1.2 and -2.2.2, at least)
+dnl does Strange Things with extra processes using the Posix-compatibility
+dnl real-time library, so we don't want to use it.
+
+case "$target" in
+ *-*-linux*) ;;
+ *)
+    AC_CHECK_LIB(rt, sched_setscheduler, ,
 	AC_CHECK_LIB(posix4, sched_setscheduler))
+    ;;
+esac
+
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC

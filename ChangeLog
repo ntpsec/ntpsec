@@ -1,3 +1,14 @@
+2001-07-04  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/config.htm: Major cleanup.
+	From: Martin Janzen <janzen@pixelmetrix.com>	
+
+	* configure.in (rt library check): Don't look for -lrt under
+	Linux.  Under glibc-2.1.2 and -2.2.2 (at least), the POSIX-
+	compatibility real-time library does strange things with threads
+	as other processes and we're getting lots of complaints about it.
+	Reported by: Juha Sarlin <juha@c3l.com>
+	
 2001-06-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* html/driver35.htm: Update email address.
