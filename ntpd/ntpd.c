@@ -284,21 +284,16 @@ set_process_priority(void)
 # if defined(NTPD_PRIO) && NTPD_PRIO != 0
 #  ifdef HAVE_ATT_NICE
 	if (!done) {
-		nice (NTPD_PRIO);
-		/*
-		** HMS: One of my AT&T books says nice() returns the new
-		** nice value minus NZERO, or -1 (and errno gets set).
-		** If we can verify this behavioe *always*, we can do some
-		** better checking and logging here.
-		*/
-		++done;
+		errno = 0;
+		if (-1 == nice (NTPD_PRIO) && errno != 0)
+			msyslog(LOG_ERR, "nice() error: %m");
+		else
+			++done;
 	}
 #  endif /* HAVE_ATT_NICE */
 #  ifdef HAVE_BSD_NICE
 	if (!done) {
-		errno = 0;
-		(void) setpriority(PRIO_PROCESS, 0, NTPD_PRIO);
-		if (errno)
+		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
 			++done;

@@ -1,3 +1,12 @@
+1999-11-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntpd.c (set_process_priority): Clean up nice() and setpriority()
+
+1999-11-09  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* Makefile.am (EXTRA_DIST): Added README.cvs
+	Reported by: Kamal A Mostafa <kamal@whence.com>
+
 1999-11-08  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.98e
