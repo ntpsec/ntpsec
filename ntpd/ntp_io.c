@@ -356,7 +356,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].received = 0;
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
-		inter_list[idx].flags = INT_BROADCAST;
+		inter_list[idx].flags = INT_BROADCAST | INT_UP;
 		any_interface = &inter_list[idx];
 #if defined(MCAST)
 	/*
@@ -386,7 +386,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].received = 0;
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
-		inter_list[idx].flags = 0;
+		inter_list[idx].flags = INT_UP;
 		any6_interface = &inter_list[idx];
 		wildipv6 = idx;
 		idx++;
@@ -457,6 +457,10 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->sin)->sin6_port = port;
 
+#ifdef ISC_PLATFORM_HAVESCOPEID
+		((struct sockaddr_in6 *)&itf->sin)->sin6_scope_id = isc_netaddr_getzone(isc_if->address);
+		itf->scopeid = isc_netaddr_getzone(isc_if->address);
+#endif
 		itf->mask.ss_family = itf->sin.ss_family;
 		memcpy(&(((struct sockaddr_in6 *)&itf->mask)->sin6_addr),
 		       &(isc_if->netmask.type.in6),
@@ -1395,7 +1399,7 @@ open_socket(
 	FD_SET(fd, &activefds);
 #endif
 	add_socket_to_list(fd);
-	add_addr_to_list(addr, ind, flags);
+	add_addr_to_list(addr, ind, interf->flags);
 	/*
 	 * set non-blocking,
 	 */
@@ -2167,12 +2171,6 @@ findinterface(
 	if (rtn == SOCKET_ERROR)
 #endif
 	{
-#ifdef DEBUG
-		if (debug > 2)
-		{
-			msyslog(LOG_ERR, "Failed to connect to remote address, error: %m");
-		}
-#endif
 		closesocket(s);
 		return ANY_INTERFACE_CHOOSE(addr);
 	}
