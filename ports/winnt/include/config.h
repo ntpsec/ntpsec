@@ -19,7 +19,10 @@
 # undef  OPEN_BCAST_SOCKET		/* for	ntp_io.c */ 													
 # undef  UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
 # undef  DES				/* from libntp.mak */																
-//# define  MD5				/* from libntp.mak */														
+# define  MD5				/* from libntp.mak */	
+# define HAVE_RANDOM 
+# define random      rand
+# define srandom     srand
 
 # define MCAST				/* Enable Multicast Support */												
 # define REFCLOCK				/* from ntpd.mak */

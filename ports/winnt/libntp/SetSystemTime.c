@@ -1,7 +1,8 @@
 
 #include "clockstuff.h"
+#include "ntp_stdlib.h"
 
-char *	set_tod_using = "SetSystemTime";
+const char *	set_tod_using = "SetSystemTime";
 
 int
 ntp_set_tod(
