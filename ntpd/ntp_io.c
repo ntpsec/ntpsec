@@ -812,10 +812,17 @@ io_multicast_add(
 		}
 
 		/*
-		 * enable reception of multicast packets
+		 * Enable reception of multicast packets
+		 * If the address is link-local we can get the interface index
+		 * from the scope id. Don't do this for other types of multicast
+		 * addresses. For now let the kernel figure it out.
 		 */
 		mreq6.ipv6mr_multiaddr = iaddr6;
-		mreq6.ipv6mr_interface = inter_list[i].ifindex;
+		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
+			mreq6.ipv6mr_interface = sin6p->sin6_scope_id;
+		else
+			mreq6.ipv6mr_interface = 0;
+
 		if(setsockopt(inter_list[i].fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		   (char *)&mreq6, sizeof(mreq6)) == -1)
 			netsyslog(LOG_ERR,
