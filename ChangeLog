@@ -8,6 +8,7 @@
 	* include/icom.h: Number of arguments changed
 	* libntp/Makefile.am (libntp_a_SOURCES): Added audio.c
 	* libntp/audio.c: New file
+	* include/Makefile.am (noinst_HEADERS): audio.h added
 	* include/audio.h: New file
 	From: Dave Mills <mills@udel.edu>
 
