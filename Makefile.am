@@ -78,6 +78,7 @@ $(srcdir)/version: FRC.version
 dist-hook:
 	@find $(distdir) -type d -name CVS -print | xargs rm -rf
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
+	@chmod u+w $(distdir)/ports/winnt
 	@for i in `find $(distdir)/ports/winnt -type f -name '*.ds*' -print`; \
 	   do chmod u+w $$i ; unix2dos $$i $$i; done
 
