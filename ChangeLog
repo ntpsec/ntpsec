@@ -1,5 +1,18 @@
 1999-12-29  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_fg.c: 
+	* ntpd/refclock_conf.c: 
+	* ntpd/ntp_control.c: 
+	* ntpd/Makefile.am: 
+	* libntp/clocktypes.c: 
+	* include/ntp.h: 
+	* html/refclock.htm: 
+	* html/driver37.htm: 
+	* configure.in: 
+	* acconfig.h: 
+	Forum Graphic GPS clock support
+	From: Dmitry Smirnov <das@online.nsk.su>
+	
 	* configure.in: Default to compile the IRIG, CHU and WWV/H
 	drivers and compile the CHU driver for audio, not modem.
 	Requested by Dave Mills.
