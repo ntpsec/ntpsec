@@ -1,5 +1,8 @@
 1999-11-16  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in :  changequote for osf[45] test.
+	Reported by: Tom Smith <smith@cag.lkg.dec.com>
+
 	* ntp_update: Ignore stuff in any A.* directory.
 
 1999-11-15  Harlan Stenn  <stenn@whimsy.udel.edu>
