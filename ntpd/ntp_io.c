@@ -492,7 +492,10 @@ create_sockets(
 # ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		len = max(sizeof(struct sockaddr), lifr->lifr_addr.sa_len);
 # else
-		len = SOCKLEN(&lifr->lifr_addr);
+		if (lifr->lifr_addr.zz_family != AF_INET6)
+			len = sizeof(struct sockaddr);
+		else
+			len = SOCKLEN(&lifr->lifr_addr);
 # endif
 		size = sizeof(*lifr);
 		if (size < sizeof(lifr->lifr_name) + len)
