@@ -1,3 +1,15 @@
+2000-03-20  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_resolver.c (findhostaddr): hstrerror isn't always available.
+
+	* configure.in: Look for hstrerror.
+
+	* util/ntp_genkeys.c (main): Use snprintf, not sprintf.
+	
+	* ntpd/ntp_crypto.c: Use gethostname, not uname
+	* util/ntp_genkeys.c: Ditto
+	From: Dave Mills
+
 2000-03-19  Harlan Stenn  <harlan@pfcs.com>
 
 	* ntpd/ntp_proto.c (receive): Rename ntp_res_send() to

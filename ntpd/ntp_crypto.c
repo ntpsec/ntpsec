@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/utsname.h>
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
@@ -894,7 +893,7 @@ void
 crypto_setup(void)
 {
 	FILE *str;
-	struct utsname utsnamebuf;
+	u_char hostname[MAXFILENAME];
 	u_char filename[MAXFILENAME];
 
 	/*
@@ -910,9 +909,9 @@ crypto_setup(void)
 	 * host is the DNS name of this machine.
 	 */
 	if (public_key_file == NULL) {
-		uname(&utsnamebuf);
+		gethostname(&hostname, MAXFILENAME);
 		snprintf(filename, sizeof filename, "ntpkey_%s",
-			 utsnamebuf.nodename);
+			 hostname);
 		public_key_file = emalloc(strlen(filename) + 1);
 		strcpy(public_key_file, filename);
 	}

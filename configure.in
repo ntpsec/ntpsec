@@ -560,7 +560,7 @@ case "$target" in
  *) AC_CHECK_FUNCS(getuid)
     ;;
 esac
-AC_CHECK_FUNCS(K_open kvm_open memcpy memmove memset)
+AC_CHECK_FUNCS(hstrerror K_open kvm_open memcpy memmove memset)
 case "$target" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.

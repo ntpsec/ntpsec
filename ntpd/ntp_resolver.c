@@ -551,12 +551,36 @@ findhostaddr(
 #ifdef DEBUG
 		if (debug > 2) {
 			struct in_addr si;
+			char *hes;
+#ifndef HAVE_HSTRERROR
+			char hnum[20];
+			
+			switch (h_errno) {
+			    case HOST_NOT_FOUND:
+				hes = "Authoritive Answer Host not found";
+				break;
+			    case TRY_AGAIN:
+				hes = "Non-Authoritative Host not found, or SERVERFAIL";
+				break;
+			    case NO_RECOVERY:
+				hes = "Non recoverable errors, FORMERR, REFUSED, NOTIMP";
+				break;
+			    case NO_DATA:
+				hes = "Valid name, no data record of requested type";
+				break;
+			    default:
+				snprintf(hnum, sizeof hnum, "%d", h_errno);
+				hes = hnum;
+				break;
+			}
+#else
+			hes = hstrerror(h_errno);
+#endif
 
-			si.s_addr = de->de_peeraddr;
+			si.s_addr = entry->de_peeraddr;
 			msyslog(LOG_DEBUG,
 				"findhostaddr: Failed resolution on <%s>/%s: %s",
-				de->de_hostname, inet_ntoa(si),
-				hstrerror(h_errno));
+				entry->de_hostname, inet_ntoa(si), hes);
 		}
 #endif
 	}
