@@ -287,7 +287,7 @@ internal_current(isc_interfaceiter_t *iter, int family) {
 
 	if (ifNamed == FALSE)
 		sprintf(iter->current.name,
-			"TCP/IP Interface %d", iter->numIF);
+			"IP Interface %d", iter->numIF);
 
 	/*
 	 * Get the network mask.
