@@ -76,8 +76,6 @@
  * Interface definitions
  */
 #ifdef HAVE_PPSAPI
-extern int pps_assert;		/* selects rising or falling edge */
-extern int pps_hardpps;		/* enables the kernel PPS interface */
 #define DEVICE		"/dev/pps%d" /* device name and unit */
 #endif /* HAVE_PPSAPI */
 
@@ -195,7 +193,7 @@ atom_start(
 		    "refclock_atom: time_pps_create failed: %m");
 		return (0);
 	}
-	return (atom_ppsapi(peer, pps_assert, pps_hardpps));
+	return (atom_ppsapi(peer, 0, 0));
 #else /* HAVE_PPSAPI */
 	return (1);
 #endif /* HAVE_PPSAPI */
@@ -251,7 +249,7 @@ atom_ppsapi(
 	if (!up->pps_params.mode) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: invalid capture edge %d",
-		    pps_assert);
+		    enb_clear);
 		return (0);
 	}
 	up->pps_params.mode |= PPS_TSFMT_TSPEC;

@@ -127,7 +127,6 @@ static	struct keyword keywords[] = {
 	{ "peer",		CONFIG_PEER },
 	{ "phone",		CONFIG_PHONE },
 	{ "pidfile",		CONFIG_PIDFILE },
-	{ "pps",		CONFIG_PPS },
 	{ "requestkey",		CONFIG_REQUESTKEY },
 	{ "restrict",		CONFIG_RESTRICT },
 	{ "revoke",		CONFIG_REVOKE },
@@ -245,16 +244,6 @@ static struct keyword flags_keywords[] = {
 	{ "ntp",		PROTO_NTP },
 	{ "pps",		PROTO_PPS },
 	{ "stats",		PROTO_FILEGEN },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "pps" modifier keywords
- */
-static struct keyword pps_keywords[] = {
-	{ "assert",		CONF_PPS_ASSERT },
-	{ "clear",		CONF_PPS_CLEAR },
-	{ "hardpps",		CONF_PPS_HARDPPS },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -383,8 +372,6 @@ char const *progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
-int	pps_assert;
-int	pps_hardpps;
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
@@ -1790,38 +1777,6 @@ getconfig(
 			sys_phone[i - 1][0] = '\0';
 			break;
 
-		    case CONFIG_PPS:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"pps missing device name");
-				break;
-			}
-			(void)strncpy(pps_device, tokens[1], MAXPPS);
-			for (i = 2; i < ntokens; i++) {
-				int flag;
-
-				flag = matchkey(tokens[i], pps_keywords, 1);
-				switch(flag) {
-				    case CONF_PPS_ASSERT:
-					pps_assert = 0;
-					break;
-				    case CONF_PPS_CLEAR:
-					pps_assert = 1;
-					break;
-				    case CONF_PPS_HARDPPS:
-					pps_hardpps = 1;
-					break;
-				    default:
-					msyslog(LOG_ERR,
-						"pps unknown flag %s",
-						tokens[i]);
-					errflg = 1;
-					break;
-				}
-				if(errflg)
-				    break;
-			}
-			break;
 		}
 	}
 	if (fp[0])

@@ -28,16 +28,16 @@
  *					OPTIONS LIST	IB
  *
  *	      (Basic)				   (M12)
- *   COPYRIGHT 1991-1996 MOTOROLA INC.	COPYRIGHT 1991-2000 MOTOROLA INC.
- *   SFTW P/N # 98-P36830P		SFTW P/N # 61-G10002A
- *   SOFTWARE VER # 8			SOFTWARE VER # 1
- *   SOFTWARE REV # 8			SOFTWARE REV # 3
- *   SOFTWARE DATE  06 Aug 1996 	SOFTWARE DATE  Mar 13 2000
- *   MODEL #	B4121P1155		MODEL #    P143T12NR1
+ *   COPYRIGHT 1991-1994 MOTOROLA INC.	COPYRIGHT 1991-2000 MOTOROLA INC.
+ *   SFTW P/N # 98-P39949M		SFTW P/N # 61-G10002A
+ *   SOFTWARE VER # 5			SOFTWARE VER # 1
+ *   SOFTWARE REV # 0			SOFTWARE REV # 3
+ *   SOFTWARE DATE  20 JAN 1994 	SOFTWARE DATE  Mar 13 2000
+ *   MODEL #	A11121P116		MODEL #    P143T12NR1
  *   HDWR P/N # _			HWDR P/N # 1
- *   SERIAL #	SSG0226478		SERIAL #   P003UD
- *   MANUFACTUR DATE 7E02		MANUFACTUR DATE 0C27
- *   OPTIONS LIST    IB
+ *   SERIAL #	SSG0049809		SERIAL #   P003UD
+ *   MANUFACTUR DATE 417AMA199		MANUFACTUR DATE 0C27
+ *   OPTIONS LIST    AB
  *
  * --------------------------------------------------------------------------
  * This code uses the two devices
@@ -262,6 +262,8 @@ struct instance {
 	u_int	timeout;	/* count to retry Cj after Fa self-test */
 	u_char	count;		/* cycles thru Ea before starting */
 	s_char	assert;
+	u_char	hardpps;
+	u_char	same_file;
 	u_int	saw_At;
 };
 
@@ -272,9 +274,11 @@ static	void	oncore_consume	     P((struct instance *));
 static	void	oncore_poll	     P((int, struct peer *));
 static	void	oncore_read_config   P((struct instance *));
 static	void	oncore_receive	     P((struct recvbuf *));
-static	void	oncore_sendmsg	     P((int fd, u_char *, size_t));
+static	void	oncore_sendmsg	     P((int, u_char *, size_t));
 static	void	oncore_shutdown      P((int, struct peer *));
 static	int	oncore_start	     P((int, struct peer *));
+static	void	oncore_control	     P((int, struct refclockstat *, struct refclockstat *, struct peer *));
+static	int	oncore_ppsapi	     P((struct instance *));
 static	void	oncore_get_timestamp P((struct instance *, long, long));
 static	void	oncore_init_shmem    P((struct instance *));
 static	void	oncore_print_As      P((struct instance *));
@@ -300,7 +304,7 @@ struct	refclock refclock_oncore = {
 	oncore_start,		/* start up driver */
 	oncore_shutdown,	/* shut down driver */
 	oncore_poll,		/* transmit poll message */
-	noentry,		/* not used */
+	oncore_control, 	/* fudge (flag) control messages */
 	noentry,		/* not used */
 	noentry,		/* not used */
 	NOFLAGS 		/* not used */
@@ -502,10 +506,6 @@ static u_char oncore_cmd_Ia[] = { 'I', 'a' };	/* 12 Chan */
 	/* from buffer, char *buf, result to an int */
 #define buf_w32(buf) (((buf)[0]&0200) ? (-(~w32(buf)+1)) : w32(buf))
 
-extern int pps_assert;
-extern int pps_hardpps;
-
-
 
 /*
  * oncore_start - initialize data for processing
@@ -519,7 +519,7 @@ oncore_start(
 {
 	register struct instance *instance;
 	struct refclockproc *pp;
-	int fd1, fd2, mode;
+	int fd1, fd2;
 	char device1[30], device2[30];
 	const char *cp;
 	struct stat stat1, stat2;
@@ -548,8 +548,18 @@ oncore_start(
 		exit(1);
 	}
 
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino)) {
-		/* same device here */
+	/* create instance structure for this unit */
+
+	if (!(instance = (struct instance *) malloc(sizeof *instance))) {
+		perror("malloc");
+		return (0);
+	}
+	memset((char *) instance, 0, sizeof *instance);
+
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))
+		instance->same_file = 1;
+
+	if (instance->same_file) {	/* same device here */
 		if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW
 #if !defined(HAVE_PPSAPI) && !defined(TIOCDCDTIMESTAMP)
 		      | LDISC_PPS
@@ -559,7 +569,7 @@ oncore_start(
 			exit(1);
 		}
 		fd2 = fd1;
-	} else { /* different devices here */
+	} else {			/* different devices here */
 		if (!(fd1=refclock_open(device1, SPEED, LDISC_RAW))) {
 			perror("ONCORE: fd1");
 			exit(1);
@@ -570,24 +580,14 @@ oncore_start(
 		}
 	}
 
-	/* Devices now open, create instance structure for this unit */
-
-	if (!(instance = (struct instance *) malloc(sizeof *instance))) {
-		perror("malloc");
-		close(fd1);
-		return (0);
-	}
-	memset((char *) instance, 0, sizeof *instance);
-
-	/* link instance up and down */
+	/* initialize miscellaneous variables */
 
 	pp = peer->procptr;
 	pp->unitptr    = (caddr_t) instance;
 	instance->pp   = pp;
 	instance->unit = unit;
 	instance->peer = peer;
-
-	/* initialize miscellaneous variables */
+	instance->assert = 1;
 
 	instance->o_state = ONCORE_NO_IDEA;
 	cp = "state = ONCORE_NO_IDEA";
@@ -597,7 +597,6 @@ oncore_start(
 	instance->ppsfd = fd2;
 
 	instance->Bj_day = -1;
-	instance->assert = pps_assert;
 	instance->traim = -1;
 	instance->model = ONCORE_UNKNOWN;
 	instance->mode = MODE_UNKNOWN;
@@ -618,6 +617,96 @@ oncore_start(
 		perror("time_pps_create");
 		return(0);
 	}
+
+	if (instance->assert)
+		cp = "Initializing timing to Assert.";
+	else
+		cp = "Initializing timing to Clear.";
+	record_clock_stats(&(instance->peer->srcadr), cp);
+
+	if (instance->hardpps) {
+		cp = "HARDPPS Set.";
+		record_clock_stats(&(instance->peer->srcadr), cp);
+	}
+
+	if (!oncore_ppsapi(instance))
+		return(0);
+#endif
+
+	pp->io.clock_recv = oncore_receive;
+	pp->io.srcclock = (caddr_t)peer;
+	pp->io.datalen = 0;
+	pp->io.fd = fd1;
+	if (!io_addclock(&pp->io)) {
+		perror("io_addclock");
+		(void) close(fd1);
+		free(instance);
+		return (0);
+	}
+
+	/*
+	 * This will return the Model Number of the Oncore receiver.
+	 */
+
+	oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
+	instance->o_state = ONCORE_ID_SENT;
+	cp = "state = ONCORE_ID SENT";
+	record_clock_stats(&(instance->peer->srcadr), cp);
+	instance->timeout = 4;
+
+	instance->pollcnt = 2;
+	return (1);
+}
+
+
+/*
+ * Fudge control (get Flag2 and Flag 3, not available at oncore_start time.
+ */
+
+static void
+oncore_control(
+	int unit,		  /* unit (not used */
+	struct refclockstat *in,  /* input parameters  (not uded) */
+	struct refclockstat *out, /* output parameters (not used) */
+	struct peer *peer	  /* peer structure pointer */
+	)
+{
+	char *cp;
+	struct refclockproc *pp;
+	struct instance *instance;
+
+	pp = peer->procptr;
+	instance = (struct instance *) pp->unitptr;
+
+	instance->assert  = !(pp->sloppyclockflag & CLK_FLAG2);
+	instance->hardpps =   pp->sloppyclockflag & CLK_FLAG3;
+
+	if (instance->assert)
+		cp = "Resetting timing to Assert.";
+	else
+		cp = "Resetting timing to Clear.";
+	record_clock_stats(&(instance->peer->srcadr), cp);
+
+	if (instance->hardpps) {
+		cp = "HARDPPS Set.";
+		record_clock_stats(&(instance->peer->srcadr), cp);
+	}
+
+	(void) oncore_ppsapi(instance);
+}
+
+
+/*
+ * Initialize PPSAPI
+ */
+
+#ifdef HAVE_PPSAPI
+static int
+oncore_ppsapi(
+	struct instance *instance
+	)
+{
+	int mode;
 
 	if (time_pps_getcap(instance->pps_h, &mode) < 0) {
 		msyslog(LOG_ERR,
@@ -652,60 +741,28 @@ oncore_start(
 		exit(1);
 	}
 
-	if (pps_device && pps_device[0]) {
-		if (stat(pps_device, &stat1)) {
-			perror("ONCORE: stat pps_device");
-			return(0);
-		}
+	/* must have hardpps ON */
 
-		/* must have hardpps ON, and fd2 must be the same device as on the pps line */
+	if (instance->hardpps && instance->same_file) {
+		int	i;
 
-		if (pps_hardpps && ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))) {
-			int	i;
+		if (instance->assert)
+			i = PPS_CAPTUREASSERT;
+		else
+			i = PPS_CAPTURECLEAR;
 
-			if (instance->assert)
-				i = PPS_CAPTUREASSERT;
-			else
-				i = PPS_CAPTURECLEAR;
-
-			if (i&mode) {
-				if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
-				    PPS_TSFMT_TSPEC) < 0) {
-					msyslog(LOG_ERR,
-					    "refclock_ioctl: time_pps_kcbind failed: %m");
-					return (0);
-				}
-				pps_enable = 1;
+		if (i&mode) {
+			if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
+			    PPS_TSFMT_TSPEC) < 0) {
+				msyslog(LOG_ERR,
+				    "refclock_ioctl: time_pps_kcbind failed: %m");
+				return (0);
 			}
 		}
 	}
-#endif
-
-	pp->io.clock_recv = oncore_receive;
-	pp->io.srcclock = (caddr_t)peer;
-	pp->io.datalen = 0;
-	pp->io.fd = fd1;
-	if (!io_addclock(&pp->io)) {
-		perror("io_addclock");
-		(void) close(fd1);
-		free(instance);
-		return (0);
-	}
-
-	/*
-	 * This will return the Model Number of the Oncore receiver.
-	 */
-
-	oncore_sendmsg(instance->ttyfd, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
-	instance->o_state = ONCORE_ID_SENT;
-	cp = "state = ONCORE_ID SENT";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-	instance->timeout = 4;
-
-	instance->pollcnt = 2;
-	return (1);
+	return(1);
 }
-
+#endif
 
 
 /*
@@ -751,8 +808,8 @@ oncore_read_config(
  * -------------------------------------------------------------------------------
  *
  * If we open one or the other of the files, we read it looking for
- *   MODE, LAT, LON, (HT, HTGPS, HTMSL), DELAY, OFFSET, ASSERT, CLEAR, STATUS,
- *   POSN3D, POSN2D, CHAN, TRAIM
+ *   MODE, LAT, LON, (HT, HTGPS, HTMSL), DELAY, OFFSET, ASSERT, CLEAR, HARDPPS,
+ *   STATUS, POSN3D, POSN2D, CHAN, TRAIM
  * then initialize using method MODE.  For Mode = (1,3) all of (LAT, LON, HT) must
  *   be present or mode reverts to (2,4).
  *
@@ -793,6 +850,13 @@ oncore_read_config(
  *	There is an optional line, with either ASSERT or CLEAR on it, which
  *	   determine which transition of the PPS signal is used for timing by the
  *	   PPSAPI.  If neither is present, then ASSERT is assumed.
+ *	   ASSERT/CLEAR can also be set with FLAG2 of the ntp.conf input.
+ *	   For Flag2, ASSERT=0, and hence is default.
+ *
+ *	There is an optional line, with HARDPPS on it.	Including this line causes
+ *	   the PPS signal to control the kernel PLL.
+ *	   HARDPPS can also be set with FLAG3 of the ntp.conf input.
+ *	   For Flag3, 0 is disabled, and the default.
  *
  *	There are three options that have to do with using the shared memory opition.
  *	   First, to enable the option there must be an ASSERT line with a file name.
@@ -963,6 +1027,8 @@ oncore_read_config(
 			instance->assert = 1;
 		} else if (!strncmp(cc, "CLEAR", (size_t) 5)) {
 			instance->assert = 0;
+		} else if (!strncmp(cc, "HARDPPS", (size_t) 7)) {
+			instance->hardpps = 1;
 		} else if (!strncmp(cc, "POSN2D", (size_t) 6)) {
 			instance->shmem_Posn = 2;
 		} else if (!strncmp(cc, "POSN3D", (size_t) 6)) {
@@ -1053,7 +1119,7 @@ oncore_init_shmem(
 		perror("malloc");
 		return;
 	}
-	memset(buf, 0, sizeof(buf));
+	memset(buf, 0, oncore_shmem_length);
 	i = write(instance->statusfd, buf, oncore_shmem_length);
 	if (i != oncore_shmem_length) {
 		perror(instance->shmem_fname);
@@ -1336,9 +1402,9 @@ oncore_msg_any(
 
 	if (debug > 3) {
 #ifdef HAVE_GETCLOCK
-		(void) getclock(TIMEOFDAY, &ts); 
-		tv.tv_sec = ts.tv_sec; 
-		tv.tv_usec = ts.tv_nsec / 1000; 
+		(void) getclock(TIMEOFDAY, &ts);
+		tv.tv_sec = ts.tv_sec;
+		tv.tv_usec = ts.tv_nsec / 1000;
 #else
 		GETTIMEOFDAY(&tv, 0);
 #endif
@@ -1487,7 +1553,7 @@ oncore_msg_Cj_id(
 	} else if (Model[0] == 'B' || !strncmp(Model, "T8", (size_t) 2)) {
 		cp = "VP";
 		instance->model = ONCORE_VP;
-	} else if (!strncmp(Model, "P1", (size_t) 2)) {
+	} else if (Model[0] == 'P') {
 		cp = "M12";
 		instance->model = ONCORE_M12;
 	} else if (Model[0] == 'R') {
@@ -1567,14 +1633,6 @@ oncore_msg_Cj_id(
 	else
 		cp = "SHMEM is NOT available";
 	record_clock_stats(&(instance->peer->srcadr), cp);
-
-#ifdef HAVE_PPSAPI
-	if (instance->assert)
-		cp = "Timing on Assert.";
-	else
-		cp = "Timing on Clear.";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-#endif
 
 	mode = instance->init_type;
 	if (mode == 3 || mode == 4) {	/* Cf will call Fa */
@@ -2252,8 +2310,8 @@ oncore_get_timestamp(
 	long dt2	/* tick offset NEXT time step */
 	)
 {
-	int     Rsm;
-	u_long  i, j;
+	int	Rsm;
+	u_long	i, j;
 	l_fp ts, ts_tmp;
 	double dmy;
 #ifdef HAVE_STRUCT_TIMESPEC

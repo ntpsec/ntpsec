@@ -461,8 +461,6 @@ struct refclock refclock_ripencc = {
 static int day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-extern int pps_hardpps;
-extern int pps_assert;
 
 /*
  * ripencc_start - open the GPS devices and initialize data for processing
@@ -612,7 +610,7 @@ ripencc_start(int unit, struct peer *peer)
 		return (1);
 	}
 
-	return(ripencc_ppsapi(peer, pps_assert, pps_hardpps));
+	return(ripencc_ppsapi(peer, 0, 0));
 }
 
 /*
