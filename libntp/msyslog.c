@@ -100,7 +100,7 @@ void msyslog(int level, const char *fmt, ...)
 		if ((unsigned)olderrno > sys_nerr)
 		    sprintf((char *)(err = xerr), "error %d", olderrno);
 		else
-		    err = sys_errlist[olderrno];
+		    err = (char*)sys_errlist[olderrno];
 #elif defined(VMS) || defined (SYS_VXWORKS)
 		err = strerror(olderrno);
 #else  /* SYS_WINNT */
