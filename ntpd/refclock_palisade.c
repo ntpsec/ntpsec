@@ -385,7 +385,7 @@ if (debug > 1) {
 		secint = (long) secs;
 		secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
 
-		pp->usec = (long) (secfrac * 1000000); 
+		pp->nsec = (long) (secfrac * 1000000000); 
 
 		secint %= 86400;    /* Only care about today */
 		pp->hour = secint / 3600;
@@ -402,7 +402,7 @@ if (debug > 1) {
 	if (debug > 1)
 		printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d UTC %02d\n",
  			up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
-			pp->second, pp->usec, mb(12), mb(11), pp->year, GPS_UTC_Offset);
+			pp->second, pp->nsec, mb(12), mb(11), pp->year, GPS_UTC_Offset);
 #endif
 		/* Only use this packet when no
 		 * 8F-AD's are being received
@@ -463,7 +463,7 @@ if (debug > 1) {
 			return 0;
 		}
 
-		pp->usec = (long) (getdbl((u_char *) &mb(3)) * 1000000);
+		pp->nsec = (long) (getdbl((u_char *) &mb(3)) * 1000000);
 
 		if ((pp->day = day_of_year(&mb(14))) < 0) 
 			break;
@@ -476,7 +476,7 @@ if (debug > 1) {
 	if (debug > 1)
 printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d UTC %02x %s\n",
  			up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
-			pp->second, pp->usec, mb(15), mb(14), pp->year,
+			pp->second, pp->nsec, mb(15), mb(14), pp->year,
 			mb(19), *Tracking_Status[st]);
 #endif
 		return 1;
@@ -534,7 +534,7 @@ palisade_receive (
 		printf(
 	"palisade_receive: unit %d: %4d %03d %02d:%02d:%02d.%06ld\n",
 			up->unit, pp->year, pp->day, pp->hour, pp->minute, 
-			pp->second, pp->usec);
+			pp->second, pp->nsec);
 #endif
 
 	/*
@@ -544,7 +544,7 @@ palisade_receive (
 	 */
 
 	(void) sprintf(pp->a_lastcode,"%4d %03d %02d:%02d:%02d.%06ld",
-		   pp->year,pp->day,pp->hour,pp->minute, pp->second,pp->usec); 
+		   pp->year,pp->day,pp->hour,pp->minute, pp->second,pp->nsec); 
 	pp->lencode = 24;
 
 #ifdef PALISADE
@@ -571,7 +571,7 @@ palisade_receive (
 	    printf("palisade_receive: unit %d: %s\n",
 		   up->unit, prettydate(&pp->lastrec));
 #endif
-
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer
 #ifdef PALISADE
 		, &pp->offset, 0, pp->dispersion,

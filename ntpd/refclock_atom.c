@@ -489,7 +489,7 @@ atom_poll(
 		peer->refid = pp->refid;
 	else
 		peer->refid = 0;   /* REFID case to solve */
-	pp->leap = LEAP_NOWARNING;
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	peer->burst = ASTAGE;
 }

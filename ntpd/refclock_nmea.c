@@ -530,21 +530,21 @@ nmea_receive(
 	/* Default to 0 milliseconds, if decimal convert milliseconds in
 	   one, two or three digits
 	*/
-	pp->msec = 0; 
+	pp->nsec = 0; 
 	if (dp[6] == '.') {
 		if (isdigit((int)dp[7])) {
-			pp->msec = (dp[7] - '0') * 100;
+			pp->nsec = (dp[7] - '0') * 100000000;
 			if (isdigit((int)dp[8])) {
-				pp->msec += (dp[8] - '0') * 10;
+				pp->nsec += (dp[8] - '0') * 10000000;
 				if (isdigit((int)dp[9])) {
-					pp->msec += (dp[9] - '0');
+					pp->nsec += (dp[9] - '0') * 1000000;
 				}
 			}
 		}
 	}
 
 	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59
-	  || pp->msec > 1000) {
+	  || pp->nsec > 1000000000) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
@@ -604,7 +604,7 @@ nmea_receive(
 	 */
 	if (nmea_pps(up, &rd_tmp) == 1) {
 		pp->lastrec = up->tstamp = rd_tmp;
-		pp->msec = 0;
+		pp->nsec = 0;
 	}
 #endif /* HAVE_PPSAPI */
 
@@ -630,7 +630,7 @@ nmea_receive(
 	if (!up->polled)
 	    return;
 	up->polled = 0;
-
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 
         /* If we get here - what we got from the clock is OK, so say so */

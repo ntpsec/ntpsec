@@ -2466,7 +2466,6 @@ oncore_get_timestamp(
 
 	ts.l_ui += JAN_1970;
 	instance->pp->lastrec = ts;
-	instance->pp->msec = 0;
 
 	ts_tmp = ts;
 	ts_tmp.l_ui = 0;	/* zero integer part */
@@ -2533,6 +2532,7 @@ oncore_get_timestamp(
 /*
 		instance->pp->dispersion = instance->pp->skew = 0;
 */
+		instance->pp->lastref = instance->pp->lastrec;
 		refclock_receive(instance->peer);
 	}
 }
