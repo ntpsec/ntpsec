@@ -1,4 +1,3 @@
-
 /*
  * refclock_wwv - clock driver for NIST WWV/H time/frequency station
  */
@@ -33,7 +32,7 @@
  *
  * This driver synchronizes the computer time using data encoded in
  * radio transmissions from NIST time/frequency stations WWV in Boulder,
- * CO, and WWVH in Kauai, HI. Transmikssions are made continuously on
+ * CO, and WWVH in Kauai, HI. Transmissions are made continuously on
  * 2.5, 5, 10, 15 and 20 MHz in AM mode. An ordinary shortwave receiver
  * can be tuned manually to one of these frequencies or, in the case of
  * ICOM receivers, the receiver can be tuned automatically using this
@@ -95,9 +94,8 @@
  * been acquired and cleared by signal loss or timeout. MSYNC is set
  * when the minute sync pulse has been acquired. DSYNC is set when the
  * minutes unit digit has reached the threshold and INSYNC is set when
- * if all nine digits have reached the threshold. All three bit are
- * cleared only by timeout, upon which the driver starts over from
- * scratch.
+ * all nine digits have reached the threshold. All three bit are cleared
+ * only by timeout, upon which the driver starts over from scratch.
  *
  * DGATE is set if a data bit is invalid and BGATE is set if a BCD digit
  * bit is invalid. SFLAG is set when during seconds 59, 0 and 1 while
@@ -152,7 +150,7 @@
 #define SYNERR		12	/* not synchronized to station */
 
 /*
- * Watchdog timeouts (watch)
+ * Watchcat timeouts (watch)
  *
  * If these timeouts expire, the status bits are mashed to zero and the
  * driver starts from scratch. Suitably more refined procedures may be
@@ -170,10 +168,10 @@
  * adventurous side in the interest of the highest sensitivity.
  */
 #define ATHR		2000	/* acquisition amplitude threshold */
-#define ASNR		6.0	/* acquisition SNR threshold (dB) */
-#define AWND		7.5	/* acquisition window threshold (ms) */
+#define ASNR		6.	/* acquisition SNR threshold (dB) */
+#define AWND		7.5	/* acquisition jitter threshold (ms) */
 #define AMIN		3	/* acquisition min compare count */
-#define AMAX		6	/* acquisition max compare count */
+#define AMAX		6	/* max compare count */
 #define QTHR		2000	/* QSY amplitude threshold */
 #define QSNR		20.	/* QSY SNR threshold (dB) */
 #define STHR		500	/* second sync amplitude threshold */
@@ -181,9 +179,9 @@
 #define SCMP		10 	/* second sync compare threshold */
 #define DTHR		1000	/* bit amplitude threshold */
 #define DSNR		10.	/* bit SNR threshold (dB) */
-#define BTHR		1000	/* digit probability threshold */
-#define BSNR		3.0	/* digit likelihood threshold (dB) */
-#define BCMP		5	/* digit compare threshold (dB) */
+#define BTHR		1000	/* digit amplitude threshold */
+#define BSNR		3.	/* digit likelihood threshold (dB) */
+#define BCMP		5	/* digit compare threshold */
 
 /*
  * Tone frequency definitions.
@@ -467,7 +465,7 @@ struct sync {
 	double	synmax;		/* sync envelope at 0 s */
 	double	synmin;		/* avg sync envelope at 59 s, 1 s */
 	double	synsnr;		/* sync signal SNR */
-	double	noise;		/* max amplitude off pulse */
+	double	noise;		/* noise envelope (squares) */
 	double	sigmax;		/* max amplitude on pulse */
 	double	epoch;		/* accumulated epoch differences */
 	long	pos;		/* position at maximum amplitude */
@@ -475,13 +473,11 @@ struct sync {
 	long	mepoch;		/* minute synch epoch */
 	int	count;		/* compare counter */
 	char	refid[5];	/* reference identifier */
-	char	ident[4];	/* station identifier */
 	int	select;		/* select bits */
 };
 
 /*
- * The channel structure is used to mitigate between channels. At this
- * point we have already decided which station to use.
+ * The channel structure is used to mitigate between channels.
  */
 struct chan {
 	int	gain;		/* audio gain */
@@ -500,8 +496,6 @@ struct wwvunit {
 	double	monitor;	/* audio monitor point */
 	int	fd_icom;	/* ICOM file descriptor */
 	int	errflg;		/* error flags */
-	int	bufcnt;		/* samples in buffer */
-	int	bufptr;		/* buffer index pointer */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
@@ -661,7 +655,7 @@ wwv_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, 4);
 	DTOLFP(1. / SECOND, &up->tick);
 
 	/*
@@ -772,6 +766,7 @@ wwv_receive(
 	 */
 	double	sample;		/* codec sample */
 	u_char	*dpt;		/* buffer pointer */
+	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;
 
 	peer = (struct peer *)rbufp->recv_srcclock;
@@ -782,12 +777,11 @@ wwv_receive(
 	 * Main loop - read until there ain't no more. Note codec
 	 * samples are bit-inverted.
 	 */
-	up->bufcnt = rbufp->recv_length;
-	DTOLFP((double)up->bufcnt / SECOND, &ltemp);
+	DTOLFP((double)rbufp->recv_length / SECOND, &ltemp);
 	L_SUB(&rbufp->recv_time, &ltemp);
 	up->timestamp = rbufp->recv_time;
 	dpt = rbufp->recv_buffer;
-	for (up->bufptr = 0; up->bufptr < up->bufcnt; up->bufptr++) {
+	for (bufcnt = 0; bufcnt < rbufp->recv_length; bufcnt++) {
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
@@ -1417,8 +1411,8 @@ wwv_qrz(
 		}
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv8 %d %3d %-3s %d %5.0f %5.1f %6ld %4ld %.0f",
-			    up->port, up->gain, sp->ident, sp->count,
+			    "wwv8 %d %3d %s %d %5.0f %5.1f %6ld %4ld %.0f",
+			    up->port, up->gain, sp->refid, sp->count,
 			    sp->sigmax, snr, sp->pos, sp->pos % SECOND,
 			    sp->epoch);
 			record_clock_stats(&peer->srcadr, tbuf);
@@ -1866,11 +1860,11 @@ wwv_rsec(
 
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv5 %2d %04x %3d %4d %d %-3s %04x %d %.0f/%.1f %s %04x %d %.0f/%.1f",
+			    "wwv5 %2d %04x %3d %4d %d %s %04x %d %.0f/%.1f %s %04x %d %.0f/%.1f",
 			    up->port, up->status, up->gain, up->repoch,
-			    up->errcnt, sp->ident, sp->select,
+			    up->errcnt, sp->refid, sp->select,
 			    sp->count, sp->synmax, sp->synsnr,
-			    rp->ident, rp->select, rp->count,
+			    rp->refid, rp->select, rp->count,
 			    rp->synmax, rp->synsnr);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -2506,11 +2500,8 @@ wwv_newgame(
 		cp = &up->mitig[i];
 		cp->gain = up->gain;
 		cp->wwv.select = SELV;
-		strcpy(cp->wwv.refid, "WWV ");
-		sprintf(cp->wwv.ident,"C%.0f", floor(qsy[i]));
-		cp->wwvh.select = SELH;
-		strcpy(cp->wwvh.refid, "WWVH");
-		sprintf(cp->wwvh.ident, "H%.0f", floor(qsy[i]));
+		sprintf(cp->wwv.refid, "WV%.0f", floor(qsy[i])); 
+		sprintf(cp->wwvh.refid, "WH%.0f", floor(qsy[i])); 
 	}
 }
 
@@ -2566,7 +2557,7 @@ wwv_qsy(
  * dut	DUT sign and magnitude in deciseconds
  * lset	minutes since last clock update
  * agc	audio gain (0-255)
- * iden	station identifier (station and frequency)
+ * iden	reference identifier (station and frequency)
  * comp	minute sync compare counter
  * errs	bit errors in last minute
  * freq	frequency offset (PPM)
@@ -2622,7 +2613,7 @@ timecode(
 	 */
 	sp = up->sptr;
 	sprintf(cptr, " %d %d %s %d %d %.1f %d", up->watch,
-	    up->mitig[up->dchan].gain, sp->ident, sp->count, up->errbit,
+	    up->mitig[up->dchan].gain, sp->refid, sp->count, up->errbit,
 	    up->freq / SECOND * 1e6, MINAVG << up->avgint);
 	strcat(ptr, cptr);
 	return (strlen(ptr));
