@@ -264,6 +264,7 @@ shm_poll(
 		up->valid=0;
 		if (ok) {
 			TVTOTS(&tvr,&pp->lastrec);
+			pp->lastrec.l_ui += JAN_1970;
 			/* pp->lasttime = current_time; */
 			pp->polls++;
 			t=gmtime (&tvt.tv_sec);

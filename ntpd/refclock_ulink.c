@@ -59,6 +59,9 @@
  *		99/11/29 j.c.lang	added fudge flag 1 to control
  *					clock polling
  *		99/12/15 j.c.lang	fixed 320 quality flag
+ *		01/02/21 s.l.smith	fixed 33x quality flag
+ *					added more debugging stuff
+ *					updated 33x time code explanation
  *
  * Questions, bugs, ideas send to:
  *	Joseph C. Lang
@@ -84,7 +87,7 @@
 #define	REFID		"WWVB"	/* reference ID */
 #define	DESCRIPTION	"Ultralink WWVB Receiver" /* WRU */
 
-#define	LEN33X		32	/* timecode length Model 33X */
+#define	LEN33X		32	/* timecode length Model 325 & 33X */
 #define LEN320		24	/* timecode length Model 320 */
 
 /*
@@ -207,6 +210,7 @@ ulink_receive(
 	char	syncchar;	/* synchronization indicator */
 	char	leapchar;	/* leap indicator */
 	char	modechar;	/* model 320 mode flag */
+	char	char_quality[2];	/* temp quality flag */
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -250,36 +254,68 @@ ulink_receive(
 		case LEN33X:
 		/*
 		 * Model 33X decoder:
-		 * Timecode format is:
-		 *   <CR><LF>S9+D 00 YYYY+DDDUTCS HH:MM:SSl+5
-		 *   S      sync indicator S insync N not in sync
-		 *          the sync flag is WWVB decoder sync
-		 *          nothing to do with time being correct
-		 *   9+     signal level 0-9 9+ if over 9 note single digit
-		 *          followed by space
-		 *   D      data bit ( fun to watch but useless ;-)
-		 *   space
-		 *   00     hours since last GOOD WWVB frame sync
-		 *   space
-		 *   YYYY   current year
-		 *   +      leap year indicator
-		 *   DDD    day of year
-		 *   UTC    timezone (always UTC)
-		 *   S      daylight savings indicator
-		 *   space
-		 *   HH     hours
+		 * Timecode format from January 29, 2001 datasheet is:
+		 *   <CR><LF>S9+D 00 YYYY+DDDUTCS HH:MM:SSL+5
+		 *   S      WWVB decoder sync indicator. S for in-sync(?)
+		 *          or N for noisy signal.
+		 *   9+     RF signal level in S-units, 0-9 followed by
+		 *          a space (0x20). The space turns to '+' if the
+		 *          level is over 9.
+		 *   D      Data bit 0, 1, 2 (position mark), or
+		 *          3 (unknown).
+		 *   space  Space character (0x20)
+		 *   00     Hours since last good WWVB frame sync. Will 
+		 *          be 00-23 hrs, or '1d' to '7d'. Will be 'Lk'
+                 *          if currently in sync. 
+		 *   space  Space character (0x20)
+		 *   YYYY   Current year, 1990-2089
+		 *   +      Leap year indicator. '+' if a leap year,
+		 *          a space (0x20) if not.
+		 *   DDD    Day of year, 001 - 366.
+		 *   UTC    Timezone (always 'UTC').
+		 *   S      Daylight savings indicator
+		 *             S - standard time (STD) in effect
+		 *             O - during STD to DST day 0000-2400
+		 *             D - daylight savings time (DST) in effect
+		 *             I - during DST to STD day 0000-2400
+		 *   space  Space character (0x20)
+		 *   HH     Hours 00-23
 		 *   :      This is the REAL in sync indicator (: = insync)	
-		 *   MM     minutes
+		 *   MM     Minutes 00-59
 		 *   :      : = in sync ? = NOT in sync
-		 *   SS     seconds
-		 *   L      leap second flag
+		 *   SS     Seconds 00-59
+		 *   L      Leap second flag. Changes from space (0x20)
+		 *          to '+' or '-' during month preceding leap
+		 *          second adjustment.
 		 *   +5     UT1 correction (sign + digit ))
-		*/
+		 */
 
-		if (sscanf(pp->a_lastcode, "%*4c %2d %4d%*c%3d%*4c %2d%c%2d:%2d%c%*2c",
-		    &quality, &pp->year, &pp->day,
-		    &pp->hour, &syncchar, &pp->minute, &pp->second, 
-		    &leapchar) == 8){ 
+		if (sscanf(pp->a_lastcode, 
+                    "%*4c %2c %4d%*c%3d%*4c %2d%c%2d:%2d%c%*2c",
+		    char_quality, &pp->year, &pp->day, 
+                    &pp->hour, &syncchar, &pp->minute, &pp->second, 
+                    &leapchar) == 8) { 
+		
+			if (char_quality[0] == 'L') {
+				quality = 0;
+			} else if (char_quality[0] == '0') {
+				quality = (char_quality[1] & 0x0f);
+			} else  {
+				quality = 99;
+			}
+	
+/*
+#ifdef DEBUG
+		if (debug) {
+			printf("ulink: char_quality %c %c\n", 
+                               char_quality[0], char_quality[1]);
+			printf("ulink: quality %d\n", quality);
+			printf("ulink: syncchar %x\n", syncchar);
+			printf("ulink: leapchar %x\n", leapchar);
+                }
+#endif
+*/
+
 			break;
 		}
 		
@@ -317,6 +353,7 @@ ulink_receive(
 			&pp->msec,&leapchar) == 10) {
 		pp->msec *= 10; /* M320 returns 10's of msecs */
 		if (leapchar == 'I' ) leapchar = '+';
+		if (leapchar == 'D' ) leapchar = '-';
 		if (syncchar != '?' ) syncchar = ':';
 
  		break;
@@ -330,11 +367,29 @@ ulink_receive(
 
 	/*
 	 * Decode quality indicator
-	 * the lower the number the "better" the time is 
-	 * I used the dispersion as the measure of time quality
-	 * the quality indicator in the 320 is number of
-	 * correlating time frames (the bigger the better)
+	 * For the 325 & 33x series, the lower the number the "better" 
+	 * the time is. I used the dispersion as the measure of time 
+	 * quality. The quality indicator in the 320 is the number of 
+	 * correlating time frames (the more the better)
 	 */
+
+	/* 
+	 * The spec sheet for the 325 & 33x series states the clock will
+	 * maintain +/-0.002 seconds accuracy when locked to WWVB. This 
+	 * is indicated by 'Lk' in the quality portion of the incoming 
+	 * string. When not in lock, a drift of +/-0.015 seconds should 
+	 * be allowed for.
+	 * With the quality indicator decoding scheme above, the 'Lk' 
+	 * condition will produce a quality value of 0. If the quality 
+	 * indicator starts with '0' then the second character is the 
+	 * number of hours since we were last locked. If the first 
+	 * character is anything other than 'L' or '0' then we have been 
+	 * out of lock for more than 9 hours so we assume the worst and 
+	 * force a quality value that selects the 'default' maximum 
+	 * dispersion. The dispersion values below are what came with the
+	 * driver. They're not unreasonable so they've not been changed.
+	 */
+
 	if (pp->lencode == LEN33X) {
 		switch (quality) {
 			case 0 :
@@ -381,15 +436,14 @@ ulink_receive(
 	 * Decode synchronization, and leap characters. If
 	 * unsynchronized, set the leap bits accordingly and exit.
 	 * Otherwise, set the leap bits according to the leap character.
-	 * We can safely ignore the delete leap-second case. an astroid
-	 * hitting at a tangent angle is all that is likely
-	 * to speed the earths rotation up.
-	*/
+	 */
 
 	if (syncchar != ':')
 		pp->leap = LEAP_NOTINSYNC;
 	else if (leapchar == '+')
 		pp->leap = LEAP_ADDSECOND;
+	else if (leapchar == '-')
+		pp->leap = LEAP_DELSECOND;
 	else
 		pp->leap = LEAP_NOWARNING;
 
