@@ -136,6 +136,9 @@
 /* Motorola UT Oncore GPS */
 #undef CLOCK_ONCORE
 
+/* Spectracom 8170/Netclock/2 WWVB receiver */
+#undef CLOCK_SPECTRACOM
+
 /* KSI/Odetics TPRO/S GPS receiver/IRIG interface */
 #undef CLOCK_TPRO
 
@@ -148,8 +151,8 @@
 /* USNO modem service */
 #undef CLOCK_USNO
 
-/* Spectracom 8170/Netclock/2 WWVB receiver */
-#undef CLOCK_WWVB
+/* WWV audio driver */
+#undef CLOCK_WWV
 
 /* Ultralink M320 WWVB receiver */
 #undef CLOCK_ULINK

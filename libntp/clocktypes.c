@@ -18,14 +18,14 @@ struct clktype clktypes[] = {
 	  "GPS_TRAK" },
 	{ REFCLK_WWV_PST,	"PSTI/Traconex WWV/WWVH Receiver (3)",
 	  "WWV_PST" },
-	{ REFCLK_WWVB_SPECTRACOM, "Spectracom WWVB Receiver (4)",
-	  "WWVB_SPEC" },
+	{ REFCLK_SPECTRACOM,	"Spectracom (generic) Receivers (4)",
+	  "SPECTRACOM" },
 	{ REFCLK_TRUETIME,	"TrueTime (generic) Receivers (5)",
 	  "TRUETIME" },
 	{ REFCLK_IRIG_AUDIO,	"IRIG Audio Decoder (6)",
 	  "IRIG_AUDIO" },
-	{ REFCLK_CHU,		"Scratchbuilt CHU Receiver (7)",
-	  "CHU" },
+	{ REFCLK_CHU_AUDIO,	"Scratchbuilt CHU Receiver (7)",
+	  "CHU_AUDIO" },
 	{ REFCLK_PARSE,		"Generic reference clock driver (8)",
 	  "GENERIC" },
 	{ REFCLK_GPS_MX4200,	"Magnavox MX4200 GPS Receiver (9)",
@@ -82,6 +82,8 @@ struct clktype clktypes[] = {
 	  "ULINK_M320"},
 	{ REFCLK_PCF,		"Conrad parallel port radio clock",
 	  "PCF"},
+	{ REFCLK_WWV_AUDIO,	"WWV audio demodulator/decoder",
+	  "WWV_AUDIO"},
 	{ -1,			"", "" }
 };
 

@@ -177,8 +177,9 @@
 #define	SPEED232	B300	/* uart speed (300 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"CHU"	/* reference ID */
+
 #ifdef AUDIO_CHU
-#define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
+#define	DESCRIPTION	"CHU Audio Demodulator/Decoder" /* WRU */
 
 /*
  * Audio demodulator definitions
@@ -196,7 +197,7 @@
 #else
 #define	DEVICE		"/dev/chu%d" /* device name and unit */
 #define	SPEED232	B300	/* UART speed (300 baud) */
-#define	DESCRIPTION	"CHU Audio Receiver" /* WRU */
+#define	DESCRIPTION	"CHU Modem Decoder" /* WRU */
 #endif /* AUDIO_CHU */
 
 /*

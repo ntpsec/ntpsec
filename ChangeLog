@@ -1,3 +1,19 @@
+1999-12-06  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/Makefile.am (ntpd_SOURCES): Added refclock_wwv.c
+
+	* ntpd/refclock_wwvb.c: 
+	* ntpd/refclock_wwv.c: 
+	* ntpd/refclock_conf.c: 
+	* ntpd/refclock_chu.c: 
+	* libntp/clocktypes.c:
+	* include/ntp.h: Dave cleaned some things up
+	Dave cleaned some things up (WWVB -> SPECTRACOM, CHU -> CHU_AUDIO,
+	WWV_AUDIO)
+
+	* acconfig.h: REFCLOCK_WWVB -> REFCLOCK_SPECTRACOM, added REFCLOCK_WWV
+	* configure.in: Deal with it.
+
 1999-12-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_refclock.c (refclock_open): More PPS cleanup

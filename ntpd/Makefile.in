@@ -110,22 +110,19 @@ ETAGS_ARGS = Makefile.am
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k
 
-ntpd_SOURCES = map_vme.c ntp_config.c ntp_control.c ntp_io.c \
-	ntp_loopfilter.c ntp_monitor.c ntp_peer.c ntp_proto.c \
-	ntp_refclock.c ntp_request.c ntp_restrict.c ntp_timer.c \
-	ntp_util.c ntp_intres.c ntp_filegen.c ntpd.c \
-	refclock_conf.c refclock_chu.c refclock_local.c \
-	refclock_pst.c refclock_wwvb.c refclock_mx4200.c \
-	refclock_parse.c refclock_as2201.c refclock_bancomm.c \
-	refclock_tpro.c refclock_leitch.c refclock_irig.c \
-	refclock_msfees.c refclock_trak.c refclock_datum.c \
-	refclock_acts.c refclock_heath.c refclock_nmea.c \
-	refclock_atom.c refclock_ptbacts.c refclock_jupiter.c \
-	refclock_usno.c refclock_true.c refclock_hpgps.c \
-	refclock_shm.c refclock_gpsvme.c refclock_arbiter.c \
-	refclock_arc.c refclock_palisade.c refclock_palisade.h \
-	refclock_oncore.c refclock_chronolog.c refclock_dumbclock.c \
-	refclock_ulink.c refclock_pcf.c jupiter.h
+ntpd_SOURCES = jupiter.h map_vme.c ntp_config.c ntp_control.c ntp_filegen.c \
+	ntp_intres.c ntp_io.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
+	ntp_proto.c ntp_refclock.c ntp_request.c ntp_restrict.c ntp_timer.c \
+	ntp_util.c ntpd.c refclock_acts.c refclock_arbiter.c refclock_arc.c \
+	refclock_as2201.c refclock_atom.c refclock_bancomm.c \
+	refclock_chronolog.c refclock_chu.c refclock_conf.c refclock_datum.c \
+	refclock_dumbclock.c refclock_gpsvme.c refclock_heath.c \
+	refclock_hpgps.c refclock_irig.c refclock_jupiter.c refclock_leitch.c \
+	refclock_local.c refclock_msfees.c refclock_mx4200.c refclock_nmea.c \
+	refclock_oncore.c refclock_palisade.c refclock_palisade.h \
+	refclock_parse.c refclock_pcf.c refclock_pst.c refclock_ptbacts.c \
+	refclock_shm.c refclock_tpro.c refclock_trak.c refclock_true.c \
+	refclock_ulink.c refclock_usno.c refclock_wwv.c refclock_wwvb.c
 
 subdir = ntpd
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -143,21 +140,21 @@ check_y2k_OBJECTS =  check_y2k$U.o
 check_y2k_LDADD = $(LDADD)
 check_y2k_DEPENDENCIES =  version.o ../libntp/libntp.a
 check_y2k_LDFLAGS = 
-am_ntpd_OBJECTS =  map_vme$U.o ntp_config$U.o ntp_control$U.o ntp_io$U.o \
-ntp_loopfilter$U.o ntp_monitor$U.o ntp_peer$U.o ntp_proto$U.o \
-ntp_refclock$U.o ntp_request$U.o ntp_restrict$U.o ntp_timer$U.o \
-ntp_util$U.o ntp_intres$U.o ntp_filegen$U.o ntpd$U.o refclock_conf$U.o \
-refclock_chu$U.o refclock_local$U.o refclock_pst$U.o refclock_wwvb$U.o \
-refclock_mx4200$U.o refclock_parse$U.o refclock_as2201$U.o \
-refclock_bancomm$U.o refclock_tpro$U.o refclock_leitch$U.o \
-refclock_irig$U.o refclock_msfees$U.o refclock_trak$U.o \
-refclock_datum$U.o refclock_acts$U.o refclock_heath$U.o \
-refclock_nmea$U.o refclock_atom$U.o refclock_ptbacts$U.o \
-refclock_jupiter$U.o refclock_usno$U.o refclock_true$U.o \
-refclock_hpgps$U.o refclock_shm$U.o refclock_gpsvme$U.o \
-refclock_arbiter$U.o refclock_arc$U.o refclock_palisade$U.o \
-refclock_oncore$U.o refclock_chronolog$U.o refclock_dumbclock$U.o \
-refclock_ulink$U.o refclock_pcf$U.o
+am_ntpd_OBJECTS =  map_vme$U.o ntp_config$U.o ntp_control$U.o \
+ntp_filegen$U.o ntp_intres$U.o ntp_io$U.o ntp_loopfilter$U.o \
+ntp_monitor$U.o ntp_peer$U.o ntp_proto$U.o ntp_refclock$U.o \
+ntp_request$U.o ntp_restrict$U.o ntp_timer$U.o ntp_util$U.o ntpd$U.o \
+refclock_acts$U.o refclock_arbiter$U.o refclock_arc$U.o \
+refclock_as2201$U.o refclock_atom$U.o refclock_bancomm$U.o \
+refclock_chronolog$U.o refclock_chu$U.o refclock_conf$U.o \
+refclock_datum$U.o refclock_dumbclock$U.o refclock_gpsvme$U.o \
+refclock_heath$U.o refclock_hpgps$U.o refclock_irig$U.o \
+refclock_jupiter$U.o refclock_leitch$U.o refclock_local$U.o \
+refclock_msfees$U.o refclock_mx4200$U.o refclock_nmea$U.o \
+refclock_oncore$U.o refclock_palisade$U.o refclock_parse$U.o \
+refclock_pcf$U.o refclock_pst$U.o refclock_ptbacts$U.o refclock_shm$U.o \
+refclock_tpro$U.o refclock_trak$U.o refclock_true$U.o \
+refclock_ulink$U.o refclock_usno$U.o refclock_wwv$U.o refclock_wwvb$U.o
 ntpd_OBJECTS =  $(am_ntpd_OBJECTS)
 ntpd_DEPENDENCIES =  version.o ../libntp/libntp.a
 ntpd_LDFLAGS = 
@@ -188,7 +185,7 @@ DEP_FILES =  .deps/check_y2k.P .deps/map_vme.P .deps/ntp_config.P \
 .deps/refclock_parse.P .deps/refclock_pcf.P .deps/refclock_pst.P \
 .deps/refclock_ptbacts.P .deps/refclock_shm.P .deps/refclock_tpro.P \
 .deps/refclock_trak.P .deps/refclock_true.P .deps/refclock_ulink.P \
-.deps/refclock_usno.P .deps/refclock_wwvb.P
+.deps/refclock_usno.P .deps/refclock_wwv.P .deps/refclock_wwvb.P
 SOURCES = check_y2k.c $(ntpd_SOURCES)
 OBJECTS = check_y2k$U.o $(am_ntpd_OBJECTS)
 
@@ -272,6 +269,8 @@ check_y2k: $(check_y2k_OBJECTS) $(check_y2k_DEPENDENCIES)
 map_vme$U.o:
 ntp_config$U.o:
 ntp_control$U.o:
+ntp_filegen$U.o:
+ntp_intres$U.o:
 ntp_io$U.o:
 ntp_loopfilter$U.o:
 ntp_monitor$U.o:
@@ -282,43 +281,42 @@ ntp_request$U.o:
 ntp_restrict$U.o:
 ntp_timer$U.o:
 ntp_util$U.o:
-ntp_intres$U.o:
-ntp_filegen$U.o:
 ntpd$U.o:
-refclock_conf$U.o:
-refclock_chu$U.o:
-refclock_local$U.o:
-refclock_pst$U.o:
-refclock_wwvb$U.o:
-refclock_mx4200$U.o:
-refclock_parse$U.o:
-refclock_as2201$U.o:
-refclock_bancomm$U.o:
-refclock_tpro$U.o:
-refclock_leitch$U.o:
-refclock_irig$U.o:
-refclock_msfees$U.o:
-refclock_trak$U.o:
-refclock_datum$U.o:
 refclock_acts$U.o:
-refclock_heath$U.o:
-refclock_nmea$U.o:
-refclock_atom$U.o:
-refclock_ptbacts$U.o:
-refclock_jupiter$U.o:
-refclock_usno$U.o:
-refclock_true$U.o:
-refclock_hpgps$U.o:
-refclock_shm$U.o:
-refclock_gpsvme$U.o:
 refclock_arbiter$U.o:
 refclock_arc$U.o:
-refclock_palisade$U.o:
-refclock_oncore$U.o:
+refclock_as2201$U.o:
+refclock_atom$U.o:
+refclock_bancomm$U.o:
 refclock_chronolog$U.o:
+refclock_chu$U.o:
+refclock_conf$U.o:
+refclock_datum$U.o:
 refclock_dumbclock$U.o:
-refclock_ulink$U.o:
+refclock_gpsvme$U.o:
+refclock_heath$U.o:
+refclock_hpgps$U.o:
+refclock_irig$U.o:
+refclock_jupiter$U.o:
+refclock_leitch$U.o:
+refclock_local$U.o:
+refclock_msfees$U.o:
+refclock_mx4200$U.o:
+refclock_nmea$U.o:
+refclock_oncore$U.o:
+refclock_palisade$U.o:
+refclock_parse$U.o:
 refclock_pcf$U.o:
+refclock_pst$U.o:
+refclock_ptbacts$U.o:
+refclock_shm$U.o:
+refclock_tpro$U.o:
+refclock_trak$U.o:
+refclock_true$U.o:
+refclock_ulink$U.o:
+refclock_usno$U.o:
+refclock_wwv$U.o:
+refclock_wwvb$U.o:
 
 ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
 	@rm -f ntpd
@@ -423,6 +421,8 @@ refclock_ulink_.c: refclock_ulink.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_ulink.c; then echo $(srcdir)/refclock_ulink.c; else echo refclock_ulink.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_ulink_.c
 refclock_usno_.c: refclock_usno.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_usno.c; then echo $(srcdir)/refclock_usno.c; else echo refclock_usno.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_usno_.c
+refclock_wwv_.c: refclock_wwv.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwv.c; then echo $(srcdir)/refclock_wwv.c; else echo refclock_wwv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwv_.c
 refclock_wwvb_.c: refclock_wwvb.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwvb.c; then echo $(srcdir)/refclock_wwvb.c; else echo refclock_wwvb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwvb_.c
 check_y2k_.o map_vme_.o ntp_config_.o ntp_control_.o ntp_filegen_.o \
@@ -438,7 +438,7 @@ refclock_msfees_.o refclock_mx4200_.o refclock_nmea_.o \
 refclock_oncore_.o refclock_palisade_.o refclock_parse_.o \
 refclock_pcf_.o refclock_pst_.o refclock_ptbacts_.o refclock_shm_.o \
 refclock_tpro_.o refclock_trak_.o refclock_true_.o refclock_ulink_.o \
-refclock_usno_.o refclock_wwvb_.o : $(ANSI2KNR)
+refclock_usno_.o refclock_wwv_.o refclock_wwvb_.o : $(ANSI2KNR)
 
 tags: TAGS
 
