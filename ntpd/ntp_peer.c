@@ -605,6 +605,12 @@ newpeer(
 	if (cast_flags & MDF_BCAST) {
 		enable_broadcast(peer->dstadr, srcadr);
 	}
+#ifdef DEBUG
+	if (debug>2)
+		printf("newpeer: using fd %d and our addr %s\n",
+		    peer->dstadr->fd, stoa(&peer->dstadr->sin));
+#endif
+
 
 	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;

@@ -1743,7 +1743,8 @@ sendpkt(
 				exit(1);
 			}
 
-			netsyslog(LOG_ERR, "sendto(%s): %m", stoa(dest));
+			netsyslog(LOG_ERR, "sendto(%s) (fd=%d): %m",
+				  stoa(dest), inter->fd);
 		}
 	}
 	else
@@ -2136,6 +2137,13 @@ findinterface(
 	int rtn, i;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
+#ifdef DEBUG
+	if (debug>2)
+	    printf("Finding interface for addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
+
 	/*
 	 * This is considerably hoke. We open a socket, connect to it
 	 * and slap a getsockname() on it. If anything breaks, as it
@@ -2199,6 +2207,12 @@ findbcastinter(
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	register int i;
 	
+#ifdef DEBUG
+	if (debug>2)
+	    printf("Finding broadcast interface for addr %s in list of addresses\n",
+		   stoa(addr));
+#endif
+
 	i = find_addr_in_list(addr);
 	if(i >= 0)
 	     return (&inter_list[i]);
