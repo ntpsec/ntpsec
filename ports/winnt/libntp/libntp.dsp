@@ -209,6 +209,10 @@ SOURCE=..\..\..\libntp\ieee754io.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libisc\inet_ntop.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\libisc\interfaceiter.c
 # End Source File
 # Begin Source File
@@ -430,6 +434,10 @@ SOURCE=..\include\netinet\in.h
 # Begin Source File
 
 SOURCE=..\include\arpa\inet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\isc\interfaceiter.h
 # End Source File
 # Begin Source File
 

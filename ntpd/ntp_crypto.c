@@ -3597,8 +3597,7 @@ crypto_tai(
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
 	char	*ptr;
-	int	rval;
-	u_int	i;
+	int	rval,i;
 #ifdef KERNEL_PLL
 #if NTP_API > 3
 	struct timex ntv;	/* kernel interface structure */
@@ -3656,7 +3655,7 @@ crypto_tai(
 			continue;
 		if (sscanf(buf, "%u %u", &leapsec[i], &offset) != 2)
 			continue;
-		if (i != offset - TAI_1972) { 
+		if (i != (int)(offset - TAI_1972)) { 
 			break;
 		}
 		i++;
