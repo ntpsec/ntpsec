@@ -1625,7 +1625,7 @@ oncore_msg_Cj_id(
 	 * instance->shmem_fname if SHMEM is not supported
 	 */
 
-	if (instance->shmem_fname);
+	if (instance->shmem_fname)
 		oncore_init_shmem(instance);
 
 	if (instance->shmem)
