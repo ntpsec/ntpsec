@@ -1,13 +1,8 @@
 /*
  * socktoa - return a numeric host name from a sockaddr_storage structure
  */
-#ifdef SYS_WINNT
-/* Skip asynch rpc inclusion */
-#ifndef __RPCASYNC_H__
-#define __RPCASYNC_H__
-#endif
-#include <windows.h>
-#endif
+
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -16,7 +11,7 @@
 
 #include <arpa/inet.h>
 
-#ifndef HAVE_IPV6
+#ifdef ISC_PLATFORM_NEEDNTOP
 #include <isc/net.h>
 #endif
 
