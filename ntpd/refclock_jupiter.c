@@ -688,7 +688,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			    "jupiter_receive", "%s chan ver %s, %s (%s)",
 			    ip->chans, ip->vers, ip->date, ip->opts);
 			msyslog(LOG_DEBUG,
-			    "jupiter_receive: %s chan ver %s, %s (%s)\n",
+			    "jupiter_receive: %s chan ver %s, %s (%s)",
 			    ip->chans, ip->vers, ip->date, ip->opts);
 			if (instance->wantid)
 				instance->wantid = 0;
