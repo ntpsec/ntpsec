@@ -598,7 +598,8 @@ newpeer(
 	if (debug)
 		printf(
 		    "newpeer: %s->%s mode %d vers %d poll %d %d flags %x %x ttl %d key %08x\n",
-		    ntoa(&peer->dstadr->sin), ntoa(&peer->srcadr),
+		    peer->dstadr == NULL ? "null" : ntoa(&peer->dstadr->sin),
+		    ntoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
 		    peer->ttlmax, peer->keyid);
