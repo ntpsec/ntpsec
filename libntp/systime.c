@@ -1,5 +1,8 @@
 /*
  * systime -- routines to fiddle a UNIX clock.
+ *
+ * ATTENTION: Get approval from Dave Mills on all changes to this file!
+ *
  */
 #include "ntp_machine.h"
 #include "ntp_fp.h"
