@@ -2027,7 +2027,7 @@ AC_MSG_RESULT($ntp_ok)
 AC_MSG_CHECKING(RIPENCC specific Trimble driver)
 AC_ARG_ENABLE(RIPENCC,
     AC_HELP_STRING([--enable-RIPENCC], [- RIPENCC specific Trimble driver]),
-    [ntp_ok=$enableval], [ntp_ok=no])
+    [ntp_ok=$enableval], [ntp_ok=yes])
 # 020629: HMS: s/$ntp_eac -> -/no because of ptr += sprintf(ptr, ...) usage
 case "$ac_cv_var_ripe_ncc_ok" in
  no) ntp_ok=no ;;
@@ -2102,7 +2102,7 @@ esac
 
 AC_MSG_CHECKING(TrueTime 560 IRIG-B decoder)
 AC_ARG_ENABLE(TT560,
-    AC_HELP_STRING([--enable-TT650], [- TrueTime 560 IRIG-B decoder]),
+    AC_HELP_STRING([--enable-TT560], [- TrueTime 560 IRIG-B decoder]),
     [ntp_ok=$enableval], [ntp_ok=no])
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
