@@ -17,18 +17,20 @@
 #include "ntp_stdlib.h"
 
 /*
- * This driver supports the parallel port radio clocks sold by Conrad
+ * This driver supports the parallel port radio clock sold by Conrad
  * Electronic under order numbers 967602 and 642002.
  *
  * It requires that the local timezone be CET/CEST and that the pcfclock
- * device driver be installed.  A device driver for Linux 2.2 is available
- * at http://home.pages.de/~voegele/pcf.html.
+ * device driver be installed.  A device driver for Linux is available at
+ * http://home.pages.de/~voegele/pcf.html.  Information about a FreeBSD
+ * driver is available at http://schumann.cx/pcfclock/.
  */
 
 /*
  * Interface definitions
  */
-#define	DEVICE		"/dev/pcfclock%d"
+#define	DEVICE		"/dev/pcfclocks/%d"
+#define	OLDDEVICE	"/dev/pcfclock%d"
 #define	PRECISION	(-1)	/* precision assumed (about 0.5 s) */
 #define REFID		"PCF"
 #define DESCRIPTION	"Conrad parallel port radio clock"
@@ -67,17 +69,22 @@ pcf_start(
 {
 	struct refclockproc *pp;
 	int fd;
-	char device[20];
+	char device[128];
 
 	/*
 	 * Open device file for reading.
 	 */
 	(void)sprintf(device, DEVICE, unit);
+	fd = open(device, O_RDONLY);
+	if (fd == -1) {
+		(void)sprintf(device, OLDDEVICE, unit);
+		fd = open(device, O_RDONLY);
+	}
 #ifdef DEBUG
 	if (debug)
 		printf ("starting PCF with device %s\n",device);
 #endif
-	if ((fd = open(device, O_RDONLY)) == -1) {
+	if (fd == -1) {
 		return (0);
 	}
 	

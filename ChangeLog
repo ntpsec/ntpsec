@@ -1,5 +1,9 @@
 2000-08-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver35.htm: 
+	* ntpd/refclock_pcf.c: Updates and improvements
+	From: Andreas Voegele <andreas.voegele@gmx.de>
+
 	* configure.in (ac_cv_struct_ntptimeval): Lose the TAI check - we
 	don't need it since we can check NTP_API.  Re-hack the generated
 	configure script.
