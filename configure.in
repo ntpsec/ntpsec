@@ -48,7 +48,7 @@ esac
 
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
-   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root time control]),
+   AC_HELP_STRING([--enable-clockctl], [Use /dev/clockctl for non-root clock control]),
     [ans=$enableval],
     [case "$host" in
       *-*-netbsd*)
@@ -63,9 +63,27 @@ ac_clockctl=$ans])
 AC_CHECK_HEADERS(sys/clockctl.h)
 case "$ac_clockctl$ac_cv_header_sys_clockctl_h" in
  yesyes)
-    AC_DEFINE(HAVE_CLOCKCTL, ,[[Use /dev/clockctl?]])
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
     ;;
 esac
+
+AC_CACHE_CHECK(if we have linux capabilities (libcap), ac_linuxcaps,
+[AC_ARG_ENABLE(linuxcaps,
+   AC_HELP_STRING([--enable-linuxcaps], [Use Linux capabilities for non-root clock control]),
+    [ans=$enableval],
+    [ans=no])
+ac_linuxcaps=$ans])
+# End of AC_CACHE_CHECK for linuxcaps
+AC_CHECK_HEADERS(sys/capability.h)
+AC_CHECK_HEADERS(sys/prctl.h)
+case "$ac_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
+ yesyesyes)
+    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+    LIBS="$LIBS -lcap"
+    ;;
+esac
+
 
 case "$build" in
  $host)

@@ -420,7 +420,8 @@ extern int	stats_control;		/* write stats to fileset? */
 extern volatile int debug;		/* debugging flag */
 extern int	nofork;			/* no-fork flag */
 extern int 	initializing;		/* initializing flag */
-#ifdef HAVE_CLOCKCTL
+#ifdef HAVE_DROPROOT
+extern int droproot;			/* flag: try to drop root privileges after startup */
 extern char *user;			/* user to switch to */
 extern char *group;			/* group to switch to */
 extern char *chrootdir;			/* directory to chroot to */
