@@ -507,9 +507,10 @@ ntpdatemain (
 	if (sys_authenticate) {
 		init_auth();
 		if (!authreadkeys(key_file)) {
-			msyslog(LOG_ERR, "no key file, exitting");
+			msyslog(LOG_ERR, "no key file <%s>, exiting", key_file);
 			exit(1);
 		}
+		authtrust(sys_authkey, 1);
 		if (!authistrusted(sys_authkey)) {
 			char buf[10];
 

@@ -1,5 +1,10 @@
 2000-07-27  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpdate/ntpdate.c (ntpdatemain): Cleanup error message.
+
+	* ntpdate/ntpdate.c (ntpdatemain): Add missing authtrust() call
+	From: Jason Heiss <jheiss@cruzeiro.ugcs.caltech.edu>
+
 	* ntpd/refclock_ulink.c (ulink_receive): 
 	* ntpd/ntp_crypto.c: 
 	* libntp/authparity.c: 
