@@ -71,6 +71,15 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 		memcpy(&dst->type.in6,
 		       &((struct sockaddr_in6 *) src)->sin6_addr,
 		       sizeof(struct in6_addr));
+
+		/*
+		 * For KAME addresses we need to fix up the address
+		 * for public consumption 
+		 */
+#ifdef __KAME__
+		dst->type.in6.s6_addr[2] = 0;
+		dst->type.in6.s6_addr[3] = 0;
+#endif
 		break;
 	default:
 		INSIST(0);
@@ -98,8 +107,6 @@ get_scopeid(unsigned int family, struct sockaddr *src) {
 		u_int8_t *p;
 		p = &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[0];
 		scopeid = ((u_int16_t)p[2] << 8) | p[3];
-		&((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[2] = 0;
-		&((struct sockaddr_in6 *)src)->sin6_addr.s6_addr[3] = 0;
 	} else
 		scopeid = 0;
 #else
