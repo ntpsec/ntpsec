@@ -2207,7 +2207,7 @@ crypto_iff(
 	DSA_SIG	*sdsa;		/* DSA parameters */
 	BIGNUM	*bn, *bk;
 	u_int	len;
-	u_char	*ptr;
+	const u_char	*ptr;
 	int	temp;
 
 	/*
@@ -2237,7 +2237,7 @@ crypto_iff(
 	 */
 	bctx = BN_CTX_new(); bk = BN_new(); bn = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (const u_char *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_iff %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -2495,7 +2495,7 @@ crypto_gq(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	DSA_SIG	*sdsa;		/* RSA signature context fake */
 	BIGNUM	*y, *v;
-	u_char	*ptr;
+	const u_char	*ptr;
 	u_int	len;
 	int	temp;
 
@@ -2527,7 +2527,7 @@ crypto_gq(
 	 */
 	bctx = BN_CTX_new(); y = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (const u_char *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_gq %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -2813,7 +2813,7 @@ crypto_mv(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	BIGNUM	*k, *u, *v;
 	u_int	len;
-	u_char	*ptr;
+	const u_char	*ptr;
 	int	temp;
 
 	/*
@@ -2843,7 +2843,7 @@ crypto_mv(
 	 */
 	bctx = BN_CTX_new(); k = BN_new(); u = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (const u_char *)ep->pkt;
 	if ((sdsa = d2i_DSAparams(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_mv %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));

@@ -1911,8 +1911,8 @@ decodeint(
 {
 	if (*str == '0') {
 		if (*(str+1) == 'x' || *(str+1) == 'X')
-		    return hextoint(str+2, (u_long *)&val);
-		return octtoint(str, (u_long *)&val);
+		    return hextoint(str+2, (void *)&val);
+		return octtoint(str, (void *)&val);
 	}
 	return atoint(str, val);
 }
