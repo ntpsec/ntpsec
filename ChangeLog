@@ -1,3 +1,10 @@
+2000-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99h
+	Crypto merge
+
+	* librsaref/Makefile.am (nodist_librsaref_a_SOURCES): Added nodist_
+
 2000-02-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Lose the changequote calls and fix the quoting.

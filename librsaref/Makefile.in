@@ -111,7 +111,7 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 # NOTES:
 # don't use RSAREF's global.h - we use ours.
 
-librsaref_a_SOURCES = \
+nodist_librsaref_a_SOURCES = \
 	des.h \
 	desc.c \
 	digit.c \
@@ -136,7 +136,7 @@ librsaref_a_SOURCES = \
 	rsaref.h
 
 
-BUILT_SOURCES = $(librsaref_a_SOURCES)
+BUILT_SOURCES = $(nodist_librsaref_a_SOURCES)
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 subdir = librsaref
@@ -151,14 +151,14 @@ CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 librsaref_a_AR = $(AR) cru
 librsaref_a_LIBADD = 
-am_librsaref_a_OBJECTS =  desc.o digit.o md2c.o md5c.o nn.o prime.o \
+nodist_librsaref_a_OBJECTS =  desc.o digit.o md2c.o md5c.o nn.o prime.o \
 r_dh.o r_encode.o r_enhanc.o r_keygen.o r_random.o r_stdlib.o rsa.o
-librsaref_a_OBJECTS =  $(am_librsaref_a_OBJECTS)
+librsaref_a_OBJECTS =  $(nodist_librsaref_a_OBJECTS)
 AR = ar
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES =  $(librsaref_a_SOURCES)
+DIST_SOURCES = 
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -171,8 +171,8 @@ $(DEPDIR)/md2c.Po $(DEPDIR)/md5c.Po $(DEPDIR)/nn.Po $(DEPDIR)/prime.Po \
 $(DEPDIR)/r_dh.Po $(DEPDIR)/r_encode.Po $(DEPDIR)/r_enhanc.Po \
 $(DEPDIR)/r_keygen.Po $(DEPDIR)/r_random.Po $(DEPDIR)/r_stdlib.Po \
 $(DEPDIR)/rsa.Po
-SOURCES = $(librsaref_a_SOURCES)
-OBJECTS = $(am_librsaref_a_OBJECTS)
+SOURCES = $(nodist_librsaref_a_SOURCES)
+OBJECTS = $(nodist_librsaref_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:

@@ -7,7 +7,7 @@ CLEANFILES = $(EXTRA_LIBRARIES)
 # NOTES:
 # don't use RSAREF's global.h - we use ours.
 
-librsaref_a_SOURCES = \
+nodist_librsaref_a_SOURCES = \
 	des.h \
 	desc.c \
 	digit.c \
@@ -31,7 +31,7 @@ librsaref_a_SOURCES = \
 	rsa.h \
 	rsaref.h
 
-BUILT_SOURCES = $(librsaref_a_SOURCES)
+BUILT_SOURCES = $(nodist_librsaref_a_SOURCES)
 INCLUDES = -I$(top_srcdir)/include
 ETAGS_ARGS = Makefile.am
 
