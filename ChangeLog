@@ -1,5 +1,8 @@
 2000-03-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in (ac_busted_vpath_in_make): Add FreeBSD.  I bet all
+	systems that use pmake will need this.
+
 	* Makefile.am: General cleanup
 
 	* configure.in: 4.0.99h1

@@ -92,7 +92,13 @@ esac
 ac_busted_vpath_in_make=no
 
 case "$target" in
+ *-next-nextstep3)
+    CFLAGS="$CFLAGS -posix" ;;
+ *-*-freebsd*)	# I bet any pmake system needs this check
+    ac_busted_vpath_in_make=yes
+    ;;
  *-*-irix6.1*)	# 64 bit only
+    # busted vpath?
     ;;
  *-*-irix6*)	# 6.2 (and later?)
     ac_busted_vpath_in_make=yes
@@ -114,8 +120,6 @@ case "$target" in
       esac
     fi
     ;;
- *-next-nextstep3)
-    CFLAGS="$CFLAGS -posix" ;;
  *-*-solaris2.5.1)
     ac_busted_vpath_in_make=yes
     ;;
