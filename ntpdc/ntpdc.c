@@ -4,6 +4,11 @@
 
 #include <stdio.h>
 
+#include <ctype.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <netdb.h>
+
 #include "ntpdc.h"
 #include "ntp_select.h"
 #include "ntp_io.h"
@@ -12,11 +17,6 @@
 #define ISC_IPV6_H 1
 #include "isc/net.h"
 #include "isc/result.h"
-
-#include <ctype.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <netdb.h>
 
 #ifdef SYS_WINNT
 # include <io.h>
