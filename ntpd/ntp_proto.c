@@ -3088,14 +3088,16 @@ proto_config(
 	 * Add muliticast group address.
 	 */
 	case PROTO_MULTICAST_ADD:
-		io_multicast_add(*svalue);
+		if (svalue)
+		    io_multicast_add(*svalue);
 		break;
 
 	/*
 	 * Delete multicast group address.
 	 */
 	case PROTO_MULTICAST_DEL:
-		io_multicast_del(*svalue);
+		if (svalue)
+		    io_multicast_del(*svalue);
 		break;
 
 	/*
