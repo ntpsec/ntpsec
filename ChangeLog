@@ -13,7 +13,6 @@
 	are both defined.
 
 	From: Jeffrey C Honig <jch@bsdi.com>
-
 	
 	* ntpd/ntp_refclock.c: sys/sio.h and SCO5_CLOCK cleanup
 	From: Kamal A Mostafa <kamal@whence.com>	
