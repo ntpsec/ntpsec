@@ -20,6 +20,14 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 03/09/2005	Heiko Gerstung
+#				- added UTC offset to version time information
+#				- bugfixed several issues preventing this script to be used on NT4 
+#				- removed an obsolete warning
+#
+# 03/08/2005	Danny Mayer
+#				- bugfixed NOBK label position
+#
 # 03/08/2005	Heiko Gerstung
 #				- bugfixed BK detection and support for multiple ChangeSets 
 #				
@@ -93,6 +101,8 @@ REM ****************************************************************************
 	SET TIMEDELIM=
 	SET DATEFORMAT=
 	SET TIMEFORMAT=
+	SET UTC=
+	SET ACTIVEBIAS=
 
 REM *****************************************************************************************************************
 REM Check if DATE and TIME environment variables are available
@@ -102,8 +112,60 @@ REM ****************************************************************************
 	SET MYTIME=%TIME%
 
 	REM ** Not available (huh? Are you older than NT4SP6A, grandpa?)
-	IF "%MYDATE%" == "" FOR /F "TOKENS=1 DELIMS=" %%a IN ('date/t') DO SET MYDATE=%%a&echo Warning: No DATE variable .. using "DATE /T"
-	IF "%MYTIME%" == "" FOR /F "TOKENS=1 DELIMS=" %%a IN ('time/t') DO SET MYTIME=%%a&echo Warning: No TIME variable .. using "TIME /T"
+	IF "%MYDATE%" == "" FOR /F "TOKENS=1 DELIMS=" %%a IN ('date/t') DO SET MYDATE=%%a
+	IF "%MYTIME%" == "" FOR /F "TOKENS=1 DELIMS=" %%a IN ('time/t') DO SET MYTIME=%%a
+
+REM *****************************************************************************************************************
+REM Try to find out UTC offset 
+REM *****************************************************************************************************************
+
+	REM *** Start with setting a dummy value which is used when we are not able to find out the real UTC offset
+	SET UTC=(LOCAL TIME)
+	SET UTC_HR=
+	SET UTC_MIN=
+	SET UTC_SIGN=
+	
+	REM *** Now get the timezone settings from the registry
+	regedit /e %TEMP%\TZ.TMP "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+	IF NOT EXIST %TEMP%\TZ.TMP GOTO NOTZINFO
+
+	for /f "Tokens=1* Delims==" %%a in ('type %TEMP%\TZ.TMP') do if %%a == "ActiveTimeBias" SET ACTIVEBIAS=%%b
+	for /f "Tokens=1* Delims=:" %%a in ('echo %ACTIVEBIAS%') do ( SET ACTIVEBIAS=%%b & SET PARTYP=%%a )
+	
+	REM *** Clean up temporary file
+	IF EXIST %TEMP%\TZ.TMP DEL %TEMP%\TZ.TMP
+	
+	REM *** Check if we really got a dword value from the registry ...
+	IF NOT "%PARTYP%"=="dword " goto NOTZINFO
+
+	REM *** Check if we are in UTC timezone, then we can avoid some stress...
+	if "%ACTIVEBIAS%" == "00000000" SET UTC=(UTC) & GOTO NOTZINFO
+	
+	SET HI=0x%ACTIVEBIAS:~0,4%
+	SET LO=0x%ACTIVEBIAS:~4,4%
+	
+	if "%HI%"=="0xffff" ( SET /A ACTIVEBIAS=%LO% - %HI% - 1 ) ELSE ( SET /A ACTIVEBIAS=%LO%)
+	SET /A UTC_HR="%ACTIVEBIAS%/60"
+	SET /A UTC_MIN="%ACTIVEBIAS% %% 60"
+	SET UTC_SIGN=%ACTIVEBIAS:~0,1%
+
+	REM *** check the direction in which the local timezone alters UTC time
+	IF NOT "%UTC_SIGN%"=="-" SET UTC_SIGN=+
+	IF "%UTC_SIGN%"=="-" SET UTC_HR=%UTC_HR:~1,2%
+
+	REM *** Now turn the direction, because we need to know it from the viewpoint of UTC
+	IF "%UTC_SIGN%"=="+" (SET UTC_SIGN=-) ELSE (SET UTC_SIGN=+)
+
+	REM *** Put the values in a "00" format
+	IF %UTC_HR% LEQ 9 SET UTC_HR=0%UTC_HR%
+	IF %UTC_MIN% LEQ 9 SET UTC_MIN=0%UTC_MIN%
+			
+	REM *** Set up UTC offset string used in version string
+	SET UTC=(UTC%UTC_SIGN%%UTC_HR%:%UTC_MIN%)
+	
+	
+:NOTZINFO
+echo off
 
 REM *****************************************************************************************************************
 REM Now grab the Version number out of the source code (using the version.m4 file...)
@@ -122,7 +184,9 @@ REM ****************************************************************************
 
 		REM ** Try to get the CSet rev directly from BK
 		FOR /F "TOKENS=1 DELIMS==" %%a IN ('bk.exe -R prs -hr+ -nd:I: ChangeSet') DO @SET CSET=%%a
-:NOBK		
+
+:NOBK
+
 		REM ** If that was not successful, we'll take a look into a version file, if available
 		IF EXIST ..\..\..\version ( 
 			IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\version') DO @SET CSET=%%a
@@ -148,19 +212,26 @@ REM ****************************************************************************
 	regedit /E userset.reg "HKEY_CURRENT_USER\Control Panel\International"
 	IF not exist userset.reg goto ERRNOREG
 
+	rem *** convert from unicode to ascii if necessary
 	type userset.reg > userset.txt
 
-	FOR /F "TOKENS=1-9 DELIMS=== " %%a IN ('findstr "iDate" userset.txt') DO @SET DATEFORMAT=%%~b
-	FOR /F "TOKENS=1-9 DELIMS=== " %%a IN ('findstr "iTime" userset.txt') DO @SET TIMEFORMAT=%%~b
 
-	FOR /F "TOKENS=1-9 DELIMS=== " %%a IN ('findstr /R "sDate\>" userset.txt') DO @SET DATEDELIM=%%~b
-	FOR /F "TOKENS=1-9 DELIMS=== " %%a IN ('findstr /R "sTime\>" userset.txt') DO @SET TIMEDELIM=%%~b
+	FOR /F "TOKENS=1-9 DELIMS== " %%a IN ('findstr "iDate" userset.txt') DO SET DATEFORMAT=%%b
+	FOR /F "TOKENS=1-9 DELIMS== " %%a IN ('findstr "iTime" userset.txt') DO SET TIMEFORMAT=%%b
 
-	REM Clean up any temporary files we may have created...
-	IF exist userset.reg del userset.reg
-	IF exist userset.txt del userset.txt
+	FOR /F "TOKENS=1-9 DELIMS== " %%a IN ('findstr /R "sDate\>" userset.txt') DO SET DATEDELIM=%%b
+	FOR /F "TOKENS=1-9 DELIMS== " %%a IN ('findstr /R "sTime\>" userset.txt') DO SET TIMEDELIM=%%b
 	
+	IF "%TIMEFORMAT%"=="" GOTO ERRNOTIME
+	IF "%DATEFORMAT%"=="" GOTO ERRNODATE
+	IF "%TIMEDELIM%"=="" GOTO ERRNOTIME
+	IF "%DATEDELIM%"=="" GOTO ERRNODATE
 
+	SET TIMEDELIM=%TIMEDELIM:~1,1%
+	SET DATEDELIM=%DATEDELIM:~1,1%
+	SET TIMEFORMAT=%TIMEFORMAT:~1,1%
+	SET DATEFORMAT=%DATEFORMAT:~1,1%
+	
 REM *****************************************************************************************************************
 REM Well, well. Its time to look at the time and format it in a standard way (if possible)
 REM *****************************************************************************************************************
@@ -188,7 +259,9 @@ REM ****************************************************************************
 		SET SUBSEC=%DD%
 	)
 
-
+	IF "%HOUR%"=="" GOTO ERRNOTIME
+	IF "%MIN%"=="" GOTO ERRNOTIME
+	
 	IF "%SEC%"=="" SET SEC=00
 	IF "%SUBSEC%"=="" SET SUBSEC=00
 
@@ -202,21 +275,25 @@ REM ****************************************************************************
 
 	IF "%DD%" == "" (
 		REM No Day of Week in Date
-		IF "%DATEFORMAT%" == "0" SET DOW=_&SET DAY=%BB%&SET NMM=%AA%&SET YEAR=%CC%
-		IF "%DATEFORMAT%" == "1" SET DOW=_&SET DAY=%AA%&SET NMM=%BB%&SET YEAR=%CC%
-		IF "%DATEFORMAT%" == "2" SET DOW=_&SET DAY=%CC%&SET NMM=%BB%&SET YEAR=%AA%
+		( IF "%DATEFORMAT%" == "0" SET DOW=_&SET DAY=%BB%&SET NMM=%AA%&SET YEAR=%CC% )
+		( IF "%DATEFORMAT%" == "1" SET DOW=_&SET DAY=%AA%&SET NMM=%BB%&SET YEAR=%CC% )
+		( IF "%DATEFORMAT%" == "2" SET DOW=_&SET DAY=%CC%&SET NMM=%BB%&SET YEAR=%AA% )
 	) ELSE (
-		IF "%DATEFORMAT%" == "0" SET DOW=%AA%&SET DAY=%CC%&SET NMM=%BB%&SET YEAR=%DD%
-		IF "%DATEFORMAT%" == "1" SET DOW=%AA%&SET DAY=%BB%&SET NMM=%CC%&SET YEAR=%DD%
-		IF "%DATEFORMAT%" == "2" SET DOW=%AA%&SET DAY=%DD%&SET NMM=%CC%&SET YEAR=%BB%
+		( IF "%DATEFORMAT%" == "0" SET DOW=%AA%&SET DAY=%CC%&SET NMM=%BB%&SET YEAR=%DD% )
+		( IF "%DATEFORMAT%" == "1" SET DOW=%AA%&SET DAY=%BB%&SET NMM=%CC%&SET YEAR=%DD% )
+		( IF "%DATEFORMAT%" == "2" SET DOW=%AA%&SET DAY=%DD%&SET NMM=%CC%&SET YEAR=%BB% )
 	)
-
+	
 	REM Something went wrong, we weren't able to get a valid date
 	IF NOT "%YEAR%" == "0" GOTO DATEOK
 	goto ERRNODATE
 
-
 :DATEOK
+
+	REM Clean up any temporary files we may have created...
+	REM IF exist userset.reg del userset.reg
+	REM IF exist userset.txt del userset.txt
+
 	IF "%NMM%" == "01" SET MONTH=Jan
 	IF "%NMM%" == "02" SET MONTH=Feb
 	IF "%NMM%" == "03" SET MONTH=Mar
@@ -258,9 +335,8 @@ REM ****************************************************************************
 REM Now create a valid version.c file ...
 REM *****************************************************************************************************************
 
-        ECHO !define NTPVERSION %VER% > ntpversion.nsh
-	ECHO Version %VER% Build %RUN% date %MONTH%/%DAY%/%YEAR% time %HOUR%:%MIN%:%SEC%
-	ECHO char * Version = "%GENERATED_PROGRAM% %VER% %MONTH% %DAY% %HOUR%:%MIN%:%SEC% %YEAR% (%RUN%)" ; > version.c
+	ECHO Version %VER% Build %RUN% date %MONTH%/%DAY%/%YEAR% time %HOUR%:%MIN%:%SEC% %UTC%
+	ECHO char * Version = "%GENERATED_PROGRAM% %VER% %MONTH% %DAY% %HOUR%:%MIN%:%SEC% %UTC% %YEAR% (%RUN%)" ; > version.c
 	GOTO EOF
 
 
