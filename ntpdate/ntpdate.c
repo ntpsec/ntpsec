@@ -599,16 +599,13 @@ ntpdatemain (
 #endif
 			if (nfound > 0)
 				input_handler();
-			else if (
 #ifndef SYS_WINNT
-				nfound == -1
+			else if (nfound == -1)
 #else
-				nfound == SOCKET_ERROR
+			else if (nfound == SOCKET_ERROR)
 #endif /* SYS_WINNT */
-				) {
-#ifndef SYS_WINNT
+			{
 				if (errno != EINTR)
-#endif
 					netsyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 						"poll() error: %m"
@@ -616,7 +613,7 @@ ntpdatemain (
 						"select() error: %m"
 #endif
 						);
-			} else {
+			} else if (errno != 0) {
 #ifndef SYS_VXWORKS
 				netsyslog(LOG_DEBUG,
 #ifdef HAVE_POLL_H
