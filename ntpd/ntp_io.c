@@ -1885,7 +1885,11 @@ findinterface(
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
+#ifndef SYS_WINNT
+	if (rtn < 0)
+#else
 	if (rtn == SOCKET_ERROR)
+#endif
 	{
 		closesocket(s);
 		return ANY_INTERFACE_CHOOSE(addr);
@@ -1893,7 +1897,11 @@ findinterface(
 
 	rtn = getsockname(s, (struct sockaddr *)&saddr, &saddrlen);
 	closesocket(s);
+#ifndef SYS_WINNT
+	if (rtn < 0)
+#else
 	if (rtn == SOCKET_ERROR)
+#endif
 		return ANY_INTERFACE_CHOOSE(addr);
 
 	for (i = nwilds; i < ninterfaces; i++) {
