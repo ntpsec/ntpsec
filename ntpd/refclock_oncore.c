@@ -637,7 +637,7 @@ oncore_init_shmem(struct instance *instance, char *filename)
 			       MAP_HASSEMAPHORE |
 #endif
 			       MAP_SHARED,
-	    instance->statusfd, 0LL);
+	    instance->statusfd, (off_t)0);
 	if (instance->shmem == MAP_FAILED) {
 		instance->shmem = 0;
 		close (instance->statusfd);

@@ -1,5 +1,8 @@
 2000-01-04  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c (oncore_init_shmem): Use a cast to widen
+	mmap's NIL offset.
+
 	* ntpd/refclock_chu.c (chu_rf): Make declaration == definition.
 	Rename min/max to es_min/es_max to avoid native SunOS compiler
 	collision.
