@@ -513,8 +513,7 @@ crypto_recv(
 			temp32 = (fstamp >> 16) & 0xffff;
 			dp =
 			    (const EVP_MD *)EVP_get_digestbynid(temp32);
-			if (vallen < MINHOSTNAME || vallen >
-			    MAXHOSTNAME)
+			if (vallen == 0 || vallen > MAXHOSTNAME)
 				rval = XEVNT_LEN;
 			else if (dp == NULL)
 				rval = XEVNT_MD;
@@ -1215,8 +1214,7 @@ crypto_xmit(
 		vallen = ntohl(ep->vallen);
 		if (vallen == 8) {
 			strcpy(certname, sys_hostname);
-		} else if (vallen < MINHOSTNAME || vallen >
-		    MAXHOSTNAME) {
+		} else if (vallen == 0 || vallen > MAXHOSTNAME) {
 			opcode |= CRYPTO_ERROR;
 			break;
 
