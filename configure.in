@@ -2564,7 +2564,7 @@ AC_ARG_WITH(openssl-libdir,
 case "$ans" in
  no) ;;
  yes) # Look in:
-    ans="/usr/lib /usr/local/lib /usr/local/ssl/lib"
+    ans="/usr/lib /usr/lib/openssl /usr/local/lib /usr/local/ssl/lib"
     ;;
  *) # Look where they said
     ;;
