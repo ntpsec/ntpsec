@@ -2476,7 +2476,7 @@ add_addr_to_list(struct sockaddr_storage *addr, int if_index, int flags){
 int
 modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
-	int index;
+	int idx;
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 #ifdef DEBUG
@@ -2485,18 +2485,18 @@ modify_addr_in_list(struct sockaddr_storage *addr, int flag) {
 		   stoa(addr));
 #endif
 
-	index = -1;
+	idx = -1;
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
 			laddr->flags = flag;
-			index = laddr->if_index;
+			idx = laddr->if_index;
 			break;
 		}
 		else
 			laddr = next;
 	}
-	return (index); /* Not found */
+	return (idx); /* Not found */
 }
 
 void
