@@ -234,6 +234,11 @@ internal_current(isc_interfaceiter_t *iter, int family) {
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&(iter->IFData.iiAddress));
 
+	/* XXXPDM This will need to be revisited */
+	iter->current.ifindex = 0;	/* Set to zero for now */
+	iter->current.scopeid = 0;	/* Set to zero for now */
+
+
 	/*
 	 * Get interface flags.
 	 */
