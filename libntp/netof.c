@@ -27,14 +27,18 @@ netof(
 
         if(netaddr->ss_family == AF_INET) {
                 netnum = ((struct sockaddr_in*)netaddr)->sin_addr.s_addr;
-	if(IN_CLASSC(netnum))
-	    netnum &= IN_CLASSC_NET;
-	else if (IN_CLASSB(netnum))
-	    netnum &= IN_CLASSB_NET;
-	else			/* treat all other like class A */
-	    netnum &= IN_CLASSA_NET;
-                ((struct sockaddr_in*)netaddr)->sin_addr.s_addr = netnum;
-         }
+
+		/*
+		 * We live in a modern CIDR world where the basement nets, which
+		 * used to be class A, are now probably associated with each
+		 * host address. So, for class-A nets, all bits are significant.
+		 */
+		if(IN_CLASSC(netnum))
+		    netnum &= IN_CLASSC_NET;
+		else if (IN_CLASSB(netnum))
+		    netnum &= IN_CLASSB_NET;
+			((struct sockaddr_in*)netaddr)->sin_addr.s_addr = netnum;
+		 }
          else if(netaddr->ss_family == AF_INET6) {
 		/* Here we put 0 at the local link address so we get net address */
 		  memset(&((struct sockaddr_in6*)netaddr)->sin6_addr.s6_addr[8], 0, 8*sizeof(u_char));

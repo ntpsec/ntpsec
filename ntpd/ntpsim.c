@@ -87,7 +87,7 @@ void ntpinit(int argc, char *argv[])
 {
 #ifdef AUTOKEY
         u_int n;
-        char hostname[MAXFILENAME];
+        char hostname[MAX_HOSTLEN + 1];
 #endif /* AUTOKEY */
 	initializing = 1;
         init_auth();
@@ -106,7 +106,7 @@ void ntpinit(int argc, char *argv[])
         mon_start(MON_OFF);
 	getconfig(argc, argv);
 #ifdef AUTOKEY
-        gethostname(hostname, MAXFILENAME);
+        gethostname(hostname, MAX_HOSTNAME);
         n = strlen(hostname) + 1;
         sys_hostname = emalloc(n);
         memcpy(sys_hostname, hostname, n);

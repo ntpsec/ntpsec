@@ -94,32 +94,56 @@ typedef char s_char;
  */
 #define	NTP_VERSION	((u_char)4) /* current version number */
 #define	NTP_OLDVERSION	((u_char)1) /* oldest credible version */
-#define	NTP_PORT	123	/* included for sake of non-unix machines */
+#define	NTP_PORT	123	/* included for non-unix machines */
+
+/*
+ * Poll interval parameters
+ */
 #define NTP_UNREACH	16	/* poll interval backoff count */
-#define NTP_MINDPOLL	6	/* log2 default min poll interval (64 s) */
-#define NTP_MAXDPOLL	10	/* log2 default max poll interval (~17 m) */
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
-#define	NTP_MAXPOLL	17	/* log2 max poll interval (~4.5 h) */
+#define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
+#define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
+#define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
+#define NTP_BURST	8	/* packets in burst */
+#define CALL_DELAY	10	/* modem callup delay (s) */
+#define	START_DELAY	10	/* association startup delay (s) */
+#define BURST_DELAY	2	/* interburst delay (s) */
+#define	RESP_DELAY	1	/* crypto response delay (s) */
+
+/*
+ * Clock filter algorithm tuning parameters
+ */
+#define MINDISPERSE	.01	/* min dispersion */
+#define MAXDISPERSE	16.	/* max dispersion (square) */
+#define	NTP_SHIFT	8	/* clock filter stages */
+#define NTP_FWEIGHT	.5	/* clock filter weight */
+
+/*
+ * Selection algorithm tuning parameters
+ */
 #define	NTP_MINCLOCK	3	/* minimum survivors */
 #define	NTP_MAXCLOCK	10	/* maximum candidates */
-#define	NTP_SHIFT	8	/* number of clock filter stages */
-#define NTP_BURST	10	/* burst mode counter */
-#define	NTP_MAXKEY	65535	/* maximum authentication key number */
-#define NTP_MAXSESSION	100	/* maximum session key list entries */
-#define NTP_MAXEXTEN	1024	/* maximum extension field size */
-#define NTP_MAXSTRLEN	256	/* maximum string length */
-#define NTP_AUTOMAX	13	/* log2 default max session key lifetime */
-#define KEY_REVOKE	16	/* log2 default key revoke timeout */
-#define NTP_FWEIGHT	.5	/* clock filter weight */
+#define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	4.	/* popcorn spike gate */
-#define BURST_DELAY	2	/* interburst delay (s) */
-#define CALL_DELAY	10	/* modem callup delay (s) */
-#define	RESP_DELAY	1	/* crypto response delay (s) */
-#define	START_DELAY	10	/* association startup delay (s) */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define HYST		.5	/* anti-clockhop hysteresis */
-#define HYST_TC		.875	/* anti-clockhop hysteresis decay factor */
+#define HYST_TC		.875	/* anti-clockhop hysteresis decay */
 #define MAX_TTL		8	/* max ttl mapping vector size */
+#define NTP_MAXEXTEN	1024	/* maximum extension field size */
+
+/*
+ * Miscellaneous stuff
+ */
+#define NTP_MAXKEY	65535	/* maximum authentication key number */
+
+/*
+ * Limits of things
+ */
+#define	MAXFILENAME	128	/* max length of file name */
+#define MAXHOSTNAME	128	/* max length of DNS host name */
+#define MINHOSTNAME	4	/* min length of DNS host name */
+#define NTP_MAXSTRLEN	256	/* maximum string length */
+#define MAXINTERFACES	512	/* max number of interfaces */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -139,70 +163,8 @@ typedef char s_char;
 			    1L << (int)(a)) /* log2 to double */
 #define UNIVAR(x)	(SQUARE(.28867513 * LOGTOD(x))) /* std uniform distr */
 #define ULOGTOD(a)	(1L << (int)(a)) /* ulog2 to double */
-#define MAXDISPERSE	16.	/* max dispersion (square) */
-#define MINDISPERSE	.01	/* min dispersion */
-#define MAXDISTANCE	1.	/* max root distance */
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
-
-#ifdef OPENSSL
-/*
- * The following structures are used in the autokey protocol.
- *
- * The autokey structure holds the values used to authenticate key IDs.
- */
-struct autokey {		/* network byte order */
-	keyid_t	key;		/* key ID */
-	int32	seq;		/* key number */
-};
-
-/*
- * The value structure holds variable length data such as public
- * key, agreement parameters, public valule and leapsecond table.
- * They are in network byte order.
- */
-struct value {			/* network byte order */
-	tstamp_t tstamp;	/* timestamp */
-	tstamp_t fstamp;	/* filestamp */
-	u_int32	vallen;		/* value length */
-	u_char	*ptr;		/* data pointer (various) */
-	u_int32	siglen;		/* signature length */
-	u_char	*sig;		/* signature */
-};
-
-/*
- * The packet extension field structures are used to hold values
- * and signatures in network byte order.
- */
-struct exten {
-	u_int32	opcode;		/* opcode */
-	u_int32	associd;	/* association ID */
-	u_int32	tstamp;		/* timestamp */
-	u_int32	fstamp;		/* filestamp */
-	u_int32	vallen;		/* value length */
-	u_int32	pkt[1];		/* start of value field */
-};
-
-/*
- * The certificate info/value structure
- */
-struct cert_info {
-	struct cert_info *link;	/* forward link */
-	u_int	flags;		/* flags that wave */
-	EVP_PKEY *pkey;		/* generic key */
-	long	version;	/* X509 version */
-	int	nid;		/* signature/digest ID */
-	const EVP_MD *digest;	/* message digest algorithm */
-	u_long	serial;		/* serial number */
-	tstamp_t first;		/* valid not before */
-	tstamp_t last;		/* valid not after */
-	u_char	*subject;	/* subject common name */
-	u_char	*issuer;	/* issuer common name */
-	u_char	*grpkey;	/* GQ group key */
-	u_int	grplen;		/* GQ group key length */
-	struct value cert;	/* certificate/value */
-};
-#endif /* OPENSSL */
 
 /*
  * The interface structure is used to hold the addresses and socket
@@ -247,7 +209,6 @@ struct interface {
 #define TEST9		0x0100	/* peer delay/dispersion bounds check */
 #define TEST10		0x0200	/* autokey failed */
 #define	TEST11		0x0400	/* proventic not confirmed */
-#define TEST12		0x0800	/* autokey error */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -392,7 +353,7 @@ struct peer {
 /*
  * Values for peer.mode
  */
-#define	MODE_UNSPEC	0	/* unspecified (probably old NTP version) */
+#define	MODE_UNSPEC	0	/* unspecified (old version) */
 #define	MODE_ACTIVE	1	/* symmetric active */
 #define	MODE_PASSIVE	2	/* symmetric passive */
 #define	MODE_CLIENT	3	/* client mode */
@@ -590,7 +551,7 @@ struct pkt {
 	 * be broke.
 	 */
 #ifdef OPENSSL
-	u_int32	exten[1000 / 4]; /* max extension field */
+	u_int32	exten[NTP_MAXEXTEN / 4]; /* max extension field */
 #else /* OPENSSL */
 	u_int32	exten[1];	/* misused */
 #endif /* OPENSSL */
@@ -783,6 +744,7 @@ struct mon_data {
 #define	MDF_LCAST	0x08		/* localcast */
 #define MDF_ACAST	0x10		/* manycast */
 #define	MDF_BCLNT	0x20		/* broadcast client */
+#define MDF_ACLNT	0x40		/* manycast client */
 
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring
@@ -844,15 +806,6 @@ struct restrictlist6 {
 #define	RESTRICT_FLAGS		1	/* add flags to restrict entry */
 #define	RESTRICT_UNFLAG		2	/* remove flags from restrict entry */
 #define	RESTRICT_REMOVE		3	/* remove a restrict entry */
-
-/*
- * Experimental alternate selection algorithm identifiers
- */
-#define	SELECT_1	1
-#define	SELECT_2	2
-#define	SELECT_3	3
-#define	SELECT_4	4
-#define	SELECT_5	5
 
 /*
  * Endpoint structure for the select algorithm

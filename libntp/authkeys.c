@@ -389,6 +389,7 @@ auth_delkeys(void)
 				authnumfreekeys++;
 				sk = *skp;
 			}
+			sk = sk->next;
 		}
 	}
 }

@@ -1024,7 +1024,7 @@ again:
 		       (u_long)ntohl(ss->timeup));
 	(void) fprintf(fp, "time since reset:       %ld\n",
 		       (u_long)ntohl(ss->timereset));
-	(void) fprintf(fp, "bad stratum in packet:  %ld\n",
+	(void) fprintf(fp, "packets restricted:     %ld\n",
 		       (u_long)ntohl(ss->badstratum));
 	(void) fprintf(fp, "old version packets:    %ld\n",
 		       (u_long)ntohl(ss->oldversionpkt));
@@ -1041,7 +1041,7 @@ again:
 	if (itemsize != sizeof(struct info_sys_stats))
 	    return;
 	
-	(void) fprintf(fp, "packets rejected:       %ld\n",
+	(void) fprintf(fp, "packets limited:        %ld\n",
 		       (u_long)ntohl(ss->limitrejected));
 }
 

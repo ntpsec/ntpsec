@@ -10,9 +10,6 @@
 #include "ntp_refclock.h"
 #include "recvbuff.h"
 
-#define MAXINTERFACES	512
-#define MAXFILENAME	128	/* maximum length of a file name */
-
 #ifdef SYS_WINNT
 #define exit service_exit
 extern	void	service_exit	(int);
@@ -141,7 +138,7 @@ extern	void	resetmanycast	P((void));
 
 /* ntp_crypto.c */
 #ifdef OPENSSL
-extern	void	crypto_recv	P((struct peer *, struct recvbuf *));
+extern	int	crypto_recv	P((struct peer *, struct recvbuf *));
 extern	int	crypto_xmit	P((struct pkt *, struct sockaddr_storage *, int, struct exten *, keyid_t));
 extern	keyid_t	session_key	P((struct sockaddr_storage *, struct sockaddr_storage *, keyid_t, keyid_t, u_long));
 extern	void	make_keylist	P((struct peer *, struct interface *));
@@ -161,6 +158,7 @@ extern	void	receive 	P((struct recvbuf *));
 extern	void	peer_clear	P((struct peer *));
 extern	void 	process_packet	P((struct peer *, struct pkt *, l_fp *));
 extern	void	clock_select	P((void));
+extern	void	kod_proto	P((void));
 
 /*
  * there seems to be a bug in the IRIX 4 compiler which prevents
@@ -381,14 +379,14 @@ extern int	sys_ttlmax;		/* max ttl mapping vector index */
  * Statistics counters
  */
 extern u_long	sys_stattime;		/* time when we started recording */
-extern u_long	sys_badstratum; 	/* packets with invalid stratum */
-extern u_long	sys_oldversionpkt;	/* old version packets received */
-extern u_long	sys_newversionpkt;	/* new version packets received */
+extern u_long	sys_restricted;	 	/* restricted packets */
+extern u_long	sys_oldversionpkt;	/* old version packets */
+extern u_long	sys_newversionpkt;	/* new version packets  */
 extern u_long	sys_unknownversion;	/* don't know version packets */
-extern u_long	sys_badlength;		/* packets with bad length */
+extern u_long	sys_badlength;		/* bad length or format */
 extern u_long	sys_processed;		/* packets processed */
-extern u_long	sys_badauth;		/* packets dropped because of auth */
-extern u_long	sys_limitrejected;	/* pkts rejected due to client count per net */
+extern u_long	sys_badauth;		/* bad authentication */
+extern u_long	sys_limitrejected;	/* rate limit exceeded */
 
 /* ntp_refclock.c */
 #ifdef REFCLOCK

@@ -103,10 +103,6 @@
 # include <sys/ci/ciioctl.h>
 #endif
 
-#ifdef OPENSSL
-#include "ntp_crypto.h"
-#endif /* OPENSSL */
-
 /*
  * Signals we catch for debugging.	If not debugging we ignore them.
  */
