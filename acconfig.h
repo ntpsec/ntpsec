@@ -346,6 +346,9 @@
 /* Do we want the SCO clock hacks? */
 #undef SCO5_CLOCK
 
+/* Do we want the ReliantUNIX clock hacks? */
+#undef RELIANTUNIX_CLOCK
+
 /* Does the kernel have an FLL bug? */
 #undef KERNEL_FLL_BUG
 

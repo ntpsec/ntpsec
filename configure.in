@@ -2599,7 +2599,11 @@ esac
 # Unfortunately, there is no easy way to know if particular release
 # has this "feature" or any obvious way to test for it.
 case "$target" in
- *-*-sco3.2v5*|mips-sni-sysv4*) AC_DEFINE(SCO5_CLOCK) ;;
+ mips-sni-sysv4*) AC_DEFINE(RELIANTUNIX_CLOCK) ;;
+esac
+
+case "$target" in
+ *-*-sco3.2v5*) AC_DEFINE(SCO5_CLOCK) ;;
 esac
 
 ac_cv_make_tickadj=yes

@@ -1,3 +1,10 @@
+1999-11-06  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* acconfig.h: RELIANTUNIX_CLOCK
+	* configure.in (ac_cv_var_tickadj): RELIANTUNIX_CLOCK
+	* libntp/systime.c (adj_systime): Reliant patches
+	From: Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru>
+
 1999-11-05  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/refclock_parse.c (parse_start): ASYNC_PPS_CD_NEG cleanup
