@@ -1,5 +1,7 @@
 2000-01-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.99a
+
 	* scripts/ntpsweep: New version
 	* html/copyright.htm: Added Hans Lambermont
 	From: Hans Lambermont <Hans.Lambermont@nl.origin-it.com>
