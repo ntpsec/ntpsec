@@ -284,7 +284,9 @@ shm_poll(
 	}
 	else {
 		refclock_report(peer, CEVNT_TIMEOUT);
+		/*
 		msyslog (LOG_NOTICE, "SHM: no new value found in shared memory");
+		*/
 		return;
 	}
 	if (!refclock_process(pp)) {
