@@ -124,6 +124,7 @@ static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int));
 static	void	close_socket	P((SOCKET));
 static	void	close_file	P((SOCKET));
 static	char *	fdbits		P((int, fd_set *));
+static	void	set_reuseaddr	P((int));
 
 typedef struct vsock vsock_t;
 
@@ -421,27 +422,13 @@ create_sockets(
 	 * Now that we have opened all the sockets, turn off the reuse
 	 * flag for security.
 	 */
-	for (i = 0; i < ninterfaces; i++) {
-		int off = 0;
-
-		/*
-		 * if inter_list[ n ].fd  is -1, we might have a adapter
-		 * configured but not present
-		 */
-		if ( inter_list[ i ].fd != -1 ) {
-			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
-				       SO_REUSEADDR, (char *)&off,
-				       sizeof(off))) {
-				netsyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR,off) failed on address %s: %m",
-					stoa((&inter_list[i].sin)));
-			}
-		}
-	}
+	set_reuseaddr(0);
 
 	/*
 	 * Blacklist all bound interface addresses
 	 * Wildcard interfaces are ignored.
 	 */
+
 	for (i = nwilds; i < ninterfaces; i++) {
 		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
@@ -492,6 +479,9 @@ io_setbclient(void)
 {
 	int i;
 
+#ifdef OPEN_BCAST_SOCKET
+	set_reuseaddr(1);
+#endif
 	for (i = nwilds; i < ninterfaces; i++) {
 		if (!(inter_list[i].flags & INT_BROADCAST))
 			continue;
@@ -507,6 +497,33 @@ io_setbclient(void)
 		    INT_BROADCAST, 1);
 		inter_list[i].flags |= INT_BCASTOPEN;
 #endif
+	}
+#ifdef OPEN_BCAST_SOCKET
+	set_reuseaddr(0);
+#endif
+}
+
+/*
+ * set_reuseaddr() - set/clear REUSEADDR on all sockets
+ *			NB possible hole - should we be doing this on broadcast
+ *			fd's also?
+ */
+static void
+set_reuseaddr(int flag) {
+	int i;
+
+	for (i=0; i < ninterfaces; i++) {
+		/*
+		 * if inter_list[ n ].fd  is -1, we might have a adapter
+		 * configured but not present
+		 */
+		if (inter_list[i].fd != INVALID_SOCKET) {
+			if (setsockopt(inter_list[i].fd, SOL_SOCKET,
+					SO_REUSEADDR, (char *)&flag,
+					sizeof(flag))) {
+				netsyslog(LOG_ERR, "create_sockets: setsockopt(SO_REUSEADDR, %s) failed: %m", flag ? "on" : "off");
+			}
+		}
 	}
 }
 
@@ -567,7 +584,9 @@ io_multicast_add(
 		* Try opening a socket for the specified class D address. This
 		* works under SunOS 4.x, but not OSF1 .. :-(
 		*/
+		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sinp, 0, 1);
+		set_reuseaddr(0);
 		if (s < 0) {
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
 			if (wildipv4 >= 0) {
@@ -642,7 +661,9 @@ io_multicast_add(
 		 * Try opening a socket for the specified class D address. This
 		 * works under SunOS 4.x, but not OSF1 .. :-(
 		 */
+		set_reuseaddr(1);
 		s = open_socket((struct sockaddr_storage*)sin6p, 0, 1);
+		set_reuseaddr(0);
 		if(s < 0){
 			memset((char *)&inter_list[i], 0, sizeof(struct interface));
 			if (wildipv6 >= 0) {
