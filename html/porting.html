@@ -9,9 +9,11 @@
 
     <body>
         <h3>Porting Hints</h3>
-        <img src="pic/wingdorothy.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>The Wizard of Oz</i>, L. Frank Baum</a>
-        <p>Porting Dorothy in Oz.<br clear="left">
+        <img src="pic/wingdorothy.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>The Wizard of Oz</i>, L. Frank Baum</a>
+        <p>Porting Dorothy in Oz
         </p>
+        <p>Last update: <csobj format="ShortTime" h="24" locale="00000409" region="0" t="DateTime" w="50">20:17</csobj> UTC <csobj format="LongDate" h="24" locale="00000409" region="0" t="DateTime" w="257">Monday, December 02, 2002</csobj></p>
+        <br clear="left">
         <hr>
         <p>NOTE: The following procedures have been replaced by GNU <tt>automake</tt> and <tt>autoconfigure</tt>. This page is to be updated in the next release.</p>
         <p>Porting to a new machine or operating system ordinarily requires updating the <tt>./machines</tt> directory and the <tt>./compilers</tt> directories in order to define the build environment and autoconfigure means. You will probably have to modify the <tt>ntp_machines.h</tt> file and <tt>&quot;l_stdlib.h&quot;</tt> files as well. The two most famous trouble spots are the I/O code in <tt>./ntpd/ntp_io.c</tt> and the clock adjustment code in <tt>./ntpd/ntp_unixclock.c</tt>.</p>

@@ -1615,6 +1615,65 @@ crypto_encrypt(
 
 
 /*
+ * crypto_ident - construct extension field for identity scheme
+ *
+ * This routine determines which identity scheme is in use and
+ * constructs an extension field for that scheme.
+ */
+u_int
+crypto_ident(
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	char	filename[MAXFILENAME + 1];
+	tstamp_t fstamp;
+
+	/*
+	 * If the server identity has already been verified, no further
+	 * action is necessary. Otherwise, try to load the identity file
+	 * containing the scheme parameters. If the file does not exist,
+	 * not to worry. Note we can't get here unless the trusted
+	 * certificate has been found and the CRYPTO_FLAG_VALID bit is
+	 * set, so the certificate issuer is valid.
+	 */
+	if (peer->crypto & CRYPTO_FLAG_VRFY)
+		return (0);
+
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	if (peer->crypto & CRYPTO_FLAG_GQ) {
+		snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
+		    peer->issuer);
+		peer->ident_pkey = crypto_key(filename, &fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_GQ);
+	}
+	if (peer->crypto & CRYPTO_FLAG_IFF) {
+		snprintf(filename, MAXFILENAME, "ntpkey_iff_%s",
+		    peer->issuer);
+		peer->ident_pkey = crypto_key(filename, &fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_IFF);
+	}
+	if (peer->crypto & CRYPTO_FLAG_MV) {
+		snprintf(filename, MAXFILENAME, "ntpkey_mv_%s",
+		    peer->issuer);
+		peer->ident_pkey = crypto_key(filename, &fstamp);
+		if (peer->ident_pkey != NULL)
+			return (CRYPTO_MV);
+	}
+
+	/*
+	 * No compatible identity scheme is available. Use the default
+	 * TC scheme.
+	 */
+	msyslog(LOG_ERR,
+	    "crypto_ident: no compatible identity scheme found");
+	return (0);
+}
+
+
+/*
  * crypto_args - construct extension field from arguments
  *
  * This routine creates an extension field with current timestamps and
@@ -1919,33 +1978,31 @@ bighash(
  * keys, sign keys and certificates.
  *
  * The IFF identity scheme is based on DSA cryptography and algorithms
- * described in Stimson p. 285. The IFF values hide in a DSA cuckoo
+ * described in Stinson p. 285. The IFF values hide in a DSA cuckoo
  * structure, but only the primes and generator are used. The p is a
  * 512-bit prime, q a 160-bit prime that divides p - 1 and is a qth root
- * of 1 mod p; that is, g^q = 1 mod p. The TA rolls a random group key
- * disguised as a DSA structure member, then computes public key g^(q -
- * a). These values are shared only among group members and never
- * revealed in messages. Alice challenges Bob to confirm identity using
- * the protocol described below.
+ * of 1 mod p; that is, g^q = 1 mod p. The TA rolls primvate random
+ * group key b disguised as a DSA structure member, then computes public
+ * key g^(q - b). These values are shared only among group members and
+ * never revealed in messages. Alice challenges Bob to confirm identity
+ * using the protocol described below.
  *
  * How it works
  *
- * The scheme goes like this. Both Alice and Bob have the same prime p,
- * prime q, generator g and some random a as the group key. They also
- * have v = g^(q - a) mod p as the public key. These values are
- * computed and distributed in advance via secret means, although only
- * the group key a is truly secret.
+ * The scheme goes like this. Both Alice and Bob have the public primes
+ * p, q and generator g. The TA gives private key b to Bob and public
+ * key v = g^(q - a) mod p to Alice.
  *
  * Alice rolls new random challenge r and sends to Bob in the IFF
- * request message. Bob rolls new random k, then computes y = k + a r
+ * request message. Bob rolls new random k, then computes y = k + b r
  * mod q and x = g^k mod p and sends (y, hash(x)) to Alice in the
  * response message. Besides making the response shorter, the hash makes
- * it effectivey impossible for an intruder to solve for a by observing
+ * it effectivey impossible for an intruder to solve for b by observing
  * a number of these messages.
  * 
  * Alice receives the response and computes g^y v^r mod p. After a bit
  * of algebra, this simplifies to g^k. If the hash of this result
- * matches x, Alice knows that Bob has the group key a. The signed
+ * matches hash(x), Alice knows that Bob has the group key b. The signed
  * response binds this knowledge to Bob's private key and the public key
  * previously received in his certificate.
  *
@@ -1954,6 +2011,7 @@ bighash(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing identity parameters
  */
 static int
 crypto_alice(
@@ -1964,30 +2022,14 @@ crypto_alice(
 	DSA	*dsa;		/* IFF parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
-	char	filename[MAXFILENAME + 1];
 	tstamp_t tstamp;
-	tstamp_t fstamp;
 	u_int	len;
 
 	/*
-	 * If the IFF parameters are not valid or there is no trusted
-	 * host, something awful happened. Otherwise, load the identity
-	 * file containing the scheme parameters.
+	 * The identity parameters must have correct format and content.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_IFF) || peer->issuer == NULL) {
-		msyslog(LOG_ERR, "crypto_alice: IFF unavailable");
-		return (XEVNT_PUB);
-	}
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
-	snprintf(filename, MAXFILENAME, "ntpkey_iff_%s", peer->issuer);
-	peer->ident_pkey = crypto_key(filename, &fstamp);
-	if (peer->ident_pkey == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_alice: file %s not found or corrupt",
-		    filename);
-		return (XEVNT_PUB);
-	}
+	if (peer->ident_pkey == NULL)
+		return (XEVNT_ID);
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
 		msyslog(LOG_ERR, "crypto_alice: IFF defective key");
 		return (XEVNT_PUB);
@@ -2072,15 +2114,15 @@ crypto_bob(
 	}
 
 	/*
-	 * Bob rolls random k (0 < k < q), computes y = k + a r mod q
-	 * and g = g^k mod p, then sends (y, hash(g)) to Alice.
+	 * Bob rolls random k (0 < k < q), computes y = k + b r mod q
+	 * and x = g^k mod p, then sends (y, hash(x)) to Alice.
 	 */
 	bctx = BN_CTX_new(); bk = BN_new(); bn = BN_new();
 	sdsa = DSA_SIG_new();
 	BN_rand(bk, len * 8, -1, 1);		/* k */
-	BN_mod_mul(bn, dsa->priv_key, r, dsa->q, bctx); /* a r mod q */
+	BN_mod_mul(bn, dsa->priv_key, r, dsa->q, bctx); /* b r mod q */
 	BN_add(bn, bn, bk);
-	BN_mod(bn, bn, dsa->q, bctx);		/* k + a r mod q */
+	BN_mod(bn, bn, dsa->q, bctx);		/* k + b r mod q */
 	sdsa->r = BN_dup(bn);
 	BN_mod_exp(bk, dsa->g, bk, dsa->p, bctx); /* g^k mod p */
 	bighash(bk, bk);
@@ -2126,7 +2168,7 @@ crypto_bob(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missint public key
- * XEVNT_ID	bad or missing identification
+ * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_iff(
@@ -2146,8 +2188,7 @@ crypto_iff(
 	 * If the IFF parameters are not valid or no challenge was sent,
 	 * something awful happened or we are being tormented.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_IFF) || peer->ident_pkey ==
-	    NULL) {
+	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_iff: IFF unavailable");
 		return (XEVNT_PUB);
 	}
@@ -2161,7 +2202,7 @@ crypto_iff(
 	}
 
 	/*
-	 * Extract the k + a r and g^k values from the response.
+	 * Extract the k + b r and g^k values from the response.
 	 */
 	bctx = BN_CTX_new(); bk = BN_new(); bn = BN_new();
 	len = ntohl(ep->vallen);
@@ -2173,16 +2214,14 @@ crypto_iff(
 	}
 
 	/*
-	 * Compute g^(k + a r) g^(q - a)r mod p. Remember, a is the
-	 * private key known only to Bob and g^(q - a) is the public key
-	 * needed only by Alice.
+	 * Compute g^(k + b r) g^(q - b)r mod p.
 	 */
 	BN_mod_exp(bn, dsa->pub_key, peer->iffval, dsa->p, bctx);
 	BN_mod_exp(bk, dsa->g, sdsa->r, dsa->p, bctx);
 	BN_mod_mul(bn, bn, bk, dsa->p, bctx);
 
 	/*
-	 * The result should match the hash of g^k mod p.
+	 * Verify the hash of the result matches hash(x).
 	 */
 	bighash(bn, bn);
 	temp = BN_cmp(bn, sdsa->s);
@@ -2212,11 +2251,11 @@ crypto_iff(
  * generations of host keys, sign keys and certificates.
  *
  * The GQ identity scheme is based on RSA cryptography and algorithms
- * described in Stimson p. 300 (with errors). The GQ values hide in a
+ * described in Stinson p. 300 (with errors). The GQ values hide in a
  * RSA cuckoo structure, but only the modulus is used. The 512-bit
  * public modulus is n = p q, where p and q are secret large primes. The
  * TA rolls random group key b disguised as a RSA structure member.
- *  Except for the public key, these values are shared only among group
+ * Except for the public key, these values are shared only among group
  * members and never revealed in messages.
  *
  * When rolling new certificates, Bob recomputes the private and
@@ -2246,7 +2285,7 @@ crypto_iff(
  * 
  * Alice receives the response and computes y^b v^r mod n. After a bit
  * of algebra, this simplifies to k^b. If the hash of this result
- * matches x, Alice knows that Bob has the group key b. The signed
+ * matches hash(x), Alice knows that Bob has the group key b. The signed
  * response binds this knowledge to Bob's private key and the public key
  * previously received in his certificate.
  *
@@ -2255,6 +2294,7 @@ crypto_iff(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing identity parameters
  */
 static int
 crypto_alice2(
@@ -2262,35 +2302,18 @@ crypto_alice2(
 	struct value *vp	/* value pointer */
 	)
 {
-	RSA	*rsapar;	/* GQ parameters */
+	RSA	*rsa;		/* GQ parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
-	char	filename[MAXFILENAME + 1];
 	tstamp_t tstamp;
-	tstamp_t fstamp;
 	u_int	len;
 
 	/*
-	 * If the GQ parameters are not valid or there is no trusted
-	 * host, something awful happened. Otherwise, load the identity
-	 * file containing the scheme parameters.
+	 * The identity parameters must have correct format and content.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_GQ) || peer->issuer == NULL) {
-		msyslog(LOG_ERR, "crypto_alice2: GQ unavailable");
-		return (XEVNT_PUB);
-	}
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
-	snprintf(filename, MAXFILENAME, "ntpkey_gq_%s",
-	    peer->issuer);
-	peer->ident_pkey = crypto_key(filename, &fstamp);
-	if (peer->ident_pkey == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_alice: file %s not found or corrupt",
-		    filename);
-		return (XEVNT_PUB);
-	}
-	if ((rsapar = peer->ident_pkey->pkey.rsa) == NULL) {
+	if (peer->ident_pkey == NULL)
+		return (XEVNT_ID);
+	if ((rsa = peer->ident_pkey->pkey.rsa) == NULL) {
 		msyslog(LOG_ERR, "crypto_alice: GQ defective key");
 		return (XEVNT_PUB);
 	}
@@ -2300,12 +2323,12 @@ crypto_alice2(
 	 * omitting BN_rand_range, so we have to do it the hard way.
 	 */
 	bctx = BN_CTX_new();
-	len = BN_num_bytes(rsapar->n);
+	len = BN_num_bytes(rsa->n);
 	if (peer->iffval != NULL)
 		BN_free(peer->iffval);
 	peer->iffval = BN_new();
 	BN_rand(peer->iffval, len * 8, -1, 1);	/* r mod n */
-	BN_mod(peer->iffval, peer->iffval, rsapar->n, bctx);
+	BN_mod(peer->iffval, peer->iffval, rsa->n, bctx);
 	BN_CTX_free(bctx);
 
 	/*
@@ -2375,7 +2398,7 @@ crypto_bob2(
 
 	/*
 	 * Bob rolls random k (0 < k < n), computes y = k u^r mod n and
-	 * g = k^b mod n, then sends (y, hash(g)) to Alice. 
+	 * x = k^b mod n, then sends (y, hash(x)) to Alice. 
 	 */
 	bctx = BN_CTX_new(); k = BN_new(); g = BN_new(); y = BN_new();
 	sdsa = DSA_SIG_new();
@@ -2428,7 +2451,7 @@ crypto_bob2(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
- * XEVNT_ID	bad or missing identification
+ * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_gq(
@@ -2448,8 +2471,7 @@ crypto_gq(
 	 * If the GQ parameters are not valid or no challenge was sent,
 	 * something awful happened or we are being tormented.
 	 */
-	if (!(crypto_flags & CRYPTO_FLAG_GQ) || peer->ident_pkey ==
-	    NULL) {
+	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_gq: GQ unavailable");
 		return (XEVNT_PUB);
 	}
@@ -2463,7 +2485,8 @@ crypto_gq(
 	}
 
 	/*
-	 * Extract the k u^r and k^b values from the response.
+	 * Extract the y = k u^r and hash(x = k^b) values from the
+	 * response.
 	 */
 	bctx = BN_CTX_new(); y = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
@@ -2475,7 +2498,7 @@ crypto_gq(
 	}
 
 	/*
-	 * Alice computes v^r y^b mod n.
+	 * Compute v^r y^b mod n.
 	 */
 	BN_mod_exp(v, peer->grpkey, peer->iffval, rsa->n, bctx);
 						/* v^r mod n */
@@ -2483,7 +2506,7 @@ crypto_gq(
 	BN_mod_mul(y, v, y, rsa->n, bctx);	/* v^r y^b mod n */
 
 	/*
-	 * The result should match the hash of g^k mod n.
+	 * Verify the hash of the result matches hash(x).
 	 */
 	bighash(y, y);
 	temp = BN_cmp(y, sdsa->s);
@@ -2577,6 +2600,7 @@ crypto_gq(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
+ * XEVNT_ID	bad or missing identity parameters
  */
 static int
 crypto_alice3(
@@ -2587,31 +2611,14 @@ crypto_alice3(
 	DSA	*dsa;		/* MV parameters */
 	BN_CTX	*bctx;		/* BIGNUM context */
 	EVP_MD_CTX ctx;		/* signature context */
-	char	filename[MAXFILENAME + 1];
 	tstamp_t tstamp;
-	tstamp_t fstamp;
 	u_int	len;
 
 	/*
-	 * If there is no trusted host, something awful happened.
-	 * Otherwise, try to load the identity file containing the
-	 * scheme parameters. If the file does not exist, not to worry;
-	 * the client does not need identity confirmation. If it does
-	 * exist, it must have correct format and content.
+	 * The identity parameters must have correct format and content.
 	 */
-	if (peer->issuer == NULL) {
-		msyslog(LOG_ERR, "crypto_alice: MV unavailable");
-		return (XEVNT_PUB);
-	}
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
-	snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
-	    peer->issuer);
-	peer->ident_pkey = crypto_key(filename, &fstamp);
-	if (peer->ident_pkey == NULL) {
-		peer->crypto |= CRYPTO_FLAG_VRFY;
-		return (XEVNT_OK);
-	}
+	if (peer->ident_pkey == NULL)
+		return (XEVNT_ID);
 	if ((dsa = peer->ident_pkey->pkey.dsa) == NULL) {
 		msyslog(LOG_ERR, "crypto_alice: MV defective key");
 		return (XEVNT_PUB);
@@ -2755,7 +2762,7 @@ crypto_bob3(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missint public key
- * XEVNT_ID	bad or missing identification
+ * XEVNT_ID	bad or missing identity parameters
  */
 int
 crypto_mv(
@@ -2775,8 +2782,7 @@ crypto_mv(
 	 * If the MV parameters are not valid or no challenge was sent,
 	 * something awful happened or we are being tormented.
 	 */
-	if (!(peer->crypto & CRYPTO_FLAG_MV) || peer->ident_pkey ==
-	    NULL) {
+	if (peer->ident_pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_mv: MV unavailable");
 		return (XEVNT_PUB);
 	}
@@ -3295,15 +3301,14 @@ cert_install(
 			peer->crypto |= CRYPTO_FLAG_VALID;
 
 			/*
-			 * If this is the default identity scheme, the
-			 * identity is confirmed valid. The next
-			 * signature will set the server proventic. If
-			 * this is an identity scheme, fetch the
-			 * identity credentials.
+			 * If the server has an an identity scheme,
+			 * fetch the identity credentials. If not, the
+			 * identity is verified only by the trusted
+			 * certificate. The next signature will set the
+			 * server proventic.
 			 */
-			if ((peer->crypto & crypto_flags &
-			    (CRYPTO_FLAG_IFF | CRYPTO_FLAG_GQ)) |
-			    (peer->crypto & CRYPTO_FLAG_MV))
+			if (peer->crypto & (CRYPTO_FLAG_GQ |
+			    CRYPTO_FLAG_IFF | CRYPTO_FLAG_MV))
 				continue;
 
 			peer->crypto |= CRYPTO_FLAG_VRFY;
@@ -3697,7 +3702,7 @@ crypto_setup(void)
 	}
 	if (rand_file == NULL) {
 		msyslog(LOG_ERR,
-		    "crypto_setup random seed file not specified");
+		    "crypto_setup: random seed file not specified");
 		exit (-1);
 	}
 	if ((bytes = RAND_load_file(rand_file, -1)) == 0) {
