@@ -30,6 +30,7 @@ EXTRA_DIST = \
 	README.des \
 	README.hackers \
 	README.rsa \
+	README.versions \
 	TODO \
 	WHERE-TO-START \
 	acconfig.h \
