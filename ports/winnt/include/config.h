@@ -26,7 +26,7 @@
 
 # define CLOCK_LOCAL			/* from ntpd.mak */
 //# define CLOCK_PARSE 
-# define CLOCK_ATOM
+/* # define CLOCK_ATOM */
 /* # define CLOCK_SHM	*/		 /* from ntpd.mak */																
 # define CLOCK_NMEA
 # define CLOCK_PALISADE		 * from ntpd.mak */																
