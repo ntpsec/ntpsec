@@ -226,6 +226,7 @@ static struct keyword tinker_keywords[] = {
 	{ "stepout",		CONF_CLOCK_MINSTEP },
 	{ "allan",		CONF_CLOCK_ALLAN },
 	{ "huffpuff",		CONF_CLOCK_HUFFPUFF },
+	{ "freq",		CONF_CLOCK_FREQ },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1020,6 +1021,10 @@ getconfig(
 			    case CONF_CLOCK_HUFFPUFF:
 				loop_config(LOOP_HUFFPUFF, ftemp);
 				break;
+
+			    case CONF_CLOCK_FREQ:
+				loop_config(LOOP_FREQ, ftemp);
+				break;  
 			    }
 			}
 			break;

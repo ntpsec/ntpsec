@@ -724,6 +724,7 @@ struct pkt {
 #define LOOP_MINPOLL		7	/* set min poll interval (log2 s) */
 #define LOOP_ALLAN		8	/* set minimum Allan intercept */
 #define LOOP_HUFFPUFF		9	/* set huff-n'-puff filter length */
+#define LOOP_FREQ		10	/* set initial frequency */
 
 /*
  * Configuration items for the stats printer

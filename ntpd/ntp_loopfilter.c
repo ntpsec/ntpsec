@@ -962,6 +962,11 @@ loop_config(
 			sys_huffpuff[i] = 1e9;
 		sys_mindly = 1e9;
 		break;
+
+	case LOOP_FREQ:			/* initial frequency */	
+		drift_comp = freq / 1e6;
+		rstclock(S_FSET, current_time, 0);
+		break;
 	}
 }
 
