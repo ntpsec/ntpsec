@@ -2,6 +2,7 @@
 
 	* ntpd/ntp_request.c (dns_a): Call crypto_public with the resolved
 	name and the peer pointer.
+	(dns_a): crypto_public() is only available if PUBKEY is #defined.
 
 	* ntpd/ntp_crypto.c (crypto_public): sprintf is Evil.  Use snprintf.
 	(crypto_setup): Ditto
