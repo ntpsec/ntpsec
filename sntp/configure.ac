@@ -2,6 +2,7 @@
 AC_INIT(main.c)
 AM_INIT_AUTOMAKE([msntp],[1.6])
 AC_CONFIG_SRCDIR([header.h])
+AC_CANONICAL_SYSTEM
 
 # Checks for programs.
 AC_PROG_CC
@@ -28,6 +29,15 @@ AC_CHECK_FUNCS([gettimeofday inet_ntoa memset])
 AC_CHECK_FUNCS(socket, , AC_CHECK_LIB(socket, socket))
 AC_CHECK_FUNCS(sqrt, , AC_CHECK_LIB(m, sqrt))
 AC_CHECK_FUNCS([strrchr])
+
+case "$host" in
+ *-*-linux*)
+    CFLAGS="$CFLAGS -DADJTIME_MISSING"
+    ;;
+ *-*-solaris*)
+    CFLAGS="$CFLAGS -DNONBLOCK_BROKEN"
+    ;;
+esac
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
