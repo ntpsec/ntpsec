@@ -210,6 +210,7 @@ create_wildcards(u_short port) {
 	(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 	inter_list[idx].mask.ss_family = AF_INET;
 	((struct sockaddr_in*)&inter_list[idx].mask)->sin_addr.s_addr = htonl(~(u_int32)0);
+	inter_list[idx].num_mcast = 0;
 	inter_list[idx].received = 0;
 	inter_list[idx].sent = 0;
 	inter_list[idx].notsent = 0;
@@ -237,6 +238,7 @@ create_wildcards(u_short port) {
 		(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 		inter_list[idx].mask.ss_family = AF_INET6;
 		memset(&((struct sockaddr_in6*)&inter_list[idx].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
+		inter_list[idx].num_mcast = 0;
 		inter_list[idx].received = 0;
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
@@ -252,14 +254,15 @@ create_wildcards(u_short port) {
 isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
 
-	/* XXXPDM This should be fixed later, but since we may not have set
-	 * the UP flag, we at least get to use the interface. The listen_to
-	 * _virtual_ips check should be last.
-	 */
-	if (listen_to_virtual_ips == 1)
-		return (ISC_TRUE);
-	if ((isc_if->flags & INTERFACE_F_UP) == 0)	/* Ignore interfaces not up */
+	if (listen_to_virtual_ips == 0  && (strchr(isc_if->name, (int)':') != NULL))
 		return (ISC_FALSE);
+
+	/* XXXPDM This should be fixed later, but since we may not have set
+	 * the UP flag, we at least get to use the interface.
+	 *
+	if ((isc_if->flags & INTERFACE_F_UP) == 0)
+		return (ISC_FALSE);
+*/
 	return (ISC_TRUE);
 }
 void
@@ -402,6 +405,7 @@ create_sockets(
 			convert_isc_if(&isc_if, &inter_list[idx], port);
 			inter_list[idx].fd = INVALID_SOCKET;
 			inter_list[idx].bfd = INVALID_SOCKET;
+			inter_list[idx].num_mcast = 0;
 			inter_list[idx].received = 0;
 			inter_list[idx].sent = 0;
 			inter_list[idx].notsent = 0;
@@ -627,6 +631,7 @@ io_multicast_add(
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, inet_ntoa(iaddr));
 		inter_list[i].flags |= INT_MULTICAST;
+		inter_list[i].num_mcast++;
 		if (i >= ninterfaces)
 			ninterfaces = i+1;
 
@@ -703,6 +708,7 @@ io_multicast_add(
 			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s)",
 			 mreq6.ipv6mr_interface, stoa(&addr));
 		inter_list[i].flags |= INT_MULTICAST;
+		inter_list[i].num_mcast++;
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
 
@@ -805,9 +811,10 @@ io_multicast_del(
 					(char *)&mreq, sizeof(mreq)) == -1)
 				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address: %s %m",
 					stoa(&addr));
-				/* This is **WRONG** -- there may be others ! */
-				/* There should be a count of users ... */
-				inter_list[i].flags &= ~INT_MULTICAST;
+				inter_list[i].num_mcast--;
+				/* If there are none left negate the Multicast flag */
+				if(inter_list[i].num_mcast == 0)
+					inter_list[i].flags &= ~INT_MULTICAST;
 			}
 		}
 		break;
@@ -855,9 +862,9 @@ io_multicast_del(
 					(char *)&mreq6, sizeof(mreq6)) == -1)
 				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address %s: %m",
 					stoa(&addr));
-				/* This is **WRONG** -- there may be others ! */
-				/* There should be a count of users ... */
-				inter_list[i].flags &= ~INT_MULTICAST;
+				/* If there are none left negate the Multicast flag */
+				if(inter_list[i].num_mcast == 0)
+					inter_list[i].flags &= ~INT_MULTICAST;
 			}
 		}
 		break;
