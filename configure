@@ -11069,6 +11069,15 @@ case "$host" in
     ;;
 esac
 
+	ac_expanded=`(
+	    test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+	    test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+	    eval echo \""$sysconfdir "\"
+        )`
+	cat >>confdefs.h <<EOF
+#define NTP_KEYSDIR "$ac_expanded"
+EOF
+
 # This is necessary so that .o files in LIBOBJS are also built via
 # the ANSI2KNR-filtering rules.
 LIBOBJS=`echo $LIBOBJS|sed 's/\.o /\$U.o /g;s/\.o$/\$U.o/'`

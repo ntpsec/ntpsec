@@ -1,5 +1,10 @@
 2000-08-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c: Initialize path_keysdir to NTP_KEYSDIR.
+
+	* configure.in (NTP_KEYSDIR): Added
+	* acinclude.m4: Added AC_DEFINE_DIR macro
+
 	* util/ntp-genkeys.c (main): Sanity checks on the file paths.
 
 2000-08-02  Harlan Stenn  <stenn@whimsy.udel.edu>

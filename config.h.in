@@ -866,6 +866,9 @@
 /* Define if you have the `__ntp_gettime' function. */
 #undef HAVE___NTP_GETTIME
 
+/* Default location of crypto key info */
+#undef NTP_KEYSDIR
+
 /* Name of package */
 #undef PACKAGE
 

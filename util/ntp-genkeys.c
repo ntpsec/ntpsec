@@ -143,7 +143,7 @@ int errflag = 0;
 char *path_keys;
 char *link_keys;
 
-char *path_keysdir;
+char *path_keysdir = NTP_KEYSDIR;
 char *link_keysdir;
 
 char *path_publickey;
@@ -172,7 +172,6 @@ u_long	client_limit;
 u_long	client_limit_period;
 l_fp	sys_revoketime;
 u_long	sys_revoke;		/* keys revoke timeout */
-int	crypto_flags;
 volatile int debug = 1;		/* debugging flag */
 
 struct peer *
