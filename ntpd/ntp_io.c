@@ -1875,11 +1875,11 @@ input_handler(
 						rb->recv_length =
 						    read(fd, (char *)&rb->recv_space, (unsigned)i);
 
-						if (rb->recv_length == -1)
+						if (rb->recv_length <= 0 ||errno != 0)
 						{
 							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 							freerecvbuf(rb);
-							goto select_again;
+							continue;
 						}
 
 						/*
@@ -1919,7 +1919,7 @@ input_handler(
 								 * machine
 								 */
 								freerecvbuf(rb);
-#if 1
+#if 0
 								goto select_again;
 #else
 								continue;
@@ -1987,7 +1987,7 @@ input_handler(
 #ifdef DEBUG
 		if (debug)
 		    printf("%s on %d(%lu) fd=%d from %s\n",
-			   (i) ? "drop" : "ignore",
+		    (i == wildipv4 || i == wildipv6) ? "ignore" : "drop",
 			   i, free_recvbuffs(), fd,
 			   stoa(&from));
 #endif
@@ -1995,7 +1995,7 @@ input_handler(
 		    packets_ignored++;
 		else
 		    packets_dropped++;
-		goto select_again;
+		continue;
 	}
 
 	rb = get_free_recv_buffer();
@@ -2056,7 +2056,7 @@ input_handler(
 
 	inter_list[i].received++;
 	packets_received++;
-	goto select_again;
+	continue;
 					}
 					/* Check more interfaces */
 				}
