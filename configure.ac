@@ -86,39 +86,6 @@ then
 fi
 AC_SUBST(ARLIB_DIR)
 
-AC_MSG_CHECKING(for bin subdirectory)
-AC_ARG_WITH(binsubdir,
-	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
-	use_binsubdir="$withval", use_binsubdir="bin")
-
-case "$use_binsubdir" in
- bin)
-    ;;
- sbin)
-    ;;
- *)
-    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
-    ;;
-esac
-AC_MSG_RESULT($use_binsubdir)
-BINSUBDIR=$use_binsubdir
-AC_SUBST(BINSUBDIR)
-
-if test -d $srcdir/arlib
-then
-    AC_ARG_WITH(arlib,
-	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
-    [ans=$withval], [ans=no])
-
-    case "$ans" in
-     yes)
-	ARLIB_DIR=arlib
-	AC_CONFIG_SUBDIRS(arlib)
-	;;
-    esac
-fi
-AC_SUBST(ARLIB_DIR)
-
 AC_ARG_WITH(rpath,
 	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
 [ans=$withval], [ans=x])
