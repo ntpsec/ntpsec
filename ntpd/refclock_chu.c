@@ -1376,10 +1376,9 @@ chu_major(
 	struct chuunit *up;
 
 	u_char	code[11];	/* decoded timecode */
-	l_fp	toffset, offset; /* l_fp temps */
+	l_fp	offset;		/* l_fp temps */
 	int	val1, val2;	/* maximum distance */
 	int	synchar;	/* stray cat */
-	double	dtemp;
 	int	temp;
 	int	i, j, k;
 
@@ -1461,13 +1460,9 @@ chu_major(
 		up->errflg = CEVNT_BADTIME;
 		return (0);
 	}
-	pp->lastref = offset;
-	for (i = 0; i < up->ntstamp; i++) {
-		toffset = offset;
-		L_SUB(&toffset, &up->tstamp[i]);
-		LFPTOD(&toffset, dtemp);
-		SAMPLE(dtemp + FUDGE + pp->fudgetime1);
-	}
+	for (i = 0; i < up->ntstamp; i++)
+		refclock_process_offset(pp, offset, up->tstamp[i], FUDGE +
+		    pp->fudgetime1);
 	return (i);
 }
 
