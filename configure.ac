@@ -115,7 +115,6 @@ case "$ac_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
     ;;
 esac
 
-
 case "$build" in
  $host)
     ;;
@@ -123,7 +122,7 @@ case "$build" in
      *-*-vxworks*)
 	# Quick and dirty sanity check
 	case "$VX_KERNEL" in
-	 '') AC_MSG_ERROR(Please follow the directions in html/vxworks.html!)
+	 '') AC_MSG_ERROR(Please follow the directions in html/build/hints/vxworks.html!)
 	    ;;
 	esac
         CFLAGS="$CFLAGS -DSYS_VXWORKS"
@@ -145,6 +144,8 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wcast-qual"
     # CFLAGS="$CFLAGS -Wconversion"
     # CFLAGS="$CFLAGS -Werror"
+    # CFLAGS="$CFLAGS -Wextra"
+    # CFLAGS="$CFLAGS -Wfloat-equal"
     CFLAGS="$CFLAGS -Wmissing-prototypes"
     CFLAGS="$CFLAGS -Wpointer-arith"
     CFLAGS="$CFLAGS -Wshadow"
@@ -3808,6 +3809,24 @@ then
 	;;
     esac
 fi
+
+AC_MSG_CHECKING(for bin subdirectory)
+AC_ARG_WITH(binsubdir,
+	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
+	use_binsubdir="$withval", use_binsubdir="bin")
+
+case "$use_binsubdir" in
+ bin)
+    ;;
+ sbin)
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
+    ;;
+esac
+AC_MSG_RESULT($use_binsubdir)
+BINSUBDIR=$use_binsubdir
+AC_SUBST(BINSUBDIR)
 
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(ElectricFence/Makefile)

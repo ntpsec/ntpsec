@@ -26,7 +26,8 @@ AUTOMAKE_OPTIONS = foreign
 
 NULL=
 
-sbin_PROGRAMS = sntp
+bindir=	${exec_prefix}/${BINSUBDIR}
+bin_PROGRAMS = sntp
 
 sntp_SOURCES = \
 	header.h \
@@ -40,3 +41,5 @@ sntp_SOURCES = \
 	$(NULL)
 
 dist_man_MANS=	sntp.1
+
+include ../bincheck.mf

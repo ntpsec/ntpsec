@@ -1,10 +1,11 @@
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-AUTOMAKE_OPTIONS = ../util/ansi2knr
+AUTOMAKE_OPTIONS=	../util/ansi2knr
+
+bindir=		${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	ntpdc
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
 BUILT_SOURCES=	maybe-layout
-INCLUDES=	-I$(top_srcdir)/include
+AM_CPPFLAGS=	-I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 ntpdc_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@
 # ntpdc-layout doesn't need any additional libraries at all
@@ -43,3 +44,5 @@ version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 # $(CC) -E nl_in.c | nl.pl > nl.c
 nl.c: nl_in.c nl.pl
 	$(CC) -E $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(srcdir)/nl_in.c | ./nl.pl > nl.c
+
+include ../bincheck.mf
