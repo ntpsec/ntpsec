@@ -91,10 +91,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_ONCORE)
 
-#if defined(HAVE_PPSAPI) + defined(HAVE_CIOGETEV) + defined(HAVE_TIOCGPPSEV) + defined(TIOCDCDTIMESTAMP) > 1
-#error More than one timestamp method defined.
-#endif
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
