@@ -187,8 +187,6 @@ void
 init_io(void)
 {
 #ifdef SYS_WINNT
-	WORD wVersionRequested;
-	WSADATA wsaData;
 	init_transmitbuff();
 #endif /* SYS_WINNT */
 
@@ -214,8 +212,7 @@ init_io(void)
 #endif
 
 #ifdef SYS_WINNT
-	wVersionRequested = MAKEWORD(2,0);
-	if (WSAStartup(wVersionRequested, &wsaData))
+	if (!Win32InitSockets())
 	{
 		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
 		exit(1);

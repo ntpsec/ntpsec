@@ -8,6 +8,8 @@
 #include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+/* Don't include ISC's version of IPv6 variables and structures */
+#define ISC_IPV6_H 1
 #include "isc/net.h"
 #include "isc/result.h"
 
@@ -176,8 +178,6 @@ char password[9];
 #endif /* SYS_WINNT || SYS_VXWORKS */
 
 #ifdef SYS_WINNT
-WORD wVersionRequested;
-WSADATA wsaData;
 DWORD NumberOfBytesWritten;
 
 HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
@@ -301,6 +301,15 @@ ntpdcmain(
 	taskPrioritySet(taskIdSelf(), 100 );
 #endif
 
+#ifdef SYS_WINNT
+	if (!Win32InitSockets())
+	{
+		fprintf(stderr, "No useable winsock.dll:");
+		exit(1);
+	}
+#endif /* SYS_WINNT */
+
+	/* Check to see if we have IPv6. Otherwise force the -4 flag */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_default = AF_INET;
 	}
@@ -372,14 +381,6 @@ ntpdcmain(
 		exit(1);
 	}
 	pktdatasize = INITDATASIZE;
-
-#ifdef SYS_WINNT
-	wVersionRequested = MAKEWORD(1,1);
-	if (WSAStartup(wVersionRequested, &wsaData)) {
-		fprintf(stderr, "No useable winsock.dll");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
 
 	if (numcmds == 0) {
 		(void) openhost(chosts[0]);

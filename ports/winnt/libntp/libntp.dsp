@@ -473,7 +473,7 @@ SOURCE=..\..\..\include\md5.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\net.h
+SOURCE=..\include\isc\net.h
 # End Source File
 # Begin Source File
 

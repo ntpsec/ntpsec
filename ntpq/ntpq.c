@@ -10,6 +10,8 @@
 #include "ntp_io.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+/* Don't include ISC's version of IPv6 variables and structures */
+#define ISC_IPV6_H 1
 #include "isc/net.h"
 #include "isc/result.h"
 
@@ -375,8 +377,6 @@ int s_port = 0;
 struct servent *server_entry = NULL;		/* server entry for ntp */
 
 #ifdef SYS_WINNT
-WORD wVersionRequested;
-WSADATA wsaData;
 DWORD NumberOfBytesWritten;
 
 HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
@@ -501,6 +501,15 @@ ntpqmain(
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 
+#ifdef SYS_WINNT
+	if (!Win32InitSockets())
+	{
+		fprintf(stderr, "No useable winsock.dll:");
+		exit(1);
+	}
+#endif /* SYS_WINNT */
+
+	/* Check to see if we have IPv6. Otherwise force the -4 flag */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_default = AF_INET;
 	}
@@ -555,14 +564,6 @@ ntpqmain(
 #ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
 	if (interactive)
 	    (void) signal_no_reset(SIGINT, abortcmd);
-#endif /* SYS_WINNT */
-
-#ifdef SYS_WINNT
-	wVersionRequested = MAKEWORD(1,1);
-	if (WSAStartup(wVersionRequested, &wsaData)) {
-		fprintf(stderr, "No useable winsock.dll");
-		exit(1);
-	}
 #endif /* SYS_WINNT */
 
 	if (numcmds == 0) {

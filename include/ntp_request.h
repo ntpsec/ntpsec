@@ -276,11 +276,8 @@ struct resp_pkt {
 #define	REQ_MON_GETLIST_1	42	/* return collected v1 monitor data */
 #define	REQ_HOSTNAME_ASSOCID	43	/* Here is a hostname + assoc_id */
 
-/* Use for alternate sized structures */
-#define ALT_LONG (sizeof(struct in6_addr) + sizeof(long))
-#define ALT_INT (sizeof(struct in6_addr) +  sizeof(int)) 
-#define ALT_2ADDR_INT ((sizeof(struct in6_addr) * 2) + sizeof(int)) 
-#define ALT_2ADDR_LONG ((sizeof(struct in6_addr) * 2) + sizeof(long)) 
+/* Determine size of pre-v6 version of structures */
+#define v4sizeof(type)		offsetof(type, v6_flag)
 
 /*
  * Flags in the peer information returns
@@ -316,7 +313,8 @@ struct info_peer_list {
 	u_short port;		/* port number of peer */
 	u_char hmode;		/* mode for this peer */
 	u_char flags;		/* flags (from above) */
-	u_long v6_flag;		/* is this v6 or not */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused1;		/* (unused) padding for addr6 */
 	struct in6_addr addr6;	/* v6 address of peer */
 };
 
@@ -337,7 +335,8 @@ struct info_peer_summary {
 	s_fp delay;		/* peer.estdelay */
 	l_fp offset;		/* peer.estoffset */
 	u_fp dispersion;	/* peer.estdisp */
-	u_long v6_flag;			/* is this v6 or not */
+	u_int v6_flag;			/* is this v6 or not */
+	u_int unused1;			/* (unused) padding for dstadr6 */
 	struct in6_addr dstadr6;	/* local address (v6) */
 	struct in6_addr srcadr6;	/* source address (v6) */
 };
@@ -348,7 +347,7 @@ struct info_peer_summary {
  */
 struct info_peer {
 	u_int32 dstadr;		/* local address */
-	u_int32	srcadr;		/* sources address */
+	u_int32	srcadr;		/* source address */
 	u_short srcport;	/* remote port */
 	u_char flags;		/* peer flags */
 	u_char leap;		/* peer.leap */
@@ -391,9 +390,10 @@ struct info_peer {
 	int32 unused6;
 	int32 unused7;
 	s_fp estbdelay;		/* broadcast offset */
-	u_long v6_flag;			/* is this v6 or not */
-	struct in6_addr dstadr6; 	/*local address (v6-like) */
-	struct in6_addr srcadr6; 	/*sources address (v6-like) */
+	u_int v6_flag;			/* is this v6 or not */
+	u_int unused9;			/* (unused) padding for dstadr6 */
+	struct in6_addr dstadr6; 	/* local address (v6-like) */
+	struct in6_addr srcadr6; 	/* sources address (v6-like) */
 };
 
 
@@ -426,6 +426,7 @@ struct info_peer_stats {
 	u_char unused7;		/* (unused) */
 	u_char unused8;		/* (unused) */
 	u_int v6_flag;			/* is this v6 or not */
+	u_int unused9;			/* (unused) padding for dstadr6 */
 	struct in6_addr dstadr6;	/* local address */
 	struct in6_addr srcadr6;	/* remote address */
 };
@@ -465,7 +466,8 @@ struct info_sys {
 	s_fp frequency;		/* frequency residual (scaled ppm)  */
 	l_fp authdelay;		/* default authentication delay */
 	u_fp stability;		/* clock stability (scaled ppm) */
-	u_long v6_flag;		/* is this v6 or not */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused4;		/* unused, padding for peer6 */
 	struct in6_addr peer6;	/* system peer address (v6) */
 };
 
@@ -572,11 +574,12 @@ struct conf_peer {
 	u_char maxpoll;		/* max host poll interval */
 	u_char flags;		/* flags for this request */
 	u_char ttl;		/* time to live (multicast) or refclock mode */
-	u_short unused;		/* unused */
+	u_short unused1;	/* unused */
 	keyid_t keyid;		/* key to use for this association */
 	char keystr[MAXFILENAME]; /* public key file name*/
-	u_long v6_flag;		/* is this v6 or not */
-	struct in6_addr peeraddr6;	/* ipv6 addresss to poll */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused2;			/* unused, padding for peeraddr6 */
+	struct in6_addr peeraddr6;	/* ipv6 address to poll */
 };
 
 #define	CONF_FLAG_AUTHENABLE	0x01
@@ -625,7 +628,8 @@ struct info_restrict {
 	u_int32 count;		/* number of packets matched */
 	u_short flags;		/* restrict flags */
 	u_short mflags;		/* match flags */
-	u_long v6_flag;		/* is this v6 or not */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused1;		/* unused, padding for addr6 */
 	struct in6_addr addr6;	/* match address (v6) */
 	struct in6_addr mask6; 	/* match mask (v6) */
 };
@@ -659,7 +663,8 @@ struct info_monitor_1 {
 	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
-	u_long v6_flag;		/* is this v6 or not */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused1;		/* unused, padding for addr6 */
 	struct in6_addr addr6;	/* host address V6 style */
 	struct in6_addr daddr6;	/* host address V6 style */
 };
@@ -677,7 +682,8 @@ struct info_monitor {
 	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
-	u_long v6_flag;		/* is this v6 or not */
+	u_int v6_flag;		/* is this v6 or not */
+	u_int unused1;		/* unused, padding for addr6 */
 	struct in6_addr addr6;	/* host v6 address */
 };
 
