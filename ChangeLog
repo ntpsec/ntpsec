@@ -1,3 +1,7 @@
+2001-06-03  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99m-rc1a
+
 2001-06-02  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_refclock.c (refclock_open): Add O_NOCTTY to the open()
