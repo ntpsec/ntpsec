@@ -64,14 +64,16 @@ rm -f conftest*
 case "$GCC" in
  yes)
     CFLAGS="$CFLAGS -Wall"
-    # CFLAGS="$CFLAGS -Wtraditional"
-    CFLAGS="$CFLAGS -Wshadow"
-    # CFLAGS="$CFLAGS -Wwrite-strings"
-    CFLAGS="$CFLAGS -Wconversion"
-    CFLAGS="$CFLAGS -Wpointer-arith"
-    CFLAGS="$CFLAGS -Wcast-qual"
     # CFLAGS="$CFLAGS -Wcast-align"
+    CFLAGS="$CFLAGS -Wcast-qual"
+    # CFLAGS="$CFLAGS -Wconversion"
+    # CFLAGS="$CFLAGS -Werror"
+    CFLAGS="$CFLAGS -Wmissing-prototypes"
+    CFLAGS="$CFLAGS -Wpointer-arith"
+    CFLAGS="$CFLAGS -Wshadow"
     CFLAGS="$CFLAGS -Wstrict-prototypes"
+    # CFLAGS="$CFLAGS -Wtraditional"
+    # CFLAGS="$CFLAGS -Wwrite-strings"
 
     AC_CACHE_CHECK(whether ${CC-cc} -pipe works, ac_cv_prog_cc_pipe,
     [echo 'void f(){}' > conftest.c
