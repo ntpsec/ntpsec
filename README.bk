@@ -1,7 +1,7 @@
 In order to use the BitKeeper repository version of NTP you will have
 to have the following tools installed:
 
-	autoconf	2.52 or later
+	autoconf	2.53 or later
 	automake	1.5 or later
 	lynx
 
