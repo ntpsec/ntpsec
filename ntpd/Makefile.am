@@ -44,7 +44,7 @@ libntpd_a_SOURCES = jupiter.h map_vme.c ntp_control.c \
 	refclock_pcf.c refclock_pst.c refclock_ptbacts.c refclock_shm.c \
 	refclock_tpro.c refclock_trak.c refclock_true.c refclock_tt560.c \
 	refclock_ulink.c refclock_usno.c refclock_wwv.c refclock_wwvb.c \
-	refclock_zyfer.c
+	refclock_zyfer.c refclock_ripencc.c
 
 $(PROGRAMS): $(LDADD)
 
