@@ -287,9 +287,9 @@ receive(
 	int	is_authentic;		/* cryptosum ok */
 	keyid_t	skeyid;			/* cryptographic keys */
 	struct sockaddr_in *dstadr_sin;	/* active runway */
+	l_fp	p_org;			/* originate timestamp */
 #ifdef OPENSSL
 	keyid_t pkeyid, tkeyid;		/* cryptographic keys */
-	l_fp	p_org;			/* originate timestamp */
 	struct autokey *ap;		/* autokey structure pointer */
 	struct peer *peer2;		/* aux peer structure pointer */
 #endif /* OPENSSL */
@@ -2438,7 +2438,9 @@ fast_xmit(
 	l_fp xmt_ts;		/* transmit timestamp */
 	l_fp xmt_tx;		/* transmit timestamp after authent */
 	int sendlen, authlen;
+#ifdef OPENSSL
 	u_int32	temp32;
+#endif
 
 	/*
 	 * Initialize transmit packet header fields from the receive
