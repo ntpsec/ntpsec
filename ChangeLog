@@ -1,3 +1,12 @@
+1999-08-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_nmea.c: Patches for:
+        Trimble OEM Ace-II receiver. Low cost PCB with single 
+        voltage input, external active antenna and two serial 
+        ports with either NMEA and ITAPs output. Programmable
+        to be tuned for 'time' accuracy in fixed station config.
+	From: Nick Hibma <nick.hibma@jrc.it>
+
 1999-08-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_config.c: Added listen_to_virtual_ips support (-L flag)
