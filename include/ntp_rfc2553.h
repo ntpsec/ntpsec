@@ -88,7 +88,7 @@
 #if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
 
 #define	_SS_MAXSIZE	128
-#define	_SS_ALIGNSIZE	(sizeof(u_int64_t))
+#define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 #define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(u_int8_t))
 #define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(u_int8_t) - \
@@ -114,7 +114,7 @@ struct sockaddr_storage {
 	short		ss_family;	/* address family */
 #endif
 	char		__ss_pad1[_SS_PAD1SIZE];
-	u_int64_t	__ss_align;	/* force desired structure storage alignment */
+	ntp_uint64_t	__ss_align;	/* force desired structure storage alignment */
 	char		__ss_pad2[_SS_PAD2SIZE];
 };
 #endif
