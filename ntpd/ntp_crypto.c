@@ -1813,7 +1813,7 @@ void
 crypto_update(void)
 {
 	EVP_MD_CTX ctx;		/* message digest context */
-	struct cert_info *cp, **zp; /* certificate info/value */
+	struct cert_info *cp, *cpn, **zp; /* certificate info/value */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t tstamp;	/* NTP timestamp */
 	u_int	len;
@@ -1846,9 +1846,10 @@ crypto_update(void)
 	 * expunged.
 	 */
 	zp = &cinfo;
-	for (cp = cinfo; cp != NULL; cp = cp->link) {
+	for (cp = cinfo; cp != NULL; cp = cpn) {
+		cpn = cp->link;
 		if (tstamp > cp->last) {
-			*zp = cp->link;
+			*zp = cpn;
 			cert_free(cp);
 		} else {
 			cp->cert.tstamp = hostval.tstamp;
@@ -1862,8 +1863,8 @@ crypto_update(void)
 			if (EVP_SignFinal(&ctx, cp->cert.sig, &len,
 			    sign_pkey))
 				cp->cert.siglen = htonl(len);
+			zp = &cp->link;
 		}
-		zp = &cp->link;
 	}
 
 	/*
