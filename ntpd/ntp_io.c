@@ -562,7 +562,7 @@ create_sockets(
 				outifaceipv4 = i;
 				ofacesetipv4 = ISC_TRUE;
 			}
-			else if ((outifaceipv4 == -1) && !(inter_list[i].flags & INT_LOOPBACK))
+			else if ((outifaceipv4 != -1) && !(inter_list[i].flags & INT_LOOPBACK))
 				outifaceipv4 = -1;
 		}
 		if (inter_list[i].sin.ss_family == AF_INET6) {
@@ -571,7 +571,7 @@ create_sockets(
 				outifaceipv6 = i;
 				ofacesetipv6 = ISC_TRUE;
 			}
-			else if ((outifaceipv6 == -1) && !(inter_list[i].flags & INT_LOOPBACK))
+			else if ((outifaceipv6 != -1) && !(inter_list[i].flags & INT_LOOPBACK))
 				outifaceipv6 = -1;
 		}
 	}
