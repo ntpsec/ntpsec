@@ -170,7 +170,6 @@ internal_current(isc_interfaceiter_t *iter) {
 
 		memset(iter->current.name, 0, sizeof(iter->current.name));
 		memcpy(iter->current.name, sdl->sdl_data, namelen);
-		iter->current.ifindex = sdl->sdl_index;	/* Save the if index */
 
 		iter->current.flags = 0;
 

@@ -454,8 +454,7 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	if (iter->valid != ISC_R_SUCCESS)
 		return (iter->valid);
 	if (iter->proc == NULL) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
+		UNEXPECTED_ERROR(__FILE__, __LINE__,
 			      "/proc/net/if_inet6:iter->proc == NULL");
 		return (ISC_R_FAILURE);
 	}
@@ -463,15 +462,13 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	res = sscanf(iter->entry, "%32[a-f0-9] %x %x %x %x %16s\n",
 		     address, &ifindex, &prefix, &flag3, &flag4, name);
 	if (res != 6) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
+		UNEXPECTED_ERROR(__FILE__, __LINE__,
 			      "/proc/net/if_inet6:sscanf() -> %d (expected 6)",
 			      res);
 		return (ISC_R_FAILURE);
 	}
 	if (strlen(address) != 32) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
+		UNEXPECTED_ERROR(__FILE__, __LINE__,
 			      "/proc/net/if_inet6:strlen(%s) != 32", address);
 		return (ISC_R_FAILURE);
 	}
@@ -558,16 +555,6 @@ internal_current4(isc_interfaceiter_t *iter) {
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, ifreq.ifr_name, sizeof(ifreq.ifr_name));
 
-	/* Some older O/S's don't have the interface index. Since ifr_index is
-	 * usually a macro definition into the actual structure we
-	 * use that to determine if we should get it.
-	 */
-#ifdef ifr_index
-	iter->current.ifindex = ifreq.ifr_index;	/* Save the if index */
-#else
-	iter->current.ifindex = 0;
-#endif
-
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&ifrp->ifr_addr, ifreq.ifr_name);
 
@@ -645,9 +632,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	prefixlen = lifreq.lifr_addrlen;
 #else
 	isc_netaddr_format(&iter->current.address, sabuf, sizeof(sabuf));
-	isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
-		      ISC_LOGMODULE_INTERFACE,
-		      ISC_LOG_INFO,
+	UNEXPECTED_ERROR(__FILE__, __LINE__,
 		      isc_msgcat_get(isc_msgcat,
 				     ISC_MSGSET_IFITERIOCTL,
 				     ISC_MSG_GETIFCONFIG,
@@ -781,7 +766,6 @@ internal_current6(isc_interfaceiter_t *iter) {
 	INSIST(sizeof(lifreq.lifr_name) <= sizeof(iter->current.name));
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, lifreq.lifr_name, sizeof(lifreq.lifr_name));
-	iter->current.ifindex = lifreq.lifr_index;	/* Save the if index */
 
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&lifreq.lifr_addr, lifreq.lifr_name);
