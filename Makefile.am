@@ -65,7 +65,7 @@ $(srcdir)/COPYRIGHT: html/copyright.htm
 
 $(srcdir)/version: FRC.version
 	if test -f $(srcdir)/BitKeeper/triggers/.lgc; then \
-	    cmp $(srcdir)/BitKeeper/triggers/.lgc $(srcdir)/version || \
+	    cmp -s $(srcdir)/BitKeeper/triggers/.lgc $(srcdir)/version || \
 	    cp $(srcdir)/BitKeeper/triggers/.lgc $(srcdir)/version; \
 	fi
 
