@@ -725,6 +725,11 @@ socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_stora
 	return ISC_FALSE;
 #endif /* SO_BROADCAST */
 }
+
+/*
+ * NOTE: Not all platforms support multicast
+ */
+#ifdef MCAST
 /*
  * Add a multicast address to a given socket
  * The socket is in the inter_list all we need to do is enable
@@ -857,6 +862,7 @@ socket_multicast_disable(struct interface *iface, int ind, struct sockaddr_stora
 	}
 	return ISC_TRUE;
 }
+#endif	/* MCAST */
 /*
  * io_multicast_add() - add multicast group address
  */
