@@ -82,6 +82,9 @@
 /* Sun IRIG audio decoder */
 #undef CLOCK_IRIG
 
+/* JJY receiver */
+#undef CLOCK_JJY
+
 /* Rockwell Jupiter GPS clock */
 #undef CLOCK_JUPITER
 

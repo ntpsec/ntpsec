@@ -240,6 +240,12 @@ extern	struct refclock	refclock_hopfpci;
 #define	refclock_hopfpci refclock_none
 #endif
 
+#ifdef CLOCK_JJY
+extern	struct refclock	refclock_jjy;
+#else
+#define	refclock_jjy refclock_none
+#endif
+
 /*
  * Order is clock_start(), clock_shutdown(), clock_poll(),
  * clock_control(), clock_init(), clock_buginfo, clock_flags;
@@ -286,7 +292,8 @@ struct refclock *refclock_conf[] = {
 	&refclock_wwv,		/* 36 REFCLOCK_WWV_AUDIO */
 	&refclock_fg,		/* 37 REFCLOCK_FG */
 	&refclock_hopfser,	/* 38 REFCLK_HOPF_SERIAL */
-	&refclock_hopfpci	/* 39 REFCLK_HOPF_PCI */
+	&refclock_hopfpci,	/* 39 REFCLK_HOPF_PCI */
+	&refclock_jjy		/* 40 REFCLK_JJY */
 };
 
 u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);
