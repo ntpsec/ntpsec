@@ -14,6 +14,6 @@ $(PROGRAMS): $(LDADD)
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)
 
-version.o: $(ntptrace_OBJECTS) ../libntp/libntp.a Makefile
+version.o: $(ntptrace_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntptrace
 	$(COMPILE) -c version.c
