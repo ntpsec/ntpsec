@@ -55,8 +55,17 @@
 /*    [Change] Log to clockstats even if bad reply                    */
 /*    [Fix]    PRECISION = (-3) (about 100 ms)                        */
 /*    [Add]    Support the C-DEX Co.Ltd. JJY receiver                 */
+/*                                                                    */
 /*  2001/12/04                                                        */
 /*    [Fix]    C-DEX JST2000 ( fukusima@goto.info.waseda.ac.jp )      */
+/*                                                                    */
+/*  2002/07/12                                                        */
+/*    [Fix]    Portability for FreeBSD ( patched by the user )        */
+/*                                                                    */
+/*  2004/10/31                                                        */
+/*    [Change] Command send timing for the Tristate Ltd. JJY receiver */
+/*             JJY-01 ( Firmware version 2.01 )                       */
+/*             Thanks to Andy Taki for testing under FreeBSD          */
 /*                                                                    */
 /**********************************************************************/
 
@@ -506,6 +515,41 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			up->lineerror = 1 ;
 			break ;
 		}
+
+		/*** Start of modification on 2004/10/31 */
+		/*
+		 * Following codes are moved from the function jjy_poll_tristate_jjy01 in this source.
+		 * The Tristate JJY-01 ( Firmware version 1.01 ) accepts "time" and "stim" commands without any delay.
+		 * But the JJY-01 ( Firmware version 2.01 ) does not accept these commands continuously,
+		 * so this driver issues the second command "stim" after the reply of the first command "time".
+		 */
+
+		/*
+		 * Send "stim<CR><LF>" or "time<CR><LF>" command
+		 */
+		 
+
+		if ( up->version >= 100 ) {
+#ifdef DEBUG
+			if ( debug ) {
+				printf ( "jjy_receive_tristate_jjy01 (refclock_jjy.c) : send 'stim<CR><LF>'\n" ) ;
+			}
+#endif
+			if ( write ( pp->io.fd, "stim\r\n",6 ) != 6  ) {
+				refclock_report ( peer, CEVNT_FAULT ) ;
+			}
+		} else {
+#ifdef DEBUG
+			if ( debug ) {
+				printf ( "jjy_receive_tristate_jjy01 (refclock_jjy.c) : send 'time<CR><LF>'\n" ) ;
+			}
+#endif
+			if ( write ( pp->io.fd, "time\r\n",6 ) != 6  ) {
+				refclock_report ( peer, CEVNT_FAULT ) ;
+			}
+		}
+		/*** End of modification ***/
+
 		return 0 ;
 
 	case 2 : /* HH:MM:SS */
@@ -524,7 +568,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			/*
 			 * The command "date" and "time" ( or "stim" ) were sent to the JJY receiver continuously.
 			 * But the JJY receiver replies a date and time separately.
-			 * Just after midnight transtions, we ignore this time.
+			 * Just after midnight transitions, we ignore this time.
 			 */
 			return 0 ;
 		}
@@ -665,22 +709,14 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 	 * Send "date<CR><LF>" command
 	 */
 
+#ifdef DEBUG
+	if ( debug ) {
+		printf ( "jjy_poll_tristate_jjy01 (refclock_jjy.c) : send 'date<CR><LF>'\n" ) ;
+	}
+#endif
+
 	if ( write ( pp->io.fd, "date\r\n",6 ) != 6  ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
-	}
-
-	/*
-	 * Send "stim<CR><LF>" or "time<CR><LF>" command
-	 */
-
-	if ( up->version >= 100 ) {
-		if ( write ( pp->io.fd, "stim\r\n",6 ) != 6  ) {
-			refclock_report ( peer, CEVNT_FAULT ) ;
-		}
-	} else {
-		if ( write ( pp->io.fd, "time\r\n",6 ) != 6  ) {
-			refclock_report ( peer, CEVNT_FAULT ) ;
-		}
 	}
 
 }
@@ -698,6 +734,12 @@ jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 	/*
 	 * Send "<ENQ>1J<ETX>" command
 	 */
+
+#ifdef DEBUG
+	if ( debug ) {
+		printf ( "jjy_poll_cdex_jst2000 (refclock_jjy.c) : send '<ENQ>1J<ETX>'\n" ) ;
+	}
+#endif
 
 	if ( write ( pp->io.fd, "\0051J\003", 4 ) != 4  ) {
 		refclock_report ( peer, CEVNT_FAULT ) ;
