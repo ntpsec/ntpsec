@@ -59,7 +59,7 @@
 /*
  * We probably don't need this on NTP
  */
-/*#ifdef ISC_ONLY_IPV6 */
+#ifdef ISC_ONLY_IPV6 
 /***
  *** Types.
  ***/
@@ -151,5 +151,5 @@ struct sockaddr_in6 {
 #define IN6_IS_ADDR_SITELOCAL(a)	\
 	(((a)->s6_addr[0] == 0xfe) && (((a)->s6_addr[1] & 0xc0) == 0xc0))
 
-/*#endif /* ISC_ONLY_IPV6 */
+#endif /* ISC_ONLY_IPV6 */
 #endif /* ISC_IPV6_H */
