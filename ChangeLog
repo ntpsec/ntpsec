@@ -1,3 +1,7 @@
+2000-03-15  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* librsaref/Makefile.am (BUILT_SOURCES): Cleanup more nodist_ stuff.
+
 2000-03-14  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* build (RSASUF): If we have rsaref2/ and are building

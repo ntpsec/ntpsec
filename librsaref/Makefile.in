@@ -365,12 +365,12 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 #EXTRA_DIST = 
 
-$(librsaref_a_SOURCES): stamp-rsaref
+$(nodist_librsaref_a_SOURCES): stamp-rsaref
 
 stamp-rsaref:
 	@rm -f stamp-rsaref stamp-rsarefT
 	@echo timestamp > stamp-rsarefT 2> /dev/null
-	for i in $(librsaref_a_SOURCES); do \
+	for i in $(nodist_librsaref_a_SOURCES); do \
 	    case "@MAKE_LIBRSAREF@" in \
 	     '') touch $$i ;; \
 	     *) cmp -s $(srcdir)/$$i $(srcdir)/../rsaref2/source/$$i 2>/dev/null \
