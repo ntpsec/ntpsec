@@ -11,9 +11,6 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-@SET_MAKE@
-
-
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -66,6 +63,8 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+
+@SET_MAKE@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -84,6 +83,7 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -114,6 +114,7 @@ _am_include = @_am_include@
 _am_quote = @_am_quote@
 install_sh = @install_sh@
 
+
 bin_SCRIPTS = ntp-wait
 noinst_SCRIPTS = calc_tickadj checktime freq_adj mkver ntpsweep ntpver plot_summary summary
 EXTRA_DIST = fixautomakedepsmagic hpadjtime.sh monitoring ntp-close \
@@ -125,22 +126,23 @@ subdir = scripts
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = calc_tickadj checktime freq_adj mkver ntp-wait \
-	ntpsweep ntpver plot_summary summary
+ntpsweep ntpver plot_summary summary
 SCRIPTS = $(bin_SCRIPTS) $(noinst_SCRIPTS)
 
 DIST_SOURCES =
 DIST_COMMON = README Makefile.am Makefile.in calc_tickadj.in \
-	checktime.in freq_adj.in mkver.in ntp-wait.in ntpsweep.in \
-	ntpver.in plot_summary.in summary.in
+checktime.in freq_adj.in mkver.in ntp-wait.in ntpsweep.in ntpver.in \
+plot_summary.in summary.in
+
 all: all-am
 
 .SUFFIXES:
 
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  scripts/Makefile
 
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
@@ -195,10 +197,6 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
-	    $(mkinstalldirs) "$(distdir)/$$dir"; \
-	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \

@@ -11,11 +11,6 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-@SET_MAKE@
-
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-
-
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -68,6 +63,8 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+
+@SET_MAKE@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -86,6 +83,7 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -116,6 +114,9 @@ _am_include = @_am_include@
 _am_quote = @_am_quote@
 install_sh = @install_sh@
 
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+
+
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 SUBDIRS = sys
 ETAGS_ARGS = Makefile.am
@@ -127,21 +128,18 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 DIST_SOURCES =
-
-RECURSIVE_TARGETS = all-recursive install-data-recursive \
-	install-exec-recursive installdirs-recursive install-recursive \
-	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in
+
 DIST_SUBDIRS = $(SUBDIRS)
 all: all-recursive
 
 .SUFFIXES:
 
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  kernel/Makefile
 
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
@@ -152,7 +150,10 @@ Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 # (1) if the variable is set in `config.status', edit `config.status'
 #     (which will cause the Makefiles to be regenerated when you run `make');
 # (2) otherwise, pass the desired values on the `make' command line.
-$(RECURSIVE_TARGETS):
+all-recursive install-data-recursive install-exec-recursive \
+installdirs-recursive install-recursive uninstall-recursive \
+install-info-recursive uninstall-info-recursive \
+check-recursive installcheck-recursive info-recursive dvi-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
 	dot_seen=no; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -217,9 +218,9 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	tags=; \
 	here=`pwd`; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
+   if test "$$subdir" = .; then :; else \
 	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
-	  fi; \
+   fi; \
 	done; \
 	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -246,10 +247,6 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
-	    $(mkinstalldirs) "$(distdir)/$$dir"; \
-	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \
@@ -339,20 +336,19 @@ mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-generic
 
-uninstall-am:
-
-.PHONY: $(RECURSIVE_TARGETS) all all-am check check-am clean \
+.PHONY: all all-am all-recursive check check-am check-recursive clean \
 	clean-generic clean-recursive distclean distclean-generic \
-	distclean-recursive distclean-tags distdir dvi dvi-am info \
-	info-am install install-am install-data install-data-am \
-	install-data-recursive install-exec install-exec-am \
-	install-exec-recursive install-info install-man \
+	distclean-recursive distclean-tags distdir dvi dvi-am \
+	dvi-recursive info info-am info-recursive install install-am \
+	install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-recursive install-man \
 	install-recursive install-strip installcheck installcheck-am \
-	installdirs installdirs-am installdirs-recursive \
-	maintainer-clean maintainer-clean-generic \
+	installcheck-recursive installdirs installdirs-am \
+	installdirs-recursive maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-generic \
 	mostlyclean-recursive tags tags-recursive uninstall \
-	uninstall-am uninstall-recursive
+	uninstall-am uninstall-info-recursive uninstall-recursive
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

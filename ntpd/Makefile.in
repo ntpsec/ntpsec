@@ -11,11 +11,6 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-@SET_MAKE@
-
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-
-
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -68,6 +63,8 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+
+@SET_MAKE@
 AMTAR = @AMTAR@
 AUTOKEY = @AUTOKEY@
 AWK = @AWK@
@@ -86,6 +83,7 @@ LDFLAGS = @LDFLAGS@
 LIBPARSE = @LIBPARSE@
 LIBRSAREF = @LIBRSAREF@
 LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
 MAKE_ADJTIMED = @MAKE_ADJTIMED@
 MAKE_CHECK_Y2K = @MAKE_CHECK_Y2K@
 MAKE_LIBPARSE = @MAKE_LIBPARSE@
@@ -115,6 +113,9 @@ VERSION = @VERSION@
 _am_include = @_am_include@
 _am_quote = @_am_quote@
 install_sh = @install_sh@
+
+#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+
 
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 bin_PROGRAMS = ntpd
@@ -162,119 +163,94 @@ bin_PROGRAMS = ntpd$(EXEEXT)
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 PROGRAMS = $(bin_PROGRAMS)
 
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
+ANSI2KNR = ../util/ansi2knr
 check_y2k_SOURCES = check_y2k.c
 check_y2k_OBJECTS = check_y2k$U.$(OBJEXT)
 check_y2k_LDADD = $(LDADD)
 check_y2k_DEPENDENCIES = version.o ../libntp/libntp.a
-check_y2k_LDFLAGS =
+check_y2k_LDFLAGS = 
 am_ntpd_OBJECTS = cmd_args$U.$(OBJEXT) map_vme$U.$(OBJEXT) \
-	ntp_config$U.$(OBJEXT) ntp_control$U.$(OBJEXT) \
-	ntp_crypto$U.$(OBJEXT) ntp_filegen$U.$(OBJEXT) \
-	ntp_intres$U.$(OBJEXT) ntp_io$U.$(OBJEXT) \
-	ntp_loopfilter$U.$(OBJEXT) ntp_monitor$U.$(OBJEXT) \
-	ntp_peer$U.$(OBJEXT) ntp_proto$U.$(OBJEXT) \
-	ntp_refclock$U.$(OBJEXT) ntp_request$U.$(OBJEXT) \
-	ntp_resolver$U.$(OBJEXT) ntp_restrict$U.$(OBJEXT) \
-	ntp_timer$U.$(OBJEXT) ntp_util$U.$(OBJEXT) ntpd$U.$(OBJEXT) \
-	refclock_acts$U.$(OBJEXT) refclock_arbiter$U.$(OBJEXT) \
-	refclock_arc$U.$(OBJEXT) refclock_as2201$U.$(OBJEXT) \
-	refclock_atom$U.$(OBJEXT) refclock_bancomm$U.$(OBJEXT) \
-	refclock_chronolog$U.$(OBJEXT) refclock_chu$U.$(OBJEXT) \
-	refclock_conf$U.$(OBJEXT) refclock_datum$U.$(OBJEXT) \
-	refclock_dumbclock$U.$(OBJEXT) refclock_fg$U.$(OBJEXT) \
-	refclock_gpsvme$U.$(OBJEXT) refclock_heath$U.$(OBJEXT) \
-	refclock_hopfser$U.$(OBJEXT) refclock_hopfpci$U.$(OBJEXT) \
-	refclock_hpgps$U.$(OBJEXT) refclock_irig$U.$(OBJEXT) \
-	refclock_jupiter$U.$(OBJEXT) refclock_leitch$U.$(OBJEXT) \
-	refclock_local$U.$(OBJEXT) refclock_msfees$U.$(OBJEXT) \
-	refclock_mx4200$U.$(OBJEXT) refclock_nmea$U.$(OBJEXT) \
-	refclock_oncore$U.$(OBJEXT) refclock_palisade$U.$(OBJEXT) \
-	refclock_parse$U.$(OBJEXT) refclock_pcf$U.$(OBJEXT) \
-	refclock_pst$U.$(OBJEXT) refclock_ptbacts$U.$(OBJEXT) \
-	refclock_shm$U.$(OBJEXT) refclock_tpro$U.$(OBJEXT) \
-	refclock_trak$U.$(OBJEXT) refclock_true$U.$(OBJEXT) \
-	refclock_ulink$U.$(OBJEXT) refclock_usno$U.$(OBJEXT) \
-	refclock_wwv$U.$(OBJEXT) refclock_wwvb$U.$(OBJEXT)
+ntp_config$U.$(OBJEXT) ntp_control$U.$(OBJEXT) ntp_crypto$U.$(OBJEXT) \
+ntp_filegen$U.$(OBJEXT) ntp_intres$U.$(OBJEXT) ntp_io$U.$(OBJEXT) \
+ntp_loopfilter$U.$(OBJEXT) ntp_monitor$U.$(OBJEXT) ntp_peer$U.$(OBJEXT) \
+ntp_proto$U.$(OBJEXT) ntp_refclock$U.$(OBJEXT) ntp_request$U.$(OBJEXT) \
+ntp_resolver$U.$(OBJEXT) ntp_restrict$U.$(OBJEXT) ntp_timer$U.$(OBJEXT) \
+ntp_util$U.$(OBJEXT) ntpd$U.$(OBJEXT) refclock_acts$U.$(OBJEXT) \
+refclock_arbiter$U.$(OBJEXT) refclock_arc$U.$(OBJEXT) \
+refclock_as2201$U.$(OBJEXT) refclock_atom$U.$(OBJEXT) \
+refclock_bancomm$U.$(OBJEXT) refclock_chronolog$U.$(OBJEXT) \
+refclock_chu$U.$(OBJEXT) refclock_conf$U.$(OBJEXT) \
+refclock_datum$U.$(OBJEXT) refclock_dumbclock$U.$(OBJEXT) \
+refclock_fg$U.$(OBJEXT) refclock_gpsvme$U.$(OBJEXT) \
+refclock_heath$U.$(OBJEXT) refclock_hopfser$U.$(OBJEXT) \
+refclock_hopfpci$U.$(OBJEXT) refclock_hpgps$U.$(OBJEXT) \
+refclock_irig$U.$(OBJEXT) refclock_jupiter$U.$(OBJEXT) \
+refclock_leitch$U.$(OBJEXT) refclock_local$U.$(OBJEXT) \
+refclock_msfees$U.$(OBJEXT) refclock_mx4200$U.$(OBJEXT) \
+refclock_nmea$U.$(OBJEXT) refclock_oncore$U.$(OBJEXT) \
+refclock_palisade$U.$(OBJEXT) refclock_parse$U.$(OBJEXT) \
+refclock_pcf$U.$(OBJEXT) refclock_pst$U.$(OBJEXT) \
+refclock_ptbacts$U.$(OBJEXT) refclock_shm$U.$(OBJEXT) \
+refclock_tpro$U.$(OBJEXT) refclock_trak$U.$(OBJEXT) \
+refclock_true$U.$(OBJEXT) refclock_ulink$U.$(OBJEXT) \
+refclock_usno$U.$(OBJEXT) refclock_wwv$U.$(OBJEXT) \
+refclock_wwvb$U.$(OBJEXT)
 ntpd_OBJECTS = $(am_ntpd_OBJECTS)
 ntpd_DEPENDENCIES = version.o ../libntp/libntp.a
-ntpd_LDFLAGS =
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/check_y2k$U.Po $(DEPDIR)/cmd_args$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/map_vme$U.Po $(DEPDIR)/ntp_config$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_control$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_crypto$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_filegen$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_intres$U.Po $(DEPDIR)/ntp_io$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_loopfilter$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_monitor$U.Po $(DEPDIR)/ntp_peer$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_proto$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_refclock$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_request$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_resolver$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_restrict$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntp_timer$U.Po $(DEPDIR)/ntp_util$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ntpd$U.Po $(DEPDIR)/refclock_acts$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_arbiter$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_arc$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_as2201$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_atom$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_bancomm$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_chronolog$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_chu$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_conf$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_datum$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_dumbclock$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_fg$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_gpsvme$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_heath$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_hopfpci$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_hopfser$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_hpgps$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_irig$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_jupiter$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_leitch$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_local$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_msfees$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_mx4200$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_nmea$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_oncore$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_palisade$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_parse$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_pcf$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_pst$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_ptbacts$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_shm$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_tpro$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_trak$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_true$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_ulink$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_usno$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_wwv$U.Po \
-@AMDEP_TRUE@	$(DEPDIR)/refclock_wwvb$U.Po
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ntpd_LDFLAGS = 
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-
-DEFS = @DEFS@
-DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
-CPPFLAGS = @CPPFLAGS@
-LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
 DIST_SOURCES = check_y2k.c $(ntpd_SOURCES)
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+@AMDEP@DEP_FILES = $(DEPDIR)/check_y2k$U.Po $(DEPDIR)/cmd_args$U.Po \
+@AMDEP@ $(DEPDIR)/map_vme$U.Po $(DEPDIR)/ntp_config$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_control$U.Po $(DEPDIR)/ntp_crypto$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_filegen$U.Po $(DEPDIR)/ntp_intres$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_io$U.Po $(DEPDIR)/ntp_loopfilter$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_monitor$U.Po $(DEPDIR)/ntp_peer$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_proto$U.Po $(DEPDIR)/ntp_refclock$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_request$U.Po $(DEPDIR)/ntp_resolver$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_restrict$U.Po $(DEPDIR)/ntp_timer$U.Po \
+@AMDEP@ $(DEPDIR)/ntp_util$U.Po $(DEPDIR)/ntpd$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_acts$U.Po $(DEPDIR)/refclock_arbiter$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_arc$U.Po $(DEPDIR)/refclock_as2201$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_atom$U.Po $(DEPDIR)/refclock_bancomm$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_chronolog$U.Po $(DEPDIR)/refclock_chu$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_conf$U.Po $(DEPDIR)/refclock_datum$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_dumbclock$U.Po $(DEPDIR)/refclock_fg$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_gpsvme$U.Po $(DEPDIR)/refclock_heath$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_hopfpci$U.Po $(DEPDIR)/refclock_hopfser$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_hpgps$U.Po $(DEPDIR)/refclock_irig$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_jupiter$U.Po $(DEPDIR)/refclock_leitch$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_local$U.Po $(DEPDIR)/refclock_msfees$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_mx4200$U.Po $(DEPDIR)/refclock_nmea$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_oncore$U.Po $(DEPDIR)/refclock_palisade$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_parse$U.Po $(DEPDIR)/refclock_pcf$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_pst$U.Po $(DEPDIR)/refclock_ptbacts$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_shm$U.Po $(DEPDIR)/refclock_tpro$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_trak$U.Po $(DEPDIR)/refclock_true$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_ulink$U.Po $(DEPDIR)/refclock_usno$U.Po \
+@AMDEP@ $(DEPDIR)/refclock_wwv$U.Po $(DEPDIR)/refclock_wwvb$U.Po
 DIST_COMMON = Makefile.am Makefile.in
+
 SOURCES = check_y2k.c $(ntpd_SOURCES)
+OBJECTS = check_y2k$U.$(OBJEXT) $(am_ntpd_OBJECTS)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .h .o .obj
 
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  ntpd/Makefile
 
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
@@ -303,205 +279,144 @@ clean-binPROGRAMS:
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
-check_y2k$(EXEEXT): $(check_y2k_OBJECTS) $(check_y2k_DEPENDENCIES)
-	@rm -f check_y2k$(EXEEXT)
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+../util/ansi2knr: ../util/ansi2knr.$(OBJEXT)
+	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
+
+../util/ansi2knr.$(OBJEXT):
+	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr.$(OBJEXT)
+
+
+mostlyclean-kr:
+	-rm -f *_.c
+
+check_y2k: $(check_y2k_OBJECTS) $(check_y2k_DEPENDENCIES)
+	@rm -f check_y2k
 	$(LINK) $(check_y2k_LDFLAGS) $(check_y2k_OBJECTS) $(check_y2k_LDADD) $(LIBS)
 
-ntpd$(EXEEXT): $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
-	@rm -f ntpd$(EXEEXT)
+ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
+	@rm -f ntpd
 	$(LINK) $(ntpd_LDFLAGS) $(ntpd_OBJECTS) $(ntpd_LDADD) $(LIBS)
-
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/check_y2k$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/cmd_args$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/map_vme$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_config$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_control$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_crypto$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_filegen$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_intres$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_io$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_loopfilter$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_monitor$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_peer$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_proto$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_refclock$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_request$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_resolver$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_restrict$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_timer$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntp_util$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/ntpd$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_acts$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_arbiter$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_arc$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_as2201$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_atom$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_bancomm$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_chronolog$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_chu$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_conf$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_datum$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_dumbclock$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_fg$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_gpsvme$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_heath$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_hopfpci$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_hopfser$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_hpgps$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_irig$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_jupiter$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_leitch$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_local$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_msfees$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_mx4200$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_nmea$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_oncore$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_palisade$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_parse$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_pcf$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_pst$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_ptbacts$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_shm$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_tpro$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_trak$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_true$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_ulink$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_usno$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_wwv$U.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/refclock_wwvb$U.Po@_am_quote@
-
-distclean-depend:
-	-rm -rf $(DEPDIR)
-
-CCDEPMODE = @CCDEPMODE@
-
-.c.o:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `cygpath -w $<`
 check_y2k_.c: check_y2k.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/check_y2k.c; then echo $(srcdir)/check_y2k.c; else echo check_y2k.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > check_y2k_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/check_y2k.c; then echo $(srcdir)/check_y2k.c; else echo check_y2k.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > check_y2k_.c
 cmd_args_.c: cmd_args.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cmd_args.c; then echo $(srcdir)/cmd_args.c; else echo cmd_args.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cmd_args_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/cmd_args.c; then echo $(srcdir)/cmd_args.c; else echo cmd_args.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > cmd_args_.c
 map_vme_.c: map_vme.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/map_vme.c; then echo $(srcdir)/map_vme.c; else echo map_vme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > map_vme_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/map_vme.c; then echo $(srcdir)/map_vme.c; else echo map_vme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > map_vme_.c
 ntp_config_.c: ntp_config.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_config.c; then echo $(srcdir)/ntp_config.c; else echo ntp_config.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_config_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_config.c; then echo $(srcdir)/ntp_config.c; else echo ntp_config.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_config_.c
 ntp_control_.c: ntp_control.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_control.c; then echo $(srcdir)/ntp_control.c; else echo ntp_control.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_control_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_control.c; then echo $(srcdir)/ntp_control.c; else echo ntp_control.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_control_.c
 ntp_crypto_.c: ntp_crypto.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_crypto.c; then echo $(srcdir)/ntp_crypto.c; else echo ntp_crypto.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_crypto_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_crypto.c; then echo $(srcdir)/ntp_crypto.c; else echo ntp_crypto.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_crypto_.c
 ntp_filegen_.c: ntp_filegen.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_filegen.c; then echo $(srcdir)/ntp_filegen.c; else echo ntp_filegen.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_filegen_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_filegen.c; then echo $(srcdir)/ntp_filegen.c; else echo ntp_filegen.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_filegen_.c
 ntp_intres_.c: ntp_intres.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_intres.c; then echo $(srcdir)/ntp_intres.c; else echo ntp_intres.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_intres_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_intres.c; then echo $(srcdir)/ntp_intres.c; else echo ntp_intres.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_intres_.c
 ntp_io_.c: ntp_io.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_io.c; then echo $(srcdir)/ntp_io.c; else echo ntp_io.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_io_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_io.c; then echo $(srcdir)/ntp_io.c; else echo ntp_io.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_io_.c
 ntp_loopfilter_.c: ntp_loopfilter.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_loopfilter.c; then echo $(srcdir)/ntp_loopfilter.c; else echo ntp_loopfilter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_loopfilter_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_loopfilter.c; then echo $(srcdir)/ntp_loopfilter.c; else echo ntp_loopfilter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_loopfilter_.c
 ntp_monitor_.c: ntp_monitor.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_monitor.c; then echo $(srcdir)/ntp_monitor.c; else echo ntp_monitor.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_monitor_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_monitor.c; then echo $(srcdir)/ntp_monitor.c; else echo ntp_monitor.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_monitor_.c
 ntp_peer_.c: ntp_peer.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_peer.c; then echo $(srcdir)/ntp_peer.c; else echo ntp_peer.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_peer_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_peer.c; then echo $(srcdir)/ntp_peer.c; else echo ntp_peer.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_peer_.c
 ntp_proto_.c: ntp_proto.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_proto.c; then echo $(srcdir)/ntp_proto.c; else echo ntp_proto.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_proto_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_proto.c; then echo $(srcdir)/ntp_proto.c; else echo ntp_proto.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_proto_.c
 ntp_refclock_.c: ntp_refclock.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_refclock.c; then echo $(srcdir)/ntp_refclock.c; else echo ntp_refclock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_refclock_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_refclock.c; then echo $(srcdir)/ntp_refclock.c; else echo ntp_refclock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_refclock_.c
 ntp_request_.c: ntp_request.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_request.c; then echo $(srcdir)/ntp_request.c; else echo ntp_request.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_request_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_request.c; then echo $(srcdir)/ntp_request.c; else echo ntp_request.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_request_.c
 ntp_resolver_.c: ntp_resolver.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_resolver.c; then echo $(srcdir)/ntp_resolver.c; else echo ntp_resolver.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_resolver_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_resolver.c; then echo $(srcdir)/ntp_resolver.c; else echo ntp_resolver.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_resolver_.c
 ntp_restrict_.c: ntp_restrict.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_restrict.c; then echo $(srcdir)/ntp_restrict.c; else echo ntp_restrict.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_restrict_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_restrict.c; then echo $(srcdir)/ntp_restrict.c; else echo ntp_restrict.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_restrict_.c
 ntp_timer_.c: ntp_timer.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_timer.c; then echo $(srcdir)/ntp_timer.c; else echo ntp_timer.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_timer_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_timer.c; then echo $(srcdir)/ntp_timer.c; else echo ntp_timer.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_timer_.c
 ntp_util_.c: ntp_util.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_util.c; then echo $(srcdir)/ntp_util.c; else echo ntp_util.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_util_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntp_util.c; then echo $(srcdir)/ntp_util.c; else echo ntp_util.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntp_util_.c
 ntpd_.c: ntpd.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpd.c; then echo $(srcdir)/ntpd.c; else echo ntpd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpd_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/ntpd.c; then echo $(srcdir)/ntpd.c; else echo ntpd.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > ntpd_.c
 refclock_acts_.c: refclock_acts.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_acts.c; then echo $(srcdir)/refclock_acts.c; else echo refclock_acts.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_acts_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_acts.c; then echo $(srcdir)/refclock_acts.c; else echo refclock_acts.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_acts_.c
 refclock_arbiter_.c: refclock_arbiter.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_arbiter.c; then echo $(srcdir)/refclock_arbiter.c; else echo refclock_arbiter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_arbiter_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_arbiter.c; then echo $(srcdir)/refclock_arbiter.c; else echo refclock_arbiter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_arbiter_.c
 refclock_arc_.c: refclock_arc.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_arc.c; then echo $(srcdir)/refclock_arc.c; else echo refclock_arc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_arc_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_arc.c; then echo $(srcdir)/refclock_arc.c; else echo refclock_arc.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_arc_.c
 refclock_as2201_.c: refclock_as2201.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_as2201.c; then echo $(srcdir)/refclock_as2201.c; else echo refclock_as2201.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_as2201_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_as2201.c; then echo $(srcdir)/refclock_as2201.c; else echo refclock_as2201.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_as2201_.c
 refclock_atom_.c: refclock_atom.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_atom.c; then echo $(srcdir)/refclock_atom.c; else echo refclock_atom.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_atom_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_atom.c; then echo $(srcdir)/refclock_atom.c; else echo refclock_atom.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_atom_.c
 refclock_bancomm_.c: refclock_bancomm.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_bancomm.c; then echo $(srcdir)/refclock_bancomm.c; else echo refclock_bancomm.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_bancomm_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_bancomm.c; then echo $(srcdir)/refclock_bancomm.c; else echo refclock_bancomm.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_bancomm_.c
 refclock_chronolog_.c: refclock_chronolog.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_chronolog.c; then echo $(srcdir)/refclock_chronolog.c; else echo refclock_chronolog.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_chronolog_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_chronolog.c; then echo $(srcdir)/refclock_chronolog.c; else echo refclock_chronolog.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_chronolog_.c
 refclock_chu_.c: refclock_chu.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_chu.c; then echo $(srcdir)/refclock_chu.c; else echo refclock_chu.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_chu_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_chu.c; then echo $(srcdir)/refclock_chu.c; else echo refclock_chu.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_chu_.c
 refclock_conf_.c: refclock_conf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_conf.c; then echo $(srcdir)/refclock_conf.c; else echo refclock_conf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_conf_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_conf.c; then echo $(srcdir)/refclock_conf.c; else echo refclock_conf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_conf_.c
 refclock_datum_.c: refclock_datum.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_datum.c; then echo $(srcdir)/refclock_datum.c; else echo refclock_datum.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_datum_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_datum.c; then echo $(srcdir)/refclock_datum.c; else echo refclock_datum.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_datum_.c
 refclock_dumbclock_.c: refclock_dumbclock.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_dumbclock.c; then echo $(srcdir)/refclock_dumbclock.c; else echo refclock_dumbclock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_dumbclock_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_dumbclock.c; then echo $(srcdir)/refclock_dumbclock.c; else echo refclock_dumbclock.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_dumbclock_.c
 refclock_fg_.c: refclock_fg.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_fg.c; then echo $(srcdir)/refclock_fg.c; else echo refclock_fg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_fg_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_fg.c; then echo $(srcdir)/refclock_fg.c; else echo refclock_fg.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_fg_.c
 refclock_gpsvme_.c: refclock_gpsvme.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_gpsvme.c; then echo $(srcdir)/refclock_gpsvme.c; else echo refclock_gpsvme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_gpsvme_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_gpsvme.c; then echo $(srcdir)/refclock_gpsvme.c; else echo refclock_gpsvme.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_gpsvme_.c
 refclock_heath_.c: refclock_heath.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_heath.c; then echo $(srcdir)/refclock_heath.c; else echo refclock_heath.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_heath_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_heath.c; then echo $(srcdir)/refclock_heath.c; else echo refclock_heath.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_heath_.c
 refclock_hopfpci_.c: refclock_hopfpci.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hopfpci.c; then echo $(srcdir)/refclock_hopfpci.c; else echo refclock_hopfpci.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hopfpci_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hopfpci.c; then echo $(srcdir)/refclock_hopfpci.c; else echo refclock_hopfpci.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hopfpci_.c
 refclock_hopfser_.c: refclock_hopfser.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hopfser.c; then echo $(srcdir)/refclock_hopfser.c; else echo refclock_hopfser.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hopfser_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hopfser.c; then echo $(srcdir)/refclock_hopfser.c; else echo refclock_hopfser.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hopfser_.c
 refclock_hpgps_.c: refclock_hpgps.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hpgps.c; then echo $(srcdir)/refclock_hpgps.c; else echo refclock_hpgps.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hpgps_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_hpgps.c; then echo $(srcdir)/refclock_hpgps.c; else echo refclock_hpgps.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_hpgps_.c
 refclock_irig_.c: refclock_irig.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_irig.c; then echo $(srcdir)/refclock_irig.c; else echo refclock_irig.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_irig_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_irig.c; then echo $(srcdir)/refclock_irig.c; else echo refclock_irig.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_irig_.c
 refclock_jupiter_.c: refclock_jupiter.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_jupiter.c; then echo $(srcdir)/refclock_jupiter.c; else echo refclock_jupiter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_jupiter_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_jupiter.c; then echo $(srcdir)/refclock_jupiter.c; else echo refclock_jupiter.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_jupiter_.c
 refclock_leitch_.c: refclock_leitch.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_leitch.c; then echo $(srcdir)/refclock_leitch.c; else echo refclock_leitch.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_leitch_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_leitch.c; then echo $(srcdir)/refclock_leitch.c; else echo refclock_leitch.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_leitch_.c
 refclock_local_.c: refclock_local.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_local.c; then echo $(srcdir)/refclock_local.c; else echo refclock_local.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_local_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_local.c; then echo $(srcdir)/refclock_local.c; else echo refclock_local.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_local_.c
 refclock_msfees_.c: refclock_msfees.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_msfees.c; then echo $(srcdir)/refclock_msfees.c; else echo refclock_msfees.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_msfees_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_msfees.c; then echo $(srcdir)/refclock_msfees.c; else echo refclock_msfees.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_msfees_.c
 refclock_mx4200_.c: refclock_mx4200.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_mx4200.c; then echo $(srcdir)/refclock_mx4200.c; else echo refclock_mx4200.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_mx4200_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_mx4200.c; then echo $(srcdir)/refclock_mx4200.c; else echo refclock_mx4200.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_mx4200_.c
 refclock_nmea_.c: refclock_nmea.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_nmea.c; then echo $(srcdir)/refclock_nmea.c; else echo refclock_nmea.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_nmea_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_nmea.c; then echo $(srcdir)/refclock_nmea.c; else echo refclock_nmea.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_nmea_.c
 refclock_oncore_.c: refclock_oncore.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_oncore.c; then echo $(srcdir)/refclock_oncore.c; else echo refclock_oncore.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_oncore_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_oncore.c; then echo $(srcdir)/refclock_oncore.c; else echo refclock_oncore.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_oncore_.c
 refclock_palisade_.c: refclock_palisade.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_palisade.c; then echo $(srcdir)/refclock_palisade.c; else echo refclock_palisade.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_palisade_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_palisade.c; then echo $(srcdir)/refclock_palisade.c; else echo refclock_palisade.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_palisade_.c
 refclock_parse_.c: refclock_parse.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_parse.c; then echo $(srcdir)/refclock_parse.c; else echo refclock_parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_parse_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_parse.c; then echo $(srcdir)/refclock_parse.c; else echo refclock_parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_parse_.c
 refclock_pcf_.c: refclock_pcf.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pcf.c; then echo $(srcdir)/refclock_pcf.c; else echo refclock_pcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pcf_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pcf.c; then echo $(srcdir)/refclock_pcf.c; else echo refclock_pcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pcf_.c
 refclock_pst_.c: refclock_pst.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pst.c; then echo $(srcdir)/refclock_pst.c; else echo refclock_pst.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pst_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pst.c; then echo $(srcdir)/refclock_pst.c; else echo refclock_pst.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pst_.c
 refclock_ptbacts_.c: refclock_ptbacts.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_ptbacts.c; then echo $(srcdir)/refclock_ptbacts.c; else echo refclock_ptbacts.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_ptbacts_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_ptbacts.c; then echo $(srcdir)/refclock_ptbacts.c; else echo refclock_ptbacts.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_ptbacts_.c
 refclock_shm_.c: refclock_shm.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_shm.c; then echo $(srcdir)/refclock_shm.c; else echo refclock_shm.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_shm_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_shm.c; then echo $(srcdir)/refclock_shm.c; else echo refclock_shm.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_shm_.c
 refclock_tpro_.c: refclock_tpro.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_tpro.c; then echo $(srcdir)/refclock_tpro.c; else echo refclock_tpro.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_tpro_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_tpro.c; then echo $(srcdir)/refclock_tpro.c; else echo refclock_tpro.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_tpro_.c
 refclock_trak_.c: refclock_trak.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_trak.c; then echo $(srcdir)/refclock_trak.c; else echo refclock_trak.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_trak_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_trak.c; then echo $(srcdir)/refclock_trak.c; else echo refclock_trak.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_trak_.c
 refclock_true_.c: refclock_true.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_true.c; then echo $(srcdir)/refclock_true.c; else echo refclock_true.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_true_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_true.c; then echo $(srcdir)/refclock_true.c; else echo refclock_true.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_true_.c
 refclock_ulink_.c: refclock_ulink.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_ulink.c; then echo $(srcdir)/refclock_ulink.c; else echo refclock_ulink.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_ulink_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_ulink.c; then echo $(srcdir)/refclock_ulink.c; else echo refclock_ulink.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_ulink_.c
 refclock_usno_.c: refclock_usno.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_usno.c; then echo $(srcdir)/refclock_usno.c; else echo refclock_usno.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_usno_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_usno.c; then echo $(srcdir)/refclock_usno.c; else echo refclock_usno.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_usno_.c
 refclock_wwv_.c: refclock_wwv.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwv.c; then echo $(srcdir)/refclock_wwv.c; else echo refclock_wwv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwv_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwv.c; then echo $(srcdir)/refclock_wwv.c; else echo refclock_wwv.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwv_.c
 refclock_wwvb_.c: refclock_wwvb.c $(ANSI2KNR)
-	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwvb.c; then echo $(srcdir)/refclock_wwvb.c; else echo refclock_wwvb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwvb_.c
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_wwvb.c; then echo $(srcdir)/refclock_wwvb.c; else echo refclock_wwvb.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_wwvb_.c
 check_y2k_.$(OBJEXT) cmd_args_.$(OBJEXT) map_vme_.$(OBJEXT) \
 ntp_config_.$(OBJEXT) ntp_control_.$(OBJEXT) ntp_crypto_.$(OBJEXT) \
 ntp_filegen_.$(OBJEXT) ntp_intres_.$(OBJEXT) ntp_io_.$(OBJEXT) \
@@ -529,19 +444,6 @@ refclock_true_.$(OBJEXT) refclock_ulink_.$(OBJEXT) \
 refclock_usno_.$(OBJEXT) refclock_wwv_.$(OBJEXT) \
 refclock_wwvb_.$(OBJEXT) : $(ANSI2KNR)
 
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT) core *.core
-
-distclean-compile:
-	-rm -f *.tab.c
-
-ANSI2KNR = ../util/ansi2knr
-../util/ansi2knr:
-	cd ../util && $(MAKE) $(AM_MAKEFLAGS) ansi2knr
-
-mostlyclean-kr:
-	-rm -f *_.c
-
 tags: TAGS
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
@@ -553,7 +455,7 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	       END { for (i in files) print i; }'`; \
 	mkid -fID $$unique $(LISP)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS: $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -574,6 +476,83 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID
 
+@AMDEP@@_am_include@ $(DEPDIR)/check_y2k$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/cmd_args$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/map_vme$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_config$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_control$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_crypto$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_filegen$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_intres$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_io$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_loopfilter$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_monitor$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_peer$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_proto$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_refclock$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_request$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_resolver$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_restrict$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_timer$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntp_util$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/ntpd$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_acts$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_arbiter$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_arc$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_as2201$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_atom$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_bancomm$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_chronolog$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_chu$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_conf$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_datum$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_dumbclock$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_fg$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_gpsvme$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_heath$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_hopfpci$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_hopfser$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_hpgps$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_irig$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_jupiter$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_leitch$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_local$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_msfees$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_mx4200$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_nmea$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_oncore$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_palisade$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_parse$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_pcf$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_pst$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_ptbacts$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_shm$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_tpro$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_trak$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_true$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_ulink$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_usno$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_wwv$U.Po
+@AMDEP@@_am_include@ $(DEPDIR)/refclock_wwvb$U.Po
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+@AMDEP@CCDEPMODE = @CCDEPMODE@
+
+.c.o:
+@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c -o $@ `cygpath -w $<`
+
+
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ..
@@ -582,10 +561,6 @@ distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
-	    $(mkinstalldirs) "$(distdir)/$$dir"; \
-	  fi; \
 	  if test -d $$d/$$file; then \
 	    cp -pR $$d/$$file $(distdir) \
 	    || exit 1; \
