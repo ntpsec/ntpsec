@@ -2211,7 +2211,7 @@ do_resolve_internal(void)
 		 */
 
 		closelog();
-		kill_asyncio();
+		kill_asyncio(0);
 
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 

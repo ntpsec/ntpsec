@@ -343,7 +343,9 @@ hack_restrict(
 
 
 void
-kill_asyncio (void)
+kill_asyncio (
+	int startfd
+	)
 {
 	if (debug > 1) printf("kill_asyncio...\n");
 	return;

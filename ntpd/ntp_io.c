@@ -1776,11 +1776,13 @@ io_closeclock(
 #endif	/* REFCLOCK */
 
 void
-kill_asyncio(void)
+kill_asyncio(
+	int startfd
+	)
 {
 	int i;
 
 	BLOCKIO();
-	for (i = 0; i <= maxactivefd; i++)
+	for (i = startfd; i <= maxactivefd; i++)
 	    (void)close_socket(i);
 }
