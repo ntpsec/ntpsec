@@ -318,7 +318,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	l_fp	tRecvTimestamp;		/* arrival timestamp */
 	int 	rc ;
 	char	sLogText [ MAX_LOGTEXT ] ;
-	int 	i, bCntrlChar, iCntrlChar ;
+	int 	i, bCntrlChar ;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -351,7 +351,6 @@ jjy_receive ( struct recvbuf *rbufp )
 		for ( i = 0 ; i < up->charcount ; i ++ ) {
 			if ( up->rawbuf[i] < ' ' ) {
 				bCntrlChar = 1 ;
-				iCntrlChar = up->charcount ;
 				break ;
 			}
 		}
@@ -694,11 +693,9 @@ static void
 jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 {
 
-	struct jjyunit      *up;
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct jjyunit *) pp->unitptr ;
 
 	/*
 	 * Send "<ENQ>1J<ETX>" command
