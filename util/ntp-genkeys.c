@@ -164,6 +164,7 @@ crypto_config(
 	)
 {
 	switch (item) {
+#ifdef OPENSSL
 	    case CRYPTO_CONF_PRIV:
 		if (debug > 0)
 			printf("crypto_config: PRIVATEKEY/<%d> <%s>\n",
@@ -186,6 +187,7 @@ crypto_config(
 			printf("crypto_config: CERT/<%d> <%s>\n", item, cp);
 		f1_cert = strdup(cp);
 		break;
+#endif /* OPENSSL */
 	    default:
 		if (debug > 1)
 			printf("crypto_config: <%d> <%s>\n", item, cp);
