@@ -1,3 +1,5 @@
+See README.hackers for notes on coding styles.
+
 If you are going to patch both ntp-stable and ntp-dev
 please do it this way:
 
