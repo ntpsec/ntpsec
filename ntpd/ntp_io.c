@@ -136,7 +136,9 @@ ISC_LIST(vsock_t)	sockets_list;
 
 void add_socket_to_list(SOCKET fd);
 void delete_socket_from_list(SOCKET fd);
-
+int create_wildcards(u_short port);
+BOOL address_okay(isc_interface_t *isc_if);
+void convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port);
 
 /*
  * init_io - initialize I/O data structures and call socket creation routine
@@ -280,7 +282,7 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       sizeof(struct in_addr));
 		((struct sockaddr_in*)&itf->mask)->sin_port = port;
 
-		if ((isc_if->flags & INTERFACE_F_LOOPBACK != 0) && (loopback_interface == NULL))
+		if (((isc_if->flags & INTERFACE_F_LOOPBACK) != 0) && (loopback_interface == NULL))
 		{
 			loopback_interface = itf;
 		}
@@ -309,7 +311,7 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->mask)->sin6_port = port;
 
-		if ((isc_if->flags & INTERFACE_F_LOOPBACK != 0) && (loopback6_interface == NULL))
+		if (((isc_if->flags & INTERFACE_F_LOOPBACK) != 0) && (loopback6_interface == NULL))
 		{
 			loopback6_interface = itf;
 		}
@@ -775,7 +777,7 @@ io_multicast_del(
 				/* We are sharing "any address" port :-(  Don't close it! */
 				if (setsockopt(inter_list[i].fd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 					(char *)&mreq, sizeof(mreq)) == -1)
-				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address: %m",
+				netsyslog(LOG_ERR, "setsockopt IP_DROP_MEMBERSHIP fails on address: %s %m",
 					stoa(&addr));
 				/* This is **WRONG** -- there may be others ! */
 				/* There should be a count of users ... */
@@ -866,7 +868,7 @@ open_socket(
 	/* create a datagram (UDP) socket */
 #ifndef SYS_WINNT
 	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) < 0) {
-		errval = errno
+		errval = errno;
 		if(addr->ss_family == AF_INET)
 			netsyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed on address %s: %m",
 				stoa(addr));

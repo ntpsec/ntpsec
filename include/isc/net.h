@@ -166,11 +166,13 @@
 #define INADDR_LOOPBACK 0x7f000001UL
 #endif
 
+#if 0
 #ifndef ISC_PLATFORM_HAVEIN6PKTINFO
 struct in6_pktinfo {
 	struct in6_addr ipi6_addr;    /* src/dst IPv6 address */
 	unsigned int    ipi6_ifindex; /* send/recv interface index */
 };
+#endif
 #endif
 
 /*
