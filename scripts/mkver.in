@@ -3,7 +3,7 @@ PROG=${1-UNKNOWN}
 
 ConfStr="$PROG"
 
-case "@RSAREF@" in
+case "@LIBRSAREF@" in
  '') ;;
  *)  ConfStr="$ConfStr RSAREF" ;;
 esac

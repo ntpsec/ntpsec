@@ -68,7 +68,7 @@
 /* MD5 authentication */
 #undef MD5
 
-/* DFS authentication (COCOM only) */
+/* DES authentication (COCOM only) */
 #undef DES
 
 /* time_t */

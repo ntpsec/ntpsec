@@ -2048,6 +2048,7 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT($ans)
 
+AC_SUBST(RSAREF)
 AC_SUBST(LIBRSAREF)
 AC_SUBST(MAKE_LIBRSAREF)
 AC_MSG_CHECKING(if we need to make and use the RSAREF library)
