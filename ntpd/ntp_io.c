@@ -156,7 +156,8 @@ u_long io_timereset;		/* time counters were reset */
  */
 struct interface *any_interface;	/* default ipv4 interface */
 struct interface *any6_interface;	/* default ipv6 interface */
-struct interface *loopback_interface;	/* loopback interface */
+struct interface *loopback_interface;	/* loopback ipv4 interface */
+struct interface *loopback6_interface;	/* loopback ipv6 interface */
 struct interface inter_list[MAXINTERFACES];
 int ninterfaces;
 
@@ -202,7 +203,8 @@ init_io(void)
 	packets_sent = packets_notsent = 0;
 	handler_calls = handler_pkts = 0;
 	io_timereset = 0;
-	loopback_interface = 0;
+	loopback_interface = NULL;
+	loopback6_interface = NULL;
 
 #ifdef REFCLOCK
 	refio = 0;
@@ -410,9 +412,9 @@ create_sockets(
 
 			if (ifap->ifa_flags & IFF_LOOPBACK) {
 				inter_list[i].flags = INT_LOOPBACK;
-				if (loopback_interface == NULL
+				if (loopback6_interface == NULL
 				|| IN6_IS_ADDR_LOOPBACK(&((struct sockaddr_in6*)sin)->sin6_addr))
-				loopback_interface = &inter_list[i];
+				loopback6_interface = &inter_list[i];
 			}
 
 			if (ifap->ifa_flags & (IFF_LOOPBACK|IFF_POINTOPOINT)) {
@@ -558,7 +560,7 @@ create_sockets(
 		inter_list[i].flags = 0;
 
 		af = lifr->lifr_addr.zz_family;
-		close_socket(vs);
+		closesocket(vs);
 
 		vs = socket(af, SOCK_DGRAM, 0);
 #  ifndef SYS_WINNT
@@ -618,7 +620,7 @@ create_sockets(
 #  ifndef SYS_WINNT
 				inter_list[i].flags |= INT_LOOPBACK;
 #  endif /* not SYS_WINNT */
-				if (loopback_interface == 0)
+				if (loopback_interface == NULL)
 				{
 					loopback_interface = &inter_list[i];
 				}
@@ -640,9 +642,9 @@ create_sockets(
 #  ifndef SYS_WINNT
                 	        inter_list[i].flags |= INT_LOOPBACK;
 #  endif /* not SYS_WINNT */
-	                        if (loopback_interface == 0)
+	                        if (loopback6_interface == NULL)
         	                {
-                	                loopback_interface = &inter_list[i];
+                	                loopback6_interface = &inter_list[i];
                         	}
                 	}
                 	break;
@@ -734,7 +736,7 @@ create_sockets(
 		if (i > MAXINTERFACES)
 		    break;
 	}
-	close_socket(vs);
+	closesocket(vs);
 #endif	/* _BSDI_VERSION >= 199510 */
 
 	ninterfaces = i;
@@ -777,7 +779,11 @@ create_sockets(
 	/*
 	 * Blacklist all bound interface addresses
 	 */
+#ifdef HAVE_IPV6
 	for (i = 2; i < ninterfaces; i++) {
+#else
+	for (i = 1; i < ninterfaces; i++) {
+#endif
 		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
@@ -1272,7 +1278,7 @@ open_socket(
 		else return INVALID_SOCKET;
 
 		msyslog(LOG_ERR, buff);
-		close_socket(fd);
+		closesocket(fd);
 
 		/*
 		 * soft fail if opening a multicast address
@@ -1418,7 +1424,7 @@ close_socket(
 	(void) closesocket(fd);
 	FD_CLR( (u_int) fd, &activefds);
 
-	if (fd >= maxactivefd) {
+	if (fd == maxactivefd) {
 		newmax = 0;
 		for (i = 0; i < maxactivefd; i++)
 			if (FD_ISSET(i, &activefds))
@@ -1442,7 +1448,7 @@ close_file(
 	(void) close(fd);
 	FD_CLR( (u_int) fd, &activefds);
 
-	if (fd >= maxactivefd) {
+	if (fd == maxactivefd) {
 		newmax = 0;
 		for (i = 0; i < maxactivefd; i++)
 			if (FD_ISSET(i, &activefds))
