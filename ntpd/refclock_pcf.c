@@ -152,7 +152,7 @@ pcf_poll(
 	tm.tm_hour = buf[7] * 10 + buf[6];
 	tm.tm_min = buf[5] * 10 + buf[4];
 	tm.tm_sec = buf[3] * 10 + buf[2];
-	tm.tm_isdst = -1;
+	tm.tm_isdst = (buf[8] & 1) ? 1 : (buf[8] & 2) ? 0 : -1;
 
 	/*
 	 * Y2K convert the 2-digit year

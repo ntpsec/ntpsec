@@ -1,3 +1,12 @@
+2000-11-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_parse.c (rawdcf_init_1): make Linux happier with
+	some modem control stuff.
+	From: Wolfram Pienkoss <wp@bszh.de> (via Frank Kardel)
+
+	* ntpd/refclock_pcf.c (pcf_poll): isdst fix
+	From: Andreas Voegele <andreas.voegele@gmx.de>
+
 2000-10-28  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.99k10

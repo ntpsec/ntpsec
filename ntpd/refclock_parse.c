@@ -5148,16 +5148,24 @@ rawdcf_init_1(
 	struct parseunit *parse
 	)
 {
+	/* fixed 2000 for using with Linux by Wolfram Pienkoss <wp@bszh.de> */
 	/*
 	 * You can use the RS232 to supply the power for a DCF77 receiver.
 	 * Here a voltage between the DTR and the RTS line is used. Unfortunately
 	 * the name has changed from CIOCM_DTR to TIOCM_DTR recently.
 	 */
-	
+	int sl232;
+
+	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
+	{
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_DTR): %m", CLK_UNIT(parse->peer));
+		return 0;
+	}
+
 #ifdef TIOCM_DTR
-	int sl232 = TIOCM_DTR;	/* turn on DTR for power supply */
+	sl232 = sl232 & ~TIOCM_RTS | TIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
 #else
-	int sl232 = CIOCM_DTR;	/* turn on DTR for power supply */
+	sl232 = sl232 & ~CIOCM_RTS | CIOCM_DTR;	/* turn on DTR, clear RTS for power supply */
 #endif
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
@@ -5187,16 +5195,24 @@ rawdcf_init_2(
 	struct parseunit *parse
 	)
 {
+	/* fixed 2000 for using with Linux by Wolfram Pienkoss <wp@bszh.de> */
 	/*
 	 * You can use the RS232 to supply the power for a DCF77 receiver.
 	 * Here a voltage between the DTR and the RTS line is used. Unfortunately
 	 * the name has changed from CIOCM_DTR to TIOCM_DTR recently.
 	 */
-	
+	int sl232;
+
+	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
+	{
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_RTS): %m", CLK_UNIT(parse->peer));
+		return 0;
+	}
+
 #ifdef TIOCM_RTS
-	int sl232 = TIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
+	sl232 = sl232 & ~TIOCM_DTR | TIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
 #else
-	int sl232 = CIOCM_RTS;	/* turn on DTR for power supply */
+	sl232 = sl232 & ~CIOCM_DTR | CIOCM_RTS;	/* turn on RTS, clear DTR for power supply */
 #endif
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
