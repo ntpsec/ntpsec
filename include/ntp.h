@@ -666,6 +666,8 @@ struct pkt {
 #define PROTO_KERNEL		9
 #define PROTO_MONITOR		10
 #define PROTO_FILEGEN		11
+#define	PROTO_PPS		12
+#define PROTO_CAL		13
 
 /*
  * Configuration items for the loop filter

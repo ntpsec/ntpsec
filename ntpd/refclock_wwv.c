@@ -2586,7 +2586,8 @@ wwv_newchan(
 		up->sptr = sp;
 		up->status |= sp->select & (SELV | SELH);
 		memcpy((char *)&pp->refid, sp->refid, 4);
-		memcpy((char *)&peer->refid, sp->refid, 4);
+		if (peer->stratum <= 1)
+			memcpy((char *)&peer->refid, sp->refid, 4);
 		wwv_qsy(peer, up->dchan);
 	}
 }

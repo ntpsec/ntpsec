@@ -265,6 +265,9 @@ extern double	drift_comp;		/* clock frequency (ppm) */
 extern double	clock_stability;	/* clock stability (ppm) */
 extern double	clock_max;		/* max offset allowed before step (s) */
 extern u_long	pps_control;		/* last pps sample time */
+#ifdef KERNEL_PLL
+extern int	pll_status;		/* status bits for kernel pll */
+#endif /* KERNEL_PLL */
 
 /*
  * Clock state machine control flags
@@ -272,7 +275,9 @@ extern u_long	pps_control;		/* last pps sample time */
 extern int	ntp_enable;		/* clock discipline enabled */
 extern int	pll_control;		/* kernel support available */
 extern int	kern_enable;		/* kernel support enabled */
+extern int	pps_enable;		/* kernel PPS discipline enabled */
 extern int	ext_enable;		/* external clock enabled */
+extern int	cal_enable;		/* refclock calibrate enable */
 extern int	allow_set_backward;	/* step corrections allowed */
 extern int	correct_any;		/* corrections > 1000 s allowed */
 

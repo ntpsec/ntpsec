@@ -2471,7 +2471,7 @@ init_proto(void)
 #ifndef KERNEL_FLL_BUG
 	kern_enable = 1;
 #endif
-	msyslog(LOG_DEBUG, "kern_enable is %d", kern_enable);
+	pps_enable = 1;
 	stats_control = 1;
 
 	/*
@@ -2579,6 +2579,22 @@ proto_config(
 		 * Specify the use of authenticated data
 		 */
 		sys_authenticate = (int)value;
+		break;
+
+	case PROTO_PPS:
+
+		/*
+		 * Turn on/off PPS discipline
+		 */
+		pps_enable = (int)value;
+		break;
+
+	case PROTO_CAL:
+
+		/*
+		 * Turn on/off refclock calibrate
+		 */
+		cal_enable = (int)value;
 		break;
 
 	default:

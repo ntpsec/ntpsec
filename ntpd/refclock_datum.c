@@ -45,10 +45,6 @@
 #endif /* WWVBCLK */
 #endif /* STREAM */
 
-#if defined (WWVBPPS)
-#include <sys/ppsclock.h>
-#endif /* WWVBPPS */
-
 #include "ntp_stdlib.h"
 
 /*
@@ -120,8 +116,8 @@
 */
 
 
-#define	PTSPRECISION	(-10)		/* precision assumed 1/1024 ms */
-#define	DATMREFID "DATM"		/* reference id */
+#define	PRECISION	(-10)		/* precision assumed 1/1024 ms */
+#define	REFID "DATM"			/* reference id */
 #define DATUM_DISPERSION 0		/* fixed dispersion = 0 ms */
 #define DATUM_MAX_ERROR 0.100		/* limits on sigma squared */
 
@@ -238,7 +234,6 @@ datum_pts_start(
 {
 	struct datum_pts_unit **temp_datum_pts_unit;
 	struct datum_pts_unit *datum_pts;
-
 #ifdef HAVE_TERMIOS
 	struct termios arg;
 #endif
@@ -304,6 +299,10 @@ datum_pts_start(
 	msyslog(LOG_ERR, "Datum_PTS: Termios not supported in this driver");
 	(void)close(datum_pts->PTS_fd);
 
+	peer->precision = PRECISION;
+	pp->clockdesc = DESCRIPTION;
+	memcpy((char *)&pp->refid, REFID, 4);
+
 	return 0;
 
 #endif
@@ -330,10 +329,6 @@ datum_pts_start(
 
 		return 0;
 	}
-
-	peer->precision = PTSPRECISION;
-	peer->stratum = 0;
-	memcpy((char *)&peer->refid, DATMREFID, 4);
 
 	/*
 	** Now add one to the number of units and return a successful code

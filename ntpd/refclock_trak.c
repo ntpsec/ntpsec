@@ -10,7 +10,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_TRAK)
+#if defined(REFCLOCK) && defined(CLOCK_TRAK) && defined(PPS)
 
 #include <stdio.h>
 #include <ctype.h>

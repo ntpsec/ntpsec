@@ -1544,10 +1544,8 @@ dopeers(
 		}
 		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "host");
 	}
-	(void) fprintf(fp,
-			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
-	(void) fprintf(fp,
-			   "                                      (s)  (s)          (ms)     (ms)    (ms) \n");
+	fprintf(fp,
+	   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
 		(void) fprintf(fp, "=");

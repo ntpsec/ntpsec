@@ -559,7 +559,7 @@ struct conf_sys_flags {
  * System flags we can set/clear
  */
 #define	SYS_FLAG_BCLIENT	0x1
-#define	SYS_FLAG_AUTHENTICATE	0x2
+#define	SYS_FLAG_PPS		0x2
 #define SYS_FLAG_NTP		0x4
 #define SYS_FLAG_KERNEL		0x8
 #define SYS_FLAG_MONITOR	0x10

@@ -1257,8 +1257,8 @@ doset(
 	sys.flags = 0;
 	res = 0;
 	for (items = 0; items < pcmd->nargs; items++) {
-		if (STREQ(pcmd->argval[items].string, "auth"))
-		    sys.flags |= SYS_FLAG_AUTHENTICATE;
+		if (STREQ(pcmd->argval[items].string, "pps"))
+		    sys.flags |= SYS_FLAG_PPS;
 		else if (STREQ(pcmd->argval[items].string, "bclient"))
 		    sys.flags |= SYS_FLAG_BCLIENT;
 		else if (STREQ(pcmd->argval[items].string, "monitor"))

@@ -23,6 +23,7 @@
 #ifdef TTYCLK
 # ifdef HAVE_SYS_CLKDEFS_H
 #  include <sys/clkdefs.h>
+#  include <stropts.h>
 # endif
 # ifdef HAVE_SYS_SIO_H
 #  include <sys/sio.h>
@@ -33,8 +34,6 @@
 #include <sys/ppsclock.h>
 #endif /* HAVE_PPSCLOCK_H */
 
-/*#undef HAVE_PPSAPI	/* !!! !!! !!! !!! fix me */
-
 #ifdef HAVE_PPSAPI
 # ifdef HAVE_TIMEPPS_H
 #  include <timepps.h>
@@ -44,6 +43,12 @@
 #  endif
 # endif
 #endif /* HAVE_PPSAPI */
+
+#ifdef KERNEL_PLL
+#include "ntp_syscall.h"
+#endif /* KERNEL_PLL */
+
+#undef HAVE_PPSAPI      /* !!! !!! !!! !!! fix me */
 
 /*
  * Reference clock support is provided here by maintaining the fiction
@@ -80,6 +85,7 @@
 #define FUDGEFAC	.1	/* fudge correction factor */
 
 int fdpps;			/* pps file descriptor */
+int cal_enable;			/* enable refclock calibrate */
 
 /*
  * Type/unit peer index. Used to find the peer structure for control and
@@ -591,8 +597,17 @@ refclock_receive(
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, CLOCK_PHI * (current_time -
 	    peer->epoch), SQRT(peer->jitter));
-	if (pps_control && pp->sloppyclockflag & CLK_FLAG1)
-		pp->fudgetime1 -= pp->offset * FUDGEFAC;
+	if (cal_enable && last_offset < MINDISPERSE) {
+		if (
+			peer != sys_peer
+#ifdef KERNEL_PLL
+			|| pll_status & STA_PPSTIME
+#endif /* KERNEL_PLL */
+			)
+			pp->fudgetime1 -= pp->offset * FUDGEFAC;
+		else
+			pp->fudgetime1 -= pp->fudgetime1 * FUDGEFAC;
+	}
 }
 
 /*
@@ -1054,6 +1069,8 @@ refclock_control(
 	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
 		return;
 	if (!(peer = typeunit[clktype][unit]))
+		return;
+	if (peer->procptr == NULL)
 		return;
 	pp = peer->procptr;
 

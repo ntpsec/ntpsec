@@ -5,8 +5,6 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ATOM)
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -15,6 +13,8 @@
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+
+#if defined(REFCLOCK) && defined(CLOCK_ATOM)
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -40,11 +40,27 @@
  * within +-500 ms by another means, such as a radio clock or NTP
  * itself. There are two ways to connect the PPS signal, normally at TTL
  * levels, to the computer. One is to shift to EIA levels and connect to
- * the DCD lead of a serial port. This requires a level converter and
+ * pin 8 (DCD) of a serial port. This requires a level converter and
  * may require a one-shot flipflop to lengthen the pulse. The other is
- * to connect the PS signal directly to pin 10 of a PC paralell port.
+ * to connect the PPS signal directly to pin 10 (ACK) of a PC paralell
+ * port.
+ *
  * Both methods require a modified device driver and kernel interface
- * using the PPSAPI interface proposed to the IETF.
+ * compatible with the Pulse-per-Second API for Unix-like Operating
+ * Systems, Version 1.0, RFC-2783 (PPSAPI). Implementations are
+ * available for FreeBSD, Linux, SunOS, Solaris and Alpha. However, at
+ * present only the Alpha implementation provides the full generality of
+ * the API with multiple PPS drivers and multiple handles per driver.
+ *
+ * In many configurations a single port is used for the radio timecode
+ * and PPS signal. In order to provide for this configuration and others
+ * involving dedicated multiple serial/parallel ports, the driver first
+ * attempts to open the device /dev/pps%d, where %d is the unit number.
+ * If this fails, the driver attempts to open the device specified by
+ * the pps configuration command. If a port is to be shared, the pps
+ * command must be placed before the radio device(s) and the radio
+ * device(s) must be placed before the PPS driver(s) in the
+ * configuration file.
  *
  * Fudge Factors
  *
@@ -76,7 +92,6 @@ static struct peer *pps_peer;	/* atom driver for PPS sources */
 struct ppsunit {
 	struct timespec ts;	/* last timestamp */
 	int fddev;		/* pps device descriptor */
-	pps_params_t pps_params; /* pps parameters */
 	pps_info_t pps_info;	/* last pps data */
 	pps_handle_t handle;	/* pps handlebars */
 };
@@ -88,8 +103,11 @@ struct ppsunit {
 static	int	atom_start	P((int, struct peer *));
 static	void	atom_shutdown	P((int, struct peer *));
 static	void	atom_poll	P((int, struct peer *));
+static	void	atom_control	P((int, struct refclockstat *, struct
+				    refclockstat *, struct peer *));
 #ifdef HAVE_PPSAPI
 static	int	atom_pps	P((struct peer *));
+static	int	atom_ppsapi	P((struct peer *, int, int));
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -97,9 +115,17 @@ static	int	atom_pps	P((struct peer *));
  */
 struct	refclock refclock_atom = {
 	atom_start,		/* start up driver */
+#ifdef HAVE_PPSAPI
 	atom_shutdown,		/* shut down driver */
+#else
+	noentry,		/* shut down driver */
+#endif /* HAVE_PPSAPI */
 	atom_poll,		/* transmit poll message */
-	noentry,		/* not used (old atom_control) */
+#ifdef HAVE_PPSAPI
+	atom_control,		/* fudge control */
+#else
+	noentry,		/* fudge control */
+#endif /* HAVE_PPSAPI */
 	noentry,		/* initialize driver */
 	noentry,		/* not used (old atom_buginfo) */
 	NOFLAGS			/* not used */
@@ -118,8 +144,7 @@ atom_start(
 	struct refclockproc *pp;
 #ifdef HAVE_PPSAPI
 	register struct ppsunit *up;
-	int mode;
-	pps_handle_t handle;
+	char device[80];
 #endif /* HAVE_PPSAPI */
 
 	/*
@@ -137,66 +162,114 @@ atom_start(
 	pp->unitptr = (caddr_t)up;
 
 	/*
-	 * Open PPS device, if not done already. If some driver has
-	 * already opened the PPS device, the fdpps has the file
-	 * descriptor for it. If not and the pps_device string is non-
-	 * null, then this must be the device name. If the pps_device is
-	 * null, then open the canned device /dev/pps%d, or wherever the
-	 * link points.
+	 * Open PPS device. If this fails and some driver has already
+	 * opened the associated radio device, fdpps has the file
+	 * descriptor for it.
 	 */
-	if (fdpps > 0) {
+	sprintf(device, DEVICE, unit);
+	up->fddev = open(device, O_RDWR, 0777);
+	if (up->fddev <= 0 && fdpps > 0) {
+		strcpy(device, pps_device);
 		up->fddev = fdpps;
-	} else {
-		if (strlen(pps_device) == 0)
-			sprintf(pps_device, DEVICE, unit);
-		up->fddev = open(pps_device, O_RDWR, 0777);
-		if (up->fddev <= 0) {
-			msyslog(LOG_ERR,
-			    "refclock_atom: %s: %m", pps_device);
-			return (0);
-		}
+	}
+	if (up->fddev <= 0) {
+		msyslog(LOG_ERR,
+		    "refclock_atom: %s: %m", device);
+		return (0);
 	}
 
 	/*
-	 * Light up the PPSAPI interface, select edge, enable kernel.
+	 * Light off the PPSAPI interface. If this PPS device is shared
+	 * with the radio device, take the default options from the pps
+	 * command. This is for legacy purposes.
 	 */
-	if (time_pps_create(up->fddev, &handle) < 0) {
+	if (time_pps_create(up->fddev, &up->handle) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_create failed: %m");
 		return (0);
 	}
-	if (time_pps_getcap(handle, &mode) < 0) {
+	return(atom_ppsapi(peer, pps_assert, pps_hardpps));
+#else /* HAVE_PPSAPI */
+	return (1);
+#endif /* HAVE_PPSAPI */
+}
+
+
+#ifdef HAVE_PPSAPI
+/*
+ * atom_control - fudge control
+ */
+static void
+atom_control(
+	int unit,		/* unit (not used */
+	struct refclockstat *in, /* input parameters (not uded) */
+	struct refclockstat *out, /* output parameters (not used) */
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	struct refclockproc *pp;
+
+	pp = peer->procptr;
+	atom_ppsapi(peer, pp->sloppyclockflag & CLK_FLAG2,
+	    pp->sloppyclockflag & CLK_FLAG3);
+}
+
+
+/*
+ * Initialize PPSAPI
+ */
+int
+atom_ppsapi(
+	struct peer *peer,	/* peer structure pointer */
+	int enb_clear,		/* clear enable */
+	int enb_hardpps		/* hardpps enable */
+	)
+{
+	struct refclockproc *pp;
+	register struct ppsunit *up;
+	pps_params_t pps_params;
+	int capability;
+
+	pp = peer->procptr;
+	up = (struct ppsunit *)pp->unitptr;
+	if (time_pps_getcap(up->handle, &capability) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_getcap failed: %m");
 		return (0);
 	}
-	if (pps_assert)
-		up->pps_params.mode = mode & PPS_CAPTUREASSERT;
+	memset(&pps_params, 0, sizeof(pps_params_t));
+	if (enb_clear)
+		pps_params.mode = capability & PPS_CAPTURECLEAR;
 	else
-		up->pps_params.mode = mode & PPS_CAPTURECLEAR;
-	if (time_pps_setparams(handle, &up->pps_params) < 0) {
+		pps_params.mode = capability & PPS_CAPTUREASSERT;
+	if (!pps_params.mode) {
+		msyslog(LOG_ERR,
+		    "refclock_atom: invalid capture edge %d",
+		    pps_assert);
+		return (0);
+	}
+	if (time_pps_setparams(up->handle, &pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: time_pps_setparams failed: %m");
 		return (0);
 	}
-	if (pps_hardpps) {
-		if (time_pps_kcbind(handle, PPS_KC_HARDPPS,
-		    up->pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
+	if (enb_hardpps) {
+		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
+		    pps_params.mode, PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_atom: time_pps_kcbind failed: %m");
 			return (0);
 		}
 	}
-	(void)time_pps_getparams(handle, &up->pps_params);
-	up->handle = handle;
 #if DEBUG
-	if (debug)
+	if (debug) {
+		time_pps_getparams(up->handle, &pps_params);
 		printf(
-		    "refclock_atom: %s vers %d cap 0x%x mode 0x%x\n",
-		    pps_device, up->pps_params.api_version, mode,
-		    up->pps_params.mode);
+		    "refclock_ppsapi: fd %d capability 0x%x version %d mode 0x%x kern %d\n",
+		    up->fddev, capability, pps_params.api_version,
+		    pps_params.mode, enb_hardpps);
+	}
 #endif
-#endif /* HAVE_PPSAPI */
 	return (1);
 }
 
@@ -210,7 +283,6 @@ atom_shutdown(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-#ifdef HAVE_PPSAPI
 	struct refclockproc *pp;
 	register struct ppsunit *up;
 
@@ -223,11 +295,9 @@ atom_shutdown(
 	if (pps_peer == peer)
 		pps_peer = 0;
 	free(up);
-#endif /* HAVE_PPSAPI */
 }
 
 
-#ifdef HAVE_PPSAPI
 /*
  * atom_pps - receive data from the PPSAPI interface
  *
@@ -293,6 +363,7 @@ atom_pps(
 	return (0);
 }
 #endif /* HAVE_PPSAPI */
+
 
 /*
  * pps_sample - receive PPS data from some other clock driver
@@ -398,4 +469,11 @@ atom_poll(
 
 #else
 int refclock_atom_bs;
+int
+pps_sample(
+	   l_fp *offset		/* PPS offset */
+	   )
+{
+	return 1;
+}
 #endif /* REFCLOCK */

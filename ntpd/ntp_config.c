@@ -242,6 +242,8 @@ static struct keyword flags_keywords[] = {
 	{ "monitor",		PROTO_MONITOR },
 	{ "ntp",		PROTO_NTP },
 	{ "stats",		PROTO_FILEGEN },
+	{ "pps",		PROTO_PPS },
+	{ "calibrate",		PROTO_CAL },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -338,7 +340,7 @@ static char res_file[MAX_PATH];
 char const *progname;
 char	sys_phone[MAXPHONE][MAXDIAL]; /* ACTS phone numbers */
 char	pps_device[MAXPPS + 1]; /* PPS device name */
-int	pps_assert = 1;
+int	pps_assert;
 int	pps_hardpps;
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
@@ -1522,10 +1524,10 @@ getconfig(
 				flag = matchkey(tokens[i], pps_keywords);
 				switch(flag) {
 				    case CONF_PPS_ASSERT:
-					pps_assert = 1;
+					pps_assert = 0;
 					break;
 				    case CONF_PPS_CLEAR:
-					pps_assert = 0;
+					pps_assert = 1;
 					break;
 				    case CONF_PPS_HARDPPS:
 					pps_hardpps = 1;

@@ -47,7 +47,7 @@
 # include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_MX4200) && defined(PPS)
+#if defined(REFCLOCK) && defined(CLOCK_MX4200) && defined(HAVE_PPSAPI)
 
 #include <stdio.h>
 #include <ctype.h>
@@ -81,6 +81,14 @@ struct ppsclockev {
 	u_int serial;
 };
 #endif /* ! HAVE_STRUCT_PPSCLOCKEV */
+
+#ifdef HAVE_TIMEPPS_H
+#   include <timepps.h>
+#else
+# ifdef HAVE_SYS_TIMEPPS_H
+#   include <sys/timepps.h>
+# endif
+#endif
 
 /*
  * This driver supports the Magnavox Model MX 4200 GPS Receiver
@@ -141,6 +149,9 @@ struct mx4200unit {
 	u_int  known;			/* position known yet? */
 	u_long clamp_time;		/* when to stop postion averaging */
 	u_long log_time;		/* when to print receiver status */
+	pps_handle_t	pps_h;
+	pps_params_t	pps_p;
+	pps_info_t	pps_i;
 };
 
 static char pmvxg[] = "PMVXG";
@@ -175,7 +186,7 @@ int	mx4200_cmpl_fp	P((const void *, const void *));
 #else
 int	mx4200_cmpl_fp	P((const l_fp *, const l_fp *));
 #endif /* not QSORT_USES_VOID_P */
-static	void	mx4200_config	P((struct peer *));
+static	int	mx4200_config	P((struct peer *));
 static	void	mx4200_ref	P((struct peer *));
 static	void	mx4200_send	P((struct peer *, char *, ...))
     __attribute__ ((format (printf, 2, 3)));
@@ -226,6 +237,7 @@ mx4200_start(
 	 * Allocate unit structure
 	 */
 	if (!(up = (struct mx4200unit *) emalloc(sizeof(struct mx4200unit)))) {
+		perror("emalloc");
 		(void) close(fd);
 		return (0);
 	}
@@ -250,8 +262,7 @@ mx4200_start(
 	memcpy((char *)&pp->refid, REFID, 4);
 
 	/* Ensure the receiver is properly configured */
-	mx4200_config(peer);
-	return (1);
+	return mx4200_config(peer);
 }
 
 
@@ -277,7 +288,7 @@ mx4200_shutdown(
 /*
  * mx4200_config - Configure the receiver
  */
-static void
+static int
 mx4200_config(
 	struct peer *peer
 	)
@@ -286,6 +297,7 @@ mx4200_config(
 	int add_mode;
 	register struct mx4200unit *up;
 	struct refclockproc *pp;
+	int mode;
 
 	pp = peer->procptr;
 	up = (struct mx4200unit *)pp->unitptr;
@@ -315,6 +327,47 @@ mx4200_config(
 	up->last_leap   	= 0;	/* LEAP_NOWARNING */
 	up->clamp_time  	= current_time + (AVGING_TIME * 60 * 60);
 	up->log_time    	= current_time + SLEEPTIME;
+
+	if (time_pps_create(pp->io.fd, &up->pps_h) < 0) {
+		perror("time_pps_create");
+		msyslog(LOG_ERR,
+			"mx4200_config: time_pps_create failed: %m");
+		return (0);
+	}
+	if (time_pps_getcap(up->pps_h, &mode) < 0) {
+		msyslog(LOG_ERR,
+			"mx4200_config: time_pps_getcap failed: %m");
+		return (0);
+	}
+
+	if (time_pps_getparams(up->pps_h, &up->pps_p) < 0) {
+		msyslog(LOG_ERR,
+			"mx4200_config: time_pps_getparams failed: %m");
+		return (0);
+	}
+
+	/* nb. only turn things on, if someone else has turned something
+	 *      on before we get here, leave it alone!
+	 */
+
+	up->pps_p.mode = PPS_CAPTUREASSERT | PPS_TSFMT_TSPEC;
+	up->pps_p.mode &= mode;		/* only set what is legal */
+
+	if (time_pps_setparams(up->pps_h, &up->pps_p) < 0) {
+		perror("time_pps_setparams");
+		msyslog(LOG_ERR,
+			"mx4200_config: time_pps_setparams failed: %m");
+		exit(1);
+	}
+
+	if (time_pps_kcbind(up->pps_h, PPS_KC_HARDPPS, PPS_CAPTUREASSERT,
+			PPS_TSFMT_TSPEC) < 0) {
+		perror("time_pps_kcbind");
+		msyslog(LOG_ERR,
+			"mx4200_config: time_pps_kcbind failed: %m");
+		exit(1);
+	}
+
 
 	/*
 	 * "007" Control Port Configuration
@@ -428,6 +481,8 @@ mx4200_config(
 			/* precision for position output */
 			/* nmea version for cga & gll output */
 			/* pass-through control */
+
+	return (1);
 }
 
 /*
@@ -542,7 +597,7 @@ mx4200_ref(
 	    lons,	/* longitude DDDMM.MMMM */
 	    ewc,	/* east/west */
 	    alt,	/* Altitude */
-	    1);		/* Altitude Reference (0=WGS84 ellipsoid, 1=MSL geoid) */
+	    1);		/* Altitude Reference (0=WGS84 ellipsoid, 1=MSL geoid)*/
 
 	msyslog(LOG_DEBUG,
 	    "mx4200: reconfig to fixed location: %s %c, %s %c, %.2f m",
@@ -718,10 +773,14 @@ mx4200_receive(
 	sentence_type = strtol(cp, &cp, 10);
 
 	/*
+	 * Process the sentence according to its type.
+	 */
+	switch (sentence_type) {
+
+	/*
 	 * "000" Status message
 	 */
-
-	if (sentence_type == PMVXG_D_STATUS) {
+	case PMVXG_D_STATUS:
 		/*
 		 * XXX
 		 * Since we configure the receiver to not give us status
@@ -737,35 +796,35 @@ mx4200_receive(
 		}
 		mx4200_debug(peer, "mx4200_receive: reset receiver\n");
 		mx4200_config(peer);
-		return;
-	}
+		break;
 
 	/*
 	 * "021" Position, Height, Velocity message,
 	 *  if we are still averaging our position
 	 */
-	if (sentence_type == PMVXG_D_PHV && !up->known) {
-		/*
-		 * Parse the message, calculating our averaged position.
-		 */
-		if ((cp = mx4200_parse_p(peer)) != NULL) {
-			mx4200_debug(peer, "mx4200_receive: pos: %s\n", cp);
-			return;
+	case PMVXG_D_PHV:
+		if (!up->known) {
+			/*
+			 * Parse the message, calculating our averaged position.
+			 */
+			if ((cp = mx4200_parse_p(peer)) != NULL) {
+				mx4200_debug(peer, "mx4200_receive: pos: %s\n", cp);
+				return;
+			}
+			mx4200_debug(peer,
+			    "mx4200_receive: position avg %f %.9f %.9f %.4f\n",
+			    up->N_fixes, up->avg_lat, up->avg_lon, up->avg_alt);
+			/*
+			 * Reinitialize as a reference station
+			 * if position is well known.
+			 */
+			if (current_time > up->clamp_time) {
+				up->known++;
+				mx4200_debug(peer, "mx4200_receive: reconfiguring!\n");
+				mx4200_ref(peer);
+			}
 		}
-		mx4200_debug(peer,
-		    "mx4200_receive: position avg %f %.9f %.9f %.4f\n",
-		    up->N_fixes, up->avg_lat, up->avg_lon, up->avg_alt);
-		/*
-		 * Reinitialize as a reference station
-		 * if position is well known.
-		 */
-		if (current_time > up->clamp_time) {
-			up->known++;
-			mx4200_debug(peer, "mx4200_receive: reconfiguring!\n");
-			mx4200_ref(peer);
-		}
-		return;
-	}
+		break;
 
 	/*
 	 * Print to the syslog:
@@ -773,21 +832,20 @@ mx4200_receive(
 	 * "030" Software Configuration
 	 * "523" Time Recovery Parameters Currently in Use
 	 */
-	if (sentence_type == PMVXG_D_MODEDATA ||
-	    sentence_type == PMVXG_D_SOFTCONF ||
-	    sentence_type == PMVXG_D_TRECOVUSEAGE ) {
+	case PMVXG_D_MODEDATA:
+	case PMVXG_D_SOFTCONF:
+	case PMVXG_D_TRECOVUSEAGE:
+
 		if ((cp = mx4200_parse_s(peer)) != NULL) {
 			mx4200_debug(peer,
 				     "mx4200_receive: multi-record: %s\n", cp);
-			return;
 		}
-		return;
-	}
+		break;
 
 	/*
 	 * "830" Time Recovery Results message
 	 */
-	if (sentence_type == PMVXG_D_TRECOVOUT) {
+	case PMVXG_D_TRECOVOUT:
 
 		/*
 		 * Capture the last PPS signal.
@@ -846,12 +904,16 @@ mx4200_receive(
 		 * Turn off the flag and return
 		 */
 		up->polled = 0;
-		return;
-	}
+		break;
 
 	/*
 	 * Ignore all other sentence types
 	 */
+	default:
+		break;
+
+	} /* switch (sentence_type) */
+
 	return;
 }
 
@@ -904,17 +966,19 @@ mx4200_parse_t(
 	struct mx4200unit *up;
 	char   time_mark_valid, time_sync, op_mode;
 	int    sentence_type, valid;
-	int    year, day_of_year, month, day_of_month, hour, minute, second, leapsec;
+	int    year, day_of_year, month, day_of_month;
+	int    hour, minute, second, leapsec;
 	int    oscillator_offset, time_mark_error, time_bias;
 
 	pp = peer->procptr;
 	up = (struct mx4200unit *)pp->unitptr;
 
 	leapsec = 0;  /* Not all receivers output leap second warnings (!) */
-	sscanf(pp->a_lastcode, "$PMVXG,%d,%c,%d,%d,%d,%d:%d:%d,%c,%c,%d,%d,%d,%d",
+	sscanf(pp->a_lastcode,
+		"$PMVXG,%d,%c,%d,%d,%d,%d:%d:%d,%c,%c,%d,%d,%d,%d",
 		&sentence_type, &time_mark_valid, &year, &month, &day_of_month,
-		&hour, &minute, &second, &time_sync, &op_mode, &oscillator_offset,
-		&time_mark_error, &time_bias, &leapsec);
+		&hour, &minute, &second, &time_sync, &op_mode,
+		&oscillator_offset, &time_mark_error, &time_bias, &leapsec);
 
 	if (sentence_type != PMVXG_D_TRECOVOUT)
 		return ("wrong rec-type");
@@ -1194,9 +1258,10 @@ mx4200_parse_p(
 	/* Should never happen! */
 	if (up->moving) return ("mobile platform - no pos!");
 
-	sscanf ( pp->a_lastcode, "$PMVXG,%d,%lf,%lf,%c,%lf,%c,%lf,%lf,%lf,%lf,%d",
-		&sentence_type, &mtime, &lat, &north_south, &lon, &east_west, &alt,
-		&geoid, &vele, &veln, &mode);
+	sscanf ( pp->a_lastcode,
+		"$PMVXG,%d,%lf,%lf,%c,%lf,%c,%lf,%lf,%lf,%lf,%d",
+		&sentence_type, &mtime, &lat, &north_south, &lon, &east_west,
+		&alt, &geoid, &vele, &veln, &mode);
 
 	/* Sentence type */
 	if (sentence_type != PMVXG_D_PHV)
@@ -1416,19 +1481,19 @@ mx4200_parse_s(
 
 		case PMVXG_D_STATUS:
 			msyslog(LOG_DEBUG,
-				"mx4200: status: %s", pp->a_lastcode);
+			  "mx4200: status: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_MODEDATA:
 			msyslog(LOG_DEBUG,
-				"mx4200: mode data: %s", pp->a_lastcode);
+			  "mx4200: mode data: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_SOFTCONF:
 			msyslog(LOG_DEBUG,
-				"mx4200: firmware configuration: %s", pp->a_lastcode);
+			  "mx4200: firmware configuration: %s", pp->a_lastcode);
 			break;
 		case PMVXG_D_TRECOVUSEAGE:
 			msyslog(LOG_DEBUG,
-				"mx4200: time recovery parms: %s", pp->a_lastcode);
+			  "mx4200: time recovery parms: %s", pp->a_lastcode);
 			break;
 		default:
 			return ("wrong rec-type");
@@ -1438,7 +1503,7 @@ mx4200_parse_s(
 }
 
 /*
- * Process a PPS signal, returning a timestamp.
+ * Process a PPS signal, placing a timestamp in pp->lastrec.
  */
 static int
 mx4200_pps(
@@ -1449,13 +1514,7 @@ mx4200_pps(
 	struct refclockproc *pp;
 	struct mx4200unit *up;
 
-	int request;
-#ifdef HAVE_CIOGETEV
-	request = CIOGETEV;
-#endif
-#ifdef HAVE_TIOCGPPSEV
-	request = TIOCGPPSEV;
-#endif
+	struct timespec timeout;
 
 	pp = peer->procptr;
 	up = (struct mx4200unit *)pp->unitptr;
@@ -1463,41 +1522,47 @@ mx4200_pps(
 	/*
 	 * Grab the timestamp of the PPS signal.
 	 */
-	temp_serial = up->ppsev.serial;
-	if (ioctl(fdpps, request, (caddr_t)&up->ppsev) < 0) {
-		/* XXX Actually, if this fails, we're pretty much screwed */
+	temp_serial = up->pps_i.assert_sequence;
+	timeout.tv_sec  = 0;
+	timeout.tv_nsec = 0;
+	if (time_pps_fetch(up->pps_h, PPS_TSFMT_TSPEC, &(up->pps_i),
+			&timeout) < 0) {
 		mx4200_debug(peer,
-		  "mx4200_pps: CIOGETEV/TIOCGPPSEV: serial=%d, fdpps=%d, %s\n",
-		  up->ppsev.serial, fdpps, strerror(errno));
+		  "mx4200_pps: time_pps_fetch: serial=%d, handle=%d, %s\n",
+		     up->pps_i.assert_sequence, up->pps_h, strerror(errno));
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}
-	if (temp_serial == up->ppsev.serial) {
+	if (temp_serial == up->pps_i.assert_sequence) {
 		mx4200_debug(peer,
-		    "mx4200_pps: ppsev serial not incrementing: %d\n",
-		    up->ppsev.serial);
+		   "mx4200_pps: assert_sequence serial not incrementing: %d\n",
+			up->pps_i.assert_sequence);
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}
-
 	/*
 	 * Check pps serial number against last one
 	 */
-	if (up->lastserial + 1 != up->ppsev.serial && up->lastserial != 0) {
-		if (up->ppsev.serial == up->lastserial)
+	if (up->lastserial + 1 != up->pps_i.assert_sequence &&
+	    up->lastserial != 0) {
+		if (up->pps_i.assert_sequence == up->lastserial) {
 			mx4200_debug(peer, "mx4200_pps: no new pps event\n");
-		else
+		} else {
 			mx4200_debug(peer, "mx4200_pps: missed %d pps events\n",
-			    up->ppsev.serial - up->lastserial - 1);
+			    up->pps_i.assert_sequence - up->lastserial - 1);
+		}
 		refclock_report(peer, CEVNT_FAULT);
 	}
-	up->lastserial = up->ppsev.serial;
+	up->lastserial = up->pps_i.assert_sequence;
 
 	/*
 	 * Return the timestamp in pp->lastrec
 	 */
-	up->ppsev.tv.tv_sec += (u_int32) JAN_1970;
-	TVTOTS(&up->ppsev.tv,&pp->lastrec);
+
+	pp->lastrec.l_ui = up->pps_i.assert_timestamp.tv_sec +
+			   (u_int32) JAN_1970;
+	pp->lastrec.l_uf = ((double)(up->pps_i.assert_timestamp.tv_nsec) *
+			   4.2949672960) + 0.5;
 
 	return(0);
 }

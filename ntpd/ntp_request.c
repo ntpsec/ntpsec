@@ -1433,11 +1433,11 @@ setclr_flags(
 
 	flags = ((struct conf_sys_flags *)inpkt->data)->flags;
 
-	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE |
+	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
 		      SYS_FLAG_FILEGEN)) {
 		msyslog(LOG_ERR, "setclr_flags: extra flags: %#x",
-			flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_AUTHENTICATE | 
+			flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS | 
 				  SYS_FLAG_NTP | SYS_FLAG_KERNEL |
 				  SYS_FLAG_MONITOR | SYS_FLAG_FILEGEN));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -1446,8 +1446,8 @@ setclr_flags(
 
 	if (flags & SYS_FLAG_BCLIENT)
 	    proto_config(PROTO_BROADCLIENT, set, 0.);
-	if (flags & SYS_FLAG_AUTHENTICATE)
-	    proto_config(PROTO_AUTHENTICATE, set, 0.);
+	if (flags & SYS_FLAG_PPS)
+	    proto_config(PROTO_PPS, set, 0.);
 	if (flags & SYS_FLAG_NTP)
 	    proto_config(PROTO_NTP, set, 0.);
 	if (flags & SYS_FLAG_KERNEL)

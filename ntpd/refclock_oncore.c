@@ -83,7 +83,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI)
+#if defined(REFCLOCK) && defined(CLOCK_ONCORE) && defined(HAVE_PPSAPI) && 0
 
 #include <stdio.h>
 #include <ctype.h>

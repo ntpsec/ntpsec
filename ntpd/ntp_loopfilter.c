@@ -113,6 +113,7 @@ int	pll_nano;		/* nanosecond kernel switch */
 int	ntp_enable;		/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
 int	kern_enable;		/* kernel support enabled */
+int	pps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	allow_set_backward = TRUE; /* step corrections allowed */
@@ -173,14 +174,20 @@ local_clock(
 	double dtemp, etemp;	/* double temps */
 	int retval;		/* return value */
 
+	/*
+	 * If the loop is opened, monitor and record the offsets
+	 * anyway in order to determine the open-loop response.
+	 */
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "local_clock: offset %.6f jitter %.6f state %d\n",
 		    fp_offset, SQRT(epsil), state);
 #endif
-	if (!ntp_enable)
+	if (!ntp_enable) {
+		record_loop_stats();
 		return(0);
+	}
 
 	/*
 	 * If the clock is way off, don't tempt fate by correcting it.
@@ -379,7 +386,6 @@ local_clock(
 			etemp = min(mu, ULOGTOD(sys_poll));
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			clock_offset = fp_offset;
- 
 			break;
 		}
 	}
@@ -462,12 +468,18 @@ local_clock(
 
 		/*
 		 * Wiggle the PPS bits according to the health of the
-		 * prefer peer.
+		 * prefer peer. Note that we explicitly turn off the
+		 * PPS if not enabled.
 		 */
-		if (pll_status & STA_PPSSIGNAL)
-			ntv.status |= STA_PPSFREQ;
-		if (pll_status & STA_PPSFREQ && pps_stratum < STRATUM_UNSPEC)
-			ntv.status |= STA_PPSTIME;
+		if (pps_enable) {
+			if (pll_status & STA_PPSSIGNAL)
+				ntv.status |= STA_PPSFREQ;
+			if (pll_status & STA_PPSFREQ && pps_stratum <
+			    STRATUM_UNSPEC)
+				ntv.status |= STA_PPSTIME;
+		} else {
+			pll_status &= ~(STA_PPSFREQ | STA_PPSTIME);
+		}
 
 		/*
 		 * Update the offset and frequency from the kernel
@@ -480,13 +492,10 @@ local_clock(
 				    ntv.status);
 		}
 		pll_status = ntv.status;
-		if (pll_nano) {
+		if (pll_nano)
 			clock_offset = ntv.offset / 1e9;
-			sys_poll = ntv.constant;
-		} else {
+		else
 			clock_offset = ntv.offset / 1e6;
-			sys_poll = ntv.constant + 4;
-		}
 		clock_frequency = ntv.freq / 65536e6 - drift_comp;
 		flladj = plladj = 0;
 
@@ -494,8 +503,7 @@ local_clock(
 		 * If the kernel pps discipline is working, monitor its
 		 * performance.
 		 */
-		if (ntv.status & STA_PPSTIME && ntv.status &
-		    STA_PPSSIGNAL) {
+		if (ntv.status & STA_PPSTIME) {
 			if (!pps_control)
 				NLOG(NLOG_SYSEVENT)msyslog(LOG_INFO,
 				    "pps sync enabled");
@@ -504,7 +512,7 @@ local_clock(
 				sys_jitter = ntv.jitter / 1e9;
 			else
 				sys_jitter = ntv.jitter / 1e6;
-			sys_poll = ntv.shift;
+			sys_poll = NTP_MINDPOLL;
 		}
 	}
 #endif /* KERNEL_PLL */
@@ -726,7 +734,7 @@ loop_config(
 #endif /* NTP_API */
 		ntv.maxerror = MAXDISPERSE;
 		ntv.esterror = MAXDISPERSE;
-		ntv.status = STA_UNSYNC | STA_PLL;
+		ntv.status = STA_UNSYNC;
 #ifdef SIGSYS
 		/*
 		 * Use sigsetjmp() to save state and then call
