@@ -2013,11 +2013,13 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO | CRYPTO_RESP,
 				    peer->hcookie, peer->associd);
+#ifdef PUBKEY
 			else if (crypto_flags & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,
 				    peer->assoc);
+#endif /* PUBKEY */
 			peer->cmmd = 0;
 			break;
 
@@ -2053,11 +2055,13 @@ peer_xmit(
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_AUTO, peer->hcookie,
 				    peer->assoc);
+#ifdef PUBKEY
 			else if (crypto_flags & CRYPTO_FLAG_TAI &&
 			    sys_tai == 0)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_TAI, peer->hcookie,
 				    peer->assoc);
+#endif /* PUBKEY */
 			peer->cmmd = 0;
 			break;
 		}
