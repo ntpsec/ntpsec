@@ -220,7 +220,7 @@ struct	refclock refclock_oncore = {
  * for the the UT or VP Oncore.
  */
 
-static struct {
+static struct msg_desc {
 	const char	flag[3];
 	const int	len;
 	void		(*handler) P((struct instance *, u_char *, u_int));
@@ -254,7 +254,6 @@ static struct {
 	{ {0},	  7,	0, ""}
 };
 
-static unsigned int oncore_shmem_length;
 static unsigned int oncore_shmem_Cb;
 
 /*
@@ -593,22 +592,23 @@ static void
 oncore_init_shmem(struct instance *instance, char *filename)
 {
 #ifdef ONCORE_SHMEM_STATUS
-	int i, l, m, n;
+	int i, l, n;
 	char *buf;
+	struct msg_desc *mp;
+	static unsigned int oncore_shmem_length;
 
 	if (oncore_messages[0].shmem == 0) {
 		n = 1;
-		l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) - 1;
-		for(m = 0; m < l; m++) {
-			oncore_messages[m].shmem = n;
+		for (mp = oncore_messages; mp->flag[0]; mp++) {
+			mp->shmem = n;
 			/* Allocate space for multiplexed almanac */
-			if (!strcmp(oncore_messages[m].flag, "Cb")) {
+			if (!strcmp(mp->flag, "Cb")) {
 				oncore_shmem_Cb = n;
-				n += (oncore_messages[m].len + 2) * 34;
+				n += (mp->len + 2) * 34;
 			}
-			n += oncore_messages[m].len + 2;
+			n += mp->len + 2;
 		}
-		oncore_shmem_length = n;
+		oncore_shmem_length = n + 2;
 		fprintf(stderr, "ONCORE: SHMEM length: %d bytes\n", oncore_shmem_length);
 	}
 	instance->statusfd = open(filename, O_RDWR|O_CREAT|O_TRUNC, 0644);
@@ -640,22 +640,22 @@ oncore_init_shmem(struct instance *instance, char *filename)
 		close (instance->statusfd);
 		exit(4);
 	}
-	l = sizeof(oncore_messages)/sizeof(oncore_messages[0]) - 1;
-	for(m = 0; m < l; m++) {
-		instance->shmem[oncore_messages[m].shmem + 0] = oncore_messages[m].len >> 8;
-		instance->shmem[oncore_messages[m].shmem + 1] = oncore_messages[m].len & 0xff;
-		instance->shmem[oncore_messages[m].shmem + 2] = '@';
-		instance->shmem[oncore_messages[m].shmem + 3] = '@';
-		instance->shmem[oncore_messages[m].shmem + 4] = oncore_messages[m].flag[0];
-		instance->shmem[oncore_messages[m].shmem + 5] = oncore_messages[m].flag[1];
-		if (!strcmp(oncore_messages[m].flag, "Cb")) {
+	for (mp = oncore_messages; mp->flag[0]; mp++) {
+		l = mp->shmem;
+		instance->shmem[l + 0] = mp->len >> 8;
+		instance->shmem[l + 1] = mp->len & 0xff;
+		instance->shmem[l + 2] = '@';
+		instance->shmem[l + 3] = '@';
+		instance->shmem[l + 4] = mp->flag[0];
+		instance->shmem[l + 5] = mp->flag[1];
+		if (!strcmp(mp->flag, "Cb")) {
 			for (i = 1; i < 35; i++) {
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 0] = oncore_messages[m].len >> 8;
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 1] = oncore_messages[m].len & 0xff;
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 2] = '@';
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 3] = '@';
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 4] = oncore_messages[m].flag[0];
-				instance->shmem[oncore_messages[m].shmem + i * 35 + 5] = oncore_messages[m].flag[1];
+				instance->shmem[l + i * 35 + 0] = mp->len >> 8;
+				instance->shmem[l + i * 35 + 1] = mp->len & 0xff;
+				instance->shmem[l + i * 35 + 2] = '@';
+				instance->shmem[l + i * 35 + 3] = '@';
+				instance->shmem[l + i * 35 + 4] = mp->flag[0];
+				instance->shmem[l + i * 35 + 5] = mp->flag[1];
 			}
 		}
 	}
@@ -747,10 +747,9 @@ oncore_read_config(
  */
 
 	FILE	*fd;
-	char	*cp, line[100], units[2], device[20];
-	int	i, j, sign, lat_flg, long_flg, ht_flg, mode;
+	char	*cp, *cc, *ca, line[100], units[2], device[20];
+	int	i, sign, lat_flg, long_flg, ht_flg, mode;
 	double	f1, f2, f3;
-
 
 	sprintf(device, "%s%d", INIT_FILE, instance->unit);
 	if ((fd=fopen(device, "r")) == NULL)
@@ -762,36 +761,54 @@ oncore_read_config(
 	mode = 0;
 	lat_flg = long_flg = ht_flg = 0;
 	while (fgets(line, 100, fd)) {
-		if ((cp=strchr(line, '#')))
+
+		/* Remove comments */
+		if ((cp = strchr(line, '#')))
 			*cp = '\0';
-		i = strlen(line);
-		if (line[i - 1] == '\n')
+		
+		/* Remove trailing space */
+		for (i = strlen(line);
+		     i > 0 && isascii(line[i - 1]) && isspace(line[i - 1]);
+			)
 			line[--i] = '\0';
-		for (j=0; j<i; j++) {	/* let them use `=' between terms */
-			if (isascii((int)line[j]) && islower((int)line[j]))
-				line[j] = toupper(line[j]);
-			if (line[j] == '=') {
-				line[j] = ' ';
+
+		/* Remove leading space */
+		for (cc = line; *cc && isascii(*cc) && isspace(*cc); cc++)
+			continue;
+
+		/* Stop if nothing left */
+		if (!*cc)
+			continue;
+
+		/* Lowercase the command and find the arg */
+		for (ca = cc; *ca; ca++) {
+			if (isascii(*ca) && islower(*ca)) {
+				*ca = toupper(*ca);
+			} else if (isascii(*ca) && isspace(*ca)) {
+				break;
+			} else if (*ca == '=') {
+				*ca = ' ';
 				break;
 			}
 		}
-		for (j=0; j<i; j++)
-			if (line[j] != ' ')
-				break;
-		if (!strncmp(&line[j], "STATUS", 6)) {
-			j += 6;
-			while (isascii(line[j]) && isspace(line[j]))
-				j++;
-			oncore_init_shmem(instance, &line[j]);
+		
+		/* Remove space leading the arg */
+		for (; *ca && isascii(*ca) && isspace(*ca); ca++)
+			continue;
+
+		if (!strncmp(cc, "STATUS", 6)) {
+			oncore_init_shmem(instance, ca);
 			continue;
 		}
-		for (j=0; j<i; j++)	/* just in case lower case */
-			if (isascii((int)line[j]) && islower((int)line[j]))
-				line[j] = toupper(line[j]);
-		if (!strncmp(&line[j], "LAT", 3)) {
-			j += 3;
+
+		/* Uppercase argument as well */
+		for (cp = ca; *cp; cp++)
+			if (isascii(*cp) && islower(*cp))
+				*cp = toupper(*cp);
+
+		if (!strncmp(cc, "LAT", 3)) {
 			f1 = f2 = f3 = 0;
-			sscanf(&line[j], "%lf %lf %lf", &f1, &f2, &f3);
+			sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3);
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -799,10 +816,9 @@ oncore_read_config(
 			}
 			instance->ss_lat = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*miliseconds*/
 			lat_flg++;
-		} else if (!strncmp(&line[j], "LON", 3)) {
-			j += 3;
+		} else if (!strncmp(cc, "LON", 3)) {
 			f1 = f2 = f3 = 0;
-			sscanf(&line[j], "%lf %lf %lf", &f1, &f2, &f3);
+			sscanf(ca, "%lf %lf %lf", &f1, &f2, &f3);
 			sign = 1;
 			if (f1 < 0) {
 				f1 = -f1;
@@ -810,29 +826,24 @@ oncore_read_config(
 			}
 			instance->ss_long = sign*1000*(fabs(f3) + 60*(fabs(f2) + 60*f1)); /*miliseconds*/
 			long_flg++;
-		} else if (!strncmp(&line[j], "HT", 2)) {
-			instance->ss_ht_type = 0;
-			if (!strncmp(&line[j], "HTGPS", 5)) {
+		} else if (!strncmp(cc, "HT", 2)) {
+			if (!strncmp(cc, "HTGPS", 5)) 
 				instance->ss_ht_type = 0;
-				j +=3;
-			}
-			if (!strncmp(&line[j], "HTMSL", 5)) {
+			else if (!strncmp(cc, "HTMSL", 5))
 				instance->ss_ht_type = 1;
-				j +=3;
-			}
-			j += 2;
+			else 
+				instance->ss_ht_type = 0;
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(&line[j], "%lf %1s", &f1, units);
+			sscanf(ca, "%lf %1s", &f1, units);
 			if (units[0] == 'F')
 				f1 = 0.3048 * f1;
 			instance->ss_ht = 100 * f1;    /* cm */
 			ht_flg++;
-		} else if (!strncmp(&line[j], "DELAY", 5)) {
-			j += 5;
+		} else if (!strncmp(cc, "DELAY", 5)) {
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(&line[j], "%lf %1s", &f1, units);
+			sscanf(ca, "%lf %1s", &f1, units);
 			if (units[0] == 'N')
 				;
 			else if (units[0] == 'U')
@@ -844,11 +855,10 @@ oncore_read_config(
 			if (f1 < 0 || f1 > 1.e9)
 				f1 = 0;
 			instance->delay = f1;		/* delay in ns */
-		} else if (!strncmp(&line[j], "OFFSET", 6)) {
-			j += 6;
+		} else if (!strncmp(cc, "OFFSET", 6)) {
 			f1 = 0;
 			units[0] = '\0';
-			sscanf(&line[j], "%lf %1s", &f1, units);
+			sscanf(ca, "%lf %1s", &f1, units);
 			if (units[0] == 'N')
 				;
 			else if (units[0] == 'U')
@@ -860,15 +870,14 @@ oncore_read_config(
 			if (f1 < 0 || f1 > 1.e9)
 				f1 = 0;
 			instance->offset = f1;		/* offset in ns */
-		} else if (!strncmp(&line[j], "MODE", 4)) {
-			j += 4;
-			sscanf(&line[j], "%d", &mode);
+		} else if (!strncmp(cc, "MODE", 4)) {
+			sscanf(ca, "%d", &mode);
 			if (mode < 0 || mode > 4)
 				mode = 4;
 			instance->init_type = mode;
-		} else if (!strncmp(&line[j], "ASSERT", 6)) {
+		} else if (!strncmp(cc, "ASSERT", 6)) {
 			instance->assert = 1;
-		} else if (!strncmp(&line[j], "CLEAR", 5)) {
+		} else if (!strncmp(cc, "CLEAR", 5)) {
 			instance->assert = 0;
 		}
 	}

@@ -1,5 +1,9 @@
 2000-01-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_oncore.c (oncore_read_config): Patches and cleanup
+	From: Poul-Henning Kamp <phk@critter.freebsd.dk>
+	more isascii() stuff from HMS.
+
 	* ntpd/refclock_fg.c (fg_receive): Cast.
 	From: Tom Smith <smith@cag.lkg.dec.com>
 
