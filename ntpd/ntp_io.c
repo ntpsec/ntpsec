@@ -269,15 +269,16 @@ int
 create_wildcards(u_short port) {
 
 	int idx = 0;
-	BOOL okipv4 = TRUE;
+	isc_boolean_t okipv4 = ISC_TRUE;
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
 #ifdef IPV6_V6ONLY
-	okipv4 = (isc_net_probeipv4() == ISC_R_SUCCESS);
+	if(isc_net_probeipv4() != ISC_R_SUCCESS)
+		okipv4 == ISC_FALSE;
 #endif
 
-	if(okipv4) {
+	if(okipv4 == ISC_TRUE) {
 		inter_list[idx].sin.ss_family = AF_INET;
 		((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr = htonl(INADDR_ANY);
 		((struct sockaddr_in*)&inter_list[idx].sin)->sin_port = port;
