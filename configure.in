@@ -572,7 +572,7 @@ case "$target" in
 	# this conditional will need to change.  Maybe use AC_TRY_RUN
 	# instead to try to set the time to itself and check errno.
     ;;
- *) AC_CHECK_FUNCS(clock_settime)
+ *) AC_CHECK_FUNCS(clock_gettime clock_settime)
     ;;
 esac
 AC_CHECK_FUNCS(daemon)
