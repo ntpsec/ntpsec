@@ -1,3 +1,9 @@
+2000-02-10  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntptrace/ntptrace.c (DoTrace): If the server's srcadr is 0.0.0.0
+	then we haven't synced yet.  Note and punt.
+	Reported by: Bdale Garbee <bdale@gag.com>,http://bugs.debian.org/56551
+
 2000-02-09  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ports/winnt/include/config.h: Typo (CLOCK_PALISADE comment)

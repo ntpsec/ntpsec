@@ -242,6 +242,15 @@ DoTrace(
 {
 	int retries = sys_retries;
 
+	if (!server->srcadr.sin_addr.s_addr) {
+		if (nonames)
+		    printf("%s:\t*Not Synchronized*\n", ntoa(&server->srcadr));
+		else
+		    printf("%s:\t*Not Synchronized*\n", ntohost(&server->srcadr));
+		fflush(stdout);
+		return;
+	}
+
 	if (!verbose) {
 		if (nonames)
 		    printf("%s: ", ntoa(&server->srcadr));
