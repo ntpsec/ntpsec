@@ -1448,14 +1448,11 @@ poll_update(
 			hpoll = peer->minpoll;
 
 	/*
-	 * The normal case is to use the minimum of the host and peer
-	 * poll intervals, but not below minpoll and not above maxpoll.
-	 * In other words, ovesampling is okay, but undersampling is a
-	 * sin, unless this would cause excess network traffic.
+	 * The ordinary case; clamp the poll interval between minpoll
+	 * and maxpoll.
 	 */
 	} else {
-		hpoll = min(max(min(peer->ppoll, mpoll), peer->minpoll),
-		    peer->maxpoll);
+		hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 	}
 
 	/*
@@ -1490,9 +1487,15 @@ poll_update(
 			peer->nextdate += sys_calldelay;
 		else
 			peer->nextdate += BURST_DELAY;
-
+	/*
+	 * The ordinary case; use the minimum of the host and peer
+	 * intervals, but not less than minpoll. In other words,
+	 * oversampling is okay but understampling is evil.
+	 */
 	} else {
-		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
+		peer->nextdate = peer->outdate +
+		    RANDPOLL(max(min(peer->ppoll, hpoll),
+		    peer->minpoll));
 	}
 
 	/*
