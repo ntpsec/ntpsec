@@ -1301,9 +1301,11 @@ dns_a(
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		} else {
+#if 0
 #ifdef PUBKEY
 			crypto_public(peer, dp->hostname);
 #endif /* PUBKEY */
+#endif
 		}
 		
 		dp++;

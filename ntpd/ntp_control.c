@@ -110,14 +110,16 @@ static struct ctl_var sys_var[] = {
 	{ CS_CLOCK,	RO, "clock" },		/* 14 */
 	{ CS_PROCESSOR, RO, "processor" },	/* 15 */
 	{ CS_SYSTEM,	RO, "system" },		/* 16 */
-	{ CS_STABIL,	RO, "stability" },	/* 17 */
-	{ CS_VARLIST,	RO, "sys_var_list" },	/* 18 */
+	{ CS_VERSION,	RO, "version" },	/* 17 */
+	{ CS_STABIL,	RO, "stability" },	/* 18 */
+	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
 #ifdef PUBKEY
-	{ CS_PRIVATE,	RO, "privatekey" },	/* 19 */
-	{ CS_PUBLIC,	RO, "publickey" },	/* 20 */
-	{ CS_DHPARAMS,	RO, "dhparams" },	/* 21 */
-	{ CS_HOSTNAM,	RO, "hostname" },	/* 22 */
-	{ CS_REVTIME,	RO, "revoketime"},	/* 23 */
+	{ CS_PRIVATE,	RO, "privatekey" },	/* 120 */
+	{ CS_PUBLIC,	RO, "publickey" },	/* 21 */
+	{ CS_DHPARAMS,	RO, "dhparams" },	/* 22 */
+	{ CS_HOSTNAM,	RO, "hostname" },	/* 23 */
+	{ CS_REVTIME,	RO, "revoketime"},	/* 24 */
+	{ CS_TAI,	RO, "tai"},		/* 25 */
 #endif /* PUBKEY */
 	{ 0,		EOV,	""  }
 };
@@ -129,6 +131,7 @@ static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
  * more-or-less)
  */
 static	u_char def_sys_var[] = {
+	CS_VERSION,
 	CS_PROCESSOR,
 	CS_SYSTEM,
 	CS_LEAP,
@@ -152,6 +155,7 @@ static	u_char def_sys_var[] = {
 	CS_DHPARAMS,
 	CS_HOSTNAM,
 	CS_REVTIME,
+	CS_TAI,
 #endif /* PUBKEY */
 	0
 };
@@ -1242,6 +1246,11 @@ ctl_putsys(
 #endif /* HAVE_UNAME */
 		break;
 
+	case CS_VERSION:
+		ctl_putstr(sys_var[CS_VERSION].text, Version,
+		    strlen(Version));
+		break;
+
 	case CS_STABIL:
 		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
 		    1e6);
@@ -1335,7 +1344,8 @@ ctl_putsys(
 		strcpy(str1, dh_params_file);
 		if (dh_params_fstamp != 0)
 			sprintf(str1, "%s.%u", str1, dh_params_fstamp);
-		ctl_putstr(sys_var[CS_DHPARAMS].text, str1, strlen(str1));
+		ctl_putstr(sys_var[CS_DHPARAMS].text, str1,
+		    strlen(str1));
 		break;
 
 	case CS_HOSTNAM:
@@ -1346,7 +1356,16 @@ ctl_putsys(
 		break;
 
 	case CS_REVTIME:
-		ctl_putts(sys_var[CS_REVTIME].text, &sys_revoketime);
+		if (sys_revoketime.l_ui == 0)
+			break;
+		ctl_putuint(sys_var[CS_REVTIME].text,
+		    sys_revoketime.l_ui);
+		break;
+
+	case CS_TAI:
+		if (sys_tai == 0)
+			break;
+		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
 #endif /* PUBKEY */
 	}

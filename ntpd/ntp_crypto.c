@@ -50,7 +50,7 @@
  *   CRYPTO_DHPAR 5  DH parameters
  *   CRYPTO_DH    6  DH public value
  *   CRYPTO_NAME  7  host name/public key
- *   CRYPTO_TAI   8  TAI offset
+ *   CRYPTO_TAI   8  TAI leapsecond table
  *
  *   Note: requests carry the association ID of the receiver; responses
  *   carry the association ID of the sender.
@@ -60,7 +60,11 @@
 /*
  * Cryptodefines
  */
-#define MAX_KEYLEN	1024	/* maximum key length */
+#define TAI_1972	10	/* initial TAI offset */
+#define MAX_LEAP	100	/* max UTC leapseconds */
+#define MAX_LINLEN	1024	/* max line */
+#define MAX_KEYLEN	1024	/* max key */
+#define MAX_ENCLEN	(ENCODED_CONTENT_LEN(1024)) /* max enc key */
 
 /*
  * Autokey protocol status codes
@@ -83,6 +87,7 @@ static R_RSA_PUBLIC_KEY public_key; /* RSA public key */
 static struct value host;	/* host name/public key */
 static struct value dhparam;	/* Diffie_Hellman parameters */
 static struct value dhpub;	/* Diffie_Hellman public value */
+static struct value tai_leap;	/* TAI leapseconds table */
 static u_char *dh_private;	/* DH private value */
 static u_int dh_keyLen;		/* DH private value length */
 
@@ -98,12 +103,16 @@ u_int	public_key_fstamp;	/* RSA public key filestamp */
 char	*dh_params_file = NULL;	/* DH parameters file */
 u_int	dh_params_fstamp;	/* DH parameters filestamp */
 char	*keysdir = "/usr/local/etc/"; /* crypto keys directory */
+u_int	tai_leap_fstamp;	/* TAI leapseconds filestamp */
+char	*tai_leap_file = NULL;	/* TAI leapseconds file */
+u_int	sys_tai;		/* current UTC offset from TAI */
 
 /*
  * Cryptotypes
  */
 static	void	crypto_rsa	P((char *, u_int *, u_char *, u_int));
 static	void	crypto_dh	P((char *, u_int *));
+static	void	crypto_tai	P((char *, u_int *));
 #endif /* PUBKEY */
 
 
@@ -265,7 +274,7 @@ make_keylist(
 	R_SignUpdate(&ctx, (u_char *)ap, 12);
 	rval = R_SignFinal(&ctx, ap->sig, &len, &private_key);
 	if (rval != RV_OK)
-		msyslog(LOG_ERR, "make_keylist: signature fails %x",
+		msyslog(LOG_ERR, "keylist signature fails %x",
 		    rval);
 	else
 		ap->siglen = htonl(len);
@@ -300,7 +309,7 @@ crypto_recv(
 	u_int temp;
 #ifdef PUBKEY
 	R_SIGNATURE_CTX ctx;	/* signature context */
-	u_char dh_key[MAX_DH_LEN]; /* Diffie-Hellman agreed key */
+	u_char dh_key[MAX_KEYLEN]; /* Diffie-Hellman agreed key */
 	R_RSA_PUBLIC_KEY *kp;	/* temporary public key pointer */
 	u_int32 *pp;		/* packet pointer */
 	u_int rsalen = sizeof(R_RSA_PUBLIC_KEY) - sizeof(u_int) + 4;
@@ -620,6 +629,59 @@ crypto_recv(
 				    4], tstamp, ntohl(vp->fstamp));
 #endif
 			break;
+		/*
+		 * Install TAI leapsecond table.
+		 */
+		case CRYPTO_TAI | CRYPTO_RESP:
+			vp = (struct value *)&pkt[i + 2];
+			temp = ntohl(vp->vallen);
+			kp = (R_RSA_PUBLIC_KEY *)peer->pubkey;
+			j = i + 5 + temp / 4;
+			if (tstamp <= tai_leap.tstamp) {
+				rval = RV_TSP;
+			} else if (kp == NULL) {
+				rval = RV_PUB;
+			} else if (ntohl(pkt[j]) != kp->bits / 8) {
+				rval = RV_SIG;
+			} else {
+				R_VerifyInit(&ctx, DA_MD5);
+				R_VerifyUpdate(&ctx, (u_char *)vp,
+				    temp + 12);
+				rval = R_VerifyFinal(&ctx,
+				    (u_char *)&pkt[j + 1],
+				    ntohl(pkt[j]), kp);
+			}
+#ifdef DEBUG
+			if (debug)
+				printf(
+				    "crypto_recv: verify %x TAI %u ts %u fs %u\n",
+				    rval, temp, tstamp,
+				    ntohl(vp->fstamp));
+#endif
+			if (rval != RV_OK)
+				break;
+
+			/*
+			 * Initialize TAI leapsecond table and extension
+			 * field in network byte order.
+			 */
+			tai_leap.fstamp = htonl(vp->fstamp);
+			tai_leap.vallen = vp->vallen;
+			if (tai_leap.val == NULL)
+				free(tai_leap.val);
+			tai_leap.val = emalloc(temp);
+			if (tai_leap.sig == NULL)
+				tai_leap.sig =
+				    emalloc(private_key.bits / 8);
+			pp = (u_int32 *)tai_leap.val;
+			memcpy(pp, &vp->val, temp);
+			sys_tai = temp / 4 + TAI_1972;
+			crypto_agree();
+
+for (i = 0; i < temp / 4; i++)
+	printf("xxx %u %u\n", i, ntohl(*pp++));
+
+			break;
 #endif /* PUBKEY */
 
 		/*
@@ -729,8 +791,7 @@ crypto_xmit(
 		rval = R_SignFinal(&ctx, (u_char *)&cp->sig, &temp,
 		    &private_key);
 		if (rval != RV_OK) {
-			msyslog(LOG_ERR,
-			    "crypto_xmit: cookie signature fails %x",
+			msyslog(LOG_ERR, "cookie signature fails %x",
 			    rval);
 			break;
 		}
@@ -750,7 +811,7 @@ crypto_xmit(
 		vp->vallen = 0;
 		len += 12;
 		temp = ntohl(dhparam.vallen);
-		if (dhparam.val == NULL)
+		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
 		memcpy(&vp->val, dhparam.val, temp);
@@ -773,7 +834,7 @@ crypto_xmit(
 		vp->vallen = 0;
 		len += 12;
 		temp = ntohl(dhpub.vallen);
-		if (dhpub.val == NULL)
+		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
 		memcpy(&vp->val, dhpub.val, temp);
@@ -795,7 +856,7 @@ crypto_xmit(
 		vp->vallen = 0;
 		len += 12;
 		temp = ntohl(host.vallen);
-		if (host.val == NULL)
+		if (temp == 0)
 			break;
 		vp->vallen = htonl(temp);
 		memcpy(&vp->val, host.val, temp);
@@ -804,6 +865,27 @@ crypto_xmit(
 		temp = public_key.bits / 8;
 		xpkt[j++] = htonl(temp);
 		memcpy(&xpkt[j], host.sig, temp);
+		len += temp + 4;
+		break;
+	/*
+	 * Send TAI leapsecond table, timestamp and signature.
+	 */
+	case CRYPTO_TAI | CRYPTO_RESP:
+		vp = (struct value *)&xpkt[i + 2];
+		vp->tstamp = tai_leap.tstamp;
+		vp->fstamp = tai_leap.fstamp;
+		vp->vallen = 0;
+		len += 12;
+		temp = ntohl(tai_leap.vallen);
+		if (temp == 0)
+			break;
+		vp->vallen = htonl(temp);
+		memcpy(&vp->val, tai_leap.val, temp);
+		len += temp;
+		j = i + 5 + temp / 4;
+		temp = public_key.bits / 8;
+		xpkt[j++] = htonl(temp);
+		memcpy(&xpkt[j], tai_leap.sig, temp);
 		len += temp + 4;
 		break;
 #endif /* PUBKEY */
@@ -866,7 +948,7 @@ crypto_setup(void)
 	    (u_char *)&private_key, sizeof(R_RSA_PRIVATE_KEY));
 	if (private_key.bits == 0) {
 		msyslog(LOG_ERR,
-		    "crypto_setup: required RSA private key missing or corrupted");
+		    "crypto_setup: required RSA private key file missing or corrupted");
 		exit;
 	}
 
@@ -885,7 +967,7 @@ crypto_setup(void)
 	    (u_char *)&public_key, sizeof(R_RSA_PUBLIC_KEY));
 	if (public_key.bits == 0) {
 		msyslog(LOG_ERR,
-		    "crypto_setup: required RSA public key missing or corrupted");
+		    "crypto_setup: required RSA public key file missing or corrupted");
 		exit;
 	}
 	if (strstr(public_key_file, sys_hostname) == NULL) {
@@ -919,20 +1001,22 @@ crypto_setup(void)
 	/*
 	 * Load optional Diffie-Hellman key agreement parameters from
 	 * file, default "ntpkey_dh". If the file is missing or
-	 * defective, the parameters can later be retrieved from a
+	 * defective, the values can later be retrieved from a
 	 * server.
 	 */
 	if (dh_params_file == NULL)
 		dh_params_file = "ntpkey_dh";
 	crypto_dh(dh_params_file, &dh_params_fstamp);
-	temp = dh_params.primeLen;
-	if (temp == 0)
-		return;
-	dhparam.fstamp = htonl(dh_params_fstamp);
-	dhpub.fstamp = htonl(dh_params_fstamp);
-	dhpub.vallen = htonl(temp);
-	dhpub.val = emalloc(temp);
-	dhpub.sig = emalloc(private_key.bits / 8);
+
+	/*
+	 * Load optional TAI leapseconds file, default "leap-second". If
+	 * the file is missing or defective, the values can later be
+	 * retrieved from a
+	 * server.
+	 */
+	if (tai_leap_file == NULL)
+		tai_leap_file = "leap-seconds";
+	crypto_tai(tai_leap_file, &tai_leap_fstamp);
 }
 
 
@@ -955,34 +1039,30 @@ crypto_agree(void)
 	R_SignInit(&ctx, DA_MD5);
 	R_SignUpdate(&ctx, (u_char *)&host, 12);
 	R_SignUpdate(&ctx, host.val, ntohl(host.vallen));
-	rval = R_SignFinal(&ctx, host.sig, &temp, &private_key);
-	if (rval != RV_OK) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: host signature fails %x", rval);
+	rval = R_SignFinal(&ctx, host.sig, &len, &private_key);
+	if (rval != RV_OK || len != private_key.bits / 8) {
+		msyslog(LOG_ERR, "host signature fails %x", rval);
 		exit(1);
 	}
-	host.siglen = ntohl(temp);
+	host.siglen = ntohl(len);
 
 	/*
 	 * Sign Diffie-Hellman parameters and timestamps.
 	 */
-	if (dh_params.primeLen == 0) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: unavailable DH parameters");
-		return;
+	if (dhparam.vallen > 0) {
+		dhparam.tstamp = htonl(sys_revoketime.l_ui);
+		R_SignInit(&ctx, DA_MD5);
+		R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
+		R_SignUpdate(&ctx, dhparam.val, ntohl(dhparam.vallen));
+		rval = R_SignFinal(&ctx, dhparam.sig, &len,
+		    &private_key);
+		if (rval != RV_OK || len != private_key.bits / 8) {
+			msyslog(LOG_ERR,
+			    "DH parameters signature fails %x", rval);
+			exit(1);
+		}
+		dhparam.siglen = ntohl(len);
 	}
-	dhparam.tstamp = htonl(sys_revoketime.l_ui);
-	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (u_char *)&dhparam, 12);
-	R_SignUpdate(&ctx, dhparam.val, ntohl(dhparam.vallen));
-	rval = R_SignFinal(&ctx, dhparam.sig, &temp, &private_key);
-	if (rval != RV_OK) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: DH parameters signature fails %x",
-		    rval);
-		exit(1);
-	}
-	dhparam.siglen = ntohl(temp);
 
 	/*
 	 * Compute Diffie-Hellman public value.
@@ -996,30 +1076,51 @@ crypto_agree(void)
 	rval = R_SetupDHAgreement(dhpub.val, dh_private, dh_keyLen,
 	    &dh_params, &randomstr);
 	if (rval != RV_OK) {
-		msyslog(LOG_ERR, "crypto_agree: invalid DH parameters");
+		msyslog(LOG_ERR, "invalid DH parameters");
 		exit(1);
 	}
 
 	/*
 	 * Sign Diffie-Hellman public value and timestamps.
 	 */
-	dhpub.tstamp = htonl(sys_revoketime.l_ui);
-	R_SignInit(&ctx, DA_MD5);
-	R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
-	R_SignUpdate(&ctx, dhpub.val, ntohl(dhpub.vallen));
-	rval = R_SignFinal(&ctx, dhpub.sig, &temp, &private_key);
-	if (rval != RV_OK) {
-		msyslog(LOG_ERR,
-		    "crypto_agree: DH public value signature fails %x",
-		    rval);
-		exit(1);
+	if (dhpub.vallen > 0) {
+		dhpub.tstamp = htonl(sys_revoketime.l_ui);
+		R_SignInit(&ctx, DA_MD5);
+		R_SignUpdate(&ctx, (u_char *)&dhpub, 12);
+		R_SignUpdate(&ctx, dhpub.val, ntohl(dhpub.vallen));
+		rval = R_SignFinal(&ctx, dhpub.sig, &len,
+		    &private_key);
+		if (rval != RV_OK || len != private_key.bits / 8) {
+			msyslog(LOG_ERR,
+			    "DH public value signature fails %x", rval);
+			exit(1);
+		}
+		dhpub.siglen = ntohl(len);
 	}
-	dhpub.siglen = ntohl(temp);
+
+	/*
+	 * Sign TAI leapsecond table and timestamps.
+	 */
+	if (tai_leap.vallen > 0) {
+		tai_leap.tstamp = htonl(sys_revoketime.l_ui);
+		R_SignInit(&ctx, DA_MD5);
+		R_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
+		R_SignUpdate(&ctx, tai_leap.val,
+		    ntohl(tai_leap.vallen));
+		rval = R_SignFinal(&ctx, tai_leap.sig, &len,
+		    &private_key);
+		if (rval != RV_OK || len != private_key.bits / 8) {
+			msyslog(LOG_ERR,
+			    "TAI leapseconds signature fails %x", rval);
+			exit(1);
+		}
+		tai_leap.siglen = ntohl(len);
+	}
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "cypto_agree: host %s ts %u pubval %d\n",
-		    sys_hostname, ntohl(host.tstamp),
+		    sys_hostname, sys_revoketime.l_ui,
 		    ntohl(dhpub.vallen));
 #endif
 }
@@ -1037,8 +1138,8 @@ crypto_rsa(
 	)
 {
 	FILE *str;		/* file handle */
-	u_char buf[MAX_KEYLEN];	/* file line buffer */
-	u_char encoded_key[MAX_KEYLEN]; /* encoded key buffer */
+	u_char buf[MAX_LINLEN];	/* file line buffer */
+	u_char encoded_key[MAX_ENCLEN]; /* encoded key buffer */
 	char filename[MAXFILENAME]; /* name of parameter file */
 	char linkname[MAXFILENAME]; /* file link (for filestamp) */
 	u_int bits, len;
@@ -1056,14 +1157,14 @@ crypto_rsa(
 		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
 	str = fopen(filename, "r");
 	if (str == NULL) {
-		msyslog(LOG_ERR, "RSA key file %s not found", filename);
+		msyslog(LOG_ERR, "RSA file %s not found", filename);
 		return;
 	}
 
 	/*
 	 * Ignore initial comments and empty lines.
 	 */
-	while ((rptr = fgets(buf, MAX_KEYLEN - 1, str)) != NULL) {
+	while ((rptr = fgets(buf, MAX_LINLEN - 1, str)) != NULL) {
 		len = strlen(buf);
 		if (len < 1)
 			continue;
@@ -1094,9 +1195,7 @@ crypto_rsa(
 		rval = RV_OK;
 	if (rval != RV_OK) {
 		fclose(str);
-		msyslog(LOG_ERR,
-		    "crypto_dh: RSA key file %s error %x",
-		    cp, rval);
+		msyslog(LOG_ERR, "RSA file %s error %x", cp, rval);
 		return;
 	}
 	fclose(str);
@@ -1118,7 +1217,7 @@ crypto_rsa(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_rsa: RSA key file %s link %d fs %u modulus %d\n",
+		    "crypto_rsa: RSA file %s link %d fs %u modulus %d\n",
 		    cp, rval, *fstamp, bits);
 #endif
 	return;
@@ -1135,8 +1234,8 @@ crypto_dh(
 	)
 {
 	FILE *str;		/* file handle */
-	u_char buf[MAX_KEYLEN];	/* file line buffer */
-	u_char encoded_key[MAX_KEYLEN]; /* encoded key buffer */
+	u_char buf[MAX_LINLEN];	/* file line buffer */
+	u_char encoded_key[MAX_ENCLEN]; /* encoded key buffer */
 	u_char prime[MAX_KEYLEN]; /* decoded prime */
 	u_char generator[MAX_KEYLEN]; /* decode generator */
 	u_int primelen;		/* prime length (octets) */
@@ -1153,7 +1252,6 @@ crypto_dh(
 	 * character of the file name is not '/', prepend the keys
 	 * directory string. 
 	 */
-	*fstamp = 0;
 	if (*cp == '/')
 		strcpy(filename, cp);
 	else
@@ -1161,15 +1259,14 @@ crypto_dh(
 	str = fopen(filename, "r");
 	if (str == NULL) {
 		msyslog(LOG_ERR,
-		    "crypto_dh: DH parameter file %s not found",
-		    filename);
+		    "crypto_dh: DH file %s not found", filename);
 		return;
 	}
 
 	/*
 	 * Ignore initial comments and empty lines.
 	 */
-	while ((rptr = fgets(buf, MAX_KEYLEN - 1, str)) != NULL) {
+	while ((rptr = fgets(buf, MAX_LINLEN - 1, str)) != NULL) {
 		if (strlen(buf) < 1)
 			continue;
 		if (*buf == '#' || *buf == '\r' || *buf == '\0')
@@ -1187,7 +1284,7 @@ crypto_dh(
 		rval = RV_DAT;
 	else if (sscanf(buf, "%u %s", &primelen, encoded_key) != 2)
 		rval = RV_DAT;
-	else if (primelen > MAX_DH_LEN)
+	else if (primelen > MAX_KEYLEN)
 		rval = RV_KEY;
 	else if (R_DecodePEMBlock(prime, &len, encoded_key,
 	    strlen(encoded_key)))
@@ -1200,8 +1297,7 @@ crypto_dh(
 	if (rval != RV_OK) {
 		fclose(str);
 		msyslog(LOG_ERR,
-		    "crypto_dh: DH parameter file %s prime error %x",
-		    cp, rval);
+		    "crypto_dh: DH file %s prime error %x", cp, rval);
 		return;
 	}
 
@@ -1210,7 +1306,7 @@ crypto_dh(
 	 */
 	if (fscanf(str, "%u %s", &generatorlen, encoded_key) != 2)
 		rval = RV_DAT;
-	else if (generatorlen > MAX_DH_LEN)
+	else if (generatorlen > MAX_KEYLEN)
 		rval = RV_KEY;
 	else if (R_DecodePEMBlock(generator, &len, encoded_key,
 	    strlen(encoded_key)))
@@ -1222,8 +1318,8 @@ crypto_dh(
 		rval = RV_OK;
 	if (rval != RV_OK) {
 		msyslog(LOG_ERR,
-		    "crypto_dh: DH parameter file %s generator error %x",
-		    cp, rval);
+		    "crypto_dh: DH file %s generator error %x", cp,
+		    rval);
 		return;
 	}
 	fclose(str);
@@ -1233,7 +1329,6 @@ crypto_dh(
 	 * network byte order. Note the private key length is set
 	 * arbitrarily at half the prime length.
 	 */
-	dhparam.fstamp = htonl(dh_params_fstamp);
 	len = 4 + primelen + 4 + generatorlen;
 	dhparam.vallen = htonl(len);
 	dhparam.val = emalloc(len);
@@ -1254,7 +1349,6 @@ crypto_dh(
 	/*
 	 * Initialize Diffie-Hellman public value extension field.
 	 */
-	dhpub.fstamp = htonl(dh_params_fstamp);
 	dhpub.vallen = htonl(dh_params.primeLen);
 	dhpub.val = emalloc(dh_params.primeLen);
 	dhpub.sig = emalloc(private_key.bits / 8);
@@ -1269,18 +1363,120 @@ crypto_dh(
 	} else {
 		rptr = strrchr(filename, '.');
 	}
-	if (rptr != NULL)
+	if (rptr != NULL) {
 		sscanf(++rptr, "%u", fstamp);
+		dhparam.fstamp = htonl(*fstamp);
+		dhpub.fstamp = htonl(*fstamp);
+	}
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_dh: DH parameter file link %d %s fs %u prime %u gen %u\n",
-		    rval, dh_params_file, dh_params_fstamp,
+		    "crypto_dh: DH file %s link %d fs %u prime %u gen %u\n",
+		    dh_params_file, rval, dh_params_fstamp,
 		    dh_params.primeLen, dh_params.generatorLen);
 #endif
 }
 
 
+/*
+ * crypto_tai - read TAI offset table and check for errors.
+ */
+static void
+crypto_tai(
+	char *cp,		/* file name */
+	u_int *fstamp		/* filestamp */
+	)
+{
+	FILE *str;		/* file handle */
+	u_char buf[MAX_LINLEN];	/* file line buffer */
+	u_int leapsec[MAX_LEAP]; /* NTP time at leaps */
+	u_int offset;		/* offset at leap (s) */
+	char filename[MAXFILENAME]; /* name of parameter file */
+	char linkname[MAXFILENAME]; /* file link (for filestamp) */
+	u_int32 *pp;
+	u_int len;
+	char *rptr;
+	int rval, i;
+
+	/*
+	 * Open the key file and discard comment lines. If the first
+	 * character of the file name is not '/', prepend the keys
+	 * directory string. 
+	 */
+	if (*cp == '/')
+		strcpy(filename, cp);
+	else
+		snprintf(filename, MAXFILENAME, "%s%s", keysdir, cp);
+	str = fopen(filename, "r");
+	if (str == NULL) {
+		msyslog(LOG_ERR, "TAI file %s not found", filename);
+		return;
+	}
+
+	/*
+	 * We are rather paranoid here, since an intruder might cause a
+	 * coredump by infiltrating a naughty key. The line must contain
+	 * a single integer followed by a PEM encoded, null-terminated
+	 * string.
+	 */
+	i = 0;
+	rval = RV_OK;
+	while (i < MAX_LEAP) {
+		rptr = fgets(buf, MAX_LINLEN - 1, str);
+		if (rptr == NULL)
+			break;
+		if (strlen(buf) < 1)
+			continue;
+		if (*buf == '#')
+			continue;
+		if (sscanf(buf, "%u %u", &leapsec[i], &offset) != 2)
+			continue;
+		if (i != offset - TAI_1972) { 
+			rval = RV_DAT;
+			break;
+		}
+		i++;
+	}
+	fclose(str);
+	if (rval != RV_OK || i == 0) {
+		msyslog(LOG_ERR, "TAI file %s error %d", cp, rval);
+		return;
+	}
+	len = --i * sizeof(u_int32);
+	tai_leap.vallen = htonl(len);
+	tai_leap.val = emalloc(len);
+	tai_leap.sig = emalloc(private_key.bits / 8);
+	pp = (u_int32 *)tai_leap.val;
+	sys_tai = len / 4 + TAI_1972;
+	for (; i >= 0; i--) {
+		*pp++ = htonl(leapsec[i]);
+	}
+	tai_leap.sig = emalloc(private_key.bits / 8);
+
+	/*
+	 * Extract filestamp if present.
+	 */
+	rval = readlink(filename, linkname, MAXFILENAME - 1);
+	if (rval > 0) {
+		linkname[rval] = '\0';
+		rptr = strrchr(linkname, '.');
+	} else {
+		rptr = strrchr(filename, '.');
+	}
+	if (rptr != NULL) {
+		sscanf(++rptr, "%u", fstamp);
+		tai_leap.fstamp = htonl(*fstamp);
+	}
+#ifdef DEBUG
+	if (debug)
+		printf(
+		    "crypto_tai: TAI file %s link %d fs %u offset %u\n",
+		    tai_leap_file, rval, tai_leap_fstamp,
+		    ntohl(tai_leap.vallen) / 4 + TAI_1972);
+#endif
+}
+
+#if 0
 /*
  * crypto_public - read and install the public key from the public key
  * file. The name of the file is in the form "ntpkey_host", where host
@@ -1324,6 +1520,7 @@ crypto_public(
 	memcpy(peer->pubkey, (char *)&keybuf, keylen);
 	return (1);
 }
+#endif
 
 
 /*

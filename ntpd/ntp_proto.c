@@ -690,8 +690,8 @@ receive(
 		peer->flags &= ~FLAG_AUTHENTIC;
 	}
 	if (peer->hmode == MODE_BROADCAST &&
-	    (restrict_mask & RES_DONTTRUST))	/* test 9 */
-		peer->flash |= TEST9;		/* access denied */
+	    (restrict_mask & RES_DONTTRUST))	/* test 4 */
+		peer->flash |= TEST4;		/* access denied */
 	if (peer->flags & FLAG_AUTHENABLE) {
 		if (!(peer->flags & FLAG_AUTHENTIC)) /* test 5 */
 			peer->flash |= TEST5;	/* auth failed */
@@ -824,7 +824,8 @@ process_packet(
 	pmode = PKT_MODE(pkt->li_vn_mode);
 
 	/*
-	 * Test for old or duplicate packets (tests 1 through 3).
+	 * Test for old, duplicate or unsynchronized packets (tests 1
+	 * through 3).
 	 */
 	if (L_ISHIS(&peer->org, &p_xmt))	/* count old packets */
 		peer->oldpkt++;
@@ -841,7 +842,7 @@ process_packet(
 	peer->org = p_xmt;
 
 	/*
-	 * Test for valid packet header (tests 6 through 8)
+	 * Test for valid peer data (tests 6 through 8)
 	 */
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
@@ -852,19 +853,21 @@ process_packet(
 		peer->flash |= TEST6;	/* peer clock unsynchronized */
 	if (!(peer->flags & FLAG_CONFIG) && sys_peer != 0) { /* test 7 */
 		if (PKT_TO_STRATUM(pkt->stratum) > sys_stratum) {
-			peer->flash |= TEST7;	/* peer stratum too high */
+			peer->flash |= TEST7; /* peer stratum too high */
 			sys_badstratum++;
 		}
 	}
 	if (fabs(p_del) >= MAXDISPERSE		/* test 8 */
 	    || p_disp >= MAXDISPERSE)
-		peer->flash |= TEST8;		/* delay/dispersion too high */
+		peer->flash |= TEST8;		/* root data */
 
 	/*
-	 * If the packet header is invalid, abandon ship. Otherwise
+	 * If the packet is denied access, declared not authentic or has
+	 * invalid timestamps, stuff it in the compactor. Otherwise,
 	 * capture the header data.
 	 */
-	if (peer->flash & ~(u_int)(TEST1 | TEST2 | TEST3 | TEST4)) {
+	if (peer->flash & ~(u_int)(TEST1 | TEST2 | TEST3 | TEST4 |
+	    TEST5 | TEST10 | TEST11)) {
 #ifdef DEBUG
 		if (debug)
 			printf("packet: bad header %03x\n",
@@ -877,10 +880,8 @@ process_packet(
 	 * The header is valid. Capture the remaining header values and
 	 * mark as reachable.
 	 */
-/*
 	record_raw_stats(&peer->srcadr, &peer->dstadr->sin,
 	    &p_org, &p_rec, &p_xmt, &peer->rec);
-*/
 	peer->leap = PKT_LEAP(pkt->li_vn_mode);
 	peer->pmode = pmode;		/* unspec */
 	peer->stratum = PKT_TO_STRATUM(pkt->stratum);
@@ -958,11 +959,11 @@ process_packet(
 		LFPTOD(&t23, p_del);
 	}
 	LFPTOD(&ci, p_offset);
-	if (fabs(p_del) >= MAXDISPERSE || p_disp >= MAXDISPERSE) /* test 4 */
-		peer->flash |= TEST4;	/* delay/dispersion too big */
+	if (fabs(p_del) >= MAXDISPERSE || p_disp >= MAXDISPERSE) /* test 9 */
+		peer->flash |= TEST9;	/* delay/dispersion too big */
 
 	/*
-	 * If the packet data are invalid (tests 1 through 4), abandon
+	 * If the packet data are invalid (tests 6 through 9), abandon
 	 * ship. Otherwise, forward to the clock filter.
 	 */
 	if (peer->flash) {
@@ -1957,9 +1958,14 @@ peer_xmit(
 				    sendlen, (peer->cmmd >> 16) |
 				    CRYPTO_RESP, peer->pcookie.key,
 				    peer->associd);
-			if (crypto_flags  && peer->pubkey == NULL)
+			if (crypto_flags && peer->pubkey == NULL)
 				sendlen += crypto_xmit((u_int32 *)&xpkt,
 				    sendlen, CRYPTO_NAME,
+				    peer->pcookie.key, peer->assoc);
+			else if (crypto_flags & CRYPTO_FLAG_TAI &&
+			    sys_tai == 0)
+				sendlen += crypto_xmit((u_int32 *)&xpkt,
+				    sendlen, CRYPTO_TAI,
 				    peer->pcookie.key, peer->assoc);
 			else if (crypto_flags && dh_params.prime ==
 			    NULL)

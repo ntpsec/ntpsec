@@ -30,11 +30,9 @@
  * Cryptoflags
  */
 #define CRYPTO_FLAG_ENAB  0x01	/* enable public key */
+#define CRYPTO_FLAG_TAI	  0x02	/* request TAI leapseconds */
 
 #ifdef PUBKEY
-
-#define MAX_DH_LEN (DH_PRIME_LEN(1024)) /* max agreed key length */
-
 /*
  * Configuration codes
  */
@@ -74,5 +72,6 @@ extern	char *	public_key_file;
 extern	u_int	public_key_fstamp;
 extern	char *	dh_params_file;
 extern	u_int	dh_params_fstamp;
+extern	u_int	sys_tai;
 #endif /* PUBKEY */
 #endif /* AUTOKEY */

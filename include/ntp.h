@@ -224,12 +224,12 @@ struct interface {
 #define TEST1		0x0001	/* duplicate packet received */
 #define TEST2		0x0002	/* bogus packet received */
 #define TEST3		0x0004	/* protocol unsynchronized */
-#define TEST4		0x0008	/* peer delay/dispersion bounds check */
-#define TEST5		0x0010	/* peer authentication failed */
+#define TEST4		0x0008	/* access denied */
+#define TEST5		0x0010	/* authentication failed */
 #define TEST6		0x0020	/* peer clock unsynchronized */
 #define TEST7		0x0040	/* peer stratum out of bounds */
-#define TEST8		0x0080	/* root delay/dispersion bounds check */
-#define TEST9		0x0100	/* access denied */
+#define TEST8		0x0080  /* root delay/dispersion bounds check */
+#define TEST9		0x0100	/* peer delay/dispersion bounds check */
 #define TEST10		0x0200	/* autokey not authentic */
 #define TEST11		0x0400	/* autokey not confirmed */
 
