@@ -359,6 +359,7 @@ struct xcmd builtins[] = {
 #define	MAXVARLEN	256		/* maximum length of a variable name */
 #define	MAXVALLEN	400		/* maximum length of a variable value */
 #define	MAXOUTLINE	72		/* maximum length of an output line */
+#define SCREENWIDTH     76              /* nominal screen width in columns */
 
 /*
  * Some variables used and manipulated locally
@@ -1997,49 +1998,48 @@ help(
 	int n;
 	struct xcmd *xcp;
 	char *cmd;
-	const char *cmdsort[100];
-	int length[100];
-	int maxlength;
-	int numperline;
-	static const char *spaces = "                    ";	/* 20 spaces */
+	const char *list[100];
+        int word, words;
+        int row, rows;
+        int col, cols;
 
 	if (pcmd->nargs == 0) {
-		n = 0;
+		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    cmdsort[n++] = xcp->keyword;
+			    list[words++] = xcp->keyword;
 		}
-		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    cmdsort[n++] = xcp->keyword;
-
+		for (xcp = opcmds; xcp->keyword != 0; xcp++) {
+		    list[words++] = xcp->keyword;
+                }
 #ifdef QSORT_USES_VOID_P
-		qsort(cmdsort, (size_t)n, sizeof(char *), helpsort);
+		qsort(list, (size_t)(words), sizeof(char *), helpsort);
 #else
-		qsort((char *)cmdsort, (size_t)n, sizeof(char *), helpsort);
+		qsort((char *)(list), (size_t)(words), sizeof(char *), helpsort);
 #endif
-
-		maxlength = 0;
-		for (i = 0; i < n; i++) {
-			length[i] = strlen(cmdsort[i]);
-			if (length[i] > maxlength)
-			    maxlength = length[i];
+		col = 0;
+		for (word = 0; word < words; word++) {
+		 	int length = strlen(list[word]);
+			if (col < length) {
+			    col = length;
+                        }
 		}
-		maxlength++;
-		numperline = 76 / maxlength;
 
-		(void) fprintf(fp, "Commands available:\n");
-		for (i = 0; i < n; i++) {
-			if ((i % numperline) == (numperline-1)
-			    || i == (n-1))
-			    (void) fprintf(fp, "%s\n", cmdsort[i]);
-			else
-			    (void) fprintf(fp, "%s%s", cmdsort[i],
-					   spaces+20-maxlength+length[i]);
-		}
+		cols = SCREENWIDTH / ++col;
+                rows = (words + cols - 1) / cols;
+
+		(void) fprintf(fp, "ntpq commands:\n");
+
+		for (row = 0; row < rows; row++) {
+                        for (word = row; word < words; word += rows) {
+			        (void) fprintf(fp, "%-*.*s", col, col-1, list[word]);
+                        }
+                        (void) fprintf(fp, "\n");
+                }
 	} else {
 		cmd = pcmd->argval[0].string;
-		n = findcmd(cmd, builtins, opcmds, &xcp);
-		if (n == 0) {
+		words = findcmd(cmd, builtins, opcmds, &xcp);
+		if (words == 0) {
 			(void) fprintf(stderr,
 				       "Command `%s' is unknown\n", cmd);
 			return;
