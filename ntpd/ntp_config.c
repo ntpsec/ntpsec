@@ -972,7 +972,7 @@ getconfig(
 				break;
 
 			    case CONF_CLOCK_PANIC:
-				loop_config(LOOP_MAX, ftemp);
+				loop_config(LOOP_PANIC, ftemp);
 				break;
 
 			    case CONF_CLOCK_PHI:
