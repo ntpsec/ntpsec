@@ -11,9 +11,17 @@ You can get bitkeeper by visiting:
 
 	http://ntp.bkserver.net/ 
  
-Once you have installed bitkeeper, you can clone any NTP repository:
+Once you have installed bitkeeper, you can clone any NTP repository.
+
+The ntp-stable repository can be found at the following:
+
+     bk clone bk://www.ntp.org/home/bk/ntp-stable ntp-stable
 
      bk clone bk://ntp.bkserver.net/ntp-stable ntp-stable
+
+The ntp-dev repository can be found at the following:
+
+     bk clone bk://www.ntp.org/home/bk/ntp-dev ntp-dev
 
      bk clone bk://ntp.bkserver.net/ntp-dev ntp-dev
 
@@ -23,3 +31,8 @@ Once you have obtained the sources, do the following:
 	autoreconf		generates configure and Makefile.in's
 
 and you should be ready to go.
+
+You can keep update your repository by incanting:
+
+	bk pull
+
