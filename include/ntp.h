@@ -373,7 +373,8 @@ struct peer {
 #define REFCLK_CHRONOLOG        32	/* Chrono-log K WWVB receiver */
 #define REFCLK_DUMBCLOCK        33	/* Dumb localtime clock */
 #define REFCLK_ULINK            34      /* Ultralink M320 WWVB receiver */
-#define REFCLK_MAX		34	/* Grow as needed... */
+#define REFCLK_PCF		35	/* Conrad parallel port radio clock */
+#define REFCLK_MAX		35	/* Grow as needed... */
 
 /*
  * We tell reference clocks from real peers by giving the reference

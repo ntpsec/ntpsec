@@ -80,6 +80,8 @@ struct clktype clktypes[] = {
 	  "DUMBCLOCK" },
 	{ REFCLK_ULINK,         "Ultralink M320 WWVB receiver",
 	  "ULINK_M320"},
+	{ REFCLK_PCF,		"Conrad parallel port radio clock",
+	  "PCF"},
 	{ -1,			"", "" }
 };
 

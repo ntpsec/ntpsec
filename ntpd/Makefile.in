@@ -125,7 +125,7 @@ ntpd_SOURCES = map_vme.c ntp_config.c ntp_control.c ntp_io.c \
 	refclock_shm.c refclock_gpsvme.c refclock_arbiter.c \
 	refclock_arc.c refclock_palisade.c refclock_palisade.h \
 	refclock_oncore.c refclock_chronolog.c refclock_dumbclock.c \
-	refclock_ulink.c jupiter.h
+	refclock_ulink.c refclock_pcf.c jupiter.h
 
 subdir = ntpd
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -157,7 +157,7 @@ refclock_jupiter$U.o refclock_usno$U.o refclock_true$U.o \
 refclock_hpgps$U.o refclock_shm$U.o refclock_gpsvme$U.o \
 refclock_arbiter$U.o refclock_arc$U.o refclock_palisade$U.o \
 refclock_oncore$U.o refclock_chronolog$U.o refclock_dumbclock$U.o \
-refclock_ulink$U.o
+refclock_ulink$U.o refclock_pcf$U.o
 ntpd_OBJECTS =  $(am_ntpd_OBJECTS)
 ntpd_DEPENDENCIES =  version.o ../libntp/libntp.a
 ntpd_LDFLAGS = 
@@ -185,10 +185,10 @@ DEP_FILES =  .deps/check_y2k.P .deps/map_vme.P .deps/ntp_config.P \
 .deps/refclock_irig.P .deps/refclock_jupiter.P .deps/refclock_leitch.P \
 .deps/refclock_local.P .deps/refclock_msfees.P .deps/refclock_mx4200.P \
 .deps/refclock_nmea.P .deps/refclock_oncore.P .deps/refclock_palisade.P \
-.deps/refclock_parse.P .deps/refclock_pst.P .deps/refclock_ptbacts.P \
-.deps/refclock_shm.P .deps/refclock_tpro.P .deps/refclock_trak.P \
-.deps/refclock_true.P .deps/refclock_ulink.P .deps/refclock_usno.P \
-.deps/refclock_wwvb.P
+.deps/refclock_parse.P .deps/refclock_pcf.P .deps/refclock_pst.P \
+.deps/refclock_ptbacts.P .deps/refclock_shm.P .deps/refclock_tpro.P \
+.deps/refclock_trak.P .deps/refclock_true.P .deps/refclock_ulink.P \
+.deps/refclock_usno.P .deps/refclock_wwvb.P
 SOURCES = check_y2k.c $(ntpd_SOURCES)
 OBJECTS = check_y2k$U.o $(am_ntpd_OBJECTS)
 
@@ -318,6 +318,7 @@ refclock_oncore$U.o:
 refclock_chronolog$U.o:
 refclock_dumbclock$U.o:
 refclock_ulink$U.o:
+refclock_pcf$U.o:
 
 ntpd: $(ntpd_OBJECTS) $(ntpd_DEPENDENCIES)
 	@rm -f ntpd
@@ -404,6 +405,8 @@ refclock_palisade_.c: refclock_palisade.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_palisade.c; then echo $(srcdir)/refclock_palisade.c; else echo refclock_palisade.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_palisade_.c
 refclock_parse_.c: refclock_parse.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_parse.c; then echo $(srcdir)/refclock_parse.c; else echo refclock_parse.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_parse_.c
+refclock_pcf_.c: refclock_pcf.c $(ANSI2KNR)
+	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pcf.c; then echo $(srcdir)/refclock_pcf.c; else echo refclock_pcf.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pcf_.c
 refclock_pst_.c: refclock_pst.c $(ANSI2KNR)
 	$(CPP) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) `if test -f $(srcdir)/refclock_pst.c; then echo $(srcdir)/refclock_pst.c; else echo refclock_pst.c; fi` | sed 's/^# \([0-9]\)/#line \1/' | $(ANSI2KNR) > refclock_pst_.c
 refclock_ptbacts_.c: refclock_ptbacts.c $(ANSI2KNR)
@@ -433,9 +436,9 @@ refclock_heath_.o refclock_hpgps_.o refclock_irig_.o \
 refclock_jupiter_.o refclock_leitch_.o refclock_local_.o \
 refclock_msfees_.o refclock_mx4200_.o refclock_nmea_.o \
 refclock_oncore_.o refclock_palisade_.o refclock_parse_.o \
-refclock_pst_.o refclock_ptbacts_.o refclock_shm_.o refclock_tpro_.o \
-refclock_trak_.o refclock_true_.o refclock_ulink_.o refclock_usno_.o \
-refclock_wwvb_.o : $(ANSI2KNR)
+refclock_pcf_.o refclock_pst_.o refclock_ptbacts_.o refclock_shm_.o \
+refclock_tpro_.o refclock_trak_.o refclock_true_.o refclock_ulink_.o \
+refclock_usno_.o refclock_wwvb_.o : $(ANSI2KNR)
 
 tags: TAGS
 

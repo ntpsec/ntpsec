@@ -218,6 +218,9 @@
 /* Dumb generic hh:mm:ss local clock */
 #undef CLOCK_DUMBCLOCK
 
+/* Conrad parallel port radio clock */
+#undef CLOCK_PCF
+
 /* define if we need to declare int errno; */
 #undef DECL_ERRNO
 

@@ -1892,6 +1892,15 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(Conrad parallel port radio clock)
+AC_ARG_ENABLE(PCF,		[  --enable-PCF            + Conrad parallel port radio clock],
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_PCF)
+fi
+AC_MSG_RESULT($ntp_ok)
+
 # Requires modem control
 AC_MSG_CHECKING(USNO modem service)
 AC_ARG_ENABLE(USNO,		[  --enable-USNO           s USNO modem service],

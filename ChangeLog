@@ -1,5 +1,17 @@
 1999-12-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* acconfig.h: PCF refclock
+	* configure.in: 
+	* html/driver35.htm: 
+	* html/refclock.htm: 
+	* include/ntp.h: 
+	* libntp/clocktypes.c: 
+	* ntpd/Makefile.am: 
+	* ntpd/ntp_control.c: 
+	* ntpd/refclock_conf.c: 
+	* ntpd/refclock_pcf.c: 
+	From: Andreas Voegele <andreas.voegele@gmx.de>
+	
 	* acconfig.h: DECL_STIME_1
 
 	* configure.in (iCFLAGS): Use -std1 for alpha*-dec-osf* if we are
