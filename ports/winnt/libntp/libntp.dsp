@@ -209,7 +209,15 @@ SOURCE=..\..\..\libntp\ieee754io.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libisc\inet_aton.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libisc\inet_ntop.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libisc\inet_pton.c
 # End Source File
 # Begin Source File
 

@@ -121,6 +121,11 @@ int nwilds;				/* Total number of wildcard intefaces */
 int wildipv4 = -1;			/* Index into inter_list for IPv4 wildcard */
 int wildipv6 = -1;			/* Index into inter_list for IPv6 wildcard */
 
+/*
+ * These should be set if there is only one */
+int outifaceipv4 = -1;		/* The only IPv4 outgoing interface */
+int outifaceipv6 = -1;		/* The only IPv6 outgoing interface */
+
 #ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
@@ -431,6 +436,8 @@ create_sockets(
 {
 	struct sockaddr_storage resmask;
 	int i;
+	isc_boolean_t ofacesetipv4;
+	isc_boolean_t ofacesetipv6;
 	isc_mem_t *mctx = NULL;
 	isc_interfaceiter_t *iter = NULL;
 	isc_boolean_t scan_ipv4 = ISC_FALSE;
@@ -539,10 +546,34 @@ create_sockets(
 	 * Wildcard interfaces, if any, are ignored.
 	 */
 
+	ofacesetipv4 = ISC_FALSE;
+	ofacesetipv6 = ISC_FALSE;
 	for (i = nwilds; i < ninterfaces; i++) {
 		SET_HOSTMASK(&resmask, inter_list[i].sin.ss_family);
 		hack_restrict(RESTRICT_FLAGS, &inter_list[i].sin, &resmask,
 		    RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
+
+		/*
+		 * We set the outgoing interface number ONLY if there is just one
+		 */
+		if (inter_list[i].sin.ss_family == AF_INET) {
+			if((outifaceipv4 == -1) && !(inter_list[i].flags & INT_LOOPBACK) && 
+				ofacesetipv4 == ISC_FALSE) {
+				outifaceipv4 = i;
+				ofacesetipv4 = ISC_TRUE;
+			}
+			else if ((outifaceipv4 == -1) && !(inter_list[i].flags & INT_LOOPBACK))
+				outifaceipv4 = -1;
+		}
+		if (inter_list[i].sin.ss_family == AF_INET6) {
+			if((outifaceipv6 == -1) && !(inter_list[i].flags & INT_LOOPBACK) && 
+				ofacesetipv6 == ISC_FALSE) {
+				outifaceipv6 = i;
+				ofacesetipv6 = ISC_TRUE;
+			}
+			else if ((outifaceipv6 == -1) && !(inter_list[i].flags & INT_LOOPBACK))
+				outifaceipv6 = -1;
+		}
 	}
 
 	/*
@@ -1964,11 +1995,59 @@ findinterface(
 	)
 {
 	int ind;
-
+	int i;
 	SOCKET s;
-	int rtn, i;
+	int rtn;
 	struct sockaddr_storage saddr;
-	int saddrlen = SOCKLEN(addr);
+	int saddrlen;
+	u_int32 amask, imask;
+	u_int32 laddr, iaddr, maddr;
+
+	/*
+	 * If there is only one outgoing interface we already know the interface
+	 *
+	if (addr->ss_family == AF_INET && outifaceipv4 != -1) {
+		return (&inter_list[outifaceipv4]);
+	}
+	if (addr->ss_family == AF_INET6 && outifaceipv6 != -1) {
+		return (&inter_list[outifaceipv6]);
+	}
+
+	/*
+	 * If we got this far we need to try and match the
+	 * network part of the address
+	 */
+	for (i= nwilds; i < ninterfaces; i++)
+	{
+		/*
+		 * For IPv4 we can check the network mask to see if
+		 * we have a match on the outgoing interface
+		 */
+		if (addr->ss_family == AF_INET) {
+			laddr = htonl(((struct sockaddr_in*)addr)->sin_addr.s_addr);
+			maddr = ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr;
+			iaddr = ((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr;
+
+			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+			amask = (((struct sockaddr_in*)addr)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+			imask = (((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr);
+/*
+			if ((((struct sockaddr_in*)&addr)->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr) ==
+			     (((struct sockaddr_in*)&inter_list[i])->sin_addr.s_addr &
+			    ((struct sockaddr_in*)&inter_list[i].mask)->sin_addr.s_addr))
+*/
+			if (amask == imask)
+			     return (&inter_list[i]);
+		}
+	}
+
+
+
+	saddrlen = SOCKLEN(addr);
 	ind = find_addr_in_list(addr);
 	if (ind >= 0)
 		return (&inter_list[ind]);

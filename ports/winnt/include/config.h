@@ -95,6 +95,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_IO_COMPLETION_PORT
 # define HAVE_SOCKADDR_IN6
 # define ISC_PLATFORM_NEEDNTOP
+# define ISC_PLATFORM_NEEDPTON
 
 #define ISC_PLATFORM_NEEDIN6ADDRANY
 
