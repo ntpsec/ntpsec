@@ -168,24 +168,24 @@ crypto_config(
 	switch (item) {
 #ifdef OPENSSL
 	    case CRYPTO_CONF_PRIV:
-		if (debug > 0)
+		if (debug > 1)
 			printf("crypto_config: PRIVATEKEY/<%d> <%s>\n",
 			       item, cp);
 		f1_privatekey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_SIGN:
-		if (debug > 0)
+		if (debug > 1)
 			printf("crypto_config: SIGNKEY/<%d> <%s>\n",
 			       item, cp);
 		f1_signkey = strdup(cp);
 		break;
 	    case CRYPTO_CONF_KEYS:
-		if (debug > 0)
+		if (debug > 1)
 			printf("crypto_config: KEYSDIR/<%d> <%s>\n", item, cp);
 		keysdir = strdup(cp);
 		break;
 	    case CRYPTO_CONF_CERT:
-		if (debug > 0)
+		if (debug > 1)
 			printf("crypto_config: CERT/<%d> <%s>\n", item, cp);
 		f1_cert = strdup(cp);
 		break;
@@ -294,7 +294,7 @@ getauthkeys(
 	char *keyfile
 	)
 {
-	if (debug > 0) printf("getauthkeys: got <%s>\n", keyfile);
+	if (debug > 1) printf("getauthkeys: got <%s>\n", keyfile);
 	f1_keys = strdup(keyfile);
 	return;
 }
@@ -590,6 +590,7 @@ genthings(
 {
 	int rc = 0;
 	int i;
+	char *cp;
 
 
 	printf("Generating things for %s...\n", hostname);
@@ -623,16 +624,34 @@ genthings(
 	/* keysdir if f1_ doesn't begin with '/' */
 
 	if (gen_rsa & GEN_LINK) {
-		printf("rsakey symlink(%s, %s)\n",
-		       f2_privatekey, getpath(keysdir, f1_privatekey, NULL));
+		cp = getpath(keysdir, f1_privatekey, NULL);
+		if (verbose)
+			printf("rsakey symlink(%s, %s)\n", f2_privatekey, cp);
+		(void)unlink(cp);
+		if (symlink(f2_privatekey, cp)) {
+			fprintf(stderr, "rsakey symlink(%s, %s): %s\n",
+				f2_privatekey, cp, strerror(errno));
+		}
 	}
 	if (gen_sign & GEN_LINK) {
-		printf("signkey symlink(%s, %s)\n",
-		       f2_signkey, getpath(keysdir, f1_signkey, NULL));
+		cp = getpath(keysdir, f1_signkey, NULL);
+		if (verbose)
+			printf("signkey symlink(%s, %s)\n",
+			       f2_signkey, cp);
+		if (symlink(f2_signkey, cp)) {
+			fprintf(stderr, "signkey symlink(%s, %s): %s\n",
+				f2_signkey, cp, strerror(errno));
+		}
 	}
 	if (gen_cert & GEN_LINK) {
-		printf("cert symlink(%s, %s)\n",
-		       f2_cert, getpath(keysdir, f1_cert, NULL));
+		cp = getpath(keysdir, f1_cert, NULL);
+		if (verbose)
+			printf("cert symlink(%s, %s)\n",
+			       f2_cert, cp);
+		if (symlink(f2_cert, cp)) {
+			fprintf(stderr, "cert symlink(%s, %s): %s\n",
+				f2_cert, cp, strerror(errno));
+		}
 	}
 
 	/* Might we need a link to the MD5 keyfile? */
@@ -719,14 +738,16 @@ genkeys(
 			if (!cp)
 				exit(-1);
 			strcpy(f3_signkey, cp);
- printf("f3: GS1: <%s>\n", f3_signkey);
+			if (debug > 1)
+				printf("f3: GS1: <%s>\n", f3_signkey);
 			++gotsignkey;
 		} else {	/* Use new signkey in default location */
 			cp = getpath(keysdir, f2_signkey, NULL);
 			if (!cp)
 				exit(-1);
 			strcpy(f3_signkey, cp);
- printf("f3: GS0: <%s>\n", f3_signkey);
+			if (debug > 1)
+				printf("f3: GS0: <%s>\n", f3_signkey);
 			++gotsignkey;
 		}
 	}
@@ -735,12 +756,14 @@ genkeys(
 		if (!cp)
 			exit(-1);
 		strcpy(f3_signkey, cp);
- printf("f3: ES: <%s>\n", f3_signkey);
+		if (debug > 1)
+			printf("f3: ES: <%s>\n", f3_signkey);
 		++gotsignkey;
 	}
 	if (!gotsignkey) {	/* Iff a default sign key exists, use it. */
 		/* build the name, stat() it, and if it exists, use it. */
- printf("f3: DS: <%s>\n", f3_signkey);
+		if (debug > 1)
+			printf("f3: DS: <%s>\n", f3_signkey);
 	}
 	if (!gotsignkey && *f2_privatekey) { /* We built an rsakey - use it. */
 		if (f1_privatekey) { /* Use the explicit rsakey in ntp.conf */
@@ -748,14 +771,16 @@ genkeys(
 			if (!cp)
 				exit(-1);
 			strcpy(f3_signkey, cp);
- printf("f3: GR1: <%s>\n", f3_signkey);
+			if (debug > 1)
+				printf("f3: GR1: <%s>\n", f3_signkey);
 			++gotsignkey;
 		} else {	/* Use new rsakey in default location */
 			cp = getpath(keysdir, f2_privatekey, NULL);
 			if (!cp)
 				exit(-1);
 			strcpy(f3_signkey, cp);
- printf("f3: GR0: <%s>\n", f3_signkey);
+			if (debug > 1)
+				printf("f3: GR0: <%s>\n", f3_signkey);
 			++gotsignkey;
 		}
 	}
@@ -764,11 +789,13 @@ genkeys(
 		if (!cp)
 			exit(-1);
 		strcpy(f3_signkey, cp);
- printf("f3: ER: <%s>\n", f3_signkey);
+		if (debug > 1)
+			printf("f3: ER: <%s>\n", f3_signkey);
 		++gotsignkey;
 	}
 	if (!gotsignkey) {	/* Iff a default rsakey exists, use it. */
- printf("f3: DR: <%s>\n", f3_signkey);
+		if (debug > 1)
+			printf("f3: DR: <%s>\n", f3_signkey);
 	}
 #endif /* OPENSSL */
 
