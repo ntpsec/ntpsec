@@ -290,8 +290,12 @@ local_clock(
 	 * is most effective if the delays are highly assymetric and
 	 * clockhopping is avoided and the clock frequency wander is
 	 * relatively small.
+	 *
+	 * Note either there is no prefer peer or this update is from
+	 * the prefer peer.
 	 */
-	if (sys_huffpuff != NULL) {
+	if (sys_huffpuff != NULL && (sys_prefer == NULL || sys_prefer ==
+	    peer)) {
 		if (peer->delay < sys_huffpuff[sys_huffptr])
 			sys_huffpuff[sys_huffptr] = peer->delay;
 		if (peer->delay < sys_mindly)
