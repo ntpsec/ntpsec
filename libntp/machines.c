@@ -11,6 +11,7 @@
 #include "ntp_machine.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
+#include "ntp_unixtime.h"
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -154,7 +155,7 @@ ntp_set_tod(
 #endif /* HAVE_CLOCK_SETTIME */
 #ifdef HAVE_SETTIMEOFDAY
 	{
-		rc = settimeofday(tvp, tzp);
+		rc = SETTIMEOFDAY(tvp, tzp);
 		if (!rc)
 		{
 			set_tod_using = "settimeofday";

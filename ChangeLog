@@ -1,3 +1,8 @@
+1999-07-26  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* libntp/machines.c (ntp_set_tod): Bugfix
+	From: Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru>
+
 1999-07-25  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.0.94b
