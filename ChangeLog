@@ -1,3 +1,11 @@
+1999-12-01  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* acconfig.h: DECL_STIME_1
+
+	* configure.in (iCFLAGS): Use -std1 for alpha*-dec-osf* if we are
+	using "cc".
+	Reported by: Tom Smith <smith@cag.lkg.dec.com>
+
 1999-11-30  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/l_stdlib.h: DECL_SYSTIME_1 --- a long *

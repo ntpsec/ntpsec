@@ -437,6 +437,7 @@
 
 /* stime()? */
 #undef DECL_STIME_0
+#undef DECL_STIME_1
 
 /* strtol()? */
 #undef DECL_STRTOL_0
