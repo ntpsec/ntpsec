@@ -1,5 +1,7 @@
 1999-12-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* configure.in: 4.0.98g
+
 	* ntpd/refclock_oncore.c: Cleanup and fixes
 	From: Reg Clemens <reg@dwf.com> and Kamal A Mostafa <kamal@whence.com>
 
