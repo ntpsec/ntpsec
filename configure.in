@@ -3525,12 +3525,6 @@ $isc_in_addr6_hack
     ;;
 esac
 
-case "$ac_cv_header_sys_sysctl_h" in
- yes)
-    AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[ISC: sys/sysctl.h implies iflist_sysctl])
-    ;;
-esac
-
 #
 # Look for a sysctl call to get the list of network interfaces.
 #
@@ -3544,7 +3538,7 @@ found_rt_iflist
 #endif
 ],
         [AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_IFLIST_SYSCTL)],
+         AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[ISC: Use iflist_sysctl?])],
         [AC_MSG_RESULT(no)])
 
 case "$build" in
