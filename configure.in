@@ -261,7 +261,17 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h memory.h netdb.h)
 AC_CHECK_HEADERS(poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
-AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h utmp.h utmpx.h)
+AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h)
+case "$host" in
+ *-*-aix*)
+    AC_CHECK_HEADERS(utmpx.h)
+    case "$ac_cv_header_utmpx_h" in
+     yes) ;;
+     *) AC_CHECK_HEADERS(utmp.h) ;;
+    esac
+    ;;
+ *) AC_CHECK_HEADERS(utmp.h utmpx.h) ;;
+esac
 AC_CHECK_HEADERS(arpa/nameser.h)
 AC_CHECK_HEADERS(net/if.h, [], [],
 [#if HAVE_SYS_SOCKET_H
