@@ -74,12 +74,12 @@
 #define	MAXSIG		6000.	/* max signal level reference */
 #define	MAXCLP		100	/* max clips above reference per s */
 #define MAXSNR		30.	/* max SNR reference */
-#define DGAIN		20.	/* data channel gain reference */
-#define SGAIN		10.	/* sync channel gain reference */
 #define MAXFREQ		1.	/* max frequency tolerance (125 PPM) */
 #define PI		3.1415926535 /* the real thing */
-#define DATSIZ		(170 * MS) /* data matched filter size */
-#define SYNSIZ		(800 * MS) /* minute sync matched filter size */
+#define DATCYC		17	/* data filter cycles */
+#define DATSIZ		(DATCYC * 10 * MS) /* data filter size */
+#define SYNCYC		800	/* minute filter cycles */
+#define SYNSIZ		(SYNCYC * MS) /* minute filter size */
 #define MAXERR		30	/* max data bit errors in minute */
 #define NCHAN		5	/* number of radio channels */
 #define	AUDIO_PHI	5e-6	/* dispersion growth factor */
@@ -126,7 +126,6 @@
  */
 #define SYNCNG		0x0001	/* sync or SNR below threshold */
 #define DATANG		0x0002	/* data or SNR below threshold */
-#define ERRRNG		0x0004	/* data error */
 #define SELV		0x0100	/* WWV station select */
 #define SELH		0x0200	/* WWVH station select */
 
@@ -167,21 +166,19 @@
  */
 #define MTHR		13.	/* acquisition signal gate (percent) */
 #define TTHR		50.	/* tracking signal gate (percent) */
-#define ATHR		2000.	/* acquisition amplitude threshold */
-#define ASNR		6.	/* acquisition SNR threshold (dB) */
+#define ATHR		1000.	/* acquisition amplitude threshold */
+#define ASNR		10.	/* acquisition SNR threshold (dB) */
 #define AWND		20.	/* acquisition jitter threshold (ms) */
 #define AMIN		3	/* min bit count */
 #define AMAX		6	/* max bit count */
-#define QTHR		2000	/* QSY sync threshold */
+#define QTHR		2000.	/* QSY sync threshold */
 #define QSNR		20.	/* QSY sync SNR threshold (dB) */
-#define XTHR		1000.	/* QSY data threshold */
-#define XSNR		10.	/* QSY data SNR threshold (dB) */
-#define STHR		500	/* second sync amplitude threshold */
+#define STHR		1000.	/* second sync amplitude threshold */
 #define	SSNR		10.	/* second sync SNR threshold */
 #define SCMP		10 	/* second sync compare threshold */
-#define DTHR		1000	/* bit amplitude threshold */
+#define DTHR		1000.	/* bit amplitude threshold */
 #define DSNR		10.	/* bit SNR threshold (dB) */
-#define BTHR		1000	/* digit amplitude threshold */
+#define BTHR		1000.	/* digit amplitude threshold */
 #define BSNR		3.	/* digit likelihood threshold (dB) */
 #define BCMP		5	/* digit compare threshold */
 
@@ -229,30 +226,29 @@
 
 /*
  * Table of sine values at 4.5-degree increments. This is used by the
- * synchronous matched filter demodulators. The integral of sine-squared
- * over one complete cycle is PI, so the table is normallized by 1 / PI.
+ * synchronous matched filter demodulators.
  */
 double sintab[] = {
- 0.000000e+00,  2.497431e-02,  4.979464e-02,  7.430797e-02, /* 0-3 */
- 9.836316e-02,  1.218119e-01,  1.445097e-01,  1.663165e-01, /* 4-7 */
- 1.870979e-01,  2.067257e-01,  2.250791e-01,  2.420447e-01, /* 8-11 */
- 2.575181e-01,  2.714038e-01,  2.836162e-01,  2.940800e-01, /* 12-15 */
- 3.027307e-01,  3.095150e-01,  3.143910e-01,  3.173286e-01, /* 16-19 */
- 3.183099e-01,  3.173286e-01,  3.143910e-01,  3.095150e-01, /* 20-23 */
- 3.027307e-01,  2.940800e-01,  2.836162e-01,  2.714038e-01, /* 24-27 */
- 2.575181e-01,  2.420447e-01,  2.250791e-01,  2.067257e-01, /* 28-31 */
- 1.870979e-01,  1.663165e-01,  1.445097e-01,  1.218119e-01, /* 32-35 */
- 9.836316e-02,  7.430797e-02,  4.979464e-02,  2.497431e-02, /* 36-39 */
--0.000000e+00, -2.497431e-02, -4.979464e-02, -7.430797e-02, /* 40-43 */
--9.836316e-02, -1.218119e-01, -1.445097e-01, -1.663165e-01, /* 44-47 */
--1.870979e-01, -2.067257e-01, -2.250791e-01, -2.420447e-01, /* 48-51 */
--2.575181e-01, -2.714038e-01, -2.836162e-01, -2.940800e-01, /* 52-55 */
--3.027307e-01, -3.095150e-01, -3.143910e-01, -3.173286e-01, /* 56-59 */
--3.183099e-01, -3.173286e-01, -3.143910e-01, -3.095150e-01, /* 60-63 */
--3.027307e-01, -2.940800e-01, -2.836162e-01, -2.714038e-01, /* 64-67 */
--2.575181e-01, -2.420447e-01, -2.250791e-01, -2.067257e-01, /* 68-71 */
--1.870979e-01, -1.663165e-01, -1.445097e-01, -1.218119e-01, /* 72-75 */
--9.836316e-02, -7.430797e-02, -4.979464e-02, -2.497431e-02, /* 76-79 */
+ 0.000000e+00,  7.845910e-02,  1.564345e-01,  2.334454e-01, /* 0-3 */
+ 3.090170e-01,  3.826834e-01,  4.539905e-01,  5.224986e-01, /* 4-7 */
+ 5.877853e-01,  6.494480e-01,  7.071068e-01,  7.604060e-01, /* 8-11 */
+ 8.090170e-01,  8.526402e-01,  8.910065e-01,  9.238795e-01, /* 12-15 */
+ 9.510565e-01,  9.723699e-01,  9.876883e-01,  9.969173e-01, /* 16-19 */
+ 1.000000e+00,  9.969173e-01,  9.876883e-01,  9.723699e-01, /* 20-23 */
+ 9.510565e-01,  9.238795e-01,  8.910065e-01,  8.526402e-01, /* 24-27 */
+ 8.090170e-01,  7.604060e-01,  7.071068e-01,  6.494480e-01, /* 28-31 */
+ 5.877853e-01,  5.224986e-01,  4.539905e-01,  3.826834e-01, /* 32-35 */
+ 3.090170e-01,  2.334454e-01,  1.564345e-01,  7.845910e-02, /* 36-39 */
+-0.000000e+00, -7.845910e-02, -1.564345e-01, -2.334454e-01, /* 40-43 */
+-3.090170e-01, -3.826834e-01, -4.539905e-01, -5.224986e-01, /* 44-47 */
+-5.877853e-01, -6.494480e-01, -7.071068e-01, -7.604060e-01, /* 48-51 */
+-8.090170e-01, -8.526402e-01, -8.910065e-01, -9.238795e-01, /* 52-55 */
+-9.510565e-01, -9.723699e-01, -9.876883e-01, -9.969173e-01, /* 56-59 */
+-1.000000e+00, -9.969173e-01, -9.876883e-01, -9.723699e-01, /* 60-63 */
+-9.510565e-01, -9.238795e-01, -8.910065e-01, -8.526402e-01, /* 64-67 */
+-8.090170e-01, -7.604060e-01, -7.071068e-01, -6.494480e-01, /* 68-71 */
+-5.877853e-01, -5.224986e-01, -4.539905e-01, -3.826834e-01, /* 72-75 */
+-3.090170e-01, -2.334454e-01, -1.564345e-01, -7.845910e-02, /* 76-79 */
  0.000000e+00};						    /* 80 */
 
 /*
@@ -455,23 +451,23 @@ struct decvec {
 };
 
 /*
- * The station structure is used to acquire the minute pulse from WWV
- * and/or WWVH. These stations are distinguished by the frequency used
- * for the second and minute sync pulses, 1000 Hz for WWV and 1200 Hz
- * for WWVH. Other than frequency, the format is the same.
+ * The station structure (sp) is used to acquire the minute pulse from
+ * WWV and/or WWVH. These stations are distinguished by the frequency
+ * used for the second and minute sync pulses, 1000 Hz for WWV and 1200
+ * Hz for WWVH. Other than frequency, the format is the same.
  */
 struct sync {
 	double	epoch;		/* accumulated epoch differences */
-	double	maxamp;		/* sync max envelope (square) */
-	double	noiamp;		/* sync noise envelope (square) */
+	double	maxeng;		/* sync max energy */
+	double	noieng;		/* sync noise energy */
 	long	pos;		/* max amplitude position */
 	long	lastpos;	/* last max position */
 	long	mepoch;		/* minute synch epoch */
 
-	double	amp;		/* sync amplitude (I, Q squares) */
-	double	synamp;		/* sync max envelope at 800 ms */
-	double	synmax;		/* sync envelope at 0 s */
-	double	synmin;		/* sync envelope at 59, 1 s */
+	double	amp;		/* sync energy (I, Q squares) */
+	double	syneng;		/* sync max energy at 800 ms */
+	double	synnoi;		/* sync noise energy at 59, 1 s */
+	double	synmax;		/* sync amplitude at 0 s */
 	double	synsnr;		/* sync signal SNR */
 	int	count;		/* bit counter */
 	char	refid[5];	/* reference identifier */
@@ -480,19 +476,16 @@ struct sync {
 };
 
 /*
- * The channel structure is used to mitigate between channels.
+ * The channel structure (cp) is used to mitigate between channels.
  */
 struct chan {
 	int	gain;		/* audio gain */
-	double	sigamp;		/* data max envelope (square) */
-	double	noiamp;		/* data noise envelope (square) */
-	double	datsnr;		/* data signal SNR */
 	struct sync wwv;	/* wwv station */
 	struct sync wwvh;	/* wwvh station */
 };
 
 /*
- * WWV unit control structure
+ * WWV unit control structure (up)
  */
 struct wwvunit {
 	l_fp	timestamp;	/* audio sample timestamp */
@@ -554,9 +547,9 @@ struct wwvunit {
 	 * Variables used to estimate signal levels and bit/digit
 	 * probabilities
 	 */
-	double	sigsig;		/* data max signal */
-	double	sigamp;		/* data max envelope (square) */
-	double	noiamp;		/* data noise envelope (square) */
+	double	sigsig;		/* data channel max signal */
+	double	sigeng;		/* data max energy */
+	double	noieng;		/* data noise energy */
 	double	datsnr;		/* data SNR (dB) */
 
 	/*
@@ -584,8 +577,7 @@ static	void	wwv_epoch	P((struct peer *));
 static	void	wwv_rf		P((struct peer *, double));
 static	void	wwv_endpoc	P((struct peer *, int));
 static	void	wwv_rsec	P((struct peer *, double));
-static	void	wwv_qrz		P((struct peer *, struct sync *,
-				    double, int));
+static	void	wwv_qrz		P((struct peer *, struct sync *, int));
 static	void	wwv_corr4	P((struct peer *, struct decvec *,
 				    double [], double [][4]));
 static	void	wwv_gain	P((struct peer *));
@@ -726,6 +718,12 @@ wwv_start(
 		else
 			up->fd_icom = icom_init("/dev/icom", B9600,
 			    temp);
+		if (up->fd_icom < 0) {
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_NOTICE,
+			    "icom: device /dev/icom not found");
+			up->errflg = CEVNT_FAULT;
+		}
 	}
 	if (up->fd_icom > 0) {
 		if ((temp = wwv_qsy(peer, up->schan)) != 0) {
@@ -922,7 +920,7 @@ wwv_rf(
 {
 	struct refclockproc *pp;
 	struct wwvunit *up;
-	struct sync *sp;
+	struct sync *sp, *rp;
 
 	static double lpf[5];	/* 150-Hz lpf delay line */
 	double data;		/* lpf output */
@@ -1004,12 +1002,13 @@ wwv_rf(
 	 */
 	i = up->datapt;
 	up->datapt = (up->datapt + IN100) % 80;
-	dtemp = sintab[i] * data / DATSIZ * DGAIN;
+	dtemp = sintab[i] * data / 4. / 170;
 	up->irig -= ibuf[iptr];
 	ibuf[iptr] = dtemp;
 	up->irig += dtemp;
+
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * data / DATSIZ * DGAIN;
+	dtemp = sintab[i] * data / 4. / 170;
 	up->qrig -= qbuf[iptr];
 	qbuf[iptr] = dtemp;
 	up->qrig += dtemp;
@@ -1058,36 +1057,48 @@ wwv_rf(
 	 */
 	up->mphase = (up->mphase + 1) % MINUTE;
 	epoch = up->mphase % SECOND;
+
+	/*
+	 * WWV
+	 */
 	i = csinptr;
 	csinptr = (csinptr + IN1000) % 80;
-	dtemp = sintab[i] * syncx / SYNSIZ * SGAIN;
-	ciamp = ciamp - cibuf[jptr] + dtemp;
+	dtemp = sintab[i] * syncx / 4.;
+	ciamp -= cibuf[jptr];
 	cibuf[jptr] = dtemp;
+	ciamp += dtemp;
+
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * syncx / SYNSIZ * SGAIN;
-	cqamp = cqamp - cqbuf[jptr] + dtemp;
+	dtemp = sintab[i] * syncx / 4.;
+	cqamp -= cqbuf[jptr];
 	cqbuf[jptr] = dtemp;
+	cqamp += dtemp;
+
 	sp = &up->mitig[up->schan].wwv;
-	dtemp = ciamp * ciamp + cqamp * cqamp;
-	sp->amp = dtemp;
+	sp->amp = sqrt(ciamp * ciamp + cqamp * cqamp) / 800;
 	if (!(up->status & MSYNC))
-		wwv_qrz(peer, sp, dtemp, (int)(pp->fudgetime1 *
-		    SECOND));
+		wwv_qrz(peer, sp, (int)(pp->fudgetime1 * SECOND));
+
+	/*
+	 * WWVH
+	 */
 	i = hsinptr;
 	hsinptr = (hsinptr + IN1200) % 80;
-	dtemp = sintab[i] * syncx / SYNSIZ * SGAIN;
-	hiamp = hiamp - hibuf[jptr] + dtemp;
+	dtemp = sintab[i] * syncx / 4.;
+	hiamp -= hibuf[jptr];
 	hibuf[jptr] = dtemp;
+	hiamp += dtemp;
+
 	i = (i + 20) % 80;
-	dtemp = sintab[i] * syncx / SYNSIZ * SGAIN;
-	hqamp = hqamp - hqbuf[jptr] + dtemp;
+	dtemp = sintab[i] * syncx / 4.;
+	hqamp -= hqbuf[jptr];
 	hqbuf[jptr] = dtemp;
-	sp = &up->mitig[up->schan].wwvh;
-	dtemp = hiamp * hiamp + hqamp * hqamp;
-	sp->amp = dtemp;
+	hqamp += dtemp;
+
+	rp = &up->mitig[up->schan].wwvh;
+	rp->amp = sqrt(hiamp * hiamp + hqamp * hqamp) / 800;
 	if (!(up->status & MSYNC))
-		wwv_qrz(peer, sp, dtemp, (int)(pp->fudgetime2 *
-		    SECOND));
+		wwv_qrz(peer, rp, (int)(pp->fudgetime2 * SECOND));
 	jptr = (jptr + 1) % SYNSIZ;
 
 	/*
@@ -1174,96 +1185,96 @@ wwv_rf(
 
 		/*
 		 * WWV FIR matched filter, five cycles of 1000-Hz
-		 * sinewave.
+		 * sinewave normalized for unit energy per cycle..
 		 */
 		mf[40] = mf[39];
-		mfsync = (mf[39] = mf[38]) * 4.224514e-02;
-		mfsync += (mf[38] = mf[37]) * 5.974365e-02;
-		mfsync += (mf[37] = mf[36]) * 4.224514e-02;
+		mfsync = (mf[39] = mf[38]) * 1.767767e-01;
+		mfsync += (mf[38] = mf[37]) * 2.500000e-01;
+		mfsync += (mf[37] = mf[36]) * 1.767767e-01;
 		mf[36] = mf[35];
-		mfsync += (mf[35] = mf[34]) * -4.224514e-02;
-		mfsync += (mf[34] = mf[33]) * -5.974365e-02;
-		mfsync += (mf[33] = mf[32]) * -4.224514e-02;
+		mfsync += (mf[35] = mf[34]) * -1.767767e-01;
+		mfsync += (mf[34] = mf[33]) * -2.500000e-01;
+		mfsync += (mf[33] = mf[32]) * -1.767767e-01;
 		mf[32] = mf[31];
-		mfsync += (mf[31] = mf[30]) * 4.224514e-02;
-		mfsync += (mf[30] = mf[29]) * 5.974365e-02;
-		mfsync += (mf[29] = mf[28]) * 4.224514e-02;
+		mfsync += (mf[31] = mf[30]) * 1.767767e-01;
+		mfsync += (mf[30] = mf[29]) * 2.500000e-01;
+		mfsync += (mf[29] = mf[28]) * 1.767767e-01;
 		mf[28] = mf[27];
-		mfsync += (mf[27] = mf[26]) * -4.224514e-02;
-		mfsync += (mf[26] = mf[25]) * -5.974365e-02;
-		mfsync += (mf[25] = mf[24]) * -4.224514e-02;
+		mfsync += (mf[27] = mf[26]) * -1.767767e-01;
+		mfsync += (mf[26] = mf[25]) * -2.500000e-01;
+		mfsync += (mf[25] = mf[24]) * -1.767767e-01;
 		mf[24] = mf[23];
-		mfsync += (mf[23] = mf[22]) * 4.224514e-02;
-		mfsync += (mf[22] = mf[21]) * 5.974365e-02;
-		mfsync += (mf[21] = mf[20]) * 4.224514e-02;
+		mfsync += (mf[23] = mf[22]) * 1.767767e-01;
+		mfsync += (mf[22] = mf[21]) * 2.500000e-01;
+		mfsync += (mf[21] = mf[20]) * 1.767767e-01;
 		mf[20] = mf[19];
-		mfsync += (mf[19] = mf[18]) * -4.224514e-02;
-		mfsync += (mf[18] = mf[17]) * -5.974365e-02;
-		mfsync += (mf[17] = mf[16]) * -4.224514e-02;
+		mfsync += (mf[19] = mf[18]) * -1.767767e-01;
+		mfsync += (mf[18] = mf[17]) * -2.500000e-01;
+		mfsync += (mf[17] = mf[16]) * -1.767767e-01;
 		mf[16] = mf[15];
-		mfsync += (mf[15] = mf[14]) * 4.224514e-02;
-		mfsync += (mf[14] = mf[13]) * 5.974365e-02;
-		mfsync += (mf[13] = mf[12]) * 4.224514e-02;
+		mfsync += (mf[15] = mf[14]) * 1.767767e-01;
+		mfsync += (mf[14] = mf[13]) * 2.500000e-01;
+		mfsync += (mf[13] = mf[12]) * 1.767767e-01;
 		mf[12] = mf[11];
-		mfsync += (mf[11] = mf[10]) * -4.224514e-02;
-		mfsync += (mf[10] = mf[9]) * -5.974365e-02;
-		mfsync += (mf[9] = mf[8]) * -4.224514e-02;
+		mfsync += (mf[11] = mf[10]) * -1.767767e-01;
+		mfsync += (mf[10] = mf[9]) * -2.500000e-01;
+		mfsync += (mf[9] = mf[8]) * -1.767767e-01;
 		mf[8] = mf[7];
-		mfsync += (mf[7] = mf[6]) * 4.224514e-02;
-		mfsync += (mf[6] = mf[5]) * 5.974365e-02;
-		mfsync += (mf[5] = mf[4]) * 4.224514e-02;
+		mfsync += (mf[7] = mf[6]) * 1.767767e-01;
+		mfsync += (mf[6] = mf[5]) * 2.500000e-01;
+		mfsync += (mf[5] = mf[4]) * 1.767767e-01;
 		mf[4] = mf[3];
-		mfsync += (mf[3] = mf[2]) * -4.224514e-02;
-		mfsync += (mf[2] = mf[1]) * -5.974365e-02;
-		mfsync += (mf[1] = mf[0]) * -4.224514e-02;
+		mfsync += (mf[3] = mf[2]) * -1.767767e-01;
+		mfsync += (mf[2] = mf[1]) * -2.500000e-01;
+		mfsync += (mf[1] = mf[0]) * -1.767767e-01;
 		mf[0] = syncx;
 	} else if (up->status & SELH) {
 		pdelay = (int)(pp->fudgetime2 * SECOND);
 
 		/*
 		 * WWVH FIR matched filter, six cycles of 1200-Hz
-		 * sinewave.
+		 * sinewave normalized for unit energy per cycle..
 		 */
 		mf[40] = mf[39];
-		mfsync = (mf[39] = mf[38]) * 4.833363e-02;
-		mfsync += (mf[38] = mf[37]) * 5.681959e-02;
-		mfsync += (mf[37] = mf[36]) * 1.846180e-02;
-		mfsync += (mf[36] = mf[35]) * -3.511644e-02;
-		mfsync += (mf[35] = mf[34]) * -5.974365e-02;
-		mfsync += (mf[34] = mf[33]) * -3.511644e-02;
-		mfsync += (mf[33] = mf[32]) * 1.846180e-02;
-		mfsync += (mf[32] = mf[31]) * 5.681959e-02;
-		mfsync += (mf[31] = mf[30]) * 4.833363e-02;
+		mfsync = (mf[39] = mf[38]) * 2.022542e-01;
+		mfsync += (mf[38] = mf[37]) * 2.377641e-01;
+		mfsync += (mf[37] = mf[36]) * 7.725425e-02;
+		mfsync += (mf[36] = mf[35]) * -1.469463e-01;
+		mfsync += (mf[35] = mf[34]) * -2.500000e-01;
+		mfsync += (mf[34] = mf[33]) * -1.469463e-01;
+		mfsync += (mf[33] = mf[32]) * 7.725425e-02;
+		mfsync += (mf[32] = mf[31]) * 2.377641e-01;
+		mfsync += (mf[31] = mf[30]) * 2.022542e-01;
 		mf[30] = mf[29];
-		mfsync += (mf[29] = mf[28]) * -4.833363e-02;
-		mfsync += (mf[28] = mf[27]) * -5.681959e-02;
-		mfsync += (mf[27] = mf[26]) * -1.846180e-02;
-		mfsync += (mf[26] = mf[25]) * 3.511644e-02;
-		mfsync += (mf[25] = mf[24]) * 5.974365e-02;
-		mfsync += (mf[24] = mf[23]) * 3.511644e-02;
-		mfsync += (mf[23] = mf[22]) * -1.846180e-02;
-		mfsync += (mf[22] = mf[21]) * -5.681959e-02;
-		mfsync += (mf[21] = mf[20]) * -4.833363e-02;
+		mfsync += (mf[29] = mf[28]) * -2.022542e-01;
+		mfsync += (mf[28] = mf[27]) * -2.377641e-01;
+		mfsync += (mf[27] = mf[26]) * -7.725425e-02;
+		mfsync += (mf[26] = mf[25]) * 1.469463e-01;
+		mfsync += (mf[25] = mf[24]) * 2.500000e-01;
+		mfsync += (mf[24] = mf[23]) * 1.469463e-01;
+		mfsync += (mf[23] = mf[22]) * -7.725425e-02;
+		mfsync += (mf[22] = mf[21]) * -2.377641e-01;
+		mfsync += (mf[21] = mf[20]) * -2.022542e-01;
 		mf[20] = mf[19];
-		mfsync += (mf[19] = mf[18]) * 4.833363e-02;
-		mfsync += (mf[18] = mf[17]) * 5.681959e-02;
-		mfsync += (mf[17] = mf[16]) * 1.846180e-02;
-		mfsync += (mf[16] = mf[15]) * -3.511644e-02;
-		mfsync += (mf[15] = mf[14]) * -5.974365e-02;
-		mfsync += (mf[14] = mf[13]) * -3.511644e-02;
-		mfsync += (mf[13] = mf[12]) * 1.846180e-02;
-		mfsync += (mf[12] = mf[11]) * 5.681959e-02;
-		mfsync += (mf[11] = mf[10]) * 4.833363e-02;
+		mfsync += (mf[19] = mf[18]) * 2.022542e-01;
+		mfsync += (mf[18] = mf[17]) * 2.377641e-01;
+		mfsync += (mf[17] = mf[16]) * 7.725425e-02;
+		mfsync += (mf[16] = mf[15]) * -1.469463e-01;
+		mfsync += (mf[15] = mf[14]) * -2.500000e-01;
+		mfsync += (mf[14] = mf[13]) * -1.469463e-01;
+		mfsync += (mf[13] = mf[12]) * 7.725425e-02;
+		mfsync += (mf[12] = mf[11]) * 2.377641e-01;
+		mfsync += (mf[11] = mf[10]) * 2.022542e-01;
 		mf[10] = mf[9];
-		mfsync += (mf[9] = mf[8]) * -4.833363e-02;
-		mfsync += (mf[8] = mf[7]) * -5.681959e-02;
-		mfsync += (mf[7] = mf[6]) * -1.846180e-02;
-		mfsync += (mf[6] = mf[5]) * 3.511644e-02;
-		mfsync += (mf[5] = mf[4]) * 5.974365e-02;
-		mfsync += (mf[4] = mf[3]) * 3.511644e-02;
-		mfsync += (mf[3] = mf[2]) * -1.846180e-02;
-		mfsync += (mf[2] = mf[1]) * -5.681959e-02;
-		mfsync += (mf[1] = mf[0]) * -4.833363e-02;
+		mfsync += (mf[9] = mf[8]) * -2.022542e-01;
+		mfsync += (mf[8] = mf[7]) * -2.377641e-01;
+		mfsync += (mf[7] = mf[6]) * -7.725425e-02;
+		mfsync += (mf[6] = mf[5]) * 1.469463e-01;
+		mfsync += (mf[5] = mf[4]) * 2.500000e-01;
+		mfsync += (mf[4] = mf[3]) * 1.469463e-01;
+		mfsync += (mf[3] = mf[2]) * -7.725425e-02;
+		mfsync += (mf[2] = mf[1]) * -2.377641e-01;
+		mfsync += (mf[1] = mf[0]) * -2.022542e-01;
 		mf[0] = syncx;
 	} else {
 		mfsync = 0;
@@ -1276,9 +1287,10 @@ wwv_rf(
 	 * ms for both the WWV and WWVH filters, and also for the
 	 * propagation delay. Once each second look for second sync. If
 	 * not in minute sync, fiddle the codec gain. Note the SNR is
-	 * computed from the maximum sample and the two samples 6 ms
-	 * before and 6 ms after it, so if we slip more than a cycle the
-	 * SNR should plummet.
+	 * computed from the maximum sample and the envelope of the
+	 * sample 6 ms before it, so if we slip more than a cycle the
+	 * SNR should plummet. The matched filter has a gain of 5, so
+	 * scale the output accordinly.
 	 */
 	dtemp = (epobuf[epoch] += (mfsync - epobuf[epoch]) /
 	    up->avgint);
@@ -1289,15 +1301,15 @@ wwv_rf(
 	if (epoch == 0) {
 		int k, j;
 
-		up->epomax = epomax;
+		up->epomax = epomax / 5.;
 		k = epopos - 6 * MS;
 		if (k < 0)
 			k += SECOND;
-		j = epopos + 6 * MS;
+		j = k + MS / 4;
 		if (j >= SECOND)
 			i -= SECOND;
-		up->eposnr = wwv_snr(epomax, max(abs(epobuf[k]),
-		    abs(epobuf[j])));
+		up->eposnr = wwv_snr(epomax, sqrt(epobuf[k] *
+		    epobuf[k] + epobuf[j] * epobuf[j]));
 		epopos -= pdelay + 5 * MS; 
 		if (epopos < 0)
 			epopos += SECOND;
@@ -1329,7 +1341,7 @@ wwv_rf(
  * at least 6 dB. In addition after finding a candidate, The peak second
  * pulse amplitude must be at least 2000, the SNR at least 6 dB and the
  * difference between the current and previous epoch must be less than
- * 7.5 ms, which corresponds to a frequency error of 125 PPM.. A compare
+ * 7.5 ms, which corresponds to a frequency error of 125 PPM. A compare
  * counter keeps track of the number of successive intervals which
  * satisfy these criteria.
  *
@@ -1342,7 +1354,6 @@ static void
 wwv_qrz(
 	struct peer *peer,	/* peer structure pointer */
 	struct sync *sp,	/* sync channel structure */
-	double	syncx,		/* bandpass filtered sync signal */
 	int	pdelay		/* propagation delay (samples) */
 	)
 {
@@ -1358,8 +1369,8 @@ wwv_qrz(
 
 	/*
 	 * Find the sample with peak energy, which defines the minute
-	 * epoch. If a sample has been found with good amplitude,
-	 * accumulate the noise squares for all except the second before
+	 * epoch. If a sample has been found with good energy,
+	 * accumulate the noise energy for all except the second before
 	 * and after that position.
 	 */
 	isgood = up->epomax > STHR && up->eposnr > SSNR;
@@ -1373,12 +1384,12 @@ wwv_qrz(
 	epoch = up->mphase - fpoch;
 	if (epoch < 0)
 		epoch += MINUTE;
-	if (syncx > sp->maxamp) {
-		sp->maxamp = syncx;
+	if (sp->amp > sp->maxeng) {
+		sp->maxeng = sp->amp;
 		sp->pos = epoch;
 	}
 	if (abs((epoch - sp->lastpos) % MINUTE) > SECOND)
-		sp->noiamp += syncx;
+		sp->noieng += sp->amp;
 
 	/*
 	 * At the end of the minute, determine the epoch of the
@@ -1387,8 +1398,8 @@ wwv_qrz(
 	 * intrinsic frequency error plus jitter.
 	 */
 	if (up->mphase == 0) {
-		sp->synmax = sqrt(sp->maxamp);
-		sp->synmin = sqrt(sp->noiamp / (MINUTE - 2 * SECOND));
+		sp->synmax = sp->maxeng;
+		sp->synnoi = sp->noieng / (MINUTE - 2 * SECOND);
 		epoch = (sp->pos - sp->lastpos) % MINUTE;
 
 		/*
@@ -1396,7 +1407,7 @@ wwv_qrz(
 		 * dance to find a valid minute sync pulse, emphasis
 		 * valid.
 		 */
-		snr = wwv_snr(sp->synmax, sp->synmin);
+		snr = wwv_snr(sp->maxeng, sp->synnoi);
 		isgood = isgood && sp->synmax > ATHR && snr > ASNR;
 		switch (sp->count) {
 
@@ -1456,7 +1467,7 @@ wwv_qrz(
 #endif
 		}
 		sp->lastpos = sp->pos;
-		sp->maxamp = sp->noiamp = 0;
+		sp->maxeng = sp->noieng = 0;
 	}
 }
 
@@ -1707,52 +1718,58 @@ wwv_epoch(
 	struct wwvunit *up;
 	struct chan *cp;
 	static double dpulse;	/* data pulse length */
+	double energy;		/* energy per cycle */
 	double dtemp;
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
 
 	/*
-	 * Sample the minute sync pulse envelopes at epoch 800 for both
-	 * the WWV and WWVH stations. This will be used later for
-	 * channel and station mitigation. Note that the seconds epoch
-	 * is set here well before the end of the second to make sure we
-	 * never seet the epoch backwards.
+	 * Sample the minute sync pulse energy at epoch 800 for both the
+	 * WWV and WWVH stations. This will be used later for channel
+	 * and station mitigation. Note that the seconds epoch is set
+	 * here well before the end of the second to make sure we never
+	 * seet the epoch backwards.
 	 */
 	if (up->rphase == 800 * MS) {
 		up->repoch = up->yepoch;
 		cp = &up->mitig[up->achan];
-		cp->wwv.synamp = cp->wwv.amp;
-		cp->wwvh.synamp = cp->wwvh.amp;
+		cp->wwv.syneng = cp->wwv.amp;
+		cp->wwvh.syneng = cp->wwvh.amp;
 	}
 
 	/*
-	 * Sample the data subcarrier at epoch 15 ms, giving a guard
-	 * time of +-15 ms from the beginning of the second until the
-	 * pulse rises at 30 ms. The I-channel amplitude is used to
-	 * calculate the slice level. The envelope amplitude is used
-	 * during the probe seconds to determine the SNR. There is a
-	 * compromise here; we want to delay the sample as long as
-	 * possible to give the radio time to change frequency and the
-	 * AGC to stabilize, but as early as possible if the second
-	 * epoch is not exact.
+	 * Monitor the data channel signal and energy at each cycle to
+	 * establish the slice level and SNR. Set the noise, energy and
+	 * signal floor at epoch 15 ms, giving a guard time of +-15 ms
+	 * from the beginning of the second until the pulse rises at 30
+	 * ms. There is a compromise here; we want to delay the sample
+	 * as long as possible to give the radio time to change
+	 * frequency and the AGC to stabilize, but as early as possible
+	 * if the second epoch is not exact.
 	 */
+	energy = sqrt(up->irig * up->irig + up->qrig * up->qrig);
 	if (up->rphase == 15 * MS) {
-		up->noiamp = up->irig * up->irig + up->qrig * up->qrig;
+		up->noieng = up->sigeng = up->sigsig = energy;
 
 	/*
-	 * Sample the data subcarrier at epoch 215 ms, giving a guard
+	 * Find the maximum signal and signal energy prior to epoch 215
+	 * ms. This finds the autocorrelation peaks even under a 15-ms
+	 * slip either way.
+	 */
+	} else if (up->rphase < 215 * MS) {
+		if (up->irig > up->sigsig) {
+			up->sigsig = up->irig;
+			up->sigeng = energy;
+		}
+
+	/*
+	 * Sample the Q channel at epoch 215 ms, giving a guard
 	 * time of +-15 ms from the earliest the pulse peak can be
-	 * reached to the earliest it can begin to fall. For the data
-	 * channel latch the I-channel amplitude for all except the
-	 * probe seconds and adjust the 100-Hz reference oscillator
-	 * phase using the Q-channel amplitude at this epoch. For the
-	 * probe channel latch the envelope amplitude.
+	 * reached to the earliest it can begin to fall. Use the sample
+	 * to adjust the 100-Hz reference oscillator phase.
 	 */
 	} else if (up->rphase == 215 * MS) {
-		up->sigsig = up->irig;
-		if (up->sigsig < 0)
-			up->sigsig = 0;
 		up->datpha = up->qrig / up->avgint;
 		if (up->datpha >= 0) {
 			up->datapt++;
@@ -1763,17 +1780,16 @@ wwv_epoch(
 			if (up->datapt < 0)
 				up->datapt += 80;
 		}
-		up->sigamp = up->irig * up->irig + up->qrig * up->qrig;
 
 	/*
 	 * The slice level is set half way between the peak signal and
 	 * noise levels. Sample the negative zero crossing after epoch
-	 * 200 ms and record the epoch at that time. This defines the
+	 * 215 ms and record the epoch at that time. This defines the
 	 * length of the data pulse, which will later be converted into
 	 * scaled bit probabilities.
 	 */
-	} else if (up->rphase > 200 * MS) {
-		dtemp = (up->sigsig + sqrt(up->noiamp)) / 2;
+	} else if (up->rphase > 215 * MS) {
+		dtemp = (up->sigsig + up->noieng) / 2;
 		if (up->irig < dtemp && dpulse == 0)
 			dpulse = up->rphase;
 	}
@@ -1785,14 +1801,15 @@ wwv_epoch(
 	 * seconds synch is diddling the epoch. Then, determine the true
 	 * offset and update the median filter in the driver interface.
 	 *
-	 * Sample the data subcarrier envelope at the end of the second
-	 * to determine the SNR for the pulse. This gives a guard time
-	 * of +-30 ms from the decay of the longest pulse to the rise of
-	 * the next pulse.
+	 * Sample the energy at the end of the second to determine the
+	 * SNR for the pulse. This gives a better measurement than the
+	 * beginning of the second, especially when returning from the
+	 * probe channel. This gives a guard time of +-30 ms from the
+	 * decay of the longest pulse to the rise of the next pulse.
 	 */
 	up->rphase++;
 	if (up->mphase % SECOND == up->repoch) {
-		up->datsnr = wwv_snr(up->sigsig, sqrt(up->noiamp));
+		up->datsnr = wwv_snr(up->sigeng, energy);
 		wwv_rsec(peer, dpulse);
 		wwv_gain(peer);
 		up->rphase = dpulse = 0;
@@ -1879,41 +1896,35 @@ wwv_rsec(
 	 */
 	case SYNC2:			/* 0 */
 		cp = &up->mitig[up->achan];
-		cp->wwv.synmax = sqrt(cp->wwv.synamp);
-		cp->wwvh.synmax = sqrt(cp->wwvh.synamp);
+		cp->wwv.synmax = cp->wwv.syneng;
+		cp->wwvh.synmax = cp->wwvh.syneng;
+		up->errcnt = 0;
 		break;
 
 	/*
 	 * At the end of second 1 determine the minute sync pulse
 	 * amplitude and SNR and set SYNCNG if these values are below
 	 * thresholds. Determine the data pulse amplitude and SNR and
-	 * set DATANG if these values are below thresholds. Set ERRRNG
-	 * if data pulses in second 59 and second 1 are decoded in
-	 * error. Shift a 1 into the reachability register if SYNCNG and
-	 * DATANG are both lit; otherwise shift a 0. Ignore ERRRNG for
-	 * the present. The number of 1 bits in the last six intervals
-	 * represents the channel metric used by the mitigation routine.
-	 * Finally, QSY back to the data channel.
+	 * set DATANG if these values are below thresholds. Shift a 1
+	 * into the reachability register if SYNCNG and DATANG are both
+	 * lit; otherwise shift a 0. The number of 1 bits in the last
+	 * six intervals represents the channel metric used by the
+	 * mitigation routine. Finally, QSY back to the data channel.
 	 */
 	case SYNC3:			/* 1 */
 		cp = &up->mitig[up->achan];
-		cp->sigamp = sqrt(up->sigamp);
-		cp->noiamp = sqrt(up->noiamp);
-		cp->datsnr = wwv_snr(cp->sigamp, cp->noiamp);
 
 		/*
 		 * WWV station
 		 */
 		sp = &cp->wwv;
-		sp->synmin = sqrt((sp->synmin + sp->synamp) / 2.);
-		sp->synsnr = wwv_snr(sp->synmax, sp->synmin);
-		sp->select &= ~(SYNCNG | DATANG | ERRRNG);
+		sp->synnoi = (sp->synnoi + sp->syneng) / 2.;
+		sp->synsnr = wwv_snr(sp->synmax, sqrt(sp->synnoi));
+		sp->select &= ~(SYNCNG | DATANG);
 		if (sp->synmax < QTHR || sp->synsnr < QSNR)
 			sp->select |= SYNCNG;
-		if (cp->sigamp < XTHR || cp->datsnr < XSNR)
+		if (up->errcnt > 0)
 			sp->select |= DATANG;
-		if (up->errcnt > 2)
-			sp->select |= ERRRNG;
 		sp->reach <<= 1;
 		if (sp->reach & (1 << AMAX))
 			sp->count--;
@@ -1926,19 +1937,17 @@ wwv_rsec(
 		 * WWVH station
 		 */
 		rp = &cp->wwvh;
-		rp->synmin = sqrt((rp->synmin + rp->synamp) / 2.);
-		rp->synsnr = wwv_snr(rp->synmax, rp->synmin);
-		rp->select &= ~(SYNCNG | DATANG | ERRRNG);
+		rp->synnoi = (rp->synnoi + rp->syneng) / 2.;
+		rp->synsnr = wwv_snr(rp->synmax, sqrt(rp->synnoi));
+		rp->select &= ~(SYNCNG | DATANG);
 		if (rp->synmax < QTHR || rp->synsnr < QSNR)
 			rp->select |= SYNCNG;
-		if (cp->sigamp < XTHR || cp->datsnr < XSNR)
+		if (up->errcnt > 0)
 			rp->select |= DATANG;
-		if (up->errcnt > 2)
-			rp->select |= ERRRNG;
 		rp->reach <<= 1;
 		if (rp->reach & (1 << AMAX))
 			rp->count--;
-		if (!(rp->select & (SYNCNG | DATANG | ERRRNG))) {
+		if (!(rp->select & (SYNCNG | DATANG))) {
 			rp->reach |= 1;
 			rp->count++;
 		}
@@ -1948,9 +1957,9 @@ wwv_rsec(
 		 */
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv5 %2d %04x %3d %4d %d %.0f/%.1f %s %04x %.0f %.0f/%.1f %s %04x %.0f %.0f/%.1f",
+			    "wwv5 %2d %04x %3d %4d %d% .0f/%.1f %s %04x %.0f %.0f/%.1f %s %04x %.0f %.0f/%.1f",
 			    up->port, up->status, up->gain, up->yepoch,
-			    up->errcnt, cp->sigamp, cp->datsnr,
+			    up->errcnt, up->sigeng, up->datsnr,
 			    sp->refid, sp->reach & 0xffff,
 			    wwv_metric(sp), sp->synmax, sp->synsnr,
 			    rp->refid, rp->reach & 0xffff,
@@ -2051,7 +2060,6 @@ wwv_rsec(
 #endif /* ICOM */
 		up->status |= SFLAG | SELV | SELH;
 		up->errbit = up->errcnt;
-		up->errcnt = 0;
 		break;
 
 	/*
@@ -2066,8 +2074,8 @@ wwv_rsec(
 	 */
 	case MIN1:			/* 59 */
 		cp = &up->mitig[up->achan];
-		cp->wwv.synmin = cp->wwv.synamp;
-		cp->wwvh.synmin = cp->wwvh.synamp;
+		cp->wwv.synnoi = cp->wwv.syneng;
+		cp->wwvh.synnoi = cp->wwvh.syneng;
 
 		/*
 		 * Dance the leap if necessary and the kernel has the
