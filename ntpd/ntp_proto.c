@@ -1318,14 +1318,10 @@ clock_update(void)
 		sys_poll = sys_peer->minpoll;
 	if (sys_poll > sys_peer->maxpoll)
 		sys_poll = sys_peer->maxpoll;
-#ifdef REFCLOCK
-	if (!(sys_peer->flags & FLAG_REFCLOCK))
-		poll_update(sys_peer, sys_poll);
-#endif /* REFCLOCK */
+	poll_update(sys_peer, sys_poll);
 	if (sys_peer->epoch <= sys_clocktime)
 		return;
 
-	sys_clocktime = sys_peer->epoch;
 #ifdef DEBUG
 	if (debug)
 		printf("clock_update: at %ld assoc %d \n", current_time,
@@ -1567,6 +1563,7 @@ peer_clear(
 	peer->estbdelay = sys_bdelay;
 	peer->hpoll = peer->minpoll;
 	peer->ppoll = peer->maxpoll;
+	peer->disp = MAXDISPERSE;
 	peer->jitter = SQRT(MAXDISPERSE);
 	peer->epoch = current_time;
 #ifdef REFCLOCK

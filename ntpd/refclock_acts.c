@@ -30,32 +30,20 @@
  * use as backup when neither a radio clock nor connectivity to Internet
  * time servers is available.
  *
- * For best results the propagation delay due to the individual modem
- * and telephone circuit must be known. The ACTS echo-delay measurement
- * scheme no longer works, so corrections due to propagation delay must
- * be determined by other means. Systematic corrections range from 200
- * to 400 milliseconds, depending on the particular service and call
- * routing. Variations from call to call can reach 100 miliseconds and
- * between messages during a call from a few milliseconds to 50
- * milliseconds or more.
- *
- * This driver requires a 1200-bps modem with a Hayes-compatible command
+ * This driver requires a 9600-bps modem with a Hayes-compatible command
  * set and control over the modem data terminal ready (DTR) control
  * line. The modem setup string is hard-coded in the driver and may
- * require changes for nonstandard modems or special circumstances. The
- * calling program is initiated by setting fudge flag1. This can be done
- * using ntpdc, either manually or via a cron job. In auto mode, flag1
- * is set at each poll event. In backup mode, flag1 is set at each poll
- * event, but only if the prefer peer is unreachable.
+ * require changes for nonstandard modems or special circumstances.
  *
- * When flag1 is set, the calling program dials each number listed in
- * the phones command of the configuration file in turn. The number is
- * specified by the Hayes ATDT prefix followed by the number itself,
- * including the prefix and long-distance digits and delay code, if
- * necessary. The flag1 is reset and the calling program terminated if
- * (a) a valid clock update has been determined, (b) no more numbers
- * remain in the list, (c) a device fault or timeout occurs or (d) fudge
- * flag1 is reset manually using ntpdc.
+ * The calling program is initiated by setting fudge flag1, either
+ * manually or automatically. When flag1 is set, the calling program
+ * dials each number listed in the phones command of the configuration
+ * file in turn. The number is specified by the Hayes ATDT prefix
+ * followed by the number itself, including the prefix and long-distance
+ * digits and delay code, if necessary. The flag1 is reset and the
+ * calling program terminated if (a) a valid clock update has been
+ * determined, (b) no more numbers remain in the list, (c) a device
+ * fault or timeout occurs or (d) fudge flag1 is reset manually.
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom radios. It selects the parsing algorithm depending on the
@@ -97,8 +85,9 @@
  * 47999 90-04-18 21:39:16 50 0 +.1 045.0 UTC(NIST) *
  * ...
  *
- * MJD, DST, DUT1, msADV and UTC are not used by this driver. The "*" is
- * the on-time marker.
+ * MJD, DST, DUT1 and UTC are not used by this driver. The "*" or "#" is
+ * the on-time markers echoed by the driver and used by NIST to measure
+ * and correct for the propagation delay.
  *
  * US Naval Observatory (USNO)
  *
@@ -120,7 +109,7 @@
  * PTB: +49 531 512038 (Germany)
  * NPL: 0906 851 6333 (UK only)
  *
- * Data format
+ * Data format (see the documentation for phone numbers and formats.)
  *
  * 1995-01-23 20:58:51 MEZ  10402303260219950123195849740+40000500
  *
@@ -135,12 +124,13 @@
  * Interface definitions
  */
 #define	DEVICE		"/dev/acts%d" /* device name and unit */
+#define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define LOCKFILE	"/var/spool/locks/LCK..cua%d"
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
-#define MSGCNT		10	/* we need this many messages */
-#define SMAX		80	/* max string length */
+#define MSGCNT		20	/* max message count */
+#define SMAX		80	/* max clockstats line length */
 
 /*
  * Calling program modes
@@ -161,12 +151,13 @@
 #define REFWWVB		"WWVB"	/* WWVB reference ID */
 #define	LENWWVB0	22	/* WWVB format 0 */
 #define	LENWWVB2	24	/* WWVB format 2 */
+#define LF		0x0a	/* ASCII LF */
 
 /*
  * Modem setup strings. These may have to be changed for some modems.
  *
  * AT	command prefix
- * B1	initiate call negotiation using Bell 212A
+ * B1	US answer tone
  * &C1	enable carrier detect
  * &D2	hang up and return to command mode on DTR transition
  * E0	modem command echo disabled
@@ -184,8 +175,8 @@
 #define WAIT		2	/* DTR timeout */
 #define MODEM		3	/* modem timeout */
 #define ANSWER		60	/* answer timeout */
-#define CONNECT		10	/* first message timeout */
-#define TIMECODE	20	/* all messages timeout */
+#define CONNECT		10	/* first valid message timeout */
+#define TIMECODE	30	/* all valid messages timeout */
 
 /*
  * State machine codes
@@ -207,6 +198,7 @@ struct actsunit {
 	int	retry;		/* retry index */
 	int	msgcnt;		/* count of messages received */
 	l_fp	tstamp;		/* on-time timestamp */
+	char	*bufptr;	/* buffer pointer */
 };
 
 /*
@@ -215,6 +207,7 @@ struct actsunit {
 static	int	acts_start	P((int, struct peer *));
 static	void	acts_shutdown	P((int, struct peer *));
 static	void	acts_receive	P((struct recvbuf *));
+static	void	acts_message	P((struct peer *));
 static	void	acts_poll	P((int, struct peer *));
 static	void	acts_timeout	P((struct peer *));
 static	void	acts_disc	P((struct peer *));
@@ -269,6 +262,7 @@ acts_start (
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	peer->sstclktype = CTL_SST_TS_TELEPHONE;
+	up->bufptr = pp->a_lastcode;
 	return (1);
 }
 
@@ -304,9 +298,57 @@ acts_receive (
 	struct actsunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
+	char	tbuf[BMAX];
+	char	*tptr;
+
+	/*
+	 * Initialize pointers and read the timecode and timestamp. Note
+	 * we are in raw mode and victim of whatever the terminal
+	 * interfact kicks up; so, we have to reassemble messages from
+	 * arbitrary fragments. Capture the timecode at the beginning of
+	 * the message and at the '*' on-time character.
+	 */
+	peer = (struct peer *)rbufp->recv_srcclock;
+	pp = peer->procptr;
+	up = (struct actsunit *)pp->unitptr;
+	pp->lencode = refclock_gtraw(rbufp, tbuf, BMAX - (up->bufptr -
+	    pp->a_lastcode), &pp->lastrec);
+	for (tptr = tbuf; *tptr != '\0'; tptr++) {
+		if (*tptr == LF) {
+			if (up->bufptr == pp->a_lastcode) {
+				up->tstamp = pp->lastrec;
+				continue;
+
+			} else {
+				*up->bufptr = '\0';
+				acts_message(peer);
+				up->bufptr = pp->a_lastcode;
+			}
+		} else {
+			*up->bufptr++ = *tptr;
+			if (*tptr == '*' || *tptr == '#') {
+				up->tstamp = pp->lastrec;
+				write(pp->io.fd, tptr, 1);
+			}
+		}
+	}
+}
+
+
+/*
+ * acts_message - process message
+ */
+void
+acts_message(
+	struct peer *peer
+	)
+{
+	struct actsunit *up;
+	struct refclockproc *pp;
+	char	tbuf[SMAX];
+	u_int	len;
 	int	day;		/* day of the month */
 	int	month;		/* month of the year */
-
 	u_long	mjd;		/* Modified Julian Day */
 	double	dut1;		/* DUT adjustment */
 	double	msADV;		/* ACTS transmit advance (ms) */
@@ -322,24 +364,11 @@ acts_receive (
 	char	dstchar;	/* WWVB daylight/savings indicator */
 	u_int	dst;		/* ACTS daylight/standard time */
 
-	int	len;
-	char	tbuf[SMAX];	/* monitor buffer */
-
-	/*
-	 * Initialize pointers and read the timecode and timestamp.
-	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
-	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX,
-		&pp->lastrec);
-	if (pp->lencode == 0) {
-		up->tstamp = pp->lastrec;
-		return;
-	}
-	pp->a_lastcode[pp->lencode] = '\0';
-	sprintf(tbuf, "acts: (%d %d) %d %s", up->state, up->timer,
-	    pp->lencode, pp->a_lastcode);
+	len = strlen(pp->a_lastcode);
+	sprintf(tbuf, "acts: (%d %d) %d %s", up->state, up->timer, len,
+	    pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("%s\n", tbuf);
@@ -403,13 +432,14 @@ acts_receive (
 	 * occasional errors due noise are forgivable.
 	 */
 	pp->nsec = 0;
-	switch(pp->lencode) {
+	switch(len) {
 
 	/*
-	 * USNO on-time '*' on a line by itself.
+	 * For USNO format on-time character '*', which is on a line by
+	 * itself. By sure a timecode has been received.
 	 */
 	case 1:
-		if (*pp->a_lastcode == '*' && up->msgcnt > 0)
+		if (*pp->a_lastcode == '*' && up->state == S_MSG) 
 			break;
 
 		return;
@@ -427,6 +457,19 @@ acts_receive (
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
+
+		/*
+		 * Reset the timer and wait until NIST has calculated
+		 * roundtrip delay.
+		 */
+		if (up->state != S_MSG) {
+			up->state = S_MSG;
+			up->timer = TIMECODE;
+		}
+		if (flag != '#')
+			return;
+
+		pp->lastrec = up->tstamp;
 		pp->day = ymd2yd(pp->year, month, day);
 		if (leap == 1)
 	    		pp->leap = LEAP_ADDSECOND;
@@ -448,6 +491,14 @@ acts_receive (
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
+
+		/*
+		 * Reset the timer and wait for the on-time character.
+		 */
+		if (up->state != S_MSG) {
+			up->state = S_MSG;
+			up->timer = TIMECODE;
+		}
 		pp->lastrec = up->tstamp;
 		memcpy(&pp->refid, REFUSNO, 4);
 		if (up->msgcnt == 0)
@@ -466,6 +517,14 @@ acts_receive (
 		    &msADV, &flag) != 12) {
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
+		}
+
+		/*
+		 * Reset the timer and wait for the on-time character.
+		 */
+		if (up->state != S_MSG) {
+			up->state = S_MSG;
+			up->timer = TIMECODE;
 		}
 		pp->lastrec = up->tstamp;
 		if (leapmonth == month) {
@@ -507,10 +566,10 @@ acts_receive (
 	 */
 	case LENWWVB2:
 		if (sscanf(pp->a_lastcode,
-		    "%c%c%2d %3d %2d:%2d:%2d.%3ld %c%c",
+		    "%c%c%2d %3d %2d:%2d:%2d.%3ld%c%c%c",
 		    &synchar, &qualchar, &pp->year, &pp->day,
 		    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
-		    &leapchar, &dstchar) != 9) {
+		    &dstchar, &leapchar, &dstchar) != 11) {
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
@@ -539,14 +598,17 @@ acts_receive (
 
 	/*
 	 * The fudge time1 value is added to each sample by the main
-	 * line routines. We collect a maximum of MSGCNT samples or
-	 * until timeout.
+	 * line routines. Note that we use the median filter only when
+	 * the dispersion has receeded below the threshold.
 	 */
 	if (refclock_process(pp)) {
 		pp->lastref = pp->lastrec;
-		refclock_receive(peer);
-		up->state = S_MSG;
-		up->timer = TIMECODE;
+		if (peer->disp > MAXDISTANCE)
+			refclock_receive(peer);
+		if (up->state != S_MSG) {
+			up->state = S_MSG;
+			up->timer = TIMECODE;
+		}
 	} else {
 		refclock_report(peer, CEVNT_BADTIME);
 	}
@@ -689,18 +751,12 @@ acts_timeout(
 		}
 
 		/*
-		 * Open device and light up a discipline if present. We
-		 * use 1200 baud for modem, 9600 baud for direct
-		 * connect.
+		 * Open device and light up a discipline if present.
 		 */
 		if (!pp->io.fd) {
 			sprintf(device, DEVICE, up->unit);
-			if (pp->sloppyclockflag & CLK_FLAG3)
-				fd = refclock_open(device, B9600,
-				    LDISC_ACTS);
-			else
-				fd = refclock_open(device, B1200,
-				    LDISC_ACTS);
+			fd = refclock_open(device, SPEED232,
+			    LDISC_ACTS | LDISC_RAW);
 			if (fd < 0) {
 				msyslog(LOG_ERR,
 				    "acts: device open fails");
@@ -808,6 +864,7 @@ acts_disc (
 	 * number, fold the tent and go home.
 	 */
 	if (up->msgcnt > 0) {
+		refclock_receive(peer);
 		up->retry = 0;
 	} else {
 		up->retry++;
@@ -846,12 +903,17 @@ acts_disc (
 		}
 
 	}
+
+	/*
+	 * If there are more numbers to dial or the modem is not in
+	 * command mode, retry after a short wait.
+	 */
 	up->msgcnt = 0;
-	up->state = S_IDLE;
-	if (up->retry > 0)
+	up->timer = 0;
+	up->bufptr = pp->a_lastcode;
+	if (up->retry > 0 || up->state == S_OK)
 		up->timer = MODEM;
-	else
-		up->timer = 0;
+	up->state = S_IDLE;
 }
 
 #else

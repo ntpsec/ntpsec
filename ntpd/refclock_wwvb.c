@@ -112,7 +112,6 @@
  * WWVB unit control structure
  */
 struct wwvbunit {
-	u_char	tcswitch;	/* timecode switch */
 	l_fp	laststamp;	/* last receive timestamp */
 	u_char	lasthour;	/* last hour (for monitor) */
 	u_char	linect;		/* count ignored lines (for monitor */
@@ -157,7 +156,7 @@ wwvb_start(
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	sprintf(device, DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
 		return (0);
 
@@ -166,7 +165,7 @@ wwvb_start(
 	 */
 	if (!(up = (struct wwvbunit *)
 	      emalloc(sizeof(struct wwvbunit)))) {
-		(void) close(fd);
+		close(fd);
 		return (0);
 	}
 	memset((char *)up, 0, sizeof(struct wwvbunit));
@@ -177,7 +176,7 @@ wwvb_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void) close(fd);
+		close(fd);
 		free(up);
 		return (0);
 	}
@@ -253,17 +252,11 @@ wwvb_receive(
 	 * 0 provides the lowest jitter.
 	 */
 	if (temp == 0) {
-		if (up->tcswitch == 0) {
-			up->tcswitch = 1;
-			up->laststamp = trtmp;
-		} else
-		    up->tcswitch = 0;
+		up->laststamp = trtmp;
 		return;
 	}
 	pp->lencode = temp;
 	pp->lastrec = up->laststamp;
-	up->laststamp = trtmp;
-	up->tcswitch = 1;
 
 	/*
 	 * We get down to business, check the timecode format and decode

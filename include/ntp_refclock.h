@@ -170,6 +170,7 @@ struct refclockbug {
 #define LDISC_CHU	0x8	/* depredated */
 #define LDISC_PPS	0x10	/* ppsclock, ppsapi */
 #define LDISC_RAW	0x20	/* raw binary */
+#define LDISC_ECHO	0x40	/* enable echo */
 
 struct refclockproc {
 	struct	refclockio io;	/* I/O handler structure */
@@ -254,15 +255,16 @@ extern	void	refclock_buginfo P((struct sockaddr_storage *,
 extern	void	refclock_control P((struct sockaddr_storage *,
 				    struct refclockstat *,
 				    struct refclockstat *));
-extern	int	refclock_open	P((char *, int, int));
+extern	int	refclock_open	P((char *, u_int, u_int));
+extern	int	refclock_setup	P((int, u_int, u_int));
 extern	void	refclock_timer	P((struct peer *));
 extern	void	refclock_transmit P((struct peer *));
-extern	int	refclock_ioctl	P((int, int));
+extern	int	refclock_ioctl	P((int, u_int));
 extern 	int	refclock_process P((struct refclockproc *));
 extern 	void	refclock_process_offset P((struct refclockproc *, l_fp, l_fp, double));
 extern	void	refclock_report	P((struct peer *, int));
-extern	int	refclock_gtlin	P((struct recvbuf *, char *, int,
-				    l_fp *));
+extern	int	refclock_gtlin	P((struct recvbuf *, char *, int, l_fp *));
+extern	int	refclock_gtraw  P((struct recvbuf *, char *, int, l_fp *));
 #endif /* REFCLOCK */
 
 #endif /* NTP_REFCLOCK_H */
