@@ -556,7 +556,7 @@ avoided firmware bug (stime %.2f, laststime %.2f)\n",
 			    pp->year, pp->day,
 			    pp->hour, pp->minute, pp->second,
 			    prettydate(&pp->lastrec), lfptoa(&pp->offset, 6));
-
+			pp->lastref = pp->lastrec;
 			refclock_receive(peer);
 
 			/*
@@ -633,11 +633,9 @@ jupiter_offset(register struct peer *peer)
 		pp->lastrec.l_ui, &pp->yearstart, &offset.l_ui)) {
 		return ("jupiter_process: clocktime failed");
 	}
-	if (pp->usec) {
-		TVUTOTSF(pp->usec, offset.l_uf);
-	} else {
-		MSUTOTSF(pp->msec, offset.l_uf);
-	}
+	offset.l_uf = 0;
+        DTOLFP(pp->nsec / 1e9, &ltemp);
+        L_ADD(&offset, &ltemp);
 	L_ADD(&offset, &pp->fudgetime1);
 	up->lastref = offset;   /* save last reference time */
 	L_SUB(&offset, &pp->lastrec); /* form true offset */
@@ -876,8 +874,6 @@ jupiter_parse_t(register struct peer *peer, register u_short *sp)
 		pp->hour = jt->hour;
 		pp->minute = jt->minute;
 		pp->second = jt->second;
-		pp->msec = 0;
-		pp->usec = 0;
 	}
 
 	/* XXX debugging */

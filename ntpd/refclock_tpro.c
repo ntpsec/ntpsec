@@ -198,6 +198,8 @@ tpro_poll(
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
+	refclock_receive(peer);
+	pp->lastref = pp->lastrec;
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
 	peer->burst = NSTAGE;

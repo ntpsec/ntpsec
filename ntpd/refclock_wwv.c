@@ -491,17 +491,21 @@ struct chan {
 struct wwvunit {
 	l_fp	timestamp;	/* audio sample timestamp */
 	l_fp	tick;		/* audio sample increment */
-	double	comp[SIZE];	/* decompanding table */
 	double	phase, freq;	/* logical clock phase and frequency */
 	double	monitor;	/* audio monitor point */
 	int	fd_icom;	/* ICOM file descriptor */
 	int	errflg;		/* error flags */
+	int	watch;		/* watchcat */
+	int	swatch;		/* second sync watchcat */
+
+	/*
+	 * Audio codec variables
+	 */
+	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clipped count */
-	int	watch;		/* watchcat */
-	int	swatch;		/* second sync watchcat */
 
 	/*
 	 * Variables used to establish basic system timing
@@ -854,11 +858,10 @@ wwv_poll(
 	up = (struct wwvunit *)pp->unitptr;
 	if (pp->coderecv == pp->codeproc)
 		up->errflg = CEVNT_TIMEOUT;
-	else
-		pp->polls++;
 	if (up->errflg)
 		refclock_report(peer, up->errflg);
 	up->errflg = 0;
+	pp->polls++;
 }
 
 
@@ -2028,13 +2031,14 @@ wwv_rsec(
 	/*
 	 * If all nine digits have been found and compared correctly,
 	 * determine the current offset from the time of century and the
-	 * sample timestamp. If in second sync, declare victory and
-	 * clamp the root dispersion.
+	 * sample timestamp. If in second sync for a couple of minutes,
+	 * declare victory.
 	 */
 	if (up->digcnt >= 9 && (up->alarm & (3 << SYNERR)) == 0) {
 		up->status |= INSYNC;
 		up->watch = 0;
 		pp->disp = 0;
+		pp->lastref = up->timestamp;
 	}
 	up->rsec = nsec;
 	if (up->status & INSYNC) {
@@ -2047,10 +2051,7 @@ wwv_rsec(
 		    1].digit * 10 + up->decvec[DA + 2].digit * 100;
 		pp->year = up->decvec[YR].digit + up->decvec[YR +
 		    1].digit * 10;
-		if (pp->year < UTCYEAR)
-			pp->year += 2000;
-		else
-			pp->year += 1900;
+		pp->year += 2000;
 		L_CLR(&offset);
 		if (!clocktime(pp->day, pp->hour, pp->minute,
 		    pp->second, GMT, up->timestamp.l_ui,

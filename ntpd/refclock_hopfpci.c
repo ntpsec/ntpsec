@@ -262,10 +262,9 @@ hopfpci_poll(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
+	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
 	return;
 }
 
