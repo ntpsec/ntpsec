@@ -639,6 +639,28 @@ the frequency estimate, every effort should be made to operate the
 daemon
 on a continuous basis and minimize the intervals when for some reason it
 is not running.
+
+<H4>
+Configuring NTP with NetInfo</H4>
+If NetInfo support is compiled into NTP, you can opt to configure ntp
+in your NetInfo domain. NTP will look int he NetInfo directory
+<TT>/locations/ntp</TT> for property/value pairs which are equivalent
+the the lines in the configuration file described above. Each
+configuration keyword may have a coresponding property in NetInfo.
+Each value for a given property is treated as arguments to that property,
+similar to a line in the configuration file.
+
+<P>For example, the configuration shown in the configuration file above
+can be duplicated in NetInfo by adding a property "<TT>server</TT>" with
+values "<TT>rackety.udel.edu</TT>", "<TT>umd1.umd.edu</TT>", and
+"<TT>lilben.tn.cornell.edu</TT>"; and a property "<TT>driftfile</TT>"
+with the single value "<TT>/etc/ntp.drift</TT>".
+
+<P>Values may contain multiple tokens similar to the arguments available
+in the configuration file. For example, to use <TT>mimsy.mil</TT> as an
+NTP version 1 time server, you would add a value "<TT>mimsy.mil version
+1</TT>" to the "<TT>server</TT>" property.
+
 <H4>
 Ntp4 Versus Previous Versions</H4>
 There are several items of note when dealing with a mixture of

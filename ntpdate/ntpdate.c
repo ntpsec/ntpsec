@@ -45,6 +45,10 @@ struct timeval timeout = {60,0};
 # include <utmp.h>
 #endif
 
+#ifdef HAVE_NETINFO
+#include <netinfo/ni.h>
+#endif
+
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_io.h"
@@ -273,6 +277,10 @@ void clear_globals()
 }
 #endif
 
+#ifdef HAVE_NETINFO
+static ni_namelist *getnetinfoservers P((void));
+#endif
+
 /*
  * Main program.  Initialize us and loop waiting for I/O and/or
  * timer expiries.
@@ -300,6 +308,9 @@ ntpdatemain (
 	l_fp tmp;
 	int errflg;
 	int c;
+#ifdef HAVE_NETINFO
+	ni_namelist *netinfoservers;
+#endif
 #ifdef SYS_WINNT
 	HANDLE process_handle;
 
@@ -416,18 +427,14 @@ ntpdatemain (
 			break;
 		default:
 			break;
-		}
-
-	sys_maxservers = argc - ntp_optind;
-	if (errflg || sys_maxservers == 0) {
+	    }
+	
+	if (errflg) {
 		(void) fprintf(stderr,
 				   "usage: %s [-bBdqsv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
 				   progname);
 		exit(2);
 	}
-
-	sys_servers = (struct server **)
-		emalloc(sys_maxservers * sizeof(struct server *));
 
 	if (debug || simple_query) {
 #ifdef HAVE_SETVBUF
@@ -465,8 +472,33 @@ ntpdatemain (
 	/*
 	 * Add servers we are going to be polling
 	 */
+	sys_maxservers = argc - ntp_optind;
+#ifdef HAVE_NETINFO
+	if ((netinfoservers = getnetinfoservers()))
+		sys_maxservers += netinfoservers->ni_namelist_len;
+#endif
+	sys_servers = (struct server **)
+		emalloc(sys_maxservers * sizeof(struct server *));
+
 	for ( ; ntp_optind < argc; ntp_optind++)
 		addserver(argv[ntp_optind]);
+
+#ifdef HAVE_NETINFO
+	if (netinfoservers) {
+		if ( netinfoservers->ni_namelist_len &&
+		    *netinfoservers->ni_namelist_val ) {
+			u_int servercount = 0;
+			while (servercount < netinfoservers->ni_namelist_len) {
+				if (debug) msyslog(LOG_DEBUG,
+						   "Adding time server %s from NetInfo configuration.",
+						   netinfoservers->ni_namelist_val[servercount]);
+				addserver(netinfoservers->ni_namelist_val[servercount++]);
+			}
+		}
+		ni_namelist_free(netinfoservers);
+		free(netinfoservers);
+	}
+#endif
 
 	if (sys_numservers == 0) {
 		msyslog(LOG_ERR, "no servers can be used, exiting");
@@ -1970,4 +2002,35 @@ signal_no_reset(
 	}
 }
 #endif
+#endif
+
+#ifdef HAVE_NETINFO
+static ni_namelist *
+getnetinfoservers(void)
+{
+	ni_status status;
+	void *domain;
+	ni_id confdir;
+	ni_namelist *namelist = (ni_namelist*)malloc(sizeof(ni_namelist));
+
+	/* Find a time server in NetInfo */
+	if ((status = ni_open(NULL, ".", &domain)) != NI_OK) return NULL;
+
+	while (status = ni_pathsearch(domain, &confdir, NETINFO_CONFIG_DIR) == NI_NODIR) {
+		void *next_domain;
+		if (ni_open(domain, "..", &next_domain) != NI_OK) break;
+		ni_free(domain);
+		domain = next_domain;
+	}
+	if (status != NI_OK) return NULL;
+
+	NI_INIT(namelist);
+	if (ni_lookupprop(domain, &confdir, "server", namelist) != NI_OK) {
+		ni_namelist_free(namelist);
+		free(namelist);
+		return NULL;
+	}
+
+	return(namelist);
+}
 #endif

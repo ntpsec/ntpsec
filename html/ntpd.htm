@@ -43,6 +43,10 @@ local host is to be configured as a broadcast/multicast client or
 manycast client, with all peers being determined by listening to
 broadcasts at run time.
 
+<P>If NetInfo support is built into <TT>ntpd</TT>, then <TT>ntpd</TT> will
+attempt to read its configuration from the NetInfo if the default ntp.conf
+file cannot be read and no file is specified by the <TT>-c</TT> option.
+
 <P>Various internal <TT>ntpd</TT> variables can be displayed and
 configuration options altered while the daemon is running using the
 <TT><A HREF="ntpq.htm">ntpq</A></TT> and <TT><A

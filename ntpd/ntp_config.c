@@ -21,6 +21,10 @@
 #endif /* VMS */
 #include <sys/time.h>
 
+#ifdef HAVE_NETINFO
+#include <netinfo/ni.h>
+#endif
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -403,7 +407,21 @@ int	listen_to_virtual_ips = 0;
 int	config_priority_override = 0;
 int	config_priority;
 #endif
+
 static const char *ntp_options = "aAbc:dD:f:gk:l:Lmnp:P:r:s:t:v:V:x";
+
+#ifdef HAVE_NETINFO
+/*
+ * NetInfo configuration state
+ */
+struct netinfo_config_state {
+	void *domain;		/* domain with config */
+	ni_id config_dir;	/* ID config dir      */
+	int prop_index;		/* current property   */
+	int val_index;		/* current value      */
+	char **val_list;       	/* value list         */
+};
+#endif
 
 /*
  * Function prototypes
@@ -411,14 +429,19 @@ static const char *ntp_options = "aAbc:dD:f:gk:l:Lmnp:P:r:s:t:v:V:x";
 static	unsigned long get_pfxmatch P((char **, struct masks *));
 static	unsigned long get_match P((char *, struct masks *));
 static	unsigned long get_logmask P((char *));
-static	int gettokens	P((FILE *, char *, char **, int *));
-static	int matchkey	P((char *, struct keyword *));
-static	int getnetnum	P((const char *, struct sockaddr_in *, int));
-static	void	save_resolve	P((char *, int, int, int, int, int, int, u_long));
-static	void	do_resolve_internal P((void));
-static	void	abort_resolve	P((void));
+#ifdef HAVE_NETINFO
+static	struct netinfo_config_state *get_netinfo_config P((void));
+static	void free_netinfo_config P((struct netinfo_config_state *));
+static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
+#endif
+static	int gettokens P((FILE *, char *, char **, int *));
+static	int matchkey P((char *, struct keyword *));
+static	int getnetnum P((const char *, struct sockaddr_in *, int));
+static	void save_resolve P((char *, int, int, int, int, int, int, u_long));
+static	void do_resolve_internal P((void));
+static	void abort_resolve P((void));
 #if !defined(VMS)
-static	RETSIGTYPE catchchild	P((int));
+static	RETSIGTYPE catchchild P((int));
 #endif /* VMS */
 
 /*
@@ -628,6 +651,10 @@ getconfig(
 	int tok;
 	struct interface *localaddr;
 	const char *config_file;
+#ifdef HAVE_NETINFO
+	struct netinfo_config_state *config_netinfo = NULL;
+	int check_netinfo = 1;
+#endif /* HAVE_NETINFO */
 #ifdef SYS_WINNT
 	char *alt_config_file;
 	LPTSTR temp;
@@ -703,6 +730,9 @@ getconfig(
 
 		    case 'c':
 			config_file = ntp_optarg;
+#ifdef HAVE_NETINFO
+			check_netinfo = 0;
+#endif
 			break;
 
 		    case 'd':
@@ -819,7 +849,12 @@ getconfig(
 		exit(2);
 	}
 
-	if ((fp = fopen(FindConfig(config_file), "r")) == NULL)
+#ifdef HAVE_NETINFO
+	/* If there is no config_file, try NetInfo. */
+	if ((fp = fopen(FindConfig(config_file), "r")) == NULL && check_netinfo && !(config_netinfo = get_netinfo_config()))
+#else
+	if ((fp = fopen(FindConfig(config_file), "r")))
+#endif /* !HAVE_NETINFO */
 	{
 		fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(config_file));
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
@@ -842,8 +877,16 @@ getconfig(
 #endif /* not SYS_WINNT */
 	}
 
-	while ((tok = gettokens(fp, line, tokens, &ntokens))
-		   != CONFIG_UNKNOWN) {
+	for (;;) {
+		if (fp)
+			tok = gettokens(fp, line, tokens, &ntokens);
+#ifdef HAVE_NETINFO
+		else
+			tok = gettokens_netinfo(config_netinfo, tokens, &ntokens);
+#endif /* HAVE_NETINFO */
+
+		if (tok == CONFIG_UNKNOWN) break;
+
 		switch(tok) {
 		    case CONFIG_PEER:
 		    case CONFIG_SERVER:
@@ -904,7 +947,7 @@ getconfig(
 					break;
 				}
 			}
-
+			
 			peerversion = NTP_VERSION;
 			minpoll = NTP_MINDPOLL;
 			maxpoll = NTP_MAXDPOLL;
@@ -1748,7 +1791,10 @@ getconfig(
 			break;
 		}
 	}
-	(void) fclose(fp);
+	if (fp) (void)fclose(fp);
+#ifdef HAVE_NETINFO
+	if (config_netinfo) free_netinfo_config(config_netinfo);
+#endif /* HAVE_NETINFO */
 
 	if (res_fp != NULL) {
 		/*
@@ -1759,12 +1805,172 @@ getconfig(
 }
 
 
+#ifdef HAVE_NETINFO
+
+/* 
+ * get_netinfo_config - find the nearest NetInfo domain with an ntp
+ * configuration and initialize the configuration state.
+ */
+static struct netinfo_config_state *
+get_netinfo_config()
+{
+	ni_status status;
+	void *domain;
+	ni_id config_dir;
+       	struct netinfo_config_state *config;
+
+	if (ni_open(NULL, ".", &domain) != NI_OK) return NULL;
+
+	while ((status = ni_pathsearch(domain, &config_dir, NETINFO_CONFIG_DIR)) == NI_NODIR) {
+		void *next_domain;
+		if (ni_open(domain, "..", &next_domain) != NI_OK) {
+			ni_free(next_domain);
+			break;
+		}
+		ni_free(domain);
+		domain = next_domain;
+	}
+	if (status != NI_OK) {
+		ni_free(domain);
+		return NULL;
+	}
+
+       	config = (struct netinfo_config_state *)malloc(sizeof(struct netinfo_config_state));
+       	config->domain = domain;
+       	config->config_dir = config_dir;
+       	config->prop_index = 0;
+       	config->val_index = 0;
+       	config->val_list = NULL;
+
+	return config;
+}
+
+
+
+/*
+ * free_netinfo_config - release NetInfo configuration state
+ */
+static void
+free_netinfo_config(struct netinfo_config_state *config)
+{
+	ni_free(config->domain);
+	free(config);
+}
+
+
+
+/*
+ * gettokens_netinfo - return tokens from NetInfo
+ */
+static int
+gettokens_netinfo (
+	struct netinfo_config_state *config,
+	char **tokenlist,
+	int *ntokens
+	)
+{
+	int prop_index = config->prop_index;
+	int val_index = config->val_index;
+	char **val_list = config->val_list;
+
+	/*
+	 * Iterate through each keyword and look for a property that matches it.
+	 */
+	again:
+	if (!val_list) {
+	       	for (; prop_index < (sizeof(keywords)/sizeof(keywords[0])); prop_index++)
+	       	{
+		       	ni_namelist namelist;
+			struct keyword current_prop = keywords[prop_index];
+
+			/*
+			 * For each value associated in the property, we're going to return
+			 * a separate line. We squirrel away the values in the config state
+			 * so the next time through, we don't need to do this lookup.
+			 */
+		       	NI_INIT(&namelist);
+	       		if (ni_lookupprop(config->domain, &config->config_dir, current_prop.text, &namelist) == NI_OK) {
+				ni_index index;
+
+				/* Found the property, but it has no values */
+				if (namelist.ni_namelist_len == 0) continue;
+
+				if (! (val_list = config->val_list = (char**)malloc(sizeof(char*) * (namelist.ni_namelist_len + 1))))
+					{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
+
+				for (index = 0; index < namelist.ni_namelist_len; index++) {
+					char *value = namelist.ni_namelist_val[index];
+
+					if (! (val_list[index] = (char*)malloc(strlen(value+1))))
+						{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
+
+					strcpy(val_list[index], value);
+				}
+				val_list[index] = NULL;
+
+				break;
+			}
+			ni_namelist_free(&namelist);
+		}
+		config->prop_index = prop_index;
+	}
+
+	/* No list; we're done here. */
+       	if (!val_list) return CONFIG_UNKNOWN;
+
+	/*
+	 * We have a list of values for the current property.
+	 * Iterate through them and return each in order.
+	 */
+	if (val_list[val_index])
+	{
+		int ntok = 1;
+		int quoted = 0;
+		char *tokens = val_list[val_index];
+
+		msyslog(LOG_INFO, "%s %s", keywords[prop_index].text, val_list[val_index]);
+
+		(const char*)tokenlist[0] = keywords[prop_index].text;
+		for (ntok = 1; ntok < MAXTOKENS; ntok++) {
+			tokenlist[ntok] = tokens;
+			while (!ISEOL(*tokens) && (!ISSPACE(*tokens) || quoted))
+				quoted ^= (*tokens++ == '"');
+
+			if (ISEOL(*tokens)) {
+				*tokens = '\0';
+				break;
+			} else {		/* must be space */
+				*tokens++ = '\0';
+				while (ISSPACE(*tokens)) tokens++;
+				if (ISEOL(*tokens)) break;
+			}
+		}
+		*ntokens = ntok + 1;
+		
+		config->val_index++;
+
+		return keywords[prop_index].keytype;
+	}
+
+	/* We're done with the current property. */
+	prop_index = ++config->prop_index;
+
+	/* Free val_list and reset counters. */
+	for (val_index = 0; val_list[val_index]; val_index++)
+		free(val_list[val_index]);
+       	free(val_list);	val_list = config->val_list = NULL; val_index = config->val_index = 0;
+
+	goto again;
+}
+
+#endif /* HAVE_NETINFO */
+
 
 /*
  * gettokens - read a line and return tokens
  */
 static int
-gettokens(
+gettokens (
 	FILE *fp,
 	char *line,
 	char **tokenlist,
@@ -1772,7 +1978,6 @@ gettokens(
 	)
 {
 	register char *cp;
-	register int eol;
 	register int ntok;
 	register int quoted = 0;
 
@@ -1795,31 +2000,27 @@ gettokens(
 	/*
 	 * Now separate out the tokens
 	 */
-	eol = 0;
-	ntok = 0;
-	while (!eol) {
-		tokenlist[ntok++] = cp;
+	for (ntok = 0; ntok < MAXTOKENS; ntok++) {
+		tokenlist[ntok] = cp;
 		while (!ISEOL(*cp) && (!ISSPACE(*cp) || quoted))
 			quoted ^= (*cp++ == '"');
 
 		if (ISEOL(*cp)) {
 			*cp = '\0';
-			eol = 1;
+			break;
 		} else {		/* must be space */
 			*cp++ = '\0';
 			while (ISSPACE(*cp))
 				cp++;
 			if (ISEOL(*cp))
-				eol = 1;
+				break;
 		}
-		if (ntok == MAXTOKENS)
-			eol = 1;
 	}
 
 	/*
 	 * Return the match
 	 */
-	*ntokens = ntok;
+	*ntokens = ntok + 1;
 	ntok = matchkey(tokenlist[0], keywords);
 	if (ntok == CONFIG_UNKNOWN)
 		goto again;

@@ -1,3 +1,21 @@
+1999-09-17  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* acconfig.h:
+	* config.guess:
+	* config.h.in:
+	* config.sub:
+	* configure.in:
+	* html/copyright.htm:
+	* html/notes.htm:
+	* html/ntpd.htm:
+	* html/ntpdate.htm:
+	* include/ntp.h:
+	* ntpd/ntp_config.c:
+	* ntpdate/ntpdate.c:
+	* util/tickadj.c:
+	NetInfo support.
+	From: Wilfredo Sanchez <wsanchez@apple.com>
+
 1999-09-15  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* acconfig.h:

@@ -192,7 +192,7 @@ main(
 # undef hz
 #endif /* hz */
 
-#ifdef HAVE_LIBKVM
+#ifdef HAVE_KVM_OPEN
 # include <kvm.h>
 #endif
 

@@ -245,6 +245,9 @@
 /* canonical system (cpu-vendor-os) string */
 #undef STR_SYSTEM
 
+/* define if NetInfo support is available */
+#undef HAVE_NETINFO
+
 /* define if [gs]ettimeofday() only takes 1 argument */
 #undef SYSV_TIMEOFDAY
 
@@ -692,6 +695,9 @@
 
 /* Define if you have the <netinet/ip.h> header file.  */
 #undef HAVE_NETINET_IP_H
+
+/* Define if you have the <netinfo/ni.h> header file.  */
+#undef HAVE_NETINFO_NI_H
 
 /* Define if you have the <poll.h> header file.  */
 #undef HAVE_POLL_H

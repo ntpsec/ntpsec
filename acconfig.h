@@ -187,6 +187,9 @@
 /* canonical system (cpu-vendor-os) string */
 #undef STR_SYSTEM
 
+/* define if NetInfo support is available */
+#undef HAVE_NETINFO
+
 /* define if [gs]ettimeofday() only takes 1 argument */
 #undef SYSV_TIMEOFDAY
 

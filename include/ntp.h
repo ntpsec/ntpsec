@@ -705,4 +705,9 @@ struct endpoint {
 #define AM_NEWBCL	 5
 #define AM_POSSBCL	 6
 
+/* NetInfo configuration locations */
+#ifdef HAVE_NETINFO
+#define NETINFO_CONFIG_DIR "/config/ntp"
+#endif
+
 #endif /* NTP_H */

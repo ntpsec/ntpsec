@@ -51,6 +51,11 @@ well when <TT>ntpdate</TT> is run by <TT>cron</TT> every hour or two.
 on a regular basis from <TT>cron</TT> as an alternative to running a daemon,
 doing so once every hour or two will result in precise enough timekeeping
 to avoid stepping the clock.
+
+<P>If NetInfo support is compiled into <TT>ntpdate</TT>, then the
+<TT>server</TT> argument is optional if <TT>ntpdate</TT> can find a time
+server in the NetInfo configuration for <TT>ntpd</TT>.
+
 <H4>
 Command Line Options</H4>
 
