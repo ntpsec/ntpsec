@@ -664,14 +664,14 @@ local_clock(
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.
 	 */
-	record_loop_stats(last_offset, drift_comp, clock_jitter,
+	record_loop_stats(clock_offset, drift_comp, clock_jitter,
 	    clock_stability, sys_poll);
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %lu jitr %.3f freq %.3f stab %.3f poll %d count %d\n",
-		    mu, clock_jitter, drift_comp * 1e6, clock_stability *
-		    1e6, sys_poll, tc_counter);
+		    "local_clock: mu %lu jitr %.6f freq %.3f stab %.6f poll %d count %d\n",
+		    mu, clock_jitter, drift_comp * 1e6, clock_stability,
+		    sys_poll, tc_counter);
 #endif /* DEBUG */
 	return (rval);
 #endif /* LOCKCLOCK */

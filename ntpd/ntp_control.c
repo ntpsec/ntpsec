@@ -149,8 +149,8 @@ static	u_char def_sys_var[] = {
 	CS_STATE,
 	CS_OFFSET,
 	CS_DRIFT,
-	CS_ERROR,
 	CS_JITTER,
+	CS_ERROR,
 	CS_STABIL,
 #ifdef OPENSSL
 	CS_HOST,
@@ -1279,7 +1279,7 @@ ctl_putsys(
 
 	case CS_STABIL:
 		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
-		    1e6);
+		    1e3);
 		break;
 
 	case CS_VARLIST:
