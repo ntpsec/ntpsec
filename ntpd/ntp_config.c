@@ -1921,9 +1921,12 @@ getconfig(
 			break;
 		}
 	}
-	if (fp) (void)fclose(fp);
+	if (fp)
+		(void)fclose(fp);
+
 #ifdef HAVE_NETINFO
-	if (config_netinfo) free_netinfo_config(config_netinfo);
+	if (config_netinfo)
+		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
 
 #if !defined(VMS) && !defined(SYS_VXWORKS)
@@ -1962,7 +1965,6 @@ getconfig(
 		 */
 		do_resolve_internal();
 	}
-	ntp_res_send(0, 0, inet_addr("127.0.0.1"), 0);	/* HMS: Testing... */
 }
 
 

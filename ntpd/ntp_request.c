@@ -1278,20 +1278,27 @@ dns_a(
 		associd = dp->associd;
 		peer = findpeerbyassoc((int)associd);
 		if (peer == 0 || peer->flags & FLAG_REFCLOCK) {
+			msyslog(LOG_ERR, "dns_a: %s",
+				(peer == 0)
+				? "peer == 0"
+				: "peer->flags & FLAG_REFCLOCK");
 			++bogon;
 		}
 		peeraddr.sin_addr.s_addr = dp->peeraddr;
-		for (hnl = 0; *dp->hostname && hnl < sizeof dp->hostname; ++hnl) ;
+		for (hnl = 0; dp->hostname[hnl] && hnl < sizeof dp->hostname; ++hnl) ;
 		if (hnl >= sizeof dp->hostname) {
+			msyslog(LOG_ERR, "dns_a: hnl (%d) >= %d",
+				hnl, sizeof dp->hostname);
 			++bogon;
 		}
+
+		msyslog(LOG_INFO, "dns_a: <%s> for %s, AssocID %d, bogon %d",
+			dp->hostname, inet_ntoa(peeraddr.sin_addr), associd,
+			bogon);
 		
 		if (!bogon) {
 			cp = emalloc(hnl + 1);
 			strncpy(cp, dp->hostname, hnl);
-
-			msyslog(LOG_INFO, "dns_a: <%s> for %s, AssocID %d",
-				cp, inet_ntoa(peeraddr.sin_addr), associd);
 		}
 
 		if (bogon) {

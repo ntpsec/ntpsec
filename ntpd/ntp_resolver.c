@@ -150,7 +150,6 @@ ntp_res_send(
 	 * - child stuffs data and calls ntp_res(NTP_RES_V2)
 	 */
 
-	msyslog(LOG_INFO, "ntp_res_send: req_keyid %d\n", req_keyid);
 	for (pid = -1; pid == -1;) {
 #ifdef RES_TEST
 		pid = 0;
@@ -181,15 +180,11 @@ ntp_res_send(
 		openlog("ntp_res_send", LOG_PID | LOG_NDELAY, LOG_NTP);
 #endif
 
-		msyslog(LOG_DEBUG, "ntp_res_send: in child...");
 		addentry(name, paddr, associd);
-		msyslog(LOG_DEBUG, "ntp_res_send: back from addentry()");
 		ntp_res();
-		msyslog(LOG_DEBUG, "ntp_res_send: in child...DONE");
 		break;
 
 	    default:	/* Parent */
-		msyslog(LOG_DEBUG, "ntp_res_send: in parent...");
 		/* Nothing to do.  (In Real Life, this never happens.) */
 		return;
 	}
@@ -881,9 +876,11 @@ doconfigure(
 				struct in_addr si;
 
 				si.s_addr = de->de_peeraddr;
+#if 0
 				msyslog(LOG_INFO,
 					"resolved <%s>/%s, done with it",
 					de->de_hostname, inet_ntoa(si));
+#endif 0
 
 				deremove = de;
 				de = deremove->de_next;

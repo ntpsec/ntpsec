@@ -1,3 +1,11 @@
+2000-03-16  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_resolver.c (ntp_res_send): Lose some debugging noise.
+
+	* ntpd/ntp_config.c (getconfig): Lose testing code.
+
+	* ntpd/ntp_request.c (dns_a): Fix buglet in hostname length check.
+
 2000-03-16  Harlan Stenn  <harlan@pfcs.com>
 
 	* ntpd/ntp_request.c (dns_a): Start cracking the returned information.
