@@ -5,7 +5,7 @@ AC_CANONICAL_SYSTEM
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
 AM_CONFIG_HEADER(config.h)
 AC_ARG_PROGRAM
-AM_INIT_AUTOMAKE(ntp, 4.1.1a)
+AM_INIT_AUTOMAKE(ntp, 4.1.1b)
 AC_PREREQ(2.52)		# We need the cross-compile-aware SIZEOF stuff.
 
 ac_cv_var_atom_ok=no
