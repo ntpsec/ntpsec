@@ -143,16 +143,6 @@ struct req_pkt_tail {
 };
 
 /*
- * The req_pkt_tail structure is used by ntpd to adjust for different
- * packet sizes that may arrive.
- */
-struct req_pkt_tail {
-	l_fp tstamp;			/* time stamp, for authentication */
-	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
-};
-
-/*
  * Input packet lengths.  One with the mac, one without.
  */
 #define	REQ_LEN_HDR	8	/* 4 * u_char + 2 * u_short */
