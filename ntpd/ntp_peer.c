@@ -568,7 +568,7 @@ newpeer(
 		 */
 		if (peer->dstadr == ANY_INTERFACE_CHOOSE(srcadr))
 			peer->dstadr = findinterface(srcadr);
-	} else if (dstadr != ANY_INTERFACE_CHOOSE(srcadr))
+	} else if (dstadr != NULL && dstadr != ANY_INTERFACE_CHOOSE(srcadr))
 		peer->dstadr = dstadr;
 	else
 		peer->dstadr = findinterface(srcadr);
