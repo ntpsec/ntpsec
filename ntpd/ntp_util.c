@@ -367,7 +367,7 @@ stats_config(
 		    || (fabs(old_drift) > (NTP_MAXFREQ * 1e6))) {
 			msyslog(LOG_ERR, "invalid frequency (%f) in %s", 
 			    old_drift, stats_drift_file);
-			exit(1);
+			old_drift = 0.0;
 		}
 		msyslog(LOG_INFO, "frequency initialized %.3f from %s",
 		    old_drift, stats_drift_file);

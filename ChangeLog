@@ -1,3 +1,8 @@
+2000-07-08  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_util.c (stats_config): If we read a bogus old_drift,
+	use 0 instead of failing.
+
 2000-07-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* README.cvs: Cleanup.
