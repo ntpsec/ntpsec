@@ -401,7 +401,16 @@ internal_current4(isc_interfaceiter_t *iter) {
 	INSIST(sizeof(ifreq.ifr_name) <= sizeof(iter->current.name));
 	memset(iter->current.name, 0, sizeof(iter->current.name));
 	memcpy(iter->current.name, ifreq.ifr_name, sizeof(ifreq.ifr_name));
+
+	/* Some older O/S's don't have the interface index. Since ifr_index is
+	 * usually a macro definition into the actual structure we
+	 * use that to determine if we should get it.
+	 */
+#ifdef ifr_index
 	iter->current.ifindex = ifreq.ifr_index;	/* Save the if index */
+#else
+	iter->current.ifindex = 0;
+#endif
 
 	get_addr(family, &iter->current.address,
 		 (struct sockaddr *)&ifrp->ifr_addr);

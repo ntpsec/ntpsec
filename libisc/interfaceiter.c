@@ -78,6 +78,7 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 	}
 }
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 /*
  * Get the scope id here for multicasting purposes
  * For the KAME stack we need to play games to get the scope.
@@ -109,6 +110,7 @@ get_scopeid(unsigned int family, struct sockaddr *src) {
 	}
 	return (0);
 }
+#endif
 /*
  * Include system-dependent code.
  */
