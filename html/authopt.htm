@@ -83,16 +83,16 @@ associations, additional keys can be used as passwords for the <tt><a
 href=ntpq.htm>ntpq</a></tt> and <tt><a href=ntpdc.htm>ntpdc</a></tt>
 utility programs.
 
-<p>When <tt>ntpd</tt> is first started, it reads the key file and
-installs the keys in the key cache. However, the keys must be activated
-with the <tt>trusted</tt> command before use. This allows, for instance,
-the installation of possibly several batches of keys and then activating
-or deactivating each batch remotely using <tt>ntpdc</tt>. This also
-provides a revocation capability that can be used if a key becomes
-compromised. The <tt>requestkey</tt> command selects the key used as the
-password for the <tt>ntpdc</tt> utility, while the <tt>controlkey</tt>
-command selects the key used as the password for the <tt>ntpq</tt>
-utility.
+<p>When <tt>ntpd</tt> is first started, it reads the key file specified
+int he <tt>keys</tt> command and installs the keys in the key cache.
+However, the keys must be activated with the <tt>trusted</tt> command
+before use. This allows, for instance, the installation of possibly
+several batches of keys and then activating or deactivating each batch
+remotely using <tt>ntpdc</tt>. This also provides a revocation
+capability that can be used if a key becomes compromised. The
+<tt>requestkey</tt> command selects the key used as the password for the
+<tt>ntpdc</tt> utility, while the <tt>controlkey</tt> command selects
+the key used as the password for the <tt>ntpq</tt> utility.
 
 <h4>Public-Key Scheme</h4>
 
@@ -135,18 +135,26 @@ file name.
 
 <p>The <tt>ntp.keys</tt> file contains the DES/MD5 private keys. It must
 be distributed by secure means to other servers and clients sharing the
-same security compartment and made visible only to root. The
-<tt>ntpkey</tt> file contains the RSA private key. It is useful only to
-the machine that generated it and never shared with any other daemon or
-application program, so must be made visible only to root.
+same security compartment and made visible only to root. While this file
+is not used with the autokey scheme, it is needed to authenticate some
+remote configuration commands used by the <a
+href=ntpdc.htm><tt>ntpq</tt></a> and <a href=ntpq.htm><tt>ntpdc</tt></a>
+utilities. The <tt>ntpkey</tt> file contains the RSA private key. It is
+useful only to the machine that generated it and never shared with any
+other daemon or application program, so must be made visible only to
+root.
 
 <p>The <tt>ntp_dh</tt> file contains the agreement parameters. It is
 necessary that all servers and clients of a security compartment share a
 single set of parameters, but it does not matter which <tt>ntp_dh</tt>
-file generates them. The servers load the parameters directly from the
-file, while the clients load them indirectly from the servers using the
-autokey protocol. This file can be also be distributed using insecure
-means, since the data are public values.
+file generates them. Servers load the parameters directly from the
+file, while the clients can load them indirectly from the servers using
+the autokey protocol. Note that the parameters will be requested by all
+associations, either configured or not; but, none of the associations
+can proceed until one of them has received them. Once loaded, the
+parameters can be provided on request to other clients and servers. The
+<tt>ntp_dh</tt> file can be also be distributed using insecure means,
+since the data are public values.
 
 <p>The <tt>ntpkey_<i>host</i></tt> file contains the RSA public key,
 where <tt><i>host</i></tt> is the name of the host. Each <tt>server</tt>
@@ -172,6 +180,26 @@ not yet established by a certificate authority or web of trust.
 Therefore, when the most secure requirements apply, the public keys and
 agreement parameters should be loaded from files, rather than using the
 autokey protocol.
+
+<h4>Leapseconds Table</tt>
+
+<p>The NIST provides a table showing the epoch for all historic
+occasions of leap second insertion since 1972. The leapsecond table
+shows each epoch of insertion along with the offset of International
+Atomic Time (TAI) with respect to Coordinated Universtal Time (UTC), as
+disseminated by NTP. The table can be obtained directly from NIST
+national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-
+seconds</tt>.
+
+<p>While not strictly a security function, the Autokey scheme provides
+means to securely retrieve the leapsecond table from a server or peer.
+Servers load the leapsecond table directly from the file specified in
+the <tt>crypto</tt> command, while clients can load the table indirectly
+from the servers using the autokey protocol. Note that the table will be
+requested by all associations, either configured or not; but, none of
+the associations can proceed until one of them has received the table.
+Once loaded, the table can be provided on request to other clients and
+servers.
 
 <h4>Key Management</h4>
 
@@ -233,7 +261,6 @@ each association depends on this interval and the current poll interval.
 The default value is 12 (4096 s or about 1.1 hours). For poll intervals
 above the specified interval, a session key list with a single entry
 will be regenerated for every message sent.</dd>
-
 <dt><tt>controlkey <i>key</i></tt></dt>
 <dd>Specifies the key identifier to use with the <a
 href=ntpq.htm><tt>ntpq</tt></a> utility, which uses the standard
@@ -241,8 +268,8 @@ protocol defined in RFC-1305. The <tt><i>key</i></tt> argument is the
 key identifier for a trusted key, where the value can be in the range 1
 to 65534, inclusive.</dd>
 
-<dt><tt>crypto [privatekey <i>file</i>] [publickey <i>file</i>] [dhparms
-<i>file</i>] </tt></dt>
+<dt><tt>crypto [flags <i>flags</i>] [privatekey <i>file</i>] [publickey
+<i>file</i>] [dhparms <i>file</i>] [leap <i>file</i>] </tt></dt>
 <dd>This command requires the NTP daemon build process be configured
 with the RSA library. This command activates public-key cryptography and
 loads the required RSA private and public key files and the optional
@@ -251,6 +278,11 @@ files are left unspecified, the default names are used as described
 below. Following are the subcommands:</dd>
 
 <dl>
+
+<dt><tt>flags <i>flags</tt></i>
+<dd>Specifies optional flag bits. The only flag bit defined at this time
+is <tt>0x2</tt> which causes the leapsecond file to be fetched from any
+available server or peer.</dd>
 
 <dt><tt>privatekey <i>file</tt></i>
 <dd>Specifies the location of the RSA private key file, which
@@ -264,6 +296,10 @@ defaults to <tt>/usr/local/etc/ntpkey_<i>host</i></tt>., where
 <dt><tt>dhparms <i>file</tt></i>
 <dd>Specifies the location of the Diffie-Hellman parameters file,
 which otherwise defaults to <tt>/usr/local/etc/ntpkey_dh</tt>.</dd>
+
+<dt><tt>leap <i>file</tt></i>
+<dd>Specifies the location of the leapsecond table file,
+which otherwise defaults to <tt>/usr/local/etc/ntpkey_leap</tt>.</dd>
 
 </dl>
 

@@ -1,3 +1,12 @@
+2000-07-14  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* html/ntpq.htm: 
+	* html/index.htm: 
+	* html/debug.htm: 
+	* html/authopt.htm: 
+	Reality check.
+	From Dave Mills
+
 2000-07-13  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* Makefile.am (SUBDIRS): Added ElectricFence
