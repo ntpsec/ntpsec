@@ -1,3 +1,7 @@
+2001-06-12  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* configure.in: 4.0.99m-rc2
+
 2001-06-10  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_config.c:
