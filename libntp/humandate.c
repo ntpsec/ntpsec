@@ -15,8 +15,6 @@ static const char *days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-struct tm * ntp2unix_tm(u_long ntp, int local);
-
 char *
 humandate(
 	u_long ntptime
