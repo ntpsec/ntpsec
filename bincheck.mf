@@ -7,8 +7,9 @@ install-exec-hook:
 	 bin) ODIR=${exec_prefix}/sbin ;;			\
 	 sbin) ODIR=${exec_prefix}/bin ;;			\
 	esac;							\
-	for i in ${bin_PROGRAMS} ${bin_SCRIPTS}; do		\
-	   test -f $$ODIR/$$i && echo "$$i is also in $$ODIR!";	\
+	test -z "${bin_PROGRAMS}${bin_SCRIPTS}"			\
+	|| for i in ${bin_PROGRAMS} ${bin_SCRIPTS} " "; do		\
+	   test ! -f $$ODIR/$$i || echo "*** $$i is also in $$ODIR!";	\
 	done
 
 #
