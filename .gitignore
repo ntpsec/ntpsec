@@ -56,3 +56,4 @@ scripts/Makefile.in
 stamp-h.in
 util/Makefile.in
 ChangeLog
+version
