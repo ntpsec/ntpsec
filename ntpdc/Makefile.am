@@ -4,7 +4,7 @@ bindir=		${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	ntpdc
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
-BUILT_SOURCES=	maybe-layout
+BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@
 AM_CPPFLAGS=	-I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 ntpdc_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@
@@ -17,11 +17,6 @@ EXTRA_DIST=	nl_in.c nl.pl layout.std
 ETAGS_ARGS= 	Makefile.am
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c
-
-maybe-layout:
-	@case "${PATH_PERL}" in \
-	    /*) ${MAKE} check-layout ;;	\
-	esac
 
 ntpdc-layout.o: nl.c
 
