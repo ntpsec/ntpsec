@@ -186,12 +186,10 @@
 #define	REFID		"CHU"	/* reference ID */
 #ifdef ICOM
 #define DWELL		5	/* minutes before qsy */
+#define NCHAN		3	/* number of channels */
 #endif /* ICOM */
 #ifdef AUDIO_CHU
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
-#ifdef ICOM
-#define NCHAN		3	/* number of channels */
-#endif /* ICOM */
 
 /*
  * Audio demodulator definitions

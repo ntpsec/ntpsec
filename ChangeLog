@@ -1,5 +1,7 @@
 2000-01-18  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* ntpd/refclock_chu.c: NCHAN is used with generic ICOM.
+
 	* ntpd/refclock_wwv.c: Use new auido stuff
 	* ntpd/refclock_irig.c: Use new audio stuff
 	* ntpd/refclock_chu.c: Use new audio stuff
