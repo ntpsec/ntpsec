@@ -1,3 +1,9 @@
+2000-01-13  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_fg.c: New version
+	* html/driver37.htm: New version
+	From: Dmitry Smirnov <das@online.nsk.su>
+
 2000-01-12  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* README.des: Cleanup
