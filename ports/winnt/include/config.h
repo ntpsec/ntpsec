@@ -78,6 +78,7 @@
  */
 #define vsnprintf _vsnprintf
 #define snprintf _snprintf
+#define stricmp _stricmp
 #define isascii __isascii
 #define finite _finite
 #define random      rand
