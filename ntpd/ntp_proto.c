@@ -108,6 +108,7 @@ transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
+	int	hpoll;
 
 	/*
 	 * The polling state machine. There are two kinds of machines,
@@ -115,6 +116,7 @@ transmit(
 	 * server modes) and those that do (all other modes). The dance
 	 * is intricate...
 	 */
+	hpoll = peer->hpoll;
 	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 
 		/*
@@ -189,28 +191,37 @@ transmit(
 					peer_clear(peer, "CRYPTO");
 					peer->flash += TEST4;
 				} else {
-					peer->hpoll++;
+					if (hpoll < peer->maxpoll)
+						hpoll++;
 				}
 			} else {
 				/*
 				 * Here the peer is reachable. If it has
 				 * not been heard for three consecutive
-				 * polls, stuff the clock filter. Next,
-				 * determine the poll interval. If the
-				 * peer is unfit for synchronization,
-				 * increase it by one; otherwise, use
-				 * the system poll interval. 
+				 * polls, stuff infinity in the clock
+				 * filter. Next, determine the poll
+				 * interval. If the peer is unfit for
+				 * synchronization, increase it by one;
+				 * else, use the system poll interval,
+				 * but clamp it within bounds for this
+				 * peer. 
 				 */
 				peer->unreach = 0;
 				if (!(peer->reach & 0x07))
 					clock_filter(peer, 0., 0.,
 					    MAXDISPERSE);
-				if (peer_unfit(peer))
-					peer->hpoll++;
-				else
-					peer->hpoll = sys_poll;
-				if (peer->flags & FLAG_BURST)
-					peer->burst = NTP_BURST;
+				if (peer_unfit(peer)) {
+					if (hpoll < peer->maxpoll)
+						hpoll++;
+				} else {
+					hpoll = sys_poll;
+					if (hpoll > peer->maxpoll)
+						hpoll = peer->maxpoll;
+					else if (hpoll < peer->minpoll)
+						hpoll = peer->minpoll;
+					if (peer->flags & FLAG_BURST)
+						peer->burst = NTP_BURST;
+				}
 			}
 		} else {
 
@@ -253,7 +264,7 @@ transmit(
 					}
 				}
 				clock_select();
-				poll_update(peer);
+				poll_update(peer, hpoll);
 				return;
 			}
 		}
@@ -264,14 +275,14 @@ transmit(
 	 * Do not transmit if in broadcast client mode. 
 	 */
 	if (peer->hmode == MODE_BCLIENT) {
-		poll_update(peer);
+		poll_update(peer, hpoll);
 		return;
 
 	/*
 	 * Do not transmit in broadcast mode unless we are synchronized.
 	 */
 	} else if (peer->hmode == MODE_BROADCAST && sys_peer == NULL) {
-		poll_update(peer);
+		poll_update(peer, hpoll);
 		return;
 	}
 
@@ -284,11 +295,11 @@ transmit(
 			unpeer(peer);
 			return;
 		}
-		peer->hpoll= peer->minpoll;
+		poll_update(peer, peer->minpoll);
 	} else {
 		peer_xmit(peer);
+		poll_update(peer, hpoll);
 	}
-	poll_update(peer);
 }
 
 /*
@@ -1033,7 +1044,7 @@ receive(
 		 */
 		if (peer->cmmd != 0) {
 			peer->ppoll = pkt->ppoll;
-			poll_update(peer);
+			poll_update(peer, peer->hpoll);
 		}
 	}
 #endif /* OPENSSL */
@@ -1058,6 +1069,7 @@ receive(
 		return;
 	}
 
+#ifdef OPENSSL
 	/*
 	 * If TEST10 is lit, the autokey sequence has broken, which
 	 * probably means the server has refreshed its private value.
@@ -1074,6 +1086,7 @@ receive(
 		else
 			unpeer(peer);
 	}
+#endif /* OPENSSL */
 }
 
 
@@ -1210,7 +1223,7 @@ process_packet(
 		peer->timereachable = current_time;
 	}
 	peer->reach |= 1;
-	poll_update(peer);
+	poll_update(peer, peer->hpoll);
 
 	/*
 	 * For a client/server association, calculate the clock offset,
@@ -1314,8 +1327,7 @@ clock_update(void)
 		sys_poll = sys_peer->minpoll;
 	if (sys_poll > sys_peer->maxpoll)
 		sys_poll = sys_peer->maxpoll;
-	sys_peer->hpoll = sys_poll;
-	poll_update(sys_peer);
+	poll_update(sys_peer, sys_poll);
 	if (sys_peer->epoch <= sys_clocktime)
 		return;
 
@@ -1385,13 +1397,11 @@ clock_update(void)
  */
 void
 poll_update(
-	struct peer *peer
+	struct peer *peer,
+	int	mpoll
 	)
 {
-	u_char	hpoll;
-#ifdef OPENSSL
-	int	oldpoll;
-#endif /* OPENSSL */
+	int	hpoll;
 
 	/*
 	 * This routine figures out when the next poll should set, and
@@ -1402,14 +1412,7 @@ poll_update(
 	 * current_time, the call is from the poll process; otherwise,
 	 * it is from the receive process.
 	 */
-	hpoll = peer->hpoll;
-#ifdef OPENSSL
-	oldpoll = hpoll;
-#endif /* OPENSSL */
-	if (hpoll > peer->maxpoll)
-		hpoll = peer->maxpoll;
-	else if (hpoll < peer->minpoll)
-		hpoll = peer->minpoll;
+	hpoll = mpoll;
 
 	/*
 	 * If during the crypto protocol and a message is pending, make
@@ -1477,7 +1480,6 @@ poll_update(
 	 * up to the next second after this one. This way the only way
 	 * to get nexdate == current time is from the poll routine.
 	 */
-	peer->hpoll = hpoll;
 	if (peer->nextdate <= current_time)
 		peer->nextdate = current_time + 1;
 #ifdef OPENSSL
@@ -1487,9 +1489,10 @@ poll_update(
 	 * keylist are probably bogus. In this case purge the keylist
 	 * and regenerate it later.
 	 */
-	if (peer->hpoll != oldpoll)
+	if (hpoll != peer->hpoll)
 		key_expire(peer);
 #endif /* OPENSSL */
+	peer->hpoll = hpoll;
 #ifdef DEBUG
 	if (debug > 1)
 		printf("poll_update: at %lu %s flags %04x poll %d burst %d last %lu next %lu\n",
@@ -1580,7 +1583,7 @@ peer_clear(
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (oreach)
-		poll_update(peer);
+		poll_update(peer, peer->minpoll);
 	else if (initializing)
 		peer->nextdate = current_time + peer_associations;
 	else
