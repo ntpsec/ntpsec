@@ -536,6 +536,12 @@ AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
 ])
 if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
+else
+    # Hack around a problem...
+    case "$host" in
+     *-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
+	;;
+    esac
 fi
 
 AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
