@@ -205,7 +205,12 @@ case "$target" in
 esac
 AC_CHECK_HEADERS(sys/sockio.h sys/stat.h sys/stream.h sys/stropts.h)
 AC_CHECK_HEADERS(sys/sysctl.h sys/termios.h sys/time.h)
-AC_EGREP_HEADER(PPS_API_VERS_1, sys/timepps.h, AC_CHECK_HEADERS(sys/timepps.h))
+AC_EGREP_CPP(yes,
+[#include <sys/timepps.h>
+#ifdef PPS_API_VERS_1
+yes
+#endif
+], AC_CHECK_HEADERS(sys/timepps.h))
 AC_CHECK_HEADERS(sys/timers.h sys/timex.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$target" in
