@@ -2526,7 +2526,8 @@ AC_MSG_CHECKING(for the level of crypto support)
 AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(if we want to compile with ElectricFence)
-AC_ARG_WITH(electricfence,	[  --with-electricfence    - compile with ElectricFence malloc debugger],
+AC_ARG_WITH(electricfence,
+	AC_HELP_STRING([--with-electricfence], [- compile with ElectricFence malloc debugger]),
 [ans=$withval], [ans=no])
 case "$ans" in
  no) ;;
@@ -2536,6 +2537,20 @@ case "$ans" in
     AC_SUBST(EF_PROGS)
     EF_LIBS=libefence.a
     AC_SUBST(EF_LIBS)
+    ans=yes
+    ;;
+esac
+AC_MSG_RESULT($ans)
+
+AC_MSG_CHECKING(if we want to try SNTP)
+AC_ARG_WITH(sntp,
+	AC_HELP_STRING([--with-sntp], [- Build SNTP?]),
+[ans=$withval], [ans=no])
+case "$ans" in
+ no) ;;
+ *)
+    MAKE_SNTP="sntp"
+    AC_SUBST(MAKE_SNTP)
     ans=yes
     ;;
 esac
@@ -3391,6 +3406,13 @@ AC_CONFIG_FILES(scripts/ntpver)
 AC_CONFIG_FILES(scripts/plot_summary)
 AC_CONFIG_FILES(scripts/summary)
 AC_CONFIG_FILES(util/Makefile)
+
+case "$MAKE_SNTP" in
+ '') ;;
+ *)
+    AC_CONFIG_SUBDIRS(sntp)
+    ;;
+esac
 
 AC_CONFIG_COMMANDS(default, [[chmod +x scripts/calc_tickadj scripts/checktime scripts/freq_adj scripts/mkver scripts/ntp-wait scripts/ntpsweep scripts/ntptrace scripts/ntpver scripts/plot_summary scripts/summary]], [])
 

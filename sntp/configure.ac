@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([msntp],[1.6],[BUG-REPORT-ADDRESS])
-AM_INIT_AUTOMAKE
+AC_INIT(main.c)
+AM_INIT_AUTOMAKE([msntp],[1.6])
 AC_CONFIG_SRCDIR([header.h])
 
 # Checks for programs.
