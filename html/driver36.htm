@@ -9,7 +9,7 @@ Radio WWV/H Audio Demodulator/Decoder
 Address: 127.127.36.<I>u</I>
 <br>Reference ID: <tt>WWV</tt> or <tt>WWVH</tt>
 <br>Driver ID: <tt>WWV_AUDIO</tt>
-<br>Autotune Port: <tt>/dev/icom</tt>; 9600 baud, 8-bits, no parity
+<br>Autotune Port: <tt>/dev/icom</tt>; 1200/9600 baud, 8-bits, no parity
 <br>Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
 
 <h4>Description</h4>
@@ -319,15 +319,20 @@ changed in the driver source file.
 expressed in hex format. To activate the CI-V interface, the
 <tt>mode</tt> keyword of the <tt>server</tt> configuration command
 specifies a nonzero select code in decimal format. A table of ID select
-codes for the known ICOM radios is given below. A missing <tt>mode</tt>
-keyword or a zero argument leaves the interface disabled. The driver
-will attempt to open the device <tt>/dev/icom</tt> and, if successful
-will activate the autotune function and tune the radio to each operating
-frequency in turn while attempting to acquire minute sync from either
-WWV or WWVH. However, the driver is liberal in what it assumes of the
-configuration. If the <tt>/dev/icom</tt> link is not present or the open
-fails or the CI-V bus or radio is inoperative, the driver quietly gives
-up with no harm done.
+codes for the known ICOM radios is given below. Since all ICOM select
+codes are less than 128, the high order bit of the code is used by the
+driver to specify the baud rate. If this bit is not set, the rate is
+9600 bps for the newer radios; if set, the rate is 1200 bps for the
+older radios. A missing <tt>mode</tt> keyword or a zero argument leaves
+the interface disabled.
+
+<p>If specified, the driver will attempt to open the device
+<tt>/dev/icom</tt> and, if successful will activate the autotune
+function and tune the radio to each operating frequency in turn while
+attempting to acquire minute sync from either WWV or WWVH. However, the
+driver is liberal in what it assumes of the configuration. If the
+<tt>/dev/icom</tt> link is not present or the open fails or the CI-V bus
+or radio is inoperative, the driver quietly gives up with no harm done.
 
 <p>Once acquiring minute sync, the driver operates as described above to
 set the clock. However, during seconds 59, 0 and 1 of each minute it

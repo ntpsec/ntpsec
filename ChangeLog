@@ -1,5 +1,12 @@
 2000-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* html/driver7.htm: Patches from Dave Mills
+	* html/driver36.htm: Patches from Dave Mills
+
+	* html/copyright.htm: Added Kamal Mostafa
+
+2000-01-19  Harlan Stenn  <stenn@whimsy.udel.edu>
+
 	* configure.in: 4.0.99b
 
 2000-01-18  Harlan Stenn  <stenn@whimsy.udel.edu>
