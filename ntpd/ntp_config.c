@@ -2006,7 +2006,10 @@ getnetnum(
 #ifdef DEBUG
 		if (debug > 3)
 			printf(
-				"getnetnum: \"%s\" invalid host number, line ignored\n",
+				"getnetnum: \"%s\" invalid host number%s.",
+				(complain)
+				? ", line ignored\n"
+				: "",
 				num);
 #endif
 		return 0;
