@@ -5176,7 +5176,7 @@ rawdcf_init_1(
 }
 #else
 static int
-rawdcfdtr_init(
+rawdcfdtr_init_1(
 	struct parseunit *parse
 	)
 {
