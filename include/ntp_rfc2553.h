@@ -68,7 +68,7 @@
 #ifndef _NTP_RFC2553_H_
 #define _NTP_RFC2553_H_
 
-#ifdef _SS_MAXSIZE
+#if defined(_SS_MAXSIZE) || defined(_SS_SIZE)
 #define HAVE_IPV6
 #else
 

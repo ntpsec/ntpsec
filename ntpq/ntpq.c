@@ -593,7 +593,10 @@ openhost(
 	char service[5];
 
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
-	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_flags = AI_CANONNAME;
+#ifdef AI_ADDRCONFIG
+	hints.ai_flags |= AI_ADDRCONFIG;
+#endif
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -1653,7 +1656,10 @@ getnetnum(
 			   ? sizeof(struct sockaddr_in)
 			   : sizeof(struct sockaddr_in6);
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
-	hints.ai_flags = AI_ADDRCONFIG|AI_CANONNAME;
+	hints.ai_flags = AI_CANONNAME;
+#ifdef AI_ADDRCONFIG
+	hints.ai_flags |= AI_ADDRCONFIG;
+#endif
 	
 	/* decodenetnum works with addresses only */
 	if (decodenetnum(hname, num)) {
