@@ -55,6 +55,8 @@
 /*    [Change] Log to clockstats even if bad reply                    */
 /*    [Fix]    PRECISION = (-3) (about 100 ms)                        */
 /*    [Add]    Support the C-DEX Co.Ltd. JJY receiver                 */
+/*  2001/12/04                                                        */
+/*    [Fix]    C-DEX JST2000 ( fukusima@goto.info.waseda.ac.jp )      */
 /*                                                                    */
 /**********************************************************************/
 
@@ -579,7 +581,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 			up->lineerror = 1 ;
 			break ;
 		}
-		rc = sscanf ( pBuf, "J%2d%2d%2d %2d%2d%2d%1d",
+		rc = sscanf ( pBuf, "J%2d%2d%2d%*1d%2d%2d%2d%1d",
 		              &up->year, &up->month, &up->day, &up->hour, &up->minute, &up->second, &up->msecond ) ;
 		if ( rc != 7 || up->month < 1 || up->month > 12 || up->day < 1 || up->day > 31
 		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
