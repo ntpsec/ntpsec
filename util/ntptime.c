@@ -104,7 +104,7 @@ main(
 		break;
 	    case 'f':
 		ntx.modes |= MOD_FREQUENCY;
-		ntx.freq = (int)(atof(ntp_optarg) / SCALE_FREQ);
+		ntx.freq = (long)(atof(ntp_optarg) * SCALE_FREQ);
 		break;
 	    case 'm':
 		ntx.modes |= MOD_MAXERROR;

@@ -17,6 +17,9 @@
 #ifdef HAVE_SUN_AUDIOIO_H
 #include <sun/audioio.h>
 #endif /* HAVE_SUN_AUDIOIO_H */
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -1067,8 +1070,13 @@ irig_debug(
 		info.record.samples, info.record.eof,
 		info.record.pause, info.record.error,
 		info.record.waiting, info.record.balance);
+#ifdef __NetBSD__
+	printf("irig: monitor %d, blocksize %d, hiwat %d, lowat %d, mode %d\n",
+	       info.monitor_gain, info.blocksize, info.hiwat, info.lowat, info.mode);
+#else /* __NetBSD__ */
 	printf("irig: monitor %d, muted %d\n",
 	       info.monitor_gain, info.output_muted);
+#endif /* __NetBSD__ */
 }
 #endif /* DEBUG */
 

@@ -1,3 +1,11 @@
+1999-06-23  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/refclock_irig.c (irig_debug): NetBSD patches
+	From: Frederick Bruckman <fb@enteract.com>
+
+	* util/ntptime.c (main): ntx.freq bugfix (-f option)
+	From: Frederick Bruckman <fb@enteract.com>
+
 1999-06-22  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: Fix typo with DECL_H_ERRNO test
