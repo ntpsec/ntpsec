@@ -739,9 +739,9 @@ neol_hexatoi_len(const char str[],
   int i;
   int n = 0;
 
-  for(i=0; isxdigit(str[i]) && i < maxlen; i++)
+  for(i=0; isxdigit((int)str[i]) && i < maxlen; i++)
     {
-      hexdigit = isdigit(str[i]) ? toupper(str[i]) - '0' : toupper(str[i]) - 'A' + 10;
+      hexdigit = isdigit((int)str[i]) ? toupper(str[i]) - '0' : toupper(str[i]) - 'A' + 10;
       n = 16 * n + hexdigit;
     }
   *result = n;
@@ -757,7 +757,7 @@ neol_atoi_len(const char str[],
   int i;
   int n = 0;
 
-  for(i=0; isdigit(str[i]) && i < maxlen; i++)
+  for(i=0; isdigit((int)str[i]) && i < maxlen; i++)
     {
       digit = str[i] - '0';
       n = 10 * n + digit;
