@@ -46,7 +46,36 @@ case "$host" in
     LIBS="$LIBS -lcurses"
     ;;
 esac
+
 AMU_OS_CFLAGS
+
+AC_ARG_WITH(rpath,
+	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
+[ans=$withval], [ans=x])
+case "$ans" in
+ no)
+    need_dash_r=
+    ;;
+ yes)
+    need_dash_r=1
+    ;;
+esac
+case "$host" in
+ *-*-netbsd*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+ *-*-solaris*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+esac
 
 AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 [AC_ARG_ENABLE(clockctl,
@@ -2715,6 +2744,10 @@ case "$ans" in
 	ans=openssl
 	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+	case "$need_dash_r" in
+	 1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
+	    ;;
+	esac
 	AC_SUBST(LCRYPTO, [-lcrypto])
 	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
 	AC_CHECK_FUNCS(EVP_md2 EVP_mdc2)
@@ -3641,7 +3674,7 @@ AC_TRY_COMPILE([
 #
 AC_MSG_CHECKING(for Kame IPv6 support)
 AC_ARG_WITH(kame,
-	[  --with-kame[=PATH]	use Kame IPv6 [default path /usr/local/v6]],
+	AC_HELP_STRING([--with-kame], [- =/usr/local/v6]),
 	use_kame="$withval", use_kame="no")
 
 case "$use_kame" in
@@ -3778,17 +3811,6 @@ found_rt_iflist
         [AC_MSG_RESULT(no)])
 
 ###
-
-case "$build" in
- $host)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-        LDFLAGS="$LDFLAGS -r"
-        ;;
-    esac
-    ;;
-esac
 
 AC_DEFINE_DIR(NTP_KEYSDIR, sysconfdir, [Default location of crypto key info])
 
