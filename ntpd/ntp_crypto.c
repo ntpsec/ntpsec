@@ -288,8 +288,8 @@ make_keylist(
 	 * included in the hash is zero if broadcast mode, the peer
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
-	lifetime = min(sys_automax, (unsigned long) NTP_MAXSESSION *
-	    (1 <<(peer->kpoll)));
+	lifetime = min(sys_automax, NTP_MAXSESSION * (1 <<
+	    peer->hpoll));
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -299,9 +299,9 @@ make_keylist(
 		peer->keynumber = i;
 		keyid = session_key(&dstadr->sin, &peer->srcadr, keyid,
 		    cookie, lifetime);
-		lifetime -= 1 << peer->kpoll;
+		lifetime -= 1 << peer->hpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    lifetime <= (unsigned long)(1 << (peer->kpoll)))
+		    lifetime <= (1 << peer->hpoll))
 			break;
 	}
 
@@ -338,7 +338,7 @@ make_keylist(
 	if (debug)
 		printf("make_keys: %d %08x %08x ts %u fs %u poll %d\n",
 		    ntohl(ap->seq), ntohl(ap->key), cookie,
-		    ntohl(vp->tstamp), ntohl(vp->fstamp), peer->kpoll);
+		    ntohl(vp->tstamp), ntohl(vp->fstamp), peer->hpoll);
 #endif
 }
 
@@ -1196,7 +1196,7 @@ crypto_xmit(
 		vtemp.tstamp = ep->tstamp;
 		vtemp.fstamp = ep->fstamp;
 		vtemp.vallen = ep->vallen;
-		vtemp.ptr = (unsigned char *)ep->pkt;
+		vtemp.ptr = (u_char *)ep->pkt;
 		len += crypto_send(fp, &vtemp);
 		break;
 
@@ -3134,7 +3134,7 @@ cert_sign(
 	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    (unsigned char *) sys_hostname, strlen(sys_hostname), -1, 0);
+	    (u_char *)sys_hostname, strlen(sys_hostname), -1, 0);
 	subj = X509_get_subject_name(req);
 	X509_set_subject_name(cert, subj);
 	X509_set_pubkey(cert, pkey);
@@ -3676,7 +3676,7 @@ crypto_tai(
 	len = i * 4;
 	tai_leap.vallen = htonl(len);
 	ptr = emalloc(len);
-	tai_leap.ptr = (unsigned char *) ptr;
+	tai_leap.ptr = (u_char *)ptr;
 	for (; i >= 0; i--) {
 		*ptr++ = (char) htonl(leapsec[i]);
 	}
@@ -3805,7 +3805,7 @@ crypto_setup(void)
 		exit (-1);
 	}
 	hostval.vallen = htonl(strlen(sys_hostname));
-	hostval.ptr = (unsigned char *) sys_hostname;
+	hostval.ptr = (u_char *)sys_hostname;
 	
 	/*
 	 * Construct public key extension field for agreement scheme.

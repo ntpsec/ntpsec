@@ -872,8 +872,7 @@ resetmanycast(void)
 		for (peer = peer_hash[i]; peer != 0; peer =
 		    peer->next) {
 			if (peer->cast_flags & MDF_ACAST) {
-				peer->ttl = 0;
-				poll_update(peer, 0);
+				peer_clear(peer, "ACST");
 			}
 		}
 	}

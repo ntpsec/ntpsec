@@ -164,7 +164,7 @@ extern	void	kod_proto	P((void));
  * This is also true AIX compiler.
  * So give up and define it to be int. WLJ
  */
-extern	void	poll_update P((struct peer *, int));
+extern	void	poll_update P((struct peer *));
 
 extern	void	clear		P((struct peer *));
 extern	void	clock_filter	P((struct peer *, double, double, double));

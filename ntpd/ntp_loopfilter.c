@@ -315,10 +315,6 @@ local_clock(
 	 * these actions interact with the command line options.
 	 */
 	retval = 0;
-	if (sys_poll > peer->maxpoll)
-		sys_poll = peer->maxpoll;
-	else if (sys_poll < peer->minpoll)
-		sys_poll = peer->minpoll;
 	clock_frequency = flladj = plladj = 0;
 	mu = peer->epoch - last_time;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
