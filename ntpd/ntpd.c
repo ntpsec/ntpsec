@@ -1103,10 +1103,8 @@ getgroup:
 		 */
 	}
 #ifndef SYS_WINNT
-	exit(1); /* unreachable */
-#endif
-#ifndef SYS_WINNT
-	return 1;		/* DEC OSF cc braindamage */
+	exit(1);	/* unreachable */
+	return 1;	/* DEC OSF cc braindamage */
 #endif
 }
 

@@ -411,6 +411,8 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		itf->flags |= INT_LOOPBACK;
 	if((isc_if->flags & INTERFACE_F_POINTTOPOINT) != 0)
 		itf->flags |= INT_PPP;
+	if((isc_if->flags & INTERFACE_F_MULTICAST) != 0)
+		itf->flags |= INT_MULTICAST;
 
 	/* Copy the scopeid and the interface index */
 	itf->ifindex = isc_if->ifindex;
@@ -750,7 +752,7 @@ io_multicast_add(
 			"setsockopt IP_ADD_MEMBERSHIP fails: %m for %x / %x (%s)",
 			mreq.imr_multiaddr.s_addr,
 			mreq.imr_interface.s_addr, inet_ntoa(iaddr));
-		inter_list[i].flags |= INT_MULTICAST;
+		inter_list[i].flags |= INT_MCASTOPEN;
 		inter_list[i].num_mcast++;
 		if (i >= ninterfaces)
 			ninterfaces = i+1;
@@ -840,7 +842,7 @@ io_multicast_add(
 			netsyslog(LOG_ERR,
 			 "setsockopt IPV6_JOIN_GROUP fails: %m on interface %d(%s)",
 			 mreq6.ipv6mr_interface, stoa(&addr));
-		inter_list[i].flags |= INT_MULTICAST;
+		inter_list[i].flags |= INT_MCASTOPEN;
 		inter_list[i].num_mcast++;
 		if(i >= ninterfaces)
 			ninterfaces = i+1;
@@ -921,7 +923,7 @@ io_multicast_del(
 			/* Be sure it's the correct family */
 			if (inter_list[i].sin.ss_family != AF_INET)
 				continue;
-			if (!(inter_list[i].flags & INT_MULTICAST))
+			if (!(inter_list[i].flags & INT_MCASTOPEN))
 				continue;
 			if (!(inter_list[i].fd < 0))
 				continue;
@@ -945,7 +947,7 @@ io_multicast_del(
 				inter_list[i].num_mcast--;
 				/* If there are none left negate the Multicast flag */
 				if(inter_list[i].num_mcast == 0)
-					inter_list[i].flags &= ~INT_MULTICAST;
+					inter_list[i].flags &= ~INT_MCASTOPEN;
 			}
 		}
 		break;
@@ -971,7 +973,7 @@ io_multicast_del(
 			/* Be sure it's the correct family */
 			if (inter_list[i].sin.ss_family != AF_INET6)
 				continue;
-			if (!(inter_list[i].flags & INT_MULTICAST))
+			if (!(inter_list[i].flags & INT_MCASTOPEN))
 				continue;
 			if (!(inter_list[i].fd < 0))
 				continue;
@@ -994,7 +996,7 @@ io_multicast_del(
 					stoa(&addr));
 				/* If there are none left negate the Multicast flag */
 				if(inter_list[i].num_mcast == 0)
-					inter_list[i].flags &= ~INT_MULTICAST;
+					inter_list[i].flags &= ~INT_MCASTOPEN;
 			}
 		}
 		break;

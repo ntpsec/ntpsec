@@ -192,8 +192,9 @@ struct interface {
 #define	INT_PPP		 2	/* Point-to-point interface */
 #define	INT_LOOPBACK	 4	/* the loopback interface */
 #define	INT_BROADCAST	 8	/* can broadcast out this interface */
-#define INT_MULTICAST	16	/* multicasting enabled */
+#define INT_MULTICAST	16	/* can multicast out this interface */
 #define	INT_BCASTOPEN	32	/* broadcast socket is open */
+#define INT_MCASTOPEN	64	/* multicasting enabled */
 
 /*
  * Define flasher bits (tests 1 through 11 in packet procedure)
