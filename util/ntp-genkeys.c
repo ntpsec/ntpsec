@@ -505,7 +505,7 @@ newfile(
 	char fb[PATH_MAX];
 	char *cp;
 
-	printf("newfile(%s,%s,%s)\n", f1?f1:"NULL", f2?f2:"NULL", f3?f3:"NULL");
+	if (debug > 1) printf("newfile(%s,%s,%s)\n", f1, f2, f3?f3:"NULL");
 	/*
 	   If:
 	   - no symlink support, or
@@ -534,7 +534,7 @@ newfile(
 			*cp = 0;
 		}
 		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
-		printf("case 1: file is <%s>\n", fb);
+		if (debug > 1) printf("case 1: file is <%s>\n", fb);
 	} else {
 	/*
 	   - If ('/' == *f3)
@@ -549,7 +549,7 @@ newfile(
 				++cp;
 				*cp = 0;
 			}
-			printf("case 2: file is <%s>\n", fb);
+			if (debug > 1) printf("case 2: file is <%s>\n", fb);
 		} else {
 			*fb = 0;
 		}
@@ -559,7 +559,7 @@ newfile(
 			*cp = 0;
 		}
 		snprintf(fb, sizeof fb, "%s/%s", fb, f2);
-		printf("case 3: file is <%s>\n", fb);
+		if (debug > 1) printf("case 3: file is <%s>\n", fb);
 	}
 
 	/*
@@ -573,6 +573,24 @@ newfile(
 		exit(1);
 	}
 	return fp;
+}
+
+void
+cleanlinks(
+	const char *f1,		/* Visible file */
+	const char *f2,		/* New timestamped file name */
+	const char *f3		/* Previous symlink target */
+	)
+{
+	/*
+	  Just return if nosymlinks.
+	  unlink f1
+	  file = dirname(f3) / f2
+	  symlink file, f1
+	  If trash:
+	  - if f3 begins with a /, unlink it
+	  - else, unlink dirname(f1) / f3
+	*/
 }
 
 
@@ -596,7 +614,6 @@ main(
 	struct timeval tv;		/* initialization vector */
 	u_long ntptime;			/* NTP timestamp */
 	u_char hostname[256];		/* DNS host name */
-	u_char filename[256];		/* public key file name */
 	u_char md5key[17];		/* generated MD5 key */ 
 	FILE *str;			/* file handle */
 	u_int temp;
@@ -738,15 +755,8 @@ main(
 		 */
 		printf("Generating MD5 key file...\n");
 		str = newfile(f1_keys, f2_keys, f3_keys);
-
-		sprintf(filename, "ntp.keys.%lu", ntptime);
-		str = fopen(filename, "w");
-		if (str == NULL) {
-			perror("MD5 key file");
-			return (-1);
-		}
 		srandom((u_int)tv.tv_usec);
-		fprintf(str, "# MD5 key file %s\n# %s", filename,
+		fprintf(str, "# MD5 key file %s\n# %s", f2_keys,
 			ctime(&tv.tv_sec));
 		for (i = 1; i <= 16; i++) {
 			for (j = 0; j < 16; j++) {
@@ -762,6 +772,7 @@ main(
 				md5key);
 		}
 		fclose(str);
+		cleanlinks(f1_keys, f2_keys, f3_keys);
 	}
 
 #ifdef PUBKEY
@@ -791,45 +802,33 @@ main(
 		 * Generate the file "ntpkey.*" containing the RSA
 		 * private key in printable ASCII format.
 		 */
-		sprintf(filename, "ntpkey.%lu", ntptime);
 		str = newfile(f1_privatekey, f2_privatekey, f3_privatekey);
-
-		str = fopen(filename, "w");
-		if (str == NULL) { 
-			perror("RSA private key file");
-			return (-1);
-		}
 		len = sizeof(rsaref_private) - sizeof(rsaref_private.bits);
 		modulus = (u_int32)rsaref_private.bits;
-		fprintf(str, "# RSA private key file %s\n# %s", filename,
+		fprintf(str, "# RSA private key file %s\n# %s", f2_privatekey,
 			ctime(&tv.tv_sec));
 		R_EncodePEMBlock(encoded_key, &temp,
 				 (u_char *)rsaref_private.modulus, len);
 		encoded_key[temp] = '\0';
 		fprintf(str, "%d %s\n", modulus, encoded_key);
 		fclose(str);
+		cleanlinks(f1_privatekey, f2_privatekey, f3_privatekey);
 
 		/*
 		 * Generate the file "ntpkey_host.*" containing the RSA
 		 * public key in printable ASCII format.
 		 */
-		sprintf(filename, "ntpkey_%s.%lu", hostname, ntptime);
 		str = newfile(f1_publickey, f2_publickey, f3_publickey);
-
-		str = fopen(filename, "w");
-		if (str == NULL) { 
-			perror("RSA public key file");
-			return (-1);
-		}
 		len = sizeof(rsaref_public) - sizeof(rsaref_public.bits);
 		modulus = (u_int32)rsaref_public.bits;
-		fprintf(str, "# RSA public key file %s\n# %s", filename,
+		fprintf(str, "# RSA public key file %s\n# %s", f2_publickey,
 			ctime(&tv.tv_sec));
 		R_EncodePEMBlock(encoded_key, &temp,
 				 (u_char *)rsaref_public.modulus, len);
 		encoded_key[temp] = '\0';
 		fprintf(str, "%d %s\n", modulus, encoded_key);
 		fclose(str);
+		cleanlinks(f1_publickey, f2_publickey, f3_publickey);
 	}
 #endif /* PUBKEY */
 
@@ -865,14 +864,8 @@ main(
 			return (-1);
 		}
 
-		sprintf(filename, "ntpkey_dh.%lu", ntptime);
-		str = fopen(filename, "w");
-		if (str == NULL) { 
-			perror("Diffie-Hellman parameters file");
-			return (-1);
-		}
 		fprintf(str, "# Diffie-Hellman parameter file %s\n# %s",
-			filename, ctime(&tv.tv_sec));
+			f2_dhparms, ctime(&tv.tv_sec));
 		R_EncodePEMBlock(encoded_key, &temp,
 				 (u_char *)dh_params.prime,
 				 dh_params.primeLen);
@@ -884,6 +877,7 @@ main(
 		encoded_key[temp] = '\0';
 		fprintf(str, "%d %s\n", dh_params.generatorLen, encoded_key);
 		fclose(str);
+		cleanlinks(f1_dhparms, f2_dhparms, f3_dhparms);
 	}
 #endif /* PUBKEY */
 
