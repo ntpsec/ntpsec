@@ -1,5 +1,10 @@
 1999-07-07  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+        * html/monopt.htm: We have four types of files now
+        * ntpd/refclock_oncore.c: If debug is on, tell when
+        we are waiting for a valid almanac
+	From: Poul-Henning Kamp <phk@critter.freebsd.dk>
+
 	* include/ntp_machine.h (HAVE_TERMIOS): STREAMS does not imply
 	HAVE_TERMIOS !!!
 	* include/parse.h (timercmp): Macro defined if needed.

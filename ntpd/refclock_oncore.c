@@ -1100,9 +1100,11 @@ oncore_msg_Ea(
 	/* When we have an almanac, start the En messages */
 
 	if (instance->state == ONCORE_ALMANAC) {
-		if ((instance->Ea[72] & 1))
+		if ((instance->Ea[72] & 1)) {
+			if (debug)
+				printf("ONCORE: waiting for almanac\n");
 			return;
-		else {
+		} else {
 			oncore_sendmsg(instance->ttyfd, oncore_cmd_En, sizeof oncore_cmd_En);
 			instance->state = ONCORE_RUN;
 			cp = "state = ONCORE_RUN";
