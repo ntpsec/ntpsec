@@ -215,7 +215,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: assocID %d offset %.6f jitter %.6f state %d\n",
+		    "local_clock: assocID %d off %.6f jit %.6f sta %d\n",
 		    peer->associd, fp_offset, SQRT(epsil), state);
 #endif
 	if (!ntp_enable) {
@@ -677,15 +677,9 @@ local_clock(
 	record_loop_stats(last_offset, drift_comp, sys_jitter,
 	    clock_stability, sys_poll);
 #ifdef DEBUG
-	if (debug > 1)
-		printf(
-		    "local_clock: fadj %.3f fll %.3f pll %.3f\n",
-		    clock_frequency * 1e6, flladj * 1e6, plladj * 1e6);
-#endif /* DEBUG */
-#ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: mu %.0f noise %.3f stabil %.3f poll %d count %d\n",
+		    "local_clock: mu %.0f noi %.3f stb %.3f pol %d cnt %d\n",
 		    mu, sys_jitter * 1e6 / mu, clock_stability * 1e6,
 		    sys_poll, tc_counter);
 #endif /* DEBUG */

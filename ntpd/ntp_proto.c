@@ -1307,7 +1307,7 @@ clock_filter(
 	double dst[NTP_SHIFT];		/* distance vector */
 	int ord[NTP_SHIFT];		/* index vector */
 	register int i, j, k, m;
-	double dsp, jit, dtemp, etemp, ftemp;
+	double dsp, jit, dtemp, etemp;
 
 	/*
 	 * Shift the new sample into the register and discard the oldest
@@ -1330,10 +1330,10 @@ clock_filter(
 
 	/*
 	 * Update dispersions since the last update and at the same
-	 * time initialize the distance and index vectors. The distance
-	 * is a compound metric: If the sample dispersion is less than
-	 * MAXDISTANCE and younger than the minimum Allan intercept, use
-	 * delay. Otherwise, use MAXDISTANCE plus conventional distance.
+	 * time initialize the distance and index lists. The distance
+	 * list uses a compound metric. If the sample is valid and
+	 * younger than the minimum Allan intercept, use delay;
+	 * otherwise, use biased dispersion.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
 	peer->update = current_time;
@@ -1343,19 +1343,19 @@ clock_filter(
 			if (peer->filter_disp[j] > MAXDISPERSE)
 				peer->filter_disp[j] = MAXDISPERSE;
 		}
-		ftemp = peer->filter_delay[j] / 2. +
-		    peer->filter_disp[j];
-		if (ftemp < MAXDISTANCE && current_time -
-		    peer->filter_epoch[j] < allan_xpt)
-			dst[i] = peer->filter_delay[j];
+		if (peer->filter_disp[j] >= MAXDISPERSE)
+			dst[i] = MAXDISPERSE;
+		else if (peer->update - peer->filter_epoch[j] >
+		    allan_xpt)
+			dst[i] = MAXDISTANCE + peer->filter_disp[j];
 		else
-			dst[i] = MAXDISTANCE + ftemp;
+ 			dst[i] = peer->filter_delay[j];
 		ord[i] = j;
 		j++; j %= NTP_SHIFT;
 	}
 
         /*
-	 * Sort the samples in the register by the compound metric.
+	 * Sort the samples in both lists by distance.
 	 */
 	for (i = 1; i < NTP_SHIFT; i++) {
 		for (j = 0; j < i; j++) {
@@ -1371,53 +1371,47 @@ clock_filter(
 	}
 
 	/*
-	 * Copy the ord[] array to the association structure so ntpq
-	 * can see it later.
+	 * Copy the index list to the association structure so ntpq
+	 * can see it later. Prune the distance list to samples less
+	 * than MAXDISTANCE, but keep at least two valid samples for
+	 * jitter calculation.
 	 */
+	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = ord[i];
-#if DEBUG
-		if (debug > 1) {
-			j = ord[i];
-			printf("cfilter: %d %d %f %f %f %f\n", i,
-			    j, dst[i], peer->filter_offset[j],
-			    peer->filter_delay[j],
-			    peer->filter_disp[j]);
-		}
-#endif
+		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
+		    MAXDISTANCE))
+			continue;
+		m++;
 	}
 	
 	/*
-	 * Compute the offset, delay, dispersion and jitter squares
-	 * weighted by the sample metric and normalized. The sample
-	 * metric is the distance from the limb line with slope 0.5
-	 * centered on the minimum delay sample offset. The dispersion
-	 * is weighted exponentially by NTP_FWEIGHT (0.5) so to
-	 * normalize close to 1.0. If no acceptable samples remain in
-	 * the shift register, quietly tiptoe home leaving only the
+	 * Compute the dispersion and jitter squares. The dispersion
+	 * is weighted exponentially by NTP_FWEIGHT (0.5) so it is
+	 * normalized close to 1.0. The jitter is the mean of the square
+	 * differences relative to the lowest delay sample. If no
+	 * acceptable samples remain in the shift register, quietly
+	 * tiptoe home leaving only the
 	 * dispersion.
 	 */
 	jit = 0;
 	peer->disp = 0;
 	k = ord[0];
-	m = 0;
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 
 		j = ord[i];
 		peer->disp = NTP_FWEIGHT * (peer->disp +
 		    peer->filter_disp[j]);
-		if (dst[i] >= MAXDISTANCE)
-			continue;
-		m++;
-		jit += DIFF(peer->filter_offset[j],
-		    peer->filter_offset[k]);
+		if (i < m)
+			jit += DIFF(peer->filter_offset[j],
+			    peer->filter_offset[k]);
 	}
 
 	/*
 	 * If no acceptable samples remain in the shift register,
-	 * quietly tiptoe home leaving only the dispersion. Otherwise
-	 * normalize the offset, delay and jitter averages. Note the
-	 * jitter must not be less than the system precision.
+	 * quietly tiptoe home leaving only the dispersion. Otherwise,
+	 * save the offset, delay and jitter average. Note the jitter
+	 * must not be less than the system precision.
 	 */
 	if (m == 0)
 		return;
@@ -1436,7 +1430,7 @@ clock_filter(
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: discard %lu\n",
-			    peer->filter_epoch[k] - peer->epoch);
+			    peer->epoch - peer->filter_epoch[k]);
 #endif
 		return;
 	}
@@ -1452,7 +1446,7 @@ clock_filter(
 	    (1 << (sys_poll + 1))) {
 #ifdef DEBUG
 		if (debug)
-			printf("clock_filter: samples %d popcorn spike %.6f jitter %.6f\n",
+			printf("clock_filter: n %d popcorn spike %.6f jitter %.6f\n",
 			    m, peer->offset, SQRT(peer->jitter));
 #endif
 		return;
@@ -1467,9 +1461,9 @@ clock_filter(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "clock_filter: offset %.6f delay %.6f disp %.6f jit %.6f, age %lu\n",
-		    peer->offset, peer->delay, peer->disp,
-		    SQRT(peer->jitter), current_time - peer->epoch);
+		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f, age %lu\n",
+		    m, peer->offset, peer->delay, peer->disp,
+		    SQRT(peer->jitter), peer->update - peer->epoch);
 #endif
 }
 

@@ -1,3 +1,13 @@
+2001-05-21  Harlan Stenn  <stenn@whimsy.udel.edu>
+
+	* ntpd/ntp_proto.c (clock_filter): Huff-n-Puff and Popcorn
+	improvements.
+	* ntpd/ntp_loopfilter.c (local_clock): Debug cleanup
+	From: Dave Mills.
+
+	* include/ntp_syscall.h (ntp_gettime): Updated patch from Ulrich.
+	My original attempt was not backwards compatible.
+
 2001-05-17  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* include/ntp_syscall.h (ntp_gettime): Fill in the tai member.

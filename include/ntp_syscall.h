@@ -33,10 +33,14 @@ ntp_gettime(
 
 	tntx.modes = 0;
 	result = __adjtimex (&tntx);
-	ntv->tai = tntx.tai;
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
+#ifdef NTP_API
+# if NTP_API > 3
+	ntv->tai = tntx.tai;
+# endif
+#endif
 	return(result);
 }
 # else /* !HAVE__ADJTIMEX */
