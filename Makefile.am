@@ -19,7 +19,7 @@ SUBDIRS = \
 	@MAKE_SNTP@	\
 	util
 
-DIST_SUBDIRS = $(SUBDIRS) ntptrace sntp
+DIST_SUBDIRS = $(SUBDIRS) sntp
 
 EXTRA_DIST = \
 	COPYRIGHT \
