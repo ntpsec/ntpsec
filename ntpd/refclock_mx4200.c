@@ -1524,8 +1524,8 @@ mx4200_pps(
 	if (time_pps_fetch(up->pps_h, PPS_TSFMT_TSPEC, &(up->pps_i),
 			&timeout) < 0) {
 		mx4200_debug(peer,
-		  "mx4200_pps: time_pps_fetch: serial=%d, handle=%d, %s\n",
-		     up->pps_i.assert_sequence, up->pps_h, strerror(errno));
+		  "mx4200_pps: time_pps_fetch: serial=%d, %s\n",
+		     up->pps_i.assert_sequence, strerror(errno));
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}

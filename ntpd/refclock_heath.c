@@ -339,6 +339,7 @@ heath_receive(
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
+		break;
 
 	/*
 	 * GC-1000 II timecode format: "hh:mm:ss.f   "
@@ -349,6 +350,7 @@ heath_receive(
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
+		break;
 
 	default:
 		refclock_report(peer, CEVNT_BADREPLY);

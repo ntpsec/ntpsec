@@ -54,7 +54,6 @@ static	double sys_syserr;	/* system error (squares) */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 u_int sys_survivors;		/* truest of the truechimers */
-int	mode_ntpdate;		/* simulate ntpdate */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 #ifdef AUTOKEY
 char	*sys_hostname;		/* gethostname() name */

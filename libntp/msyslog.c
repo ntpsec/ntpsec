@@ -66,10 +66,6 @@ void msyslog(int level, const char *fmt, ...)
 	register int c;
 	register char *n, *prog;
 	register const char *f;
-#ifdef CHAR_SYS_ERRLIST
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-#endif
 	int olderrno;
 	char *err;
 

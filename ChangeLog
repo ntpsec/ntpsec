@@ -1,5 +1,16 @@
 2001-04-21  Harlan Stenn  <stenn@whimsy.udel.edu>
 
+	* util/ntp-genkeys.c: config_file should be declared, not defined.
+	* ntpd/refclock_mx4200.c (mx4200_pps): debug cleanup.
+	* ntpd/refclock_hopfser.c: If we're not using it, provide the _bs.
+	* ntpd/refclock_heath.c (heath_receive): Add missing "break"
+	statements.
+	* ntpd/ntp_proto.c: Lose extra definition of mode_ntpdate.
+	* librsaref/Makefile.am (nodist_librsaref_a_SOURCES): Put RSASRCS
+	on the same line as rsaref.h to improve portability.
+	* libntp/msyslog.c: Lint cleanup.
+	From: Marc.Brett@westerngeco.com
+
 	* util/ntp-genkeys.c:
 	* ntpdate/ntpdate.c:
 	* ntpd/ntp_config.c: Netinfo header reorder.

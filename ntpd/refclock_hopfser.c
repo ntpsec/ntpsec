@@ -367,4 +367,6 @@ hopfserial_poll (
 	return;
 }
 
+#else
+int refclock_hopfser_bs;
 #endif /* REFCLOCK */

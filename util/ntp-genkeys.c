@@ -117,7 +117,7 @@
  */
 
 
-char *config_file;
+extern char *config_file;
 
 #ifdef HAVE_NETINFO
 struct netinfo_config_state *config_netinfo = NULL;
@@ -736,7 +736,7 @@ main(
 #endif /* PUBKEY */
 	struct timeval tv;		/* initialization vector */
 	u_long ntptime;			/* NTP timestamp */
-	u_char hostname[256];		/* DNS host name */
+	char hostname[256];		/* DNS host name */
 	u_char md5key[17];		/* generated MD5 key */ 
 	FILE *str;			/* file handle */
 	u_int temp;
