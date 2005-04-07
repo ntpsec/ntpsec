@@ -1083,8 +1083,7 @@ process_packet(
 	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
 	    pstratum >= STRATUM_UNSPEC || L_ISNEG(&ci))
 		peer->flash |= TEST6;		/* peer not synch */
-	if (p_del < 0 || p_disp < 0 || p_del /	/* test 7 */
-	    2 + p_disp >= MAXDISPERSE)
+	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
 		peer->flash |= TEST7;		/* invalid distance */
 
 	/*
