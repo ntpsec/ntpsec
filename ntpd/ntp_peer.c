@@ -307,7 +307,7 @@ clear_all(void)
 			    MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
-				if (peer->flags & FLAG_CONFIG)
+				if (!(peer->flags & FLAG_CONFIG))
 					unpeer(peer);
 			}
 		}

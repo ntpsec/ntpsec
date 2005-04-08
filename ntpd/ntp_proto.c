@@ -63,7 +63,6 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_selerr;	/* select jitter (s) */
 static	double sys_mindist = MINDISTANCE; /* selection floor (s) */
 static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
 double	sys_jitter;		/* system jitter (s) */
@@ -101,7 +100,7 @@ u_long	sys_badauth;		/* bad authentication */
 u_long	sys_limitrejected;	/* rate exceeded */
 
 static	double	root_distance	P((struct peer *));
-static	double	clock_combine	P((struct peer **, int));
+static	void	clock_combine	P((struct peer **, int));
 static	void	peer_xmit	P((struct peer *));
 static	void	fast_xmit	P((struct recvbuf *, int, keyid_t,
 				    int));
@@ -471,7 +470,7 @@ receive(
 	 *
 	 * NONE    The packet has no MAC.
 	 * OK      the packet has a MAC and authentication succeeds
-	 * ERROR   the packet has a MAC and authentication fails.
+	 * ERROR   the packet has a MAC and authentication fails
 	 * CRYPTO  crypto-NAK. The MAC has four octets only.
 	 *
 	 * Note: The AUTH(x, y) macro is used to filter outcomes. If x
@@ -639,7 +638,7 @@ receive(
 			   is_authentic))
 				fast_xmit(rbufp, MODE_SERVER, skeyid,
 				    restrict_mask);
-			else if (skeyid)
+			else if (is_authentic == AUTH_ERROR)
 				fast_xmit(rbufp, MODE_SERVER, 0,
 				    restrict_mask);
 			return;			/* hooray */
@@ -750,10 +749,8 @@ receive(
 			if (crypto_recv(peer, rbufp) == XEVNT_OK)
 				return;
 
-			peer->flash |= TEST9;	/* crypto error */
 			peer_clear(peer, "CRYP");
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
+			unpeer(peer);
 #endif /* OPENSSL */
 			return;
 
@@ -860,19 +857,11 @@ receive(
 	/*
 	 * If this is a broadcast mode packet, skip further checking.
 	 */
-	if (hismode == MODE_BROADCAST) {
-		/* fall through */
-
-	/*
-	 * If the origin timestamp is zero, the sender has not yet heard
-	 * from us. Otherwise, if the origin timestamp does not match
-	 * the transmit timestamp, the packet is bogus.
-	 */
-	} else if (L_ISZERO(&p_org)) {
-		peer->flash |= TEST3;		/* unsynch */
-			
-	} else if (!L_ISEQU(&p_org, &peer->xmt)) {
-		peer->flash |= TEST2;		/* bogus */
+	if (hismode != MODE_BROADCAST) {
+		if (L_ISZERO(&p_org))
+			peer->flash |= TEST3;	/* unsynch */
+		else if (!L_ISEQU(&p_org, &peer->xmt))
+			peer->flash |= TEST2;	/* bogus */
 	}
 
 	/*
@@ -943,12 +932,12 @@ receive(
 		peer->flash |= TEST8;
 		rval = crypto_recv(peer, rbufp);
 		if (rval != XEVNT_OK) {
-			peer->flash |= TEST9;	/* crypto error */
 			peer_clear(peer, "CRYP");
-			if (!(peer->flags & FLAG_CONFIG))
+			peer->flash |= TEST9;	/* crypto error */
+			if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
-			return;
-
+				return;
+			}
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST8;
@@ -1064,11 +1053,12 @@ process_packet(
 	 */
 	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
-			peer->flash |= TEST4;	/* access deny */
 			peer_clear(peer, "DENY");
-			if (!(peer->flags & FLAG_CONFIG))
+			peer->flash |= TEST4;	/* access deny */
+			if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
-			return;
+				return;
+			}
 		}
 	}
 
@@ -1083,7 +1073,8 @@ process_packet(
 	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
 	    pstratum >= STRATUM_UNSPEC || L_ISNEG(&ci))
 		peer->flash |= TEST6;		/* peer not synch */
-	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
+	if (p_del < 0 || p_disp < 0 || p_del /	/* test 7 */
+	    2 + p_disp >= MAXDISPERSE)
 		peer->flash |= TEST7;		/* invalid distance */
 
 	/*
@@ -1704,7 +1695,7 @@ clock_select(void)
 	int	nlist, nl3;
 
 	int	allow, osurv;
-	double	d, e, f;
+	double	d, e, f, g;
 	double	high, low;
 	double	synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
@@ -2054,7 +2045,7 @@ clock_select(void)
 	while (1) {
 		d = 1e9;
 		e = -1e9;
-		f = 0;
+		f = g = 0;
 		k = 0;
 		for (i = 0; i < nlist; i++) {
 			if (error[i] < d)
@@ -2067,7 +2058,7 @@ clock_select(void)
 				f = SQRT(f / (nlist - 1));
 			}
 			if (f * synch[i] > e) {
-				sys_selerr = f;
+				g = f;
 				e = f * synch[i];
 				k = i;
 			}
@@ -2080,7 +2071,7 @@ clock_select(void)
 		if (debug > 2)
 			printf(
 			    "select: drop %s select %.6f jitter %.6f\n",
-			    ntoa(&peer_list[k]->srcadr), sys_selerr, d);
+			    ntoa(&peer_list[k]->srcadr), g, d);
 #endif
 		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
 		    peer_list[k]->hmode == MODE_CLIENT)
@@ -2207,9 +2198,9 @@ clock_select(void)
 			sys_peer = peer_list[0];
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_peer->rank++;
-		sys_offset = clock_combine(peer_list, nlist);
+		clock_combine(peer_list, nlist);
 		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
-		    SQUARE(sys_selerr));
+		    SQUARE(sys_jitter));
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: combine offset %.6f\n",
@@ -2238,22 +2229,24 @@ clock_select(void)
 /*
  * clock_combine - combine offsets from selected peers
  */
-static double
+static void
 clock_combine(
-	struct peer **peers,
-	int	npeers
+	struct peer **peers,		/* survivor list */
+	int	npeers			/* number of survivors */
 	)
 {
 	int	i;
-	double	x, y, z;
+	double	x, y, z, w;
 
-	y = z = 0;
+	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
 		x = root_distance(peers[i]);
 		y += 1. / x;
 		z += peers[i]->offset / x;
+		w += SQUARE(peers[i]->offset - peers[0]->offset) / x;
 	}
-	return (z / y);
+	sys_offset = z / y;
+	sys_jitter = SQRT(w / y);
 }
 
 /*
@@ -2562,12 +2555,12 @@ peer_xmit(
 				    &peer->srcadr, sendlen, exten, 0);
 				free(exten);
 			} else {
+				peer_clear(peer, "CRYP");
+				peer->flash |= TEST9; /* crypto error */
 				msyslog(LOG_INFO,
 				    "transmit: crypto error for %s",
 				    stoa(&peer->srcadr));
 				free(exten);
-				peer->flash |= TEST9; /* crypto error */
-				peer_clear(peer, "CRYP");
 				return;
 			}
 		}
@@ -2587,10 +2580,10 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
+		peer_clear(peer, "NKEY");
+		peer->flash |= TEST9;		/* no key found */
 		msyslog(LOG_INFO, "transmit: key %u not found for %s",
 		    xkeyid, stoa(&peer->srcadr));
-		peer->flash |= TEST9;		/* no key found */
-		peer_clear(peer, "NKEY");
 		return;
 	}
 	sendlen += authlen;

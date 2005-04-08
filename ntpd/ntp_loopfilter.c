@@ -282,7 +282,6 @@ local_clock(
 	etemp = SQUARE(clock_jitter);
 	dtemp = max(abs(fp_offset - last_offset),
 	    LOGTOD(sys_precision));
-	dtemp = SQUARE(fp_offset - last_offset);
 	clock_jitter = SQRT(etemp + (SQUARE(dtemp) - etemp) /
 	    CLOCK_AVG);
 
