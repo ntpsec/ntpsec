@@ -1265,7 +1265,7 @@ clock_update(void)
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		dtemp = sys_peer->disp + clock_phi * (current_time -
-		    sys_peer->epoch) + sys_peer->jitter +
+		    sys_peer->epoch) + sys_jitter +
 		    fabs(sys_peer->offset);
 #ifdef REFCLOCK
 		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
