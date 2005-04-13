@@ -11,7 +11,7 @@
     <body>
         <h3>Reference Clock Drivers</h3>
         <img src="pic/stack1a.jpg" alt="gif" align="left">Master Time Facility at the <a href="http://www.eecis.udel.edu/%7emills/lab.html">UDel Internet Research Laboratory</a>
-        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=99>12:31 AM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=299>Sunday, September 12, 2004</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h=25 locale=00000409 region=0 t="DateTime" w=97>10:21 PM</csobj> UTC <csobj format="LongDate" h=25 locale=00000409 region=0 t="DateTime" w=319>Wednesday, February 16, 2005</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links10.txt"></script>
@@ -49,7 +49,7 @@
         <p>Where the highest performance is required, generally better than one millisecond, additional hardware and/or software functions may be required. Kernel modifications for precision time are described in the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page. Special line discipline and streams modules for use in capturing precision timestamps are described in the <a href="ldisc.html">Line Disciplines and Streams Drivers</a> page.</p>
         <h4 id="list">Comprehensive List of Clock Drivers</h4>
         <p>Following is a list showing the type and title of each driver currently implemented. The compile-time identifier for each is shown in parentheses. Click on a selected type for specific description and configuration documentation, including the clock address, reference ID, driver ID, device name and serial line speed, and features (line disciplines, etc.). For those drivers without specific documentation, please contact the author listed in the <a href="copyright.html">Copyright Notice</a> page.</p>
-        <ul>
+		<ul>
             <li class="inline"><a href="drivers/driver1.html">Type 1</a> Undisciplined Local Clock (<tt>LOCAL</tt>)
             <li class="inline"><a href="drivers/driver2.html">Type 2</a> Trak 8820 GPS Receiver (<tt>GPS_TRAK</tt>)
             <li class="inline"><a href="drivers/driver3.html">Type 3</a> PSTI/Traconex 1020 WWV/WWVH Receiver (<tt>WWV_PST</tt>)
@@ -64,7 +64,7 @@
             <li class="inline"><a href="drivers/driver12.html">Type 12</a> KSI/Odetics TPRO/S IRIG Interface (<tt>IRIG_TPRO</tt>)
             <li class="inline">Type 13 Leitch CSD 5300 Master Clock Controller (<tt>ATOM_LEITCH</tt>)
             <li class="inline">Type 14 EES M201 MSF Receiver (<tt>MSF_EES</tt>)
-            <li class="inline"><a href="drivers/driver5.html">Type 15</a> * TrueTime generic receivers
+            <li class="inline">Type 15 reserved
             <li class="inline"><a href="drivers/driver16.html">Type 16</a> Bancomm GPS/IRIG Receiver (<tt>GPS_BANCOMM</tt>)
             <li class="inline">Type 17 Datum Precision Time System (<tt>GPS_DATUM</tt>)
             <li class="inline"><a href="drivers/driver18.html">Type 18</a> Automated Computer Time Service (<tt>ACTS_MODEM</tt>)
@@ -73,10 +73,9 @@
             <li class="inline">Type 21 TrueTime GPS-VME Interface (<tt>GPS_VME</tt>)
             <li class="inline"><a href="drivers/driver22.html">Type 22</a> PPS Clock Discipline (<tt>PPS</tt>)
             
-			<li class="inline"><a href="drivers/driver23.html">Type 23</a> Replaced by type 18 (<tt>ACTS_MODEM</tt>)
-			<li class="inline"><a href="drivers/driver24.html">Type 24</a> Replaced by type 18 (<tt>ACTS_MODEM</tt>)  
-			<li class="inline"><a href="drivers/driver5.html">Type 25</a> * TrueTime generic receivers
-            
+			<li class="inline">Type 23 reserved
+			<li class="inline">Type 24 reserved
+			<li class="inline">Type 25 reserved
 			<li class="inline"><a href="drivers/driver26.html">Type 26</a> Hewlett Packard 58503A GPS Receiver (<tt>GPS_HP</tt>)
             <li class="inline"><a href="drivers/driver27.html">Type 27</a> Arcron MSF Receiver (<tt>MSF_ARCRON</tt>)
             <li class="inline"><a href="drivers/driver28.html">Type 28</a> Shared Memory Driver (<tt>SHM</tt>)
@@ -97,9 +96,8 @@
             <li class="inline"><a href="drivers/driver43.html">Type 43</a> RIPE NCC interface for Trimble Palisade
             <li class="inline"><a href="drivers/driver44.html">Type 44</a> NeoClock4X - DCF77 / TDF serial line
         </ul>
-        <p>* All TrueTime receivers are now supported by one driver, type 5. Types 15 and 25 will be retained only for a limited time and may be reassigned in future.</p>
-        <hr>
-        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+		<hr>
+		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 
 </html>
