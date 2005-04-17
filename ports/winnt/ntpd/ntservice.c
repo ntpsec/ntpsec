@@ -20,6 +20,7 @@
 #include <config.h>
 #include <stdio.h>
 
+#include <ntp_cmdargs.h>
 #include "syslog.h"
 #include "ntservice.h"
 #include "clockstuff.h"
@@ -37,6 +38,7 @@ extern char *Version;
 HANDLE hServDoneEvent = NULL;
 extern HANDLE WaitHandles[3];
 extern volatile int debug;
+extern char *progname;
 
 void uninit_io_completion_port();
 int ntpdmain(int argc, char *argv[]);
@@ -63,9 +65,9 @@ int main( int argc, char *argv[] )
 	int rc,
 	i = 1;
 
-  /* Save the command line parameters */
-  glb_argc = argc;
-  glb_argv = argv;
+	/* Save the command line parameters */
+	glb_argc = argc;
+	glb_argv = argv;
 
 	/* Command line users should put -f in the options */
 	while (argv[i]) {
@@ -91,9 +93,13 @@ int main( int argc, char *argv[] )
 
 		rc = StartServiceCtrlDispatcher(dispatchTable);
 		if (!rc) {
+			progname = argv[0];
 			rc = GetLastError();
-			fprintf(stderr, "StartServiceCtrlDispatcher returned: %i\n", rc);
-			fprintf(stderr, "Use -f to run from the command line.\n");
+#ifdef DEBUG
+			fprintf(stderr, "%s: unable to start as service, rc: %i\n\n", progname, rc);
+#endif
+			ntpd_usage();
+			fprintf(stderr, "\nUse -d, -q, or -n to run from the command line.\n");
 			exit(rc);
 		}
 	}

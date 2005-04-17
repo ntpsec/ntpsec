@@ -43,7 +43,6 @@
 # include <signal.h>
 # include <process.h>
 # include <io.h>
-# include "../libntp/log.h"
 # include <clockstuff.h>
 #include "ntp_iocompletionport.h"
 #endif /* SYS_WINNT */
