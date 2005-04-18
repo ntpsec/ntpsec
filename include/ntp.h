@@ -226,6 +226,7 @@ struct interface {
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unfit for synchronization */
+#define	TEST14		0x2000	/* peer stratum out of bounds */
 
 /*
  * Authentication codes
@@ -364,9 +365,8 @@ struct peer {
 	u_long	badauth;	/* packets cryptosum failed */
 	u_long	bogusorg;	/* packets bogus origin */
 	u_long	oldpkt;		/* packets duplicate packet */
-	u_long	seldisptoolarge; /* packets dispersion to large*/
+	u_long	seldisptoolarge; /* packets dispersion too large */
 	u_long	selbroken;	/* not used */
-	u_long	rank;	/* number of times selected or in cluster */
 };
 
 /*
