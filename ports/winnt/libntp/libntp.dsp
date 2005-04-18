@@ -246,10 +246,6 @@ SOURCE=..\..\..\libntp\lib_strbuf.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\log.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\machines.c
 # End Source File
 # Begin Source File
@@ -483,10 +479,6 @@ SOURCE=..\..\..\include\l_stdlib.h
 # Begin Source File
 
 SOURCE=..\..\..\libntp\lib_strbuf.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\log.h
 # End Source File
 # Begin Source File
 

@@ -49,7 +49,6 @@
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntp_timer.h"
-# include "../libntp/log.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
 
@@ -165,7 +164,6 @@ void init_winnt_time(void) {
 		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
 		exit(1);
 	}
-	addSourceToRegistry("NTP", szMsgPath);
 
 	/* Initialize random file before OpenSSL checks */
 	if(!init_randfile())
