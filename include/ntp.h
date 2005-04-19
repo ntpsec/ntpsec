@@ -127,8 +127,7 @@ typedef char s_char;
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
-#define HYST		.5	/* anti-clockhop hysteresis */
-#define HYST_TC		.875	/* anti-clockhop hysteresis decay */
+#define HOPPER		3	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
 #define NTP_MAXEXTEN	1024	/* max extension field size */
 
@@ -339,7 +338,6 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	estbdelay;	/* clock offset to broadcast server */
-	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
 	 * End of clear-to-zero area
