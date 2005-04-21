@@ -863,8 +863,13 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 	{
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY); 
+/*
+ * Temporarily just use INADDR_ANY for now
+ * We should be checking if they're the same address
+ * PDMXXX
+ */
+/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr; */
+		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -874,6 +879,15 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
 		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			"Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
+			iface->fd, stoa(&iface->sin),
+			mreq.imr_multiaddr.s_addr,
+			mreq.imr_interface.s_addr, stoa(maddr));
+		}
+#endif
 		break;
 	case AF_INET6:
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
@@ -888,7 +902,7 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 		mreq6.ipv6mr_multiaddr = iaddr6;
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&iaddr6))
-			mreq6.ipv6mr_interface = iface->scopeid;
+			mreq6.ipv6mr_interface = ((struct sockaddr_in6*)&iface->sin)->sin6_scope_id;
 		else
 #endif
 			mreq6.ipv6mr_interface = 0;
@@ -901,6 +915,14 @@ socket_multicast_enable(struct interface *iface, int ind, struct sockaddr_storag
 			mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			 "Added IPv6 multicast group on socket %d, addr %s for interface %d(%s)\n",
+			iface->fd, stoa(&iface->sin),
+			mreq6.ipv6mr_interface, stoa(maddr));
+		}
+#endif
 		break;
 #else
 		return ISC_FALSE;
@@ -1078,9 +1100,6 @@ io_unsetbclient(void)
 	}
 }
 
-/*
- * io_multicast_add() - add multicast group address
- */
 void
 io_multicast_add(
 	struct sockaddr_storage addr
@@ -1151,6 +1170,7 @@ io_multicast_add(
 		       &((struct sockaddr_in6*)&addr)->sin6_addr,
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6*)&inter_list[ind].sin)->sin6_port = htons(NTP_PORT);
+		((struct sockaddr_in6*)&inter_list[ind].sin)->sin6_scope_id = ((struct sockaddr_in6*)&addr)->sin6_scope_id;
 		memset(&((struct sockaddr_in6*)&inter_list[ind].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
 		break;
@@ -1166,20 +1186,24 @@ io_multicast_add(
 			sizeof(inter_list[ind].name));
 		((struct sockaddr_in*)&inter_list[ind].mask)->sin_addr.s_addr =
 						htonl(~(u_int32)0);
-		inter_list[ind].ignore_packets = ISC_FALSE;
 		if (ind >= ninterfaces)
 			ninterfaces = ind + 1;
 	}
 	else
 	{
 		memset((char *)&inter_list[ind], 0, sizeof(struct interface));
-		ind = findlocalinterface(&addr);
+		ind = -1;
+		if (addr.ss_family == AF_INET)
+			ind = wildipv4;
+		else if (addr.ss_family == AF_INET6)
+			ind = wildipv6;
+
 		if (ind >= 0) {
 			/* HACK ! -- stuff in an address */
 			inter_list[ind].bcast = addr;
 			netsyslog(LOG_ERR,
-			 "...multicast address %s using socket %d",
-			 stoa(&addr), ind);
+			 "...multicast address %s using wildcard socket",
+			 stoa(&addr));
 		} else {
 			netsyslog(LOG_ERR,
 			"No multicast socket available to use for address %s",
@@ -1196,7 +1220,7 @@ io_multicast_add(
 #endif
 #else /* MCAST */
 	netsyslog(LOG_ERR,
-	    "Cannot add multicast address %s: no multicast support",
+	    "Cannot add multicast address %s: no Multicast support",
 	    stoa(&addr));
 #endif /* MCAST */
 }
