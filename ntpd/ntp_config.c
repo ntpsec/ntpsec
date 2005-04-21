@@ -242,6 +242,7 @@ static struct keyword tos_keywords[] = {
 	{ "cohort",		CONF_TOS_COHORT },
 	{ "mindist",		CONF_TOS_MINDIST },
 	{ "maxdist",		CONF_TOS_MAXDIST },
+	{ "maxhop",		CONF_TOS_MAXHOP },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1088,6 +1089,10 @@ getconfig(
 
 			    case CONF_TOS_MAXDIST:
 				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MAXHOP:
+				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
 				break;
 			    }
 			}

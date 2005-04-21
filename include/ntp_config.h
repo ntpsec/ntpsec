@@ -149,6 +149,7 @@
 #define CONF_TOS_COHORT		5
 #define CONF_TOS_MINDIST	6
 #define CONF_TOS_MAXDIST	7
+#define	CONF_TOS_MAXHOP		8
 
 #ifdef OPENSSL
 /*
