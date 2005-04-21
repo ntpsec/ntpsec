@@ -766,8 +766,6 @@ peer_reset(
 	peer->bogusorg = 0;
 	peer->oldpkt = 0;
 	peer->seldisptoolarge = 0;
-	peer->selbroken = 0;
-	peer->rank = 0;
 	peer->timereset = current_time;
 }
 

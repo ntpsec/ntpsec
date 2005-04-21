@@ -127,8 +127,7 @@ typedef char s_char;
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
-#define HYST		.5	/* anti-clockhop hysteresis */
-#define HYST_TC		.875	/* anti-clockhop hysteresis decay */
+#define HOPPER		3	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
 #define NTP_MAXEXTEN	1024	/* max extension field size */
 
@@ -226,6 +225,7 @@ struct interface {
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unfit for synchronization */
+#define	TEST14		0x2000	/* peer stratum out of bounds */
 
 /*
  * Authentication codes
@@ -338,7 +338,6 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	estbdelay;	/* clock offset to broadcast server */
-	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
 	 * End of clear-to-zero area
@@ -364,9 +363,8 @@ struct peer {
 	u_long	badauth;	/* packets cryptosum failed */
 	u_long	bogusorg;	/* packets bogus origin */
 	u_long	oldpkt;		/* packets duplicate packet */
-	u_long	seldisptoolarge; /* packets dispersion to large*/
+	u_long	seldisptoolarge; /* packets dispersion too large */
 	u_long	selbroken;	/* not used */
-	u_long	rank;	/* number of times selected or in cluster */
 };
 
 /*

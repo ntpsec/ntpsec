@@ -63,9 +63,10 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_mindist = MINDISTANCE; /* selection floor (s) */
+static	double sys_mindist = MINDISTANCE; /* selection threshold (s) */
 static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
 double	sys_jitter;		/* system jitter (s) */
+int	sys_hopper;		/* anticlockhop counter */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -77,8 +78,8 @@ char	*sys_hostname;		/* gethostname() name */
 /*
  * TOS and multicast mapping stuff
  */
-int	sys_floor = 1;		/* cluster stratum floor */
-int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling*/
+int	sys_floor = 0;		/* cluster stratum floor */
+int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling */
 int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum survivors */
 int	sys_cohort = 0;		/* cohort switch */
@@ -165,10 +166,11 @@ transmit(
 	if (peer->burst == 0) {
 		u_char oreach;
 
+		if (peer == sys_peer)
+			sys_hopper++;
 		oreach = peer->reach;
 		peer->outdate = current_time;
 		peer->reach <<= 1;
-		peer->hyst *= HYST_TC;
 		if (!peer->reach) {
 
 			/*
@@ -1558,7 +1560,7 @@ clock_filter(
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
 		    allan_xpt)
-			dst[i] = MAXDISTANCE + peer->filter_disp[j];
+			dst[i] = sys_maxdist + peer->filter_disp[j];
 		else
 			dst[i] = peer->filter_delay[j];
 		ord[i] = j;
@@ -1584,14 +1586,14 @@ clock_filter(
 	/*
 	 * Copy the index list to the association structure so ntpq
 	 * can see it later. Prune the distance list to samples less
-	 * than MAXDISTANCE, but keep at least two valid samples for
+	 * than max distance, but keep at least two valid samples for
 	 * jitter calculation.
 	 */
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = (u_char) ord[i];
 		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
-		    MAXDISTANCE))
+		    sys_maxdist))
 			continue;
 		m++;
 	}
@@ -1931,11 +1933,6 @@ clock_select(void)
 	 * configured, his association raft is drowned as well, but only
 	 * if at at least eight poll intervals have gone. We must leave
 	 * at least one peer to collect the million bucks.
-	 *
-	 * Note the hysteresis gimmick that increases the effective
-	 * distance for those rascals that have not made the final cut.
-	 * This is to discourage clockhopping. Note also the prejudice
-	 * against lower stratum peers if the floor is elevated.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1951,18 +1948,12 @@ clock_select(void)
 
 		/*
 		 * The order metric is formed from the stratum times
-		 * MAXDISTANCE (1.) plus the root distance. It strongly
+		 * max distance (1.) plus the root distance. It strongly
 		 * favors the lowest stratum, but a higher stratum peer
 		 * can capture the clock if the low stratum dominant
 		 * hasn't been heard for awhile.
 		 */
-		d = peer->stratum;
-		if (d < sys_floor)
-			d += sys_floor;
-		if (d > sys_ceiling)
-			d = STRATUM_UNSPEC;
-		d = root_distance(peer) + d * MAXDISTANCE;
-		d *= 1. - peer->hyst;
+		d = root_distance(peer) + peer->stratum * sys_maxdist;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
 				continue;
@@ -1972,6 +1963,7 @@ clock_select(void)
 		for (k = j; k > 0; k--) {
 			if (d >= synch[k - 1])
 				break;
+
 			peer_list[k] = peer_list[k - 1];
 			error[k] = error[k - 1];
 			synch[k] = synch[k - 1];
@@ -2096,41 +2088,37 @@ clock_select(void)
 	 * stratum. Note that the head of the list is at the lowest
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
-	 *
-	 * Fiddle for hysteresis. Pump it up for a peer only if the peer
-	 * stratum is at least the floor and there are enough survivors.
-	 * This minimizes the pain when tossing out rascals beneath the
-	 * floorboard. Don't count peers with stratum above the ceiling.
-	 * Manycast is sooo complicated.
 	 */
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
 		peer = peer_list[i];
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
-		peer->rank++;
-		peer->flags |= FLAG_SYSPEER;
-		if (peer->stratum >= sys_floor && osurv >= sys_minclock)
-			peer->hyst = HYST;
-		else
-			peer->hyst = 0;
-		if (peer->stratum <= sys_ceiling)
-			sys_survivors++;
+		sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
+		if (peer == osys_peer)
+			typesystem = peer;
 #ifdef REFCLOCK
 		if (peer->refclktype == REFCLK_ATOM_PPS)
 			sys_pps = peer;
 #endif /* REFCLOCK */
+#if DEBUG
+		if (debug > 1)
+			printf("cluster: survivor %s metric %.6f\n",
+			    ntoa(&peer_list[i]->srcadr), synch[i]);
+#endif
+	}
 
-		/*
-		 * If this is the old system peer and it's stratum is
-		 * the same as the head of the list, don't hop the
-		 * clock.
-		 */
-		if (peer == osys_peer && peer->stratum ==
-		    peer_list[0]->stratum)
-			typesystem = peer;
+	/*
+	 * Anticlockhop provision. Keep the current system peer if it is
+	 * a survivor but not first in the list. But do that only HOPPER
+	 * times.
+	 */
+	if (osys_peer == NULL || typesystem == NULL || typesystem ==
+	    peer_list[0] || sys_hopper > HOPPER) {
+		typesystem = peer_list[0];
+		sys_hopper = 0;
 	}
 
 	/*
@@ -2149,10 +2137,8 @@ clock_select(void)
 	 * Mitigation rules of the game. There are several types of
 	 * peers that can be selected here: (1) prefer peer (flag
 	 * FLAG_PREFER) (2) pps peers (type REFCLK_ATOM_PPS), (3) the
-	 * existing system peer, if any, and (4) the head of the
-	 * survivor list. Note that only one peer can be declared
-	 * prefer. Note that all of these must be at the lowest stratum,
-	 * i.e., the stratum of the head of the survivor list.
+	 * existing system peer, if any, and (3) the head of the
+	 * survivor list.
 	 */
 	if (sys_prefer) {
 
@@ -2189,15 +2175,10 @@ clock_select(void)
 	} else {
 
 		/*
-		 * If a system peer has been identified, choose it;
-		 * otherwise choose the head of the survivor list.
+		 * Otherwise, choose the anticlockhopper.
 		 */ 
-		if (typesystem)
-			sys_peer = typesystem;
-		else
-			sys_peer = peer_list[0];
+		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
-		sys_peer->rank++;
 		clock_combine(peer_list, nlist);
 		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
 		    SQUARE(sys_jitter));
@@ -2207,6 +2188,11 @@ clock_select(void)
 			   sys_offset);
 #endif
 	}
+
+	/*
+	 * We have found the alpha male.
+	 */
+	sys_peer->flags |= FLAG_SYSPEER;
 	if (osys_peer != sys_peer) {
 		char *src;
 
@@ -2831,7 +2817,8 @@ key_expire(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > unreachable or bad leap or bad stratum or noselect
+ * > unreachable or bad leap ornoselect
+ * > stratum below the floor or at or above the ceiling
  * > root distance exceeded
  * > a synchronization loop would form
  */
@@ -2842,11 +2829,14 @@ peer_unfit(
 {
 	int	rval = 0;
 
-	peer->flash &= ~(TEST11 | TEST12 | TEST13);
+	peer->flash &= ~(TEST11 | TEST12 | TEST13 | TEST14);
 	if (!peer->reach || peer->leap == LEAP_NOTINSYNC ||
 	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
 	    FLAG_NOSELECT)
 		rval |= TEST13;		/* unfit */
+
+	if (peer->stratum < sys_floor || peer->stratum >= sys_ceiling)
+		rval |= TEST14;		/* stratum out of bounds */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
