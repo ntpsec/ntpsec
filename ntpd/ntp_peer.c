@@ -307,7 +307,7 @@ clear_all(void)
 			    MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
-				if (peer->flags & FLAG_CONFIG)
+				if (!(peer->flags & FLAG_CONFIG))
 					unpeer(peer);
 			}
 		}
@@ -766,8 +766,6 @@ peer_reset(
 	peer->bogusorg = 0;
 	peer->oldpkt = 0;
 	peer->seldisptoolarge = 0;
-	peer->selbroken = 0;
-	peer->rank = 0;
 	peer->timereset = current_time;
 }
 

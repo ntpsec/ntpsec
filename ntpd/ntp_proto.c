@@ -63,10 +63,11 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_selerr;	/* select jitter (s) */
-static	double sys_mindist = MINDISTANCE; /* selection floor (s) */
+static	double sys_mindist = MINDISTANCE; /* selection threshold (s) */
 static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
 double	sys_jitter;		/* system jitter (s) */
+static	int sys_hopper;		/* anticlockhop counter */
+static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -78,8 +79,8 @@ char	*sys_hostname;		/* gethostname() name */
 /*
  * TOS and multicast mapping stuff
  */
-int	sys_floor = 1;		/* cluster stratum floor */
-int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling*/
+int	sys_floor = 0;		/* cluster stratum floor */
+int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling */
 int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum survivors */
 int	sys_cohort = 0;		/* cohort switch */
@@ -101,7 +102,7 @@ u_long	sys_badauth;		/* bad authentication */
 u_long	sys_limitrejected;	/* rate exceeded */
 
 static	double	root_distance	P((struct peer *));
-static	double	clock_combine	P((struct peer **, int));
+static	void	clock_combine	P((struct peer **, int));
 static	void	peer_xmit	P((struct peer *));
 static	void	fast_xmit	P((struct recvbuf *, int, keyid_t,
 				    int));
@@ -166,10 +167,11 @@ transmit(
 	if (peer->burst == 0) {
 		u_char oreach;
 
+		if (peer == sys_peer)
+			sys_hopper++;
 		oreach = peer->reach;
 		peer->outdate = current_time;
 		peer->reach <<= 1;
-		peer->hyst *= HYST_TC;
 		if (!peer->reach) {
 
 			/*
@@ -471,7 +473,7 @@ receive(
 	 *
 	 * NONE    The packet has no MAC.
 	 * OK      the packet has a MAC and authentication succeeds
-	 * ERROR   the packet has a MAC and authentication fails.
+	 * ERROR   the packet has a MAC and authentication fails
 	 * CRYPTO  crypto-NAK. The MAC has four octets only.
 	 *
 	 * Note: The AUTH(x, y) macro is used to filter outcomes. If x
@@ -639,7 +641,7 @@ receive(
 			   is_authentic))
 				fast_xmit(rbufp, MODE_SERVER, skeyid,
 				    restrict_mask);
-			else if (skeyid)
+			else if (is_authentic == AUTH_ERROR)
 				fast_xmit(rbufp, MODE_SERVER, 0,
 				    restrict_mask);
 			return;			/* hooray */
@@ -750,10 +752,8 @@ receive(
 			if (crypto_recv(peer, rbufp) == XEVNT_OK)
 				return;
 
-			peer->flash |= TEST9;	/* crypto error */
 			peer_clear(peer, "CRYP");
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
+			unpeer(peer);
 #endif /* OPENSSL */
 			return;
 
@@ -860,19 +860,11 @@ receive(
 	/*
 	 * If this is a broadcast mode packet, skip further checking.
 	 */
-	if (hismode == MODE_BROADCAST) {
-		/* fall through */
-
-	/*
-	 * If the origin timestamp is zero, the sender has not yet heard
-	 * from us. Otherwise, if the origin timestamp does not match
-	 * the transmit timestamp, the packet is bogus.
-	 */
-	} else if (L_ISZERO(&p_org)) {
-		peer->flash |= TEST3;		/* unsynch */
-			
-	} else if (!L_ISEQU(&p_org, &peer->xmt)) {
-		peer->flash |= TEST2;		/* bogus */
+	if (hismode != MODE_BROADCAST) {
+		if (L_ISZERO(&p_org))
+			peer->flash |= TEST3;	/* unsynch */
+		else if (!L_ISEQU(&p_org, &peer->xmt))
+			peer->flash |= TEST2;	/* bogus */
 	}
 
 	/*
@@ -943,12 +935,12 @@ receive(
 		peer->flash |= TEST8;
 		rval = crypto_recv(peer, rbufp);
 		if (rval != XEVNT_OK) {
-			peer->flash |= TEST9;	/* crypto error */
 			peer_clear(peer, "CRYP");
-			if (!(peer->flags & FLAG_CONFIG))
+			peer->flash |= TEST9;	/* crypto error */
+			if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
-			return;
-
+				return;
+			}
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST8;
@@ -1064,11 +1056,12 @@ process_packet(
 	 */
 	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
-			peer->flash |= TEST4;	/* access deny */
 			peer_clear(peer, "DENY");
-			if (!(peer->flags & FLAG_CONFIG))
+			peer->flash |= TEST4;	/* access deny */
+			if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
-			return;
+				return;
+			}
 		}
 	}
 
@@ -1275,7 +1268,7 @@ clock_update(void)
 		sys_reftime = sys_peer->rec;
 		sys_rootdelay = sys_peer->rootdelay + sys_peer->delay;
 		dtemp = sys_peer->disp + clock_phi * (current_time -
-		    sys_peer->epoch) + sys_peer->jitter +
+		    sys_peer->epoch) + sys_jitter +
 		    fabs(sys_peer->offset);
 #ifdef REFCLOCK
 		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
@@ -1568,7 +1561,7 @@ clock_filter(
 			dst[i] = MAXDISPERSE;
 		else if (peer->update - peer->filter_epoch[j] >
 		    allan_xpt)
-			dst[i] = MAXDISTANCE + peer->filter_disp[j];
+			dst[i] = sys_maxdist + peer->filter_disp[j];
 		else
 			dst[i] = peer->filter_delay[j];
 		ord[i] = j;
@@ -1594,14 +1587,14 @@ clock_filter(
 	/*
 	 * Copy the index list to the association structure so ntpq
 	 * can see it later. Prune the distance list to samples less
-	 * than MAXDISTANCE, but keep at least two valid samples for
+	 * than max distance, but keep at least two valid samples for
 	 * jitter calculation.
 	 */
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = (u_char) ord[i];
 		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
-		    MAXDISTANCE))
+		    sys_maxdist))
 			continue;
 		m++;
 	}
@@ -1705,7 +1698,7 @@ clock_select(void)
 	int	nlist, nl3;
 
 	int	allow, osurv;
-	double	d, e, f;
+	double	d, e, f, g;
 	double	high, low;
 	double	synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
 	struct peer *osys_peer;
@@ -1941,11 +1934,6 @@ clock_select(void)
 	 * configured, his association raft is drowned as well, but only
 	 * if at at least eight poll intervals have gone. We must leave
 	 * at least one peer to collect the million bucks.
-	 *
-	 * Note the hysteresis gimmick that increases the effective
-	 * distance for those rascals that have not made the final cut.
-	 * This is to discourage clockhopping. Note also the prejudice
-	 * against lower stratum peers if the floor is elevated.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -1961,18 +1949,12 @@ clock_select(void)
 
 		/*
 		 * The order metric is formed from the stratum times
-		 * MAXDISTANCE (1.) plus the root distance. It strongly
+		 * max distance (1.) plus the root distance. It strongly
 		 * favors the lowest stratum, but a higher stratum peer
 		 * can capture the clock if the low stratum dominant
 		 * hasn't been heard for awhile.
 		 */
-		d = peer->stratum;
-		if (d < sys_floor)
-			d += sys_floor;
-		if (d > sys_ceiling)
-			d = STRATUM_UNSPEC;
-		d = root_distance(peer) + d * MAXDISTANCE;
-		d *= 1. - peer->hyst;
+		d = root_distance(peer) + peer->stratum * sys_maxdist;
 		if (j >= NTP_MAXCLOCK) {
 			if (d >= synch[j - 1])
 				continue;
@@ -1982,6 +1964,7 @@ clock_select(void)
 		for (k = j; k > 0; k--) {
 			if (d >= synch[k - 1])
 				break;
+
 			peer_list[k] = peer_list[k - 1];
 			error[k] = error[k - 1];
 			synch[k] = synch[k - 1];
@@ -2055,7 +2038,7 @@ clock_select(void)
 	while (1) {
 		d = 1e9;
 		e = -1e9;
-		f = 0;
+		f = g = 0;
 		k = 0;
 		for (i = 0; i < nlist; i++) {
 			if (error[i] < d)
@@ -2068,7 +2051,7 @@ clock_select(void)
 				f = SQRT(f / (nlist - 1));
 			}
 			if (f * synch[i] > e) {
-				sys_selerr = f;
+				g = f;
 				e = f * synch[i];
 				k = i;
 			}
@@ -2081,7 +2064,7 @@ clock_select(void)
 		if (debug > 2)
 			printf(
 			    "select: drop %s select %.6f jitter %.6f\n",
-			    ntoa(&peer_list[k]->srcadr), sys_selerr, d);
+			    ntoa(&peer_list[k]->srcadr), g, d);
 #endif
 		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
 		    peer_list[k]->hmode == MODE_CLIENT)
@@ -2106,41 +2089,39 @@ clock_select(void)
 	 * stratum. Note that the head of the list is at the lowest
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
-	 *
-	 * Fiddle for hysteresis. Pump it up for a peer only if the peer
-	 * stratum is at least the floor and there are enough survivors.
-	 * This minimizes the pain when tossing out rascals beneath the
-	 * floorboard. Don't count peers with stratum above the ceiling.
-	 * Manycast is sooo complicated.
 	 */
 	leap_consensus = 0;
 	for (i = nlist - 1; i >= 0; i--) {
 		peer = peer_list[i];
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
-		peer->rank++;
-		peer->flags |= FLAG_SYSPEER;
-		if (peer->stratum >= sys_floor && osurv >= sys_minclock)
-			peer->hyst = HYST;
-		else
-			peer->hyst = 0;
-		if (peer->stratum <= sys_ceiling)
-			sys_survivors++;
+		sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
+		if (peer == osys_peer)
+			typesystem = peer;
 #ifdef REFCLOCK
 		if (peer->refclktype == REFCLK_ATOM_PPS)
 			sys_pps = peer;
 #endif /* REFCLOCK */
+#if DEBUG
+		if (debug > 1)
+			printf("cluster: survivor %s metric %.6f\n",
+			    ntoa(&peer_list[i]->srcadr), synch[i]);
+#endif
+	}
 
-		/*
-		 * If this is the old system peer and it's stratum is
-		 * the same as the head of the list, don't hop the
-		 * clock.
-		 */
-		if (peer == osys_peer && peer->stratum ==
-		    peer_list[0]->stratum)
-			typesystem = peer;
+	/*
+	 * Anticlockhop provision. Keep the current system peer if it is
+	 * a survivor but not first in the list. But do that only HOPPER
+	 * times.
+	 */
+	if (osys_peer == NULL || typesystem == NULL || typesystem ==
+	    peer_list[0] || sys_hopper > sys_maxhop) {
+		typesystem = peer_list[0];
+		sys_hopper = 0;
+	} else {
+		peer->selbroken++;
 	}
 
 	/*
@@ -2159,10 +2140,8 @@ clock_select(void)
 	 * Mitigation rules of the game. There are several types of
 	 * peers that can be selected here: (1) prefer peer (flag
 	 * FLAG_PREFER) (2) pps peers (type REFCLK_ATOM_PPS), (3) the
-	 * existing system peer, if any, and (4) the head of the
-	 * survivor list. Note that only one peer can be declared
-	 * prefer. Note that all of these must be at the lowest stratum,
-	 * i.e., the stratum of the head of the survivor list.
+	 * existing system peer, if any, and (3) the head of the
+	 * survivor list.
 	 */
 	if (sys_prefer) {
 
@@ -2199,24 +2178,24 @@ clock_select(void)
 	} else {
 
 		/*
-		 * If a system peer has been identified, choose it;
-		 * otherwise choose the head of the survivor list.
+		 * Otherwise, choose the anticlockhopper.
 		 */ 
-		if (typesystem)
-			sys_peer = typesystem;
-		else
-			sys_peer = peer_list[0];
+		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
-		sys_peer->rank++;
-		sys_offset = clock_combine(peer_list, nlist);
+		clock_combine(peer_list, nlist);
 		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
-		    SQUARE(sys_selerr));
+		    SQUARE(sys_jitter));
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: combine offset %.6f\n",
 			   sys_offset);
 #endif
 	}
+
+	/*
+	 * We have found the alpha male.
+	 */
+	sys_peer->flags |= FLAG_SYSPEER;
 	if (osys_peer != sys_peer) {
 		char *src;
 
@@ -2239,22 +2218,24 @@ clock_select(void)
 /*
  * clock_combine - combine offsets from selected peers
  */
-static double
+static void
 clock_combine(
-	struct peer **peers,
-	int	npeers
+	struct peer **peers,		/* survivor list */
+	int	npeers			/* number of survivors */
 	)
 {
 	int	i;
-	double	x, y, z;
+	double	x, y, z, w;
 
-	y = z = 0;
+	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
 		x = root_distance(peers[i]);
 		y += 1. / x;
 		z += peers[i]->offset / x;
+		w += SQUARE(peers[i]->offset - peers[0]->offset) / x;
 	}
-	return (z / y);
+	sys_offset = z / y;
+	sys_jitter = SQRT(w / y);
 }
 
 /*
@@ -2563,12 +2544,12 @@ peer_xmit(
 				    &peer->srcadr, sendlen, exten, 0);
 				free(exten);
 			} else {
+				peer_clear(peer, "CRYP");
+				peer->flash |= TEST9; /* crypto error */
 				msyslog(LOG_INFO,
 				    "transmit: crypto error for %s",
 				    stoa(&peer->srcadr));
 				free(exten);
-				peer->flash |= TEST9; /* crypto error */
-				peer_clear(peer, "CRYP");
 				return;
 			}
 		}
@@ -2588,10 +2569,10 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
+		peer_clear(peer, "NKEY");
+		peer->flash |= TEST9;		/* no key found */
 		msyslog(LOG_INFO, "transmit: key %u not found for %s",
 		    xkeyid, stoa(&peer->srcadr));
-		peer->flash |= TEST9;		/* no key found */
-		peer_clear(peer, "NKEY");
 		return;
 	}
 	sendlen += authlen;
@@ -2839,7 +2820,8 @@ key_expire(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > unreachable or bad leap or bad stratum or noselect
+ * > unreachable or bad leap or noselect
+ * > stratum below the floor or at or above the ceiling
  * > root distance exceeded
  * > a synchronization loop would form
  */
@@ -2850,11 +2832,13 @@ peer_unfit(
 {
 	int	rval = 0;
 
-	peer->flash &= ~(TEST11 | TEST12 | TEST13);
+	peer->flash &= ~(TEST10 | TEST11 | TEST12 | TEST13);
 	if (!peer->reach || peer->leap == LEAP_NOTINSYNC ||
-	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
-	    FLAG_NOSELECT)
+	    peer->flags & FLAG_NOSELECT)
 		rval |= TEST13;		/* unfit */
+
+	if (peer->stratum < sys_floor || peer->stratum >= sys_ceiling)
+		rval |= TEST10;		/* stratum out of bounds */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
@@ -3147,6 +3131,14 @@ proto_config(
 	case PROTO_COHORT:
 		sys_cohort = (int)dvalue;
 		break;
+
+	/*
+	 * Set the anticlockhop threshold.
+	 */
+	case PROTO_MAXHOP:
+		sys_maxhop = (int)dvalue;
+		break;
+
 	/*
 	 * Set the adjtime() resolution (s).
 	 */

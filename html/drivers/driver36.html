@@ -51,7 +51,7 @@
 		<p>To work well, the driver needs a shortwave receiver with good audio response at 100 Hz. Most shortwave and communications receivers roll off the audio response below 250 Hz, so this can be a problem, especially with receivers using DSP technology, since DSP filters can have very fast rolloff outside the passband. Some DSP transceivers, in particular the ICOM 775, have a programmable low frequency cutoff which can be set as low as 80 Hz. However, this particular radio has a strong low frequency buzz at about 10 Hz which appears in the audio output and can affect data recovery under marginal conditions. Although not tested, it would seem very likely that a cheap shortwave receiver could function just as well as an expensive communications receiver.</p>
         <h4>Autotune</h4>
         <p>The driver includes provisions to automatically tune the radio in response to changing radio propagation conditions throughout the day and night. The radio interface is compatible with the ICOM CI-V standard, which is a bidirectional serial bus operating at TTL levels. The bus can be connected to a serial port using a level converter such as the CT-17.</p>
-        <p>Each ICOM radio is assigned a unique 8-bit ID select code, usually expressed in hex format. To activate the CI-V interface, the <tt>mode</tt> keyword of the <tt>server</tt> configuration command specifies a nonzero select code in decimal format. A table of ID select codes for the known ICOM radios is given below. Since all ICOM select codes are less than 128, the high order bit of the code is used by the driver to specify the baud rate. If this bit is not set, the rate is 9600 bps for the newer radios; if set, the rate is 1200 bps for the older radios. A missing <tt>mode</tt> keyword or a zero argument leaves the interface disabled.</p>
+        <p>Each ICOM radio is assigned a unique 8-bit ID select code, usually expressed in hex format. To activate the CI-V interface, the <tt>mode</tt> keyword of the <tt>server</tt> configuration command specifies a nonzero select code in decimal format. A table of ID select codes for the known ICOM radios is given on the <a href="../audio.html">Reference Clock Audio Drivers</a> page. A missing <tt>mode</tt> keyword or a zero argument leaves the interface disabled.</p>
         <p>If specified, the driver will attempt to open the device <tt>/dev/icom</tt> and, if successful will activate the autotune function and tune the radio to each operating frequency in turn while attempting to acquire minute sync from either WWV or WWVH. However, the driver is liberal in what it assumes of the configuration. If the <tt>/dev/icom</tt> link is not present or the open fails or the CI-V bus or radio is inoperative, the driver quietly gives up with no harm done.</p>
         <p>Once acquiring minute sync, the driver operates as described above to set the clock. However, during seconds 59, 0 and 1 of each minute it tunes the radio to one of the five broadcast frequencies to measure the sync pulse and data pulse amplitudes and SNR and update the signal metric. Each of the five frequencies are probed in a five-minute rotation to build a database of current propagation conditions for all signals that can be heard at the time. At the end of each probe a mitigation procedure scans the database and retunes the radio to the best frequency and station found. For this to work well, the radio should be set for a fast AGC recovery time. This is most important while tracking a strong signal, which is normally the case, and then probing another frequency, which may have much weaker signals.</p>
         <p>Reception conditions for each frequency and station are evaluated according to the signal metric, which uses the minute sync pulse amplitude and SNR and data subcarrier amplitude and SNR. The minute pulse is evaluated at second 0, while the data pulse is evaluated at second 1. In principle, the data pulse in second 58 is usable, but the AGC in most radios is not fast enough for a reliable measurement.</p>
@@ -164,92 +164,8 @@
         <p>An example timecode is:</p>
         <p><tt>0 2000 006 22:36:00 S +3 1 115 WV20 86 5 66.4 1024</tt></p>
         <p>Here the clock has been set and no alarms are raised. The year, day and time are displayed along with no leap warning, standard time and DUT +0.3 s. The clock was set on the last minute, the AGC is safely in the middle ot the range 0-255, and the receiver is tracking WWV on 20 MHz. Good receiving conditions prevail, as indicated by the metric 86 and 5 bit errors during the last minute. The current frequency is 66.4 PPM and the averaging interval is 1024 s, indicating the maximum precision available.</p>
-        <h4>Modes</h4>
-        <p>The <tt>mode</tt> keyword of the <tt>server</tt> configuration command specifies the ICOM ID select code in decimal. A missing or zero argument disables the CI-V interface. Following are the ID select codes for the known radios. These codes are for 9600 baud rate; for 1200 baud rate add 128.</p>
-        <table width="100%" cols="6">
-            <tr>
-                <td>Radio</td>
-                <td>Hex</td>
-                <td>Decimal</td>
-                <td>Radio</td>
-                <td>Hex</td>
-                <td>Decimal</td>
-            </tr>
-			<tr>
-				<td>706</td>
-				<td>0x4e</td>
-				<td>78</td>
-				<td>775</td>
-				<td>0x46</td>
-				<td>68</td>
-			</tr>
-			<tr>
-				<td>706MKIIG</td>
-				<td>0x58</td>
-				<td>88</td>
-				<td>781</td>
-				<td>0x26</td>
-				<td>38</td>
-			</tr>
-			<tr>
-                <td>725</td>
-                <td>0x28</td>
-				<td>40</td>
-				<td>970</td>
-				<td>0x2e</td>
-				<td>46</td>
-			</tr>
-            <tr>
-                <td>726</td>
-                <td>0x30</td>
-				<td>48</td>
-				<td>R71</td>
-				<td>0x1A</td>
-				<td>26</td>
-			</tr>
-            <tr>
-                <td>735</td>
-                <td>0x04</td>
-				<td>4</td>
-				<td>R72</td>
-				<td>0x32</td>
-				<td>50</td>
-			</tr>
-			<tr>
-                <td>751</td>
-                <td>0x1c</td>
-				<td>28</td>
-				<td>R7000</td>
-				<td>0x08</td>
-				<td>8</td>
-			</tr>
-			<tr>
-				<td>756PROII</td>
-				<td>0x64</td>
-				<td>100</td>
-				<td>R8500</td>
-				<td>0x4a</td>
-				<td>74</td>
-			</tr>
-			<tr>
-                <td>761</td>
-                <td>0x1e</td>
-				<td>30</td>
-				<td>R9000</td>
-				<td>0x2a</td>
-				<td>42</td>
-			</tr>
-			<tr>
-                <td>765</td>
-                <td>0x2c</td>
-				<td>44</td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-		</table>
-        <h4>Fudge Factors</h4>
-        <dl>
+		<h4>Fudge Factors</h4>
+		<dl>
             <dt><tt>time1 <i>time</i></tt>
             <dd>Specifies the propagation delay for WWV (40:40:49.0N 105:02:27.0W), in seconds and fraction, with default 0.0.
             <dt><tt>time2 <i>time</i></tt>
@@ -267,7 +183,7 @@
             <dt><tt>flag4 0 | 1</tt>
             <dd>Enable verbose <tt>clockstats</tt> recording if set.
         </dl>
-        <hr>
+		<hr>
         <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
     </body>
 

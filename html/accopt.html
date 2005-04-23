@@ -12,7 +12,7 @@
         <h3>Access Control Options</h3>
         <img src="pic/pogo6.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
         <p>The skunk watches for intruders and sprays.</p>
-        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">03:02 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 13, 2003</csobj></p>
+        <p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="99">05:01 AM</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="223">Friday, April 01, 2005</csobj></p>
         <br clear="left">
         <h4>Related Links</h4>
         <script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -49,14 +49,12 @@
                 <dt><tt>noquery</tt>
                 <dd>Deny <tt>ntpq</tt> and <tt>ntpdc</tt> queries. Time service is not affected.
                 <dt><tt>nopeer</tt>
-                <dd>Deny packets which would result in mobilizing a new association. &nbsp;This includes broadcast and symmetric active packets when a configured association does not exist.
-                <dt><tt>noserve</tt>
+                <dd>Deny packets which would result in mobilizing a new association. &nbsp;This includes broadcast, symmetric-active and manycast client packets when a configured association does not exist.<dt><tt>noserve</tt>
                 <dd>Deny all packets except <tt>ntpq</tt> and <tt>ntpdc</tt> queries.
                 <dt><tt>notrap</tt>
                 <dd>Decline to provide mode 6 control message trap service to matching hosts. The trap service is a subsystem of the <tt>ntpdq</tt> control message protocol which is intended for use by remote event logging programs.
                 <dt><tt>notrust</tt>
-                <dd>Deny service unless the packet is cryptographically authenticated.
-                <dt><tt>ntpport</tt>
+                <dd>Deny packets unless the packet is cryptographically authenticated.<dt><tt>ntpport</tt>
                 <dd>This is actually a match algorithm modifier, rather than a restriction flag. Its presence causes the restriction entry to be matched only if the source port in the packet is the standard NTP UDP port (123). Both <tt>ntpport</tt> and <tt>non-ntpport</tt> may be specified. The <tt>ntpport</tt> is considered more specific and is sorted later in the list.
                 <dt><tt>version</tt>
                 <dd>Deny packets that do not match the current NTP version.

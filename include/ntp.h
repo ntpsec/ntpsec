@@ -127,8 +127,7 @@ typedef char s_char;
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
-#define HYST		.5	/* anti-clockhop hysteresis */
-#define HYST_TC		.875	/* anti-clockhop hysteresis decay */
+#define MAXHOP		2	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
 #define NTP_MAXEXTEN	1024	/* max extension field size */
 
@@ -209,20 +208,20 @@ struct interface {
  *
  * Packet errors
  */
-#define TEST1		0x0001	/* duplicate packet */
+#define TEST1		0X0001	/* duplicate packet */
 #define TEST2		0x0002	/* bogus packet */
 #define TEST3		0x0004	/* invalid timestamp */
 #define TEST4		0x0008	/* access denied */
 #define TEST5		0x0010	/* authentication error */
-#define TEST6		0x0020	/* peer not synchronized */
-#define TEST7		0x0040	/* invalid distance */
+#define TEST6		0x0020	/* loopback error */
+#define TEST7		0x0040	/* synch distance out of bounds */
 #define TEST8		0x0080  /* autokey error */
 #define TEST9		0x0100	/* crypto error */
 
 /*
  * Peer errors
  */
-#define TEST10		0x0200	/* peer stratum exceeded */
+#define TEST10		0x0200	/* peer stratum out of bounds */
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unfit for synchronization */
@@ -338,7 +337,6 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	estbdelay;	/* clock offset to broadcast server */
-	double	hyst;		/* anti-clockhop hysteresis */
 
 	/*
 	 * End of clear-to-zero area
@@ -364,9 +362,8 @@ struct peer {
 	u_long	badauth;	/* packets cryptosum failed */
 	u_long	bogusorg;	/* packets bogus origin */
 	u_long	oldpkt;		/* packets duplicate packet */
-	u_long	seldisptoolarge; /* packets dispersion to large*/
+	u_long	seldisptoolarge; /* packets dispersion too large */
 	u_long	selbroken;	/* not used */
-	u_long	rank;	/* number of times selected or in cluster */
 };
 
 /*
@@ -744,6 +741,7 @@ struct pkt {
 #define PROTO_MINDIST		20
 #define PROTO_MAXDIST		21
 #define PROTO_ADJ		22
+#define	PROTO_MAXHOP		23
 
 /*
  * Configuration items for the loop filter
