@@ -17,10 +17,11 @@
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
+extern int default_ai_family;
 int	listen_to_virtual_ips = 1;
 char 	*specific_interface = NULL;        /* interface name or IP address to bind to */
 
-static const char *ntp_options = "aAbB:c:C:dD:f:gHi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
+static const char *ntp_options = "46aAbB:c:C:dD:f:gHi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -29,7 +30,7 @@ extern int	check_netinfo;
 
 void ntpd_usage( void )
 {
-		(void) fprintf(stderr, "usage: %s [ -abdgnqx ] [ -c config_file ]\n", progname);
+		(void) fprintf(stderr, "usage: %s [ -46abdgnqx ] [ -c config_file ]\n", progname);
 		(void) fprintf(stderr, "\t\t[ -f drift_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broadcast_delay ] [ -s stats_dir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trusted_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
@@ -210,6 +211,12 @@ getCmdOpts(
 	 */
 	while ((c = ntp_getopt(argc, argv, ntp_options)) != EOF) {
 		switch (c) {
+		    case '4':
+			default_ai_family = AF_INET;
+			break;
+		    case '6':
+			default_ai_family = AF_INET6;
+			break;
 		    case 'a':
 			proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
 			break;

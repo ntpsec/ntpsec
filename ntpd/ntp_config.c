@@ -341,6 +341,8 @@ static char res_file[MAX_PATH];
 /*
  * Definitions of things either imported from or exported to outside
  */
+
+int default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 char const *progname;
 char	*sys_phone[MAXPHONE] = {NULL}; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
@@ -619,6 +621,7 @@ getconfig(
 
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			peeraddr.ss_family = default_ai_family;
 			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
@@ -949,6 +952,7 @@ getconfig(
 			if (ntokens > 1) {
 				istart = 1;
 				memset((char *)&peeraddr, 0, sizeof(peeraddr));
+				peeraddr.ss_family = default_ai_family;
 				switch (matchkey(tokens[istart],
 				    addr_type, 0)) {
 				case CONF_ADDR_IPV4:
@@ -1223,6 +1227,7 @@ getconfig(
 			}
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			peeraddr.ss_family = default_ai_family;
 			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
@@ -1413,6 +1418,7 @@ getconfig(
 			}
 			istart = 1;
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			peeraddr.ss_family = default_ai_family;
 			switch (matchkey(tokens[istart], addr_type, 0)) {
 			case CONF_ADDR_IPV4:
 				peeraddr.ss_family = AF_INET;
@@ -2058,28 +2064,7 @@ gettokens (
 			if (ISEOL(*cp))
 				break;
 		}
-		
-
 	}
-
-
-       /* Heiko: Remove leading and trailing quotes around tokens */
-       {
-            int i,j = 0;
-	    
-		
-	    for (i = 0; i < ntok; i++) {	    
-                /* Now check if the first char is a quote and remove that */
-                if ( tokenlist[ntok][0] == '"' )
-                        tokenlist[ntok]++;
-
-                /* Now check the last char ... */
-                j = strlen(tokenlist[ntok])-1;
-                if ( tokenlist[ntok][j] == '"' )
-                        tokenlist[ntok][j] = '\0';
-	    }
-							
-        }
 
 	if (ntok == MAXTOKENS) {
 		--ntok;
