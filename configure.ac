@@ -315,7 +315,17 @@ esac
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h)
+AC_CHECK_HEADERS(bstring.h)
+AC_CHECK_HEADER(dns_sd.h,
+	[AC_CHECK_LIB(dns_sd,
+			DNSServiceRegister,
+			[AC_DEFINE(HAVE_DNSREGISTRATION, 1,
+				[Use Rendezvous/DNS-SD registration])])])
+case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
+ yes) LIBS="-ldns_sd $LIBS" ;;
+esac
+AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h math.h)
+
 # HMS: Lame, but fast.
 if test -f /etc/redhat-release
 then
