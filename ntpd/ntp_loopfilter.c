@@ -454,7 +454,8 @@ local_clock(
 				dtemp = CLOCK_FLL - sys_poll;
 				if (dtemp < CLOCK_AVG)
 					dtemp = CLOCK_AVG;
-				flladj = (fp_offset - clock_offset) /
+				flladj = (fp_offset - last_base -
+				    clock_offset) /
 				    (max(mu, allan_xpt) * dtemp);
 			}
 
