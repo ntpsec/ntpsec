@@ -844,7 +844,7 @@ refclock_setup(
 			printf("refclock_setup fd %d modem status: 0x%x\n",
 			    fd, ltemp);
 #endif
-		if (ltemp & TIOCM_DSR)
+		if (ltemp & TIOCM_DSR && lflags & LDISC_REMOTE)
 			ttyp->c_cflag &= ~CLOCAL;
 #endif /* TIOCMGET */
 	}

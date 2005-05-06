@@ -214,9 +214,10 @@ heath_start(
 	/*
 	 * Open serial port
 	 */
-	(void)sprintf(device, DEVICE, unit);
-	if (!(fd = refclock_open(device, speed[peer->ttl & 0x3], 0)))
-	    return (0);
+	sprintf(device, DEVICE, unit);
+	if (!(fd = refclock_open(device, speed[peer->ttl & 0x3],
+	    LDISC_REMOTE)))
+		return (0);
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;
 	pp->io.srcclock = (caddr_t)peer;

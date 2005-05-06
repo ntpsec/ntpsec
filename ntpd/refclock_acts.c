@@ -178,6 +178,7 @@
  * Timeouts (all in seconds)
  */
 #define SETUP		3	/* setup timeout */
+#define	DTR		1	/* DTR timeout */
 #define ANSWER		60	/* answer timeout */
 #define CONNECT		20	/* first valid message timeout */
 #define TIMECODE	30	/* all valid messages timeout */
@@ -186,11 +187,12 @@
  * State machine codes
  */
 #define S_IDLE		0	/* wait for poll */
-#define S_OK		1	/* wait for modem */
-#define S_CONNECT	2	/* wait for answer*/
-#define S_FIRST		3	/* wait for first valid message */
-#define S_MSG		4	/* wait for all messages */
-#define S_CLOSE		5	/* wait after sending disconnect */
+#define S_OK		1	/* wait for modem setup */
+#define S_DTR		2	/* wait for modem DTR */
+#define S_CONNECT	3	/* wait for answer*/
+#define S_FIRST		4	/* wait for first valid message */
+#define S_MSG		5	/* wait for all messages */
+#define S_CLOSE		6	/* wait after sending disconnect */
 
 /*
  * Unit control structure
@@ -390,18 +392,8 @@ acts_message(
 			return;
 		}
 		ioctl(pp->io.fd, TIOCMBIS, (char *)&dtr);
-		sprintf(tbuf, "DIAL #%d %s", up->retry,
-		    sys_phone[up->retry]);
-		record_clock_stats(&peer->srcadr, tbuf);
-#ifdef DEBUG
-		if (debug)
-			printf("%s\n", tbuf);
-#endif
-		write(pp->io.fd, sys_phone[up->retry],
-		    strlen(sys_phone[up->retry]));
-		write(pp->io.fd, "\r", 1);
-		up->state = S_CONNECT;
-		up->timer = ANSWER;
+		up->state = S_DTR;
+		up->timer = DTR;
 		return;
 
 	/*
@@ -732,6 +724,7 @@ acts_timeout(
 	int	fd;
 	char	device[20];
 	char	lockfile[128], pidbuf[8];
+	char	tbuf[BMAX];
 
 	/*
 	 * The state machine is driven by messages from the modem, when
@@ -776,7 +769,7 @@ acts_timeout(
 		if (!pp->io.fd) {
 			sprintf(device, DEVICE, up->unit);
 			fd = refclock_open(device, SPEED232,
-			    LDISC_ACTS | LDISC_RAW);
+			    LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 			if (fd == 0) {
 				return;
 			}
@@ -826,6 +819,25 @@ acts_timeout(
 	case S_OK:
 		msyslog(LOG_ERR, "acts: no modem");
 		break;
+
+	/*
+	 * In DTR state we are waiting for the modem to settle down
+	 * before hammering it with a dial command.
+	 */
+	case S_DTR:
+		sprintf(tbuf, "DIAL #%d %s", up->retry,
+		    sys_phone[up->retry]);
+		record_clock_stats(&peer->srcadr, tbuf);
+#ifdef DEBUG
+		if (debug)
+			printf("%s\n", tbuf);
+#endif
+		write(pp->io.fd, sys_phone[up->retry],
+		    strlen(sys_phone[up->retry]));
+		write(pp->io.fd, "\r", 1);
+		up->state = S_CONNECT;
+		up->timer = ANSWER;
+		return;
 
 	/*
 	 * In CONNECT state the call did not complete.
