@@ -279,6 +279,7 @@ receive(
 	register struct pkt *pkt;	/* receive packet pointer */
 	int	hisversion;		/* packet version */
 	int	hismode;		/* packet mode */
+	int	hisstratum;		/* packet stratum */
 	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
@@ -332,6 +333,7 @@ receive(
 	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
+	hisstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (hismode == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY) {
 			sys_restricted++;
@@ -657,12 +659,18 @@ receive(
 		}
 
 		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
+
+		/*
 		 * Do not respond if our time is worse than the
 		 * manycaster or it has already synchronized to us.
 		 */
-		if (sys_peer == NULL || PKT_TO_STRATUM(pkt->stratum) <
-		    sys_stratum || (sys_cohort &&
-		    PKT_TO_STRATUM(pkt->stratum) == sys_stratum) ||
+		if (sys_peer == NULL || hisstratum < sys_stratum ||
+		    (sys_cohort && hisstratum) == sys_stratum ||
 		    rbufp->dstadr->addr_refid == pkt->refid)
 			return;			/* no help */
 
@@ -724,6 +732,13 @@ receive(
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic))
 			return;			/* bad auth */
+
+		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
 
 		switch (sys_bclient) {
 
@@ -808,6 +823,14 @@ receive(
 			    restrict_mask);
 			return;			/* hooray */
 		}
+
+		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
+
 		if ((peer = newpeer(&rbufp->recv_srcadr,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion,
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,

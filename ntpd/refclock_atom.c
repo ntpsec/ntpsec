@@ -334,6 +334,7 @@ atom_timer(
 	struct timespec timeout, ts;
 	long	sec, nsec;
 	double	dtemp;
+	char	tbuf[80];	/* monitor buffer */
 
 	/*
 	 * Convert the timespec nanoseconds field to signed double and
@@ -377,6 +378,9 @@ atom_timer(
 	 * PPS clock advanced three or more times, either the signal has
 	 * failed for a number of seconds or we have runts, in which
 	 * case just ignore them.
+	 *
+	 * If flag4 is lit, record each second offset to clockstats.
+	 * That's so we can make awesome Allan deviation plots.
 	 */
 	sec = ts.tv_sec - up->ts.tv_sec;
 	nsec = ts.tv_nsec - up->ts.tv_nsec;
@@ -403,6 +407,10 @@ atom_timer(
 		ts.tv_nsec -= NANOSECOND;
 	dtemp = -(double)ts.tv_nsec / NANOSECOND;
 	SAMPLE(dtemp + pp->fudgetime1);
+	if (pp->sloppyclockflag & CLK_FLAG4){
+		sprintf(tbuf, "%.9f", dtemp);
+		record_clock_stats(&peer->srcadr, tbuf);
+	}
 #ifdef DEBUG
 	if (debug > 1)
 		printf("atom_timer: %lu %f %f\n", current_time,

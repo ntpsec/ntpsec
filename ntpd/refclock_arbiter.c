@@ -267,12 +267,12 @@ arb_receive(
 
 		} else if (!strncmp(tbuf, "SR", 2)) {
 			strcpy(up->status, tbuf + 2);
-			if (pp->sloppyclockflag & CLK_FLAG4) {
+			if (pp->sloppyclockflag & CLK_FLAG4)
 				write(pp->io.fd, "LA", 2);
-				return;
-			} else {
+			else
 				write(pp->io.fd, "B5", 2);
-			}
+			return;
+
 		} else if (!strncmp(tbuf, "LA", 2)) {
 			strcpy(up->latlon, tbuf + 2);
 			write(pp->io.fd, "LO", 2);
@@ -397,6 +397,8 @@ arb_receive(
 	 */
 	if (!refclock_process(pp))
 		refclock_report(peer, CEVNT_BADTIME);
+	else if (peer->disp > MAXDISTANCE)
+		refclock_receive(peer);
 	if (up->tcswitch >= ARBSTAGE) {
 		write(pp->io.fd, "B0", 2);
 	}
