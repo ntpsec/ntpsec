@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/parse_conf.c,v 4.8 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/parse_conf.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *  
- * parse_conf.c,v 4.8 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * parse_conf.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * Parser configuration module for reference clocks
  *
@@ -11,7 +11,7 @@
  * a struct timeval.
  * when STREAM is not defined NTP time stamps will be used.
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,6 +148,9 @@ int parse_conf_bs;
  * History:
  *
  * parse_conf.c,v
+ * Revision 4.9  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.8  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

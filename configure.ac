@@ -1865,7 +1865,7 @@ ac_cv_var_atom_ok=yes
 case "$ac_cv_c_inline$ac_cv_struct_timespec" in
  inlineyes)
     case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
-     *yes* | *sunos* | *solaris* | *sco* )
+     *yes* | *sunos* | *solaris* | *sco* | *netbsd* )
 	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
 	ac_cv_var_jupiter_ok=yes
 	ac_cv_var_oncore_ok=yes
@@ -2505,13 +2505,13 @@ AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
 AC_ARG_ENABLE(parse-clocks,
-   AC_HELP_STRING([--enable-parse-clocks], [- include all suitable PARSE clocks:]),
+   AC_HELP_STRING([--enable-parse-clocks], [+ include all suitable PARSE clocks:]),
     [ntp_eapc=$enableval],
     [case "$ntp_eac" in
      yes) ntp_eapc=$ntp_canparse ;;
      *) ntp_eapc=no ;;
     esac
-    ntp_eapc=no])
+    ntp_eapc=yes])
 AC_MSG_RESULT($ntp_eapc)
 
 case "$ntp_eac$ntp_eapc$ntp_canparse" in
@@ -2906,7 +2906,7 @@ AC_MSG_CHECKING(if we can make dcf parse utilities)
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$host" in
-     *-*-sunos4*|*-*-solaris2*|*-*-linux*)
+     *-*-sunos4*|*-*-solaris2*|*-*-linux*|*-*-netbsd*)
 	ans="dcfd testdcf"
 	DCFD=dcfd
         TESTDCF=testdcf

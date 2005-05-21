@@ -1,9 +1,9 @@
 /*
- * /src/NTP/ntp4-dev/include/parse_conf.h,v 4.5 2004/11/14 16:11:05 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/include/parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * parse_conf.h,v 4.5 2004/11/14 16:11:05 kardel RELEASE_20041114_B
+ * parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #ifndef __PARSE_CONF_H__
 #define __PARSE_CONF_H__
 #if	!(defined(lint) || defined(__GNUC__))
-  static char prshrcsid[] = "parse_conf.h,v 4.5 2004/11/14 16:11:05 kardel RELEASE_20041114_B";
+  static char prshrcsid[] = "parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
 #endif
 
 /*

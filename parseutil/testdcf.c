@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/testdcf.c,v 4.6 2004/11/14 15:29:42 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/parseutil/testdcf.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * testdcf.c,v 4.6 2004/11/14 15:29:42 kardel RELEASE_20041114_B
+ * testdcf.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *  
  * simple DCF77 100/200ms pulse test program (via 50Baud serial line)
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -402,7 +402,7 @@ main(
 			}
 #endif
 
-			printf("  DCF77 monitor - Copyright (C) 1993-1996, Frank Kardel\n\n");
+			printf("  DCF77 monitor - Copyright (C) 1993-2005, Frank Kardel\n\n");
 
 			clock_time.hour = 0;
 			clock_time.minute = 0;
@@ -514,6 +514,9 @@ main(
  * History:
  *
  * testdcf.c,v
+ * Revision 4.7  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.6  2004/11/14 15:29:42  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_rcc8000.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/clk_rcc8000.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20050508_A
  *  
- * clk_rcc8000.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * clk_rcc8000.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20050508_A
  *
  * Radiocode Clocks Ltd RCC 8000 Intelligent Off-Air Master Clock support
  *

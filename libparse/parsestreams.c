@@ -1,12 +1,12 @@
 /*
- * /src/NTP/ntp4-dev/libparse/parsestreams.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/parsestreams.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *  
- * parsestreams.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B
+ * parsestreams.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * STREAMS module for reference clocks
  * (SunOS4.x)
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #endif
 
 #ifndef lint
-static char rcsid[] = "parsestreams.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B";
+static char rcsid[] = "parsestreams.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
 #endif
 
 #ifndef KERNEL
@@ -540,9 +540,9 @@ parseopen(
 		if (!notice)
 		{
 #ifdef VDDRV
-			printf("%s: Copyright (C) 1991-2004, Frank Kardel\n", parsesync_vd.Drv_name);
+			printf("%s: Copyright (C) 1991-2005, Frank Kardel\n", parsesync_vd.Drv_name);
 #else
-			printf("%s: Copyright (C) 1991-2004, Frank Kardel\n", "parsestreams.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B");
+			printf("%s: Copyright (C) 1991-2005, Frank Kardel\n", "parsestreams.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A");
 #endif
 			notice = 1;
 		}
@@ -1327,6 +1327,9 @@ zs_xsisr(
  * History:
  *
  * parsestreams.c,v
+ * Revision 4.11  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.10  2004/11/14 16:06:08  kardel
  * update Id tags
  *

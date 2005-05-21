@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/include/trimble.h,v 4.5 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/include/trimble.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * trimble.h,v 4.5 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * trimble.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * $Created: Sun Aug  2 16:16:49 1998 $
  *
- * Copyright (c) 1998-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1998-2005 by Frank Kardel <kardel <AT> ntp.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -139,6 +139,9 @@ extern cmd_info_t *trimble_convert P((unsigned int cmd, cmd_info_t *tbl));
  * History:
  *
  * trimble.h,v
+ * Revision 4.6  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.5  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

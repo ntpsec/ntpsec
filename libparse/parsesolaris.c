@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/libparse/parsesolaris.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/parsesolaris.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *  
- * parsesolaris.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B
+ * parsesolaris.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * STREAMS module for reference clocks
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #define _KERNEL			/* it is a _KERNEL module */
 
 #ifndef lint
-static char rcsid[] = "parsesolaris.c,v 4.10 2004/11/14 16:06:08 kardel RELEASE_20041114_B";
+static char rcsid[] = "parsesolaris.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
 #endif
 
 #include <sys/types.h>
@@ -386,7 +386,7 @@ parseopen(
 		 */
 		if (!notice)
 		{
-		  cmn_err(CE_CONT, "?%s: Copyright (c) 1993-2004, Frank Kardel\n", modlstrmod.strmod_linkinfo);
+		  cmn_err(CE_CONT, "?%s: Copyright (c) 1993-2005, Frank Kardel\n", modlstrmod.strmod_linkinfo);
 			notice = 1;
 		}
 
@@ -1161,6 +1161,9 @@ zs_xsisr(
  * History:
  *
  * parsesolaris.c,v
+ * Revision 4.11  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.10  2004/11/14 16:06:08  kardel
  * update Id tags
  *
