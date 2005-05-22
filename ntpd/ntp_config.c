@@ -734,7 +734,6 @@ getconfig(
 					    break;
 				    }
 				    peerkey = (int)atol(tokens[++i]);
-				    peerflags |= FLAG_AUTHENABLE;
 				    break;
 
 				case CONF_MOD_MINPOLL:
