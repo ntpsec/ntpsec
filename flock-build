@@ -34,7 +34,7 @@ SIG=`perl -e 'print rand'`
 echo $SIG > .buildkey
 
 case "$LIST" in
- '') LIST="albert bunnylou churchy cowbird hepzibah pogo porkypine rackety snavely" ;;
+ '') LIST="albert barnstable bunnylou churchy cowbird hepzibah pogo porkypine rackety snavely" ;;
 esac
 
 for i in $LIST
