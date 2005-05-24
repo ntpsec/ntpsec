@@ -516,6 +516,7 @@ AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_CHECK_TYPE(time_t, long)
+AC_CHECK_SIZEOF(time_t)
 AC_STRUCT_TM
 
 AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
