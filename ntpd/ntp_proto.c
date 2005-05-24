@@ -920,7 +920,6 @@ receive(
 	} else if (!AUTH(peer->keyid || (restrict_mask & RES_DONTTRUST),
 	    is_authentic)) {
 		peer->flash |= TEST5;
-		peer->flags |= FLAG_AUTHENTIC;
 		return;				/* bad auth */
 	}
 
@@ -930,8 +929,10 @@ receive(
 	 */
 	peer->received++;
 	peer->timereceived = current_time;
-	peer->flags &= ~FLAG_AUTHENTIC;
-
+	if (is_authentic == AUTH_OK)
+		peer->flags |= FLAG_AUTHENTIC;
+	else
+		peer->flags &= ~FLAG_AUTHENTIC;
 #ifdef OPENSSL
 	/*
 	 * More autokey dance. The rules of the cha-cha are as follows:
