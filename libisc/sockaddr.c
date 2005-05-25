@@ -259,6 +259,7 @@ isc_sockaddr_any(isc_sockaddr_t *sockaddr)
 	ISC_LINK_INIT(sockaddr, link);
 }
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 {
@@ -272,6 +273,7 @@ isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 	sockaddr->length = sizeof(sockaddr->type.sin6);
 	ISC_LINK_INIT(sockaddr, link);
 }
+#endif
 
 void
 isc_sockaddr_fromin(isc_sockaddr_t *sockaddr, const struct in_addr *ina,
