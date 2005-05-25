@@ -413,7 +413,9 @@ addentry(
 	ce = (struct conf_entry *)emalloc(sizeof(struct conf_entry));
 	ce->ce_name = cp;
 	ce->ce_peeraddr = 0;
+#ifdef ISC_PLATFORM_HAVEIPV6
 	ce->ce_peeraddr6 = in6addr_any;
+#endif
 	ANYSOCK(&ce->peer_store);
 	ce->ce_hmode = (u_char)mode;
 	ce->ce_version = (u_char)version;
