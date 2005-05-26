@@ -566,6 +566,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		if (iter->current.address.type.in.s_addr == htonl(INADDR_ANY))
 			return (ISC_R_IGNORE);
 		break;
+#ifdef ISC_PLATFORM_HAVEIPV6
 	case AF_INET6:
 		if (memcmp(&iter->current.address.type.in6, &in6addr_any,
 			   sizeof(in6addr_any)) == 0)
