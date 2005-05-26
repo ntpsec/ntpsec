@@ -345,6 +345,7 @@ isc_netaddr_issitelocal(isc_netaddr_t *na) {
 	}
 }
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
 	isc_netaddr_t *src;
@@ -359,3 +360,4 @@ isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
 	memcpy(&t->type.in, (char *)&src->type.in6 + 12, 4);
 	return;
 }
+#endif
