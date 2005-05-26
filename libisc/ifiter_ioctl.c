@@ -572,6 +572,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 			   sizeof(in6addr_any)) == 0)
 			return (ISC_R_IGNORE);
 		break;
+#endif
 	}
 
 	/*
