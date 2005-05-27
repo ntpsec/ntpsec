@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.51 2005/05/26 19:19:14 kardel RELEASE_20050526_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
  *
- * refclock_parse.c,v 4.51 2005/05/26 19:19:14 kardel RELEASE_20050526_A
+ * refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="4.51";
+static char rcsid[]="4.52";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2763,8 +2763,6 @@ parse_start(
 	parse->generic->timestarted    = current_time;
 	parse->lastchange     = current_time;
 
-	parse->generic->currentstatus	        = CEVNT_TIMEOUT; /* expect the worst */
-
 	parse->flags          = 0;
 	parse->pollneeddata   = 0;
 	parse->laststatistic  = current_time;
@@ -3407,6 +3405,9 @@ parse_control(
 
 /*--------------------------------------------------
  * event handling - note that nominal events will also be posted
+ * mimics refclock_report() but take into account that bad status
+ * counters are managed in the parser and keeps track of accumulated state
+ * times
  */
 static void
 parse_event(
@@ -3419,11 +3420,11 @@ parse_event(
 		parse->statetime[parse->generic->currentstatus] += current_time - parse->lastchange;
 		parse->lastchange              = current_time;
 
-		parse->generic->currentstatus    = (u_char)event;
-
 		if (parse->parse_type->cl_event)
 		    parse->parse_type->cl_event(parse, event);
       
+		parse->generic->currentstatus = (u_char)event;
+
 		if (event != CEVNT_NOMINAL)
 		{
 		        parse->generic->lastevent = parse->generic->currentstatus;
@@ -3451,9 +3452,6 @@ parse_event(
 					    "clock %s event '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
 					    (u_int)event);
 		}
-
-		report_event(EVNT_PEERCLOCK, parse->peer);
-		report_event(EVNT_CLOCKEXCPT, parse->peer);
 	}
 }
 
@@ -3468,6 +3466,7 @@ parse_process(
 {
 	l_fp off, rectime, reftime;
 	double fudge;
+	int event_code = CEVNT_FAULT;
 	
 	/*
 	 * check for changes in conversion status
@@ -3644,7 +3643,6 @@ parse_process(
 		 * seconds and the receiver is at least 2 minutes in the
 		 * POWERUP or NOSYNC state before switching to SYNC
 		 */
-		parse_event(parse, CEVNT_FAULT);
 		NLOG(NLOG_CLOCKSTATUS)
 			ERR(ERR_BADSTATUS)
 			msyslog(LOG_ERR,"PARSE receiver #%d: NOT SYNCHRONIZED",
@@ -3684,7 +3682,7 @@ parse_process(
 			/*
 			 * we have had some problems receiving the time code
 			 */
-			parse_event(parse, CEVNT_PROP);
+			event_code = CEVNT_PROP;
 			NLOG(NLOG_CLOCKSTATUS)
 				ERR(ERR_BADSTATUS)
 				msyslog(LOG_ERR,"PARSE receiver #%d: TIMECODE NOT CONFIRMED",
@@ -3828,7 +3826,7 @@ parse_process(
 		/*
 		 * log OK status
 		 */
-		parse_event(parse, CEVNT_NOMINAL);
+		event_code = CEVNT_NOMINAL;
 	}
 
 	clear_err(parse, ERR_BADIO);
@@ -3856,7 +3854,7 @@ parse_process(
 	 * see the clock states section above for more reasoning
 	 */
 	if (((current_time - parse->lastsync) > parse->maxunsync) ||
-	    (parse->lastsync <= parse->lastmissed))
+	    (parse->lastsync < parse->lastmissed))
 	{
 		parse->generic->leap = LEAP_NOTINSYNC;
 	}
@@ -3901,6 +3899,8 @@ parse_process(
 	parse->timedata.parse_state &= ~(unsigned)(PARSEB_PPS|PARSEB_S_PPS);
 
 	refclock_receive(parse->peer);
+
+	parse_event(parse, event_code);	/* post event AFTER processing - refclock_receive likes to report a CEVNT_FAULT at startup */
 }
 
 /**===========================================================================
@@ -5613,6 +5613,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.52  2005/05/26 21:55:06  kardel
+ * cleanup status reporting
+ *
  * Revision 4.51  2005/05/26 19:19:14  kardel
  * implement fast refclock startup
  *

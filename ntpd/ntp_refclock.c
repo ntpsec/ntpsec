@@ -127,7 +127,8 @@ refclock_report(
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
 		else {
-			NLOG(NLOG_CLOCKEVENT)msyslog(LOG_INFO,
+			NLOG(NLOG_CLOCKEVENT)
+			  msyslog(LOG_INFO,
 			    "clock %s event '%s' (0x%02x)",
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
@@ -225,6 +226,7 @@ refclock_newpeer(
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
 	pp->timestarted = current_time;
+	pp->currentstatus = CEVNT_FAULT; /* new clocks are assumed faulty until first reception */
 
 	/*
 	 * Set peer.pmode based on the hmode. For appearances only.
