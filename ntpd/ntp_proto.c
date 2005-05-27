@@ -929,7 +929,10 @@ receive(
 	 */
 	peer->received++;
 	peer->timereceived = current_time;
-
+	if (is_authentic == AUTH_OK)
+		peer->flags |= FLAG_AUTHENTIC;
+	else
+		peer->flags &= ~FLAG_AUTHENTIC;
 #ifdef OPENSSL
 	/*
 	 * More autokey dance. The rules of the cha-cha are as follows:

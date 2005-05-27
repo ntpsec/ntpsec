@@ -1393,7 +1393,7 @@ doprintpeers(
 	while (nextvar(&datalen, &data, &name, &value)) {
 		struct sockaddr_storage dum_store;
 
-		i = findvar(name, peer_var);
+		i = findvar(name, peer_var, 1);
 		if (i == 0)
 			continue;	/* don't know this one */
 		switch (i) {

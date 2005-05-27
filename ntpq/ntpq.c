@@ -2791,12 +2791,15 @@ nextvar(
 
 
 /*
- * findvar - see if this variable is known to us
+ * findvar - see if this variable is known to us.
+ * If "code" is 1, return ctl_var->code.
+ * Otherwise return the ordinal position of the found variable.
  */
 int
 findvar(
 	char *varname,
-	struct ctl_var *varlist
+	struct ctl_var *varlist,
+	int code
 	)
 {
 	register char *np;
@@ -2806,7 +2809,10 @@ findvar(
 	np = varname;
 	while (vl->fmt != EOV) {
 		if (vl->fmt != PADDING && STREQ(np, vl->text))
-		    return vl->code;
+		    return (code)
+				? vl->code
+				: (vl - varlist)
+			    ;
 		vl++;
 	}
 	return 0;
@@ -3070,7 +3076,7 @@ cookedprint(
 
 	startoutput();
 	while (nextvar(&length, &data, &name, &value)) {
-		varid = findvar(name, varlist);
+		varid = findvar(name, varlist, 0);
 		if (varid == 0) {
 			output_raw = '*';
 		} else {
