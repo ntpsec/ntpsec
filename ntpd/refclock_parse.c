@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.50 2005/04/16 20:51:35 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.51 2005/05/26 19:19:14 kardel RELEASE_20050526_A
  *
- * refclock_parse.c,v 4.50 2005/04/16 20:51:35 kardel RELEASE_20050508_A
+ * refclock_parse.c,v 4.51 2005/05/26 19:19:14 kardel RELEASE_20050526_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="4.50";
+static char rcsid[]="4.51";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -3890,9 +3890,10 @@ parse_process(
 	}
 	
 	/*
-	 * ready, unless the machine wants a sample
+	 * ready, unless the machine wants a sample or 
+	 * we are in fast startup mode (peer->dist > MAXDISTANCE)
 	 */
-	if (!parse->pollneeddata)
+	if (!parse->pollneeddata && parse->peer->disp <= MAXDISTANCE)
 	    return;
 
 	parse->pollneeddata = 0;
@@ -5612,6 +5613,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.51  2005/05/26 19:19:14  kardel
+ * implement fast refclock startup
+ *
  * Revision 4.50  2005/04/16 20:51:35  kardel
  * set pps_enable = 1 when binding a kernel PPS source
  *
