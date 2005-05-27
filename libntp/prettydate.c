@@ -53,11 +53,20 @@ ntp2unix_tm(
     for (epoch_nr = 0; epoch_nr < MAX_EPOCH_NR; epoch_nr++) {
 		tm = local ? localtime(&t) : gmtime(&t);
 
+#if SIZEOF_TIME_T < 4
+# include "Bletch: sizeof(time_t) < 4!"
+#endif
+
+#if SIZEOF_TIME_T == 4
+		/* If 32 bits, then year is 1970-2038, so no sense looking */
+		epoch_nr = MAX_EPOCH_NR;
+#else	/* SIZEOF_TIME_T > 4 */
 		/* Check that the resulting year is in the correct epoch: */
 		if (1900 + tm->tm_year > curr_year - 68) break;
 
 		/* Epoch wraparound: Add 2^32 seconds! */
 		t += (time_t) 65536 << 16;
+#endif /* SIZEOF_TIME_T > 4 */
 	}
 	return tm;
 }
