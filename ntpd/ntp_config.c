@@ -391,7 +391,7 @@ static	int matchkey P((char *, struct keyword *, int));
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
-	t_MSK,		/* Network Mask */
+	t_MSK		/* Network Mask */
 	};
 static	int getnetnum P((const char *, struct sockaddr_storage *, int,
 			 enum gnn_type));

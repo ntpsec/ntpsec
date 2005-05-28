@@ -211,6 +211,7 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, isc_boolean_t address_only) {
 		p = ntohs(sockaddr->type.sin.sin_port);
 		length = sizeof(sockaddr->type.sin.sin_addr.s_addr);
 		break;
+#if ISC_PLATFORM_HAVEIPV6
 	case AF_INET6:
 		in6 = &sockaddr->type.sin6.sin6_addr;
 		if (IN6_IS_ADDR_V4MAPPED(in6)) {
@@ -222,6 +223,7 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, isc_boolean_t address_only) {
 		}
 		p = ntohs(sockaddr->type.sin6.sin6_port);
 		break;
+#endif
 	default:
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat,
@@ -259,6 +261,7 @@ isc_sockaddr_any(isc_sockaddr_t *sockaddr)
 	ISC_LINK_INIT(sockaddr, link);
 }
 
+#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 {
@@ -272,6 +275,7 @@ isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 	sockaddr->length = sizeof(sockaddr->type.sin6);
 	ISC_LINK_INIT(sockaddr, link);
 }
+#endif
 
 void
 isc_sockaddr_fromin(isc_sockaddr_t *sockaddr, const struct in_addr *ina,
