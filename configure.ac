@@ -2506,13 +2506,14 @@ AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
 AC_ARG_ENABLE(parse-clocks,
-   AC_HELP_STRING([--enable-parse-clocks], [+ include all suitable PARSE clocks:]),
+   AC_HELP_STRING([--enable-parse-clocks], [- include all suitable PARSE clocks:]),
     [ntp_eapc=$enableval],
     [case "$ntp_eac" in
      yes) ntp_eapc=$ntp_canparse ;;
      *) ntp_eapc=no ;;
     esac
-    ntp_eapc=yes])
+    # Delete the next line one of these days
+    ntp_eapc=no])
 AC_MSG_RESULT($ntp_eapc)
 
 case "$ntp_eac$ntp_eapc$ntp_canparse" in
