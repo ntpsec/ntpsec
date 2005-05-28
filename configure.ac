@@ -94,6 +94,7 @@ case "$ans" in
     need_dash_r=1
     ;;
 esac
+# HMS: Why isn't this $build?
 case "$host" in
  *-*-netbsd*)
     case "$need_dash_r" in
@@ -192,6 +193,7 @@ esac
 
 ac_busted_vpath_in_make=no
 
+# HMS: Why isn't this $build?
 case "$host" in
  *-next-nextstep3)
     CFLAGS="$CFLAGS -posix"
@@ -492,8 +494,9 @@ case "$ac_cv_c_volatile" in
     ;;
 esac
 
-case "$host" in
- sparc-*-solaris2*)
+# AM_C_PROTOTYPES gives us ansi2knr
+case "$build" in
+ *-*-solaris2*)
     # Assume that solaris2 is Ansi C...
     ;;
  *)
@@ -689,6 +692,7 @@ if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
 else
     # Hack around a problem...
+    # HMS: Why isn't this $build?
     case "$host" in
      *-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
 	;;
