@@ -579,8 +579,7 @@ refclock_receive(
 	pp = peer->procptr;
 	peer->received++;
 	peer->timereceived = current_time;
-	if (peer->leap == LEAP_NOTINSYNC || pp->leap ==
-	    LEAP_NOTINSYNC)
+	if (pp->leap == LEAP_NOTINSYNC)
 		refclock_report(peer, CEVNT_FAULT);
 	peer->leap = pp->leap;
 	if (!peer->reach)
