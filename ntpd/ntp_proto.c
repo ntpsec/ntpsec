@@ -48,7 +48,6 @@ struct	peer *sys_pps;		/* our PPS peer */
 struct	peer *sys_prefer;	/* our cherished peer */
 int	sys_kod;		/* kod credit */
 int	sys_kod_rate = 2;	/* max kod packets per second */
-u_long	sys_clocktime;		/* last system clock update */
 #ifdef OPENSSL
 u_long	sys_automax;		/* maximum session key lifetime */
 #endif /* OPENSSL */
