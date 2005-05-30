@@ -226,7 +226,6 @@ refclock_newpeer(
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
 	pp->timestarted = current_time;
-	pp->currentstatus = CEVNT_FAULT; /* new clocks are assumed faulty until first reception */
 
 	/*
 	 * Set peer.pmode based on the hmode. For appearances only.
@@ -579,8 +578,6 @@ refclock_receive(
 	pp = peer->procptr;
 	peer->received++;
 	peer->timereceived = current_time;
-	if (pp->leap == LEAP_NOTINSYNC)
-		refclock_report(peer, CEVNT_FAULT);
 	peer->leap = pp->leap;
 	if (!peer->reach)
 		report_event(EVNT_REACH, peer);
