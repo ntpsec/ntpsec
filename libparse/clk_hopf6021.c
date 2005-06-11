@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_hopf6021.c,v 4.10 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/clk_hopf6021.c,v 4.10 2004/11/14 15:29:41 kardel RELEASE_20050508_A
  *
- * clk_hopf6021.c,v 4.10 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * clk_hopf6021.c,v 4.10 2004/11/14 15:29:41 kardel RELEASE_20050508_A
  *
  * Radiocode Clocks HOPF Funkuhr 6021 mit serieller Schnittstelle
  * base code version from 24th Nov 1995 - history at end

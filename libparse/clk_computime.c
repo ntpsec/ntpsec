@@ -4,9 +4,9 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_COMPUTIME)
 /*
- * /src/NTP/ntp4-dev/libparse/clk_computime.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/clk_computime.c,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * clk_computime.c,v 4.9 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * clk_computime.c,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  * 
  * Supports Diem's Computime Radio Clock
  * 
@@ -14,7 +14,7 @@
  *
  * adapted by Alois Camenzind <alois.camenzind@ubs.ch>
  * 
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -187,6 +187,9 @@ int clk_computime_bs;
 
 /*
  * clk_computime.c,v
+ * Revision 4.10  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.9  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

@@ -127,7 +127,8 @@ refclock_report(
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
 		else {
-			NLOG(NLOG_CLOCKEVENT)msyslog(LOG_INFO,
+			NLOG(NLOG_CLOCKEVENT)
+			  msyslog(LOG_INFO,
 			    "clock %s event '%s' (0x%02x)",
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
@@ -577,9 +578,6 @@ refclock_receive(
 	pp = peer->procptr;
 	peer->received++;
 	peer->timereceived = current_time;
-	if (peer->leap == LEAP_NOTINSYNC || pp->leap ==
-	    LEAP_NOTINSYNC)
-		refclock_report(peer, CEVNT_FAULT);
 	peer->leap = pp->leap;
 	if (!peer->reach)
 		report_event(EVNT_REACH, peer);

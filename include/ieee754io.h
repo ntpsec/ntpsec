@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/include/ieee754io.h,v 4.2 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/include/ieee754io.h,v 4.3 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * ieee754io.h,v 4.2 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * ieee754io.h,v 4.3 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * $Created: Sun Jul 13 12:22:11 1997 $
  *
- * Copyright (c) 1997-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,6 +60,9 @@ int put_ieee754 P((unsigned char **bufpp, int size, l_fp *lfpp, offsets_t offset
  * History:
  *
  * ieee754io.h,v
+ * Revision 4.3  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.2  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
