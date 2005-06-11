@@ -887,7 +887,7 @@ case $host in
 	# project handles the AF_INET6 case correctly.  We need to avoid
 	# using the former but prefer the latter unless overridden by
 	# --enable-getifaddrs=glibc.
-	if test $use_getifaddrs = glibc
+	if test $want_getifaddrs = glibc
 	then
 		AC_CHECK_FUNCS(getifaddrs)
 	else
