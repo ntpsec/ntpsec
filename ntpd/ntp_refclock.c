@@ -343,7 +343,6 @@ refclock_transmit(
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
-				peer_clear(peer, "INIT");
 			}
 		} else {
 			if (!(oreach & 0x07)) {
