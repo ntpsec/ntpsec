@@ -222,6 +222,7 @@ refclock_newpeer(
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
 	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
+	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
@@ -575,11 +576,16 @@ refclock_receive(
 	 * filter.
 	 */
 	pp = peer->procptr;
+	peer->leap = pp->leap;
+	if (peer->leap == LEAP_NOTINSYNC)
+		return;
+
 	peer->received++;
 	peer->timereceived = current_time;
-	peer->leap = pp->leap;
-	if (!peer->reach)
+	if (!peer->reach) {
 		report_event(EVNT_REACH, peer);
+		peer->timereachable = current_time;
+	}
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
 	peer->org = pp->lastrec;
