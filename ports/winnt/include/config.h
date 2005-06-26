@@ -97,8 +97,10 @@ char *NTstrerror(int errnum);
 
 int NT_set_process_priority(void);	/* Define this function */
 
-# define MCAST				/* Enable Multicast Support */												
-# define REFCLOCK				/* from ntpd.mak */
+# define MCAST				/* Enable Multicast Support */
+# define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */
+
+# define REFCLOCK			/* from ntpd.mak */
 
 # define CLOCK_LOCAL			/* from ntpd.mak */
 //# define CLOCK_PARSE 
@@ -107,7 +109,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
 # define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
 # define CLOCK_NMEA
-# define CLOCK_PALISADE		 /* from ntpd.mak */
+# define CLOCK_PALISADE		/* from ntpd.mak */
 # define CLOCK_DUMBCLOCK
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
