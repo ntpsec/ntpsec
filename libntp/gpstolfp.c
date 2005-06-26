@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/libntp/gpstolfp.c,v 4.7 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libntp/gpstolfp.c,v 4.8 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * gpstolfp.c,v 4.7 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * gpstolfp.c,v 4.8 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * $Created: Sun Jun 28 16:30:38 1998 $
  *
- * Copyright (c) 1998-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1998-2005 by Frank Kardel <kardel <AT> ntp.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,6 +59,9 @@ gpstolfp(
  * History:
  *
  * gpstolfp.c,v
+ * Revision 4.8  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.7  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

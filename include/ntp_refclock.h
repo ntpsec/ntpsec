@@ -163,14 +163,15 @@ struct refclockbug {
  * modules to be installed/loaded in the kernel. If specified, but not
  * installed, the code runs as if unspecified.
  */
-#define LDISC_STD	0x0	/* standard */
-#define LDISC_CLK	0x1	/* tty_clk \n intercept */
-#define LDISC_CLKPPS	0x2	/* tty_clk \377 intercept */
-#define LDISC_ACTS	0x4	/* tty_clk #* intercept */
-#define LDISC_CHU	0x8	/* depredated */
+#define LDISC_STD	0x00	/* standard */
+#define LDISC_CLK	0x01	/* tty_clk \n intercept */
+#define LDISC_CLKPPS	0x02	/* tty_clk \377 intercept */
+#define LDISC_ACTS	0x04	/* tty_clk #* intercept */
+#define LDISC_CHU	0x08	/* depredated */
 #define LDISC_PPS	0x10	/* ppsclock, ppsapi */
 #define LDISC_RAW	0x20	/* raw binary */
 #define LDISC_ECHO	0x40	/* enable echo */
+#define	LDISC_REMOTE	0x80	/* remobe mode */
 
 struct refclockproc {
 	struct	refclockio io;	/* I/O handler structure */

@@ -129,6 +129,11 @@
 # define SIGDIE4 	SIGTERM
 #endif /* SYS_WINNT */
 
+#ifdef HAVE_DNSREGISTRATION
+#include <dns_sd.h>
+DNSServiceRef mdns;
+#endif
+
 /*
  * Scheduling priority we run at
  */
@@ -460,6 +465,13 @@ ntpdmain(
 	 */
 	get_systime(&now);
 	SRANDOM((int)(now.l_i * now.l_uf));
+
+#ifdef HAVE_DNSREGISTRATION
+	msyslog(LOG_INFO, "Attemping to register mDNS\n");
+	if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
+		msyslog(LOG_ERR, "Unable to register mDNS\n");
+	}
+#endif
 
 #if !defined(VMS)
 # ifndef NODETACH
@@ -960,6 +972,10 @@ finish(
 {
 
 	msyslog(LOG_NOTICE, "ntpd exiting on signal %d", sig);
+#ifdef HAVE_DNSREGISTRATION
+	if (mdns != NULL)
+	DNSServiceRefDeallocate(mdns);
+#endif
 
 	switch (sig)
 	{

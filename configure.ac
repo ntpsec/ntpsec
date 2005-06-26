@@ -94,6 +94,7 @@ case "$ans" in
     need_dash_r=1
     ;;
 esac
+# HMS: Why isn't this $build?
 case "$host" in
  *-*-netbsd*)
     case "$need_dash_r" in
@@ -192,6 +193,7 @@ esac
 
 ac_busted_vpath_in_make=no
 
+# HMS: Why isn't this $build?
 case "$host" in
  *-next-nextstep3)
     CFLAGS="$CFLAGS -posix"
@@ -315,7 +317,17 @@ esac
 AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(bstring.h errno.h fcntl.h ieeefp.h math.h)
+AC_CHECK_HEADERS(bstring.h)
+AC_CHECK_HEADER(dns_sd.h,
+	[AC_CHECK_LIB(dns_sd,
+			DNSServiceRegister,
+			[AC_DEFINE(HAVE_DNSREGISTRATION, 1,
+				[Use Rendezvous/DNS-SD registration])])])
+case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
+ yes) LIBS="-ldns_sd $LIBS" ;;
+esac
+AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h math.h)
+
 # HMS: Lame, but fast.
 if test -f /etc/redhat-release
 then
@@ -482,8 +494,9 @@ case "$ac_cv_c_volatile" in
     ;;
 esac
 
-case "$host" in
- sparc-*-solaris2*)
+# AM_C_PROTOTYPES gives us ansi2knr
+case "$build" in
+ *-*-solaris2*)
     # Assume that solaris2 is Ansi C...
     ;;
  *)
@@ -506,6 +519,7 @@ AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_CHECK_TYPE(time_t, long)
+AC_CHECK_SIZEOF(time_t)
 AC_STRUCT_TM
 
 AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
@@ -678,6 +692,7 @@ if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
 else
     # Hack around a problem...
+    # HMS: Why isn't this $build?
     case "$host" in
      *-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
 	;;
@@ -872,7 +887,7 @@ case $host in
 	# project handles the AF_INET6 case correctly.  We need to avoid
 	# using the former but prefer the latter unless overridden by
 	# --enable-getifaddrs=glibc.
-	if test $use_getifaddrs = glibc
+	if test $want_getifaddrs = glibc
 	then
 		AC_CHECK_FUNCS(getifaddrs)
 	else
@@ -1855,7 +1870,7 @@ ac_cv_var_atom_ok=yes
 case "$ac_cv_c_inline$ac_cv_struct_timespec" in
  inlineyes)
     case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
-     *yes* | *sunos* | *solaris* | *sco* )
+     *yes* | *sunos* | *solaris* | *sco* | *netbsd* )
 	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
 	ac_cv_var_jupiter_ok=yes
 	ac_cv_var_oncore_ok=yes
@@ -2501,6 +2516,7 @@ AC_ARG_ENABLE(parse-clocks,
      yes) ntp_eapc=$ntp_canparse ;;
      *) ntp_eapc=no ;;
     esac
+    # Delete the next line one of these days
     ntp_eapc=no])
 AC_MSG_RESULT($ntp_eapc)
 
@@ -2896,7 +2912,7 @@ AC_MSG_CHECKING(if we can make dcf parse utilities)
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$host" in
-     *-*-sunos4*|*-*-solaris2*|*-*-linux*)
+     *-*-sunos4*|*-*-solaris2*|*-*-linux*|*-*-netbsd*)
 	ans="dcfd testdcf"
 	DCFD=dcfd
         TESTDCF=testdcf

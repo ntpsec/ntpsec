@@ -1,12 +1,12 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_trimtsip.c,v 4.16 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/clk_trimtsip.c,v 4.17 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * clk_trimtsip.c,v 4.16 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * clk_trimtsip.c,v 4.17 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * Trimble TSIP support
  * Thanks to Sven Dietrich for providing test hardware
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -398,6 +398,9 @@ int clk_trimtsip_bs;
  * History:
  *
  * clk_trimtsip.c,v
+ * Revision 4.17  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.16  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

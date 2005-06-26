@@ -127,7 +127,8 @@ refclock_report(
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
 		else {
-			NLOG(NLOG_CLOCKEVENT)msyslog(LOG_INFO,
+			NLOG(NLOG_CLOCKEVENT)
+			  msyslog(LOG_INFO,
 			    "clock %s event '%s' (0x%02x)",
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
@@ -221,6 +222,7 @@ refclock_newpeer(
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
 	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
+	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
@@ -342,7 +344,6 @@ refclock_transmit(
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
-				peer_clear(peer, "INIT");
 			}
 		} else {
 			if (!(oreach & 0x07)) {
@@ -575,14 +576,16 @@ refclock_receive(
 	 * filter.
 	 */
 	pp = peer->procptr;
+	peer->leap = pp->leap;
+	if (peer->leap == LEAP_NOTINSYNC)
+		return;
+
 	peer->received++;
 	peer->timereceived = current_time;
-	if (peer->leap == LEAP_NOTINSYNC || pp->leap ==
-	    LEAP_NOTINSYNC)
-		refclock_report(peer, CEVNT_FAULT);
-	peer->leap = pp->leap;
-	if (!peer->reach)
+	if (!peer->reach) {
 		report_event(EVNT_REACH, peer);
+		peer->timereachable = current_time;
+	}
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
 	peer->org = pp->lastrec;
@@ -844,7 +847,7 @@ refclock_setup(
 			printf("refclock_setup fd %d modem status: 0x%x\n",
 			    fd, ltemp);
 #endif
-		if (ltemp & TIOCM_DSR)
+		if (ltemp & TIOCM_DSR && lflags & LDISC_REMOTE)
 			ttyp->c_cflag &= ~CLOCAL;
 #endif /* TIOCMGET */
 	}

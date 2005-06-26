@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/parse.c,v 4.18 2004/11/14 16:11:05 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *  
- * parse.c,v 4.18 2004/11/14 16:11:05 kardel RELEASE_20041114_B
+ * parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * Parser module for reference clock
  *
@@ -11,7 +11,7 @@
  * a struct timeval.
  * when PARSEKERNEL is not defined NTP time stamps will be used.
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
 
 #if	!(defined(lint) || defined(__GNUC__))
-static char rcsid[] = "parse.c,v 4.18 2004/11/14 16:11:05 kardel RELEASE_20041114_B";
+static char rcsid[] = "parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
 #endif
 
 #include "ntp_fp.h"
@@ -886,6 +886,9 @@ int parse_bs;
  * History:
  *
  * parse.c,v
+ * Revision 4.19  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.18  2004/11/14 16:11:05  kardel
  * update Id tags
  *

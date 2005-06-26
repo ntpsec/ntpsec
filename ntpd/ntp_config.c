@@ -242,6 +242,7 @@ static struct keyword tos_keywords[] = {
 	{ "cohort",		CONF_TOS_COHORT },
 	{ "mindist",		CONF_TOS_MINDIST },
 	{ "maxdist",		CONF_TOS_MAXDIST },
+	{ "maxhop",		CONF_TOS_MAXHOP },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -392,7 +393,7 @@ static	int matchkey P((char *, struct keyword *, int));
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
-	t_MSK,		/* Network Mask */
+	t_MSK		/* Network Mask */
 	};
 static	int getnetnum P((const char *, struct sockaddr_storage *, int,
 			 enum gnn_type));
@@ -736,7 +737,6 @@ getconfig(
 					    break;
 				    }
 				    peerkey = (int)atol(tokens[++i]);
-				    peerflags |= FLAG_AUTHENABLE;
 				    break;
 
 				case CONF_MOD_MINPOLL:
@@ -1092,6 +1092,10 @@ getconfig(
 
 			    case CONF_TOS_MAXDIST:
 				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MAXHOP:
+				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
 				break;
 			    }
 			}

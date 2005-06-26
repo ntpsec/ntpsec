@@ -39,8 +39,8 @@
 #define CLOCK_PANIC	1000.	/* default panic threshold (s) */
 #define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
 #define CLOCK_PLL	16.	/* PLL loop gain (log2) */
-#define CLOCK_FLL	(NTP_MAXPOLL + 1.) /* FLL loop gain */
-#define CLOCK_AVG	4.	/* parameter averaging constant */
+#define CLOCK_AVG	8.	/* parameter averaging constant */
+#define CLOCK_FLL	(NTP_MAXPOLL + CLOCK_AVG) /* FLL loop gain */
 #define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
@@ -446,15 +446,16 @@ local_clock(
 			/*
 			 * The FLL and PLL frequency gain constants
 			 * depend on the poll interval and Allan
+			 * intercept. The PLL is always used, but
+			 * becomes ineffective above the Allan
 			 * intercept. The FLL is not used below one-half
 			 * the Allan intercept. Above that the loop gain
 			 * increases in steps to 1 / CLOCK_AVG. 
 			 */
 			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
 				dtemp = CLOCK_FLL - sys_poll;
-				if (dtemp < CLOCK_AVG)
-					dtemp = CLOCK_AVG;
-				flladj = (fp_offset - clock_offset) /
+				flladj = (fp_offset - last_base -
+				    clock_offset) /
 				    (max(mu, allan_xpt) * dtemp);
 			}
 

@@ -90,4 +90,4 @@ extern	int	nextvar		P((int *, char **, char **, char **));
 extern	int	decodetime	P((char *, l_fp *));
 extern	void	printvars	P((int, char *, int, int, FILE *));
 extern	int	decodeint	P((char *, long *));
-extern	int	findvar		P((char *, struct ctl_var *));
+extern	int	findvar		P((char *, struct ctl_var *, int code));

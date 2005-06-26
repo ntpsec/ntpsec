@@ -120,6 +120,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
 
 # define SIZEOF_SIGNED_CHAR 1
+# define SIZEOF_TIME_T 4
 # define SIZEOF_INT 4			/* for ntp_types.h */
 
 //# define HAVE_NET_IF_H

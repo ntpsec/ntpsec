@@ -1,7 +1,7 @@
 #! /bin/sh
 
 case "$LIST" in
- '') LIST="whimsy grundoon howland beauregard deacon" ;;
+ '') LIST="whimsy grundoon howland beauregard deacon mort " ;;
 esac
 
 export LIST

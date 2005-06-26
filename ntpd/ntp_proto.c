@@ -48,7 +48,6 @@ struct	peer *sys_pps;		/* our PPS peer */
 struct	peer *sys_prefer;	/* our cherished peer */
 int	sys_kod;		/* kod credit */
 int	sys_kod_rate = 2;	/* max kod packets per second */
-u_long	sys_clocktime;		/* last system clock update */
 #ifdef OPENSSL
 u_long	sys_automax;		/* maximum session key lifetime */
 #endif /* OPENSSL */
@@ -66,7 +65,8 @@ static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_mindist = MINDISTANCE; /* selection threshold (s) */
 static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
 double	sys_jitter;		/* system jitter (s) */
-int	sys_hopper;		/* anticlockhop counter */
+static	int sys_hopper;		/* anticlockhop counter */
+static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -278,6 +278,7 @@ receive(
 	register struct pkt *pkt;	/* receive packet pointer */
 	int	hisversion;		/* packet version */
 	int	hismode;		/* packet mode */
+	int	hisstratum;		/* packet stratum */
 	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
@@ -331,6 +332,7 @@ receive(
 	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
+	hisstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (hismode == MODE_PRIVATE) {
 		if (restrict_mask & RES_NOQUERY) {
 			sys_restricted++;
@@ -656,12 +658,18 @@ receive(
 		}
 
 		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
+
+		/*
 		 * Do not respond if our time is worse than the
 		 * manycaster or it has already synchronized to us.
 		 */
-		if (sys_peer == NULL || PKT_TO_STRATUM(pkt->stratum) <
-		    sys_stratum || (sys_cohort &&
-		    PKT_TO_STRATUM(pkt->stratum) == sys_stratum) ||
+		if (sys_peer == NULL || hisstratum < sys_stratum ||
+		    (sys_cohort && hisstratum) == sys_stratum ||
 		    rbufp->dstadr->addr_refid == pkt->refid)
 			return;			/* no help */
 
@@ -723,6 +731,13 @@ receive(
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic))
 			return;			/* bad auth */
+
+		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
 
 		switch (sys_bclient) {
 
@@ -807,6 +822,14 @@ receive(
 			    restrict_mask);
 			return;			/* hooray */
 		}
+
+		/*
+		 * Do not respond if the stratum is below the floor or
+		 * at or above the ceiling.
+		 */
+		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+			return;
+
 		if ((peer = newpeer(&rbufp->recv_srcadr,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion,
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
@@ -905,7 +928,10 @@ receive(
 	 */
 	peer->received++;
 	peer->timereceived = current_time;
-
+	if (is_authentic == AUTH_OK)
+		peer->flags |= FLAG_AUTHENTIC;
+	else
+		peer->flags &= ~FLAG_AUTHENTIC;
 #ifdef OPENSSL
 	/*
 	 * More autokey dance. The rules of the cha-cha are as follows:
@@ -2116,9 +2142,11 @@ clock_select(void)
 	 * times.
 	 */
 	if (osys_peer == NULL || typesystem == NULL || typesystem ==
-	    peer_list[0] || sys_hopper > HOPPER) {
+	    peer_list[0] || sys_hopper > sys_maxhop) {
 		typesystem = peer_list[0];
 		sys_hopper = 0;
+	} else {
+		peer->selbroken++;
 	}
 
 	/*
@@ -2817,7 +2845,7 @@ key_expire(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > unreachable or bad leap ornoselect
+ * > unreachable or bad leap or noselect
  * > stratum below the floor or at or above the ceiling
  * > root distance exceeded
  * > a synchronization loop would form
@@ -2829,14 +2857,13 @@ peer_unfit(
 {
 	int	rval = 0;
 
-	peer->flash &= ~(TEST11 | TEST12 | TEST13 | TEST14);
+	peer->flash &= ~(TEST10 | TEST11 | TEST12 | TEST13);
 	if (!peer->reach || peer->leap == LEAP_NOTINSYNC ||
-	    peer->stratum >= STRATUM_UNSPEC || peer->flags &
-	    FLAG_NOSELECT)
+	    peer->flags & FLAG_NOSELECT)
 		rval |= TEST13;		/* unfit */
 
 	if (peer->stratum < sys_floor || peer->stratum >= sys_ceiling)
-		rval |= TEST14;		/* stratum out of bounds */
+		rval |= TEST10;		/* stratum out of bounds */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
@@ -3129,6 +3156,14 @@ proto_config(
 	case PROTO_COHORT:
 		sys_cohort = (int)dvalue;
 		break;
+
+	/*
+	 * Set the anticlockhop threshold.
+	 */
+	case PROTO_MAXHOP:
+		sys_maxhop = (int)dvalue;
+		break;
+
 	/*
 	 * Set the adjtime() resolution (s).
 	 */

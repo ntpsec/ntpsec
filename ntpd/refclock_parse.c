@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.44 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
  *
- * refclock_parse.c,v 4.44 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -9,7 +9,7 @@
  * available and configured. Currently the STREAMS module
  * is only available for Suns running SunOS 4.x and SunOS5.x
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="4.44";
+static char rcsid[]="4.52";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -426,7 +426,7 @@ typedef struct poll_info
 #define NO_INIT		0
 #define NO_END		0
 #define NO_EVENT	0
-#define NO_DATA		0
+#define NO_LCLDATA	0
 #define NO_MESSAGE	0
 #define NO_PPSDELAY     0
 
@@ -447,7 +447,7 @@ typedef struct poll_info
 #define NOCLOCK_POLL		NO_POLL
 #define NOCLOCK_INIT		NO_INIT
 #define NOCLOCK_END		NO_END
-#define NOCLOCK_DATA		NO_DATA
+#define NOCLOCK_DATA		NO_LCLDATA
 #define NOCLOCK_FORMAT		""
 #define NOCLOCK_TYPE		CTL_SST_TS_UNSPEC
 #define NOCLOCK_SAMPLES		0
@@ -869,7 +869,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		DCFPZF535_ROOTDELAY,
 		DCFPZF535_BASEDELAY,
 		DCF_P_ID,
@@ -892,7 +892,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		DCFPZF535OCXO_ROOTDELAY,
 		DCFPZF535OCXO_BASEDELAY,
 		DCF_P_ID,
@@ -915,7 +915,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		DCFUA31_ROOTDELAY,
 		DCFUA31_BASEDELAY,
 		DCF_A_ID,
@@ -938,7 +938,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		DCF7000_ROOTDELAY,
 		DCF7000_BASEDELAY,
 		DCF_A_ID,
@@ -984,7 +984,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		RAWDCF_ROOTDELAY,
 		CONRAD_BASEDELAY,
 		DCF_A_ID,
@@ -1007,7 +1007,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		RAWDCF_ROOTDELAY,
 		TIMEBRICK_BASEDELAY,
 		DCF_A_ID,
@@ -1053,7 +1053,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		RAWDCF_ROOTDELAY,
 		IGELCLOCK_BASEDELAY,
 		DCF_A_ID,
@@ -1153,7 +1153,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		HOPF6021_ROOTDELAY,
 		HOPF6021_BASEDELAY,
 		DCF_ID,
@@ -1176,7 +1176,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		COMPUTIME_ROOTDELAY,
 		COMPUTIME_BASEDELAY,
 		COMPUTIME_ID,
@@ -1199,7 +1199,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
@@ -1222,7 +1222,7 @@ static struct parse_clockinfo
   		NO_EVENT,		        /* special event handling (e.g. reset clock) */
   		NO_END,				/* active poll end routine */
   		NO_MESSAGE,			/* process a lower layer message */
-		NO_DATA,			/* local data area for "poll" mechanism */
+		NO_LCLDATA,			/* local data area for "poll" mechanism */
 		0,				/* rootdelay */
 		11.0 /* bits */ / 9600,		/* current offset by which the RS232
 				           	time code is delayed from the actual time */
@@ -1247,7 +1247,7 @@ static struct parse_clockinfo
 		NO_EVENT,
 		NO_END,
 		NO_MESSAGE,
-		NO_DATA,
+		NO_LCLDATA,
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
@@ -1270,7 +1270,7 @@ static struct parse_clockinfo
                 NO_EVENT,
                 NO_END,
                 NO_MESSAGE,
-                NO_DATA,
+                NO_LCLDATA,
                 VARITEXT_ROOTDELAY,
                 VARITEXT_BASEDELAY,
                 VARITEXT_ID,
@@ -1285,7 +1285,30 @@ static struct parse_clockinfo
                 VARITEXT_LFLAG,
                 VARITEXT_SAMPLES,
                 VARITEXT_KEEP
-        }
+        },
+	{				/* mode 18 */
+		MBG_FLAGS,
+		NO_POLL,
+		NO_INIT,
+		NO_EVENT,
+		GPS16X_END,
+		GPS16X_MESSAGE,
+		GPS16X_DATA,
+		GPS16X_ROOTDELAY,
+		GPS16X_BASEDELAY,
+		GPS16X_ID,
+		GPS16X_DESCRIPTION,
+		GPS16X_FORMAT,
+		GPS_TYPE,
+		GPS16X_MAXUNSYNC,
+		GPS16X_SPEED,
+		GPS16X_CFLAG,
+		GPS16X_IFLAG,
+		GPS16X_OFLAG,
+		GPS16X_LFLAG,
+		GPS16X_SAMPLES,
+		GPS16X_KEEP
+	},
 };
 
 static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
@@ -2663,6 +2686,10 @@ parse_ppsapi(
 		} else {
 		        msyslog(LOG_INFO, "PARSE receiver #%d: HARDPPS enabled",
 				CLK_UNIT(parse->peer));
+			/*
+			 * tell the rest, that we have a kernel PPS source
+			 */
+		        pps_enable = 1;
 		}
 	}
 	parse->flags |= PARSE_PPSCLOCK;
@@ -2735,8 +2762,6 @@ parse_start(
 	 */
 	parse->generic->timestarted    = current_time;
 	parse->lastchange     = current_time;
-
-	parse->generic->currentstatus	        = CEVNT_TIMEOUT; /* expect the worst */
 
 	parse->flags          = 0;
 	parse->pollneeddata   = 0;
@@ -3011,7 +3036,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2004, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2005, Frank Kardel");
 		notice = 1;
 	}
 
@@ -3075,6 +3100,11 @@ parse_ctl(
 #endif
 		}
 		
+		/*
+		 * keep fudgetime2 in sync with TRUSTTIME/MAXUNSYNC flag1
+		 */
+		parse->generic->fudgetime2 = (parse->flags & PARSE_TRUSTTIME) ? (double)parse->maxunsync : parse->ppsphaseadjust;
+
 		if (in->haveflags & CLK_HAVETIME1)
                 {
 		  parse->generic->fudgetime1 = in->fudgetime1;
@@ -3375,6 +3405,9 @@ parse_control(
 
 /*--------------------------------------------------
  * event handling - note that nominal events will also be posted
+ * mimics refclock_report() but take into account that bad status
+ * counters are managed in the parser and keeps track of accumulated state
+ * times
  */
 static void
 parse_event(
@@ -3387,11 +3420,11 @@ parse_event(
 		parse->statetime[parse->generic->currentstatus] += current_time - parse->lastchange;
 		parse->lastchange              = current_time;
 
-		parse->generic->currentstatus    = (u_char)event;
-
 		if (parse->parse_type->cl_event)
 		    parse->parse_type->cl_event(parse, event);
       
+		parse->generic->currentstatus = (u_char)event;
+
 		if (event != CEVNT_NOMINAL)
 		{
 		        parse->generic->lastevent = parse->generic->currentstatus;
@@ -3419,9 +3452,6 @@ parse_event(
 					    "clock %s event '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
 					    (u_int)event);
 		}
-
-		report_event(EVNT_PEERCLOCK, parse->peer);
-		report_event(EVNT_CLOCKEXCPT, parse->peer);
 	}
 }
 
@@ -3436,6 +3466,7 @@ parse_process(
 {
 	l_fp off, rectime, reftime;
 	double fudge;
+	int event_code = CEVNT_FAULT;
 	
 	/*
 	 * check for changes in conversion status
@@ -3612,7 +3643,6 @@ parse_process(
 		 * seconds and the receiver is at least 2 minutes in the
 		 * POWERUP or NOSYNC state before switching to SYNC
 		 */
-		parse_event(parse, CEVNT_FAULT);
 		NLOG(NLOG_CLOCKSTATUS)
 			ERR(ERR_BADSTATUS)
 			msyslog(LOG_ERR,"PARSE receiver #%d: NOT SYNCHRONIZED",
@@ -3652,7 +3682,7 @@ parse_process(
 			/*
 			 * we have had some problems receiving the time code
 			 */
-			parse_event(parse, CEVNT_PROP);
+			event_code = CEVNT_PROP;
 			NLOG(NLOG_CLOCKSTATUS)
 				ERR(ERR_BADSTATUS)
 				msyslog(LOG_ERR,"PARSE receiver #%d: TIMECODE NOT CONFIRMED",
@@ -3796,7 +3826,7 @@ parse_process(
 		/*
 		 * log OK status
 		 */
-		parse_event(parse, CEVNT_NOMINAL);
+		event_code = CEVNT_NOMINAL;
 	}
 
 	clear_err(parse, ERR_BADIO);
@@ -3824,7 +3854,7 @@ parse_process(
 	 * see the clock states section above for more reasoning
 	 */
 	if (((current_time - parse->lastsync) > parse->maxunsync) ||
-	    (parse->lastsync <= parse->lastmissed))
+	    (parse->lastsync < parse->lastmissed))
 	{
 		parse->generic->leap = LEAP_NOTINSYNC;
 	}
@@ -3858,18 +3888,19 @@ parse_process(
 	}
 	
 	/*
-	 * ready, unless the machine wants a sample
+	 * ready, unless the machine wants a sample or 
+	 * we are in fast startup mode (peer->dist > MAXDISTANCE)
 	 */
-	if (!parse->pollneeddata)
+	if (!parse->pollneeddata && parse->peer->disp <= MAXDISTANCE)
 	    return;
 
 	parse->pollneeddata = 0;
 
-#if THIS_CANT_BE_RIGHT
 	parse->timedata.parse_state &= ~(unsigned)(PARSEB_PPS|PARSEB_S_PPS);
-#endif
 
 	refclock_receive(parse->peer);
+
+	parse_event(parse, event_code);	/* post event AFTER processing - refclock_receive likes to report a CEVNT_FAULT at startup */
 }
 
 /**===========================================================================
@@ -5582,6 +5613,30 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.52  2005/05/26 21:55:06  kardel
+ * cleanup status reporting
+ *
+ * Revision 4.51  2005/05/26 19:19:14  kardel
+ * implement fast refclock startup
+ *
+ * Revision 4.50  2005/04/16 20:51:35  kardel
+ * set pps_enable = 1 when binding a kernel PPS source
+ *
+ * Revision 4.49  2005/04/16 17:29:26  kardel
+ * add non polling clock type 18 for just listenning to Meinberg clocks
+ *
+ * Revision 4.48  2005/04/16 16:22:27  kardel
+ * bk sync 20050415 ntp-dev
+ *
+ * Revision 4.47  2004/11/29 10:42:48  kardel
+ * bk sync ntp-dev 20041129
+ *
+ * Revision 4.46  2004/11/29 10:26:29  kardel
+ * keep fudgetime2 in sync with trusttime/ppsphaseadjust depending in flag1
+ *
+ * Revision 4.45  2004/11/14 20:53:20  kardel
+ * clear PPS flags after using them
+ *
  * Revision 4.44  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

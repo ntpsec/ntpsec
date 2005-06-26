@@ -110,6 +110,7 @@ extern	int 	local_clock P((struct peer *, double));
 extern	void	adj_host_clock	P((void));
 extern	void	loop_config P((int, double));
 extern	void	huffpuff	P((void));
+extern	u_long	sys_clocktime;
 
 /* ntp_monitor.c */
 extern	void	init_mon	P((void));

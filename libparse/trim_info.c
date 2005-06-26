@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/libparse/trim_info.c,v 4.4 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libparse/trim_info.c,v 4.5 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * trim_info.c,v 4.4 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * trim_info.c,v 4.5 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * $Created: Sun Aug  2 20:20:34 1998 $
  *
- * Copyright (c) 1995-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,9 @@ trimble_convert(
 
 /*
  * trim_info.c,v
+ * Revision 4.5  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.4  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 ;# --*-perl-*--
 ;#
-;# /src/NTP/ntp4-dev/scripts/monitoring/ntploopwatch,v 4.7 2004/11/14 16:11:05 kardel RELEASE_20041114_B
+;# /src/NTP/ntp4-dev/scripts/monitoring/ntploopwatch,v 4.7 2004/11/14 16:11:05 kardel RELEASE_20050508_A
 ;#
 ;# process loop filter statistics file and either
 ;#     - show statistics periodically using gnuplot

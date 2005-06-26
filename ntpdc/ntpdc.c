@@ -873,13 +873,17 @@ sendrequest(
 		    + MAX_MAC_LEN - sizeof(struct req_pkt_tail));
 
 		if (info_auth_keyid == 0) {
-			maclen = getkeyid("Keyid: ");
-			if (maclen == 0) {
-				(void) fprintf(stderr,
-				    "Invalid key identifier\n");
-				return 1;
+			if (((struct conf_peer *)qpkt.data)->keyid > 0)
+				info_auth_keyid = ((struct conf_peer *)qpkt.data)->keyid;
+			else {
+				maclen = getkeyid("Keyid: ");
+				if (maclen == 0) {
+					(void) fprintf(stderr,
+					    "Invalid key identifier\n");
+					return 1;
+				}
+				info_auth_keyid = maclen;
 			}
-			info_auth_keyid = maclen;
 		}
 		if (!authistrusted(info_auth_keyid)) {
 			pass = getpass("MD5 Password: ");

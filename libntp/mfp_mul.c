@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/libntp/mfp_mul.c,v 4.6 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * /src/NTP/ntp4-dev/libntp/mfp_mul.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
- * mfp_mul.c,v 4.6 2004/11/14 15:29:41 kardel RELEASE_20041114_B
+ * mfp_mul.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * $Created: Sat Aug 16 20:35:08 1997 $
  *
- * Copyright (c) 1997-2004 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -148,6 +148,9 @@ mfp_mul(
  * History:
  *
  * mfp_mul.c,v
+ * Revision 4.7  2005/04/16 17:32:10  kardel
+ * update copyright
+ *
  * Revision 4.6  2004/11/14 15:29:41  kardel
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
