@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/include/mbg_gps166.h,v 4.4 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/include/mbg_gps166.h,v 4.5 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
- * mbg_gps166.h,v 4.4 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * mbg_gps166.h,v 4.5 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
  * $Created: Sun Jul 20 09:20:50 1997 $
  *
@@ -552,7 +552,12 @@ unsigned long mbg_csum P((unsigned char *, unsigned int));
 
 #endif
 /*
+ * History:
+ *
  * mbg_gps166.h,v
+ * Revision 4.5  2005/06/25 10:58:45  kardel
+ * add missing log keywords
+ *
  * Revision 4.1  1998/06/12 15:07:30  kardel
  * fixed prototyping
  *
