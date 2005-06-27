@@ -1598,7 +1598,7 @@ clock_filter(
 	 */
 	for (i = 1; i < NTP_SHIFT; i++) {
 		for (j = 0; j < i; j++) {
-			if (dst[j] > dst[i]) {
+			if (dst[j] > dst[i] + LOGTOD(sys_precision)) {
 				k = ord[j];
 				ord[j] = ord[i];
 				ord[i] = k;

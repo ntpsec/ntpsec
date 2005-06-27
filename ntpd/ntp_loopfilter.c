@@ -454,8 +454,7 @@ local_clock(
 			 */
 			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
 				dtemp = CLOCK_FLL - sys_poll;
-				flladj = (fp_offset - last_base -
-				    clock_offset) /
+				flladj = (fp_offset - clock_offset) /
 				    (max(mu, allan_xpt) * dtemp);
 			}
 
@@ -465,7 +464,7 @@ local_clock(
 			 * interval and poll interval. This allows
 			 * oversampling, but not undersampling.
 			 */ 
-			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
+			etemp = max(mu, (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
 			break;
