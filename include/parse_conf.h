@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/include/parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/include/parse_conf.h,v 4.7 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
- * parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * parse_conf.h,v 4.7 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
@@ -35,7 +35,7 @@
 #ifndef __PARSE_CONF_H__
 #define __PARSE_CONF_H__
 #if	!(defined(lint) || defined(__GNUC__))
-  static char prshrcsid[] = "parse_conf.h,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
+  static char prshrcsid[] = "parse_conf.h,v 4.7 2005/06/25 10:58:45 kardel RELEASE_20050625_A";
 #endif
 
 /*
@@ -72,3 +72,12 @@ struct format
   u_long      flags;
 };
 #endif
+
+/*
+ * History:
+ *
+ * parse_conf.h,v
+ * Revision 4.7  2005/06/25 10:58:45  kardel
+ * add missing log keywords
+ *
+ */
