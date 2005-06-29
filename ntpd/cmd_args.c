@@ -17,14 +17,32 @@
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
+extern int default_ai_family;
 int	listen_to_virtual_ips = 1;
 char 	*specific_interface = NULL;        /* interface name or IP address to bind to */
 
-static const char *ntp_options = "aAbB:c:C:dD:f:gi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
+static const char *ntp_options = "46aAbB:c:C:dD:f:gHi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
 #endif
+
+
+void ntpd_usage( void )
+{
+		(void) fprintf(stderr, "usage: %s [ -46abdgnqx ] [ -c config_file ]\n", progname);
+		(void) fprintf(stderr, "\t\t[ -f drift_file ] [ -k key_file ] [ -l log_file ]\n");
+		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broadcast_delay ] [ -s stats_dir ]\n");
+		(void) fprintf(stderr, "\t\t[ -t trusted_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
+		(void) fprintf(stderr, "\t\t[ -L [ interface ] ]\n");
+#if defined(HAVE_SCHED_SETSCHEDULER)
+		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
+#endif
+#ifdef HAVE_DROPROOT
+		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i jaildir ]\n");
+#endif
+}  /* ntpd_usage */
+
 
 /*
  * getstartup - search through the options looking for a debugging flag
@@ -125,41 +143,30 @@ getstartup(
 		    ++errflg;
 		    break;
 
-	    case '-':
-	      if ( ! strcmp(ntp_optarg, "version") ) {
-		printf("%.80s: %.80s\n", progname, Version);
-		exit(0);
-	      } else if ( ! strcmp(ntp_optarg, "help") ) {
-		/* usage(); */
-		/* exit(0); */
-		++errflg;
-	      } else if ( ! strcmp(ntp_optarg, "copyright") ) {
-		printf("unknown\n");
-		exit(0);
-	      } else {
-		fprintf(stderr, "%.80s: Error unknown argument '--%.80s'\n",
-			progname,
-			ntp_optarg);
-		exit(12);
-	      }
-	      break;
+		case '-':
+			if ( ! strcmp(ntp_optarg, "version") ) {
+				printf("%.80s: %.80s\n", progname, Version);
+				exit(0);
+			} else if ( ! strcmp(ntp_optarg, "help") ) {
+				ntpd_usage();
+				exit(0);
+			} else if ( ! strcmp(ntp_optarg, "copyright") ) {
+				printf("unknown\n");
+				exit(0);
+			} else {
+				fprintf(stderr, "%.80s: Error unknown argument '--%.80s'\n",
+					progname,
+					ntp_optarg);
+				exit(12);
+			}
+			break;
 
 		default:
 			break;
-		}
+	    }
 
 	if (errflg || ntp_optind != argc) {
-		(void) fprintf(stderr, "usage: %s [ -abdgnqx ] [ -c config_file ] [ -e e_delay ]\n", progname);
-		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
-		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
-		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
-		(void) fprintf(stderr, "\t\t[ -L interface ]\n");
-#if defined(HAVE_SCHED_SETSCHEDULER)
-		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
-#endif
-#ifdef HAVE_DROPROOT
-		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
-#endif
+		ntpd_usage();
 		exit(2);
 	}
 	ntp_optind = 0;	/* reset ntp_optind to restart ntp_getopt */
@@ -204,6 +211,12 @@ getCmdOpts(
 	 */
 	while ((c = ntp_getopt(argc, argv, ntp_options)) != EOF) {
 		switch (c) {
+		    case '4':
+			default_ai_family = AF_INET;
+			break;
+		    case '6':
+			default_ai_family = AF_INET6;
+			break;
 		    case 'a':
 			proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
 			break;
@@ -397,17 +410,7 @@ getCmdOpts(
 	}
 
 	if (errflg || ntp_optind != argc) {
-		(void) fprintf(stderr, "usage: %s [ -abdgnx ] [ -c config_file ] [ -e e_delay ]\n", progname);
-		(void) fprintf(stderr, "\t\t[ -f freq_file ] [ -k key_file ] [ -l log_file ]\n");
-		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broad_delay ] [ -s statdir ]\n");
-		(void) fprintf(stderr, "\t\t[ -t trust_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
-		(void) fprintf(stderr, "\t\t[ -L interface ]\n");
-#if defined(HAVE_SCHED_SETSCHEDULER)
-		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
-#endif
-#ifdef HAVE_DROPROOT
-		(void) fprintf(stderr, "\t\t[ -u user[:group] ] [ -i chrootdir ]\n");
-#endif
+		ntpd_usage();
 		exit(2);
 	}
 	return;

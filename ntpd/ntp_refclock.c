@@ -112,15 +112,41 @@ refclock_report(
 	if (pp == NULL)
 		return;
 
-	if (code == CEVNT_BADREPLY)
-		pp->badformat++;
-	if (code == CEVNT_BADTIME)
-		pp->baddata++;
-	if (code == CEVNT_TIMEOUT)
-		pp->noreply++;
+	switch (code) {
+		case CEVNT_NOMINAL:
+			break;
+
+		case CEVNT_TIMEOUT:
+			pp->noreply++;
+			break;
+
+		case CEVNT_BADREPLY:
+			pp->badformat++;
+			break;
+
+		case CEVNT_FAULT:
+			break;
+
+		case CEVNT_PROP:
+			break;
+
+		case CEVNT_BADDATE:
+		case CEVNT_BADTIME:
+			pp->baddata++;
+			break;
+
+		default:
+			/* shouldn't happen */
+			break;
+	}
+
 	if (pp->currentstatus != code) {
 		pp->currentstatus = (u_char)code;
-		pp->lastevent = (u_char)code;
+
+		/* RFC1305: copy only iff not CEVNT_NOMINAL */
+		if (code != CEVNT_NOMINAL)
+			pp->lastevent = (u_char)code;
+
 		if (code == CEVNT_FAULT)
 			msyslog(LOG_ERR,
 			    "clock %s event '%s' (0x%02x)",
@@ -133,9 +159,11 @@ refclock_report(
 			    refnumtoa(&peer->srcadr),
 			    ceventstr(code), code);
 		}
+
+		/* RFC1305: post peer clock event */
+		report_event(EVNT_PEERCLOCK, peer);
 	}
 }
-
 
 /*
  * init_refclock - initialize the reference clock drivers
@@ -222,6 +250,7 @@ refclock_newpeer(
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
 	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
+	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
@@ -343,7 +372,6 @@ refclock_transmit(
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
-				peer_clear(peer, "INIT");
 			}
 		} else {
 			if (!(oreach & 0x07)) {
@@ -576,11 +604,16 @@ refclock_receive(
 	 * filter.
 	 */
 	pp = peer->procptr;
+	peer->leap = pp->leap;
+	if (peer->leap == LEAP_NOTINSYNC)
+		return;
+
 	peer->received++;
 	peer->timereceived = current_time;
-	peer->leap = pp->leap;
-	if (!peer->reach)
+	if (!peer->reach) {
 		report_event(EVNT_REACH, peer);
+		peer->timereachable = current_time;
+	}
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
 	peer->org = pp->lastrec;

@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/include/parse.h,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/include/parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
- * parse.h,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
@@ -35,7 +35,7 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 #if	!(defined(lint) || defined(__GNUC__))
-  static char parsehrcsid[]="parse.h,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
+  static char parsehrcsid[]="parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A";
 #endif
 
 #include "ntp_types.h"
@@ -390,6 +390,9 @@ extern int parse_timedout P((parse_t *, timestamp_t *, struct timeval *));
  * History:
  *
  * parse.h,v
+ * Revision 4.11  2005/06/25 10:58:45  kardel
+ * add missing log keywords
+ *
  * Revision 4.5  1998/08/09 22:23:32  kardel
  * 4.0.73e2 adjustments
  *

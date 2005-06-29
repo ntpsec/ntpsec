@@ -495,10 +495,11 @@ ntpqmain(
 {
 	extern int ntp_optind;
 
-#ifdef NO_MAIN_ALLOWED
+#ifdef SYS_VXWORKS
 	clear_globals();
 	taskPrioritySet(taskIdSelf(), 100 );
 #endif
+
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 

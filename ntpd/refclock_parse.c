@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.57 2005/06/25 09:25:19 kardel RELEASE_20050625_A
  *
- * refclock_parse.c,v 4.52 2005/05/26 21:55:06 kardel RELEASE_20050526_B
+ * refclock_parse.c,v 4.57 2005/06/25 09:25:19 kardel RELEASE_20050625_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="4.52";
+static char rcsid[]="4.57";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -210,6 +210,9 @@ struct	refclock refclock_parse = {
 
 #undef ABS
 #define ABS(_X_) (((_X_) < 0) ? -(_X_) : (_X_))
+
+#define PARSE_HARDPPS_DISABLE 0
+#define PARSE_HARDPPS_ENABLE  1
 
 /**===========================================================================
  ** function vector for dynamically binding io handling mechanism
@@ -395,6 +398,7 @@ struct parseunit
 #ifdef HAVE_PPSAPI
         pps_handle_t  ppshandle;        /* store PPSAPI handle */
         pps_params_t  ppsparams;        /* current PPS parameters */
+        int           hardppsstate;     /* current hard pps state */
 #endif
 	parsetime_t   timedata;		/* last (parse module) data */
 	void         *localdata;        /* optional local, receiver-specific data */
@@ -1863,7 +1867,6 @@ stream_receive(
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR,"PARSE receiver #%d: stream_receive: bad size (got %d expected %d)",
 				CLK_UNIT(parse->peer), rbufp->recv_length, (int)sizeof(parsetime_t));
-		parse->generic->baddata++;
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
 	}
@@ -2210,7 +2213,6 @@ local_receive(
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %d expected %d)",
 				CLK_UNIT(parse->peer), rbufp->recv_length, (int)sizeof(parsetime_t));
-		parse->generic->baddata++;
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
 	}
@@ -2601,11 +2603,53 @@ parse_shutdown(
 
 #ifdef HAVE_PPSAPI
 /*----------------------------------------
+ * set up HARDPPS via PPSAPI
+ */
+static void
+parse_hardpps(
+	      struct parseunit *parse,
+	      int mode
+	      )
+{
+        if (parse->hardppsstate == mode)
+	        return;
+
+	if (CLK_PPS(parse->peer) && (parse->flags & PARSE_PPSKERNEL)) {
+		int	i = 0;
+
+		if (mode == PARSE_HARDPPS_ENABLE) 
+		        {
+			        if (parse->flags & PARSE_CLEAR)
+				        i = PPS_CAPTURECLEAR;
+				else
+				        i = PPS_CAPTUREASSERT;
+			}
+		
+		if (time_pps_kcbind(parse->ppshandle, PPS_KC_HARDPPS, i,
+		    PPS_TSFMT_TSPEC) < 0) {
+		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
+				CLK_UNIT(parse->peer));
+		} else {
+		        NLOG(NLOG_CLOCKINFO)
+		                msyslog(LOG_INFO, "PARSE receiver #%d: HARDPPS %sabled",
+					CLK_UNIT(parse->peer), (mode == PARSE_HARDPPS_ENABLE) ? "en" : "dis");
+			/*
+			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
+			 */
+			if (mode == PARSE_HARDPPS_ENABLE)
+			        pps_enable = 1;
+		}
+	}
+
+	parse->hardppsstate = mode;
+}
+
+/*----------------------------------------
  * set up PPS via PPSAPI
  */
 static int
 parse_ppsapi(
-	struct parseunit *parse
+	     struct parseunit *parse
 	)
 {
 	int cap, mode, mode1;
@@ -2617,13 +2661,13 @@ parse_ppsapi(
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
 			CLK_UNIT(parse->peer));
 		
-		return (0);
+		return 0;
 	}
 
 	if (time_pps_getparams(parse->ppshandle, &parse->ppsparams) < 0) {
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getparams failed: %m",
 			CLK_UNIT(parse->peer));
-		return (0);
+		return 0;
 	}
 
 	/* nb. only turn things on, if someone else has turned something
@@ -2647,15 +2691,27 @@ parse_ppsapi(
 	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED to initialize PPS to %s",
 		  CLK_UNIT(parse->peer), cp);
 	
-		return(0);
+		return 0;
 	}
 
 	if (!(mode1 & cap)) {
 	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter",
 		  CLK_UNIT(parse->peer), cp);
 		mode1 = 0;
+	} else {
+	        if (mode1 == PPS_OFFSETCLEAR) 
+		        {
+			        parse->ppsparams.clear_offset.tv_sec = parse->ppsphaseadjust;
+			        parse->ppsparams.clear_offset.tv_nsec = 1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+			}
+	  
+		if (mode1 == PPS_OFFSETASSERT)
+	                {
+		                parse->ppsparams.assert_offset.tv_sec = parse->ppsphaseadjust;
+				parse->ppsparams.assert_offset.tv_nsec = 1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+			}
 	}
-
+	
 	/* only set what is legal */
 
 	parse->ppsparams.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
@@ -2666,35 +2722,11 @@ parse_ppsapi(
 		return 0;
 	}
 
-	/* If HARDPPS is on, we tell kernel */
-
-	if (parse->flags & PARSE_PPSKERNEL) {
-		int	i;
-
-		if (parse->flags & PARSE_CLEAR)
-			i = PPS_CAPTURECLEAR;
-		else
-			i = PPS_CAPTUREASSERT;
-
-		/* we know that 'i' is legal from above */
-
-		if (time_pps_kcbind(parse->ppshandle, PPS_KC_HARDPPS, i,
-		    PPS_TSFMT_TSPEC) < 0) {
-		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
-				CLK_UNIT(parse->peer));
-			return (0);
-		} else {
-		        msyslog(LOG_INFO, "PARSE receiver #%d: HARDPPS enabled",
-				CLK_UNIT(parse->peer));
-			/*
-			 * tell the rest, that we have a kernel PPS source
-			 */
-		        pps_enable = 1;
-		}
-	}
 	parse->flags |= PARSE_PPSCLOCK;
-	return(1);
+	return 1;
 }
+#else
+#define parse_hardpps(_PARSE_, _MODE_) /* empty */
 #endif
 
 /*--------------------------------------------------
@@ -2718,6 +2750,16 @@ parse_start(
 	char parsedev[sizeof(PARSEDEVICE)+20];
 	parsectl_t tmp_ctl;
 	u_int type;
+
+	/*
+	 * get out Copyright information once
+	 */
+	if (!notice)
+        {
+		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2005, Frank Kardel");
+		notice = 1;
+	}
 
 	type = CLK_TYPE(peer);
 	unit = CLK_UNIT(peer);
@@ -2910,6 +2952,7 @@ parse_start(
  * PPS via PPSAPI
  */
 #if defined(HAVE_PPSAPI)
+		parse->hardppsstate = PARSE_HARDPPS_DISABLE;
 		if (CLK_PPS(parse->peer))
 		{
 		  if (time_pps_create(fd232, &parse->ppshandle) < 0) 
@@ -3030,16 +3073,6 @@ parse_start(
 				}
 		}
 	
-	/*
-	 * get out Copyright information once
-	 */
-	if (!notice)
-        {
-		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2005, Frank Kardel");
-		notice = 1;
-	}
-
 	/*
 	 * print out configuration
 	 */
@@ -3165,7 +3198,6 @@ parse_poll(
 		 * start worrying when exceeding a poll inteval
 		 * bad news - didn't get a response last time
 		 */
-		parse->generic->noreply++;
 		parse->lastmissed = current_time;
 		parse_event(parse, CEVNT_TIMEOUT);
 		
@@ -3306,7 +3338,6 @@ parse_control(
 			    mkascii(outstatus+strlen(outstatus), (int)(sizeof(outstatus)- strlen(outstatus) - 1),
 				    tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1));
 
-			parse->generic->badformat += tmpctl.parsegettc.parse_badformat;
 		}
 	
 		tmpctl.parseformat.parse_format = tmpctl.parsegettc.parse_format;
@@ -3405,9 +3436,7 @@ parse_control(
 
 /*--------------------------------------------------
  * event handling - note that nominal events will also be posted
- * mimics refclock_report() but take into account that bad status
- * counters are managed in the parser and keeps track of accumulated state
- * times
+ * keep track of state dwelling times
  */
 static void
 parse_event(
@@ -3423,35 +3452,14 @@ parse_event(
 		if (parse->parse_type->cl_event)
 		    parse->parse_type->cl_event(parse, event);
       
-		parse->generic->currentstatus = (u_char)event;
-
-		if (event != CEVNT_NOMINAL)
-		{
-		        parse->generic->lastevent = parse->generic->currentstatus;
-		}
-		else
+		if (event == CEVNT_NOMINAL)
 		{
 			NLOG(NLOG_CLOCKSTATUS)
 				msyslog(LOG_INFO, "PARSE receiver #%d: SYNCHRONIZED",
 					CLK_UNIT(parse->peer));
 		}
 
-		if (event == CEVNT_FAULT)
-		{
-		        NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
-			        ERR(ERR_BADEVENT)
-			              msyslog(LOG_ERR,
-					      "clock %s fault '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
-					      (u_int)event);
-		}
-		else
-		{
-		  NLOG(NLOG_CLOCKEVENT) /* conditional if clause for conditional syslog */
-		          if (event == CEVNT_NOMINAL || list_err(parse, ERR_BADEVENT))
-		                    msyslog(LOG_INFO,
-					    "clock %s event '%s' (0x%02x)", refnumtoa(&parse->peer->srcadr), ceventstr(event),
-					    (u_int)event);
-		}
+		refclock_report(parse->peer, event);
 	}
 }
 
@@ -3466,7 +3474,6 @@ parse_process(
 {
 	l_fp off, rectime, reftime;
 	double fudge;
-	int event_code = CEVNT_FAULT;
 	
 	/*
 	 * check for changes in conversion status
@@ -3501,7 +3508,6 @@ parse_process(
 				ERR(ERR_BADDATA)
 					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / cableling)",
 						CLK_UNIT(parse->peer), mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
-				parse->generic->badformat += tmpctl.parsegettc.parse_badformat;
 			}
 		}
 	}
@@ -3531,7 +3537,6 @@ parse_process(
 			break; 		/* well, still waiting - timeout is handled at higher levels */
 			    
 		case CVT_FAIL:
-			parse->generic->badformat++;
 			if (parsetime->parse_status & CVT_BADFMT)
 			{
 				parse_event(parse, CEVNT_BADREPLY);
@@ -3643,6 +3648,7 @@ parse_process(
 		 * seconds and the receiver is at least 2 minutes in the
 		 * POWERUP or NOSYNC state before switching to SYNC
 		 */
+		parse_event(parse, CEVNT_FAULT);
 		NLOG(NLOG_CLOCKSTATUS)
 			ERR(ERR_BADSTATUS)
 			msyslog(LOG_ERR,"PARSE receiver #%d: NOT SYNCHRONIZED",
@@ -3682,7 +3688,7 @@ parse_process(
 			/*
 			 * we have had some problems receiving the time code
 			 */
-			event_code = CEVNT_PROP;
+			parse_event(parse, CEVNT_PROP);
 			NLOG(NLOG_CLOCKSTATUS)
 				ERR(ERR_BADSTATUS)
 				msyslog(LOG_ERR,"PARSE receiver #%d: TIMECODE NOT CONFIRMED",
@@ -3712,6 +3718,17 @@ parse_process(
 	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 	{
 		l_fp offset;
+		double ppsphaseadjust = parse->ppsphaseadjust;
+
+#ifdef HAVE_PPSAPI
+		/*
+		 * set fudge = 0.0 if already included in PPS time stamps
+		 */
+		if (parse->ppsparams.mode & (PPS_OFFSETCLEAR|PPS_OFFSETASSERT))
+		        {
+			        ppsphaseadjust = 0.0;
+			}
+#endif
 
 		/*
 		 * we have a PPS signal - much better than the RS232 stuff (we hope)
@@ -3729,7 +3746,7 @@ parse_process(
 			if (M_ISGEQ(off.l_i, off.l_f, -1, 0x80000000) &&
 			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_f))
 			{
-				fudge = parse->ppsphaseadjust; /* pick PPS fudge factor */
+				fudge = ppsphaseadjust; /* pick PPS fudge factor */
 			
 				/*
 				 * RS232 offsets within [-0.5..0.5[ - take PPS offsets
@@ -3765,7 +3782,7 @@ parse_process(
 		}
 		else
 		{
-			fudge = parse->ppsphaseadjust; /* pick PPS fudge factor */
+			fudge = ppsphaseadjust; /* pick PPS fudge factor */
 			/*
 			 * Well, no time code to guide us - assume on second pulse
 			 * and pray, that we are within [-0.5..0.5[
@@ -3826,7 +3843,7 @@ parse_process(
 		/*
 		 * log OK status
 		 */
-		event_code = CEVNT_NOMINAL;
+		parse_event(parse, CEVNT_NOMINAL);
 	}
 
 	clear_err(parse, ERR_BADIO);
@@ -3834,29 +3851,22 @@ parse_process(
 	clear_err(parse, ERR_NODATA);
 	clear_err(parse, ERR_INTERNAL);
   
-#ifdef DEBUG
-	if (debug > 2) 
-		{
-			printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
-				CLK_UNIT(parse->peer),
-				prettydate(&reftime),
-				prettydate(&rectime),
-				fudge);
-		}
-#endif
-
-
 	/*
 	 * and now stick it into the clock machine
 	 * samples are only valid iff lastsync is not too old and
 	 * we have seen the clock in sync at least once
 	 * after the last time we didn't see an expected data telegram
+	 * at startup being not in sync is also bad just like
+	 * POWERUP state
 	 * see the clock states section above for more reasoning
 	 */
 	if (((current_time - parse->lastsync) > parse->maxunsync) ||
-	    (parse->lastsync < parse->lastmissed))
+	    (parse->lastsync < parse->lastmissed) ||
+	    ((parse->lastsync == 0) && !PARSE_SYNC(parsetime->parse_state)) ||
+	    PARSE_POWERUP(parsetime->parse_state))
 	{
 		parse->generic->leap = LEAP_NOTINSYNC;
+		parse->lastsync = 0;	/* wait for full sync again */
 	}
 	else
 	{
@@ -3879,14 +3889,38 @@ parse_process(
 			    parse->generic->leap = LEAP_NOWARNING;
 		    }
 	}
-  
-	refclock_process_offset(parse->generic, reftime, rectime, fudge);
-	if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer) &&
-	    (parse->generic->leap != LEAP_NOTINSYNC))
+
+	if (parse->generic->leap != LEAP_NOTINSYNC)
 	{
-		(void) pps_sample(&parse->timedata.parse_ptime.fp);
+	        /*
+		 * only good/trusted samples are interesting
+		 */
+#ifdef DEBUG
+	        if (debug > 2) 
+		        {
+			        printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
+				       CLK_UNIT(parse->peer),
+				       prettydate(&reftime),
+				       prettydate(&rectime),
+				       fudge);
+			}
+#endif
+		parse->generic->lastref = reftime;
+		
+		refclock_process_offset(parse->generic, reftime, rectime, fudge);
+
+		/*
+		 * pass PPS information on to PPS clock
+		 */
+		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
+		        {
+			        (void) pps_sample(&parse->timedata.parse_ptime.fp);
+				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
+			}
+	} else {
+	        parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
 	}
-	
+
 	/*
 	 * ready, unless the machine wants a sample or 
 	 * we are in fast startup mode (peer->dist > MAXDISTANCE)
@@ -3899,8 +3933,6 @@ parse_process(
 	parse->timedata.parse_state &= ~(unsigned)(PARSEB_PPS|PARSEB_S_PPS);
 
 	refclock_receive(parse->peer);
-
-	parse_event(parse, event_code);	/* post event AFTER processing - refclock_receive likes to report a CEVNT_FAULT at startup */
 }
 
 /**===========================================================================
@@ -5613,6 +5645,23 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.57  2005/06/25 09:25:19  kardel
+ * sort out log output sequence
+ *
+ * Revision 4.56  2005/06/14 21:47:27  kardel
+ * collect samples only if samples are ok (sync or trusted flywheel)
+ * propagate pps phase adjustment value to kernel via PPSAPI to help HARDPPS
+ * en- and dis-able HARDPPS in correlation to receiver sync state
+ *
+ * Revision 4.55  2005/06/02 21:28:31  kardel
+ * clarify trust logic
+ *
+ * Revision 4.54  2005/06/02 17:06:49  kardel
+ * change status reporting to use fixed refclock_report()
+ *
+ * Revision 4.53  2005/06/02 16:33:31  kardel
+ * fix acceptance of clocks unsync clocks right at start
+ *
  * Revision 4.52  2005/05/26 21:55:06  kardel
  * cleanup status reporting
  *

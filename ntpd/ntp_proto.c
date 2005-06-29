@@ -1594,11 +1594,13 @@ clock_filter(
 	}
 
         /*
-	 * Sort the samples in both lists by distance.
+	 * Sort the samples in both lists by distance. Note, we do not
+	 * displace a higher distance sample by a lower distance one
+	 * unless lower by at least the precision.  
 	 */
 	for (i = 1; i < NTP_SHIFT; i++) {
 		for (j = 0; j < i; j++) {
-			if (dst[j] > dst[i]) {
+			if (dst[j] > dst[i] + LOGTOD(sys_precision)) {
 				k = ord[j];
 				ord[j] = ord[i];
 				ord[i] = k;
@@ -1647,7 +1649,7 @@ clock_filter(
 	 * If no acceptable samples remain in the shift register,
 	 * quietly tiptoe home leaving only the dispersion. Otherwise,
 	 * save the offset, delay and jitter. Note the jitter must not
-	 * be less than the system precision.
+	 * be less than the precision.
 	 */
 	if (m == 0)
 		return;
