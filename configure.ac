@@ -385,7 +385,11 @@ esac
 AC_CHECK_HEADERS(sys/ipc.h)
 AC_CHECK_HEADERS(sys/lock.h sys/mman.h sys/modem.h sys/param.h sys/ppsclock.h)
 # HMS: Check sys/proc.h and sys/resource.h after some others
-AC_CHECK_HEADERS(sys/ppstime.h sys/sched.h)
+AC_CHECK_HEADERS(sys/ppstime.h)
+case "$ac_cv_header_sched_h" in
+ yes) ;;
+ *) AC_CHECK_HEADERS(sys/sched.h) ;;
+esac
 case "$host" in
  *-*-sco*)
     AC_CHECK_HEADERS(sys/sio.h)
