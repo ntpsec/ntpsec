@@ -242,7 +242,6 @@ static struct keyword tos_keywords[] = {
 	{ "cohort",		CONF_TOS_COHORT },
 	{ "mindist",		CONF_TOS_MINDIST },
 	{ "maxdist",		CONF_TOS_MAXDIST },
-	{ "maxhop",		CONF_TOS_MAXHOP },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -343,7 +342,7 @@ static char res_file[MAX_PATH];
  * Definitions of things either imported from or exported to outside
  */
 
-int default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
+short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 char const *progname;
 char	*sys_phone[MAXPHONE] = {NULL}; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
@@ -393,7 +392,7 @@ static	int matchkey P((char *, struct keyword *, int));
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
-	t_MSK		/* Network Mask */
+	t_MSK,		/* Network Mask */
 	};
 static	int getnetnum P((const char *, struct sockaddr_storage *, int,
 			 enum gnn_type));
@@ -737,6 +736,7 @@ getconfig(
 					    break;
 				    }
 				    peerkey = (int)atol(tokens[++i]);
+				    peerflags |= FLAG_AUTHENABLE;
 				    break;
 
 				case CONF_MOD_MINPOLL:
@@ -1092,10 +1092,6 @@ getconfig(
 
 			    case CONF_TOS_MAXDIST:
 				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MAXHOP:
-				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
 				break;
 			    }
 			}
