@@ -1,4 +1,4 @@
-#AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
+#auTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
 ACLOCAL_AMFLAGS= -I m4
 
@@ -32,7 +32,7 @@ DIST_SUBDIRS= \
 	ElectricFence	\
 	arlib \
 	libntp	\
-	libopts \
+	libopts	\
 	libparse	\
 	ntpd	\
 	ntpdate	\

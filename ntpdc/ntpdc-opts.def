@@ -95,8 +95,8 @@ flag = {
     descrip   = "Print a list of the peers";
     flags-cant = command;
     doc = <<-  _EndOfDoc_
-	Print a list of the peers known to the server as well as a summary
-	of their state. This is equivalent to the listpeers interactive command.
+	Print a list of the peers known to the server as well as a summary of
+	their state. This is equivalent to the 'listpeers' interactive command.
 	_EndOfDoc_;
 };
 
@@ -107,7 +107,7 @@ flag = {
     flags-cant = command;
     doc = <<-  _EndOfDoc_
 	Print a list of the peers known to the server as well as a summary
-	of their state. This is equivalent to the peers interactive command.
+	of their state. This is equivalent to the 'peers' interactive command.
 	_EndOfDoc_;
 };
 
@@ -118,7 +118,7 @@ flag = {
     flags-cant = command;
     doc = <<-  _EndOfDoc_
 	Print a list of the peers known to the server as well as a summary
-	of their state. This is equivalent to the dmpeers interactive command.
+	of their state. This is equivalent to the 'dmpeers' interactive command.
 	_EndOfDoc_;
 };
 
@@ -169,7 +169,22 @@ flag = {
 };
 
 detail = <<-  _END_DETAIL
-	The ntpq utility program is used to monitor NTP daemon ntpd operations
-	and determine performance. It uses NTP mode 7 control message formats
-	described in the source code.
+	The
+	ntpdc
+	utility program is used to query an NTP daemon about its
+	current state and to request changes in that state.
+	It uses NTP mode 7 control message formats described in the source code.
+	The program may
+	be run either in interactive mode or controlled using command line
+	arguments.
+	Extensive state and statistics information is available
+	through the
+	.Nm
+	interface.
+	In addition, nearly all the
+	configuration options which can be specified at startup using
+	ntpd's configuration file may also be specified at run time using
+	.Nm .
+
+
 	_END_DETAIL;
