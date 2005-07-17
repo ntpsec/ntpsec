@@ -575,6 +575,11 @@ newpeer(
 		peer->dstadr = loopback_interface;
 	else if (cast_flags & (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
 		peer->dstadr = findbcastinter(srcadr);
+#ifdef DEBUG
+		if (debug > 1)
+			printf("Found broadcast interface address %s, for address %s\n",
+				stoa(&(peer->dstadr)->sin), stoa(srcadr));
+#endif
 		/*
 		 * If it was a multicast packet, findbcastinter() may not
 		 * find it, so try a little harder.
