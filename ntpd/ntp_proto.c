@@ -2293,8 +2293,8 @@ clock_select(void)
 			if (debug > 1)
 				printf("select: prefer offset %.6f\n",
 				    sys_offset);
-		}
 #endif
+		}
 	} else {
 
 		/*
