@@ -498,10 +498,11 @@ ntpqmain(
 	extern int ntp_optind;
 	extern char *ntp_optarg;
 
-#ifdef NO_MAIN_ALLOWED
-    clear_globals();
-    taskPrioritySet(taskIdSelf(), 100 );
+#ifdef SYS_VXWORKS
+	clear_globals();
+	taskPrioritySet(taskIdSelf(), 100 );
 #endif
+
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 

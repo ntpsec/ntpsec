@@ -133,10 +133,6 @@ extern keyid_t	cache_keyid;		/* key identifier */
 extern u_char *	cache_key;		/* key pointer */
 extern u_int	cache_keylen;		/* key length */
 
-/* clocktypes.c */
-struct clktype;
-extern struct clktype clktypes[];
-
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */
 extern int	ntp_optind;		/* global argv index */
