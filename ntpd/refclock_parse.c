@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.57 2005/06/25 09:25:19 kardel RELEASE_20050625_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A
  *
- * refclock_parse.c,v 4.57 2005/06/25 09:25:19 kardel RELEASE_20050625_A
+ * refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,27 +178,24 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[]="4.57";
+static char rcsid[] = "refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
  **/
 
-static	void	parse_init	P((void));
 static	int	parse_start	P((int, struct peer *));
 static	void	parse_shutdown	P((int, struct peer *));
 static	void	parse_poll	P((int, struct peer *));
 static	void	parse_control	P((int, struct refclockstat *, struct refclockstat *, struct peer *));
-
-#define	parse_buginfo	noentry
 
 struct	refclock refclock_parse = {
 	parse_start,
 	parse_shutdown,
 	parse_poll,
 	parse_control,
-	parse_init,
-	parse_buginfo,
+	noentry,
+	noentry,
 	NOFLAGS
 };
 
@@ -1329,8 +1326,6 @@ static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 #define PARSESTATISTICS   (60*60)	        /* output state statistics every hour */
 
-static struct parseunit *parseunits[MAXUNITS];
-
 static int notice = 0;
 
 #define PARSE_STATETIME(parse, i) ((parse->generic->currentstatus == i) ? parse->statetime[i] + current_time - parse->lastchange : parse->statetime[i])
@@ -2067,7 +2062,7 @@ local_input(
 								printf(
 								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
 								       rbufp->fd,
-								       pps_info.assert_sequence + pps_info.clear_sequence ,
+								       (long)pps_info.assert_sequence + (long)pps_info.clear_sequence,
 								       lfptoa(&parse->parseio.parse_dtime.parse_ptime.fp, 6));
 							}
 #endif
@@ -2080,7 +2075,7 @@ local_input(
 								printf(
 								       "parse: local_receive: fd %d PPSAPI seq assert %ld, seq clear %ld - NO PPS event\n",
 								       rbufp->fd,
-								       pps_info.assert_sequence, pps_info.clear_sequence);
+								       (long)pps_info.assert_sequence, (long)pps_info.clear_sequence);
 							}
 						}
 #endif
@@ -2538,16 +2533,6 @@ cparse_statistics(
  **/
 
 /*--------------------------------------------------
- * parse_init - initialize internal parse driver data
- */
-static void
-parse_init(void)
-{
-	memset((caddr_t)parseunits, 0, sizeof parseunits);
-}
-
-
-/*--------------------------------------------------
  * parse_shutdown - shut down a PARSE clock
  */
 static void
@@ -2556,12 +2541,20 @@ parse_shutdown(
 	struct peer *peer
 	)
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = (struct parseunit *)0;
 
-	if (parse && !parse->peer)
+	if (peer && peer->procptr)
+		parse = (struct parseunit *)peer->procptr->unitptr;
+
+	if (!parse)
 	{
-		msyslog(LOG_ERR,
-			"PARSE receiver #%d: parse_shutdown: INTERNAL ERROR, unit not in use", unit);
+		/* nothing to clean up */
+		return;
+	}
+
+        if (!parse->peer)
+	{
+		msyslog(LOG_INFO, "PARSE receiver #%d: INTERNAL ERROR - unit already inactive - shutdown ignored", unit);
 		return;
 	}
 
@@ -2598,6 +2591,7 @@ parse_shutdown(
 			CLK_UNIT(parse->peer), parse->parse_type->cl_description);
 
 	parse->peer = (struct peer *)0; /* unused now */
+	peer->procptr->unitptr = (caddr_t)0;
 	free(parse);
 }
 
@@ -2989,8 +2983,6 @@ parse_start(
 	}
 
 	parse->binding = init_iobinding(parse);
-	parse->generic->io.clock_recv = parse->binding->bd_receive; /* pick correct receive routine */
-	parse->generic->io.io_input   = parse->binding->bd_io_input; /* pick correct input routine */
 
 	if (parse->binding == (bind_t *)0)
 		{
@@ -2998,6 +2990,9 @@ parse_start(
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 			return 0;			/* well, ok - special initialisation broke */
 		}      
+
+	parse->generic->io.clock_recv = parse->binding->bd_receive; /* pick correct receive routine */
+	parse->generic->io.io_input   = parse->binding->bd_io_input; /* pick correct input routine */
 
 	/*
 	 * as we always(?) get 8 bit chars we want to be
@@ -3133,11 +3128,6 @@ parse_ctl(
 #endif
 		}
 		
-		/*
-		 * keep fudgetime2 in sync with TRUSTTIME/MAXUNSYNC flag1
-		 */
-		parse->generic->fudgetime2 = (parse->flags & PARSE_TRUSTTIME) ? (double)parse->maxunsync : parse->ppsphaseadjust;
-
 		if (in->haveflags & CLK_HAVETIME1)
                 {
 		  parse->generic->fudgetime1 = in->fudgetime1;
@@ -3271,6 +3261,11 @@ parse_control(
 		outstatus[0] = '\0';
 
 		out->type       = REFCLK_PARSE;
+
+		/*
+		 * keep fudgetime2 in sync with TRUSTTIME/MAXUNSYNC flag1
+		 */
+		parse->generic->fudgetime2 = (parse->flags & PARSE_TRUSTTIME) ? (double)parse->maxunsync : parse->ppsphaseadjust;
 
 		/*
 		 * figure out skew between PPS and RS232 - just for informational
@@ -5645,6 +5640,19 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.60  2005/07/17 21:14:44  kardel
+ * change contents of version string to include the RCS/CVS Id
+ *
+ * Revision 4.59  2005/07/06 06:56:38  kardel
+ * syntax error
+ *
+ * Revision 4.58  2005/07/04 13:10:40  kardel
+ * fix bug 455: tripping over NULL pointer on cleanup
+ * fix shadow storage logic for ppsphaseadjust and trustime wrt/ time2
+ * fix compiler warnings for some platforms wrt/ printf formatstrings and
+ *     varying structure element sizes
+ * reorder assignment in binding to avoid tripping over NULL pointers
+ *
  * Revision 4.57  2005/06/25 09:25:19  kardel
  * sort out log output sequence
  *
