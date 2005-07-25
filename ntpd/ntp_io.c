@@ -161,11 +161,11 @@ static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
 /*
  * Not all platforms support multicast
  */
 #ifdef MCAST
-static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, int, struct sockaddr_storage *));
 static	isc_boolean_t	socket_multicast_disable P((struct interface *, int, struct sockaddr_storage *));
 #endif
