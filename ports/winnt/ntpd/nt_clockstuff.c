@@ -430,7 +430,7 @@ static void StartClockThread(void)
 
 	/* init sync objects */
 	InitializeCriticalSection(&TimerCritialSection);
-	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
+	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, "TimerThreadExitRequest");
 
 	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 0, &tid);
 	if (ClockThreadHandle != NULL) {
