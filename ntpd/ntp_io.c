@@ -827,10 +827,6 @@ socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_stora
 
 #endif /* OPEN_BCAST_SOCKET */
 /*
- * NOTE: Not all platforms support multicast
- */
-#ifdef MCAST
-/*
  * Check to see if the address is a multicast address
  */
 static isc_boolean_t
@@ -880,6 +876,10 @@ addr_ismulticast(struct sockaddr_storage *maddr)
 		return (ISC_FALSE);
 	}
 }
+/*
+ * NOTE: Not all platforms support multicast
+ */
+#ifdef MCAST
 /*
  * Add a multicast address to a given socket
  * The socket is in the inter_list all we need to do is enable
@@ -2497,7 +2497,7 @@ findbcastinter(
 	}
 */
 	for (i = nwilds; i < ninterfaces; i++) {
-		/* Don't both with ignore interfaces */
+		/* Don't bother with ignored interfaces */
 		if (inter_list[i].ignore_packets == ISC_TRUE)
 			continue;
 		/*
