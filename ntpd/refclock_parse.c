@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A
  *
- * refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A
+ * refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.60 2005/07/17 21:14:44 kardel RELEASE_20050717_A";
+static char rcsid[] = "refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -461,7 +461,7 @@ typedef struct poll_info
  * receiver specific constants
  */
 #define MBG_SPEED		(B9600)
-#define MBG_CFLAG		(CS7|PARENB|CREAD|CLOCAL|HUPCL)
+#define MBG_CFLAG		(CS7|PARENB|CREAD|CLOCAL|HUPCL|CSTOPB)
 #define MBG_IFLAG		(IGNBRK|IGNPAR|ISTRIP)
 #define MBG_OFLAG		0
 #define MBG_LFLAG		0
@@ -5640,6 +5640,11 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.61  2005/07/27 21:16:19  kardel
+ * fix a long (> 11 years) misconfiguration wrt/ Meinberg cflag factory
+ * default setup. CSTOPB was missing for the 7E2 default data format of
+ * the DCF77 clocks.
+ *
  * Revision 4.60  2005/07/17 21:14:44  kardel
  * change contents of version string to include the RCS/CVS Id
  *
