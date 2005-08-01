@@ -161,6 +161,9 @@ static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+/*
+ * Multicast functions
+ */
 static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
 /*
  * Not all platforms support multicast
@@ -875,6 +878,59 @@ addr_ismulticast(struct sockaddr_storage *maddr)
 	default:
 		return (ISC_FALSE);
 	}
+}
+/*
+ * Multicast servers need to set the appropriate Multicast interface
+ * socket option in order for it to know which interface to use for
+ * send the multicast packet.
+ */
+void
+enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
+{
+	switch (maddr->ss_family)
+	{
+	case AF_INET:
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_IF,
+		   (char *)&(((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr),
+		    sizeof(struct sockaddr_in*)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_IF failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+			return;
+		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			"Added IPv4 multicast interface on socket %d, addr %s for multicast address %s\n",
+			iface->fd, stoa(&iface->sin),
+			stoa(maddr));
+		}
+#endif
+		break;
+	case AF_INET6:
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+		    &iface->scopeid, sizeof(iface->scopeid)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IPV6_MULTICAST_IF failure: %m on socket %d, addr %s, scope %d for multicast address %s",
+			iface->fd, stoa(&iface->sin), iface->scopeid,
+			stoa(maddr));
+			return;
+		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			"Added IPv6 multicast interface on socket %d, addr %s, scope %d for multicast address %s\n",
+			iface->fd,  stoa(&iface->sin), iface->scopeid,
+			stoa(maddr));
+		}
+#endif
+		break;
+#else
+		return;
+#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
+	}
+	return;
 }
 /*
  * NOTE: Not all platforms support multicast
@@ -2231,8 +2287,10 @@ input_handler(
 	{
 		if (select_count == 0) /* We really had nothing to do */
 		{
+#ifdef DEBUG
 			if (debug)
 			    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
+#endif
 			--handler_count;
 			return;
 		}
@@ -2244,9 +2302,10 @@ input_handler(
 		 * it.
 		 */
 		L_SUB(&ts_e, &ts);
+#ifdef DEBUG
 		if (debug > 3)
 		    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
-
+#endif
 		/* just bail. */
 		--handler_count;
 		return;
@@ -2515,7 +2574,7 @@ findbcastinter(
 		if (inter_list[i].sin.ss_family == AF_INET6 &&
 		   (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr)))
 		{
-			continue;
+/*			continue; */
 		}
 #endif
 		/*
