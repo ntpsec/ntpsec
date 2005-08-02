@@ -214,8 +214,6 @@ struct peer *
 findpeer(
 	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
-	int	fd,
-	int	pkt_version,
 	int	pkt_mode,
 	int	*action
 	)
@@ -228,8 +226,6 @@ findpeer(
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
 		if (SOCKCMP(srcadr, &peer->srcadr) &&
 		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
-			if (peer->version != pkt_version)
-				continue;
 
 			/*
 			 * if the association matching rules determine
