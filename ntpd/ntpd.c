@@ -698,7 +698,6 @@ ntpdmain(
 	init_io_completion_port();
 #endif
 	init_lib();
-	init_random();
 	init_request();
 	init_control();
 	init_peer();

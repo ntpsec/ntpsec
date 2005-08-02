@@ -65,7 +65,6 @@ ntpsim(
         init_mon();
         init_timer();
         init_lib();
-        init_random();
         init_request();
         init_control();
         init_peer();
