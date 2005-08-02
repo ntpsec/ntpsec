@@ -56,9 +56,7 @@ struct recvbuf {
 #define	recv_srcclock	X_from_where.X_recv_srcclock
 #define recv_peer	X_from_where.X_recv_peer
 #if defined HAVE_IO_COMPLETION_PORT
-        IoCompletionInfo	iocompletioninfo;
 	WSABUF		wsabuff;
-	DWORD		AddressLength;
 #else
 	struct sockaddr_storage srcadr;	/* where packet came from */
 #endif

@@ -451,8 +451,8 @@ receive(
 	 * multicaster, the broadcast address is null, so we use the
 	 * unicast address anyway. Don't ask.
 	 */
-	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr, rbufp->fd,
-	    hisversion, hismode, &retcode);
+	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr,  hismode,
+	    &retcode);
 	dstadr_sin = &rbufp->dstadr->sin;
 	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);
@@ -658,10 +658,10 @@ receive(
 		}
 
 		/*
-		 * Do not respond if the stratum is below the floor or
+		 * Do not respond if our stratum is below the floor or
 		 * at or above the ceiling.
 		 */
-		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+		if (sys_stratum < sys_floor || sys_stratum >= sys_ceiling)
 			return;
 
 		/*

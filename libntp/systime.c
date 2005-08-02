@@ -61,6 +61,7 @@ get_systime(
 
 	/*
 	 * Convert Unix clock from seconds and nanoseconds to seconds.
+	 * The bottom is only two bits down, so no need for fuzz.
 	 */
 # ifdef HAVE_CLOCK_GETTIME
 	clock_gettime(CLOCK_REALTIME, &ts);
@@ -75,10 +76,11 @@ get_systime(
 
 	/*
 	 * Convert Unix clock from seconds and microseconds to seconds.
+	 * Add in unbiased random fuzz beneath the microsecond.
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = tv.tv_usec / 1e6;
+	dtemp = (tv.tv_usec + (RANDOM & 0xffffffff) / FRAC - .5) / 1e6;
 
 #endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
