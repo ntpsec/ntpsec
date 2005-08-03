@@ -80,7 +80,8 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = (tv.tv_usec + (RANDOM & 0xffffffff) / FRAC - .5) / 1e6;
+	/* ntp_random() produces 31 bits (always nonnegative) */
+	dtemp = (tv.tv_usec + ntp_random() / FRAC - .5) / 1e6;
 
 #endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
