@@ -239,7 +239,8 @@ ntp_monitor(
 		 * Preempt from the MRU list if old enough.
 		 */
 		md = mon_mru_list.mru_prev;
-		if (((u_long)RANDOM & 0xffffffff) / FRAC >
+		/* We get 31 bits from ntp_random() */
+		if (((u_long)ntp_random()) / FRAC >
 		    (double)(current_time - md->lasttime) / mon_age)
 			return;
 

@@ -144,7 +144,7 @@ init_peer(void)
 	/*
 	 * Initialize our first association ID
 	 */
-	while ((current_association_ID = RANDOM & 0xffff) == 0);
+	while ((current_association_ID = ntp_random() & 0xffff) == 0);
 }
 
 
