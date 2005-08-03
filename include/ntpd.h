@@ -20,6 +20,9 @@ void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 #endif /* SYS_WINNT */
 
+extern	void	ntp_srandom	P((unsigned long));
+extern	int	ntp_random	P((void));
+
 /* ntp_config.c */
 extern	void	getconfig	P((int, char **));
 
@@ -74,6 +77,7 @@ extern	void	ntp_intres	P((void));
 extern	struct interface *findinterface P((struct sockaddr_storage *));
 extern  struct interface *findbcastinter P((struct sockaddr_storage *));
 extern  void	enable_broadcast P((struct interface *, struct sockaddr_storage *));
+extern  void	enable_multicast_if P((struct interface *, struct sockaddr_storage *));
 extern	void	interface_dump	 P((struct interface *));
 
 extern	void	init_io 	P((void));

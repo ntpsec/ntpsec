@@ -20,8 +20,6 @@
 
 #define BUFCHECK_SECS	10
 static void	TransmitCheckThread(void *NotUsed);
-static BOOL	bExit;
-static HANDLE	TimerHandle;
 static HANDLE hHeapHandle = NULL;
 
 static HANDLE hIoCompletionPort = NULL;
@@ -101,6 +99,7 @@ iocompletionthread(void *NotUsed)
 					lpo->request_type);
 			}
 #endif
+			break;
 		}
 	}
 }
@@ -117,13 +116,6 @@ init_io_completion_port(
 	 * Create a handle to the Heap
 	 */
 	hHeapHandle = HeapCreate(0, 20*sizeof(IoCompletionInfo), 0);
-
-	/* Set the exit flag */
-	bExit = FALSE;
-	/*
-	 * Initialize the timer watch section
-	 */
-//	_beginthread(TransmitCheckThread, 0, NULL);
 
 	/* Create the event used to signal an IO event
 	 */
@@ -160,12 +152,6 @@ uninit_io_completion_port(
 	void
 	)
 {
-	/*
-	 * Tell the timer handle to exit
-	 */
-	bExit = TRUE;
-	SetEvent(TimerHandle);
-
 	if (hIoCompletionPort != NULL) {
 		/*  Get each of the service threads to exit
 		*/
@@ -389,24 +375,6 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 	}
 }
 
-
-static int 
-OnSendToComplete(DWORD Key, IoCompletionInfo *lpo, DWORD Bytes)
-{
-	transmitbuf *buff = NULL;
-	(void) Bytes;
-	(void) Key;
-
-	buff = (struct transmitbuf *) lpo->buff;
-
-	free_transmit_buffer(buff);
-	/* Clear the heap */
-	if (lpo != NULL)
-		HeapFree(hHeapHandle, 0, lpo);
-	return 1;
-}
-
-
 static int 
 OnWriteComplete(DWORD Key, IoCompletionInfo *lpo, DWORD Bytes)
 {
@@ -608,21 +576,6 @@ struct recvbuf *GetReceivedBuffers()
 	} /* switch */
 
 	return (getrecvbufs());	/* get received buffers */
-}
-static void
-TransmitCheckThread(void *NotUsed)
-{
-
-	int SleepSecs = BUFCHECK_SECS;
-	while (TRUE) 
-	{
-		Sleep(SleepSecs*1000);
-
-		/* If we are done we exit */
-		if (bExit)
-			return;
-				
-	} /* while */
 }
 
 #else

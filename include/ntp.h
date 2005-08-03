@@ -697,15 +697,7 @@ struct pkt {
  * How we randomize polls.  The poll interval is a power of two. We chose
  * a random interval which is this value plus-minus one second.
  */
-#if defined(HAVE_MRAND48)
-# define RANDOM		(mrand48())
-# define SRANDOM(x)	(srand48(x))
-#else
-# define RANDOM		(random())
-# define SRANDOM(x)	(srandom(x))
-#endif
-
-#define RANDPOLL(x)	((1 << (x)) - 1 + (RANDOM & 0x3))
+#define RANDPOLL(x)	((1 << (x)) - 1 + (ntp_random() & 0x3))
 
 /*
  * min, min3 and max.  Makes it easier to transliterate the spec without

@@ -353,8 +353,6 @@ extern void alarm P((int seconds));
 #define getclock	clock_gettime
 #define fcntl		ioctl
 #define _getch		getchar
-#define random 		rand
-#define srandom		srand
 
 /* define this away for vxWorks */
 #define openlog(x,y)

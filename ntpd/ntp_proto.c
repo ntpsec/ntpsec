@@ -1524,7 +1524,7 @@ peer_clear(
 	if (initializing)
 		peer->nextdate = current_time + peer_associations;
 	else
-		peer->nextdate = current_time + (RANDOM & ((1 <<
+		peer->nextdate = current_time + (ntp_random() & ((1 <<
 		    NTP_MINPOLL) - 1));
 #ifdef DEBUG
 	if (debug)
