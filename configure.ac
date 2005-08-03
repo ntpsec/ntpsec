@@ -3505,66 +3505,6 @@ case "$ac_cv_var_ntpd_sim" in
     ;;
 esac
 
-AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery,
-[AC_ARG_ENABLE(udp-wildcard,
-   AC_HELP_STRING([--enable-udp-wildcard], [s use UDP wildcard delivery]),
-    [ans=$enableval],
-    [ans=no
-     case "$host" in
-      *-fujitsu-uxp*)
-	 ans=yes
-	 ;;
-      *-univel-sysv*)
-	 ans=yes
-	 ;;
-      *-*-aix3.2*)
-	 ans=yes
-	 ;;
-      *-*-aix[[45]]*)
-	 ans=yes
-	 ;;
-      *-*-bsdi*)
-	 ans=yes
-	 ;;
-      *-*-domainos)
-	 ans=yes
-	 ;;
-      *-*-freebsd*)
-	ans=yes
-	;;
-      *-*-hpux*)
-	 ans=yes
-	 ;;
-      *-*-irix6*)
-	 ans=yes
-	 ;;
-      *-*-linux*)
-	 ans=yes
-	 ;;
-      *-*-mpeix*)
-	 ans=yes
-	 ;;
-      *-*-osf*)
-	 ans=yes
-	 ;;
-      *-*-ptx*)
-	 ans=yes
-	 ;;
-      *-*-solaris2*)
-	 ans=yes
-	 ;;
-      *-*-sunos4*)
-	 ans=yes
-	 ;;
-      *-*-unicosmp*)
-	 ans=yes
-	 ;;
-     esac])
-ac_cv_var_udp_wildcard_delivery=$ans])
-case "$ac_cv_var_udp_wildcard_delivery" in
- yes) AC_DEFINE(UDP_WILDCARD_DELIVERY, 1, [use UDP Wildcard Delivery?]) ;;
-esac
-
 case "$build" in
  $host)
     ;;
