@@ -37,14 +37,6 @@
 # include <sys/sockio.h>
 #endif
 
-/*
- * Macro to allow packets to be delivered to wildcard sockets
- * This should only be turned on if absolutely necessary
- * and requires a manual change and rebuild of the code
- * It is not recommended since that means you don't know
- * to which address it's being delivered.
- */
-#define ALLOW_WILDCARD_PACKETS
 
 /* 
  * Set up some macros to look for IPv6 and IPv6 multicast
@@ -403,13 +395,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_BROADCAST | INT_UP;
-#ifdef ALLOW_WILDCARD_SOCKETS
-		any_interface = &inter_list[idx];
-		wildipv4 = idx;
-		inter_list[idx].ignore_packets = ISC_FALSE;
-#else
 		inter_list[idx].ignore_packets = ISC_TRUE;
-#endif
 #if defined(MCAST)
 	/*
 	 * enable possible multicast reception on the broadcast socket
@@ -440,13 +426,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_UP;
-#ifdef ALLOW_WILDCARD_SOCKETS
-		any6_interface = &inter_list[idx];
-		wildipv6 = idx;
-		inter_list[idx].ignore_packets = ISC_FALSE;
-#else
 		inter_list[idx].ignore_packets = ISC_TRUE;
-#endif
 		idx++;
 	}
 #endif
@@ -686,12 +666,6 @@ create_sockets(
 				NTP_PORT,
 				(inter_list[i].ignore_packets == ISC_FALSE) ?
 				"Enabled": "Disabled");
-/*		if ((inter_list[i].flags & INT_BROADCAST) &&
-		     inter_list[i].bfd != INVALID_SOCKET)
-			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
-				stoa((&inter_list[i].bcast)),
-				NTP_PORT);
-*/
 	/*
 	 * Calculate the address hash for each interface address.
 	 */
@@ -887,6 +861,7 @@ addr_ismulticast(struct sockaddr_storage *maddr)
 void
 enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 {
+#ifdef MCAST
 	switch (maddr->ss_family)
 	{
 	case AF_INET:
@@ -931,6 +906,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 #endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	}
 	return;
+#endif
 }
 /*
  * NOTE: Not all platforms support multicast
@@ -1998,7 +1974,6 @@ input_handler(
 	l_fp ts_e;			/* Timestamp at EOselect() gob */
 	fd_set fds;
 	int select_count = 0;
-	static int handler_count = 0;
 
 	/*
 	 * Initialize the skip list
@@ -2009,9 +1984,6 @@ input_handler(
 	}
 	totskips = 0;
 
-	++handler_count;
-	if (handler_count != 1)
-	    msyslog(LOG_ERR, "input_handler: handler_count is %d!", handler_count);
 	handler_calls++;
 
 	/*
@@ -2291,7 +2263,6 @@ input_handler(
 			if (debug)
 			    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
 #endif
-			--handler_count;
 			return;
 		}
 		/* We've done our work */
@@ -2307,7 +2278,6 @@ input_handler(
 		    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
 #endif
 		/* just bail. */
-		--handler_count;
 		return;
 	}
 	else if (n == -1)
@@ -2328,10 +2298,8 @@ input_handler(
 			    if ((FD_ISSET(j, &fds) && (read(j, &b, 0) == -1)))
 				netsyslog(LOG_ERR, "Bad file descriptor %d", j);
 		}
-		--handler_count;
 		return;
 	}
-	--handler_count;
 	return;
 }
 
