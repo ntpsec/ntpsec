@@ -144,9 +144,7 @@ init_peer(void)
 	/*
 	 * Initialize our first association ID
 	 */
-	current_association_ID = (associd_t)ranp2(16);
-	if (current_association_ID == 0)
-	    current_association_ID = 1;
+	while ((current_association_ID = ntp_random() & 0xffff) == 0);
 }
 
 
@@ -214,8 +212,6 @@ struct peer *
 findpeer(
 	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
-	int	fd,
-	int	pkt_version,
 	int	pkt_mode,
 	int	*action
 	)
@@ -228,8 +224,6 @@ findpeer(
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
 		if (SOCKCMP(srcadr, &peer->srcadr) &&
 		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
-			if (peer->version != pkt_version)
-				continue;
 
 			/*
 			 * if the association matching rules determine
@@ -576,9 +570,14 @@ newpeer(
 	else if (cast_flags & (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
 		peer->dstadr = findbcastinter(srcadr);
 #ifdef DEBUG
-		if (debug > 1)
-			printf("Found broadcast interface address %s, for address %s\n",
-				stoa(&(peer->dstadr)->sin), stoa(srcadr));
+		if (debug > 1) {
+			if (peer->dstadr != NULL)
+				printf("Found broadcast interface address %s, for address %s\n",
+					stoa(&(peer->dstadr)->sin), stoa(srcadr));
+			else
+				printf("No broadcast local address found for address %s\n",
+					stoa(srcadr));
+		}
 #endif
 		/*
 		 * If it was a multicast packet, findbcastinter() may not
@@ -604,6 +603,12 @@ newpeer(
 	 */
 	if (cast_flags & MDF_BCAST) {
 		enable_broadcast(peer->dstadr, srcadr);
+	}
+	/*
+	 * Multicast needs the socket interface enabled for multicast
+	 */
+	if (cast_flags & MDF_MCAST) {
+		enable_multicast_if(peer->dstadr, srcadr);
 	}
 #ifdef DEBUG
 	if (debug>2)

@@ -60,7 +60,6 @@ extern	void *	emalloc		P((u_int));
 extern	int	ntp_getopt	P((int, char **, const char *));
 extern	void	init_auth	P((void));
 extern	void	init_lib	P((void));
-extern	void	init_random	P((void));
 extern	struct savekey *auth_findkey P((keyid_t));
 extern	int	auth_moremem	P((void));
 extern	int	ymd2yd		P((int, int, int));

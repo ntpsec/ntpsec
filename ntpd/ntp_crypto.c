@@ -274,7 +274,7 @@ make_keylist(
 	 * NTP_MAXKEY.
 	 */
 	while (1) {
-		keyid = (u_long)RANDOM & 0xffffffff;
+		keyid = (u_long)ntp_random();	/* 31 bits from ntp_random() */
 		if (keyid <= NTP_MAXKEY)
 			continue;
 

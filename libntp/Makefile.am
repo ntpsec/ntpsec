@@ -11,7 +11,7 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	lib_strbuf.c machines.c md5c.c memmove.c mfptoa.c \
 	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
-	ranny.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
+	random.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
 	statestr.c strdup.c strerror.c strstr.c \
 	syssignal.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
 	uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
@@ -25,7 +25,7 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	$(srcdir)/../libisc/netscope.c
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
-EXTRA_libntp_a_SOURCES = adjtimex.c random.c
+EXTRA_libntp_a_SOURCES = adjtimex.c
 INCLUDES = -I$(top_srcdir)/include -I../include
 ETAGS_ARGS = Makefile.am
 

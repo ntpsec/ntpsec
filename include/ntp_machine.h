@@ -81,11 +81,6 @@ MISC
   RETSIGTYPE		- Define signal function type.
   NO_SIGNED_CHAR_DECL - No "signed char" see include/ntp.h
   LOCK_PROCESS		- Have plock.
-  UDP_WILDCARD_DELIVERY
-			- these systems deliver broadcast packets to the wildcard
-			  port instead to a port bound to the interface bound
-			  to the correct broadcast address - are these
-			  implementations broken or did the spec change ?
 */
 
 /*
@@ -353,8 +348,6 @@ extern void alarm P((int seconds));
 #define getclock	clock_gettime
 #define fcntl		ioctl
 #define _getch		getchar
-#define random 		rand
-#define srandom		srand
 
 /* define this away for vxWorks */
 #define openlog(x,y)

@@ -464,7 +464,7 @@ ntpdmain(
 	 * Initialize random generator and public key pair
 	 */
 	get_systime(&now);
-	SRANDOM((int)(now.l_i * now.l_uf));
+	ntp_srandom((int)(now.l_i * now.l_uf));
 
 #ifdef HAVE_DNSREGISTRATION
 	msyslog(LOG_INFO, "Attemping to register mDNS\n");
@@ -698,7 +698,6 @@ ntpdmain(
 	init_io_completion_port();
 #endif
 	init_lib();
-	init_random();
 	init_request();
 	init_control();
 	init_peer();

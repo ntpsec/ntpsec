@@ -37,14 +37,6 @@
 # include <sys/sockio.h>
 #endif
 
-/*
- * Macro to allow packets to be delivered to wildcard sockets
- * This should only be turned on if absolutely necessary
- * and requires a manual change and rebuild of the code
- * It is not recommended since that means you don't know
- * to which address it's being delivered.
- */
-#define ALLOW_WILDCARD_PACKETS
 
 /* 
  * Set up some macros to look for IPv6 and IPv6 multicast
@@ -161,6 +153,9 @@ static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
 static	isc_boolean_t	socket_broadcast_disable P((struct interface *, int, struct sockaddr_storage *));
+/*
+ * Multicast functions
+ */
 static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
 /*
  * Not all platforms support multicast
@@ -400,13 +395,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_BROADCAST | INT_UP;
-#ifdef ALLOW_WILDCARD_SOCKETS
-		any_interface = &inter_list[idx];
-		wildipv4 = idx;
-		inter_list[idx].ignore_packets = ISC_FALSE;
-#else
 		inter_list[idx].ignore_packets = ISC_TRUE;
-#endif
 #if defined(MCAST)
 	/*
 	 * enable possible multicast reception on the broadcast socket
@@ -437,13 +426,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].sent = 0;
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_UP;
-#ifdef ALLOW_WILDCARD_SOCKETS
-		any6_interface = &inter_list[idx];
-		wildipv6 = idx;
-		inter_list[idx].ignore_packets = ISC_FALSE;
-#else
 		inter_list[idx].ignore_packets = ISC_TRUE;
-#endif
 		idx++;
 	}
 #endif
@@ -683,12 +666,6 @@ create_sockets(
 				NTP_PORT,
 				(inter_list[i].ignore_packets == ISC_FALSE) ?
 				"Enabled": "Disabled");
-/*		if ((inter_list[i].flags & INT_BROADCAST) &&
-		     inter_list[i].bfd != INVALID_SOCKET)
-			msyslog(LOG_INFO, "Listening on broadcast address %s#%d",
-				stoa((&inter_list[i].bcast)),
-				NTP_PORT);
-*/
 	/*
 	 * Calculate the address hash for each interface address.
 	 */
@@ -875,6 +852,61 @@ addr_ismulticast(struct sockaddr_storage *maddr)
 	default:
 		return (ISC_FALSE);
 	}
+}
+/*
+ * Multicast servers need to set the appropriate Multicast interface
+ * socket option in order for it to know which interface to use for
+ * send the multicast packet.
+ */
+void
+enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
+{
+#ifdef MCAST
+	switch (maddr->ss_family)
+	{
+	case AF_INET:
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_IF,
+		   (char *)&(((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr),
+		    sizeof(struct sockaddr_in*)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_IF failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+			return;
+		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			"Added IPv4 multicast interface on socket %d, addr %s for multicast address %s\n",
+			iface->fd, stoa(&iface->sin),
+			stoa(maddr));
+		}
+#endif
+		break;
+	case AF_INET6:
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+		    &iface->scopeid, sizeof(iface->scopeid)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IPV6_MULTICAST_IF failure: %m on socket %d, addr %s, scope %d for multicast address %s",
+			iface->fd, stoa(&iface->sin), iface->scopeid,
+			stoa(maddr));
+			return;
+		}
+#ifdef DEBUG
+		if (debug > 0) {
+			printf(
+			"Added IPv6 multicast interface on socket %d, addr %s, scope %d for multicast address %s\n",
+			iface->fd,  stoa(&iface->sin), iface->scopeid,
+			stoa(maddr));
+		}
+#endif
+		break;
+#else
+		return;
+#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
+	}
+	return;
+#endif
 }
 /*
  * NOTE: Not all platforms support multicast
@@ -1942,7 +1974,6 @@ input_handler(
 	l_fp ts_e;			/* Timestamp at EOselect() gob */
 	fd_set fds;
 	int select_count = 0;
-	static int handler_count = 0;
 
 	/*
 	 * Initialize the skip list
@@ -1953,9 +1984,6 @@ input_handler(
 	}
 	totskips = 0;
 
-	++handler_count;
-	if (handler_count != 1)
-	    msyslog(LOG_ERR, "input_handler: handler_count is %d!", handler_count);
 	handler_calls++;
 
 	/*
@@ -2231,9 +2259,10 @@ input_handler(
 	{
 		if (select_count == 0) /* We really had nothing to do */
 		{
+#ifdef DEBUG
 			if (debug)
 			    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
-			--handler_count;
+#endif
 			return;
 		}
 		/* We've done our work */
@@ -2244,11 +2273,11 @@ input_handler(
 		 * it.
 		 */
 		L_SUB(&ts_e, &ts);
+#ifdef DEBUG
 		if (debug > 3)
 		    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
-
+#endif
 		/* just bail. */
-		--handler_count;
 		return;
 	}
 	else if (n == -1)
@@ -2269,10 +2298,8 @@ input_handler(
 			    if ((FD_ISSET(j, &fds) && (read(j, &b, 0) == -1)))
 				netsyslog(LOG_ERR, "Bad file descriptor %d", j);
 		}
-		--handler_count;
 		return;
 	}
-	--handler_count;
 	return;
 }
 
@@ -2515,7 +2542,7 @@ findbcastinter(
 		if (inter_list[i].sin.ss_family == AF_INET6 &&
 		   (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&inter_list[i].sin)->sin6_addr)))
 		{
-			continue;
+/*			continue; */
 		}
 #endif
 		/*
