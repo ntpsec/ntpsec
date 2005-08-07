@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A
+ * /src/NTP/ntp4-dev/ntpd/refclock_parse.c,v 4.62 2005/08/06 17:40:00 kardel RELEASE_20050806_A
  *
- * refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A
+ * refclock_parse.c,v 4.62 2005/08/06 17:40:00 kardel RELEASE_20050806_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -178,7 +178,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.61 2005/07/27 21:16:19 kardel RELEASE_20050727_A";
+static char rcsid[] = "refclock_parse.c,v 4.62 2005/08/06 17:40:00 kardel RELEASE_20050806_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -3331,7 +3331,7 @@ parse_control(
 
 			if (tmpctl.parsegettc.parse_count)
 			    mkascii(outstatus+strlen(outstatus), (int)(sizeof(outstatus)- strlen(outstatus) - 1),
-				    tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1));
+				    tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count));
 
 		}
 	
@@ -5640,6 +5640,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.62  2005/08/06 17:40:00  kardel
+ * cleanup size handling wrt/ to buffer boundaries
+ *
  * Revision 4.61  2005/07/27 21:16:19  kardel
  * fix a long (> 11 years) misconfiguration wrt/ Meinberg cflag factory
  * default setup. CSTOPB was missing for the 7E2 default data format of
