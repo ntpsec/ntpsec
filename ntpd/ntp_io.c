@@ -2192,13 +2192,12 @@ input_handler(
 						   (struct sockaddr *)&rb->recv_srcadr,
 						   &fromlen);
 				if (rb->recv_length == 0
-#ifdef EWOULDBLOCK
-				 || errno==EWOULDBLOCK
-#endif
+				 || (rb->recv_length == -1 && 
+				    (errno==EWOULDBLOCK
 #ifdef EAGAIN
-				 || errno==EAGAIN
+				  || errno==EAGAIN
 #endif
-				 ) {
+				 ))) {
 					freerecvbuf(rb);
 					continue;
 				}
