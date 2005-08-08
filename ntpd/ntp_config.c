@@ -343,7 +343,6 @@ static char res_file[MAX_PATH];
  */
 
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
-char const *progname;
 char	*sys_phone[MAXPHONE] = {NULL}; /* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 #if defined(HAVE_SCHED_SETSCHEDULER)
@@ -511,7 +510,7 @@ getconfig(
 	 * Initialize, initialize
 	 */
 	errflg = 0;
-	/* HMS: don't initialize debug to 0 here! */
+	
 #ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
 #else
@@ -530,7 +529,6 @@ getconfig(
 	alt_config_file = alt_config_file_storage;
 
 #endif /* SYS_WINNT */
-	progname = argv[0];
 	res_fp = NULL;
 	ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
 

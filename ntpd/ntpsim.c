@@ -4,6 +4,7 @@
  */
 #include "ntpd.h"
 #include "ntpsim.h"
+#include "ntpdsim-opts.h"
 
 /*
  * Defines...
@@ -73,7 +74,15 @@ ntpsim(
         init_io();
         init_loopfilter();
         mon_start(MON_OFF);
+
+	{
+		int optct = optionProcess(&ntpdsimOptions, argc, argv);
+		argc -= optct;
+		argv += optct;
+	}
+
 	getconfig(argc, argv);
+
         initializing = 0;
 	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 

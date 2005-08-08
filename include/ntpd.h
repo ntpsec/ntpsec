@@ -308,7 +308,6 @@ extern int	cal_enable;		/* refclock calibrate enable */
 extern int	allow_panic;		/* allow panic correction */
 extern int	mode_ntpdate;		/* exit on first clock set */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
-extern int	forground_process;	/* run the process in the forground */
 
 /*
  * Clock state machine variables

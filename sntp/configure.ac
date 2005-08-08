@@ -6,6 +6,9 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_LIBTOOL
+
+LIBOPTS_CHECK
 
 # Checks for libraries.
 
@@ -31,9 +34,11 @@ AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
 		[ ac_cv_have_ss_family_in_struct_ss="no" ],
 	)
 ])
-if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
-fi
+case "$ac_cv_have_ss_family_in_struct_ss" in
+ yes)
+    AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
+    ;;
+esac
 
 AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
 		ac_cv_have___ss_family_in_struct_ss, [
@@ -47,9 +52,11 @@ AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
 		[ ac_cv_have___ss_family_in_struct_ss="no" ]
 	)
 ])
-if test "x$ac_cv_have___ss_family_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
-fi
+case "$ac_cv_have___ss_family_in_struct_ss" in
+ yes)
+    AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
+    ;;
+esac
 
 case "$ac_cv_have_ss_family_in_struct_ss$ac_cv_have___ss_family_in_struct_ss" in
  noyes)

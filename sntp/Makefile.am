@@ -7,6 +7,10 @@
 # that not all of the following system settings have been tested recently.
 
 AUTOMAKE_OPTIONS = foreign
+ACLOCAL_AMFLAGS= -I .
+
+AM_CPPFLAGS=	$(LIBOPTS_CFLAGS)
+LDADD=	$(LIBOPTS_LDADD)
 
 # Compiling this sort of ANSI C under SunOS 4.1 is a mug's game, because Sun's
 # Unix headers make GNU C vomit even in compatibility mode, but the following
@@ -29,17 +33,41 @@ NULL=
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS = sntp
 
+SUBDIRS=
+if NEED_LIBOPTS
+SUBDIRS+= libopts
+endif
+SUBDIRS+= .
+
 sntp_SOURCES = \
 	header.h \
 	internet.c \
 	internet.h \
 	kludges.h \
 	main.c \
+	sntp-opts.c \
+	sntp-opts.h \
 	socket.c \
 	timing.c \
 	unix.c \
 	$(NULL)
 
 dist_man_MANS=	sntp.1
+
+EXTRA_DIST=	sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu
+BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
+man_MANS=	sntp.1
+
+sntp-opts.h: sntp-opts.c
+sntp-opts.c: sntp-opts.def
+	cd $(srcdir) && autogen sntp-opts.def
+
+sntp.1: sntp-opts.def
+	cd $(srcdir) && autogen -Tagman1.tpl -bsntp sntp-opts.def
+
+sntp-opts.texi sntp-opts.menu: sntp-opts.def
+	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
+		-Taginfo.tpl -DLEVEL=section sntp-opts.def
+
 
 include ../bincheck.mf

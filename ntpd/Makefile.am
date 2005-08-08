@@ -6,17 +6,23 @@ bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
 
 noinst_LIBRARIES=	libntpd.a
 
-AM_CPPFLAGS= -I$(top_srcdir)/include -I../include
+AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
+
+BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
+man_MANS=	ntpd.1
+
+BUILT_SOURCES+=	ntpdsim-opts.c ntpdsim-opts.h ntpdsim.1 ntpdsim-opts.texi ntpdsim-opts.menu
+man_MANS+=	ntpdsim.1
 
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm @LCRYPTO@
-ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@
+ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
+ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
@@ -31,8 +37,8 @@ check-local: @MAKE_CHECK_Y2K@
 
 # SIM: cmd_args.c ntp_config.c ntp_io.c ntpd.c + ntpsim.c (include/ntpsim.h)
 # ntp_resolver.c is presently unused...
-ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntpd.c
-ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c
+ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntpd.c ntpd-opts.c ntpd-opts.h
+ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c ntpdsim-opts.c ntpdsim-opts.h
 libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \
 	ntp_intres.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
@@ -53,10 +59,35 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_ulink.c refclock_wwv.c refclock_wwvb.c \
 	refclock_zyfer.c
 
+ntpd-opts.h: ntpd-opts.c
+ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def
+	cd $(srcdir) && autogen ntpd-opts.def
+
+ntpd.1: ntpd-opts.def ntpdbase-opts.def
+	cd $(srcdir) && autogen -Tagman1.tpl -bntpd ntpd-opts.def
+
+ntpd-opts.texi ntpd-opts.menu: ntpd-opts.def
+	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
+		-Taginfo.tpl -DLEVEL=section ntpd-opts.def
+
+ntpdsim-opts.h: ntpdsim-opts.c
+ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def
+	cd $(srcdir) && autogen ntpdsim-opts.def
+
+ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def
+	cd $(srcdir) && autogen -Tagman1.tpl -bntpdsim ntpdsim-opts.def
+
+ntpdsim-opts.texi ntpdsim-opts.menu: ntpdsim-opts.def
+	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
+		-Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
+
 $(PROGRAMS): $(LDADD)
 
 ../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
+	cd ../libntp && $(MAKE) libntp.a
+
+../libntp/libntpsim.a:
+	cd ../libntp && $(MAKE) libntpsim.a
 
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE)

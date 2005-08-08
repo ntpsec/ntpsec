@@ -147,7 +147,9 @@ flag = {
 };
 
 detail = <<-  _END_DETAIL
-	The ntpq utility program is used to query NTP servers which
+	The
+	[= prog-name =]
+	utility program is used to query NTP servers which
 	implement the standard NTP mode 6 control message formats defined
 	in Appendix B of the NTPv3 specification RFC1305, requesting
 	information about current state and/or changes in that state.
@@ -159,30 +161,32 @@ detail = <<-  _END_DETAIL
 	Requests to read and write arbitrary
 	variables can be assembled, with raw and pretty-printed output
 	options being available.
-	The ntpq utility can also obtain and print a
+	The
+	[= prog-name =]
+	utility can also obtain and print a
 	list of peers in a common format by sending multiple queries to the
 	server.
 
 	If one or more request options is included on the command line
 	when
-	ntpq
+	[= prog-name =]
 	is executed, each of the requests will be sent
 	to the NTP servers running on each of the hosts given as command
 	line arguments, or on localhost by default.
 	If no request options
 	are given,
-	ntpq
+	[= prog-name =]
 	will attempt to read commands from the
 	standard input and execute these on the NTP server running on the
 	first host given on the command line, again defaulting to localhost
 	when no other host is specified.
 	The
-	ntpq
+	[= prog-name =]
 	utility will prompt for
 	commands if the standard input is a terminal device.
 
 	The
-	ntpq
+	[= prog-name =]
 	utility uses NTP mode 6 packets to communicate with the
 	NTP server, and hence can be used to query any compatible server on
 	the network which permits it.
@@ -190,7 +194,7 @@ detail = <<-  _END_DETAIL
 	this communication will be somewhat unreliable, especially over
 	large distances in terms of network topology.
 	The
-	ntpq
+	[= prog-name =]
 	utility makes
 	one attempt to retransmit requests, and will time requests out if
 	the remote host is not heard from within a suitable timeout
@@ -205,7 +209,7 @@ detail = <<-  _END_DETAIL
 	cause the specified query (queries) to be sent to the indicated
 	host(s) immediately.
 	Otherwise,
-	.Nm  
+	[= prog-name =]  
 	will attempt to read
 	interactive format commands from the standard input.
 	.Ss "Internal Commands"
@@ -217,7 +221,7 @@ detail = <<-  _END_DETAIL
 	A
 	number of interactive format commands are executed entirely within
 	the
-	.Nm
+	[= prog-name =]
 	utility itself and do not result in NTP mode 6
 	requests being sent to a server.
 	These are described following.
@@ -228,14 +232,14 @@ detail = <<-  _END_DETAIL
 	.Ql \&?
 	by itself will print a list of all the command
 	keywords known to this incarnation of
-	.Nm .
+	[= prog-name =] .
 	A
 	.Ql \&?
 	followed by a command keyword will print function and usage
 	information about the command.
 	This command is probably a better
 	source of information about
-	.Nm
+	[= prog-name =]
 	than this manual
 	page.
 	@item addvars
@@ -251,7 +255,7 @@ detail = <<-  _END_DETAIL
 	is ignored, and can be omitted,
 	in requests to the server to read variables.
 	The
-	.Nm
+	[= prog-name =]
 	utility maintains an internal list in which data to be included in control
 	messages can be assembled, and sent using the
 	.Ic readlist
@@ -273,13 +277,13 @@ detail = <<-  _END_DETAIL
 	list.
 	@item authenticate [ yes | no ]
 	Normally
-	.Nm
+	[= prog-name =]
 	does not authenticate requests unless
 	they are write requests.
 	The command
 	.Ql authenticate yes
 	causes
-	.Nm
+	[= prog-name =]
 	to send authentication with all requests it
 	makes.
 	Authenticated requests causes some servers to handle
@@ -290,18 +294,18 @@ detail = <<-  _END_DETAIL
 	The command
 	.Ql authenticate
 	causes
-	.Nm
+	[= prog-name =]
 	to display whether or not
-	.Nm
+	[= prog-name =]
 	is currently autheinticating requests.
 	@item cooked
 	Causes output from query commands to be "cooked", so that
 	variables which are recognized by
-	.Nm
+	[= prog-name =]
 	will have their
 	values reformatted for human consumption.
 	Variables which
-	.Nm
+	[= prog-name =]
 	thinks should have a decodable value but didn't are
 	marked with a trailing
 	.Ql \&? .
@@ -355,7 +359,7 @@ detail = <<-  _END_DETAIL
 	]
 	.Xc
 	Sets the NTP version number which
-	.Nm
+	[= prog-name =]
 	claims in
 	packets.
 	Defaults to 3, Note that mode 6 control messages (and
@@ -366,7 +370,7 @@ detail = <<-  _END_DETAIL
 	when communicating with servers.
 	@item quit
 	Exit
-	.Nm .
+	[= prog-name =] .
 	@item passwd
 	This command prompts you to type in a password (which will not
 	be echoed) which will be used to authenticate configuration
@@ -385,7 +389,7 @@ detail = <<-  _END_DETAIL
 	The
 	default is about 5000 milliseconds.
 	Note that since
-	.Nm
+	[= prog-name =]
 	retries each query once after a timeout, the total waiting time for
 	a timeout will be twice the timeout value set.
 	@end table
