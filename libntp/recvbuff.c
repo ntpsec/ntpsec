@@ -24,12 +24,18 @@ static	struct recvbuf *volatile fulllist;  /* lifo buffers with data */
 static	struct recvbuf *volatile beginlist; /* fifo buffers with data */
 	
 #if defined(HAVE_IO_COMPLETION_PORT)
-static CRITICAL_SECTION RecvCritSection;
-# define RECV_BLOCK_IO()	EnterCriticalSection(&RecvCritSection)
-# define RECV_UNBLOCK_IO()	LeaveCriticalSection(&RecvCritSection)
+
+/*
+ * For Windows we need to set up a lock to manipulate the
+ * recv buffers to prevent corruption. We keep it lock for as
+ * short a time as possible
+ */
+static CRITICAL_SECTION RecvLock;
+# define LOCK()		EnterCriticalSection(&RecvLock)
+# define UNLOCK()	LeaveCriticalSection(&RecvLock)
 #else
-# define RECV_BLOCK_IO()	
-# define RECV_UNBLOCK_IO()	
+# define LOCK()	
+# define UNLOCK()	
 #endif
 
 u_long
@@ -62,7 +68,6 @@ initialise_buffer(struct recvbuf *buff)
 	memset((char *) buff, 0, sizeof(struct recvbuf));
 
 #if defined HAVE_IO_COMPLETION_PORT
-	buff->iocompletioninfo.overlapped.hEvent = CreateEvent(NULL, FALSE,FALSE, NULL);
 	buff->wsabuff.len = RX_BUFF_SIZE;
 	buff->wsabuff.buf = (char *) buff->recv_buffer;
 #endif
@@ -114,7 +119,7 @@ init_recvbuff(int nbufs)
 	full_recvbufs = lowater_adds = 0;
 
 #if defined(HAVE_IO_COMPLETION_PORT)
-	InitializeCriticalSection(&RecvCritSection);
+	InitializeCriticalSection(&RecvLock);
 #endif
 
 }
@@ -131,7 +136,7 @@ getrecvbufs(void)
 {
 	struct recvbuf *rb = NULL; /* nothing has arrived */;
 
-	RECV_BLOCK_IO();
+	LOCK();
 	if (full_recvbufs == 0)
 	{
 #ifdef DEBUG
@@ -166,7 +171,7 @@ getrecvbufs(void)
 			}
 		}
 	}
-	RECV_UNBLOCK_IO();
+	UNLOCK();
 
 	/*
 	 * Return the chain
@@ -182,13 +187,13 @@ freerecvbuf(
 	struct recvbuf *rb
 	)
 {
-	RECV_BLOCK_IO();
+	LOCK();
 	BLOCKIO();
 	rb->next = (struct recvbuf *) freelist;
 	freelist = rb;
 	free_recvbufs++;
 	UNBLOCKIO();
-	RECV_UNBLOCK_IO();
+	UNLOCK();
 }
 
 	
@@ -197,7 +202,7 @@ add_full_recv_buffer(
 	struct recvbuf *rb
 	)
 {
-	RECV_BLOCK_IO();
+	LOCK();
 	if (full_recvbufs == 0)
 	{
 		beginlist = rb;
@@ -211,14 +216,14 @@ add_full_recv_buffer(
 	fulllist = rb;
 	full_recvbufs++;
 
-	RECV_UNBLOCK_IO();
+	UNLOCK();
 }
 
 struct recvbuf *
 get_free_recv_buffer(void)
 {
 	struct recvbuf * buffer = NULL;
-	RECV_BLOCK_IO();
+	LOCK();
 	if (free_recvbufs <= RECV_LOWAT)
 		{
 			if (total_recvbufs >= RECV_TOOMANY) {
@@ -239,7 +244,7 @@ get_free_recv_buffer(void)
 		--free_recvbufs;
 	}
 
-	RECV_UNBLOCK_IO();
+	UNLOCK();
 	return buffer;
 }
 
@@ -247,13 +252,13 @@ struct recvbuf *
 get_full_recv_buffer(void)
 {
 	struct recvbuf * buffer = NULL;
-	RECV_BLOCK_IO();
+	LOCK();
 	if (full_recvbufs > 0) {
 		--full_recvbufs;
 		buffer = beginlist;
 		beginlist = buffer->next;
 		buffer->next = NULL;
 	}
-	RECV_UNBLOCK_IO();
+	UNLOCK();
 	return buffer;
 }

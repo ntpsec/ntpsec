@@ -558,7 +558,7 @@ printf("1: argc=%d\n", argc);
 	 */
 	get_systime(&now);
 
-	SRANDOM((int)(now.l_i * now.l_uf));
+	ntp_srandom((int)(now.l_i * now.l_uf));
 
 #ifdef HAVE_DNSREGISTRATION
 	/* HMS: does this have to happen this early? */
@@ -799,7 +799,6 @@ printf("1: argc=%d\n", argc);
 	init_io_completion_port();
 #endif
 	init_lib();
-	init_random();
 	init_request();
 	init_control();
 	init_peer();

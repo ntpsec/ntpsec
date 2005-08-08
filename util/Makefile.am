@@ -9,7 +9,7 @@ EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
 INCLUDES=	-I$(top_srcdir)/include
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a
-ntp_keygen_LDADD=	@LCRYPTO@
+ntp_keygen_LDADD=	@LCRYPTO@ ../libntp/libntp.a
 #EXTRA_DIST=	README TAGS
 EXTRA_DIST=
 ETAGS_ARGS=	Makefile.am

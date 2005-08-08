@@ -1005,7 +1005,7 @@ case "$host" in
  *) AC_CHECK_FUNCS(mlockall)
     ;;
 esac
-AC_CHECK_FUNCS(mrand48 srand48 nice nlist)
+AC_CHECK_FUNCS(nice nlist)
 case "$host" in
  *-*-solaris2.6)
     # Broken...
@@ -1014,10 +1014,6 @@ case "$host" in
     ;;
 esac
 AC_CHECK_FUNCS(plock pututline pututxline readlink recvmsg rtprio)
-case "$ac_cv_func_mrand48" in
- yes) ;;
- *) AC_REPLACE_FUNCS(random) ;;
-esac
 case "$host" in
  *-*-aix[[45]]*)
     # Just a stub in AIX 4.  Idiots.
@@ -1207,10 +1203,8 @@ case "$host" in
     AC_DEFINE(DECL_ADJTIME_0, 1, [Declaration style])
     AC_DEFINE(DECL_INET_NTOA_0, 1, [Declaration style])
     AC_DEFINE(DECL_MKTEMP_0, 1, [Declaration style])
-    AC_DEFINE(DECL_MRAND48_0, 1, [Declaration style])
     AC_DEFINE(DECL_SELECT_0, 1, [Declaration style])
     AC_DEFINE(DECL_SETITIMER_0, 1, [Declaration style])
-    AC_DEFINE(DECL_SRAND48_0, 1, [Declaration style])
     AC_DEFINE(DECL_SYSLOG_0, 1, [Declaration style])
     AC_DEFINE(DECL_TIMEOFDAY_0, 1, [Declaration style])
     ;;
@@ -1257,13 +1251,11 @@ case "$host" in
     AC_DEFINE(DECL_MEMMOVE_0, 1, [Declaration style])
     AC_DEFINE(DECL_MKTEMP_0, 1, [Declaration style])
     AC_DEFINE(DECL_MKSTEMP_0, 1, [Declaration style])
-    AC_DEFINE(DECL_MRAND48_0, 1, [Declaration style])
     AC_DEFINE(DECL_RENAME_0, 1, [Declaration style])
     AC_DEFINE(DECL_SELECT_0, 1, [Declaration style])
     AC_DEFINE(DECL_SETITIMER_0, 1, [Declaration style])
     AC_DEFINE(DECL_SETPRIORITY_0, 1, [Declaration style])
     AC_DEFINE(DECL_SIGVEC_0, 1, [Declaration style])
-    AC_DEFINE(DECL_SRAND48_0, 1, [Declaration style])
     case "`basename $ac_cv_prog_CC`" in
      acc*) ;;
      *) AC_DEFINE(DECL_STDIO_0, 1, [Declaration style])
@@ -1284,13 +1276,11 @@ case "$host" in
     AC_DEFINE(DECL_IOCTL_0, 1, [Declaration style])
     AC_DEFINE(DECL_IPC_0, 1, [Declaration style])
     AC_DEFINE(DECL_MKTEMP_0, 1, [Declaration style])
-    AC_DEFINE(DECL_MRAND48_0, 1, [Declaration style])
     AC_DEFINE(DECL_NLIST_0, 1, [Declaration style])
     AC_DEFINE(DECL_PLOCK_0, 1, [Declaration style])
     AC_DEFINE(DECL_SELECT_0, 1, [Declaration style])
     AC_DEFINE(DECL_SETITIMER_0, 1, [Declaration style])
     AC_DEFINE(DECL_SETPRIORITY_0, 1, [Declaration style])
-    AC_DEFINE(DECL_SRAND48_0, 1, [Declaration style])
     AC_DEFINE(DECL_STIME_0, 1, [Declaration style])
     AC_DEFINE(DECL_SYSLOG_0, 1, [Declaration style])
     AC_DEFINE(DECL_TIMEOFDAY_0, 1, [Declaration style])
@@ -3534,66 +3524,6 @@ case "$ac_cv_var_ntpd_sim" in
     MAKE_NTPDSIM=ntpdsim
     MAKE_LIBNTPSIM=libntpsim.a
     ;;
-esac
-
-AC_CACHE_CHECK(if we want UDP wildcard delivery, ac_cv_var_udp_wildcard_delivery,
-[AC_ARG_ENABLE(udp-wildcard,
-   AC_HELP_STRING([--enable-udp-wildcard], [s use UDP wildcard delivery]),
-    [ans=$enableval],
-    [ans=no
-     case "$host" in
-      *-fujitsu-uxp*)
-	 ans=yes
-	 ;;
-      *-univel-sysv*)
-	 ans=yes
-	 ;;
-      *-*-aix3.2*)
-	 ans=yes
-	 ;;
-      *-*-aix[[45]]*)
-	 ans=yes
-	 ;;
-      *-*-bsdi*)
-	 ans=yes
-	 ;;
-      *-*-domainos)
-	 ans=yes
-	 ;;
-      *-*-freebsd*)
-	ans=yes
-	;;
-      *-*-hpux*)
-	 ans=yes
-	 ;;
-      *-*-irix6*)
-	 ans=yes
-	 ;;
-      *-*-linux*)
-	 ans=yes
-	 ;;
-      *-*-mpeix*)
-	 ans=yes
-	 ;;
-      *-*-osf*)
-	 ans=yes
-	 ;;
-      *-*-ptx*)
-	 ans=yes
-	 ;;
-      *-*-solaris2*)
-	 ans=yes
-	 ;;
-      *-*-sunos4*)
-	 ans=yes
-	 ;;
-      *-*-unicosmp*)
-	 ans=yes
-	 ;;
-     esac])
-ac_cv_var_udp_wildcard_delivery=$ans])
-case "$ac_cv_var_udp_wildcard_delivery" in
- yes) AC_DEFINE(UDP_WILDCARD_DELIVERY, 1, [use UDP Wildcard Delivery?]) ;;
 esac
 
 case "$build" in

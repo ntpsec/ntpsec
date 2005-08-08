@@ -794,11 +794,11 @@ gen_md5(
 
 	fprintf(stderr, "Generating MD5 keys...\n");
 	str = fheader("MD5key", hostname);
-	srandom(epoch);
+	ntp_srandom(epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < 16; j++) {
 			while (1) {
-				temp = random() & 0xff;
+				temp = ntp_random() & 0xff;
 				if (temp == '#')
 					continue;
 				if (temp > 0x20 && temp < 0x7f)

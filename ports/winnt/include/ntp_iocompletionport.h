@@ -8,10 +8,22 @@
 struct IoCompletionInfo;
 struct refclockio;
 
+/*
+ * Request types
+ */
+enum {
+	SOCK_RECV,
+	SOCK_SEND,
+	CLOCK_READ,
+	CLOCK_WRITE
+};
+
 typedef int IoCompletionInfoFunction(DWORD Key, struct IoCompletionInfo *, DWORD Bytes);
 
 typedef struct IoCompletionInfo {
 	OVERLAPPED			overlapped;
+	int				request_type;
+	LPVOID				buff;
 	IoCompletionInfoFunction *	iofunction;
 } IoCompletionInfo;
 
@@ -26,12 +38,13 @@ extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, s
 
 extern	HANDLE get_io_event (void);
 
-static int OnSocketRecv(DWORD, struct IoCompletionInfo *, DWORD);
-
 struct recvbuf *GetReceivedBuffers(void);
 
 static int QueueIORead( struct refclockio * );
-static int OnIoReadComplete(DWORD, struct IoCompletionInfo *, DWORD);
+
+static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD);
+static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD);
+static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD);
 # endif
 
 #endif

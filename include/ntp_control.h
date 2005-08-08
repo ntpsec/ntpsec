@@ -267,6 +267,7 @@ struct ctl_trap {
 	u_char tr_flags;		/* trap flags */
 	u_char tr_version;		/* version number of trapper */
 };
+extern struct ctl_trap ctl_trap[];
 
 /*
  * Flag bits

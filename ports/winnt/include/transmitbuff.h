@@ -6,8 +6,6 @@
 # include "ntp_iocompletionport.h"
 #endif
 
-#define TRANSMIT_BUF_LENGTH 1024
-
 /*
  * Format of a transmitbuf.  These are used by the asynchronous receive
  * routine to store incoming packets and related information.
@@ -16,10 +14,8 @@
 typedef struct transmitbuf {
 	struct transmitbuf *next;		/* next buffer in chain */
 
-#if defined HAVE_IO_COMPLETION_PORT
-        IoCompletionInfo	iocompletioninfo;
-	WSABUF			wsabuf;
-#endif
+	WSABUF	wsabuf;
+	time_t	ts;		/* Time stamp for the request */
 
 	/*
 	 * union {
@@ -37,7 +33,7 @@ extern	void	init_transmitbuff	P((void));
 
 /* freetransmitbuf - make a single transmitbuf available for reuse
  */
-extern	void	free_transmit_buffer P((struct transmitbuf *));
+extern	void	free_transmit_buffer	P((transmitbuf *));
 
 /*  Get a free buffer (typically used so an async
  *  read can directly place data into the buffer
@@ -45,13 +41,7 @@ extern	void	free_transmit_buffer P((struct transmitbuf *));
  *  The buffer is removed from the free list. Make sure
  *  you put it back with freetransmitbuf() or 
  */
-extern	struct transmitbuf *get_free_transmit_buffer P((void));
-
-
-
-
-
-
+extern transmitbuf *get_free_transmit_buffer P((void));
 
 #endif /* defined __transmitbuff_h */
 

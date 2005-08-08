@@ -66,7 +66,6 @@ ntpsim(
         init_mon();
         init_timer();
         init_lib();
-        init_random();
         init_request();
         init_control();
         init_peer();
@@ -90,7 +89,7 @@ ntpsim(
 	 * Watch out here, we want the real time, not the silly stuff.
 	 */
 	gettimeofday(&seed, NULL);
-	srand48(seed.tv_usec);
+	ntp_srandom(seed.tv_usec);
 
 	/*
 	 * Push a beep and timer interrupt on the queue

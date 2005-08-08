@@ -218,7 +218,7 @@ static long rand_sep = SEP_3;
 static long *end_ptr = &randtbl[DEG_3 + 1];
 
 static inline long good_rand P((long));
-long random P((void));
+long ntp_random P((void));
 
 static inline long
 good_rand (
@@ -265,7 +265,7 @@ good_rand (
  * for default usage relies on values produced by this routine.
  */
 void
-srandom(
+ntp_srandom(
 	unsigned long x
 	)
 {
@@ -280,7 +280,7 @@ srandom(
 		fptr = &state[rand_sep];
 		rptr = &state[0];
 		for (i = 0; i < 10 * rand_deg; i++)
-			(void)random();
+			(void)ntp_random();
 	}
 }
 
@@ -296,13 +296,13 @@ srandom(
  * a fixed seed.
  */
 void
-srandomdev( void )
+ntp_srandomdev( void )
 {
 	struct timeval tv;
 	unsigned long junk;	/* Purposely used uninitialized */
 
 	gettimeofday(&tv, NULL);
-	srandom(getpid() ^ tv.tv_sec ^ tv.tv_usec ^ junk);
+	ntp_srandom(getpid() ^ tv.tv_sec ^ tv.tv_usec ^ junk);
 	return;
 }
 
@@ -330,7 +330,7 @@ srandomdev( void )
  * complain about mis-alignment, but you should disregard these messages.
  */
 char *
-initstate(
+ntp_initstate(
 	unsigned long seed,		/* seed for R.N.G. */
 	char *arg_state,		/* pointer to state array */
 	long n				/* # bytes of state info */
@@ -371,7 +371,7 @@ initstate(
 	}
 	state = (long *) (long_arg_state + 1); /* first location */
 	end_ptr = &state[rand_deg];	/* must set end_ptr before srandom */
-	srandom(seed);
+	ntp_srandom(seed);
 	if (rand_type == TYPE_0)
 		long_arg_state[0] = rand_type;
 	else
@@ -399,7 +399,7 @@ initstate(
  * complain about mis-alignment, but you should disregard these messages.
  */
 char *
-setstate(
+ntp_setstate(
 	char *arg_state			/* pointer to state array */
 	)
 {
@@ -453,7 +453,7 @@ setstate(
  * Returns a 31-bit random number.
  */
 long
-random( void )
+ntp_random( void )
 {
 	register long i;
 	register long *f, *r;

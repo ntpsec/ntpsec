@@ -64,7 +64,6 @@
 #endif
 
 #define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
-#define UDP_WILDCARD_DELIVERY	/* for	ntp_io.c */ 				/*	98/06/01  */
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
