@@ -115,6 +115,7 @@ static	struct keyword mod_keywords[] = {
 	{ "minpoll",		CONF_MOD_MINPOLL },
 	{ "mode",		CONF_MOD_MODE },    /* refclocks */
 	{ "noselect",		CONF_MOD_NOSELECT },
+	{ "preempt",		CONF_MOD_PREEMPT },
 	{ "true",		CONF_MOD_TRUE },
 	{ "prefer",		CONF_MOD_PREFER },
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
@@ -236,12 +237,14 @@ static struct keyword tinker_keywords[] = {
  */
 static struct keyword tos_keywords[] = {
 	{ "minclock",		CONF_TOS_MINCLOCK },
+	{ "maxclock",		CONF_TOS_MAXCLOCK },
 	{ "minsane",		CONF_TOS_MINSANE },
 	{ "floor",		CONF_TOS_FLOOR },
 	{ "ceiling",		CONF_TOS_CEILING },
 	{ "cohort",		CONF_TOS_COHORT },
 	{ "mindist",		CONF_TOS_MINDIST },
 	{ "maxdist",		CONF_TOS_MAXDIST },
+	{ "maxhop",		CONF_TOS_MAXHOP },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -776,6 +779,10 @@ getconfig(
 				    peerflags |= FLAG_PREFER;
 				    break;
 
+				case CONF_MOD_PREEMPT:
+				    peerflags |= FLAG_PREEMPT;
+				    break;
+
 				case CONF_MOD_NOSELECT:
 				    peerflags |= FLAG_NOSELECT;
 				    break;
@@ -1068,6 +1075,10 @@ getconfig(
 
 			    case CONF_TOS_MINCLOCK:
 				proto_config(PROTO_MINCLOCK, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MAXCLOCK:
+				proto_config(PROTO_MAXCLOCK, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_MINSANE:

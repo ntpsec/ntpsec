@@ -82,6 +82,7 @@ int	sys_floor = 0;		/* cluster stratum floor */
 int	sys_ceiling = STRATUM_UNSPEC; /* cluster stratum ceiling */
 int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum survivors */
+int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_cohort = 0;		/* cohort switch */
 int	sys_ttlmax;		/* max ttl mapping vector index */
 u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
@@ -149,9 +150,11 @@ transmit(
 	 * lowest practical value and avoid knocking on spurious doors.
 	 */
 	if (peer->cast_flags & MDF_ACAST) {
+		if (sys_survivors >= sys_maxclock)
+			return;
+
 		peer->outdate = current_time;
-		if (sys_survivors < sys_minclock && peer->ttl <
-		    sys_ttlmax)
+		if (peer->ttl < sys_ttlmax)
 			peer->ttl++;
 		peer_xmit(peer);
 		poll_update(peer, hpoll);
@@ -166,9 +169,24 @@ transmit(
 	if (peer->burst == 0) {
 		u_char oreach;
 
+		/*
+		 * If the peer has not been reachable for awhile back
+		 * off. If the PREEMPT flag is up, evict it from the
+		 * house.
+		 */
+		oreach = peer->reach;
+		if (peer->unreach > NTP_UNREACH) {
+			if (peer->flags & FLAG_PREEMPT &&
+			    peer_associations > sys_maxclock) {
+				unpeer(peer);
+				return;
+
+			} else {
+				hpoll++;
+			}
+		}
 		if (peer == sys_peer)
 			sys_hopper++;
-		oreach = peer->reach;
 		peer->outdate = current_time;
 		peer->reach <<= 1;
 		if (!peer->reach) {
@@ -180,10 +198,6 @@ transmit(
 			 */
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
-				if (!(peer->flags & FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
-				}
 				peer->timereachable = current_time;
 			}
 
@@ -199,14 +213,7 @@ transmit(
 			if (peer->flags & FLAG_IBURST &&
 			    peer->unreach == 0) {
 				peer->burst = NTP_BURST;
-			} else if (peer->unreach > NTP_UNREACH) {
-				if (!(peer->flags & FLAG_CONFIG)) {
-					unpeer(peer);
-					return;
-				} 
-				hpoll++;
 			}
-			peer->unreach++;
 		} else {
 
 			/*
@@ -217,14 +224,16 @@ transmit(
 			 * system poll interval. Send a burst only if
 			 * enabled and the peer is fit.
 			 */
-			peer->unreach = 0;
+			if (!(peer->flags & FLAG_PREEMPT))
+				peer->unreach = 0;
 			if (!(peer->reach & 0x07))
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 			hpoll = sys_poll;
 			if (peer->flags & FLAG_BURST &&
-			    !peer_unfit(peer))
+			    peer_unfit(peer))
 				peer->burst = NTP_BURST;
 		}
+		peer->unreach++;
 	} else {
 		peer->burst--;
 
@@ -277,6 +286,7 @@ receive(
 	register struct peer *peer;	/* peer structure pointer */
 	register struct pkt *pkt;	/* receive packet pointer */
 	int	hisversion;		/* packet version */
+	int	hisleap;		/* packet leap indicator */
 	int	hismode;		/* packet mode */
 	int	hisstratum;		/* packet stratum */
 	int	restrict_mask;		/* restrict bits */
@@ -331,6 +341,7 @@ receive(
 	}
 	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
+	hisleap = PKT_LEAP(pkt->li_vn_mode);
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
 	hisstratum = PKT_TO_STRATUM(pkt->stratum);
 	if (hismode == MODE_PRIVATE) {
@@ -652,20 +663,21 @@ receive(
 		 * This must be manycast. Do not respond if not
 		 * configured as a manycast server.
 		 */
-		if (hismode == MODE_CLIENT && !sys_manycastserver) {
+		if (!sys_manycastserver) {
 			sys_restricted++;
 			return;			/* not enabled */
 		}
 
 		/*
-		 * Do not respond if our stratum is below the floor or
-		 * at or above the ceiling.
+		 * Do not respond if unsynchronized or stratum is below
+		 * the floor or at or above the ceiling.
 		 */
-		if (sys_stratum < sys_floor || sys_stratum >= sys_ceiling)
+		if (sys_leap == LEAP_NOTINSYNC || sys_stratum <
+		    sys_floor || sys_stratum >= sys_ceiling)
 			return;
 
 		/*
-		 * Do not respond if our time is worse than the
+		 * Do not respond if our stratum is greater than the
 		 * manycaster or it has already synchronized to us.
 		 */
 		if (sys_peer == NULL || hisstratum < sys_stratum ||
@@ -711,8 +723,9 @@ receive(
 		}
 		if ((peer = newpeer(&rbufp->recv_srcadr,
 		    rbufp->dstadr, MODE_CLIENT,
-		    hisversion, NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_IBURST,
-		    MDF_UCAST | MDF_ACLNT, 0, skeyid)) == NULL)
+		    hisversion, NTP_MINDPOLL, NTP_MAXDPOLL,
+		    FLAG_IBURST | FLAG_PREEMPT, MDF_UCAST | MDF_ACLNT,
+		    0, skeyid)) == NULL)
 			return;			/* system error */
 
 		/*
@@ -733,10 +746,11 @@ receive(
 			return;			/* bad auth */
 
 		/*
-		 * Do not respond if the stratum is below the floor or
-		 * at or above the ceiling.
+		 * Do not respond if unsynchronized or stratum is below
+		 * the floor or at or above the ceiling.
 		 */
-		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+		if (hisleap == LEAP_NOTINSYNC || hisstratum <
+		    sys_floor || hisstratum >= sys_ceiling)
 			return;
 
 		switch (sys_bclient) {
@@ -824,10 +838,11 @@ receive(
 		}
 
 		/*
-		 * Do not respond if the stratum is below the floor or
-		 * at or above the ceiling.
+		 * Do not respond if unsynchronized or stratum is below
+		 * the floor or at or above the ceiling.
 		 */
-		if (hisstratum < sys_floor || hisstratum >= sys_ceiling)
+		if (hisleap == LEAP_NOTINSYNC || hisstratum <
+		    sys_floor || hisstratum >= sys_ceiling)
 			return;
 
 		if ((peer = newpeer(&rbufp->recv_srcadr,
@@ -876,7 +891,7 @@ receive(
 	if (L_ISEQU(&peer->org, &p_xmt)) {
 		peer->flash |= TEST1;
 		peer->oldpkt++;
-		return;				/* dupe */
+		return;				/* duplicate packet */
 	}
 
 	/*
@@ -884,9 +899,9 @@ receive(
 	 */
 	if (hismode != MODE_BROADCAST) {
 		if (L_ISZERO(&p_org))
-			peer->flash |= TEST3;	/* unsynch */
+			peer->flash |= TEST3;	/* protocol unsynch */
 		else if (!L_ISEQU(&p_org, &peer->xmt))
-			peer->flash |= TEST2;	/* bogus */
+			peer->flash |= TEST2;	/* bogus packet */
 	}
 
 	/*
@@ -1082,7 +1097,7 @@ process_packet(
 	if (pleap == LEAP_NOTINSYNC && pstratum == STRATUM_UNSPEC) {
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
 			peer_clear(peer, "DENY");
-			peer->flash |= TEST4;	/* access deny */
+			peer->flash |= TEST4;	/* access denied */
 			if (!(peer->flags & FLAG_CONFIG)) {
 				unpeer(peer);
 				return;
@@ -1091,19 +1106,34 @@ process_packet(
 	}
 
 	/*
+	 * Capture the header values.
+	 */
+	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
+	    &p_rec, &p_xmt, &peer->rec);
+	peer->leap = pleap;
+	peer->stratum = pstratum;
+	peer->pmode = pmode;
+	peer->ppoll = pkt->ppoll;
+	peer->precision = pkt->precision;
+	peer->rootdelay = p_del;
+	peer->rootdispersion = p_disp;
+	peer->refid = pkt->refid;		/* network byte order */
+	peer->reftime = p_reftime;
+
+	/*
 	 * Verify the server is synchronized; that is, the leap bits and
 	 * stratum are valid, the root delay and root dispersion are
 	 * valid and the reference timestamp is not later than the
 	 * transmit timestamp.
 	 */
+	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
+	    pstratum < sys_floor || pstratum >= sys_ceiling)
+		peer->flash |= TEST6;		/* peer not synch */
 	ci = p_xmt;
 	L_SUB(&ci, &p_reftime);
-	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
-	    pstratum >= STRATUM_UNSPEC || L_ISNEG(&ci))
-		peer->flash |= TEST6;		/* peer not synch */
 	if (p_del < 0 || p_disp < 0 || p_del /	/* test 7 */
-	    2 + p_disp >= MAXDISPERSE)
-		peer->flash |= TEST7;		/* invalid distance */
+	    2 + p_disp >= MAXDISPERSE || L_ISNEG(&ci))
+		peer->flash |= TEST7;		/* bad header */
 
 	/*
 	 * If any tests fail at this point, the packet is discarded.
@@ -1118,22 +1148,6 @@ process_packet(
 #endif
 		return;
 	}
-
-	/*
-	 * The protocol and server are verified. Capture the remaining
-	 * header values and mark as reachable.
-	 */
-	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
-	    &p_rec, &p_xmt, &peer->rec);
-	peer->leap = pleap;
-	peer->stratum = pstratum;
-	peer->pmode = pmode;
-	peer->ppoll = pkt->ppoll;
-	peer->precision = pkt->precision;
-	peer->rootdelay = p_del;
-	peer->rootdispersion = p_disp;
-	peer->refid = pkt->refid;		/* network byte order */
-	peer->reftime = p_reftime;
 	if (!(peer->reach)) {
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
@@ -1205,19 +1219,6 @@ process_packet(
 		    LOGTOD(peer->precision) + clock_phi * p_disp;
 	}
 	p_del = max(p_del, LOGTOD(sys_precision));
-
-	/*
-	 * If any flasher bits remain set at this point, abandon ship.
-	 * Otherwise, forward to the clock filter.
-	 */
-	if (peer->flash) {
-#ifdef DEBUG
-		if (debug)
-			printf("packet: flash data %04x\n",
-			    peer->flash);
-#endif
-		return;
-	}
 	clock_filter(peer, p_offset, p_del, p_disp);
 	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp, peer->jitter);
@@ -1351,18 +1352,6 @@ poll_update(
 	 */
 	if (peer->flags & FLAG_FIXPOLL) {
 		hpoll = peer->minpoll;
-
-	/*
-	 * A manycast server beacons at minpoll until a sufficient
-	 * number of servers have been found or the ttl has topped out,
-	 * then beacons at maxpoll.
-	 */
-	} else if (peer->cast_flags & MDF_ACAST) {
-		if (sys_survivors >= sys_minclock || peer->ttl >=
-		    sys_ttlmax)
-			hpoll = peer->maxpoll;
-		else
-			hpoll = peer->minpoll;
 
 	/*
 	 * The ordinary case; clamp the poll interval between minpoll
@@ -1727,7 +1716,7 @@ clock_select(void)
 	int	allow, osurv;
 	double	d, e, f, g;
 	double	high, low;
-	double	synch[NTP_MAXCLOCK], error[NTP_MAXCLOCK];
+	double	synch[NTP_MAXASSOC], error[NTP_MAXASSOC];
 	struct peer *osys_peer;
 	struct peer *typeacts = NULL;
 	struct peer *typelocal = NULL;
@@ -1956,22 +1945,18 @@ clock_select(void)
 	/*
 	 * Clustering algorithm. Construct candidate list in order first
 	 * by stratum then by root distance, but keep only the best
-	 * NTP_MAXCLOCK of them. Scan the list to find falsetickers, who
-	 * leave the island immediately. If a falseticker is not
-	 * configured, his association raft is drowned as well, but only
-	 * if at at least eight poll intervals have gone. We must leave
-	 * at least one peer to collect the million bucks.
+	 * NTP_MAXASSOC of them. Scan the list to find falsetickers, who
+	 * leave the island immediately. The TRUE peer is alwasy a
+	 * truechimer. We must leave at least one peer to collect the
+	 * million bucks.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		if (nlist > 1 && (peer->offset <= low || peer->offset >=
-		    high) && !(peer->flags & (FLAG_TRUE |
-		    FLAG_PREFER))) {
-			if (!(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
+		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
-		}
+
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
 
 		/*
@@ -1982,7 +1967,7 @@ clock_select(void)
 		 * hasn't been heard for awhile.
 		 */
 		d = root_distance(peer) + peer->stratum * sys_maxdist;
-		if (j >= NTP_MAXCLOCK) {
+		if (j >= NTP_MAXASSOC) {
 			if (d >= synch[j - 1])
 				continue;
 			else
@@ -2038,29 +2023,22 @@ clock_select(void)
 	 * cast out one falsticker. For the Byzantine agreement
 	 * algorithm used here, that number is 4; however, the default
 	 * sys_minsane is 1 to speed initial synchronization. Careful
-	 * operators will tinker the value to 4 and use at least that
+	 * operators will tinker a higher value and use at least that
 	 * number of synchronization sources.
 	 */
 	if (nlist < sys_minsane)
 		return;
 
-	for (i = 0; i < nlist; i++) {
+	for (i = 0; i < nlist; i++)
 		peer_list[i]->status = CTL_PST_SEL_SELCAND;
-
-#ifdef DEBUG
-		if (debug > 2)
-			printf("select: %s distance %.6f jitter %.6f\n",
-			    ntoa(&peer_list[i]->srcadr), synch[i],
-			    error[i]);
-#endif
-	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
 	 * by root dispersion. Continue voting as long as there are more
 	 * than sys_minclock survivors and the minimum select jitter is
 	 * greater than the maximum peer jitter. Stop if we are about to
-	 * discard a prefer peer, who of course has the immunity idol.
+	 * discard a TRUE or PREFER  peer, who of course has the
+	 * immunity idol.
 	 */
 	while (1) {
 		d = 1e9;
@@ -2085,7 +2063,7 @@ clock_select(void)
 		}
 		f = max(f, LOGTOD(sys_precision));
 		if (nlist <= sys_minclock || f <= d ||
-		    peer_list[k]->flags & FLAG_TRUE)
+		    peer_list[k]->flags & (FLAG_TRUE | FLAG_PREFER))
 			break;
 #ifdef DEBUG
 		if (debug > 2)
@@ -2093,9 +2071,6 @@ clock_select(void)
 			    "select: drop %s select %.6f jitter %.6f\n",
 			    ntoa(&peer_list[k]->srcadr), g, d);
 #endif
-		if (!(peer_list[k]->flags & FLAG_CONFIG) &&
-		    peer_list[k]->hmode == MODE_CLIENT)
-			unpeer(peer_list[k]);
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];
 			error[j - 1] = error[j];
@@ -2118,11 +2093,12 @@ clock_select(void)
 	 * far.
 	 */
 	leap_consensus = 0;
-	for (i = nlist - 1; i >= 0; i--) {
+	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
+		sys_survivors++;
+		peer->unreach = 0;
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
-		sys_survivors++;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
 		if (peer == osys_peer)
@@ -2150,18 +2126,6 @@ clock_select(void)
 	} else {
 		peer->selbroken++;
 	}
-
-	/*
-	 * In manycast client mode we may have spooked a sizeable number
-	 * of peers that we don't need. If there are at least
-	 * sys_minclock of them, the manycast message will be turned
-	 * off. By the time we get here we nay be ready to prune some of
-	 * them back, but we want to make sure all the candicates have
-	 * had a chance. If they didn't pass the sanity and intersection
-	 * tests, they have already been voted off the island.
-	 */
-	if (sys_survivors < sys_minclock && osurv >= sys_minclock)
-		resetmanycast();
 
 	/*
 	 * Mitigation rules of the game. There are several types of
@@ -2847,10 +2811,10 @@ key_expire(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > unreachable or bad leap or noselect
- * > stratum below the floor or at or above the ceiling
- * > root distance exceeded
- * > a synchronization loop would form
+ * > TEST10 bad leap or stratum below floor or at or above ceiling
+ * > TEST11 root distance exceeded
+ * > TEST12 a synchronization loop would form
+ * > TEST13 unreachable or noselect
  */
 int				/* FALSE if fit, TRUE if unfit */
 peer_unfit(
@@ -2859,12 +2823,8 @@ peer_unfit(
 {
 	int	rval = 0;
 
-	peer->flash &= ~(TEST10 | TEST11 | TEST12 | TEST13);
-	if (!peer->reach || peer->leap == LEAP_NOTINSYNC ||
-	    peer->flags & FLAG_NOSELECT)
-		rval |= TEST13;		/* unfit */
-
-	if (peer->stratum < sys_floor || peer->stratum >= sys_ceiling)
+	if (peer->leap == LEAP_NOTINSYNC || peer->stratum < sys_floor ||
+	    peer->stratum >= sys_ceiling)
 		rval |= TEST10;		/* stratum out of bounds */
 
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
@@ -2875,6 +2835,10 @@ peer_unfit(
 	    peer->refid)
 		rval |= TEST12;		/* synch loop */
 
+	if (!peer->reach || peer->flags & FLAG_NOSELECT)
+		rval |= TEST13;		/* unreachable */
+
+	peer->flash &= ~(TEST10 | TEST11 | TEST12 | TEST13);
 	peer->flash |= rval;
 	return (rval);
 }
@@ -3116,6 +3080,14 @@ proto_config(
 	case PROTO_MINCLOCK:
 		sys_minclock = (int)dvalue;
 		break;
+
+	/*
+	 * Set the minimum number of survivors.
+	 */
+	case PROTO_MAXCLOCK:
+		sys_maxclock = (int)dvalue;
+		break;
+
 
 	/*
 	 * Set the minimum number of candidates.
