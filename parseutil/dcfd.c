@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.14 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.16 2005/08/10 06:33:25 kardel RELEASE_20050810_A
  *  
- * dcfd.c,v 4.14 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * dcfd.c,v 4.16 2005/08/10 06:33:25 kardel RELEASE_20050810_A
  *
  * DCF77 100/200ms pulse synchronisation daemon program (via 50Baud serial line)
  *
@@ -46,6 +46,7 @@
 # include <config.h>
 #endif
 
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -1566,13 +1567,16 @@ main(
 		memset(term.c_cc, 0, sizeof(term.c_cc));
 		term.c_cc[VMIN] = 1;
 #ifdef NO_PARENB_IGNPAR
-		term.c_cflag = B50|CS8|CREAD|CLOCAL;
+		term.c_cflag = CS8|CREAD|CLOCAL;
 #else
-		term.c_cflag = B50|CS8|CREAD|CLOCAL|PARENB;
+		term.c_cflag = CS8|CREAD|CLOCAL|PARENB;
 #endif
 		term.c_iflag = IGNPAR;
 		term.c_oflag = 0;
 		term.c_lflag = 0;
+
+		cfsetispeed(&term, B50);
+		cfsetospeed(&term, B50);
 
 		if (TTY_SETATTR(fd, &term) == -1)
 		{
@@ -1872,6 +1876,12 @@ main(
  * History:
  *
  * dcfd.c,v
+ * Revision 4.16  2005/08/10 06:33:25  kardel
+ * cleanup warnings
+ *
+ * Revision 4.15  2005/08/10 06:28:45  kardel
+ * fix setting of baud rate
+ *
  * Revision 4.14  2005/04/16 17:32:10  kardel
  * update copyright
  *
