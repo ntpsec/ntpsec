@@ -121,8 +121,9 @@ typedef char s_char;
 /*
  * Selection algorithm tuning parameters
  */
-#define	NTP_MINCLOCK	3	/* min cluster survivors */
-#define	NTP_MAXCLOCK	50	/* max selection candidates */
+#define	NTP_MINCLOCK	3	/* min survivors */
+#define	NTP_MAXCLOCK	10	/* max candidates */
+#define	NTP_MAXASSOC	50	/* max associations */
 #define MINDISTANCE	.01	/* min root distance */
 #define MAXDISTANCE	1.	/* max root distance */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
@@ -210,21 +211,21 @@ struct interface {
  */
 #define TEST1		0X0001	/* duplicate packet */
 #define TEST2		0x0002	/* bogus packet */
-#define TEST3		0x0004	/* invalid timestamp */
+#define TEST3		0x0004	/* protocol unsynchronized */
 #define TEST4		0x0008	/* access denied */
 #define TEST5		0x0010	/* authentication error */
-#define TEST6		0x0020	/* loopback error */
-#define TEST7		0x0040	/* synch distance out of bounds */
+#define TEST6		0x0020	/* bad synch or stratum */
+#define TEST7		0x0040	/* bad header data */
 #define TEST8		0x0080  /* autokey error */
 #define TEST9		0x0100	/* crypto error */
 
 /*
  * Peer errors
  */
-#define TEST10		0x0200	/* peer stratum out of bounds */
+#define TEST10		0x0200	/* peer bad synch or stratum */
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
-#define TEST13		0x1000	/* peer unfit for synchronization */
+#define TEST13		0x1000	/* peer unreacable */
 
 /*
  * Authentication codes
@@ -422,6 +423,7 @@ struct peer {
 #define FLAG_ASSOC	0x0800	/* autokey request */
 #define FLAG_FIXPOLL	0x1000	/* stick at minpoll */
 #define FLAG_TRUE	0x2000	/* select truechimer */
+#define	FLAG_PREEMPT	0x4000	/* preemptable association */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -725,15 +727,16 @@ struct pkt {
 #define	PROTO_PPS		12
 #define PROTO_CAL		13
 #define PROTO_MINCLOCK		14
-#define PROTO_MINSANE		15
-#define PROTO_FLOOR		16
-#define PROTO_CEILING		17
-#define PROTO_COHORT		18
-#define PROTO_CALLDELAY		19
-#define PROTO_MINDIST		20
-#define PROTO_MAXDIST		21
-#define PROTO_ADJ		22
-#define	PROTO_MAXHOP		23
+#define	PROTO_MAXCLOCK		15
+#define PROTO_MINSANE		16
+#define PROTO_FLOOR		17
+#define PROTO_CEILING		18
+#define PROTO_COHORT		19
+#define PROTO_CALLDELAY		20
+#define PROTO_MINDIST		21
+#define PROTO_MAXDIST		22
+#define PROTO_ADJ		23
+#define	PROTO_MAXHOP		24
 
 /*
  * Configuration items for the loop filter

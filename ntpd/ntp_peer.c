@@ -882,7 +882,7 @@ findmanycastpeer(
 void
 resetmanycast(void)
 {
-	register struct peer *peer;
+	struct peer *peer, *next_peer;
 	int i;
 
 	/*
@@ -891,13 +891,11 @@ resetmanycast(void)
 	 * client associations and reset the ttl and poll interval.
 	 */
 	for (i = 0; i < NTP_HASH_SIZE; i++) {
-		if (peer_hash_count[i] == 0)
-			continue;
-
-		for (peer = peer_hash[i]; peer != 0; peer =
-		    peer->next) {
-			if (peer->cast_flags & MDF_ACAST) {
-				peer_clear(peer, "ACST");
+		for (peer = peer_hash[i]; peer != NULL; peer =
+		    next_peer) {
+			next_peer= peer->next;
+			if (peer->cast_flags & MDF_ACLNT) {
+				unpeer(peer);
 			}
 		}
 	}
