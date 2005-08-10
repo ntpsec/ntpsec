@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.16 2005/08/10 06:33:25 kardel RELEASE_20050810_A
+ * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
  *  
- * dcfd.c,v 4.16 2005/08/10 06:33:25 kardel RELEASE_20050810_A
+ * dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
  *
  * DCF77 100/200ms pulse synchronisation daemon program (via 50Baud serial line)
  *
@@ -129,6 +129,8 @@
 #ifdef DECL_ERRNO
      extern int errno;
 #endif
+
+static char *revision = "4.17";
 
 /*
  * display received data (avoids also detaching from tty)
@@ -1658,7 +1660,7 @@ main(
 		(void) alarm(1<<ADJINTERVAL);
 #endif
 
-		PRINTF("  DCF77 monitor - Copyright (C) 1993-1998 by Frank Kardel\n\n");
+		PRINTF("  DCF77 monitor %s - Copyright (C) 1993-2005 by Frank Kardel\n\n", revision);
 
 		pbuf[60] = '\0';
 		for ( i = 0; i < 60; i++)
@@ -1876,6 +1878,9 @@ main(
  * History:
  *
  * dcfd.c,v
+ * Revision 4.17  2005/08/10 10:09:44  kardel
+ * output revision information
+ *
  * Revision 4.16  2005/08/10 06:33:25  kardel
  * cleanup warnings
  *
