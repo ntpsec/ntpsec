@@ -98,7 +98,8 @@ u_long assocpeer_calls;			/* calls to findpeerbyassoc */
 u_long peer_allocations;		/* allocations from free list */
 u_long peer_demobilizations;		/* structs freed to free list */
 int total_peer_structs;			/* peer structs */
-int peer_associations;			/* active associations */
+int peer_associations;			/* mobilized associations */
+int peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static	void	getmorepeermem	P((void));
@@ -338,12 +339,15 @@ unpeer(
 #endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug)
-		printf("demobilize %u %d\n", peer_to_remove->associd,
-		    peer_associations);
+		printf("demobilize %u %d %d\n", peer_to_remove->associd,
+		    peer_associations, peer_preempt);
 #endif
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
+	peer_associations--;
+	if (peer_to_remove->flags & FLAG_PREEMPT)
+		peer_preempt--;
 #ifdef REFCLOCK
 	/*
 	 * If this peer is actually a clock, shut it down first
@@ -396,7 +400,6 @@ unpeer(
 	peer_to_remove->next = peer_free;
 	peer_free = peer_to_remove;
 	peer_free_count++;
-	peer_associations--;
 }
 
 
@@ -543,6 +546,8 @@ newpeer(
 	peer_free = peer->next;
 	peer_free_count--;
 	peer_associations++;
+	if (flags & FLAG_PREEMPT)
+		peer_preempt++;
 	memset((char *)peer, 0, sizeof(struct peer));
 
 	/*
@@ -894,9 +899,8 @@ resetmanycast(void)
 		for (peer = peer_hash[i]; peer != NULL; peer =
 		    next_peer) {
 			next_peer= peer->next;
-			if (peer->cast_flags & MDF_ACLNT) {
+			if (peer->cast_flags & MDF_ACLNT) 
 				unpeer(peer);
-			}
 		}
 	}
 }

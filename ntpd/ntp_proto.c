@@ -141,22 +141,26 @@ transmit(
 	}
 
 	/*
-	 * In manycast mode we start with the minpoll interval and unity
-	 * ttl. The ttl is increased by one for each poll until either
-	 * enough servers have been found or the maximum ttl is reached.
-	 * About once per day when the agreement parameters are
-	 * refreshed, the manycast clients are reset and we start from
-	 * the beginning. This is to catch and clamp the ttl to the
-	 * lowest practical value and avoid knocking on spurious doors.
+	 * In manycast mode we start with unity ttl. The ttl is
+	 * increased by one for each poll until either sys_maxclock
+	 * servers have been found or the maximum ttl is reached. When
+	 * sys_maxclock servers are found we stop polling until either
+	 * fewer servers are available
 	 */
 	if (peer->cast_flags & MDF_ACAST) {
-		if (sys_survivors >= sys_maxclock)
-			return;
-
 		peer->outdate = current_time;
-		if (peer->ttl < sys_ttlmax)
-			peer->ttl++;
-		peer_xmit(peer);
+		if (sys_survivors < sys_minclock || peer_preempt <
+		    sys_maxclock) {
+#if DEBUG
+	if (debug)
+		printf("transmit: survivors %d minclock %d preempt %d maxclock %d\n",
+		    sys_survivors, sys_minclock, peer_preempt,
+		    sys_maxclock);
+#endif
+			if (peer->ttl < sys_ttlmax)
+				peer->ttl++;
+			peer_xmit(peer);
+		}
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -177,7 +181,7 @@ transmit(
 		oreach = peer->reach;
 		if (peer->unreach > NTP_UNREACH) {
 			if (peer->flags & FLAG_PREEMPT &&
-			    peer_associations > sys_maxclock) {
+			    peer_preempt > sys_maxclock) {
 				unpeer(peer);
 				return;
 
@@ -2011,9 +2015,6 @@ clock_select(void)
 				    "no servers reachable");
 				report_event(EVNT_PEERSTCHG, NULL);
 			}
-			if (osurv > 0)
-				resetmanycast();
-			return;
 		}
 	}
 
