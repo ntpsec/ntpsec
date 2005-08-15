@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/libparse/parse.c,v 4.20 2005/08/06 17:39:40 kardel RELEASE_20050806_A
  *  
- * parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * parse.c,v 4.20 2005/08/06 17:39:40 kardel RELEASE_20050806_A
  *
  * Parser module for reference clock
  *
@@ -47,7 +47,7 @@
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
 
 #if	!(defined(lint) || defined(__GNUC__))
-static char rcsid[] = "parse.c,v 4.19 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
+static char rcsid[] = "parse.c,v 4.20 2005/08/06 17:39:40 kardel RELEASE_20050806_A";
 #endif
 
 #include "ntp_fp.h"
@@ -209,7 +209,7 @@ parse_restart(
 		 */
 		parseio->parse_data[parseio->parse_index] = '\0';
 		memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
-		parseio->parse_ldsize = parseio->parse_index+1;
+		parseio->parse_ldsize = parseio->parse_index;
 		updated = PARSE_INP_TIME;
 	}
 		
@@ -254,7 +254,7 @@ parse_end(
 	 */
 	parseio->parse_data[parseio->parse_index] = '\0';
 	memcpy(parseio->parse_ldata, parseio->parse_data, (unsigned)(parseio->parse_index+1));
-	parseio->parse_ldsize = parseio->parse_index+1;
+	parseio->parse_ldsize = parseio->parse_index;
 	parseio->parse_index = 0;
 	parseprintf(DD_PARSE, ("parse: parse_end: buffer end\n"));
 	return PARSE_INP_TIME;
@@ -886,6 +886,9 @@ int parse_bs;
  * History:
  *
  * parse.c,v
+ * Revision 4.20  2005/08/06 17:39:40  kardel
+ * cleanup size handling wrt/ to buffer boundaries
+ *
  * Revision 4.19  2005/04/16 17:32:10  kardel
  * update copyright
  *

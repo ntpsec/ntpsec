@@ -344,8 +344,8 @@ extern u_long	assocpeer_calls;	/* number of calls to findpeerbyassoc */
 extern u_long	peer_allocations;	/* number of allocations from the free list */
 extern u_long	peer_demobilizations;	/* number of structs freed to free list */
 extern int	total_peer_structs;	/* number of peer structs in circulation */
-extern int	peer_associations;	/* number of active associations */
-
+extern int	peer_associations;	/* mobilized associations */
+extern int	peer_preempt;		/* preemptable associations */
 /* ntp_proto.c */
 /*
  * System variables are declared here.	See Section 3.2 of the

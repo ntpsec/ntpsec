@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.14 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
  *  
- * dcfd.c,v 4.14 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
  *
  * DCF77 100/200ms pulse synchronisation daemon program (via 50Baud serial line)
  *
@@ -46,6 +46,7 @@
 # include <config.h>
 #endif
 
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -128,6 +129,8 @@
 #ifdef DECL_ERRNO
      extern int errno;
 #endif
+
+static char *revision = "4.17";
 
 /*
  * display received data (avoids also detaching from tty)
@@ -1566,13 +1569,16 @@ main(
 		memset(term.c_cc, 0, sizeof(term.c_cc));
 		term.c_cc[VMIN] = 1;
 #ifdef NO_PARENB_IGNPAR
-		term.c_cflag = B50|CS8|CREAD|CLOCAL;
+		term.c_cflag = CS8|CREAD|CLOCAL;
 #else
-		term.c_cflag = B50|CS8|CREAD|CLOCAL|PARENB;
+		term.c_cflag = CS8|CREAD|CLOCAL|PARENB;
 #endif
 		term.c_iflag = IGNPAR;
 		term.c_oflag = 0;
 		term.c_lflag = 0;
+
+		cfsetispeed(&term, B50);
+		cfsetospeed(&term, B50);
 
 		if (TTY_SETATTR(fd, &term) == -1)
 		{
@@ -1654,7 +1660,7 @@ main(
 		(void) alarm(1<<ADJINTERVAL);
 #endif
 
-		PRINTF("  DCF77 monitor - Copyright (C) 1993-1998 by Frank Kardel\n\n");
+		PRINTF("  DCF77 monitor %s - Copyright (C) 1993-2005 by Frank Kardel\n\n", revision);
 
 		pbuf[60] = '\0';
 		for ( i = 0; i < 60; i++)
@@ -1872,6 +1878,15 @@ main(
  * History:
  *
  * dcfd.c,v
+ * Revision 4.17  2005/08/10 10:09:44  kardel
+ * output revision information
+ *
+ * Revision 4.16  2005/08/10 06:33:25  kardel
+ * cleanup warnings
+ *
+ * Revision 4.15  2005/08/10 06:28:45  kardel
+ * fix setting of baud rate
+ *
  * Revision 4.14  2005/04/16 17:32:10  kardel
  * update copyright
  *
