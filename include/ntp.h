@@ -124,8 +124,8 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define	NTP_MAXASSOC	50	/* max associations */
-#define MINDISTANCE	.01	/* min root distance */
-#define MAXDISTANCE	1.	/* max root distance */
+#define MINDISPERSE	.01	/* min dispersion increment */
+#define MAXDISTANCE	1.	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define MAXHOP		2	/* anti-clockhop threshold */
@@ -343,11 +343,12 @@ struct peer {
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
-#define end_clear_to_zero update
+	u_int	unshift;	/* unreachable shift register */
 	u_int	unreach;	/* unreachable count */
+#define end_clear_to_zero unreach
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
-	u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
+	u_long	nextaction;	/* peer local activity timeout (refclocks) */
 	void (*action) P((struct peer *)); /* action timeout function */
 
 	/*
@@ -733,7 +734,7 @@ struct pkt {
 #define PROTO_CEILING		18
 #define PROTO_COHORT		19
 #define PROTO_CALLDELAY		20
-#define PROTO_MINDIST		21
+#define PROTO_MINDISP		21
 #define PROTO_MAXDIST		22
 #define PROTO_ADJ		23
 #define	PROTO_MAXHOP		24

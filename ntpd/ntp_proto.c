@@ -62,8 +62,8 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
 static	u_char leap_consensus;	/* consensus of survivor leap bits */
-static	double sys_mindist = MINDISTANCE; /* selection threshold (s) */
-static	double sys_maxdist = MAXDISTANCE; /* selection ceiling (s) */
+static	double sys_mindisp = MINDISPERSE; /* min disp increment (s) */
+static	double sys_maxdist = MAXDISTANCE; /* selection threshold (s) */
 double	sys_jitter;		/* system jitter (s) */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
@@ -144,8 +144,10 @@ transmit(
 	 * In manycast mode we start with unity ttl. The ttl is
 	 * increased by one for each poll until either sys_maxclock
 	 * servers have been found or the maximum ttl is reached. When
-	 * sys_maxclock servers are found we stop polling until either
-	 * fewer servers are available
+	 * sys_maxclock servers are found we stop polling until one or
+	 * more servers have timed out or until less than minpoll
+	 * associations turn up. In this case additional better servers
+	 * are dragged in and preempt the existing ones.
 	 */
 	if (peer->cast_flags & MDF_ACAST) {
 		peer->outdate = current_time;
@@ -189,6 +191,9 @@ transmit(
 				hpoll++;
 			}
 		}
+		peer->unshift <<= 1;
+		if (peer->unshift & 0x1000)
+			peer->unreach--;
 		if (peer == sys_peer)
 			sys_hopper++;
 		peer->outdate = current_time;
@@ -228,8 +233,11 @@ transmit(
 			 * system poll interval. Send a burst only if
 			 * enabled and the peer is fit.
 			 */
-			if (!(peer->flags & FLAG_PREEMPT))
-				peer->unreach = 0;
+			if (!(peer->flags & FLAG_PREEMPT) &&
+			    peer->unshift & 0x1) {
+				peer->unshift &= ~0x1;
+				peer->unreach--;
+			}
 			if (!(peer->reach & 0x07))
 				clock_filter(peer, 0., 0., MAXDISPERSE);
 			hpoll = sys_poll;
@@ -237,6 +245,7 @@ transmit(
 			    peer_unfit(peer))
 				peer->burst = NTP_BURST;
 		}
+		peer->unshift |=0x1;
 		peer->unreach++;
 	} else {
 		peer->burst--;
@@ -678,7 +687,7 @@ receive(
 		 */
 		if (sys_leap == LEAP_NOTINSYNC || sys_stratum <
 		    sys_floor || sys_stratum >= sys_ceiling)
-			return;
+			return;			/* bad stratum */
 
 		/*
 		 * Do not respond if our stratum is greater than the
@@ -755,7 +764,7 @@ receive(
 		 */
 		if (hisleap == LEAP_NOTINSYNC || hisstratum <
 		    sys_floor || hisstratum >= sys_ceiling)
-			return;
+			return;			/* bad stratum */
 
 		switch (sys_bclient) {
 
@@ -775,19 +784,17 @@ receive(
 			if ((peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_CLIENT, hisversion,
 			    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_MCAST |
-			    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) == NULL)
+			    FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT, 0,
+			    skeyid)) == NULL)
 				return;		/* system error */
 #ifdef OPENSSL
 			if (skeyid <= NTP_MAXKEY)
-				return;
+				return;		/* symmetric keys */
 
-			if (crypto_recv(peer, rbufp) == XEVNT_OK)
-				return;
-
-			peer_clear(peer, "CRYP");
-			unpeer(peer);
+			if (crypto_recv(peer, rbufp) != XEVNT_OK)
+				unpeer(peer);	/* crypto failure */
 #endif /* OPENSSL */
-			return;
+			return;			/* hooray */
 
 
 		/*
@@ -807,8 +814,8 @@ receive(
 #endif /* OPENSSL */
 			if ((peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_BCLIENT, hisversion,
-			    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_BCLNT, 0,
-			    skeyid)) == NULL)
+			    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_PREEMPT,
+			    MDF_BCLNT, 0, skeyid)) == NULL)
 				return;		/* system error */
 		}
 		break;
@@ -847,12 +854,12 @@ receive(
 		 */
 		if (hisleap == LEAP_NOTINSYNC || hisstratum <
 		    sys_floor || hisstratum >= sys_ceiling)
-			return;
+			return;			/* bad stratum */
 
 		if ((peer = newpeer(&rbufp->recv_srcadr,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion,
-		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
-		    skeyid)) == NULL)
+		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST,
+		    0, skeyid)) == NULL)
 			return;			/* system error */
 
 		break;
@@ -865,12 +872,12 @@ receive(
 
 	/*
 	 * A passive packet matches a passive association. This is
-	 * usually the result of reconfiguring a client on the fly. The
-	 * association must be ephemeral, so just kill it.
+	 * usually the result of reconfiguring a client on the fly. As
+	 * this association might be legitamate and this packet an
+	 * attempt to deny service, just ignore it.
 	 */
 	case AM_ERR:
-		unpeer(peer);
-		/* fall through */
+		return;
 
 	/*
 	 * For everything else there is the bit bucket.
@@ -925,8 +932,6 @@ receive(
 	 */
 	if (is_authentic == AUTH_CRYPTO) {
 		peer_clear(peer, "AUTH");
-		if (!(peer->flags & FLAG_CONFIG))
-			unpeer(peer);
 		return;				/* crypto-NAK */
 
 	/* 
@@ -981,10 +986,8 @@ receive(
 		if (rval != XEVNT_OK) {
 			peer_clear(peer, "CRYP");
 			peer->flash |= TEST9;	/* crypto error */
-			if (!(peer->flags & FLAG_CONFIG)) {
-				unpeer(peer);
-				return;
-			}
+			return;
+
 		} else if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST8;
@@ -1037,8 +1040,6 @@ receive(
 	if (peer->flash & TEST4) {
 		msyslog(LOG_INFO, "receive: fatal error %04x for %s",
 		    peer->flash, stoa(&peer->srcadr));
-		if (!(peer->flags & FLAG_CONFIG))
-			unpeer(peer);
 		return;
 	}
 
@@ -1055,8 +1056,6 @@ receive(
 			    "receive: flash auto %04x\n", peer->flash);
 #endif
 		peer_clear(peer, "AUTO");
-		if (!(peer->flags & FLAG_CONFIG))
-			unpeer(peer);
 	}
 #endif /* OPENSSL */
 }
@@ -1102,10 +1101,6 @@ process_packet(
 		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
 			peer_clear(peer, "DENY");
 			peer->flash |= TEST4;	/* access denied */
-			if (!(peer->flags & FLAG_CONFIG)) {
-				unpeer(peer);
-				return;
-			}
 		}
 	}
 
@@ -1302,11 +1297,11 @@ clock_update(void)
 		    fabs(sys_peer->offset);
 #ifdef REFCLOCK
 		if (!(sys_peer->flags & FLAG_REFCLOCK) && dtemp <
-		    sys_mindist)
-			dtemp = sys_mindist;
+		    sys_mindisp)
+			dtemp = sys_mindisp;
 #else
-		if (dtemp < sys_mindist)
-			dtemp = sys_mindist;
+		if (dtemp < sys_mindisp)
+			dtemp = sys_mindisp;
 #endif /* REFCLOCK */
 		sys_rootdispersion = sys_peer->rootdispersion + dtemp;
 		sys_leap = leap_consensus;
@@ -2097,7 +2092,11 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		sys_survivors++;
-		peer->unreach = 0;
+		if (sys_survivors <= sys_maxclock && peer->unshift &
+		    0x1) {
+			peer->unshift &= ~0x1;
+			peer->unreach--;
+		}
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
@@ -3020,7 +3019,7 @@ proto_config(
 		break;
 
 	/*
-	 * Turn on/off facility to listen to broadcasts.
+	 * Turn on/off enable broadcasts.
 	 */
 	case PROTO_BROADCLIENT:
 		sys_bclient = (int)value;
@@ -3028,6 +3027,13 @@ proto_config(
 			io_unsetbclient();
 		else
 			io_setbclient();
+		break;
+
+	/*
+	 * Turn on/off PPS discipline.
+	 */
+	case PROTO_PPS:
+		pps_enable = (int)value;
 		break;
 
 	/*
@@ -3062,85 +3068,78 @@ proto_config(
 		break;
 
 	/*
-	 * Require authentication to mobilize ephemeral associations.
+	 * Turn on/off authentication to mobilize ephemeral
+	 * associations.
 	 */
 	case PROTO_AUTHENTICATE:
 		sys_authenticate = (int)value;
 		break;
 
 	/*
-	 * Turn on/off PPS discipline.
-	 */
-	case PROTO_PPS:
-		pps_enable = (int)value;
-		break;
-
-	/*
-	 * Set the minimum number of survivors.
+	 * Set minimum number of survivors.
 	 */
 	case PROTO_MINCLOCK:
 		sys_minclock = (int)dvalue;
 		break;
 
 	/*
-	 * Set the minimum number of survivors.
+	 * Set maximum number of preemptable associations.
 	 */
 	case PROTO_MAXCLOCK:
 		sys_maxclock = (int)dvalue;
 		break;
 
-
 	/*
-	 * Set the minimum number of candidates.
+	 * Set minimum number of survivors.
 	 */
 	case PROTO_MINSANE:
 		sys_minsane = (int)dvalue;
 		break;
 
 	/*
-	 * Set the stratum floor.
+	 * Set stratum floor.
 	 */
 	case PROTO_FLOOR:
 		sys_floor = (int)dvalue;
 		break;
 
 	/*
-	 * Set the stratum ceiling.
+	 * Set stratum ceiling.
 	 */
 	case PROTO_CEILING:
 		sys_ceiling = (int)dvalue;
 		break;
 
 	/*
-	 * Set the select threshold.
-	 */
-	case PROTO_MINDIST:
-		sys_mindist = dvalue;
-		break;
-
-	/*
-	 * Set the select threshold.
-	 */
-	case PROTO_MAXDIST:
-		sys_maxdist = dvalue;
-		break;
-
-	/*
-	 * Set the cohort switch.
+	 * Set cohort switch.
 	 */
 	case PROTO_COHORT:
 		sys_cohort = (int)dvalue;
 		break;
 
 	/*
-	 * Set the anticlockhop threshold.
+	 * Set minimum dispersion increment.
+	 */
+	case PROTO_MINDISP:
+		sys_mindisp = dvalue;
+		break;
+
+	/*
+	 * Set maximum distance (select threshold).
+	 */
+	case PROTO_MAXDIST:
+		sys_maxdist = dvalue;
+		break;
+
+	/*
+	 * Set anticlockhop threshold.
 	 */
 	case PROTO_MAXHOP:
 		sys_maxhop = (int)dvalue;
 		break;
 
 	/*
-	 * Set the adjtime() resolution (s).
+	 * Set adjtime() resolution (s).
 	 */
 	case PROTO_ADJ:
 		sys_tick = dvalue;
