@@ -73,6 +73,7 @@ static	struct keyword keywords[] = {
 	{ "disable",		CONFIG_DISABLE },
 	{ "driftfile",		CONFIG_DRIFTFILE },
 	{ "enable",		CONFIG_ENABLE },
+	{ "end",		CONFIG_END },
 	{ "filegen",		CONFIG_FILEGEN },
 	{ "fudge",		CONFIG_FUDGE },
 	{ "includefile",	CONFIG_INCLUDEFILE },
@@ -585,6 +586,8 @@ getconfig(
 	}
 
 	for (;;) {
+		if (tok == CONFIG_END) 
+			break;
 		if (fp[includelevel])
 			tok = gettokens(fp[includelevel], line, tokens, &ntokens);
 #ifdef HAVE_NETINFO
@@ -868,6 +871,12 @@ getconfig(
 			    stats_config(STATS_PID_FILE, (char *)0);
 			break;
 
+		    case CONFIG_END:
+			for ( i = 0; i <= includelevel; i++ ) {
+				fclose(fp[i]);
+			}
+			break;
+			
 		    case CONFIG_INCLUDEFILE:
 			if (ntokens < 2) {
 			    msyslog(LOG_ERR, "includefile needs one argument");
