@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/testdcf.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/ntp4-dev/parseutil/testdcf.c,v 4.10 2005/08/06 14:18:43 kardel RELEASE_20050806_A
  *
- * testdcf.c,v 4.7 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * testdcf.c,v 4.10 2005/08/06 14:18:43 kardel RELEASE_20050806_A
  *  
  * simple DCF77 100/200ms pulse test program (via 50Baud serial line)
  *
@@ -36,6 +36,7 @@
 
 #include "ntp_stdlib.h"
 
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -64,6 +65,8 @@ struct clocktime		/* clock time broken up from time code */
 };
 
 typedef struct clocktime clocktime_t;
+
+static char type(unsigned int);
 
 #define TIMES10(_X_) (((_X_) << 3) + ((_X_) << 1))
 
@@ -123,6 +126,8 @@ typedef struct clocktime clocktime_t;
  * 58 		P3    - Date Parity (even)
  * 59		      - usually missing (minute indication), except for leap insertion
  */
+
+static char revision[] = "4.10";
 
 static struct rawdcfcode 
 {
@@ -282,13 +287,13 @@ convert_rawdcf(
 	}
 }
 
-char
+static char
 type(
 	unsigned int c
 	)
 {
 	c ^= 0xFF;
-	return (c > 0xF);
+	return (c >= 0xF);
 }
 
 static const char *wday[8] =
@@ -377,13 +382,16 @@ main(
 			term.c_cc[VMIN] = 1;
 #ifdef NO_PARENB_IGNPAR /* Was: defined(SYS_IRIX4) || defined (SYS_IRIX5) */
 			/* somehow doesn't grok PARENB & IGNPAR (mj) */
-			term.c_cflag = B50|CS8|CREAD|CLOCAL;
+			term.c_cflag = CS8|CREAD|CLOCAL;
 #else
-			term.c_cflag = B50|CS8|CREAD|CLOCAL|PARENB;
+			term.c_cflag = CS8|CREAD|CLOCAL|PARENB;
 #endif
 			term.c_iflag = IGNPAR;
 			term.c_oflag = 0;
 			term.c_lflag = 0;
+
+			cfsetispeed(&term, B50);
+			cfsetospeed(&term, B50);
 
 			if (tcsetattr(fd, TCSANOW, &term) == -1)
 			{
@@ -402,7 +410,7 @@ main(
 			}
 #endif
 
-			printf("  DCF77 monitor - Copyright (C) 1993-2005, Frank Kardel\n\n");
+			printf("  DCF77 monitor %s - Copyright (C) 1993-2005, Frank Kardel\n\n", revision);
 
 			clock_time.hour = 0;
 			clock_time.minute = 0;
@@ -514,6 +522,15 @@ main(
  * History:
  *
  * testdcf.c,v
+ * Revision 4.10  2005/08/06 14:18:43  kardel
+ * cleanup warnings
+ *
+ * Revision 4.9  2005/08/06 14:14:38  kardel
+ * document revision on startup
+ *
+ * Revision 4.8  2005/08/06 14:10:08  kardel
+ * fix setting of baud rate
+ *
  * Revision 4.7  2005/04/16 17:32:10  kardel
  * update copyright
  *

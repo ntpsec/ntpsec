@@ -75,6 +75,7 @@
 #define CONF_MOD_MODE		10
 #define CONF_MOD_NOSELECT 	11
 #define CONF_MOD_TRUE		12
+#define	CONF_MOD_PREEMPT	13
 
 /*
  * "restrict" modifier keywords
@@ -143,13 +144,14 @@
  * "tos" modifier keywords
  */
 #define CONF_TOS_MINCLOCK	1
-#define CONF_TOS_MINSANE	2
-#define CONF_TOS_FLOOR		3
-#define CONF_TOS_CEILING	4
-#define CONF_TOS_COHORT		5
-#define CONF_TOS_MINDIST	6
-#define CONF_TOS_MAXDIST	7
-#define	CONF_TOS_MAXHOP		8
+#define	CONF_TOS_MAXCLOCK	2
+#define CONF_TOS_MINSANE	3
+#define CONF_TOS_FLOOR		4
+#define CONF_TOS_CEILING	5
+#define CONF_TOS_COHORT		6
+#define CONF_TOS_MINDIST	7
+#define CONF_TOS_MAXDIST	8
+#define	CONF_TOS_MAXHOP		9
 
 #ifdef OPENSSL
 /*
