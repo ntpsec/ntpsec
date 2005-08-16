@@ -122,10 +122,6 @@ SOURCE=..\..\..\libntp\authusekey.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\binio.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\buftvtots.c
 # End Source File
 # Begin Source File
@@ -190,10 +186,6 @@ SOURCE=..\..\..\libntp\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\gpstolfp.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\hextoint.c
 # End Source File
 # Begin Source File
@@ -203,10 +195,6 @@ SOURCE=..\..\..\libntp\hextolfp.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\humandate.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\libntp\ieee754io.c
 # End Source File
 # Begin Source File
 
@@ -262,10 +250,6 @@ SOURCE=..\..\..\libntp\memmove.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\mfp_mul.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\mfptoa.c
 # End Source File
 # Begin Source File
@@ -314,6 +298,10 @@ SOURCE=..\..\..\libisc\netscope.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ntp_random.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\ntp_rfc2553.c
 # End Source File
 # Begin Source File
@@ -339,10 +327,6 @@ SOURCE=..\..\..\libntp\prettydate.c
 # Begin Source File
 
 SOURCE=.\randfile.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\libntp\ranny.c
 # End Source File
 # Begin Source File
 
@@ -539,6 +523,10 @@ SOURCE=..\..\..\include\ntp_malloc.h
 # Begin Source File
 
 SOURCE=..\..\..\include\ntp_proto.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_random.h
 # End Source File
 # Begin Source File
 

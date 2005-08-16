@@ -17,6 +17,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
+#include <ntp_random.h>
 #include <isc/net.h>
 #include <isc/result.h>
 

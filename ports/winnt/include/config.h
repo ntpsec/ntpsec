@@ -75,6 +75,7 @@
  * Miscellaneous functions that Microsoft maps
  * to other names
  */
+#define inline __inline
 #define vsnprintf _vsnprintf
 #define snprintf _snprintf
 #define stricmp _stricmp
