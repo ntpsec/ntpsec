@@ -9,6 +9,7 @@
 #ifdef OPENSSL
 #include "ntp_crypto.h"
 #endif /* OPENSSL */
+#include <ntp_random.h>
 
 #include <isc/boolean.h>
 
