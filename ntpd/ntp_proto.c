@@ -176,34 +176,18 @@ transmit(
 		u_char oreach;
 
 		/*
-		 * If the peer has not been reachable for awhile back
-		 * off. If the PREEMPT flag is up, evict it from the
-		 * house.
+		 * Update the reachability status.
 		 */
 		oreach = peer->reach;
-		if (peer->unreach > NTP_UNREACH) {
-			if (peer->flags & FLAG_PREEMPT &&
-			    peer_preempt > sys_maxclock) {
-				unpeer(peer);
-				return;
-
-			} else {
-				hpoll++;
-			}
-		}
-		peer->unshift <<= 1;
-		if (peer->unshift & 0x1000)
-			peer->unreach--;
+		peer->outdate = current_time;
 		if (peer == sys_peer)
 			sys_hopper++;
-		peer->outdate = current_time;
 		peer->reach <<= 1;
 		if (!peer->reach) {
 
 			/*
-			 * If this association was reachable but now
-			 * unreachable, raise a trap. If ephemeral, dump
-			 * it right away.
+			 * Here the peer is unreachable. If it was
+			 * previously reachable, raise a trap.
 			 */
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
@@ -211,13 +195,9 @@ transmit(
 			}
 
 			/*
-			 * We send an initial burst only once after a
-			 * server becomes unreachable. After the unreach
-			 * counter trips, we send a single packet and
-			 * double the poll interval if persistent or
-			 * dump the association if ephemeral. Here it
-			 * can be ephemeral only if the server has never
-			 * been reachable.
+			 * Bump the poll interval. Send a burst if
+			 * enabled, but only once after a peer becomes
+			 * unreachable.
 			 */
 			if (peer->flags & FLAG_IBURST &&
 			    peer->unreach == 0) {
@@ -228,25 +208,39 @@ transmit(
 			/*
 			 * Here the peer is reachable. If it has not
 			 * been heard for three consecutive polls, stuff
-			 * infinity in the clock filter dispersion.
-			 * Next, set the host poll interval to the
-			 * system poll interval. Send a burst only if
-			 * enabled and the peer is fit.
+			 * infinity in the clock filter. Next, set the
+			 * poll interval to the system poll interval.
+			 * Send a burst only if enabled and the peer is
+			 * fit.
 			 */
-			if (!(peer->flags & FLAG_PREEMPT) &&
-			    peer->unshift & 0x1) {
-				peer->unshift &= ~0x1;
-				peer->unreach--;
-			}
 			if (!(peer->reach & 0x07))
 				clock_filter(peer, 0., 0., MAXDISPERSE);
+			if (!(peer->flags & FLAG_PREEMPT))	
+				peer->unreach = 0;
 			hpoll = sys_poll;
 			if (peer->flags & FLAG_BURST &&
 			    peer_unfit(peer))
 				peer->burst = NTP_BURST;
 		}
-		peer->unshift |=0x1;
-		peer->unreach++;
+		if (peer->status < CTL_PST_SEL_SYNCCAND)
+			peer->unreach += 3;
+		else if (peer_preempt > sys_maxclock) {
+			if (peer->status < CTL_PST_SEL_SYNCCAND)
+				peer->unreach += 2;
+			else
+				peer->unreach += 1;
+		} else {
+			peer->unreach = 0;
+		}
+		if (peer->unreach >= NTP_UNREACH) {
+			if (peer->flags & FLAG_PREEMPT) {
+				unpeer(peer);
+				return;
+
+			} else {
+				hpoll++;
+			}
+		}
 	} else {
 		peer->burst--;
 
@@ -1995,11 +1989,11 @@ clock_select(void)
 	 */
 	if (nlist == 0) {
 		if (typeacts != 0) {
-			typeacts->status = CTL_PST_SEL_SANE;
+			typeacts->status = CTL_PST_SEL_DISTSYSPEER;
 			peer_list[0] = typeacts;
 			nlist = 1;
 		} else if (typelocal != 0) {
-			typelocal->status = CTL_PST_SEL_SANE;
+			typelocal->status = CTL_PST_SEL_DISTSYSPEER;
 			peer_list[0] = typelocal;
 			nlist = 1;
 		} else {
@@ -2092,11 +2086,6 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		sys_survivors++;
-		if (sys_survivors <= sys_maxclock && peer->unshift &
-		    0x1) {
-			peer->unshift &= ~0x1;
-			peer->unreach--;
-		}
 		leap_consensus |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
