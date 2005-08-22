@@ -342,6 +342,8 @@ unpeer(
 		printf("demobilize %u %d %d\n", peer_to_remove->associd,
 		    peer_associations, peer_preempt);
 #endif
+	set_peerdstadr(peer_to_remove, NULL);
+
 	peer_clear(peer_to_remove, "KILL");
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
@@ -519,36 +521,31 @@ peer_config(
 void
 set_peerdstadr(struct peer *peer, struct interface *interface)
 {
-  if (peer->dstadr != NULL)
-    {
-      peer->dstadr->peercnt--;
-      ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
-    }
-
-  if (peer->dstadr != interface) 
-    {
-      peer->dstadr = interface;
-      /* reset crypto information */
-      peer_crypto_clear(peer);
-    }
+	if (peer->dstadr != interface) {
+		if (peer->dstadr != NULL)
+		{
+			peer->dstadr->peercnt--;
+			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
+		}
+		peer->dstadr = interface;
+		/* reset crypto information */
+		peer_crypto_clear(peer);
   
-  if (peer->dstadr != NULL)
-    {
-      ISC_LIST_APPEND(peer->dstadr->peers, peer, ilink);
-      peer->dstadr->peercnt++;
-    }
+		if (peer->dstadr != NULL)
+		{
+			ISC_LIST_APPEND(peer->dstadr->peers, peer, ilink);
+			peer->dstadr->peercnt++;
+		}
+	}
 }
 
 /*
  * attempt to re-rebind interface if necessary
  */
-void
+static void
 peer_refresh_interface(struct peer *peer)
 {
 	interface_t *niface;
-
-	if (peer->dstadr)	/* we only work for citizens that got lost */
-		return;
 
 	niface = select_peerinterface(peer, &peer->srcadr, NULL, peer->cast_flags);
 
@@ -585,6 +582,7 @@ peer_refresh_interface(struct peer *peer)
 		}
 	}
 #endif
+
 	if (niface != NULL) {
 		set_peerdstadr(peer, niface);
 	} else {
@@ -598,6 +596,27 @@ peer_refresh_interface(struct peer *peer)
 		{
 			msyslog(LOG_INFO, "peer %s is not configured and has lost its interface - deleting", stoa(&peer->srcadr));
 			unpeer(peer);
+		}
+	}
+}
+
+/*
+ * refresh_all_peerinterfaces - see that all interface bindings are up to date
+ */
+void
+refresh_all_peerinterfaces(void)
+{
+	struct peer *peer, *next_peer;
+	int n;
+
+	/*
+	 * this is called when te interfac list has changed
+	 * give all peers a chance to find a better interface
+	 */
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
+		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
+			next_peer = peer->next;
+			peer_refresh_interface(peer);
 		}
 	}
 }
@@ -783,6 +802,8 @@ newpeer(
 			/*
 			 * Dump it, something screwed up
 			 */
+			set_peerdstadr(peer, NULL);
+	
 			peer->next = peer_free;
 			peer_free = peer;
 			peer_free_count++;

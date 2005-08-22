@@ -766,6 +766,7 @@ update_interfaces(
 	)
 {
 	interface_info_t ifi;
+	int need_refresh = 0;
 	isc_mem_t *mctx = NULL;
 	isc_interfaceiter_t *iter = NULL;
 	isc_boolean_t scan_ipv4 = ISC_FALSE;
@@ -819,7 +820,7 @@ update_interfaces(
 		unsigned int family;
 		interface_t interface;
 		interface_t *iface;
-
+		
 		result = isc_interfaceiter_current(iter, &isc_if);
 
 		if (result != ISC_R_SUCCESS)
@@ -886,6 +887,8 @@ update_interfaces(
                         if (loopback_interface == &interface) 
                                 loopback_interface = iface; 
 
+			need_refresh = 1;
+			
 			ifi.action = IFS_CREATED;
 			ifi.interface = iface;
 			if (receiver && iface)
@@ -930,7 +933,7 @@ update_interfaces(
 
 					peer = ISC_LIST_HEAD(interf->peers);
 					/*
-					 * re-assign all peers interface bindings
+					 * disconnect peer from deleted interface
 					 */
 					while (peer != NULL) {
 						struct peer *npeer = ISC_LIST_NEXT(peer, ilink);
@@ -938,12 +941,9 @@ update_interfaces(
 						/*
 						 * this one just lost it's interface
 						 */
+						need_refresh = 1;
 						set_peerdstadr(peer, NULL);
 	
-						/*
-						 * see whether we can get a new one for him right now
-						 */
-						peer_refresh_interface(peer);
 						peer = npeer;
 					}
 					delete_interface(interf);
@@ -952,6 +952,12 @@ update_interfaces(
 			interf = next;
 		}
 	}
+
+	/*
+	 * now re-configure as the world has changed
+	 */
+	if (need_refresh) 
+		refresh_all_peerinterfaces();
 }
 		
 
