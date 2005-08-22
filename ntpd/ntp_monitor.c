@@ -177,6 +177,24 @@ mon_stop(
 	mon_mru_list.mru_prev = &mon_mru_list;
 }
 
+void
+ntp_monclearinterface(struct interface *interface)
+{
+        struct mon_data *md;
+
+	for (md = mon_mru_list.mru_next; md != &mon_mru_list;
+	     md = md->mru_next) {
+	  if (md->interface == interface) 
+	    {
+	      /* dequeue from mru list and put to free list */
+	      md->mru_prev->mru_next = md->mru_next;
+	      md->mru_next->mru_prev = md->mru_prev;
+	      remove_from_hash(md);
+	      md->hash_next = mon_free;
+	      mon_free = md;
+	    }
+	}
+}
 
 /*
  * ntp_monitor - record stats about this packet
