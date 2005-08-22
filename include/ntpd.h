@@ -132,7 +132,6 @@ extern	void	clear_all	P((void));
 extern	void	expire_all	P((void));
 #endif /* OPENSSL */
 extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
-extern	void	resetmanycast	P((void));
 
 /* ntp_crypto.c */
 #ifdef OPENSSL

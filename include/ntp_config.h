@@ -56,8 +56,9 @@
 #define CONFIG_TTL		35
 #define CONFIG_INCLUDEFILE      36
 #define CONFIG_KEYSDIR		37
+#define CONFIG_END		38
 #ifdef OPENSSL
-#define CONFIG_CRYPTO		38
+#define CONFIG_CRYPTO		39
 #endif /* OPENSSL */
 
 /*
@@ -149,7 +150,7 @@
 #define CONF_TOS_FLOOR		4
 #define CONF_TOS_CEILING	5
 #define CONF_TOS_COHORT		6
-#define CONF_TOS_MINDIST	7
+#define CONF_TOS_MINDISP	7
 #define CONF_TOS_MAXDIST	8
 #define	CONF_TOS_MAXHOP		9
 
