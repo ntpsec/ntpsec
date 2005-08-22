@@ -447,6 +447,7 @@ static void
 init_interface(interface_t *interface)
 {
   ISC_LINK_INIT(interface, link);
+  ISC_LIST_INIT(interface->peers);
   interface->fd = INVALID_SOCKET;
   interface->bfd = INVALID_SOCKET;
   interface->num_mcast = 0;
@@ -878,6 +879,13 @@ update_interfaces(
 			 * this is new - add to out interface list
 			 */
 			iface = create_interface(port, iface);
+                        /* 
+                         * in case we just dug out a loopback interface 
+                         * let it point to the correctly created one 
+                         */ 
+                        if (loopback_interface == &interface) 
+                                loopback_interface = iface; 
+
 			ifi.action = IFS_CREATED;
 			ifi.interface = iface;
 			if (receiver && iface)
