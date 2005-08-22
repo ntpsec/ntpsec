@@ -106,6 +106,10 @@
             <dd>Obtain and print the server's restriction list. This list is (usually) printed in sorted order and may help to understand how the restrictions are applied.
             <dt><tt>monlist [ <i>version</i> ]</tt>
             <dd>Obtain and print traffic counts collected and maintained by the monitor facility. The version number should not normally need to be specified.
+	    <dt><tt>ifstats</tt>
+	    <dd>List interface statistics for interfaces used by ntpd for network communication.</dd>
+	    <dt><tt>ifreload</tt>
+	    <dd>Force rescan of current system interfaces. Outputs interface statistics for interfaces that could possibly change. Marks unchanged interfaces with <b>.</b>, added interfaces with <b>+</b> and deleted interfaces with <b>-</b>.</dd>
             <dt><tt>clkbug <i>clock_peer_address</i> [...]</tt>
             <dd>Obtain debugging information for a reference clock driver. This information is provided only by some clock drivers and is mostly undecodable without a copy of the driver source in hand.
         </dl>

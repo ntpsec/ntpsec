@@ -12,6 +12,7 @@
 #include <ntp_random.h>
 
 #include <isc/boolean.h>
+#include <isc/list.h>
 
 /*
  * Calendar arithmetic - contributed by G. Healton
@@ -144,7 +145,6 @@ typedef char s_char;
 #define	MAXFILENAME	128	/* max length of file name */
 #define MAXHOSTNAME	512	/* max length of host/node name */
 #define NTP_MAXSTRLEN	256	/* max string length */
-#define MAXINTERFACES	512	/* max number of interfaces */
 
 /*
  * Operations for jitter calculations (these use doubles).
@@ -171,6 +171,8 @@ typedef char s_char;
  * The interface structure is used to hold the addresses and socket
  * numbers of each of the interfaces we are using.
  */
+typedef struct interface interface_t;
+
 struct interface {
 	SOCKET fd;			/* socket this is opened on */
 	SOCKET bfd;			/* socket for receiving broadcasts */
@@ -186,22 +188,27 @@ struct interface {
 	volatile long received;		/* number of incoming packets */
 	long sent;			/* number of outgoing packets */
 	long notsent;			/* number of send failures */
-	u_int ifindex;			/* Interface index */
 	u_int scopeid;			/* Scope used for Multicasting */
+	u_int ifindex;			/* interface index */
+        u_char phase;		        /* phase in update cycle */
 	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
+        ISC_LIST(struct peer) peers;    /* list of peers for the interface */
+        u_int peercnt;		        /* number of peers referencinf this interface - informational only */
+        ISC_LINK(interface_t) link;     /* interface list */
 };
 
 /*
  * Flags for interfaces
  */
-#define INT_UP		 1	/* Interface is up */
-#define	INT_PPP		 2	/* Point-to-point interface */
-#define	INT_LOOPBACK	 4	/* the loopback interface */
-#define	INT_BROADCAST	 8	/* can broadcast out this interface */
-#define INT_MULTICAST	16	/* can multicast out this interface */
-#define	INT_BCASTOPEN	32	/* broadcast socket is open */
-#define INT_MCASTOPEN	64	/* multicasting enabled */
-
+#define INT_UP		0x001	/* Interface is up */
+#define	INT_PPP		0x002	/* Point-to-point interface */
+#define	INT_LOOPBACK	0x004	/* the loopback interface */
+#define	INT_BROADCAST	0x008	/* can broadcast out this interface */
+#define INT_MULTICAST	0x010	/* can multicast out this interface */
+#define	INT_BCASTOPEN	0x020	/* broadcast socket is open */
+#define INT_MCASTOPEN	0x040	/* multicasting enabled */
+#define INT_WILDCARD    0x080   /* wildcard interface - usually skipped */
+#define INT_MCASTIF     0x100	/* bound directly to MCAST address */
 /*
  * Define flasher bits (tests 1 through 11 in packet procedure)
  * These reveal the state at the last grumble from the peer and are
@@ -246,6 +253,7 @@ struct peer {
 	struct peer *ass_next;	/* link pointer in associd hash */
 	struct sockaddr_storage srcadr; /* address of remote host */
 	struct interface *dstadr; /* pointer to address on local host */
+        ISC_LINK(struct peer) ilink; /* interface link list */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */
@@ -865,6 +873,7 @@ struct restrictlist6 {
 #define	RESTRICT_FLAGS		1	/* add flags to restrict entry */
 #define	RESTRICT_UNFLAG		2	/* remove flags from restrict entry */
 #define	RESTRICT_REMOVE		3	/* remove a restrict entry */
+#define	RESTRICT_REMOVEIF       4	/* remove an interface restrict entry */
 
 /*
  * Endpoint structure for the select algorithm

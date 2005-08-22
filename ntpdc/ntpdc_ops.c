@@ -78,6 +78,8 @@ static	void	clockstat	P((struct parse *, FILE *));
 static	void	fudge		P((struct parse *, FILE *));
 static	void	clkbug		P((struct parse *, FILE *));
 static	void	kerninfo	P((struct parse *, FILE *));
+static  void    get_if_stats    P((struct parse *, FILE *));
+static  void    do_if_reload    P((struct parse *, FILE *));
 
 /*
  * Commands we understand.  Ntpdc imports this.
@@ -204,6 +206,12 @@ struct xcmd opcmds[] = {
 	{ "kerninfo",	kerninfo,	{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display the kernel pll/pps variables" },
+	{ "ifstats",	get_if_stats,	{ NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "list interface statistics" },
+	{ "ifreload",	do_if_reload,	{ NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "reload interface configuration" },
 
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "", "", "", "" }, "" }
@@ -3026,4 +3034,121 @@ again:
 		      (u_long)ntohl(ik->stbcnt));
 	(void)fprintf(fp, "calibration errors:   %ld\n",
 		      (u_long)ntohl(ik->errcnt));
+}
+
+#define IF_LIST_FMT     "%2d %c %48s %c %12.12s %03x %3d %2d %5d %5d %5d %1d %2d\n"
+#define IF_LIST_FMT_STR "%2s %c %48s %c %12.12s %3s %3s %2s %5s %5s %5s %1s %2s\n"
+#define IF_LIST_AFMT_STR "     %48s %c\n"
+#define IF_LIST_LABELS  "#", 'A', "Address/Mask/Broadcast", 'T', "IF name", "Flg", "TL", "#M", "recv", "sent", "drop", "S", "PC"
+#define IF_LIST_LINE    "==========================================================================================================\n"
+
+static void
+iflist(
+	FILE *fp,
+	struct info_if_stats *ifs,
+	int items,
+	int itemsize,
+	int res
+	)
+{
+	static char *actions = "?.+-";
+	struct sockaddr_storage saddr;
+
+	if (res != 0)
+	    return;
+
+	if (!checkitems(items, fp))
+	    return;
+
+	if (!checkitemsize(itemsize, sizeof(struct info_if_stats)))
+	    return;
+
+	fprintf(fp, IF_LIST_FMT_STR, IF_LIST_LABELS);
+	fprintf(fp, IF_LIST_LINE);
+	
+	while (items > 0) {
+		if (ntohl(ifs->v6_flag)) {
+			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unaddr.addr6, sizeof(ifs->unaddr.addr6));
+			saddr.ss_family = AF_INET6;
+		} else {
+			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unaddr.addr, sizeof(ifs->unaddr.addr));
+			saddr.ss_family = AF_INET;
+		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+		saddr.ss_len = SOCKLEN(&saddr);
+#endif
+		fprintf(fp, IF_LIST_FMT,
+			ntohl(ifs->ifindex),
+			actions[(ifs->action >= 1 && ifs->action < 4) ? ifs->action : 0],
+			stoa((&saddr)), 'A',
+			ifs->name,
+			ntohl(ifs->flags),
+			ntohl(ifs->last_ttl),
+			ntohl(ifs->num_mcast),
+			ntohl(ifs->received),
+			ntohl(ifs->sent),
+			ntohl(ifs->notsent),
+			ntohl(ifs->scopeid),
+			ntohl(ifs->peercnt));
+
+		if (!ntohl(ifs->v6_flag)) {
+			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unbcast.addr, sizeof(ifs->unbcast.addr));
+			saddr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+			saddr.ss_len = SOCKLEN(&saddr);
+#endif
+			fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'B');
+
+		}
+		if (ntohl(ifs->v6_flag)) {
+			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unmask.addr6, sizeof(ifs->unmask.addr6));
+			saddr.ss_family = AF_INET6;
+		} else {
+			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unmask.addr, sizeof(ifs->unmask.addr));
+			saddr.ss_family = AF_INET;
+		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+		saddr.ss_len = SOCKLEN(&saddr);
+#endif
+		fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'M');
+
+		ifs++;
+		items--;
+	}
+}
+
+/*ARGSUSED*/
+static void
+get_if_stats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	struct info_if_stats *ifs;
+	int items;
+	int itemsize;
+	int res;
+
+	res = doquery(impl_ver, REQ_IF_STATS, 1, 0, 0, (char *)NULL, &items,
+		      &itemsize, (void *)&ifs, 0, 
+		      sizeof(struct info_if_stats));
+	iflist(fp, ifs, items, itemsize, res);
+}
+
+/*ARGSUSED*/
+static void
+do_if_reload(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	struct info_if_stats *ifs;
+	int items;
+	int itemsize;
+	int res;
+
+	res = doquery(impl_ver, REQ_IF_RELOAD, 1, 0, 0, (char *)NULL, &items,
+		      &itemsize, (void *)&ifs, 0, 
+		      sizeof(struct info_if_stats));
+	iflist(fp, ifs, items, itemsize, res);
 }
