@@ -2267,6 +2267,9 @@ peer_xmit(
 	if (peer->flash & TEST9)
 		return;
 
+	if (!peer->dstadr)	/* don't bother with peers without interface */
+		return;
+
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
 					 peer->hmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
