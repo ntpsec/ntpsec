@@ -757,7 +757,7 @@ peer_list_sum(
 						GET_INADDR(pp->dstadr->bcast):
 						1 : GET_INADDR(pp->dstadr->sin);
 				else
-						memset(&ips->dstadr6, 0, sizeof(ips->dstadr6));
+						memset(&ips->dstadr, 0, sizeof(ips->dstadr));
 
 				skip = 0;
 			}
@@ -862,7 +862,7 @@ peer_info (
 					GET_INADDR(pp->dstadr->bcast):
 					2 : GET_INADDR(pp->dstadr->sin);
 			else
-				memset(&ip->dstadr6, 0, sizeof(ip->dstadr6));
+				memset(&ip->dstadr, 0, sizeof(ip->dstadr));
 
 			ip->srcadr = GET_INADDR(pp->srcadr);
 			if (client_v6_capable)

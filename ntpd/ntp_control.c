@@ -1448,6 +1448,9 @@ ctl_putpeer(
 		if (peer->dstadr) {
 			ctl_putadr(peer_var[CP_DSTADR].text, 0,
 				   &(peer->dstadr->sin));
+		} else {
+			ctl_putadr(peer_var[CP_DSTADR].text, 0,
+				   NULL);
 		}
 		break;
 
