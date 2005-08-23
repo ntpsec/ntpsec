@@ -1276,7 +1276,7 @@ enable_multicast_if(interface_t *iface, struct sockaddr_storage *maddr)
 			stoa(maddr));
 			return;
 		}
-		DPRINTF(0, ("Added IPv6 multicast interface on socket %d, addr %s, scope %d for multicast address %s\n",
+		DPRINTF(1, ("Added IPv6 multicast interface on socket %d, addr %s, scope %d for multicast address %s\n",
 			    iface->fd,  stoa(&iface->sin), iface->scopeid,
 			    stoa(maddr)));
 		break;
@@ -1325,7 +1325,7 @@ socket_multicast_enable(interface_t *iface, int lscope, struct sockaddr_storage 
 			mreq.imr_interface.s_addr, stoa(maddr));
 			return ISC_FALSE;
 		}
-		DPRINTF(0, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
+		DPRINTF(1, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
 			    iface->fd, stoa(&iface->sin),
 			    mreq.imr_multiaddr.s_addr,
 			    mreq.imr_interface.s_addr, stoa(maddr)));
@@ -1351,7 +1351,7 @@ socket_multicast_enable(interface_t *iface, int lscope, struct sockaddr_storage 
 			mreq6.ipv6mr_interface, stoa(maddr));
 			return ISC_FALSE;
 		}
-		DPRINTF(0, ("Added IPv6 multicast group on socket %d, addr %s for interface %d(%s)\n",
+		DPRINTF(1, ("Added IPv6 multicast group on socket %d, addr %s for interface %d(%s)\n",
 			    iface->fd, stoa(&iface->sin),
 			    mreq6.ipv6mr_interface, stoa(maddr)));
 		break;
@@ -2888,8 +2888,13 @@ findbcastinter(
 
 	interface = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
 	
-	DPRINTF(2, ("Found bcastinter index #%d %s\n", interface->ifindex, interface->name));
-
+#ifdef DEBUG
+	if (interface) {
+		DPRINTF(2, ("Found bcastinter index #%d %s\n", interface->ifindex, interface->name));
+	} else {
+		DPRINTF(2, ("No bcast interface found for %s\n", stoa(addr)));
+	}
+#endif
 	/*
 	 * Do nothing right now
 	 * Eventually we will find the interface this
