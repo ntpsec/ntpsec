@@ -84,6 +84,7 @@ int	sys_minsane = 1;	/* minimum candidates */
 int	sys_minclock = NTP_MINCLOCK; /* minimum survivors */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_cohort = 0;		/* cohort switch */
+int	sys_beacon = BEACON;	/* manycast beacon interval */
 int	sys_ttlmax;		/* max ttl mapping vector index */
 u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 
@@ -151,18 +152,17 @@ transmit(
 	 */
 	if (peer->cast_flags & MDF_ACAST) {
 		peer->outdate = current_time;
-		if (sys_survivors < sys_minclock || peer_preempt <
-		    sys_maxclock) {
-#if DEBUG
-	if (debug)
-		printf("transmit: survivors %d minclock %d preempt %d maxclock %d\n",
-		    sys_survivors, sys_minclock, peer_preempt,
-		    sys_maxclock);
-#endif
+		if (peer->unreach > sys_beacon) {
+			peer->unreach = 0;
+			peer->ttl = 0;
+			peer_xmit(peer);
+		} else if (sys_survivors < sys_minclock ||
+		    peer_preempt < sys_maxclock) {
 			if (peer->ttl < sys_ttlmax)
 				peer->ttl++;
 			peer_xmit(peer);
 		}
+		peer->unreach++;
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -222,7 +222,17 @@ transmit(
 			    peer_unfit(peer))
 				peer->burst = NTP_BURST;
 		}
-		if (peer->status < CTL_PST_SEL_SYNCCAND)
+
+		/*
+		 * Respond to the peer evaluation produced by the
+		 * selection algorithm. If less than the outlieer level,
+		 * up the distance by three. If there are excess
+		 * associations less than the candidate level, up the
+		 * distance by two. If there are excess associations
+		 * otherwise, up the distance. If the distance exceeds
+		 * the threshold, off the rascal.
+		 */ 
+		if (peer->status < CTL_PST_SEL_SELCAND)
 			peer->unreach += 3;
 		else if (peer_preempt > sys_maxclock) {
 			if (peer->status < CTL_PST_SEL_SYNCCAND)
@@ -3146,6 +3156,13 @@ proto_config(
 	 */
 	case PROTO_ADJ:
 		sys_tick = dvalue;
+		break;
+
+	/*
+	 * Set manycast beacon interval.
+	 */
+	case PROTO_BEACON:
+		sys_beacon = (int)dvalue;
 		break;
 
 #ifdef REFCLOCK
