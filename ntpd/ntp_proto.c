@@ -2267,20 +2267,9 @@ peer_xmit(
 	if (peer->flash & TEST9)
 		return;
 
-	/*
-	 * freshen up interfaces if needbe
-	 */
-	peer_refresh_interface(peer);
+	if (!peer->dstadr)	/* don't bother with peers without interface */
+		return;
 
-	if (!peer->dstadr) {
-		/*
-		 * still no luck - keep on waiting
-		 */
-		DPRINTF(1, ("peer_xmit: peer %s has no interface - IGNORED\n", stoa(&peer->srcadr)));
-
-		return;		/* no use in attempting to send on a peer without an interface */
-	}
-	
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
 					 peer->hmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
