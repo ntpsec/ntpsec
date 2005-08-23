@@ -145,7 +145,7 @@ extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
 extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_storage *, struct interface *, int));
-extern  void    peer_refresh_interface P((struct peer *));
+extern  void    refresh_all_peerinterfaces P((void));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
 #ifdef OPENSSL
