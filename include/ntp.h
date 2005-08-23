@@ -130,6 +130,7 @@ typedef char s_char;
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define MAXHOP		2	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
+#define	BEACON		7200	/* manycast beacon interval */
 #define NTP_MAXEXTEN	1024	/* max extension field size */
 
 /*
@@ -737,7 +738,7 @@ struct pkt {
 #define PROTO_MAXDIST		22
 #define PROTO_ADJ		23
 #define	PROTO_MAXHOP		24
-
+#define	PROTO_BEACON		25
 /*
  * Configuration items for the loop filter
  */
