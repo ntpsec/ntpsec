@@ -1654,13 +1654,13 @@ io_multicast_add(
 	jstatus = socket_multicast_enable(interface, lscope, &addr);
 
 	if (jstatus == ISC_TRUE)
-	  netsyslog(LOG_INFO, "Added Multicast Listener %s on interface #%d %s\n", stoa(&addr), interface->ifindex, interface->name);
+		netsyslog(LOG_INFO, "Added Multicast Listener %s on interface #%d %s\n", stoa(&addr), interface->ifindex, interface->name);
 	else
 		netsyslog(LOG_ERR, "Failed to add Multicast Listener %s\n", stoa(&addr));
 #else /* MCAST */
 	netsyslog(LOG_ERR,
-	    "Cannot add multicast address %s: no Multicast support",
-	    stoa(&addr));
+		  "Cannot add multicast address %s: no Multicast support",
+		  stoa(&addr));
 #endif /* MCAST */
 	return;
 }
@@ -2860,8 +2860,13 @@ findlocalcastinterface(
 		}
 	}
 #ifdef DEBUG
-	if (debug > 1)
-	  printf("findlocalcastinterface: found interface #%d %s\n", nif->ifindex, nif->name);
+	if (debug > 1) 
+	{
+		if (nif)
+			printf("findlocalcastinterface: found interface #%d %s\n", nif->ifindex, nif->name);
+		else
+			printf("findlocalcastinterface: no interface found for %s flags 0x%x\n", stoa(addr), flags);
+	}
 #endif
 	return (nif);
 }
