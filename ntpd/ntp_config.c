@@ -122,6 +122,7 @@ static	struct keyword mod_keywords[] = {
 	{ "prefer",		CONF_MOD_PREFER },
 	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
 	{ "version",		CONF_MOD_VERSION },
+	{ "dynamic",		CONF_MOD_DYNAMIC },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -802,6 +803,11 @@ getconfig(
 				case CONF_MOD_IBURST:
 				    peerflags |= FLAG_IBURST;
 				    break;
+
+			        case CONF_MOD_DYNAMIC:
+				    peerflags |= FLAG_DYNAMIC;
+				    break;
+
 #ifdef OPENSSL
 				case CONF_MOD_SKEY:
 				    peerflags |= FLAG_SKEY |

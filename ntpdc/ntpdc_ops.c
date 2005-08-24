@@ -80,6 +80,7 @@ static	void	clkbug		P((struct parse *, FILE *));
 static	void	kerninfo	P((struct parse *, FILE *));
 static  void    get_if_stats    P((struct parse *, FILE *));
 static  void    do_if_reload    P((struct parse *, FILE *));
+static  void    do_reset_pollinterval P((struct parse *, FILE *));
 
 /*
  * Commands we understand.  Ntpdc imports this.
@@ -119,7 +120,7 @@ struct xcmd opcmds[] = {
 	  { "", "", "", "" },
 	  "display event timer subsystem statistics" },
 	{ "addpeer",	addpeer,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll|prefer" },
+	  { "addr", "keyid", "version", "minpoll|prefer|dynamic" },
 	  "configure a new peer association" },
 	{ "addserver",	addserver,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
 	  { "addr", "keyid", "version", "minpoll|prefer" },
@@ -212,6 +213,9 @@ struct xcmd opcmds[] = {
 	{ "ifreload",	do_if_reload,	{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "reload interface configuration" },
+	{ "pollreset",	do_reset_pollinterval,	{ OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD },
+	  { "peer_address", "peer2_addr", "peer3_addr", "peer4_addr" },
+	  "reset poll interval for given peers - all if no peers given" },
 
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "", "", "", "" }, "" }
@@ -1338,6 +1342,8 @@ again:
 		    flags |= CONF_FLAG_PREFER;
 		else if (STREQ(pcmd->argval[items].string, "burst"))
 		    flags |= CONF_FLAG_BURST;
+		else if (STREQ(pcmd->argval[items].string, "dynamic"))
+                    flags |= CONF_FLAG_DYNAMIC;
 		else {
 		        long val;
 			if (!atoint(pcmd->argval[items].string, &val)) {
@@ -3036,11 +3042,11 @@ again:
 		      (u_long)ntohl(ik->errcnt));
 }
 
-#define IF_LIST_FMT     "%2d %c %48s %c %c %12.12s %03x %3d %2d %5d %5d %5d %2d %3d\n"
-#define IF_LIST_FMT_STR "%2s %c %48s %c %c %12.12s %3s %3s %2s %5s %5s %5s %2s %3s\n"
+#define IF_LIST_FMT     "%2d %c %48s %c %c %12.12s %03x %3d %2d %5d %5d %5d %2d %2d %3d\n"
+#define IF_LIST_FMT_STR "%2s %c %48s %c %c %12.12s %3s %3s %2s %5s %5s %5s %2s %2s %3s\n"
 #define IF_LIST_AFMT_STR "     %48s %c\n"
-#define IF_LIST_LABELS  "#", 'A', "Address/Mask/Broadcast", 'T', 'E', "IF name", "Flg", "TL", "#M", "recv", "sent", "drop", "S", "PC"
-#define IF_LIST_LINE    "==========================================================================================================\n"
+#define IF_LIST_LABELS  "#", 'A', "Address/Mask/Broadcast", 'T', 'E', "IF name", "Flg", "TL", "#M", "recv", "sent", "drop", "S", "IX", "PC"
+#define IF_LIST_LINE    "=============================================================================================================\n"
 
 static void
 iflist(
@@ -3078,7 +3084,7 @@ iflist(
 		saddr.ss_len = SOCKLEN(&saddr);
 #endif
 		fprintf(fp, IF_LIST_FMT,
-			ntohl(ifs->ifindex),
+			ntohl(ifs->ifnum),
 			actions[(ifs->action >= 1 && ifs->action < 4) ? ifs->action : 0],
 			stoa((&saddr)), 'A',
 			ifs->ignore_packets ? 'D' : 'E',
@@ -3090,6 +3096,7 @@ iflist(
 			ntohl(ifs->sent),
 			ntohl(ifs->notsent),
 			ntohl(ifs->scopeid),
+			ntohl(ifs->ifindex),
 			ntohl(ifs->peercnt));
 
 		if (!ntohl(ifs->v6_flag)) {
@@ -3152,4 +3159,59 @@ do_if_reload(
 		      &itemsize, (void *)&ifs, 0, 
 		      sizeof(struct info_if_stats));
 	iflist(fp, ifs, items, itemsize, res);
+}
+
+/*
+ * do_reset_pollinterval - re-set poll interval to start value
+ */
+static void
+do_reset_pollinterval(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	/* 8 is the maximum number of peers which will fit in a packet */
+	struct conf_unpeer *pl, plist[min(MAXARGS, 8)];
+	int qitems;
+	int items;
+	int itemsize;
+	char *dummy;
+	int res;
+	int sendsize;
+
+again:
+	if (impl_ver == IMPL_XNTPD)
+		sendsize = sizeof(struct conf_unpeer);
+	else
+		sendsize = v4sizeof(struct conf_unpeer);
+
+	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
+		if (pcmd->argval[0].netnum.ss_family == AF_INET) {
+			pl->peeraddr = GET_INADDR(pcmd->argval[qitems].netnum);
+			if (impl_ver == IMPL_XNTPD)
+				pl->v6_flag = 0;
+		} else {
+			if (impl_ver == IMPL_XNTPD_OLD) {
+				fprintf(stderr,
+				    "***Server doesn't understand IPv6 addresses\n");
+				return;
+			}
+			pl->peeraddr6 =
+			    GET_INADDR6(pcmd->argval[qitems].netnum);
+			pl->v6_flag = 1;
+		}
+		pl = (struct conf_unpeer *)((char *)pl + sendsize);
+	}
+
+	res = doquery(impl_ver, REQ_POLLRESET, 1, qitems,
+		      sendsize, (char *)plist, &items,
+		      &itemsize, &dummy, 0, sizeof(struct conf_unpeer));
+	
+	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
+		impl_ver = IMPL_XNTPD_OLD;
+		goto again;
+	}
+
+	if (res == 0)
+	    (void) fprintf(fp, "done!\n");
 }

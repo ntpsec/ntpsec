@@ -69,18 +69,18 @@ extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
 typedef struct interface_info {
-	interface_t *interface;
+	struct interface *interface;
 	u_char       action;
 } interface_info_t;
 
 typedef void (*interface_receiver_t)(void *, interface_info_t *);
 
 extern  void    interface_enumerate P((interface_receiver_t, void *));
-extern	interface_t *findinterface P((struct sockaddr_storage *));
-extern  interface_t *findbcastinter P((struct sockaddr_storage *));
-extern  void	enable_broadcast P((interface_t *, struct sockaddr_storage *));
+extern	struct interface *findinterface P((struct sockaddr_storage *));
+extern  struct interface *findbcastinter P((struct sockaddr_storage *));
+extern  void	enable_broadcast P((struct interface *, struct sockaddr_storage *));
 extern  void	enable_multicast_if P((struct interface *, struct sockaddr_storage *));
-extern	void	interface_dump	 P((interface_t *));
+extern	void	interface_dump	 P((struct interface *));
 
 extern  void    interface_update P((interface_receiver_t, void *));
 extern	void	init_io 	P((void));
@@ -91,7 +91,7 @@ extern	void	io_unsetbclient P((void));
 extern	void	io_multicast_add P((struct sockaddr_storage));
 extern	void	io_multicast_del P((struct sockaddr_storage));
 extern	void	kill_asyncio	 P((int));
-extern	void	sendpkt 	P((struct sockaddr_storage *, interface_t *, int, struct pkt *, int));
+extern	void	sendpkt 	P((struct sockaddr_storage *, struct interface *, int, struct pkt *, int));
 #ifdef HAVE_SIGNALED_IO
 extern	void	wait_for_signal P((void));
 extern	void	unblock_io_and_alarm P((void));
@@ -123,7 +123,7 @@ extern	void	init_mon	P((void));
 extern	void	mon_start	P((int));
 extern	void	mon_stop	P((int));
 extern	void	ntp_monitor     P((struct recvbuf *));
-extern  void    ntp_monclearinterface P((interface_t *interface));
+extern  void    ntp_monclearinterface P((struct interface *interface));
 
 /* ntp_peer.c */
 extern	void	init_peer	P((void));
@@ -141,6 +141,8 @@ extern	int 	peer_unconfig	P((struct sockaddr_storage *, struct interface *, int)
 extern  void    refresh_all_peerinterfaces P((void));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
+extern  void    peer_reset_pollinterval P((struct peer *));
+
 #ifdef OPENSSL
 extern	void	expire_all	P((void));
 #endif /* OPENSSL */

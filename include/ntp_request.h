@@ -286,6 +286,7 @@ struct resp_pkt {
 #define	REQ_HOSTNAME_ASSOCID	43	/* Here is a hostname + assoc_id */
 #define REQ_IF_STATS		44	/* get interface statistics */
 #define REQ_IF_RELOAD		45	/* reload interface list */
+#define REQ_POLLRESET		46      /* reset poll interval */
 
 /* Determine size of pre-v6 version of structures */
 #define v4sizeof(type)		offsetof(type, v6_flag)
@@ -599,6 +600,7 @@ struct conf_peer {
 #define CONF_FLAG_IBURST	0x08
 #define CONF_FLAG_NOSELECT	0x10
 #define CONF_FLAG_SKEY		0x20
+#define CONF_FLAG_DYNAMIC	0x40
 
 /*
  * Structure for passing peer deletion information.  Currently
@@ -899,7 +901,8 @@ struct info_if_stats {
 	int32 sent;			/* number of outgoing packets */
 	int32 notsent;			/* number of send failures */
 	u_int32 scopeid;		/* Scope used for Multicasting */
-	u_int32 ifindex;		/* interface index */
+	u_int32 ifindex;		/* interface index - from system */
+	u_int32 ifnum;		        /* sequential interface number */
 	u_char ignore_packets;	        /* Specify whether the packet should be ignored */
         u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
         u_char action;		        /* reason the item is listed */
