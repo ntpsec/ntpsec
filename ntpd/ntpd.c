@@ -705,10 +705,18 @@ printf("1: argc=%d\n", argc);
 				"Cannot adjust stack limit for mlockall: %m");
 		    }
 	    }
-	    else
-	    {
-		/* Squawk about not being able to setrlimit(). */
+#  ifdef RLIMIT_MEMLOCK
+	    /*
+	     * The default RLIMIT_MEMLOCK is very low on Linux systems.
+	     * Unless we increase this limit malloc calls are likely to
+	     * fail if we drop root privlege.  To be useful the value
+	     * has to be larger than the largest ntpd resident set size.
+	     */
+	    rl.rlim_cur = rl.rlim_max = 32*1024*1024;
+	    if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1) {
+	    	msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 	    }
+#  endif /* RLIMIT_MEMLOCK */
 	}
 # endif /* HAVE_SETRLIMIT */
 	/*

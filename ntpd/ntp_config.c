@@ -73,6 +73,7 @@ static	struct keyword keywords[] = {
 	{ "disable",		CONFIG_DISABLE },
 	{ "driftfile",		CONFIG_DRIFTFILE },
 	{ "enable",		CONFIG_ENABLE },
+	{ "end",		CONFIG_END },
 	{ "filegen",		CONFIG_FILEGEN },
 	{ "fudge",		CONFIG_FUDGE },
 	{ "includefile",	CONFIG_INCLUDEFILE },
@@ -242,9 +243,10 @@ static struct keyword tos_keywords[] = {
 	{ "floor",		CONF_TOS_FLOOR },
 	{ "ceiling",		CONF_TOS_CEILING },
 	{ "cohort",		CONF_TOS_COHORT },
-	{ "mindist",		CONF_TOS_MINDIST },
+	{ "mindist",		CONF_TOS_MINDISP },
 	{ "maxdist",		CONF_TOS_MAXDIST },
 	{ "maxhop",		CONF_TOS_MAXHOP },
+	{ "beacon",		CONF_TOS_BEACON },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -583,6 +585,8 @@ getconfig(
 	}
 
 	for (;;) {
+		if (tok == CONFIG_END) 
+			break;
 		if (fp[includelevel])
 			tok = gettokens(fp[includelevel], line, tokens, &ntokens);
 #ifdef HAVE_NETINFO
@@ -866,6 +870,12 @@ getconfig(
 			    stats_config(STATS_PID_FILE, (char *)0);
 			break;
 
+		    case CONFIG_END:
+			for ( i = 0; i <= includelevel; i++ ) {
+				fclose(fp[i]);
+			}
+			break;
+			
 		    case CONFIG_INCLUDEFILE:
 			if (ntokens < 2) {
 			    msyslog(LOG_ERR, "includefile needs one argument");
@@ -1095,12 +1105,20 @@ getconfig(
 				proto_config(PROTO_COHORT, 0, ftemp, NULL);
 				break;
 
-			    case CONF_TOS_MINDIST:
-				proto_config(PROTO_MINDIST, 0, ftemp, NULL);
+			    case CONF_TOS_MINDISP:
+				proto_config(PROTO_MINDISP, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_MAXDIST:
 				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_MAXHOP:
+				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_BEACON:
+				proto_config(PROTO_BEACON, 0, ftemp, NULL);
 				break;
 			    }
 			}
