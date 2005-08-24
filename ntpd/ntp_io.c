@@ -881,6 +881,7 @@ update_interfaces(
 #ifdef DEBUG
 			if (debug > 1) {
 				print_interface(iface ? iface : &interface, "updating ", iface ? " new - created\n" : " new - creation FAILED");
+			}
 #endif
 		}
 	}
