@@ -148,6 +148,8 @@ extern	int 	peer_unconfig	P((struct sockaddr_storage *, struct interface *, int)
 extern  void    refresh_all_peerinterfaces P((void));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
+extern  void    peer_reset_pollinterval P((struct peer *));
+
 #ifdef OPENSSL
 extern	void	expire_all	P((void));
 #endif /* OPENSSL */
