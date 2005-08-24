@@ -2779,7 +2779,7 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 {
 	struct info_if_stats **ifsp = (struct info_if_stats **)data;
 	struct info_if_stats *ifs = *ifsp;
-	interface_t *interface = interface_info->interface;
+	struct interface *interface = interface_info->interface;
 	
 	memset((char*)ifs, 0, sizeof(*ifs));
 	
@@ -2808,6 +2808,7 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 	ifs->notsent = htonl(interface->notsent);
 	ifs->scopeid = htonl(interface->scopeid);
 	ifs->ifindex = htonl(interface->ifindex);
+	ifs->ifnum = htonl(interface->ifnum);
 	ifs->ignore_packets = interface->ignore_packets;
 	ifs->peercnt = htonl(interface->peercnt);
 	ifs->action = interface_info->action;

@@ -556,7 +556,7 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 static void
 peer_refresh_interface(struct peer *peer)
 {
-	interface_t *niface;
+	struct interface *niface;
 
 	niface = select_peerinterface(peer, &peer->srcadr, NULL, peer->cast_flags);
 

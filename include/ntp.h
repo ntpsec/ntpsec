@@ -171,8 +171,6 @@ typedef char s_char;
  * The interface structure is used to hold the addresses and socket
  * numbers of each of the interfaces we are using.
  */
-typedef struct interface interface_t;
-
 struct interface {
 	SOCKET fd;			/* socket this is opened on */
 	SOCKET bfd;			/* socket for receiving broadcasts */
@@ -190,11 +188,12 @@ struct interface {
 	long notsent;			/* number of send failures */
 	u_int scopeid;			/* Scope used for Multicasting */
 	u_int ifindex;			/* interface index */
+	u_int ifnum;		        /* sequential interface instance count */
         u_char phase;		        /* phase in update cycle */
 	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
         ISC_LIST(struct peer) peers;    /* list of peers for the interface */
         u_int peercnt;		        /* number of peers referencinf this interface - informational only */
-        ISC_LINK(interface_t) link;     /* interface list */
+        ISC_LINK(struct interface) link;     /* interface list */
 };
 
 /*

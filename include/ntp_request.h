@@ -901,7 +901,8 @@ struct info_if_stats {
 	int32 sent;			/* number of outgoing packets */
 	int32 notsent;			/* number of send failures */
 	u_int32 scopeid;		/* Scope used for Multicasting */
-	u_int32 ifindex;		/* interface index */
+	u_int32 ifindex;		/* interface index - from system */
+	u_int32 ifnum;		        /* sequential interface number */
 	u_char ignore_packets;	        /* Specify whether the packet should be ignored */
         u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
         u_char action;		        /* reason the item is listed */

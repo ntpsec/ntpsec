@@ -3042,11 +3042,11 @@ again:
 		      (u_long)ntohl(ik->errcnt));
 }
 
-#define IF_LIST_FMT     "%2d %c %48s %c %c %12.12s %03x %3d %2d %5d %5d %5d %2d %3d\n"
-#define IF_LIST_FMT_STR "%2s %c %48s %c %c %12.12s %3s %3s %2s %5s %5s %5s %2s %3s\n"
+#define IF_LIST_FMT     "%2d %c %48s %c %c %12.12s %03x %3d %2d %5d %5d %5d %2d %2d %3d\n"
+#define IF_LIST_FMT_STR "%2s %c %48s %c %c %12.12s %3s %3s %2s %5s %5s %5s %2s %2s %3s\n"
 #define IF_LIST_AFMT_STR "     %48s %c\n"
-#define IF_LIST_LABELS  "#", 'A', "Address/Mask/Broadcast", 'T', 'E', "IF name", "Flg", "TL", "#M", "recv", "sent", "drop", "S", "PC"
-#define IF_LIST_LINE    "==========================================================================================================\n"
+#define IF_LIST_LABELS  "#", 'A', "Address/Mask/Broadcast", 'T', 'E', "IF name", "Flg", "TL", "#M", "recv", "sent", "drop", "S", "IX", "PC"
+#define IF_LIST_LINE    "=============================================================================================================\n"
 
 static void
 iflist(
@@ -3084,7 +3084,7 @@ iflist(
 		saddr.ss_len = SOCKLEN(&saddr);
 #endif
 		fprintf(fp, IF_LIST_FMT,
-			ntohl(ifs->ifindex),
+			ntohl(ifs->ifnum),
 			actions[(ifs->action >= 1 && ifs->action < 4) ? ifs->action : 0],
 			stoa((&saddr)), 'A',
 			ifs->ignore_packets ? 'D' : 'E',
@@ -3096,6 +3096,7 @@ iflist(
 			ntohl(ifs->sent),
 			ntohl(ifs->notsent),
 			ntohl(ifs->scopeid),
+			ntohl(ifs->ifindex),
 			ntohl(ifs->peercnt));
 
 		if (!ntohl(ifs->v6_flag)) {

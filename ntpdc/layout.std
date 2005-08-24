@@ -410,7 +410,7 @@ offsetof(calcnt) = 48
 offsetof(errcnt) = 52
 offsetof(stbcnt) = 56
 
-sizeof(struct info_if_stats) = 132
+sizeof(struct info_if_stats) = 136
 offsetof(unaddr) = 0
 offsetof(unbcast) = 16
 offsetof(unmask) = 32
@@ -425,9 +425,10 @@ offsetof(sent) = 104
 offsetof(notsent) = 108
 offsetof(scopeid) = 112
 offsetof(ifindex) = 116
-offsetof(ignore_packets) = 120
-offsetof(peercnt) = 124
-offsetof(action) = 128
+offsetof(ifnum) = 120
+offsetof(ignore_packets) = 124
+offsetof(peercnt) = 128
+offsetof(action) = 132
 
 sizeof(struct info_dns_assoc) = 32
 offsetof(peeraddr) = 0
