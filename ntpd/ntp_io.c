@@ -730,9 +730,9 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 void
 interface_update(interface_receiver_t receiver, void *data)
 {
-  /* XXX verify BLOCK_IO(); */
+  	BLOCKIO();
 	update_interfaces(htons(NTP_PORT), receiver, data);
-  /* XXX verify UNBLOCK_IO(); */
+  	UNBLOCKIO();
 }
 
 /*
@@ -881,6 +881,7 @@ update_interfaces(
 #ifdef DEBUG
 			if (debug > 1) {
 				print_interface(iface ? iface : &interface, "updating ", iface ? " new - created\n" : " new - creation FAILED");
+			}
 #endif
 		}
 	}
