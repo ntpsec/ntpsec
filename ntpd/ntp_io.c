@@ -399,14 +399,15 @@ interface_dump(struct interface *itf)
 static void
 print_interface(struct interface *iface, char *pfx, char *sfx)
 {
-	printf("%sinterface #%d: fd=%d, bfd=%d, name=%s, flags=0x%x, scope=%d",
+	printf("%sinterface #%d: fd=%d, bfd=%d, name=%s, flags=0x%x, scope=%d, ifindex=%d",
 	       pfx,
-	       iface->ifindex,
+	       iface->ifnum,
 	       iface->fd,
 	       iface->bfd,
 	       iface->name,
 	       iface->flags,
-	       iface->scopeid);
+	       iface->scopeid,
+	       iface->ifindex);
 	/* Leave these as three printf calls. */
 	printf(", sin=%s",
 	       stoa((&iface->sin)));
@@ -527,7 +528,7 @@ remove_interface(struct interface *interface)
 	if (interface->fd != INVALID_SOCKET) 
 	{
 		msyslog(LOG_INFO, "Deleting interface #%d %s, %s#%d",
-			interface->ifindex,
+			interface->ifnum,
 			interface->name,
 			stoa((&interface->sin)),
 			NTP_PORT);  /* XXX should extract port from sin structure */
@@ -537,7 +538,7 @@ remove_interface(struct interface *interface)
 	if (interface->bfd != INVALID_SOCKET) 
 	{
 		msyslog(LOG_INFO, "Deleting interface #%d %s, broadcast address %s#%d",
-			interface->ifindex,
+			interface->ifnum,
 			interface->name,
 			stoa((&interface->bcast)),
 			(u_short) NTP_PORT);  /* XXX extract port from sin structure */
