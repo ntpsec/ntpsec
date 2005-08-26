@@ -80,7 +80,6 @@ static	void	clkbug		P((struct parse *, FILE *));
 static	void	kerninfo	P((struct parse *, FILE *));
 static  void    get_if_stats    P((struct parse *, FILE *));
 static  void    do_if_reload    P((struct parse *, FILE *));
-static  void    do_reset_pollinterval P((struct parse *, FILE *));
 
 /*
  * Commands we understand.  Ntpdc imports this.
@@ -213,10 +212,6 @@ struct xcmd opcmds[] = {
 	{ "ifreload",	do_if_reload,	{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "reload interface configuration" },
-	{ "pollreset",	do_reset_pollinterval,	{ OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD },
-	  { "peer_address", "peer2_addr", "peer3_addr", "peer4_addr" },
-	  "reset poll interval for given peers - all if no peers given" },
-
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "", "", "", "" }, "" }
 };
@@ -3159,59 +3154,4 @@ do_if_reload(
 		      &itemsize, (void *)&ifs, 0, 
 		      sizeof(struct info_if_stats));
 	iflist(fp, ifs, items, itemsize, res);
-}
-
-/*
- * do_reset_pollinterval - re-set poll interval to start value
- */
-static void
-do_reset_pollinterval(
-	struct parse *pcmd,
-	FILE *fp
-	)
-{
-	/* 8 is the maximum number of peers which will fit in a packet */
-	struct conf_unpeer *pl, plist[min(MAXARGS, 8)];
-	int qitems;
-	int items;
-	int itemsize;
-	char *dummy;
-	int res;
-	int sendsize;
-
-again:
-	if (impl_ver == IMPL_XNTPD)
-		sendsize = sizeof(struct conf_unpeer);
-	else
-		sendsize = v4sizeof(struct conf_unpeer);
-
-	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
-		if (pcmd->argval[0].netnum.ss_family == AF_INET) {
-			pl->peeraddr = GET_INADDR(pcmd->argval[qitems].netnum);
-			if (impl_ver == IMPL_XNTPD)
-				pl->v6_flag = 0;
-		} else {
-			if (impl_ver == IMPL_XNTPD_OLD) {
-				fprintf(stderr,
-				    "***Server doesn't understand IPv6 addresses\n");
-				return;
-			}
-			pl->peeraddr6 =
-			    GET_INADDR6(pcmd->argval[qitems].netnum);
-			pl->v6_flag = 1;
-		}
-		pl = (struct conf_unpeer *)((char *)pl + sendsize);
-	}
-
-	res = doquery(impl_ver, REQ_POLLRESET, 1, qitems,
-		      sendsize, (char *)plist, &items,
-		      &itemsize, &dummy, 0, sizeof(struct conf_unpeer));
-	
-	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
-		impl_ver = IMPL_XNTPD_OLD;
-		goto again;
-	}
-
-	if (res == 0)
-	    (void) fprintf(fp, "done!\n");
 }

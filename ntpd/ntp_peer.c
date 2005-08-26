@@ -536,13 +536,6 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 		 */
 		peer_crypto_clear(peer);
 
-		/*
-		 * when the interface changes we drop back
-		 * to polling intervals as being used at
-		 * association initialization
-		 */
-		peer_reset_pollinterval(peer);
-
 		if (peer->dstadr != NULL)
 		{
 			ISC_LIST_APPEND(peer->dstadr->peers, peer, ilink);
@@ -629,40 +622,6 @@ refresh_all_peerinterfaces(void)
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			peer_refresh_interface(peer);
-		}
-	}
-}
-
-void
-peer_reset_pollinterval(struct peer *peer)
-{
-	if (peer)
-	{
-		int last_hpoll = peer->hpoll;
-		
-		if (peer->flags & FLAG_REFCLOCK)  /* refclocks are exempt from forced poll_update() */
-			return;
-
-		DPRINTF(1, ("resetting poll interval for peer %s\n", stoa(&peer->srcadr)));
-
-		poll_update(peer, peer->minpoll);
-
-		if (peer->hpoll != last_hpoll) 
-		{
-			msyslog(LOG_INFO, "peer %s poll interval re-set", stoa(&peer->srcadr));
-		}
-	}
-	else
-	{
-		int n;
-		struct peer * cpeer;
-		struct peer * next_peer;
-		
-		for (n = 0; n < NTP_HASH_SIZE; n++) {
-			for (cpeer = peer_hash[n]; cpeer != 0; cpeer = next_peer) {
-				next_peer = cpeer->next;
-				peer_reset_pollinterval(cpeer);
-			}
 		}
 	}
 }
