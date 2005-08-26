@@ -286,7 +286,6 @@ struct resp_pkt {
 #define	REQ_HOSTNAME_ASSOCID	43	/* Here is a hostname + assoc_id */
 #define REQ_IF_STATS		44	/* get interface statistics */
 #define REQ_IF_RELOAD		45	/* reload interface list */
-#define REQ_POLLRESET		46      /* reset poll interval */
 
 /* Determine size of pre-v6 version of structures */
 #define v4sizeof(type)		offsetof(type, v6_flag)

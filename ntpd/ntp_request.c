@@ -101,7 +101,6 @@ static	void	set_control_keyid P((struct sockaddr_storage *, struct interface *, 
 static	void	get_ctl_stats   P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
 static	void	get_if_stats    P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
 static	void	do_if_reload    P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_reset_pollinterval P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
 #ifdef KERNEL_PLL
 static	void	get_kernel_info P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
 #endif /* KERNEL_PLL */
@@ -176,8 +175,6 @@ static	struct req_proc ntp_codes[] = {
 #endif
 	{ REQ_IF_STATS,		AUTH, 0, 0,	get_if_stats },
 	{ REQ_IF_RELOAD,        AUTH, 0, 0,	do_if_reload },
-	{ REQ_POLLRESET,	AUTH, v4sizeof(struct conf_unpeer),
-	  sizeof(struct conf_unpeer), do_reset_pollinterval },
 
 	{ NO_REQUEST,		NOAUTH,	0, 0,	0 }
 };
@@ -2857,107 +2854,3 @@ do_if_reload(
 	flush_pkt();
 }
 
-/*
- * do_reset_pollinterval
- */
-static void
-do_reset_pollinterval(
-	struct sockaddr_storage *srcadr,
-	struct interface *inter,
-	struct req_pkt *inpkt
-	)
-{
-	register struct conf_unpeer *cp;
-	struct conf_unpeer temp_cp;
-	register int items;
-	register struct peer *peer;
-	struct sockaddr_storage peeraddr;
-	int bad, found;
-
-	/*
-	 * This is a bit unstructured, but I like to be careful.
-	 * We check to see that every peer exists and is actually
-	 * configured.  If so, we reset the poll interval.  If not, we return
-	 * an error.
-	 */
-	items = INFO_NITEMS(inpkt->err_nitems);
-	cp = (struct conf_unpeer *)inpkt->data;
-
-	bad = 0;
-	while (items-- > 0 && !bad) {
-		memset(&temp_cp, 0, sizeof(temp_cp));
-		memset(&peeraddr, 0, sizeof(peeraddr));
-		memcpy(&temp_cp, cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
-		if (client_v6_capable && temp_cp.v6_flag != 0) {
-			peeraddr.ss_family = AF_INET6;
-			GET_INADDR6(peeraddr) = temp_cp.peeraddr6;
-		} else {
-			peeraddr.ss_family = AF_INET;
-			GET_INADDR(peeraddr) = temp_cp.peeraddr;
-		}
-		NSRCPORT(&peeraddr) = htons(NTP_PORT);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		peeraddr.ss_len = SOCKLEN(&peeraddr);
-#endif
-		found = 0;
-		peer = (struct peer *)0;
-		printf("searching for %s\n", stoa(&peeraddr));
-		while (!found) {
-			peer = findexistingpeer(&peeraddr, peer, -1);
-			if (peer == (struct peer *)0)
-			    break;
-			if (peer->flags & FLAG_CONFIG)
-			    found = 1;
-		}
-		if (!found)
-		    bad = 1;
-		cp = (struct conf_unpeer *)
-		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
-	}
-
-	if (bad) {
-		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
-		return;
-	}
-
-	/*
-	 * Now do it in earnest.
-	 */
-
-	items = INFO_NITEMS(inpkt->err_nitems);
-	if (items) 
-	{
-		cp = (struct conf_unpeer *)inpkt->data;
-		while (items-- > 0) {
-			memset(&temp_cp, 0, sizeof(temp_cp));
-			memset(&peeraddr, 0, sizeof(peeraddr));
-			memcpy(&temp_cp, cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
-			if (client_v6_capable && temp_cp.v6_flag != 0) {
-				peeraddr.ss_family = AF_INET6;
-				GET_INADDR6(peeraddr) = temp_cp.peeraddr6;
-			} else {
-				peeraddr.ss_family = AF_INET;
-				GET_INADDR(peeraddr) = temp_cp.peeraddr;
-			}
-			NSRCPORT(&peeraddr) = htons(NTP_PORT);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			peeraddr.ss_len = SOCKLEN(&peeraddr);
-#endif
-
-			peer = findexistingpeer(&peeraddr, 0, -1);
-			while (peer) {
-				if (peer->flags & FLAG_CONFIG)
-					peer_reset_pollinterval(peer);
-				peer = findexistingpeer(&peeraddr, peer, -1);
-			}
-
-			cp = (struct conf_unpeer *)
-				((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
-		}
-	} else {
-                /* do it for all peers */
-		peer_reset_pollinterval(NULL);
-	}
-	
-	req_ack(srcadr, inter, inpkt, INFO_OKAY);
-}
