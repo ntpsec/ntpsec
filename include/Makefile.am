@@ -28,6 +28,7 @@ noinst_HEADERS = \
 	ntp_control.h \
 	ntp_crypto.h \
 	ntp_datum.h \
+	ntp_debug.h \
 	ntp_filegen.h \
 	ntp_fp.h \
 	ntp_if.h \
@@ -36,6 +37,7 @@ noinst_HEADERS = \
 	ntp_malloc.h \
 	ntp_md5.h \
 	ntp_proto.h \
+	ntp_random.h \
 	ntp_refclock.h \
 	ntp_request.h \
 	ntp_rfc2553.h \
