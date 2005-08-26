@@ -2,11 +2,11 @@
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
 ACLOCAL_AMFLAGS= -I m4
 
-include $(srcdir)/libopts/MakeDefs.inc
+#include $(srcdir)/sntp/libopts/MakeDefs.inc
 
 SUBDIRS=
 if NEED_LIBOPTS
-SUBDIRS+= libopts
+SUBDIRS+= sntp/libopts
 endif
 SUBDIRS+= \
 	scripts \
@@ -32,7 +32,6 @@ DIST_SUBDIRS= \
 	ElectricFence	\
 	arlib \
 	libntp	\
-	libopts	\
 	libparse	\
 	ntpd	\
 	ntpdate	\
@@ -43,6 +42,7 @@ DIST_SUBDIRS= \
 	clockstuff	\
 	kernel	\
 	sntp	\
+	sntp/libopts	\
 	util
 DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --with-sntp
 

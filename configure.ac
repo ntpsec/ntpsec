@@ -50,7 +50,6 @@ esac
 
 AMU_OS_CFLAGS
 
-AC_CONFIG_SUBDIRS(libopts)
 LIBOPTS_CHECK
 
 AC_MSG_CHECKING(for bin subdirectory)

@@ -375,8 +375,8 @@ AC_DEFUN([LIBOPTS_CHECK],[
        [Force using the supplied libopts tearoff code]),[
     if test x$enableval = xyes ; then
        AC_MSG_NOTICE([Using supplied libopts tearoff])
-       LIBOPTS_LDADD='$(top_builddir)/sntp/libopts/libopts.la'
-       LIBOPTS_CFLAGS='-I$(top_srcdir)/sntp/libopts'
+       LIBOPTS_LDADD='$(top_builddir)/libopts/libopts.la'
+       LIBOPTS_CFLAGS='-I$(top_srcdir)/libopts'
        INVOKE_LIBOPTS_MACROS
        NEED_LIBOPTS_DIR=true
     fi])
@@ -404,8 +404,8 @@ AC_DEFUN([LIBOPTS_CHECK],[
       LIBOPTS_LDADD="${lo_cv_test_autoopts}"
       LIBOPTS_CFLAGS="`${aoconfig} --cflags`"
     else
-      LIBOPTS_LDADD='$(top_builddir)/sntp/libopts/libopts.la'
-      LIBOPTS_CFLAGS='-I$(top_srcdir)/sntp/libopts'
+      LIBOPTS_LDADD='$(top_builddir)/libopts/libopts.la'
+      LIBOPTS_CFLAGS='-I$(top_srcdir)/libopts'
       INVOKE_LIBOPTS_MACROS
       NEED_LIBOPTS_DIR=true
     fi
@@ -414,5 +414,5 @@ AC_DEFUN([LIBOPTS_CHECK],[
   AM_CONDITIONAL([NEED_LIBOPTS], [test -n "${NEED_LIBOPTS_DIR}"])
   AC_SUBST(LIBOPTS_LDADD)
   AC_SUBST(LIBOPTS_CFLAGS)
-  AC_CONFIG_FILES([sntp/libopts/Makefile])
+  AC_CONFIG_FILES([libopts/Makefile])
 ]) # end of AC_DEFUN of LIBOPTS_CHECK
