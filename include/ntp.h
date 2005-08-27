@@ -9,6 +9,7 @@
 #ifdef OPENSSL
 #include "ntp_crypto.h"
 #endif /* OPENSSL */
+#include <ntp_random.h>
 
 #include <isc/boolean.h>
 
@@ -101,7 +102,7 @@ typedef char s_char;
 /*
  * Poll interval parameters
  */
-#define NTP_UNREACH	12	/* poll unreach threshold */
+#define NTP_UNREACH	24	/* poll unreach threshold */
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
@@ -124,12 +125,13 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define	NTP_MAXASSOC	50	/* max associations */
-#define MINDISTANCE	.01	/* min root distance */
-#define MAXDISTANCE	1.	/* max root distance */
+#define MINDISPERSE	.01	/* min dispersion increment */
+#define MAXDISTANCE	1.	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define MAXHOP		2	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
+#define	BEACON		7200	/* manycast beacon interval */
 #define NTP_MAXEXTEN	1024	/* max extension field size */
 
 /*
@@ -343,11 +345,11 @@ struct peer {
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
-#define end_clear_to_zero update
 	u_int	unreach;	/* unreachable count */
+#define end_clear_to_zero unreach
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
-	u_long	nextaction;	/* peer local activity timeout (refclocks mainly) */
+	u_long	nextaction;	/* peer local activity timeout (refclocks) */
 	void (*action) P((struct peer *)); /* action timeout function */
 
 	/*
@@ -733,11 +735,11 @@ struct pkt {
 #define PROTO_CEILING		18
 #define PROTO_COHORT		19
 #define PROTO_CALLDELAY		20
-#define PROTO_MINDIST		21
+#define PROTO_MINDISP		21
 #define PROTO_MAXDIST		22
 #define PROTO_ADJ		23
 #define	PROTO_MAXHOP		24
-
+#define	PROTO_BEACON		25
 /*
  * Configuration items for the loop filter
  */

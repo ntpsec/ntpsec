@@ -10,6 +10,7 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include <ntp_random.h>
 #ifdef OPENSSL
 #include "openssl/rand.h"
 #endif /* OPENSSL */
@@ -302,8 +303,6 @@ clear_all(void)
 			    MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
-				if (!(peer->flags & FLAG_CONFIG))
-					unpeer(peer);
 			}
 		}
 	}
@@ -342,6 +341,7 @@ unpeer(
 		printf("demobilize %u %d %d\n", peer_to_remove->associd,
 		    peer_associations, peer_preempt);
 #endif
+	peer_clear(peer_to_remove, "KILL");
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
@@ -820,13 +820,13 @@ expire_all(void)
 	 */
 	if (!crypto_flags)
 		return;
+
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
 			if (!(peer->flags & FLAG_SKEY)) {
 				continue;
-			} else if (peer->cast_flags & MDF_ACAST) {
-				peer_clear(peer, "ACST");
+
 			} else if (peer->hmode == MODE_ACTIVE ||
 			    peer->hmode == MODE_PASSIVE) {
 				key_expire(peer);
@@ -838,7 +838,6 @@ expire_all(void)
 	}
 	RAND_bytes((u_char *)&sys_private, 4);
 	crypto_update();
-	resetmanycast();
 }
 #endif /* OPENSSL */
 
@@ -857,8 +856,8 @@ findmanycastpeer(
 	int i;
 
  	/*
- 	 * This routine is called upon arrival of a client-mode message
-	 * from a manycast server. Search the peer list for a manycast
+ 	 * This routine is called upon arrival of a server-mode message
+	 * from a manycast client. Search the peer list for a manycast
 	 * client association where the last transmit timestamp matches
 	 * the originate timestamp. This assumes the transmit timestamps
 	 * for possibly more than one manycast association are unique.
@@ -878,29 +877,4 @@ findmanycastpeer(
 		}
 	}
 	return (NULL);
-}
-
-
-/*
- * resetmanycast - reset all manycast clients
- */
-void
-resetmanycast(void)
-{
-	struct peer *peer, *next_peer;
-	int i;
-
-	/*
-	 * This routine is called when the number of client associations
-	 * falls below the minimum. Search the peer list for manycast
-	 * client associations and reset the ttl and poll interval.
-	 */
-	for (i = 0; i < NTP_HASH_SIZE; i++) {
-		for (peer = peer_hash[i]; peer != NULL; peer =
-		    next_peer) {
-			next_peer= peer->next;
-			if (peer->cast_flags & MDF_ACLNT) 
-				unpeer(peer);
-		}
-	}
 }

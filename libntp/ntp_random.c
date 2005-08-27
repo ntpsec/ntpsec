@@ -48,6 +48,8 @@ static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
 #include <stdio.h>
 
 #include <ntp_types.h>
+#include <ntp_random.h>
+#include <ntp_unixtime.h>
 
 /*
  * random.c:
@@ -218,7 +220,6 @@ static long rand_sep = SEP_3;
 static long *end_ptr = &randtbl[DEG_3 + 1];
 
 static inline long good_rand P((long));
-long ntp_random P((void));
 
 static inline long
 good_rand (
@@ -295,16 +296,18 @@ ntp_srandom(
  * state buffer are no longer derived from the LC algorithm applied to
  * a fixed seed.
  */
+#ifdef NEED_SRANDOMDEV
 void
 ntp_srandomdev( void )
 {
 	struct timeval tv;
 	unsigned long junk;	/* Purposely used uninitialized */
 
-	gettimeofday(&tv, NULL);
+	GETTIMEOFDAY(&tv, NULL);
 	ntp_srandom(getpid() ^ tv.tv_sec ^ tv.tv_usec ^ junk);
 	return;
 }
+#endif
 
 /*
  * initstate:

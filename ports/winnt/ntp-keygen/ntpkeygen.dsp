@@ -96,6 +96,10 @@ SOURCE="..\..\..\util\ntp-keygen.c"
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ntp_random.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\libntp\randfile.c
 # End Source File
 # Begin Source File
