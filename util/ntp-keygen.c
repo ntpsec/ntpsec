@@ -96,6 +96,7 @@
 # include <sys/types.h>
 #endif
 #include "ntp_types.h"
+#include "ntp_random.h"
 #include "l_stdlib.h"
 
 #ifdef SYS_WINNT
