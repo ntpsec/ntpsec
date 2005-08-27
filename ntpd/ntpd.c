@@ -10,6 +10,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include <ntp_random.h>
 
 #ifdef SIM
 # include "ntpsim.h"

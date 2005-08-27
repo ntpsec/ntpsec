@@ -13,15 +13,8 @@
 #ifdef SYS_WINNT
 #define exit ntservice_exit
 extern	void	ntservice_exit	(int);
-/*	declare the service threads */
-void	service_main	(DWORD, LPTSTR *);
-void	service_ctrl	(DWORD);
-void	worker_thread	(void *);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 #endif /* SYS_WINNT */
-
-extern	void	ntp_srandom	P((unsigned long));
-extern	int	ntp_random	P((void));
 
 /* ntp_config.c */
 extern	void	getconfig	P((int, char **));

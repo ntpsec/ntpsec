@@ -10,6 +10,7 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include <ntp_random.h>
 #ifdef OPENSSL
 #include "openssl/rand.h"
 #endif /* OPENSSL */

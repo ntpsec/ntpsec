@@ -16,6 +16,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_string.h"
+#include <ntp_random.h>
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
