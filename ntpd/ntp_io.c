@@ -3258,7 +3258,7 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 	return NULL; /* Not found */
 }
 
-#ifdef __NetBSD__
+#if defined(__NetBSD__) || defined(__FreeBSD__)
 #include <net/route.h>
 
 static void
@@ -3326,7 +3326,9 @@ init_async_notifications()
 	
 	if (fd >= 0) {
 		init_nonblocking_io(fd);
+#if defined(HAVE_SIGNALED_IO)
 		init_socket_sig(fd);
+#endif /* HAVE_SIGNALED_IO */
 		
 		reader = new_asyncio_reader();
 
