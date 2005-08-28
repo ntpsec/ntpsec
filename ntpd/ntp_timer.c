@@ -343,7 +343,7 @@ timer(void)
 	 * interface update timer
 	 */
 	if (interface_interval && interface_timer <= current_time) {
-	  interface_timer = current_time + interface_interval;
+		timer_interfacetimeout(current_time + interface_interval);
 #ifdef DEBUG
 	  if (debug)
 	    printf("timer: interface update\n");
@@ -387,6 +387,12 @@ alarming(
 #endif /* VMS */
 }
 #endif /* SYS_WINNT */
+
+void
+timer_interfacetimeout(u_long timeout)
+{
+	interface_timer = timeout;
+}
 
 
 /*

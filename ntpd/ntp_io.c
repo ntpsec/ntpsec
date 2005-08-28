@@ -148,20 +148,8 @@ static  struct interface *new_interface P((struct interface *));
 static  void add_interface P((struct interface *));
 static  void update_interfaces P((u_short, interface_receiver_t, void *));
 static  void remove_interface P((struct interface *));
-static  struct interface *find_iface P((struct sockaddr_storage *saddr, char *));
 static  struct interface *create_interface P((u_short, struct interface *));
 
-
-static	int create_sockets	P((u_short));
-static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
-static	void	close_socket	P((SOCKET));
-#ifdef REFCLOCK
-static	void	close_file	P((SOCKET));
-#endif
-static	char *	fdbits		P((int, fd_set *));
-static	void	set_reuseaddr	P((int));
-static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
-static	isc_boolean_t	socket_broadcast_disable P((struct interface *, struct sockaddr_storage *));
 
 /*
  * Multicast functions
@@ -180,13 +168,45 @@ static void print_interface	P((struct interface *, char *, char *));
 #endif
 
 typedef struct vsock vsock_t;
+enum desc_type { FD_TYPE_SOCKET, FD_TYPE_FILE };
 
 struct vsock {
 	SOCKET				fd;
+	enum desc_type                  type;
 	ISC_LINK(vsock_t)		link;
 };
 
-ISC_LIST(vsock_t)	sockets_list;
+/*
+ * async notification processing (e. g. routing sockets)
+ */
+/*
+ * support for receiving data on fd that is not a refclock or a socket
+ * like e. g. routing sockets
+ */
+struct asyncio_reader {
+	SOCKET fd;		                    /* fd to be read */
+	void  *data;		                    /* possibly local data */
+	void (*receiver)(struct asyncio_reader *);  /* input handler */
+	ISC_LINK(struct asyncio_reader) link;       /* the list this is being kept in */
+};
+
+ISC_LIST(struct asyncio_reader) asyncio_reader_list;
+
+static void init_async_notifications P((void));
+
+static void delete_asyncio_reader P((struct asyncio_reader *));
+static struct asyncio_reader *new_asyncio_reader P((void));
+static void add_asyncio_reader P((struct asyncio_reader *, enum desc_type));
+static void remove_asyncio_reader P((struct asyncio_reader *));
+
+static	int create_sockets	P((u_short));
+static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
+static	char *	fdbits		P((int, fd_set *));
+static	void	set_reuseaddr	P((int));
+static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
+static	isc_boolean_t	socket_broadcast_disable P((struct interface *, struct sockaddr_storage *));
+
+ISC_LIST(vsock_t)	fd_list;
 
 typedef struct remaddr remaddr_t;
 
@@ -203,8 +223,8 @@ ISC_LIST(struct interface)     inter_list;
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
 
-void	add_socket_to_list	P((SOCKET));
-void	delete_socket_from_list	P((SOCKET));
+void	add_fd_to_list	P((SOCKET, enum desc_type));
+void	close_and_delete_fd_from_list	P((SOCKET));
 void	add_addr_to_list	P((struct sockaddr_storage *, struct interface *));
 void	delete_addr_from_list	P((struct sockaddr_storage *));
 struct interface *find_addr_in_list	P((struct sockaddr_storage *));
@@ -320,7 +340,9 @@ init_io(void)
 	(void) set_signal();
 #endif
 
-	ISC_LIST_INIT(sockets_list);
+	ISC_LIST_INIT(fd_list);
+
+	ISC_LIST_INIT(asyncio_reader_list);
 
         ISC_LIST_INIT(remoteaddr_list);
 
@@ -332,6 +354,8 @@ init_io(void)
 	BLOCKIO();
 	(void) create_sockets(htons(NTP_PORT));
 	UNBLOCKIO();
+
+	init_async_notifications();
 
 	DPRINTF(1, ("init_io: maxactivefd %d\n", maxactivefd));
 }
@@ -424,6 +448,55 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 
 #endif
 
+/*
+ * create an asyncio_reader structure
+ */
+static struct asyncio_reader *
+new_asyncio_reader()
+{
+	struct asyncio_reader *reader;
+
+	reader = (struct asyncio_reader *)emalloc(sizeof(struct asyncio_reader));
+
+	memset((char *)reader, 0, sizeof(*reader));
+	ISC_LINK_INIT(reader, link);
+	reader->fd = INVALID_SOCKET;
+	return reader;
+}
+
+/*
+ * delete a reader
+ */
+static void
+delete_asyncio_reader(struct asyncio_reader *reader)
+{
+	free(reader);
+}
+
+/*
+ * add asynchio_reader
+ */
+static void
+add_asyncio_reader(struct asyncio_reader *reader, enum desc_type type)
+{
+	ISC_LIST_APPEND(asyncio_reader_list, reader, link);
+	add_fd_to_list(reader->fd, type);
+}
+	
+/*
+ * remove asynchio_reader
+ */
+static void
+remove_asyncio_reader(struct asyncio_reader *reader)
+{
+	ISC_LIST_UNLINK_TYPE(asyncio_reader_list, reader, link, struct asyncio_reader);
+
+	if (reader->fd != INVALID_SOCKET)
+		close_and_delete_fd_from_list(reader->fd);
+
+	reader->fd = INVALID_SOCKET;
+}
+	
 /*
  * interface list enumerator - visitor pattern
  */
@@ -532,7 +605,7 @@ remove_interface(struct interface *interface)
 			interface->name,
 			stoa((&interface->sin)),
 			NTP_PORT);  /* XXX should extract port from sin structure */
-		close_socket(interface->fd);
+		close_and_delete_fd_from_list(interface->fd);
 	}
   
 	if (interface->bfd != INVALID_SOCKET) 
@@ -542,7 +615,7 @@ remove_interface(struct interface *interface)
 			interface->name,
 			stoa((&interface->bcast)),
 			(u_short) NTP_PORT);  /* XXX extract port from sin structure */
-		close_socket(interface->bfd);
+		close_and_delete_fd_from_list(interface->bfd);
 	}
 
 	ninterfaces--;
@@ -750,9 +823,9 @@ interface_update(interface_receiver_t receiver, void *data)
  *     remove interface from known interface list
  *     forall peers associated with this interface
  *       disconnect peer from this interface
- *       attempt to re-assign interface to peer (will unpeer() unconfigured peers)
+ * Phase 3:
+ *   attempt to re-assign interfaces to peers (will unpeer() unconfigured peers)
  *
- * done
  */
 
 static void
@@ -839,9 +912,11 @@ update_interfaces(
 
 		convert_isc_if(&isc_if, &interface, port);
 
-		if (!(interface.flags & INT_UP))  /* interfaces must be UP to be usable */
+		if (!(interface.flags & INT_UP))  { /* interfaces must be UP to be usable */
+			DPRINTF(1, ("skipping interface %s (%s) - DOWN\n", interface.name, stoa(&interface.sin)));
 			continue;
-
+		}
+		
 		/*
 		 * map to local *address* in order
 		 * to map all duplicate interfaces to an interface structure
@@ -854,12 +929,11 @@ update_interfaces(
 		{
 			/*
 			 * found existing interface - mark as verified
-			 * XXX - should compare central parameters...
 			 */
 			iface->phase = sys_interphase;
 #ifdef DEBUG
 			if (debug > 1)
-				print_interface(iface, "updating ", " present - updated\n");
+				print_interface(iface, "updating ", " present\n");
 #endif
 			ifi.action = IFS_EXISTS;
 			ifi.interface = iface;
@@ -941,7 +1015,7 @@ update_interfaces(
 	}
 
 	/*
-	 * now re-configure as the world has changed
+	 * phase3 - re-configure as the world has changed if necessary
 	 */
 	if (need_refresh) 
 		refresh_all_peerinterfaces();
@@ -1730,6 +1804,72 @@ io_multicast_del(
 #endif /* not MCAST */
 }
 
+/*
+ * init_nonblocking_io() - set up descriptor to be non blocking
+ */
+static void init_nonblocking_io(SOCKET fd)
+{
+		/*
+	 * set non-blocking,
+	 */
+
+#ifdef USE_FIONBIO
+	/* in vxWorks we use FIONBIO, but the others are defined for old systems, so
+	 * all hell breaks loose if we leave them defined
+	 */
+#undef O_NONBLOCK
+#undef FNDELAY
+#undef O_NDELAY
+#endif
+
+#if defined(O_NONBLOCK) /* POSIX */
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+	{
+		netsyslog(LOG_ERR, "fcntl(O_NONBLOCK) fails on fd #%d: %m",
+			fd);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#elif defined(FNDELAY)
+	if (fcntl(fd, F_SETFL, FNDELAY) < 0)
+	{
+		netsyslog(LOG_ERR, "fcntl(FNDELAY) fails on fd #%d: %m",
+			fd);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#elif defined(O_NDELAY) /* generally the same as FNDELAY */
+	if (fcntl(fd, F_SETFL, O_NDELAY) < 0)
+	{
+		netsyslog(LOG_ERR, "fcntl(O_NDELAY) fails on fd #%d: %m",
+			fd);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#elif defined(FIONBIO)
+# if defined(SYS_WINNT)
+		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
+# else
+		if (ioctl(fd,FIONBIO,&on) < 0)
+# endif
+	{
+		netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on fd #%d: %m",
+			fd);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#elif defined(FIOSNBIO)
+	if (ioctl(fd,FIOSNBIO,&on) < 0)
+	{
+		netsyslog(LOG_ERR, "ioctl(FIOSNBIO) fails on fd #%d: %m",
+			fd);
+		exit(1);
+		/*NOTREACHED*/
+	}
+#else
+# include "Bletch: Need non-blocking I/O!"
+#endif
+}
 
 /*
  * open_socket - open a socket, returning the file descriptor
@@ -1872,80 +2012,15 @@ open_socket(
 		   stoa(addr),
 		    flags));
 
-	/*
-	 * I/O Completion Ports don't care about the select and FD_SET
-	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-	if (fd > maxactivefd)
-	    maxactivefd = fd;
-	FD_SET(fd, &activefds);
-#endif
-	add_socket_to_list(fd);
-	add_addr_to_list(addr, interf);
-	/*
-	 * set non-blocking,
-	 */
-
-#ifdef USE_FIONBIO
-	/* in vxWorks we use FIONBIO, but the others are defined for old systems, so
-	 * all hell breaks loose if we leave them defined
-	 */
-#undef O_NONBLOCK
-#undef FNDELAY
-#undef O_NDELAY
-#endif
-
-#if defined(O_NONBLOCK) /* POSIX */
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
-	{
-		netsyslog(LOG_ERR, "fcntl(O_NONBLOCK) fails on address %s: %m",
-			stoa(addr));
-		exit(1);
-		/*NOTREACHED*/
-	}
-#elif defined(FNDELAY)
-	if (fcntl(fd, F_SETFL, FNDELAY) < 0)
-	{
-		netsyslog(LOG_ERR, "fcntl(FNDELAY) fails on address %s: %m",
-			stoa(addr));
-		exit(1);
-		/*NOTREACHED*/
-	}
-#elif defined(O_NDELAY) /* generally the same as FNDELAY */
-	if (fcntl(fd, F_SETFL, O_NDELAY) < 0)
-	{
-		netsyslog(LOG_ERR, "fcntl(O_NDELAY) fails on address %s: %m",
-			stoa(addr));
-		exit(1);
-		/*NOTREACHED*/
-	}
-#elif defined(FIONBIO)
-# if defined(SYS_WINNT)
-		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
-# else
-		if (ioctl(fd,FIONBIO,&on) < 0)
-# endif
-	{
-		netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on address %s: %m",
-			stoa(addr));
-		exit(1);
-		/*NOTREACHED*/
-	}
-#elif defined(FIOSNBIO)
-	if (ioctl(fd,FIOSNBIO,&on) < 0)
-	{
-		netsyslog(LOG_ERR, "ioctl(FIOSNBIO) fails on address %s: %m",
-			stoa(addr));
-		exit(1);
-		/*NOTREACHED*/
-	}
-#else
-# include "Bletch: Need non-blocking I/O!"
-#endif
-
+	init_nonblocking_io(fd);
+	
 #ifdef HAVE_SIGNALED_IO
 	init_socket_sig(fd);
 #endif /* not HAVE_SIGNALED_IO */
+
+	add_fd_to_list(fd, FD_TYPE_SOCKET);
+
+	add_addr_to_list(addr, interf);
 
 	/*
 	 *	Turn off the SO_REUSEADDR socket option.  It apparently
@@ -1966,7 +2041,6 @@ open_socket(
 		    fcntl(fd, F_GETFL, 0)));
 #endif /* SYS_WINNT || VMS */
 
-
 #if defined (HAVE_IO_COMPLETION_PORT)
 /*
  * Add the socket to the completion port
@@ -1975,76 +2049,6 @@ open_socket(
 #endif
 	return fd;
 }
-
-/*
- * close_socket - close a socket and remove from the activefd list
- */
-static void
-close_socket(
-	     SOCKET fd
-	)
-{
-	SOCKET i, newmax;
-
-	if (fd < 0)
-		return;
-	
-	(void) closesocket(fd);
-
-	/*
-	 * I/O Completion Ports don't care about select and fd_set
-	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-	FD_CLR( (u_int) fd, &activefds);
-
-	if (fd == maxactivefd) {
-		newmax = 0;
-		for (i = 0; i < maxactivefd; i++)
-			if (FD_ISSET(i, &activefds))
-				newmax = i;
-		maxactivefd = newmax;
-	}
-#endif
-	delete_socket_from_list(fd);
-
-}
-
-
-/*
- * close_file - close a file and remove from the activefd list
- * added 1/31/1997 Greg Schueman for Windows NT portability
- */
-#ifdef REFCLOCK
-static void
-close_file(
-	SOCKET fd
-	)
-{
-	int i, newmax;
-
-	if (fd < 0)
-		return;
-	
-	(void) close(fd);
-
-#ifndef HAVE_IO_COMPLETION_PORT
-	/*
-	 * I/O Completion Ports don't care about select and fd_set
-	 */
-	FD_CLR( (u_int) fd, &activefds);
-
-	if (fd == maxactivefd) {
-		newmax = 0;
-		for (i = 0; i < maxactivefd; i++)
-			if (FD_ISSET(i, &activefds))
-				newmax = i;
-		maxactivefd = newmax;
-	}
-#endif
-	delete_socket_from_list(fd);
-}
-#endif
-
 
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
 /*
@@ -2331,6 +2335,7 @@ input_handler(
 	fd_set fds;
 	int select_count = 0;
 	struct interface *interface;
+	struct asyncio_reader *asyncio_reader;
 
 	/*
 	 * Initialize the skip list
@@ -2603,6 +2608,18 @@ input_handler(
 	}
 
 	/*
+	 * scan list of asyncio readers
+	 */
+	for (asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
+	     asyncio_reader != NULL;
+	     asyncio_reader = ISC_LIST_PREV(asyncio_reader, link))
+	{
+		if (FD_ISSET(asyncio_reader->fd, &fds)) {
+			asyncio_reader->receiver(asyncio_reader);
+		}
+	}
+	
+	/*
 	 * Done everything from that select.
 	 */
 
@@ -2699,6 +2716,7 @@ findlocalinterface(
 {
 	SOCKET s;
 	int rtn;
+	struct interface *interface;
 	struct sockaddr_storage saddr;
 	int saddrlen = SOCKLEN(addr);
 
@@ -2752,41 +2770,34 @@ findlocalinterface(
 
 	DPRINTF(2, ("findlocalinterface: kernel maps %s to %s\n", stoa(addr), stoa(&saddr)));
 	
-	return find_iface(&saddr, NULL);
-}
-
-static struct interface *
-find_iface(struct sockaddr_storage *saddr, char *ifname)
-{
-        struct interface *interface;
-    
 	for (interface = ISC_LIST_HEAD(inter_list);
 	     interface != NULL;
 	     interface = ISC_LIST_NEXT(interface, link)) 
-	  {
-	        if (interface->flags & INT_WILDCARD)
-		        continue;
+	{
+		if (interface->flags & INT_WILDCARD)
+			continue;
 	  
 		/* Don't both with ignore interfaces */
 		if (interface->ignore_packets == ISC_TRUE)
 			continue;
+
 		/*
 		 * First look if is the the correct family
 		 */
-		if(interface->sin.ss_family != saddr->ss_family)
-	  		continue;
+		if(interface->sin.ss_family != saddr.ss_family)
+			continue;
 		/*
 		 * We match the unicast address only.
 		 */
-		if (SOCKCMP(&interface->sin, saddr) &&
-		    ((ifname != NULL) ? (0 == strcmp(ifname, interface->name)) : 1))
+		if (SOCKCMP(&interface->sin, &saddr))
 		{
 			break;
 		}
-	  }
+	}
+
 	return interface;
 }
- 
+
 /*
  * findlocalcastinterface - find local *cast interface index corresponding to address
  * depending on the flags passed
@@ -2989,36 +3000,6 @@ io_clr_stats(void)
 
 #ifdef REFCLOCK
 /*
- * This is a hack so that I don't have to fool with these ioctls in the
- * pps driver ... we are already non-blocking and turn on SIGIO thru
- * another mechanisim
- */
-int
-io_addclock_simple(
-	struct refclockio *rio
-	)
-{
-	BLOCKIO();
-	/*
-	 * Stuff the I/O structure in the list and mark the descriptor
-	 * in use.	There is a harmless (I hope) race condition here.
-	 */
-	rio->next = refio;
-	refio = rio;
-
-	/*
-	 * I/O Completion Ports don't care about select and fd_set
-	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-	if (rio->fd > maxactivefd)
-	    maxactivefd = rio->fd;
-	FD_SET(rio->fd, &activefds);
-#endif
-	UNBLOCKIO();
-	return 1;
-}
-
-/*
  * io_addclock - add a reference clock to the list and arrange that we
  *				 get SIGIO interrupts from it.
  */
@@ -3033,33 +3014,31 @@ io_addclock(
 	 * in use.	There is a harmless (I hope) race condition here.
 	 */
 	rio->next = refio;
-	refio = rio;
 
 # ifdef HAVE_SIGNALED_IO
 	if (init_clock_sig(rio))
 	{
-		refio = rio->next;
 		UNBLOCKIO();
 		return 0;
 	}
 # elif defined(HAVE_IO_COMPLETION_PORT)
 	if (io_completion_port_add_clock_io(rio))
 	{
-		add_socket_to_list(rio->fd);
-		refio = rio->next;
 		UNBLOCKIO();
 		return 0;
 	}
 # endif
 
 	/*
-	 * I/O Completion Ports don't care about select and fd_set
+	 * enqueue
 	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-	if (rio->fd > maxactivefd)
-	    maxactivefd = rio->fd;
-	FD_SET(rio->fd, &activefds);
-#endif
+	refio = rio;
+
+        /*
+	 * register fd
+	 */
+	add_fd_to_list(rio->fd, FD_TYPE_FILE);
+
 	UNBLOCKIO();
 	return 1;
 }
@@ -3097,26 +3076,10 @@ io_closeclock(
 	/*
 	 * Close the descriptor.
 	 */
-	close_file(rio->fd);
+	close_and_delete_fd_from_list(rio->fd);
 }
 #endif	/* REFCLOCK */
 
-	/*
-	 * I/O Completion Ports don't care about select and fd_set
-	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-void
-kill_asyncio(
-	int startfd
-	)
-{
-	SOCKET i;
-
-	BLOCKIO();
-	for (i = startfd; i <= maxactivefd; i++)
-	    (void)close_socket(i);
-}
-#else
 /*
  * On NT a SOCKET is an unsigned int so we cannot possibly keep it in
  * an array. So we use one of the ISC_LIST functions to hold the
@@ -3130,42 +3093,96 @@ kill_asyncio(int startfd)
 
 	BLOCKIO();
 
-	lsock = ISC_LIST_HEAD(sockets_list);
+	lsock = ISC_LIST_HEAD(fd_list);
 	while (lsock != NULL) {
+		/*
+		 * careful here - list is being dismantled while
+		 * we scan it - setting next here insures that
+		 * we are able to correctly scan the list
+		 */
 		next = ISC_LIST_NEXT(lsock, link);
-		close_socket(lsock->fd);
+		/*
+		 * will remove socket from list
+		 */
+		close_and_delete_fd_from_list(lsock->fd);
 		lsock = next;
 	}
 
 }
-#endif
+
 /*
  * Add and delete functions for the list of open sockets
  */
 void
-add_socket_to_list(SOCKET fd){
+add_fd_to_list(SOCKET fd, enum desc_type type) {
 	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
 	lsock->fd = fd;
+	lsock->type = type;
 
-	ISC_LIST_APPEND(sockets_list, lsock, link);
+	ISC_LIST_APPEND(fd_list, lsock, link);
+	/*
+	 * I/O Completion Ports don't care about the select and FD_SET
+	 */
+#ifndef HAVE_IO_COMPLETION_PORT
+	/*
+	 * keep activefds in sync
+	 */
+	if (fd > maxactivefd)
+	    maxactivefd = fd;
+	FD_SET( (u_int)fd, &activefds);
+#endif
 }
+
 void
-delete_socket_from_list(SOCKET fd) {
+close_and_delete_fd_from_list(SOCKET fd) {
 
 	vsock_t *next;
-	vsock_t *lsock = ISC_LIST_HEAD(sockets_list);
+	vsock_t *lsock = ISC_LIST_HEAD(fd_list);
 
 	while(lsock != NULL) {
 		next = ISC_LIST_NEXT(lsock, link);
 		if(lsock->fd == fd) {
-			ISC_LIST_DEQUEUE_TYPE(sockets_list, lsock, link, vsock_t);
+			ISC_LIST_DEQUEUE_TYPE(fd_list, lsock, link, vsock_t);
+
+			switch (lsock->type) {
+			case FD_TYPE_SOCKET:
+#ifdef SYS_WINNT
+				closesocket(lsock->fd);
+				break;
+#endif
+			case FD_TYPE_FILE:
+				(void) close(lsock->fd);
+				break;
+			default:
+				msyslog(LOG_ERR, "internal error - illegal descriptor type %d - EXITING", (int)lsock->type);
+				exit(1);
+			}
+
 			free(lsock);
+			/*
+			 * I/O Completion Ports don't care about select and fd_set
+			 */
+#ifndef HAVE_IO_COMPLETION_PORT
+			/*
+			 * remove from activefds
+			 */
+			FD_CLR( (u_int) fd, &activefds);
+			
+			if (fd == maxactivefd) {
+				int i, newmax = 0;
+				for (i = 0; i < maxactivefd; i++)
+					if (FD_ISSET(i, &activefds))
+						newmax = i;
+				maxactivefd = newmax;
+			}
+#endif
 			break;
 		}
 		else
 			lsock = next;
 	}
 }
+
 void
 add_addr_to_list(struct sockaddr_storage *addr, struct interface *interface){
 	remaddr_t *laddr = (remaddr_t *)emalloc(sizeof(remaddr_t));
@@ -3240,3 +3257,91 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 	}
 	return NULL; /* Not found */
 }
+
+#ifdef __NetBSD__
+#include <net/route.h>
+
+static void
+process_routing_msgs(struct asyncio_reader *reader)
+{
+	char buffer[5120];
+	char *p = buffer;
+
+	int cnt;
+	
+	cnt = read(reader->fd, buffer, sizeof(buffer));
+	
+	if (cnt < 0) {
+		msyslog(LOG_ERR, "i/o error on routing socket %m - disabling");
+		remove_asyncio_reader(reader);
+		delete_asyncio_reader(reader);
+		return;
+	}
+
+	/*
+	 * process routing message
+	 */
+	while ((p + sizeof(struct rt_msghdr)) <= (buffer + cnt))
+	{
+		struct rt_msghdr *rtm;
+		
+		rtm = (struct rt_msghdr *)p;
+		if (rtm->rtm_version != RTM_VERSION) {
+			msyslog(LOG_ERR, "version mismatch on routing socket %m - disabling");
+			remove_asyncio_reader(reader);
+			delete_asyncio_reader(reader);
+			return;
+		}
+		
+		switch (rtm->rtm_type) {
+		case RTM_NEWADDR:
+		case RTM_DELADDR:
+		case RTM_IFINFO:
+		case RTM_IFANNOUNCE:
+			/*
+			 * we are keen on new and deleted addresses and if an interface goes up and down
+			 */
+			DPRINTF(1, ("routing message op = %d: scheduling interface update\n", rtm->rtm_type));
+			timer_interfacetimeout(current_time + 2);
+			break;
+		default:
+			/*
+			 * the rest doesn't bother us.
+			 */
+			DPRINTF(1, ("routing message op = %d: ignored\n", rtm->rtm_type));
+			break;
+		}
+		p += rtm->rtm_msglen;
+	}
+}
+
+/*
+ * set up routing notifications
+ */
+static void
+init_async_notifications()
+{
+	struct asyncio_reader *reader;
+	int fd = socket(PF_ROUTE, SOCK_RAW, 0);
+	
+	if (fd >= 0) {
+		init_nonblocking_io(fd);
+		init_socket_sig(fd);
+		
+		reader = new_asyncio_reader();
+
+		reader->fd = fd;
+		reader->receiver = process_routing_msgs;
+		
+		add_asyncio_reader(reader, 1);
+		msyslog(LOG_INFO, "Listening on routing socket on fd #%d for interface updates", fd);
+	} else {
+		msyslog(LOG_ERR, "unable to open routing socket (%m) - using polled interface update");
+	}
+}
+#else
+static void
+init_async_notifications()
+{
+}
+#endif

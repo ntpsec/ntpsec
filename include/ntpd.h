@@ -210,6 +210,8 @@ extern	void	init_timer	P((void));
 extern	void	reinit_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
+extern  void    timet_interfacetimeout P((u_long));
+
 #ifdef OPENSSL
 extern	char	*sys_hostname;
 extern	l_fp	sys_revoketime;
