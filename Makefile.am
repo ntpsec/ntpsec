@@ -2,8 +2,6 @@
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
 ACLOCAL_AMFLAGS= -I m4
 
-#include $(srcdir)/sntp/libopts/MakeDefs.inc
-
 SUBDIRS=
 if NEED_LIBOPTS
 SUBDIRS+= sntp/libopts

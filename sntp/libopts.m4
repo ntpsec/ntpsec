@@ -370,13 +370,15 @@ dnl Default to system libopts
 NEED_LIBOPTS_DIR=''
 
 AC_DEFUN([LIBOPTS_CHECK],[
+  m4_pushdef([AO_Libopts_Dir],
+    [ifelse([$1], , [libopts], [$1])])
   AC_ARG_ENABLE([local-libopts],
     AC_HELP_STRING([--enable-local-libopts],
        [Force using the supplied libopts tearoff code]),[
     if test x$enableval = xyes ; then
        AC_MSG_NOTICE([Using supplied libopts tearoff])
-       LIBOPTS_LDADD='$(top_builddir)/libopts/libopts.la'
-       LIBOPTS_CFLAGS='-I$(top_srcdir)/libopts'
+       LIBOPTS_LDADD='$(top_builddir)/AO_Libopts_Dir/libopts.la'
+       LIBOPTS_CFLAGS='-I$(top_srcdir)/AO_Libopts_Dir'
        INVOKE_LIBOPTS_MACROS
        NEED_LIBOPTS_DIR=true
     fi])
@@ -404,8 +406,8 @@ AC_DEFUN([LIBOPTS_CHECK],[
       LIBOPTS_LDADD="${lo_cv_test_autoopts}"
       LIBOPTS_CFLAGS="`${aoconfig} --cflags`"
     else
-      LIBOPTS_LDADD='$(top_builddir)/libopts/libopts.la'
-      LIBOPTS_CFLAGS='-I$(top_srcdir)/libopts'
+      LIBOPTS_LDADD='$(top_builddir)/AO_Libopts_Dir/libopts.la'
+      LIBOPTS_CFLAGS='-I$(top_srcdir)/AO_Libopts_Dir'
       INVOKE_LIBOPTS_MACROS
       NEED_LIBOPTS_DIR=true
     fi
@@ -414,5 +416,6 @@ AC_DEFUN([LIBOPTS_CHECK],[
   AM_CONDITIONAL([NEED_LIBOPTS], [test -n "${NEED_LIBOPTS_DIR}"])
   AC_SUBST(LIBOPTS_LDADD)
   AC_SUBST(LIBOPTS_CFLAGS)
-  AC_CONFIG_FILES([libopts/Makefile])
+  AC_CONFIG_FILES(AO_Libopts_Dir[/Makefile])
+  m4_popdef([AO_Libopts_Dir])
 ]) # end of AC_DEFUN of LIBOPTS_CHECK

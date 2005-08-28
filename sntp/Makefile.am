@@ -69,5 +69,4 @@ sntp-opts.texi sntp-opts.menu: sntp-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section sntp-opts.def
 
-
 include ../bincheck.mf
