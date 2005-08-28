@@ -3335,7 +3335,7 @@ init_async_notifications()
 		reader->fd = fd;
 		reader->receiver = process_routing_msgs;
 		
-		add_asyncio_reader(reader, 1);
+		add_asyncio_reader(reader, FD_TYPE_FILE);
 		msyslog(LOG_INFO, "Listening on routing socket on fd #%d for interface updates", fd);
 	} else {
 		msyslog(LOG_ERR, "unable to open routing socket (%m) - using polled interface update");
