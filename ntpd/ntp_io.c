@@ -448,7 +448,7 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 
 #endif
 
-#ifdef SUPPORT_ASYNCIO_READER
+#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 /*
  * create an asyncio_reader structure
  */
@@ -497,7 +497,8 @@ remove_asyncio_reader(struct asyncio_reader *reader)
 
 	reader->fd = INVALID_SOCKET;
 }
-#endif	
+#endif /* defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+
 /*
  * interface list enumerator - visitor pattern
  */
@@ -2610,8 +2611,9 @@ input_handler(
 		}
 	}
 
+#ifdef HAS_BSD_ROUTING_SOCKET
 	/*
-	 * scan list of asyncio readers
+	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
 	for (asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
 	     asyncio_reader != NULL;
@@ -2621,6 +2623,7 @@ input_handler(
 			asyncio_reader->receiver(asyncio_reader);
 		}
 	}
+#endif /* HAS_BSD_ROUTING_SOCKET */
 	
 	/*
 	 * Done everything from that select.
@@ -3261,7 +3264,7 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 	return NULL; /* Not found */
 }
 
-#ifdef SUPPORT_ASYNCIO_READER
+#ifdef HAS_BSD_ROUTING_SOCKET
 #include <net/route.h>
 
 static void
@@ -3329,14 +3332,16 @@ init_async_notifications()
 	
 	if (fd >= 0) {
 		init_nonblocking_io(fd);
+#if defined(HAVE_SIGNALED_IO)
 		init_socket_sig(fd);
+#endif /* HAVE_SIGNALED_IO */
 		
 		reader = new_asyncio_reader();
 
 		reader->fd = fd;
 		reader->receiver = process_routing_msgs;
 		
-		add_asyncio_reader(reader, 1);
+		add_asyncio_reader(reader, FD_TYPE_FILE);
 		msyslog(LOG_INFO, "Listening on routing socket on fd #%d for interface updates", fd);
 	} else {
 		msyslog(LOG_ERR, "unable to open routing socket (%m) - using polled interface update");
