@@ -176,7 +176,7 @@ struct vsock {
 	ISC_LINK(vsock_t)		link;
 };
 
-#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 /*
  * async notification processing (e. g. routing sockets)
  */
@@ -198,7 +198,7 @@ static struct asyncio_reader *new_asyncio_reader P((void));
 static void add_asyncio_reader P((struct asyncio_reader *, enum desc_type));
 static void remove_asyncio_reader P((struct asyncio_reader *));
 
-#endif /* defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
 
 static void init_async_notifications P((void));
 
@@ -345,7 +345,7 @@ init_io(void)
 
 	ISC_LIST_INIT(fd_list);
 
-#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 	ISC_LIST_INIT(asyncio_reader_list);
 #endif
 
@@ -453,7 +453,7 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 
 #endif
 
-#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 /*
  * create an asyncio_reader structure
  */
@@ -502,7 +502,7 @@ remove_asyncio_reader(struct asyncio_reader *reader)
 
 	reader->fd = INVALID_SOCKET;
 }
-#endif /* defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
 
 /*
  * interface list enumerator - visitor pattern
@@ -3311,8 +3311,12 @@ process_routing_msgs(struct asyncio_reader *reader)
 		switch (rtm->rtm_type) {
 		case RTM_NEWADDR:
 		case RTM_DELADDR:
+#ifdef RTM_IFINFO
 		case RTM_IFINFO:
+#endif
+#ifdef RTM_IFANNOUNCE
 		case RTM_IFANNOUNCE:
+#endif
 			/*
 			 * we are keen on new and deleted addresses and if an interface goes up and down
 			 */
