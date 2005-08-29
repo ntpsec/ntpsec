@@ -176,6 +176,7 @@ struct vsock {
 	ISC_LINK(vsock_t)		link;
 };
 
+#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 /*
  * async notification processing (e. g. routing sockets)
  */
@@ -192,12 +193,14 @@ struct asyncio_reader {
 
 ISC_LIST(struct asyncio_reader) asyncio_reader_list;
 
-static void init_async_notifications P((void));
-
 static void delete_asyncio_reader P((struct asyncio_reader *));
 static struct asyncio_reader *new_asyncio_reader P((void));
 static void add_asyncio_reader P((struct asyncio_reader *, enum desc_type));
 static void remove_asyncio_reader P((struct asyncio_reader *));
+
+#endif /* defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+
+static void init_async_notifications P((void));
 
 static	int create_sockets	P((u_short));
 static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
@@ -342,7 +345,9 @@ init_io(void)
 
 	ISC_LIST_INIT(fd_list);
 
+#if defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
 	ISC_LIST_INIT(asyncio_reader_list);
+#endif
 
         ISC_LIST_INIT(remoteaddr_list);
 
@@ -1811,8 +1816,6 @@ io_multicast_del(
  */
 static void init_nonblocking_io(SOCKET fd)
 {
-	int on = 1;
-
 	/*
 	 * set non-blocking,
 	 */
@@ -1851,16 +1854,20 @@ static void init_nonblocking_io(SOCKET fd)
 		/*NOTREACHED*/
 	}
 #elif defined(FIONBIO)
+	{
+		int on = 1;
 # if defined(SYS_WINNT)
+
 		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
 # else
 		if (ioctl(fd,FIONBIO,&on) < 0)
 # endif
-	{
-		netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on fd #%d: %m",
-			fd);
-		exit(1);
-		/*NOTREACHED*/
+		{
+			netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on fd #%d: %m",
+				fd);
+			exit(1);
+			/*NOTREACHED*/
+		}
 	}
 #elif defined(FIOSNBIO)
 	if (ioctl(fd,FIOSNBIO,&on) < 0)
@@ -2339,7 +2346,9 @@ input_handler(
 	fd_set fds;
 	int select_count = 0;
 	struct interface *interface;
+#if defined(HAS_BSD_ROUTING_SOCKET)
 	struct asyncio_reader *asyncio_reader;
+#endif
 
 	/*
 	 * Initialize the skip list
