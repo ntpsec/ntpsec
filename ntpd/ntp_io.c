@@ -448,6 +448,7 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 
 #endif
 
+#ifdef SUPPORT_ASYNCIO_READER
 /*
  * create an asyncio_reader structure
  */
@@ -496,7 +497,7 @@ remove_asyncio_reader(struct asyncio_reader *reader)
 
 	reader->fd = INVALID_SOCKET;
 }
-	
+#endif	
 /*
  * interface list enumerator - visitor pattern
  */
@@ -1809,7 +1810,9 @@ io_multicast_del(
  */
 static void init_nonblocking_io(SOCKET fd)
 {
-		/*
+	int on = 1;
+
+	/*
 	 * set non-blocking,
 	 */
 
@@ -3258,7 +3261,7 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 	return NULL; /* Not found */
 }
 
-#ifdef __NetBSD__
+#ifdef SUPPORT_ASYNCIO_READER
 #include <net/route.h>
 
 static void
