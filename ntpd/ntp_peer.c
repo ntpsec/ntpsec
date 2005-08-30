@@ -588,21 +588,7 @@ peer_refresh_interface(struct peer *peer)
 	}
 #endif
 
-	if (niface != NULL) {
-		set_peerdstadr(peer, niface);
-	} else {
-		/* oops - losing this one */
-		if (peer->flags & FLAG_CONFIG) 
-		{
-			msyslog(LOG_INFO, "peer %s is configured but has currently to transmit interface - peer remains configured, check network configuration", stoa(&peer->srcadr));
-			set_peerdstadr(peer, NULL);
-		}
-		else
-		{
-			msyslog(LOG_INFO, "peer %s is not configured and has lost its interface - deleting", stoa(&peer->srcadr));
-			unpeer(peer);
-		}
-	}
+	set_peerdstadr(peer, niface);
 }
 
 /*

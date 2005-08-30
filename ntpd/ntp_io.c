@@ -176,7 +176,7 @@ struct vsock {
 	ISC_LINK(vsock_t)		link;
 };
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
 /*
  * async notification processing (e. g. routing sockets)
  */
@@ -198,7 +198,7 @@ static struct asyncio_reader *new_asyncio_reader P((void));
 static void add_asyncio_reader P((struct asyncio_reader *, enum desc_type));
 static void remove_asyncio_reader P((struct asyncio_reader *));
 
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
 
 static void init_async_notifications P((void));
 
@@ -345,7 +345,7 @@ init_io(void)
 
 	ISC_LIST_INIT(fd_list);
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
 	ISC_LIST_INIT(asyncio_reader_list);
 #endif
 
@@ -453,7 +453,7 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 
 #endif
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
 /*
  * create an asyncio_reader structure
  */
@@ -502,7 +502,7 @@ remove_asyncio_reader(struct asyncio_reader *reader)
 
 	reader->fd = INVALID_SOCKET;
 }
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_BSD_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
 
 /*
  * interface list enumerator - visitor pattern
@@ -2346,7 +2346,7 @@ input_handler(
 	fd_set fds;
 	int select_count = 0;
 	struct interface *interface;
-#if defined(HAS_BSD_ROUTING_SOCKET)
+#if defined(HAS_ROUTING_SOCKET)
 	struct asyncio_reader *asyncio_reader;
 #endif
 
@@ -2620,7 +2620,7 @@ input_handler(
 		}
 	}
 
-#ifdef HAS_BSD_ROUTING_SOCKET
+#ifdef HAS_ROUTING_SOCKET
 	/*
 	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
@@ -2632,7 +2632,7 @@ input_handler(
 			asyncio_reader->receiver(asyncio_reader);
 		}
 	}
-#endif /* HAS_BSD_ROUTING_SOCKET */
+#endif /* HAS_ROUTING_SOCKET */
 	
 	/*
 	 * Done everything from that select.
@@ -3273,7 +3273,7 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 	return NULL; /* Not found */
 }
 
-#ifdef HAS_BSD_ROUTING_SOCKET
+#ifdef HAS_ROUTING_SOCKET
 #include <net/route.h>
 
 static void
