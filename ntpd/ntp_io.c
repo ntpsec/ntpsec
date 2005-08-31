@@ -607,11 +607,16 @@ remove_interface(struct interface *interface)
   
 	if (interface->fd != INVALID_SOCKET) 
 	{
-		msyslog(LOG_INFO, "Deleting interface #%d %s, %s#%d",
+		msyslog(LOG_INFO, "Deleting interface #%d %s, %s#%d, interface stats: received=%ld, sent=%ld, dropped=%ld, active_time=%ld secs",
 			interface->ifnum,
 			interface->name,
 			stoa((&interface->sin)),
-			NTP_PORT);  /* XXX should extract port from sin structure */
+			NTP_PORT,  /* XXX should extract port from sin structure */
+			interface->received,
+			interface->sent,
+			interface->notsent,
+			current_time - interface->starttime);
+
 		close_and_delete_fd_from_list(interface->fd);
 	}
   

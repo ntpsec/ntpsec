@@ -899,6 +899,7 @@ struct info_if_stats {
         int32 received;	                /* number of incoming packets */
 	int32 sent;			/* number of outgoing packets */
 	int32 notsent;			/* number of send failures */
+	int32 uptime;		        /* number of seconds this interface was active */
 	u_int32 scopeid;		/* Scope used for Multicasting */
 	u_int32 ifindex;		/* interface index - from system */
 	u_int32 ifnum;		        /* sequential interface number */

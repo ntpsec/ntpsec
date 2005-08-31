@@ -2806,6 +2806,7 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 	ifs->scopeid = htonl(interface->scopeid);
 	ifs->ifindex = htonl(interface->ifindex);
 	ifs->ifnum = htonl(interface->ifnum);
+	ifs->uptime = htonl(current_time - interface->starttime);
 	ifs->ignore_packets = interface->ignore_packets;
 	ifs->peercnt = htonl(interface->peercnt);
 	ifs->action = interface_info->action;
