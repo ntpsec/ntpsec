@@ -1452,28 +1452,56 @@ peer_crypto_clear(
 	 * unauthenticated data in the clock filter.
 	 */
 #ifdef OPENSSL
-	key_expire(peer);
+	peer->assoc = 0;
+	peer->crypto = 0;
+
 	if (peer->pkey != NULL)
 		EVP_PKEY_free(peer->pkey);
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
+	peer->pkey = NULL;
+
+	memset(&peer->first, 0, sizeof(peer->first));
+	memset(&peer->last, 0, sizeof(peer->last));
+
+	peer->digest = NULL;	/* XXX MEMLEAK? check whether this needs to be freed in any way - never was freed */
+
 	if (peer->subject != NULL)
 		free(peer->subject);
+	peer->subject = NULL;
+
 	if (peer->issuer != NULL)
 		free(peer->issuer);
+	peer->issuer = NULL;
+
+	peer->pkeyid = 0;
+
+	peer->pcookie = 0;
+
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	peer->ident_pkey = NULL;
+	
+	memset(&peer->fstamp, 0, sizeof(peer->fstamp));
+
 	if (peer->iffval != NULL)
 		BN_free(peer->iffval);
+	peer->iffval = NULL;
+
 	if (peer->grpkey != NULL)
 		BN_free(peer->grpkey);
+	peer->grpkey = NULL;
+
+	value_free(&peer->cookval);
+	value_free(&peer->recval);
+	value_free(&peer->tai_leap);
+
 	if (peer->cmmd != NULL) {
 		free(peer->cmmd);
 		peer->cmmd = NULL;
 	}
-	value_free(&peer->cookval);
-	value_free(&peer->recval);
-	value_free(&peer->tai_leap);
+
+	key_expire(peer);
+
 	value_free(&peer->encrypt);
-	value_free(&peer->sndval);
 #endif /* OPENSSL */
 }
 

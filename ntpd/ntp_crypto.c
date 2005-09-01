@@ -2006,6 +2006,9 @@ bighash(
 	EVP_DigestUpdate(&ctx, ptr, len);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	BN_bin2bn(dgst, len, bk);
+
+	/* XXX MEMLEAK? free ptr? */
+
 	return (1);
 }
 
