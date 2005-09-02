@@ -360,7 +360,11 @@ AC_CHECK_HEADERS(net/if.h, [], [],
 #endif
 ])
 AC_CHECK_HEADERS(net/if6.h)
-AC_CHECK_HEADERS(net/route.h)
+AC_CHECK_HEADERS(net/route.h, [], [], [
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+])
 AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
 AC_CHECK_HEADERS(netinet/in.h)
 AC_CHECK_HEADERS(netinet/ip.h, [], [],
