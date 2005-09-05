@@ -371,6 +371,11 @@ AC_CHECK_HEADERS(net/if.h, [], [],
 #endif
 ])
 AC_CHECK_HEADERS(net/if6.h)
+AC_CHECK_HEADERS(net/route.h, [], [], [
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+])
 AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
 AC_CHECK_HEADERS(netinet/in.h)
 AC_CHECK_HEADERS(netinet/ip.h, [], [],
@@ -635,6 +640,21 @@ dnl yes
 dnl #endif
 dnl ], su_cv_have_boot_time=yes, su_cv_have_boot_time=no)])
 dnl AC_MSG_RESULT($su_cv_have_boot_time)
+
+AC_CACHE_CHECK(for struct rt_msghdr, ac_cv_struct_rt_msghdr,
+[AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <net/route.h>],[
+extern struct rt_msghdr *p;
+return p;],
+	ac_cv_struct_rt_msghdr=yes,
+	ac_cv_struct_rt_msghdr=no)
+])
+if test $ac_cv_struct_rt_msghdr = yes; then
+    AC_DEFINE(HAS_ROUTING_SOCKET, 1, [Do we have a routing socket (struct rt_msghdr)?])
+fi
 
 AC_CACHE_CHECK(
   struct sigaction for sa_sigaction,
