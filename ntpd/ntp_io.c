@@ -202,6 +202,13 @@ void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
 int	findlocalinterface	P((struct sockaddr_storage *));
 int	findlocalcastinterface	P((struct sockaddr_storage *, int));
 
+/*
+ * Routines to read the ntp packets
+ */
+#if !defined(HAVE_IO_COMPLETION_PORT)
+static inline int     read_network_packet	P((SOCKET, struct interface *, l_fp));
+static inline int     read_refclock_packet	P((SOCKET, struct refclockio *, l_fp));
+#endif
 
 #ifdef SYS_WINNT
 /*
@@ -592,16 +599,14 @@ create_sockets(
 		if(debug)
 			netsyslog(LOG_ERR, "no IPv4 interfaces found");
 #endif
-		/*
-		 * Create wildcard addresses
-		 * This ensures that no other application
-		 * can be receiving ntp packets 
-		 */
+	/*
+	 * Create wildcard addresses
+	 * This ensures that no other application
+	 * can be receiving ntp packets 
+	 */
 
-	if (specific_interface == NULL) {
-		nwilds = create_wildcards(port);
-		idx = nwilds;
-	}
+	nwilds = create_wildcards(port);
+	idx = nwilds;
 
 	result = isc_interfaceiter_create(mctx, &iter);
 	if (result != ISC_R_SUCCESS)
@@ -931,13 +936,7 @@ socket_multicast_enable(struct interface *iface, int ind, int lscope, struct soc
 	{
 	case AF_INET:
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-/*
- * Temporarily just use INADDR_ANY for now
- * We should be checking if they're the same address
- * PDMXXX
- */
-/*		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr; */
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -1252,6 +1251,8 @@ io_multicast_add(
 	if (inter_list[ind].fd != INVALID_SOCKET)
 	{
 		inter_list[ind].bfd = INVALID_SOCKET;
+		inter_list[ind].ignore_packets = ISC_FALSE;
+
 		(void) strncpy(inter_list[ind].name, "multicast",
 			sizeof(inter_list[ind].name));
 		((struct sockaddr_in*)&inter_list[ind].mask)->sin_addr.s_addr =
@@ -1759,7 +1760,7 @@ sendpkt(
 #ifdef DEBUG
 	if (debug > 1)
 	    printf("%ssendpkt(fd=%d dst=%s, src=%s, ttl=%d, len=%d)\n",
-		   (ttl >= 0) ? "\tMCAST\t*****" : "",
+		   (ttl > 0) ? "\tMCAST\t*****" : "",
 		   inter->fd, stoa(dest),
 		   stoa(&inter->sin), ttl, len);
 #endif
@@ -1945,6 +1946,176 @@ fdbits(
 }
 
 /*
+ * Routine to read the refclock packets for a specific interface
+ * Return the number of bytes read. That way we know if we should
+ * read it again or go on to the next one if no bytes returned
+ */
+static inline int
+read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
+{
+	int i;
+	int buflen;
+	register struct recvbuf *rb;
+
+	if (free_recvbuffs() == 0)
+	{
+		char buf[RX_BUFF_SIZE];
+
+		buflen = read(fd, buf, sizeof buf);
+		packets_dropped++;
+		return (buflen);	/* Return what we found */
+	}
+
+	rb = get_free_recv_buffer();
+
+	i = (rp->datalen == 0
+	    || rp->datalen > sizeof(rb->recv_space))
+	    ? sizeof(rb->recv_space) : rp->datalen;
+	buflen = read(fd, (char *)&rb->recv_space, (unsigned)i);
+
+	if (buflen < 0)
+	{
+		if (errno != EINTR && errno != EAGAIN) {
+			netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
+		}
+		freerecvbuf(rb);
+		return (0);
+	}
+	/*
+	 * Got one. Mark how and when it got here,
+	 * put it on the full list and do bookkeeping.
+	 */
+	rb->recv_length = buflen;
+	rb->recv_srcclock = rp->srcclock;
+	rb->dstadr = 0;
+	rb->fd = fd;
+	rb->recv_time = ts;
+	rb->receiver = rp->clock_recv;
+
+	if (rp->io_input)
+	{
+		/*
+		 * have direct input routine for refclocks
+		 */
+		if (rp->io_input(rb) == 0)
+		{
+			/*
+			 * data was consumed - nothing to pass up
+			 * into block input machine
+			 */
+			freerecvbuf(rb);
+			return (buflen);
+		}
+	}
+	
+	add_full_recv_buffer(rb);
+
+	rp->recvcount++;
+	packets_received++;
+	return (buflen);
+}
+
+/*
+ * Routine to read the network NTP packets for a specific interface
+ * Return the number of bytes read. That way we know if we should
+ * read it again or go on to the next one if no bytes returned
+ */
+static inline int
+read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
+{
+	int fromlen;
+	int buflen;
+	register struct recvbuf *rb;
+
+	/*
+	 * Get a buffer and read the frame.  If we
+	 * haven't got a buffer, or this is received
+	 * on a disallowed socket, just dump the
+	 * packet.
+	 */
+
+	if (free_recvbuffs() == 0 || itf->ignore_packets == ISC_TRUE)
+	{
+		char buf[RX_BUFF_SIZE];
+		struct sockaddr_storage from;
+		fromlen = sizeof from;
+		buflen = recvfrom(fd, buf, sizeof(buf), 0,
+				(struct sockaddr*)&from, &fromlen);
+#ifdef DEBUG
+		if (debug > 3)
+			printf("%s on (%lu) fd=%d from %s\n",
+			(itf->ignore_packets == ISC_TRUE) ? "ignore" : "drop",
+			free_recvbuffs(), fd,
+			stoa(&from));
+#endif
+		if (itf->ignore_packets == ISC_TRUE)
+			packets_ignored++;
+		else
+			packets_dropped++;
+		return (buflen);
+	}
+
+	rb = get_free_recv_buffer();
+
+	fromlen = sizeof(struct sockaddr_storage);
+	rb->recv_length = recvfrom(fd,
+			  (char *)&rb->recv_space,
+			   sizeof(rb->recv_space), 0,
+			   (struct sockaddr *)&rb->recv_srcadr,
+			   &fromlen);
+	if (rb->recv_length == 0|| (rb->recv_length == -1 && 
+	    (errno==EWOULDBLOCK
+#ifdef EAGAIN
+	   || errno==EAGAIN
+#endif
+	 ))) {
+		freerecvbuf(rb);
+		return (rb->recv_length);
+	}
+	else if (rb->recv_length < 0)
+	{
+		netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
+		stoa(&rb->recv_srcadr), fd);
+#ifdef DEBUG
+		if (debug)
+			printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);
+#endif
+		freerecvbuf(rb);
+		return (rb->recv_length);
+	}
+#ifdef DEBUG
+	if (debug > 2) {
+		if(rb->recv_srcadr.ss_family == AF_INET)
+			printf("input_handler: fd=%d length %d from %08lx %s\n",
+				fd, rb->recv_length,
+				(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
+				0x00000000ffffffff,
+				stoa(&rb->recv_srcadr));
+		else
+			printf("input_handler: fd=%d length %d from %s\n",
+				fd, rb->recv_length,
+				stoa(&rb->recv_srcadr));
+	}
+#endif
+
+	/*
+	 * Got one.  Mark how and when it got here,
+	 * put it on the full list and do bookkeeping.
+	 */
+	rb->dstadr = itf;
+	rb->fd = fd;
+	rb->recv_time = ts;
+	rb->receiver = receive;
+
+	add_full_recv_buffer(rb);
+
+	itf->received++;
+	packets_received++;
+	return (rb->recv_length);
+}
+
+
+/*
  * input_handler - receive packets asynchronously
  */
 void
@@ -1953,36 +2124,17 @@ input_handler(
 	)
 {
 
-	/*
-	 * List of fd's to skip the read
-	 * We don't really expect to have this many
-	 * refclocks on a system
-	 */
-#define MAXSKIPS  20
-	int skiplist[MAXSKIPS];
-	int totskips;
-	isc_boolean_t skip;
-	int nonzeroreads;
 	int buflen;
 	register int i, n;
-	register struct recvbuf *rb;
 	register int doing;
 	register SOCKET fd;
 	struct timeval tvzero;
-	int fromlen;
 	l_fp ts;			/* Timestamp at BOselect() gob */
+#ifdef DEBUG
 	l_fp ts_e;			/* Timestamp at EOselect() gob */
+#endif
 	fd_set fds;
 	int select_count = 0;
-
-	/*
-	 * Initialize the skip list
-	 */
-	for (i = 0; i<MAXSKIPS; i++)
-	{
-		skiplist[i] = 0;
-	}
-	totskips = 0;
 
 	handler_calls++;
 
@@ -2004,282 +2156,12 @@ input_handler(
 	 * Check out the reference clocks first, if any
 	 */
 
-	nonzeroreads = 1;
-	while (nonzeroreads > 0)
-	{
-		nonzeroreads = 0;
-		n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
-
-		/*
-		 * If there are no packets waiting just return
-		 */
-		if (n <= 0)
-			return;
-
-		++select_count;
-		++handler_pkts;
-
-		if (refio != 0)
-		{
-			register struct refclockio *rp;
-
-			for (rp = refio; rp != 0; rp = rp->next)
-			{
-				fd = rp->fd;
-				skip = ISC_FALSE;
-				/* Check for skips */
-				for (i = 0; i < totskips; i++)
-				{
-					if (fd == skiplist[i])
-					{
-						skip = ISC_TRUE;
-						break;
-					}
-				}
-				/* fd was on skip list */
-				if (skip == ISC_TRUE)
-					continue;
-
-				if (FD_ISSET(fd, &fds))
-				{
-					n--;
-					if (free_recvbuffs() == 0)
-					{
-						char buf[RX_BUFF_SIZE];
-
-						buflen = read(fd, buf, sizeof buf);
-						packets_dropped++;
-						if (buflen > 0)
-							nonzeroreads++;
-						else if (totskips < MAXSKIPS)
-						{
-							skiplist[totskips] = fd;
-							totskips++;
-						}
-						continue;	/* Keep reading until drained */
-					}
-
-					rb = get_free_recv_buffer();
-
-					i = (rp->datalen == 0
-					    || rp->datalen > sizeof(rb->recv_space))
-					    ? sizeof(rb->recv_space) : rp->datalen;
-					buflen =
-					    read(fd, (char *)&rb->recv_space, (unsigned)i);
-
-					if (buflen < 0)
-					{
-						if (errno != EINTR && errno != EAGAIN) {
-							netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
-						}
-						freerecvbuf(rb);
-						if (totskips < MAXSKIPS)
-						{
-							skiplist[totskips] = fd;
-							totskips++;
-						}
-						continue;
-					}
-					if(buflen > 0)
-						nonzeroreads++;
-					else if (totskips < MAXSKIPS)
-					{
-						skiplist[totskips] = fd;
-						totskips++;
-					}
-					/*
-					 * Got one.  Mark how and when it got here,
-					 * put it on the full list and do
-					 * bookkeeping.
-					 */
-					rb->recv_length = buflen;
-					rb->recv_srcclock = rp->srcclock;
-					rb->dstadr = 0;
-					rb->fd = fd;
-					rb->recv_time = ts;
-					rb->receiver = rp->clock_recv;
-	
-					if (rp->io_input)
-					{
-						/*
-						 * have direct
-						 * input routine
-						 * for refclocks
-						 */
-						if (rp->io_input(rb) == 0)
-						{
-							/*
-							 * data was consumed -
-							 * nothing to pass up
-							 * into block input
-							 * machine
-							 */
-							freerecvbuf(rb);
-							continue;
-						}
-					}
-	
-					add_full_recv_buffer(rb);
-
-					rp->recvcount++;
-					packets_received++;
-				} /* End if (FD_ISSET(fd, &fds)) */
-			} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
-		} /* End if (refio != 0) */
-	} /* End while (nonzeroreads > 0) */
-
-#endif /* REFCLOCK */
+	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
 
 	/*
-	 * Loop through the interfaces looking for data
-	 * to read.
+	 * If there are no packets waiting just return
 	 */
-	for (i = ninterfaces - 1; (i >= 0) ; i--)
-	{
-		for (doing = 0; (doing < 2); doing++)
-		{
-			if (doing == 0)
-			{
-				fd = inter_list[i].fd;
-			}
-			else
-			{
-				if (!(inter_list[i].flags & INT_BCASTOPEN))
-				    break;
-				fd = inter_list[i].bfd;
-			}
-			if (fd < 0) continue;
-			if (FD_ISSET(fd, &fds))
-			{
-				n--;
-
-				/*
-				 * Get a buffer and read the frame.  If we
-				 * haven't got a buffer, or this is received
-				 * on a disallowed socket, just dump the
-				 * packet.
-				 */
-
-				if (free_recvbuffs() == 0 ||
-				    inter_list[i].ignore_packets == ISC_TRUE)
-				{
-					char buf[RX_BUFF_SIZE];
-					struct sockaddr_storage from;
-
-					fromlen = sizeof from;
-					(void) recvfrom(fd, buf, sizeof(buf), 0,
-							(struct sockaddr*)&from, &fromlen);
-#ifdef DEBUG
-					if (debug > 3)
-					    printf("%s on %d(%lu) fd=%d from %s\n",
-					    (inter_list[i].ignore_packets == ISC_TRUE) ? "ignore" : "drop",
-					     i, free_recvbuffs(), fd,
-					     stoa(&from));
-#endif
-					if (inter_list[i].ignore_packets == ISC_TRUE)
-					    packets_ignored++;
-					else
-					    packets_dropped++;
-					continue;
-				}
-
-				rb = get_free_recv_buffer();
-
-				fromlen = sizeof(struct sockaddr_storage);
-				rb->recv_length = recvfrom(fd,
-						  (char *)&rb->recv_space,
-						   sizeof(rb->recv_space), 0,
-						   (struct sockaddr *)&rb->recv_srcadr,
-						   &fromlen);
-				if (rb->recv_length == 0
-				 || (rb->recv_length == -1 && 
-				    (errno==EWOULDBLOCK
-#ifdef EAGAIN
-				  || errno==EAGAIN
-#endif
-				 ))) {
-					freerecvbuf(rb);
-					continue;
-				}
-				else if (rb->recv_length < 0)
-				{
-					netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
- 					stoa(&rb->recv_srcadr), fd);
-#ifdef DEBUG
-					if (debug)
-						printf("input_handler: fd=%d dropped (bad recvfrom)\n", fd);
-#endif
-					freerecvbuf(rb);
-					continue;
-				}
-#ifdef DEBUG
-				if (debug > 2) {
-					if(rb->recv_srcadr.ss_family == AF_INET)
-						printf("input_handler: if=%d fd=%d length %d from %08lx %s\n",
-		   					i, fd, rb->recv_length,
-							(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
-							0x00000000ffffffff,
-							stoa(&rb->recv_srcadr));
-					else
-						printf("input_handler: if=%d fd=%d length %d from %s\n",
-							i, fd, rb->recv_length,
-							stoa(&rb->recv_srcadr));
-				}
-#endif
-
-				/*
-				 * Got one.  Mark how and when it got here,
-				 * put it on the full list and do bookkeeping.
-				 */
-				rb->dstadr = &inter_list[i];
-				rb->fd = fd;
-				rb->recv_time = ts;
-				rb->receiver = receive;
-
-				add_full_recv_buffer(rb);
-
-				inter_list[i].received++;
-				packets_received++;
-				continue;
-			}
-		/* Check more interfaces */
-		}
-	}
-
-	/*
-	 * Done everything from that select.
-	 */
-
-	/*
-	 * If nothing to do, just return.
-	 * If an error occurred, complain and return.
-	 */
-	if (n == 0)
-	{
-		if (select_count == 0) /* We really had nothing to do */
-		{
-#ifdef DEBUG
-			if (debug)
-			    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
-#endif
-			return;
-		}
-		/* We've done our work */
-		get_systime(&ts_e);
-		/*
-		 * (ts_e - ts) is the amount of time we spent
-		 * processing this gob of file descriptors.  Log
-		 * it.
-		 */
-		L_SUB(&ts_e, &ts);
-#ifdef DEBUG
-		if (debug > 3)
-		    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
-#endif
-		/* just bail. */
-		return;
-	}
-	else if (n == -1)
+	if (n < 0)
 	{
 		int err = errno;
 		/*
@@ -2299,6 +2181,91 @@ input_handler(
 		}
 		return;
 	}
+	else if (n == 0)
+		return;
+
+	++handler_pkts;
+
+	if (refio != 0)
+	{
+		register struct refclockio *rp;
+
+		for (rp = refio; rp != 0; rp = rp->next)
+		{
+			fd = rp->fd;
+
+			if (FD_ISSET(fd, &fds))
+			{
+				do {
+					++select_count;
+					buflen = read_refclock_packet(fd, rp, ts);
+				} while (buflen > 0);
+
+			} /* End if (FD_ISSET(fd, &fds)) */
+		} /* End for (rp = refio; rp != 0 && n > 0; rp = rp->next) */
+	} /* End if (refio != 0) */
+
+#endif /* REFCLOCK */
+
+	/*
+	 * Loop through the interfaces looking for data to read.
+	 */
+	for (i = ninterfaces - 1; (i >= 0) ; i--)
+	{
+		for (doing = 0; (doing < 2); doing++)
+		{
+			if (doing == 0)
+			{
+				fd = inter_list[i].fd;
+			}
+			else
+			{
+				if (!(inter_list[i].flags & INT_BCASTOPEN))
+				    break;
+				fd = inter_list[i].bfd;
+			}
+			if (fd < 0) continue;
+			if (FD_ISSET(fd, &fds))
+			{
+				do {
+					++select_count;
+					buflen = read_network_packet(fd, &inter_list[i], ts);
+				} while (buflen > 0);
+
+			}
+		/* Check more interfaces */
+		}
+	}
+
+	/*
+	 * Done everything from that select.
+	 */
+
+	/*
+	 * If nothing to do, just return.
+	 * If an error occurred, complain and return.
+	 */
+	if (select_count == 0) /* We really had nothing to do */
+	{
+#ifdef DEBUG
+		if (debug)
+		    netsyslog(LOG_DEBUG, "input_handler: select() returned 0");
+#endif
+		return;
+	}
+		/* We've done our work */
+#ifdef DEBUG
+	get_systime(&ts_e);
+	/*
+	 * (ts_e - ts) is the amount of time we spent
+	 * processing this gob of file descriptors.  Log
+	 * it.
+	 */
+	L_SUB(&ts_e, &ts);
+	if (debug > 3)
+	    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
+#endif
+	/* just bail. */
 	return;
 }
 
