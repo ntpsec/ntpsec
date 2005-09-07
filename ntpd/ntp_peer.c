@@ -528,13 +528,22 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			peer->dstadr->peercnt--;
 			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
 		}
-		peer->dstadr = interface;
 
-		/*
-		 * reset crypto information - session keys are
-		 * address dependent
-		 */
-		peer_crypto_clear(peer);
+		if (interface == NULL)
+		{
+			/*
+			 * reset crypto information if we disconnect from
+			 * an interface - other crypto updates are handled
+			 * by the crypto machinery
+			 */
+			peer_crypto_clear(peer);
+		}
+
+		DPRINTF(1, ("set_peerdstadr: at %ld next %ld assoc ID %d\n",
+			    current_time, peer->nextdate, peer->associd));
+
+
+		peer->dstadr = interface;
 
 		if (peer->dstadr != NULL)
 		{

@@ -1451,6 +1451,9 @@ peer_crypto_clear(
 	 * purged, too. This makes it much harder to sneak in some
 	 * unauthenticated data in the clock filter.
 	 */
+	DPRINTF(1, ("peer_crypto_clear: at %ld next %ld assoc ID %d\n",
+		    current_time, peer->nextdate, peer->associd));
+
 #ifdef OPENSSL
 	peer->assoc = 0;
 	peer->crypto = 0;
@@ -1557,11 +1560,9 @@ peer_clear(
 	else
 		peer->nextdate = current_time + (ntp_random() & ((1 <<
 		    NTP_MINPOLL) - 1));
-#ifdef DEBUG
-	if (debug)
-		printf("peer_clear: at %ld next %ld assoc ID %d refid %s\n",
-		    current_time, peer->nextdate, peer->associd, ident);
-#endif
+
+	DPRINTF(1, ("peer_clear: at %ld next %ld assoc ID %d refid %s\n",
+		    current_time, peer->nextdate, peer->associd, ident));
 }
 
 

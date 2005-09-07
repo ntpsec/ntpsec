@@ -2763,7 +2763,6 @@ findlocalinterface(
 	}
 #endif
 	
-	((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
 	if (s == INVALID_SOCKET)
 		return NULL;
