@@ -1,7 +1,7 @@
 
 /*
- *  $Id: load.c,v 4.15 2005/07/27 19:59:19 bkorb Exp $
- *  Time-stamp:      "2005-07-26 10:39:46 bkorb"
+ *  $Id: load.c,v 4.7 2005/02/13 01:48:00 bkorb Exp $
+ *  Time-stamp:      "2005-07-31 08:41:52 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -83,7 +83,9 @@ assembleArgValue( char* pzTxt, tOptionLoadMode mode );
  * ret-type: ag_bool
  * ret-desc: AG_TRUE if the name was handled, otherwise AG_FALSE.
  *           If the name does not start with ``$'', then it is handled
- *           simply by copying the input name to the output buffer.
+ *           simply by copying the input name to the output buffer and
+ *           resolving the name with either @code{canonicalize_file_name(3GLIBC)}
+ *           or @code{realpath(3C)}.
  *
  * doc:
  *
@@ -104,13 +106,15 @@ assembleArgValue( char* pzTxt, tOptionLoadMode mode );
  *
  * err:  @code{AG_FALSE} is returned if:
  *       @*
- *       @bullet{} @code{$$} is not the full string and
- *                 the next character is not '/'.
+ *       @bullet{} The input name exceeds @code{bufSize} bytes.
  *       @*
- *       @bullet{} @code{$NAME} is not the full string and
+ *       @bullet{} @code{$$} or @code{$NAME} is not the full string and
  *                 the next character is not '/'.
  *       @*
  *       @bullet{} @code{NAME} is not a known environment variable
+ *       @*
+ *       @bullet{} @code{canonicalize_file_name} or @code{realpath} return
+ *                 errors (cannot resolve the resulting path).
 =*/
 ag_bool
 optionMakePath(
@@ -128,14 +132,14 @@ optionMakePath(
      *  IF not an environment variable, just copy the data
      */
     if (*pzName != '$') {
-        char* pzS = pzName;
+        tCC*  pzS = pzName;
         char* pzD = pzBuf;
         int   ct  = bufSize;
 
         for (;;) {
             if ( (*(pzD++) = *(pzS++)) == NUL)
                 break;
-            if (--ct == 0)
+            if (--ct <= 0)
                 return AG_FALSE;
         }
     }
@@ -154,14 +158,14 @@ optionMakePath(
         return AG_FALSE;
 
 #if defined(HAVE_CANONICALIZE_FILE_NAME)
-    do {
+    {
         char* pz = canonicalize_file_name(pzBuf);
         if (pz == NULL)
             return AG_FALSE;
         if (strlen(pz) < bufSize)
             strcpy(pzBuf, pz);
         free(pz);
-    } while (0);
+    }
 
 #elif defined(HAVE_REALPATH)
     {

@@ -1,8 +1,8 @@
 
 /*
- *  Time-stamp:      "2005-07-27 10:11:09 bkorb"
+ *  Time-stamp:      "2005-07-25 12:05:56 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.12 2005/07/27 17:26:32 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.7 2005/02/13 01:48:00 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -55,9 +55,7 @@
 #ifndef AUTOGEN_AUTOOPTS_H
 #define AUTOGEN_AUTOOPTS_H
 
-#ifndef   __EXTENSIONS__
-#  define __EXTENSIONS__
-#endif
+#define __EXTENSIONS__
 
 #include "config.h"
 #include "compat/compat.h"

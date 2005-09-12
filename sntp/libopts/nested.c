@@ -1,6 +1,6 @@
 
 /*
- *  $Id: nested.c,v 4.3 2005/07/27 17:26:32 bkorb Exp $
+ *  $Id: nested.c,v 4.8 2005/09/04 21:13:39 bkorb Exp $
  *  Time-stamp:      "2005-07-27 10:10:28 bkorb"
  *
  *   Automated Options Nested Values module.

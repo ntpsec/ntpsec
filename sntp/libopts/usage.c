@@ -1,6 +1,6 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.8 2005/06/07 22:26:44 bkorb Exp $
+ *  usage.c  $Id: usage.c,v 4.4 2005/01/23 23:33:06 bkorb Exp $
  * Time-stamp:      "2005-02-20 13:47:52 bkorb"
  *
  *  This module implements the default usage procedure for

@@ -35,6 +35,7 @@ prog-name      = "ntpd";
 prog-title     = "NTP daemon program";
 homerc         =  $HOME, ".";
 long-opts;
+config-header  = "config.h";
 
 #include ntpdbase-opts.def
 

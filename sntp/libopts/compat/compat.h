@@ -2,12 +2,12 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2005-06-26 08:18:00 bkorb"
+ *  Time-stamp:      "2005-08-28 13:47:02 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.4 2005/06/26 16:26:45 bkorb Exp $
+ * $Id: compat.h,v 4.1 2005/01/01 00:20:58 bkorb Exp $
  */
 #ifndef COMPAT_H
 #define COMPAT_H 1
@@ -185,17 +185,58 @@
 #  define MAXPATHLEN 4096
 #endif /* MAXPATHLEN */
 
-# ifndef LONG_MAX
-#   define LONG_MAX     ~(1L << (8*sizeof(long) -1))
-#   define INT_MAX      ~(1 << (8*sizeof(int) -1))
-#   define SHORT_MAX    ~(1 << (8*sizeof(short) -1))
-# endif
+#ifndef LONG_MAX
+#  define LONG_MAX      ~(1L << (8*sizeof(long) -1))
+#  define INT_MAX       ~(1 << (8*sizeof(int) -1))
+#endif
 
-# ifndef ULONG_MAX
-#   define ULONG_MAX    ~(OUL)
-#   define UINT_MAX     ~(OU)
-#   define USHORT_MAX   ~(OUS)
+#ifndef ULONG_MAX
+#  define ULONG_MAX     ~(0UL)
+#  define UINT_MAX      ~(0U)
+#endif
+
+#ifndef SHORT_MAX
+#  define SHORT_MAX     ~(1 << (8*sizeof(short) -1))
+#  define USHORT_MAX    ((1<<(8*sizeof(short)))-1)
+#endif
+
+#ifndef HAVE_INT8_T
+  typedef signed char   int8_t;
+#endif
+#ifndef HAVE_UINT8_T
+  typedef unsigned char uint8_t;
+#endif
+#ifndef HAVE_INT16_T
+  typedef signed short  int16_t;
+#endif
+#ifndef HAVE_UINT16_T
+  typedef unsigned short uint16_t;
+#endif
+
+#ifndef HAVE_INT32_T
+# if SIZEOF_INT == 4
+	typedef signed int  int32_t;
+# elif SIZEOF_LONG == 4
+	typedef signed int  int32_t;
 # endif
+#endif
+
+#ifndef HAVE_UINT32_T
+# if SIZEOF_UINT == 4
+	typedef unsigned int uint32_t;
+# elif SIZEOF_LONG == 4
+	typedef unsigned int uint32_t;
+# else
+#   error Cannot create a uint32_t type.
+# endif
+#endif
+
+#ifndef HAVE_INTPTR_T
+  typedef signed long   intptr_t;
+#endif
+#ifndef HAVE_UINTPTR_T
+  typedef unsigned long uintptr_t;
+#endif
 
 /* redefine these for BSD style string libraries */
 #ifndef HAVE_STRCHR

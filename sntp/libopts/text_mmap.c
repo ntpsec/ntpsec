@@ -1,5 +1,5 @@
 /*
- * $Id: text_mmap.c,v 4.5 2005/04/16 17:07:29 bkorb Exp $
+ * $Id:$
  *
  * Time-stamp:      "2005-02-24 11:56:43 bkorb"
  */

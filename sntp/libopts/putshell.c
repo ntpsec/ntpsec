@@ -1,6 +1,6 @@
 
 /*
- *  $Id: putshell.c,v 4.6 2005/06/07 22:26:44 bkorb Exp $
+ *  $Id: putshell.c,v 4.2 2005/01/09 00:25:06 bkorb Exp $
  * Time-stamp:      "2005-02-14 14:55:01 bkorb"
  *
  *  This module will interpret the options set in the tOptions

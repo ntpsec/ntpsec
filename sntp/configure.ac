@@ -3,6 +3,7 @@ AC_INIT(main.c)
 AM_INIT_AUTOMAKE([msntp],[1.6])
 AC_CONFIG_SRCDIR([header.h])
 AC_CANONICAL_HOST
+AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 AC_PROG_CC
@@ -60,8 +61,8 @@ esac
 
 case "$ac_cv_have_ss_family_in_struct_ss$ac_cv_have___ss_family_in_struct_ss" in
  noyes)
-    AC_DEFINE_UNQUOTED(ss_family, __ss_family, [])
-    AC_DEFINE_UNQUOTED(ss_len, __ss_len, [])
+    AC_DEFINE_UNQUOTED(ss_family, __ss_family, [Do we have ss_family?])
+    AC_DEFINE_UNQUOTED(ss_len, __ss_len, [Do we have ss_len?])
     ;;
 esac
 

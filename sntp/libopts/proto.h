@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Thu Jul 28 16:19:17 PDT 2005
+ * Generated Sun Sep  4 14:14:55 PDT 2005
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD
@@ -46,12 +46,6 @@ LOCAL tSuccess
 validateOptionsStruct( tOptions* pOpts, const char* pzProgram );
 
 /*
- *  Extracted from cook.c
- */
-/*
- *  Extracted from enumeration.c
- */
-/*
  *  Extracted from environment.c
  */
 LOCAL void
@@ -75,18 +69,6 @@ loadOptionLine(
     tOptionLoadMode   load_mode );
 
 /*
- *  Extracted from makeshell.c
- */
-/*
- *  Extracted from nested.c
- */
-/*
- *  Extracted from putshell.c
- */
-/*
- *  Extracted from save.c
- */
-/*
  *  Extracted from sort.c
  */
 LOCAL void
@@ -107,15 +89,6 @@ text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI );
 LOCAL int
 text_munmap( tmap_info_t* pMI );
 
-/*
- *  Extracted from tokenize.c
- */
-/*
- *  Extracted from usage.c
- */
-/*
- *  Extracted from version.c
- */
 #ifdef REDEF_LOCAL
 #  undef LOCAL
 #  define LOCAL
