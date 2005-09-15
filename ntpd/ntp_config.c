@@ -2102,6 +2102,24 @@ gettokens (
 		}
 	}
 
+     /* Heiko: Remove leading and trailing quotes around tokens */
+     {
+            int i,j = 0;
+	    
+		
+			for (i = 0; i < ntok; i++) {	    
+					/* Now check if the first char is a quote and remove that */
+					if ( tokenlist[ntok][0] == '"' )
+							tokenlist[ntok]++;
+
+					/* Now check the last char ... */
+					j = strlen(tokenlist[ntok])-1;
+					if ( tokenlist[ntok][j] == '"' )
+							tokenlist[ntok][j] = '\0';
+			}
+							
+    }
+
 	if (ntok == MAXTOKENS) {
 		--ntok;
 		/* HMS: chomp it to lose the EOL? */
