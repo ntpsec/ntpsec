@@ -119,11 +119,12 @@ static struct ctl_var sys_var[] = {
 	{ CS_PUBLIC,	RO, "hostkey" },	/* 23 */
 	{ CS_CERTIF,	RO, "cert" },		/* 24 */
 	{ CS_REVTIME,	RO, "refresh" },	/* 25 */
-	{ CS_LEAPTAB,	RO, "leapseconds" },	/* 26 */
+	{ CS_LEAPTAB,	RO, "leapsec" },	/* 26 */
 	{ CS_TAI,	RO, "tai" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
+	{ CS_IDENT,	RO, "ident" },		/* 29 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 29 */
+	{ 0,		EOV, "" }		/* 21/30 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -158,7 +159,9 @@ static	u_char def_sys_var[] = {
 	CS_FLAGS,
 	CS_PUBLIC,
 	CS_REVTIME,
+	CS_IDENT,
 	CS_LEAPTAB,
+	CS_TAI,
 	CS_CERTIF,
 #endif /* OPENSSL */
 	0
@@ -1390,12 +1393,26 @@ ctl_putsys(
 			    ntohl(hostval.tstamp));
 		break;
 
+	case CS_IDENT:
+		if (iffpar_pkey != NULL)
+			ctl_putstr(sys_var[CS_IDENT].text,
+			    iffpar_file, strlen(iffpar_file));
+		if (gqpar_pkey != NULL)
+			ctl_putstr(sys_var[CS_IDENT].text,
+			    gqpar_file, strlen(gqpar_file));
+		if (mvpar_pkey != NULL)
+			ctl_putstr(sys_var[CS_IDENT].text,
+			    mvpar_file, strlen(mvpar_file));
+		break;
+
 	case CS_LEAPTAB:
 		if (tai_leap.fstamp != 0)
 			ctl_putuint(sys_var[CS_LEAPTAB].text,
 			    ntohl(tai_leap.fstamp));
-		if (sys_tai != 0)
-			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
+		break;
+
+	case CS_TAI:
+		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
 #endif /* OPENSSL */
 	}

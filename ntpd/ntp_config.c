@@ -259,6 +259,7 @@ static struct keyword crypto_keywords[] = {
 	{ "cert",		CONF_CRYPTO_CERT },
 	{ "gqpar",		CONF_CRYPTO_GQPAR },
 	{ "host",		CONF_CRYPTO_RSA },
+	{ "ident",		CONF_CRYPTO_IDENT },
 	{ "iffpar",		CONF_CRYPTO_IFFPAR },
 	{ "leap",		CONF_CRYPTO_LEAP },
 	{ "mvpar",		CONF_CRYPTO_MVPAR },
@@ -1203,6 +1204,11 @@ getconfig(
 
 			    case CONF_CRYPTO_RSA:
 				crypto_config(CRYPTO_CONF_PRIV,
+				    tokens[i]);
+				break;
+
+			    case CONF_CRYPTO_IDENT:
+				crypto_config(CRYPTO_CONF_IDENT,
 				    tokens[i]);
 				break;
 

@@ -61,7 +61,6 @@ int	sys_calldelay;		/* modem callup delay (s) */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
-static	u_char leap_consensus;	/* consensus of survivor leap bits */
 static	double sys_mindisp = MINDISPERSE; /* min disp increment (s) */
 static	double sys_maxdist = MAXDISTANCE; /* selection threshold (s) */
 double	sys_jitter;		/* system jitter (s) */
@@ -853,11 +852,9 @@ receive(
 		}
 
 		/*
-		 * Do not respond if unsynchronized or stratum is below
-		 * the floor or at or above the ceiling.
+		 * Do not respond if stratum is below the floor.
 		 */
-		if (hisleap == LEAP_NOTINSYNC || hisstratum <
-		    sys_floor || hisstratum >= sys_ceiling)
+		if (hisstratum < sys_floor)
 			return;			/* bad stratum */
 
 		if ((peer = newpeer(&rbufp->recv_srcadr,
@@ -1308,7 +1305,6 @@ clock_update(void)
 			dtemp = sys_mindisp;
 #endif /* REFCLOCK */
 		sys_rootdispersion = sys_peer->rootdispersion + dtemp;
-		sys_leap = leap_consensus;
 		if (oleap == LEAP_NOTINSYNC) {
 			report_event(EVNT_SYNCCHG, NULL);
 #ifdef OPENSSL
@@ -2092,11 +2088,11 @@ clock_select(void)
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
 	 */
-	leap_consensus = 0;
+	sys_leap = LEAP_NOWARNING;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		sys_survivors++;
-		leap_consensus |= peer->leap;
+		sys_leap |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;

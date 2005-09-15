@@ -31,9 +31,10 @@
 /*
  * Flags used for certificate management
  */
-#define CERT_SIGN       0x01	/* certificate is signed */
-#define CERT_TRUST      0x02	/* certificate is trusted */
-#define CERT_PRIV	0x04	/* certificate is private */
+#define	CERT_TRUST	0x01	/* certificate is trusted */
+#define CERT_SIGN	0x02	/* certificate is signed */
+#define CERT_VALID	0x04	/* certificate is valid */
+#define CERT_PRIV	0x08	/* certificate is private */
 #define CERT_ERROR	0x80	/* certificate has errors */
 
 /*
@@ -91,6 +92,7 @@
 #define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
 #define	CRYPTO_CONF_MVPAR 10	/* GQ parameters file name */
 #define CRYPTO_CONF_PW	  11	/* private key password */
+#define	CRYPTO_CONF_IDENT 12	/* specify identity scheme */
 
 /*
  * Miscellaneous crypto stuff
@@ -99,6 +101,7 @@
 #define NTP_AUTOMAX	13	/* log2 default max session key life */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define	TAI_1972	10	/* initial TAI offset (s) */
 
 /*
  * The autokey structure holds the values used to authenticate key IDs.
@@ -163,5 +166,4 @@ extern	u_int	crypto_flags;	/* status word */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
-extern	u_int	sys_tai;	/* current UTC offset from TAI */
 #endif /* OPENSSL */

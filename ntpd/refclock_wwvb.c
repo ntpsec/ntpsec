@@ -43,7 +43,7 @@
  *
  * Format 0 (22 ASCII printing characters):
  *
- * <cr><lf>i  ddd hh:mm:ss  TZ=zz<cr><lf>
+ * <cr><lf>i  ddd hh:mm:ss TZ=zz<cr><lf>
  *
  *	on-time = first <cr>
  *	hh:mm:ss = hours, minutes, seconds

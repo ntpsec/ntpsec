@@ -173,7 +173,8 @@ struct ntp_control {
 #define	CS_REVTIME	25
 #define CS_LEAPTAB	26
 #define CS_TAI		27
-#define CS_DIGEST	28
+#define	CS_DIGEST	28
+#define CS_IDENT	29
 #define	CS_MAXCODE	CS_DIGEST
 #else
 #define	CS_MAXCODE	CS_VARLIST

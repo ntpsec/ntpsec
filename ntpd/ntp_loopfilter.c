@@ -122,7 +122,7 @@ double	drift_comp;		/* frequency (s/s) */
 double	clock_stability;	/* frequency stability (s/s) */
 u_long	sys_clocktime;		/* last system clock update */
 u_long	pps_control;		/* last pps update */
-
+u_long	sys_tai;		/* TAI offset from UTC (s) */
 static void rstclock P((int, u_long, double)); /* transition function */
 
 #ifdef KERNEL_PLL
@@ -200,16 +200,22 @@ init_loopfilter(void)
  */
 int
 local_clock(
-	struct peer *peer,	/* synch source peer structure */
-	double fp_offset	/* clock offset (s) */
+	struct	peer *peer,	/* synch source peer structure */
+	double	fp_offset	/* clock offset (s) */
 	)
 {
 	int	rval;		/* return code */
-	u_long mu;		/* interval since last update (s) */
-	double flladj;		/* FLL frequency adjustment (ppm) */
-	double plladj;		/* PLL frequency adjustment (ppm) */
-	double clock_frequency;	/* clock frequency adjustment (ppm) */
-	double dtemp, etemp;	/* double temps */
+	u_long	mu;		/* interval since last update (s) */
+	double	flladj;		/* FLL frequency adjustment (ppm) */
+	double	plladj;		/* PLL frequency adjustment (ppm) */
+	double	clock_frequency; /* clock frequency adjustment (ppm) */
+	double	dtemp, etemp;	/* double temps */
+#ifdef OPENSSL
+	u_int32 *tpt;
+	int	i;
+	u_int	len;
+	long	togo;
+#endif /* OPENSSL */
 
 	/*
 	 * If the loop is opened, monitor and record the offsets
@@ -391,6 +397,7 @@ local_clock(
 			    fp_offset);
 			reinit_timer();
 			tc_counter = 0;
+			sys_tai = 0;
 			rval = 2;
 			if (state == S_NSET) {
 				rstclock(S_FREQ, peer->epoch, 0);
@@ -472,6 +479,32 @@ local_clock(
 		rstclock(S_SYNC, peer->epoch, fp_offset);
 	}
 
+#ifdef OPENSSL
+	/*
+	 * Scan the loopsecond table to determine the TAI offset. If
+	 * there is a scheduled leap in future, set the leap warning.
+	 */
+	tpt = (u_int32 *)tai_leap.ptr;
+	len = ntohl(tai_leap.vallen) / sizeof(u_int32);
+	if (tpt != NULL) {
+		for (i = 0; i < len; i++) {
+			togo = ntohl(tpt[i]) - peer->rec.l_ui;
+			if (togo > 0) {
+				sys_leap |= LEAP_ADDSECOND;
+				break;
+			}
+#ifdef STA_NANO
+			if (pll_control && kern_enable) {
+				memset(&ntv, 0, sizeof(ntv));
+				ntv.modes = MOD_BITS | MOD_TAI;
+				ntv.constant = i + TAI_1972 - 1;
+				ntp_adjtime(&ntv);
+			}
+#endif /* STA_NANO */
+		}
+		sys_tai = i + TAI_1972 - 1;
+	}
+#endif /* OPENSSL */
 #ifdef KERNEL_PLL
 	/*
 	 * This code segment works when clock adjustments are made using
