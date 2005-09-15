@@ -259,6 +259,7 @@ static struct keyword crypto_keywords[] = {
 	{ "cert",		CONF_CRYPTO_CERT },
 	{ "gqpar",		CONF_CRYPTO_GQPAR },
 	{ "host",		CONF_CRYPTO_RSA },
+	{ "ident",		CONF_CRYPTO_IDENT },
 	{ "iffpar",		CONF_CRYPTO_IFFPAR },
 	{ "leap",		CONF_CRYPTO_LEAP },
 	{ "mvpar",		CONF_CRYPTO_MVPAR },
@@ -1204,6 +1205,11 @@ getconfig(
 				    tokens[i]);
 				break;
 
+			    case CONF_CRYPTO_IDENT:
+				crypto_config(CRYPTO_CONF_IDENT,
+				    tokens[i]);
+				break;
+
 			    case CONF_CRYPTO_IFFPAR:
 				crypto_config(CRYPTO_CONF_IFFPAR,
 				    tokens[i]);
@@ -2093,6 +2099,24 @@ gettokens (
 				break;
 		}
 	}
+
+     /* Heiko: Remove leading and trailing quotes around tokens */
+     {
+            int i,j = 0;
+	    
+		
+			for (i = 0; i < ntok; i++) {	    
+					/* Now check if the first char is a quote and remove that */
+					if ( tokenlist[ntok][0] == '"' )
+							tokenlist[ntok]++;
+
+					/* Now check the last char ... */
+					j = strlen(tokenlist[ntok])-1;
+					if ( tokenlist[ntok][j] == '"' )
+							tokenlist[ntok][j] = '\0';
+			}
+							
+    }
 
 	if (ntok == MAXTOKENS) {
 		--ntok;

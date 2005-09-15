@@ -108,6 +108,7 @@ extern	void	adj_host_clock	P((void));
 extern	void	loop_config P((int, double));
 extern	void	huffpuff	P((void));
 extern	u_long	sys_clocktime;
+extern	u_long	sys_tai;
 
 /* ntp_monitor.c */
 extern	void	init_mon	P((void));
@@ -147,6 +148,13 @@ extern	u_int	crypto_ident	P((struct peer *));
 extern	struct exten *crypto_args P((struct peer *, u_int, char *));
 extern	int	crypto_public	P((struct peer *, u_char *, u_int));
 extern	void	value_free	P((struct value *));
+extern	char	*iffpar_file;
+extern	EVP_PKEY *iffpar_pkey;
+extern	char	*gqpar_file;
+extern	EVP_PKEY *gqpar_pkey;
+extern	char	*mvpar_file;
+extern	EVP_PKEY *mvpar_pkey;
+extern struct value tai_leap;
 #endif /* OPENSSL */
 
 /* ntp_proto.c */

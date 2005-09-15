@@ -2,42 +2,43 @@
 
 <html>
 
-    <head>
-        <meta name="generator" content="HTML Tidy, see www.w3.org">
-        <title>NTP PARSE clock data formats</title>
-        <link href="scripts/style.css" type="text/css" rel="stylesheet">
-    </head>
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="HTML Tidy, see www.w3.org">
+		<title>NTP PARSE clock data formats</title>
+		<link href="scripts/style.css" type="text/css" rel="stylesheet">
+	</head>
 
-    <body>
-        <h3>NTP PARSE clock data formats</h3>
-        <p>The parse driver currently supports several clocks with different query mechanisms. In order for you to find a sample that might be similar to a clock you might want to integrate into parse i'll sum up the major features of the clocks (this information is distributed in the parse/clk_*.c and ntpd/refclock_parse.c files).</p>
-        <hr>
-        <h4>Meinberg clocks</h4>
-        <pre>
+	<body>
+		<h3>NTP PARSE clock data formats</h3>
+		<p>The parse driver currently supports several clocks with different query mechanisms. In order for you to find a sample that might be similar to a clock you might want to integrate into parse i'll sum up the major features of the clocks (this information is distributed in the parse/clk_*.c and ntpd/refclock_parse.c files).</p>
+		<hr>
+		<h4>Meinberg clocks</h4>
+		<pre>
 Meinberg: start=&lt;STX&gt;, end=&lt;ETX&gt;, sync on start
       pattern=&quot;\2D:  .  .  ;T: ;U:  .  .  ;    \3&quot;
       pattern=&quot;\2  .  .  ;  ;   :  :  ;        \3&quot;
       pattern=&quot;\2  .  .  ;  ;   :  :  ;    :  ;        ;   .         .       &quot;
 </pre>
-        <p>Meinberg is a German manufacturer of time code receivers. Those clocks have a pretty common output format in the stock version. In order to support NTP Meinberg was so kind to produce some special versions of the firmware for the use with NTP. So, if you are going to use a Meinberg clock please ask whether there is a special Uni Erlangen version. You can reach <a href="http://www.meinberg.de/">Meinberg</a> via the Web. Information can also be ordered via eMail from <a href="mailto:%20info@meinberg.de">info@meinberg.de</a></p>
-        <p>General characteristics:<br>
-            Meinberg clocks primarily output pulse per second and a describing ASCII string. This string can be produced in two modes. either upon the reception of a question mark or every second. NTP uses the latter mechanism. The DCF77 variants have a pretty good relationship between RS232 time code and the PPS signal while the GPS receiver has no fixed timeing between the datagram and the pulse (you need to use PPS with GPS!) on DCF77 you might get away without the PPS signal.</p>
-        <p>The preferred tty setting for Meinberg is:</p>
-        <pre>
+		<p>Meinberg is a German manufacturer of time code receivers. Those clocks have a pretty common output format in the stock version. In order to support NTP Meinberg was so kind to produce some special versions of the firmware for the use with NTP. So, if you are going to use a Meinberg clock please ask whether there is a special Uni Erlangen version. You can reach <a href="http://www.meinberg.de/">Meinberg</a> via the Web. Information can also be ordered via eMail from <a href="mailto:%20info@meinberg.de">info@meinberg.de</a></p>
+		<p>General characteristics:<br>
+			Meinberg clocks primarily output pulse per second and a describing ASCII string. This string can be produced in two modes. either upon the reception of a question mark or every second. NTP uses the latter mechanism. The DCF77 variants have a pretty good relationship between RS232 time code and the PPS signal while the GPS receiver has no fixed timeing between the datagram and the pulse (you need to use PPS with GPS!) on DCF77 you might get away without the PPS signal.</p>
+		<p>The preferred tty setting for Meinberg is:</p>
+		<pre>
 		CFLAG		(B9600|CS7|PARENB|CREAD|HUPCL)
 		IFLAG		(IGNBRK|IGNPAR|ISTRIP)
 		OFLAG		0
 		LFLAG		0
         </pre>
-        <p>The tty setting for Meinberg GPS 166/167 receivers is:</p>
-        <pre>
+		<p>The tty setting for Meinberg GPS 166/167 receivers is:</p>
+		<pre>
 		CFLAG		(B19200|CS8|PARENB|CREAD|HUPCL)
 		IFLAG		(IGNBRK|IGNPAR|ISTRIP)
 		OFLAG		0
 		LFLAG		0
         </pre>
-        <p>The clock is run at datagram once per second. Stock dataformat is:</p>
-        <pre>
+		<p>The clock is run at datagram once per second. Stock dataformat is:</p>
+		<pre>
     &lt;STX&gt;D:&lt;dd&gt;.&lt;mm&gt;.&lt;yy&gt;;T:&lt;w&gt;;U:&lt;hh&gt;:&lt;mm&gt;:&lt;ss&gt;;&lt;S&gt;&lt;F&gt;&lt;D&gt;&lt;A&gt;&lt;ETX&gt;
 pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
       1  23 45 6 78 9 01 234 5 678 90 1 23 4 56 7 8  9  0  1   2
@@ -56,7 +57,7 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
                       start/end change
 &lt;A&gt;             = 'A' if a leap second is announced
 </pre>
-        <pre>
+		<pre>
         &lt;STX&gt;&lt;dd&gt;.&lt;mm&gt;.&lt;yy&gt;; &lt;w&gt;; &lt;hh&gt;:&lt;mm&gt;:&lt;ss&gt;; &lt;U&gt;&lt;S&gt;&lt;F&gt;&lt;D&gt;&lt;A&gt;&lt;L&gt;&lt;R&gt;&lt;ETX&gt;
     pos:  0   00 0 00 0 00 11 1 11 11 1 11 2 22 22 2  2  2  2  2  3  3   3
           1   23 4 56 7 89 01 2 34 56 7 89 0 12 34 5  6  7  8  9  0  1   2
@@ -75,9 +76,9 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
     &lt;L&gt;             = 'A' LEAP second announcement
     &lt;R&gt;             = 'R' alternate antenna
 </pre>
-        <p>Meinberg GPS166 receiver<br>
-            You must get the Uni-Erlangen firmware for the GPS receiver support to work to full satisfaction !</p>
-        <pre>
+		<p>Meinberg GPS166 receiver<br>
+			You must get the Uni-Erlangen firmware for the GPS receiver support to work to full satisfaction !</p>
+		<pre>
         &lt;STX&gt;&lt;dd&gt;.&lt;mm&gt;.&lt;yy&gt;; &lt;w&gt;; &lt;hh&gt;:&lt;mm&gt;:&lt;ss&gt;; &lt;+/-&gt;&lt;00:00&gt;; &lt;U&gt;&lt;S&gt;&lt;F&gt;&lt;D&gt;&lt;A&gt;&lt;L&gt;&lt;R&gt;&lt;L&gt;; &lt;position...&gt;&lt;ETX&gt;
  *
            000000000111111111122222222223333333333444444444455555555556666666
@@ -102,23 +103,23 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
     &lt;R&gt;             = 'R' alternate antenna (reminiscent of PZF535) usually ' '
     &lt;L&gt;		   = 'L' on 23:59:60
 </pre>
-        <p>For the Meinberg parse look into clock_meinberg.c</p>
-        <h4>Raw DCF77 Data via serial line</h4>
-        <p>RAWDCF: end=TIMEOUT&gt;1.5s, sync each char (any char),generate psuedo time codes, fixed format</p>
-        <p>direct DCF77 code input</p>
-        <p>In Europe it is relatively easy/cheap the receive the german time code transmitter DCF77. The simplest version to process its signal is to feed the 100/200ms pulse of the demodulated AM signal via a level converter to an RS232 port at 50Baud. parse/clk_rawdcf.c holds all necessary decoding logic for the time code which is transmitted each minute for one minute. A bit of the time code is sent once a second.</p>
-        <pre>
+		<p>For the Meinberg parse look into clock_meinberg.c</p>
+		<h4>Raw DCF77 Data via serial line</h4>
+		<p>RAWDCF: end=TIMEOUT&gt;1.5s, sync each char (any char),generate psuedo time codes, fixed format</p>
+		<p>direct DCF77 code input</p>
+		<p>In Europe it is relatively easy/cheap the receive the german time code transmitter DCF77. The simplest version to process its signal is to feed the 100/200ms pulse of the demodulated AM signal via a level converter to an RS232 port at 50Baud. parse/clk_rawdcf.c holds all necessary decoding logic for the time code which is transmitted each minute for one minute. A bit of the time code is sent once a second.</p>
+		<pre>
 	The preferred tty setting is:
 		CFLAG           (B50|CS8|CREAD|CLOCAL)
 		IFLAG		0
 		OFLAG		0
  		LFLAG		0
 </pre>
-        <h4>DCF77 raw time code</h4>
-        <p>From &quot;Zur Zeit&quot;, Physikalisch-Technische Bundesanstalt (PTB), Braunschweig und Berlin, M&#132;rz 1989<br>
-        </p>
-        <p>Timecode transmission:</p>
-        <pre>
+		<h4>DCF77 raw time code</h4>
+		<p>From &quot;Zur Zeit&quot;, Physikalisch-Technische Bundesanstalt (PTB), Braunschweig und Berlin, M&#132;rz 1989<br>
+		</p>
+		<p>Timecode transmission:</p>
+		<pre>
 	AM:
 
 	time marks are send every second except for the second before the
@@ -129,8 +130,8 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 	time marks of a 100ms duration constitute a logical 0
 	time marks of a 200ms duration constitute a logical 1
 </pre>
-        <p>see the spec. (basically a (non-)inverted psuedo random phase shift) encoding:</p>
-        <pre>
+		<p>see the spec. (basically a (non-)inverted psuedo random phase shift) encoding:</p>
+		<pre>
 	FM:
 
 	Second	Contents
@@ -161,11 +162,11 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 	58 		P3    - Date Parity (even)
 	59		      - usually missing (minute indication), except for leap insertion
 </pre>
-        <hr>
-        <h4>Schmid clock</h4>
-        <p>Schmid clock: needs poll, binary input, end='\xFC', sync start</p>
-        <p>The Schmid clock is a DCF77 receiver that sends a binary time code at the reception of a flag byte. The contents if the flag byte determined the time code format. The binary time code is delimited by the byte 0xFC.</p>
-        <pre>
+		<hr>
+		<h4>Schmid clock</h4>
+		<p>Schmid clock: needs poll, binary input, end='\xFC', sync start</p>
+		<p>The Schmid clock is a DCF77 receiver that sends a binary time code at the reception of a flag byte. The contents if the flag byte determined the time code format. The binary time code is delimited by the byte 0xFC.</p>
+		<pre>
 	TTY setup is:
 		CFLAG		(B1200|CS8|CREAD|CLOCAL)
 		IFLAG		0
@@ -173,8 +174,8 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
  		LFLAG		0
 
 </pre>
-        <p>The command to Schmid's DCF77 clock is a single byte; each bit allows the user to select some part of the time string, as follows (the output for the lsb is sent first).</p>
-        <pre>
+		<p>The command to Schmid's DCF77 clock is a single byte; each bit allows the user to select some part of the time string, as follows (the output for the lsb is sent first).</p>
+		<pre>
 	Bit 0:	time in MEZ, 4 bytes *binary, not BCD*; hh.mm.ss.tenths
 	Bit 1:	date 3 bytes *binary, not BCD: dd.mm.yy
 	Bit 2:	week day, 1 byte (unused here)
@@ -191,19 +192,19 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 					bits 5-7: Zero
 	Bit 6:	time in backup mode, units of 5 minutes (unused here)
 </pre>
-        <hr>
-        <h4>Trimble SV6 ASCII time code (TAIP)</h4>
-        <p>Trimble SV6: needs poll, ascii timecode, start='&gt;', end='&lt;', query='&gt;QTM&lt;', eol='&lt;'</p>
-        <p>Trimble SV6 is a GPS receiver with PPS output. It needs to be polled. It also need a special tty mode setup (EOL='&lt;').</p>
-        <pre>
+		<hr>
+		<h4>Trimble SV6 ASCII time code (TAIP)</h4>
+		<p>Trimble SV6: needs poll, ascii timecode, start='&gt;', end='&lt;', query='&gt;QTM&lt;', eol='&lt;'</p>
+		<p>Trimble SV6 is a GPS receiver with PPS output. It needs to be polled. It also need a special tty mode setup (EOL='&lt;').</p>
+		<pre>
 	TTY setup is:
 		CFLAG            (B4800|CS8|CREAD)
 		IFLAG            (BRKINT|IGNPAR|ISTRIP|ICRNL|IXON)
 		OFLAG            (OPOST|ONLCR)
 		LFLAG            (ICANON|ECHOK)
 </pre>
-        <p>Special flags are:</p>
-        <pre>		PARSE_F_PPSPPS	    - use CIOGETEV for PPS time stamping
+		<p>Special flags are:</p>
+		<pre>		PARSE_F_PPSPPS	    - use CIOGETEV for PPS time stamping
 		PARSE_F_PPSONSECOND - the time code is not related to
 				      the PPS pulse (so use the time code
 				      only for the second epoch)
@@ -215,11 +216,11 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 	----33445566600112222BB7__-_____--99-	Parse
 	&gt;RTM                      1     ;*  &lt; 	Check
 </pre>
-        <hr>
-        <h4>ELV DCF7000</h4>
-        <p>ELV DCF7000: end='\r', pattern=&quot; - - - - - - - \r&quot;</p>
-        <p>The ELV DCF7000 is a cheap DCF77 receiver sending each second a time code (though not very precise!) delimited by '`r'</p>
-        <pre>
+		<hr>
+		<h4>ELV DCF7000</h4>
+		<p>ELV DCF7000: end='\r', pattern=&quot; - - - - - - - \r&quot;</p>
+		<p>The ELV DCF7000 is a cheap DCF77 receiver sending each second a time code (though not very precise!) delimited by '`r'</p>
+		<pre>
 	Timecode
 	  YY-MM-DD-HH-MM-SS-FF\r
 
@@ -227,10 +228,10 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 		FF&amp;0x2	- DST switch warning
 		FF&amp;0x4  - unsynchronised
 </pre>
-        <hr>
-        <h4>HOPF 6021 und Kompatible</h4>
-        <p>HOPF Funkuhr 6021 mit serieller Schnittstelle Created by F.Schnekenbuehl &lt;frank@comsys.dofn.de&gt; from clk_rcc8000.c Nortel DASA Network Systems GmbH, Department: ND250 A Joint venture of Daimler-Benz Aerospace and Nortel.</p>
-        <pre>
+		<hr>
+		<h4>HOPF 6021 und Kompatible</h4>
+		<p>HOPF Funkuhr 6021 mit serieller Schnittstelle Created by F.Schnekenbuehl &lt;frank@comsys.dofn.de&gt; from clk_rcc8000.c Nortel DASA Network Systems GmbH, Department: ND250 A Joint venture of Daimler-Benz Aerospace and Nortel.</p>
+		<pre>
  hopf Funkuhr 6021 
       used with 9600,8N1,
       UTC via serial line
@@ -241,8 +242,8 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
       transmit with control characters
       transmit evry second
  </pre>
-        <p>Type 6021 Serial Output format</p>
-        <pre>
+		<p>Type 6021 Serial Output format</p>
+		<pre>
       000000000011111111 / char
       012345678901234567 \ position
       sABHHMMSSDDMMYYnre  Actual
@@ -277,10 +278,10 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
       x 1 1 0  - Saturday
       x 1 1 1  - Sunday
 </pre>
-        <hr>
-        <h4>Diem Computime Clock</h4>
-        <p>The Computime receiver sends a datagram in the following format every minute</p>
-        <pre>   
+		<hr>
+		<h4>Diem Computime Clock</h4>
+		<p>The Computime receiver sends a datagram in the following format every minute</p>
+		<pre>   
    Timestamp	T:YY:MM:MD:WD:HH:MM:SSCRLF 
    Pos          0123456789012345678901 2 3
 		0000000000111111111122 2 2
@@ -296,10 +297,10 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
    CR   Carriage return 
    LF   Linefeed
 </pre>
-        <hr>
-        <h4>WHARTON 400A Series Clock with a 404.2 Serial interface</h4>
-        <p>The WHARTON 400A Series clock is able to send date/time serial messages in 7 output formats. We use format 1 here because it is the shortest. We set up the clock to send a datagram every second. For use with this driver, the WHARTON 400A Series clock must be set-up as follows :</p>
-        <pre>
+		<hr>
+		<h4>WHARTON 400A Series Clock with a 404.2 Serial interface</h4>
+		<p>The WHARTON 400A Series clock is able to send date/time serial messages in 7 output formats. We use format 1 here because it is the shortest. We set up the clock to send a datagram every second. For use with this driver, the WHARTON 400A Series clock must be set-up as follows :</p>
+		<pre>
   					Programmable	Selected
   					Option No	Option
 	BST or CET display		3		9 or 11
@@ -309,8 +310,8 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 	Bit length 8 bits		11		8
 	Parity even			12		E
 </pre>
-        <p>WHARTON 400A Series output format 1 is as follows :</p>
-        <pre>
+		<p>WHARTON 400A Series output format 1 is as follows :</p>
+		<pre>
    Timestamp	STXssmmhhDDMMYYSETX
    Pos		0  12345678901234
   		0  00000000011111
@@ -329,8 +330,8 @@ pos:  0  00 00 0 00 0 11 111 1 111 12 2 22 2 22 2 2  2  3  3   3
 		bit 2	0 = not synchronised	1 = synchronised
 		bit 3	0 = no early warning	1 = early warning
 </pre>
-        <hr>
-        <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
-    </body>
+		<hr>
+		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+	</body>
 
 </html>

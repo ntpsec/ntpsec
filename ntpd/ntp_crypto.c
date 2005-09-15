@@ -99,7 +99,6 @@
  * Global cryptodata in host byte order
  */
 u_int32	crypto_flags = 0x0;	/* status word */
-u_int	sys_tai;		/* current UTC offset from TAI */
 
 /*
  * Global cryptodata in network byte order
@@ -108,6 +107,12 @@ struct cert_info *cinfo = NULL;	/* certificate info/value */
 struct value hostval;		/* host value */
 struct value pubkey;		/* public key */
 struct value tai_leap;		/* leapseconds table */
+EVP_PKEY *iffpar_pkey = NULL;	/* IFF parameters */
+EVP_PKEY *gqpar_pkey = NULL;	/* GQ parameters */
+EVP_PKEY *mvpar_pkey = NULL;	/* MV parameters */
+char	*iffpar_file = NULL; /* IFF parameters file */
+char	*gqpar_file = NULL;	/* GQ parameters file */
+char	*mvpar_file = NULL;	/* MV parameters file */
 
 /*
  * Private cryptodata in host byte order
@@ -115,17 +120,11 @@ struct value tai_leap;		/* leapseconds table */
 static char *passwd = NULL;	/* private key password */
 static EVP_PKEY *host_pkey = NULL; /* host key */
 static EVP_PKEY *sign_pkey = NULL; /* sign key */
-static EVP_PKEY *iffpar_pkey = NULL; /* IFF parameters */
-static EVP_PKEY	*gqpar_pkey = NULL; /* GQ parameters */
-static EVP_PKEY	*mvpar_pkey = NULL; /* MV parameters */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
 static char *rand_file = NULL;	/* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
-static char *iffpar_file = NULL; /* IFF parameters file */
-static char *gqpar_file = NULL;	/* GQ parameters file */
-static char *mvpar_file = NULL;	/* MV parameters file */
 static char *cert_file = NULL;	/* certificate file */
 static char *leap_file = NULL;	/* leapseconds file */
 static tstamp_t if_fstamp = 0;	/* IFF file stamp */
@@ -1042,22 +1041,10 @@ crypto_recv(
 				tai_leap.ptr = emalloc(vallen);
 				memcpy(tai_leap.ptr, ep->pkt, vallen);
 				crypto_update();
-				sys_tai = vallen / 4 + TAI_1972 - 1;
 			}
 			crypto_flags |= CRYPTO_FLAG_TAI;
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
-#ifdef KERNEL_PLL
-#if NTP_API > 3
-			/*
-			 * If the kernel cooperates, initialize the
-			 * current TAI offset.
-			 */
-			ntv.modes = MOD_TAI;
-			ntv.constant = sys_tai;
-			(void)ntp_adjtime(&ntv);
-#endif /* NTP_API */
-#endif /* KERNEL_PLL */
 			sprintf(statstr, "leap %u ts %u fs %u",
 			    vallen, ntohl(ep->tstamp),
 			    ntohl(ep->fstamp));
@@ -1158,7 +1145,7 @@ crypto_xmit(
 	struct peer *peer;	/* peer structure pointer */
 	u_int	opcode;		/* extension field opcode */
 	struct exten *fp;	/* extension pointers */
-	struct cert_info *cp;	/* certificate info/value pointer */
+	struct cert_info *cp, *xp; /* certificate info/value pointer */
 	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int	vallen;
@@ -1228,17 +1215,28 @@ crypto_xmit(
 			memcpy(certname, ep->pkt, vallen);
 			certname[vallen] = '\0';
 		}
+
+		/*
+		 * Find the self-signed, trusted certificate. If not
+		 * found, use the first one found.
+		 */
+		xp = NULL;
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			if (cp->flags & CERT_PRIV)
 				continue;
 
 			if (strcmp(certname, cp->subject) == 0) {
-				len += crypto_send(fp, &cp->cert);
-				break;
+				if (xp == NULL)
+					xp = cp;
+				else if (strcmp(certname, cp->issuer) ==
+				    0 && cp->flags & CERT_TRUST)
+					xp = cp;
 			}
 		}
-		if (cp == NULL)
+		if (xp == NULL)
 			opcode |= CRYPTO_ERROR;
+		else
+			len += crypto_send(fp, &xp->cert);
 		break;
 
 	/*
@@ -3349,10 +3347,10 @@ cert_install(
 			 * this might result in a loop that could
 			 * persist until timeout.
 			 */
-			if (!(xp->flags & CERT_TRUST))
+			if (!(xp->flags & (CERT_TRUST | CERT_VALID)))
 				continue;
 
-			yp->flags |= CERT_TRUST;
+			yp->flags |= CERT_VALID;
 
 			/*
 			 * If subject Y matches the server subject name,
@@ -3621,20 +3619,16 @@ crypto_tai(
 {
 	FILE	*str;		/* file handle */
 	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
-	u_int	leapsec[MAX_LEAP]; /* NTP time at leaps */
-	u_int	offset;		/* offset at leap (s) */
+	u_int32	leapsec[MAX_LEAP]; /* NTP time at leaps */
+	int	offset;		/* offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t fstamp;	/* filestamp */
 	u_int	len;
-	char	*ptr;
-	int	rval, i;
-#ifdef KERNEL_PLL
-#if NTP_API > 3
-	struct timex ntv;	/* kernel interface structure */
-#endif /* NTP_API */
-#endif /* KERNEL_PLL */
+	u_int32	*ptr;
+	char	*dp;
+	int	rval, i, j;
 
 	/*
 	 * Open the file and discard comment lines. If the first
@@ -3656,12 +3650,12 @@ crypto_tai(
 	rval = readlink(filename, linkname, MAXFILENAME - 1);
 	if (rval > 0) {
 		linkname[rval] = '\0';
-		ptr = strrchr(linkname, '.');
+		dp = strrchr(linkname, '.');
 	} else {
-		ptr = strrchr(filename, '.');
+		dp = strrchr(filename, '.');
 	}
-	if (ptr != NULL)
-		sscanf(++ptr, "%u", &fstamp);
+	if (dp != NULL)
+		sscanf(++dp, "%u", &fstamp);
 	else
 		fstamp = 0;
 	tai_leap.fstamp = htonl(fstamp);
@@ -3678,8 +3672,8 @@ crypto_tai(
 	 */
 	i = 0;
 	while (i < MAX_LEAP) {
-		ptr = fgets(buf, NTP_MAXSTRLEN - 1, str);
-		if (ptr == NULL)
+		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
+		if (dp == NULL)
 			break;
 
 		if (strlen(buf) < 1)
@@ -3688,16 +3682,16 @@ crypto_tai(
 		if (*buf == '#')
 			continue;
 
-		if (sscanf(buf, "%u %u", &leapsec[i], &offset) != 2)
+		if (sscanf(buf, "%u %d", &leapsec[i], &offset) != 2)
 			continue;
 
-		if (i != (int)(offset - TAI_1972)) { 
+		if (i != offset - TAI_1972) 
 			break;
-		}
+
 		i++;
 	}
 	fclose(str);
-	if (ptr != NULL) {
+	if (dp != NULL) {
 		msyslog(LOG_INFO,
 		    "crypto_tai: leapseconds file %s error %d", cp,
 		    rval);
@@ -3706,29 +3700,17 @@ crypto_tai(
 
 	/*
 	 * The extension field table entries consists of the NTP seconds
-	 * of leap insertion in reverse order, so that the most recent
-	 * insertion is the first entry in the table.
+	 * of leap insertion in network byte order.
 	 */
-	len = i * 4;
+	len = i * sizeof(u_int32);
 	tai_leap.vallen = htonl(len);
 	ptr = emalloc(len);
 	tai_leap.ptr = (u_char *)ptr;
-	for (; i >= 0; i--) {
-		*ptr++ = (char) htonl(leapsec[i]);
-	}
+	for (j = 0; j < i; j++)
+		*ptr++ = htonl(leapsec[j]);
 	crypto_flags |= CRYPTO_FLAG_TAI;
-	sys_tai = len / 4 + TAI_1972 - 1;
-#ifdef KERNEL_PLL
-#if NTP_API > 3
-	ntv.modes = MOD_TAI;
-	ntv.constant = sys_tai;
-	if (ntp_adjtime(&ntv) == TIME_ERROR)
-		msyslog(LOG_INFO,
-		    "crypto_tai: kernel TAI update failed");
-#endif /* NTP_API */
-#endif /* KERNEL_PLL */
-	sprintf(statstr, "%s link %d fs %u offset %u", cp, rval, fstamp,
-	    ntohl(tai_leap.vallen) / 4 + TAI_1972 - 1);
+	sprintf(statstr, "%s fs %u leap %u len %u", cp, fstamp,
+	   leapsec[--j], len);
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 	if (debug)
@@ -3945,7 +3927,7 @@ crypto_setup(void)
 	 * It the certificate is trusted, the subject must be the same
 	 * as the issuer, in other words it must be self signed.
 	 */
-	if (cinfo->flags & CERT_PRIV && strcmp(cinfo->subject,
+	if (cinfo->flags & CERT_TRUST && strcmp(cinfo->subject,
 	    cinfo->issuer) != 0) {
 		if (cert_valid(cinfo, sign_pkey) != XEVNT_OK) {
 			msyslog(LOG_ERR,
@@ -4042,6 +4024,18 @@ crypto_config(
 	case CRYPTO_CONF_MVPAR:
 		mvpar_file = emalloc(strlen(cp) + 1);
 		strcpy(mvpar_file, cp);
+		break;
+
+	/*
+	 * Set identity scheme.
+	 */
+	case CRYPTO_CONF_IDENT:
+		if (!strcasecmp(cp, "iff"))
+			crypto_flags |= CRYPTO_FLAG_IFF;
+		else if (!strcasecmp(cp, "gq"))
+			crypto_flags |= CRYPTO_FLAG_GQ;
+		else if (!strcasecmp(cp, "mv"))
+			crypto_flags |= CRYPTO_FLAG_MV;
 		break;
 
 	/*
