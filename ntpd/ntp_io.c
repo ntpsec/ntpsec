@@ -42,16 +42,14 @@
  * Set up some macros to look for IPv6 and IPv6 multicast
  */
 
-#if defined(ISC_PLATFORM_HAVEIPV6)
-# ifdef WANT_IPV6
+#if defined(ISC_PLATFORM_HAVEIPV6) && !defined(DISABLE_IPV6)
 
-#  define INCLUDE_IPV6_SUPPORT
+#define INCLUDE_IPV6_SUPPORT
 
-#  if defined(INCLUDE_IPV6_SUPPORT) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-#   define INCLUDE_IPV6_MULTICAST_SUPPORT
+#if defined(INCLUDE_IPV6_SUPPORT) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+#define INCLUDE_IPV6_MULTICAST_SUPPORT
 
-#  endif	/* IPV6 Multicast Support */
-# endif  /* Want IPv6 Support */
+#endif	/* IPV6 Multicast Support */
 #endif  /* IPv6 Support */
 
 extern int listen_to_virtual_ips;
@@ -413,6 +411,8 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_port = port;
 		((struct sockaddr_in*)&inter_list[idx].bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
+		any_interface = &inter_list[idx];
+		wildipv4 = idx;
 		idx++;
 	}
 
@@ -425,9 +425,7 @@ create_wildcards(u_short port) {
 		inter_list[idx].sin.ss_family = AF_INET6;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr = in6addr_any;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_port = port;
-# ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_scope_id = 0;
-# endif
 		(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 		inter_list[idx].mask.ss_family = AF_INET6;
 		memset(&((struct sockaddr_in6*)&inter_list[idx].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
@@ -438,6 +436,8 @@ create_wildcards(u_short port) {
 		inter_list[idx].notsent = 0;
 		inter_list[idx].flags = INT_UP;
 		inter_list[idx].ignore_packets = ISC_TRUE;
+		any6_interface = &inter_list[idx];
+		wildipv6 = idx;
 		idx++;
 	}
 #endif
@@ -1238,15 +1238,13 @@ io_multicast_add(
 #endif
 		memset(&((struct sockaddr_in6*)&inter_list[ind].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
-#ifdef ISC_PLATFORM_HAVESCOPEID
 		i = findlocalcastinterface(&addr, INT_MULTICAST);
 		if (i >= 0)
 			lscope = ((struct sockaddr_in6*)&inter_list[i].sin)->sin6_scope_id;
-# ifdef DEBUG
+#ifdef DEBUG
 	if (debug > 1)
 		printf("Found interface index %d, scope: %d for address %s\n",
 			i, lscope, stoa(&addr));
-# endif
 #endif
 		break;
 	}
@@ -1509,11 +1507,7 @@ open_socket(
 		                sprintf(buff,
                                 "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=%d fails: %%m",
                                 fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
-# ifdef ISC_PLATFORM_HAVESCOPEID
                                 ((struct sockaddr_in6*)addr)->sin6_scope_id, stoa(addr),
-# else
-				-1,
-# endif
                                 IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
 #endif
 		else 
@@ -2340,9 +2334,7 @@ findlocalinterface(
 	else if(addr->ss_family == AF_INET6) {
 		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
 		((struct sockaddr_in6*)&saddr)->sin6_port = htons(2000);
-# ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&saddr)->sin6_scope_id = ((struct sockaddr_in6*)addr)->sin6_scope_id;
-# endif
 	}
 #endif
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);

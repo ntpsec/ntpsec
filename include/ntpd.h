@@ -378,6 +378,7 @@ extern int	sys_floor;		/* cluster stratum floor */
 extern int	sys_ceiling;		/* cluster stratum ceiling */
 extern u_char	sys_ttl[];		/* ttl mapping vector */
 extern int	sys_ttlmax;		/* max ttl mapping vector index */
+extern int	leap_next;		/* leap consensus */
 
 /*
  * Statistics counters

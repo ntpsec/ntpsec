@@ -218,7 +218,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
 	{ CP_DIGEST,	RO, "signature" },	/* 44 */
-	{ CP_IDENT,	RO, "identity" },	/* 45 */
+	{ CP_IDENT,	RO, "trust" },		/* 45 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 38/46 */
 };

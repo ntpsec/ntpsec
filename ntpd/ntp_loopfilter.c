@@ -490,18 +490,18 @@ local_clock(
 		for (i = 0; i < len; i++) {
 			togo = ntohl(tpt[i]) - peer->rec.l_ui;
 			if (togo > 0) {
-				sys_leap |= LEAP_ADDSECOND;
+				leap_next |= LEAP_ADDSECOND;
 				break;
 			}
-#ifdef STA_NANO
-			if (pll_control && kern_enable) {
-				memset(&ntv, 0, sizeof(ntv));
-				ntv.modes = MOD_BITS | MOD_TAI;
-				ntv.constant = i + TAI_1972 - 1;
-				ntp_adjtime(&ntv);
-			}
-#endif /* STA_NANO */
 		}
+#ifdef STA_NANO
+		if (pll_control && kern_enable && sys_tai == 0) {
+			memset(&ntv, 0, sizeof(ntv));
+			ntv.modes = MOD_BITS | MOD_TAI;
+			ntv.constant = i + TAI_1972 - 1;
+			ntp_adjtime(&ntv);
+		}
+#endif /* STA_NANO */
 		sys_tai = i + TAI_1972 - 1;
 	}
 #endif /* OPENSSL */
@@ -567,13 +567,11 @@ local_clock(
 			/*
 			 * Set the leap bits in the status word.
 			 */
-			if (sys_leap == LEAP_NOTINSYNC) {
-				ntv.status |= STA_UNSYNC;
-			} else if (calleapwhen(sys_reftime.l_ui) <
+			if (calleapwhen(sys_reftime.l_ui) <
 				    CLOCK_DAY) {
-				if (sys_leap & LEAP_ADDSECOND)
+				if (leap_next & LEAP_ADDSECOND)
 					ntv.status |= STA_INS;
-				else if (sys_leap & LEAP_DELSECOND)
+				else if (leap_next & LEAP_DELSECOND)
 					ntv.status |= STA_DEL;
 			}
 

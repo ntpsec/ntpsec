@@ -380,11 +380,6 @@ crypto_recv(
 	int	rval = XEVNT_OK;
 	u_char	*ptr;
 	u_int32 temp32;
-#ifdef KERNEL_PLL
-#if NTP_API > 3
-	struct timex ntv;	/* kernel interface structure */
-#endif /* NTP_API */
-#endif /* KERNEL_PLL */
 
 	/*
 	 * Initialize. Note that the packet has already been checked for
@@ -499,6 +494,8 @@ crypto_recv(
 			    !(crypto_flags & fstamp & CRYPTO_FLAG_MASK))
 			    {
 				rval = XEVNT_KEY;
+			} else {
+				fstamp &= ~CRYPTO_FLAG_MASK;
 			}
 
 			/*
