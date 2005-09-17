@@ -1,6 +1,6 @@
 
 /*
- *  Time-stamp:      "2005-07-25 12:05:56 bkorb"
+ *  Time-stamp:      "2005-09-08 14:20:35 bkorb"
  *
  *  autoopts.h  $Id: autoopts.h,v 4.7 2005/02/13 01:48:00 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
@@ -298,26 +298,6 @@ typedef struct {
 #  define _SC_PAGESIZE _SC_PAGE_SIZE
 # endif
 #endif
-
-/*
- *  This is an output only structure used by text_mmap and text_munmap.
- *  Clients must not alter the contents and must provide it to both
- *  the text_mmap and text_munmap procedures.  BE ADVISED: if you are
- *  mapping the file with PROT_WRITE the NUL byte at the end MIGHT NOT
- *  BE WRITABLE.  In any event, that byte is not be written back
- *  to the source file.  ALSO: if "txt_data" is valid and "txt_errno"
- *  is not zero, then there *may* not be a terminating NUL.
- */
-typedef struct {
-    void*       txt_data;      /* text file data   */
-    size_t      txt_size;      /* actual file size */
-    int         txt_fd;        /* file descriptor  */
-    size_t      txt_full_size; /* mmaped mem size  */
-    int         txt_zero_fd;   /* fd for /dev/zero */
-    int         txt_errno;     /* warning code     */
-    int         txt_prot;      /* "prot" flags     */
-    int         txt_flags;     /* mapping type     */
-} tmap_info_t;
 
 /*
  *  Define and initialize all the user visible strings.

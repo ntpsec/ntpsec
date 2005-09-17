@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sun Sep  4 14:14:55 PDT 2005
+ * Generated Thu Sep 15 20:48:22 PDT 2005
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD
@@ -79,15 +79,6 @@ optionSort( tOptions* pOpts );
  */
 LOCAL void
 addArgListEntry( void** ppAL, void* entry );
-
-/*
- *  Extracted from text_mmap.c
- */
-LOCAL void*
-text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI );
-
-LOCAL int
-text_munmap( tmap_info_t* pMI );
 
 #ifdef REDEF_LOCAL
 #  undef LOCAL

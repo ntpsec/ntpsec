@@ -191,13 +191,14 @@
 #endif
 
 #ifndef ULONG_MAX
-#  define ULONG_MAX     ~(0UL)
-#  define UINT_MAX      ~(0U)
+#  define ULONG_MAX     ~(OUL)
+#  define UINT_MAX      ~(OU)
 #endif
 
 #ifndef SHORT_MAX
 #  define SHORT_MAX     ~(1 << (8*sizeof(short) -1))
-#  define USHORT_MAX    ((1<<(8*sizeof(short)))-1)
+#else
+#  define USHORT_MAX    ~(OUS)
 #endif
 
 #ifndef HAVE_INT8_T
@@ -222,7 +223,7 @@
 #endif
 
 #ifndef HAVE_UINT32_T
-# if SIZEOF_UINT == 4
+# if SIZEOF_INT == 4
 	typedef unsigned int uint32_t;
 # elif SIZEOF_LONG == 4
 	typedef unsigned int uint32_t;
