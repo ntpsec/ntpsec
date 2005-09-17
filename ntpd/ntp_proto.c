@@ -66,6 +66,7 @@ static	double sys_maxdist = MAXDISTANCE; /* selection threshold (s) */
 double	sys_jitter;		/* system jitter (s) */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
+int	leap_next;		/* leap consensus */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -1286,6 +1287,7 @@ clock_update(void)
 	 * the leap changes, we gotta reroll the keys.
 	 */
 	case 1:
+		sys_leap = leap_next;
 		sys_stratum = (u_char)(sys_peer->stratum + 1);
 		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
@@ -2088,11 +2090,11 @@ clock_select(void)
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
 	 */
-	sys_leap = LEAP_NOWARNING;
+	leap_next = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		sys_survivors++;
-		sys_leap |= peer->leap;
+		leap_next |= peer->leap;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
