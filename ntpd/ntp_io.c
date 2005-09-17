@@ -165,7 +165,7 @@ static	isc_boolean_t	socket_multicast_disable P((struct interface *, struct sock
 
 #ifdef DEBUG
 static void print_interface	P((struct interface *, char *, char *));
-#define DPRINT_INTERFACE(_LVL_, _ARGS_) do { if (debug >= (_LVL_)) { print_interface _ARGS_; } while (0)
+#define DPRINT_INTERFACE(_LVL_, _ARGS_) do { if (debug >= (_LVL_)) { print_interface _ARGS_; } } while (0)
 #else
 #define DPRINT_INTERFACE(_LVL_, _ARGS_)
 #endif
@@ -2484,9 +2484,9 @@ input_handler(
 {
 
 	int buflen;
-	register int i, n;
-	register int doing;
-	register SOCKET fd;
+	int n;
+	int doing;
+	SOCKET fd;
 	struct timeval tvzero;
 	l_fp ts;			/* Timestamp at BOselect() gob */
 #ifdef DEBUG
@@ -2594,7 +2594,7 @@ input_handler(
 			{
 				do {
 					++select_count;
-					buflen = read_network_packet(fd, &inter_list[i], ts);
+					buflen = read_network_packet(fd, interface, ts);
 				} while (buflen > 0);
 			}
 		/* Check more interfaces */
@@ -2610,6 +2610,7 @@ input_handler(
 	     asyncio_reader = ISC_LIST_PREV(asyncio_reader, link))
 	{
 		if (FD_ISSET(asyncio_reader->fd, &fds)) {
+			++select_count;
 			asyncio_reader->receiver(asyncio_reader);
 		}
 	}
