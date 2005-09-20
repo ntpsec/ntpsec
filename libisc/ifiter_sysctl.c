@@ -265,7 +265,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 		if (dst_sa != NULL &&
 		    (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
-			get_addr(family, &iter->current.dstaddress, dst_sa,
+			get_addr(family, &iter->current.broadcast, dst_sa,
 				 iter->current.name);
 
 
