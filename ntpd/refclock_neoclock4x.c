@@ -3,12 +3,12 @@
  * Refclock_neoclock4x.c
  * - NeoClock4X driver for DCF77 or FIA Timecode
  *
- * Date: 2003-07-07 v1.13
+ * Date: 2004-04-07 v1.14
  *
  * see http://www.linum.com/redir/jump/id=neoclock4x&action=redir
  * for details about the NeoClock4X device
  *
- * Copyright (C) 2002-2003 by Linum Software GmbH <neoclock4x@linum.com>
+ * Copyright (C) 2002-2004 by Linum Software GmbH <neoclock4x@linum.com>
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -59,6 +59,17 @@
 #endif
 
 /*
+ * NTP version 4.20 change the pp->msec field to pp->nsec.
+ * To allow to support older ntp versions with this sourcefile
+ * you can define NTP_REP_420 to allow this driver to compile
+ * with ntp version back to 4.1.2.
+ *
+ */
+#if 0
+#define NTP_PRE_420
+#endif
+
+/*
  * If you want the driver for whatever reason to not use
  * the TX line to send anything to your NeoClock4X
  * device you must tell the NTP refclock driver which
@@ -74,6 +85,7 @@
 #define NEOCLOCK4X_FIRMWARE                NEOCLOCK4X_FIRMWARE_VERSION_A
 #endif
 
+/* at this time only firmware version A is known */
 #define NEOCLOCK4X_FIRMWARE_VERSION_A      'A'
 
 #define NEOCLOCK4X_TIMECODELEN 37
@@ -95,7 +107,7 @@
 #define NEOCLOCK4X_OFFSET_ANTENNA2         33
 #define NEOCLOCK4X_OFFSET_CRC              35
 
-#define NEOCLOCK4X_DRIVER_VERSION          "1.12 (2003-01-10)"
+#define NEOCLOCK4X_DRIVER_VERSION          "1.14 (2004-04-07)"
 
 struct neoclock4x_unit {
   l_fp	laststamp;	/* last receive timestamp */
@@ -172,13 +184,37 @@ neoclock4x_start(int unit,
   /* LDISC_STD, LDISC_RAW
    * Open serial port. Use CLK line discipline, if available.
    */
-  fd = refclock_open(dev, B2400, LDISC_CLK);
+  fd = refclock_open(dev, B2400, LDISC_STD);
   if(fd <= 0)
     {
       return (0);
     }
 
 #if defined(HAVE_TERMIOS)
+
+#if 1
+  if(tcgetattr(fd, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+
+  /* 2400 Baud 8N2 */
+  termsettings.c_iflag = IGNBRK | IGNPAR | ICRNL;
+  termsettings.c_oflag = 0;
+  termsettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
+  (void)cfsetispeed(&termsettings, (u_int)B2400);
+  (void)cfsetospeed(&termsettings, (u_int)B2400);
+
+  if(tcsetattr(fd, TCSANOW, &termsettings) < 0)
+    {
+      msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
+      (void) close(fd);
+      return (0);
+    }
+
+#else
   if(tcgetattr(fd, &termsettings) < 0)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
@@ -198,6 +234,8 @@ neoclock4x_start(int unit,
       (void) close(fd);
       return (0);
     }
+#endif
+
 #elif defined(HAVE_SYSV_TTYS)
   if(ioctl(fd, TCGETA, &termsettings) < 0)
     {
@@ -524,7 +562,11 @@ neoclock4x_receive(struct recvbuf *rbufp)
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_MINUTE], &pp->minute, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_SECOND], &pp->second, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &dsec, 2);
+#if defined(NTP_PRE_420)
+  pp->msec *= 10; /* convert 1/100s from neoclock to real miliseconds */
+#else
   pp->nsec = dsec * 10000; /* convert 1/100s from neoclock to nanoseconds */
+#endif
 
   memcpy(up->radiosignal, &pp->a_lastcode[NEOCLOCK4X_OFFSET_RADIOSIGNAL], 3);
   up->radiosignal[3] = 0;
@@ -580,10 +622,16 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   if(pp->sloppyclockflag & CLK_FLAG4)
     {
-      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03ld",
+      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
 	      up->unit,
 	      pp->year, month, day,
-	      pp->hour, pp->minute, pp->second, pp->nsec/1000);
+	      pp->hour, pp->minute, pp->second,
+#if defined(NTP_PRE_420)
+              pp->msec
+#else
+              pp->nsec/1000
+#endif
+              );
     }
 
   up->utc_year   = pp->year;
@@ -592,7 +640,11 @@ neoclock4x_receive(struct recvbuf *rbufp)
   up->utc_hour   = pp->hour;
   up->utc_minute = pp->minute;
   up->utc_second = pp->second;
+#if defined(NTP_PRE_420)
+  up->utc_msec   = pp->msec;
+#else
   up->utc_msec   = pp->nsec/1000;
+#endif
 
   if(!refclock_process(pp))
     {
@@ -1063,4 +1115,11 @@ int refclock_neoclock4x_bs;
  * - fix reporting of clock status
  *   changes. previously a bad clock
  *   status was never reset.
+ *
+ * 2004/04/07 cjh
+ * Revision 1.14
+ * - open serial port in a way
+ *   AIX and some other OS can
+ *   handle much better
+ *
  */
