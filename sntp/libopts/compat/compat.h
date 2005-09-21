@@ -2,7 +2,7 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2005-08-28 13:47:02 bkorb"
+ *  Time-stamp:      "2005-09-20 19:29:16 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
@@ -20,10 +20,11 @@
 
 #ifndef HAVE_STRSIGNAL
    char * strsignal( int signo );
-#else
-#  define  _GNU_SOURCE /* for strsignal in GNU's libc */
-#  define  __USE_GNU   /* exact same thing as above   */
 #endif
+
+#define  _GNU_SOURCE    1 /* for strsignal in GNU's libc */
+#define  __USE_GNU      1 /* exact same thing as above   */
+#define  __EXTENSIONS__ 1 /* and another way to call for it */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
