@@ -1,7 +1,7 @@
 
 /*
  *  $Id: autoopts.c,v 4.8 2005/02/13 01:47:59 bkorb Exp $
- *  Time-stamp:      "2005-03-13 08:39:23 bkorb"
+ *  Time-stamp:      "2005-09-18 11:48:37 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -54,6 +54,14 @@
 
 #ifndef HAVE_PATHFIND
 #  include "compat/pathfind.c"
+#endif
+
+#ifndef HAVE_SNPRINTF
+#  include "compat/snprintf.c"
+#endif
+
+#ifndef HAVE_STRDUP
+#  include "compat/strdup.c"
 #endif
 
 static const char zNil[] = "";

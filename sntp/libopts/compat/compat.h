@@ -223,7 +223,7 @@
 #endif
 
 #ifndef HAVE_UINT32_T
-# if SIZEOF_INT == 4
+# if SIZEOF_UINT == 4
 	typedef unsigned int uint32_t;
 # elif SIZEOF_LONG == 4
 	typedef unsigned int uint32_t;

@@ -1,6 +1,6 @@
 
 /*
- *  Time-stamp:      "2005-09-08 14:20:35 bkorb"
+ *  Time-stamp:      "2005-09-20 19:32:35 bkorb"
  *
  *  autoopts.h  $Id: autoopts.h,v 4.7 2005/02/13 01:48:00 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
@@ -55,14 +55,7 @@
 #ifndef AUTOGEN_AUTOOPTS_H
 #define AUTOGEN_AUTOOPTS_H
 
-#define __EXTENSIONS__
-
-#include "config.h"
 #include "compat/compat.h"
-#include <sys/param.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <utime.h>
 
 #define AO_NAME_LIMIT    127
 #define AO_NAME_SIZE     (AO_NAME_LIMIT + 1)

@@ -1,5 +1,4 @@
 #define AUTOOPTS_INTERNAL
-#include "config.h"
 #include "compat/compat.h"
 #include "autoopts/options.h"
 #include "autoopts/usage-txt.h"
