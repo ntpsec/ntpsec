@@ -547,10 +547,12 @@ printf("1: argc=%d\n", argc);
 	if (HAVE_OPT( NICE ))
 		priority_done = 0;
 
+#if defined(HAVE_SCHED_SETSCHEDULER)
 	if (HAVE_OPT( PRIORITY )) {
 		config_priority = OPT_VALUE_PRIORITY;
 		config_priority_override = 1;
 	}
+#endif
 
 	setup_logfile();
 
