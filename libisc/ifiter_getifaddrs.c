@@ -149,12 +149,12 @@ internal_current(isc_interfaceiter_t *iter) {
 			 ifa->ifa_name);
 
 	if (ifa->ifa_dstaddr != NULL &&
-	    (iter->current.flags & IFF_POINTOPOINT) != 0)
+	    (iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0)
 		get_addr(family, &iter->current.dstaddress, ifa->ifa_dstaddr,
 			 ifa->ifa_name);
 
 	if (ifa->ifa_broadaddr != NULL &&
-	    (iter->current.flags & IFF_BROADCAST) != 0)
+	    (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
 		get_addr(family, &iter->current.broadcast, ifa->ifa_broadaddr,
 			 ifa->ifa_name);
 
