@@ -113,6 +113,15 @@ getaddrinfo (const char *nodename, const char *servname,
 	struct sockaddr_in *sockin;
 	short ntpport = htons(NTP_PORT);
 
+	ai = calloc(sizeof(struct addrinfo), 1);
+	if (ai == NULL)
+		return (EAI_MEMORY);
+
+	/*
+	 * Heiko: Default values taken from hint
+	 */
+	memcpy (ai, hints, sizeof(struct addrinfo));
+
 	if (nodename != NULL) {
 		rval = do_nodename(nodename, ai, hints);
 		if (rval != 0) {
@@ -121,15 +130,13 @@ getaddrinfo (const char *nodename, const char *servname,
 		}
 	}
 	if (nodename == NULL && hints != NULL) {
-		ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
 		if (ai->ai_addr == NULL) {
-			freeaddrinfo(ai);
-			return (EAI_MEMORY);
+			ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
+			if (ai->ai_addr == NULL) {
+				freeaddrinfo(ai);
+				return (EAI_MEMORY);
+			}
 		}
-		/*
-		 * Heiko: Default values taken from hint
-		 */
-		memcpy (ai, hints, sizeof(struct addrinfo));
 		ai->ai_addrlen = sizeof(struct sockaddr_storage);
 		sockin = (struct sockaddr_in *)ai->ai_addr;
 		sockin->sin_family = (short) ai->ai_family;
@@ -139,16 +146,13 @@ getaddrinfo (const char *nodename, const char *servname,
 #endif
 	}
 	if (servname != NULL) {
-		if (ai == NULL) {
-			ai = calloc(sizeof(struct addrinfo), 1);
-			if (ai == NULL)
+		if (ai->ai_addr == NULL) {
+			ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
+			if (ai->ai_addr == NULL) {
+				freeaddrinfo(ai);
 				return (EAI_MEMORY);
+			}
 		}
-
-		/*
-		 * Heiko: Default values taken from hint
-		 */
-		memcpy (ai, hints, sizeof(struct addrinfo));
 		ai->ai_socktype = SOCK_DGRAM;
 		if (strcmp(servname, "ntp") != 0) {
 			freeaddrinfo(ai);
