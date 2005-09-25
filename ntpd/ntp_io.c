@@ -425,7 +425,9 @@ create_wildcards(u_short port) {
 		inter_list[idx].sin.ss_family = AF_INET6;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr = in6addr_any;
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_port = port;
+# ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_scope_id = 0;
+# endif
 		(void) strncpy(inter_list[idx].name, "wildcard", sizeof(inter_list[idx].name));
 		inter_list[idx].mask.ss_family = AF_INET6;
 		memset(&((struct sockaddr_in6*)&inter_list[idx].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
@@ -1239,8 +1241,10 @@ io_multicast_add(
 		memset(&((struct sockaddr_in6*)&inter_list[ind].mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
 		i = findlocalcastinterface(&addr, INT_MULTICAST);
+# ifdef ISC_PLATFORM_HAVESCOPEID
 		if (i >= 0)
 			lscope = ((struct sockaddr_in6*)&inter_list[i].sin)->sin6_scope_id;
+# endif
 #ifdef DEBUG
 	if (debug > 1)
 		printf("Found interface index %d, scope: %d for address %s\n",
@@ -1507,7 +1511,12 @@ open_socket(
 		                sprintf(buff,
                                 "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=%d fails: %%m",
                                 fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
-                                ((struct sockaddr_in6*)addr)->sin6_scope_id, stoa(addr),
+# ifdef ISC_PLATFORM_HAVESCOPEID
+                                ((struct sockaddr_in6*)addr)->sin6_scope_id
+# else
+                                -1
+# endif
+				, stoa(addr),
                                 IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
 #endif
 		else 
@@ -2334,7 +2343,9 @@ findlocalinterface(
 	else if(addr->ss_family == AF_INET6) {
 		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
 		((struct sockaddr_in6*)&saddr)->sin6_port = htons(2000);
+# ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&saddr)->sin6_scope_id = ((struct sockaddr_in6*)addr)->sin6_scope_id;
+# endif
 	}
 #endif
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
