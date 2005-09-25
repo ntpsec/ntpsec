@@ -1355,14 +1355,14 @@ case "$ac_cv_arg_setpgrp_negpid" in
 esac
 
 AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
-[case "$host" in
+[[case "$host" in
  *-*-bsdi[[23]]*)
     ans=yes
     ;;
  *-*-freebsd*)
     ans=yes
     ;;
- *-*-netbsd*)
+ *-*-netbsd*3.[0-8]*|*-*-netbsd*[0-2].*|*-*-netbsd*3.99.[0-7])
     ans=yes
     ;;
  *-*-openbsd*)
@@ -1374,7 +1374,7 @@ AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
  *) ans=no
     ;;
 esac
-ac_cv_func_ctty_for_f_setown=$ans])
+ac_cv_func_ctty_for_f_setown=$ans]])
 case "$ac_cv_func_ctty_for_f_setown" in
  yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
 esac
