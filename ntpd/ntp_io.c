@@ -704,7 +704,9 @@ create_wildcards(u_short port) {
 		interface->sin.ss_family = AF_INET6;
 		((struct sockaddr_in6*)&interface->sin)->sin6_addr = in6addr_any;
  		((struct sockaddr_in6*)&interface->sin)->sin6_port = port;
+# ifdef ISC_PLATFORM_HAVESCOPEID
  		((struct sockaddr_in6*)&interface->sin)->sin6_scope_id = 0;
+# endif
 		(void) strncpy(interface->name, "wildcard", sizeof(interface->name));
 		interface->mask.ss_family = AF_INET6;
 		memset(&((struct sockaddr_in6*)&interface->mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
@@ -1659,10 +1661,12 @@ io_multicast_add(
 		memset(&((struct sockaddr_in6*)&interface->mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
 		iface = findlocalcastinterface(&addr, INT_MULTICAST);
+# ifdef ISC_PLATFORM_HAVESCOPEID
 		if (iface) {
 			lscope = ((struct sockaddr_in6*)&iface->sin)->sin6_scope_id;
-			DPRINTF(1, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
 		}
+# endif
+		DPRINTF(1, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
 		break;
 	}
 		
@@ -1995,7 +1999,12 @@ open_socket(
 		                sprintf(buff,
                                 "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=%d fails: %%m",
                                 fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
-                                ((struct sockaddr_in6*)addr)->sin6_scope_id, stoa(addr),
+# ifdef ISC_PLATFORM_HAVESCOPEID
+                                ((struct sockaddr_in6*)addr)->sin6_scope_id
+# else
+                                -1
+# endif
+				, stoa(addr),
                                 IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
 #endif
 		else
@@ -2711,7 +2720,9 @@ findlocalinterface(
 	else if(addr->ss_family == AF_INET6) {
  		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
 		((struct sockaddr_in6*)&saddr)->sin6_port = htons(2000);
+# ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&saddr)->sin6_scope_id = ((struct sockaddr_in6*)addr)->sin6_scope_id;
+# endif
 	}
 #endif
 	
