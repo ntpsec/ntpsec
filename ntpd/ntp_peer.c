@@ -536,6 +536,9 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			 * an interface - other crypto updates are handled
 			 * by the crypto machinery
 			 */
+#ifdef DEBUG
+			msyslog(LOG_INFO, "set_peerdstadr: disconnectiong peer from interface - clearing crypto");
+#endif
 			peer_crypto_clear(peer);
 		}
 
@@ -598,6 +601,20 @@ peer_refresh_interface(struct peer *peer)
 #endif
 
 	set_peerdstadr(peer, niface);
+
+	/*
+	 * Broadcast needs the socket enabled for broadcast
+	 */
+	if (peer->cast_flags & MDF_BCAST && peer->dstadr) {
+		enable_broadcast(peer->dstadr, &peer->srcadr);
+	}
+
+	/*
+	 * Multicast needs the socket interface enabled for multicast
+	 */
+	if (peer->cast_flags & MDF_MCAST) {
+		enable_multicast_if(peer->dstadr, &peer->srcadr);
+	}
 }
 
 /*
@@ -746,7 +763,7 @@ newpeer(
 	/*
 	 * Multicast needs the socket interface enabled for multicast
 	 */
-	if (cast_flags & MDF_MCAST) {
+	if (cast_flags & MDF_MCAST && peer->dstadr) {
 		enable_multicast_if(peer->dstadr, srcadr);
 	}
 #ifdef DEBUG

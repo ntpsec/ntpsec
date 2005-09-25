@@ -3095,15 +3095,6 @@ iflist(
 			ntohl(ifs->peercnt),
 			ntohl(ifs->uptime));
 
-		if (!ntohl(ifs->v6_flag)) {
-			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unbcast.addr, sizeof(ifs->unbcast.addr));
-			saddr.ss_family = AF_INET;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			saddr.ss_len = SOCKLEN(&saddr);
-#endif
-			fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'B');
-
-		}
 		if (ntohl(ifs->v6_flag)) {
 			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unmask.addr6, sizeof(ifs->unmask.addr6));
 			saddr.ss_family = AF_INET6;
@@ -3115,6 +3106,16 @@ iflist(
 		saddr.ss_len = SOCKLEN(&saddr);
 #endif
 		fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'M');
+
+		if (!ntohl(ifs->v6_flag) && ntohl(ifs->flags) & (INT_BCASTOPEN)) {
+			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unbcast.addr, sizeof(ifs->unbcast.addr));
+			saddr.ss_family = AF_INET;
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+			saddr.ss_len = SOCKLEN(&saddr);
+#endif
+			fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'B');
+
+		}
 
 		ifs++;
 		items--;

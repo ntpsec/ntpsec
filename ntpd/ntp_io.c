@@ -281,7 +281,7 @@ connection_reset_fix(SOCKET fd) {
 #endif
 
 /*
- * About interfaces, sockets, reception and more...
+ * About dynamic interfaces, sockets, reception and more...
  *
  * the code solves following tasks:
  *
@@ -313,7 +313,8 @@ connection_reset_fix(SOCKET fd) {
  *     but a list of interfaces that represent a unique address as determined by the kernel
  *     by the procedure in findlocalinterface. Thus it is perfectly legal to see only
  *     one representavive of a group of real interfaces if they share the same address.
- *    
+ * 
+ * Frank Kardel 20050910
  */
 
 /*
@@ -575,6 +576,7 @@ new_interface(struct interface *interface)
 	}
 
 	iface->ifnum = sys_ifnum++;  /* count every new instance of an interface in the system */
+	iface->starttime = current_time;
 
 	return iface;
 }
@@ -826,6 +828,29 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 }
 
 /*
+ * refresh_interface
+ * check to see if getsockname of the current socket still agrees
+ * with the original binding address
+ * if not - recreate sockets if possible
+ */
+static int
+refresh_interface(struct interface * interface)
+{
+	if (interface->fd != INVALID_SOCKET)
+	{
+		close_and_delete_fd_from_list(interface->fd);
+		interface->fd = open_socket(&interface->sin,
+					    interface->flags, 0, interface);
+
+		return interface->fd != INVALID_SOCKET;
+	}
+	else
+	{
+		return 0;	/* invalid sockets are not refreshable */
+	}
+}
+
+/*
  * interface_update - externally callable update function
  */
 void
@@ -837,21 +862,27 @@ interface_update(interface_receiver_t receiver, void *data)
 }
 
 /*
- * update_interfaces
- * strategy
+ * update_interface strategy
+ *
  * toggle configuration phase
+ *
  * Phase 1:
  * forall currently existing interfaces
- *   if address is known: copy configuration phase into interface (make it seen)
- *   if addres is NOT known: attempt to create a new interface entry
+ *   if address is known:
+ *       drop socket - rebind again
+ *
+ *   if address is NOT known:
+ *     attempt to create a new interface entry
+ *
  * Phase 2:
  * forall currently known interfaces
  *   if interface does not match configuration phase (not seen in phase 1):
  *     remove interface from known interface list
  *     forall peers associated with this interface
  *       disconnect peer from this interface
+ *
  * Phase 3:
- *   attempt to re-assign interfaces to peers (will unpeer() unconfigured peers)
+ *   attempt to re-assign interfaces to peers
  *
  */
 
@@ -863,7 +894,6 @@ update_interfaces(
 	)
 {
 	interface_info_t ifi;
-	int need_refresh = 0;
 	isc_mem_t *mctx = NULL;
 	isc_interfaceiter_t *iter = NULL;
 	isc_boolean_t scan_ipv4 = ISC_FALSE;
@@ -937,6 +967,8 @@ update_interfaces(
 		 */
 		init_interface(&interface);
 
+		DPRINT_INTERFACE(1, (&interface, "examining", "\n"));
+
 		convert_isc_if(&isc_if, &interface, port);
 
 		if (!(interface.flags & INT_UP))  { /* interfaces must be UP to be usable */
@@ -944,6 +976,7 @@ update_interfaces(
 			continue;
 		}
 		
+
 		/*
 		 * map to local *address* in order
 		 * to map all duplicate interfaces to an interface structure
@@ -952,11 +985,12 @@ update_interfaces(
 		 */
 		iface = findlocalinterface(&interface.sin);
 		
-		if (iface) 
+		if (iface && refresh_interface(iface)) 
 		{
 			/*
-			 * found existing interface - mark as verified
+			 * found existing and up to date interface - mark present
 			 */
+
 			iface->phase = sys_interphase;
 			DPRINT_INTERFACE(2, (iface, "updating ", " present\n"));
 			ifi.action = IFS_EXISTS;
@@ -967,17 +1001,40 @@ update_interfaces(
 		else
 		{
 			/*
-			 * this is new - add to out interface list
+			 * this is new or refreshing failed - add to our interface list
+			 * if refreshing failed we will delete the interface structure in
+			 * phase 2 as the interface was not marked current. We can bind to
+			 * the address as the refresh code already closed to offending socket
 			 */
+			
 			iface = create_interface(port, &interface);
 
-			need_refresh = 1;
-			
-			ifi.action = IFS_CREATED;
-			ifi.interface = iface;
-			if (receiver && iface)
-				receiver(data, &ifi);
-			DPRINT_INTERFACE(2, (iface ? iface : &interface, "updating ", iface ? " new - created\n" : " new - creation FAILED"));
+			if (iface)
+			{
+				ifi.action = IFS_CREATED;
+				ifi.interface = iface;
+				if (receiver && iface)
+					receiver(data, &ifi);
+			        DPRINT_INTERFACE(2, (iface ? iface : &interface, "updating ", iface ? " new - created\n" : " new - creation FAILED"));
+			}
+			else
+			{
+				msyslog(LOG_INFO, "failed to initialize interface for address %s", stoa(&interface.sin));
+			}
+		}
+		/* 
+		 * Check to see if we are going to use the interface
+		 * If we don't use it we mark it to drop any packet
+		 * received but we still must create the socket and
+		 * bind to it. This prevents other apps binding to it
+		 * and potentially causing problems with more than one
+		 * process fiddling with the clock
+		 */
+		if (address_okay(&isc_if) == ISC_TRUE) {
+			iface->ignore_packets = ISC_FALSE;
+		}
+		else {
+			iface->ignore_packets = ISC_TRUE;
 		}
 	}
 
@@ -1019,7 +1076,6 @@ update_interfaces(
 						/*
 						 * this one just lost it's interface
 						 */
-						need_refresh = 1;
 						set_peerdstadr(peer, NULL);
 	
 						peer = npeer;
@@ -1034,8 +1090,7 @@ update_interfaces(
 	/*
 	 * phase3 - re-configure as the world has changed if necessary
 	 */
-	if (need_refresh) 
-		refresh_all_peerinterfaces();
+	refresh_all_peerinterfaces();
 }
 		
 
@@ -1074,8 +1129,8 @@ create_sockets(
 }
 
 /*
- * create_sockets - create a socket for each interface plus a default
- *			socket for when we don't know where to send
+ * create_interface - create a new interface for a given prototype
+ *		      binding the socket.
  */
 static struct interface *
 create_interface(
@@ -1085,28 +1140,12 @@ create_interface(
 {
 	struct sockaddr_storage resmask;
 	struct interface *interface;
-	isc_interface_t isc_if;
 
 	DPRINTF(2, ("create_interface(%s#%d)\n", stoa(&iface->sin), ntohs( (u_short) port)));
 
 	/* build an interface */
 	interface = new_interface(iface);
 	
-	/* 
-	 * Check to see if we are going to use the interface
-	 * If we don't use it we mark it to drop any packet
-	 * received but we still must create the socket and
-	 * bind to it. This prevents other apps binding to it
-	 * and potentially causing problems with more than one
-	 * process fiddling with the clock
-	 */
-	if (address_okay(&isc_if) == ISC_TRUE) {
-	  interface->ignore_packets = ISC_FALSE;
-	}
-	else {
-	  interface->ignore_packets = ISC_TRUE;
-	}
-
 	/*
 	 * create socket
 	 */
@@ -2714,12 +2753,12 @@ findlocalinterface(
 	saddr.ss_family = addr->ss_family;
 	if(addr->ss_family == AF_INET) {
 		memcpy(&((struct sockaddr_in*)&saddr)->sin_addr, &((struct sockaddr_in*)addr)->sin_addr, sizeof(struct in_addr));
-		((struct sockaddr_in*)&saddr)->sin_port = htons(2000);
+		((struct sockaddr_in*)&saddr)->sin_port = htons(NTP_PORT);
 	}
 #ifdef INCLUDE_IPV6_SUPPORT
 	else if(addr->ss_family == AF_INET6) {
  		memcpy(&((struct sockaddr_in6*)&saddr)->sin6_addr, &((struct sockaddr_in6*)addr)->sin6_addr, sizeof(struct in6_addr));
-		((struct sockaddr_in6*)&saddr)->sin6_port = htons(2000);
+		((struct sockaddr_in6*)&saddr)->sin6_port = htons(NTP_PORT);
 # ifdef ISC_PLATFORM_HAVESCOPEID
 		((struct sockaddr_in6*)&saddr)->sin6_scope_id = ((struct sockaddr_in6*)addr)->sin6_scope_id;
 # endif
@@ -3278,6 +3317,15 @@ process_routing_msgs(struct asyncio_reader *reader)
 		switch (rtm->rtm_type) {
 		case RTM_NEWADDR:
 		case RTM_DELADDR:
+#ifdef RTM_ADD
+		case RTM_ADD:
+#endif
+#ifdef RTM_DELETE
+		case RTM_DELETE:
+#endif
+#ifdef RTM_LOSING
+		case RTM_LOSING:
+#endif
 #ifdef RTM_IFINFO
 		case RTM_IFINFO:
 #endif
@@ -3285,7 +3333,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 		case RTM_IFANNOUNCE:
 #endif
 			/*
-			 * we are keen on new and deleted addresses and if an interface goes up and down
+			 * we are keen on new and deleted addresses and if an interface goes up and down or routing changes
 			 */
 			DPRINTF(1, ("routing message op = %d: scheduling interface update\n", rtm->rtm_type));
 			timer_interfacetimeout(current_time + 2);
@@ -3333,4 +3381,3 @@ init_async_notifications()
 {
 }
 #endif
-
