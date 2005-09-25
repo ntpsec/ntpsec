@@ -110,54 +110,48 @@ getaddrinfo (const char *nodename, const char *servname,
 {
 	int rval;
 	struct addrinfo *ai = NULL;
-	struct sockaddr_in *sockin;
 	short ntpport = htons(NTP_PORT);
 
+
+	/*
+	 * If no name is provide just return an error
+	 */
+	if (nodename == NULL || servname == NULL)
+		return (EAI_NONAME);
+	
 	ai = calloc(sizeof(struct addrinfo), 1);
 	if (ai == NULL)
 		return (EAI_MEMORY);
 
 	/*
-	 * Heiko: Default values taken from hint
+	 * Copy default values from hints, if available
 	 */
-	memcpy (ai, hints, sizeof(struct addrinfo));
+	if (hints != NULL) {
+		ai->ai_flags = hints->ai_flags;
+		ai->ai_family = hints->ai_family;
+		ai->ai_socktype = hints->ai_socktype;
+		ai->ai_protocol = hints->ai_protocol;
+	}
 
-	if (nodename != NULL) {
-		rval = do_nodename(nodename, ai, hints);
-		if (rval != 0) {
-			freeaddrinfo(ai);
-			return (rval);
-		}
+	rval = do_nodename(nodename, ai, hints);
+	if (rval != 0) {
+		freeaddrinfo(ai);
+		return (rval);
 	}
-	if (nodename == NULL && hints != NULL) {
-		if (ai->ai_addr == NULL) {
-			ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
-			if (ai->ai_addr == NULL) {
-				freeaddrinfo(ai);
-				return (EAI_MEMORY);
-			}
-		}
-		ai->ai_addrlen = sizeof(struct sockaddr_storage);
-		sockin = (struct sockaddr_in *)ai->ai_addr;
-		sockin->sin_family = (short) ai->ai_family;
-		sockin->sin_addr.s_addr = htonl(INADDR_ANY);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
-#endif
-	}
-	if (servname != NULL) {
-		if (ai->ai_addr == NULL) {
-			ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
-			if (ai->ai_addr == NULL) {
-				freeaddrinfo(ai);
-				return (EAI_MEMORY);
-			}
-		}
+
+	/*
+	 * This normally is not the place for this, but as long as this is
+	 * only used within NTP is should be okay. This will only get called
+	 * if the O/S doesn't supply the getaddrinfo() API.
+	 */
+	if (ai->ai_socktype == 0) {
 		ai->ai_socktype = SOCK_DGRAM;
-		if (strcmp(servname, "ntp") != 0) {
-			freeaddrinfo(ai);
-			return (EAI_SERVICE);
-		}
+	}
+	if (strcmp(servname, "ntp") != 0 && strcmp(servname, "123") != 0) {
+		freeaddrinfo(ai);
+		return (EAI_SERVICE);
+	}
+	else {
 		/*
 		 * Set up the port number
 		 */
