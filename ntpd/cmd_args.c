@@ -21,7 +21,7 @@ extern int default_ai_family;
 int	listen_to_virtual_ips = 1;
 char 	*specific_interface = NULL;        /* interface name or IP address to bind to */
 
-static const char *ntp_options = "46aAbB:c:C:dD:f:gHi:k:l:L:nNO:p:P:qr:s:S:t:T:W:u:v:V:xY:Z:-:";
+static const char *ntp_options = "46aAbB:c:C:dD:f:gHi:k:l:L:nNO:p:P:qr:s:S:t:T:W:U:u:v:V:xY:Z:-:";
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -34,7 +34,7 @@ void ntpd_usage( void )
 		(void) fprintf(stderr, "\t\t[ -f drift_file ] [ -k key_file ] [ -l log_file ]\n");
 		(void) fprintf(stderr, "\t\t[ -p pid_file ] [ -r broadcast_delay ] [ -s stats_dir ]\n");
 		(void) fprintf(stderr, "\t\t[ -t trusted_key ] [ -v sys_var ] [ -V default_sysvar ]\n");
-		(void) fprintf(stderr, "\t\t[ -L [ interface ] ]\n");
+		(void) fprintf(stderr, "\t\t[ -L [ interface ] [ -U interface_update_interval ]\n");
 #if defined(HAVE_SCHED_SETSCHEDULER)
 		(void) fprintf(stderr, "\t\t[ -P fixed_process_priority ]\n");
 #endif
@@ -355,6 +355,25 @@ getCmdOpts(
 				}
 			} while (0);
 			break;
+
+		    case 'U':
+		      do 
+			{
+			  long val;
+			  extern int interface_interval;
+			  
+			  if ((1 == sscanf(ntp_optarg, "%ld", &val)) && ((val >= 60) || (val == 0)))
+			    interface_interval = val;
+			  else 
+			    {
+			      msyslog(LOG_ERR,
+				      "command line interface update interval %s must be 0 or longer than 60 seconds",
+				      ntp_optarg);
+			      errflg++;
+			    }
+			}
+		      while(0);
+		      break;
 
 		    case 'v':
 		    case 'V':

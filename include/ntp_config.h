@@ -77,6 +77,7 @@
 #define CONF_MOD_NOSELECT 	11
 #define CONF_MOD_TRUE		12
 #define	CONF_MOD_PREEMPT	13
+#define CONF_MOD_DYNAMIC	14
 
 /*
  * "restrict" modifier keywords
