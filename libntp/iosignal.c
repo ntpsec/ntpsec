@@ -31,6 +31,12 @@
 # include <ifaddrs.h>
 #endif
 
+# ifdef __QNXNTO__
+#  include <fcntl.h>
+#  include <unix.h>
+#  define FNDELAY O_NDELAY
+# endif
+
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -79,12 +85,6 @@ extern	void	input_handler	P((l_fp *));
 
 # if !defined(USE_TTY_SIGPOLL) || !defined(USE_UDP_SIGPOLL)
 #  define USE_SIGIO
-# endif
-
-# ifdef __QNXNTO__
-#  include <fcntl.h>
-#  include <unix.h>
-#  define FNDELAY O_NDELAY
 # endif
 
 # if defined(USE_SIGIO) && defined(USE_SIGPOLL)
