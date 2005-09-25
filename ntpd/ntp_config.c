@@ -15,8 +15,6 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
-#include "ntp_config.h"
-#include "ntp_cmdargs.h"
 #include <ntp_random.h>
 #include <isc/net.h>
 #include <isc/result.h>
@@ -40,6 +38,14 @@
 # include <io.h>
 HANDLE ResolverThreadHandle = NULL;
 #endif /* SYS_WINNT */
+
+/*
+ * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
+ * so #include these later.
+ */
+
+#include "ntp_config.h"
+#include "ntp_cmdargs.h"
 
 extern int priority_done;
 
