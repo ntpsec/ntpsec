@@ -2914,8 +2914,8 @@ AC_MSG_RESULT($ans)
 
 AC_MSG_CHECKING(if we want to try SNTP)
 AC_ARG_WITH(sntp,
-	AC_HELP_STRING([--with-sntp], [- Build SNTP?]),
-[ans=$withval], [ans=no])
+	AC_HELP_STRING([--with-sntp], [+ Build SNTP?]),
+	[ans=$withval], [ans=yes])
 case "$ans" in
  no) ;;
  *)
