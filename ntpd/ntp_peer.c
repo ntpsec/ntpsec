@@ -341,7 +341,6 @@ unpeer(
 		printf("demobilize %u %d %d\n", peer_to_remove->associd,
 		    peer_associations, peer_preempt);
 #endif
-	peer_clear(peer_to_remove, "KILL");
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
