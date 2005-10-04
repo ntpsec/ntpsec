@@ -1583,7 +1583,7 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		temp = peer->flash | peer_unfit(peer);
+		temp = peer->flash;
 		ctl_puthex(peer_var[CP_FLASH].text, temp);
 		break;
 

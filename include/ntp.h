@@ -219,7 +219,8 @@ struct interface {
 #define TEST7		0x0040	/* bad header data */
 #define TEST8		0x0080  /* autokey error */
 #define TEST9		0x0100	/* crypto error */
-
+#define	PKT_TEST_MASK	(TEST1 | TEST2 | TEST3 | TEST4 | TEST5 |\
+			TEST6 | TEST7 | TEST8 | TEST9)
 /*
  * Peer errors
  */
@@ -227,6 +228,7 @@ struct interface {
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unreacable */
+#define	PEER_TEST_MASK	(TEST10 | TEST11 | TEST12 | TEST13)
 
 /*
  * Authentication codes

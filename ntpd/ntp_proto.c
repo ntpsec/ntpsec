@@ -1,4 +1,4 @@
-y/*
+/*
  * ntp_proto.c - NTP version 4 protocol machinery
  *
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
@@ -111,6 +111,7 @@ static	void	fast_xmit	P((struct recvbuf *, int, keyid_t,
 				    int));
 static	void	clock_update	P((void));
 static	int	default_get_precision	P((void));
+static	int	peer_unfit	P((struct peer *));
 
 
 /*
@@ -895,7 +896,7 @@ receive(
 	default:
 		return;
 	}
-	peer->flash = 0;
+	peer->flash &= ~PKT_TEST_MASK;
 
 	/*
 	 * Next comes a rigorous schedule of timestamp checking. If the
@@ -932,7 +933,7 @@ receive(
 	 */
 	peer->org = p_xmt;
 	peer->rec = rbufp->recv_time;
-	if (peer->flash) {
+	if (peer->flash & PKT_TEST_MASK) {
 #ifdef OPENSSL
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 			rval = crypto_recv(peer, rbufp);
@@ -1143,7 +1144,7 @@ process_packet(
 	 * Note that some flashers may have already been set in the
 	 * receive() routine.
 	 */
-	if (peer->flash) {
+	if (peer->flash & PKT_TEST_MASK) {
 #ifdef DEBUG
 		if (debug)
 			printf("packet: flash header %04x\n",
@@ -1292,11 +1293,8 @@ clock_update(void)
 	 */
 	case 1:
 		sys_leap = leap_next;
-		sys_stratum = sys_peer->stratum + 1;
-		if (sys_stratum == 1 || sys_stratum == STRATUM_UNSPEC)
-			sys_refid = sys_peer->refid;
-		else
-			sys_refid = addr2refid(&sys_peer->srcadr);
+		sys_stratum = min(sys_peer->stratum + 1,
+		    STRATUM_UNSPEC);
 		sys_reftime = sys_peer->rec;
 
 		/*
@@ -1970,7 +1968,7 @@ clock_select(void)
 	 * Clustering algorithm. Construct candidate list in order first
 	 * by stratum then by root distance, but keep only the best
 	 * NTP_MAXASSOC of them. Scan the list to find falsetickers, who
-	 * leave the island immediately. The TRUE peer is alwasy a
+	 * leave the island immediately. The TRUE peer is always a
 	 * truechimer. We must leave at least one peer to collect the
 	 * million bucks. If in orphan mode, rascals found with lower
 	 * stratum are guaranteed a seat on the bus.
@@ -2114,10 +2112,6 @@ clock_select(void)
 	 * stratum. Note that the head of the list is at the lowest
 	 * stratum and that unsynchronized peers cannot survive this
 	 * far.
-	 *
-	 * In orphan mode the prefer peer is determined as the minimum
-	 * root delay of the available peers. In normal mode the prefer
-	 * peer is designated in the configuration file.
 	 */
 	leap_next = 0;
 	for (i = 0; i < nlist; i++) {
@@ -2155,12 +2149,33 @@ clock_select(void)
 
 	/*
 	 * Mitigation rules of the game. There are several types of
-	 * peers that can be selected here: (1) prefer peer (flag
-	 * FLAG_PREFER) (2) pps peers (type REFCLK_ATOM_PPS), (3) the
-	 * existing system peer, if any, and (3) the head of the
+	 * peers that can be selected here: (1) orphan, (2) prefer peer
+	 * (flag FLAG_PREFER) (3) pps peers (type REFCLK_ATOM_PPS), (4)
+	 * the existing system peer, if any, and (5) the head of the
 	 * survivor list.
 	 */
-	if (sys_prefer) {
+	if (typesystem->stratum >= sys_orphan) {
+
+		/*
+		 * If in orphan mode, choose the system peer. If the
+		 * lowest distance, the offset is zero.
+		 */
+		sys_peer = typesystem;
+		sys_peer->status = CTL_PST_SEL_SYSPEER;
+		if (sys_orphandelay < sys_peer->rootdelay) {
+			sys_offset = 0;
+			sys_refid = htonl(LOOPBACKADR);
+		} else {
+			sys_offset = sys_peer->offset;
+			sys_refid = sys_peer->refid;
+		}
+		sys_jitter = LOGTOD(sys_precision);
+#ifdef DEBUG
+		if (debug > 1)
+			printf("select: orphan offset %.6f\n",
+			    sys_offset);
+#endif
+	} else if (sys_prefer) {
 
 		/*
 		 * If a pps peer is present, choose it; otherwise,
@@ -2170,7 +2185,6 @@ clock_select(void)
 			sys_peer = sys_pps;
 			sys_peer->status = CTL_PST_SEL_PPS;
 			sys_offset = sys_peer->offset;
-			sys_jitter = sys_peer->jitter;
 			if (!pps_control)
 				NLOG(NLOG_SYSEVENT)
 				    msyslog(LOG_INFO,
@@ -2184,18 +2198,19 @@ clock_select(void)
 		} else {
 			sys_peer = sys_prefer;
 			sys_peer->status = CTL_PST_SEL_SYSPEER;
-			if (peer->stratum >= sys_orphan &&
-			    sys_orphandelay < sys_peer->rootdelay)
-				sys_offset = 0;
-			else
-				sys_offset = sys_peer->offset;
-			sys_jitter = sys_peer->jitter;
+			sys_offset = sys_peer->offset;
 #ifdef DEBUG
 			if (debug > 1)
 				printf("select: prefer offset %.6f\n",
 				    sys_offset);
 #endif
 		}
+		if (sys_peer->stratum == STRATUM_REFCLOCK ||
+		    sys_peer->stratum == STRATUM_UNSPEC)
+			sys_refid = sys_peer->refid;
+		else
+			sys_refid = addr2refid(&sys_peer->srcadr);
+		sys_jitter = sys_peer->jitter;
 	} else {
 
 		/*
@@ -2204,6 +2219,11 @@ clock_select(void)
 		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		clock_combine(peer_list, nlist);
+		if (sys_stratum == STRATUM_REFCLOCK || sys_stratum ==
+		    STRATUM_UNSPEC)
+			sys_refid = sys_peer->refid;
+		else
+			sys_refid = addr2refid(&sys_peer->srcadr);
 		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
 		    SQUARE(sys_jitter));
 #ifdef DEBUG
@@ -2876,7 +2896,7 @@ key_expire(
  * A peer is unfit for synchronization if
  * > TEST10 bad leap or stratum below floor or at or above ceiling
  * > TEST11 root distance exceeded
- * > TEST12 a direct or indirect synchronization loop would form
+ * > TEST12 a direct synchronization loop would form
  * > TEST13 unreachable or noselect
  */
 int				/* FALSE if fit, TRUE if unfit */
@@ -2895,14 +2915,14 @@ peer_unfit(
 	    ULOGTOD(sys_poll))
 		rval |= TEST11;		/* distance exceeded */
 
-	if (peer->stratum > 1 && (peer->refid ==
-	    peer->dstadr->addr_refid || peer->refid == sys_refid))
+	if (peer->stratum > 1 && peer->refid ==
+	    peer->dstadr->addr_refid)
 		rval |= TEST12;		/* synch loop */
 
 	if (!peer->reach || peer->flags & FLAG_NOSELECT)
 		rval |= TEST13;		/* unreachable */
 
-	peer->flash &= ~(TEST10 | TEST11 | TEST12 | TEST13);
+	peer->flash &= ~PEER_TEST_MASK;
 	peer->flash |= rval;
 	return (rval);
 }
