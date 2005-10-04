@@ -1,4 +1,4 @@
-y/*
+/*
  * ntp_proto.c - NTP version 4 protocol machinery
  *
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
