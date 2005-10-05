@@ -132,23 +132,25 @@ transmit(
 	 * is intricate...
 	 */
 	/*
-	 * In broadcast mode the poll interval is never changed from
-	 * minpoll. Orphan mode is active when enabled and when no other
-	 * source is available. In this mode broadcasts are made at the
-	 * orphan stratum and with root delay randomized over a 1-s
-	 * range. The root delay is used by the election algorithm to
-	 * select a single source from among the orphan dwellers.
+	 * Orphan mode is active when enabled and when no other source
+	 * is available. In this mode packets are sent at the orphan
+	 * stratum and with root delay randomized over a 1-s range. In
+	 * broadcast mode the root delay is used by the election
+	 * algorithm to select a single source from among the orphans.
 	 */
 	hpoll = peer->hpoll;
+	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
+		sys_leap = LEAP_NOWARNING;
+		sys_stratum = sys_orphan;
+	}
+
+	/*
+	 * In broadcast mode the poll interval is never changed from
+	 * minpoll.
+	 */
 	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
 		peer->outdate = current_time;
-		if (sys_peer != NULL) {
-			peer_xmit(peer);
-		} else if (sys_orphan < STRATUM_UNSPEC) {
-			sys_leap = LEAP_NOWARNING;
-			sys_stratum = sys_orphan;
-			peer_xmit(peer);
-		}
+		peer_xmit(peer);
 		poll_update(peer, hpoll);
 		return;
 	}
@@ -2167,7 +2169,7 @@ clock_select(void)
 			sys_refid = htonl(LOOPBACKADR);
 		} else {
 			sys_offset = sys_peer->offset;
-			sys_refid = sys_peer->refid;
+			sys_refid = addr2refid(&sys_peer->srcadr);
 		}
 		sys_jitter = LOGTOD(sys_precision);
 #ifdef DEBUG
@@ -2219,8 +2221,8 @@ clock_select(void)
 		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		clock_combine(peer_list, nlist);
-		if (sys_stratum == STRATUM_REFCLOCK || sys_stratum ==
-		    STRATUM_UNSPEC)
+		if (sys_peer->stratum == STRATUM_REFCLOCK ||
+		    sys_peer->stratum == STRATUM_UNSPEC)
 			sys_refid = sys_peer->refid;
 		else
 			sys_refid = addr2refid(&sys_peer->srcadr);
