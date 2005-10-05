@@ -855,6 +855,10 @@ refclock_setup(
 		ttyp->c_iflag = IGNBRK | IGNPAR | ICRNL;
 		ttyp->c_oflag = 0;
 		ttyp->c_cflag = CS8 | CLOCAL | CREAD;
+		if (lflags & LDISC_7O1) {
+			/* HP Z3801A needs 7-bit, odd parity */
+  			ttyp->c_cflag = CS7 | PARENB | PARODD | CLOCAL | CREAD;
+		}
 		cfsetispeed(&ttyb, speed);
 		cfsetospeed(&ttyb, speed);
 		for (i = 0; i < NCCS; ++i)
