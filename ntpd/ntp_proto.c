@@ -142,6 +142,9 @@ transmit(
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
 		sys_leap = LEAP_NOWARNING;
 		sys_stratum = sys_orphan;
+		sys_refid = htonl(LOOPBACKADR);
+		sys_rootdelay = 0;
+		sys_rootdispersion = 0;
 	}
 
 	/*
@@ -2329,10 +2332,12 @@ peer_xmit(
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
-	if (sys_stratum >= sys_orphan)
+	if (sys_stratum < sys_orphan)
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	else if (sys_peer != NULL)
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
 	else
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdelay = 0;
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
@@ -2759,10 +2764,12 @@ fast_xmit(
 	}
 	xpkt.ppoll = rpkt->ppoll;
 	xpkt.precision = sys_precision;
-	if (sys_stratum >= sys_orphan)
+	if (sys_stratum < sys_orphan)
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	else if (sys_peer != NULL)
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
 	else
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdelay = 0;
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	xpkt.org = rpkt->xmt;
