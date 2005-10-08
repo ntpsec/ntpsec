@@ -345,7 +345,8 @@ unpeer(
 #endif
 	set_peerdstadr(peer_to_remove, NULL);
 
-	peer_clear(peer_to_remove, "KILL");
+	/* XXXMEMLEAK? peer_clear->crypto allocation */
+
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;

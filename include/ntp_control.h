@@ -175,7 +175,8 @@ struct ntp_control {
 #define CS_TAI		27
 #define	CS_DIGEST	28
 #define CS_IDENT	29
-#define	CS_MAXCODE	CS_DIGEST
+#define	CS_REVOKE	30
+#define	CS_MAXCODE	CS_REVOKE
 #else
 #define	CS_MAXCODE	CS_VARLIST
 #endif /* OPENSSL */

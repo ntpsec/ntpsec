@@ -115,7 +115,6 @@ typedef char s_char;
 /*
  * Clock filter algorithm tuning parameters
  */
-#define MINDISPERSE	.01	/* min dispersion */
 #define MAXDISPERSE	16.	/* max dispersion */
 #define	NTP_SHIFT	8	/* clock filter stages */
 #define NTP_FWEIGHT	.5	/* clock filter weight */
@@ -126,7 +125,7 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define	NTP_MAXASSOC	50	/* max associations */
-#define MINDISPERSE	.01	/* min dispersion increment */
+#define MINDISPERSE	.005	/* min dispersion increment */
 #define MAXDISTANCE	1.	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
@@ -227,7 +226,8 @@ struct interface {
 #define TEST7		0x0040	/* bad header data */
 #define TEST8		0x0080  /* autokey error */
 #define TEST9		0x0100	/* crypto error */
-
+#define	PKT_TEST_MASK	(TEST1 | TEST2 | TEST3 | TEST4 | TEST5 |\
+			TEST6 | TEST7 | TEST8 | TEST9)
 /*
  * Peer errors
  */
@@ -235,6 +235,7 @@ struct interface {
 #define	TEST11		0x0400	/* peer distance exceeded */
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unreacable */
+#define	PEER_TEST_MASK	(TEST10 | TEST11 | TEST12 | TEST13)
 
 /*
  * Authentication codes
@@ -749,6 +750,8 @@ struct pkt {
 #define PROTO_ADJ		23
 #define	PROTO_MAXHOP		24
 #define	PROTO_BEACON		25
+#define	PROTO_ORPHAN		26
+
 /*
  * Configuration items for the loop filter
  */

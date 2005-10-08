@@ -155,6 +155,7 @@
 #define CONF_TOS_MAXDIST	8
 #define	CONF_TOS_MAXHOP		9
 #define	CONF_TOS_BEACON		10
+#define	CONF_TOS_ORPHAN		11
 
 #ifdef OPENSSL
 /*

@@ -120,7 +120,7 @@ struct in6_pktinfo {
 #endif
 
 #if _MSC_VER < 1300
-#define in6addr_any isc_in6addr_any
+#define in6addr_any isc_net_in6addrany
 #define in6addr_loopback isc_in6addr_loopback
 #endif
 

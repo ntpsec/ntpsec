@@ -497,7 +497,7 @@ local_clock(
 #ifdef STA_NANO
 		if (pll_control && kern_enable && sys_tai == 0) {
 			memset(&ntv, 0, sizeof(ntv));
-			ntv.modes = MOD_BITS | MOD_TAI;
+			ntv.modes = MOD_TAI;
 			ntv.constant = i + TAI_1972 - 1;
 			ntp_adjtime(&ntv);
 		}

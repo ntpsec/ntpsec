@@ -109,14 +109,17 @@ getaddrinfo (const char *nodename, const char *servname,
 	const struct addrinfo *hints, struct addrinfo **res)
 {
 	int rval;
+	struct servent *sp;
 	struct addrinfo *ai = NULL;
-	short ntpport = htons(NTP_PORT);
+	int port;
+	const char *proto = NULL;
+	int family, socktype, flags, protocol;
 
 
 	/*
 	 * If no name is provide just return an error
 	 */
-	if (nodename == NULL || servname == NULL)
+	if (nodename == NULL && servname == NULL)
 		return (EAI_NONAME);
 	
 	ai = calloc(sizeof(struct addrinfo), 1);
@@ -131,6 +134,62 @@ getaddrinfo (const char *nodename, const char *servname,
 		ai->ai_family = hints->ai_family;
 		ai->ai_socktype = hints->ai_socktype;
 		ai->ai_protocol = hints->ai_protocol;
+
+		family = hints->ai_family;
+		socktype = hints->ai_socktype;
+		protocol = hints->ai_protocol;
+		flags = hints->ai_flags;
+
+		switch (family) {
+		case AF_UNSPEC:
+			switch (hints->ai_socktype) {
+			case SOCK_STREAM:
+				proto = "tcp";
+				break;
+			case SOCK_DGRAM:
+				proto = "udp";
+				break;
+			}
+			break;
+		case AF_INET:
+		case AF_INET6:
+			switch (hints->ai_socktype) {
+			case 0:
+				break;
+			case SOCK_STREAM:
+				proto = "tcp";
+				break;
+			case SOCK_DGRAM:
+				proto = "udp";
+				break;
+			case SOCK_RAW:
+				break;
+			default:
+				return (EAI_SOCKTYPE);
+			}
+			break;
+#ifdef	AF_LOCAL
+		case AF_LOCAL:
+			switch (hints->ai_socktype) {
+			case 0:
+				break;
+			case SOCK_STREAM:
+				break;
+			case SOCK_DGRAM:
+				break;
+			default:
+				return (EAI_SOCKTYPE);
+			}
+			break;
+#endif
+		default:
+			return (EAI_FAMILY);
+		}
+	} else {
+		protocol = 0;
+		family = 0;
+		socktype = 0;
+		flags = 0;
 	}
 
 	rval = do_nodename(nodename, ai, hints);
@@ -140,26 +199,43 @@ getaddrinfo (const char *nodename, const char *servname,
 	}
 
 	/*
-	 * This normally is not the place for this, but as long as this is
-	 * only used within NTP is should be okay. This will only get called
-	 * if the O/S doesn't supply the getaddrinfo() API.
+	 * First, look up the service name (port) if it was
+	 * requested.  If the socket type wasn't specified, then
+	 * try and figure it out.
 	 */
-	if (ai->ai_socktype == 0) {
-		ai->ai_socktype = SOCK_DGRAM;
-	}
-	if (strcmp(servname, "ntp") != 0 && strcmp(servname, "123") != 0) {
-		freeaddrinfo(ai);
-		return (EAI_SERVICE);
-	}
-	else {
-		/*
-		 * Set up the port number
-		 */
-		if (ai->ai_family == AF_INET)
-			((struct sockaddr_in *)ai->ai_addr)->sin_port = ntpport;
-		else if (ai->ai_family == AF_INET6)
-			((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = ntpport;
-	}
+	if (servname != NULL) {
+		char *e;
+
+		port = strtol(servname, &e, 10);
+		if (*e == '\0') {
+			if (socktype == 0)
+				return (EAI_SOCKTYPE);
+			if (port < 0 || port > 65535)
+				return (EAI_SERVICE);
+			port = htons((unsigned short) port);
+		} else {
+			sp = getservbyname(servname, proto);
+			if (sp == NULL)
+				return (EAI_SERVICE);
+			port = sp->s_port;
+			if (socktype == 0) {
+				if (strcmp(sp->s_proto, "tcp") == 0)
+					socktype = SOCK_STREAM;
+				else if (strcmp(sp->s_proto, "udp") == 0)
+					socktype = SOCK_DGRAM;
+			}
+		}
+	} else
+		port = 0;
+
+	/*
+	/*
+	 * Set up the port number
+	 */
+	if (ai->ai_family == AF_INET)
+		((struct sockaddr_in *)ai->ai_addr)->sin_port = (unsigned short) port;
+	else if (ai->ai_family == AF_INET6)
+		((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = (unsigned short) port;
 	*res = ai;
 	return (0);
 }
@@ -214,10 +290,37 @@ do_nodename(
 {
 	struct hostent *hp;
 	struct sockaddr_in *sockin;
+	struct sockaddr_in6 *sockin6;
 
 	ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
 	if (ai->ai_addr == NULL)
 		return (EAI_MEMORY);
+
+	/*
+	 * For an empty node name just use the wildcard.
+	 * NOTE: We need to assume that the address family is
+	 * set elsewhere so that we can set the appropriate wildcard
+	 */
+	if (nodename == NULL) {
+		ai->ai_addrlen = sizeof(struct sockaddr_storage);
+		if (ai->ai_family == AF_INET)
+		{
+			sockin = (struct sockaddr_in *)ai->ai_addr;
+			sockin->sin_family = (short) ai->ai_family;
+			sockin->sin_addr.s_addr = htonl(INADDR_ANY);
+		}
+		else
+		{
+			sockin6 = (struct sockaddr_in6 *)ai->ai_addr;
+			sockin6->sin6_family = (short) ai->ai_family;
+			sockin6->sin6_addr = in6addr_any;
+		}
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
+#endif
+
+		return (0);
+	}
 
 	/*
 	 * See if we have an IPv6 address

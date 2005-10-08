@@ -249,6 +249,7 @@ static struct keyword tos_keywords[] = {
 	{ "maxdist",		CONF_TOS_MAXDIST },
 	{ "maxhop",		CONF_TOS_MAXHOP },
 	{ "beacon",		CONF_TOS_BEACON },
+	{ "orphan",		CONF_TOS_ORPHAN },
 	{ "",			CONFIG_UNKNOWN }
 };
 
@@ -1125,6 +1126,10 @@ getconfig(
 
 			    case CONF_TOS_MAXHOP:
 				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
+				break;
+
+			    case CONF_TOS_ORPHAN:
+				proto_config(PROTO_ORPHAN, 0, ftemp, NULL);
 				break;
 
 			    case CONF_TOS_BEACON:
