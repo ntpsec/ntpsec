@@ -13,7 +13,7 @@
 		<h3>Server Options</h3>
 		<img src="pic/boom3a.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>The chicken is getting configuration advice.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">18:37</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="246">Thursday, July 28, 2005</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">19:29</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="284">Saturday, October 01, 2005</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -58,7 +58,7 @@
 			<dt><tt>iburst</tt>
 			<dd>When the server is unreachable, send a burst of eight packets instead of the usual one. The packet spacing is normally 2 s; however, the spacing between the first two packets can be changed with the <tt>calldelay</tt> command to allow additional time for a modem or ISDN call to complete. This is designed to speed the initial synchronization acquisition with the <tt>server</tt> command and <tt>s</tt> addresses and when <tt>ntpd</tt> is started with the <tt>-q</tt> option.
 			<dt><tt>key</tt> <i><tt>key</tt></i>
-			<dd>All packets sent to and received from the server or peer are to include authentication fields encrypted using the specified <i>key</i> identifier with values from 1 to 65534, inclusive. The default is to include no encryption field.
+			<dd>All packets sent to and received from the server or peer are to include authentication fields encrypted using the specified <i><tt>key</tt></i> identifier with values from 1 to 65534, inclusive. The default is to include no encryption field.
 			<dt><tt>minpoll <i>minpoll</i></tt><br>
 				<tt>maxpoll <i>maxpoll</i></tt>
 			<dd>These options specify the minimum and maximum poll intervals for NTP messages, in seconds as a power of two. The maximum poll interval defaults to 10 (1,024 s), but can be increased by the <tt>maxpoll</tt> option to an upper limit of 17 (36.4 h). The minimum poll interval defaults to 6 (64 s), but can be decreased by the <tt>minpoll</tt> option to a lower limit of 4 (16 s).
