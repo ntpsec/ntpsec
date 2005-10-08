@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/libparse/data_mbg.c,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * /src/NTP/REPOSITORY/ntp4-dev/libparse/data_mbg.c,v 4.7 2005/10/07 22:11:10 kardel RELEASE_20051008_A
  *
- * data_mbg.c,v 4.6 2005/04/16 17:32:10 kardel RELEASE_20050508_A
+ * data_mbg.c,v 4.7 2005/10/07 22:11:10 kardel RELEASE_20051008_A
  *
  * $Created: Sun Jul 20 12:08:14 1997 $
  *
@@ -47,7 +47,7 @@
 #include "ieee754io.h"
 
 static void get_mbg_tzname P((unsigned char **, char *));
-static void mbg_time_status_str P((unsigned char **, unsigned int));
+static void mbg_time_status_str P((unsigned char **, unsigned int, int));
 
 #if 0				/* no actual floats on Meinberg binary interface */
 static offsets_t mbg_float  = { 1, 0, 3, 2, 0, 0, 0, 0 }; /* byte order for meinberg floats */
@@ -209,74 +209,80 @@ get_mbg_antinfo(
 static void
 mbg_time_status_str(
 	unsigned char **buffpp,
-	unsigned int status
+	unsigned int status,
+	int size
 	)
 {
-  static struct state
-    {
-      int         flag;		/* bit flag */
-      const char *string;	/* bit name */
-    } states[] =
-    {
-      { TM_UTC,    "UTC CORR" },
-      { TM_LOCAL,  "LOCAL TIME" },
-      { TM_DL_ANN, "DST WARN" },
-      { TM_DL_ENB, "DST" },
-      { TM_LS_ANN, "LEAP WARN" },
-      { TM_LS_ENB, "LEAP SEC" },
-      { 0, "" }
-    };
-
-  if (status)
-    {
-      unsigned char *p;
-      struct state *s;
-	
-      p = *buffpp;
-
-      for (s = states; s->flag; s++)
+	static struct state
 	{
-	  if (s->flag & status)
-	    {
-	      if (p != *buffpp)
+		int         flag;		/* bit flag */
+		const char *string;	/* bit name */
+	} states[] =
+		  {
+			  { TM_UTC,    "UTC CORR" },
+			  { TM_LOCAL,  "LOCAL TIME" },
+			  { TM_DL_ANN, "DST WARN" },
+			  { TM_DL_ENB, "DST" },
+			  { TM_LS_ANN, "LEAP WARN" },
+			  { TM_LS_ENB, "LEAP SEC" },
+			  { 0, "" }
+		  };
+
+	if (status)
+	{
+		unsigned char *start, *p;
+		struct state *s;
+	
+		start = p = *buffpp;
+
+		for (s = states; s->flag; s++)
 		{
-		  *p++ = ',';
-		  *p++ = ' ';
+			if (s->flag & status)
+			{
+				if (p != *buffpp)
+				{
+					strncpy(p, ", ", size - (p - start));
+					p += 2;
+				}
+				strncpy((char *)p, s->string, size - (p - start));
+				p += strlen((char *)p);
+			}
 		}
-	      strcpy((char *)p, s->string);
-	      p += strlen((char *)p);
-	    }
+		*buffpp = p;
 	}
-      *buffpp = p;
-    }
 }
       
 void
 mbg_tm_str(
 	unsigned char **buffpp,
-	TM *tmp
+	TM *tmp,
+	int size
 	)
 {
-  sprintf((char *)*buffpp, "%04d-%02d-%02d %02d:%02d:%02d.%07ld (%c%02d%02d) ",
-	  tmp->year, tmp->month, tmp->mday,
-	  tmp->hour, tmp->minute, tmp->second, tmp->frac,
-	  (tmp->offs_from_utc < 0) ? '-' : '+',
-	  abs(tmp->offs_from_utc) / 3600,
-	  (abs(tmp->offs_from_utc) / 60) % 60);
-  *buffpp += strlen((char *)*buffpp);
-  mbg_time_status_str(buffpp, tmp->status);
+	unsigned char *s = *buffpp;
+
+	snprintf((char *)*buffpp, size, "%04d-%02d-%02d %02d:%02d:%02d.%07ld (%c%02d%02d) ",
+		 tmp->year, tmp->month, tmp->mday,
+		 tmp->hour, tmp->minute, tmp->second, tmp->frac,
+		 (tmp->offs_from_utc < 0) ? '-' : '+',
+		 abs(tmp->offs_from_utc) / 3600,
+		 (abs(tmp->offs_from_utc) / 60) % 60);
+	*buffpp += strlen((char *)*buffpp);
+
+	mbg_time_status_str(buffpp, tmp->status, size - (*buffpp - s));
 }
 
 void
 mbg_tgps_str(
 	unsigned char **buffpp,
-	T_GPS *tgpsp
+	T_GPS *tgpsp,
+	int size
 	)
 {
-  sprintf((char *)*buffpp, "week %d + %ld days + %ld.%07ld sec",
-	  tgpsp->wn, tgpsp->sec / 86400,
-	  tgpsp->sec % 86400, tgpsp->tick);
-  *buffpp += strlen((char *)*buffpp);
+	snprintf((char *)*buffpp, size, "week %d + %ld days + %ld.%07ld sec",
+		 tgpsp->wn, tgpsp->sec / 86400,
+		 tgpsp->sec % 86400, tgpsp->tick);
+	*buffpp += strlen((char *)*buffpp);
 }
 
 void
@@ -502,6 +508,12 @@ get_mbg_iono(
 
 /*
  * data_mbg.c,v
+ * Revision 4.7  2005/10/07 22:11:10  kardel
+ * bounded buffer implementation
+ *
+ * Revision 4.6.2.1  2005/09/25 10:23:06  kardel
+ * support bounded buffers
+ *
  * Revision 4.6  2005/04/16 17:32:10  kardel
  * update copyright
  *
