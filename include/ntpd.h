@@ -164,7 +164,6 @@ extern	void	peer_clear	P((struct peer *, char *));
 extern	void 	process_packet	P((struct peer *, struct pkt *));
 extern	void	clock_select	P((void));
 extern	void	kod_proto	P((void));
-extern	int	peer_unfit	P((struct peer *));
 
 /*
  * there seems to be a bug in the IRIX 4 compiler which prevents
