@@ -813,6 +813,10 @@ receive(
 			    FLAG_IBURST, MDF_BCLNT, 0, skeyid)) ==
 			    NULL)
 				return;		/* system error */
+#ifdef OPENSSL
+			if (skeyid > NTP_MAXKEY)
+				crypto_recv(peer, rbufp);
+#endif /* OPENSSL */
 			return;			/* hooray */
 
 
@@ -942,8 +946,10 @@ receive(
 #ifdef OPENSSL
 		if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 			rval = crypto_recv(peer, rbufp);
-			if (rval != XEVNT_OK)
+			if (rval != XEVNT_OK) {
+				peer_clear(peer, "CRYP");
 				peer->flash |= TEST9; /* crypto error */
+			}
 		}
 #endif /* OPENSSL */
 		return;				/* unsynch */
@@ -1013,6 +1019,7 @@ receive(
 		peer->flash |= TEST8;
 		rval = crypto_recv(peer, rbufp);
 		if (rval != XEVNT_OK) {
+			peer_clear(peer, "CRYP");
 			peer->flash |= TEST9;	/* crypto error */
 			return;
 
@@ -2924,8 +2931,9 @@ peer_unfit(
 	    ULOGTOD(sys_poll))
 		rval |= TEST11;		/* distance exceeded */
 
-	if (peer->stratum > 1 && peer->refid ==
-	    peer->dstadr->addr_refid)
+	if (peer->stratum > 1 && (peer->refid ==
+	    peer->dstadr->addr_refid || (peer->refid == sys_refid &&
+	    peer->refid != htonl(LOOPBACKADR))))
 		rval |= TEST12;		/* synch loop */
 
 	if (!peer->reach || peer->flags & FLAG_NOSELECT)
