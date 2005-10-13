@@ -567,7 +567,7 @@ local_clock(
 			/*
 			 * Set the leap bits in the status word.
 			 */
-			if (calleapwhen(sys_reftime.l_ui) <
+			if (calleapwhen(peer->rec.l_ui) <
 				    CLOCK_DAY) {
 				if (leap_next & LEAP_ADDSECOND)
 					ntv.status |= STA_INS;
