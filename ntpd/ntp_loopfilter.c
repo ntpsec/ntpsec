@@ -497,7 +497,7 @@ local_clock(
 #ifdef STA_NANO
 		if (pll_control && kern_enable && sys_tai == 0) {
 			memset(&ntv, 0, sizeof(ntv));
-			ntv.modes = MOD_BITS | MOD_TAI;
+			ntv.modes = MOD_TAI;
 			ntv.constant = i + TAI_1972 - 1;
 			ntp_adjtime(&ntv);
 		}
@@ -567,7 +567,7 @@ local_clock(
 			/*
 			 * Set the leap bits in the status word.
 			 */
-			if (calleapwhen(sys_reftime.l_ui) <
+			if (calleapwhen(peer->rec.l_ui) <
 				    CLOCK_DAY) {
 				if (leap_next & LEAP_ADDSECOND)
 					ntv.status |= STA_INS;

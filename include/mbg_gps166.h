@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/include/mbg_gps166.h,v 4.5 2005/06/25 10:58:45 kardel RELEASE_20050625_A
+ * /src/NTP/REPOSITORY/ntp4-dev/include/mbg_gps166.h,v 4.6 2005/10/07 22:11:56 kardel RELEASE_20051008_A
  *
- * mbg_gps166.h,v 4.5 2005/06/25 10:58:45 kardel RELEASE_20050625_A
+ * mbg_gps166.h,v 4.6 2005/10/07 22:11:56 kardel RELEASE_20051008_A
  *
  * $Created: Sun Jul 20 09:20:50 1997 $
  *
@@ -524,8 +524,8 @@ typedef struct {
 
 } IONO;
 
-void mbg_tm_str P((unsigned char **, TM *));
-void mbg_tgps_str P((unsigned char **, T_GPS *));
+void mbg_tm_str P((unsigned char **, TM *, int));
+void mbg_tgps_str P((unsigned char **, T_GPS *, int));
 void get_mbg_header P((unsigned char **, GPS_MSG_HDR *));
 void put_mbg_header P((unsigned char **, GPS_MSG_HDR *));
 void get_mbg_sw_rev P((unsigned char **, SW_REV *));
@@ -555,6 +555,12 @@ unsigned long mbg_csum P((unsigned char *, unsigned int));
  * History:
  *
  * mbg_gps166.h,v
+ * Revision 4.6  2005/10/07 22:11:56  kardel
+ * bounded buffer implementation
+ *
+ * Revision 4.5.2.1  2005/09/25 10:23:48  kardel
+ * support bounded buffers
+ *
  * Revision 4.5  2005/06/25 10:58:45  kardel
  * add missing log keywords
  *

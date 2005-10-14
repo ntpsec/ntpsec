@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/parseutil/dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
+ * /src/NTP/REPOSITORY/ntp4-dev/parseutil/dcfd.c,v 4.18 2005/10/07 22:08:18 kardel RELEASE_20051008_A
  *  
- * dcfd.c,v 4.17 2005/08/10 10:09:44 kardel RELEASE_20050810_B
+ * dcfd.c,v 4.18 2005/10/07 22:08:18 kardel RELEASE_20051008_A
  *
  * DCF77 100/200ms pulse synchronisation daemon program (via 50Baud serial line)
  *
@@ -130,7 +130,7 @@
      extern int errno;
 #endif
 
-static char *revision = "4.17";
+static char *revision = "4.18";
 
 /*
  * display received data (avoids also detaching from tty)
@@ -1604,21 +1604,6 @@ main(
 		/*
 		 * setup periodic operations (state control / frequency control)
 		 */
-#ifdef HAVE_SIGVEC
-		{
-			struct sigvec vec;
-
-			vec.sv_handler   = tick;
-			vec.sv_mask      = 0;
-			vec.sv_flags     = 0;
-
-			if (sigvec(SIGALRM, &vec, (struct sigvec *)0) == -1)
-			{
-				syslog(LOG_ERR, "sigvec(SIGALRM): %m");
-				exit(1);
-			}
-		}
-#else
 #ifdef HAVE_SIGACTION
 		{
 			struct sigaction act;
@@ -1633,6 +1618,21 @@ main(
 			if (sigaction(SIGALRM, &act, (struct sigaction *)0) == -1)
 			{
 				syslog(LOG_ERR, "sigaction(SIGALRM): %m");
+				exit(1);
+			}
+		}
+#else
+#ifdef HAVE_SIGVEC
+		{
+			struct sigvec vec;
+
+			vec.sv_handler   = tick;
+			vec.sv_mask      = 0;
+			vec.sv_flags     = 0;
+
+			if (sigvec(SIGALRM, &vec, (struct sigvec *)0) == -1)
+			{
+				syslog(LOG_ERR, "sigvec(SIGALRM): %m");
 				exit(1);
 			}
 		}
@@ -1878,6 +1878,13 @@ main(
  * History:
  *
  * dcfd.c,v
+ * Revision 4.18  2005/10/07 22:08:18  kardel
+ * make dcfd.c compile on NetBSD 3.99.9 again (configure/sigvec compatibility fix)
+ *
+ * Revision 4.17.2.1  2005/10/03 19:15:16  kardel
+ * work around configure not detecting a missing sigvec compatibility
+ * interface on NetBSD 3.99.9 and above
+ *
  * Revision 4.17  2005/08/10 10:09:44  kardel
  * output revision information
  *
