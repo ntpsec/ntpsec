@@ -1497,8 +1497,13 @@ ctl_putpeer(
 		break;
 
 	case CP_DSTADR:
-		ctl_putadr(peer_var[CP_DSTADR].text, 0,
-		    &(peer->dstadr->sin));
+		if (peer->dstadr) {
+			ctl_putadr(peer_var[CP_DSTADR].text, 0,
+				   &(peer->dstadr->sin));
+		} else {
+			ctl_putadr(peer_var[CP_DSTADR].text, 0,
+				   NULL);
+		}
 		break;
 
 	case CP_DSTPORT:

@@ -857,7 +857,7 @@ sendrequest(
 		qpkt.mbz_itemsize = MBZ_ITEMSIZE(qsize);
 	} else {
 		qpkt.err_nitems = ERR_NITEMS(0, 0);
-		qpkt.mbz_itemsize = MBZ_ITEMSIZE(0);
+		qpkt.mbz_itemsize = MBZ_ITEMSIZE(qsize);  /* allow for optional first item */
 	}
 
 	if (!auth) {

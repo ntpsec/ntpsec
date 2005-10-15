@@ -1126,7 +1126,7 @@ process_packet(
 	/*
 	 * Capture the header values.
 	 */
-	record_raw_stats(&peer->srcadr, &peer->dstadr->sin, &p_org,
+	record_raw_stats(&peer->srcadr, peer->dstadr ? &peer->dstadr->sin : NULL, &p_org,
 	    &p_rec, &p_xmt, &peer->rec);
 	peer->leap = pleap;
 	peer->stratum = min(pstratum, STRATUM_UNSPEC);
@@ -1462,6 +1462,79 @@ poll_update(
 #endif
 }
 
+/*
+ * peer_crypto_clear - discard crypto information
+ */
+void
+peer_crypto_clear(
+		  struct peer *peer
+		  )
+{
+	/*
+	 * If cryptographic credentials have been acquired, toss them to
+	 * Valhalla. Note that autokeys are ephemeral, in that they are
+	 * tossed immediately upon use. Therefore, the keylist can be
+	 * purged anytime without needing to preserve random keys. Note
+	 * that, if the peer is purged, the cryptographic variables are
+	 * purged, too. This makes it much harder to sneak in some
+	 * unauthenticated data in the clock filter.
+	 */
+	DPRINTF(1, ("peer_crypto_clear: at %ld next %ld assoc ID %d\n",
+		    current_time, peer->nextdate, peer->associd));
+
+#ifdef OPENSSL
+	peer->assoc = 0;
+	peer->crypto = 0;
+
+	if (peer->pkey != NULL)
+		EVP_PKEY_free(peer->pkey);
+	peer->pkey = NULL;
+
+	memset(&peer->first, 0, sizeof(peer->first));
+	memset(&peer->last, 0, sizeof(peer->last));
+
+	peer->digest = NULL;	/* XXX MEMLEAK? check whether this needs to be freed in any way - never was freed */
+
+	if (peer->subject != NULL)
+		free(peer->subject);
+	peer->subject = NULL;
+
+	if (peer->issuer != NULL)
+		free(peer->issuer);
+	peer->issuer = NULL;
+
+	peer->pkeyid = 0;
+
+	peer->pcookie = 0;
+
+	if (peer->ident_pkey != NULL)
+		EVP_PKEY_free(peer->ident_pkey);
+	peer->ident_pkey = NULL;
+	
+	memset(&peer->fstamp, 0, sizeof(peer->fstamp));
+
+	if (peer->iffval != NULL)
+		BN_free(peer->iffval);
+	peer->iffval = NULL;
+
+	if (peer->grpkey != NULL)
+		BN_free(peer->grpkey);
+	peer->grpkey = NULL;
+
+	value_free(&peer->cookval);
+	value_free(&peer->recval);
+	value_free(&peer->tai_leap);
+
+	if (peer->cmmd != NULL) {
+		free(peer->cmmd);
+		peer->cmmd = NULL;
+	}
+
+	key_expire(peer);
+
+	value_free(&peer->encrypt);
+#endif /* OPENSSL */
+}
 
 /*
  * peer_clear - clear peer filter registers.  See Section 3.4.8 of the spec.
@@ -1474,39 +1547,8 @@ peer_clear(
 {
 	int	i;
 
-	/*
-	 * If cryptographic credentials have been acquired, toss them to
-	 * Valhalla. Note that autokeys are ephemeral, in that they are
-	 * tossed immediately upon use. Therefore, the keylist can be
-	 * purged anytime without needing to preserve random keys. Note
-	 * that, if the peer is purged, the cryptographic variables are
-	 * purged, too. This makes it much harder to sneak in some
-	 * unauthenticated data in the clock filter.
-	 */
-#ifdef OPENSSL
-	key_expire(peer);
-	if (peer->pkey != NULL)
-		EVP_PKEY_free(peer->pkey);
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
-	if (peer->subject != NULL)
-		free(peer->subject);
-	if (peer->issuer != NULL)
-		free(peer->issuer);
-	if (peer->iffval != NULL)
-		BN_free(peer->iffval);
-	if (peer->grpkey != NULL)
-		BN_free(peer->grpkey);
-	if (peer->cmmd != NULL) {
-		free(peer->cmmd);
-		peer->cmmd = NULL;
-	}
-	value_free(&peer->cookval);
-	value_free(&peer->recval);
-	value_free(&peer->tai_leap);
-	value_free(&peer->encrypt);
-	value_free(&peer->sndval);
-#endif /* OPENSSL */
+	peer_crypto_clear(peer);
+	
 	if (peer == sys_peer)
 		sys_peer = NULL;
 
@@ -1549,11 +1591,9 @@ peer_clear(
 	else
 		peer->nextdate += (ntp_random() & ((1 << NTP_MINDPOLL) -
 		    1));
-#ifdef DEBUG
-	if (debug)
-		printf("peer_clear: at %ld next %ld assoc ID %d refid %s\n",
-		    current_time, peer->nextdate, peer->associd, ident);
-#endif
+
+	DPRINTF(1, ("peer_clear: at %ld next %ld assoc ID %d refid %s\n",
+		    current_time, peer->nextdate, peer->associd, ident));
 }
 
 
@@ -2334,8 +2374,11 @@ peer_xmit(
 	 * If the crypto is broken, don't make it worse. Otherwise,
 	 * initialize the header fields.
 	 */
+	if (!peer->dstadr)	/* don't bother with peers without interface */
+		return;
+
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
-	    peer->hmode);
+					 peer->hmode);
 	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
@@ -2368,13 +2411,13 @@ peer_xmit(
 		get_systime(&peer->xmt);
 		HTONL_FP(&peer->xmt, &xpkt.xmt);
 		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
-		    &xpkt, sendlen);
+			&xpkt, sendlen);
 		peer->sent++;
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d\n",
-			    current_time, stoa(&peer->dstadr->sin),
-			    stoa(&peer->srcadr), peer->hmode);
+			       current_time, peer->dstadr ? stoa(&peer->dstadr->sin) : "-",
+			       stoa(&peer->srcadr), peer->hmode);
 #endif
 		return;
 	}
@@ -2446,20 +2489,20 @@ peer_xmit(
 		exten = NULL;
 		switch (peer->hmode) {
 
-		/*
-		 * In broadcast server mode the autokey values are
-		 * required by the broadcast clients. Push them when a
-		 * new keylist is generated; otherwise, push the
-		 * association message so the client can request them at
-		 * other times.
-		 */
+			/*
+			 * In broadcast server mode the autokey values are
+			 * required by the broadcast clients. Push them when a
+			 * new keylist is generated; otherwise, push the
+			 * association message so the client can request them at
+			 * other times.
+			 */
 		case MODE_BROADCAST:
 			if (peer->flags & FLAG_ASSOC)
 				exten = crypto_args(peer, CRYPTO_AUTO |
-				    CRYPTO_RESP, NULL);
+						    CRYPTO_RESP, NULL);
 			else
 				exten = crypto_args(peer, CRYPTO_ASSOC |
-				    CRYPTO_RESP, NULL);
+						    CRYPTO_RESP, NULL);
 			break;
 
 		/*
@@ -2482,10 +2525,10 @@ peer_xmit(
 			 */
 			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    sys_hostname);
+						    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
 				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->issuer);
+						    peer->issuer);
 
 			/*
 			 * Identity. Note we have to sign the
@@ -2495,11 +2538,11 @@ peer_xmit(
 			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				exten = crypto_args(peer,
-				    crypto_ident(peer), NULL);
+						    crypto_ident(peer), NULL);
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			   !(peer->crypto & CRYPTO_FLAG_SIGN))
+				 !(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
-				    sys_hostname);
+						    sys_hostname);
 
 			/*
 			 * Autokey. We request the cookie only when the
@@ -2512,27 +2555,27 @@ peer_xmit(
 			 * the autokey values without being asked.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			    peer->leap != LEAP_NOTINSYNC &&
-			    !(peer->crypto & CRYPTO_FLAG_AGREE))
+				 peer->leap != LEAP_NOTINSYNC &&
+				 !(peer->crypto & CRYPTO_FLAG_AGREE))
 				exten = crypto_args(peer, CRYPTO_COOK,
-				    NULL);
+						    NULL);
 			else if (peer->flags & FLAG_ASSOC)
 				exten = crypto_args(peer, CRYPTO_AUTO |
-				    CRYPTO_RESP, NULL);
+						    CRYPTO_RESP, NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
 				exten = crypto_args(peer, CRYPTO_AUTO,
-				    NULL);
+						    NULL);
 
 			/*
 			 * Postamble. We trade leapseconds only when the
 			 * server and client are synchronized.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			    peer->leap != LEAP_NOTINSYNC &&
-			    peer->crypto & CRYPTO_FLAG_TAI &&
-			    !(peer->crypto & CRYPTO_FLAG_LEAP))
+				 peer->leap != LEAP_NOTINSYNC &&
+				 peer->crypto & CRYPTO_FLAG_TAI &&
+				 !(peer->crypto & CRYPTO_FLAG_LEAP))
 				exten = crypto_args(peer, CRYPTO_TAI,
-				    NULL);
+						    NULL);
 			break;
 
 		/*
@@ -2563,42 +2606,42 @@ peer_xmit(
 			 */
 			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    sys_hostname);
+						    sys_hostname);
 			else if (!(peer->crypto & CRYPTO_FLAG_VALID))
 				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->issuer);
+						    peer->issuer);
 
 			/*
 			 * Identity
 			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
 				exten = crypto_args(peer,
-				    crypto_ident(peer), NULL);
+						    crypto_ident(peer), NULL);
 
 			/*
 			 * Autokey
 			 */
 			else if (!(peer->crypto & CRYPTO_FLAG_AGREE))
 				exten = crypto_args(peer, CRYPTO_COOK,
-				    NULL);
+						    NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO) &&
-			    (peer->cast_flags & MDF_BCLNT))
+				 (peer->cast_flags & MDF_BCLNT))
 				exten = crypto_args(peer, CRYPTO_AUTO,
-				    NULL);
+						    NULL);
 
 			/*
 			 * Postamble. We can sign the certificate here,
 			 * since there is no chance of deadlock.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			   !(peer->crypto & CRYPTO_FLAG_SIGN))
+				 !(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
-				    sys_hostname);
+						    sys_hostname);
 			else if (sys_leap != LEAP_NOTINSYNC &&
-			    peer->crypto & CRYPTO_FLAG_TAI &&
-			    !(peer->crypto & CRYPTO_FLAG_LEAP))
+				 peer->crypto & CRYPTO_FLAG_TAI &&
+				 !(peer->crypto & CRYPTO_FLAG_LEAP))
 				exten = crypto_args(peer, CRYPTO_TAI,
-				    NULL);
+						    NULL);
 			break;
 		}
 
@@ -2612,14 +2655,14 @@ peer_xmit(
 		if (peer->cmmd != NULL) {
 			peer->cmmd->associd = htonl(peer->associd);
 			sendlen += crypto_xmit(&xpkt, &peer->srcadr,
-			    sendlen, peer->cmmd, 0);
+					       sendlen, peer->cmmd, 0);
 			free(peer->cmmd);
 			peer->cmmd = NULL;
 		}
 		if (exten != NULL) {
 			if (exten->opcode != 0)
 				sendlen += crypto_xmit(&xpkt,
-				    &peer->srcadr, sendlen, exten, 0);
+						       &peer->srcadr, sendlen, exten, 0);
 			if (ntohl(exten->opcode) & CRYPTO_ERROR) {
 				peer->flash |= TEST9; /* crypto error */
 				free(exten);
@@ -2672,7 +2715,7 @@ peer_xmit(
 		exit (-1);
 	}
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
-	    sendlen);
+		sendlen);
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2691,19 +2734,19 @@ peer_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d index %d\n",
-		    current_time, ntoa(&peer->dstadr->sin),
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen -
-		    authlen, authlen, peer->keynumber);
+			"transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d index %d\n",
+			current_time, peer->dstadr ? ntoa(&peer->dstadr->sin) : "-",
+			ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen -
+			authlen, authlen, peer->keynumber);
 #endif
 #else
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
-		    current_time, ntoa(&peer->dstadr->sin),
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen -
-		    authlen, authlen);
+			"transmit: at %ld %s->%s mode %d keyid %08x len %d mac %d\n",
+			current_time, peer->dstadr ? ntoa(&peer->dstadr->sin) : "-",
+			ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen -
+			authlen, authlen);
 #endif
 #endif /* OPENSSL */
 }
@@ -2931,7 +2974,7 @@ peer_unfit(
 	    ULOGTOD(sys_poll))
 		rval |= TEST11;		/* distance exceeded */
 
-	if (peer->stratum > 1 && (peer->refid ==
+	if (peer->stratum > 1 && (!peer->dstadr || peer->refid ==
 	    peer->dstadr->addr_refid || (peer->refid == sys_refid &&
 	    peer->refid != htonl(LOOPBACKADR))))
 		rval |= TEST12;		/* synch loop */
