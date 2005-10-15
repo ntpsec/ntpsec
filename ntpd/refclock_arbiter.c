@@ -91,10 +91,8 @@
 #define	DEVICE		"/dev/gps%d" /* device name and unit */
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
-#define	REFID		"GPS " /* reference ID */
+#define	REFID		"GPS "	/* reference ID */
 #define	DESCRIPTION	"Arbiter 1088A/B GPS Receiver" /* WRU */
-#define ARBSTAGE	40	/* median filter stages */
-
 #define	LENARB		24	/* format B5 timecode length */
 #define MAXSTA		40	/* max length of status string */
 #define MAXPOS		80	/* max length of position string */
@@ -312,7 +310,7 @@ arb_receive(
 	 * tacked on the end for clockstats display. 
 	 */
 	up->tcswitch++;
-	if (temp < LENARB)
+	if (up->tcswitch <= 1 || temp < LENARB)
 		return;
 
 	/*
@@ -399,7 +397,8 @@ arb_receive(
 		refclock_report(peer, CEVNT_BADTIME);
 	else if (peer->disp > MAXDISTANCE)
 		refclock_receive(peer);
-	if (up->tcswitch >= ARBSTAGE) {
+
+	if (up->tcswitch >= MAXSTAGE) {
 		write(pp->io.fd, "B0", 2);
 	}
 }
