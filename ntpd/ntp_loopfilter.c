@@ -346,24 +346,29 @@ local_clock(
 			state = S_SPIK;
 
 			/* fall through to S_SPIK/S_FREQ */
-
 		/*
-		 * In S_SPIK state we ignore succeeding outlyers until
-		 * either an inlyer is found or the stepout threshold is
-		 * exceeded.
-		 *
 		 * In S_FREQ state we ignore outlyers and inlyers. At
 		 * the first outlyer after the stepout threshold,
 		 * compute the apparent frequency correction and step
 		 * the phase.
 		 */
-		case S_SPIK:
 		case S_FREQ:
 			if (mu < clock_minstep)
 				return (0);
 
 			clock_frequency = (fp_offset - last_base -
 			    clock_offset) / mu;
+
+			/* fall through to S_SPIK */
+
+		/*
+		 * In S_SPIK state we ignore succeeding outlyers until
+		 * either an inlyer is found or the stepout threshold is
+		 * exceeded.
+		 */
+		case S_SPIK:
+			if (mu < clock_minstep)
+				return (0);
 
 			/* fall through to default */
 
@@ -751,7 +756,7 @@ adj_host_clock(
 	 * If NTP is disabled or ntpdate mode enabled or the kernel
 	 * discipline enabled, we have no business going further.
 	 */
-	if (!ntp_enable || mode_ntpdate || (pll_control && kern_enable))
+	if (!ntp_enable || mode_ntpdate || pll_control && kern_enable)
 		return;
 
 	/*
@@ -925,7 +930,7 @@ loop_config(
 		 * is zero to cancel any previous nonsense. If you don't
 		 * want this initialization, remove the ntp.drift file.
 		 */
-		if (pll_control) {
+		if (pll_control && kern_enable) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_FREQUENCY;
 			ntv.freq = (int32)(drift_comp * 65536e6);
