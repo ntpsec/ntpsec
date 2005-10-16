@@ -132,15 +132,17 @@ transmit(
 	 * is intricate...
 	 */
 	/*
-	 * Orphan mode is active when enabled and when no other source
-	 * is available. In this mode packets are sent at the orphan
-	 * stratum and with root delay randomized over a 1-s range. In
-	 * broadcast mode the root delay is used by the election
-	 * algorithm to select a single source from among the orphans.
+	 * Orphan mode is active when enabled and when no servers less
+	 * than the orphan statum are available. In this mode packets
+	 * are sent at the orphan stratum. An orphan with no other
+	 * synchronization source is an orphan parent. It assumes root
+	 * delay zero and reference ID the loopback address. All others
+	 * are orphan children with root delay randomized over a 1-s
+	 * range. The root delay is used by the election algorithm to
+	 * select the order of synchronization.
 	 */
 	hpoll = peer->hpoll;
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
-		sys_leap = LEAP_NOWARNING;
 		sys_stratum = sys_orphan;
 		sys_refid = htonl(LOOPBACKADR);
 		sys_rootdelay = 0;
@@ -216,9 +218,10 @@ transmit(
 			}
 
 			/*
-			 * Bump the poll interval. Send a burst if
-			 * enabled, but only once after a peer becomes
-			 * unreachable.
+			 * Send a burst if enabled, but only once after
+			 * a peer becomes unreachable. If the prempt
+			 * flag is dim, bump the unreach counter by one;
+			 * otherwise, bump it by three.
 			 */
 			if (peer->flags & FLAG_IBURST &&
 			    peer->unreach == 0) {
@@ -1313,7 +1316,7 @@ clock_update(void)
 		 * In orphan mode the stratum defaults to the orphan
 		 * stratum. The root delay is set to a random value
 		 * generated at startup. The root dispersion is set from
-		 * the peer dispersion; the the peer root dispersion
+		 * the peer dispersion; the peer root dispersion is
 		 * ignored.
 		 */
 		dtemp = sys_peer->disp + clock_phi * (current_time -
@@ -1341,6 +1344,7 @@ clock_update(void)
 			report_event(EVNT_SYNCCHG, NULL);
 #ifdef OPENSSL
 			expire_all();
+			crypto_update();
 #endif /* OPENSSL */
 		}
 		break;
@@ -1351,8 +1355,10 @@ clock_update(void)
 	default:
 		break;
 	}
-	if (ostratum != sys_stratum)
+	if (ostratum != sys_stratum) {
 		report_event(EVNT_PEERSTCHG, NULL);
+		crypto_update();
+	}
 }
 
 
@@ -2067,7 +2073,7 @@ clock_select(void)
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
-	 * by root dispersion. Continue voting as long as there are more
+	 * by root distance. Continue voting as long as there are more
 	 * than sys_minclock survivors and the minimum select jitter is
 	 * greater than the maximum peer jitter. Stop if we are about to
 	 * discard a TRUE or PREFER  peer, who of course has the
@@ -2115,15 +2121,12 @@ clock_select(void)
 	 * What remains is a list usually not greater than sys_minclock
 	 * peers. We want only a peer at the lowest stratum to become
 	 * the system peer, although all survivors are eligible for the
-	 * combining algorithm. First record their order, diddle the
-	 * flags and clamp the poll intervals. Then, consider each peer
-	 * in turn and OR the leap bits on the assumption that, if some
-	 * of them honk nonzero bits, they must know what they are
-	 * doing. Check for prefer and pps peers at any stratum. Check
-	 * if the old system peer is among the peers at the lowest
-	 * stratum. Note that the head of the list is at the lowest
-	 * stratum and that unsynchronized peers cannot survive this
-	 * far.
+	 * combining algorithm. Consider each peer in turn and OR the
+	 * leap bits on the assumption that, if some of them honk
+	 * nonzero bits, they must know what they are doing. Check for
+	 * prefer and pps peers at any stratum. Note that the head of
+	 * the list is at the lowest stratum and that unsynchronized
+	 * peers cannot survive this far.
 	 */
 	leap_next = 0;
 	for (i = 0; i < nlist; i++) {
@@ -2170,7 +2173,8 @@ clock_select(void)
 
 		/*
 		 * If in orphan mode, choose the system peer. If the
-		 * lowest distance, the offset is zero.
+		 * lowest distance, we are the orphan parent and the
+		 * offset is zero.
 		 */
 		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
@@ -2269,7 +2273,7 @@ clock_select(void)
 
 
 /*
- * clock_combine - combine offsets from selected peers
+ * clock_combine - compute system offset and jitter from selected peers
  */
 static void
 clock_combine(
@@ -2331,20 +2335,30 @@ peer_xmit(
 	l_fp	xmt_tx;
 
 	/*
-	 * If the crypto is broken, don't make it worse. Otherwise,
-	 * initialize the header fields.
+	 * Initialize header fields. The root delay field is special. If
+	 * the system stratum is less than the orphan stratum, send the
+	 * real root delay. Otherwise, if there is no system peer, send
+	 * the orphan delay. Otherwise, we must be an orphan parent, so
+	 * send zero.
 	 */
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
 	    peer->hmode);
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 	xpkt.ppoll = peer->hpoll;
 	xpkt.precision = sys_precision;
-	if (sys_stratum < sys_orphan)
+	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+	if (sys_stratum < sys_orphan) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	else if (sys_peer != NULL)
+	} else if (sys_peer != NULL) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
-	else
+	} else {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = 0;
+	}
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	xpkt.refid = sys_refid;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
@@ -2382,7 +2396,7 @@ peer_xmit(
 	/*
 	 * The received packet contains a MAC, so the transmitted packet
 	 * must be authenticated. If autokey is enabled, fuss with the
-	 * various modes; otherwise, private key cryptography is used.
+	 * various modes; otherwise, symmetric key cryptography is used.
 	 */
 #ifdef OPENSSL
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
@@ -2471,7 +2485,7 @@ peer_xmit(
 		 * until then. In any case, if a new keylist is
 		 * generated, the autokey values are pushed.
 		 *
-		 * If the crypto bit is set, don't send requests.
+		 * If the crypto bit is lit, don't send requests.
 		 */
 		case MODE_ACTIVE:
 		case MODE_PASSIVE:
@@ -2735,6 +2749,11 @@ fast_xmit(
 	 * buffer provided. We leave some fields intact as received. If
 	 * the gazinta was from a multicast address, the gazoutta must
 	 * go out another way.
+	 *
+	 * The root delay field is special. If the system stratum is
+	 * less than the orphan stratum, send the real root delay.
+	 * Otherwise, if there is no system peer, send the orphan delay.
+	 * Otherwise, we must be an orphan parent, so send zero.
 	 */
 	rpkt = &rbufp->recv_pkt;
 	if (rbufp->dstadr->flags & INT_MCASTOPEN)
@@ -2753,7 +2772,7 @@ fast_xmit(
 		 * the rate limit on these packets. Once a second
 		 * initialize a bucket counter. Every packet sent
 		 * decrements the counter until reaching zero. If the
-		 * counter is zero, drop the kod.
+		 * counter is zero, drop the kiss.
 		 */
 		if (sys_kod == 0 || !(mask & RES_DEMOBILIZE))
 			return;
@@ -2771,12 +2790,20 @@ fast_xmit(
 	}
 	xpkt.ppoll = rpkt->ppoll;
 	xpkt.precision = sys_precision;
-	if (sys_stratum < sys_orphan)
+	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+	if (sys_stratum < sys_orphan) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	else if (sys_peer != NULL)
+	} else if (sys_peer != NULL) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
-	else
+	} else {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    peer->version, peer->hmode);
 		xpkt.rootdelay = 0;
+	}
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	xpkt.org = rpkt->xmt;
@@ -2804,11 +2831,11 @@ fast_xmit(
 
 	/*
 	 * The received packet contains a MAC, so the transmitted packet
-	 * must be authenticated. For private-key cryptography, use the
-	 * predefined private keys to generate the cryptosum. For
-	 * autokey cryptography, use the server private value to
-	 * generate the cookie, which is unique for every source-
-	 * destination-key ID combination.
+	 * must be authenticated. For symmetric key cryptography, use
+	 * the predefined and trusted symmetric keys to generate the
+	 * cryptosum. For autokey cryptography, use the server private
+	 * value to generate the cookie, which is unique for every
+	 * source-destination-key ID combination.
 	 */
 #ifdef OPENSSL
 	if (xkeyid > NTP_MAXKEY) {
@@ -2912,7 +2939,7 @@ key_expire(
  * A peer is unfit for synchronization if
  * > TEST10 bad leap or stratum below floor or at or above ceiling
  * > TEST11 root distance exceeded
- * > TEST12 a direct synchronization loop would form
+ * > TEST12 a direct or indirect synchronization loop would form
  * > TEST13 unreachable or noselect
  */
 int				/* FALSE if fit, TRUE if unfit */
@@ -2922,20 +2949,42 @@ peer_unfit(
 {
 	int	rval = 0;
 
+	/*
+	 * A stratum error occurs if (1) the server has never been
+	 * synchronized, (2) the server stratum is below the floor or
+	 * greater than or equal to the ceiling, (3) the system stratum
+	 * is below the orphan stratum and the server stratum is greater
+	 * than or equal to the orphan stratum.
+	 */
 	if (peer->leap == LEAP_NOTINSYNC || peer->stratum < sys_floor ||
 	    peer->stratum >= sys_ceiling || (sys_stratum < sys_orphan &&
 	    peer->stratum >= sys_orphan))
 		rval |= TEST10;		/* stratum out of bounds */
 
+	/*
+	 * A distance error occurs if the root distance is greater than
+	 * or equal to the distance threshold plus the increment due to
+	 * one poll interval.
+	 */
 	if (root_distance(peer) >= sys_maxdist + clock_phi *
 	    ULOGTOD(sys_poll))
 		rval |= TEST11;		/* distance exceeded */
 
+	/*
+	 * A loop error occurs if the remote peer is synchronized to the
+	 * local peer of if the remote peer is synchronized to the same
+	 * server as the local peer, but only if the remote peer is not
+	 * the orphan parent.
+	 */
 	if (peer->stratum > 1 && (peer->refid ==
 	    peer->dstadr->addr_refid || (peer->refid == sys_refid &&
 	    peer->refid != htonl(LOOPBACKADR))))
 		rval |= TEST12;		/* synch loop */
 
+	/*
+	 * An unreachable error occurs if the server is unreachable or
+	 * the noselect bit is set.
+	 */
 	if (!peer->reach || peer->flags & FLAG_NOSELECT)
 		rval |= TEST13;		/* unreachable */
 
