@@ -143,6 +143,7 @@ transmit(
 	 */
 	hpoll = peer->hpoll;
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
+		sys_leap = LEAP_NOWARNING;
 		sys_stratum = sys_orphan;
 		sys_refid = htonl(LOOPBACKADR);
 		sys_rootdelay = 0;
@@ -2335,32 +2336,55 @@ peer_xmit(
 	l_fp	xmt_tx;
 
 	/*
-	 * Initialize header fields. The root delay field is special. If
-	 * the system stratum is less than the orphan stratum, send the
-	 * real root delay. Otherwise, if there is no system peer, send
-	 * the orphan delay. Otherwise, we must be an orphan parent, so
-	 * send zero.
+	 * This is deliciously complicated. There are three cases.
+	 *
+	 * case		leap	stratum	refid	delay	dispersion
+	 *
+	 * normal	system	system	system	system	system
+	 * orphan child	00	orphan	system	orphan	system
+	 * orphan parent 00	orphan	loopbk	0	0
 	 */
-	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
-	    peer->hmode);
-	xpkt.ppoll = peer->hpoll;
-	xpkt.precision = sys_precision;
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+	/*
+	 * This is a normal packet. Use the system variables.
+	 */
 	if (sys_stratum < sys_orphan) {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    peer->version, peer->hmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+		xpkt.refid = sys_refid;
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+
+	/*
+	 * This is a orphan child packet. The host is synchronized to an
+	 * orphan parent. Show leap synchronized, orphan stratum, system
+	 * reference ID, orphan root delay and system root dispersion.
+	 */
 	} else if (sys_peer != NULL) {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 		    peer->version, peer->hmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_orphan);
+		xpkt.refid = htonl(LOOPBACKADR);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+
+	/*
+	 * This is an orphan parent. Show leap synchronized, orphan
+	 * stratum, loopack reference ID and zero root delay and root
+	 * dispersion.
+	 */
 	} else {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 		    peer->version, peer->hmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_orphan);
+		xpkt.refid = sys_refid;
 		xpkt.rootdelay = 0;
+		xpkt.rootdispersion = 0;
 	}
-	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
-	xpkt.refid = sys_refid;
+	xpkt.ppoll = peer->hpoll;
+	xpkt.precision = sys_precision;
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	HTONL_FP(&peer->org, &xpkt.org);
 	HTONL_FP(&peer->rec, &xpkt.rec);
@@ -2760,50 +2784,76 @@ fast_xmit(
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
-	 * If the packet has picked up a restriction due to either
-	 * access denied or rate exceeded, decide what to do with it.
+	 * This is deliciously complicated. There are four cases.
+	 *
+	 * case		leap	stratum	refid	delay	dispersion
+	 *
+	 * KoD		11	16	KISS	system	system
+	 * normal	system	system	system	system	system
+	 * orphan child	00	orphan	system	orphan	system
+	 * orphan parent 00	orphan	loopbk	0	0
+	 */
+	/*
+	 * This is a kiss-of-death (KoD) packet. Show leap
+	 * unsynchronized, stratum zero, reference ID the four-character
+	 * kiss code and system root delay. Note the rate limit on these
+	 * packets. Once a second initialize a bucket counter. Every
+	 * packet sent decrements the counter until reaching zero. If
+	 * the counter is zero, drop the kiss.
 	 */
 	if (mask & RES_LIMITED) {
-
-		/*
-		 * Here we light up a kiss-of-death (KoD) packet. KoD
-		 * packets have leap bits unsynchronized, stratum zero
-		 * and reference ID the four-character error code. Note
-		 * the rate limit on these packets. Once a second
-		 * initialize a bucket counter. Every packet sent
-		 * decrements the counter until reaching zero. If the
-		 * counter is zero, drop the kiss.
-		 */
 		if (sys_kod == 0 || !(mask & RES_DEMOBILIZE))
 			return;
 
 		sys_kod--;
-		memcpy(&xpkt.refid, "RATE", 4);
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_UNSPEC;
-	} else {
+		memcpy(&xpkt.refid, "RATE", 4);
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+
+	/*
+	 * This is a normal packet. Use the system variables.
+	 */
+	} else if (sys_stratum < sys_orphan) {
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
 		xpkt.refid = sys_refid;
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+
+	/*
+	 * This is a orphan child packet. The host is synchronized to an
+	 * orphan parent. Show leap synchronized, orphan stratum, system
+	 * reference ID and orphan root delay.
+	 */
+	} else if (sys_peer != NULL) {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_orphan);
+		xpkt.refid = sys_refid;
+		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
+		xpkt.rootdispersion =
+		    HTONS_FP(DTOUFP(sys_rootdispersion));
+
+	/*
+	 * This is an orphan parent. Show leap synchronized, orphan
+	 * stratum, loopack reference ID and zero root delay.
+	 */
+	} else {
+		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+		    PKT_VERSION(rpkt->li_vn_mode), xmode);
+		xpkt.stratum = STRATUM_TO_PKT(sys_orphan);
+		xpkt.refid = htonl(LOOPBACKADR);
+		xpkt.rootdelay = HTONS_FP(DTOFP(0));
+		xpkt.rootdispersion = HTONS_FP(DTOFP(0));
 	}
 	xpkt.ppoll = rpkt->ppoll;
 	xpkt.precision = sys_precision;
-	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
-	if (sys_stratum < sys_orphan) {
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap,
-		    peer->version, peer->hmode);
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	} else if (sys_peer != NULL) {
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
-		    peer->version, peer->hmode);
-		xpkt.rootdelay = HTONS_FP(DTOFP(sys_orphandelay));
-	} else {
-		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
-		    peer->version, peer->hmode);
-		xpkt.rootdelay = 0;
-	}
 	xpkt.rootdispersion = HTONS_FP(DTOUFP(sys_rootdispersion));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	xpkt.org = rpkt->xmt;
