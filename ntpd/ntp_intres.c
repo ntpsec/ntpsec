@@ -459,13 +459,13 @@ findhostaddr(
 
 	checkparent();		/* make sure our guy is still running */
 
-	if (entry->ce_name != NULL && SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name != NULL && !SOCKNUL(&entry->peer_store)) {
 		/* HMS: Squawk? */
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
 		return 1;
 	}
 
-        if (entry->ce_name == NULL && !SOCKNUL(&entry->peer_store)) {
+        if (entry->ce_name == NULL && SOCKNUL(&entry->peer_store)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
