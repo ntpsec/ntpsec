@@ -3278,6 +3278,7 @@ cert_valid(
  *
  * Returns
  * XEVNT_OK	success
+ * XEVNT_TSP	bad or missing timestamp
  * XEVNT_CRT	bad or missing certificate 
  */
 int
@@ -3287,7 +3288,6 @@ cert_install(
 	)
 {
 	struct cert_info *cp, *xp, *yp, **zp;
-	int	rval;
 
 	/*
 	 * Parse and validate the signed certificate. If valid,
@@ -3312,7 +3312,6 @@ cert_install(
 	 * earlier signature. However, we gotta find a way to leak old
 	 * stuff from the cache, so we do it anyway. 
 	 */
-	rval = XEVNT_OK;
 	yp = cp;
 	zp = &cinfo;
 	for (xp = cinfo; xp != NULL; xp = xp->link) {
@@ -3404,7 +3403,7 @@ cert_install(
 	 * That was awesome. Now update the timestamps and signatures.
 	 */
 	crypto_update();
-	return (rval);
+	return (XEVNT_OK);
 }
 
 
