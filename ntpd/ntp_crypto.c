@@ -239,13 +239,17 @@ session_key(
 /*
  * make_keylist - generate key list
  *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_PER	host certificate expired
+ *
  * This routine constructs a pseudo-random sequence by repeatedly
  * hashing the session key starting from a given source address,
  * destination address, private value and the next key ID of the
  * preceeding session key. The last entry on the list is saved along
  * with its sequence number and public signature.
  */
-void
+int
 make_keylist(
 	struct peer *peer,	/* peer structure pointer */
 	struct interface *dstadr /* interface */
@@ -323,7 +327,10 @@ make_keylist(
 	vp->fstamp = hostval.tstamp;
 	vp->vallen = htonl(sizeof(struct autokey));
 	vp->siglen = 0;
-	if (vp->tstamp != 0) {
+	if (tstamp != 0) {
+		if (tstamp < cinfo->first || tstamp > cinfo->last)
+			return (XEVNT_PER);
+
 		if (vp->sig == NULL)
 			vp->sig = emalloc(sign_siglen);
 		EVP_SignInit(&ctx, sign_digest);
@@ -342,6 +349,7 @@ make_keylist(
 		    ntohl(ap->seq), ntohl(ap->key), cookie,
 		    ntohl(vp->tstamp), ntohl(vp->fstamp), peer->hpoll);
 #endif
+	return (XEVNT_OK);
 }
 
 
@@ -601,7 +609,7 @@ crypto_recv(
 			strcpy(peer->issuer, cinfo->issuer);
 
 			/*
-			 * We plug in the public key and group key in
+			 * We plug in the public key and lifetime from
 			 * the first certificate received. However, note
 			 * that this certificate might not be signed by
 			 * the server, so we can't check the
@@ -615,7 +623,23 @@ crypto_recv(
 				X509_free(cert);
 				peer->first = cinfo->first;
 				peer->last = cinfo->last;
+			} else if (max(peer->first, cinfo->first) <
+			    min(peer->last, cinfo->last)) {
+				peer->flags |= CRYPTO_FLAG_INVLD;
+				sprintf(statstr,
+				    "broken server certificate trail %s->%s",
+				    cinfo->issuer, cinfo->subject);
+				record_crypto_stats(&peer->srcadr,
+				    statstr);
+				report_event(XEVNT_SRV, peer);
+#ifdef DEBUG
+				if (debug)
+					printf("crypto_recv: %s\n",
+					    statstr);
+#endif
 			}
+			peer->cfirst = cinfo->first;
+			peer->clast = cinfo->last;
 			peer->flash &= ~TEST8;
 			temp32 = cinfo->nid;
 			sprintf(statstr, "cert %s 0x%x %s (%u) fs %u",
@@ -1446,8 +1470,8 @@ crypto_xmit(
  * XEVNT_PUB	bad or missing public key
  * XEVNT_SGL	bad signature length
  * XEVNT_SIG	signature not verified
- * XEVNT_PER	certificate expired
  * XEVNT_ERR	protocol error
+ * XEVNT_SRV	server certificate expired
  */
 static int
 crypto_verify(
@@ -1563,9 +1587,12 @@ crypto_verify(
 
 	} else if (siglen != (u_int)EVP_PKEY_size(pkey)) {
 		rval = XEVNT_SGL;
-	} else if (tstamp < peer->first || tstamp > peer->last){
-		rval = XEVNT_PER;
 	} else {
+		tstamp = crypto_time();
+		if (peer->flags & CRYPTO_FLAG_INVLD || tstamp <
+		    peer->first || tstamp > peer->last)
+			return (XEVNT_SRV);
+
 		EVP_VerifyInit(&ctx, peer->digest);
 		EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen +
 		    12);
@@ -1599,6 +1626,7 @@ crypto_verify(
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
  * XEVNT_CKY	bad or missing cookie
+ * XEVNT_PER	host certificate expired
  */
 static int
 crypto_encrypt(
@@ -1648,6 +1676,9 @@ crypto_encrypt(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -1859,6 +1890,11 @@ crypto_update(void)
 	if ((tstamp = crypto_time()) == 0)
 		return;
 
+	if (tstamp < cinfo->first || tstamp > cinfo->last) {
+		msyslog(
+		    LOG_ERR, "crypto_update: expired certificate\n");
+		return;
+	}
 	hostval.tstamp = htonl(tstamp);
 
 	/*
@@ -2120,6 +2156,9 @@ crypto_alice(
 	if (tstamp == 0)
 		return (XEVNT_OK);
 
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2137,6 +2176,7 @@ crypto_alice(
  * XEVNT_OK	success
  * XEVNT_ID	bad or missing group key
  * XEVNT_ERR	protocol error
+ * XEVNT_PER	host expired certificate
  */
 static int
 crypto_bob(
@@ -2212,6 +2252,9 @@ crypto_bob(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -2363,6 +2406,7 @@ crypto_iff(
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
  * XEVNT_ID	bad or missing group key
+ * XEVNT_PER	host certificate expired
  */
 static int
 crypto_alice2(
@@ -2414,6 +2458,9 @@ crypto_alice2(
 	if (tstamp == 0)
 		return (XEVNT_OK);
 
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2431,6 +2478,7 @@ crypto_alice2(
  * XEVNT_OK	success
  * XEVNT_ID	bad or missing group key
  * XEVNT_ERR	protocol error
+ * XEVNT_PER	host certificate expired
  */
 static int
 crypto_bob2(
@@ -2506,6 +2554,9 @@ crypto_bob2(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -2681,6 +2732,7 @@ crypto_gq(
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
  * XEVNT_ID	bad or missing group key
+ * XEVNT_PER	host certificate expired
  */
 static int
 crypto_alice3(
@@ -2732,6 +2784,9 @@ crypto_alice3(
 	if (tstamp == 0)
 		return (XEVNT_OK);
 
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
+
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
@@ -2748,6 +2803,7 @@ crypto_alice3(
  * Returns
  * XEVNT_OK	success
  * XEVNT_ERR	protocol error
+ * XEVNT_PER	host certificate expired
  */
 static int
 crypto_bob3(
@@ -2828,6 +2884,9 @@ crypto_bob3(
 	vp->siglen = 0;
 	if (tstamp == 0)
 		return (XEVNT_OK);
+
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -3119,13 +3178,15 @@ cert_parse(
  * serial number, issuer name and validity interval of the server. The
  * validity interval extends from the current time to the same time one
  * year hence. For NTP purposes, it is convenient to use the NTP seconds
- * of the current time as the serial number.
+ * of the current time as the serial number. By default, the valid
+ * period is one year.
  *
  * Returns
  * XEVNT_OK	success
  * XEVNT_PUB	bad or missing public key
  * XEVNT_CRT	bad or missing certificate
  * XEVNT_VFY	certificate not verified
+ * XEVNT_PER	host certificate expired
  */
 static int
 cert_sign(
@@ -3151,6 +3212,9 @@ cert_sign(
 	tstamp = crypto_time();
 	if (tstamp == 0)
 		return (XEVNT_TSP);
+
+	if (tstamp < cinfo->first || tstamp > cinfo->last)
+		return (XEVNT_PER);
 
 	ptr = (u_char *)ep->pkt;
 	if ((req = d2i_X509(NULL, &ptr, ntohl(ep->vallen))) == NULL) {

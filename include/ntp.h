@@ -293,8 +293,10 @@ struct peer {
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
-	tstamp_t first;		/* not valid before */
-	tstamp_t last;		/* not valid after */
+	tstamp_t first;		/* server signature invalid before */
+	tstamp_t last;		/* server signature invalid after */
+	tstamp_t cfirst;	/* client signature invalid before */
+	tstamp_t clast;		/* client signature invalid after */
 	const EVP_MD *digest;	/* message digest algorithm */
 	char	*subject;	/* certificate subject name */
 	char	*issuer;	/* certificate issuer name */

@@ -3026,9 +3026,9 @@ peer_unfit(
 	 * server as the local peer, but only if the remote peer is not
 	 * the orphan parent.
 	 */
-	if (peer->stratum > 1 && (peer->refid ==
-	    peer->dstadr->addr_refid || (peer->refid == sys_refid &&
-	    peer->refid != htonl(LOOPBACKADR))))
+	if (peer->stratum > 1 && peer->refid != htonl(LOOPBACKADR) &&
+	    (peer->refid == peer->dstadr->addr_refid || peer->refid ==
+	    sys_refid))
 		rval |= TEST12;		/* synch loop */
 
 	/*

@@ -496,8 +496,9 @@ local_clock(
 	if (tpt != NULL) {
 		for (i = 0; i < len; i++) {
 			togo = ntohl(tpt[i]) - peer->rec.l_ui;
-			if (togo > 0 && togo < CLOCK_JUNE) {
-				leap_next |= LEAP_ADDSECOND;
+			if (togo > 0) {
+				if (togo < CLOCK_JUNE)
+					leap_next |= LEAP_ADDSECOND;
 				break;
 			}
 		}
@@ -582,7 +583,7 @@ local_clock(
 			tm = gmtime(&tstamp);
 			if (tm != NULL) {
 				if ((tm->tm_mon == 6 && tm->tm_mday ==
-				    30) || (tm->tm_mon == 12 &&
+				    30) || (tm->tm_mon + 1 == 12 &&
 				    tm->tm_mday == 31)) {
 					if (leap_next & LEAP_ADDSECOND)
 						ntv.status |= STA_INS;
@@ -595,7 +596,7 @@ local_clock(
 					printf(
 					    "local_clock: leap %d status %x date %d/%d\n",
 					    leap_next, ntv.status,
-					    tm->tm_mon, tm->tm_mday);
+					    tm->tm_mon + 1, tm->tm_mday);
 #endif
 			}
 
@@ -870,7 +871,9 @@ loop_config(
 		 * Call out the safety patrol. If ntpdate mode or if the
 		 * step threshold has been increased by the -x option or
 		 * tinker command, kernel discipline is unsafe, so don't
-		 * do any of this stuff.
+		 * do any of this stuff. Otherwise, initialize the
+		 * kernel to appear unsynchronized until the first
+		 * update is received.
 		 */
 		if (mode_ntpdate || clock_max > CLOCK_MAX)
 			break;
@@ -909,6 +912,11 @@ loop_config(
 #else /* SIGSYS */
 		ntp_adjtime(&ntv);
 #endif /* SIGSYS */
+
+		/*
+		 * Save the result status and light up nanoseconds
+		 * and/or an external clock if available.
+		 */
 		pll_status = ntv.status;
 		if (pll_control) {
 #ifdef STA_NANO
