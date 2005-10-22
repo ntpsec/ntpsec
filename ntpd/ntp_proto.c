@@ -1017,7 +1017,8 @@ receive(
 	 *
 	 * In case of crypto error, fire the orchestra and stop dancing.
 	 * This is considered a permanant error, so light the crypto bit
-	 * to suppress further requests.
+	 * to suppress further requests. If preemptable or ephemeral,
+	 * scuttle the ship.
 	 */
 	if (crypto_flags && (peer->flags & FLAG_SKEY)) {
 		peer->flash |= TEST8;
@@ -1025,6 +1026,9 @@ receive(
 		if (rval != XEVNT_OK) {
 			peer_clear(peer, "CRYP");
 			peer->flash |= TEST9;	/* crypto error */
+			if (peer->flags & FLAG_PREEMPT ||
+			    !(peer->flags & FLAG_CONFIG))
+				unpeer(peer);
 			return;
 
 		} else if (hismode == MODE_SERVER) {
@@ -2655,14 +2659,18 @@ peer_xmit(
 			peer->cmmd = NULL;
 		}
 		if (exten != NULL) {
-			if (exten->opcode != 0)
-				sendlen += crypto_xmit(&xpkt,
+			int ltemp = 0;
+
+			if (exten->opcode != 0) {
+				ltemp = crypto_xmit(&xpkt,
 				    &peer->srcadr, sendlen, exten, 0);
-			if (ntohl(exten->opcode) & CRYPTO_ERROR) {
-				peer->flash |= TEST9; /* crypto error */
-				free(exten);
-				return;
+				if (ltemp == 0) {
+					peer->flash |= TEST9; /* crypto error */
+					free(exten);
+					return;
+				}
 			}
+			sendlen += ltemp;
 			free(exten);
 		}
 

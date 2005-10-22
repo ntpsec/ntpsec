@@ -27,7 +27,6 @@
 #define CRYPTO_FLAG_AUTO  0x1000 /* autokey verified */
 #define CRYPTO_FLAG_SIGN  0x2000 /* certificate signed */
 #define CRYPTO_FLAG_LEAP  0x4000 /* leapseconds table verified */
-#define	CRYPTO_FLAG_INVLD 0x8000 /* invalid certificate trail */
 
 /*
  * Flags used for certificate management
