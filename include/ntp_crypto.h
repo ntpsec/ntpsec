@@ -70,12 +70,13 @@
 #define XEVNT_SGL	XEVNT_CMD(7) /* bad signature length */
 #define XEVNT_SIG	XEVNT_CMD(8) /* signature not verified */
 #define XEVNT_VFY	XEVNT_CMD(9) /* certificate not verified */
-#define XEVNT_PER	XEVNT_CMD(10) /* certificate expired */
+#define XEVNT_PER	XEVNT_CMD(10) /* host certificate expired */
 #define XEVNT_CKY	XEVNT_CMD(11) /* bad or missing cookie */
 #define XEVNT_DAT	XEVNT_CMD(12) /* bad or missing leapseconds table */
 #define XEVNT_CRT	XEVNT_CMD(13) /* bad or missing certificate */
 #define XEVNT_ID	XEVNT_CMD(14) /* bad or missing group key */
 #define	XEVNT_ERR	XEVNT_CMD(15) /* protocol error */
+#define	XEVNT_SRV	XEVNT_CMD(16) /* server certificate expired */
 
 /*
  * Configuration codes
