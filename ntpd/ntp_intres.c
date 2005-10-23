@@ -1075,7 +1075,7 @@ doconfigure(
 			    "doconfigure: <%s> has peeraddr %s",
 			    ce->ce_name, stoa(&ce->peer_store));
 #endif
-		if (dores && !SOCKNUL(&(ce->peer_store))) {
+		if (dores && SOCKNUL(&(ce->peer_store))) {
 			if (!findhostaddr(ce)) {
 				msyslog(LOG_ERR,
 					"couldn't resolve `%s', giving up on it",
