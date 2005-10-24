@@ -456,13 +456,15 @@ crypto_recv(
 		case CRYPTO_ASSOC:
 
 			/*
-			 * Discard the message if it has already been
-			 * stored. Otherwise, pass the extension field
+			 * If the machine is running when this message
+			 * arrives, the other fellow has reset and so
+			 * must we. Otherwise, pass the extension field
 			 * to the transmit side.
 			 */
-			if (peer->crypto)
+			if (peer->crypto) {
+				rval = XEVNT_ERR;
 				break;
-
+			}
 			fp = emalloc(len);
 			memcpy(fp, ep, len);
 			temp32 = CRYPTO_RESP;
@@ -500,8 +502,8 @@ crypto_recv(
 				    "crypto_recv: ident host 0x%x server 0x%x\n",
 				    crypto_flags, fstamp);
 #endif
-			temp32 = crypto_flags & fstamp &
-			    CRYPTO_FLAG_MASK;
+			temp32 = (crypto_flags | ident_scheme) &
+			    fstamp & CRYPTO_FLAG_MASK;
 			if (crypto_flags & CRYPTO_FLAG_PRIV) {
 				if (!(fstamp & CRYPTO_FLAG_PRIV)) {
 					rval = XEVNT_KEY;
@@ -586,9 +588,7 @@ crypto_recv(
 			 */
 			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
-
 				break;
-printf("xxx %x\n", rval);
 
 			/*
 			 * Scan the certificate list to delete old
@@ -597,7 +597,6 @@ printf("xxx %x\n", rval);
 			 */
 			if ((rval = cert_install(ep, peer)) != XEVNT_OK)
 				break;
-printf("yyy %x\n", rval);
 
 			/*
 			 * If we snatch the certificate before the
@@ -779,49 +778,6 @@ printf("yyy %x\n", rval);
 				printf("crypto_recv: %s\n", statstr);
 #endif
 			break;
-	
-		/*
-		 * X509 certificate sign response. Validate the
-		 * certificate signed by the server and install. Later
-		 * this can be provided to clients of this server in
-		 * lieu of the self signed certificate in order to
-		 * validate the public key.
-		 */
-		case CRYPTO_SIGN | CRYPTO_RESP:
-
-			/*
-			 * Discard the message if invalid or not
-			 * proventic.
-			 */
-			if (!(peer->crypto & CRYPTO_FLAG_PROV)) {
-				rval = XEVNT_ERR;
-				break;
-			}
-			if ((rval = crypto_verify(ep, NULL, peer)) !=
-			    XEVNT_OK)
-				break;
-
-			/*
-			 * Scan the certificate list to delete old
-			 * versions and link the newest version first on
-			 * the list.
-			 */
-			if ((rval = cert_install(ep, peer)) != XEVNT_OK)
-				break;
-
-			peer->crypto |= CRYPTO_FLAG_SIGN;
-			peer->flash &= ~TEST8;
-			temp32 = cinfo->nid;
-			sprintf(statstr, "sign %s 0x%x %s (%u) fs %u",
-			    cinfo->issuer, cinfo->flags,
-			    OBJ_nid2ln(temp32), temp32,
-			    ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
-#ifdef DEBUG
-			if (debug)
-				printf("crypto_recv: %s\n", statstr);
-#endif
-			break;
 
 		/*
 		 * Cookie request in symmetric modes. Roll a random
@@ -831,8 +787,13 @@ printf("yyy %x\n", rval);
 		case CRYPTO_COOK:
 
 			/*
-			 * Discard the message if invalid.
+			 * Discard the message if invalid or certificate
+			 * trail not trusted.
 			 */
+			if (!(peer->crypto & CRYPTO_FLAG_VALID)) {
+				rval = XEVNT_ERR;
+				break;
+			}
 			if ((rval = crypto_verify(ep, NULL, peer)) !=
 			    XEVNT_OK)
 				break;
@@ -989,6 +950,49 @@ printf("yyy %x\n", rval);
 				printf("crypto_recv: %s\n", statstr);
 #endif
 			break;
+	
+		/*
+		 * X509 certificate sign response. Validate the
+		 * certificate signed by the server and install. Later
+		 * this can be provided to clients of this server in
+		 * lieu of the self signed certificate in order to
+		 * validate the public key.
+		 */
+		case CRYPTO_SIGN | CRYPTO_RESP:
+
+			/*
+			 * Discard the message if invalid or not
+			 * proventic.
+			 */
+			if (!(peer->crypto & CRYPTO_FLAG_PROV)) {
+				rval = XEVNT_ERR;
+				break;
+			}
+			if ((rval = crypto_verify(ep, NULL, peer)) !=
+			    XEVNT_OK)
+				break;
+
+			/*
+			 * Scan the certificate list to delete old
+			 * versions and link the newest version first on
+			 * the list.
+			 */
+			if ((rval = cert_install(ep, peer)) != XEVNT_OK)
+				break;
+
+			peer->crypto |= CRYPTO_FLAG_SIGN;
+			peer->flash &= ~TEST8;
+			temp32 = cinfo->nid;
+			sprintf(statstr, "sign %s 0x%x %s (%u) fs %u",
+			    cinfo->issuer, cinfo->flags,
+			    OBJ_nid2ln(temp32), temp32,
+			    ntohl(ep->fstamp));
+			record_crypto_stats(&peer->srcadr, statstr);
+#ifdef DEBUG
+			if (debug)
+				printf("crypto_recv: %s\n", statstr);
+#endif
+			break;
 
 		/*
 		 * Install leapseconds table in symmetric modes. This
@@ -1027,14 +1031,10 @@ printf("yyy %x\n", rval);
 		case CRYPTO_TAI | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if invalid or not
-			 * proventic or signature not verified with
-			 * respect to the leapsecond table values.
+			 * If this is a response, discard the message if
+			 * signature not verified with respect to the
+			 * leapsecond table values.
 			 */
-			if (!(peer->crypto & CRYPTO_FLAG_VRFY)) {
-				rval = XEVNT_ERR;
-				break;
-			}
 			if (peer->cmmd == NULL) {
 				if ((rval = crypto_verify(ep,
 				    &peer->tai_leap, peer)) != XEVNT_OK)
@@ -1042,10 +1042,7 @@ printf("yyy %x\n", rval);
 			}
 
 			/*
-			 * Initialize peer variables, leapseconds
-			 * structure and extension field in network byte
-			 * order. Since a filestamp may have changed,
-			 * recompute the signatures.
+			 * Initialize peer variables with latest update.
 			 */
 			peer->tai_leap.tstamp = ep->tstamp;
 			peer->tai_leap.fstamp = ep->fstamp;
@@ -1070,9 +1067,8 @@ printf("yyy %x\n", rval);
 			crypto_flags |= CRYPTO_FLAG_TAI;
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
-			sprintf(statstr, "leap %u ts %u fs %u",
-			    vallen, ntohl(ep->tstamp),
-			    ntohl(ep->fstamp));
+			sprintf(statstr, "leap %u ts %u fs %u", vallen,
+			    ntohl(ep->tstamp), ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
 #ifdef DEBUG
 			if (debug)
@@ -1087,6 +1083,7 @@ printf("yyy %x\n", rval);
 		 * valid field length. Remaining checks are below and on
 		 * the transmit side.
 		 */
+		case CRYPTO_CERT:
 		case CRYPTO_IFF:
 		case CRYPTO_GQ:
 		case CRYPTO_MV:
@@ -1095,7 +1092,6 @@ printf("yyy %x\n", rval);
 				rval = XEVNT_LEN;
 				break;
 			}
-
 			/* fall through */
 
 		/*
@@ -1199,10 +1195,13 @@ crypto_xmit(
 	/*
 	 * Send association request and response with status word and
 	 * host name. Note, this message is not signed and the filestamp
-	 * contains only the status word. We check at this point whether
-	 * the identity schemes are compatible to save tears later on.
+	 * contains only the status word.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
+		len += crypto_send(fp, &hostval);
+		fp->fstamp = htonl(crypto_flags);
+		break;
+
 	case CRYPTO_ASSOC:
 		len += crypto_send(fp, &hostval);
 		fp->fstamp = htonl(crypto_flags | ident_scheme);
@@ -1223,9 +1222,9 @@ crypto_xmit(
 
 	/*
 	 * Send certificate response or sign request. Use the values
-	 * from the certificate. If the request contains no subject
-	 * name, assume the name of this host. This is for backwards
-	 * compatibility. Private certificates are never sent.
+	 * from the certificate cache. If the request contains no
+	 * subject name, assume the name of this host. This is for
+	 * backwards compatibility. Private certificates are never sent.
 	 */
 	case CRYPTO_SIGN:
 	case CRYPTO_CERT | CRYPTO_RESP:
@@ -1414,8 +1413,8 @@ crypto_xmit(
 
 	/*
 	 * Send leapseconds table and signature. Use the values from the
-	 * tai structure. If no table has been loaded, just send a
-	 * request.
+	 * tai structure. If no table has been loaded, just send an
+	 * empty request.
 	 */
 	case CRYPTO_TAI:
 	case CRYPTO_TAI | CRYPTO_RESP:
@@ -1459,7 +1458,7 @@ crypto_xmit(
 	if (debug)
 		printf(
 		    "crypto_xmit: flags 0x%x ext offset %d len %u code 0x%x assocID %d\n",
-		    start, len, crypto_flags, opcode >> 16, associd);
+		    crypto_flags, start, len, opcode >> 16, associd);
 #endif
 	return (len);
 }
@@ -1492,14 +1491,13 @@ crypto_verify(
 	u_int	vallen;		/* value length */
 	u_int	siglen;		/* signature length */
 	u_int	opcode, len;
-	int	rval;
 	int	i;
 
 	/*
-	 * We require valid opcode and field length, timestamp,
-	 * filestamp, public key, digest, signature length, within
-	 * certificate lifetime and signature, where relevant. Note that
-	 * preliminary length checks are done in the main loop.
+	 * We require valid opcode and field lengths, timestamp,
+	 * filestamp, public key, digest, signature length and
+	 * signature, where relevant. Note that preliminary length
+	 * checks are done in the main loop.
 	 */
 	len = ntohl(ep->opcode) & 0x0000ffff;
 	opcode = ntohl(ep->opcode) & 0xffff0000;
@@ -1514,7 +1512,7 @@ crypto_verify(
 		return (XEVNT_ERR);
 
  	if (opcode & CRYPTO_RESP) {
- 		if (len <= VALUE_LEN)
+ 		if (len < VALUE_LEN)
 			return (XEVNT_LEN);
 	} else {
  		if (len < VALUE_LEN)
@@ -1524,101 +1522,89 @@ crypto_verify(
 	/*
 	 * We have a value header. Check for valid field lengths. The
 	 * field length must be long enough to contain the value header,
-	 * value and signature. If a request and a previous request of
-	 * the same type is pending, discard the previous request. If a
-	 * request but no signature, there is no need for further
-	 * checking.
+	 * value and signature. Note both the value and signature fields
+	 * are rounded up to the next word.
 	 */
 	vallen = ntohl(ep->vallen);
-	if (len < ((VALUE_LEN + vallen + 3) / 4) * 4)
-		return (XEVNT_LEN);
-
 	i = (vallen + 3) / 4;
 	siglen = ntohl(ep->pkt[i++]);
-	if (len < VALUE_LEN + vallen + siglen)
+	if (len < VALUE_LEN + ((vallen + 3) / 4) * 4 + ((siglen + 3) /
+	    4) * 4)
 		return (XEVNT_LEN);
 
-	if (!(opcode & CRYPTO_RESP)) {
-		if (peer->cmmd != NULL) {
-			if ((opcode | CRYPTO_RESP) ==
-			    (ntohl(peer->cmmd->opcode) & 0xffff0000)) {
-				free(peer->cmmd);
-				peer->cmmd = NULL;
-			} else {
-				return (XEVNT_LEN);
-			}
-		}
-		if (siglen == 0)
-			return (XEVNT_OK);
+	/*
+	 * Punt if this is a response with no data. Punt if this is a
+	 * request and a previous response is pending. 
+	 */
+	if (opcode & CRYPTO_RESP) {
+		if (vallen == 0)
+			return (XEVNT_LEN);
+	} else {
+		if (peer->cmmd != NULL)
+			return (XEVNT_LEN);
 	}
 
 	/*
-	 * We have a signature. Check for valid timestamp and filestamp.
-	 * The timestamp must not precede the filestamp. The timestamp
-	 * and filestamp must not precede the corresponding values in
-	 * the value structure. Once the autokey values have been
-	 * installed, the timestamp must always be later than the
-	 * corresponding value in the value structure. Duplicate
-	 * timestamps are illegal once the cookie has been validated.
+	 * Check for valid timestamp and filestamp. If the timestamp is
+	 * zero, the sender is not synchronized and signatures are
+	 * disregarded. If not, the timestamp must not precede the
+	 * filestamp. The timestamp and filestamp must not precede the
+	 * corresponding values in the value structure, if present. Once
+	 * the autokey values have been installed, the timestamp must
+	 * always be later than the corresponding value in the value
+	 * structure. Duplicate timestamps are illegal once the cookie
+	 * has been validated.
 	 */
-	rval = XEVNT_OK;
+	tstamp = ntohl(ep->tstamp);
+	fstamp = ntohl(ep->fstamp);
+	if (tstamp == 0)
+		return (XEVNT_OK);
+
+	if (tstamp < fstamp)
+		return (XEVNT_TSP);
+
+	if (vp != NULL) {
+		tstamp1 = ntohl(vp->tstamp);
+		fstamp1 = ntohl(vp->fstamp);
+		if ((tstamp < tstamp1 || (tstamp == tstamp1 &&
+		    (peer->crypto & CRYPTO_FLAG_AUTO))))
+			return (XEVNT_TSP);
+
+		if ((tstamp < fstamp1 || fstamp < fstamp1))
+			return (XEVNT_FSP);
+	}
+
+	/*
+	 * Check for valid signature length, public key and digest
+	 * algorithm.
+	 */
 	if (crypto_flags & peer->crypto & CRYPTO_FLAG_PRIV)
 		pkey = sign_pkey;
 	else
 		pkey = peer->pkey;
-	tstamp = ntohl(ep->tstamp);
-	fstamp = ntohl(ep->fstamp);
-	if (vp != NULL) {
-		tstamp1 = ntohl(vp->tstamp);
-		fstamp1 = ntohl(vp->fstamp);
-	}
-	if (tstamp == 0 || tstamp < fstamp) {
-		rval = XEVNT_TSP;
-	} else if (vp != NULL && (tstamp < tstamp1 || (tstamp ==
-	    tstamp1 && (peer->crypto & CRYPTO_FLAG_AUTO)))) {
-		rval = XEVNT_TSP;
-	} else if (vp != NULL && (tstamp < fstamp1 || fstamp <
-	    fstamp1)) {
-		rval = XEVNT_FSP;
+	if (siglen == 0 || pkey == NULL || peer->digest == NULL)
+		return (XEVNT_OK);
+
+	if (siglen != (u_int)EVP_PKEY_size(pkey))
+		return (XEVNT_SGL);
 
 	/*
-	 * If a public key and digest is present, and if valid key
-	 * length and within certificate lifetime, check for valid
-	 * signature. Note that the first valid signature lights the
-	 * proventic bit.
+	 * Darn, I thought we would never get here. Verify the
+	 * signature. If the identity exchange is verified, light the
+	 * proventic bit. If no client identity scheme is specified,
+	 * avoid doing the sign exchange.
 	 */
-	} else if (pkey == NULL || peer->digest == NULL) {
-		/* fall through */
+	EVP_VerifyInit(&ctx, peer->digest);
+	EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen + 12);
+	if (!EVP_VerifyFinal(&ctx, (u_char *)&ep->pkt[i], siglen, pkey))
+		return (XEVNT_SIG);
 
-	} else if (siglen != (u_int)EVP_PKEY_size(pkey)) {
-		rval = XEVNT_SGL;
-	} else {
-		EVP_VerifyInit(&ctx, peer->digest);
-		EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen +
-		    12);
-		if (EVP_VerifyFinal(&ctx, (u_char *)&ep->pkt[i], siglen,
-		    pkey)) {
-			if (peer->crypto & CRYPTO_FLAG_VRFY) {
-				peer->crypto |= CRYPTO_FLAG_PROV;
-				if (!(crypto_flags & CRYPTO_FLAG_MASK))
-					peer->crypto |=
-					    CRYPTO_FLAG_SIGN;
-			}
-		} else {
-			rval = XEVNT_SIG;
-		}
+	if (peer->crypto & CRYPTO_FLAG_VRFY) {
+		peer->crypto |= CRYPTO_FLAG_PROV;
+		if (!(crypto_flags & CRYPTO_FLAG_MASK))
+			peer->crypto |= CRYPTO_FLAG_SIGN;
 	}
-
-	/*
-	 * Wow, that was an adventure.
-	 */
-#ifdef DEBUG
-	if (debug > 1)
-		printf(
-		    "crypto_recv: verify %x vallen %u siglen %u ts %u fs %u\n",
-		    rval, vallen, siglen, tstamp, fstamp);
-#endif
-	return (rval);
+	return (XEVNT_OK);
 }
 
 

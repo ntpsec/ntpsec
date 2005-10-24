@@ -308,7 +308,6 @@ struct peer {
 	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
-	struct value tai_leap;	/* leapseconds values */
 	struct exten *cmmd;	/* extension pointer */
 
 	/*
@@ -318,6 +317,7 @@ struct peer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
+	struct value tai_leap;	/* send leapsecond table */
 #else /* OPENSSL */
 #define clear_to_zero status
 #endif /* OPENSSL */
