@@ -1880,11 +1880,6 @@ crypto_update(void)
 	if ((tstamp = crypto_time()) == 0)
 		return;
 
-	if (tstamp < cinfo->first || tstamp > cinfo->last) {
-		msyslog(
-		    LOG_ERR, "crypto_update: expired certificate\n");
-		return;
-	}
 	hostval.tstamp = htonl(tstamp);
 
 	/*
