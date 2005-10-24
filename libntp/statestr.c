@@ -134,12 +134,13 @@ struct codestring crypto_codes[] = {
 	{ XEVNT_SGL & ~CRPT_EVENT,	"bad_signature_length" },
 	{ XEVNT_SIG & ~CRPT_EVENT,	"signature_not_verified" },
 	{ XEVNT_VFY & ~CRPT_EVENT,	"certificate_not_verified" },
-	{ XEVNT_PER & ~CRPT_EVENT,	"certificate_expired" },
+	{ XEVNT_PER & ~CRPT_EVENT,	"host certificate_expired" },
 	{ XEVNT_CKY & ~CRPT_EVENT,	"bad_or_missing_cookie" },
 	{ XEVNT_DAT & ~CRPT_EVENT,	"bad_or_missing_leapsecond_table" },
 	{ XEVNT_CRT & ~CRPT_EVENT,	"bad_or_missing_certificate" },	
 	{ XEVNT_ID & ~CRPT_EVENT,	"bad_or_missing_group_key" },
 	{ XEVNT_ERR & ~CRPT_EVENT,	"protocol_error" },
+	{ XEVNT_SRV & ~CRPT_EVENT,	"server certificate expired" },
 	{ -1,				"crypto" }
 };
 #endif /* OPENSSL */

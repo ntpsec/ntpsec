@@ -1356,7 +1356,7 @@ esac
 
 AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
 [[case "$host" in
- *-*-bsdi[[23]]*)
+ *-*-bsdi[23]*)
     ans=yes
     ;;
  *-*-freebsd*)
@@ -3910,7 +3910,7 @@ $isc_netinetin6_hack
 $isc_netinet6in6_hack
 $isc_in_addr6_hack
 ],
-	[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);],
+	[[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);]],
 	[AC_MSG_RESULT(yes)],
 	[AC_MSG_RESULT(no)
 	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,

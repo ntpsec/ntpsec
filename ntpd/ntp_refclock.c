@@ -504,7 +504,7 @@ refclock_process(
  *
  * This routine implements a recursive median filter to suppress spikes
  * in the data, as well as determine a performance statistic. It
- * calculates the mean offset and jitter (squares). A time adjustment
+ * calculates the mean offset and RMS jitter. A time adjustment
  * fudgetime1 can be added to the final offset to compensate for various
  * systematic errors. The routine returns the number of samples
  * processed, which could be zero.
@@ -545,7 +545,7 @@ refclock_sample(
 	 * approximately 60 percent of the samples remain.
 	 */
 	i = 0; j = n;
-	m = n - (n * 2) / NSTAGE;
+	m = n - (n * 4) / 10;
 	while ((j - i) > m) {
 		offset = off[(j + i) / 2];
 		if (off[j - 1] - offset < offset - off[i])
