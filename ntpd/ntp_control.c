@@ -1027,8 +1027,8 @@ ctl_putfs(
 	if (tm == NULL)
 		return;
 
-	sprintf(cp, "%04d%02d%02d%02d%02d", tm->tm_year + 1900, tm->tm_mon,
-	    tm->tm_mday, tm->tm_hour, tm->tm_min);
+	sprintf(cp, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+	    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
 	while (*cp != '\0')
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);

@@ -1514,7 +1514,6 @@ peer_clear(
 	}
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
-	value_free(&peer->tai_leap);
 	value_free(&peer->encrypt);
 	value_free(&peer->sndval);
 #endif /* OPENSSL */
