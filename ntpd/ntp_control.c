@@ -9,6 +9,7 @@
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
+#include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
@@ -59,6 +60,7 @@ static	void	ctl_putid	P((const char *, char *));
 static	void	ctl_putarray	P((const char *, double *, int));
 static	void	ctl_putsys	P((int));
 static	void	ctl_putpeer	P((int, struct peer *));
+static	void	ctl_putfs	P((const char *, tstamp_t));
 #ifdef REFCLOCK
 static	void	ctl_putclock	P((int, struct refclockstat *, int));
 #endif	/* REFCLOCK */
@@ -116,15 +118,16 @@ static struct ctl_var sys_var[] = {
 #ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 21 */
 	{ CS_HOST,	RO, "hostname" },	/* 22 */
-	{ CS_PUBLIC,	RO, "hostkey" },	/* 23 */
+	{ CS_PUBLIC,	RO, "update" },		/* 23 */
 	{ CS_CERTIF,	RO, "cert" },		/* 24 */
-	{ CS_REVTIME,	RO, "refresh" },	/* 25 */
+	{ CS_REVTIME,	RO, "expire" },		/* 25 */
 	{ CS_LEAPTAB,	RO, "leapsec" },	/* 26 */
 	{ CS_TAI,	RO, "tai" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
 	{ CS_IDENT,	RO, "ident" },		/* 29 */
+	{ CS_REVOKE,	RO, "expire" },		/* 30 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 21/30 */
+	{ 0,		EOV, "" }		/* 21/31 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -158,7 +161,6 @@ static	u_char def_sys_var[] = {
 	CS_DIGEST,
 	CS_FLAGS,
 	CS_PUBLIC,
-	CS_REVTIME,
 	CS_IDENT,
 	CS_LEAPTAB,
 	CS_TAI,
@@ -999,6 +1001,39 @@ ctl_putuint(
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
+/*
+ * ctl_putfs - write a decoded filestamp into the response
+ */
+static void
+ctl_putfs(
+	const char *tag,
+	tstamp_t uval
+	)
+{
+	register char *cp;
+	register const char *cq;
+	char buffer[200];
+	struct tm *tm = NULL;
+	time_t fstamp;
+
+	cp = buffer;
+	cq = tag;
+	while (*cq != '\0')
+		*cp++ = *cq++;
+
+	*cp++ = '=';
+	fstamp = uval - JAN_1970;
+	tm = gmtime(&fstamp);
+	if (tm == NULL)
+		return;
+
+	sprintf(cp, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+	    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+	while (*cp != '\0')
+		cp++;
+	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+}
+
 
 /*
  * ctl_puthex - write a tagged unsigned integer, in hex, into the response
@@ -1373,23 +1408,23 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			sprintf(cbuf, "%s %s 0x%x %u", cp->subject,
-			    cp->issuer, cp->flags,
-			    ntohl(cp->cert.fstamp));
+			sprintf(cbuf, "%s %s 0x%x", cp->subject,
+			    cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
 			    strlen(cbuf));
+			ctl_putfs(sys_var[CS_REVOKE].text, cp->last);
 		}
 		break;
 
 	case CS_PUBLIC:
 		if (hostval.fstamp != 0)
-			ctl_putuint(sys_var[CS_PUBLIC].text,
-			    ntohl(hostval.fstamp));
+			ctl_putfs(sys_var[CS_PUBLIC].text,
+			    ntohl(hostval.tstamp));
 		break;
 
 	case CS_REVTIME:
 		if (hostval.tstamp != 0)
-			ctl_putuint(sys_var[CS_REVTIME].text,
+			ctl_putfs(sys_var[CS_REVTIME].text,
 			    ntohl(hostval.tstamp));
 		break;
 
@@ -1407,7 +1442,7 @@ ctl_putsys(
 
 	case CS_LEAPTAB:
 		if (tai_leap.fstamp != 0)
-			ctl_putuint(sys_var[CS_LEAPTAB].text,
+			ctl_putfs(sys_var[CS_LEAPTAB].text,
 			    ntohl(tai_leap.fstamp));
 		break;
 
@@ -1548,7 +1583,7 @@ ctl_putpeer(
 		break;
 
 	case CP_FLASH:
-		temp = peer->flash | peer_unfit(peer);
+		temp = peer->flash;
 		ctl_puthex(peer_var[CP_FLASH].text, temp);
 		break;
 
@@ -1671,22 +1706,17 @@ ctl_putpeer(
 
 	case CP_HOST:
 		if (peer->subject != NULL)
-			ctl_putstr(peer_var[CP_HOST].text, peer->subject,
-			    strlen(peer->subject));
+			ctl_putstr(peer_var[CP_HOST].text,
+			    peer->subject, strlen(peer->subject));
 		break;
 
-	case CP_VALID:
-		if (peer->pkey == NULL)
-			break;
-
-		sprintf(str, "%u:%u", peer->first, peer->last);
-		ctl_putstr(peer_var[CP_VALID].text, str, strlen(str));
+	case CP_VALID:		/* not used */
 		break;
 
 	case CP_IDENT:
 		if (peer->issuer != NULL)
-			ctl_putstr(peer_var[CP_IDENT].text, peer->issuer,
-			    strlen(peer->issuer));
+			ctl_putstr(peer_var[CP_IDENT].text,
+			    peer->issuer, strlen(peer->issuer));
 		break;
 
 	case CP_INITSEQ:
@@ -1694,7 +1724,7 @@ ctl_putpeer(
 			break;
 		ctl_putint(peer_var[CP_INITSEQ].text, ap->seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, ap->key);
-		ctl_putuint(peer_var[CP_INITTSP].text,
+		ctl_putfs(peer_var[CP_INITTSP].text,
 		    ntohl(peer->recval.tstamp));
 		break;
 #endif /* OPENSSL */

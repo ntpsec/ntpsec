@@ -509,6 +509,15 @@ printf("1: argc=%d\n", argc);
 	}
 #endif
 
+#ifdef OPENSSL
+	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
+		msyslog(LOG_ERR,
+		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx\n",
+		    OPENSSL_VERSION_NUMBER, SSLeay());
+		exit(1);
+	}
+#endif
+
 #ifdef SYS_WINNT
 	/*
 	 * Initialize the time structures and variables

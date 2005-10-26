@@ -172,7 +172,8 @@ struct refclockbug {
 #define LDISC_PPS	0x10	/* ppsclock, ppsapi */
 #define LDISC_RAW	0x20	/* raw binary */
 #define LDISC_ECHO	0x40	/* enable echo */
-#define	LDISC_REMOTE	0x80	/* remobe mode */
+#define	LDISC_REMOTE	0x80	/* remote mode */
+#define	LDISC_7O1      0x100    /* 7-bit, odd parity for Z3801A */
 
 struct refclockproc {
 	struct	refclockio io;	/* I/O handler structure */

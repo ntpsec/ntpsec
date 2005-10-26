@@ -1375,14 +1375,14 @@ case "$ac_cv_arg_setpgrp_negpid" in
 esac
 
 AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
-[case "$host" in
- *-*-bsdi[[23]]*)
+[[case "$host" in
+ *-*-bsdi[23]*)
     ans=yes
     ;;
  *-*-freebsd*)
     ans=yes
     ;;
- *-*-netbsd*)
+ *-*-netbsd*3.[0-8]*|*-*-netbsd*[0-2].*|*-*-netbsd*3.99.[0-7])
     ans=yes
     ;;
  *-*-openbsd*)
@@ -1394,7 +1394,7 @@ AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
  *) ans=no
     ;;
 esac
-ac_cv_func_ctty_for_f_setown=$ans])
+ac_cv_func_ctty_for_f_setown=$ans]])
 case "$ac_cv_func_ctty_for_f_setown" in
  yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
 esac
@@ -2804,7 +2804,7 @@ AC_ARG_WITH(openssl-libdir,
 case "$ans" in
  no) ;;
  yes) # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/local/lib /usr/local/ssl/lib"
+    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib"
     ;;
  *) # Look where they said
     ;;
@@ -2819,6 +2819,7 @@ case "$ans" in
 	    test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
 	    ;;
 	 *)
+	    test -f $i/libcrypto.so -a -f $i/libssl.so && break
 	    test -f $i/libcrypto.a -a -f $i/libssl.a && break
 	    ;;
 	esac
@@ -2843,7 +2844,7 @@ AC_ARG_WITH(openssl-incdir,
 case "$ans" in
  no) ;;
  yes) # look in:
-    ans="/usr/include /usr/local/include /usr/local/ssl/include"
+    ans="/usr/include /usr/sfw/include /usr/local/include /usr/local/ssl/include"
     ;;
  *) # Look where they said
     ;;
@@ -3930,7 +3931,7 @@ $isc_netinetin6_hack
 $isc_netinet6in6_hack
 $isc_in_addr6_hack
 ],
-	[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);],
+	[[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);]],
 	[AC_MSG_RESULT(yes)],
 	[AC_MSG_RESULT(no)
 	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,

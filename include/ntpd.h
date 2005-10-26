@@ -139,7 +139,7 @@ extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
 extern	int	crypto_recv	P((struct peer *, struct recvbuf *));
 extern	int	crypto_xmit	P((struct pkt *, struct sockaddr_storage *, int, struct exten *, keyid_t));
 extern	keyid_t	session_key	P((struct sockaddr_storage *, struct sockaddr_storage *, keyid_t, keyid_t, u_long));
-extern	void	make_keylist	P((struct peer *, struct interface *));
+extern	int	make_keylist	P((struct peer *, struct interface *));
 extern	void	key_expire	P((struct peer *));
 extern	void	crypto_update	P((void));
 extern	void	crypto_config	P((int, char *));
@@ -164,7 +164,6 @@ extern	void	peer_clear	P((struct peer *, char *));
 extern	void 	process_packet	P((struct peer *, struct pkt *));
 extern	void	clock_select	P((void));
 extern	void	kod_proto	P((void));
-extern	int	peer_unfit	P((struct peer *));
 
 /*
  * there seems to be a bug in the IRIX 4 compiler which prevents
