@@ -627,8 +627,6 @@ crypto_recv(
 				    ntohl(cinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
-				peer->first = cinfo->first;
-				peer->last = cinfo->last;
 			}
 			peer->flash &= ~TEST8;
 			temp32 = cinfo->nid;
@@ -1241,9 +1239,10 @@ crypto_xmit(
 		}
 
 		/*
-		 * Try to find the self-signed, trusted certificate,
-		 * which stops the trail hike. If not found, use the
-		 * first one found.
+		 * Find all certificates with matching subject. If a
+		 * self-signed, trusted certificate is found, use that.
+		 * If not, use the first one with matching subject. A
+		 * private certificate is never divulged or signed.
 		 */
 		xp = NULL;
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
@@ -1253,9 +1252,11 @@ crypto_xmit(
 			if (strcmp(certname, cp->subject) == 0) {
 				if (xp == NULL)
 					xp = cp;
-				else if (strcmp(certname, cp->issuer) ==
-				    0 && cp->flags & CERT_TRUST)
+				if (strcmp(certname, cp->issuer) ==
+				    0 && cp->flags & CERT_TRUST) {
 					xp = cp;
+					break;
+				}
 			}
 		}
 
@@ -1264,7 +1265,16 @@ crypto_xmit(
 		 * give back an empty response. If certificate not found
 		 * or beyond the lifetime, return an error. This is to
 		 * avoid a bad dude trying to get an expired certificate
-		 * resigned. Otherwise, sign it.
+		 * re-signed. Otherwise, send it.
+		 *
+		 * Note the timestamp and filestamp are taken from the
+		 * certificate value structure. For all certificates the
+		 * timestamp is the latest signature update time. For
+		 * host and imported certificates the filestamp is the
+		 * creation epoch. For signed certificates the filestamp
+		 * is the creation epoch of the trusted certificate at
+		 * the base of the certificate trail. In principle, this
+		 * allows strong checking for signature masquerade.
 		 */
 		if (tstamp == 0)
 			break;
@@ -3155,16 +3165,31 @@ cert_parse(
 
 
 /*
- * cert_sign - sign x509 certificate and update value structure.
+ * cert_sign - sign x509 certificate equest and update value structure.
  *
- * The certificate request is a copy of the client certificate, which
- * includes the version number, subject name and public key of the
- * client. The resulting certificate includes these values plus the
- * serial number, issuer name and validity interval of the server. The
- * validity interval extends from the current time to the same time one
- * year hence. For NTP purposes, it is convenient to use the NTP seconds
- * of the current time as the serial number. By default, the valid
- * period is one year.
+ * The certificate request includes a copy of the host certificate,
+ * which includes the version number, subject name and public key of the
+ * host. The resulting certificate includes these values plus the
+ * serial number, issuer name and valid interval of the server. The
+ * valid interval extends from the current time to the same time one
+ * year hence. This may extend the life of the signed certificate beyond
+ * that of the signer certificate.
+ *
+ * It is convenient to use the NTP seconds of the current time as the
+ * serial number. In the value structure the timestamp is the current
+ * time and the filestamp is taken from the extension field. Note this
+ * routine is called only when the client clock is synchronized to a
+ * proventic source, so timestamp comparisons are valid.
+ *
+ * The host certificate is valid from the time it was generated for a
+ * period of one year. A signed certificate is valid from the time of
+ * signature for a period of one year, but only the host certificate (or
+ * sign certificate if used) is actually used to encrypt and decrypt
+ * signatures. The signature trail is built from the client via the
+ * intermediate servers to the trusted server. Each signature on the
+ * trail must be valid at the time of signature, but it could happen
+ * that a signer certificate expire before the signed certificate, which
+ * remains valid until its expiration. 
  *
  * Returns
  * XEVNT_OK	success
@@ -3193,6 +3218,8 @@ cert_sign(
 
 	/*
 	 * Decode ASN.1 objects and construct certificate structure.
+	 * Make sure the system clock is synchronized to a proventic
+	 * source.
 	 */
 	tstamp = crypto_time();
 	if (tstamp == 0)
@@ -3327,7 +3354,7 @@ cert_valid(
  *
  * Returns
  * XEVNT_OK	success
- * XEVNT_TSP	bad or missing timestamp
+ * XEVNT_FSP	bad or missing filestamp
  * XEVNT_CRT	bad or missing certificate 
  */
 int
@@ -3341,8 +3368,6 @@ cert_install(
 	/*
 	 * Parse and validate the signed certificate. If valid,
 	 * construct the info/value structure; otherwise, scamper home.
-	 * Note that we do not check the period of validity, since the
-	 * clock may not be set yet.
 	 */
 	if ((cp = cert_parse((u_char *)ep->pkt, ntohl(ep->vallen),
 	    ntohl(ep->fstamp))) == NULL)
@@ -3372,7 +3397,7 @@ cert_install(
 				cert_free(xp);
 			} else {
 				cert_free(cp);
-				return (XEVNT_TSP);
+				return (XEVNT_FSP);
 			}
 			break;
 		}
@@ -3382,7 +3407,8 @@ cert_install(
 	cinfo = yp;
 
 	/*
-	 * Scan the certificate list to see if Y is signed by X.
+	 * Scan the certificate list to see if Y is signed by X. This is
+	 * independent of order.
 	 */
 	for (yp = cinfo; yp != NULL; yp = yp->link) {
 		for (xp = cinfo; xp != NULL; xp = xp->link) {
@@ -3409,11 +3435,26 @@ cert_install(
 			    xp->last)
 				continue;
 
+			/*
+			 * For certificates generated by the ntp-keygen
+			 * program the filestamp and first (not-before)
+			 * on the certificate are the same. We use the
+			 * filestamp from the signed to update the
+			 * filestamp on the signer, if later. This is
+			 * used to establish the beginning of the valid
+			 * period for the entire trail. Very elegant.
+			 */
+			if (yp->cert.fstamp < xp->cert.fstamp) {
+				yp->flags |= CERT_ERROR;
+				continue;
+			}
+			if (yp->cert.fstamp > xp->cert.fstamp)
+				xp->cert.fstamp = yp->cert.fstamp;
 			yp->flags |= CERT_SIGN;
 
 			/*
 			 * If X is trusted, then Y is trusted. Note that
-			 * we might stumble over a self signed
+			 * we might stumble over a self-signed
 			 * certificate that is not trusted, at least
 			 * temporarily. This can happen when a dude
 			 * first comes up, but has not synchronized the
