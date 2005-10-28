@@ -153,7 +153,7 @@ extern	struct	peer *findmanycastpeer	P((struct recvbuf *));
 extern	int	crypto_recv	P((struct peer *, struct recvbuf *));
 extern	int	crypto_xmit	P((struct pkt *, struct sockaddr_storage *, int, struct exten *, keyid_t));
 extern	keyid_t	session_key	P((struct sockaddr_storage *, struct sockaddr_storage *, keyid_t, keyid_t, u_long));
-extern	void	make_keylist	P((struct peer *, struct interface *));
+extern	int	make_keylist	P((struct peer *, struct interface *));
 extern	void	key_expire	P((struct peer *));
 extern	void	crypto_update	P((void));
 extern	void	crypto_config	P((int, char *));

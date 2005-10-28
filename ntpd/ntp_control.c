@@ -118,7 +118,7 @@ static struct ctl_var sys_var[] = {
 #ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 21 */
 	{ CS_HOST,	RO, "hostname" },	/* 22 */
-	{ CS_PUBLIC,	RO, "hostkey" },	/* 23 */
+	{ CS_PUBLIC,	RO, "update" },		/* 23 */
 	{ CS_CERTIF,	RO, "cert" },		/* 24 */
 	{ CS_REVTIME,	RO, "expire" },		/* 25 */
 	{ CS_LEAPTAB,	RO, "leapsec" },	/* 26 */
@@ -1027,8 +1027,8 @@ ctl_putfs(
 	if (tm == NULL)
 		return;
 
-	sprintf(cp, "%04d%02d%02d%04d", tm->tm_year + 1900, tm->tm_mon,
-	    tm->tm_mday + 1, tm->tm_hour * 60 + tm->tm_min);
+	sprintf(cp, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+	    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
 	while (*cp != '\0')
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
@@ -1419,7 +1419,7 @@ ctl_putsys(
 	case CS_PUBLIC:
 		if (hostval.fstamp != 0)
 			ctl_putfs(sys_var[CS_PUBLIC].text,
-			    ntohl(hostval.fstamp));
+			    ntohl(hostval.tstamp));
 		break;
 
 	case CS_REVTIME:

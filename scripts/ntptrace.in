@@ -4,19 +4,24 @@
 
 use Socket;
 use Getopt::Std;
-use vars qw($opt_n);
+use vars qw($opt_n $opt_m);
 
 $ntpq = "ntpq";
 
-getopts('n');
+getopts('nm:');
 
 $dodns = 1;
 $dodns = 0 if (defined($opt_n));
+
+$max_hosts = (defined($opt_m) ? $opt_m :  99);
+$max_hosts = 0 if ( $max_hosts !~ /^\d+$/ );
+$nb_host = 1;
 
 $host = shift;
 $host ||= "127.0.0.1";
 
 for (;;) {
+	$nb_host++;
 	$rootdelay = 0;
 	$rootdispersion = 0;
 	$stratum = 255;
@@ -49,6 +54,7 @@ for (;;) {
 	printf("\n");
 	last if ($stratum == 0 || $stratum == 1 || $stratum == 16);
 	last if ($refid =~ /^127\.127\.\d{1,3}\.\d{1,3}$/);
+	last if ($nb_host > $max_hosts);
 
 	$cmd = "$ntpq -n -c \"pstat $peer\" $host";
 	open(PH, $cmd . "|") || die "failed to start command $cmd: $!";

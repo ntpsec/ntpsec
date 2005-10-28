@@ -43,6 +43,7 @@
 #define CLOCK_FLL	(NTP_MAXPOLL + CLOCK_AVG) /* FLL loop gain */
 #define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
+#define CLOCK_JUNE	(CLOCK_DAY * 30) /* June in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
@@ -487,7 +488,8 @@ local_clock(
 #ifdef OPENSSL
 	/*
 	 * Scan the loopsecond table to determine the TAI offset. If
-	 * there is a scheduled leap in future, set the leap warning.
+	 * there is a scheduled leap in future, set the leap warning,
+	 * but only if less than 30 days before the leap.
 	 */
 	tpt = (u_int32 *)tai_leap.ptr;
 	len = ntohl(tai_leap.vallen) / sizeof(u_int32);
@@ -495,7 +497,8 @@ local_clock(
 		for (i = 0; i < len; i++) {
 			togo = ntohl(tpt[i]) - peer->rec.l_ui;
 			if (togo > 0) {
-				leap_next |= LEAP_ADDSECOND;
+				if (togo < CLOCK_JUNE)
+					leap_next |= LEAP_ADDSECOND;
 				break;
 			}
 		}
@@ -545,6 +548,9 @@ local_clock(
 		if (ext_enable) {
 			ntv.modes = MOD_STATUS;
 		} else {
+			struct tm *tm = NULL;
+			time_t tstamp;
+
 			ntv.modes = MOD_BITS;
 			if (clock_offset < 0)
 				dtemp = -.5;
@@ -570,14 +576,28 @@ local_clock(
 			ntv.status = STA_PLL;
 
 			/*
-			 * Set the leap bits in the status word.
+			 * Set the leap bits in the status word, but
+			 * only on the last day of June or December.
 			 */
-			if (calleapwhen(peer->rec.l_ui) <
-				    CLOCK_DAY) {
-				if (leap_next & LEAP_ADDSECOND)
-					ntv.status |= STA_INS;
-				else if (leap_next & LEAP_DELSECOND)
-					ntv.status |= STA_DEL;
+			tstamp = peer->rec.l_ui - JAN_1970;
+			tm = gmtime(&tstamp);
+			if (tm != NULL) {
+				if ((tm->tm_mon == 6 && tm->tm_mday ==
+				    30) || (tm->tm_mon + 1 == 12 &&
+				    tm->tm_mday == 31)) {
+					if (leap_next & LEAP_ADDSECOND)
+						ntv.status |= STA_INS;
+					else if (leap_next &
+					    LEAP_DELSECOND)
+						ntv.status |= STA_DEL;
+				}
+#ifdef DEBUG
+				if (debug)
+					printf(
+					    "local_clock: leap %d status %x date %d/%d\n",
+					    leap_next, ntv.status,
+					    tm->tm_mon + 1, tm->tm_mday);
+#endif
 			}
 
 			/*
@@ -754,9 +774,10 @@ adj_host_clock(
 
 	/*
 	 * If NTP is disabled or ntpdate mode enabled or the kernel
-	 * discipline enabled, we have no business going further.
+	 * discipline is enabled, we have no business going further.
 	 */
-	if (!ntp_enable || mode_ntpdate || pll_control && kern_enable)
+	if (!ntp_enable || mode_ntpdate || (pll_control &&
+	    kern_enable))
 		return;
 
 	/*
@@ -850,7 +871,9 @@ loop_config(
 		 * Call out the safety patrol. If ntpdate mode or if the
 		 * step threshold has been increased by the -x option or
 		 * tinker command, kernel discipline is unsafe, so don't
-		 * do any of this stuff.
+		 * do any of this stuff. Otherwise, initialize the
+		 * kernel to appear unsynchronized until the first
+		 * update is received.
 		 */
 		if (mode_ntpdate || clock_max > CLOCK_MAX)
 			break;
@@ -889,6 +912,11 @@ loop_config(
 #else /* SIGSYS */
 		ntp_adjtime(&ntv);
 #endif /* SIGSYS */
+
+		/*
+		 * Save the result status and light up nanoseconds
+		 * and/or an external clock if available.
+		 */
 		pll_status = ntv.status;
 		if (pll_control) {
 #ifdef STA_NANO
