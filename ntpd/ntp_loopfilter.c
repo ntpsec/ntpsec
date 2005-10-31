@@ -558,7 +558,11 @@ local_clock(
 			struct tm *tm = NULL;
 			time_t tstamp;
 
+#ifdef STA_NANO
+			ntv.modes = MOD_BITS | MOD_NANO;
+#else /* STA_NANO */
 			ntv.modes = MOD_BITS;
+#endif /* STA_NANO */
 			if (clock_offset < 0)
 				dtemp = -.5;
 			else
@@ -603,7 +607,8 @@ local_clock(
 					printf(
 					    "local_clock: leap %d status %x date %d/%d\n",
 					    leap_next, ntv.status,
-					    tm->tm_mon + 1, tm->tm_mday);
+					    tm->tm_mon + 1,
+					    tm->tm_mday);
 #endif
 			}
 
@@ -871,8 +876,8 @@ loop_config(
 #ifdef KERNEL_PLL
 		/*
 		 * Assume the kernel supports the ntp_adjtime() syscall.
-		 * If that syscall works, initialize the kernel
-		 * variables. Otherwise, continue leaving no harm
+		 * If that syscall works, initialize the kernel time
+ 		 * variables. Otherwise, continue leaving no harm
 		 * behind. While at it, ask to set nanosecond mode. If
 		 * the kernel agrees, rejoice; othewise, it does only
 		 * microseconds.
@@ -923,8 +928,8 @@ loop_config(
 #endif /* SIGSYS */
 
 		/*
-		 * Save the result status and light up nanoseconds
-		 * and/or an external clock if available.
+		 * Save the result status and light up an external clock
+		 * if available.
 		 */
 		pll_status = ntv.status;
 		if (pll_control) {

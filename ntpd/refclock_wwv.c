@@ -79,7 +79,7 @@
 #define	MAXCLP		100	/* max clips above reference per s */
 #define MAXERR		10	/* max data bit errors in minute */
 #define MAXSNR		40.	/* max SNR reference */
-#define MAXFREQ		1.	/* max frequency tolerance (125 PPM) */
+#define MAXFREQ		1.5	/* max frequency tolerance (187 PPM) */
 #define PI		3.1415926535 /* the real thing */
 #define DATCYC		170	/* data filter cycles */
 #define DATSIZ		(DATCYC * MS) /* data filter size */
