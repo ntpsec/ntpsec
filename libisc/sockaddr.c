@@ -261,10 +261,10 @@ isc_sockaddr_any(isc_sockaddr_t *sockaddr)
 	ISC_LINK_INIT(sockaddr, link);
 }
 
-#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 {
+#ifdef ISC_PLATFORM_HAVEIPV6
 	memset(sockaddr, 0, sizeof(*sockaddr));
 	sockaddr->type.sin6.sin6_family = AF_INET6;
 #ifdef ISC_PLATFORM_HAVESALEN
@@ -274,8 +274,8 @@ isc_sockaddr_any6(isc_sockaddr_t *sockaddr)
 	sockaddr->type.sin6.sin6_port = 0;
 	sockaddr->length = sizeof(sockaddr->type.sin6);
 	ISC_LINK_INIT(sockaddr, link);
-}
 #endif
+}
 
 void
 isc_sockaddr_fromin(isc_sockaddr_t *sockaddr, const struct in_addr *ina,

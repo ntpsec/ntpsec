@@ -313,7 +313,13 @@ do_nodename(
 		{
 			sockin6 = (struct sockaddr_in6 *)ai->ai_addr;
 			sockin6->sin6_family = (short) ai->ai_family;
-			sockin6->sin6_addr = in6addr_any;
+			/*
+			 * we have already zeroed out the address
+			 * so we don't actually need to do this
+			 * This assignment is causing problems so
+			 * we don't do what this would do.
+			 sockin6->sin6_addr = in6addr_any;
+			 */
 		}
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
