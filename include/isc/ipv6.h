@@ -76,8 +76,8 @@ struct in6_addr {
 #define s6_addr16	_S6_un._S6_u16
 #define s6_addr32	_S6_un._S6_u32
 
-#define IN6ADDR_ANY_INIT 	{{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}}
-#define IN6ADDR_LOOPBACK_INIT 	{{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }}}
+#define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
+#define IN6ADDR_LOOPBACK_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }}
 
 LIBISC_EXTERNAL_DATA extern const struct in6_addr in6addr_any;
 LIBISC_EXTERNAL_DATA extern const struct in6_addr in6addr_loopback;

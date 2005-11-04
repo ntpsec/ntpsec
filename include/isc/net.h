@@ -180,12 +180,12 @@ struct in6_pktinfo {
 /*
  * Cope with a missing in6addr_any and in6addr_loopback.
  */
-#if defined(ISC_PLATFORM_NEEDIN6ADDRANY)
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRANY)
 extern const struct in6_addr isc_net_in6addrany;
 #define in6addr_any isc_net_in6addrany
 #endif
 
-#if defined(ISC_PLATFORM_NEEDIN6ADDRLOOPBACK)
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRLOOPBACK)
 extern const struct in6_addr isc_net_in6addrloop;
 #define in6addr_loopback isc_net_in6addrloop
 #endif

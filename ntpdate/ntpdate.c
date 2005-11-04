@@ -21,6 +21,12 @@
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
 
+/* Don't include ISC's version of IPv6 variables and structures */
+#define ISC_IPV6_H 1
+#include "isc/net.h"
+#include "isc/result.h"
+#include "isc/sockaddr.h"
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -46,6 +52,10 @@
 #endif /* HAVE_SYS_RESOURCE_H */
 
 #include <arpa/inet.h>
+
+#ifdef __QNXNTO__
+# include "adjtime.h"
+#endif
 
 #ifdef SYS_VXWORKS
 # include "ioLib.h"
@@ -351,6 +361,12 @@ ntpdatemain (
 	clear_globals();
 #endif
 
+
+	/* Check to see if we have IPv6. Otherwise force the -4 flag */
+	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+		ai_fam_templ = AF_INET;
+	}
+
 	errflg = 0;
 	progname = argv[0];
 	syslogit = 0;
@@ -605,13 +621,13 @@ ntpdatemain (
 #endif
 			if (nfound > 0)
 				input_handler();
-#ifndef SYS_WINNT
-			else if (nfound == -1)
-#else
 			else if (nfound == SOCKET_ERROR)
-#endif /* SYS_WINNT */
 			{
+#ifndef SYS_WINNT
 				if (errno != EINTR)
+#else
+				if (WSAGetLastError() != WSAEINTR)
+#endif
 					netsyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 						"poll() error: %m"
@@ -1419,6 +1435,16 @@ findserver(
 {
 	struct server *server;
 	struct server *mc_server;
+	isc_sockaddr_t laddr;
+	isc_sockaddr_t saddr;
+
+	if(addr->ss_family == AF_INET) {
+		isc_sockaddr_fromin( &laddr, &((struct sockaddr_in*)&addr)->sin_addr, 0);
+	}
+	else {
+		isc_sockaddr_fromin6(&laddr, &((struct sockaddr_in6*)&addr)->sin6_addr, 0);
+	}
+
 
 	mc_server = NULL;
 	if (htons(((struct sockaddr_in*)addr)->sin_port) != NTP_PORT)
@@ -1427,20 +1453,18 @@ findserver(
 	for (server = sys_servers; server != NULL; 
 	     server = server->next_server) {
 		
-		if (memcmp(addr, &server->srcadr, SOCKLEN(addr))==0)
-			return server;
-		/* Multicast compatibility to verify here... I'm not sure it's working */
-		if(addr->ss_family == AF_INET) {
-			if (IN_MULTICAST(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)))
-				mc_server = server;
+		if(server->srcadr.ss_family == AF_INET) {
+			isc_sockaddr_fromin(&saddr, &((struct sockaddr_in*)&server->srcadr)->sin_addr, 0);
 		}
 		else {
-#ifdef AF_INET6
-			if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)(&server->srcadr))->sin6_addr))
-			mc_server = server;
-#else
-			return 0;
-#endif
+			isc_sockaddr_fromin6(&saddr, &((struct sockaddr_in6*)&server->srcadr)->sin6_addr, 0);
+		}
+		if (isc_sockaddr_eqaddr(&laddr, &saddr) == ISC_TRUE)
+			return server;
+
+		if(addr->ss_family == server->srcadr.ss_family) {
+			if (isc_sockaddr_ismulticast(&saddr) == ISC_TRUE)
+				mc_server = server;
 		}
 	}
 
@@ -1856,11 +1880,10 @@ sendpkt(
 	cc = sendto(sock, (char *)pkt, len, 0, (struct sockaddr *)dest,
 			SOCKLEN(dest));
 
+	if (cc == SOCKET_ERROR) {
 #ifndef SYS_WINNT
-	if (cc == -1) {
 		if (errno != EWOULDBLOCK && errno != ENOBUFS)
 #else
-	if (cc == SOCKET_ERROR) {
 		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS)
 #endif /* SYS_WINNT */

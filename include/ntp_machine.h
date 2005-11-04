@@ -239,6 +239,7 @@ typedef unsigned long u_long;
 #ifndef SYS_WINNT
 # define SOCKET	int
 # define INVALID_SOCKET	-1
+# define SOCKET_ERROR	-1
 # define closesocket close
 #endif
 /*

@@ -79,6 +79,12 @@
 #include "ntp_types.h"
 
 /*
+ * Don't include any additional IPv6 definitions
+ * We are defining our own here.
+ */
+#define ISC_IPV6_H 1
+
+ /*
  * If various macros are not defined we need to define them
  */
 
@@ -141,6 +147,19 @@ struct sockaddr_storage {
 #endif
 
 #ifndef ISC_PLATFORM_HAVEIPV6
+/*
+ * Definition of some useful macros to handle IP6 addresses
+ */
+#ifdef ISC_PLATFORM_NEEDIN6ADDRANY
+#ifdef SYS_WINNT
+#define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
+#else
+#define IN6ADDR_ANY_INIT \
+	{{{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }}}
+#endif
+#endif
+
 
 /*
  * IPv6 address
@@ -148,11 +167,6 @@ struct sockaddr_storage {
 #ifdef SYS_WINNT
 #define in6_addr in_addr6
 #else
-/*
- * Don't include any additional IPv6 definitions
- * We are defining our own here.
- */
-#define ISC_IPV6_H 1
 
 struct in6_addr {
 	union {
@@ -165,18 +179,9 @@ struct in6_addr {
 #define s6_addr   __u6_addr.__u6_addr8
 #endif
 
-/*
- * Definition of some useful macros to handle IP6 addresses
- */
-#ifdef SYS_WINNT
-#define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
-#else
-#define IN6ADDR_ANY_INIT \
-	{{{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }}}
-#endif
-
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRANY)
 extern const struct in6_addr in6addr_any;
+#endif
 
 #define SIN6_LEN
 #ifndef HAVE_SOCKADDR_IN6
