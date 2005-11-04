@@ -4,7 +4,7 @@ noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
 EXTRA_LIBRARIES = libntpsim.a
 libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	audio.c authkeys.c authreadkeys.c authusekey.c buftvtots.c \
-	caljulian.c calleapwhen.c caltontp.c calyearstart.c clocktime.c \
+	caljulian.c caltontp.c calyearstart.c clocktime.c \
 	clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c emalloc.c \
 	findconfig.c fptoa.c fptoms.c getopt.c hextoint.c \
 	hextolfp.c humandate.c icom.c inttoa.c iosignal.c \

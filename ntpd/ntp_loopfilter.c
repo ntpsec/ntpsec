@@ -89,6 +89,14 @@
  * support is used as described above; if false, the kernel is bypassed
  * entirely and the daemon PLL used instead.
  *
+ * There have been three versions of the kernel discipline code. The
+ * first (microkernel) now in Solaris discipilnes the microseconds. The
+ * second and third (nanokernel) disciplines the clock in nanoseconds.
+ * These versions are identifed if the symbol STA_PLL is present in the
+ * header file /usr/include/sys/timex.h. The third and current version
+ * includes TAI offset and is identified by the symbol NTP_API with
+ * value 4.
+ *
  * Each update to a prefer peer sets pps_stratum if it survives the
  * intersection algorithm and its time is within range. The PPS time
  * discipline is enabled (STA_PPSTIME bit set in the status word) when
@@ -129,7 +137,6 @@ static void rstclock P((int, u_long, double)); /* transition function */
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
 int	pll_status;		/* status bits for kernel pll */
-int	pll_nano;		/* nanosecond kernel switch */
 #endif /* KERNEL_PLL */
 
 /*
@@ -502,7 +509,7 @@ local_clock(
 				break;
 			}
 		}
-#ifdef STA_NANO
+#if defined(STA_NANO) && NTP_API == 4
 		if (pll_control && kern_enable && sys_tai == 0) {
 			memset(&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_TAI;
@@ -551,20 +558,24 @@ local_clock(
 			struct tm *tm = NULL;
 			time_t tstamp;
 
+#ifdef STA_NANO
+			ntv.modes = MOD_BITS | MOD_NANO;
+#else /* STA_NANO */
 			ntv.modes = MOD_BITS;
+#endif /* STA_NANO */
 			if (clock_offset < 0)
 				dtemp = -.5;
 			else
 				dtemp = .5;
-			if (pll_nano) {
-				ntv.offset = (int32)(clock_offset *
-				    1e9 + dtemp);
-				ntv.constant = sys_poll;
-			} else {
-				ntv.offset = (int32)(clock_offset *
-				    1e6 + dtemp);
-				ntv.constant = sys_poll - 4;
-			}
+#ifdef STA_NANO
+			ntv.offset = (int32)(clock_offset * 1e9 +
+			    dtemp);
+			ntv.constant = sys_poll;
+#else /* STA_NANO */
+			ntv.offset = (int32)(clock_offset * 1e6 +
+			    dtemp);
+			ntv.constant = sys_poll - 4;
+#endif /* STA_NANO */
 			if (clock_frequency != 0) {
 				ntv.modes |= MOD_FREQUENCY;
 				ntv.freq = (int32)((clock_frequency +
@@ -596,7 +607,8 @@ local_clock(
 					printf(
 					    "local_clock: leap %d status %x date %d/%d\n",
 					    leap_next, ntv.status,
-					    tm->tm_mon + 1, tm->tm_mday);
+					    tm->tm_mon + 1,
+					    tm->tm_mday);
 #endif
 			}
 
@@ -647,10 +659,11 @@ local_clock(
 				    ntv.status);
 		}
 		pll_status = ntv.status;
-		if (pll_nano)
-			clock_offset = ntv.offset / 1e9;
-		else
-			clock_offset = ntv.offset / 1e6;
+#ifdef STA_NANO
+		clock_offset = ntv.offset / 1e9;
+#else /* STA_NANO */
+		clock_offset = ntv.offset / 1e6;
+#endif /* STA_NANO */
 		clock_frequency = ntv.freq / 65536e6 - drift_comp;
 		flladj = plladj = 0;
 
@@ -659,10 +672,11 @@ local_clock(
 		 */
 		if (ntv.status & STA_PPSTIME) {
 			pps_control = current_time;
-			if (pll_nano)
-				clock_jitter = ntv.jitter / 1e9;
-			else
-				clock_jitter = ntv.jitter / 1e6;
+#ifdef STA_NANO
+			clock_jitter = ntv.jitter / 1e9;
+#else /* STA_NANO */
+			clock_jitter = ntv.jitter / 1e6;
+#endif /* STA_NANO */
 		}
 	}
 #endif /* KERNEL_PLL */
@@ -862,8 +876,8 @@ loop_config(
 #ifdef KERNEL_PLL
 		/*
 		 * Assume the kernel supports the ntp_adjtime() syscall.
-		 * If that syscall works, initialize the kernel
-		 * variables. Otherwise, continue leaving no harm
+		 * If that syscall works, initialize the kernel time
+ 		 * variables. Otherwise, continue leaving no harm
 		 * behind. While at it, ask to set nanosecond mode. If
 		 * the kernel agrees, rejoice; othewise, it does only
 		 * microseconds.
@@ -882,7 +896,7 @@ loop_config(
 		memset(&ntv, 0, sizeof(ntv));
 #ifdef STA_NANO
 		ntv.modes = MOD_BITS | MOD_NANO;
-#else
+#else /* STA_NANO */
 		ntv.modes = MOD_BITS;
 #endif /* STA_NANO */
 		ntv.maxerror = MAXDISPERSE;
@@ -914,14 +928,12 @@ loop_config(
 #endif /* SIGSYS */
 
 		/*
-		 * Save the result status and light up nanoseconds
-		 * and/or an external clock if available.
+		 * Save the result status and light up an external clock
+		 * if available.
 		 */
 		pll_status = ntv.status;
 		if (pll_control) {
 #ifdef STA_NANO
-			if (pll_status & STA_NANO)
-				pll_nano = 1;
 			if (pll_status & STA_CLK)
 				ext_enable = 1;
 #endif /* STA_NANO */

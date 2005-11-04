@@ -1294,14 +1294,14 @@ clock_update(void)
 	 */
 	case 2:
 		clear_all();
+		sys_leap = LEAP_NOTINSYNC;
 		sys_stratum = STRATUM_UNSPEC;
+		sys_peer = NULL;
+		sys_rootdelay = 0;
+		sys_rootdispersion = 0;
 		memcpy(&sys_refid, "STEP", 4);
 		sys_poll = NTP_MINPOLL;
 		report_event(EVNT_CLOCKRESET, NULL);
-#ifdef OPENSSL
-		if (oleap != LEAP_NOTINSYNC)
-			expire_all();
-#endif /* OPENSSL */
 		break;
 
 	/*
@@ -1360,10 +1360,8 @@ clock_update(void)
 	default:
 		break;
 	}
-	if (ostratum != sys_stratum) {
+	if (ostratum != sys_stratum)
 		report_event(EVNT_PEERSTCHG, NULL);
-		crypto_update();
-	}
 }
 
 
