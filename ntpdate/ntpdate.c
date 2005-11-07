@@ -87,6 +87,7 @@ struct timeval timeout = {60,0};
 #define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy
 				on Windows NT timers. */
 #pragma comment(lib, "winmm")
+isc_boolean_t ntp_port_inuse(int af, u_short port);
 #endif /* SYS_WINNT */
 
 /*
@@ -131,7 +132,7 @@ int fd_family[MAX_AF];	/* to remember the socket family */
 struct pollfd fdmask[MAX_AF];
 #else
 fd_set fdmask;
-int maxfd;
+SOCKET maxfd;
 #endif
 int polltest = 0;
 
@@ -1439,10 +1440,10 @@ findserver(
 	isc_sockaddr_t saddr;
 
 	if(addr->ss_family == AF_INET) {
-		isc_sockaddr_fromin( &laddr, &((struct sockaddr_in*)&addr)->sin_addr, 0);
+		isc_sockaddr_fromin( &laddr, &((struct sockaddr_in*)addr)->sin_addr, 0);
 	}
 	else {
-		isc_sockaddr_fromin6(&laddr, &((struct sockaddr_in6*)&addr)->sin6_addr, 0);
+		isc_sockaddr_fromin6(&laddr, &((struct sockaddr_in6*)addr)->sin6_addr, 0);
 	}
 
 
@@ -1724,6 +1725,7 @@ init_io(void)
 	 * Init hints addrinfo structure
 	 */
 	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = ai_fam_templ;
 	hints.ai_flags = AI_PASSIVE;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -1733,6 +1735,13 @@ init_io(void)
 	       /*NOTREACHED*/
 	}
 
+#ifdef SYS_WINNT
+	if (ntp_port_inuse(AF_INET, NTP_PORT) ){
+		netsyslog(LOG_ERR, "the NTP socket is in use, exiting: %m");
+		exit(1);
+	}
+#endif
+
 	/* Remember the address of the addrinfo structure chain */
 	ressave = res;
 
@@ -1741,7 +1750,8 @@ init_io(void)
 	 */
 	for(nbsock = 0; (nbsock < MAX_AF) && res ; res = res->ai_next) {
 	/* create a datagram (UDP) socket */
-	   if ((fd[nbsock] = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0) {
+	   fd[nbsock] = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	   if (fd[nbsock] == SOCKET_ERROR) {
 #ifndef SYS_WINNT
 		if (errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT ||
 		    errno == EPFNOSUPPORT)
@@ -1797,7 +1807,7 @@ init_io(void)
 	    fdmask[nbsock].events = POLLIN;
 #else
 	    FD_SET(fd[nbsock], &fdmask);
-	    if ((SOCKET) maxfd < fd[nbsock]+1) {
+	    if (maxfd < fd[nbsock]+1) {
 		maxfd = fd[nbsock]+1;
 	    }
 #endif
@@ -1903,7 +1913,7 @@ input_handler(void)
 	struct timeval tvzero;
 	int fromlen;
 	l_fp ts;
-	int i;
+	SOCKET i;
 #ifdef HAVE_POLL_H
 	struct pollfd fds[MAX_AF];
 #else
@@ -2283,5 +2293,36 @@ getnetinfoservers(void)
 	}
 
 	return(namelist);
+}
+#endif
+
+#ifdef SYS_WINNT
+isc_boolean_t ntp_port_inuse(int af, u_short port)
+{
+	/*
+	 * Check if NTP socket is already in use on this system
+	 * This is only for Windows Systems, as they tend not to fail on the real bind() below
+	 */
+	
+	SOCKET checksocket;
+	struct sockaddr_in checkservice;
+	checksocket = socket(af, SOCK_DGRAM, 0);
+	if (checksocket == INVALID_SOCKET) {
+		return (ISC_TRUE);
+	}
+
+	checkservice.sin_family = (short) AF_INET;
+	checkservice.sin_addr.s_addr = INADDR_LOOPBACK;
+	checkservice.sin_port = htons(port);
+
+	if (bind(checksocket, (struct sockaddr *)&checkservice,
+		sizeof(checkservice)) == SOCKET_ERROR) {
+		if ( WSAGetLastError() == WSAEADDRINUSE ){
+			closesocket(checksocket);
+			return (ISC_TRUE);
+		}
+	}
+	closesocket(checksocket);
+	return (ISC_FALSE);
 }
 #endif
