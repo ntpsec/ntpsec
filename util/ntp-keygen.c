@@ -1791,8 +1791,8 @@ x509	(
 	ASN1_INTEGER_set(serial, epoch + JAN_1970);
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);
-	X509_gmtime_adj(X509_get_notBefore(cert), 0L);
-	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
+	X509_time_adj(X509_get_notBefore(cert), 0L, &epoch);
+	X509_time_adj(X509_get_notAfter(cert), YEAR, &epoch);
 	subj = X509_get_subject_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
 	    (unsigned char *) hostname, strlen(hostname), -1, 0);

@@ -1104,16 +1104,9 @@ refclock_control(
 		if (in->haveflags & CLK_HAVETIME2)
 			pp->fudgetime2 = in->fudgetime2;
 		if (in->haveflags & CLK_HAVEVAL1)
-			pp->stratum = (u_char) in->fudgeval1;
+			peer->stratum = pp->stratum = (u_char)in->fudgeval1;
 		if (in->haveflags & CLK_HAVEVAL2)
-			pp->refid = in->fudgeval2;
-		peer->stratum = pp->stratum;
-		if (peer->stratum == STRATUM_REFCLOCK || peer->stratum ==
-		    STRATUM_UNSPEC)
-			peer->refid = pp->refid;
-		else
-			peer->refid = ((struct
-			    sockaddr_in*)&peer->srcadr)->sin_addr.s_addr;
+			peer->refid = pp->refid = in->fudgeval2;
 		if (in->haveflags & CLK_HAVEFLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
 			pp->sloppyclockflag |= in->flags & CLK_FLAG1;
