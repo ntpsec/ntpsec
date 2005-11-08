@@ -474,10 +474,11 @@ struct sync {
 	double	syneng;		/* sync signal max 800 ms */
 	double	synmax;		/* sync signal max 0 s */
 	double	synsnr;		/* sync signal SNR */
-	int	count;		/* bit counter */
-	char	refid[5];	/* reference identifier */
-	int	select;		/* select bits */
+	double	metric;		/* signal quality metric */
 	int	reach;		/* reachability register */
+	int	count;		/* bit counter */
+	int	select;		/* select bits */
+	char	refid[5];	/* reference identifier */
 };
 
 /*
@@ -1212,8 +1213,8 @@ wwv_rf(
 		struct chan *cp;
 
 		sp = up->sptr;
-		if (wwv_metric(sp) >= TTHR && epoch == sp->mepoch %
-		    SECOND) {
+		if (sp->metric >= TTHR && epoch == sp->mepoch % SECOND)
+		    {
 			up->rsec = 60 - sp->mepoch / SECOND;
 			up->rphase = 0;
 			up->status |= MSYNC;
@@ -1428,12 +1429,13 @@ wwv_qrz(
 			sp->count++;
 			break;
 		}
+		sp->metric = wwv_metric(sp);
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
 			    "wwv8 %d %3d %s %d %5.0f %5.1f %5.0f %5ld %5d %ld",
 			    up->port, up->gain, sp->refid, sp->count,
-			    sp->synmax, sp->synsnr, wwv_metric(sp),
-			    sp->pos, up->tepoch, epoch);
+			    sp->synmax, sp->synsnr, sp->metric, sp->pos,
+			    up->tepoch, epoch);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 			if (debug)
@@ -1893,6 +1895,7 @@ wwv_rsec(
 			sp->reach |= 1;
 			sp->count++;
 		}
+		sp->metric = wwv_metric(sp);
 
 		/*
 		 * WWVH station
@@ -1907,6 +1910,7 @@ wwv_rsec(
 			rp->reach |= 1;
 			rp->count++;
 		}
+		rp->metric = wwv_metric(rp);
 
 		/*
 		 * Set up for next minute.
@@ -1918,9 +1922,9 @@ wwv_rsec(
 			    up->epomax, up->eposnr, up->sigsig,
 			    up->datsnr,
 			    sp->refid, sp->reach & 0xffff,
-			    wwv_metric(sp), sp->synmax, sp->synsnr,
+			    sp->metric, sp->synmax, sp->synsnr,
 			    rp->refid, rp->reach & 0xffff,
-			    wwv_metric(rp), rp->synmax, rp->synsnr);
+			    rp->metric, rp->synmax, rp->synsnr);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 			if (debug)
@@ -1931,15 +1935,19 @@ wwv_rsec(
 		up->alarm = 0;
 
 		/*
-		 * Before synchronizing to a station bail out if no
-		 * stations are heard or the watchcat exceeds the DATA
-		 * timeout (4 min) and too many bad data bits or the
-		 * watchcat exceeds the SYNCH timeout (30 min).
+		 * We are at the end of the minute scan. It's very
+		 * important to know when to move on. Before first
+		 * synchronizing to a station, step to the next channel
+		 * immediately if no station has been heard. Step after
+		 * the DATA timeout (4 min) if a station has been heard,
+		 * but too few good data bits have been found. In any
+		 * case, step after the SYNCH timeout (30 min).
 		 *
 		 * After synchronizing to a station, report the data
-		 * unless the watchcat exceeds the SYNCH timeout (30
-		 * min). Bail out if the watchcat exceeds the PANIC
-		 * timeout (2 days).
+		 * only if less than the SYNCH timeout. After that, do
+		 * not report the data, but step to the next channel
+		 * after the SYNCH timeout. In any case, step after the
+		 * PANIC timeout (2 days).
 		 */
 		if (!(up->status & INSYNC)) {
 			if (!wwv_newchan(peer)) {
@@ -2589,24 +2597,32 @@ wwv_newchan(
 	rank = 0;
 	for (i = 0; i < NCHAN; i++) {
 		rp = &up->mitig[i].wwvh;
-		dtemp = wwv_metric(rp);
+		dtemp = rp->metric;
 		if (dtemp >= rank) {
 			rank = dtemp;
 			sp = rp;
 			j = i;
 		}
 		rp = &up->mitig[i].wwv;
-		dtemp = wwv_metric(rp);
+		dtemp = rp->metric;
 		if (dtemp >= rank) {
 			rank = dtemp;
 			sp = rp;
 			j = i;
 		}
 	}
+
+	/*
+	 * If the clock has been set, stick with the best channel, but
+	 * only if signal quality is above thresholds. Otherwise, if
+	 * minute sync is lit, reset to 15 MHz and kill the V/H bits.
+	 * Otherwise, set the refid and kill the V/H bits.
+	 */
+
 	if ((!(up->status & INSYNC) && rank >= MTHR) || rank >= TTHR) {
 		up->dchan = j;
 		up->sptr = sp;
-		memcpy(&pp->refid, sp->refid, 4);
+		pp->refid = sp->refid;
 		up->status |= sp->select & (SELV | SELH);
 	} else if (up->status & MSYNC) {
 		up->dchan = DCHAN;
@@ -2617,7 +2633,7 @@ wwv_newchan(
 		memcpy(&pp->refid, "SCAN", 4);
 		up->status &= ~(SELV | SELH);
 	}
-	memcpy(&peer->refid, &pp->refid, 4);
+	peer->refid = pp->refid;
 	return (up->status & (SELV | SELH));
 }
 
@@ -2804,7 +2820,7 @@ timecode(
 	 */
 	sp = up->sptr;
 	sprintf(cptr, " %d %d %s %.0f %d %.1f %d", up->watch,
-	    up->mitig[up->dchan].gain, sp->refid, wwv_metric(sp),
+	    up->mitig[up->dchan].gain, sp->refid, sp->metric,
 	    up->errbit, up->freq / SECOND * 1e6, up->avgint);
 	strcat(ptr, cptr);
 	return (strlen(ptr));
