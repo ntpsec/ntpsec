@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.63 2005/10/07 22:10:25 kardel RELEASE_20051008_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A
  *
- * refclock_parse.c,v 4.63 2005/10/07 22:10:25 kardel RELEASE_20051008_A
+ * refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -181,7 +181,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.63 2005/10/07 22:10:25 kardel RELEASE_20051008_A";
+static char rcsid[] = "refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2041,6 +2041,8 @@ local_input(
 					{
 						if (pps_info.assert_sequence + pps_info.clear_sequence != parse->ppsserial)
 						{
+							double dtemp;
+
 						        struct timespec pts;
 							/*
 							 * add PPS time stamp if available via ppsclock module
@@ -2050,14 +2052,19 @@ local_input(
 							  pts = pps_info.clear_timestamp;
 							else
 							  pts = pps_info.assert_timestamp;
+
 							parse->parseio.parse_dtime.parse_ptime.fp.l_ui = pts.tv_sec + JAN_1970;
-							/* XXX round down to usec - really ? */
-							pts.tv_nsec = (pts.tv_nsec + 500) / 1000;
-							if (pts.tv_nsec > 1000000) {
-							  pts.tv_nsec -= 1000000;
-							  pts.tv_sec++;
+
+							dtemp = pts.tv_nsec / 1e9;
+							if (dtemp < 0.) {
+								dtemp += 1;
+								parse->parseio.parse_dtime.parse_ptime.fp.l_ui--;
 							}
-							TVUTOTSF(pts.tv_nsec, parse->parseio.parse_dtime.parse_ptime.fp.l_uf);
+							if (dtemp > 1.) {
+								dtemp -= 1;
+								parse->parseio.parse_dtime.parse_ptime.fp.l_ui++;
+							}
+							parse->parseio.parse_dtime.parse_ptime.fp.l_uf = dtemp * FRAC;
 
 						        parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
 #ifdef DEBUG
@@ -2695,15 +2702,15 @@ parse_ppsapi(
 		CLK_UNIT(parse->peer), cp);
 
 	if (!(mode & cap)) {
-	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED to initialize PPS to %s",
-		  CLK_UNIT(parse->peer), cp);
+	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED to initialize PPS to %s (PPS API capabilities=0x%x)",
+		  CLK_UNIT(parse->peer), cp, cap);
 	
 		return 0;
 	}
 
 	if (!(mode1 & cap)) {
-	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter",
-		  CLK_UNIT(parse->peer), cp);
+	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter (PPS API capabilities=0x%x)",
+		  CLK_UNIT(parse->peer), cp, cap);
 		mode1 = 0;
 	} else {
 	        if (mode1 == PPS_OFFSETCLEAR) 
@@ -5665,6 +5672,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.64  2005/11/09 20:44:47  kardel
+ * utilize full PPS timestamp resolution from PPS API
+ *
  * Revision 4.63  2005/10/07 22:10:25  kardel
  * bounded buffer implementation
  *
