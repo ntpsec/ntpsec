@@ -13,7 +13,7 @@
 		<h3>Authentication Options</h3>
 		<img src="pic/alice44.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 		<p>Our resident cryptographer; now you see him, now you don't.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">04:49</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Saturday, November 05, 2005</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">00:46</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="299">Tuesday, November 08, 2005</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/links9.txt"></script>
@@ -112,6 +112,7 @@
 			<dd>Specifies the key identifiers which are trusted for the purposes of authenticating peers with symmetric key cryptography, as well as keys used by the <tt>ntpq</tt> and <tt>ntpdc</tt> programs. The authentication procedures require that both the local and remote servers share the same key and key identifier for this purpose, although different keys can be used with different servers. The <tt><i>key</i></tt> arguments are 32-bit unsigned integers with values from 1 to 65,534.
 		</dl>
 		<h4 id="err">Error Codes</h4>
+		<p>Errors can occur due to mismatched configurations, unexpected restarts, expired certificates and unfriendly people. In most cases the protocol state machine recovers automatically by retransmission, timeout and restart, where necessary. Some errors are due to mismatched keys, digest schemes or identity schemes and must be corrected by installing the correct media and/or correcting the configuration file. One of the most common errrors is expired certificates, which must be regenerated and signed at least once per year using the <tt><a href="ntp-keygen.html">ntp-keygen</a></tt> program.</p>
 		<p>The following error codes are reported via the NTP control and monitoring protocol trap mechanism.</p>
 		<dl>
 			<dt>101 (bad field format or length)
@@ -124,24 +125,23 @@
 			<dd>The public key is missing, has incorrect format or is an unsupported type.
 			<dt>105 (unsupported digest type)
 			<dd>The server requires an unsupported digest/signature scheme.
-			<dt>106 (mismatched digest types)
-			<dd>Not used.
-			<dt>107 (bad signature length)
+			<dt>106 (unsupported identity type)<dd>The client or server has requested an identity scheme the other does not support.<dt>107 (bad signature length)
 			<dd>The signature length does not match the current public key.
 			<dt>108 (signature not verified)
 			<dd>The message fails the signature check. It could be bogus or signed by a different private key.
 			<dt>109 (certificate not verified)
-			<dd>The certificate is invalid or signed with the wrong key.
-			<dt>110 (certificate not verified)
-			<dd>The certificate is not yet valid or has expired or the signature could not be verified.
-			<dt>111 (bad or missing cookie)
+			<dd>The certificate is invalid or signed with the wrong key.<dt>110 (host certificate expired)<dd>The old server certificate has expired.<dt>111 (bad or missing cookie)
 			<dd>The cookie is missing, corrupted or bogus.
 			<dt>112 (bad or missing leapseconds table)
 			<dd>The leapseconds table is missing, corrupted or bogus.
 			<dt>113 (bad or missing certificate)
 			<dd>The certificate is missing, corrupted or bogus.
-			<dt>114 (bad or missing identity)
-			<dd>The identity key is missing, corrupt or bogus.
+			<dt>114 (bad or missing group key)<dd>The identity key is missing, corrupt or bogus.
+		
+			<dt>115 (protocol error)
+			<dd>The protocol state machine has wedged due to unexpected restart
+			<dt>116 (server certificate expired)
+			<dd>The old server certificate has expired.
 		</dl>
 		<h4 id="file">Files</h4>
 		<p>See the <a href="keygen.html"><tt>ntp-keygen</tt></a> page.</p>
