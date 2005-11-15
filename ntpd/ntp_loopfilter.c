@@ -502,7 +502,8 @@ local_clock(
 	len = ntohl(tai_leap.vallen) / sizeof(u_int32);
 	if (tpt != NULL) {
 		for (i = 0; i < len; i++) {
-			togo = ntohl(tpt[i]) - peer->rec.l_ui;
+			togo = (long)ntohl(tpt[i]) -
+			    (long)peer->rec.l_ui;
 			if (togo > 0) {
 				if (togo < CLOCK_JUNE)
 					leap_next |= LEAP_ADDSECOND;
@@ -593,7 +594,7 @@ local_clock(
 			tstamp = peer->rec.l_ui - JAN_1970;
 			tm = gmtime(&tstamp);
 			if (tm != NULL) {
-				if ((tm->tm_mon == 6 && tm->tm_mday ==
+				if ((tm->tm_mon + 1 == 6 && tm->tm_mday ==
 				    30) || (tm->tm_mon + 1 == 12 &&
 				    tm->tm_mday == 31)) {
 					if (leap_next & LEAP_ADDSECOND)
