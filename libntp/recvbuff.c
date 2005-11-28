@@ -11,17 +11,18 @@
 #include "recvbuff.h"
 #include "iosignal.h"
 
+#include <isc/list.h>
 /*
  * Memory allocation
  */
-static u_long volatile full_recvbufs;		/* number of recvbufs on fulllist */
-static u_long volatile free_recvbufs;		/* number of recvbufs on freelist */
-static u_long volatile total_recvbufs;		/* total recvbufs currently in use */
+static u_long volatile full_recvbufs;	/* number of recvbufs on fulllist */
+static u_long volatile free_recvbufs;	/* number of recvbufs on freelist */
+static u_long volatile total_recvbufs;	/* total recvbufs currently in use */
 static u_long volatile lowater_adds;	/* number of times we have added memory */
 
-static	struct recvbuf *volatile freelist;  /* free buffers */
-static	struct recvbuf *volatile fulllist;  /* lifo buffers with data */
-static	struct recvbuf *volatile beginlist; /* fifo buffers with data */
+
+static ISC_LIST(recvbuf_t)	full_list;	/* Currently used recv buffers */
+static ISC_LIST(recvbuf_t)	free_list;	/* Currently unused buffers */
 	
 #if defined(HAVE_IO_COMPLETION_PORT)
 
@@ -63,9 +64,9 @@ lowater_additions(void)
 }
 
 static void 
-initialise_buffer(struct recvbuf *buff)
+initialise_buffer(recvbuf_t *buff)
 {
-	memset((char *) buff, 0, sizeof(struct recvbuf));
+	memset((char *) buff, 0, sizeof(recvbuf_t));
 
 #if defined HAVE_IO_COMPLETION_PORT
 	buff->wsabuff.len = RX_BUFF_SIZE;
@@ -74,49 +75,36 @@ initialise_buffer(struct recvbuf *buff)
 }
 
 static void
-create_buffers(void)
+create_buffers(int nbufs)
 {
-	register struct recvbuf *buf;
+	register recvbuf_t *buf;
 	int i;
-	buf = (struct recvbuf *)
-	    emalloc(RECV_INC*sizeof(struct recvbuf));
-	for (i = 0; i < RECV_INC; i++)
+	buf = (recvbuf_t *)
+	    emalloc(nbufs*sizeof(recvbuf_t));
+	for (i = 0; i < nbufs; i++)
 	{
 		initialise_buffer(buf);
-		buf->next = (struct recvbuf *) freelist;
-		freelist = buf;
+		ISC_LIST_APPEND(free_list, buf, link);
 		buf++;
+		free_recvbufs++;
+		total_recvbufs++;
 	}
-
-	free_recvbufs += RECV_INC;
-	total_recvbufs += RECV_INC;
 	lowater_adds++;
 }
 
 void
 init_recvbuff(int nbufs)
 {
-	register struct recvbuf *buf;
-	int i;
 
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	freelist = 0;
-
-	buf = (struct recvbuf *)
-	    emalloc(nbufs*sizeof(struct recvbuf));
-	for (i = 0; i < nbufs; i++)
-	{
-		initialise_buffer(buf);
-		buf->next = (struct recvbuf *) freelist;
-		freelist = buf;
-		buf++;
-	}
-
-	fulllist = 0;
-	free_recvbufs = total_recvbufs = nbufs;
+	ISC_LIST_INIT(full_list);
+	ISC_LIST_INIT(free_list);
+	free_recvbufs = total_recvbufs = 0;
 	full_recvbufs = lowater_adds = 0;
+
+	create_buffers(nbufs);
 
 #if defined(HAVE_IO_COMPLETION_PORT)
 	InitializeCriticalSection(&RecvLock);
@@ -124,73 +112,15 @@ init_recvbuff(int nbufs)
 
 }
 
-
-/*
- * getrecvbufs - get receive buffers which have data in them
- *
- * 
- */
-
-struct recvbuf *
-getrecvbufs(void)
-{
-	struct recvbuf *rb = NULL; /* nothing has arrived */;
-
-	LOCK();
-	if (full_recvbufs == 0)
-	{
-#ifdef DEBUG
-		if (debug > 4)
-		    printf("getrecvbufs called, no action here\n");
-#endif
-	}
-	else {
-
-		/*
-		 * Get the fulllist chain and mark it empty
-		 */
-#ifdef DEBUG
-		if (debug > 4)
-		    printf("getrecvbufs returning %ld buffers\n", full_recvbufs);
-#endif
-		rb = beginlist;
-		fulllist = 0;
-		full_recvbufs = 0;
-
-		/*
-		 * Check to see if we're below the low water mark.
-		 */
-		if (free_recvbufs <= RECV_LOWAT)
-		{
-			if (total_recvbufs >= RECV_TOOMANY)
-			    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
-				    total_recvbufs);
-			else
-			{
-				create_buffers();
-			}
-		}
-	}
-	UNLOCK();
-
-	/*
-	 * Return the chain
-	 */
-	return rb;
-}
-
 /*
  * freerecvbuf - make a single recvbuf available for reuse
  */
 void
-freerecvbuf(
-	struct recvbuf *rb
-	)
+freerecvbuf(recvbuf_t *rb)
 {
 	LOCK();
 	BLOCKIO();
-	rb->next = (struct recvbuf *) freelist;
-	freelist = rb;
+	ISC_LIST_APPEND(free_list, rb, link);
 	free_recvbufs++;
 	UNBLOCKIO();
 	UNLOCK();
@@ -198,67 +128,48 @@ freerecvbuf(
 
 	
 void
-add_full_recv_buffer(
-	struct recvbuf *rb
-	)
+add_full_recv_buffer(recvbuf_t *rb)
 {
 	LOCK();
-	if (full_recvbufs == 0)
+	ISC_LIST_APPEND(full_list, rb, link);
+	full_recvbufs++;
+	UNLOCK();
+}
+
+recvbuf_t *
+get_free_recv_buffer(void)
+{
+	recvbuf_t * buffer = NULL;
+	LOCK();
+	if (free_recvbufs <= 0)
 	{
-		beginlist = rb;
-		rb->next = 0;
+		create_buffers(RECV_INC);
+	}
+	buffer = ISC_LIST_HEAD(free_list);
+	if (buffer == NULL)
+	{
+		msyslog(LOG_ERR, "free recvbufs was incorrect (%ld)",
+				    free_recvbufs);
 	}
 	else
 	{
-		rb->next = fulllist->next;
-		fulllist->next = rb;
+		ISC_LIST_DEQUEUE(free_list, buffer, link);
 	}
-	fulllist = rb;
-	full_recvbufs++;
-
 	UNLOCK();
+	return (buffer);
 }
 
-struct recvbuf *
-get_free_recv_buffer(void)
-{
-	struct recvbuf * buffer = NULL;
-	LOCK();
-	if (free_recvbufs <= RECV_LOWAT)
-		{
-			if (total_recvbufs >= RECV_TOOMANY) {
-			    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
-				    total_recvbufs);
-			}
-			else
-			{
-				create_buffers();
-			}
-		}
-
-	if (free_recvbufs > 0)
-	{
-		buffer = freelist;
-		freelist = buffer->next;
-		buffer->next = NULL;
-		--free_recvbufs;
-	}
-
-	UNLOCK();
-	return buffer;
-}
-
-struct recvbuf *
+recvbuf_t *
 get_full_recv_buffer(void)
 {
-	struct recvbuf * buffer = NULL;
+	recvbuf_t *rbuf;
 	LOCK();
-	if (full_recvbufs > 0) {
+	rbuf = ISC_LIST_HEAD(full_list);
+	if (rbuf != NULL)
+	{
+		ISC_LIST_DEQUEUE(full_list, rbuf, link);
 		--full_recvbufs;
-		buffer = beginlist;
-		beginlist = buffer->next;
-		buffer->next = NULL;
 	}
 	UNLOCK();
-	return buffer;
+	return (rbuf);
 }

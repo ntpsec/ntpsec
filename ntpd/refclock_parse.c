@@ -2182,7 +2182,6 @@ local_input(
 				buf.srcadr = rbufp->srcadr;
 				buf.dstadr = rbufp->dstadr;
 				buf.fd     = rbufp->fd;
-				buf.next = 0;
 				buf.X_from_where = rbufp->X_from_where;
 				rbufp->receiver(&buf);
 			}

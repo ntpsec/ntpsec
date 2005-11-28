@@ -412,7 +412,7 @@ ntpdmain(
 	)
 {
 	l_fp now;
-	struct recvbuf *rbuflist;
+	int tot_full_recvbufs;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
 	struct sigaction sa;
@@ -446,15 +446,6 @@ ntpdmain(
 			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %ld", (long)uid);
 			exit(1);
 		}
-	}
-#endif
-
-#ifdef OPENSSL
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_ERR,
-		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		exit(1);
 	}
 #endif
 
@@ -620,18 +611,6 @@ ntpdmain(
 				"Cannot adjust stack limit for mlockall: %m");
 		    }
 	    }
-#  ifdef RLIMIT_MEMLOCK
-	    /*
-	     * The default RLIMIT_MEMLOCK is very low on Linux systems.
-	     * Unless we increase this limit malloc calls are likely to
-	     * fail if we drop root privlege.  To be useful the value
-	     * has to be larger than the largest ntpd resident set size.
-	     */
-	    rl.rlim_cur = rl.rlim_max = 32*1024*1024;
-	    if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1) {
-	    	msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
-	    }
-#  endif /* RLIMIT_MEMLOCK */
 	}
 # endif /* HAVE_SETRLIMIT */
 	/*
@@ -873,11 +852,10 @@ getgroup:
 #if defined(HAVE_IO_COMPLETION_PORT)
 
 	for (;;) {
-		rbuflist = GetReceivedBuffers();
+		tot_full_recvbufs = GetReceivedBuffers();
 #else /* normal I/O */
 
 	was_alarmed = 0;
-	rbuflist = (struct recvbuf *)0;
 	for (;;)
 	{
 # if !defined(HAVE_SIGNALED_IO) 
@@ -890,14 +868,14 @@ getgroup:
 		block_io_and_alarm();
 # endif
 
-		rbuflist = getrecvbufs();	/* get received buffers */
+		tot_full_recvbufs = full_recvbuffs();	/* get received buffers */
 		if (alarm_flag) 	/* alarmed? */
 		{
 			was_alarmed = 1;
 			alarm_flag = 0;
 		}
 
-		if (!was_alarmed && rbuflist == (struct recvbuf *)0)
+		if (!was_alarmed && tot_full_recvbufs > 0)
 		{
 			/*
 			 * Nothing to do.  Wait for something.
@@ -940,7 +918,7 @@ getgroup:
 				was_alarmed = 1;
 				alarm_flag = 0;
 			}
-			rbuflist = getrecvbufs();  /* get received buffers */
+			tot_full_recvbufs = full_recvbuffs();  /* get received buffers */
 		}
 # ifdef HAVE_SIGNALED_IO
 		unblock_io_and_alarm();
@@ -961,18 +939,13 @@ getgroup:
 		 * Call the data procedure to handle each received
 		 * packet.
 		 */
-		while (rbuflist != (struct recvbuf *)0)
+		rbuf = get_full_recv_buffer();
+		while (rbuf != NULL)
 		{
-			rbuf = rbuflist;
-			rbuflist = rbuf->next;
 			(rbuf->receiver)(rbuf);
 			freerecvbuf(rbuf);
+			rbuf = get_full_recv_buffer();
 		}
-#if defined DEBUG && defined SYS_WINNT
-		if (debug > 4)
-		    printf("getrecvbufs: %ld handler interrupts, %ld frames\n",
-			   handler_calls, handler_pkts);
-#endif
 
 		/*
 		 * Go around again
