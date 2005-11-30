@@ -936,13 +936,13 @@ socket_multicast_enable(struct interface *iface, int ind, int lscope, struct soc
 	struct in6_addr iaddr6;
 #endif /* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	struct ip_mreq mreq;
-	memset((char *)&mreq, 0, sizeof(mreq));
 
 	switch (maddr->ss_family)
 	{
 	case AF_INET:
+		memset((char *)&mreq, 0, sizeof(mreq));
 		mreq.imr_multiaddr = (((struct sockaddr_in*)maddr)->sin_addr);
-		mreq.imr_interface.s_addr = ((struct sockaddr_in*)&iface->sin)->sin_addr.s_addr;
+		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 			(char *)&mreq, sizeof(mreq)) == -1) {
 			netsyslog(LOG_ERR,
@@ -971,6 +971,7 @@ socket_multicast_enable(struct interface *iface, int ind, int lscope, struct soc
 		 * from the scope id. Don't do this for other types of multicast
 		 * addresses. For now let the kernel figure it out.
 		 */
+		memset((char *)&mreq6, 0, sizeof(mreq6));
 		iaddr6 = ((struct sockaddr_in6*)maddr)->sin6_addr;
 		mreq6.ipv6mr_multiaddr = iaddr6;
 		mreq6.ipv6mr_interface = lscope;
@@ -1253,9 +1254,12 @@ io_multicast_add(
 		break;
 	}
 
+	set_reuseaddr(1);
 	inter_list[ind].bfd = INVALID_SOCKET;
 	inter_list[ind].fd = open_socket(&inter_list[ind].sin,
 			    INT_MULTICAST, 1, &inter_list[ind], ind);
+	set_reuseaddr(0);
+
 	if (inter_list[ind].fd != INVALID_SOCKET)
 	{
 		inter_list[ind].bfd = INVALID_SOCKET;

@@ -4,7 +4,9 @@ m4_include([version.m4])
 AC_INIT(ntp, VERSION_NUMBER)
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
-AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) string])
+dnl the 'build' machine is where we run configure and compile
+dnl the 'host' machine is where the resulting stuff runs.
+AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) of where we should run])
 AM_CONFIG_HEADER(config.h)
 dnl AC_ARG_PROGRAM
 AC_PREREQ(2.53)
@@ -95,6 +97,9 @@ case "$ans" in
     ;;
 esac
 # HMS: Why isn't this $build?
+# Well, that depends on if we need this for the build toolchain or
+# for info in the host executable...
+# I still have no idea which way this should go, but nobody has complained.
 case "$host" in
  *-*-netbsd*)
     case "$need_dash_r" in
@@ -191,24 +196,9 @@ case "$GCC" in
     ;;
 esac
 
-ac_busted_vpath_in_make=no
-
-# HMS: Why isn't this $build?
 case "$host" in
  *-next-nextstep3)
     CFLAGS="$CFLAGS -posix"
-    ;;
- *-*-irix6.1*)	# 64 bit only
-    # busted vpath?
-    ;;
- *-*-irix6*)	# 6.2 (and later?)
-    ac_busted_vpath_in_make=yes
-    ;;
- *-*-solaris2.5.1)
-    ac_busted_vpath_in_make=yes
-    ;;
- *-*-unicosmp*)
-    ac_busted_vpath_in_make=yes
     ;;
 dnl This is currently commented out by bor. 
 dnl The new versions of ReliantUNIX round adjtime() interval down
@@ -223,6 +213,23 @@ dnl     if getconf _LFS_CFLAGS > /dev/null 2>&1 ; then
 dnl       CFLAGS="$CFLAGS `getconf _LFS_CFLAGS`"
 dnl     fi
 dnl     ;;
+esac
+
+ac_busted_vpath_in_make=no
+
+case "$build" in
+ *-*-irix6.1*)	# 64 bit only
+    # busted vpath?
+    ;;
+ *-*-irix6*)	# 6.2 (and later?)
+    ac_busted_vpath_in_make=yes
+    ;;
+ *-*-solaris2.5.1)
+    ac_busted_vpath_in_make=yes
+    ;;
+ *-*-unicosmp*)
+    ac_busted_vpath_in_make=yes
+    ;;
 esac
 
 case "$ac_busted_vpath_in_make$srcdir" in
@@ -716,7 +723,7 @@ if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
 else
     # Hack around a problem...
-    # HMS: Why isn't this $build?
+    # HMS: This is $host because we need the -D if we are building *for* it.
     case "$host" in
      *-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
 	;;
@@ -1883,7 +1890,7 @@ ac_cv_var_atom_ok=yes
 
 case "$ac_cv_c_inline$ac_cv_struct_timespec" in
  inlineyes)
-    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$build_os" in
+    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$host_os" in
      *yes* | *sunos* | *solaris* | *sco* | *netbsd* )
 	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
 	ac_cv_var_jupiter_ok=yes
@@ -2780,11 +2787,15 @@ AC_SUBST(OPENSSL_LIB)
 AC_MSG_CHECKING(for openssl library directory)
 AC_ARG_WITH(openssl-libdir,
 	AC_HELP_STRING([--with-openssl-libdir], [+ =/something/reasonable]),
-[ans=$withval], [ans=yes])
+[ans=$withval],
+[case "$build" in
+ $host) ans=yes ;;
+ *)     ans=no ;;
+esac])
 case "$ans" in
  no) ;;
  yes) # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/local/lib /usr/local/ssl/lib"
+    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib"
     ;;
  *) # Look where they said
     ;;
@@ -2799,6 +2810,7 @@ case "$ans" in
 	    test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
 	    ;;
 	 *)
+	    test -f $i/libcrypto.so -a -f $i/libssl.so && break
 	    test -f $i/libcrypto.a -a -f $i/libssl.a && break
 	    ;;
 	esac
@@ -2819,11 +2831,15 @@ AC_MSG_RESULT($ans)
 AC_MSG_CHECKING(for openssl include directory)
 AC_ARG_WITH(openssl-incdir,
 	AC_HELP_STRING([--with-openssl-incdir], [+ =/something/reasonable]),
-[ans=$withval], [ans=yes])
+[ans=$withval],
+[case "$build" in
+ $host) ans=yes ;;
+ *)     ans=no ;;
+esac])
 case "$ans" in
  no) ;;
  yes) # look in:
-    ans="/usr/include /usr/local/include /usr/local/ssl/include"
+    ans="/usr/include /usr/sfw/include /usr/local/include /usr/local/ssl/include"
     ;;
  *) # Look where they said
     ;;

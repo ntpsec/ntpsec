@@ -47,7 +47,6 @@ extern	int	authreadkeys	P((const char *));
 extern	void	authtrust	P((keyid_t, u_long));
 extern	int	authusekey	P((keyid_t, int, const u_char *));
 
-extern	u_long	calleapwhen	P((u_long));
 extern	u_long	calyearstart	P((u_long));
 extern	const char *clockname	P((int));
 extern	int	clocktime	P((int, int, int, int, int, u_long, u_long *, u_int32 *));
