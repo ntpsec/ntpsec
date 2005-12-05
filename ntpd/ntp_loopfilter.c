@@ -594,23 +594,23 @@ local_clock(
 			tstamp = peer->rec.l_ui - JAN_1970;
 			tm = gmtime(&tstamp);
 			if (tm != NULL) {
-				if ((tm->tm_mon + 1 == 6 && tm->tm_mday ==
-				    30) || (tm->tm_mon + 1 == 12 &&
-				    tm->tm_mday == 31)) {
+				int	oleap;
+
+				oleap = ntv.status;
+				if ((tm->tm_mon + 1 == 6 &&
+				    tm->tm_mday == 30) || (tm->tm_mon +
+				    1 == 12 && tm->tm_mday == 31)) {
 					if (leap_next & LEAP_ADDSECOND)
 						ntv.status |= STA_INS;
 					else if (leap_next &
 					    LEAP_DELSECOND)
 						ntv.status |= STA_DEL;
+				if (oleap != (ntv.status & (STA_INS |
+				    STA_DEL)))
+					msyslog(LOG_NOTICE,
+					    "leap change %x",
+					    ntv.status);
 				}
-#ifdef DEBUG
-				if (debug)
-					printf(
-					    "local_clock: leap %d status %x date %d/%d\n",
-					    leap_next, ntv.status,
-					    tm->tm_mon + 1,
-					    tm->tm_mday);
-#endif
 			}
 
 			/*

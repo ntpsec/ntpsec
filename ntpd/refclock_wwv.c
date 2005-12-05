@@ -659,8 +659,8 @@ wwv_start(
 	 * contains all the 256 values in the interest of speed.
 	 */
 	up->comp[0] = up->comp[OFFSET] = 0.;
-	up->comp[1] = 1; up->comp[OFFSET + 1] = -1.;
-	up->comp[2] = 3; up->comp[OFFSET + 2] = -3.;
+	up->comp[1] = 1.; up->comp[OFFSET + 1] = -1.;
+	up->comp[2] = 3.; up->comp[OFFSET + 2] = -3.;
 	step = 2.;
 	for (i = 3; i < OFFSET; i++) {
 		up->comp[i] = up->comp[i - 1] + step;
@@ -2101,6 +2101,10 @@ wwv_clock(
 		up->alarm |= NINERR;
 	if (!(up->alarm)) {
 		up->status |= INSYNC;
+		if (up->misc & SECWAR)
+			pp->leap = LEAP_ADDSECOND;
+		else
+			pp->leap = LEAP_NOWARNING;
 		pp->second = up->rsec;
 		pp->minute = up->decvec[MN].digit + up->decvec[MN +
 		    1].digit * 10;
@@ -2282,14 +2286,12 @@ wwv_tsec(
 	    1].digit * 600;
 	day = up->decvec[DA].digit + up->decvec[DA + 1].digit * 10 +
 	    up->decvec[DA + 2].digit * 100;
-	pp->leap = LEAP_NOWARNING;
 
 	/*
 	 * Set the leap bit on the last minute of the leap day.
 	 */
-	isleap = (up->decvec[YR].digit & 0x3) == 0;
+	isleap = up->decvec[YR].digit & 0x3;
 	if (up->misc & SECWAR && up->status & INSYNC) {
-		pp->leap = LEAP_ADDSECOND;
 		if ((day == (isleap ? 182 : 183) || day == (isleap ?
 		    365 : 366)) && minute == 1439)
 			up->status |= LEPSEC;
@@ -2322,7 +2324,7 @@ wwv_tsec(
 	while (carry(&up->decvec[DA + 1]) != 0);
 	while (carry(&up->decvec[DA + 2]) != 0);
 	temp = carry(&up->decvec[YR]);	/* carry years */
-	if (temp)
+	if (temp == 0)
 		carry(&up->decvec[YR + 1]);
 }
 
