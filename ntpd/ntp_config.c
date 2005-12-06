@@ -1612,10 +1612,10 @@ getconfig(
 					break;
 
 				    case CONF_FDG_REFID:
-					/* HMS: Endianness and 0 bytes? */
-					/* XXX */
-					strncpy((char *)&clock_stat.fudgeval2,
-						tokens[++i], 4);
+					i++;
+					memcpy(&clock_stat.fudgeval2,
+					    tokens[i], min(strlen(tokens[i]),
+					    4));
 					clock_stat.haveflags |= CLK_HAVEVAL2;
 					break;
 

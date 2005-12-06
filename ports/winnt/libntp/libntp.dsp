@@ -130,10 +130,6 @@ SOURCE=..\..\..\libntp\caljulian.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\calleapwhen.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\caltontp.c
 # End Source File
 # Begin Source File
