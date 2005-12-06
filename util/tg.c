@@ -50,6 +50,7 @@
  * should be readily portable to other hardware and operating systems.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <sys/audio.h>
 #include <math.h>
