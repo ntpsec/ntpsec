@@ -690,6 +690,7 @@ irig_base(
 	 */
 	if (up->carphase != 7)
 		return;
+
 	env = (up->lastenv[2] - up->lastenv[6]) / 2.;
 	lope = (up->lastint[2] - up->lastint[6]) / 2.;
 	if (lope > up->intmax)
@@ -939,11 +940,8 @@ irig_decode(
 			else
 				pp->leap = LEAP_NOWARNING;
 			up->second = (up->second + up->decim) % 60;
-			if (pp->year > 0) {
+			if (pp->year > 0)
 				pp->year += 2000;
-				if (syncchar == '0')
-					up->errflg |= IRIG_ERR_CHECK;
-			}
 			if (pp->second != up->second)
 				up->errflg |= IRIG_ERR_CHECK;
 			up->second = pp->second;
@@ -993,6 +991,7 @@ irig_poll(
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
+
 	} else {
 		refclock_receive(peer);
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);

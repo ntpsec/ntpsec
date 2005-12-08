@@ -59,6 +59,16 @@
  * unless the mode keyword on the server configuration command specifies
  * a nonzero ICOM ID select code. The C-IV trace is turned on if the
  * debug level is greater than one.
+ *
+ * Fudge factors
+ *
+ * Fudge flag4 causes the dubugging output described above to be
+ * recorded in the clockstats file. Fudge flag2 selects the audio input
+ * port, where 0 is the mike port (default) and 1 is the line-in port.
+ * It does not seem useful to select the compact disc player port. Fudge
+ * flag3 enables audio monitoring of the input signal. For this purpose,
+ * the monitor gain is set to a default value. Fudgetime2 is used as a
+ * frequency vernier for broken codec sample frequency.
  */
 /*
  * General definitions. Note the DGAIN parameter might need to be
@@ -818,6 +828,7 @@ wwv_receive(
 		 * 125 PPM.
 		 */
 		up->phase += up->freq / SECOND;
+		up->phase += pp->fudgetime2 / 1e6;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
