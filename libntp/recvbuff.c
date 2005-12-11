@@ -74,13 +74,17 @@ initialise_buffer(recvbuf_t *buff)
 #endif
 }
 
-static void
+static int
 create_buffers(int nbufs)
 {
 	register recvbuf_t *buf;
 	int i;
-	buf = (recvbuf_t *)
-	    emalloc(nbufs*sizeof(recvbuf_t));
+	buf = (recvbuf_t *) emalloc(nbufs*sizeof(recvbuf_t));
+	/*
+	 * If no memory available, Bail
+	 */
+	if (buf == NULL)
+		return (0);
 	for (i = 0; i < nbufs; i++)
 	{
 		initialise_buffer(buf);
@@ -90,6 +94,8 @@ create_buffers(int nbufs)
 		total_recvbufs++;
 	}
 	lowater_adds++;
+
+	return (nbufs);
 }
 
 void
@@ -119,10 +125,8 @@ void
 freerecvbuf(recvbuf_t *rb)
 {
 	LOCK();
-	BLOCKIO();
 	ISC_LIST_APPEND(free_list, rb, link);
 	free_recvbufs++;
-	UNBLOCKIO();
 	UNLOCK();
 }
 
@@ -141,19 +145,30 @@ get_free_recv_buffer(void)
 {
 	recvbuf_t * buffer = NULL;
 	LOCK();
-	if (free_recvbufs <= 0)
-	{
-		create_buffers(RECV_INC);
-	}
 	buffer = ISC_LIST_HEAD(free_list);
 	if (buffer == NULL)
 	{
-		msyslog(LOG_ERR, "free recvbufs was incorrect (%ld)",
-				    free_recvbufs);
+		if (full_recvbufs >= RECV_TOOMANY) {
+		    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
+		    full_recvbufs);
+		    return (buffer);
+		}
+		else
+		{
+			/*
+			 * See if more are available
+			 */
+			if (create_buffers(RECV_INC) <= 0)
+			{
+				msyslog(LOG_ERR, "No more memory for recvufs");
+				return (NULL);
+			}
+		}
 	}
 	else
 	{
 		ISC_LIST_DEQUEUE(free_list, buffer, link);
+		free_recvbufs--;
 	}
 	UNLOCK();
 	return (buffer);
