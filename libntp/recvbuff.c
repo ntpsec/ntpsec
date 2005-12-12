@@ -180,9 +180,8 @@ get_full_recv_buffer(void)
 	recvbuf_t *rbuf;
 
 #ifdef DEBUG
-	if (debug)
-	    printf("get_full_recv_buffer() called and full_recvbufs is %d\n", full_recvbufs);
-	else
+	if (debug > 1 && full_recvbufs)
+	    printf("get_full_recv_buffer() called and full_recvbufs is %lu\n", full_recvbufs);
 #endif
 	if (0 == full_recvbufs)
 	    msyslog(LOG_ERR, "get_full_recv_buffer() called but full_recvbufs is 0!");
