@@ -115,11 +115,33 @@
 		<p>Authenticated requests always include a timestamp in the packet data, which is included in the computation of the authentication code. This timestamp is compared by the server to its receive time stamp. If they differ by more than a small amount the request is rejected. This is done for two reasons. First, it makes simple replay attacks on the server, by someone who might be able to overhear traffic on your LAN, much more difficult. Second, it makes it more difficult to request configuration changes to your server from topologically remote hosts. While the reconfiguration facility will work well with a server on the local host, and may work adequately between time-synchronized hosts on the same LAN, it will work very poorly for more distant hosts. As such, if reasonable passwords are chosen, care is taken in the distribution and protection of keys and appropriate source address restrictions are applied, the run time reconfiguration facility should provide an adequate level of security.</p>
 		<p>The following commands all make authenticated requests.</p>
 		<dl>
-			<dt><tt>addpeer <i>peer_address</i> [ <i>keyid</i> ] [ <i>version</i> ] [ <i>prefer</i> ]</tt>
-			<dd>Add a configured peer association at the given address and operating in symmetric active mode. Note that an existing association with the same peer may be deleted when this command is executed, or may simply be converted to conform to the new configuration, as appropriate. If the optional <tt>keyid</tt> is a nonzero integer, all outgoing packets to the remote server will have an authentication field attached encrypted with this key. If the value is 0 (or not given) no authentication will be done. The <tt>version#</tt> can be 1, 2 or 3 and defaults to 3. The <tt>prefer</tt> keyword indicates a preferred peer (and thus will be used primarily for clock synchronisation if possible). The preferred peer also determines the validity of the PPS signal - if the preferred peer is suitable for synchronisation so is the PPS signal.
-			<dt><tt>addserver <i>peer_address</i> [ <i>keyid</i> ] [ <i>version</i> ] [ <i>prefer</i> ]</tt>
+			<dt><tt>addpeer <i>peer_address</i> [
+		<i>keyid</i> ] [ <i>version</i> ] [
+		<i>minpoll|prefer|iburst|burst</i> [...] ]</tt>
+			<dd>Add a configured peer association at the
+			given address and operating in symmetric
+			active mode. Note that an existing association
+			with the same peer may be deleted when this
+			command is executed, or may simply be
+			converted to conform to the new configuration,
+			as appropriate. If the optional <tt>keyid</tt>
+			is a nonzero integer, all outgoing packets to
+			the remote server will have an authentication
+			field attached encrypted with this key. If the
+			value is 0 (or not given) no authentication
+			will be done. The <tt>version#</tt> can be 1,
+			2 or 3 and defaults to 3.  The remaining
+			options are either a numeric value for <tt>minpoll</tt> or
+			a literal string <tt>prefer</tt>, <tt>iburst</tt>, or
+			<tt>burst</tt>, and have the action as specified in the
+			<tt>peer</tt> configuration file command of
+			ntpd.  See the <a href="confopt.html">Server Options</a> page for further information.
+			Each flag (or its absence) replaces the
+			previous setting. The <tt>prefer</tt> keyword indicates a preferred peer (and thus will be used primarily for clock synchronisation if possible). The preferred peer also determines the validity of the PPS signal - if the preferred peer is suitable for synchronisation so is the PPS signal.
+			<dt><tt>addserver <i>peer_address</i> [ <i>keyid</i> ] [ <i>version</i> ] [ [ <i>minpoll|prefer|iburst|burst</i> [...] ]</tt>
 			<dd>Identical to the addpeer command, except that the operating mode is client.
-			<dt><tt>broadcast <i>peer_address</i> [ <i>keyid</i> ] [ <i>version</i> ] [ <i>prefer</i> ]</tt>
+			<dt><tt>broadcast <i>peer_address</i> [
+			<i>keyid</i> ] [ <i>version</i> ] [ <i>prefer</i> ]</tt>
 			<dd>Identical to the addpeer command, except that the operating mode is broadcast. In this case a valid key identifier and key are required. The <tt>peer_address</tt> parameter can be the broadcast address of the local network or a multicast group address assigned to NTP. If a multicast address, a multicast-capable kernel is required.
 			<dt><tt>unconfig <i>peer_address</i> [...]</tt>
 			<dd>This command causes the configured bit to be removed from the specified peer(s). In many cases this will cause the peer association to be deleted. When appropriate, however, the association may persist in an unconfigured mode if the remote peer is willing to continue on in this fashion.
