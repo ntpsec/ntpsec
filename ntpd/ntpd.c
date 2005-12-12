@@ -875,7 +875,7 @@ getgroup:
 			alarm_flag = 0;
 		}
 
-		if (!was_alarmed && tot_full_recvbufs > 0)
+		if (!was_alarmed && tot_full_recvbufs == 0)
 		{
 			/*
 			 * Nothing to do.  Wait for something.
