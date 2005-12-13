@@ -94,7 +94,6 @@ create_buffers(int nbufs)
 		total_recvbufs++;
 	}
 	lowater_adds++;
-
 	return (nbufs);
 }
 
@@ -148,21 +147,13 @@ get_free_recv_buffer(void)
 	buffer = ISC_LIST_HEAD(free_list);
 	if (buffer == NULL)
 	{
-		if (full_recvbufs >= RECV_TOOMANY) {
-		    msyslog(LOG_ERR, "too many recvbufs allocated (%ld)",
-		    full_recvbufs);
-		    return (buffer);
-		}
-		else
+		/*
+		 * See if more are available
+		 */
+		if (create_buffers(RECV_INC) <= 0)
 		{
-			/*
-			 * See if more are available
-			 */
-			if (create_buffers(RECV_INC) <= 0)
-			{
-				msyslog(LOG_ERR, "No more memory for recvufs");
-				return (NULL);
-			}
+			msyslog(LOG_ERR, "No more memory for recvufs");
+			return (NULL);
 		}
 	}
 	else
@@ -185,6 +176,24 @@ get_full_recv_buffer(void)
 		ISC_LIST_DEQUEUE(full_list, rbuf, link);
 		--full_recvbufs;
 	}
+	else
+	{
+		/*
+		 * Make sure we reset the full count to 0
+		 */
+		full_recvbufs = 0;
+	}
 	UNLOCK();
 	return (rbuf);
+}
+
+/*
+ * Checks to see if there are buffers to process
+ */
+isc_boolean_t has_full_recv_buffer(void)
+{
+	if (ISC_LIST_HEAD(full_list) != NULL)
+		return (ISC_TRUE);
+	else
+		return (ISC_FALSE);
 }

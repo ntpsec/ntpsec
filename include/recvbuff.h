@@ -10,6 +10,7 @@
 #include "ntp_types.h"
 
 #include <isc/list.h>
+#include <isc/result.h>
 
 /*
  * recvbuf memory management
@@ -109,6 +110,11 @@ extern u_long lowater_additions P((void));
  *
  */
 extern	struct recvbuf *get_full_recv_buffer P((void));
+
+/*
+ * Checks to see if there are buffers to process
+ */
+extern isc_boolean_t has_full_recv_buffer P((void));
 
 #endif /* defined __recvbuff_h */
 
