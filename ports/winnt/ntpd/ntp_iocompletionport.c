@@ -278,12 +278,16 @@ static unsigned long QueueSocketRecv(SOCKET s) {
 					     HEAP_ZERO_MEMORY,
 					     sizeof(IoCompletionInfo));
 	if (lpo == NULL)
+	{
+		msyslog(LOG_ERR, "Out of heap memory for recvbufs: %m");
 		return 0;
+	}
 
 	buff = get_free_recv_buffer();
 
 	if (buff == NULL)
 	{
+		msyslog(LOG_ERR, "Out of memory for recvbufs: %m");
 		HeapFree(hHeapHandle, 0, lpo);
 		return 0;
 	}
@@ -357,7 +361,7 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 		buff->dstadr = inter;
 #ifdef DEBUG
 		if (debug > 3)
-  			printf("Received %d bytes from %s\n", stoa(&buff->recv_srcadr));
+  			printf("Received %d bytes from %s\n", Bytes, stoa(&buff->recv_srcadr));
 #endif
 		add_full_recv_buffer(buff);
 		if( !SetEvent( WaitableIoEventHandle ) ) {
