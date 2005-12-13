@@ -38,7 +38,7 @@ extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, s
 
 extern	HANDLE get_io_event (void);
 
-struct recvbuf *GetReceivedBuffers(void);
+int GetReceivedBuffers(void);
 
 static int QueueIORead( struct refclockio * );
 
