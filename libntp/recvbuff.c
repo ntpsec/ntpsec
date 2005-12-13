@@ -185,6 +185,8 @@ get_full_recv_buffer(void)
 	}
 	else
 	{
+		if (full_recvbufs)
+		    msyslog(LOG_ERR, "get_full_recv_buffer: full_list is empty but full_recvbufs is %lu!", full_recvbufs);
 		/*
 		 * Make sure we reset the full count to 0
 		 */
