@@ -21,12 +21,12 @@ man_MANS+=	ntpdsim.1
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD) ../libntp/libntp.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
+ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
-EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def ntpdsim-opts.def
+EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def ntpdsim-opts.def $(BUILT_SOURCES)
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
@@ -59,25 +59,25 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_ulink.c refclock_wwv.c refclock_wwvb.c \
 	refclock_zyfer.c
 
-ntpd-opts.h: ntpd-opts.c
-ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def
+$(srcdir)/ntpd-opts.h: ntpd-opts.c
+$(srcdir)/ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def
 	cd $(srcdir) && autogen ntpd-opts.def
 
-ntpd.1: ntpd-opts.def ntpdbase-opts.def
+$(srcdir)/ntpd.1: ntpd-opts.def ntpdbase-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bntpd ntpd-opts.def
 
-ntpd-opts.texi ntpd-opts.menu: ntpd-opts.def
+$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: ntpd-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
-ntpdsim-opts.h: ntpdsim-opts.c
-ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def
+$(srcdir)/ntpdsim-opts.h: ntpdsim-opts.c
+$(srcdir)/ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def
 	cd $(srcdir) && autogen ntpdsim-opts.def
 
-ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def
+$(srcdir)/ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bntpdsim ntpdsim-opts.def
 
-ntpdsim-opts.texi ntpdsim-opts.menu: ntpdsim-opts.def
+$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: ntpdsim-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
 

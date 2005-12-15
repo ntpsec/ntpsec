@@ -7,7 +7,7 @@ EXTRA_DATA=	check-layout
 BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@
 AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD=	version.o ../libntp/libntp.a @READLINE_LIBS@ $(LIBOPTS_LDADD)
+ntpdc_LDADD=	version.o @READLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES=	.version version.c
@@ -21,14 +21,14 @@ BUILT_SOURCES+=	ntpdc-opts.c ntpdc-opts.h ntpdc.1 ntpdc-opts.texi	\
 man_MANS=	ntpdc.1
 
 
-ntpdc-opts.h: ntpdc-opts.c
-ntpdc-opts.c: ntpdc-opts.def
+$(srcdir)/ntpdc-opts.h: ntpdc-opts.c
+$(srcdir)/ntpdc-opts.c: ntpdc-opts.def
 	cd $(srcdir) && autogen ntpdc-opts.def
 
-ntpdc.1: ntpdc-opts.def
+$(srcdir)/ntpdc.1: ntpdc-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bntpdc ntpdc-opts.def
 
-ntpdc-opts.texi ntpdc-opts.menu: ntpdc-opts.def
+$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: ntpdc-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 

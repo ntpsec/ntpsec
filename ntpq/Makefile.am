@@ -14,14 +14,14 @@ man_MANS=	ntpq.1
 
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
-ntpq-opts.h: ntpq-opts.c
-ntpq-opts.c: ntpq-opts.def
+$(srcdir)/ntpq-opts.h: ntpq-opts.c
+$(srcdir)/ntpq-opts.c: ntpq-opts.def
 	cd $(srcdir) && autogen ntpq-opts.def
 
-ntpq.1: ntpq-opts.def
+$(srcdir)/ntpq.1: ntpq-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bntpq ntpq-opts.def
 
-ntpq-opts.texi ntpq-opts.menu: ntpq-opts.def
+$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: ntpq-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section ntpq-opts.def
 

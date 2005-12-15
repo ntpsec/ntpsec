@@ -58,14 +58,14 @@ EXTRA_DIST=	sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu
 BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
 man_MANS=	sntp.1
 
-sntp-opts.h: sntp-opts.c
-sntp-opts.c: sntp-opts.def
+$(srcdir)/sntp-opts.h: sntp-opts.c
+$(srcdir)/sntp-opts.c: sntp-opts.def
 	cd $(srcdir) && autogen sntp-opts.def
 
-sntp.1: sntp-opts.def
+$(srcdir)/sntp.1: sntp-opts.def
 	cd $(srcdir) && autogen -Tagman1.tpl -bsntp sntp-opts.def
 
-sntp-opts.texi sntp-opts.menu: sntp-opts.def
+$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: sntp-opts.def
 	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
 		-Taginfo.tpl -DLEVEL=section sntp-opts.def
 
