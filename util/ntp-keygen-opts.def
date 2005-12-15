@@ -1,0 +1,263 @@
+/* -*- Mode: Text -*- */
+
+autogen definitions options;
+
+/*
+ *   $Id: sntp-opts.def,v 1.1.1.1 2005/12/14 00:29:10 bkorb Exp $
+ *
+ *  NTP copyright 1970-2005 ntp.org
+ *
+ *  NTP is free software.
+ *  You may redistribute it and/or modify it under the terms of the
+ *  GNU General Public License, as published by the Free Software
+ *  Foundation; either version 2, or (at your option) any later version.
+ *
+ *  AutoGen is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with AutoGen.  See the file "COPYING".  If not,
+ *  write to:  The Free Software Foundation, Inc.,
+ *             59 Temple Place - Suite 330,
+ *             Boston,  MA  02111-1307, USA.
+ */
+
+copyright = {
+    date  = "1970-2005";
+    owner = "ntp.org";
+    eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
+    type  = bsd;
+};
+
+
+prog-name      = "ntp-keygen";
+prog-title     = "Create a NTP host key";
+package        = ntp;
+homerc         =  $HOME, ".";
+rcfile         = '.ntprc';
+long-opts;
+environrc;
+test-main;
+
+/*
+#include       $top_srcdir/version.def
+*/
+
+config-header  = "config.h";
+
+flag = {
+    name      = certificate;
+    value     = c;
+    arg-type  = string;
+    arg-name  = scheme;
+    ifdef     = OPENSSL;
+    descrip   = "certificate scheme";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = debug-level;
+    value     = d;
+    max       = NOLIMIT;
+    nopreset;
+    descrip   = "Increase output debug message level";
+    doc = <<-  _EndOfDoc_
+	Increase the debugging message output level.  Can be supplied multiple times.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = set-debug-level;
+    value     = D;
+    max       = NOLIMIT;
+    descrip   = "Set the output debug message level";
+    arg-type  = string;
+    flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
+    doc = <<-  _EndOfDoc_
+	Set the output debugging level.  Can be supplied multiple times,
+	but each overrides the previous value(s).
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = id-key;
+    value     = e;
+    ifdef     = OPENSSL;
+    descrip   = "Write identity keys";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = gq-params;
+    value     = G;
+    ifdef     = OPENSSL;
+    descrip   = "Generate GQ parameters and keys";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = gq-keys;
+    value     = g;
+    ifdef     = OPENSSL;
+    descrip   = "update GQ keys";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = host-key;
+    value     = H;
+    ifdef     = OPENSSL;
+    descrip   = "generate RSA host key";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = iffkey;
+    value     = I;
+    ifdef     = OPENSSL;
+    descrip   = "generate IFF parameters";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = issuer-name;
+    value     = i;
+    ifdef     = OPENSSL;
+    descrip   = "set issuer name";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = md5key;
+    value     = M;
+    descrip   = "generate MD5 keys";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = modulus;
+    value     = m;
+    arg-type  = number;
+    arg-name  = modulus;
+    arg-range = '256->2048';
+    ifdef     = OPENSSL;
+    descrip   = "modulus";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = pvt-cert;
+    value     = P;
+    ifdef     = OPENSSL;
+    descrip   = "generate PC private certificate";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = pvt-passwd;
+    value     = p;
+    ifdef     = OPENSSL;
+    arg-type  = string;
+    arg-name  = passwd;
+    descrip   = "output private password";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = get-pvt-passwd;
+    value     = q;
+    ifdef     = OPENSSL;
+    arg-type  = string;
+    arg-name  = passwd;
+    descrip   = "input private password";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = sign-key;
+    value     = S;
+    arg-type  = string;
+    arg-name  = sign;
+    ifdef     = OPENSSL;
+    descrip   = "generate sign key (RSA or DSA)";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = subject-name;
+    value     = s;
+    arg-type  = string;
+    arg-name  = host;
+    ifdef     = OPENSSL;
+    descrip   = "set subject name";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = trusted-cert;
+    value     = T;
+    ifdef     = OPENSSL;
+    descrip   = "trusted certificate (TC scheme)";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = mv-params;
+    value     = V;
+    arg-type  = number;
+    arg-name  = num;
+    ifdef     = OPENSSL;
+    descrip   = "generate <num> MV parameters";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = mv-keys;
+    value     = v;
+    arg-type  = number;
+    arg-name  = num;
+    ifdef     = OPENSSL;
+    descrip   = "update <num> MV keys";
+    doc = <<-  _EndOfDoc_
+	Just some descriptive text.
+	_EndOfDoc_;
+};
+
+detail = <<-  _EODetail_
+	If there is no new host key, look for an existing one.
+	If one is not found, create it.
+	_EODetail_;

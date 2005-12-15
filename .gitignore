@@ -129,3 +129,4 @@ sntp/sntp.1
 stamp-h.in
 util/Makefile.in
 version
+util/ntp-keygen.1
