@@ -1209,6 +1209,21 @@ docmd(
 		i++;
 	}
 
+	/* Any extra args are assumed to be "OPT|NTP_STR". */
+	for ( ; i < MAXARGS + MOREARGS;) {
+	     if ((i+ti) >= ntok)
+		  break;
+		rval = getarg(tokens[i+ti], (int)(OPT|NTP_STR), &pcmd.argval[i]);
+		if (rval == -1) {
+			ti++;
+			continue;
+		}
+		if (rval == 0)
+			return;
+		pcmd.nargs++;
+		i++;
+	}
+
 	i += ti;
 	if (i < ntok && *tokens[i] == '>') {
 		char *fname;

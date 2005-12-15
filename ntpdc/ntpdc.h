@@ -11,7 +11,7 @@
  * Maximum number of arguments
  */
 #define	MAXARGS	4
-
+#define	MOREARGS 4
 /*
  * Flags for forming descriptors.
  */
@@ -39,7 +39,7 @@ typedef union {
  */
 struct parse {
 	char *keyword;
-	arg_v argval[MAXARGS];
+	arg_v argval[MAXARGS + MOREARGS];
 	int nargs;
 };
 
