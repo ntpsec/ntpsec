@@ -875,7 +875,7 @@ getgroup:
 			alarm_flag = 0;
 		}
 
-		if (!was_alarmed && tot_full_recvbufs > 0)
+		if (!was_alarmed && tot_full_recvbufs == 0)
 		{
 			/*
 			 * Nothing to do.  Wait for something.
@@ -939,12 +939,15 @@ getgroup:
 		 * Call the data procedure to handle each received
 		 * packet.
 		 */
-		rbuf = get_full_recv_buffer();
-		while (rbuf != NULL)
+		if (full_recvbuffs() > 0)
 		{
-			(rbuf->receiver)(rbuf);
-			freerecvbuf(rbuf);
 			rbuf = get_full_recv_buffer();
+			while (rbuf != NULL)
+			{
+				(rbuf->receiver)(rbuf);
+				freerecvbuf(rbuf);
+				rbuf = get_full_recv_buffer();
+			}
 		}
 
 		/*
