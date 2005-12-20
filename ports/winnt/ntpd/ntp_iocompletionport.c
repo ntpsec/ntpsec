@@ -17,6 +17,15 @@
 #include "ntp_iocompletionport.h"
 #include "transmitbuff.h"
 
+/*
+ * local function definitions
+ */
+static int QueueIORead( struct refclockio *, recvbuf_t *buff, IoCompletionInfo *lpo);
+static int QueueSocketRecv(SOCKET, recvbuf_t *buff, IoCompletionInfo *lpo);
+
+static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD);
+static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD);
+static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD);
 
 #define BUFCHECK_SECS	10
 static void	TransmitCheckThread(void *NotUsed);
@@ -91,6 +100,12 @@ iocompletionthread(void *NotUsed)
 		case SOCK_SEND:
 		case CLOCK_WRITE:
 			OnWriteComplete(Key, lpo, BytesTransferred);
+			/* Clear the allocated memory */
+			if (lpo != NULL)
+			{
+				HeapFree(hHeapHandle, 0, lpo);
+				lpo = NULL;
+			}
 			break;
 		default:
 #if DEBUG
@@ -116,6 +131,12 @@ init_io_completion_port(
 	 * Create a handle to the Heap
 	 */
 	hHeapHandle = HeapCreate(0, 20*sizeof(IoCompletionInfo), 0);
+	if (hHeapHandle == NULL)
+	{
+		msyslog(LOG_ERR, "Can't initialize Heap: %m");
+		exit(1);
+	}
+
 
 	/* Create the event used to signal an IO event
 	 */
@@ -160,39 +181,31 @@ uninit_io_completion_port(
 }
 
 
-static int QueueIORead( struct refclockio *rio ) {
+static int QueueIORead( struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo) {
 
-	struct recvbuf *buff;
-	IoCompletionInfo *lpo;
+	memset(lpo, 0, sizeof(IoCompletionInfo));
+	memset(buff, 0, sizeof(recvbuf_t));
 
-	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
-					     HEAP_ZERO_MEMORY,
-					     sizeof(IoCompletionInfo));
-	buff = get_free_recv_buffer();
-	
-	if (buff == NULL)
-		return 0;
-	
 	lpo->request_type = CLOCK_READ;
 	lpo->buff = buff;
 
 	buff->fd = rio->fd;
 	if (!ReadFile((HANDLE) buff->fd, &buff->recv_buffer, sizeof(buff->recv_buffer), NULL, (LPOVERLAPPED) lpo)) {
-			DWORD Result = GetLastError();
-			switch (Result) {				
-					case NO_ERROR :
-					case ERROR_HANDLE_EOF :
-					case ERROR_IO_PENDING :
-				break ;
+		DWORD Result = GetLastError();
+		switch (Result) {				
+		case NO_ERROR :
+		case ERROR_HANDLE_EOF :
+		case ERROR_IO_PENDING :
+			break ;
 
-				default:
-					msyslog(LOG_ERR, "Can't read from Refclock: %m");
-					freerecvbuf(buff);
-					/* Clear the heap */
-					if (lpo != NULL)
-						HeapFree(hHeapHandle, 0, lpo);
-					return 0;
-			}
+		/*
+		 * Something bad happened
+		 */
+		default:
+			msyslog(LOG_ERR, "Can't read from Refclock: %m");
+			freerecvbuf(buff);
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -200,41 +213,55 @@ static int QueueIORead( struct refclockio *rio ) {
 
 
 /* Return 1 on Successful Read */
+/* Return 1 on Successful Read */
 static int 
 OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 {
-	struct recvbuf *buff = NULL;
+	recvbuf_t *buff;
+	recvbuf_t *newbuff;
 	struct refclockio * rio = (struct refclockio *) i;
 
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
 	*/
-	buff = (struct recvbuf *) lpo->buff;
-	if (Bytes > 0) { /* ignore 0 bytes read due to timeout's */
-		get_systime(&buff->recv_time);
-		buff->recv_length = (int) Bytes;
-		buff->receiver = rio->clock_recv;
-		buff->dstadr = NULL;
-		buff->recv_srcclock = rio->srcclock;
-		add_full_recv_buffer(buff);
-		if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-			if (debug > 3) {
-				printf( "Error %d setting IoEventHandle\n", GetLastError() );
-			}
-#endif
-		}
-		buff = NULL;
+	buff = (recvbuf_t *) lpo->buff;
+	/*
+	 * Get a new recv buffer for the next packet
+	 */
+	newbuff = get_free_recv_buffer();
+	if (newbuff == NULL) {
+		/*
+		 * recv buffers not available so we drop the packet
+		 * and reuse the buffer.
+		 */
+		newbuff = buff;
 	}
 	else 
- 		freerecvbuf(buff);
+	{
+		if (Bytes > 0) { /* ignore 0 bytes read due to timeout's */
+			get_systime(&buff->recv_time);
+			buff->recv_length = (int) Bytes;
+			buff->receiver = rio->clock_recv;
+			buff->dstadr = NULL;
+			buff->recv_srcclock = rio->srcclock;
+			add_full_recv_buffer(buff);
+		}
+		else
+		{
+			freerecvbuf(buff);
+		}
+	}
+	if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+		if (debug > 3) {
+			printf( "Error %d setting IoEventHandle\n", GetLastError() );
+		}
+#endif
+	}
 
-	/* Clear the heap */
-	if (lpo != NULL)
-		HeapFree(hHeapHandle, 0, lpo);
-
-	QueueIORead( rio );
+	QueueIORead( rio, newbuff, lpo );
 	return 1;
 }
+
 
 /*  Add a reference clock data structures I/O handles to
  *  the I/O completion port. Return 1 if any error.
@@ -244,26 +271,53 @@ io_completion_port_add_clock_io(
 	struct refclockio *rio
 	)
 {
+	IoCompletionInfo *lpo;
+	recvbuf_t *buff;
+
 	if (NULL == CreateIoCompletionPort((HANDLE) rio->fd, hIoCompletionPort, (DWORD) rio, 0)) {
 		msyslog(LOG_ERR, "Can't add COM port to i/o completion port: %m");
 		return 1;
 	}
-	QueueIORead( rio );
-	return 0;
-}
-
-/* Queue a receiver on a socket. Returns 0 if no buffer can be queued */
-
-static unsigned long QueueSocketRecv(SOCKET s) {
-	
-	struct recvbuf *buff;
-	IoCompletionInfo *lpo;
-	int AddrLen;
 
 	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
 					     HEAP_ZERO_MEMORY,
 					     sizeof(IoCompletionInfo));
+	if (lpo == NULL)
+	{
+		msyslog(LOG_ERR, "Can't allocate heap for completion port: %m");
+		return 1;
+	}
+
 	buff = get_free_recv_buffer();
+
+	if (buff == NULL)
+	{
+		msyslog(LOG_ERR, "Can't allocate memory for clock socket: %m");
+		HeapFree(hHeapHandle, 0, lpo);
+		return 1;
+	}
+	QueueIORead( rio, buff, lpo );
+	return 1;
+}
+
+/* Queue a receiver on a socket. Returns 0 if no buffer can be queued */
+
+static int QueueSocketRecv(SOCKET s, recvbuf_t *buff, IoCompletionInfo *lpo) {
+	
+	int AddrLen;
+
+	if (lpo == NULL)
+	{
+		msyslog(LOG_ERR, "Out of heap memory for recvbufs: %m");
+		return 0;
+	}
+
+	if (buff == NULL)
+	{
+		msyslog(LOG_ERR, "Out of memory for recvbufs: %m");
+		HeapFree(hHeapHandle, 0, lpo);
+		return 0;
+	}
 
 	lpo->request_type = SOCK_RECV;
 	lpo->buff = buff;
@@ -284,7 +338,7 @@ static unsigned long QueueSocketRecv(SOCKET s) {
 				case WSA_IO_INCOMPLETE :
 				case WSA_WAIT_IO_COMPLETION :
 				case WSA_IO_PENDING :
-				break ;
+					break ;
 
 				case WSAENOTSOCK :
 					netsyslog(LOG_ERR, "Can't read from socket, because it isn't a socket: %m");
@@ -320,6 +374,7 @@ static int
 OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 {
 	struct recvbuf *buff = NULL;
+	struct recvbuf *newbuff = NULL;
 	struct interface * inter = (struct interface *) i;
 	
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
@@ -328,33 +383,45 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 	buff = (struct recvbuf *) lpo->buff;
 	get_systime(&buff->recv_time);	
 	
-	if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {	
-		buff->recv_length = (int) Bytes;
-		buff->receiver = receive; 
-		buff->dstadr = inter;
+	/*
+	 * Get a new recv buffer for the next packet
+	 */
+	newbuff = get_free_recv_buffer();
+	if (newbuff == NULL) {
+		/*
+		 * recv buffers not available so we drop the packet
+		 * and reuse the buffer.
+		 */
+		newbuff = buff;
+	}
+	else 
+	{
+		if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {	
+			buff->recv_length = (int) Bytes;
+			buff->receiver = receive; 
+			buff->dstadr = inter;
 #ifdef DEBUG
-		if (debug > 3)
-  			printf("Received %d bytes from %s\n", stoa(&buff->recv_srcadr));
+			if (debug > 3)
+  				printf("Received %d bytes from %s\n", Bytes, stoa(&buff->recv_srcadr));
 #endif
-		add_full_recv_buffer(buff);
-		if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-			if (debug > 3) {
-				printf( "Error %d setting IoEventHandle\n", GetLastError() );
-			}
-#endif
+			add_full_recv_buffer(buff);
+		}
+		else {
+			freerecvbuf(buff);
 		}
 	}
-	else {
-		freerecvbuf(buff);
+	if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+		if (debug > 3) {
+			printf( "Error %d setting IoEventHandle\n", GetLastError() );
+		}
+#endif
 	}
-	/* Clear the heap */
-	if (lpo != NULL)
-		HeapFree(hHeapHandle, 0, lpo);
 
-	QueueSocketRecv(inter->fd);
+	QueueSocketRecv(inter->fd, newbuff, lpo);
 	return 1;
 }
+
 
 
 /*  Add a socket handle to the I/O completion port, and send an I/O
@@ -363,31 +430,52 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
  *  Note: As per the winsock documentation, we use WSARecvFrom. Using
  *        ReadFile() is less efficient.
  */
-extern void
+extern int
 io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 {
+	IoCompletionInfo *lpo;
+	recvbuf_t *buff;
+
 	if (fd != INVALID_SOCKET) {
 		if (NULL == CreateIoCompletionPort((HANDLE) fd, hIoCompletionPort,
 						   (DWORD) inter, 0)) {
 			msyslog(LOG_ERR, "Can't add socket to i/o completion port: %m");
+			return 1;
 		}
-		else QueueSocketRecv(fd);
 	}
+
+	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
+					     HEAP_ZERO_MEMORY,
+					     sizeof(IoCompletionInfo));
+	if (lpo == NULL)
+	{
+		msyslog(LOG_ERR, "Can't allocate heap for completion port: %m");
+		return 1;
+	}
+
+	buff = get_free_recv_buffer();
+
+	if (buff == NULL)
+	{
+		msyslog(LOG_ERR, "Can't allocate memory for network socket: %m");
+		HeapFree(hHeapHandle, 0, lpo);
+		return 1;
+	}
+
+	QueueSocketRecv(fd, buff, lpo);
+	return 0;
 }
 
 static int 
 OnWriteComplete(DWORD Key, IoCompletionInfo *lpo, DWORD Bytes)
 {
-	transmitbuf *buff = NULL;
+	transmitbuf_t *buff;
 	(void) Bytes;
 	(void) Key;
 
-	buff = (struct transmitbuf *) lpo->buff;
+	buff = (transmitbuf_t *) lpo->buff;
 
 	free_transmit_buffer(buff);
-	/* Clear the heap */
-	if (lpo != NULL)
-		HeapFree(hHeapHandle, 0, lpo);
 	return 1;
 }
 
@@ -399,7 +487,7 @@ io_completion_port_sendto(
 	int len, 
 	struct sockaddr_storage* dest)
 {
-	transmitbuf *buff = NULL;
+	transmitbuf_t *buff = NULL;
 	DWORD Result = ERROR_SUCCESS;
 	int errval;
 	int AddrLen;
@@ -408,6 +496,9 @@ io_completion_port_sendto(
 	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
 					     HEAP_ZERO_MEMORY,
 					     sizeof(IoCompletionInfo));
+
+	if (lpo == NULL)
+		return ERROR_OUTOFMEMORY;
 
 	if (len <= sizeof(buff->pkt)) {
 		buff = get_free_transmit_buffer();
@@ -454,12 +545,13 @@ io_completion_port_sendto(
 			if (debug)
 			printf("No more transmit buffers left - data discarded\n");
 #endif
+			HeapFree(hHeapHandle, 0, lpo);
 			return ERROR_OUTOFMEMORY;
 		}
 	}
 	else {
 #ifdef DEBUG
-		if (debug) printf("Packet too large\n");
+		if (debug) printf("Packet too large: %d Bytes\n", len);
 #endif
 		return ERROR_INSUFFICIENT_BUFFER;
 	}
@@ -476,7 +568,7 @@ io_completion_port_write(
 	int len)
 {
 	DWORD errval;
-	transmitbuf *buff = NULL;
+	transmitbuf_t *buff = NULL;
 	DWORD lpNumberOfBytesWritten;
 	DWORD Result = ERROR_INSUFFICIENT_BUFFER;
 	IoCompletionInfo *lpo;
@@ -484,6 +576,9 @@ io_completion_port_write(
 	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
 					     HEAP_ZERO_MEMORY,
 					     sizeof(IoCompletionInfo));
+
+	if (lpo == NULL)
+		return ERROR_OUTOFMEMORY;
 
 	if (len <= sizeof(buff->pkt)) {
 		buff = get_free_transmit_buffer();
@@ -525,12 +620,12 @@ io_completion_port_write(
 			if (debug)
 			printf("No more transmit buffers left - data discarded\n");
 #endif
-
+			HeapFree(hHeapHandle, 0, lpo);
 		}
 	}
 	else {
 #ifdef DEBUG
-		if (debug) printf("Packet too large\n");
+		if (debug) printf("Packet too large: %d Bytes\n", len);
 #endif
 	}
 	return Result;
@@ -541,7 +636,7 @@ io_completion_port_write(
  * Note that this is in effect the main loop for processing requests
  * both send and receive. This should be reimplemented
  */
-struct recvbuf *GetReceivedBuffers()
+int GetReceivedBuffers()
 {
 	DWORD Index = WaitForMultipleObjectsEx(MAXHANDLES, WaitHandles, FALSE, INFINITE, TRUE);
 	switch (Index) {
@@ -575,7 +670,7 @@ struct recvbuf *GetReceivedBuffers()
 				
 	} /* switch */
 
-	return (getrecvbufs());	/* get received buffers */
+	return (full_recvbuffs());	/* get received buffers */
 }
 
 #else

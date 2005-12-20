@@ -9,6 +9,9 @@
 #include "ntp_fp.h"
 #include "ntp_types.h"
 
+#include <isc/list.h>
+#include <isc/result.h>
+
 /*
  * recvbuf memory management
  */
@@ -45,8 +48,11 @@ extern HANDLE	get_recv_buff_event P((void));
  */   
 #define	RX_BUFF_SIZE	1000		/* hail Mary */
 
+
+typedef struct recvbuf recvbuf_t;
+
 struct recvbuf {
-	struct recvbuf *next;		/* next buffer in chain */
+	ISC_LINK(recvbuf_t)	link;
 	union {
 		struct sockaddr_storage X_recv_srcadr;
 		caddr_t X_recv_srcclock;
@@ -80,9 +86,6 @@ extern	void	init_recvbuff	P((int));
  */
 extern	void	freerecvbuf P((struct recvbuf *));
 
-	
-extern	struct recvbuf * getrecvbufs P((void));
-
 /*  Get a free buffer (typically used so an async
  *  read can directly place data into the buffer
  *
@@ -107,6 +110,11 @@ extern u_long lowater_additions P((void));
  *
  */
 extern	struct recvbuf *get_full_recv_buffer P((void));
+
+/*
+ * Checks to see if there are buffers to process
+ */
+extern isc_boolean_t has_full_recv_buffer P((void));
 
 #endif /* defined __recvbuff_h */
 
