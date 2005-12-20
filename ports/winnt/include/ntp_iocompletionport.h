@@ -32,7 +32,7 @@ extern	void	uninit_io_completion_port (void);
 
 extern	int	io_completion_port_add_clock_io	(struct refclockio * /*rio */);
 
-extern	void	io_completion_port_add_socket (SOCKET fd, struct interface *);
+extern	int	io_completion_port_add_socket (SOCKET fd, struct interface *);
 
 extern	DWORD	io_completion_port_sendto (struct interface *, struct pkt *, int, struct sockaddr_storage*);
 
@@ -40,11 +40,6 @@ extern	HANDLE get_io_event (void);
 
 int GetReceivedBuffers(void);
 
-static int QueueIORead( struct refclockio * );
-
-static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD);
-static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD);
-static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD);
 # endif
 
 #endif
