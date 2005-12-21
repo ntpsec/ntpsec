@@ -153,14 +153,19 @@ get_free_recv_buffer(void)
 		if (create_buffers(RECV_INC) <= 0)
 		{
 			msyslog(LOG_ERR, "No more memory for recvufs");
+			UNLOCK();
+			return (NULL);
+		}
+		buffer = ISC_LIST_HEAD(free_list);
+		if (buffer == NULL)
+		{
+			msyslog(LOG_ERR, "Failed to obtain more memory for recvbufs");
+			UNLOCK();
 			return (NULL);
 		}
 	}
-	else
-	{
-		ISC_LIST_DEQUEUE(free_list, buffer, link);
-		free_recvbufs--;
-	}
+	ISC_LIST_DEQUEUE(free_list, buffer, link);
+	free_recvbufs--;
 	UNLOCK();
 	return (buffer);
 }
