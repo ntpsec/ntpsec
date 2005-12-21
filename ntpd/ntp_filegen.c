@@ -169,7 +169,8 @@ filegen_open(
 					free(savename);
 				} else {
 					/*
-					 * there is at least a second link tpo this file
+					 * there is at least a second link to
+					 * this file.
 					 * just remove the conflicting one
 					 */
 					if (
