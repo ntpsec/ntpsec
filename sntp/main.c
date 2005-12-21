@@ -457,13 +457,14 @@ but allow for version 1 semantics and sick clients. */
         failed = (data->mode != NTP_SERVER && data->mode != NTP_PASSIVE);
         response = 1;
     }
-    if (failed || data->status != 0 || data->version < 1 ||
+    if (failed || data->status == 3 || data->version < 1 ||
             data->version > NTP_VERSION_MAX ||
             data->stratum > NTP_STRATUM_MAX) {
         if (verbose)
             fprintf(stderr,
-                "%s: totally spurious NTP packet rejected on socket %d\n",
-                argv0,which);
+                "%s: Unusable NTP packet rejected on socket %d (f=%d, status %d, version %d, stratum %d)\n",
+                argv0, which,
+		failed, data->status, data->version, data->stratum);
         return 1;
     }
 
