@@ -17,8 +17,8 @@
  */
 static u_long volatile full_recvbufs;	/* number of recvbufs on fulllist */
 static u_long volatile free_recvbufs;	/* number of recvbufs on freelist */
-static u_long volatile total_recvbufs;	/* total recvbufs currently in use */
-static u_long volatile lowater_adds;	/* number of times we have added memory */
+static u_long volatile total_recvbufs;	/* number of recvbufs available */
+static u_long volatile lowater_adds;	/* number of times we have added recvbufs */
 
 
 static ISC_LIST(recvbuf_t)	full_list;	/* Currently used recv buffers */
@@ -174,6 +174,16 @@ recvbuf_t *
 get_full_recv_buffer(void)
 {
 	recvbuf_t *rbuf;
+
+	if (0 == full_recvbufs)
+	    return 0;
+
+#ifdef DEBUG
+	if (debug > 1 && full_recvbufs)
+	    printf("get_full_recv_buffer() called and full_recvbufs is %lu\n", full_recvbufs);
+#endif
+	if (0 == full_recvbufs)
+	    msyslog(LOG_ERR, "get_full_recv_buffer() called but full_recvbufs is 0!");
 	LOCK();
 	rbuf = ISC_LIST_HEAD(full_list);
 	if (rbuf != NULL)
@@ -183,6 +193,8 @@ get_full_recv_buffer(void)
 	}
 	else
 	{
+		if (full_recvbufs)
+		    msyslog(LOG_ERR, "get_full_recv_buffer: full_list is empty but full_recvbufs is %lu!", full_recvbufs);
 		/*
 		 * Make sure we reset the full count to 0
 		 */

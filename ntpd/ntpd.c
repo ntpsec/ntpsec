@@ -935,18 +935,18 @@ getgroup:
 		}
 
 #endif /* HAVE_IO_COMPLETION_PORT */
-		/*
-		 * Call the data procedure to handle each received
-		 * packet.
-		 */
-		if (full_recvbuffs() > 0)
+
+		while (full_recvbuffs())
 		{
+			/*
+			 * Call the data procedure to handle each received
+			 * packet.
+			 */
 			rbuf = get_full_recv_buffer();
-			while (rbuf != NULL)
+			if (rbuf != NULL)	/* This should always be true */
 			{
 				(rbuf->receiver)(rbuf);
 				freerecvbuf(rbuf);
-				rbuf = get_full_recv_buffer();
 			}
 		}
 
