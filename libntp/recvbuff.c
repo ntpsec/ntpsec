@@ -170,6 +170,9 @@ get_full_recv_buffer(void)
 {
 	recvbuf_t *rbuf;
 
+	if (0 == full_recvbufs)
+	    return 0;
+
 #ifdef DEBUG
 	if (debug > 1 && full_recvbufs)
 	    printf("get_full_recv_buffer() called and full_recvbufs is %lu\n", full_recvbufs);
