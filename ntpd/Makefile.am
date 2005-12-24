@@ -31,6 +31,7 @@ ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim
+run_ag = cd $(srcdir) && autogen -L $(top_srcdir)/include
 
 check-local: @MAKE_CHECK_Y2K@
 	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
@@ -61,25 +62,23 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 
 $(srcdir)/ntpd-opts.h: ntpd-opts.c
 $(srcdir)/ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def
-	cd $(srcdir) && autogen ntpd-opts.def
+	$(run_ag) ntpd-opts.def
 
 $(srcdir)/ntpd.1: ntpd-opts.def ntpdbase-opts.def
-	cd $(srcdir) && autogen -Tagman1.tpl -bntpd ntpd-opts.def
+	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
 $(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: ntpd-opts.def
-	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
-		-Taginfo.tpl -DLEVEL=section ntpd-opts.def
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(srcdir)/ntpdsim-opts.h: ntpdsim-opts.c
 $(srcdir)/ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def
-	cd $(srcdir) && autogen ntpdsim-opts.def
+	$(run_ag) ntpdsim-opts.def
 
 $(srcdir)/ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def
-	cd $(srcdir) && autogen -Tagman1.tpl -bntpdsim ntpdsim-opts.def
+	$(run_ag) -Tagman1.tpl -bntpdsim ntpdsim-opts.def
 
 $(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: ntpdsim-opts.def
-	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
-		-Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
 
 $(PROGRAMS): $(LDADD)
 

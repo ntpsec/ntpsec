@@ -32,6 +32,7 @@ NULL=
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS = sntp
+run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -60,13 +61,12 @@ man_MANS=	sntp.1
 
 $(srcdir)/sntp-opts.h: sntp-opts.c
 $(srcdir)/sntp-opts.c: sntp-opts.def
-	cd $(srcdir) && autogen sntp-opts.def
+	$(run_ag) sntp-opts.def
 
 $(srcdir)/sntp.1: sntp-opts.def
-	cd $(srcdir) && autogen -Tagman1.tpl -bsntp sntp-opts.def
+	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: sntp-opts.def
-	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
-		-Taginfo.tpl -DLEVEL=section sntp-opts.def
+	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
 include ../bincheck.mf

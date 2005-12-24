@@ -41,11 +41,9 @@ long-opts;
 environrc;
 test-main;
 
-/*
-#include       $top_srcdir/version.def
-*/
-
 config-header  = "config.h";
+include        = '#include <stdlib.h>';
+#include       version.def
 
 flag = {
     name      = certificate;
@@ -59,29 +57,7 @@ flag = {
 	_EndOfDoc_;
 };
 
-flag = {
-    name      = debug-level;
-    value     = d;
-    max       = NOLIMIT;
-    nopreset;
-    descrip   = "Increase output debug message level";
-    doc = <<-  _EndOfDoc_
-	Increase the debugging message output level.  Can be supplied multiple times.
-	_EndOfDoc_;
-};
-
-flag = {
-    name      = set-debug-level;
-    value     = D;
-    max       = NOLIMIT;
-    descrip   = "Set the output debug message level";
-    arg-type  = string;
-    flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
-    doc = <<-  _EndOfDoc_
-	Set the output debugging level.  Can be supplied multiple times,
-	but each overrides the previous value(s).
-	_EndOfDoc_;
-};
+#include       debug-opt.def
 
 flag = {
     name      = id-key;

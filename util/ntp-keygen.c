@@ -219,6 +219,7 @@ main(
 	)
 {
 	struct timeval tv;	/* initialization vector */
+	int	md5key = 0;	/* generate MD5 keys */
 #ifdef OPENSSL
 	X509	*cert = NULL;	/* X509 certificate */
 	EVP_PKEY *pkey_host = NULL; /* host key */
@@ -226,9 +227,6 @@ main(
 	EVP_PKEY *pkey_iff = NULL; /* IFF parameters */
 	EVP_PKEY *pkey_gq = NULL; /* GQ parameters */
 	EVP_PKEY *pkey_mv = NULL; /* MV parameters */
-#endif
-	int	md5key = 0;	/* generate MD5 keys */
-#ifdef OPENSSL
 	int	hostkey = 0;	/* generate RSA keys */
 	int	iffkey = 0;	/* generate IFF parameters */
 	int	gqpar = 0;	/* generate GQ parameters */
@@ -244,7 +242,7 @@ main(
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
-	int	iffsw = 0;	/* IFF key switch */
+#define iffsw   HAVE_OPT(ID_KEY)
 #endif /* OPENSSL */
 	char	hostbuf[MAXHOSTNAME + 1];
 	u_int	temp;
@@ -304,31 +302,18 @@ main(
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 
 #ifdef OPENSSL
-	if (HAVE_OPT( ID_KEY ))
-	    iffsw++;
-#endif
-
-#ifdef OPENSSL
 	if (HAVE_OPT( GQ_PARAMS ))
 	    gqpar++;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( GQ_KEYS ))
 	    gqkey++;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( HOST_KEY ))
 	    hostkey++;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( IFFKEY ))
 	    iffkey++;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( ISSUER_NAME ))
 	    trustname = OPT_ARG( ISSUER_NAME );
 #endif
@@ -339,46 +324,30 @@ main(
 #ifdef OPENSSL
 	if (HAVE_OPT( MODULUS ))
 	    modulus = DESC(MODULUS).optOccCt;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( PVT_CERT ))
 	    exten = EXT_KEY_PRIVATE;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( PVT_PASSWD ))
 	    passwd2 = OPT_ARG( PVT_PASSWD );
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( GET_PVT_PASSWD ))
 	    passwd1 = OPT_ARG( GET_PVT_PASSWD );
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( SIGN_KEY ))
 	    sign = OPT_ARG( SIGN_KEY );
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( SUBJECT_NAME ))
 	    hostname = OPT_ARG( SUBJECT_NAME );
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( TRUSTED_CERT ))
 	    exten = EXT_KEY_TRUST;
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( MV_PARAMS )) {
 		mvpar++;
 		nkeys = DESC(MV_PARAMS).optOccCt;
 	}
-#endif
 
-#ifdef OPENSSL
 	if (HAVE_OPT( MV_KEYS )) {
 		mvkey++;
 		nkeys = DESC(MV_KEYS).optOccCt;
@@ -431,7 +400,7 @@ main(
 	 * If there is no new host key, look for an existing one. If not
 	 * found, create it.
 	 */
-	while (pkey_host == NULL && rval == 0 && !iffsw) {
+	while (pkey_host == NULL && rval == 0 && !HAVE_OPT(ID_KEY)) {
 		sprintf(filename, "ntpkey_host_%s", hostname);
 		if ((fstr = fopen(filename, "r")) != NULL) {
 			pkey_host = PEM_read_PrivateKey(fstr, NULL,
@@ -461,7 +430,7 @@ main(
 	 * found, use the host key instead.
 	 */
 	pkey = pkey_sign;
-	while (pkey_sign == NULL && rval == 0 && !iffsw) {
+	while (pkey_sign == NULL && rval == 0 && !HAVE_OPT(ID_KEY)) {
 		sprintf(filename, "ntpkey_sign_%s", hostname);
 		if ((fstr = fopen(filename, "r")) != NULL) {
 			pkey_sign = PEM_read_PrivateKey(fstr, NULL,
@@ -511,7 +480,7 @@ main(
 	/*
 	 * If there is no new GQ file, look for an existing one.
 	 */
-	if (pkey_gq == NULL && rval == 0 && !iffsw) {
+	if (pkey_gq == NULL && rval == 0 && !HAVE_OPT(ID_KEY)) {
 		sprintf(filename, "ntpkey_gq_%s", hostname);
 		if ((fstr = fopen(filename, "r")) != NULL) {
 			pkey_gq = PEM_read_PrivateKey(fstr, NULL, NULL,
@@ -543,7 +512,7 @@ main(
 	/*
 	 * Generate a X509v3 certificate.
 	 */
-	while (scheme == NULL && rval == 0 && !iffsw) {
+	while (scheme == NULL && rval == 0 && !HAVE_OPT(ID_KEY)) {
 		sprintf(filename, "ntpkey_cert_%s", hostname);
 		if ((fstr = fopen(filename, "r")) != NULL) {
 			cert = PEM_read_X509(fstr, NULL, NULL, NULL);
@@ -566,7 +535,7 @@ main(
 		}
 		scheme = "RSA-MD5";
 	}
-	if (pkey != NULL && rval == 0 && !iffsw) {
+	if (pkey != NULL && rval == 0 && !HAVE_OPT(ID_KEY)) {
 		ectx = EVP_get_digestbyname(scheme);
 		if (ectx == NULL) {
 			fprintf(stderr,
@@ -582,7 +551,7 @@ main(
 	 * Write the IFF client parameters and keys as a DSA private key
 	 * encoded in PEM. Note the private key is obscured.
 	 */
-	if (pkey_iff != NULL && rval == 0 && iffsw) {
+	if (pkey_iff != NULL && rval == 0 && HAVE_OPT(ID_KEY)) {
 		DSA	*dsa;
 		char	*sptr;
 		char	*tld;

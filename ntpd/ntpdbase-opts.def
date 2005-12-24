@@ -102,30 +102,7 @@ flag = {
 };
 #endif
 
-flag = {
-    name      = debug-level;
-    value     = d;
-    max       = NOLIMIT;
-    descrip   = "Increase output debug message level";
-    doc = <<-  _EndOfDoc_
-	Increase the debugging message output level.  Can be supplied multiple times.
-	_EndOfDoc_;
-};
-
-flag = {
-    name      = set-debug-level;
-    value     = D;
-    max       = NOLIMIT;
-    descrip   = "Set the output debug message level";
-    arg-type  = string;
-    flag-code = <<- _EOS_
-	DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
-	_EOS_;
-    doc = <<-  _EndOfDoc_
-	Set the output debugging level.  Can be supplied multiple times,
-	but each overrides the previous value(s).
-	_EndOfDoc_;
-};
+#include debug-opt.def
 
 flag = {
     name      = driftfile;

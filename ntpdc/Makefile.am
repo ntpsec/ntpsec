@@ -19,18 +19,17 @@ EXTRA_DIST=	nl_in.c nl.pl layout.std	\
 BUILT_SOURCES+=	ntpdc-opts.c ntpdc-opts.h ntpdc.1 ntpdc-opts.texi	\
 		ntpdc-opts.menu
 man_MANS=	ntpdc.1
-
+run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include
 
 $(srcdir)/ntpdc-opts.h: ntpdc-opts.c
 $(srcdir)/ntpdc-opts.c: ntpdc-opts.def
-	cd $(srcdir) && autogen ntpdc-opts.def
+	$(run_ag) ntpdc-opts.def
 
 $(srcdir)/ntpdc.1: ntpdc-opts.def
-	cd $(srcdir) && autogen -Tagman1.tpl -bntpdc ntpdc-opts.def
+	$(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
 
 $(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: ntpdc-opts.def
-	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
-		-Taginfo.tpl -DLEVEL=section ntpdc-opts.def
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
 

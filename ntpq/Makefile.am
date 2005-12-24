@@ -11,19 +11,18 @@ ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h ntpq.1 ntpq-opts.texi ntpq-opts.menu
 man_MANS=	ntpq.1
-
+run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
 $(srcdir)/ntpq-opts.h: ntpq-opts.c
 $(srcdir)/ntpq-opts.c: ntpq-opts.def
-	cd $(srcdir) && autogen ntpq-opts.def
+	$(run_ag) ntpq-opts.def
 
 $(srcdir)/ntpq.1: ntpq-opts.def
-	cd $(srcdir) && autogen -Tagman1.tpl -bntpq ntpq-opts.def
+	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
 
 $(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: ntpq-opts.def
-	cd $(srcdir) && autogen -L ${prefix}/share/autogen \
-		-Taginfo.tpl -DLEVEL=section ntpq-opts.def
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)
 
