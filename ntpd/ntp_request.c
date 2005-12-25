@@ -495,17 +495,21 @@ process_private(
 	    !(inpkt->implementation == IMPL_XNTPD &&
 	    inpkt->request == REQ_CONFIG &&
 	    temp_size == sizeof(struct old_conf_peer))) {
+#ifdef DEBUG
 		if (debug > 2)
 			printf("process_private: wrong item size, received %d, should be %d or %d\n",
 			    temp_size, proc->sizeofitem, proc->v6_sizeofitem);
+#endif
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
 	if ((proc->sizeofitem != 0) &&
 	    ((temp_size * INFO_NITEMS(inpkt->err_nitems)) >
 	    (rbufp->recv_length - REQ_LEN_HDR))) {
+#ifdef DEBUG
 		if (debug > 2)
 			printf("process_private: not enough data\n");
+#endif
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -928,7 +932,10 @@ peer_stats (
 	struct sockaddr_storage addr;
 	extern struct peer *sys_peer;
 
-	printf("peer_stats: called\n");
+#ifdef DEBUG
+	if (debug)
+	     printf("peer_stats: called\n");
+#endif
 	items = INFO_NITEMS(inpkt->err_nitems);
 	ipl = (struct info_peer_list *) inpkt->data;
 	ip = (struct info_peer_stats *)prepare_pkt(srcadr, inter, inpkt,
@@ -946,14 +953,20 @@ peer_stats (
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		addr.ss_len = SOCKLEN(&addr);
 #endif
-		printf("peer_stats: looking for %s, %d, %d\n", stoa(&addr),
+#ifdef DEBUG
+		if (debug)
+		    printf("peer_stats: looking for %s, %d, %d\n", stoa(&addr),
 		    ipl->port, ((struct sockaddr_in6 *)&addr)->sin6_port);
+#endif
 		ipl = (struct info_peer_list *)((char *)ipl +
 		    INFO_ITEMSIZE(inpkt->mbz_itemsize));
 
 		if ((pp = findexistingpeer(&addr, (struct peer *)0, -1)) == 0)
 		    continue;
-		printf("peer_stats: found %s\n", stoa(&addr));
+#ifdef DEBUG
+		if (debug)
+		     printf("peer_stats: found %s\n", stoa(&addr));
+#endif
 		if (pp->srcadr.ss_family == AF_INET) {
 			ip->dstadr = (pp->processed) ?
 				pp->cast_flags == MDF_BCAST ?
@@ -1301,7 +1314,7 @@ do_conf(
 		    && temp_cp.hmode != MODE_BROADCAST)
 		    fl = 1;
 		if (temp_cp.flags & ~(CONF_FLAG_AUTHENABLE | CONF_FLAG_PREFER
-				  | CONF_FLAG_BURST | CONF_FLAG_SKEY))
+				  | CONF_FLAG_BURST | CONF_FLAG_IBURST | CONF_FLAG_SKEY))
 		    fl = 1;
 		cp = (struct conf_peer *)
 		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
@@ -1330,6 +1343,8 @@ do_conf(
 		    fl |= FLAG_PREFER;
 		if (temp_cp.flags & CONF_FLAG_BURST)
 		    fl |= FLAG_BURST;
+		if (temp_cp.flags & CONF_FLAG_IBURST)
+		    fl |= FLAG_IBURST;
 		if (temp_cp.flags & CONF_FLAG_SKEY)
 			fl |= FLAG_SKEY;
 		if (client_v6_capable && temp_cp.v6_flag != 0) {
@@ -1513,7 +1528,10 @@ do_unconf(
 #endif
 		found = 0;
 		peer = (struct peer *)0;
-		printf("searching for %s\n", stoa(&peeraddr));
+#ifdef DEBUG
+		if (debug)
+		     printf("searching for %s\n", stoa(&peeraddr));
+#endif
 		while (!found) {
 			peer = findexistingpeer(&peeraddr, peer, -1);
 			if (peer == (struct peer *)0)

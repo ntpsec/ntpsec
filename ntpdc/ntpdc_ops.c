@@ -117,10 +117,10 @@ struct xcmd opcmds[] = {
 	  { "", "", "", "" },
 	  "display event timer subsystem statistics" },
 	{ "addpeer",	addpeer,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll|prefer" },
+	  { "addr", "keyid", "version", "minpoll|prefer|burst ..." },
 	  "configure a new peer association" },
 	{ "addserver",	addserver,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll|prefer" },
+	  { "addr", "keyid", "version", "minpoll|prefer|burst|iburst ..." },
 	  "configure a new server" },
 	{ "addrefclock",addrefclock,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_STR, OPT|NTP_STR },
 	  { "addr", "mode", "minpoll|prefer", "minpoll|prefer" },
@@ -1330,6 +1330,8 @@ again:
 		    flags |= CONF_FLAG_PREFER;
 		else if (STREQ(pcmd->argval[items].string, "burst"))
 		    flags |= CONF_FLAG_BURST;
+		else if (STREQ(pcmd->argval[items].string, "iburst"))
+		    flags |= CONF_FLAG_IBURST;
 		else {
 		        long val;
 			if (!atoint(pcmd->argval[items].string, &val)) {
