@@ -28,13 +28,13 @@
 #endif
 
 #ifdef  DOSYNCTODR
-#if !defined(VMS)
-#include <sys/resource.h>
-#endif /* VMS */
+# if !defined(VMS)
+#  include <sys/resource.h>
+# endif /* VMS */
 #endif
 
 #if defined(VMS)
-#include <descrip.h>
+# include <descrip.h>
 #endif /* VMS */
 
 /*
@@ -58,15 +58,15 @@ static	char *stats_temp_file;
  * Statistics file stuff
  */
 #ifndef NTP_VAR
-#ifndef SYS_WINNT
-#define NTP_VAR "/var/NTP/"		/* NOTE the trailing '/' */
-#else
-#define NTP_VAR "c:\\var\\ntp\\"		/* NOTE the trailing '\\' */
-#endif /* SYS_WINNT */
+# ifndef SYS_WINNT
+#  define NTP_VAR "/var/NTP/"		/* NOTE the trailing '/' */
+# else
+#  define NTP_VAR "c:\\var\\ntp\\"		/* NOTE the trailing '\\' */
+# endif /* SYS_WINNT */
 #endif
 
 #ifndef MAXPATHLEN
-#define MAXPATHLEN 256
+# define MAXPATHLEN 256
 #endif
 
 static	char statsdir[MAXPATHLEN] = NTP_VAR;
@@ -101,79 +101,20 @@ init_util(void)
 	stats_temp_file = 0;
 	key_file_name = 0;
 
-#define PEERNAME "peerstats"
-#define LOOPNAME "loopstats"
-#define CLOCKNAME "clockstats"
-#define RAWNAME "rawstats"
-#define STANAME "systats"
-#ifdef OPENSSL
-#define CRYPTONAME "cryptostats"
-#endif /* OPENSSL */
+	filegen_register(&statsdir[0], "peerstats", &peerstats);
 
-	peerstats.fp       = NULL;
-	peerstats.prefix   = &statsdir[0];
-	peerstats.basename = (char*)emalloc(strlen(PEERNAME)+1);
-	strcpy(peerstats.basename, PEERNAME);
-	peerstats.id       = 0;
-	peerstats.type     = FILEGEN_DAY;
-	peerstats.flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("peerstats", &peerstats);
-	
-	loopstats.fp       = NULL;
-	loopstats.prefix   = &statsdir[0];
-	loopstats.basename = (char*)emalloc(strlen(LOOPNAME)+1);
-	strcpy(loopstats.basename, LOOPNAME);
-	loopstats.id       = 0;
-	loopstats.type     = FILEGEN_DAY;
-	loopstats.flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("loopstats", &loopstats);
+	filegen_register(&statsdir[0], "loopstats", &loopstats);
 
-	clockstats.fp      = NULL;
-	clockstats.prefix  = &statsdir[0];
-	clockstats.basename = (char*)emalloc(strlen(CLOCKNAME)+1);
-	strcpy(clockstats.basename, CLOCKNAME);
-	clockstats.id      = 0;
-	clockstats.type    = FILEGEN_DAY;
-	clockstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("clockstats", &clockstats);
+	filegen_register(&statsdir[0], "clockstats", &clockstats);
 
-	rawstats.fp      = NULL;
-	rawstats.prefix  = &statsdir[0];
-	rawstats.basename = (char*)emalloc(strlen(RAWNAME)+1);
-	strcpy(rawstats.basename, RAWNAME);
-	rawstats.id      = 0;
-	rawstats.type    = FILEGEN_DAY;
-	rawstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("rawstats", &rawstats);
+	filegen_register(&statsdir[0], "rawstats", &rawstats);
 
-	sysstats.fp      = NULL;
-	sysstats.prefix  = &statsdir[0];
-	sysstats.basename = (char*)emalloc(strlen(STANAME)+1);
-	strcpy(sysstats.basename, STANAME);
-	sysstats.id      = 0;
-	sysstats.type    = FILEGEN_DAY;
-	sysstats.flag    = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("sysstats", &sysstats);
+	filegen_register(&statsdir[0], "sysstats", &sysstats);
 
 #ifdef OPENSSL
-	cryptostats.fp	 = NULL;
-	cryptostats.prefix = &statsdir[0];
-	cryptostats.basename = (char*)emalloc(strlen(CRYPTONAME)+1);
-	strcpy(cryptostats.basename, CRYPTONAME);
-	cryptostats.id	 = 0;
-	cryptostats.type = FILEGEN_DAY;
-	cryptostats.flag = FGEN_FLAG_LINK; /* not yet enabled !!*/
-	filegen_register("cryptostats", &cryptostats);
+	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
 
-#undef PEERNAME
-#undef LOOPNAME
-#undef CLOCKNAME
-#undef RAWNAME
-#undef STANAME
-#ifdef OPENSSL
-#undef CRYPTONAME
-#endif /* OPENSSL */
 }
 
 
@@ -281,7 +222,7 @@ hourly_stats(void)
 #ifndef NO_RENAME
 		(void) rename(stats_temp_file, stats_drift_file);
 #else
-        /* we have no rename NFS of ftp in use*/
+		/* we have no rename NFS of ftp in use */
 		if ((fp = fopen(stats_drift_file, "w")) == NULL) {
 			msyslog(LOG_ERR, "can't open %s: %m",
 			    stats_drift_file);
