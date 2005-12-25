@@ -91,24 +91,6 @@ int stats_control;
  */
 double	old_drift;
 
-static void setup_FILEGEN P((FILEGEN *fp));
-
-/*
- * setup_FILEGEN
- */
-
-static void
-setup_FILEGEN(FILEGEN *fp)
-{
-	fp->fp       = NULL;
-	fp->prefix   = &statsdir[0];
-	fp->basename = (char*)emalloc(1);
-	fp->basename[0] = 0;
-	fp->id       = 0;
-	fp->type     = FILEGEN_DAY;
-	fp->flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
-}
-
 /*
  * init_util - initialize the utilities
  */
@@ -119,24 +101,18 @@ init_util(void)
 	stats_temp_file = 0;
 	key_file_name = 0;
 
-	setup_FILEGEN(&peerstats);
-	filegen_register("peerstats", &peerstats);
+	filegen_register(&statsdir[0], "peerstats", &peerstats);
 
-	setup_FILEGEN(&loopstats);
-	filegen_register("loopstats", &loopstats);
+	filegen_register(&statsdir[0], "loopstats", &loopstats);
 
-	setup_FILEGEN(&clockstats);
-	filegen_register("clockstats", &clockstats);
+	filegen_register(&statsdir[0], "clockstats", &clockstats);
 
-	setup_FILEGEN(&rawstats);
-	filegen_register("rawstats", &rawstats);
+	filegen_register(&statsdir[0], "rawstats", &rawstats);
 
-	setup_FILEGEN(&sysstats);
-	filegen_register("sysstats", &sysstats);
+	filegen_register(&statsdir[0], "sysstats", &sysstats);
 
 #ifdef OPENSSL
-	setup_FILEGEN(&cryptostats);
-	filegen_register("cryptostats", &cryptostats);
+	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
 
 }
