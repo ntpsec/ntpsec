@@ -20,6 +20,7 @@
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
+extern const char *specific_interface;
 extern int default_ai_family;
 
 

@@ -1,4 +1,12 @@
 
+include        = <<- _EOF_
+	#ifdef __windows
+	  extern int atoi(const char*);
+	#else
+	# include <stdlib.h>
+	#endif
+	_EOF_;
+
 flag = {
     name      = debug-level;
     value     = d;

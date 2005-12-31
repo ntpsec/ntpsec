@@ -91,6 +91,9 @@ $(PROGRAMS): $(LDADD)
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE)
 
+$(top_srcdir)/version :
+	cd $(top_srcdir) && $(MAKE) version
+
 version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/version
 	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpd
 	$(COMPILE) -c version.c

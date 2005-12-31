@@ -156,7 +156,7 @@ volatile int debug = 0;		/* No debugging by default */
 #endif
 
 int	listen_to_virtual_ips = 1;
-char 	*specific_interface = NULL;        /* interface name or IP address to bind to */
+const char *specific_interface = NULL;        /* interface name or IP address to bind to */
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -213,14 +213,14 @@ static	RETSIGTYPE	no_debug	P((int));
 
 int 		ntpdmain		P((int, char **));
 static void	set_process_priority	P((void));
-static void	init_logging		P((char *));
+static void	init_logging		P((char const *));
 static void	setup_logfile		P((void));
 
 /*
  * Initialize the logging
  */
 void
-init_logging(char *name)
+init_logging(char const *name)
 {
 	char *cp;
 
@@ -230,7 +230,7 @@ init_logging(char *name)
 	 */
 	cp = strrchr(name, '/');
 	if (cp == 0)
-		cp = name;
+		cp = (char*)name;
 	else
 		cp++;
 
@@ -268,18 +268,18 @@ setup_logfile(
 	)
 {
 	if (HAVE_OPT( LOGFILE )) {
-		char *ntp_optarg = OPT_ARG( LOGFILE );
+		const char *optarg = OPT_ARG( LOGFILE );
 		FILE *new_file;
 
-		if(strcmp(ntp_optarg, "stderr") == 0)
+		if(strcmp(optarg, "stderr") == 0)
 			new_file = stderr;
-		else if(strcmp(ntp_optarg, "stdout") == 0)
+		else if(strcmp(optarg, "stdout") == 0)
 			new_file = stdout;
 		else
-			new_file = fopen(ntp_optarg, "a");
+			new_file = fopen(optarg, "a");
 		if (new_file != NULL) {
 			NLOG(NLOG_SYSINFO)
-				msyslog(LOG_NOTICE, "logging to file %s", ntp_optarg);
+				msyslog(LOG_NOTICE, "logging to file %s", optarg);
 			if (syslog_file != NULL &&
 				fileno(syslog_file) != fileno(new_file))
 				(void)fclose(syslog_file);
@@ -290,7 +290,7 @@ setup_logfile(
 		else
 			msyslog(LOG_ERR,
 				"Cannot open log file %s",
-				ntp_optarg);
+				optarg);
 	}
 }
 
@@ -525,7 +525,7 @@ printf("1: argc=%d\n", argc);
 	init_winnt_time();
 #endif
 
-	/* getstartup(argc, argv); /* startup configuration, may set debug */
+	/* getstartup(argc, argv); / * startup configuration, may set debug */
 
 #ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
