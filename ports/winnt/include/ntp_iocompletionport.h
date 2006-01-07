@@ -5,27 +5,8 @@
 
 # if defined(HAVE_IO_COMPLETION_PORT)
 
-struct IoCompletionInfo;
 struct refclockio;
 
-/*
- * Request types
- */
-enum {
-	SOCK_RECV,
-	SOCK_SEND,
-	CLOCK_READ,
-	CLOCK_WRITE
-};
-
-typedef int IoCompletionInfoFunction(DWORD Key, struct IoCompletionInfo *, DWORD Bytes);
-
-typedef struct IoCompletionInfo {
-	OVERLAPPED			overlapped;
-	int				request_type;
-	LPVOID				buff;
-	IoCompletionInfoFunction *	iofunction;
-} IoCompletionInfo;
 
 extern	void	init_io_completion_port (void);
 extern	void	uninit_io_completion_port (void);
