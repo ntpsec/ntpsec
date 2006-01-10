@@ -1300,7 +1300,6 @@ clock_update(void)
 		sys_rootdelay = 0;
 		sys_rootdispersion = 0;
 		memcpy(&sys_refid, "STEP", 4);
-		sys_poll = NTP_MINPOLL;
 		report_event(EVNT_CLOCKRESET, NULL);
 		break;
 
