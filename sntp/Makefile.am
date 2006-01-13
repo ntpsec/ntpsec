@@ -7,7 +7,7 @@
 # that not all of the following system settings have been tested recently.
 
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS= -I m4
+ACLOCAL_AMFLAGS= -I libopts/m4
 
 AM_CPPFLAGS=	$(LIBOPTS_CFLAGS)
 LDADD=	$(LIBOPTS_LDADD)
