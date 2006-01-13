@@ -1,6 +1,6 @@
 #auTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.5
-ACLOCAL_AMFLAGS= -I m4
+ACLOCAL_AMFLAGS= -I m4 -I sntp/m4
 
 SUBDIRS=
 if NEED_LIBOPTS

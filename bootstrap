@@ -34,7 +34,6 @@ gunzip -c $(autoopts-config --libsrc) | (
   cd sntp
   tar -xvf -
   mv libopts-*.*.* libopts )
-mv -f sntp/libopts/m4/libopts.m4 m4/libopts.m4
 
 prog_opt_files=$(
     egrep -l '^prog.name' $(
