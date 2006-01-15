@@ -419,11 +419,25 @@ AC_CHECK_HEADERS(sys/stat.h sys/stream.h)
 AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/systune.h)
 AC_CHECK_HEADERS(sys/termios.h sys/time.h sys/signal.h)
 AC_EGREP_CPP(yes,
-[#include <sys/timepps.h>
+[#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#if HAVE_ERRNO_H
+# include <errno.h>
+#endif
+#include <sys/timepps.h>
 #ifdef PPS_API_VERS_1
 yes
 #endif
-], [AC_CHECK_HEADERS(sys/timepps.h)])
+], [AC_CHECK_HEADERS(sys/timepps.h, [], [],
+[#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#if HAVE_ERRNO_H
+# include <errno.h>
+#endif
+])
+])
 AC_CHECK_HEADERS(sys/timers.h sys/tpro.h sys/types.h sys/wait.h)
 AC_HEADER_TIME
 case "$host" in

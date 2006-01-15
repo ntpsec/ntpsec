@@ -2238,17 +2238,17 @@ oncore_msg_Bj(
 
 	switch(buf[4]) {
 	case 1:
-		instance->peer->leap = LEAP_ADDSECOND;
-		cp = "Set peer.leap to LEAP_ADDSECOND";
+		instance->pp->leap = LEAP_ADDSECOND;
+		cp = "Set pp.leap to LEAP_ADDSECOND";
 		break;
 	case 2:
-		instance->peer->leap = LEAP_DELSECOND;
-		cp = "Set peer.leap to LEAP_DELSECOND";
+		instance->pp->leap = LEAP_DELSECOND;
+		cp = "Set pp.leap to LEAP_DELSECOND";
 		break;
 	case 0:
 	default:
-		instance->peer->leap = LEAP_NOWARNING;
-		cp = "Set peer.leap to LEAP_NOWARNING";
+		instance->pp->leap = LEAP_NOWARNING;
+		cp = "Set pp.leap to LEAP_NOWARNING";
 		break;
 	}
 	record_clock_stats(&(instance->peer->srcadr), cp);
@@ -2843,18 +2843,18 @@ oncore_msg_Gj(
 
 	/* Only raise warning within a month of the leap second */
 
-	instance->peer->leap = LEAP_NOWARNING;
-	cp = "Set peer.leap to LEAP_NOWARNING";
+	instance->pp->leap = LEAP_NOWARNING;
+	cp = "Set pp.leap to LEAP_NOWARNING";
 
 	if (buf[6] == instance->BEHa[6] && buf[7] == instance->BEHa[7] && /* year */
 	    buf[8] == instance->BEHa[4]) {	/* month */
 		if (dt) {
 			if (dt < 0) {
-				instance->peer->leap = LEAP_DELSECOND;
-				cp = "Set peer.leap to LEAP_DELSECOND";
+				instance->pp->leap = LEAP_DELSECOND;
+				cp = "Set pp.leap to LEAP_DELSECOND";
 			} else {
-				instance->peer->leap = LEAP_ADDSECOND;
-				cp = "Set peer.leap to LEAP_ADDSECOND";
+				instance->pp->leap = LEAP_ADDSECOND;
+				cp = "Set pp.leap to LEAP_ADDSECOND";
 			}
 		}
 	}
