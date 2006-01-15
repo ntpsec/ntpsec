@@ -900,6 +900,8 @@ void
 enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef MCAST
+	int off = 0;
+
 	switch (maddr->ss_family)
 	{
 	case AF_INET:
@@ -911,6 +913,17 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 			iface->fd, stoa(&iface->sin), stoa(maddr));
 			return;
 		}
+#ifdef IP_MULTICAST_LOOP
+		/*
+		 * Don't send back to itself, but allow it to fail to set it
+		 */
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       (char *)&off, sizeof(off)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+		}
+#endif
 #ifdef DEBUG
 		if (debug > 0) {
 			printf(
@@ -930,6 +943,17 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 			stoa(maddr));
 			return;
 		}
+#ifdef IPV6_MULTICAST_LOOP
+		/*
+		 * Don't send back to itself, but allow it to fail to set it
+		 */
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+		       (char *)&off, sizeof(off)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+		}
+#endif
 #ifdef DEBUG
 		if (debug > 0) {
 			printf(
