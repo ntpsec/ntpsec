@@ -87,7 +87,7 @@
  * false, the discipline loop is unlocked and no corrections of any kind
  * are made. If both ntp_control and kern_enable are set, the kernel
  * support is used as described above; if false, the kernel is bypassed
- * entirely and the daemon PLL used instead.
+ * entirely and the daemon discipline used instead.
  *
  * There have been three versions of the kernel discipline code. The
  * first (microkernel) now in Solaris discipilnes the microseconds. The
@@ -125,13 +125,13 @@ double	allan_xpt = CLOCK_ALLAN; /* Allan intercept (s) */
 /*
  * Program variables
  */
-static double clock_offset;	/* current offset (s) */
+static double clock_offset;	/* offset (s) */
 double	clock_jitter;		/* offset jitter (s) */
 double	drift_comp;		/* frequency (s/s) */
-double	clock_stability;	/* frequency stability (s/s) */
+double	clock_stability;	/* frequency stability (wander) (s/s) */
 u_long	sys_clocktime;		/* last system clock update */
 u_long	pps_control;		/* last pps update */
-u_long	sys_tai;		/* TAI offset from UTC (s) */
+u_long	sys_tai;		/* UTC offset from TAI (s) */
 static void rstclock P((int, u_long, double)); /* transition function */
 
 #ifdef KERNEL_PLL
@@ -188,7 +188,8 @@ init_loopfilter(void)
 {
 	/*
 	 * Initialize state variables. Initially, we expect no drift
-	 * file, so set the state to S_NSET.
+	 * file, so set the state to S_NSET. If a drift file is present,
+	 * it will be detected later and the state set to S_FSET.
 	 */
 	rstclock(S_NSET, 0, 0);
 	clock_jitter = LOGTOD(sys_precision);
@@ -226,8 +227,9 @@ local_clock(
 #endif /* OPENSSL */
 
 	/*
-	 * If the loop is opened, monitor and record the offsets
-	 * anyway in order to determine the open-loop response.
+	 * If the loop is opened or the NIST LOCKCLOCK is in use,
+	 * monitor and record the offsets anyway in order to determine
+	 * the open-loop response and then go home.
 	 */
 #ifdef DEBUG
 	if (debug)
@@ -268,7 +270,8 @@ local_clock(
 	 * threshold, above which the clock will be stepped instead of
 	 * slewed. The value defaults to 128 ms, but can be set to even
 	 * unreasonable values. If set to zero, the clock will never be
-	 * stepped.
+	 * stepped. Note that a slew will persist beyond the life of
+	 * this program.
 	 *
 	 * Note that if ntpdate is active, the terminal does not detach,
 	 * so the termination comments print directly to the console.
@@ -289,14 +292,6 @@ local_clock(
 		    clock_stability, sys_poll);
 		exit (0);
 	}
-
-	/*
-         * Update the jitter estimate.
-         */
-	etemp = SQUARE(clock_jitter);
-	dtemp = SQUARE(max(fabs(fp_offset - last_offset),
-	    LOGTOD(sys_precision)));
-	clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
 	 * The huff-n'-puff filter finds the lowest delay in the recent
@@ -352,8 +347,8 @@ local_clock(
 		 */
 		case S_SYNC:
 			state = S_SPIK;
+			return (0);
 
-			/* fall through to S_SPIK/S_FREQ */
 		/*
 		 * In S_FREQ state we ignore outlyers and inlyers. At
 		 * the first outlyer after the stepout threshold,
@@ -382,27 +377,26 @@ local_clock(
 
 		/*
 		 * We get here by default in S_NSET and S_FSET states
-		 * and from above in S_FREQ state. Step the phase and
-		 * clamp down the poll interval.
+		 * and from above in S_FREQ or S_SPIK states.
 		 *
 		 * In S_NSET state an initial frequency correction is
 		 * not available, usually because the frequency file has
 		 * not yet been written. Since the time is outside the
-		 * capture range, the clock is stepped. The frequency
+		 * step threshold, the clock is stepped. The frequency
 		 * will be set directly following the stepout interval.
 		 *
 		 * In S_FSET state the initial frequency has been set
 		 * from the frequency file. Since the time is outside
-		 * the capture range, the clock is stepped immediately,
+		 * the step threshold, the clock is stepped immediately,
 		 * rather than after the stepout interval. Guys get
 		 * nervous if it takes 17 minutes to set the clock for
 		 * the first time.
 		 *
-		 * In S_SPIK state the stepout threshold has expired and
-		 * the phase is still above the step threshold. Note
-		 * that a single spike greater than the step threshold
-		 * is always suppressed, even at the longer poll
-		 * intervals.
+		 * In S_FREQ and S_SPIK states the stepout threshold has
+		 * expired and the phase is still above the step
+		 * threshold. Note that a single spike greater than the
+		 * step threshold is always suppressed, even at the
+		 * longer poll intervals.
 		 */ 
 		default:
 			step_systime(fp_offset);
@@ -410,7 +404,9 @@ local_clock(
 			    fp_offset);
 			reinit_timer();
 			tc_counter = 0;
+			sys_poll = NTP_MINPOLL;
 			sys_tai = 0;
+			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
 			if (state == S_NSET) {
 				rstclock(S_FREQ, peer->epoch, 0);
@@ -420,13 +416,23 @@ local_clock(
 		}
 		rstclock(S_SYNC, peer->epoch, 0);
 	} else {
+
+		/*
+		 * The offset is less than the step threshold. Calculate
+		 * the jitter as the exponentially weighted offset
+		 * differences.
+ 	      	 */
+		etemp = SQUARE(clock_jitter);
+		dtemp = SQUARE(max(fabs(fp_offset - last_offset),
+		    LOGTOD(sys_precision)));
+		clock_jitter = SQRT(etemp + (dtemp - etemp) /
+		    CLOCK_AVG);
 		switch (state) {
 
 		/*
 		 * In S_NSET state this is the first update received and
 		 * the frequency has not been initialized. The first
-		 * thing to do is directly measure the oscillator
-		 * frequency.
+		 * thing to do is directly measure the frequency offset.
 		 */
 		case S_NSET:
 			clock_offset = fp_offset;
@@ -550,7 +556,7 @@ local_clock(
 		 * variables, which will be read later by the local
 		 * clock driver. Afterwards, remember the time and
 		 * frequency offsets for jitter and stability values and
-		 * to update the drift file.
+		 * to update the frequency file.
 		 */
 		memset(&ntv,  0, sizeof(ntv));
 		if (ext_enable) {
@@ -577,6 +583,12 @@ local_clock(
 			    dtemp);
 			ntv.constant = sys_poll - 4;
 #endif /* STA_NANO */
+
+			/*
+			 * The frequency is set directly only if
+			 * clock_frequency is nonzero coming out of FREQ
+			 * state.
+			 */
 			if (clock_frequency != 0) {
 				ntv.modes |= MOD_FREQUENCY;
 				ntv.freq = (int32)((clock_frequency +
@@ -634,7 +646,7 @@ local_clock(
 
 		/*
 		 * Pass the stuff to the kernel. If it squeals, turn off
-		 * the pigs. In any case, fetch the kernel offset and
+		 * the pig. In any case, fetch the kernel offset and
 		 * frequency and pretend we did it here.
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
@@ -657,7 +669,7 @@ local_clock(
 #else /* STA_NANO */
 		clock_offset = ntv.offset / 1e6;
 #endif /* STA_NANO */
-		clock_frequency = ntv.freq / 65536e6 - drift_comp;
+		clock_frequency = ntv.freq / 65536e6;
 		flladj = plladj = 0;
 
 		/*
@@ -671,31 +683,43 @@ local_clock(
 			clock_jitter = ntv.jitter / 1e6;
 #endif /* STA_NANO */
 		}
-	}
+	} else {
 #endif /* KERNEL_PLL */
  
+		/*
+		 * We get here if the kernel discipline is not enabled.
+		 * Adjust the clock frequency as the sum of the directly
+		 * computed frequency (if measured) and the PLL and FLL
+		 * increments.
+		 */
+		clock_frequency = drift_comp + clock_frequency +
+		    flladj + plladj;
+#ifdef KERNEL_PLL
+	}
+#endif /* KERNEL_PLL */
+
 	/*
-	 * Adjust the clock frequency and calculate the stability. If
-	 * kernel support is available, we use the results of the kernel
-	 * discipline instead of the PLL/FLL discipline. In this case,
-	 * drift_comp is a sham and used only for updating the drift
-	 * file and for billboard eye candy.
+	 * Clamp the frequency within the tolerance range and calculate
+	 * the frequency change since the last update.
 	 */
-	dtemp = clock_frequency + flladj + plladj;
-	etemp = drift_comp + dtemp;
-	if (etemp > NTP_MAXFREQ)
-		drift_comp = NTP_MAXFREQ;
-	else if (etemp <= -NTP_MAXFREQ)
-		drift_comp = -NTP_MAXFREQ;
-	else
-		drift_comp = etemp;
-	if (fabs(etemp) > NTP_MAXFREQ)
+	if (fabs(clock_frequency) > NTP_MAXFREQ)
 		NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 		    msyslog(LOG_NOTICE,
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
-		    etemp * 1e6, NTP_MAXFREQ * 1e6);
+		    clock_frequency * 1e6, NTP_MAXFREQ * 1e6);
+	dtemp = SQUARE(clock_frequency - drift_comp);
+	if (clock_frequency > NTP_MAXFREQ)
+		drift_comp = NTP_MAXFREQ;
+	else if (clock_frequency < -NTP_MAXFREQ)
+		drift_comp = -NTP_MAXFREQ;
+	else
+		drift_comp = clock_frequency;
+
+	/*
+	 * Calculate the wander as the exponentially weighted frequency
+	 * differences.
+	 */
 	etemp = SQUARE(clock_stability);
-	dtemp = SQUARE(dtemp);
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 
 	/*
