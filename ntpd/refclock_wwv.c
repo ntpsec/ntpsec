@@ -67,8 +67,7 @@
  * port, where 0 is the mike port (default) and 1 is the line-in port.
  * It does not seem useful to select the compact disc player port. Fudge
  * flag3 enables audio monitoring of the input signal. For this purpose,
- * the monitor gain is set to a default value. Fudgetime2 is used as a
- * frequency vernier for broken codec sample frequency.
+ * the monitor gain is set to a default value.
  */
 /*
  * General definitions. Note the DGAIN parameter might need to be
@@ -76,7 +75,9 @@
  * WWV/WWVH data subcarrier is transmitted at 10 dB down from 100
  * percent modulation; however, the matched filter boosts it by a factor
  * of 17 and the receiver bandpass does what it does. The compromise
- * value here is five. Your milege may vary..
+ * value here is five. Your milege may vary.. The FREQ_OFFSET parameter
+ * can be used as a frequency vernier to correct codec frequency if
+ * greater than MAXFREQ.
  */
 #define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	AUDIO_BUFSIZ	320	/* audio buffer size (50 ms) */
@@ -100,6 +101,7 @@
 #define DCHAN		3	/* default radio channel (15 Mhz) */
 #define	AUDIO_PHI	5e-6	/* dispersion growth factor */
 #define DGAIN		5.	/* subcarrier gain */
+#define	FREQ_OFFSET	0	/* codec frequency correction (PPM) */
 
 /*
  * General purpose status bits (status)
@@ -828,7 +830,7 @@ wwv_receive(
 		 * 125 PPM.
 		 */
 		up->phase += up->freq / SECOND;
-		up->phase += pp->fudgetime2 / 1e6;
+		up->phase += FREQ_OFFSET / 1e6;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
@@ -2134,6 +2136,7 @@ wwv_clock(
 		} else {
 			up->watch = 0;
 			pp->disp = 0;
+			pp->lastref = up->timestamp;
 			refclock_process_offset(pp, offset,
 			    up->timestamp, PDELAY);
 			refclock_receive(peer);

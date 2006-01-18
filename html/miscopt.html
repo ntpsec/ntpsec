@@ -12,7 +12,7 @@
 		<h3>Miscellaneous Options</h3>
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">19:08</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="284">Saturday, October 01, 2005</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">18:50</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="271">Monday, January 09, 2006</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
@@ -83,8 +83,7 @@
 				<p>The variables operate as follows:</p>
 				<dl>
 					<dt><tt>allan <i>allan</i></tt>
-					<dd>The argument becomes the new value for the minimum Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm. The value in log2 seconds defaults to 7 (1024 s), which is also the lower limit.
-					<dt><tt>dispersion <i>dispersion</i></tt>
+					<dd>The argument becomes the new value for the Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm. The value is in  seconds with default 1500 s, which is appropriate for most computer clocks.<dt><tt>dispersion <i>dispersion</i></tt>
 					<dd>The argument becomes the new value for the dispersion increase rate, normally .000015 s/s.
 					<dt><tt>freq <i>freq</i></tt>
 					<dd>The argument becomes the initial value of the frequency offset in parts-per-million. This overrides the value in the frequency file, if present, and avoids the initial training state if it is not.
