@@ -1,11 +1,11 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_rawdcf.c,v 4.15 2005/08/06 19:17:06 kardel RELEASE_20050806_B
+ * /src/NTP/ntp4-dev/libparse/clk_rawdcf.c,v 4.16 2006/01/22 15:51:22 kardel RELEASE_20060122_A
  *  
- * clk_rawdcf.c,v 4.15 2005/08/06 19:17:06 kardel RELEASE_20050806_B
+ * clk_rawdcf.c,v 4.16 2006/01/22 15:51:22 kardel RELEASE_20060122_A
  *
  * Raw DCF77 pulse clock support
  *
- * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2006 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -602,6 +602,9 @@ int clk_rawdcf_bs;
  * History:
  *
  * clk_rawdcf.c,v
+ * Revision 4.16  2006/01/22 15:51:22  kardel
+ * generate reasonable timecode output on invalid input
+ *
  * Revision 4.15  2005/08/06 19:17:06  kardel
  * clean log output
  *
