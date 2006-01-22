@@ -129,8 +129,8 @@ static struct dcfparam
 	unsigned char *zerobits;
 } dcfparameter = 
 {
-	"###############RADMLS1248124P124812P1248121241248112481248P", /* 'ONE' representation */
-	"--------------------s-------p------p----------------------p"  /* 'ZERO' representation */
+	"###############RADMLS1248124P124812P1248121241248112481248P??", /* 'ONE' representation */
+	"--------------------s-------p------p----------------------p__"  /* 'ZERO' representation */
 };
 
 static struct rawdcfcode 
