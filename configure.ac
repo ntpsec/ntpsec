@@ -26,6 +26,8 @@ AC_MINIX
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
+# Ralf Wildenhues: With per-target flags we need CC_C_O
+AC_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_PROG_CPP
 
@@ -288,6 +290,8 @@ case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
  *no*) ;;
  *) save_LIBS=$LIBS
     LIBS=
+    # Ralf Wildenhues: either unset ... or cache READLINE_LIBS
+    unset ac_cv_lib_readline_readline
     AC_CHECK_LIB(readline, readline, ,
      AC_MSG_NOTICE([Trying again with -lcurses])
      unset ac_cv_lib_readline_readline
