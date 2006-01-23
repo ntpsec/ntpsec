@@ -631,7 +631,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 #if defined(NTP_PRE_420)
               pp->msec
 #else
-              pp->nsec/1000
+              (int)(pp->nsec/1000)
 #endif
               );
     }

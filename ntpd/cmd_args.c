@@ -184,7 +184,7 @@ getCmdOpts(
 	char *argv[]
 	)
 {
-	extern char *config_file;
+	extern const char *config_file;
 	int errflg;
 	tOptions myOptions =
 #ifdef SIM
@@ -254,12 +254,12 @@ getCmdOpts(
 	if (HAVE_OPT( PROPAGATIONDELAY ))
 		do {
 			double tmp;
-			char *ntp_optarg = OPT_ARG( PROPAGATIONDELAY );
+			const char *my_ntp_optarg = OPT_ARG( PROPAGATIONDELAY );
 
-			if (sscanf(ntp_optarg, "%lf", &tmp) != 1) {
+			if (sscanf(my_ntp_optarg, "%lf", &tmp) != 1) {
 				msyslog(LOG_ERR,
 					"command line broadcast delay value %s undecodable",
-					ntp_optarg);
+					my_ntp_optarg);
 			} else {
 				proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
 			}
@@ -269,12 +269,12 @@ getCmdOpts(
 		stats_config(STATS_STATSDIR, OPT_ARG( STATSDIR ));
 
 	if (HAVE_OPT( TRUSTEDKEY )) {
-		int     ct = STACKCT_OPT(  TRUSTEDKEY );
-		char**  pp = STACKLST_OPT( TRUSTEDKEY );
+		int           ct = STACKCT_OPT(  TRUSTEDKEY );
+		const char**  pp = STACKLST_OPT( TRUSTEDKEY );
 
 		do  {
 			u_long tkey;
-			char* p = *pp++;
+			const char* p = *pp++;
 
 			tkey = (int)atol(p);
 			if (tkey <= 0 || tkey > NTP_MAXKEY) {
@@ -307,25 +307,25 @@ getCmdOpts(
 	}
 
 	if (HAVE_OPT( VAR )) {
-		int     ct = STACKCT_OPT(  VAR );
-		char**  pp = STACKLST_OPT( VAR );
+		int           ct = STACKCT_OPT(  VAR );
+		const char**  pp = STACKLST_OPT( VAR );
 
 		do  {
-			char* ntp_optarg = *pp++;
+			const char* my_ntp_optarg = *pp++;
 
-			set_sys_var(ntp_optarg, strlen(ntp_optarg)+1,
+			set_sys_var(my_ntp_optarg, strlen(my_ntp_optarg)+1,
 			    (u_short) (RW));
 		} while (--ct > 0);
 	}
 
 	if (HAVE_OPT( DVAR )) {
-		int     ct = STACKCT_OPT(  DVAR );
-		char**  pp = STACKLST_OPT( DVAR );
+		int           ct = STACKCT_OPT(  DVAR );
+		const char**  pp = STACKLST_OPT( DVAR );
 
 		do  {
-			char* ntp_optarg = *pp++;
+			const char* my_ntp_optarg = *pp++;
 
-			set_sys_var(ntp_optarg, strlen(ntp_optarg)+1,
+			set_sys_var(my_ntp_optarg, strlen(my_ntp_optarg)+1,
 			    (u_short) (RW | DEF));
 		} while (--ct > 0);
 	}

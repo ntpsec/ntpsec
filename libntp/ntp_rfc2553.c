@@ -229,7 +229,7 @@ getaddrinfo (const char *nodename, const char *servname,
 		port = 0;
 
 	/*
-	/*
+	 *
 	 * Set up the port number
 	 */
 	if (ai->ai_family == AF_INET)

@@ -537,8 +537,8 @@ ntpqmain(
 	}
 
 	if (HAVE_OPT(COMMAND)) {
-		int	cmdct = STACKCT_OPT( COMMAND );
-		char**	cmds  = STACKLST_OPT( COMMAND );
+		int		cmdct = STACKCT_OPT( COMMAND );
+		const char**	cmds  = STACKLST_OPT( COMMAND );
 
 		while (cmdct-- > 0) {
 			ADDCMD(*cmds++);

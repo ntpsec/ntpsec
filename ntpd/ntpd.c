@@ -222,7 +222,7 @@ static void	setup_logfile		P((void));
 void
 init_logging(char const *name)
 {
-	char *cp;
+	const char *cp;
 
 	/*
 	 * Logging.  This may actually work on the gizmo board.  Find a name
@@ -230,7 +230,7 @@ init_logging(char const *name)
 	 */
 	cp = strrchr(name, '/');
 	if (cp == 0)
-		cp = (char*)name;
+		cp = name;
 	else
 		cp++;
 
@@ -268,18 +268,18 @@ setup_logfile(
 	)
 {
 	if (HAVE_OPT( LOGFILE )) {
-		const char *optarg = OPT_ARG( LOGFILE );
+		const char *my_optarg = OPT_ARG( LOGFILE );
 		FILE *new_file;
 
-		if(strcmp(optarg, "stderr") == 0)
+		if(strcmp(my_optarg, "stderr") == 0)
 			new_file = stderr;
-		else if(strcmp(optarg, "stdout") == 0)
+		else if(strcmp(my_optarg, "stdout") == 0)
 			new_file = stdout;
 		else
-			new_file = fopen(optarg, "a");
+			new_file = fopen(my_optarg, "a");
 		if (new_file != NULL) {
 			NLOG(NLOG_SYSINFO)
-				msyslog(LOG_NOTICE, "logging to file %s", optarg);
+				msyslog(LOG_NOTICE, "logging to file %s", my_optarg);
 			if (syslog_file != NULL &&
 				fileno(syslog_file) != fileno(new_file))
 				(void)fclose(syslog_file);
@@ -290,7 +290,7 @@ setup_logfile(
 		else
 			msyslog(LOG_ERR,
 				"Cannot open log file %s",
-				optarg);
+				my_optarg);
 	}
 }
 

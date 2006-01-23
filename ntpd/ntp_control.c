@@ -60,7 +60,9 @@ static	void	ctl_putid	P((const char *, char *));
 static	void	ctl_putarray	P((const char *, double *, int));
 static	void	ctl_putsys	P((int));
 static	void	ctl_putpeer	P((int, struct peer *));
+#ifdef OPENSSL
 static	void	ctl_putfs	P((const char *, tstamp_t));
+#endif
 #ifdef REFCLOCK
 static	void	ctl_putclock	P((int, struct refclockstat *, int));
 #endif	/* REFCLOCK */
@@ -1004,6 +1006,7 @@ ctl_putuint(
 /*
  * ctl_putfs - write a decoded filestamp into the response
  */
+#ifdef OPENSSL
 static void
 ctl_putfs(
 	const char *tag,
@@ -1033,6 +1036,7 @@ ctl_putfs(
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
+#endif
 
 
 /*
@@ -2965,7 +2969,7 @@ set_var(
 
 void
 set_sys_var(
-	char *data,
+	const char *data,
 	u_long size,
 	u_short def
 	)

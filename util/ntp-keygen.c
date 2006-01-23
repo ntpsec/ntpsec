@@ -242,10 +242,10 @@ main(
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
+	u_int	temp;
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif /* OPENSSL */
 	char	hostbuf[MAXHOSTNAME + 1];
-	u_int	temp;
 
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */

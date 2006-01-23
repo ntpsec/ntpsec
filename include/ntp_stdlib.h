@@ -100,7 +100,7 @@ extern	const char *	FindConfig	P((const char *));
 
 extern	void	signal_no_reset P((int, RETSIGTYPE (*func)(int)));
 
-extern	void	getauthkeys 	P((char *));
+extern	void	getauthkeys 	P((const char *));
 extern	void	auth_agekeys	P((void));
 extern	void	rereadkeys	P((void));
 

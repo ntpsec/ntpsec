@@ -251,11 +251,11 @@ hourly_stats(void)
 void
 stats_config(
 	int item,
-	char *invalue	/* only one type so far */
+	const char *invalue	/* only one type so far */
 	)
 {
 	FILE *fp;
-	char *value;
+	const char *value;
 	int len;
 
 	/*
@@ -644,7 +644,7 @@ record_crypto_stats(
  */
 void
 getauthkeys(
-	char *keyfile
+	const char *keyfile
 	)
 {
 	int len;

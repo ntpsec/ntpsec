@@ -59,7 +59,7 @@ struct ctl_var {
 extern  char *  add_var P((struct ctl_var **, u_long, u_short));
 extern  void    free_varlist P((struct ctl_var *));
 extern  void    set_var P((struct ctl_var **, const char *, u_long, u_short));
-extern  void    set_sys_var P((char *, u_long, u_short));
+extern  void    set_sys_var P((const char *, u_long, u_short));
 
 /* ntp_intres.c */
 extern	void	ntp_res_name	P((struct sockaddr_storage, u_short));
@@ -210,7 +210,7 @@ extern	l_fp	sys_revoketime;
 /* ntp_util.c */
 extern	void	init_util	P((void));
 extern	void	hourly_stats	P((void));
-extern	void	stats_config	P((int, char *));
+extern	void	stats_config	P((int, const char *));
 extern	void	record_peer_stats P((struct sockaddr_storage *, int, double, double, double, double));
 extern	void	record_loop_stats P((double, double, double, double, int));
 extern	void	record_clock_stats P((struct sockaddr_storage *, const char *));
