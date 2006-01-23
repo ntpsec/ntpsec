@@ -455,7 +455,7 @@ ntpdmain(
 	)
 {
 	l_fp now;
-	struct recvbuf *rbuflist;
+	int tot_full_recvbufs;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
 	struct sigaction sa;
@@ -968,11 +968,10 @@ getgroup:
 #if defined(HAVE_IO_COMPLETION_PORT)
 
 	for (;;) {
-		rbuflist = GetReceivedBuffers();
+		tot_full_recvbufs = GetReceivedBuffers();
 #else /* normal I/O */
 
 	was_alarmed = 0;
-	rbuflist = (struct recvbuf *)0;
 	for (;;)
 	{
 # if !defined(HAVE_SIGNALED_IO) 
@@ -985,14 +984,14 @@ getgroup:
 		block_io_and_alarm();
 # endif
 
-		rbuflist = getrecvbufs();	/* get received buffers */
+		tot_full_recvbufs = full_recvbuffs();	/* get received buffers */
 		if (alarm_flag) 	/* alarmed? */
 		{
 			was_alarmed = 1;
 			alarm_flag = 0;
 		}
 
-		if (!was_alarmed && rbuflist == (struct recvbuf *)0)
+		if (!was_alarmed && tot_full_recvbufs == 0)
 		{
 			/*
 			 * Nothing to do.  Wait for something.
@@ -1035,7 +1034,7 @@ getgroup:
 				was_alarmed = 1;
 				alarm_flag = 0;
 			}
-			rbuflist = getrecvbufs();  /* get received buffers */
+			tot_full_recvbufs = full_recvbuffs();  /* get received buffers */
 		}
 # ifdef HAVE_SIGNALED_IO
 		unblock_io_and_alarm();
@@ -1052,22 +1051,20 @@ getgroup:
 		}
 
 #endif /* HAVE_IO_COMPLETION_PORT */
-		/*
-		 * Call the data procedure to handle each received
-		 * packet.
-		 */
-		while (rbuflist != (struct recvbuf *)0)
+
+		while (full_recvbuffs())
 		{
-			rbuf = rbuflist;
-			rbuflist = rbuf->next;
-			(rbuf->receiver)(rbuf);
-			freerecvbuf(rbuf);
+			/*
+			 * Call the data procedure to handle each received
+			 * packet.
+			 */
+			rbuf = get_full_recv_buffer();
+			if (rbuf != NULL)	/* This should always be true */
+			{
+				(rbuf->receiver)(rbuf);
+				freerecvbuf(rbuf);
+			}
 		}
-#if defined DEBUG && defined SYS_WINNT
-		if (debug > 4)
-		    printf("getrecvbufs: %ld handler interrupts, %ld frames\n",
-			   handler_calls, handler_pkts);
-#endif
 
 		/*
 		 * Go around again
