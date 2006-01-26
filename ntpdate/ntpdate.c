@@ -331,7 +331,7 @@ ntpdatemain (
 	)
 {
 	int was_alarmed;
-	struct recvbuf *rbuflist;
+	int tot_recvbufs;
 	struct recvbuf *rbuf;
 	l_fp tmp;
 	int errflg;
@@ -592,7 +592,6 @@ ntpdatemain (
 
 	initializing = 0;
 	was_alarmed = 0;
-	rbuflist = (struct recvbuf *)0;
 
 	while (complete_servers < sys_numservers) {
 #ifdef HAVE_POLL_H
@@ -607,9 +606,9 @@ ntpdatemain (
 			was_alarmed = 1;
 			alarm_flag = 0;
 		}
-		rbuflist = getrecvbufs();	/* get received buffers */
+		tot_recvbufs = full_recvbuffs();	/* get received buffers */
 
-		if (!was_alarmed && rbuflist == (struct recvbuf *)0) {
+		if (!was_alarmed && tot_recvbufs > 0) {
 			/*
 			 * Nothing to do.	 Wait for something.
 			 */
@@ -651,18 +650,19 @@ ntpdatemain (
 				was_alarmed = 1;
 				alarm_flag = 0;
 			}
-			rbuflist = getrecvbufs();	/* get received buffers */
+			tot_recvbufs = full_recvbuffs();	/* get received buffers */
 		}
 
 		/*
 		 * Out here, signals are unblocked.  Call receive
 		 * procedure for each incoming packet.
 		 */
-		while (rbuflist != (struct recvbuf *)0) {
-			rbuf = rbuflist;
-			rbuflist = rbuf->next;
+		rbuf = get_full_recv_buffer();
+		while (rbuf != NULL)
+		{
 			receive(rbuf);
 			freerecvbuf(rbuf);
+			rbuf = get_full_recv_buffer();
 		}
 
 		/*

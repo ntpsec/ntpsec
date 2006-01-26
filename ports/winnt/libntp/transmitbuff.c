@@ -14,48 +14,26 @@
 /*
  * transmitbuf memory management
  */
-#define TRANSMIT_INIT	10	/* 10 buffers initially */
-#define TRANSMIT_LOWAT	3	/* when we're down to three buffers get more */
-#define TRANSMIT_INC	5	/* get 5 more at a time */
+#define TRANSMIT_INIT		10	/* 10 buffers initially */
+#define TRANSMIT_LOWAT		 3	/* when we're down to three buffers get more */
+#define TRANSMIT_INC		 5	/* get 5 more at a time */
 #define TRANSMIT_TOOMANY	40	/* this is way too many buffers */
-
-/*
- * Maximum time in seconds to allow transmit request to complete
- * After that we are free to delete it if we need the buffer
- */
-
-#define	MAX_TRANSMIT_SEND_TIME	60.0	
 
 /*
  * Memory allocation
  */
-static volatile u_long full_transmitbufs = 0;		/* number of transmitbufs on fulllist */
-static volatile u_long free_transmitbufs = 0;		/* number of transmitbufs on freelist */
+static volatile u_long full_transmitbufs = 0;	/* number of transmitbufs on fulllist */
+static volatile u_long free_transmitbufs = 0;	/* number of transmitbufs on freelist */
 
-typedef struct transmitb transmitb_t;
-
-struct transmitb {
-	transmitbuf			*tb;
-	ISC_LINK(transmitb_t)		link;
-};
-
-ISC_LIST(transmitb_t)	fulllist;		/* Currently used transmit buffers */
-
-static	transmitbuf *volatile freelist = NULL;  /* free buffers */
-static	transmitbuf *volatile beginlist = NULL; /* fifo buffers with data */
+ISC_LIST(transmitbuf_t)	free_list;		/* Currently used transmit buffers */
+ISC_LIST(transmitbuf_t)	full_list;		/* Currently used transmit buffers */
 
 static u_long total_transmitbufs = 0;		/* total transmitbufs currently in use */
-static u_long lowater_additions = 0;	/* number of times we have added memory */
-
-static	transmitbuf initial_bufs[TRANSMIT_INIT]; /* initial allocation */
-
+static u_long lowater_additions = 0;		/* number of times we have added memory */
 
 static CRITICAL_SECTION TransmitLock;
 # define LOCK(lock)	EnterCriticalSection(lock)
 # define UNLOCK(lock)	LeaveCriticalSection(lock)
-
-static	struct transmitbuf initial_bufs[TRANSMIT_INIT]; /* initial allocation */
-static	int eventid = 0;
 
 static void 
 initialise_buffer(transmitbuf *buff)
@@ -66,121 +44,70 @@ initialise_buffer(transmitbuf *buff)
 	buff->wsabuf.buf = (char *) &buff->pkt;
 }
 
+static void
+add_buffer_to_freelist(transmitbuf *tb)
+{
+	ISC_LIST_APPEND(free_list, tb, link);
+	free_transmitbufs++;
+}
+
+static void
+create_buffers(int nbufs)
+{
+	transmitbuf_t *buf;
+	int i;
+
+	buf = (transmitbuf_t *) emalloc(nbufs*sizeof(transmitbuf_t));
+	for (i = 0; i < nbufs; i++)
+	{
+		initialise_buffer(buf);
+		add_buffer_to_freelist(buf);
+		total_transmitbufs++;
+		buf++;
+	}
+
+	lowater_additions++;
+}
 
 extern void
 init_transmitbuff(void)
 {
-	int i;
 	/*
 	 * Init buffer free list and stat counters
 	 */
-	freelist = NULL;
-	for (i = 0; i < TRANSMIT_INIT; i++)
-	{
-		initialise_buffer(&initial_bufs[i]);
-		initial_bufs[i].next = (transmitbuf *) freelist;
-		freelist = &initial_bufs[i];
-	}
-
-	ISC_LIST_INIT(fulllist);
-	free_transmitbufs = total_transmitbufs = TRANSMIT_INIT;
+	ISC_LIST_INIT(full_list);
+	ISC_LIST_INIT(free_list);
+	free_transmitbufs = total_transmitbufs = 0;
 	full_transmitbufs = lowater_additions = 0;
+	create_buffers(TRANSMIT_INIT);
 
 	InitializeCriticalSection(&TransmitLock);
 }
 
 static void
-add_buffer_to_freelist(transmitbuf *tb)
-{
-	tb->next = freelist;
-	freelist = tb;
-	free_transmitbufs++;
-}
+delete_buffer_from_full_list(transmitbuf_t *tb) {
 
-static void
-delete_buffer_from_full_list(transmitbuf *tb) {
+	transmitbuf_t *next = NULL;
+	transmitbuf_t *lbuf = ISC_LIST_HEAD(full_list);
 
-	transmitb_t *next;
-	transmitb_t *lbuf = ISC_LIST_HEAD(fulllist);
-
-	while(lbuf != NULL) {
+	while (lbuf != NULL) {
 		next = ISC_LIST_NEXT(lbuf, link);
-		if(lbuf->tb == tb) {
-			ISC_LIST_DEQUEUE_TYPE(fulllist, lbuf, link, transmitb_t);
-			free(lbuf);
+		if (lbuf == tb) {
+			ISC_LIST_DEQUEUE(full_list, lbuf, link);
 			break;
 		}
 		else
 			lbuf = next;
 	}
+	full_transmitbufs--;
 }
-
-/*
- * routine to free up any buffer that has not been freed up
- * after MAX_TRANSMIT_SEND_TIME seconds. Note that we are not being
- * too careful here about the correct value of time since we just need
- * and approximate measure of how much time has elapsed since the
- * packet was sent and this routine is only called if we run out
- * of tranmit buffers.
- */
-static int
-free_unsent_buffers()
-{
-	int tot_freed = 0;
-	double elapsed_time;
-	time_t ct;
-	transmitbuf *buf;
-	transmitb_t *next;
-	transmitb_t *lbuf = ISC_LIST_HEAD(fulllist);
-
-	time(&ct);	/* Current Time */
-
-	LOCK(&TransmitLock);
-	while(lbuf != NULL) {
-		next = ISC_LIST_NEXT(lbuf, link);
-		elapsed_time = difftime(ct, lbuf->tb->ts);
-		if (elapsed_time > MAX_TRANSMIT_SEND_TIME) {
-			ISC_LIST_DEQUEUE_TYPE(fulllist, lbuf, link, transmitb_t);
-			free(lbuf);
-			add_buffer_to_freelist(lbuf->tb);
-			tot_freed++;
-		}
-		else
-			lbuf = next;
-	}
-	UNLOCK(&TransmitLock);
-	return (tot_freed);
-}
-
-static void
-create_buffers(void)
-{
-	transmitbuf *buf;
-	int i;
-	if (free_unsent_buffers() > 0)
-		return;
-
-	buf = (transmitbuf *) emalloc(TRANSMIT_INC*sizeof(transmitbuf));
-	for (i = 0; i < TRANSMIT_INC; i++)
-	{
-		initialise_buffer(buf);
-		buf->next = (transmitbuf *) freelist;
-		freelist = buf;
-		buf++;
-	}
-
-	free_transmitbufs += TRANSMIT_INC;
-	total_transmitbufs += TRANSMIT_INC;
-	lowater_additions++;
-}
-
 
 extern void
-free_transmit_buffer(transmitbuf *rb)
+free_transmit_buffer(transmitbuf_t *rb)
 {
 	LOCK(&TransmitLock);
-	add_buffer_to_freelist(rb);
 	delete_buffer_from_full_list(rb);
+	add_buffer_to_freelist(rb);
 	UNLOCK(&TransmitLock);
 }
 
@@ -188,21 +115,21 @@ free_transmit_buffer(transmitbuf *rb)
 extern transmitbuf *
 get_free_transmit_buffer(void)
 {
-	transmitb_t *lbuf = (transmitb_t *)malloc(sizeof(transmitb_t));
 
-	transmitbuf * buffer = NULL;
+	transmitbuf_t * buffer = NULL;
 	LOCK(&TransmitLock);
 	if (free_transmitbufs <= 0) {
-		create_buffers();
+		create_buffers(TRANSMIT_INC);
 	}
-	buffer = freelist;
-	freelist = buffer->next;
-	buffer->next = NULL;
-	time(&buffer->ts);	/* Time we gave out the transmit buffer */
-	lbuf->tb = buffer;
-	ISC_LIST_APPEND(fulllist, lbuf, link);
-	--free_transmitbufs;
+	buffer = ISC_LIST_HEAD(free_list);
+	if (buffer != NULL)
+	{
+		ISC_LIST_DEQUEUE(free_list, buffer, link);
+		free_transmitbufs--;
+		ISC_LIST_APPEND(full_list, buffer, link);
+		full_transmitbufs++;
+	}
 	UNLOCK(&TransmitLock);
-	return buffer;
+	return (buffer);
 }
 

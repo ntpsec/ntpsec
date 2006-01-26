@@ -149,6 +149,10 @@ static	void	close_socket	P((SOCKET));
 #ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
 #endif
+#ifdef F_DUPFD
+static int	dup_fd		P((int));
+#endif
+
 static	char *	fdbits		P((int, fd_set *));
 static	void	set_reuseaddr	P((int));
 static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
@@ -240,6 +244,29 @@ connection_reset_fix(SOCKET fd) {
 		return (ISC_R_UNEXPECTED);
 }
 #endif
+
+#ifdef F_DUPFD
+static int dup_fd(int fd)
+{
+	int tmp, newfd;
+        /*
+         * Leave a space for stdio to work in.
+         */
+        if (fd >= 0 && fd < 20) {
+                newfd = fcntl(fd, F_DUPFD, 20);
+
+                tmp = errno;
+                if (newfd == -1)
+                        perror("fcntl");
+                (void)close(fd);
+                errno = tmp;
+                return (newfd);
+        }
+}
+#endif
+
+
+
 /*
  * init_io - initialize I/O data structures and call socket creation routine
  */
@@ -873,6 +900,8 @@ void
 enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef MCAST
+	int off = 0;
+
 	switch (maddr->ss_family)
 	{
 	case AF_INET:
@@ -884,6 +913,17 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 			iface->fd, stoa(&iface->sin), stoa(maddr));
 			return;
 		}
+#ifdef IP_MULTICAST_LOOP
+		/*
+		 * Don't send back to itself, but allow it to fail to set it
+		 */
+		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       (char *)&off, sizeof(off)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+		}
+#endif
 #ifdef DEBUG
 		if (debug > 0) {
 			printf(
@@ -903,6 +943,17 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 			stoa(maddr));
 			return;
 		}
+#ifdef IPV6_MULTICAST_LOOP
+		/*
+		 * Don't send back to itself, but allow it to fail to set it
+		 */
+		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+		       (char *)&off, sizeof(off)) == -1) {
+			netsyslog(LOG_ERR,
+			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
+			iface->fd, stoa(&iface->sin), stoa(maddr));
+		}
+#endif
 #ifdef DEBUG
 		if (debug > 0) {
 			printf(
@@ -1451,6 +1502,14 @@ open_socket(
 	}
 #endif /* SYS_WINNT */
 
+#ifdef F_DUPFD
+	/*
+	 * Fixup the file descriptor for some systems
+	 */
+	fd = dup_fd(fd);
+#endif
+
+
 	/* set SO_REUSEADDR since we will be binding the same port
 	   number on each interface */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
@@ -1974,16 +2033,20 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 	int buflen;
 	register struct recvbuf *rb;
 
-	if (free_recvbuffs() == 0)
+	rb = get_free_recv_buffer();
+
+	if (rb == NULL)
 	{
+		/*
+		 * No buffer space available - just drop the packet
+		 */
 		char buf[RX_BUFF_SIZE];
 
 		buflen = read(fd, buf, sizeof buf);
 		packets_dropped++;
-		return (buflen);	/* Return what we found */
+		return (buflen);
 	}
 
-	rb = get_free_recv_buffer();
 
 	i = (rp->datalen == 0
 	    || rp->datalen > sizeof(rb->recv_space))
@@ -1996,7 +2059,7 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 			netsyslog(LOG_ERR, "clock read fd %d: %m", fd);
 		}
 		freerecvbuf(rb);
-		return (0);
+		return (buflen);
 	}
 	/*
 	 * Got one. Mark how and when it got here,
@@ -2051,7 +2114,9 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	 * packet.
 	 */
 
-	if (free_recvbuffs() == 0 || itf->ignore_packets == ISC_TRUE)
+	rb = get_free_recv_buffer();
+
+	if (rb == NULL || itf->ignore_packets == ISC_TRUE)
 	{
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
@@ -2071,8 +2136,6 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 			packets_dropped++;
 		return (buflen);
 	}
-
-	rb = get_free_recv_buffer();
 
 	fromlen = sizeof(struct sockaddr_storage);
 	rb->recv_length = recvfrom(fd,
@@ -2168,12 +2231,13 @@ input_handler(
 	fds = activefds;
 	tvzero.tv_sec = tvzero.tv_usec = 0;
 
+	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
+
 #ifdef REFCLOCK
 	/*
 	 * Check out the reference clocks first, if any
 	 */
 
-	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
 
 	/*
 	 * If there are no packets waiting just return

@@ -2182,7 +2182,6 @@ local_input(
 				buf.srcadr = rbufp->srcadr;
 				buf.dstadr = rbufp->dstadr;
 				buf.fd     = rbufp->fd;
-				buf.next = 0;
 				buf.X_from_where = rbufp->X_from_where;
 				rbufp->receiver(&buf);
 			}
@@ -2971,7 +2970,7 @@ parse_start(
 		{
 		  if (time_pps_create(fd232, &parse->ppshandle) < 0) 
 		    {
-		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS", CLK_UNIT(parse->peer));
+		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
 		    }
 		  else
 		    {
