@@ -3,6 +3,7 @@
 BUILD_ARGS="$@"
 PARSE="--enable-parse-clocks"
 #PARSE=
+STD="--with-sntp --enable-simulator"
 
 # Backroom:
 #   beauregard	   freebsd-4
@@ -41,14 +42,14 @@ do
     echo $i
     case "1" in
      0)
-    ssh $i "cd $c_d ; ./build $SIG $PARSE $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG $PARSE --without-crypto $BUILD_ARGS" &
-    ssh $i "cd $c_d ; ./build $SIG        --disable-all-clocks $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD --without-crypto $BUILD_ARGS" &
+    ssh $i "cd $c_d ; ./build $SIG        $STD --disable-all-clocks $BUILD_ARGS" &
 	;;
      1) ssh $i "cd $c_d ; \
-./build $SIG $PARSE $BUILD_ARGS ; \
-./build $SIG $PARSE --without-crypto $BUILD_ARGS ; \
-./build $SIG        --disable-all-clocks $BUILD_ARGS" \
+./build $SIG $PARSE $STD $BUILD_ARGS ; \
+./build $SIG $PARSE $STD --without-crypto $BUILD_ARGS ; \
+./build $SIG        $STD --disable-all-clocks $BUILD_ARGS" \
 &
 	;;
     esac
