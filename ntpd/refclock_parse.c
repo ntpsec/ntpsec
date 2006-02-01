@@ -2970,7 +2970,7 @@ parse_start(
 		{
 		  if (time_pps_create(fd232, &parse->ppshandle) < 0) 
 		    {
-		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS", CLK_UNIT(parse->peer));
+		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
 		    }
 		  else
 		    {
