@@ -5,4 +5,4 @@ case "$LIST" in
 esac
 
 export LIST
-flock-build --disable-parse-clocks --with-arlib --enable-simulator "$@"
+flock-build --disable-parse-clocks --with-arlib "$@"
