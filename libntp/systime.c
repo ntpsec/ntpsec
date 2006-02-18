@@ -81,8 +81,16 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	/* ntp_random() produces 31 bits (always nonnegative) */
-	dtemp = (tv.tv_usec + ntp_random() / FRAC - .5) / 1e6;
+	dtemp = ts.tv_nsec / 1e6;
+
+	/*
+	 * ntp_random() produces 31 bits (always nonnegative.
+	 * This bit is done only after the precision has been
+	 * determined.
+	 */
+	if (sys_precision != 0)
+		dtemp += (ntp_random() / FRAC - .5) / (1 <<
+		    -sys_precision);
 
 #endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
