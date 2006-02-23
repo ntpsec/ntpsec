@@ -81,7 +81,7 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = ts.tv_nsec / 1e6;
+	dtemp = tv.tv_usec / 1e6;
 
 	/*
 	 * ntp_random() produces 31 bits (always nonnegative.
