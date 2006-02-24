@@ -116,16 +116,16 @@ struct xcmd opcmds[] = {
 	{ "timerstats",	timerstats,	{ NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display event timer subsystem statistics" },
-	{ "addpeer",	addpeer,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll|prefer|burst ..." },
+	{ "addpeer",	addpeer,	{ NTP_ADD, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
+	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
 	  "configure a new peer association" },
-	{ "addserver",	addserver,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll|prefer|burst|iburst ..." },
+	{ "addserver",	addserver,	{ NTP_ADD, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
+	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
 	  "configure a new server" },
 	{ "addrefclock",addrefclock,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_STR, OPT|NTP_STR },
 	  { "addr", "mode", "minpoll|prefer", "minpoll|prefer" },
 	  "configure a new server" },
-	{ "broadcast",	broadcast,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_UINT, OPT|NTP_STR },
+	{ "broadcast",	broadcast,	{ NTP_ADD, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
 	  { "addr", "keyid", "version", "minpoll" },
 	  "configure broadcasting time service" },
 	{ "unconfig",	unconfig,	{ NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD },
@@ -482,6 +482,52 @@ refid_string(
 	return numtoa(refid);
 }
 
+static void
+print_pflag(
+	    FILE *fp,
+	    u_int32 flags
+	    )
+{
+     const char *str;
+
+     if (flags == 0) {
+		(void) fprintf(fp, " none\n");
+	} else {
+		str = "";
+		if (flags & INFO_FLAG_SYSPEER) {
+			(void) fprintf(fp, " system_peer");
+			str = ",";
+		}
+		if (flags & INFO_FLAG_CONFIG) {
+			(void) fprintf(fp, "%s config", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_REFCLOCK) {
+			(void) fprintf(fp, "%s refclock", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_AUTHENABLE) {
+			(void) fprintf(fp, "%s auth", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_BCLIENT) {
+			(void) fprintf(fp, "%s bclient", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_PREFER) {
+			(void) fprintf(fp, "%s prefer", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_IBURST) {
+			(void) fprintf(fp, "%s iburst", str);
+			str = ",";
+		}
+		if (flags & INFO_FLAG_BURST) {
+			(void) fprintf(fp, "%s burst", str);
+		}
+		(void) fprintf(fp, "\n");
+	}
+}
 /*
  * printpeer - print detail information for a peer
  */
@@ -492,7 +538,6 @@ printpeer(
 	)
 {
 	register int i;
-	const char *str;
 	l_fp tempts;
 	struct sockaddr_storage srcadr, dstadr;
 	
@@ -538,39 +583,7 @@ printpeer(
 		       fptoa(NTOHS_FP(pp->estbdelay), 5), pp->ttl);
 	
 	(void) fprintf(fp, "timer %lds, flags", (long)ntohl(pp->timer));
-	if (pp->flags == 0) {
-		(void) fprintf(fp, " none\n");
-	} else {
-		str = "";
-		if (pp->flags & INFO_FLAG_SYSPEER) {
-			(void) fprintf(fp, " system_peer");
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_CONFIG) {
-			(void) fprintf(fp, "%s config", str);
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_REFCLOCK) {
-			(void) fprintf(fp, "%s refclock", str);
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_AUTHENABLE) {
-			(void) fprintf(fp, "%s auth", str);
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_BCLIENT) {
-			(void) fprintf(fp, "%s bclient", str);
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_PREFER) {
-			(void) fprintf(fp, "%s prefer", str);
-			str = ",";
-		}
-		if (pp->flags & INFO_FLAG_BURST) {
-			(void) fprintf(fp, "%s burst", str);
-		}
-		(void) fprintf(fp, "\n");
-	}
+	print_pflag(fp, pp->flags); 
 
 	NTOHL_FP(&pp->reftime, &tempts);
 	(void) fprintf(fp, "reference time:      %s\n",
@@ -803,7 +816,9 @@ again:
 			       (int)pp->candidate);
 		if (items > 0)
 		    (void) fprintf(fp, "\n");
-		pp++;
+		(void) fprintf(fp, "flags:	");
+		print_pflag(fp, ntohs(pp->flags));
+	        pp++;
 	}
 }
 
@@ -1280,51 +1295,31 @@ doconfig(
 	u_long keyid;
 	u_int version;
 	u_char minpoll;
+	u_char maxpoll;
 	u_int flags;
 	u_char cmode;
 	int res;
 	int sendsize;
+	int numtyp;
 
 again:
 	keyid = 0;
-	version = NTP_OLDVERSION + 1;
+	version = 3;
 	flags = 0;
 	res = 0;
 	cmode = 0;
 	minpoll = NTP_MINDPOLL;
+	maxpoll = NTP_MAXDPOLL;
+	numtyp = 1;
+	if (refc)
+	     numtyp = 5;
 
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_peer);
 	else
 		sendsize = v4sizeof(struct conf_peer);
 
-	items = pcmd->nargs;
-
-	if (refc) {
-		if (pcmd->nargs > 1) {
-			cmode = (u_char) pcmd->argval[1].uval;
-			items = 2;
-		}
-	} else {
-		if (pcmd->nargs > 1) {
-			keyid = pcmd->argval[1].uval;
-			if (keyid > 0) {
-				flags |= CONF_FLAG_AUTHENABLE;
-			}
-			if (pcmd->nargs > 2) {
-				version = (u_int)pcmd->argval[2].uval;
-				if (version > NTP_VERSION ||
-				    version < NTP_OLDVERSION) {
-					(void)fprintf(fp,
-					"invalid version number %u\n",
-					    version);
-					res++;
-				}
-				items = 3;
-			}
-		}
-	}
-
+	items = 1;
 	while (pcmd->nargs > items) {
 		if (STREQ(pcmd->argval[items].string, "prefer"))
 		    flags |= CONF_FLAG_PREFER;
@@ -1332,28 +1327,74 @@ again:
 		    flags |= CONF_FLAG_BURST;
 		else if (STREQ(pcmd->argval[items].string, "iburst"))
 		    flags |= CONF_FLAG_IBURST;
+		else if (!refc && STREQ(pcmd->argval[items].string, "keyid"))
+		    numtyp = 1;
+		else if (!refc && STREQ(pcmd->argval[items].string, "version"))
+		    numtyp = 2;
+		else if (STREQ(pcmd->argval[items].string, "minpoll"))
+		    numtyp = 3;
+		else if (STREQ(pcmd->argval[items].string, "maxpoll"))
+		    numtyp = 4;
 		else {
 		        long val;
-			if (!atoint(pcmd->argval[items].string, &val)) {
-				(void) fprintf(fp,
-				    "%s not understood\n",
-				    pcmd->argval[items].string);
-				res++;
-				break;
-			} else {
-				if (val >= NTP_MINPOLL && val <= NTP_MAXPOLL) {
-					minpoll = (u_char)val;
-				} else {
-					(void) fprintf(fp,
-						       "minpol must be within %d..%d\n",
-						       NTP_MINPOLL, NTP_MAXPOLL);
-					res++;
-					break;
-				}					
+			if (!atoint(pcmd->argval[items].string, &val))
+			     numtyp = 0;				  
+			switch (numtyp) {
+			case 1:
+			     keyid = val;
+			     numtyp = 2;				  
+			     break;
+			     
+			case 2:
+			     version = (u_int) val;
+			     numtyp = 0;				  
+			     break;
+
+			case 3:
+			     minpoll = (u_char)val;
+			     numtyp = 0;				  
+			     break;
+
+			case 4:
+			     maxpoll = (u_char)val;
+			     numtyp = 0;				  
+			     break;
+
+			case 5:
+			     cmode = (u_char)val;
+			     numtyp = 0;				  
+			     break;
+
+			default:
+			     (void) fprintf(fp, "*** '%s' not understood\n",
+					    pcmd->argval[items].string);
+			     res++;
+			     numtyp = 0;				  
 			}
-		}
-		items++;
+			if (val < 0) {
+			     (void) fprintf(stderr,
+				     "***Value '%s' should be unsigned\n",
+				      pcmd->argval[items].string);
+			     res++;
+			}
+		   }
+	     items++;
 	}
+	if (keyid > 0)
+	     flags |= CONF_FLAG_AUTHENABLE;
+	if (version > NTP_VERSION ||
+	    version < NTP_OLDVERSION) {
+	     (void)fprintf(fp, "***invalid version number: %u\n",
+			   version);
+	     res++;
+	}
+	if (minpoll < NTP_MINPOLL || minpoll > NTP_MAXPOLL || 
+	    maxpoll < NTP_MINPOLL || maxpoll > NTP_MAXPOLL || 
+	    minpoll > maxpoll) {
+	     (void) fprintf(fp, "***min/max-poll must be within %d..%d\n",
+			    NTP_MINPOLL, NTP_MAXPOLL);
+	     res++;
+	}					
 
 	if (res)
 	    return;
@@ -1377,7 +1418,7 @@ again:
 	cpeer.keyid = keyid;
 	cpeer.version = (u_char) version;
 	cpeer.minpoll = minpoll;
-	cpeer.maxpoll = NTP_MAXDPOLL;
+	cpeer.maxpoll = maxpoll;
 	cpeer.flags = (u_char)flags;
 	cpeer.ttl = cmode;
 
@@ -1529,6 +1570,7 @@ doset(
 		}
 	}
 
+	sys.flags = htonl(sys.flags);
 	if (res || sys.flags == 0)
 	    return;
 
@@ -1834,6 +1876,8 @@ again:
 			}
 		}
 	}
+	cres.flags = htons(cres.flags);
+	cres.mflags = htons(cres.mflags);
 
 	/*
 	 * Make sure mask for default address is zero.  Otherwise,
@@ -2087,6 +2131,7 @@ reset(
 			rflags.flags |= sreset[i].flag;
 		}
 	}
+	rflags.flags = htonl(rflags.flags);
 
 	if (err) {
 		(void) fprintf(fp, "Not done due to errors\n");

@@ -11,7 +11,8 @@
  * Maximum number of arguments
  */
 #define	MAXARGS	4
-#define	MOREARGS 4
+#define	MOREARGS 10
+
 /*
  * Flags for forming descriptors.
  */
