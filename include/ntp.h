@@ -754,6 +754,7 @@ struct pkt {
 #define LOOP_ALLAN		8	/* set minimum Allan intercept */
 #define LOOP_HUFFPUFF		9	/* set huff-n'-puff filter length */
 #define LOOP_FREQ		10	/* set initial frequency */
+#define LOOP_KERN_CLEAR		11	/* reset kernel pll parameters */
 
 /*
  * Configuration items for the stats printer
