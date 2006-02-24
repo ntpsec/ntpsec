@@ -10,9 +10,10 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
+#include "ntpd.h"		/* for sys_precision */
 
 #ifdef SIM
-#include "ntpsim.h"
+# include "ntpsim.h"
 #endif /*SIM */
 
 #ifdef HAVE_SYS_PARAM_H
@@ -63,6 +64,7 @@ get_systime(
 	/*
 	 * Convert Unix clock from seconds and nanoseconds to seconds.
 	 * The bottom is only two bits down, so no need for fuzz.
+	 * Some systems don't have that level of precision, however...
 	 */
 # ifdef HAVE_CLOCK_GETTIME
 	clock_gettime(CLOCK_REALTIME, &ts);
@@ -83,16 +85,16 @@ get_systime(
 	now->l_i = tv.tv_sec + JAN_1970;
 	dtemp = tv.tv_usec / 1e6;
 
+#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
+
 	/*
-	 * ntp_random() produces 31 bits (always nonnegative.
+	 * ntp_random() produces 31 bits (always nonnegative).
 	 * This bit is done only after the precision has been
 	 * determined.
 	 */
 	if (sys_precision != 0)
 		dtemp += (ntp_random() / FRAC - .5) / (1 <<
 		    -sys_precision);
-
-#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
 	/*
 	 * Renormalize to seconds past 1900 and fraction.
@@ -192,11 +194,11 @@ step_systime(
 		    (double)adjtv.tv_sec) * 1e6 + .5);
 	}
 #if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
-#ifdef HAVE_CLOCK_GETTIME
+# ifdef HAVE_CLOCK_GETTIME
 	(void) clock_gettime(CLOCK_REALTIME, &ts);
-#else
+# else
 	(void) getclock(TIMEOFDAY, &ts);
-#endif
+# endif
 	timetv.tv_sec = ts.tv_sec;
 	timetv.tv_usec = ts.tv_nsec / 1000;
 #else /*  not HAVE_GETCLOCK */

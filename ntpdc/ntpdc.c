@@ -57,6 +57,11 @@ static int keyid_entered = 0;
 static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
 
+/*
+ * for get_systime()
+ */
+s_char	sys_precision;		/* local clock precision (log2 s) */
+
 int		ntpdcmain	P((int,	char **));
 /*
  * Built in command handler declarations
