@@ -116,6 +116,11 @@ static timer_t ntpdate_timerid;
 #define PEER_SHIFT	8	/* 8 suitable for crystal time base */
 
 /*
+ * for get_systime()
+ */
+s_char	sys_precision;		/* local clock precision (log2 s) */
+
+/*
  * Debugging flag
  */
 volatile int debug = 0;
