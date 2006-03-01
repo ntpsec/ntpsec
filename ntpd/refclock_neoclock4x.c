@@ -3,7 +3,7 @@
  * Refclock_neoclock4x.c
  * - NeoClock4X driver for DCF77 or FIA Timecode
  *
- * Date: 2004-04-07 v1.14
+ * Date: 2006-01-11 v1.15
  *
  * see http://www.linum.com/redir/jump/id=neoclock4x&action=redir
  * for details about the NeoClock4X device
@@ -63,7 +63,7 @@
 /*
  * NTP version 4.20 change the pp->msec field to pp->nsec.
  * To allow to support older ntp versions with this sourcefile
- * you can define NTP_REP_420 to allow this driver to compile
+ * you can define NTP_PRE_420 to allow this driver to compile
  * with ntp version back to 4.1.2.
  *
  */
@@ -109,7 +109,9 @@
 #define NEOCLOCK4X_OFFSET_ANTENNA2         33
 #define NEOCLOCK4X_OFFSET_CRC              35
 
-#define NEOCLOCK4X_DRIVER_VERSION          "1.14 (2004-04-07)"
+#define NEOCLOCK4X_DRIVER_VERSION          "1.15 (2006-01-11)"
+
+#define NSEC_TO_MILLI                      1000000
 
 struct neoclock4x_unit {
   l_fp	laststamp;	/* last receive timestamp */
@@ -147,9 +149,6 @@ static int      neol_hexatoi_len        P((const char str[], int *, int));
 static void     neol_jdn_to_ymd         P((unsigned long, int *, int *, int *));
 static void     neol_localtime          P((unsigned long, int* , int*, int*, int*, int*, int*));
 static unsigned long neol_mktime        P((int, int, int, int, int, int));
-#if 0
-static void     neol_mdelay             P((int));
-#endif
 #if !defined(NEOCLOCK4X_FIRMWARE)
 static int      neol_query_firmware     P((int, int, char *, int));
 static int      neol_check_firmware     P((int, const char*, char *));
@@ -347,7 +346,7 @@ neoclock4x_start(int unit,
   strcpy(up->firmware, "(c) 2002 NEOL S.A. FRANCE / L0.01 NDF:A:* (compile time)");
   up->firmwaretag = 'A';
 #else
-  msyslog(LOG_EMERG, "NeoClock4X(%d): Unkown firmware defined at compile time for NeoClock4X",
+  msyslog(LOG_EMERG, "NeoClock4X(%d): unknown firmware defined at compile time for NeoClock4X",
 	  unit);
   (void) close(fd);
   pp->io.fd = -1;
@@ -565,9 +564,9 @@ neoclock4x_receive(struct recvbuf *rbufp)
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_SECOND], &pp->second, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &dsec, 2);
 #if defined(NTP_PRE_420)
-  pp->msec *= 10; /* convert 1/100s from neoclock to real miliseconds */
+  pp->msec = dsec * 10; /* convert 1/100s from neoclock to real miliseconds */
 #else
-  pp->nsec = dsec * 10000; /* convert 1/100s from neoclock to nanoseconds */
+  pp->nsec = dsec * 10 * NSEC_TO_MILLI; /* convert 1/100s from neoclock to nanoseconds */
 #endif
 
   memcpy(up->radiosignal, &pp->a_lastcode[NEOCLOCK4X_OFFSET_RADIOSIGNAL], 3);
@@ -624,14 +623,14 @@ neoclock4x_receive(struct recvbuf *rbufp)
 
   if(pp->sloppyclockflag & CLK_FLAG4)
     {
-      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
+      msyslog(LOG_DEBUG, "NeoClock4X(%d): calculated UTC date/time: %04d-%02d-%02d %02d:%02d:%02d.%03ld",
 	      up->unit,
 	      pp->year, month, day,
 	      pp->hour, pp->minute, pp->second,
 #if defined(NTP_PRE_420)
               pp->msec
 #else
-              (int)(pp->nsec/1000)
+              pp->nsec/NSEC_TO_MILLI
 #endif
               );
     }
@@ -645,7 +644,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 #if defined(NTP_PRE_420)
   up->utc_msec   = pp->msec;
 #else
-  up->utc_msec   = pp->nsec/1000;
+  up->utc_msec   = pp->nsec/NSEC_TO_MILLI;
 #endif
 
   if(!refclock_process(pp))
@@ -901,24 +900,6 @@ neol_jdn_to_ymd(unsigned long jdn,
   *dd = (int)d;
 }
 
-#if 0
-/*
- *  delay in milliseconds
- */
-static void
-neol_mdelay(int milliseconds)
-{
-  struct timeval tv;
-
-  if(milliseconds)
-    {
-      tv.tv_sec  = 0;
-      tv.tv_usec = milliseconds * 1000;
-      select(1, NULL, NULL, NULL, &tv);
-    }
-}
-#endif
-
 #if !defined(NEOCLOCK4X_FIRMWARE)
 static int
 neol_query_firmware(int fd,
@@ -1123,5 +1104,10 @@ int refclock_neoclock4x_bs;
  * - open serial port in a way
  *   AIX and some other OS can
  *   handle much better
+ *
+ * 2006/01/11 cjh
+ * Revision 1.15
+ * - remove some unsued #ifdefs
+ * - fix nsec calculation, closes #499
  *
  */

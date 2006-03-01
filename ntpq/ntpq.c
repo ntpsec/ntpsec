@@ -50,6 +50,11 @@ const char *prompt = "ntpq> ";	/* prompt to ask him about */
 
 
 /*
+ * for get_systime()
+ */
+s_char	sys_precision;		/* local clock precision (log2 s) */
+
+/*
  * Keyid used for authenticated requests.  Obtained on the fly.
  */
 u_long info_auth_keyid = 0;

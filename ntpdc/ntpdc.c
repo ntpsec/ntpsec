@@ -49,6 +49,7 @@ static	const char *	prompt = "ntpdc> ";	/* prompt to ask him about */
  * Keyid used for authenticated requests.  Obtained on the fly.
  */
 static	u_long	info_auth_keyid;
+static int keyid_entered = 0;
 
 /*
  * Type of key md5
@@ -57,6 +58,11 @@ static	u_long	info_auth_keyid;
 
 static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
+
+/*
+ * for get_systime()
+ */
+s_char	sys_precision;		/* local clock precision (log2 s) */
 
 int		ntpdcmain	P((int,	char **));
 /*
@@ -156,7 +162,7 @@ static	struct xcmd builtins[] = {
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
 #define	MAXLINE		512		/* maximum line length */
-#define	MAXTOKENS	(1+1+MAXARGS+2)	/* maximum number of usable tokens */
+#define	MAXTOKENS	(1+1+MAXARGS+MOREARGS+2)	/* maximum number of usable tokens */
 #define	SCREENWIDTH  	78		/* nominal screen width in columns */
 
 /*
@@ -906,7 +912,7 @@ sendrequest(
 		qpkt.mbz_itemsize = MBZ_ITEMSIZE(0);
 	}
 
-	if (!auth) {
+	if (!auth || (keyid_entered && info_auth_keyid == 0)) {
 		qpkt.auth_seq = AUTH_SEQ(0, 0);
 		return sendpkt((char *)&qpkt, req_pkt_size);
 	} else {
@@ -1152,7 +1158,7 @@ docmd(
 	const char *cmdline
 	)
 {
-	char *tokens[1+MAXARGS+2];
+	char *tokens[1+MAXARGS+MOREARGS+2];
 	struct parse pcmd;
 	int ntok;
 	int i, ti;
@@ -1742,12 +1748,15 @@ keyid(
 	)
 {
 	if (pcmd->nargs == 0) {
-		if (info_auth_keyid == 0)
+		if (info_auth_keyid == 0 && !keyid_entered)
 		    (void) fprintf(fp, "no keyid defined\n");
+		else if (info_auth_keyid == 0 && keyid_entered)
+		    (void) fprintf(fp, "no keyid will be sent\n");
 		else
 		    (void) fprintf(fp, "keyid is %lu\n", (u_long)info_auth_keyid);
 	} else {
 		info_auth_keyid = pcmd->argval[0].uval;
+		keyid_entered = 1;
 	}
 }
 

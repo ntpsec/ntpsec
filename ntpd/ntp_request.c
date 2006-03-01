@@ -1000,10 +1000,13 @@ peer_stats (
 		    ip->flags |= INFO_FLAG_PREFER;
 		if (pp->flags & FLAG_BURST)
 		    ip->flags |= INFO_FLAG_BURST;
+		if (pp->flags & FLAG_IBURST)
+		    ip->flags |= INFO_FLAG_IBURST;
 		if (pp->status == CTL_PST_SEL_SYNCCAND)
 		    ip->flags |= INFO_FLAG_SEL_CANDIDATE;
 		if (pp->status >= CTL_PST_SEL_SYSPEER)
 		    ip->flags |= INFO_FLAG_SHORTLIST;
+		ip->flags = htons(ip->flags);
 		ip->timereceived = htonl((u_int32)(current_time - pp->timereceived));
 		ip->timetosend = htonl(pp->nextdate - current_time);
 		ip->timereachable = htonl((u_int32)(current_time - pp->timereachable));
@@ -1620,7 +1623,9 @@ setclr_flags(
 	)
 {
 	register u_int flags;
+	int prev_kern_enable;
 
+	prev_kern_enable = kern_enable;
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
 		msyslog(LOG_ERR, "setclr_flags: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -1628,7 +1633,8 @@ setclr_flags(
 	}
 
 	flags = ((struct conf_sys_flags *)inpkt->data)->flags;
-
+	flags = ntohl(flags);
+	
 	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
 		      SYS_FLAG_FILEGEN | SYS_FLAG_AUTH | SYS_FLAG_CAL)) {
@@ -1658,6 +1664,12 @@ setclr_flags(
 	if (flags & SYS_FLAG_CAL)
 		proto_config(PROTO_CAL, set, 0., NULL);
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
+
+	/* Reset the kernel ntp parameters if the kernel flag changed. */
+	if (prev_kern_enable && !kern_enable)
+	     	loop_config(LOOP_KERN_CLEAR, 0.0);
+	if (!prev_kern_enable && kern_enable)
+	     	loop_config(LOOP_DRIFTCOMP, drift_comp);
 }
 
 
@@ -1780,6 +1792,8 @@ do_restrict(
 	cr = (struct conf_restrict *)inpkt->data;
 
 	bad = 0;
+	cr->flags = ntohs(cr->flags);
+	cr->mflags = ntohs(cr->mflags);
 	while (items-- > 0 && !bad) {
 		if (cr->mflags & ~(RESM_NTPONLY))
 		    bad |= 1;
@@ -1926,7 +1940,7 @@ mon_getlist_1(
 				: GET_INADDR(md->interface->bcast))
 				: 4);
 		}
-		im->flags = md->cast_flags;
+		im->flags = htonl(md->cast_flags);
 		im->port = md->rmtport;
 		im->mode = md->mode;
 		im->version = md->version;
@@ -1974,7 +1988,8 @@ reset_stats(
 	}
 
 	flags = ((struct reset_flags *)inpkt->data)->flags;
-
+	flags = ntohl(flags);
+     
 	if (flags & ~RESET_ALLFLAGS) {
 		msyslog(LOG_ERR, "reset_stats: reset leaves %#lx",
 			flags & ~RESET_ALLFLAGS);
