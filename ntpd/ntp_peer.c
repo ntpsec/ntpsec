@@ -426,13 +426,18 @@ peer_config(
 	 * First search from the beginning for an association with given
 	 * remote address and mode. If an interface is given, search
 	 * from there to find the association which matches that
-	 * destination.
+	 * destination.  If the given interface is "any", track down
+	 * the actual interface, because that's what gets put into the
+	 * peer structure.
 	 */
 	peer = findexistingpeer(srcadr, (struct peer *)0, hmode);
 	if (dstadr != 0) {
 		while (peer != 0) {
 			if (peer->dstadr == dstadr)
 				break;
+			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
+			    peer->dstadr == findinterface(srcadr))
+			     break;
 			peer = findexistingpeer(srcadr, peer, hmode);
 		}
 	}

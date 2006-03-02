@@ -40,6 +40,30 @@
  *   MANUFACTUR DATE 417AMA199		MANUFACTUR DATE 0C27
  *   OPTIONS LIST    AB
  *
+ *	      (M12+T)				  (M12+T later version)
+ *   COPYRIGHT 1991-2002 MOTOROLA INC.	COPYRIGHT 1991-2003 MOTOROLA INC.
+ *   SFTW P/N #     61-G10268A		SFTW P/N #     61-G10268A
+ *   SOFTWARE VER # 2			SOFTWARE VER # 2
+ *   SOFTWARE REV # 0			SOFTWARE REV # 1
+ *   SOFTWARE DATE  AUG 14 2002 	SOFTWARE DATE  APR 16 2003
+ *   MODEL #	P283T12T11		MODEL #    P273T12T12
+ *   HWDR P/N # 2			HWDR P/N # 2
+ *   SERIAL #	P04DC2			SERIAL #   P05Z7Z
+ *   MANUFACTUR DATE 2J17		MANUFACTUR DATE 3G15
+ *
+ * --------------------------------------------------------------------------
+ * Reg Clemens (Feb 2006)
+ * Fix some gcc4 compiler complaints
+ * Fix possible segfault in oncore_init_shmem
+ * change all (possible) fprintf(stderr, to record_clock_stats
+ * Apply patch from Russell J. Yount <rjy@cmu.edu> Fixed (new) MT12+T UTC not correct
+ *   immediately after new Almanac Read.
+ * Apply patch for new PPS implementation by Rodolfo Giometti <giometti@linux.it>
+ *   now code can use old Ulrich Windl <Ulrich.Windl@rz.uni-regensburg.de> or
+ *   the new one.  Compiles depending on timepps.h seen.
+ * --------------------------------------------------------------------------
+ * Luis Batanero Guerrero <luisba@rao.es> (Dec 2005) Patch for leap seconds
+ * (the oncore driver was setting the wrong ntpd variable)
  * --------------------------------------------------------------------------
  * Reg.Clemens (Mar 2004)
  * Support for interfaces other than PPSAPI removed, for Solaris, SunOS,
@@ -115,10 +139,6 @@
 
 #ifdef HAVE_SYS_SIO_H
 # include <sys/sio.h>
-#endif
-
-#ifdef HAVE_SYS_TERMIOS_H
-# include <sys/termios.h>
 #endif
 
 enum receive_state {
@@ -243,6 +263,8 @@ struct instance {
 	u_char	count2; 	/* cycles thru Ea after count, to check for @@Ea */
 	u_char	count3; 	/* cycles thru Ea checking for # channels */
 	u_char	count4; 	/* cycles thru leap after Gj to issue Bj */
+	u_char	count5; 	/* cycles thru get_timestamp waiting for valid UTC correction */
+	u_char	count5_set;	/* only set count5 once */
 	u_char	pollcnt;
 	u_char	timeout;	/* count to retry Cj after Fa self-test */
 
@@ -506,36 +528,17 @@ oncore_start(
 	struct peer *peer
 	)
 {
+#define STRING_LEN	32
 	register struct instance *instance;
 	struct refclockproc *pp;
-	int fd1, fd2;
-	char device1[30], device2[30];
+	int fd1, fd2, num;
+	char device1[STRING_LEN], device2[STRING_LEN], Msg[160];
 	const char *cp;
 	struct stat stat1, stat2;
-
-	/* OPEN DEVICES */
-	/* opening different devices for fd1 and fd2 presents no problems */
-	/* opening the SAME device twice, seems to be OS dependent.
-		(a) on Linux (no streams) no problem
-		(b) on SunOS (and possibly Solaris, untested), (streams)
-			never see the line discipline.
-	   Since things ALWAYS work if we only open the device once, we check
-	     to see if the two devices are in fact the same, then proceed to
-	     do one open or two.
-	*/
-
-	(void)sprintf(device1, DEVICE1, unit);
-	(void)sprintf(device2, DEVICE2, unit);
-
-	if (stat(device1, &stat1)) {
-		perror("ONCORE: stat fd1");
-		exit(1);
-	}
-
-	if (stat(device2, &stat2)) {
-		perror("ONCORE: stat fd2");
-		exit(1);
-	}
+#ifdef PPS_HAVE_FINDSOURCE
+	int ret;
+	char id[STRING_LEN];
+#endif
 
 	/* create instance structure for this unit */
 
@@ -544,20 +547,6 @@ oncore_start(
 		return (0);
 	}
 	memset((char *) instance, 0, sizeof *instance);
-
-	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
-		perror("ONCORE: fd1");
-		exit(1);
-	}
-
-	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
-		fd2 = fd1;
-	else {	/* different devices here */
-		if ((fd2=open(device2, O_RDWR)) < 0) {
-			perror("ONCORE: fd2");
-			exit(1);
-		}
-	}
 
 	/* initialize miscellaneous variables */
 
@@ -568,16 +557,6 @@ oncore_start(
 	instance->peer = peer;
 	instance->assert = 1;
 	instance->once = 1;
-
-	cp = "ONCORE DRIVER -- CONFIGURING";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-
-	instance->o_state = ONCORE_NO_IDEA;
-	cp = "state = ONCORE_NO_IDEA";
-	record_clock_stats(&(instance->peer->srcadr), cp);
-
-	instance->ttyfd = fd1;
-	instance->ppsfd = fd2;
 
 	instance->Bj_day = -1;
 	instance->traim = -1;
@@ -595,15 +574,127 @@ oncore_start(
 	pp->clockdesc = "Motorola Oncore GPS Receiver";
 	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
 
-	/* go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X */
+	cp = "ONCORE DRIVER -- CONFIGURING";
+	record_clock_stats(&(instance->peer->srcadr), cp);
 
-	oncore_read_config(instance);
+	instance->o_state = ONCORE_NO_IDEA;
+	cp = "state = ONCORE_NO_IDEA";
+	record_clock_stats(&(instance->peer->srcadr), cp);
 
-	if (time_pps_create(fd2, &instance->pps_h) < 0) {
-		perror("time_pps_create: PPSAPI probably not in kernel");
+	/* Now open files.
+	 * This is a bit complicated, a we dont want to open the same file twice
+	 * (its a problem on some OS), and device2 may not exist for the new PPS
+	 */
+
+	(void)sprintf(device1, DEVICE1, unit);
+	(void)sprintf(device2, DEVICE2, unit);
+
+#ifdef PPS_HAVE_FINDSOURCE
+	/* Try to find the PPS source (by using "index = -1"
+	 * we ask just for a generic source)
+	 */
+
+	num = fd2 = -1;
+	if ((num=time_pps_findsource(num, device2, STRING_LEN, id, STRING_LEN)) < 0) {
+		sprintf(Msg, "No available PPS source in the system");
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		exit(1);
+	}
+
+	sprintf(Msg, "Found PPS source #%d \"%s\" on \"%s\"", num, id, device2);
+	record_clock_stats(&(instance->peer->srcadr), Msg);
+
+	/* there are two cases here:
+	 *     either there is a device name in device2 and we must open it,
+	 *  or there is not, and and it is not a device, and there is nothing
+	 *     to open.
+	 *  in either case we must use refclock_open to get fd1 opened raw.
+	 */
+
+	if (strlen(device2)) {
+		if (stat(device1, &stat1)) {
+			sprintf(Msg, "Can't stat fd1 (%s)\n", device1);
+			record_clock_stats(&(instance->peer->srcadr), Msg);
+			exit(1);
+		}
+
+		if (stat(device2, &stat2)) {
+			sprintf(Msg, "Can't stat fd2 (%s)\n", device2);
+			record_clock_stats(&(instance->peer->srcadr), Msg);
+			exit(1);
+		}
+
+		if ((stat1.st_dev != stat2.st_dev) || (stat1.st_ino != stat2.st_ino)) {
+			if ((ret=open(device2, O_RDWR)) < 0) {	/* different devices here */
+				sprintf(Msg, "Can't open fd2 (%s)\n", device2);
+				record_clock_stats(&(instance->peer->srcadr), Msg);
+				exit(1);
+			}
+		}
+	}
+
+	if ((fd1=refclock_open(device1, SPEED, LDISC_RAW)) < 0) {
+		sprintf(Msg, "Can't open fd1 (%s)\n", device1);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		exit(1);
+	}
+
+#else
+	/* OPEN DEVICES */
+	/* opening different devices for fd1 and fd2 presents no problems */
+	/* opening the SAME device twice, seems to be OS dependent.
+		(a) on Linux (no streams) no problem
+		(b) on SunOS (and possibly Solaris, untested), (streams)
+			never see the line discipline.
+	   Since things ALWAYS work if we only open the device once, we check
+	     to see if the two devices are in fact the same, then proceed to
+	     do one open or two.
+	*/
+
+	if (stat(device1, &stat1)) {
+		sprintf(Msg, "Can't stat fd1 (%s)\n", device1);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		exit(1);
+	}
+
+	if (stat(device2, &stat2)) {
+		sprintf(Msg, "Can't stat fd2 (%s)\n", device2);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		exit(1);
+	}
+
+	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
+		sprintf(Msg, "Can't open fd1 (%s)\n", device1);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		exit(1);
+	}
+
+	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
+		fd2 = fd1;
+	else {	/* different devices here */
+		if ((fd2=open(device2, O_RDWR)) < 0) {
+			sprintf(Msg, "Can't open fd2 (%s)\n", device2);
+			record_clock_stats(&(instance->peer->srcadr), Msg);
+			exit(1);
+		}
+	}
+	num = fd2;
+#endif
+	/* open ppsapi soure */
+
+	if (time_pps_create(num, &instance->pps_h) < 0) {
 		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");
 		return(0);
 	}
+
+	/* continue initialization */
+
+	instance->ttyfd = fd1;
+	instance->ppsfd = fd2;
+
+	/* go read any input data in /etc/ntp.oncoreX or /etc/ntp/oncore.X */
+
+	oncore_read_config(instance);
 
 	if (!oncore_ppsapi(instance))
 		return(0);
@@ -613,7 +704,7 @@ oncore_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd1;
 	if (!io_addclock(&pp->io)) {
-		perror("io_addclock");
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: io_addclock");
 		(void) close(fd1);
 		free(instance);
 		return (0);
@@ -666,7 +757,8 @@ oncore_shutdown(
 	io_closeclock(&pp->io);
 
 	close(instance->ttyfd);
-	close(instance->ppsfd);
+	if (instance->ppsfd != -1)
+		close(instance->ppsfd);
 	if (instance->shmemfd)
 		close(instance->shmemfd);
 	free(instance);
@@ -768,7 +860,7 @@ oncore_ppsapi(
 	instance->pps_p.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
 
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
-		perror("time_pps_setparams");
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: time_pps_setparams fails");
 		exit(1);
 	}
 
@@ -806,8 +898,8 @@ oncore_init_shmem(
 	)
 {
 	int i, l, n, fd, shmem_old_size, n1;
-	char *buf, Msg[160];
-	u_char *cp, *cp1, *shmem_old;
+	char Msg[160];
+	u_char *cp, *cp1, *buf, *shmem_old;
 	struct msg_desc *mp;
 	struct stat sbuf;
 	size_t shmem_length;
@@ -819,26 +911,26 @@ oncore_init_shmem(
 	*/
 
 	shmem_old = 0;
+	shmem_old_size = 0;
 	if ((fd = open(instance->shmem_fname, O_RDONLY)) < 0)
-		perror("LOAD:SHMEM");
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't open SHMEM file");
 	else {
 		fstat(fd, &sbuf);
 		shmem_old_size = sbuf.st_size;
-		shmem_old = (u_char *) malloc((unsigned) sbuf.st_size);
-		if (shmem_old == NULL) {
-			perror("malloc");
-			close(fd);
-			return;
+		if (shmem_old_size != 0) {
+			shmem_old = (u_char *) malloc((unsigned) sbuf.st_size);
+			if (shmem_old == NULL)
+				record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't malloc buffer for shmem_old");
+			else
+				read(fd, shmem_old, shmem_old_size);
 		}
-
-		read(fd, shmem_old, shmem_old_size);
 		close(fd);
 	}
 
 	/* OK, we now create the NEW SHMEM. */
 
 	if ((instance->shmemfd = open(instance->shmem_fname, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
-		perror(instance->shmem_fname);
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't open shmem");
 		return;
 	}
 
@@ -867,11 +959,10 @@ oncore_init_shmem(
 		n += (mp->len + 3);
 	}
 	shmem_length = n + 2;
-	fprintf(stderr, "ONCORE: SHMEM length: %ld bytes\n", (long) shmem_length);
 
 	buf = malloc(shmem_length);
 	if (buf == NULL) {
-		perror("malloc");
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't malloc buffer for shmem");
 		close(instance->shmemfd);
 		return;
 	}
@@ -907,20 +998,21 @@ oncore_init_shmem(
 	}
 
 	/* we now walk thru the two buffers (shmem_old and buf, soon to become shmem)
-	 * copying the data in shmem_old to buf.  When we are done we write it out
-	 * and free both buffers.
-	 * If the structures change (an addition or deletion) I will stop copying.
-	 * The two will be the same unless we add/subtract from the oncore_messages list
-	 * so this should work most of the time, and takes a lot less code than doing it right.
+	 * copying the data in shmem_old to buf.
+	 * When we are done we write it out and free both buffers.
+	 * If the structure sizes dont agree, I will not copy.
+	 * This could be due to an addition/deletion or a problem with the disk file.
 	 */
 
 	if (shmem_old) {
-		for (cp=buf+4, cp1=shmem_old+4; (n = 256*(*(cp-3)) + *(cp-2));	cp+=(n+3), cp1+=(n+3)) {
-			n1 = 256*(*(cp1-3)) + *(cp1-2);
-			if (n1 != n || strncmp(cp, cp1, 4))
-				break;
+		if (shmem_old_size == shmem_length) {
+			for (cp=buf+4, cp1=shmem_old+4; (n = 256*(*(cp-3)) + *(cp-2));	cp+=(n+3), cp1+=(n+3)) {
+				n1 = 256*(*(cp1-3)) + *(cp1-2);
+				if (n == 0 || n1 != n || strncmp((char *) cp, (char *) cp1, 4))
+					break;
 
-			memcpy(cp, cp1, (size_t) n);
+				memcpy(cp, cp1, (size_t) n);
+			}
 		}
 		free(shmem_old);
 	}
@@ -929,7 +1021,7 @@ oncore_init_shmem(
 	free(buf);
 
 	if (i != shmem_length) {
-		perror(instance->shmem_fname);
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: error writing shmem");
 		close(instance->shmemfd);
 		return;
 	}
@@ -948,7 +1040,7 @@ oncore_init_shmem(
 	}
 
 	sprintf(Msg, "SHMEM (size = %ld) is CONFIGURED and available as %s",
-		(long) shmem_length, instance->shmem_fname);
+		(u_long) shmem_length, instance->shmem_fname);
 	record_clock_stats(&(instance->peer->srcadr), Msg);
 }
 #endif /* ONCORE_SHMEM_STATUS */
@@ -1435,6 +1527,17 @@ oncore_get_timestamp(
 	if (instance->rsm.bad_almanac)
 		return;
 
+	/* Once the Almanac is valid, the M12+T does not produce valid UTC
+	 * immediately.
+	 * Wait for UTC offset decode valid, then wait one message more
+	 * so we are not off by 13 seconds after  reset.
+	 */
+
+	if (instance->count5) {
+		instance->count5--;
+		return;
+	}
+
 	j = instance->ev_serial;
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
@@ -1559,7 +1662,7 @@ oncore_get_timestamp(
 	current_params.clear_offset.tv_nsec = -dt2;
 
 	if (time_pps_setparams(instance->pps_h, &current_params))
-		perror("time_pps_setparams");
+		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Error doing time_pps_setparams");
 
 	/* have time from UNIX origin, convert to NTP origin. */
 
@@ -2548,13 +2651,13 @@ oncore_msg_Cj_id(
 
 	/* next, the Firmware Version and Revision numbers */
 
-	instance->version  = atoi(&instance->Cj[83]);
-	instance->revision = atoi(&instance->Cj[111]);
+	instance->version  = atoi((char *) &instance->Cj[83]);
+	instance->revision = atoi((char *) &instance->Cj[111]);
 
 	/* from model number decide which Oncore this is,
 		and then the number of channels */
 
-	for (cp=&instance->Cj[160]; *cp == ' '; cp++)	/* start right after 'Model #' */
+	for (cp= (char *) &instance->Cj[160]; *cp == ' '; cp++)   /* start right after 'Model #' */
 		;
 	cp1 = cp;
 	cp2 = Model;
@@ -2641,7 +2744,8 @@ oncore_msg_Cj_init(
 	size_t len
 	)
 {
-	char *cp, Cmd[20], Msg[160];
+	char *cp, Msg[160];
+	u_char Cmd[20];
 	int	mode;
 
 
@@ -2950,19 +3054,30 @@ oncore_check_almanac(
 		instance->rsm.bad_almanac = instance->BEHa[72]&0x1;
 		instance->rsm.bad_fix	  = instance->BEHa[72]&0x52;
 	} else if (instance->chan == 12) {
-		int bits1, bits2;
+		int bits1, bits2, bits3;
 
 		bits1 = (instance->BEHa[129]>>5) & 0x7; 	/* actually Ha */
 		bits2 = instance->BEHa[130];
 		instance->rsm.bad_almanac = (bits2 & 0x80);
 		instance->rsm.bad_fix	  = (bits2 & 0x8) || (bits1 == 0x2);
 					  /* too few sat     Bad Geom	  */
+
+		bits3 = instance->BEHa[141];	/* UTC parameters */
+		if (!instance->count5_set && (bits3 & 0xC0)) {
+			instance->count5 = 2;
+			instance->count5_set = 1;
+		}
 #if 0
-		fprintf(stderr, "ONCORE[%d]: DEBUG BITS: (%x %x), (%x %x),  %x %x %x %x %x\n",
+{
+		char Msg[160];
+
+		sprintf(Msg, "ONCORE[%d]: DEBUG BITS: (%x %x), (%x %x %x),  %x %x %x %x %x\n",
 		instance->unit,
-		instance->BEHa[129], instance->BEHa[130], bits1, bits2, instance->mode == MODE_0D,
+		instance->BEHa[129], instance->BEHa[130], bits1, bits2, bits3, instance->mode == MODE_0D,
 		instance->mode == MODE_2D, instance->mode == MODE_3D,
 		instance->rsm.bad_almanac, instance->rsm.bad_fix);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+}
 #endif
 	}
 }
@@ -3124,7 +3239,7 @@ oncore_load_almanac(
 
 #if 1
 	for (cp=instance->shmem+4; (n = 256*(*(cp-3)) + *(cp-2)); cp+=(n+3)) {
-		if (!strncmp(cp, "@@Cb", 4) &&
+		if (!strncmp((char *) cp, "@@Cb", 4) &&
 		    oncore_checksum_ok(cp, 33) &&
 		    (*(cp+4) == 4 || *(cp+4) == 5)) {
 			write(instance->ttyfd, cp, n);
@@ -3161,9 +3276,9 @@ oncore_load_almanac(
 	if (!instance->posn_set) {	/* if we input a posn use it, else from SHMEM */
 		record_clock_stats(&(instance->peer->srcadr), "Loading Posn from SHMEM");
 		for (cp=instance->shmem+4; (n = 256*(*(cp-3)) + *(cp-2));  cp+=(n+3)) {
-			if ((instance->chan == 6  && (!strncmp(cp, "@@Ba", 4) && oncore_checksum_ok(cp,  68))) ||
-			    (instance->chan == 8  && (!strncmp(cp, "@@Ea", 4) && oncore_checksum_ok(cp,  76))) ||
-			    (instance->chan == 12 && (!strncmp(cp, "@@Ha", 4) && oncore_checksum_ok(cp, 154)))) {
+			if ((instance->chan == 6  && (!strncmp((char *) cp, "@@Ba", 4) && oncore_checksum_ok(cp,  68))) ||
+			    (instance->chan == 8  && (!strncmp((char *) cp, "@@Ea", 4) && oncore_checksum_ok(cp,  76))) ||
+			    (instance->chan == 12 && (!strncmp((char *) cp, "@@Ha", 4) && oncore_checksum_ok(cp, 154)))) {
 				int ii, jj, kk;
 
 				instance->posn_set = 1;
@@ -3370,7 +3485,7 @@ oncore_set_posn(
 	)
 {
 	int	mode;
-	char	Cmd[20];
+	u_char	  Cmd[20];
 
 	/* Turn OFF position hold, it needs to be off to set position (for some units),
 	   will get set ON in @@Ea later */

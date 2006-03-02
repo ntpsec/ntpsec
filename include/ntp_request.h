@@ -290,6 +290,7 @@ struct resp_pkt {
 #define	INFO_FLAG_AUTHENABLE	0x20
 #define	INFO_FLAG_SEL_CANDIDATE	0x40
 #define	INFO_FLAG_SHORTLIST	0x80
+#define	INFO_FLAG_IBURST	0x100
 
 /*
  * Flags in the system information returns

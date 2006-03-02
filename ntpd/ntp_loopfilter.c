@@ -997,6 +997,24 @@ loop_config(
 #endif /* LOCKCLOCK */
 		break;
 
+	case LOOP_KERN_CLEAR:
+#ifndef LOCKCLOCK
+#ifdef KERNEL_PLL
+		/* Completely turn off the kernel time adjustments. */
+		if (pll_control) {
+			memset((char *)&ntv, 0, sizeof(ntv));
+			ntv.modes = MOD_BITS | MOD_FREQUENCY;
+			ntv.status = STA_UNSYNC;
+			ntp_adjtime(&ntv);
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_INFO,
+		  	    "kernel time sync disabled %04x",
+			    ntv.status);
+		   }
+#endif /* KERNEL_PLL */
+#endif /* LOCKCLOCK */
+		break;
+
 	/*
 	 * Special tinker variables for Ulrich Windl. Very dangerous.
 	 */
