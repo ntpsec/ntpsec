@@ -756,11 +756,16 @@ oncore_shutdown(
 
 	io_closeclock(&pp->io);
 
+	time_pps_destroy (instance->pps_h);
+
 	close(instance->ttyfd);
-	if (instance->ppsfd != -1)
+
+	if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd))
 		close(instance->ppsfd);
+
 	if (instance->shmemfd)
 		close(instance->shmemfd);
+
 	free(instance);
 }
 
