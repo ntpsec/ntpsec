@@ -94,6 +94,10 @@ MISC
 #endif /* not __STDC__ and not HAVE_PROTOTYPES */
 #endif /* P */
 
+#if !defined(HAVE_NTP_ADJTIME) && defined(HAVE___ADJTIMEX)
+# define ntp_adjtime __adjtimex
+#endif
+
 #if 0
 
 /*

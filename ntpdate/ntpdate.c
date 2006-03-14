@@ -53,10 +53,6 @@
 
 #include <arpa/inet.h>
 
-#ifdef __QNXNTO__
-# include "adjtime.h"
-#endif
-
 #ifdef SYS_VXWORKS
 # include "ioLib.h"
 # include "sockLib.h"
