@@ -28,6 +28,7 @@ noinst_HEADERS = \
 	ntp_control.h \
 	ntp_crypto.h \
 	ntp_datum.h \
+	ntp_debug.h \
 	ntp_filegen.h \
 	ntp_fp.h \
 	ntp_if.h \

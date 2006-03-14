@@ -549,9 +549,9 @@ record_raw_stats(
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
                 fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n",
-		    day, ulfptoa(&now, 3), stoa(srcadr), stoa(dstadr),
-		    ulfptoa(t1, 9), ulfptoa(t2, 9), ulfptoa(t3, 9),
-		    ulfptoa(t4, 9));
+			day, ulfptoa(&now, 3), stoa(srcadr), dstadr ? stoa(dstadr) : "-",
+			ulfptoa(t1, 9), ulfptoa(t2, 9), ulfptoa(t3, 9),
+			ulfptoa(t4, 9));
 		fflush(rawstats.fp);
 	}
 }
@@ -738,3 +738,15 @@ sock_hash(
 
 	return hashVal;
 }
+
+#if notyet
+/*
+ * ntp_exit - document explicitly that ntpd has exited
+ */
+void
+ntp_exit(int retval)
+{
+  msyslog(LOG_ERR, "EXITING with return code %d", retval);
+  exit(retval);
+}
+#endif

@@ -5,6 +5,7 @@
 #include "ntp_syslog.h"
 #include "ntp_fp.h"
 #include "ntp.h"
+#include "ntp_debug.h"
 #include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
@@ -67,12 +68,21 @@ extern	void	ntp_res_recv	P((void));
 extern	void	ntp_intres	P((void));
 
 /* ntp_io.c */
+typedef struct interface_info {
+	struct interface *interface;
+	u_char       action;
+} interface_info_t;
+
+typedef void (*interface_receiver_t)(void *, interface_info_t *);
+
+extern  void    interface_enumerate P((interface_receiver_t, void *));
 extern	struct interface *findinterface P((struct sockaddr_storage *));
 extern  struct interface *findbcastinter P((struct sockaddr_storage *));
 extern  void	enable_broadcast P((struct interface *, struct sockaddr_storage *));
 extern  void	enable_multicast_if P((struct interface *, struct sockaddr_storage *));
 extern	void	interface_dump	 P((struct interface *));
 
+extern  void    interface_update P((interface_receiver_t, void *));
 extern	void	init_io 	P((void));
 extern	void	input_handler	P((l_fp *));
 extern	void	io_clr_stats	P((void));
@@ -81,7 +91,6 @@ extern	void	io_unsetbclient P((void));
 extern	void	io_multicast_add P((struct sockaddr_storage));
 extern	void	io_multicast_del P((struct sockaddr_storage));
 extern	void	kill_asyncio	 P((int));
-
 extern	void	sendpkt 	P((struct sockaddr_storage *, struct interface *, int, struct pkt *, int));
 #ifdef HAVE_SIGNALED_IO
 extern	void	wait_for_signal P((void));
@@ -114,21 +123,26 @@ extern	u_long	sys_tai;
 extern	void	init_mon	P((void));
 extern	void	mon_start	P((int));
 extern	void	mon_stop	P((int));
-extern	void	ntp_monitor P((struct recvbuf *));
+extern	void	ntp_monitor     P((struct recvbuf *));
+extern  void    ntp_monclearinterface P((struct interface *interface));
 
 /* ntp_peer.c */
 extern	void	init_peer	P((void));
 extern	struct peer *findexistingpeer P((struct sockaddr_storage *, struct peer *, int));
 extern	struct peer *findpeer	P((struct sockaddr_storage *, struct interface *, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
+extern  void         set_peerdstadr       P((struct peer *peer, struct interface *interface));
+extern  struct interface *select_peerinterface P((struct peer *, struct sockaddr_storage *, struct interface *, u_char));
 extern	struct peer *newpeer	P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));
 extern	struct peer *peer_config P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *));
 extern	void	peer_reset	P((struct peer *));
 extern	int 	peer_unconfig	P((struct sockaddr_storage *, struct interface *, int));
+extern  void    refresh_all_peerinterfaces P((void));
 extern	void	unpeer		P((struct peer *));
 extern	void	clear_all	P((void));
+
 #ifdef OPENSSL
 extern	void	expire_all	P((void));
 #endif /* OPENSSL */
@@ -160,6 +174,7 @@ extern struct value tai_leap;
 /* ntp_proto.c */
 extern	void	transmit	P((struct peer *));
 extern	void	receive 	P((struct recvbuf *));
+extern  void    peer_crypto_clear P((struct peer *peer));
 extern	void	peer_clear	P((struct peer *, char *));
 extern	void 	process_packet	P((struct peer *, struct pkt *));
 extern	void	clock_select	P((void));
@@ -202,6 +217,8 @@ extern	void	init_timer	P((void));
 extern	void	reinit_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
+extern  void    timer_interfacetimeout P((u_long));
+
 #ifdef OPENSSL
 extern	char	*sys_hostname;
 extern	l_fp	sys_revoketime;

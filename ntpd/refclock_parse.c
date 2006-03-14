@@ -5207,10 +5207,7 @@ trimbletsip_message(
 		}
 		else
 		{
-#ifdef DEBUG
-			if (debug)
-				printf("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd);
-#endif
+			DPRINTF(1, ("TRIMBLE UNKNOWN COMMAND 0x%02x\n", cmd));
 			return;
 		}
 

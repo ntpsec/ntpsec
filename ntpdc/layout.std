@@ -410,6 +410,27 @@ offsetof(calcnt) = 48
 offsetof(errcnt) = 52
 offsetof(stbcnt) = 56
 
+sizeof(struct info_if_stats) = 140
+offsetof(unaddr) = 0
+offsetof(unbcast) = 16
+offsetof(unmask) = 32
+offsetof(v6_flag) = 48
+offsetof(name) = 52
+offsetof(family) = 84
+offsetof(flags) = 88
+offsetof(last_ttl) = 92
+offsetof(num_mcast) = 96
+offsetof(received) = 100
+offsetof(sent) = 104
+offsetof(notsent) = 108
+offsetof(uptime) = 112
+offsetof(scopeid) = 116
+offsetof(ifindex) = 120
+offsetof(ifnum) = 124
+offsetof(ignore_packets) = 128
+offsetof(peercnt) = 132
+offsetof(action) = 136
+
 sizeof(struct info_dns_assoc) = 32
 offsetof(peeraddr) = 0
 offsetof(associd) = 4

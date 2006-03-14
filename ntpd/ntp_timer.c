@@ -34,6 +34,8 @@
  * procedure to do cleanup and print a message.
  */
 
+volatile u_long interface_interval = 300;     /* update interface every 5 minutes as default */
+	  
 /*
  * Alarm flag.	The mainline code imports this.
  */
@@ -46,6 +48,7 @@ static	u_long adjust_timer;		/* second timer */
 static	u_long keys_timer;		/* minute timer */
 static	u_long hourly_timer;		/* hour timer */
 static	u_long huffpuff_timer;		/* huff-n'-puff timer */
+static  u_long interface_timer;	        /* interface update timer */
 #ifdef OPENSSL
 static	u_long revoke_timer;		/* keys revoke timer */
 u_char	sys_revoke = KEY_REVOKE;	/* keys revoke timeout (log2 s) */
@@ -150,6 +153,7 @@ init_timer(void)
 	adjust_timer = 1;
 	hourly_timer = HOUR;
 	huffpuff_timer = 0;
+	interface_timer = 0;
 	current_time = 0;
 	timer_overflows = 0;
 	timer_xmtcalls = 0;
@@ -336,6 +340,18 @@ timer(void)
 #endif /* OPENSSL */
 
 	/*
+	 * interface update timer
+	 */
+	if (interface_interval && interface_timer <= current_time) {
+		timer_interfacetimeout(current_time + interface_interval);
+#ifdef DEBUG
+	  if (debug)
+	    printf("timer: interface update\n");
+#endif
+	  interface_update(NULL, NULL);
+	}
+	
+	/*
 	 * Finally, call the hourly routine.
 	 */
 	if (hourly_timer <= current_time) {
@@ -371,6 +387,12 @@ alarming(
 #endif /* VMS */
 }
 #endif /* SYS_WINNT */
+
+void
+timer_interfacetimeout(u_long timeout)
+{
+	interface_timer = timeout;
+}
 
 
 /*
