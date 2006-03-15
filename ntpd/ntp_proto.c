@@ -1498,9 +1498,6 @@ peer_crypto_clear(
 		EVP_PKEY_free(peer->pkey);
 	peer->pkey = NULL;
 
-	memset(&peer->first, 0, sizeof(peer->first));
-	memset(&peer->last, 0, sizeof(peer->last));
-
 	peer->digest = NULL;	/* XXX MEMLEAK? check whether this needs to be freed in any way - never was freed */
 
 	if (peer->subject != NULL)
