@@ -22,10 +22,22 @@
 			<dd>The broadcast and multicast modes require a special calibration to determine the network delay between the local and remote servers. Ordinarily, this is done automatically by the initial protocol exchanges between the client and server. In some cases, the calibration procedure may fail due to network or server access controls, for example. This command specifies the default delay to be used under these circumstances. Typically (for Ethernet), a number between 0.003 and 0.007 seconds is appropriate. The default when this command is not used is 0.004 seconds.
 			<dt><tt>calldelay <i>delay</i></tt>
 			<dd>This option controls the delay in seconds between the first and second packets sent in burst or iburst mode to allow additional time for a modem or ISDN call to complete.
-			<dt><tt>driftfile <i>driftfile</i></tt>
+			<dt><tt>driftfile <i>driftfile</i> [<i>
+		minutes </i> [<i> tolerance </i>] ]</tt>
 			<dd>This command specifies the complete path and name of the file used to record the frequency of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency and then updated once per hour with the current frequency computed by the daemon. If the file name is specified, but the file itself does not exist, the starts with an initial frequency of zero and creates the file when writing it for the first time. If this command is not given, the daemon will always start with an initial frequency of zero.
 				<p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
-			<dt><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
+			
+<p>The two optional values determine how often the file is written, and
+are particuarly useful when is it desirable to avoid spinning up the
+disk unnecessarily.  The parameter <tt>minutes</tt> is how often the file will be written.  If omitted or less
+than 1, the interval will be 60 minutes (one hour).  The parameter <tt>tolerance</tt> is the
+threshold to skip writing the new value.  If the new value is within
+<tt>tolerance</tt> percent of the last value written (compared out to 3
+decimal places), the write will be
+skipped. The default is 0.0, which means that the write will occur
+unless the current and previous values are the same.  A tolerance of
+.1 equates roughly to a difference in the 2nd decimal place.</p>
+<dt><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
 				<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt>
 			<dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
 				<dl>
