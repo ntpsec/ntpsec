@@ -543,7 +543,7 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			 * by the crypto machinery
 			 */
 #ifdef DEBUG
-			msyslog(LOG_INFO, "set_peerdstadr: disconnectiong peer from interface - clearing crypto");
+			msyslog(LOG_INFO, "set_peerdstadr: disconnecting peer from interface - clearing crypto");
 #endif
 			peer_crypto_clear(peer);
 		}
