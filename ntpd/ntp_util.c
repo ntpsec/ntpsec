@@ -53,6 +53,9 @@ static	char *key_file_name;
  */
 static	char *stats_drift_file;
 static	char *stats_temp_file;
+int stats_write_period = 3600;	/* # of seconds between writes. */
+double stats_write_tolerance = 0;
+static double prev_drift_comp = 99999.;
 
 /*
  * Statistics file stuff
@@ -122,7 +125,7 @@ init_util(void)
  * hourly_stats - print some interesting stats
  */
 void
-hourly_stats(void)
+write_stats(void)
 {
 	FILE *fp;
 
@@ -206,6 +209,11 @@ hourly_stats(void)
 
 	
 	record_sys_stats();
+	if ((u_long)(fabs(prev_drift_comp - drift_comp) * 1e9) <=
+	    (u_long)(fabs(stats_write_tolerance * drift_comp) * 1e9)) {
+	     return;
+	}
+	prev_drift_comp = drift_comp;
 	if (stats_drift_file != 0) {
 		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
 			msyslog(LOG_ERR, "can't open %s: %m",
@@ -336,6 +344,7 @@ stats_config(
 			break;
 		}
 		fclose(fp);
+		prev_drift_comp = old_drift / 1e6;
 		msyslog(LOG_INFO,
 		    "frequency initialized %.3f PPM from %s",
 			old_drift, stats_drift_file);
