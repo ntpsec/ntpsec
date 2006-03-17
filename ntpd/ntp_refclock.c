@@ -890,6 +890,7 @@ refclock_setup(
 	ttyp->c_lflag = ICANON;
 	if (lflags & LDISC_RAW) {
 		ttyp->c_lflag = 0;
+		ttyp->c_iflag = 0;
 		ttyp->c_cc[VMIN] = 1;
 	}
 	if (lflags & LDISC_ECHO)
@@ -952,6 +953,7 @@ refclock_setup(
 	ttyp->c_lflag = ICANON;
 	if (lflags & LDISC_RAW) {
 		ttyp->c_lflag = 0;
+		ttyp->c_iflag = 0;
 		ttyp->c_cc[VMIN] = 1;
 	}
 	if (ioctl(fd, TCSETA, ttyp) < 0) {
