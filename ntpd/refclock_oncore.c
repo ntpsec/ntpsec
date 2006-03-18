@@ -936,6 +936,9 @@ oncore_init_shmem(
 
 	if ((instance->shmemfd = open(instance->shmem_fname, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
 		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't open shmem");
+		if (shmem_old)
+			free(shmem_old);
+
 		return;
 	}
 
@@ -969,6 +972,9 @@ oncore_init_shmem(
 	if (buf == NULL) {
 		record_clock_stats(&(instance->peer->srcadr), "ONCORE: Can't malloc buffer for shmem");
 		close(instance->shmemfd);
+		if (shmem_old)
+			free(shmem_old);
+
 		return;
 	}
 
