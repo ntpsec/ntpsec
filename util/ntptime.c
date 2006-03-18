@@ -401,8 +401,8 @@ sprintb(
 	else
 	    (void)sprintf(buf, "0x%x", v);
 	cp = buf + strlen(buf);
-	bits++;
 	if (bits) {
+		bits++;
 		*cp++ = ' ';
 		*cp++ = '(';
 		while ((i = *bits++) != 0) {
