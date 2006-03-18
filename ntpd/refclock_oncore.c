@@ -2228,7 +2228,7 @@ oncore_msg_BaEaHa(
 		default:	i = 0; break;
 		}
 
-		if (i) {
+		if (i && smp) {
 			i *= (len+6);
 			smp[i + 2]++;
 			memcpy(&smp[i+3], buf, (size_t) (len+3));
