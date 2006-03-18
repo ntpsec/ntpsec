@@ -3565,16 +3565,19 @@ crypto_key(
 	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
 		msyslog(LOG_ERR, "crypto_key: no data %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if ((ptr = strrchr(ptr, '.')) == NULL) {
 		msyslog(LOG_ERR, "crypto_key: no filestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if (sscanf(++ptr, "%u", fstamp) != 1) {
 		msyslog(LOG_ERR, "crypto_key: invalid timestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 
