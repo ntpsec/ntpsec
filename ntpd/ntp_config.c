@@ -870,6 +870,16 @@ getconfig(
 			    stats_config(STATS_FREQ_FILE, tokens[1]);
 			else
 			    stats_config(STATS_FREQ_FILE, (char *)0);
+			stats_write_period = stats_write_tolerance = 0;
+			if (ntokens >= 3)
+			     stats_write_period = 60 * atol(tokens[2]);
+			if (stats_write_period <= 0)
+			     stats_write_period = 3600;
+			if (ntokens >= 4) {
+			     double ftemp;
+			     sscanf(tokens[3], "%lf", &ftemp);
+			     stats_write_tolerance = ftemp / 100;
+			}
 			break;
 	
 		    case CONFIG_PIDFILE:

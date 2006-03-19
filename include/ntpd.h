@@ -209,7 +209,7 @@ extern	l_fp	sys_revoketime;
 
 /* ntp_util.c */
 extern	void	init_util	P((void));
-extern	void	hourly_stats	P((void));
+extern	void	write_stats	P((void));
 extern	void	stats_config	P((int, const char *));
 extern	void	record_peer_stats P((struct sockaddr_storage *, int, double, double, double, double));
 extern	void	record_loop_stats P((double, double, double, double, int));
@@ -421,6 +421,8 @@ extern u_long	timer_xmtcalls;
 
 /* ntp_util.c */
 extern int	stats_control;		/* write stats to fileset? */
+extern int	stats_write_period;	/* # of seconds between writes. */
+extern double	stats_write_tolerance;
 
 /* ntpd.c */
 extern volatile int debug;		/* debugging flag */
