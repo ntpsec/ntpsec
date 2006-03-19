@@ -527,8 +527,13 @@ hack_restrict(
 				rl6->addr6 = addr6;
 				rl6->mask6 = mask6;
 				rl6->mflags = (u_short)mflags;
-				rl6->next = rlprev6->next;
-				rlprev6->next = rl6;
+				if (rlprev6) {
+					rl6->next = rlprev6->next;
+					rlprev6->next = rl6;
+				} else {
+					rl6->next = restrictlist6;
+					restrictlist6 = rl6;
+				}
 				restrictcount6++;
 			}
 			if ((rl6->flags ^ (u_short)flags) &
@@ -564,7 +569,11 @@ hack_restrict(
 			if (rl6 != 0 &&
 			    !IN6_IS_ADDR_UNSPECIFIED(&rl6->addr6)
 			    && !(rl6->mflags & RESM_INTERFACE)) {
-				rlprev6->next = rl6->next;
+				if (rlprev6) {
+					rlprev6->next = rl6->next;
+				} else {
+					restrictlist6 = rl6->next;
+				}
 				restrictcount6--;
 				if (rl6->flags & RES_LIMITED) {
 					res_limited_refcnt6--;
