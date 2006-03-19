@@ -166,7 +166,7 @@ leitch_poll(
 	if (debug)
 	    fprintf(stderr, "leitch_poll()\n");
 #endif
-	if (unit > MAXUNITS) {
+	if (unit >= MAXUNITS) {
 		/* XXXX syslog it */
 		return;
 	}

@@ -818,7 +818,7 @@ send_slow(
 	}
 
 	/* Copy in the command to be sent. */
-	while(*s) { up->cmdqueue[CMDQUEUELEN - spaceleft--] = *s++; }
+	while(*s && spaceleft > 0) { up->cmdqueue[CMDQUEUELEN - spaceleft--] = *s++; }
 
 	return(1);
 }

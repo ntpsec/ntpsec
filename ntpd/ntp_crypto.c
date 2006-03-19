@@ -3565,16 +3565,19 @@ crypto_key(
 	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
 		msyslog(LOG_ERR, "crypto_key: no data %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if ((ptr = strrchr(ptr, '.')) == NULL) {
 		msyslog(LOG_ERR, "crypto_key: no filestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if (sscanf(++ptr, "%u", fstamp) != 1) {
 		msyslog(LOG_ERR, "crypto_key: invalid timestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 
@@ -3656,16 +3659,19 @@ crypto_cert(
 	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
 		msyslog(LOG_ERR, "crypto_cert: no data %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if ((ptr = strrchr(ptr, '.')) == NULL) {
 		msyslog(LOG_ERR, "crypto_cert: no filestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 	if (sscanf(++ptr, "%u", &fstamp) != 1) {
 		msyslog(LOG_ERR, "crypto_cert: invalid filestamp %s\n",
 		    filename);
+		(void)fclose(str);
 		return (NULL);
 	}
 
@@ -3675,6 +3681,7 @@ crypto_cert(
 	if (!PEM_read(str, &name, &header, &data, &len)) {
 		msyslog(LOG_ERR, "crypto_cert %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
+		(void)fclose(str);
 		return (NULL);
 	}
 	free(header);
@@ -3683,6 +3690,7 @@ crypto_cert(
 		    name);
 		free(name);
 		free(data);
+		(void)fclose(str);
 		return (NULL);
 	}
 	free(name);
@@ -3692,6 +3700,7 @@ crypto_cert(
 	 */
 	ret = cert_parse(data, len, fstamp);
 	free(data);
+	(void)fclose(str);
 	if (ret == NULL)
 		return (NULL);
 
