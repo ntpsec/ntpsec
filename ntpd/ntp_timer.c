@@ -46,7 +46,7 @@ volatile int alarm_flag;
  */
 static	u_long adjust_timer;		/* second timer */
 static	u_long keys_timer;		/* minute timer */
-static	u_long hourly_timer;		/* hour timer */
+static	u_long stats_timer;		/* stats timer */
 static	u_long huffpuff_timer;		/* huff-n'-puff timer */
 static  u_long interface_timer;	        /* interface update timer */
 #ifdef OPENSSL
@@ -151,7 +151,7 @@ init_timer(void)
 	alarm_flag = 0;
 	alarm_overflow = 0;
 	adjust_timer = 1;
-	hourly_timer = HOUR;
+	stats_timer = 0;
 	huffpuff_timer = 0;
 	interface_timer = 0;
 	current_time = 0;
@@ -352,11 +352,12 @@ timer(void)
 	}
 	
 	/*
-	 * Finally, call the hourly routine.
+	 * Finally, periodically write stats.
 	 */
-	if (hourly_timer <= current_time) {
-		hourly_timer += HOUR;
-		hourly_stats();
+	if (stats_timer <= current_time) {
+	     if (stats_timer != 0)
+		  write_stats();
+	     stats_timer += stats_write_period;
 	}
 }
 

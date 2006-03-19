@@ -990,6 +990,7 @@ finish(
 {
 
 	msyslog(LOG_NOTICE, "ntpd exiting on signal %d", sig);
+	write_stats();
 #ifdef HAVE_DNSREGISTRATION
 	if (mdns != NULL)
 	DNSServiceRefDeallocate(mdns);

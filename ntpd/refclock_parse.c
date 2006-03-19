@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A
  *
- * refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A
+ * refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -181,7 +181,7 @@
 #include "ascii.h"
 #include "ieee754io.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.64 2005/11/09 20:44:47 kardel RELEASE_20051109_A";
+static char rcsid[] = "refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -4228,7 +4228,7 @@ gps16x_message(
 						strncpy(p, "\"", BUFFER_SIZE(buffer, p));
 						set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 						
-						for (i = MIN_SVNO; i <= MAX_SVNO; i++)
+						for (i = MIN_SVNO; i < MAX_SVNO; i++)
 						{
 							p = buffer;
 							snprintf(p, BUFFER_SIZE(buffer, p), "gps_cfg[%d]=\"[0x%x] ", i, cfgh.cfg[i]);
@@ -4940,7 +4940,7 @@ trimble_check(
 
 	poll_poll(parse->peer);	/* emit query string and re-arm timer */
 	
-	if (t->qtracking)
+	if (t && t->qtracking)
 	{
 		u_long oldsats = t->ltrack & ~t->ctrack;
 		
@@ -4951,14 +4951,15 @@ trimble_check(
 		{
 			int i;
 				
-			for (i = 0; oldsats; i++)
+			for (i = 0; oldsats; i++) {
 				if (oldsats & (1 << i))
 					{
 						sendcmd(&buf, CMD_CSTATTRACK);
 						sendbyte(&buf, i+1);	/* old sat */
 						sendetx(&buf, parse);
 					}
-			oldsats &= ~(1 << i);
+				oldsats &= ~(1 << i);
+			}
 		}
 						
 		sendcmd(&buf, CMD_CSTATTRACK);
@@ -5668,6 +5669,12 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.66  2006/03/18 00:45:30  kardel
+ * coverity fixes found in NetBSD coverity scan
+ *
+ * Revision 4.65  2006/01/26 06:08:33  kardel
+ * output errno on PPS setup failure
+ *
  * Revision 4.64  2005/11/09 20:44:47  kardel
  * utilize full PPS timestamp resolution from PPS API
  *

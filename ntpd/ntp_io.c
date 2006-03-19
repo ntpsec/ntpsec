@@ -372,7 +372,7 @@ init_io(void)
 	any6_interface = NULL;
 
 #ifdef REFCLOCK
-	refio = 0;
+	refio = NULL;
 #endif
 
 #if defined(HAVE_SIGNALED_IO)
@@ -2514,7 +2514,10 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	{
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
-		fromlen = sizeof from;
+		if (rb != NULL)
+			freerecvbuf(rb);
+
+		fromlen = sizeof(from);
 		buflen = recvfrom(fd, buf, sizeof(buf), 0,
 				(struct sockaddr*)&from, &fromlen);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
@@ -2625,12 +2628,6 @@ input_handler(
 
 	n = select(maxactivefd+1, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
 
-#ifdef REFCLOCK
-	/*
-	 * Check out the reference clocks first, if any
-	 */
-
-
 	/*
 	 * If there are no packets waiting just return
 	 */
@@ -2659,11 +2656,16 @@ input_handler(
 
 	++handler_pkts;
 
-	if (refio != 0)
+#ifdef REFCLOCK
+	/*
+	 * Check out the reference clocks first, if any
+	 */
+
+	if (refio != NULL)
 	{
 		register struct refclockio *rp;
 
-		for (rp = refio; rp != 0; rp = rp->next)
+		for (rp = refio; rp != NULL; rp = rp->next)
 		{
 			fd = rp->fd;
 
@@ -3145,14 +3147,14 @@ io_closeclock(
 	{
 		register struct refclockio *rp;
 
-		for (rp = refio; rp != 0; rp = rp->next)
+		for (rp = refio; rp != NULL; rp = rp->next)
 		    if (rp->next == rio)
 		    {
 			    rp->next = rio->next;
 			    break;
 		    }
 
-		if (rp == 0)
+		if (rp == NULL)
 			return;
 	}
 
