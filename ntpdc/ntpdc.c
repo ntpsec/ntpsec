@@ -472,6 +472,8 @@ openhost(
 	}
 	if (a_info != 0) {
 		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
+		if (ai != NULL)
+			freeaddrinfo(ai);
 		return 0;
 	}
 
@@ -551,7 +553,8 @@ openhost(
 		    ai->ai_addrlen) == -1)
 #endif /* SYS_VXWORKS */
 	    error("connect", "", "");
-	freeaddrinfo(ai);
+	if (ai != NULL)
+		freeaddrinfo(ai);
 	havehost = 1;
 	req_pkt_size = REQ_LEN_NOMAC;
 	impl_ver = IMPL_XNTPD;
