@@ -440,8 +440,13 @@ hack_restrict(
 				rl->mask = mask;
 				rl->mflags = (u_short)mflags;
 
-				rl->next = rlprev->next;
-				rlprev->next = rl;
+				if (rlprev == NULL) {
+					rl->next = restrictlist;
+					restrictlist = rl;
+				} else {
+					rl->next = rlprev->next;
+					rlprev->next = rl;
+				}
 				restrictcount++;
 			}
 			if ((rl->flags ^ (u_short)flags) &
@@ -477,7 +482,11 @@ hack_restrict(
 			if (rl != 0
 			    && rl->addr != htonl(INADDR_ANY)
 			    && !(rl->mflags & RESM_INTERFACE)) {
-				rlprev->next = rl->next;
+				if (rlprev != NULL) {
+					rlprev->next = rl->next;
+				} else {
+					restrictlist = rl->next;
+				}
 				restrictcount--;
 				if (rl->flags & RES_LIMITED) {
 					res_limited_refcnt--;
