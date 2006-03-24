@@ -609,7 +609,7 @@ ntpdatemain (
 		}
 		tot_recvbufs = full_recvbuffs();	/* get received buffers */
 
-		if (!was_alarmed && tot_recvbufs > 0) {
+		if (!was_alarmed && tot_recvbufs == 0) {
 			/*
 			 * Nothing to do.	 Wait for something.
 			 */
