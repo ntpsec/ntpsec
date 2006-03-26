@@ -130,3 +130,4 @@ stamp-h.in
 util/Makefile.in
 version
 util/ntp-keygen.1
+sntp/libopts/*

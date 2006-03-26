@@ -37,6 +37,7 @@ prog-title     = "vendor-specific NTP query program";
 homerc         =  $HOME, ".";
 long-opts;
 config-header  = config.h;
+argument       = '[ host ...]';
 
 #ifndef __windows__
 rcfile         = ".ntprc";

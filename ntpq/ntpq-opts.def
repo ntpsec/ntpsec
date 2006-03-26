@@ -37,6 +37,7 @@ prog-title     = "standard NTP query program";
 homerc         =  $HOME, ".";
 long-opts;
 config-header  = config.h;
+argument       = '[ host ...]';
 
 #ifndef __windows__
 rcfile         = ".ntprc";
@@ -90,6 +91,8 @@ flag = {
 	_EndOfDoc_;
 };
 
+#include debug-opt.def
+
 flag = {
     name      = peers;
     value     = p;
@@ -109,31 +112,6 @@ flag = {
     doc = <<-  _EndOfDoc_
 	Force ntpq to operate in interactive mode.  Prompts will be written
 	to the standard output and commands read from the standard input.
-	_EndOfDoc_;
-};
-
-flag = {
-    name      = debug-level;
-    value     = d;
-    max       = NOLIMIT;
-    descrip   = "Increase output debug message level";
-    doc = <<-  _EndOfDoc_
-	Increase the debugging message output level.  Can be supplied multiple times.
-	_EndOfDoc_;
-};
-
-flag = {
-    name      = set-debug-level;
-    value     = D;
-    max       = NOLIMIT;
-    descrip   = "Set the output debug message level";
-    arg-type  = string;
-    flag-code = <<- _EOS_
-	DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
-	_EOS_;
-    doc = <<-  _EndOfDoc_
-	Set the output debugging level.  Can be supplied multiple times,
-	but each overrides the previous value(s).
 	_EndOfDoc_;
 };
 
