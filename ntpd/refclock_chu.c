@@ -1231,7 +1231,7 @@ chu_a(
 	}
 	i = -(2 * k);
 	for (j = 0; j < nchar; j++) {
-		if (i < 0 || i > 19) {
+		if (i < 0 || i > 18) {
 			i += 2;
 			continue;
 		}
