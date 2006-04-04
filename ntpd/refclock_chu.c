@@ -1112,7 +1112,7 @@ chu_b(
 		up->tstamp[up->ntstamp] = up->cstamp[i];
 		L_SUB(&up->tstamp[up->ntstamp], &offset);
 		L_ADD(&offset, &up->charstamp);
-		if (up->ntstamp < MAXSTAGE) 
+		if (up->ntstamp < MAXSTAGE - 1) 
 			up->ntstamp++;
 	}
 }
@@ -1216,7 +1216,7 @@ chu_a(
 			up->tstamp[up->ntstamp] = up->cstamp[i];
 			L_SUB(&up->tstamp[up->ntstamp], &offset);
 			L_ADD(&offset, &up->charstamp);
-			if (up->ntstamp < MAXSTAGE) 
+			if (up->ntstamp < MAXSTAGE - 1) 
 				up->ntstamp++;
 		}
 		while (temp > up->prevsec) {
@@ -1231,7 +1231,7 @@ chu_a(
 	}
 	i = -(2 * k);
 	for (j = 0; j < nchar; j++) {
-		if (i < 0 || i > 19) {
+		if (i < 0 || i > 18) {
 			i += 2;
 			continue;
 		}

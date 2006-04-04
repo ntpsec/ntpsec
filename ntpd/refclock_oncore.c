@@ -2218,7 +2218,7 @@ oncore_msg_BaEaHa(
 		case 6:   smp = &instance->shmem[instance->shmem_Ba]; break;
 		case 8:   smp = &instance->shmem[instance->shmem_Ea]; break;
 		case 12:  smp = &instance->shmem[instance->shmem_Ha]; break;
-		default:  smp = (u_char) 0;			      break;
+		default:  smp = (u_char *) NULL;		      break;
 		}
 
 		switch (instance->mode) {
@@ -2228,7 +2228,7 @@ oncore_msg_BaEaHa(
 		default:	i = 0; break;
 		}
 
-		if (i && smp) {
+		if (i && smp != NULL) {
 			i *= (len+6);
 			smp[i + 2]++;
 			memcpy(&smp[i+3], buf, (size_t) (len+3));

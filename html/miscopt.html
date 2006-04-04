@@ -61,8 +61,9 @@ unless the current and previous values are the same.  A tolerance of
 			<dt><tt>includefile <i>includefile</i></tt>
 			<dd>This command allows additional configuration commands to be included from a separate file. Include files may be nested to a depth of five; upon reaching the end of any include file, command processing resumes in the previous configuration file. This option is useful for sites that run <tt>ntpd</tt> on multiple hosts, with (mostly) common options (e.g., a restriction list).
 			<dt><tt>logconfig <i>configkeyword</i></tt>
-			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. By default, all output is turned on. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).
-				<p>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class.Thus, a minimal log configuration could look like this:</p>
+			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).
+				<p>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class. By default, <tt>logconfig</tt> output is set to <tt>allsync</tt>.
+			<p>Thus, a minimal log configuration could look like this:</p>
 				<p><tt>logconfig=syncstatus +sysevents</tt></p>
 				<dl>
 					<dd>
@@ -71,14 +72,13 @@ unless the current and previous values are the same.  A tolerance of
 				</dl>
 			
 			<dd>
-				<p><tt>logconfig=syncall +clockall</tt></p>
+				<p><tt>logconfig=allsync +allclock</tt></p>
 				<dl>
 					<dd>
 						<p>This configuration will list all clock information and synchronization information. All other events and messages about peers, system events and so on is suppressed.</p>
 					
 				</dl>
-			<dd>
-				<p><tt>logfile <i>logfile</i></tt></p>
+				<dt><tt>logfile <i>logfile</i></tt>
 				<dl>
 					<dd>
 						<p>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.</p>
