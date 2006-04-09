@@ -1,6 +1,9 @@
 # version=Protocol.Major.Minor
 # odd minor numbers are for -dev, even minor numbers are for -stable
-version=4.2.1
+proto=4
+major=2
+minor=1
+version=${proto}.${major}.${minor}
 # Point.  3 cases:
 # - Numeric values increment
 # - empty 'increments' to 1
