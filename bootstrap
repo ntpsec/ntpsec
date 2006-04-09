@@ -3,7 +3,7 @@
 #  This "bootstrap" script performs various pre-autoreconf actions
 #  that are required after pulling fresh sources from the repository.
 #
-#  NOTE:  THIS FILE DEFINES THE NTP VERSION NUMBER
+#  NOTE:  THE NTP VERSION NUMBER COMES FROM packageinfo.sh
 #
 #  all other instances of it anywhere in the source base have propagated
 #  from this one source.
