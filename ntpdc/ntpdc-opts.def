@@ -24,33 +24,10 @@ autogen definitions options;
  *             Boston,  MA  02111-1307, USA.
  */
 
-copyright = {
-    date  = "1970-2004";
-    owner = "ntp.org";
-    eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
-    type  = bsd;
-};
-
-
 prog-name      = "ntpdc";
 prog-title     = "vendor-specific NTP query program";
-homerc         =  $HOME, ".";
-long-opts;
-config-header  = config.h;
-argument       = '[ host ...]';
 
-#ifndef __windows__
-rcfile         = ".ntprc";
-#else
-rcfile         = "ntp.ini";
-#endif
-
-environrc;
-
-version         = `
-eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
-[ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
-echo $VERSION`;
+#include copyright.def
 
 test-main;
 

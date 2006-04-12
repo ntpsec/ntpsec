@@ -1,0 +1,24 @@
+/* -*- Mode: Text -*- */
+
+copyright = {
+    date  = "1970-2004";
+    owner = "ntp.org";
+    eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
+    type  = bsd;
+};
+
+#ifndef __windows__
+rcfile         = ".ntprc";
+#else
+rcfile         = "ntp.ini";
+#endif
+
+homerc         =  $HOME, ".";
+long-opts;
+config-header  = config.h;
+environrc;
+
+version         = `
+eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
+[ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
+echo $VERSION`;

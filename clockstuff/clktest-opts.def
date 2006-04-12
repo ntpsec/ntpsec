@@ -1,0 +1,228 @@
+/* -*- Mode: Text -*- */
+
+autogen definitions options;
+
+/*
+ *   $Id: opts.def,v 3.34 2004/10/15 01:48:34 bkorb Exp $
+ *
+ *  NTP copyright 1970-2004 Someone
+ *
+ *  NTP is free software.
+ *  You may redistribute it and/or modify it under the terms of the
+ *  GNU General Public License, as published by the Free Software
+ *  Foundation; either version 2, or (at your option) any later version.
+ *
+ *  AutoGen is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with AutoGen.  See the file "COPYING".  If not,
+ *  write to:  The Free Software Foundation, Inc.,
+ *             59 Temple Place - Suite 330,
+ *             Boston,  MA  02111-1307, USA.
+ */
+
+prog-name      = "clktest";
+prog-title     = "test the clock line discipline";
+argument       = '<tty_device>';
+
+#include copyright.def
+
+detail = <<- _EODetail_
+	Clktest can be used to test the clock line discipline (CLKLDISC,
+	it must be available), and to take a look at radio clocks attached
+	to a serial port.
+	_EODetail_;
+
+test-main;
+
+export = <<- _EOExport_
+	#include <stdio.h>
+	#include <ctype.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <signal.h>
+	#include <netinet/in.h>
+	#include <sys/ioctl.h>
+	#include <sys/time.h>
+	#include <sys/file.h>
+	#include <sgtty.h>
+
+	#include "../include/ntp_fp.h"
+	#include "../include/ntp.h"
+	#include "../include/ntp_unixtime.h"
+
+	#ifdef CLKLDISC
+	# define DEFMAGIC	'\r'
+	#endif
+
+	#ifdef CLKLDISC
+	# ifdef STREAM
+	#  include <stropts.h>
+	#  ifdef HAVE_SYS_CLKDEFS_H
+	#   include <sys/clkdefs.h>
+	#  endif
+	#  undef  DEFMAGIC
+	#  define DEFMAGIC	"\r"
+	# endif
+	#endif
+	_EOExport_;
+
+flag = {
+    name      = magic2;
+    value     = a;
+    arg-type  = number;
+    arg-name  = kill-code;
+    arg-range = '0->255';
+    descrip   = "The 'kill' character (default: '\\r')";
+    ifdef     = CLKLDISC;
+    doc = <<-  _EndOfDoc_
+	"CLKLDISC" is actually never defined, or you will have compile issues.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = magic1;
+    value     = c;
+    arg-type  = number;
+    arg-name  = erase-code;
+    arg-range = '0->255';
+    descrip   = "The 'erase' character (default: '\\r')";
+    ifdef     = CLKLDISC;
+    doc = <<-  _EndOfDoc_
+	Or maybe the kill or maybe something else.
+	_EndOfDoc_;
+};
+
+extern = <<- _EOExtern_
+	#ifdef STREAM
+	extern char magic[32];
+	#endif
+	_EOExtern_;
+
+include = <<- _EOInclude_
+	#ifdef STREAM
+	char magic[32] = "";
+	#endif
+	_EOInclude_;
+
+flag = {
+    name      = magic1;
+    value     = c;
+    arg-type  = string;
+    arg-name  = erase-code;
+    descrip   = "Magic characters for streams";
+    ifdef     = STREAM;
+    doc = <<-  _EndOfDoc_
+	Or maybe the kill or maybe something else.
+	_EndOfDoc_;
+
+    flag-code = <<- _EOCode_
+	    unsigned long tmp;
+
+	    if (!atouint(pOptDesc->pzLastArg, &tmp)) {
+	        fprintf(stderr, "%s error:  not a number:  ``%s''\n",
+	                pOptions->pzProgName, pOptDesc->pzLastArg );
+	        USAGE( EXIT_FAILURE );
+	    }
+	_EOCode_;
+};
+
+include       = 'extern int speed;';
+flag = {
+    name      = speed;
+    value     = b;
+    arg-type  = string;
+    arg-name  = bps;
+    descrip   = "Set the rate according to the speed";
+    doc = <<-  _EndOfDoc_
+	Be careful with this option.  It will cause an infinite loop, unless
+	all speeds are unsupported.
+	_EndOfDoc_;
+
+    flag-code = <<- _EOCode_
+	    /*
+	     * speed table
+	     */
+	    static struct speeds {
+	            const unsigned int bps;
+	            const unsigned int rate;
+	    } *spd, speedtab[] = {
+	        { 300,          B300 },
+	        { 1200,         B1200 },
+	        { 2400,         B2400 },
+	        { 4800,         B4800 },
+	        { 9600,         B9600 },
+	        { 19200,        EXTA },
+	        { 38400,        EXTB },
+	        { 0,            0 }
+	    };
+	    unsigned long tmp;
+
+	    if (!atouint(pOptDesc->pzLastArg, &tmp)) {
+	        fprintf(stderr, "%s error:  not a number:  ``%s''\n",
+	                pOptions->pzProgName, pOptDesc->pzLastArg );
+	        USAGE( EXIT_FAILURE );
+	    }
+
+	    for (spd = speedtab;;) {
+	        if (tmp == spd->bps)
+	            break;
+	        spd++;
+	        if (spd->bps == 0) {
+	            fprintf(stderr, "%s: speed %lu is unsupported\n",
+	                    pOptions->pzProgName, tmp);
+	            USAGE( EXIT_FAILURE );
+	        }
+	    }
+
+	    speed = spd->rate;
+	_EOCode_;
+};
+
+
+flag = {
+    name      = debug;
+    value     = d;
+    descrip   = "Turn on debugging output";
+    doc = <<-  _EndOfDoc_
+	This option is not really used.
+	_EndOfDoc_;
+};
+
+include       = 'extern int ttflags;';
+flag = {
+    name      = crmod;
+    value     = f;
+    descrip   = "Turn on CRMOD flag";
+    flag-code = '    ttflags |= CRMOD;';
+    doc = <<-  _EndOfDoc_
+	
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = command;
+    value     = s;
+    arg-type  = string;
+    arg-name  = cmd-name;
+    descrip   = "";
+    flags-must= timeout;
+    doc = <<-  _EndOfDoc_
+	
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = timeout;
+    value     = t;
+    arg-type  = number;
+    arg-name  = seconds;
+    arg-range = '1->600'; /* one second to ten minutes */
+    descrip   = "Limit wait for command completion";
+    doc = <<-  _EndOfDoc_
+	
+	_EndOfDoc_;
+};
