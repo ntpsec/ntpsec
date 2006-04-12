@@ -7,7 +7,7 @@ version=${proto}.${major}.${minor}
 # Point.  3 cases:
 # - Numeric values increment
 # - empty 'increments' to 1
-# - NEW (for example) 'increments' to empty
+# - NEW 'increments' to empty
 point=10
 # Special.  Normally unused.  A suffix.
 #special=ag
