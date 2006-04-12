@@ -18,7 +18,7 @@ Here are some recent versions numbers as an example:
  4.2.2		A production release (from the ntp-stable repository)
  4.2.2p2	A production release (from the ntp-stable repository)
  4.2.3p12	A development release
- 4.2.3p15-rc1	A release candidate for 4.2.2
+ 4.2.3p15-rc1	A release candidate for 4.2.4
 
 Note that after the ntp-dev repo produces a production release it will
 be copied into the ntp-stable and the cycle will repeat.
