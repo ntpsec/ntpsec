@@ -1,6 +1,7 @@
 #! /bin/sh
  
-. packageinfo.sh
+# This script must be executed from the TLD of the source tree...
+. ./packageinfo.sh
 
 NAME="$version"
 case $point in
