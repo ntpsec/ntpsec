@@ -361,7 +361,7 @@ hack_restrict(
 		SET_IPV6_ADDR_MASK(&addr6,
 		    &GET_INADDR6(*resaddr), &mask6);
 		if (IN6_IS_ADDR_UNSPECIFIED(&addr6)) {
-			rlprev6 = 0;
+			rlprev6 = NULL;
 			rl6 = restrictlist6;
 		} else {
 			rlprev6 = restrictlist6;
@@ -440,8 +440,13 @@ hack_restrict(
 				rl->mask = mask;
 				rl->mflags = (u_short)mflags;
 
-				rl->next = rlprev->next;
-				rlprev->next = rl;
+				if (rlprev == NULL) {
+					rl->next = restrictlist;
+					restrictlist = rl;
+				} else {
+					rl->next = rlprev->next;
+					rlprev->next = rl;
+				}
 				restrictcount++;
 			}
 			if ((rl->flags ^ (u_short)flags) &
@@ -478,7 +483,11 @@ hack_restrict(
 			if (rl != 0
 			    && rl->addr != htonl(INADDR_ANY)
 			    && !(rl->mflags & RESM_INTERFACE && op != RESTRICT_REMOVEIF)) {
-				rlprev->next = rl->next;
+				if (rlprev != NULL) {
+					rlprev->next = rl->next;
+				} else {
+					restrictlist = rl->next;
+				}
 				restrictcount--;
 				if (rl->flags & RES_LIMITED) {
 					res_limited_refcnt--;

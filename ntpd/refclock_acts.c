@@ -333,7 +333,7 @@ acts_receive (
 				acts_message(peer);
 				up->bufptr = pp->a_lastcode;
 			}
-		} else {
+		} else if (!iscntrl(*tptr)) {
 			*up->bufptr++ = *tptr;
 			if (*tptr == '*' || *tptr == '#') {
 				up->tstamp = pp->lastrec;

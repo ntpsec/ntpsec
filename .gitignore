@@ -119,3 +119,5 @@ ports/winnt/ntpd/ntpd.dsp.$$$
 ports/winnt/ntpdate/ntpdate.dsp.$$$
 ports/winnt/ntpdc/ntpdc.dsp.$$$
 ports/winnt/ntpq/ntpq.dsp.$$$
+include/version.def
+version.m4
