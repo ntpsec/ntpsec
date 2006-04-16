@@ -957,7 +957,7 @@ getgroup:
 
 #endif /* HAVE_IO_COMPLETION_PORT */
 
-		while (full_recvbuffs())
+		while (1)
 		{
 			/*
 			 * Call the data procedure to handle each received
@@ -969,6 +969,8 @@ getgroup:
 				(rbuf->receiver)(rbuf);
 				freerecvbuf(rbuf);
 			}
+			else
+				break;
 		}
 
 		/*
