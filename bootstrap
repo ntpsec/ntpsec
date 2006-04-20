@@ -27,7 +27,7 @@
 
 set -e
 
-. packageinfo.sh
+. ./packageinfo.sh
 
 dversion=`scripts/VersionName`
 
