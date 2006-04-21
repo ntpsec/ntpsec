@@ -1471,7 +1471,10 @@ AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
 #ifdef SIGIO
    yes
 #endif
-  ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no))
+  ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no)
+  ac_cv_hdr_def_sigio=no
+)
+
 
 dnl Override those system that have a losing SIGIO
 AC_CACHE_CHECK(if we want to use signalled IO, ac_cv_var_signalled_io,
@@ -1524,7 +1527,9 @@ AC_CACHE_CHECK(for SIGPOLL, ac_cv_hdr_def_sigpoll,
 #ifdef SIGPOLL
   yes
 #endif
- ], ac_cv_hdr_def_sigpoll=yes, ac_cv_hdr_def_sigpoll=no))
+ ], ac_cv_hdr_def_sigpoll=yes, ac_cv_hdr_def_sigpoll=no)
+ ac_cv_hdr_def_sigpoll=no
+)
 
 AC_CACHE_CHECK(for SIGSYS, ac_cv_hdr_def_sigsys,
  AC_EGREP_CPP(yes,
