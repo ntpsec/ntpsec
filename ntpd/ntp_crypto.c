@@ -3336,7 +3336,7 @@ cert_valid(
 
 	ptr = (u_char *)cinf->cert.ptr;
 	cert = d2i_X509(NULL, &ptr, ntohl(cinf->cert.vallen));
-	if (!X509_verify(cert, pkey))
+	if (cert == NULL || !X509_verify(cert, pkey))
 		return (XEVNT_VFY);
 
 	X509_free(cert);
