@@ -1,0 +1,59 @@
+#! /bin/sh
+
+# possible usage: $0 [-f] [version.m4] [version.def]
+#
+# -f would be 'force the update'
+
+usecmp=true
+outputs=
+for i in $*
+do
+    case "$i" in
+     -f) usecmp=false ;;
+     version.m4)
+	outputs="version.m4 $outputs"
+	;;
+     *version.def)
+	outputs="include/version.def $outputs"
+	;;
+     *) echo "Unrecognized option: $i"
+	exit 1
+	;;
+    esac
+done
+
+case "$outputs" in
+ '') outputs="version.m4 include/version.def" ;;
+esac
+
+set -e
+
+. ./packageinfo.sh
+
+dversion=`scripts/VersionName`
+
+set +e
+
+case "$outputs" in
+ *version.m4*)
+    echo "m4_define([VERSION_NUMBER],[${dversion}])" > version.m4+
+    if $usecmp || cmp version.m4+ version.m4
+    then
+	rm -f version.m4+
+    else
+	mv version.m4+ version.m4
+    fi
+    ;;
+esac
+
+case "$outputs" in
+ *version.def*)
+    echo "version = '${dversion}';" > include/version.def+
+    if $usecmp || cmp include/version.def+ include/version.def
+    then
+	rm -f include/version.def+
+    else
+	mv include/version.def+ include/version.def
+    fi
+    ;;
+esac
