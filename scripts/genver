@@ -4,12 +4,12 @@
 #
 # -f would be 'force the update'
 
-usecmp=true
+force=0
 outputs=
 for i in $*
 do
     case "$i" in
-     -f) usecmp=false ;;
+     -f) force=1 ;;
      version.m4)
 	outputs="version.m4 $outputs"
 	;;
@@ -37,23 +37,31 @@ set +e
 case "$outputs" in
  *version.m4*)
     echo "m4_define([VERSION_NUMBER],[${dversion}])" > version.m4+
-    if $usecmp || cmp version.m4+ version.m4
-    then
-	rm -f version.m4+
-    else
+    cmp version.m4+ version.m4
+    rc=$?
+    case "$force$rc" in
+     *1*)
 	mv version.m4+ version.m4
-    fi
+	;;
+     *)
+	rm -f version.m4+
+	;;
+    esac
     ;;
 esac
 
 case "$outputs" in
  *version.def*)
     echo "version = '${dversion}';" > include/version.def+
-    if $usecmp || cmp include/version.def+ include/version.def
-    then
-	rm -f include/version.def+
-    else
+    cmp include/version.def+ include/version.def
+    rc=$?
+    case "$force$rc" in
+     *1*)
 	mv include/version.def+ include/version.def
-    fi
+	;;
+     *)
+	rm -f include/version.def+
+	;;
+    esac
     ;;
 esac
