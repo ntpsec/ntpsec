@@ -7,11 +7,13 @@ version=${proto}.${major}.${minor}
 # Point.  3 cases:
 # - Numeric values increment
 # - empty 'increments' to 1
-# - NEW (for example) 'increments' to empty
-point=1
+# - NEW 'increments' to empty
+point=247
 # Special.  Normally unused.  A suffix.
-special=ag
-#special=
+#special=ag
+special=
 # ReleaseCandidate. 'yes' or 'no'.
 releasecandidate=yes
-releasecandidate=no
+#releasecandidate=no
+# ChangeLog tag
+CLTAG=NTP_4_2_0

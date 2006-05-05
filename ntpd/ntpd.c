@@ -984,14 +984,13 @@ getgroup:
 		block_io_and_alarm();
 # endif
 
-		tot_full_recvbufs = full_recvbuffs();	/* get received buffers */
 		if (alarm_flag) 	/* alarmed? */
 		{
 			was_alarmed = 1;
 			alarm_flag = 0;
 		}
 
-		if (!was_alarmed && tot_full_recvbufs == 0)
+		if (!was_alarmed && has_full_recv_buffer() == ISC_FALSE)
 		{
 			/*
 			 * Nothing to do.  Wait for something.
@@ -1034,42 +1033,56 @@ getgroup:
 				was_alarmed = 1;
 				alarm_flag = 0;
 			}
-			tot_full_recvbufs = full_recvbuffs();  /* get received buffers */
 		}
-# ifdef HAVE_SIGNALED_IO
-		unblock_io_and_alarm();
-# endif /* HAVE_SIGNALED_IO */
 
-		/*
-		 * Out here, signals are unblocked.  Call timer routine
-		 * to process expiry.
-		 */
 		if (was_alarmed)
 		{
+# ifdef HAVE_SIGNALED_IO
+			unblock_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
+			/*
+			 * Out here, signals are unblocked.  Call timer routine
+			 * to process expiry.
+			 */
 			timer();
 			was_alarmed = 0;
+# ifdef HAVE_SIGNALED_IO
+                        block_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
 		}
 
 #endif /* HAVE_IO_COMPLETION_PORT */
 
-		while (full_recvbuffs())
+		rbuf = get_full_recv_buffer();
+		while (rbuf != NULL)
 		{
+# ifdef HAVE_SIGNALED_IO
+			unblock_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
 			/*
 			 * Call the data procedure to handle each received
 			 * packet.
 			 */
-			rbuf = get_full_recv_buffer();
 			if (rbuf != NULL)	/* This should always be true */
 			{
 				(rbuf->receiver)(rbuf);
 				freerecvbuf(rbuf);
+			} else {
+				 msyslog(LOG_ERR, "receive buffer corruption - receiver found to be NULL - ABORTING");
+				 abort();
 			}
+# ifdef HAVE_SIGNALED_IO
+                        block_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
 		}
 
 		/*
 		 * Go around again
 		 */
 	}
+# ifdef HAVE_SIGNALED_IO
+	unblock_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
 	return 1;
 }
 

@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
  *
- * refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A
+ * refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -180,8 +180,9 @@
 #include "binio.h"
 #include "ascii.h"
 #include "ieee754io.h"
+#include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.66 2006/03/18 00:45:30 kardel RELEASE_20060318_A";
+static char rcsid[] = "refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2020,7 +2021,7 @@ local_input(
 	{
 		if (parse_ioread(&parse->parseio, (unsigned int)(*s++), &ts))
 		{
-			struct recvbuf buf;
+			struct recvbuf *buf;
 
 			/*
 			 * got something good to eat
@@ -2171,20 +2172,25 @@ local_input(
 #endif /* TIOCDCDTIMESTAMP */
 #endif /* HAVE_PPSAPI */
 			}
-			if (count)
-			{	/* simulate receive */
-				memmove((caddr_t)buf.recv_buffer,
-					(caddr_t)&parse->parseio.parse_dtime,
-					sizeof(parsetime_t));
-				parse_iodone(&parse->parseio);
-				buf.recv_length = sizeof(parsetime_t);
-				buf.recv_time = rbufp->recv_time;
-				buf.srcadr = rbufp->srcadr;
-				buf.dstadr = rbufp->dstadr;
-				buf.fd     = rbufp->fd;
-				buf.X_from_where = rbufp->X_from_where;
-				rbufp->receiver(&buf);
-			}
+
+  			if (count)
+  			{	/* simulate receive */
+				buf = get_free_recv_buffer();
+				if (buf != NULL) {
+					memmove((caddr_t)buf->recv_buffer,
+						(caddr_t)&parse->parseio.parse_dtime,
+						sizeof(parsetime_t));
+					buf->recv_length  = sizeof(parsetime_t);
+					buf->recv_time    = rbufp->recv_time;
+					buf->srcadr       = rbufp->srcadr;
+					buf->dstadr       = rbufp->dstadr;
+					buf->receiver     = rbufp->receiver;
+					buf->fd           = rbufp->fd;
+					buf->X_from_where = rbufp->X_from_where;
+					add_full_recv_buffer(buf);
+				}
+  				parse_iodone(&parse->parseio);
+  			}
 			else
 			{
 				memmove((caddr_t)rbufp->recv_buffer,
@@ -5672,6 +5678,15 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.68  2006/05/01 17:02:51  kardel
+ * copy receiver method also for newlwy created receive buffers
+ *
+ * Revision 4.67  2006/05/01 14:37:29  kardel
+ * If an input buffer parses into more than one message do insert the
+ * parsed message in a new input buffer instead of processing it
+ * directly. This avoids deed complicated processing in signal
+ * handling.
+ *
  * Revision 4.66  2006/03/18 00:45:30  kardel
  * coverity fixes found in NetBSD coverity scan
  *

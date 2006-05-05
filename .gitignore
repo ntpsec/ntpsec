@@ -56,6 +56,7 @@ include/isc/netaddr.h.$$$
 include/ntp.patch
 include/ntp_control.patch
 include/ntp_request.patch
+include/version.def
 install-sh
 jedi.sh
 kernel/Makefile.in
@@ -125,11 +126,10 @@ ports/winnt/ntpdc/ntpdc.dsp.$$$
 ports/winnt/ntpq/ntpq.dsp.$$$
 rsaref2
 scripts/Makefile.in
+sntp/libopts/*
 sntp/sntp.1
 stamp-h.in
 util/Makefile.in
-version
 util/ntp-keygen.1
-sntp/libopts/*
+version
 version.m4
-include/version.def

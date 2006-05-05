@@ -27,30 +27,28 @@
 
 set -e
 
-. packageinfo.sh
+#. ./packageinfo.sh
 
-rm -rf sntp/libopts*
-gunzip -c $(autoopts-config --libsrc) | (
-  cd sntp
-  tar -xvf -
-  mv libopts-*.*.* libopts )
+scripts/genver
 
-prog_opt_files=$(
-    egrep -l '^prog.name' $(
-        find * -type f -name *.def|fgrep -v /SCCS/))
+#rm -rf sntp/libopts*
+#gunzip -c $(autoopts-config --libsrc) | (
+#  cd sntp
+#  tar -xvf -
+#  mv libopts-*.*.* libopts )
 
-echo "m4_define([VERSION_NUMBER],[${version}])" > version.m4
-
-echo "version = '${version}';" > include/version.def
+#prog_opt_files=$(
+#    egrep -l '^prog.name' $(
+#        find * -type f -name *.def|fgrep -v /SCCS/))
 
 incdir=${PWD}/include
 
-for f in ${prog_opt_files}
-do
-  ( cd $(dirname ${f})
-    echo "Running autogen on $f..."
-    autogen -L${incdir} $(basename ${f}) )
-done
+#for f in ${prog_opt_files}
+#do
+#  ( cd $(dirname ${f})
+#    echo "Running autogen on $f..."
+#    autogen -L${incdir} $(basename ${f}) )
+#done
 
 (cd sntp && autoreconf -i -v)
 
