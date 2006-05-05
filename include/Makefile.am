@@ -1,7 +1,7 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = ../util/ansi2knr
 ETAGS_ARGS = $(srcdir)/Makefile.am
-#EXTRA_DIST = TAGS
+EXTRA_DIST = version.def
 
 SUBDIRS = isc
 

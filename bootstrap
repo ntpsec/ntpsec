@@ -27,9 +27,9 @@
 
 set -e
 
-. ./packageinfo.sh
+#. ./packageinfo.sh
 
-dversion=`scripts/VersionName`
+scripts/genver
 
 #rm -rf sntp/libopts*
 #gunzip -c $(autoopts-config --libsrc) | (
@@ -40,10 +40,6 @@ dversion=`scripts/VersionName`
 #prog_opt_files=$(
 #    egrep -l '^prog.name' $(
 #        find * -type f -name *.def|fgrep -v /SCCS/))
-
-echo "m4_define([VERSION_NUMBER],[${dversion}])" > version.m4
-
-echo "version = '${dversion}';" > include/version.def
 
 incdir=${PWD}/include
 
