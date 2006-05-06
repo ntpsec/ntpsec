@@ -122,7 +122,6 @@ init_recvbuff(int nbufs)
 void
 freerecvbuf(recvbuf_t *rb)
 {
-	BLOCKIO();
 	LOCK();
 	ISC_LIST_APPEND(free_list, rb, link);
 #if defined SYS_WINNT
@@ -131,26 +130,22 @@ freerecvbuf(recvbuf_t *rb)
 #endif
 	free_recvbufs++;
 	UNLOCK();
-	UNBLOCKIO();
 }
 
 	
 void
 add_full_recv_buffer(recvbuf_t *rb)
 {
-	BLOCKIO();
 	LOCK();
 	ISC_LIST_APPEND(full_list, rb, link);
 	full_recvbufs++;
 	UNLOCK();
-	UNBLOCKIO();
 }
 
 recvbuf_t *
 get_free_recv_buffer(void)
 {
 	recvbuf_t * buffer = NULL;
-	BLOCKIO();
 	LOCK();
 	buffer = ISC_LIST_HEAD(free_list);
 	if (buffer == NULL)
@@ -162,7 +157,6 @@ get_free_recv_buffer(void)
 		{
 			msyslog(LOG_ERR, "No more memory for recvufs");
 			UNLOCK();
-			UNBLOCKIO();
 			return (NULL);
 		}
 		buffer = ISC_LIST_HEAD(free_list);
@@ -170,7 +164,6 @@ get_free_recv_buffer(void)
 		{
 			msyslog(LOG_ERR, "Failed to obtain more memory for recvbufs");
 			UNLOCK();
-			UNBLOCKIO();
 			return (NULL);
 		}
 	}
@@ -178,7 +171,6 @@ get_free_recv_buffer(void)
 	free_recvbufs--;
 	initialise_buffer(buffer);
 	UNLOCK();
-	UNBLOCKIO();
 	return (buffer);
 }
 
@@ -186,7 +178,6 @@ recvbuf_t *
 get_full_recv_buffer(void)
 {
 	recvbuf_t *rbuf;
-	BLOCKIO();
 	LOCK();
 	rbuf = ISC_LIST_HEAD(full_list);
 	if (rbuf != NULL)
@@ -202,7 +193,6 @@ get_full_recv_buffer(void)
 		full_recvbufs = 0;
 	}
 	UNLOCK();
-	UNBLOCKIO();
 	return (rbuf);
 }
 
