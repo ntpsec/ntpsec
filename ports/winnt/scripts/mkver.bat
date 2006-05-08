@@ -171,33 +171,60 @@ REM ****************************************************************************
 REM Now grab the Version number out of the source code (using the version.m4 file...)
 REM *****************************************************************************************************************
 
-	REM First, get the main ntp version number 
-	IF NOT EXIST ..\..\..\version.m4 goto ERRNOVERF
-	IF NOT EXIST ..\include\config.h goto ERRNOCONF
-	FOR /F "TOKENS=4 DELIMS==[] " %%a IN ('findstr  "VERSION_NUMBER" ..\..\..\version.m4') DO @SET VER=%%a
-	
-	REM Now, try to add a BK ChangeSet version number
-	
-		REM ** Check if BK is installed ...
-                bk -R prs -hr+ -nd:I: ChangeSet 2> NUL > NUL
-		IF ERRORLEVEL 1 GOTO NOBK
+	REM First, get the main NTP version number. In recent versions this must be extracted 
+	REM from a packageinfo.sh file while in earlier versions the info was available from 
+	REM a version.m4 file.
+	SET F_PACKAGEINFO_SH=..\..\..\packageinfo.sh
+	SET F_VERSION_M4=..\..\..\version.m4
+	IF EXIST %F_PACKAGEINFO_SH% goto VER_FROM_PACKAGE_INFO
+	IF EXIST ..\..\..\version.m4 goto VER_FROM_M4
+        goto ERRNOVERF
 
-		REM ** Try to get the CSet rev directly from BK
-		FOR /F "TOKENS=1 DELIMS==" %%a IN ('bk.exe -R prs -hr+ -nd:I: ChangeSet') DO @SET CSET=%%a
+:VER_FROM_PACKAGE_INFO
+	REM Get version from packageinfo.sh file, which contains lines reading e.g.
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "proto=" %%F_PACKAGEINFO_SH%%') DO SET PROTO=%%a
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "major=" %%F_PACKAGEINFO_SH%%') DO SET MAJOR=%%a
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "minor=" %%F_PACKAGEINFO_SH%%') DO SET MINOR=%%a
+
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "point=" %%F_PACKAGEINFO_SH%%') DO SET POINT=%%a
+	IF NOT "%POINT%"=="" set POINT=p%POINT%
+
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "special=" %%F_PACKAGEINFO_SH%%') DO SET SPECIAL=%%a
+	IF NOT "%SPECIAL%"=="" set SPECIAL=-%SPECIAL%
+
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "releasecandidate=" %%F_PACKAGEINFO_SH%%') DO SET REL_CAND_STR=%%a
+	IF /I "%REL_CAND_STR%"=="yes" set REL_CAND=-RC
+	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%REL_CAND%
+	goto VER_GET_CSET
+
+:VER_FROM_M4
+	REM Get version from version.m4 file, which contains a line reading e.g.
+	REM m4_define([VERSION_NUMBER],[4.2.0b-rc1])
+	FOR /F "TOKENS=4 DELIMS==[] " %%a IN ('findstr  "VERSION_NUMBER" ..\..\..\version.m4') DO @SET VER=%%a
+
+:VER_GET_CSET
+	REM Now we have the version info, try to add a BK ChangeSet version number
+	
+	REM ** Check if BK is installed ...
+	bk -R prs -hr+ -nd:I: ChangeSet 2> NUL > NUL
+	IF ERRORLEVEL 1 GOTO NOBK
+
+	REM ** Try to get the CSet rev directly from BK
+	FOR /F "TOKENS=1 DELIMS==" %%a IN ('bk.exe -R prs -hr+ -nd:I: ChangeSet') DO @SET CSET=%%a
 
 :NOBK
-
-		REM ** If that was not successful, we'll take a look into a version file, if available
-		IF EXIST ..\..\..\version ( 
-			IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\version') DO @SET CSET=%%a
-		)
+	REM ** If that was not successful, we'll take a look into a version file, if available
+	IF EXIST ..\..\..\version ( 
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\version') DO @SET CSET=%%a
+	)
 
 	REM ** Now, expand our version number with the CSet revision, if we managed to get one
-		IF NOT "%CSET%"=="" SET VER=%VER%@%CSET%
+	IF NOT "%CSET%"=="" SET VER=%VER%@%CSET%
 		
 	REM We can add a "crypto" identifier (-o) if we see that Crypto support is included in our build
-		FOR /F "TOKENS=1-3 " %%a IN ('findstr /R "^#define\ OPENSSL" ..\include\config.h') DO @SET SSL=%%c
-		IF "%SSL%"=="1" SET VER=%VER%-o
+	IF NOT EXIST ..\include\config.h goto ERRNOCONF
+	FOR /F "TOKENS=1-3 " %%a IN ('findstr /R "^#define\ OPENSSL" ..\include\config.h') DO @SET SSL=%%c
+	IF "%SSL%"=="1" SET VER=%VER%-o
 
 
 REM *****************************************************************************************************************
