@@ -17,3 +17,9 @@ releasecandidate=yes
 #releasecandidate=no
 # ChangeLog tag
 CLTAG=NTP_4_2_0
+###
+# The following is for ntp-stable.  3 cases:
+# - Numeric values increment
+# - empty 'increments' to 1
+# - NEW 'increments' to empty
+rcpoint=
