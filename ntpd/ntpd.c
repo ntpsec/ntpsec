@@ -412,7 +412,6 @@ ntpdmain(
 	)
 {
 	l_fp now;
-	int tot_full_recvbufs;
 	struct recvbuf *rbuf;
 #ifdef _AIX			/* HMS: ifdef SIGDANGER? */
 	struct sigaction sa;
@@ -873,9 +872,12 @@ getgroup:
 #if defined(HAVE_IO_COMPLETION_PORT)
 
 	for (;;) {
-		tot_full_recvbufs = GetReceivedBuffers();
+		int tot_full_recvbufs = GetReceivedBuffers();
 #else /* normal I/O */
 
+#if defined(HAVE_SIGNALED_IO)
+	block_io_and_alarm();
+# endif
 	was_alarmed = 0;
 	for (;;)
 	{
@@ -885,8 +887,6 @@ getgroup:
 
 		fd_set rdfdes;
 		int nfound;
-# elif defined(HAVE_SIGNALED_IO)
-		block_io_and_alarm();
 # endif
 
 		if (alarm_flag) 	/* alarmed? */
