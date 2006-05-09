@@ -979,6 +979,7 @@ getgroup:
                         block_io_and_alarm();
 # endif /* HAVE_SIGNALED_IO */
 			freerecvbuf(rbuf);
+			rbuf = get_full_recv_buffer();
 		}
 
 		/*
