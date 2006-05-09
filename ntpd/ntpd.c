@@ -968,10 +968,9 @@ getgroup:
 			 * Call the data procedure to handle each received
 			 * packet.
 			 */
-			if (rbuf != NULL)	/* This should always be true */
+			if (rbuf->receiver != NULL)	/* This should always be true */
 			{
 				(rbuf->receiver)(rbuf);
-				freerecvbuf(rbuf);
 			} else {
 				 msyslog(LOG_ERR, "receive buffer corruption - receiver found to be NULL - ABORTING");
 				 abort();
@@ -979,6 +978,7 @@ getgroup:
 # ifdef HAVE_SIGNALED_IO
                         block_io_and_alarm();
 # endif /* HAVE_SIGNALED_IO */
+			freerecvbuf(rbuf);
 		}
 
 		/*
