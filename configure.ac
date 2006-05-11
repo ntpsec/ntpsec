@@ -1473,6 +1473,7 @@ AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
 #endif
   ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no))
 
+
 dnl Override those system that have a losing SIGIO
 AC_CACHE_CHECK(if we want to use signalled IO, ac_cv_var_signalled_io,
 [ans=no

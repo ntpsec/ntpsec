@@ -150,6 +150,10 @@ SOURCE=..\..\..\libntp\decodenetnum.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dnslookup.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\dofptoa.c
 # End Source File
 # Begin Source File

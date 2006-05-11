@@ -27,9 +27,11 @@
 
 set -e
 
-. ./packageinfo.sh
+AUTORECONF=${AUTORECONF:-autoreconf}
 
-dversion=`scripts/VersionName`
+#. ./packageinfo.sh
+
+scripts/genver
 
 #rm -rf sntp/libopts*
 #gunzip -c $(autoopts-config --libsrc) | (
@@ -41,10 +43,6 @@ dversion=`scripts/VersionName`
 #    egrep -l '^prog.name' $(
 #        find * -type f -name *.def|fgrep -v /SCCS/))
 
-echo "m4_define([VERSION_NUMBER],[${dversion}])" > version.m4
-
-echo "version = '${dversion}';" > include/version.def
-
 incdir=${PWD}/include
 
 #for f in ${prog_opt_files}
@@ -54,6 +52,6 @@ incdir=${PWD}/include
 #    autogen -L${incdir} $(basename ${f}) )
 #done
 
-(cd sntp && autoreconf -i -v)
+(cd sntp && ${AUTORECONF} -i -v)
 
-autoreconf -i -v
+${AUTORECONF} -i -v

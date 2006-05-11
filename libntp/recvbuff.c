@@ -17,14 +17,14 @@
  */
 static u_long volatile full_recvbufs;	/* number of recvbufs on fulllist */
 static u_long volatile free_recvbufs;	/* number of recvbufs on freelist */
-static u_long volatile total_recvbufs;	/* number of recvbufs available */
-static u_long volatile lowater_adds;	/* number of times we have added recvbufs */
+static u_long volatile total_recvbufs;	/* total recvbufs currently in use */
+static u_long volatile lowater_adds;	/* number of times we have added memory */
 
 
 static ISC_LIST(recvbuf_t)	full_list;	/* Currently used recv buffers */
 static ISC_LIST(recvbuf_t)	free_list;	/* Currently unused buffers */
 	
-#if defined(HAVE_IO_COMPLETION_PORT)
+#if defined(SYS_WINNT)
 
 /*
  * For Windows we need to set up a lock to manipulate the
@@ -68,7 +68,7 @@ initialise_buffer(recvbuf_t *buff)
 {
 	memset((char *) buff, 0, sizeof(recvbuf_t));
 
-#if defined HAVE_IO_COMPLETION_PORT
+#if defined SYS_WINNT
 	buff->wsabuff.len = RX_BUFF_SIZE;
 	buff->wsabuff.buf = (char *) buff->recv_buffer;
 #endif
@@ -87,7 +87,6 @@ create_buffers(int nbufs)
 		return (0);
 	for (i = 0; i < nbufs; i++)
 	{
-		initialise_buffer(buf);
 		ISC_LIST_APPEND(free_list, buf, link);
 		buf++;
 		free_recvbufs++;
@@ -111,7 +110,7 @@ init_recvbuff(int nbufs)
 
 	create_buffers(nbufs);
 
-#if defined(HAVE_IO_COMPLETION_PORT)
+#if defined(SYS_WINNT)
 	InitializeCriticalSection(&RecvLock);
 #endif
 
@@ -125,6 +124,10 @@ freerecvbuf(recvbuf_t *rb)
 {
 	LOCK();
 	ISC_LIST_APPEND(free_list, rb, link);
+#if defined SYS_WINNT
+	rb->wsabuff.len = RX_BUFF_SIZE;
+	rb->wsabuff.buf = (char *) rb->recv_buffer;
+#endif
 	free_recvbufs++;
 	UNLOCK();
 }
@@ -166,6 +169,7 @@ get_free_recv_buffer(void)
 	}
 	ISC_LIST_DEQUEUE(free_list, buffer, link);
 	free_recvbufs--;
+	initialise_buffer(buffer);
 	UNLOCK();
 	return (buffer);
 }
@@ -174,16 +178,6 @@ recvbuf_t *
 get_full_recv_buffer(void)
 {
 	recvbuf_t *rbuf;
-
-	if (0 == full_recvbufs)
-	    return 0;
-
-#ifdef DEBUG
-	if (debug > 1 && full_recvbufs)
-	    printf("get_full_recv_buffer() called and full_recvbufs is %lu\n", full_recvbufs);
-#endif
-	if (0 == full_recvbufs)
-	    msyslog(LOG_ERR, "get_full_recv_buffer() called but full_recvbufs is 0!");
 	LOCK();
 	rbuf = ISC_LIST_HEAD(full_list);
 	if (rbuf != NULL)
@@ -193,8 +187,6 @@ get_full_recv_buffer(void)
 	}
 	else
 	{
-		if (full_recvbufs)
-		    msyslog(LOG_ERR, "get_full_recv_buffer: full_list is empty but full_recvbufs is %lu!", full_recvbufs);
 		/*
 		 * Make sure we reset the full count to 0
 		 */

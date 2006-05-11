@@ -509,6 +509,10 @@ findhostaddr(
 				entry->ce_config.v6_flag = 1;
 			}
 		}
+		else if (error == EAI_NONAME)
+		{
+			msyslog(LOG_ERR, "host name not found: %s", entry->ce_name);
+		}
 	} else {
 #ifdef DEBUG
 		if (debug > 2)
@@ -522,14 +526,24 @@ findhostaddr(
 				   NULL, 0, 0);
 	}
 
+	/*
+	 * If the resolver failed, see if the failure is
+	 * temporary.  If so, return success.
+	 */
 	if (error != 0) {
-		/*
-		 * If the resolver is in use, see if the failure is
-		 * temporary.  If so, return success.
-		 */
-		if (error == EAI_AGAIN)
-		    return (1);
-		return (0);
+		switch (error)
+		{
+		case EAI_AGAIN:
+			return (1);
+		case EAI_NONAME:
+			return (0);
+		case EAI_NODATA:
+		case EAI_FAIL:
+		case EAI_SYSTEM:
+			return (1);
+		default:
+			return (0);
+		}
 	}
 
 	if (entry->ce_name) {
@@ -558,7 +572,7 @@ openntp(void)
 	struct addrinfo *addrResult;
 	const char *localhost = "127.0.0.1";	/* Use IPv6 loopback */
 
-	if (sockfd >= 0)
+	if (sockfd != INVALID_SOCKET)
 	    return;
 
 	memset(&hints, 0, sizeof(hints));

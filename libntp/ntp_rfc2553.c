@@ -101,6 +101,30 @@ static char *ai_errlist[] = {
 	"Unknown error", 				/* EAI_MAX        */
 };
 
+
+int
+DNSlookup_name(
+	const char FAR *name,
+	int ai_family,
+	struct hostent **Addresses
+);
+
+#ifndef SYS_WINNT
+/*
+ * Encapsulate gethostbyname to control the error code
+ */
+int
+DNSlookup_name(
+	const char FAR *name,
+	int ai_family,
+	struct hostent **Addresses
+)
+{
+	*Addresses = gethostbyname(name);
+	return (h_errno);
+}
+#endif
+
 static	int do_nodename P((const char *nodename, struct addrinfo *ai,
     const struct addrinfo *hints));
 
@@ -244,10 +268,17 @@ void
 freeaddrinfo(struct addrinfo *ai)
 {
 	if (ai->ai_canonname != NULL)
+	{
 		free(ai->ai_canonname);
+		ai->ai_canonname = NULL;
+	}
 	if (ai->ai_addr != NULL)
+	{
 		free(ai->ai_addr);
+		ai->ai_addr = NULL;
+	}
 	free(ai);
+	ai = NULL;
 }
 
 int
@@ -288,9 +319,10 @@ do_nodename(
 	struct addrinfo *ai,
 	const struct addrinfo *hints)
 {
-	struct hostent *hp;
+	struct hostent *hp = NULL;
 	struct sockaddr_in *sockin;
 	struct sockaddr_in6 *sockin6;
+	int errval;
 
 	ai->ai_addr = calloc(sizeof(struct sockaddr_storage), 1);
 	if (ai->ai_addr == NULL)
@@ -355,11 +387,13 @@ do_nodename(
 	/*
 	 * Look for a name
 	 */
-	hp = gethostbyname(nodename);
+
+	errval = DNSlookup_name(nodename, AF_INET, &hp);
+
 	if (hp == NULL) {
-		if (h_errno == TRY_AGAIN)
+		if (errval == TRY_AGAIN || errval == EAI_AGAIN)
 			return (EAI_AGAIN);
-		else {
+		else if (errval == EAI_NONAME) {
 			if (inet_pton(AF_INET, nodename,
 			    &((struct sockaddr_in *)ai->ai_addr)->sin_addr) == 1) {
 				((struct sockaddr *)ai->ai_addr)->sa_family = AF_INET;
@@ -367,7 +401,11 @@ do_nodename(
 				ai->ai_addrlen = sizeof(struct sockaddr_in);
 				return (0);
 			}
-			return (EAI_FAIL);
+			return (errval);
+		}
+		else
+		{
+			return (errval);
 		}
 	}
 	ai->ai_family = hp->h_addrtype;

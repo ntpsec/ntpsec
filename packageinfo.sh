@@ -8,7 +8,7 @@ version=${proto}.${major}.${minor}
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=240
+point=250
 # Special.  Normally unused.  A suffix.
 #special=ag
 special=
@@ -17,3 +17,9 @@ releasecandidate=yes
 #releasecandidate=no
 # ChangeLog tag
 CLTAG=NTP_4_2_0
+###
+# The following is for ntp-stable.  3 cases:
+# - Numeric values increment
+# - empty 'increments' to 1
+# - NEW 'increments' to empty
+rcpoint=
