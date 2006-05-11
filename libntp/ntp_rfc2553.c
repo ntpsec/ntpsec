@@ -74,6 +74,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifndef SYS_WINNT
+#include <netdb.h>
+#endif
 #include "ntp_rfc2553.h"
 
 #include "ntpd.h"
