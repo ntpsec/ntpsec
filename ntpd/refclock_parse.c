@@ -3217,7 +3217,7 @@ parse_poll(
 		parse_event(parse, CEVNT_TIMEOUT);
 		
 		ERR(ERR_NODATA)
-			msyslog(LOG_WARNING, "PARSE receiver #%d: no data from device within poll interval (check receiver / cableling)", CLK_UNIT(parse->peer));
+			msyslog(LOG_WARNING, "PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", CLK_UNIT(parse->peer));
 	}
 
 	/*
@@ -3525,7 +3525,7 @@ parse_process(
 			else
 			{
 				ERR(ERR_BADDATA)
-					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / cableling)",
+					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / wiring)",
 						CLK_UNIT(parse->peer), mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
 			}
 		}
