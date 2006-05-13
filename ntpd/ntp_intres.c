@@ -537,7 +537,9 @@ findhostaddr(
 			return (1);
 		case EAI_NONAME:
 			return (0);
+#if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
 		case EAI_NODATA:
+#endif
 		case EAI_FAIL:
 		case EAI_SYSTEM:
 			return (1);
