@@ -257,11 +257,16 @@ static int dup_fd(int fd)
 
                 tmp = errno;
                 if (newfd == -1)
-                        perror("fcntl");
+		{
+			msyslog(LOG_ERR, "Error duplicating file descriptor: %m");
+                        return (fd);
+		}
                 (void)close(fd);
                 errno = tmp;
                 return (newfd);
         }
+	else
+		return (fd);
 }
 #endif
 
