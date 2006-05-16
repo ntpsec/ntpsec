@@ -541,8 +541,10 @@ findhostaddr(
 		case EAI_NODATA:
 #endif
 		case EAI_FAIL:
+#ifdef EAI_SYSTEM
 		case EAI_SYSTEM:
 			return (1);
+#endif
 		default:
 			return (0);
 		}
