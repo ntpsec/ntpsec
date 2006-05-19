@@ -27,6 +27,8 @@
 
 set -e
 
+AUTORECONF=${AUTORECONF:-autoreconf}
+
 #. ./packageinfo.sh
 
 scripts/genver
@@ -50,6 +52,6 @@ incdir=${PWD}/include
 #    autogen -L${incdir} $(basename ${f}) )
 #done
 
-(cd sntp && autoreconf -i -v)
+(cd sntp && ${AUTORECONF} -i -v)
 
-autoreconf -i -v
+${AUTORECONF} -i -v
