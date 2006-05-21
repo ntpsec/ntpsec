@@ -149,8 +149,8 @@ static	void	close_socket	P((SOCKET));
 #ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
 #endif
-#ifdef F_DUPFD
-static int	dup_fd		P((int));
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
+static int	move_fd		P((int));
 #ifndef FOPEN_MAX
 #define FOPEN_MAX	20
 #endif
@@ -248,8 +248,8 @@ connection_reset_fix(SOCKET fd) {
 }
 #endif
 
-#ifdef F_DUPFD
-static int dup_fd(int fd)
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
+static int move_fd(int fd)
 {
 	int tmp, newfd;
         /*
@@ -1515,7 +1515,7 @@ open_socket(
 	 * Fixup the file descriptor for some systems
 	 * See bug #530 for details of the issue.
 	 */
-	fd = dup_fd(fd);
+	fd = move_fd(fd);
 #endif
 
 	/*
