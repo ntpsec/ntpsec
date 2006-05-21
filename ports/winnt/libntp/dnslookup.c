@@ -53,7 +53,7 @@ int ReturnCode(int errcode)
 	case 0:
 		return (0);
 	case WSAEINVAL:
-		return (EAI_BADHINTS);
+		return (EAI_BADFLAGS);
 	case WSANO_DATA:
 		return (EAI_NONAME);
 	case WSANOTINITIALISED:
@@ -62,7 +62,7 @@ int ReturnCode(int errcode)
 	case WSA_NOT_ENOUGH_MEMORY:
 		return (EAI_MEMORY);
 	default:
-		return (EAI_SYSTEM);
+		return (EAI_FAIL);
 	}
 }
 
@@ -98,7 +98,7 @@ AddToAddresses(char **Addresses, int *cnt, CSADDR_INFO *csaddr)
 
 int
 DNSlookup_name(
-	const char FAR *name,
+	const char *name,
 	int ai_family,
 	struct hostent **Addresses
 )

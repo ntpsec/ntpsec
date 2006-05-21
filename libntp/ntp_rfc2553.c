@@ -74,9 +74,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifndef SYS_WINNT
-#include <netdb.h>
-#endif
 #include "ntp_rfc2553.h"
 
 #include "ntpd.h"
@@ -109,7 +106,7 @@ static char *ai_errlist[] = {
  */
 int
 DNSlookup_name(
-	const char FAR *name,
+	const char *name,
 	int ai_family,
 	struct hostent **Addresses
 );
@@ -120,7 +117,7 @@ DNSlookup_name(
  */
 int
 DNSlookup_name(
-	const char FAR *name,
+	const char *name,
 	int ai_family,
 	struct hostent **Addresses
 )
