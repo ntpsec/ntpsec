@@ -251,21 +251,19 @@ connection_reset_fix(SOCKET fd) {
 #if !defined(SYS_WINNT) && defined(F_DUPFD)
 static int move_fd(int fd)
 {
-	int tmp, newfd;
+	int newfd;
         /*
          * Leave a space for stdio to work in.
          */
         if (fd >= 0 && fd < FOPEN_MAX) {
                 newfd = fcntl(fd, F_DUPFD, FOPEN_MAX);
 
-                tmp = errno;
                 if (newfd == -1)
 		{
 			msyslog(LOG_ERR, "Error duplicating file descriptor: %m");
                         return (fd);
 		}
                 (void)close(fd);
-                errno = tmp;
                 return (newfd);
         }
 	else
