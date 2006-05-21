@@ -528,7 +528,7 @@ findhostaddr(
 
 	/*
 	 * If the resolver failed, see if the failure is
-	 * temporary.  If so, return success.
+	 * temporary. If so, return success.
 	 */
 	if (error != 0) {
 		switch (error)

@@ -104,7 +104,9 @@ static char *ai_errlist[] = {
 	"Unknown error", 				/* EAI_MAX        */
 };
 
-
+/*
+ * Local declaration
+ */
 int
 DNSlookup_name(
 	const char FAR *name,
@@ -256,7 +258,7 @@ getaddrinfo (const char *nodename, const char *servname,
 		port = 0;
 
 	/*
-	/*
+	 *
 	 * Set up the port number
 	 */
 	if (ai->ai_family == AF_INET)

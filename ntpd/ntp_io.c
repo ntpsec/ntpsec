@@ -1510,16 +1510,18 @@ open_socket(
 	}
 #endif /* SYS_WINNT */
 
-#ifdef F_DUPFD
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
 	/*
 	 * Fixup the file descriptor for some systems
+	 * See bug #530 for details of the issue.
 	 */
 	fd = dup_fd(fd);
 #endif
 
-
-	/* set SO_REUSEADDR since we will be binding the same port
-	   number on each interface */
+	/*
+	 * set SO_REUSEADDR since we will be binding the same port
+	 * number on each interface
+	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 		       (char *)&on, sizeof(on)))
 	{
