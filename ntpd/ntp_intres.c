@@ -528,7 +528,7 @@ findhostaddr(
 
 	/*
 	 * If the resolver failed, see if the failure is
-	 * temporary.  If so, return success.
+	 * temporary. If so, return success.
 	 */
 	if (error != 0) {
 		switch (error)
@@ -541,8 +541,10 @@ findhostaddr(
 		case EAI_NODATA:
 #endif
 		case EAI_FAIL:
+#ifdef EAI_SYSTEM
 		case EAI_SYSTEM:
 			return (1);
+#endif
 		default:
 			return (0);
 		}

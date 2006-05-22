@@ -151,6 +151,9 @@ static	void	close_file	P((SOCKET));
 #endif
 #ifdef F_DUPFD
 static int	dup_fd		P((int));
+#ifndef FOPEN_MAX
+#define FOPEN_MAX	20
+#endif
 #endif
 
 static	char *	fdbits		P((int, fd_set *));
@@ -252,16 +255,21 @@ static int dup_fd(int fd)
         /*
          * Leave a space for stdio to work in.
          */
-        if (fd >= 0 && fd < 20) {
-                newfd = fcntl(fd, F_DUPFD, 20);
+        if (fd >= 0 && fd < FOPEN_MAX) {
+                newfd = fcntl(fd, F_DUPFD, FOPEN_MAX);
 
                 tmp = errno;
                 if (newfd == -1)
-                        perror("fcntl");
+		{
+			msyslog(LOG_ERR, "Error duplicating file descriptor: %m");
+                        return (fd);
+		}
                 (void)close(fd);
                 errno = tmp;
                 return (newfd);
         }
+	else
+		return (fd);
 }
 #endif
 
@@ -1502,16 +1510,18 @@ open_socket(
 	}
 #endif /* SYS_WINNT */
 
-#ifdef F_DUPFD
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
 	/*
 	 * Fixup the file descriptor for some systems
+	 * See bug #530 for details of the issue.
 	 */
 	fd = dup_fd(fd);
 #endif
 
-
-	/* set SO_REUSEADDR since we will be binding the same port
-	   number on each interface */
+	/*
+	 * set SO_REUSEADDR since we will be binding the same port
+	 * number on each interface
+	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 		       (char *)&on, sizeof(on)))
 	{
