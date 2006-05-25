@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C
  *
- * refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B
+ * refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -9,7 +9,7 @@
  * available and configured. Currently the STREAMS module
  * is only available for Suns running SunOS 4.x and SunOS5.x
  *
- * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2006 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B";
+static char rcsid[] = "refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2601,13 +2601,13 @@ parse_shutdown(
 		parse->parse_type->cl_end(parse);
 	}
 	
-	if (parse->binding)
-	    PARSE_END(parse);
-
 	/*
 	 * Tell the I/O module to turn us off.  We're history.
 	 */
 	io_closeclock(&parse->generic->io);
+
+	if (parse->binding)
+	    PARSE_END(parse);
 
 	free_varlist(parse->kv);
   
@@ -5681,6 +5681,11 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.70  2006/05/25 18:20:50  kardel
+ * bug #619
+ * terminate parse io engine after de-registering
+ * from refclock io engine
+ *
  * Revision 4.69  2006/05/25 17:28:02  kardel
  * complete refclock io structure initialization *before* inserting it into the
  * refclock input machine (avoids null pointer deref) (bug #619)
