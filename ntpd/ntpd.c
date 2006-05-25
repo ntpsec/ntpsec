@@ -958,29 +958,55 @@ getgroup:
 
 #endif /* HAVE_IO_COMPLETION_PORT */
 
-		rbuf = get_full_recv_buffer();
-		while (rbuf != NULL)
+#ifdef DEBUG
 		{
-# ifdef HAVE_SIGNALED_IO
-			unblock_io_and_alarm();
-# endif /* HAVE_SIGNALED_IO */
-			/*
-			 * Call the data procedure to handle each received
-			 * packet.
-			 */
-			if (rbuf->receiver != NULL)	/* This should always be true */
-			{
-				(rbuf->receiver)(rbuf);
-			} else {
-				 msyslog(LOG_ERR, "receive buffer corruption - receiver found to be NULL - ABORTING");
-				 abort();
-			}
-# ifdef HAVE_SIGNALED_IO
-                        block_io_and_alarm();
-# endif /* HAVE_SIGNALED_IO */
-			freerecvbuf(rbuf);
+			l_fp pts;
+			l_fp tsa, tsb;
+			int bufcount = 0;
+			
+			get_systime(&pts);
+			tsa = pts;
+#endif
 			rbuf = get_full_recv_buffer();
+			while (rbuf != NULL)
+			{
+# ifdef HAVE_SIGNALED_IO
+				unblock_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
+				/*
+				 * Call the data procedure to handle each received
+				 * packet.
+				 */
+				if (rbuf->receiver != NULL)	/* This should always be true */
+				{
+#ifdef DEBUG
+					l_fp dts = pts;
+
+					L_SUB(&dts, &rbuf->recv_time);
+					DPRINTF(2, ("processing timestamp delta %s (with prec. fuzz)\n", lfptoa(&dts, 9)));
+					collect_timing(rbuf, "buffer processing delay", 1, &dts);
+					bufcount++;
+#endif
+					(rbuf->receiver)(rbuf);
+				} else {
+					msyslog(LOG_ERR, "receive buffer corruption - receiver found to be NULL - ABORTING");
+					abort();
+				}
+# ifdef HAVE_SIGNALED_IO
+				block_io_and_alarm();
+# endif /* HAVE_SIGNALED_IO */
+				freerecvbuf(rbuf);
+				rbuf = get_full_recv_buffer();
+			}
+#ifdef DEBUG
+			get_systime(&tsb);
+			L_SUB(&tsb, &tsa);
+			if (bufcount) {
+				collect_timing(NULL, "processing", bufcount, &tsb);
+				DPRINTF(2, ("processing time for %d buffers %s\n", bufcount, lfptoa(&tsb, 9)));
+			}
 		}
+#endif
 
 		/*
 		 * Go around again

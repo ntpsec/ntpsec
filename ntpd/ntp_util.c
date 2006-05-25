@@ -79,6 +79,9 @@ static FILEGEN loopstats;
 static FILEGEN clockstats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
+#ifdef DEBUG
+static FILEGEN timingstats;
+#endif
 #ifdef OPENSSL
 static FILEGEN cryptostats;
 #endif /* OPENSSL */
@@ -118,6 +121,9 @@ init_util(void)
 	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
 
+#ifdef DEBUG
+	filegen_register(&statsdir[0], "timingstats", &timingstats);
+#endif
 }
 
 
@@ -457,6 +463,7 @@ record_peer_stats(
 		fflush(peerstats.fp);
 	}
 }
+
 /*
  * record_loop_stats - write loop filter statistics to file
  *
@@ -647,7 +654,39 @@ record_crypto_stats(
 }
 #endif /* OPENSSL */
 
+#ifdef DEBUG
+/*
+ * record_crypto_stats - write crypto statistics to file
+ *
+ * file format:
+ * day (mjd)
+ * time (s past midnight)
+ * text message
+ */
+void
+record_timing_stats(
+	const char *text
+	)
+{
+	static unsigned int flshcnt;
+	l_fp	now;
+	u_long	day;
 
+	if (!stats_control)
+		return;
+
+	get_systime(&now);
+	filegen_setup(&timingstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1900;
+	now.l_ui %= 86400;
+	if (timingstats.fp != NULL) {
+		fprintf(timingstats.fp, "%lu %s %s\n",
+			    day, lfptoa(&now, 3), text);
+		if (++flshcnt % 100 == 0)
+			fflush(timingstats.fp);
+	}
+}
+#endif
 /*
  * getauthkeys - read the authentication keys from the specified file
  */

@@ -270,7 +270,7 @@ make_keylist(
 	int	i;
 
 	if (!dstadr)
-		return;
+		return XEVNT_OK;
 	
 	/*
 	 * Allocate the key list if necessary.

@@ -15,6 +15,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_request.h"
 #include "ntp.h"
+#include "ntp_unixtime.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
@@ -309,7 +310,27 @@ static int move_fd(int fd)
 }
 #endif
 
+#ifdef DEBUG
+/*
+ * collect timing information for various processing
+ * paths. currently we only pass then on to the file
+ * for later processing. this could also do histogram
+ * based analysis in other to reduce the load (and skew)
+ * dur to the file output
+ */
+void
+collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
+{
+	char buf[2048];
 
+	snprintf(buf, sizeof(buf), "%s %d %s %s", 
+		 (rb != NULL) ? 
+		 ((rb->dstadr) ? stoa(&rb->recv_srcadr) : "-REFCLOCK-") : "-",
+		 count, lfptoa(dts, 9), tag);
+	record_timing_stats(buf);
+}
+#endif
+  
 /*
  * About dynamic interfaces, sockets, reception and more...
  *
@@ -337,12 +358,12 @@ static int move_fd(int fd)
  *     the code here currently allocates a separate interface entry for those
  *     multicast addresses
  *     iff it is able to bind to a *new* socket with the multicast address (flags |= MCASTIF)
- *     in case of failure the multicast address of bound to an existing interface.
+ *     in case of failure the multicast address is bound to an existing interface.
  *   - on some systems it is perfectly legal to assign the same address to
  *     multiple interfaces. Therefore this code does not really keep a list of interfaces
  *     but a list of interfaces that represent a unique address as determined by the kernel
  *     by the procedure in findlocalinterface. Thus it is perfectly legal to see only
- *     one representavive of a group of real interfaces if they share the same address.
+ *     one representative of a group of real interfaces if they share the same address.
  * 
  * Frank Kardel 20050910
  */
@@ -1034,7 +1055,7 @@ update_interfaces(
 			 * this is new or refreshing failed - add to our interface list
 			 * if refreshing failed we will delete the interface structure in
 			 * phase 2 as the interface was not marked current. We can bind to
-			 * the address as the refresh code already closed to offending socket
+			 * the address as the refresh code already closed the offending socket
 			 */
 			
 			iface = create_interface(port, &interface);
@@ -2124,6 +2145,24 @@ open_socket(
 
 		return (INVALID_SOCKET);
 	}
+
+#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+	{
+		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
+			       (char*)&on, sizeof(on)))
+		{
+			netsyslog(LOG_DEBUG,
+				  "setsockopt SO_TIMESTAMP on fails on address %s: %m",
+				  stoa(addr));
+		}
+#ifdef DEBUG
+		else
+		{
+			DPRINTF(1, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n", fd, stoa(addr)));
+		}
+#endif
+	}
+#endif
 	DPRINTF(1, ("bind() fd %d, family %d, port %d, addr %s, flags=0x%x\n",
 		   fd,
 		   addr->ss_family,
@@ -2156,7 +2195,7 @@ open_socket(
 	    }
 
 #if !defined(SYS_WINNT) && !defined(VMS)
-	DPRINTF(1, ("flags for fd %d: 0%o\n", fd,
+	DPRINTF(1, ("flags for fd %d: 0x%x\n", fd,
 		    fcntl(fd, F_GETFL, 0)));
 #endif /* SYS_WINNT || VMS */
 
@@ -2449,7 +2488,6 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 		return (buflen);
 	}
 
-
 	i = (rp->datalen == 0
 	    || rp->datalen > sizeof(rb->recv_space))
 	    ? sizeof(rb->recv_space) : rp->datalen;
@@ -2463,6 +2501,7 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 		freerecvbuf(rb);
 		return (buflen);
 	}
+
 	/*
 	 * Got one. Mark how and when it got here,
 	 * put it on the full list and do bookkeeping.
@@ -2508,6 +2547,12 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	int fromlen;
 	int buflen;
 	register struct recvbuf *rb;
+#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+	struct msghdr msghdr;
+	struct iovec iovec;
+	char control[5120];	/* pick up control messages */
+	struct cmsghdr *cmsghdr;
+#endif
 
 	/*
 	 * Get a buffer and read the frame.  If we
@@ -2540,11 +2585,26 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	}
 
 	fromlen = sizeof(struct sockaddr_storage);
+
+#if !defined(SO_TIMESTAMP) || !defined(SCM_TIMESTAMP)
 	rb->recv_length = recvfrom(fd,
 			  (char *)&rb->recv_space,
 			   sizeof(rb->recv_space), 0,
 			   (struct sockaddr *)&rb->recv_srcadr,
 			   &fromlen);
+#else
+	iovec.iov_base        = (void *)&rb->recv_space;
+	iovec.iov_len         = sizeof(rb->recv_space);
+	msghdr.msg_name       = (void *)&rb->recv_srcadr;
+	msghdr.msg_namelen    = sizeof(rb->recv_space);
+	msghdr.msg_iov        = &iovec;
+	msghdr.msg_iovlen     = 1;
+	msghdr.msg_control    = (void *)&control;
+	msghdr.msg_controllen = sizeof(control);
+	msghdr.msg_flags      = 0;
+	rb->recv_length       = recvmsg(fd, &msghdr, 0);
+#endif
+
 	if (rb->recv_length == 0|| (rb->recv_length == -1 && 
 	    (errno==EWOULDBLOCK
 #ifdef EAGAIN
@@ -2562,6 +2622,43 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 		freerecvbuf(rb);
 		return (rb->recv_length);
 	}
+#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+	cmsghdr = CMSG_FIRSTHDR(&msghdr);
+	while (cmsghdr != NULL) {
+		switch (cmsghdr->cmsg_type)
+		{
+		case SCM_TIMESTAMP:
+		{
+			struct timeval *tvp = (struct timeval *)CMSG_DATA(cmsghdr);
+			double dtemp;
+			l_fp nts;
+			DPRINTF(2, ("input_handler: system network time stamp: %ld.%06ld\n", tvp->tv_sec, tvp->tv_usec));
+			nts.l_i = tvp->tv_sec + JAN_1970;
+			dtemp = tvp->tv_usec / 1e6;
+			/* fuzz lower bits not covered by precision */
+			if (sys_precision != 0)
+				dtemp += (ntp_random() / FRAC - .5) / (1 <<
+								       -sys_precision);
+			nts.l_uf = (u_int32)(dtemp*FRAC);
+#ifdef DEBUG
+			{
+				l_fp dts = ts;
+				L_SUB(&dts, &nts);
+				rb->dstadr = itf;
+				collect_timing(rb, "input processing delay", 1, &dts);
+				DPRINTF(2, ("input_handler: timestamp delta: %s (incl. prec fuzz)\n", lfptoa(&dts, 9)));
+			}
+#endif
+			ts = nts;  /* replace loop timestamp by network time stamp */
+			break;
+		}
+		default:
+			DPRINTF(1, ("input_handler: skipping control message %d\n", cmsghdr->cmsg_type));
+			break;
+		}
+		cmsghdr = CMSG_NXTHDR(&msghdr, cmsghdr);
+	}
+#endif
 #ifdef DEBUG
 	if (debug > 2) {
 		if(rb->recv_srcadr.ss_family == AF_INET)
@@ -2761,6 +2858,7 @@ input_handler(
 	 * it.
 	 */
 	L_SUB(&ts_e, &ts);
+	collect_timing(NULL, "input handler", 1, &ts_e);
 	if (debug > 3)
 	    netsyslog(LOG_INFO, "input_handler: Processed a gob of fd's in %s msec", lfptoms(&ts_e, 6));
 #endif
@@ -2800,6 +2898,16 @@ findinterface(
 
 /*
  * findlocalinterface - find local interface index corresponding to address
+ *
+ * This code attempts to find the local sending address for an outgoing
+ * address by connecting a new socket to destinationaddress:NTP_PORT
+ * and reading the sockname of the resulting connect.
+ * the complicated sequence simulates the routing table lookup
+ * for to first hop without duplicating any of the routing logic into
+ * ntpd. preferably we would have used an API call - but its not there -
+ * so this is the best we can do here short of duplicating to entire routing
+ * logic in ntpd which would be a silly and really unportable thing to do.
+ *
  */
 struct interface *
 findlocalinterface(
@@ -2815,12 +2923,6 @@ findlocalinterface(
 	DPRINTF(2, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)
 
-	/*
-	 * This is considerably hoke. We open a socket, connect to it
-	 * and slap a getsockname() on it. If anything breaks, as it
-	 * probably will in some j-random knockoff, we just return the
-	 * NULL
-	 */
 	memset(&saddr, 0, sizeof(saddr));
 	saddr.ss_family = addr->ss_family;
 	if(addr->ss_family == AF_INET) {
@@ -3144,6 +3246,7 @@ io_closeclock(
 	struct refclockio *rio
 	)
 {
+	BLOCKIO();
 	/*
 	 * Remove structure from the list
 	 */
@@ -3162,14 +3265,17 @@ io_closeclock(
 			    break;
 		    }
 
-		if (rp == NULL)
+		if (rp == NULL) {
+			UNBLOCKIO();
 			return;
+		}
 	}
 
 	/*
 	 * Close the descriptor.
 	 */
 	close_and_delete_fd_from_list(rio->fd);
+	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */
 
@@ -3201,6 +3307,7 @@ kill_asyncio(int startfd)
 		lsock = next;
 	}
 
+	UNBLOCKIO();
 }
 
 /*

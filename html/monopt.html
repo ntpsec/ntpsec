@@ -70,6 +70,10 @@
 							<dt>Rate exceeded <tt>147</tt>
 							<dd>Number of packets discarded due to rate limitation.
 						</dl>
+					<dt><tt>timingstats</tt>
+					<dd><b>ONLY</b> available when the deamon is compiled with debugging support. Enables recording of <tt>ntpd</tt> processing time information for various selected code paths:
+	                                <dd><tt>53876 36.920 10.0.3.5 1 0.000014592 input processing delay</tt>
+	                                <dd>The first two fields show the date (Modified Julian Day) and time (seconds and fraction past UTC midnight). The next field is a potential <tt>peer address</tt>, <tt>-</tt> or <tt>-REFCLOCK-</tt> depending on the associated io source. Then an event count for the number of processed events in the code path follows. The fifth field is the total time spend for the events. The rest of the line denotes the code path description (see source for more information).
 					<dt><tt>statsdir <i>directory_path</i></tt>
 					<dd>Indicates the full path of a directory where statistics files should be created (see below). This keyword allows the (otherwise constant) <tt>filegen</tt> filename prefix to be modified for file generation sets, which is useful for handling statistics logs.
 					<dt><tt>filegen <i>name</i> [file <i>filename</i>] [type <i>typename</i>] [link | nolink] [enable | disable]</tt>

@@ -92,6 +92,9 @@ extern	void	io_multicast_add P((struct sockaddr_storage));
 extern	void	io_multicast_del P((struct sockaddr_storage));
 extern	void	kill_asyncio	 P((int));
 extern	void	sendpkt 	P((struct sockaddr_storage *, struct interface *, int, struct pkt *, int));
+#ifdef DEBUG
+extern  void    collect_timing  P((struct recvbuf *, const char *, int, l_fp *));
+#endif
 #ifdef HAVE_SIGNALED_IO
 extern	void	wait_for_signal P((void));
 extern	void	unblock_io_and_alarm P((void));
@@ -234,6 +237,9 @@ extern	void	record_clock_stats P((struct sockaddr_storage *, const char *));
 extern	void	record_raw_stats P((struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *));
 extern	void	record_sys_stats P((void));
 extern	void	record_crypto_stats P((struct sockaddr_storage *, const char *));
+#ifdef DEBUG
+extern	void	record_timing_stats P((const char *));
+#endif
 extern  int	sock_hash P((struct sockaddr_storage *));
 extern	double	old_drift;
 
