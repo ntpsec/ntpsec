@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B
  *
- * refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
+ * refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A";
+static char rcsid[] = "refclock_parse.c,v 4.69 2006/05/25 17:28:02 kardel RELEASE_20060525_B";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2994,19 +2994,11 @@ parse_start(
 	}
 
 	/*
-	 * Insert in async io device list.
+	 * pick correct input machine
 	 */
 	parse->generic->io.srcclock = (caddr_t)parse;
 	parse->generic->io.datalen = 0;
 	
-	if (!io_addclock(&parse->generic->io))
-        {
-		msyslog(LOG_ERR,
-			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;
-	}
-
 	parse->binding = init_iobinding(parse);
 
 	if (parse->binding == (bind_t *)0)
@@ -3018,6 +3010,17 @@ parse_start(
 
 	parse->generic->io.clock_recv = parse->binding->bd_receive; /* pick correct receive routine */
 	parse->generic->io.io_input   = parse->binding->bd_io_input; /* pick correct input routine */
+
+	/*
+	 * Insert in async io device list.
+	 */
+	if (!io_addclock(&parse->generic->io))
+        {
+		msyslog(LOG_ERR,
+			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
+		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		return 0;
+	}
 
 	/*
 	 * as we always(?) get 8 bit chars we want to be
@@ -5678,6 +5681,10 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.69  2006/05/25 17:28:02  kardel
+ * complete refclock io structure initialization *before* inserting it into the
+ * refclock input machine (avoids null pointer deref) (bug #619)
+ *
  * Revision 4.68  2006/05/01 17:02:51  kardel
  * copy receiver method also for newlwy created receive buffers
  *

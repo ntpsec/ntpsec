@@ -2744,6 +2744,7 @@ io_closeclock(
 	struct refclockio *rio
 	)
 {
+	BLOCKIO();
 	/*
 	 * Remove structure from the list
 	 */
@@ -2770,6 +2771,7 @@ io_closeclock(
 	 * Close the descriptor.
 	 */
 	close_file(rio->fd);
+	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */
 
@@ -2787,6 +2789,7 @@ kill_asyncio(
 	BLOCKIO();
 	for (i = startfd; i <= maxactivefd; i++)
 	    (void)close_socket(i);
+	UNBLOCKIO();
 }
 #else
 /*
@@ -2808,6 +2811,7 @@ kill_asyncio(int startfd)
 		close_socket(lsock->fd);
 		lsock = next;
 	}
+	UNBLOCKIO();
 
 }
 #endif
