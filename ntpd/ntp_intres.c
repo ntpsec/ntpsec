@@ -15,6 +15,11 @@
  * might go about autoconfiguring an NTP distribution network.
  *
  */
+ /*
+ * For special situations define the FORCE_DNSRETRY Macro
+ * to force retries even if it fails the lookup.
+ * Use with extreme caution since it will then retry forever.
+ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -525,6 +530,10 @@ findhostaddr(
 				   (char *)&entry->ce_name, MAXHOSTNAMELEN,
 				   NULL, 0, 0);
 	}
+#ifdef DEBUG
+	if (debug > 2)
+		printf("intres: got error status of: %d\n", error);
+#endif
 
 	/*
 	 * If the resolver failed, see if the failure is
@@ -536,7 +545,11 @@ findhostaddr(
 		case EAI_AGAIN:
 			return (1);
 		case EAI_NONAME:
+#ifndef FORCE_DNSRETRY
 			return (0);
+#else
+			return (1);
+#endif
 #if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
 		case EAI_NODATA:
 #endif
