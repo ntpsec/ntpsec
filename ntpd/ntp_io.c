@@ -310,7 +310,7 @@ static int move_fd(int fd)
 }
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 /*
  * collect timing information for various processing
  * paths. currently we only pass then on to the file
@@ -2635,12 +2635,14 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 			DPRINTF(2, ("input_handler: system network time stamp: %ld.%06ld\n", tvp->tv_sec, tvp->tv_usec));
 			nts.l_i = tvp->tv_sec + JAN_1970;
 			dtemp = tvp->tv_usec / 1e6;
-			/* fuzz lower bits not covered by precision */
-			if (sys_precision != 0)
-				dtemp += (ntp_random() / FRAC - .5) / (1 <<
-								       -sys_precision);
+
+ 			/* fuzz lower bits not covered by precision */
+ 			if (sys_precision != 0)
+ 				dtemp += (ntp_random() / FRAC - .5) / (1 <<
+ 								       -sys_precision);
+
 			nts.l_uf = (u_int32)(dtemp*FRAC);
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 			{
 				l_fp dts = ts;
 				L_SUB(&dts, &nts);
@@ -2850,7 +2852,7 @@ input_handler(
 		return;
 	}
 		/* We've done our work */
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 	get_systime(&ts_e);
 	/*
 	 * (ts_e - ts) is the amount of time we spent

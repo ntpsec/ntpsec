@@ -79,7 +79,7 @@ static FILEGEN loopstats;
 static FILEGEN clockstats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 static FILEGEN timingstats;
 #endif
 #ifdef OPENSSL
@@ -121,7 +121,7 @@ init_util(void)
 	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
 
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 	filegen_register(&statsdir[0], "timingstats", &timingstats);
 #endif
 }
@@ -654,7 +654,7 @@ record_crypto_stats(
 }
 #endif /* OPENSSL */
 
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 /*
  * record_crypto_stats - write crypto statistics to file
  *

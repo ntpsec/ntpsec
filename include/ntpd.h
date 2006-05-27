@@ -99,6 +99,11 @@ extern  void    collect_timing  P((struct recvbuf *, const char *, int, l_fp *))
 extern	void	wait_for_signal P((void));
 extern	void	unblock_io_and_alarm P((void));
 extern	void	block_io_and_alarm P((void));
+#define UNBLOCK_IO_AND_ALARM() unblock_io_and_alarm()
+#define BLOCK_IO_AND_ALARM() block_io_and_alarm()
+#else
+#define UNBLOCK_IO_AND_ALARM()
+#define BLOCK_IO_AND_ALARM()
 #endif
 
 /* ntp_leap.c */
