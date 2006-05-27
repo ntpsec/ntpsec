@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
  *
- * refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C
+ * refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.70 2006/05/25 18:20:50 kardel RELEASE_20060525_C";
+static char rcsid[] = "refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2776,7 +2776,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2005, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2006, Frank Kardel");
 		notice = 1;
 	}
 
@@ -3012,17 +3012,6 @@ parse_start(
 	parse->generic->io.io_input   = parse->binding->bd_io_input; /* pick correct input routine */
 
 	/*
-	 * Insert in async io device list.
-	 */
-	if (!io_addclock(&parse->generic->io))
-        {
-		msyslog(LOG_ERR,
-			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;
-	}
-
-	/*
 	 * as we always(?) get 8 bit chars we want to be
 	 * sure, that the upper bits are zero for less
 	 * than 8 bit I/O - so we pass that information on.
@@ -3072,11 +3061,8 @@ parse_start(
 #ifdef HAVE_TERMIOS
 	(void) tcflush(parse->generic->io.fd, TCIOFLUSH);
 #else
-#ifdef TCFLSH
+#if defined(TCFLSH) && defined(TCIOFLUSH)
 	{
-#ifndef TCIOFLUSH
-#define TCIOFLUSH 2
-#endif
 		int flshcmd = TCIOFLUSH;
 
 		(void) ioctl(parse->generic->io.fd, TCFLSH, (caddr_t)&flshcmd);
@@ -3096,6 +3082,17 @@ parse_start(
 				}
 		}
 	
+	/*
+	 * Insert in async io device list.
+	 */
+	if (!io_addclock(&parse->generic->io))
+        {
+		msyslog(LOG_ERR,
+			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
+		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		return 0;
+	}
+
 	/*
 	 * print out configuration
 	 */
@@ -5678,6 +5675,15 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.73  2006/05/26 14:23:46  kardel
+ * cleanup of copyright info
+ *
+ * Revision 4.72  2006/05/26 14:19:43  kardel
+ * cleanup of ioctl cruft
+ *
+ * Revision 4.71  2006/05/26 14:15:57  kardel
+ * delay adding refclock to async refclock io after all initializations
+ *
  * Revision 4.70  2006/05/25 18:20:50  kardel
  * bug #619
  * terminate parse io engine after de-registering
