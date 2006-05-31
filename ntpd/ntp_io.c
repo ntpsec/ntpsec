@@ -149,8 +149,8 @@ static	void	close_socket	P((SOCKET));
 #ifdef REFCLOCK
 static	void	close_file	P((SOCKET));
 #endif
-#ifdef F_DUPFD
-static int	dup_fd		P((int));
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
+static int	move_fd		P((int));
 #ifndef FOPEN_MAX
 #define FOPEN_MAX	20
 #endif
@@ -248,24 +248,22 @@ connection_reset_fix(SOCKET fd) {
 }
 #endif
 
-#ifdef F_DUPFD
-static int dup_fd(int fd)
+#if !defined(SYS_WINNT) && defined(F_DUPFD)
+static int move_fd(int fd)
 {
-	int tmp, newfd;
+	int newfd;
         /*
          * Leave a space for stdio to work in.
          */
         if (fd >= 0 && fd < FOPEN_MAX) {
                 newfd = fcntl(fd, F_DUPFD, FOPEN_MAX);
 
-                tmp = errno;
                 if (newfd == -1)
 		{
 			msyslog(LOG_ERR, "Error duplicating file descriptor: %m");
                         return (fd);
 		}
                 (void)close(fd);
-                errno = tmp;
                 return (newfd);
         }
 	else
@@ -1515,7 +1513,7 @@ open_socket(
 	 * Fixup the file descriptor for some systems
 	 * See bug #530 for details of the issue.
 	 */
-	fd = dup_fd(fd);
+	fd = move_fd(fd);
 #endif
 
 	/*
@@ -2746,6 +2744,7 @@ io_closeclock(
 	struct refclockio *rio
 	)
 {
+	BLOCKIO();
 	/*
 	 * Remove structure from the list
 	 */
@@ -2772,6 +2771,7 @@ io_closeclock(
 	 * Close the descriptor.
 	 */
 	close_file(rio->fd);
+	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */
 
@@ -2789,6 +2789,7 @@ kill_asyncio(
 	BLOCKIO();
 	for (i = startfd; i <= maxactivefd; i++)
 	    (void)close_socket(i);
+	UNBLOCKIO();
 }
 #else
 /*
@@ -2810,6 +2811,7 @@ kill_asyncio(int startfd)
 		close_socket(lsock->fd);
 		lsock = next;
 	}
+	UNBLOCKIO();
 
 }
 #endif

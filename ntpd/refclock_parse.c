@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
  *
- * refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A
+ * refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -9,7 +9,7 @@
  * available and configured. Currently the STREAMS module
  * is only available for Suns running SunOS 4.x and SunOS5.x
  *
- * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2006 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.68 2006/05/01 17:02:51 kardel RELEASE_20060501_A";
+static char rcsid[] = "refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -2601,13 +2601,13 @@ parse_shutdown(
 		parse->parse_type->cl_end(parse);
 	}
 	
-	if (parse->binding)
-	    PARSE_END(parse);
-
 	/*
 	 * Tell the I/O module to turn us off.  We're history.
 	 */
 	io_closeclock(&parse->generic->io);
+
+	if (parse->binding)
+	    PARSE_END(parse);
 
 	free_varlist(parse->kv);
   
@@ -2776,7 +2776,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2005, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2006, Frank Kardel");
 		notice = 1;
 	}
 
@@ -2994,19 +2994,11 @@ parse_start(
 	}
 
 	/*
-	 * Insert in async io device list.
+	 * pick correct input machine
 	 */
 	parse->generic->io.srcclock = (caddr_t)parse;
 	parse->generic->io.datalen = 0;
 	
-	if (!io_addclock(&parse->generic->io))
-        {
-		msyslog(LOG_ERR,
-			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;
-	}
-
 	parse->binding = init_iobinding(parse);
 
 	if (parse->binding == (bind_t *)0)
@@ -3069,11 +3061,8 @@ parse_start(
 #ifdef HAVE_TERMIOS
 	(void) tcflush(parse->generic->io.fd, TCIOFLUSH);
 #else
-#ifdef TCFLSH
+#if defined(TCFLSH) && defined(TCIOFLUSH)
 	{
-#ifndef TCIOFLUSH
-#define TCIOFLUSH 2
-#endif
 		int flshcmd = TCIOFLUSH;
 
 		(void) ioctl(parse->generic->io.fd, TCFLSH, (caddr_t)&flshcmd);
@@ -3093,6 +3082,17 @@ parse_start(
 				}
 		}
 	
+	/*
+	 * Insert in async io device list.
+	 */
+	if (!io_addclock(&parse->generic->io))
+        {
+		msyslog(LOG_ERR,
+			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
+		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		return 0;
+	}
+
 	/*
 	 * print out configuration
 	 */
@@ -5678,6 +5678,24 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.73  2006/05/26 14:23:46  kardel
+ * cleanup of copyright info
+ *
+ * Revision 4.72  2006/05/26 14:19:43  kardel
+ * cleanup of ioctl cruft
+ *
+ * Revision 4.71  2006/05/26 14:15:57  kardel
+ * delay adding refclock to async refclock io after all initializations
+ *
+ * Revision 4.70  2006/05/25 18:20:50  kardel
+ * bug #619
+ * terminate parse io engine after de-registering
+ * from refclock io engine
+ *
+ * Revision 4.69  2006/05/25 17:28:02  kardel
+ * complete refclock io structure initialization *before* inserting it into the
+ * refclock input machine (avoids null pointer deref) (bug #619)
+ *
  * Revision 4.68  2006/05/01 17:02:51  kardel
  * copy receiver method also for newlwy created receive buffers
  *

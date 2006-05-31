@@ -1324,6 +1324,9 @@ findcmd(
 /*
  * getarg - interpret an argument token
  *
+ * string is always set.
+ * type is set to the decoded type.
+ *
  * return:	 0 - failure
  *		 1 - success
  *		-1 - skip to next token
@@ -1339,9 +1342,13 @@ getarg(
 	char *cp, *np;
 	static const char *digits = "0123456789";
 
-	switch (code & ~OPT) {
+	memset(argp, 0, sizeof(*argp));
+
+	argp->string = str;
+	argp->type   = code & ~OPT;
+
+	switch (argp->type) {
 	    case NTP_STR:
-		argp->string = str;
 		break;
 	    case NTP_ADD:
 		if (!strcmp("-6", str)) {
