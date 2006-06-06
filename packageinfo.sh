@@ -2,7 +2,7 @@
 # odd minor numbers are for -dev, even minor numbers are for -stable
 proto=4
 major=2
-minor=2
+minor=3
 version=${proto}.${major}.${minor}
 # Point.  3 cases:
 # - Numeric values increment
