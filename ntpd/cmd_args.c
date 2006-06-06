@@ -332,16 +332,16 @@ getCmdOpts(
 	if (HAVE_OPT( SLEW ))
 		clock_max = 600;
 
-	if (HAVE_OPT( UPDATEINTERVAL ) {
-		long val;
+	if (HAVE_OPT( UPDATEINTERVAL )) {
+		long val = OPT_VALUE_UPDATEINTERVAL;
 		extern int interface_interval;
 			  
-		if ((1 == sscanf(OPT_ARG( UPDATEINTERVAL ), "%ld", &val)) && ((val >= 60) || (val == 0)))
+		if ((val >= 60) || (val == 0))
 			interface_interval = val;
 		else {
 			msyslog(LOG_ERR,
-				"command line interface update interval %s must be 0 or longer than 60 seconds",
-				      ntp_optarg);
+				"command line interface update interval %ld must be 0 or longer than 60 seconds",
+				      val);
 			errflg++;
 		}
 	}

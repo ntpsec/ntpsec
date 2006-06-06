@@ -306,6 +306,19 @@ flag = {
 };
 
 flag = {
+    name      = updateinterval;
+    value     = U;
+    arg-type  = number;
+    descrip   = "interval in seconds between scans for new or dropped interfaces";
+    doc = <<-  _EndOfDoc_
+	Give the time in seconds between two scans for new or dropped interfaces.
+	For systems with routing socket support the scans will be performed shortly after the interface change
+	has been detected by the system.
+	Use 0 to disable scanning. 60 seconds is the minimum time between scans.
+	_EndOfDoc_;
+};
+
+flag = {
     name      = statsdir;
     value     = s;
     arg-type  = string;
