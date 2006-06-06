@@ -8,6 +8,7 @@ case $point in
  [0-9]*)
     NAME="${NAME}p$point"
     ;;
+ NEW) ;;
  '') ;;
  *) echo "Unexpected value for 'point' <$point>!"
     exit 1
