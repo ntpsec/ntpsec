@@ -464,7 +464,6 @@ ntpdmain(
 
 	initializing = 1;		/* mark that we are initializing */
 
-printf("0: argc=%d\n", argc);
 	{
 		int optct = optionProcess(
 #ifdef SIM
@@ -476,7 +475,6 @@ printf("0: argc=%d\n", argc);
 		argc -= optct;
 		argv += optct;
 	}
-printf("1: argc=%d\n", argc);
 
 	/* HMS: is this lame? Should we process -l first? */
 
