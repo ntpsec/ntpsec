@@ -22,13 +22,13 @@ man_MANS=	ntpdc.1
 run_ag=         cd $(srcdir) && autogen -L ../include
 
 $(srcdir)/ntpdc-opts.h: ntpdc-opts.c
-$(srcdir)/ntpdc-opts.c: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdc-opts.c: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) ntpdc-opts.def
 
-$(srcdir)/ntpdc.1: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdc.1: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
 
-$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: ntpdc-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h

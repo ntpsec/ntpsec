@@ -21,13 +21,13 @@ man_MANS=	ntp-keygen.1
 run_ag=         cd $(srcdir) && autogen -L ../include
 
 $(srcdir)/ntp-keygen-opts.h: ntp-keygen-opts.c
-$(srcdir)/ntp-keygen-opts.c: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntp-keygen-opts.c: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) ntp-keygen-opts.def
 
-$(srcdir)/ntp-keygen.1: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntp-keygen.1: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
 
-$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu: ntp-keygen-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
 
 
