@@ -2947,20 +2947,6 @@ case "$ans" in
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(if we want to try SNTP)
-AC_ARG_WITH(sntp,
-	AC_HELP_STRING([--with-sntp], [+ Build SNTP?]),
-	[ans=$withval], [ans=yes])
-case "$ans" in
- no) ;;
- *)
-    MAKE_SNTP="sntp"
-    AC_SUBST(MAKE_SNTP)
-    ans=yes
-    ;;
-esac
-AC_MSG_RESULT($ans)
-
 AC_SUBST(MAKE_CHECK_LAYOUT)
 AC_MSG_CHECKING(if we want to run check-layout)
 case "$cross_compiling$PATH_PERL" in
@@ -4022,11 +4008,6 @@ AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
-case "$MAKE_SNTP" in
- '') ;;
- *)
-    AC_CONFIG_SUBDIRS(sntp)
-    ;;
-esac
+AC_CONFIG_SUBDIRS(sntp)
 
 AC_OUTPUT

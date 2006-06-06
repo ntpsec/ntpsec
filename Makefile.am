@@ -21,7 +21,7 @@ SUBDIRS+= \
 	adjtimed	\
 	clockstuff	\
 	kernel	\
-	@MAKE_SNTP@	\
+	sntp	\
 	util
 
 DIST_SUBDIRS= \
