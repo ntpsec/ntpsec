@@ -1735,6 +1735,15 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
+AC_MSG_CHECKING(if we including processing time debugging code)
+AC_ARG_ENABLE(debug-timing,
+   AC_HELP_STRING([--enable-debug-timing], [- include processing time debugging code (costs performance)]),
+    [ntp_ok=$enableval], [ntp_ok=no])
+if test "$ntp_ok" = "yes"; then
+    AC_DEFINE(DEBUG_TIMING, 1, [Enable processing time debugging?])
+fi
+AC_MSG_RESULT($ntp_ok)
+
 AC_MSG_CHECKING(for a the number of minutes in a DST adjustment)
 AC_ARG_ENABLE(dst_minutes,
    AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),

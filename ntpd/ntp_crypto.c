@@ -193,6 +193,9 @@ session_key(
 	u_int32	header[10];	/* data in network byte order */
 	u_int	hdlen, len;
 
+	if (!dstadr)
+		return 0;
+	
 	/*
 	 * Generate the session key and key ID. If the lifetime is
 	 * greater than zero, install the key and call it trusted.
@@ -266,6 +269,9 @@ make_keylist(
 	u_int	len, mpoll;
 	int	i;
 
+	if (!dstadr)
+		return XEVNT_OK;
+	
 	/*
 	 * Allocate the key list if necessary.
 	 */
@@ -2046,6 +2052,9 @@ bighash(
 	EVP_DigestUpdate(&ctx, ptr, len);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	BN_bin2bn(dgst, len, bk);
+
+	/* XXX MEMLEAK? free ptr? */
+
 	return (1);
 }
 

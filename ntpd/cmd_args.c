@@ -23,7 +23,6 @@ extern char const *progname;
 extern const char *specific_interface;
 extern int default_ai_family;
 
-
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
 #endif
@@ -333,6 +332,19 @@ getCmdOpts(
 	if (HAVE_OPT( SLEW ))
 		clock_max = 600;
 
+	if (HAVE_OPT( UPDATEINTERVAL ) {
+		long val;
+		extern int interface_interval;
+			  
+		if ((1 == sscanf(OPT_ARG( UPDATEINTERVAL ), "%ld", &val)) && ((val >= 60) || (val == 0)))
+			interface_interval = val;
+		else {
+			msyslog(LOG_ERR,
+				"command line interface update interval %s must be 0 or longer than 60 seconds",
+				      ntp_optarg);
+			errflg++;
+		}
+	}
 #ifdef SIM
 	if (HAVE_OPT( SIMBROADCASTDELAY ))
 		sscanf(OPT_ARG( SIMBROADCASTDELAY ), "%lf", &ntp_node.bdly);

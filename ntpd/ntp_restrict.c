@@ -474,6 +474,7 @@ hack_restrict(
 			break;
 	
 		case RESTRICT_REMOVE:
+		case RESTRICT_REMOVEIF:
 			/*
 			 * Remove an entry from the table entirely if we
 			 * found one. Don't remove the default entry and
@@ -481,7 +482,7 @@ hack_restrict(
 			 */
 			if (rl != 0
 			    && rl->addr != htonl(INADDR_ANY)
-			    && !(rl->mflags & RESM_INTERFACE)) {
+			    && !(rl->mflags & RESM_INTERFACE && op != RESTRICT_REMOVEIF)) {
 				if (rlprev != NULL) {
 					rlprev->next = rl->next;
 				} else {
@@ -570,6 +571,7 @@ hack_restrict(
 			break;
 
 		case RESTRICT_REMOVE:
+		case RESTRICT_REMOVEIF:
 			/*
 			 * Remove an entry from the table entirely if we
 			 * found one. Don't remove the default entry and
@@ -577,7 +579,7 @@ hack_restrict(
 			 */
 			if (rl6 != 0 &&
 			    !IN6_IS_ADDR_UNSPECIFIED(&rl6->addr6)
-			    && !(rl6->mflags & RESM_INTERFACE)) {
+			    && !(rl6->mflags & RESM_INTERFACE && op != RESTRICT_REMOVEIF)) {
 				if (rlprev6 != NULL) {
 					rlprev6->next = rl6->next;
 				} else {
