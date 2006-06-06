@@ -33,24 +33,24 @@ AUTORECONF=${AUTORECONF:-autoreconf}
 
 scripts/genver
 
-#rm -rf sntp/libopts*
-#gunzip -c $(autoopts-config --libsrc) | (
-#  cd sntp
-#  tar -xvf -
-#  mv libopts-*.*.* libopts )
+rm -rf sntp/libopts*
+gunzip -c $(autoopts-config --libsrc) | (
+  cd sntp
+  tar -xvf -
+  mv libopts-*.*.* libopts )
 
-#prog_opt_files=$(
-#    egrep -l '^prog.name' $(
-#        find * -type f -name *.def|fgrep -v /SCCS/))
+prog_opt_files=$(
+    egrep -l '^prog.name' $(
+        find * -type f -name *.def|fgrep -v /SCCS/))
 
 incdir=${PWD}/include
 
-#for f in ${prog_opt_files}
-#do
-#  ( cd $(dirname ${f})
-#    echo "Running autogen on $f..."
-#    autogen -L${incdir} $(basename ${f}) )
-#done
+for f in ${prog_opt_files}
+do
+  ( cd $(dirname ${f})
+    echo "Running autogen on $f..."
+    autogen -L${incdir} $(basename ${f}) )
+done
 
 (cd sntp && ${AUTORECONF} -i -v)
 
