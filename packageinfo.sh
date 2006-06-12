@@ -8,7 +8,7 @@ version=${proto}.${major}.${minor}
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=
+point=0
 # Special.  Normally unused.  A suffix.
 #special=ag
 special=
@@ -22,4 +22,4 @@ CLTAG=NTP_4_2_0
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-rcpoint=NEW
+rcpoint=
