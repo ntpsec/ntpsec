@@ -57,6 +57,7 @@ EXTRA_DIST = \
 	README.versions \
 	TODO \
 	WHERE-TO-START \
+	bootstrap \
 	build \
 	config.guess \
 	config.h.in \
