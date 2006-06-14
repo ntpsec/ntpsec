@@ -52,6 +52,6 @@ do
     autogen -L${incdir} $(basename ${f}) )
 done
 
-(cd sntp && ${AUTORECONF} -i -v)
-
 ${AUTORECONF} -i -v
+
+(cd sntp && ${AUTORECONF} -f -i -v)

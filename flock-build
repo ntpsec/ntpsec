@@ -3,7 +3,7 @@
 BUILD_ARGS="$@"
 PARSE="--enable-parse-clocks"
 #PARSE=
-STD="--with-sntp --enable-simulator"
+STD="--enable-simulator"
 
 # Backroom:
 #   beauregard	   freebsd-4

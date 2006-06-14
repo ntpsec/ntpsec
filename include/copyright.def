@@ -1,10 +1,11 @@
 /* -*- Mode: Text -*- */
 
 copyright = {
-    date  = "1970-2004";
+    date  = "1970-2006";
     owner = "ntp.org";
     eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
-    type  = bsd;
+    type  = note;
+    text  = "see html/copyright.html";
 };
 
 #ifndef __windows__

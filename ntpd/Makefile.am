@@ -61,23 +61,23 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_zyfer.c
 
 $(srcdir)/ntpd-opts.h: ntpd-opts.c
-$(srcdir)/ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) ntpd-opts.def
 
-$(srcdir)/ntpd.1: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpd.1: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
-$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: ntpd-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(srcdir)/ntpdsim-opts.h: ntpdsim-opts.c
-$(srcdir)/ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) ntpdsim-opts.def
 
-$(srcdir)/ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bntpdsim ntpdsim-opts.def
 
-$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: ntpdsim-opts.def ntpdbase-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
 
 $(PROGRAMS): $(LDADD)

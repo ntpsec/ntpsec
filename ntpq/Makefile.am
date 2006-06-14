@@ -15,13 +15,13 @@ run_ag=         cd $(srcdir) && autogen -L ../include
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
 $(srcdir)/ntpq-opts.h: ntpq-opts.c
-$(srcdir)/ntpq-opts.c: ntpq-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpq-opts.c: ntpq-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) ntpq-opts.def
 
-$(srcdir)/ntpq.1: ntpq-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpq.1: ntpq-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
 
-$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: ntpq-opts.def $(top_srcdir)/include/debug-opt.def
+$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: ntpq-opts.def $(top_srcdir)/include/debug-opt.def $(top_srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)
