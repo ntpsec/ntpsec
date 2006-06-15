@@ -54,4 +54,8 @@ done
 
 ${AUTORECONF} -i -v
 
+# HMS: 20060615: the next line seems to be needed to make sure
+# we get the correct srcdir path in sntp/libopts/Makefile.in
+rm -rf sntp/autom4te.cache
+
 (cd sntp && ${AUTORECONF} -f -i -v)
