@@ -33,6 +33,13 @@ AUTORECONF=${AUTORECONF:-autoreconf}
 
 scripts/genver
 
+# The copy for ntp...
+rm -rf libopts*
+gunzip -c $(autoopts-config --libsrc) | (
+  tar -xvf -
+  mv libopts-*.*.* libopts )
+
+# The copy for sntp...
 rm -rf sntp/libopts*
 gunzip -c $(autoopts-config --libsrc) | (
   cd sntp
