@@ -54,7 +54,7 @@ esac
 
 AMU_OS_CFLAGS
 
-LIBOPTS_CHECK(sntp/libopts)
+LIBOPTS_CHECK(libopts)
 
 AC_MSG_CHECKING(for bin subdirectory)
 AC_ARG_WITH(binsubdir,

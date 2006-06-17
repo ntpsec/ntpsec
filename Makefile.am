@@ -1,82 +1,89 @@
 #AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
 AUTOMAKE_OPTIONS = util/ansi2knr foreign 1.8
-ACLOCAL_AMFLAGS= -I m4 -I sntp/libopts/m4
+ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
+
+NULL=
 
 SUBDIRS=
 if NEED_LIBOPTS
-SUBDIRS+= sntp/libopts
+SUBDIRS+= libopts
 endif
-SUBDIRS+= \
-	scripts \
-	include \
+SUBDIRS+= 		\
+	scripts 	\
+	include 	\
 	ElectricFence	\
-	@ARLIB_DIR@ \
-	libntp	\
+	@ARLIB_DIR@ 	\
+	libntp		\
 	libparse	\
-	ntpd	\
-	ntpdate	\
-	ntpdc	\
-	ntpq	\
+	ntpd		\
+	ntpdate		\
+	ntpdc		\
+	ntpq		\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\
-	kernel	\
-	sntp	\
-	util
+	kernel		\
+	sntp		\
+	util		\
+	$(NULL)
 
-DIST_SUBDIRS= \
-	scripts \
-	include \
+DIST_SUBDIRS=		\
+	scripts		\
+	include		\
 	ElectricFence	\
-	arlib \
-	libntp	\
+	arlib		\
+	libntp		\
+	libopts		\
 	libparse	\
-	ntpd	\
-	ntpdate	\
-	ntpdc	\
-	ntpq	\
+	ntpd		\
+	ntpdate		\
+	ntpdc		\
+	ntpq		\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\
-	kernel	\
-	sntp	\
-	sntp/libopts	\
-	util
-DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --with-sntp
+	kernel		\
+	sntp		\
+	util		\
+	$(NULL)
 
-EXTRA_DIST = \
-	COPYRIGHT \
-	ChangeLog \
+DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --enable-local-libopts
+
+EXTRA_DIST =		\
+	COPYRIGHT	\
+	ChangeLog	\
 	ChangeLog-4.1.0 \
-	NEWS \
-	NOTES.y2kfixes \
-	README.bk \
-	README.hackers \
-	README.patches \
+	NEWS		\
+	NOTES.y2kfixes	\
+	README.bk	\
+	README.hackers	\
+	README.patches	\
 	README.refclocks \
-	README.versions \
-	TODO \
-	WHERE-TO-START \
-	bootstrap \
-	build \
-	config.guess \
-	config.h.in \
-	config.sub \
-	dot.emacs \
-	excludes \
-	flock-build \
-	install-sh \
-	packageinfo.sh \
-	readme.y2kfixes \
-	results.y2kfixes \
+	README.versions	\
+	TODO		\
+	WHERE-TO-START	\
+	bootstrap	\
+	build		\
+	config.guess	\
+	config.h.in	\
+	config.sub	\
+	dot.emacs	\
+	excludes	\
+	flock-build	\
+	install-sh	\
+	packageinfo.sh	\
+	readme.y2kfixes	\
+	results.y2kfixes	\
 	\
-	conf \
-	html \
-	libisc \
-	ports \
+	conf		\
+	html		\
+	libisc		\
+	ports		\
 	\
-	version \
-	version.m4
+	version		\
+	version.m4	\
+	\
+	$(NULL)
 
 DISTCLEANFILES = .gcc-warning
 
