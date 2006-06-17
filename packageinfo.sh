@@ -1,3 +1,4 @@
+repotype=stable
 # version=Protocol.Major.Minor
 # odd minor numbers are for -dev, even minor numbers are for -stable
 proto=4
