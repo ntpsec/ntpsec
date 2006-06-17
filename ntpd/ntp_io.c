@@ -1026,7 +1026,20 @@ update_interfaces(
 			DPRINTF(1, ("skipping interface %s (%s) - DOWN\n", interface.name, stoa(&interface.sin)));
 			continue;
 		}
-		
+
+		/*
+		 * skip any interfaces UP and bound to a wildcard
+		 * address - some dhcp clients produce that in the
+		 * wild
+		 */
+		if (family == AF_INET &&
+		    ((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr == htonl(INADDR_ANY))
+			continue;
+
+		if (family == AF_INET6 &&
+		    memcmp(&((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr, &in6addr_any,
+			   sizeof(in6addr_any) == 0))
+			continue;
 
 		/*
 		 * map to local *address* in order

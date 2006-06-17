@@ -1,3 +1,4 @@
+repotype=stable
 # version=Protocol.Major.Minor
 # odd minor numbers are for -dev, even minor numbers are for -stable
 proto=4
@@ -22,4 +23,4 @@ CLTAG=NTP_4_2_0
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-rcpoint=0
+rcpoint=1
