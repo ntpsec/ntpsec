@@ -1084,6 +1084,7 @@ update_interfaces(
 			else
 			{
 				msyslog(LOG_INFO, "failed to initialize interface for address %s", stoa(&interface.sin));
+				continue;
 			}
 		}
 		/* 
