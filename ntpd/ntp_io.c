@@ -590,6 +590,28 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		itf->flags |= INT_MULTICAST;
 
 }
+
+/*
+ * find out if a given interface structure contains
+ * a wildcard address
+ */
+static int
+is_wildcard_ifaddr(struct interface *itf)
+{
+	if (itf->family == AF_INET &&
+	    ((struct sockaddr_in*)&itf->sin)->sin_addr.s_addr == htonl(INADDR_ANY))
+		return 1;
+
+#ifdef INCLUDE_IPV6_SUPPORT
+	if (itf->family == AF_INET6 &&
+	    memcmp(&((struct sockaddr_in6*)&itf->sin)->sin6_addr, &in6addr_any,
+		   sizeof(in6addr_any) == 0))
+		return 1;
+#endif
+
+	return 0;
+}
+
 /*
  * create_sockets - create a socket for each interface plus a default
  *			socket for when we don't know where to send
@@ -690,15 +712,9 @@ create_sockets(
 		/*
 		 * skip any interfaces UP and bound to a wildcard
 		 * address - some dhcp clients produce that in the
-		 * wild
+		 * wild.
 		 */
-		if (family == AF_INET &&
-		    ((struct sockaddr_in*)&inter_list[idx].sin)->sin_addr.s_addr == htonl(INADDR_ANY))
-			continue;
-
-		if (family == AF_INET6 &&
-		    memcmp(&((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr, &in6addr_any,
-			   sizeof(in6addr_any) == 0))
+		if (is_wildcard_ifaddr(&inter_list[idx]))
 			continue;
 
 		inter_list[idx].fd = INVALID_SOCKET;
