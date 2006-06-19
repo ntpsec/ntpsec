@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 #  This "bootstrap" script performs various pre-autoreconf actions
 #  that are required after pulling fresh sources from the repository.
