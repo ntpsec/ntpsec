@@ -1027,6 +1027,7 @@ update_interfaces(
 			continue;
 		}
 
+#if 0	/* XXX: [BUG 637] FIXME */
 		/*
 		 * skip any interfaces UP and bound to a wildcard
 		 * address - some dhcp clients produce that in the
@@ -1040,6 +1041,7 @@ update_interfaces(
 		    memcmp(&((struct sockaddr_in6*)&inter_list[idx].sin)->sin6_addr, &in6addr_any,
 			   sizeof(in6addr_any) == 0))
 			continue;
+#endif
 
 		/*
 		 * map to local *address* in order
