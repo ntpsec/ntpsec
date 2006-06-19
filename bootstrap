@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 #  This "bootstrap" script performs various pre-autoreconf actions
 #  that are required after pulling fresh sources from the repository.
@@ -61,8 +61,11 @@ done
 
 ${AUTORECONF} -i -v
 
-# HMS: 20060615: the next line seems to be needed to make sure
-# we get the correct srcdir path in sntp/libopts/Makefile.in
-rm -rf sntp/autom4te.cache
-
-(cd sntp && ${AUTORECONF} -f -i -v)
+# HMS: 20060618: Now that we use separate copies of libopts
+# we should only need the previous line.
+#
+## HMS: 20060615: the next line seems to be needed to make sure
+## we get the correct srcdir path in sntp/libopts/Makefile.in
+#rm -rf sntp/autom4te.cache
+#
+#(cd sntp && ${AUTORECONF} -f -i -v)

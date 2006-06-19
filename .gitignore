@@ -133,3 +133,4 @@ util/Makefile.in
 util/ntp-keygen.1
 version
 version.m4
+libopts/*
