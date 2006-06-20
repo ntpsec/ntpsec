@@ -671,9 +671,8 @@ AC_CACHE_CHECK(for struct rt_msghdr, ac_cv_struct_rt_msghdr,
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include <net/route.h>],[
-extern struct rt_msghdr *p;
-return p;],
+#include <net/route.h>],
+[struct rt_msghdr p;],
 	ac_cv_struct_rt_msghdr=yes,
 	ac_cv_struct_rt_msghdr=no)
 ])
