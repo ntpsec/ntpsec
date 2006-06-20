@@ -913,6 +913,27 @@ interface_update(interface_receiver_t receiver, void *data)
 }
 
 /*
+ * find out if a given interface structure contains
+ * a wildcard address
+ */
+static int
+is_wildcard_ifaddr(struct interface *itf)
+{
+	if (itf->family == AF_INET &&
+	    ((struct sockaddr_in*)&itf->sin)->sin_addr.s_addr == htonl(INADDR_ANY))
+		return 1;
+
+#ifdef INCLUDE_IPV6_SUPPORT
+	if (itf->family == AF_INET6 &&
+	    memcmp(&((struct sockaddr_in6*)&itf->sin)->sin6_addr, &in6addr_any,
+		   sizeof(in6addr_any) == 0))
+		return 1;
+#endif
+
+	return 0;
+}
+
+/*
  * update_interface strategy
  *
  * toggle configuration phase
@@ -1026,7 +1047,14 @@ update_interfaces(
 			DPRINTF(1, ("skipping interface %s (%s) - DOWN\n", interface.name, stoa(&interface.sin)));
 			continue;
 		}
-		
+
+		/*
+		 * skip any interfaces UP and bound to a wildcard
+		 * address - some dhcp clients produce that in the
+		 * wild
+		 */
+		if (is_wildcard_ifaddr(&interface))
+			continue;
 
 		/*
 		 * map to local *address* in order
@@ -1071,6 +1099,7 @@ update_interfaces(
 			else
 			{
 				msyslog(LOG_INFO, "failed to initialize interface for address %s", stoa(&interface.sin));
+				continue;
 			}
 		}
 		/* 
