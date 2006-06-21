@@ -3525,8 +3525,12 @@ process_routing_msgs(struct asyncio_reader *reader)
 		}
 		
 		switch (rtm->rtm_type) {
+#ifdef RTM_NEWADDR
 		case RTM_NEWADDR:
+#endif
+#ifdef RTM_DELADDR
 		case RTM_DELADDR:
+#endif
 #ifdef RTM_ADD
 		case RTM_ADD:
 #endif
