@@ -185,11 +185,11 @@ getCmdOpts(
 {
 	extern const char *config_file;
 	int errflg;
-	tOptions myOptions =
+	tOptions *myOptions =
 #ifdef SIM
-				ntpdsimOptions
+				&ntpdsimOptions
 #else
-				ntpdOptions
+				&ntpdOptions
 #endif
 				;
 
@@ -377,7 +377,7 @@ getCmdOpts(
 
 	if (errflg || argc) {
 		printf("argc is <%d>\n", argc);
-		optionUsage(&myOptions, 2);
+		optionUsage(myOptions, 2);
 	}
 	return;
 }
