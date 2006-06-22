@@ -12,8 +12,10 @@
 #ifdef SIM
 # include "ntpsim.h"
 # include "ntpdsim-opts.h"
+# define OPTSTRUCT	ntpdsimOptions
 #else
 # include "ntpd-opts.h"
+# define OPTSTRUCT	ntpdOptions
 #endif /* SIM */
 
 /*
@@ -29,152 +31,6 @@ extern int	check_netinfo;
 
 
 /*
- * getstartup - search through the options looking for a debugging flag
- */
-void
-getstartup(
-	int argc,
-	char *argv[]
-	)
-{
-#if 0
-	int errflg;
-	extern int priority_done;
-	int c;
-
-	/*
-	 * "This is a big hack.	We don't really want to read command line
-	 * configuration until everything else is initialized, since
-	 * the ability to configure the system may depend on storage
-	 * and the like having been initialized."
-	 *
-	 * Now we crack the options first and process them later, as
-	 * needed...
-	 *
-	 * "Except that we also don't want to initialize anything until
-	 * after detaching from the terminal, ..."
-	 *
-	 * Why?
-	 *
-	 * "... but we won't know to do that until we've parsed the command
-	 * line.  Do that now, crudely, and do it again later."
-	 *
-	 * Again, now we crack in one place and process in another.
-	 *
-	 * Our ntp_getopt() is explicitly reusable, by the
-	 * way.  Your own mileage may vary.
-	 *
-	 * This hack is even called twice (to allow complete logging to file)
-	 */
-
-	errflg = 0;
-
-	/*
-	 * Decode argument list
-	 */
-	while ((c = ntp_getopt(argc, argv, ntp_options)) != EOF)
-	    switch (c) {
-#ifdef DEBUG
-		case 'd':
-		    ++debug;
-		    break;
-		case 'D':
-		    debug = (int)atol(ntp_optarg);
-		    printf("Debug1: %s -> %x = %d\n", ntp_optarg, debug, debug);
-		    break;
-#else
-		case 'd':
-		case 'D':
-		    msyslog(LOG_ERR, "ntpd not compiled with -DDEBUG option - no DEBUG support");
-		    fprintf(stderr, "ntpd not compiled with -DDEBUG option - no DEBUG support\n");
-		    ++errflg;
-		    break;
-#endif
-		case 'L':
-		    listen_to_virtual_ips = 0;
-		    if(ntp_optarg)
-			specific_interface = ntp_optarg; 
-		    break;
-		case 'l':
-			{
-				FILE *new_file;
-
-				if(strcmp(ntp_optarg, "stderr") == 0)
-					new_file = stderr;
-				else if(strcmp(ntp_optarg, "stdout") == 0)
-					new_file = stdout;
-				else
-					new_file = fopen(ntp_optarg, "a");
-				if (new_file != NULL) {
-					NLOG(NLOG_SYSINFO)
-						msyslog(LOG_NOTICE, "logging to file %s", ntp_optarg);
-					if (syslog_file != NULL &&
-						fileno(syslog_file) != fileno(new_file))
-						(void)fclose(syslog_file);
-
-					syslog_file = new_file;
-					syslogit = 0;
-				}
-				else
-					msyslog(LOG_ERR,
-						"Cannot open log file %s",
-						ntp_optarg);
-			}
-			break;
-
-		case 'n':
-		case 'q':
-		    ++nofork;
-		    break;
- 
-		case 'N':
-		    priority_done = 0;
-		    break;
-			
-		case '?':
-		    ++errflg;
-		    break;
-
-		case '-':
-			if ( ! strcmp(ntp_optarg, "version") ) {
-				printf("%.80s: %.80s\n", progname, Version);
-				exit(0);
-			} else if ( ! strcmp(ntp_optarg, "help") ) {
-				optionUsage(&myOptions, 0);
-			} else if ( ! strcmp(ntp_optarg, "copyright") ) {
-				printf("unknown\n");
-				exit(0);
-			} else {
-				fprintf(stderr, "%.80s: Error unknown argument '--%.80s'\n",
-					progname,
-					ntp_optarg);
-				exit(12);
-			}
-			break;
-
-		default:
-			break;
-	    }
-
-	if (errflg || ntp_optind != argc) {
-		optionUsage(&myOptions, 2);
-	}
-	ntp_optind = 0;	/* reset ntp_optind to restart ntp_getopt */
-
-#ifdef DEBUG
-	if (debug) {
-#ifdef HAVE_SETVBUF
-		static char buf[BUFSIZ];
-		setvbuf(stdout, buf, _IOLBF, BUFSIZ);
-#else
-		setlinebuf(stdout);
-#endif
-	}
-#endif
-#endif
-}
-
-/*
  * getCmdOpts - get command line options
  */
 void
@@ -185,13 +41,7 @@ getCmdOpts(
 {
 	extern const char *config_file;
 	int errflg;
-	tOptions myOptions =
-#ifdef SIM
-				ntpdsimOptions
-#else
-				ntpdOptions
-#endif
-				;
+	tOptions *myOptions = &OPTSTRUCT;
 
 	/*
 	 * Initialize, initialize
@@ -377,7 +227,7 @@ getCmdOpts(
 
 	if (errflg || argc) {
 		printf("argc is <%d>\n", argc);
-		optionUsage(&myOptions, 2);
+		optionUsage(myOptions, 2);
 	}
 	return;
 }

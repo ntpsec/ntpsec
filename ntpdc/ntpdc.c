@@ -20,7 +20,7 @@
 #include "ntpdc-opts.h"
 
 #ifdef SYS_WINNT
-#include <Mswsock.h>
+# include <Mswsock.h>
 # include <io.h>
 #else
 # define closesocket close
@@ -32,9 +32,14 @@
 #endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #ifdef SYS_VXWORKS
-/* vxWorks needs mode flag -casey*/
-#define open(name, flags)   open(name, flags, 0777)
-#define SERVER_PORT_NUM     123
+				/* vxWorks needs mode flag -casey*/
+# define open(name, flags)   open(name, flags, 0777)
+# define SERVER_PORT_NUM     123
+#endif
+
+/* We use COMMAND as an autogen keyword */
+#ifdef COMMAND
+# undef COMMAND
 #endif
 
 /*
