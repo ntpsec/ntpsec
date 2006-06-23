@@ -2720,14 +2720,14 @@ parse_ppsapi(
 	} else {
 	        if (mode1 == PPS_OFFSETCLEAR) 
 		        {
-			        parse->ppsparams.clear_offset.tv_sec = parse->ppsphaseadjust;
-			        parse->ppsparams.clear_offset.tv_nsec = 1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+			        parse->ppsparams.clear_offset.tv_sec = -parse->ppsphaseadjust;
+			        parse->ppsparams.clear_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
 	  
 		if (mode1 == PPS_OFFSETASSERT)
 	                {
-		                parse->ppsparams.assert_offset.tv_sec = parse->ppsphaseadjust;
-				parse->ppsparams.assert_offset.tv_nsec = 1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+		                parse->ppsparams.assert_offset.tv_sec = -parse->ppsphaseadjust;
+				parse->ppsparams.assert_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
 	}
 	
@@ -3177,6 +3177,12 @@ parse_ctl(
 		      msyslog(LOG_INFO, "PARSE receiver #%d: new PPS phase adjustment %.6f s",
 			  CLK_UNIT(parse->peer),
 			      parse->ppsphaseadjust);
+#if defined(HAVE_PPSAPI)
+		      if (CLK_PPS(parse->peer))
+		      {
+			      parse_ppsapi(parse);
+		      }
+#endif
 		    }
 		}
 	}
