@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A
  *
- * refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A
+ * refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.73 2006/05/26 14:23:46 kardel RELEASE_20060526_A";
+static char rcsid[] = "refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -4154,8 +4154,8 @@ gps16x_message(
 			case GPS_ANT_INFO:
 				{
 					ANT_INFO antinfo;
-					u_char buffer[512];
-					u_char *p;
+					char buffer[512];
+					char *p;
 					
 					get_mbg_antinfo(&bufp, &antinfo);
 					snprintf(buffer, sizeof(buffer), "meinberg_antenna_status=\"");
@@ -4211,8 +4211,8 @@ gps16x_message(
 			case GPS_CFGH:
 				{
 					CFGH cfgh;
-					u_char buffer[512];
-					u_char *p;
+					char buffer[512];
+					char *p;
 					
 					get_mbg_cfgh(&bufp, &cfgh);
 					if (cfgh.valid)
@@ -5685,6 +5685,13 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.76  2006/06/22 18:40:47  kardel
+ * clean up signedness (gcc 4)
+ *
+ * Revision 4.75  2006/06/22 16:58:10  kardel
+ * Bug #632: call parse_ppsapi() in parse_ctl() when updating
+ * the PPS offset. Fix sign of offset passed to kernel.
+ *
  * Revision 4.74  2006/06/18 21:18:37  kardel
  * NetBSD Coverity CID 3796: possible NULL deref
  *
