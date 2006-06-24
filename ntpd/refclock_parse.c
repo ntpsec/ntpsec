@@ -4887,7 +4887,8 @@ trimbletsip_setup(
 		return 1;	/* not yet */
 	}
 
-	t->last_reset = current_time;
+	if (t)
+		t->last_reset = current_time;
 			
 	buf.txt = buffer;
   
@@ -5684,6 +5685,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.74  2006/06/18 21:18:37  kardel
+ * NetBSD Coverity CID 3796: possible NULL deref
+ *
  * Revision 4.73  2006/05/26 14:23:46  kardel
  * cleanup of copyright info
  *
