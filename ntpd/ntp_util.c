@@ -341,6 +341,7 @@ stats_config(
 			msyslog(LOG_ERR, "Frequency format error in %s", 
 			    stats_drift_file);
 			old_drift = 1e9;
+			fclose(fp);
 			break;
 		}
 		fclose(fp);
