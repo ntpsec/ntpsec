@@ -869,13 +869,13 @@ dogetassoc(
 	FILE *fp
 	)
 {
-	u_short *datap;
+	char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
 
 	res = doquery(CTL_OP_READSTAT, 0, 0, 0, (char *)0, &rstatus,
-			  &dsize, (char **)&datap);
+			  &dsize, &datap);
 
 	if (res != 0)
 		return 0;
@@ -898,10 +898,10 @@ dogetassoc(
 
 	numassoc = 0;
 	while (dsize > 0) {
-		assoc_cache[numassoc].assid = ntohs(*datap);
-		datap++;
-		assoc_cache[numassoc].status = ntohs(*datap);
-		datap++;
+		assoc_cache[numassoc].assid = ntohs(*((u_short *)datap));
+		datap += sizeof(u_short);
+		assoc_cache[numassoc].status = ntohs(*((u_short *)datap));
+		datap += sizeof(u_short);
 		if (++numassoc >= MAXASSOC)
 			break;
 		dsize -= sizeof(u_short) + sizeof(u_short);

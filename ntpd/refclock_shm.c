@@ -244,6 +244,10 @@ shm_poll(
 		struct timeval tvt;
 		struct tm *t;
 		int ok=1;
+		tvr.tv_sec = 0;
+		tvr.tv_usec = 0;
+		tvt.tv_sec = 0;
+		tvt.tv_usec = 0;
 		switch (up->mode) {
 		    case 0: {
 			    tvr.tv_sec=up->receiveTimeStampSec;
