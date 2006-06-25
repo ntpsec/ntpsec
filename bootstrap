@@ -56,7 +56,8 @@ for f in ${prog_opt_files}
 do
   ( cd $(dirname ${f})
     echo "Running autogen on $f..."
-    autogen -L${incdir} $(basename ${f}) )
+    autogen -L${incdir} $(basename ${f})
+  ) || exit 1
 done
 
 ${AUTORECONF} -i -v
