@@ -121,3 +121,4 @@ ports/winnt/ntpdc/ntpdc.dsp.$$$
 ports/winnt/ntpq/ntpq.dsp.$$$
 include/version.def
 version.m4
+sntp/bincheck.mf

@@ -937,7 +937,7 @@ static isc_boolean_t
 socket_broadcast_disable(struct interface *iface, int ind, struct sockaddr_storage *maddr)
 {
 #ifdef SO_BROADCAST
-	int off = 0;
+	int off = 0;	/* XXX: Should this be a u_char (Bug 657)? */
 
 	if (maddr->ss_family == AF_INET)
 	{
@@ -1016,7 +1016,7 @@ void
 enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef MCAST
-	int off = 0;
+	u_char off = 0;
 
 	switch (maddr->ss_family)
 	{
@@ -1034,7 +1034,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 		 * Don't send back to itself, but allow it to fail to set it
 		 */
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       (char *)&off, sizeof(off)) == -1) {
+		       &off, sizeof(off)) == -1) {
 			netsyslog(LOG_ERR,
 			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
 			iface->fd, stoa(&iface->sin), stoa(maddr));
@@ -1064,7 +1064,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 		 * Don't send back to itself, but allow it to fail to set it
 		 */
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       (char *)&off, sizeof(off)) == -1) {
+		       &off, sizeof(off)) == -1) {
 			netsyslog(LOG_ERR,
 			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
 			iface->fd, stoa(&iface->sin), stoa(maddr));
@@ -1578,7 +1578,7 @@ open_socket(
 {
 	int errval;
 	SOCKET fd;
-	int on = 1, off = 0;
+	int on = 1, off = 0;	/* XXX: Should these be u_char (bug 657)? */
 #if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
 	int tos;
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
