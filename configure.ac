@@ -31,9 +31,17 @@ AC_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_PROG_CPP
 
+# HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
 case "$host" in
  *-*-amigaos)
     CFLAGS="$CFLAGS -Dfork=vfork -DSYS_AMIGA"
+    ;;
+ *-*-hpux10.)	# at least for hppa2.0-hp-hpux10.20
+    case "$GCC" in
+     no)
+	CFLAGS="$CFLAGS -Wp,-H18816"
+	;;
+    esac
     ;;
  *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
