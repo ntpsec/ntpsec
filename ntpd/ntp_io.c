@@ -1460,7 +1460,7 @@ static isc_boolean_t
 socket_broadcast_disable(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef SO_BROADCAST
-	int off = 0;	/* XXX: Should this be a u_char (Bug 657)? */
+	int off = 0;	/* This seems to be OK as an int */
 
 	if (maddr->ss_family == AF_INET)
 	{
@@ -2119,7 +2119,8 @@ open_socket(
 {
 	int errval;
 	SOCKET fd;
-	int on = 1, off = 0;	/* XXX: Should these be u_char (bug 657)? */
+	int on = 1, off = 0;	/* int is OK for REUSEADR per */
+				/* http://www.kohala.com/start/mcast.api.txt */
 #if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
 	int tos;
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
