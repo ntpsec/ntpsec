@@ -33,6 +33,8 @@ AUTORECONF=${AUTORECONF:-autoreconf}
 
 scripts/genver
 
+cp bincheck.mf sntp/
+
 #rm -rf sntp/libopts*
 #gunzip -c $(autoopts-config --libsrc) | (
 #  cd sntp
