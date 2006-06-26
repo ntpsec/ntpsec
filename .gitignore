@@ -64,6 +64,7 @@ kernel/sys/Makefile.in
 libntp/Makefile.am.$$$
 libntp/Makefile.in
 libntp/net.c.bak
+libopts/*
 libparse/Makefile.in
 librsaref/*.h
 librsaref/Makefile.in
@@ -126,6 +127,7 @@ ports/winnt/ntpdc/ntpdc.dsp.$$$
 ports/winnt/ntpq/ntpq.dsp.$$$
 rsaref2
 scripts/Makefile.in
+sntp/bincheck.mf
 sntp/libopts/*
 sntp/sntp.1
 stamp-h.in
@@ -133,4 +135,3 @@ util/Makefile.in
 util/ntp-keygen.1
 version
 version.m4
-libopts/*

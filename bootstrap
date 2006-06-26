@@ -60,6 +60,8 @@ do
   ) || exit 1
 done
 
+cp bincheck.mf sntp/
+
 ${AUTORECONF} -i -v
 
 # HMS: 20060618: Now that we use separate copies of libopts

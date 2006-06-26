@@ -80,6 +80,7 @@ EXTRA_DIST =		\
 	libisc		\
 	ports		\
 	\
+	bincheck.mf	\
 	version		\
 	version.m4	\
 	\
