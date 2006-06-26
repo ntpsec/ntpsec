@@ -10,8 +10,6 @@ LDADD=	$(LIBOPTS_LDADD)
 
 NULL=
 
-EXTRA_DIST=	bincheck.mf
-
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
 run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include
@@ -37,7 +35,8 @@ sntp_SOURCES = \
 
 dist_man_MANS=	sntp.1
 
-EXTRA_DIST=	sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu
+EXTRA_DIST=	bincheck.mf	\
+		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu
 BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
 man_MANS=	sntp.1
 
