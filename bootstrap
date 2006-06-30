@@ -33,18 +33,19 @@ AUTORECONF=${AUTORECONF:-autoreconf}
 
 scripts/genver
 
-# The copy for ntp...
-rm -rf libopts*
-gunzip -c $(autoopts-config --libsrc) | (
-  tar -xvf -
-  mv libopts-*.*.* libopts )
+# 20060629: HMS: Let's try checking in libopts and the autogen-generated files
+## The copy for ntp...
+#rm -rf libopts*
+#gunzip -c $(autoopts-config --libsrc) | (
+#  tar -xvf -
+#  mv libopts-*.*.* libopts )
 
-# The copy for sntp...
-rm -rf sntp/libopts*
-gunzip -c $(autoopts-config --libsrc) | (
-  cd sntp
-  tar -xvf -
-  mv libopts-*.*.* libopts )
+## The copy for sntp...
+#rm -rf sntp/libopts*
+#gunzip -c $(autoopts-config --libsrc) | (
+#  cd sntp
+#  tar -xvf -
+#  mv libopts-*.*.* libopts )
 
 prog_opt_files=$(
     egrep -l '^prog.name' $(
@@ -52,13 +53,13 @@ prog_opt_files=$(
 
 incdir=${PWD}/include
 
-for f in ${prog_opt_files}
-do
-  ( cd $(dirname ${f})
-    echo "Running autogen on $f..."
-    autogen -L${incdir} $(basename ${f})
-  ) || exit 1
-done
+#for f in ${prog_opt_files}
+#do
+#  ( cd $(dirname ${f})
+#    echo "Running autogen on $f..."
+#    autogen -L${incdir} $(basename ${f})
+#  ) || exit 1
+#done
 
 cp bincheck.mf sntp/
 
