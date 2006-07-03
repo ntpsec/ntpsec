@@ -3071,8 +3071,8 @@ peer_unfit(
 	 * the orphan parent.
 	 */
 	if (peer->stratum > 1 && peer->refid != htonl(LOOPBACKADR) &&
-	    ((!peer->dstadr || peer->refid == peer->dstadr->addr_refid) || peer->refid ==
-	    sys_refid))
+	    ((!peer->dstadr || peer->refid == peer->dstadr->addr_refid) ||
+	    peer->refid == sys_refid))
 		rval |= TEST12;		/* synch loop */
 
 	/*
