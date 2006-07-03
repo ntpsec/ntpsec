@@ -76,7 +76,7 @@ do
 	    ;;
 	esac
     done
-    case"$l" in
+    case "$l" in
      '') ;;
      *) touch $l
 	;;
