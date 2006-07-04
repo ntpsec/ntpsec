@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.14 2006/03/25 19:24:56 bkorb Exp $
- *  Time-stamp:      "2005-10-29 13:19:36 bkorb"
+ *  $Id: autoopts.c,v 4.20 2006/06/24 23:34:51 bkorb Exp $
+ *  Time-stamp:      "2006-07-01 14:41:46 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -64,6 +64,10 @@
 # ifndef HAVE_STRDUP
 #   include "compat/strdup.c"
 # endif
+#endif
+
+#ifndef HAVE_STRCHR
+#  include "compat/strchr.c"
 #endif
 
 static const char zNil[] = "";
@@ -350,7 +354,7 @@ longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState )
  *  Find the short option descriptor for the current option
  */
 LOCAL tSuccess
-shortOptionFind( tOptions* pOpts, tAoUC optValue, tOptState* pOptState )
+shortOptionFind( tOptions* pOpts, uint_t optValue, tOptState* pOptState )
 {
     tOptDesc*  pRes = pOpts->pOptDesc;
     int        ct   = pOpts->optCt;
@@ -423,7 +427,7 @@ findOptDesc( tOptions* pOpts, tOptState* pOptState )
      *  OTHERWISE see if there is room to advance and then do so.
      */
     if ((pOpts->pzCurOpt != NULL) && (*pOpts->pzCurOpt != NUL))
-        return shortOptionFind( pOpts, *pOpts->pzCurOpt, pOptState );
+        return shortOptionFind( pOpts, (tAoUC)*(pOpts->pzCurOpt), pOptState );
 
     if (pOpts->curOptIdx >= pOpts->origArgCt)
         return PROBLEM; /* NORMAL COMPLETION */
@@ -493,7 +497,7 @@ findOptDesc( tOptions* pOpts, tOptState* pOptState )
      *  short (i.e. single character) option.
      */
     if ((pOpts->fOptSet & OPTPROC_SHORTOPT) != 0)
-        return shortOptionFind( pOpts, *pOpts->pzCurOpt, pOptState );
+        return shortOptionFind( pOpts, (tAoUC)*(pOpts->pzCurOpt), pOptState );
 
     return longOptionFind( pOpts, pOpts->pzCurOpt, pOptState );
 }

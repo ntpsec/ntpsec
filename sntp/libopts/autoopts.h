@@ -1,8 +1,8 @@
 
 /*
- *  Time-stamp:      "2005-10-29 15:06:44 bkorb"
+ *  Time-stamp:      "2006-07-01 14:40:47 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.17 2006/03/25 19:24:56 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.22 2006/06/24 23:34:51 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -75,6 +75,12 @@
 
 #undef  EXPORT
 #define EXPORT
+
+#if defined(_WIN32)
+# define DIRch '\\'
+#else
+# define DIRCH '/'
+#endif
 
 /*
  *  Convert the number to a list usable in a printf call
@@ -178,8 +184,8 @@ typedef struct {
     tCC*    pzOptFmt;
 } arg_types_t;
 
-#  define AGALOC( c, w )        malloc( c )
-#  define AGREALOC( p, c, w )   realloc( p, c )
+#  define AGALOC( c, w )        malloc( (unsigned)c )
+#  define AGREALOC( p, c, w )   realloc( p, (unsigned)c )
 #  define AGFREE( p )           free( p )
 #  define AGDUPSTR( p, s, w )   p = strdup( s )
 #  define TAGMEM( m, t )
@@ -292,6 +298,11 @@ typedef struct {
 # endif
 #endif
 
+#ifndef HAVE_STRCHR
+extern char* strchr( const char *s, int c);
+extern char* strrchr( const char *s, int c);
+#endif
+
 /*
  *  Define and initialize all the user visible strings.
  *  We do not do translations.  If translations are to be done, then
@@ -306,9 +317,6 @@ typedef struct {
 extern FILE* option_usage_fp;
 
 extern tOptProc optionPrintVersion, optionPagedUsage, optionLoadOpt;
-
-#define LOCAL static
-#include "proto.h"
 
 #endif /* AUTOGEN_AUTOOPTS_H */
 /*

@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sun Apr  9 11:50:00 PDT 2006
+ * Generated Sat Jul  1 14:52:42 PDT 2006
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -21,7 +21,7 @@ LOCAL tSuccess
 longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState );
 
 LOCAL tSuccess
-shortOptionFind( tOptions* pOpts, tAoUC optValue, tOptState* pOptState );
+shortOptionFind( tOptions* pOpts, uint_t optValue, tOptState* pOptState );
 
 LOCAL tSuccess
 doImmediateOpts( tOptions* pOpts );

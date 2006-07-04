@@ -5,10 +5,10 @@
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2005/07/27 17:26:32 $
+ * Last Modified:    $Date: 2005/09/04 21:13:39 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.4 2005/07/27 17:26:32 bkorb Exp $
+ * $Id: pathfind.c,v 4.4 2005/09/04 21:13:39 bkorb Exp $
  */
 
 /* Code: */

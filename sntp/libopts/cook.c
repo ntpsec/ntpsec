@@ -1,7 +1,7 @@
 
 /*
- *  $Id: cook.c,v 4.3 2006/03/25 19:24:56 bkorb Exp $
- *  Time-stamp:      "2005-05-20 13:58:56 bkorb"
+ *  $Id: cook.c,v 4.6 2006/06/24 23:34:51 bkorb Exp $
+ *  Time-stamp:      "2006-06-24 11:29:58 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
@@ -60,7 +60,7 @@
  * what:  escape-process a string fragment
  * arg:   + const char* + pzScan  + points to character after the escape +
  * arg:   + char*       + pRes    + Where to put the result byte +
- * arg:   + char        + nl_ch   + replacement char if scanned char is \n +
+ * arg:   + u_int       + nl_ch   + replacement char if scanned char is \n +
  *
  * ret-type: unsigned int
  * ret-desc: The number of bytes consumed processing the escaped character.
@@ -81,7 +81,7 @@
  * err:  @code{NULL} is returned if the string(s) is/are mal-formed.
 =*/
 unsigned int
-ao_string_cook_escape_char( const char* pzIn, char* pRes, char nl )
+ao_string_cook_escape_char( const char* pzIn, char* pRes, u_int nl )
 {
     unsigned int  res = 1;
 
@@ -94,7 +94,7 @@ ao_string_cook_escape_char( const char* pzIn, char* pRes, char nl )
         res++;
         /* FALLTHROUGH */
     case '\n':        /* NL  - emit newline        */
-        *pRes = nl;
+        *pRes = (char)nl;
         return res;
 
     case 'a': *pRes = '\a'; break;
@@ -325,7 +325,7 @@ ao_string_cook( char* pzScan, int* pLineCt )
              *  THEN we do the full escape character processing
              */
             else if (q != '\'') {
-                int ct = ao_string_cook_escape_char( pzS, pzD-1, '\n' );
+                int ct = ao_string_cook_escape_char( pzS, pzD-1, (u_int)'\n' );
                 if (ct == 0)
                     return NULL;
 

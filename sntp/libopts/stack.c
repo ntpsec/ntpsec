@@ -1,8 +1,8 @@
 
 /*
  *  stack.c
- *  $Id: stack.c,v 4.6 2006/03/25 19:24:56 bkorb Exp $
- *  Time-stamp:      "2005-02-20 16:33:20 bkorb"
+ *  $Id: stack.c,v 4.8 2006/03/25 19:23:28 bkorb Exp $
+ *  Time-stamp:      "2006-07-01 14:35:13 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
@@ -82,6 +82,7 @@ optionUnstackArg(
         return;
     }
 
+#ifdef WITH_LIBREGEX
     {
         regex_t   re;
         int       i, ct, dIdx;
@@ -130,7 +131,45 @@ optionUnstackArg(
 
         regfree( &re );
     }
+#else  /* not WITH_LIBREGEX */
+    {
+        int i, ct, dIdx;
 
+        /*
+         *  search the list for the entry(s) to remove.  Entries that
+         *  are removed are *not* copied into the result.  The source
+         *  index is incremented every time.  The destination only when
+         *  we are keeping a define.
+         */
+        for (i = 0, dIdx = 0, ct = pAL->useCt; --ct >= 0; i++) {
+            tCC*      pzSrc = pAL->apzArgs[ i ];
+            char*     pzEq  = strchr( pzSrc, '=' );
+
+            if (pzEq != NULL)
+                *pzEq = NUL;
+
+            if (strcmp( pzSrc, pOptDesc->pzLastArg ) == 0) {
+                /*
+                 *  Remove this entry by reducing the in-use count
+                 *  and *not* putting the string pointer back into
+                 *  the list.
+                 */
+                pAL->useCt--;
+            } else {
+                if (pzEq != NULL)
+                    *pzEq = '=';
+
+                /*
+                 *  IF we have dropped an entry
+                 *  THEN we have to move the current one.
+                 */
+                if (dIdx != i)
+                    pAL->apzArgs[ dIdx ] = pzSrc;
+                dIdx++;
+            }
+        }
+    }
+#endif /* WITH_LIBREGEX */
     /*
      *  IF we have unstacked everything,
      *  THEN indicate that we don't have any of these options

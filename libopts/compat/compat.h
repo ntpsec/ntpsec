@@ -2,12 +2,12 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2005-09-21 20:56:13 bkorb"
+ *  Time-stamp:      "2006-06-24 10:57:22 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.6 2005/10/02 16:34:30 bkorb Exp $
+ * $Id: compat.h,v 4.8 2006/06/24 23:34:51 bkorb Exp $
  */
 #ifndef COMPAT_H
 #define COMPAT_H 1
@@ -213,6 +213,9 @@
 #endif
 #ifndef HAVE_UINT16_T
   typedef unsigned short    uint16_t;
+#endif
+#ifndef HAVE_UINT_T
+  typedef unsigned int      uint_t;
 #endif
 
 #ifndef HAVE_INT32_T

@@ -1,7 +1,7 @@
 
 /*
- *  $Id: pgusage.c,v 4.7 2006/03/25 19:24:56 bkorb Exp $
- * Time-stamp:      "2005-10-29 13:23:12 bkorb"
+ *  $Id: pgusage.c,v 4.9 2006/06/24 23:34:51 bkorb Exp $
+ * Time-stamp:      "2006-06-24 10:48:00 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -114,7 +114,7 @@ optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
     case PAGER_STATE_READY:
     {
         tSCC zPage[]  = "%1$s /tmp/use.%2$lu ; rm -f /tmp/use.%2$lu";
-        char* pzPager = getenv( "PAGER" );
+        tCC* pzPager  = (tCC*)getenv( "PAGER" );
 
         /*
          *  Use the "more(1)" program if "PAGER" has not been defined

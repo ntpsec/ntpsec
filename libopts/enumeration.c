@@ -1,7 +1,7 @@
 
 /*
- *  $Id: enumeration.c,v 4.9 2006/03/25 19:24:56 bkorb Exp $
- * Time-stamp:      "2005-12-09 06:37:15 bkorb"
+ *  $Id: enumeration.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * Time-stamp:      "2006-06-24 10:46:02 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -193,7 +193,7 @@ findName(
             if (res != name_ct) {
                 pz_enum_err_fmt = zAmbigKey;
                 option_usage_fp = stderr;
-                enumError( pOpts, pOD, paz_names, name_ct );
+                enumError( pOpts, pOD, paz_names, (int)name_ct );
             }
             res = idx; /* save partial match */
         }
@@ -205,7 +205,7 @@ findName(
     if (res == name_ct) {
         pz_enum_err_fmt = zNoKey;
         option_usage_fp = stderr;
-        enumError( pOpts, pOD, paz_names, name_ct );
+        enumError( pOpts, pOD, paz_names, (int)name_ct );
     }
 
     /*
@@ -275,7 +275,7 @@ optionEnumerationVal(
         /*
          *  print the list of enumeration names.
          */
-        enumError( pOpts, pOD, paz_names, name_ct );
+        enumError( pOpts, pOD, paz_names, (int)name_ct );
         return (char*)0UL;
 
     case 1UL:
@@ -341,7 +341,7 @@ optionSetMembers(
         /*
          *  print the list of enumeration names.
          */
-        enumError( pOpts, pOD, paz_names, name_ct );
+        enumError( pOpts, pOD, paz_names, (int)name_ct );
         return;
 
     case 1UL:
@@ -433,7 +433,7 @@ optionSetMembers(
             if ((len == 3) && (strncmp( pzArg, zAll, 3 ) == 0)) {
                 if (iv)
                      res = 0;
-                else res = ~0;
+                else res = ~0UL;
             }
             else if ((len == 4) && (strncmp( pzArg, zNone, 4 ) == 0)) {
                 if (! iv)
@@ -449,7 +449,7 @@ optionSetMembers(
                     if (*pz != NUL) {
                         if (len >= AO_NAME_LIMIT)
                             break;
-                        strncpy( z, pzArg, len );
+                        strncpy( z, pzArg, (unsigned)len );
                         z[len] = NUL;
                         p = z;
                     } else {
