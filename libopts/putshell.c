@@ -1,7 +1,7 @@
 
 /*
- *  $Id: putshell.c,v 4.9 2006/03/25 19:24:56 bkorb Exp $
- * Time-stamp:      "2005-12-13 10:28:47 bkorb"
+ *  $Id: putshell.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * Time-stamp:      "2006-06-24 14:29:07 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
@@ -95,7 +95,7 @@ putQuotedStr( tCC* pzStr )
         /*
          *  Emit the string up to the single quote (apostrophe) we just found.
          */
-        fwrite( pzStr, (pz - pzStr), 1, stdout );
+        fwrite( pzStr, (unsigned)(pz - pzStr), 1, stdout );
         fputc( '\'', stdout );
         pzStr = pz;
 
@@ -200,7 +200,7 @@ optionPutShell( tOptions* pOpts )
                     else if (ch == NUL)      { pz--; goto name_done; }
                     else fputc( '_', stdout );
                 } name_done:;
-                printf( "=%1$ld # 0x%1$lX\n", val );
+                printf( "=%1$lu # 0x%1$lX\n", (unsigned long)val );
                 val <<= 1;
             }
             free( (void*)(pOD->pzLastArg) );
@@ -230,13 +230,13 @@ optionPutShell( tOptions* pOpts )
             printf( zOptCookieCt, pOpts->pzPROGNAME, pOD->pz_NAME, ct );
 
             while (--ct >= 0) {
-                tSCC zOptNumArg[] = "%s_%s_%d=";
-                tSCC zOptEnd[]    = "\nexport %s_%s_%d\n";
+                tSCC numarg_z[] = "%s_%s_%d=";
+                tSCC end_z[]    = "\nexport %s_%s_%d\n";
 
-                printf( zOptNumArg, pOpts->pzPROGNAME, pOD->pz_NAME,
+                printf( numarg_z, pOpts->pzPROGNAME, pOD->pz_NAME,
                         pAL->useCt - ct );
                 putQuotedStr( *(ppz++) );
-                printf( zOptEnd, pOpts->pzPROGNAME, pOD->pz_NAME,
+                printf( end_z, pOpts->pzPROGNAME, pOD->pz_NAME,
                         pAL->useCt - ct );
             }
         }

@@ -1,6 +1,6 @@
 /*
  *  This file defines the string_tokenize interface
- * Time-stamp:      "2005-04-25 18:47:21 bkorb"
+ * Time-stamp:      "2006-06-24 15:27:49 bkorb"
  *
  *  string_tokenize copyright 2005 Bruce Korb
  *
@@ -240,7 +240,7 @@ ao_string_tokenize( const char* str )
 
                 switch (ch) {
                 case '"':
-                    copy_cooked( &pzDest, (cc_t**)&str );
+                    copy_cooked( &pzDest, (cc_t**)(void*)&str );
                     if (str == NULL) {
                         free(res);
                         errno = EINVAL;
@@ -251,7 +251,7 @@ ao_string_tokenize( const char* str )
                     break;
 
                 case '\'':
-                    copy_raw( &pzDest, (cc_t**)&str );
+                    copy_raw( &pzDest, (cc_t**)(void*)&str );
                     if (str == NULL) {
                         free(res);
                         errno = EINVAL;

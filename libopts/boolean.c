@@ -1,6 +1,6 @@
 
 /*
- *  $Id: boolean.c,v 4.5 2006/03/25 19:24:56 bkorb Exp $
+ *  $Id: boolean.c,v 4.6 2006/03/25 19:23:28 bkorb Exp $
  * Time-stamp:      "2005-02-14 08:24:12 bkorb"
  *
  *   Automated Options Paged Usage module.

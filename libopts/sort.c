@@ -1,7 +1,7 @@
 
 /*
- *  sort.c  $Id: sort.c,v 4.7 2006/03/25 19:24:56 bkorb Exp $
- * Time-stamp:      "2005-02-20 17:18:41 bkorb"
+ *  sort.c  $Id: sort.c,v 4.10 2006/06/24 23:34:51 bkorb Exp $
+ * Time-stamp:      "2006-06-24 10:53:35 bkorb"
  *
  *  This module implements argument sorting.
  */
@@ -155,7 +155,7 @@ checkShortOpts( tOptions* pOpts, char* pzArg, tOptState* pOS,
                 char** ppzOpts, int* pOptsIdx )
 {
     while (*pzArg != NUL) {
-        if (FAILED( shortOptionFind( pOpts, *pzArg, pOS )))
+        if (FAILED( shortOptionFind( pOpts, (tAoUC)*pzArg, pOS )))
             return FAILURE;
 
         /*
@@ -295,7 +295,7 @@ optionSort( tOptions* pOpts )
             if ((pOpts->fOptSet & OPTPROC_SHORTOPT) == 0) {
                 res = longOptionFind( pOpts, pzArg+1, &os );
             } else {
-                res = shortOptionFind( pOpts, pzArg[1], &os );
+                res = shortOptionFind( pOpts, (tAoUC)pzArg[1], &os );
             }
             break;
         }

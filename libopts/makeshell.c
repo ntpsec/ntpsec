@@ -1,7 +1,7 @@
 
 /*
- *  $Id: makeshell.c,v 4.8 2006/03/25 19:24:56 bkorb Exp $
- * Time-stamp:      "2005-10-29 13:23:33 bkorb"
+ *  $Id: makeshell.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * Time-stamp:      "2006-06-24 10:47:07 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -930,8 +930,8 @@ openOutput( const char* pzFile )
     struct stat stbf;
 
     do  {
-        char*  pzScan;
-        int    sizeLeft;
+        char*    pzScan;
+        uint32_t sizeLeft;
 
         /*
          *  IF we cannot stat the file,
@@ -949,10 +949,10 @@ openOutput( const char* pzFile )
             exit( EXIT_FAILURE );
         }
 
-        pzData = (char*)malloc( stbf.st_size + 1 );
+        pzData = (char*)malloc( (unsigned)(stbf.st_size + 1) );
         fp = fopen( pzFile, "r" FOPEN_BINARY_FLAG );
 
-        sizeLeft = stbf.st_size;
+        sizeLeft = (unsigned)stbf.st_size;
         pzScan   = pzData;
 
         /*
@@ -1045,8 +1045,8 @@ genshelloptUsage( tOptions*  pOpts, int exitCode )
 
     default:
     {
-        int  stat;
-        wait( &stat );
+        int  sts;
+        wait( &sts );
     }
     }
 
@@ -1082,8 +1082,8 @@ genshelloptUsage( tOptions*  pOpts, int exitCode )
 
     default:
     {
-        int  stat;
-        wait( &stat );
+        int  sts;
+        wait( &sts );
     }
     }
 

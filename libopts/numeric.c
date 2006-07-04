@@ -1,6 +1,6 @@
 
 /*
- *  $Id: numeric.c,v 4.6 2006/03/25 19:24:56 bkorb Exp $
+ *  $Id: numeric.c,v 4.7 2006/03/25 19:23:28 bkorb Exp $
  *  Time-stamp:      "2005-02-14 08:22:56 bkorb"
  */
 
