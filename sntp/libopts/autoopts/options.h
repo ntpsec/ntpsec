@@ -856,7 +856,7 @@ tOptProc optionStackArg, optionUnstackArg, optionBooleanVal, optionNumericVal;
 
 extern char* ao_string_cook( char*, int* );
 
-extern unsigned int ao_string_cook_escape_char( const char*, char*, char );
+extern unsigned int ao_string_cook_escape_char( const char*, char*, u_int );
 
 extern void genshelloptUsage( tOptions*, int );
 
