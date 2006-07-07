@@ -68,7 +68,7 @@ libntp/net.c.bak
 libparse/Makefile.in
 librsaref/*.h
 librsaref/Makefile.in
-ltmain.sh
+#ltmain.sh
 missing
 mkinstalldirs
 ntp_io.diff
