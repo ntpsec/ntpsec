@@ -78,6 +78,13 @@ AC_CHECK_FUNCS(sqrt, , AC_CHECK_LIB(m, sqrt))
 AC_CHECK_FUNCS([strrchr])
 
 case "$host" in
+ *-*-hpux10.)	# at least for hppa2.0-hp-hpux10.20
+    case "$GCC" in
+     no)
+	CFLAGS="$CFLAGS -Wp,-H18816"
+	;;
+    esac
+    ;;
  *-*-linux*)
     CFLAGS="$CFLAGS -DADJTIME_MISSING"
     ;;
