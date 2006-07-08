@@ -56,6 +56,15 @@
 extern int listen_to_virtual_ips;
 extern const char *specific_interface;
 
+#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+#if defined(CMSG_FIRSTHDR)
+#define HAVE_TIMESTAMP
+#define USE_TIMESTAMP_CMSG
+#else
+/* fill in for old/other timestamp interfaces */
+#endif
+#endif
+
 #if defined(SYS_WINNT)
 #include <transmitbuff.h>
 #include <isc/win32os.h>
@@ -289,7 +298,7 @@ connection_reset_fix(SOCKET fd) {
  * of the file descriptor in the range of
  * [0..FOPEN_MAX)
  * in order to keep this range clean for socket
- * file descriptions to attempt to move them above
+ * file descriptions we attempt to move them above
  * FOPEM_MAX. This is not as easy as it sounds as
  * FOPEN_MAX changes from implementation to implementation
  * and may exceed to current file decriptor limits.
@@ -358,34 +367,29 @@ static int move_fd(SOCKET fd)
 	}
 
 	/*
-	 * with socket_boundary == 0 we stop attempting to move fds
+	 * Leave a space for stdio to work in. potentially moving the
+	 * socket_boundary lower until allocation succeeds.
 	 */
-	if (socket_boundary > 0) {
-		/*
-		 * Leave a space for stdio to work in. potentially moving the
-		 * socket_boundary lower until allocation succeeds.
-		 */
-		do {
-			if (fd >= 0 && fd < socket_boundary) {
-				/* inside reserved range: attempt to move fd */
-				newfd = fcntl(fd, F_DUPFD, socket_boundary);
-				
-				if (newfd != -1) {
-					/* success: drop the old one - return the new one */
-					(void)close(fd);
-					return (newfd);
-				}
-			} else {
-				/* outside reserved range: no work - return the original one */
-				return (fd);
+	do {
+		if (fd >= 0 && fd < socket_boundary) {
+			/* inside reserved range: attempt to move fd */
+			newfd = fcntl(fd, F_DUPFD, socket_boundary);
+			
+			if (newfd != -1) {
+				/* success: drop the old one - return the new one */
+				(void)close(fd);
+				return (newfd);
 			}
-			socket_boundary = max(0, socket_boundary - FD_CHUNK);
+		} else {
+			/* outside reserved range: no work - return the original one */
+			return (fd);
+		}
+		socket_boundary = max(0, socket_boundary - FD_CHUNK);
 #ifdef DEBUG
-			msyslog(LOG_DEBUG, "ntp_io: selecting new socket boundary: %d",
-				socket_boundary);
+		msyslog(LOG_DEBUG, "ntp_io: selecting new socket boundary: %d",
+			socket_boundary);
 #endif
-		} while (socket_boundary > 0);
-	}
+	} while (socket_boundary > 0);
 #endif /* !defined(SYS_WINNT) && defined(F_DUPFD) */
 	return (fd);
 }
@@ -2254,7 +2258,7 @@ open_socket(
 		return (INVALID_SOCKET);
 	}
 
-#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+#ifdef HAVE_TIMESTAMP
 	{
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (char*)&on, sizeof(on)))
@@ -2269,7 +2273,7 @@ open_socket(
 			DPRINTF(1, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n", fd, stoa(addr)));
 		}
 #endif
-	}
+	}	
 #endif
 	DPRINTF(1, ("bind() fd %d, family %d, port %d, addr %s, flags=0x%x\n",
 		   fd,
@@ -2644,6 +2648,57 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 	return (buflen);
 }
 
+#ifdef HAVE_TIMESTAMP
+/*
+ * extract timestamps from control message buffer
+ */
+static l_fp
+	fetch_timestamp(struct recvbuf *rb, struct msghdr *msghdr, l_fp ts)
+{
+#ifdef USE_TIMESTAMP_CMSG
+	struct cmsghdr *cmsghdr;
+
+	cmsghdr = CMSG_FIRSTHDR(msghdr);
+	while (cmsghdr != NULL) {
+		switch (cmsghdr->cmsg_type)
+		{
+		case SCM_TIMESTAMP:
+		{
+			struct timeval *tvp = (struct timeval *)CMSG_DATA(cmsghdr);
+			double dtemp;
+			l_fp nts;
+			DPRINTF(2, ("fetch_timestamp: system network time stamp: %ld.%06ld\n", tvp->tv_sec, tvp->tv_usec));
+			nts.l_i = tvp->tv_sec + JAN_1970;
+			dtemp = tvp->tv_usec / 1e6;
+
+ 			/* fuzz lower bits not covered by precision */
+ 			if (sys_precision != 0)
+ 				dtemp += (ntp_random() / FRAC - .5) / (1 <<
+ 								       -sys_precision);
+
+			nts.l_uf = (u_int32)(dtemp*FRAC);
+#ifdef DEBUG_TIMING
+			{
+				l_fp dts = ts;
+				L_SUB(&dts, &nts);
+				collect_timing(rb, "input processing delay", 1, &dts);
+				DPRINTF(2, ("fetch_timestamp: timestamp delta: %s (incl. prec fuzz)\n", lfptoa(&dts, 9)));
+			}
+#endif
+			ts = nts;  /* network time stamp */
+			break;
+		}
+		default:
+			DPRINTF(1, ("fetch_timestamp: skipping control message 0x%x\n", cmsghdr->cmsg_type));
+			break;
+		}
+		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
+	}
+#endif
+	return ts;
+}
+#endif
+
 /*
  * Routine to read the network NTP packets for a specific interface
  * Return the number of bytes read. That way we know if we should
@@ -2652,14 +2707,13 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 static inline int
 read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 {
-	int fromlen;
+	size_t fromlen;
 	int buflen;
 	register struct recvbuf *rb;
-#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
+#ifdef HAVE_TIMESTAMP
 	struct msghdr msghdr;
 	struct iovec iovec;
 	char control[5120];	/* pick up control messages */
-	struct cmsghdr *cmsghdr;
 #endif
 
 	/*
@@ -2694,7 +2748,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 
 	fromlen = sizeof(struct sockaddr_storage);
 
-#if !defined(SO_TIMESTAMP) || !defined(SCM_TIMESTAMP)
+#ifndef HAVE_TIMESTAMP
 	rb->recv_length = recvfrom(fd,
 			  (char *)&rb->recv_space,
 			   sizeof(rb->recv_space), 0,
@@ -2726,59 +2780,21 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	{
 		netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
 		stoa(&rb->recv_srcadr), fd);
-		DPRINTF(4, ("input_handler: fd=%d dropped (bad recvfrom)\n", fd));
+		DPRINTF(4, ("read_network_packet: fd=%d dropped (bad recvfrom)\n", fd));
 		freerecvbuf(rb);
 		return (rb->recv_length);
 	}
-#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
-	cmsghdr = CMSG_FIRSTHDR(&msghdr);
-	while (cmsghdr != NULL) {
-		switch (cmsghdr->cmsg_type)
-		{
-		case SCM_TIMESTAMP:
-		{
-			struct timeval *tvp = (struct timeval *)CMSG_DATA(cmsghdr);
-			double dtemp;
-			l_fp nts;
-			DPRINTF(2, ("input_handler: system network time stamp: %ld.%06ld\n", tvp->tv_sec, tvp->tv_usec));
-			nts.l_i = tvp->tv_sec + JAN_1970;
-			dtemp = tvp->tv_usec / 1e6;
 
- 			/* fuzz lower bits not covered by precision */
- 			if (sys_precision != 0)
- 				dtemp += (ntp_random() / FRAC - .5) / (1 <<
- 								       -sys_precision);
-
-			nts.l_uf = (u_int32)(dtemp*FRAC);
-#ifdef DEBUG_TIMING
-			{
-				l_fp dts = ts;
-				L_SUB(&dts, &nts);
-				rb->dstadr = itf;
-				collect_timing(rb, "input processing delay", 1, &dts);
-				DPRINTF(2, ("input_handler: timestamp delta: %s (incl. prec fuzz)\n", lfptoa(&dts, 9)));
-			}
-#endif
-			ts = nts;  /* replace loop timestamp by network time stamp */
-			break;
-		}
-		default:
-			DPRINTF(1, ("input_handler: skipping control message %d\n", cmsghdr->cmsg_type));
-			break;
-		}
-		cmsghdr = CMSG_NXTHDR(&msghdr, cmsghdr);
-	}
-#endif
 #ifdef DEBUG
 	if (debug > 2) {
 		if(rb->recv_srcadr.ss_family == AF_INET)
-			printf("input_handler: fd=%d length %d from %08lx %s\n",
+			printf("read_network_packet: fd=%d length %d from %08lx %s\n",
 				fd, rb->recv_length,
 				(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
 				0x00000000ffffffff,
 				stoa(&rb->recv_srcadr));
 		else
-			printf("input_handler: fd=%d length %d from %s\n",
+			printf("read_network_packet: fd=%d length %d from %s\n",
 				fd, rb->recv_length,
 				stoa(&rb->recv_srcadr));
 	}
@@ -2790,6 +2806,9 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	 */
 	rb->dstadr = itf;
 	rb->fd = fd;
+#ifdef HAVE_TIMESTAMP
+	ts = fetch_timestamp(rb, &msghdr, ts);  /* pick up a network time stamp if possible */
+#endif
 	rb->recv_time = ts;
 	rb->receiver = receive;
 
@@ -2799,7 +2818,6 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	packets_received++;
 	return (rb->recv_length);
 }
-
 
 /*
  * input_handler - receive packets asynchronously
@@ -2816,7 +2834,7 @@ input_handler(
 	SOCKET fd;
 	struct timeval tvzero;
 	l_fp ts;			/* Timestamp at BOselect() gob */
-#ifdef DEBUG
+#ifdef DEBUG_TIMING
 	l_fp ts_e;			/* Timestamp at EOselect() gob */
 #endif
 	fd_set fds;
@@ -3028,7 +3046,7 @@ findlocalinterface(
 	int rtn;
 	struct interface *interface;
 	struct sockaddr_storage saddr;
-	int saddrlen = SOCKLEN(addr);
+	size_t saddrlen = SOCKLEN(addr);
 
 	DPRINTF(2, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)
