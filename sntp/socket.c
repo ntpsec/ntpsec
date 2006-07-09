@@ -8,6 +8,8 @@ the only system that the author uses that has it is Linux. */
 
 
 
+#include "config.h"
+
 #include "header.h"
 #include "internet.h"
 #include <fcntl.h>
