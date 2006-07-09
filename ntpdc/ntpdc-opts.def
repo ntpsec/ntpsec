@@ -4,6 +4,7 @@ autogen definitions options;
 
 prog-name      = "ntpdc";
 prog-title     = "vendor-specific NTP query program";
+argument       = '[ host ...]';
 
 #include copyright.def
 

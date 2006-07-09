@@ -296,6 +296,7 @@ ntpdcmain(
 	char *argv[]
 	)
 {
+	int ntp_optind = 0;
 
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
@@ -369,6 +370,18 @@ ntpdcmain(
 		ADDCMD("dmpeers");
 	}
 
+	if (ntp_optind == argc) {
+		ADDHOST(DEFHOST);
+	} else {
+		for (; ntp_optind < argc; ntp_optind++)
+		    ADDHOST(argv[ntp_optind]);
+	}
+
+	if (numcmds == 0 && interactive == 0
+	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
+		interactive = 1;
+	}
+
 #if 0
 	ai_fam_templ = ai_fam_default;
 	while ((c = ntp_getopt(argc, argv, "46c:dilnps")) != EOF)
@@ -404,12 +417,14 @@ ntpdcmain(
 		    errflg++;
 		    break;
 	    }
+
 	if (errflg) {
 		(void) fprintf(stderr,
 			       "usage: %s [-46dilnps] [-c cmd] host ...\n",
 			       progname);
 		exit(2);
 	}
+
 	if (ntp_optind == argc) {
 		ADDHOST(DEFHOST);
 	} else {
