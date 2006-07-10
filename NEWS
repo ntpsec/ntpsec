@@ -1,4 +1,5 @@
 (4.2.2)
+* Get sntp working under AIX-5
 * Resolve an ambiguity in the copyright notice
 -
 * SNTP
