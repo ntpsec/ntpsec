@@ -160,7 +160,7 @@ static  void update_interfaces P((u_short, interface_receiver_t, void *));
 static  void remove_interface P((struct interface *));
 static  struct interface *create_interface P((u_short, struct interface *));
 
-static int	move_fd		P((int));
+static int	move_fd		P((SOCKET));
 
 /*
  * Multicast functions
