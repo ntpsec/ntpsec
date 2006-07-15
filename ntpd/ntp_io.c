@@ -1123,9 +1123,9 @@ update_interfaces(
 		 */
 		init_interface(&interface);
 
-		DPRINT_INTERFACE(1, (&interface, "examining", "\n"));
-
 		convert_isc_if(&isc_if, &interface, port);
+
+		DPRINT_INTERFACE(1, (&interface, "examining ", "\n"));
 
 		if (!(interface.flags & INT_UP))  { /* interfaces must be UP to be usable */
 			DPRINTF(1, ("skipping interface %s (%s) - DOWN\n", interface.name, stoa(&interface.sin)));
@@ -3634,6 +3634,12 @@ process_routing_msgs(struct asyncio_reader *reader)
 #ifdef RTM_DELETE
 		case RTM_DELETE:
 #endif
+#ifdef RTM_REDIRECT
+		case RTM_REDIRECT:
+#endif
+#ifdef RTM_CHANGE
+		case RTM_CHANGE:
+#endif
 #ifdef RTM_LOSING
 		case RTM_LOSING:
 #endif
@@ -3647,7 +3653,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 			 * we are keen on new and deleted addresses and if an interface goes up and down or routing changes
 			 */
 			DPRINTF(1, ("routing message op = %d: scheduling interface update\n", rtm->rtm_type));
-			timer_interfacetimeout(current_time + 2);
+			timer_interfacetimeout(current_time);
 			break;
 		default:
 			/*
