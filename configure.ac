@@ -1792,7 +1792,7 @@ case "$ac_cv_var_mcast" in
     AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
 	ac_cv_var_typeof_ip_multicast_loop,
 	[case "$host" in
-	 *-*-netbsd|*-*-linux*|*-*-winnt*)
+	 *-*-netbsd*|*-*-linux*|*-*-winnt*)
 	    ac_cv_var_typeof_ip_multicast_loop=u_int
 	    ;;
 	 *) ac_cv_var_typeof_ip_multicast_loop=u_char
