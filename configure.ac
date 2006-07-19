@@ -1750,7 +1750,21 @@ AC_CACHE_CHECK(for kernel multicast support, ac_cv_var_mcast,
   ], ac_cv_var_mcast=yes) ;;
   esac])
 case "$ac_cv_var_mcast" in
- yes) AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?]) ;;
+ yes)
+    AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?])
+    AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
+	ac_cv_var_typeof_ip_multicast_loop,
+	[case "$host" in
+	 *-*-netbsd|*-*-linux*|*-*-winnt*)
+	    ac_cv_var_typeof_ip_multicast_loop=u_int
+	    ;;
+	 *) ac_cv_var_typeof_ip_multicast_loop=u_char
+	    ;;
+	esac])
+    AC_DEFINE_UNQUOTED(TYPEOF_IP_MULTICAST_LOOP,
+		   $ac_cv_var_typeof_ip_multicast_loop,
+		   [What type to use for setsockopt])
+    ;;
 esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,

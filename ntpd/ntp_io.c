@@ -1016,7 +1016,7 @@ void
 enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 {
 #ifdef MCAST
-	u_char off = 0;
+	/*u_char*/ TYPEOF_IP_MULTICAST_LOOP off = 0;
 
 	switch (maddr->ss_family)
 	{
