@@ -1,4 +1,5 @@
 (4.2.2)
+* Get sntp working under AIX-5
 * Resolve an ambiguity in the copyright notice
 -
 * SNTP
@@ -56,7 +57,7 @@
 * Solaris dosynctodr info update
 * html/pic/* is *lots* smaller
 * New/updated drivers: Forum Graphic GPS, WWV/H, Heath GC-100 II, HOPF
-  serial and PCI, ONCORE, ulink331 
+  serial and PCI, ONCORE, ulink331
 * Rewrite of the audio drivers
 
 (4.0.99)
