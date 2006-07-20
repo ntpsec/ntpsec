@@ -30,7 +30,8 @@ arlib/depcomp
 arlib/install-sh
 arlib/missing
 arlib/mkinstalldirs
-autom4te.cache
+*/autom4te.cache -prune
+autom4te.cache -prune
 br-flock
 builderrors.txt
 clockstuff/Makefile.in
