@@ -25,6 +25,7 @@
 #sntp/libopts/*
 #sntp/sntp.1
 #util/ntp-keygen.1
+*/autom4te.cache -prune
 *~
 ./A.*
 .buildkey
@@ -43,7 +44,7 @@ arlib/depcomp
 arlib/install-sh
 arlib/missing
 arlib/mkinstalldirs
-autom4te.cache
+autom4te.cache -prune
 br-flock
 builderrors.txt
 clockstuff/Makefile.in
