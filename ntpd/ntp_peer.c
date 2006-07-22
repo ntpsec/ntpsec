@@ -538,7 +538,7 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
 		}
 
-		DPRINTF(1, ("set_peerdstadr(%s): change interface from %s to %s\n",
+		DPRINTF(4, ("set_peerdstadr(%s): change interface from %s to %s\n",
 			    stoa(&peer->srcadr),
 			    (peer->dstadr != NULL) ? stoa(&peer->dstadr->sin) : "<null>",
 			    (interface != NULL) ? stoa(&interface->sin) : "<null>"));
@@ -574,7 +574,7 @@ peer_refresh_interface(struct peer *peer)
 	niface = select_peerinterface(peer, &peer->srcadr, NULL, peer->cast_flags);
 
 #ifdef DEBUG
-	if (debug)
+	if (debug > 3)
 	{
 		printf(
 			"peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
@@ -668,7 +668,7 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 		if (cast_flags & (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
 			interface = findbcastinter(srcadr);
 #ifdef DEBUG
-			if (debug > 1) {
+			if (debug > 3) {
 				if (interface != NULL)
 					printf("Found broadcast interface address %s, for address %s\n",
 					       stoa(&(interface)->sin), stoa(srcadr));
@@ -778,7 +778,7 @@ newpeer(
 	set_peerdstadr(peer, dstadr);
 
 #ifdef DEBUG
-	if (debug>2) {
+	if (debug > 2) {
 		if (peer->dstadr)
 			printf("newpeer: using fd %d and our addr %s\n",
 			       peer->dstadr->fd, stoa(&peer->dstadr->sin));
