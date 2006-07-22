@@ -893,7 +893,6 @@ struct info_if_stats {
 	union addrun unmask;	        /* mask */
 	u_int32 v6_flag;                /* is this v6 */
 	char name[32];			/* name of interface */
-	u_short family;			/* Address family */
 	int32 flags;			/* interface flags */
 	int32 last_ttl;			/* last TTL specified */
 	int32 num_mcast;		/* No. of IP addresses in multicast socket */
@@ -904,9 +903,11 @@ struct info_if_stats {
 	u_int32 scopeid;		/* Scope used for Multicasting */
 	u_int32 ifindex;		/* interface index - from system */
 	u_int32 ifnum;		        /* sequential interface number */
-	u_char ignore_packets;	        /* Specify whether the packet should be ignored */
         u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
+	u_short family;			/* Address family */
+	u_char ignore_packets;	        /* Specify whether the packet should be ignored */
         u_char action;		        /* reason the item is listed */
+	int32 _filler0;		        /* pad to a 64 bit size boundary */
 };
 
 #define IFS_EXISTS	1	/* just exists */
