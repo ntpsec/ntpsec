@@ -1,7 +1,7 @@
 
 /*
- *  $Id: makeshell.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
- * Time-stamp:      "2006-06-24 10:47:07 bkorb"
+ *  $Id: makeshell.c,v 4.13 2006/07/15 22:10:21 bkorb Exp $
+ * Time-stamp:      "2006-07-15 08:18:01 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -499,6 +499,10 @@ optionParseShell( tOptions* pOpts )
 static void
 textToVariable( tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD )
 {
+#if defined(__windows__) && !defined(__CYGWIN__)
+    printf( "%1$s_%2$s_TEXT='no %2$s text'\n",
+            pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
+#else
     int  nlHoldCt = 0;
     int  pipeFd[2];
     FILE* fp;
@@ -585,6 +589,7 @@ textToVariable( tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD )
 
     fputs( "'\n\n", stdout );
     close( pipeFd[0] );
+#endif
 }
 
 
@@ -1017,6 +1022,9 @@ openOutput( const char* pzFile )
 void
 genshelloptUsage( tOptions*  pOpts, int exitCode )
 {
+#if defined(__windows__) && !defined(__CYGWIN__)
+    optionUsage( pOpts, exitCode );
+#else
     /*
      *  IF not EXIT_SUCCESS,
      *  THEN emit the short form of usage.
@@ -1088,6 +1096,7 @@ genshelloptUsage( tOptions*  pOpts, int exitCode )
     }
 
     exit( EXIT_SUCCESS );
+#endif
 }
 
 /*

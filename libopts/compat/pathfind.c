@@ -5,16 +5,25 @@
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2005/09/04 21:13:39 $
+ * Last Modified:    $Date: 2006/07/15 22:10:21 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.4 2005/09/04 21:13:39 bkorb Exp $
+ * $Id: pathfind.c,v 4.6 2006/07/15 22:10:21 bkorb Exp $
  */
 
 /* Code: */
 
 #include "compat.h"
 #ifndef HAVE_PATHFIND
+#if defined(__windows__) && !defined(__CYGWIN__)
+char*
+pathfind( const char*  path,
+          const char*  fileName,
+          const char*  mode )
+{
+    return NULL;
+}
+#else
 
 static char* make_absolute( const char *string, const char *dot_path );
 static char* canonicalize_pathname( char *path );
@@ -317,7 +326,7 @@ extract_colon_unit( char* pzDir, const char *string, int *p_index )
     *p_index = ix;
     return pzDir;
 }
-
+#endif /* __windows__ / __CYGWIN__ */
 #endif /* HAVE_PATHFIND */
 
 /*

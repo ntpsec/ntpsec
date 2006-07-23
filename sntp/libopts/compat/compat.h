@@ -2,21 +2,27 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2006-06-24 10:57:22 bkorb"
+ *  Time-stamp:      "2006-07-15 08:27:23 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.8 2006/06/24 23:34:51 bkorb Exp $
+ * $Id: compat.h,v 4.10 2006/07/15 22:10:21 bkorb Exp $
  */
-#ifndef COMPAT_H
-#define COMPAT_H 1
+#ifndef COMPAT_H_GUARD
+#define COMPAT_H_GUARD 1
 
-#ifndef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H)
+#  include <config.h>
+
+#elif defined(_WIN32) && !defined(__CYGWIN__)
+#  include "windows-config.h"
+
+#else
 #  error "compat.h" requires "config.h"
+   choke me.
 #endif
 
-#include <config.h>
 
 #ifndef HAVE_STRSIGNAL
    char * strsignal( int signo );
@@ -56,6 +62,7 @@
 
 #  if ! defined(HAVE_SYS_POLL_H) && ! defined(HAVE_SYS_SELECT_H)
 #    error This system cannot support daemon processing
+     Choke Me.
 #  endif
 
 #  if HAVE_SYS_POLL_H
@@ -123,7 +130,12 @@
 #  include <libgen.h>
 #endif
 
-#include <limits.h>
+#if defined(HAVE_LIMITS_H)  /* this is also in options.h */
+#  include <limits.h>
+#elif defined(HAVE_SYS_LIMITS_H)
+#  include <sys/limits.h>
+#endif /* HAVE_LIMITS/SYS_LIMITS_H */
+
 #include <memory.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -138,7 +150,10 @@
 #include <string.h>
 
 #include <time.h>
-#include <utime.h>
+
+#ifndef __windows__
+#  include <utime.h>
+#endif
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -233,6 +248,7 @@
 	typedef unsigned long   uint32_t;
 # else
 #   error Cannot create a uint32_t type.
+    Choke Me.
 # endif
 #endif
 
@@ -283,7 +299,7 @@
    #define WORD_MIN  INT_MIN
 #endif
 
-#endif /* COMPAT_H */
+#endif /* COMPAT_H_GUARD */
 
 /*
  * Local Variables:

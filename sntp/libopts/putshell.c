@@ -1,7 +1,7 @@
 
 /*
- *  $Id: putshell.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
- * Time-stamp:      "2006-06-24 14:29:07 bkorb"
+ *  $Id: putshell.c,v 4.12 2006/07/16 15:27:50 bkorb Exp $
+ * Time-stamp:      "2006-07-16 08:13:24 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
@@ -95,7 +95,7 @@ putQuotedStr( tCC* pzStr )
         /*
          *  Emit the string up to the single quote (apostrophe) we just found.
          */
-        fwrite( pzStr, (unsigned)(pz - pzStr), 1, stdout );
+        (void)fwrite( pzStr, (unsigned)(pz - pzStr), 1, stdout );
         fputc( '\'', stdout );
         pzStr = pz;
 
