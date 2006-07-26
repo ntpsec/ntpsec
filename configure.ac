@@ -59,6 +59,10 @@ case "$host" in
     LDFLAGS="$LDFLAGS -L/SYSLOG/PUB"
     LIBS="$LIBS -lcurses"
     ;;
+ *-*-solaris*)
+    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+    libxnet=-lxnet
+    ;;
 esac
 
 AMU_OS_CFLAGS
@@ -297,10 +301,11 @@ dnl AC_CHECK_LIB(kvm, main, , , -lelf)
 AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
 AC_CHECK_LIB(ld, nlist)
 AC_CHECK_LIB(mld, nlist)
-AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
+AC_CHECK_FUNC(gethostent, ,
+  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
 AC_CHECK_FUNC(openlog, , 
   AC_CHECK_LIB(gen, openlog, , 
-  AC_CHECK_LIB(syslog, openlog, , , -lsocket)))
+  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
 AC_CHECK_LIB(md5, MD5Init, , 
   AC_CHECK_LIB(md, MD5Init))
 AC_CHECK_FUNCS(MD5Init)
@@ -345,7 +350,9 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
+AC_CHECK_FUNC(setsockopt, ,
+	[AC_CHECK_LIB(socket, setsockopt)
+	 AC_CHECK_LIB(xnet, setsockopt)])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
