@@ -6,9 +6,6 @@ autogen definitions options;
 
 prog-name      = "ntpdsim";
 prog-title     = "NTP daemon simulation program";
-homerc         =  $HOME, ".";
-long-opts;
-config-header  = config.h;
 
 #define SIM
 #include ntpdbase-opts.def

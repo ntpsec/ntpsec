@@ -6,9 +6,6 @@ autogen definitions options;
 
 prog-name      = "ntpq";
 prog-title     = "standard NTP query program";
-homerc         =  $HOME, ".";
-long-opts;
-config-header  = config.h;
 argument       = '[ host ...]';
 
 test-main;
