@@ -557,6 +557,7 @@ ntpdmain(
 	if (HAVE_OPT( PRIORITY )) {
 		config_priority = OPT_VALUE_PRIORITY;
 		config_priority_override = 1;
+		priority_done = 0;
 	}
 #endif
 
