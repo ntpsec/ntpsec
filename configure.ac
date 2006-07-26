@@ -1474,25 +1474,6 @@ case "$ac_cv_var_syscall_bug" in
  yes) AC_DEFINE(SYSCALL_BUG, 1, [Buggy syscall() (Solaris2.4)?]) ;;
 esac
 
-AC_CACHE_CHECK(for Streams/TLI, ac_cv_var_streams_tli,
-[ case "$ac_cv_header_sys_stropts_h" in
-  yes)
-     ans=no
-     # There must be a better way...
-     case "$host" in
-      *-*-ptx*)
-         ans=yes
-         ;;
-     esac
-     ;;
- esac
- ac_cv_var_streams_tli=$ans])
-case "$ac_cv_var_streams_tli" in
- yes)
-    AC_DEFINE(STREAMS_TLI, 1, [Do we have STREAMS/TLI? (Can we replace this with HAVE_SYS_STROPTS_H?)])
-    ;;
-esac
-
 AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
  AC_EGREP_CPP(yes,
   [#include <signal.h>
@@ -1500,7 +1481,6 @@ AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
    yes
 #endif
   ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no))
-
 
 dnl Override those system that have a losing SIGIO
 AC_CACHE_CHECK(if we want to use signalled IO, ac_cv_var_signalled_io,
