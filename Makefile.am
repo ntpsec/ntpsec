@@ -127,6 +127,14 @@ dist-hook:
 	@sleep 1
 	@touch .gcc-warning
 
+ChangeLog: FRC.ChangeLog
+	cd $(srcdir)					\
+	&& . packageinfo.sh				\
+	&& ARGS="-hr$${CLTAG}.."			\
+	&& ( bk -R prs $${ARGS} -nd':I:'		\
+	   | bk changes -m -v - > ChangeLog.new )	\
+	&& mv ChangeLog.new ChangeLog
+
 # HMS: The following seems to be a work-in-progress...
 
 CVO=`$(srcdir)/config.guess`
@@ -152,7 +160,7 @@ BHOST=`(hostname || uname -n)`
 		echo " "; \
 	fi
 
-FRC.distwarn FRC.checkcvo FRC.checkhost FRC.version:
+FRC.ChangeLog FRC.distwarn FRC.checkcvo FRC.checkhost FRC.version:
 
 # HMS: what was I trying to do with this?
 #dot.emacs: FRC.distwarn
