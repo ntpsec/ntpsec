@@ -1,7 +1,7 @@
 
 /*
- *  $Id: streqvcmp.c,v 4.9 2006/03/25 19:23:28 bkorb Exp $
- * Time-stamp:      "2005-10-29 14:05:07 bkorb"
+ *  $Id: streqvcmp.c,v 4.10 2006/07/27 02:51:47 bkorb Exp $
+ * Time-stamp:      "2006-07-26 18:25:53 bkorb"
  *
  *  String Equivalence Comparison
  *
@@ -273,9 +273,7 @@ strequate( const char* s )
  * err:  none.
 =*/
 void
-strtransform( d, s )
-    char*       d;
-    const char* s;
+strtransform( char* d, const char* s )
 {
     do  {
         *(d++) = (char)charmap[ (unsigned)*s ];

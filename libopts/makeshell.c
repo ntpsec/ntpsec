@@ -1,7 +1,7 @@
 
 /*
- *  $Id: makeshell.c,v 4.13 2006/07/15 22:10:21 bkorb Exp $
- * Time-stamp:      "2006-07-15 08:18:01 bkorb"
+ *  $Id: makeshell.c,v 4.14 2006/07/27 02:51:47 bkorb Exp $
+ * Time-stamp:      "2006-07-24 21:30:51 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -499,6 +499,13 @@ optionParseShell( tOptions* pOpts )
 static void
 textToVariable( tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD )
 {
+#   define _TT_(n) tSCC z ## n [] = #n;
+    TEXTTO_TABLE
+#   undef _TT_
+#   define _TT_(n) z ## n ,
+      static const char*  apzTTNames[] = { TEXTTO_TABLE };
+#   undef _TT_
+
 #if defined(__windows__) && !defined(__CYGWIN__)
     printf( "%1$s_%2$s_TEXT='no %2$s text'\n",
             pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
@@ -506,13 +513,6 @@ textToVariable( tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD )
     int  nlHoldCt = 0;
     int  pipeFd[2];
     FILE* fp;
-
-#   define _TT_(n) tSCC z ## n [] = #n;
-    TEXTTO_TABLE
-#   undef _TT_
-#   define _TT_(n) z ## n ,
-      static const char*  apzTTNames[] = { TEXTTO_TABLE };
-#   undef _TT_
 
     printf( "%s_%s_TEXT='", pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
     fflush( stdout );
