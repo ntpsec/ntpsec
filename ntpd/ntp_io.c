@@ -60,6 +60,9 @@ extern const char *specific_interface;
 #if defined(CMSG_FIRSTHDR)
 #define HAVE_TIMESTAMP
 #define USE_TIMESTAMP_CMSG
+#ifndef TIMESTAMP_CTLMSGBUF_SIZE
+#define TIMESTAMP_CTLMSGBUF_SIZE 1536 /* moderate default */
+#endif
 #else
 /* fill in for old/other timestamp interfaces */
 #endif
@@ -2706,7 +2709,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 #ifdef HAVE_TIMESTAMP
 	struct msghdr msghdr;
 	struct iovec iovec;
-	char control[5120];	/* pick up control messages */
+	char control[TIMESTAMP_CTLMSGBUF_SIZE];	/* pick up control messages */
 #endif
 
 	/*
