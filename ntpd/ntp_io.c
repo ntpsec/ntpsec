@@ -2751,7 +2751,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	iovec.iov_base        = (void *)&rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
 	msghdr.msg_name       = (void *)&rb->recv_srcadr;
-	msghdr.msg_namelen    = sizeof(rb->recv_space);
+	msghdr.msg_namelen    = sizeof(rb->recv_srcadr);
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;
 	msghdr.msg_control    = (void *)&control;
