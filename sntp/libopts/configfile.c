@@ -1,5 +1,5 @@
 /*
- *  $Id: configfile.c,v 4.22 2006/06/24 23:34:51 bkorb Exp $
+ *  $Id: configfile.c,v 4.23 2006/07/01 21:57:23 bkorb Exp $
  *  Time-stamp:      "2006-07-01 12:46:31 bkorb"
  *
  *  configuration/rc/ini file handling.

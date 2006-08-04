@@ -1,6 +1,6 @@
 
-/*  $Id: version.c,v 4.8 2006/03/25 19:23:28 bkorb Exp $
- * Time-stamp:      "2005-12-13 10:29:09 bkorb"
+/*  $Id: version.c,v 4.9 2006/07/27 02:51:47 bkorb Exp $
+ * Time-stamp:      "2006-07-26 18:38:16 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -146,9 +146,7 @@ printVersion( tOptions* pOpts, tOptDesc* pOD, FILE* fp )
  *  This routine will print the version to stdout.
 =*/
 void
-optionPrintVersion( pOpts, pOD )
-    tOptions*  pOpts;
-    tOptDesc*  pOD;
+optionPrintVersion( tOptions*  pOpts, tOptDesc*  pOD )
 {
     printVersion( pOpts, pOD, stdout );
 }
@@ -164,9 +162,7 @@ optionPrintVersion( pOpts, pOD )
  *  This routine will print the version to stderr.
 =*/
 void
-optionVersionStderr( pOpts, pOD )
-    tOptions*  pOpts;
-    tOptDesc*  pOD;
+optionVersionStderr( tOptions*  pOpts, tOptDesc*  pOD )
 {
     printVersion( pOpts, pOD, stderr );
 }

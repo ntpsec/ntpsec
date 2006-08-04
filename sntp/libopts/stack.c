@@ -1,8 +1,8 @@
 
 /*
  *  stack.c
- *  $Id: stack.c,v 4.8 2006/03/25 19:23:28 bkorb Exp $
- *  Time-stamp:      "2006-07-01 14:35:13 bkorb"
+ *  $Id: stack.c,v 4.10 2006/07/14 04:20:17 bkorb Exp $
+ *  Time-stamp:      "2006-07-13 21:11:29 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
@@ -51,7 +51,9 @@
  * If you do not wish that, delete this exception notice.
  */
 
-#include REGEX_HEADER
+#ifdef WITH_LIBREGEX
+#  include REGEX_HEADER
+#endif
 
 /*=export_func  optionUnstackArg
  * private:

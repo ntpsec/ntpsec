@@ -8,11 +8,8 @@ prog-name      = "ntp-keygen";
 prog-title     = "Create a NTP host key";
 package        = ntp;
 
-long-opts;
-
 test-main;
 
-config-header  = "config.h";
 include        = '#include <stdlib.h>';
 #include       version.def
 

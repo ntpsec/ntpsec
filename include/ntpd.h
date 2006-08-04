@@ -140,7 +140,6 @@ extern	struct peer *findexistingpeer P((struct sockaddr_storage *, struct peer *
 extern	struct peer *findpeer	P((struct sockaddr_storage *, struct interface *, int, int *));
 extern	struct peer *findpeerbyassoc P((u_int));
 extern  void         set_peerdstadr       P((struct peer *peer, struct interface *interface));
-extern  struct interface *select_peerinterface P((struct peer *, struct sockaddr_storage *, struct interface *, u_char));
 extern	struct peer *newpeer	P((struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t));
 extern	void	peer_all_reset	P((void));
 extern	void	peer_clr_stats	P((void));

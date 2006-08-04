@@ -6,9 +6,6 @@ autogen definitions options;
 
 prog-name      = "ntpq";
 prog-title     = "standard NTP query program";
-homerc         =  $HOME, ".";
-long-opts;
-config-header  = config.h;
 argument       = '[ host ...]';
 
 test-main;
@@ -85,6 +82,17 @@ flag = {
 };
 
 detail = <<-  _END_DETAIL
+	The
+	[= prog-name =]
+	utility program is used to query NTP servers which
+	implement the standard NTP mode 6 control message formats defined
+	in Appendix B of the NTPv3 specification RFC1305, requesting
+	information about current state and/or changes in that state.
+	The same formats are used in NTPv4, although some of the
+	variables have changed and new ones added.
+	_END_DETAIL;
+
+prog-man-descrip = <<-  _END_PROG_MAN_DESCRIP
 	The
 	[= prog-name =]
 	utility program is used to query NTP servers which
@@ -332,4 +340,4 @@ detail = <<-  _END_DETAIL
 	a timeout will be twice the timeout value set.
 	@end table
 
-	_END_DETAIL;
+	_END_PROG_MAN_DESCRIP;

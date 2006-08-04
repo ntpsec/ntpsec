@@ -104,6 +104,7 @@ int peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static void	    getmorepeermem	 P((void));
+static struct interface *select_peerinterface P((struct peer *, struct sockaddr_storage *, struct interface *, u_char));
 
 /*
  * init_peer - initialize peer data structures and counters
@@ -529,30 +530,30 @@ void
 set_peerdstadr(struct peer *peer, struct interface *interface)
 {
 	if (peer->dstadr != interface) {
+		struct interface *prev_dstadr = peer->dstadr;
+
 		if (peer->dstadr != NULL)
 		{
 			peer->dstadr->peercnt--;
 			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
 		}
 
-		if (interface == NULL)
-		{
-			/*
-			 * reset crypto information if we disconnect from
-			 * an interface - other crypto updates are handled
-			 * by the crypto machinery
-			 */
-#ifdef DEBUG
-			msyslog(LOG_INFO, "set_peerdstadr: disconnecting peer from interface - clearing crypto");
-#endif
-			peer_crypto_clear(peer);
-		}
-
-		DPRINTF(1, ("set_peerdstadr: at %ld next %ld assoc ID %d\n",
-			    current_time, peer->nextdate, peer->associd));
-
+		DPRINTF(4, ("set_peerdstadr(%s): change interface from %s to %s\n",
+			    stoa(&peer->srcadr),
+			    (peer->dstadr != NULL) ? stoa(&peer->dstadr->sin) : "<null>",
+			    (interface != NULL) ? stoa(&interface->sin) : "<null>"));
 
 		peer->dstadr = interface;
+
+		if (prev_dstadr != NULL) {
+			/*
+			 * reset crypto information if we change from an
+			 * active interface
+			 * all other crypto updates are handled by the crypto
+			 * machinery
+			 */
+			peer_crypto_clear(peer);
+		}
 
 		if (peer->dstadr != NULL)
 		{
@@ -573,7 +574,7 @@ peer_refresh_interface(struct peer *peer)
 	niface = select_peerinterface(peer, &peer->srcadr, NULL, peer->cast_flags);
 
 #ifdef DEBUG
-	if (debug)
+	if (debug > 3)
 	{
 		printf(
 			"peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
@@ -633,7 +634,7 @@ refresh_all_peerinterfaces(void)
 	int n;
 
 	/*
-	 * this is called when te interfac list has changed
+	 * this is called when the interface list has changed
 	 * give all peers a chance to find a better interface
 	 */
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
@@ -648,7 +649,7 @@ refresh_all_peerinterfaces(void)
 /*
  * find an interface suitable for the src address
  */
-struct interface *
+static struct interface *
 select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct interface *dstadr, u_char cast_flags)
 {
 	struct interface *interface;
@@ -667,7 +668,7 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 		if (cast_flags & (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
 			interface = findbcastinter(srcadr);
 #ifdef DEBUG
-			if (debug > 1) {
+			if (debug > 3) {
 				if (interface != NULL)
 					printf("Found broadcast interface address %s, for address %s\n",
 					       stoa(&(interface)->sin), stoa(srcadr));
@@ -687,6 +688,15 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 			interface = dstadr;
 		else
 			interface = findinterface(srcadr);
+
+	/*
+	 * we do not bind to the wildcard interfaces for output 
+	 * as our (network) source address would be undefined and
+	 * crypto will not work without knowing the own transmit address
+	 */
+	if (interface != NULL && interface->flags & INT_WILDCARD)
+		interface = NULL;
+
 	return interface;
 }
 
@@ -758,7 +768,24 @@ newpeer(
 		return (NULL);
 	}
 	
+	peer->srcadr = *srcadr;
+	peer->hmode = (u_char)hmode;
+	peer->version = (u_char)version;
+	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
+	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
+	peer->flags = flags;
+
 	set_peerdstadr(peer, dstadr);
+
+#ifdef DEBUG
+	if (debug > 2) {
+		if (peer->dstadr)
+			printf("newpeer: using fd %d and our addr %s\n",
+			       peer->dstadr->fd, stoa(&peer->dstadr->sin));
+		else
+			printf("newpeer: local interface currently not bound\n");
+	}
+#endif
 	
 	/*
 	 * Broadcast needs the socket enabled for broadcast
@@ -772,21 +799,6 @@ newpeer(
 	if (cast_flags & MDF_MCAST && peer->dstadr) {
 		enable_multicast_if(peer->dstadr, srcadr);
 	}
-#ifdef DEBUG
-	if (debug>2) {
-		if (peer->dstadr)
-			printf("newpeer: using fd %d and our addr %s\n",
-			       peer->dstadr->fd, stoa(&peer->dstadr->sin));
-		else
-			printf("newpeer: local interface currently not bound\n");
-	}
-#endif
-	peer->srcadr = *srcadr;
-	peer->hmode = (u_char)hmode;
-	peer->version = (u_char)version;
-	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
-	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
-	peer->flags = flags;
 	if (key != 0)
 		peer->flags |= FLAG_AUTHENABLE;
 	if (key > NTP_MAXKEY)

@@ -117,10 +117,21 @@ detail = <<-  _END_DETAIL
 .I sntp
 can be used as a SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
-run as an interactive command, in a
+run as an interactive command or in a
 .I cron
-job or as a daemon.  It can be run as a daemon to provide a SNTP server for
-other clients.  NTP is the Network Time Protocol (RFC 1305) and SNTP is the
+job.
+NTP is the Network Time Protocol (RFC 1305) and SNTP is the
+Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).
+	_END_DETAIL;
+
+prog-man-descrip = <<-  _END_PROG_MAN_DESCRIP
+.I sntp
+can be used as a SNTP client to query a NTP or SNTP server and either display
+the time or set the local system's time (given suitable privilege).  It can be
+run as an interactive command or in a
+.I cron
+job.
+NTP is the Network Time Protocol (RFC 1305) and SNTP is the
 Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).
 .SS Options
 .PP
@@ -366,4 +377,4 @@ option to a larger value may help.  Or it may not.
 .I sntp
 was developed by N.M. Maclaren of the University of Cambridge Computing
 Service.
-	_END_DETAIL;
+	_END_PROG_MAN_DESCRIP;

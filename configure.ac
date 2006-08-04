@@ -59,6 +59,10 @@ case "$host" in
     LDFLAGS="$LDFLAGS -L/SYSLOG/PUB"
     LIBS="$LIBS -lcurses"
     ;;
+ *-*-solaris*)
+    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+    libxnet=-lxnet
+    ;;
 esac
 
 AMU_OS_CFLAGS
@@ -297,10 +301,11 @@ dnl AC_CHECK_LIB(kvm, main, , , -lelf)
 AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
 AC_CHECK_LIB(ld, nlist)
 AC_CHECK_LIB(mld, nlist)
-AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
+AC_CHECK_FUNC(gethostent, ,
+  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
 AC_CHECK_FUNC(openlog, , 
   AC_CHECK_LIB(gen, openlog, , 
-  AC_CHECK_LIB(syslog, openlog, , , -lsocket)))
+  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
 AC_CHECK_LIB(md5, MD5Init, , 
   AC_CHECK_LIB(md, MD5Init))
 AC_CHECK_FUNCS(MD5Init)
@@ -345,7 +350,9 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
+AC_CHECK_FUNC(setsockopt, ,
+	[AC_CHECK_LIB(socket, setsockopt)
+	 AC_CHECK_LIB(xnet, setsockopt)])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -1474,25 +1481,6 @@ case "$ac_cv_var_syscall_bug" in
  yes) AC_DEFINE(SYSCALL_BUG, 1, [Buggy syscall() (Solaris2.4)?]) ;;
 esac
 
-AC_CACHE_CHECK(for Streams/TLI, ac_cv_var_streams_tli,
-[ case "$ac_cv_header_sys_stropts_h" in
-  yes)
-     ans=no
-     # There must be a better way...
-     case "$host" in
-      *-*-ptx*)
-         ans=yes
-         ;;
-     esac
-     ;;
- esac
- ac_cv_var_streams_tli=$ans])
-case "$ac_cv_var_streams_tli" in
- yes)
-    AC_DEFINE(STREAMS_TLI, 1, [Do we have STREAMS/TLI? (Can we replace this with HAVE_SYS_STROPTS_H?)])
-    ;;
-esac
-
 AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
  AC_EGREP_CPP(yes,
   [#include <signal.h>
@@ -1500,7 +1488,6 @@ AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
    yes
 #endif
   ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no))
-
 
 dnl Override those system that have a losing SIGIO
 AC_CACHE_CHECK(if we want to use signalled IO, ac_cv_var_signalled_io,
@@ -1787,7 +1774,24 @@ AC_CACHE_CHECK(for kernel multicast support, ac_cv_var_mcast,
   ], ac_cv_var_mcast=yes) ;;
   esac])
 case "$ac_cv_var_mcast" in
- yes) AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?]) ;;
+ yes)
+    AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?])
+    AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
+	ac_cv_var_typeof_ip_multicast_loop,
+	[case "$host" in
+	 *-*-netbsd*|*-*-linux*)
+	    ac_cv_var_typeof_ip_multicast_loop=u_int
+	    ;;
+	 *-*-winnt*)
+	    ac_cv_var_typeof_ip_multicast_loop=BOOL
+	    ;;
+	 *) ac_cv_var_typeof_ip_multicast_loop=u_char
+	    ;;
+	esac])
+    AC_DEFINE_UNQUOTED(TYPEOF_IP_MULTICAST_LOOP,
+		   $ac_cv_var_typeof_ip_multicast_loop,
+		   [What type to use for setsockopt])
+    ;;
 esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,

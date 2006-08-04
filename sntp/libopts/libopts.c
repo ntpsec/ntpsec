@@ -1,6 +1,5 @@
 #define AUTOOPTS_INTERNAL
 #include "compat/compat.h"
-#define HAVE_LIBSNPRINTFV
 #define LOCAL static
 #include "autoopts/options.h"
 #include "autoopts/usage-txt.h"

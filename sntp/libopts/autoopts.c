@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.20 2006/06/24 23:34:51 bkorb Exp $
- *  Time-stamp:      "2006-07-01 14:41:46 bkorb"
+ *  $Id: autoopts.c,v 4.22 2006/07/15 22:10:21 bkorb Exp $
+ *  Time-stamp:      "2006-07-15 13:54:08 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -56,14 +56,12 @@
 #  include "compat/pathfind.c"
 #endif
 
-#ifndef HAVE_LIBSNPRINTFV
-# ifndef HAVE_SNPRINTF
-#   include "compat/snprintf.c"
-# endif
+#ifndef HAVE_SNPRINTF
+#  include "compat/snprintf.c"
+#endif
 
-# ifndef HAVE_STRDUP
-#   include "compat/strdup.c"
-# endif
+#ifndef HAVE_STRDUP
+#  include "compat/strdup.c"
 #endif
 
 #ifndef HAVE_STRCHR

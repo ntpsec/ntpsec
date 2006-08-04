@@ -1,8 +1,8 @@
 
 /*
- *  Time-stamp:      "2006-07-01 14:40:47 bkorb"
+ *  Time-stamp:      "2006-07-15 13:52:50 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.22 2006/06/24 23:34:51 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.25 2006/07/15 22:10:21 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -76,8 +76,8 @@
 #undef  EXPORT
 #define EXPORT
 
-#if defined(_WIN32)
-# define DIRch '\\'
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# define DIRCH '\\'
 #else
 # define DIRCH '/'
 #endif
@@ -108,8 +108,11 @@ typedef int tDirection;
  *  USAGE:  define procedures to return "tSuccess".  Test their results
  *          with the SUCCEEDED, FAILED and HADGLITCH macros.
  */
+#undef  SUCCESS
 #define SUCCESS  ((tSuccess) 0)
+#undef  FAILURE
 #define FAILURE  ((tSuccess)-1)
+#undef  PROBLEM
 #define PROBLEM  ((tSuccess) 1)
 
 typedef int tSuccess;
@@ -189,10 +192,6 @@ typedef struct {
 #  define AGFREE( p )           free( p )
 #  define AGDUPSTR( p, s, w )   p = strdup( s )
 #  define TAGMEM( m, t )
-
-#ifdef AUTOGEN_BUILD
-#  include <snprintfv/printf.h>
-#endif /* AUTOGEN_BUILD */
 
 /*
  *  DO option handling?

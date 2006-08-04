@@ -1,7 +1,7 @@
 
 /*
- *  save.c  $Id: save.c,v 4.14 2006/06/24 23:34:51 bkorb Exp $
- * Time-stamp:      "2006-07-01 12:41:27 bkorb"
+ *  save.c  $Id: save.c,v 4.16 2006/07/16 15:27:50 bkorb Exp $
+ * Time-stamp:      "2006-07-16 08:13:22 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -308,7 +308,7 @@ printEntry(
             /*
              *  Print the continuation and the text from the current line
              */
-            fwrite( pzLA, (unsigned)(pzNl - pzLA), 1, fp );
+            (void)fwrite( pzLA, (unsigned)(pzNl - pzLA), 1, fp );
             pzLA = pzNl+1; /* advance the Last Arg pointer */
             fputs( "\\\n", fp );
         }
