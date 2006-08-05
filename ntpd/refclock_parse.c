@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A
  *
- * refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A
+ * refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.76 2006/06/22 18:40:47 kardel RELEASE_20060622_A";
+static char rcsid[] = "refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -208,6 +208,7 @@ struct	refclock refclock_parse = {
  */
 #define	MAXUNITS	4	/* maximum number of "PARSE" units permitted */
 #define PARSEDEVICE	"/dev/refclock-%d" /* device to open %d is unit number */
+#define PARSEPPSDEVICE	"/dev/refclockpps-%d" /* optional pps device to open %d is unit number */
 
 #undef ABS
 #define ABS(_X_) (((_X_) < 0) ? -(_X_) : (_X_))
@@ -396,6 +397,7 @@ struct parseunit
         double        ppsphaseadjust;   /* phase adjustment of PPS time stamp */
         u_long        lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
 	u_long        ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
+	int	      ppsfd;	        /* fd to ise for PPS io */
 #ifdef HAVE_PPSAPI
         pps_handle_t  ppshandle;        /* store PPSAPI handle */
         pps_params_t  ppsparams;        /* current PPS parameters */
@@ -1628,8 +1630,8 @@ ppsclock_init(
 	 * now push the parse streams module
 	 * it will ensure exclusive access to the device
 	 */
-	if (ioctl(parse->generic->io.fd, I_PUSH, (caddr_t)m1) == -1 &&
-	    ioctl(parse->generic->io.fd, I_PUSH, (caddr_t)m2) == -1)
+	if (ioctl(parse->ppsfd, I_PUSH, (caddr_t)m1) == -1 &&
+	    ioctl(parse->ppsfd, I_PUSH, (caddr_t)m2) == -1)
 	{
 		if (errno != EINVAL)
 		{
@@ -1640,7 +1642,7 @@ ppsclock_init(
 	}
 	if (!local_init(parse))
 	{
-		(void)ioctl(parse->generic->io.fd, I_POP, (caddr_t)0);
+		(void)ioctl(parse->ppsfd, I_POP, (caddr_t)0);
 		return 0;
 	}
 
@@ -2110,7 +2112,7 @@ local_input(
 #ifdef TIOCDCDTIMESTAMP
 				struct timeval dcd_time;
 				
-				if (ioctl(rbufp->fd, TIOCDCDTIMESTAMP, &dcd_time) != -1)
+				if (ioctl(parse->ppsfd, TIOCDCDTIMESTAMP, &dcd_time) != -1)
 				{
 					l_fp tstmp;
 					
@@ -2124,7 +2126,7 @@ local_input(
 						{
 							printf(
 							       "parse: local_receive: fd %d DCDTIMESTAMP %s\n",
-							       rbufp->fd,
+							       parse->ppsfd,
 							       lfptoa(&tstmp, 6));
 							printf(" sigio %s\n",
 							       lfptoa(&ts.fp, 6));
@@ -2142,10 +2144,10 @@ local_input(
 				    struct ppsclockev ev;
 
 #ifdef HAVE_CIOGETEV
-				    if (ioctl(parse->generic->io.fd, CIOGETEV, (caddr_t)&ev) == 0)
+				    if (ioctl(parse->ppsfd, CIOGETEV, (caddr_t)&ev) == 0)
 #endif
 #ifdef HAVE_TIOCGPPSEV
-				      if (ioctl(parse->generic->io.fd, TIOCGPPSEV, (caddr_t)&ev) == 0)
+				    if (ioctl(parse->ppsfd, TIOCGPPSEV, (caddr_t)&ev) == 0)
 #endif
 					{
 					  if (ev.serial != parse->ppsserial)
@@ -2170,11 +2172,10 @@ local_input(
 				  }
 #endif
 #endif /* TIOCDCDTIMESTAMP */
-#endif /* HAVE_PPSAPI */
+#endif /* !HAVE_PPSAPI */
 			}
-
-  			if (count)
-  			{	/* simulate receive */
+			if (count)
+			{	/* simulate receive */
 				buf = get_free_recv_buffer();
 				if (buf != NULL) {
 					memmove((caddr_t)buf->recv_buffer,
@@ -2189,8 +2190,8 @@ local_input(
 					buf->X_from_where = rbufp->X_from_where;
 					add_full_recv_buffer(buf);
 				}
-  				parse_iodone(&parse->parseio);
-  			}
+				parse_iodone(&parse->parseio);
+			}
 			else
 			{
 				memmove((caddr_t)rbufp->recv_buffer,
@@ -2589,6 +2590,8 @@ parse_shutdown(
 		(void)time_pps_destroy(parse->ppshandle);
 	}
 #endif
+	if (parse->generic->io.fd != parse->ppsfd && parse->ppsfd != -1)
+		(void)close(parse->ppsfd);  /* close separate PPS source */
 
 	/*
 	 * print statistics a last time and
@@ -2650,7 +2653,7 @@ parse_hardpps(
 				CLK_UNIT(parse->peer));
 		} else {
 		        NLOG(NLOG_CLOCKINFO)
-		                msyslog(LOG_INFO, "PARSE receiver #%d: HARDPPS %sabled",
+		                msyslog(LOG_INFO, "PARSE receiver #%d: kernel PPS synchronisation %sabled",
 					CLK_UNIT(parse->peer), (mode == PARSE_HARDPPS_ENABLE) ? "en" : "dis");
 			/*
 			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
@@ -2767,6 +2770,7 @@ parse_start(
 #endif
 	struct parseunit * parse;
 	char parsedev[sizeof(PARSEDEVICE)+20];
+	char parseppsdev[sizeof(PARSEPPSDEVICE)+20];
 	parsectl_t tmp_ctl;
 	u_int type;
 
@@ -2794,6 +2798,7 @@ parse_start(
 	 * Unit okay, attempt to open the device.
 	 */
 	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
+	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 
 #ifndef O_NOCTTY
 #define O_NOCTTY 0
@@ -2831,6 +2836,7 @@ parse_start(
 	parse->timedata.parse_status = (unsigned short)~0;	/* be sure to mark initial status change */
 	parse->lastmissed     = 0;	/* assume got everything */
 	parse->ppsserial      = 0;
+	parse->ppsfd	      = -1;
 	parse->localdata      = (void *)0;
 	parse->localstate     = 0;
 	parse->kv             = (struct ctl_var *)0;
@@ -2921,13 +2927,29 @@ parse_start(
 		tio.c_cflag     |= parse_clockinfo[type].cl_speed;
 #endif
 
+		/*
+		 * set up pps device
+		 * if the PARSEPPSDEVICE can be opened that will be used
+		 * for PPS else PARSEDEVICE will be used
+		 */
+		parse->ppsfd = open(parseppsdev, O_RDWR | O_NOCTTY
+#ifdef O_NONBLOCK
+				    | O_NONBLOCK
+#endif
+				    , 0777);
+
+		if (parse->ppsfd == -1)
+		{
+			parse->ppsfd = fd232;
+		}
+
 /*
  * Linux PPS - the old way
  */
 #if defined(HAVE_TIO_SERIAL_STUFF)		/* Linux hack: define PPS interface */
 		{
 			struct serial_struct	ss;
-			if (ioctl(fd232, TIOCGSERIAL, &ss) < 0 ||
+			if (ioctl(parse->ppsfd, TIOCGSERIAL, &ss) < 0 ||
 			    (
 #ifdef ASYNC_LOW_LATENCY
 			     ss.flags |= ASYNC_LOW_LATENCY,
@@ -2937,8 +2959,8 @@ parse_start(
 			     ss.flags |= ASYNC_PPS_CD_NEG,
 #endif
 #endif
-			     ioctl(fd232, TIOCSSERIAL, &ss)) < 0) {
-				msyslog(LOG_NOTICE, "refclock_parse: TIOCSSERIAL fd %d, %m", fd232);
+			     ioctl(parse->ppsfd, TIOCSSERIAL, &ss)) < 0) {
+				msyslog(LOG_NOTICE, "refclock_parse: TIOCSSERIAL fd %d, %m", parse->ppsfd);
 				msyslog(LOG_NOTICE,
 					"refclock_parse: optional PPS processing not available");
 			} else {
@@ -2960,7 +2982,7 @@ parse_start(
 		    {
 			int i = 1;
 		    
-			if (ioctl(fd232, TIOCSPPS, (caddr_t)&i) == 0)
+			if (ioctl(parse->ppsfd, TIOCSPPS, (caddr_t)&i) == 0)
 			    {
 				parse->flags |= PARSE_PPSCLOCK;
 			    }
@@ -2974,7 +2996,7 @@ parse_start(
 		parse->hardppsstate = PARSE_HARDPPS_DISABLE;
 		if (CLK_PPS(parse->peer))
 		{
-		  if (time_pps_create(fd232, &parse->ppshandle) < 0) 
+		  if (time_pps_create(parse->ppsfd, &parse->ppshandle) < 0) 
 		    {
 		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
 		    }
@@ -3099,13 +3121,14 @@ parse_start(
 	NLOG(NLOG_CLOCKINFO)
 		{
 			/* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "PARSE receiver #%d: reference clock \"%s\" (device %s) added",
+			msyslog(LOG_INFO, "PARSE receiver #%d: reference clock \"%s\" (I/O device %s, PPS device %s) added",
 				CLK_UNIT(parse->peer),
-				parse->parse_type->cl_description, parsedev);
+				parse->parse_type->cl_description, parsedev,
+				(parse->ppsfd != parse->generic->io.fd) ? parseppsdev : parsedev);
 
-			msyslog(LOG_INFO, "PARSE receiver #%d: Stratum %d, %sPPS support, trust time %s, precision %d",
+			msyslog(LOG_INFO, "PARSE receiver #%d: Stratum %d, trust time %s, precision %d",
 				CLK_UNIT(parse->peer),
-				parse->peer->stratum, CLK_PPS(parse->peer) ? "" : "no ",
+				parse->peer->stratum,
 				l_mktime(parse->maxunsync), parse->peer->precision);
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: rootdelay %.6f s, phase adjustment %.6f s, PPS phase adjustment %.6f s, %s IO handling",
@@ -3117,13 +3140,15 @@ parse_start(
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: Format recognition: %s", CLK_UNIT(parse->peer),
 				parse->parse_type->cl_format);
-                        msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS ioctl support%s", CLK_UNIT(parse->peer),
-				(parse->flags & PARSE_PPSCLOCK) ? "" : "NO ",
+                        msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS support%s", CLK_UNIT(parse->peer),
+				CLK_PPS(parse->peer) ? "" : "NO ",
+				CLK_PPS(parse->peer) ?
 #ifdef PPS_METHOD
-				" (interface is " PPS_METHOD ")"
+				" (implementation " PPS_METHOD ")"
 #else
 				""
 #endif
+				: ""
 				);
 		}
 
@@ -5682,6 +5707,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.77  2006/08/05 07:44:49  kardel
+ * support optionally separate PPS devices via /dev/refclockpps-{0..3}
+ *
  * Revision 4.76  2006/06/22 18:40:47  kardel
  * clean up signedness (gcc 4)
  *

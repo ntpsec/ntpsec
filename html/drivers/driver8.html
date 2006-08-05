@@ -15,9 +15,10 @@
 		Address: 127.127.8.<i>u</i><br>
 		Reference ID: <tt>PARSE</tt><br>
 		Driver ID: <tt>GENERIC</tt><br>
-		Serial Port: <tt>/dev/refclock-<i>u</i></tt>; TTY mode according to clock type
+		Serial Port: <tt>/dev/refclock-<i>u</i></tt>; TTY mode according to clock type<br>
+                PPS device: <tt>/dev/refclockpps-<i>u</i></tt>; alternate PPS device (if not available via the serial port)
 		<h4>Description</h4>
-		The PARSE driver supports 17 different clockes types/configurations. PARSE is actually a multi clock driver.<br>
+		The PARSE driver supports 19 different clock types/configurations. PARSE is actually a multi clock driver.<br>
 		<br>
 		<p>The actual receiver status is mapped into various synchronization states generally used by receivers. The driver is configured to interpret the time codes of DCF C51, PZF535, PZF509, GPS16x, Trimble SV6 GPS, ELV DCF7000, Schmid, Wharton 400A and low cost receivers (see list below).</p>
 		<p>The reference clock support in ntp contains the necessary configuration tables for those receivers. In addition to supporting several different clock types and 4 devices, the generation a a PPS signal is also provided as an configuration option. The PPS configuration option uses the receiver generated time stamps for feeding the PPS loopfilter control for much finer clock synchronization.</p>
@@ -26,12 +27,10 @@
 		<h4>ntpq (8)</h4>
 		<h5>timecode variable</h5>
 		<p>The ntpq program can read clock variables command list several variables. These hold the following information: refclock_time is the local time with the offset to UTC (format HHMM). The currently active receiver flags are listed in refclock_status. Additional feature flags of the receiver are optionally listed in parentheses. The actual time code is listed in timecode. A qualification of the decoded time code format is following in refclock_format. The last piece of information is the overall running time and the accumulated times for the clock event states in refclock_states. When PPS information is present additional variable are available. refclock_ppstime lists then the PPS timestamp and refclock_ppsskew lists the difference between RS232 derived timestamp and the PPS timestamp.</p>
-		<p>Currently, eighteen clock types (devices /dev/refclock-0 - /dev/refclock-3) are supported by the PARSE driver.<br>
+		<p>Currently, nineteen clock types (devices /dev/refclock-0 - /dev/refclock-3) are supported by the PARSE driver.<br>
 			A note on the implementations:</p>
 		<ul>
-			<li>These implementations where mainly done <b><i>WITHOUT</i></b> actual access to the hardware. Thus not all implementations provide full support. The development was done with the help of many kind souls who had the hardware and where so kind to borrow me their time an patience during the development and debugging cycle. Thus for continued support and quality direct access to the receivers is a big help. Nevertheless i am not prepared to buy these reference clocks - donations to <a href="http://www4.informatik.uni-erlangen.de/%7ekardel">me</a> (<a href="mailto:kardel <AT> acm.org">kardel 
-					<AT>
-					ntp.org</a>) are welcome as long as they work within Europe 8-).
+			<li>These implementations where mainly done <b><i>WITHOUT</i></b> actual access to the hardware. Thus not all implementations provide full support. The development was done with the help of many kind souls who had the hardware and where so kind to borrow me their time an patience during the development and debugging cycle. Thus for continued support and quality direct access to the receivers is a big help. Nevertheless i am not prepared to buy these reference clocks - donations to (<a href="mailto:kardel <AT> ntp.org">kardel &lt;AT&gt; ntp.org</a>) are welcome as long as they work within Europe 8-).
 				<p>Verified implementations are:</p>
 				<ul>
 					<li>RAWDCF variants
@@ -99,10 +98,13 @@
 				<p><b><tt>RAWDCF receiver (DTR=low/RTS=high) </tt></b></p>
 			<li><b><tt>server 127.127.8.0-3 mode 17</tt></b>
 				<p><b><tt>VARITEXT Receiver (MSF) </tt></b></p>
+			<li><b><tt>server 127.127.8.0-3 mode 18</tt></b>
+				<p><b><tt><a href="http://www.meinberg.de">Meinberg </a><a href="http://www.meinberg.de/english/products/gps167.htm">GPS166/GPS167 receiver</a> (GPS / &lt;&lt;1us) without additional data communication (version, GPS status etc) for multi drop, heterogenous multi client operation</tt></b><br>
+				</p>
 		</ul>
 		<p>Actual data formats and set-up requirements of the various clocks can be found in <a href="../parsedata.html">NTP PARSE clock data formats</a>.</p>
 		<p>The reference clock support carefully monitors the state transitions of the receiver. All state changes and exceptional events such as loss of time code transmission are logged via the syslog facility. Every hour a summary of the accumulated times for the clock states is listed via syslog.</p>
-		<p>PPS support is only available when the receiver is completely synchronized. The receiver is believed to deliver correct time for an additional period of time after losing synchronizations, unless a disruption in time code transmission is detected (possible power loss). The trust period is dependent on the receiver oscillator and thus a function of clock type. This is one of the parameters in the clockinfo field of the reference clock implementation. This parameter cannot be configured by ntpdc.</p>
+		<p>PPS support is only available when the receiver is completely synchronized. The receiver is believed to deliver correct time for an additional period of time after losing synchronizations, unless a disruption in time code transmission is detected (possible power loss). The trust period is dependent on the receiver oscillator and thus a function of clock type.</p>
 		<br>
 		<p>For the Meinberg GPS166/GPS167 receiver is also a special firmware release available (Uni-Erlangen). This release should be used for proper operation.</p>
 		<p>The raw DCF77 pulses can be fed via a level converter directly into Pin 3 (Rx) of the Sun. The telegrams will be decoded an used for synchronization. AM DCF77 receivers are running as low as $25. The accuracy is dependent on the receiver and is somewhere between 2ms (expensive) to 10ms (cheap). Upon bad signal reception of DCF77 synchronizations will cease as no backup oscillator is available as usually found in other reference clock receivers. So it is important to have a good place for the DCF77 antenna. For transmitter shutdowns you are out of luck unless you have other NTP servers with alternate time sources available.</p>
@@ -111,6 +113,7 @@
 		<h4>Hardware PPS support<br>
 		</h4>
 		<p>For PPS to be used you MUST add 128 to the mode parameter.</p>
+                <p>If the PPS signal is fed in on device different from the device providing the serial communication (/dev/refclock-{0..3}) this device is configured as /dev/refclockpps-{0..3}. This allows to feed in PPS information e.g. via the parallel port (if supported by the underlying operation system) and handle the communication via the serial port.</p> 
 		<h4>Monitor Data</h4>
 		<p>Clock states statistics are written hourly the the syslog service. Online information can be found by examining the clock variable via the ntpq cv command.<br>
 			Some devices have quite extensive addtional information (GPS16x, Trimble). The driver reads out much of the internal GPS data<br>
@@ -219,7 +222,7 @@
 		</dl>
 		<span style="font-weight: bold;">Note about auxiliary SUN STREAMS modules (SunOS and Solaris):</span><br>
 		<dl>
-			<dt>The timecode of these receivers used to be sampled via a STREAMS module in the kernel (The STREAMS module has been designed for use with SUN Systems under SunOS 4.1.x or Solaris 2.3 - 2.8. It can be linked directly into the kernel or loaded via the loadable driver mechanism). This STREAMS module can be adapted to be able to convert different time code formats. Today the PPSAPI mechanism can be used. There is no real need for the STREAMS modules any more.<br>
+			<dt>The timecode of these receivers can be sampled via a STREAMS module in the kernel (The STREAMS module has been designed for use with SUN Systems under SunOS 4.1.x or Solaris 2.3 - 2.8. It can be linked directly into the kernel or loaded via the loadable driver mechanism). This STREAMS module can be adapted to be able to convert different time code formats. Today usually the PPSAPI mechanism is used.<br>
 		</dl>
 		<h4>Making your own PARSE clocks</h4>
 		<p>The parse clock mechanismis deviated from the way other ntp reference clocks work. For a short description how to build parse reference clocks see <a href="../parsenew.html">making PARSE clocks</a></p>
