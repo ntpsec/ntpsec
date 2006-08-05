@@ -129,11 +129,9 @@ dist-hook:
 
 ChangeLog: FRC.ChangeLog
 	cd $(srcdir)					\
-	&& . packageinfo.sh				\
-	&& ARGS="-hr$${CLTAG}.."			\
-	&& ( bk -R prs $${ARGS} -nd':I:'		\
-	   | bk changes -m -v - > ChangeLog.new )	\
-	&& mv ChangeLog.new ChangeLog
+	&& /bin/test -e ChangeLog			\
+		-a SCCS/s.ChangeSet -ot ChangeLog	\
+	|| scripts/genChangeLog
 
 # HMS: The following seems to be a work-in-progress...
 
