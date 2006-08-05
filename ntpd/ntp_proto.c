@@ -1661,19 +1661,23 @@ clock_filter(
 	}
 
         /*
-	 * Sort the samples in both lists by distance. Note, we do not
-	 * displace a higher distance sample by a lower distance one
-	 * unless lower by at least the precision.  
+	 * If the clock discipline has stabilized, sort the samples in
+	 * both lists by distance. Note, we do not displace a higher
+	 * distance sample by a lower distance one unless lower by at
+	 * least the precision.  
 	 */
-	for (i = 1; i < NTP_SHIFT; i++) {
-		for (j = 0; j < i; j++) {
-			if (dst[j] > dst[i] + LOGTOD(sys_precision)) {
-				k = ord[j];
-				ord[j] = ord[i];
-				ord[i] = k;
-				etemp = dst[j];
-				dst[j] = dst[i];
-				dst[i] = etemp;
+	if (state == 4) {
+		for (i = 1; i < NTP_SHIFT; i++) {
+			for (j = 0; j < i; j++) {
+				if (dst[j] > dst[i] +
+				    LOGTOD(sys_precision)) {
+					k = ord[j];
+					ord[j] = ord[i];
+					ord[i] = k;
+					etemp = dst[j];
+					dst[j] = dst[i];
+					dst[i] = etemp;
+				}
 			}
 		}
 	}
@@ -1730,10 +1734,10 @@ clock_filter(
 
 	/*
 	 * A new sample is useful only if it is younger than the last
-	 * one used, but only if the sucker has been synchronized.
+	 * one used. Note the order is FIFO if the clock discipline has
+	 * not stabilized.
 	 */
-	if (peer->filter_epoch[k] <= peer->epoch && sys_leap !=
-	    LEAP_NOTINSYNC) {
+	if (peer->filter_epoch[k] <= peer->epoch) {
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: discard %lu\n",
