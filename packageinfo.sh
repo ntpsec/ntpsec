@@ -14,13 +14,13 @@ point=3
 #special=ag
 special=
 # ReleaseCandidate. 'yes' or 'no'.
-#releasecandidate=yes
-releasecandidate=no
+releasecandidate=yes
 # ChangeLog tag
 CLTAG=NTP_4_2_0
 ###
-# The following is for ntp-stable.  3 cases:
+# The following is for ntp-stable.  2 cases:
 # - Numeric values increment
-# - empty 'increments' to 1
-# - NEW 'increments' to empty
-rcpoint=NEW
+# - GO triggers a release
+# - - rcpoint gets set to 0
+# - - releasecandidate gets set to no
+rcpoint=GO
