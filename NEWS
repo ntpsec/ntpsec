@@ -1,3 +1,4 @@
+* Support separate PPS devices for PARSE refclocks
 * [Bug 637, 51?] Dynamic interface scanning can now be done
 * Options processing now uses GNU AutoGen
 
