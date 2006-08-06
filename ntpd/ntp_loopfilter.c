@@ -158,7 +158,6 @@ int	state;			/* clock discipline state */
 u_char	sys_poll = NTP_MINDPOLL; /* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
-double	last_base;		/* last base offset (s) */
 
 /*
  * Huff-n'-puff filter variables
@@ -359,8 +358,8 @@ local_clock(
 			if (mu < clock_minstep)
 				return (0);
 
-			clock_frequency = (fp_offset - last_base -
-			    clock_offset) / mu;
+			clock_frequency = (fp_offset - clock_offset) /
+			    mu;
 
 			/* fall through to S_SPIK */
 
@@ -431,21 +430,22 @@ local_clock(
 
 		/*
 		 * In S_NSET state this is the first update received and
-		 * the frequency has not been initialized. The first
-		 * thing to do is directly measure the frequency offset.
+		 * the frequency has not been initialized. Adjust the
+		 * phase, but do not adjust the frequency until after
+		 * the stepout threshold.
 		 */
 		case S_NSET:
-			clock_offset = fp_offset;
 			rstclock(S_FREQ, peer->epoch, fp_offset);
-			return (0);
+			break;
 
 		/*
-		 * In S_FSET state this is the first update and the
-		 * frequency has been initialized. Adjust the phase, but
-		 * don't adjust the frequency until the next update.
+		 * In S_FSET state this is the first update received and
+		 * the frequency has been initialized. Adjust the phase,
+		 * but do not adjust the frequency until the next
+		 * update.
 		 */
 		case S_FSET:
-			clock_offset = fp_offset;
+			rstclock(S_SYNC, peer->epoch, fp_offset);
 			break;
 
 		/*
@@ -457,8 +457,9 @@ local_clock(
 			if (mu < clock_minstep)
 				return (0);
 
-			clock_frequency = (fp_offset - last_base -
-			    clock_offset) / mu;
+			clock_frequency = (fp_offset - clock_offset) /
+			    mu;
+			rstclock(S_SYNC, peer->epoch, fp_offset);
 			break;
 
 		/*
@@ -493,9 +494,9 @@ local_clock(
 			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
+			rstclock(S_SYNC, peer->epoch, fp_offset);
 			break;
 		}
-		rstclock(S_SYNC, peer->epoch, fp_offset);
 	}
 
 #ifdef OPENSSL
@@ -545,7 +546,8 @@ local_clock(
 	 * the ntp discipline until the residual offset sinks beneath
 	 * the waves.
 	 */
-	if (pll_control && kern_enable && fabs(clock_offset) < .5) {
+	if (pll_control && kern_enable && fabs(clock_offset) < .5 &&
+	    state != S_FREQ) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
@@ -838,16 +840,14 @@ rstclock(
 	double	offset		/* new offset */
 	)
 {
-	state = trans;
-	sys_clocktime = update;
-	last_base = offset - clock_offset;
-	last_offset = clock_offset = offset;
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: time %lu base %.6f offset %.6f freq %.3f state %d\n",
-		    sys_clocktime, last_base, last_offset, drift_comp *
-		    1e6, trans);
+		printf("local_clock: time %lu offset %.6f freq %.3f state %d\n",
+		    update, offset, drift_comp * 1e6, trans);
 #endif
+	state = trans;
+	sys_clocktime = update;
+	last_offset = clock_offset = offset;
 }
 
 

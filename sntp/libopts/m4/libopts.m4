@@ -65,7 +65,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # ...and int types headers
   # ========================
   AC_CHECK_HEADERS(stdint.h inttypes.h, break)
-  AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t,
+  AC_CHECK_TYPES([uint_t, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t,
      intptr_t])
   
   # ====================
