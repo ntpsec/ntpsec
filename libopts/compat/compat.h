@@ -37,7 +37,7 @@
  *  SYSTEM HEADERS:
  */
 #include <sys/types.h>
-#include <sys/mman.h>
+//#include <sys/mman.h>
 #include <sys/param.h>
 #if HAVE_SYS_PROCSET_H
 #  include <sys/procset.h>
@@ -152,7 +152,7 @@
 #include <time.h>
 
 #ifndef __windows__
-#  include <utime.h>
+//#  include <utime.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
