@@ -9,7 +9,7 @@ version=${proto}.${major}.${minor}
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=24
+point=26
 # Special.  Normally unused.  A suffix.
 #special=ag
 special=
@@ -19,8 +19,9 @@ releasecandidate=no
 # ChangeLog tag
 CLTAG=NTP_4_2_0
 ###
-# The following is for ntp-stable.  3 cases:
+# The following is for ntp-stable.  2 cases:
 # - Numeric values increment
-# - empty 'increments' to 1
-# - NEW 'increments' to empty
+# - GO triggers a release
+# - - rcpoint gets set to 0
+# - - releasecandidate gets set to no
 rcpoint=GRONK
