@@ -37,7 +37,9 @@
  *  SYSTEM HEADERS:
  */
 #include <sys/types.h>
-//#include <sys/mman.h>
+#if HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+#endif
 #include <sys/param.h>
 #if HAVE_SYS_PROCSET_H
 #  include <sys/procset.h>
