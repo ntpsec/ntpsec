@@ -36,6 +36,8 @@
 #if !defined _WIN32_WINNT || _WIN32_WINNT < 0x0400
 # error Please define _WIN32_WINNT in the project settings/makefile
 #endif
+
+#define __windows__ 1
 /*
  * ANSI C compliance enabled
  */
@@ -63,7 +65,8 @@
 #define _WSPIAPI_H_
 #endif
 
-#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */ 													
+#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */
+#define TYPEOF_IP_MULTICAST_LOOP BOOL												
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
@@ -71,6 +74,10 @@
 /* Enable OpenSSL */
 #define OPENSSL 1
 
+/*
+ * Include standard stat information
+ */
+#include <isc/stat.h>
 /*
  * Miscellaneous functions that Microsoft maps
  * to other names
@@ -84,6 +91,27 @@
 #define finite _finite
 #define random      rand
 #define srandom     srand
+#define fdopen	_fdopen
+#define read	_read
+#define open	_open
+#define close	_close
+#define write	_write
+#define strdup  _strdup
+#define stat    _stat       /* struct stat from <sys/stat.h> */
+#define unlink  _unlink
+#define fchmod( _x, _y );
+#define lseek   _lseek
+#define pipe    _pipe
+#define dup2    _dup2
+
+#define pid_t	int		/* PID is an int */
+#define ssize_t	int		/* ssize is an int */
+
+/*
+ * Map the stream to the file number
+ */
+#define STDOUT_FILENO	_fileno(stdout)
+#define STDERR_FILENO	_fileno(stderr)
 
 /*
  * We need to include string.h first before we override strerror
@@ -142,6 +170,13 @@ int NT_set_process_priority(void);	/* Define this function */
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
+# define HAVE_VPRINTF
+
+#define HAVE_LIMITS_H   1
+#define HAVE_STRDUP     1
+#define HAVE_STRCHR     1
+#define HAVE_FCNTL_H    1
+
 
 # define NEED_S_CHAR_TYPEDEF
 
