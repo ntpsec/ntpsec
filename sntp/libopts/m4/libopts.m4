@@ -24,7 +24,8 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # =================
   AC_CHECK_HEADERS(dlfcn.h errno.h fcntl.h libgen.h memory.h netinet/in.h \
     setjmp.h sys/mman.h sys/param.h sys/poll.h sys/procset.h sys/select.h \
-    sys/socket.h sys/stropts.h sys/time.h sys/un.h sys/wait.h unistd.h)
+    sys/socket.h sys/stropts.h sys/time.h sys/un.h sys/wait.h unistd.h    \
+    utime.h)
   
   # --------------------------------------------
   # Verify certain entries from AC_CHECK_HEADERS
