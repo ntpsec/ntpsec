@@ -39,6 +39,15 @@
 # include <sys/sockio.h>
 #endif
 
+/*
+ * setsockopt does not always have the same arg declaration
+ * across all platforms. If it's not defined we make it empty
+ */
+
+#ifndef SETSOCKOPT_ARG_CAST
+#define SETSOCKOPT_ARG_CAST
+#endif
+
 /* 
  * Set up some macros to look for IPv6 and IPv6 multicast
  */
@@ -1556,7 +1565,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 		 * Don't send back to itself, but allow it to fail to set it
 		 */
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       &off, sizeof(off)) == -1) {
+		       SETSOCKOPT_ARG_CAST &off, sizeof(off)) == -1) {
 			netsyslog(LOG_ERR,
 			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
 			iface->fd, stoa(&iface->sin), stoa(maddr));
@@ -2253,7 +2262,11 @@ open_socket(
 		/*
 		 * Don't log this under all conditions
 		 */
-		if (turn_off_reuse == 0 || debug > 1)
+		if (turn_off_reuse == 0
+#ifdef DEBUG
+		    || debug > 1
+#endif
+		   )
 			netsyslog(LOG_ERR, buff);
 
 		closesocket(fd);

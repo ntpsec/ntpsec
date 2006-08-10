@@ -902,12 +902,14 @@ jupiter_debug(peer, function, fmt, va_alist)
 	 */
 	vsnprintf(buffer, sizeof(buffer), fmt, ap);
 	record_clock_stats(&(peer->srcadr), buffer);
+#ifdef DEBUG
 	if (debug) {
 		fprintf(stdout, "%s: ", function);
 		fprintf(stdout, buffer);
 		fprintf(stdout, "\n");
 		fflush(stdout);
 	}
+#endif
 
 	va_end(ap);
 }

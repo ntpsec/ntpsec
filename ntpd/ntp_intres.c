@@ -249,7 +249,9 @@ ntp_intres(void)
 	readconf(in, req_file);
 	(void) fclose(in);
 
+#ifdef DEBUG
 	if (!debug )
+#endif
 		(void) unlink(req_file);
 
 	/*
@@ -785,8 +787,10 @@ request(
 		}
 		else if (n == 0)
 		{
+#ifdef DEBUG
 			if (debug)
 			    msyslog(LOG_INFO, "select() returned 0.");
+#endif
 			return 0;
 		}
 

@@ -70,6 +70,12 @@ case "$CONFIG_ARGS" in
     ;;
 esac
 
+case "$CONFIG_ARGS" in
+ *--disable-debugging*)
+    KEYSUF="$KEYSUF-nodebug"
+    ;;
+esac
+
 CCSUF=""
 
 case "$CC" in

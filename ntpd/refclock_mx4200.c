@@ -1572,6 +1572,7 @@ mx4200_debug(peer, fmt, va_alist)
      char *fmt;
 #endif /* __STDC__ */
 {
+#ifdef DEBUG
 	va_list ap;
 	struct refclockproc *pp;
 	struct mx4200unit *up;
@@ -1596,6 +1597,7 @@ mx4200_debug(peer, fmt, va_alist)
 
 		va_end(ap);
 	}
+#endif
 }
 
 /*
