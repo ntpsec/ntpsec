@@ -2262,7 +2262,11 @@ open_socket(
 		/*
 		 * Don't log this under all conditions
 		 */
-		if (turn_off_reuse == 0 || debug > 1)
+		if (turn_off_reuse == 0
+#ifdef DEBUG
+		    || debug > 1
+#endif
+		   )
 			netsyslog(LOG_ERR, buff);
 
 		closesocket(fd);

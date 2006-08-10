@@ -153,7 +153,7 @@
 
 #include <time.h>
 
-#ifndef __windows__
+#ifdef HAVE_UTIME_H
 #  include <utime.h>
 #endif
 
