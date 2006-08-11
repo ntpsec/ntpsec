@@ -7,7 +7,7 @@ copyright = {
     owner = "ntp.org";
     eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
     type  = note;
-    text  = 'See the sntp/Copyright file';
+    text  = `cat Copyright`;
 };
 
 
@@ -26,10 +26,7 @@ rcfile         = "ntp.ini";
 
 environrc;
 
-version         = `
-eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
-[ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
-echo $VERSION`;
+#include version.def;
 
 test-main;
 
