@@ -44,11 +44,12 @@ man_MANS=	sntp.1
 
 FRC:
 $(srcdir)/version.def: FRC
-	cd $(srcdir)					\
+	@cd $(srcdir)					\
 	&& test -e ../include/version.def		\
 	&& ( if cmp -s ../include/version.def version.def;	\
 	   then : ;						\
 	   else cp ../include/version.def version.def;		\
+		echo "Installing new sntp/version.def file";	\
 	   fi )
 
 $(srcdir)/sntp-opts.h: sntp-opts.c
