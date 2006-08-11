@@ -7,7 +7,7 @@ copyright = {
     owner = "ntp.org";
     eaddr = "http://bugs.ntp.isc.org, bugs@ntp.org";
     type  = note;
-    text  = `cat Copyright`;
+    text  = `cat COPYRIGHT`;
 };
 
 
