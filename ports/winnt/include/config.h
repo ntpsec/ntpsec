@@ -67,6 +67,7 @@
 
 #define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */
 #define TYPEOF_IP_MULTICAST_LOOP BOOL												
+#define SETSOCKOPT_ARG_CAST (const char *)
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY

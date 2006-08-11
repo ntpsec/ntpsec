@@ -73,6 +73,7 @@ int main( int argc, char *argv[] )
 	while (argv[i]) {
 		if (!_strnicmp(argv[i], "-d", 2) ||
 			!strcmp(argv[i], "-q") ||
+			!strcmp(argv[i], "--help") ||
 			!strcmp(argv[i], "-n")) {
 			foreground = TRUE;
 			break;
@@ -98,8 +99,7 @@ int main( int argc, char *argv[] )
 #ifdef DEBUG
 			fprintf(stderr, "%s: unable to start as service, rc: %i\n\n", progname, rc);
 #endif
-			ntpd_usage();
-			fprintf(stderr, "\nUse -d, -q, or -n to run from the command line.\n");
+			fprintf(stderr, "\nUse -d, -q, --help or -n to run from the command line.\n");
 			exit(rc);
 		}
 	}
