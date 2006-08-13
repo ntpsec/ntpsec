@@ -20,6 +20,10 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 08/08/2006	Heiko Gerstung
+#				- bugfixed point / rcpoint errors leading to a wrong
+#				  version string 
+#				- added a few cases for uppercase strings
 # 03/09/2005	Heiko Gerstung
 #				- added UTC offset to version time information
 #				- bugfixed several issues preventing this script to be used on NT4 
@@ -175,6 +179,9 @@ REM ****************************************************************************
 	REM from a packageinfo.sh file while in earlier versions the info was available from 
 	REM a version.m4 file.
 	SET F_PACKAGEINFO_SH=..\..\..\packageinfo.sh
+	TYPE ..\..\..\packageinfo.sh | FIND /V "rcpoint=" | FIND "point=" > point.txt
+	SET F_POINT_SH=point.txt
+	
 	SET F_VERSION_M4=..\..\..\version.m4
 	IF EXIST %F_PACKAGEINFO_SH% goto VER_FROM_PACKAGE_INFO
 	IF EXIST ..\..\..\version.m4 goto VER_FROM_M4
@@ -182,25 +189,43 @@ REM ****************************************************************************
 
 :VER_FROM_PACKAGE_INFO
 	REM Get version from packageinfo.sh file, which contains lines reading e.g.
+	
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "proto=" %%F_PACKAGEINFO_SH%%') DO SET PROTO=%%a
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "major=" %%F_PACKAGEINFO_SH%%') DO SET MAJOR=%%a
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "minor=" %%F_PACKAGEINFO_SH%%') DO SET MINOR=%%a
 
-	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "point=" %%F_PACKAGEINFO_SH%%') DO SET POINT=%%a
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "point=" %%F_POINT_SH%%') DO SET POINT=%%a
 	IF NOT "%POINT%"=="" set POINT=p%POINT%
+	IF "%POINT%"=="NEW" set POINT=
+
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "rcpoint=" %%F_PACKAGEINFO_SH%%') DO SET RCPOINT=%%a
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "special=" %%F_PACKAGEINFO_SH%%') DO SET SPECIAL=%%a
 	IF NOT "%SPECIAL%"=="" set SPECIAL=-%SPECIAL%
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "releasecandidate=" %%F_PACKAGEINFO_SH%%') DO SET REL_CAND_STR=%%a
 	IF /I "%REL_CAND_STR%"=="yes" set REL_CAND=-RC
-	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%REL_CAND%
+	IF /I "%REL_CAND_STR%"=="Yes" set REL_CAND=-RC
+	IF /I "%REL_CAND_STR%"=="YES" set REL_CAND=-RC
+	IF /I "%REL_CAND_STR%"=="Y" set REL_CAND=-RC
+	IF /I "%REL_CAND_STR%"=="y" set REL_CAND=-RC
+
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "repotype=" %%F_PACKAGEINFO_SH%%') DO SET REPOTYPE=%%a
+	IF "%REPOTYPE%"=="stable" set REPOTYPE=STABLE
+	IF "%REPOTYPE%"=="Stable" set REPOTYPE=STABLE
+	
+	IF NOT "%REPOTYPE%"=="STABLE" SET RCPOINT=
+
+	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%REL_CAND%%RCPOINT%
+	
 	goto VER_GET_CSET
+	
 
 :VER_FROM_M4
 	REM Get version from version.m4 file, which contains a line reading e.g.
 	REM m4_define([VERSION_NUMBER],[4.2.0b-rc1])
 	FOR /F "TOKENS=4 DELIMS==[] " %%a IN ('findstr  "VERSION_NUMBER" ..\..\..\version.m4') DO @SET VER=%%a
+	echo --- %VER% ---
 
 :VER_GET_CSET
 	REM Now we have the version info, try to add a BK ChangeSet version number
@@ -401,9 +426,12 @@ REM ****************************************************************************
    ECHO   -P          Database Name
    ECHO   -H          Help on options
 
-
-
 REM *****************************************************************************************************************
 REM All good things come to an end someday. Time to leave
 REM *****************************************************************************************************************
 :EOF
+
+REM *** Cleaning up 
+IF EXIST point.txt DEL point.txt
+IF EXIST userset.txt DEL userset.txt
+IF EXIST userset.reg DEL userset.reg
