@@ -207,6 +207,15 @@ flag = {
 };
 
 flag = {
+    name      = enablemmtimer;
+    value     = M;
+    descrip   = "Enable Multimedia Timer (Windows only)";
+    doc = <<-  _EndOfDoc_
+	Enable the Multimedia Timer for Windows.
+	_EndOfDoc_;
+};
+
+flag = {
     name      = nofork;
     value     = n;
     descrip   = "Do not fork";
