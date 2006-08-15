@@ -46,7 +46,7 @@ man_MANS=	sntp.1
 FRC:
 $(srcdir)/version.def: FRC
 	@cd $(srcdir)					\
-	&& test -e ../include/version.def		\
+	&& test -r ../include/version.def		\
 	&& ( if cmp -s ../include/version.def version.def;	\
 	   then : ;						\
 	   else cp ../include/version.def version.def;		\
