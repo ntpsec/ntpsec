@@ -12,8 +12,6 @@
 #include "recvbuff.h"
 
 #ifdef SYS_WINNT
-#define exit ntservice_exit
-extern	void	ntservice_exit	(int);
 #define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 #endif /* SYS_WINNT */
 
