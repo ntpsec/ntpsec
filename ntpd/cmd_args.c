@@ -82,7 +82,7 @@ getCmdOpts(
 /*
  * Enable the Multi-Media Timer for Windows?
  */
-#ifdef WINNT
+#ifdef SYS_WINNT
 	if (HAVE_OPT( ENABLEMMTIMER ))
 		enable_mm_timer();
 #endif

@@ -207,6 +207,7 @@ flag = {
 };
 
 flag = {
+    ifdef     = SYS_WINNT;
     name      = enablemmtimer;
     value     = M;
     descrip   = "Enable Multimedia Timer (Windows only)";
