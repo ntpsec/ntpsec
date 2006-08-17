@@ -1,3 +1,4 @@
+#include autogen-version.def
 
 test-main;
 

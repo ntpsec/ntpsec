@@ -226,6 +226,7 @@ OnConsoleEvent(
 	)
 {
 	switch (dwCtrlType) {
+#ifdef DEBUG
 		case CTRL_BREAK_EVENT :
 			if (debug > 0) {
 				debug <<= 1;
@@ -238,6 +239,7 @@ OnConsoleEvent(
 			}
 			printf("debug level %d\n", debug);
 		break ;
+#endif
 
 		case CTRL_C_EVENT  :
 		case CTRL_CLOSE_EVENT :
