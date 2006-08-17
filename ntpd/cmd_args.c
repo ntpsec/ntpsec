@@ -79,6 +79,14 @@ getCmdOpts(
 	if (HAVE_OPT( DRIFTFILE ))
 		stats_config(STATS_FREQ_FILE, OPT_ARG( DRIFTFILE ));
 
+/*
+ * Enable the Multi-Media Timer for Windows?
+ */
+#ifdef SYS_WINNT
+	if (HAVE_OPT( ENABLEMMTIMER ))
+		enable_mm_timer();
+#endif
+
 	if (HAVE_OPT( PANICGATE ))
 		allow_panic = TRUE;
 
