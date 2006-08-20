@@ -12,19 +12,6 @@
 #*
 .#*
 # Simulated bk default ignores end here
-#*-opts.c
-#*-opts.h
-#*-opts.menu
-#*-opts.texi
-#libopts/*
-#ltmain.sh
-#ntpd/ntpd.1
-#ntpd/ntpdsim.1
-#ntpdc.1
-#ntpq/ntpq.1
-#sntp/libopts/*
-#sntp/sntp.1
-#util/ntp-keygen.1
 */autom4te.cache -prune
 *~
 ./A.*

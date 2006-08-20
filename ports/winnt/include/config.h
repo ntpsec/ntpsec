@@ -25,7 +25,7 @@
 
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
 #pragma warning(disable: 4101) /* unreferenced local variable */
-#pragma warning(disable : 4127)
+#pragma warning(disable: 4127) /* conditional expression is constant */
 
 /*
  * Windows NT Configuration Values
@@ -72,6 +72,11 @@
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
 
+/*
+ * Multimedia timer enable
+ */
+#define USE_MM_TIMER
+
 /* Enable OpenSSL */
 #define OPENSSL 1
 
@@ -104,6 +109,7 @@
 #define lseek   _lseek
 #define pipe    _pipe
 #define dup2    _dup2
+#define sleep(x) Sleep((DWORD) x * 1000 /* milliseconds */ );
 
 #define pid_t	int		/* PID is an int */
 #define ssize_t	int		/* ssize is an int */

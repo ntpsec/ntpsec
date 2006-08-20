@@ -515,19 +515,20 @@ ntpdmain(
 	}
 #endif
 
-#ifdef SYS_WINNT
-	/*
-	 * Initialize the time structures and variables
-	 */
-	init_winnt_time();
-#endif
-
 	/* getstartup(argc, argv); / * startup configuration, may set debug */
 
 #ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 	if (debug)
 	    printf("%s\n", Version);
+#endif
+
+/*
+ * Enable the Multi-Media Timer for Windows?
+ */
+#ifdef SYS_WINNT
+	if (HAVE_OPT( MODIFYMMTIMER ))
+		set_mm_timer(MM_TIMER_HIRES);
 #endif
 
 	if (HAVE_OPT( NOFORK ) || HAVE_OPT( QUIT ))
@@ -559,6 +560,13 @@ ntpdmain(
 		config_priority_override = 1;
 		priority_done = 0;
 	}
+#endif
+
+#ifdef SYS_WINNT
+	/*
+	 * Initialize the time structures and variables
+	 */
+	init_winnt_time();
 #endif
 
 	setup_logfile();
