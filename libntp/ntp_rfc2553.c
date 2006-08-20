@@ -413,7 +413,7 @@ do_nodename(
 	ai->ai_family = hp->h_addrtype;
 	ai->ai_addrlen = sizeof(struct sockaddr);
 	sockin = (struct sockaddr_in *)ai->ai_addr;
-	memcpy(&sockin->sin_addr, hp->h_addr, hp->h_length);
+	memcpy(&sockin->sin_addr, hp->h_addr, sizeof(struct in_addr));
 	ai->ai_addr->sa_family = hp->h_addrtype;
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	ai->ai_addr->sa_len = sizeof(struct sockaddr);
