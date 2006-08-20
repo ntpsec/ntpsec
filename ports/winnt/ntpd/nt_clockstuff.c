@@ -60,7 +60,7 @@
    * by the variable below which is initialized by a default value but 
    * might be changed depending on a command line switch.
    */
-  int modify_mm_timer = 0;
+  int modify_mm_timer = MM_TIMER_LORES;
 
   #define MM_TIMER_INTV   1  /* the interval we'd want to set the MM timer to [ms] */
 
@@ -115,9 +115,9 @@ static DOUBLE ppm_per_adjust_unit = 0.0;
  * Request Multimedia Timer
  */
 void
-enable_mm_timer()
+set_mm_timer(int timerres)
 {
-	modify_mm_timer = 1;
+	modify_mm_timer = timerres;
 }
 /*
  * adj_systime - called once every second to make system time adjustments.
@@ -280,7 +280,7 @@ adj_systime(
 void init_winnt_time(void)
 {
 	BOOL noslew;
-	HANDLE hToken;
+	HANDLE hToken = INVALID_HANDLE_VALUE;
 	TOKEN_PRIVILEGES tkp;
 
 	/*

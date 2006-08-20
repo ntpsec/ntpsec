@@ -208,11 +208,11 @@ flag = {
 
 flag = {
     ifdef     = SYS_WINNT;
-    name      = enablemmtimer;
+    name      = modifymmtimer;
     value     = M;
-    descrip   = "Enable Multimedia Timer (Windows only)";
+    descrip   = "Modify Multimedia Timer (Windows only)";
     doc = <<-  _EndOfDoc_
-	Enable the Multimedia Timer for Windows.
+	Set the Windows Multimedia Timer to highest resolution.
 	_EndOfDoc_;
 };
 

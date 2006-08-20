@@ -141,7 +141,7 @@ void
 init_timer(void)
 {
 # if defined SYS_WINNT & !defined(SYS_CYGWIN32)
-	HANDLE hToken;
+	HANDLE hToken = INVALID_HANDLE_VALUE;
 	TOKEN_PRIVILEGES tkp;
 # endif /* SYS_WINNT */
 
