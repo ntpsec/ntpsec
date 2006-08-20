@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include <ntp_cmdargs.h>
+#include <ntp_stdlib.h>
 #include "syslog.h"
 #include "ntservice.h"
 #include "clockstuff.h"
@@ -34,7 +35,6 @@ static BOOL foreground = FALSE;
 static char ConsoleTitle[128];
 static int glb_argc;
 static char **glb_argv;
-extern char *Version;
 HANDLE hServDoneEvent = NULL;
 extern HANDLE WaitHandles[3];
 extern volatile int debug;
@@ -46,7 +46,7 @@ int ntpdmain(int argc, char *argv[]);
  * Forward declarations
  */
 void ServiceControl(DWORD dwCtrlCode);
-
+void ntservice_exit(void);
 
 void WINAPI service_main( DWORD argc, LPTSTR *argv )
 {
@@ -62,8 +62,8 @@ void WINAPI service_main( DWORD argc, LPTSTR *argv )
  */
 int main( int argc, char *argv[] )
 {
-	int rc,
-	i = 1;
+	int rc;
+	int i = 1;
 
 	/* Save the command line parameters */
 	glb_argc = argc;
@@ -127,11 +127,8 @@ ntservice_init() {
 		strcat(ConsoleTitle, Version);
 		SetConsoleTitle(ConsoleTitle);
 	}
-}
 
-void
-ntservice_shutdown() {
-	UpdateSCM(SERVICE_STOPPED);
+	atexit( ntservice_exit );
 }
 /*
  * Routine to check if this is a service or a foreground program
@@ -146,7 +143,7 @@ ntservice_isservice() {
  * win32API calls
  */
 void
-ntservice_exit(int status)
+ntservice_exit( void )
 {
 
 	if (!foreground) { /* did not become a service, simply exit */
@@ -157,18 +154,20 @@ ntservice_exit(int status)
 		UpdateSCM(SERVICE_STOPPED);
 	}
 	uninit_io_completion_port();
+	Sleep( 200 );  	//##++ 
+
 	reset_winnt_time();
+
+	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service has stopped.");
 
 # ifdef DEBUG
 	_CrtDumpMemoryLeaks();
 # endif 
-#undef exit	
-	exit(status);
 }
 
 /* 
  * ServiceControl(): Handles requests from the SCM and passes them on
- * to named.
+ * to the service.
  */
 void
 ServiceControl(DWORD dwCtrlCode) {
@@ -180,6 +179,7 @@ ServiceControl(DWORD dwCtrlCode) {
 		UpdateSCM(SERVICE_STOP_PENDING);
 		if (WaitHandles[0] != NULL) {
 			SetEvent(WaitHandles[0]);
+			Sleep( 100 );  //##++
 		}
 		return;
  
@@ -246,6 +246,7 @@ OnConsoleEvent(
 		case CTRL_SHUTDOWN_EVENT :
 			if (WaitHandles[0] != NULL) {
 				SetEvent(WaitHandles[0]);
+				Sleep( 100 );  //##++
 			}
 		break;
 

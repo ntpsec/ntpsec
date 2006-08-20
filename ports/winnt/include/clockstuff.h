@@ -23,4 +23,15 @@ void reset_winnt_time(void);
 
 #define FILETIME_1970     0x019db1ded53e8000
 #define HECTONANOSECONDS  10000000ui64
+
+/*
+ * Multimedia Timer
+ */
+
+void set_mm_timer(int);
+
+enum {
+	MM_TIMER_LORES,
+	MM_TIMER_HIRES
+};
 #endif

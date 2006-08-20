@@ -49,6 +49,24 @@
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntp_timer.h"
+#include "ntpd.h"
+
+/*
+ * Include code to possibly modify the MM timer while the service is active. 
+ */
+
+  /*
+   * Whether or not MM timer modifications takes place is still controlled 
+   * by the variable below which is initialized by a default value but 
+   * might be changed depending on a command line switch.
+   */
+  int modify_mm_timer = MM_TIMER_LORES;
+
+  #define MM_TIMER_INTV   1  /* the interval we'd want to set the MM timer to [ms] */
+
+  static UINT wTimerRes;
+  static TIMECAPS tc;
+
 
 extern double sys_residual;	/* residual from previous adjustment */
 
@@ -56,6 +74,21 @@ char szMsgPath[255];
 BOOL init_randfile();
 
 static long last_Adj = 0;
+
+#define LS_CORR_INTV_SECS  2   /* seconds to apply leap second correction */
+#define LS_CORR_INTV   ( (LONGLONG) HECTONANOSECONDS * LS_CORR_INTV_SECS )  
+#define LS_CORR_LIMIT  ( (LONGLONG) HECTONANOSECONDS / 2 )  // half a second
+
+typedef union
+{
+	FILETIME ft;
+	ULONGLONG ull;
+} FT_ULL;
+
+static FT_ULL ls_ft;
+static DWORD ls_time_adjustment;
+static LARGE_INTEGER ls_ref_perf_cnt;
+static LONGLONG ls_elapsed;
 
 static void StartClockThread(void);
 static void StopClockThread(void);
@@ -79,6 +112,14 @@ static DWORD units_per_tick = 0;
 static DOUBLE ppm_per_adjust_unit = 0.0;
 
 /*
+ * Request Multimedia Timer
+ */
+void
+set_mm_timer(int timerres)
+{
+	modify_mm_timer = timerres;
+}
+/*
  * adj_systime - called once every second to make system time adjustments.
  * Returns 1 if okay, 0 if trouble.
  */
@@ -90,7 +131,7 @@ adj_systime(
 	double dtemp;
 	u_char isneg = 0;
 	int rc;
-   long dwTimeAdjustment;
+	long dwTimeAdjustment;
 
 	/*
 	 * Add the residual from the previous adjustment to the new
@@ -98,7 +139,8 @@ adj_systime(
 	 */
 	dtemp = sys_residual + now;
 	sys_residual = 0;
-	if (dtemp < 0) {
+	if (dtemp < 0)
+	{
 		isneg = 1;
 		dtemp = -dtemp;
 	}
@@ -119,6 +161,93 @@ adj_systime(
 	 * and leave the remainder in dtemp */
 	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5)) ;
 	dtemp += (double) -dwTimeAdjustment * ppm_per_adjust_unit;	
+
+
+  /* If a leap second is pending then determine the UTC time stamp 
+	 * of when the insertion must take place */
+	if (leap_next & LEAP_ADDSECOND)  
+	{
+		if ( ls_ft.ull == 0 )  /* time stamp has not yet been computed */
+		{
+			FT_ULL ft;
+			SYSTEMTIME st;
+			int itmp;
+
+			GetSystemTimeAsFileTime(&ft.ft);   
+			FileTimeToSystemTime(&ft.ft, &st);
+
+ 			/* Accept leap announcement only 1 month in advance,
+			 * for end of March, June, September, or December.
+			 */
+			if ( ( st.wMonth % 3 ) == 0 )
+			{
+				/* The comarison time stamp is computed according 
+				 * to 0:00h UTC of the following day */   
+				if ( ++st.wMonth > 12 )
+				{
+					st.wMonth -= 12;
+					st.wYear++;
+				}
+				
+				st.wDay = 1;
+				st.wHour = 0;
+				st.wMinute = 0;
+				st.wSecond = 0;
+				st.wMilliseconds = 0;
+
+				SystemTimeToFileTime(&st, &ls_ft.ft);
+				msyslog(LOG_INFO, "Detected positive leap second announcement "
+				                  "for %04d-%02d-%02d %02d:%02d:%02d UTC",
+													st.wYear, st.wMonth, st.wDay,
+				                  st.wHour, st.wMinute, st.wSecond);
+			}
+		}
+  }
+
+ 
+  /* If the time stamp for the next leap second has been set
+	 * then check if the leap second must be handled */
+	if ( ls_ft.ull )
+	{
+		LARGE_INTEGER this_perf_count;
+
+		QueryPerformanceCounter( &this_perf_count );
+
+		if ( ls_time_adjustment == 0 ) /* has not yet been scheduled */
+		{
+			FT_ULL curr_ft;
+
+	 		GetSystemTimeAsFileTime(&curr_ft.ft);   
+			if ( curr_ft.ull >= ls_ft.ull )
+			{
+				ls_time_adjustment = every / LS_CORR_INTV_SECS;
+				ls_ref_perf_cnt = this_perf_count;
+				ls_elapsed = 0;
+				msyslog(LOG_INFO, "Inserting positive leap second.");
+			}
+		}
+		else  /* leap sec adjustment has been scheduled previously */
+		{
+			ls_elapsed = ( this_perf_count.QuadPart - ls_ref_perf_cnt.QuadPart ) 
+			               * HECTONANOSECONDS / PerfFrequency;
+		}
+
+		if ( ls_time_adjustment )  /* leap second adjustment is currently active */
+		{
+			if ( ls_elapsed > ( LS_CORR_INTV - LS_CORR_LIMIT ) )
+			{
+				ls_time_adjustment = 0;  /* leap second adjustment done */
+				ls_ft.ull = 0;
+			}
+
+		/* NOTE: While the system time is slewed during the leap second 
+		 * the interpolation function which is based on the performance 
+		 * counter does not account for the slew.
+		 */
+		dwTimeAdjustment -= ls_time_adjustment;
+		}
+	}
+
 
 	/* only adjust the clock if adjustment changes */
 	if (last_Adj != dwTimeAdjustment) { 	
@@ -148,9 +277,10 @@ adj_systime(
 }
 
 
-void init_winnt_time(void) {
+void init_winnt_time(void)
+{
 	BOOL noslew;
-	HANDLE hToken;
+	HANDLE hToken = INVALID_HANDLE_VALUE;
 	TOKEN_PRIVILEGES tkp;
 
 	/*
@@ -160,7 +290,8 @@ void init_winnt_time(void) {
 	ntservice_init();
 
 	/* Set the Event-ID message-file name. */
-	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) {
+	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) 
+	{
 		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
 		exit(1);
 	}
@@ -175,10 +306,11 @@ void init_winnt_time(void) {
 
 	  /* get the current process token handle */
 	if (!OpenProcessToken(GetCurrentProcess(),
-	  TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-		  msyslog(LOG_ERR, "OpenProcessToken failed: %m");
-		  exit(-1);
-		  }
+	     TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) 
+	{
+		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
+		exit(-1);
+	}
 	  /* get the LUID for system-time privilege. */
 	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
 	tkp.PrivilegeCount = 1;  /* one privilege to set */
@@ -191,17 +323,17 @@ void init_winnt_time(void) {
 	/* cannot use return value of AdjustTokenPrivileges. */
 	/* (success does not indicate all privileges were set) */
 	if (GetLastError() != ERROR_SUCCESS) 
-		{
-	  	msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
+	{
+		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
 	 	/* later set time call will probably fail */
-	  	}
+	}
 
 	/* Reset the Clock to a reasonable increment */
 	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every,&noslew))
-		{
+	{
 		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
-		exit (-1);
-		}
+		exit(-1);
+	}
 
 	units_per_tick = initial_units_per_tick;
 
@@ -230,24 +362,18 @@ void init_winnt_time(void) {
 	StartClockThread();
 
 	/* Set up the Console Handler */
-	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE)) {
+	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE))
+	{
 		msyslog(LOG_ERR, "Can't set console control handler: %m");
 	}
-
 }
 
-/*
- * Shutdown just needs to stop the clock thread
- */
-void shutdown_winnt_time(void)
+
+void reset_winnt_time(void)
 {
-	StopClockThread();
-}
-
-void reset_winnt_time(void) {
-
 	/* restore the clock frequency back to its original value */
-	if (!SetSystemTimeAdjustment(0, TRUE)) {
+	if (!SetSystemTimeAdjustment(0, TRUE)) 
+	{
 		msyslog(LOG_ERR, "Failed to reset clock state, SetSystemTimeAdjustment(): %m");
 	}
   	/* read the current system time, and write it back to
@@ -295,8 +421,8 @@ gettimeofday(
 	/*  Get base time we are going to extrapolate from
 	 */	
 	EnterCriticalSection(&TimerCritialSection);
-		Count = LastTimerCount;
-		Time = LastTimerTime;
+	Count = LastTimerCount;
+	Time = LastTimerTime;
 	LeaveCriticalSection(&TimerCritialSection);
 
 	/*  Calculate when now is.
@@ -306,7 +432,7 @@ gettimeofday(
 
 	if (NowCount >= Count)
 	{
-	    TicksElapsed = NowCount - Count; /* linear progression of ticks */
+		TicksElapsed = NowCount - Count; /* linear progression of ticks */
 	}
 	else
 	{
@@ -379,7 +505,7 @@ TimerApcFunction(
 	EnterCriticalSection(&TimerCritialSection);
 	LastTimerCount = (ULONGLONG) LargeIntNowCount.QuadPart;
 	LastTimerTime = ((ULONGLONG) dwTimerHighValue << 32) +
-				(ULONGLONG) dwTimerLowValue;
+			 (ULONGLONG) dwTimerLowValue;
 	LeaveCriticalSection(&TimerCritialSection);
 }
 
@@ -415,38 +541,71 @@ static void StartClockThread(void)
 	FILETIME StartTime;
 	LARGE_INTEGER Freq = { 0, 0 };
 	
-	/* get the performance counter freq*/
-	if (!QueryPerformanceFrequency(&Freq)) {
+	/* get the performance counter freq */
+	if (!QueryPerformanceFrequency(&Freq))
+	{
 		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
 		exit (-1);
 	}
 
 	PerfFrequency = Freq.QuadPart;
 
+
+	if ( modify_mm_timer != 0)
+	{
+		if (timeGetDevCaps( &tc, sizeof( tc ) ) == TIMERR_NOERROR ) 
+		{
+			wTimerRes = min( max( tc.wPeriodMin, MM_TIMER_INTV ), tc.wPeriodMax );
+
+			timeBeginPeriod( wTimerRes );
+#ifdef DEBUG
+			msyslog( LOG_INFO, "MM timer resolution: %u..%u ms, set to %u ms\n",
+			         tc.wPeriodMin, tc.wPeriodMax, wTimerRes );
+#endif
+		}
+		else
+			msyslog( LOG_ERR, "Failed to get MM timer caps\n" );
+	}
+
+
 	/* init variables with the time now */
 	GetSystemTimeAsFileTime(&StartTime);
 	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) +
-		(ULONGLONG) StartTime.dwLowDateTime;
+			  (ULONGLONG) StartTime.dwLowDateTime;
 
 	/* init sync objects */
 	InitializeCriticalSection(&TimerCritialSection);
 	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, "TimerThreadExitRequest");
 
 	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 0, &tid);
-	if (ClockThreadHandle != NULL) {
+	if (ClockThreadHandle != NULL)
+	{
 		/* remember the thread priority is only within the process class */
-		  if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) {
+		if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) 
+		{
 #ifdef DEBUG
 			printf("Error setting thread priority\n");
 #endif
 		  }
 	}
+
+	atexit( StopClockThread );
 }
 
 static void StopClockThread(void)
 {	
+	if ( wTimerRes )  /* if not 0 then the MM timer has been modified at startup */
+	{
+		timeEndPeriod( wTimerRes ); 
+		wTimerRes = 0;
+#ifdef DEBUG
+		msyslog( LOG_INFO, "MM timer set to default\n" );
+#endif
+	}
+
 	if (SetEvent(TimerThreadExitRequest) &&
-	    WaitForSingleObject(ClockThreadHandle, 10000L) == 0) {
+	    WaitForSingleObject(ClockThreadHandle, 10000L) == 0)
+	{
 		CloseHandle(TimerThreadExitRequest);
 		TimerThreadExitRequest = NULL;
 
@@ -454,8 +613,10 @@ static void StopClockThread(void)
 		ClockThreadHandle = NULL;
 
 		DeleteCriticalSection(&TimerCritialSection);
-		msyslog(LOG_INFO, "The Network Time Protocol Service has stopped.");
 	}
 	else
-		msyslog(LOG_ERR, "Network Time Protocol Service Failed to Stop");
+	{
+		msyslog(LOG_ERR, "Failed to stop clock thread.");
+		Sleep( 100 );
+	}
 }

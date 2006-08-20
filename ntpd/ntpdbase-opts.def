@@ -1,3 +1,4 @@
+#include autogen-version.def
 
 test-main;
 
@@ -202,6 +203,16 @@ flag = {
     descrip   = "Do not listen to virtual IPs";
     doc = <<-  _EndOfDoc_
 	Do not listen to virtual IPs. The default is to listen.
+	_EndOfDoc_;
+};
+
+flag = {
+    ifdef     = SYS_WINNT;
+    name      = modifymmtimer;
+    value     = M;
+    descrip   = "Modify Multimedia Timer (Windows only)";
+    doc = <<-  _EndOfDoc_
+	Set the Windows Multimedia Timer to highest resolution.
 	_EndOfDoc_;
 };
 

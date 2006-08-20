@@ -1,8 +1,8 @@
 
 /*
- *  Time-stamp:      "2006-07-15 13:52:50 bkorb"
+ *  Time-stamp:      "2006-08-12 10:26:19 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.25 2006/07/15 22:10:21 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.14 2006/08/12 17:36:43 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -107,12 +107,20 @@ typedef int tDirection;
  *
  *  USAGE:  define procedures to return "tSuccess".  Test their results
  *          with the SUCCEEDED, FAILED and HADGLITCH macros.
+ *
+ *  Microsoft sticks its nose into user space here, so for Windows' sake,
+ *  make sure all of these are undefined.
  */
 #undef  SUCCESS
-#define SUCCESS  ((tSuccess) 0)
 #undef  FAILURE
-#define FAILURE  ((tSuccess)-1)
 #undef  PROBLEM
+#undef  SUCCEEDED
+#undef  SUCCESSFUL
+#undef  FAILED
+#undef  HADGLITCH
+
+#define SUCCESS  ((tSuccess) 0)
+#define FAILURE  ((tSuccess)-1)
 #define PROBLEM  ((tSuccess) 1)
 
 typedef int tSuccess;
