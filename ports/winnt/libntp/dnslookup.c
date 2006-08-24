@@ -163,7 +163,7 @@ DNSlookup_name(
 				addr = (struct hostent *) malloc(sizeof(struct hostent));
 				memset(addr, 0, sizeof(struct hostent));
 				addr->h_addrtype = (short) results->lpcsaBuffer->iSocketType;
-				addr->h_length = (short) results->lpcsaBuffer->RemoteAddr.iSockaddrLength;
+				addr->h_length = sizeof(struct in_addr); /* Only passing back the address */
 			}
 			for (i = 0; i < results->dwNumberOfCsAddrs; i++)
 			{
