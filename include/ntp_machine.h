@@ -54,8 +54,6 @@ HOW TO GET IP INTERFACE INFORMATION
   the stream in an I_STR ioctl. This ususally also implies
   USE_STREAMS_DEVICE FOR IF_CONFIG. Dell UNIX is a notable exception.
 
-  STREAMS_TLI - use ioctl(I_STR) to implement ioctl(SIOCGIFCONF)
-
 WHAT DOES IOCTL(SIOCGIFCONF) RETURN IN THE BUFFER
 
   UNIX V.4 machines implement a sockets library on top of streams.
