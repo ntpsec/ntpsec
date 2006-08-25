@@ -115,7 +115,6 @@ DNSlookup_name(
 /*
  * Encapsulate gethostbyname to control the error code
  */
-#define DNSlookup_name LC_DNSlookup_name
 int
 DNSlookup_name(
 	const char *name,
