@@ -39,12 +39,12 @@ dist_man_MANS=	sntp.1
 EXTRA_DIST=	bincheck.mf	\
 		COPYRIGHT	\
 		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu version.def
-BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
+BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu check-version.def
 man_MANS=	sntp.1
 
 
 FRC:
-$(srcdir)/version.def: FRC
+check-version.def: FRC
 	@cd $(srcdir)					\
 	&& test -r ../include/version.def		\
 	&& ( if cmp -s ../include/version.def version.def;	\
@@ -53,14 +53,14 @@ $(srcdir)/version.def: FRC
 		echo "Installing new sntp/version.def file";	\
 	   fi )
 
-$(srcdir)/sntp-opts.h: sntp-opts.c
-$(srcdir)/sntp-opts.c: sntp-opts.def $(srcdir)/version.def
+$(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def
 	$(run_ag) sntp-opts.def
 
-$(srcdir)/sntp.1: sntp-opts.def $(srcdir)/version.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
-$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: sntp-opts.def $(srcdir)/version.def
+$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/version.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
 include bincheck.mf
