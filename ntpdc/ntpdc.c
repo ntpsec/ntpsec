@@ -296,7 +296,7 @@ ntpdcmain(
 	char *argv[]
 	)
 {
-	int ntp_optind = 0;
+	extern int ntp_optind;
 
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;

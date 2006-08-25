@@ -87,7 +87,7 @@
 #define MINUTE		(SECOND * 60) /* minute epoch */
 #define OFFSET		128	/* companded sample offset */
 #define SIZE		256	/* decompanding table size */
-#define	MAXSIG		6000.	/* max signal level reference */
+#define	MAXAMP		6000.	/* max signal level reference */
 #define	MAXCLP		100	/* max clips above reference per s */
 #define MAXSNR		40.	/* max SNR reference */
 #define MAXFREQ		1.5	/* max frequency tolerance (187 PPM) */
@@ -115,10 +115,10 @@
  * only by timeout, upon which the driver starts over from scratch.
  *
  * DGATE is lit if the data bit amplitude or SNR is below thresholds and
- * BGATE is lit if a the pulse width amplitude or SNR is below
- * thresolds. LEPSEC is set during the last minute of the leap day At
- * the end of this minute the driver inserts second 60 in the seconds
- * state machine and the minute sync slips a second.
+ * BGATE is lit if the pulse width amplitude or SNR is below thresolds.
+ * LEPSEC is set during the last minute of the leap day. At the end of
+ * this minute the driver inserts second 60 in the seconds state machine
+ * and the minute sync slips a second.
  */
 #define MSYNC		0x0001	/* minute epoch sync */
 #define SSYNC		0x0002	/* second epoch sync */
@@ -170,11 +170,11 @@
 #define MTHR		13.	/* acquisition signal gate (percent) */
 #define TTHR		50.	/* tracking signal gate (percent) */
 #define AWND		20	/* acquisition jitter threshold (ms) */
-#define ATHR		3000.	/* QRZ minute sync threshold */
+#define ATHR		2500.	/* QRZ minute sync threshold */
 #define ASNR		20.	/* QRZ minute sync SNR threshold (dB) */
-#define QTHR		3000.	/* QSY minute sync threshold */
+#define QTHR		2500.	/* QSY minute sync threshold */
 #define QSNR		20.	/* QSY minute sync SNR threshold (dB) */
-#define STHR		3000.	/* second sync threshold */
+#define STHR		2500.	/* second sync threshold */
 #define	SSNR		15.	/* second sync SNR threshold (dB) */
 #define SCMP		10 	/* second sync compare threshold */
 #define DTHR		1000.	/* bit threshold */
@@ -184,7 +184,7 @@
 #define BTHR		1000.	/* digit threshold */
 #define BSNR		3.	/* digit likelihood threshold (dB) */
 #define BCMP		3	/* digit compare threshold */
-#define	MAXERR		20	/* maximum error alarm */
+#define	MAXERR		40	/* maximum error alarm */
 
 /*
  * Tone frequency definitions. The increments are for 4.5-deg sine
@@ -516,7 +516,6 @@ struct wwvunit {
 	 * Variables used to establish basic system timing
 	 */
 	int	avgint;		/* master time constant */
-	int	tepoch;		/* sync epoch median */
 	int	yepoch;		/* sync epoch */
 	int	repoch;		/* buffered sync epoch */
 	double	epomax;		/* second sync amplitude */
@@ -809,15 +808,15 @@ wwv_receive(
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
-		 * Clip noise spikes greater than MAXSIG. If no clips,
+		 * Clip noise spikes greater than MAXAMP. If no clips,
 		 * increase the gain a tad; if the clips are too high, 
 		 * decrease a tad.
 		 */
-		if (sample > MAXSIG) {
-			sample = MAXSIG;
+		if (sample > MAXAMP) {
+			sample = MAXAMP;
 			up->clipcnt++;
-		} else if (sample < -MAXSIG) {
-			sample = -MAXSIG;
+		} else if (sample < -MAXAMP) {
+			sample = -MAXAMP;
 			up->clipcnt++;
 		}
 
@@ -1339,7 +1338,7 @@ wwv_qrz(
 	 * Little bit of class here.
 	 */
 	if (up->epomax > STHR && up->eposnr > SSNR) {
-		fpoch = up->mphase % SECOND - up->tepoch;
+		fpoch = up->mphase % SECOND - up->yepoch;
 		if (fpoch < 0)
 			fpoch += SECOND;
 	} else {
@@ -1424,7 +1423,7 @@ wwv_qrz(
 			    "wwv8 %d %3d %s %d %5.0f %5.1f %5.0f %5ld %5d %ld",
 			    up->port, up->gain, sp->refid, sp->count,
 			    sp->synmax, sp->synsnr, sp->metric, sp->pos,
-			    up->tepoch, epoch);
+			    up->yepoch, epoch);
 			record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 			if (debug)
@@ -1458,11 +1457,15 @@ wwv_endpoc(
 	struct refclockproc *pp;
 	struct wwvunit *up;
 	static int epoch_mf[3]; /* epoch median filter */
+	static int tepoch;	/* current second epoch */
  	static int xepoch;	/* last second epoch */
- 	static int zepoch;	/* last averaging interval epoch */
+ 	static int zepoch;	/* last run epoch */
+	static int zcount;	/* last run end time */
+	static int scount;	/* seconds counter */
 	static int syncnt;	/* run length counter */
 	static int maxrun;	/* longest run length */
-	static int mepoch;	/* longest run epoch */
+	static int mepoch;	/* longest run end epoch */
+	static int mcount;	/* longest run end time */
 	static int avgcnt;	/* averaging interval counter */
 	static int avginc;	/* averaging ratchet */
 	static int iniflg;	/* initialization flag */
@@ -1478,6 +1481,21 @@ wwv_endpoc(
 	}
 
 	/*
+	 * If the signal amplitude or SNR fall below thresholds, dim the
+	 * second sync lamp and wait for hotter ions. If no stations are
+	 * heard we are either in a probe cycle or the ions are really
+	 * dim. 
+	 */
+	scount++;
+	if (up->epomax < STHR || up->eposnr < SSNR) {
+		up->status &= ~(SSYNC | FGATE);
+		avgcnt = syncnt = maxrun = 0;
+		return;
+	}
+	if (!(up->status & (SELV | SELH)))
+		return;
+
+	/*
 	 * A three-stage median filter is used to help denoise the
 	 * second sync pulse. The median sample becomes the candidate
 	 * epoch.
@@ -1487,119 +1505,100 @@ wwv_endpoc(
 	epoch_mf[0] = epopos;
 	if (epoch_mf[0] > epoch_mf[1]) {
 		if (epoch_mf[1] > epoch_mf[2])
-			up->tepoch = epoch_mf[1];	/* 0 1 2 */
+			tepoch = epoch_mf[1];	/* 0 1 2 */
 		else if (epoch_mf[2] > epoch_mf[0])
-			up->tepoch = epoch_mf[0];	/* 2 0 1 */
+			tepoch = epoch_mf[0];	/* 2 0 1 */
 		else
-			up->tepoch = epoch_mf[2];	/* 0 2 1 */
+			tepoch = epoch_mf[2];	/* 0 2 1 */
 	} else {
 		if (epoch_mf[1] < epoch_mf[2])
-			up->tepoch = epoch_mf[1];	/* 2 1 0 */
+			tepoch = epoch_mf[1];	/* 2 1 0 */
 		else if (epoch_mf[2] < epoch_mf[0])
-			up->tepoch = epoch_mf[0];	/* 1 0 2 */
+			tepoch = epoch_mf[0];	/* 1 0 2 */
 		else
-			up->tepoch = epoch_mf[2];	/* 1 2 0 */
+			tepoch = epoch_mf[2];	/* 1 2 0 */
 	}
 
-	/*
-	 * If the signal amplitude or SNR fall below thresholds, dim the
-	 * second sync lamp and start over. If no stations are heard we
-	 * are either in a probe cycle or the ions are dim. In that case
-	 * allow the amplitude and SNR to discharge and go no further. 
-	 */
-	if (up->epomax < STHR || up->eposnr < SSNR) {
-		up->status &= ~(SSYNC | FGATE);
-		avgcnt = syncnt = maxrun = 0;
-		return;
-	}
-	if (!(up->status & (SELV | SELH)))
-		return;
-
-	avgcnt++;
 
 	/*
 	 * If the epoch candidate is the same as the last one, increment
-	 * the compare counter. If not, save the length and epoch of the
-	 * current run for use later and reset the counter.
+	 * the run counter. If not, save the length, epoch and end
+	 * time of the current run for use later and reset the counter.
+	 * If the run is at least SCMP (10) s, the SSYNC bit is lit and
+	 * the epoch considered valid for synchronization.
 	 */
-	tmp2 = (up->tepoch - xepoch) % SECOND;
+	tmp2 = (tepoch - xepoch) % SECOND;
 	if (tmp2 == 0) {
 		syncnt++;
-	} else {
-		if (maxrun > 0 && mepoch == xepoch) {
-			maxrun += syncnt;
-		} else if (syncnt > maxrun) {
-			maxrun = syncnt;
-			mepoch = xepoch;
+		if (syncnt > SCMP) {
+			up->status |= SSYNC;
+			up->yepoch = tepoch;
 		}
+	} else if (syncnt >= maxrun) {
+		maxrun = syncnt;
+		mepoch = xepoch;
+		mcount = scount;
 		syncnt = 0;
 	}
-	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status & (SSYNC |
-	    MSYNC))) {
+	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status & MSYNC))
+	    {
 		sprintf(tbuf,
-		    "wwv1 %04x %5.0f %5.1f %5d %5d %4d %4d",
-		    up->status, up->epomax, up->eposnr, up->tepoch,
-		    tmp2, avgcnt, syncnt);
+		    "wwv1 %04x %5.0f %5.1f %5d %5d %4d %4d %4d %5d",
+		    up->status, up->epomax, up->eposnr, tepoch,
+		    tmp2, avgcnt, syncnt, maxrun, mepoch);
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 		if (debug)
 			printf("%s\n", tbuf);
 #endif /* DEBUG */
 	}
-
-	/*
-	 * The sample clock frequency is disciplined using a first order
-	 * feedback loop with time constant consistent with the Allan
-	 * intercept of typical computer clocks.
-	 *
-	 * The frequency update is calculated from the epoch change in
-	 * 125-us units divided by the averaging interval in seconds.
-	 * The averaging interval affects other receiver functions,
-	 * including the the 1000/1200-Hz comb filter and codec clock
-	 * loop. It also affects the 100-Hz subcarrier loop and the bit
-	 * and digit comparison counter thresholds.
-	 */
+	avgcnt++;
 	if (avgcnt < up->avgint) {
-		xepoch = up->tepoch;
+		xepoch = tepoch;
 		return;
 	}
 
 	/*
-	 * During the averaging interval the longest run of identical
-	 * epoches is determined. If the longest run is at least 10
-	 * seconds, the SSYNC bit is lit and the value becomes the
-	 * reference epoch for the next interval. If not, the second
-	 * sync lamp is dark and flashers set.
+	 * The sample clock frequency is disciplined using a first order
+	 * feedback loop with time constant consistent with the Allan
+	 * intercept of typical computer clocks. During each averaging
+	 * interval the candidate epoch at the end of the longest run is
+	 * determined. If the longest run is zero, all epoches in the
+	 * interval are different, so the candidate epoch is the current
+	 * epoch. The frequency update is computed from the candidate
+	 * epoch difference (125-us units) and time difference (seconds)
+	 * between updates.
 	 */
-	if (maxrun > 0 && mepoch == xepoch) {
-		maxrun += syncnt;
-	} else if (syncnt > maxrun) {
+	if (syncnt >= maxrun) {
 		maxrun = syncnt;
 		mepoch = xepoch;
+		mcount = scount;
 	}
-	xepoch = up->tepoch;
-	if (maxrun > SCMP) {
-		up->status |= SSYNC;
-		up->yepoch = mepoch;
-	} else {
-		up->status &= ~SSYNC;
+	xepoch = tepoch;
+	if (maxrun == 0) {
+		mepoch = tepoch;
+		mcount = scount;
 	}
 
 	/*
-	 * If the epoch change over the averaging interval is less than
-	 * 1 ms, the frequency is adjusted, but clamped at +-125 PPM. If
-	 * greater than 1 ms, the counter is decremented. If the epoch
-	 * change is less than 0.5 ms, the counter is incremented. If
-	 * the counter increments to +3, the averaging interval is
-	 * doubled and the counter set to zero; if it decrements to -3,
-	 * the interval is halved and the counter set to zero.
+	 * The master clock runs at the codec sample frequency of 8000
+	 * Hz, so the intrinsic time resolution is 125 us. The frequency
+	 * resolution ranges from 18 PPM at the minimum averaging
+	 * interval to 0.12 PPM at the maximum averaging interval. If a
+	 * frequency update is greater than the maximum MAXFREQ (1.5 or
+	 * 187.5 PPM), the hysteresis counter is decremented and the
+	 * update is ignored. Otherwise the frequency is adjusted, but
+	 * clamped to the maximum. If the update is greater than half
+	 * the maximum, the hysteresis counter is incremented. If the
+	 * counter increments to +3, the averaging interval is doubled
+	 * and the counter set to zero; if it decrements to -3, the
+	 * interval is halved and the counter set to zero.
 	 */
-	if (maxrun == 0)
-		mepoch = up->tepoch;
 	dtemp = (mepoch - zepoch) % SECOND;
 	if (up->status & FGATE) {
 		if (abs(dtemp) < MAXFREQ * MINAVG) {
-			up->freq += dtemp / (avgcnt * FCONST);
+			up->freq += (dtemp / 2) / ((mcount - zcount) *
+			    FCONST);
 			if (up->freq > MAXFREQ)
 				up->freq = MAXFREQ;
 			else if (up->freq < -MAXFREQ)
@@ -1627,9 +1626,10 @@ wwv_endpoc(
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		sprintf(tbuf,
-		    "wwv2 %04x %4.0f %4d %4d %2d %4d %4.0f %7.2f",
-		    up->status, up->epomax, mepoch, maxrun, avginc,
-		    avgcnt, dtemp, up->freq * 1e6 / SECOND);
+		    "wwv2 %04x %5.0f %5.1f %5d %4d %4d %4d %4.0f %7.2f",
+		    up->status, up->epomax, up->eposnr, mepoch,
+		    up->avgint, maxrun, mcount - zcount, dtemp,
+		    up->freq * 1e6 / SECOND);
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 		if (debug)
@@ -1638,6 +1638,7 @@ wwv_endpoc(
 	}
 	up->status |= FGATE;
 	zepoch = mepoch;
+	zcount = mcount;
 	avgcnt = syncnt = maxrun = 0;
 }
 
@@ -1852,16 +1853,14 @@ wwv_rsec(
 	 *
 	 * The WWV/H format contains data pulses in second 59 (position
 	 * identifier) and second 1, but not in second 0. The minute
-	 * sync pulse is contained in second 0. second 0. At the end of
-	 * second 58 QSY to the probe channel, which rotates in turn
-	 * over all WWV/H frequencies. At the end of second 0 measure
-	 * the minute sync pulse. At the end of second 1 measure the
-	 * data pulse and QSY back to the data channel. Note that the
-	 * seconds numbering here applies to the end of the second, so
-	 * appears one second earlier than the clock displayed on the
-	 * radio itself.
+	 * sync pulse is contained in second 0. At the end of second 58
+	 * QSY to the probe channel, which rotates in turn over all
+	 * WWV/H frequencies. At the end of second 0 measure the minute
+	 * sync pulse. At the end of second 1 measure the data pulse and
+	 * QSY back to the data channel. Note that the actions commented
+	 * here happen at the end of the second numbered as shown.
 	 *
-	 * At the end of second 0 save the minute sync pulse peak
+	 * At the end of second 0 save the minute sync pulse maximum
 	 * amplitude previously latched at 800 ms. 
 	 */
 	case SYNC2:			/* 0 */
@@ -1874,7 +1873,7 @@ wwv_rsec(
 	 * At the end of second 1 measure the minute sync pulse
 	 * minimum amplitude and calculate the SNR. If the minute sync
 	 * pulse and SNR are above threshold and the data pulse
-	 * amplitude and SNR are above thresold and, shift a 1 into the
+	 * amplitude and SNR are above thresold, shift a 1 into the
 	 * station reachability register; otherwise, shift a 0. The
 	 * number of 1 bits in the last six intervals is a component of
 	 * the channel metric computed by the mitigation routine.
@@ -1892,7 +1891,7 @@ wwv_rsec(
 		if (sp->reach & (1 << AMAX))
 			sp->count--;
 		if (sp->synmax >= QTHR && sp->synsnr >= QSNR &&
-		    ~(up->status & (DGATE | BGATE))) {
+		    !(up->status & (DGATE | BGATE))) {
 			sp->reach |= 1;
 			sp->count++;
 		}
@@ -1907,7 +1906,7 @@ wwv_rsec(
 		if (rp->reach & (1 << AMAX))
 			rp->count--;
 		if (rp->synmax >= QTHR && rp->synsnr >= QSNR &&
-		    ~(up->status & (DGATE | BGATE))) {
+		    !(up->status & (DGATE | BGATE))) {
 			rp->reach |= 1;
 			rp->count++;
 		}
@@ -2092,10 +2091,15 @@ wwv_rsec(
 }
 
 /*
- * If victory has been declared and seconds sync is lit, strike
- * a timestamp. It should not be a surprise, especially if the
- * radio is not tunable, that sometimes no stations are above
- * the noise and the reference ID set to NONE.
+ * The radio clock is set if the alarm bits are all zero. After that,
+ * the time is considered valid if the second sync bit is lit. It should
+ * not be a surprise, especially if the radio is not tunable, that
+ * sometimes no stations are above the noise and the integrators
+ * discharge below the thresholds. We assume that, after a day of signal
+ * loss, the minute sync epoch will be in the same second. This requires
+ * the codec frequency be accurate within 6 PPM. Practical experience
+ * shows the frequency typically within 0.1 PPM, so after a day of
+ * signal loss, the time should be within 8.6 ms.. 
  */
 static void
 wwv_clock(
@@ -2112,8 +2116,9 @@ wwv_clock(
 		up->alarm |= SYNERR;
 	if (up->digcnt < 9)
 		up->alarm |= NINERR;
-	if (!(up->alarm)) {
+	if (!(up->alarm))
 		up->status |= INSYNC;
+	if (up->status & INSYNC && up->status & SSYNC) {
 		if (up->misc & SECWAR)
 			pp->leap = LEAP_ADDSECOND;
 		else
@@ -2187,7 +2192,7 @@ wwv_corr4(
 	 * minute units digit has been resolved, don't to anything else.
 	 */
 	mldigit = 0;
-	topmax = nxtmax = -MAXSIG;
+	topmax = nxtmax = -MAXAMP;
 	for (i = 0; tab[i][0] != 0; i++) {
 		acc = 0;
 		for (j = 0; j < 4; j++)
@@ -2581,12 +2586,12 @@ wwv_metric(
 {
 	double	dtemp;
 
-	dtemp = sp->count * MAXSIG;
-	if (sp->synmax < MAXSIG)
+	dtemp = sp->count * MAXAMP;
+	if (sp->synmax < MAXAMP)
 		dtemp += sp->synmax;
 	else
-		dtemp += MAXSIG - 1;
-	dtemp /= (AMAX + 1) * MAXSIG;
+		dtemp += MAXAMP - 1;
+	dtemp /= (AMAX + 1) * MAXAMP;
 	return (dtemp * 100.);
 }
 
@@ -2697,7 +2702,7 @@ timecode(
  * wwv_gain - adjust codec gain
  *
  * This routine is called at the end of each second. It counts the
- * number of signal clips above the MAXSIG threshold during the previous
+ * number of signal clips above the MAXAMP threshold during the previous
  * second. If there are no clips, the gain is bumped up; if too many
  * clips, it is bumped down. The decoder is relatively insensitive to
  * amplitude, so this crudity works just fine. The input port is set and
