@@ -23,4 +23,4 @@ CLTAG=NTP_4_2_0
 # - GO triggers a release
 # - - rcpoint gets set to 0
 # - - releasecandidate gets set to no
-rcpoint=1
+rcpoint=2
