@@ -2850,6 +2850,7 @@ fast_xmit(
 	 * the counter is zero, drop the kiss.
 	 */
 	if (mask & RES_LIMITED) {
+		sys_limitrejected++;
 		if (sys_kod == 0 || !(mask & RES_DEMOBILIZE))
 			return;
 
