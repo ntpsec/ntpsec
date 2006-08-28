@@ -2206,6 +2206,19 @@ getnetnum(
 	struct addrinfo *ptr;
 	int retval;
 
+#if 0
+	printf("getnetnum: <%s> is a %s (%d)\n",
+		num,
+		(a_type == t_UNK)
+		? "t_UNK"
+		: (a_type == t_REF)
+		  ? "t_REF"
+		  : (a_type == t_MSK)
+		    ? "t_MSK"
+		    : "???",
+		a_type);
+#endif
+
 	/* Get host address. Looking for UDP datagram connection */
  	memset(&hints, 0, sizeof (hints));
  	if (addr->ss_family == AF_INET || addr->ss_family == AF_INET6)
@@ -2219,9 +2232,14 @@ getnetnum(
 		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
+
+	if (a_type != t_UNK) {
+		hints.ai_flags = AI_NUMERICHOST;
+	}
+
 #ifdef DEBUG
-		if (debug > 3)
-			printf("getaddrinfo %s\n", num);
+	if (debug > 3)
+		printf("getnetnum: calling getaddrinfo(%s,...)\n", num);
 #endif
 	retval = getaddrinfo(num, "ntp", &hints, &ptr);
 	if (retval != 0 ||
@@ -2252,8 +2270,16 @@ getnetnum(
 	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("getnetnum given %s, got %s \n",
-		   num, stoa(addr));
+		printf("getnetnum given %s, got %s (%s/%d)\n",
+		   num, stoa(addr),
+			(a_type == t_UNK)
+			? "t_UNK"
+			: (a_type == t_REF)
+			  ? "t_REF"
+			  : (a_type == t_MSK)
+			    ? "t_MSK"
+			    : "???",
+			a_type);
 #endif
         freeaddrinfo(ptr);
 	return 1;
