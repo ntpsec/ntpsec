@@ -77,7 +77,7 @@
 			<dd>Exit <tt>ntpdc</tt>.
 			<dt><tt>passwd</tt>
 			<dd>This command prompts you to type in a password (which will not be echoed) which will be used to authenticate configuration requests. The password must correspond to the key configured for use by the NTP server for this purpose if such requests are to be successful.
-			<dt><tt>timeout <i>millseconds</i></tt>
+			<dt><tt>timeout <i>milliseconds</i></tt>
 			<dd>Specify a timeout period for responses to server queries. The default is about 8000 milliseconds. Note that since <tt>ntpdc</tt> retries each query once after a timeout, the total waiting time for a timeout will be twice the timeout value set.
 		</dl>
 		<h4>Control Message Commands</h4>
@@ -104,7 +104,7 @@
 			<dt><tt>sysinfo</tt>
 			<dd>Print a variety of system state variables, i.e., state related to the local server. All except the last four lines are described in the NTP Version 3 specification, RFC-1305.
 				<p>The <tt>system flags</tt> show various system flags, some of which can be set and cleared by the <tt>enable</tt> and <tt>disable</tt> configuration commands, respectively. These are the <tt>auth</tt>, <tt>bclient</tt>, <tt>monitor</tt>, <tt>pll</tt>, <tt>pps</tt> and <tt>stats</tt> flags. See the <tt>ntpd</tt> documentation for the meaning of these flags. There are two additional flags which are read only, the <tt>kernel_pll</tt> and <tt>kernel_pps</tt>. These flags indicate the synchronization status when the precision time kernel modifications are in use. The <tt>kernel_pll</tt> indicates that the local clock is being disciplined by the kernel, while the kernel_pps indicates the kernel discipline is provided by the PPS signal.</p>
-				<p>The <tt>stability</tt> is the residual frequency error remaining afterthe system frequency correction is applied and is intended for maintenance and debugging. In most architectures, this value will initially decrease from as high as 500 ppm to a nominal value in the range .01 to 0.1 ppm. If it remains high for some time after starting the daemon, something may be wrong with the local clock, or the value of the kernel variable <tt>tick</tt> may be incorrect.</p>
+				<p>The <tt>stability</tt> is the residual frequency error remaining after the system frequency correction is applied and is intended for maintenance and debugging. In most architectures, this value will initially decrease from as high as 500 ppm to a nominal value in the range .01 to 0.1 ppm. If it remains high for some time after starting the daemon, something may be wrong with the local clock, or the value of the kernel variable <tt>tick</tt> may be incorrect.</p>
 				<p>The <tt>broadcastdelay</tt> shows the default broadcast delay, as set by the <tt>broadcastdelay</tt> configuration command.</p>
 				<p>The <tt>authdelay</tt> shows the default authentication delay, as set by the <tt>authdelay</tt> configuration command.</p>
 			<dt><tt>sysstats</tt>
