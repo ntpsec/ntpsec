@@ -296,11 +296,7 @@ case "$host" in
     AC_CHECK_LIB(advapi32, main)
     ;;
 esac
-AC_CHECK_LIB(elf, nlist)	dnl Only needed for tickadj...
-dnl AC_CHECK_LIB(kvm, main, , , -lelf)
-AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
-AC_CHECK_LIB(ld, nlist)
-AC_CHECK_LIB(mld, nlist)
+
 AC_CHECK_FUNC(gethostent, ,
   AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
 AC_CHECK_FUNC(openlog, , 
@@ -480,16 +476,31 @@ case "$host" in
   ;;
 esac
 
-AC_CHECK_HEADER(nlist.h,
-[AC_DEFINE(NLIST_STRUCT, 1, [nlist stuff])
-AC_CACHE_CHECK([for n_un in struct nlist], ac_cv_struct_nlist_n_un,
-[AC_TRY_COMPILE([#include <nlist.h>],
-[struct nlist n; n.n_un.n_name = 0;],
-ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])
-if test $ac_cv_struct_nlist_n_un = yes; then
-  AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
-fi
-])dnl
+case "$host" in
+ *-*-linux*)
+    AC_CHECK_FUNCS(__adjtimex __ntp_gettime)
+    ;;
+esac
+case "$ac_cv_func___adjtimex" in
+ yes) ;;
+ *)
+    AC_CHECK_LIB(elf, nlist)	dnl Only needed for tickadj...
+    dnl AC_CHECK_LIB(kvm, main, , , -lelf)
+    AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
+    AC_CHECK_LIB(ld, nlist)
+    AC_CHECK_LIB(mld, nlist)
+    AC_CHECK_HEADER(nlist.h,
+    [AC_DEFINE(NLIST_STRUCT, 1, [nlist stuff])
+     AC_CACHE_CHECK([for n_un in struct nlist], ac_cv_struct_nlist_n_un,
+      [AC_TRY_COMPILE([#include <nlist.h>],
+       [struct nlist n; n.n_un.n_name = 0;],
+       ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])
+     if test $ac_cv_struct_nlist_n_un = yes; then
+       AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
+     fi
+    ])dnl
+    ;;
+esac
 
 dnl AC_CHECK_HEADERS(net/if.h, [], [],
 dnl [#if HAVE_SYS_TYPES_H
@@ -924,11 +935,6 @@ case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
 esac
 AC_TYPE_UID_T
 
-case "$host" in
- *-*-linux*)
-    AC_CHECK_FUNCS(__adjtimex __ntp_gettime)
-    ;;
-esac
 case "$host" in
  *-*-aix[[45]]*)
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
