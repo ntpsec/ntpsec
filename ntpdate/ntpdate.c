@@ -1482,7 +1482,7 @@ findserver(
 		server = (struct server *)emalloc(sizeof(struct server));
 		memset((char *)server, 0, sizeof(struct server));
 
-		memcpy(&server->srcadr, &addr, sizeof(struct sockaddr_storage));
+		memcpy(&server->srcadr, addr, sizeof(struct sockaddr_storage));
 
 		server->event_time = ++sys_numservers;
 
