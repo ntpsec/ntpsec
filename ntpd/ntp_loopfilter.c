@@ -540,14 +540,11 @@ local_clock(
 	 * clock, respectively.
 	 *
 	 * Important note: The kernel discipline is used only if the
-	 * offset is less than 0.5 s, as anything higher can lead to
-	 * overflow problems. This might occur if some misguided lad set
-	 * the step threshold to something ridiculous. No problem; use
-	 * the ntp discipline until the residual offset sinks beneath
-	 * the waves.
+	 * step threshold is less than 0.5 s, as anything higher can
+	 * lead to overflow problems. This might occur if some misguided
+	 * lad set the step threshold to something ridiculous.
 	 */
-	if (pll_control && kern_enable && fabs(clock_offset) < .5 &&
-	    state != S_FREQ) {
+	if (pll_control && kern_enable && clock_max < 0.5) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
@@ -795,6 +792,14 @@ adj_host_clock(
 
 #ifndef LOCKCLOCK
 	/*
+	 * If clock discipline is disabled or if the kernel is enabled,
+	 * get out of Dodge quick.
+	 */
+	if (!ntp_enable || mode_ntpdate || (pll_control &&
+	    kern_enable && clock_max < 0.5))
+		return;
+
+	/*
 	 * Declare PPS kernel unsync if the pps signal has not been
 	 * heard for a few minutes.
 	 */
@@ -804,14 +809,6 @@ adj_host_clock(
 			    msyslog(LOG_NOTICE, "pps sync disabled");
 		pps_control = 0;
 	}
-
-	/*
-	 * If NTP is disabled or ntpdate mode enabled or the kernel
-	 * discipline is enabled, we have no business going further.
-	 */
-	if (!ntp_enable || mode_ntpdate || (pll_control &&
-	    kern_enable))
-		return;
 
 	/*
 	 * Implement the phase and frequency adjustments. The gain
