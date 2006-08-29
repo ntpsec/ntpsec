@@ -481,7 +481,9 @@ case "$host" in
     AC_CHECK_FUNCS(__adjtimex __ntp_gettime)
     ;;
 esac
-if test $ac_cv_func___adjtimex != yes; then
+case "$ac_cv_func___adjtimex" in
+ yes) ;;
+ *)
     AC_CHECK_LIB(elf, nlist)	dnl Only needed for tickadj...
     dnl AC_CHECK_LIB(kvm, main, , , -lelf)
     AC_CHECK_LIB(kvm, main)		dnl We already know about -lelf here...
@@ -489,15 +491,16 @@ if test $ac_cv_func___adjtimex != yes; then
     AC_CHECK_LIB(mld, nlist)
     AC_CHECK_HEADER(nlist.h,
     [AC_DEFINE(NLIST_STRUCT, 1, [nlist stuff])
-    AC_CACHE_CHECK([for n_un in struct nlist], ac_cv_struct_nlist_n_un,
-    [AC_TRY_COMPILE([#include <nlist.h>],
-    [struct nlist n; n.n_un.n_name = 0;],
-    ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])
-    if test $ac_cv_struct_nlist_n_un = yes; then
-      AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
-    fi
+     AC_CACHE_CHECK([for n_un in struct nlist], ac_cv_struct_nlist_n_un,
+      [AC_TRY_COMPILE([#include <nlist.h>],
+       [struct nlist n; n.n_un.n_name = 0;],
+       ac_cv_struct_nlist_n_un=yes, ac_cv_struct_nlist_n_un=no)])
+     if test $ac_cv_struct_nlist_n_un = yes; then
+       AC_DEFINE(NLIST_NAME_UNION, 1, [does struct nlist use a name union?])
+     fi
     ])dnl
-fi
+    ;;
+esac
 
 dnl AC_CHECK_HEADERS(net/if.h, [], [],
 dnl [#if HAVE_SYS_TYPES_H
