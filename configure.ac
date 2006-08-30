@@ -2355,15 +2355,16 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(EES M201 MSF receiver)
-AC_ARG_ENABLE(MSFEES,
-    AC_HELP_STRING([--enable-MSFEES], [+ EES M201 MSF receiver]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_MSFEES, 1, [EES M201 MSF receiver])
-fi
-AC_MSG_RESULT($ntp_ok)
+dnl Bug 340: longstanding unfixed bugs
+dnl AC_MSG_CHECKING(EES M201 MSF receiver)
+dnl AC_ARG_ENABLE(MSFEES,
+dnl     AC_HELP_STRING([--enable-MSFEES], [+ EES M201 MSF receiver]),
+dnl     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+dnl if test "$ntp_ok" = "yes"; then
+dnl     ntp_refclock=yes
+dnl     AC_DEFINE(CLOCK_MSFEES, 1, [EES M201 MSF receiver])
+dnl fi
+dnl AC_MSG_RESULT($ntp_ok)
 
 # Not Ultrix
 AC_MSG_CHECKING(Magnavox MX4200 GPS receiver)
@@ -2516,15 +2517,16 @@ case "$ntp_ok$ac_cv_header_sys_tpro" in
  yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
-AC_MSG_CHECKING(TRAK 8810 GPS receiver)
-AC_ARG_ENABLE(TRAK,
-    AC_HELP_STRING([--enable-TRAK], [+ TRAK 8810 GPS receiver]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-if test "$ntp_ok" = "yes"; then
-    ntp_refclock=yes
-    AC_DEFINE(CLOCK_TRAK, 1, [TRAK 8810 GPS receiver])
-fi
-AC_MSG_RESULT($ntp_ok)
+dnl Bug 342: longstanding unfixed bugs
+dnl AC_MSG_CHECKING(TRAK 8810 GPS receiver)
+dnl AC_ARG_ENABLE(TRAK,
+dnl     AC_HELP_STRING([--enable-TRAK], [+ TRAK 8810 GPS receiver]),
+dnl     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+dnl if test "$ntp_ok" = "yes"; then
+dnl     ntp_refclock=yes
+dnl     AC_DEFINE(CLOCK_TRAK, 1, [TRAK 8810 GPS receiver])
+dnl fi
+dnl AC_MSG_RESULT($ntp_ok)
 
 # Not on a vax-dec-bsd
 AC_MSG_CHECKING(Kinemetrics/TrueTime receivers)
