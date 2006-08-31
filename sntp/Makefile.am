@@ -39,7 +39,8 @@ dist_man_MANS=	sntp.1
 EXTRA_DIST=	bincheck.mf	\
 		COPYRIGHT	\
 		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu version.def
-BUILT_SOURCES=	sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu check-version.def
+BUILT_SOURCES=	check-version.def	\
+		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
 man_MANS=	sntp.1
 
 

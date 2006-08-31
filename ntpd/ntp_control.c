@@ -363,11 +363,11 @@ int num_ctl_traps;
 static u_char clocktypes[] = {
 	CTL_SST_TS_NTP, 	/* REFCLK_NONE (0) */
 	CTL_SST_TS_LOCAL,	/* REFCLK_LOCALCLOCK (1) */
-	CTL_SST_TS_UHF, 	/* REFCLK_GPS_TRAK (2) */
+	CTL_SST_TS_UHF, 	/* deprecated REFCLK_GPS_TRAK (2) */
 	CTL_SST_TS_HF,		/* REFCLK_WWV_PST (3) */
 	CTL_SST_TS_LF,		/* REFCLK_WWVB_SPECTRACOM (4) */
 	CTL_SST_TS_UHF, 	/* REFCLK_TRUETIME (5) */
-	CTL_SST_TS_UHF, 	/* REFCLK_GOES_TRAK (6) */
+	CTL_SST_TS_UHF, 	/* REFCLK_GOES_TRAK (6) IRIG_AUDIO? */
 	CTL_SST_TS_HF,		/* REFCLK_CHU (7) */
 	CTL_SST_TS_LF,		/* REFCLOCK_PARSE (default) (8) */
 	CTL_SST_TS_LF,		/* REFCLK_GPS_MX4200 (9) */
@@ -375,7 +375,7 @@ static u_char clocktypes[] = {
 	CTL_SST_TS_UHF, 	/* REFCLK_GPS_ARBITER (11) */
 	CTL_SST_TS_UHF, 	/* REFCLK_IRIG_TPRO (12) */
 	CTL_SST_TS_ATOM,	/* REFCLK_ATOM_LEITCH (13) */
-	CTL_SST_TS_LF,		/* REFCLK_MSF_EES (14) */
+	CTL_SST_TS_LF,		/* deprecated REFCLK_MSF_EES (14) */
 	CTL_SST_TS_NTP, 	/* not used (15) */
 	CTL_SST_TS_UHF, 	/* REFCLK_IRIG_BANCOMM (16) */
 	CTL_SST_TS_UHF, 	/* REFCLK_GPS_DATU (17) */
