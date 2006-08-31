@@ -26,7 +26,10 @@ ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
-EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def ntpdsim-opts.def $(BUILT_SOURCES)
+EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def ntpdsim-opts.def	\
+	refclock_msfees.c	\
+	refclock_trak.c		\
+	$(BUILT_SOURCES)
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
@@ -55,11 +58,11 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_fg.c refclock_gpsvme.c refclock_heath.c refclock_hopfser.c \
 	refclock_hopfpci.c refclock_hpgps.c refclock_irig.c refclock_jjy.c \
 	refclock_jupiter.c refclock_leitch.c refclock_local.c \
-	refclock_msfees.c refclock_mx4200.c refclock_neoclock4x.c \
+	refclock_mx4200.c refclock_neoclock4x.c \
 	refclock_nmea.c refclock_oncore.c refclock_palisade.c \
 	refclock_palisade.h refclock_parse.c \
 	refclock_pcf.c refclock_pst.c refclock_ripencc.c refclock_shm.c \
-	refclock_tpro.c refclock_trak.c refclock_true.c refclock_tt560.c \
+	refclock_tpro.c refclock_true.c refclock_tt560.c \
 	refclock_ulink.c refclock_wwv.c refclock_wwvb.c \
 	refclock_zyfer.c
 
