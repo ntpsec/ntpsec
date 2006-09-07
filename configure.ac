@@ -1802,23 +1802,20 @@ esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,
  [ac_cv_var_ntp_syscalls=no
- case "$ac_cv_func___adjtimex" in
-  yes)
+ case "$ac_cv_func_ntp_adjtime$ac_cv_func_ntp_gettime$ac_cv_func___adjtimex" in
+  yesyes*)
     ac_cv_var_ntp_syscalls=libc
     ;;
-  *) case "$ac_cv_func_ntp_adjtime$ac_cv_func_ntp_gettime" in
-      yesyes)
-        ac_cv_var_ntp_syscalls=libc
-        ;;
-      *) AC_EGREP_CPP(yes,
+  *yes)
+    ac_cv_var_ntp_syscalls=inline
+    ;;
+  *) AC_EGREP_CPP(yes,
          [#include <sys/syscall.h>
 #if defined(SYS_ntp_gettime) && defined(SYS_ntp_adjtime)
            yes
 #endif
           ], ac_cv_var_ntp_syscalls=kernel)
-         ;;
-     esac
-     ;;
+    ;;
  esac])
 case "$ac_cv_var_ntp_syscalls" in
  libc)
