@@ -12,8 +12,9 @@ EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h ntpq.1 ntpq-opts.texi ntpq-opts.menu
 man_MANS=	ntpq.1
 run_ag=         cd $(srcdir) && autogen -L ../include
-std_def_list=	$(top_srcdir)/include/debug-opt.def	\
-		$(top_srcdir)/include/copyright.def 	\
+std_def_list=	$(top_srcdir)/include/debug-opt.def		\
+		$(top_srcdir)/include/autogen-version.def 	\
+		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 

@@ -35,8 +35,9 @@ ETAGS_ARGS = Makefile.am
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim
 run_ag = cd $(srcdir) && autogen -L ../include
-std_def_list=	$(top_srcdir)/include/debug-opt.def	\
-		$(top_srcdir)/include/copyright.def 	\
+std_def_list=	$(top_srcdir)/include/debug-opt.def		\
+		$(top_srcdir)/include/autogen-version.def 	\
+		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
 
 check-local: @MAKE_CHECK_Y2K@
