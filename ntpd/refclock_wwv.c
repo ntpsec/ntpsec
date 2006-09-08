@@ -929,7 +929,6 @@ wwv_rf(
 	struct refclockproc *pp;
 	struct wwvunit *up;
 	struct sync *sp, *rp;
-	int	j, k;
 
 	static double lpf[5];	/* 150-Hz lpf delay line */
 	double data;		/* lpf output */
@@ -1251,21 +1250,17 @@ wwv_rf(
 	dtemp = (epobuf[epoch] += (mfsync - epobuf[epoch]) /
 	    up->avgint);
 	if (dtemp > epomax) {
-		j = epoch + 6 * MS;
-		if (j >= SECOND)
-			j -= SECOND;
-		k = epoch - 6 * MS;
-		if (k < 0)
-			k += SECOND;
-		nxtmax = max(fabs(epobuf[j]), fabs(epobuf[k]));
+		int	j;
+
 		epomax = dtemp;
 		epopos = epoch;
+		j = epoch - 6 * MS;
+		if (j < 0)
+			j += SECOND;
+		nxtmax = fabs(epobuf[j]);
 	}
 	if (epoch == 0) {
 		up->epomax = epomax;
-		j = epopos - 10 * MS;
-		if (j < 0)
-			j += SECOND;
 		up->eposnr = wwv_snr(epomax, nxtmax);
 		epopos -= pdelay + TCKCYC * MS;
 		if (epopos < 0)
