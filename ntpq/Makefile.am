@@ -18,14 +18,14 @@ std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/version.def
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
-$(srcdir)/ntpq-opts.h: ntpq-opts.c
-$(srcdir)/ntpq-opts.c: ntpq-opts.def $(std_def_list)
+$(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.c
+$(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
 
-$(srcdir)/ntpq.1: ntpq-opts.def $(std_def_list)
+$(srcdir)/ntpq.1: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
 
-$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: ntpq-opts.def $(std_def_list)
+$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)

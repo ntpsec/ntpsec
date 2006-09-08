@@ -67,24 +67,24 @@ libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	refclock_ulink.c refclock_wwv.c refclock_wwvb.c \
 	refclock_zyfer.c
 
-$(srcdir)/ntpd-opts.h: ntpd-opts.c
-$(srcdir)/ntpd-opts.c: ntpd-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
+$(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
-$(srcdir)/ntpd.1: ntpd-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
-$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: ntpd-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
-$(srcdir)/ntpdsim-opts.h: ntpdsim-opts.c
-$(srcdir)/ntpdsim-opts.c: ntpdsim-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpdsim-opts.h: $(srcdir)/ntpdsim-opts.c
+$(srcdir)/ntpdsim-opts.c: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpdsim-opts.def
 
-$(srcdir)/ntpdsim.1: ntpdsim-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpdsim.1: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpdsim ntpdsim-opts.def
 
-$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: ntpdsim-opts.def ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
 
 $(PROGRAMS): $(LDADD)
