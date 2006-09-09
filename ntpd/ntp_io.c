@@ -1908,12 +1908,12 @@ io_multicast_add(
 		memset(&((struct sockaddr_in6*)&interface->mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
 		iface = findlocalcastinterface(&addr, INT_MULTICAST);
-# ifdef ISC_PLATFORM_HAVESCOPEID
 		if (iface) {
+# ifdef ISC_PLATFORM_HAVESCOPEID
 			lscope = ((struct sockaddr_in6*)&iface->sin)->sin6_scope_id;
-		}
 # endif
-		DPRINTF(4, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
+			DPRINTF(4, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
+		}
 		break;
 	}
 		
