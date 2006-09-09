@@ -25,14 +25,14 @@ std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntpdc-opts.h: ntpdc-opts.c
-$(srcdir)/ntpdc-opts.c: ntpdc-opts.def $(std_def_list)
+$(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
+$(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
-$(srcdir)/ntpdc.1: ntpdc-opts.def $(std_def_list)
+$(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
 
-$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: ntpdc-opts.def $(std_def_list)
+$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
