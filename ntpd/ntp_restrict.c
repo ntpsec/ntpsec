@@ -158,7 +158,8 @@ init_restrict(void)
  */
 int
 restrictions(
-	struct sockaddr_storage *srcadr
+	struct sockaddr_storage *srcadr,
+	int at_listhead
 	)
 {
 	struct restrictlist *rl;
@@ -260,7 +261,7 @@ restrictions(
 	 * packet is greater than res_min_interval and the average is
 	 * greater thatn res_avg_interval.
 	 */
-	if (mon_enabled == MON_OFF) {
+	if (!at_listhead || mon_enabled == MON_OFF) {
 		flags &= ~RES_LIMITED;
 	} else {
 		struct mon_data *md;

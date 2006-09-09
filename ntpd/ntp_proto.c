@@ -349,6 +349,7 @@ receive(
 	int	rval;			/* cookie snatcher */
 #endif /* OPENSSL */
 	int retcode = AM_NOMATCH;
+	int	at_listhead;
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -369,8 +370,8 @@ receive(
 		sys_badlength++;
 		return;				/* bogus port */
 	}
-	ntp_monitor(rbufp);
-	restrict_mask = restrictions(&rbufp->recv_srcadr);
+	at_listhead = ntp_monitor(rbufp);
+	restrict_mask = restrictions(&rbufp->recv_srcadr, at_listhead);
 #ifdef DEBUG
 	if (debug > 1)
 		printf("receive: at %ld %s<-%s flags %x restrict %03x\n",
