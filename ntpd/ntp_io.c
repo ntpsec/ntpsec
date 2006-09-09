@@ -1195,7 +1195,7 @@ update_interfaces(
 			{
 				ifi.action = IFS_CREATED;
 				ifi.interface = iface;
-				if (receiver && iface)
+				if (receiver)
 					receiver(data, &ifi);
 			}
 			else
