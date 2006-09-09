@@ -974,13 +974,17 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 
 /*
  * refresh_interface
- * check to see if getsockname of the current socket still agrees
- * with the original binding address
- * if not - recreate sockets if possible
+ *
+ * some OSes have been observed to keep
+ * cached routes even when more specific routes
+ * become available.
+ * this can be mitigated by re-binding
+ * the socket.
  */
 static int
 refresh_interface(struct interface * interface)
 {
+#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 	if (interface->fd != INVALID_SOCKET)
 	{
 		close_and_delete_fd_from_list(interface->fd);
@@ -993,6 +997,9 @@ refresh_interface(struct interface * interface)
 	{
 		return 0;	/* invalid sockets are not refreshable */
 	}
+#else /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
+	return interface->fd != INVALID_SOCKET;
+#endif /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
 }
 
 /*

@@ -1445,6 +1445,19 @@ case "$ac_cv_func_ctty_for_f_setown" in
  yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
 esac
 
+AC_CACHE_CHECK(if the OS misses to clear cached routes when more specific routes become available, ac_cv_os_routeupdates,
+[[case "$host" in
+ *-*-netbsd*)
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+ac_cv_os_routeupdates=$ans]])
+case "$ac_cv_os_routeupdates" in
+ yes) AC_DEFINE(OS_MISSES_SPECIFIC_ROUTE_UPDATES, 1, [need to recreate sockets on changed routing?]) ;;
+esac
+
 ntp_warning='GRONK'
 AC_MSG_CHECKING(if we'll use clock_settime or settimeofday or stime)
 case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
