@@ -3,6 +3,7 @@
 autogen definitions options;
 
 #include copyright.def
+#include autogen-version.def
 
 prog-name      = "ntpq";
 prog-title     = "standard NTP query program";

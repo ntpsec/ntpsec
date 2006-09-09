@@ -124,3 +124,4 @@ util/Makefile.in
 version
 version.m4
 sntp/version.def
+sntp/autogen-version.def

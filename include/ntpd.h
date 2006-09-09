@@ -126,7 +126,7 @@ extern	u_long	sys_tai;
 extern	void	init_mon	P((void));
 extern	void	mon_start	P((int));
 extern	void	mon_stop	P((int));
-extern	void	ntp_monitor     P((struct recvbuf *));
+extern	int	ntp_monitor     P((struct recvbuf *));
 extern  void    ntp_monclearinterface P((struct interface *interface));
 
 /* ntp_peer.c */
@@ -211,7 +211,7 @@ extern	void	process_private P((struct recvbuf *, int));
 
 /* ntp_restrict.c */
 extern	void	init_restrict	P((void));
-extern	int 	restrictions	P((struct sockaddr_storage *));
+extern	int 	restrictions	P((struct sockaddr_storage *, int));
 extern	void	hack_restrict	P((int, struct sockaddr_storage *, struct sockaddr_storage *, int, int));
 
 /* ntp_timer.c */

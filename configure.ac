@@ -1445,6 +1445,19 @@ case "$ac_cv_func_ctty_for_f_setown" in
  yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
 esac
 
+AC_CACHE_CHECK(if the OS misses to clear cached routes when more specific routes become available, ac_cv_os_routeupdates,
+[[case "$host" in
+ *-*-netbsd*)
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+ac_cv_os_routeupdates=$ans]])
+case "$ac_cv_os_routeupdates" in
+ yes) AC_DEFINE(OS_MISSES_SPECIFIC_ROUTE_UPDATES, 1, [need to recreate sockets on changed routing?]) ;;
+esac
+
 ntp_warning='GRONK'
 AC_MSG_CHECKING(if we'll use clock_settime or settimeofday or stime)
 case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
@@ -1802,23 +1815,20 @@ esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,
  [ac_cv_var_ntp_syscalls=no
- case "$ac_cv_func___adjtimex" in
-  yes)
+ case "$ac_cv_func_ntp_adjtime$ac_cv_func_ntp_gettime$ac_cv_func___adjtimex" in
+  yesyes*)
     ac_cv_var_ntp_syscalls=libc
     ;;
-  *) case "$ac_cv_func_ntp_adjtime$ac_cv_func_ntp_gettime" in
-      yesyes)
-        ac_cv_var_ntp_syscalls=libc
-        ;;
-      *) AC_EGREP_CPP(yes,
+  *yes)
+    ac_cv_var_ntp_syscalls=inline
+    ;;
+  *) AC_EGREP_CPP(yes,
          [#include <sys/syscall.h>
 #if defined(SYS_ntp_gettime) && defined(SYS_ntp_adjtime)
            yes
 #endif
           ], ac_cv_var_ntp_syscalls=kernel)
-         ;;
-     esac
-     ;;
+    ;;
  esac])
 case "$ac_cv_var_ntp_syscalls" in
  libc)

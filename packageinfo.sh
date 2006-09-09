@@ -9,7 +9,7 @@ version=${proto}.${major}.${minor}
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=37
+point=39
 # Special.  Normally unused.  A suffix.
 #special=ag
 special=
