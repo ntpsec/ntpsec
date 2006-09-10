@@ -1,14 +1,14 @@
 /*
- * $Id: text_mmap.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * $Id: text_mmap.c,v 4.10 2006/08/22 16:09:02 bkorb Exp $
  *
- * Time-stamp:      "2006-06-24 10:54:43 bkorb"
+ * Time-stamp:      "2006-08-22 07:17:49 bkorb"
  */
 
-#ifndef MAP_ANONYMOUS 
-#  ifdef   MAP_ANON 
-#  define  MAP_ANONYMOUS   MAP_ANON 
-#  endif 
-#endif 
+#ifndef MAP_ANONYMOUS
+#  ifdef   MAP_ANON
+#  define  MAP_ANONYMOUS   MAP_ANON
+#  endif
+#endif
 
 /*
  *  Some weird systems require that a specifically invalid FD number
