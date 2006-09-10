@@ -79,6 +79,7 @@ create_buffers(int nbufs)
 {
 	register recvbuf_t *buf;
 	int i;
+
 	buf = (recvbuf_t *) emalloc(nbufs*sizeof(recvbuf_t));
 	/*
 	 * If no memory available, Bail
@@ -88,7 +89,6 @@ create_buffers(int nbufs)
 	for (i = 0; i < nbufs; i++)
 	{
 		ISC_LIST_APPEND(free_list, buf, link);
-		buf++;
 		free_recvbufs++;
 		total_recvbufs++;
 	}
