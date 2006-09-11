@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.13 2006/07/15 22:17:36 bkorb Exp $
- *  Time-stamp:      "2006-07-15 13:54:08 bkorb"
+ *  $Id: autoopts.c,v 4.22 2006/07/15 22:10:21 bkorb Exp $
+ *  Time-stamp:      "2006-09-10 14:42:45 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -87,6 +87,50 @@ doPresets( tOptions* pOpts );
 static int
 checkConsistency( tOptions* pOpts );
 /* = = = END-STATIC-FORWARD = = = */
+
+LOCAL void *
+ao_malloc( size_t sz )
+{
+    void * res = malloc(sz);
+    if (res == NULL) {
+        fprintf( stderr, "malloc of %d bytes failed\n", sz );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
+
+LOCAL void *
+ao_realloc( void *p, size_t sz )
+{
+    void * res = realloc(p, sz);
+    if (res == NULL) {
+        fprintf( stderr, "realloc of %d bytes at 0x%p failed\n", sz, p );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
+
+LOCAL void
+ao_free( void *p )
+{
+    if (p != NULL)
+        free(p);
+}
+
+
+LOCAL char *
+ao_strdup( char const *str )
+{
+    char * res = strdup(str);
+    if (res == NULL) {
+        fprintf( stderr, "strdup of %d byte string failed\n", strlen(str) );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
 
 /*
  *  handleOption

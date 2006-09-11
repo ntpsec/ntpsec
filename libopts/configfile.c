@@ -1,6 +1,6 @@
 /*
- *  $Id: configfile.c,v 1.10 2006/07/14 04:31:37 bkorb Exp $
- *  Time-stamp:      "2006-07-01 12:46:31 bkorb"
+ *  $Id: configfile.c,v 4.23 2006/07/01 21:57:23 bkorb Exp $
+ *  Time-stamp:      "2006-09-10 13:57:10 bkorb"
  *
  *  configuration/rc/ini file handling.
  */
@@ -541,6 +541,9 @@ handleConfig(
 {
     char* pzName = pzText++;
     char* pzEnd  = strchr( pzText, '\n' );
+
+    if (pzEnd == NULL)
+        return pzText + strlen(pzText);
 
     while (ISNAMECHAR( *pzText ))  pzText++;
     while (isspace( *pzText )) pzText++;
