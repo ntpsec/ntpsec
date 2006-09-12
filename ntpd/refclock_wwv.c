@@ -1459,14 +1459,17 @@ wwv_endpoc(
 	 * If the epoch candidate is the same as the last one, increment
 	 * the run counter. If not, save the length, epoch and end
 	 * time of the current run for use later and reset the counter.
-	 * If the run is at least SCMP (10) s, the SSYNC bit is lit and
-	 * the epoch considered valid for synchronization.
+	 * The epoch is considered valid if the run is at least SCMP
+	 * (10) s, the minute is synchronized and the interval since the
+	 * last epoch  is not greater than the averaging interval. Thus,
+	 * after a long absence, the program will wait a full averaging
+	 * interval while the integrator charges up.
 	 */
 	tmp2 = (tepoch - xepoch) % SECOND;
 	if (tmp2 == 0) {
 		syncnt++;
-		if (syncnt > SCMP && up->status & MSYNC && up->status &
-		    FGATE) {
+		if (syncnt > SCMP && up->status & MSYNC && (up->status &
+		    FGATE || scount - zcount <= up->avgint)) {
 			up->status |= SSYNC;
 			up->yepoch = tepoch;
 		}
