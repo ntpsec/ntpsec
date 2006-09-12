@@ -801,6 +801,18 @@ remove_interface(struct interface *interface)
 		      RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
 }
 
+static void
+list_if_listening(struct interface *interface, u_short port)
+{
+	msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
+		interface->ifnum,
+		interface->name,
+		stoa((&interface->sin)),
+		ntohs( (u_short) port),
+		(interface->ignore_packets == ISC_FALSE) ?
+		"Enabled": "Disabled");
+}
+
 void
 create_wildcards(u_short port) {
 	isc_boolean_t okipv4 = ISC_TRUE;
@@ -835,9 +847,12 @@ create_wildcards(u_short port) {
 		interface->fd = open_socket(&interface->sin,
 				 interface->flags, 0, interface);
 
-		wildipv4 = interface;
-		any_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv4 = interface;
+			any_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		}
 	}
 
 #ifdef INCLUDE_IPV6_SUPPORT
@@ -863,9 +878,12 @@ create_wildcards(u_short port) {
 		interface->fd = open_socket(&interface->sin,
 				 interface->flags, 0, interface);
 
-		wildipv6 = interface;
-		any6_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv6 = interface;
+			any6_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		}
 	}
 #endif
 }
@@ -1343,13 +1361,7 @@ create_interface(
 				 interface->flags, 0, interface);
 
 	if (interface->fd != INVALID_SOCKET)
-	  msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
-		  interface->ifnum,
-		  interface->name,
-		  stoa((&interface->sin)),
-		  ntohs( (u_short) port),
-		  (interface->ignore_packets == ISC_FALSE) ?
-		  "Enabled": "Disabled");
+		list_if_listening(interface, port);
 
 	if ((interface->flags & INT_BROADCAST) &&
 	    interface->bfd != INVALID_SOCKET)
