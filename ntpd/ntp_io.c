@@ -845,13 +845,17 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&interface->bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv4 = interface;
 			any_interface = interface;
 			add_interface(interface);
 			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
 		}
 	}
 
@@ -876,13 +880,17 @@ create_wildcards(u_short port) {
 		interface->ignore_packets = ISC_TRUE;
 
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv6 = interface;
 			any6_interface = interface;
 			add_interface(interface);
 			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
 		}
 	}
 #endif
@@ -2206,10 +2214,14 @@ open_socket(
 	 * number on each interface
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       (char *)&on, sizeof(on)))
+		       turn_off_reuse ? (char *)&off : (char *)&on, sizeof(on)))
 	{
-		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR on fails on address %s: %m",
-			stoa(addr));
+		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR %s on fails on address %s: %m",
+			turn_off_reuse ? "off" : "on", stoa(addr));
+
+		closesocket(fd);
+
+		return INVALID_SOCKET;
 	}
 
 	/*
