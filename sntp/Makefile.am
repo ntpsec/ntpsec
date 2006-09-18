@@ -38,13 +38,23 @@ dist_man_MANS=	sntp.1
 
 EXTRA_DIST=	bincheck.mf	\
 		COPYRIGHT	\
-		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu version.def
-BUILT_SOURCES=	check-version.def	\
+		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
+		autogen-version.def version.def
+BUILT_SOURCES=	check-autogen-version.def check-version.def	\
 		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
 man_MANS=	sntp.1
 
 
 FRC:
+check-autogen-version.def: FRC
+	@cd $(srcdir)							\
+	&& test -r ../include/autogen-version.def			\
+	&& ( if cmp -s ../include/autogen-version.def autogen-version.def; \
+	   then : ;							\
+	   else cp ../include/autogen-version.def autogen-version.def;	 \
+		echo "Installing new sntp/autogen-version.def file";	\
+	   fi )
+
 check-version.def: FRC
 	@cd $(srcdir)					\
 	&& test -r ../include/version.def		\

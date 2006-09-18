@@ -71,7 +71,7 @@
 
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_  
+#define _WINSOCKAPI_
 #endif
 
 #ifndef __RPCASYNC_H__
@@ -83,7 +83,7 @@
 #include <winsock2.h>
 
 /*
- * Compatibility declarations for Windows, assuming SYS_WINNT 
+ * Compatibility declarations for Windows, assuming SYS_WINNT
  * has been defined.
  */
 #define strdup  _strdup
@@ -94,7 +94,7 @@
 
 #include <io.h>
 #define open    _open
-#define close   _close 
+#define close   _close
 #define read    _read
 #define write   _write
 #define lseek   _lseek
@@ -102,7 +102,7 @@
 #define dup2    _dup2
 
 #define O_RDWR     _O_RDWR
-#define O_RDONLY   _O_RDONLY 
+#define O_RDONLY   _O_RDONLY
 #define O_EXCL     _O_EXCL
 
 #ifndef	S_ISREG

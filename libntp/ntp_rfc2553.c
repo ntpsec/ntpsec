@@ -302,7 +302,7 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 	}
 	if (host != NULL) {
 		strncpy(host, hp->h_name, hostlen);
-		host[hostlen] = '\0';
+		host[hostlen - 1] = '\0';
 	}
 	return (0);
 }

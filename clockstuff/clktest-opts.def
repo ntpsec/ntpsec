@@ -7,6 +7,7 @@ prog-title     = "test the clock line discipline";
 argument       = '<tty_device>';
 
 #include copyright.def
+#include autogen-version.def
 
 detail = <<- _EODetail_
 	Clktest can be used to test the clock line discipline (CLKLDISC,

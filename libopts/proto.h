@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Thu Jul 27 21:15:11 PDT 2006
+ * Generated Sun Sep 10 16:03:11 PDT 2006
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -14,6 +14,18 @@
 /*
  *  Extracted from autoopts.c
  */
+LOCAL void *
+ao_malloc( size_t sz );
+
+LOCAL void *
+ao_realloc( void *p, size_t sz );
+
+LOCAL void
+ao_free( void *p );
+
+LOCAL char *
+ao_strdup( char const *str );
+
 LOCAL tSuccess
 handleOption( tOptions* pOpts, tOptState* pOptState );
 

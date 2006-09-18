@@ -2,6 +2,8 @@
 
 autogen definitions options;
 
+#include autogen-version.def
+
 copyright = {
     date  = "1970-2006";
     owner = "ntp.org";

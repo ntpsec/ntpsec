@@ -3,7 +3,7 @@ MAINTAINERCLEANFILES  = Makefile.in
 lib_LTLIBRARIES       = libopts.la
 libopts_la_SOURCES    = libopts.c
 libopts_la_CPPFLAGS   = -I$(top_srcdir)
-libopts_la_LDFLAGS    = -version-info  27:4:2
+libopts_la_LDFLAGS    = -version-info  27:4:3
 EXTRA_DIST            = \
     COPYING.lgpl            COPYING.mbsd            MakeDefs.inc  \
     README                  autoopts/options.h      autoopts/usage-txt.h  \

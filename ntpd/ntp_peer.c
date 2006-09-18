@@ -609,18 +609,20 @@ peer_refresh_interface(struct peer *peer)
 
 	set_peerdstadr(peer, niface);
 
-	/*
-	 * Broadcast needs the socket enabled for broadcast
-	 */
-	if (peer->cast_flags & MDF_BCAST && peer->dstadr) {
-		enable_broadcast(peer->dstadr, &peer->srcadr);
-	}
+	if (peer->dstadr) {
+		/*
+	 	 * Broadcast needs the socket enabled for broadcast
+	 	 */
+		if (peer->cast_flags & MDF_BCAST) {
+			enable_broadcast(peer->dstadr, &peer->srcadr);
+		}
 
-	/*
-	 * Multicast needs the socket interface enabled for multicast
-	 */
-	if (peer->cast_flags & MDF_MCAST) {
-		enable_multicast_if(peer->dstadr, &peer->srcadr);
+		/*
+	 	 * Multicast needs the socket interface enabled for multicast
+	 	 */
+		if (peer->cast_flags & MDF_MCAST) {
+			enable_multicast_if(peer->dstadr, &peer->srcadr);
+		}
 	}
 }
 

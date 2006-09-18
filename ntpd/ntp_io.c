@@ -801,6 +801,18 @@ remove_interface(struct interface *interface)
 		      RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
 }
 
+static void
+list_if_listening(struct interface *interface, u_short port)
+{
+	msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
+		interface->ifnum,
+		interface->name,
+		stoa((&interface->sin)),
+		ntohs( (u_short) port),
+		(interface->ignore_packets == ISC_FALSE) ?
+		"Enabled": "Disabled");
+}
+
 void
 create_wildcards(u_short port) {
 	isc_boolean_t okipv4 = ISC_TRUE;
@@ -833,11 +845,18 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&interface->bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
-		wildipv4 = interface;
-		any_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv4 = interface;
+			any_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
+		}
 	}
 
 #ifdef INCLUDE_IPV6_SUPPORT
@@ -861,11 +880,18 @@ create_wildcards(u_short port) {
 		interface->ignore_packets = ISC_TRUE;
 
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
-		wildipv6 = interface;
-		any6_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv6 = interface;
+			any6_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
+		}
 	}
 #endif
 }
@@ -974,13 +1000,17 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 
 /*
  * refresh_interface
- * check to see if getsockname of the current socket still agrees
- * with the original binding address
- * if not - recreate sockets if possible
+ *
+ * some OSes have been observed to keep
+ * cached routes even when more specific routes
+ * become available.
+ * this can be mitigated by re-binding
+ * the socket.
  */
 static int
 refresh_interface(struct interface * interface)
 {
+#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 	if (interface->fd != INVALID_SOCKET)
 	{
 		close_and_delete_fd_from_list(interface->fd);
@@ -993,6 +1023,9 @@ refresh_interface(struct interface * interface)
 	{
 		return 0;	/* invalid sockets are not refreshable */
 	}
+#else /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
+	return interface->fd != INVALID_SOCKET;
+#endif /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
 }
 
 /*
@@ -1188,7 +1221,7 @@ update_interfaces(
 			{
 				ifi.action = IFS_CREATED;
 				ifi.interface = iface;
-				if (receiver && iface)
+				if (receiver)
 					receiver(data, &ifi);
 			}
 			else
@@ -1336,13 +1369,7 @@ create_interface(
 				 interface->flags, 0, interface);
 
 	if (interface->fd != INVALID_SOCKET)
-	  msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
-		  interface->ifnum,
-		  interface->name,
-		  stoa((&interface->sin)),
-		  ntohs( (u_short) port),
-		  (interface->ignore_packets == ISC_FALSE) ?
-		  "Enabled": "Disabled");
+		list_if_listening(interface, port);
 
 	if ((interface->flags & INT_BROADCAST) &&
 	    interface->bfd != INVALID_SOCKET)
@@ -1901,12 +1928,12 @@ io_multicast_add(
 		memset(&((struct sockaddr_in6*)&interface->mask)->sin6_addr.s6_addr, 0xff, sizeof(struct in6_addr));
 #endif
 		iface = findlocalcastinterface(&addr, INT_MULTICAST);
-# ifdef ISC_PLATFORM_HAVESCOPEID
 		if (iface) {
+# ifdef ISC_PLATFORM_HAVESCOPEID
 			lscope = ((struct sockaddr_in6*)&iface->sin)->sin6_scope_id;
-		}
 # endif
-		DPRINTF(4, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
+			DPRINTF(4, ("Found interface #%d %s, scope: %d for address %s\n", iface->ifnum, iface->name, lscope, stoa(&addr)));
+		}
 		break;
 	}
 		
@@ -2187,10 +2214,14 @@ open_socket(
 	 * number on each interface
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       (char *)&on, sizeof(on)))
+		       turn_off_reuse ? (char *)&off : (char *)&on, sizeof(on)))
 	{
-		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR on fails on address %s: %m",
-			stoa(addr));
+		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR %s on fails on address %s: %m",
+			turn_off_reuse ? "off" : "on", stoa(addr));
+
+		closesocket(fd);
+
+		return INVALID_SOCKET;
 	}
 
 	/*
