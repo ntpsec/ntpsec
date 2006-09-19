@@ -1835,6 +1835,7 @@ io_setbclient(void)
 			nif++;
 			netsyslog(LOG_INFO,"io_setbclient: Opened broadcast client on interface #%d %s, socket: %d",
 				  interf->ifnum, interf->name, fd);
+			interf->addr_refid = addr2refid(&interf->sin);
 		}
 	}
 	set_reuseaddr(0);
