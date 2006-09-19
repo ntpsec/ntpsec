@@ -308,7 +308,7 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 		namelen = min(strlen(hp->h_name), hostlen - 1);
 		if (namelen > 0) {
 			strncpy(host, hp->h_name, namelen);
-			host[namelen - 1] = '\0';
+			host[namelen] = '\0';
 		}
 	}
 	return (0);
