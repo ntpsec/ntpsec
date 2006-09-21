@@ -1,3 +1,4 @@
+* [Bug 689] Deprecate HEATH GC-1001 II; the driver never worked.
 * [Bug 342] Deprecate broken TRAK refclock driver
 * [Bug 340] Deprecate broken MSF EES refclock driver
 * Support separate PPS devices for PARSE refclocks
