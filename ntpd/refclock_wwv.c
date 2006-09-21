@@ -894,9 +894,9 @@ wwv_poll(
  * wwv_rf - process signals and demodulate to baseband
  *
  * This routine grooms and filters decompanded raw audio samples. The
- * output signals include the 100-Hz baseband data signal in quadrature
- * form, plus the epoch index of the second sync signal and the second
- * index of the minute sync signal.
+ * output signal is the 100-Hz filtered baseband data signal in
+ * quadrature phase. The routine also determines the minute synch epoch,
+ * as well as certain signal maxima, minima and related values.
  *
  * There are two 1-s ramps used by this program. Both count the 8000
  * logical clock samples spanning exactly one second. The epoch ramp
@@ -917,8 +917,8 @@ wwv_poll(
  * matched filters for the data signal (170 ms at 100 Hz), WWV minute
  * sync signal (800 ms at 1000 Hz) and WWVH minute sync signal (800 ms
  * at 1200 Hz). Two additional matched filters are switched in
- * as required for the WWV second sync signal (5 ms at 1000 Hz) and
- * WWVH second sync signal (5 ms at 1200 Hz).
+ * as required for the WWV second sync signal (5 cycles at 1000 Hz) and
+ * WWVH second sync signal (6 cycles at 1200 Hz).
  */
 static void
 wwv_rf(
@@ -955,7 +955,7 @@ wwv_rf(
 	static double csiamp;	/* wwv I tick amplitude */
 	static double csqamp;	/* wwv Q tick amplitude */
 
-	static int hsinptr;	/* wwvh channels phase */
+	static int hsinptr;	/* wwvh channel phase */
 	static double hibuf[SYNSIZ]; /* wwvh I channel delay line */
 	static double hqbuf[SYNSIZ]; /* wwvh Q channel delay line */
 	static double hiamp;	/* wwvh I channel amplitude */
@@ -966,9 +966,9 @@ wwv_rf(
 	static double hsiamp;	/* wwvh I tick amplitude */
 	static double hsqamp;	/* wwvh Q tick amplitude */
 
-	static double epobuf[SECOND]; /* epoch sync comb filter */
-	static double epomax, nxtmax; /* epoch sync amplitude buffer */
-	static int epopos;	/* epoch sync position buffer */
+	static double epobuf[SECOND]; /* second sync comb filter */
+	static double epomax, nxtmax; /* second sync amplitude buffer */
+	static int epopos;	/* epoch second sync position buffer */
 
 	static int iniflg;	/* initialization flag */
 	int	pdelay;		/* propagation delay (samples) */
@@ -1198,6 +1198,12 @@ wwv_rf(
 	 * sync epoch is zero. Watch out for the first second; if
 	 * already synchronized to the second, the buffered sync epoch
 	 * must be set.
+	 *
+	 * Note the guard interval is 200 ms; if for some reason the
+	 * clock drifts more than that, it might wind up in the wrong
+	 * second. If the maximum frequency error is not more than about
+	 * 1 PPM, the clock can go as much as two days while still in
+	 * the same second.
 	 */
 	if (up->status & MSYNC) {
 		wwv_epoch(peer);
@@ -1243,7 +1249,7 @@ wwv_rf(
 	 * propagation delay. Once each second look for second sync. If
 	 * not in minute sync, fiddle the codec gain. Note the SNR is
 	 * computed from the maximum sample and the envelope of the
-	 * sample 10 ms before it, so if we slip more than a cycle the
+	 * sample 6 ms before it, so if we slip more than a cycle the
 	 * SNR should plummet. The signal is scaled to produce unit
 	 * energy at the maximum value.
 	 */
@@ -1288,7 +1294,7 @@ wwv_rf(
  * filter.
  *
  * Students of radar receiver technology will discover this algorithm
- * amounts to a range gate discriminator. A valid pulse must have peak
+ * amounts to a range-gate discriminator. A valid pulse must have peak
  * amplitude at least QTHR (2500) and SNR at least QSNR (20) dB and the
  * difference between the current and previous epoch must be less than
  * AWND (20 ms). Note that the discriminator peak occurs about 800 ms
@@ -1375,7 +1381,7 @@ wwv_qrz(
  * wwv_endpoc - identify and acquire second sync pulse
  *
  * This routine is called at the end of the second sync interval. It
- * determines the second sync epoch position within the interval and
+ * determines the second sync epoch position within the second and
  * disciplines the sample clock using a frequency-lock loop (FLL).
  *
  * Second sync is determined in the RF input routine as the maximum
@@ -1463,7 +1469,8 @@ wwv_endpoc(
 	 * (10) s, the minute is synchronized and the interval since the
 	 * last epoch  is not greater than the averaging interval. Thus,
 	 * after a long absence, the program will wait a full averaging
-	 * interval while the integrator charges up.
+	 * interval while the comb filter charges up and noise
+	 * dissapates..
 	 */
 	tmp2 = (tepoch - xepoch) % SECOND;
 	if (tmp2 == 0) {
@@ -1611,9 +1618,7 @@ wwv_endpoc(
  * sync pulses. Therefore, the data subcarrier reference phase is
  * disciplined using the hardlimited quadrature-phase signal sampled at
  * the same time as the in-phase signal. The phase tracking loop uses
- * phase adjustments of plus-minus one sample (125 us). Since this might
- * result in a phase slip of one cycle, the matched filter peak is the
- * maximum at the epoch and one cycle ahead or behind it. 
+ * phase adjustments of plus-minus one sample (125 us). 
  */
 static void
 wwv_epoch(
@@ -1644,11 +1649,25 @@ wwv_epoch(
 		up->repoch = up->yepoch;
 
 	/*
-	 * Sample the I and Q data channels at epoch 200 ms. Use the
-	 * signal energy as the peak to compute the SNR. Use the Q
-	 * sample to adjust the 100-Hz reference oscillator phase.
+	 * Use the signal amplitude at epoch 15 ms as the noise floor.
+	 * This gives a guard time of +-15 ms from the beginning of the
+	 * second until the second pulse rises at 30 ms. There is a
+	 * compromise here; we want to delay the sample as long as
+	 * possible to give the radio time to change frequency and the
+	 * AGC to stabilize, but as early as possible if the second
+	 * epoch is not exact.
+	 */
+	if (up->rphase == 15 * MS)
+		sigmin = sigzer = sigone = up->irig;
+
+	/*
+	 * Latch the data signal at 200 ms. Keep this around until the
+	 * end of the second. Use the signal energy as the peak to
+	 * compute the SNR. Use the Q sample to adjust the 100-Hz
+	 * reference oscillator phase.
 	 */
 	if (up->rphase == 200 * MS) {
+		sigzer = up->irig;
 		engmax = sqrt(up->irig * up->irig + up->qrig *
 		    up->qrig);
 		up->datpha = up->qrig / up->avgint;
@@ -1663,23 +1682,6 @@ wwv_epoch(
 		}
 	}
 
-	/*
-	 * Use the signal amplitude at epoch 15 ms as the noise floor.
-	 * This gives a guard time of +-15 ms from the beginning of the
-	 * second until the pulse rises at 30 ms. There is a compromise
-	 * here; we want to delay the sample as long as possible to give
-	 * the radio time to change frequency and the AGC to stabilize,
-	 * but as early as possible if the second epoch is not exact.
-	 */
-	if (up->rphase == 15 * MS)
-		sigmin = sigzer = sigone = up->irig;
-
-	/*
-	 * Latch the data signal at 200 ms. Keep this around until the
-	 * end of the second.
-	 */
-	else if (up->rphase == 200 * MS) 
-		sigzer = up->irig;
 
 	/*
 	 * Latch the data signal at 500 ms. Keep this around until the
@@ -1824,8 +1826,8 @@ wwv_rsec(
 	/*
 	 * At the end of second 1 use the minute sync amplitude latched
 	 * at 800 ms as the noise to calculate the SNR. If the minute
-	 * sync pulse and SNR are above threshold and the data pulse
-	 * amplitude and SNR are above thresold, shift a 1 into the
+	 * sync pulse and SNR are above thresholds and the data pulse
+	 * amplitude and SNR are above thresolds, shift a 1 into the
 	 * station reachability register; otherwise, shift a 0. The
 	 * number of 1 bits in the last six intervals is a component of
 	 * the channel metric computed by the wwv_metric() routine.
@@ -2002,7 +2004,11 @@ wwv_rsec(
 		if (up->fd_icom > 0) {
 			up->schan = (up->schan + 1) % NCHAN;
 			wwv_qsy(peer, up->schan);
+		} else {
+			up->mitig[up->achan].gain = up->gain;
 		}
+#else
+		up->mitig[up->achan].gain = up->gain;
 #endif /* ICOM */
 		break;
 
@@ -2169,7 +2175,7 @@ wwv_corr4(
 	/*
 	 * The current maximum likelihood digit is compared to the last
 	 * maximum likelihood digit. If different, the compare counter
-	 * and maximum likelihood digit are reset. When the compare
+	 * and maximum likelihood digit are reset.  When the compare
 	 * counter reaches the BCMP threshold (3), the digit is assumed
 	 * correct. When the compare counter of all nine digits have
 	 * reached threshold, the clock is assumed correct.
@@ -2179,6 +2185,9 @@ wwv_corr4(
 	 * not considered correct until all nine clock digits have
 	 * reached threshold. This is intended as eye candy, but avoids
 	 * mistakes when the signal is low and the SNR is very marginal.
+	 * once correctly set, the maximum likelihood digit is ignored
+	 * on the assumption the clock will always be correct unless for
+	 * some reason it drifts to a different second.
 	 */
 	vp->mldigit = mldigit;
 	if (vp->digprb < BTHR || vp->digsnr < BSNR) {
@@ -2189,7 +2198,8 @@ wwv_corr4(
 		if (vp->digit != mldigit) {
 			vp->count = 0;
 			up->alarm |= CMPERR;
-			vp->digit = mldigit;
+			if (!(up->status & INSYNC))
+				vp->digit = mldigit;
 		} else {
 			if (vp->count < BCMP)
 				vp->count++;
