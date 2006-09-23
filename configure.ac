@@ -1458,6 +1458,19 @@ case "$ac_cv_os_routeupdates" in
  yes) AC_DEFINE(OS_MISSES_SPECIFIC_ROUTE_UPDATES, 1, [need to recreate sockets on changed routing?]) ;;
 esac
 
+AC_CACHE_CHECK(if the OS needs the wildcard socket set to REUSEADDR for binding interface addresses, ac_cv_os_wildcardreuse,
+[[case "$host" in
+ *-*-linux*)
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+ac_cv_os_wildcardreuse=$ans]])
+case "$ac_cv_os_wildcardreuse" in
+ yes) AC_DEFINE(OS_NEEDS_REUSEADDR_FOR_IFADDRBIND, 1, [wildcard socket needs to set REUSEADDR when binding to interface addresses]) ;;
+esac
+
 ntp_warning='GRONK'
 AC_MSG_CHECKING(if we'll use clock_settime or settimeofday or stime)
 case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
