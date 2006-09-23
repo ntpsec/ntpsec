@@ -1,6 +1,6 @@
 
 /*
- *  $Id: autoopts.c,v 4.22 2006/07/15 22:10:21 bkorb Exp $
+ *  $Id: autoopts.c,v 4.14 2006/09/13 14:31:07 bkorb Exp $
  *  Time-stamp:      "2006-09-10 14:42:45 bkorb"
  *
  *  This file contains all of the routines that must be linked into

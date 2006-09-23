@@ -7,7 +7,7 @@
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.12 2006/09/07 14:46:34 bkorb Exp $
+ * $Id: compat.h,v 4.12 2006/09/16 19:58:55 bkorb Exp $
  */
 #ifndef COMPAT_H_GUARD
 #define COMPAT_H_GUARD 1
@@ -237,17 +237,17 @@
 
 #ifndef HAVE_INT32_T
 # if SIZEOF_INT == 4
-	typedef signed int      int32_t;
+        typedef signed int      int32_t;
 # elif SIZEOF_LONG == 4
-	typedef signed long     int32_t;
+        typedef signed long     int32_t;
 # endif
 #endif
 
 #ifndef HAVE_UINT32_T
 # if SIZEOF_INT == 4
-	typedef unsigned int    uint32_t;
+        typedef unsigned int    uint32_t;
 # elif SIZEOF_LONG == 4
-	typedef unsigned long   uint32_t;
+        typedef unsigned long   uint32_t;
 # else
 #   error Cannot create a uint32_t type.
     Choke Me.

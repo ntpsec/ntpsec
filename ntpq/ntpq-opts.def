@@ -54,7 +54,7 @@ flag = {
     name      = peers;
     value     = p;
     descrip   = "Print a list of the peers";
-    flags-cant = command;
+    flags-cant = interactive;
     doc = <<-  _EndOfDoc_
 	Print a list of the peers known to the server as well as a summary
 	of their state. This is equivalent to the 'peers' interactive command.
