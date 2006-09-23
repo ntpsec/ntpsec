@@ -1,9 +1,15 @@
+* WWV refclock improvements from Dave Mills.
+* [Bug 689] Deprecate HEATH GC-1001 II; the driver never worked.
 * [Bug 342] Deprecate broken TRAK refclock driver
 * [Bug 340] Deprecate broken MSF EES refclock driver
 * Support separate PPS devices for PARSE refclocks
 * [Bug 637, 51?] Dynamic interface scanning can now be done
 * Options processing now uses GNU AutoGen
 
+(4.2.2p4) Released by Harlan Stenn <stenn@ntp.isc.org>
+ * [Bug 710] compat getnameinfo() has off-by-one error
+ * [Bug 690] Buffer overflow in Windows when doing DNS Lookups
+
 (4.2.2p3) Released by Harlan Stenn <stenn@ntp.isc.org>
  * Make the ChangeLog file cleaner and easier to read
  * [Bug 601] ntpq's decodeint uses an extra level of indirection

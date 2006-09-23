@@ -1,14 +1,14 @@
 /*
- * $Id: text_mmap.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * $Id: text_mmap.c,v 4.12 2006/08/22 16:06:36 bkorb Exp $
  *
- * Time-stamp:      "2006-06-24 10:54:43 bkorb"
+ * Time-stamp:      "2006-09-10 14:50:04 bkorb"
  */
 
-#ifndef MAP_ANONYMOUS 
-#  ifdef   MAP_ANON 
-#  define  MAP_ANONYMOUS   MAP_ANON 
-#  endif 
-#endif 
+#ifndef MAP_ANONYMOUS
+#  ifdef   MAP_ANON
+#  define  MAP_ANONYMOUS   MAP_ANON
+#  endif
+#endif
 
 /*
  *  Some weird systems require that a specifically invalid FD number
@@ -183,9 +183,8 @@ text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
             return pMI->txt_data;
 
         pMI->txt_errno = errno;
-#endif
 
-#if defined(HAVE_DEV_ZERO)
+#elif defined(HAVE_DEV_ZERO)
         pMI->txt_zero_fd = open( "/dev/zero", O_RDONLY );
 
         if (pMI->txt_zero_fd == AO_INVALID_FD) {
@@ -211,10 +210,6 @@ text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
 
     {
         void* p = AGALOC( pMI->txt_size+1, "file text" );
-        if (pMI->txt_data == NULL) {
-            pMI->txt_errno = ENOMEM;
-            goto fail_return;
-        }
         memcpy( p, pMI->txt_data, pMI->txt_size );
         ((char*)p)[pMI->txt_size] = NUL;
         munmap(pMI->txt_data, pMI->txt_size );

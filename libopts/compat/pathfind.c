@@ -5,10 +5,10 @@
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2006/07/15 22:10:21 $
+ * Last Modified:    $Date: 2006/08/22 16:06:36 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.6 2006/07/15 22:10:21 bkorb Exp $
+ * $Id: pathfind.c,v 4.7 2006/08/22 16:06:36 bkorb Exp $
  */
 
 /* Code: */
@@ -148,7 +148,7 @@ pathfind( const char*  path,
                 break;
             }
         }
-        
+
         closedir( dirP );
 
         if (pathName != NULL)
@@ -168,7 +168,7 @@ make_absolute( const char *string, const char *dot_path )
 {
     char *result;
     int result_len;
-  
+
     if (!dot_path || *string == '/') {
         result = strdup( string );
     } else {
@@ -179,7 +179,7 @@ make_absolute( const char *string, const char *dot_path )
             if (result[result_len - 1] != '/') {
                 result[result_len++] = '/';
                 result[result_len] = '\0';
-            }    
+            }
         } else {
             result = malloc( 3 + strlen( string ) );
             result[0] = '.'; result[1] = '/'; result[2] = '\0';

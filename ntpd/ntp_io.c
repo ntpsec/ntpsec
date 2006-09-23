@@ -801,6 +801,18 @@ remove_interface(struct interface *interface)
 		      RESM_NTPONLY|RESM_INTERFACE, RES_IGNORE);
 }
 
+static void
+list_if_listening(struct interface *interface, u_short port)
+{
+	msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
+		interface->ifnum,
+		interface->name,
+		stoa((&interface->sin)),
+		ntohs( (u_short) port),
+		(interface->ignore_packets == ISC_FALSE) ?
+		"Enabled": "Disabled");
+}
+
 void
 create_wildcards(u_short port) {
 	isc_boolean_t okipv4 = ISC_TRUE;
@@ -833,11 +845,18 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&interface->bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
-		wildipv4 = interface;
-		any_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv4 = interface;
+			any_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
+		}
 	}
 
 #ifdef INCLUDE_IPV6_SUPPORT
@@ -861,11 +880,18 @@ create_wildcards(u_short port) {
 		interface->ignore_packets = ISC_TRUE;
 
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 interface->flags, 1, interface);
 
-		wildipv6 = interface;
-		any6_interface = interface;
-		add_interface(interface);
+		if (interface->fd != INVALID_SOCKET) {
+			wildipv6 = interface;
+			any6_interface = interface;
+			add_interface(interface);
+			list_if_listening(interface, port);
+		} else {
+			msyslog(LOG_ERR, "unable to bind to wildcard socket address %s - another process may be running - EXITING",
+				stoa((&interface->sin)));
+			exit(1);
+		}
 	}
 #endif
 }
@@ -1343,13 +1369,7 @@ create_interface(
 				 interface->flags, 0, interface);
 
 	if (interface->fd != INVALID_SOCKET)
-	  msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
-		  interface->ifnum,
-		  interface->name,
-		  stoa((&interface->sin)),
-		  ntohs( (u_short) port),
-		  (interface->ignore_packets == ISC_FALSE) ?
-		  "Enabled": "Disabled");
+		list_if_listening(interface, port);
 
 	if ((interface->flags & INT_BROADCAST) &&
 	    interface->bfd != INVALID_SOCKET)
@@ -1815,6 +1835,7 @@ io_setbclient(void)
 			nif++;
 			netsyslog(LOG_INFO,"io_setbclient: Opened broadcast client on interface #%d %s, socket: %d",
 				  interf->ifnum, interf->name, fd);
+			interf->addr_refid = addr2refid(&interf->sin);
 		}
 	}
 	set_reuseaddr(0);
@@ -2194,10 +2215,14 @@ open_socket(
 	 * number on each interface
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       (char *)&on, sizeof(on)))
+		       turn_off_reuse ? (char *)&off : (char *)&on, sizeof(on)))
 	{
-		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR on fails on address %s: %m",
-			stoa(addr));
+		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR %s on fails on address %s: %m",
+			turn_off_reuse ? "off" : "on", stoa(addr));
+
+		closesocket(fd);
+
+		return INVALID_SOCKET;
 	}
 
 	/*
