@@ -544,7 +544,8 @@ local_clock(
 	 * lead to overflow problems. This might occur if some misguided
 	 * lad set the step threshold to something ridiculous.
 	 */
-	if (pll_control && kern_enable && clock_max < 0.5) {
+	if (pll_control && kern_enable && clock_max < 0.5 &&
+	    clock_max > 0) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
