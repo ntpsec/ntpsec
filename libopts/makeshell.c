@@ -1,6 +1,6 @@
 
 /*
- *  $Id: makeshell.c,v 4.14 2006/07/27 02:51:47 bkorb Exp $
+ *  $Id: makeshell.c,v 4.10 2006/07/27 02:59:08 bkorb Exp $
  * Time-stamp:      "2006-07-24 21:30:51 bkorb"
  *
  *  This module will interpret the options set in the tOptions

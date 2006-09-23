@@ -7,7 +7,7 @@
 #  include <stdarg.h>
 #  ifndef   VA_START
 #    define VA_START(a, f)  va_start(a, f)
-#    define VA_END(a)	    va_end(a)
+#    define VA_END(a)       va_end(a)
 #  endif /* VA_START */
 #  define SNV_USING_STDARG_H
 
@@ -15,7 +15,7 @@
 #  include <varargs.h>
 #  ifndef   VA_START
 #    define VA_START(a, f) va_start(a)
-#    define VA_END(a)	 va_end(a)
+#    define VA_END(a)    va_end(a)
 #  endif /* VA_START */
 #  undef  SNV_USING_STDARG_H
 
