@@ -184,7 +184,6 @@ getCmdOpts(
 
 	if (HAVE_OPT( UPDATEINTERVAL )) {
 		long val = OPT_VALUE_UPDATEINTERVAL;
-		extern int interface_interval;
 			  
 		if ((val >= 60) || (val == 0))
 			interface_interval = val;

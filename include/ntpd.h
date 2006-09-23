@@ -70,6 +70,8 @@ typedef struct interface_info {
 
 typedef void (*interface_receiver_t)(void *, interface_info_t *);
 
+extern  volatile int disable_dynamic_updates;
+
 extern  void    interface_enumerate P((interface_receiver_t, void *));
 extern	struct interface *findinterface P((struct sockaddr_storage *));
 extern  struct interface *findbcastinter P((struct sockaddr_storage *));
@@ -220,6 +222,7 @@ extern	void	reinit_timer	P((void));
 extern	void	timer		P((void));
 extern	void	timer_clr_stats P((void));
 extern  void    timer_interfacetimeout P((u_long));
+extern  volatile int interface_interval;
 
 #ifdef OPENSSL
 extern	char	*sys_hostname;

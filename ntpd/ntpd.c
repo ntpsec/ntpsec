@@ -930,6 +930,18 @@ getgroup:
 			exit (-1);
 		}
 	
+		/*
+		 * for now assume that the privilege to bind to privileged ports
+		 * is associated with running with uid 0 - should be refined on
+		 * ports that allow binding to NTP_PORT with uid != 0
+		 */
+		disable_dynamic_updates |= (sw_uid != 0);  /* also notifies routing message listener */
+
+		if (disable_dynamic_updates && interface_interval) {
+			interface_interval = 0;
+			msyslog(LOG_INFO, "running in unprivileged mode disables dynamic interface tracking");
+		}
+
 #ifdef HAVE_LINUX_CAPABILITIES
 		do {
 			/*  We may be running under non-root uid now, but we still hold full root privileges!

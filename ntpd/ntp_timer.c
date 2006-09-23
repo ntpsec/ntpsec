@@ -34,7 +34,7 @@
  * procedure to do cleanup and print a message.
  */
 
-volatile u_long interface_interval = 300;     /* update interface every 5 minutes as default */
+volatile int interface_interval = 300;     /* update interface every 5 minutes as default */
 	  
 /*
  * Alarm flag.	The mainline code imports this.

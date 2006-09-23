@@ -132,6 +132,8 @@ struct interface *loopback_interface;	/* loopback ipv4 interface */
 
 int ninterfaces;			/* Total number of interfaces */
 
+volatile int disable_dynamic_updates;   /* when set to != 0 dynamic updates won't happen */
+
 #ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
@@ -1034,9 +1036,11 @@ refresh_interface(struct interface * interface)
 void
 interface_update(interface_receiver_t receiver, void *data)
 {
-  	BLOCKIO();
-	update_interfaces(htons(NTP_PORT), receiver, data);
-  	UNBLOCKIO();
+	if (!disable_dynamic_updates) {
+		BLOCKIO();
+		update_interfaces(htons(NTP_PORT), receiver, data);
+		UNBLOCKIO();
+	}
 }
 
 /*
@@ -1060,6 +1064,7 @@ is_wildcard_addr(struct sockaddr_storage *sas)
 	return 0;
 }
 
+#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
 /*
  * enable/disable re-use of wildcard address socket
  */
@@ -1100,6 +1105,7 @@ set_wildcard_reuse(int family, int on)
 				  &any_interface->sin : &any6_interface->sin)));
 	}
 }
+#endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */
 
 /*
  * update_interface strategy
@@ -1115,7 +1121,7 @@ set_wildcard_reuse(int family, int on)
  *     attempt to create a new interface entry
  *
  * Phase 2:
- * forall currently known interfaces
+ * forall currently known non MCAST and WILDCARD interfaces
  *   if interface does not match configuration phase (not seen in phase 1):
  *     remove interface from known interface list
  *     forall peers associated with this interface
@@ -1996,6 +2002,7 @@ io_multicast_add(
 						htonl(~(u_int32)0);
 		DPRINT_INTERFACE(2, (interface, "multicast add ", "\n"));
 		add_interface(interface);
+		list_if_listening(interface, NTP_PORT);
 	}
 	else
 	{
@@ -3686,6 +3693,16 @@ process_routing_msgs(struct asyncio_reader *reader)
 
 	int cnt;
 	
+	if (disable_dynamic_updates) {
+		/*
+		 * discard ourselves if we are not need any more
+		 * usually happens when running unprivileged
+		 */
+		remove_asyncio_reader(reader);
+		delete_asyncio_reader(reader);
+		return;
+	}
+
 	cnt = read(reader->fd, buffer, sizeof(buffer));
 	
 	if (cnt < 0) {
@@ -3776,7 +3793,7 @@ init_async_notifications()
 		reader->fd = fd;
 		reader->receiver = process_routing_msgs;
 		
-		add_asyncio_reader(reader, FD_TYPE_FILE);
+		add_asyncio_reader(reader, FD_TYPE_SOCKET);
 		msyslog(LOG_INFO, "Listening on routing socket on fd #%d for interface updates", fd);
 	} else {
 		msyslog(LOG_ERR, "unable to open routing socket (%m) - using polled interface update");
