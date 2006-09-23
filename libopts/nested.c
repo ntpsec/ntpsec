@@ -1,6 +1,6 @@
 
 /*
- *  $Id: nested.c,v 4.9 2006/03/25 19:23:28 bkorb Exp $
+ *  $Id: nested.c,v 4.5 2006/09/20 04:27:44 bkorb Exp $
  *  Time-stamp:      "2005-07-27 10:10:28 bkorb"
  *
  *   Automated Options Nested Values module.
@@ -511,10 +511,10 @@ static void
 unloadNestedArglist( tArgList* pAL )
 {
     int ct = pAL->useCt;
-    tOptionValue** ppNV = (tOptionValue**)(pAL->apzArgs);
+    tCC** ppNV = pAL->apzArgs;
 
     while (ct-- > 0) {
-        tOptionValue* pNV = *(ppNV++);
+        tOptionValue* pNV = (tOptionValue*)*(ppNV++);
         if (pNV->valType == OPARG_TYPE_HIERARCHY)
             unloadNestedArglist( pNV->v.nestVal );
         free( pNV );

@@ -1,5 +1,5 @@
 /*
- *  $Id: configfile.c,v 4.23 2006/07/01 21:57:23 bkorb Exp $
+ *  $Id: configfile.c,v 1.12 2006/09/20 04:27:44 bkorb Exp $
  *  Time-stamp:      "2006-09-10 13:57:10 bkorb"
  *
  *  configuration/rc/ini file handling.
@@ -205,8 +205,7 @@ optionFindValue( const tOptDesc* pOptDesc,
     else do {
         tArgList* pAL = pOptDesc->optCookie;
         int ct = pAL->useCt;
-        const tOptionValue** ppOV =
-            (const tOptionValue**)(void*)&(pAL->apzArgs);
+        tCC** ppOV = pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -214,12 +213,12 @@ optionFindValue( const tOptDesc* pOptDesc,
         }
 
         if (pzName == NULL) {
-            pRes = *ppOV;
+            pRes = (tOptionValue*)*ppOV;
             break;
         }
 
         while (--ct >= 0) {
-            const tOptionValue* pOV = *(ppOV++);
+            const tOptionValue* pOV = (tOptionValue*)*(ppOV++);
             const tOptionValue* pRV = optionGetValue( pOV, pzName );
 
             if (pRV == NULL)
@@ -283,7 +282,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
     else do {
         tArgList* pAL = pOptDesc->optCookie;
         int ct = pAL->useCt;
-        tOptionValue** ppOV = (tOptionValue**)(void*)&(pAL->apzArgs);
+        tCC** ppOV = pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -291,7 +290,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
         }
 
         while (--ct >= 0) {
-            tOptionValue* pOV = *(ppOV++);
+            tOptionValue* pOV = (tOptionValue*)*(ppOV++);
             if (foundOldVal) {
                 pRes = pOV;
                 break;
@@ -346,14 +345,14 @@ optionGetValue( const tOptionValue* pOld, const char* pzValName )
 
     if (pAL->useCt > 0) {
         int ct = pAL->useCt;
-        tOptionValue** papOV = (tOptionValue**)(pAL->apzArgs);
+        tCC** papOV = pAL->apzArgs;
 
         if (pzValName == NULL) {
-            pRes = *papOV;
+            pRes = (tOptionValue*)*papOV;
         }
 
         else do {
-            tOptionValue* pOV = *(papOV++);
+            tOptionValue* pOV = (tOptionValue*)*(papOV++);
             if (strcmp( pOV->pzName, pzValName ) == 0) {
                 pRes = pOV;
                 break;
@@ -407,17 +406,17 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
     pAL = pOVList->v.nestVal;
     {
         int   ct   = pAL->useCt;
-        tOptionValue** papNV = (tOptionValue**)(pAL->apzArgs);
+        tCC** papNV = pAL->apzArgs;
 
         while (ct-- > 0) {
-            tOptionValue* pNV = *(papNV++);
+            tOptionValue* pNV = (tOptionValue*)*(papNV++);
             if (pNV == pOldOV) {
                 if (ct == 0) {
                     err = ENOENT;
 
                 } else {
                     err  = 0;
-                    pRes = *papNV;
+                    pRes = (tOptionValue*)*papNV;
                 }
                 break;
             }

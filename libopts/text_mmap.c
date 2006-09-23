@@ -1,5 +1,5 @@
 /*
- * $Id: text_mmap.c,v 4.12 2006/08/22 16:06:36 bkorb Exp $
+ * $Id: text_mmap.c,v 4.12 2006/09/16 19:58:54 bkorb Exp $
  *
  * Time-stamp:      "2006-09-10 14:50:04 bkorb"
  */
@@ -19,7 +19,8 @@
 #define AO_INVALID_FD  -1
 
 #define FILE_WRITABLE(_prt,_flg) \
-	((_prt & PROT_WRITE) && ((_flg & (MAP_SHARED|MAP_PRIVATE)) == MAP_SHARED))
+        (   (_prt & PROT_WRITE) \
+         && ((_flg & (MAP_SHARED|MAP_PRIVATE)) == MAP_SHARED))
 #define MAP_FAILED_PTR ((void*)MAP_FAILED)
 
 /*=export_func  text_mmap
