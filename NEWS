@@ -1,3 +1,4 @@
+* [Bug 714] ntpq -p should conflict with -i, not -c.
 * WWV refclock improvements from Dave Mills.
 * [Bug 689] Deprecate HEATH GC-1001 II; the driver never worked.
 * [Bug 342] Deprecate broken TRAK refclock driver
