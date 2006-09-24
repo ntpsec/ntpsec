@@ -1,5 +1,5 @@
 /*
- * $Id: text_mmap.c,v 4.12 2006/09/16 19:58:54 bkorb Exp $
+ * $Id: text_mmap.c,v 4.15 2006/09/23 00:09:48 bkorb Exp $
  *
  * Time-stamp:      "2006-09-10 14:50:04 bkorb"
  */
@@ -28,7 +28,7 @@
  *
  * what:  map a text file with terminating NUL
  *
- * arg:   const char*,  pzFile,  name of the file to map
+ * arg:   char const*,  pzFile,  name of the file to map
  * arg:   int,          prot,    mmap protections (see mmap(2))
  * arg:   int,          flags,   mmap flags (see mmap(2))
  * arg:   tmap_info_t*, mapinfo, returned info about the mapping
@@ -77,7 +77,7 @@
  * text_munmap( &mi );
 =*/
 void*
-text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
+text_mmap( char const* pzFile, int prot, int flags, tmap_info_t* pMI )
 {
     memset( pMI, 0, sizeof(*pMI) );
 #ifdef HAVE_MMAP

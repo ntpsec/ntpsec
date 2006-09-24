@@ -1,6 +1,6 @@
 
 /*
- *  $Id: cook.c,v 4.4 2006/06/24 23:36:07 bkorb Exp $
+ *  $Id: cook.c,v 4.7 2006/09/23 00:12:48 bkorb Exp $
  *  Time-stamp:      "2006-06-24 11:29:58 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
@@ -58,7 +58,7 @@
  * private:
  *
  * what:  escape-process a string fragment
- * arg:   + const char* + pzScan  + points to character after the escape +
+ * arg:   + char const* + pzScan  + points to character after the escape +
  * arg:   + char*       + pRes    + Where to put the result byte +
  * arg:   + u_int       + nl_ch   + replacement char if scanned char is \n +
  *
@@ -81,7 +81,7 @@
  * err:  @code{NULL} is returned if the string(s) is/are mal-formed.
 =*/
 unsigned int
-ao_string_cook_escape_char( const char* pzIn, char* pRes, u_int nl )
+ao_string_cook_escape_char( char const* pzIn, char* pRes, u_int nl )
 {
     unsigned int  res = 1;
 

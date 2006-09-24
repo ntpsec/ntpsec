@@ -2,7 +2,7 @@
 /*
  *  stack.c
  *  $Id: stack.c,v 4.10 2006/07/14 04:20:17 bkorb Exp $
- *  Time-stamp:      "2006-07-13 21:11:29 bkorb"
+ *  Time-stamp:      "2006-09-22 18:13:19 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
@@ -89,7 +89,7 @@ optionUnstackArg(
         regex_t   re;
         int       i, ct, dIdx;
 
-        if (regcomp( &re, pOptDesc->pzLastArg, REG_NOSUB ) != 0)
+        if (regcomp( &re, pOptDesc->optArg.argString, REG_NOSUB ) != 0)
             return;
 
         /*
@@ -150,7 +150,7 @@ optionUnstackArg(
             if (pzEq != NULL)
                 *pzEq = NUL;
 
-            if (strcmp( pzSrc, pOptDesc->pzLastArg ) == 0) {
+            if (strcmp( pzSrc, pOptDesc->optArg.argString ) == 0) {
                 /*
                  *  Remove this entry by reducing the in-use count
                  *  and *not* putting the string pointer back into
@@ -250,10 +250,10 @@ optionStackArg(
     tOptions*  pOpts,
     tOptDesc*  pOD )
 {
-    if (pOD->pzLastArg == NULL)
+    if (pOD->optArg.argString == NULL)
         return;
 
-    addArgListEntry( &(pOD->optCookie), (void*)pOD->pzLastArg );
+    addArgListEntry( &(pOD->optCookie), (void*)pOD->optArg.argString );
 }
 /*
  * Local Variables:

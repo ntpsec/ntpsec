@@ -1,7 +1,7 @@
 
 /*
- *  $Id: nested.c,v 4.9 2006/03/25 19:23:28 bkorb Exp $
- *  Time-stamp:      "2005-07-27 10:10:28 bkorb"
+ *  $Id: nested.c,v 4.11 2006/09/23 00:12:48 bkorb Exp $
+ *  Time-stamp:      "2006-09-22 18:14:12 bkorb"
  *
  *   Automated Options Nested Values module.
  */
@@ -53,30 +53,30 @@
 static void
 removeBackslashes( char* pzSrc );
 
-static const char*
-scanQuotedString( const char* pzTxt );
+static char const*
+scanQuotedString( char const* pzTxt );
 
 static tOptionValue*
-addStringValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen );
+addStringValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen );
 
 static tOptionValue*
-addBoolValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen );
+addBoolValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen );
 
 static tOptionValue*
-addNumberValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen );
+addNumberValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen );
 
 static tOptionValue*
-addNestedValue( void** pp, const char* pzName, size_t nameLen,
+addNestedValue( void** pp, char const* pzName, size_t nameLen,
                 char* pzValue, size_t dataLen, tOptionLoadMode mode );
 
-static const char*
-scanNameEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode );
+static char const*
+scanNameEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode );
 
-static const char*
-scanXmlEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode );
+static char const*
+scanXmlEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode );
 
 static void
 unloadNestedArglist( tArgList* pAL );
@@ -115,8 +115,8 @@ removeBackslashes( char* pzSrc )
  *
  *  Find the end of a quoted string, skipping escaped quote characters.
  */
-static const char*
-scanQuotedString( const char* pzTxt )
+static char const*
+scanQuotedString( char const* pzTxt )
 {
     char q = *(pzTxt++); /* remember the type of quote */
 
@@ -154,8 +154,8 @@ scanQuotedString( const char* pzTxt )
  *  Associate a name with either a string or no value.
  */
 static tOptionValue*
-addStringValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen )
+addStringValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen )
 {
     tOptionValue* pNV;
     size_t sz = nameLen + dataLen + sizeof(*pNV);
@@ -188,8 +188,8 @@ addStringValue( void** pp, const char* pzName, size_t nameLen,
  *  Associate a name with either a string or no value.
  */
 static tOptionValue*
-addBoolValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen )
+addBoolValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen )
 {
     tOptionValue* pNV;
     size_t sz = nameLen + sizeof(*pNV) + 1;
@@ -228,8 +228,8 @@ addBoolValue( void** pp, const char* pzName, size_t nameLen,
  *  Associate a name with either a string or no value.
  */
 static tOptionValue*
-addNumberValue( void** pp, const char* pzName, size_t nameLen,
-                const char* pzValue, size_t dataLen )
+addNumberValue( void** pp, char const* pzName, size_t nameLen,
+                char const* pzValue, size_t dataLen )
 {
     tOptionValue* pNV;
     size_t sz = nameLen + sizeof(*pNV) + 1;
@@ -259,7 +259,7 @@ addNumberValue( void** pp, const char* pzName, size_t nameLen,
  *  Associate a name with either a string or no value.
  */
 static tOptionValue*
-addNestedValue( void** pp, const char* pzName, size_t nameLen,
+addNestedValue( void** pp, char const* pzName, size_t nameLen,
                 char* pzValue, size_t dataLen, tOptionLoadMode mode )
 {
     tOptionValue* pNV;
@@ -291,12 +291,12 @@ addNestedValue( void** pp, const char* pzName, size_t nameLen,
  *  We have an entry that starts with a name.  Find the end of it, cook it
  *  (if called for) and create the name/value association.
  */
-static const char*
-scanNameEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode )
+static char const*
+scanNameEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
 {
     tOptionValue* pNV;
-    const char* pzScan = pzName+1;
-    const char* pzVal;
+    char const* pzScan = pzName+1;
+    char const* pzVal;
     size_t nameLen = 1;
     size_t dataLen = 0;
 
@@ -381,12 +381,12 @@ scanNameEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode )
  *  directive.  If it is something else, then whatever it is we are looking
  *  at is bogus.  Returning NULL stops processing.
  */
-static const char*
-scanXmlEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode )
+static char const*
+scanXmlEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
 {
     size_t nameLen = 1, valLen = 0;
-    const char*   pzScan = ++pzName;
-    const char*   pzVal;
+    char const*   pzScan = ++pzName;
+    char const*   pzVal;
     tOptionValue  valu;
     tOptionValue* pNewVal;
 
@@ -445,7 +445,7 @@ scanXmlEntry( const char* pzName, tOptionValue* pRes, tOptionLoadMode mode )
         char z[68];
         char* pzD = z;
         int  ct = nameLen;
-        const char* pzS = pzName;
+        char const* pzS = pzName;
 
         *(pzD++) = '<';
         *(pzD++) = '/';
@@ -511,10 +511,10 @@ static void
 unloadNestedArglist( tArgList* pAL )
 {
     int ct = pAL->useCt;
-    tOptionValue** ppNV = (tOptionValue**)(pAL->apzArgs);
+    tCC** ppNV = pAL->apzArgs;
 
     while (ct-- > 0) {
-        tOptionValue* pNV = *(ppNV++);
+        tOptionValue* pNV = (tOptionValue*)*(ppNV++);
         if (pNV->valType == OPARG_TYPE_HIERARCHY)
             unloadNestedArglist( pNV->v.nestVal );
         free( pNV );
@@ -594,8 +594,8 @@ sortNestedList( tArgList* pAL )
  * private:
  *
  * what:  parse a hierarchical option argument
- * arg:   + const char*     + pzTxt   + the text to scan +
- * arg:   + const char*     + pzName  + the name for the text +
+ * arg:   + char const*     + pzTxt   + the text to scan +
+ * arg:   + char const*     + pzName  + the name for the text +
  * arg:   + size_t          + nameLen + the length of "name"  +
  * arg:   + tOptionLoadMode + mode    + the value formation mode    +
  *
@@ -608,7 +608,7 @@ sortNestedList( tArgList* pAL )
  *  option that takes a hierarchical value.
 =*/
 tOptionValue*
-optionLoadNested( const char* pzTxt, const char* pzName, size_t nameLen,
+optionLoadNested( char const* pzTxt, char const* pzName, size_t nameLen,
                   tOptionLoadMode mode )
 {
     tOptionValue* pRes;
@@ -689,8 +689,8 @@ void
 optionNestedVal( tOptions* pOpts, tOptDesc* pOD )
 {
     tOptionValue* pOV =
-        optionLoadNested(pOD->pzLastArg, pOD->pz_Name, strlen( pOD->pz_Name ),
-                         OPTION_LOAD_UNCOOKED);
+        optionLoadNested(pOD->optArg.argString, pOD->pz_Name,
+                         strlen(pOD->pz_Name), OPTION_LOAD_UNCOOKED);
 
     if (pOV != NULL)
         addArgListEntry( &(pOD->optCookie), (void*)pOV );

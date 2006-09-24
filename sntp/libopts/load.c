@@ -1,6 +1,6 @@
 
 /*
- *  $Id: load.c,v 4.23 2006/07/01 21:57:23 bkorb Exp $
+ *  $Id: load.c,v 4.24 2006/09/23 00:12:48 bkorb Exp $
  *  Time-stamp:      "2006-07-01 12:43:03 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
@@ -77,8 +77,8 @@ assembleArgValue( char* pzTxt, tOptionLoadMode mode );
  * what:  translate and construct a path
  * arg:   + char*       + pzBuf      + The result buffer +
  * arg:   + int         + bufSize    + The size of this buffer +
- * arg:   + const char* + pzName     + The input name +
- * arg:   + const char* + pzProgPath + The full path of the current program +
+ * arg:   + char const* + pzName     + The input name +
+ * arg:   + char const* + pzProgPath + The full path of the current program +
  *
  * ret-type: ag_bool
  * ret-desc: AG_TRUE if the name was handled, otherwise AG_FALSE.
@@ -479,7 +479,7 @@ loadOptionLine(
  * what:  process a string for an option name and value
  *
  * arg:   tOptions*,   pOpts,  program options descriptor
- * arg:   const char*, pzLine, NUL-terminated text
+ * arg:   char const*, pzLine, NUL-terminated text
  *
  * doc:
  *

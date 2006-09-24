@@ -1,7 +1,7 @@
 
 /*
  *  $Id: boolean.c,v 4.6 2006/03/25 19:23:28 bkorb Exp $
- * Time-stamp:      "2005-02-14 08:24:12 bkorb"
+ * Time-stamp:      "2006-09-22 18:13:34 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -71,9 +71,9 @@ optionBooleanVal( tOptions* pOpts, tOptDesc* pOD )
     char* pz;
     ag_bool  res = AG_TRUE;
 
-    switch (*(pOD->pzLastArg)) {
+    switch (*(pOD->optArg.argString)) {
     case '0':
-        val = strtol( pOD->pzLastArg, &pz, 0 );
+        val = strtol( pOD->optArg.argString, &pz, 0 );
         if ((val != 0) || (*pz != NUL))
             break;
         /* FALLTHROUGH */
@@ -85,12 +85,12 @@ optionBooleanVal( tOptions* pOpts, tOptDesc* pOD )
         res = AG_FALSE;
         break;
     case '#':
-        if (pOD->pzLastArg[1] != 'f')
+        if (pOD->optArg.argString[1] != 'f')
             break;
         res = AG_FALSE;
     }
 
-    pOD->pzLastArg = (char*)res;
+    pOD->optArg.argBool = res;
 }
 /*
  * Local Variables:

@@ -3,7 +3,7 @@
  */
 
 static char *
-strdup( const char *s )
+strdup( char const *s )
 {
     char *cp;
 

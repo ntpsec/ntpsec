@@ -1,7 +1,7 @@
 
 /*
- *  save.c  $Id: save.c,v 4.8 2006/07/16 15:29:31 bkorb Exp $
- * Time-stamp:      "2006-07-16 08:13:22 bkorb"
+ *  save.c  $Id: save.c,v 4.17 2006/09/23 00:09:48 bkorb Exp $
+ * Time-stamp:      "2006-09-22 18:11:20 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -76,7 +76,7 @@ findDirName( tOptions* pOpts, int* p_free )
     if (pOpts->specOptIdx.save_opts == 0)
         return NULL;
 
-    pzDir = pOpts->pOptDesc[ pOpts->specOptIdx.save_opts ].pzLastArg;
+    pzDir = pOpts->pOptDesc[ pOpts->specOptIdx.save_opts ].optArg.argString;
     if ((pzDir != NULL) && (*pzDir != NUL))
         return pzDir;
 
@@ -370,7 +370,7 @@ optionSaveFile( tOptions* pOpts )
     }
 
     {
-        const char*  pz = pOpts->pzUsageTitle;
+        char const*  pz = pOpts->pzUsageTitle;
         fputs( "#  ", fp );
         do { fputc( *pz, fp ); } while (*(pz++) != '\n');
     }
@@ -437,7 +437,7 @@ optionSaveFile( tOptions* pOpts )
         switch (arg_state) {
         case 0:
         case OPARG_TYPE_NUMERIC:
-            printEntry( fp, p, p->pzLastArg );
+            printEntry( fp, p, p->optArg.argString );
             break;
 
         case OPARG_TYPE_STRING:
@@ -455,31 +455,33 @@ optionSaveFile( tOptions* pOpts )
                 while (uct-- > 0)
                     printEntry( fp, p, *(ppz++) );
             } else {
-                printEntry( fp, p, p->pzLastArg );
+                printEntry( fp, p, p->optArg.argString );
             }
             break;
 
         case OPARG_TYPE_ENUMERATION:
         case OPARG_TYPE_MEMBERSHIP:
         {
-            tCC* val = p->pzLastArg;
+            tCC* val = p->optArg.argString;
             /*
              *  This is a magic incantation that will convert the
              *  bit flag values back into a string suitable for printing.
              */
             (*(p->pOptProc))( (tOptions*)2UL, p );
-            printEntry( fp, p, p->pzLastArg );
-            if ((p->pzLastArg != NULL) && (arg_state != OPARG_TYPE_ENUMERATION))
+            printEntry( fp, p, p->optArg.argString );
+            if (  (p->optArg.argString != NULL)
+               && (arg_state != OPARG_TYPE_ENUMERATION))
                 /*
                  *  bit flag and enumeration strings get allocated
                  */
-                AGFREE( (void*)p->pzLastArg );
-            p->pzLastArg = val;
+                AGFREE( (void*)p->optArg.argString );
+            p->optArg.argString = val;
             break;
         }
 
         case OPARG_TYPE_BOOLEAN:
-            printEntry( fp, p, (p->pzLastArg != 0) ? "true" : "false" );
+            printEntry( fp, p, (p->optArg.argBool != AG_FALSE)
+                        ? "true" : "false" );
             break;
 
         default:

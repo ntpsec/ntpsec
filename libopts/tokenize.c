@@ -30,14 +30,14 @@
 /* = = = START-STATIC-FORWARD = = = */
 /* static forward declarations maintained by :mkfwd */
 static void
-copy_cooked( ch_t** ppDest, const char ** ppSrc );
+copy_cooked( ch_t** ppDest, char const ** ppSrc );
 
 static void
-copy_raw( ch_t** ppDest, const char ** ppSrc );
+copy_raw( ch_t** ppDest, char const ** ppSrc );
 /* = = = END-STATIC-FORWARD = = = */
 
 static void
-copy_cooked( ch_t** ppDest, const char ** ppSrc )
+copy_cooked( ch_t** ppDest, char const ** ppSrc )
 {
     ch_t* pDest = (ch_t*)*ppDest;
     const ch_t* pSrc  = (const ch_t*)(*ppSrc + 1);
@@ -60,12 +60,12 @@ copy_cooked( ch_t** ppDest, const char ** ppSrc )
 
  done:
     *ppDest = (ch_t*)pDest; /* next spot for storing character */
-    *ppSrc  = (const char *)pSrc;  /* char following closing quote    */
+    *ppSrc  = (char const *)pSrc;  /* char following closing quote    */
 }
 
 
 static void
-copy_raw( ch_t** ppDest, const char ** ppSrc )
+copy_raw( ch_t** ppDest, char const ** ppSrc )
 {
     ch_t* pDest = *ppDest;
     cc_t* pSrc  = (cc_t*) (*ppSrc + 1);
@@ -108,7 +108,7 @@ copy_raw( ch_t** ppDest, const char ** ppSrc )
 
  done:
     *ppDest = pDest; /* next spot for storing character */
-    *ppSrc  = (const char *) pSrc;  /* char following closing quote    */
+    *ppSrc  = (char const *) pSrc;  /* char following closing quote    */
 }
 
 
@@ -116,7 +116,7 @@ copy_raw( ch_t** ppDest, const char ** ppSrc )
  *
  * what: tokenize an input string
  *
- * arg:  + const char* + string + string to be tokenized +
+ * arg:  + char const* + string + string to be tokenized +
  *
  * ret_type:  token_list_t*
  * ret_desc:  pointer to a structure that lists each token
@@ -178,7 +178,7 @@ copy_raw( ch_t** ppDest, const char ** ppSrc )
  *  @end itemize
 =*/
 token_list_t*
-ao_string_tokenize( const char* str )
+ao_string_tokenize( char const* str )
 {
     int max_token_ct = 1; /* allow for trailing NUL on string */
     token_list_t* res;

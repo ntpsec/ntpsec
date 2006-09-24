@@ -1,6 +1,6 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.10 2006/08/12 17:36:43 bkorb Exp $
+ *  usage.c  $Id: usage.c,v 4.16 2006/09/23 00:09:48 bkorb Exp $
  * Time-stamp:      "2006-07-01 12:41:02 bkorb"
  *
  *  This module implements the default usage procedure for
@@ -409,7 +409,7 @@ printInitList(
     *pInitIntro = AG_FALSE;
 
     for (;;) {
-        const char* pzPath = *(papz++);
+        char const* pzPath = *(papz++);
 
         if (pzPath == NULL)
             break;

@@ -1,14 +1,14 @@
 /*
- * $Id: text_mmap.c,v 4.11 2006/06/24 23:34:51 bkorb Exp $
+ * $Id: text_mmap.c,v 4.15 2006/09/23 00:09:48 bkorb Exp $
  *
- * Time-stamp:      "2006-06-24 10:54:43 bkorb"
+ * Time-stamp:      "2006-09-10 14:50:04 bkorb"
  */
 
-#ifndef MAP_ANONYMOUS 
-#  ifdef   MAP_ANON 
-#  define  MAP_ANONYMOUS   MAP_ANON 
-#  endif 
-#endif 
+#ifndef MAP_ANONYMOUS
+#  ifdef   MAP_ANON
+#  define  MAP_ANONYMOUS   MAP_ANON
+#  endif
+#endif
 
 /*
  *  Some weird systems require that a specifically invalid FD number
@@ -19,7 +19,8 @@
 #define AO_INVALID_FD  -1
 
 #define FILE_WRITABLE(_prt,_flg) \
-	((_prt & PROT_WRITE) && ((_flg & (MAP_SHARED|MAP_PRIVATE)) == MAP_SHARED))
+        (   (_prt & PROT_WRITE) \
+         && ((_flg & (MAP_SHARED|MAP_PRIVATE)) == MAP_SHARED))
 #define MAP_FAILED_PTR ((void*)MAP_FAILED)
 
 /*=export_func  text_mmap
@@ -27,7 +28,7 @@
  *
  * what:  map a text file with terminating NUL
  *
- * arg:   const char*,  pzFile,  name of the file to map
+ * arg:   char const*,  pzFile,  name of the file to map
  * arg:   int,          prot,    mmap protections (see mmap(2))
  * arg:   int,          flags,   mmap flags (see mmap(2))
  * arg:   tmap_info_t*, mapinfo, returned info about the mapping
@@ -76,7 +77,7 @@
  * text_munmap( &mi );
 =*/
 void*
-text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
+text_mmap( char const* pzFile, int prot, int flags, tmap_info_t* pMI )
 {
     memset( pMI, 0, sizeof(*pMI) );
 #ifdef HAVE_MMAP
@@ -183,9 +184,8 @@ text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
             return pMI->txt_data;
 
         pMI->txt_errno = errno;
-#endif
 
-#if defined(HAVE_DEV_ZERO)
+#elif defined(HAVE_DEV_ZERO)
         pMI->txt_zero_fd = open( "/dev/zero", O_RDONLY );
 
         if (pMI->txt_zero_fd == AO_INVALID_FD) {
@@ -211,10 +211,6 @@ text_mmap( const char* pzFile, int prot, int flags, tmap_info_t* pMI )
 
     {
         void* p = AGALOC( pMI->txt_size+1, "file text" );
-        if (pMI->txt_data == NULL) {
-            pMI->txt_errno = ENOMEM;
-            goto fail_return;
-        }
         memcpy( p, pMI->txt_data, pMI->txt_size );
         ((char*)p)[pMI->txt_size] = NUL;
         munmap(pMI->txt_data, pMI->txt_size );

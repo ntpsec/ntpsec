@@ -1,7 +1,7 @@
 
 /*
  *  $Id: numeric.c,v 4.7 2006/03/25 19:23:28 bkorb Exp $
- *  Time-stamp:      "2005-02-14 08:22:56 bkorb"
+ *  Time-stamp:      "2006-09-22 18:14:38 bkorb"
  */
 
 /*
@@ -61,23 +61,23 @@ void
 optionNumericVal( tOptions* pOpts, tOptDesc* pOD )
 {
     char* pz;
-    long  val;
+    int   val;
 
     /*
      *  Numeric options may have a range associated with it.
      *  If it does, the usage procedure requests that it be
      *  emitted by passing a NULL pOD pointer.
      */
-    if ((pOD == NULL) || (pOD->pzLastArg == NULL))
+    if ((pOD == NULL) || (pOD->optArg.argString == NULL))
         return;
 
-    val = strtol( pOD->pzLastArg, &pz, 0 );
+    val = (int)strtol( pOD->optArg.argString, &pz, 0 );
     if (*pz != NUL) {
-        fprintf( stderr, zNotNumber, pOpts->pzProgName, pOD->pzLastArg );
+        fprintf( stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString );
         (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
     }
 
-    pOD->pzLastArg = (char*)val;
+    pOD->optArg.argInt = val;
 }
 /*
  * Local Variables:

@@ -1,6 +1,6 @@
 
 /*
- *  $Id: streqvcmp.c,v 4.10 2006/07/27 02:51:47 bkorb Exp $
+ *  $Id: streqvcmp.c,v 4.11 2006/09/23 00:09:48 bkorb Exp $
  * Time-stamp:      "2006-07-26 18:25:53 bkorb"
  *
  *  String Equivalence Comparison
@@ -103,8 +103,8 @@ static unsigned char charmap[] = {
  *
  * what: compare two strings with an equivalence mapping
  *
- * arg:  + const char* + str1 + first string +
- * arg:  + const char* + str2 + second string +
+ * arg:  + char const* + str1 + first string +
+ * arg:  + char const* + str2 + second string +
  * arg:  + int         + ct   + compare length +
  *
  * ret_type:  int
@@ -144,8 +144,8 @@ strneqvcmp( tCC* s1, tCC* s2, int ct )
  *
  * what: compare two strings with an equivalence mapping
  *
- * arg:  + const char* + str1 + first string +
- * arg:  + const char* + str2 + second string +
+ * arg:  + char const* + str1 + first string +
+ * arg:  + char const* + str2 + second string +
  *
  * ret_type:  int
  * ret_desc:  the difference between two differing characters
@@ -234,7 +234,7 @@ streqvmap( char From, char To, int ct )
  *
  * what: map a list of characters to the same value
  *
- * arg:  + const char* + ch_list + characters to equivalence +
+ * arg:  + char const* + ch_list + characters to equivalence +
  *
  * doc:
  *
@@ -246,7 +246,7 @@ streqvmap( char From, char To, int ct )
  * err:  none.
 =*/
 void
-strequate( const char* s )
+strequate( char const* s )
 {
     if ((s != NULL) && (*s != NUL)) {
         unsigned char equiv = (unsigned)*s;
@@ -261,7 +261,7 @@ strequate( const char* s )
  * what: convert a string into its mapped-to value
  *
  * arg:  + char*       + dest + output string +
- * arg:  + const char* + src  + input string +
+ * arg:  + char const* + src  + input string +
  *
  * doc:
  *
@@ -273,7 +273,7 @@ strequate( const char* s )
  * err:  none.
 =*/
 void
-strtransform( char* d, const char* s )
+strtransform( char* d, char const* s )
 {
     do  {
         *(d++) = (char)charmap[ (unsigned)*s ];

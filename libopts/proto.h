@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Tue Sep 19 21:27:54 PDT 2006
+ * Generated Fri Sep 22 18:22:00 PDT 2006
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -55,7 +55,7 @@ parseAttributes(
     tOptionValue*       pType );
 
 LOCAL tSuccess
-validateOptionsStruct( tOptions* pOpts, const char* pzProgram );
+validateOptionsStruct( tOptions* pOpts, char const* pzProgram );
 
 /*
  *  Extracted from environment.c

@@ -1,6 +1,6 @@
 
 /*
- *  sort.c  $Id: sort.c,v 4.7 2006/06/24 23:36:08 bkorb Exp $
+ *  sort.c  $Id: sort.c,v 4.10 2006/06/24 23:34:51 bkorb Exp $
  * Time-stamp:      "2006-06-24 10:53:35 bkorb"
  *
  *  This module implements argument sorting.

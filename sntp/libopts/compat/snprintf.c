@@ -7,7 +7,7 @@
 #  include <stdarg.h>
 #  ifndef   VA_START
 #    define VA_START(a, f)  va_start(a, f)
-#    define VA_END(a)	    va_end(a)
+#    define VA_END(a)       va_end(a)
 #  endif /* VA_START */
 #  define SNV_USING_STDARG_H
 
@@ -15,7 +15,7 @@
 #  include <varargs.h>
 #  ifndef   VA_START
 #    define VA_START(a, f) va_start(a)
-#    define VA_END(a)	 va_end(a)
+#    define VA_END(a)    va_end(a)
 #  endif /* VA_START */
 #  undef  SNV_USING_STDARG_H
 
@@ -24,7 +24,7 @@
 #endif
 
 static int
-snprintf(char *str, size_t n, const char *fmt, ...)
+snprintf(char *str, size_t n, char const *fmt, ...)
 {
     va_list ap;
     int rval;
@@ -50,7 +50,7 @@ snprintf(char *str, size_t n, const char *fmt, ...)
 }
 
 static int
-vsnprintf( char *str, size_t n, const char *fmt, va_list ap )
+vsnprintf( char *str, size_t n, char const *fmt, va_list ap )
 {
 #ifdef VSPRINTF_CHARSTAR
     return (strlen(vsprintf(str, fmt, ap)));

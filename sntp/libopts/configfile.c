@@ -1,6 +1,6 @@
 /*
- *  $Id: configfile.c,v 4.23 2006/07/01 21:57:23 bkorb Exp $
- *  Time-stamp:      "2006-07-01 12:46:31 bkorb"
+ *  $Id: configfile.c,v 4.26 2006/09/23 00:12:48 bkorb Exp $
+ *  Time-stamp:      "2006-09-22 18:01:50 bkorb"
  *
  *  configuration/rc/ini file handling.
  */
@@ -53,7 +53,7 @@
 static void
 filePreset(
     tOptions*     pOpts,
-    const char*   pzFileName,
+    char const*   pzFileName,
     int           direction );
 
 static char*
@@ -113,7 +113,7 @@ skipUnknown( char* pzText );
 /*=export_func  configFileLoad
  *
  * what:  parse a configuration file
- * arg:   + const char*     + pzFile + the file to load +
+ * arg:   + char const*     + pzFile + the file to load +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  An allocated, compound value structure
@@ -141,7 +141,7 @@ skipUnknown( char* pzText );
  *  @end itemize
 =*/
 const tOptionValue*
-configFileLoad( const char* pzFile )
+configFileLoad( char const* pzFile )
 {
     tmap_info_t   cfgfile;
     tOptionValue* pRes = NULL;
@@ -167,8 +167,8 @@ configFileLoad( const char* pzFile )
  *
  * what:  find a hierarcicaly valued option instance
  * arg:   + const tOptDesc* + pOptDesc + an option with a nested arg type +
- * arg:   + const char*     + name     + name of value to find +
- * arg:   + const char*     + value    + the matching value    +
+ * arg:   + char const*     + name     + name of value to find +
+ * arg:   + char const*     + value    + the matching value    +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -189,7 +189,7 @@ configFileLoad( const char* pzFile )
 =*/
 const tOptionValue*
 optionFindValue( const tOptDesc* pOptDesc,
-                 const char* pzName, const char* pzVal )
+                 char const* pzName, char const* pzVal )
 {
     const tOptionValue* pRes = NULL;
 
@@ -205,8 +205,7 @@ optionFindValue( const tOptDesc* pOptDesc,
     else do {
         tArgList* pAL = pOptDesc->optCookie;
         int ct = pAL->useCt;
-        const tOptionValue** ppOV =
-            (const tOptionValue**)(void*)&(pAL->apzArgs);
+        tCC** ppOV = pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -214,12 +213,12 @@ optionFindValue( const tOptDesc* pOptDesc,
         }
 
         if (pzName == NULL) {
-            pRes = *ppOV;
+            pRes = (tOptionValue*)*ppOV;
             break;
         }
 
         while (--ct >= 0) {
-            const tOptionValue* pOV = *(ppOV++);
+            const tOptionValue* pOV = (tOptionValue*)*(ppOV++);
             const tOptionValue* pRV = optionGetValue( pOV, pzName );
 
             if (pRV == NULL)
@@ -243,8 +242,8 @@ optionFindValue( const tOptDesc* pOptDesc,
  * what:  find a hierarcicaly valued option instance
  * arg:   + const tOptDesc* + pOptDesc + an option with a nested arg type +
  * arg:   + const tOptionValue* + pPrevVal + the last entry +
- * arg:   + const char*     + name     + name of value to find +
- * arg:   + const char*     + value    + the matching value    +
+ * arg:   + char const*     + name     + name of value to find +
+ * arg:   + char const*     + value    + the matching value    +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -266,7 +265,7 @@ optionFindValue( const tOptDesc* pOptDesc,
 =*/
 const tOptionValue*
 optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
-                 const char* pzName, const char* pzVal )
+                 char const* pzName, char const* pzVal )
 {
     int foundOldVal = 0;
     tOptionValue* pRes = NULL;
@@ -283,7 +282,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
     else do {
         tArgList* pAL = pOptDesc->optCookie;
         int ct = pAL->useCt;
-        tOptionValue** ppOV = (tOptionValue**)(void*)&(pAL->apzArgs);
+        tCC** ppOV = pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -291,7 +290,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
         }
 
         while (--ct >= 0) {
-            tOptionValue* pOV = *(ppOV++);
+            tOptionValue* pOV = (tOptionValue*)*(ppOV++);
             if (foundOldVal) {
                 pRes = pOV;
                 break;
@@ -311,7 +310,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
  *
  * what:  get a specific value from a hierarcical list
  * arg:   + const tOptionValue* + pOptValue + a hierarchcal value +
- * arg:   + const char*   + valueName + name of value to get +
+ * arg:   + char const*   + valueName + name of value to get +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -333,7 +332,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
  *  @end itemize
 =*/
 const tOptionValue*
-optionGetValue( const tOptionValue* pOld, const char* pzValName )
+optionGetValue( const tOptionValue* pOld, char const* pzValName )
 {
     tArgList*     pAL;
     tOptionValue* pRes = NULL;
@@ -346,14 +345,14 @@ optionGetValue( const tOptionValue* pOld, const char* pzValName )
 
     if (pAL->useCt > 0) {
         int ct = pAL->useCt;
-        tOptionValue** papOV = (tOptionValue**)(pAL->apzArgs);
+        tCC** papOV = pAL->apzArgs;
 
         if (pzValName == NULL) {
-            pRes = *papOV;
+            pRes = (tOptionValue*)*papOV;
         }
 
         else do {
-            tOptionValue* pOV = *(papOV++);
+            tOptionValue* pOV = (tOptionValue*)*(papOV++);
             if (strcmp( pOV->pzName, pzValName ) == 0) {
                 pRes = pOV;
                 break;
@@ -407,17 +406,17 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
     pAL = pOVList->v.nestVal;
     {
         int   ct   = pAL->useCt;
-        tOptionValue** papNV = (tOptionValue**)(pAL->apzArgs);
+        tCC** papNV = pAL->apzArgs;
 
         while (ct-- > 0) {
-            tOptionValue* pNV = *(papNV++);
+            tOptionValue* pNV = (tOptionValue*)*(papNV++);
             if (pNV == pOldOV) {
                 if (ct == 0) {
                     err = ENOENT;
 
                 } else {
                     err  = 0;
-                    pRes = *papNV;
+                    pRes = (tOptionValue*)*papNV;
                 }
                 break;
             }
@@ -436,7 +435,7 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
 static void
 filePreset(
     tOptions*     pOpts,
-    const char*   pzFileName,
+    char const*   pzFileName,
     int           direction )
 {
     tmap_info_t   cfgfile;
@@ -541,6 +540,9 @@ handleConfig(
 {
     char* pzName = pzText++;
     char* pzEnd  = strchr( pzText, '\n' );
+
+    if (pzEnd == NULL)
+        return pzText + strlen(pzText);
 
     while (ISNAMECHAR( *pzText ))  pzText++;
     while (isspace( *pzText )) pzText++;
@@ -871,7 +873,7 @@ internalFileLoad( tOptions* pOpts )
  * what: Load the locatable config files, in order
  *
  * arg:  + tOptions*   + pOpts  + program options descriptor +
- * arg:  + const char* + pzProg + program name +
+ * arg:  + char const* + pzProg + program name +
  *
  * ret_type:  int
  * ret_desc:  0 -> SUCCESS, -1 -> FAILURE
@@ -900,7 +902,7 @@ internalFileLoad( tOptions* pOpts )
  *       always be returned.
 =*/
 int
-optionFileLoad( tOptions* pOpts, const char* pzProgram )
+optionFileLoad( tOptions* pOpts, char const* pzProgram )
 {
     if (! SUCCESSFUL( validateOptionsStruct( pOpts, pzProgram )))
         return -1;
@@ -919,7 +921,7 @@ optionFileLoad( tOptions* pOpts, const char* pzProgram )
  * arg:   + tOptDesc* + pOptDesc + the descriptor for this arg +
  *
  * doc:
- *  Processes the options found in the file named with pOptDesc->pzLastArg.
+ *  Processes the options found in the file named with pOptDesc->optArg.argString.
 =*/
 void
 optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
@@ -933,12 +935,12 @@ optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
      */
     if (! DISABLED_OPT( pOptDesc )) {
         struct stat sb;
-        if (stat( pOptDesc->pzLastArg, &sb ) != 0) {
+        if (stat( pOptDesc->optArg.argString, &sb ) != 0) {
             if ((pOpts->fOptSet & OPTPROC_ERRSTOP) == 0)
                 return;
 
             fprintf( stderr, zFSErrOptLoad, errno, strerror( errno ),
-                     pOptDesc->pzLastArg );
+                     pOptDesc->optArg.argString );
             (*pOpts->pUsageProc)( pOpts, EXIT_FAILURE );
             /* NOT REACHED */
         }
@@ -947,12 +949,12 @@ optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
             if ((pOpts->fOptSet & OPTPROC_ERRSTOP) == 0)
                 return;
 
-            fprintf( stderr, zNotFile, pOptDesc->pzLastArg );
+            fprintf( stderr, zNotFile, pOptDesc->optArg.argString );
             (*pOpts->pUsageProc)( pOpts, EXIT_FAILURE );
             /* NOT REACHED */
         }
 
-        filePreset(pOpts, pOptDesc->pzLastArg, DIRECTION_CALLED);
+        filePreset(pOpts, pOptDesc->optArg.argString, DIRECTION_CALLED);
     }
 }
 
@@ -1207,7 +1209,7 @@ skipUnknown( char* pzText )
  *  already been called.)
  */
 LOCAL tSuccess
-validateOptionsStruct( tOptions* pOpts, const char* pzProgram )
+validateOptionsStruct( tOptions* pOpts, char const* pzProgram )
 {
     if (pOpts == NULL) {
         fputs( zAO_Bad, stderr );
@@ -1249,7 +1251,7 @@ validateOptionsStruct( tOptions* pOpts, const char* pzProgram )
      *  and the set of equivalent characters.
      */
     if (pOpts->pzProgName == NULL) {
-        const char* pz = strrchr( pzProgram, DIRCH );
+        char const* pz = strrchr( pzProgram, DIRCH );
 
         if (pz == NULL)
              pOpts->pzProgName = pzProgram;
