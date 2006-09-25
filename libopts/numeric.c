@@ -1,6 +1,6 @@
 
 /*
- *  $Id: numeric.c,v 4.7 2006/03/25 19:23:28 bkorb Exp $
+ *  $Id: numeric.c,v 4.9 2006/09/24 02:10:45 bkorb Exp $
  *  Time-stamp:      "2006-09-22 18:14:38 bkorb"
  */
 
@@ -83,7 +83,6 @@ optionNumericVal( tOptions* pOpts, tOptDesc* pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/numeric.c */

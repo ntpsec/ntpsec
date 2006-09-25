@@ -1,6 +1,6 @@
 
 /*
- *  $Id: enumeration.c,v 4.12 2006/09/23 00:12:48 bkorb Exp $
+ *  $Id: enumeration.c,v 4.14 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:00:53 bkorb"
  *
  *   Automated Options Paged Usage module.
@@ -479,7 +479,6 @@ optionSetMembers(
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/enumeration.c */

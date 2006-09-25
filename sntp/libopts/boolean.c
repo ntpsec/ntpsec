@@ -1,6 +1,6 @@
 
 /*
- *  $Id: boolean.c,v 4.6 2006/03/25 19:23:28 bkorb Exp $
+ *  $Id: boolean.c,v 4.8 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:13:34 bkorb"
  *
  *   Automated Options Paged Usage module.
@@ -96,7 +96,6 @@ optionBooleanVal( tOptions* pOpts, tOptDesc* pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/boolean.c */

@@ -1,5 +1,5 @@
 /*
- * $Id: text_mmap.c,v 4.15 2006/09/23 00:09:48 bkorb Exp $
+ * $Id: text_mmap.c,v 4.16 2006/09/24 02:10:45 bkorb Exp $
  *
  * Time-stamp:      "2006-09-10 14:50:04 bkorb"
  */
@@ -357,7 +357,6 @@ text_munmap( tmap_info_t* pMI )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/text_mmap.c */

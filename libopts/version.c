@@ -1,5 +1,5 @@
 
-/*  $Id: version.c,v 4.10 2006/09/23 00:09:48 bkorb Exp $
+/*  $Id: version.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:15:00 bkorb"
  *
  *  This module implements the default usage procedure for
@@ -171,7 +171,6 @@ optionVersionStderr( tOptions*  pOpts, tOptDesc*  pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/version.c */

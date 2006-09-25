@@ -2,7 +2,7 @@
 /*
  *  Time-stamp:      "2006-09-10 14:43:25 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.28 2006/09/23 00:12:48 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.29 2006/09/24 02:10:45 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -331,7 +331,6 @@ extern tOptProc optionPrintVersion, optionPagedUsage, optionLoadOpt;
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/autoopts.h */

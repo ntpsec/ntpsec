@@ -1,6 +1,6 @@
 
 /*
- *  $Id: environment.c,v 4.11 2006/09/23 00:12:48 bkorb Exp $
+ *  $Id: environment.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2005-10-29 13:23:59 bkorb"
  *
  *  This file contains all of the routines that must be linked into
@@ -255,7 +255,6 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/environment.c */

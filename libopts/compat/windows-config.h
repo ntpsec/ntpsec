@@ -1,3 +1,9 @@
+
+/*
+ * Time-stamp:        "2006-09-23 19:44:29 bkorb"
+ *             by: bkorb
+ * Last Committed:    $Date: 2006/09/24 02:57:02 $
+ */
 #ifndef WINDOWS_CONFIG_HACKERY
 #define WINDOWS_CONFIG_HACKERY 1
 

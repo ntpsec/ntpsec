@@ -1,11 +1,12 @@
+* K&R C support is being deprecated.
 * [Bug 714] ntpq -p should conflict with -i, not -c.
 * WWV refclock improvements from Dave Mills.
 * [Bug 689] Deprecate HEATH GC-1001 II; the driver never worked.
-* [Bug 342] Deprecate broken TRAK refclock driver
-* [Bug 340] Deprecate broken MSF EES refclock driver
-* Support separate PPS devices for PARSE refclocks
-* [Bug 637, 51?] Dynamic interface scanning can now be done
-* Options processing now uses GNU AutoGen
+* [Bug 342] Deprecate broken TRAK refclock driver.
+* [Bug 340] Deprecate broken MSF EES refclock driver.
+* Support separate PPS devices for PARSE refclocks.
+* [Bug 637, 51?] Dynamic interface scanning can now be done.
+* Options processing now uses GNU AutoGen.
 
 (4.2.2p4) Released by Harlan Stenn <stenn@ntp.isc.org>
  * [Bug 710] compat getnameinfo() has off-by-one error

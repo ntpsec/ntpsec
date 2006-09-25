@@ -1,6 +1,6 @@
 
 /*
- *  $Id: autoopts.c,v 4.24 2006/09/23 00:12:48 bkorb Exp $
+ *  $Id: autoopts.c,v 4.26 2006/09/24 02:10:44 bkorb Exp $
  *  Time-stamp:      "2006-09-22 18:21:53 bkorb"
  *
  *  This file contains all of the routines that must be linked into
@@ -1083,7 +1083,6 @@ optionProcess(
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/autoopts.c */

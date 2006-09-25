@@ -1,7 +1,7 @@
 
 /*
- *  $Id: putshell.c,v 4.12 2006/07/16 15:27:50 bkorb Exp $
- * Time-stamp:      "2006-09-22 18:08:30 bkorb"
+ *  $Id: putshell.c,v 4.14 2006/09/24 02:10:45 bkorb Exp $
+ * Time-stamp:      "2006-09-24 15:28:15 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
@@ -192,7 +192,7 @@ optionPutShell( tOptions* pOpts )
                 printf( "typeset -x -i %s_", pOD->pz_NAME );
                 pz += strspn( pz, " +\t\n\f" );
                 for (;;) {
-                    char ch = *(pz++);
+                    int ch = *(pz++);
                          if (islower( ch ))  fputc( toupper( ch ), stdout );
                     else if (isalnum( ch ))  fputc( ch, stdout );
                     else if (isspace( ch )
@@ -327,7 +327,6 @@ optionPutShell( tOptions* pOpts )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/putshell.c */

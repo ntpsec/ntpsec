@@ -1,7 +1,7 @@
 
 /*
- *  $Id: load.c,v 4.24 2006/09/23 00:12:48 bkorb Exp $
- *  Time-stamp:      "2006-07-01 12:43:03 bkorb"
+ *  $Id: load.c,v 4.25 2006/09/24 02:10:45 bkorb Exp $
+ *  Time-stamp:      "2006-09-24 15:23:01 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -258,10 +258,10 @@ insertEnvVal(
     char* pzDir = pzBuf;
 
     for (;;) {
-        char ch = *++pzName;
+        int ch = (int)*++pzName;
         if (! ISNAMECHAR( ch ))
             break;
-        *(pzDir++) = ch;
+        *(pzDir++) = (char)ch;
     }
 
     if (pzDir == pzBuf)
@@ -293,16 +293,16 @@ mungeString( char* pzTxt, tOptionLoadMode mode )
     if (mode == OPTION_LOAD_KEEP)
         return;
 
-    if (isspace( *pzTxt )) {
+    if (isspace( (int)*pzTxt )) {
         char* pzS = pzTxt;
         char* pzD = pzTxt;
-        while (isspace( *++pzS ))  ;
+        while (isspace( (int)*++pzS ))  ;
         while ((*(pzD++) = *(pzS++)) != NUL)   ;
         pzE = pzD-1;
     } else
         pzE = pzTxt + strlen( pzTxt );
 
-    while ((pzE > pzTxt) && isspace( pzE[-1] ))  pzE--;
+    while ((pzE > pzTxt) && isspace( (int)pzE[-1] ))  pzE--;
     *pzE = NUL;
 
     if (mode == OPTION_LOAD_UNCOOKED)
@@ -352,9 +352,9 @@ assembleArgValue( char* pzTxt, tOptionLoadMode mode )
      *  because we'll have to skip over an immediately following ':' or '='
      *  (and the white space following *that*).
      */
-    space_break = isspace(*pzEnd);
+    space_break = isspace((int)*pzEnd);
     *(pzEnd++) = NUL;
-    while (isspace(*pzEnd))  pzEnd++;
+    while (isspace((int)*pzEnd))  pzEnd++;
     if (space_break && ((*pzEnd == ':') || (*pzEnd == '=')))
         pzEnd++;
 
@@ -377,7 +377,7 @@ loadOptionLine(
     tDirection  direction,
     tOptionLoadMode   load_mode )
 {
-    while (isspace( *pzLine ))  pzLine++;
+    while (isspace( (int)*pzLine ))  pzLine++;
 
     {
         char* pzArg = assembleArgValue( pzLine, load_mode );
@@ -514,7 +514,6 @@ optionLoadLine(
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/load.c */

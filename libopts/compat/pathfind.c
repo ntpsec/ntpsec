@@ -4,11 +4,12 @@
 
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
+ * Time-stamp:       "2006-09-23 19:46:16 bkorb"
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2006/09/23 00:48:05 $
+ * Last Modified:    $Date: 2006/09/24 02:57:02 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.8 2006/09/23 00:48:05 bkorb Exp $
+ * $Id: pathfind.c,v 4.10 2006/09/24 02:57:02 bkorb Exp $
  */
 
 /* Code: */
@@ -333,7 +334,6 @@ extract_colon_unit( char* pzDir, char const *string, int *p_index )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of compat/pathfind.c */

@@ -1,6 +1,6 @@
 /*
- *  $Id: configfile.c,v 4.26 2006/09/23 00:12:48 bkorb Exp $
- *  Time-stamp:      "2006-09-22 18:01:50 bkorb"
+ *  $Id: configfile.c,v 4.28 2006/09/24 02:10:45 bkorb Exp $
+ *  Time-stamp:      "2006-09-24 15:18:51 bkorb"
  *
  *  configuration/rc/ini file handling.
  */
@@ -204,8 +204,8 @@ optionFindValue( const tOptDesc* pOptDesc,
 
     else do {
         tArgList* pAL = pOptDesc->optCookie;
-        int ct = pAL->useCt;
-        tCC** ppOV = pAL->apzArgs;
+        int    ct   = pAL->useCt;
+        void** ppOV = (void**)(pAL->apzArgs);
 
         if (ct == 0) {
             errno = ENOENT;
@@ -218,7 +218,7 @@ optionFindValue( const tOptDesc* pOptDesc,
         }
 
         while (--ct >= 0) {
-            const tOptionValue* pOV = (tOptionValue*)*(ppOV++);
+            const tOptionValue* pOV = *(ppOV++);
             const tOptionValue* pRV = optionGetValue( pOV, pzName );
 
             if (pRV == NULL)
@@ -281,8 +281,8 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
 
     else do {
         tArgList* pAL = pOptDesc->optCookie;
-        int ct = pAL->useCt;
-        tCC** ppOV = pAL->apzArgs;
+        int    ct   = pAL->useCt;
+        void** ppOV = (void**)pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -290,7 +290,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
         }
 
         while (--ct >= 0) {
-            tOptionValue* pOV = (tOptionValue*)*(ppOV++);
+            tOptionValue* pOV = *(ppOV++);
             if (foundOldVal) {
                 pRes = pOV;
                 break;
@@ -344,15 +344,15 @@ optionGetValue( const tOptionValue* pOld, char const* pzValName )
     pAL = pOld->v.nestVal;
 
     if (pAL->useCt > 0) {
-        int ct = pAL->useCt;
-        tCC** papOV = pAL->apzArgs;
+        int    ct    = pAL->useCt;
+        void** papOV = (void**)(pAL->apzArgs);
 
         if (pzValName == NULL) {
             pRes = (tOptionValue*)*papOV;
         }
 
         else do {
-            tOptionValue* pOV = (tOptionValue*)*(papOV++);
+            tOptionValue* pOV = *(papOV++);
             if (strcmp( pOV->pzName, pzValName ) == 0) {
                 pRes = pOV;
                 break;
@@ -405,11 +405,11 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
     }
     pAL = pOVList->v.nestVal;
     {
-        int   ct   = pAL->useCt;
-        tCC** papNV = pAL->apzArgs;
+        int    ct    = pAL->useCt;
+        void** papNV = (void**)(pAL->apzArgs);
 
         while (ct-- > 0) {
-            tOptionValue* pNV = (tOptionValue*)*(papNV++);
+            tOptionValue* pNV = *(papNV++);
             if (pNV == pOldOV) {
                 if (ct == 0) {
                     err = ENOENT;
@@ -461,14 +461,14 @@ filePreset(
         st.flags = OPTST_SET;
 
     do  {
-        while (isspace( *pzFileText ))  pzFileText++;
+        while (isspace( (int)*pzFileText ))  pzFileText++;
 
-        if (isalpha( *pzFileText )) {
+        if (isalpha( (int)*pzFileText )) {
             pzFileText = handleConfig( pOpts, &st, pzFileText, direction );
 
         } else switch (*pzFileText) {
         case '<':
-            if (isalpha( pzFileText[1] ))
+            if (isalpha( (int)pzFileText[1] ))
                 pzFileText = handleStructure(pOpts, &st, pzFileText, direction);
 
             else switch (pzFileText[1]) {
@@ -544,8 +544,8 @@ handleConfig(
     if (pzEnd == NULL)
         return pzText + strlen(pzText);
 
-    while (ISNAMECHAR( *pzText ))  pzText++;
-    while (isspace( *pzText )) pzText++;
+    while (ISNAMECHAR( (int)*pzText ))  pzText++;
+    while (isspace( (int)*pzText )) pzText++;
     if (pzText > pzEnd) {
     name_only:
         *pzEnd++ = NUL;
@@ -559,10 +559,10 @@ handleConfig(
      *  is an invalid format and we give up parsing the text.
      */
     if ((*pzText == '=') || (*pzText == ':')) {
-        while (isspace( *++pzText ))   ;
+        while (isspace( (int)*++pzText ))   ;
         if (pzText > pzEnd)
             goto name_only;
-    } else if (! isspace(pzText[-1]))
+    } else if (! isspace((int)pzText[-1]))
         return NULL;
 
     /*
@@ -626,7 +626,7 @@ handleDirective(
     size_t name_len;
 
     if (  (strncmp( pzText+2, zProg, title_len ) != 0)
-       || (! isspace( pzText[title_len+2] )) )  {
+       || (! isspace( (int)pzText[title_len+2] )) )  {
         pzText = strchr( pzText+2, '>' );
         if (pzText != NULL)
             pzText++;
@@ -640,8 +640,8 @@ handleDirective(
     do  {
         pzText += title_len;
 
-        if (isspace(*pzText)) {
-            while (isspace(*pzText))  pzText++;
+        if (isspace((int)*pzText)) {
+            while (isspace((int)*pzText))  pzText++;
             if (  (strneqvcmp( pzText, pOpts->pzProgName, (int)name_len) == 0)
                && (pzText[name_len] == '>'))  {
                 pzText += name_len + 1;
@@ -991,7 +991,7 @@ parseAttributes(
             break;
         }
 
-        while (isspace( *++pzText ))   ;
+        while (isspace( (int)*++pzText ))   ;
 
         if (strncmp( pzText, zLoadType, lenLoadType ) == 0) {
             pzText = parseValueType( pzText+lenLoadType, pType );
@@ -1046,7 +1046,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadCooked, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_COOKED;
                 return pzText + len;
             }
@@ -1059,7 +1059,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadUncooked, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_UNCOOKED;
                 return pzText + len;
             }
@@ -1072,7 +1072,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadKeep, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_KEEP;
                 return pzText + len;
             }
@@ -1113,7 +1113,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeString);
         if (strncmp( pzText, zLtypeString, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_STRING;
                 return pzText + len;
             }
@@ -1124,7 +1124,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeInteger);
         if (strncmp( pzText, zLtypeInteger, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_NUMERIC;
                 return pzText + len;
             }
@@ -1146,7 +1146,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeKeyword);
         if (strncmp( pzText, zLtypeKeyword, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_ENUMERATION;
                 return pzText + len;
             }
@@ -1157,7 +1157,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeSetMembership);
         if (strncmp( pzText, zLtypeSetMembership, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_MEMBERSHIP;
                 return pzText + len;
             }
@@ -1168,7 +1168,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeNest);
         if (strncmp( pzText, zLtypeNest, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_HIERARCHY;
                 return pzText + len;
             }
@@ -1190,7 +1190,7 @@ static char*
 skipUnknown( char* pzText )
 {
     for (;; pzText++) {
-        if (isspace( *pzText ))  return pzText;
+        if (isspace( (int)*pzText ))  return pzText;
         switch (*pzText) {
         case NUL: return NULL;
         case '/':
@@ -1273,7 +1273,6 @@ validateOptionsStruct( tOptions* pOpts, char const* pzProgram )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/configfile.c */

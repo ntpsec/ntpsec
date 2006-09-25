@@ -1,6 +1,6 @@
 
 /*
- *  $Id: makeshell.c,v 4.15 2006/09/23 00:12:48 bkorb Exp $
+ *  $Id: makeshell.c,v 4.17 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:19:24 bkorb"
  *
  *  This module will interpret the options set in the tOptions
@@ -1104,7 +1104,6 @@ genshelloptUsage( tOptions*  pOpts, int exitCode )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/makeshell.c */

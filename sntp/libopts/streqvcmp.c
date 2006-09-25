@@ -1,6 +1,6 @@
 
 /*
- *  $Id: streqvcmp.c,v 4.11 2006/09/23 00:09:48 bkorb Exp $
+ *  $Id: streqvcmp.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-07-26 18:25:53 bkorb"
  *
  *  String Equivalence Comparison
@@ -284,7 +284,6 @@ strtransform( char* d, char const* s )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/streqvcmp.c */

@@ -1,6 +1,6 @@
 
 /*
- *  save.c  $Id: save.c,v 4.17 2006/09/23 00:09:48 bkorb Exp $
+ *  save.c  $Id: save.c,v 4.19 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:11:20 bkorb"
  *
  *  This module's routines will take the currently set options and
@@ -495,7 +495,6 @@ optionSaveFile( tOptions* pOpts )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/save.c */

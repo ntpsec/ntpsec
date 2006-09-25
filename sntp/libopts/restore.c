@@ -1,6 +1,6 @@
 
 /*
- *  restore.c  $Id: restore.c,v 4.7 2006/03/25 19:23:28 bkorb Exp $
+ *  restore.c  $Id: restore.c,v 4.8 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2005-02-23 15:10:20 bkorb"
  *
  *  This module's routines will save the current option state to memory
@@ -201,7 +201,6 @@ optionFree( tOptions* pOpts )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/restore.c */

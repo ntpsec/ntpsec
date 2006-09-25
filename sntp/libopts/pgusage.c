@@ -1,6 +1,6 @@
 
 /*
- *  $Id: pgusage.c,v 4.12 2006/07/16 15:27:50 bkorb Exp $
+ *  $Id: pgusage.c,v 4.13 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-07-16 08:13:26 bkorb"
  *
  *   Automated Options Paged Usage module.
@@ -152,7 +152,6 @@ optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/pgusage.c */

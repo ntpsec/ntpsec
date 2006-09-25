@@ -1,7 +1,7 @@
 
 /*
- *  $Id: nested.c,v 4.11 2006/09/23 00:12:48 bkorb Exp $
- *  Time-stamp:      "2006-09-22 18:14:12 bkorb"
+ *  $Id: nested.c,v 4.13 2006/09/24 02:10:45 bkorb Exp $
+ *  Time-stamp:      "2006-09-24 15:27:32 bkorb"
  *
  *   Automated Options Nested Values module.
  */
@@ -197,12 +197,12 @@ addBoolValue( void** pp, char const* pzName, size_t nameLen,
     pNV = AGALOC( sz, "option name/bool value pair" );
     if (pNV == NULL)
         return NULL;
-    while (isspace( *pzValue ) && (dataLen > 0)) {
+    while (isspace( (int)*pzValue ) && (dataLen > 0)) {
         dataLen--; pzValue++;
     }
     if (dataLen == 0)
         pNV->v.boolVal = 0;
-    else if (isdigit( *pzValue ))
+    else if (isdigit( (int)*pzValue ))
         pNV->v.boolVal = atoi( pzValue );
     else switch (*pzValue) {
     case 'f':
@@ -237,7 +237,7 @@ addNumberValue( void** pp, char const* pzName, size_t nameLen,
     pNV = AGALOC( sz, "option name/bool value pair" );
     if (pNV == NULL)
         return NULL;
-    while (isspace( *pzValue ) && (dataLen > 0)) {
+    while (isspace( (int)*pzValue ) && (dataLen > 0)) {
         dataLen--; pzValue++;
     }
     if (dataLen == 0)
@@ -300,9 +300,9 @@ scanNameEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
     size_t nameLen = 1;
     size_t dataLen = 0;
 
-    while (ISNAMECHAR( *pzScan ))  { pzScan++; nameLen++; }
+    while (ISNAMECHAR( (int)*pzScan ))  { pzScan++; nameLen++; }
 
-    while (isspace( *pzScan )) {
+    while (isspace( (int)*pzScan )) {
         char ch = *(pzScan++);
         if ((ch == '\n') || (ch == ',')) {
             addStringValue( &(pRes->v.nestVal), pzName, nameLen, NULL, 0 );
@@ -313,7 +313,7 @@ scanNameEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
     switch (*pzScan) {
     case '=':
     case ':':
-        while (isspace( *++pzScan ))  ;
+        while (isspace( (int)*++pzScan ))  ;
         switch (*pzScan) {
         case ',':  goto comma_char;
         case '"':
@@ -390,7 +390,7 @@ scanXmlEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
     tOptionValue  valu;
     tOptionValue* pNewVal;
 
-    if (! isalpha(*pzName)) {
+    if (! isalpha((int)*pzName)) {
         switch (*pzName) {
         default:
             pzName = NULL;
@@ -411,7 +411,7 @@ scanXmlEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
         return pzName;
     }
 
-    while (isalpha( *++pzScan ))  nameLen++;
+    while (isalpha( (int)*++pzScan ))  nameLen++;
     if (nameLen > 64)
         return NULL;
     valu.valType = OPARG_TYPE_STRING;
@@ -461,7 +461,7 @@ scanXmlEntry( char const* pzName, tOptionValue* pRes, tOptionLoadMode mode )
             return NULL;
         valLen = (pzScan - pzVal);
         pzScan += nameLen + 3;
-        while (isspace( *pzScan ))  pzScan++;
+        while (isspace(  (int)*pzScan ))  pzScan++;
     }
 
     switch (valu.valType) {
@@ -514,7 +514,7 @@ unloadNestedArglist( tArgList* pAL )
     tCC** ppNV = pAL->apzArgs;
 
     while (ct-- > 0) {
-        tOptionValue* pNV = (tOptionValue*)*(ppNV++);
+        tOptionValue* pNV = (tOptionValue*)(void*)*(ppNV++);
         if (pNV->valType == OPARG_TYPE_HIERARCHY)
             unloadNestedArglist( pNV->v.nestVal );
         free( pNV );
@@ -566,8 +566,8 @@ sortNestedList( tArgList* pAL )
      */
     for (ix = 0; ++ix < lm;) {
         int iy = ix-1;
-        tOptionValue* pNewNV = (tOptionValue*)pAL->apzArgs[ix];
-        tOptionValue* pOldNV = (tOptionValue*)pAL->apzArgs[iy];
+        tOptionValue* pNewNV = (tOptionValue*)(void*)(pAL->apzArgs[ix]);
+        tOptionValue* pOldNV = (tOptionValue*)(void*)(pAL->apzArgs[iy]);
 
         /*
          *  For as long as the new entry precedes the "old" entry,
@@ -576,7 +576,7 @@ sortNestedList( tArgList* pAL )
          */
         while (strcmp( pOldNV->pzName, pNewNV->pzName ) > 0) {
             pAL->apzArgs[iy+1] = (void*)pOldNV;
-            pOldNV = (tOptionValue*)pAL->apzArgs[--iy];
+            pOldNV = (tOptionValue*)(void*)(pAL->apzArgs[--iy]);
             if (iy < 0)
                 break;
         }
@@ -621,7 +621,7 @@ optionLoadNested( char const* pzTxt, char const* pzName, size_t nameLen,
         errno = EINVAL;
         return NULL;
     }
-    while (isspace( *pzTxt ))  pzTxt++;
+    while (isspace( (int)*pzTxt ))  pzTxt++;
     if (*pzTxt == NUL) {
         errno = ENOENT;
         return NULL;
@@ -649,8 +649,8 @@ optionLoadNested( char const* pzTxt, char const* pzName, size_t nameLen,
      *  Scan until we hit a NUL.
      */
     do  {
-        while (isspace( *pzTxt ))  pzTxt++;
-        if (isalpha( *pzTxt )) {
+        while (isspace( (int)*pzTxt ))  pzTxt++;
+        if (isalpha( (int)*pzTxt )) {
             pzTxt = scanNameEntry( pzTxt, pRes, mode );
         }
         else switch (*pzTxt) {
@@ -699,7 +699,6 @@ optionNestedVal( tOptions* pOpts, tOptDesc* pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/nested.c */

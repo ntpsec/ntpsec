@@ -1,6 +1,6 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.16 2006/09/23 00:09:48 bkorb Exp $
+ *  usage.c  $Id: usage.c,v 4.17 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2006-07-01 12:41:02 bkorb"
  *
  *  This module implements the default usage procedure for
@@ -726,7 +726,6 @@ setStdOptFmts( tOptions* pOpts, tCC** ppT )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/usage.c */
