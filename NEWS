@@ -1,3 +1,5 @@
+* [Bug 690] Fix a Windows DNS lookup buffer overflow.
+* [Bug 670] Resolved a Windows issue with the dynamic interface rescan code.
 * K&R C support is being deprecated.
 * [Bug 714] ntpq -p should conflict with -i, not -c.
 * WWV refclock improvements from Dave Mills.
