@@ -92,7 +92,7 @@ AddToAddresses(char **Addresses, int *cnt, CSADDR_INFO *csaddr)
 	memcpy(sinaddr, &sin->sin_addr, sizeof(struct in_addr));
 	
 	(*cnt)++;
-	*Addresses = addr;
+	*Addresses = (char *) addr_list;
 	return 0;
 }
 
