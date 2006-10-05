@@ -17,28 +17,6 @@
 
 int NT_set_process_priority(void)
 {
-	DWORD  SingleCPUMask = 0;
-	DWORD ProcessAffinityMask, SystemAffinityMask;
-	if (!GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &
-		 SystemAffinityMask))
-		msyslog(LOG_ERR, "GetProcessAffinityMask: %m");
-	else {
-		SingleCPUMask = 1; 
-# ifdef DEBUG 
-	msyslog(LOG_INFO, "System AffinityMask = %x", SystemAffinityMask); 
-# endif 
-		}
-
-	while (SingleCPUMask && !(SingleCPUMask & SystemAffinityMask)) 
-		SingleCPUMask = SingleCPUMask << 1; 
-		
-	if (!SingleCPUMask) 
-		msyslog(LOG_ERR, "Can't set Processor Affinity Mask"); 
-	else if (!SetProcessAffinityMask(GetCurrentProcess(), SingleCPUMask)) 
-		msyslog(LOG_ERR, "SetProcessAffinityMask: %m"); 
-# ifdef DEBUG 
-	else msyslog(LOG_INFO,"ProcessorAffinity Mask: %x", SingleCPUMask ); 
-# endif 
 	if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) 
 		{
 		msyslog(LOG_ERR, "SetPriorityClass: %m"); 
