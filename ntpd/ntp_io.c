@@ -3046,14 +3046,16 @@ input_handler(
 	/*
 	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
-	for (asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
-	     asyncio_reader != NULL;
-	     asyncio_reader = ISC_LIST_PREV(asyncio_reader, link))
+	asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
+
+	while (asyncio_reader != NULL)
 	{
+	        struct asyncio_reader *next = ISC_LIST_PREV(asyncio_reader, link);
 		if (FD_ISSET(asyncio_reader->fd, &fds)) {
 			++select_count;
 			asyncio_reader->receiver(asyncio_reader);
 		}
+		asyncio_reader = next;
 	}
 #endif /* HAS_ROUTING_SOCKET */
 	
