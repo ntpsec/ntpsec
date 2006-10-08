@@ -31,17 +31,23 @@ enum {
 typedef struct IoCompletionInfo {
 	OVERLAPPED			overlapped;
 	int				request_type;
-	recvbuf_t			*buff;
+	union {
+		recvbuf_t		*rbuf;
+		transmitbuf_t		*tbuf;
+	} buff_space;
 } IoCompletionInfo;
+
+#define	recv_buf	buff_space.rbuf
+#define	trans_buf	buff_space.tbuf
 
 /*
  * local function definitions
  */
 static int QueueIORead( struct refclockio *, recvbuf_t *buff, IoCompletionInfo *lpo);
 
-static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD);
-static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD);
-static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD);
+static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD, int);
+static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD, int);
+static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD, int);
 
 
 #define BUFCHECK_SECS	10
@@ -55,16 +61,20 @@ static HANDLE WaitableIoEventHandle = NULL;
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
 
+//#define USE_HEAP
+
 IoCompletionInfo *
 GetHeapAlloc(char *fromfunc)
 {
 	IoCompletionInfo *lpo;
 
+#ifdef USE_HEAP
 	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
 			     HEAP_ZERO_MEMORY,
 			     sizeof(IoCompletionInfo));
-
-//	lpo = (IoCompletionInfo *) calloc(1, sizeof(IoCompletionInfo));
+#else
+	lpo = (IoCompletionInfo *) calloc(1, sizeof(IoCompletionInfo));
+#endif
 #ifdef DEBUG
 	if (debug > 1) {
 		printf("Allocation %d memory for %s, ptr %x\n", sizeof(IoCompletionInfo), fromfunc, lpo);
@@ -83,11 +93,27 @@ FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 	}
 #endif
 
+#ifdef USE_HEAP
 	HeapFree(hHeapHandle, 0, lpo);
-
-//	free(lpo);
+#else
+	free(lpo);
+#endif
 }
 
+transmitbuf_t *
+get_trans_buf()
+{
+	transmitbuf_t *tb  = calloc(sizeof(transmitbuf_t), 1);
+	tb->wsabuf.len = 0;
+	tb->wsabuf.buf = (char *) &tb->pkt;
+	return (tb);
+}
+
+void
+free_trans_buf(transmitbuf_t *tb)
+{
+	free(tb);
+}
 
 HANDLE
 get_io_event()
@@ -111,7 +137,7 @@ static void
 iocompletionthread(void *NotUsed)
 {
 	BOOL bSuccess = FALSE;
-	int errstatus;
+	int errstatus = 0;
 	DWORD BytesTransferred = 0;
 	DWORD Key = 0;
 	IoCompletionInfo * lpo = NULL;
@@ -133,20 +159,27 @@ iocompletionthread(void *NotUsed)
 		if (lpo == NULL)
 		{
 #ifdef DEBUG
-			msyslog(LOG_INFO, "Overlapped IO Thread Exits: %m");	
+			if (debug > 2) {
+				printf("Overlapped IO Thread Exits: \n");
+			}
 #endif
 			break; /* fail */
 		}
-
+		
 		/*
 		 * Deal with errors
 		 */
+		errstatus = 0;
 		if (!bSuccess)
 		{
 			errstatus = GetLastError();
 			if (BytesTransferred == 0 && errstatus == WSA_OPERATION_ABORTED)
 			{
-				msyslog(LOG_ERR, "Transfer Operation aborted: %m");
+#ifdef DEBUG
+				if (debug > 2) {
+					printf("Transfer Operation aborted\n");
+				}
+#endif
 			}
 			else
 			{
@@ -161,18 +194,18 @@ iocompletionthread(void *NotUsed)
 		switch(lpo->request_type)
 		{
 		case CLOCK_READ:
-			OnIoReadComplete(Key, lpo, BytesTransferred);
+			OnIoReadComplete(Key, lpo, BytesTransferred, errstatus);
 			break;
 		case SOCK_RECV:
-			OnSocketRecv(Key, lpo, BytesTransferred);
+			OnSocketRecv(Key, lpo, BytesTransferred, errstatus);
 			break;
 		case SOCK_SEND:
 		case CLOCK_WRITE:
-			OnWriteComplete(Key, lpo, BytesTransferred);
+			OnWriteComplete(Key, lpo, BytesTransferred, errstatus);
 			break;
 		default:
 #if DEBUG
-			if (debug > 3) {
+			if (debug > 2) {
 				printf("Unknown request type %d found in completion port\n",
 					lpo->request_type);
 			}
@@ -250,7 +283,7 @@ static int QueueIORead( struct refclockio *rio, recvbuf_t *buff, IoCompletionInf
 	memset(buff, 0, sizeof(recvbuf_t));
 
 	lpo->request_type = CLOCK_READ;
-	lpo->buff = buff;
+	lpo->recv_buf = buff;
 
 	buff->fd = rio->fd;
 	if (!ReadFile((HANDLE) buff->fd, &buff->recv_buffer, sizeof(buff->recv_buffer), NULL, (LPOVERLAPPED) lpo)) {
@@ -277,7 +310,7 @@ static int QueueIORead( struct refclockio *rio, recvbuf_t *buff, IoCompletionInf
 
 /* Return 1 on Successful Read */
 static int 
-OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
+OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	recvbuf_t *buff;
 	recvbuf_t *newbuff;
@@ -286,7 +319,7 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
 	 */
-	buff = (recvbuf_t *) lpo->buff;
+	buff = (recvbuf_t *) lpo->recv_buf;
 	/*
 	 * Get a new recv buffer for the next packet
 	 */
@@ -300,7 +333,10 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 	}
 	else 
 	{
-		if (Bytes > 0) { /* ignore 0 bytes read due to timeout's */
+		/*
+		 * ignore 0 bytes read due to timeout's and closure on fd
+		 */
+		if (Bytes > 0 && errstatus != WSA_OPERATION_ABORTED) {
 			get_systime(&buff->recv_time);
 			buff->recv_length = (int) Bytes;
 			buff->receiver = rio->clock_recv;
@@ -367,7 +403,7 @@ static unsigned long QueueSocketRecv(SOCKET s, recvbuf_t *buff, IoCompletionInfo
 	int AddrLen;
 
 	lpo->request_type = SOCK_RECV;
-	lpo->buff = buff;
+	lpo->recv_buf = buff;
 
 	if (buff != NULL) {
 		DWORD BytesReceived = 0;
@@ -414,7 +450,7 @@ static unsigned long QueueSocketRecv(SOCKET s, recvbuf_t *buff, IoCompletionInfo
 
 /* Returns 0 if any Error */
 static int 
-OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
+OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	struct recvbuf *buff = NULL;
 	recvbuf_t *newbuff;
@@ -423,7 +459,19 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
 	*/
 	
-	buff = (struct recvbuf *) lpo->buff;
+	buff = lpo->recv_buf;
+
+	/*
+	 * If the socket is closed we get an Operation Aborted error
+	 * Just clean up
+	 */
+	if (errstatus == WSA_OPERATION_ABORTED)
+	{
+		freerecvbuf(buff);
+		FreeHeap(lpo, "OnSocketRecv: Socket Closed");
+		return (1);
+	}
+
 	get_systime(&buff->recv_time);	
 
 	/*
@@ -453,15 +501,22 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes)
 			freerecvbuf(buff);
 		}
 	}
-	if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-		if (debug > 3) {
-			printf( "Error %d setting IoEventHandle\n", GetLastError() );
-		}
-#endif
-	}
-
 	QueueSocketRecv(inter->fd, newbuff, lpo);
+	/*
+	 * Now signal we have something to process
+	 */
+#if 0
+	if (newbuff != buff) {
+		if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+			if (debug > 3) {
+				printf( "Error %d setting IoEventHandle\n", GetLastError() );
+			}
+#endif
+		}
+	}
+#endif
+
 	return 1;
 }
 
@@ -507,16 +562,20 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 }
 
 static int 
-OnWriteComplete(DWORD Key, IoCompletionInfo *lpo, DWORD Bytes)
+OnWriteComplete(DWORD Key, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	transmitbuf_t *buff;
 	(void) Bytes;
 	(void) Key;
 
-	buff = (transmitbuf_t *) lpo->buff;
+	buff = lpo->trans_buf;
 
-	free_transmit_buffer(buff);
-	FreeHeap(lpo, "OnWriteComplete");
+	free_trans_buf(buff);
+
+	if (errstatus == WSA_OPERATION_ABORTED)
+		FreeHeap(lpo, "OnWriteComplete: Socket Closed");
+	else
+		FreeHeap(lpo, "OnWriteComplete");
 	return 1;
 }
 
@@ -542,7 +601,7 @@ io_completion_port_sendto(
 		return ERROR_OUTOFMEMORY;
 
 	if (len <= sizeof(buff->pkt)) {
-		buff = get_free_transmit_buffer();
+		buff = get_trans_buf();
 
 		if (buff == NULL) {
 			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
@@ -558,7 +617,7 @@ io_completion_port_sendto(
 
 		AddrLen = sizeof(struct sockaddr_in);
 		lpo->request_type = SOCK_SEND;
-		lpo->buff = (recvbuf_t *) buff;
+		lpo->trans_buf = buff;
 
 		Result = WSASendTo(inter->fd, &buff->wsabuf, 1, &BytesSent, Flags, (struct sockaddr *) dest, AddrLen, (LPOVERLAPPED) lpo, NULL);
 
@@ -579,7 +638,7 @@ io_completion_port_sendto(
 			 */
 			default :
 				netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
-				free_transmit_buffer(buff);
+				free_trans_buf(buff);
 				FreeHeap(lpo, "io_completion_port_sendto");
 				break;
 			}
@@ -620,14 +679,14 @@ io_completion_port_write(
 		return ERROR_OUTOFMEMORY;
 
 	if (len <= sizeof(buff->pkt)) {
-		buff = get_free_transmit_buffer();
+		buff = get_trans_buf();
 		if (buff == NULL) {
 			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
 			FreeHeap(lpo, "io_completion_port_write");
 		}
 
 		lpo->request_type = CLOCK_WRITE;
-		lpo->buff = (recvbuf_t *)buff;
+		lpo->trans_buf = buff;
 		memcpy(&buff->pkt, pkt, len);
 
 		Result = WriteFile(fd, buff->pkt, len, &lpNumberOfBytesWritten, (LPOVERLAPPED) lpo);
@@ -646,7 +705,7 @@ io_completion_port_write(
 
 			default :
 				netsyslog(LOG_ERR, "WriteFile - error sending message: %m");
-				free_transmit_buffer(buff);
+				free_trans_buf(buff);
 				FreeHeap(lpo, "io_completion_port_write");
 				break;
 			}
@@ -673,7 +732,8 @@ io_completion_port_write(
  */
 int GetReceivedBuffers()
 {
-	DWORD Index = WaitForMultipleObjectsEx(MAXHANDLES, WaitHandles, FALSE, INFINITE, TRUE);
+//	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
+	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, 500);
 	switch (Index) {
 	case WAIT_OBJECT_0 + 0 : /* exit request */
 		exit(0);

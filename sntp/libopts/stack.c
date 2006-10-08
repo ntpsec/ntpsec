@@ -1,8 +1,8 @@
 
 /*
  *  stack.c
- *  $Id: stack.c,v 4.10 2006/07/14 04:20:17 bkorb Exp $
- *  Time-stamp:      "2006-07-13 21:11:29 bkorb"
+ *  $Id: stack.c,v 4.13 2006/10/05 03:39:53 bkorb Exp $
+ *  Time-stamp:      "2006-09-22 18:13:19 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
@@ -78,7 +78,7 @@ optionUnstackArg(
      *  THEN indicate that we don't have any of these options
      */
     if (pAL == NULL) {
-        pOptDesc->fOptState &= OPTST_PERSISTENT;
+        pOptDesc->fOptState &= OPTST_PERSISTENT_MASK;
         if ( (pOptDesc->fOptState & OPTST_INITENABLED) == 0)
             pOptDesc->fOptState |= OPTST_DISABLED;
         return;
@@ -89,7 +89,7 @@ optionUnstackArg(
         regex_t   re;
         int       i, ct, dIdx;
 
-        if (regcomp( &re, pOptDesc->pzLastArg, REG_NOSUB ) != 0)
+        if (regcomp( &re, pOptDesc->optArg.argString, REG_NOSUB ) != 0)
             return;
 
         /*
@@ -150,7 +150,7 @@ optionUnstackArg(
             if (pzEq != NULL)
                 *pzEq = NUL;
 
-            if (strcmp( pzSrc, pOptDesc->pzLastArg ) == 0) {
+            if (strcmp( pzSrc, pOptDesc->optArg.argString ) == 0) {
                 /*
                  *  Remove this entry by reducing the in-use count
                  *  and *not* putting the string pointer back into
@@ -177,7 +177,7 @@ optionUnstackArg(
      *  THEN indicate that we don't have any of these options
      */
     if (pAL->useCt == 0) {
-        pOptDesc->fOptState &= OPTST_PERSISTENT;
+        pOptDesc->fOptState &= OPTST_PERSISTENT_MASK;
         if ( (pOptDesc->fOptState & OPTST_INITENABLED) == 0)
             pOptDesc->fOptState |= OPTST_DISABLED;
         free( (void*)pAL );
@@ -250,16 +250,15 @@ optionStackArg(
     tOptions*  pOpts,
     tOptDesc*  pOD )
 {
-    if (pOD->pzLastArg == NULL)
+    if (pOD->optArg.argString == NULL)
         return;
 
-    addArgListEntry( &(pOD->optCookie), (void*)pOD->pzLastArg );
+    addArgListEntry( &(pOD->optCookie), (void*)pOD->optArg.argString );
 }
 /*
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/stack.c */

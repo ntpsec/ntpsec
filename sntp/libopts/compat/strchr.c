@@ -2,9 +2,9 @@
    SYNOPSIS
        #include <string.h>
 
-       char *strchr(const char *s, int c);
+       char *strchr(char const *s, int c);
 
-       char *strrchr(const char *s, int c);
+       char *strrchr(char const *s, int c);
 
    DESCRIPTION
        The  strchr() function returns a pointer to the first occurrence of the
@@ -25,7 +25,7 @@
 */
 
 char*
-strchr( const char *s, int c)
+strchr( char const *s, int c)
 {
     do {
         if ((unsigned)*s == (unsigned)c)
@@ -37,9 +37,9 @@ strchr( const char *s, int c)
 }
 
 char*
-strrchr( const char *s, int c)
+strrchr( char const *s, int c)
 {
-    const char *e = s + strlen(s);
+    char const *e = s + strlen(s);
 
     for (;;) {
         if (--e < s)
@@ -55,7 +55,6 @@ strrchr( const char *s, int c)
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of compat/strsignal.c */

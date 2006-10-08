@@ -1,6 +1,6 @@
 
 /*
- *  restore.c  $Id: restore.c,v 4.5 2006/03/31 19:52:11 bkorb Exp $
+ *  restore.c  $Id: restore.c,v 4.9 2006/10/05 03:39:53 bkorb Exp $
  * Time-stamp:      "2005-02-23 15:10:20 bkorb"
  *
  *  This module's routines will save the current option state to memory
@@ -181,7 +181,7 @@ optionFree( tOptions* pOpts )
                 if (  (p->fOptState & OPTST_STACKED)
                    && (p->optCookie != NULL)) {
                     AGFREE( p->optCookie );
-                    p->fOptState &= OPTST_PERSISTENT;
+                    p->fOptState &= OPTST_PERSISTENT_MASK;
                     if ((p->fOptState & OPTST_INITENABLED) == 0)
                         p->fOptState |= OPTST_DISABLED;
                 }
@@ -201,7 +201,6 @@ optionFree( tOptions* pOpts )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/restore.c */

@@ -1,12 +1,12 @@
 
-/*  $Id: version.c,v 4.7 2006/07/27 02:59:08 bkorb Exp $
- * Time-stamp:      "2006-07-26 18:38:16 bkorb"
+/*  $Id: version.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
+ * Time-stamp:      "2006-09-22 18:15:00 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
  */
 
-static const char zAOV[] =
+static char const zAOV[] =
     "Automated Options version %s, copyright (c) 1999-2006 Bruce Korb\n";
 
 /*  Automated Options is free software.
@@ -58,16 +58,16 @@ printVersion( tOptions* pOpts, tOptDesc* pOD, FILE* fp );
 /*=export_func  optionVersion
  *
  * what:     return the compiled AutoOpts version number
- * ret_type: const char*
+ * ret_type: char const*
  * ret_desc: the version string in constant memory
  * doc:
  *  Returns the full version string compiled into the library.
  *  The returned string cannot be modified.
 =*/
-const char*
+char const*
 optionVersion( void )
 {
-    static const char zVersion[] =
+    static char const zVersion[] =
         STR( AO_CURRENT.AO_REVISION );
 
     return zVersion;
@@ -79,16 +79,16 @@ printVersion( tOptions* pOpts, tOptDesc* pOD, FILE* fp )
 {
     char swCh;
 
-    if (pOD->pzLastArg == NULL)
+    if (pOD->optArg.argString == NULL)
          swCh = 'v';
-    else swCh = pOD->pzLastArg[0];
+    else swCh = pOD->optArg.argString[0];
 
     if (pOpts->pzFullVersion != NULL) {
         fputs( pOpts->pzFullVersion, fp );
         fputc( '\n', fp );
 
     } else {
-        const char *pz = pOpts->pzUsageTitle;
+        char const *pz = pOpts->pzUsageTitle;
         do { fputc( *pz, fp ); } while (*(pz++) != '\n');
     }
 
@@ -171,7 +171,6 @@ optionVersionStderr( tOptions*  pOpts, tOptDesc*  pOD )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/version.c */

@@ -1,3 +1,9 @@
+
+/*
+ * Time-stamp:        "2006-09-23 19:44:29 bkorb"
+ *             by: bkorb
+ * Last Committed:    $Date: 2006/09/24 02:57:02 $
+ */
 #ifndef WINDOWS_CONFIG_HACKERY
 #define WINDOWS_CONFIG_HACKERY 1
 
@@ -36,7 +42,7 @@
  * # define HAVE_VSPRINTF
  * # define HAVE_SNPRINTF
  * # define HAVE_VSNPRINTF
- * # define HAVE_PROTOTYPES		/* from ntpq.mak * /
+ * # define HAVE_PROTOTYPES             /* from ntpq.mak * /
  * # define HAVE_MEMMOVE
  * # define HAVE_TERMIOS_H
  * # define HAVE_ERRNO_H
@@ -48,7 +54,7 @@
  * # define ISC_PLATFORM_NEEDNTOP
  * # define ISC_PLATFORM_NEEDPTON
  * # define NEED_S_CHAR_TYPEDEF
- * # define USE_PROTOTYPES 		/* for ntp_types.h * /
+ * # define USE_PROTOTYPES              /* for ntp_types.h * /
  *
  * #define ULONG_CONST(a) a ## UL
  */
@@ -71,7 +77,7 @@
 
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_  
+#define _WINSOCKAPI_
 #endif
 
 #ifndef __RPCASYNC_H__
@@ -83,7 +89,7 @@
 #include <winsock2.h>
 
 /*
- * Compatibility declarations for Windows, assuming SYS_WINNT 
+ * Compatibility declarations for Windows, assuming SYS_WINNT
  * has been defined.
  */
 #define strdup  _strdup
@@ -94,7 +100,7 @@
 
 #include <io.h>
 #define open    _open
-#define close   _close 
+#define close   _close
 #define read    _read
 #define write   _write
 #define lseek   _lseek
@@ -102,17 +108,17 @@
 #define dup2    _dup2
 
 #define O_RDWR     _O_RDWR
-#define O_RDONLY   _O_RDONLY 
+#define O_RDONLY   _O_RDONLY
 #define O_EXCL     _O_EXCL
 
-#ifndef	S_ISREG
+#ifndef S_ISREG
 #  define S_IFREG _S_IFREG
-#  define	S_ISREG(mode)	(((mode) & S_IFREG) == S_IFREG)
+#  define       S_ISREG(mode)   (((mode) & S_IFREG) == S_IFREG)
 #endif
 
-#ifndef	S_ISDIR
+#ifndef S_ISDIR
 #  define S_IFDIR _S_IFDIR
-#  define	S_ISDIR(mode)	(((mode) & S_IFDIR) == S_IFDIR)
+#  define       S_ISDIR(mode)   (((mode) & S_IFDIR) == S_IFDIR)
 #endif
 
 #endif /* WINDOWS_CONFIG_HACKERY */

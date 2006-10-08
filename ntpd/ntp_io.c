@@ -132,6 +132,8 @@ struct interface *loopback_interface;	/* loopback ipv4 interface */
 
 int ninterfaces;			/* Total number of interfaces */
 
+volatile int disable_dynamic_updates;   /* when set to != 0 dynamic updates won't happen */
+
 #ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
@@ -1034,9 +1036,11 @@ refresh_interface(struct interface * interface)
 void
 interface_update(interface_receiver_t receiver, void *data)
 {
-  	BLOCKIO();
-	update_interfaces(htons(NTP_PORT), receiver, data);
-  	UNBLOCKIO();
+	if (!disable_dynamic_updates) {
+		BLOCKIO();
+		update_interfaces(htons(NTP_PORT), receiver, data);
+		UNBLOCKIO();
+	}
 }
 
 /*
@@ -1044,21 +1048,64 @@ interface_update(interface_receiver_t receiver, void *data)
  * a wildcard address
  */
 static int
-is_wildcard_ifaddr(struct interface *itf)
+is_wildcard_addr(struct sockaddr_storage *sas)
 {
-	if (itf->family == AF_INET &&
-	    ((struct sockaddr_in*)&itf->sin)->sin_addr.s_addr == htonl(INADDR_ANY))
+	if (sas->ss_family == AF_INET &&
+	    ((struct sockaddr_in*)sas)->sin_addr.s_addr == htonl(INADDR_ANY))
 		return 1;
 
 #ifdef INCLUDE_IPV6_SUPPORT
-	if (itf->family == AF_INET6 &&
-	    memcmp(&((struct sockaddr_in6*)&itf->sin)->sin6_addr, &in6addr_any,
+	if (sas->ss_family == AF_INET6 &&
+	    memcmp(&((struct sockaddr_in6*)sas)->sin6_addr, &in6addr_any,
 		   sizeof(in6addr_any) == 0))
 		return 1;
 #endif
 
 	return 0;
 }
+
+#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+/*
+ * enable/disable re-use of wildcard address socket
+ */
+static void
+set_wildcard_reuse(int family, int on)
+{
+	int onvalue = 1;
+	int offvalue = 0;
+	int *onoff;
+	SOCKET fd = INVALID_SOCKET;
+
+	onoff = on ? &onvalue : &offvalue;
+
+	switch (family) {
+	case AF_INET:
+		if (any_interface) {
+			fd = any_interface->fd;
+		}
+		break;
+
+#ifdef INCLUDE_IPV6_SUPPORT
+	case AF_INET6:
+		if (any6_interface) {
+			fd = any6_interface->fd;
+		}
+		break;
+#endif /* !INCLUDE_IPV6_SUPPORT */
+	}
+
+	if (fd != INVALID_SOCKET) {
+		if (setsockopt(fd, SOL_SOCKET,
+			       SO_REUSEADDR, (char *)onoff,
+			       sizeof(*onoff))) {
+			netsyslog(LOG_ERR, "set_wildcard_reuse: setsockopt(SO_REUSEADDR, %s) failed: %m", *onoff ? "on" : "off");
+		}
+		DPRINTF(4, ("set SO_REUSEADDR to %s on %s\n", *onoff ? "ON" : "OFF",
+			    stoa((family == AF_INET) ?
+				  &any_interface->sin : &any6_interface->sin)));
+	}
+}
+#endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */
 
 /*
  * update_interface strategy
@@ -1074,7 +1121,7 @@ is_wildcard_ifaddr(struct interface *itf)
  *     attempt to create a new interface entry
  *
  * Phase 2:
- * forall currently known interfaces
+ * forall currently known non MCAST and WILDCARD interfaces
  *   if interface does not match configuration phase (not seen in phase 1):
  *     remove interface from known interface list
  *     forall peers associated with this interface
@@ -1180,7 +1227,7 @@ update_interfaces(
 		 * address - some dhcp clients produce that in the
 		 * wild
 		 */
-		if (is_wildcard_ifaddr(&interface))
+		if (is_wildcard_addr(&interface.sin))
 			continue;
 
 		/*
@@ -1941,12 +1988,13 @@ io_multicast_add(
 	set_reuseaddr(1);
 	interface->bfd = INVALID_SOCKET;
 	interface->fd = open_socket(&interface->sin,
-			    INT_MULTICAST, 1, interface);
+			    INT_MULTICAST, 0, interface);
 
 	if (interface->fd != INVALID_SOCKET)
 	{
 		interface->bfd = INVALID_SOCKET;
 		interface->ignore_packets = ISC_FALSE;
+		interface->flags |= INT_MCASTIF;
 		
 		(void) strncpy(interface->name, "multicast",
 			sizeof(interface->name));
@@ -1954,6 +2002,7 @@ io_multicast_add(
 						htonl(~(u_int32)0);
 		DPRINT_INTERFACE(2, (interface, "multicast add ", "\n"));
 		add_interface(interface);
+		list_if_listening(interface, NTP_PORT);
 	}
 	else
 	{
@@ -2194,6 +2243,7 @@ open_socket(
 		    errval == WSAEPFNOSUPPORT)
 #endif
 			return (INVALID_SOCKET);
+		msyslog(LOG_ERR, "unexpected error code %d (not PROTONOSUPPORT|AFNOSUPPORT|FPNOSUPPORT) - exiting", errval);
 		exit(1);
 		/*NOTREACHED*/
 	}
@@ -2212,7 +2262,7 @@ open_socket(
 
 	/*
 	 * set SO_REUSEADDR since we will be binding the same port
-	 * number on each interface
+	 * number on each interface according to flag
 	 */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
 		       turn_off_reuse ? (char *)&off : (char *)&on, sizeof(on)))
@@ -2263,34 +2313,34 @@ open_socket(
 #endif /* IPV6_BINDV6ONLY */
 	}
 
+#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+	/*
+	 * some OSes don't allow bindinf to more specific
+	 * addresses if a wildcard address already bound
+	 * to the port and SO_REUSEADDR is not set
+	 */
+	if (!is_wildcard_addr(addr)) {
+		set_wildcard_reuse(addr->ss_family, 1);
+	}
+#endif
+
 	/*
 	 * bind the local address.
 	 */
-	if (bind(fd, (struct sockaddr *)addr, SOCKLEN(addr)) < 0) {
-		char buff[160];
+	errval = bind(fd, (struct sockaddr *)addr, SOCKLEN(addr));
 
-		if(addr->ss_family == AF_INET)
-			sprintf(buff,
-				"bind() fd %d, family %d, port %d, addr %s, in_classd=%d flags=0x%x fails: %%m",
-				fd, addr->ss_family, (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
-				stoa(addr),
-				IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), flags);
-#ifdef INCLUDE_IPV6_SUPPORT
-		else if(addr->ss_family == AF_INET6)
-		                sprintf(buff,
-                                "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=%d fails: %%m",
-                                fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
-# ifdef ISC_PLATFORM_HAVESCOPEID
-                                ((struct sockaddr_in6*)addr)->sin6_scope_id
-# else
-                                -1
-# endif
-				, stoa(addr),
-                                IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
+#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+	/*
+	 * some OSes don't allow binding to more specific
+	 * addresses if a wildcard address already bound
+	 * to the port and REUSE_ADDR is not set
+	 */
+	if (!is_wildcard_addr(addr)) {
+		set_wildcard_reuse(addr->ss_family, 0);
+	}
 #endif
-		else
-			return INVALID_SOCKET;
 
+	if (errval < 0) {
 		/*
 		 * Don't log this under all conditions
 		 */
@@ -2298,12 +2348,31 @@ open_socket(
 #ifdef DEBUG
 		    || debug > 1
 #endif
-		   )
-			netsyslog(LOG_ERR, buff);
+			) {
+			if (addr->ss_family == AF_INET)
+				netsyslog(LOG_ERR,
+					  "bind() fd %d, family %d, port %d, addr %s, in_classd=%d flags=0x%x fails: %m",
+					  fd, addr->ss_family, (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
+					  stoa(addr),
+					  IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), flags);
+#ifdef INCLUDE_IPV6_SUPPORT
+			else if (addr->ss_family == AF_INET6)
+		                netsyslog(LOG_ERR,
+					  "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=%d fails: %m",
+					  fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
+# ifdef ISC_PLATFORM_HAVESCOPEID
+					  ((struct sockaddr_in6*)addr)->sin6_scope_id
+# else
+					  -1
+# endif
+					  , stoa(addr),
+					  IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
+#endif
+		}
 
 		closesocket(fd);
-
-		return (INVALID_SOCKET);
+		
+		return INVALID_SOCKET;
 	}
 
 #ifdef HAVE_TIMESTAMP
@@ -2339,20 +2408,6 @@ open_socket(
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
 
 	add_addr_to_list(addr, interf);
-
-	/*
-	 *	Turn off the SO_REUSEADDR socket option.  It apparently
-	 *	causes heartburn on systems with multicast IP installed.
-	 *	On normal systems it only gets looked at when the address
-	 *	is being bound anyway..
-	 */
-	if (turn_off_reuse)
-	    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-			   (char *)&off, sizeof(off)))
-	    {
-		    netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR off fails on address %s: %m",
-			    stoa(addr));
-	    }
 
 #if !defined(SYS_WINNT) && !defined(VMS)
 	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd,
@@ -2991,14 +3046,16 @@ input_handler(
 	/*
 	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
-	for (asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
-	     asyncio_reader != NULL;
-	     asyncio_reader = ISC_LIST_PREV(asyncio_reader, link))
+	asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
+
+	while (asyncio_reader != NULL)
 	{
+	        struct asyncio_reader *next = ISC_LIST_PREV(asyncio_reader, link);
 		if (FD_ISSET(asyncio_reader->fd, &fds)) {
 			++select_count;
 			asyncio_reader->receiver(asyncio_reader);
 		}
+		asyncio_reader = next;
 	}
 #endif /* HAS_ROUTING_SOCKET */
 	
@@ -3638,6 +3695,16 @@ process_routing_msgs(struct asyncio_reader *reader)
 
 	int cnt;
 	
+	if (disable_dynamic_updates) {
+		/*
+		 * discard ourselves if we are not need any more
+		 * usually happens when running unprivileged
+		 */
+		remove_asyncio_reader(reader);
+		delete_asyncio_reader(reader);
+		return;
+	}
+
 	cnt = read(reader->fd, buffer, sizeof(buffer));
 	
 	if (cnt < 0) {
@@ -3728,7 +3795,7 @@ init_async_notifications()
 		reader->fd = fd;
 		reader->receiver = process_routing_msgs;
 		
-		add_asyncio_reader(reader, FD_TYPE_FILE);
+		add_asyncio_reader(reader, FD_TYPE_SOCKET);
 		msyslog(LOG_INFO, "Listening on routing socket on fd #%d for interface updates", fd);
 	} else {
 		msyslog(LOG_ERR, "unable to open routing socket (%m) - using polled interface update");

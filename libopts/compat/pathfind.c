@@ -4,11 +4,12 @@
 
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
+ * Time-stamp:       "2006-09-23 19:46:16 bkorb"
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2006/08/22 16:09:02 $
+ * Last Modified:    $Date: 2006/09/24 02:57:02 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.7 2006/08/22 16:09:02 bkorb Exp $
+ * $Id: pathfind.c,v 4.10 2006/09/24 02:57:02 bkorb Exp $
  */
 
 /* Code: */
@@ -17,17 +18,17 @@
 #ifndef HAVE_PATHFIND
 #if defined(__windows__) && !defined(__CYGWIN__)
 char*
-pathfind( const char*  path,
-          const char*  fileName,
-          const char*  mode )
+pathfind( char const*  path,
+          char const*  fileName,
+          char const*  mode )
 {
     return NULL;
 }
 #else
 
-static char* make_absolute( const char *string, const char *dot_path );
+static char* make_absolute( char const *string, char const *dot_path );
 static char* canonicalize_pathname( char *path );
-static char* extract_colon_unit( char* dir, const char *string, int *p_index );
+static char* extract_colon_unit( char* dir, char const *string, int *p_index );
 
 
 /*=export_func pathfind
@@ -36,9 +37,9 @@ static char* extract_colon_unit( char* dir, const char *string, int *p_index );
  *
  * ifndef: HAVE_PATHFIND
  *
- * arg:  + const char* + path + colon separated list of search directories +
- * arg:  + const char* + file + the name of the file to look for +
- * arg:  + const char* + mode + the mode bits that must be set to match +
+ * arg:  + char const* + path + colon separated list of search directories +
+ * arg:  + char const* + file + the name of the file to look for +
+ * arg:  + char const* + mode + the mode bits that must be set to match +
  *
  * ret_type:  char*
  * ret_desc:  the path to the located file
@@ -85,9 +86,9 @@ static char* extract_colon_unit( char* dir, const char *string, int *p_index );
  * err:  returns NULL if the file is not found.
 =*/
 char*
-pathfind( const char*  path,
-          const char*  fileName,
-          const char*  mode )
+pathfind( char const*  path,
+          char const*  fileName,
+          char const*  mode )
 {
     int   p_index   = 0;
     int   mode_bits = 0;
@@ -164,7 +165,7 @@ pathfind( const char*  path,
  * a new string, even if STRING was an absolute pathname to begin with.
  */
 static char*
-make_absolute( const char *string, const char *dot_path )
+make_absolute( char const *string, char const *dot_path )
 {
     char *result;
     int result_len;
@@ -288,7 +289,7 @@ canonicalize_pathname( char *path )
  * more.  Advance (P_INDEX) to the character after the colon.
  */
 static char*
-extract_colon_unit( char* pzDir, const char *string, int *p_index )
+extract_colon_unit( char* pzDir, char const *string, int *p_index )
 {
     char*  pzDest = pzDir;
     int    ix     = *p_index;
@@ -300,7 +301,7 @@ extract_colon_unit( char* pzDir, const char *string, int *p_index )
         return NULL;
 
     {
-        const char* pzSrc = string + ix;
+        char const* pzSrc = string + ix;
 
         while (*pzSrc == ':')  pzSrc++;
 
@@ -333,7 +334,6 @@ extract_colon_unit( char* pzDir, const char *string, int *p_index )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of compat/pathfind.c */

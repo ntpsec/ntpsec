@@ -1,6 +1,6 @@
 /*
- *  $Id: configfile.c,v 1.12 2006/09/20 04:27:44 bkorb Exp $
- *  Time-stamp:      "2006-09-10 13:57:10 bkorb"
+ *  $Id: configfile.c,v 4.29 2006/09/28 01:26:16 bkorb Exp $
+ *  Time-stamp:      "2006-09-24 15:18:51 bkorb"
  *
  *  configuration/rc/ini file handling.
  */
@@ -53,7 +53,7 @@
 static void
 filePreset(
     tOptions*     pOpts,
-    const char*   pzFileName,
+    char const*   pzFileName,
     int           direction );
 
 static char*
@@ -113,7 +113,7 @@ skipUnknown( char* pzText );
 /*=export_func  configFileLoad
  *
  * what:  parse a configuration file
- * arg:   + const char*     + pzFile + the file to load +
+ * arg:   + char const*     + pzFile + the file to load +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  An allocated, compound value structure
@@ -141,7 +141,7 @@ skipUnknown( char* pzText );
  *  @end itemize
 =*/
 const tOptionValue*
-configFileLoad( const char* pzFile )
+configFileLoad( char const* pzFile )
 {
     tmap_info_t   cfgfile;
     tOptionValue* pRes = NULL;
@@ -167,8 +167,8 @@ configFileLoad( const char* pzFile )
  *
  * what:  find a hierarcicaly valued option instance
  * arg:   + const tOptDesc* + pOptDesc + an option with a nested arg type +
- * arg:   + const char*     + name     + name of value to find +
- * arg:   + const char*     + value    + the matching value    +
+ * arg:   + char const*     + name     + name of value to find +
+ * arg:   + char const*     + value    + the matching value    +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -189,7 +189,7 @@ configFileLoad( const char* pzFile )
 =*/
 const tOptionValue*
 optionFindValue( const tOptDesc* pOptDesc,
-                 const char* pzName, const char* pzVal )
+                 char const* pzName, char const* pzVal )
 {
     const tOptionValue* pRes = NULL;
 
@@ -204,8 +204,8 @@ optionFindValue( const tOptDesc* pOptDesc,
 
     else do {
         tArgList* pAL = pOptDesc->optCookie;
-        int ct = pAL->useCt;
-        tCC** ppOV = pAL->apzArgs;
+        int    ct   = pAL->useCt;
+        void** ppOV = (void**)(pAL->apzArgs);
 
         if (ct == 0) {
             errno = ENOENT;
@@ -218,7 +218,7 @@ optionFindValue( const tOptDesc* pOptDesc,
         }
 
         while (--ct >= 0) {
-            const tOptionValue* pOV = (tOptionValue*)*(ppOV++);
+            const tOptionValue* pOV = *(ppOV++);
             const tOptionValue* pRV = optionGetValue( pOV, pzName );
 
             if (pRV == NULL)
@@ -242,8 +242,8 @@ optionFindValue( const tOptDesc* pOptDesc,
  * what:  find a hierarcicaly valued option instance
  * arg:   + const tOptDesc* + pOptDesc + an option with a nested arg type +
  * arg:   + const tOptionValue* + pPrevVal + the last entry +
- * arg:   + const char*     + name     + name of value to find +
- * arg:   + const char*     + value    + the matching value    +
+ * arg:   + char const*     + name     + name of value to find +
+ * arg:   + char const*     + value    + the matching value    +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -265,7 +265,7 @@ optionFindValue( const tOptDesc* pOptDesc,
 =*/
 const tOptionValue*
 optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
-                 const char* pzName, const char* pzVal )
+                 char const* pzName, char const* pzVal )
 {
     int foundOldVal = 0;
     tOptionValue* pRes = NULL;
@@ -281,8 +281,8 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
 
     else do {
         tArgList* pAL = pOptDesc->optCookie;
-        int ct = pAL->useCt;
-        tCC** ppOV = pAL->apzArgs;
+        int    ct   = pAL->useCt;
+        void** ppOV = (void**)pAL->apzArgs;
 
         if (ct == 0) {
             errno = ENOENT;
@@ -290,7 +290,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
         }
 
         while (--ct >= 0) {
-            tOptionValue* pOV = (tOptionValue*)*(ppOV++);
+            tOptionValue* pOV = *(ppOV++);
             if (foundOldVal) {
                 pRes = pOV;
                 break;
@@ -310,7 +310,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
  *
  * what:  get a specific value from a hierarcical list
  * arg:   + const tOptionValue* + pOptValue + a hierarchcal value +
- * arg:   + const char*   + valueName + name of value to get +
+ * arg:   + char const*   + valueName + name of value to get +
  *
  * ret_type:  const tOptionValue*
  * ret_desc:  a compound value structure
@@ -332,7 +332,7 @@ optionFindNextValue( const tOptDesc* pOptDesc, const tOptionValue* pPrevVal,
  *  @end itemize
 =*/
 const tOptionValue*
-optionGetValue( const tOptionValue* pOld, const char* pzValName )
+optionGetValue( const tOptionValue* pOld, char const* pzValName )
 {
     tArgList*     pAL;
     tOptionValue* pRes = NULL;
@@ -344,15 +344,15 @@ optionGetValue( const tOptionValue* pOld, const char* pzValName )
     pAL = pOld->v.nestVal;
 
     if (pAL->useCt > 0) {
-        int ct = pAL->useCt;
-        tCC** papOV = pAL->apzArgs;
+        int    ct    = pAL->useCt;
+        void** papOV = (void**)(pAL->apzArgs);
 
         if (pzValName == NULL) {
             pRes = (tOptionValue*)*papOV;
         }
 
         else do {
-            tOptionValue* pOV = (tOptionValue*)*(papOV++);
+            tOptionValue* pOV = *(papOV++);
             if (strcmp( pOV->pzName, pzValName ) == 0) {
                 pRes = pOV;
                 break;
@@ -405,11 +405,11 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
     }
     pAL = pOVList->v.nestVal;
     {
-        int   ct   = pAL->useCt;
-        tCC** papNV = pAL->apzArgs;
+        int    ct    = pAL->useCt;
+        void** papNV = (void**)(pAL->apzArgs);
 
         while (ct-- > 0) {
-            tOptionValue* pNV = (tOptionValue*)*(papNV++);
+            tOptionValue* pNV = *(papNV++);
             if (pNV == pOldOV) {
                 if (ct == 0) {
                     err = ENOENT;
@@ -435,7 +435,7 @@ optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
 static void
 filePreset(
     tOptions*     pOpts,
-    const char*   pzFileName,
+    char const*   pzFileName,
     int           direction )
 {
     tmap_info_t   cfgfile;
@@ -461,14 +461,14 @@ filePreset(
         st.flags = OPTST_SET;
 
     do  {
-        while (isspace( *pzFileText ))  pzFileText++;
+        while (isspace( (int)*pzFileText ))  pzFileText++;
 
-        if (isalpha( *pzFileText )) {
+        if (isalpha( (int)*pzFileText )) {
             pzFileText = handleConfig( pOpts, &st, pzFileText, direction );
 
         } else switch (*pzFileText) {
         case '<':
-            if (isalpha( pzFileText[1] ))
+            if (isalpha( (int)pzFileText[1] ))
                 pzFileText = handleStructure(pOpts, &st, pzFileText, direction);
 
             else switch (pzFileText[1]) {
@@ -544,8 +544,8 @@ handleConfig(
     if (pzEnd == NULL)
         return pzText + strlen(pzText);
 
-    while (ISNAMECHAR( *pzText ))  pzText++;
-    while (isspace( *pzText )) pzText++;
+    while (ISNAMECHAR( (int)*pzText ))  pzText++;
+    while (isspace( (int)*pzText )) pzText++;
     if (pzText > pzEnd) {
     name_only:
         *pzEnd++ = NUL;
@@ -559,10 +559,10 @@ handleConfig(
      *  is an invalid format and we give up parsing the text.
      */
     if ((*pzText == '=') || (*pzText == ':')) {
-        while (isspace( *++pzText ))   ;
+        while (isspace( (int)*++pzText ))   ;
         if (pzText > pzEnd)
             goto name_only;
-    } else if (! isspace(pzText[-1]))
+    } else if (! isspace((int)pzText[-1]))
         return NULL;
 
     /*
@@ -626,7 +626,7 @@ handleDirective(
     size_t name_len;
 
     if (  (strncmp( pzText+2, zProg, title_len ) != 0)
-       || (! isspace( pzText[title_len+2] )) )  {
+       || (! isspace( (int)pzText[title_len+2] )) )  {
         pzText = strchr( pzText+2, '>' );
         if (pzText != NULL)
             pzText++;
@@ -640,8 +640,8 @@ handleDirective(
     do  {
         pzText += title_len;
 
-        if (isspace(*pzText)) {
-            while (isspace(*pzText))  pzText++;
+        if (isspace((int)*pzText)) {
+            while (isspace((int)*pzText))  pzText++;
             if (  (strneqvcmp( pzText, pOpts->pzProgName, (int)name_len) == 0)
                && (pzText[name_len] == '>'))  {
                 pzText += name_len + 1;
@@ -873,7 +873,7 @@ internalFileLoad( tOptions* pOpts )
  * what: Load the locatable config files, in order
  *
  * arg:  + tOptions*   + pOpts  + program options descriptor +
- * arg:  + const char* + pzProg + program name +
+ * arg:  + char const* + pzProg + program name +
  *
  * ret_type:  int
  * ret_desc:  0 -> SUCCESS, -1 -> FAILURE
@@ -902,7 +902,7 @@ internalFileLoad( tOptions* pOpts )
  *       always be returned.
 =*/
 int
-optionFileLoad( tOptions* pOpts, const char* pzProgram )
+optionFileLoad( tOptions* pOpts, char const* pzProgram )
 {
     if (! SUCCESSFUL( validateOptionsStruct( pOpts, pzProgram )))
         return -1;
@@ -921,7 +921,7 @@ optionFileLoad( tOptions* pOpts, const char* pzProgram )
  * arg:   + tOptDesc* + pOptDesc + the descriptor for this arg +
  *
  * doc:
- *  Processes the options found in the file named with pOptDesc->pzLastArg.
+ *  Processes the options found in the file named with pOptDesc->optArg.argString.
 =*/
 void
 optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
@@ -935,12 +935,12 @@ optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
      */
     if (! DISABLED_OPT( pOptDesc )) {
         struct stat sb;
-        if (stat( pOptDesc->pzLastArg, &sb ) != 0) {
+        if (stat( pOptDesc->optArg.argString, &sb ) != 0) {
             if ((pOpts->fOptSet & OPTPROC_ERRSTOP) == 0)
                 return;
 
             fprintf( stderr, zFSErrOptLoad, errno, strerror( errno ),
-                     pOptDesc->pzLastArg );
+                     pOptDesc->optArg.argString );
             (*pOpts->pUsageProc)( pOpts, EXIT_FAILURE );
             /* NOT REACHED */
         }
@@ -949,12 +949,12 @@ optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )
             if ((pOpts->fOptSet & OPTPROC_ERRSTOP) == 0)
                 return;
 
-            fprintf( stderr, zNotFile, pOptDesc->pzLastArg );
+            fprintf( stderr, zNotFile, pOptDesc->optArg.argString );
             (*pOpts->pUsageProc)( pOpts, EXIT_FAILURE );
             /* NOT REACHED */
         }
 
-        filePreset(pOpts, pOptDesc->pzLastArg, DIRECTION_CALLED);
+        filePreset(pOpts, pOptDesc->optArg.argString, DIRECTION_CALLED);
     }
 }
 
@@ -991,7 +991,7 @@ parseAttributes(
             break;
         }
 
-        while (isspace( *++pzText ))   ;
+        while (isspace( (int)*++pzText ))   ;
 
         if (strncmp( pzText, zLoadType, lenLoadType ) == 0) {
             pzText = parseValueType( pzText+lenLoadType, pType );
@@ -1046,7 +1046,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadCooked, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_COOKED;
                 return pzText + len;
             }
@@ -1059,7 +1059,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadUncooked, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_UNCOOKED;
                 return pzText + len;
             }
@@ -1072,7 +1072,7 @@ parseLoadMode(
         if (strncmp( pzText, zLoadKeep, len ) == 0) {
             if (  (pzText[len] == '>')
                || (pzText[len] == '/')
-               || isspace(pzText[len])) {
+               || isspace((int)pzText[len])) {
                 *pMode = OPTION_LOAD_KEEP;
                 return pzText + len;
             }
@@ -1113,7 +1113,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeString);
         if (strncmp( pzText, zLtypeString, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_STRING;
                 return pzText + len;
             }
@@ -1124,7 +1124,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeInteger);
         if (strncmp( pzText, zLtypeInteger, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_NUMERIC;
                 return pzText + len;
             }
@@ -1146,7 +1146,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeKeyword);
         if (strncmp( pzText, zLtypeKeyword, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_ENUMERATION;
                 return pzText + len;
             }
@@ -1157,7 +1157,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeSetMembership);
         if (strncmp( pzText, zLtypeSetMembership, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_MEMBERSHIP;
                 return pzText + len;
             }
@@ -1168,7 +1168,7 @@ parseValueType(
     {
         size_t len = strlen(zLtypeNest);
         if (strncmp( pzText, zLtypeNest, len ) == 0) {
-            if ((pzText[len] == '>') || isspace(pzText[len])) {
+            if ((pzText[len] == '>') || isspace((int)pzText[len])) {
                 pType->valType = OPARG_TYPE_HIERARCHY;
                 return pzText + len;
             }
@@ -1190,7 +1190,7 @@ static char*
 skipUnknown( char* pzText )
 {
     for (;; pzText++) {
-        if (isspace( *pzText ))  return pzText;
+        if (isspace( (int)*pzText ))  return pzText;
         switch (*pzText) {
         case NUL: return NULL;
         case '/':
@@ -1209,7 +1209,7 @@ skipUnknown( char* pzText )
  *  already been called.)
  */
 LOCAL tSuccess
-validateOptionsStruct( tOptions* pOpts, const char* pzProgram )
+validateOptionsStruct( tOptions* pOpts, char const* pzProgram )
 {
     if (pOpts == NULL) {
         fputs( zAO_Bad, stderr );
@@ -1251,7 +1251,7 @@ validateOptionsStruct( tOptions* pOpts, const char* pzProgram )
      *  and the set of equivalent characters.
      */
     if (pOpts->pzProgName == NULL) {
-        const char* pz = strrchr( pzProgram, DIRCH );
+        char const* pz = strrchr( pzProgram, DIRCH );
 
         if (pz == NULL)
              pOpts->pzProgName = pzProgram;
@@ -1273,7 +1273,6 @@ validateOptionsStruct( tOptions* pOpts, const char* pzProgram )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/configfile.c */

@@ -1,7 +1,7 @@
 
 /*
- *  $Id: cook.c,v 4.6 2006/06/24 23:34:51 bkorb Exp $
- *  Time-stamp:      "2006-06-24 11:29:58 bkorb"
+ *  $Id: cook.c,v 4.9 2006/09/28 01:26:16 bkorb Exp $
+ *  Time-stamp:      "2006-09-24 15:21:02 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
@@ -58,7 +58,7 @@
  * private:
  *
  * what:  escape-process a string fragment
- * arg:   + const char* + pzScan  + points to character after the escape +
+ * arg:   + char const* + pzScan  + points to character after the escape +
  * arg:   + char*       + pRes    + Where to put the result byte +
  * arg:   + u_int       + nl_ch   + replacement char if scanned char is \n +
  *
@@ -81,7 +81,7 @@
  * err:  @code{NULL} is returned if the string(s) is/are mal-formed.
 =*/
 unsigned int
-ao_string_cook_escape_char( const char* pzIn, char* pRes, u_int nl )
+ao_string_cook_escape_char( char const* pzIn, char* pRes, u_int nl )
 {
     unsigned int  res = 1;
 
@@ -106,7 +106,7 @@ ao_string_cook_escape_char( const char* pzIn, char* pRes, u_int nl )
     case 'v': *pRes = '\v'; break;
 
     case 'x':         /* HEX Escape       */
-        if (isxdigit( *pzIn ))  {
+        if (isxdigit( (int)*pzIn ))  {
             unsigned int  val;
             unsigned char ch = *pzIn++;
 
@@ -140,7 +140,7 @@ ao_string_cook_escape_char( const char* pzIn, char* pRes, u_int nl )
          *  IF the character copied was an octal digit,
          *  THEN set the output character to an octal value
          */
-        if (isdigit( *pRes ) && (*pRes < '8'))  {
+        if (isdigit( (int)*pRes ) && (*pRes < '8'))  {
             unsigned int  val = *pRes - '0';
             unsigned char ch  = *pzIn++;
 
@@ -239,7 +239,7 @@ ao_string_cook( char* pzScan, int* pLineCt )
             pzS++;
 
         scan_for_quote:
-            while (isspace(*pzS))
+            while (isspace((int)*pzS))
                 if (*(pzS++) == '\n')
                     (*pLineCt)++;
 
@@ -349,7 +349,6 @@ ao_string_cook( char* pzScan, int* pLineCt )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/cook.c */

@@ -2,12 +2,12 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2006-07-15 08:27:23 bkorb"
+ *  Time-stamp:      "2006-09-07 06:49:09 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.10 2006/07/15 22:10:21 bkorb Exp $
+ * $Id: compat.h,v 4.14 2006/09/24 02:10:45 bkorb Exp $
  */
 #ifndef COMPAT_H_GUARD
 #define COMPAT_H_GUARD 1
@@ -37,7 +37,7 @@
  *  SYSTEM HEADERS:
  */
 #include <sys/types.h>
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 #  include <sys/mman.h>
 #endif
 #include <sys/param.h>
@@ -237,17 +237,17 @@
 
 #ifndef HAVE_INT32_T
 # if SIZEOF_INT == 4
-	typedef signed int      int32_t;
+        typedef signed int      int32_t;
 # elif SIZEOF_LONG == 4
-	typedef signed long     int32_t;
+        typedef signed long     int32_t;
 # endif
 #endif
 
 #ifndef HAVE_UINT32_T
 # if SIZEOF_INT == 4
-	typedef unsigned int    uint32_t;
+        typedef unsigned int    uint32_t;
 # elif SIZEOF_LONG == 4
-	typedef unsigned long   uint32_t;
+        typedef unsigned long   uint32_t;
 # else
 #   error Cannot create a uint32_t type.
     Choke Me.
@@ -307,7 +307,6 @@
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of compat/compat.h */

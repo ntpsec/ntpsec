@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.22 2006/07/15 22:10:21 bkorb Exp $
- *  Time-stamp:      "2006-07-15 13:54:08 bkorb"
+ *  $Id: autoopts.c,v 4.27 2006/10/05 03:39:53 bkorb Exp $
+ *  Time-stamp:      "2006-10-04 19:32:32 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -68,7 +68,7 @@
 #  include "compat/strchr.c"
 #endif
 
-static const char zNil[] = "";
+static char const zNil[] = "";
 
 #define SKIP_RC_FILES(po) \
     DISABLED_OPT(&((po)->pOptDesc[ (po)->specOptIdx.save_opts+1]))
@@ -88,6 +88,50 @@ static int
 checkConsistency( tOptions* pOpts );
 /* = = = END-STATIC-FORWARD = = = */
 
+LOCAL void *
+ao_malloc( size_t sz )
+{
+    void * res = malloc(sz);
+    if (res == NULL) {
+        fprintf( stderr, "malloc of %d bytes failed\n", sz );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
+
+LOCAL void *
+ao_realloc( void *p, size_t sz )
+{
+    void * res = realloc(p, sz);
+    if (res == NULL) {
+        fprintf( stderr, "realloc of %d bytes at 0x%p failed\n", sz, p );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
+
+LOCAL void
+ao_free( void *p )
+{
+    if (p != NULL)
+        free(p);
+}
+
+
+LOCAL char *
+ao_strdup( char const *str )
+{
+    char * res = strdup(str);
+    if (res == NULL) {
+        fprintf( stderr, "strdup of %d byte string failed\n", strlen(str) );
+        exit( EXIT_FAILURE );
+    }
+    return res;
+}
+
+
 /*
  *  handleOption
  *
@@ -104,7 +148,7 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
     tOptDesc* pOD = pOptState->pOD;
     tOptProc* pOP = pOD->pOptProc;
 
-    pOD->pzLastArg =  pOptState->pzOptArg;
+    pOD->optArg.argString = pOptState->pzOptArg;
 
     /*
      *  IF we are presetting options, then we will ignore any un-presettable
@@ -169,7 +213,7 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
          *  Copy the most recent option argument.  set membership state
          *  is kept in ``p->optCookie''.  Do not overwrite.
          */
-        p->pzLastArg = pOD->pzLastArg;
+        p->optArg.argString = pOD->optArg.argString;
         pOD = p;
 
     } else {
@@ -177,8 +221,8 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
         pOD->optActualIndex = pOD->optIndex;
     }
 
-    pOD->fOptState &= OPTST_PERSISTENT;
-    pOD->fOptState |= (pOptState->flags & ~OPTST_PERSISTENT);
+    pOD->fOptState &= OPTST_PERSISTENT_MASK;
+    pOD->fOptState |= (pOptState->flags & ~OPTST_PERSISTENT_MASK);
 
     /*
      *  Keep track of count only for DEFINED (command line) options.
@@ -186,11 +230,11 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
      */
     if (  (pOD->fOptState & OPTST_DEFINED)
        && (++pOD->optOccCt > pOD->optMaxCt)  )  {
-        const char* pzEqv =
+        char const* pzEqv =
             (pOD->optEquivIndex != NO_EQUIVALENT) ? zEquiv : zNil;
 
         if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0) {
-            const char* pzFmt = (pOD->optMaxCt > 1) ? zAtMost : zOnlyOne;
+            char const* pzFmt = (pOD->optMaxCt > 1) ? zAtMost : zOnlyOne;
             fputs( zErrOnly, stderr );
             fprintf( stderr, pzFmt, pOD->pz_Name, pzEqv,
                      pOD->optMaxCt );
@@ -514,11 +558,13 @@ nextOption( tOptions* pOpts, tOptState* pOptState )
 {
     tSuccess res;
     enum { ARG_NONE, ARG_MAY, ARG_MUST } arg_type = ARG_NONE;
+    teOptArgType at;
 
     res = findOptDesc( pOpts, pOptState );
     if (! SUCCESSFUL( res ))
         return res;
-    pOptState->flags |= (pOptState->pOD->fOptState & OPTST_PERSISTENT);
+    pOptState->flags |= (pOptState->pOD->fOptState & OPTST_PERSISTENT_MASK);
+    at = OPTST_GET_ARGTYPE(pOptState->flags);
 
     /*
      *  Figure out what to do about option arguments.  An argument may be
@@ -528,7 +574,7 @@ nextOption( tOptions* pOpts, tOptState* pOptState )
      */
     if ((pOptState->flags & OPTST_DISABLED) != 0)
         arg_type = ARG_NONE;
-    else if (OPTST_GET_ARGTYPE(pOptState->flags) == OPARG_TYPE_NONE)
+    else if (at == OPARG_TYPE_NONE)
         arg_type = ARG_NONE;
     else if (pOptState->flags & OPTST_ARG_OPTIONAL)
         arg_type = ARG_MAY;
@@ -1039,7 +1085,6 @@ optionProcess(
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/autoopts.c */

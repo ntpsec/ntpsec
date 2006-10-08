@@ -1,6 +1,6 @@
 
 /*
- *  $Id: environment.c,v 4.7 2006/03/31 19:52:10 bkorb Exp $
+ *  $Id: environment.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
  * Time-stamp:      "2005-10-29 13:23:59 bkorb"
  *
  *  This file contains all of the routines that must be linked into
@@ -65,7 +65,7 @@
 LOCAL void
 doPrognameEnv( tOptions* pOpts, teEnvPresetType type )
 {
-    const char*   pczOptStr = getenv( pOpts->pzPROGNAME );
+    char const*   pczOptStr = getenv( pOpts->pzPROGNAME );
     token_list_t* pTL;
     int           sv_argc;
     tAoUI         sv_flag;
@@ -255,7 +255,6 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/environment.c */

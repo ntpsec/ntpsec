@@ -1,622 +1,297 @@
-/* Windows NT Clock Routines
- *
- *
- * Revision History:
- * $Log: <Not implemented> $
- * Revision 1.9  2000/11/19 09:02:12  dietrich
- * From: Ron Thornton [rthornto@pictel.com]
- * Sent: Thu 11/16/00 8:51 AM
- * On Windows 2000 it requires a privilege on the current process token
- * that is disabled by default on Windows 2000.
- *
- * I set the token by adding the following code at the beginning of the
- * init_winnt_time() function in nt_clockstuff.c.
- *
- * Revision 1.8  2000/11/19 08:03:20  dietrich
- * From: "Colin Dancer" <colin.dancer@pyrochrome.net>
- * To: <bugs@ntp.org>
- * Sent: 10 November 2000 12:59
- * Subject: NT bug in NTP 4.0.99j
- *
- * I've found a bug in (and produced a fix for) the NT clock interpolation
- * code in NTP 4.0.99j.
- *
- * The symptoms of the problem are that gettimeofday() function on NT
- * can be wrong by hundreds of seconds if, while a gettimeofday() call
- * is being processed, an APC completes after the query of the performance
- * counter but before the lock is grabbed.  The most obvious fix is to move
- * the lock to include the querying of the performance counter, but this
- * could affect the predictability of the timestamp so I have instead
- * tweaked the code to detect and sidestep the duff calculation.
- *
- * I've also found that on a loaded system the execution of the APC can be
- * delayed, leading to errors of upto 10ms.  There is no easy fix to this,
- * but I do have code for an alternative interpolation scheme which avoids
- * the problem on single processor systems. I'm currently integrating this
- * along with code for deciding which algorithm to use based on whether
- * the system is SP or MP.
- *
- * Created by Sven Dietrich  sven@inter-yacht.com
- *
- */
-
+/* This file implementes system calls that are not compatible with UNIX */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include <config.h>
 #endif
 
+
+#include <stdio.h>
+#include "ntp_machine.h"
 #include "ntp_stdlib.h"
-#include "clockstuff.h"
-#include "ntservice.h"
-#include "ntp_timer.h"
-#include "ntpd.h"
-
-/*
- * Include code to possibly modify the MM timer while the service is active. 
- */
-
-  /*
-   * Whether or not MM timer modifications takes place is still controlled 
-   * by the variable below which is initialized by a default value but 
-   * might be changed depending on a command line switch.
-   */
-  int modify_mm_timer = MM_TIMER_LORES;
-
-  #define MM_TIMER_INTV   1  /* the interval we'd want to set the MM timer to [ms] */
-
-  static UINT wTimerRes;
-  static TIMECAPS tc;
+#include "ntp_syslog.h"
+#include "ntp_fp.h"
+#include "ntp.h"
+#include "ntp_refclock.h"
+#include "win32_io.h"
 
 
-extern double sys_residual;	/* residual from previous adjustment */
-
-char szMsgPath[255];
-BOOL init_randfile();
-
-static long last_Adj = 0;
-
-#define LS_CORR_INTV_SECS  2   /* seconds to apply leap second correction */
-#define LS_CORR_INTV   ( (LONGLONG) HECTONANOSECONDS * LS_CORR_INTV_SECS )  
-#define LS_CORR_LIMIT  ( (LONGLONG) HECTONANOSECONDS / 2 )  // half a second
-
-typedef union
+int NT_set_process_priority(void)
 {
-	FILETIME ft;
-	ULONGLONG ull;
-} FT_ULL;
-
-static FT_ULL ls_ft;
-static DWORD ls_time_adjustment;
-static LARGE_INTEGER ls_ref_perf_cnt;
-static LONGLONG ls_elapsed;
-
-static void StartClockThread(void);
-static void StopClockThread(void);
-
-
-static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
-
-static ULONGLONG RollOverCount = 0;
-static ULONGLONG LastTimerCount = 0;
-static ULONGLONG LastTimerTime = 0;
-
-static HANDLE ClockThreadHandle = NULL;
-static HANDLE TimerThreadExitRequest = NULL;
-
-static DWORD every = 0;
-static DWORD initial_units_per_tick = 0;
-static DWORD lastLowTimer = 0;
-
-ULONGLONG PerfFrequency = 0;
-static DWORD units_per_tick = 0;
-static DOUBLE ppm_per_adjust_unit = 0.0;
-
-/*
- * Request Multimedia Timer
- */
-void
-set_mm_timer(int timerres)
-{
-	modify_mm_timer = timerres;
+	if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) 
+		{
+		msyslog(LOG_ERR, "SetPriorityClass: %m"); 
+		return 0;
+		}
+	else 
+		return 1;
 }
+
 /*
- * adj_systime - called once every second to make system time adjustments.
- * Returns 1 if okay, 0 if trouble.
+ * refclock_open - open serial port for reference clock
+ *
+ * This routine opens a serial port for I/O and sets default options. It
+ * returns the file descriptor if success and zero if failure.
  */
 int
-adj_systime(
-	double now
+refclock_open(
+	char *dev,		/* device name pointer */
+	u_int speed,		/* serial port speed (code) */
+	u_int flags		/* line discipline flags */
 	)
 {
-	double dtemp;
-	u_char isneg = 0;
-	int rc;
-	long dwTimeAdjustment;
+	HANDLE Handle = INVALID_HANDLE_VALUE;
+	COMMTIMEOUTS timeouts;
+	DCB dcb = {0};
 
-	/*
-	 * Add the residual from the previous adjustment to the new
-	 * adjustment, bound and round.
-	 */
-	dtemp = sys_residual + now;
-	sys_residual = 0;
-	if (dtemp < 0)
-	{
-		isneg = 1;
-		dtemp = -dtemp;
+	//
+	// open communication port handle
+	//
+	Handle = CreateFile(dev,
+		GENERIC_READ | GENERIC_WRITE,
+		0, // no sharing
+		NULL, // no security
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+		NULL); // not template
+	if (Handle == INVALID_HANDLE_VALUE) {  
+		 
+		msyslog(LOG_ERR, "NT_COM: Device %s: CreateFile error: %m", dev);
+		return -1;
 	}
 
-	if (dtemp > NTP_MAXFREQ)
-		dtemp = NTP_MAXFREQ;
+	/*  Change the input/output buffers to be large.
+	*/
+	if (!SetupComm( Handle, 1024, 1024)) {
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetupComm error: %m", dev);
+		return -1;
+	}
 
-	dtemp = dtemp * 1e6;
+	dcb.DCBlength = sizeof(dcb);
+	if (!GetCommState(Handle, &dcb)) {
+		// Error getting current DCB settings
+		msyslog(LOG_ERR, "NT_COM: Device %s: GetCommState error: %m", dev);
+		return -1;
+	}
 
-	if (isneg)
-		dtemp = -dtemp;
-
-	/* dtemp is in micro seconds. NT uses 100 ns units,
-	 * so a unit change in dwTimeAdjustment corresponds
-	 * to slewing 10 ppm on a 100 Hz system.
-	 * Calculate the number of 100ns units to add,
-	 * using OS tick frequency as per suggestion from Harry Pyle,
-	 * and leave the remainder in dtemp */
-	dwTimeAdjustment = (DWORD)( dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5)) ;
-	dtemp += (double) -dwTimeAdjustment * ppm_per_adjust_unit;	
-
-
-  /* If a leap second is pending then determine the UTC time stamp 
-	 * of when the insertion must take place */
-	if (leap_next & LEAP_ADDSECOND)  
-	{
-		if ( ls_ft.ull == 0 )  /* time stamp has not yet been computed */
-		{
-			FT_ULL ft;
-			SYSTEMTIME st;
-			int itmp;
-
-			GetSystemTimeAsFileTime(&ft.ft);   
-			FileTimeToSystemTime(&ft.ft, &st);
-
- 			/* Accept leap announcement only 1 month in advance,
-			 * for end of March, June, September, or December.
-			 */
-			if ( ( st.wMonth % 3 ) == 0 )
-			{
-				/* The comarison time stamp is computed according 
-				 * to 0:00h UTC of the following day */   
-				if ( ++st.wMonth > 12 )
-				{
-					st.wMonth -= 12;
-					st.wYear++;
-				}
-				
-				st.wDay = 1;
-				st.wHour = 0;
-				st.wMinute = 0;
-				st.wSecond = 0;
-				st.wMilliseconds = 0;
-
-				SystemTimeToFileTime(&st, &ls_ft.ft);
-				msyslog(LOG_INFO, "Detected positive leap second announcement "
-				                  "for %04d-%02d-%02d %02d:%02d:%02d UTC",
-													st.wYear, st.wMonth, st.wDay,
-				                  st.wHour, st.wMinute, st.wSecond);
-			}
-		}
-  }
-
- 
-  /* If the time stamp for the next leap second has been set
-	 * then check if the leap second must be handled */
-	if ( ls_ft.ull )
-	{
-		LARGE_INTEGER this_perf_count;
-
-		QueryPerformanceCounter( &this_perf_count );
-
-		if ( ls_time_adjustment == 0 ) /* has not yet been scheduled */
-		{
-			FT_ULL curr_ft;
-
-	 		GetSystemTimeAsFileTime(&curr_ft.ft);   
-			if ( curr_ft.ull >= ls_ft.ull )
-			{
-				ls_time_adjustment = every / LS_CORR_INTV_SECS;
-				ls_ref_perf_cnt = this_perf_count;
-				ls_elapsed = 0;
-				msyslog(LOG_INFO, "Inserting positive leap second.");
-			}
-		}
-		else  /* leap sec adjustment has been scheduled previously */
-		{
-			ls_elapsed = ( this_perf_count.QuadPart - ls_ref_perf_cnt.QuadPart ) 
-			               * HECTONANOSECONDS / PerfFrequency;
-		}
-
-		if ( ls_time_adjustment )  /* leap second adjustment is currently active */
-		{
-			if ( ls_elapsed > ( LS_CORR_INTV - LS_CORR_LIMIT ) )
-			{
-				ls_time_adjustment = 0;  /* leap second adjustment done */
-				ls_ft.ull = 0;
-			}
-
-		/* NOTE: While the system time is slewed during the leap second 
-		 * the interpolation function which is based on the performance 
-		 * counter does not account for the slew.
-		 */
-		dwTimeAdjustment -= ls_time_adjustment;
-		}
+	switch (speed) {
+	  case B300 :   dcb.BaudRate = 300; break;
+	  case B1200 :  dcb.BaudRate = 1200; break;
+	  case B2400 :  dcb.BaudRate = 2400; break;
+	  case B4800 :  dcb.BaudRate = 4800; break;
+	  case B9600 :  dcb.BaudRate = 9600; break;
+	  case B19200 : dcb.BaudRate = 19200; break;
+	  case B38400 : dcb.BaudRate = 38400; break;
+	  default :
+		msyslog(LOG_ERR, "NT_COM: Device %s: unsupported baud rate", dev);
+		return -1;
 	}
 
 
-	/* only adjust the clock if adjustment changes */
-	if (last_Adj != dwTimeAdjustment) { 	
-			last_Adj = dwTimeAdjustment;
-# ifdef DEBUG
-		if (debug > 1)
-			printf("SetSystemTimeAdjustment( %ld) + (%ld)\n", dwTimeAdjustment, units_per_tick);			
-# endif
-			dwTimeAdjustment += units_per_tick;
-			rc = !SetSystemTimeAdjustment(dwTimeAdjustment, FALSE);
+	dcb.ByteSize = 8;
+	dcb.fBinary = TRUE;
+	dcb.fParity = TRUE;
+	dcb.fOutxCtsFlow = 0;
+	dcb.fOutxDsrFlow = 0;
+	dcb.fDtrControl = DTR_CONTROL_DISABLE;
+	dcb.fDsrSensitivity = 0;
+	dcb.fTXContinueOnXoff = FALSE;
+	dcb.fOutX = 0; 
+	dcb.fInX = 0;
+	dcb.fErrorChar = 0;
+	dcb.fNull = 0;
+	dcb.fRtsControl = RTS_CONTROL_DISABLE; // RTS_CONTROL_DISABLE;
+	dcb.fAbortOnError = 0;
+	dcb.ByteSize = 8;
+	dcb.StopBits = ONESTOPBIT;
+	dcb.Parity = NOPARITY;
+	dcb.ErrorChar = 0;
+	dcb.EvtChar = 0;
+	dcb.EofChar = 0;
+
+	if (!SetCommState(Handle, &dcb)) {
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommState error: %m", dev);
+		return -1;
 	}
-	else rc = 0;
-	if (rc)
-	{
-		msyslog(LOG_ERR, "Can't adjust time: %m");
-		return 0;
+
+	timeouts.ReadIntervalTimeout = 20; 
+	timeouts.ReadTotalTimeoutMultiplier = 0;
+	timeouts.ReadTotalTimeoutConstant = 5000;
+	timeouts.WriteTotalTimeoutMultiplier = 0;
+	timeouts.WriteTotalTimeoutConstant = 5000;
+
+	   // Error setting time-outs.
+	if (!SetCommTimeouts(Handle, &timeouts)) {
+		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommTimeouts error: %m", dev);
+		return -1;
+	}
+
+	return (int) Handle;
+}
+
+
+int 
+ioctl(int fd,
+	  int cmd,
+	  int *x) {
+
+	if ((cmd == TIOCMSET) && (*x & TIOCM_RTS)) {
+		if (!EscapeCommFunction((HANDLE) fd, SETRTS)) 
+			return -1;
+	}
+	else if ((cmd == TIOCMSET) && !(*x & TIOCM_RTS)){
+		if (!EscapeCommFunction((HANDLE) fd, CLRRTS)) 
+			return -1;
+	}
+
+	return 0;
+}
+
+
+int	
+tcsetattr(
+	int fd, 
+	int optional_actions, 
+	const struct termios * s)
+{
+	DCB dcb = { 0 };
+	HANDLE Handle = (HANDLE) fd;
+	dcb.DCBlength = sizeof(dcb);
+	if (!GetCommState(Handle, &dcb)) {
+		// Error getting current DCB settings
+		msyslog(LOG_ERR, "NT_COM: GetCommState error: %m");
+		return FALSE;
+	}
+
+	switch (max(s->c_ospeed, s->c_ispeed)) {
+		case B300 :   dcb.BaudRate = 300; break;
+		case B1200 :  dcb.BaudRate = 1200; break;
+		case B2400 :  dcb.BaudRate = 2400; break;
+		case B4800 :  dcb.BaudRate = 4800; break;
+		case B9600 :  dcb.BaudRate = 9600; break;
+		case B19200 : dcb.BaudRate = 19200; break;
+		case B38400 : dcb.BaudRate = 38400; break;
+		default :
+			msyslog(LOG_ERR, "NT_COM: unsupported baud rate");
+			return FALSE;
+	}
+
+	switch (s->c_cflag & CSIZE) {
+		case CS5 : dcb.ByteSize = 5; break;
+		case CS6 : dcb.ByteSize = 6; break;
+		case CS7 : dcb.ByteSize = 7; break;
+		case CS8 : dcb.ByteSize = 8; break;
+		default :
+			msyslog(LOG_ERR, "NT_COM: unsupported word size");
+			return FALSE;
+	}
+
+	if (s->c_cflag & PARENB) {
+		dcb.fParity = TRUE;
+		if (s->c_cflag & PARODD) {
+			dcb.Parity = ODDPARITY;
+		}
+		else {
+			dcb.Parity = EVENPARITY;
+		}
 	}
 	else {
-		sys_residual = dtemp / 1000000.0;
+		dcb.fParity = FALSE;
+		dcb.Parity = NOPARITY;
 	}
 
-#ifdef DEBUG
-	if (debug > 6)
-		printf("adj_systime: adj %.9f -> remaining residual %.9f\n", now, sys_residual);
-#endif
-	return 1;
+
+	dcb.fOutxCtsFlow = 0;
+	dcb.fOutxDsrFlow = 0;
+	dcb.fDtrControl = DTR_CONTROL_DISABLE;
+	dcb.fDsrSensitivity = 0;
+	dcb.fOutX = 0; 
+	dcb.fInX = 0;
+	dcb.fErrorChar = 0;
+	dcb.fNull = 0;
+	dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	dcb.fAbortOnError = 0;
+	dcb.ErrorChar = 0;
+	dcb.EvtChar = 0;
+	dcb.EofChar = 0;
+
+	if (!SetCommState(Handle, &dcb)) {
+		msyslog(LOG_ERR, "NT_COM: SetCommState error: %m");
+		return FALSE;
+	}
+	return TRUE;
 }
 
-
-void init_winnt_time(void)
+extern	int	
+tcgetattr(
+	int fd, struct termios *s)
 {
-	BOOL noslew;
-	HANDLE hToken = INVALID_HANDLE_VALUE;
-	TOKEN_PRIVILEGES tkp;
-
-	/*
-	 * Make sure the service is initialized
-	 * before we do anything else
-	 */
-	ntservice_init();
-
-	/* Set the Event-ID message-file name. */
-	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) 
-	{
-		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
-		exit(1);
+	DCB dcb = { 0 };
+	HANDLE Handle = (HANDLE) fd;
+	dcb.DCBlength = sizeof(dcb);
+	if (!GetCommState(Handle, &dcb)) {
+		// Error getting current DCB settings
+		msyslog(LOG_ERR, "NT_COM: GetCommState error: %m");
+		return FALSE;
 	}
 
-	/* Initialize random file before OpenSSL checks */
-	if(!init_randfile())
-		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
-
-	/*
-	 * Get privileges needed for fiddling with the clock
-	 */
-
-	  /* get the current process token handle */
-	if (!OpenProcessToken(GetCurrentProcess(),
-	     TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) 
-	{
-		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
-		exit(-1);
+	/*  Set c_ispeed & c_ospeed
+ 	*/
+	switch (dcb.BaudRate) {
+		case 300 : s->c_ispeed = s->c_ospeed = B300; break;
+		case 1200 : s->c_ispeed = s->c_ospeed = B1200; break;
+		case 2400 : s->c_ispeed = s->c_ospeed = B2400; break;
+		case 4800 : s->c_ispeed = s->c_ospeed = B4800; break;
+		case 9600 : s->c_ispeed = s->c_ospeed = B9600; break;
+		case 19200 : s->c_ispeed = s->c_ospeed = B19200; break;
+		case 38400 : s->c_ispeed = s->c_ospeed = B38400; break;
+		default : s->c_ispeed = s->c_ospeed = B9600;
 	}
-	  /* get the LUID for system-time privilege. */
-	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
-	tkp.PrivilegeCount = 1;  /* one privilege to set */
-	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-	/* get set-time privilege for this process. */
-	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,
-	 	(PTOKEN_PRIVILEGES) NULL, 0);
-
-	/* cannot use return value of AdjustTokenPrivileges. */
-	/* (success does not indicate all privileges were set) */
-	if (GetLastError() != ERROR_SUCCESS) 
-	{
-		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
-	 	/* later set time call will probably fail */
-	}
-
-	/* Reset the Clock to a reasonable increment */
-	if (!GetSystemTimeAdjustment(&initial_units_per_tick, &every,&noslew))
-	{
-		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
-		exit(-1);
-	}
-
-	units_per_tick = initial_units_per_tick;
-
-	/* Calculate the time adjustment resulting from incrementing
-	 * units per tick by 1 unit for 1 second */
-	ppm_per_adjust_unit = 1000000.0 / (double) every;
-
-#ifdef DEBUG
-	msyslog(LOG_INFO, "Initial Clock increment %7.1f us",
-			(float) (units_per_tick / 10));
-	msyslog(LOG_INFO, "Adjustment rate %5.3f ppm/s", ppm_per_adjust_unit);
-#endif
-
-	/*++++ Gerhard Junker
-	* see Platform SDK for QueryPerformanceCounter
-	* On a multiprocessor machine, it should not matter which processor is called. 
-	* However, you can get different results on different processors due to bugs in the BIOS or the HAL. 
-	* To specify processor affinity for a thread, use the SetThreadAffinityMask function. 
-	* ... we will hope, the apc routine will run on the same processor
-	*/
-
-	SetThreadAffinityMask(GetCurrentThread(), 1L);
-
-	/*---- Gerhard Junker */
-
-	StartClockThread();
-
-	/* Set up the Console Handler */
-	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE))
-	{
-		msyslog(LOG_ERR, "Can't set console control handler: %m");
-	}
-}
-
-
-void reset_winnt_time(void)
-{
-	/* restore the clock frequency back to its original value */
-	if (!SetSystemTimeAdjustment(0, TRUE)) 
-	{
-		msyslog(LOG_ERR, "Failed to reset clock state, SetSystemTimeAdjustment(): %m");
-	}
-  	/* read the current system time, and write it back to
-           force CMOS update: */
-      /************ Added back in 2003-01-26 *****************/
-	{
-		SYSTEMTIME st;
-		GetSystemTime(&st);
-		SetSystemTime(&st);
-	}
-}
-
-
-
-int
-gettimeofday(
-	struct timeval *tv
-	)
-{
-	/*  Use the system time (roughly synchronised to the tick, and
-	 *  extrapolated using the system performance counter.
-	 */
-
-	ULONGLONG Count;
-	LARGE_INTEGER LargeIntNowCount;
-	ULONGLONG Time;
-	ULONGLONG NowCount;
-	ULONGLONG PreCount;                                                  /*FIX*/
-	LONGLONG TicksElapsed;
-	LONG time_adjustment;
-
-	/*  Mark a mark ASAP. The latency to here should
-	 *  be reasonably deterministic
-	 */
-
-	PreCount = LastTimerCount;                                           /*FIX*/
-
-	if (!QueryPerformanceCounter(&LargeIntNowCount)) {
-		msyslog(LOG_ERR, "QueryPeformanceCounter failed: %m");
-		exit(1);
-	}
-
-	NowCount = LargeIntNowCount.QuadPart;
-
-	/*  Get base time we are going to extrapolate from
-	 */	
-	EnterCriticalSection(&TimerCritialSection);
-	Count = LastTimerCount;
-	Time = LastTimerTime;
-	LeaveCriticalSection(&TimerCritialSection);
-
-	/*  Calculate when now is.
-	 *
-	 *  Result = LastTimerTime +  (NowCount - LastTimerCount) / PerfFrequency
-	 */
-
-	if (NowCount >= Count)
-	{
-		TicksElapsed = NowCount - Count; /* linear progression of ticks */
-	}
-	else
-	{
-	/************************************************************************/
-	/* Differentiate between real rollover and the case of taking a         */
-	/* perfcount then the APC coming in.                                    */
-	/************************************************************************/
-		if (Count > PreCount)                                           /*FIX*/
-		{								/*FIX*/
-			TicksElapsed = 0;                                       /*FIX*/
-		}                                                               /*FIX*/
-		else                                                            /*FIX*/
-		{                                                               /*FIX*/
-			TicksElapsed = NowCount + (RollOverCount - Count);	/*FIX*/
-		}                                                               /*FIX*/
-	}
-
-	/*  Calculate the new time (in 100's of nano-seconds)
-	 */
-	time_adjustment = (long) ((TicksElapsed * HECTONANOSECONDS) / PerfFrequency);
-	Time += time_adjustment;
-
-	/* Convert the hecto-nano second time to tv format
-	 */
-	Time -= FILETIME_1970;
-	tv->tv_sec = (LONG) ( Time / 10000000ui64);
-	tv->tv_usec = (LONG) (( Time % 10000000ui64) / 10);
-
-	return 0;
-}
-
-static void CALLBACK
-TimerApcFunction(
-	LPVOID lpArgToCompletionRoutine,
-	DWORD dwTimerLowValue,
-	DWORD dwTimerHighValue
-	)
-{
-	LARGE_INTEGER LargeIntNowCount;
-	(void) lpArgToCompletionRoutine; /* not used */
-
-	if (dwTimerLowValue == lastLowTimer) return;
 	
-	/* Grab the counter first of all */
-	QueryPerformanceCounter(&LargeIntNowCount);
 
-	/* Save this for next time */
-	lastLowTimer = dwTimerLowValue;
-
-	/* Check to see if the counter has rolled. This happens
-	   more often on Multi-CPU systems */
-
-	if ((ULONGLONG) LargeIntNowCount.QuadPart < LastTimerCount) {
-		/* Counter Rolled - try and estimate the rollover point using
-		  the nominal counter frequency divided by an estimate of the
-		  OS frequency */
-		RollOverCount = LastTimerCount + PerfFrequency * every /  HECTONANOSECONDS -
-			(ULONGLONG) LargeIntNowCount.QuadPart;
-#ifdef DEBUG
-		msyslog(LOG_INFO,
-			"Performance Counter Rollover %I64u:\rLast Timer Count %I64u\rCurrent Count %I64u",
-				RollOverCount, LastTimerCount, LargeIntNowCount.QuadPart);
-#endif
+	s->c_cflag = 0;
+	switch (dcb.ByteSize) {
+		case 5 : s->c_cflag |= CS5; break;
+		case 6 : s->c_cflag |= CS6; break;
+		case 7 : s->c_cflag |= CS7; break;
+		case 8 : s->c_cflag |= CS8; break;
+	}
+	if (dcb.fParity) {
+		  s->c_cflag |= PARENB;
+	}
+	switch (dcb.Parity) {
+		case EVENPARITY : break;
+		case MARKPARITY : break;
+		case NOPARITY : break;
+		case ODDPARITY : s->c_cflag |= PARODD; break;
+		case SPACEPARITY : break;
 	}
 
-	/* Now we can hang out and wait for the critical section to free up;
-	   we will get the CPU this timeslice. Meanwhile other tasks can use
-	   the last value of LastTimerCount */
+	s->c_iflag = 0;
+	s->c_lflag = 0;
+	s->c_line = 0;
+	s->c_oflag = 0;
+
+	return TRUE; /* ok */
+}
+
+
+extern int tcflush(int fd, int mode) {
+
+
+
+
+return 0;
+
+}
+
+extern int cfsetispeed(struct termios *tio, int speed) {
 		
-	EnterCriticalSection(&TimerCritialSection);
-	LastTimerCount = (ULONGLONG) LargeIntNowCount.QuadPart;
-	LastTimerTime = ((ULONGLONG) dwTimerHighValue << 32) +
-			 (ULONGLONG) dwTimerLowValue;
-	LeaveCriticalSection(&TimerCritialSection);
-}
+return 0;		
+};	
 
 
+extern int cfsetospeed(struct termios *tio, int speed) {
+		
+return 0;		
+};	
 
-DWORD WINAPI ClockThread(void *arg)
-{
-
-	LARGE_INTEGER DueTime;
-	HANDLE WaitableTimerHandle = CreateWaitableTimer(NULL, FALSE, NULL);
-
-	(void) arg; /* not used */
-
-	if (WaitableTimerHandle != NULL) {
-		DueTime.QuadPart = 0i64;
-		if (SetWaitableTimer(WaitableTimerHandle, &DueTime, 1L /* ms */, TimerApcFunction, &WaitableTimerHandle, FALSE) != NO_ERROR) {
-			for(;;) {
-				if (WaitForSingleObjectEx(TimerThreadExitRequest, INFINITE, TRUE) == WAIT_OBJECT_0) {
-					break; /* we've been asked to exit */
-				}
-			}
-		}
-		CloseHandle(WaitableTimerHandle);
-		WaitableTimerHandle = NULL;
-	}
-	return 0;
-}
-
-
-static void StartClockThread(void)
-{
-	DWORD tid;
-	FILETIME StartTime;
-	LARGE_INTEGER Freq = { 0, 0 };
-	
-	/* get the performance counter freq */
-	if (!QueryPerformanceFrequency(&Freq))
-	{
-		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
-		exit (-1);
-	}
-
-	PerfFrequency = Freq.QuadPart;
-
-
-	if ( modify_mm_timer != 0)
-	{
-		if (timeGetDevCaps( &tc, sizeof( tc ) ) == TIMERR_NOERROR ) 
-		{
-			wTimerRes = min( max( tc.wPeriodMin, MM_TIMER_INTV ), tc.wPeriodMax );
-
-			timeBeginPeriod( wTimerRes );
-#ifdef DEBUG
-			msyslog( LOG_INFO, "MM timer resolution: %u..%u ms, set to %u ms\n",
-			         tc.wPeriodMin, tc.wPeriodMax, wTimerRes );
-#endif
-		}
-		else
-			msyslog( LOG_ERR, "Failed to get MM timer caps\n" );
-	}
-
-
-	/* init variables with the time now */
-	GetSystemTimeAsFileTime(&StartTime);
-	LastTimerTime = (((ULONGLONG) StartTime.dwHighDateTime) << 32) +
-			  (ULONGLONG) StartTime.dwLowDateTime;
-
-	/* init sync objects */
-	InitializeCriticalSection(&TimerCritialSection);
-	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, "TimerThreadExitRequest");
-
-	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 0, &tid);
-	if (ClockThreadHandle != NULL)
-	{
-		/* remember the thread priority is only within the process class */
-		if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) 
-		{
-#ifdef DEBUG
-			printf("Error setting thread priority\n");
-#endif
-		  }
-	}
-
-	atexit( StopClockThread );
-}
-
-static void StopClockThread(void)
-{	
-	if ( wTimerRes )  /* if not 0 then the MM timer has been modified at startup */
-	{
-		timeEndPeriod( wTimerRes ); 
-		wTimerRes = 0;
-#ifdef DEBUG
-		msyslog( LOG_INFO, "MM timer set to default\n" );
-#endif
-	}
-
-	if (SetEvent(TimerThreadExitRequest) &&
-	    WaitForSingleObject(ClockThreadHandle, 10000L) == 0)
-	{
-		CloseHandle(TimerThreadExitRequest);
-		TimerThreadExitRequest = NULL;
-
-		CloseHandle(ClockThreadHandle);
-		ClockThreadHandle = NULL;
-
-		DeleteCriticalSection(&TimerCritialSection);
-	}
-	else
-	{
-		msyslog(LOG_ERR, "Failed to stop clock thread.");
-		Sleep( 100 );
-	}
-}

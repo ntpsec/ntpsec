@@ -1,7 +1,7 @@
 
 /*
- *  $Id: putshell.c,v 4.12 2006/07/16 15:27:50 bkorb Exp $
- * Time-stamp:      "2006-07-16 08:13:24 bkorb"
+ *  $Id: putshell.c,v 4.16 2006/10/05 03:39:53 bkorb Exp $
+ * Time-stamp:      "2006-10-05 20:37:42 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
@@ -162,10 +162,10 @@ optionPutShell( tOptions* pOpts )
          *  but copy over the set-state bits.
          */
         if (pOD->optActualIndex != optIx) {
-            tOptDesc* p = pOpts->pOptDesc + pOD->optActualIndex;
-            p->pzLastArg = pOD->pzLastArg;
-            p->fOptState &= OPTST_PERSISTENT;
-            p->fOptState |= pOD->fOptState & ~OPTST_PERSISTENT;
+            tOptDesc* p   = pOpts->pOptDesc + pOD->optActualIndex;
+            p->optArg     = pOD->optArg;
+            p->fOptState &= OPTST_PERSISTENT_MASK;
+            p->fOptState |= pOD->fOptState & ~OPTST_PERSISTENT_MASK;
             printf( zEquivMode, pOpts->pzPROGNAME, pOD->pz_NAME, p->pz_NAME );
             pOD = p;
         }
@@ -176,7 +176,7 @@ optionPutShell( tOptions* pOpts )
          *  of bitmask value and we need to emit the bit values.
          */
         if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_MEMBERSHIP) {
-            char* pz;
+            char const * pz;
             uintptr_t val = 1;
             printf( zOptNumFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
                     (uintptr_t)(pOD->optCookie) );
@@ -187,12 +187,12 @@ optionPutShell( tOptions* pOpts )
              *  We are building the typeset list.  The list returned starts with
              *  'none + ' for use by option saving stuff.  We must ignore that.
              */
-            pz = (char*)pOD->pzLastArg + 7;
+            pz = pOD->optArg.argString + 7;
             while (*pz != NUL) {
                 printf( "typeset -x -i %s_", pOD->pz_NAME );
                 pz += strspn( pz, " +\t\n\f" );
                 for (;;) {
-                    char ch = *(pz++);
+                    int ch = *(pz++);
                          if (islower( ch ))  fputc( toupper( ch ), stdout );
                     else if (isalnum( ch ))  fputc( ch, stdout );
                     else if (isspace( ch )
@@ -203,7 +203,7 @@ optionPutShell( tOptions* pOpts )
                 printf( "=%1$lu # 0x%1$lX\n", (unsigned long)val );
                 val <<= 1;
             }
-            free( (void*)(pOD->pzLastArg) );
+            free( (void*)(pOD->optArg.argString) );
             continue;
         }
 
@@ -256,12 +256,12 @@ optionPutShell( tOptions* pOpts )
          */
         else if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_NUMERIC)
             printf( zOptNumFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
-                    (uintptr_t)(pOD->pzLastArg) );
+                    (int)pOD->optArg.argInt );
 
         /*
          *  If the argument type is an enumeration, then it is much
          *  like a text value, except we call the callback function
-         *  to emit the value corresponding to the "pzLastArg" number.
+         *  to emit the value corresponding to the "optArg" number.
          */
         else if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_ENUMERATION) {
             printf( zOptValFmt, pOpts->pzPROGNAME, pOD->pz_NAME );
@@ -277,14 +277,14 @@ optionPutShell( tOptions* pOpts )
          */
         else if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_BOOLEAN)
             printf( zFullOptFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
-                    ((uintptr_t)(pOD->pzLastArg) == 0) ? "false" : "true" );
+                    (pOD->optArg.argBool == 0) ? "false" : "true" );
 
         /*
          *  IF the option has an empty value,
          *  THEN we set the argument to the occurrence count.
          */
-        else if (  (pOD->pzLastArg == NULL)
-                || (pOD->pzLastArg[0] == NUL) )
+        else if (  (pOD->optArg.argString == NULL)
+                || (pOD->optArg.argString[0] == NUL) )
 
             printf( zOptNumFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
                     (int)pOD->optOccCt );
@@ -294,7 +294,7 @@ optionPutShell( tOptions* pOpts )
          */
         else {
             printf( zOptValFmt, pOpts->pzPROGNAME, pOD->pz_NAME );
-            putQuotedStr( pOD->pzLastArg );
+            putQuotedStr( pOD->optArg.argString );
             printf( zOptEnd, pOpts->pzPROGNAME, pOD->pz_NAME );
         }
     } while (++optIx < pOpts->presetOptCt );
@@ -327,7 +327,6 @@ optionPutShell( tOptions* pOpts )
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/putshell.c */

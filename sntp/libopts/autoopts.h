@@ -1,8 +1,8 @@
 
 /*
- *  Time-stamp:      "2006-08-12 10:26:19 bkorb"
+ *  Time-stamp:      "2006-09-10 14:43:25 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.14 2006/08/12 17:36:43 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.29 2006/09/24 02:10:45 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values
@@ -195,11 +195,12 @@ typedef struct {
     tCC*    pzOptFmt;
 } arg_types_t;
 
-#  define AGALOC( c, w )        malloc( (unsigned)c )
-#  define AGREALOC( p, c, w )   realloc( p, (unsigned)c )
-#  define AGFREE( p )           free( p )
-#  define AGDUPSTR( p, s, w )   p = strdup( s )
-#  define TAGMEM( m, t )
+#define AGALOC( c, w )        ao_malloc( (unsigned)c )
+#define AGREALOC( p, c, w )   ao_realloc( p, (unsigned)c )
+#define AGFREE( p )           ao_free( p )
+#define AGDUPSTR( p, s, w )   p = ao_strdup( s )
+
+#define TAGMEM( m, t )
 
 /*
  *  DO option handling?
@@ -306,8 +307,8 @@ typedef struct {
 #endif
 
 #ifndef HAVE_STRCHR
-extern char* strchr( const char *s, int c);
-extern char* strrchr( const char *s, int c);
+extern char* strchr( char const *s, int c);
+extern char* strrchr( char const *s, int c);
 #endif
 
 /*
@@ -330,7 +331,6 @@ extern tOptProc optionPrintVersion, optionPagedUsage, optionLoadOpt;
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
- * tab-width: 4
  * indent-tabs-mode: nil
  * End:
  * end of autoopts/autoopts.h */
