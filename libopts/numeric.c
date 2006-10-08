@@ -1,7 +1,7 @@
 
 /*
- *  $Id: numeric.c,v 4.9 2006/09/24 02:10:45 bkorb Exp $
- *  Time-stamp:      "2006-09-22 18:14:38 bkorb"
+ *  $Id: numeric.c,v 4.10 2006/10/05 03:39:53 bkorb Exp $
+ *  Time-stamp:      "2006-10-04 16:12:34 bkorb"
  */
 
 /*
@@ -61,7 +61,7 @@ void
 optionNumericVal( tOptions* pOpts, tOptDesc* pOD )
 {
     char* pz;
-    int   val;
+    long  val;
 
     /*
      *  Numeric options may have a range associated with it.
@@ -71,7 +71,7 @@ optionNumericVal( tOptions* pOpts, tOptDesc* pOD )
     if ((pOD == NULL) || (pOD->optArg.argString == NULL))
         return;
 
-    val = (int)strtol( pOD->optArg.argString, &pz, 0 );
+    val = strtol( pOD->optArg.argString, &pz, 0 );
     if (*pz != NUL) {
         fprintf( stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString );
         (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);

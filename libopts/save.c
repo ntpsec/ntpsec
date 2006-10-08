@@ -1,7 +1,7 @@
 
 /*
- *  save.c  $Id: save.c,v 4.19 2006/09/24 02:10:45 bkorb Exp $
- * Time-stamp:      "2006-09-22 18:11:20 bkorb"
+ *  save.c  $Id: save.c,v 4.20 2006/10/05 03:39:53 bkorb Exp $
+ * Time-stamp:      "2006-10-05 21:09:18 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -437,7 +437,7 @@ optionSaveFile( tOptions* pOpts )
         switch (arg_state) {
         case 0:
         case OPARG_TYPE_NUMERIC:
-            printEntry( fp, p, p->optArg.argString );
+            printEntry( fp, p, (void*)(p->optArg.argInt));
             break;
 
         case OPARG_TYPE_STRING:
@@ -462,26 +462,25 @@ optionSaveFile( tOptions* pOpts )
         case OPARG_TYPE_ENUMERATION:
         case OPARG_TYPE_MEMBERSHIP:
         {
-            tCC* val = p->optArg.argString;
+            uintptr_t val = p->optArg.argEnum;
             /*
              *  This is a magic incantation that will convert the
              *  bit flag values back into a string suitable for printing.
              */
             (*(p->pOptProc))( (tOptions*)2UL, p );
-            printEntry( fp, p, p->optArg.argString );
+            printEntry( fp, p, (void*)(p->optArg.argString));
             if (  (p->optArg.argString != NULL)
                && (arg_state != OPARG_TYPE_ENUMERATION))
                 /*
                  *  bit flag and enumeration strings get allocated
                  */
                 AGFREE( (void*)p->optArg.argString );
-            p->optArg.argString = val;
+            p->optArg.argEnum = val;
             break;
         }
 
         case OPARG_TYPE_BOOLEAN:
-            printEntry( fp, p, (p->optArg.argBool != AG_FALSE)
-                        ? "true" : "false" );
+            printEntry( fp, p, p->optArg.argBool ? "true" : "false" );
             break;
 
         default:

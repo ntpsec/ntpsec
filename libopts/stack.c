@@ -1,7 +1,7 @@
 
 /*
  *  stack.c
- *  $Id: stack.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
+ *  $Id: stack.c,v 4.13 2006/10/05 03:39:53 bkorb Exp $
  *  Time-stamp:      "2006-09-22 18:13:19 bkorb"
  *
  *  This is a special option processing routine that will save the
@@ -78,7 +78,7 @@ optionUnstackArg(
      *  THEN indicate that we don't have any of these options
      */
     if (pAL == NULL) {
-        pOptDesc->fOptState &= OPTST_PERSISTENT;
+        pOptDesc->fOptState &= OPTST_PERSISTENT_MASK;
         if ( (pOptDesc->fOptState & OPTST_INITENABLED) == 0)
             pOptDesc->fOptState |= OPTST_DISABLED;
         return;
@@ -177,7 +177,7 @@ optionUnstackArg(
      *  THEN indicate that we don't have any of these options
      */
     if (pAL->useCt == 0) {
-        pOptDesc->fOptState &= OPTST_PERSISTENT;
+        pOptDesc->fOptState &= OPTST_PERSISTENT_MASK;
         if ( (pOptDesc->fOptState & OPTST_INITENABLED) == 0)
             pOptDesc->fOptState |= OPTST_DISABLED;
         free( (void*)pAL );

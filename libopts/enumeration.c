@@ -1,7 +1,7 @@
 
 /*
  *  $Id: enumeration.c,v 4.14 2006/09/24 02:10:45 bkorb Exp $
- * Time-stamp:      "2006-09-22 18:00:53 bkorb"
+ * Time-stamp:      "2006-10-05 21:10:21 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -235,7 +235,7 @@ optionKeywordName(
 {
     tOptDesc od;
 
-    od.optArg.argIntptr = enum_val;
+    od.optArg.argEnum = enum_val;
     (*(pOD->pOptProc))( (void*)(2UL), &od );
     return od.optArg.argString;
 }
@@ -280,7 +280,7 @@ optionEnumerationVal(
 
     case 1UL:
     {
-        unsigned int ix = pOD->optArg.argIntptr;
+        unsigned int ix = pOD->optArg.argEnum;
         /*
          *  print the name string.
          */
@@ -293,7 +293,7 @@ optionEnumerationVal(
     case 2UL:
     {
         tSCC zInval[] = "*INVALID*";
-        unsigned int ix = pOD->optArg.argIntptr;
+        unsigned int ix = pOD->optArg.argEnum;
         /*
          *  Replace the enumeration value with the name string.
          */

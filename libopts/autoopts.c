@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.26 2006/09/24 02:10:44 bkorb Exp $
- *  Time-stamp:      "2006-09-22 18:21:53 bkorb"
+ *  $Id: autoopts.c,v 4.27 2006/10/05 03:39:53 bkorb Exp $
+ *  Time-stamp:      "2006-10-04 19:32:32 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -221,8 +221,8 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
         pOD->optActualIndex = pOD->optIndex;
     }
 
-    pOD->fOptState &= OPTST_PERSISTENT;
-    pOD->fOptState |= (pOptState->flags & ~OPTST_PERSISTENT);
+    pOD->fOptState &= OPTST_PERSISTENT_MASK;
+    pOD->fOptState |= (pOptState->flags & ~OPTST_PERSISTENT_MASK);
 
     /*
      *  Keep track of count only for DEFINED (command line) options.
@@ -558,11 +558,13 @@ nextOption( tOptions* pOpts, tOptState* pOptState )
 {
     tSuccess res;
     enum { ARG_NONE, ARG_MAY, ARG_MUST } arg_type = ARG_NONE;
+    teOptArgType at;
 
     res = findOptDesc( pOpts, pOptState );
     if (! SUCCESSFUL( res ))
         return res;
-    pOptState->flags |= (pOptState->pOD->fOptState & OPTST_PERSISTENT);
+    pOptState->flags |= (pOptState->pOD->fOptState & OPTST_PERSISTENT_MASK);
+    at = OPTST_GET_ARGTYPE(pOptState->flags);
 
     /*
      *  Figure out what to do about option arguments.  An argument may be
@@ -572,7 +574,7 @@ nextOption( tOptions* pOpts, tOptState* pOptState )
      */
     if ((pOptState->flags & OPTST_DISABLED) != 0)
         arg_type = ARG_NONE;
-    else if (OPTST_GET_ARGTYPE(pOptState->flags) == OPARG_TYPE_NONE)
+    else if (at == OPARG_TYPE_NONE)
         arg_type = ARG_NONE;
     else if (pOptState->flags & OPTST_ARG_OPTIONAL)
         arg_type = ARG_MAY;

@@ -1,7 +1,7 @@
 
 /*
- *  $Id: putshell.c,v 4.14 2006/09/24 02:10:45 bkorb Exp $
- * Time-stamp:      "2006-09-24 15:28:15 bkorb"
+ *  $Id: putshell.c,v 4.16 2006/10/05 03:39:53 bkorb Exp $
+ * Time-stamp:      "2006-10-05 20:37:42 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
@@ -164,8 +164,8 @@ optionPutShell( tOptions* pOpts )
         if (pOD->optActualIndex != optIx) {
             tOptDesc* p   = pOpts->pOptDesc + pOD->optActualIndex;
             p->optArg     = pOD->optArg;
-            p->fOptState &= OPTST_PERSISTENT;
-            p->fOptState |= pOD->fOptState & ~OPTST_PERSISTENT;
+            p->fOptState &= OPTST_PERSISTENT_MASK;
+            p->fOptState |= pOD->fOptState & ~OPTST_PERSISTENT_MASK;
             printf( zEquivMode, pOpts->pzPROGNAME, pOD->pz_NAME, p->pz_NAME );
             pOD = p;
         }
@@ -176,7 +176,7 @@ optionPutShell( tOptions* pOpts )
          *  of bitmask value and we need to emit the bit values.
          */
         if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_MEMBERSHIP) {
-            char* pz;
+            char const * pz;
             uintptr_t val = 1;
             printf( zOptNumFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
                     (uintptr_t)(pOD->optCookie) );
@@ -187,7 +187,7 @@ optionPutShell( tOptions* pOpts )
              *  We are building the typeset list.  The list returned starts with
              *  'none + ' for use by option saving stuff.  We must ignore that.
              */
-            pz = (char*)pOD->optArg.argString + 7;
+            pz = pOD->optArg.argString + 7;
             while (*pz != NUL) {
                 printf( "typeset -x -i %s_", pOD->pz_NAME );
                 pz += strspn( pz, " +\t\n\f" );
@@ -256,7 +256,7 @@ optionPutShell( tOptions* pOpts )
          */
         else if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_NUMERIC)
             printf( zOptNumFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
-                    pOD->optArg.argIntptr );
+                    (int)pOD->optArg.argInt );
 
         /*
          *  If the argument type is an enumeration, then it is much
@@ -277,7 +277,7 @@ optionPutShell( tOptions* pOpts )
          */
         else if (OPTST_GET_ARGTYPE(pOD->fOptState) == OPARG_TYPE_BOOLEAN)
             printf( zFullOptFmt, pOpts->pzPROGNAME, pOD->pz_NAME,
-                    (pOD->optArg.argIntptr == 0) ? "false" : "true" );
+                    (pOD->optArg.argBool == 0) ? "false" : "true" );
 
         /*
          *  IF the option has an empty value,
