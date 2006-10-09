@@ -1,3 +1,4 @@
+* [Bug 715] Fix a multicast issue under Linux.
 * [Bug 690] Fix a Windows DNS lookup buffer overflow.
 * [Bug 670] Resolved a Windows issue with the dynamic interface rescan code.
 * K&R C support is being deprecated.
