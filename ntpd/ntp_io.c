@@ -3144,7 +3144,7 @@ findlocalinterface(
 	int rtn;
 	struct interface *interface;
 	struct sockaddr_storage saddr;
-	socklen_t saddrlen = SOCKLEN(addr);
+	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)

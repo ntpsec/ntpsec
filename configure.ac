@@ -637,7 +637,7 @@ fi
 #
 # Look for in_port_t.
 #
-AC_MSG_CHECKING(for type in_port_t)
+AC_MSG_CHECKING(for in_port_t)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>],
@@ -1008,6 +1008,28 @@ esac
 no)
 ;;
 esac
+
+AC_MSG_CHECKING([type of socklen arg for getsockname()])
+AC_CACHE_VAL(ac_cv_func_getsockname_socklen_type,dnl
+[for ac_cv_func_getsockname_socklen_type in 'socklen_t' 'size_t' 'unsigned int' 'int'; do
+  AC_TRY_COMPILE(dnl
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+extern getsockname (int, struct sockaddr *, $ac_cv_func_getsockname_socklen_type *);],,dnl
+  [ac_not_found=no ; break], ac_not_found=yes)
+ done
+])dnl AC_CACHE_VAL
+if test "$ac_not_found" = yes; then
+ ac_cv_func_getsockname_socklen_type='socklen_t'
+fi
+AC_MSG_RESULT([$ac_cv_func_getsockname_socklen_type])
+AC_DEFINE_UNQUOTED([GETSOCKNAME_SOCKLEN_TYPE],
+		   $ac_cv_func_getsockname_socklen_type,
+		   [What is getsockname()'s socklen type?])
 
 AC_CHECK_FUNCS(getrusage)
 AC_CHECK_FUNC(gettimeofday, ,[
