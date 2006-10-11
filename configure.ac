@@ -69,6 +69,17 @@ AMU_OS_CFLAGS
 
 LIBOPTS_CHECK(libopts)
 
+AC_MSG_CHECKING([[if $CC can handle #warning]])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[#warning foo]])],[ac_cv_cpp_warning=yes],[ac_cv_cpp_warning=no])
+AC_MSG_RESULT([$ac_cv_cpp_warning])
+
+case "$ac_cv_cpp_warning" in
+ no)
+    AC_DEFINE([NO_OPTION_NAME_WARNINGS], [1], [Should we avoid #warning on option name collisions?])
+    AC_MSG_RESULT([[Enabling NO_OPTION_NAME_WARNINGS as #warning does not work]])
+    ;;
+esac
+
 AC_MSG_CHECKING(for bin subdirectory)
 AC_ARG_WITH(binsubdir,
 	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
@@ -626,7 +637,7 @@ fi
 #
 # Look for in_port_t.
 #
-AC_MSG_CHECKING(for type in_port_t)
+AC_MSG_CHECKING(for in_port_t)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>],
@@ -997,6 +1008,28 @@ esac
 no)
 ;;
 esac
+
+AC_MSG_CHECKING([type of socklen arg for getsockname()])
+AC_CACHE_VAL(ac_cv_func_getsockname_socklen_type,dnl
+[for ac_cv_func_getsockname_socklen_type in 'socklen_t' 'size_t' 'unsigned int' 'int'; do
+  AC_TRY_COMPILE(dnl
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+extern getsockname (int, struct sockaddr *, $ac_cv_func_getsockname_socklen_type *);],,dnl
+  [ac_not_found=no ; break], ac_not_found=yes)
+ done
+])dnl AC_CACHE_VAL
+if test "$ac_not_found" = yes; then
+ ac_cv_func_getsockname_socklen_type='socklen_t'
+fi
+AC_MSG_RESULT([$ac_cv_func_getsockname_socklen_type])
+AC_DEFINE_UNQUOTED([GETSOCKNAME_SOCKLEN_TYPE],
+		   $ac_cv_func_getsockname_socklen_type,
+		   [What is getsockname()'s socklen type?])
 
 AC_CHECK_FUNCS(getrusage)
 AC_CHECK_FUNC(gettimeofday, ,[

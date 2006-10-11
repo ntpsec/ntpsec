@@ -11,6 +11,17 @@ AC_PROG_LIBTOOL
 
 LIBOPTS_CHECK
 
+AC_MSG_CHECKING([[if $CC can handle #warning]])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[#warning foo]])],[ac_cv_cpp_warning=yes],[ac_cv_cpp_warning=no])
+AC_MSG_RESULT([$ac_cv_cpp_warning])
+
+case "$ac_cv_cpp_warning" in
+ no)
+    AC_DEFINE([NO_OPTION_NAME_WARNINGS], [1], [Should we avoid #warning on option name collisions?])
+    AC_MSG_RESULT([[Enabling NO_OPTION_NAME_WARNINGS as #warning does not work]])
+    ;;
+esac
+
 # Checks for libraries.
 
 # Checks for header files.
