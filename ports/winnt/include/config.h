@@ -13,11 +13,18 @@
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 #define ISC_PLATFORM_HAVEIPV6
 #define ISC_PLATFORM_HAVEIN6PKTINFO
+#else
+typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
 #endif
 
 #define ISC_PLATFORM_NEEDIN6ADDRANY
 #define HAVE_SOCKADDR_IN6
 
+/*
+ * The type of the socklen_t defined for getnameinfo() and getaddrinfo()
+ * is int for VS compilers on Windows but the type is already declared 
+ */
+#define GETSOCKNAME_SOCKLEN_TYPE socklen_t
 /*
  * An attempt to cut down the number of warnings generated during compilation.
  * All of these should be benign to disable.
@@ -76,6 +83,12 @@
  * Multimedia timer enable
  */
 #define USE_MM_TIMER
+/*
+ * Use 32-bit time definitions
+ * VS 2005 defaults to 64-bit time
+ * Leave commented out for now
+ */
+//#define _USE_32BIT_TIME_T
 
 /* Enable OpenSSL */
 #define OPENSSL 1
