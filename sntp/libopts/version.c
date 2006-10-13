@@ -1,5 +1,5 @@
 
-/*  $Id: version.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
+/*  $Id: version.c,v 4.9 2006/09/24 02:11:16 bkorb Exp $
  * Time-stamp:      "2006-09-22 18:15:00 bkorb"
  *
  *  This module implements the default usage procedure for

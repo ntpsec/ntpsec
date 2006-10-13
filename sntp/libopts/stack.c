@@ -1,7 +1,7 @@
 
 /*
  *  stack.c
- *  $Id: stack.c,v 4.13 2006/10/05 03:39:53 bkorb Exp $
+ *  $Id: stack.c,v 4.10 2006/10/05 03:48:57 bkorb Exp $
  *  Time-stamp:      "2006-09-22 18:13:19 bkorb"
  *
  *  This is a special option processing routine that will save the

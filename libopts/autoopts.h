@@ -2,7 +2,7 @@
 /*
  *  Time-stamp:      "2006-09-10 14:43:25 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.29 2006/09/24 02:10:45 bkorb Exp $
+ *  autoopts.h  $Id: autoopts.h,v 4.17 2006/09/24 02:11:16 bkorb Exp $
  *  Time-stamp:      "2005-02-14 05:59:50 bkorb"
  *
  *  This file defines all the global structures and special values

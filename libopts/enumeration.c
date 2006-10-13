@@ -1,6 +1,6 @@
 
 /*
- *  $Id: enumeration.c,v 4.14 2006/09/24 02:10:45 bkorb Exp $
+ *  $Id: enumeration.c,v 4.12 2006/10/06 05:29:00 bkorb Exp $
  * Time-stamp:      "2006-10-05 21:10:21 bkorb"
  *
  *   Automated Options Paged Usage module.
