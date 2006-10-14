@@ -253,15 +253,16 @@ ISC_LIST(struct interface)     inter_list;
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
 
-void	add_fd_to_list	P((SOCKET, enum desc_type));
-void	close_and_delete_fd_from_list	P((SOCKET));
-void	add_addr_to_list	P((struct sockaddr_storage *, struct interface *));
-void	delete_addr_from_list	P((struct sockaddr_storage *));
-struct interface *find_addr_in_list	P((struct sockaddr_storage *));
-struct interface *find_flagged_addr_in_list P((struct sockaddr_storage *, int));
-static void create_wildcards	P((u_short));
-isc_boolean_t address_okay	P((isc_interface_t *));
-void	convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
+static void	add_fd_to_list	P((SOCKET, enum desc_type));
+static void	close_and_delete_fd_from_list	P((SOCKET));
+static void	add_addr_to_list	P((struct sockaddr_storage *, struct interface *));
+static void	delete_addr_from_list	P((struct sockaddr_storage *));
+static struct interface *find_addr_in_list	P((struct sockaddr_storage *));
+static struct interface *find_flagged_addr_in_list P((struct sockaddr_storage *, int));
+static void	create_wildcards	P((u_short));
+static isc_boolean_t	address_okay	P((isc_interface_t *));
+static void		convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
+static struct interface *getinterface	P((struct sockaddr_storage *));
 static struct interface *findlocalinterface	P((struct sockaddr_storage *));
 static struct interface *findlocalcastinterface	P((struct sockaddr_storage *, int));
 
@@ -815,7 +816,7 @@ list_if_listening(struct interface *interface, u_short port)
 		"Enabled": "Disabled");
 }
 
-void
+static void
 create_wildcards(u_short port) {
 	isc_boolean_t okipv4 = ISC_TRUE;
 	/*
@@ -852,6 +853,8 @@ create_wildcards(u_short port) {
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv4 = interface;
 			any_interface = interface;
+			
+			add_addr_to_list(&interface->sin, interface);
 			add_interface(interface);
 			list_if_listening(interface, port);
 		} else {
@@ -887,6 +890,7 @@ create_wildcards(u_short port) {
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv6 = interface;
 			any6_interface = interface;
+			add_addr_to_list(&interface->sin, interface);
 			add_interface(interface);
 			list_if_listening(interface, port);
 		} else {
@@ -899,7 +903,7 @@ create_wildcards(u_short port) {
 }
 
 
-isc_boolean_t
+static isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
 
 	DPRINTF(4, ("address_okay: listen Virtual: %d, IF name: %s, Up Flag: %d\n", 
@@ -936,7 +940,7 @@ address_okay(isc_interface_t *isc_if) {
 	return (ISC_TRUE);
 }
 
-void
+static void
 convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 	itf->scopeid = 0;
 	itf->family = (short) isc_if->af;
@@ -1236,7 +1240,7 @@ update_interfaces(
 		 * with the appropriate socket (our name space is
 		 * (ip-address) - NOT (interface name, ip-address))
 		 */
-		iface = findlocalinterface(&interface.sin);
+		iface = getinterface(&interface.sin);
 		
 		if (iface && refresh_interface(iface)) 
 		{
@@ -1457,6 +1461,7 @@ create_interface(
 	/*
 	 * put into our interface list
 	 */
+	add_addr_to_list(&interface->sin, interface);
 	add_interface(interface);
 
 	DPRINT_INTERFACE(2, (interface, "created ", "\n"));
@@ -2001,6 +2006,7 @@ io_multicast_add(
 		((struct sockaddr_in*)&interface->mask)->sin_addr.s_addr =
 						htonl(~(u_int32)0);
 		DPRINT_INTERFACE(2, (interface, "multicast add ", "\n"));
+		add_addr_to_list(&interface->sin, interface);
 		add_interface(interface);
 		list_if_listening(interface, NTP_PORT);
 	}
@@ -2406,8 +2412,6 @@ open_socket(
 #endif /* not HAVE_SIGNALED_IO */
 
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
-
-	add_addr_to_list(addr, interf);
 
 #if !defined(SYS_WINNT) && !defined(VMS)
 	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd,
@@ -3135,14 +3139,13 @@ findinterface(
  * logic in ntpd which would be a silly and really unportable thing to do.
  *
  */
-struct interface *
+static struct interface *
 findlocalinterface(
 	struct sockaddr_storage *addr
 	)
 {
 	SOCKET s;
 	int rtn;
-	struct interface *interface;
 	struct sockaddr_storage saddr;
 	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
 
@@ -3191,29 +3194,25 @@ findlocalinterface(
 
 	DPRINTF(4, ("findlocalinterface: kernel maps %s to %s\n", stoa(addr), stoa(&saddr)));
 	
-	for (interface = ISC_LIST_HEAD(inter_list);
-	     interface != NULL;
-	     interface = ISC_LIST_NEXT(interface, link)) 
-	{
-		if (interface->flags & INT_WILDCARD)
-			continue;
-	  
+	return getinterface(&saddr);
+}
+
+/*
+ * fetch an interface structure the matches the
+ * address is not a wildcard/mcast or ignoring interface
+ */
+static struct interface *
+getinterface(struct sockaddr_storage *addr)
+{
+	struct interface *interface = find_addr_in_list(addr);
+
+	if (interface != NULL) {
+		if (interface->flags & (INT_WILDCARD|INT_MCASTIF))
+			return NULL;
+		
 		/* Don't both with ignore interfaces */
 		if (interface->ignore_packets == ISC_TRUE)
-			continue;
-
-		/*
-		 * First look if is the the correct family
-		 */
-		if(interface->sin.ss_family != saddr.ss_family)
-			continue;
-		/*
-		 * We match the unicast address only.
-		 */
-		if (SOCKCMP(&interface->sin, &saddr))
-		{
-			break;
-		}
+			return NULL;
 	}
 
 	return interface;
@@ -3313,8 +3312,15 @@ findbcastinter(
 	DPRINTF(4, ("Finding broadcast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
+#if 0 /* currently disabled - see comment inside */
 	interface = find_flagged_addr_in_list(addr, INT_BCASTOPEN|INT_MCASTOPEN);
 	
+	/*
+	 * Do nothing right now
+	 * Eventually we will find the interface this
+	 * way, but until it works properly we just see
+	 * which one we got
+	 */
 #ifdef DEBUG
 	if (interface) {
 		DPRINTF(4, ("Found bcastinter index #%d %s\n", interface->ifnum, interface->name));
@@ -3322,29 +3328,23 @@ findbcastinter(
 		DPRINTF(4, ("No bcast interface found for %s\n", stoa(addr)));
 	}
 #endif
-	/*
-	 * Do nothing right now
-	 * Eventually we will find the interface this
-	 * way, but until it works properly we just see
-	 * which one we got
-	 */
-/*	if (interface != NULL)
+	if (interface != NULL)
 	{
-		return (interface);
+		return interface;
 	}
-*/
+#endif
 
 	for (interface = ISC_LIST_HEAD(inter_list);
 	     interface != NULL;
 	     interface = ISC_LIST_NEXT(interface, link)) 
-	  {
+	{
 	        if (interface->flags & INT_WILDCARD)
 		        continue;
-	  
+		
 		/* Don't bother with ignored interfaces */
 		if (interface->ignore_packets == ISC_TRUE)
 			continue;
-
+		
 		/*
 		 * First look if this is the correct family
 		 */
@@ -3355,13 +3355,15 @@ findbcastinter(
 		if (interface->flags & INT_LOOPBACK)
 			continue;
 
+#if 0 /* XXX - disable null effect code - kd */
 		/* for IPv6 multicast check the address for linklocal */
 #ifdef INCLUDE_IPV6_SUPPORT
 		if (interface->sin.ss_family == AF_INET6 &&
-		   (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&interface->sin)->sin6_addr)))
+		    (IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&interface->sin)->sin6_addr)))
 		{
 /*			continue; */
 		}
+#endif
 #endif
 		/*
 		 * If we are looking to match a multicast address grab it.
@@ -3370,7 +3372,7 @@ findbcastinter(
 		 */
 		if (addr_ismulticast(addr) == ISC_TRUE && interface->flags & INT_MULTICAST)
 		{
-			return (interface);
+			break;
 		}
 
 		/*
@@ -3380,24 +3382,33 @@ findbcastinter(
 		 * Sloppy.
 		 */
 		if(addr->ss_family == AF_INET) {
-			if (SOCKCMP(&interface->bcast, addr))
-				return interface;
+			if (SOCKCMP(&interface->bcast, addr)) {
+				break;
+			}
 			if ((NSRCADR(&interface->sin) &
-				NSRCADR(&interface->mask)) == (NSRCADR(addr) &
-			    	NSRCADR(&interface->mask)))
-				return interface;
+			     NSRCADR(&interface->mask)) == (NSRCADR(addr) &
+							    NSRCADR(&interface->mask)))
+				break;
 		}
 #ifdef INCLUDE_IPV6_SUPPORT
 		else if(addr->ss_family == AF_INET6) {
-			if (SOCKCMP(&interface->bcast, addr))
-				return interface;
-			if (SOCKCMP(netof(&interface->sin), netof(addr)))
-				return interface;
+			if (SOCKCMP(&interface->bcast, addr)) {
+				break;
+			}
+			if (SOCKCMP(netof(&interface->sin), netof(addr))) {
+				break;
+			}
 		}
 #endif
 	}
 #endif /* SIOCGIFCONF */
- 	return ANY_INTERFACE_CHOOSE(addr);
+	if (interface == NULL) {
+		DPRINTF(4, ("No bcast interface found for %s\n", stoa(addr)));
+		return ANY_INTERFACE_CHOOSE(addr);
+	} else {
+		DPRINTF(4, ("Found bcastinter index #%d %s\n", interface->ifnum, interface->name));
+		return interface;
+	}
 }
 
 
@@ -3539,7 +3550,7 @@ kill_asyncio(int startfd)
 /*
  * Add and delete functions for the list of open sockets
  */
-void
+static void
 add_fd_to_list(SOCKET fd, enum desc_type type) {
 	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
 	lsock->fd = fd;
@@ -3559,7 +3570,7 @@ add_fd_to_list(SOCKET fd, enum desc_type type) {
 #endif
 }
 
-void
+static void
 close_and_delete_fd_from_list(SOCKET fd) {
 
 	vsock_t *next;
@@ -3609,19 +3620,29 @@ close_and_delete_fd_from_list(SOCKET fd) {
 	}
 }
 
-void
+static void
 add_addr_to_list(struct sockaddr_storage *addr, struct interface *interface){
-	remaddr_t *laddr = (remaddr_t *)emalloc(sizeof(remaddr_t));
-	memcpy(&laddr->addr, addr, sizeof(struct sockaddr_storage));
-	laddr->interface = interface;
-
-	ISC_LIST_APPEND(remoteaddr_list, laddr, link);
-
-	DPRINTF(4, ("Added addr %s to list of addresses\n",
-		    stoa(addr)));
+#ifdef DEBUG
+	if (find_addr_in_list(addr) == NULL) {
+#endif
+		/* not there yet - add to list */
+		remaddr_t *laddr = (remaddr_t *)emalloc(sizeof(remaddr_t));
+		memcpy(&laddr->addr, addr, sizeof(struct sockaddr_storage));
+		laddr->interface = interface;
+		
+		ISC_LIST_APPEND(remoteaddr_list, laddr, link);
+		
+		DPRINTF(4, ("Added addr %s to list of addresses\n",
+			    stoa(addr)));
+#ifdef DEBUG
+	} else {
+		DPRINTF(4, ("WARNING: Attempt to add duplicate addr %s to address list\n",
+			    stoa(addr)));
+	}
+#endif
 }
 
-void
+static void
 delete_addr_from_list(struct sockaddr_storage *addr) {
 
 	remaddr_t *next;
@@ -3633,38 +3654,39 @@ delete_addr_from_list(struct sockaddr_storage *addr) {
 			ISC_LIST_DEQUEUE_TYPE(remoteaddr_list, laddr, link, remaddr_t);
 			free(laddr);
 			break;
+			DPRINTF(4, ("Deleted addr %s from list of addresses\n",
+				    stoa(addr)));
 		}
 		else
 			laddr = next;
 	}
-	DPRINTF(4, ("Deleted addr %s from list of addresses\n",
-		    stoa(addr)));
 }
 
-struct interface *
+static struct interface *
 find_addr_in_list(struct sockaddr_storage *addr) {
 
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
-	DPRINTF(4, ("Finding addr %s in list of addresses\n",
+	DPRINTF(4, ("Searching for addr %s in list of addresses - ",
 		    stoa(addr)));
 
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
 		if(SOCKCMP(&laddr->addr, addr)) {
+			DPRINTF(4, ("FOUND\n"));
 			return laddr->interface;
-			break;
 		}
 		else
 			laddr = next;
 	}
+	DPRINTF(4, ("NOT FOUND\n"));
 	return NULL; /* Not found */
 }
 
 /*
  * Find the given address with the associated flag in the list
  */
-struct interface *
+static struct interface *
 find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
 	remaddr_t *next;
@@ -3686,6 +3708,10 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 
 #ifdef HAS_ROUTING_SOCKET
 #include <net/route.h>
+
+#ifndef UPDATE_GRACE
+#define UPDATE_GRACE	2	/* wait UPDATE_GRACE seconds before scanning */
+#endif
 
 static void
 process_routing_msgs(struct asyncio_reader *reader)
@@ -3761,7 +3787,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 			 * we are keen on new and deleted addresses and if an interface goes up and down or routing changes
 			 */
 			DPRINTF(3, ("routing message op = %d: scheduling interface update\n", rtm->rtm_type));
-			timer_interfacetimeout(current_time);
+			timer_interfacetimeout(current_time + UPDATE_GRACE);
 			break;
 		default:
 			/*
