@@ -3367,11 +3367,18 @@ findbcastinter(
 #endif
 		/*
 		 * If we are looking to match a multicast address grab it.
-		 * We must not do this before we have eliminated any linklocal
-		 * addresses
 		 */
 		if (addr_ismulticast(addr) == ISC_TRUE && interface->flags & INT_MULTICAST)
 		{
+#ifdef INCLUDE_IPV6_SUPPORT
+			if(addr->ss_family == AF_INET6) {
+				/* Only use link-local address for link-scope mcast */
+				if(IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr) &&
+				  !IN6_IS_ADDR_LINKLOCAL(&((struct sockaddr_in6*)&interface->sin)->sin6_addr)) {
+					continue;
+				}
+			}
+#endif
 			break;
 		}
 
