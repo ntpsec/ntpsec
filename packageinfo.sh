@@ -14,8 +14,8 @@ point=59
 #special=ag
 special=
 # ReleaseCandidate. 'yes' or 'no'.
-#releasecandidate=yes
-releasecandidate=no
+releasecandidate=yes
+#releasecandidate=no
 # ChangeLog tag
 CLTAG=NTP_4_2_0
 ###
