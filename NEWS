@@ -1,13 +1,49 @@
 * [Bug 718] Use the recommended type for the saddrlen arg to getsockname().
+* [Bug 717] Fix libopts compile problem.
 * [Bug 715] Fix a multicast issue under Linux.
 * [Bug 690] Fix a Windows DNS lookup buffer overflow.
 * [Bug 670] Resolved a Windows issue with the dynamic interface rescan code.
 * K&R C support is being deprecated.
 * [Bug 714] ntpq -p should conflict with -i, not -c.
 * WWV refclock improvements from Dave Mills.
+* [Bug 708] Use thread affinity only for the clock interpolation thread.
+* [Bug 706] ntpd can be running several times in parallel.
+* [Bug 704] Documentation typos.
+* [Bug 701] coverity: NULL dereference in ntp_peer.c
+* [Bug 695] libopts does not protect against macro collisions.
+* [Bug 693] __adjtimex is independent of ntp_{adj,get}time.
+* [Bug 692] sys_limitrejected was not being incremented.
+* [Bug 691] restrictions() assumption not always valid.
 * [Bug 689] Deprecate HEATH GC-1001 II; the driver never worked.
+* [Bug 688] Fix documentation typos.
+* [Bug 686] Handle leap seconds better under Windows.
+* [Bug 685] Use the Windows multimedia timer.
+* [Bug 684] Only allow debug options if debugging is enabled.
+* [Bug 683] Use the right version string.
+* [Bug 680] Fix the generated version string on Windows.
+* [Bug 678] Use the correct size for control messages.
+* [Bug 677] Do not check uint_t in configure.ac.
+* [Bug 676] Use the right value for msg_namelen.
+* [Bug 675] Make sure ntpd builds without debugging.
+* [Bug 672] Fix cross-platform structure padding/size differences.
+* [Bug 660] New TIMESTAMP code fails tp build on Solaris Express.
+* [Bug 659] libopts does not build under Windows.
+* [Bug 658] HP-UX with cc needs -Wp,-H8166 in CFLAGS.
+* [Bug 656] ntpdate doesn't work with multicast address.
+* [Bug 638] STREAMS_TLI is deprecated - remove it.
+* [Bug 635] Fix tOptions definition.
+* [Bug 628] Fallback to ntp discipline not working for large offsets.
+* [Bug 622] Dynamic interface tracking for ntpd.
+* [Bug 603] Don't link with libelf if it's not needed.
+* [Bug 523] ntpd service under Windows does't shut down properly.
+* [Bug 500] sntp should always be built.
+* [Bug 479] Fix the -P option.
+* [Bug 421] Support the bc637PCI-U card.
 * [Bug 342] Deprecate broken TRAK refclock driver.
 * [Bug 340] Deprecate broken MSF EES refclock driver.
+* [Bug 153] Don't do DNS lookups on address masks.
+* [Bug 143] Fix interrupted system call on HP-UX.
+* [Bug 42] Distribution tarballs should be signed.
 * Support separate PPS devices for PARSE refclocks.
 * [Bug 637, 51?] Dynamic interface scanning can now be done.
 * Options processing now uses GNU AutoGen.

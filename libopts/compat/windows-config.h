@@ -1,8 +1,8 @@
 
 /*
- * Time-stamp:        "2006-09-23 19:44:29 bkorb"
+ * Time-stamp:        "2006-10-12 17:42:52 bkorb"
  *             by: bkorb
- * Last Committed:    $Date: 2006/09/24 02:57:02 $
+ * Last Committed:    $Date: 2006/10/13 00:44:35 $
  */
 #ifndef WINDOWS_CONFIG_HACKERY
 #define WINDOWS_CONFIG_HACKERY 1
@@ -34,6 +34,12 @@
  */
 
 #define SIZEOF_INT 4
+
+#define SIZEOF_CHARP 4
+#define SIZEOF_LONG  4
+#define SIZEOF_SHORT 4
+
+typedef unsigned long uintptr_t;
 
 /*
  * # define HAVE_NET_IF_H

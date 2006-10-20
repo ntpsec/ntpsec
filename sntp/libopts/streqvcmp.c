@@ -1,6 +1,6 @@
 
 /*
- *  $Id: streqvcmp.c,v 4.12 2006/09/24 02:10:45 bkorb Exp $
+ *  $Id: streqvcmp.c,v 4.9 2006/09/24 02:11:16 bkorb Exp $
  * Time-stamp:      "2006-07-26 18:25:53 bkorb"
  *
  *  String Equivalence Comparison

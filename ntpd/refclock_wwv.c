@@ -764,6 +764,9 @@ wwv_shutdown(
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
+	if (up == NULL)
+		return;
+
 	io_closeclock(&pp->io);
 #ifdef ICOM
 	if (up->fd_icom > 0)

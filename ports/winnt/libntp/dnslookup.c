@@ -105,7 +105,7 @@ DNSlookup_name(
 {
 	char buffer[sizeof(WSAQUERYSET) + 2048];
 	WSAQUERYSET query;
-	hostent_t *addr = NULL;
+	struct hostent *addr = NULL;
 	char *bufaddr = NULL;
 	char ** addrlist = &bufaddr;
 	int addrcnt = 0;
@@ -145,7 +145,6 @@ DNSlookup_name(
 	 */
 	retcode = EAI_NONAME;
 	dwLength = sizeof(buffer);
-	*addrlist = NULL;
 
 	while(err == 0)		/* Drop out when error */
 	{
@@ -164,6 +163,8 @@ DNSlookup_name(
 				memset(addr, 0, sizeof(struct hostent));
 				addr->h_addrtype = (short) results->lpcsaBuffer->iSocketType;
 				addr->h_length = sizeof(struct in_addr); /* Only passing back the address */
+				addrlist = malloc(sizeof(char *));
+				*addrlist = NULL;
 			}
 			for (i = 0; i < results->dwNumberOfCsAddrs; i++)
 			{
@@ -177,6 +178,7 @@ DNSlookup_name(
 		addr->h_name = (char *) name;
 		addr->h_addr_list = addrlist;
 		retcode = 0;
+		*Addresses = addr;
 	}
 	else
 	{
@@ -189,7 +191,6 @@ DNSlookup_name(
 #endif
 		retcode = ReturnCode(errcode);
 	}
-	*Addresses = addr;
 	WSALookupServiceEnd(handle);
 	return (retcode);
 }
