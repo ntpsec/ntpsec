@@ -1,3 +1,4 @@
+* [Bug 666] ntpq opeers displays jitter rather than dispersion.
 * [Bug 718] Use the recommended type for the saddrlen arg to getsockname().
 * [Bug 717] Fix libopts compile problem.
 * [Bug 715] Fix a multicast issue under Linux.
