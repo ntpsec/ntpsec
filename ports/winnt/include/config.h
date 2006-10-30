@@ -13,6 +13,7 @@
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 #define ISC_PLATFORM_HAVEIPV6
 #define ISC_PLATFORM_HAVEIN6PKTINFO
+#define NO_OPTION_NAME_WARNINGS
 #else
 typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
 #endif
