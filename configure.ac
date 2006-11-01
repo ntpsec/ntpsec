@@ -799,8 +799,10 @@ if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 else
     # Hack around a problem...
     # HMS: This is $host because we need the -D if we are building *for* it.
+    # HMS: 061029: Now that we separate the ss_* checks this is causing
+    # a problem - disable it until we get to the bottom of it.
     case "$host" in
-     *-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
+     XXX*-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
 	;;
     esac
 fi
@@ -825,8 +827,45 @@ AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
 [/* Handle ss_family */
 #if !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE___SS_FAMILY_IN_SS)
 # define ss_family __ss_family
-# define ss_len __ss_len
 #endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
+
+AC_CACHE_CHECK([for ss_len field in struct sockaddr_storage],
+		ac_cv_have_ss_len_in_struct_ss, [
+	AC_TRY_COMPILE(
+		[
+#include <sys/types.h>
+#include <sys/socket.h>
+		],
+		[ struct sockaddr_storage s; s.ss_len = 1; ],
+		[ ac_cv_have_ss_len_in_struct_ss="yes" ],
+		[ ac_cv_have_ss_len_in_struct_ss="no" ],
+	)
+])
+if test "x$ac_cv_have_ss_len_in_struct_ss" = "xyes" ; then
+	AC_DEFINE(HAVE_SS_LEN_IN_SS, 1, [Does struct sockaddr_storage have ss_len?])
+fi
+
+AC_CACHE_CHECK([for __ss_len field in struct sockaddr_storage],
+		ac_cv_have___ss_len_in_struct_ss, [
+	AC_TRY_COMPILE(
+		[
+#include <sys/types.h>
+#include <sys/socket.h>
+		],
+		[ struct sockaddr_storage s; s.__ss_len = 1; ],
+		[ ac_cv_have___ss_len_in_struct_ss="yes" ],
+		[ ac_cv_have___ss_len_in_struct_ss="no" ]
+	)
+])
+if test "x$ac_cv_have___ss_len_in_struct_ss" = "xyes" ; then
+	AC_DEFINE(HAVE___SS_LEN_IN_SS, 1, [Does struct sockaddr_storage have __ss_len?])
+fi
+
+AH_VERBATIM([X_HAVE_SS_LEN_IN_SS],
+[/* Handle ss_len */
+#if !defined(HAVE_SS_LEN_IN_SS) && defined(HAVE___SS_LEN_IN_SS)
+# define ss_len __ss_len
+#endif /* !defined(HAVE_SS_LEN_IN_SS) && defined(HAVE_SA_LEN_IN_SS) */])
 
 case "$ac_cv_header_machine_soundcard_h$ac_cv_header_sys_soundcard_h" in
   *yes*)
