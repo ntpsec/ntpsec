@@ -67,6 +67,19 @@ esac
 
 AMU_OS_CFLAGS
 
+# NTP has (so far) been relying on leading-edge autogen.
+# Therefore, by default:
+# - use the version we ship with
+# - do not install it
+# - build a static copy (AC_DISABLE_SHARED - done earlier)
+case "${enable_local_libopts+set}" in
+ set) ;;
+ *) enable_local_libopts=yes ;;
+esac
+case "${enable_libopts_install+set}" in
+ set) ;;
+ *) enable_libopts_install=no ;;
+esac
 LIBOPTS_CHECK(libopts)
 
 AC_MSG_CHECKING([[if $CC can handle #warning]])
@@ -280,6 +293,10 @@ AC_SUBST(LDFLAGS)dnl
 # HMS: From bunnylou/cowbird
 case "$host" in
  alpha-dec-osf4.0)
+    AC_DISABLE_SHARED
+    ;;
+ *) # So far, the only shared library we might use is libopts.
+    # It's a small library - we might as well use a static version of it.
     AC_DISABLE_SHARED
     ;;
 esac
