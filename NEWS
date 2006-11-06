@@ -1,3 +1,4 @@
+* [Bug 734] setsockopt(..., IP_MULTICAST_IF, ...) fails on 64-bit platforms.
 * [Bug 732] C-DEX JST2000 patch from Hideo Kuramatsu.
 * [Bug 721] check for __ss_family and __ss_len separately.
 * [Bug 666] ntpq opeers displays jitter rather than dispersion.
