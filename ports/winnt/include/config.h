@@ -18,6 +18,13 @@
 typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
 #endif
 
+/*
+ * Some types don't exist in VS V6
+ */
+#if _MSC_VER < 1300
+typedef unsigned int	uintptr_t;
+#endif
+
 #define ISC_PLATFORM_NEEDIN6ADDRANY
 #define HAVE_SOCKADDR_IN6
 
