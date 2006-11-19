@@ -38,6 +38,9 @@
 #ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
 # include <sys/sockio.h>
 #endif
+#ifdef HAVE_SYS_UIO_H
+# include <sys/uio.h>
+#endif
 
 /*
  * setsockopt does not always have the same arg declaration
