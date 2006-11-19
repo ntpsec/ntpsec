@@ -1218,6 +1218,50 @@ case "$host" in
 esac
 AC_CHECK_FUNCS(uname updwtmp updwtmpx vsnprintf vsprintf)
 
+###
+
+# http://bugs.ntp.isc.org/737
+case "$ac_cv_func_recvmsg" in
+ yes)
+ AC_MSG_CHECKING([if we need extra help to define struct iovec])
+ AC_CACHE_VAL(ac_cv_struct_iovec_help,dnl
+ [for ac_cv_struct_iovec_help in '0' '1'; do
+   AC_TRY_COMPILE(dnl
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if $ac_cv_struct_iovec_help
+#include <sys/uio.h>
+#endif
+
+void foo();
+void foo() {
+	ssize_t x;
+	int s = 0;
+	struct iovec iov;
+	struct msghdr mh;
+	int flags = 0;
+
+	mh.msg_iov = &iov;
+	x = recvmsg(s, &mh, flags);
+}],,dnl
+  [ac_worked=yes ; break 1], ac_worked=no)
+  done
+])dnl AC_CACHE_VAL
+    case "$ac_worked$ac_cv_struct_iovec_help" in
+     yes1)
+	AC_DEFINE(HAVE_SYS_UIO_H, 1, [Use sys/uio.h for struct iovec help])
+	ans=yes
+	;;
+     *) ans=no
+    esac
+    AC_MSG_RESULT([$ans])
+    ;;
+esac
+
 case "$host" in
  *-*-sunos4*)
     AC_DEFINE(SPRINTF_CHAR, 1, [*s*printf() functions are char*])
