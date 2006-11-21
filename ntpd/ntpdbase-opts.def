@@ -418,7 +418,6 @@ flag = {
 flag = {
     name      = slew;
     value     = x;
-    arg-type  = string;
     descrip   = "Slew up to 600 seconds";
     doc = <<-  _EndOfDoc_
 	Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold.

@@ -1,3 +1,4 @@
+* [Bug 739] ntpd -x should not take an argument.
 * [Bug 737] Some systems need help providing struct iovec.
 * [Bug 717] Fix libopts compile problem.
 * [Bug 728] parse documentation fixes.
