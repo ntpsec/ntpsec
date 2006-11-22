@@ -259,7 +259,7 @@ transmit(
 			}
 			hpoll = sys_poll;
 			if (peer->flags & FLAG_BURST &&
-			    peer_unfit(peer))
+			    !peer_unfit(peer))
 				peer->burst = NTP_BURST;
 		}
 

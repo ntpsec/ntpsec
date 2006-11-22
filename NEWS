@@ -1,3 +1,4 @@
+* [Bug 741] "burst" doesn't work with !unfit peers.
 * [Bug 735] Fix a make/gmake VPATH issue on Solaris.
 * [Bug 739] ntpd -x should not take an argument.
 * [Bug 737] Some systems need help providing struct iovec.
