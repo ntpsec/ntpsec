@@ -137,7 +137,7 @@ dist-hook:
 	@echo "Feel free to send patches that fix these warnings, though."
 	@echo " "
 	@sleep 1
-	@touch .gcc-warning
+	@touch $@
 
 ChangeLog: FRC.ChangeLog
 	cd $(srcdir)					\
