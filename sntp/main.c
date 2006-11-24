@@ -180,6 +180,7 @@ const char *argv0 = NULL;              /* For diagnostics only - not NULL */
 int verbose = 0,                       /* Default = 0, -v = 1, -V = 2, -W = 3 */
     operation = 0;                     /* Defined in header.h - see action */
 const char *lockname = NULL;           /* The name of the lock file */
+int unprivport = 0;			/* Use an unpriv port for query? */
 
 #define COUNT_MAX          25          /* Do NOT increase this! */
 #define WEEBLE_FACTOR     1.2          /* See run_server() and run_daemon() */
@@ -286,7 +287,7 @@ helpfully.  This is called before any files or sockets are opened. */
     fprintf(stderr,"            [ -c count ] [ -e minerr ] [ -E maxerr ]\n");
     fprintf(stderr,"            [ -d delay | -x [ separation ] ");
     fprintf(stderr,"[ -f savefile ] ]\n");
-    fprintf(stderr,"        [ -4 | -6 ] [ address(es) ] ]\n");
+    fprintf(stderr,"        [ -4 | -6 ] [-u] [ address(es) ] ]\n");
     if (halt) exit(EXIT_FAILURE);
 }
 
@@ -476,7 +477,7 @@ packets is an abomination, anyway, so reject it. */
     delay2 = data->current-data->originate;
     failed = (
 	      (  data->stratum != 0
-	      && data->stratum != NTP_STRATUM_MAX
+	      /* && data->stratum != NTP_STRATUM_MAX */
 	      && data->reference == 0.0
 	      )
 	     || data->transmit == 0.0
@@ -492,6 +493,12 @@ packets is an abomination, anyway, so reject it. */
             fprintf(stderr,
                 "%s: incomprehensible NTP packet rejected on socket %d\n",
                 argv0,which);
+        return 1;
+    }
+    if (data->stratum == NTP_STRATUM_MAX) {
+	fprintf(stderr,
+	    "%s: unsynch NTP response on socket %d\n",
+	    argv0,which);
         return 1;
     }
 
@@ -1530,8 +1537,10 @@ one of the specialised routines to do the work. */
         ++argv0;
     else
         argv0 = argv[0];
+
     setvbuf(stdout,NULL,_IOLBF,BUFSIZ);
     setvbuf(stderr,NULL,_IOLBF,BUFSIZ);
+
     if (INT_MAX < 2147483647) fatal(0,"sntp requires >= 32-bit ints",NULL);
     if (DBL_EPSILON > 1.0e-13)
         fatal(0,"sntp requires doubles with eps <= 1.0e-13",NULL);
@@ -1545,6 +1554,8 @@ one of the specialised routines to do the work. */
 	    preferred_family(PREF_FAM_INET);
 	else if (strcmp(argv[1],"-6") == 0)
 	    preferred_family(PREF_FAM_INET6);
+        else if (strcmp(argv[1],"-u") == 0)
+            ++unprivport;
         else if (strcmp(argv[1],"-q") == 0 && action == 0)
             action = action_query;
         else if (strcmp(argv[1],"-r") == 0 && action == 0)
