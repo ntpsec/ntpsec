@@ -218,7 +218,8 @@ static FILE *savefile = NULL;          /* Holds the data to restart from */
 to SNTP. */
 
 typedef struct NTP_DATA {
-    unsigned char status, version, mode, stratum, polling, precision;
+    unsigned char status, version, mode, stratum, polling;
+    signed char precision;
     double dispersion, reference, originate, receive, transmit, current;
 } ntp_data;
 
@@ -239,7 +240,7 @@ void pack_ntp(unsigned char *, int, ntp_data *);
 void unpack_ntp(ntp_data *, unsigned char *, int);
 void make_packet(ntp_data *, int);
 int read_packet(int, ntp_data *, double *, double *);
-void format_time(char *, int, double, double, double, double);
+void format_time(char *, int, double, double, double, double, int);
 double reset_clock(double, double, int);
 void run_server(void);
 double estimate_stats(int *, int *, data_record *, double, double *, double *,
@@ -544,7 +545,7 @@ elsewhere for other kludges. */
 
 
 void format_time (char *text, int length, double offset, double error,
-    double drift, double drifterr) {
+    double drift, double drifterr, int precision) {
 
 /* Format the current time into a string, with the extra information as
 requested.  Note that the rest of the program uses the correction needed, which
@@ -567,12 +568,14 @@ systems do not set the return value from (s)printf. */
     errno = 0;
     if ((gmt = localtime(&now)) == NULL)
         fatal(1,"unable to work out local time",NULL);
-    len = 24;
+    len = 21;
     if (length <= len) fatal(0,"internal error calling format_time",NULL);
     errno = 0;
-    sprintf(text,"%.4d %s %.2d %.2d:%.2d:%.2d.%.3d",
+    precision /= -3;
+    len += precision;
+    sprintf(text,"%.4d %s %.2d %.2d:%.2d:%.2d.%.*d",
             gmt->tm_year+1900,months[gmt->tm_mon],gmt->tm_mday,
-            gmt->tm_hour,gmt->tm_min,gmt->tm_sec,milli);
+            gmt->tm_hour,gmt->tm_min,gmt->tm_sec,precision,milli);
     if (strlen(text) != len)
         fatal(1,"unable to format current local time",NULL);
 
@@ -582,8 +585,9 @@ systems do not set the return value from (s)printf. */
         if (length < len+30)
             fatal(0,"internal error calling format_time",NULL);
         errno = 0;
-        sprintf(&text[len]," %c %.3f +/- %.3f secs",(offset > 0.0 ? '-' : '+'),
-                (offset > 0.0 ? offset : -offset),dispersion+error);
+        sprintf(&text[len]," %c %.*f +/- %.*f secs",(offset > 0.0 ? '-' : '+'),
+		precision,(offset > 0.0 ? offset : -offset),
+		precision,dispersion+error);
         if (strlen(&text[len]) < 22)
             fatal(1,"unable to format clock correction",NULL);
     }
@@ -660,7 +664,7 @@ correction not having completed, but it will rarely help much. */
     adjust_time(offset,(action == action_reset ? 1 : 0),
         (daemon ? 2.0*minerr : 0.0));
     if (daemon ? verbose > 1 : verbose) {
-        format_time(text,50,0.0,-1.0,0.0,-1.0);
+        format_time(text,50,0.0,-1.0,0.0,-1.0,-10);
         fprintf(stderr,
             "%s: time changed by %.3f secs to %s +/- %.3f+%.3f\n",
             argv0,offset,text,dispersion,error);
@@ -1093,14 +1097,14 @@ void query_savefile (void) {
 
     previous = when = current_time(JAN_1970);
     if (verbose > 2) {
-        format_time(text,50,0.0,-1.0,0.0,-1.0);
+        format_time(text,50,0.0,-1.0,0.0,-1.0,-10);
         fprintf(stderr,"Started=%.6f %s\n",when,text);
     }
     handle_saving(save_read_only,&total,&index,&cycle,record,&previous,&when,
         &correction);
     estimate_stats(&total,&index,record,correction,&dispersion,
         &when,&offset,&error,&drift,&drifterr,&waiting,0);
-    format_time(text,100,offset,error,drift,drifterr);
+    format_time(text,100,offset,error,drift,drifterr,-10);
     printf("%s\n",text);
     if (fclose(savefile)) fatal(1,"unable to close daemon save file",NULL);
     if (verbose > 2) fprintf(stderr,"Stopped normally\n");
@@ -1137,7 +1141,7 @@ the rest are mainly for diagnostics. */
 
     started = previous = when = current_time(JAN_1970);
     if (verbose > 2) {
-        format_time(text,50,0.0,-1.0,0.0,-1.0);
+        format_time(text,50,0.0,-1.0,0.0,-1.0,-10);
         fprintf(stderr,"Started=%.6f %s\n",when,text);
     }
     if (initial) {
@@ -1184,7 +1188,7 @@ check that we aren't in a failing loop. */
             if (operation == op_listen)
                 fprintf(stderr," rep. %.0f skip %.0f",replicates,skips);
             fprintf(stderr," max.off. %.3f corr. %.3f\n",maxoff,correction);
-            format_time(text,100,offset,error,drift,drifterr);
+            format_time(text,100,offset,error,drift,drifterr,-10);
             fprintf(stderr,"%s: %s\n",argv0,text);
             maxoff = 0.0;
         }
@@ -1333,7 +1337,7 @@ is the statistics are bad. */
         correction = 0.0;
         if (operation == op_client || accepts >= count) {
             if (action == action_display) {
-                format_time(text,100,offset,error,drift,drifterr);
+                format_time(text,100,offset,error,drift,drifterr,-10);
                 printf("%s\n",text);
             } else {
                 x = reset_clock(offset,error,1);
@@ -1374,13 +1378,14 @@ triggered if the signal handling works. */
 
     double history[COUNT_MAX], guesses[COUNT_MAX], offset, error, deadline,
         a, b, x, y;
+    int precs[COUNT_MAX], precision = 0;
     int accepts = 0, rejects = 0, flushes = 0, replicates = 0, cycle = 0, k;
     unsigned char transmit[NTP_PACKET_MIN];
     ntp_data data;
     char text[100];
 
     if (verbose > 2) {
-        format_time(text,50,0.0,-1.0,0.0,-1.0);
+        format_time(text,50,0.0,-1.0,0.0,-1.0,-10);
         fprintf(stderr,"Started=%.6f %s\n",current_time(JAN_1970),text);
     }
     for (k = 0; k < nhosts; ++k) open_socket(k,hostnames[k],delay);
@@ -1418,6 +1423,7 @@ the same time. */
                         goto continue1;
                     }
                 history[accepts] = a;
+		precs[accepts] = data.precision;
                 guesses[accepts++] = x;
             }
             if (verbose > 2)
@@ -1435,10 +1441,14 @@ the same time. */
                     x = guesses[k];
                     guesses[k] = guesses[k+1];
                     guesses[k+1] = x;
+		    precision = precs[k];
+		    precs[k] = precs[k+1];
+		    precs[k+1] = precision;
                 }
 continue1:  ;
         }
         offset = guesses[0];
+	precision = precs[0];
         error = minerr+guesses[count <= 5 ? count-1 : 5]-offset;
         if (verbose > 2)
             fprintf(stderr,"accepts=%d rejects=%d flushes=%d replicates=%d\n",
@@ -1449,11 +1459,13 @@ mainly out of paranoia. */
 
     } else {
         offset = 0.0;
+	precision = 0;
         error = NTP_INSANITY;
         while (accepts < count && attempts < 2*count) {
             if (current_time(JAN_1970) > deadline)
                 fatal(0,"not enough valid responses received in time",NULL);
             make_packet(&data,NTP_CLIENT);
+            precs[attempts] = data.precision;
             outgoing[attempts++] = data.transmit;
             if (verbose > 2) {
                 fprintf(stderr,"Outgoing packet on socket %d:\n",cycle);
@@ -1486,6 +1498,7 @@ the results warrant. */
             if (y < error) {
                 offset = x;
                 error = y;
+		precision = data.precision;
             }
             if (verbose > 2)
                 fprintf(stderr,"best=%.6f+/-%.6f\n",offset,error);
@@ -1511,7 +1524,7 @@ the results warrant. */
         fprintf(stderr,"Correction: %.6f +/- %.6f disp=%.6f\n",
             offset,error,dispersion);
     if (action == action_display) {
-        format_time(text,75,offset,error,0.0,-1.0);
+        format_time(text,75,offset,error,0.0,-1.0,precision);
         printf("%s\n",text);
     } else
         (void)reset_clock(offset,error,0);
