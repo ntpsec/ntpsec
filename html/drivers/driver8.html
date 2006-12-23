@@ -18,7 +18,7 @@
 		Serial Port: <tt>/dev/refclock-<i>u</i></tt>; TTY mode according to clock type<br>
                 PPS device: <tt>/dev/refclockpps-<i>u</i></tt>; alternate PPS device (if not available via the serial port)
 		<h4>Description</h4>
-		The PARSE driver supports 19 different clock types/configurations. PARSE is actually a multi-clock driver.<br>
+		The PARSE driver supports 20 different clock types/configurations. PARSE is actually a multi-clock driver.<br>
 		<br>
 		<p>The actual receiver status is mapped into various synchronization states generally used by receivers. The driver is configured to interpret the time codes of Meinberg DCF77 AM receivers, DCF77 FM receivers, Meinberg GPS16x/17x receivers, Trimble SV6 GPS, ELV DCF7000, Schmid, Wharton 400A and low cost receivers (see <a href="#clocklist">list below</a>).</p>
 		<p>The reference clock support in NTP contains the necessary configuration tables for those receivers. In addition to supporting several different clock types and up to 4 devices, the processing of a PPS signal is also provided as a configuration option. The PPS configuration option uses the receiver-generated time stamps for feeding the PPS loopfilter control for much finer clock synchronization.</p>
@@ -154,6 +154,10 @@
 				<p>This mode works without additional data communication (version, GPS status etc.) and thus should be used with multidrop, heterogeneous multiclient operation.</p>
 				<p><b>Note:</b> mode 18 must not be used with Meinberg PCI cards, use mode 2 instead.<br>
 				<br></p>
+			<li><b><tt>server 127.127.8.0-3 mode 19</tt></b>
+				<p><b><tt>Gude Analog- und Digitalsystem GmbH 'Expert mouseCLOCK USB v2.0'</tt></b><br>
+				<br></p>
+
 		</ul>
 		<p>Actual data formats and setup requirements of the various clocks can be found in <a href="../parsedata.html">NTP PARSE clock data formats</a>.</p>
 		<h4>Operation</h4>

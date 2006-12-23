@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.78 2006/12/22 20:08:27 kardel RELEASE_20061222_A
  *
- * refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A
+ * refclock_parse.c,v 4.78 2006/12/22 20:08:27 kardel RELEASE_20061222_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -182,7 +182,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.77 2006/08/05 07:44:49 kardel RELEASE_20060805_A";
+static char rcsid[] = "refclock_parse.c,v 4.78 2006/12/22 20:08:27 kardel RELEASE_20061222_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -647,6 +647,11 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  */
 #define CONRAD_BASEDELAY	0.292 /* Conrad receiver @ 50 Baud on a Sun */
 #define CONRAD_DESCRIPTION	"RAW DCF77 CODE (Conrad DCF77 receiver module)"
+
+/* Gude Analog- und Digitalsystem GmbH 'Expert mouseCLOCK USB v2.0' */
+#define GUDE_EMC_USB_V20_SPEED            (B4800)
+#define GUDE_EMC_USB_V20_BASEDELAY        0.425 /* USB serial<->USB converter FTDI232R */
+#define GUDE_EMC_USB_V20_DESCRIPTION      "RAW DCF77 CODE (Expert mouseCLOCK USB v2.0)"
 
 /*
  * TimeBrick receiver
@@ -1316,6 +1321,29 @@ static struct parse_clockinfo
 		GPS16X_LFLAG,
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
+	},
+	{				/* mode 19 */
+		RAWDCF_FLAGS,
+		NO_POLL,
+		RAWDCF_INIT,
+		NO_EVENT,
+		NO_END,
+		NO_MESSAGE,
+		NO_LCLDATA,
+		RAWDCF_ROOTDELAY,
+		GUDE_EMC_USB_V20_BASEDELAY,
+		DCF_A_ID,
+		GUDE_EMC_USB_V20_DESCRIPTION,
+		RAWDCF_FORMAT,
+		DCF_TYPE,
+		RAWDCF_MAXUNSYNC,
+		GUDE_EMC_USB_V20_SPEED,
+		RAWDCF_CFLAG,
+		RAWDCF_IFLAG,
+		RAWDCF_OFLAG,
+		RAWDCF_LFLAG,
+		RAWDCF_SAMPLES,
+		RAWDCF_KEEP
 	},
 };
 
@@ -5707,6 +5735,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.78  2006/12/22 20:08:27  kardel
+ * Bug 746 (RFE): add configuration for Expert mouseCLOCK USB v2.0 as mode 19
+ *
  * Revision 4.77  2006/08/05 07:44:49  kardel
  * support optionally separate PPS devices via /dev/refclockpps-{0..3}
  *
