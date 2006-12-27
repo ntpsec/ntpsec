@@ -1,3 +1,4 @@
+* [Bug 746] Expert mouseCLOCK USB v2.0 support added.'
 * driver8.html updates.
 * [Bug 747] Drop <NOBR> tags from ntpdc.html.
 * sntp now uses the returned precision to control decimal places.
