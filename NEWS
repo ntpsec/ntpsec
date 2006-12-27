@@ -1,4 +1,5 @@
-* [Bug 747] Drop <NOBR> tags from ntpdc.html
+* driver8.html updates.
+* [Bug 747] Drop <NOBR> tags from ntpdc.html.
 * sntp now uses the returned precision to control decimal places.
 * sntp -u will use an unprivileged port for its queries.
 * [Bug 741] "burst" doesn't work with !unfit peers.
