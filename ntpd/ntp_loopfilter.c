@@ -650,17 +650,15 @@ local_clock(
 		 * frequency and pretend we did it here.
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
-			if (ntv.status != pll_status)
-				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-				    msyslog(LOG_NOTICE,
-				    "kernel time sync disabled %04x",
-				    ntv.status);
+			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
+			    msyslog(LOG_NOTICE,
+			    "kernel time sync error %04x", ntv.status);
 			ntv.status &= ~(STA_PPSFREQ | STA_PPSTIME);
 		} else {
-			if (ntv.status != pll_status)
+			if ((ntv.status ^ pll_status) & ~STA_FLL)
 				NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
 				    msyslog(LOG_NOTICE,
-				    "kernel time sync enabled %04x",
+				    "kernel time sync status change %04x",
 				    ntv.status);
 		}
 		pll_status = ntv.status;
