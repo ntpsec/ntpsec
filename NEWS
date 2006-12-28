@@ -1,3 +1,4 @@
+(4.2.4) Released by Harlan Stenn <stenn@ntp.org>
 * monopt.html fixes from Dave Mills.
 * [Bug 452] Do not report kernel PLL/FLL flips.
 * [Bug 746] Expert mouseCLOCK USB v2.0 support added.'
@@ -64,11 +65,11 @@
 * [Bug 637, 51?] Dynamic interface scanning can now be done.
 * Options processing now uses GNU AutoGen.
 
-(4.2.2p4) Released by Harlan Stenn <stenn@ntp.isc.org>
+(4.2.2p4) Released by Harlan Stenn <stenn@ntp.org>
  * [Bug 710] compat getnameinfo() has off-by-one error
  * [Bug 690] Buffer overflow in Windows when doing DNS Lookups
 
-(4.2.2p3) Released by Harlan Stenn <stenn@ntp.isc.org>
+(4.2.2p3) Released by Harlan Stenn <stenn@ntp.org>
  * Make the ChangeLog file cleaner and easier to read
  * [Bug 601] ntpq's decodeint uses an extra level of indirection
  * [Bug 657] Different OSes need different sized args for IP_MULTICAST_LOOP
