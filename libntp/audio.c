@@ -377,9 +377,10 @@ audio_gain(
 	if (debug > 1)
 		printf("audio_gain: gain %d/%d\n", gain, l);
 # endif
+#if 0	/* not a good idea to do this; connector wiring dependency */
 	/* figure out what channel(s) to use. just nuke right for now. */
 	r = 0 ; /* setting to zero nicely mutes the channel */
-
+#endif
 	l |= r << 8;
         if ( cf_agc )
           rval = ioctl(ctl_fd, agc, &l);

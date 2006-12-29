@@ -462,7 +462,7 @@ irig_receive(
 		 * per second, which results in a frequency change of
 		 * 125 PPM.
 		 */
-		up->phase += up->freq / SECOND;
+		up->phase += (up->freq + clock_codec) / SECOND;
 		up->phase += pp->fudgetime2 / 1e6;
 		if (up->phase >= .5) {
 			up->phase -= 1.;

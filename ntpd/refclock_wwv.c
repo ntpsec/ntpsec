@@ -92,6 +92,7 @@
 #define TCKSIZ		(TCKCYC * MS) /* tick filter size */
 #define NCHAN		5	/* number of radio channels */
 #define	AUDIO_PHI	5e-6	/* dispersion growth factor */
+#define	TBUF		128	/* max monitor line length */
 
 /*
  * Tunable parameters. The DGAIN parameter can be changed to fit the
@@ -102,12 +103,10 @@
  * radio is not tunable, the DCHAN parameter can be changed to fit the
  * expected best propagation frequency: higher if further from the
  * transmitter, lower if nearer. The compromise value works for the US
- * right coast. The FREQ_OFFSET parameter can be used as a frequency
- * vernier to correct codec requency if greater than MAXFREQ.
+ * right coast.
  */
 #define DCHAN		3	/* default radio channel (15 Mhz) */
 #define DGAIN		5.	/* subcarrier gain */
-#define	FREQ_OFFSET	0.	/* codec frequency correction (PPM) */
 
 /*
  * General purpose status bits (status)
@@ -837,8 +836,7 @@ wwv_receive(
 		 * per second, which results in a frequency change of
 		 * 125 PPM.
 		 */
-		up->phase += up->freq / SECOND;
-		up->phase += FREQ_OFFSET / 1e6;
+		up->phase += (up->freq + clock_codec) / SECOND;
 		if (up->phase >= .5) {
 			up->phase -= 1.;
 		} else if (up->phase < -.5) {
@@ -1174,10 +1172,6 @@ wwv_rf(
 			 */
 			if (!wwv_newchan(peer))
 				up->watch = 0;
-#ifdef ICOM
-			if (up->fd_icom > 0)
-				wwv_qsy(peer, up->dchan);
-#endif /* ICOM */
 		} else {
 
 			/*
@@ -1212,7 +1206,8 @@ wwv_rf(
 		wwv_epoch(peer);
 	} else if (up->sptr != NULL) {
 		sp = up->sptr;
-		if (sp->metric >= TTHR && epoch == sp->mepoch % SECOND) 		    {
+		if (sp->metric >= TTHR && epoch == sp->mepoch % SECOND)
+ 		    {
 			up->rsec = (60 - sp->mepoch / SECOND) % 60;
 			up->rphase = 0;
 			up->status |= MSYNC;
@@ -1313,7 +1308,7 @@ wwv_qrz(
 {
 	struct refclockproc *pp;
 	struct wwvunit *up;
-	char	tbuf[80];	/* monitor buffer */
+	char	tbuf[TBUF];	/* monitor buffer */
 	long	epoch;
 
 	pp = peer->procptr;
@@ -1365,7 +1360,7 @@ wwv_qrz(
 			sp->metric = wwv_metric(sp);
 		if (pp->sloppyclockflag & CLK_FLAG4) {
 			sprintf(tbuf,
-			    "wwv8 %04x %3d %s %04x %.0f %.0f/%.1f %4ld %4ld",
+			    "wwv8 %04x %3d %s %04x %.0f %.0f/%.1f %ld %ld",
 			    up->status, up->gain, sp->refid,
 			    sp->reach & 0xffff, sp->metric, sp->synmax,
 			    sp->synsnr, sp->pos % SECOND, epoch);
@@ -1413,7 +1408,7 @@ wwv_endpoc(
 	static int avgcnt;	/* averaging interval counter */
 	static int avginc;	/* averaging ratchet */
 	static int iniflg;	/* initialization flag */
-	char tbuf[80];		/* monitor buffer */
+	char tbuf[TBUF];		/* monitor buffer */
 	double dtemp;
 	int tmp2;
 
@@ -1768,7 +1763,7 @@ wwv_rsec(
 	struct wwvunit *up;
 	struct chan *cp;
 	struct sync *sp, *rp;
-	char	tbuf[80];	/* monitor buffer */
+	char	tbuf[TBUF];	/* monitor buffer */
 	int	sw, arg, nsec;
 
 	pp = peer->procptr;
@@ -1887,35 +1882,28 @@ wwv_rsec(
 		up->errcnt = up->digcnt = up->alarm = 0;
 
 		/*
-		 * We now begin the minute scan. If not yet synchronized
-		 * to a station, restart if the units digit has not been
-		 * found within the DATA timeout (15 m) or if not
-		 * synchronized within the SYNCH timeout (40 m). After
-		 * synchronizing to a station, restart if no stations
-		 * are found within the PANIC timeout (2 days).
+		 * If synchronized to a station, restart if no stations
+		 * have been heard within the PANIC timeout (2 days). If
+		 * not and the minute digit has been found, restart if
+		 * not synchronized withing the SYNCH timeout (40 m). If
+		 * not, restart if the unit digit has not been found
+		 * within the DATA timeout (15 m).
 		 */
 		if (up->status & INSYNC) {
 			if (up->watch > PANIC) {
 				wwv_newgame(peer);
 				return;
 			}
-		} else {
-			if (!(up->status & DSYNC)) {
-				if (up->watch > DATA) {
-					wwv_newgame(peer);
-					return;
-				}
-			}
+		} else if (up->status & DSYNC) {
 			if (up->watch > SYNCH) {
 				wwv_newgame(peer);
 				return;
 			}
+		} else if (up->watch > DATA) {
+			wwv_newgame(peer);
+			return;
 		}
 		wwv_newchan(peer);
-#ifdef ICOM
-		if (up->fd_icom > 0)
-			wwv_qsy(peer, up->dchan);
-#endif /* ICOM */
 		break;
 
 	/*
@@ -1987,7 +1975,7 @@ wwv_rsec(
 
 	/*
 	 * Save the data channel gain, then QSY to the probe channel and
-	 * dim the seconds comb filters. The newchan() routine will
+	 * dim the seconds comb filters. The www_newchan() routine will
 	 * light them back up.
 	 */
 	case MSC21:			/* 58 */
@@ -2143,7 +2131,7 @@ wwv_corr4(
 	struct wwvunit *up;
 	double	topmax, nxtmax;	/* metrics */
 	double	acc;		/* accumulator */
-	char	tbuf[80];	/* monitor buffer */
+	char	tbuf[TBUF];	/* monitor buffer */
 	int	mldigit;	/* max likelihood digit */
 	int	i, j;
 
@@ -2420,16 +2408,14 @@ wwv_newchan(
 	struct wwvunit *up;
 	struct sync *sp, *rp;
 	double rank, dtemp;
-	int i, j;
+	int i, j, rval;
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
 
 	/*
 	 * Search all five station pairs looking for the channel with
-	 * maximum metric. If no station is found above thresholds, tune
-	 * to WWV on 15 MHz, set the reference ID to NONE and wait for
-	 * hotter ions.
+	 * maximum metric.
 	 */
 	sp = NULL;
 	j = 0;
@@ -2453,21 +2439,29 @@ wwv_newchan(
 
 	/*
 	 * If the strongest signal is less than the MTHR threshold (13),
-	 * we are beneath the waves, so squelch the second sync. If the
-	 * strongest signal is greater than the threshold, tune to that
-	 * frequency and transmitter QTH.
+	 * we are beneath the waves, so squelch the second sync and
+	 * advance to the next station. This makes sure all stations are
+	 * scanned when the ions grow dim. If the strongest signal is
+	 * greater than the threshold, tune to that frequency and
+	 * transmitter QTH.
 	 */
 	if (rank < MTHR) {
 		up->dchan = (up->dchan + 1) % NCHAN;
 		up->status &= ~(SELV | SELH);
-		return (FALSE);
+		rval = FALSE;
+	} else {
+		up->dchan = j;
+		up->status |= SELV | SELH;
+		up->sptr = sp;
+		memcpy(&pp->refid, sp->refid, 4);
+		peer->refid = pp->refid;
+		rval = TRUE;
 	}
-	up->dchan = j;
-	up->status |= SELV | SELH;
-	up->sptr = sp;
-	memcpy(&pp->refid, sp->refid, 4);
-	peer->refid = pp->refid;
-	return (TRUE);
+#ifdef ICOM
+	if (up->fd_icom > 0)
+		wwv_qsy(peer, up->dchan);
+#endif /* ICOM */
+	return (rval);
 }
 
 
@@ -2514,7 +2508,8 @@ wwv_newgame(
 	/*
 	 * Initialize the station processes for audio gain, select bit,
 	 * station/frequency identifier and reference identifier. Start
-	 * probing at the next channel after the data channel.
+	 * probing at the strongest channel or the default channel if
+	 * nothing heard.
 	 */
 	memset(up->mitig, 0, sizeof(up->mitig));
 	for (i = 0; i < NCHAN; i++) {
@@ -2525,13 +2520,9 @@ wwv_newgame(
 		cp->wwvh.select = SELH;
 		sprintf(cp->wwvh.refid, "WH%.0f", floor(qsy[i])); 
 	}
-	up->dchan = (DCHAN + NCHAN - 1) % NCHAN;;
+	up->dchan = (DCHAN + NCHAN - 1) % NCHAN;
 	wwv_newchan(peer);
-	up->achan = up->schan = up->dchan;
-#ifdef ICOM
-	if (up->fd_icom > 0)
-		wwv_qsy(peer, up->dchan);
-#endif /* ICOM */
+	up->schan = up->dchan;
 }
 
 /*

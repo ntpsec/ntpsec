@@ -129,6 +129,7 @@ static double clock_offset;	/* offset (s) */
 double	clock_jitter;		/* offset jitter (s) */
 double	drift_comp;		/* frequency (s/s) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
+double	clock_codec;		/* audio codec frequency (sambles/s) */
 u_long	sys_clocktime;		/* last system clock update */
 u_long	pps_control;		/* last pps update */
 u_long	sys_tai;		/* UTC offset from TAI (s) */
@@ -618,16 +619,6 @@ local_clock(
 			}
 
 			/*
-			 * Switch to FLL mode if the poll interval is
-			 * greater than MAXDPOLL, so that the kernel
-			 * loop behaves as the daemon loop; viz.,
-			 * selects the FLL when necessary, etc. For
-			 * legacy only.
-			 */
-			if (sys_poll > NTP_MAXDPOLL)
-				ntv.status |= STA_FLL;
-
-			/*
 			 * If the PPS signal is up and enabled, light
 			 * the frequency bit. If the PPS driver is
 			 * working, light the phase bit as well. If not,
@@ -1048,6 +1039,10 @@ loop_config(
 	case LOOP_FREQ:			/* initial frequency */	
 		drift_comp = freq / 1e6;
 		rstclock(S_FSET, 0, 0);
+		break;
+
+	case LOOP_CODEC:		/* audio codec frequency */
+		clock_codec = freq;
 		break;
 	}
 }

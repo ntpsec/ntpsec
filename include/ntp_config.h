@@ -141,6 +141,7 @@
 #define CONF_CLOCK_ALLAN	5
 #define CONF_CLOCK_HUFFPUFF	6
 #define CONF_CLOCK_FREQ		7
+#define CONF_CLOCK_CODEC	8
 
 /*
  * "tos" modifier keywords
