@@ -13,6 +13,8 @@ LDADD=	version.o libntpd.a @LIBPARSE@
 BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
 man_MANS=	ntpd.1
 
+# What about ntpdsim.1?
+
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
