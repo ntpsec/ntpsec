@@ -121,11 +121,11 @@ struct wwvbunit {
 /*
  * Function prototypes
  */
-static	int	wwvb_start	P((int, struct peer *));
-static	void	wwvb_shutdown	P((int, struct peer *));
-static	void	wwvb_receive	P((struct recvbuf *));
-static	void	wwvb_poll	P((int, struct peer *));
-static	void	wwvb_timer	P((int, struct peer *));
+static	int	wwvb_start	(int, struct peer *);
+static	void	wwvb_shutdown	(int, struct peer *);
+static	void	wwvb_receive	(struct recvbuf *);
+static	void	wwvb_poll	(int, struct peer *);
+static	void	wwvb_timer	(int, struct peer *);
 
 /*
  * Transfer vector

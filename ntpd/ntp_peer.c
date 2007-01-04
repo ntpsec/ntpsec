@@ -103,8 +103,8 @@ int peer_associations;			/* mobilized associations */
 int peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
-static void	    getmorepeermem	 P((void));
-static struct interface *select_peerinterface P((struct peer *, struct sockaddr_storage *, struct interface *, u_char));
+static void	    getmorepeermem	 (void);
+static struct interface *select_peerinterface (struct peer *, struct sockaddr_storage *, struct interface *, u_char);
 
 /*
  * init_peer - initialize peer data structures and counters

@@ -186,10 +186,10 @@ static int speed[] = {B1200, B2400, B4800, B9600};
 /*
  * Function prototypes
  */
-static	int	heath_start	P((int, struct peer *));
-static	void	heath_shutdown	P((int, struct peer *));
-static	void	heath_receive	P((struct recvbuf *));
-static	void	heath_poll	P((int, struct peer *));
+static	int	heath_start	(int, struct peer *);
+static	void	heath_shutdown	(int, struct peer *);
+static	void	heath_receive	(struct recvbuf *);
+static	void	heath_poll	(int, struct peer *);
 
 /*
  * Transfer vector

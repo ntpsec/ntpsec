@@ -111,10 +111,10 @@ struct arbunit {
 /*
  * Function prototypes
  */
-static	int	arb_start	P((int, struct peer *));
-static	void	arb_shutdown	P((int, struct peer *));
-static	void	arb_receive	P((struct recvbuf *));
-static	void	arb_poll	P((int, struct peer *));
+static	int	arb_start	(int, struct peer *);
+static	void	arb_shutdown	(int, struct peer *);
+static	void	arb_receive	(struct recvbuf *);
+static	void	arb_poll	(int, struct peer *);
 
 /*
  * Transfer vector

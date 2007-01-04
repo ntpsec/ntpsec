@@ -215,29 +215,29 @@ int verbose = 0;
 int always_step = 0;
 int never_step = 0;
 
-int 	ntpdatemain P((int, char **));
+int 	ntpdatemain (int, char **);
 
-static	void	transmit	P((struct server *));
-static	void	receive 	P((struct recvbuf *));
-static	void	server_data P((struct server *, s_fp, l_fp *, u_fp));
-static	void	clock_filter	P((struct server *));
-static	struct server *clock_select P((void));
-static	int clock_adjust	P((void));
-static	void	addserver	P((char *));
-static	struct server *findserver P((struct sockaddr_storage *));
-		void	timer		P((void));
-static	void	init_alarm	P((void));
+static	void	transmit	(struct server *);
+static	void	receive 	(struct recvbuf *);
+static	void	server_data (struct server *, s_fp, l_fp *, u_fp);
+static	void	clock_filter	(struct server *);
+static	struct server *clock_select (void);
+static	int clock_adjust	(void);
+static	void	addserver	(char *);
+static	struct server *findserver (struct sockaddr_storage *);
+		void	timer		(void);
+static	void	init_alarm	(void);
 #ifndef SYS_WINNT
-static	RETSIGTYPE alarming P((int));
+static	RETSIGTYPE alarming (int);
 #endif /* SYS_WINNT */
-static	void	init_io 	P((void));
-static	void	sendpkt 	P((struct sockaddr_storage *, struct pkt *, int));
-void	input_handler	P((void));
+static	void	init_io 	(void);
+static	void	sendpkt 	(struct sockaddr_storage *, struct pkt *, int);
+void	input_handler	(void);
 
-static	int l_adj_systime	P((l_fp *));
-static	int l_step_systime	P((l_fp *));
+static	int l_adj_systime	(l_fp *);
+static	int l_step_systime	(l_fp *);
 
-static	void	printserver P((struct server *, FILE *));
+static	void	printserver (struct server *, FILE *);
 
 #ifdef SYS_WINNT
 int 	on = 1;
@@ -307,7 +307,7 @@ void clear_globals()
 #endif
 
 #ifdef HAVE_NETINFO
-static ni_namelist *getnetinfoservers P((void));
+static ni_namelist *getnetinfoservers (void);
 #endif
 
 /*

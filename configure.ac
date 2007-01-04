@@ -26,9 +26,11 @@ AC_MINIX
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
+dnl AC_PROG_CC_C89
+dnl AC_PROG_CC_STDC
+# We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
 AC_PROG_CC_C_O
-AC_PROG_CC_STDC
 AC_PROG_CPP
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
@@ -60,7 +62,7 @@ case "$host" in
     LIBS="$LIBS -lcurses"
     ;;
  *-*-solaris*)
-    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+    CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"
     libxnet=-lxnet
     ;;
 esac

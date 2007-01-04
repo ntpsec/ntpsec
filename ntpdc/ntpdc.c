@@ -69,42 +69,42 @@ u_long	current_time;		/* needed by authkeys; not used */
  */
 s_char	sys_precision;		/* local clock precision (log2 s) */
 
-int		ntpdcmain	P((int,	char **));
+int		ntpdcmain	(int,	char **);
 /*
  * Built in command handler declarations
  */
-static	int	openhost	P((const char *));
-static	int	sendpkt		P((char *, int));
-static	void	growpktdata	P((void));
-static	int	getresponse	P((int, int, int *, int *, char **, int));
-static	int	sendrequest	P((int, int, int, int, int, char *));
-static	void	getcmds		P((void));
-static	RETSIGTYPE abortcmd	P((int));
-static	void	docmd		P((const char *));
-static	void	tokenize	P((const char *, char **, int *));
-static	int	findcmd		P((char *, struct xcmd *, struct xcmd *, struct xcmd **));
-static	int	getarg		P((char *, int, arg_v *));
-static	int	getnetnum	P((const char *, struct sockaddr_storage *, char *, int));
-static	void	help		P((struct parse *, FILE *));
+static	int	openhost	(const char *);
+static	int	sendpkt		(char *, int);
+static	void	growpktdata	(void);
+static	int	getresponse	(int, int, int *, int *, char **, int);
+static	int	sendrequest	(int, int, int, int, int, char *);
+static	void	getcmds		(void);
+static	RETSIGTYPE abortcmd	(int);
+static	void	docmd		(const char *);
+static	void	tokenize	(const char *, char **, int *);
+static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
+static	int	getarg		(char *, int, arg_v *);
+static	int	getnetnum	(const char *, struct sockaddr_storage *, char *, int);
+static	void	help		(struct parse *, FILE *);
 #ifdef QSORT_USES_VOID_P
-static	int	helpsort	P((const void *, const void *));
+static	int	helpsort	(const void *, const void *);
 #else
-static	int	helpsort	P((char **, char **));
+static	int	helpsort	(char **, char **);
 #endif
-static	void	printusage	P((struct xcmd *, FILE *));
-static	void	timeout		P((struct parse *, FILE *));
-static	void	my_delay	P((struct parse *, FILE *));
-static	void	host		P((struct parse *, FILE *));
-static	void	keyid		P((struct parse *, FILE *));
-static	void	keytype		P((struct parse *, FILE *));
-static	void	passwd		P((struct parse *, FILE *));
-static	void	hostnames	P((struct parse *, FILE *));
-static	void	setdebug	P((struct parse *, FILE *));
-static	void	quit		P((struct parse *, FILE *));
-static	void	version		P((struct parse *, FILE *));
-static	void	warning		P((const char *, const char *, const char *));
-static	void	error		P((const char *, const char *, const char *));
-static	u_long	getkeyid	P((const char *));
+static	void	printusage	(struct xcmd *, FILE *);
+static	void	timeout		(struct parse *, FILE *);
+static	void	my_delay	(struct parse *, FILE *);
+static	void	host		(struct parse *, FILE *);
+static	void	keyid		(struct parse *, FILE *);
+static	void	keytype		(struct parse *, FILE *);
+static	void	passwd		(struct parse *, FILE *);
+static	void	hostnames	(struct parse *, FILE *);
+static	void	setdebug	(struct parse *, FILE *);
+static	void	quit		(struct parse *, FILE *);
+static	void	version		(struct parse *, FILE *);
+static	void	warning		(const char *, const char *, const char *);
+static	void	error		(const char *, const char *, const char *);
+static	u_long	getkeyid	(const char *);
 
 
 

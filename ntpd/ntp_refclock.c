@@ -86,11 +86,11 @@ static struct peer *typeunit[REFCLK_MAX + 1][MAXUNIT];
  * Forward declarations
  */
 #ifdef QSORT_USES_VOID_P
-static int refclock_cmpl_fp P((const void *, const void *));
+static int refclock_cmpl_fp (const void *, const void *);
 #else
-static int refclock_cmpl_fp P((const double *, const double *));
+static int refclock_cmpl_fp (const double *, const double *);
 #endif /* QSORT_USES_VOID_P */
-static int refclock_sample P((struct refclockproc *));
+static int refclock_sample (struct refclockproc *);
 
 
 /*

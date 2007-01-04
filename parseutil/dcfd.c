@@ -1609,7 +1609,7 @@ main(
 			struct sigaction act;
 
 # ifdef HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION
-			act.sa_sigaction = (void (*) P((int, siginfo_t *, void *)))0;
+			act.sa_sigaction = (void (*) (int, siginfo_t *, void *))0;
 # endif /* HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION */
 			act.sa_handler   = tick;
 			sigemptyset(&act.sa_mask);

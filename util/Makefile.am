@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
-AUTOMAKE_OPTIONS=	ansi2knr
+AUTOMAKE_OPTIONS=	
 
 bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
 		ntp-keygen

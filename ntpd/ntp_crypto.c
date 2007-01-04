@@ -135,31 +135,31 @@ static u_int ident_scheme = 0;	/* server identity scheme */
 /*
  * Cryptotypes
  */
-static	int	crypto_verify	P((struct exten *, struct value *,
-				    struct peer *));
-static	int	crypto_encrypt	P((struct exten *, struct value *,
-				    keyid_t *));
-static	int	crypto_alice	P((struct peer *, struct value *));
-static	int	crypto_alice2	P((struct peer *, struct value *));
-static	int	crypto_alice3	P((struct peer *, struct value *));
-static	int	crypto_bob	P((struct exten *, struct value *));
-static	int	crypto_bob2	P((struct exten *, struct value *));
-static	int	crypto_bob3	P((struct exten *, struct value *));
-static	int	crypto_iff	P((struct exten *, struct peer *));
-static	int	crypto_gq	P((struct exten *, struct peer *));
-static	int	crypto_mv	P((struct exten *, struct peer *));
-static	u_int	crypto_send	P((struct exten *, struct value *));
-static	tstamp_t crypto_time	P((void));
-static	u_long	asn2ntp		P((ASN1_TIME *));
-static	struct cert_info *cert_parse P((u_char *, u_int, tstamp_t));
-static	int	cert_sign	P((struct exten *, struct value *));
-static	int	cert_valid	P((struct cert_info *, EVP_PKEY *));
-static	int	cert_install	P((struct exten *, struct peer *));
-static	void	cert_free	P((struct cert_info *));
-static	EVP_PKEY *crypto_key	P((char *, tstamp_t *));
-static	int	bighash		P((BIGNUM *, BIGNUM *));
-static	struct cert_info *crypto_cert P((char *));
-static	void	crypto_tai	P((char *));
+static	int	crypto_verify	(struct exten *, struct value *,
+				    struct peer *);
+static	int	crypto_encrypt	(struct exten *, struct value *,
+				    keyid_t *);
+static	int	crypto_alice	(struct peer *, struct value *);
+static	int	crypto_alice2	(struct peer *, struct value *);
+static	int	crypto_alice3	(struct peer *, struct value *);
+static	int	crypto_bob	(struct exten *, struct value *);
+static	int	crypto_bob2	(struct exten *, struct value *);
+static	int	crypto_bob3	(struct exten *, struct value *);
+static	int	crypto_iff	(struct exten *, struct peer *);
+static	int	crypto_gq	(struct exten *, struct peer *);
+static	int	crypto_mv	(struct exten *, struct peer *);
+static	u_int	crypto_send	(struct exten *, struct value *);
+static	tstamp_t crypto_time	(void);
+static	u_long	asn2ntp		(ASN1_TIME *);
+static	struct cert_info *cert_parse (u_char *, u_int, tstamp_t);
+static	int	cert_sign	(struct exten *, struct value *);
+static	int	cert_valid	(struct cert_info *, EVP_PKEY *);
+static	int	cert_install	(struct exten *, struct peer *);
+static	void	cert_free	(struct cert_info *);
+static	EVP_PKEY *crypto_key	(char *, tstamp_t *);
+static	int	bighash		(BIGNUM *, BIGNUM *);
+static	struct cert_info *crypto_cert (char *);
+static	void	crypto_tai	(char *);
 
 #ifdef SYS_WINNT
 int

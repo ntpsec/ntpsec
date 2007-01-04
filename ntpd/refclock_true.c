@@ -167,15 +167,15 @@ struct true_unit {
 /*
  * Function prototypes
  */
-static	int	true_start	P((int, struct peer *));
-static	void	true_shutdown	P((int, struct peer *));
-static	void	true_receive	P((struct recvbuf *));
-static	void	true_poll	P((int, struct peer *));
-static	void	true_send	P((struct peer *, const char *));
-static	void	true_doevent	P((struct peer *, enum true_event));
+static	int	true_start	(int, struct peer *);
+static	void	true_shutdown	(int, struct peer *);
+static	void	true_receive	(struct recvbuf *);
+static	void	true_poll	(int, struct peer *);
+static	void	true_send	(struct peer *, const char *);
+static	void	true_doevent	(struct peer *, enum true_event);
 
 #ifdef CLOCK_PPS720
-static	u_long	true_sample720	P((void));
+static	u_long	true_sample720	(void);
 #endif
 
 /*

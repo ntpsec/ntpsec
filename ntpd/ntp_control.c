@@ -30,7 +30,7 @@
 struct ctl_proc {
 	short control_code;		/* defined request code */
 	u_short flags;			/* flags word */
-	void (*handler) P((struct recvbuf *, int)); /* handle request */
+	void (*handler) (struct recvbuf *, int); /* handle request */
 };
 
 /*
@@ -42,42 +42,42 @@ struct ctl_proc {
 /*
  * Request processing routines
  */
-static	void	ctl_error	P((int));
+static	void	ctl_error	(int);
 #ifdef REFCLOCK
-static	u_short ctlclkstatus	P((struct refclockstat *));
+static	u_short ctlclkstatus	(struct refclockstat *);
 #endif
-static	void	ctl_flushpkt	P((int));
-static	void	ctl_putdata	P((const char *, unsigned int, int));
-static	void	ctl_putstr	P((const char *, const char *,
-				    unsigned int));
-static	void	ctl_putdbl	P((const char *, double));
-static	void	ctl_putuint	P((const char *, u_long));
-static	void	ctl_puthex	P((const char *, u_long));
-static	void	ctl_putint	P((const char *, long));
-static	void	ctl_putts	P((const char *, l_fp *));
-static	void	ctl_putadr	P((const char *, u_int32, struct sockaddr_storage*));
-static	void	ctl_putid	P((const char *, char *));
-static	void	ctl_putarray	P((const char *, double *, int));
-static	void	ctl_putsys	P((int));
-static	void	ctl_putpeer	P((int, struct peer *));
+static	void	ctl_flushpkt	(int);
+static	void	ctl_putdata	(const char *, unsigned int, int);
+static	void	ctl_putstr	(const char *, const char *,
+				    unsigned int);
+static	void	ctl_putdbl	(const char *, double);
+static	void	ctl_putuint	(const char *, u_long);
+static	void	ctl_puthex	(const char *, u_long);
+static	void	ctl_putint	(const char *, long);
+static	void	ctl_putts	(const char *, l_fp *);
+static	void	ctl_putadr	(const char *, u_int32, struct sockaddr_storage*);
+static	void	ctl_putid	(const char *, char *);
+static	void	ctl_putarray	(const char *, double *, int);
+static	void	ctl_putsys	(int);
+static	void	ctl_putpeer	(int, struct peer *);
 #ifdef OPENSSL
-static	void	ctl_putfs	P((const char *, tstamp_t));
+static	void	ctl_putfs	(const char *, tstamp_t);
 #endif
 #ifdef REFCLOCK
-static	void	ctl_putclock	P((int, struct refclockstat *, int));
+static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
-static	struct ctl_var *ctl_getitem P((struct ctl_var *, char **));
-static	u_long count_var	P((struct ctl_var *));
-static	void	control_unspec	P((struct recvbuf *, int));
-static	void	read_status	P((struct recvbuf *, int));
-static	void	read_variables	P((struct recvbuf *, int));
-static	void	write_variables P((struct recvbuf *, int));
-static	void	read_clock_status P((struct recvbuf *, int));
-static	void	write_clock_status P((struct recvbuf *, int));
-static	void	set_trap	P((struct recvbuf *, int));
-static	void	unset_trap	P((struct recvbuf *, int));
-static	struct ctl_trap *ctlfindtrap P((struct sockaddr_storage *,
-				    struct interface *));
+static	struct ctl_var *ctl_getitem (struct ctl_var *, char **);
+static	u_long count_var	(struct ctl_var *);
+static	void	control_unspec	(struct recvbuf *, int);
+static	void	read_status	(struct recvbuf *, int);
+static	void	read_variables	(struct recvbuf *, int);
+static	void	write_variables (struct recvbuf *, int);
+static	void	read_clock_status (struct recvbuf *, int);
+static	void	write_clock_status (struct recvbuf *, int);
+static	void	set_trap	(struct recvbuf *, int);
+static	void	unset_trap	(struct recvbuf *, int);
+static	struct ctl_trap *ctlfindtrap (struct sockaddr_storage *,
+				    struct interface *);
 
 static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_UNSPEC,	NOAUTH, control_unspec },

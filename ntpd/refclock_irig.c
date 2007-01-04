@@ -168,10 +168,12 @@
 #endif /* IRIG_SUCKS */
 
 /*
- * Experimentally determined filter delays
+ * The baseband filters introduce errors which are compensated by the
+ * following values. Additional delay of 0.2 ms is for the codec and its
+ * filters.
  */
-#define IRIG_B		.0019	/* IRIG-B filter delay */
-#define IRIG_E		.0019	/* IRIG-E filter delay */
+#define IRIG_B		(.0022 + .0002) /* IRIG-B filter delay */
+#define IRIG_E		(.0219 + .0002) /* IRIG-E filter delay */
 
 /*
  * Data bit definitions
@@ -266,18 +268,18 @@ struct irigunit {
 /*
  * Function prototypes
  */
-static	int	irig_start	P((int, struct peer *));
-static	void	irig_shutdown	P((int, struct peer *));
-static	void	irig_receive	P((struct recvbuf *));
-static	void	irig_poll	P((int, struct peer *));
+static	int	irig_start	(int, struct peer *);
+static	void	irig_shutdown	(int, struct peer *);
+static	void	irig_receive	(struct recvbuf *);
+static	void	irig_poll	(int, struct peer *);
 
 /*
  * More function prototypes
  */
-static	void	irig_base	P((struct peer *, double));
-static	void	irig_rf		P((struct peer *, double));
-static	void	irig_decode	P((struct peer *, int));
-static	void	irig_gain	P((struct peer *));
+static	void	irig_base	(struct peer *, double);
+static	void	irig_rf		(struct peer *, double);
+static	void	irig_decode	(struct peer *, int);
+static	void	irig_gain	(struct peer *);
 
 /*
  * Transfer vector
@@ -362,7 +364,6 @@ irig_start(
 	memcpy((char *)&pp->refid, REFID, 4);
 	up->tc = MINTC;
 	up->decim = 1;
-	up->fdelay = IRIG_B;
 	up->gain = 127;
 
 	/*
@@ -958,7 +959,7 @@ irig_decode(
 				    pp->a_lastcode);
 #ifdef DEBUG
 				if (debug)
-					printf("irig: %s\n",
+					printf("irig %s\n",
 					    pp->a_lastcode);
 #endif /* DEBUG */
 			}
@@ -997,7 +998,7 @@ irig_poll(
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 		if (debug)
-			printf("irig: %s\n", pp->a_lastcode);
+			printf("irig %s\n", pp->a_lastcode);
 #endif /* DEBUG */
 	}
 	pp->polls++;

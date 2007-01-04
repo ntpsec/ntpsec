@@ -142,17 +142,17 @@ char *req_file;		/* name of the file with configuration info */
 /* end stuff to be filled in */
 
 
-static	RETSIGTYPE bong		P((int));
-static	void	checkparent	P((void));
-static	void	removeentry	P((struct conf_entry *));
-static	void	addentry	P((char *, int, int, int, int, u_int,
-				   int, keyid_t, char *));
-static	int	findhostaddr	P((struct conf_entry *));
-static	void	openntp		P((void));
-static	int	request		P((struct conf_peer *));
-static	char *	nexttoken	P((char **));
-static	void	readconf	P((FILE *, char *));
-static	void	doconfigure	P((int));
+static	RETSIGTYPE bong		(int);
+static	void	checkparent	(void);
+static	void	removeentry	(struct conf_entry *);
+static	void	addentry	(char *, int, int, int, int, u_int,
+				   int, keyid_t, char *);
+static	int	findhostaddr	(struct conf_entry *);
+static	void	openntp		(void);
+static	int	request		(struct conf_peer *);
+static	char *	nexttoken	(char **);
+static	void	readconf	(FILE *, char *);
+static	void	doconfigure	(int);
 
 struct ntp_res_t_pkt {		/* Tagged packet: */
 	void *tag;		/* For the caller */
@@ -174,7 +174,7 @@ struct ntp_res_c_pkt {		/* Control packet: */
 };
 
 
-static void	resolver_exit P((int));
+static void	resolver_exit (int);
 
 /*
  * Call here instead of just exiting

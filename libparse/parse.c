@@ -68,7 +68,7 @@ static char rcsid[] = "parse.c,v 4.20 2005/08/06 17:39:40 kardel RELEASE_2005080
 extern clockformat_t *clockformats[];
 extern unsigned short nformats;
 
-static u_long timepacket P((parse_t *));
+static u_long timepacket (parse_t *);
 
 /*
  * strings support usually not in kernel - duplicated, but what the heck

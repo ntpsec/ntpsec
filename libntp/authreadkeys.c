@@ -15,7 +15,7 @@
 #define	KEY_TYPE_MD5	4
 
 /* Forwards */
-static char *nexttok P((char **));
+static char *nexttok (char **);
 
 /*
  * nexttok - basic internal tokenizing routine

@@ -53,7 +53,7 @@ struct parse {
  */
 struct xcmd {
   const char *keyword;		/* command key word */
-	void (*handler)	P((struct parse *, FILE *));	/* command handler */
+	void (*handler)	(struct parse *, FILE *);	/* command handler */
 	u_char arg[MAXARGS];	/* descriptors for arguments */
   const char *desc[MAXARGS];	/* descriptions for arguments */
   const char *comment;
@@ -79,15 +79,15 @@ struct ctl_var {
 	const char *text;
 };
 
-extern	void	asciize		P((int, char *, FILE *));
-extern	int	getnetnum	P((const char *, struct sockaddr_storage *, char *, int));
-extern	void	sortassoc	P((void));
-extern	int	doquery		P((int, int, int, int, char *, u_short *, int *, char **));
-extern	char *	nntohost	P((struct sockaddr_storage *));
-extern	int	decodets	P((char *, l_fp *));
-extern	int	decodeuint	P((char *, u_long *));
-extern	int	nextvar		P((int *, char **, char **, char **));
-extern	int	decodetime	P((char *, l_fp *));
-extern	void	printvars	P((int, char *, int, int, FILE *));
-extern	int	decodeint	P((char *, long *));
-extern	int	findvar		P((char *, struct ctl_var *, int code));
+extern	void	asciize		(int, char *, FILE *);
+extern	int	getnetnum	(const char *, struct sockaddr_storage *, char *, int);
+extern	void	sortassoc	(void);
+extern	int	doquery		(int, int, int, int, char *, u_short *, int *, char **);
+extern	char *	nntohost	(struct sockaddr_storage *);
+extern	int	decodets	(char *, l_fp *);
+extern	int	decodeuint	(char *, u_long *);
+extern	int	nextvar		(int *, char **, char **, char **);
+extern	int	decodetime	(char *, l_fp *);
+extern	void	printvars	(int, char *, int, int, FILE *);
+extern	int	decodeint	(char *, long *);
+extern	int	findvar		(char *, struct ctl_var *, int code);

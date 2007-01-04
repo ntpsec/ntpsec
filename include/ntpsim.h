@@ -67,22 +67,22 @@ typedef struct nde {
 /*
  * Function prototypes
  */
-int	ntpsim		P((int argc, char *argv[]));
-Event	event		P((double, funcTkn));
-Queue	queue		P((Event, Queue ));
-Node	node		P((void));
-void	push		P((Event, Queue *));
-Event	pop		P((Queue *));
-void	ndbeep		P((Node *, Event));
-void	ndeclk		P((Node *, Event));
-void	ntptmr		P((Node *, Event));
-void	netpkt		P((Node *, Event));
-int	srvr_rply	P((Node *, struct sockaddr_storage *,
-			    struct interface *, struct pkt *));
-double	gauss		P((double, double));
-double	poisson		P((double, double));
-int	node_clock	P((Node *, double));
-void	abortsim	P((char *));
+int	ntpsim		(int argc, char *argv[]);
+Event	event		(double, funcTkn);
+Queue	queue		(Event, Queue );
+Node	node		(void);
+void	push		(Event, Queue *);
+Event	pop		(Queue *);
+void	ndbeep		(Node *, Event);
+void	ndeclk		(Node *, Event);
+void	ntptmr		(Node *, Event);
+void	netpkt		(Node *, Event);
+int	srvr_rply	(Node *, struct sockaddr_storage *,
+			    struct interface *, struct pkt *);
+double	gauss		(double, double);
+double	poisson		(double, double);
+int	node_clock	(Node *, double);
+void	abortsim	(char *);
 
 /*
  * The global Node

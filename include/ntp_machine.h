@@ -74,23 +74,11 @@ WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
 
 MISC
 
-  HAVE_PROTOTYPES	- Prototype functions
   DOSYNCTODR		- Resync TODR clock  every hour.
   RETSIGTYPE		- Define signal function type.
   NO_SIGNED_CHAR_DECL - No "signed char" see include/ntp.h
   LOCK_PROCESS		- Have plock.
 */
-
-/*
- * Set up for prototyping (duplicated from ntp_types.h)
- */
-#ifndef P
-#if defined(__STDC__) || defined(HAVE_PROTOTYPES)
-#define P(x)    x
-#else /* not __STDC__ and not HAVE_PROTOTYPES */
-#define P(x)    ()
-#endif /* not __STDC__ and not HAVE_PROTOTYPES */
-#endif /* P */
 
 #if !defined(HAVE_NTP_ADJTIME) && defined(HAVE___ADJTIMEX)
 # define ntp_adjtime __adjtimex
@@ -287,7 +275,7 @@ typedef unsigned long u_long;
 # define vsnprintf _vsnprintf
 #endif /* SYS_WINNT */
 
-int ntp_set_tod P((struct timeval *tvp, void *tzp));
+int ntp_set_tod (struct timeval *tvp, void *tzp);
 
 #if defined (SYS_CYGWIN32)
 #include <windows.h>
@@ -326,7 +314,7 @@ int ntp_set_tod P((struct timeval *tvp, void *tzp));
 #include "taskLib.h"
 #include "time.h"
 
-extern int sysClkRateGet P(());
+extern int sysClkRateGet ();
 
 /* usrtime.h
  * Bob Herlien's excellent time code find it at:
@@ -335,14 +323,14 @@ extern int sysClkRateGet P(());
  * adjtime() too ... casey
  */
 /*
-extern int	  gettimeofday P(( struct timeval *tp, struct timezone *tzp ));
-extern int	  settimeofday P((struct timeval *, struct timezone *));
-extern int	  adjtime P(( struct timeval *delta, struct timeval *olddelta ));
+extern int	  gettimeofday ( struct timeval *tp, struct timezone *tzp );
+extern int	  settimeofday (struct timeval *, struct timezone *);
+extern int	  adjtime ( struct timeval *delta, struct timeval *olddelta );
  */
 
 /* in  machines.c */
-extern void sleep P((int seconds));
-extern void alarm P((int seconds));
+extern void sleep (int seconds);
+extern void alarm (int seconds);
 /* machines.c */
 
 
@@ -382,10 +370,10 @@ extern int h_errno;
 
 #define TRY_AGAIN	2
 
-struct hostent *gethostbyname P((char * netnum));
-struct hostent *gethostbyaddr P((char * netnum, int size, int addr_type));
+struct hostent *gethostbyname (char * netnum);
+struct hostent *gethostbyaddr (char * netnum, int size, int addr_type);
 /* type is the protocol */
-struct servent *getservbyname P((char *name, char *type));
+struct servent *getservbyname (char *name, char *type);
 #endif	/* NO_NETDB */
 
 #ifdef NO_MAIN_ALLOWED
@@ -544,7 +532,7 @@ extern char *strdup(const char *);
 #endif
 
 #ifndef HAVE_TIMEGM
-extern time_t	timegm		P((struct tm *));
+extern time_t	timegm		(struct tm *);
 #endif
 
 #ifdef HAVE_SYSV_TTYS

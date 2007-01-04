@@ -527,8 +527,8 @@ static int possible_leap = 0;       /* No resync required by default. */
 #endif
 
 #if 0
-static void dummy_event_handler P((struct peer *));
-static void   arc_event_handler P((struct peer *));
+static void dummy_event_handler (struct peer *);
+static void   arc_event_handler (struct peer *);
 #endif /* 0 */
 
 #define QUALITY_UNKNOWN     -1 /* Indicates unknown clock quality. */
@@ -539,10 +539,10 @@ static void   arc_event_handler P((struct peer *));
 /*
  * Function prototypes
  */
-static  int     arc_start       P((int, struct peer *));
-static  void    arc_shutdown    P((int, struct peer *));
-static  void    arc_receive     P((struct recvbuf *));
-static  void    arc_poll        P((int, struct peer *));
+static  int     arc_start       (int, struct peer *);
+static  void    arc_shutdown    (int, struct peer *);
+static  void    arc_receive     (struct recvbuf *);
+static  void    arc_poll        (int, struct peer *);
 
 /*
  * Transfer vector
@@ -1436,7 +1436,7 @@ arc_receive(
 /* request_time() sends a time request to the clock with given peer. */
 /* This automatically reports a fault if necessary. */
 /* No data should be sent after this until arc_poll() returns. */
-static  void    request_time    P((int, struct peer *));
+static  void    request_time    (int, struct peer *);
 static void
 request_time(
 	int unit,

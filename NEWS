@@ -1,5 +1,6 @@
 * ntpdsim no longer needs special command-line options.
 * New ntp.conf processing code from Sachin Kamboj.
+* [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
 (4.2.4) Released by Harlan Stenn <stenn@ntp.org>

@@ -47,8 +47,8 @@ struct req_proc {
 	short needs_auth;	/* true when authentication needed */
 	short sizeofitem;	/* size of request data item (older size)*/
 	short v6_sizeofitem;	/* size of request data item (new size)*/
-	void (*handler) P((struct sockaddr_storage *, struct interface *,
-			   struct req_pkt *));	/* routine to handle request */
+	void (*handler) (struct sockaddr_storage *, struct interface *,
+			   struct req_pkt *);	/* routine to handle request */
 };
 
 /*
@@ -58,58 +58,58 @@ static	struct req_proc univ_codes[] = {
 	{ NO_REQUEST,		NOAUTH,	 0,	0 }
 };
 
-static	void	req_ack	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, int));
-static	char *	prepare_pkt	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, u_int));
-static	char *	more_pkt	P((void));
-static	void	flush_pkt	P((void));
-static	void	peer_list	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	peer_list_sum	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	peer_info	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	peer_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	sys_info	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	sys_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	mem_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	io_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	timer_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	loop_info	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_conf		P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_unconf	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	set_sys_flag	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	clr_sys_flag	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	setclr_flags	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, u_long));
-static	void	list_restrict	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_resaddflags	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_ressubflags	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_unrestrict	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_restrict	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, int));
-static	void	mon_getlist_0	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	mon_getlist_1	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	reset_stats	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	reset_peer	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_key_reread	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	trust_key	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	untrust_key	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_trustkey	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, u_long));
-static	void	get_auth_info	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	reset_auth_stats P((void));
-static	void	req_get_traps	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	req_set_trap	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	req_clr_trap	P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_setclr_trap	P((struct sockaddr_storage *, struct interface *, struct req_pkt *, int));
-static	void	set_request_keyid P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	set_control_keyid P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	get_ctl_stats   P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	get_if_stats    P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	do_if_reload    P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
+static	void	req_ack	(struct sockaddr_storage *, struct interface *, struct req_pkt *, int);
+static	char *	prepare_pkt	(struct sockaddr_storage *, struct interface *, struct req_pkt *, u_int);
+static	char *	more_pkt	(void);
+static	void	flush_pkt	(void);
+static	void	peer_list	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	peer_list_sum	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	peer_info	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	peer_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	sys_info	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	sys_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	mem_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	io_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	timer_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	loop_info	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_conf		(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_unconf	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	set_sys_flag	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	clr_sys_flag	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	setclr_flags	(struct sockaddr_storage *, struct interface *, struct req_pkt *, u_long);
+static	void	list_restrict	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_resaddflags	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_ressubflags	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_unrestrict	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_restrict	(struct sockaddr_storage *, struct interface *, struct req_pkt *, int);
+static	void	mon_getlist_0	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	mon_getlist_1	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	reset_stats	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	reset_peer	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_key_reread	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	trust_key	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	untrust_key	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_trustkey	(struct sockaddr_storage *, struct interface *, struct req_pkt *, u_long);
+static	void	get_auth_info	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	reset_auth_stats (void);
+static	void	req_get_traps	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	req_set_trap	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	req_clr_trap	(struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_setclr_trap	(struct sockaddr_storage *, struct interface *, struct req_pkt *, int);
+static	void	set_request_keyid (struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	set_control_keyid (struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	get_ctl_stats   (struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	get_if_stats    (struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	do_if_reload    (struct sockaddr_storage *, struct interface *, struct req_pkt *);
 #ifdef KERNEL_PLL
-static	void	get_kernel_info P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
+static	void	get_kernel_info (struct sockaddr_storage *, struct interface *, struct req_pkt *);
 #endif /* KERNEL_PLL */
 #ifdef REFCLOCK
-static	void	get_clock_info P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
-static	void	set_clock_fudge P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
+static	void	get_clock_info (struct sockaddr_storage *, struct interface *, struct req_pkt *);
+static	void	set_clock_fudge (struct sockaddr_storage *, struct interface *, struct req_pkt *);
 #endif	/* REFCLOCK */
 #ifdef REFCLOCK
-static	void	get_clkbug_info P((struct sockaddr_storage *, struct interface *, struct req_pkt *));
+static	void	get_clkbug_info (struct sockaddr_storage *, struct interface *, struct req_pkt *);
 #endif	/* REFCLOCK */
 
 /*
@@ -1985,7 +1985,7 @@ mon_getlist_1(
  */
 struct reset_entry {
 	int flag;		/* flag this corresponds to */
-	void (*handler) P((void)); /* routine to handle request */
+	void (*handler) (void); /* routine to handle request */
 };
 
 struct reset_entry reset_entries[] = {

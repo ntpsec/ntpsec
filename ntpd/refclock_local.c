@@ -119,8 +119,8 @@ extern int ext_enable;		/* external clock enable */
 /*
  * Function prototypes
  */
-static	int local_start P((int, struct peer *));
-static	void	local_poll	P((int, struct peer *));
+static	int local_start (int, struct peer *);
+static	void	local_poll	(int, struct peer *);
 
 /*
  * Local variables

@@ -1,6 +1,5 @@
 dnl ######################################################################
 dnl Specify additional compile options based on the OS and the compiler
-dnl From Erez Zadok <ezk@cs.sunysb.edu>, http://www.am-utils.org
 AC_DEFUN([AMU_OS_CFLAGS],
 [
 AC_CACHE_CHECK(additional compiler flags,
@@ -44,9 +43,13 @@ case "${host_os}" in
 		# turn on additional headers
 		ac_cv_os_cflags="-D_XOPEN_EXTENDED_SOURCE"
 		;;
+	aix5.3* )
+		# avoid circular dependencies in yp headers, and more
+		ac_cv_os_cflags="-DHAVE_BAD_HEADERS -D_XOPEN_EXTENDED_SOURCE -D_USE_IRS -D_MSGQSUPPORT"
+		;;
 	aix* )
 		# avoid circular dependencies in yp headers
-		ac_cv_os_cflags="-DHAVE_BAD_HEADERS -D_XOPEN_EXTENDED_SOURCE"
+		ac_cv_os_cflags="-DHAVE_BAD_HEADERS -D_XOPEN_EXTENDED_SOURCE -D_USE_IRS"
 		;;
 	OFF-sunos4* )
 		# make sure passing whole structures is handled in gcc
@@ -56,9 +59,9 @@ case "${host_os}" in
 				;;
 		esac
 		;;
-	sunos[[34]]* | solaris1* | solaris2.[[0-5]]* | sunos5.[[0-5]]* )
+	sunos[[34]]* | solaris1* | solaris2.[[0-5]] | sunos5.[[0-5]] | solaris2.5.* | sunos5.5.* )
 		ac_cv_os_cflags="" ;;
-	solaris* | sunos* )
+	solaris2* | sunos5* )
 		# turn on 64-bit file offset interface
 		case "${CC}" in
 			* )
@@ -74,7 +77,7 @@ case "${host_os}" in
 				;;
 		esac
 		;;
-	darwin* | rhapsody* )
+	darwin* | macosx* | rhapsody* )
 		ac_cv_os_cflags="-D_P1003_1B_VISIBLE"
 		;;
 	* )

@@ -79,7 +79,7 @@ static int vmsinc[2];		/* timer increment */
 #if defined SYS_WINNT
 static HANDLE WaitableTimerHandle = NULL;
 #else
-static	RETSIGTYPE alarming P((int));
+static	RETSIGTYPE alarming (int);
 #endif /* SYS_WINNT */
 
 #if !defined(VMS)
