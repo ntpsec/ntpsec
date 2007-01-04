@@ -194,27 +194,27 @@ int was_alarmed;
 /*
  * We put this here, since the argument profile is syscall-specific
  */
-extern int syscall	P((int, ...));
+extern int syscall	(int, ...);
 #endif /* DECL_SYSCALL */
 
 
 #ifdef	SIGDIE2
-static	RETSIGTYPE	finish		P((int));
+static	RETSIGTYPE	finish		(int);
 #endif	/* SIGDIE2 */
 
 #ifdef	DEBUG
 #ifndef SYS_WINNT
-static	RETSIGTYPE	moredebug	P((int));
-static	RETSIGTYPE	lessdebug	P((int));
+static	RETSIGTYPE	moredebug	(int);
+static	RETSIGTYPE	lessdebug	(int);
 #endif
 #else /* not DEBUG */
-static	RETSIGTYPE	no_debug	P((int));
+static	RETSIGTYPE	no_debug	(int);
 #endif	/* not DEBUG */
 
-int 		ntpdmain		P((int, char **));
-static void	set_process_priority	P((void));
-static void	init_logging		P((char const *));
-static void	setup_logfile		P((void));
+int 		ntpdmain		(int, char **);
+static void	set_process_priority	(void);
+static void	init_logging		(char const *);
+static void	setup_logfile		(void);
 
 /*
  * Initialize the logging

@@ -7,17 +7,6 @@
 #define SIZEOF_INT 4
 
 /*
- * Set up for prototyping
- */
-#ifndef P
-#if defined(__STDC__) || defined(HAVE_PROTOTYPES)
-#define P(x)    x
-#else /* not __STDC__ and not HAVE_PROTOTYPES */
-#define P(x)    ()
-#endif /* not __STDC__ and HAVE_PROTOTYPES */
-#endif /* P */
-
-/*
  * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
  *                      and u_int isn't defined anywhere
  */

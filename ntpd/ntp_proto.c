@@ -104,14 +104,14 @@ u_long	sys_badlength;		/* bad length or format */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_limitrejected;	/* rate exceeded */
 
-static	double	root_distance	P((struct peer *));
-static	void	clock_combine	P((struct peer **, int));
-static	void	peer_xmit	P((struct peer *));
-static	void	fast_xmit	P((struct recvbuf *, int, keyid_t,
-				    int));
-static	void	clock_update	P((void));
-static	int	default_get_precision	P((void));
-static	int	peer_unfit	P((struct peer *));
+static	double	root_distance	(struct peer *);
+static	void	clock_combine	(struct peer **, int);
+static	void	peer_xmit	(struct peer *);
+static	void	fast_xmit	(struct recvbuf *, int, keyid_t,
+				    int);
+static	void	clock_update	(void);
+static	int	default_get_precision	(void);
+static	int	peer_unfit	(struct peer *);
 
 
 /*

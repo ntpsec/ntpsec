@@ -73,11 +73,11 @@ struct dumbclock_unit {
 /*
  * Function prototypes
  */
-static	int	dumbclock_start		P((int, struct peer *));
-static	void	dumbclock_shutdown	P((int, struct peer *));
-static	void	dumbclock_receive	P((struct recvbuf *));
+static	int	dumbclock_start		(int, struct peer *);
+static	void	dumbclock_shutdown	(int, struct peer *);
+static	void	dumbclock_receive	(struct recvbuf *);
 #if 0
-static	void	dumbclock_poll		P((int, struct peer *));
+static	void	dumbclock_poll		(int, struct peer *);
 #endif
 
 /*

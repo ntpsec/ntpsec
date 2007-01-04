@@ -135,28 +135,28 @@ struct instance {
 /*
  * Function prototypes
  */
-static	void	jupiter_canmsg	P((struct instance *, u_int));
-static	u_short	jupiter_cksum	P((u_short *, u_int));
-static	int	jupiter_config	P((struct instance *));
-static	void	jupiter_debug	P((struct peer *, char *, char *, ...))
+static	void	jupiter_canmsg	(struct instance *, u_int);
+static	u_short	jupiter_cksum	(u_short *, u_int);
+static	int	jupiter_config	(struct instance *);
+static	void	jupiter_debug	(struct peer *, char *, char *, ...)
     __attribute__ ((format (printf, 3, 4)));
-static	char *	jupiter_parse_t	P((struct instance *, u_short *));
-static	char *	jupiter_parse_gpos	P((struct instance *, u_short *));
-static	void	jupiter_platform	P((struct instance *, u_int));
-static	void	jupiter_poll	P((int, struct peer *));
-static	void	jupiter_control	P((int, struct refclockstat *, struct
-				    refclockstat *, struct peer *));
+static	char *	jupiter_parse_t	(struct instance *, u_short *);
+static	char *	jupiter_parse_gpos	(struct instance *, u_short *);
+static	void	jupiter_platform	(struct instance *, u_int);
+static	void	jupiter_poll	(int, struct peer *);
+static	void	jupiter_control	(int, struct refclockstat *, struct
+				    refclockstat *, struct peer *);
 #ifdef HAVE_PPSAPI
-static	int	jupiter_ppsapi	P((struct instance *));
-static	int	jupiter_pps	P((struct instance *));
+static	int	jupiter_ppsapi	(struct instance *);
+static	int	jupiter_pps	(struct instance *);
 #endif /* HAVE_PPSAPI */
-static	int	jupiter_recv	P((struct instance *));
-static	void	jupiter_receive P((struct recvbuf *rbufp));
-static	void	jupiter_reqmsg	P((struct instance *, u_int, u_int));
-static	void	jupiter_reqonemsg	P((struct instance *, u_int));
-static	char *	jupiter_send	P((struct instance *, struct jheader *));
-static	void	jupiter_shutdown	P((int, struct peer *));
-static	int	jupiter_start	P((int, struct peer *));
+static	int	jupiter_recv	(struct instance *);
+static	void	jupiter_receive (struct recvbuf *rbufp);
+static	void	jupiter_reqmsg	(struct instance *, u_int, u_int);
+static	void	jupiter_reqonemsg	(struct instance *, u_int);
+static	char *	jupiter_send	(struct instance *, struct jheader *);
+static	void	jupiter_shutdown	(int, struct peer *);
+static	int	jupiter_start	(int, struct peer *);
 
 /*
  * Transfer vector

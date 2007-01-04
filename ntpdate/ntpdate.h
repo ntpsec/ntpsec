@@ -4,7 +4,7 @@
 
 #include "ntp_malloc.h"
 
-extern void	loadservers	P((char *cfgpath));
+extern void	loadservers	(char *cfgpath);
 
 /*
  * The server structure is a much simplified version of the

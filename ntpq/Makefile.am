@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS=	../util/ansi2knr
+AUTOMAKE_OPTIONS=	
 
 bin_PROGRAMS=	ntpq
 AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)

@@ -133,7 +133,7 @@ double	clock_codec;		/* audio codec frequency (sambles/s) */
 u_long	sys_clocktime;		/* last system clock update */
 u_long	pps_control;		/* last pps update */
 u_long	sys_tai;		/* UTC offset from TAI (s) */
-static void rstclock P((int, u_long, double)); /* transition function */
+static void rstclock (int, u_long, double); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -173,7 +173,7 @@ static double sys_mindly;	/* huff-n'-puff filter min delay */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
 #ifdef SIGSYS
-static void pll_trap P((int));	/* configuration trap */
+static void pll_trap (int);	/* configuration trap */
 static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
 static sigjmp_buf env;		/* environment var. for pll_trap() */

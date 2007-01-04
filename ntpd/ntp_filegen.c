@@ -49,13 +49,13 @@
  */
 #define FGEN_AGE_SECS   (24*60*60) /* life time of FILEGEN_AGE in seconds */
 
-static	void	filegen_open	P((FILEGEN *, u_long));
-static	int	valid_fileref	P((char *, char *));
+static	void	filegen_open	(FILEGEN *, u_long);
+static	int	valid_fileref	(char *, char *);
 #ifdef	UNUSED
-static	FILEGEN *filegen_unregister P((char *));
+static	FILEGEN *filegen_unregister (char *);
 #endif	/* UNUSED */
 
-static void	filegen_init	P((char *, const char *, FILEGEN *));
+static void	filegen_init	(char *, const char *, FILEGEN *);
 
 /*
  * filegen_init

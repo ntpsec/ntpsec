@@ -94,11 +94,11 @@ struct hopfclock_unit {
  * Function prototypes
  */
 
-static	int	hopfserial_start	P((int, struct peer *));
-static	void	hopfserial_shutdown	P((int, struct peer *));
-static	void	hopfserial_receive	P((struct recvbuf *));
-static	void	hopfserial_poll		P((int, struct peer *));
-/* static  void hopfserial_io		P((struct recvbuf *)); */
+static	int	hopfserial_start	(int, struct peer *);
+static	void	hopfserial_shutdown	(int, struct peer *);
+static	void	hopfserial_receive	(struct recvbuf *);
+static	void	hopfserial_poll		(int, struct peer *);
+/* static  void hopfserial_io		(struct recvbuf *); */
 /*
  * Transfer vector
  */

@@ -155,16 +155,16 @@ struct palisade_unit {
  * Function prototypes
  */
 
-static	int	palisade_start		P((int, struct peer *));
-static	void	palisade_shutdown	P((int, struct peer *));
-static	void	palisade_receive	P((struct peer *));
-static	void	palisade_poll		P((int, struct peer *));
-static  void 	palisade_io		P((struct recvbuf *));
-int 		palisade_configure	P((int, struct peer *));
-int 		TSIP_decode		P((struct peer *));
-long		HW_poll			P((struct refclockproc *));
-float 		getfloat		P((u_char *)); 
-double 		getdbl 			P((u_char *));
-short  		getint 			P((u_char *));
+static	int	palisade_start		(int, struct peer *);
+static	void	palisade_shutdown	(int, struct peer *);
+static	void	palisade_receive	(struct peer *);
+static	void	palisade_poll		(int, struct peer *);
+static  void 	palisade_io		(struct recvbuf *);
+int 		palisade_configure	(int, struct peer *);
+int 		TSIP_decode		(struct peer *);
+long		HW_poll			(struct refclockproc *);
+float 		getfloat		(u_char *); 
+double 		getdbl 			(u_char *);
+short  		getint 			(u_char *);
 
 #endif /* PALISADE_H */

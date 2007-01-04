@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
-AUTOMAKE_OPTIONS = ../util/ansi2knr
+AUTOMAKE_OPTIONS = 
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 

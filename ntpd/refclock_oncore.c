@@ -299,55 +299,55 @@ struct instance {
 #define rcvbuf	instance->Rcvbuf
 #define rcvptr	instance->Rcvptr
 
-static	int	oncore_start	      P((int, struct peer *));
-static	void	oncore_poll	      P((int, struct peer *));
-static	void	oncore_shutdown       P((int, struct peer *));
-static	void	oncore_consume	      P((struct instance *));
-static	void	oncore_read_config    P((struct instance *));
-static	void	oncore_receive	      P((struct recvbuf *));
-static	int	oncore_ppsapi	      P((struct instance *));
-static	void	oncore_get_timestamp  P((struct instance *, long, long));
-static	void	oncore_init_shmem     P((struct instance *));
+static	int	oncore_start	      (int, struct peer *);
+static	void	oncore_poll	      (int, struct peer *);
+static	void	oncore_shutdown       (int, struct peer *);
+static	void	oncore_consume	      (struct instance *);
+static	void	oncore_read_config    (struct instance *);
+static	void	oncore_receive	      (struct recvbuf *);
+static	int	oncore_ppsapi	      (struct instance *);
+static	void	oncore_get_timestamp  (struct instance *, long, long);
+static	void	oncore_init_shmem     (struct instance *);
 
-static	void	oncore_antenna_report P((struct instance *, enum antenna_state));
-static	void	oncore_chan_test      P((struct instance *));
-static	void	oncore_check_almanac  P((struct instance *));
-static	void	oncore_check_antenna  P((struct instance *));
-static	void	oncore_check_leap_sec P((struct instance *));
-static	int	oncore_checksum_ok    P((u_char *, int));
-static	void	oncore_compute_dH     P((struct instance *));
-static	void	oncore_load_almanac   P((struct instance *));
-static	void	oncore_print_Cb       P((struct instance *, u_char *));
-/* static  void    oncore_print_array	 P((u_char *, int));	*/
-static	void	oncore_print_posn     P((struct instance *));
-static	void	oncore_sendmsg	      P((int, u_char *, size_t));
-static	void	oncore_set_posn       P((struct instance *));
-static	void	oncore_set_traim      P((struct instance *));
-static	void	oncore_shmem_get_3D   P((struct instance *));
-static	void	oncore_ss	      P((struct instance *));
-static	int	oncore_wait_almanac   P((struct instance *));
+static	void	oncore_antenna_report (struct instance *, enum antenna_state);
+static	void	oncore_chan_test      (struct instance *);
+static	void	oncore_check_almanac  (struct instance *);
+static	void	oncore_check_antenna  (struct instance *);
+static	void	oncore_check_leap_sec (struct instance *);
+static	int	oncore_checksum_ok    (u_char *, int);
+static	void	oncore_compute_dH     (struct instance *);
+static	void	oncore_load_almanac   (struct instance *);
+static	void	oncore_print_Cb       (struct instance *, u_char *);
+/* static  void    oncore_print_array	 (u_char *, int);	*/
+static	void	oncore_print_posn     (struct instance *);
+static	void	oncore_sendmsg	      (int, u_char *, size_t);
+static	void	oncore_set_posn       (struct instance *);
+static	void	oncore_set_traim      (struct instance *);
+static	void	oncore_shmem_get_3D   (struct instance *);
+static	void	oncore_ss	      (struct instance *);
+static	int	oncore_wait_almanac   (struct instance *);
 
-static	void	oncore_msg_any	   P((struct instance *, u_char *, size_t, int));
-static	void	oncore_msg_Adef    P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Ag	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_As	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_At	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Ay	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Az	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_BaEaHa  P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Bd	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Bj	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_BnEnHn  P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_CaFaIa  P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Cb	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Cf	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Cj	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Cj_id   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Cj_init P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Ga	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Gb	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Gj	   P((struct instance *, u_char *, size_t));
-static	void	oncore_msg_Sz	   P((struct instance *, u_char *, size_t));
+static	void	oncore_msg_any	   (struct instance *, u_char *, size_t, int);
+static	void	oncore_msg_Adef    (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Ag	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_As	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_At	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Ay	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Az	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_BaEaHa  (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Bd	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Bj	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_BnEnHn  (struct instance *, u_char *, size_t);
+static	void	oncore_msg_CaFaIa  (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Cb	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Cf	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Cj	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Cj_id   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Cj_init (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Ga	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Gb	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Gj	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Sz	   (struct instance *, u_char *, size_t);
 
 struct	refclock refclock_oncore = {
 	oncore_start,		/* start up driver */
@@ -367,7 +367,7 @@ struct	refclock refclock_oncore = {
 static struct msg_desc {
 	const char	flag[3];
 	const int	len;
-	void		(*handler) P((struct instance *, u_char *, size_t));
+	void		(*handler) (struct instance *, u_char *, size_t);
 	const char	*fmt;
 	int		shmem;
 } oncore_messages[] = {

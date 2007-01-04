@@ -567,32 +567,32 @@ struct wwvunit {
 /*
  * Function prototypes
  */
-static	int	wwv_start	P((int, struct peer *));
-static	void	wwv_shutdown	P((int, struct peer *));
-static	void	wwv_receive	P((struct recvbuf *));
-static	void	wwv_poll	P((int, struct peer *));
+static	int	wwv_start	(int, struct peer *);
+static	void	wwv_shutdown	(int, struct peer *);
+static	void	wwv_receive	(struct recvbuf *);
+static	void	wwv_poll	(int, struct peer *);
 
 /*
  * More function prototypes
  */
-static	void	wwv_epoch	P((struct peer *));
-static	void	wwv_rf		P((struct peer *, double));
-static	void	wwv_endpoc	P((struct peer *, int));
-static	void	wwv_rsec	P((struct peer *, double));
-static	void	wwv_qrz		P((struct peer *, struct sync *, int));
-static	void	wwv_corr4	P((struct peer *, struct decvec *,
-				    double [], double [][4]));
-static	void	wwv_gain	P((struct peer *));
-static	void	wwv_tsec	P((struct peer *));
-static	int	timecode	P((struct wwvunit *, char *));
-static	double	wwv_snr		P((double, double));
-static	int	carry		P((struct decvec *));
-static	int	wwv_newchan	P((struct peer *));
-static	void	wwv_newgame	P((struct peer *));
-static	double	wwv_metric	P((struct sync *));
-static	void	wwv_clock	P((struct peer *));
+static	void	wwv_epoch	(struct peer *);
+static	void	wwv_rf		(struct peer *, double);
+static	void	wwv_endpoc	(struct peer *, int);
+static	void	wwv_rsec	(struct peer *, double);
+static	void	wwv_qrz		(struct peer *, struct sync *, int);
+static	void	wwv_corr4	(struct peer *, struct decvec *,
+				    double [], double [][4]);
+static	void	wwv_gain	(struct peer *);
+static	void	wwv_tsec	(struct peer *);
+static	int	timecode	(struct wwvunit *, char *);
+static	double	wwv_snr		(double, double);
+static	int	carry		(struct decvec *);
+static	int	wwv_newchan	(struct peer *);
+static	void	wwv_newgame	(struct peer *);
+static	double	wwv_metric	(struct sync *);
+static	void	wwv_clock	(struct peer *);
 #ifdef ICOM
-static	int	wwv_qsy		P((struct peer *, int));
+static	int	wwv_qsy		(struct peer *, int);
 #endif /* ICOM */
 
 static double qsy[NCHAN] = {2.5, 5, 10, 15, 20}; /* frequencies (MHz) */

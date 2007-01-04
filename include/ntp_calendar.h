@@ -78,8 +78,8 @@ struct calendar {
 #define	JANFEBLEAP	((JAN+FEBLEAP) * SECSPERDAY)
 
 
-extern	void	caljulian	P((u_long, struct calendar *));
-extern	u_long	caltontp	P((const struct calendar *));
+extern	void	caljulian	(u_long, struct calendar *);
+extern	u_long	caltontp	(const struct calendar *);
 
 /*
  * Additional support stuff for Ed Rheingold's calendrical calculations
@@ -87,7 +87,7 @@ extern	u_long	caltontp	P((const struct calendar *));
 
 /*
  * Start day of NTP time as days past the imaginary date 12/1/1 BC.
- * P((This is the beginning of the Christian Era, or BCE.))
+ * (This is the beginning of the Christian Era, or BCE.)
  */
 #define DAY_NTP_STARTS 693596
 /*

@@ -146,8 +146,8 @@ struct codestring crypto_codes[] = {
 #endif /* OPENSSL */
 
 /* Forwards */
-static const char *getcode P((int, struct codestring *));
-static const char *getevents P((int));
+static const char *getcode (int, struct codestring *);
+static const char *getevents (int);
 
 /*
  * getcode - return string corresponding to code

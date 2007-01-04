@@ -96,20 +96,20 @@ struct leitchunit {
 /*
  * Function prototypes
  */
-static	void	leitch_init	P((void));
-static	int	leitch_start	P((int, struct peer *));
-static	void	leitch_shutdown	P((int, struct peer *));
-static	void	leitch_poll	P((int, struct peer *));
-static	void	leitch_control	P((int, struct refclockstat *, struct refclockstat *, struct peer *));
+static	void	leitch_init	(void);
+static	int	leitch_start	(int, struct peer *);
+static	void	leitch_shutdown	(int, struct peer *);
+static	void	leitch_poll	(int, struct peer *);
+static	void	leitch_control	(int, struct refclockstat *, struct refclockstat *, struct peer *);
 #define	leitch_buginfo	noentry
-static	void	leitch_receive	P((struct recvbuf *));
-static	void	leitch_process	P((struct leitchunit *));
+static	void	leitch_receive	(struct recvbuf *);
+static	void	leitch_process	(struct leitchunit *);
 #if 0
-static	void	leitch_timeout	P((struct peer *));
+static	void	leitch_timeout	(struct peer *);
 #endif
-static	int	leitch_get_date	P((struct recvbuf *, struct leitchunit *));
-static	int	leitch_get_time	P((struct recvbuf *, struct leitchunit *, int));
-static	int	days_per_year		P((int));
+static	int	leitch_get_date	(struct recvbuf *, struct leitchunit *);
+static	int	leitch_get_time	(struct recvbuf *, struct leitchunit *, int);
+static	int	days_per_year		(int);
 
 static struct leitchunit leitchunits[MAXUNITS];
 static u_char unitinuse[MAXUNITS];

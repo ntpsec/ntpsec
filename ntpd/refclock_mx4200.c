@@ -167,28 +167,28 @@ static char pmvxg[] = "PMVXG";
 /*
  * Function prototypes
  */
-static	int	mx4200_start	P((int, struct peer *));
-static	void	mx4200_shutdown	P((int, struct peer *));
-static	void	mx4200_receive	P((struct recvbuf *));
-static	void	mx4200_poll	P((int, struct peer *));
+static	int	mx4200_start	(int, struct peer *);
+static	void	mx4200_shutdown	(int, struct peer *);
+static	void	mx4200_receive	(struct recvbuf *);
+static	void	mx4200_poll	(int, struct peer *);
 
-static	char *	mx4200_parse_t	P((struct peer *));
-static	char *	mx4200_parse_p	P((struct peer *));
-static	char *	mx4200_parse_s	P((struct peer *));
+static	char *	mx4200_parse_t	(struct peer *);
+static	char *	mx4200_parse_p	(struct peer *);
+static	char *	mx4200_parse_s	(struct peer *);
 #ifdef QSORT_USES_VOID_P
-int	mx4200_cmpl_fp	P((const void *, const void *));
+int	mx4200_cmpl_fp	(const void *, const void *);
 #else
-int	mx4200_cmpl_fp	P((const l_fp *, const l_fp *));
+int	mx4200_cmpl_fp	(const l_fp *, const l_fp *);
 #endif /* not QSORT_USES_VOID_P */
-static	int	mx4200_config	P((struct peer *));
-static	void	mx4200_ref	P((struct peer *));
-static	void	mx4200_send	P((struct peer *, char *, ...))
+static	int	mx4200_config	(struct peer *);
+static	void	mx4200_ref	(struct peer *);
+static	void	mx4200_send	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
-static	u_char	mx4200_cksum	P((char *, int));
-static	int	mx4200_jday	P((int, int, int));
-static	void	mx4200_debug	P((struct peer *, char *, ...))
+static	u_char	mx4200_cksum	(char *, int);
+static	int	mx4200_jday	(int, int, int);
+static	void	mx4200_debug	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
-static	int	mx4200_pps	P((struct peer *));
+static	int	mx4200_pps	(struct peer *);
 
 /*
  * Transfer vector

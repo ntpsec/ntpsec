@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-AUTOMAKE_OPTIONS = ../util/ansi2knr
+AUTOMAKE_OPTIONS = 
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris

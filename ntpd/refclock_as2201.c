@@ -129,10 +129,10 @@ static char stat_command[][30] = {
 /*
  * Function prototypes
  */
-static	int	as2201_start	P((int, struct peer *));
-static	void	as2201_shutdown	P((int, struct peer *));
-static	void	as2201_receive	P((struct recvbuf *));
-static	void	as2201_poll	P((int, struct peer *));
+static	int	as2201_start	(int, struct peer *);
+static	void	as2201_shutdown	(int, struct peer *);
+static	void	as2201_receive	(struct recvbuf *);
+static	void	as2201_poll	(int, struct peer *);
 
 /*
  * Transfer vector

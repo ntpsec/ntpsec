@@ -18,51 +18,51 @@ int 	maxhostlen;
 /*
  * Declarations for command handlers in here
  */
-static	int checkassocid	P((u_int32));
-static	char *	strsave 	P((char *));
-static	struct varlist *findlistvar P((struct varlist *, char *));
-static	void	doaddvlist	P((struct varlist *, char *));
-static	void	dormvlist	P((struct varlist *, char *));
-static	void	doclearvlist	P((struct varlist *));
-static	void	makequerydata	P((struct varlist *, int *, char *));
-static	int doquerylist P((struct varlist *, int, int, int, u_short *, int *, char **));
-static	void	doprintvlist	P((struct varlist *, FILE *));
-static	void	addvars 	P((struct parse *, FILE *));
-static	void	rmvars		P((struct parse *, FILE *));
-static	void	clearvars	P((struct parse *, FILE *));
-static	void	showvars	P((struct parse *, FILE *));
-static	int dolist		P((struct varlist *, int, int, int, FILE *));
-static	void	readlist	P((struct parse *, FILE *));
-static	void	writelist	P((struct parse *, FILE *));
-static	void	readvar 	P((struct parse *, FILE *));
-static	void	writevar	P((struct parse *, FILE *));
-static	void	clocklist	P((struct parse *, FILE *));
-static	void	clockvar	P((struct parse *, FILE *));
-static	int findassidrange	P((u_int32, u_int32, int *, int *));
-static	void	mreadlist	P((struct parse *, FILE *));
-static	void	mreadvar	P((struct parse *, FILE *));
-static	int dogetassoc	P((FILE *));
-static	void	printassoc	P((int, FILE *));
-static	void	associations	P((struct parse *, FILE *));
-static	void	lassociations	P((struct parse *, FILE *));
-static	void	passociations	P((struct parse *, FILE *));
-static	void	lpassociations	P((struct parse *, FILE *));
+static	int checkassocid	(u_int32);
+static	char *	strsave 	(char *);
+static	struct varlist *findlistvar (struct varlist *, char *);
+static	void	doaddvlist	(struct varlist *, char *);
+static	void	dormvlist	(struct varlist *, char *);
+static	void	doclearvlist	(struct varlist *);
+static	void	makequerydata	(struct varlist *, int *, char *);
+static	int doquerylist (struct varlist *, int, int, int, u_short *, int *, char **);
+static	void	doprintvlist	(struct varlist *, FILE *);
+static	void	addvars 	(struct parse *, FILE *);
+static	void	rmvars		(struct parse *, FILE *);
+static	void	clearvars	(struct parse *, FILE *);
+static	void	showvars	(struct parse *, FILE *);
+static	int dolist		(struct varlist *, int, int, int, FILE *);
+static	void	readlist	(struct parse *, FILE *);
+static	void	writelist	(struct parse *, FILE *);
+static	void	readvar 	(struct parse *, FILE *);
+static	void	writevar	(struct parse *, FILE *);
+static	void	clocklist	(struct parse *, FILE *);
+static	void	clockvar	(struct parse *, FILE *);
+static	int findassidrange	(u_int32, u_int32, int *, int *);
+static	void	mreadlist	(struct parse *, FILE *);
+static	void	mreadvar	(struct parse *, FILE *);
+static	int dogetassoc	(FILE *);
+static	void	printassoc	(int, FILE *);
+static	void	associations	(struct parse *, FILE *);
+static	void	lassociations	(struct parse *, FILE *);
+static	void	passociations	(struct parse *, FILE *);
+static	void	lpassociations	(struct parse *, FILE *);
 
 #ifdef	UNUSED
-static	void	radiostatus P((struct parse *, FILE *));
+static	void	radiostatus (struct parse *, FILE *);
 #endif	/* UNUSED */
 
-static	void	pstatus 	P((struct parse *, FILE *));
-static	long	when		P((l_fp *, l_fp *, l_fp *));
-static	char *	prettyinterval	P((char *, long));
-static	int doprintpeers	P((struct varlist *, int, int, int, char *, FILE *, int));
-static	int dogetpeers	P((struct varlist *, int, FILE *, int));
-static	void	dopeers 	P((int, FILE *, int));
-static	void	peers		P((struct parse *, FILE *));
-static	void	lpeers		P((struct parse *, FILE *));
-static	void	doopeers	P((int, FILE *, int));
-static	void	opeers		P((struct parse *, FILE *));
-static	void	lopeers 	P((struct parse *, FILE *));
+static	void	pstatus 	(struct parse *, FILE *);
+static	long	when		(l_fp *, l_fp *, l_fp *);
+static	char *	prettyinterval	(char *, long);
+static	int doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
+static	int dogetpeers	(struct varlist *, int, FILE *, int);
+static	void	dopeers 	(int, FILE *, int);
+static	void	peers		(struct parse *, FILE *);
+static	void	lpeers		(struct parse *, FILE *);
+static	void	doopeers	(int, FILE *, int);
+static	void	opeers		(struct parse *, FILE *);
+static	void	lopeers 	(struct parse *, FILE *);
 
 
 /*

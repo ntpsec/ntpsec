@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign # ansi2knr
+AUTOMAKE_OPTIONS = foreign
 
 #lib_LIBRARIES = libares.a
 noinst_LIBRARIES = libares.a

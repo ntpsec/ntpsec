@@ -266,18 +266,18 @@ struct irigunit {
 /*
  * Function prototypes
  */
-static	int	irig_start	P((int, struct peer *));
-static	void	irig_shutdown	P((int, struct peer *));
-static	void	irig_receive	P((struct recvbuf *));
-static	void	irig_poll	P((int, struct peer *));
+static	int	irig_start	(int, struct peer *);
+static	void	irig_shutdown	(int, struct peer *);
+static	void	irig_receive	(struct recvbuf *);
+static	void	irig_poll	(int, struct peer *);
 
 /*
  * More function prototypes
  */
-static	void	irig_base	P((struct peer *, double));
-static	void	irig_rf		P((struct peer *, double));
-static	void	irig_decode	P((struct peer *, int));
-static	void	irig_gain	P((struct peer *));
+static	void	irig_base	(struct peer *, double);
+static	void	irig_rf		(struct peer *, double);
+static	void	irig_decode	(struct peer *, int);
+static	void	irig_gain	(struct peer *);
 
 /*
  * Transfer vector

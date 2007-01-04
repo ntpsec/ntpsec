@@ -38,9 +38,9 @@
 /*
  * Function prototypes
  */
-static	int 	pcf_start 		P((int, struct peer *));
-static	void	pcf_shutdown		P((int, struct peer *));
-static	void	pcf_poll		P((int, struct peer *));
+static	int 	pcf_start 		(int, struct peer *);
+static	void	pcf_shutdown		(int, struct peer *);
+static	void	pcf_poll		(int, struct peer *);
 
 /*
  * Transfer vector
