@@ -3,8 +3,8 @@
  * University of Delaware, 2001
  */
 #include "ntpd.h"
-#include "ntpsim.h"
-#include "ntpdsim-opts.h"
+/*#include "ntpsim.h"*/
+#include "ntpd-opts.h"
 
 /*
  * Defines...
@@ -75,7 +75,7 @@ ntpsim(
         mon_start(MON_OFF);
 
 	{
-		int optct = optionProcess(&ntpdsimOptions, argc, argv);
+		int optct = optionProcess(&ntpdOptions, argc, argv);
 		argc -= optct;
 		argv += optct;
 	}

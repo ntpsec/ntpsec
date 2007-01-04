@@ -9,14 +9,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_cmdargs.h"
 
-#ifdef SIM
-# include "ntpsim.h"
-# include "ntpdsim-opts.h"
-# define OPTSTRUCT	ntpdsimOptions
-#else
-# include "ntpd-opts.h"
-# define OPTSTRUCT	ntpdOptions
-#endif /* SIM */
+#include "ntpd-opts.h"
 
 /*
  * Definitions of things either imported from or exported to outside
@@ -41,7 +34,7 @@ getCmdOpts(
 {
 	extern const char *config_file;
 	int errflg;
-	tOptions *myOptions = &OPTSTRUCT;
+	tOptions *myOptions = &ntpdOptions;
 
 	/*
 	 * Initialize, initialize

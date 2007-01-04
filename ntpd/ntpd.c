@@ -14,10 +14,9 @@
 
 #ifdef SIM
 # include "ntpsim.h"
-# include "ntpdsim-opts.h"
-#else
-# include "ntpd-opts.h"
 #endif
+
+#include "ntpd-opts.h"
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -466,11 +465,7 @@ ntpdmain(
 
 	{
 		int optct = optionProcess(
-#ifdef SIM
-					  &ntpdsimOptions
-#else
 					  &ntpdOptions
-#endif
 					  , argc, argv);
 		argc -= optct;
 		argv += optct;

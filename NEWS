@@ -1,3 +1,5 @@
+* ntpdsim no longer needs special command-line options.
+* New ntp.conf processing code from Sachin Kamboj.
 * codec (audio) and ICOM changes from Dave Mills.
 
 (4.2.4) Released by Harlan Stenn <stenn@ntp.org>

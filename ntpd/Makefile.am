@@ -13,20 +13,17 @@ LDADD=	version.o libntpd.a @LIBPARSE@
 BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
 man_MANS=	ntpd.1
 
-BUILT_SOURCES+=	ntpdsim-opts.c ntpdsim-opts.h ntpdsim.1 ntpdsim-opts.texi ntpdsim-opts.menu
-man_MANS+=	ntpdsim.1
-
 # ntpd may need:
 # log10                               refclock_wwv.o
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
 ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
-ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ $(LIBOPTS_LDADD)
+ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
-EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def ntpdsim-opts.def	\
+EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def \
 	refclock_msfees.c	\
 	refclock_trak.c		\
 	$(BUILT_SOURCES)
@@ -46,7 +43,7 @@ check-local: @MAKE_CHECK_Y2K@
 # SIM: cmd_args.c ntp_config.c ntp_io.c ntpd.c + ntpsim.c (include/ntpsim.h)
 # ntp_resolver.c is presently unused...
 ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntpd.c ntpd-opts.c ntpd-opts.h
-ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c ntpdsim-opts.c ntpdsim-opts.h
+ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c
 libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \
 	ntp_intres.c ntp_loopfilter.c ntp_monitor.c ntp_peer.c \
@@ -77,23 +74,10 @@ $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_
 $(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
-$(srcdir)/ntpdsim-opts.h: $(srcdir)/ntpdsim-opts.c
-$(srcdir)/ntpdsim-opts.c: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) ntpdsim-opts.def
-
-$(srcdir)/ntpdsim.1: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntpdsim ntpdsim-opts.def
-
-$(srcdir)/ntpdsim-opts.texi $(srcdir)/ntpdsim-opts.menu: $(srcdir)/ntpdsim-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdsim-opts.def
-
 $(PROGRAMS): $(LDADD)
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE) libntp.a
-
-../libntp/libntpsim.a:
-	cd ../libntp && $(MAKE) libntpsim.a
 
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE)
