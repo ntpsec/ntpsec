@@ -188,10 +188,10 @@ static char rcsid[] = "refclock_parse.c,v 4.78 2006/12/22 20:08:27 kardel RELEAS
  ** external interface to ntp mechanism
  **/
 
-static	int	parse_start	P((int, struct peer *));
-static	void	parse_shutdown	P((int, struct peer *));
-static	void	parse_poll	P((int, struct peer *));
-static	void	parse_control	P((int, struct refclockstat *, struct refclockstat *, struct peer *));
+static	int	parse_start	(int, struct peer *);
+static	void	parse_shutdown	(int, struct peer *);
+static	void	parse_poll	(int, struct peer *);
+static	void	parse_control	(int, struct refclockstat *, struct refclockstat *, struct peer *);
 
 struct	refclock refclock_parse = {
 	parse_start,
@@ -225,16 +225,16 @@ struct parseunit;		/* to keep inquiring minds happy */
 typedef struct bind
 {
   const char *bd_description;	                                /* name of type of binding */
-  int	(*bd_init)     P((struct parseunit *));			/* initialize */
-  void	(*bd_end)      P((struct parseunit *));			/* end */
-  int   (*bd_setcs)    P((struct parseunit *, parsectl_t *));	/* set character size */
-  int	(*bd_disable)  P((struct parseunit *));			/* disable */
-  int	(*bd_enable)   P((struct parseunit *));			/* enable */
-  int	(*bd_getfmt)   P((struct parseunit *, parsectl_t *));	/* get format */
-  int	(*bd_setfmt)   P((struct parseunit *, parsectl_t *));	/* setfmt */
-  int	(*bd_timecode) P((struct parseunit *, parsectl_t *));	/* get time code */
-  void	(*bd_receive)  P((struct recvbuf *));			/* receive operation */
-  int	(*bd_io_input) P((struct recvbuf *));			/* input operation */
+  int	(*bd_init)     (struct parseunit *);			/* initialize */
+  void	(*bd_end)      (struct parseunit *);			/* end */
+  int   (*bd_setcs)    (struct parseunit *, parsectl_t *);	/* set character size */
+  int	(*bd_disable)  (struct parseunit *);			/* disable */
+  int	(*bd_enable)   (struct parseunit *);			/* enable */
+  int	(*bd_getfmt)   (struct parseunit *, parsectl_t *);	/* get format */
+  int	(*bd_setfmt)   (struct parseunit *, parsectl_t *);	/* setfmt */
+  int	(*bd_timecode) (struct parseunit *, parsectl_t *);	/* get time code */
+  void	(*bd_receive)  (struct recvbuf *);			/* receive operation */
+  int	(*bd_io_input) (struct recvbuf *);			/* input operation */
 } bind_t;
 
 #define PARSE_END(_X_)			(*(_X_)->binding->bd_end)(_X_)
@@ -417,9 +417,9 @@ struct parseunit
  ** includes NTP parameters, TTY parameters and IO handling parameters
  **/
 
-static	void	poll_dpoll	P((struct parseunit *));
-static	void	poll_poll	P((struct peer *));
-static	int	poll_init	P((struct parseunit *));
+static	void	poll_dpoll	(struct parseunit *);
+static	void	poll_poll	(struct peer *);
+static	int	poll_init	(struct parseunit *);
 
 typedef struct poll_info
 {
@@ -530,8 +530,8 @@ typedef struct poll_info
 /*
  * Meinberg GPS16X receiver
  */
-static	void	gps16x_message	 P((struct parseunit *, parsetime_t *));
-static  int     gps16x_poll_init P((struct parseunit *));
+static	void	gps16x_message	 (struct parseunit *, parsetime_t *);
+static  int     gps16x_poll_init (struct parseunit *);
 
 #define	GPS16X_ROOTDELAY	0.0         /* nothing here */
 #define	GPS16X_BASEDELAY	0.001968         /* XXX to be fixed ! 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
@@ -671,7 +671,7 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  * RAWDCF receivers that need to be powered from DTR
  * (like Expert mouse clock)
  */
-static	int	rawdcf_init_1	P((struct parseunit *));
+static	int	rawdcf_init_1	(struct parseunit *);
 #define RAWDCFDTRSET_DESCRIPTION	"RAW DCF77 CODE (DTR SET/RTS CLR)"
 #define RAWDCFDTRSET_INIT 		rawdcf_init_1
 
@@ -679,7 +679,7 @@ static	int	rawdcf_init_1	P((struct parseunit *));
  * RAWDCF receivers that need to be powered from
  * DTR CLR and RTS SET
  */
-static	int	rawdcf_init_2	P((struct parseunit *));
+static	int	rawdcf_init_2	(struct parseunit *);
 #define RAWDCFDTRCLRRTSSET_DESCRIPTION	"RAW DCF77 CODE (DTR CLR/RTS SET)"
 #define RAWDCFDTRCLRRTSSET_INIT	rawdcf_init_2
 
@@ -694,17 +694,17 @@ static	int	rawdcf_init_2	P((struct parseunit *));
 #define TRIM_TAIPCMDSIZE	(sizeof(TRIM_TAIPPOLLCMD)-1)
 
 static poll_info_t trimbletaip_pollinfo = { TRIM_POLLRATE, TRIM_TAIPPOLLCMD, TRIM_TAIPCMDSIZE };
-static	int	trimbletaip_init	P((struct parseunit *));
-static	void	trimbletaip_event	P((struct parseunit *, int));
+static	int	trimbletaip_init	(struct parseunit *);
+static	void	trimbletaip_event	(struct parseunit *, int);
 
 /* query time & UTC correction data */
 static char tsipquery[] = { DLE, 0x21, DLE, ETX, DLE, 0x2F, DLE, ETX };
 
 static poll_info_t trimbletsip_pollinfo = { TRIM_POLLRATE, tsipquery, sizeof(tsipquery) };
-static	int	trimbletsip_init	P((struct parseunit *));
-static	void	trimbletsip_end   	P((struct parseunit *));
-static	void	trimbletsip_message	P((struct parseunit *, parsetime_t *));
-static	void	trimbletsip_event	P((struct parseunit *, int));
+static	int	trimbletsip_init	(struct parseunit *);
+static	void	trimbletsip_end   	(struct parseunit *);
+static	void	trimbletsip_message	(struct parseunit *, parsetime_t *);
+static	void	trimbletsip_event	(struct parseunit *, int);
 
 #define TRIMBLETSIP_IDLE_TIME	    (300) /* 5 minutes silence at most */
 #define TRIMBLE_RESET_HOLDOFF       TRIMBLETSIP_IDLE_TIME
@@ -852,11 +852,11 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 static struct parse_clockinfo
 {
 	u_long  cl_flags;		/* operation flags (io modes) */
-  void  (*cl_poll)    P((struct parseunit *));			/* active poll routine */
-  int   (*cl_init)    P((struct parseunit *));			/* active poll init routine */
-  void  (*cl_event)   P((struct parseunit *, int));		/* special event handling (e.g. reset clock) */
-  void  (*cl_end)     P((struct parseunit *));			/* active poll end routine */
-  void  (*cl_message) P((struct parseunit *, parsetime_t *));	/* process a lower layer message */
+  void  (*cl_poll)    (struct parseunit *);			/* active poll routine */
+  int   (*cl_init)    (struct parseunit *);			/* active poll init routine */
+  void  (*cl_event)   (struct parseunit *, int);		/* special event handling (e.g. reset clock) */
+  void  (*cl_end)     (struct parseunit *);			/* active poll end routine */
+  void  (*cl_message) (struct parseunit *, parsetime_t *);	/* process a lower layer message */
 	void   *cl_data;		/* local data area for "poll" mechanism */
 	double    cl_rootdelay;		/* rootdelay */
 	double    cl_basedelay;		/* current offset by which the RS232
@@ -1365,11 +1365,11 @@ static int notice = 0;
 
 #define PARSE_STATETIME(parse, i) ((parse->generic->currentstatus == i) ? parse->statetime[i] + current_time - parse->lastchange : parse->statetime[i])
 
-static void parse_event   P((struct parseunit *, int));
-static void parse_process P((struct parseunit *, parsetime_t *));
-static void clear_err     P((struct parseunit *, u_long));
-static int  list_err      P((struct parseunit *, u_long));
-static char * l_mktime    P((u_long));
+static void parse_event   (struct parseunit *, int);
+static void parse_process (struct parseunit *, parsetime_t *);
+static void clear_err     (struct parseunit *, u_long);
+static int  list_err      (struct parseunit *, u_long);
+static char * l_mktime    (u_long);
 
 /**===========================================================================
  ** implementation error message regression module
@@ -1548,27 +1548,27 @@ mkascii(
  * define possible io handling methods
  */
 #ifdef STREAM
-static int  ppsclock_init   P((struct parseunit *));
-static int  stream_init     P((struct parseunit *));
-static void stream_end      P((struct parseunit *));
-static int  stream_enable   P((struct parseunit *));
-static int  stream_disable  P((struct parseunit *));
-static int  stream_setcs    P((struct parseunit *, parsectl_t *));
-static int  stream_getfmt   P((struct parseunit *, parsectl_t *));
-static int  stream_setfmt   P((struct parseunit *, parsectl_t *));
-static int  stream_timecode P((struct parseunit *, parsectl_t *));
-static void stream_receive  P((struct recvbuf *));
+static int  ppsclock_init   (struct parseunit *);
+static int  stream_init     (struct parseunit *);
+static void stream_end      (struct parseunit *);
+static int  stream_enable   (struct parseunit *);
+static int  stream_disable  (struct parseunit *);
+static int  stream_setcs    (struct parseunit *, parsectl_t *);
+static int  stream_getfmt   (struct parseunit *, parsectl_t *);
+static int  stream_setfmt   (struct parseunit *, parsectl_t *);
+static int  stream_timecode (struct parseunit *, parsectl_t *);
+static void stream_receive  (struct recvbuf *);
 #endif
 					 
-static int  local_init     P((struct parseunit *));
-static void local_end      P((struct parseunit *));
-static int  local_nop      P((struct parseunit *));
-static int  local_setcs    P((struct parseunit *, parsectl_t *));
-static int  local_getfmt   P((struct parseunit *, parsectl_t *));
-static int  local_setfmt   P((struct parseunit *, parsectl_t *));
-static int  local_timecode P((struct parseunit *, parsectl_t *));
-static void local_receive  P((struct recvbuf *));
-static int  local_input    P((struct recvbuf *));
+static int  local_init     (struct parseunit *);
+static void local_end      (struct parseunit *);
+static int  local_nop      (struct parseunit *);
+static int  local_setcs    (struct parseunit *, parsectl_t *);
+static int  local_getfmt   (struct parseunit *, parsectl_t *);
+static int  local_setfmt   (struct parseunit *, parsectl_t *);
+static int  local_timecode (struct parseunit *, parsectl_t *);
+static void local_receive  (struct recvbuf *);
+static int  local_input    (struct recvbuf *);
 
 static bind_t io_bindings[] =
 {
@@ -4825,11 +4825,11 @@ struct txbuf
 	u_char *txt;			/* pointer to actual data buffer */
 };
 
-void	sendcmd		P((struct txbuf *buf, int c)); 
-void	sendbyte	P((struct txbuf *buf, int b)); 
-void	sendetx		P((struct txbuf *buf, struct parseunit *parse)); 
-void	sendint		P((struct txbuf *buf, int a)); 
-void	sendflt		P((struct txbuf *buf, double a)); 
+void	sendcmd		(struct txbuf *buf, int c); 
+void	sendbyte	(struct txbuf *buf, int b); 
+void	sendetx		(struct txbuf *buf, struct parseunit *parse); 
+void	sendint		(struct txbuf *buf, int a); 
+void	sendflt		(struct txbuf *buf, double a); 
  
 void
 sendcmd(
@@ -4842,11 +4842,11 @@ sendcmd(
 	buf->idx = 2;
 }
 
-void	sendcmd		P((struct txbuf *buf, int c)); 
-void	sendbyte	P((struct txbuf *buf, int b)); 
-void	sendetx		P((struct txbuf *buf, struct parseunit *parse)); 
-void	sendint		P((struct txbuf *buf, int a)); 
-void	sendflt		P((struct txbuf *buf, double a)); 
+void	sendcmd		(struct txbuf *buf, int c); 
+void	sendbyte	(struct txbuf *buf, int b); 
+void	sendetx		(struct txbuf *buf, struct parseunit *parse); 
+void	sendint		(struct txbuf *buf, int a); 
+void	sendflt		(struct txbuf *buf, double a); 
  
 void
 sendbyte(
@@ -5049,7 +5049,7 @@ trimbletsip_end(
 		parse->localdata = (void *)0;
 	}
 	parse->peer->nextaction = 0;
-	parse->peer->action = (void (*) P((struct peer *)))0;
+	parse->peer->action = (void (*) (struct peer *))0;
 }
 
 /*--------------------------------------------------

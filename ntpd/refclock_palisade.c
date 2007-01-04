@@ -91,7 +91,7 @@ struct refclock refclock_palisade = {
 	NOFLAGS			/* not used */
 };
 
-int day_of_year P((char *dt));
+int day_of_year (char *dt);
 
 /* Extract the clock type from the mode setting */
 #define CLK_TYPE(x) ((int)(((x)->ttl) & 0x7F))

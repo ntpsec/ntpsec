@@ -91,10 +91,10 @@ struct pstunit {
 /*
  * Function prototypes
  */
-static	int	pst_start	P((int, struct peer *));
-static	void	pst_shutdown	P((int, struct peer *));
-static	void	pst_receive	P((struct recvbuf *));
-static	void	pst_poll	P((int, struct peer *));
+static	int	pst_start	(int, struct peer *);
+static	void	pst_shutdown	(int, struct peer *);
+static	void	pst_receive	(struct recvbuf *);
+static	void	pst_poll	(int, struct peer *);
 
 /*
  * Transfer vector

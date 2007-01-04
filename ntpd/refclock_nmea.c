@@ -97,18 +97,18 @@ struct nmeaunit {
 /*
  * Function prototypes
  */
-static	int	nmea_start	P((int, struct peer *));
-static	void	nmea_shutdown	P((int, struct peer *));
+static	int	nmea_start	(int, struct peer *);
+static	void	nmea_shutdown	(int, struct peer *);
 #ifdef HAVE_PPSAPI
-static	void	nmea_control	P((int, struct refclockstat *, struct
-				    refclockstat *, struct peer *));
-static	int	nmea_ppsapi	P((struct peer *, int, int));
-static	int	nmea_pps	P((struct nmeaunit *, l_fp *));
+static	void	nmea_control	(int, struct refclockstat *, struct
+				    refclockstat *, struct peer *);
+static	int	nmea_ppsapi	(struct peer *, int, int);
+static	int	nmea_pps	(struct nmeaunit *, l_fp *);
 #endif /* HAVE_PPSAPI */
-static	void	nmea_receive	P((struct recvbuf *));
-static	void	nmea_poll	P((int, struct peer *));
-static	void	gps_send	P((int, const char *, struct peer *));
-static	char	*field_parse	P((char *, int));
+static	void	nmea_receive	(struct recvbuf *);
+static	void	nmea_poll	(int, struct peer *);
+static	void	gps_send	(int, const char *, struct peer *);
+static	char	*field_parse	(char *, int);
 
 /*
  * Transfer vector

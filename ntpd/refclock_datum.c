@@ -173,13 +173,13 @@ static struct datum_pts_unit
 ** Callback function prototypes that ntpd needs to know about.
 */
 
-static	int	datum_pts_start		P((int, struct peer *));
-static	void	datum_pts_shutdown	P((int, struct peer *));
-static	void	datum_pts_poll		P((int, struct peer *));
-static	void	datum_pts_control	P((int, struct refclockstat *,
-					   struct refclockstat *, struct peer *));
-static	void	datum_pts_init		P((void));
-static	void	datum_pts_buginfo	P((int, struct refclockbug *, struct peer *));
+static	int	datum_pts_start		(int, struct peer *);
+static	void	datum_pts_shutdown	(int, struct peer *);
+static	void	datum_pts_poll		(int, struct peer *);
+static	void	datum_pts_control	(int, struct refclockstat *,
+					   struct refclockstat *, struct peer *);
+static	void	datum_pts_init		(void);
+static	void	datum_pts_buginfo	(int, struct refclockbug *, struct peer *);
 
 /*
 ** This is the call back function structure that ntpd actually uses for
@@ -219,7 +219,7 @@ struct	refclock refclock_datum = {
 ** the adjtime() call.
 */
 
-static	void	datum_pts_receive	P((struct recvbuf *));
+static	void	datum_pts_receive	(struct recvbuf *);
 
 /*......................................................................*/
 /*	datum_pts_start - start up the datum PTS. This means open the	*/

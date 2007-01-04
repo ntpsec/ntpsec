@@ -102,7 +102,7 @@
 #include "ntp-keygen-opts.h"
 
 #ifdef SYS_WINNT
-extern	int	ntp_getopt	P((int, char **, const char *));
+extern	int	ntp_getopt	(int, char **, const char *);
 #define getopt ntp_getopt
 #define optarg ntp_optarg
 #endif
@@ -140,20 +140,20 @@ extern	int	ntp_getopt	P((int, char **, const char *));
 /*
  * Prototypes
  */
-FILE	*fheader	P((const char *, const char *));
-void	fslink		P((const char *, const char *));
-int	gen_md5		P((char *));
+FILE	*fheader	(const char *, const char *);
+void	fslink		(const char *, const char *);
+int	gen_md5		(char *);
 #ifdef OPENSSL
-EVP_PKEY *gen_rsa	P((char *));
-EVP_PKEY *gen_dsa	P((char *));
-EVP_PKEY *gen_iff	P((char *));
-EVP_PKEY *gen_gqpar	P((char *));
-EVP_PKEY *gen_gqkey	P((char *, EVP_PKEY *));
-EVP_PKEY *gen_mv	P((char *));
-int	x509		P((EVP_PKEY *, const EVP_MD *, char *, char *));
-void	cb		P((int, int, void *));
-EVP_PKEY *genkey	P((char *, char *));
-u_long	asn2ntp		P((ASN1_TIME *));
+EVP_PKEY *gen_rsa	(char *);
+EVP_PKEY *gen_dsa	(char *);
+EVP_PKEY *gen_iff	(char *);
+EVP_PKEY *gen_gqpar	(char *);
+EVP_PKEY *gen_gqkey	(char *, EVP_PKEY *);
+EVP_PKEY *gen_mv	(char *);
+int	x509		(EVP_PKEY *, const EVP_MD *, char *, char *);
+void	cb		(int, int, void *);
+EVP_PKEY *genkey	(char *, char *);
+u_long	asn2ntp		(ASN1_TIME *);
 #endif /* OPENSSL */
 
 /*

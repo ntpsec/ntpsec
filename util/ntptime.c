@@ -52,11 +52,11 @@
 /*
  * Function prototypes
  */
-char *sprintb		P((u_int, const char *));
-const char *timex_state	P((int));
+char *sprintb		(u_int, const char *);
+const char *timex_state	(int);
 
 #ifdef SIGSYS
-void pll_trap		P((int));
+void pll_trap		(int);
 
 static struct sigaction newsigsys;	/* new sigaction status */
 static struct sigaction sigsys;		/* current sigaction status */

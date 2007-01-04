@@ -86,8 +86,8 @@ static	int mon_mem_increments;		/* times called malloc() */
 int	mon_enabled;			/* enable switch */
 u_long	mon_age = 3000;			/* preemption limit */
 static	int mon_have_memory;
-static	void	mon_getmoremem	P((void));
-static	void	remove_from_hash P((struct mon_data *));
+static	void	mon_getmoremem	(void);
+static	void	remove_from_hash (struct mon_data *);
 
 /*
  * init_mon - initialize monitoring global data

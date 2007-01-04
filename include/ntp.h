@@ -357,7 +357,7 @@ struct peer {
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks) */
-	void (*action) P((struct peer *)); /* action timeout function */
+	void (*action) (struct peer *); /* action timeout function */
 
 	/*
 	 * Statistic counters

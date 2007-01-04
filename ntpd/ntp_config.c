@@ -394,29 +394,29 @@ struct netinfo_config_state {
 /*
  * Function prototypes
  */
-static	unsigned long get_pfxmatch P((char **, struct masks *));
-static	unsigned long get_match P((char *, struct masks *));
-static	unsigned long get_logmask P((char *));
+static	unsigned long get_pfxmatch (char **, struct masks *);
+static	unsigned long get_match (char *, struct masks *);
+static	unsigned long get_logmask (char *);
 #ifdef HAVE_NETINFO
-static	struct netinfo_config_state *get_netinfo_config P((void));
-static	void free_netinfo_config P((struct netinfo_config_state *));
-static	int gettokens_netinfo P((struct netinfo_config_state *, char **, int *));
+static	struct netinfo_config_state *get_netinfo_config (void);
+static	void free_netinfo_config (struct netinfo_config_state *);
+static	int gettokens_netinfo (struct netinfo_config_state *, char **, int *);
 #endif
-static	int gettokens P((FILE *, char *, char **, int *));
-static	int matchkey P((char *, struct keyword *, int));
+static	int gettokens (FILE *, char *, char **, int *);
+static	int matchkey (char *, struct keyword *, int);
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
 	t_MSK,		/* Network Mask */
 	};
-static	int getnetnum P((const char *, struct sockaddr_storage *, int,
-			 enum gnn_type));
-static	void save_resolve P((char *, int, int, int, int, u_int, int,
-    keyid_t, u_char *));
-static	void do_resolve_internal P((void));
-static	void abort_resolve P((void));
+static	int getnetnum (const char *, struct sockaddr_storage *, int,
+			 enum gnn_type);
+static	void save_resolve (char *, int, int, int, int, u_int, int,
+    keyid_t, u_char *);
+static	void do_resolve_internal (void);
+static	void abort_resolve (void);
 #if !defined(VMS) && !defined(SYS_WINNT)
-static	RETSIGTYPE catchchild P((int));
+static	RETSIGTYPE catchchild (int);
 #endif /* VMS */
 
 /*

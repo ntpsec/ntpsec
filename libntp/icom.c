@@ -48,7 +48,7 @@
 /*
  * Local function prototypes
  */
-static void doublefreq		P((double, u_char *, int));
+static void doublefreq		(double, u_char *, int);
 
 
 /*

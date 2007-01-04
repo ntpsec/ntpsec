@@ -210,15 +210,15 @@ struct actsunit {
 /*
  * Function prototypes
  */
-static	int	acts_start	P((int, struct peer *));
-static	void	acts_shutdown	P((int, struct peer *));
-static	void	acts_receive	P((struct recvbuf *));
-static	void	acts_message	P((struct peer *));
-static	void	acts_timecode	P((struct peer *, char *));
-static	void	acts_poll	P((int, struct peer *));
-static	void	acts_timeout	P((struct peer *));
-static	void	acts_disc	P((struct peer *));
-static	void	acts_timer	P((int, struct peer *));
+static	int	acts_start	(int, struct peer *);
+static	void	acts_shutdown	(int, struct peer *);
+static	void	acts_receive	(struct recvbuf *);
+static	void	acts_message	(struct peer *);
+static	void	acts_timecode	(struct peer *, char *);
+static	void	acts_poll	(int, struct peer *);
+static	void	acts_timeout	(struct peer *);
+static	void	acts_disc	(struct peer *);
+static	void	acts_timer	(int, struct peer *);
 
 /*
  * Transfer vector (conditional structure name)

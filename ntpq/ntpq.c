@@ -238,60 +238,60 @@ static const char *tstflagnames[] = {
 };
 
 
-int		ntpqmain	P((int,	char **));
+int		ntpqmain	(int,	char **);
 /*
  * Built in command handler declarations
  */
-static	int	openhost	P((const char *));
-static	int	sendpkt		P((char *, int));
-static	int	getresponse	P((int, int, u_short *, int *, char **, int));
-static	int	sendrequest	P((int, int, int, int, char *));
-static	char *	tstflags	P((u_long));
-static	void	getcmds		P((void));
-static	RETSIGTYPE abortcmd	P((int));
-static	void	docmd		P((const char *));
-static	void	tokenize	P((const char *, char **, int *));
-static	int	findcmd		P((char *, struct xcmd *, struct xcmd *, struct xcmd **));
-static	int	getarg		P((char *, int, arg_v *));
-static	int	rtdatetolfp	P((char *, l_fp *));
-static	int	decodearr	P((char *, int *, l_fp *));
-static	void	help		P((struct parse *, FILE *));
+static	int	openhost	(const char *);
+static	int	sendpkt		(char *, int);
+static	int	getresponse	(int, int, u_short *, int *, char **, int);
+static	int	sendrequest	(int, int, int, int, char *);
+static	char *	tstflags	(u_long);
+static	void	getcmds		(void);
+static	RETSIGTYPE abortcmd	(int);
+static	void	docmd		(const char *);
+static	void	tokenize	(const char *, char **, int *);
+static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
+static	int	getarg		(char *, int, arg_v *);
+static	int	rtdatetolfp	(char *, l_fp *);
+static	int	decodearr	(char *, int *, l_fp *);
+static	void	help		(struct parse *, FILE *);
 #ifdef QSORT_USES_VOID_P
-static	int	helpsort	P((const void *, const void *));
+static	int	helpsort	(const void *, const void *);
 #else
-static	int	helpsort	P((char **, char **));
+static	int	helpsort	(char **, char **);
 #endif
-static	void	printusage	P((struct xcmd *, FILE *));
-static	void	timeout		P((struct parse *, FILE *));
-static	void	auth_delay	P((struct parse *, FILE *));
-static	void	host		P((struct parse *, FILE *));
-static	void	ntp_poll	P((struct parse *, FILE *));
-static	void	keyid		P((struct parse *, FILE *));
-static	void	keytype		P((struct parse *, FILE *));
-static	void	passwd		P((struct parse *, FILE *));
-static	void	hostnames	P((struct parse *, FILE *));
-static	void	setdebug	P((struct parse *, FILE *));
-static	void	quit		P((struct parse *, FILE *));
-static	void	version		P((struct parse *, FILE *));
-static	void	raw		P((struct parse *, FILE *));
-static	void	cooked		P((struct parse *, FILE *));
-static	void	authenticate	P((struct parse *, FILE *));
-static	void	ntpversion	P((struct parse *, FILE *));
-static	void	warning		P((const char *, const char *, const char *));
-static	void	error		P((const char *, const char *, const char *));
-static	u_long	getkeyid	P((const char *));
-static	void	atoascii	P((int, char *, char *));
-static	void	makeascii	P((int, char *, FILE *));
-static	void	rawprint	P((int, int, char *, int, FILE *));
-static	void	startoutput	P((void));
-static	void	output		P((FILE *, char *, char *));
-static	void	endoutput	P((FILE *));
-static	void	outputarr	P((FILE *, char *, int, l_fp *));
-static	void	cookedprint	P((int, int, char *, int, FILE *));
+static	void	printusage	(struct xcmd *, FILE *);
+static	void	timeout		(struct parse *, FILE *);
+static	void	auth_delay	(struct parse *, FILE *);
+static	void	host		(struct parse *, FILE *);
+static	void	ntp_poll	(struct parse *, FILE *);
+static	void	keyid		(struct parse *, FILE *);
+static	void	keytype		(struct parse *, FILE *);
+static	void	passwd		(struct parse *, FILE *);
+static	void	hostnames	(struct parse *, FILE *);
+static	void	setdebug	(struct parse *, FILE *);
+static	void	quit		(struct parse *, FILE *);
+static	void	version		(struct parse *, FILE *);
+static	void	raw		(struct parse *, FILE *);
+static	void	cooked		(struct parse *, FILE *);
+static	void	authenticate	(struct parse *, FILE *);
+static	void	ntpversion	(struct parse *, FILE *);
+static	void	warning		(const char *, const char *, const char *);
+static	void	error		(const char *, const char *, const char *);
+static	u_long	getkeyid	(const char *);
+static	void	atoascii	(int, char *, char *);
+static	void	makeascii	(int, char *, FILE *);
+static	void	rawprint	(int, int, char *, int, FILE *);
+static	void	startoutput	(void);
+static	void	output		(FILE *, char *, char *);
+static	void	endoutput	(FILE *);
+static	void	outputarr	(FILE *, char *, int, l_fp *);
+static	void	cookedprint	(int, int, char *, int, FILE *);
 #ifdef QSORT_USES_VOID_P
-static	int	assoccmp	P((const void *, const void *));
+static	int	assoccmp	(const void *, const void *);
 #else
-static	int	assoccmp	P((struct association *, struct association *));
+static	int	assoccmp	(struct association *, struct association *);
 #endif /* sgi || bsdi */
 
 

@@ -41,7 +41,7 @@ char *strchr(), *strrchr();
 # define memcpy(t,f,c) bcopy(f,t,(int)c)
 # define memset(a,x,c) if (x == 0x00) bzero(a,(int)c); else ntp_memset((char*)a,x,c)
 
-void ntp_memset P((char *, int, int));
+void ntp_memset (char *, int, int);
 
 #endif /*  NTP_NEED_BOPS */
 

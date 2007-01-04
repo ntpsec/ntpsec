@@ -170,28 +170,28 @@ int maxactivefd;
  */
 static  u_char          sys_interphase = 0;
 
-static  struct interface *new_interface P((struct interface *));
-static  void add_interface P((struct interface *));
-static  void update_interfaces P((u_short, interface_receiver_t, void *));
-static  void remove_interface P((struct interface *));
-static  struct interface *create_interface P((u_short, struct interface *));
+static  struct interface *new_interface (struct interface *);
+static  void add_interface (struct interface *);
+static  void update_interfaces (u_short, interface_receiver_t, void *);
+static  void remove_interface (struct interface *);
+static  struct interface *create_interface (u_short, struct interface *);
 
-static int	move_fd		P((SOCKET));
+static int	move_fd		(SOCKET);
 
 /*
  * Multicast functions
  */
-static	isc_boolean_t	addr_ismulticast	 P((struct sockaddr_storage *));
+static	isc_boolean_t	addr_ismulticast	 (struct sockaddr_storage *);
 /*
  * Not all platforms support multicast
  */
 #ifdef MCAST
-static	isc_boolean_t	socket_multicast_enable	 P((struct interface *, int, struct sockaddr_storage *));
-static	isc_boolean_t	socket_multicast_disable P((struct interface *, struct sockaddr_storage *));
+static	isc_boolean_t	socket_multicast_enable	 (struct interface *, int, struct sockaddr_storage *);
+static	isc_boolean_t	socket_multicast_disable (struct interface *, struct sockaddr_storage *);
 #endif
 
 #ifdef DEBUG
-static void print_interface	P((struct interface *, char *, char *));
+static void print_interface	(struct interface *, char *, char *);
 #define DPRINT_INTERFACE(_LVL_, _ARGS_) do { if (debug >= (_LVL_)) { print_interface _ARGS_; } } while (0)
 #else
 #define DPRINT_INTERFACE(_LVL_, _ARGS_)
@@ -223,21 +223,21 @@ struct asyncio_reader {
 
 ISC_LIST(struct asyncio_reader) asyncio_reader_list;
 
-static void delete_asyncio_reader P((struct asyncio_reader *));
-static struct asyncio_reader *new_asyncio_reader P((void));
-static void add_asyncio_reader P((struct asyncio_reader *, enum desc_type));
-static void remove_asyncio_reader P((struct asyncio_reader *));
+static void delete_asyncio_reader (struct asyncio_reader *);
+static struct asyncio_reader *new_asyncio_reader (void);
+static void add_asyncio_reader (struct asyncio_reader *, enum desc_type);
+static void remove_asyncio_reader (struct asyncio_reader *);
 
 #endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
 
-static void init_async_notifications P((void));
+static void init_async_notifications (void);
 
-static	int create_sockets	P((u_short));
-static	SOCKET	open_socket	P((struct sockaddr_storage *, int, int, struct interface *));
-static	char *	fdbits		P((int, fd_set *));
-static	void	set_reuseaddr	P((int));
-static	isc_boolean_t	socket_broadcast_enable	 P((struct interface *, SOCKET, struct sockaddr_storage *));
-static	isc_boolean_t	socket_broadcast_disable P((struct interface *, struct sockaddr_storage *));
+static	int create_sockets	(u_short);
+static	SOCKET	open_socket	(struct sockaddr_storage *, int, int, struct interface *);
+static	char *	fdbits		(int, fd_set *);
+static	void	set_reuseaddr	(int);
+static	isc_boolean_t	socket_broadcast_enable	 (struct interface *, SOCKET, struct sockaddr_storage *);
+static	isc_boolean_t	socket_broadcast_disable (struct interface *, struct sockaddr_storage *);
 
 ISC_LIST(vsock_t)	fd_list;
 
@@ -256,25 +256,25 @@ ISC_LIST(struct interface)     inter_list;
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
 
-static void	add_fd_to_list	P((SOCKET, enum desc_type));
-static void	close_and_delete_fd_from_list	P((SOCKET));
-static void	add_addr_to_list	P((struct sockaddr_storage *, struct interface *));
-static void	delete_addr_from_list	P((struct sockaddr_storage *));
-static struct interface *find_addr_in_list	P((struct sockaddr_storage *));
-static struct interface *find_flagged_addr_in_list P((struct sockaddr_storage *, int));
-static void	create_wildcards	P((u_short));
-static isc_boolean_t	address_okay	P((isc_interface_t *));
-static void		convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
-static struct interface *getinterface	P((struct sockaddr_storage *));
-static struct interface *findlocalinterface	P((struct sockaddr_storage *));
-static struct interface *findlocalcastinterface	P((struct sockaddr_storage *, int));
+static void	add_fd_to_list	(SOCKET, enum desc_type);
+static void	close_and_delete_fd_from_list	(SOCKET);
+static void	add_addr_to_list	(struct sockaddr_storage *, struct interface *);
+static void	delete_addr_from_list	(struct sockaddr_storage *);
+static struct interface *find_addr_in_list	(struct sockaddr_storage *);
+static struct interface *find_flagged_addr_in_list (struct sockaddr_storage *, int);
+static void	create_wildcards	(u_short);
+static isc_boolean_t	address_okay	(isc_interface_t *);
+static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
+static struct interface *getinterface	(struct sockaddr_storage *);
+static struct interface *findlocalinterface	(struct sockaddr_storage *);
+static struct interface *findlocalcastinterface	(struct sockaddr_storage *, int);
 
 /*
  * Routines to read the ntp packets
  */
 #if !defined(HAVE_IO_COMPLETION_PORT)
-static inline int     read_network_packet	P((SOCKET, struct interface *, l_fp));
-static inline int     read_refclock_packet	P((SOCKET, struct refclockio *, l_fp));
+static inline int     read_network_packet	(SOCKET, struct interface *, l_fp);
+static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
 
 #ifdef SYS_WINNT

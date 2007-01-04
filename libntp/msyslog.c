@@ -42,8 +42,8 @@ static char separator = '/';
 extern	char *progname;
 
 /* Declare the local functions */
-void	addto_syslog	P((int, char *));
-void	format_errmsg   P((char *, int, const char *, int));
+void	addto_syslog	(int, char *);
+void	format_errmsg   (char *, int, const char *, int);
 
 
 /*

@@ -375,30 +375,30 @@ struct chuunit {
 /*
  * Function prototypes
  */
-static	int	chu_start	P((int, struct peer *));
-static	void	chu_shutdown	P((int, struct peer *));
-static	void	chu_receive	P((struct recvbuf *));
-static	void	chu_poll	P((int, struct peer *));
+static	int	chu_start	(int, struct peer *);
+static	void	chu_shutdown	(int, struct peer *);
+static	void	chu_receive	(struct recvbuf *);
+static	void	chu_poll	(int, struct peer *);
 
 /*
  * More function prototypes
  */
-static	void	chu_decode	P((struct peer *, int));
-static	void	chu_burst	P((struct peer *));
-static	void	chu_clear	P((struct peer *));
-static	void	chu_a		P((struct peer *, int));
-static	void	chu_b		P((struct peer *, int));
-static	int	chu_dist	P((int, int));
-static	double	chu_major	P((struct peer *));
+static	void	chu_decode	(struct peer *, int);
+static	void	chu_burst	(struct peer *);
+static	void	chu_clear	(struct peer *);
+static	void	chu_a		(struct peer *, int);
+static	void	chu_b		(struct peer *, int);
+static	int	chu_dist	(int, int);
+static	double	chu_major	(struct peer *);
 #ifdef HAVE_AUDIO
-static	void	chu_rf		P((struct peer *, double));
-static	void	chu_gain	P((struct peer *));
-static	void	chu_audio_receive P((struct recvbuf *rbufp));
+static	void	chu_rf		(struct peer *, double);
+static	void	chu_gain	(struct peer *);
+static	void	chu_audio_receive (struct recvbuf *rbufp);
 #endif /* HAVE_AUDIO */
 #ifdef ICOM
-static	int	chu_newchan	P((struct peer *, double));
+static	int	chu_newchan	(struct peer *, double);
 #endif /* ICOM */
-static	void	chu_serial_receive P((struct recvbuf *rbufp));
+static	void	chu_serial_receive (struct recvbuf *rbufp);
 
 /*
  * Global variables

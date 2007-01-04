@@ -67,10 +67,10 @@ struct chronolog_unit {
 /*
  * Function prototypes
  */
-static	int	chronolog_start		P((int, struct peer *));
-static	void	chronolog_shutdown	P((int, struct peer *));
-static	void	chronolog_receive	P((struct recvbuf *));
-static	void	chronolog_poll		P((int, struct peer *));
+static	int	chronolog_start		(int, struct peer *);
+static	void	chronolog_shutdown	(int, struct peer *);
+static	void	chronolog_receive	(struct recvbuf *);
+static	void	chronolog_poll		(int, struct peer *);
 
 /*
  * Transfer vector

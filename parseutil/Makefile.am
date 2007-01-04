@@ -1,5 +1,5 @@
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
-AUTOMAKE_OPTIONS = ../util/ansi2knr
+AUTOMAKE_OPTIONS = 
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 EXTRA_PROGRAMS = testdcf dcfd
 INCLUDES = -I$(top_srcdir)/include

@@ -219,7 +219,7 @@ static long rand_deg = DEG_3;
 static long rand_sep = SEP_3;
 static long *end_ptr = &randtbl[DEG_3 + 1];
 
-static inline long good_rand P((long));
+static inline long good_rand (long);
 
 static inline long
 good_rand (

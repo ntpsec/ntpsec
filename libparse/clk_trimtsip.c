@@ -116,8 +116,8 @@ struct trimble
 #define STATUS_UNSAFE 1		/* not enough receivers for full precision */
 #define STATUS_SYNC   2		/* enough information for good operation */
 
-static unsigned long inp_tsip P((parse_t *, unsigned int, timestamp_t *));
-static unsigned long cvt_trimtsip P((unsigned char *, int, struct format *, clocktime_t *, void *));
+static unsigned long inp_tsip (parse_t *, unsigned int, timestamp_t *);
+static unsigned long cvt_trimtsip (unsigned char *, int, struct format *, clocktime_t *, void *);
 
 struct clockformat clock_trimtsip =
 {

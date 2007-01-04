@@ -12,15 +12,6 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_ 1
 
-/* PROTOTYPES should be set to one if and only if the compiler supports
-     function argument prototyping.
-   The following makes PROTOTYPES default to 1 if it has not already been
-     defined as 0 with C compiler flags.
- */
-#ifdef HAVE_PROTOTYPES
-#define PROTOTYPES 1
-#endif
-
 /* POINTER defines a generic pointer type */
 typedef unsigned char *POINTER;
 
@@ -39,16 +30,6 @@ typedef unsigned char BYTE;		/* local modification for RSAEuro */
 
 #ifndef UNUSED_ARG
 #define UNUSED_ARG(x) x = *(&x);
-#endif
-
-/* PROTO_LIST is defined depending on how PROTOTYPES is defined above.
-   If using PROTOTYPES, then PROTO_LIST returns the list, otherwise it
-     returns an empty list.  
- */
-#if PROTOTYPES
-#define PROTO_LIST(list) list
-#else
-#define PROTO_LIST(list) ()
 #endif
 
 #endif /* end _GLOBAL_H_ */

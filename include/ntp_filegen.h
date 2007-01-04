@@ -45,7 +45,7 @@ typedef struct FILEGEN
 	  u_char  flag;		/* flags modifying processing of file generation */
 	}	FILEGEN;
 
-extern	void	filegen_setup	P((FILEGEN *, u_long));
-extern	void	filegen_config	P((FILEGEN *, char *, u_int, u_int));
-extern	FILEGEN *filegen_get	P((char *));
-extern	void	filegen_register P((char *, const char *, FILEGEN *));
+extern	void	filegen_setup	(FILEGEN *, u_long);
+extern	void	filegen_config	(FILEGEN *, char *, u_int, u_int);
+extern	FILEGEN *filegen_get	(char *);
+extern	void	filegen_register (char *, const char *, FILEGEN *);
