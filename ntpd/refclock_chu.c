@@ -36,8 +36,8 @@
  * 7335 kHz and 14670 kHz in upper sideband, compatible AM mode. An
  * ordinary shortwave receiver can be tuned manually to one of these
  * frequencies or, in the case of ICOM receivers, the receiver can be
- * tuned automatically using this program as propagation conditions
- * change throughout the day and night.
+ * tuned automatically as propagation conditions change throughout the
+ * day and season.
  *
  * The driver receives, demodulates and decodes the radio signals when
  * connected to the audio codec of a suported workstation hardware and
@@ -48,7 +48,7 @@
  * The driver can be compiled to use a Bell 103 compatible modem or
  * modem chip to receive the radio signal and demodulate the data.
  * Alternatively, the driver can be compiled to use the audio codec of
- * the Sun workstation or another with compatible audio drivers. In the
+ * the workstation or another with compatible audio drivers. In the
  * latter case, the driver implements the modem using DSP routines, so
  * the radio can be connected directly to either the microphone on line
  * input port. In either case, the driver decodes the data using a
@@ -56,14 +56,14 @@
  * of redundancy available to maximize accuracy and minimize errors.
  *
  * The CHU time broadcast includes an audio signal compatible with the
- * Bell 103 modem standard (mark = 2225 Hz, space = 2025 Hz). It consist
- * of nine, ten-character bursts transmitted at 300 bps and beginning
- * each second from second 31 to second 39 of the minute. Each character
- * consists of eight data bits plus one start bit and two stop bits to
- * encode two hex digits. The burst data consist of five characters (ten
- * hex digits) followed by a repeat of these characters. In format A,
- * the characters are repeated in the same polarity; in format B, the
- * characters are repeated in the opposite polarity.
+ * Bell 103 modem standard (mark = 2225 Hz, space = 2025 Hz). The signal
+ * consists of nine, ten-character bursts transmitted at 300 bps between
+ * seconds 31 and 39 of each minute. Each character consists of eight
+ * data bits plus one start bit and two stop bits to encode two hex
+ * digits. The burst data consist of five characters (ten hex digits)
+ * followed by a repeat of these characters. In format A, the characters
+ * are repeated in the same polarity; in format B, the characters are
+ * repeated in the opposite polarity.
  *
  * Format A bursts are sent at seconds 32 through 39 of the minute in
  * hex digits
@@ -97,9 +97,9 @@
  * coincides with 0.5 second. Since characters have 11 bits and are
  * transmitted at 300 bps, the last stop bit of the first character
  * coincides with 0.5 - 10 * 11/300 = 0.133 second. Depending on the
- * UART, character interrupts can vary somewhere between the beginning
- * of bit 9 and end of bit 11. These eccentricities can be corrected
- * along with the radio propagation delay using fudge time 1.
+ * UART, character interrupts can vary somewhere between the end of bit
+ * 9 and end of bit 11. These eccentricities can be corrected along with
+ * the radio propagation delay using fudge time 1.
  *
  * Debugging aids
  *
@@ -107,11 +107,13 @@
  * data helpful in diagnosing problems with the radio signal and serial
  * connections. With debugging enabled (-d on the ntpd command line),
  * the driver produces one line for each burst in two formats
- * corresponding to format A and B. Following is format A:
+ * corresponding to format A and B.
+ *
+ * Following is format A:
  *
  *	n b f s m code
  *
- * where n is the number of characters in the burst (0-11), b the burst
+ * where n is the number of characters in the burst (0-10), b the burst
  * distance (0-40), f the field alignment (-1, 0, 1), s the
  * synchronization distance (0-16), m the burst number (2-9) and code
  * the burst characters as received. Note that the hex digits in each
@@ -119,43 +121,50 @@
  *
  *	10 38 0 16 9 06851292930685129293
  *
- * is interpreted as containing 11 characters with burst distance 38,
+ * is interpreted as containing 10 characters with burst distance 38,
  * field alignment 0, synchronization distance 16 and burst number 9.
  * The nibble-swapped timecode shows day 58, hour 21, minute 29 and
  * second 39.
- *
- * When the audio driver is compiled, format A is preceded by
- * the current gain (0-255) and relative signal level (0-9999). The
- * receiver folume control should be set so that the gain is somewhere
- * near the middle of the range 0-255, which results in a signal level
- * near 1000.
  *
  * Following is format B:
  * 
  *	n b s code
  *
- * where n is the number of characters in the burst (0-11), b the burst
+ * where n is the number of characters in the burst (0-10), b the burst
  * distance (0-40), s the synchronization distance (0-40) and code the
  * burst characters as received. Note that the hex digits in each
  * character are reversed and the last ten digits inverted, so the burst
  *
- *	11 40 1091891300ef6e76ecff
+ *	10 40 1091891300ef6e76ec
  *
- * is interpreted as containing 11 characters with burst distance 40.
+ * is interpreted as containing 10 characters with burst distance 40.
  * The nibble-swapped timecode shows DUT1 +0.1 second, year 1998 and TAI
  * - UTC 31 seconds.
+ *
+ * Each line is preceeded by the code chuA or chuB, as appropriate. If
+ * the audio driver is compiled, the current gain (0-255) and relative
+ * signal level (0-9999) follow the code. The receiver folume control
+ * should be set so that the gain is somewhere near the middle of the
+ * range 0-255, which results in a signal level near 1000.
  *
  * In addition to the above, the reference timecode is updated and
  * written to the clockstats file and debug score after the last burst
  * received in the minute. The format is
  *
- *	qq yyyy ddd hh:mm:ss nn dd tt
+ *	sq yyyy ddd hh:mm:ss l s dd t agc ident m b      
  *
- * where qq are the error flags, as described below, yyyy is the year,
- * ddd the day, hh:mm:ss the time of day, nn the number of format A
- * bursts received during the previous minute, dd the decoding distance
- * and tt the number of timestamps. The error flags are cleared after
- * every update.
+ * s	'?' before first synchronized and ' ' after that
+ * q	status code (see below)
+ * yyyy	year
+ * ddd	day of year
+ * hh:mm:ss time of day
+ * l	leap second indicator (space, L or D)
+ * dst	Canadian daylight code (opaque)
+ * t	number of minutes since last synchronized
+ * agc	audio gain (0 - 255)
+ * ident identifier (CHU0 3330 kHz, CHU1 7335 kHz, CHU2 14670 kHz)
+ * m	signal metric (0 - 100)
+ * b	number of timecodes for the previous minute (0 - 59)
  *
  * Fudge factors
  *
@@ -188,7 +197,6 @@
 /*
  * Interface definitions
  */
-#define	SPEED232	B300	/* uart speed (300 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"CHU"	/* reference ID */
 #define	DEVICE		"/dev/chu%d" /* device name and unit */
@@ -212,6 +220,7 @@
 #define	MAXCLP		100	/* max clips above reference per s */
 #define LIMIT		1000.	/* soft limiter threshold */
 #define AGAIN		6.	/* baseband gain */
+#define	SRVSIZ		(8 * 11) /* UART delay line */
 #define LAG		10	/* discriminator lag */
 #define	DEVICE_AUDIO	"/dev/audio" /* device name */
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
@@ -224,7 +233,6 @@
  * Decoder definitions
  */
 #define CHAR		(11. / 300.) /* character time (s) */
-#define	FUDGE		.185	/* offset to first stop bit (s) */
 #define BURST		11	/* max characters per burst */
 #define MINCHAR		9	/* min characters per burst */
 #define MINDIST		28	/* min burst distance (of 40)  */
@@ -234,6 +242,14 @@
 #define METRIC		50.	/* min channel metric */
 #define PANIC		1440	/* panic timeout (m) */
 #define HOLD		30	/* reach hold (m) */
+
+/*
+ * This is the offset to the first stop bit, which defines the timecode
+ * offset (.133 s). To this is added the receiver delay (4.7 ms), filter
+ * delay 0.5 ms), discriminator delay (1.4 ms) and whopping strays.
+ * Empiricity rules.
+ */
+#define	FUDGE		.1745	/* offset to first stop bit (s) */
 
 /*
  * Hex extension codes (>= 16)
@@ -271,19 +287,6 @@
 #define DECERR		0x04	/* data decoding error */
 #define TSPERR		0x08	/* insufficient data */
 
-#ifdef HAVE_AUDIO
-/*
- * Maximum likelihood UART structure. There are eight of these
- * corresponding to the number of phases.
- */ 
-struct surv {
-	double	shift[12];	/* mark register */
-	double	es_max, es_min;	/* max/min envelope signals */
-	double	dist;		/* sample distance */
-	int	uart;		/* decoded character */
-};
-#endif /* HAVE_AUDIO */
-
 #ifdef ICOM
 /*
  * CHU station structure. There are three of these corresponding to the
@@ -310,13 +313,9 @@ struct chuunit {
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
 	char	ident[5];	/* station ID and channel */
-#ifdef ICOM
+	int	fd_audio;	/* audio port file descriptor */
 	int	fd_icom;	/* ICOM file descriptor */
-	int	chan;		/* data channel */
-	int	achan;		/* active channel */
-	int	dwell;		/* dwell cycle */
-	struct xmtr xmtr[NCHAN]; /* station metric */
-#endif /* ICOM */
+	double	maxsignal;	/* signal level */
 
 	/*
 	 * Character burst variables
@@ -341,7 +340,6 @@ struct chuunit {
 	/*
 	 * Audio codec variables
 	 */
-	int	fd_audio;	/* audio port file descriptor */
 	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
@@ -354,20 +352,24 @@ struct chuunit {
 	 */
 	l_fp	tick;		/* audio sample increment */
 	double	bpf[9];		/* IIR bandpass filter */
-	double	disc[LAG];	/* discriminator shift register */
 	double	lpf[27];	/* FIR lowpass filter */
-	double	monitor;	/* audio monitor */
-	double	maxsignal;	/* signal level */
+	double	disc[LAG];	/* discriminator shift register */
 	int	discptr;	/* discriminator pointer */
 
 	/*
 	 * Maximum likelihood UART variables
 	 */
 	double	baud;		/* baud interval */
-	struct surv surv[8];	/* UART survivor structures */
+	double	surv[SRVSIZ];	/* UART delay line */
 	int	decptr;		/* decode pointer */
 	int	dbrk;		/* holdoff counter */
 #endif /* HAVE_AUDIO */
+#ifdef ICOM
+	int	chan;		/* data channel */
+	int	achan;		/* active channel */
+	int	dwell;		/* dwell cycle */
+	struct xmtr xmtr[NCHAN]; /* station metric */
+#endif /* ICOM */
 };
 
 /*
@@ -389,7 +391,6 @@ static	void	chu_b		P((struct peer *, int));
 static	int	chu_dist	P((int, int));
 static	double	chu_major	P((struct peer *));
 #ifdef HAVE_AUDIO
-static	void	chu_uart	P((struct surv *, double));
 static	void	chu_rf		P((struct peer *, double));
 static	void	chu_gain	P((struct peer *));
 static	void	chu_audio_receive P((struct recvbuf *rbufp));
@@ -714,17 +715,17 @@ chu_rf(
 {
 	struct refclockproc *pp;
 	struct chuunit *up;
-	struct surv *sp;
 
 	/*
 	 * Local variables
 	 */
-	double	signal;		/* bandpass signal */
+	double	bpass;		/* bandpass signal */
 	double	limit;		/* limiter signal */
 	double	disc;		/* discriminator signal */
-	double	lpf;		/* lowpass signal */
-	double	span;		/* UART signal span */
-	double	dist;		/* UART signal distance */
+	double	lpass;		/* lowpass signal */
+	double	max, min;	/* envelope extremes */
+	double	span, zxing;	/* threshold corrector */
+	int	uart;		/* assembly register */
 	int	i, j;
 
 	pp = peer->procptr;
@@ -734,16 +735,16 @@ chu_rf(
 	 * Bandpass filter. 4th-order elliptic, 500-Hz bandpass centered
 	 * at 2125 Hz. Passband ripple 0.3 dB, stopband ripple 50 dB.
 	 */
-	signal = (up->bpf[8] = up->bpf[7]) * 5.844676e-01;
-	signal += (up->bpf[7] = up->bpf[6]) * 4.884860e-01;
-	signal += (up->bpf[6] = up->bpf[5]) * 2.704384e+00;
-	signal += (up->bpf[5] = up->bpf[4]) * 1.645032e+00;
-	signal += (up->bpf[4] = up->bpf[3]) * 4.644557e+00;
-	signal += (up->bpf[3] = up->bpf[2]) * 1.879165e+00;
-	signal += (up->bpf[2] = up->bpf[1]) * 3.522634e+00;
-	signal += (up->bpf[1] = up->bpf[0]) * 7.315738e-01;
-	up->bpf[0] = sample - signal;
-	signal = up->bpf[0] * 6.176213e-03
+	bpass = (up->bpf[8] = up->bpf[7]) * 5.844676e-01;
+	bpass += (up->bpf[7] = up->bpf[6]) * 4.884860e-01;
+	bpass += (up->bpf[6] = up->bpf[5]) * 2.704384e+00;
+	bpass += (up->bpf[5] = up->bpf[4]) * 1.645032e+00;
+	bpass += (up->bpf[4] = up->bpf[3]) * 4.644557e+00;
+	bpass += (up->bpf[3] = up->bpf[2]) * 1.879165e+00;
+	bpass += (up->bpf[2] = up->bpf[1]) * 3.522634e+00;
+	bpass += (up->bpf[1] = up->bpf[0]) * 7.315738e-01;
+	up->bpf[0] = sample - bpass;
+	bpass = up->bpf[0] * 6.176213e-03
 	    + up->bpf[1] * 3.156599e-03
 	    + up->bpf[2] * 7.567487e-03
 	    + up->bpf[3] * 4.344580e-03
@@ -752,8 +753,6 @@ chu_rf(
 	    + up->bpf[6] * 7.567487e-03
 	    + up->bpf[7] * 3.156599e-03
 	    + up->bpf[8] * 6.176213e-03;
-
-	up->monitor = signal / 4.;	/* note monitor after filter */
 
 	/*
 	 * Soft limiter/discriminator. The 11-sample discriminator lag
@@ -764,7 +763,7 @@ chu_rf(
 	 * this frequency, so the discriminator output is biased. Life
 	 * at 8000 Hz sucks.
 	 */
-	limit = signal;
+	limit = bpass;
 	if (limit > LIMIT)
 		limit = LIMIT;
 	else if (limit < -LIMIT)
@@ -780,135 +779,96 @@ chu_rf(
 	/*
 	 * Lowpass filter. Raised cosine, Ts = 1 / 300, beta = 0.1.
 	 */
-	lpf = (up->lpf[26] = up->lpf[25]) * 2.538771e-02;
-	lpf += (up->lpf[25] = up->lpf[24]) * 1.084671e-01;
-	lpf += (up->lpf[24] = up->lpf[23]) * 2.003159e-01;
-	lpf += (up->lpf[23] = up->lpf[22]) * 2.985303e-01;
-	lpf += (up->lpf[22] = up->lpf[21]) * 4.003697e-01;
-	lpf += (up->lpf[21] = up->lpf[20]) * 5.028552e-01;
-	lpf += (up->lpf[20] = up->lpf[19]) * 6.028795e-01;
-	lpf += (up->lpf[19] = up->lpf[18]) * 6.973249e-01;
-	lpf += (up->lpf[18] = up->lpf[17]) * 7.831828e-01;
-	lpf += (up->lpf[17] = up->lpf[16]) * 8.576717e-01;
-	lpf += (up->lpf[16] = up->lpf[15]) * 9.183463e-01;
-	lpf += (up->lpf[15] = up->lpf[14]) * 9.631951e-01;
-	lpf += (up->lpf[14] = up->lpf[13]) * 9.907208e-01;
-	lpf += (up->lpf[13] = up->lpf[12]) * 1.000000e+00;
-	lpf += (up->lpf[12] = up->lpf[11]) * 9.907208e-01;
-	lpf += (up->lpf[11] = up->lpf[10]) * 9.631951e-01;
-	lpf += (up->lpf[10] = up->lpf[9]) * 9.183463e-01;
-	lpf += (up->lpf[9] = up->lpf[8]) * 8.576717e-01;
-	lpf += (up->lpf[8] = up->lpf[7]) * 7.831828e-01;
-	lpf += (up->lpf[7] = up->lpf[6]) * 6.973249e-01;
-	lpf += (up->lpf[6] = up->lpf[5]) * 6.028795e-01;
-	lpf += (up->lpf[5] = up->lpf[4]) * 5.028552e-01;
-	lpf += (up->lpf[4] = up->lpf[3]) * 4.003697e-01;
-	lpf += (up->lpf[3] = up->lpf[2]) * 2.985303e-01;
-	lpf += (up->lpf[2] = up->lpf[1]) * 2.003159e-01;
-	lpf += (up->lpf[1] = up->lpf[0]) * 1.084671e-01;
-	lpf += up->lpf[0] = disc * 2.538771e-02;
+	lpass = (up->lpf[26] = up->lpf[25]) * 2.538771e-02;
+	lpass += (up->lpf[25] = up->lpf[24]) * 1.084671e-01;
+	lpass += (up->lpf[24] = up->lpf[23]) * 2.003159e-01;
+	lpass += (up->lpf[23] = up->lpf[22]) * 2.985303e-01;
+	lpass += (up->lpf[22] = up->lpf[21]) * 4.003697e-01;
+	lpass += (up->lpf[21] = up->lpf[20]) * 5.028552e-01;
+	lpass += (up->lpf[20] = up->lpf[19]) * 6.028795e-01;
+	lpass += (up->lpf[19] = up->lpf[18]) * 6.973249e-01;
+	lpass += (up->lpf[18] = up->lpf[17]) * 7.831828e-01;
+	lpass += (up->lpf[17] = up->lpf[16]) * 8.576717e-01;
+	lpass += (up->lpf[16] = up->lpf[15]) * 9.183463e-01;
+	lpass += (up->lpf[15] = up->lpf[14]) * 9.631951e-01;
+	lpass += (up->lpf[14] = up->lpf[13]) * 9.907208e-01;
+	lpass += (up->lpf[13] = up->lpf[12]) * 1.000000e+00;
+	lpass += (up->lpf[12] = up->lpf[11]) * 9.907208e-01;
+	lpass += (up->lpf[11] = up->lpf[10]) * 9.631951e-01;
+	lpass += (up->lpf[10] = up->lpf[9]) * 9.183463e-01;
+	lpass += (up->lpf[9] = up->lpf[8]) * 8.576717e-01;
+	lpass += (up->lpf[8] = up->lpf[7]) * 7.831828e-01;
+	lpass += (up->lpf[7] = up->lpf[6]) * 6.973249e-01;
+	lpass += (up->lpf[6] = up->lpf[5]) * 6.028795e-01;
+	lpass += (up->lpf[5] = up->lpf[4]) * 5.028552e-01;
+	lpass += (up->lpf[4] = up->lpf[3]) * 4.003697e-01;
+	lpass += (up->lpf[3] = up->lpf[2]) * 2.985303e-01;
+	lpass += (up->lpf[2] = up->lpf[1]) * 2.003159e-01;
+	lpass += (up->lpf[1] = up->lpf[0]) * 1.084671e-01;
+	lpass += up->lpf[0] = disc * 2.538771e-02;
 
 	/*
-	 * Maximum likelihood decoder. The UART updates each of the
-	 * eight survivors and determines the span, slice level and
-	 * tentative decoded character. Valid 11-bit characters are
-	 * framed so that bit 1 and bit 11 (stop bits) are mark and bit
-	 * 2 (start bit) is space. When a valid character is found, the
-	 * survivor with maximum distance determines the final decoded
-	 * character.
+	 * he samples are decimated to eight times the baud rate and
+	 * saved in an 11-baud (88-sample) shift register. At each shift
+	 * the span and threshold are determined from the max and min of
+	 * all 11 bits of the character at this sample phase. If the
+	 * current bit is above the threshold and previous bit is below
+	 * it, a start condition is enabled at the first negative
+	 * threshold crossing.
 	 */
 	up->baud += 1. / SECOND;
 	if (up->baud > 1. / (BAUD * 8.)) {
 		up->baud -= 1. / (BAUD * 8.);
-		sp = &up->surv[up->decptr];
-		span = sp->es_max - sp->es_min;
-		up->maxsignal += (span - up->maxsignal) / 80.;
+		up->decptr = (up->decptr + 1) % SRVSIZ;
+		up->surv[up->decptr] = -lpass * AGAIN;
+		max = min = 0;
+		j = up->decptr;
+		for (i = 0; i < 11; i++) {
+			if (up->surv[j] > max)
+				max = up->surv[j];
+			if (up->surv[j] < min)
+				min = up->surv[j];
+			j = (j + 8) % SRVSIZ;
+		}
+		span = max - min;
+		zxing = (max + min) / 2;
 		if (up->dbrk > 0) {
 			up->dbrk--;
-		} else if ((sp->uart & 0x403) == 0x401 && span > 1000.)
-		    {
-			dist = 0;
-			j = 0;
-			for (i = 0; i < 8; i++) {
-				if (up->surv[i].dist > dist) {
-					dist = up->surv[i].dist;
-					j = i;
-				}
+			if (up->dbrk > 0)
+				return;
+		
+printf("ptr %2d", up->decptr);
+
+			uart = 0;
+			j = up->decptr;
+			for (i = 0; i < 11; i++) {
+
+printf("%6.0f", up->surv[j] - zxing);
+
+				uart <<= 1;
+				if (up->surv[j] > zxing)
+					uart |= 1;
+				j = (j + 8) % SRVSIZ;
 			}
-			chu_decode(peer, (up->surv[j].uart >> 2) &
-			    0xff);
-			up->dbrk = 80;
-		}
-		up->decptr = (up->decptr + 1) % 8;
-		chu_uart(sp, -lpf * AGAIN);
-	}
-}
 
+printf(" %02x\n", (uart >> 1) & 0xff);
 
+			up->maxsignal += (span - up->maxsignal) / 8.;
+			chu_decode(peer, (uart >> 1) & 0xff);
 /*
- * chu_uart - maximum likelihood UART
- *
- * This routine updates a shift register holding the last 11 envelope
- * samples. It then computes the slice level and span over these samples
- * and determines the tentative data bits and distance. The calling
- * program selects over the last eight survivors the one with maximum
- * distance to determine the decoded character.
- */
-static void
-chu_uart(
-	struct surv *sp,	/* survivor structure pointer */
-	double	sample		/* baseband signal */
-	)
-{
-	double	es_max, es_min;	/* max/min envelope */
-	double	slice;		/* slice level */
-	double	dist;		/* distance */
-	double	dtemp;
-	int	i;
-
-	/*
-	 * Save the sample and shift right. At the same time, measure
-	 * the maximum and minimum over all eleven samples.
-	 */
-	es_max = -1e6;
-	es_min = 1e6;
-	sp->shift[0] = sample;
-	for (i = 11; i > 0; i--) {
-		sp->shift[i] = sp->shift[i - 1];
-		if (sp->shift[i] > es_max)
-			es_max = sp->shift[i];
-		if (sp->shift[i] < es_min)
-			es_min = sp->shift[i];
-	}
-
-	/*
-	 * Determine the slice level midway beteen the maximum and
-	 * minimum and the span as the maximum less the minimum. Compute
-	 * the distance on the assumption the first and last bits must
-	 * be mark, the second space and the rest either mark or space.
-	 */ 
-	slice = (es_max + es_min) / 2.;
-	dist = 0;
-	sp->uart = 0;
-	for (i = 1; i < 12; i++) {
-		sp->uart <<= 1;
-		dtemp = sp->shift[i];
-		if (dtemp > slice)
-			sp->uart |= 0x1;
-		if (i == 1 || i == 11) {
-			dist += dtemp - es_min;
-		} else if (i == 10) {
-			dist += es_max - dtemp;
-		} else {
-			if (dtemp > slice)
-				dist += dtemp - es_min;
-			else
-				dist += es_max - dtemp;
+printf("max %.0f min %.0f span %.0f zxing %.0f\n", max, min, span, zxing);
+*/
 		}
+		if (span < 2000)
+			return;
+
+		if (up->surv[(up->decptr + 80) % SRVSIZ] - zxing < 0.3 *
+		    span || up->surv[up->decptr] - zxing > -0.3 * span)
+			return;
+
+		if (up->surv[(up->decptr + 84) % SRVSIZ] < zxing)
+			up->dbrk = 80;
 	}
-	sp->es_max = es_max;
-	sp->es_min = es_min;
-	sp->dist = dist / (11 * (es_max - es_min));
 }
 #endif /* HAVE_AUDIO */
 
@@ -1074,8 +1034,8 @@ chu_b(
 	 * is, only if the distance is 40. Note that once a valid frame
 	 * has been found errors are ignored.
 	 */
-	sprintf(tbuf, "chuB %04x %2d %2d ", up->status, nchar,
-	    -up->burdist);
+	sprintf(tbuf, "chuB %04x %4.0f %2d %2d ", up->status,
+	    up->maxsignal, nchar, -up->burdist);
 	for (i = 0; i < nchar; i++)
 		sprintf(&tbuf[strlen(tbuf)], "%02x", up->cbuf[i]);
 	if (pp->sloppyclockflag & CLK_FLAG4)
@@ -1168,20 +1128,9 @@ chu_a(
 	if (temp > 9 || k + 9 >= nchar || temp != ((up->cbuf[k + 9] >>
 	    4) & 0xf))
 		temp = 0;
-#ifdef HAVE_AUDIO
-	if (up->fd_audio)
-		sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
-		    up->status, up->maxsignal, nchar, up->burdist, k,
-		    up->syndist, temp);
-	else
-		sprintf(tbuf, "chuA %04x %2d %2d %2d %2d %1d ",
-		    up->status, nchar, up->burdist, k, up->syndist,
-		    temp);
-
-#else
-	sprintf(tbuf, "chuA %04x %2d %2d %2d %2d %1d ", up->status,
-	    nchar, up->burdist, k, up->syndist, temp);
-#endif /* HAVE_AUDIO */
+	sprintf(tbuf, "chuA %04x %4.0f %2d %2d %1d %2d %1d ",
+	    up->status, up->maxsignal, nchar, up->burdist, k,
+	    up->syndist, temp);
 	for (i = 0; i < nchar; i++)
 		sprintf(&tbuf[strlen(tbuf)], "%02x",
 		    up->cbuf[i]);
@@ -1318,30 +1267,15 @@ chu_poll(
 		leapchar = 'L';
 	} else if (up->leap & 0x4) {
 		pp->leap = LEAP_DELSECOND;
-		leapchar = 'l';
+		leapchar = 'D';
 	} else {
 		pp->leap = LEAP_NOWARNING;
 	}
-#ifdef HAVE_AUDIO
-	if (up->fd_audio)
-		sprintf(pp->a_lastcode,
-		    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %d %s %.0f %d",
-		    synchar, qual, pp->year, pp->day, pp->hour,
-		    pp->minute, pp->second, leapchar, up->dst, up->dut,
-		    minset, up->gain, up->ident, dtemp, up->ntstamp);
-	else
-		sprintf(pp->a_lastcode,
-		    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %s %.0f %d",
-		    synchar, qual, pp->year, pp->day, pp->hour,
-		    pp->minute, pp->second, leapchar, up->dst, up->dut,
-		    minset, up->ident, dtemp, up->ntstamp);
-#else
 	sprintf(pp->a_lastcode,
-	    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %s %.0f %d",
+	    "%c%1X %04d %3d %02d:%02d:%02d %c %x %+d %d %d %s %.0f %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
-	    pp->second, leapchar, up->dst, up->dut, minset, up->ident,
-	    dtemp, up->ntstamp);
-#endif /* HAVE_AUDIO */
+	    pp->second, leapchar, up->dst, up->dut, minset, up->gain,
+	    up->ident, dtemp, up->ntstamp);
 	pp->lencode = strlen(pp->a_lastcode);
 
 	/*
@@ -1369,8 +1303,7 @@ chu_poll(
 	}
 #ifdef DEBUG
 	if (debug)
-		printf("chu: timecode %d %s\n", pp->lencode,
-		    pp->a_lastcode);
+		printf("%s\n", pp->a_lastcode);
 #endif
 #ifdef ICOM
 	chu_newchan(peer, dtemp);
