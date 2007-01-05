@@ -52,7 +52,8 @@ DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --enable-local-libopts
 EXTRA_DIST =		\
 	COPYRIGHT	\
 	ChangeLog	\
-	ChangeLog-4.1.0 \
+	CommitLog	\
+	CommitLog-4.1.0 \
 	NEWS		\
 	NOTES.y2kfixes	\
 	README.bk	\
