@@ -17,8 +17,7 @@
 ./A.*
 .buildkey
 COPYRIGHT
-ChangeLog
-ChangeLog.new
+CommitLog
 ElectricFence/Makefile.in
 Makefile.in
 acinclude.m4
