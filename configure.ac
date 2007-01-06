@@ -311,8 +311,6 @@ AC_ISC_POSIX
 AC_PATH_PROG(PATH_SH, sh)
 AC_PATH_PROG(PATH_PERL, perl)
 
-hs_ULONG_CONST
-
 case "$host" in
  *-*-vxworks*)
     ac_link="$ac_link $VX_KERNEL"

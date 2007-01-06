@@ -1111,8 +1111,8 @@ ctl_putts(
 
 	*cp++ = '=';
 	(void) sprintf(cp, "0x%08lx.%08lx",
-			   ts->l_ui & ULONG_CONST(0xffffffff),
-			   ts->l_uf & ULONG_CONST(0xffffffff));
+			   ts->l_ui & 0xffffffffUL,
+			   ts->l_uf & 0xffffffffUL);
 	while (*cp != '\0')
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);

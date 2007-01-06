@@ -1,3 +1,4 @@
+* [Bug 757] Lose ULONG_CONST().
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
