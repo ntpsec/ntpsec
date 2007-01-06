@@ -596,25 +596,6 @@ case "$ac_cv_c_volatile" in
     ;;
 esac
 
-# AM_C_PROTOTYPES gives us ansi2knr
-case "$build" in
- *-*-solaris2*)
-    # Assume that solaris2 is Ansi C...
-    ;;
- *)
-    AM_C_PROTOTYPES
-    ;;
-esac
-AC_CACHE_CHECK(if C compiler permits function prototypes, ac_cv_have_prototypes,
-[AC_TRY_COMPILE([
-extern int foo (short);
-int foo(short i) { return i; }],[
-int i;], ac_cv_have_prototypes=yes, ac_cv_have_prototypes=no)
-])
-if test "$ac_cv_have_prototypes" = yes; then
-  AC_DEFINE(HAVE_PROTOTYPES, 1, [Are function prototypes OK?])
-fi
-
 AC_C_CONST
 AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
@@ -1304,14 +1285,8 @@ ac_cv_func_qsort_argtype,
 [AC_TRY_COMPILE([
 #include "l_stdlib.h"
 
-#ifdef HAVE_PROTOTYPES
-#define P(x) x
-#else
-#define P(x) ()
-#endif
-
 extern void *base;
-extern sortfunc P((const void *, const void *));
+extern sortfunc (const void *, const void *);
 int sortfunc(a, b)
   const void *a;
   const void *b; { return 0; }
@@ -1387,13 +1362,8 @@ AC_CACHE_CHECK(if declaring 'syscall()' is ok, ac_cv_decl_syscall,
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef HAVE_PROTOTYPES
-#define P(x) x
-#else
-#define P(x) ()
-#endif
 ],
-  [extern int syscall P((int, ...));],
+  [extern int syscall (int, ...);],
   ac_cv_decl_syscall=yes, ac_cv_decl_syscall=no)])
 case "$ac_cv_decl_syscall" in
  yes) AC_DEFINE(DECL_SYSCALL, 1, [Declare syscall()?]) ;;

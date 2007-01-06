@@ -225,10 +225,10 @@ const char *kmem = KMEM;
 const char *file = NULL;
 int   fd  = -1;
 
-static	void	getoffsets	P((off_t *, off_t *, off_t *, off_t *));
-static	int	openfile	P((const char *, int));
-static	void	writevar	P((int, off_t, int));
-static	void	readvar		P((int, off_t, int *));
+static	void	getoffsets	(off_t *, off_t *, off_t *, off_t *);
+static	int	openfile	(const char *, int);
+static	void	writevar	(int, off_t, int);
+static	void	readvar		(int, off_t, int *);
 
 /*
  * main - parse arguments and handle options

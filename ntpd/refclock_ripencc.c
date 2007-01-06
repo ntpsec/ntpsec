@@ -411,33 +411,33 @@ void cmd_0x8EADq (TSIPPKT *cmd);
 /* header/source border XXXXXXXXXXXXXXXXXXXXXXXXXX */
 
 /* Trimble parse functions */
-static 	int	parse0x8FAD	P((TSIPPKT *, struct peer *));
-static 	int	parse0x8F0B	P((TSIPPKT *, struct peer *));
+static 	int	parse0x8FAD	(TSIPPKT *, struct peer *);
+static 	int	parse0x8F0B	(TSIPPKT *, struct peer *);
 #ifdef TRIMBLE_OUTPUT_FUNC
-static 	int	parseany	P((TSIPPKT *, struct peer *));
-static 	void	TranslateTSIPReportToText	P((TSIPPKT *, char *));
+static 	int	parseany	(TSIPPKT *, struct peer *);
+static 	void	TranslateTSIPReportToText	(TSIPPKT *, char *);
 #endif /* TRIMBLE_OUTPUT_FUNC */
-static 	int	parse0x5C	P((TSIPPKT *, struct peer *));
-static 	int	parse0x4F	P((TSIPPKT *, struct peer *));
-static	void	tsip_input_proc	P((TSIPPKT *, int));
+static 	int	parse0x5C	(TSIPPKT *, struct peer *);
+static 	int	parse0x4F	(TSIPPKT *, struct peer *);
+static	void	tsip_input_proc	(TSIPPKT *, int);
 
 /* Trimble helper functions */
-static	void	bPutFloat 	P((float *, unsigned char *));
-static	void	bPutDouble 	P((double *, unsigned char *));
-static	void	bPutULong 	P((unsigned long *, unsigned char *));
-static	int	print_msg_table_header	P((int rptcode, char *HdrStr, int force));
-static	char *	show_time	P((float time_of_week));
+static	void	bPutFloat 	(float *, unsigned char *);
+static	void	bPutDouble 	(double *, unsigned char *);
+static	void	bPutULong 	(unsigned long *, unsigned char *);
+static	int	print_msg_table_header	(int rptcode, char *HdrStr, int force);
+static	char *	show_time	(float time_of_week);
 
 /* RIPE NCC functions */
-static	void	ripencc_control	P((int, struct refclockstat *, struct
-				refclockstat *, struct peer *));
-static	int	ripencc_ppsapi	P((struct peer *, int, int));
-static	int	ripencc_get_pps_ts	P((struct ripencc_unit *, l_fp *));
-static	int	ripencc_start	P((int, struct peer *));
-static 	void	ripencc_shutdown	P((int, struct peer *));
-static 	void	ripencc_poll	P((int, struct peer *));
-static 	void	ripencc_send	P((struct peer *, TSIPPKT spt));
-static 	void	ripencc_receive	P((struct recvbuf *));
+static	void	ripencc_control	(int, struct refclockstat *, struct
+				refclockstat *, struct peer *);
+static	int	ripencc_ppsapi	(struct peer *, int, int);
+static	int	ripencc_get_pps_ts	(struct ripencc_unit *, l_fp *);
+static	int	ripencc_start	(int, struct peer *);
+static 	void	ripencc_shutdown	(int, struct peer *);
+static 	void	ripencc_poll	(int, struct peer *);
+static 	void	ripencc_send	(struct peer *, TSIPPKT spt);
+static 	void	ripencc_receive	(struct recvbuf *);
 
 /* fill in reflock structure for our clock */
 struct refclock refclock_ripencc = {

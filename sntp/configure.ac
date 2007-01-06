@@ -96,7 +96,7 @@ case "$ac_cv_have_ss_family_in_struct_ss$ac_cv_have___ss_family_in_struct_ss" in
 esac
 
 # Checks for library functions.
-AC_FUNC_MEMCMP
+#AC_FUNC_MEMCMP	 dnl HMS: we don't have a memcmp.c to use here, so why bother?
 AC_FUNC_SETVBUF_REVERSED
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm])

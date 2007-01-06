@@ -11,8 +11,8 @@
 #include <sys/select.h>
 #else
 #include <sockLib.h>
-extern int  select P((int width, fd_set *pReadFds, fd_set *pWriteFds,
-            fd_set *pExceptFds, struct timeval *pTimeOut));
+extern int  select (int width, fd_set *pReadFds, fd_set *pWriteFds,
+            fd_set *pExceptFds, struct timeval *pTimeOut);
 
 #endif
 #endif
