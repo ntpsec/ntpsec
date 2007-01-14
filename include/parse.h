@@ -1,7 +1,7 @@
 /*
- * /src/NTP/ntp4-dev/include/parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A
+ * /src/NTP/REPOSITORY/ntp4-dev/include/parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A
  *
- * parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A
+ * parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
@@ -35,7 +35,7 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 #if	!(defined(lint) || defined(__GNUC__))
-  static char parsehrcsid[]="parse.h,v 4.11 2005/06/25 10:58:45 kardel RELEASE_20050625_A";
+  static char parsehrcsid[]="parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A";
 #endif
 
 #include "ntp_types.h"
@@ -185,7 +185,7 @@ extern unsigned int splclock P((void));
  */
 #define PARSE_TCMAX	    400	  /* maximum addition data size */
 
-typedef union timestamp
+typedef union
 {
   struct timeval tv;		/* timeval - kernel view */
   l_fp           fp;		/* fixed point - ntp view */
@@ -390,6 +390,10 @@ extern int parse_timedout P((parse_t *, timestamp_t *, struct timeval *));
  * History:
  *
  * parse.h,v
+ * Revision 4.12  2007/01/14 08:36:03  kardel
+ * make timestamp union anonymous to avoid conflicts with
+ * some OSes that choose to create a nameing conflic here.
+ *
  * Revision 4.11  2005/06/25 10:58:45  kardel
  * add missing log keywords
  *
