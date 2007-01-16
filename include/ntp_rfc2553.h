@@ -260,12 +260,12 @@ struct addrinfo {
 #define	EAI_MAX		14
 
 
-int	getaddrinfo P((const char *, const char *,
-			 const struct addrinfo *, struct addrinfo **));
-int	getnameinfo P((const struct sockaddr *, u_int, char *,
-			 size_t, char *, size_t, int));
-void	freeaddrinfo P((struct addrinfo *));
-char	*gai_strerror P((int));
+int	getaddrinfo (const char *, const char *,
+			 const struct addrinfo *, struct addrinfo **);
+int	getnameinfo (const struct sockaddr *, u_int, char *,
+			 size_t, char *, size_t, int);
+void	freeaddrinfo (struct addrinfo *);
+char	*gai_strerror (int);
 
 /*
  * Constants for getnameinfo()

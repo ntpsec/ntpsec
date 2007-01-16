@@ -22,9 +22,9 @@
 		<h4>Description</h4>
 		<p>This driver synchronizes the computer time using data encoded in radio transmissions from Canadian time/frequency station CHU in Ottawa, Ontario. It replaces an earlier one, built by Dennis Ferguson in 1988, which required a special line discipline to preprocessed the signal. The new driver includes more powerful algorithms implemented directly in the driver and requires no preprocessing.</p>
 		<p>CHU transmissions are made continuously on 3330 kHz, 7335 kHz and 14670 kHz in upper sideband, compatible AM mode. An ordinary shortwave receiver can be tuned manually to one of these frequencies or, in the case of ICOM receivers, the receiver can be tuned automatically as propagation conditions change throughout the day and night. The performance of this driver when tracking the station is ordinarily better than 1 ms in time with frequency drift less than 0.5 PPM when not tracking the station.</p>
-		<p>While there are currently no known commercial CHU receivers, a simple but effective receiver/demodulator can be constructed from an ordinary shortwave receiver and Bell 103 compatible, 300-b/s modem or modem chip, as described on the <a href="../pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page. The driver can use the modem to receive the radio signal and demodulate the data or, if available, the driver can use the audio codec of the Sun workstation or another with compatible audio interface. In the latter case, the driver implements the modem using DSP routines, so the radio can be connected directly to either the microphone or line input port.</p>
+		<p>While there are currently no known commercial CHU receivers, a simple but effective receiver/demodulator can be constructed from an ordinary shortwave receiver and Bell 103 compatible, 300-b/s modem or modem chip, as described on the <a href="../pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page. The driver can use the modem to receive the radio signal and demodulate the data or, if available, the driver can use the audio codec of the Sun workstation or another machine with compatible audio interface. In the latter case, the driver implements the modem using DSP routines, so the radio can be connected directly to either the microphone or line input port.</p>
 		<p>This driver incorporates several features in common with other audio drivers such as described in the <a href="driver36.html">Radio WWV/H Audio Demodulator/Decoder</a> and the <a href="driver6.html">IRIG Audio Decoder</a> pages. They include automatic gain control (AGC), selectable audio codec port and signal monitoring capabilities. For a discussion of these common features, as well as a guide to hookup, debugging and monitoring, see the <a href="../audio.html">Reference Clock Audio Drivers</a> page.</p>
-		<p>Ordinarily, the driver poll interval is set to 14 (about 4.5 h), although this can be changed with configuration commands. As long as the clock is set or verified at least once during this interval, the NTP algorithms will consider the source reachable and selectable to discipline the system clock. However, if this does not happen for eight poll intervals, the algorithms will consider the source unreachable and some other source will be chosen (if available) to discipline the system clock.</p>
+		<p>Ordinarily, the driver timeout interval is set to 1440 minutes (one day).  If no signals are heard before the timeout, the driver resets all state variables and starts over. As long as the clock is set or verified at least once during this interval, the NTP algorithms will consider the source reachable and selectable to discipline the system clock. However, if this does not happen for eight poll intervals, the algorithms will consider the source unreachable and some other source will be chosen (if available) to discipline the system clock.</p>
 		<p>The decoding algorithms process the data using maximum-likelihood techniques which exploit the considerable degree of redundancy available in each broadcast message or burst. As described below, every character is sent twice and, in the case of format A bursts, the burst is sent eight times every minute. In the case of format B bursts, which are sent once each minute, the burst is considered correct only if every character matches its repetition in the burst. In the case of format A messages, a majority decoder requires at least six repetitions for each digit in the timecode and more than half of the repetitions decode to the same digit. Every character in every burst provides an independent timestamp upon arrival with a potential total of over 60 timestamps for each minute.</p>
 		<p>A timecode in the format described below is assembled when all bursts have been received in the minute. The timecode is considered valid and the clock set when at least one valid format B burst has been decoded and the above requirements are met. The <tt>yyyy</tt> year field in the timecode indicates whether a valid format B burst has been received. Upon startup, this field is initialized at zero; when a valid format B burst is received, it is set to the current Gregorian year. The <tt>q</tt> quality character field in the timecode indicates whether a valid timecode has been determined. If any of the high order three bits of this character are set, the timecode is invalid.</p>
 		<p>Once the clock has been set for the first time, it will appear reachable and selectable to discipline the system clock, even if the broadcast signal is lost. Since the signals are almost always available during some period of the day and the NTP clock discipline algorithms are designed to work well even in this case, it is unlikely that the system clock could drift more than a few tens of milliseconds during periods of signal loss. To protect against this most unlikely situation, if after four days with no signals, the clock is considered unset and resumes the synchronization procedure from the beginning.</p>
@@ -68,21 +68,15 @@
 		<h4>Debugging Aids</h4>
 		<p>The most convenient way to track the program status is using the <tt>ntpq</tt> program and the <tt>clockvar</tt> command. This displays the last determined timecode and related status and error counters, even when the program is not discipline the system clock. If the debugging trace feature (<tt>-d</tt> on the <tt>ntpd</tt> command line)is enabled, the program produces detailed status messages as it operates. If the <tt>fudge flag 4</tt> is set, these messages are written to the <tt>clockstats</tt> file. All messages produced by this driver have the prefix <tt>chu</tt> for convenient filtering with the Unix <tt>grep</tt> command.</p>
 		<p>With debugging enabled the driver produces messages in the following formats:</p>
-		<p>A format <tt>chuA</tt> message is produced for each format A burst received in seconds 32 through 39 of the minute:</p>
-		<p><tt>chuA n b s code</tt></p>
-		<p>where <tt>n</tt> is the number of characters in the burst (0-11), <tt>b</tt> the burst distance (0-40), <tt>s</tt> the synchronization distance (0-40) and <tt>code</tt> the burst characters as received. Note that the hex digits in each character are reversed and the last ten digits inverted, so the burst</p>
-		<p><tt>11 40 1091891300ef6e76ecff</tt></p>
-		<p>is interpreted as containing 11 characters with burst distance 40. The nibble-swapped timecode shows DUT1 +0.1 second, year 1998 and TAI -UTC 31 seconds.</p>
-		<p>A format <tt>chuB</tt> message is produced for each format B burst received in second 31 of the minute:</p>
-		<p><tt>chuB n b f s m code</tt></p>
-		<p>where <tt>n</tt> is the number of characters in the burst (0-11), <tt>b</tt> the burst distance (0-40), <tt>f</tt> the field alignment (-1, 0, 1), <tt>s</tt>the synchronization distance (0-16), <tt>m</tt>the burst number (2-9) and <tt>code</tt> the burst characters as received. Note that the hex digits in each character are reversed, so the burst</p>
-		<p><tt>10 38 0 16 9 06851292930685129293</tt></p>
-		<p>is interpreted as containing 11 characters with burst distance 38, field alignment 0, synchronization distance 16 and burst number 9. The nibble-swapped timecode shows day 58, hour 21, minute 29 and second 39.</p>
+		<p>A single message beginning with <tt>chuB</tt> is produced for each format A burst received in second 31, while six messages beginning with <tt>chuA</tt> are produced for each format A burst received in seconds 32 through 37 of the minute. The following four numbers are</p>
+		<p><tt>stat sig n b</tt></p>
+		<p>where <tt>stat</tt> is the status code, <tt>sig</tt> the signal level, <tt>n</tt> the number of characters in the burst (0-11) and <tt>b</tt> the burst distance (0-40). Good bursts will have signal levels of a few hundred or more and the other numbers near the top of the range specified. See the source for the interpretation of the remaining data in the burst.</p>
 		<p>If the CI-V interface for ICOM radios is active, a debug level greater than 1 will produce a trace of the CI-V command and response messages. Interpretation of these messages requires knowledge of the CI-V protocol, which is beyond the scope of this document.</p>
 		<h4>Monitor Data</h4>
+		
 		When enabled by the <tt>filegen</tt> facility, every received timecode is written to the <tt>clockstats</tt> file in the following format:
 		<pre>
-        sq yy ddd hh:mm:ss.fff ld dut lset agc rfrq bcnt dist tsmp
+        sq yy ddd hh:mm:ss.fff l ds du lset agc rfrq bcnt dist tsmp
 
         s       sync indicator
         q       quality character
@@ -92,14 +86,13 @@
         mm      minute of hour
         ss      second of minute
         fff     millisecond of second
-        l       leap second warning
-        d       DST state
+        lw       leap second warning
+        dst       DST state
         dut     DUT sign and magnitude in deciseconds
         lset    minutes since last set
         agc     audio gain (0-255)
-        rfrq    radio frequency
-        bcnt    burst count
-        dist    decoding distance
+        ident   CHU&nbsp;identifier code
+        dist    decoder distance
         tsmp    timestamps captured
 </pre>
 		The fields beginning with <tt>year</tt> and extending through <tt>dut</tt> are decoded from the received data and are in fixed-length format. The <tt>agc</tt> and <tt>lset</tt> fields, as well as the following driver-dependent fields, are in variable-length format.
@@ -121,25 +114,20 @@
 				<p>It is important to note that one or more of the above alarms does not necessarily indicate a clock error, but only that the decoder has detected a condition that may in future result in an error.</p>
 			<dt><tt>yyyy ddd hh:mm:ss.fff</tt>
 			<dd>The timecode format itself is self explanatory. Note that the Gregorian year is decoded directly from the transmitted timecode.
-			<dt><tt>l</tt>
+			<dt><tt>lw</tt>
 			<dd>The leap second warning is normally space, but changes to <tt>L</tt> if a leap second is to occur at the end of the month of June or December.
-			<dt><tt>d</tt>
-			<dd>The DST code for Canada encodes the state for all provinces.
-			<dt><tt>dut</tt>
-			<dd>The DUT sign and magnitude shows the current UT1 offset relative to the displayed UTC time, in deciseconds.
-			<dt><tt>lset</tt>
+			<dt><tt>dst</tt>
+			<dd>The DST code for Canada encodes the state for all provinces. It is encoded as two hex characters.<dt><tt>dut</tt>
+			<dd>The DUT sign and magnitude shows the current UT1 offset relative to the displayed UTC time, in deciseconds. It is encoded as one digit preceeded by sign.<dt><tt>lset</tt>
 			<dd>Before the clock is set, the interval since last set is the number of minutes since the program was started; after the clock is set, this is number of minutes since the time was last verified relative to the broadcast signal.
 			<dt><tt>agc</tt>
 			<dd>The audio gain shows the current codec gain setting in the range 0 to 255. Ordinarily, the receiver audio gain control or IRIG level control should be set for a value midway in this range.
-			<dt><tt>rfrq</tt>
-			<dd>The current radio frequency, if the CI-V interface is active, or 'X' if not.
-			<dt><tt>bcnt</tt>
-			<dd>The number of format A bursts received during the most recent minute bursts were received.
+			<dt><tt>ident</tt>
+			<dd>The CHU&nbsp;identifier followed by the current radio frequency code, if the CI-V interface is active, or 'X' if not. The radio frequncy is encoded as 0 for 3330 kHz, 1 for 7335 kHz and 2 for 14670 kHz.
 			<dt><tt>dist</tt>
-			<dd>The minimum decoding distance determined during the most recent minute bursts were received.
+			<dd>The minimum decoding distance determined during the most recent minute bursts were received. The values range from 0 to 100, with the higher values indicating good signals.
 			<dt><tt>tsmp</tt>
-			<dd>The number of timestamps determined during the most recent minute bursts were received.
-		</dl>
+			<dd>The number of timestamps determined during the most recent minute bursts were received. The values range from 0 to 60, with the higher values indicating good signals.</dl>
 		<h4>Modes</h4>
 		<p>The <tt>mode</tt> keyword of the <tt>server</tt> configuration command specifies the ICOM ID select code. A missing or zero argument disables the CI-V interface. Following are the ID select codes for the known radios.</p>
 		<table width="100%" cols="6">

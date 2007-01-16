@@ -67,8 +67,8 @@ static struct audio_info info;	/* audio device info */
 static int ctl_fd;		/* audio control file descriptor */
 
 #ifdef PCM_STYLE_SOUND
-static void audio_config_read P((int, char **, char **));
-static int  mixer_name P((const char *, int));
+static void audio_config_read (int, char **, char **);
+static int  mixer_name (const char *, int);
 
 
 int

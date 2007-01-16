@@ -371,25 +371,25 @@ typedef u_int32 u_fp;
  * Prototypes
  */
 #if 0
-extern	char *	dofptoa		P((u_fp, int, short, int));
-extern	char *	dolfptoa	P((u_long, u_long, int, short, int));
+extern	char *	dofptoa		(u_fp, int, short, int);
+extern	char *	dolfptoa	(u_long, u_long, int, short, int);
 #endif
 
-extern	int	atolfp		P((const char *, l_fp *));
-extern	int	buftvtots	P((const char *, l_fp *));
-extern	char *	fptoa		P((s_fp, short));
-extern	char *	fptoms		P((s_fp, short));
-extern	int	hextolfp	P((const char *, l_fp *));
-extern  void    gpstolfp        P((int, int, unsigned long, l_fp *));
-extern	int	mstolfp		P((const char *, l_fp *));
-extern	char *	prettydate	P((l_fp *));
-extern	char *	gmprettydate	P((l_fp *));
-extern	char *	uglydate	P((l_fp *));
-extern  void    mfp_mul         P((int32 *, u_int32 *, int32, u_int32, int32, u_int32));
+extern	int	atolfp		(const char *, l_fp *);
+extern	int	buftvtots	(const char *, l_fp *);
+extern	char *	fptoa		(s_fp, short);
+extern	char *	fptoms		(s_fp, short);
+extern	int	hextolfp	(const char *, l_fp *);
+extern  void    gpstolfp        (int, int, unsigned long, l_fp *);
+extern	int	mstolfp		(const char *, l_fp *);
+extern	char *	prettydate	(l_fp *);
+extern	char *	gmprettydate	(l_fp *);
+extern	char *	uglydate	(l_fp *);
+extern  void    mfp_mul         (int32 *, u_int32 *, int32, u_int32, int32, u_int32);
 
-extern	void	get_systime	P((l_fp *));
-extern	int	step_systime	P((double));
-extern	int	adj_systime	P((double));
+extern	void	get_systime	(l_fp *);
+extern	int	step_systime	(double);
+extern	int	adj_systime	(double);
 
 #define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
 #define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))

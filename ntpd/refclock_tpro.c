@@ -42,9 +42,9 @@ struct tprounit {
 /*
  * Function prototypes
  */
-static	int	tpro_start	P((int, struct peer *));
-static	void	tpro_shutdown	P((int, struct peer *));
-static	void	tpro_poll	P((int unit, struct peer *));
+static	int	tpro_start	(int, struct peer *);
+static	void	tpro_shutdown	(int, struct peer *);
+static	void	tpro_poll	(int unit, struct peer *);
 
 /*
  * Transfer vector

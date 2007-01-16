@@ -121,7 +121,7 @@ extern	int	ntp_getopt	(int, char **, const char *);
  * Cryptodefines
  */
 #define	MD5KEYS		16	/* number of MD5 keys generated */
-#define	JAN_1970	ULONG_CONST(2208988800) /* NTP seconds */
+#define	JAN_1970	2208988800UL /* NTP seconds */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
 #define MAXFILENAME	256	/* max file name length */
 #define MAXHOSTNAME	256	/* max host name length */
