@@ -53,6 +53,7 @@ struct ntp_control {
 #define	CTL_OP_WRITECLOCK	5
 #define	CTL_OP_SETTRAP		6
 #define	CTL_OP_ASYNCMSG		7
+#define CTL_OP_CONFIGURE        8
 #define	CTL_OP_UNSETTRAP	31
 
 /*

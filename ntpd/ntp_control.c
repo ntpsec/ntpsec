@@ -77,6 +77,7 @@ static	void	read_clock_status (struct recvbuf *, int);
 static	void	write_clock_status (struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
+static	void	configure	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap (struct sockaddr_storage *,
 				    struct interface *);
 
