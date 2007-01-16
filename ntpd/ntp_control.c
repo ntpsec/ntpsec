@@ -11,6 +11,7 @@
 #include "ntp_control.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+#include "ntp_config.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -88,6 +89,7 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clock_status },
 	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
 	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
+        { CTL_OP_CONFIGURE,     AUTH, configure },
 	{ NO_REQUEST,		0 }
 };
 
@@ -2304,6 +2306,56 @@ write_variables(
 	  }
 	*/
 	ctl_flushpkt(0);
+}
+
+/* SK:
+ * configure: remotely configure an NTP daemon
+ */
+static void configure(struct recvbuf *rbufp,int restrict_mask)
+{
+    int data_count;
+    int retval;
+
+    /* I haven't yet implemented changes to an existing association.
+     * Hence check if the association id is 0
+     */
+    if (res_associd != 0) {
+        ctl_error(CERR_BADVALUE);
+        return;
+    }
+    
+    /* Initialize the remote config buffer */
+    data_count = reqend - reqpt;
+    memcpy(remote_config.buffer, reqpt, data_count);
+    remote_config.buffer[data_count++] = '\n';
+    remote_config.buffer[data_count] = '\0';
+    remote_config.pos = 0;
+    remote_config.err_pos = 0;
+    remote_config.no_errors = 0;
+
+    if (debug > 0)
+        printf("Got Remote Configuration Command: %s\n\n", remote_config.buffer);
+    config_remotely();
+
+    /* Check if errors were reported. If not, output 'Config Succeeded'
+     * Else output the error message
+     */
+    printf("No_Errors %d\n", remote_config.no_errors);
+    if (remote_config.no_errors == 0) {
+        retval = snprintf(remote_config.err_msg, MAXLINE, "Config Succeeded");
+        if (retval > 0) 
+            remote_config.err_pos += retval;
+    }
+    ctl_putdata(remote_config.err_msg, remote_config.err_pos, 0);
+
+//    datapt = remote_config.err_msg;
+//    dataend = remote_config.err_msg + remote_config.err_pos;
+//    datalinelen = remote_config.err_pos;
+//    datanotbinflag = 1;
+    
+//    printf("Reply: %s\n\nReply_len: %d\n\n", datapt, datalinelen);
+    
+    ctl_flushpkt(0);
 }
 
 

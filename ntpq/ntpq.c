@@ -1528,6 +1528,12 @@ docmd(
 /*
  * tokenize - turn a command line into tokens
  */
+
+
+/* SK:
+ * Modified to allow a quoted string 
+ */
+
 static void
 tokenize(
 	const char *line,
@@ -1547,14 +1553,25 @@ tokenize(
 		    cp++;
 		if (ISEOL(*cp))
 		    break;
-		do {
+
+                /* Check if the next token begins with a double quote.
+                 * If yes, continue reading till the next double quote
+                 */
+                if (*cp == '\"') {
+                    ++cp;
+                    do {
+                        *sp++ = *cp++;
+                    } while ((*cp != '\"') && !ISEOL(*cp));
+                }
+                else {
+                    do {
 			*sp++ = *cp++;
-		} while (!ISSPACE(*cp) && !ISEOL(*cp));
+                    } while ((*cp != '\"') && !ISSPACE(*cp) && !ISEOL(*cp));
+                }
 
 		*sp++ = '\0';
 	}
 }
-
 
 
 /*

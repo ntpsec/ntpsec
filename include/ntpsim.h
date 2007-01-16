@@ -1,9 +1,15 @@
-/*
- * ntpsim.h - Prototypes for ntpsim
+/* ntpsim.h
+ *
+ * The header file for the ntp discrete event simulator. 
+ *
+ * Written By: Sachin Kamboj
+ *             University of Delaware
+ *             Newark, DE 19711
+ * Copyright (c) 2006
  */
 
-#ifndef __ntpsim_h
-#define __ntpsim_h
+#ifndef __NTPSIM_H__
+#define __NTPSIM_H__
 
 #include <stdio.h>
 #include <math.h>
@@ -19,75 +25,120 @@
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
 
-#define PI 3.1415926535
+/* #include "config.tab.h"*/         /* Bison generated header file for flex */
+#include "ntp_data_structures.h"
 
-/*
- * ntpsim declarations
+/* CONSTANTS */
+
+#define PI 3.1415926535         /* The world's most famous constant */
+#define SIM_TIME 86400		/* end simulation time */
+#define NET_DLY .001            /* network delay */
+#define PROC_DLY .001		/* processing delay */
+#define BEEP_DLY 3600           /* beep interval (s) */
+#define	SLEW	500e-6		/* correction rate (PPM) */
+
+
+/* Discrete Event Queue
+ * --------------------
+ * The NTP simulator is a discrete event simulator.
+ *
+ * Central to this simulator is an event queue which is a priority queue
+ * in which the "priority" is given by the time of arrival of the event.
+ *
+ * A discrete set of events can happen and are stored in the queue to arrive
+ * at a particular time.
  */
+
+/* Possible Discrete Events */
+
 typedef enum {
-        BEEP, CLOCK, TIMER, PACKET
+    BEEP,          /* Event to record simulator stats */
+    CLOCK,         /* Event to advance the clock to the specified time */
+    TIMER,         /* Event that designates a timer interrupt. */
+    PACKET         /* Event that designates arrival of a packet */
 } funcTkn;
 
+
+/* Event information */
+
 typedef struct {
-        double time;
-        union {
-                struct pkt evnt_pkt;
-		struct recvbuf evnt_buf;
-        } buffer;
+    double time;       /* Time at which event occurred */
+    funcTkn function;  /* Type of event that occured */
+    union {
+        struct pkt evnt_pkt;
+        struct recvbuf evnt_buf;
+    } buffer;          /* Other data associated with the event */
 #define ntp_pkt buffer.evnt_pkt
 #define rcv_buf buffer.evnt_buf
-        funcTkn function;
 } Event;
 
-typedef struct List {
-        Event event;
-        struct List *next;
-} *Queue;
 
-typedef struct nde {
-        double	time;			/* simulation time */
-	double	sim_time;		/* end simulation time */
-	double	ntp_time;		/* client disciplined time */
-	double	adj;			/* remaining time correction */
-	double	slew;			/* correction slew rate */
+/* Server Script Information */
 
-	double	clk_time;		/* server time */
-	double	ferr;			/* frequency errort */
-	double	fnse;			/* random walk noise */
-	double	ndly;			/* network delay */
-	double	snse;			/* phase noise */
-	double	pdly;			/* processing delay */
-	double	bdly;			/* beep interval */
+typedef struct {
+    double duration;
+ // double time_offset;
+    double freq_offset;
+    double wander;
+    double jitter; 
+    double prop_delay;
+    double proc_delay;
+} script_info;   
 
-	double	last_time;		/* last clock read time */
-        Queue	events;			/* Node Event Queue */
-	struct recvbuf *rbuflist;	/* Node Receive Buffer */
-} Node;
 
-/*
- * Function prototypes
- */
-int	ntpsim		(int argc, char *argv[]);
-Event	event		(double, funcTkn);
-Queue	queue		(Event, Queue );
-Node	node		(void);
-void	push		(Event, Queue *);
-Event	pop		(Queue *);
-void	ndbeep		(Node *, Event);
-void	ndeclk		(Node *, Event);
-void	ntptmr		(Node *, Event);
-void	netpkt		(Node *, Event);
-int	srvr_rply	(Node *, struct sockaddr_storage *,
-			    struct interface *, struct pkt *);
-double	gauss		(double, double);
-double	poisson		(double, double);
-int	node_clock	(Node *, double);
-void	abortsim	(char *);
 
-/*
- * The global Node
- */
-Node ntp_node;
+/* Server Structures */
+
+typedef struct {
+    double server_time;             /* Server time */
+    struct sockaddr_storage *addr;  /* Server Address */
+    queue *script;                  /* Server Script */
+    script_info *curr_script;       /* Current Script */
+} server_info;
+
+
+/* Simulation control information */
+
+typedef struct Sim_Info {
+    double sim_time;      /* Time in the simulation */
+    double end_time;      /* Time at which simulation needs to be ended */
+    double beep_delay;    /* Delay between simulation "beeps" at which
+                             simulation  stats are recorded. */
+    int num_of_servers;   /* Number of servers in the simulation */
+    server_info *servers; /* Pointer to array of servers */
+} sim_info;
+
+
+/* Local Clock (Client) Variables */
+
+typedef struct Local_Clock_Info {
+    double local_time;     /* Client disciplined time */
+    double adj;            /* Remaining time correction */
+    double slew;           /* Correction Slew Rate */
+    double last_read_time; /* Last time the clock was read */
+} local_clock_info;
+
+extern local_clock_info simclock;   /* Local Clock Variables */
+extern sim_info simulation;         /* Simulation Control Variables */
+
+/* Function Prototypes */
+
+Event    *event                  (double t, funcTkn f);
+void     sim_event_timer         (Event *e);
+int      simulate_server         (struct sockaddr_storage *serv_addr,
+				  struct interface *inter,
+				  struct pkt *rpkt);
+void     sim_update_clocks       (Event *e);
+void     sim_event_recv_packet   (Event *e);
+void     sim_event_beep          (Event *e);
+void     abortsim                (char *errmsg);
+double	 gauss		         (double, double);
+double	 poisson		 (double, double);
+int      yyparse                 (void);
+void     create_server_associations (void);
+
 
 #endif
+
+
 

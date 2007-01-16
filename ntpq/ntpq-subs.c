@@ -63,6 +63,8 @@ static	void	lpeers		(struct parse *, FILE *);
 static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
+static  void    config          (struct parse *, FILE *);
+static  void    config_from_file (struct parse *, FILE *);
 
 
 /*
@@ -150,6 +152,12 @@ struct xcmd opcmds[] = {
 	{ "lopeers", lopeers,   { OPT|IP_VERSION, NO, NO, NO },
 	  { "-4|-6", "", "", "" },
 	  "obtain and print a list of all peers and clients showing dstadr [IP version]" },
+	{ "config", config,   { NTP_STR, NO, NO, NO },
+	  { "<configuration command>", "", "", "" },
+	  "send a remote configuration command to ntpd" },
+        { "config-from-file", config_from_file, { NTP_STR, NO, NO, NO },
+          { "<configuration filename>", "", "", "" },
+          "configure ntpd using the configuration filename" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -158,6 +166,7 @@ struct xcmd opcmds[] = {
 /*
  * Variable list data space
  */
+#define MAXLINE     512  /* maximum length of a line */
 #define MAXLIST 	64	/* maximum number of variables in list */
 #define LENHOSTNAME 256 /* host name is 256 characters long */
 /*
@@ -1765,4 +1774,85 @@ lopeers(
 			af = AF_INET;
 	}
 	doopeers(1, fp, af);
+}
+
+
+/* 
+ * config - send a configuration command to a remote host
+ */
+static void 
+config (
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    u_short rstatus;
+    int rsize;
+    char *rdata;
+    int res;
+
+    if (debug > 2) {
+        printf("In Config\n");
+        printf("Keyword = %s\n", pcmd->keyword);
+        printf("Command = %s\n", pcmd->argval[0].string);
+    }
+    
+    res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(pcmd->argval[0].string),
+                  pcmd->argval[0].string, &rstatus,
+                  &rsize, &rdata);
+    rdata[rsize] = '\0';
+    printf("%s\n", rdata);
+
+}
+
+/* 
+ * config_from_file - remotely configure an ntpd daemon using the
+ * specified configuration file
+ * SK: This function is a kludge at best and is full of bad design
+ * bugs:
+ * 1. ntpq uses UDP, which means that there is no guarantee of in-order,
+ *    error-free delivery. 
+ * 2. The maximum length of a packet is constrained, and as a result, the
+ *    maximum length of a line in a configuration file is constrained. 
+ *    Longer lines will lead to unpredictable results.
+ * 3. Since this function is sending a line at a time, we can't update
+ *    the control key through the configuration file (YUCK!!)
+ */
+static void 
+config_from_file (
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    u_short rstatus;
+    int rsize;
+    char *rdata;
+    int res;
+    FILE *config_fd;
+    char config_cmd[MAXLINE];
+
+    if (debug > 2) {
+        printf("In Config\n");
+        printf("Keyword = %s\n", pcmd->keyword);
+        printf("Filename = %s\n", pcmd->argval[0].string);
+    }
+
+    if ((config_fd = fopen(pcmd->argval[0].string, "r")) == NULL) {
+        printf("ERROR!! Couldn't open file: %s\n", pcmd->argval[0].string);
+    } 
+    else {
+        int i = 0;
+        printf("Sending configuration file, one line at a time.\n");
+        while (fgets(config_cmd, MAXLINE, config_fd) != NULL) {
+            ++i;
+            res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(config_cmd),
+                          config_cmd, &rstatus,
+                          &rsize, &rdata);
+            printf("Line No: %d ", i);
+            rdata[rsize] = '\0';
+            printf(rdata);
+        }
+        printf("Done sending file\n");
+        fclose(config_fd);
+    }
 }

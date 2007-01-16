@@ -1,6 +1,14 @@
-/*
- * ntp_config.c - read and apply configuration information
+/* ntp_config.c
+ *
+ * This file contains the ntpd configuration code.
+ *
+ * Written By: Sachin Kamboj
+ *             University of Delaware
+ *             Newark, DE 19711
+ * Some parts borrowed from the older ntp_config.c
+ * Copyright (c) 2006
  */
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -15,6 +23,7 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
+#include "ntpsim.h"
 #include <ntp_random.h>
 #include <isc/net.h>
 #include <isc/result.h>
@@ -47,247 +56,10 @@ HANDLE ResolverThreadHandle = NULL;
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
+#include "ntp_data_structures.h"
+
 extern int priority_done;
 
-/*
- * These routines are used to read the configuration file at
- * startup time.  An entry in the file must fit on a single line.
- * Entries are processed as multiple tokens separated by white space
- * Lines are considered terminated when a '#' is encountered.  Blank
- * lines are ignored.
- */
-/*
- * Translation table - keywords to function index
- */
-struct keyword {
-	const char *text;
-	int keytype;
-};
-
-/*
- * Command keywords
- */
-static	struct keyword keywords[] = {
-	{ "automax",		CONFIG_AUTOMAX },
-	{ "broadcast",		CONFIG_BROADCAST },
-	{ "broadcastclient",	CONFIG_BROADCASTCLIENT },
-	{ "broadcastdelay",	CONFIG_BDELAY },
-	{ "calldelay",		CONFIG_CDELAY},
-#ifdef OPENSSL
-	{ "crypto",		CONFIG_CRYPTO },
-#endif /* OPENSSL */
-	{ "controlkey",		CONFIG_CONTROLKEY },
-	{ "disable",		CONFIG_DISABLE },
-	{ "driftfile",		CONFIG_DRIFTFILE },
-	{ "enable",		CONFIG_ENABLE },
-	{ "end",		CONFIG_END },
-	{ "filegen",		CONFIG_FILEGEN },
-	{ "fudge",		CONFIG_FUDGE },
-	{ "includefile",	CONFIG_INCLUDEFILE },
-	{ "keys",		CONFIG_KEYS },
-	{ "keysdir",		CONFIG_KEYSDIR },
-	{ "logconfig",		CONFIG_LOGCONFIG },
-	{ "logfile",		CONFIG_LOGFILE },
-	{ "manycastclient",	CONFIG_MANYCASTCLIENT },
-	{ "manycastserver",	CONFIG_MANYCASTSERVER },
-	{ "multicastclient",	CONFIG_MULTICASTCLIENT },
-	{ "peer",		CONFIG_PEER },
-	{ "phone",		CONFIG_PHONE },
-	{ "pidfile",		CONFIG_PIDFILE },
-	{ "discard",		CONFIG_DISCARD },
-	{ "requestkey",		CONFIG_REQUESTKEY },
-	{ "restrict",		CONFIG_RESTRICT },
-	{ "revoke",		CONFIG_REVOKE },
-	{ "server",		CONFIG_SERVER },
-	{ "setvar",		CONFIG_SETVAR },
-	{ "statistics",		CONFIG_STATISTICS },
-	{ "statsdir",		CONFIG_STATSDIR },
-	{ "tick",		CONFIG_ADJ },
-	{ "tinker",		CONFIG_TINKER },
-	{ "tos",		CONFIG_TOS },
-	{ "trap",		CONFIG_TRAP },
-	{ "trustedkey",		CONFIG_TRUSTEDKEY },
-	{ "ttl",		CONFIG_TTL },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "peer", "server", "broadcast" modifier keywords
- */
-static	struct keyword mod_keywords[] = {
-	{ "autokey",		CONF_MOD_SKEY },
-	{ "burst",		CONF_MOD_BURST },
-	{ "iburst",		CONF_MOD_IBURST },
-	{ "key",		CONF_MOD_KEY },
-	{ "maxpoll",		CONF_MOD_MAXPOLL },
-	{ "minpoll",		CONF_MOD_MINPOLL },
-	{ "mode",		CONF_MOD_MODE },    /* refclocks */
-	{ "noselect",		CONF_MOD_NOSELECT },
-	{ "preempt",		CONF_MOD_PREEMPT },
-	{ "true",		CONF_MOD_TRUE },
-	{ "prefer",		CONF_MOD_PREFER },
-	{ "ttl",		CONF_MOD_TTL },     /* NTP peers */
-	{ "version",		CONF_MOD_VERSION },
-	{ "dynamic",		CONF_MOD_DYNAMIC },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "restrict" modifier keywords
- */
-static	struct keyword res_keywords[] = {
-	{ "ignore",		CONF_RES_IGNORE },
-	{ "limited",		CONF_RES_LIMITED },
-	{ "kod",		CONF_RES_DEMOBILIZE },
-	{ "lowpriotrap",	CONF_RES_LPTRAP },
-	{ "mask",		CONF_RES_MASK },
-	{ "nomodify",		CONF_RES_NOMODIFY },
-	{ "nopeer",		CONF_RES_NOPEER },
-	{ "noquery",		CONF_RES_NOQUERY },
-	{ "noserve",		CONF_RES_NOSERVE },
-	{ "notrap",		CONF_RES_NOTRAP },
-	{ "notrust",		CONF_RES_NOTRUST },
-	{ "ntpport",		CONF_RES_NTPPORT },
-	{ "version",		CONF_RES_VERSION },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "trap" modifier keywords
- */
-static	struct keyword trap_keywords[] = {
-	{ "port",		CONF_TRAP_PORT },
-	{ "interface",		CONF_TRAP_INTERFACE },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "fudge" modifier keywords
- */
-static	struct keyword fudge_keywords[] = {
-	{ "flag1",		CONF_FDG_FLAG1 },
-	{ "flag2",		CONF_FDG_FLAG2 },
-	{ "flag3",		CONF_FDG_FLAG3 },
-	{ "flag4",		CONF_FDG_FLAG4 },
-	{ "refid",		CONF_FDG_REFID }, /* this mapping should be cleaned up (endianness, \0) - kd 20041031 */
-	{ "stratum",		CONF_FDG_STRATUM },
-	{ "time1",		CONF_FDG_TIME1 },
-	{ "time2",		CONF_FDG_TIME2 },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "filegen" modifier keywords
- */
-static	struct keyword filegen_keywords[] = {
-	{ "disable",		CONF_FGEN_FLAG_DISABLE },
-	{ "enable",		CONF_FGEN_FLAG_ENABLE },
-	{ "file",		CONF_FGEN_FILE },
-	{ "link",		CONF_FGEN_FLAG_LINK },
-	{ "nolink",		CONF_FGEN_FLAG_NOLINK },
-	{ "type",		CONF_FGEN_TYPE },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "type" modifier keywords
- */
-static	struct keyword fgen_types[] = {
-	{ "age",		FILEGEN_AGE   },
-	{ "day",		FILEGEN_DAY   },
-	{ "month",		FILEGEN_MONTH },
-	{ "none",		FILEGEN_NONE  },
-	{ "pid",		FILEGEN_PID   },
-	{ "week",		FILEGEN_WEEK  },
-	{ "year",		FILEGEN_YEAR  },
-	{ "",			CONFIG_UNKNOWN}
-};
-
-/*
- * "enable", "disable" modifier keywords
- */
-static struct keyword flags_keywords[] = {
-	{ "auth",		PROTO_AUTHENTICATE },
-	{ "bclient",		PROTO_BROADCLIENT },
-	{ "calibrate",		PROTO_CAL },
-	{ "kernel",		PROTO_KERNEL },
-	{ "monitor",		PROTO_MONITOR },
-	{ "ntp",		PROTO_NTP },
-	{ "stats",		PROTO_FILEGEN },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "discard" modifier keywords
- */
-static struct keyword discard_keywords[] = {
-	{ "average",		CONF_DISCARD_AVERAGE },
-	{ "minimum",		CONF_DISCARD_MINIMUM },
-	{ "monitor",		CONF_DISCARD_MONITOR },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "tinker" modifier keywords
- */
-static struct keyword tinker_keywords[] = {
-	{ "step",		CONF_CLOCK_MAX },
-	{ "panic",		CONF_CLOCK_PANIC },
-	{ "dispersion",		CONF_CLOCK_PHI },
-	{ "stepout",		CONF_CLOCK_MINSTEP },
-	{ "allan",		CONF_CLOCK_ALLAN },
-	{ "huffpuff",		CONF_CLOCK_HUFFPUFF },
-	{ "freq",		CONF_CLOCK_FREQ },
-	{ "codec",		CONF_CLOCK_CODEC },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-/*
- * "tos" modifier keywords
- */
-static struct keyword tos_keywords[] = {
-	{ "minclock",		CONF_TOS_MINCLOCK },
-	{ "maxclock",		CONF_TOS_MAXCLOCK },
-	{ "minsane",		CONF_TOS_MINSANE },
-	{ "floor",		CONF_TOS_FLOOR },
-	{ "ceiling",		CONF_TOS_CEILING },
-	{ "cohort",		CONF_TOS_COHORT },
-	{ "mindist",		CONF_TOS_MINDISP },
-	{ "maxdist",		CONF_TOS_MAXDIST },
-	{ "maxhop",		CONF_TOS_MAXHOP },
-	{ "beacon",		CONF_TOS_BEACON },
-	{ "orphan",		CONF_TOS_ORPHAN },
-	{ "",			CONFIG_UNKNOWN }
-};
-
-#ifdef OPENSSL
-/*
- * "crypto" modifier keywords
- */
-static struct keyword crypto_keywords[] = {
-	{ "cert",		CONF_CRYPTO_CERT },
-	{ "gqpar",		CONF_CRYPTO_GQPAR },
-	{ "host",		CONF_CRYPTO_RSA },
-	{ "ident",		CONF_CRYPTO_IDENT },
-	{ "iffpar",		CONF_CRYPTO_IFFPAR },
-	{ "leap",		CONF_CRYPTO_LEAP },
-	{ "mvpar",		CONF_CRYPTO_MVPAR },
-	{ "pw",			CONF_CRYPTO_PW },
-	{ "randfile",		CONF_CRYPTO_RAND },
-	{ "sign",		CONF_CRYPTO_SIGN },
-	{ "",			CONFIG_UNKNOWN }
-};
-#endif /* OPENSSL */
-
-/*
- * Address type selection, IPv4 or IPv4.
- * Used on various lines.
- */
-static struct keyword addr_type[] = {
-	{ "-4",			CONF_ADDR_IPV4 },
-	{ "-6",			CONF_ADDR_IPV6 },
-	{ "",			CONFIG_UNKNOWN }
-};
 
 /*
  * "logconfig" building blocks
@@ -322,10 +94,7 @@ static struct masks logcfg_item[] = {
 	{ (char *)0,	0 }
 };
 
-/*
- * Limits on things
- */
-#define MAXTOKENS	20	/* 20 tokens on line */
+/* Limits */
 #define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	10	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
@@ -391,33 +160,1792 @@ struct netinfo_config_state {
 };
 #endif
 
-/*
- * Function prototypes
- */
-static	unsigned long get_pfxmatch (char **, struct masks *);
-static	unsigned long get_match (char *, struct masks *);
-static	unsigned long get_logmask (char *);
-#ifdef HAVE_NETINFO
-static	struct netinfo_config_state *get_netinfo_config (void);
-static	void free_netinfo_config (struct netinfo_config_state *);
-static	int gettokens_netinfo (struct netinfo_config_state *, char **, int *);
-#endif
-static	int gettokens (FILE *, char *, char **, int *);
-static	int matchkey (char *, struct keyword *, int);
+struct FILE_INFO *fp[MAXINCLUDELEVEL];
+int curr_include_level;      /* The current include level */
+struct config_tree my_config;/* Root of the configuration tree */
+struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
+struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
+                                             pointer info */
+int input_from_file = 1;     /* A boolean flag, which when set, indicates that
+                                the input is to be taken from the configuration
+                                file, instead of the remote-configuration buffer
+                             */
+/* int newline_is_special = 1; */ /* A boolean flag, which when set, implies that
+                                newlines are special characters that need to
+                                be returned as tokens */
+int old_config_style = 1;    /* A boolean flag, which when set, indicates that the
+                              * old configuration format with a newline at the end
+                              * of every command is being used
+                              */
+
+extern int sys_maxclock;
+
+/* FUNCTION PROTOTYPES */
+
+struct FILE_INFO *F_OPEN(const char *path, const char *mode);
+int FGETC(struct FILE_INFO *stream);
+int UNGETC(int ch, struct FILE_INFO *stream);
+int FCLOSE(struct FILE_INFO *stream);
+
+int get_next_char();
+void push_back_char(int ch);
+
+static struct state *create_states(char *keyword,int token,int expect_string, struct state *pre_state);
+//static struct state *create_keyword_scanner(struct key_tok *keyword_list);
+static void delete_keyword_scanner(struct state *key_scanner);
+void print_keyword_scanner(struct state *key_scanner, int pos);
+int yylex(void);
+
+void yyerror (char *msg);
+static int get_flags_from_list(queue *flag_list);
+static void init_auth_node(void);
+static void init_syntax_tree(void);
+queue *enqueue_in_new_queue(void *my_node);
+struct attr_val *create_attr_dval(int attr, double value);
+struct attr_val *create_attr_ival(int attr, int value);
+struct attr_val *create_attr_sval(int attr, char *s);
+struct attr_val *create_attr_pval(int attr, void *s);
+int *create_ival(int val);
+double *create_dval(double val);
+void **create_pval(void *val);
+struct address_node *create_address_node(char *addr, int type);
+struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
+struct filegen_node *create_filegen_node(void **name, queue *options);
+struct restrict_node *create_restrict_node(struct address_node *addr,struct address_node *mask,queue *flags, int line_no);
+void destroy_restrict_node(struct restrict_node *my_node);
+struct setvar_node *create_setvar_node(char *var, char *val, u_short def);
+struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *options);
+script_info *create_sim_script_info(double duration, queue *script_queue);
+static struct sockaddr_storage *get_next_address(struct address_node *addr);
+server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
+struct sim_node *create_sim_node(queue *init_opts, queue *servers);
+
+static void config_other_modes(void);
+static void config_auth(void);
+static void config_tos(void);
+static void config_monitor(void);
+static void config_access(void);
+static void config_tinker(void);
+static void config_system_opts(void);
+static void config_logconfig(void);
+static void config_phone(void);
+static void config_setvar(void);
+static void config_ttl(void);
+static void config_trap(void);
+static void config_fudge(void);
+static void config_vars(void);
+static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
+static int get_correct_host_mode(int hmode);
+static void config_peers(void);
+static void config_sim(void);
+static void config_ntpd(void);
+static void config_ntpdsim(void);
+void getconfig(int argc,char *argv[]);
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
 	t_MSK,		/* Network Mask */
 	};
-static	int getnetnum (const char *, struct sockaddr_storage *, int,
-			 enum gnn_type);
-static	void save_resolve (char *, int, int, int, int, u_int, int,
-    keyid_t, u_char *);
-static	void do_resolve_internal (void);
-static	void abort_resolve (void);
-#if !defined(VMS) && !defined(SYS_WINNT)
-static	RETSIGTYPE catchchild (int);
-#endif /* VMS */
+
+static unsigned long get_pfxmatch(char **s,struct masks *m);
+static unsigned long get_match(char *s,struct masks *m);
+static unsigned long get_logmask(char *s);
+static int getnetnum(const char *num,struct sockaddr_storage *addr,int complain,enum gnn_type a_type);
+static int get_multiple_netnums(const char *num, struct sockaddr_storage *addr, struct addrinfo **res, int complain, enum gnn_type a_type);
+static void save_resolve(char *name,int mode,int version,int minpoll,int maxpoll,u_int flags,int ttl,keyid_t keyid,u_char *keystr);
+static void abort_resolve(void);
+static void do_resolve_internal(void);
+
+
+
+/* INCLUSION OF CODE FOR THE DATA STRUCTURES
+ * -----------------------------------------
+ */
+
+#include "ntp_data_structures.c"
+
+/* INCLUSION OF BISON GENERATED FILE
+ * ---------------------------------
+ */
+#include "ntp_config.tab.c"
+
+
+/* FUNCTIONS FOR INITIALIZATION
+ * ----------------------------
+ */
+
+static int get_flags_from_list(queue *flag_list)
+{
+    int flags = 0;
+    struct attr_val *curr_flag;
+    
+    while (!empty(flag_list)) {
+        curr_flag = (struct attr_val *) dequeue(flag_list);
+        flags |= curr_flag->value.i;
+        free_node(curr_flag);
+    }
+    return flags;
+}
+
+static void init_auth_node()
+{
+    my_config.auth.autokey = 0;
+    my_config.auth.control_key = 0;
+    my_config.auth.crypto_cmd_list = NULL;
+    my_config.auth.keys = NULL;
+    my_config.auth.keysdir = NULL;
+    my_config.auth.requested_key = 0;
+    my_config.auth.revoke = 0;
+    my_config.auth.trusted_key_list = NULL;
+}
+
+static void init_syntax_tree()
+{
+    my_config.peers = create_queue();
+    my_config.orphan_cmds = create_queue();
+    
+    my_config.broadcastclient = 0;
+    my_config.manycastserver = create_queue();
+    my_config.multicastclient = create_queue();
+
+    my_config.stats_list = create_queue();
+    my_config.stats_dir = NULL;
+    my_config.filegen_opts = create_queue();
+
+    my_config.discard_opts = create_queue();
+    my_config.restrict_opts = create_queue();
+
+    my_config.enable_opts = create_queue();
+    my_config.disable_opts = create_queue();
+    my_config.tinker = create_queue();
+    my_config.fudge = create_queue();
+
+    my_config.logconfig = create_queue();
+    my_config.phone = create_queue();
+    my_config.setvar = create_queue();
+    my_config.ttl = create_queue();
+    my_config.trap = create_queue();
+    my_config.vars = create_queue();
+    my_config.sim_details = NULL;
+    init_auth_node();
+}
+
+/* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE 
+ * -----------------------------------------------
+ */
+
+queue *enqueue_in_new_queue(void *my_node)
+{ 
+    queue *my_queue = create_queue();
+    enqueue(my_queue, my_node);
+    return my_queue;
+}
+
+struct attr_val *create_attr_dval(int attr, double value)
+{
+    struct attr_val *my_val;
+    my_val = (struct attr_val *)
+        get_node(sizeof(struct attr_val));
+    my_val->attr = attr;
+    my_val->value.d = value;
+    my_val->type = T_Double;
+    return my_val;
+}
+
+struct attr_val *create_attr_ival(int attr, int value)
+{
+    struct attr_val *my_val;
+    my_val = (struct attr_val *)
+        get_node(sizeof(struct attr_val));
+    my_val->attr = attr;
+    my_val->value.i = value;
+    my_val->type = T_Integer;
+    return my_val;
+}
+
+struct attr_val *create_attr_sval(int attr, char *s)
+{
+    struct attr_val *my_val;
+    my_val = (struct attr_val *)
+        get_node(sizeof(struct attr_val));
+    my_val->attr = attr;
+    my_val->value.s = s;
+    my_val->type = T_String;
+    return my_val;
+}
+
+struct attr_val *create_attr_pval(int attr, void *p)
+{
+    struct attr_val *my_val;
+    my_val = (struct attr_val *)
+        get_node(sizeof(struct attr_val));
+    my_val->attr = attr;
+    my_val->value.p = p;
+    my_val->type = T_Void;
+    return my_val;
+}
+
+int *create_ival(int val)
+{
+    int *p = (int *)get_node(sizeof(int));
+    *p = val;
+    return p;
+}
+
+double *create_dval(double val)
+{
+    double *p = (double *) get_node(sizeof(int));
+    *p = val;
+    return p;
+}
+
+void **create_pval(void *val)
+{
+    void **p = (void **) get_node(sizeof(void *));
+    *p = val;
+    return p;
+}
+
+struct address_node *create_address_node(char *addr, int type)
+{
+    struct address_node *my_node = (struct address_node *) 
+        get_node(sizeof(struct address_node));
+    my_node->address = addr;
+    my_node->type = type;
+    return my_node;
+}
+
+struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options)
+{
+    struct peer_node* my_node;
+    int errflag = 0;
+
+    my_node = (struct peer_node *)
+        get_node(sizeof(struct peer_node));
+
+    /* Initialze node values to default */
+    my_node->minpoll = NTP_MINDPOLL;
+    my_node->maxpoll = NTP_MAXDPOLL;
+    my_node->ttl = 0;
+    my_node->peerversion = NTP_VERSION;
+    my_node->peerkey = 0;
+    my_node->peerflags = 0;
+
+    /* Now set the node to the read values */
+    my_node->host_mode = hmode;
+    my_node->addr = addr;
+    
+    while (options && !empty(options)) {
+        struct attr_val *my_val = dequeue(options);
+
+        /* Check the kind of option being set */
+        switch(my_val->attr) { 
+        case T_Minpoll:
+            if (my_val->value.i < NTP_MINPOLL) {
+                msyslog(LOG_INFO,
+                        "minpoll: provided value (%d) is below minimum (%d)",
+                        my_val->value.i, NTP_MINPOLL);
+                my_node->minpoll = NTP_MINPOLL;
+            }
+            else
+                my_node->minpoll = my_val->value.i;
+            break;
+        case T_Maxpoll:
+            if (my_val->value.i > NTP_MAXPOLL) {
+                msyslog(LOG_INFO,
+                        "maxpoll: provided value (%d) is above maximum (%d)",
+                         my_val->value.i, NTP_MAXPOLL);
+                my_node->maxpoll = NTP_MAXPOLL;
+            }
+            else
+                my_node->maxpoll = my_val->value.i;
+            break;
+        case T_Ttl:
+            if (my_node->ttl >= MAX_TTL) {
+                msyslog(LOG_ERR, "ttl: invalid argument");
+                errflag = 1;
+            } 
+            else
+                my_node->ttl = my_val->value.i;
+            break;
+        case T_Mode:
+            my_node->ttl = my_val->value.i;
+            break;
+        case T_Key:
+            my_node->peerkey = my_val->value.i;
+            my_node->peerflags |=  FLAG_AUTHENABLE;
+            break;
+        case T_Version:
+            my_node->peerversion = my_val->value.i;
+            break;
+        case T_Flag:
+            my_node->peerflags |= my_val->value.i;
+            break;
+        }
+        free_node(my_val);
+    }
+    if (options)
+        destroy_queue(options);
+    
+    /* Check if errors were reported. If yes, ignore the node */
+    if (errflag) {
+        free_node(my_node);
+        return NULL;
+    }
+    return my_node;
+}
+
+struct filegen_node *create_filegen_node(
+    void **name, 
+    queue *options)
+{
+    struct filegen_node *my_node = (struct filegen_node *)
+        get_node(sizeof(struct filegen_node));
+
+    my_node->name = (char *) *name;
+    free_node(name);
+
+    my_node->options = options;
+    return my_node;
+}
+
+
+struct restrict_node *create_restrict_node(
+    struct address_node *addr,
+    struct address_node *mask,
+    queue *flags,
+    int line_no)
+{
+    struct restrict_node *my_node = (struct restrict_node *)
+        get_node(sizeof(struct restrict_node));
+    my_node->addr = addr;
+    my_node->mask = mask;
+    my_node->flags = flags;
+    my_node->line_no = line_no;
+    return my_node;
+}
+
+void destroy_restrict_node(struct restrict_node *my_node)
+{
+    /* With great care, free all the memory occupied by
+     * the restrict node
+     */
+    if (my_node->addr)
+        free_node(my_node->addr);
+    if (my_node->mask)
+        free_node(my_node->mask);
+    if (my_node->flags)
+        destroy_queue(my_node->flags);
+    free_node(my_node);
+}
+
+
+struct setvar_node *create_setvar_node(char *var, char *val, u_short def)
+{
+    int len1 = strlen(var);
+    int len2 = strlen(val);
+    
+    char *s = (char *) emalloc(len1 + len2 + 2);
+    struct setvar_node *my_node;
+    
+    /* Copy the var = val to s */
+    strcpy(s, var);
+    s[len1] = '=';
+    strcpy(&s[len1 + 1], val);
+    s[len1+len2+1] = '\0';
+    
+    free(var);
+    free(val);
+
+    /* Now store the string and its length into a setvar_node */
+    my_node = (struct setvar_node *)
+        get_node(sizeof(struct setvar_node));
+    my_node->data = s;
+    my_node->len = len1 + len2 + 2;
+    my_node->def = def;
+    return my_node;
+}
+
+struct addr_opts_node *create_addr_opts_node(
+    struct address_node *addr, 
+    queue *options)
+{
+    struct addr_opts_node *my_node = (struct addr_opts_node *)
+        get_node(sizeof(struct addr_opts_node));
+    my_node->addr = addr;
+    my_node->options = options;
+    return my_node;
+}
+
+script_info *create_sim_script_info(double duration, queue *script_queue)
+{
+    script_info *my_info;
+    struct attr_val *my_attr_val;
+    my_info = (script_info *)get_node(sizeof(script_info));
+
+    /* Initialize Script Info with default values*/
+    my_info->duration = duration;
+    my_info->freq_offset = 0;
+    my_info->wander = 0;
+    my_info->jitter = 0;
+    my_info->prop_delay = NET_DLY;
+    my_info->proc_delay = PROC_DLY;
+
+    /* Traverse the script_queue and fill out non-default values */
+    while (!empty(script_queue)) {
+        my_attr_val = (struct attr_val *) dequeue(script_queue);
+        
+        /* Set the desired value */
+        switch(my_attr_val->attr) {
+        case T_Freq_Offset:
+            my_info->freq_offset = my_attr_val->value.d;
+            break;
+        case T_Wander:
+            my_info->wander = my_attr_val->value.d;
+            break;
+        case T_Jitter:
+            my_info->jitter = my_attr_val->value.d;
+            break;
+        case T_Prop_Delay:
+            my_info->prop_delay = my_attr_val->value.d;
+            break;
+        case T_Proc_Delay:
+            my_info->proc_delay = my_attr_val->value.d;
+            break;
+        default:
+            yyerror("ERROR!! Invalid script info in file\n");
+            break;
+        }
+        free_node(my_attr_val);
+    }
+    destroy_queue(script_queue);
+    return (my_info);
+}
+
+
+#define ADDR_LENGTH 16 + 1
+
+static struct sockaddr_storage *get_next_address(struct address_node *addr)
+{
+    static char *addr_prefix = "192.168.0.";
+    static int curr_addr_no = 1;
+    char addr_string[ADDR_LENGTH];
+
+    struct sockaddr_storage *final_addr = (struct sockaddr_storage *) 
+        malloc(sizeof(struct sockaddr_storage));
+    struct addrinfo *ptr;
+    int retval;
+    
+    if (addr->type == T_String) {
+        snprintf(addr_string, ADDR_LENGTH, "%s%d", addr_prefix, curr_addr_no++);
+        printf("Selecting ip address %s for hostname %s\n", addr_string, addr->address);
+        retval = getaddrinfo(addr_string, "ntp", NULL, &ptr);
+    }
+    else {
+        retval = getaddrinfo(addr->address, "ntp", NULL, &ptr);
+    }
+    
+    if (retval == 0) {
+        memcpy(final_addr, ptr->ai_addr, ptr->ai_addrlen);
+        fprintf(stderr, "Successful in setting ip address of simulated server to: %s\n", stoa(final_addr));
+    }
+    else {
+        fprintf(stderr, "ERROR!! Could not get a new address\n");
+        exit(1);
+    }
+    freeaddrinfo(ptr);
+    return final_addr;
+}
+    
+
+server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script)
+{
+    server_info *my_info;
+    my_info = (server_info *) get_node(sizeof(server_info));
+
+    my_info->server_time = server_offset;
+    my_info->addr = get_next_address(addr);
+    my_info->script = script;
+    my_info->curr_script = dequeue(my_info->script);
+    return my_info;
+}
+
+struct sim_node *create_sim_node(queue *init_opts, queue *servers)
+{
+    struct sim_node *my_node = (struct sim_node *) 
+        get_node(sizeof(struct sim_node));
+    my_node->init_opts = init_opts;
+    my_node->servers = servers;
+    return my_node;
+}
+
+
+/* INCLUSION OF SCANNER FILE 
+ * -------------------------
+ */
+
+#include "ntp_scanner.c"
+
+struct key_tok keyword_list[] = {
+    { "automax",	T_Automax,         NO_ARG },
+    { "broadcast",	T_Broadcast,       SINGLE_ARG },
+    { "broadcastclient",T_Broadcastclient, NO_ARG },
+    { "broadcastdelay",	T_Broadcastdelay,  NO_ARG },
+    { "calldelay",	T_Calldelay,       NO_ARG },
+    { "disable",	T_Disable,         NO_ARG },
+    { "driftfile",	T_Driftfile,       SINGLE_ARG },
+    { "enable",		T_Enable,          NO_ARG },
+    { "end",		T_End,             NO_ARG },
+    { "filegen",	T_Filegen,         NO_ARG },
+    { "fudge",		T_Fudge,           SINGLE_ARG },
+    { "includefile",	T_Includefile,     SINGLE_ARG },
+    { "logconfig",	T_Logconfig,       SINGLE_ARG },
+    { "logfile",	T_Logfile,         SINGLE_ARG },
+    { "manycastclient",	T_Manycastclient,  SINGLE_ARG },
+    { "manycastserver", T_Manycastserver,  MULTIPLE_ARG },
+    { "multicastclient",T_Multicastclient, MULTIPLE_ARG },
+    { "peer",		T_Peer,            SINGLE_ARG },
+    { "phone",		T_Phone,           MULTIPLE_ARG },
+    { "pidfile",	T_Pidfile,         SINGLE_ARG },
+    { "pool",           T_Pool,            SINGLE_ARG },
+    { "discard",	T_Discard,         NO_ARG },
+    { "restrict",	T_Restrict,        NO_ARG },    
+    { "server",		T_Server,          SINGLE_ARG },
+    { "setvar",		T_Setvar,          NO_ARG },
+    { "statistics",	T_Statistics,      NO_ARG },
+    { "statsdir",	T_Statsdir,        SINGLE_ARG },
+    { "tick",		T_Tick,            NO_ARG },
+    { "tinker",		T_Tinker,          NO_ARG },
+    { "tos",		T_Tos,             NO_ARG },
+    { "trap",		T_Trap,            SINGLE_ARG },
+    { "default",        T_Default,         NO_ARG },
+
+/* authentication_command */
+    { "controlkey",	T_ControlKey,      NO_ARG },
+    { "crypto",		T_Crypto,          NO_ARG },
+    { "keys",		T_Keys,            SINGLE_ARG },
+    { "keysdir",	T_Keysdir,         SINGLE_ARG },
+    { "requestkey",	T_Requestkey,      NO_ARG },
+    { "revoke",		T_Revoke,          NO_ARG },
+    { "trustedkey",	T_Trustedkey,      NO_ARG },
+/* option */
+    { "autokey",        T_Autokey,         NO_ARG },
+    { "burst",	        T_Burst,           NO_ARG },
+    { "iburst",	        T_Iburst,          NO_ARG },
+    { "key",            T_Key,             NO_ARG },
+    { "maxpoll",	T_Maxpoll,         NO_ARG },
+    { "minpoll",	T_Minpoll,         NO_ARG },
+    { "mode",		T_Mode,            NO_ARG },     
+    { "noselect",	T_Noselect,        NO_ARG },
+    { "preempt",	T_Preempt,         NO_ARG },
+    { "true",	        T_True,            NO_ARG },
+    { "prefer",	        T_Prefer,          NO_ARG },
+    { "ttl",	        T_Ttl,             NO_ARG },      
+    { "version",	T_Version,         NO_ARG },
+/* crypto_command */
+    { "cert",		T_Cert,            SINGLE_ARG },
+    { "gqpar",		T_Gqpar,           SINGLE_ARG },
+    { "host",		T_Host,            SINGLE_ARG },
+    { "ident",		T_Ident,           SINGLE_ARG },
+    { "iffpar",		T_Iffpar,          SINGLE_ARG },
+    { "leap",		T_Leap,            SINGLE_ARG },
+    { "mvpar",		T_Mvpar,           SINGLE_ARG },
+    { "pw",		T_Pw,              SINGLE_ARG },
+    { "randfile",	T_RandFile,        SINGLE_ARG },
+    { "sign",		T_Sign,            SINGLE_ARG },
+/*** MONITORING COMMANDS ***/
+/* stat */
+    { "clockstats",     T_Clockstats,      NO_ARG },
+    { "cryptostats",	T_Cryptostats,     NO_ARG },
+    { "loopstats",      T_Loopstats,       NO_ARG },
+    { "peerstats",      T_Peerstats,       NO_ARG },
+    { "rawstats",	T_Rawstats,        NO_ARG },
+    { "sysstats", 	T_Sysstats,        NO_ARG },
+/* filegen_option */
+    { "disable",	T_Disable,         NO_ARG },
+    { "enable",		T_Enable,          NO_ARG },
+    { "file",		T_File,            SINGLE_ARG },
+    { "link",		T_Link,            NO_ARG },
+    { "nolink",		T_Nolink,          NO_ARG },
+    { "type",		T_Type,            NO_ARG },
+/* filegen_type */
+    { "age",		T_Age,             NO_ARG },
+    { "day",		T_Day,             NO_ARG },
+    { "month",		T_Month,           NO_ARG },
+    { "none",		T_None,            NO_ARG },
+    { "pid",		T_Pid,             NO_ARG },
+    { "week",	        T_Week,            NO_ARG },
+    { "year",		T_Year,            NO_ARG },
+/*** ORPHAN MODE COMMANDS ***/
+/* tos_option */
+    { "minclock",	T_Minclock,        NO_ARG },
+    { "maxclock",	T_Maxclock,        NO_ARG },
+    { "minsane",	T_Minsane,         NO_ARG },
+    { "floor",		T_Floor,           NO_ARG },
+    { "ceiling",	T_Ceiling,         NO_ARG },
+    { "cohort",		T_Cohort,          NO_ARG },
+    { "mindist",	T_Mindist,         NO_ARG },
+    { "maxdist",	T_Maxdist,         NO_ARG },
+    { "maxhop",		T_Maxhop,          NO_ARG },
+    { "beacon",		T_Beacon,          NO_ARG },
+    { "orphan",		T_Orphan,          NO_ARG },
+/* access_control_flag */
+    { "ignore",		T_Ignore,          NO_ARG },
+    { "limited",	T_Limited,         NO_ARG },
+    { "kod",		T_Kod,             NO_ARG },
+    { "lowpriotrap",	T_Lowpriotrap,     NO_ARG },
+    { "mask",		T_Mask,            NO_ARG },
+    { "nomodify",	T_Nomodify,        NO_ARG },
+    { "nopeer",		T_Nopeer,          NO_ARG },
+    { "noquery",	T_Noquery,         NO_ARG },
+    { "noserve",	T_Noserve,         NO_ARG },
+    { "notrap",		T_Notrap,          NO_ARG },
+    { "notrust",	T_Notrust,         NO_ARG },
+    { "ntpport",	T_Ntpport,         NO_ARG },
+    { "version",	T_Version,         NO_ARG },
+/* discard_option */
+    { "average",	T_Average,         NO_ARG },
+    { "minimum",	T_Minimum,         NO_ARG },
+    { "monitor",	T_Monitor,         NO_ARG },
+/* fudge_factor */
+    { "flag1",		T_Flag1,           NO_ARG },
+    { "flag2",		T_Flag2,           NO_ARG },
+    { "flag3",		T_Flag3,           NO_ARG },
+    { "flag4",		T_Flag4,           NO_ARG },
+    { "refid",		T_Refid,           SINGLE_ARG },
+    { "stratum",	T_Stratum,         NO_ARG },
+    { "time1",		T_Time1,           NO_ARG },
+    { "time2",		T_Time2,           NO_ARG },
+/* system_option */
+    { "auth",		T_Auth,            NO_ARG },
+    { "bclient",	T_Bclient,         NO_ARG },
+    { "calibrate",	T_Calibrate,       NO_ARG },
+    { "kernel",		T_Kernel,          NO_ARG },
+    { "monitor",	T_Monitor,         NO_ARG },
+    { "ntp",		T_Ntp,             NO_ARG },
+    { "stats",		T_Stats,           NO_ARG },
+/* tinker_option */
+    { "step",		T_Step,            NO_ARG },
+    { "panic",		T_Panic,           NO_ARG },
+    { "dispersion",	T_Dispersion,      NO_ARG },
+    { "stepout",	T_Stepout,         NO_ARG },
+    { "allan",		T_Allan,           NO_ARG },
+    { "huffpuff",	T_Huffpuff,        NO_ARG },
+    { "freq",		T_Freq,            NO_ARG },
+/* miscellaneous_command */
+    { "port",		T_Port,            NO_ARG },
+    { "interface",	T_Interface,       SINGLE_ARG },
+/* simulator commands */
+    { "simulate",       T_Simulate,        NO_ARG },
+    { "simulation_duration", T_Sim_Duration, NO_ARG },
+    { "beep_delay",     T_Beep_Delay,      NO_ARG },
+    { "duration",       T_Duration,        NO_ARG },
+    { "server_offset",  T_Server_Offset,   NO_ARG },
+    { "freq_offset",    T_Freq_Offset,     NO_ARG },
+    { "wander",         T_Wander,          NO_ARG },
+    { "jitter",         T_Jitter,          NO_ARG },
+    { "prop_delay",     T_Prop_Delay,      NO_ARG },
+    { "proc_delay",     T_Proc_Delay,      NO_ARG }, 
+    { NULL, 0, 0}
+};
+
+
+/* FUNCTIONS FOR PERFORMING THE CONFIGURATION
+ * ------------------------------------------
+ */
+
+static void config_other_modes(void)
+{
+
+    struct sockaddr_storage addr_sock;
+    struct address_node *addr_node;
+
+    if (my_config.broadcastclient) {
+        proto_config(PROTO_BROADCLIENT, my_config.broadcastclient, 0., NULL);
+        my_config.broadcastclient = 0;
+    }
+    
+    /* Configure the many-cast servers */
+    if (!empty(my_config.manycastserver)) {
+        while (!empty(my_config.manycastserver)) {
+            addr_node = (struct address_node *)
+                dequeue(my_config.manycastserver);
+            
+            memset((char *)&addr_sock, 0, sizeof(addr_sock));
+            addr_sock.ss_family = addr_node->type;
+
+            if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
+                proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
+            
+            free(addr_node->address);
+            free_node(addr_node);
+        }
+        sys_manycastserver = 1;
+    }
+    
+    /* Configure the multicast clients */
+    if (!empty(my_config.multicastclient)) {
+        while (!empty(my_config.multicastclient)) {
+            addr_node = (struct address_node *)
+                dequeue(my_config.multicastclient);
+            
+            memset((char *)&addr_sock, 0, sizeof(addr_sock));
+            addr_sock.ss_family = addr_node->type;
+
+            if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
+                proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
+            
+            
+            free(addr_node->address);
+            free_node(addr_node);
+        }
+        proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
+    }
+}
+
+
+static void config_auth(void)
+{
+    struct attr_val *my_val;
+    int *key_val;
+    
+    /* Crypto Command */
+    if (my_config.auth.crypto_cmd_list) {
+        while (!empty(my_config.auth.crypto_cmd_list)) {
+            my_val = (struct attr_val *) 
+                dequeue(my_config.auth.crypto_cmd_list);
+            crypto_config(my_val->attr, my_val->value.s);
+            
+            free(my_val->value.s);
+            free_node(my_val);
+        }
+        destroy_queue(my_config.auth.crypto_cmd_list);
+        my_config.auth.crypto_cmd_list = NULL;
+    }
+    
+    /* Keys Command */
+    if (my_config.auth.keys)
+        getauthkeys(my_config.auth.keys);
+    
+    /* Keysdir Command */
+    if (my_config.auth.keysdir)
+        keysdir = my_config.auth.keysdir;
+
+    /* Control Key Command */
+    if (my_config.auth.control_key != 0) 
+        ctl_auth_keyid = my_config.auth.control_key;
+
+    /* Requested Key Command */
+    if (my_config.auth.requested_key) {
+#ifdef DEBUG
+        if (debug > 3)
+            printf("set info_auth_key to %08lx\n",
+                   (long unsigned int) my_config.auth.requested_key);
+#endif
+        info_auth_keyid = (keyid_t) my_config.auth.requested_key;
+    }
+
+    /* Trusted Key Command */
+    if (my_config.auth.trusted_key_list) {
+        while (!empty(my_config.auth.trusted_key_list)) {
+            key_val = (int *) dequeue(my_config.auth.trusted_key_list);
+            authtrust(*key_val, 1);
+            free_node(key_val);
+        }
+        destroy_queue(my_config.auth.trusted_key_list);
+        my_config.auth.trusted_key_list = NULL;
+    }
+    
+    /* Revoke Command */
+    if (my_config.auth.revoke) 
+        sys_revoke = (u_char) max(my_config.auth.revoke, KEY_REVOKE);
+
+#if !defined(VMS) && !defined(SYS_VXWORKS)
+    /* find a keyid */
+    if (info_auth_keyid == 0)
+        req_keyid = 65535;
+    else
+        req_keyid = info_auth_keyid;
+
+    /* if doesn't exist, make up one at random */
+    if (!authhavekey(req_keyid)) {
+        char rankey[9];
+        int i, j;
+        
+        for (i = 0; i < 8; i++)
+            for (j = 1; j < 100; ++j) {
+                rankey[i] = (char) (ntp_random() & 0xff);
+                if (rankey[i] != 0) break;
+            }
+        rankey[8] = 0;
+
+        authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
+        authtrust(req_keyid, 1);
+        if (!authhavekey(req_keyid)) {
+            msyslog(LOG_ERR, "getconfig: Couldn't generate a valid random key!");
+            /* HMS: Should this be fatal? */
+        }
+    }
+
+    /* save keyid so we will accept config requests with it */
+    info_auth_keyid = req_keyid;
+#endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
+
+}
+
+static void config_tos(void) {
+    struct attr_val *tos;
+    
+    while (!empty(my_config.orphan_cmds)) {
+        tos = (struct attr_val *) dequeue(my_config.orphan_cmds);
+        proto_config(tos->attr, 0, tos->value.d, NULL);
+        free_node(tos);
+    }
+}
+
+static void config_monitor(void)
+{
+    char **filegen_string;
+    FILEGEN *filegen;
+    struct filegen_node *my_node;
+    struct attr_val *my_opts;
+
+    char *filegen_file;
+    int filegen_type;
+    int filegen_flag;
+    
+    /* Set the statistics directory */
+    if (my_config.stats_dir) {
+        stats_config(STATS_STATSDIR,my_config.stats_dir);
+        free(my_config.stats_dir);
+        my_config.stats_dir = NULL;
+    }
+    
+    /* NOTE:
+     * Calling filegen_get is brain dead. Doing a string 
+     * comparison to find the relavant filegen structure is
+     * expensive.
+     *
+     * Through the parser, we already know which filegen is
+     * being specified. Hence, we should either store a
+     * pointer to the specified structure in the syntax tree
+     * or an index into a filegen array.
+     * 
+     * Need to change the filegen code to reflect the above.
+     */
+
+    /* Turn on the specified statistics */
+    while (!empty(my_config.stats_list)) {
+        filegen_string = (char **) dequeue(my_config.stats_list);
+        filegen = filegen_get(*filegen_string);
+
+#ifdef DEBUG
+        if (debug > 3)
+            printf("enabling filegen for %s statistics \"%s%s\"\n",
+                   *filegen_string, filegen->prefix, filegen->basename);
+#endif
+        filegen->flag |= FGEN_FLAG_ENABLED;
+        free_node(filegen_string);
+    }
+    
+    /* Configure the statistics with the options */
+    while (!empty(my_config.filegen_opts)) {
+        my_node = (struct filegen_node *) dequeue(my_config.filegen_opts);
+        filegen = filegen_get(my_node->name);
+
+        /* Initilize the filegen variables to their pre-configurtion states */
+        filegen_flag = filegen->flag;
+        filegen_type = filegen->type;
+        filegen_file = my_node->name; 
+
+        while (!empty(my_node->options)) {
+            my_opts = (struct attr_val *) dequeue(my_node->options);
+            switch (my_opts->attr) {
+            case T_File:
+                filegen_file = (char *) my_opts->value.p;
+                break;
+            case T_Type:
+                filegen_type = my_opts->value.i;
+                break;
+            case T_Flag:
+                switch (my_opts->value.i) {
+                case T_Link:
+                    filegen_flag |= FGEN_FLAG_LINK;
+                    break;
+                case T_Nolink:
+                    filegen_flag &= ~FGEN_FLAG_LINK;
+                    break;
+                case T_Enable:
+                    filegen_flag |= FGEN_FLAG_ENABLED;
+                    break;
+                case T_Disable:
+                    filegen_flag &= ~FGEN_FLAG_ENABLED;
+                    break;
+                }
+                break;
+            }
+            filegen_config(filegen, filegen_file, filegen_type, filegen_flag);
+            free_node(my_opts);
+        }
+        free_node(my_node);
+    }
+}
+
+
+static void config_access(void) 
+{
+    struct attr_val *my_opt;
+    struct restrict_node *my_node;
+    
+    struct sockaddr_storage addr_sock;
+    struct sockaddr_storage addr_mask;
+
+    int flags;
+    int mflags;
+
+    /* Configure the discard options */
+    while (!empty(my_config.discard_opts)) {
+        my_opt = (struct attr_val *)
+            dequeue(my_config.discard_opts);
+        switch(my_opt->attr) {
+        case T_Average:
+            res_avg_interval = my_opt->value.i;
+            break;
+        case T_Minimum:
+            res_min_interval = my_opt->value.i;
+            break;
+        case T_Monitor:
+            mon_age = my_opt->value.i;
+            break;
+        }
+        free_node(my_opt);
+    }
+
+    /* Configure the restrict options */
+    while (!empty(my_config.restrict_opts)) {
+        my_node = (struct restrict_node *)
+            dequeue(my_config.restrict_opts);
+
+        memset((char *)&addr_sock, 0, sizeof(addr_sock));
+        /* Check if the user specified a default rule */
+        if (my_node->addr) {
+            /* Resolve the specified address */
+            addr_sock.ss_family = my_node->addr->type;
+            
+            if (getnetnum(my_node->addr->address, 
+                          &addr_sock, 1,t_UNK) != 1) {
+                
+                /* Error in resolving name!!!
+                 * Free the node memory and move onto the next
+                 * Restrict flag 
+                 */
+                msyslog(LOG_INFO,
+                        "restrict: error in resolving name: %s on line %d. Ignoring...",
+                        my_node->addr->address, my_node->line_no);
+                destroy_restrict_node(my_node);
+                continue;
+            }
+            
+            SET_HOSTMASK(&addr_mask, addr_sock.ss_family);
+            
+            /* Resolve the mask */
+            if (my_node->mask) {
+                memset((char *)&addr_mask, 0, sizeof(addr_mask));
+                addr_mask.ss_family = my_node->mask->type;
+                if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
+                    /* Error in mask !!!
+                     * Free the node memory and move onto the next
+                     * Restrict flag 
+                     */
+                    msyslog(LOG_INFO,
+                            "restrict: error in resolving mask: %s on line %d. Ignoring...",
+                            my_node->mask->address, my_node->line_no);
+                    destroy_restrict_node(my_node);
+                    continue;
+                }
+            }
+        }
+        else { /* The user specified a default rule */
+            addr_sock.ss_family = default_ai_family;
+            ANYSOCK(&addr_mask);
+        }
+        
+        /* Parse the flags */
+        flags = 0;
+        mflags = 0;
+        
+        while (!empty(my_node->flags)) {
+            int *curr_flag = (int *) dequeue(my_node->flags);
+            if (*curr_flag == RESM_NTPONLY)
+                mflags |= *curr_flag;
+            else
+                flags |= *curr_flag;
+            free_node(curr_flag);
+        }   
+
+        /* Set the flags */        
+        hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
+                      mflags, flags);
+        destroy_restrict_node(my_node);
+    }
+}
+
+
+static void config_tinker(void)
+{
+    struct attr_val *tinker;
+    
+    while (!empty(my_config.tinker)) {
+        tinker= (struct attr_val *) dequeue(my_config.tinker);
+        loop_config(tinker->attr, tinker->value.d);
+        free_node(tinker);
+    }
+}
+
+
+static void config_system_opts(void) 
+{
+    int enable_flags;
+    int disable_flags;
+
+    enable_flags = get_flags_from_list(my_config.enable_opts);
+    disable_flags = get_flags_from_list(my_config.disable_opts);
+    
+    if (enable_flags)
+        proto_config(enable_flags, 1, 0., NULL);
+    if (disable_flags)
+        proto_config(disable_flags, 0, 0., NULL);
+}
+
+static void config_logconfig(void)
+{
+    struct attr_val *my_logconfig;
+
+    while(!empty(my_config.logconfig)) {
+        my_logconfig = (struct attr_val *)
+            dequeue(my_config.logconfig);
+        switch (my_logconfig->attr) {
+        case '+':
+            ntp_syslogmask |= get_logmask(my_logconfig->value.s);
+            break;
+        case '-':
+            ntp_syslogmask &= ~get_logmask(my_logconfig->value.s);
+            break;
+        case '=':
+            ntp_syslogmask = get_logmask(my_logconfig->value.s);
+            break;
+        }
+        free(my_logconfig->value.s);
+        free_node(my_logconfig);
+    }
+}
+
+static void config_phone(void)
+{
+    int i = 0;
+    char **s;
+    
+    while (!empty(my_config.phone)) {
+        s = (char **) dequeue(my_config.phone);
+        if (i < MAXPHONE)
+            sys_phone[i++] = *s;
+        else {
+            msyslog(LOG_INFO,
+                    "phone: Number of phone entries exceeds %d. Ignoring phone %s...",
+                    MAXPHONE, *s);
+            free(*s);
+        }
+        free_node(s);
+    }
+    sys_phone[i] = NULL;
+}
+
+static void config_setvar(void)
+{
+    struct setvar_node *my_node;
+
+    while (!empty(my_config.setvar)) {
+        my_node = (struct setvar_node *) dequeue(my_config.setvar);
+        set_sys_var(my_node->data, my_node->len, my_node->def);
+        free_node(my_node);
+    }
+}
+
+static void config_ttl(void)
+{
+    int i = 0;
+    int *curr_ttl;
+    
+    while (!empty(my_config.ttl)) {
+        curr_ttl = (int *) dequeue(my_config.ttl);
+        if (i < MAX_TTL)
+            sys_ttl[i++] = *curr_ttl;
+        else 
+            msyslog(LOG_INFO,
+                    "ttl: Number of TTL entries exceeds %d. Ignoring TTL %d...",
+                    MAX_TTL, *curr_ttl);
+     
+        free_node(curr_ttl);
+    }
+    sys_ttlmax = i - 1;
+}
+
+static void config_trap(void)
+{
+    
+    struct addr_opts_node *curr_trap;
+    struct attr_val *curr_opt;
+    struct sockaddr_storage addr_sock;
+    struct sockaddr_storage peeraddr;
+    struct address_node *addr_node;
+    struct interface *localaddr;
+    int port_no;
+    int err_flag;
+    
+    port_no = 0;
+    localaddr = 0;
+
+    
+    while (!empty(my_config.trap)) {
+        err_flag = 0;
+        curr_trap = (struct addr_opts_node *) dequeue(my_config.trap);
+        
+        while (!empty(curr_trap->options)) {
+            curr_opt = (struct attr_val *) dequeue(curr_trap->options);
+            if (curr_opt->attr == T_Port) {
+                port_no = curr_opt->value.i;
+                if (port_no <= 0 || port_no > 32767) {
+                    msyslog(LOG_ERR, "invalid port number %d, trap ignored", port_no);
+                    err_flag = 1;
+                }
+            }
+            else if (curr_opt->attr == T_Interface) {
+                addr_node = (struct address_node *) curr_opt->value.p;
+
+                /* Resolve the interface address */
+                memset((char *)&addr_sock, 0, sizeof(addr_sock));
+                addr_sock.ss_family = addr_node->type;
+                
+                if (getnetnum(addr_node->address,
+                              &addr_sock, 1, t_UNK) != 1) {
+                    err_flag = 1;
+                    break;
+                }
+                
+                localaddr = findinterface(&addr_sock);
+                
+                if (localaddr == NULL) {
+                    msyslog(LOG_ERR,
+                            "can't find interface with address %s",
+                            stoa(&addr_sock));
+                    err_flag = 1;
+                }
+                
+                free(addr_node->address);
+                free_node(addr_node);
+            }
+            free_node(curr_opt);
+        }
+        
+        /* Now process the trap for the specified interface
+         * and port number 
+         */
+        if (!err_flag) {
+            memset((char *)&peeraddr, 0, sizeof(peeraddr));
+            if (port_no != 0)
+                ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons((u_short) port_no);
+            else
+                ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons(TRAPPORT);
+
+            if (localaddr == NULL) {
+                peeraddr.ss_family = default_ai_family;
+                localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
+            }
+            else
+                peeraddr.ss_family = addr_sock.ss_family;
+            
+            if (!ctlsettrap(&peeraddr, localaddr, 0,
+                            NTP_VERSION))
+                msyslog(LOG_ERR,
+                        "can't set trap for %s, no resources",
+                        stoa(&peeraddr));
+        }
+        destroy_queue(curr_trap->options);
+        free_node(curr_trap);
+    }    
+}
+
+static void config_fudge(void)
+{
+    struct addr_opts_node *curr_fudge;
+    struct attr_val *curr_opt;
+    struct sockaddr_storage addr_sock;
+    struct address_node *addr_node;
+    struct refclockstat clock_stat;
+    int err_flag;
+    
+    
+    while (!empty(my_config.fudge)) {
+        curr_fudge = (struct addr_opts_node *) dequeue(my_config.fudge);
+        err_flag = 0;
+        
+        /* Get the reference clock address and
+         * ensure that it is sane
+         */
+        addr_node = curr_fudge->addr;
+        memset((char *)&addr_sock, 0, sizeof(addr_sock));
+        if (getnetnum(addr_node->address, &addr_sock, 1, t_REF) != 1)
+            err_flag = 1;
+        
+        if (!ISREFCLOCKADR(&addr_sock)) {
+            msyslog(LOG_ERR,
+                    "%s is inappropriate address for the fudge command, line ignored",
+                    stoa(&addr_sock));
+            err_flag = 1;
+        }
+
+        /* Parse all the options to the fudge command */
+        memset((void *)&clock_stat, 0, sizeof clock_stat);
+        while (!empty(curr_fudge->options)) {
+            curr_opt = (struct attr_val *) dequeue(curr_fudge->options);
+            
+            /* The attribute field is used to store the flag. 
+             * Set haveflags with it
+             */
+            clock_stat.haveflags |= curr_opt->attr;
+            switch (curr_opt->attr) {
+            case CLK_HAVETIME1:
+                clock_stat.fudgetime1 = curr_opt->value.d;
+                break;
+            case CLK_HAVETIME2:
+                clock_stat.fudgetime2 = curr_opt->value.d;
+                break;
+            case CLK_HAVEVAL1:
+                clock_stat.fudgeval1 = curr_opt->value.i;
+                break;
+            case CLK_HAVEVAL2:
+                memcpy(&clock_stat.fudgeval2,
+                       curr_opt->value.s, 
+                       min(strlen(curr_opt->value.s), 4));
+                free(curr_opt->value.s);
+                break;
+            case CLK_HAVEFLAG1:
+                if (curr_opt->value.i)
+                    clock_stat.flags |= CLK_FLAG1;
+                else
+                    clock_stat.flags &= ~CLK_FLAG1;
+                break;
+            case CLK_HAVEFLAG2:
+                if (curr_opt->value.i)
+                    clock_stat.flags |= CLK_FLAG2;
+                else
+                    clock_stat.flags &= ~CLK_FLAG2;
+                break;
+            case CLK_HAVEFLAG3:
+                if (curr_opt->value.i)
+                    clock_stat.flags |= CLK_FLAG3;
+                else
+                    clock_stat.flags &= ~CLK_FLAG3;
+                break;
+            case CLK_HAVEFLAG4:
+                if (curr_opt->value.i)
+                    clock_stat.flags |= CLK_FLAG4;
+                else
+                    clock_stat.flags &= ~CLK_FLAG4;
+                break;
+            }
+            
+            free_node(curr_opt);
+        }
+        if (!err_flag)
+            refclock_control(&addr_sock, &clock_stat,
+                             (struct refclockstat *)0);
+        destroy_queue(curr_fudge->options);
+        free_node(curr_fudge);
+    }
+}
+
+static void config_vars(void)
+{
+    struct attr_val *curr_var;
+    FILE *new_file;
+    
+    while (!empty(my_config.vars)) {
+        curr_var = (struct attr_val *) dequeue(my_config.vars);
+        /* Determine which variable to set and set it */
+        switch (curr_var->attr) {
+        case T_Broadcastdelay:
+            proto_config(PROTO_BROADDELAY, 0, curr_var->value.d, NULL);
+            break;
+        case T_Calldelay:
+            proto_config(PROTO_CALLDELAY, curr_var->value.i, 0, NULL);
+            break;
+        case T_Tick:
+            proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);
+            break;
+        case T_Driftfile:
+            stats_config(STATS_FREQ_FILE, curr_var->value.s);
+            free(curr_var->value.s);
+            break;
+        case T_Pidfile:
+            stats_config(STATS_PID_FILE, curr_var->value.s);
+            free(curr_var->value.s);
+            break;
+        case T_Logfile:
+            new_file = fopen(curr_var->value.s, "a");
+            if (new_file != NULL) {
+                NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
+                    msyslog(LOG_NOTICE, "logging to file %s", curr_var->value.s);
+                if (syslog_file != NULL &&
+                    fileno(syslog_file) != fileno(new_file))
+                    (void)fclose(syslog_file);
+
+                syslog_file = new_file;
+                syslogit = 0;
+            }
+            else
+                msyslog(LOG_ERR,
+                        "Cannot open log file %s",
+                        curr_var->value.s);
+            free(curr_var->value.s);
+            break;
+        case T_Automax:
+            sys_automax = 1 << max(curr_var->value.i, 10);
+            break;
+        }
+        free_node(curr_var);
+    }
+}
+
+/* Define a function to check if a resolved address is sane.
+ * If yes, return 1, else return 0;
+ */
+static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode)
+{
+    if (
+#ifdef REFCLOCK
+        !ISREFCLOCKADR(&peeraddr) &&
+#endif
+        ISBADADR(&peeraddr)) {
+        msyslog(LOG_ERR,
+                "attempt to configure invalid address %s",
+                stoa(&peeraddr));
+        return 0;
+    }
+    /*
+     * Shouldn't be able to specify multicast
+     * address for server/peer!
+     * and unicast address for manycastclient!
+     */
+    /* Check for IPv4 */
+    if (peeraddr.ss_family == AF_INET) {
+        if (((hmode == T_Server) || (hmode == T_Peer) || (hmode == T_Pool)) &&
+#ifdef REFCLOCK
+            !ISREFCLOCKADR(&peeraddr) &&
+#endif
+            IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
+            msyslog(LOG_ERR,
+                    "attempt to configure invalid address %s",
+                    stoa(&peeraddr));
+            return 0;
+        }
+        if ((hmode == T_Manycastclient) &&
+            !IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
+            msyslog(LOG_ERR,
+                    "attempt to configure invalid address %s",
+                    stoa(&peeraddr));
+            return 0;
+        }
+         
+    }
+    /* Check for IPv6 */
+    else if(peeraddr.ss_family == AF_INET6) {
+        if (((hmode == T_Server) || (hmode == T_Peer) || (hmode == T_Pool)) &&
+#ifdef REFCLOCK
+            !ISREFCLOCKADR(&peeraddr) &&
+#endif
+            IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
+            msyslog(LOG_ERR,
+                    "attempt to configure in valid address %s",
+                    stoa(&peeraddr));
+            return 0;
+        }
+        if ((hmode == T_Manycastclient) &&
+            !IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
+            msyslog(LOG_ERR,
+                    "attempt to configure in valid address %s",
+                    stoa(&peeraddr));
+            return 0;
+        }
+    }
+    
+    if (peeraddr.ss_family == AF_INET6 &&
+        isc_net_probeipv6() != ISC_R_SUCCESS)
+        return 0;
+
+    /* Ok, all tests succeeded, now we can return 1 */
+    return 1;
+}
+
+static int get_correct_host_mode(int hmode)
+{ 
+    switch (hmode) {
+    case T_Server:
+    case T_Pool:
+    case T_Manycastclient:
+        return MODE_CLIENT;
+        break;
+    case T_Peer:
+        return MODE_ACTIVE;
+        break;
+    case T_Broadcast:
+        return MODE_BROADCAST;
+        break;
+    default:
+        fprintf(stderr, "Fatal error in client_type in ntp_config.y");
+        exit(1);
+        break;
+    }
+}
+
+static void config_peers()
+{
+    struct addrinfo *res, res_bak;
+    struct sockaddr_storage peeraddr;
+    struct peer_node *curr_peer;
+    int hmode;
+    int status;
+    int no_needed;
+    int i;
+    
+    while (!empty(my_config.peers)) {
+        curr_peer = (struct peer_node *) dequeue(my_config.peers);
+        
+        /* Find the number of associations needed.
+         * If a pool coomand is specified, then sys_maxclock needed
+         * else, only one is needed
+         */
+        no_needed = (curr_peer->host_mode == T_Pool) ? sys_maxclock : 1;
+
+        /* Find the correct host-mode */
+        hmode = get_correct_host_mode(curr_peer->host_mode);
+        
+        /* Attempt to resolve the address */
+        memset((char *)&peeraddr, 0, sizeof(peeraddr));
+        peeraddr.ss_family = curr_peer->addr->type;
+        
+        status = get_multiple_netnums(curr_peer->addr->address, &peeraddr, &res, 0, t_UNK);
+        
+        /* I don't know why getnetnum would return -1.
+         * The old code had this test, so I guess it must be
+         * useful 
+         */
+        if (status == -1) {
+            /* Do nothing, apparantly we found an IPv6
+             * address and can't do anything about it */
+        }
+        /* Check if name resolution failed. If yes, store the
+         * peer information in a file for asynchronous 
+         * resolution later
+         */
+        else if (status != 1) {
+            save_resolve(curr_peer->addr->address,
+                         hmode,
+                         curr_peer->peerversion,
+                         curr_peer->minpoll,
+                         curr_peer->maxpoll, 
+                         curr_peer->peerflags, 
+                         curr_peer->ttl,
+                         curr_peer->peerkey,
+                         (u_char *)"*");
+        }
+        /* Yippie!! Name resolution has succeeded!!!
+         * Now we can proceed to some more sanity checks on
+         * the resolved address before we start to configure
+         * the peer
+         */
+        else {
+	    res_bak = res;
+            /* Loop to configure the desired number of associations 
+             */
+            for (i = 0; (i < no_needed) && res; res = res->ai_next) {
+                ++i;
+                memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+#ifdef DEBUG
+                if (debug > 1)
+                    printf("configuring host %s with address %s\n",
+                           curr_peer->addr->address, stoa(&peeraddr));
+#endif
+                if (is_sane_resolved_address(peeraddr, curr_peer->host_mode)) {
+                    if (peer_config(&peeraddr,
+                                    ANY_INTERFACE_CHOOSE(&peeraddr), 
+                                    hmode,
+                                    curr_peer->peerversion, 
+                                    curr_peer->minpoll, 
+                                    curr_peer->maxpoll, 
+                                    curr_peer->peerflags,
+                                    curr_peer->ttl, 
+                                    curr_peer->peerkey, 
+                                    (u_char *)"*") == 0) {
+                        msyslog(LOG_ERR,
+                                "configuration of %s failed",
+                                stoa(&peeraddr));
+                    }
+                }
+            }
+            freeaddrinfo(res_bak);
+        }
+
+        /* Ok, everything done. Free up peer node memory */
+        free(curr_peer->addr->address);
+        free_node(curr_peer->addr);
+        free_node(curr_peer);
+    }
+}
+
+#ifdef SIM
+static void config_sim()
+{
+    int i;
+    server_info *serv_info;
+    struct attr_val *init_stmt;
+    
+    /* Check if a simulate block was found in the configuration code.
+     * If not, return an error and exit
+     */
+    if (my_config.sim_details == NULL) {
+        fprintf(stderr, "ERROR!! I couldn't find a \"simulate\" block for configuring the simulator.\n");
+        fprintf(stderr, "\tCheck your configuration file.\n");
+        exit(1);
+    }
+
+    /* Process the initialization statements 
+     * -------------------------------------
+     */
+    while(!empty(my_config.sim_details->init_opts)) {
+        init_stmt = (struct attr_val *) 
+            dequeue(my_config.sim_details->init_opts);
+        switch(init_stmt->attr) {
+        case T_Beep_Delay:
+            simulation.beep_delay = init_stmt->value.d;
+            break;
+        case T_Sim_Duration:
+            simulation.end_time = init_stmt->value.d;
+            break;
+        default:
+            yyerror("Internal Error in parser...\n"
+                    "Invalid init statement in simulator block");
+            break;
+        }
+        free_node(init_stmt);
+    }
+    destroy_queue(my_config.sim_details->init_opts);
+
+
+    /* Process the server list 
+     * -----------------------
+     */
+    simulation.num_of_servers = get_no_of_elements(my_config.sim_details->servers);
+    simulation.servers = (server_info *) malloc(simulation.num_of_servers *
+                                                sizeof(server_info));
+
+    for (i = 0;i < simulation.num_of_servers;++i) {
+        serv_info = (server_info *) 
+            dequeue(my_config.sim_details->servers);
+        if (!serv_info) 
+            yyerror("Internal Error in parser...\n"
+                    "Tried to initialize server list but no server returned\n");
+        memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
+        free_node(serv_info);
+    }
+    destroy_queue(my_config.sim_details->servers);
+    
+    /* Free the sim_node memory and set the sim_details as NULL */
+    free_node(my_config.sim_details);
+    my_config.sim_details = NULL;
+    
+    /* Create server associations */
+    printf("Creating server associations\n");
+    create_server_associations();
+    fprintf(stderr,"\tServer associations successfully created!!\n");
+}
+#endif /* SIM */
+
+/* Define two different config functions. One for the daemon and the other for
+ * the simulator. The simulator ignores a lot of the standard ntpd configuration
+ * options 
+ */
+
+static void config_ntpd() 
+{
+    config_auth();
+    config_tos();
+    config_monitor();
+    config_access();
+    config_tinker();
+    config_system_opts();
+    config_logconfig();
+    config_phone();
+    config_setvar();
+    config_ttl();
+    config_trap();
+    config_fudge();
+    config_vars();
+    config_other_modes();
+    config_peers();
+}
+
+#ifdef SIM
+static void config_ntpdsim()
+{
+    printf("Configuring Simulator...\n");
+    printf("Some ntpd-specific commands in the configuration file will be ignored.\n");
+
+    config_tos();
+    config_monitor();
+    config_tinker();
+    config_system_opts();
+    config_logconfig();
+    config_vars();
+    config_sim();
+}
+#endif /* SIM */
+
+void config_remotely() 
+{
+    input_from_file = 0;
+//    init_syntax_tree();
+    yyparse();
+    if (debug > 1) 
+        printf("Finished Parsing!!\n");
+
+    config_ntpd();
+    
+    input_from_file = 1;
+}
+    
+
+/* ACTUAL getconfig code */
+
+void getconfig(int argc,char *argv[])
+{
+    char line[MAXLINE];
+
+#ifndef SYS_WINNT
+    config_file = CONFIG_FILE;
+#else
+    temp = CONFIG_FILE;
+    if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)config_file_storage, (DWORD)sizeof(config_file_storage))) {
+        msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
+        exit(1);
+    }
+    config_file = config_file_storage;
+    
+    temp = ALT_CONFIG_FILE;
+    if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
+        msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
+        exit(1);
+    }
+    alt_config_file = alt_config_file_storage;
+
+#endif /* SYS_WINNT */
+    progname = argv[0];
+    res_fp = NULL;
+    ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
+
+    /*
+     * install a non default variable with this daemon version
+     */
+    (void) sprintf(line, "daemon_version=\"%s\"", Version);
+    set_sys_var(line, strlen(line)+1, RO);
+    
+    /*
+     * Say how we're setting the time of day
+     */
+    (void) sprintf(line, "settimeofday=\"%s\"", set_tod_using);
+    set_sys_var(line, strlen(line)+1, RO);
+
+    /*
+     * Initialize the loop.
+     */
+    loop_config(LOOP_DRIFTINIT, 0.);
+    
+    getCmdOpts(argc, argv);
+
+    curr_include_level = 0;
+    if (
+        (fp[curr_include_level] = F_OPEN(FindConfig(config_file), "r")) == NULL
+#ifdef HAVE_NETINFO
+        /* If there is no config_file, try NetInfo. */
+        && check_netinfo && !(config_netinfo = get_netinfo_config())
+#endif /* HAVE_NETINFO */
+        ) {
+        fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(config_file));
+        msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
+#ifdef SYS_WINNT
+        /* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
+        
+        if ((fp[curr_include_level] = F_OPEN(FindConfig(alt_config_file), "r")) == NULL) {
+
+            /*
+             * Broadcast clients can sometimes run without
+             * a configuration file.
+             */
+            
+            fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(alt_config_file));
+            msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
+            return;
+        }
+#else  /* not SYS_WINNT */
+        return;
+#endif /* not SYS_WINNT */
+    }
+
+    /*** BULK OF THE PARSER ***/
+    ip_file = fp[curr_include_level];
+    key_scanner = create_keyword_scanner(keyword_list);
+    init_syntax_tree();
+    yyparse();
+    if (debug > 1) 
+        printf("Finished Parsing!!\n");
+
+    /* The actual configuration done depends on whether we are configuring the
+     * simulator or the daemon. Perform a check and call the appropriate 
+     * function as needed.
+     */
+
+#ifndef SIM
+    config_ntpd();
+#else
+    config_ntpdsim();
+#endif
+
+    while (curr_include_level != -1) {
+        FCLOSE(fp[curr_include_level--]);
+    }
+    
+    
+#ifdef HAVE_NETINFO
+    if (config_netinfo)
+        free_netinfo_config(config_netinfo);
+#endif /* HAVE_NETINFO */
+        
+    if (res_fp != NULL) {
+        if (call_resolver) {
+            /*
+             * Need name resolution
+             */
+            do_resolve_internal();
+        }
+    }
+}
+
+
+
+/* FUNCTIONS COPIED FROM THE OLDER ntp_config.c
+ * --------------------------------------------
+ */
+
 
 /*
  * get_pfxmatch - find value for prefixmatch
@@ -481,1433 +2009,6 @@ get_logmask(
 		msyslog(LOG_ERR, "logconfig: illegal argument %s - ignored", s);
 
 	return 0;
-}
-
-
-/*
- * getconfig - get command line options and read the configuration file
- */
-void
-getconfig(
-	int argc,
-	char *argv[]
-	)
-{
-	register int i;
-	int c;
-	int errflg;
-	int status;
-	int istart;
-	int peerversion;
-	int minpoll;
-	int maxpoll;
-	int ttl;
-	long stratum;
-	unsigned long ul;
-	keyid_t peerkey;
-	u_char *peerkeystr;
-	u_long fudgeflag;
-	u_int peerflags;
-	int hmode;
-	struct sockaddr_storage peeraddr;
-	struct sockaddr_storage maskaddr;
-	FILE *fp[MAXINCLUDELEVEL+1];
-	FILE *includefile;
-	int includelevel = 0;
-	char line[MAXLINE];
-	char *(tokens[MAXTOKENS]);
-	int ntokens = 0;
-	int tok = CONFIG_UNKNOWN;
-	struct interface *localaddr;
-	struct refclockstat clock_stat;
-	FILEGEN *filegen;
-
-	/*
-	 * Initialize, initialize
-	 */
-	errflg = 0;
-	
-#ifndef SYS_WINNT
-	config_file = CONFIG_FILE;
-#else
-	temp = CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)config_file_storage, (DWORD)sizeof(config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
-		exit(1);
-	}
-	config_file = config_file_storage;
-
-	temp = ALT_CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
-		exit(1);
-	}
-	alt_config_file = alt_config_file_storage;
-
-#endif /* SYS_WINNT */
-	res_fp = NULL;
-	ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
-
-	/*
-	 * install a non default variable with this daemon version
-	 */
-	(void) sprintf(line, "daemon_version=\"%s\"", Version);
-	set_sys_var(line, strlen(line)+1, RO);
-
-	/*
-	 * Say how we're setting the time of day
-	 */
-	(void) sprintf(line, "settimeofday=\"%s\"", set_tod_using);
-	set_sys_var(line, strlen(line)+1, RO);
-
-	/*
-	 * Initialize the loop.
-	 */
-	loop_config(LOOP_DRIFTINIT, 0.);
-
-	getCmdOpts(argc, argv);
-
-	if (
-	    (fp[0] = fopen(FindConfig(config_file), "r")) == NULL
-#ifdef HAVE_NETINFO
-	    /* If there is no config_file, try NetInfo. */
-	    && check_netinfo && !(config_netinfo = get_netinfo_config())
-#endif /* HAVE_NETINFO */
-	    ) {
-		fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(config_file));
-		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
-#ifdef SYS_WINNT
-		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
-
-		if ((fp[0] = fopen(FindConfig(alt_config_file), "r")) == NULL) {
-
-			/*
-			 * Broadcast clients can sometimes run without
-			 * a configuration file.
-			 */
-
-			fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(alt_config_file));
-			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
-			return;
-		}
-#else  /* not SYS_WINNT */
-		return;
-#endif /* not SYS_WINNT */
-	}
-
-	for (;;) {
-		if (tok == CONFIG_END) 
-			break;
-		if (fp[includelevel])
-			tok = gettokens(fp[includelevel], line, tokens, &ntokens);
-#ifdef HAVE_NETINFO
-		else
-			tok = gettokens_netinfo(config_netinfo, tokens, &ntokens);
-#endif /* HAVE_NETINFO */
-
-		if (tok == CONFIG_UNKNOWN) {
-		    if (includelevel > 0) {
-			fclose(fp[includelevel--]);
-			continue;
-		    } else {
-			break;
-		    }
-		}
-
-		switch(tok) {
-		    case CONFIG_PEER:
-		    case CONFIG_SERVER:
-		    case CONFIG_MANYCASTCLIENT:
-		    case CONFIG_BROADCAST:
-			if (tok == CONFIG_PEER)
-			    hmode = MODE_ACTIVE;
-			else if (tok == CONFIG_SERVER)
-			    hmode = MODE_CLIENT;
-			else if (tok == CONFIG_MANYCASTCLIENT)
-			    hmode = MODE_CLIENT;
-			else
-			    hmode = MODE_BROADCAST;
-
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"No address for %s, line ignored",
-					tokens[0]);
-				break;
-			}
-
-			istart = 1;
-			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			peeraddr.ss_family = default_ai_family;
-			switch (matchkey(tokens[istart], addr_type, 0)) {
-			case CONF_ADDR_IPV4:
-				peeraddr.ss_family = AF_INET;
-				istart++;
-				break;
-			case CONF_ADDR_IPV6:
-				peeraddr.ss_family = AF_INET6;
-				istart++;
-				break;
-			}
-
-			status = getnetnum(tokens[istart], &peeraddr, 0, t_UNK);
-			if (status == -1)
-				break;		/* Found IPv6 address */
-			if(status != 1) {
-				errflg = -1;
-			} else {
-				errflg = 0;
-
-				if (
-#ifdef REFCLOCK
-					!ISREFCLOCKADR(&peeraddr) &&
-#endif
-					ISBADADR(&peeraddr)) {
-					msyslog(LOG_ERR,
-						"attempt to configure invalid address %s",
-						stoa(&peeraddr));
-					break;
-				}
-				/*
-				 * Shouldn't be able to specify multicast
-				 * address for server/peer!
-				 * and unicast address for manycastclient!
-				 */
-				if (peeraddr.ss_family == AF_INET) {
-					if (((tok == CONFIG_SERVER) ||
-				     	(tok == CONFIG_PEER)) &&
-#ifdef REFCLOCK
-				    	!ISREFCLOCKADR(&peeraddr) &&
-#endif
-				    	IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
-						msyslog(LOG_ERR,
-							"attempt to configure invalid address %s",
-							stoa(&peeraddr));
-						break;
-					}
-					if ((tok == CONFIG_MANYCASTCLIENT) &&
-				    	!IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
-						msyslog(LOG_ERR,
-							"attempt to configure invalid address %s",
-							stoa(&peeraddr));
-						break;
-					}
-				}
-				else if(peeraddr.ss_family == AF_INET6) {
-                                if (((tok == CONFIG_SERVER) ||
-                                     (tok == CONFIG_PEER)) &&
-#ifdef REFCLOCK
-                                    !ISREFCLOCKADR(&peeraddr) &&
-#endif
-                                        IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
-                                                msyslog(LOG_ERR,
-                                                        "attempt to configure in valid address %s",
-                                                        stoa(&peeraddr));
-                                                break;
-                                        }
-                                        if ((tok == CONFIG_MANYCASTCLIENT) &&
-                                            !IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
-                                                        msyslog(LOG_ERR,
-                                                        "attempt to configure in valid address %s",
-                                                        stoa(&peeraddr));
-                                                break;
-					}
-				}
-			}
-			if (peeraddr.ss_family == AF_INET6 &&
-			    isc_net_probeipv6() != ISC_R_SUCCESS)
-				break;
-
-			peerversion = NTP_VERSION;
-			minpoll = NTP_MINDPOLL;
-			maxpoll = NTP_MAXDPOLL;
-			peerkey = 0;
-			peerkeystr = (u_char *)"*";
-			peerflags = 0;
-			ttl = 0;
-			istart++;
-			for (i = istart; i < ntokens; i++)
-			    switch (matchkey(tokens[i], mod_keywords, 1)) {
-				case CONF_MOD_VERSION:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "peer/server version requires an argument");
-					    errflg = 1;
-					    break;
-				    }
-				    peerversion = atoi(tokens[++i]);
-				    if ((u_char)peerversion > NTP_VERSION
-					|| (u_char)peerversion < NTP_OLDVERSION) {
-					    msyslog(LOG_ERR,
-						    "inappropriate version number %s, line ignored",
-						    tokens[i]);
-					    errflg = 1;
-				    }
-				    break;
-					
-				case CONF_MOD_KEY:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "key: argument required");
-					    errflg = 1;
-					    break;
-				    }
-				    peerkey = (int)atol(tokens[++i]);
-				    peerflags |= FLAG_AUTHENABLE;
-				    break;
-
-				case CONF_MOD_MINPOLL:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "minpoll: argument required");
-					    errflg = 1;
-					    break;
-				    }
-				    minpoll = atoi(tokens[++i]);
-				    if (minpoll < NTP_MINPOLL) {
-					    msyslog(LOG_INFO,
-						    "minpoll: provided value (%d) is below minimum (%d)",
-						    minpoll, NTP_MINPOLL);
-					minpoll = NTP_MINPOLL;
-				    }
-				    break;
-
-				case CONF_MOD_MAXPOLL:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "maxpoll: argument required"
-						    );
-					    errflg = 1;
-					    break;
-				    }
-				    maxpoll = atoi(tokens[++i]);
-				    if (maxpoll > NTP_MAXPOLL) {
-					    msyslog(LOG_INFO,
-						    "maxpoll: provided value (%d) is above maximum (%d)",
-						    maxpoll, NTP_MAXPOLL);
-					maxpoll = NTP_MAXPOLL;
-				    }
-				    break;
-
-				case CONF_MOD_PREFER:
-				    peerflags |= FLAG_PREFER;
-				    break;
-
-				case CONF_MOD_PREEMPT:
-				    peerflags |= FLAG_PREEMPT;
-				    break;
-
-				case CONF_MOD_NOSELECT:
-				    peerflags |= FLAG_NOSELECT;
-				    break;
-
-				case CONF_MOD_TRUE:
-				    peerflags |= FLAG_TRUE;
-
-				case CONF_MOD_BURST:
-				    peerflags |= FLAG_BURST;
-				    break;
-
-				case CONF_MOD_IBURST:
-				    peerflags |= FLAG_IBURST;
-				    break;
-
-			        case CONF_MOD_DYNAMIC:
-				    peerflags |= FLAG_DYNAMIC;
-				    break;
-
-#ifdef OPENSSL
-				case CONF_MOD_SKEY:
-				    peerflags |= FLAG_SKEY |
-					FLAG_AUTHENABLE;
-				    break;
-#endif /* OPENSSL */
-
-				case CONF_MOD_TTL:
-				    if (i >= ntokens-1) {
-					msyslog(LOG_ERR,
-					    "ttl: argument required");
-				        errflg = 1;
-				        break;
-				    }
-				    ttl = atoi(tokens[++i]);
-				    if (ttl >= MAX_TTL) {
-					msyslog(LOG_ERR,
-					    "ttl: invalid argument");
-					errflg = 1;
-				    }
-				    break;
-
-				case CONF_MOD_MODE:
-				    if (i >= ntokens-1) {
-					msyslog(LOG_ERR,
-					    "mode: argument required");
-					errflg = 1;
-					break;
-				    }
-				    ttl = atoi(tokens[++i]);
-				    break;
-
-				case CONFIG_UNKNOWN:
-				    errflg = 1;
-				    break;
-			    }
-			if (minpoll > maxpoll) {
-				msyslog(LOG_ERR,
-				    "config error: minpoll > maxpoll");
-				errflg = 1;
-			}
-			if (errflg == 0) {
-			    if (peer_config(&peeraddr,
-				ANY_INTERFACE_CHOOSE(&peeraddr), hmode,
-				peerversion, minpoll, maxpoll, peerflags,
-				ttl, peerkey, peerkeystr) == 0) {
-					msyslog(LOG_ERR,
-						"configuration of %s failed",
-						stoa(&peeraddr));
-			    }
-			} else if (errflg == -1) {
-				save_resolve(tokens[1], hmode, peerversion,
-				    minpoll, maxpoll, peerflags, ttl,
-				    peerkey, peerkeystr);
-			}
-			break;
-
-		    case CONFIG_DRIFTFILE:
-			if (ntokens >= 2)
-			    stats_config(STATS_FREQ_FILE, tokens[1]);
-			else
-			    stats_config(STATS_FREQ_FILE, (char *)0);
-			stats_write_period = stats_write_tolerance = 0;
-			if (ntokens >= 3)
-			     stats_write_period = 60 * atol(tokens[2]);
-			if (stats_write_period <= 0)
-			     stats_write_period = 3600;
-			if (ntokens >= 4) {
-			     double ftemp;
-			     sscanf(tokens[3], "%lf", &ftemp);
-			     stats_write_tolerance = ftemp / 100;
-			}
-			break;
-	
-		    case CONFIG_PIDFILE:
-			if (ntokens >= 2)
-			    stats_config(STATS_PID_FILE, tokens[1]);
-			else
-			    stats_config(STATS_PID_FILE, (char *)0);
-			break;
-
-		    case CONFIG_END:
-			for ( i = 0; i <= includelevel; i++ ) {
-				fclose(fp[i]);
-			}
-			break;
-			
-		    case CONFIG_INCLUDEFILE:
-			if (ntokens < 2) {
-			    msyslog(LOG_ERR, "includefile needs one argument");
-			    break;
-			}
-			if (includelevel >= MAXINCLUDELEVEL) {
-			    fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-			    msyslog(LOG_INFO, "getconfig: Maximum include file level exceeded.");
-			    break;
-			}
-			includefile = fopen(FindConfig(tokens[1]), "r");
-			if (includefile == NULL) {
-			    fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(tokens[1]));
-			    msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(tokens[1]));
-			    break;
-			}
-			fp[++includelevel] = includefile;
-			break;
-
-		    case CONFIG_LOGFILE:
-			if (ntokens >= 2) {
-				FILE *new_file;
-
-				new_file = fopen(tokens[1], "a");
-				if (new_file != NULL) {
-					NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-					    msyslog(LOG_NOTICE, "logging to file %s", tokens[1]);
-					if (syslog_file != NULL &&
-					    fileno(syslog_file) != fileno(new_file))
-					    (void)fclose(syslog_file);
-
-					syslog_file = new_file;
-					syslogit = 0;
-				}
-				else
-				    msyslog(LOG_ERR,
-					    "Cannot open log file %s",
-					    tokens[1]);
-			}
-			else
-			    msyslog(LOG_ERR, "logfile needs one argument");
-			break;
-
-		    case CONFIG_LOGCONFIG:
-			for (i = 1; i < ntokens; i++)
-			{
-				int add = 1;
-				int equals = 0;
-				char * s = &tokens[i][0];
-
-				switch (*s) {
-				    case '+':
-				    case '-':
-				    case '=':
-					add = *s == '+';
-					equals = *s == '=';
-					s++;
-					break;
-
-				    default:
-					break;
-				}
-				if (equals) {
-					ntp_syslogmask = get_logmask(s);
-				} else {				
-					if (add) {
-						ntp_syslogmask |= get_logmask(s);
-					} else {
-						ntp_syslogmask &= ~get_logmask(s);
-					}
-				}
-#ifdef DEBUG
-				if (debug)
-				    printf("ntp_syslogmask = 0x%08lx (%s)\n", ntp_syslogmask, tokens[i]);
-#endif
-			}
-			break;
-
-		    case CONFIG_BROADCASTCLIENT:
-			if (ntokens == 1) {
-				proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
-			} else {
-				proto_config(PROTO_BROADCLIENT, 2, 0., NULL);
-			}
-			break;
-
-		    case CONFIG_MULTICASTCLIENT:
-		    case CONFIG_MANYCASTSERVER:
-			if (ntokens > 1) {
-				istart = 1;
-				memset((char *)&peeraddr, 0, sizeof(peeraddr));
-				peeraddr.ss_family = default_ai_family;
-				switch (matchkey(tokens[istart],
-				    addr_type, 0)) {
-				case CONF_ADDR_IPV4:
-					peeraddr.ss_family = AF_INET;
-					istart++;
-					break;
-				case CONF_ADDR_IPV6:
-					peeraddr.ss_family = AF_INET6;
-					istart++;
-					break;
-				}
-				/*
-				 * Abuse maskaddr to store the prefered ip
-				 * version.
-				 */
-				memset((char *)&maskaddr, 0, sizeof(maskaddr));
-				maskaddr.ss_family = peeraddr.ss_family;
-
-				for (i = istart; i < ntokens; i++) {
-					memset((char *)&peeraddr, 0,
-					    sizeof(peeraddr));
-					peeraddr.ss_family = maskaddr.ss_family;
-					if (getnetnum(tokens[i], &peeraddr, 1,
-						      t_UNK)  == 1)
-					    proto_config(PROTO_MULTICAST_ADD,
-							 0, 0., &peeraddr);
-				}
-			} else
-			    proto_config(PROTO_MULTICAST_ADD,
-					 0, 0., NULL);
-			if (tok == CONFIG_MULTICASTCLIENT)
-				proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
-			else if (tok == CONFIG_MANYCASTSERVER)
-				sys_manycastserver = 1;
-			break;
-
-		    case CONFIG_KEYS:
-			if (ntokens >= 2) {
-				getauthkeys(tokens[1]);
-			}
-			break;
-
-		    case CONFIG_KEYSDIR:
-			if (ntokens < 2) {
-			    msyslog(LOG_ERR,
-				"Keys directory name required");
-			    break;
-			}
-			keysdir = (char *)emalloc(strlen(tokens[1]) + 1);
-			strcpy(keysdir, tokens[1]);
-			break;
-
-		    case CONFIG_TINKER:
-			for (i = 1; i < ntokens; i++) {
-			    int temp;
-			    double ftemp;
-
-			    temp = matchkey(tokens[i++], tinker_keywords, 1);
-			    if (i > ntokens - 1) {
-				msyslog(LOG_ERR,
-				    "tinker: missing argument");
-				errflg++;
-				break;
-			    }
-			    sscanf(tokens[i], "%lf", &ftemp);
-			    switch(temp) {
-
-			    case CONF_CLOCK_MAX:
-                                loop_config(LOOP_MAX, ftemp);
-				break;
-
-			    case CONF_CLOCK_PANIC:
-				loop_config(LOOP_PANIC, ftemp);
-				break;
-
-			    case CONF_CLOCK_PHI:
-				loop_config(LOOP_PHI, ftemp);
-				break;
-
-			    case CONF_CLOCK_MINSTEP:
-				loop_config(LOOP_MINSTEP, ftemp);
-				break;
-
-			    case CONF_CLOCK_ALLAN:
-				loop_config(LOOP_ALLAN, ftemp);
-				break;
-
-			    case CONF_CLOCK_HUFFPUFF:
-				loop_config(LOOP_HUFFPUFF, ftemp);
-				break;
-
-			    case CONF_CLOCK_FREQ:
-				loop_config(LOOP_FREQ, ftemp);
-
-			    case CONF_CLOCK_CODEC:
-				loop_config(LOOP_CODEC, ftemp);
-				break;  
-			    }
-			}
-			break;
-
-		    case CONFIG_TOS:
-			for (i = 1; i < ntokens; i++) {
-			    int temp;
-			    double ftemp;
-
-			    temp = matchkey(tokens[i++], tos_keywords, 1);
-			    if (i > ntokens - 1) {
-				msyslog(LOG_ERR,
-				    "tos: missing argument");
-				errflg++;
-				break;
-			    }
-			    sscanf(tokens[i], "%lf", &ftemp);
-			    switch(temp) {
-
-			    case CONF_TOS_MINCLOCK:
-				proto_config(PROTO_MINCLOCK, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MAXCLOCK:
-				proto_config(PROTO_MAXCLOCK, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MINSANE:
-				proto_config(PROTO_MINSANE, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_FLOOR:
-				proto_config(PROTO_FLOOR, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_CEILING:
-				proto_config(PROTO_CEILING, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_COHORT:
-				proto_config(PROTO_COHORT, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MINDISP:
-				proto_config(PROTO_MINDISP, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MAXDIST:
-				proto_config(PROTO_MAXDIST, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_MAXHOP:
-				proto_config(PROTO_MAXHOP, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_ORPHAN:
-				proto_config(PROTO_ORPHAN, 0, ftemp, NULL);
-				break;
-
-			    case CONF_TOS_BEACON:
-				proto_config(PROTO_BEACON, 0, ftemp, NULL);
-				break;
-			    }
-			}
-			break;
-
-		    case CONFIG_TTL:
-			for (i = 1; i < ntokens && i < MAX_TTL; i++) {
-			    sys_ttl[i - 1] = (u_char) atoi(tokens[i]);
-			    sys_ttlmax = i - 1;
-			}
-			break;
-
-		    case CONFIG_DISCARD:
-			for (i = 1; i < ntokens; i++) {
-			    int temp;
-
-			    temp = matchkey(tokens[i++],
-				discard_keywords, 1);
-			    if (i > ntokens - 1) {
-				msyslog(LOG_ERR,
-				    "discard: missing argument");
-				errflg++;
-				break;
-			    }
-			    switch(temp) {
-			    case CONF_DISCARD_AVERAGE:
-				res_avg_interval = atoi(tokens[i]);
-				break;
-
-			    case CONF_DISCARD_MINIMUM:
-				res_min_interval = atoi(tokens[i]);
-				break;
-
-			    case CONF_DISCARD_MONITOR:
-				mon_age = atoi(tokens[i]);
-				break;
-
-			    default:
-				msyslog(LOG_ERR,
-				    "discard: unknown keyword");
-				break;
-			    }
-			}
-			break;
-
-#ifdef OPENSSL
-		    case CONFIG_REVOKE:
-			if (ntokens >= 2)
-			    sys_revoke = (u_char) max(atoi(tokens[1]), KEY_REVOKE);
-			break;
-
-		    case CONFIG_AUTOMAX:
-			if (ntokens >= 2)
-			    sys_automax = 1 << max(atoi(tokens[1]), 10);
-			break;
-
-		    case CONFIG_CRYPTO:
-			if (ntokens == 1) {
-				crypto_config(CRYPTO_CONF_NONE, NULL);
-				break;
-			}
-			for (i = 1; i < ntokens; i++) {
-			    int temp;
-
-			    temp = matchkey(tokens[i++],
-				 crypto_keywords, 1);
-			    if (i > ntokens - 1) {
-				msyslog(LOG_ERR,
-				    "crypto: missing argument");
-				errflg++;
-				break;
-			    }
-			    switch(temp) {
-
-			    case CONF_CRYPTO_CERT:
-				crypto_config(CRYPTO_CONF_CERT,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_RSA:
-				crypto_config(CRYPTO_CONF_PRIV,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_IDENT:
-				crypto_config(CRYPTO_CONF_IDENT,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_IFFPAR:
-				crypto_config(CRYPTO_CONF_IFFPAR,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_GQPAR:
-				crypto_config(CRYPTO_CONF_GQPAR,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_MVPAR:
-				crypto_config(CRYPTO_CONF_MVPAR,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_LEAP:
-				crypto_config(CRYPTO_CONF_LEAP,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_PW:
-				crypto_config(CRYPTO_CONF_PW,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_RAND:
-				crypto_config(CRYPTO_CONF_RAND,
-				    tokens[i]);
-				break;
-
-			    case CONF_CRYPTO_SIGN:
-				crypto_config(CRYPTO_CONF_SIGN,
-				    tokens[i]);
-				break;
-
-			    default:
-				msyslog(LOG_ERR,
-				    "crypto: unknown keyword");
-				break;
-			    }
-			}
-			break;
-#endif /* OPENSSL */
-
-		    case CONFIG_RESTRICT:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR, "restrict requires an address");
-				break;
-			}
-			istart = 1;
-			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			peeraddr.ss_family = default_ai_family;
-			switch (matchkey(tokens[istart], addr_type, 0)) {
-			case CONF_ADDR_IPV4:
-				peeraddr.ss_family = AF_INET;
-				istart++;
-				break;
-			case CONF_ADDR_IPV6:
-				peeraddr.ss_family = AF_INET6;
-				istart++;
-				break;
-			}
-
-			/*
-			 * Assume default means an IPv4 address, except
-			 * if forced by a -4 or -6.
-			 */
-			if (STREQ(tokens[istart], "default")) {
-				if (peeraddr.ss_family == 0)
-					peeraddr.ss_family = AF_INET;
-			} else if (getnetnum(tokens[istart], &peeraddr, 1,
-					      t_UNK) != 1)
-				break;
-
-			/*
-			 * Use peerversion as flags, peerkey as mflags.  Ick.
-			 */
-			peerversion = 0;
-			peerkey = 0;
-			errflg = 0;
-			SET_HOSTMASK(&maskaddr, peeraddr.ss_family);
-			istart++;
-			for (i = istart; i < ntokens; i++) {
-				switch (matchkey(tokens[i], res_keywords, 1)) {
-				    case CONF_RES_MASK:
-					if (i >= ntokens-1) {
-						msyslog(LOG_ERR,
-							"mask keyword needs argument");
-						errflg++;
-						break;
-					}
-					i++;
-					if (getnetnum(tokens[i], &maskaddr, 1,
-						       t_MSK) != 1)
-					    errflg++;
-					break;
-
-				    case CONF_RES_IGNORE:
-					peerversion |= RES_IGNORE;
-					break;
-
-				    case CONF_RES_NOSERVE:
-					peerversion |= RES_DONTSERVE;
-					break;
-
-				    case CONF_RES_NOTRUST:
-					peerversion |= RES_DONTTRUST;
-					break;
-
-				    case CONF_RES_NOQUERY:
-					peerversion |= RES_NOQUERY;
-					break;
-
-				    case CONF_RES_NOMODIFY:
-					peerversion |= RES_NOMODIFY;
-					break;
-
-				    case CONF_RES_NOPEER:
-					peerversion |= RES_NOPEER;
-					break;
-
-				    case CONF_RES_NOTRAP:
-					peerversion |= RES_NOTRAP;
-					break;
-
-				    case CONF_RES_LPTRAP:
-					peerversion |= RES_LPTRAP;
-					break;
-
-				    case CONF_RES_NTPPORT:
-					peerkey |= RESM_NTPONLY;
-					break;
-
-				    case CONF_RES_VERSION:
-					peerversion |= RES_VERSION;
-					break;
-
-				    case CONF_RES_DEMOBILIZE:
-					peerversion |= RES_DEMOBILIZE;
-					break;
-
-				    case CONF_RES_LIMITED:
-					peerversion |= RES_LIMITED;
-					break;
-
-				    case CONFIG_UNKNOWN:
-					errflg++;
-					break;
-				}
-			}
-			if (SOCKNUL(&peeraddr))
-			    ANYSOCK(&maskaddr);
-			if (!errflg)
-			    hack_restrict(RESTRICT_FLAGS, &peeraddr, &maskaddr,
-					  (int)peerkey, peerversion);
-			break;
-
-		    case CONFIG_BDELAY:
-			if (ntokens >= 2) {
-				double tmp;
-
-				if (sscanf(tokens[1], "%lf", &tmp) != 1) {
-					msyslog(LOG_ERR,
-						"broadcastdelay value %s undecodable",
-						tokens[1]);
-				} else {
-					proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
-				}
-			}
-			break;
-
-		    case CONFIG_CDELAY:
-                        if (ntokens >= 2) {
-                                u_long ui;
-
-				if (sscanf(tokens[1], "%ld", &ui) != 1)
-					msyslog(LOG_ERR,
-					    "illegal value - line ignored");
-				else
-					proto_config(PROTO_CALLDELAY, ui, 0, NULL);
-			}
-			break;
-
-		    case CONFIG_TRUSTEDKEY:
-			for (i = 1; i < ntokens; i++) {
-				keyid_t tkey;
-
-				tkey = atol(tokens[i]);
-				if (tkey == 0) {
-					msyslog(LOG_ERR,
-						"trusted key %s unlikely",
-						tokens[i]);
-				} else {
-					authtrust(tkey, 1);
-				}
-			}
-			break;
-
-		    case CONFIG_REQUESTKEY:
-			if (ntokens >= 2) {
-				if (!atouint(tokens[1], &ul)) {
-					msyslog(LOG_ERR,
-						"%s is undecodable as request key",
-						tokens[1]);
-				} else if (ul == 0) {
-					msyslog(LOG_ERR,
-						"%s makes a poor request keyid",
-						tokens[1]);
-				} else {
-#ifdef DEBUG
-					if (debug > 3)
-					    printf(
-						    "set info_auth_key to %08lx\n", ul);
-#endif
-					info_auth_keyid = (keyid_t)ul;
-				}
-			}
-			break;
-
-		    case CONFIG_CONTROLKEY:
-			if (ntokens >= 2) {
-				keyid_t ckey;
-
-				ckey = atol(tokens[1]);
-				if (ckey == 0) {
-					msyslog(LOG_ERR,
-						"%s makes a poor control keyid",
-						tokens[1]);
-				} else {
-					ctl_auth_keyid = ckey;
-				}
-			}
-			break;
-
-		    case CONFIG_TRAP:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no address for trap command, line ignored");
-				break;
-			}
-			istart = 1;
-			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			peeraddr.ss_family = default_ai_family;
-			switch (matchkey(tokens[istart], addr_type, 0)) {
-			case CONF_ADDR_IPV4:
-				peeraddr.ss_family = AF_INET;
-				istart++;
-				break;
-			case CONF_ADDR_IPV6:
-				peeraddr.ss_family = AF_INET6;
-				istart++;
-				break;
-			}
-
-			if (getnetnum(tokens[istart], &peeraddr, 1, t_UNK) != 1)
-			    break;
-
-			/*
-			 * Use peerversion for port number.  Barf.
-			 */
-			errflg = 0;
-			peerversion = 0;
-			localaddr = 0;
-			istart++;
-			for (i = istart; i < ntokens-1; i++)
-			    switch (matchkey(tokens[i], trap_keywords, 1)) {
-				case CONF_TRAP_PORT:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "trap port requires an argument");
-					    errflg = 1;
-					    break;
-				    }
-				    peerversion = atoi(tokens[++i]);
-				    if (peerversion <= 0
-					|| peerversion > 32767) {
-					    msyslog(LOG_ERR,
-						    "invalid port number %s, trap ignored",
-						    tokens[i]);
-					    errflg = 1;
-				    }
-				    break;
-
-				case CONF_TRAP_INTERFACE:
-				    if (i >= ntokens-1) {
-					    msyslog(LOG_ERR,
-						    "trap interface requires an argument");
-					    errflg = 1;
-					    break;
-				    }
-
-				    memset((char *)&maskaddr, 0,
-					sizeof(maskaddr));
-				    maskaddr.ss_family = peeraddr.ss_family;
-				    if (getnetnum(tokens[++i],
-						   &maskaddr, 1, t_UNK) != 1) {
-					    errflg = 1;
-					    break;
-				    }
-
-				    localaddr = findinterface(&maskaddr);
-				    if (localaddr == NULL) {
-					    msyslog(LOG_ERR,
-						    "can't find interface with address %s",
-						    stoa(&maskaddr));
-					    errflg = 1;
-				    }
-				    break;
-
-				case CONFIG_UNKNOWN:
-				    errflg++;
-				    break;
-			    }
-
-			if (!errflg) {
-				if (peerversion != 0)
-				    ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons( (u_short) peerversion);
-				else
-				    ((struct sockaddr_in6*)&peeraddr)->sin6_port = htons(TRAPPORT);
-				if (localaddr == NULL)
-				    localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-				if (!ctlsettrap(&peeraddr, localaddr, 0,
-						NTP_VERSION))
-				    msyslog(LOG_ERR,
-					    "can't set trap for %s, no resources",
-					    stoa(&peeraddr));
-			}
-			break;
-
-		    case CONFIG_FUDGE:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no address for fudge command, line ignored");
-				break;
-			}
-			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			if (getnetnum(tokens[1], &peeraddr, 1, t_REF) != 1)
-			    break;
-
-			if (!ISREFCLOCKADR(&peeraddr)) {
-				msyslog(LOG_ERR,
-					"%s is inappropriate address for the fudge command, line ignored",
-					stoa(&peeraddr));
-				break;
-			}
-
-			memset((void *)&clock_stat, 0, sizeof clock_stat);
-			fudgeflag = 0;
-			errflg = 0;
-			for (i = 2; i < ntokens-1; i++) {
-				switch (c = matchkey(tokens[i],
-				    fudge_keywords, 1)) {
-				    case CONF_FDG_TIME1:
-					if (sscanf(tokens[++i], "%lf",
-						   &clock_stat.fudgetime1) != 1) {
-						msyslog(LOG_ERR,
-							"fudge %s time1 value in error",
-							stoa(&peeraddr));
-						errflg = i;
-						break;
-					}
-					clock_stat.haveflags |= CLK_HAVETIME1;
-					break;
-
-				    case CONF_FDG_TIME2:
-					if (sscanf(tokens[++i], "%lf",
-						   &clock_stat.fudgetime2) != 1) {
-						msyslog(LOG_ERR,
-							"fudge %s time2 value in error",
-							stoa(&peeraddr));
-						errflg = i;
-						break;
-					}
-					clock_stat.haveflags |= CLK_HAVETIME2;
-					break;
-
-
-				    case CONF_FDG_STRATUM:
-				      if (!atoint(tokens[++i], &stratum))
-					{
-						msyslog(LOG_ERR,
-							"fudge %s stratum value in error",
-							stoa(&peeraddr));
-						errflg = i;
-						break;
-					}
-					clock_stat.fudgeval1 = stratum;
-					clock_stat.haveflags |= CLK_HAVEVAL1;
-					break;
-
-				    case CONF_FDG_REFID:
-					i++;
-					memcpy(&clock_stat.fudgeval2,
-					    tokens[i], min(strlen(tokens[i]),
-					    4));
-					clock_stat.haveflags |= CLK_HAVEVAL2;
-					break;
-
-				    case CONF_FDG_FLAG1:
-				    case CONF_FDG_FLAG2:
-				    case CONF_FDG_FLAG3:
-				    case CONF_FDG_FLAG4:
-					if (!atouint(tokens[++i], &fudgeflag)
-					    || fudgeflag > 1) {
-						msyslog(LOG_ERR,
-							"fudge %s flag value in error",
-							stoa(&peeraddr));
-						errflg = i;
-						break;
-					}
-					switch(c) {
-					    case CONF_FDG_FLAG1:
-						c = CLK_FLAG1;
-						clock_stat.haveflags|=CLK_HAVEFLAG1;
-						break;
-					    case CONF_FDG_FLAG2:
-						c = CLK_FLAG2;
-						clock_stat.haveflags|=CLK_HAVEFLAG2;
-						break;
-					    case CONF_FDG_FLAG3:
-						c = CLK_FLAG3;
-						clock_stat.haveflags|=CLK_HAVEFLAG3;
-						break;
-					    case CONF_FDG_FLAG4:
-						c = CLK_FLAG4;
-						clock_stat.haveflags|=CLK_HAVEFLAG4;
-						break;
-					}
-					if (fudgeflag == 0)
-					    clock_stat.flags &= ~c;
-					else
-					    clock_stat.flags |= c;
-					break;
-
-				    case CONFIG_UNKNOWN:
-					errflg = -1;
-					break;
-				}
-			}
-
-#ifdef REFCLOCK
-			/*
-			 * If reference clock support isn't defined the
-			 * fudge line will still be accepted and syntax
-			 * checked, but will essentially do nothing.
-			 */
-			if (!errflg) {
-				refclock_control(&peeraddr, &clock_stat,
-				    (struct refclockstat *)0);
-			}
-#endif
-			break;
-
-		    case CONFIG_STATSDIR:
-			if (ntokens >= 2)
-				stats_config(STATS_STATSDIR,tokens[1]);
-			break;
-
-		    case CONFIG_STATISTICS:
-			for (i = 1; i < ntokens; i++) {
-				filegen = filegen_get(tokens[i]);
-
-				if (filegen == NULL) {
-					msyslog(LOG_ERR,
-						"no statistics named %s available",
-						tokens[i]);
-					continue;
-				}
-#ifdef DEBUG
-				if (debug > 3)
-				    printf("enabling filegen for %s statistics \"%s%s\"\n",
-					   tokens[i], filegen->prefix, filegen->basename);
-#endif
-				filegen->flag |= FGEN_FLAG_ENABLED;
-			}
-			break;
-
-		    case CONFIG_FILEGEN:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no id for filegen command, line ignored");
-				break;
-			}
-
-			filegen = filegen_get(tokens[1]);
-			if (filegen == NULL) {
-				msyslog(LOG_ERR,
-					"unknown filegen \"%s\" ignored",
-					tokens[1]);
-				break;
-			}
-			/*
-			 * peerversion is (ab)used for filegen file (index)
-			 * peerkey	   is (ab)used for filegen type
-			 * peerflags   is (ab)used for filegen flags
-			 */
-			peerversion = 0;
-			peerkey =	  filegen->type;
-			peerflags =   filegen->flag;
-			errflg = 0;
-
-			for (i = 2; i < ntokens; i++) {
-				switch (matchkey(tokens[i],
-				    filegen_keywords, 1)) {
-				    case CONF_FGEN_FILE:
-					if (i >= ntokens - 1) {
-						msyslog(LOG_ERR,
-							"filegen %s file requires argument",
-							tokens[1]);
-						errflg = i;
-						break;
-					}
-					peerversion = ++i;
-					break;
-				    case CONF_FGEN_TYPE:
-					if (i >= ntokens -1) {
-						msyslog(LOG_ERR,
-							"filegen %s type requires argument",
-							tokens[1]);
-						errflg = i;
-						break;
-					}
-					peerkey = matchkey(tokens[++i],
-					    fgen_types, 1);
-					if (peerkey == CONFIG_UNKNOWN) {
-						msyslog(LOG_ERR,
-							"filegen %s unknown type \"%s\"",
-							tokens[1], tokens[i]);
-						errflg = i;
-						break;
-					}
-					break;
-
-				    case CONF_FGEN_FLAG_LINK:
-					peerflags |= FGEN_FLAG_LINK;
-					break;
-
-				    case CONF_FGEN_FLAG_NOLINK:
-					peerflags &= ~FGEN_FLAG_LINK;
-					break;
-
-				    case CONF_FGEN_FLAG_ENABLE:
-					peerflags |= FGEN_FLAG_ENABLED;
-					break;
-
-				    case CONF_FGEN_FLAG_DISABLE:
-					peerflags &= ~FGEN_FLAG_ENABLED;
-					break;
-				}
-			}
-			if (!errflg)
-				filegen_config(filegen, tokens[peerversion],
-			           (u_char)peerkey, (u_char)peerflags);
-			break;
-
-		    case CONFIG_SETVAR:
-			if (ntokens < 2) {
-				msyslog(LOG_ERR,
-					"no value for setvar command - line ignored");
-			} else {
-				set_sys_var(tokens[1], strlen(tokens[1])+1,
-					    (u_short) (RW |
-					    ((((ntokens > 2)
-					       && !strcmp(tokens[2],
-							  "default")))
-					     ? DEF
-					     : 0)));
-			}
-			break;
-
-		    case CONFIG_ENABLE:
-			for (i = 1; i < ntokens; i++) {
-				int flag;
-
-				flag = matchkey(tokens[i], flags_keywords, 1);
-				if (flag == CONFIG_UNKNOWN) {
-					msyslog(LOG_ERR,
-						"enable unknown flag %s",
-						tokens[i]);
-					errflg = 1;
-					break;
-				}
-				proto_config(flag, 1, 0., NULL);
-			}
-			break;
-
-		    case CONFIG_DISABLE:
-			for (i = 1; i < ntokens; i++) {
-				int flag;
-
-				flag = matchkey(tokens[i], flags_keywords, 1);
-				if (flag == CONFIG_UNKNOWN) {
-					msyslog(LOG_ERR,
-						"disable unknown flag %s",
-						tokens[i]);
-					errflg = 1;
-					break;
-				}
-				proto_config(flag, 0, 0., NULL);
-			}
-			break;
-
-		    case CONFIG_PHONE:
-			for (i = 1; i < ntokens && i < MAXPHONE - 1; i++) {
-				sys_phone[i - 1] =
-				    emalloc(strlen(tokens[i]) + 1);
-				strcpy(sys_phone[i - 1], tokens[i]);
-			}
-			sys_phone[i] = NULL;
-			break;
-
-		    case CONFIG_ADJ: {
-			    double ftemp;
-
-			    sscanf(tokens[1], "%lf", &ftemp);
-			    proto_config(PROTO_ADJ, 0, ftemp, NULL);
-			}
-			break;
-
-		}
-	}
-	if (fp[0])
-		(void)fclose(fp[0]);
-
-#ifdef HAVE_NETINFO
-	if (config_netinfo)
-		free_netinfo_config(config_netinfo);
-#endif /* HAVE_NETINFO */
-
-#if !defined(VMS) && !defined(SYS_VXWORKS)
-	/* find a keyid */
-	if (info_auth_keyid == 0)
-		req_keyid = 65535;
-	else
-		req_keyid = info_auth_keyid;
-
-	/* if doesn't exist, make up one at random */
-	if (!authhavekey(req_keyid)) {
-		char rankey[9];
-		int j;
-
-		for (i = 0; i < 8; i++)
-			for (j = 1; j < 100; ++j) {
-				rankey[i] = (char) (ntp_random() & 0xff);
-				if (rankey[i] != 0) break;
-			}
-		rankey[8] = 0;
-		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
-		authtrust(req_keyid, 1);
-		if (!authhavekey(req_keyid)) {
-			msyslog(LOG_ERR, "getconfig: Couldn't generate a valid random key!");
-			/* HMS: Should this be fatal? */
-		}
-	}
-
-	/* save keyid so we will accept config requests with it */
-	info_auth_keyid = req_keyid;
-#endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
-
-	if (res_fp != NULL) {
-		if (call_resolver) {
-			/*
-			 * Need name resolution
-			 */
-			do_resolve_internal();
-		}
-	}
 }
 
 
@@ -2079,215 +2180,100 @@ gettokens_netinfo (
 
 #endif /* HAVE_NETINFO */
 
-
-/*
- * gettokens - read a line and return tokens
- */
-static int
-gettokens (
-	FILE *fp,
-	char *line,
-	char **tokenlist,
-	int *ntokens
-	)
-{
-	register char *cp;
-	register int ntok;
-	register int quoted = 0;
-
-	/*
-	 * Find start of first token
-	 */
-	again:
-	while ((cp = fgets(line, MAXLINE, fp)) != NULL) {
-		cp = line;
-		while (ISSPACE(*cp))
-			cp++;
-		if (!ISEOL(*cp))
-			break;
-	}
-	if (cp == NULL) {
-		*ntokens = 0;
-		return CONFIG_UNKNOWN;	/* hack.  Is recognized as EOF */
-	}
-
-	/*
-	 * Now separate out the tokens
-	 */
-	for (ntok = 0; ntok < MAXTOKENS; ntok++) {
-		tokenlist[ntok] = cp;
-		while (!ISEOL(*cp) && (!ISSPACE(*cp) || quoted))
-			quoted ^= (*cp++ == '"');
-
-		if (ISEOL(*cp)) {
-			*cp = '\0';
-			break;
-		} else {		/* must be space */
-			*cp++ = '\0';
-			while (ISSPACE(*cp))
-				cp++;
-			if (ISEOL(*cp))
-				break;
-		}
-	}
-
-     /* Heiko: Remove leading and trailing quotes around tokens */
-     {
-            int i,j = 0;
-	    
-		
-			for (i = 0; i < ntok; i++) {	    
-					/* Now check if the first char is a quote and remove that */
-					if ( tokenlist[ntok][0] == '"' )
-							tokenlist[ntok]++;
-
-					/* Now check the last char ... */
-					j = strlen(tokenlist[ntok])-1;
-					if ( tokenlist[ntok][j] == '"' )
-							tokenlist[ntok][j] = '\0';
-			}
-							
-    }
-
-	if (ntok == MAXTOKENS) {
-		--ntok;
-		/* HMS: chomp it to lose the EOL? */
-		msyslog(LOG_ERR,
-		    "gettokens: too many tokens on the line. Ignoring %s",
-		    cp);
-	} else {
-		/*
-		 * Return the match
-		 */
-		*ntokens = ntok + 1;
-		ntok = matchkey(tokenlist[0], keywords, 1);
-		if (ntok == CONFIG_UNKNOWN)
-			goto again;
-	}
-
-	return ntok;
-}
-
-
-
-/*
- * matchkey - match a keyword to a list
- */
-static int
-matchkey(
-	register char *word,
-	register struct keyword *keys,
-	int complain
-	)
-{
-	for (;;) {
-		if (keys->keytype == CONFIG_UNKNOWN) {
-			if (complain)
-				msyslog(LOG_ERR,
-				    "configure: keyword \"%s\" unknown, line ignored",
-				    word);
-			return CONFIG_UNKNOWN;
-		}
-		if (STRSAME(word, keys->text))
-			return keys->keytype;
-		keys++;
-	}
-}
-
-
 /*
  * getnetnum - return a net number (this is crude, but careful)
  */
+
 static int
 getnetnum(
-	const char *num,
-	struct sockaddr_storage *addr,
-	int complain,
-	enum gnn_type a_type
-	)
+    const char *num,
+    struct sockaddr_storage *addr,
+    int complain,
+    enum gnn_type a_type
+    )
 {
-	struct addrinfo hints;
-	struct addrinfo *ptr;
-	int retval;
+    int retval;
+    struct addrinfo *res;
 
-#if 0
-	printf("getnetnum: <%s> is a %s (%d)\n",
-		num,
-		(a_type == t_UNK)
-		? "t_UNK"
-		: (a_type == t_REF)
-		  ? "t_REF"
-		  : (a_type == t_MSK)
-		    ? "t_MSK"
-		    : "???",
-		a_type);
-#endif
+    /* Get all the addresses that resolve to this name */
+    retval = get_multiple_netnums(num, addr, &res, complain, a_type);
 
-	/* Get host address. Looking for UDP datagram connection */
- 	memset(&hints, 0, sizeof (hints));
- 	if (addr->ss_family == AF_INET || addr->ss_family == AF_INET6)
-	    hints.ai_family = addr->ss_family;
-	else
-	    hints.ai_family = AF_UNSPEC;
-	/*
-	 * If we don't have an IPv6 stack, just look up IPv4 addresses
-	 */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS)
-		hints.ai_family = AF_INET;
+    if (retval != 1) {
+        /* Name resolution failed */
+        return retval;
+    }
 
-	hints.ai_socktype = SOCK_DGRAM;
-
-	if (a_type != t_UNK) {
-		hints.ai_flags = AI_NUMERICHOST;
-	}
-
+    memcpy(addr, res->ai_addr, res->ai_addrlen);
 #ifdef DEBUG
-	if (debug > 3)
-		printf("getnetnum: calling getaddrinfo(%s,...)\n", num);
+    if (debug > 1)
+        printf("getnetnum given %s, got %s \n",
+               num, stoa(addr));
 #endif
-	retval = getaddrinfo(num, "ntp", &hints, &ptr);
-	if (retval != 0 ||
-	   (ptr->ai_family == AF_INET6 && isc_net_probeipv6() != ISC_R_SUCCESS)) {
-		if (complain)
-			msyslog(LOG_ERR,
-				"getaddrinfo: \"%s\" invalid host address, ignored",
-				num);
-#ifdef DEBUG
-		if (debug > 0)
-			printf(
-				"getaddrinfo: \"%s\" invalid host address%s.\n",
-				num, (complain)
-				? ", ignored"
-				: "");
-#endif
-		if (retval == 0 && 
-		    ptr->ai_family == AF_INET6 && 
-		    isc_net_probeipv6() != ISC_R_SUCCESS) 
-		{
-			return -1;
-		}
-		else {
-			return 0;
-		}
-	}
-
-	memcpy(addr, ptr->ai_addr, ptr->ai_addrlen);
-#ifdef DEBUG
-	if (debug > 1)
-		printf("getnetnum given %s, got %s (%s/%d)\n",
-		   num, stoa(addr),
-			(a_type == t_UNK)
-			? "t_UNK"
-			: (a_type == t_REF)
-			  ? "t_REF"
-			  : (a_type == t_MSK)
-			    ? "t_MSK"
-			    : "???",
-			a_type);
-#endif
-        freeaddrinfo(ptr);
-	return 1;
+    freeaddrinfo(res);
+    return 1;
 }
+
+static int
+get_multiple_netnums(
+    const char *num,
+    struct sockaddr_storage *addr,
+    struct addrinfo **res,
+    int complain,
+    enum gnn_type a_type
+    )
+{
+    struct addrinfo hints;
+    struct addrinfo *ptr;
+
+    int retval;
+
+    /* Get host address. Looking for UDP datagram connection */
+    memset(&hints, 0, sizeof (hints));
+    if (addr->ss_family == AF_INET || addr->ss_family == AF_INET6)
+        hints.ai_family = addr->ss_family;
+    else
+        hints.ai_family = AF_UNSPEC;
+    /*
+     * If we don't have an IPv6 stack, just look up IPv4 addresses
+     */
+    if (isc_net_probeipv6() != ISC_R_SUCCESS)
+        hints.ai_family = AF_INET;
+
+    hints.ai_socktype = SOCK_DGRAM;
+#ifdef DEBUG
+    if (debug > 3)
+        printf("getaddrinfo %s\n", num);
+#endif
+    retval = getaddrinfo(num, "ntp", &hints, &ptr);
+    if (retval != 0 ||
+        (ptr->ai_family == AF_INET6 && isc_net_probeipv6() != ISC_R_SUCCESS)) {
+        if (complain)
+            msyslog(LOG_ERR,
+                    "getaddrinfo: \"%s\" invalid host address, ignored",
+                    num);
+#ifdef DEBUG
+        if (debug > 0)
+            printf(
+                "getaddrinfo: \"%s\" invalid host address%s.\n",
+                num, (complain)
+                ? ", ignored"
+                : "");
+#endif
+        if (retval == 0 && 
+            ptr->ai_family == AF_INET6 && 
+            isc_net_probeipv6() != ISC_R_SUCCESS) 
+        {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    }
+    *res = ptr;
+
+    return 1;
+}
+
 
 
 #if !defined(VMS) && !defined(SYS_WINNT)
