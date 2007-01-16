@@ -10,9 +10,7 @@
 #include "ntp_cmdargs.h"
 
 #ifdef SIM
-# include "ntpsim.h"
-# include "ntpdsim-opts.h"
-# define OPTSTRUCT	ntpdsimOptions
+/* SK: removed */
 #else
 # include "ntpd-opts.h"
 # define OPTSTRUCT	ntpdOptions
@@ -195,32 +193,11 @@ getCmdOpts(
 		}
 	}
 #ifdef SIM
-	if (HAVE_OPT( SIMBROADCASTDELAY ))
-		sscanf(OPT_ARG( SIMBROADCASTDELAY ), "%lf", &ntp_node.bdly);
 
-	if (HAVE_OPT( PHASENOISE ))
-		sscanf(OPT_ARG( PHASENOISE ), "%lf", &ntp_node.snse);
-
-	if (HAVE_OPT( SIMSLEW ))
-		sscanf(OPT_ARG( SIMSLEW ), "%lf", &ntp_node.slew);
-
-	if (HAVE_OPT( SERVERTIME ))
-		sscanf(OPT_ARG( SERVERTIME ), "%lf", &ntp_node.clk_time);
-
-	if (HAVE_OPT( ENDSIMTIME ))
-		sscanf(OPT_ARG( ENDSIMTIME ), "%lf", &ntp_node.sim_time);
-
-	if (HAVE_OPT( FREQERR ))
-		sscanf(OPT_ARG( FREQERR ), "%lf", &ntp_node.ferr);
-
-	if (HAVE_OPT( WALKNOISE ))
-		sscanf(OPT_ARG( WALKNOISE ), "%lf", &ntp_node.fnse);
-
-	if (HAVE_OPT( NDELAY ))
-		sscanf(OPT_ARG( NDELAY ), "%lf", &ntp_node.ndly);
-
-	if (HAVE_OPT( PDELAY ))
-		sscanf(OPT_ARG( PDELAY ), "%lf", &ntp_node.pdly);
+	/* SK:
+	 * The simulator no longer takes any command line arguments. Hence,
+	 * all the code that was here has been removed.
+	 */
 
 #endif /* SIM */
 

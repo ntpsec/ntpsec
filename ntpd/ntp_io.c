@@ -2572,7 +2572,7 @@ sendpkt(
 	if (err != ERROR_SUCCESS)
 #else
 #ifdef SIM
-        cc = srvr_rply(&ntp_node,  dest, inter, pkt);
+	cc = simulate_server(dest, inter, pkt);
 #else /* SIM */
 	cc = sendto(inter->fd, (char *)pkt, (unsigned int)len, 0, (struct sockaddr *)dest,
 		    SOCKLEN(dest));
