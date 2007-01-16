@@ -30,7 +30,7 @@ dnl AC_PROG_CC_C89
 dnl AC_PROG_CC_STDC
 # We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
-AC_PROG_CC_C_O
+AM_PROG_CC_C_O
 AC_PROG_CPP
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
