@@ -105,6 +105,7 @@
  * Implements the current "goal state" of NTPv4
  * Autokey improvements
  * Much better IPv6 support
+ * [Bug 360] ntpd loses handles with LAN connection disabled.
  * [Bug 239] Fix intermittend autokey failure with multicast clients.
  * Rewrite of the multicast code
  * New version numbering scheme
