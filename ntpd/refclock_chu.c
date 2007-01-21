@@ -65,7 +65,7 @@
  * repeated in the opposite polarity.
  *
  * Format A bursts are sent at seconds 32 through 39 of the minute in
- * hex digits
+ * hex digits (nibble swapped)
  *
  *	6dddhhmmss6dddhhmmss
  *
@@ -144,7 +144,7 @@
  *
  * Each line is preceeded by the code chuA or chuB, as appropriate. If
  * the audio driver is compiled, the current gain (0-255) and relative
- * signal level (0-9999) follow the code. The receiver folume control
+ * signal level (0-9999) follow the code. The receiver volume control
  * should be set so that the gain is somewhere near the middle of the
  * range 0-255, which results in a signal level near 1000.
  *
@@ -204,8 +204,8 @@
 #define	DEVICE		"/dev/chu%d" /* device name and unit */
 #define	SPEED232	B300	/* UART speed (300 baud) */
 #ifdef ICOM
-#define TUNE		.001	/* offset for narrow filter (kHz) */
-#define DWELL		5	/* minutes in a probe cycle */
+#define TUNE		.001	/* offset for narrow filter (MHz) */
+#define DWELL		5	/* minutes in a dwell */
 #define NCHAN		3	/* number of channels */
 #define ISTAGE		3	/* number of integrator stages */
 #endif /* ICOM */
@@ -218,9 +218,9 @@
 #define BAUD		300	/* modulation rate (bps) */
 #define OFFSET		128	/* companded sample offset */
 #define SIZE		256	/* decompanding table size */
-#define	MAXSIG		6000.	/* maximum signal level */
+#define	MAXSGL		6000.	/* maximum signal level */
 #define	MAXCLP		100	/* max clips above reference per s */
-#define	SPAN		1000.	/* min envelope span */
+#define	SPAN		800.	/* min envelope span */
 #define LIMIT		1000.	/* soft limiter threshold */
 #define AGAIN		6.	/* baseband gain */
 #define LAG		10	/* discriminator lag */
@@ -238,27 +238,19 @@
 #define BURST		11	/* max characters per burst */
 #define MINCHAR		9	/* min characters per burst */
 #define MINDIST		28	/* min burst distance (of 40)  */
-#define MINBURST	4	/* min bursts in minute */
 #define MINSYNC		8	/* min sync distance (of 16) */
 #define MINSTAMP	20	/* min timestamps (of 60) */
-#define METRIC		50.	/* min channel metric */
-#define PANIC		1440	/* panic timeout (m) */
+#define METRIC		50	/* min channel metric (of 160) */
 
 /*
- * This is the offset to the last stop bit of the first character, which
- * defines the timecode offset (170 ms). To this is added the receiver
- * delay (4.7 ms), filter delay 0.5 ms), discriminator delay (1.4 ms)
- * and codec delay (0.2 ms) for a total of 176.8 ms. The calibrated
- * delay is within a millisecond or two, depending on strays.
+ * The offset to the last stop bit of the first character, which defines
+ * the timecode offset 170 ms. To this is added the receiver delay 4.7
+ * ms, codec delay 1 ms and modem delay 0.8 ms. The receiver delay was
+ * measured, the codec delay came from the AC97 spec sheet and the modem
+ * delay was measured in simulation. The result is within 0.5 ms as
+ * verified by on-air testing. 
  */
-#define	FUDGE		.1768	/* offset to first stop bit (s) */
-
-/*
- * Hex extension codes (>= 16)
- */
-#define HEX_MISS	16	/* miss _ */
-#define HEX_SOFT	17	/* soft error * */
-#define HEX_HARD	18	/* hard error = */
+#define	FUDGE		.1765	/* offset to first stop bit (s) */
 
 /*
  * Status bits (status)
@@ -326,13 +318,13 @@ struct chuunit {
 	l_fp	timestamp;	/* current buffer timestamp */
 	l_fp	laststamp;	/* last buffer timestamp */
 	l_fp	charstamp;	/* character time as a l_fp */
+	int	second;		/* counts the seconds of the minute */
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
 	char	ident[5];	/* station ID and channel */
 #ifdef ICOM
 	int	fd_icom;	/* ICOM file descriptor */
-	int	chan;		/* data channel */
-	int	achan;		/* active channel */
+	int	chan;		/* radio channel */
 	int	dwell;		/* dwell cycle */
 	struct xmtr xmtr[NCHAN]; /* station metric */
 #endif /* ICOM */
@@ -347,6 +339,8 @@ struct chuunit {
 	int	burdist;	/* burst distance */
 	int	syndist;	/* sync distance */
 	int	burstcnt;	/* format A bursts this minute */
+	double	maxsignal;	/* signal level (modem only) */
+	int	gain;		/* codec gain (modem only) */
 
 	/*
 	 * Format particulars
@@ -363,7 +357,6 @@ struct chuunit {
 	int	fd_audio;	/* audio port file descriptor */
 	double	comp[SIZE];	/* decompanding table */
 	int	port;		/* codec port */
-	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clip count */
 	int	seccnt;		/* second interval counter */
@@ -376,7 +369,6 @@ struct chuunit {
 	double	disc[LAG];	/* discriminator shift register */
 	double	lpf[27];	/* FIR lowpass filter */
 	double	monitor;	/* audio monitor */
-	double	maxsignal;	/* signal level */
 	int	discptr;	/* discriminator pointer */
 
 	/*
@@ -385,6 +377,7 @@ struct chuunit {
 	double	baud;		/* baud interval */
 	struct surv surv[8];	/* UART survivor structures */
 	int	decptr;		/* decode pointer */
+	int	decpha;		/* decode phase */
 	int	dbrk;		/* holdoff counter */
 #endif /* HAVE_AUDIO */
 };
@@ -395,6 +388,7 @@ struct chuunit {
 static	int	chu_start	(int, struct peer *);
 static	void	chu_shutdown	(int, struct peer *);
 static	void	chu_receive	(struct recvbuf *);
+static	void	chu_second	(int, struct peer *);
 static	void	chu_poll	(int, struct peer *);
 
 /*
@@ -442,7 +436,7 @@ struct	refclock refclock_chu = {
 	noentry,		/* not used (old chu_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old chu_buginfo) */
-	NOFLAGS			/* not used */
+	chu_second		/* housekeeping timer */
 };
 
 
@@ -674,15 +668,15 @@ chu_audio_receive(
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
-		 * Clip noise spikes greater than MAXSIG. If no clips,
+		 * Clip noise spikes greater than MAXSgl. If no clips,
 		 * increase the gain a tad; if the clips are too high, 
 		 * decrease a tad.
 		 */
-		if (sample > MAXSIG) {
-			sample = MAXSIG;
+		if (sample > MAXSGL) {
+			sample = MAXSGL;
 			up->clipcnt++;
-		} else if (sample < -MAXSIG) {
-			sample = -MAXSIG;
+		} else if (sample < -MAXSGL) {
+			sample = -MAXSGL;
 			up->clipcnt++;
 		}
 		chu_rf(peer, sample);
@@ -693,7 +687,6 @@ chu_audio_receive(
 		 */
 		up->seccnt = (up->seccnt + 1) % SECOND;
 		if (up->seccnt == 0) {
-			pp->second = (pp->second + 1) % 60;
 			chu_gain(peer);
 		}
 	}
@@ -750,7 +743,8 @@ chu_rf(
 
 	/*
 	 * Bandpass filter. 4th-order elliptic, 500-Hz bandpass centered
-	 * at 2125 Hz. Passband ripple 0.3 dB, stopband ripple 50 dB.
+	 * at 2125 Hz. Passband ripple 0.3 dB, stopband ripple 50 dB,
+	 * phase delay 0.24 ms.
 	 */
 	signal = (up->bpf[8] = up->bpf[7]) * 5.844676e-01;
 	signal += (up->bpf[7] = up->bpf[6]) * 4.884860e-01;
@@ -796,7 +790,7 @@ chu_rf(
 		disc = -SQRT(-disc);
 
 	/*
-	 * Lowpass filter. Raised cosine, Ts = 1 / 300, beta = 0.1.
+	 * Lowpass filter. Raised cosine FIR, Ts = 1 / 300, beta = 0.1.
 	 */
 	lpf = (up->lpf[26] = up->lpf[25]) * 2.538771e-02;
 	lpf += (up->lpf[25] = up->lpf[24]) * 1.084671e-01;
@@ -842,13 +836,16 @@ chu_rf(
 		sp = &up->surv[up->decptr];
 		sp->cstamp = up->timestamp;
 		chu_uart(sp, -lpf * AGAIN);
-		if (up->decptr != 0)
-			return;
-
 		if (up->dbrk > 0) {
 			up->dbrk--;
-			return;
+			if (up->dbrk > 0)
+				return;
+
+			up->decpha = up->decptr;
 		}
+		if (up->decptr != up->decpha)
+			return;
+
 		dist = 0;
 		j = -1;
 		for (i = 0; i < 8; i++) {
@@ -870,10 +867,16 @@ chu_rf(
 		if (j < 0)
 			return;
 
+		/*
+		 * Process the character, then blank the decoder until
+		 * the end of the next character.This sets the decoding
+		 * phase of the entire burst from the phase of the first
+		 * character.
+		 */
 		up->maxsignal = up->surv[j].span;
-		chu_decode(peer, (up->surv[j].uart >> 1) &
-		    0xff, up->surv[j].cstamp);
-		up->dbrk = 10;
+		chu_decode(peer, (up->surv[j].uart >> 1) & 0xff,
+		    up->surv[j].cstamp);
+		up->dbrk = 88;
 	}
 }
 
@@ -915,12 +918,15 @@ chu_uart(
 	}
 
 	/*
-	 * Determine the slice level midway beteen the maximum and
-	 * minimum and the span as the maximum less the minimum. Compute
-	 * the distance on the assumption the first and last bits must
-	 * be mark, the second space and the rest either mark or space.
+	 * Determine the span as the maximum less the minimum and the
+	 * slice level as the minimum plus a fraction of the span. Note
+	 * the slight bias toward mark to correct for the modem tendency
+	 * to make more mark than space errors. Compute the distance on
+	 * the assumption the last two bits must be mark, the first
+	 * space and the rest either mark or space. 
 	 */ 
-	slice = (es_max + es_min) / 2.;
+	sp->span = es_max - es_min;
+	slice = es_min + .45 * sp->span;
 	dist = 0;
 	sp->uart = 0;
 	for (i = 1; i < 12; i++) {
@@ -928,9 +934,9 @@ chu_uart(
 		dtemp = sp->shift[i];
 		if (dtemp > slice)
 			sp->uart |= 0x1;
-		if (i == 1 || i == 11) {
+		if (i == 1 || i == 2) {
 			dist += dtemp - es_min;
-		} else if (i == 10) {
+		} else if (i == 11) {
 			dist += es_max - dtemp;
 		} else {
 			if (dtemp > slice)
@@ -939,7 +945,6 @@ chu_uart(
 				dist += es_max - dtemp;
 		}
 	}
-	sp->span = es_max - es_min;
 	sp->dist = dist / (11 * sp->span);
 }
 #endif /* HAVE_AUDIO */
@@ -1090,7 +1095,6 @@ chu_b(
 
 	u_char	code[11];	/* decoded timecode */
 	char	tbuf[80];	/* trace buffer */
-	l_fp	offset;		/* timestamp offset */
 	int	i;
 
 	pp = peer->procptr;
@@ -1098,10 +1102,10 @@ chu_b(
 
 	/*
 	 * In a format B burst, a character is considered valid only if
-	 * the first occurrence matches the last occurrence. The burst
-	 * is considered valid only if all characters are valid; that
-	 * is, only if the distance is 40. Note that once a valid frame
-	 * has been found errors are ignored.
+	 * the first occurence matches the last occurence. The burst is
+	 * considered valid only if all characters are valid; that is,
+	 * only if the distance is 40. Note that once a valid frame has
+	 * been found errors are ignored.
 	 */
 	sprintf(tbuf, "chuB %04x %4.0f %2d %2d ", up->status,
 	    up->maxsignal, nchar, -up->burdist);
@@ -1117,11 +1121,10 @@ chu_b(
 		up->status |= BFRAME;
 		return;
 	}
-	up->status |= BVALID;
 
 	/*
-	 * Convert the burst data to internal format. If this succeeds,
-	 * save the timestamps for later.
+	 * Convert the burst data to internal format. Don't bother with
+	 * the timestamps.
 	 */
 	for (i = 0; i < 5; i++) {
 		code[2 * i] = hexchar[up->cbuf[i] & 0xf];
@@ -1133,17 +1136,9 @@ chu_b(
 		up->status |= BFORMAT;
 		return;
 	}
+	up->status |= BVALID;
 	if (up->leap & 0x8)
 		up->dut = -up->dut;
-	offset.l_ui = 31;
-	offset.l_f = 0;
-	for (i = 0; i < nchar && i < 10; i++) {
-		up->tstamp[up->ntstamp] = up->cstamp[i];
-		L_SUB(&up->tstamp[up->ntstamp], &offset);
-		L_ADD(&offset, &up->charstamp);
-		if (up->ntstamp < MAXSTAGE - 1) 
-			up->ntstamp++;
-	}
 }
 
 
@@ -1172,7 +1167,7 @@ chu_a(
 	 * Determine correct burst phase. There are three cases
 	 * corresponding to in-phase, one character early or one
 	 * character late. These cases are distinguished by the position
-	 * of the framing digits x6 at positions 0 and 5 and x3 at
+	 * of the framing digits 0x6 at positions 0 and 5 and 0x3 at
 	 * positions 4 and 9. The correct phase is when the distance
 	 * relative to the framing digits is maximum. The burst is valid
 	 * only if the maximum distance is at least MINSYNC.
@@ -1193,14 +1188,18 @@ chu_a(
 			k = i;
 		}
 	}
+
+	/*
+	 * Extract the second number; it must be in the range 2 through
+	 * 9 and the two repititions must be the same.
+	 */
 	temp = (up->cbuf[k + 4] >> 4) & 0xf;
-	if (temp > 9 || k + 9 >= nchar || temp != ((up->cbuf[k + 9] >>
-	    4) & 0xf))
+	if (temp < 2 || temp > 9 || k + 9 >= nchar || temp !=
+	    ((up->cbuf[k + 9] >> 4) & 0xf))
 		temp = 0;
 	sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
 	    up->status, up->maxsignal, nchar, up->burdist, k,
 	    up->syndist, temp);
-
 	for (i = 0; i < nchar; i++)
 		sprintf(&tbuf[strlen(tbuf)], "%02x",
 		    up->cbuf[i]);
@@ -1222,8 +1221,11 @@ chu_a(
 	 * processing. In addition, the seconds decode is advanced from
 	 * the previous burst to the current one.
 	 */
-	if (temp != 0) {
-		pp->second = 30 + temp;
+	if (temp == 0) {
+		up->status |= AFORMAT;
+	} else {
+		up->status |= AVALID;
+		up->second = pp->second = 30 + temp;
 		offset.l_ui = 30 + temp;
 		offset.l_f = 0;
 		i = 0;
@@ -1235,7 +1237,7 @@ chu_a(
 			up->tstamp[up->ntstamp] = up->cstamp[i];
 			L_SUB(&up->tstamp[up->ntstamp], &offset);
 			L_ADD(&offset, &up->charstamp);
-			if (up->ntstamp < MAXSTAGE - 1) 
+			if (up->ntstamp < MAXSTAGE - 1)
 				up->ntstamp++;
 		}
 		while (temp > up->prevsec) {
@@ -1248,6 +1250,10 @@ chu_a(
 			up->prevsec++;
 		}
 	}
+
+	/*
+	 * Stash the data in the decoding matrix.
+	 */
 	i = -(2 * k);
 	for (j = 0; j < nchar; j++) {
 		if (i < 0 || i > 18) {
@@ -1259,7 +1265,6 @@ chu_a(
 		up->decode[i][(up->cbuf[j] >> 4) & 0xf]++;
 		i++;
 	}
-	up->status |= AVALID;
 	up->burstcnt++;
 }
 
@@ -1274,6 +1279,22 @@ chu_poll(
 	)
 {
 	struct refclockproc *pp;
+
+	pp = peer->procptr;
+	pp->polls++;
+}
+
+
+/*
+ * chu_second - process minute data
+ */
+static void
+chu_second(
+	int unit,
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	struct refclockproc *pp;
 	struct chuunit *up;
 	l_fp	offset;
 	char	synchar, qual, leapchar;
@@ -1282,36 +1303,24 @@ chu_poll(
 
 	pp = peer->procptr;
 	up = (struct chuunit *)pp->unitptr;
-	if (pp->coderecv == pp->codeproc)
-		up->errflg = CEVNT_TIMEOUT;
-	else
-		pp->polls++;
 
 	/*
-	 * If once in sync and the radio has not been heard for awhile
-	 * (30 m), it is no longer reachable. If not heard in a long
-	 * while (one day), turn out the lights and start from scratch.
+	 * This routine is called once per minute to process the
+	 * accumulated burst data. We do a bit of fancy footwork so that
+	 * this doesn't run while burst data are being accumulated.
 	 */
-	minset = ((current_time - peer->update) + 30) / 60;
-	if (up->status & INSYNC && minset > PANIC)
-		up->status = 0;
+	up->second = (up->second + 1) % 60;
+	if (up->second != 0)
+		return;
 
 	/*
 	 * Process the last burst, if still in the burst buffer.
-	 * Don't mess with anything if nothing has been heard. If the
-	 * minute contains a valid A frame and valid B frame, assume
-	 * synchronized; however, believe the time only if within metric
-	 * threshold. Note the quality indicator is only for
-	 * diagnostics; the data are used only if in sync and above
-	 * metric threshold.
+	 * If the minute contains a valid B frame with sufficient A
+	 * frame metric, it is considered valid. However, the timecode
+	 * is sent to clockstats even if invalid.
 	 */
 	chu_burst(peer);
-	if (up->burstcnt == 0) {
-#ifdef ICOM
-		chu_newchan(peer, 0);
-#endif /* ICOM */
-		return;
-	}
+	minset = ((current_time - peer->update) + 30) / 60;
 	dtemp = chu_major(peer);
 	qual = 0;
 	if (up->status & (BFRAME | AFRAME))
@@ -1322,7 +1331,7 @@ chu_poll(
 		qual |= DECERR;
 	if (up->status & STAMP)
 		qual |= TSPERR;
-	if (up->status & AVALID && up->status & BVALID)
+	if (up->status & BVALID && dtemp >= METRIC)
 		up->status |= INSYNC;
 	synchar = leapchar = ' ';
 	if (!(up->status & INSYNC)) {
@@ -1337,26 +1346,11 @@ chu_poll(
 	} else {
 		pp->leap = LEAP_NOWARNING;
 	}
-#ifdef HAVE_AUDIO
-	if (up->fd_audio)
-		sprintf(pp->a_lastcode,
-		    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %d %s %.0f %d",
-		    synchar, qual, pp->year, pp->day, pp->hour,
-		    pp->minute, pp->second, leapchar, up->dst, up->dut,
-		    minset, up->gain, up->ident, dtemp, up->ntstamp);
-	else
-		sprintf(pp->a_lastcode,
-		    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %s %.0f %d",
-		    synchar, qual, pp->year, pp->day, pp->hour,
-		    pp->minute, pp->second, leapchar, up->dst, up->dut,
-		    minset, up->ident, dtemp, up->ntstamp);
-#else
 	sprintf(pp->a_lastcode,
-	    "%c%1X %04d %3d %02d:%02d:%02d %c%x %+d %d %s %.0f %d",
+	    "%c%1X %04d %03d %02d:%02d:%02d %c%x %+d %d %d %s %.0f %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
-	    pp->second, leapchar, up->dst, up->dut, minset, up->ident,
-	    dtemp, up->ntstamp);
-#endif /* HAVE_AUDIO */
+	    pp->second, leapchar, up->dst, up->dut, minset, up->gain,
+	    up->ident, dtemp, up->ntstamp);
 	pp->lencode = strlen(pp->a_lastcode);
 
 	/*
@@ -1365,7 +1359,8 @@ chu_poll(
 	 * discipline the clock. Be sure not to leave stray timestamps
 	 * around if signals are too weak or the clock time is invalid.
 	 */
-	if (up->status & INSYNC && dtemp > METRIC) {
+	if (up->status & INSYNC && !(up->status & (DECODE | STAMP)) &&
+	    dtemp > METRIC) {
 		if (!clocktime(pp->day, pp->hour, pp->minute, 0, GMT,
 		    up->tstamp[0].l_ui, &pp->yearstart, &offset.l_ui)) {
 			up->errflg = CEVNT_BADTIME;
@@ -1378,10 +1373,9 @@ chu_poll(
 			pp->lastref = up->timestamp;
 			refclock_receive(peer);
 		}
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
-	} else if (pp->sloppyclockflag & CLK_FLAG4) {
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	}
+	if (dtemp > 0)
+		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("chu: timecode %d %s\n", pp->lencode,
@@ -1409,8 +1403,8 @@ chu_major(
 	struct chuunit *up;
 
 	u_char	code[11];	/* decoded timecode */
-	int	mindist;	/* minimum distance */
-	int	val1, val2;	/* maximum distance */
+	int	metric;		/* distance metric */
+	int	val1;		/* maximum distance */
 	int	synchar;	/* stray cat */
 	int	temp;
 	int	i, j, k;
@@ -1421,54 +1415,32 @@ chu_major(
 	/*
 	 * Majority decoder. Each burst encodes two replications at each
 	 * digit position in the timecode. Each row of the decoding
-	 * matrix encodes the number of occurrences of each digit found
+	 * matrix encodes the number of occurences of each digit found
 	 * at the corresponding position. The maximum over all
 	 * occurrences at each position is the distance for this
 	 * position and the corresponding digit is the maximum
-	 * likelihood candidate. If the distance is zero, assume a miss
-	 * '_'; if the distance is not more than half the total number
-	 * of occurrences, assume a soft error '*'; if two different
-	 * digits with the same distance are found, assume a hard error
-	 * '='. These will later cause a format error when the timecode
-	 * is interpreted. The decoding distance is defined as the
-	 * minimum distance over the first nine digits. The tenth digit
-	 * varies over the seconds, so we don't count it.
+	 * likelihood candidate. If the distance is not more than half
+	 * the total number of occurences, a majority has not been found
+	 * and the data are discarded. The decoding distance is defined
+	 * as the sum of the distances over the first nine digits. The
+	 * tenth digit varies over the seconds, so we don't count it.
 	 */
-	mindist = 16;
+	metric = 0;
 	for (i = 0; i < 9; i++) {
-		val1 = val2 = 0;
+		val1 = 0;
 		k = 0;
 		for (j = 0; j < 16; j++) {
 			temp = up->decode[i][j] + up->decode[i + 10][j];
 			if (temp > val1) {
-				val2 = val1;
 				val1 = temp;
 				k = j;
 			}
 		}
-		if (val1 == 0)
-			code[i] = HEX_MISS;
-		else if (val1 == val2)
-			code[i] = HEX_HARD;
-		else if (val1 <= up->burstcnt)
-			code[i] = HEX_SOFT;
-		else
-			code[i] = k;
-		if (val1 < mindist)
-			mindist = val1;
-		code[i] = hexchar[code[i]];
+		if (val1 <= up->burstcnt)
+			up->status |= DECODE;
+		metric += val1;
+		code[i] = hexchar[k];
 	}
-	code[i] = 0;
-
-	/*
-	 * A valid timecode requires a minimum distance at least half
-	 * the total number of occurrences. A valid timecode also
-	 * requires at least 20 valid timestamps.
-	 */
-	if (up->burstcnt < MINBURST || mindist < up->burstcnt)
-		up->status |= DECODE;
-	if (up->ntstamp < MINSTAMP)
-		up->status |= STAMP;
 
 	/*
 	 * Compute the timecode timestamp from the days, hours and
@@ -1478,15 +1450,11 @@ chu_major(
 	 * for the years and does not use the years of the timecode.
 	 */
 	if (sscanf((char *)code, "%1x%3d%2d%2d", &synchar, &pp->day,
-	    &pp->hour, &pp->minute) != 4) {
-		up->status |= AFORMAT;
-		return (0);
-	}
-	if (up->status & (DECODE | STAMP)) {
-		up->errflg = CEVNT_BADREPLY;
-		return (0);
-	}
-	return (mindist * 100. / (2. * up->burstcnt));
+	    &pp->hour, &pp->minute) != 4)
+		up->status |= DECODE;
+	if (up->ntstamp < MINSTAMP)
+		up->status |= STAMP;
+	return (metric);
 }
 
 
@@ -1531,10 +1499,9 @@ chu_newchan(
 	struct chuunit *up;
 	struct refclockproc *pp;
 	struct xmtr *sp;
-	char	tbuf[80];	/* trace buffer */
 	int	rval;
 	double	metric;
-	int	i, j;
+	int	i;
 
 	pp = peer->procptr;
 	up = (struct chuunit *)pp->unitptr;
@@ -1543,86 +1510,62 @@ chu_newchan(
 	 * The radio can be tuned to three channels: 0 (3330 kHz), 1
 	 * (7335 kHz) and 2 (14670 kHz). There are five one-minute
 	 * dwells in each cycle. During the first dwell the radio is
-	 * tuned to one of three probe channels; during the remaining
-	 * four dwells the radio is tuned to the data channel. The probe
-	 * channel is selects as the least recently used. At the end of
-	 * each dwell the channel metrics are measured and the highest
-	 * one is selected as the data channel. 
+	 * tuned to one of the three channels to measure the channel
+	 * metric. The channel is selected as the one least recently
+	 * measured. During the remaining four dwells the radio is tuned
+	 * to the channel with the highest channel metric. 
 	 */
 	if (up->fd_icom <= 0)
 		return (0);
 
-	sp = &up->xmtr[up->achan];
+	/*
+	 * Update the current channel metric and age of all channels.
+	 * Scan all channels for the highest metric.
+	 */
+	sp = &up->xmtr[up->chan];
 	sp->metric -= sp->integ[sp->iptr];
 	sp->integ[sp->iptr] = met;
 	sp->metric += sp->integ[sp->iptr];
+	sp->probe = 0;
 	sp->iptr = (sp->iptr + 1) % ISTAGE;
 	metric = 0;
-	j = 0;
 	for (i = 0; i < NCHAN; i++) {
 		up->xmtr[i].probe++;
-		if (i == up->achan)
-			up->xmtr[i].probe = 0;
-		if (up->xmtr[i].metric < metric)
-			continue;
-		metric = up->xmtr[i].metric;
-		j = i;
-	}
-	if (j != up->chan && metric > 0) {
-		up->chan = j;
-		sprintf(tbuf, "chu: QSY to %.3f MHz metric %.0f",
-		    qsy[up->chan], metric);
-		if (pp->sloppyclockflag & CLK_FLAG4)
-			record_clock_stats(&peer->srcadr, tbuf);
-#ifdef DEBUG
-		if (debug)
-			printf("%s\n", tbuf);
-#endif
+		if (up->xmtr[i].metric > metric) {
+			metric = up->xmtr[i].metric;
+			up->chan = i;
+		}
 	}
 
 	/*
-	 * Start the next dwell. We speed up the initial sync a little.
-	 * If not in sync and no bursts were heard the previous dwell,
-	 * restart the probe.
+	 * Start the next dwell. If the first or no stations have been
+	 * heard, continue round-robin scan. If no stations are heard,
+	 * skew the minute by a few seconds in case we landed in the
+	 * middle of a burst.
 	 */
-	rval = 0;
-	if (up->burstcnt == 0 && !(up->status & INSYNC))
-		up->dwell = 0;
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "chu: at %ld dwell %d achan %d metric %.0f chan %d\n",
-		    current_time, up->dwell, up->achan, sp->metric,
-		    up->chan);
-#endif
-	if (up->dwell == 0) {
+	up->dwell = (up->dwell + 1) % DWELL;
+	if (up->dwell == 0 || metric == 0) {
 		rval = 0;
 		for (i = 0; i < NCHAN; i++) {
-			if (up->xmtr[i].probe < rval)
-				continue;
-			rval = up->xmtr[i].probe;
-			up->achan = i;
-		}
-		rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
-		    qsy[up->achan] + TUNE);
-#ifdef DEBUG
-		if (debug)
-			printf("chu: at %ld probe channel %d\n",
-		    current_time, up->achan);
-#endif
-	} else {
-		if (up->achan != up->chan) {
-			rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
-			    qsy[up->chan] + TUNE);
-			up->achan = up->chan;
+			if (up->xmtr[i].probe > rval) {
+				rval = up->xmtr[i].probe;
+				up->chan = i;
+			}
 		}
 	}
-	sprintf(up->ident, "CHU%d", up->achan);
+
+	/* Retune the radio at each dwell in case somebody nudges the
+	 * tuning knob.
+	 */
+	rval = icom_freq(up->fd_icom, peer->ttl & 0x7f, qsy[up->chan] +
+	    TUNE);
+	sprintf(up->ident, "CHU%d", up->chan);
 	memcpy(&pp->refid, up->ident, 4); 
-	up->dwell = (up->dwell + 1) % DWELL;
+	memcpy(&peer->refid, up->ident, 4); 
 	return (rval);
 }
 #endif /* ICOM */
+
 
 /*
  * chu_dist - determine the distance of two octet arguments
