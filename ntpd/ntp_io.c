@@ -2810,7 +2810,7 @@ static l_fp
 static inline int
 read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 {
-	size_t fromlen;
+	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
 	register struct recvbuf *rb;
 #ifdef HAVE_TIMESTAMP
