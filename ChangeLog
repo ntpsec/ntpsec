@@ -1,3 +1,4 @@
+(4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 760] The background resolver must be aware of the 'dynamic' keyword.
 * [Bug 753] make union timestamp anonymous (Philip Prindeville).
 * confopt.html: move description for "dynamic" keyword into the right section.
@@ -104,6 +105,7 @@
  * Implements the current "goal state" of NTPv4
  * Autokey improvements
  * Much better IPv6 support
+ * [Bug 239] Fix intermittend autokey failure with multicast clients.
  * Rewrite of the multicast code
  * New version numbering scheme
 
