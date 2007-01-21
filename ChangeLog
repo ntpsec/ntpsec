@@ -1,3 +1,4 @@
+* [Bug 760] The background resolver must be aware of the 'dynamic' keyword.
 * [Bug 753] make union timestamp anonymous (Philip Prindeville).
 * confopt.html: move description for "dynamic" keyword into the right section.
 * pick the right type for the recv*() length argument.
