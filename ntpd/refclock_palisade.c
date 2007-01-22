@@ -50,6 +50,18 @@
  *
  * Version 2.45; July 14, 1999
  *
+ *
+ *
+ * 31/03/06: Added support for Thunderbolt GPS Disciplined Clock.
+ *	     Contact: Fernando Pablo Hauscarriaga
+ * 	     E-mail: fernandoph@iar.unlp.edu.ar
+ * 	     Home page: www.iar.unlp.edu.ar/~fernandoph
+ *	          Instituto Argentino de Radioastronomia
+ *	                    www.iar.unlp.edu.ar
+ *
+ * 14/01/07: Conditinal compilation for Thunderbolt support no longer needed
+ *           now we use mode 2 for decode thunderbolt packets.
+ *           Fernando P. Hauscarriaga
  */
 
 #ifdef HAVE_CONFIG_H
@@ -99,9 +111,111 @@ int day_of_year (char *dt);
 /* Supported clock types */
 #define CLK_TRIMBLE	0	/* Trimble Palisade */
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
+#define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
 
 int praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
+
+/* These routines are for sending packets to the Thunderbolt receiver
+ * They are taken from Markus Prosch
+ */
+
+/*
+ * sendcmd - Build data packet for sending
+ */
+static void 
+sendcmd (
+	struct packettx *buffer, int c
+	)
+{
+        buffer->data[0] = DLE;
+        buffer->data[1] = (unsigned char)c;
+        buffer->size = 2;
+}
+
+/*
+ * sendsupercmd - Build super data packet for sending
+ */
+static void 
+sendsupercmd (
+	struct packettx *buffer, int c1, int c2
+	)
+{
+        buffer->data[0] = DLE;
+        buffer->data[1] = (unsigned char)c1;
+        buffer->data[2] = (unsigned char)c2;
+        buffer->size = 3;
+}
+
+/*
+ * sendbyte -
+ */
+static void 
+sendbyte (
+	struct packettx *buffer, int b
+	)
+{
+        if (b == DLE)
+                buffer->data[buffer->size++] = DLE;
+        buffer->data[buffer->size++] = (unsigned char)b;
+}
+
+/*
+ * sendint -
+ */
+static void 
+sendint (
+	struct packettx *buffer, int a
+	)
+{
+        sendbyte(buffer, (unsigned char)((a>>8) & 0xff));
+        sendbyte(buffer, (unsigned char)(a & 0xff));
+}
+
+/*
+ * sendetx - Send packet or super packet to the device
+ */
+static int 
+sendetx (
+	struct packettx *buffer, int fd
+	)
+{
+        int result;
+	
+        buffer->data[buffer->size++] = DLE;
+        buffer->data[buffer->size++] = ETX;
+        result = write(fd, buffer->data, (unsigned long)buffer->size);
+	
+        if (result != -1)
+                return(result);
+        else
+                return (-1);
+}
+
+/*
+ * init_thunderbolt - Prepares Thunderbolt receiver to be used with
+ *                    NTP (also taken from Markus Prosch).
+ */
+static void
+init_thunderbolt (
+	int fd
+	)
+{
+	u_char buffer[256];
+	struct packettx buf;
+	
+	buf.data = buffer;
+	
+	/* set UTC time */
+	sendsupercmd (&buf, 0x8E, 0xA2);
+	sendbyte     (&buf, 0x3);
+	sendetx      (&buf, fd);
+	
+	/* activate packets 0x8F-AB and 0x8F-AC */
+	sendsupercmd (&buf, 0x8F, 0xA5);
+	sendint      (&buf, 0x5);
+	sendetx      (&buf, fd);
+}
 
 /*
  * palisade_start - open the devices and initialize data for processing
@@ -186,14 +300,6 @@ palisade_start (
         tio.c_iflag &= ~ICRNL;
 #endif /*  NTP 4.x */
 
-	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-                msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
-#ifdef DEBUG
-                printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
-#endif
-                return 0;
-        }
-
 	/*
 	 * Allocate and initialize unit structure
 	 */
@@ -218,10 +324,21 @@ palisade_start (
 		case CLK_PRAECIS:
 			msyslog(LOG_NOTICE, "Palisade(%d) Praecis mode enabled\n",unit);
 			break;
+		case CLK_THUNDERBOLT:
+			msyslog(LOG_NOTICE, "Palisade(%d) Thunderbolt mode enabled\n",unit);
+			tio.c_cflag = (CS8|CLOCAL|CREAD);
+			break;		
 		default:
 			msyslog(LOG_NOTICE, "Palisade(%d) mode unknown\n",unit);
 			break;
 	}
+	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
+                msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
+#ifdef DEBUG
+                printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
+#endif
+                return 0;
+        }
 
 	pp = peer->procptr;
 	pp->io.clock_recv = palisade_io;
@@ -253,6 +370,9 @@ palisade_start (
 	up->unit = (short) unit;
 	up->rpt_status = TSIP_PARSED_EMPTY;
     	up->rpt_cnt = 0;
+
+    	if (up->type == CLK_THUNDERBOLT)
+       	    	init_thunderbolt(fd);
 
 	return 1;
 }
@@ -349,6 +469,7 @@ TSIP_decode (
 	 * proper format, declare bad format and exit.
 	 */
 
+	if (up->type != CLK_THUNDERBOLT){
 	if ((up->rpt_buf[0] == (char) 0x41) ||
 		(up->rpt_buf[0] == (char) 0x46) ||
 		(up->rpt_buf[0] == (char) 0x54) ||
@@ -358,10 +479,11 @@ TSIP_decode (
 	/* standard time packet - GPS time and GPS week number */
 #ifdef DEBUG
 			printf("Palisade Port B packets detected. Connect to Port A\n");
-#endif
 
 		return 0;	
 	}
+	}
+#endif
 
 	/*
 	 * We cast both to u_char to as 0x8f uses the sign bit on a char
@@ -377,6 +499,8 @@ TSIP_decode (
 	
 	   switch (mb(0) & 0xff) {
 	     int GPS_UTC_Offset;
+             long tow;
+
 	     case PACKET_8F0B: 
 
 		if (up->polled <= 0)
@@ -513,12 +637,185 @@ printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d UTC %
 		return 1;
 		break;
 
+             case PACKET_8FAC:   
+	     if (up->polled <= 0)
+                        return 0; 
+
+                if (up->rpt_cnt != LENCODE_8FAC)/* check length */
+                        break;
+
+#ifdef DEBUG
+if (debug > 1) {
+                double lat, lon, alt;
+                lat = getdbl((u_char *) &mb(36)) * R2D;
+                lon = getdbl((u_char *) &mb(44)) * R2D;
+                alt = getdbl((u_char *) &mb(52));
+
+                printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
+                                up->unit, lat,lon,alt);
+                printf("TSIP_decode: unit %d\n", up->unit);
+               }
+#endif
+		if (getint((u_char *) &mb(10)) & 0x80) 
+		   pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
+                else 
+		   pp->leap = LEAP_NOWARNING;
+                		
+#ifdef DEBUG
+		if (debug > 1) 
+		   printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
+			  up->unit, mb(0) & 0xff, pp->leap);
+		if (debug > 1) {
+		    printf("Receiver MODE: 0x%02X\n", (u_char)mb(1));
+		    if (mb(1) == 0x00)
+			 printf("                AUTOMATIC\n");
+		    if (mb(1) == 0x01)
+			 printf("                SINGLE SATELLITE\n");   
+		    if (mb(1) == 0x03)
+			 printf("                HORIZONTAL(2D)\n");
+		    if (mb(1) == 0x04)
+			 printf("                FULL POSITION(3D)\n");
+		    if (mb(1) == 0x05)
+			 printf("                DGPR REFERENCE\n");
+		    if (mb(1) == 0x06)
+			 printf("                CLOCK HOLD(2D)\n");
+		    if (mb(1) == 0x07)
+			 printf("                OVERDETERMINED CLOCK\n");
+
+		    printf("\n** Disciplining MODE 0x%02X:\n", (u_char)mb(2));
+		    if (mb(2) == 0x00)
+			 printf("                NORMAL\n");
+		    if (mb(2) == 0x01)
+			 printf("                POWER-UP\n");
+		    if (mb(2) == 0x02)
+			 printf("                AUTO HOLDOVER\n");
+		    if (mb(2) == 0x03)
+			 printf("                MANUAL HOLDOVER\n");
+		    if (mb(2) == 0x04)
+			 printf("                RECOVERY\n");
+		    if (mb(2) == 0x06)
+			 printf("                DISCIPLINING DISABLED\n");
+		}
+#endif   
+                return 0;
+                break;
+
+          case PACKET_8FAB:
+                /* Thunderbolt Primary Timing Packet */
+	        
+                if (up->rpt_cnt != LENCODE_8FAB) /* check length */
+                        break;
+
+                if (up->polled  <= 0)
+                        return 0;
+
+		GPS_UTC_Offset = getint((u_char *) &mb(7));
+                
+                if (GPS_UTC_Offset == 0){ /* Check UTC Offset */
+#ifdef DEBUG
+		      printf("TSIP_decode: UTC Offset Unknown\n");
+#endif
+			  break;
+		 }
+
+
+                 if ((mb(9) & 0x1d) == 0x0) {
+                      /* if we know the GPS time and the UTC offset,
+                      we expect UTC timing information !!! */
+
+                   pp->leap = LEAP_NOTINSYNC;
+                   refclock_report(peer, CEVNT_BADTIME);
+                   up->polled = -1;
+                   return 0;
+                 }
+
+		pp->nsec = 0;
+#ifdef DEBUG		
+		printf("\nTiming Flags are:\n");
+		printf("Timing flag value is: 0x%X\n", mb(9));
+		if ((mb(9) & 0x01) != 0)
+			printf ("	Getting UTC time\n");
+		else
+			printf ("	Getting GPS time\n");
+		if ((mb(9) & 0x02) != 0)
+			printf ("	PPS is from UTC\n");
+		else
+			printf ("	PPS is from GPS\n");
+		if ((mb(9) & 0x04) != 0)
+			printf ("	Time is not Set\n");
+		else
+			printf ("	Time is Set\n");
+		if ((mb(9) & 0x08) != 0)
+			printf("	I dont have UTC info\n");
+		else
+			printf ("	I have UTC info\n");
+		if ((mb(9) & 0x10) != 0)
+			printf ("	Time is from USER\n\n");
+		else
+			printf ("	Time is from GPS\n\n");	
+#endif		
+
+                if ((pp->day = day_of_year(&mb(13))) < 0)
+                  break;
+		tow = getlong((u_char *) &mb(1));
+#ifdef DEBUG		
+	        if (debug > 1) {
+                   printf("pp->day: %d\n", pp->day); 
+                   printf("TOW: %ld\n", tow);
+                   printf("DAY: %d\n", mb(13));
+                }
+#endif
+                pp->year = getint((u_char *) &mb(15));
+                pp->hour = mb(12);
+                pp->minute = mb(11);
+                pp->second = mb(10);
+
+
+#ifdef DEBUG
+        if (debug > 1)
+printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d ",up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
+#endif
+                return 1;
+                break;
+
 	  default: 	
 		/* Ignore Packet */
 		return 0;
 	  } /* switch */
 	}/* if 8F packets */	
 
+        else if (up->rpt_buf[0] == (u_char)0x42) {
+           printf("0x42\n");
+           return 0;
+        }
+        else if (up->rpt_buf[0] == (u_char)0x43) {
+           printf("0x43\n");
+           return 0;
+        }
+        else if (up->rpt_buf[0] == PACKET_41) {
+           printf("0x41\n");
+           return 0;
+        }
+        else if (up->rpt_buf[0] == PACKET_6D) {
+#ifdef DEBUG
+           int sats;
+
+           if ((mb(0) & 0x01) && (mb(0) & 0x02))
+              printf("2d Fix Dimension\n");
+           if (mb(0) & 0x04)
+              printf("3d Fix Dimension\n");
+
+	   if (mb(0) & 0x08)
+	      printf("Fix Mode is MANUAL\n");
+	   else
+	      printf("Fix Mode is AUTO\n");
+	
+           sats = mb(0) & 0xF0;
+	   sats = sats >> 4;
+	   printf("Tracking %d Satellites\n", sats);
+#endif
+		return 0;
+        } /* else if not super packet */
 	refclock_report(peer, CEVNT_BADREPLY);
 	up->polled = -1;
 #ifdef DEBUG
@@ -949,6 +1246,25 @@ getint (
 return (short) (bp[1] + (bp[0] << 8));
 }
 
+/*
+ * cast a 32 bit character array into a long (32 bit) int
+ */
+long
+getlong(
+#ifdef PALISADE
+        bp
+	)
+        u_char *bp;
 #else
+	u_char *bp
+	)
+#endif
+{
+return (long) (bp[0] << 24) | 
+              (bp[1] << 16) |
+              (bp[2] << 8) |
+               bp[3];
+}
+
 int refclock_palisade_bs;
 #endif /* REFCLOCK */
