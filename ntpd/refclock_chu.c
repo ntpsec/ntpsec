@@ -194,6 +194,11 @@
  * 9600 bps if the high order 0x80 bit of the mode is zero and 1200 bps
  * if one. The C-IV trace is turned on if the debug level is greater
  * than one.
+ *
+ * Alarm codes
+ *
+ * CEVNT_BADTIME	invalid date or time
+ * CEVNT_PROP		propagation failure - no stations heard
  */
 /*
  * Interface definitions
@@ -240,7 +245,7 @@
 #define MINDIST		28	/* min burst distance (of 40)  */
 #define MINSYNC		8	/* min sync distance (of 16) */
 #define MINSTAMP	20	/* min timestamps (of 60) */
-#define METRIC		50	/* min channel metric (of 160) */
+#define MINMETRIC	50	/* min channel metric (of 160) */
 
 /*
  * The offset to the last stop bit of the first character, which defines
@@ -266,6 +271,7 @@
 #define AVALID		0x0100	/* valid A frame */
 #define BVALID		0x0200	/* valid B frame */
 #define INSYNC		0x0400	/* clock synchronized */
+#define	METRIC		0x0800	/* one or more stations heard */
 
 /*
  * Alarm status bits (alarm)
@@ -462,7 +468,7 @@ chu_start(
 	double	step;		/* codec adjustment */
 
 	/*
-	 * Open audio device.
+	 * Open audio device. Don't complain if not there.
 	 */
 	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
 #ifdef DEBUG
@@ -471,7 +477,7 @@ chu_start(
 #endif
 
 	/*
-	 * Open serial port in raw mode.
+	 * If audio is unavailable, Open serial port in raw mode.
 	 */
 	if (fd_audio > 0) {
 		fd = fd_audio;
@@ -487,7 +493,7 @@ chu_start(
 	sprintf(device, DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
-	if (fd <= 0)
+	if (fd < 0)
 		return (0);
 
 	/*
@@ -556,16 +562,11 @@ chu_start(
 	}
 	if (up->fd_icom > 0) {
 		if (chu_newchan(peer, 0) != 0) {
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE,
-			    "icom: radio not found");
-			up->errflg = CEVNT_FAULT;
+			msyslog(LOG_NOTICE, "icom: radio not found");
 			close(up->fd_icom);
 			up->fd_icom = 0;
 		} else {
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE,
-			    "icom: autotune enabled");
+			msyslog(LOG_NOTICE, "icom: autotune enabled");
 		}
 	}
 #endif /* ICOM */
@@ -1331,7 +1332,7 @@ chu_second(
 		qual |= DECERR;
 	if (up->status & STAMP)
 		qual |= TSPERR;
-	if (up->status & BVALID && dtemp >= METRIC)
+	if (up->status & BVALID && dtemp >= MINMETRIC)
 		up->status |= INSYNC;
 	synchar = leapchar = ' ';
 	if (!(up->status & INSYNC)) {
@@ -1356,11 +1357,10 @@ chu_second(
 	/*
 	 * If in sync and the signal metric is above threshold, the
 	 * timecode is ipso fatso valid and can be selected to
-	 * discipline the clock. Be sure not to leave stray timestamps
-	 * around if signals are too weak or the clock time is invalid.
+	 * discipline the clock.
 	 */
 	if (up->status & INSYNC && !(up->status & (DECODE | STAMP)) &&
-	    dtemp > METRIC) {
+	    dtemp > MINMETRIC) {
 		if (!clocktime(pp->day, pp->hour, pp->minute, 0, GMT,
 		    up->tstamp[0].l_ui, &pp->yearstart, &offset.l_ui)) {
 			up->errflg = CEVNT_BADTIME;
@@ -1418,7 +1418,7 @@ chu_major(
 	 * matrix encodes the number of occurences of each digit found
 	 * at the corresponding position. The maximum over all
 	 * occurrences at each position is the distance for this
-	 * position and the corresponding digit is the maximum
+	 * position and the corresponding digit is the maximum-
 	 * likelihood candidate. If the distance is not more than half
 	 * the total number of occurences, a majority has not been found
 	 * and the data are discarded. The decoding distance is defined
@@ -1478,7 +1478,7 @@ chu_clear(
 	 */
 	up->ndx = up->prevsec = 0;
 	up->burstcnt = up->ntstamp = 0;
-	up->status &= INSYNC;
+	up->status &= INSYNC | METRIC;
 	for (i = 0; i < 20; i++) {
 		for (j = 0; j < 16; j++)
 			up->decode[i][j] = 0;
@@ -1532,16 +1532,15 @@ chu_newchan(
 	for (i = 0; i < NCHAN; i++) {
 		up->xmtr[i].probe++;
 		if (up->xmtr[i].metric > metric) {
+			up->status |= METRIC;
 			metric = up->xmtr[i].metric;
 			up->chan = i;
 		}
 	}
 
 	/*
-	 * Start the next dwell. If the first or no stations have been
-	 * heard, continue round-robin scan. If no stations are heard,
-	 * skew the minute by a few seconds in case we landed in the
-	 * middle of a burst.
+	 * Start the next dwell. If the first dwell or no stations have
+	 * been heard, continue round-robin scan.
 	 */
 	up->dwell = (up->dwell + 1) % DWELL;
 	if (up->dwell == 0 || metric == 0) {
@@ -1561,7 +1560,11 @@ chu_newchan(
 	    TUNE);
 	sprintf(up->ident, "CHU%d", up->chan);
 	memcpy(&pp->refid, up->ident, 4); 
-	memcpy(&peer->refid, up->ident, 4); 
+	memcpy(&peer->refid, up->ident, 4);
+	if (metric == 0 && up->status & METRIC) {
+		up->status &= ~METRIC;
+		refclock_report(peer, CEVNT_PROP);
+	} 
 	return (rval);
 }
 #endif /* ICOM */
