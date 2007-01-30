@@ -127,8 +127,8 @@ DNSlookup_name(
 }
 #endif
 
-static	int do_nodename P((const char *nodename, struct addrinfo *ai,
-    const struct addrinfo *hints));
+static	int do_nodename (const char *nodename, struct addrinfo *ai,
+    const struct addrinfo *hints);
 
 int
 getaddrinfo (const char *nodename, const char *servname,
