@@ -140,11 +140,11 @@ dist-hook:
 	@sleep 1
 	@touch $@
 
-ChangeLog: FRC.ChangeLog
+CommitLog: FRC.CommitLog
 	cd $(srcdir)					\
-	&& /bin/test -e ChangeLog			\
-		-a SCCS/s.ChangeSet -ot ChangeLog	\
-	|| scripts/genChangeLog
+	&& /bin/test -e CommitLog			\
+		-a SCCS/s.ChangeSet -ot CommitLog	\
+	|| scripts/genCommitLog
 
 # HMS: The following seems to be a work-in-progress...
 
@@ -171,7 +171,7 @@ BHOST=`(hostname || uname -n)`
 		echo " "; \
 	fi
 
-FRC.ChangeLog FRC.distwarn FRC.checkcvo FRC.checkhost FRC.version:
+FRC.CommitLog FRC.distwarn FRC.checkcvo FRC.checkhost FRC.version:
 
 # HMS: what was I trying to do with this?
 #dot.emacs: FRC.distwarn
