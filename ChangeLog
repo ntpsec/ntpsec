@@ -1,4 +1,5 @@
 (4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 770] Fix numeric parameters to ntp-keygen (Alain Guibert).
 * [Bug 768] Fix io_setbclient() error message.
 * [Bug 765] Use net_bind_service capability on linux.
 * [Bug 760] The background resolver must be aware of the 'dynamic' keyword.
