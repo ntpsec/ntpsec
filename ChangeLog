@@ -1,7 +1,17 @@
+* [Bug 592] Trimble Thunderbolt GPS support
+* IRIG, CHU, WWV refclock improvements from Dave Mills.
 * [Bug 757] Lose ULONG_CONST().
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
+(4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 770] Fix numeric parameters to ntp-keygen (Alain Guibert).
+* [Bug 768] Fix io_setbclient() error message.
+* [Bug 765] Use net_bind_service capability on linux.
+* [Bug 760] The background resolver must be aware of the 'dynamic' keyword.
+* [Bug 753] make union timestamp anonymous (Philip Prindeville).
+* confopt.html: move description for "dynamic" keyword into the right section.
+* pick the right type for the recv*() length argument.
 (4.2.4) Released by Harlan Stenn <stenn@ntp.org>
 * monopt.html fixes from Dave Mills.
 * [Bug 452] Do not report kernel PLL/FLL flips.
@@ -104,6 +114,8 @@
  * Implements the current "goal state" of NTPv4
  * Autokey improvements
  * Much better IPv6 support
+ * [Bug 360] ntpd loses handles with LAN connection disabled.
+ * [Bug 239] Fix intermittend autokey failure with multicast clients.
  * Rewrite of the multicast code
  * New version numbering scheme
 

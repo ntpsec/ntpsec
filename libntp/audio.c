@@ -244,18 +244,21 @@ audio_init(
 #endif
 
 	/*
-	 * Open audio device. Do not complain if not there.
+	 * Open audio device
 	 */
 	fd = open(dname, O_RDWR | O_NONBLOCK, 0777);
-	if (fd < 0)
+	if (fd < 0) {
+		msyslog(LOG_ERR, "audio_init: %s %m\n", dname);
 		return (fd);
+	}
 
 	/*
 	 * Open audio control device.
 	 */
 	ctl_fd = open(actl, O_RDWR);
 	if (ctl_fd < 0) {
-		msyslog(LOG_ERR, "audio_init: invalid control device <%s>\n", actl);
+		msyslog(LOG_ERR, "audio_init: invalid control device <%s>\n",
+		    actl);
 		close(fd);
 		return(ctl_fd);
 	}

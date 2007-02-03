@@ -323,7 +323,7 @@ main(
 
 #ifdef OPENSSL
 	if (HAVE_OPT( MODULUS ))
-	    modulus = DESC(MODULUS).optOccCt;
+	    modulus = OPT_VALUE_MODULUS;
 
 	if (HAVE_OPT( PVT_CERT ))
 	    exten = EXT_KEY_PRIVATE;
@@ -345,12 +345,12 @@ main(
 
 	if (HAVE_OPT( MV_PARAMS )) {
 		mvpar++;
-		nkeys = DESC(MV_PARAMS).optOccCt;
+		nkeys = OPT_VALUE_MV_PARAMS;
 	}
 
 	if (HAVE_OPT( MV_KEYS )) {
 		mvkey++;
-		nkeys = DESC(MV_KEYS).optOccCt;
+		nkeys = OPT_VALUE_MV_KEYS;
 	}
 #endif
 

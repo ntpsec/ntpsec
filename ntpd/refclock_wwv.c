@@ -68,6 +68,10 @@
  * It does not seem useful to select the compact disc player port. Fudge
  * flag3 enables audio monitoring of the input signal. For this purpose,
  * the monitor gain is set to a default value.
+ *
+ * CEVNT_BADTIME	invalid date or time
+ * CEVNT_PROP		propagation failure - no stations heard
+ * CEVNT_TIMEOUT	timeout (see newgame() below)
  */
 /*
  * General definitions. These ordinarily do not need to be changed.
@@ -132,6 +136,7 @@
 #define FGATE		0x0010	/* frequency gate */
 #define DGATE		0x0020	/* data pulse amplitude error */
 #define BGATE		0x0040	/* data pulse width error */
+#define	METRIC		0x0080	/*one or more stations heard */
 #define LEPSEC		0x1000	/* leap minute */
 
 /*
@@ -228,11 +233,11 @@
  * sync pulse produced by the FIR matched filters. As the 5-ms delay of
  * these filters is compensated, the program delay is 1.1 ms due to the
  * 600-Hz IIR bandpass filter. The measured receiver delay is 4.7 ms and
- * the codec delay less than 0.2 ms. The additional propagation delay
+ * the codec delay about 0.5 ms. The additional propagation delay
  * specific to each receiver location can be programmed in the fudge
  * time1 and time2 values for WWV and WWVH, respectively.
  */
-#define PDELAY	(.0011 + .0047 + .0002)	/* net system delay (s) */
+#define PDELAY	(.0011 + .0047 + .0005)	/* net system delay (s) */
 
 /*
  * Table of sine values at 4.5-degree increments. This is used by the
@@ -704,7 +709,9 @@ wwv_start(
 	/*
 	 * Initialize autotune if available. Note that the ICOM select
 	 * code must be less than 128, so the high order bit can be used
-	 * to select the line speed 0 (9600 bps) or 1 (1200 bps).
+	 * to select the line speed 0 (9600 bps) or 1 (1200 bps). Note
+	 * we don't complain if the ICOM device is not there; but, if it
+	 * is, the radio better be working.
 	 */
 	temp = 0;
 #ifdef DEBUG
@@ -718,25 +725,14 @@ wwv_start(
 		else
 			up->fd_icom = icom_init("/dev/icom", B9600,
 			    temp);
-		if (up->fd_icom < 0) {
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE,
-			    "icom: %m");
-			up->errflg = CEVNT_FAULT;
-		}
 	}
 	if (up->fd_icom > 0) {
 		if (wwv_qsy(peer, DCHAN) != 0) {
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE,
-			    "icom: radio not found");
-			up->errflg = CEVNT_FAULT;
+			msyslog(LOG_NOTICE, "icom: radio not found");
 			close(up->fd_icom);
 			up->fd_icom = 0;
 		} else {
-			NLOG(NLOG_SYNCEVENT | NLOG_SYSEVENT)
-			    msyslog(LOG_NOTICE,
-			    "icom: autotune enabled");
+			msyslog(LOG_NOTICE, "icom: autotune enabled");
 		}
 	}
 #endif /* ICOM */
@@ -882,8 +878,6 @@ wwv_poll(
 
 	pp = peer->procptr;
 	up = (struct wwvunit *)pp->unitptr;
-	if (pp->coderecv == pp->codeproc)
-		up->errflg = CEVNT_TIMEOUT;
 	if (up->errflg)
 		refclock_report(peer, up->errflg);
 	up->errflg = 0;
@@ -1484,8 +1478,8 @@ wwv_endpoc(
 		mepoch = xepoch;
 		syncnt = 0;
 	}
-	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status & MSYNC))
-	    {
+	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
+	    MSYNC)) {
 		sprintf(tbuf,
 		    "wwv1 %04x %3d %4d %5.0f %5.1f %5d %4d %4d %4d",
 		    up->status, up->gain, tepoch, up->epomax,
@@ -2194,7 +2188,7 @@ wwv_corr4(
 		} else {
 			if (vp->count < BCMP)
 				vp->count++;
-			else
+			if (vp->count == BCMP)
 				up->digcnt++;
 		}
 	}
@@ -2448,6 +2442,10 @@ wwv_newchan(
 	if (rank < MTHR) {
 		up->dchan = (up->dchan + 1) % NCHAN;
 		up->status &= ~(SELV | SELH);
+		if (up->status & METRIC) {
+			up->status &= ~METRIC;
+			refclock_report(peer, CEVNT_PROP);
+		}
 		rval = FALSE;
 	} else {
 		up->dchan = j;
@@ -2455,6 +2453,7 @@ wwv_newchan(
 		up->sptr = sp;
 		memcpy(&pp->refid, sp->refid, 4);
 		peer->refid = pp->refid;
+		up->status |= METRIC;
 		rval = TRUE;
 	}
 #ifdef ICOM
@@ -2468,18 +2467,15 @@ wwv_newchan(
 /*
  * wwv_newgame - reset and start over
  *
- * There are four conditions resulting in a new game:
+ * There are three conditions resulting in a new game:
  *
- * 1	During initial acquisition (MSYNC dark) going 6 minutes (ACQSN)
- *	without reliably finding the minute pulse (MSYNC lit).
- *
- * 2	After finding the minute pulse (MSYNC lit), going 15 minutes
+ * 1	After finding the minute pulse (MSYNC lit), going 15 minutes
  *	(DATA) without finding the unit seconds digit.
  *
- * 3	After finding good data (DATA lit), going more than 40 minutes
+ * 2	After finding good data (DSYNC lit), going more than 40 minutes
  *	(SYNCH) without finding station sync (INSYNC lit).
  *
- * 4	After finding station sync (INSYNC lit), going more than 2 days
+ * 3	After finding station sync (INSYNC lit), going more than 2 days
  *	(PANIC) without finding any station. 
  */
 static void
@@ -2499,6 +2495,8 @@ wwv_newgame(
 	 * Initialize strategic values. Note we set the leap bits
 	 * NOTINSYNC and the refid "NONE".
 	 */
+	if (up->status)
+		up->errflg = CEVNT_TIMEOUT;
 	peer->leap = LEAP_NOTINSYNC;
 	up->watch = up->status = up->alarm = 0;
 	up->avgint = MINAVG;

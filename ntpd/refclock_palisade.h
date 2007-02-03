@@ -71,6 +71,7 @@
 #  define _SVID3
 # endif
 # include <termios.h>
+# include <sys/stat.h>
 # ifdef TERMIOS_NEEDS__SVID3
 #  undef _SVID3
 # endif
@@ -108,9 +109,18 @@
 #define LENCODE_8F0B	74	/* Length of TSIP 8F-0B Packet & header */
 #define LENCODE_NTP     22	/* Length of Palisade NTP Packet */
 
+#define LENCODE_8FAC    68      /* Length of Thunderbolt 8F-AC Position Packet*/
+#define LENCODE_8FAB    17      /* Length of Thunderbolt Primary Timing Packet*/
+
 /* Allowed Sub-Packet ID's */
 #define PACKET_8F0B	0x0B
 #define PACKET_NTP	0xAD
+
+/* Thunderbolt Packets */
+#define PACKET_8FAC     0xAC	/* Supplementary Thunderbolt Time Packet */
+#define PACKET_8FAB     0xAB	/* Primary Thunderbolt Time Packet */
+#define PACKET_6D	0x6D	/* Supplementary Thunderbolt Tracking Stats */
+#define PACKET_41	0x41	/* Thunderbolt I dont know what this packet is, it's not documented on my manual*/
 
 #define DLE 0x10
 #define ETX 0x03
@@ -137,6 +147,16 @@
 /* Conversion Definitions */
 #define GPS_PI 		(3.1415926535898)
 #define	R2D		(180.0/GPS_PI)
+
+/*
+ * Structure for build data packets for send (thunderbolt uses it only)
+ * taken from Markus Prosch
+ */
+struct packettx
+{
+  short size;
+  u_char *data;
+};
 
 /*
  * Palisade unit control structure.
@@ -166,5 +186,14 @@ long		HW_poll			(struct refclockproc *);
 float 		getfloat		(u_char *); 
 double 		getdbl 			(u_char *);
 short  		getint 			(u_char *);
+long		getlong			(u_char *);
+
+/* Thunderbolt specific function prototypes */
+static  void    sendcmd                 (struct packettx *buffer, int c);
+static  void    sendsupercmd            (struct packettx *buffer, int c1, int c2);
+static  void    sendbyte                (struct packettx *buffer, int b);
+static  void    sendint                 (struct packettx *buffer, int a);
+static  int     sendetx                 (struct packettx *buffer, int fd);
+static  void    init_thunderbolt        (int fd);
 
 #endif /* PALISADE_H */
