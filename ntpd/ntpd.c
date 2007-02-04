@@ -932,11 +932,6 @@ getgroup:
 	
 #ifndef HAVE_LINUX_CAPABILITIES
 		/*
-		 * TODO:
-		 * need to add more strategys for other systems that can bind to privileged ports
-		 * without being "root"
-		 */
-		/*
 		 * for now assume that the privilege to bind to privileged ports
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
@@ -951,8 +946,10 @@ getgroup:
 
 #ifdef HAVE_LINUX_CAPABILITIES
 		do {
-			/*  We may be running under non-root uid now, but we still hold full root privileges!
-			 *  We drop all of them, except for the crucial one: cap_sys_time:
+			/*
+			 *  We may be running under non-root uid now, but we still hold full root privileges!
+			 *  We drop all of them, except for the crucial one or two: cap_sys_time and
+			 *  cap_net_bind_service if doing dynamic interface tracking.
 			 */
 			cap_t caps;
 			char *captext = interface_interval ?
