@@ -930,12 +930,19 @@ getgroup:
 			exit (-1);
 		}
 	
+#ifndef HAVE_LINUX_CAPABILITIES
+		/*
+		 * TODO:
+		 * need to add more strategys for other systems that can bind to privileged ports
+		 * without being "root"
+		 */
 		/*
 		 * for now assume that the privilege to bind to privileged ports
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
 		disable_dynamic_updates |= (sw_uid != 0);  /* also notifies routing message listener */
+#endif
 
 		if (disable_dynamic_updates && interface_interval) {
 			interface_interval = 0;
@@ -948,7 +955,10 @@ getgroup:
 			 *  We drop all of them, except for the crucial one: cap_sys_time:
 			 */
 			cap_t caps;
-			if( ! ( caps = cap_from_text( "cap_sys_time=ipe" ) ) ) {
+			char *captext = interface_interval ?
+			       	"cap_sys_time,cap_net_bind_service=ipe" :
+			       	"cap_sys_time=ipe";
+			if( ! ( caps = cap_from_text( captext ) ) ) {
 				msyslog( LOG_ERR, "cap_from_text() failed: %m" );
 				exit(-1);
 			}
