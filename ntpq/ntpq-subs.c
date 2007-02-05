@@ -1469,8 +1469,9 @@ doprintpeers(
 				havevar[HAVE_OFFSET] = 1;
 			break;
 			case CP_JITTER:
-			if (decodetime(value, &estjitter))
-				havevar[HAVE_JITTER] = 1;
+			if (pvl == peervarlist)
+				if (decodetime(value, &estjitter))
+					havevar[HAVE_JITTER] = 1;
 			break;
 			case CP_DISPERSION:
 			if (decodetime(value, &estdisp))
