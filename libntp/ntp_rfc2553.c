@@ -394,6 +394,12 @@ do_nodename(
 	}
 
 	/*
+	 * If the numeric host flag is set, don't attempt resolution
+	 */
+	if (hints != NULL && (hints->ai_flags & AI_NUMERICHOST))
+		return (EAI_NONAME);
+
+	/*
 	 * Look for a name
 	 */
 
