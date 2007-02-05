@@ -39,11 +39,12 @@
  * tuned automatically using this program as propagation conditions
  * change throughout the weasons, both day and night.
  *
- * The driver receives, demodulates and decodes the radio signals when
- * connected to the audio codec of a workstation running Solaris, SunOS
- * FreeBSD or Linux, and with a little help, other workstations with
- * similar codecs or sound cards. In this implementation, only one audio
- * driver and codec can be supported on a single machine.
+ * The driver requires an audio codec or sound card with sampling rate 8
+ * kHz and mu-law companding. This is the same standard as used by the
+ * telephone industry and is supported by most hardware and operating
+ * systems, including Solaris, SunOS, FreeBSD, NetBSD and Linux. In this
+ * implementation, only one audio driver and codec can be supported on a
+ * single machine.
  *
  * The demodulation and decoding algorithms used in this driver are
  * based on those developed for the TAPR DSP93 development board and the
@@ -229,15 +230,21 @@
 #define SECWAR		0x40	/* 3 leap second warning */
 
 /*
- * The on-time synchronization point for the driver is the second epoch
- * sync pulse produced by the FIR matched filters. As the 5-ms delay of
- * these filters is compensated, the program delay is 1.1 ms due to the
- * 600-Hz IIR bandpass filter. The measured receiver delay is 4.7 ms and
- * the codec delay about 0.5 ms. The additional propagation delay
- * specific to each receiver location can be programmed in the fudge
- * time1 and time2 values for WWV and WWVH, respectively.
+ * The on-time synchronization point is the positive-going zero crossing
+ * of the first cycle of the 5-ms second pulse. The IIR baseband filter
+ * phase delay is 0.91 ms, while the receiver delay is approximately 4.7
+ * ms at 1000 Hz. The fudge value -0.45 ms due to the codec and other
+ * causes was determined by calibrating to a PPS signal from a GPS
+ * receiver. The additional propagation delay specific to each receiver
+ * location can be  programmed in the fudge time1 and time2 values for
+ * WWV and WWVH, respectively.
+ *
+ * The resulting offsets with a 2.4-GHz P4 running FreeBSD 6.1 are
+ * generally within .02 ms short-term with .02 ms jitter. The long-term
+ * offsets vary up to 0.3 ms due to ionosperhic layer height variations.
+ * The processor load due to the driver is 5.8 percent.
  */
-#define PDELAY	(.0011 + .0047 + .0005)	/* net system delay (s) */
+#define PDELAY	((.91 + 4.7 - 0.45) / 1000) /* system delay (s) */
 
 /*
  * Table of sine values at 4.5-degree increments. This is used by the
@@ -369,7 +376,7 @@ struct progx progx[] = {
 };
 
 /*
- * BCD coefficients for maximum likelihood digit decode
+ * BCD coefficients for maximum-likelihood digit decode
  */
 #define P15	1.		/* max positive number */
 #define N15	-1.		/* max negative number */
@@ -451,14 +458,14 @@ char dstcod[] = {
 /*
  * The decoding matrix consists of nine row vectors, one for each digit
  * of the timecode. The digits are stored from least to most significant
- * order. The maximum likelihood timecode is formed from the digits
- * corresponding to the maximum likelihood values reading in the
+ * order. The maximum-likelihood timecode is formed from the digits
+ * corresponding to the maximum-likelihood values reading in the
  * opposite order: yy ddd hh:mm.
  */
 struct decvec {
 	int radix;		/* radix (3, 4, 6, 10) */
 	int digit;		/* current clock digit */
-	int mldigit;		/* maximum likelihood digit */
+	int mldigit;		/* maximum-likelihood digit */
 	int count;		/* match count */
 	double digprb;		/* max digit probability */
 	double digsnr;		/* likelihood function (dB) */
@@ -507,6 +514,7 @@ struct wwvunit {
 	l_fp	tick;		/* audio sample increment */
 	double	phase, freq;	/* logical clock phase and frequency */
 	double	monitor;	/* audio monitor point */
+	double	pdelay;		/* propagation delay (s) */
 #ifdef ICOM
 	int	fd_icom;	/* ICOM file descriptor */
 #endif /* ICOM */
@@ -517,7 +525,7 @@ struct wwvunit {
 	 * Audio codec variables
 	 */
 	double	comp[SIZE];	/* decompanding table */
-	int	port;		/* codec port */
+ 	int	port;		/* codec port */
 	int	gain;		/* codec gain */
 	int	mongain;	/* codec monitor gain */
 	int	clipcnt;	/* sample clipped count */
@@ -966,7 +974,6 @@ wwv_rf(
 	static int epopos;	/* epoch second sync position buffer */
 
 	static int iniflg;	/* initialization flag */
-	int	pdelay;		/* propagation delay (samples) */
 	int	epoch;		/* comb filter index */
 	double	dtemp;
 	int	i;
@@ -1004,7 +1011,7 @@ wwv_rf(
 	 * compensate for the radio audio response at 100 Hz.
 	 *
 	 * Matlab IIR 4th-order IIR elliptic, 150 Hz lowpass, 0.2 dB
-	 * passband ripple, -50 dB stopband ripple.
+	 * passband ripple, -50 dB stopband ripple, phase delay 0.97 ms.
 	 */
 	data = (lpf[4] = lpf[3]) * 8.360961e-01;
 	data += (lpf[3] = lpf[2]) * -3.481740e+00;
@@ -1048,7 +1055,7 @@ wwv_rf(
 	 * tones and most of the noise and voice modulation components.
 	 *
 	 * Matlab 4th-order IIR elliptic, 800-1400 Hz bandpass, 0.2 dB
-	 * passband ripple, -50 dB stopband ripple.
+	 * passband ripple, -50 dB stopband ripple, phase delay 0.91 ms.
 	 */
 	syncx = (bpf[8] = bpf[7]) * 4.897278e-01;
 	syncx += (bpf[7] = bpf[6]) * -2.765914e+00;
@@ -1221,18 +1228,14 @@ wwv_rf(
 	 * provides a resolution of one sample (125 us). The filters run
 	 * only if the station has been reliably determined.
 	 */
-	if (up->status & SELV) {
-		pdelay = (int)(pp->fudgetime1 * SECOND);
+	if (up->status & SELV)
 		mfsync = sqrt(csiamp * csiamp + csqamp * csqamp) /
 		    TCKCYC;
-	} else if (up->status & SELH) {
-		pdelay = (int)(pp->fudgetime2 * SECOND);
+	else if (up->status & SELH)
 		mfsync = sqrt(hsiamp * hsiamp + hsqamp * hsqamp) /
 		    TCKCYC;
-	} else {
-		pdelay = 0;
+	else
 		mfsync = 0;
-	}
 
 	/*
 	 * Enhance the seconds sync pulse using a 1-s (8000-sample) comb
@@ -1252,6 +1255,7 @@ wwv_rf(
 
 		epomax = dtemp;
 		epopos = epoch;
+		up->timestamp = up->timestamp;
 		j = epoch - 6 * MS;
 		if (j < 0)
 			j += SECOND;
@@ -1260,7 +1264,7 @@ wwv_rf(
 	if (epoch == 0) {
 		up->epomax = epomax;
 		up->eposnr = wwv_snr(epomax, nxtmax);
-		epopos -= pdelay + TCKCYC * MS;
+		epopos -= TCKCYC * MS;
 		if (epopos < 0)
 			epopos += SECOND;
 		wwv_endpoc(peer, epopos);
@@ -2089,7 +2093,7 @@ wwv_clock(
 			pp->disp = 0;
 			pp->lastref = up->timestamp;
 			refclock_process_offset(pp, offset,
-			    up->timestamp, PDELAY);
+			    up->timestamp, PDELAY + up->pdelay);
 			refclock_receive(peer);
 		}
 	}
@@ -2104,12 +2108,12 @@ wwv_clock(
 
 
 /*
- * wwv_corr4 - determine maximum likelihood digit
+ * wwv_corr4 - determine maximum-likelihood digit
  *
  * This routine correlates the received digit vector with the BCD
  * coefficient vectors corresponding to all valid digits at the given
  * position in the decoding matrix. The maximum value corresponds to the
- * maximum likelihood digit, while the ratio of this value to the next
+ * maximum-likelihood digit, while the ratio of this value to the next
  * lower value determines the likelihood function. Note that, if the
  * digit is invalid, the likelihood vector is averaged toward a miss.
  */
@@ -2158,9 +2162,9 @@ wwv_corr4(
 	vp->digsnr = wwv_snr(topmax, nxtmax);
 
 	/*
-	 * The current maximum likelihood digit is compared to the last
-	 * maximum likelihood digit. If different, the compare counter
-	 * and maximum likelihood digit are reset.  When the compare
+	 * The current maximum-likelihood digit is compared to the last
+	 * maximum-likelihood digit. If different, the compare counter
+	 * and maximum-likelihood digit are reset.  When the compare
 	 * counter reaches the BCMP threshold (3), the digit is assumed
 	 * correct. When the compare counter of all nine digits have
 	 * reached threshold, the clock is assumed correct.
@@ -2170,7 +2174,7 @@ wwv_corr4(
 	 * not considered correct until all nine clock digits have
 	 * reached threshold. This is intended as eye candy, but avoids
 	 * mistakes when the signal is low and the SNR is very marginal.
-	 * once correctly set, the maximum likelihood digit is ignored
+	 * once correctly set, the maximum-likelihood digit is ignored
 	 * on the assumption the clock will always be correct unless for
 	 * some reason it drifts to a different second.
 	 */
@@ -2308,7 +2312,7 @@ wwv_tsec(
  * This routine rotates a likelihood vector one position and increments
  * the clock digit modulo the radix. It returns the new clock digit or
  * zero if a carry occurred. Once synchronized, the clock digit will
- * match the maximum likelihood digit corresponding to that position.
+ * match the maximum-likelihood digit corresponding to that position.
  */
 static int
 carry(
@@ -2453,8 +2457,14 @@ wwv_newchan(
 		up->sptr = sp;
 		memcpy(&pp->refid, sp->refid, 4);
 		peer->refid = pp->refid;
-		up->status |= METRIC;
+		if (sp->select & SELV)
+			up->pdelay = pp->fudgetime1;
+		else if (sp->select & SELH)
+			up->pdelay = pp->fudgetime2;
+		else
+			up->pdelay = 0;
 		rval = TRUE;
+		up->status |= METRIC;
 	}
 #ifdef ICOM
 	if (up->fd_icom > 0)
@@ -2657,7 +2667,8 @@ timecode(
  * there are no clips, the gain is bumped up; if there are more than
  * MAXCLP clips (100), it is bumped down. The decoder is relatively
  * insensitive to amplitude, so this crudity works just peachy. The
- * input port is set and the error flag is cleared, mostly to be ornery.
+ * routine also jiggles the input port and selectively mutes the
+ * monitor.
  */
 static void
 wwv_gain(
