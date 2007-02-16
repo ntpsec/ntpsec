@@ -519,7 +519,8 @@ local_clock(
 			}
 		}
 #if defined(STA_NANO) && NTP_API == 4
-		if (pll_control && kern_enable && sys_tai == 0) {
+		if (pll_control && kern_enable && clock_max > 0 &&
+		    sys_tai == 0) {
 			memset(&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_TAI;
 			ntv.constant = i + TAI_1972 - 1;
@@ -545,8 +546,8 @@ local_clock(
 	 * lead to overflow problems. This might occur if some misguided
 	 * lad set the step threshold to something ridiculous.
 	 */
-	if (pll_control && kern_enable && clock_max < 0.5 &&
-	    clock_max > 0) {
+	if (pll_control && kern_enable && clock_max > 0 &&
+	    clock_max < .5) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
@@ -974,7 +975,7 @@ loop_config(
 		 * is zero to cancel any previous nonsense. If you don't
 		 * want this initialization, remove the ntp.drift file.
 		 */
-		if (pll_control && kern_enable) {
+		if (pll_control && kern_enable && clock_max > 0) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_FREQUENCY;
 			ntv.freq = (int32)(drift_comp * 65536e6);

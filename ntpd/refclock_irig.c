@@ -170,7 +170,7 @@
 #define SUBFLD		10	/* bits per frame */
 #define FIELD		100	/* bits per second */
 #define MINTC		2	/* min PLL time constant */
-#define MAXTC		20	/* max PLL time constant max */
+#define MAXTC		10	/* max PLL time constant max */
 #define	MAXAMP		5000.	/* maximum signal amplitude */
 #define	MINAMP		4000.	/* minimum signal amplitude */
 #define DRPOUT		100.	/* dropout signal amplitude */
