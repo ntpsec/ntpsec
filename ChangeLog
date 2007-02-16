@@ -1,4 +1,5 @@
-* [Bug 592] Trimble Thunderbolt GPS support
+* [Bug 778] ntpd fails to lock with drift=+500 when started with drift=-500.
+* [Bug 592] Trimble Thunderbolt GPS support.
 * IRIG, CHU, WWV, WWVB refclock improvements from Dave Mills.
 * [Bug 757] Lose ULONG_CONST().
 * [Bug 756] Require ANSI C (function prototypes).
