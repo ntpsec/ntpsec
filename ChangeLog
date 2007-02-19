@@ -1,3 +1,4 @@
+* [Bug 782] Remove P() macros from Windows files.
 * [Bug 778] ntpd fails to lock with drift=+500 when started with drift=-500.
 * [Bug 592] Trimble Thunderbolt GPS support.
 * IRIG, CHU, WWV, WWVB refclock improvements from Dave Mills.

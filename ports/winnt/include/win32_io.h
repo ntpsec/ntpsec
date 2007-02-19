@@ -192,8 +192,8 @@ struct termios
 
 
 
-extern	BOOL	TTY_GETATTR P((int fd, DCB *tio));
-extern	BOOL	TTY_SETATTR P((int fd, const DCB *tio));
+extern	BOOL	TTY_GETATTR (int fd, DCB *tio);
+extern	BOOL	TTY_SETATTR (int fd, const DCB *tio);
 
 */
 
