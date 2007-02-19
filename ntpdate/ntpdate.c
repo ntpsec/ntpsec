@@ -159,11 +159,6 @@ int simple_query = 0;
 int unpriv_port = 0;
 
 /*
- * Time to spend measuring drift rate
- */
-int rate = 0;
-
-/*
  * Program name.
  */
 char *progname;
@@ -278,10 +273,6 @@ void clear_globals()
    */
   unpriv_port = 0;
 
-  /*
-   * Time to spend measuring drift rate
-   */
-  rate = 0;
   /*
    * Systemwide parameters and flags
    */
@@ -432,17 +423,6 @@ ntpdatemain (
 		case 'q':
 			simple_query = 1;
 			break;
-		case 'r':
-			c = atoi(ntp_optarg);
-			if (c <= 0 || c > (60 * 60)) {
-				(void) fprintf(stderr,
-					   "%s: rate (%d) is invalid: 0 - %d\n",
-					   progname, c, (60 * 60));
-				errflg++;
-			} else {
-				rate = c;
-			}
-			break;
 		case 's':
 			syslogit = 1;
 			break;
@@ -474,7 +454,7 @@ ntpdatemain (
 	
 	if (errflg) {
 		(void) fprintf(stderr,
-		    "usage: %s [-46bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-r rate] [-t timeo] server ...\n",
+		    "usage: %s [-46bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-t timeo] server ...\n",
 		    progname);
 		exit(2);
 	}
