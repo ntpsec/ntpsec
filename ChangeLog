@@ -6,6 +6,7 @@
 * codec (audio) and ICOM changes from Dave Mills.
 
 (4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 776] Remove unimplemented "rate" flag from ntpdate.
 * [Bug 586] Avoid lookups if AI_NUMERICHOST is set.
 * [Bug 770] Fix numeric parameters to ntp-keygen (Alain Guibert).
 * [Bug 768] Fix io_setbclient() error message.
