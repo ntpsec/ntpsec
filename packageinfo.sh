@@ -9,13 +9,13 @@ version=${proto}.${major}.${minor}
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=
+point=0
 # Special.  Normally unused.  A suffix.
 #special=ag
 special=
 # ReleaseCandidate. 'yes' or 'no'.
 #releasecandidate=yes
-releasecandidate=no
+releasecandidate=yes
 # ChangeLog tag
 CLTAG=NTP_4_2_0
 ###
@@ -25,5 +25,5 @@ CLTAG=NTP_4_2_0
 # - - rcpoint gets set to 0
 # - - releasecandidate gets set to no
 # - GRONK is for -dev
-rcpoint=3
+rcpoint=4
 #rcpoint=GRONK
