@@ -367,7 +367,7 @@ ntpdatemain (
 	/*
 	 * Decode argument list
 	 */
-	while ((c = ntp_getopt(argc, argv, "46a:bBde:k:o:p:qr:st:uv")) != EOF)
+	while ((c = ntp_getopt(argc, argv, "46a:bBde:k:o:p:qst:uv")) != EOF)
 		switch (c)
 		{
 		case '4':
