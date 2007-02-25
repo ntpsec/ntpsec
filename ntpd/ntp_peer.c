@@ -672,10 +672,10 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 #ifdef DEBUG
 			if (debug > 3) {
 				if (interface != NULL)
-					printf("Found broadcast interface address %s, for address %s\n",
+					printf("Found *-cast interface address %s, for address %s\n",
 					       stoa(&(interface)->sin), stoa(srcadr));
 				else
-					printf("No broadcast local address found for address %s\n",
+					printf("No *-cast local address found for address %s\n",
 					       stoa(srcadr));
 			}
 #endif
