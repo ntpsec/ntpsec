@@ -1,3 +1,4 @@
+* [Bug 795] Moved declaration of variable to top of function.
 * [Bug 798] ntpq [p typo crashes ntpq.
 * [Bug 786] Fix refclock_bancomm.c on Solaris.
 * [Bug 789] Fix multicast client crypto authentication.
