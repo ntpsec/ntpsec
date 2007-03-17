@@ -662,12 +662,16 @@ openhost(
 	
 	cp = hname;
 	
-	if(*cp == '[') {
+	if (*cp == '[') {
 		cp++;
-		for(i = 0; *cp != ']'; cp++, i++)
+		for (i = 0; *cp && *cp != ']'; cp++, i++)
 			name[i] = *cp;
-	name[i] = '\0';
-	hname = name;
+		if (*cp == ']') {
+			name[i] = '\0';
+			hname = name;
+		} else {
+			return 0;
+		}
 	}
 
 	/*
