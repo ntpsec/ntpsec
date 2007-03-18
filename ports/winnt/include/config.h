@@ -25,8 +25,33 @@ typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
 typedef unsigned int	uintptr_t;
 #endif
 
+#if _MSC_VER < 1400
+/*
+ * Use 32-bit time definitions for versions prior to VS 2005
+ * VS 2005 defaults to 64-bit time
+ */
+# define SIZEOF_TIME_T 4
+#else
+# define SIZEOF_TIME_T 8
+#endif
+
 #define ISC_PLATFORM_NEEDIN6ADDRANY
 #define HAVE_SOCKADDR_IN6
+
+/*
+ * VS 2005 deprecates a number of standard functions
+ * Set up the compiler to automatically replace them.
+ * Note that these are ignored by previous versions
+ * of the compiler
+ */
+#undef _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+#undef _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT 1
+#define _CRT_SECURE_NO_DEPRECATE 1
+
+
+
 
 /*
  * The type of the socklen_t defined for getnameinfo() and getaddrinfo()
@@ -91,12 +116,6 @@ typedef unsigned int	uintptr_t;
  * Multimedia timer enable
  */
 #define USE_MM_TIMER
-/*
- * Use 32-bit time definitions
- * VS 2005 defaults to 64-bit time
- * Leave commented out for now
- */
-//#define _USE_32BIT_TIME_T
 
 /* Enable OpenSSL */
 #define OPENSSL 1
@@ -178,7 +197,6 @@ int NT_set_process_priority(void);	/* Define this function */
 # define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
 
 # define SIZEOF_SIGNED_CHAR 1
-# define SIZEOF_TIME_T 4
 # define SIZEOF_INT 4			/* for ntp_types.h */
 
 //# define HAVE_NET_IF_H

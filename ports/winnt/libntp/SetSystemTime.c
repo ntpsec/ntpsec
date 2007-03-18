@@ -12,11 +12,11 @@ ntp_set_tod(
 {
 	SYSTEMTIME st;
 	struct tm *gmtm;
-	long x = tv->tv_sec;
+	const time_t x = tv->tv_sec;
 	long y = tv->tv_usec;
 	(void) tzp;
 
-	gmtm = gmtime((const time_t *) &x);
+	gmtm = gmtime(&x);
 	st.wSecond		= (WORD) gmtm->tm_sec;
 	st.wMinute		= (WORD) gmtm->tm_min;
 	st.wHour		= (WORD) gmtm->tm_hour;
