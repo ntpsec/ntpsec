@@ -43,6 +43,7 @@
  *	STATUS: G (good), D (diag fail), T (time not provided) or
  *		P (last phone update failed)
  */
+#define PRECISION	(-20)	/* 1x10-8 */
 #define MAXUNITS 1		/* max number of LEITCH units */
 #define LEITCHREFID	"ATOM"	/* reference id */
 #define LEITCH_DESCRIPTION "Leitch: CSD 5300 Master Clock System Driver"
@@ -393,7 +394,7 @@ leitch_start(
 	 * All done.  Initialize a few random peer variables, then
 	 * return success.
 	 */
-	peer->precision = 0;
+	peer->precision = PRECISION;
 	peer->stratum = stratumtouse[unit];
 	peer->refid = refid[unit];
 	unitinuse[unit] = 1;
