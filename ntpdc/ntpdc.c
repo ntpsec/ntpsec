@@ -499,10 +499,14 @@ openhost(
 	
 	if (*cp == '[') {
 		cp++;	
-		for(i = 0; *cp != ']'; cp++, i++)
-			name[i] = *cp;	
-		name[i] = '\0';
-		hname = name;
+		for (i = 0; *cp && *cp != ']'; cp++, i++)
+			name[i] = *cp;
+		if (*cp == ']') {
+			name[i] = '\0';
+			hname = name;
+		} else {
+			return 0;
+		}
 	}	
 
 	/*
