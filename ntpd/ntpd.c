@@ -500,7 +500,7 @@ ntpdmain(
 		if (uid)
 		{
 			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %ld", (long)uid);
-			printf("must be run as root, not uid %ld", (long)uid);
+			printf("must be run as root, not uid %ld\n", (long)uid);
 			exit(1);
 		}
 	}
@@ -509,7 +509,7 @@ ntpdmain(
 #ifdef OPENSSL
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_ERR,
-		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx\n",
+		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx",
 		    OPENSSL_VERSION_NUMBER, SSLeay());
 		exit(1);
 	}
