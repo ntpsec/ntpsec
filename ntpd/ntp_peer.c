@@ -530,6 +530,18 @@ void
 set_peerdstadr(struct peer *peer, struct interface *interface)
 {
 	if (peer->dstadr != interface) {
+		if (interface != NULL &&
+		    (peer->cast_flags & MDF_BCLNT) &&
+		    (interface->flags & INT_MCASTIF) &&
+		    peer->burst) {
+			/*
+			 * don't accept updates to a true multicast reception
+			 * interface while a BCLNT peer is running it's
+			 * unicast protocol
+			 */
+			return;
+		}
+
 		if (peer->dstadr != NULL)
 		{
 			peer->dstadr->peercnt--;
@@ -603,9 +615,9 @@ peer_refresh_interface(struct peer *peer)
                 /*
                  * clear crypto if we change the local address
                  */
-                if (peer->dstadr != piface) {
-                        peer_crypto_clear(peer);
-                }
+                if (peer->dstadr != piface && !(peer->cast_flags & MDF_BCLNT)) {
+			peer_crypto_clear(peer);
+		}
 
 		/*
 	 	 * Broadcast needs the socket enabled for broadcast
