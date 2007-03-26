@@ -1,10 +1,11 @@
+* [Bug 789] Fix multicast client crypto authentication and make sure arriving
+	    multicast packets do not disturb the autokey dance.
 * [Bug 787] Bug fixes for 64-bit time_t on Windows.
 * [Bug 796] Clean up duplicate #defines in ntp_control.c.
 * [Bug 569] Use the correct precision for the Leitch CSD-5300.
 * [Bug 795] Moved declaration of variable to top of function.
 * [Bug 798] ntpq [p typo crashes ntpq/ntpdc.
 * [Bug 786] Fix refclock_bancomm.c on Solaris.
-* [Bug 789] Fix multicast client crypto authentication.
 * [Bug 774] parsesolaris.c does not compile under the new Solaris.
 * [Bug 782] Remove P() macros from Windows files.
 * [Bug 778] ntpd fails to lock with drift=+500 when started with drift=-500.
