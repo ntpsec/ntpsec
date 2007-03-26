@@ -1,3 +1,4 @@
+* [Bug 787] Bug fixes for 64-bit time_t on Windows.
 * [Bug 796] Clean up duplicate #defines in ntp_control.c.
 * [Bug 569] Use the correct precision for the Leitch CSD-5300.
 * [Bug 795] Moved declaration of variable to top of function.
