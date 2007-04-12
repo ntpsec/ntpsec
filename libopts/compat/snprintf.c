@@ -43,7 +43,7 @@ snprintf(char *str, size_t n, char const *fmt, ...)
 #endif
 
     if (rval > n) {
-        fprintf(stderr, "snprintf buffer overrun %d > %d\n", rval, n);
+        fprintf(stderr, "snprintf buffer overrun %d > %d\n", rval, (int)n);
         abort();
     }
     return rval;

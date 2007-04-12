@@ -2,12 +2,12 @@
 
 /* --- fake the preprocessor into handlng portability */
 /*
- *  Time-stamp:      "2006-09-07 06:49:09 bkorb"
+ *  Time-stamp:      "2007-02-03 17:41:06 bkorb"
  *
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Created:          Mon Jun 30 15:54:46 1997
  *
- * $Id: compat.h,v 4.13 2006/09/24 02:11:16 bkorb Exp $
+ * $Id: compat.h,v 4.15 2007/02/04 22:17:39 bkorb Exp $
  */
 #ifndef COMPAT_H_GUARD
 #define COMPAT_H_GUARD 1
@@ -47,7 +47,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-#if defined( HAVE_POSIX_SYSINFO )
+#if defined( HAVE_SOLARIS_SYSINFO )
 #  include <sys/systeminfo.h>
 #elif defined( HAVE_UNAME_SYSCALL )
 #  include <sys/utsname.h>
@@ -200,8 +200,10 @@
 #endif /* !MAXPATHLEN && PATH_MAX */
 
 #if !defined (MAXPATHLEN)
-#  define MAXPATHLEN 4096
+#  define MAXPATHLEN ((size_t)4096)
 #endif /* MAXPATHLEN */
+
+#define AG_PATH_MAX  ((size_t)MAXPATHLEN)
 
 #ifndef LONG_MAX
 #  define LONG_MAX      ~(1L << (8*sizeof(long) -1))

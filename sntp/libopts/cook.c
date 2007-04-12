@@ -1,6 +1,6 @@
 
 /*
- *  $Id: cook.c,v 4.7 2006/09/28 01:26:33 bkorb Exp $
+ *  $Id: cook.c,v 4.10 2007/02/04 17:44:12 bkorb Exp $
  *  Time-stamp:      "2006-09-24 15:21:02 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
@@ -8,7 +8,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -58,9 +58,9 @@
  * private:
  *
  * what:  escape-process a string fragment
- * arg:   + char const* + pzScan  + points to character after the escape +
- * arg:   + char*       + pRes    + Where to put the result byte +
- * arg:   + u_int       + nl_ch   + replacement char if scanned char is \n +
+ * arg:   + char const*  + pzScan  + points to character after the escape +
+ * arg:   + char*        + pRes    + Where to put the result byte +
+ * arg:   + unsigned int + nl_ch   + replacement char if scanned char is \n +
  *
  * ret-type: unsigned int
  * ret-desc: The number of bytes consumed processing the escaped character.
@@ -78,7 +78,7 @@
  *  character that is different from \n, if need be.  For example, use
  *  0x7F and never emit a 0x7F.
  *
- * err:  @code{NULL} is returned if the string(s) is/are mal-formed.
+ * err:  @code{NULL} is returned if the string is mal-formed.
 =*/
 unsigned int
 ao_string_cook_escape_char( char const* pzIn, char* pRes, u_int nl )

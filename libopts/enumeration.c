@@ -1,7 +1,7 @@
 
 /*
- *  $Id: enumeration.c,v 4.12 2006/10/06 05:29:00 bkorb Exp $
- * Time-stamp:      "2006-10-05 21:10:21 bkorb"
+ *  $Id: enumeration.c,v 4.17 2007/02/04 17:44:12 bkorb Exp $
+ * Time-stamp:      "2007-01-13 10:22:35 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -10,7 +10,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -58,33 +58,33 @@ tSCC*  pz_enum_err_fmt;
 /* static forward declarations maintained by :mkfwd */
 static void
 enumError(
-    tOptions* pOpts,
-    tOptDesc* pOD,
-    tCC**     paz_names,
-    int       name_ct );
+    tOptions*     pOpts,
+    tOptDesc*     pOD,
+    tCC* const *  paz_names,
+    int           name_ct );
 
 static uintptr_t
 findName(
     tCC*          pzName,
     tOptions*     pOpts,
     tOptDesc*     pOD,
-    tCC**         paz_names,
+    tCC* const *  paz_names,
     unsigned int  name_ct );
 /* = = = END-STATIC-FORWARD = = = */
 
 static void
 enumError(
-    tOptions* pOpts,
-    tOptDesc* pOD,
-    tCC**     paz_names,
-    int       name_ct )
+    tOptions*     pOpts,
+    tOptDesc*     pOD,
+    tCC* const *  paz_names,
+    int           name_ct )
 {
     size_t max_len = 0;
     size_t ttl_len = 0;
 
     if (pOpts != NULL)
-        fprintf( option_usage_fp, pz_enum_err_fmt,
-                 pOpts->pzProgName, pOD->optArg.argString );
+        fprintf( option_usage_fp, pz_enum_err_fmt, pOpts->pzProgName,
+                 pOD->optArg.argString, pOD->pz_Name );
 
     fprintf( option_usage_fp, zValidKeys, pOD->pz_Name );
 
@@ -98,7 +98,7 @@ enumError(
      *  of all the names.
      */
     {
-        tCC** paz = paz_names;
+        tCC * const * paz = paz_names;
         int   ct  = name_ct;
 
         do  {
@@ -137,7 +137,7 @@ enumError(
         int   ent_no = 0;
         char  zFmt[16];  /* format for all-but-last entries on a line */
 
-        sprintf( zFmt, "%%-%ds", max_len );
+        sprintf( zFmt, "%%-%ds", (int)max_len );
         max_len = 78 / max_len; /* max_len is now max entries on a line */
         fputs( "  ", option_usage_fp );
 
@@ -175,7 +175,7 @@ findName(
     tCC*          pzName,
     tOptions*     pOpts,
     tOptDesc*     pOD,
-    tCC**         paz_names,
+    tCC* const *  paz_names,
     unsigned int  name_ct )
 {
     uintptr_t     res = name_ct;
@@ -186,7 +186,7 @@ findName(
      *  Multiple partial matches means we have an ambiguous match.
      */
     for (idx = 0; idx < name_ct; idx++) {
-        if (strncmp( (char*)paz_names[idx], (char*)pzName, len ) == 0) {
+        if (strncmp( (char*)paz_names[idx], (char*)pzName, len) == 0) {
             if (paz_names[idx][len] == NUL)
                 return idx;  /* full match */
 
@@ -247,7 +247,7 @@ optionKeywordName(
  *
  * arg:   tOptions*,     pOpts,     the program options descriptor
  * arg:   tOptDesc*,     pOD,       enumeration option description
- * arg:   char const**,  paz_names, list of enumeration names
+ * arg:   char const * const *,  paz_names, list of enumeration names
  * arg:   unsigned int,  name_ct,   number of names in list
  *
  * ret_type:  uintptr_t
@@ -263,9 +263,11 @@ uintptr_t
 optionEnumerationVal(
     tOptions*     pOpts,
     tOptDesc*     pOD,
-    tCC**         paz_names,
+    tCC * const * paz_names,
     unsigned int  name_ct )
 {
+    uintptr_t res = 0UL;
+
     /*
      *  IF the program option descriptor pointer is invalid,
      *  then it is some sort of special request.
@@ -276,7 +278,7 @@ optionEnumerationVal(
          *  print the list of enumeration names.
          */
         enumError( pOpts, pOD, paz_names, (int)name_ct );
-        return 0UL;
+        break;
 
     case 1UL:
     {
@@ -288,8 +290,10 @@ optionEnumerationVal(
             printf( "INVALID-%d", ix );
         else
             fputs( paz_names[ ix ], stdout );
-        return 0UL;
+
+        break;
     }
+
     case 2UL:
     {
         tSCC zInval[] = "*INVALID*";
@@ -300,13 +304,21 @@ optionEnumerationVal(
         if (ix >= name_ct)
             return (uintptr_t)zInval;
 
-        return (uintptr_t)paz_names[ ix ];
-    }
-    default:
+        res = (uintptr_t)paz_names[ ix ];
         break;
     }
 
-    return findName( pOD->optArg.argString, pOpts, pOD, paz_names, name_ct );
+    default:
+        res = findName( pOD->optArg.argString, pOpts, pOD, paz_names, name_ct );
+
+        if (pOD->fOptState & OPTST_ALLOC_ARG) {
+            AGFREE(pOD->optArg.argString);
+            pOD->fOptState &= ~OPTST_ALLOC_ARG;
+            pOD->optArg.argString = NULL;
+        }
+    }
+
+    return res;
 }
 
 
@@ -316,7 +328,8 @@ optionEnumerationVal(
  *
  * arg:   tOptions*,     pOpts,     the program options descriptor
  * arg:   tOptDesc*,     pOD,       enumeration option description
- * arg:   char const**,  paz_names, list of enumeration names
+ * arg:   char const * const *,
+ *                       paz_names, list of enumeration names
  * arg:   unsigned int,  name_ct,   number of names in list
  *
  * doc:   This converts the optArg.argString string from the option description
@@ -329,7 +342,7 @@ void
 optionSetMembers(
     tOptions*     pOpts,
     tOptDesc*     pOD,
-    tCC**         paz_names,
+    tCC* const *  paz_names,
     unsigned int  name_ct )
 {
     /*
@@ -382,7 +395,8 @@ optionSetMembers(
             bits >>= 1;
         }
 
-        pOD->optArg.argString = pz = malloc( len );
+        pOD->optArg.argString = pz = AGALOC( len, "enum name" );
+
         /*
          *  Start by clearing all the bits.  We want to turn off any defaults
          *  because we will be restoring to current state, not adding to
@@ -430,12 +444,12 @@ optionSetMembers(
             if (len == 0)
                 break;
 
-            if ((len == 3) && (strncmp( pzArg, zAll, 3 ) == 0)) {
+            if ((len == 3) && (strncmp(pzArg, zAll, (size_t)3) == 0)) {
                 if (iv)
                      res = 0;
                 else res = ~0UL;
             }
-            else if ((len == 4) && (strncmp( pzArg, zNone, 4 ) == 0)) {
+            else if ((len == 4) && (strncmp(pzArg, zNone, (size_t)4) == 0)) {
                 if (! iv)
                     res = 0;
             }
@@ -449,7 +463,7 @@ optionSetMembers(
                     if (*pz != NUL) {
                         if (len >= AO_NAME_LIMIT)
                             break;
-                        strncpy( z, pzArg, (unsigned)len );
+                        strncpy( z, pzArg, (size_t)len );
                         z[len] = NUL;
                         p = z;
                     } else {
