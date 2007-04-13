@@ -137,7 +137,7 @@
 #define FGATE		0x0010	/* frequency gate */
 #define DGATE		0x0020	/* data pulse amplitude error */
 #define BGATE		0x0040	/* data pulse width error */
-#define	METRIC		0x0080	/*one or more stations heard */
+#define	METRIC		0x0080	/* one or more stations heard */
 #define LEPSEC		0x1000	/* leap minute */
 
 /*
@@ -2443,9 +2443,9 @@ wwv_newchan(
 	 * greater than the threshold, tune to that frequency and
 	 * transmitter QTH.
 	 */
+	up->status &= ~(SELV | SELH);
 	if (rank < MTHR) {
 		up->dchan = (up->dchan + 1) % NCHAN;
-		up->status &= ~(SELV | SELH);
 		if (up->status & METRIC) {
 			up->status &= ~METRIC;
 			refclock_report(peer, CEVNT_PROP);
@@ -2453,18 +2453,20 @@ wwv_newchan(
 		rval = FALSE;
 	} else {
 		up->dchan = j;
-		up->status |= SELV | SELH;
 		up->sptr = sp;
 		memcpy(&pp->refid, sp->refid, 4);
 		peer->refid = pp->refid;
-		if (sp->select & SELV)
-			up->pdelay = pp->fudgetime1;
-		else if (sp->select & SELH)
-			up->pdelay = pp->fudgetime2;
-		else
-			up->pdelay = 0;
-		rval = TRUE;
 		up->status |= METRIC;
+		if (sp->select & SELV) {
+			up->status |= SELV;
+			up->pdelay = pp->fudgetime1;
+		} else if (sp->select & SELH) {
+			up->status |= SELH;
+			up->pdelay = pp->fudgetime2;
+		} else {
+			up->pdelay = 0;
+		}
+		rval = TRUE;
 	}
 #ifdef ICOM
 	if (up->fd_icom > 0)
