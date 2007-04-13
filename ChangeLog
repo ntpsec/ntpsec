@@ -1,3 +1,4 @@
+* [Bug 810] Fix ntp-keygen documentation.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
 	    multicast packets do not disturb the autokey dance.
 * [Bug 787] Bug fixes for 64-bit time_t on Windows.
