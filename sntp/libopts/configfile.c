@@ -1,12 +1,12 @@
 /*
- *  $Id: configfile.c,v 1.15 2006/09/28 01:26:33 bkorb Exp $
- *  Time-stamp:      "2006-09-24 15:18:51 bkorb"
+ *  $Id: configfile.c,v 1.20 2007/02/04 17:44:12 bkorb Exp $
+ *  Time-stamp:      "2007-01-13 12:49:10 bkorb"
  *
  *  configuration/rc/ini file handling.
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -145,13 +145,16 @@ configFileLoad( char const* pzFile )
 {
     tmap_info_t   cfgfile;
     tOptionValue* pRes = NULL;
+    tOptionLoadMode save_mode = option_load_mode;
+
     char* pzText =
         text_mmap( pzFile, PROT_READ, MAP_PRIVATE, &cfgfile );
 
     if (TEXT_MMAP_FAILED_ADDR(pzText))
         return NULL; /* errno is set */
 
-    pRes = optionLoadNested(pzText, pzFile, strlen(pzFile), OPTION_LOAD_COOKED);
+    option_load_mode = OPTION_LOAD_COOKED;
+    pRes = optionLoadNested(pzText, pzFile, strlen(pzFile));
 
     if (pRes == NULL) {
         int err = errno;
@@ -159,6 +162,8 @@ configFileLoad( char const* pzFile )
         errno = err;
     } else
         text_munmap( &cfgfile );
+
+    option_load_mode = save_mode;
     return pRes;
 }
 
@@ -392,8 +397,8 @@ optionGetValue( const tOptionValue* pOld, char const* pzValName )
  *  @code{ENOENT} - the supplied @code{pOldValue} pointed to the last entry.
  *  @end itemize
 =*/
-const tOptionValue*
-optionNextValue( const tOptionValue* pOVList, const tOptionValue* pOldOV )
+tOptionValue const *
+optionNextValue(tOptionValue const * pOVList,tOptionValue const * pOldOV )
 {
     tArgList*     pAL;
     tOptionValue* pRes = NULL;
@@ -439,9 +444,9 @@ filePreset(
     int           direction )
 {
     tmap_info_t   cfgfile;
+    tOptState     st = OPTSTATE_INITIALIZER(PRESET);
     char*         pzFileText =
         text_mmap( pzFileName, PROT_READ|PROT_WRITE, MAP_PRIVATE, &cfgfile );
-    tOptState     st = OPTSTATE_INITIALIZER(PRESET);
 
     if (TEXT_MMAP_FAILED_ADDR(pzFileText))
         return;
@@ -700,10 +705,11 @@ handleStructure(
     char*         pzText,
     int           direction )
 {
-    tOptionLoadMode mode = OPTION_LOAD_UNCOOKED;
+    tOptionLoadMode mode = option_load_mode;
     tOptionValue     valu;
 
     char* pzName = ++pzText;
+    char* pzData;
     char* pcNulPoint;
 
     while (ISNAMECHAR( *pzText ))  pzText++;
@@ -718,13 +724,14 @@ handleStructure(
             break;
         if (*pzText != '/')
             return NULL;
+        /* FALLTHROUGH */
 
     case '/':
         if (pzText[1] != '>')
             return NULL;
         *pzText = NUL;
         pzText += 2;
-        loadOptionLine( pOpts, pOS, pzName, direction, OPTION_LOAD_KEEP );
+        loadOptionLine( pOpts, pOS, pzName, direction, mode );
         return pzText;
 
     case '>':
@@ -738,10 +745,11 @@ handleStructure(
     }
 
     /*
-     *  If we are here, we have a value.  Separate the name from the
-     *  value for a moment.
+     *  If we are here, we have a value.  "pzText" points to a closing angle
+     *  bracket.  Separate the name from the value for a moment.
      */
     *pcNulPoint = NUL;
+    pzData = ++pzText;
 
     /*
      *  Find the end of the option text and NUL terminate it
@@ -755,7 +763,7 @@ handleStructure(
         sprintf( pz, "</%s>", pzName );
         *pzText = ' ';
         pzText = strstr( pzText, pz );
-        if (pz != z) free(pz);
+        if (pz != z) AGFREE(pz);
 
         if (pzText == NULL)
             return pzText;
@@ -767,8 +775,9 @@ handleStructure(
 
     /*
      *  Rejoin the name and value for parsing by "loadOptionLine()".
+     *  Erase any attributes parsed by "parseAttributes()".
      */
-    *(pcNulPoint++) = ' ';
+    memset(pcNulPoint, ' ', pzData - pcNulPoint);
 
     /*
      *  "pzName" points to what looks like text for one option/configurable.
@@ -791,7 +800,7 @@ internalFileLoad( tOptions* pOpts )
 {
     int     idx;
     int     inc = DIRECTION_PRESET;
-    char    zFileName[ MAXPATHLEN+1 ];
+    char    zFileName[ AG_PATH_MAX+1 ];
 
     if (pOpts->papzHomeList == NULL)
         return;
@@ -829,7 +838,7 @@ internalFileLoad( tOptions* pOpts )
 
         idx += inc;
 
-        if (! optionMakePath( zFileName, sizeof( zFileName ),
+        if (! optionMakePath( zFileName, (int)sizeof(zFileName),
                               pzPath, pOpts->pzProgPath ))
             continue;
 
@@ -921,7 +930,8 @@ optionFileLoad( tOptions* pOpts, char const* pzProgram )
  * arg:   + tOptDesc* + pOptDesc + the descriptor for this arg +
  *
  * doc:
- *  Processes the options found in the file named with pOptDesc->optArg.argString.
+ *  Processes the options found in the file named with
+ *  pOptDesc->optArg.argString.
 =*/
 void
 optionLoadOpt( tOptions* pOpts, tOptDesc* pOptDesc )

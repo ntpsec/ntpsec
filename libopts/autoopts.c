@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.17 2006/10/05 03:48:56 bkorb Exp $
- *  Time-stamp:      "2006-10-04 19:32:32 bkorb"
+ *  $Id: autoopts.c,v 4.23 2007/02/13 19:43:46 bkorb Exp $
+ *  Time-stamp:      "2007-02-13 11:26:59 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -10,7 +10,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -52,22 +52,6 @@
  * If you do not wish that, delete this exception notice.
  */
 
-#ifndef HAVE_PATHFIND
-#  include "compat/pathfind.c"
-#endif
-
-#ifndef HAVE_SNPRINTF
-#  include "compat/snprintf.c"
-#endif
-
-#ifndef HAVE_STRDUP
-#  include "compat/strdup.c"
-#endif
-
-#ifndef HAVE_STRCHR
-#  include "compat/strchr.c"
-#endif
-
 static char const zNil[] = "";
 
 #define SKIP_RC_FILES(po) \
@@ -93,23 +77,26 @@ ao_malloc( size_t sz )
 {
     void * res = malloc(sz);
     if (res == NULL) {
-        fprintf( stderr, "malloc of %d bytes failed\n", sz );
+        fprintf( stderr, "malloc of %d bytes failed\n", (int)sz );
         exit( EXIT_FAILURE );
     }
     return res;
 }
-
+#undef  malloc
+#define malloc(_s) ao_malloc(_s)
 
 LOCAL void *
 ao_realloc( void *p, size_t sz )
 {
     void * res = realloc(p, sz);
     if (res == NULL) {
-        fprintf( stderr, "realloc of %d bytes at 0x%p failed\n", sz, p );
+        fprintf( stderr, "realloc of %d bytes at 0x%p failed\n", (int)sz, p );
         exit( EXIT_FAILURE );
     }
     return res;
 }
+#undef  realloc
+#define realloc(_p,_s) ao_realloc(_p,_s)
 
 
 LOCAL void
@@ -118,6 +105,8 @@ ao_free( void *p )
     if (p != NULL)
         free(p);
 }
+#undef  free
+#define free(_p) ao_free(_p)
 
 
 LOCAL char *
@@ -125,12 +114,29 @@ ao_strdup( char const *str )
 {
     char * res = strdup(str);
     if (res == NULL) {
-        fprintf( stderr, "strdup of %d byte string failed\n", strlen(str) );
+        fprintf( stderr, "strdup of %d byte string failed\n", (int)strlen(str) );
         exit( EXIT_FAILURE );
     }
     return res;
 }
+#undef  strdup
+#define strdup(_p) ao_strdup(_p)
 
+#ifndef HAVE_PATHFIND
+#  include "compat/pathfind.c"
+#endif
+
+#ifndef HAVE_SNPRINTF
+#  include "compat/snprintf.c"
+#endif
+
+#ifndef HAVE_STRDUP
+#  include "compat/strdup.c"
+#endif
+
+#ifndef HAVE_STRCHR
+#  include "compat/strchr.c"
+#endif
 
 /*
  *  handleOption
@@ -147,6 +153,8 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
      */
     tOptDesc* pOD = pOptState->pOD;
     tOptProc* pOP = pOD->pOptProc;
+    if (pOD->fOptState & OPTST_ALLOC_ARG)
+        AGFREE(pOD->optArg.argString);
 
     pOD->optArg.argString = pOptState->pzOptArg;
 
@@ -230,14 +238,17 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
      */
     if (  (pOD->fOptState & OPTST_DEFINED)
        && (++pOD->optOccCt > pOD->optMaxCt)  )  {
-        char const* pzEqv =
-            (pOD->optEquivIndex != NO_EQUIVALENT) ? zEquiv : zNil;
 
         if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0) {
-            char const* pzFmt = (pOD->optMaxCt > 1) ? zAtMost : zOnlyOne;
+            char const * pzEqv =
+                (pOD->optEquivIndex != NO_EQUIVALENT) ? zEquiv : zNil;
+
             fputs( zErrOnly, stderr );
-            fprintf( stderr, pzFmt, pOD->pz_Name, pzEqv,
-                     pOD->optMaxCt );
+
+            if (pOD->optMaxCt > 1)
+                fprintf(stderr, zAtMost, pOD->optMaxCt, pOD->pz_Name, pzEqv);
+            else
+                fprintf(stderr, zOnlyOne, pOD->pz_Name, pzEqv);
         }
 
         return FAILURE;
@@ -921,9 +932,9 @@ checkConsistency( tOptions* pOpts )
 
             errCt++;
             if (pOD->optMinCt > 1)
-                fprintf( stderr, zNotEnough, pOD->pz_Name, pOD->optMinCt );
+                 fprintf( stderr, zNotEnough, pOD->pz_Name, pOD->optMinCt );
             else fprintf( stderr, zNeedOne, pOD->pz_Name );
-           } while (0);
+        } while (0);
 
         if (--oCt <= 0)
             break;

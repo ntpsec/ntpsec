@@ -1,7 +1,7 @@
 
 /*
- *  $Id: boolean.c,v 4.6 2006/09/24 02:11:16 bkorb Exp $
- * Time-stamp:      "2006-09-22 18:13:34 bkorb"
+ *  $Id: boolean.c,v 4.10 2007/02/04 17:44:12 bkorb Exp $
+ * Time-stamp:      "2007-01-13 10:10:39 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -10,7 +10,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -67,16 +67,17 @@
 void
 optionBooleanVal( tOptions* pOpts, tOptDesc* pOD )
 {
-    long  val;
     char* pz;
     ag_bool  res = AG_TRUE;
 
     switch (*(pOD->optArg.argString)) {
     case '0':
-        val = strtol( pOD->optArg.argString, &pz, 0 );
+    {
+        long  val = strtol( pOD->optArg.argString, &pz, 0 );
         if ((val != 0) || (*pz != NUL))
             break;
         /* FALLTHROUGH */
+    }
     case 'N':
     case 'n':
     case 'F':
@@ -90,6 +91,10 @@ optionBooleanVal( tOptions* pOpts, tOptDesc* pOD )
         res = AG_FALSE;
     }
 
+    if (pOD->fOptState & OPTST_ALLOC_ARG) {
+        AGFREE(pOD->optArg.argString);
+        pOD->fOptState &= ~OPTST_ALLOC_ARG;
+    }
     pOD->optArg.argBool = res;
 }
 /*

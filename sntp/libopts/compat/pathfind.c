@@ -4,11 +4,12 @@
 
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
+ * Time-stamp:       "2006-09-23 19:46:16 bkorb"
  * Created:          Tue Jun 24 15:07:31 1997
- * Last Modified:    $Date: 2006/09/24 02:11:16 $
+ * Last Modified:    $Date: 2006/11/27 01:52:23 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.9 2006/09/24 02:11:16 bkorb Exp $
+ * $Id: pathfind.c,v 4.10 2006/11/27 01:52:23 bkorb Exp $
  */
 
 /* Code: */
@@ -92,7 +93,7 @@ pathfind( char const*  path,
     int   p_index   = 0;
     int   mode_bits = 0;
     char* pathName  = NULL;
-    char  zPath[ MAXPATHLEN + 1 ];
+    char  zPath[ AG_PATH_MAX + 1 ];
 
     if (strchr( mode, 'r' )) mode_bits |= R_OK;
     if (strchr( mode, 'w' )) mode_bits |= W_OK;
@@ -313,7 +314,7 @@ extract_colon_unit( char* pzDir, char const *string, int *p_index )
                 goto copy_done;
             }
 
-            if ((pzDest - pzDir) >= MAXPATHLEN)
+            if ((pzDest - pzDir) >= AG_PATH_MAX)
                 break;
         } copy_done:;
 

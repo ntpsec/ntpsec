@@ -1,7 +1,7 @@
 
 /*
- *  $Id: environment.c,v 4.9 2006/09/24 02:11:16 bkorb Exp $
- * Time-stamp:      "2005-10-29 13:23:59 bkorb"
+ *  $Id: environment.c,v 4.12 2007/02/04 17:44:12 bkorb Exp $
+ * Time-stamp:      "2007-01-13 10:02:07 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -10,7 +10,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -197,7 +197,7 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
         st.pzOptArg = getenv( zEnvName );
         if (st.pzOptArg == NULL)
             continue;
-        st.flags    = OPTST_PRESET | st.pOD->fOptState;
+        st.flags    = OPTST_PRESET | OPTST_ALLOC_ARG | st.pOD->fOptState;
         st.optType  = TOPT_UNDEFINED;
 
         if (  (st.pOD->pz_DisablePfx != NULL)
@@ -229,7 +229,6 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
 
         /*
          *  Make sure the option value string is persistent and consistent.
-         *  This may be a memory leak, but we cannot do anything about it.
          *
          *  The interpretation of the option value depends
          *  on the type of value argument the option takes
@@ -244,6 +243,7 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
                 st.pzOptArg = zNil;
             } else {
                 AGDUPSTR( st.pzOptArg, st.pzOptArg, "option argument" );
+                st.flags |= OPTST_ALLOC_ARG;
             }
         }
 
