@@ -18,6 +18,8 @@
 typedef int socklen_t;	/* VS 6.0 doesn't know about socklen_t */
 #endif
 
+#define HAVE_UINTPTR_T
+
 /*
  * Some types don't exist in VS V6
  */
