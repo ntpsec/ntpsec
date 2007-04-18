@@ -143,9 +143,9 @@ int	pll_status;		/* status bits for kernel pll */
 /*
  * Clock state machine control flags
  */
-int	ntp_enable;		/* clock discipline enabled */
+int	ntp_enable = 1;		/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
-int	kern_enable;		/* kernel support enabled */
+int	kern_enable = 1;	/* kernel support enabled */
 int	pps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
@@ -338,8 +338,6 @@ local_clock(
 	 */
 	clock_frequency = flladj = plladj = 0;
 	mu = peer->epoch - sys_clocktime;
-	if (clock_max == 0 || clock_max > 0.5)
-		kern_enable = 0;
 	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
@@ -1002,6 +1000,8 @@ loop_config(
 	 */
 	case LOOP_MAX:			/* step threshold */
 		clock_max = freq;
+		if (clock_max == 0 || clock_max > 0.5)
+		kern_enable = 0;
 		break;
 
 	case LOOP_PANIC:		/* panic threshold */

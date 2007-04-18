@@ -1,3 +1,4 @@
+* [Bug 740] Fix kernel/daemon startup drift anomaly.
 * refclock_wwv.c fixes from Dave Mills.
 * [Bug 810] Fix ntp-keygen documentation.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
