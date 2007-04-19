@@ -3210,14 +3210,6 @@ init_proto(void)
 #ifdef OPENSSL
 	sys_automax = 1 << NTP_AUTOMAX;
 #endif /* OPENSSL */
-
-	/*
-	 * Default these to enable
-	 */
-	ntp_enable = 1;
-#ifndef KERNEL_FLL_BUG
-	kern_enable = 1;
-#endif
 	pps_enable = 0;
 	stats_control = 1;
 }

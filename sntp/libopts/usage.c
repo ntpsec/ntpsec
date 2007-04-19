@@ -1,6 +1,6 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.12 2006/09/24 02:11:16 bkorb Exp $
+ *  usage.c  $Id: usage.c,v 4.13 2006/11/27 01:52:23 bkorb Exp $
  * Time-stamp:      "2006-07-01 12:41:02 bkorb"
  *
  *  This module implements the default usage procedure for
@@ -400,7 +400,7 @@ printInitList(
     tCC*        pzRc,
     tCC*        pzPN )
 {
-    char zPath[ MAXPATHLEN+1 ];
+    char zPath[ AG_PATH_MAX+1 ];
 
     if (papz == NULL)
         return;
@@ -414,7 +414,7 @@ printInitList(
         if (pzPath == NULL)
             break;
 
-        if (optionMakePath( zPath, sizeof( zPath ), pzPath, pzPN ))
+        if (optionMakePath(zPath, (int)sizeof( zPath ), pzPath, pzPN))
             pzPath = zPath;
 
         /*

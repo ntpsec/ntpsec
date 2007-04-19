@@ -3,6 +3,7 @@
 autogen definitions options;
 
 #include copyright.def
+#include homerc.def
 #include autogen-version.def
 
 prog-name      = "ntp-keygen";
@@ -22,7 +23,14 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "certificate scheme";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	scheme is one of
+	RSA-MD2, RSA-MD5, RSA-SHA, RSA-SHA1, RSA-MDC2, RSA-RIPEMD160,
+	DSA-SHA, or DSA-SHA1.
+
+	Select the certificate message digest/signature encryption scheme.
+	Note that RSA schemes must be used with a RSA sign key and DSA
+	schemes must be used with a DSA sign key.  The default without
+	this option is RSA-MD5.
 	_EndOfDoc_;
 };
 
@@ -34,7 +42,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "Write identity keys";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Write the IFF client keys to the standard output.  This is
+	intended for automatic key distribution by mail.
 	_EndOfDoc_;
 };
 
@@ -44,7 +53,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "Generate GQ parameters and keys";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate parameters and keys for the GQ identification scheme,
+	obsoleting any that may exist.
 	_EndOfDoc_;
 };
 
@@ -54,7 +64,9 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "update GQ keys";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate keys for the GQ identification scheme using the existing
+	GQ parameters.  If the GQ parameters do not yet exist, create
+	them first.
 	_EndOfDoc_;
 };
 
@@ -64,7 +76,7 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "generate RSA host key";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate new host keys, obsoleting any that may exist.
 	_EndOfDoc_;
 };
 
@@ -74,7 +86,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "generate IFF parameters";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate parameters for the IFF identification scheme, obsoleting
+	any that may exist.
 	_EndOfDoc_;
 };
 
@@ -84,7 +97,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "set issuer name";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Set the suject name to name.  This is used as the subject field
+	in certificates and in the file name for host and sign keys.
 	_EndOfDoc_;
 };
 
@@ -93,7 +107,7 @@ flag = {
     value     = M;
     descrip   = "generate MD5 keys";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate MD5 keys, obsoleting any that may exist.
 	_EndOfDoc_;
 };
 
@@ -106,7 +120,7 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "modulus";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	The number of bits in the prime modulus.  The default is 512.
 	_EndOfDoc_;
 };
 
@@ -116,7 +130,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "generate PC private certificate";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate a private certificate.  By default, the program generates
+	public certificates.
 	_EndOfDoc_;
 };
 
@@ -128,7 +143,8 @@ flag = {
     arg-name  = passwd;
     descrip   = "output private password";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Encrypt generated files containing private data with the specified
+	password and the DES-CBC algorithm.
 	_EndOfDoc_;
 };
 
@@ -140,7 +156,7 @@ flag = {
     arg-name  = passwd;
     descrip   = "input private password";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Set the password for reading files to the specified password.
 	_EndOfDoc_;
 };
 
@@ -152,7 +168,9 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "generate sign key (RSA or DSA)";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate a new sign key of the designated type, obsoleting any
+	that may exist.  By default, the program uses the host key as the
+	sign key.
 	_EndOfDoc_;
 };
 
@@ -164,8 +182,9 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "set subject name";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
-	_EndOfDoc_;
+	Set the issuer name to name.  This is used for the issuer field
+	in certificates and in the file name for identity files.
+		_EndOfDoc_;
 };
 
 flag = {
@@ -174,7 +193,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "trusted certificate (TC scheme)";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate a trusted certificate.  By default, the program generates
+	a non-trusted certificate.
 	_EndOfDoc_;
 };
 
@@ -186,7 +206,8 @@ flag = {
     ifdef     = OPENSSL;
     descrip   = "generate <num> MV parameters";
     doc = <<-  _EndOfDoc_
-	Just some descriptive text.
+	Generate parameters and keys for the Mu-Varadharajan (MV)
+	identification scheme.
 	_EndOfDoc_;
 };
 
@@ -197,9 +218,6 @@ flag = {
     arg-name  = num;
     ifdef     = OPENSSL;
     descrip   = "update <num> MV keys";
-    doc = <<-  _EndOfDoc_
-	Just some descriptive text.
-	_EndOfDoc_;
 };
 
 detail = <<-  _EODetail_

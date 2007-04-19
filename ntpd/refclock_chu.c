@@ -38,11 +38,12 @@
  * tuned automatically as propagation conditions change throughout the
  * day and season.
  *
- * The driver receives, demodulates and decodes the radio signals when
- * connected to the audio codec of a suported workstation hardware and
- * operating system. These include Solaris, SunOS, FreeBSD, NetBSD and
- * Linux. In this implementation, only one audio driver and codec can be
- * supported on a single machine.
+ * The driver requires an audio codec or sound card with sampling rate 8
+ * kHz and mu-law companding. This is the same standard as used by the
+ * telephone industry and is supported by most hardware and operating
+ * systems, including Solaris, SunOS, FreeBSD, NetBSD and Linux. In this
+ * implementation, only one audio driver and codec can be supported on a
+ * single machine.
  *
  * The driver can be compiled to use a Bell 103 compatible modem or
  * modem chip to receive the radio signal and demodulate the data.
@@ -51,7 +52,7 @@
  * latter case, the driver implements the modem using DSP routines, so
  * the radio can be connected directly to either the microphone on line
  * input port. In either case, the driver decodes the data using a
- * maximum likelihood technique which exploits the considerable degree
+ * maximum-likelihood technique which exploits the considerable degree
  * of redundancy available to maximize accuracy and minimize errors.
  *
  * The CHU time broadcast includes an audio signal compatible with the
@@ -223,7 +224,7 @@
 #define BAUD		300	/* modulation rate (bps) */
 #define OFFSET		128	/* companded sample offset */
 #define SIZE		256	/* decompanding table size */
-#define	MAXSGL		6000.	/* maximum signal level */
+#define	MAXAMP		6000.	/* maximum signal level */
 #define	MAXCLP		100	/* max clips above reference per s */
 #define	SPAN		800.	/* min envelope span */
 #define LIMIT		1000.	/* soft limiter threshold */
@@ -248,14 +249,20 @@
 #define MINMETRIC	50	/* min channel metric (of 160) */
 
 /*
- * The offset to the last stop bit of the first character, which defines
- * the timecode offset 170 ms. To this is added the receiver delay 4.7
- * ms, codec delay 1 ms and modem delay 0.8 ms. The receiver delay was
- * measured, the codec delay came from the AC97 spec sheet and the modem
- * delay was measured in simulation. The result is within 0.5 ms as
- * verified by on-air testing. 
+ * The on-time synchronization point for the driver is the last stop bit
+ * of the first character 170 ms. The modem delay is 0.8 ms, while the
+ * receiver delay is approxmately 4.7 ms at 2125 Hz. The fudge value 1.3
+ * ms due to the codec and other causes was determined by calibrating to
+ * a PPS signal from a GPS receiver. The additional propagation delay
+ * specific to each receiver location can be programmed in the fudge
+ * time1. 
+ *
+ * The resulting offsets with a 2.4-GHz P4 running FreeBSD 6.1 are
+ * generally within 0.5 ms short term with 0.3 ms jitter. The long-term
+ * offsets vary up to 0.3 ms due to ionospheric layer height variations.
+ * The processor load due to the driver is 0.4 percent.
  */
-#define	FUDGE		.1765	/* offset to first stop bit (s) */
+#define	PDELAY	((170 + .8 + 4.7 + 1.3) / 1000)	/* system delay (s) */
 
 /*
  * Status bits (status)
@@ -289,7 +296,7 @@
 
 #ifdef HAVE_AUDIO
 /*
- * Maximum likelihood UART structure. There are eight of these
+ * Maximum-likelihood UART structure. There are eight of these
  * corresponding to the number of phases.
  */ 
 struct surv {
@@ -318,7 +325,7 @@ struct xmtr {
  * CHU unit control structure
  */
 struct chuunit {
-	u_char	decode[20][16];	/* maximum likelihood decoding matrix */
+	u_char	decode[20][16];	/* maximum-likelihood decoding matrix */
 	l_fp	cstamp[BURST];	/* character timestamps */
 	l_fp	tstamp[MAXSTAGE]; /* timestamp samples */
 	l_fp	timestamp;	/* current buffer timestamp */
@@ -378,7 +385,7 @@ struct chuunit {
 	int	discptr;	/* discriminator pointer */
 
 	/*
-	 * Maximum likelihood UART variables
+	 * Maximum-likelihood UART variables
 	 */
 	double	baud;		/* baud interval */
 	struct surv surv[8];	/* UART survivor structures */
@@ -669,15 +676,15 @@ chu_audio_receive(
 		sample = up->comp[~*dpt++ & 0xff];
 
 		/*
-		 * Clip noise spikes greater than MAXSgl. If no clips,
+		 * Clip noise spikes greater than MAXAMP. If no clips,
 		 * increase the gain a tad; if the clips are too high, 
 		 * decrease a tad.
 		 */
-		if (sample > MAXSGL) {
-			sample = MAXSGL;
+		if (sample > MAXAMP) {
+			sample = MAXAMP;
 			up->clipcnt++;
-		} else if (sample < -MAXSGL) {
-			sample = -MAXSGL;
+		} else if (sample < -MAXAMP) {
+			sample = -MAXAMP;
 			up->clipcnt++;
 		}
 		chu_rf(peer, sample);
@@ -711,7 +718,7 @@ chu_audio_receive(
  *
  * This routine implements a 300-baud Bell 103 modem with mark 2225 Hz
  * and space 2025 Hz. It uses a bandpass filter followed by a soft
- * limiter, FM discriminator and lowpass filter. A maximum likelihood
+ * limiter, FM discriminator and lowpass filter. A maximum-likelihood
  * decoder samples the baseband signal at eight times the baud rate and
  * detects the start bit of each character.
  *
@@ -822,7 +829,7 @@ chu_rf(
 	lpf += up->lpf[0] = disc * 2.538771e-02;
 
 	/*
-	 * Maximum likelihood decoder. The UART updates each of the
+	 * Maximum-likelihood decoder. The UART updates each of the
 	 * eight survivors and determines the span, slice level and
 	 * tentative decoded character. Valid 11-bit characters are
 	 * framed so that bit 10 and bit 11 (stop bits) are mark and bit
@@ -883,7 +890,7 @@ chu_rf(
 
 
 /*
- * chu_uart - maximum likelihood UART
+ * chu_uart - maximum-likelihood UART
  *
  * This routine updates a shift register holding the last 11 envelope
  * samples. It then computes the slice level and span over these samples
@@ -1368,7 +1375,7 @@ chu_second(
 			offset.l_uf = 0;
 			for (i = 0; i < up->ntstamp; i++)
 				refclock_process_offset(pp, offset,
-				    up->tstamp[i], FUDGE +
+				up->tstamp[i], PDELAY +
 				    pp->fudgetime1);
 			pp->lastref = up->timestamp;
 			refclock_receive(peer);
@@ -1606,11 +1613,12 @@ chu_dist(
 /*
  * chu_gain - adjust codec gain
  *
- * This routine is called once each second. If the signal envelope
- * amplitude is too low, the codec gain is bumped up by four units; if
- * too high, it is bumped down. The decoder is relatively insensitive to
- * amplitude, so this crudity works just fine. The input port is set and
- * the error flag is cleared, mostly to be ornery.
+ * This routine is called at the end of each second. During the second
+ * the number of signal clips above the MAXAMP threshold (6000). If
+ * there are no clips, the gain is bumped up; if there are more than
+ * MAXCLP clips (100), it is bumped down. The decoder is relatively
+ * insensitive to amplitude, so this crudity works just peachy. The
+ * routine also jiggles the input port and selectively mutes the
  */
 static void
 chu_gain(

@@ -25,9 +25,6 @@ extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *);
 
-extern	double	fabs		(double);
-extern	double	sqrt		(double);
-
 /* ntp_control.c */
 /*
  * Structure for translation tables between internal system

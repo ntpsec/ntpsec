@@ -23,22 +23,17 @@
 /*
  * Structure to hold request procedure information
  */
-#define NOAUTH	0
-#define AUTH	1
-
-#define NO_REQUEST	(-1)
 
 struct ctl_proc {
 	short control_code;		/* defined request code */
+#define NO_REQUEST	(-1)
 	u_short flags;			/* flags word */
+		/* Only one flag.  Authentication required or not. */
+#define NOAUTH	0
+#define AUTH	1
 	void (*handler) (struct recvbuf *, int); /* handle request */
 };
 
-/*
- * Only one flag.  Authentication required or not.
- */
-#define NOAUTH	0
-#define AUTH	1
 
 /*
  * Request processing routines

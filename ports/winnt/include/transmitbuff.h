@@ -31,12 +31,12 @@ typedef struct transmitbuf {
 } transmitbuf;
 
 
-extern	void	init_transmitbuff	P((void));
+extern	void	init_transmitbuff	(void);
 
 
 /* freetransmitbuf - make a single transmitbuf available for reuse
  */
-extern	void	free_transmit_buffer	P((transmitbuf_t *));
+extern	void	free_transmit_buffer	(transmitbuf_t *);
 
 /*  Get a free buffer (typically used so an async
  *  read can directly place data into the buffer
@@ -44,7 +44,7 @@ extern	void	free_transmit_buffer	P((transmitbuf_t *));
  *  The buffer is removed from the free list. Make sure
  *  you put it back with freetransmitbuf() or 
  */
-extern transmitbuf_t *get_free_transmit_buffer P((void));
+extern transmitbuf_t *get_free_transmit_buffer (void);
 
 #endif /* defined __transmitbuff_h */
 

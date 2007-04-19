@@ -1425,6 +1425,13 @@ doprintpeers(
 				havevar[HAVE_REFID] = 1;
 				if (*value == '\0') {
 					dstadr_refid = "0.0.0.0";
+				} else if ((int)strlen(value) <= 4) {
+					refid_string[0] = '.';
+					(void) strcpy(&refid_string[1], value);
+					i = strlen(refid_string);
+					refid_string[i] = '.';
+					refid_string[i+1] = '\0';
+					dstadr_refid = refid_string;
 				} else if (decodenetnum(value, &dstadr)) {
 					if (SOCKNUL(&dstadr))
 						dstadr_refid = "0.0.0.0";
@@ -1435,13 +1442,6 @@ doprintpeers(
 					else
 						dstadr_refid =
 						    stoa(&dstadr);
-				} else if ((int)strlen(value) <= 4) {
-					refid_string[0] = '.';
-					(void) strcpy(&refid_string[1], value);
-					i = strlen(refid_string);
-					refid_string[i] = '.';
-					refid_string[i+1] = '\0';
-					dstadr_refid = refid_string;
 				} else {
 					havevar[HAVE_REFID] = 0;
 				}

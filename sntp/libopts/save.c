@@ -1,7 +1,7 @@
 
 /*
- *  save.c  $Id: save.c,v 4.12 2006/10/06 05:29:01 bkorb Exp $
- * Time-stamp:      "2006-10-05 21:09:18 bkorb"
+ *  save.c  $Id: save.c,v 4.17 2007/02/04 17:44:12 bkorb Exp $
+ * Time-stamp:      "2007-01-13 10:32:27 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -9,7 +9,7 @@
  */
 
 /*
- *  Automated Options copyright 1992-2006 Bruce Korb
+ *  Automated Options copyright 1992-2007 Bruce Korb
  *
  *  Automated Options is free software.
  *  You may redistribute it and/or modify it under the terms of the
@@ -63,8 +63,8 @@ findFileName( tOptions* pOpts, int* p_free_name );
 
 static void
 printEntry(
-    FILE*      fp,
-    tOptDesc*  p,
+    FILE *     fp,
+    tOptDesc * p,
     tCC*       pzLA );
 /* = = = END-STATIC-FORWARD = = = */
 
@@ -108,7 +108,7 @@ findDirName( tOptions* pOpts, int* p_free )
             char z[ AO_NAME_SIZE ];
             if ((pzEndDir - pzDir) > AO_NAME_LIMIT )
                 return NULL;
-            strncpy( z, pzDir, (unsigned)(pzEndDir - pzDir) );
+            strncpy( z, pzDir, (size_t)(pzEndDir - pzDir) );
             z[ (pzEndDir - pzDir) ] = NUL;
             pzEnv = getenv( z );
         } else {
@@ -170,7 +170,7 @@ findFileName( tOptions* pOpts, int* p_free_name )
          *  path to a file name that has not been created yet.
          */
         if (errno == ENOENT) {
-            char z[MAXPATHLEN];
+            char z[AG_PATH_MAX];
 
             /*
              *  Strip off the last component, stat the remaining string and
@@ -182,7 +182,7 @@ findFileName( tOptions* pOpts, int* p_free_name )
                 continue;  /* bail out of error condition */
             }
 
-            strncpy( z, pzDir, (unsigned)(pzDirCh - pzDir));
+            strncpy( z, pzDir, (size_t)(pzDirCh - pzDir));
             z[ pzDirCh - pzDir ] = NUL;
 
             if (  (stat( z, &stBuf ) == 0)
@@ -270,22 +270,31 @@ findFileName( tOptions* pOpts, int* p_free_name )
 
 static void
 printEntry(
-    FILE*      fp,
-    tOptDesc*  p,
+    FILE *     fp,
+    tOptDesc * p,
     tCC*       pzLA )
 {
     /*
-     *  There is an argument.  Pad the name so values line up
+     *  There is an argument.  Pad the name so values line up.
+     *  Not disabled *OR* this got equivalenced to another opt,
+     *  then use current option name.
+     *  Otherwise, there must be a disablement name.
      */
-    fprintf( fp, "%-18s",
-             (DISABLED_OPT( p )) ? p->pz_DisableName : p->pz_Name );
+    {
+        char const * pz;
+        if (! DISABLED_OPT(p) || (p->optEquivIndex != NO_EQUIVALENT))
+            pz = p->pz_Name;
+        else
+            pz = p->pz_DisableName;
 
+        fprintf(fp, "%-18s", pz);
+    }
     /*
      *  IF the option is numeric only,
      *  THEN the char pointer is really the number
      */
     if (OPTST_GET_ARGTYPE(p->fOptState) == OPARG_TYPE_NUMERIC)
-        fprintf( fp, "  %d\n", (t_word)pzLA );
+        fprintf( fp, "  %d\n", (int)(t_word)pzLA );
 
     /*
      *  OTHERWISE, FOR each line of the value text, ...
@@ -308,7 +317,7 @@ printEntry(
             /*
              *  Print the continuation and the text from the current line
              */
-            (void)fwrite( pzLA, (unsigned)(pzNl - pzLA), 1, fp );
+            (void)fwrite( pzLA, (size_t)(pzNl - pzLA), (size_t)1, fp );
             pzLA = pzNl+1; /* advance the Last Arg pointer */
             fputs( "\\\n", fp );
         }
@@ -469,12 +478,16 @@ optionSaveFile( tOptions* pOpts )
              */
             (*(p->pOptProc))( (tOptions*)2UL, p );
             printEntry( fp, p, (void*)(p->optArg.argString));
+
             if (  (p->optArg.argString != NULL)
-               && (arg_state != OPARG_TYPE_ENUMERATION))
+               && (arg_state != OPARG_TYPE_ENUMERATION)) {
                 /*
-                 *  bit flag and enumeration strings get allocated
+                 *  set membership strings get allocated
                  */
                 AGFREE( (void*)p->optArg.argString );
+                p->fOptState &= ~OPTST_ALLOC_ARG;
+            }
+
             p->optArg.argEnum = val;
             break;
         }

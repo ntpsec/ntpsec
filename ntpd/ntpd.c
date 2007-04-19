@@ -495,7 +495,7 @@ ntpdmain(
 		if (uid)
 		{
 			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %ld", (long)uid);
-			printf("must be run as root, not uid %ld", (long)uid);
+			printf("must be run as root, not uid %ld\n", (long)uid);
 			exit(1);
 		}
 	}
@@ -504,7 +504,7 @@ ntpdmain(
 #ifdef OPENSSL
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_ERR,
-		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx\n",
+		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx",
 		    OPENSSL_VERSION_NUMBER, SSLeay());
 		exit(1);
 	}
@@ -925,12 +925,14 @@ getgroup:
 			exit (-1);
 		}
 	
+#ifndef HAVE_LINUX_CAPABILITIES
 		/*
 		 * for now assume that the privilege to bind to privileged ports
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
 		disable_dynamic_updates |= (sw_uid != 0);  /* also notifies routing message listener */
+#endif
 
 		if (disable_dynamic_updates && interface_interval) {
 			interface_interval = 0;
@@ -939,11 +941,16 @@ getgroup:
 
 #ifdef HAVE_LINUX_CAPABILITIES
 		do {
-			/*  We may be running under non-root uid now, but we still hold full root privileges!
-			 *  We drop all of them, except for the crucial one: cap_sys_time:
+			/*
+			 *  We may be running under non-root uid now, but we still hold full root privileges!
+			 *  We drop all of them, except for the crucial one or two: cap_sys_time and
+			 *  cap_net_bind_service if doing dynamic interface tracking.
 			 */
 			cap_t caps;
-			if( ! ( caps = cap_from_text( "cap_sys_time=ipe" ) ) ) {
+			char *captext = interface_interval ?
+			       	"cap_sys_time,cap_net_bind_service=ipe" :
+			       	"cap_sys_time=ipe";
+			if( ! ( caps = cap_from_text( captext ) ) ) {
 				msyslog( LOG_ERR, "cap_from_text() failed: %m" );
 				exit(-1);
 			}
