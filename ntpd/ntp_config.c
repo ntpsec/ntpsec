@@ -187,7 +187,7 @@ int FGETC(struct FILE_INFO *stream);
 int UNGETC(int ch, struct FILE_INFO *stream);
 int FCLOSE(struct FILE_INFO *stream);
 
-int get_next_char();
+int get_next_char(void);
 void push_back_char(int ch);
 
 static struct state *create_states(char *keyword,int token,int expect_string, struct state *pre_state);
@@ -237,9 +237,11 @@ static void config_vars(void);
 static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void config_peers(void);
-static void config_sim(void);
 static void config_ntpd(void);
+#ifdef SIM
+static void config_sim(void);
 static void config_ntpdsim(void);
+#endif
 void getconfig(int argc,char *argv[]);
 enum gnn_type {
 	t_UNK,		/* Unknown */
@@ -1610,7 +1612,7 @@ static int get_correct_host_mode(int hmode)
 
 static void config_peers()
 {
-    struct addrinfo *res, res_bak;
+    struct addrinfo *res, *res_bak;
     struct sockaddr_storage peeraddr;
     struct peer_node *curr_peer;
     int hmode;

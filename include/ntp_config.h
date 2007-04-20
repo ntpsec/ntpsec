@@ -151,6 +151,6 @@ struct REMOTE_CONFIG_INFO {
 };
 
 extern struct REMOTE_CONFIG_INFO remote_config;
-void config_remotely();
+void config_remotely(void);
 
 #endif
