@@ -1,3 +1,4 @@
+* [Bug 812] ntpd should drop supplementary groups.
 * [Bug 815] Fix warning compiling 4.2.5p22 under Windows with VC6.
 * [Bug 740] Fix kernel/daemon startup drift anomaly.
 * refclock_wwv.c fixes from Dave Mills.
