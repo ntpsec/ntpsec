@@ -874,13 +874,31 @@ ntpdmain(
 				sw_uid = (uid_t)strtoul(user, &endp, 0);
 				if (*endp != '\0') 
 					goto getuser;
-			} else {
-getuser:	
-				if ((pw = getpwnam(user)) != NULL) {
-					sw_uid = pw->pw_uid;
+
+				if ((pw = getpwuid(sw_uid)) != NULL) {
+					user = strdup(pw->pw_name);
+					if (NULL == user) {
+						msyslog(LOG_ERR, "strdup() failed: %m");
+						exit (-1);
+					}
+					sw_gid = pw->pw_gid;
 				} else {
 					errno = 0;
-					msyslog(LOG_ERR, "Cannot find user `%s'", user);
+					msyslog(LOG_ERR, "Cannot find user ID %s", user);
+					exit (-1);
+				}
+
+			} else {
+getuser:	
+				errno = 0;
+				if ((pw = getpwnam(user)) != NULL) {
+					sw_uid = pw->pw_uid;
+					sw_gid = pw->pw_gid;
+				} else {
+					if (errno)
+					    msyslog(LOG_ERR, "getpwnam(%s) failed: %m", user);
+					else
+					    msyslog(LOG_ERR, "Cannot find user `%s'", user);
 					exit (-1);
 				}
 			}
@@ -912,6 +930,10 @@ getgroup:
 				msyslog(LOG_ERR, "Cannot chroot() to `%s': %m", chrootdir);
 				exit (-1);
 			}
+		}
+		if (user && initgroups(user, sw_gid)) {
+			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
+			exit (-1);
 		}
 		if (group && setgid(sw_gid)) {
 			msyslog(LOG_ERR, "Cannot setgid() to group `%s': %m", group);
