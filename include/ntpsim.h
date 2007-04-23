@@ -77,7 +77,6 @@ typedef struct {
 
 typedef struct {
     double duration;
- // double time_offset;
     double freq_offset;
     double wander;
     double jitter; 

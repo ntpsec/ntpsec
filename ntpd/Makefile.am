@@ -9,8 +9,10 @@ noinst_LIBRARIES=	libntpd.a
 AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
+AM_YFLAGS=	-d
 
-BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
+BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu ntp_parser.h
+
 man_MANS=	ntpd.1
 
 # What about ntpdsim.1?
@@ -44,7 +46,8 @@ check-local: @MAKE_CHECK_Y2K@
 
 # SIM: cmd_args.c ntp_config.c ntp_io.c ntpd.c + ntpsim.c (include/ntpsim.h)
 # ntp_resolver.c is presently unused...
-ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntpd.c ntpd-opts.c ntpd-opts.h
+ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntp_parser.y	\
+	ntp_data_structures.c ntp_scanner.c ntpd.c ntpd-opts.c ntpd-opts.h
 ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c
 libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \

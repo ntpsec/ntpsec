@@ -9,20 +9,10 @@
  * (Some code shamelessly based on the original NTP discrete event simulator)
  */
 
+#ifdef SIM
 #include "ntpd.h"
 #include "ntpsim.h"
 #include "ntp_data_structures.h"
-
-/* Include the C source file for the data structures used by the simulator.
- * Since these data structures are only used by the simulator, we will
- * directly include the source file here instead of exporting the public
- * interface of the data structures and "corrupting" the global namespace.
- *
- * SK: Update: The configuration code now makes use of these data structures.
- * So I will include this file in the ntp_config.c instead of here.
- * Once the autoconfigure code is updated, we can get rid of this messiness.
- */
-//#include "data_structures.c"
 
 
 /* Global Variable Definitions */
@@ -83,8 +73,7 @@ void create_server_associations()
 
 
 /* Main Simulator Code */
-int
-ntpsim(int argc, char *argv[])
+int ntpsim(int argc, char *argv[])
 {
     Event *curr_event;
     struct timeval seed;
@@ -101,23 +90,6 @@ ntpsim(int argc, char *argv[])
     simulation.beep_delay = BEEP_DLY;
     simulation.sim_time = 0;
     simulation.end_time = SIM_TIME;
-
-    /* Parse the configuration file  
-     */
-/*     if (argc != 2) { */
-/*         fprintf(stderr, "USAGE: %s <ntpsim configuration file>\n", argv[0]); */
-/*         exit(1); */
-/*     } */
-/*     ip_file = fopen(argv[1], "r"); */
-/*     if (ip_file == NULL) { */
-/*         fprintf(stderr, "ERROR!!, Could not open file: %s\n", argv[1]); */
-/*         exit(1); */
-/*     } */
-/*     key_scanner = create_keyword_scanner(keyword_list); */
-/*     print_keyword_scanner(key_scanner, 0); */
-        
-/*     debug=1; */
-/*     yyparse(); */
 
     /*
      * Initialize ntp variables
@@ -136,6 +108,7 @@ ntpsim(int argc, char *argv[])
     init_io();
     init_loopfilter();
     mon_start(MON_OFF);    
+
     /* Call getconfig to parse the configuration file */
     getconfig(argc, argv);
     initializing = 0;
@@ -451,11 +424,6 @@ void sim_event_beep(Event *e)
                
                n->time, n->clk_time, n->ntp_time);
 */
-        /* Enqueue the next beep onto the event queue */
-/*
-
-    }
-*/
 
 }
 
@@ -469,6 +437,7 @@ void abortsim(char *errmsg)
     perror(errmsg);
     exit(1);
 }
+
 
 
 /* CODE ORIGINALLY IN libntp/systime.c 
@@ -620,3 +589,5 @@ poisson(
     while ((q1 = drand48()) == 0);
     return (m - s * log(q1 * s));
 }
+
+#endif

@@ -2,6 +2,9 @@
 #define __NTP_CONFIG_H__
 
 #include "ntp_data_structures.h"
+#ifdef SIM
+  #include "ntpsim.h"
+#endif
 
 
 /*
@@ -131,15 +134,6 @@ struct config_tree {
     struct sim_node *sim_details;
 };
 
-/* Structure to hold a filename, file pointer and positional info */
-struct FILE_INFO {
-    char *fname;               /* Path to the file */
-    FILE *fd;                  /* File Descriptor */
-    int line_no;               /* Line Number in the file being scanned */
-    int col_no;                /* Column Number in the file being scanned */
-    int prev_line_col_no;      /* Col No on the previous line when a '\n' is
-                                  seen */
-};
 
 /* Structure for holding a remote configuration command */
 struct REMOTE_CONFIG_INFO {
@@ -150,7 +144,29 @@ struct REMOTE_CONFIG_INFO {
     int no_errors;
 };
 
+
+struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
+struct address_node *create_address_node(char *addr, int type);
+queue *enqueue_in_new_queue(void *my_node);
+struct attr_val *create_attr_dval(int attr, double value);
+struct attr_val *create_attr_ival(int attr, int value);
+struct attr_val *create_attr_sval(int attr, char *s);
+struct attr_val *create_attr_pval(int attr, void *s);
+struct filegen_node *create_filegen_node(void **name, queue *options);
+void **create_pval(void *val);
+struct restrict_node *create_restrict_node(struct address_node *addr,struct address_node *mask,queue *flags, int line_no);
+int *create_ival(int val);
+struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *options);
+struct sim_node *create_sim_node(queue *init_opts, queue *servers);
+struct setvar_node *create_setvar_node(char *var, char *val, u_short def);
+
+#ifdef SIM
+script_info *create_sim_script_info(double duration, queue *script_queue);
+server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
+#endif
+
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(void);
+
 
 #endif

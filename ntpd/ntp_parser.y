@@ -1,4 +1,4 @@
-/* config.y
+/* ntp_parser.y
  *
  * The parser for the NTP configuration file. 
  *
@@ -7,6 +7,39 @@
  *             Newark, DE 19711
  * Copyright (c) 2006
  */
+
+%{
+  #ifdef HAVE_CONFIG_H
+  # include <config.h>
+  #endif
+
+  #include "ntpd.h"
+  #include "ntp_machine.h"
+  #include "ntp.h"
+  #include "ntp_stdlib.h"
+  #include "ntp_filegen.h"
+  #include "ntp_data_structures.h"
+  #include "ntp_scanner.h"  
+  #include "ntp_config.h"
+
+  #include "ntpsim.h"		/* HMS: Do we really want this all the time? */
+                                /* SK: It might be a good idea to always
+				   include the simulator code. That way
+				   someone can use the same configuration file
+				   for both the simulator and the daemon
+				*/
+
+  /*  #include "ntp_parser.h"     SK: Arent't we generating this using bison?
+				   This was not an issue when we were 
+				   directly including the source file. However,
+				   we will need a seperate description of the
+				   tokens in the scanner.
+				*/
+
+
+  struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
+  void yyerror (char *msg);
+%}
 
 %union {
     char   *String;
@@ -17,6 +50,7 @@
     struct attr_val *Attr_val;
     struct address_node *Address_node;
     struct setvar_node *Set_var;
+
     /* Simulation types */
     server_info *Sim_server;
     script_info *Sim_script;
@@ -164,6 +198,7 @@
 %token          T_Void     /* Not an actual token */
 %token          T_EOC
 
+
 /* NTP Simulator Tokens */
 %token     T_Simulate
 %token     T_Beep_Delay
@@ -175,6 +210,7 @@
 %token     T_Jitter
 %token     T_Prop_Delay
 %token     T_Proc_Delay
+
 
 
 /*** NON-TERMINALS ***/
@@ -900,6 +936,7 @@ void yyerror (char *msg)
         ++remote_config.no_errors;
     }
 }
+
 
 /* Initial Testing function -- ignore 
 int main(int argc, char *argv[])

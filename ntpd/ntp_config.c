@@ -56,6 +56,8 @@ HANDLE ResolverThreadHandle = NULL;
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
+#include "ntp_scanner.h"
+#include "ntp_parser.h"
 #include "ntp_data_structures.h"
 
 extern int priority_done;
@@ -95,10 +97,8 @@ static struct masks logcfg_item[] = {
 };
 
 /* Limits */
-#define MAXLINE		1024	/* maximum length of line */
 #define MAXPHONE	10	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
-#define MAXINCLUDELEVEL	5	/* maximum include file levels */
 
 /*
  * Miscellaneous macros
@@ -115,7 +115,6 @@ static struct masks logcfg_item[] = {
  * name.
  */
 int call_resolver = 1;		/* ntp-genkeys sets this to 0, for example */
-static FILE *res_fp;
 #ifndef SYS_WINNT
 static char res_file[20];	/* enough for /tmp/ntpXXXXXX\0 */
 #define RES_TEMPFILE	"/tmp/ntpXXXXXX"
@@ -127,8 +126,12 @@ static char res_file[MAX_PATH];
  * Definitions of things either imported from or exported to outside
  */
 
+int curr_include_level;			/* The current include level */
+struct FILE_INFO *fp[MAXINCLUDELEVEL];
+FILE *res_fp;
+struct config_tree my_config;		/* Root of the configuration tree */
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
-char	*sys_phone[MAXPHONE] = {NULL}; /* ACTS phone numbers */
+char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
@@ -160,10 +163,6 @@ struct netinfo_config_state {
 };
 #endif
 
-struct FILE_INFO *fp[MAXINCLUDELEVEL];
-int curr_include_level;      /* The current include level */
-struct config_tree my_config;/* Root of the configuration tree */
-struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
 struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
                                              pointer info */
 int input_from_file = 1;     /* A boolean flag, which when set, indicates that
@@ -173,6 +172,7 @@ int input_from_file = 1;     /* A boolean flag, which when set, indicates that
 /* int newline_is_special = 1; */ /* A boolean flag, which when set, implies that
                                 newlines are special characters that need to
                                 be returned as tokens */
+
 int old_config_style = 1;    /* A boolean flag, which when set, indicates that the
                               * old configuration format with a newline at the end
                               * of every command is being used
@@ -182,43 +182,12 @@ extern int sys_maxclock;
 
 /* FUNCTION PROTOTYPES */
 
-struct FILE_INFO *F_OPEN(const char *path, const char *mode);
-int FGETC(struct FILE_INFO *stream);
-int UNGETC(int ch, struct FILE_INFO *stream);
-int FCLOSE(struct FILE_INFO *stream);
-
-int get_next_char(void);
-void push_back_char(int ch);
-
-static struct state *create_states(char *keyword,int token,int expect_string, struct state *pre_state);
-//static struct state *create_keyword_scanner(struct key_tok *keyword_list);
-static void delete_keyword_scanner(struct state *key_scanner);
-void print_keyword_scanner(struct state *key_scanner, int pos);
-int yylex(void);
-
-void yyerror (char *msg);
 static int get_flags_from_list(queue *flag_list);
 static void init_auth_node(void);
 static void init_syntax_tree(void);
-queue *enqueue_in_new_queue(void *my_node);
-struct attr_val *create_attr_dval(int attr, double value);
-struct attr_val *create_attr_ival(int attr, int value);
-struct attr_val *create_attr_sval(int attr, char *s);
-struct attr_val *create_attr_pval(int attr, void *s);
-int *create_ival(int val);
 double *create_dval(double val);
-void **create_pval(void *val);
-struct address_node *create_address_node(char *addr, int type);
-struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
-struct filegen_node *create_filegen_node(void **name, queue *options);
-struct restrict_node *create_restrict_node(struct address_node *addr,struct address_node *mask,queue *flags, int line_no);
 void destroy_restrict_node(struct restrict_node *my_node);
-struct setvar_node *create_setvar_node(char *var, char *val, u_short def);
-struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *options);
-script_info *create_sim_script_info(double duration, queue *script_queue);
 static struct sockaddr_storage *get_next_address(struct address_node *addr);
-server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
-struct sim_node *create_sim_node(queue *init_opts, queue *servers);
 
 static void config_other_modes(void);
 static void config_auth(void);
@@ -257,19 +226,6 @@ static int get_multiple_netnums(const char *num, struct sockaddr_storage *addr, 
 static void save_resolve(char *name,int mode,int version,int minpoll,int maxpoll,u_int flags,int ttl,keyid_t keyid,u_char *keystr);
 static void abort_resolve(void);
 static void do_resolve_internal(void);
-
-
-
-/* INCLUSION OF CODE FOR THE DATA STRUCTURES
- * -----------------------------------------
- */
-
-#include "ntp_data_structures.c"
-
-/* INCLUSION OF BISON GENERATED FILE
- * ---------------------------------
- */
-#include "ntp_config.tab.c"
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -681,12 +637,6 @@ struct sim_node *create_sim_node(queue *init_opts, queue *servers)
     return my_node;
 }
 
-
-/* INCLUSION OF SCANNER FILE 
- * -------------------------
- */
-
-#include "ntp_scanner.c"
 
 struct key_tok keyword_list[] = {
     { "automax",	T_Automax,         NO_ARG },

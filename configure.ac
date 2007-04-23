@@ -32,6 +32,7 @@ dnl AC_PROG_CC_STDC
 # Ralf Wildenhues: With per-target flags we need CC_C_O
 AM_PROG_CC_C_O
 AC_PROG_CPP
+AC_PROG_YACC
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
 case "$host" in

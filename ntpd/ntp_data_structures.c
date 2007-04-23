@@ -1,4 +1,4 @@
-/* data_structures.c
+/* ntp_data_structures.c
  *
  * This file contains the data structures used by the ntp configuration
  * code and the discrete event simulator.
@@ -9,6 +9,9 @@
  * Copyright (c) 2006
  */
 
+
+#include <stdlib.h>    /* Needed for malloc */
+#include "ntp_data_structures.h"
 
 /* Priority Queue
  * --------------
@@ -98,7 +101,7 @@ queue *enqueue(queue *my_queue, void *my_node)
         new_node->next = my_queue->front;
         my_queue->front = new_node;
     }
-    else {                /* Insert Elsewhere, includeing the end */
+    else {                /* Insert Elsewhere, including the end */
         new_node->next = i->next;
         i->next = new_node;
     }

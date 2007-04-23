@@ -360,9 +360,10 @@ step_systime(
  * Clock routines for the simulator - Harish Nair, with help
  */
 
+
 /* SK: 
  * The code that used to be here has been moved to ntpsim.c,
  * where, IMHO, it rightfully belonged.
  */
 
-#endif /* SIM */
+#endif

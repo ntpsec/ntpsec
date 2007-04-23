@@ -14,20 +14,11 @@
 #include <errno.h>
 #include <string.h>
 
-/* SCANNER GLOBAL VARIABLES 
- * ------------------------
- */
-#define MAX_LEXEME 1024+1    /* The maximum size of a lexeme */
-char yytext[MAX_LEXEME];     /* Buffer for storing the input text/lexeme */
+#include "ntp_config.h"
+#include "ntpsim.h"
+#include "ntp_scanner.h"
+#include "ntp_parser.h"
 
-
-/* STRUCTURES
- * ----------
- */
-
-#define NO_ARG 0 
-#define SINGLE_ARG 1
-#define MULTIPLE_ARG 2
 
 /* Define a structure to hold the FSA for the keywords.
  * The structure is actually a trie
@@ -43,13 +34,15 @@ struct state {
                                   that the next token should be a string */
 };
 
-/* Define a structure to hold a (keyword, token) pair */
-struct key_tok {
-    char *keyword;             /* Keyword */
-    int token;                 /* Associated Token */
-    int expect_string;         /* A boolean flag, which when set, indicates
-                                  that the next token should be a string */
-};
+
+/* SCANNER GLOBAL VARIABLES 
+ * ------------------------
+ */
+
+#define MAX_LEXEME 1024+1    /* The maximum size of a lexeme */
+char yytext[MAX_LEXEME];     /* Buffer for storing the input text/lexeme */
+struct state *key_scanner;   /* A FSA for recognizing keywords */
+
 
 /* CONSTANTS 
  * ---------
@@ -62,7 +55,6 @@ struct key_tok {
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-struct state *key_scanner;   /* A FSA for recognizing keywords */
 char special_char[] =        /* This list of special characters */
 { '{', '}', '(', ')', ',', ';','|','=' };
  
@@ -70,6 +62,8 @@ char special_char[] =        /* This list of special characters */
 /* FUNCTIONS
  * ---------
  */
+
+int get_next_char(void);
 
 /* Define a function to create the states of the scanner. This function
  * is used by the create_keyword_scanner function below.
@@ -79,7 +73,7 @@ char special_char[] =        /* This list of special characters */
  * for some other keyword that has the same prefix as the current one.
  */
 
-static struct state *create_states(char *keyword, 
+struct state *create_states(char *keyword, 
                                    int token, 
                                    int expect_string,
                                    struct state *pre_state)
@@ -146,7 +140,7 @@ static struct state *create_states(char *keyword,
  * creates a keywords scanner out of it.
  */
 
-static struct state *create_keyword_scanner(struct key_tok *keyword_list)
+struct state *create_keyword_scanner(struct key_tok *keyword_list)
 {
     struct state *scanner = NULL;
     while (keyword_list->keyword != NULL) {
@@ -163,12 +157,12 @@ static struct state *create_keyword_scanner(struct key_tok *keyword_list)
 /* Define a function to delete the keyword scanner, freeing all the allocated
  * memory
  */
-static void delete_keyword_scanner(struct state *key_scanner)
+static void delete_keyword_scanner(struct state *my_key_scanner)
 {
-    if (key_scanner) {
-        delete_keyword_scanner(key_scanner->next_char);
-        delete_keyword_scanner(key_scanner->next_state);
-        free(key_scanner);
+    if (my_key_scanner) {
+        delete_keyword_scanner(my_key_scanner->next_char);
+        delete_keyword_scanner(my_key_scanner->next_state);
+        free(my_key_scanner);
     }
 }
 
@@ -177,10 +171,10 @@ static void delete_keyword_scanner(struct state *key_scanner)
  * above functions.
  */
 
-void print_keyword_scanner(struct state *key_scanner, int pos)
+void print_keyword_scanner(struct state *my_key_scanner, int pos)
 {
     static char lexeme[MAX_LEXEME];
-    struct state *curr_state = key_scanner;
+    struct state *curr_state = my_key_scanner;
     while (curr_state != NULL) {
         lexeme[pos] = curr_state->ch;
         if (curr_state->token != NON_ACCEPTING) {
@@ -265,7 +259,7 @@ int FCLOSE(struct FILE_INFO *stream)
  * input_from_file flag.
  */
 
-int get_next_char()
+int get_next_char(void)
 {
     int retval;
     if (input_from_file)
@@ -459,11 +453,6 @@ static int is_ipv6_address(char *lexeme)
     if (lexeme[i-1] == ':' && lexeme[i-2] != ':')
         return 0;
     
-    /* Make sure that we have either read all eight quads or
-     * we have seen a group
-     */
-//    if (group_seen && quad_no <= 7))      
-
     return ((quad_no <= 7 && digits_read <= 4) ? 1 : 0);
 }
 
