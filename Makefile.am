@@ -79,6 +79,7 @@ EXTRA_DIST =		\
 	conf		\
 	html		\
 	libisc		\
+	m4		\
 	ports		\
 	\
 	bincheck.mf	\

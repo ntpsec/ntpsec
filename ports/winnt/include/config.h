@@ -57,7 +57,7 @@ typedef unsigned int	uintptr_t;
 
 /*
  * The type of the socklen_t defined for getnameinfo() and getaddrinfo()
- * is int for VS compilers on Windows but the type is already declared 
+ * is int for VS compilers on Windows but the type is already declared
  */
 #define GETSOCKNAME_SOCKLEN_TYPE socklen_t
 /*
@@ -89,7 +89,7 @@ typedef unsigned int	uintptr_t;
 
 /* Prevent inclusion of winsock.h in windows.h */
 #ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_  
+#define _WINSOCKAPI_
 #endif
 
 #ifndef __RPCASYNC_H__
@@ -108,9 +108,9 @@ typedef unsigned int	uintptr_t;
 #endif
 
 #define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */
-#define TYPEOF_IP_MULTICAST_LOOP BOOL												
+#define TYPEOF_IP_MULTICAST_LOOP BOOL
 #define SETSOCKOPT_ARG_CAST (const char *)
-#define HAVE_RANDOM 
+#define HAVE_RANDOM
 #define MAXHOSTNAMELEN 64
 #define AUTOKEY
 
@@ -180,7 +180,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define REFCLOCK			/* from ntpd.mak */
 
 # define CLOCK_LOCAL			/* from ntpd.mak */
-//# define CLOCK_PARSE 
+//# define CLOCK_PARSE
 /* # define CLOCK_ATOM */
 /* # define CLOCK_SHM	*/		 /* from ntpd.mak */
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
@@ -196,7 +196,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define NTP_POSIX_SOURCE
 
 # define SYSLOG_FILE			/* from libntp.mak */
-# define SYSV_TIMEOFDAY 		/* for ntp_unixtime.h */
+# define SYSV_TIMEOFDAY			/* for ntp_unixtime.h */
 
 # define SIZEOF_SIGNED_CHAR 1
 # define SIZEOF_INT 4			/* for ntp_types.h */
@@ -228,7 +228,10 @@ int NT_set_process_priority(void);	/* Define this function */
 
 # define NEED_S_CHAR_TYPEDEF
 
-# define USE_PROTOTYPES 		/* for ntp_types.h */														
+# define USE_PROTOTYPES		/* for ntp_types.h */
+
+/* Directory separator, usually / or \ */
+#define DIR_SEP "\\"
 
 #define ULONG_CONST(a) a ## UL
 
