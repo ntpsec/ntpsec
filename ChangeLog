@@ -1,3 +1,4 @@
+* [Bug 785] improve handling of multicast interfaces (multicast routers still need to run a multicast routing software/daemon)
 (4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 811] ntpd should not read a .ntprc file.
 * [Bug 793] Update Hans Lambermont's email address in ntpsweep.
