@@ -909,8 +909,10 @@ static void config_auth(void)
     }
     
     /* Revoke Command */
+#ifdef OPENSSL
     if (my_config.auth.revoke) 
         sys_revoke = (u_char) max(my_config.auth.revoke, KEY_REVOKE);
+#endif /* OPENSSL */
 
 #if !defined(VMS) && !defined(SYS_VXWORKS)
     /* find a keyid */
@@ -1768,8 +1770,10 @@ void config_remotely()
     input_from_file = 0;
 //    init_syntax_tree();
     yyparse();
+#ifdef DEBUG
     if (debug > 1) 
         printf("Finished Parsing!!\n");
+#endif
 
     config_ntpd();
     
@@ -1858,8 +1862,10 @@ void getconfig(int argc,char *argv[])
     key_scanner = create_keyword_scanner(keyword_list);
     init_syntax_tree();
     yyparse();
+#ifdef DEBUG
     if (debug > 1) 
         printf("Finished Parsing!!\n");
+#endif
 
     /* The actual configuration done depends on whether we are configuring the
      * simulator or the daemon. Perform a check and call the appropriate 
