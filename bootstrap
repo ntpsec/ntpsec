@@ -90,6 +90,10 @@ done
 
 ## EOAutoGen stuff
 
+# Yacc/bison files
+
+touch ntpd/ntp_parser.[ch]
+
 cp bincheck.mf sntp/
 
 ${AUTORECONF} -i -v
