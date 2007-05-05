@@ -69,6 +69,7 @@ case "$host" in
 esac
 
 AMU_OS_CFLAGS
+NTP_DIR_SEP
 
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:

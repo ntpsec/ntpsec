@@ -358,15 +358,34 @@ stats_config(
 		break;
 	
 	    case STATS_STATSDIR:
+		/* HMS: the following test is insufficient:
+		 * - value may be missing the DIR_SEP
+		 * - we still need the filename after it
+		 */
 		if (strlen(value) >= sizeof(statsdir)) {
 			msyslog(LOG_ERR,
 			    "value for statsdir too long (>%d, sigh)",
 			    (int)sizeof(statsdir)-1);
 		} else {
 			l_fp now;
+			int add_dir_sep;
+			int value_l = strlen(value);
+
+			/* We do not want a DIR_SEP if we have no prefix */
+			if (value_l == 0)
+				add_dir_sep = 0;
+			else
+				add_dir_sep = strcmp(DIR_SEP,
+					value + value_l - strlen(DIR_SEP));
+
+			if (add_dir_sep)
+			    snprintf(statsdir, sizeof(statsdir),
+				"%s%s", value, DIR_SEP);
+			else
+			    snprintf(statsdir, sizeof(statsdir),
+				"%s", value);
 
 			get_systime(&now);
-			strcpy(statsdir,value);
 			if(peerstats.prefix == &statsdir[0] &&
 			    peerstats.fp != NULL) {
 				fclose(peerstats.fp);
