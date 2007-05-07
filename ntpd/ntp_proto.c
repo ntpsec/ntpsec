@@ -938,6 +938,8 @@ receive(
 			peer->flash |= TEST3;	/* protocol unsynch */
 		else if (!L_ISEQU(&p_org, &peer->xmt))
 			peer->flash |= TEST2;	/* bogus packet */
+		else
+			L_CLR(&peer->org);	/* avoid replay */
 	}
 
 	/*
@@ -3102,18 +3104,12 @@ peer_unfit(
 #define MINLOOPS 5		/* minimum number of step samples */
 
 /*
- * This routine calculates the system precision, defined as the minimum
- * of a sequence of differences between successive readings of the
- * system clock. However, if the system clock can be read more than once
- * during a tick interval, the difference can be zero or one LSB unit,
- * where the LSB corresponds to one nanosecond or one microsecond.
- * Conceivably, if some other process preempts this one and reads the
- * clock, the difference can be more than one LSB unit.
- *
- * For hardware clock frequencies of 10 MHz or less, we assume the
- * logical clock advances only at the hardware clock tick. For higher
- * frequencies, we assume the logical clock can advance no more than 100
- * nanoseconds between ticks.
+ * This routine measures the system precision defined as the minimum of
+ * a sequence of differences between successive readings of the system
+ * clock. However, if a difference is less than MINSTEP, the clock has
+ * been read more than once during a clock tick and the difference is
+ * ignored. We set MINSTEP greater than zero in case something happens
+ * like a cache miss.
  */
 int
 default_get_precision(void)
@@ -3126,13 +3122,12 @@ default_get_precision(void)
 	int	i;		/* log2 precision */
 
 	/*
-	 * Loop to find tick value in nanoseconds. Toss out outlyer
-	 * values less than the minimun tick value. In wacky cases, use
-	 * the default maximum value.
+	 * Loop to find precision value in seconds.
 	 */
-	get_systime(&last);
 	tick = MAXSTEP;
-	for (i = 0; i < MINLOOPS;) {
+	i = 0;
+	get_systime(&last);
+	while (1) {
 		get_systime(&val);
 		diff = val;
 		L_SUB(&diff, &last);
@@ -3140,9 +3135,11 @@ default_get_precision(void)
 		LFPTOD(&diff, dtemp);
 		if (dtemp < MINSTEP)
 			continue;
-		i++;
+
 		if (dtemp < tick)
 			tick = dtemp;
+		if (++i >= MINLOOPS)
+			break;
 	}
 
 	/*
