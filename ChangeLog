@@ -1,3 +1,4 @@
+* fuzz bit and replay cleanup from Dave Mills.
 * [Bug 542] Tolerate missing directory separator at EO statsdir.
 * [Bug 812] ntpd should drop supplementary groups.
 * [Bug 815] Fix warning compiling 4.2.5p22 under Windows with VC6.
