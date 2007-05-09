@@ -52,15 +52,14 @@ get_systime(
 	l_fp *now		/* system time */
 	)
 {
-	double dtemp;
+	double	dtemp;
 
 #if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
 	struct timespec ts;	/* seconds and nanoseconds */
 
 	/*
-	 * Convert Unix clock from seconds and nanoseconds to seconds.
-	 * The bottom is only two bits down, so no need for fuzz.
-	 * Some systems don't have that level of precision, however...
+	 * Convert Unix timespec from seconds and nanoseconds to NTP
+	 * seconds and fraction.
 	 */
 # ifdef HAVE_CLOCK_GETTIME
 	clock_gettime(CLOCK_REALTIME, &ts);
@@ -68,29 +67,22 @@ get_systime(
 	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = ts.tv_sec + JAN_1970;
+	ts.tv_nsec |= ntp_random() & 0x3;
 	dtemp = ts.tv_nsec / 1e9;
 
 #else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 	struct timeval tv;	/* seconds and microseconds */
 
 	/*
-	 * Convert Unix clock from seconds and microseconds to seconds.
-	 * Add in unbiased random fuzz beneath the microsecond.
+	 * Convert Unix timeval from seconds and microseconds to NTP
+	 * seconds and fraction.
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
+	tv.tv_usec |= ntp_random() & 0xfff;
 	dtemp = tv.tv_usec / 1e6;
 
 #endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
-
-	/*
-	 * ntp_random() produces 31 bits (always nonnegative).
-	 * This bit is done only after the precision has been
-	 * determined.
-	 */
-	if (sys_precision != 0)
-		dtemp += (ntp_random() / FRAC - .5) / (1 <<
-		    -sys_precision);
 
 	/*
 	 * Renormalize to seconds past 1900 and fraction.
