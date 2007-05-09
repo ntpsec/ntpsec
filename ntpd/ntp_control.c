@@ -2329,8 +2329,11 @@ static void configure(struct recvbuf *rbufp,int restrict_mask)
     remote_config.err_pos = 0;
     remote_config.no_errors = 0;
 
+#ifdef DEBUG
     if (debug > 0)
         printf("Got Remote Configuration Command: %s\n\n", remote_config.buffer);
+#endif
+
     config_remotely();
 
     /* Check if errors were reported. If not, output 'Config Succeeded'

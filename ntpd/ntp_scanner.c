@@ -555,10 +555,12 @@ int yylex()
         push_back_char(yytext[i]); 
         yytext[i] = '\0';
     } while (i == 0);
-    
+
+#ifdef DEBUG
     if (debug >= 3)
         printf ("yylex: Just Read: %s\n", yytext);
-    
+#endif
+
     /* Now return the desired token */
     if ((expect_string == NO_ARG) && 
         (token = is_keyword(yytext, &expect_string)))
