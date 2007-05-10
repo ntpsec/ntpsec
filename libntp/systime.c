@@ -71,8 +71,16 @@ get_systime(
 	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = ts.tv_sec + JAN_1970;
-	ts.tv_nsec |= ntp_random() & 0x3;
-	dtemp = ts.tv_nsec / 1e9;
+	dtemp = sys_residual + ts.tv_nsec / 1e9;
+	if (dtemp >= 1.) {
+		dtemp -= 1.;
+		now->l_i++;
+	} else if (dtemp < 0) {
+		dtemp += 1.;
+		now->l_i--;
+	}
+	now->l_uf = (u_int32)(dtemp * FRAC);
+	now->l_uf |= ntp_random() & 0x3;
 
 #else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 	struct timeval tv;	/* seconds and microseconds */
@@ -83,24 +91,18 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	tv.tv_usec |= ntp_random() & 0xfff;
-	dtemp = tv.tv_usec / 1e6;
-
-#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
-
-	/*
-	 * Renormalize to seconds past 1900 and fraction.
-	 */
-	dtemp += sys_residual;
-	if (dtemp >= 1) {
-		dtemp -= 1;
+	dtemp = sys_residual + tv.tv_usec / 1e6;
+	if (dtemp >= 1.) {
+		dtemp -= 1.;
 		now->l_i++;
 	} else if (dtemp < 0) {
-		dtemp += 1;
+		dtemp += 1.;
 		now->l_i--;
 	}
-	dtemp *= FRAC;
-	now->l_uf = (u_int32)dtemp;
+	now->l_uf = (u_int32)(dtemp * FRAC);
+	now->l_uf |= ntp_random() & 0xfff;
+
+#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 }
 
 
