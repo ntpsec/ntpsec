@@ -39,6 +39,29 @@
 
   struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
   void yyerror (char *msg);
+
+  /* SK: The following is a terrible hack to allow the NTP code to be built
+   * without OPENSSL. The following symbols need to be defined in the 
+   * here because bison will balk at the presence of a C like preprocesser 
+   * directive in the rules section.
+   *
+   * There should be a better way of doing this...
+   */
+#ifndef OPENSSL
+  #define CRYPTO_CONF_NONE  0     
+  #define CRYPTO_CONF_PRIV  1     
+  #define CRYPTO_CONF_SIGN  2     
+  #define CRYPTO_CONF_LEAP  3     
+  #define CRYPTO_CONF_KEYS  4     
+  #define CRYPTO_CONF_CERT  5     
+  #define CRYPTO_CONF_RAND  6     
+  #define CRYPTO_CONF_TRST  7     
+  #define CRYPTO_CONF_IFFPAR 8    
+  #define CRYPTO_CONF_GQPAR 9     
+  #define CRYPTO_CONF_MVPAR 10    
+  #define CRYPTO_CONF_PW    11    
+ #define CRYPTO_CONF_IDENT 12    
+#endif
 %}
 
 %union {

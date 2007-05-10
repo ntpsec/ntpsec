@@ -866,7 +866,13 @@ static void config_auth(void)
         while (!empty(my_config.auth.crypto_cmd_list)) {
             my_val = (struct attr_val *) 
                 dequeue(my_config.auth.crypto_cmd_list);
-            crypto_config(my_val->attr, my_val->value.s);
+	    #ifdef OPENSSL
+                crypto_config(my_val->attr, my_val->value.s);
+	    #else
+		printf("Warning: Code not built with OpenSSL libraries!\n"
+		       "Crypto commands are ignored\n");
+		msyslog(LOG_ERR, "config_auth: Crypto commands are ignored\n");
+	    #endif
             
             free(my_val->value.s);
             free_node(my_val);
@@ -1464,7 +1470,11 @@ static void config_vars(void)
             free(curr_var->value.s);
             break;
         case T_Automax:
-            sys_automax = 1 << max(curr_var->value.i, 10);
+            #ifdef OPENSSL
+	        sys_automax = 1 << max(curr_var->value.i, 10);
+	    #else
+		printf("Warning: Automax command ignored!\n");
+	    #endif
             break;
         }
         free_node(curr_var);
