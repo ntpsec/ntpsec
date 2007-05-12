@@ -732,8 +732,7 @@ io_completion_port_write(
  */
 int GetReceivedBuffers()
 {
-//	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
-	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, 500);
+	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
 	switch (Index) {
 	case WAIT_OBJECT_0 + 0 : /* exit request */
 		exit(0);

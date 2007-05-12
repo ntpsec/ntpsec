@@ -1,3 +1,4 @@
+* [Bug 819] Timeout for WaitForMultipleObjects was 500ms instead of INFINITE
 * Audio documentation updates from Dave Mills.
 * New config file parsing code, from Sachin Kamboj.
 * fuzz bit cleanup from Dave Mills.
