@@ -47,7 +47,8 @@ check-local: @MAKE_CHECK_Y2K@
 # SIM: cmd_args.c ntp_config.c ntp_io.c ntpd.c + ntpsim.c (include/ntpsim.h)
 # ntp_resolver.c is presently unused...
 ntpd_SOURCES = cmd_args.c ntp_config.c ntp_io.c ntp_parser.y	\
-	ntp_data_structures.c ntp_scanner.c ntpd.c ntpd-opts.c ntpd-opts.h
+	ntp_data_structures.c ntp_scanner.c ntp_scanner.h ntpd.c \
+	ntpd-opts.c ntpd-opts.h
 ntpdsim_SOURCES = $(ntpd_SOURCES) ntpsim.c
 libntpd_a_SOURCES = jupiter.h ntp_control.c \
 	ntp_crypto.c ntp_filegen.c \
