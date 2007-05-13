@@ -50,6 +50,7 @@ export = <<- _EOExport_
 	#endif
 	_EOExport_;
 
+#ifdef CLKLDISC
 flag = {
     name      = magic2;
     value     = a;
@@ -75,7 +76,9 @@ flag = {
 	Or maybe the kill or maybe something else.
 	_EndOfDoc_;
 };
+#endif CLKLDISC
 
+#ifdef STREAM
 extern = <<- _EOExtern_
 	#ifdef STREAM
 	extern char magic[32];
@@ -109,6 +112,7 @@ flag = {
 	    }
 	_EOCode_;
 };
+#endif
 
 include       = 'extern int speed;';
 flag = {

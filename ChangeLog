@@ -1,4 +1,6 @@
 * [Bug 819] Timeout for WaitForMultipleObjects was 500ms instead of INFINITE
+* Use autogen 5.9.1.
+* Fix clktest command-line arg processing.'
 * Audio documentation updates from Dave Mills.
 * New config file parsing code, from Sachin Kamboj.
 * fuzz bit cleanup from Dave Mills.
