@@ -1,3 +1,4 @@
+* The new config code missed an #ifdef for building without refclocks.
 * Distribute some files needed by the new config parsing code.
 * [Bug 819] Timeout for WaitForMultipleObjects was 500ms instead of INFINITE
 * Use autogen 5.9.1.

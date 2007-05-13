@@ -1417,9 +1417,13 @@ static void config_fudge(void)
             
             free_node(curr_opt);
         }
+
+#ifdef REFCLOCK
         if (!err_flag)
             refclock_control(&addr_sock, &clock_stat,
                              (struct refclockstat *)0);
+#endif
+
         destroy_queue(curr_fudge->options);
         free_node(curr_fudge);
     }
