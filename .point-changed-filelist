@@ -2,10 +2,6 @@ ntpd/ntpd-opts.c
 ntpd/ntpd-opts.h
 ntpd/ntpd-opts.texi
 ntpd/ntpd.1
-ntpd/ntpdsim-opts.c
-ntpd/ntpdsim-opts.h
-ntpd/ntpdsim-opts.texi
-ntpd/ntpdsim.1
 ntpdc/ntpdc-opts.c
 ntpdc/ntpdc-opts.h
 ntpdc/ntpdc-opts.texi
