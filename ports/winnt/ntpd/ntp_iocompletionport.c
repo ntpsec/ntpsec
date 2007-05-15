@@ -505,7 +505,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	/*
 	 * Now signal we have something to process
 	 */
-#if 0
 	if (newbuff != buff) {
 		if( !SetEvent( WaitableIoEventHandle ) ) {
 #ifdef DEBUG
@@ -515,7 +514,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 #endif
 		}
 	}
-#endif
 
 	return 1;
 }
