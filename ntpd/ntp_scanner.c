@@ -8,6 +8,10 @@
  * Copyright (c) 2006
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
