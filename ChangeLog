@@ -1,3 +1,6 @@
+* [Bug 817] Use longnames for setting ntp variables on the command-line;
+	    Allowing '-v' with and without an arg to disambiguate usage
+	    is error-prone.
 * [Bug 822] set progname once, early.
 * [Bug 819] remove erroneous #if 0 in Windows completion port code.
 * The new config code missed an #ifdef for building without refclocks.

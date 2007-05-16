@@ -393,7 +393,7 @@ flag = {
 
 flag = {
     name      = var;
-    value     = v;
+/*    value     = v;	Bug 817 */
     arg-type  = string;
     descrip   = "make ARG an ntp variable (RW)";
     max       = NOLIMIT;
@@ -405,7 +405,7 @@ flag = {
 
 flag = {
     name      = dvar;
-    value     = V;
+/*    value     = V;	Bug 817 */
     arg-type  = string;
     descrip   = "make ARG an ntp variable (RW|DEF)";
     max       = NOLIMIT;

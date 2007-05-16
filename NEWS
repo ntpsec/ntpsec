@@ -1,3 +1,8 @@
+Backward-Incomatible changes:
+
+ntpd no longer accepts '-v name' or '-V name' to define internal variables.
+Use '--var name' or '--dvar name' instead. (Bug 817)
+---
 NTP 4.2.4 (Harlan Stenn <stenn@ntp.org>, 2006/12/31)
 
 Focus: enhancements and bug fixes.
