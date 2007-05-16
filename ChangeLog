@@ -1,3 +1,4 @@
+* [Bug 826] Fix redefinition of PI.
 * [Bug 825] ntp_scanner.c needs to #include <config.h> .
 * [Bug 824] New parser code has some build problems with the SIM code.
 * [Bug 817] Use longnames for setting ntp variables on the command-line;
