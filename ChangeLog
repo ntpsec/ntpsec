@@ -1,3 +1,4 @@
+* [Bug 824] New parser code has some build problems with the SIM code.
 * [Bug 817] Use longnames for setting ntp variables on the command-line;
 	    Allowing '-v' with and without an arg to disambiguate usage
 	    is error-prone.

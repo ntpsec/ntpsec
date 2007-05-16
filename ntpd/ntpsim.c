@@ -403,11 +403,14 @@ void sim_event_recv_packet(Event *e)
 /*** TODO: Need to decide on how to output for multiple servers ***/
 void sim_event_beep(Event *e)
 {
+#if 0
     static int first_time = 1;
     char *dash = "-----------------";
+#endif
+
     fprintf(stderr, "BEEP!!!\n");
     enqueue(event_queue, event(e->time + simulation.beep_delay, BEEP));
-/*
+#if 0
     if(simulation.beep_delay > 0) {
         if (first_time) {
             printf("\t%4c    T    %4c\t%4c  T+ERR  %3c\t%5cT+ERR+NTP\n", 
@@ -423,7 +426,7 @@ void sim_event_beep(Event *e)
                simclock.local_time, 
                
                n->time, n->clk_time, n->ntp_time);
-*/
+#endif
 
 }
 

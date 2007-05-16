@@ -1,4 +1,4 @@
-/* A Bison parser, made from /backroom/ntp-dev/A.whimsy/ntpd/../../ntpd/ntp_parser.y
+/* A Bison parser, made from /deacon/backroom/ntp-dev/A.whimsy/ntpd/../../ntpd/ntp_parser.y
    by GNU bison 1.35.  */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -2282,7 +2282,7 @@ case 208:
     break;
 case 209:
 #line 892 "ntp_parser.y"
-{  yyval.Sim_server = create_sim_server(yyvsp[-4].Address_node, yyvsp[-2].Double, yyvsp[-1].Queue); }
+{ yyval.Sim_server = create_sim_server(yyvsp[-4].Address_node, yyvsp[-2].Double, yyvsp[-1].Queue); }
     break;
 case 210:
 #line 896 "ntp_parser.y"

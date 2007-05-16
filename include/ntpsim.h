@@ -30,6 +30,9 @@
 
 /* CONSTANTS */
 
+#ifdef PI
+# undef PI
+#endif
 #define PI 3.1415926535         /* The world's most famous constant */
 #define SIM_TIME 86400		/* end simulation time */
 #define NET_DLY .001            /* network delay */
@@ -136,8 +139,4 @@ double	 poisson		 (double, double);
 int      yyparse                 (void);
 void     create_server_associations (void);
 
-
 #endif
-
-
-

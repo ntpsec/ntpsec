@@ -60,6 +60,8 @@ HANDLE ResolverThreadHandle = NULL;
 #include "ntp_parser.h"
 #include "ntp_data_structures.h"
 
+void yyerror (char *msg);
+
 extern int priority_done;
 
 
@@ -537,9 +539,13 @@ struct addr_opts_node *create_addr_opts_node(
 
 script_info *create_sim_script_info(double duration, queue *script_queue)
 {
+#ifdef SIM
+    return NULL;
+#else
     script_info *my_info;
     struct attr_val *my_attr_val;
     my_info = (script_info *)get_node(sizeof(script_info));
+    /* XXX: check the return value... */
 
     /* Initialize Script Info with default values*/
     my_info->duration = duration;
@@ -578,6 +584,7 @@ script_info *create_sim_script_info(double duration, queue *script_queue)
     }
     destroy_queue(script_queue);
     return (my_info);
+#endif
 }
 
 
@@ -618,6 +625,9 @@ static struct sockaddr_storage *get_next_address(struct address_node *addr)
 
 server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script)
 {
+#ifdef SIM
+    return NULL;
+#else
     server_info *my_info;
     my_info = (server_info *) get_node(sizeof(server_info));
 
@@ -626,6 +636,7 @@ server_info *create_sim_server(struct address_node *addr, double server_offset, 
     my_info->script = script;
     my_info->curr_script = dequeue(my_info->script);
     return my_info;
+#endif /* SIM */
 }
 
 struct sim_node *create_sim_node(queue *init_opts, queue *servers)

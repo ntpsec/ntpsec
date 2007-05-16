@@ -65,7 +65,7 @@ void *get_node(size_t size)
         return new_node + 1;
     }
     else
-        return NULL;
+        return NULL;	/* XXX: log this! */
 }
 
 /* Define a function to free the allocated memory for a queue node */

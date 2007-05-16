@@ -889,7 +889,7 @@ sim_server_list
         
 sim_server         
         :    sim_server_name '{' sim_server_offset sim_act_list '}' 
-                 {  $$ = create_sim_server($1, $3, $4); }
+                 { $$ = create_sim_server($1, $3, $4); }
         ;
 
 sim_server_offset   

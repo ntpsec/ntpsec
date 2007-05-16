@@ -2,9 +2,7 @@
 #define __NTP_CONFIG_H__
 
 #include "ntp_data_structures.h"
-#ifdef SIM
-  #include "ntpsim.h"
-#endif
+#include "ntpsim.h"
 
 
 /*
@@ -160,10 +158,8 @@ struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *o
 struct sim_node *create_sim_node(queue *init_opts, queue *servers);
 struct setvar_node *create_setvar_node(char *var, char *val, u_short def);
 
-#ifdef SIM
 script_info *create_sim_script_info(double duration, queue *script_queue);
 server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
-#endif
 
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(void);
