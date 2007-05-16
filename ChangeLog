@@ -1,3 +1,4 @@
+* [Bug 822] set progname once, early.
 * [Bug 819] remove erroneous #if 0 in Windows completion port code.
 * The new config code missed an #ifdef for building without refclocks.
 * Distribute some files needed by the new config parsing code.

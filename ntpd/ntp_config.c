@@ -1819,7 +1819,6 @@ void getconfig(int argc,char *argv[])
     alt_config_file = alt_config_file_storage;
 
 #endif /* SYS_WINNT */
-    progname = argv[0];
     res_fp = NULL;
     ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
 
