@@ -221,40 +221,43 @@ write_stats(void)
 	}
 	prev_drift_comp = drift_comp;
 	if (stats_drift_file != 0) {
-		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
-			msyslog(LOG_ERR, "can't open %s: %m",
-			    stats_temp_file);
-			return;
-		}
-		fprintf(fp, "%.3f\n", drift_comp * 1e6);
-		(void)fclose(fp);
-		/* atomic */
+		if (state == 4) {
+			if ((fp = fopen(stats_temp_file, "w")) == NULL) {
+				msyslog(LOG_ERR, "can't open %s: %m",
+					stats_temp_file);
+				return;
+			}
+			fprintf(fp, "%.3f\n", drift_comp * 1e6);
+			(void)fclose(fp);
+			/* atomic */
 #ifdef SYS_WINNT
-		(void) _unlink(stats_drift_file); /* rename semantics differ under NT */
+			(void) _unlink(stats_drift_file); /* rename semantics differ under NT */
 #endif /* SYS_WINNT */
 
 #ifndef NO_RENAME
-		(void) rename(stats_temp_file, stats_drift_file);
+			(void) rename(stats_temp_file, stats_drift_file);
 #else
-		/* we have no rename NFS of ftp in use */
-		if ((fp = fopen(stats_drift_file, "w")) == NULL) {
-			msyslog(LOG_ERR, "can't open %s: %m",
-			    stats_drift_file);
-			return;
-		}
-
+			/* we have no rename NFS of ftp in use */
+			if ((fp = fopen(stats_drift_file, "w")) == NULL) {
+				msyslog(LOG_ERR, "can't open %s: %m",
+					stats_drift_file);
+				return;
+			}
 #endif
 
 #if defined(VMS)
-		/* PURGE */
-		{
-			$DESCRIPTOR(oldvers,";-1");
-			struct dsc$descriptor driftdsc = {
-				strlen(stats_drift_file),0,0,stats_drift_file };
+			/* PURGE */
+			{
+				$DESCRIPTOR(oldvers,";-1");
+				struct dsc$descriptor driftdsc = {
+					strlen(stats_drift_file),0,0,stats_drift_file };
 
-			while(lib$delete_file(&oldvers,&driftdsc) & 1) ;
-		}
+				while(lib$delete_file(&oldvers,&driftdsc) & 1);
+			}
 #endif
+		} else {
+			/* XXX: Log a message at INFO level */
+		}
 	}
 }
 

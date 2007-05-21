@@ -1,3 +1,4 @@
+* [Bug 808] Only write the drift file if we are in state 4.
 * Initial import of libisc/log.c and friends.
 * [Bug 826] Fix redefinition of PI.
 * [Bug 825] ntp_scanner.c needs to #include <config.h> .
