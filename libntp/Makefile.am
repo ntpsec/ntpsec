@@ -17,6 +17,7 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
 	$(srcdir)/../libisc/assertions.c $(srcdir)/../libisc/error.c \
 	$(srcdir)/../libisc/interfaceiter.c $(srcdir)/../libisc/lib.c \
+	$(srcdir)/../libisc/log.c \
 	$(srcdir)/../libisc/mem.c $(srcdir)/../libisc/msgcat.c \
 	$(srcdir)/../libisc/net.c $(srcdir)/../libisc/isc_strerror.c \
 	$(srcdir)/../libisc/inet_ntop.c \
