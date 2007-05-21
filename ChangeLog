@@ -1,3 +1,4 @@
+* Initial import of libisc/log.c and friends.
 * [Bug 826] Fix redefinition of PI.
 * [Bug 825] ntp_scanner.c needs to #include <config.h> .
 * [Bug 824] New parser code has some build problems with the SIM code.
