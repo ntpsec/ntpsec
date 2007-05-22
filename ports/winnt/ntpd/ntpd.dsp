@@ -113,6 +113,10 @@ SOURCE=..\..\..\ntpd\ntp_crypto.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\ntp_data_structures.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\ntp_filegen.c
 # SUBTRACT CPP /YX
 # End Source File
@@ -143,6 +147,10 @@ SOURCE=..\..\..\ntpd\ntp_monitor.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\ntp_parser.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\ntp_peer.c
 # SUBTRACT CPP /YX
 # End Source File
@@ -165,6 +173,10 @@ SOURCE=..\..\..\ntpd\ntp_request.c
 
 SOURCE=..\..\..\ntpd\ntp_restrict.c
 # SUBTRACT CPP /YX
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\ntpd\ntp_scanner.c
 # End Source File
 # Begin Source File
 
