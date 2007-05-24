@@ -61,7 +61,7 @@ static HANDLE WaitableIoEventHandle = NULL;
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
 
-//#define USE_HEAP
+#define USE_HEAP
 
 IoCompletionInfo *
 GetHeapAlloc(char *fromfunc)
@@ -76,7 +76,7 @@ GetHeapAlloc(char *fromfunc)
 	lpo = (IoCompletionInfo *) calloc(1, sizeof(IoCompletionInfo));
 #endif
 #ifdef DEBUG
-	if (debug > 1) {
+	if (debug > 3) {
 		printf("Allocation %d memory for %s, ptr %x\n", sizeof(IoCompletionInfo), fromfunc, lpo);
 	}
 #endif
@@ -87,7 +87,7 @@ void
 FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 {
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug > 3)
 	{
 		printf("Freeing memory for %s, ptr %x\n", fromfunc, lpo);
 	}
@@ -238,7 +238,8 @@ init_io_completion_port(
 	 */
 	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, "WaitableIoEventHandle");
 	if (WaitableIoEventHandle == NULL) {
-		msyslog(LOG_ERR, "Can't create I/O event handle: %m");
+		msyslog(LOG_ERR,
+		"Can't create I/O event handle: %m - another process may be running - EXITING");
 		exit(1);
 	}
 
@@ -253,9 +254,9 @@ init_io_completion_port(
 	/*
 	 * Initialize the Wait Handles
 	 */
-	WaitHandles[0] = CreateEvent(NULL, FALSE, FALSE, "WaitHandles0"); /* exit request */
-	WaitHandles[1] = get_timer_handle();
-	WaitHandles[2] = get_io_event();
+	WaitHandles[0] = get_io_event();
+	WaitHandles[1] = CreateEvent(NULL, FALSE, FALSE, "WaitHandles0"); /* exit request */
+	WaitHandles[2] = get_timer_handle();
 
 	/* Have one thread servicing I/O - there were 4, but this would 
 	 * somehow cause NTP to stop replying to ntpq requests; TODO
@@ -343,18 +344,18 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 			buff->dstadr = NULL;
 			buff->recv_srcclock = rio->srcclock;
 			add_full_recv_buffer(buff);
+			if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+				if (debug > 3) {
+					printf( "Error %d setting IoEventHandle\n", GetLastError() );
+				}
+#endif
+			}
 		}
 		else
 		{
 			freerecvbuf(buff);
 		}
-	}
-	if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-		if (debug > 3) {
-			printf( "Error %d setting IoEventHandle\n", GetLastError() );
-		}
-#endif
 	}
 
 	QueueIORead( rio, newbuff, lpo );
@@ -410,10 +411,11 @@ static unsigned long QueueSocketRecv(SOCKET s, recvbuf_t *buff, IoCompletionInfo
 		DWORD Flags = 0;
 		buff->fd = s;
 		AddrLen = sizeof(struct sockaddr_in);
+		buff->src_addr_len = sizeof(struct sockaddr);
 
 		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &buff->wsabuff, 1, 
 						&BytesReceived, &Flags, 
-						(struct sockaddr *) &buff->recv_srcadr, (LPINT) &AddrLen, 
+						(struct sockaddr *) &buff->recv_srcadr, (LPINT) &buff->src_addr_len, 
 						(LPOVERLAPPED) lpo, NULL)) {
 			DWORD Result = WSAGetLastError();
 			switch (Result) {
@@ -459,7 +461,20 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
 	*/
 	
+	/*
+	 * Check returned structures
+	 */
+	if (lpo == NULL)
+		return (1); /* Nothing to do */
+
 	buff = lpo->recv_buf;
+	/*
+	 * Make sure we have a buffer
+	 */
+	if (buff == NULL) {
+//		FreeHeap(lpo, "OnSocketRecv: Socket Closed");
+		return (1);
+	}
 
 	/*
 	 * If the socket is closed we get an Operation Aborted error
@@ -472,7 +487,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		return (1);
 	}
 
-	get_systime(&buff->recv_time);	
 
 	/*
 	 * Get a new recv buffer for the next packet
@@ -487,36 +501,36 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	}
 	else 
 	{
-		if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {	
+		/*
+		 * If we keep it add some info to the structure
+		 */
+		if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {
+			get_systime(&buff->recv_time);	
 			buff->recv_length = (int) Bytes;
 			buff->receiver = receive; 
 			buff->dstadr = inter;
 #ifdef DEBUG
 			if (debug > 3)
-  				printf("Received %d bytes from %s\n", Bytes, stoa(&buff->recv_srcadr));
+  				printf("Received %d bytes in buffer %x from %s\n", Bytes, buff, stoa(&buff->recv_srcadr));
 #endif
 			add_full_recv_buffer(buff);
+			/*
+			 * Now signal we have something to process
+			 */
+			if( !SetEvent( WaitableIoEventHandle ) ) {
+#ifdef DEBUG
+				if (debug > 1) {
+					printf( "Error %d setting IoEventHandle\n", GetLastError() );
+				}
+#endif
+			}
 		}
 		else {
 			freerecvbuf(buff);
 		}
 	}
-	QueueSocketRecv(inter->fd, newbuff, lpo);
-	/*
-	 * Now signal we have something to process
-	 */
-#if 0
-	if (newbuff != buff) {
-		if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-			if (debug > 3) {
-				printf( "Error %d setting IoEventHandle\n", GetLastError() );
-			}
-#endif
-		}
-	}
-#endif
-
+	if (newbuff != NULL)
+		QueueSocketRecv(inter->fd, newbuff, lpo);
 	return 1;
 }
 
@@ -732,38 +746,38 @@ io_completion_port_write(
  */
 int GetReceivedBuffers()
 {
-//	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
-	DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, 500);
-	switch (Index) {
-	case WAIT_OBJECT_0 + 0 : /* exit request */
-		exit(0);
-		break;
-
-	case WAIT_OBJECT_0 + 1 : /* timer */
-		timer();
-		break;
-
-	case WAIT_OBJECT_0 + 2 : /* Io event */
+	isc_boolean_t have_packet = ISC_FALSE;
+	while (!have_packet) {
+		DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
+		switch (Index) {
+		case WAIT_OBJECT_0 + 0 : /* Io event */
 # ifdef DEBUG
-		if ( debug > 3 )
-		{
-			printf( "IoEvent occurred\n" );
-		}
+			if ( debug > 3 )
+			{
+				printf( "IoEvent occurred\n" );
+			}
 # endif
-		break;
+			have_packet = ISC_TRUE;
+			break;
+		case WAIT_OBJECT_0 + 1 : /* exit request */
+			exit(0);
+			break;
+		case WAIT_OBJECT_0 + 2 : /* timer */
+			timer();
+			break;
+		case WAIT_IO_COMPLETION : /* loop */
+		case WAIT_TIMEOUT :
+			break;
+		case WAIT_FAILED:
+			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects Failed: Error: %m");
+			break;
 
-	case WAIT_IO_COMPLETION : /* loop */
-	case WAIT_TIMEOUT :
-		break;
-	case WAIT_FAILED:
-		msyslog(LOG_ERR, "ntpd: WaitForMultipleObjectsEx Failed: Error: %m");
-		break;
-
-		/* For now do nothing if not expected */
-	default:
-		break;		
+			/* For now do nothing if not expected */
+		default:
+			break;		
 				
-	} /* switch */
+		} /* switch */
+	}
 
 	return (full_recvbuffs());	/* get received buffers */
 }
