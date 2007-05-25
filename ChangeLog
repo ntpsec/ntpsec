@@ -1,4 +1,5 @@
 (4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
+* Upgraded autogen and libopts.
 * [Bug 811] ntpd should not read a .ntprc file.
 (4.2.4p1) (skipped)
 (4.2.4p0) Released by Harlan Stenn <stenn@ntp.org>
