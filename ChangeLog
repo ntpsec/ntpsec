@@ -1,3 +1,5 @@
+* [Bug 841] make deferred binding to local interface the default
+	    (allows peers/servers to be configured even when no route exists)
 * [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been configured
 * [Bug 832] Add libisc/log.c headers to the distribution.
 * [Bug 808] Only write the drift file if we are in state 4.
