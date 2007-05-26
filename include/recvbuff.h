@@ -66,6 +66,7 @@ struct recvbuf {
 #else
 	struct sockaddr_storage srcadr;	/* where packet came from */
 #endif
+	int src_addr_len;		/* source address length */
 	struct interface *dstadr;	/* interface datagram arrived thru */
 	SOCKET	fd;			/* fd on which it was received */
 	int msg_flags;			/* Flags received about the packet */
@@ -76,6 +77,7 @@ struct recvbuf {
 		struct pkt X_recv_pkt;
 		u_char X_recv_buffer[RX_BUFF_SIZE];
 	} recv_space;
+	int used;
 #define	recv_pkt	recv_space.X_recv_pkt
 #define	recv_buffer	recv_space.X_recv_buffer
 };

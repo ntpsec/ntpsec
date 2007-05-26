@@ -1,3 +1,11 @@
+NTP 4.2.4p2 (Harlan Stenn <stenn@ntp.org>, 2007/05/18)
+
+Focus: bug fix.
+
+[Bug 527] Don't write from source address length to wrong location (Windows).
+(Upgraded autogen and libopts.)
+[Bug 811] ntpd should not read a .ntprc file.
+---
 NTP 4.2.4 (Harlan Stenn <stenn@ntp.org>, 2006/12/31)
 
 Focus: enhancements and bug fixes.
