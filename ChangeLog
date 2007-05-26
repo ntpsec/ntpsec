@@ -41,8 +41,10 @@
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
-(4.2.4p1) Released by Harlan Stenn <stenn@ntp.org>
+(4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 811] ntpd should not read a .ntprc file.
+(4.2.4p1) (skipped)
+(4.2.4p0) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 793] Update Hans Lambermont's email address in ntpsweep.
 * [Bug 776] Remove unimplemented "rate" flag from ntpdate.
 * [Bug 586] Avoid lookups if AI_NUMERICHOST is set.
@@ -156,7 +158,7 @@
  * Autokey improvements
  * Much better IPv6 support
  * [Bug 360] ntpd loses handles with LAN connection disabled.
- * [Bug 239] Fix intermittend autokey failure with multicast clients.
+ * [Bug 239] Fix intermittent autokey failure with multicast clients.
  * Rewrite of the multicast code
  * New version numbering scheme
 
