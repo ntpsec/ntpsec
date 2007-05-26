@@ -1768,10 +1768,10 @@ static void config_ntpd()
     config_setvar();
     config_ttl();
     config_trap();
-    config_fudge();
     config_vars();
     config_other_modes();
     config_peers();
+    config_fudge();
 }
 
 #ifdef SIM

@@ -600,7 +600,6 @@ struct conf_peer {
 #define CONF_FLAG_IBURST	0x08
 #define CONF_FLAG_NOSELECT	0x10
 #define CONF_FLAG_SKEY		0x20
-#define CONF_FLAG_DYNAMIC	0x40
 
 /*
  * Structure for passing peer deletion information.  Currently
