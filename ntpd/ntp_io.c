@@ -3254,6 +3254,9 @@ findlocalcastinterface(
 {
 	struct interface *interface;
 	struct interface *nif = NULL;
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+	isc_boolean_t want_linklocal;
+#endif 
 
 	/*
 	 * see how kernel maps the mcast address
@@ -3266,7 +3269,7 @@ findlocalcastinterface(
 	}
 
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-	isc_boolean_t want_linklocal = ISC_FALSE; 
+	want_linklocal = ISC_FALSE; 
 	if (addr_ismulticast(addr) && flags == INT_MULTICAST)
 	{
 		if (IN6_IS_ADDR_MC_LINKLOCAL(&((struct sockaddr_in6*)addr)->sin6_addr))
