@@ -8,7 +8,9 @@ noinst_HEADERS = \
 	assertions.h \
 	boolean.h \
 	buffer.h \
+	dir.h \
 	error.h \
+	file.h \
 	formatcheck.h \
 	int.h \
 	interfaceiter.h \
@@ -16,6 +18,7 @@ noinst_HEADERS = \
 	lang.h \
 	lib.h \
 	list.h \
+	log.h \
 	magic.h \
 	mem.h \
 	msgcat.h \
@@ -31,7 +34,10 @@ noinst_HEADERS = \
 	result.h \
 	region.h \
 	sockaddr.h \
+	stat.h \
+	stdio.h \
 	strerror.h \
 	string.h \
+	time.h \
 	types.h \
 	util.h
