@@ -27,6 +27,8 @@
 * [Bug 810] Fix ntp-keygen documentation.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
 	    multicast packets do not disturb the autokey dance.
+* [Bug 785] improve handling of multicast interfaces
+	    (multicast routers still need to run a multicast routing software/daemon)
 * [Bug 787] Bug fixes for 64-bit time_t on Windows.
 * [Bug 796] Clean up duplicate #defines in ntp_control.c.
 * [Bug 569] Use the correct precision for the Leitch CSD-5300.
