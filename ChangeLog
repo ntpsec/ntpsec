@@ -28,10 +28,6 @@
 * [Bug 740] Fix kernel/daemon startup drift anomaly.
 * refclock_wwv.c fixes from Dave Mills.
 * [Bug 810] Fix ntp-keygen documentation.
-* [Bug 789] Fix multicast client crypto authentication and make sure arriving
-	    multicast packets do not disturb the autokey dance.
-* [Bug 785] improve handling of multicast interfaces
-	    (multicast routers still need to run a multicast routing software/daemon)
 * [Bug 787] Bug fixes for 64-bit time_t on Windows.
 * [Bug 796] Clean up duplicate #defines in ntp_control.c.
 * [Bug 569] Use the correct precision for the Leitch CSD-5300.
@@ -48,6 +44,12 @@
 * codec (audio) and ICOM changes from Dave Mills.
 
 (4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 795] Moved declaration of variable to top of function.
+* [Bug 789] Fix multicast client crypto authentication and make sure arriving
+	    multicast packets do not disturb the autokey dance.
+* [Bug 785] improve handling of multicast interfaces
+	    (multicast routers still need to run a multicast routing
+	    software/daemon)
 * [Bug 527] Don't write from source address length to wrong location
 * Upgraded autogen and libopts.
 * [Bug 811] ntpd should not read a .ntprc file.
