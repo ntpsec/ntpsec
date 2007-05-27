@@ -2,6 +2,12 @@ NTP 4.2.4p2 (Harlan Stenn <stenn@ntp.org>, 2007/05/18)
 
 Focus: bug fix.
 
+[Bug 795] Moved declaration of variable to top of function.
+[Bug 789] Fix multicast client crypto authentication and make sure arriving
+         multicast packets do not disturb the autokey dance.
+[Bug 785] improve handling of multicast interfaces
+         (multicast routers still need to run a multicast routing
+         software/daemon)
 [Bug 527] Don't write from source address length to wrong location (Windows).
 (Upgraded autogen and libopts.)
 [Bug 811] ntpd should not read a .ntprc file.
