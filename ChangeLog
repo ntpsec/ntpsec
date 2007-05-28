@@ -1,3 +1,4 @@
+* [Bug 843] Windows Completion port code was incorrectly merged from -stable 
 * [Bug 841] make deferred binding to local interface the default
 	    (allows peers/servers to be configured even when no route exists)
 * [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been configured
