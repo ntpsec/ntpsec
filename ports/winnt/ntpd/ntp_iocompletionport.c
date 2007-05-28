@@ -529,21 +529,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 			freerecvbuf(buff);
 		}
 	}
-
-	QueueSocketRecv(inter->fd, newbuff, lpo);
-	/*
-	 * Now signal we have something to process
-	 */
-	if (newbuff != buff) {
-		if( !SetEvent( WaitableIoEventHandle ) ) {
-#ifdef DEBUG
-			if (debug > 3) {
-				printf( "Error %d setting IoEventHandle\n", GetLastError() );
-			}
-#endif
-		}
-	}
-
 	if (newbuff != NULL)
 		QueueSocketRecv(inter->fd, newbuff, lpo);
 	return 1;
