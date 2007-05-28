@@ -1,3 +1,5 @@
+* [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
+	    to reflect the actual configuration
 * [Bug 795] Moved declaration of variable to top of function.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
 	    multicast packets do not disturb the autokey dance.

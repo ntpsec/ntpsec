@@ -263,7 +263,7 @@ static void	delete_addr_from_list	P((struct sockaddr_storage *));
 static struct interface *find_addr_in_list	P((struct sockaddr_storage *));
 static struct interface *find_flagged_addr_in_list P((struct sockaddr_storage *, int));
 static void	create_wildcards	P((u_short));
-static isc_boolean_t	address_okay	P((isc_interface_t *));
+static isc_boolean_t	address_okay	P((struct interface *));
 static void		convert_isc_if		P((isc_interface_t *, struct interface *, u_short));
 static void	delete_interface_from_list	P((struct interface *));
 static struct interface *getinterface	P((struct sockaddr_storage *, int));
@@ -908,49 +908,52 @@ create_wildcards(u_short port) {
 
 
 static isc_boolean_t
-address_okay(isc_interface_t *isc_if) {
+address_okay(struct interface *iface) {
 
-	DPRINTF(4, ("address_okay: listen Virtual: %d, IF name: %s, Up Flag: %d\n", 
-		    listen_to_virtual_ips, isc_if->name, (isc_if->flags & INTERFACE_F_UP)));
+	DPRINTF(4, ("address_okay: listen Virtual: %d, IF name: %s\n", 
+		    listen_to_virtual_ips, iface->name));
 
 	/*
 	 * Always allow the loopback
 	 */
-	if((isc_if->flags & INTERFACE_F_LOOPBACK) != 0)
+	if((iface->flags & INT_LOOPBACK) != 0) {
+		DPRINTF(4, ("address_okay: loopback - OK\n"));
 		return (ISC_TRUE);
+	}
 
 	/*
 	 * Check if the interface is specified
 	 */
 	if (specific_interface != NULL) {
-		if (strcasecmp(isc_if->name, specific_interface) == 0)
+		if (strcasecmp(iface->name, specific_interface) == 0) {
+			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
 			return (ISC_TRUE);
-		else
+		} else {
+			DPRINTF(4, ("address_okay: specific interface name NOT matched - FAIL\n"));
 			return (ISC_FALSE);
+		}
 	}
 	else {
 		if (listen_to_virtual_ips == 0  && 
-		   (strchr(isc_if->name, (int)':') != NULL))
+		    (strchr(iface->name, (int)':') != NULL)) {
+			DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
 			return (ISC_FALSE);
+		}
 	}
 
-	/* XXXPDM This should be fixed later, but since we may not have set
-	 * the UP flag, we at least get to use the interface.
-	 * The UP flag is not always set so we don't do this right now.
-	 */
-/*	if ((isc_if->flags & INTERFACE_F_UP) == 0)
-		return (ISC_FALSE);
-*/
+	DPRINTF(4, ("address_okay: OK\n"));
 	return (ISC_TRUE);
 }
 
 static void
-convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
+convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port)
+{
 	itf->scopeid = 0;
 	itf->family = (short) isc_if->af;
+	strcpy(itf->name, isc_if->name);
+
 	if(isc_if->af == AF_INET) {
 		itf->sin.ss_family = (u_short) isc_if->af;
-		strcpy(itf->name, isc_if->name);
 		memcpy(&(((struct sockaddr_in*)&itf->sin)->sin_addr),
 		       &(isc_if->address.type.in),
 		       sizeof(struct in_addr));
@@ -974,7 +977,6 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 #ifdef INCLUDE_IPV6_SUPPORT
 	else if (isc_if->af == AF_INET6) {
 		itf->sin.ss_family = (u_short) isc_if->af;
-		strcpy(itf->name, isc_if->name);
 		memcpy(&(((struct sockaddr_in6 *)&itf->sin)->sin6_addr),
 		       &(isc_if->address.type.in6),
 		       sizeof(((struct sockaddr_in6 *)&itf->sin)->sin6_addr));
@@ -1227,6 +1229,21 @@ update_interfaces(
 
 		convert_isc_if(&isc_if, &interface, port);
 
+		/* 
+		 * Check to see if we are going to use the interface
+		 * If we don't use it we mark it to drop any packet
+		 * received but we still must create the socket and
+		 * bind to it. This prevents other apps binding to it
+		 * and potentially causing problems with more than one
+		 * process fiddling with the clock
+		 */
+		if (address_okay(&interface) == ISC_TRUE) {
+			interface.ignore_packets = ISC_FALSE;
+		}
+		else {
+			interface.ignore_packets = ISC_TRUE;
+		}
+
 		DPRINT_INTERFACE(4, (&interface, "examining ", "\n"));
 
 		if (!(interface.flags & INT_UP))  { /* interfaces must be UP to be usable */
@@ -1274,34 +1291,22 @@ update_interfaces(
 			
 			iface = create_interface(port, &interface);
 
-			DPRINT_INTERFACE(3, (iface ? iface : &interface, "updating ", iface ? " new - created\n" : " new - creation FAILED"));
-
 			if (iface)
 			{
 				ifi.action = IFS_CREATED;
 				ifi.interface = iface;
 				if (receiver)
 					receiver(data, &ifi);
+
+				DPRINT_INTERFACE(3, (iface, "updating ", " new - created\n"));
 			}
 			else
 			{
+				DPRINT_INTERFACE(3, (&interface, "updating ", " new - creation FAILED"));
+			
 				msyslog(LOG_INFO, "failed to initialize interface for address %s", stoa(&interface.sin));
 				continue;
 			}
-		}
-		/* 
-		 * Check to see if we are going to use the interface
-		 * If we don't use it we mark it to drop any packet
-		 * received but we still must create the socket and
-		 * bind to it. This prevents other apps binding to it
-		 * and potentially causing problems with more than one
-		 * process fiddling with the clock
-		 */
-		if (address_okay(&isc_if) == ISC_TRUE) {
-			iface->ignore_packets = ISC_FALSE;
-		}
-		else {
-			iface->ignore_packets = ISC_TRUE;
 		}
 	}
 
@@ -3173,6 +3178,7 @@ findlocalinterface(
 	int rtn;
 	struct sockaddr_storage saddr;
 	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
+	struct interface *iface;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)
@@ -3219,7 +3225,17 @@ findlocalinterface(
 
 	DPRINTF(4, ("findlocalinterface: kernel maps %s to %s\n", stoa(addr), stoa(&saddr)));
 	
-	return getinterface(&saddr, flags);
+	iface = getinterface(&saddr, flags);
+
+	/* Don't both with ignore interfaces */
+	if (iface != NULL && iface->ignore_packets == ISC_TRUE)
+	{
+		return NULL;
+	}
+	else
+	{
+		return iface;
+	}
 }
 
 /*
@@ -3231,16 +3247,14 @@ getinterface(struct sockaddr_storage *addr, int flags)
 {
 	struct interface *interface = find_addr_in_list(addr);
 
-	if (interface != NULL) {
-		if (interface->flags & flags)
-			return NULL;
-		
-		/* Don't both with ignore interfaces */
-		if (interface->ignore_packets == ISC_TRUE)
-			return NULL;
+	if (interface != NULL && interface->flags & flags)
+	{
+		return NULL;
 	}
-
-	return interface;
+	else
+	{
+		return interface;
+	}
 }
 
 /*
