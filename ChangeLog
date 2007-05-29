@@ -46,7 +46,8 @@
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
-(4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
+	    to reflect the actual configuration.
 * [Bug 795] Moved declaration of variable to top of function.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
 	    multicast packets do not disturb the autokey dance.
