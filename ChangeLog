@@ -1,7 +1,9 @@
-* [Bug 843] Windows Completion port code was incorrectly merged from -stable 
-* [Bug 841] make deferred binding to local interface the default
+* Cleanup FILE * usage after fclose() in ntp_filegen.c.
+* [Bug 843] Windows Completion port code was incorrectly merged from -stable.
+* [Bug 841] make deferred binding to local interface the default.
 	    (allows peers/servers to be configured even when no route exists)
-* [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been configured
+* [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been
+	    configured.
 * [Bug 824] Added new parser modules to the Windows project file.
 * [Bug 832] Add libisc/log.c headers to the distribution.
 * [Bug 808] Only write the drift file if we are in state 4.

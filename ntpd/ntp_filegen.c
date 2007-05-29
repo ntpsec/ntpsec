@@ -62,15 +62,15 @@ static void	filegen_init	(char *, const char *, FILEGEN *);
  */
 
 static void
-filegen_init(char *prefix, const char *basename, FILEGEN *fp)
+filegen_init(char *prefix, const char *basename, FILEGEN *fgp)
 {
-	fp->fp       = NULL;
-	fp->prefix   = prefix;		/* Yes, this is TOTALLY lame! */
-	fp->basename = (char*)emalloc(strlen(basename) + 1);
-	strcpy(fp->basename, basename);
-	fp->id       = 0;
-	fp->type     = FILEGEN_DAY;
-	fp->flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
+	fgp->fp       = NULL;
+	fgp->prefix   = prefix;		/* Yes, this is TOTALLY lame! */
+	fgp->basename = (char*)emalloc(strlen(basename) + 1);
+	strcpy(fgp->basename, basename);
+	fgp->id       = 0;
+	fgp->type     = FILEGEN_DAY;
+	fgp->flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
 }
 
 
@@ -244,6 +244,7 @@ filegen_open(
 	} else {
 		if (gen->fp != NULL) {
 			fclose(gen->fp);
+			gen->fp = NULL;
 		}
 		gen->fp = fp;
 		gen->id = newid;
@@ -297,8 +298,10 @@ filegen_setup(
 	struct calendar cal;
 
 	if (!(gen->flag & FGEN_FLAG_ENABLED)) {
-		if (gen->fp != NULL)
-		    fclose(gen->fp);
+		if (gen->fp != NULL) {
+			fclose(gen->fp);
+			gen->fp = NULL;
+		}
 		return;
 	}
 	
@@ -356,9 +359,9 @@ filegen_setup(
 	 */
 	if (gen->fp == NULL || gen->id != new_gen) {
 #if DEBUG
-	if (debug)
-		printf("filegen  %0x %lu %lu %lu\n", gen->type, now,
-		    gen->id, new_gen); 
+		if (debug)
+			printf("filegen  %0x %lu %lu %lu\n", gen->type, now,
+			    gen->id, new_gen); 
 #endif
 		filegen_open(gen, new_gen);
 	}
@@ -376,12 +379,14 @@ filegen_config(
 	u_int   flag
 	)
 {
+	int file_existed = 0;
+
 	/*
 	 * if nothing would be changed...
 	 */
-	if ((basename == gen->basename || strcmp(basename,gen->basename) == 0) &&
-	    type == gen->type &&
-	    flag == gen->flag)
+	if ((basename == gen->basename || strcmp(basename,gen->basename) == 0)
+	    && type == gen->type
+	    && flag == gen->flag)
 	    return;
   
 	/*
@@ -390,8 +395,11 @@ filegen_config(
 	if (!valid_fileref(gen->prefix,basename))
 	    return;
   
-	if (gen->fp != NULL)
-	    fclose(gen->fp);
+	if (gen->fp != NULL) {
+		fclose(gen->fp);
+		gen->fp = NULL;
+		file_existed = 1;
+	}
 
 #ifdef DEBUG
 	if (debug > 2)
@@ -412,7 +420,7 @@ filegen_config(
 	 * is currently open
 	 * otherwise the new settings will be used anyway at the next open
 	 */
-	if (gen->fp != NULL) {
+	if (file_existed) {
 		l_fp now;
 
 		get_systime(&now);
