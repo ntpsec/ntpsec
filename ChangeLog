@@ -1,3 +1,5 @@
+* [Bug 825] Correct logconfig -/+ keyword processing.
+* [Bug 828] Correct parsing of " delimited strings.
 * Cleanup FILE * usage after fclose() in ntp_filegen.c.
 * [Bug 843] Windows Completion port code was incorrectly merged from -stable.
 * [Bug 841] make deferred binding to local interface the default.
