@@ -536,8 +536,9 @@ int yylex()
                  (yytext[i] = get_next_char()) != EOF; ++i) {
         
             /* Break on reading in whitespace or a special character */
-            if (isspace(yytext[i]) || is_special(yytext[i]) || is_EOC(ch))
-                break;
+            if (isspace(yytext[i]) || is_special(yytext[i]) || is_EOC(ch)
+			|| yytext[i] == '"')
+		break;
         
             /* Read the rest of the line on reading a start of comment 
                character */
@@ -547,6 +548,17 @@ int yylex()
                     ; /* Null Statement */
                 break;
             }   
+        }
+	/* Pick up all of the string inside between " marks, to end of line.
+	 * If we make it to EOL without a terminating " assume it for them.
+	 */
+	 if (yytext[i] == '"') {
+             while ((yytext[i] = get_next_char()) != EOF &&
+                     yytext[i] != '"' && yytext[i] != '\n') {
+			i++;
+		}
+             if (yytext[i] == '"')
+		 yytext[i] =  ' ';
         }
         /* If the last character read was an EOF, pushback a newline
          * character. This is to prevent a parse error when there is

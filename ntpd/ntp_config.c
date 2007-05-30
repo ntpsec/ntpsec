@@ -329,7 +329,7 @@ struct attr_val *create_attr_sval(int attr, char *s)
     my_val = (struct attr_val *)
         get_node(sizeof(struct attr_val));
     my_val->attr = attr;
-    my_val->value.s = s;
+    my_val->value.s = strdup(s);
     my_val->type = T_String;
     return my_val;
 }
