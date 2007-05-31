@@ -1,3 +1,4 @@
+* Have autogen produce writable output files.
 * [Bug 825] Correct logconfig -/+ keyword processing.
 * [Bug 828] Correct parsing of " delimited strings.
 * Cleanup FILE * usage after fclose() in ntp_filegen.c.
