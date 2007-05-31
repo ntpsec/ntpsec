@@ -427,7 +427,11 @@ authentication_command
         |	T_ControlKey T_Integer  
                     { my_config.auth.control_key = $2;  }
         |	T_Crypto crypto_command_list  
-                    { my_config.auth.crypto_cmd_list = $2;  }
+			{ if (my_config.auth.crypto_cmd_list != NULL) 
+					append_queue(my_config.auth.crypto_cmd_list, $2); 
+		 		else 
+					my_config.auth.crypto_cmd_list = $2;
+			}
 	|	T_Keys T_String  
                     { my_config.auth.keys = $2;  }
 	|	T_Keysdir T_String  
