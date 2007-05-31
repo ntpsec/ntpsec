@@ -1,3 +1,4 @@
+* Enable debugging capability in the config parser.
 * [Bug 839] Crypto password not read from ntp.conf.
 * Have autogen produce writable output files.
 * [Bug 825] Correct logconfig -/+ keyword processing.

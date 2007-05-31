@@ -9,7 +9,7 @@ noinst_LIBRARIES=	libntpd.a
 AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
-AM_YFLAGS=	-d
+AM_YFLAGS=	-d -t
 
 BUILT_SOURCES=	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu ntp_parser.h
 
