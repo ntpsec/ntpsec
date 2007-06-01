@@ -1,4 +1,5 @@
 * [Bug 846] Correct includefile parsing.
+* [Bug 827] New parsing code does not handle "fudge" correctly.
 * Enable debugging capability in the config parser.
 * [Bug 839] Crypto password not read from ntp.conf.
 * Have autogen produce writable output files.
