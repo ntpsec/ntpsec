@@ -517,9 +517,14 @@ int yylex()
                !is_EOC(ch))
             ; /* Null Statement */
         
-        if (ch == EOF)
+        if (ch == EOF) {
+            if (curr_include_level == 0) {
             return 0;
-        else if (is_EOC(ch)) {
+			} else { 
+                ip_file = fp[--curr_include_level]; 
+                return T_EOC;
+			}
+		} else if (is_EOC(ch)) {
             expect_string = NO_ARG;   /* Reset expect_string */
             return T_EOC;
         }
