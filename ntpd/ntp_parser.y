@@ -717,7 +717,7 @@ tinker_option
  */
 
 miscellaneous_command
-        :	T_Includefile T_String 
+        :	T_Includefile T_String command  
                 {
                     if (curr_include_level >= MAXINCLUDELEVEL) {
                         fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
@@ -730,7 +730,7 @@ miscellaneous_command
                             msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig($2));
                         }
                         else
-                            ++curr_include_level;
+                            ip_file = fp[++curr_include_level];
                     }
                 }
 	|	T_End 
