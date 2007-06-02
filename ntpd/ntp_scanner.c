@@ -505,7 +505,7 @@ static int is_EOC(char ch)
 
 int yylex()
 {
-    int i;
+    int i, instring = 0;
     int token;                 /* The return value/the recognized token */
     int ch;
     static int expect_string = NO_ARG;
@@ -558,6 +558,7 @@ int yylex()
 	 * If we make it to EOL without a terminating " assume it for them.
 	 */
 	 if (yytext[i] == '"') {
+         instring = 1;
              while ((yytext[i] = get_next_char()) != EOF &&
                      yytext[i] != '"' && yytext[i] != '\n') {
 			i++;
@@ -583,10 +584,10 @@ int yylex()
 #endif
 
     /* Now return the desired token */
-    if ((expect_string == NO_ARG) && 
+    if ((expect_string == NO_ARG) &&  (!instring) &&
         (token = is_keyword(yytext, &expect_string)))
         return token;
-    else if (is_integer(yytext)) {
+    else if (is_integer(yytext) && (!instring) ) {
         errno = 0;
         if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
             && ((errno == EINVAL) || (errno == ERANGE))) {
@@ -597,7 +598,7 @@ int yylex()
         else
             return T_Integer;
     }
-    else if (is_double(yytext)) {
+    else if (is_double(yytext) && (!instring)) {
         errno = 0;
         if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
             fprintf(stderr, "Double too large to represent: %s\n",
@@ -607,7 +608,7 @@ int yylex()
         else
             return T_Double;
     }
-    else if (is_ipv4_address(yytext)) {
+    else if (is_ipv4_address(yytext) && (!instring)) {
         if (expect_string == SINGLE_ARG)
             expect_string = NO_ARG;
         errno = 0;
@@ -620,7 +621,7 @@ int yylex()
         else
             return T_IPv4_address;
     }
-    else if (is_ipv6_address(yytext)) {
+    else if (is_ipv6_address(yytext) && (!instring)) {
         if (expect_string == SINGLE_ARG)
             expect_string = NO_ARG;
         errno = 0;
@@ -634,6 +635,7 @@ int yylex()
             return T_IPv6_address;
     }
     else { /* Default: Everything is a string */
+        instring = 0;
         if (expect_string == SINGLE_ARG)
             expect_string = NO_ARG;
         errno = 0;
