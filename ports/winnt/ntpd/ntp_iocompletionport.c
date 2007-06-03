@@ -16,6 +16,8 @@
 #include "ntp_refclock.h"
 #include "ntp_iocompletionport.h"
 #include "transmitbuff.h"
+#include "ntp_request.h"
+#include "ntp_io.h"
 
 /*
  * Request types
@@ -456,8 +458,12 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	struct recvbuf *buff = NULL;
 	recvbuf_t *newbuff;
+	isc_boolean_t ignore_this;
+	l_fp arrival_time;
 	struct interface * inter = (struct interface *) i;
 	
+	get_systime(&arrival_time);	
+
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
 	*/
 	
@@ -501,11 +507,23 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	}
 	else 
 	{
+		/* For broadcast packet received on the IPv4 wildcard socket
+		 * we carve out an exception but only if the client has requested
+		 * to receive wildcard sockets
+		 */
+		ignore_this = inter->ignore_packets;
+		if (ignore_this == ISC_TRUE && inter->family == AF_INET &&
+		    inter->flags == (INT_BROADCAST | INT_WILDCARD) &&
+		    get_packet_mode(buff) == MODE_BROADCAST &&
+		    get_broadcastclient_flag() == ISC_TRUE
+		    )
+			ignore_this = ISC_FALSE;
+
 		/*
 		 * If we keep it add some info to the structure
 		 */
-		if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {
-			get_systime(&buff->recv_time);	
+		if (Bytes > 0 && ignore_this == ISC_FALSE) {
+			memcpy(&buff->recv_time, &arrival_time, sizeof(arrival_time));	
 			buff->recv_length = (int) Bytes;
 			buff->receiver = receive; 
 			buff->dstadr = inter;

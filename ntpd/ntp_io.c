@@ -133,6 +133,7 @@ struct interface *any_interface;	/* default ipv4 interface */
 struct interface *any6_interface;	/* default ipv6 interface */
 struct interface *loopback_interface;	/* loopback ipv4 interface */
 
+isc_boolean_t	broadcast_client_enabled = ISC_FALSE;	/* is broadcast client enabled */
 int ninterfaces;			/* Total number of interfaces */
 
 volatile int disable_dynamic_updates;   /* when set to != 0 dynamic updates won't happen */
@@ -758,7 +759,7 @@ add_interface(struct interface *interface)
 }
 
 /*
- * remove interface from known interface list and clean up
+ * remove interface from knoen interface list and clean up
  * associated resources
  */
 static void
@@ -1548,6 +1549,7 @@ socket_broadcast_enable(struct interface *iface, SOCKET fd, struct sockaddr_stor
 #endif
 	}
 	iface->flags |= INT_BCASTOPEN;
+	broadcast_client_enabled = ISC_TRUE;
 	return ISC_TRUE;
 #else
 	return ISC_FALSE;
@@ -1575,6 +1577,7 @@ socket_broadcast_disable(struct interface *iface, struct sockaddr_storage *maddr
 		}
 	}
 	iface->flags &= ~INT_BCASTOPEN;
+	broadcast_client_enabled = ISC_FALSE;
 	return ISC_TRUE;
 #else
 	return ISC_FALSE;
@@ -1582,6 +1585,15 @@ socket_broadcast_disable(struct interface *iface, struct sockaddr_storage *maddr
 }
 
 #endif /* OPEN_BCAST_SOCKET */
+
+/*
+ * return the broadcast client flag value
+ */
+isc_boolean_t
+get_broadcastclient_flag(void)
+{
+	return (broadcast_client_enabled);
+}
 /*
  * Check to see if the address is a multicast address
  */
@@ -2833,6 +2845,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 {
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
+	isc_boolean_t ignore_this;
 	register struct recvbuf *rb;
 #ifdef HAVE_TIMESTAMP
 	struct msghdr msghdr;
@@ -2849,7 +2862,19 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 
 	rb = get_free_recv_buffer();
 
-	if (rb == NULL || itf->ignore_packets == ISC_TRUE)
+	/* For broadcast packet received on the IPv4 wildcard socket
+	 * we carve out an exception but only if the client has requested
+	 * to receive wildcard sockets
+	 */
+	ignore_this = itf->ignore_packets;
+	if (ignore_this == ISC_TRUE && itf->family == AF_INET &&
+	    itf->flags == (INT_BROADCAST | INT_WILDCARD) &&
+	    get_packet_mode(rb) == MODE_BROADCAST &&
+	    get_broadcastclient_flag() == ISC_TRUE
+	    )
+	    ignore_this = ISC_FALSE;
+
+	if (rb == NULL || ignore_this == ISC_TRUE)
 	{
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;

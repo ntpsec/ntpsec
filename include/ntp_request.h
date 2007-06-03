@@ -6,6 +6,7 @@
 #define _NTP_REQUEST_H
 
 #include "ntp_types.h"
+#include "recvbuff.h"
 
 /*
  * A mode 7 packet is used exchanging data between an NTP server
@@ -923,4 +924,10 @@ struct info_dns_assoc {
 	associd_t associd;	/* association ID */
 	char hostname[NTP_MAXHOSTNAME];	/* hostname */
 };
+
+/*
+ * function declarations
+ */
+int get_packet_mode(struct recvbuf *rbufp); /* Return packet mode */
+
 #endif /* NTP_REQUEST_H */
