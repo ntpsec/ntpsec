@@ -401,6 +401,15 @@ flush_pkt(void)
 
 
 /*
+ * Given a buffer, return the packet mode
+ */
+int
+get_packet_mode(struct recvbuf *rbufp)
+{
+	struct req_pkt *inpkt = (struct req_pkt *)&rbufp->recv_pkt;
+	return (INFO_MODE(inpkt->rm_vn_mode));
+}
+/*
  * process_private - process private mode (7) packets
  */
 void

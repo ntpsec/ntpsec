@@ -30,6 +30,7 @@
 # include "win32_io.h"
 #endif
 
+#include <isc/boolean.h>
 /*
  * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
  * to (and can).  This is here initially for QNX, but may help for
@@ -46,5 +47,7 @@
 #  define FASYNC O_ASYNC
 # endif
 #endif
+
+isc_boolean_t get_broadcastclient_flag(void); /* Get the status of client broadcast */
 
 #endif
