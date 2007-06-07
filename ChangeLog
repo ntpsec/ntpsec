@@ -1,3 +1,5 @@
+* driftfile maintenance changes from Dave Mills.  Use clock_phi instead of
+  stats_write_tolerance.
 * [Bug 828] refid string not being parsed correctly.
 * [Bug 846] Correct includefile parsing.
 * [Bug 827] New parsing code does not handle "fudge" correctly.

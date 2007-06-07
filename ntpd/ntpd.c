@@ -840,7 +840,7 @@ ntpdmain(
 
 	getconfig(argc, argv);
 
-	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
+	loop_config(LOOP_DRIFTCOMP, old_drift);
 #ifdef OPENSSL
 	crypto_setup();
 #endif /* OPENSSL */
