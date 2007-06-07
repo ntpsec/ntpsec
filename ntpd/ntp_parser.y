@@ -108,6 +108,7 @@
 %token		T_Dispersion
 %token <Double>	T_Double
 %token		T_Driftfile
+%token <Integer> T_DriftMinutes
 %token		T_Enable
 %token		T_End
 %token		T_False
@@ -745,8 +746,9 @@ miscellaneous_command
                     { enqueue(my_config.vars, create_attr_ival(T_Calldelay, $2));  }
 	|	T_Tick number
                     { enqueue(my_config.vars, create_attr_dval(T_Tick, $2));  }
-	|	T_Driftfile T_String
-                    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, $2));  }
+	|	T_Driftfile T_String drift_parm
+         { enqueue(my_config.vars, create_attr_sval(T_Driftfile, $2)); }
+
 	|	T_Pidfile T_String 
                     { enqueue(my_config.vars, create_attr_sval(T_Pidfile, $2));  }
 	|	T_Logfile T_String 
@@ -765,6 +767,11 @@ miscellaneous_command
 	|	T_Ttl integer_list 
                     { append_queue(my_config.ttl, $2); }
 	;	
+drift_parm
+	:	{ /* Null command */ }
+	|   T_Integer 
+		{ enqueue(my_config.vars, create_attr_ival(T_DriftMinutes, $1)); }
+	;
 
 variable_assign
         :	T_String '=' T_String T_Default  

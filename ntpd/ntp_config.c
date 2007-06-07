@@ -1561,6 +1561,9 @@ config_vars(void)
 			stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			free(curr_var->value.s);
 			break;
+			case T_DriftMinutes:
+			stats_write_period = 60 * curr_var->value.i;
+			break;
 		    case T_Pidfile:
 			stats_config(STATS_PID_FILE, curr_var->value.s);
 			free(curr_var->value.s);
