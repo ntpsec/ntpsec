@@ -69,70 +69,60 @@
  * decompanded input signal amplitude must be greater than 100 units and
  * the codec sample frequency error less than 250 PPM (.025 percent).
  *
- * The program performs a number of error checks to protect against
- * overdriven or underdriven input signal levels, incorrect signal
- * format or improper hardware configuration. Specifically, if any of
- * the following errors occur for a time measurement, the data are
- * rejected.
- *
- * o The peak carrier amplitude is less than DRPOUT (100). This usually
- *   means dead IRIG signal source, broken cable or wrong input port.
- *
- * o The frequency error is greater than MAXFREQ +-250 PPM (.025%). This
- *   usually means broken codec hardware or wrong codec configuration.
- *
- * o The modulation index is less than MODMIN (0.5). This usually means
- *   overdriven IRIG signal or wrong IRIG format.
- *
- * o A frame synchronization error has occurred. This usually means
- *   wrong IRIG signal format or the IRIG signal source has lost
- *   synchronization (signature control).
- *
- * o A data decoding error has occurred. This usually means wrong IRIG
- *   signal format.
- *
- * o The current second of the day is not exactly one greater than the
- *   previous one. This usually means a very noisy IRIG signal or
- *   insufficient CPU resources.
- *
- * o An audio codec error (overrun) occurred. This usually means
- *   insufficient CPU resources, as sometimes happens with Sun SPARC
- *   IPCs when doing something useful.
- *
- * Note that additional checks are done elsewhere in the reference clock
- * interface routines.
- *
- * Debugging aids
+ * Monitor Data
  *
  * The timecode format used for debugging and data recording includes
  * data helpful in diagnosing problems with the IRIG signal and codec
- * connections. With debugging enabled (-d on the ntpd command line),
- * the driver produces one line for each timecode in the following
- * format:
+ * connections. The driver produces one line for each timecode in the
+ * following format:
  *
- * 00 1 98 23 19:26:52 721 143 0.694 20 0.1 66.5 3094572411.00027
+ * 00 00 98 23 19:26:52 2782 143 0.694 10 0.3 66.5 3094572411.00027
  *
- * The most recent line is also written to the clockstats file at 64-s
- * intervals.
+ * If clockstats is enabled, the most recent line is written to the
+ * clockstats file every 64 s. If verbose recording is enabled (fudge
+ * flag 4) each line is written as generated.
  *
- * The first field contains the error flags in hex, where the hex bits
- * are interpreted as below. This is followed by the IRIG status
- * indicator, year of century, day of year and time of day. The status
- * indicator and year are not produced by some IRIG devices. Following
- * these fields are the signal amplitude (0-8100), codec gain (0-255),
- * modulation index (0-1), time constant (2-20), carrier phase error
- * (us) and carrier frequency error (PPM). The last field is the on-time
- * timestamp in NTP format.
+ * The first field containes the error flags in hex, where the hex bits
+ * are interpreted as below. This is followed by the year of century,
+ * day of year and time of day. Note that the time of day is for the
+ * previous minute, not the current time. The status indicator and year
+ * are not produced by some IRIG devices and appear as zeros. Following
+ * these fields are the carrier amplitude (0-3000), codec gain (0-255),
+ * modulation index (0-1), time constant (4-10), carrier phase error
+ * +-.5) and carrier frequency error (PPM). The last field is the on-
+ * time timestamp in NTP format.
  *
- * The fraction part of the on-time timestamp is a good indicator of how
- * well the driver is doing. Once upon a time, an UltrSPARC 30 and
- * Solaris 2.7 kept the clock within a few tens of microseconds relative
- * to the IRIG-B signal. Accuracy with IRIG-E was about ten times worse.
- * Unfortunately, Sun broke the 2.7 audio driver in 2.8, which has a 10-
- * ms sawtooth modulation. The driver attempts to remove the modulation
- * by some clever estimation techniques which mostly work. With the
- * "mixerctl -o" command before starting the daemon, the jitter is down
- * to about 100 microseconds. Your experience may vary.
+ * The error flags are defined as follows in hex:
+ *
+ * x01	Low signal. The carrier amplitude is less than 100 units. This
+ *	is usually the result of no signal or wrong input port.
+ * x02	Frequency error. The codec frequency error is greater than 250
+ *	PPM. This may be due to wrong signal format or (rarely)
+ *	defective codec.
+ * x04	Modulation error. The IRIG modulation index is less than 0.5.
+ *	This is usually the result of an overdriven codec, wrong signal
+ *	format or wrong input port.
+ * x08	Frame synch error. The decoder frame does not match the IRIG
+ *	frame. This is usually the result of an overdriven codec, wrong
+ *	signal format or noisy IRIG signal. It may also be the result of
+ *	an IRIG signature check which indicates a failure of the IRIG
+ *	signal synchronization source.
+ * x10	Data bit error. The data bit length is out of tolerance. This is
+ *	usually the result of an overdriven codec, wrong signal format
+ *	or noisy IRIG signal.
+ * x20	Seconds numbering discrepancy. The decoder second does not match
+ *	the IRIG second. This is usually the result of an overdriven
+ *	codec, wrong signal format or noisy IRIG signal.
+ * x40	Codec error (overrun). The machine is not fast enough to keep up
+ *	with the codec.
+ * x80	Device status error (Spectracom).
+ *
+ *
+ * Once upon a time, an UltrSPARC 30 and Solaris 2.7 kept the clock
+ * within a few tens of microseconds relative to the IRIG-B signal.
+ * Accuracy with IRIG-E was about ten times worse. Unfortunately, Sun
+ * broke the 2.7 audio driver in 2.8, which has a 10-ms sawtooth
+ * modulation.
  *
  * Unlike other drivers, which can have multiple instantiations, this
  * one supports only one. It does not seem likely that more than one
@@ -171,8 +161,8 @@
 #define FIELD		100	/* bits per second */
 #define MINTC		2	/* min PLL time constant */
 #define MAXTC		10	/* max PLL time constant max */
-#define	MAXAMP		5000.	/* maximum signal amplitude */
-#define	MINAMP		4000.	/* minimum signal amplitude */
+#define	MAXAMP		3000.	/* maximum signal amplitude */
+#define	MINAMP		2000.	/* minimum signal amplitude */
 #define DRPOUT		100.	/* dropout signal amplitude */
 #define MODMIN		0.5	/* minimum modulation index */
 #define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
@@ -934,8 +924,8 @@ irig_decode(
 			 * decoded second, which happens with a garbled
 			 * IRIG signal. We are very particular.
 			 */
-			if (pp->day == 0 || pp->year != 0 && syncdig ==
-			    0)
+			if (pp->day == 0 || (pp->year != 0 && syncdig ==
+			    0))
 				up->errflg |= IRIG_ERR_SIGERR;
 			if (pp->second != up->second)
 				up->errflg |= IRIG_ERR_CHECK;
