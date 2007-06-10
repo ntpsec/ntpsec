@@ -6,13 +6,13 @@ AC_CACHE_CHECK([for directory path separator], ac_cv_dir_sep,
   case "$ac_cv_dir_sep" in
    '')
     case "$target_os" in
-      *djgpp | *mingw32* | *emx*) ac_cv_dir_sep='"\\"' ;;
-      *) ac_cv_dir_sep='"/"' ;;
+      *djgpp | *mingw32* | *emx*) ac_cv_dir_sep="'\\'" ;;
+      *) ac_cv_dir_sep="'/'" ;;
     esac
     ;;
   esac
 ])
 AC_DEFINE_UNQUOTED(DIR_SEP,$ac_cv_dir_sep,dnl
-   [Directory separator, usually / or \\])dnl
+   [Directory separator character, usually / or \\])dnl
 ])
 dnl ======================================================================

@@ -308,6 +308,12 @@ timer(void)
 	}
 
 	/*
+	 * Leapseconds.
+	 */
+	if (sys_tai > 0 && current_time == sys_leapin)
+		loop_config(LOOP_LEAP, sys_tai);
+
+	/*
 	 * Garbage collect expired keys.
 	 */
 	if (keys_timer <= current_time) {

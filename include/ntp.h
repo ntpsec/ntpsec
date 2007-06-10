@@ -764,6 +764,7 @@ struct pkt {
 #define LOOP_FREQ		10	/* set initial frequency */
 #define LOOP_KERN_CLEAR		11	/* reset kernel pll parameters */
 #define LOOP_CODEC		12	/* set audio codec frequency */
+#define	LOOP_LEAP		13	/* insert leap after second 23:59 */
 
 /*
  * Configuration items for the stats printer
