@@ -57,6 +57,7 @@
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
+* [Bug 854] Broadcast address was not correctly set for interface addresses
 * [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
 	    to reflect the actual configuration.
 * [Bug 795] Moved declaration of variable to top of function.

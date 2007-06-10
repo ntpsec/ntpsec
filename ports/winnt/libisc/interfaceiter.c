@@ -99,6 +99,26 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 	}
 }
 
+/*
+ * The WSAIoctl code is not fetching the broadcast address for each interface address
+ * so we need to reconstruct it from the address and its network mask
+ */
+static void
+get_broadcastaddr(isc_netaddr_t *bcastaddr, isc_netaddr_t *addr, isc_netaddr_t *netmask) {
+
+	unsigned char *p, *a, *n;
+	int i;
+
+	p = (unsigned char *) &bcastaddr->type.in;
+	a = (unsigned char *) &addr->type.in;
+	n = (unsigned char *) &netmask->type.in;
+
+	for (i=0; i < 4; i++) {
+		p[i] = (unsigned char) (a[i] | ~n[i]);
+	}
+
+}
+
 isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	char strbuf[ISC_STRERRORSIZE]; 
@@ -271,25 +291,6 @@ internal_current(isc_interfaceiter_t *iter, int family) {
 	}
 
 	/*
-	 * If the interface is point-to-point, get the destination address.
-	 */
-	if ((iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0) {
-		get_addr(family, &iter->current.dstaddress,
-		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
-	}
-	/*
-	 * If the interface is broadcast, get the broadcast address.
-	 */
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		get_addr(family, &iter->current.broadcast,
-		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
-	}
-
-	if (ifNamed == FALSE)
-		sprintf(iter->current.name,
-			"IP Interface %d", iter->numIF);
-
-	/*
 	 * Get the network mask.
 	 */
 	switch (family) {
@@ -300,6 +301,27 @@ internal_current(isc_interfaceiter_t *iter, int family) {
 	case AF_INET6:
 		break;
 	}
+
+	/*
+	 * If the interface is point-to-point, get the destination address.
+	 */
+	if ((iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0) {
+		get_addr(family, &iter->current.dstaddress,
+		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
+	}
+	/*
+	 * If the interface is broadcast, get the broadcast address.
+	 */
+	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
+		get_addr(family, &iter->current.broadcast, 
+		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
+		get_broadcastaddr(&iter->current.broadcast, &iter->current.address,
+				   &iter->current.netmask);
+	}
+
+	if (ifNamed == FALSE)
+		sprintf(iter->current.name,
+			"IP Interface %d", iter->numIF);
 
 	return (ISC_R_SUCCESS);
 }
