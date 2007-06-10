@@ -1,7 +1,6 @@
 /*
  * ntp_util.c - stuff I didn't have any other place for
  */
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -54,8 +53,7 @@ static	char *key_file_name;
 static	char *stats_drift_file;
 static	char *stats_temp_file;
 int stats_write_period = 3600;	/* # of seconds between writes. */
-double stats_write_tolerance = 0;
-static double prev_drift_comp = 99999.;
+static double prev_drift_comp;
 
 /*
  * Statistics file stuff
@@ -106,17 +104,11 @@ init_util(void)
 	stats_drift_file = 0;
 	stats_temp_file = 0;
 	key_file_name = 0;
-
 	filegen_register(&statsdir[0], "peerstats", &peerstats);
-
 	filegen_register(&statsdir[0], "loopstats", &loopstats);
-
 	filegen_register(&statsdir[0], "clockstats", &clockstats);
-
 	filegen_register(&statsdir[0], "rawstats", &rawstats);
-
 	filegen_register(&statsdir[0], "sysstats", &sysstats);
-
 #ifdef OPENSSL
 	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
@@ -215,10 +207,9 @@ write_stats(void)
 
 	
 	record_sys_stats();
-	if ((u_long)(fabs(prev_drift_comp - drift_comp) * 1e9) <=
-	    (u_long)(fabs(stats_write_tolerance * drift_comp) * 1e9)) {
-	     return;
-	}
+	if (fabs(prev_drift_comp - drift_comp) > clock_phi)
+		return;
+
 	prev_drift_comp = drift_comp;
 	if (stats_drift_file != 0) {
 		if (state == 4) {
@@ -352,12 +343,14 @@ stats_config(
 			old_drift = 1e9;
 			fclose(fp);
 			break;
+
 		}
 		fclose(fp);
-		prev_drift_comp = old_drift / 1e6;
+		old_drift /= 1e6;
+		prev_drift_comp = old_drift;
 		msyslog(LOG_INFO,
 		    "frequency initialized %.3f PPM from %s",
-			old_drift, stats_drift_file);
+			old_drift * 1e6, stats_drift_file);
 		break;
 	
 	    case STATS_STATSDIR:
