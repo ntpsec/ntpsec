@@ -1,3 +1,4 @@
+* [Bug 858] Recent leapfile changes broke without OPENSSL.
 * Use a char for DIR_SEP, not a string.
 * [Bug 850] driftfile parsing changes.
 * driftfile maintenance changes from Dave Mills.  Use clock_phi instead of

@@ -13,9 +13,11 @@
 
 
 /* ntp_config.c */
-extern	void	getconfig	(int, char **);
 
-/* ntp_config.c */
+#define	TAI_1972	10	/* initial TAI offset (s) */
+extern	char	*keysdir;	/* crypto keys and leaptable directory */
+
+extern	void	getconfig	(int, char **);
 extern	void	ctl_clr_stats	(void);
 extern	int	ctlclrtrap	(struct sockaddr_storage *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);
