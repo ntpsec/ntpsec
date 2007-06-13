@@ -182,6 +182,7 @@ int old_config_style = 1;    /* A boolean flag, which when set,
                               */
 
 extern int sys_maxclock;
+extern char *stats_drift_file;	/* name of the driftfile */
 
 /* FUNCTION PROTOTYPES */
 
@@ -354,6 +355,8 @@ create_attr_sval(
 	my_val = (struct attr_val *)
 	    get_node(sizeof(struct attr_val));
 	my_val->attr = attr;
+	if (s == NULL) 
+		s = "\0";	/* free() and strdup() glow on NULL */
 	my_val->value.s = strdup(s);
 	my_val->type = T_String;
 	return my_val;
@@ -1558,8 +1561,13 @@ config_vars(void)
 			proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);
 			break;
 		    case T_Driftfile:
-			stats_config(STATS_FREQ_FILE, curr_var->value.s);
-			free(curr_var->value.s);
+			if (!strcmp(curr_var->value.s, "\0")) { 
+				stats_drift_file = 0;
+				msyslog(LOG_INFO, "config: driftfile disabled\n");
+			} else { 
+				stats_config(STATS_FREQ_FILE, curr_var->value.s);
+				free(curr_var->value.s);
+			}
 			break;
 			case T_DriftMinutes:
 			stats_write_period = 60 * curr_var->value.i;

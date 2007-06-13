@@ -52,7 +52,7 @@ static	char *key_file_name;
 /*
  * The name of the drift_comp file and the temporary.
  */
-static	char *stats_drift_file;
+char *stats_drift_file;
 static	char *stats_temp_file;
 int stats_write_period = 3600;	/* # of seconds between writes. */
 static double prev_drift_comp;

@@ -46,6 +46,7 @@ struct state {
 #define MAX_LEXEME 1024+1    /* The maximum size of a lexeme */
 char yytext[MAX_LEXEME];     /* Buffer for storing the input text/lexeme */
 struct state *key_scanner;   /* A FSA for recognizing keywords */
+extern int input_from_file;
 
 
 /* CONSTANTS 
@@ -265,12 +266,13 @@ int FCLOSE(struct FILE_INFO *stream)
 
 int get_next_char(void)
 {
-    int retval;
     if (input_from_file)
         return FGETC(ip_file);
     else {
-        retval = remote_config.buffer[remote_config.pos++];
-        return (retval == '\0') ? EOF : retval;
+		if (remote_config.buffer[remote_config.pos] == '\0') 
+			return EOF;
+		else 
+			return(remote_config.buffer[remote_config.pos++]);
     }
 }
 
@@ -518,9 +520,11 @@ int yylex()
             ; /* Null Statement */
         
         if (ch == EOF) {
-            if (curr_include_level == 0) {
-            return 0;
-			} else { 
+			if (input_from_file == 0)
+				return 0;
+            if (!(curr_include_level > 0)) 
+            	return 0;
+			else { 
                 ip_file = fp[--curr_include_level]; 
                 return T_EOC;
 			}
