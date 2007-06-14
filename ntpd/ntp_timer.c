@@ -310,8 +310,15 @@ timer(void)
 	/*
 	 * Leapseconds.
 	 */
-	if (sys_tai > 0 && current_time == sys_leapin)
-		loop_config(LOOP_LEAP, sys_tai);
+	if (leap_sec > 0) {
+		if (leap_sec < 86400 * 28)
+			sys_leap = LEAP_ADDSECOND;
+		if (leap_sec < 86400)
+			loop_config(LOOP_LEAP, sys_tai);
+		leap_sec--;
+	} else {
+		sys_leap = LEAP_NOWARNING;
+	}
 
 	/*
 	 * Garbage collect expired keys.

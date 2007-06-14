@@ -755,10 +755,60 @@ leap_file(
 		msyslog(LOG_INFO, "Leapseconds format error in %s", cp);
 	} else {
 		sys_tai = offset;
-		sys_leapin = leapsec;
+		leap_ins = leapsec;
 		msyslog(LOG_INFO, "TAI offset %d s at %lu from %s",
-		    sys_tai, sys_leapin, cp);
+		    sys_tai, leap_ins, cp);
 	}
+}
+
+/*
+ * leap_month - returns the number of seconds until the end of the month
+ */
+#define	L_DAY	86400			/* seconds per day */
+#define	L_YEAR	L_DAY * 365		/* days per year */
+#define	L_LYEAR	L_YEAR + 1		/* days per leap year */
+#define	L_4YEAR	L_LYEAR + 3 * L_YEAR	/* days per leap cycle */
+#define	L_CENT	(u_long)L_4YEAR * 25	/* days per century */
+
+u_long
+leap_month(
+	u_long	sec		/* current NTP second */
+	)
+{
+	u_long	ltemp;
+	u_long	*ptr;
+	u_long	year[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30,
+		    31}; 
+	u_long	lyear[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30,
+		    31}; 
+
+	/*
+	 * Find current leap cycle
+	 */
+	ltemp = sec;
+	while (ltemp > L_CENT)
+		ltemp -= L_CENT;
+	while (ltemp > L_4YEAR)
+		ltemp -= L_4YEAR;
+
+	/*
+	 * If in leap year, use leap table
+	 */
+	if (ltemp < L_LYEAR) {
+		ptr = lyear;
+	} else {
+		ptr = year;
+		ltemp -= L_LYEAR;
+		while (ltemp > L_YEAR)
+			ltemp -= L_YEAR;
+	}
+	while (ltemp > *ptr)
+		ltemp -= *ptr++;
+
+	/* The result is the number of seconds until the end of the
+	 * month when the leap is to occur.
+	 */
+	return (ltemp);
 }
 
 
