@@ -1,3 +1,4 @@
+* [Bug 853] get_node() must return a pointer to maximally-aligned memory.
 * Leap file fixes from Dave Mills.
 * [Bug 858] Recent leapfile changes broke without OPENSSL.
 * Use a char for DIR_SEP, not a string.

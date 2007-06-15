@@ -19,8 +19,12 @@
  */
 
 typedef struct node {
-    struct node *next;
+	union {
+		struct node *next;
+		double d;
+	} nodeu;
 } node;
+#define node_next nodeu.next
     
 typedef struct Queue {
     int (*get_order)(void *, void *);
