@@ -265,7 +265,7 @@ static void	delete_interface_from_list	(struct interface *);
 static struct interface *find_addr_in_list	(struct sockaddr_storage *);
 static struct interface *find_flagged_addr_in_list (struct sockaddr_storage *, int);
 static void	create_wildcards	(u_short);
-static isc_boolean_t	address_okay	(struct interface *);
+static isc_boolean_t	address_okay	(isc_interface_t *);
 static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
 static struct interface *getinterface	(struct sockaddr_storage *, int);
 static struct interface *findlocalinterface	(struct sockaddr_storage *, int);
@@ -853,7 +853,7 @@ create_wildcards(u_short port) {
 		((struct sockaddr_in*)&interface->bcast)->sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* MCAST */
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 1, interface);
+				 0, 1, interface);
 
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv4 = interface;
@@ -867,6 +867,7 @@ create_wildcards(u_short port) {
 				stoa((&interface->sin)));
 			exit(1);
 		}
+	DPRINT_INTERFACE(2, (interface, "created ", "\n"));
 	}
 
 #ifdef INCLUDE_IPV6_SUPPORT
@@ -890,7 +891,7 @@ create_wildcards(u_short port) {
 		interface->ignore_packets = ISC_TRUE;
 
 		interface->fd = open_socket(&interface->sin,
-				 interface->flags, 1, interface);
+				 0, 1, interface);
 
 		if (interface->fd != INVALID_SOCKET) {
 			wildipv6 = interface;
@@ -903,21 +904,22 @@ create_wildcards(u_short port) {
 				stoa((&interface->sin)));
 			exit(1);
 		}
+	DPRINT_INTERFACE(2, (interface, "created ", "\n"));
 	}
 #endif
 }
 
 
 static isc_boolean_t
-address_okay(struct interface *iface) {
+address_okay(isc_interface_t *isc_if) {
 
 	DPRINTF(4, ("address_okay: listen Virtual: %d, IF name: %s\n", 
-		    listen_to_virtual_ips, iface->name));
+		    listen_to_virtual_ips, isc_if->name));
 
 	/*
 	 * Always allow the loopback
 	 */
-	if((iface->flags & INT_LOOPBACK) != 0) {
+	if((isc_if->flags & INTERFACE_F_LOOPBACK) != 0) {
 		DPRINTF(4, ("address_okay: loopback - OK\n"));
 		return (ISC_TRUE);
 	}
@@ -926,7 +928,7 @@ address_okay(struct interface *iface) {
 	 * Check if the interface is specified
 	 */
 	if (specific_interface != NULL) {
-		if (strcasecmp(iface->name, specific_interface) == 0) {
+		if (strcasecmp(isc_if->name, specific_interface) == 0) {
 			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
 			return (ISC_TRUE);
 		} else {
@@ -936,7 +938,7 @@ address_okay(struct interface *iface) {
 	}
 	else {
 		if (listen_to_virtual_ips == 0  && 
-		    (strchr(iface->name, (int)':') != NULL)) {
+		    (strchr(isc_if->name, (int)':') != NULL)) {
 			DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
 			return (ISC_FALSE);
 		}
@@ -947,8 +949,7 @@ address_okay(struct interface *iface) {
 }
 
 static void
-convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port)
-{
+convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 	itf->scopeid = 0;
 	itf->family = (short) isc_if->af;
 	strcpy(itf->name, isc_if->name);
@@ -1028,7 +1029,7 @@ refresh_interface(struct interface * interface)
 	{
 		close_and_delete_fd_from_list(interface->fd);
 		interface->fd = open_socket(&interface->sin,
-					    interface->flags, 0, interface);
+					    0, 0, interface);
 		 /*
 		  * reset TTL indication so TTL is is set again 
 		  * next time around
@@ -1238,7 +1239,7 @@ update_interfaces(
 		 * and potentially causing problems with more than one
 		 * process fiddling with the clock
 		 */
-		if (address_okay(&interface) == ISC_TRUE) {
+		if (address_okay(&isc_if) == ISC_TRUE) {
 			interface.ignore_packets = ISC_FALSE;
 		}
 		else {
@@ -1431,7 +1432,7 @@ create_interface(
 	 * create socket
 	 */
 	interface->fd = open_socket(&interface->sin,
-				 interface->flags, 0, interface);
+				 0, 0, interface);
 
 	if (interface->fd != INVALID_SOCKET)
 		list_if_listening(interface, port);
@@ -1914,13 +1915,14 @@ io_setbclient(void)
 		 */
 		if (interf->bfd == INVALID_SOCKET) {
 			fd = interf->fd;
+			jstatus = socket_broadcast_enable(interf, fd, &interf->sin);
 		}
 		else {
 			fd = interf->bfd;
+			jstatus = ISC_TRUE;
 		}
 
 		/* Enable Broadcast on socket */
-		jstatus = socket_broadcast_enable(interf, fd, &interf->sin);
 		if (jstatus == ISC_TRUE)
 		{
 			nif++;
@@ -2335,6 +2337,8 @@ open_socket(
 				stoa(addr));
 		}
 #endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
+	if ((flags & INT_BROADCAST))
+		socket_broadcast_enable(interf, fd, addr);
 	}
 
 	/*
@@ -2401,7 +2405,7 @@ open_socket(
 					  "bind() fd %d, family %d, port %d, addr %s, in_classd=%d flags=0x%x fails: %m",
 					  fd, addr->ss_family, (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
 					  stoa(addr),
-					  IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), flags);
+					  IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), interf->flags);
 #ifdef INCLUDE_IPV6_SUPPORT
 			else if (addr->ss_family == AF_INET6)
 		                netsyslog(LOG_ERR,
@@ -2413,7 +2417,7 @@ open_socket(
 					  -1
 # endif
 					  , stoa(addr),
-					  IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), flags);
+					  IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), interf->flags);
 #endif
 		}
 
@@ -2444,7 +2448,7 @@ open_socket(
 		   addr->ss_family,
 		   (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
 		   stoa(addr),
-		    flags));
+		    interf->flags));
 
 	init_nonblocking_io(fd);
 	
@@ -3204,6 +3208,7 @@ findlocalinterface(
 	struct sockaddr_storage saddr;
 	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
 	struct interface *iface;
+	int on = 1;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)

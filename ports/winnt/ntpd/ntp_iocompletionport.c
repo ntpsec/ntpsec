@@ -511,13 +511,22 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		 * we carve out an exception but only if the client has requested
 		 * to receive wildcard sockets
 		 */
+#ifdef DEBUG
+		if(debug > 3 && get_packet_mode(buff) == MODE_BROADCAST)
+			printf("****Accepting Broadcast packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
+#endif
 		ignore_this = inter->ignore_packets;
 		if (ignore_this == ISC_TRUE && inter->family == AF_INET &&
 		    inter->flags == (INT_BROADCAST | INT_WILDCARD) &&
 		    get_packet_mode(buff) == MODE_BROADCAST &&
 		    get_broadcastclient_flag() == ISC_TRUE
-		    )
+		    ) {
 			ignore_this = ISC_FALSE;
+#ifdef DEBUG
+			if (debug > 3)
+  				printf("****Accepting ignored packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
+#endif
+		}
 
 		/*
 		 * If we keep it add some info to the structure
@@ -528,8 +537,8 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 			buff->receiver = receive; 
 			buff->dstadr = inter;
 #ifdef DEBUG
-			if (debug > 3)
-  				printf("Received %d bytes in buffer %x from %s\n", Bytes, buff, stoa(&buff->recv_srcadr));
+			if (debug > 1)
+  				printf("Received %d bytes of fd %d in buffer %x from %s\n", Bytes, buff->fd, buff, stoa(&buff->recv_srcadr));
 #endif
 			add_full_recv_buffer(buff);
 			/*
