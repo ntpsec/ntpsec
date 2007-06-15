@@ -3208,7 +3208,6 @@ findlocalinterface(
 	struct sockaddr_storage saddr;
 	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
 	struct interface *iface;
-	int on = 1;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)
