@@ -13,9 +13,11 @@
 
 
 /* ntp_config.c */
-extern	void	getconfig	(int, char **);
 
-/* ntp_config.c */
+#define	TAI_1972	10	/* initial TAI offset (s) */
+extern	char	*keysdir;	/* crypto keys and leaptable directory */
+
+extern	void	getconfig	(int, char **);
 extern	void	ctl_clr_stats	(void);
 extern	int	ctlclrtrap	(struct sockaddr_storage *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);
@@ -119,7 +121,7 @@ extern	void	adj_host_clock	(void);
 extern	void	loop_config (int, double);
 extern	void	huffpuff	(void);
 extern	u_long	sys_clocktime;
-extern	u_long	sys_tai;
+extern	u_int	sys_tai;
 
 /* ntp_monitor.c */
 extern	void	init_mon	(void);
@@ -180,6 +182,8 @@ extern	void	peer_clear	(struct peer *, char *);
 extern	void 	process_packet	(struct peer *, struct pkt *);
 extern	void	clock_select	(void);
 extern	void	kod_proto	(void);
+extern	u_long	leap_ins;
+extern	u_long	leap_sec;
 
 /*
  * there seems to be a bug in the IRIX 4 compiler which prevents
@@ -235,6 +239,7 @@ extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (struct sockaddr_storage *, const char *);
 extern	void	record_raw_stats (struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *);
 extern	void	record_sys_stats (void);
+extern	u_long	leap_month(u_long);
 extern	void	record_crypto_stats (struct sockaddr_storage *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);

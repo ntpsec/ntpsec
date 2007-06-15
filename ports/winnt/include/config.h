@@ -231,7 +231,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define USE_PROTOTYPES		/* for ntp_types.h */
 
 /* Directory separator, usually / or \ */
-#define DIR_SEP "\\"
+#define DIR_SEP '\\'
 
 #define ULONG_CONST(a) a ## UL
 

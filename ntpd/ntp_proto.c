@@ -67,6 +67,8 @@ double	sys_jitter;		/* system jitter (s) */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 int	leap_next;		/* leap consensus */
+u_long	leap_ins;		/* seconds ar next leap */
+u_long	leap_sec;		/* leap countdown */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -1261,6 +1263,7 @@ clock_update(void)
 	u_char	oleap;
 	u_char	ostratum;
 	double	dtemp;
+	l_fp	now;
 
 	/*
 	 * There must be a system peer at this point. If we just changed
@@ -1308,16 +1311,36 @@ clock_update(void)
 
 	/*
 	 * Clock was slewed. Update the system stratum, leap bits, root
-	 * delay, root dispersion, reference ID and reference time. If
-	 * the leap changes, we gotta reroll the keys. Except for
-	 * reference clocks, the minimum dispersion increment is not
-	 * less than sys_mindisp.
+	 * delay, root dispersion, reference ID and reference time.
+	 * Except for reference clocks, the minimum dispersion increment
+	 * is not less than sys_mindisp. If a leap is anticipated, read
+	 * the system clock because the time now might not be the time
+	 * at the last offset measurement.
 	 */
 	case 1:
-		sys_leap = leap_next;
+
 		sys_stratum = min(sys_peer->stratum + 1,
 		    STRATUM_UNSPEC);
 		sys_reftime = sys_peer->rec;
+		get_systime(&now);
+
+		/*
+		 * If no leap is scheduled and the number of upstream
+		 * leap bits is at least the sanity threshold, schedule
+		 * a leap for the end of the current month. If from the
+		 * leapseconds file schedule a leap for the last entry
+		 * in the file, but only if it is in the future. 
+		 */
+		if (leap_sec == 0) {
+			if (leap_next >= sys_minsane) {
+				leap_sec = leap_month(now.l_ui);
+			} else if (leap_ins != 0) {
+				if (now.l_ui < leap_ins) {
+					leap_sec = leap_ins - now.l_ui;
+					sys_tai--;
+				}
+			}
+		}
 
 		/*
 		 * In orphan mode the stratum defaults to the orphan
@@ -2166,18 +2189,18 @@ clock_select(void)
 	 * What remains is a list usually not greater than sys_minclock
 	 * peers. We want only a peer at the lowest stratum to become
 	 * the system peer, although all survivors are eligible for the
-	 * combining algorithm. Consider each peer in turn and OR the
-	 * leap bits on the assumption that, if some of them honk
-	 * nonzero bits, they must know what they are doing. Check for
-	 * prefer and pps peers at any stratum. Note that the head of
-	 * the list is at the lowest stratum and that unsynchronized
-	 * peers cannot survive this far.
+	 * combining algorithm. Consider each peer in turn and compute
+	 * the total number of leap bits. Check for prefer and pps peers
+	 * at any stratum. Note that the head of the list is at the
+	 * lowest stratum and that unsynchronized peers cannot survive
+	 * this far.
 	 */
 	leap_next = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		sys_survivors++;
-		leap_next |= peer->leap;
+		if (peer->leap == LEAP_ADDSECOND)
+			leap_next++;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;

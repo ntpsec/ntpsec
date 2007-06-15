@@ -42,7 +42,7 @@ void destroy_queue(queue *my_queue)
     /* Empty out the queue elements if they are not already empty */
     while (my_queue->front != NULL) {
         temp = my_queue->front;
-        my_queue->front = my_queue->front->next;
+        my_queue->front = my_queue->front->node_next;
         free(temp);
     }
 
@@ -61,7 +61,7 @@ void *get_node(size_t size)
     node *new_node;
     new_node = (node *) malloc(sizeof(node) + size);
     if (new_node != NULL) {
-        new_node->next = NULL; 
+        new_node->node_next = NULL; 
         return new_node + 1;
     }
     else
@@ -94,16 +94,16 @@ queue *enqueue(queue *my_queue, void *my_node)
 
     while (j != NULL && ((*my_queue->get_order)(new_node + 1, j + 1) > 0)) {
         i = j;
-        j = j->next;
+        j = j->node_next;
     }
     
     if (i == NULL) {       /* Insert at beginning of the queue */
-        new_node->next = my_queue->front;
+        new_node->node_next = my_queue->front;
         my_queue->front = new_node;
     }
     else {                /* Insert Elsewhere, including the end */
-        new_node->next = i->next;
-        i->next = new_node;
+        new_node->node_next = i->node_next;
+        i->node_next = new_node;
     }
 
     ++my_queue->no_of_elements;    
@@ -119,7 +119,7 @@ void *dequeue(queue *my_queue)
 {
     node *my_node = my_queue->front;
     if (my_node != NULL) {
-        my_queue->front = my_node->next;
+        my_queue->front = my_node->node_next;
         --my_queue->no_of_elements;    
         return (void *)(my_node + 1);
     }

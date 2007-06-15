@@ -36,6 +36,8 @@
 # include <descrip.h>
 #endif /* VMS */
 
+#define	MAX_LEAP	100	/* max TAI offset (s) */
+
 /*
  * This contains odds and ends.  Right now the only thing you'll find
  * in here is the hourly stats printer and some code to support
@@ -62,7 +64,7 @@ static double prev_drift_comp;
 # ifndef SYS_WINNT
 #  define NTP_VAR "/var/NTP/"		/* NOTE the trailing '/' */
 # else
-#  define NTP_VAR "c:\\var\\ntp\\"		/* NOTE the trailing '\\' */
+#  define NTP_VAR "c:\\var\\ntp\\"	/* NOTE the trailing '\\' */
 # endif /* SYS_WINNT */
 #endif
 
@@ -95,6 +97,8 @@ int stats_control;
  */
 double	old_drift;
 
+static void leap_file(char *);
+
 /*
  * init_util - initialize the utilities
  */
@@ -125,17 +129,19 @@ init_util(void)
 void
 write_stats(void)
 {
-	FILE *fp;
+	FILE	*fp;
+	double	ftemp;
+
 
 #ifdef DOSYNCTODR
 	struct timeval tv;
 #if !defined(VMS)
-	int prio_set;
+	int	prio_set;
 #endif
 #ifdef HAVE_GETCLOCK
         struct timespec ts;
 #endif
-	int o_prio;
+	int	o_prio;
 
 	/*
 	 * Sometimes having a Sun can be a drag.
@@ -160,7 +166,8 @@ write_stats(void)
 	 */
 
 #if !defined(VMS)
-	/* (prr) getpriority returns -1 on error, but -1 is also a valid
+	/*
+	 * (prr) getpriority returns -1 on error, but -1 is also a valid
 	 * return value (!), so instead we have to zero errno before the
 	 * call and check it for non-zero afterwards.
 	 */
@@ -190,9 +197,8 @@ write_stats(void)
 #else /*  not HAVE_GETCLOCK */
 	GETTIMEOFDAY(&tv,(struct timezone *)NULL);
 #endif /* not HAVE_GETCLOCK */
-	if (ntp_set_tod(&tv,(struct timezone *)NULL) != 0) {
+	if (ntp_set_tod(&tv,(struct timezone *)NULL) != 0)
 		msyslog(LOG_ERR, "can't sync battery time: %m");
-	}
 #if !defined(VMS)
 	if (prio_set)
 		setpriority(PRIO_PROCESS, 0, o_prio); /* downshift */
@@ -205,17 +211,18 @@ write_stats(void)
 		    last_offset, drift_comp * 1e6, sys_jitter,
 		    sys_poll);
 
-	
 	record_sys_stats();
-	if (fabs(prev_drift_comp - drift_comp) > clock_phi)
+	ftemp = fabs(prev_drift_comp - drift_comp); 
+	prev_drift_comp = drift_comp;
+	if (ftemp > clock_phi)
 		return;
 
-	prev_drift_comp = drift_comp;
 	if (stats_drift_file != 0) {
 		if (state == 4) {
-			if ((fp = fopen(stats_temp_file, "w")) == NULL) {
+			if ((fp = fopen(stats_temp_file, "w")) == NULL)
+			    {
 				msyslog(LOG_ERR, "can't open %s: %m",
-					stats_temp_file);
+				    stats_temp_file);
 				return;
 			}
 			fprintf(fp, "%.3f\n", drift_comp * 1e6);
@@ -229,9 +236,10 @@ write_stats(void)
 			(void) rename(stats_temp_file, stats_drift_file);
 #else
 			/* we have no rename NFS of ftp in use */
-			if ((fp = fopen(stats_drift_file, "w")) == NULL) {
+			if ((fp = fopen(stats_drift_file, "w")) == NULL)
+			    {
 				msyslog(LOG_ERR, "can't open %s: %m",
-					stats_drift_file);
+				    stats_drift_file);
 				return;
 			}
 #endif
@@ -241,9 +249,10 @@ write_stats(void)
 			{
 				$DESCRIPTOR(oldvers,";-1");
 				struct dsc$descriptor driftdsc = {
-					strlen(stats_drift_file),0,0,stats_drift_file };
-
-				while(lib$delete_file(&oldvers,&driftdsc) & 1);
+					strlen(stats_drift_file), 0, 0,
+					    stats_drift_file };
+				while(lib$delete_file(&oldvers,
+				    &driftdsc) & 1);
 			}
 #endif
 		} else {
@@ -278,20 +287,23 @@ stats_config(
 		    case STATS_FREQ_FILE:
 			strcpy(parameter,"STATS_FREQ_FILE");
 			break;
+
 		    case STATS_STATSDIR:
 			strcpy(parameter,"STATS_STATSDIR");
 			break;
+
 		    case STATS_PID_FILE:
 			strcpy(parameter,"STATS_PID_FILE");
 			break;
+
 		    default:
 			strcpy(parameter,"UNKNOWN");
 			break;
 		}
 		value = invalue;
-
 		msyslog(LOG_ERR,
-		    "ExpandEnvironmentStrings(%s) failed: %m\n", parameter);
+		    "ExpandEnvironmentStrings(%s) failed: %m\n",
+		    parameter);
 	} else {
 		value = newvalue;
 	}
@@ -351,32 +363,36 @@ stats_config(
 		msyslog(LOG_INFO,
 		    "frequency initialized %.3f PPM from %s",
 			old_drift * 1e6, stats_drift_file);
+
+		leap_file("/etc/leapseconds");
+
 		break;
 	
 	    case STATS_STATSDIR:
-		/* HMS: the following test is insufficient:
+
+		/*
+		 * HMS: the following test is insufficient:
 		 * - value may be missing the DIR_SEP
 		 * - we still need the filename after it
 		 */
 		if (strlen(value) >= sizeof(statsdir)) {
 			msyslog(LOG_ERR,
 			    "value for statsdir too long (>%d, sigh)",
-			    (int)sizeof(statsdir)-1);
+			    (int)sizeof(statsdir) - 1);
 		} else {
 			l_fp now;
 			int add_dir_sep;
 			int value_l = strlen(value);
 
-			/* We do not want a DIR_SEP if we have no prefix */
+			/* Add a DIR_SEP unless we already have one. */
 			if (value_l == 0)
 				add_dir_sep = 0;
 			else
-				add_dir_sep = strcmp(DIR_SEP,
-					value + value_l - strlen(DIR_SEP));
+				add_dir_sep = (DIR_SEP == value[value_l - 1]);
 
 			if (add_dir_sep)
 			    snprintf(statsdir, sizeof(statsdir),
-				"%s%s", value, DIR_SEP);
+				"%s%c", value, DIR_SEP);
 			else
 			    snprintf(statsdir, sizeof(statsdir),
 				"%s", value);
@@ -438,6 +454,7 @@ stats_config(
 	}
 }
 
+
 /*
  * record_peer_stats - write peer statistics to file
  *
@@ -473,12 +490,13 @@ record_peer_stats(
 	now.l_ui %= 86400;
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
-		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n",
-		    day, ulfptoa(&now, 3), stoa(addr), status, offset,
+		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
+		    ulfptoa(&now, 3), stoa(addr), status, offset,
 		    delay, dispersion, skew);
 		fflush(peerstats.fp);
 	}
 }
+
 
 /*
  * record_loop_stats - write loop filter statistics to file
@@ -517,6 +535,7 @@ record_loop_stats(
 	}
 }
 
+
 /*
  * record_clock_stats - write clock statistics to file
  *
@@ -543,15 +562,15 @@ record_clock_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
-		fprintf(clockstats.fp, "%lu %s %s %s\n",
-		    day, ulfptoa(&now, 3), stoa(addr), text);
+		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
+		    ulfptoa(&now, 3), stoa(addr), text);
 		fflush(clockstats.fp);
 	}
 }
 
+
 /*
  * record_raw_stats - write raw timestamps to file
- *
  *
  * file format
  * time (s past midnight)
@@ -580,10 +599,10 @@ record_raw_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-                fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n",
-			day, ulfptoa(&now, 3), stoa(srcadr), dstadr ? stoa(dstadr) : "-",
-			ulfptoa(t1, 9), ulfptoa(t2, 9), ulfptoa(t3, 9),
-			ulfptoa(t4, 9));
+                fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
+		    ulfptoa(&now, 3), stoa(srcadr), dstadr ? 
+		    stoa(dstadr) : "-",	ulfptoa(t1, 9), ulfptoa(t2, 9),
+		    ulfptoa(t3, 9), ulfptoa(t4, 9));
 		fflush(rawstats.fp);
 	}
 }
@@ -670,6 +689,129 @@ record_crypto_stats(
 }
 #endif /* OPENSSL */
 
+
+/*
+ * leap_file - load leapseconds table from file
+ *
+ * Read the ERTS leapsecond file in NIST text format and extract the
+ * NTP seconds of the latest leap and TAI offset after the leap..
+ */
+static void
+leap_file(
+	char	*cp		/* file name */
+	)
+{
+	FILE	*str;		/* file handle */
+	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
+	u_long	leapsec;	/* NTP time at leap */
+	int	offset;		/* TAI offset at leap (s) */
+	char	filename[MAXFILENAME]; /* name of leapseconds file */
+	char	*dp;
+	int	i;
+
+	/*
+	 * Open the file and discard comment lines. If the first
+	 * character of the file name is not '/', prepend the keys
+	 * directory string. If the file is not found, ignore; if found
+	 * with errors, report to the log and ignore.
+	 */
+	if (*cp == '/')
+		strcpy(filename, cp);
+	else
+		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
+	if ((str = fopen(filename, "r")) == NULL)
+		return;
+
+	/*
+	 * Read and parse the leapseconds file. Empty lines and comments
+	 * are ignored. Other lines must begin with two integers
+	 * followed by junk or comments. The first integer is the NTP
+	 * seconds at the leap, the second is the TAI offset after the
+	 * leap. The second word must equal the initial insertion of ten
+	 * seconds on 1 January 1972 plus one second for each succeeding
+	 * insertion.
+	 */
+	i = TAI_1972;
+	while (i < MAX_LEAP) {
+		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
+		if (dp == NULL)
+			break;
+
+		if (strlen(buf) < 1)
+			continue;
+
+		if (*buf == '#')
+			continue;
+
+		if (sscanf(buf, "%lu %d", &leapsec, &offset) != 2)
+			continue;
+
+		if (i != offset) 
+			break;
+		i++;
+	}
+	fclose(str);
+	if (dp != NULL) {
+		msyslog(LOG_INFO, "Leapseconds format error in %s", cp);
+	} else {
+		sys_tai = offset;
+		leap_ins = leapsec;
+		msyslog(LOG_INFO, "TAI offset %d s at %lu from %s",
+		    sys_tai, leap_ins, cp);
+	}
+}
+
+/*
+ * leap_month - returns the number of seconds until the end of the month
+ */
+#define	L_DAY	86400			/* seconds per day */
+#define	L_YEAR	L_DAY * 365		/* days per year */
+#define	L_LYEAR	L_YEAR + 1		/* days per leap year */
+#define	L_4YEAR	L_LYEAR + 3 * L_YEAR	/* days per leap cycle */
+#define	L_CENT	(u_long)L_4YEAR * 25	/* days per century */
+
+u_long
+leap_month(
+	u_long	sec		/* current NTP second */
+	)
+{
+	u_long	ltemp;
+	u_long	*ptr;
+	u_long	year[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30,
+		    31}; 
+	u_long	lyear[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30,
+		    31}; 
+
+	/*
+	 * Find current leap cycle
+	 */
+	ltemp = sec;
+	while (ltemp > L_CENT)
+		ltemp -= L_CENT;
+	while (ltemp > L_4YEAR)
+		ltemp -= L_4YEAR;
+
+	/*
+	 * If in leap year, use leap table
+	 */
+	if (ltemp < L_LYEAR) {
+		ptr = lyear;
+	} else {
+		ptr = year;
+		ltemp -= L_LYEAR;
+		while (ltemp > L_YEAR)
+			ltemp -= L_YEAR;
+	}
+	while (ltemp > *ptr)
+		ltemp -= *ptr++;
+
+	/* The result is the number of seconds until the end of the
+	 * month when the leap is to occur.
+	 */
+	return (ltemp);
+}
+
+
 #ifdef DEBUG_TIMING
 /*
  * record_crypto_stats - write crypto statistics to file
@@ -696,13 +838,15 @@ record_timing_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (timingstats.fp != NULL) {
-		fprintf(timingstats.fp, "%lu %s %s\n",
-			    day, lfptoa(&now, 3), text);
+		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(&now,
+		    3), text);
 		if (++flshcnt % 100 == 0)
 			fflush(timingstats.fp);
 	}
 }
 #endif
+
+
 /*
  * getauthkeys - read the authentication keys from the specified file
  */
@@ -734,13 +878,12 @@ getauthkeys(
 #ifndef SYS_WINNT
  	memmove(key_file_name, keyfile, (unsigned)(len+1));
 #else
-	if (!ExpandEnvironmentStrings(keyfile, key_file_name, MAXPATHLEN)) 
-	{
+	if (!ExpandEnvironmentStrings(keyfile, key_file_name,
+	    MAXPATHLEN)) {
 		msyslog(LOG_ERR,
 		    "ExpandEnvironmentStrings(KEY_FILE) failed: %m\n");
 	}
 #endif /* SYS_WINNT */
-
 	authreadkeys(key_file_name);
 }
 
@@ -755,6 +898,7 @@ rereadkeys(void)
 	    authreadkeys(key_file_name);
 }
 
+
 /*
  * sock_hash - hash an sockaddr_storage structure
  */
@@ -767,9 +911,9 @@ sock_hash(
 	int i;
 	int len;
 	char *ch;
-
 	hashVal = 0;
 	len = 0;
+
 	/*
 	 * We can't just hash the whole thing because there are hidden
 	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
@@ -786,6 +930,7 @@ sock_hash(
 		ch = (char *)&((struct sockaddr_in *)addr)->sin_addr;
 		len = sizeof(struct in_addr);
 		break;
+
 	case AF_INET6:
 		ch = (char *)&((struct sockaddr_in6 *)addr)->sin6_addr;
 		len = sizeof(struct in6_addr);
@@ -794,14 +939,12 @@ sock_hash(
 
 	for (i = 0; i < len ; i++)
 		hashVal = 37 * hashVal + (int)*(ch + i);
-
 	hashVal = hashVal % 128;  /* % MON_HASH_SIZE hardcoded */
-
 	if (hashVal < 0)
 		hashVal += 128;
-
 	return hashVal;
 }
+
 
 #if notyet
 /*
@@ -810,7 +953,7 @@ sock_hash(
 void
 ntp_exit(int retval)
 {
-  msyslog(LOG_ERR, "EXITING with return code %d", retval);
-  exit(retval);
+	msyslog(LOG_ERR, "EXITING with return code %d", retval);
+	exit(retval);
 }
 #endif

@@ -1,6 +1,7 @@
 /*
  * ntp_crypto.h - definitions for cryptographic operations
  */
+
 #ifdef OPENSSL
 #include "openssl/evp.h"
 /*
@@ -102,7 +103,6 @@
 #define NTP_AUTOMAX	13	/* log2 default max session key life */
 #define KEY_REVOKE	16	/* log2 default key revoke timeout */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
-#define	TAI_1972	10	/* initial TAI offset (s) */
 
 /*
  * The autokey structure holds the values used to authenticate key IDs.
@@ -162,7 +162,6 @@ struct cert_info {
 /*
  * Cryptographic values
  */
-extern	char	*keysdir;	/* crypto keys directory */
 extern	u_int	crypto_flags;	/* status word */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
