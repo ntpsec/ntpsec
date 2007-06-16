@@ -339,7 +339,7 @@
 
 
 #ifndef YYSTYPE
-#line 67 "ntp_parser.y"
+#line 68 "ntp_parser.y"
 typedef union {
     char   *String;
     double  Double;
