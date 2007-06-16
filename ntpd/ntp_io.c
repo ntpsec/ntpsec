@@ -759,7 +759,7 @@ add_interface(struct interface *interface)
 }
 
 /*
- * remove interface from knoen interface list and clean up
+ * remove interface from known interface list and clean up
  * associated resources
  */
 static void
