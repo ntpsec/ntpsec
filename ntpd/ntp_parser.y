@@ -38,6 +38,8 @@
 
 
   struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
+
+  #define YYERROR_VERBOSE
   void yyerror (char *msg);
 
   /* SK: The following is a terrible hack to allow the NTP code to be built
