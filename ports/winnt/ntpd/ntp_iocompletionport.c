@@ -517,16 +517,22 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 #endif
 		ignore_this = inter->ignore_packets;
 		if (ignore_this == ISC_TRUE && inter->family == AF_INET &&
-		    inter->flags == (INT_BROADCAST | INT_WILDCARD) &&
+		    (inter->flags & (INT_BROADCAST | INT_WILDCARD)) &&
 		    get_packet_mode(buff) == MODE_BROADCAST &&
 		    get_broadcastclient_flag() == ISC_TRUE
 		    ) {
 			ignore_this = ISC_FALSE;
 #ifdef DEBUG
-			if (debug > 3)
+			if (debug > 1)
   				printf("****Accepting ignored packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
 #endif
 		}
+#ifdef DEBUG
+		else {
+			if (debug > 3)
+				printf(" Packet mode is %d\n", get_packet_mode(buff));
+		}
+#endif
 
 		/*
 		 * If we keep it add some info to the structure
