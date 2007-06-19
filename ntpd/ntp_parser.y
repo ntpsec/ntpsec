@@ -41,6 +41,7 @@
 
   #define YYERROR_VERBOSE
   void yyerror (char *msg);
+  extern int input_from_file;  /* 0=input from ntpq>config command buffer */
 
   /* SK: The following is a terrible hack to allow the NTP code to be built
    * without OPENSSL. The following symbols need to be defined in the 
@@ -309,9 +310,11 @@ command_list
                  */
         |       error T_EOC 
                 { 
-                    fprintf(stderr, "PARSE ERROR!! At Line: %d\n", 
-                            ip_file->line_no);
-                    fprintf(stderr, "Line Ignored!!\n");
+					if (input_from_file == 1) {
+                    	msyslog(LOG_INFO, "parse error %s line %d ignored\n",
+                            ip_file->fname, ip_file->line_no);
+                	} else if (input_from_file != 0)
+						msyslog(LOG_INFO, "parse: bad boolean input flag\n"); 
                 }
 	;
 
@@ -748,8 +751,8 @@ miscellaneous_command
                     { enqueue(my_config.vars, create_attr_ival(T_Calldelay, $2));  }
 	|	T_Tick number
                     { enqueue(my_config.vars, create_attr_dval(T_Tick, $2));  }
-	|	T_Driftfile T_String drift_parm
-         { enqueue(my_config.vars, create_attr_sval(T_Driftfile, $2)); }
+	|	T_Driftfile drift_parm
+         { /* Null action, possibly all null parms */ }
 
 	|	T_Pidfile T_String 
                     { enqueue(my_config.vars, create_attr_sval(T_Pidfile, $2));  }
@@ -770,13 +773,17 @@ miscellaneous_command
                     { append_queue(my_config.ttl, $2); }
 	;	
 drift_parm
-	:	{ /* Null command */ }
-	|   T_Integer 
-		{ enqueue(my_config.vars, create_attr_ival(T_DriftMinutes, $1)); }
+	:	T_String 
+		{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+	|   T_String T_Integer 
+		{ enqueue(my_config.vars, create_attr_ival(T_DriftMinutes, $2)); 
+		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+	|	{ /* Null driftfile,  indicated by null string "\0" */ 
+		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
 	;
 
 variable_assign
-        :	T_String '=' T_String T_Default  
+    :	T_String '=' T_String T_Default  
                     { $$ = create_setvar_node($1, $3, DEF); }
 	|	T_String '=' T_String            
                     { $$ = create_setvar_node($1, $3, 0); }

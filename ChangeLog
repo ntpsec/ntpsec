@@ -1,3 +1,4 @@
+* Allow null driftfile.
 * Use YYERROR_VERBOSE for the new parser, and fix related BUILT_SOURCES.
 * [Bug #629] changes to ensure broadcast works including on wildcard addresses
 * [Bug 853] get_node() must return a pointer to maximally-aligned memory.
