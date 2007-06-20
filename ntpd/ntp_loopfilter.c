@@ -133,7 +133,6 @@ double	clock_codec;		/* audio codec frequency (sambles/s) */
 u_long	sys_clocktime;		/* last system clock update */
 u_long	pps_control;		/* last pps update */
 u_int	sys_tai;		/* TAI offset from UTC (s) */
-u_long	sys_leapin;		/* seconds at next leap (s) */
 static void rstclock (int, u_long, double); /* transition function */
 
 #ifdef KERNEL_PLL
@@ -528,9 +527,6 @@ local_clock(
 		if (ext_enable) {
 			ntv.modes = MOD_STATUS;
 		} else {
-			struct tm *tm = NULL;
-			time_t tstamp;
-
 #ifdef STA_NANO
 			ntv.modes = MOD_BITS | MOD_NANO;
 #else /* STA_NANO */
@@ -566,24 +562,6 @@ local_clock(
 			ntv.status = STA_PLL;
 
 			/*
-			 * Set the leap bits in the status word, but
-			 * only on the last day of June or December.
-			 */
-			tstamp = peer->rec.l_ui - JAN_1970;
-			tm = gmtime(&tstamp);
-			if (tm != NULL) {
-				if ((tm->tm_mon + 1 == 6 &&
-				    tm->tm_mday == 30) || (tm->tm_mon +
-				    1 == 12 && tm->tm_mday == 31)) {
-					if (leap_next & LEAP_ADDSECOND)
-						ntv.status |= STA_INS;
-					else if (leap_next &
-					    LEAP_DELSECOND)
-						ntv.status |= STA_DEL;
-				}
-			}
-
-			/*
 			 * If the PPS signal is up and enabled, light
 			 * the frequency bit. If the PPS driver is
 			 * working, light the phase bit as well. If not,
@@ -597,6 +575,17 @@ local_clock(
 			} else {
 				ntv.status &= ~(STA_PPSFREQ |
 				    STA_PPSTIME);
+			}
+
+			/*
+			 * If less than 23 hours remain before a leap,
+			 * set the kernel leap bits.
+			 */
+			if (leap_sec > 0 && leap_sec < 23 * 3600) {
+				if (sys_leap == LEAP_ADDSECOND)
+					ntv.status |= STA_INS;
+				else if (sys_leap == LEAP_DELSECOND)
+					ntv.status |= STA_DEL;
 			}
 		}
 
@@ -1005,12 +994,11 @@ loop_config(
 		clock_codec = freq;
 		break;
 
-	case LOOP_LEAP:			/* arm leap insert */
+	case LOOP_LEAP:			/* set kernel TAI offset */
 #if defined(STA_NANO) && NTP_API == 4
 		if (pll_control && kern_enable) {
-			memset(&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_TAI;
-			ntv.constant = sys_tai - 1;
+			ntv.constant = sys_tai;
 			ntp_adjtime(&ntv);
 		}
 #endif /* STA_NANO */
