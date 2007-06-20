@@ -54,8 +54,8 @@
  * File names
  */
 static	char *key_file_name;		/* keys file name */
-static	char *stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
+char *stats_drift_file;			/* frequency file name */
 int stats_write_period = 3600;		/* seconds between writes. */
 
 /*
