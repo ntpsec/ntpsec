@@ -66,9 +66,10 @@ static	double sys_maxdist = MAXDISTANCE; /* selection threshold (s) */
 double	sys_jitter;		/* system jitter (s) */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
-int	leap_next;		/* leap consensus */
-u_long	leap_ins;		/* seconds ar next leap */
+u_long	leap_ins;		/* seconds at next leap */
 u_long	leap_sec;		/* leap countdown */
+static int leap_next;		/* leap consensus */
+static int leap_sw;		/* leap is from file */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -1318,29 +1319,54 @@ clock_update(void)
 	 * at the last offset measurement.
 	 */
 	case 1:
-
 		sys_stratum = min(sys_peer->stratum + 1,
 		    STRATUM_UNSPEC);
 		sys_reftime = sys_peer->rec;
-		get_systime(&now);
 
 		/*
-		 * If no leap is scheduled and the number of upstream
-		 * leap bits is at least the sanity threshold, schedule
-		 * a leap for the end of the current month. If from the
-		 * leapseconds file schedule a leap for the last entry
-		 * in the file, but only if it is in the future. 
+		 * If no leap is scheduled and the leap is triggered
+		 * from the leapseconds file, schedule a leap for the
+		 * last entry in the file, but only if it is in the
+		 * future. If triggered by upstream server leap bits and
+		 * the number of bits is at least the sanity threshold,
+		 * schedule a leap for the end of the current month.
 		 */
+		get_systime(&now);
 		if (leap_sec == 0) {
-			if (leap_next >= sys_minsane) {
-				leap_sec = leap_month(now.l_ui);
-			} else if (leap_ins != 0) {
-				if (now.l_ui < leap_ins) {
-					leap_sec = leap_ins - now.l_ui;
+			if (leap_ins > now.l_ui) {
+				if (leap_sw == 0) {
+					leap_sw++;
 					sys_tai--;
+					loop_config(LOOP_LEAP, sys_tai);
 				}
+				if (leap_ins - now.l_ui < 28 * 86400)
+					leap_sec = leap_ins - now.l_ui;
+			} else if (leap_next >= sys_minsane) {
+				leap_sec = leap_month(now.l_ui);
 			}
+			if (leap_sec > 0)
+				msyslog(LOG_NOTICE,
+				    "leap second armed %lu s",
+				    leap_sec);
+				
+
+		/*
+		 * If the leap was not triggered from the leapsecond
+		 * file, cancel the leap if the server leap bits grow
+		 * dim.
+		 */
+		} else if (!leap_sw && leap_next < sys_minsane) {
+			leap_sec = 0;
 		}
+
+printf("xxx %d %d %d %d %d %lu\n", sys_leap, sys_tai, leap_sw, sys_minsane, leap_next, leap_sec);
+
+		/*
+		 * If this is the first time the clock is set,
+		 * reset the leap bits.
+		 */
+		if (sys_leap == LEAP_NOTINSYNC)
+			sys_leap = LEAP_NOWARNING;
 
 		/*
 		 * In orphan mode the stratum defaults to the orphan
@@ -1523,9 +1549,7 @@ peer_crypto_clear(
 	if (peer->pkey != NULL)
 		EVP_PKEY_free(peer->pkey);
 	peer->pkey = NULL;
-
-	peer->digest = NULL;	/* XXX MEMLEAK? check whether this needs to be freed in any way - never was freed */
-
+	peer->digest = NULL;		/* digest * is a constant */
 	if (peer->subject != NULL)
 		free(peer->subject);
 	peer->subject = NULL;
@@ -3203,13 +3227,14 @@ init_proto(void)
 	 */
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
+	sys_peer = NULL;
+	sys_rootdelay = 0;
+	sys_rootdispersion = 0;
 	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
 	sys_jitter = LOGTOD(sys_precision);
-	sys_rootdelay = 0;
 	sys_orphandelay = (double)(ntp_random() & 0xffff) / 65536. *
 	    sys_maxdist;
-	sys_rootdispersion = 0;
 	L_CLR(&sys_reftime);
 	sys_peer = NULL;
 	sys_survivors = 0;

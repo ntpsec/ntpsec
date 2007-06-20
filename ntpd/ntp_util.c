@@ -36,26 +36,27 @@
 # include <descrip.h>
 #endif /* VMS */
 
-#define	MAX_LEAP	100	/* max TAI offset (s) */
+/*
+ * Defines used by the leapseconds stuff
+ */
+#define	MAX_TAI	100			/* max TAI offset (s) */
+#define	L_DAY	86400UL			/* seconds per day */
+#define	L_YEAR	(L_DAY * 365)		/* days per year */
+#define	L_LYEAR	(L_YEAR + L_DAY)	/* days per leap year */
+#define	L_4YEAR	(L_LYEAR + 3 * L_YEAR)	/* days per leap cycle */
+#define	L_CENT	(L_4YEAR * 25)		/* days per century */
 
 /*
- * This contains odds and ends.  Right now the only thing you'll find
- * in here is the hourly stats printer and some code to support
- * rereading the keys file, but I may eventually put other things in
- * here such as code to do something with the leap bits.
+ * This contains odds and ends, including the hourly stats, various
+ * configuration items, leapseconds stuff, etc.
  */
 /*
- * Name of the keys file
+ * File names
  */
-static	char *key_file_name;
-
-/*
- * The name of the drift_comp file and the temporary.
- */
-char *stats_drift_file;
-static	char *stats_temp_file;
-int stats_write_period = 3600;	/* # of seconds between writes. */
-static double prev_drift_comp;
+static	char *key_file_name;		/* keys file name */
+static	char *stats_drift_file;		/* frequency file name */
+static	char *stats_temp_file;		/* temp frequency file name */
+int stats_write_period = 3600;		/* seconds between writes. */
 
 /*
  * Statistics file stuff
@@ -72,19 +73,19 @@ static double prev_drift_comp;
 # define MAXPATHLEN 256
 #endif
 
-static	char statsdir[MAXPATHLEN] = NTP_VAR;
-
-static FILEGEN peerstats;
-static FILEGEN loopstats;
-static FILEGEN clockstats;
-static FILEGEN rawstats;
-static FILEGEN sysstats;
 #ifdef DEBUG_TIMING
 static FILEGEN timingstats;
 #endif
 #ifdef OPENSSL
 static FILEGEN cryptostats;
 #endif /* OPENSSL */
+
+static	char statsdir[MAXPATHLEN] = NTP_VAR;
+static FILEGEN peerstats;
+static FILEGEN loopstats;
+static FILEGEN clockstats;
+static FILEGEN rawstats;
+static FILEGEN sysstats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -95,8 +96,12 @@ int stats_control;
 /*
  * Initial frequency offset later passed to the loopfilter.
  */
-double	old_drift;
+double	old_drift;			/* current frequency */
+static double prev_drift_comp;		/* last frequency update */
 
+/*
+ * Static prototypes
+ */
 static void leap_file(char *);
 
 /*
@@ -120,6 +125,9 @@ init_util(void)
 #ifdef DEBUG_TIMING
 	filegen_register(&statsdir[0], "timingstats", &timingstats);
 #endif
+
+leap_file("/etc/leapseconds");	/***** temp for debug *****/
+
 }
 
 
@@ -732,7 +740,7 @@ leap_file(
 	 * insertion.
 	 */
 	i = TAI_1972;
-	while (i < MAX_LEAP) {
+	while (i < MAX_TAI) {
 		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (dp == NULL)
 			break;
@@ -752,7 +760,8 @@ leap_file(
 	}
 	fclose(str);
 	if (dp != NULL) {
-		msyslog(LOG_INFO, "Leapseconds format error in %s", cp);
+		msyslog(LOG_INFO, "leapseconds format error from %s",
+		    cp);
 	} else {
 		sys_tai = offset;
 		leap_ins = leapsec;
@@ -761,15 +770,10 @@ leap_file(
 	}
 }
 
-/*
- * leap_month - returns the number of seconds until the end of the month
- */
-#define	L_DAY	86400			/* seconds per day */
-#define	L_YEAR	L_DAY * 365		/* days per year */
-#define	L_LYEAR	L_YEAR + 1		/* days per leap year */
-#define	L_4YEAR	L_LYEAR + 3 * L_YEAR	/* days per leap cycle */
-#define	L_CENT	(u_long)L_4YEAR * 25	/* days per century */
 
+/*
+ * leap_month - returns seconds until the end of the month.
+ */
 u_long
 leap_month(
 	u_long	sec		/* current NTP second */
@@ -783,32 +787,39 @@ leap_month(
 		    31}; 
 
 	/*
-	 * Find current leap cycle
+	 * Find current leap cycle.
 	 */
 	ltemp = sec;
-	while (ltemp > L_CENT)
+	while (ltemp >= L_CENT)
 		ltemp -= L_CENT;
-	while (ltemp > L_4YEAR)
+	while (ltemp >= L_4YEAR)
 		ltemp -= L_4YEAR;
 
 	/*
-	 * If in leap year, use leap table
+	 * We are within four years of the target. If in leap year, use
+	 * leap year month table; otherwise, use year month table.
 	 */
 	if (ltemp < L_LYEAR) {
 		ptr = lyear;
 	} else {
 		ptr = year;
 		ltemp -= L_LYEAR;
-		while (ltemp > L_YEAR)
+		while (ltemp >= L_YEAR)
 			ltemp -= L_YEAR;
 	}
-	while (ltemp > *ptr)
-		ltemp -= *ptr++;
 
-	/* The result is the number of seconds until the end of the
+	/*
+	 * We are within one year of the target. Find the month of the
+	 * leap.
+	 */
+	while (ltemp >= *ptr * L_DAY)
+		ltemp -= *ptr++ * L_DAY;
+
+	/*
+	 * The result is the number of seconds until the end of the
 	 * month when the leap is to occur.
 	 */
-	return (ltemp);
+	return (*ptr * L_DAY - ltemp - L_DAY);
 }
 
 

@@ -60,9 +60,10 @@ u_char	sys_revoke = KEY_REVOKE;	/* keys revoke timeout (log2 s) */
 volatile u_long alarm_overflow;
 
 #define MINUTE	60
-#define HOUR	(60*60)
+#define HOUR	(60 * 60)
 
-u_long current_time;
+u_long current_time;		/* seconds since startup */
+static int tai_sw;		/* kernel TAI switch */
 
 /*
  * Stats.  Number of overflows and number of calls to transmit().
@@ -311,13 +312,16 @@ timer(void)
 	 * Leapseconds.
 	 */
 	if (leap_sec > 0) {
-		if (leap_sec < 86400 * 28)
-			sys_leap = LEAP_ADDSECOND;
-		if (leap_sec < 86400)
-			loop_config(LOOP_LEAP, sys_tai);
+		sys_leap = LEAP_ADDSECOND;
 		leap_sec--;
-	} else {
-		sys_leap = LEAP_NOWARNING;
+		if (leap_sec == 0) {
+			sys_leap = LEAP_NOWARNING;
+			if (sys_tai > 0) {
+				sys_tai++;
+				msyslog(LOG_NOTICE, "TAI offset %d s",
+				    sys_tai);
+			}
+		}
 	}
 
 	/*
