@@ -54,7 +54,7 @@ extern struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream 
 extern short default_ai_family;
 extern int old_config_style;
 extern int input_from_file;
-extern struct FILE_INFO *fp[MAXINCLUDELEVEL];
+extern struct FILE_INFO *fp[];
 
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------

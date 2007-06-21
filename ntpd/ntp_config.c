@@ -129,7 +129,7 @@ static char res_file[MAX_PATH];
  */
 
 int curr_include_level;			/* The current include level */
-struct FILE_INFO *fp[MAXINCLUDELEVEL];
+struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree my_config;		/* Root of the configuration tree */
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
@@ -1325,7 +1325,8 @@ config_phone(void)
 		}
 		free_node(s);
 	}
-	sys_phone[i] = NULL;
+	if (i)
+		sys_phone[i] = NULL;
 }
 
 static void
