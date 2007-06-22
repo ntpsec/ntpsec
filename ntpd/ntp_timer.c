@@ -23,6 +23,10 @@
 # include "ntp_timer.h"
 #endif
 
+#ifdef KERNEL_PLL
+#include "ntp_syscall.h"
+#endif /* KERNEL_PLL */
+
 /*
  * These routines provide support for the event timer.	The timer is
  * implemented by an interrupt routine which sets a flag once every
@@ -33,7 +37,6 @@
  * dispatched to the transmit procedure.  Finally, we call the hourly
  * procedure to do cleanup and print a message.
  */
-
 volatile int interface_interval = 300;     /* update interface every 5 minutes as default */
 	  
 /*
@@ -63,7 +66,6 @@ volatile u_long alarm_overflow;
 #define HOUR	(60 * 60)
 
 u_long current_time;		/* seconds since startup */
-static int tai_sw;		/* kernel TAI switch */
 
 /*
  * Stats.  Number of overflows and number of calls to transmit().
@@ -263,7 +265,7 @@ timer(void)
 #ifdef OPENSSL
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 #endif /* OPENSSL */
-	u_int n;
+	u_int	n;
 
 	current_time += (1<<EVENT_TIMEOUT);
 
@@ -286,9 +288,9 @@ timer(void)
 	}
 
 	/*
-	 * Now dispatch any peers whose event timer has expired. Be careful
-	 * here, since the peer structure might go away as the result of
-	 * the call.
+	 * Now dispatch any peers whose event timer has expired. Be
+	 * careful here, since the peer structure might go away as the
+	 * result of the call.
 	 */
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
@@ -309,7 +311,10 @@ timer(void)
 	}
 
 	/*
-	 * Leapseconds.
+	 * Leapseconds. When the time remaining decrements to zero,
+	 * increment the TAI offset. If the kernel code is not available
+	 * or disabled, Do the leap crudely. There are of course races
+	 * here, cheerfully ignored.
 	 */
 	if (leap_sec > 0) {
 		sys_leap = LEAP_ADDSECOND;
@@ -320,7 +325,15 @@ timer(void)
 				sys_tai++;
 				msyslog(LOG_NOTICE, "TAI offset %d s",
 				    sys_tai);
+#ifdef KERNEL_PLL
+				if (!(pll_control && kern_enable))
+					step_systime(-1.0);
+#else /* KERNEL_PLL */
+				step_systime(-1.0);
+#endif /* KERNEL_PLL */
 			}
+			msyslog(LOG_NOTICE, "leap second %+.6f s",
+			    -1.0);
 		}
 	}
 

@@ -772,6 +772,7 @@ struct pkt {
 #define	STATS_FREQ_FILE		1	/* configure drift file */
 #define STATS_STATSDIR		2	/* directory prefix for stats files */
 #define	STATS_PID_FILE		3	/* configure ntpd PID file */
+#define	STATS_LEAP_FILE		4	/* configure ntpd leapseconds file */
 
 #define MJD_1900		15020	/* MJD for 1 Jan 1900 */
 

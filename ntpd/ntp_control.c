@@ -1441,17 +1441,16 @@ ctl_putsys(
 			ctl_putstr(sys_var[CS_IDENT].text,
 			    mvpar_file, strlen(mvpar_file));
 		break;
+#endif /* OPENSSL */
 
 	case CS_LEAPTAB:
-		if (tai_leap.fstamp != 0)
-			ctl_putfs(sys_var[CS_LEAPTAB].text,
-			    ntohl(tai_leap.fstamp));
+		ctl_putuint(sys_var[CS_LEAPTAB].text,
+		    leap_sec);
 		break;
 
 	case CS_TAI:
 		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
-#endif /* OPENSSL */
 	}
 }
 
