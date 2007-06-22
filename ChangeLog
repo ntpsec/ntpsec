@@ -1,3 +1,4 @@
+* [Bug 864] Place ntpd service in maintenance mode if using SMF on Solaris
 * Start using 'design by contract' assertions.
 * Allow null driftfile.
 * leap second infrastructure fixes from Dave Mills.

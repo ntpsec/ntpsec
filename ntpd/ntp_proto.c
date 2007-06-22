@@ -15,6 +15,9 @@
 #include "ntp_string.h"
 
 #include <stdio.h>
+#ifdef HAVE_LIBSCF_H
+#include <libscf.h>
+#endif
 
 #if defined(VMS) && defined(VMS_LOCALUNIT)	/*wjm*/
 #include "ntp_refclock.h"
@@ -1265,6 +1268,9 @@ clock_update(void)
 	u_char	ostratum;
 	double	dtemp;
 	l_fp	now;
+#ifdef HAVE_LIBSCF_H
+       char *fmri;
+#endif
 
 	/*
 	 * There must be a system peer at this point. If we just changed
@@ -1293,6 +1299,19 @@ clock_update(void)
 	 */
 	case -1:
 		report_event(EVNT_SYSFAULT, NULL);
+#ifdef HAVE_LIBSCF_H
+               /* enter the maintenance mode */
+               if ((fmri = getenv("SMF_FMRI")) != NULL) {
+                       if (smf_maintain_instance(fmri, 0) < 0) {
+                               printf("smf_maintain_instance:%s\n",
+                                   scf_strerror(scf_error()));
+                               exit(1);
+                       }
+                       /* sleep until SMF kills us */
+                       for (;;)
+                               pause();
+               }
+#endif
 		exit (-1);
 		/* not reached */
 

@@ -201,7 +201,13 @@ case "$ac_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
     LIBS="$LIBS -lcap"
     ;;
 esac
-
+AC_CHECK_HEADERS(libscf.h)
+case "$ac_cv_header_libscf_h" in
+ yes)
+    AC_SUBST(LSCF, [-lscf])
+    ;;
+esac
+AC_CHECK_FUNC(setppriv,AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?]), )
 case "$build" in
  $host)
     ;;
