@@ -16,6 +16,7 @@
 #include "ntp_request.h"
 #include "ntp.h"
 #include "ntp_unixtime.h"
+#include "ntp_assert.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
@@ -3619,6 +3620,8 @@ kill_asyncio(int startfd)
 static void
 add_fd_to_list(SOCKET fd, enum desc_type type) {
 	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
+
+	NTP_INSIST(lsock != NULL);
 	lsock->fd = fd;
 	lsock->type = type;
 
