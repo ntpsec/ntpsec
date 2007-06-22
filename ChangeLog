@@ -1,3 +1,4 @@
+* Start using 'design by contract' assertions.
 * Allow null driftfile.
 * More leap second fixes from Dave Mills.
 * Use YYERROR_VERBOSE for the new parser, and fix related BUILT_SOURCES.
