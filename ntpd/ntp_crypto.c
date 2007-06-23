@@ -16,7 +16,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_string.h"
-#include <ntp_random.h>
+#include "ntp_random.h"
+#include "ntp_assert.h"
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
@@ -3066,6 +3067,8 @@ cert_parse(
 	 * objects at this time, since the real crunch can happen only
 	 * when the time is valid but not yet certificated.
 	 */
+	NTP_INSIST(cert->cert_info != NULL);
+	NTP_INSIST(cert->cert_info->signature != NULL);
 	ret->nid = OBJ_obj2nid(cert->cert_info->signature->algorithm);
 	ret->digest = (const EVP_MD *)EVP_get_digestbynid(ret->nid);
 	ret->serial =
