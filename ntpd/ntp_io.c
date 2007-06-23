@@ -269,7 +269,7 @@ static void	create_wildcards	(u_short);
 static isc_boolean_t	address_okay	(isc_interface_t *);
 static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
 static struct interface *getinterface	(struct sockaddr_storage *, int);
-static struct interface *findlocalinterface	(struct sockaddr_storage *, int);
+static struct interface *findlocalinterface	(struct sockaddr_storage *, int, int);
 static struct interface *findlocalcastinterface	(struct sockaddr_storage *, int);
 
 /*
@@ -2856,6 +2856,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
 	isc_boolean_t ignore_this;
+	isc_boolean_t ignore_later = ISC_FALSE;
 	register struct recvbuf *rb;
 #ifdef HAVE_TIMESTAMP
 	struct msghdr msghdr;
@@ -2874,18 +2875,18 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 
 	/* For broadcast packet received on the IPv4 wildcard socket
 	 * we carve out an exception but only if the client has requested
-	 * to receive wildcard sockets
+	 * to receive wildcard sockets. The final check is later when we
+	 * have read the packet.
 	 */
 	ignore_this = itf->ignore_packets;
 	if (ignore_this == ISC_TRUE && itf->family == AF_INET &&
-	    itf->flags == (INT_BROADCAST | INT_WILDCARD) &&
-	    get_packet_mode(rb) == MODE_BROADCAST &&
+	    (itf->flags & (INT_BROADCAST | INT_WILDCARD)) &&
 	    get_broadcastclient_flag() == ISC_TRUE
 	    )
-	    ignore_this = ISC_FALSE;
+	    ignore_later = ISC_TRUE;
 
-	if (rb == NULL || ignore_this == ISC_TRUE)
-	{
+	if (rb == NULL ||
+	    (ignore_this == ISC_TRUE && ignore_later == ISC_FALSE)) {
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
 		if (rb != NULL)
@@ -2943,6 +2944,19 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 		freerecvbuf(rb);
 		return (rb->recv_length);
 	}
+
+	/*
+	 * Make sure only a valide broadcast packet was received
+	 * on the wildcard address
+	 */
+	if (ignore_later == ISC_TRUE && get_packet_mode(rb) != MODE_BROADCAST) {
+		freerecvbuf(rb);
+		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
+			"ignore", free_recvbuffs(), fd, stoa(&rb->recv_srcadr)));
+		packets_ignored++;
+		return (rb->recv_length);
+	}
+
 
 #ifdef DEBUG
 	if (debug > 2) {
@@ -3167,7 +3181,7 @@ findinterface(
 {
 	struct interface *interface;
 	
-	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD);
+	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD, 0);
 
 	if (interface == NULL)
 	{
@@ -3201,7 +3215,8 @@ findinterface(
 static struct interface *
 findlocalinterface(
 	struct sockaddr_storage *addr,
-	int flags
+	int flags,
+	int bflag
 	)
 {
 	SOCKET s;
@@ -3209,6 +3224,7 @@ findlocalinterface(
 	struct sockaddr_storage saddr;
 	GETSOCKNAME_SOCKLEN_TYPE saddrlen = SOCKLEN(addr);
 	struct interface *iface;
+	int on = 1;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
 		    stoa(addr));)
@@ -3232,6 +3248,14 @@ findlocalinterface(
 	s = socket(addr->ss_family, SOCK_DGRAM, 0);
 	if (s == INVALID_SOCKET)
 		return NULL;
+
+	/*
+	 * If we are looking for broadcast interface we need to set this
+	 * socket to allow broadcast
+	 */
+	if (bflag & INT_BROADCAST)
+		setsockopt(s, SOL_SOCKET, SO_BROADCAST,
+			  (char *)&on, sizeof(on));
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
 #ifndef SYS_WINNT
@@ -3305,7 +3329,7 @@ findlocalcastinterface(
 	/*
 	 * see how kernel maps the mcast address
 	 */
-        nif = findlocalinterface(addr, 0);
+        nif = findlocalinterface(addr, 0, 0);
 
 	if (nif) {
 		DPRINTF(2, ("findlocalcastinterface: kernel recommends interface #%d %s\n", nif->ifnum, nif->name));
@@ -3394,7 +3418,7 @@ findbcastinter(
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
-	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD);
+	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD, INT_BROADCAST);
 	
 	if (interface != NULL)
 	{
