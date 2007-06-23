@@ -259,13 +259,13 @@ datum_pts_start(
 	*/
 
 	temp_datum_pts_unit = (struct datum_pts_unit **)
-		malloc((nunits+1)*sizeof(struct datum_pts_unit *));
+		emalloc((nunits+1)*sizeof(struct datum_pts_unit *));
 	if (nunits > 0) memcpy(temp_datum_pts_unit, datum_pts_unit,
 			       nunits*sizeof(struct datum_pts_unit *));
 	free(datum_pts_unit);
 	datum_pts_unit = temp_datum_pts_unit;
 	datum_pts_unit[nunits] = (struct datum_pts_unit *)
-		malloc(sizeof(struct datum_pts_unit));
+		emalloc(sizeof(struct datum_pts_unit));
 	datum_pts = datum_pts_unit[nunits];
 
 	datum_pts->unit = unit;	/* set my unit id */

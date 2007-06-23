@@ -1,3 +1,4 @@
+* Use emalloc() instead of malloc() in refclock_datum.c (Calypso).
 * Start using 'design by contract' assertions.
 * Allow null driftfile.
 * leap second infrastructure fixes from Dave Mills.
