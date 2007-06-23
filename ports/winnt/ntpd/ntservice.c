@@ -25,6 +25,7 @@
 #include "syslog.h"
 #include "ntservice.h"
 #include "clockstuff.h"
+#include "ntp_iocompletionport.h"
 #ifdef DEBUG
 #include <crtdbg.h>
 #endif
@@ -36,7 +37,6 @@ static char ConsoleTitle[128];
 static int glb_argc;
 static char **glb_argv;
 HANDLE hServDoneEvent = NULL;
-extern HANDLE WaitHandles[3];
 extern volatile int debug;
 extern char *progname;
 
@@ -172,13 +172,15 @@ ntservice_exit( void )
 void
 ServiceControl(DWORD dwCtrlCode) {
 	/* Handle the requested control code */
+	HANDLE exitEvent = get_exit_event();
+
 	switch(dwCtrlCode) {
 
 	case SERVICE_CONTROL_SHUTDOWN:
 	case SERVICE_CONTROL_STOP:
 		UpdateSCM(SERVICE_STOP_PENDING);
-		if (WaitHandles[0] != NULL) {
-			SetEvent(WaitHandles[0]);
+		if (exitEvent != NULL) {
+			SetEvent(exitEvent);
 			Sleep( 100 );  //##++
 		}
 		return;
@@ -225,6 +227,8 @@ OnConsoleEvent(
 	DWORD dwCtrlType
 	)
 {
+	HANDLE exitEvent = get_exit_event();
+
 	switch (dwCtrlType) {
 #ifdef DEBUG
 		case CTRL_BREAK_EVENT :
@@ -244,8 +248,8 @@ OnConsoleEvent(
 		case CTRL_C_EVENT  :
 		case CTRL_CLOSE_EVENT :
 		case CTRL_SHUTDOWN_EVENT :
-			if (WaitHandles[0] != NULL) {
-				SetEvent(WaitHandles[0]);
+			if (exitEvent != NULL) {
+				SetEvent(exitEvent);
 				Sleep( 100 );  //##++
 			}
 		break;
