@@ -1,3 +1,5 @@
+* {Bug 863] unable to stop ntpd on Windows as the handle reference for events
+	    changed
 (4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 854] Broadcast address was not correctly set for interface addresses
 * [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
