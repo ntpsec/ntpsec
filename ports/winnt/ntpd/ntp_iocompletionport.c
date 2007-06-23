@@ -57,6 +57,7 @@ static HANDLE hHeapHandle = NULL;
 static HANDLE hIoCompletionPort = NULL;
 
 static HANDLE WaitableIoEventHandle = NULL;
+static HANDLE WaitableExitEventHandle = NULL;
 
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
@@ -119,6 +120,11 @@ HANDLE
 get_io_event()
 {
 	return( WaitableIoEventHandle );
+}
+HANDLE
+get_exit_event()
+{
+	return( WaitableExitEventHandle );
 }
 
 /*  This function will add an entry to the I/O completion port
@@ -242,6 +248,14 @@ init_io_completion_port(
 		"Can't create I/O event handle: %m - another process may be running - EXITING");
 		exit(1);
 	}
+	/* Create the event used to signal an exit event
+	 */
+	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, "WaitableExitEventHandle");
+	if (WaitableExitEventHandle == NULL) {
+		msyslog(LOG_ERR,
+		"Can't create exit event handle: %m - another process may be running - EXITING");
+		exit(1);
+	}
 
 	/* Create the IO completion port
 	 */
@@ -255,7 +269,7 @@ init_io_completion_port(
 	 * Initialize the Wait Handles
 	 */
 	WaitHandles[0] = get_io_event();
-	WaitHandles[1] = CreateEvent(NULL, FALSE, FALSE, "WaitHandles0"); /* exit request */
+	WaitHandles[1] = get_exit_event(); /* exit request */
 	WaitHandles[2] = get_timer_handle();
 
 	/* Have one thread servicing I/O - there were 4, but this would 
