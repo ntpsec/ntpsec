@@ -160,6 +160,7 @@ u_long	asn2ntp		(ASN1_TIME *);
  * Program variables
  */
 extern char *optarg;		/* command line argument */
+char	*progname;
 int	debug = 0;		/* debug, not de bug */
 int	rval;			/* return status */
 #ifdef OPENSSL
@@ -246,6 +247,8 @@ main(
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif /* OPENSSL */
 	char	hostbuf[MAXHOSTNAME + 1];
+
+	progname = argv[0];
 
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */
@@ -557,7 +560,7 @@ main(
 		char	*tld;
 
 		sptr = strrchr(filename, '.');
-		tld = malloc(strlen(sptr));	/* we have an extra byte ... */
+		tld = emalloc(strlen(sptr));	/* we have an extra byte ... */
 		strcpy(tld, 1+sptr);		/* ... see? */
 		sprintf(filename, "ntpkey_IFFkey_%s.%s", trustname,
 		    tld);
@@ -1224,8 +1227,8 @@ gen_mv(
 	dsa->p = BN_new();
 	dsa->q = BN_new();
 	dsa->g = BN_new();
-	s = malloc((n + 1) * sizeof(BIGNUM));
-	s1 = malloc((n + 1) * sizeof(BIGNUM));
+	s = emalloc((n + 1) * sizeof(BIGNUM));
+	s1 = emalloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++)
 		s1[j] = BN_new();
 	temp = 0;
@@ -1325,7 +1328,7 @@ gen_mv(
 	fprintf(stderr,
 	    "Generating polynomial coefficients for %d roots (%d bits)\n",
 	    n, BN_num_bits(dsa->q)); 
-	x = malloc((n + 1) * sizeof(BIGNUM));
+	x = emalloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		x[j] = BN_new();
 		while (1) {
@@ -1342,7 +1345,7 @@ gen_mv(
 	 * expansion of root products (x - x[j]) mod q for all j. The
 	 * method is a present from Charlie Boncelet.
 	 */
-	a = malloc((n + 1) * sizeof(BIGNUM));
+	a = emalloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
 		BN_one(a[i]);
@@ -1363,7 +1366,7 @@ gen_mv(
 	 * Generate g[i] = g^a[i] mod p for all i and the generator g.
 	 */
 	fprintf(stderr, "Generating g[i] parameters\n");
-	g = malloc((n + 1) * sizeof(BIGNUM));
+	g = emalloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
 		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
@@ -1431,8 +1434,8 @@ gen_mv(
 	 * or the product s = prod(s'[j]) mod q, which is the enabling
 	 * key.
 	 */
-	xbar = malloc((n + 1) * sizeof(BIGNUM));
-	xhat = malloc((n + 1) * sizeof(BIGNUM));
+	xbar = emalloc((n + 1) * sizeof(BIGNUM));
+	xhat = emalloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		xbar[j] = BN_new(); xhat[j] = BN_new();
 		BN_zero(xbar[j]);
