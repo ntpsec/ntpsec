@@ -1,3 +1,5 @@
+* [Bug 863] unable to stop ntpd on Windows as the handle reference for events
+            changed
 * Use emalloc() instead of malloc() in refclock_datum.c (Calypso).
 * Start using 'design by contract' assertions.
 * Allow null driftfile.
