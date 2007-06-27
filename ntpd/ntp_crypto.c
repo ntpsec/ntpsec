@@ -3746,6 +3746,7 @@ crypto_tai(
 	FILE	*str;		/* file handle */
 	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
 	u_int32	leapsec[MAX_LEAP]; /* NTP time at leaps */
+	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
@@ -3796,7 +3797,8 @@ crypto_tai(
 	 * must equal the initial insertion of ten seconds on 1 January
 	 * 1972 plus one second for each succeeding insertion.
 	 */
-	i = 0;
+	i = TAI_1972;
+	expire = 0;
 	while (i < MAX_LEAP) {
 		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (dp == NULL)
@@ -3805,13 +3807,19 @@ crypto_tai(
 		if (strlen(buf) < 1)
 			continue;
 
-		if (*buf == '#')
-			continue;
+		if (buf[0] == '#') {
+			if (buf[1] == '@') {
+				if (sscanf(&buf[2], "%lu", &expire) !=
+				    1)
+					break;
+			}
+		}
+		continue;
 
 		if (sscanf(buf, "%u %d", &leapsec[i], &offset) != 2)
 			continue;
 
-		if (i != offset - TAI_1972) 
+		if (i != offset) 
 			break;
 
 		i++;
@@ -3834,9 +3842,13 @@ crypto_tai(
 	tai_leap.ptr = (u_char *)ptr;
 	for (j = 0; j < i; j++)
 		*ptr++ = htonl(leapsec[j]);
+	sys_tai = offset;
+	leap_ins = leapsec[--j];
+	leap_expire = expire;
 	crypto_flags |= CRYPTO_FLAG_TAI;
-	sprintf(statstr, "%s fs %u leap %u len %u", cp, fstamp,
-	   leapsec[--j], len);
+	sprintf(statstr,
+	     "%s fs %u leap %lu tai %d expire %lu len %u", cp,
+	    fstamp, leap_ins, sys_tai, leap_expire, len);
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 	if (debug)
