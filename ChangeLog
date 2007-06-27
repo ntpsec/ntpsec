@@ -1,3 +1,4 @@
+* [Bug 864] Place ntpd service in maintenance mode if using SMF on Solaris
 * [Bug 862] includefile nesting; preserve phonelist on reconfig.
 * [Bug 604] ntpd regularly dies on linux/alpha.
 * more leap second infrastructure fixes from Dave Mills.

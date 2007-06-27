@@ -23,8 +23,8 @@ man_MANS=	ntpd.1
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
-ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntpsim.a
+ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntpsim.a
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
