@@ -1,3 +1,5 @@
+ntpd now syncs to refclocks right away.
+
 Backward-Incomatible changes:
 
 ntpd no longer accepts '-v name' or '-V name' to define internal variables.
