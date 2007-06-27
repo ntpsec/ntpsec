@@ -67,6 +67,7 @@ double	sys_jitter;		/* system jitter (s) */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 u_long	leap_ins;		/* seconds at next leap */
+u_long	leap_expire;		/* seconds leapfile expires */
 u_long	leap_sec;		/* leap countdown */
 static int leap_next;		/* leap consensus */
 static int leap_sw;		/* leap is from file */
@@ -1314,9 +1315,7 @@ clock_update(void)
 	 * Clock was slewed. Update the system stratum, leap bits, root
 	 * delay, root dispersion, reference ID and reference time.
 	 * Except for reference clocks, the minimum dispersion increment
-	 * is not less than sys_mindisp. If a leap is anticipated, read
-	 * the system clock because the time now might not be the time
-	 * at the last offset measurement.
+	 * is not less than sys_mindisp.
 	 */
 	case 1:
 		sys_stratum = min(sys_peer->stratum + 1,
@@ -1324,49 +1323,54 @@ clock_update(void)
 		sys_reftime = sys_peer->rec;
 
 		/*
-		 * If no leap is scheduled and the leap is triggered
-		 * from the leapseconds file, schedule a leap for the
-		 * last entry in the file, but only if it is in the
-		 * future. If triggered by upstream server leap bits and
-		 * the number of bits is at least the sanity threshold,
-		 * schedule a leap for the end of the current month.
-		 *
-		 * If the kernel code is available and enabled, pass the
-		 * current TAI offset to the kernel. Note, if the leap
-		 * hasn't been taken yet, decrement the offset.
+		 * If a leapseconds file is not present or expired and
+		 * the number of upstream server leap bits is at least
+		 * the sanity threshold, schedule a leap for the end of
+		 * the current month.
 		 */
 		get_systime(&now);
-		if (leap_sec == 0) {
-			if (leap_ins > now.l_ui) {
-				if (leap_sw == 0) {
+		if (now.l_ui > leap_expire) {
+			if (leap_next >= sys_minsane) {
+				if (!leap_sw) {
 					leap_sw++;
-					sys_tai--;
+					leap_sec = leap_month(now.l_ui);
 					msyslog(LOG_NOTICE,
-					    "TAI offset %d s", sys_tai);
-#ifdef KERNEL_PLL
-					if (pll_control && kern_enable)
-						loop_config(LOOP_LEAP,
-						    0);
-#endif /* KERNEL_PLL */
+					    "leap second armed %lu s",
+					    leap_sec);
 				}
-				if (leap_ins - now.l_ui < 28 * 86400)
-					leap_sec = leap_ins - now.l_ui;
-			} else if (leap_next >= sys_minsane) {
-				leap_sec = leap_month(now.l_ui);
+			} else {
+				leap_sw = 0;
+				leap_sec = 0;
 			}
-			if (leap_sec > 0)
-				msyslog(LOG_NOTICE,
-				    "leap second armed %lu s",
-				    leap_sec);
-				
 
 		/*
-		 * If the leap was not triggered from the leapsecond
-		 * file, cancel the leap if the server leap bits grow
-		 * dim.
+		 * If a leapseconds file is present and not expired and
+		 * a future leap is scheduled, decrement the TAI offset.
+		 * If the kernel code is available and enabled, pass the
+		 * TAI offset to the kernel. If less than 28 days remain
+		 * to the leap, schedule a leap when the leapseconds
+		 * counter expires.
 		 */
-		} else if (!leap_sw && leap_next < sys_minsane) {
-			leap_sec = 0;
+		} else if (leap_sec == 0) {
+			if (leap_ins > now.l_ui) {
+				if (leap_ins - now.l_ui < 28 * 86400) {
+					leap_sec = leap_ins - now.l_ui;
+					msyslog(LOG_NOTICE,
+					    "leap second armed %lu s",
+					    leap_sec);
+				}
+				if (!leap_sw)
+					sys_tai--;
+			}
+			if (!leap_sw) {
+				leap_sw++;
+				msyslog(LOG_NOTICE,
+				    "TAI offset %d s", sys_tai);
+#ifdef KERNEL_PLL
+				if (pll_control && kern_enable)
+					loop_config(LOOP_LEAP, 0);
+#endif /* KERNEL_PLL */
+			}
 		}
 
 		/*

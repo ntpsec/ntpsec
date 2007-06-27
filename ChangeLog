@@ -1,9 +1,9 @@
+* more leap second infrastructure fixes from Dave Mills.
 * [Bug 858] recent leapfile changes broke non-OpenSSL builds.
 * Use emalloc() instead of malloc() in refclock_datum.c (Calysto).
 * Start using 'design by contract' assertions.
 * [Bug 767] Fast sync to refclocks wanted.
 * Allow null driftfile.
-* leap second infrastructure fixes from Dave Mills.
 * Use YYERROR_VERBOSE for the new parser, and fix related BUILT_SOURCES.
 * [Bug 629] changes to ensure broadcast works including on wildcard addresses
 * [Bug 853] get_node() must return a pointer to maximally-aligned memory.

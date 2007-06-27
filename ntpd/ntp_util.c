@@ -757,12 +757,14 @@ leap_file(
 	FILE	*str;		/* file handle */
 	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
 	u_long	leapsec;	/* NTP time at leap */
+	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* TAI offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	*dp;
 	int	i;
 
 	NTP_REQUIRE(cp != NULL);
+
 	/*
 	 * Open the file and discard comment lines. If the first
 	 * character of the file name is not '/', prepend the keys
@@ -786,6 +788,7 @@ leap_file(
 	 * insertion.
 	 */
 	i = TAI_1972;
+	expire = 0;
 	while (i < MAX_TAI) {
 		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (dp == NULL)
@@ -794,8 +797,14 @@ leap_file(
 		if (strlen(buf) < 1)
 			continue;
 
-		if (*buf == '#')
-			continue;
+		if (buf[0] == '#') {
+			if (buf[1] == '@') {
+				if (sscanf(&buf[2], "%lu", &expire) !=
+				    1)
+					break;
+			}
+		}
+		continue;
 
 		if (sscanf(buf, "%lu %d", &leapsec, &offset) != 2)
 			continue;
@@ -806,13 +815,14 @@ leap_file(
 	}
 	fclose(str);
 	if (dp != NULL) {
-		msyslog(LOG_INFO, "leapseconds format error from %s",
-		    cp);
+		msyslog(LOG_INFO, "leapseconds %s error",  cp);
 	} else {
 		sys_tai = offset;
 		leap_ins = leapsec;
-		msyslog(LOG_INFO, "TAI offset %d s at %lu from %s",
-		    sys_tai, leap_ins, cp);
+		leap_expire = expire;
+		msyslog(LOG_INFO,
+		    "TAI offset %d s at %lu file %s expire %lu",
+		    sys_tai, leap_ins, cp, leap_expire);
 	}
 }
 
