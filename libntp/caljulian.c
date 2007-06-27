@@ -7,6 +7,7 @@
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
+#include "ntp_assert.h"
 
 #if 0
 /*
@@ -132,8 +133,10 @@ caljulian(
 	)
 {
 	struct tm *tm;
+	NTP_REQUIRE(jt != NULL);
 
 	tm = ntp2unix_tm(ntptime, 0);
+	NTP_INSIST(tm != NULL);
 
 	jt->hour = (u_char) tm->tm_hour;
 	jt->minute = (u_char) tm->tm_min;

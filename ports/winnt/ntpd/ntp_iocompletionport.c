@@ -59,6 +59,7 @@ static HANDLE hHeapHandle = NULL;
 static HANDLE hIoCompletionPort = NULL;
 
 static HANDLE WaitableIoEventHandle = NULL;
+static HANDLE WaitableExitEventHandle = NULL;
 
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
@@ -121,6 +122,11 @@ HANDLE
 get_io_event()
 {
 	return( WaitableIoEventHandle );
+}
+HANDLE
+get_exit_event()
+{
+	return( WaitableExitEventHandle );
 }
 
 /*  This function will add an entry to the I/O completion port
@@ -244,6 +250,14 @@ init_io_completion_port(
 		"Can't create I/O event handle: %m - another process may be running - EXITING");
 		exit(1);
 	}
+	/* Create the event used to signal an exit event
+	 */
+	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, "WaitableExitEventHandle");
+	if (WaitableExitEventHandle == NULL) {
+		msyslog(LOG_ERR,
+		"Can't create exit event handle: %m - another process may be running - EXITING");
+		exit(1);
+	}
 
 	/* Create the IO completion port
 	 */
@@ -257,7 +271,7 @@ init_io_completion_port(
 	 * Initialize the Wait Handles
 	 */
 	WaitHandles[0] = get_io_event();
-	WaitHandles[1] = CreateEvent(NULL, FALSE, FALSE, "WaitHandles0"); /* exit request */
+	WaitHandles[1] = get_exit_event(); /* exit request */
 	WaitHandles[2] = get_timer_handle();
 
 	/* Have one thread servicing I/O - there were 4, but this would 
@@ -517,16 +531,22 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 #endif
 		ignore_this = inter->ignore_packets;
 		if (ignore_this == ISC_TRUE && inter->family == AF_INET &&
-		    inter->flags == (INT_BROADCAST | INT_WILDCARD) &&
+		    (inter->flags & (INT_BROADCAST | INT_WILDCARD)) &&
 		    get_packet_mode(buff) == MODE_BROADCAST &&
 		    get_broadcastclient_flag() == ISC_TRUE
 		    ) {
 			ignore_this = ISC_FALSE;
 #ifdef DEBUG
-			if (debug > 3)
+			if (debug > 1)
   				printf("****Accepting ignored packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
 #endif
 		}
+#ifdef DEBUG
+		else {
+			if (debug > 3)
+				printf(" Packet mode is %d\n", get_packet_mode(buff));
+		}
+#endif
 
 		/*
 		 * If we keep it add some info to the structure

@@ -7,6 +7,7 @@
 #include "ntp_unixtime.h"	/* includes <sys/time.h> */
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 static const char *months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -52,6 +53,7 @@ ntp2unix_tm(
 	*/
     for (epoch_nr = 0; epoch_nr < MAX_EPOCH_NR; epoch_nr++) {
 		tm = local ? localtime(&t) : gmtime(&t);
+		NTP_INSIST(tm != NULL);
 
 #if SIZEOF_TIME_T < 4
 # include "Bletch: sizeof(time_t) < 4!"

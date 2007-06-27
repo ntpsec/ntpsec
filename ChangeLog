@@ -1,10 +1,15 @@
 * [Bug 862] includefile nesting; preserve phonelist on reconfig.
+* [Bug 604] ntpd regularly dies on linux/alpha.
+* more leap second infrastructure fixes from Dave Mills.
+* [Bug 858] recent leapfile changes broke non-OpenSSL builds.
+* Use emalloc() instead of malloc() in refclock_datum.c (Calysto).
+* Start using 'design by contract' assertions.
+* [Bug 767] Fast sync to refclocks wanted.
 * Allow null driftfile.
-* More leap second fixes from Dave Mills.
 * Use YYERROR_VERBOSE for the new parser, and fix related BUILT_SOURCES.
-* [Bug #629] changes to ensure broadcast works including on wildcard addresses
+* [Bug 629] changes to ensure broadcast works including on wildcard addresses
 * [Bug 853] get_node() must return a pointer to maximally-aligned memory.
-* Leap file fixes from Dave Mills.
+* Initial leap file fixes from Dave Mills.
 * [Bug 858] Recent leapfile changes broke without OPENSSL.
 * Use a char for DIR_SEP, not a string.
 * [Bug 850] driftfile parsing changes.
@@ -66,6 +71,9 @@
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
+* {Bug 863] unable to stop ntpd on Windows as the handle reference for events
+	    changed
+(4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 854] Broadcast address was not correctly set for interface addresses
 * [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
 	    to reflect the actual configuration.

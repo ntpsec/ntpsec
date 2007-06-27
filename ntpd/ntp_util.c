@@ -11,6 +11,7 @@
 #include "ntp_filegen.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -54,8 +55,9 @@
  * File names
  */
 static	char *key_file_name;		/* keys file name */
+char	*leapseconds_file_name;		/* leapseconds file name */
+char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
-char *stats_drift_file;			/* frequency file name */
 int stats_write_period = 3600;		/* seconds between writes. */
 
 /*
@@ -121,12 +123,11 @@ init_util(void)
 #ifdef OPENSSL
 	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
-
 #ifdef DEBUG_TIMING
 	filegen_register(&statsdir[0], "timingstats", &timingstats);
-#endif
+#endif /* DEBUG_TIMING */
 
-leap_file("/etc/leapseconds");	/***** temp for debug *****/
+leap_file("/etc/ntp.leap");	/***** temp for debug *****/
 
 }
 
@@ -296,6 +297,10 @@ stats_config(
 			strcpy(parameter,"STATS_FREQ_FILE");
 			break;
 
+		    case STATS_LEAP_FILE:
+			strcpy(parameter,"STATS_LEAP_FILE");
+			break;
+
 		    case STATS_STATSDIR:
 			strcpy(parameter,"STATS_STATSDIR");
 			break;
@@ -372,7 +377,7 @@ stats_config(
 		    "frequency initialized %.3f PPM from %s",
 			old_drift * 1e6, stats_drift_file);
 
-		leap_file("/etc/leapseconds");
+		leap_file("/etc/ntp.leap");
 
 		break;
 	
@@ -396,7 +401,8 @@ stats_config(
 			if (value_l == 0)
 				add_dir_sep = 0;
 			else
-				add_dir_sep = (DIR_SEP == value[value_l - 1]);
+				add_dir_sep = (DIR_SEP ==
+				    value[value_l - 1]);
 
 			if (add_dir_sep)
 			    snprintf(statsdir, sizeof(statsdir),
@@ -454,6 +460,10 @@ stats_config(
 		}
 		fprintf(fp, "%d", (int) getpid());
 		fclose(fp);;
+		break;
+
+	    case STATS_LEAP_FILE:
+		leapseconds_file_name = invalue;
 		break;
 
 	    default:
@@ -698,11 +708,46 @@ record_crypto_stats(
 #endif /* OPENSSL */
 
 
+#ifdef DEBUG_TIMING
 /*
- * leap_file - load leapseconds table from file
+ * record_timing_stats - write timing statistics to file
+ *
+ * file format:
+ * day (mjd)
+ * time (s past midnight)
+ * text message
+ */
+void
+record_timing_stats(
+	const char *text
+	)
+{
+	static unsigned int flshcnt;
+	l_fp	now;
+	u_long	day;
+
+	if (!stats_control)
+		return;
+
+	get_systime(&now);
+	filegen_setup(&timingstats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1900;
+	now.l_ui %= 86400;
+	if (timingstats.fp != NULL) {
+		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(&now,
+		    3), text);
+		if (++flshcnt % 100 == 0)
+			fflush(timingstats.fp);
+	}
+}
+#endif
+
+
+/*
+ * leap_file - read leapseconds file
  *
  * Read the ERTS leapsecond file in NIST text format and extract the
- * NTP seconds of the latest leap and TAI offset after the leap..
+ * NTP seconds of the latest leap and TAI offset after the leap.
  */
 static void
 leap_file(
@@ -712,10 +757,13 @@ leap_file(
 	FILE	*str;		/* file handle */
 	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
 	u_long	leapsec;	/* NTP time at leap */
+	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* TAI offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
 	char	*dp;
 	int	i;
+
+	NTP_REQUIRE(cp != NULL);
 
 	/*
 	 * Open the file and discard comment lines. If the first
@@ -740,6 +788,7 @@ leap_file(
 	 * insertion.
 	 */
 	i = TAI_1972;
+	expire = 0;
 	while (i < MAX_TAI) {
 		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
 		if (dp == NULL)
@@ -748,8 +797,14 @@ leap_file(
 		if (strlen(buf) < 1)
 			continue;
 
-		if (*buf == '#')
-			continue;
+		if (buf[0] == '#') {
+			if (buf[1] == '@') {
+				if (sscanf(&buf[2], "%lu", &expire) !=
+				    1)
+					break;
+			}
+		}
+		continue;
 
 		if (sscanf(buf, "%lu %d", &leapsec, &offset) != 2)
 			continue;
@@ -760,13 +815,14 @@ leap_file(
 	}
 	fclose(str);
 	if (dp != NULL) {
-		msyslog(LOG_INFO, "leapseconds format error from %s",
-		    cp);
+		msyslog(LOG_INFO, "leapseconds %s error",  cp);
 	} else {
 		sys_tai = offset;
 		leap_ins = leapsec;
-		msyslog(LOG_INFO, "TAI offset %d s at %lu from %s",
-		    sys_tai, leap_ins, cp);
+		leap_expire = expire;
+		msyslog(LOG_INFO,
+		    "TAI offset %d s at %lu file %s expire %lu",
+		    sys_tai, leap_ins, cp, leap_expire);
 	}
 }
 
@@ -821,41 +877,6 @@ leap_month(
 	 */
 	return (*ptr * L_DAY - ltemp - L_DAY);
 }
-
-
-#ifdef DEBUG_TIMING
-/*
- * record_crypto_stats - write crypto statistics to file
- *
- * file format:
- * day (mjd)
- * time (s past midnight)
- * text message
- */
-void
-record_timing_stats(
-	const char *text
-	)
-{
-	static unsigned int flshcnt;
-	l_fp	now;
-	u_long	day;
-
-	if (!stats_control)
-		return;
-
-	get_systime(&now);
-	filegen_setup(&timingstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
-	if (timingstats.fp != NULL) {
-		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(&now,
-		    3), text);
-		if (++flshcnt % 100 == 0)
-			fflush(timingstats.fp);
-	}
-}
-#endif
 
 
 /*

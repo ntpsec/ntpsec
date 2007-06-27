@@ -98,6 +98,7 @@
 #include "ntp_types.h"
 #include "ntp_random.h"
 #include "l_stdlib.h"
+#include "ntp_assert.h"
 
 #include "ntp-keygen-opts.h"
 
@@ -160,6 +161,7 @@ u_long	asn2ntp		(ASN1_TIME *);
  * Program variables
  */
 extern char *optarg;		/* command line argument */
+char	*progname;
 int	debug = 0;		/* debug, not de bug */
 int	rval;			/* return status */
 #ifdef OPENSSL
@@ -246,6 +248,8 @@ main(
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif /* OPENSSL */
 	char	hostbuf[MAXHOSTNAME + 1];
+
+	progname = argv[0];
 
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */
@@ -557,7 +561,7 @@ main(
 		char	*tld;
 
 		sptr = strrchr(filename, '.');
-		tld = malloc(strlen(sptr));	/* we have an extra byte ... */
+		tld = emalloc(strlen(sptr));	/* we have an extra byte ... */
 		strcpy(tld, 1+sptr);		/* ... see? */
 		sprintf(filename, "ntpkey_IFFkey_%s.%s", trustname,
 		    tld);
@@ -565,8 +569,10 @@ main(
 		fprintf(stderr, "Writing new IFF key %s\n", filename);
 		fprintf(stdout, "# %s\n# %s", filename, ctime(&epoch));
 		dsa = pkey_iff->pkey.dsa;
+		NTP_INSIST(dsa != NULL);
 		BN_copy(dsa->priv_key, BN_value_one());
 		pkey = EVP_PKEY_new();
+		NTP_INSIST(pkey != NULL);
 		EVP_PKEY_assign_DSA(pkey, dsa);
 		PEM_write_PrivateKey(stdout, pkey, passwd2 ?
 		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd2);
@@ -612,6 +618,8 @@ gen_md5(
 	fprintf(stderr, "Generating MD5 keys...\n");
 	str = fheader("MD5key", hostname);
 	keyid = BN_new(); key = BN_new();
+	NTP_INSIST(keyid != NULL);
+	NTP_INSIST(key != NULL);
 	BN_rand(keyid, 16, -1, 0);
 	BN_rand(key, 128, -1, 0);
 	BN_bn2bin(key, bin);
@@ -704,6 +712,7 @@ gen_rsa(
 	 */
 	str = fheader("RSAkey", hostname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -762,6 +771,7 @@ gen_dsa(
 	 */
 	str = fheader("DSAkey", hostname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -832,7 +842,14 @@ gen_iff(
 	 */
 	fprintf(stderr, "Generating IFF keys (%d bits)...\n", modulus);
 	b = BN_new(); r = BN_new(); k = BN_new();
+	NTP_INSIST(b != NULL);
+	NTP_INSIST(r != NULL);
+	NTP_INSIST(k != NULL);
 	u = BN_new(); v = BN_new(); w = BN_new(); ctx = BN_CTX_new();
+	NTP_INSIST(u != NULL);
+	NTP_INSIST(v != NULL);
+	NTP_INSIST(w != NULL);
+	NTP_INSIST(ctx != NULL);
 	BN_rand(b, BN_num_bits(dsa->q), -1, 0);	/* a */
 	BN_mod(b, b, dsa->q, ctx);
 	BN_sub(v, dsa->q, b);
@@ -904,6 +921,7 @@ gen_iff(
 	 */
 	str = fheader("IFFpar", trustname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -971,6 +989,7 @@ gen_gqpar(
 	 * small number to minimize the file size.
 	 */
 	ctx = BN_CTX_new();
+	NTP_INSIST(ctx != NULL);
 	BN_rand(rsa->e, BN_num_bits(rsa->n), -1, 0); /* b */
 	BN_mod(rsa->e, rsa->e, rsa->n, ctx);
 	BN_copy(rsa->d, BN_value_one());
@@ -990,6 +1009,7 @@ gen_gqpar(
 	 */
 	str = fheader("GQpar", trustname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -1024,13 +1044,21 @@ gen_gqkey(
 	 */
 	fprintf(stderr, "Updating GQ keys (%d bits)...\n", modulus);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
+	NTP_INSIST(ctx != NULL);
+	NTP_INSIST(u != NULL);
+	NTP_INSIST(v != NULL);
 	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
+	NTP_INSIST(g != NULL);
+	NTP_INSIST(k != NULL);
+	NTP_INSIST(r != NULL);
+	NTP_INSIST(y != NULL);
 
 	/*
 	 * When generating his certificate, Bob rolls random private key
 	 * u. 
 	 */
 	rsa = gqpar->pkey.rsa;
+	NTP_INSIST(rsa != NULL);
 	BN_rand(u, BN_num_bits(rsa->n), -1, 0); /* u */
 	BN_mod(u, u, rsa->n, ctx);
 	BN_mod_inverse(v, u, rsa->n, ctx);	/* u^-1 mod n */
@@ -1110,6 +1138,7 @@ gen_gqkey(
 	 */
 	str = fheader("GQpar", trustname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -1219,15 +1248,27 @@ gen_mv(
 	    "Generating MV parameters for %d keys (%d bits)...\n", n,
 	    modulus / n);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
+	NTP_INSIST(ctx != NULL);
+	NTP_INSIST(u != NULL);
+	NTP_INSIST(v != NULL);
+	NTP_INSIST(w != NULL);
 	b = BN_new(); b1 = BN_new();
+	NTP_INSIST(b != NULL);
+	NTP_INSIST(b1 != NULL);
 	dsa = DSA_new();
+	NTP_INSIST(dsa != NULL);
 	dsa->p = BN_new();
+	NTP_INSIST(dsa->p != NULL);
 	dsa->q = BN_new();
+	NTP_INSIST(dsa->q != NULL);
 	dsa->g = BN_new();
-	s = malloc((n + 1) * sizeof(BIGNUM));
-	s1 = malloc((n + 1) * sizeof(BIGNUM));
-	for (j = 1; j <= n; j++)
+	NTP_INSIST(dsa->g != NULL);
+	s = emalloc((n + 1) * sizeof(BIGNUM));
+	s1 = emalloc((n + 1) * sizeof(BIGNUM));
+	for (j = 1; j <= n; j++) {
 		s1[j] = BN_new();
+		NTP_INSIST(s1[j] != NULL);
+		}
 	temp = 0;
 	for (j = 1; j <= n; j++) {
 		while (1) {
@@ -1312,6 +1353,7 @@ gen_mv(
 	 */
 	for (j = 1; j <= n; j++) {
 		s[j] = BN_new();
+		NTP_INSIST(s[j] != NULL);
 		BN_add(s[j], dsa->q, s1[j]);
 		BN_div(s[j], u, s[j], s1[j], ctx);
 	}
@@ -1325,9 +1367,10 @@ gen_mv(
 	fprintf(stderr,
 	    "Generating polynomial coefficients for %d roots (%d bits)\n",
 	    n, BN_num_bits(dsa->q)); 
-	x = malloc((n + 1) * sizeof(BIGNUM));
+	x = emalloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		x[j] = BN_new();
+		NTP_INSIST(x[j] != NULL);
 		while (1) {
 			BN_rand(x[j], BN_num_bits(dsa->q), 0, 0);
 			BN_mod(x[j], x[j], dsa->q, ctx);
@@ -1342,9 +1385,10 @@ gen_mv(
 	 * expansion of root products (x - x[j]) mod q for all j. The
 	 * method is a present from Charlie Boncelet.
 	 */
-	a = malloc((n + 1) * sizeof(BIGNUM));
+	a = emalloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
+		NTP_INSIST(a[i] != NULL);
 		BN_one(a[i]);
 	}
 	for (j = 1; j <= n; j++) {
@@ -1363,9 +1407,10 @@ gen_mv(
 	 * Generate g[i] = g^a[i] mod p for all i and the generator g.
 	 */
 	fprintf(stderr, "Generating g[i] parameters\n");
-	g = malloc((n + 1) * sizeof(BIGNUM));
+	g = emalloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
+		NTP_INSIST(g[i] != NULL);
 		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
 	}
 
@@ -1401,6 +1446,7 @@ gen_mv(
 	 * since it is expensive to compute.
 	 */
 	biga = BN_new();
+	NTP_INSIST(biga != NULL);
 	BN_one(biga);
 	for (j = 1; j <= n; j++) {
 		for (i = 0; i < n; i++) {
@@ -1431,10 +1477,12 @@ gen_mv(
 	 * or the product s = prod(s'[j]) mod q, which is the enabling
 	 * key.
 	 */
-	xbar = malloc((n + 1) * sizeof(BIGNUM));
-	xhat = malloc((n + 1) * sizeof(BIGNUM));
+	xbar = emalloc((n + 1) * sizeof(BIGNUM));
+	xhat = emalloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		xbar[j] = BN_new(); xhat[j] = BN_new();
+		NTP_INSIST(xbar[j] != NULL);
+		NTP_INSIST(xhat[j] != NULL);
 		BN_zero(xbar[j]);
 		BN_set_word(v, n);
 		for (i = 1; i <= n; i++) {
@@ -1455,6 +1503,7 @@ gen_mv(
 	 * otherwise, the plaintext and cryptotext would be identical.
 	 */
 	ss = BN_new();
+	NTP_INSIST(ss != NULL);
 	BN_copy(ss, dsa->q);
 	BN_div(ss, u, dsa->q, s1[n], ctx);
 
@@ -1467,6 +1516,9 @@ gen_mv(
 	 * enabling key is changed.
 	 */
 	bige = BN_new(); gbar = BN_new(); ghat = BN_new();
+	NTP_INSIST(bige != NULL);
+	NTP_INSIST(gbar != NULL);
+	NTP_INSIST(ghat != NULL);
 	BN_mod_exp(bige, biga, ss, dsa->p, ctx);
 	BN_mod_exp(gbar, dsa->g, ss, dsa->p, ctx);
 	BN_mod_mul(v, ss, b, dsa->q, ctx);
@@ -1511,6 +1563,7 @@ gen_mv(
 	 */
 	str = fheader("MVpar", trustname);
 	pkey = EVP_PKEY_new();
+	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
 	    NULL, 0, NULL, passwd2);
@@ -1526,11 +1579,14 @@ gen_mv(
 	 * for its use.
 	 */
 	sdsa = DSA_new();
+	NTP_INSIST(sdsa != NULL);
 	sdsa->p = BN_dup(dsa->p);
 	sdsa->q = BN_dup(BN_value_one());
 	sdsa->g = BN_dup(BN_value_one());
 	sdsa->priv_key = BN_new();
+	NTP_INSIST(sdsa->priv_key != NULL);
 	sdsa->pub_key = BN_new();
+	NTP_INSIST(sdsa->pub_key != NULL);
 	for (j = 1; j <= n; j++) {
 		BN_copy(sdsa->priv_key, xbar[j]);
 		BN_copy(sdsa->pub_key, xhat[j]);
@@ -1559,6 +1615,7 @@ gen_mv(
 		sprintf(ident, "MVkey%d", j);
 		str = fheader(ident, trustname);
 		pkey1 = EVP_PKEY_new();
+		NTP_INSIST(pkey1 != NULL);
 		EVP_PKEY_set1_DSA(pkey1, sdsa);
 		PEM_write_PrivateKey(str, pkey1, passwd2 ?
 		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd2);
@@ -1629,8 +1686,10 @@ x509	(
 	id = OBJ_nid2sn(md->pkey_type);
 	fprintf(stderr, "Generating certificate %s\n", id);
 	cert = X509_new();
+	NTP_INSIST(cert != NULL);
 	X509_set_version(cert, 2L);
 	serial = ASN1_INTEGER_new();
+	NTP_INSIST(serial != NULL);
 	ASN1_INTEGER_set(serial, epoch + JAN_1970);
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);

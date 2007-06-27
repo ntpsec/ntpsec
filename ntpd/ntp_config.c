@@ -183,6 +183,7 @@ int old_config_style = 1;    /* A boolean flag, which when set,
 
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
+extern char *leapseconds_file_name; /*name of the leapseconds file */
 
 /* FUNCTION PROTOTYPES */
 
@@ -749,6 +750,7 @@ struct key_tok keyword_list[] = {
 	{ "filegen",		T_Filegen,         NO_ARG },
 	{ "fudge",		T_Fudge,           SINGLE_ARG },
 	{ "includefile",	T_Includefile,     SINGLE_ARG },
+	{ "leapfile",		T_Leapfile,	   SINGLE_ARG },
 	{ "logconfig",		T_Logconfig,       SINGLE_ARG },
 	{ "logfile",		T_Logfile,         SINGLE_ARG },
 	{ "manycastclient",	T_Manycastclient,  SINGLE_ARG },
@@ -1570,8 +1572,12 @@ config_vars(void)
 				free(curr_var->value.s);
 			}
 			break;
-			case T_DriftMinutes:
+		    case T_DriftMinutes:
 			stats_write_period = 60 * curr_var->value.i;
+			break;
+		    case T_Leapfile:
+			stats_config(STATS_LEAP_FILE, curr_var->value.s);
+			free(curr_var->value.s);
 			break;
 		    case T_Pidfile:
 			stats_config(STATS_PID_FILE, curr_var->value.s);

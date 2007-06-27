@@ -142,6 +142,7 @@
 %token		T_Keysdir
 %token		T_Kod
 %token		T_Leap
+%token		T_Leapfile
 %token		T_Limited
 %token		T_Link
 %token		T_Logconfig
@@ -753,6 +754,8 @@ miscellaneous_command
                     { enqueue(my_config.vars, create_attr_dval(T_Tick, $2));  }
 	|	T_Driftfile drift_parm
          { /* Null action, possibly all null parms */ }
+	|	T_Leapfile T_String 
+		{ enqueue(my_config.vars, create_attr_sval(T_Leapfile, $2)); }
 
 	|	T_Pidfile T_String 
                     { enqueue(my_config.vars, create_attr_sval(T_Pidfile, $2));  }
