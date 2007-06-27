@@ -2130,6 +2130,8 @@ clock_select(void)
 	 * the island to the rats.
 	 */
 	if (nlist == 0) {
+		error[0] = 0;
+		synch[0] = 0;
 		if (typeacts != 0) {
 			typeacts->status = CTL_PST_SEL_DISTSYSPEER;
 			peer_list[0] = typeacts;

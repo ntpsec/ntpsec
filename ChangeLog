@@ -1,3 +1,4 @@
+* [Bug 604] ntpd regularly dies on linux/alpha.
 * more leap second infrastructure fixes from Dave Mills.
 * [Bug 858] recent leapfile changes broke non-OpenSSL builds.
 * Use emalloc() instead of malloc() in refclock_datum.c (Calysto).
