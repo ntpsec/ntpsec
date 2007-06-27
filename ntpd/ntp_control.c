@@ -1441,7 +1441,6 @@ ctl_putsys(
 			ctl_putstr(sys_var[CS_IDENT].text,
 			    mvpar_file, strlen(mvpar_file));
 		break;
-#endif /* OPENSSL */
 
 	case CS_LEAPTAB:
 		ctl_putuint(sys_var[CS_LEAPTAB].text,
@@ -1451,6 +1450,8 @@ ctl_putsys(
 	case CS_TAI:
 		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
+
+#endif /* OPENSSL */
 	}
 }
 
