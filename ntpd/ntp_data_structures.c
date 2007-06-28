@@ -23,7 +23,7 @@
 
 queue *create_priority_queue(int (*get_order)(void *, void *))
 {
-    queue *my_queue = (queue *) malloc(sizeof(queue));
+    queue *my_queue = (queue *) emalloc(sizeof(queue));
     my_queue->get_order = get_order;
     my_queue->front = NULL;
     my_queue->no_of_elements = 0;
@@ -59,7 +59,7 @@ void destroy_queue(queue *my_queue)
 void *get_node(size_t size)
 {
     node *new_node;
-    new_node = (node *) malloc(sizeof(node) + size);
+    new_node = (node *) emalloc(sizeof(node) + size);
     if (new_node != NULL) {
         new_node->node_next = NULL; 
         return new_node + 1;

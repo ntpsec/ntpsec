@@ -2006,10 +2006,13 @@ asn2ntp	(
 	char	*v;		/* pointer to ASN1_TIME string */
 	struct	tm tm;		/* used to convert to NTP time */
 
+	NTP_REQUIRE(asn1time != NULL);
+	NTP_REQUIRE(asn1time->data != NULL);
+
 	/*
 	 * Extract time string YYMMDDHHMMSSZ from ASN1 time structure.
 	 * Note that the YY, MM, DD fields start with one, the HH, MM,
-	 * SS fiels start with zero and the Z character should be 'Z'
+	 * SS fields start with zero and the Z character should be 'Z'
 	 * for UTC. Also note that years less than 50 map to years
 	 * greater than 100. Dontcha love ASN.1? Better than MIL-188.
 	 */
@@ -3095,6 +3098,8 @@ cert_parse(
 	cnt = X509_get_ext_count(cert);
 	for (i = 0; i < cnt; i++) {
 		ext = X509_get_ext(cert, i);
+		NTP_INSIST(ext != NULL);
+		NTP_INSIST(ext->value != NULL);
 		method = X509V3_EXT_get(ext);
 		temp = OBJ_obj2nid(ext->object);
 		switch (temp) {
