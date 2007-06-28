@@ -73,6 +73,7 @@
 * [Bug 756] Require ANSI C (function prototypes).
 * codec (audio) and ICOM changes from Dave Mills.
 
+(4.2.4p3)
 * [Bug 863] unable to stop ntpd on Windows as the handle reference for events
 	    changed
 (4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
