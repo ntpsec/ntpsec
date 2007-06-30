@@ -1,5 +1,5 @@
 ---
-(4.2.4p3)
+(4.2.4p3) Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 863] unable to stop ntpd on Windows as the handle reference for events
 	    changed
