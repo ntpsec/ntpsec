@@ -28,9 +28,9 @@
 * Cleanup FILE * usage after fclose() in ntp_filegen.c.
 * [Bug 843] Windows Completion port code was incorrectly merged from -stable.
 * [Bug 841] make deferred binding to local interface the default.
-	    (allows peers/servers to be configured even when no route exists)
+  (allows peers/servers to be configured even when no route exists)
 * [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been
-	    configured.
+  configured.
 * [Bug 824] Added new parser modules to the Windows project file.
 * [Bug 832] Add libisc/log.c headers to the distribution.
 * [Bug 808] Only write the drift file if we are in state 4.
@@ -39,8 +39,7 @@
 * [Bug 825] ntp_scanner.c needs to #include <config.h> .
 * [Bug 824] New parser code has some build problems with the SIM code.
 * [Bug 817] Use longnames for setting ntp variables on the command-line;
-	    Allowing '-v' with and without an arg to disambiguate usage
-	    is error-prone.
+  Allowing '-v' with and without an arg to disambiguate usage is error-prone.
 * [Bug 822] set progname once, early.
 * [Bug 819] remove erroneous #if 0 in Windows completion port code.
 * The new config code missed an #ifdef for building without refclocks.
@@ -77,20 +76,19 @@
 (4.2.4p3) Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 863] unable to stop ntpd on Windows as the handle reference for events
-	    changed
+  changed
 
 ---
 (4.2.4p2) Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 854] Broadcast address was not correctly set for interface addresses
 * [Bug 829] reduce syslog noise, while there fix Enabled/Disable logging
-	    to reflect the actual configuration.
+  to reflect the actual configuration.
 * [Bug 795] Moved declaration of variable to top of function.
 * [Bug 789] Fix multicast client crypto authentication and make sure arriving
-	    multicast packets do not disturb the autokey dance.
+  multicast packets do not disturb the autokey dance.
 * [Bug 785] improve handling of multicast interfaces
-	    (multicast routers still need to run a multicast routing
-	    software/daemon)
+  (multicast routers still need to run a multicast routing software/daemon)
 * [Bug 527] Don't write from source address length to wrong location
 * Upgraded autogen and libopts.
 * [Bug 811] ntpd should not read a .ntprc file.
@@ -184,52 +182,52 @@
 ---
 (4.2.2p4) Released by Harlan Stenn <stenn@ntp.org>
 
- * [Bug 710] compat getnameinfo() has off-by-one error
- * [Bug 690] Buffer overflow in Windows when doing DNS Lookups
+* [Bug 710] compat getnameinfo() has off-by-one error
+* [Bug 690] Buffer overflow in Windows when doing DNS Lookups
 
 ---
 (4.2.2p3) Released by Harlan Stenn <stenn@ntp.org>
 
- * Make the ChangeLog file cleaner and easier to read
- * [Bug 601] ntpq's decodeint uses an extra level of indirection
- * [Bug 657] Different OSes need different sized args for IP_MULTICAST_LOOP
- * release engineering/build changes
- * Documentation fixes
- * Get sntp working under AIX-5
+* Make the ChangeLog file cleaner and easier to read
+* [Bug 601] ntpq's decodeint uses an extra level of indirection
+* [Bug 657] Different OSes need different sized args for IP_MULTICAST_LOOP
+* release engineering/build changes
+* Documentation fixes
+* Get sntp working under AIX-5
 
 ---
 (4.2.2p2) (broken)
 
- * Get sntp working under AIX-5
+* Get sntp working under AIX-5
 
 ---
 (4.2.2p1)
 
- * [Bug 661] Use environment variable to specify the base path to openssl.
- * Resolve an ambiguity in the copyright notice
- * Added some new documentation files
- * URL cleanup in the documentation
- * [Bug 657]: IP_MULTICAST_LOOP uses a u_char value/size
- * quiet gcc4 complaints
- * more Coverity fixes
- * [Bug 614] manage file descriptors better
- * [Bug 632] update kernel PPS offsets when PPS offset is re-configured
- * [Bug 637] Ignore UP in*addr_any interfaces
- * [Bug 633] Avoid writing files in srcdir
- * release engineering/build changes
+* [Bug 661] Use environment variable to specify the base path to openssl.
+* Resolve an ambiguity in the copyright notice
+* Added some new documentation files
+* URL cleanup in the documentation
+* [Bug 657]: IP_MULTICAST_LOOP uses a u_char value/size
+* quiet gcc4 complaints
+* more Coverity fixes
+* [Bug 614] manage file descriptors better
+* [Bug 632] update kernel PPS offsets when PPS offset is re-configured
+* [Bug 637] Ignore UP in*addr_any interfaces
+* [Bug 633] Avoid writing files in srcdir
+* release engineering/build changes
 
 ---
 (4.2.2)
 
- * SNTP
- * Many bugfixes
- * Implements the current "goal state" of NTPv4
- * Autokey improvements
- * Much better IPv6 support
- * [Bug 360] ntpd loses handles with LAN connection disabled.
- * [Bug 239] Fix intermittent autokey failure with multicast clients.
- * Rewrite of the multicast code
- * New version numbering scheme
+* SNTP
+* Many bugfixes
+* Implements the current "goal state" of NTPv4
+* Autokey improvements
+* Much better IPv6 support
+* [Bug 360] ntpd loses handles with LAN connection disabled.
+* [Bug 239] Fix intermittent autokey failure with multicast clients.
+* Rewrite of the multicast code
+* New version numbering scheme
 
 ---
 (4.2.0)
