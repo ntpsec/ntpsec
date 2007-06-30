@@ -1,3 +1,4 @@
+---
 NTP 4.2.4p3 (Harlan Stenn <stenn@ntp.org>, 2007/06/xx)
 
 Focus: Minor Bugfixes
@@ -5,6 +6,7 @@ Focus: Minor Bugfixes
 This release fixes a bug in Windows that made it difficult to
 terminate ntpd under windows.
 This is a recommended upgrade for Windows.
+
 ---
 NTP 4.2.4p2 (Harlan Stenn <stenn@ntp.org>, 2007/06/19)
 
@@ -16,6 +18,7 @@ ntpd crashing, and several other minor bugs. Handling of
 multicast interfaces and logging configuration were improved. 
 The required versions of autogen and libopts were incremented.
 This is a recommended upgrade for Windows and multicast users.
+
 ---
 NTP 4.2.4 (Harlan Stenn <stenn@ntp.org>, 2006/12/31)
 
@@ -31,6 +34,7 @@ and bug fixes.
 
 K&R C is no longer supported as of NTP-4.2.4. We are now aiming for ANSI 
 C support.
+
 ---
 NTP 4.2.0 (Harlan Stenn <stenn@ntp.org>, 2003/10/15)
 
