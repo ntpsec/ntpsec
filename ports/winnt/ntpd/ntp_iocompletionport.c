@@ -527,10 +527,8 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 #endif
 		ignore_this = inter->ignore_packets;
 #ifdef DEBUG
-		else {
-			if (debug > 3)
-				printf(" Packet mode is %d\n", get_packet_mode(buff));
-		}
+		if (debug > 3)
+			printf(" Packet mode is %d\n", get_packet_mode(buff));
 #endif
 
 		/*
