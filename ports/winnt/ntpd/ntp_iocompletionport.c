@@ -521,26 +521,11 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	}
 	else 
 	{
-		/* For broadcast packet received on the IPv4 wildcard socket
-		 * we carve out an exception but only if the client has requested
-		 * to receive wildcard sockets
-		 */
 #ifdef DEBUG
 		if(debug > 3 && get_packet_mode(buff) == MODE_BROADCAST)
 			printf("****Accepting Broadcast packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
 #endif
 		ignore_this = inter->ignore_packets;
-		if (ignore_this == ISC_TRUE && inter->family == AF_INET &&
-		    (inter->flags & (INT_BROADCAST | INT_WILDCARD)) &&
-		    get_packet_mode(buff) == MODE_BROADCAST &&
-		    get_broadcastclient_flag() == ISC_TRUE
-		    ) {
-			ignore_this = ISC_FALSE;
-#ifdef DEBUG
-			if (debug > 1)
-  				printf("****Accepting ignored packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
-#endif
-		}
 #ifdef DEBUG
 		else {
 			if (debug > 3)

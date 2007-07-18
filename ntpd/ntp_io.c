@@ -2856,7 +2856,6 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
 	isc_boolean_t ignore_this;
-	isc_boolean_t ignore_later = ISC_FALSE;
 	register struct recvbuf *rb;
 #ifdef HAVE_TIMESTAMP
 	struct msghdr msghdr;
@@ -2879,14 +2878,8 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	 * have read the packet.
 	 */
 	ignore_this = itf->ignore_packets;
-	if (ignore_this == ISC_TRUE && itf->family == AF_INET &&
-	    (itf->flags & (INT_BROADCAST | INT_WILDCARD)) &&
-	    get_broadcastclient_flag() == ISC_TRUE
-	    )
-	    ignore_later = ISC_TRUE;
 
-	if (rb == NULL ||
-	    (ignore_this == ISC_TRUE && ignore_later == ISC_FALSE)) {
+	if (rb == NULL ||(ignore_this == ISC_TRUE)) {
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
 		if (rb != NULL)
