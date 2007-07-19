@@ -2871,14 +2871,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	 */
 
 	rb = get_free_recv_buffer();
-
-	/* For broadcast packet received on the IPv4 wildcard socket
-	 * we carve out an exception but only if the client has requested
-	 * to receive wildcard sockets. The final check is later when we
-	 * have read the packet.
-	 */
 	ignore_this = itf->ignore_packets;
-
 	if (rb == NULL ||(ignore_this == ISC_TRUE)) {
 		char buf[RX_BUFF_SIZE];
 		struct sockaddr_storage from;
@@ -2942,7 +2935,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	 * Make sure only a valide broadcast packet was received
 	 * on the wildcard address
 	 */
-	if (ignore_later == ISC_TRUE && get_packet_mode(rb) != MODE_BROADCAST) {
+	if (ignore_this == ISC_TRUE) {
 		freerecvbuf(rb);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
 			"ignore", free_recvbuffs(), fd, stoa(&rb->recv_srcadr)));
