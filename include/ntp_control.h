@@ -166,20 +166,20 @@ struct ntp_control {
 #define CS_VERSION	18
 #define	CS_STABIL	19
 #define CS_VARLIST	20
+#define CS_TAI          21
+#define CS_LEAPTAB      22
+#define CS_LEAPEND      23
 #ifdef OPENSSL
-#define CS_FLAGS	21
-#define CS_HOST		22
-#define CS_PUBLIC	23
-#define	CS_CERTIF	24
-#define	CS_REVTIME	25
-#define CS_LEAPTAB	26
-#define CS_TAI		27
+#define CS_FLAGS	24
+#define CS_HOST		25
+#define CS_PUBLIC	26
+#define	CS_CERTIF	27
 #define	CS_DIGEST	28
 #define CS_IDENT	29
-#define	CS_REVOKE	30
-#define	CS_MAXCODE	CS_REVOKE
+#define	CS_REVTIME	30
+#define	CS_MAXCODE	CS_REVTIME
 #else
-#define	CS_MAXCODE	CS_VARLIST
+#define	CS_MAXCODE	CS_LEAPEND
 #endif /* OPENSSL */
 
 /*
@@ -222,18 +222,20 @@ struct ntp_control {
 #define	CP_FLASH	35
 #define CP_TTL		36
 #define CP_VARLIST	37
+#define	CP_IN		38
+#define	CP_OUT		39
 #ifdef OPENSSL
-#define CP_FLAGS	38
-#define CP_HOST		39
-#define CP_VALID	40
-#define	CP_INITSEQ	41
-#define	CP_INITKEY	42
-#define	CP_INITTSP	43
-#define	CP_DIGEST	44
-#define CP_IDENT	45
+#define CP_FLAGS	40
+#define CP_HOST		41
+#define CP_VALID	42
+#define	CP_INITSEQ	43
+#define	CP_INITKEY	44
+#define	CP_INITTSP	45
+#define	CP_DIGEST	46
+#define CP_IDENT	47
 #define	CP_MAXCODE	CP_IDENT
 #else
-#define	CP_MAXCODE	CP_VARLIST
+#define	CP_MAXCODE	CP_OUT
 #endif /* OPENSSL */
 
 /*

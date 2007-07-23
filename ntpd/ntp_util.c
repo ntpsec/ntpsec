@@ -58,7 +58,8 @@ static	char *key_file_name;		/* keys file name */
 char	*leapseconds_file_name;		/* leapseconds file name */
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
-int stats_write_period = 3600;		/* seconds between writes. */
+static double wander_resid;		/* wander threshold */
+double	wander_threshold = 1e-7;	/* initial wander threshold */
 
 /*
  * Statistics file stuff
@@ -221,13 +222,31 @@ write_stats(void)
 		    sys_poll);
 
 	record_sys_stats();
+	clock_stepcnt = 0;
 	ftemp = fabs(prev_drift_comp - drift_comp); 
 	prev_drift_comp = drift_comp;
 	if (ftemp > clock_phi)
 		return;
 
 	if (stats_drift_file != 0) {
-		if (state == 4) {
+
+		/*
+		 * When the frequency file is written, initialize the
+		 * wander threshold to a configured initial value.
+		 * Thereafter reduce it by a factor of 0.85. When it
+		 * drops below the frequency wander, write the frequency
+		 * file. This adapts to the prevailing wander yet
+		 * minimizes the file writes.
+		 */
+		wander_resid *= 0.8;
+#ifdef DEBUG
+		if (debug)
+			printf("write_stats: wander %.6lf thresh %.6lf, freq %.6lf\n",
+			    clock_stability * 1e6, wander_resid * 1e6,
+			    drift_comp * 1e6);
+#endif
+ 		if (state == 4 && clock_stability > wander_resid) {
+			wander_resid = wander_threshold;
 			if ((fp = fopen(stats_temp_file, "w")) == NULL)
 			    {
 				msyslog(LOG_ERR, "can't open %s: %m",
@@ -242,7 +261,8 @@ write_stats(void)
 #endif /* SYS_WINNT */
 
 #ifndef NO_RENAME
-			(void) rename(stats_temp_file, stats_drift_file);
+			(void) rename(stats_temp_file,
+			    stats_drift_file);
 #else
 			/* we have no rename NFS of ftp in use */
 			if ((fp = fopen(stats_drift_file, "w")) == NULL)
@@ -363,7 +383,7 @@ stats_config(
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
-			msyslog(LOG_ERR, "Frequency format error in %s", 
+			msyslog(LOG_ERR, "frequency format error in %s", 
 			    stats_drift_file);
 			old_drift = 1e9;
 			fclose(fp);
@@ -755,7 +775,7 @@ leap_file(
 	)
 {
 	FILE	*str;		/* file handle */
-	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
+	char	buf[NTP_MAXSTRLEN]; /* file line buffer */
 	u_long	leapsec;	/* NTP time at leap */
 	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* TAI offset at leap (s) */
@@ -766,10 +786,10 @@ leap_file(
 	NTP_REQUIRE(cp != NULL);
 
 	/*
-	 * Open the file and discard comment lines. If the first
-	 * character of the file name is not '/', prepend the keys
-	 * directory string. If the file is not found, ignore; if found
-	 * with errors, report to the log and ignore.
+	 * Open the leapseconds file. If the first character of the
+	 * file name is not '/', prepend the keys directory string. If
+	 * the file is not found, ignore; if found with errors, report
+	 * to the log and ignore.
 	 */
 	if (*cp == '/')
 		strcpy(filename, cp);
@@ -785,7 +805,8 @@ leap_file(
 	 * seconds at the leap, the second is the TAI offset after the
 	 * leap. The second word must equal the initial insertion of ten
 	 * seconds on 1 January 1972 plus one second for each succeeding
-	 * insertion.
+	 * insertion. The line beginning with #@ contains the file
+	 * expiration time in NTP seconds.
 	 */
 	i = TAI_1972;
 	expire = 0;
@@ -803,8 +824,8 @@ leap_file(
 				    1)
 					break;
 			}
+			continue;
 		}
-		continue;
 
 		if (sscanf(buf, "%lu %d", &leapsec, &offset) != 2)
 			continue;
@@ -815,14 +836,14 @@ leap_file(
 	}
 	fclose(str);
 	if (dp != NULL) {
-		msyslog(LOG_INFO, "leapseconds %s error",  cp);
+		msyslog(LOG_INFO, "leap_file: %s error", cp);
 	} else {
-		sys_tai = offset;
+		leap_tai = offset;
 		leap_ins = leapsec;
 		leap_expire = expire;
 		msyslog(LOG_INFO,
-		    "TAI offset %d s at %lu file %s expire %lu",
-		    sys_tai, leap_ins, cp, leap_expire);
+		    "leap_file: %s TAI offset %d s insert %lu expire %lu",
+		    cp, leap_tai, leap_ins, leap_expire);
 	}
 }
 

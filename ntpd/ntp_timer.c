@@ -40,21 +40,22 @@
 volatile int interface_interval = 300;     /* update interface every 5 minutes as default */
 	  
 /*
- * Alarm flag.	The mainline code imports this.
+ * Alarm flag. The mainline code imports this.
  */
 volatile int alarm_flag;
 
 /*
- * The counters
+ * The counters and timeouts
  */
-static	u_long adjust_timer;		/* second timer */
-static	u_long keys_timer;		/* minute timer */
-static	u_long stats_timer;		/* stats timer */
-static	u_long huffpuff_timer;		/* huff-n'-puff timer */
-static  u_long interface_timer;	        /* interface update timer */
+static	u_long adjust_timer;	/* second timer */
+static	u_long stats_timer;	/* stats timer */
+static	u_long huffpuff_timer;	/* huff-n'-puff timer */
+static  u_long interface_timer;	/* interface update timer */
 #ifdef OPENSSL
-static	u_long revoke_timer;		/* keys revoke timer */
-u_char	sys_revoke = KEY_REVOKE;	/* keys revoke timeout (log2 s) */
+static	u_long revoke_timer;	/* keys revoke timer */
+u_long	sys_revoke = KEY_REVOKE; /* keys revoke timeout */
+static	u_long keys_timer;	/* session key timer */
+u_long	sys_automax = NTP_AUTOMAX; /* session key timeout */
 #endif /* OPENSSL */
 
 /*
@@ -63,7 +64,8 @@ u_char	sys_revoke = KEY_REVOKE;	/* keys revoke timeout (log2 s) */
 volatile u_long alarm_overflow;
 
 #define MINUTE	60
-#define HOUR	(60 * 60)
+#define HOUR	(60 * MINUTE)
+#define	DAY	(24 * HOUR)
 
 u_long current_time;		/* seconds since startup */
 
@@ -256,7 +258,7 @@ get_timer_handle(void)
 #endif
 
 /*
- * timer - dispatch anyone who needs to be
+ * timer - event timer
  */
 void
 timer(void)
@@ -266,12 +268,15 @@ timer(void)
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 #endif /* OPENSSL */
 	u_int	n;
-
-	current_time += (1<<EVENT_TIMEOUT);
+	l_fp	now;
 
 	/*
-	 * Adjustment timeout first.
+	 * The basic timerevent is one second. This is used to adjust
+	 * the system clock in time and frequency, implement the
+	 * kiss-o'-deatch function and implement the association
+	 * polling function..
 	 */
+	current_time += (1<<EVENT_TIMEOUT);
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
@@ -320,33 +325,26 @@ timer(void)
 		sys_leap = LEAP_ADDSECOND;
 		leap_sec--;
 		if (leap_sec == 0) {
+			get_systime(&now);
+			msyslog(LOG_NOTICE, "timer: leap second at %u",
+			    now.l_ui);
 			sys_leap = LEAP_NOWARNING;
 			if (sys_tai > 0) {
 				sys_tai++;
-				msyslog(LOG_NOTICE, "TAI offset %d s",
-				    sys_tai);
 #ifdef KERNEL_PLL
 				if (!(pll_control && kern_enable))
 					step_systime(-1.0);
 #else /* KERNEL_PLL */
 				step_systime(-1.0);
 #endif /* KERNEL_PLL */
+				msyslog(LOG_NOTICE,
+				    "timer: TAI offset %d s", sys_tai);
 			}
-			msyslog(LOG_NOTICE, "leap second %+.6f s",
-			    -1.0);
 		}
 	}
 
 	/*
-	 * Garbage collect expired keys.
-	 */
-	if (keys_timer <= current_time) {
-		keys_timer += MINUTE;
-		auth_agekeys();
-	}
-
-	/*
-	 * Huff-n'-puff filter
+	 * Update huff-n'-puff filter.
 	 */
 	if (huffpuff_timer <= current_time) {
 		huffpuff_timer += HUFFPUFF;
@@ -354,13 +352,26 @@ timer(void)
 	}
 
 #ifdef OPENSSL
+
 	/*
-	 * Garbage collect old keys and generate new private value
+	 * Garbage collect expired keys.
 	 */
-	if (revoke_timer <= current_time) {
-		revoke_timer += RANDPOLL(sys_revoke);
+	if (keys_timer <= current_time) {
+		keys_timer += sys_automax;
+		auth_agekeys();
+	}
+
+	/*
+	 * Garbage collect key list and generate new private value. The
+	 * timer runs only after initial synchronization and fires about
+	 * once per day.
+	 */
+	if (revoke_timer <= current_time && sys_leap !=
+	    LEAP_NOTINSYNC) {
+		revoke_timer += sys_revoke;
 		expire_all();
-		sprintf(statstr, "refresh ts %u", ntohl(hostval.tstamp));
+		sprintf(statstr, "refresh ts %u",
+		    ntohl(hostval.tstamp));
 		record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
 		if (debug)
@@ -370,24 +381,24 @@ timer(void)
 #endif /* OPENSSL */
 
 	/*
-	 * interface update timer
+	 * Interface update timer
 	 */
 	if (interface_interval && interface_timer <= current_time) {
-		timer_interfacetimeout(current_time + interface_interval);
+		timer_interfacetimeout(current_time +
+		    interface_interval);
 #ifdef DEBUG
-	  if (debug)
-	    printf("timer: interface update\n");
+	  	if (debug > 1)
+	 	 	printf("timer: interface update\n");
 #endif
-	  interface_update(NULL, NULL);
+		interface_update(NULL, NULL);
 	}
 	
 	/*
-	 * Finally, periodically write stats.
+	 * Finally, write stats once per hour.
 	 */
 	if (stats_timer <= current_time) {
-	     if (stats_timer != 0)
-		  write_stats();
-	     stats_timer += stats_write_period;
+		stats_timer += HOUR;
+		write_stats();
 	}
 }
 

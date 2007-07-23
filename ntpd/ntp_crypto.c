@@ -41,7 +41,7 @@
  * +-------+-------+
  * |   op  |  len  | <- extension pointer
  * +-------+-------+
- * |    assocID    |
+ * |    associd    |
  * +---------------+
  * |   timestamp   | <- value pointer
  * +---------------+
@@ -127,7 +127,6 @@ static char *rand_file = NULL;	/* random seed file */
 static char *host_file = NULL;	/* host key file */
 static char *sign_file = NULL;	/* sign key file */
 static char *cert_file = NULL;	/* certificate file */
-static char *leap_file = NULL;	/* leapseconds file */
 static tstamp_t if_fstamp = 0;	/* IFF filestamp */
 static tstamp_t gq_fstamp = 0;	/* GQ file stamp */
 static tstamp_t mv_fstamp = 0;	/* MV filestamp */
@@ -149,7 +148,7 @@ static	int	crypto_bob3	(struct exten *, struct value *);
 static	int	crypto_iff	(struct exten *, struct peer *);
 static	int	crypto_gq	(struct exten *, struct peer *);
 static	int	crypto_mv	(struct exten *, struct peer *);
-static	u_int	crypto_send	(struct exten *, struct value *);
+static	u_int	crypto_send	(struct exten *, struct value *, int *);
 static	tstamp_t crypto_time	(void);
 static	u_long	asn2ntp		(ASN1_TIME *);
 static	struct cert_info *cert_parse (u_char *, u_int, tstamp_t);
@@ -160,7 +159,6 @@ static	void	cert_free	(struct cert_info *);
 static	EVP_PKEY *crypto_key	(char *, tstamp_t *);
 static	int	bighash		(BIGNUM *, BIGNUM *);
 static	struct cert_info *crypto_cert (char *);
-static	void	crypto_tai	(char *);
 
 #ifdef SYS_WINNT
 int
@@ -177,7 +175,7 @@ readlink(char * link, char * file, int len) {
  * session key is the MD5 hash of these values, while the next key ID is
  * the first four octets of the hash.
  *
- * Returns the next key ID
+ * Returns the next key ID or 0 if there is no destination address.
  */
 keyid_t
 session_key(
@@ -204,8 +202,10 @@ session_key(
 	hdlen = 0;
 	switch(srcadr->ss_family) {
 	case AF_INET:
-		header[0] = ((struct sockaddr_in *)srcadr)->sin_addr.s_addr;
-		header[1] = ((struct sockaddr_in *)dstadr)->sin_addr.s_addr;
+		header[0] =
+		    ((struct sockaddr_in *)srcadr)->sin_addr.s_addr;
+		header[1] =
+		    ((struct sockaddr_in *)dstadr)->sin_addr.s_addr;
 		header[2] = htonl(keyno);
 		header[3] = htonl(private);
 		hdlen = 4 * sizeof(u_int32);
@@ -247,6 +247,7 @@ session_key(
  * Returns
  * XEVNT_OK	success
  * XEVNT_PER	host certificate expired
+ * XEVNT_ERR	protocol error
  *
  * This routine constructs a pseudo-random sequence by repeatedly
  * hashing the session key starting from a given source address,
@@ -266,12 +267,12 @@ make_keylist(
 	struct value *vp;	/* value pointer */
 	keyid_t	keyid = 0;	/* next key ID */
 	keyid_t	cookie;		/* private value */
-	u_long	lifetime;
+	long	lifetime;
 	u_int	len, mpoll;
 	int	i;
 
 	if (!dstadr)
-		return XEVNT_OK;
+		return XEVNT_ERR;
 	
 	/*
 	 * Allocate the key list if necessary.
@@ -286,8 +287,10 @@ make_keylist(
 	 * NTP_MAXKEY.
 	 */
 	while (1) {
-		keyid = (ntp_random() + NTP_MAXKEY + 1) & ((1 <<
-		    sizeof(keyid_t)) - 1);
+		keyid = ntp_random() & 0xffffffff;
+		if (keyid <= NTP_MAXKEY)
+			continue;
+
 		if (authhavekey(keyid))
 			continue;
 		break;
@@ -310,10 +313,10 @@ make_keylist(
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
 		keyid = session_key(&dstadr->sin, &peer->srcadr, keyid,
-		    cookie, lifetime);
+		    cookie, lifetime + mpoll);
 		lifetime -= mpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    lifetime <= mpoll)
+		    lifetime < 0)
 			break;
 	}
 
@@ -369,6 +372,11 @@ make_keylist(
  * valid length and is verified. There are a few cases where some values
  * are believed even if the signature fails, but only if the proventic
  * bit is not set.
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_LEN	bad field format or length
+ * XEVNT_ERR	protocol error
  */
 int
 crypto_recv(
@@ -413,12 +421,12 @@ crypto_recv(
 		ep = (struct exten *)pkt;
 		code = ntohl(ep->opcode) & 0xffff0000;
 		len = ntohl(ep->opcode) & 0x0000ffff;
-		associd = (associd_t) ntohl(pkt[1]);
+		associd = (associd_t)ntohl(pkt[1]);
 		rval = XEVNT_OK;
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "crypto_recv: flags 0x%x ext offset %d len %u code 0x%x assocID %d\n",
+			    "crypto_recv: flags 0x%x ext offset %d len %u code 0x%x associd %d\n",
 			    peer->crypto, authlen, len, code >> 16,
 			    associd);
 #endif
@@ -437,7 +445,7 @@ crypto_recv(
 		 * fake association ID over the fence, we better toss it
 		 * out. Only the first one counts.
 		 */
-		if (code & CRYPTO_RESP) {
+		if (!(code & CRYPTO_RESP)) {
 			if (peer->assoc == 0)
 				peer->assoc = associd;
 			else if (peer->assoc != associd)
@@ -863,7 +871,7 @@ crypto_recv(
 			 * Decrypt the cookie, hunting all the time for
 			 * errors.
 			 */
-			if (vallen == (u_int) EVP_PKEY_size(host_pkey)) {
+			if (vallen == (u_int)EVP_PKEY_size(host_pkey)) {
 				RSA_private_decrypt(vallen,
 				    (u_char *)ep->pkt,
 				    (u_char *)&temp32,
@@ -1054,26 +1062,25 @@ crypto_recv(
 			peer->tai_leap.vallen = ep->vallen;
 
 			/*
-			 * Install the new table if there is no stored
-			 * table or the new table is more recent than
-			 * the stored table. Since a filestamp may have
-			 * changed, recompute the signatures.
+			 * If the packet leap values are more recent
+			 * that the stored ones, install the new leap
+			 * values and changed, recompute the signatures.
 			 */
-			if (ntohl(peer->tai_leap.fstamp) >
-			    ntohl(tai_leap.fstamp)) {
+			if (ntohl(ep->pkt[2]) > leap_expire) {
+				tai_leap.tstamp = ep->tstamp;
 				tai_leap.fstamp = ep->fstamp;
 				tai_leap.vallen = ep->vallen;
-				if (tai_leap.ptr != NULL)
-					free(tai_leap.ptr);
-				tai_leap.ptr = emalloc(vallen);
-				memcpy(tai_leap.ptr, ep->pkt, vallen);
+				leap_tai = ntohl(ep->pkt[0]);
+				leap_ins = ntohl(ep->pkt[1]);
+				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
 			}
-			crypto_flags |= CRYPTO_FLAG_TAI;
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
-			sprintf(statstr, "leap %u ts %u fs %u", vallen,
-			    ntohl(ep->tstamp), ntohl(ep->fstamp));
+			sprintf(statstr,
+			    "leap tai %d add %u expire %u fs %u",
+			    ntohl(ep->pkt[0]), ntohl(ep->pkt[1]),
+			    ntohl(ep->pkt[2]), ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
 #ifdef DEBUG
 			if (debug)
@@ -1142,7 +1149,7 @@ crypto_recv(
 		} else if (rval > XEVNT_OK && (code & CRYPTO_RESP)) {
 			rval = XEVNT_OK;
 		}
-		authlen += len;
+		authlen += (len + 3) / 4 * 4;
 	}
 	return (rval);
 }
@@ -1156,13 +1163,20 @@ crypto_recv(
  * autokey information, in which case the caller has to provide the
  * association ID to match the association.
  *
- * Returns length of extension field.
+ * Side effect: update the packet offset.
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_LEN	bad field format or length
+ * XEVNT_CRT	bad or missing certificate
+ * XEVNT_ERR	protocol error
+ * XEVNT_SRV	server certificate expired
  */
 int
 crypto_xmit(
 	struct pkt *xpkt,	/* transmit packet pointer */
 	struct sockaddr_storage *srcadr_sin,	/* active runway */
-	int	start,		/* offset to extension field */
+	int	*start,		/* offset to extension field */
 	struct exten *ep,	/* extension pointer */
 	keyid_t cookie		/* session cookie */
 	)
@@ -1187,11 +1201,11 @@ crypto_xmit(
 	 * and association ID. If this is a response and the host is not
 	 * synchronized, light the error bit and go home.
 	 */
-	pkt = (u_int32 *)xpkt + start / 4;
+	pkt = (u_int32 *)xpkt + *start / 4;
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
 	associd = (associd_t) ntohl(ep->associd);
-	fp->associd = htonl(associd);
+	fp->associd = ep->associd;
 	len = 8;
 	rval = XEVNT_OK;
 	tstamp = crypto_time();
@@ -1203,12 +1217,12 @@ crypto_xmit(
 	 * contains only the status word.
 	 */
 	case CRYPTO_ASSOC | CRYPTO_RESP:
-		len += crypto_send(fp, &hostval);
+		rval = crypto_send(fp, &hostval, &len);
 		fp->fstamp = htonl(crypto_flags);
 		break;
 
 	case CRYPTO_ASSOC:
-		len += crypto_send(fp, &hostval);
+		rval = crypto_send(fp, &hostval, &len);
 		fp->fstamp = htonl(crypto_flags | ident_scheme);
 		break;
 
@@ -1222,7 +1236,7 @@ crypto_xmit(
 		vtemp.fstamp = ep->fstamp;
 		vtemp.vallen = ep->vallen;
 		vtemp.ptr = (u_char *)ep->pkt;
-		len += crypto_send(fp, &vtemp);
+		rval = crypto_send(fp, &vtemp, &len);
 		break;
 
 	/*
@@ -1291,7 +1305,7 @@ crypto_xmit(
 		else if (tstamp < xp->first || tstamp > xp->last)
 			rval = XEVNT_SRV;
 		else
-			len += crypto_send(fp, &xp->cert);
+			rval = crypto_send(fp, &xp->cert, &len);
 		break;
 
 	/*
@@ -1303,7 +1317,7 @@ crypto_xmit(
 			break;
 		}
 		if ((rval = crypto_alice(peer, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1313,7 +1327,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_IFF | CRYPTO_RESP:
 		if ((rval = crypto_bob(ep, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1327,7 +1341,7 @@ crypto_xmit(
 			break;
 		}
 		if ((rval = crypto_alice2(peer, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1337,7 +1351,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_GQ | CRYPTO_RESP:
 		if ((rval = crypto_bob2(ep, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1351,7 +1365,7 @@ crypto_xmit(
 			break;
 		}
 		if ((rval = crypto_alice3(peer, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1361,7 +1375,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_MV | CRYPTO_RESP:
 		if ((rval = crypto_bob3(ep, &vtemp)) == XEVNT_OK) {
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 			value_free(&vtemp);
 		}
 		break;
@@ -1376,7 +1390,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_SIGN | CRYPTO_RESP:
 		if ((rval = cert_sign(ep, &vtemp)) == XEVNT_OK)
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 		value_free(&vtemp);
 		break;
 
@@ -1385,7 +1399,7 @@ crypto_xmit(
 	 * key.
 	 */
 	case CRYPTO_COOK:
-		len += crypto_send(fp, &pubkey);
+		rval = crypto_send(fp, &pubkey, &len);
 		break;
 
 	/*
@@ -1408,7 +1422,7 @@ crypto_xmit(
 		}
 		if ((rval = crypto_encrypt(ep, &vtemp, &tcookie)) ==
 		    XEVNT_OK)
-			len += crypto_send(fp, &vtemp);
+			rval = crypto_send(fp, &vtemp, &len);
 		value_free(&vtemp);
 		break;
 
@@ -1425,7 +1439,7 @@ crypto_xmit(
 			break;
 		}
 		peer->flags &= ~FLAG_ASSOC;
-		len += crypto_send(fp, &peer->sndval);
+		rval = crypto_send(fp, &peer->sndval, &len);
 		break;
 
 	/*
@@ -1435,8 +1449,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_TAI:
 	case CRYPTO_TAI | CRYPTO_RESP:
-		if (crypto_flags & CRYPTO_FLAG_TAI)
-			len += crypto_send(fp, &tai_leap);
+		rval = crypto_send(fp, &tai_leap, &len);
 		break;
 
 	/*
@@ -1447,6 +1460,7 @@ crypto_xmit(
 		if (opcode & CRYPTO_RESP)
 			rval = XEVNT_ERR;
 	}
+	fp->opcode = htonl((opcode & 0xffff0000) | len);
 
 	/*
 	 * In case of error, flame the log. If a request, toss the
@@ -1464,20 +1478,14 @@ crypto_xmit(
 		if (!(opcode & CRYPTO_RESP))
 			return (0);
 	}
-
-	/*
-	 * Round up the field length to a multiple of 8 bytes and save
-	 * the request code and length.
-	 */
-	len = ((len + 7) / 8) * 8;
-	fp->opcode = htonl((opcode & 0xffff0000) | len);
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_xmit: flags 0x%x ext offset %d len %u code 0x%x assocID %d\n",
-		    crypto_flags, start, len, opcode >> 16, associd);
+		    "crypto_xmit: flags 0x%x ext offset %d len %u code 0x%x associd %d\n",
+		    crypto_flags, *start, len, opcode >> 16, associd);
 #endif
-	return (len);
+	*start += len;
+	return (rval);
 }
 
 
@@ -1702,6 +1710,12 @@ crypto_encrypt(
  *
  * This routine determines which identity scheme is in use and
  * constructs an extension field for that scheme.
+ *
+ * Returns
+ * CRYTPO_IFF	IFF scheme
+ * CRYPTO_GQ	GQ scheme
+ * CRYPTO_MV	MV scheme
+ * CRYPTO_NULL	no available scheme
  */
 u_int
 crypto_ident(
@@ -1766,7 +1780,7 @@ crypto_ident(
 	 */
 	msyslog(LOG_INFO,
 	    "crypto_ident: no compatible identity scheme found");
-	return (0);
+	return (CRYPTO_NULL);
 }
 
 
@@ -1803,13 +1817,10 @@ crypto_args(
 	ep->opcode = htonl(opcode + len);
 
 	/*
-	 * If a response, send our ID; if a request, send the
-	 * responder's ID.
+	 * If a request, send our ID; if a response, send the
+	 * requestor's ID.
 	 */
-	if (opcode & CRYPTO_RESP)
-		ep->associd = htonl(peer->associd);
-	else
-		ep->associd = htonl(peer->assoc);
+	ep->associd = htonl(peer->associd);
 	ep->tstamp = htonl(tstamp);
 	ep->fstamp = hostval.tstamp;
 	ep->vallen = 0;
@@ -1826,43 +1837,71 @@ crypto_args(
 /*
  * crypto_send - construct extension field from value components
  *
- * Returns extension field length. Note: it is not polite to send a
- * nonempty signature with zero timestamp or a nonzero timestamp with
- * empty signature, but these rules are not enforced here.
+ * The value and signature fields are zero-padded to a word boundary.
+ * Note: it is not polite to send a nonempty signature with zero
+ * timestamp or a nonzero timestamp with an empty signature, but those
+ * rules are not enforced here.
+ *
+ * Returns
+ * XEVNT_OK	success
+ * XEVNT_LEN	bad field format or length
  */
 u_int
 crypto_send(
 	struct exten *ep,	/* extension field pointer */
-	struct value *vp	/* value pointer */
+	struct value *vp,	/* value pointer */
+	int	*start		/* buffer offset */
 	)
 {
-	u_int	len, temp32;
-	int	i;
+	u_int	len, vallen, siglen;
+	int	i, j;
 
 	/*
-	 * Copy data. If the data field is empty or zero length, encode
-	 * an empty value with length zero.
+	 * Calculate extension field length and check for buffer
+	 * overflow. Leave room for the MAC.
+	 */
+	len = 16;
+	vallen = ntohl(vp->vallen);
+	len += ((vallen + 3) / 4 + 1) * 4; 
+	siglen = ntohl(vp->siglen);
+	len += ((siglen + 3) / 4 + 1) * 4; 
+	if (*start + len > NTP_MAXEXTEN - LEN_PKT_NOMAC - MAX_MAC_LEN)
+		return (XEVNT_LEN);
+
+	/*
+	 * Copy timestamps.
 	 */
 	ep->tstamp = vp->tstamp;
 	ep->fstamp = vp->fstamp;
 	ep->vallen = vp->vallen;
-	len = 12;
-	temp32 = ntohl(vp->vallen);
-	if (temp32 > 0 && vp->ptr != NULL)
-		memcpy(ep->pkt, vp->ptr, temp32);
+
+	/*
+	 * Copy value. If the data field is empty or zero length,
+	 * encode an empty value with length zero.
+	 */
+	i = 0;
+	if (vallen > 0 && vp->ptr != NULL) {
+		j = vallen / 4;
+		if (j * 4 < vallen)
+			ep->pkt[i + j++] = 0;
+		memcpy(&ep->pkt[i], vp->ptr, vallen);
+		i += j;
+	}
 
 	/*
 	 * Copy signature. If the signature field is empty or zero
 	 * length, encode an empty signature with length zero.
 	 */
-	i = (temp32 + 3) / 4;
-	len += i * 4 + 4;
 	ep->pkt[i++] = vp->siglen;
-	temp32 = ntohl(vp->siglen);
-	if (temp32 > 0 && vp->sig != NULL)
-		memcpy(&ep->pkt[i], vp->sig, temp32);
-	len += temp32;
-	return (len);
+	if (siglen > 0 && vp->sig != NULL) {
+		j = vallen / 4;
+		if (j * 4 < siglen)
+			ep->pkt[i + j++] = 0;
+		memcpy(&ep->pkt[i], vp->sig, siglen);
+		i += j;
+	}
+	*start += len;
+	return (XEVNT_OK);
 }
 
 
@@ -1876,7 +1915,7 @@ crypto_send(
  * hostval	host name (not signed)
  * pubkey	public key
  * cinfo	certificate info/value list
- * tai_leap	leapseconds file
+ * tai_leap	leap values
  *
  * Filestamps are proventicated data, so this routine is run only when
  * the host has been synchronized to a proventicated source. Thus, the
@@ -1892,6 +1931,7 @@ crypto_update(void)
 	struct cert_info *cp, *cpn; /* certificate info/value */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t tstamp;	/* NTP timestamp */
+	u_int32	*ptr;
 	u_int	len;
 
 	if ((tstamp = crypto_time()) == 0)
@@ -1937,22 +1977,28 @@ crypto_update(void)
 	}
 
 	/*
-	 * Sign leapseconds table and timestamps. The filestamp is
-	 * derived from the leapsecond file extension from wherever the
-	 * file was generated.
+	 * Sign leapseconds values and timestamps. Note it is not an
+	 * error to return null values.
 	 */
-	if (tai_leap.vallen != 0) {
-		tai_leap.tstamp = hostval.tstamp;
-		tai_leap.siglen = 0;
-		if (tai_leap.sig == NULL)
-			tai_leap.sig = emalloc(sign_siglen);
-		EVP_SignInit(&ctx, sign_digest);
-		EVP_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
-		EVP_SignUpdate(&ctx, tai_leap.ptr,
-		    ntohl(tai_leap.vallen));
-		if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
-			tai_leap.siglen = htonl(len);
-	}
+	tai_leap.tstamp = hostval.tstamp;
+	tai_leap.fstamp = hostval.tstamp;
+	len = 3 * sizeof(u_int32);
+	if (tai_leap.ptr == NULL)
+		tai_leap.ptr = emalloc(len);
+	tai_leap.vallen = htonl(len);
+	ptr = (u_int32 *)tai_leap.ptr;
+	ptr[0] = htonl(leap_tai);
+	ptr[1] = htonl(leap_ins);
+	ptr[2] = htonl(leap_expire);
+	if (tai_leap.sig == NULL)
+		tai_leap.sig = emalloc(sign_siglen);
+	EVP_SignInit(&ctx, sign_digest);
+	EVP_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
+	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
+	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
+		tai_leap.siglen = htonl(len);
+	if (leap_tai > 0)
+		crypto_flags |= CRYPTO_FLAG_TAI;
 	sprintf(statstr, "update ts %u", ntohl(hostval.tstamp)); 
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
@@ -2006,13 +2052,10 @@ asn2ntp	(
 	char	*v;		/* pointer to ASN1_TIME string */
 	struct	tm tm;		/* used to convert to NTP time */
 
-	NTP_REQUIRE(asn1time != NULL);
-	NTP_REQUIRE(asn1time->data != NULL);
-
 	/*
 	 * Extract time string YYMMDDHHMMSSZ from ASN1 time structure.
 	 * Note that the YY, MM, DD fields start with one, the HH, MM,
-	 * SS fields start with zero and the Z character should be 'Z'
+	 * SS fiels start with zero and the Z character should be 'Z'
 	 * for UTC. Also note that years less than 50 map to years
 	 * greater than 100. Dontcha love ASN.1? Better than MIL-188.
 	 */
@@ -2056,9 +2099,7 @@ bighash(
 	EVP_DigestUpdate(&ctx, ptr, len);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	BN_bin2bn(dgst, len, bk);
-
-	/* XXX MEMLEAK? free ptr? */
-
+	free(ptr);
 	return (1);
 }
 
@@ -3098,8 +3139,6 @@ cert_parse(
 	cnt = X509_get_ext_count(cert);
 	for (i = 0; i < cnt; i++) {
 		ext = X509_get_ext(cert, i);
-		NTP_INSIST(ext != NULL);
-		NTP_INSIST(ext->value != NULL);
 		method = X509V3_EXT_get(ext);
 		temp = OBJ_obj2nid(ext->object);
 		switch (temp) {
@@ -3735,134 +3774,6 @@ crypto_cert(
 
 
 /*
- * crypto_tai - load leapseconds table from file
- *
- * This routine loads the ERTS leapsecond file in NIST text format,
- * converts to a value structure and extracts a filestamp from the file
- * name. The data are used to establish the TAI offset from UTC, which
- * is provided to the kernel if supported. Later the data can be sent to
- * another machine on request.
- */
-static void
-crypto_tai(
-	char	*cp		/* file name */
-	)
-{
-	FILE	*str;		/* file handle */
-	char	buf[NTP_MAXSTRLEN];	/* file line buffer */
-	u_int32	leapsec[MAX_LEAP]; /* NTP time at leaps */
-	u_long	expire;		/* NTP time when file expires */
-	int	offset;		/* offset at leap (s) */
-	char	filename[MAXFILENAME]; /* name of leapseconds file */
-	char	linkname[MAXFILENAME]; /* file link (for filestamp) */
-	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
-	tstamp_t fstamp;	/* filestamp */
-	u_int	len;
-	u_int32	*ptr;
-	char	*dp;
-	int	rval, i, j;
-
-	/*
-	 * Open the file and discard comment lines. If the first
-	 * character of the file name is not '/', prepend the keys
-	 * directory string. If the file is not found, not to worry; it
-	 * can be retrieved over the net. But, if it is found with
-	 * errors, we crash and burn.
-	 */
-	if (*cp == '/')
-		strcpy(filename, cp);
-	else
-		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
-	if ((str = fopen(filename, "r")) == NULL)
-		return;
-
-	/*
-	 * Extract filestamp if present.
-	 */
-	rval = readlink(filename, linkname, MAXFILENAME - 1);
-	if (rval > 0) {
-		linkname[rval] = '\0';
-		dp = strrchr(linkname, '.');
-	} else {
-		dp = strrchr(filename, '.');
-	}
-	if (dp != NULL)
-		sscanf(++dp, "%u", &fstamp);
-	else
-		fstamp = 0;
-	tai_leap.fstamp = htonl(fstamp);
-
-	/*
-	 * We are rather paranoid here, since an intruder might cause a
-	 * coredump by infiltrating naughty values. Empty lines and
-	 * comments are ignored. Other lines must begin with two
-	 * integers followed by junk or comments. The first integer is
-	 * the NTP seconds of leap insertion, the second is the offset
-	 * of TAI relative to UTC after that insertion. The second word
-	 * must equal the initial insertion of ten seconds on 1 January
-	 * 1972 plus one second for each succeeding insertion.
-	 */
-	i = TAI_1972;
-	expire = 0;
-	while (i < MAX_LEAP) {
-		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
-		if (dp == NULL)
-			break;
-
-		if (strlen(buf) < 1)
-			continue;
-
-		if (buf[0] == '#') {
-			if (buf[1] == '@') {
-				if (sscanf(&buf[2], "%lu", &expire) !=
-				    1)
-					break;
-			}
-		}
-		continue;
-
-		if (sscanf(buf, "%u %d", &leapsec[i], &offset) != 2)
-			continue;
-
-		if (i != offset) 
-			break;
-
-		i++;
-	}
-	fclose(str);
-	if (dp != NULL) {
-		msyslog(LOG_INFO,
-		    "crypto_tai: leapseconds file %s error %d", cp,
-		    rval);
-		exit (-1);
-	}
-
-	/*
-	 * The extension field table entries consists of the NTP seconds
-	 * of leap insertion in network byte order.
-	 */
-	len = i * sizeof(u_int32);
-	tai_leap.vallen = htonl(len);
-	ptr = emalloc(len);
-	tai_leap.ptr = (u_char *)ptr;
-	for (j = 0; j < i; j++)
-		*ptr++ = htonl(leapsec[j]);
-	sys_tai = offset;
-	leap_ins = leapsec[--j];
-	leap_expire = expire;
-	crypto_flags |= CRYPTO_FLAG_TAI;
-	sprintf(statstr,
-	     "%s fs %u leap %lu tai %d expire %lu len %u", cp,
-	    fstamp, leap_ins, sys_tai, leap_expire, len);
-	record_crypto_stats(NULL, statstr);
-#ifdef DEBUG
-	if (debug)
-		printf("crypto_tai: %s\n", statstr);
-#endif
-}
-
-
-/*
  * crypto_setup - load keys, certificate and leapseconds table
  *
  * This routine loads the public/private host key and certificate. If
@@ -4068,7 +3979,7 @@ crypto_setup(void)
 
 	/*
 	 * It the certificate is trusted, the subject must be the same
-	 * as the issuer, in other words it must be self signed.
+	 * as the issuer, in other words it must be self-signed.
 	 */
 	if (cinfo->flags & CERT_TRUST && strcmp(cinfo->subject,
 	    cinfo->issuer) != 0) {
@@ -4084,15 +3995,6 @@ crypto_setup(void)
 	if (cinfo->flags & CERT_PRIV)
 		crypto_flags |= CRYPTO_FLAG_PRIV;
 	crypto_flags |= cinfo->nid << 16;
-
-	/*
-	 * Load optional leapseconds table from file "ntpkey_leap". If
-	 * the file is missing or defective, the values can later be
-	 * retrieved from a server.
-	 */
-	if (leap_file == NULL)
-		leap_file = "ntpkey_leap";
-	crypto_tai(leap_file);
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -4187,14 +4089,6 @@ crypto_config(
 	case CRYPTO_CONF_CERT:
 		cert_file = emalloc(strlen(cp) + 1);
 		strcpy(cert_file, cp);
-		break;
-
-	/*
-	 * Set leapseconds file name.
-	 */
-	case CRYPTO_CONF_LEAP:
-		leap_file = emalloc(strlen(cp) + 1);
-		strcpy(leap_file, cp);
 		break;
 	}
 	crypto_flags |= CRYPTO_FLAG_ENAB;

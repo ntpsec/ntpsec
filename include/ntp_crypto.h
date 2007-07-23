@@ -49,7 +49,7 @@
 #define CRYPTO_CERT	CRYPTO_CMD(2) /* certificate */
 #define CRYPTO_COOK	CRYPTO_CMD(3) /* cookie value */
 #define CRYPTO_AUTO	CRYPTO_CMD(4) /* autokey values */
-#define CRYPTO_TAI	CRYPTO_CMD(5) /* leapseconds table */
+#define CRYPTO_TAI	CRYPTO_CMD(5) /* leapsecond values */
 #define	CRYPTO_SIGN	CRYPTO_CMD(6) /* certificate sign */
 #define CRYPTO_IFF	CRYPTO_CMD(7) /* IFF identity scheme */
 #define CRYPTO_GQ	CRYPTO_CMD(8) /* GQ identity scheme */
@@ -100,8 +100,8 @@
  * Miscellaneous crypto stuff
  */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
-#define NTP_AUTOMAX	13	/* log2 default max session key life */
-#define KEY_REVOKE	16	/* log2 default key revoke timeout */
+#define NTP_AUTOMAX	3600	/* default max session key lifetime */
+#define KEY_REVOKE	86400	/* default key revoke timeout */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
 
 /*

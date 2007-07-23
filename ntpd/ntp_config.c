@@ -1016,10 +1016,10 @@ config_auth(void)
 		my_config.auth.trusted_key_list = NULL;
 	}
     
-	/* Revoke Command */
 #ifdef OPENSSL
+	/* Revoke Command */
 	if (my_config.auth.revoke) 
-		sys_revoke = (u_char) max(my_config.auth.revoke, KEY_REVOKE);
+		sys_revoke = my_config.auth.revoke;
 #endif /* OPENSSL */
 
 #if !defined(VMS) && !defined(SYS_VXWORKS)
@@ -1573,7 +1573,10 @@ config_vars(void)
 			}
 			break;
 		    case T_DriftMinutes:
+
+#if 0	/* this code is bogus and should be replaced with wander threshold */
 			stats_write_period = 60 * curr_var->value.i;
+#endif
 			break;
 		    case T_Leapfile:
 			stats_config(STATS_LEAP_FILE, curr_var->value.s);
@@ -1601,13 +1604,11 @@ config_vars(void)
 					curr_var->value.s);
 			free(curr_var->value.s);
 			break;
-		    case T_Automax:
 #ifdef OPENSSL
-			sys_automax = 1 << max(curr_var->value.i, 10);
-#else
-			printf("Warning: Automax command ignored!\n");
-#endif
+		    case T_Automax:
+			sys_automax = curr_var->value.i;
 			break;
+#endif
 		}
 		free_node(curr_var);
 	}

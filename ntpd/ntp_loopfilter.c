@@ -159,6 +159,7 @@ int	state;			/* clock discipline state */
 u_char	sys_poll = NTP_MINDPOLL; /* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
+int	clock_stepcnt;		/* step counter */
 
 /*
  * Huff-n'-puff filter variables
@@ -225,12 +226,6 @@ local_clock(
 	 * monitor and record the offsets anyway in order to determine
 	 * the open-loop response and then go home.
 	 */
-#ifdef DEBUG
-	if (debug)
-		printf(
-		    "local_clock: assocID %d offset %.9f freq %.3f state %d\n",
-		    peer->associd, fp_offset, drift_comp * 1e6, state);
-#endif
 #ifdef LOCKCLOCK
 	return (0);
 
@@ -402,7 +397,8 @@ local_clock(
 			sys_poll = NTP_MINPOLL;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
-			if (state == S_NSET) {
+			clock_stepcnt++;
+			if (state == S_NSET || clock_stepcnt > 2) {
 				rstclock(S_FREQ, peer->epoch, 0);
 				return (rval);
 			}
@@ -783,8 +779,9 @@ rstclock(
 {
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: time %lu offset %.6f freq %.3f state %d\n",
-		    update, offset, drift_comp * 1e6, trans);
+		printf("local_clock: at %lu offset %.6f freq %.3f state %d step %d\n",
+		    update, offset, drift_comp * 1e6, trans,
+		    clock_stepcnt);
 #endif
 	state = trans;
 	sys_clocktime = update;

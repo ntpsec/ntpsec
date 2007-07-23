@@ -51,14 +51,13 @@ static	void	ctl_putuint	(const char *, u_long);
 static	void	ctl_puthex	(const char *, u_long);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, u_int32, struct sockaddr_storage*);
+static	void	ctl_putadr	(const char *, u_int32,
+				    struct sockaddr_storage*);
 static	void	ctl_putid	(const char *, char *);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
-#ifdef OPENSSL
 static	void	ctl_putfs	(const char *, tstamp_t);
-#endif
 #ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
@@ -115,19 +114,19 @@ static struct ctl_var sys_var[] = {
 	{ CS_VERSION,	RO, "version" },	/* 18 */
 	{ CS_STABIL,	RO, "stability" },	/* 19 */
 	{ CS_VARLIST,	RO, "sys_var_list" },	/* 20 */
+	{ CS_TAI,	RO, "tai" },		/* 21 */
+	{ CS_LEAPTAB,	RO, "leapsec" },	/* 22 */
+	{ CS_LEAPEND,	RO, "expire" },		/* 23 */
 #ifdef OPENSSL
-	{ CS_FLAGS,	RO, "flags" },		/* 21 */
-	{ CS_HOST,	RO, "hostname" },	/* 22 */
-	{ CS_PUBLIC,	RO, "update" },		/* 23 */
-	{ CS_CERTIF,	RO, "cert" },		/* 24 */
-	{ CS_REVTIME,	RO, "expire" },		/* 25 */
-	{ CS_LEAPTAB,	RO, "leapsec" },	/* 26 */
-	{ CS_TAI,	RO, "tai" },		/* 27 */
+	{ CS_FLAGS,	RO, "flags" },		/* 24 */
+	{ CS_HOST,	RO, "hostname" },	/* 25 */
+	{ CS_PUBLIC,	RO, "update" },		/* 26 */
+	{ CS_CERTIF,	RO, "cert" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
 	{ CS_IDENT,	RO, "ident" },		/* 29 */
-	{ CS_REVOKE,	RO, "expire" },		/* 30 */
+	{ CS_REVTIME,	RO, "until" },		/* 30 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 21/31 */
+	{ 0,		EOV, "" }		/* 24/31 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -156,14 +155,15 @@ static	u_char def_sys_var[] = {
 	CS_JITTER,
 	CS_ERROR,
 	CS_STABIL,
+	CS_TAI,
+	CS_LEAPTAB,
+	CS_LEAPEND,
 #ifdef OPENSSL
 	CS_HOST,
 	CS_DIGEST,
 	CS_FLAGS,
 	CS_PUBLIC,
 	CS_IDENT,
-	CS_LEAPTAB,
-	CS_TAI,
 	CS_CERTIF,
 #endif /* OPENSSL */
 	0
@@ -212,17 +212,19 @@ static struct ctl_var peer_var[] = {
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
+	{ CP_IN,	RO, "in" },		/* 38 */
+	{ CP_OUT,	RO, "out" },		/* 39 */
 #ifdef OPENSSL
-	{ CP_FLAGS,	RO, "flags" },		/* 38 */
-	{ CP_HOST,	RO, "hostname" },	/* 39 */
-	{ CP_VALID,	RO, "valid" },		/* 40 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 41 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 42 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 43 */
-	{ CP_DIGEST,	RO, "signature" },	/* 44 */
-	{ CP_IDENT,	RO, "trust" },		/* 45 */
+	{ CP_FLAGS,	RO, "flags" },		/* 40 */
+	{ CP_HOST,	RO, "hostname" },	/* 41 */
+	{ CP_VALID,	RO, "valid" },		/* 42 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
+	{ CP_DIGEST,	RO, "signature" },	/* 46 */
+	{ CP_IDENT,	RO, "trust" },		/* 47 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 38/46 */
+	{ 0,		EOV, "" }		/* 40/48 */
 };
 
 
@@ -234,6 +236,8 @@ static u_char def_peer_var[] = {
 	CP_SRCPORT,
 	CP_DSTADR,
 	CP_DSTPORT,
+	CP_OUT,
+	CP_IN,
 	CP_LEAP,
 	CP_STRATUM,
 	CP_PRECISION,
@@ -973,7 +977,7 @@ ctl_putdbl(
 	(void)sprintf(cp, "%.3f", ts);
 	while (*cp != '\0')
 		cp++;
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
 /*
@@ -1004,7 +1008,6 @@ ctl_putuint(
 /*
  * ctl_putfs - write a decoded filestamp into the response
  */
-#ifdef OPENSSL
 static void
 ctl_putfs(
 	const char *tag,
@@ -1034,11 +1037,11 @@ ctl_putfs(
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
-#endif
 
 
 /*
- * ctl_puthex - write a tagged unsigned integer, in hex, into the response
+ * ctl_puthex - write a tagged unsigned integer, in hex, into the
+ * response
  */
 static void
 ctl_puthex(
@@ -1108,9 +1111,8 @@ ctl_putts(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	(void) sprintf(cp, "0x%08lx.%08lx",
-			   ts->l_ui & 0xffffffffUL,
-			   ts->l_uf & 0xffffffffUL);
+	(void) sprintf(cp, "0x%08lx.%08lx", ts->l_ui & 0xffffffffUL,
+	    ts->l_uf & 0xffffffffUL);
 	while (*cp != '\0')
 		cp++;
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
@@ -1263,7 +1265,7 @@ ctl_putsys(
 			ctl_putuint(sys_var[CS_PEERID].text, 0);
 		else
 			ctl_putuint(sys_var[CS_PEERID].text,
-				sys_peer->associd);
+			    sys_peer->associd);
 		break;
 
 	case CS_STATE:
@@ -1384,11 +1386,28 @@ ctl_putsys(
 		}
 		break;
 
+	case CS_TAI:
+		if (sys_tai > 0)
+			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
+		break;
+
+	case CS_LEAPTAB:
+		if (leap_sec > 0)
+			ctl_putuint(sys_var[CS_LEAPTAB].text,
+			    leap_sec);
+		break;
+
+	case CS_LEAPEND:
+		if (leap_expire > 0)
+			ctl_putfs(sys_var[CS_LEAPEND].text,
+			    leap_expire);
+		break;
+
 #ifdef OPENSSL
 	case CS_FLAGS:
-		if (crypto_flags) {
-			ctl_puthex(sys_var[CS_FLAGS].text, crypto_flags);
-		}
+		if (crypto_flags)
+			ctl_puthex(sys_var[CS_FLAGS].text,
+			    crypto_flags);
 		break;
 
 	case CS_DIGEST:
@@ -1414,19 +1433,13 @@ ctl_putsys(
 			    cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
 			    strlen(cbuf));
-			ctl_putfs(sys_var[CS_REVOKE].text, cp->last);
+			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
 		}
 		break;
 
 	case CS_PUBLIC:
 		if (hostval.fstamp != 0)
 			ctl_putfs(sys_var[CS_PUBLIC].text,
-			    ntohl(hostval.tstamp));
-		break;
-
-	case CS_REVTIME:
-		if (hostval.tstamp != 0)
-			ctl_putfs(sys_var[CS_REVTIME].text,
 			    ntohl(hostval.tstamp));
 		break;
 
@@ -1440,15 +1453,6 @@ ctl_putsys(
 		if (mvpar_pkey != NULL)
 			ctl_putstr(sys_var[CS_IDENT].text,
 			    mvpar_file, strlen(mvpar_file));
-		break;
-
-	case CS_LEAPTAB:
-		ctl_putuint(sys_var[CS_LEAPTAB].text,
-		    leap_sec);
-		break;
-
-	case CS_TAI:
-		ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
 
 #endif /* OPENSSL */
@@ -1512,6 +1516,18 @@ ctl_putpeer(
 		ctl_putuint(peer_var[CP_DSTPORT].text,
 		    (u_long)(peer->dstadr ?
 		    ntohs(((struct sockaddr_in*)&peer->dstadr->sin)->sin_port) : 0));
+		break;
+
+	case CP_OUT:
+		if (peer->r21 > 0)
+			ctl_putdbl(peer_var[CP_IN].text,
+			    peer->r21 / 1e3);
+		break;
+
+	case CP_IN:
+		if (peer->r34 >0)
+			ctl_putdbl(peer_var[CP_OUT].text,
+			    peer->r34 / 1e3);
 		break;
 
 	case CP_LEAP:

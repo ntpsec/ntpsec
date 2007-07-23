@@ -302,8 +302,8 @@ clear_all(void)
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (!(peer->cast_flags & (MDF_ACAST | MDF_MCAST |
-			    MDF_BCAST))) {
+			if (!(peer->cast_flags & (MDF_ACAST |
+			    MDF_MCAST | MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
 			}
@@ -329,7 +329,8 @@ unpeer(
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 
 	if (peer_to_remove->flags & FLAG_SKEY) {
-		sprintf(statstr, "unpeer %d flash %x reach %03o flags %04x",
+		sprintf(statstr,
+		    "unpeer %d flash %x reach %03o flags %04x",
 		    peer_to_remove->associd, peer_to_remove->flash,
 		    peer_to_remove->reach, peer_to_remove->flags);
 		record_crypto_stats(&peer_to_remove->srcadr, statstr);
@@ -345,9 +346,6 @@ unpeer(
 		    peer_associations, peer_preempt);
 #endif
 	set_peerdstadr(peer_to_remove, NULL);
-
-	/* XXXMEMLEAK? peer_clear->crypto allocation */
-
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
 	peer_demobilizations++;
@@ -362,19 +360,20 @@ unpeer(
 		refclock_unpeer(peer_to_remove);
 #endif
 	peer_to_remove->action = 0;	/* disable timeout actions */
-	if (peer_hash[hash] == peer_to_remove)
+	if (peer_hash[hash] == peer_to_remove) {
 		peer_hash[hash] = peer_to_remove->next;
-	else {
+	} else {
 		register struct peer *peer;
 
 		peer = peer_hash[hash];
 		while (peer != 0 && peer->next != peer_to_remove)
-		    peer = peer->next;
+			peer = peer->next;
 		
 		if (peer == 0) {
 			peer_hash_count[hash]++;
-			msyslog(LOG_ERR, "peer struct for %s not in table!",
-				stoa(&peer->srcadr));
+			msyslog(LOG_ERR,
+			    "peer struct for %s not in table!",
+			    stoa(&peer->srcadr));
 		} else {
 			peer->next = peer_to_remove->next;
 		}
@@ -385,9 +384,9 @@ unpeer(
 	 */
 	hash = peer_to_remove->associd & NTP_HASH_MASK;
 	assoc_hash_count[hash]--;
-	if (assoc_hash[hash] == peer_to_remove)
+	if (assoc_hash[hash] == peer_to_remove) {
 		assoc_hash[hash] = peer_to_remove->ass_next;
-	else {
+	} else {
 		register struct peer *peer;
 
 		peer = assoc_hash[hash];
@@ -397,7 +396,7 @@ unpeer(
 		if (peer == 0) {
 			assoc_hash_count[hash]++;
 			msyslog(LOG_ERR,
-				"peer struct for %s not in association table!",
+			    "peer struct for %s not in association table!",
 				stoa(&peer->srcadr));
 		} else {
 			peer->ass_next = peer_to_remove->ass_next;
@@ -442,9 +441,11 @@ peer_config(
 		while (peer != 0) {
 			if (peer->dstadr == dstadr)
 				break;
+
 			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
 			    peer->dstadr == findinterface(srcadr))
-			     break;
+				break;
+
 			peer = findexistingpeer(srcadr, peer, hmode);
 		}
 	}
@@ -502,7 +503,7 @@ peer_config(
 		peer->minpoll = (u_char) minpoll;
 		peer->maxpoll = (u_char) maxpoll;
 		peer->flags = flags | FLAG_CONFIG |
-			(peer->flags & FLAG_REFCLOCK);
+		    (peer->flags & FLAG_REFCLOCK);
 		peer->cast_flags = cast_flags;
 		peer->ttl = (u_char) ttl;
 		peer->keyid = key;
@@ -535,29 +536,29 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 		    (interface->flags & INT_MCASTIF) &&
 		    peer->burst) {
 			/*
-			 * don't accept updates to a true multicast reception
-			 * interface while a BCLNT peer is running it's
-			 * unicast protocol
+			 * don't accept updates to a true multicast
+			 * reception interface while a BCLNT peer is
+			 * running it's unicast protocol
 			 */
 			return;
 		}
 
-		if (peer->dstadr != NULL)
-		{
+		if (peer->dstadr != NULL) {
 			peer->dstadr->peercnt--;
-			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer, ilink, struct peer);
+			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer,
+			    ilink, struct peer);
 		}
 
 		DPRINTF(4, ("set_peerdstadr(%s): change interface from %s to %s\n",
 			    stoa(&peer->srcadr),
-			    (peer->dstadr != NULL) ? stoa(&peer->dstadr->sin) : "<null>",
-			    (interface != NULL) ? stoa(&interface->sin) : "<null>"));
-
+			    (peer->dstadr != NULL) ?
+			    stoa(&peer->dstadr->sin) : "<null>",
+			    (interface != NULL) ?
+			    stoa(&interface->sin) : "<null>"));
 		peer->dstadr = interface;
-
-		if (peer->dstadr != NULL)
-		{
-			ISC_LIST_APPEND(peer->dstadr->peers, peer, ilink);
+		if (peer->dstadr != NULL) {
+			ISC_LIST_APPEND(peer->dstadr->peers, peer,
+			    ilink);
 			peer->dstadr->peercnt++;
 		}
 	}
@@ -571,53 +572,45 @@ peer_refresh_interface(struct peer *peer)
 {
 	struct interface *niface, *piface;
 
-	niface = select_peerinterface(peer, &peer->srcadr, NULL, peer->cast_flags);
+	niface = select_peerinterface(peer, &peer->srcadr, NULL,
+	    peer->cast_flags);
 
 #ifdef DEBUG
 	if (debug > 3)
 	{
 		printf(
-			"peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
-			peer->dstadr == NULL ? "<null>" : stoa(&peer->dstadr->sin),
-			stoa(&peer->srcadr),
-			peer->hmode, peer->version, peer->minpoll,
-			peer->maxpoll, peer->flags, peer->cast_flags,
-			peer->ttl, peer->keyid);
-		if (niface != NULL) 
-		{
-			printf("fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, ",
-			       niface->fd,
-			       niface->bfd,
-			       niface->name,
-			       niface->flags,
-			       niface->scopeid);
+		    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
+		    peer->dstadr == NULL ? "<null>" :
+		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
+		    peer->hmode, peer->version, peer->minpoll,
+		    peer->maxpoll, peer->flags, peer->cast_flags,
+		    peer->ttl, peer->keyid);
+		if (niface != NULL) {
+			printf(
+			    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, ",
+			    niface->fd,  niface->bfd, niface->name,
+			    niface->flags, niface->scopeid);
 			/* Leave these as three printf calls. */
-			printf(", sin=%s",
-			       stoa((&niface->sin)));
+			printf(", sin=%s", stoa((&niface->sin)));
 			if (niface->flags & INT_BROADCAST)
 				printf(", bcast=%s,",
-				       stoa((&niface->bcast)));
-			printf(", mask=%s\n",
-			       stoa((&niface->mask)));
-		}
-		else
-		{
+				    stoa((&niface->bcast)));
+			printf(", mask=%s\n", stoa((&niface->mask)));
+		} else {
 			printf("<NONE>\n");
 		}
 	}
 #endif
 
 	piface = peer->dstadr;
-
 	set_peerdstadr(peer, niface);
-
 	if (peer->dstadr) {
                 /*
                  * clear crypto if we change the local address
                  */
-                if (peer->dstadr != piface && !(peer->cast_flags & MDF_BCLNT)) {
-			peer_crypto_clear(peer);
-		}
+                if (peer->dstadr != piface && !(peer->cast_flags &
+		    MDF_BCLNT))
+			peer_clear(peer, "XFAC");
 
 		/*
 	 	 * Broadcast needs the socket enabled for broadcast
@@ -627,10 +620,12 @@ peer_refresh_interface(struct peer *peer)
 		}
 
 		/*
-	 	 * Multicast needs the socket interface enabled for multicast
+	 	 * Multicast needs the socket interface enabled for
+		 * multicast
 	 	 */
 		if (peer->cast_flags & MDF_MCAST) {
-			enable_multicast_if(peer->dstadr, &peer->srcadr);
+			enable_multicast_if(peer->dstadr,
+			    &peer->srcadr);
 		}
 	}
 }
@@ -682,20 +677,22 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 			if (debug > 3) {
 				if (interface != NULL)
 					printf("Found *-cast interface address %s, for address %s\n",
-					       stoa(&(interface)->sin), stoa(srcadr));
+					    stoa(&(interface)->sin), stoa(srcadr));
 				else
 					printf("No *-cast local address found for address %s\n",
 					       stoa(srcadr));
 			}
 #endif
 			/*
-			 * If it was a multicast packet, findbcastinter() may not
-			 * find it, so try a little harder.
+			 * If it was a multicast packet,
+			 * findbcastinter() may not find it, so try a
+			 * little harder.
 			 */
 			if (interface == ANY_INTERFACE_CHOOSE(srcadr))
 				interface = findinterface(srcadr);
 		}
-		else if (dstadr != NULL && dstadr != ANY_INTERFACE_CHOOSE(srcadr))
+		else if (dstadr != NULL && dstadr !=
+		    ANY_INTERFACE_CHOOSE(srcadr))
 			interface = dstadr;
 		else
 			interface = findinterface(srcadr);
@@ -760,7 +757,8 @@ newpeer(
 
 	ISC_LINK_INIT(peer, ilink);  /* set up interface link chain */
 
-	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr, cast_flags));
+	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr,
+	    cast_flags));
 	
 	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;
@@ -768,12 +766,12 @@ newpeer(
 	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
 	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags;
-
 #ifdef DEBUG
 	if (debug > 2) {
 		if (peer->dstadr)
 			printf("newpeer: using fd %d and our addr %s\n",
-			       peer->dstadr->fd, stoa(&peer->dstadr->sin));
+			       peer->dstadr->fd,
+				    stoa(&peer->dstadr->sin));
 		else
 			printf("newpeer: local interface currently not bound\n");
 	}
@@ -916,7 +914,7 @@ peer_unconfig(
 }
 
 /*
- * peer_clr_stats - clear peer module stat counters
+ * peer_clr_stats - clear peer module statiistics counters
  */
 void
 peer_clr_stats(void)
@@ -929,7 +927,7 @@ peer_clr_stats(void)
 }
 
 /*
- * peer_reset - reset stat counters in a peer structure
+ * peer_reset - reset statistics counters
  */
 void
 peer_reset(
@@ -950,7 +948,7 @@ peer_reset(
 
 
 /*
- * peer_all_reset - reset all peer stat counters
+ * peer_all_reset - reset all peer statistics counters
  */
 void
 peer_all_reset(void)
@@ -980,7 +978,7 @@ expire_all(void)
 	 * peer list for all associations and flush only the key list
 	 * and cookie. If a manycast client association, flush
 	 * everything. Then, recompute and sign the agreement public
-	 * value, if present.
+	 * values, if present, and refresh the leap values.
 	 */
 	if (!crypto_flags)
 		return;
@@ -995,7 +993,8 @@ expire_all(void)
 			    peer->hmode == MODE_PASSIVE) {
 				key_expire(peer);
 				peer->crypto &= ~(CRYPTO_FLAG_AUTO |
-				    CRYPTO_FLAG_AGREE);
+				    CRYPTO_FLAG_AGREE |
+				    CRYPTO_FLAG_LEAP);
 			}
 				
 		}
