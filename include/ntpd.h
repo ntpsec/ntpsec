@@ -122,6 +122,7 @@ extern	void	loop_config (int, double);
 extern	void	huffpuff	(void);
 extern	u_long	sys_clocktime;
 extern	u_int	sys_tai;
+extern	int	clock_stepcnt;
 
 /* ntp_monitor.c */
 extern	void	init_mon	(void);
@@ -154,8 +155,11 @@ extern	struct	peer *findmanycastpeer	(struct recvbuf *);
 /* ntp_crypto.c */
 #ifdef OPENSSL
 extern	int	crypto_recv	(struct peer *, struct recvbuf *);
-extern	int	crypto_xmit	(struct pkt *, struct sockaddr_storage *, int, struct exten *, keyid_t);
-extern	keyid_t	session_key	(struct sockaddr_storage *, struct sockaddr_storage *, keyid_t, keyid_t, u_long);
+extern	int	crypto_xmit	(struct pkt *, struct sockaddr_storage *,
+				    int *, struct exten *, keyid_t);
+extern	keyid_t	session_key	(struct sockaddr_storage *,
+				    struct sockaddr_storage *, keyid_t,
+				    keyid_t, u_long);
 extern	int	make_keylist	(struct peer *, struct interface *);
 extern	void	key_expire	(struct peer *);
 extern	void	crypto_update	(void);
@@ -177,11 +181,11 @@ extern struct value tai_leap;
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
 extern	void	receive 	(struct recvbuf *);
-extern  void    peer_crypto_clear (struct peer *peer);
 extern	void	peer_clear	(struct peer *, char *);
-extern	void 	process_packet	(struct peer *, struct pkt *);
+extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 extern	void	kod_proto	(void);
+extern	int	leap_tai;
 extern	u_long	leap_ins;
 extern	u_long	leap_expire;
 extern	u_long	leap_sec;
@@ -225,10 +229,10 @@ extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
 extern  void    timer_interfacetimeout (u_long);
 extern  volatile int interface_interval;
-
 #ifdef OPENSSL
 extern	char	*sys_hostname;
-extern	l_fp	sys_revoketime;
+extern u_long	sys_revoke;	/* keys revoke timeout */
+extern u_long	sys_automax;	/* session key timeout */
 #endif /* OPENSSL */
 
 /* ntp_util.c */
@@ -389,7 +393,6 @@ extern l_fp	sys_reftime;		/* time we were last updated */
 extern struct peer *sys_peer;		/* our current peer */
 extern struct peer *sys_pps;		/* our current PPS peer */
 extern struct peer *sys_prefer;		/* our cherished peer */
-extern u_long	sys_automax;		/* maximum session key lifetime */
 
 /*
  * Nonspecified system state variables.
@@ -440,7 +443,6 @@ extern u_long	mon_age;		/* monitor preempt age */
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */
-extern u_char	sys_revoke;		/* keys revoke timeout (log2 s) */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* current time (s) */
 extern u_long	timer_timereset;

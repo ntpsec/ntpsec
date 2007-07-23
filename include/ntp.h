@@ -349,6 +349,17 @@ struct peer {
 	double	estbdelay;	/* clock offset to broadcast server */
 
 	/*
+	 * Variables used to correct for packet length and asymmetry.
+	 */
+	double	t21;		/* outbound packet delay */
+	int	t21_bytes;	/* outbound packet length */
+	int	t21_last;	/* last outbound packet length */
+	double	r21;		/* outbound data rate */
+	double	t34;		/* inbound packet delay */
+	int	t34_bytes;	/* inbound packet length */
+	double	r34;		/* inbound data rate */
+
+	/*
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
@@ -433,7 +444,7 @@ struct peer {
 #define FLAG_FIXPOLL	0x1000	/* stick at minpoll */
 #define FLAG_TRUE	0x2000	/* select truechimer */
 #define	FLAG_PREEMPT	0x4000	/* preemptable association */
-
+#define	FLAG_ASYM	0x8000	/* asymmetric delay compensation */
 /*
  * Definitions for the clear() routine.  We use memset() to clear
  * the parts of the peer structure which go to zero.  These are

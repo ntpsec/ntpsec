@@ -1,3 +1,5 @@
+* Changes from Dave Mills: in/out-bound data rates, leapsecond cleanup,
+  driftfile write cleanup, packet buffer length checks, documentation updates.
 * More assertion checks and malloc()->emalloc(), courtesy of Calysto.
 * [Bug 864] Place ntpd service in maintenance mode if using SMF on Solaris
 * [Bug 862] includefile nesting; preserve phonelist on reconfig.
