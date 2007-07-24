@@ -1,6 +1,6 @@
 /* ntp_parser.y
  *
- * The parser for the NTP configuration file. 
+ * The parser for the NTP configuration file.
  *
  * Written By: Sachin Kamboj
  *             University of Delaware
@@ -19,7 +19,7 @@
   #include "ntp_stdlib.h"
   #include "ntp_filegen.h"
   #include "ntp_data_structures.h"
-  #include "ntp_scanner.h"  
+  #include "ntp_scanner.h"
   #include "ntp_config.h"
 
   #include "ntpsim.h"		/* HMS: Do we really want this all the time? */
@@ -30,7 +30,7 @@
 				*/
 
   /*  #include "ntp_parser.h"     SK: Arent't we generating this using bison?
-				   This was not an issue when we were 
+				   This was not an issue when we were
 				   directly including the source file. However,
 				   we will need a seperate description of the
 				   tokens in the scanner.
@@ -44,26 +44,26 @@
   extern int input_from_file;  /* 0=input from ntpq>config command buffer */
 
   /* SK: The following is a terrible hack to allow the NTP code to be built
-   * without OPENSSL. The following symbols need to be defined in the 
-   * here because bison will balk at the presence of a C like preprocesser 
+   * without OPENSSL. The following symbols need to be defined in the
+   * here because bison will balk at the presence of a C like preprocesser
    * directive in the rules section.
    *
    * There should be a better way of doing this...
    */
 #ifndef OPENSSL
-  #define CRYPTO_CONF_NONE  0     
-  #define CRYPTO_CONF_PRIV  1     
-  #define CRYPTO_CONF_SIGN  2     
-  #define CRYPTO_CONF_LEAP  3     
-  #define CRYPTO_CONF_KEYS  4     
-  #define CRYPTO_CONF_CERT  5     
-  #define CRYPTO_CONF_RAND  6     
-  #define CRYPTO_CONF_TRST  7     
-  #define CRYPTO_CONF_IFFPAR 8    
-  #define CRYPTO_CONF_GQPAR 9     
-  #define CRYPTO_CONF_MVPAR 10    
-  #define CRYPTO_CONF_PW    11    
- #define CRYPTO_CONF_IDENT 12    
+  #define CRYPTO_CONF_NONE  0
+  #define CRYPTO_CONF_PRIV  1
+  #define CRYPTO_CONF_SIGN  2
+  #define CRYPTO_CONF_LEAP  3
+  #define CRYPTO_CONF_KEYS  4
+  #define CRYPTO_CONF_CERT  5
+  #define CRYPTO_CONF_RAND  6
+  #define CRYPTO_CONF_TRST  7
+  #define CRYPTO_CONF_IFFPAR 8
+  #define CRYPTO_CONF_GQPAR 9
+  #define CRYPTO_CONF_MVPAR 10
+  #define CRYPTO_CONF_PW    11
+ #define CRYPTO_CONF_IDENT 12
 #endif
 %}
 
@@ -111,7 +111,7 @@
 %token		T_Dispersion
 %token <Double>	T_Double
 %token		T_Driftfile
-%token <Integer> T_DriftMinutes
+%token <Double>	T_WanderThreshold
 %token		T_Enable
 %token		T_End
 %token		T_False
@@ -230,7 +230,7 @@
 /* NTP Simulator Tokens */
 %token     T_Simulate
 %token     T_Beep_Delay
-%token     T_Sim_Duration 
+%token     T_Sim_Duration
 %token     T_Server_Offset
 %token     T_Duration
 %token     T_Freq_Offset
@@ -278,16 +278,16 @@
 %type	<Queue>	        trap_option_list
 %type   <Set_var>       variable_assign
 
-/* NTP Simulator non-terminals */   
-%type   <Queue>         sim_init_statement_list 
+/* NTP Simulator non-terminals */
+%type   <Queue>         sim_init_statement_list
 %type   <Attr_val>      sim_init_statement
-%type   <Queue>         sim_server_list             
-%type   <Sim_server>    sim_server         
-%type   <Double>        sim_server_offset   
-%type   <Address_node>  sim_server_name     
+%type   <Queue>         sim_server_list
+%type   <Sim_server>    sim_server
+%type   <Double>        sim_server_offset
+%type   <Address_node>  sim_server_name
 %type   <Address_node>  sim_address
-%type   <Queue>         sim_act_list        
-%type   <Sim_script>    sim_act            
+%type   <Queue>         sim_act_list
+%type   <Sim_script>    sim_act
 %type   <Queue>         sim_act_stmt_list
 %type   <Attr_val>      sim_act_stmt
 
@@ -298,72 +298,73 @@
  * --------------------------
  */
 
-configuration 
+configuration
 	:	command_list
 	;
 
 command_list
-	: 	command_list command T_EOC  
-	| 	command T_EOC 
+	:	command_list command T_EOC
+	|	command T_EOC
                 /* I will need to incorporate much more fine grained
                  * error messages. The following should suffice for
                  * the time being.
                  */
-        |       error T_EOC 
-                { 
+        |       error T_EOC
+                {
 					if (input_from_file == 1) {
-                    	msyslog(LOG_INFO, "parse error %s line %d ignored\n",
+			msyslog(LOG_INFO, "parse error %s line %d ignored\n",
                             ip_file->fname, ip_file->line_no);
-                	} else if (input_from_file != 0)
-						msyslog(LOG_INFO, "parse: bad boolean input flag\n"); 
+			} else if (input_from_file != 0)
+				msyslog(LOG_INFO,
+				    "parse: bad boolean input flag\n");
                 }
 	;
 
-command :	/* NULL STATEMENT */  
-	|	server_command  
-	|	other_mode_command  
-	|	authentication_command 
-	|	monitoring_command 
-	|	access_control_command 
-	|	orphan_mode_command 
-	|	fudge_command 
-	|	system_option_command 
-	|	tinker_command 
-	|	miscellaneous_command 
+command :	/* NULL STATEMENT */
+	|	server_command
+	|	other_mode_command
+	|	authentication_command
+	|	monitoring_command
+	|	access_control_command
+	|	orphan_mode_command
+	|	fudge_command
+	|	system_option_command
+	|	tinker_command
+	|	miscellaneous_command
         |       simulate_command
 	;
 
-/* Server Commands 
+/* Server Commands
  * ---------------
  */
 
-server_command 
-        : 	client_type address option_list 
-                    { 
-                        struct peer_node *my_node =  create_peer_node($1, $2, $3); 
+server_command
+        :	client_type address option_list
+                    {
+                        struct peer_node *my_node =  create_peer_node($1, $2, $3);
                         if (my_node)
-                            enqueue(my_config.peers, my_node);                        
-                    } 
-        | 	client_type address  
-                    { 
-                        struct peer_node *my_node = create_peer_node($1, $2, NULL); 
+                            enqueue(my_config.peers, my_node);
+                    }
+        |	client_type address
+                    {
+                        struct peer_node *my_node = create_peer_node($1, $2, NULL);
                         if (my_node)
-                            enqueue(my_config.peers, my_node);                        
+                            enqueue(my_config.peers, my_node);
                     }
 	;
 
 client_type
-        : 	T_Server          { $$ = T_Server; }
+        :	T_Server          { $$ = T_Server; }
         |       T_Pool            { $$ = T_Pool; }
 	|	T_Peer            { $$ = T_Peer; }
         |	T_Broadcast       { $$ = T_Broadcast; }
 	|	T_Manycastclient  { $$ = T_Manycastclient; }
 	;
 
-address 
+address
 	:	ip_address   { $$ = $1; }
         |	T_String  { $$ = create_address_node($1, default_ai_family); }
-        |       T_Integer T_String 
+        |       T_Integer T_String
                     {
                         if ($1 == -4)
                             $$ = create_address_node($2, AF_INET);
@@ -374,7 +375,7 @@ address
                             $$ = create_address_node($2, default_ai_family);
                         }
                     }
-                            
+
 
 	;
 
@@ -384,12 +385,12 @@ ip_address
 	;
 
 option_list
-	: 	option_list option         { $$ = enqueue($1, $2); }
-	|	option  { $$ = enqueue_in_new_queue($1); } 
+	:	option_list option         { $$ = enqueue($1, $2); }
+	|	option  { $$ = enqueue_in_new_queue($1); }
 	;
 
 option
-/*        : 	/* Null Statement { $$ = NULL; } */
+/*        :	/* Null Statement { $$ = NULL; } */
         :	T_Autokey      { $$ = create_attr_ival(T_Flag, FLAG_SKEY | FLAG_AUTHENABLE); }
 	|	T_Burst        { $$ = create_attr_ival(T_Flag, FLAG_BURST); }
 	|	T_Iburst       { $$ = create_attr_ival(T_Flag, FLAG_IBURST); }
@@ -406,86 +407,86 @@ option
 	;
 
 
-/* Other Modes 
+/* Other Modes
  * (broadcastclient manycastserver multicastclient)
  * ------------------------------------------------
  */
 
 other_mode_command
-        :	T_Broadcastclient  
+        :	T_Broadcastclient
                     { my_config.broadcastclient = SIMPLE; }
-        |	T_Broadcastclient T_Novolley  
+        |	T_Broadcastclient T_Novolley
                     { my_config.broadcastclient = NOVOLLEY;  }
-	|	T_Manycastserver address_list  
+	|	T_Manycastserver address_list
                     { append_queue(my_config.manycastserver, $2);  }
-	|	T_Multicastclient address_list  
+	|	T_Multicastclient address_list
                     { append_queue(my_config.multicastclient, $2);  }
 	;
 
 
 
-/* Authentication Commands 
+/* Authentication Commands
  * -----------------------
  */
 
 authentication_command
-	:	T_Autokey T_Integer  
+	:	T_Autokey T_Integer
                     { my_config.auth.autokey = $2;  }
-        |	T_ControlKey T_Integer  
+        |	T_ControlKey T_Integer
                     { my_config.auth.control_key = $2;  }
-        |	T_Crypto crypto_command_list  
-			{ if (my_config.auth.crypto_cmd_list != NULL) 
-					append_queue(my_config.auth.crypto_cmd_list, $2); 
-		 		else 
+        |	T_Crypto crypto_command_list
+			{ if (my_config.auth.crypto_cmd_list != NULL)
+					append_queue(my_config.auth.crypto_cmd_list, $2);
+				else
 					my_config.auth.crypto_cmd_list = $2;
 			}
-	|	T_Keys T_String  
+	|	T_Keys T_String
                     { my_config.auth.keys = $2;  }
-	|	T_Keysdir T_String  
+	|	T_Keysdir T_String
                     { my_config.auth.keysdir = $2;  }
-	|	T_Requestkey T_Integer  
+	|	T_Requestkey T_Integer
                     { my_config.auth.requested_key = $2;  }
-	|	T_Revoke T_Integer  
+	|	T_Revoke T_Integer
                     { my_config.auth.revoke = $2;  }
-	|	T_Trustedkey integer_list  
+	|	T_Trustedkey integer_list
                     { my_config.auth.trusted_key_list = $2;  }
 	;
 
 crypto_command_list
         :	crypto_command_list crypto_command  { $$ = enqueue($1, $2); }
-	|	crypto_command { $$ = enqueue_in_new_queue($1); } 
+	|	crypto_command { $$ = enqueue_in_new_queue($1); }
 	;
 
 crypto_command
-	:	T_Cert T_String  
+	:	T_Cert T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_CERT, $2); }
-	|	T_Leap T_String  
+	|	T_Leap T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_LEAP, $2); }
-	|	T_RandFile T_String 
+	|	T_RandFile T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_RAND, $2); }
-	|	T_Host	T_String  
+	|	T_Host	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PRIV, $2); }
-	|	T_Sign	T_String  
+	|	T_Sign	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_SIGN, $2); }
-	|	T_Ident	T_String  
+	|	T_Ident	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IDENT, $2); }
-	|	T_Iffpar T_String 
+	|	T_Iffpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IFFPAR, $2); }
-	|	T_Gqpar T_String  
+	|	T_Gqpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_GQPAR, $2); }
-	|	T_Mvpar T_String  
+	|	T_Mvpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_MVPAR, $2); }
-	|	T_Pw T_String  
+	|	T_Pw T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PW, $2); }
 	;
 
 
-/* Orphan Mode Commands 
+/* Orphan Mode Commands
  * --------------------
  */
- 
+
 orphan_mode_command
-        :	T_Tos tos_option_list  
+        :	T_Tos tos_option_list
                     { append_queue(my_config.orphan_cmds,$2);  }
 	;
 
@@ -495,44 +496,44 @@ tos_option_list
 	;
 
 tos_option
-	:	T_Ceiling T_Integer  
+	:	T_Ceiling T_Integer
                     { $$ = create_attr_dval(PROTO_CEILING, (double)$2); }
-	|	T_Floor T_Integer  
+	|	T_Floor T_Integer
                     { $$ = create_attr_dval(PROTO_FLOOR, (double)$2); }
-	|	T_Cohort boolean  
+	|	T_Cohort boolean
                     { $$ = create_attr_dval(PROTO_COHORT, (double)$2); }
-	|	T_Orphan T_Integer  
+	|	T_Orphan T_Integer
                     { $$ = create_attr_dval(PROTO_ORPHAN, (double)$2); }
-	|	T_Mindist number  
+	|	T_Mindist number
                     { $$ = create_attr_dval(PROTO_MINDISP, $2); }
-	|	T_Maxdist number  
+	|	T_Maxdist number
                     { $$ = create_attr_dval(PROTO_MAXDIST, $2); }
-	|	T_Minclock number  
+	|	T_Minclock number
                     { $$ = create_attr_dval(PROTO_MINCLOCK, $2); }
-	|	T_Maxclock number  
+	|	T_Maxclock number
                     { $$ = create_attr_dval(PROTO_MAXCLOCK, $2); }
 	|	T_Minsane T_Integer
                     { $$ = create_attr_dval(PROTO_MINSANE, (double)$2); }
-	|	T_Beacon T_Integer 
+	|	T_Beacon T_Integer
                     { $$ = create_attr_dval(PROTO_BEACON, (double)$2); }
-	|	T_Maxhop T_Integer 
+	|	T_Maxhop T_Integer
                     { $$ = create_attr_dval(PROTO_MAXHOP, (double)$2); }
 	;
 	
 
-/* Monitoring Commands 
+/* Monitoring Commands
  * -------------------
  */
 
 monitoring_command
-        :	T_Statistics stats_list  
+        :	T_Statistics stats_list
                     { append_queue(my_config.stats_list, $2);  }
-	|	T_Statsdir T_String  
+	|	T_Statsdir T_String
                     { my_config.stats_dir = $2;  }
-	|	T_Filegen stat filegen_option_list  
+	|	T_Filegen stat filegen_option_list
                     {
-                        enqueue(my_config.filegen_opts, 
-                                create_filegen_node($2, $3));                         
+                        enqueue(my_config.filegen_opts,
+                                create_filegen_node($2, $3));
                     }
 	;
 
@@ -542,17 +543,17 @@ stats_list
 	;
 
 stat
-	:	T_Clockstats 
+	:	T_Clockstats
                     { $$ = create_pval("clockstats"); }
 	|	T_Cryptostats
                     { $$ = create_pval("cryptostats"); }
-	|	T_Loopstats  
+	|	T_Loopstats
                     { $$ = create_pval("loopstats"); }
-	|	T_Peerstats  
+	|	T_Peerstats
                     { $$ = create_pval("peerstats"); }
-	|	T_Rawstats   
+	|	T_Rawstats
                     { $$ = create_pval("rawstats"); }
-        |	T_Sysstats     
+        |	T_Sysstats
                     { $$ = create_pval("sysstats"); }
 	;
 
@@ -573,35 +574,35 @@ filegen_option
 filegen_type
 	:	T_None     { $$ = FILEGEN_NONE; }
         |	T_Pid      { $$ = FILEGEN_PID; }
-        |	T_Day      { $$ = FILEGEN_DAY; } 
+        |	T_Day      { $$ = FILEGEN_DAY; }
         |	T_Week     { $$ = FILEGEN_WEEK; }
         |	T_Month    { $$ = FILEGEN_MONTH; }
-	|	T_Year     { $$ = FILEGEN_YEAR; } 
+	|	T_Year     { $$ = FILEGEN_YEAR; }
 	|	T_Age      { $$ = FILEGEN_AGE; }
 	;
 
 
-/* Access Control Commands 
+/* Access Control Commands
  * -----------------------
  */
 
 access_control_command
-        :	T_Discard discard_option_list  
+        :	T_Discard discard_option_list
                     {   append_queue(my_config.discard_opts, $2); }
-        |	T_Restrict address ac_flag_list  
-                    { 
-                        enqueue(my_config.restrict_opts, 
-                                create_restrict_node($2, NULL, $3, ip_file->line_no));                          
+        |	T_Restrict address ac_flag_list
+                    {
+                        enqueue(my_config.restrict_opts,
+                                create_restrict_node($2, NULL, $3, ip_file->line_no));
                     }
         |       T_Restrict T_Default ac_flag_list
-                    { 
-                        enqueue(my_config.restrict_opts, 
-                                create_restrict_node(NULL, NULL, $3, ip_file->line_no)); 
+                    {
+                        enqueue(my_config.restrict_opts,
+                                create_restrict_node(NULL, NULL, $3, ip_file->line_no));
                     }
 	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
-                    { 
-                        enqueue(my_config.restrict_opts, 
-                                create_restrict_node($2, $4, $5, ip_file->line_no)); 
+                    {
+                        enqueue(my_config.restrict_opts,
+                                create_restrict_node($2, $4, $5, ip_file->line_no));
                     }
 	;
 
@@ -636,12 +637,12 @@ discard_option
 	|	T_Monitor T_Integer   { $$ = create_attr_ival(T_Monitor, $2); }
 	;
 
-/* Fudge Commands 
+/* Fudge Commands
  * --------------
  */
 
-fudge_command 
-	:	T_Fudge address fudge_factor_list  
+fudge_command
+	:	T_Fudge address fudge_factor_list
                     { enqueue(my_config.fudge, create_addr_opts_node($2, $3));  }
 	;
 
@@ -651,32 +652,32 @@ fudge_factor_list
 	;
 	
 fudge_factor
-	:	T_Time1 number  
+	:	T_Time1 number
                     { $$ = create_attr_dval(CLK_HAVETIME1, $2); }
-	|	T_Time2 number  
+	|	T_Time2 number
                     { $$ = create_attr_dval(CLK_HAVETIME2, $2); }
-	|	T_Stratum T_Integer  
+	|	T_Stratum T_Integer
                     { $$ = create_attr_ival(CLK_HAVEVAL1,  $2); }
-	|	T_Refid T_String 
+	|	T_Refid T_String
                     { $$ = create_attr_sval(CLK_HAVEVAL2,  $2); }
-        |	T_Flag1 boolean  
+        |	T_Flag1 boolean
                     { $$ = create_attr_ival(CLK_HAVEFLAG1, $2); }
-	|	T_Flag2	boolean  
+	|	T_Flag2	boolean
                     { $$ = create_attr_ival(CLK_HAVEFLAG2, $2); }
-	|	T_Flag3	boolean  
+	|	T_Flag3	boolean
                     { $$ = create_attr_ival(CLK_HAVEFLAG3, $2); }
-        |	T_Flag4 boolean  
+        |	T_Flag4 boolean
                     { $$ = create_attr_ival(CLK_HAVEFLAG4, $2); }
 	;
 
-/* Command for System Options 
+/* Command for System Options
  * --------------------------
  */
 
 system_option_command
-        :	T_Enable system_option_list  
+        :	T_Enable system_option_list
                     { append_queue(my_config.enable_opts,$2);  }
-	|	T_Disable system_option_list  
+	|	T_Disable system_option_list
                     { append_queue(my_config.disable_opts,$2);  }
 	;
 
@@ -719,12 +720,12 @@ tinker_option
 	|	T_Stepout number    { $$ = create_attr_dval(LOOP_MINSTEP, $2); }
 	;
 
-/* Miscellaneous Commands 
+/* Miscellaneous Commands
  * ----------------------
  */
 
 miscellaneous_command
-        :	T_Includefile T_String command  
+        :	T_Includefile T_String command
                 {
                     if (curr_include_level >= MAXINCLUDELEVEL) {
                         fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
@@ -740,55 +741,55 @@ miscellaneous_command
                             ip_file = fp[++curr_include_level];
                     }
                 }
-	|	T_End 
+	|	T_End
                 {
-                    while (curr_include_level != -1) 
+                    while (curr_include_level != -1)
                         FCLOSE(fp[curr_include_level--]);
                 }
 
-        |	T_Broadcastdelay number 
+        |	T_Broadcastdelay number
                     { enqueue(my_config.vars, create_attr_dval(T_Broadcastdelay, $2));  }
-	|	T_Calldelay T_Integer 
+	|	T_Calldelay T_Integer
                     { enqueue(my_config.vars, create_attr_ival(T_Calldelay, $2));  }
 	|	T_Tick number
                     { enqueue(my_config.vars, create_attr_dval(T_Tick, $2));  }
 	|	T_Driftfile drift_parm
          { /* Null action, possibly all null parms */ }
-	|	T_Leapfile T_String 
+	|	T_Leapfile T_String
 		{ enqueue(my_config.vars, create_attr_sval(T_Leapfile, $2)); }
 
-	|	T_Pidfile T_String 
+	|	T_Pidfile T_String
                     { enqueue(my_config.vars, create_attr_sval(T_Pidfile, $2));  }
-	|	T_Logfile T_String 
+	|	T_Logfile T_String
                     { enqueue(my_config.vars, create_attr_sval(T_Logfile, $2));  }
-	|	T_Automax T_Integer 
+	|	T_Automax T_Integer
                     { enqueue(my_config.vars, create_attr_ival(T_Automax, $2));  }
 
-        |	T_Logconfig log_config_list 
+        |	T_Logconfig log_config_list
                     { append_queue(my_config.logconfig, $2);  }
-	|	T_Phone string_list 
+	|	T_Phone string_list
                     { append_queue(my_config.phone, $2);  }
 	|	T_Setvar variable_assign
                     { enqueue(my_config.setvar, $2);  }
-	|	T_Trap ip_address trap_option_list 
+	|	T_Trap ip_address trap_option_list
                     { enqueue(my_config.trap, create_addr_opts_node($2, $3));  }
-	|	T_Ttl integer_list 
+	|	T_Ttl integer_list
                     { append_queue(my_config.ttl, $2); }
 	;	
 drift_parm
-	:	T_String 
+	:	T_String
 		{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|   T_String T_Integer 
-		{ enqueue(my_config.vars, create_attr_ival(T_DriftMinutes, $2)); 
+	|   T_String T_Integer
+		{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
 		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|	{ /* Null driftfile,  indicated by null string "\0" */ 
+	|	{ /* Null driftfile,  indicated by null string "\0" */
 		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
 	;
 
 variable_assign
-    :	T_String '=' T_String T_Default  
+    :	T_String '=' T_String T_Default
                     { $$ = create_setvar_node($1, $3, DEF); }
-	|	T_String '=' T_String            
+	|	T_String '=' T_String
                     { $$ = create_setvar_node($1, $3, 0); }
 	;
 
@@ -804,17 +805,17 @@ trap_option
 	;
 
 	
-log_config_list 
+log_config_list
 	:	log_config_list log_config_command { $$ = enqueue($1, $2); }
 	|	log_config_command  { $$ = enqueue_in_new_queue($1); }
 	;
 
 log_config_command
         :	log_config_prefix T_String { $$ = create_attr_sval($1, $2); }
-        |       T_String  
-                { 
-                    /* YUCK!! This is needed because '+' and '-' are not special characters 
-                     * while '=' is. 
+        |       T_String
+                {
+                    /* YUCK!! This is needed because '+' and '-' are not special characters
+                     * while '=' is.
                      * We really need a better way of defining strings
                      */
                     char prefix = $1[0];
@@ -827,14 +828,14 @@ log_config_command
                 }
 	;
 
-log_config_prefix 
+log_config_prefix
 	:	'+' { $$ = '+'; }
 	|	'-' { $$ = '-'; }
 	|	'=' { $$ = '='; }
 	;
 
 
-/* Miscellaneous Rules 
+/* Miscellaneous Rules
  * -------------------
  */
 
@@ -853,30 +854,30 @@ address_list
         |	address { $$ = enqueue_in_new_queue($1); }
 	;
 
-boolean 
+boolean
         :	T_Integer
-                { 
+                {
                     if ($1 != 0 && $1 != 1) {
                         yyerror("Integer value is not boolean (0 or 1). Assuming 1");
                         $$ = 1;
                     }
                     else
-                        $$ = $1; 
+                        $$ = $1;
                 }
         |	T_True     { $$ = 1; }
         |	T_False    { $$ = 0; }
 	;
 
-number  
-        :	T_Integer { $$ = (double)$1; } 
-        |	T_Double  { $$ = $1; } 
+number
+        :	T_Integer { $$ = (double)$1; }
+        |	T_Double  { $$ = $1; }
 	;
 
-/* Simulator Configuration Commands 
+/* Simulator Configuration Commands
  * --------------------------------
  */
 
-simulate_command 
+simulate_command
         :    sim_conf_start '{' sim_init_statement_list sim_server_list '}'
              {
                  my_config.sim_details = create_sim_node($3, $4);
@@ -886,16 +887,16 @@ simulate_command
              }
         ;
 
-/* The following is a terrible hack to get the configuration file to 
- * treat newlines as whitespace characters within the simulation. 
- * This is needed because newlines are significant in the rest of the 
- * configuration file. 
+/* The following is a terrible hack to get the configuration file to
+ * treat newlines as whitespace characters within the simulation.
+ * This is needed because newlines are significant in the rest of the
+ * configuration file.
  */
 sim_conf_start
         :    T_Simulate { old_config_style = 0; }
         ;
 
-sim_init_statement_list 
+sim_init_statement_list
         :    sim_init_statement_list sim_init_statement T_EOC { $$ = enqueue($1, $2); }
         |    sim_init_statement T_EOC                         { $$ = enqueue_in_new_queue($1); }
         ;
@@ -905,21 +906,21 @@ sim_init_statement
         |    T_Sim_Duration '=' number { $$ = create_attr_dval(T_Sim_Duration, $3); }
         ;
 
-sim_server_list     
+sim_server_list
         :    sim_server_list sim_server { $$ = enqueue($1, $2); }
         |    sim_server                 { $$ = enqueue_in_new_queue($1); }
         ;
-        
-sim_server         
-        :    sim_server_name '{' sim_server_offset sim_act_list '}' 
+
+sim_server
+        :    sim_server_name '{' sim_server_offset sim_act_list '}'
                  { $$ = create_sim_server($1, $3, $4); }
         ;
 
-sim_server_offset   
+sim_server_offset
         :    T_Server_Offset '=' number T_EOC { $$ = $3; }
         ;
 
-sim_server_name     
+sim_server_name
         :    T_Server '=' sim_address { $$ = $3; }
         ;
 
@@ -928,13 +929,13 @@ sim_address
         |    T_String   { $$ = create_address_node($1, T_String); }
         ;
 
-sim_act_list        
+sim_act_list
         :    sim_act_list  sim_act { $$ = enqueue($1, $2); }
         |    sim_act               { $$ = enqueue_in_new_queue($1); }
         ;
-        
-sim_act            
-        :    T_Duration '=' number '{' sim_act_stmt_list '}'  
+
+sim_act
+        :    T_Duration '=' number '{' sim_act_stmt_list '}'
                  { $$ = create_sim_script_info($3, $5); }
         ;
 
@@ -942,19 +943,19 @@ sim_act_stmt_list
         :    sim_act_stmt_list sim_act_stmt T_EOC { $$ = enqueue($1, $2); }
         |    sim_act_stmt T_EOC                   { $$ = enqueue_in_new_queue($1); }
         ;
-    
+
 sim_act_stmt
-        :    T_Freq_Offset '=' number  
+        :    T_Freq_Offset '=' number
                  { $$ = create_attr_dval(T_Freq_Offset, $3); }
-        |    T_Wander '=' number 
+        |    T_Wander '=' number
                  { $$ = create_attr_dval(T_Wander, $3); }
-        |    T_Jitter '=' number       
+        |    T_Jitter '=' number
                  { $$ = create_attr_dval(T_Jitter, $3); }
-        |    T_Prop_Delay '=' number   
+        |    T_Prop_Delay '=' number
                  { $$ = create_attr_dval(T_Prop_Delay, $3); }
-        |    T_Proc_Delay '=' number   
+        |    T_Proc_Delay '=' number
                  { $$ = create_attr_dval(T_Proc_Delay, $3); }
-        ; 
+        ;
 
 
 %%
@@ -970,21 +971,21 @@ void yyerror (char *msg)
         fprintf(stderr, "%s\n", msg);
     else {
         /* Save the error message in the correct buffer */
-        retval = snprintf(remote_config.err_msg + remote_config.err_pos, 
-                          MAXLINE - remote_config.err_pos, 
+        retval = snprintf(remote_config.err_msg + remote_config.err_pos,
+                          MAXLINE - remote_config.err_pos,
                           "%s\n", msg);
 
         /* Increment the value of err_pos */
         if (retval > 0)
             remote_config.err_pos += retval;
-        
+
         /* Increment the number of errors */
         ++remote_config.no_errors;
     }
 }
 
 
-/* Initial Testing function -- ignore 
+/* Initial Testing function -- ignore
 int main(int argc, char *argv[])
 {
     ip_file = FOPEN(argv[1], "r");

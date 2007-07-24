@@ -47,7 +47,7 @@ typedef union {
 # define	T_Dispersion	282
 # define	T_Double	283
 # define	T_Driftfile	284
-# define	T_DriftMinutes	285
+# define	T_WanderThreshold	285
 # define	T_Enable	286
 # define	T_End	287
 # define	T_False	288

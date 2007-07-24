@@ -63,6 +63,7 @@ HANDLE ResolverThreadHandle = NULL;
 void yyerror (char *msg);
 
 extern int priority_done;
+extern double wander_threshold;
 
 
 /*
@@ -1572,11 +1573,8 @@ config_vars(void)
 				free(curr_var->value.s);
 			}
 			break;
-		    case T_DriftMinutes:
-
-#if 0	/* this code is bogus and should be replaced with wander threshold */
-			stats_write_period = 60 * curr_var->value.i;
-#endif
+		    case T_WanderThreshold:
+			wander_threshold = curr_var->value.d;
 			break;
 		    case T_Leapfile:
 			stats_config(STATS_LEAP_FILE, curr_var->value.s);
