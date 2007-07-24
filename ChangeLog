@@ -1,3 +1,4 @@
+* reformat ntp_control.c; do not use c++ // comments.
 * [Bug 629] Undo bug #629 fixes as they cause more problems than were  being
   solved
 * Changes from Dave Mills: in/out-bound data rates, leapsecond cleanup,
