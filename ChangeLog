@@ -1,3 +1,4 @@
+* Use drift_file_sw internally to control writing the drift file.
 * Implement the wander_threshold option for the driftfile config keyword.
 * reformat ntp_control.c; do not use c++ // comments.
 * [Bug 629] Undo bug #629 fixes as they cause more problems than were  being

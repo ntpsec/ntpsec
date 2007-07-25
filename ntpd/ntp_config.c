@@ -1921,7 +1921,9 @@ void
 config_remotely(void)
 {
 	input_from_file = 0;
-//	init_syntax_tree();
+#if 0
+	init_syntax_tree();
+#endif
 	yyparse();
 #ifdef DEBUG
 	if (debug > 1) 

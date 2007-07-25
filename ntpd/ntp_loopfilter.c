@@ -656,10 +656,11 @@ local_clock(
 
 	/*
 	 * Calculate the wander as the exponentially weighted frequency
-	 * differences.
+	 * differences. Enable the frequency file to be written.
 	 */
 	etemp = SQUARE(clock_stability);
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
+	drift_file_sw = TRUE;
 
 	/*
 	 * Here we adjust the poll interval by comparing the current

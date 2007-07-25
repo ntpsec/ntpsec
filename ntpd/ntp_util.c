@@ -60,6 +60,7 @@ char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
 static double wander_resid;		/* wander threshold */
 double	wander_threshold = 1e-7;	/* initial wander threshold */
+int	drift_file_sw;			/* clock update switch */
 
 /*
  * Statistics file stuff
@@ -228,17 +229,18 @@ write_stats(void)
 	if (ftemp > clock_phi)
 		return;
 
-	if (stats_drift_file != 0) {
+	if (stats_drift_file != 0 && drift_file_sw) {
 
 		/*
 		 * When the frequency file is written, initialize the
 		 * wander threshold to a configured initial value.
-		 * Thereafter reduce it by a factor of 0.85. When it
+		 * Thereafter reduce it by a factor of 0.5. When it
 		 * drops below the frequency wander, write the frequency
 		 * file. This adapts to the prevailing wander yet
 		 * minimizes the file writes.
 		 */
-		wander_resid *= 0.8;
+		drift_file_sw = FALSE;
+		wander_resid *= 0.5;
 #ifdef DEBUG
 		if (debug)
 			printf("write_stats: wander %.6lf thresh %.6lf, freq %.6lf\n",

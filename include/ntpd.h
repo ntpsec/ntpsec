@@ -251,6 +251,7 @@ extern	void	record_timing_stats (const char *);
 #endif
 extern  int	sock_hash (struct sockaddr_storage *);
 extern	double	old_drift;
+extern	int	drift_file_sw;
 
 /*
  * Variable declarations for ntpd.
