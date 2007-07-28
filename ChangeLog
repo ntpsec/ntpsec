@@ -1,3 +1,6 @@
+* Use the correct stratum on KISS codes.
+* Fuzz bits cleanup.
+* Show more digits in some debug printf's.
 * Use drift_file_sw internally to control writing the drift file.
 * Implement the wander_threshold option for the driftfile config keyword.
 * reformat ntp_control.c; do not use c++ // comments.
