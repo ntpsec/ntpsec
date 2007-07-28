@@ -780,7 +780,7 @@ rstclock(
 {
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: at %lu offset %.6f freq %.3f state %d step %d\n",
+		printf("local_clock: at %lu offset %.9f freq %.6f state %d step %d\n",
 		    update, offset, drift_comp * 1e6, trans,
 		    clock_stepcnt);
 #endif

@@ -67,6 +67,7 @@ get_systime(
 	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = ts.tv_sec + JAN_1970;
+	now->l_uf |= ntp_random() & 0x3;
 	dtemp = sys_residual + ts.tv_nsec / 1e9;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
@@ -76,7 +77,6 @@ get_systime(
 		now->l_i--;
 	}
 	now->l_uf = (u_int32)(dtemp * FRAC);
-	now->l_uf |= ntp_random() & 0x3;
 
 #else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 	struct timeval tv;	/* seconds and microseconds */
@@ -87,6 +87,7 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
+	now->l_uf |= ntp_random() & 0xfff;
 	dtemp = sys_residual + tv.tv_usec / 1e6;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
@@ -96,7 +97,6 @@ get_systime(
 		now->l_i--;
 	}
 	now->l_uf = (u_int32)(dtemp * FRAC);
-	now->l_uf |= ntp_random() & 0xfff;
 
 #endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 }

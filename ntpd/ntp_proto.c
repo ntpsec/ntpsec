@@ -1261,7 +1261,7 @@ process_packet(
 	p_del = t21 - t34;
 #ifdef DEBUG
 	if (debug > 1)
-		printf("proto: t21 %.6lf %d t34 %.6lf %d\n", peer->t21,
+		printf("proto: t21 %.9lf %d t34 %.9lf %d\n", peer->t21,
 		    peer->t21_bytes, peer->t34, peer->t34_bytes);
 #endif
 
@@ -2981,7 +2981,7 @@ fast_xmit(
 		sys_kod--;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
-		xpkt.stratum = STRATUM_UNSPEC;
+		xpkt.stratum = STRATUM_PKT_UNSPEC;
 		memcpy(&xpkt.refid, "RATE", 4);
 		xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 		xpkt.rootdispersion =
