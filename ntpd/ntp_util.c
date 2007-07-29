@@ -811,6 +811,7 @@ leap_file(
 	 * expiration time in NTP seconds.
 	 */
 	i = TAI_1972;
+	offset = 0;
 	expire = 0;
 	while (i < MAX_TAI) {
 		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
@@ -837,7 +838,7 @@ leap_file(
 		i++;
 	}
 	fclose(str);
-	if (dp != NULL) {
+	if (offset == 0 || i != offset) {
 		msyslog(LOG_INFO, "leap_file: %s error", cp);
 	} else {
 		leap_tai = offset;
