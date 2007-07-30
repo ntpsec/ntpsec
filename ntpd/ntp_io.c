@@ -2931,19 +2931,6 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 		return (rb->recv_length);
 	}
 
-	/*
-	 * Make sure only a valide broadcast packet was received
-	 * on the wildcard address
-	 */
-	if (ignore_this == ISC_TRUE) {
-		freerecvbuf(rb);
-		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
-			"ignore", free_recvbuffs(), fd, stoa(&rb->recv_srcadr)));
-		packets_ignored++;
-		return (rb->recv_length);
-	}
-
-
 #ifdef DEBUG
 	if (debug > 2) {
 		if(rb->recv_srcadr.ss_family == AF_INET)

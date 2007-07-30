@@ -1,3 +1,6 @@
+* ntp_io.c: Dead code cleanup - Coverity View 19.
+* Leap file related cleanup from Dave Mills.
+* ntp_peer.c: Set peer->srcadr before (not after) calling set_peerdstadr().
 * Initialize offset in leap_file() - Coverity View 17.
 * Use the correct stratum on KISS codes.
 * Fuzz bits cleanup.

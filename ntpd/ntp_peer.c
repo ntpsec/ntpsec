@@ -525,16 +525,17 @@ peer_config(
 }
 
 /*
- * setup peer dstadr field keeping it in sync with the interface structures
+ * setup peer dstadr field keeping it in sync with the interface
+ * structures
  */
 void
 set_peerdstadr(struct peer *peer, struct interface *interface)
 {
 	if (peer->dstadr != interface) {
-		if (interface != NULL &&
-		    (peer->cast_flags & MDF_BCLNT) &&
-		    (interface->flags & INT_MCASTIF) &&
+		if (interface != NULL && (peer->cast_flags &
+		    MDF_BCLNT) && (interface->flags & INT_MCASTIF) &&
 		    peer->burst) {
+
 			/*
 			 * don't accept updates to a true multicast
 			 * reception interface while a BCLNT peer is
@@ -542,19 +543,16 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			 */
 			return;
 		}
-
 		if (peer->dstadr != NULL) {
 			peer->dstadr->peercnt--;
 			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer,
 			    ilink, struct peer);
 		}
-
-		DPRINTF(4, ("set_peerdstadr(%s): change interface from %s to %s\n",
-			    stoa(&peer->srcadr),
-			    (peer->dstadr != NULL) ?
-			    stoa(&peer->dstadr->sin) : "<null>",
-			    (interface != NULL) ?
-			    stoa(&interface->sin) : "<null>"));
+		msyslog(LOG_INFO,
+		    "set_peerdstadr(%s): change interface from %s to %s\n",
+		    stoa(&peer->srcadr), (peer->dstadr != NULL) ?
+		    stoa(&peer->dstadr->sin) : "<null>", (interface !=
+		    NULL) ? stoa(&interface->sin) : "<null>");
 		peer->dstadr = interface;
 		if (peer->dstadr != NULL) {
 			ISC_LIST_APPEND(peer->dstadr->peers, peer,
@@ -756,11 +754,9 @@ newpeer(
 		    cast_flags, stoa(srcadr)));
 
 	ISC_LINK_INIT(peer, ilink);  /* set up interface link chain */
-
+	peer->srcadr = *srcadr;
 	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr,
 	    cast_flags));
-	
-	peer->srcadr = *srcadr;
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);

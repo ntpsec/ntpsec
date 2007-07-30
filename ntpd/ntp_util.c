@@ -782,8 +782,6 @@ leap_file(
 	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* TAI offset at leap (s) */
 	char	filename[MAXFILENAME]; /* name of leapseconds file */
-	char	*dp;
-	int	i;
 
 	NTP_REQUIRE(cp != NULL);
 
@@ -802,52 +800,38 @@ leap_file(
 
 	/*
 	 * Read and parse the leapseconds file. Empty lines and comments
-	 * are ignored. Other lines must begin with two integers
-	 * followed by junk or comments. The first integer is the NTP
-	 * seconds at the leap, the second is the TAI offset after the
-	 * leap. The second word must equal the initial insertion of ten
-	 * seconds on 1 January 1972 plus one second for each succeeding
-	 * insertion. The line beginning with #@ contains the file
-	 * expiration time in NTP seconds.
-	 */
-	i = TAI_1972;
+	 * are ignored. A line beginning with #@ contains the file
+	 * expiration time in NTP seconds. Other lines begin with two
+	 * integers followed by junk or comments. The first integer is
+	 * the NTP seconds at the leap, the second is the TAI offset
+	 * after the leap. Only the last correctly parsed line is
+	 * significant. Parsing errors are cheerfully ignored.
+ 	 */
 	offset = 0;
+	leapsec = 0;
 	expire = 0;
-	while (i < MAX_TAI) {
-		dp = fgets(buf, NTP_MAXSTRLEN - 1, str);
-		if (dp == NULL)
-			break;
-
+	while (fgets(buf, NTP_MAXSTRLEN - 1, str) != NULL) {
 		if (strlen(buf) < 1)
 			continue;
 
 		if (buf[0] == '#') {
+			if (strlen(buf) < 3)
+				continue;
+
 			if (buf[1] == '@') {
-				if (sscanf(&buf[2], "%lu", &expire) !=
-				    1)
-					break;
+				sscanf(&buf[2], "%lu", &expire);
+				continue;
 			}
-			continue;
 		}
-
-		if (sscanf(buf, "%lu %d", &leapsec, &offset) != 2)
-			continue;
-
-		if (i != offset) 
-			break;
-		i++;
+		sscanf(buf, "%lu %d", &leapsec, &offset);
 	}
 	fclose(str);
-	if (offset == 0 || i != offset) {
-		msyslog(LOG_INFO, "leap_file: %s error", cp);
-	} else {
-		leap_tai = offset;
-		leap_ins = leapsec;
-		leap_expire = expire;
-		msyslog(LOG_INFO,
-		    "leap_file: %s TAI offset %d s insert %lu expire %lu",
-		    cp, leap_tai, leap_ins, leap_expire);
-	}
+	leap_tai = offset;
+	leap_ins = leapsec;
+	leap_expire = expire;
+	msyslog(LOG_INFO,
+	    "leap_file: %s TAI offset %d s insert %lu expire %lu",
+	    cp, leap_tai, leap_ins, leap_expire);
 }
 
 
