@@ -779,7 +779,7 @@ miscellaneous_command
 drift_parm
 	:	T_String
 		{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|   T_String T_Integer
+	|   T_String number
 		{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
 		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
 	|	{ /* Null driftfile,  indicated by null string "\0" */

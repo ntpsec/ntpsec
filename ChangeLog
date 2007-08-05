@@ -1,3 +1,4 @@
+* [Bug 850] Fix the wander threshold parameter on the driftfile command.
 * ntp_io.c: Dead code cleanup - Coverity View 19.
 * Leap file related cleanup from Dave Mills.
 * ntp_peer.c: Set peer->srcadr before (not after) calling set_peerdstadr().
