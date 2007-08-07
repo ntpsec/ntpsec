@@ -446,8 +446,6 @@ authentication_command
                     { my_config.auth.keysdir = $2;  }
 	|	T_Requestkey T_Integer
                     { my_config.auth.requested_key = $2;  }
-	|	T_Revoke T_Integer
-                    { my_config.auth.revoke = $2;  }
 	|	T_Trustedkey integer_list
                     { my_config.auth.trusted_key_list = $2;  }
 	;
@@ -460,24 +458,26 @@ crypto_command_list
 crypto_command
 	:	T_Cert T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_CERT, $2); }
-	|	T_Leap T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_LEAP, $2); }
-	|	T_RandFile T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_RAND, $2); }
+	|	T_Gqpar T_String
+                    { $$ = create_attr_sval(CRYPTO_CONF_GQPAR, $2); }
 	|	T_Host	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PRIV, $2); }
-	|	T_Sign	T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_SIGN, $2); }
 	|	T_Ident	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IDENT, $2); }
 	|	T_Iffpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IFFPAR, $2); }
-	|	T_Gqpar T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_GQPAR, $2); }
+	|	T_Leap T_String
+                    { $$ = create_attr_sval(CRYPTO_CONF_LEAP, $2); }
 	|	T_Mvpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_MVPAR, $2); }
 	|	T_Pw T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PW, $2); }
+	|	T_RandFile T_String
+                    { $$ = create_attr_sval(CRYPTO_CONF_RAND, $2); }
+	|	T_Revoke T_Integer
+                    { my_config.auth.revoke = $2;  }
+	|	T_Sign	T_String
+                    { $$ = create_attr_sval(CRYPTO_CONF_SIGN, $2); }
 	;
 
 
@@ -779,7 +779,7 @@ miscellaneous_command
 drift_parm
 	:	T_String
 		{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|   T_String number
+	|   T_String T_Double
 		{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
 		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
 	|	{ /* Null driftfile,  indicated by null string "\0" */
