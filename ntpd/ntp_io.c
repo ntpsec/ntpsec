@@ -3154,7 +3154,7 @@ findinterface(
 {
 	struct interface *interface;
 	
-	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD, 0);
+	interface = findlocalinterface(addr, INT_WILDCARD, 0);
 
 	if (interface == NULL)
 	{
