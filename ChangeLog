@@ -1,3 +1,6 @@
+* [Bug 884] don't access recv buffers after having them passed to the free list.
+* [Bug 882] allow loopback interfaces to share addresses with other interfaces.
+
 ---
 (4.2.4p3) Released by Harlan Stenn <stenn@ntp.org>
 
