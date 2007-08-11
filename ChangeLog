@@ -1,3 +1,4 @@
+* ntpd/refclock_parse.c: cleanup shutdown while the file descriptor is still open.
 * [Bug 885] use emalloc() to get a message at the end of the memory
             unsigned types cannot be less than 0
             default_ai_family is a short
