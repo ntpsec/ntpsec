@@ -23,7 +23,7 @@
  */
 extern char const *progname;
 extern const char *specific_interface;
-extern int default_ai_family;
+extern short default_ai_family;
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -126,7 +126,7 @@ getCmdOpts(
 			const char* p = *pp++;
 
 			tkey = (int)atol(p);
-			if (tkey <= 0 || tkey > NTP_MAXKEY) {
+			if (tkey = 0 || tkey > NTP_MAXKEY) {
 				msyslog(LOG_ERR,
 				    "command line trusted key %s is invalid",
 				    p);

@@ -3591,7 +3591,7 @@ kill_asyncio(int startfd)
  */
 static void
 add_fd_to_list(SOCKET fd, enum desc_type type) {
-	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
+	vsock_t *lsock = (vsock_t *)emalloc(sizeof(vsock_t));
 	lsock->fd = fd;
 	lsock->type = type;
 
