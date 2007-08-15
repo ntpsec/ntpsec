@@ -165,7 +165,7 @@ adj_systime(
 
   /* If a leap second is pending then determine the UTC time stamp 
 	 * of when the insertion must take place */
-	if (leap_next & LEAP_ADDSECOND)  
+	if (leap_sec > 0)  
 	{
 		if ( ls_ft.ull == 0 )  /* time stamp has not yet been computed */
 		{

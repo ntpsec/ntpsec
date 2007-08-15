@@ -12,6 +12,7 @@
 
 #include <stdlib.h>    /* Needed for malloc */
 #include "ntp_data_structures.h"
+#include "ntp_stdlib.h"
 
 /* Priority Queue
  * --------------
