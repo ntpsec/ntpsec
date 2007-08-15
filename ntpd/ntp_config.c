@@ -221,7 +221,7 @@ void getconfig(int argc,char *argv[]);
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
-	t_MSK,		/* Network Mask */
+	t_MSK		/* Network Mask */
 };
 
 static unsigned long get_pfxmatch(char **s,struct masks *m);

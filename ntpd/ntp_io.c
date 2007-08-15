@@ -2913,35 +2913,37 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
-	if (rb->recv_length == 0|| (rb->recv_length == -1 && 
+	buflen = rb->recv_length;
+
+	if (buflen == 0 || (buflen == -1 && 
 	    (errno==EWOULDBLOCK
 #ifdef EAGAIN
 	   || errno==EAGAIN
 #endif
 	 ))) {
 		freerecvbuf(rb);
-		return (rb->recv_length);
+		return (buflen);
 	}
-	else if (rb->recv_length < 0)
+	else if (buflen < 0)
 	{
 		netsyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
 		stoa(&rb->recv_srcadr), fd);
 		DPRINTF(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n", fd));
 		freerecvbuf(rb);
-		return (rb->recv_length);
+		return (buflen);
 	}
 
 #ifdef DEBUG
 	if (debug > 2) {
 		if(rb->recv_srcadr.ss_family == AF_INET)
 			printf("read_network_packet: fd=%d length %d from %08lx %s\n",
-				fd, rb->recv_length,
+				fd, buflen,
 				(u_long)ntohl(((struct sockaddr_in*)&rb->recv_srcadr)->sin_addr.s_addr) &
 				0x00000000ffffffff,
 				stoa(&rb->recv_srcadr));
 		else
 			printf("read_network_packet: fd=%d length %d from %s\n",
-				fd, rb->recv_length,
+				fd, buflen,
 				stoa(&rb->recv_srcadr));
 	}
 #endif
@@ -2962,7 +2964,7 @@ read_network_packet(SOCKET fd, struct interface *itf, l_fp ts)
 
 	itf->received++;
 	packets_received++;
-	return (rb->recv_length);
+	return (buflen);
 }
 
 /*
@@ -3616,9 +3618,8 @@ kill_asyncio(int startfd)
  */
 static void
 add_fd_to_list(SOCKET fd, enum desc_type type) {
-	vsock_t *lsock = (vsock_t *)malloc(sizeof(vsock_t));
+	vsock_t *lsock = (vsock_t *)emalloc(sizeof(vsock_t));
 
-	NTP_INSIST(lsock != NULL);
 	lsock->fd = fd;
 	lsock->type = type;
 
