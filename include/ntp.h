@@ -126,7 +126,7 @@ typedef char s_char;
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define	NTP_MAXASSOC	50	/* max associations */
 #define MINDISPERSE	.005	/* min dispersion increment */
-#define MAXDISTANCE	1.	/* max root distance (select threshold) */
+#define MAXDISTANCE	1.5	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define MAXHOP		2	/* anti-clockhop threshold */
@@ -264,7 +264,6 @@ struct peer {
 	u_char	maxpoll;	/* max poll interval */
 	u_int	flags;		/* association flags */
 	u_char	cast_flags;	/* additional flags */
-	u_int	flash;		/* protocol error test tally bits */
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
 	u_char	ttl;		/* ttl/refclock mode */
@@ -287,8 +286,8 @@ struct peer {
 	u_char	stratum;	/* remote stratum */
 	u_char	ppoll;		/* remote poll interval */
 	s_char	precision;	/* remote clock precision */
-	double	rootdelay;	/* roundtrip delay to primary clock */
-	double	rootdispersion;	/* dispersion to primary clock */
+	double	rootdelay;	/* roundtrip delay to primary source */
+	double	rootdisp;	/* dispersion to primary source */
 	u_int32	refid;		/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
@@ -331,8 +330,10 @@ struct peer {
 	 */
 	u_char	status;		/* peer status */
 	u_char	reach;		/* reachability register */
+	u_int	flash;		/* protocol error test tally bits */
 	u_long	epoch;		/* reference epoch */
 	u_int	burst;		/* packets remaining in burst */
+	u_int	speed;		/* force minpoll */
 	u_int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
@@ -364,7 +365,6 @@ struct peer {
 	 */
 	u_long	update;		/* receive epoch */
 	u_int	unreach;	/* unreachable count */
-#define end_clear_to_zero unreach
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks) */
@@ -374,6 +374,7 @@ struct peer {
 	 * Statistic counters
 	 */
 	u_long	timereset;	/* time stat counters were reset */
+#define end_clear_to_zero timereset
 	u_long	timereceived;	/* last packet received time */
 	u_long	timereachable;	/* last reachable/unreachable time */
 
@@ -603,14 +604,14 @@ struct peer {
  * and must be converted (except the mac, which isn't, really).
  */
 struct pkt {
-	u_char	li_vn_mode;	/* leap indicator, version and mode */
+	u_char	li_vn_mode;	/* peer leap indicator */
 	u_char	stratum;	/* peer stratum */
 	u_char	ppoll;		/* peer poll interval */
 	s_char	precision;	/* peer clock precision */
-	u_fp	rootdelay;	/* distance to primary clock */
-	u_fp	rootdispersion;	/* clock dispersion */
-	u_int32	refid;		/* reference clock ID */
-	l_fp	reftime;	/* time peer clock was last updated */
+	u_fp	rootdelay;	/* roundtrip delay to primary source */
+	u_fp	rootdisp;	/* dispersion to primary source*/
+	u_int32	refid;		/* reference id */
+	l_fp	reftime;	/* last update time */
 	l_fp	org;		/* originate time stamp */
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */

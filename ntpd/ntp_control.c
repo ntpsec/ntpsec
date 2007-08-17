@@ -99,7 +99,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_STRATUM,	RO, "stratum" },	/* 2 */
 	{ CS_PRECISION, RO, "precision" },	/* 3 */
 	{ CS_ROOTDELAY, RO, "rootdelay" },	/* 4 */
-	{ CS_ROOTDISPERSION, RO, "rootdispersion" }, /* 5 */
+	{ CS_ROOTDISPERSION, RO, "rootdisp" },	/* 5 */
 	{ CS_REFID,	RO, "refid" },		/* 6 */
 	{ CS_REFTIME,	RO, "reftime" },	/* 7 */
 	{ CS_POLL,	RO, "poll" },		/* 8 */
@@ -190,7 +190,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_HPOLL,	RO, "hpoll" },		/* 12 */
 	{ CP_PRECISION,	RO, "precision" },	/* 13 */
 	{ CP_ROOTDELAY,	RO, "rootdelay" },	/* 14 */
-	{ CP_ROOTDISPERSION, RO, "rootdispersion" }, /* 15 */
+	{ CP_ROOTDISPERSION, RO, "rootdisp" },	/* 15 */
 	{ CP_REFID,	RO, "refid" },		/* 16 */
 	{ CP_REFTIME,	RO, "reftime" },	/* 17 */
 	{ CP_ORG,	RO, "org" },		/* 18 */
@@ -1243,7 +1243,7 @@ ctl_putsys(
 
 	    case CS_ROOTDISPERSION:
 		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
-			   sys_rootdispersion * 1e3);
+			   sys_rootdisp * 1e3);
 		break;
 
 	    case CS_REFID:
@@ -1564,7 +1564,7 @@ ctl_putpeer(
 
 	    case CP_ROOTDISPERSION:
 		ctl_putdbl(peer_var[CP_ROOTDISPERSION].text,
-			   peer->rootdispersion * 1e3);
+			   peer->rootdisp * 1e3);
 		break;
 
 	    case CP_REFID:
@@ -1639,7 +1639,10 @@ ctl_putpeer(
 		break;
 
 	    case CP_KEYID:
-		ctl_putuint(peer_var[CP_KEYID].text, peer->keyid);
+		if (peer->keyid > NTP_MAXKEY)
+			ctl_puthex(peer_var[CP_KEYID].text, peer->keyid);
+		else
+			ctl_putuint(peer_var[CP_KEYID].text, peer->keyid);
 		break;
 
 	    case CP_FILTDELAY:

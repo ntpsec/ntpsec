@@ -116,7 +116,7 @@ extern	int	leap_actual (int);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter (void);
-extern	int 	local_clock (struct peer *, double);
+extern	int 	local_clock (struct peer *, u_long, double);
 extern	void	adj_host_clock	(void);
 extern	void	loop_config (int, double);
 extern	void	huffpuff	(void);
@@ -166,7 +166,7 @@ extern	void	crypto_update	(void);
 extern	void	crypto_config	(int, char *);
 extern	void	crypto_setup	(void);
 extern	u_int	crypto_ident	(struct peer *);
-extern	struct exten *crypto_args (struct peer *, u_int, char *);
+extern	struct exten *crypto_args (struct peer *, u_int, associd_t, char *);
 extern	int	crypto_public	(struct peer *, u_char *, u_int);
 extern	void	value_free	(struct value *);
 extern	char	*iffpar_file;
@@ -252,7 +252,7 @@ extern	void	record_timing_stats (const char *);
 extern  int	sock_hash (struct sockaddr_storage *);
 extern	double	old_drift;
 extern	int	drift_file_sw;
-
+extern	double	wander_threshold;
 /*
  * Variable declarations for ntpd.
  */
@@ -352,7 +352,7 @@ extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
-extern double	allan_xpt;		/* Allan intercept (s) */
+extern u_char	allan_xpt;		/* Allan intercept (log2 s) */
 extern double	clock_jitter;		/* clock jitter (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
@@ -385,15 +385,15 @@ extern int	peer_preempt;		/* preemptable associations */
  * specification.
  */
 extern u_char	sys_leap;		/* system leap indicator */
-extern u_char	sys_stratum;		/* stratum of system */
+extern u_char	sys_stratum;		/* system stratum */
 extern s_char	sys_precision;		/* local clock precision */
-extern double	sys_rootdelay;		/* distance to current sync source */
-extern double	sys_rootdispersion;	/* dispersion of system clock */
-extern u_int32	sys_refid;		/* reference source for local clock */
-extern l_fp	sys_reftime;		/* time we were last updated */
-extern struct peer *sys_peer;		/* our current peer */
-extern struct peer *sys_pps;		/* our current PPS peer */
-extern struct peer *sys_prefer;		/* our cherished peer */
+extern double	sys_rootdelay;		/* roundtrip delay to primary source */
+extern double	sys_rootdisp;		/* dispersion to primary source */
+extern u_int32	sys_refid;		/* reference id */
+extern l_fp	sys_reftime;		/* last update time */
+extern struct peer *sys_peer;		/* current peer */
+extern struct peer *sys_pps;		/* current PPS peer */
+extern struct peer *sys_prefer;		/* cherished peer */
 
 /*
  * Nonspecified system state variables.

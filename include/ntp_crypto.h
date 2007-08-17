@@ -2,6 +2,26 @@
  * ntp_crypto.h - definitions for cryptographic operations
  */
 
+#ifndef NTP_CRYPTO_H
+#define NTP_CRYPTO_H
+
+/* We need the following for the config parser code */
+
+/*
+ * Configuration codes
+ */
+#define CRYPTO_CONF_NONE  0	/* nothing doing */
+#define CRYPTO_CONF_PRIV  1	/* host keys file name */
+#define CRYPTO_CONF_SIGN  2	/* signature keys file name */
+#define CRYPTO_CONF_LEAP  3	/* leapseconds table file name */
+#define CRYPTO_CONF_CERT  4	/* certificate file name */
+#define CRYPTO_CONF_RAND  5	/* random seed file name */
+#define CRYPTO_CONF_IFFPAR 6	/* IFF parameters file name */
+#define CRYPTO_CONF_GQPAR 7	/* GQ parameters file name */
+#define	CRYPTO_CONF_MVPAR 8	/* GQ parameters file name */
+#define CRYPTO_CONF_PW	  9	/* private key password */
+#define	CRYPTO_CONF_IDENT 10	/* specify identity scheme */
+
 #ifdef OPENSSL
 #include "openssl/evp.h"
 /*
@@ -80,23 +100,6 @@
 #define	XEVNT_SRV	XEVNT_CMD(16) /* server certificate expired */
 
 /*
- * Configuration codes
- */
-#define CRYPTO_CONF_NONE  0	/* nothing doing */
-#define CRYPTO_CONF_PRIV  1	/* host keys file name */
-#define CRYPTO_CONF_SIGN  2	/* signature keys file name */
-#define CRYPTO_CONF_LEAP  3	/* leapseconds table file name */
-#define CRYPTO_CONF_KEYS  4	/* keys directory path */
-#define CRYPTO_CONF_CERT  5	/* certificate file name */
-#define CRYPTO_CONF_RAND  6	/* random seed file name */
-#define	CRYPTO_CONF_TRST  7	/* specify trust */
-#define CRYPTO_CONF_IFFPAR 8	/* IFF parameters file name */
-#define CRYPTO_CONF_GQPAR 9	/* GQ parameters file name */
-#define	CRYPTO_CONF_MVPAR 10	/* GQ parameters file name */
-#define CRYPTO_CONF_PW	  11	/* private key password */
-#define	CRYPTO_CONF_IDENT 12	/* specify identity scheme */
-
-/*
  * Miscellaneous crypto stuff
  */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
@@ -167,3 +170,4 @@ extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
 #endif /* OPENSSL */
+#endif /* NTP_CRYPTO_H */

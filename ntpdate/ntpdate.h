@@ -22,7 +22,7 @@ struct server {
 	s_char precision;		/* server's clock precision */
 	u_char trust;			/* trustability of the filtered data */
 	u_fp rootdelay;			/* distance from primary clock */
-	u_fp rootdispersion;		/* peer clock dispersion */
+	u_fp rootdisp;			/* peer clock dispersion */
 	u_int32 refid;			/* peer reference ID */
 	l_fp reftime;			/* time of peer's last update */
 	u_long event_time;		/* time for next timeout */

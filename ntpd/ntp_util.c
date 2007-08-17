@@ -142,8 +142,6 @@ write_stats(void)
 {
 	FILE	*fp;
 	double	ftemp;
-
-
 #ifdef DOSYNCTODR
 	struct timeval tv;
 #if !defined(VMS)
@@ -830,7 +828,7 @@ leap_file(
 	leap_ins = leapsec;
 	leap_expire = expire;
 	msyslog(LOG_INFO,
-	    "leap_file: %s TAI offset %d s insert %lu expire %lu",
+	    "leap_file: %s TAI offset %d s at %lu expire %lu",
 	    cp, leap_tai, leap_ins, leap_expire);
 }
 

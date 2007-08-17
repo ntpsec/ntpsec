@@ -382,7 +382,7 @@ struct info_peer {
 	u_int32 pkeyid;		/* unused */
 	u_int32 refid;		/* peer.refid */
 	u_int32 timer;		/* peer.timer */
-	s_fp rootdelay;		/* peer.distance */
+	s_fp rootdelay;		/* peer.delay */
 	u_fp rootdispersion;	/* peer.dispersion */
 	l_fp reftime;		/* peer.reftime */
 	l_fp org;		/* peer.org */
@@ -466,7 +466,7 @@ struct info_sys {
 	u_char leap;		/* system leap bits */
 	u_char stratum;		/* our stratum */
 	s_char precision;	/* local clock precision */
-	s_fp rootdelay;		/* distance from sync source */
+	s_fp rootdelay;		/* delay from sync source */
 	u_fp rootdispersion;	/* dispersion from sync source */
 	u_int32 refid;		/* reference ID of sync source */
 	l_fp reftime;		/* system reference time */

@@ -915,7 +915,7 @@ peer_info (
 		ip->ttl = pp->ttl;
 		ip->associd = htons(pp->associd);
 		ip->rootdelay = HTONS_FP(DTOUFP(pp->rootdelay));
-		ip->rootdispersion = HTONS_FP(DTOUFP(pp->rootdispersion));
+		ip->rootdispersion = HTONS_FP(DTOUFP(pp->rootdisp));
 		ip->refid = pp->refid;
 		HTONL_FP(&pp->reftime, &ip->reftime);
 		HTONL_FP(&pp->org, &ip->org);
@@ -1098,7 +1098,7 @@ sys_info(
 	is->stratum = sys_stratum;
 	is->precision = sys_precision;
 	is->rootdelay = htonl(DTOFP(sys_rootdelay));
-	is->rootdispersion = htonl(DTOUFP(sys_rootdispersion));
+	is->rootdispersion = htonl(DTOUFP(sys_rootdisp));
 	is->frequency = htonl(DTOFP(sys_jitter));
 	is->stability = htonl(DTOUFP(clock_stability));
 	is->refid = sys_refid;
@@ -1301,7 +1301,7 @@ loop_info(
 	extern double last_offset;
 	extern double drift_comp;
 	extern int tc_counter;
-	extern u_long sys_clocktime;
+	extern u_long sys_epoch;
 
 	li = (struct info_loop *)prepare_pkt(srcadr, inter, inpkt,
 	    sizeof(struct info_loop));
@@ -1311,7 +1311,7 @@ loop_info(
 	DTOLFP(drift_comp * 1e6, &ltmp);
 	HTONL_FP(&ltmp, &li->drift_comp);
 	li->compliance = htonl((u_int32)(tc_counter));
-	li->watchdog_timer = htonl((u_int32)(current_time - sys_clocktime));
+	li->watchdog_timer = htonl((u_int32)(current_time - sys_epoch));
 
 	(void) more_pkt();
 	flush_pkt();
