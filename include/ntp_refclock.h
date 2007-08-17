@@ -185,7 +185,7 @@ struct refclockproc {
 	const char *clockdesc;	/* clock description */
 
 	char	a_lastcode[BMAX]; /* last timecode received */
-	u_short	lencode;	/* length of last timecode */
+	int	lencode;	/* length of last timecode */
 
 	int	year;		/* year of eternity */
 	int	day;		/* day of year */

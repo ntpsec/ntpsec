@@ -264,9 +264,6 @@ void
 timer(void)
 {
 	register struct peer *peer, *next_peer;
-#ifdef OPENSSL
-	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
-#endif /* OPENSSL */
 	u_int	n;
 	l_fp	now;
 
@@ -322,24 +319,21 @@ timer(void)
 	 * here, cheerfully ignored.
 	 */
 	if (leap_sec > 0) {
-		sys_leap = LEAP_ADDSECOND;
 		leap_sec--;
 		if (leap_sec == 0) {
-			get_systime(&now);
-			msyslog(LOG_NOTICE, "timer: leap second at %u",
-			    now.l_ui);
 			sys_leap = LEAP_NOWARNING;
-			if (sys_tai > 0) {
+			if (sys_tai > 0)
 				sys_tai++;
 #ifdef KERNEL_PLL
-				if (!(pll_control && kern_enable))
-					step_systime(-1.0);
+			if (!(pll_control && kern_enable))
+				step_systime(-1.0);
 #else /* KERNEL_PLL */
 				step_systime(-1.0);
 #endif /* KERNEL_PLL */
-				msyslog(LOG_NOTICE,
-				    "timer: TAI offset %d s", sys_tai);
-			}
+			get_systime(&now);
+			msyslog(LOG_NOTICE,
+			    "timer: leap second at %u TAI %d s",
+			    now.l_ui);
 		}
 	}
 
@@ -370,13 +364,6 @@ timer(void)
 	    LEAP_NOTINSYNC) {
 		revoke_timer += sys_revoke;
 		expire_all();
-		sprintf(statstr, "refresh ts %u",
-		    ntohl(hostval.tstamp));
-		record_crypto_stats(NULL, statstr);
-#ifdef DEBUG
-		if (debug)
-			printf("timer: %s\n", statstr);
-#endif
 	}
 #endif /* OPENSSL */
 

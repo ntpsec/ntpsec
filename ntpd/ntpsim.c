@@ -245,7 +245,7 @@ int simulate_server(
     xpkt.ppoll = rpkt->ppoll;
     xpkt.precision = rpkt->precision;
     xpkt.rootdelay = 0;
-    xpkt.rootdispersion = 0;
+    xpkt.rootdisp = 0;
     
     /* TIMESTAMP CALCULATIONS
             t1                           t4

@@ -365,8 +365,10 @@ refclock_transmit(
 		 * Update reachability and poll variables like the
 		 * network code.
 		 */
-		oreach = peer->reach;
+		oreach = peer->reach & 0xfe;
 		peer->reach <<= 1;
+		if (!(peer->reach & 0x0f))
+			clock_filter(peer, 0., 0., MAXDISPERSE);
 		peer->outdate = current_time;
 		if (!peer->reach) {
 			if (oreach) {
@@ -374,10 +376,6 @@ refclock_transmit(
 				peer->timereachable = current_time;
 			}
 		} else {
-			if (!(oreach & 0x07)) {
-				clock_filter(peer, 0., 0., MAXDISPERSE);
-				clock_select();
-			}
 			if (peer->flags & FLAG_BURST)
 				peer->burst = NSTAGE;
 		}
@@ -617,7 +615,7 @@ refclock_receive(
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
 	peer->org = pp->lastrec;
-	peer->rootdispersion = pp->disp;
+	peer->rootdisp = pp->disp;
 	get_systime(&peer->rec);
 	if (!refclock_sample(pp))
 		return;

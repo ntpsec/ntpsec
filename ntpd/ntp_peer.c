@@ -257,9 +257,7 @@ findpeer(
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
 		return ((struct peer *)0);
 	}
-
 	set_peerdstadr(peer, dstadr);
-
 	return (peer);
 }
 
@@ -549,7 +547,7 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			    ilink, struct peer);
 		}
 		msyslog(LOG_INFO,
-		    "set_peerdstadr(%s): change interface from %s to %s\n",
+		    "set_peerdstadr(%s): change interface from %s to %s",
 		    stoa(&peer->srcadr), (peer->dstadr != NULL) ?
 		    stoa(&peer->dstadr->sin) : "<null>", (interface !=
 		    NULL) ? stoa(&interface->sin) : "<null>");
@@ -971,10 +969,8 @@ expire_all(void)
 	/*
 	 * This routine is called about once per day from the timer
 	 * routine and when the client is first synchronized. Search the
-	 * peer list for all associations and flush only the key list
-	 * and cookie. If a manycast client association, flush
-	 * everything. Then, recompute and sign the agreement public
-	 * values, if present, and refresh the leap values.
+	 * peer list for all associations and flush the key list. Also, 	 * restart the protocol to retrieve the cookie, autokey and leap
+	 * values.
 	 */
 	if (!crypto_flags)
 		return;
@@ -985,14 +981,8 @@ expire_all(void)
 			if (!(peer->flags & FLAG_SKEY)) {
 				continue;
 
-			} else if (peer->hmode == MODE_ACTIVE ||
-			    peer->hmode == MODE_PASSIVE) {
-				key_expire(peer);
-				peer->crypto &= ~(CRYPTO_FLAG_AUTO |
-				    CRYPTO_FLAG_AGREE |
-				    CRYPTO_FLAG_LEAP);
 			}
-				
+			key_expire(peer);
 		}
 	}
 	RAND_bytes((u_char *)&sys_private, 4);

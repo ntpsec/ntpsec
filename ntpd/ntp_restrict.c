@@ -259,7 +259,7 @@ restrictions(
 	 * The following implements a generalized call gap facility.
 	 * Douse the RES_LIMITED bit only if the interval since the last
 	 * packet is greater than res_min_interval and the average is
-	 * greater thatn res_avg_interval.
+	 * greater than res_avg_interval.
 	 */
 	if (!at_listhead || mon_enabled == MON_OFF) {
 		flags &= ~RES_LIMITED;
@@ -267,7 +267,7 @@ restrictions(
 		struct mon_data *md;
 
 		/*
-		 * At this poin the most recent arrival is first in the
+		 * At this point the most recent arrival is first in the
 		 * MRU list. Let the first 10 packets in for free until
 		 * the average stabilizes.
 		 */

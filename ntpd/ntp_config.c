@@ -63,7 +63,6 @@ HANDLE ResolverThreadHandle = NULL;
 void yyerror (char *msg);
 
 extern int priority_done;
-extern double wander_threshold;
 
 
 /*
@@ -971,19 +970,17 @@ config_auth(void)
 			    dequeue(my_config.auth.crypto_cmd_list);
 #ifdef OPENSSL
 			crypto_config(my_val->attr, my_val->value.s);
-#else
-			printf("Warning: Code not built with OpenSSL libraries!\n"
-			       "Crypto commands are ignored\n");
-			msyslog(LOG_ERR, "config_auth: Crypto commands are ignored\n");
-#endif
-            
+#endif /* OPENSSL */
 			free(my_val->value.s);
 			free_node(my_val);
 		}
 		destroy_queue(my_config.auth.crypto_cmd_list);
 		my_config.auth.crypto_cmd_list = NULL;
 	}
-    
+#ifdef OPENSSL
+	crypto_setup();
+#endif /* OPENSSL */
+ 
 	/* Keys Command */
 	if (my_config.auth.keys)
 		getauthkeys(my_config.auth.keys);
@@ -1019,7 +1016,7 @@ config_auth(void)
     
 #ifdef OPENSSL
 	/* Revoke Command */
-	if (my_config.auth.revoke) 
+	if (my_config.auth.revoke)
 		sys_revoke = my_config.auth.revoke;
 #endif /* OPENSSL */
 

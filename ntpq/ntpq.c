@@ -224,17 +224,17 @@ struct ctl_var clock_var[] = {
 static const char *tstflagnames[] = {
 	"pkt_dup",		/* TEST1 */
 	"pkt_bogus",		/* TEST2 */
-	"pkt_proto",		/* TEST3 */
+	"pkt_unsync",		/* TEST3 */
 	"pkt_denied",		/* TEST4 */
 	"pkt_auth",		/* TEST5 */
-	"pkt_synch",		/* TEST6 */
-	"pkt_dist",		/* TEST7 */
+	"pkt_stratum",		/* TEST6 */
+	"pkt_head",		/* TEST7 */
 	"pkt_autokey",		/* TEST8 */
 	"pkt_crypto",		/* TEST9 */
 	"peer_stratum",		/* TEST10 */
 	"peer_dist",		/* TEST11 */
 	"peer_loop",		/* TEST12 */
-	"peer_unfit"		/* TEST13 */
+	"peer_unreach"		/* TEST13 */
 };
 
 

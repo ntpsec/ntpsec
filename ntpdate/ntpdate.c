@@ -720,7 +720,7 @@ transmit(
 	xpkt.ppoll = NTP_MINPOLL;
 	xpkt.precision = NTPDATE_PRECISION;
 	xpkt.rootdelay = htonl(NTPDATE_DISTANCE);
-	xpkt.rootdispersion = htonl(NTPDATE_DISP);
+	xpkt.rootdisp = htonl(NTPDATE_DISP);
 	xpkt.refid = htonl(NTPDATE_REFID);
 	L_CLR(&xpkt.reftime);
 	L_CLR(&xpkt.org);
@@ -865,7 +865,7 @@ receive(
 	server->stratum = PKT_TO_STRATUM(rpkt->stratum);
 	server->precision = rpkt->precision;
 	server->rootdelay = ntohl(rpkt->rootdelay);
-	server->rootdispersion = ntohl(rpkt->rootdispersion);
+	server->rootdisp = ntohl(rpkt->rootdisp);
 	server->refid = rpkt->refid;
 	NTOHL_FP(&rpkt->reftime, &server->reftime);
 	NTOHL_FP(&rpkt->rec, &rec);

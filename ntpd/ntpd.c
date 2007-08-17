@@ -501,15 +501,6 @@ ntpdmain(
 	}
 #endif
 
-#ifdef OPENSSL
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_ERR,
-		    "ntpd: OpenSSL version mismatch. Built against %lx, you have %lx",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		exit(1);
-	}
-#endif
-
 	/* getstartup(argc, argv); / * startup configuration, may set debug */
 
 #ifdef DEBUG
@@ -841,9 +832,6 @@ ntpdmain(
 	getconfig(argc, argv);
 
 	loop_config(LOOP_DRIFTCOMP, old_drift);
-#ifdef OPENSSL
-	crypto_setup();
-#endif /* OPENSSL */
 	initializing = 0;
 
 #ifdef HAVE_DROPROOT
@@ -1156,24 +1144,21 @@ finish(
 	int sig
 	)
 {
-
 	msyslog(LOG_NOTICE, "ntpd exiting on signal %d", sig);
-	write_stats();
 #ifdef HAVE_DNSREGISTRATION
 	if (mdns != NULL)
-	DNSServiceRefDeallocate(mdns);
+		DNSServiceRefDeallocate(mdns);
 #endif
-
-	switch (sig)
-	{
+	switch (sig) {
 # ifdef SIGBUS
-		case SIGBUS:
+	case SIGBUS:
 		printf("\nfinish(SIGBUS)\n");
 		exit(0);
 # endif
-		case 0: 		/* Should never happen... */
+	case 0: 		/* Should never happen... */
 		return;
-		default:
+
+	default:
 		exit(0);
 	}
 }

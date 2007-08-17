@@ -41,7 +41,7 @@
 #define CLOCK_PLL	16.	/* PLL loop gain (log2) */
 #define CLOCK_AVG	8.	/* parameter averaging constant */
 #define CLOCK_FLL	(NTP_MAXPOLL + CLOCK_AVG) /* FLL loop gain */
-#define	CLOCK_ALLAN	1500.	/* compromise Allan intercept (s) */
+#define	CLOCK_ALLAN	11	/* Allan intercept (log2 s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_JUNE	(CLOCK_DAY * 30) /* June in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
@@ -111,29 +111,29 @@
  * via this routine, which then calls ntp_adjtime() with the STA_PLL bit
  * set to zero, in which case the system clock is not adjusted. This is
  * also a signal for the external clock driver to discipline the system
- * clock.
+ * clock. Unless specified otherwise, all times are in seconds.
  */
 /*
  * Program variables that can be tinkered.
  */
-double	clock_max = CLOCK_MAX;	/* step threshold (s) */
-double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold (s) */
-double	clock_panic = CLOCK_PANIC; /* panic threshold (s) */
+double	clock_max = CLOCK_MAX;	/* step threshold */
+double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
+double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
-double	allan_xpt = CLOCK_ALLAN; /* Allan intercept (s) */
+u_char	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 
 /*
  * Program variables
  */
-static double clock_offset;	/* offset (s) */
-double	clock_jitter;		/* offset jitter (s) */
+static double clock_offset;	/* offset */
+double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
-double	clock_codec;		/* audio codec frequency (sambles/s) */
-u_long	sys_clocktime;		/* last system clock update */
+double	clock_codec;		/* audio codec frequency (samples/s) */
+u_long	clock_epoch;		/* interval since last update */
 u_long	pps_control;		/* last pps update */
-u_int	sys_tai;		/* TAI offset from UTC (s) */
-static void rstclock (int, u_long, double); /* transition function */
+u_int	sys_tai;		/* TAI offset from UTC */
+static void rstclock (int, double); /* transition function */
 
 #ifdef KERNEL_PLL
 struct timex ntv;		/* kernel API parameters */
@@ -192,7 +192,7 @@ init_loopfilter(void)
 	 * file, so set the state to S_NSET. If a drift file is present,
 	 * it will be detected later and the state set to S_FSET.
 	 */
-	rstclock(S_NSET, 0, 0);
+	rstclock(S_NSET, 0);
 	clock_jitter = LOGTOD(sys_precision);
 }
 
@@ -206,16 +206,16 @@ init_loopfilter(void)
  * 2	clock was stepped
  *
  * LOCKCLOCK: The only thing this routine does is set the
- * sys_rootdispersion variable equal to the peer dispersion.
+ * sys_rootdisp variable equal to the peer dispersion.
  */
 int
 local_clock(
 	struct	peer *peer,	/* synch source peer structure */
+	u_long	mu,		/* measurement interval */
 	double	fp_offset	/* clock offset (s) */
 	)
 {
 	int	rval;		/* return code */
-	u_long	mu;		/* interval since last update (s) */
 	double	flladj;		/* FLL frequency adjustment (ppm) */
 	double	plladj;		/* PLL frequency adjustment (ppm) */
 	double	clock_frequency; /* clock frequency adjustment (ppm) */
@@ -325,8 +325,8 @@ local_clock(
 	 * stepped. Note also the kernel is disabled if step is
 	 * disabled or greater than 0.5 s. 
 	 */
+	clock_epoch += mu;
 	clock_frequency = flladj = plladj = 0;
-	mu = peer->epoch - sys_clocktime;
 	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
 		switch (state) {
@@ -346,11 +346,11 @@ local_clock(
 		 * the phase.
 		 */
 		case S_FREQ:
-			if (mu < clock_minstep)
+			if (clock_epoch < clock_minstep)
 				return (0);
 
 			clock_frequency = (fp_offset - clock_offset) /
-			    mu;
+			    clock_epoch;
 
 			/* fall through to S_SPIK */
 
@@ -360,7 +360,7 @@ local_clock(
 		 * exceeded.
 		 */
 		case S_SPIK:
-			if (mu < clock_minstep)
+			if (clock_epoch < clock_minstep)
 				return (0);
 
 			/* fall through to default */
@@ -399,12 +399,12 @@ local_clock(
 			rval = 2;
 			clock_stepcnt++;
 			if (state == S_NSET || clock_stepcnt > 2) {
-				rstclock(S_FREQ, peer->epoch, 0);
+				rstclock(S_FREQ, 0);
 				return (rval);
 			}
 			break;
 		}
-		rstclock(S_SYNC, peer->epoch, 0);
+		rstclock(S_SYNC, 0);
 	} else {
 
 		/*
@@ -426,7 +426,7 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case S_NSET:
-			rstclock(S_FREQ, peer->epoch, fp_offset);
+			rstclock(S_FREQ, fp_offset);
 			break;
 
 		/*
@@ -436,7 +436,7 @@ local_clock(
 		 * update.
 		 */
 		case S_FSET:
-			rstclock(S_SYNC, peer->epoch, fp_offset);
+			rstclock(S_SYNC, fp_offset);
 			break;
 
 		/*
@@ -445,12 +445,12 @@ local_clock(
 		 * frequency and switch to S_SYNC state.
 		 */
 		case S_FREQ:
-			if (mu < clock_minstep)
+			if (clock_epoch < clock_minstep)
 				return (0);
 
 			clock_frequency = (fp_offset - clock_offset) /
-			    mu;
-			rstclock(S_SYNC, peer->epoch, fp_offset);
+			    clock_epoch;
+			rstclock(S_SYNC, fp_offset);
 			break;
 
 		/*
@@ -470,10 +470,11 @@ local_clock(
 			 * the Allan intercept. Above that the loop gain
 			 * increases in steps to 1 / CLOCK_AVG. 
 			 */
-			if (ULOGTOD(sys_poll) > allan_xpt / 2) {
+			if (sys_poll > allan_xpt - 1) {
 				dtemp = CLOCK_FLL - sys_poll;
 				flladj = (fp_offset - clock_offset) /
-				    (max(mu, allan_xpt) * dtemp);
+				    (max(clock_epoch, allan_xpt) *
+				    dtemp);
 			}
 
 			/*
@@ -482,10 +483,11 @@ local_clock(
 			 * interval and poll interval. This allows
 			 * oversampling, but not undersampling.
 			 */ 
-			etemp = min(mu, (u_long)ULOGTOD(sys_poll));
+			etemp = min(clock_epoch,
+			    (u_long)ULOGTOD(sys_poll));
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			plladj = fp_offset * etemp / (dtemp * dtemp);
-			rstclock(S_SYNC, peer->epoch, fp_offset);
+			rstclock(S_SYNC, fp_offset);
 			break;
 		}
 	}
@@ -554,7 +556,7 @@ local_clock(
 			}
 			ntv.esterror = (u_int32)(clock_jitter * 1e6);
 			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
-			    sys_rootdispersion) * 1e6);
+			    sys_rootdisp) * 1e6);
 			ntv.status = STA_PLL;
 
 			/*
@@ -695,11 +697,11 @@ local_clock(
 	record_loop_stats(clock_offset, drift_comp, clock_jitter,
 	    clock_stability, sys_poll);
 #ifdef DEBUG
-	if (debug)
+	if (debug > 1)
 		printf(
-		    "local_clock: mu %lu jitr %.6f freq %.3f stab %.6f poll %d count %d\n",
-		    mu, clock_jitter, drift_comp * 1e6,
-		    clock_stability * 1e6, sys_poll, tc_counter);
+		    "local_clock: jitr %.6f freq %.3f stab %.6f thres %.6f\n",
+		    clock_jitter, drift_comp * 1e6, clock_stability *
+		    1e6, wander_threshold * 1e6);
 #endif /* DEBUG */
 	return (rval);
 #endif /* LOCKCLOCK */
@@ -710,7 +712,7 @@ local_clock(
  * adj_host_clock - Called once every second to update the local clock.
  *
  * LOCKCLOCK: The only thing this routine does is increment the
- * sys_rootdispersion variable.
+ * sys_rootdisp variable.
  */
 void
 adj_host_clock(
@@ -729,7 +731,7 @@ adj_host_clock(
 	 * maximum error and the local clock driver will pick it up and
 	 * pass to the common refclock routines. Very elegant.
 	 */
-	sys_rootdispersion += clock_phi;
+	sys_rootdisp += clock_phi;
 
 #ifndef LOCKCLOCK
 	/*
@@ -758,8 +760,8 @@ adj_host_clock(
 	 * beyond this point and it helps to damp residual offset at the
 	 * longer poll intervals.
 	 */
-	adjustment = clock_offset / (CLOCK_PLL * min(ULOGTOD(sys_poll),
-	    allan_xpt));
+	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(min(sys_poll,
+	    allan_xpt)));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 #endif /* LOCKCLOCK */
@@ -774,19 +776,18 @@ adj_host_clock(
 static void
 rstclock(
 	int	trans,		/* new state */
-	u_long	update,		/* new update time */
 	double	offset		/* new offset */
 	)
 {
 #ifdef DEBUG
 	if (debug)
-		printf("local_clock: at %lu offset %.9f freq %.6f state %d step %d\n",
-		    update, offset, drift_comp * 1e6, trans,
-		    clock_stepcnt);
+		printf("local_clock: intvl %lu offset %.6f freq %.3f state %d poll %d count %d\n",
+		    clock_epoch, offset, drift_comp * 1e6, trans,
+		    sys_poll, tc_counter);
 #endif
 	state = trans;
-	sys_clocktime = update;
 	last_offset = clock_offset = offset;
+	clock_epoch = 0; 
 }
 
 
@@ -818,12 +819,15 @@ huffpuff()
  */
 void
 loop_config(
-	int item,
-	double freq
+	int	item,
+	double	freq
 	)
 {
 	int i;
 
+#ifdef DEBUG
+	printf("loop_config: item %d freq %f\n", item, freq);
+#endif
 	switch (item) {
 
 	case LOOP_DRIFTINIT:
@@ -907,7 +911,7 @@ loop_config(
 		 */
 		if (freq <= NTP_MAXFREQ && freq >= -NTP_MAXFREQ) {
 			drift_comp = freq;
-			rstclock(S_FSET, 0, 0);
+			rstclock(S_FSET, 0);
 		} else {
 			drift_comp = 0;
 		}
@@ -947,32 +951,37 @@ loop_config(
 #endif /* LOCKCLOCK */
 		break;
 
+	case LOOP_LEAP:		/* set kernel TAI offset */
+#if defined(STA_NANO) && NTP_API == 4
+		if (pll_control && kern_enable) {
+			ntv.modes = MOD_TAI;
+			ntv.constant = sys_tai;
+			ntp_adjtime(&ntv);
+		}
+#endif /* STA_NANO */
+		break;
+
 	/*
-	 * Special tinker variables for Ulrich Windl. Very dangerous.
+	 * tinker command variables for Ulrich Windl. Very dangerous.
 	 */
-	case LOOP_MAX:			/* step threshold */
-		clock_max = freq;
-		if (clock_max == 0 || clock_max > 0.5)
-		kern_enable = 0;
+	case LOOP_ALLAN:	/* Allan intercept (log2) (allan) */
+		allan_xpt = (u_char)freq;
 		break;
 
-	case LOOP_PANIC:		/* panic threshold */
-		clock_panic = freq;
-		break;
-
-	case LOOP_PHI:			/* dispersion rate */
-		clock_phi = freq;
-		break;
-
-	case LOOP_MINSTEP:		/* watchdog bark */
-		clock_minstep = freq; 
-		break;
-
-	case LOOP_ALLAN:		/* Allan intercept */
-		allan_xpt = freq;
+	case LOOP_CODEC:	/* audio codec frequency (codec) */
+		clock_codec = freq / 1e6;
 		break;
 	
-	case LOOP_HUFFPUFF:		/* huff-n'-puff filter length */
+	case LOOP_PHI:		/* dispersion threshold (dispersion) */
+		clock_phi = freq / 1e6;
+		break;
+
+	case LOOP_FREQ:		/* initial frequency (freq) */	
+		drift_comp = freq / 1e6;
+		rstclock(S_FSET, 0);
+		break;
+
+	case LOOP_HUFFPUFF:	/* huff-n'-puff length (huffpuff) */
 		if (freq < HUFFPUFF)
 			freq = HUFFPUFF;
 		sys_hufflen = (int)(freq / HUFFPUFF);
@@ -983,24 +992,23 @@ loop_config(
 		sys_mindly = 1e9;
 		break;
 
-	case LOOP_FREQ:			/* initial frequency */	
-		drift_comp = freq / 1e6;
-		rstclock(S_FSET, 0, 0);
+	case LOOP_PANIC:	/* panic threshold (panic) */
+		clock_panic = freq;
 		break;
 
-	case LOOP_CODEC:		/* audio codec frequency */
-		clock_codec = freq;
+	case LOOP_MAX:		/* step threshold (step) */
+		clock_max = freq;
+		if (clock_max == 0 || clock_max > 0.5)
+		kern_enable = 0;
 		break;
 
-	case LOOP_LEAP:			/* set kernel TAI offset */
-#if defined(STA_NANO) && NTP_API == 4
-		if (pll_control && kern_enable) {
-			ntv.modes = MOD_TAI;
-			ntv.constant = sys_tai;
-			ntp_adjtime(&ntv);
-		}
-#endif /* STA_NANO */
+	case LOOP_MINSTEP:	/* stepout threshold (stepout) */
+		clock_minstep = freq; 
 		break;
+
+	default:
+		msyslog(LOG_INFO,
+		    "loop_config: unsupported option %d", item);
 	}
 }
 

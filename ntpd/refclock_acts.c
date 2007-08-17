@@ -136,6 +136,7 @@
 #define REFID		"NONE"	/* default reference ID */
 #define MSGCNT		20	/* max message count */
 #define SMAX		256	/* max clockstats line length */
+#define	MAXPHONE	10	/* max number of phone numbers */
 
 /*
  * Calling program modes
@@ -232,8 +233,6 @@ struct	refclock refclock_acts = {
 	noentry,		/* not used */
 	acts_timer		/* housekeeping timer */
 };
-
-struct	refclock refclock_ptb;
 
 /*
  * Initialize data for processing
@@ -925,7 +924,6 @@ acts_disc (
 	up->timer = SETUP;
 	up->state = S_CLOSE;
 }
-
 #else
 int refclock_acts_bs;
 #endif /* REFCLOCK */
