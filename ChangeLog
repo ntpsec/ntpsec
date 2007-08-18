@@ -91,6 +91,19 @@
 * codec (audio) and ICOM changes from Dave Mills.
 
 ---
+
+* ntpd/refclock_parse.c: cleanup shutdown while the file descriptor is still
+  open.
+* [Bug 885] use emalloc() to get a message at the end of the memory
+  unsigned types cannot be less than 0
+  default_ai_family is a short
+  lose trailing , from enum list
+* [Bug 884] don't access recv buffers after having them passed to the free
+  list.
+* [Bug 882] allow loopback interfaces to share addresses with other
+  interfaces.
+
+---
 (4.2.4p3) Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 863] unable to stop ntpd on Windows as the handle reference for events
