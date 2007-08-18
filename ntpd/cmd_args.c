@@ -126,7 +126,7 @@ getCmdOpts(
 			const char* p = *pp++;
 
 			tkey = (int)atol(p);
-			if (tkey = 0 || tkey > NTP_MAXKEY) {
+			if (tkey == 0 || tkey > NTP_MAXKEY) {
 				msyslog(LOG_ERR,
 				    "command line trusted key %s is invalid",
 				    p);
