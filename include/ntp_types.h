@@ -44,15 +44,15 @@ typedef unsigned int u_int;
 # endif
 #else /* not sizeof(int) == 4 */
 # if (SIZEOF_LONG == 4)
-# else /* not sizeof(long) == 4 */
 #  ifndef int32
 #   define int32 long
 #  endif
 #  ifndef u_int32
 #   define u_int32 unsigned long
 #  endif
+# else /* not sizeof(long) == 4 */
+#  include "Bletch: what's 32 bits on this machine?"
 # endif /* not sizeof(long) == 4 */
-# include "Bletch: what's 32 bits on this machine?"
 #endif /* not sizeof(int) == 4 */
 
 typedef u_char		ntp_u_int8_t;

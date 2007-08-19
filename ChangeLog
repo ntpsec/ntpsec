@@ -1,3 +1,4 @@
+* [Bug 887] Fix error in ntp_types.h (for sizeof int != 4).
 * Bug 880 bug fixes for Windows build
 * Improve Calysto support.
 * The "revoke" parameter is a crypto command.
