@@ -1,3 +1,4 @@
+* Bug 880 bug fixes for Windows build
 * Improve Calysto support.
 * The "revoke" parameter is a crypto command.
 * The driftfile wander threshold is a real number.
