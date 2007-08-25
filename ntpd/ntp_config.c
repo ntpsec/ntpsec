@@ -977,6 +977,11 @@ config_auth(void)
 		destroy_queue(my_config.auth.crypto_cmd_list);
 		my_config.auth.crypto_cmd_list = NULL;
 	}
+
+	/* Keysdir Command */
+	if (my_config.auth.keysdir)
+		keysdir = my_config.auth.keysdir;
+
 #ifdef OPENSSL
 	crypto_setup();
 #endif /* OPENSSL */
@@ -985,10 +990,6 @@ config_auth(void)
 	if (my_config.auth.keys)
 		getauthkeys(my_config.auth.keys);
     
-	/* Keysdir Command */
-	if (my_config.auth.keysdir)
-		keysdir = my_config.auth.keysdir;
-
 	/* Control Key Command */
 	if (my_config.auth.control_key != 0) 
 		ctl_auth_keyid = my_config.auth.control_key;
