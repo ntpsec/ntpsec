@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  Sunday August 19, 2007 at 07:44:20 AM EDT
+ *  It has been AutoGen-ed  Tuesday August 28, 2007 at 07:51:11 AM EDT
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright 1970-2006 ntp.org - all rights reserved
+ * ntp-keygen copyright 1970-2007 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 tSCC zCopyright[] =
-       "ntp-keygen copyright (c) 1970-2006 ntp.org, all rights reserved";
+       "ntp-keygen copyright (c) 1970-2007 David L. Mills and/or others, all rights reserved";
 tSCC zCopyrightNotice[] =
        
 /* extracted from ../include/copyright.def near line 8 */
@@ -214,7 +214,8 @@ tSCC    zIssuer_NameText[] =
         "set issuer name";
 tSCC    zIssuer_Name_NAME[]        = "ISSUER_NAME";
 tSCC    zIssuer_Name_Name[]        = "issuer-name";
-#define ISSUER_NAME_FLAGS       (OPTST_DISABLED)
+#define ISSUER_NAME_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Issuer_Name */
 #define VALUE_OPT_ISSUER_NAME NO_EQUIVALENT
@@ -799,7 +800,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTP_KEYGEN";
 tSCC   zUsageTitle[] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p71\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p72\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
