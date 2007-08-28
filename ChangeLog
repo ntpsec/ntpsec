@@ -1,3 +1,6 @@
+* Calysto cleanup for ntpq.
+* ntp-keygen -i takes an arg.
+* Cleanup and fixes from Dave Mills.
 * [Bug 887] Fix error in ntp_types.h (for sizeof int != 4).
 * Bug 880 bug fixes for Windows build
 * Improve Calysto support.
@@ -94,6 +97,11 @@
 
 ---
 
+* Updated include/copyright.def (owner and year).
+* [Bug 878] Avoid ntpdc use of refid value as unterminated string.
+* [Bug 881] Corrected display of pll offset on 64bit systems.
+* [Bug 886] Corrected sign handling on 64bit in ntpdc loopinfo command.
+* [Bug 889] avoid malloc() interrupted by SIGIO risk
 * ntpd/refclock_parse.c: cleanup shutdown while the file descriptor is still
   open.
 * [Bug 885] use emalloc() to get a message at the end of the memory

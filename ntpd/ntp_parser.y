@@ -444,8 +444,6 @@ crypto_command
                     { $$ = create_attr_sval(CRYPTO_CONF_IDENT, $2); }
 	|	T_Iffpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IFFPAR, $2); }
-	|	T_Leap T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_LEAP, $2); }
 	|	T_Mvpar T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_MVPAR, $2); }
 	|	T_Pw T_String

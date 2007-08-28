@@ -230,7 +230,8 @@ extern	void	timer_clr_stats (void);
 extern  void    timer_interfacetimeout (u_long);
 extern  volatile int interface_interval;
 #ifdef OPENSSL
-extern	char	*sys_hostname;
+extern	char	*sys_hostname;	/* host name */
+extern	char	*group_name;	/* group name */
 extern u_long	sys_revoke;	/* keys revoke timeout */
 extern u_long	sys_automax;	/* session key timeout */
 #endif /* OPENSSL */
