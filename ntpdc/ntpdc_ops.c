@@ -886,7 +886,7 @@ again:
 			       "offset %s, frequency %s, time_const %ld, watchdog %ld\n",
 			       lfptoa(&tempts, 6),
 			       lfptoa(&temp2ts, 3),
-			       (u_long)ntohl((u_long)il->compliance),
+			       (long)(int32_t)ntohl((u_long)il->compliance),
 			       (u_long)ntohl((u_long)il->watchdog_timer));
 	} else {
 		NTOHL_FP(&il->last_offset, &tempts);
@@ -896,7 +896,7 @@ again:
 		(void) fprintf(fp, "frequency:            %s ppm\n",
 			       lfptoa(&tempts, 3));
 		(void) fprintf(fp, "poll adjust:          %ld\n",
-			       (u_long)ntohl(il->compliance));
+			       (long)(int32_t)ntohl(il->compliance));
 		(void) fprintf(fp, "watchdog timer:       %ld s\n",
 			       (u_long)ntohl(il->watchdog_timer));
 	}
@@ -2698,7 +2698,6 @@ clockstat(
 	int res;
 	l_fp ts;
 	struct clktype *clk;
-	u_long ltemp;
 
 	for (qitems = 0; qitems < min(pcmd->nargs, 8); qitems++)
 	    clist[qitems] = GET_INADDR(pcmd->argval[qitems].netnum);
@@ -2756,9 +2755,8 @@ again:
 			       lfptoa(&ts, 6));
 		(void) fprintf(fp, "stratum:              %ld\n",
 			       (u_long)ntohl(cl->fudgeval1));
-		ltemp = ntohl(cl->fudgeval2);
 		(void) fprintf(fp, "reference ID:         %s\n",
-			       (char *)&ltemp);
+			       refid_string(ntohl(cl->fudgeval2), 0));
 		(void) fprintf(fp, "fudge flags:          0x%x\n",
 			       cl->flags);
 
@@ -2990,7 +2988,7 @@ again:
 		tscale = 1e-9;
 #endif
 	(void)fprintf(fp, "pll offset:           %g s\n",
-	    (long)ntohl(ik->offset) * tscale);
+	    (int32_t)ntohl(ik->offset) * tscale);
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",

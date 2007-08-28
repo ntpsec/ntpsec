@@ -162,29 +162,13 @@ get_free_recv_buffer(void)
 	recvbuf_t * buffer = NULL;
 	LOCK();
 	buffer = ISC_LIST_HEAD(free_recv_list);
-	if (buffer == NULL)
+	if (buffer != NULL)
 	{
-		/*
-		 * See if more are available
-		 */
-		if (create_buffers(RECV_INC) <= 0)
-		{
-			msyslog(LOG_ERR, "No more memory for recvufs");
-			UNLOCK();
-			return (NULL);
-		}
-		buffer = ISC_LIST_HEAD(free_recv_list);
-		if (buffer == NULL)
-		{
-			msyslog(LOG_ERR, "Failed to obtain more memory for recvbufs");
-			UNLOCK();
-			return (NULL);
-		}
+		ISC_LIST_DEQUEUE(free_recv_list, buffer, link);
+		free_recvbufs--;
+		initialise_buffer(buffer);
+		(buffer->used)++;
 	}
-	ISC_LIST_DEQUEUE(free_recv_list, buffer, link);
-	free_recvbufs--;
-	initialise_buffer(buffer);
-	(buffer->used)++;
 	UNLOCK();
 	return (buffer);
 }
@@ -194,6 +178,29 @@ get_full_recv_buffer(void)
 {
 	recvbuf_t *rbuf;
 	LOCK();
+	
+	/*
+	 * make sure there are free buffers when we
+	 * wander off to do lengthy paket processing with
+	 * any buffer we grab from the full list.
+	 * 
+	 * fixes malloc() interrupted by SIGIO risk
+	 * (Bug 889)
+	 */
+	rbuf = ISC_LIST_HEAD(free_recv_list);
+	if (rbuf == NULL) {
+		/*
+		 * try to get us some more buffers
+		 */
+		if (create_buffers(RECV_INC) <= 0)
+		{
+			msyslog(LOG_ERR, "No more memory for recvufs");
+		}
+	}
+
+	/*
+	 * try to grab a full buffer
+	 */
 	rbuf = ISC_LIST_HEAD(full_recv_list);
 	if (rbuf != NULL)
 	{
