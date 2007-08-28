@@ -1,29 +1,26 @@
 /*
  * ntp_crypto.h - definitions for cryptographic operations
  */
-
 #ifndef NTP_CRYPTO_H
 #define NTP_CRYPTO_H
 
-/* We need the following for the config parser code */
-
 /*
- * Configuration codes
+ * Configuration codes (also needed for parser without OPENSSL)
  */
 #define CRYPTO_CONF_NONE  0	/* nothing doing */
 #define CRYPTO_CONF_PRIV  1	/* host keys file name */
 #define CRYPTO_CONF_SIGN  2	/* signature keys file name */
-#define CRYPTO_CONF_LEAP  3	/* leapseconds table file name */
-#define CRYPTO_CONF_CERT  4	/* certificate file name */
-#define CRYPTO_CONF_RAND  5	/* random seed file name */
-#define CRYPTO_CONF_IFFPAR 6	/* IFF parameters file name */
-#define CRYPTO_CONF_GQPAR 7	/* GQ parameters file name */
-#define	CRYPTO_CONF_MVPAR 8	/* GQ parameters file name */
-#define CRYPTO_CONF_PW	  9	/* private key password */
-#define	CRYPTO_CONF_IDENT 10	/* specify identity scheme */
+#define CRYPTO_CONF_CERT  3	/* certificate file name */
+#define CRYPTO_CONF_RAND  4	/* random seed file name */
+#define CRYPTO_CONF_IFFPAR 5	/* IFF parameters file name */
+#define CRYPTO_CONF_GQPAR 6	/* GQ parameters file name */
+#define	CRYPTO_CONF_MVPAR 7	/* MV parameters file name */
+#define CRYPTO_CONF_PW	  8	/* private key password */
+#define	CRYPTO_CONF_IDENT 9	/* specify identity scheme */
 
 #ifdef OPENSSL
 #include "openssl/evp.h"
+
 /*
  * The following bits are set by the CRYPTO_ASSOC message from
  * the server and are not modified by the client.
@@ -157,9 +154,18 @@ struct cert_info {
 	tstamp_t last;		/* not valid after */
 	char	*subject;	/* subject common name */
 	char	*issuer;	/* issuer common name */
-	u_char	*grpkey;	/* GQ group key */
-	u_int	grplen;		/* GQ group key length */
+	BIGNUM	*grpkey;	/* GQ group key */
 	struct value cert;	/* certificate/value */
+};
+
+/*
+ * The keys info/value structure
+ */
+struct pkey_info {
+	struct pkey_info *link; /* forward link */
+	EVP_PKEY *pkey;		/* generic key */
+	char	*name;		/* file name */
+	tstamp_t fstamp;	/* filestamp */
 };
 
 /*

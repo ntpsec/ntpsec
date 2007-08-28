@@ -305,10 +305,9 @@ struct peer {
 	char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
-	EVP_PKEY *ident_pkey;	/* identity key */
-	tstamp_t fstamp;	/* identity filestamp */
-	BIGNUM	*iffval;	/* IFF/GQ challenge */
-	BIGNUM	*grpkey;	/* GQ group key */
+	struct pkey_info *ident_pkey; /* identity key */
+	BIGNUM	*iffval;	/* identity challenge (IFF, GQ, MV) */
+	BIGNUM	*grpkey;	/* identity challenge key (GQ) */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct exten *cmmd;	/* extension pointer */
@@ -320,7 +319,6 @@ struct peer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-	struct value tai_leap;	/* send leapsecond table */
 #else /* OPENSSL */
 #define clear_to_zero status
 #endif /* OPENSSL */

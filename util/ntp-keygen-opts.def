@@ -95,6 +95,8 @@ flag = {
     name      = issuer-name;
     value     = i;
     ifdef     = OPENSSL;
+    arg-type  = string;
+    arg-name  = issuer-name;
     descrip   = "set issuer name";
     doc = <<-  _EndOfDoc_
 	Set the suject name to name.  This is used as the subject field

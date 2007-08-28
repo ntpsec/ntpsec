@@ -1,3 +1,6 @@
+* Calysto cleanup for ntpq.
+* ntp-keygen -i takes an arg.
+* Cleanup and fixes from Dave Mills.
 * [Bug 887] Fix error in ntp_types.h (for sizeof int != 4).
 * Bug 880 bug fixes for Windows build
 * Improve Calysto support.

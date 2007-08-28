@@ -879,8 +879,11 @@ receive(
 	 */
 	case AM_NEWPASS:
 		if (!AUTH(sys_authenticate | (restrict_mask &
-		    (RES_NOPEER | RES_DONTTRUST)), is_authentic))
+		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
+			fast_xmit(rbufp, MODE_PASSIVE, 0,
+			    restrict_mask);
 			return;			/* bad auth */
+		}
 
 		/*
 		 * Do not respond if unsynchronized or stratum is below
@@ -1446,6 +1449,19 @@ clock_update(
 			report_event(EVNT_SYNCCHG, NULL);
 		}
 		sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
+
+		/*
+		 * In orphan mode the stratum is clamped to the orphan
+		 * stratum and the root delay is set to a random value
+		 * generated at startup. Otherwise, the root delay is
+		 * set to the peer delay plus the peer root delay.
+		 */
+		if (sys_stratum >= sys_orphan) {
+			sys_stratum = sys_orphan;
+			sys_rootdelay = sys_orphandelay;
+		} else {
+			sys_rootdelay = peer->delay + peer->rootdelay;
+		}
 		sys_reftime = peer->rec;
 
 		/*
@@ -1508,20 +1524,6 @@ clock_update(
 					loop_config(LOOP_LEAP, 0);
 #endif /* KERNEL_PLL */
 			}
-		}
-
-		/*
-		 * In orphan mode the stratum defaults to the orphan
-		 * stratum. The root delay is set to a random value
-		 * generated at startup. The root dispersion is set from
-		 * the peer dispersion; the peer root dispersion is
-		 * ignored.
-		 */
-		if (sys_stratum >= sys_orphan) {
-			sys_stratum = sys_orphan;
-			sys_rootdelay = sys_orphandelay;
-		} else {
-			sys_rootdelay = peer->delay + peer->rootdelay;
 		}
 		break;
 	/*
@@ -1671,11 +1673,6 @@ peer_clear(
 	if (peer == sys_peer)
 		sys_peer = NULL;
 
-	/*
-	 * Wipe the association clean and initialize the nonzero values.
-	 */
-	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
-
 #ifdef OPENSSL
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
@@ -1686,37 +1683,27 @@ peer_clear(
 	 * purged, too. This makes it much harder to sneak in some
 	 * unauthenticated data in the clock filter.
 	 */
-	if (peer->pkey != NULL)
-		EVP_PKEY_free(peer->pkey);
-	peer->pkey = NULL;
-	peer->digest = NULL;		/* digest * is a constant */
-	if (peer->subject != NULL)
-		free(peer->subject);
-	peer->subject = NULL;
-	if (peer->issuer != NULL)
-		free(peer->issuer);
-	peer->issuer = NULL;
-	peer->pkeyid = 0;
-	peer->pcookie = 0;
-	if (peer->ident_pkey != NULL)
-		EVP_PKEY_free(peer->ident_pkey);
-	peer->ident_pkey = NULL;
-	memset(&peer->fstamp, 0, sizeof(peer->fstamp));
+	key_expire(peer);
 	if (peer->iffval != NULL)
 		BN_free(peer->iffval);
-	peer->iffval = NULL;
 	if (peer->grpkey != NULL)
 		BN_free(peer->grpkey);
-	peer->grpkey = NULL;
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
-	if (peer->cmmd != NULL) {
-		free(peer->cmmd);
-		peer->cmmd = NULL;
-	}
-	key_expire(peer);
 	value_free(&peer->encrypt);
+	value_free(&peer->sndval);
+	if (peer->cmmd != NULL)
+		free(peer->cmmd);
+	if (peer->subject != NULL)
+		free(peer->subject);
+	if (peer->issuer != NULL)
+		free(peer->issuer);
 #endif /* OPENSSL */
+
+	/*
+	 * Clear all values, including the optional crypto values above.
+	 */
+	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
 	peer->estbdelay = sys_bdelay;
 	peer->ppoll = peer->maxpoll;
 	peer->hpoll = peer->minpoll;

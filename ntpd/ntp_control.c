@@ -120,7 +120,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_LEAPEND,	RO, "expire" },		/* 23 */
 #ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 24 */
-	{ CS_HOST,	RO, "hostname" },	/* 25 */
+	{ CS_HOST,	RO, "host" },	/* 25 */
 	{ CS_PUBLIC,	RO, "update" },		/* 26 */
 	{ CS_CERTIF,	RO, "cert" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
@@ -161,10 +161,10 @@ static	u_char def_sys_var[] = {
 	CS_LEAPEND,
 #ifdef OPENSSL
 	CS_HOST,
-	CS_DIGEST,
-	CS_FLAGS,
-	CS_PUBLIC,
 	CS_IDENT,
+	CS_FLAGS,
+	CS_DIGEST,
+	CS_PUBLIC,
 	CS_CERTIF,
 #endif /* OPENSSL */
 	0
@@ -217,13 +217,13 @@ static struct ctl_var peer_var[] = {
 	{ CP_OUT,	RO, "out" },		/* 39 */
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 40 */
-	{ CP_HOST,	RO, "hostname" },	/* 41 */
+	{ CP_HOST,	RO, "host" },	/* 41 */
 	{ CP_VALID,	RO, "valid" },		/* 42 */
 	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
 	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
 	{ CP_DIGEST,	RO, "signature" },	/* 46 */
-	{ CP_IDENT,	RO, "trust" },		/* 47 */
+	{ CP_IDENT,	RO, "ident" },		/* 47 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 40/48 */
 };
@@ -267,10 +267,10 @@ static u_char def_peer_var[] = {
 	CP_FILTERROR,
 #ifdef OPENSSL
 	CP_HOST,
+	CP_IDENT,
+	CP_FLAGS,
 	CP_DIGEST,
 	CP_VALID,
-	CP_FLAGS,
-	CP_IDENT,
 	CP_INITSEQ,
 #endif /* OPENSSL */
 	0
@@ -1384,7 +1384,7 @@ ctl_putsys(
 		    *s = '\0';
 
 		    ctl_putdata(buf, (unsigned)( s - buf ),
-				0);
+			0);
 	    }
 	    break;
 
@@ -1396,20 +1396,20 @@ ctl_putsys(
 	    case CS_LEAPTAB:
 		if (leap_sec > 0)
 			ctl_putuint(sys_var[CS_LEAPTAB].text,
-				    leap_sec);
+			    leap_sec);
 		break;
 
 	    case CS_LEAPEND:
 		if (leap_expire > 0)
 			ctl_putfs(sys_var[CS_LEAPEND].text,
-				  leap_expire);
+			    leap_expire);
 		break;
 
 #ifdef OPENSSL
 	    case CS_FLAGS:
 		if (crypto_flags)
 			ctl_puthex(sys_var[CS_FLAGS].text,
-				   crypto_flags);
+			    crypto_flags);
 		break;
 
 	    case CS_DIGEST:
@@ -1419,22 +1419,22 @@ ctl_putsys(
 			dp = EVP_get_digestbynid(crypto_flags >> 16);
 			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
 			ctl_putstr(sys_var[CS_DIGEST].text, str,
-				   strlen(str));
+			    strlen(str));
 		}
 		break;
 
 	    case CS_HOST:
 		if (sys_hostname != NULL)
 			ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
-				   strlen(sys_hostname));
+			    strlen(sys_hostname));
 		break;
 
 	    case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			sprintf(cbuf, "%s %s 0x%x", cp->subject,
-				cp->issuer, cp->flags);
+			    cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
-				   strlen(cbuf));
+			    strlen(cbuf));
 			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
 		}
 		break;
@@ -1442,19 +1442,13 @@ ctl_putsys(
 	    case CS_PUBLIC:
 		if (hostval.fstamp != 0)
 			ctl_putfs(sys_var[CS_PUBLIC].text,
-				  ntohl(hostval.tstamp));
+			    ntohl(hostval.tstamp));
 		break;
 
 	    case CS_IDENT:
-		if (iffpar_pkey != NULL)
+		if (group_name != NULL)
 			ctl_putstr(sys_var[CS_IDENT].text,
-				   iffpar_file, strlen(iffpar_file));
-		if (gqpar_pkey != NULL)
-			ctl_putstr(sys_var[CS_IDENT].text,
-				   gqpar_file, strlen(gqpar_file));
-		if (mvpar_pkey != NULL)
-			ctl_putstr(sys_var[CS_IDENT].text,
-				   mvpar_file, strlen(mvpar_file));
+			    group_name, strlen(group_name));
 		break;
 
 #endif /* OPENSSL */
@@ -1723,28 +1717,29 @@ ctl_putpeer(
 			dp = EVP_get_digestbynid(peer->crypto >> 16);
 			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
 			ctl_putstr(peer_var[CP_DIGEST].text, str,
-				   strlen(str));
+			    strlen(str));
 		}
 		break;
 
 	    case CP_HOST:
 		if (peer->subject != NULL)
 			ctl_putstr(peer_var[CP_HOST].text,
-				   peer->subject, strlen(peer->subject));
+			    peer->subject, strlen(peer->subject));
 		break;
 
 	    case CP_VALID:		/* not used */
 		break;
 
 	    case CP_IDENT:
-		if (peer->issuer != NULL)
+		if (peer->issuer != NULL && peer->ident_pkey != NULL)
 			ctl_putstr(peer_var[CP_IDENT].text,
-				   peer->issuer, strlen(peer->issuer));
+			    peer->issuer, strlen(peer->issuer));
 		break;
 
 	    case CP_INITSEQ:
 		if ((ap = (struct autokey *)peer->recval.ptr) == NULL)
 			break;
+
 		ctl_putint(peer_var[CP_INITSEQ].text, ap->seq);
 		ctl_puthex(peer_var[CP_INITKEY].text, ap->key);
 		ctl_putfs(peer_var[CP_INITTSP].text,

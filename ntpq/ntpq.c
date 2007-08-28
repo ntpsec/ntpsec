@@ -16,6 +16,7 @@
 #include "ntp_io.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
 #include "isc/net.h"
@@ -604,6 +605,7 @@ ntpqmain(
 		exit(2);
 	}
 #endif
+	NTP_INSIST(ntp_optind <= argc);
 	if (ntp_optind == argc) {
 		ADDHOST(DEFHOST);
 	} else {
