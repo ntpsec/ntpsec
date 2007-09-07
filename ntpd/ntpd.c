@@ -12,6 +12,12 @@
 #include "ntp_stdlib.h"
 #include <ntp_random.h>
 
+#include "ntp_syslog.h"
+#include "isc/assertions.h"
+#include "isc/error.h"
+#include "isc/strerror.h"
+#include "isc/formatcheck.h"
+
 #ifdef SIM
 # include "ntpsim.h"
 #endif
@@ -214,6 +220,14 @@ int 		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
 static void	init_logging		(char const *);
 static void	setup_logfile		(void);
+
+static void	assertion_failed	(const char *file, int line,
+	isc_assertiontype_t type, const char *cond);
+static void	library_fatal_error	(const char *file, int line,
+	const char *format, va_list args) ISC_FORMAT_PRINTF(3, 0);
+static void	library_unexpected_error(const char *file, int line,
+	const char *format, va_list args) ISC_FORMAT_PRINTF(3, 0);
+
 
 /*
  * Initialize the logging
@@ -583,6 +597,15 @@ ntpdmain(
 #  endif /* DEBUG */
 	    !nofork)
 	{
+
+	/*
+	 * Install trap handlers to log errors and assertion failures.
+	 * Default handlers print to stderr which doesn't work if detached.
+	 */
+	isc_assertion_setcallback(assertion_failed);
+	isc_error_setfatal(library_fatal_error);
+	isc_error_setunexpected(library_unexpected_error);
+
 #  ifndef SYS_WINNT
 #   ifdef HAVE_DAEMON
 		daemon(0, 0);
@@ -1163,6 +1186,74 @@ finish(
 	}
 }
 #endif	/* SIGDIE2 */
+
+
+/* assertion_failed
+ * Redirect trap messages from ISC libraries to syslog.
+ * This code was cloned and simplified from BIND.
+ */
+
+/*
+ * assertion_failed - Handle assertion failures.
+ */
+
+static void
+assertion_failed(const char *file, int line, isc_assertiontype_t type,
+                 const char *cond)
+{
+	isc_assertion_setcallback(NULL);    /* Avoid recursion */
+
+	msyslog(LOG_ERR, "%s:%d: %s(%s) failed",
+		file, line, isc_assertion_typetotext(type), cond);
+	msyslog(LOG_ERR, "exiting (due to assertion failure)");
+
+	abort();
+}
+
+/*
+ * library_fatal_error - Handle fatal errors from our libraries.
+ */
+
+static void
+library_fatal_error(const char *file, int line, const char *format,
+                    va_list args)
+{
+	char errbuf[256];
+
+	isc_error_setfatal(NULL);  /* Avoid recursion */
+
+	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
+	vsnprintf(errbuf, sizeof(errbuf), format, args);
+	msyslog(LOG_ERR, errbuf);
+	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
+
+	abort();
+}
+
+/*
+ * library_unexpected_error - Handle non fatal errors from our libraries.
+ */
+#define MAX_UNEXPECTED_ERRORS 100
+int unexpected_error_cnt = 0;
+static void
+library_unexpected_error(const char *file, int line, const char *format,
+                         va_list args)
+{
+	char errbuf[256];
+
+	if (unexpected_error_cnt >= MAX_UNEXPECTED_ERRORS)
+		return;	/* avoid clutter in log */
+
+	msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
+	vsnprintf(errbuf, sizeof(errbuf), format, args);
+	msyslog(LOG_ERR, errbuf);
+
+	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
+	{
+		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
+	}
+
+}
 
 
 #ifdef DEBUG
