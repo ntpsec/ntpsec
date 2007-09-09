@@ -621,9 +621,6 @@ refclock_receive(
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
-	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
-	    peer->offset, peer->delay, clock_phi * (current_time -
-	    peer->epoch), peer->jitter);
 	if (cal_enable && last_offset < MINDISPERSE) {
 #ifdef KERNEL_PLL
 		if (peer != sys_peer || pll_status & STA_PPSTIME)
