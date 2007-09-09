@@ -1,3 +1,5 @@
+* Crypto cleanup from Dave Mills.
+* [Bug 905] ntp_crypto.c fails to compile without -DDEBUG.
 * Avoid double peer stats logging.
 * ntp-keygen cleanup from Dave Mills.
 * libopts needs to be built after ElectricFence.

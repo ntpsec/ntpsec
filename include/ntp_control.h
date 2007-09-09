@@ -175,9 +175,9 @@ struct ntp_control {
 #define CS_PUBLIC	26
 #define	CS_CERTIF	27
 #define	CS_DIGEST	28
-#define CS_IDENT	29
-#define	CS_REVTIME	30
-#define	CS_MAXCODE	CS_REVTIME
+#define	CS_REVTIME	29
+#define	CS_GROUP	30
+#define	CS_MAXCODE	CS_GROUP
 #else
 #define	CS_MAXCODE	CS_LEAPEND
 #endif /* OPENSSL */
@@ -232,8 +232,7 @@ struct ntp_control {
 #define	CP_INITKEY	44
 #define	CP_INITTSP	45
 #define	CP_DIGEST	46
-#define CP_IDENT	47
-#define	CP_MAXCODE	CP_IDENT
+#define	CP_MAXCODE	CP_DIGEST
 #else
 #define	CP_MAXCODE	CP_OUT
 #endif /* OPENSSL */
@@ -254,7 +253,6 @@ struct ntp_control {
 #define	CC_FLAGS	11
 #define	CC_DEVICE	12
 #define CC_VARLIST	13
-
 #define	CC_MAXCODE	CC_VARLIST
 
 /*
