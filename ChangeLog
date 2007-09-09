@@ -1,3 +1,4 @@
+* libopts needs to be built after ElectricFence.
 * [Bug 894] Initialize keysdir before calling crypto_setup().
 * Calysto cleanup for ntpq.
 * ntp-keygen -i takes an arg.

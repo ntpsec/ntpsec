@@ -5,13 +5,14 @@ ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
 NULL=
 
 SUBDIRS=
+SUBDIRS+= 		\
+	scripts 	\
+	include 	\
+	ElectricFence	
 if NEED_LIBOPTS
 SUBDIRS+= libopts
 endif
 SUBDIRS+= 		\
-	scripts 	\
-	include 	\
-	ElectricFence	\
 	@ARLIB_DIR@ 	\
 	libntp		\
 	libparse	\
