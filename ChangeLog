@@ -1,3 +1,4 @@
+* [Bug 902] Fix problems with the -6 flag.
 * Updated include/copyright.def (owner and year).
 * [Bug 878] Avoid ntpdc use of refid value as unterminated string.
 * [Bug 881] Corrected display of pll offset on 64bit systems.
