@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 * Crypto cleanup from Dave Mills.
 * [Bug 905] ntp_crypto.c fails to compile without -DDEBUG.
 * Avoid double peer stats logging.
