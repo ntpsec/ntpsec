@@ -1,3 +1,6 @@
+---
+(4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
+
 * [Bug 902] Fix problems with the -6 flag.
 * Updated include/copyright.def (owner and year).
 * [Bug 878] Avoid ntpdc use of refid value as unterminated string.
