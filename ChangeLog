@@ -1,3 +1,9 @@
+* Documentation updates from Dave Mills.
+* Crypto cleanup from Dave Mills.
+* [Bug 905] ntp_crypto.c fails to compile without -DDEBUG.
+* Avoid double peer stats logging.
+* ntp-keygen cleanup from Dave Mills.
+* libopts needs to be built after ElectricFence.
 * [Bug 894] Initialize keysdir before calling crypto_setup().
 * Calysto cleanup for ntpq.
 * ntp-keygen -i takes an arg.
@@ -97,7 +103,9 @@
 * codec (audio) and ICOM changes from Dave Mills.
 
 ---
+(4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 902] Fix problems with the -6 flag.
 * Updated include/copyright.def (owner and year).
 * [Bug 878] Avoid ntpdc use of refid value as unterminated string.
 * [Bug 881] Corrected display of pll offset on 64bit systems.
@@ -109,6 +117,7 @@
   unsigned types cannot be less than 0
   default_ai_family is a short
   lose trailing , from enum list
+  clarify ntp_restrict.c for easier automated analysis
 * [Bug 884] don't access recv buffers after having them passed to the free
   list.
 * [Bug 882] allow loopback interfaces to share addresses with other

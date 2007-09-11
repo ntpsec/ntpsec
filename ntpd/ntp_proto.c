@@ -79,9 +79,6 @@ keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
-#ifdef OPENSSL
-char	*sys_hostname;		/* gethostname() name */
-#endif /* OPENSSL */
 
 /*
  * TOS and multicast mapping stuff
@@ -282,8 +279,10 @@ transmit(
 				 * If timeout in Autokey dance, restart
 				 * the protocol.
 				 */
-				if (peer->crypto)
+				if (peer->crypto) {
 					peer_clear(peer, "TIME");
+					peer->unreach = 0;
+				}
 				hpoll++;
 #endif /* OPENSSL */
 			}
@@ -1686,8 +1685,6 @@ peer_clear(
 	key_expire(peer);
 	if (peer->iffval != NULL)
 		BN_free(peer->iffval);
-	if (peer->grpkey != NULL)
-		BN_free(peer->grpkey);
 	value_free(&peer->cookval);
 	value_free(&peer->recval);
 	value_free(&peer->encrypt);

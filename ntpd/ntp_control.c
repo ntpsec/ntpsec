@@ -120,12 +120,12 @@ static struct ctl_var sys_var[] = {
 	{ CS_LEAPEND,	RO, "expire" },		/* 23 */
 #ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 24 */
-	{ CS_HOST,	RO, "host" },	/* 25 */
+	{ CS_HOST,	RO, "host" },		/* 25 */
 	{ CS_PUBLIC,	RO, "update" },		/* 26 */
 	{ CS_CERTIF,	RO, "cert" },		/* 27 */
 	{ CS_DIGEST,	RO, "signature" },	/* 28 */
-	{ CS_IDENT,	RO, "ident" },		/* 29 */
-	{ CS_REVTIME,	RO, "until" },		/* 30 */
+	{ CS_REVTIME,	RO, "until" },		/* 29 */
+	{ CS_GROUP,	RO, "group" },		/* 30 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 24/31 */
 };
@@ -161,7 +161,7 @@ static	u_char def_sys_var[] = {
 	CS_LEAPEND,
 #ifdef OPENSSL
 	CS_HOST,
-	CS_IDENT,
+	CS_GROUP,
 	CS_FLAGS,
 	CS_DIGEST,
 	CS_PUBLIC,
@@ -217,15 +217,14 @@ static struct ctl_var peer_var[] = {
 	{ CP_OUT,	RO, "out" },		/* 39 */
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 40 */
-	{ CP_HOST,	RO, "host" },	/* 41 */
+	{ CP_HOST,	RO, "group" },		/* 41 */
 	{ CP_VALID,	RO, "valid" },		/* 42 */
 	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
 	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
 	{ CP_DIGEST,	RO, "signature" },	/* 46 */
-	{ CP_IDENT,	RO, "ident" },		/* 47 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 40/48 */
+	{ 0,		EOV, "" }		/* 40/47 */
 };
 
 
@@ -267,7 +266,6 @@ static u_char def_peer_var[] = {
 	CP_FILTERROR,
 #ifdef OPENSSL
 	CP_HOST,
-	CP_IDENT,
 	CP_FLAGS,
 	CP_DIGEST,
 	CP_VALID,
@@ -1429,6 +1427,12 @@ ctl_putsys(
 			    strlen(sys_hostname));
 		break;
 
+	    case CS_GROUP:
+		if (sys_groupname != NULL)
+			ctl_putstr(sys_var[CS_HOST].text, sys_groupname,
+			    strlen(sys_groupname));
+		break;
+
 	    case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			sprintf(cbuf, "%s %s 0x%x", cp->subject,
@@ -1444,13 +1448,6 @@ ctl_putsys(
 			ctl_putfs(sys_var[CS_PUBLIC].text,
 			    ntohl(hostval.tstamp));
 		break;
-
-	    case CS_IDENT:
-		if (group_name != NULL)
-			ctl_putstr(sys_var[CS_IDENT].text,
-			    group_name, strlen(group_name));
-		break;
-
 #endif /* OPENSSL */
 	}
 }
@@ -1728,12 +1725,6 @@ ctl_putpeer(
 		break;
 
 	    case CP_VALID:		/* not used */
-		break;
-
-	    case CP_IDENT:
-		if (peer->issuer != NULL && peer->ident_pkey != NULL)
-			ctl_putstr(peer_var[CP_IDENT].text,
-			    peer->issuer, strlen(peer->issuer));
 		break;
 
 	    case CP_INITSEQ:

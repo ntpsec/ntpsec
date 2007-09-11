@@ -1,71 +1,69 @@
 /*
  * Program to generate cryptographic keys for NTP clients and servers
  *
- * This program generates files "ntpkey_<type>_<hostname>.<filestamp>",
- * where <type> is the file type, <hostname> is the generating host and
- * <filestamp> is the NTP seconds in decimal format. The NTP programs
- * expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
- * association maintained by soft links.
- *
- * Files are prefixed with a header giving the name and date of creation
+ * This program generates password encrypted data files for use with the
+ * Autokey security protocol and Network Time Protocol Version 4. Files
+ * are prefixed with a header giving the name and date of creation
  * followed by a type-specific descriptive label and PEM-encoded data
- * string compatible with programs of the OpenSSL library.
+ * structure compatible with programs of the OpenSSL library.
  *
- * Note that private keys can be password encrypted as per OpenSSL
- * conventions.
- *
- * The file types include
+ * All file names are like "ntpkey_<type>_<hostname>.<filestamp>", where
+ * <type> is the file type, <hostname> the generating host name and
+ * <filestamp> the generation time in NTP seconds. The NTP programs
+ * expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
+ * association maintained by soft links. Following is a list of file
+ * types; the first line is the file name and the second link name.
  *
  * ntpkey_MD5key_<hostname>.<filestamp>
  * 	MD5 (128-bit) keys used to compute message digests in symmetric
  *	key cryptography
  *
  * ntpkey_RSAkey_<hostname>.<filestamp>
- * ntpkey_host_<hostname> (RSA) link
+ * ntpkey_host_<hostname>
  *	RSA private/public host key pair used for public key signatures
  *	and data encryption
  *
  * ntpkey_DSAkey_<hostname>.<filestamp>
- * ntpkey_sign_<hostname> (RSA or DSA) link
+ * ntpkey_sign_<hostname>
  *	DSA private/public sign key pair used for public key signatures,
  *	but not data encryption
- *
- * ntpkey_IFFpar_<hostname>.<filestamp>
- * ntpkey_iff_<hostname> (IFF server) link
- * ntpkey_IFFkey_<hostname>.<filestamp>
- * ntpkey_iffkey_<hostname> (IFF client) link
- *	Schnorr (IFF) server/client identity parameters
- *
- * ntpkey_IFFkey_<hostname>.<filestamp>
- *	Schnorr (IFF) client identity parameters
- *
- * ntpkey_GQpar_<hostname>.<filestamp>,
- * ntpkey_gq_<hostname> (GQ) link
- *	Guillou-Quisquater (GQ) identity parameters
- *
- * ntpkey_MVpar_<hostname>.<filestamp>,
- *	Mu-Varadharajan (MV) server identity parameters 
- *
- * ntpkey_MVkeyX_<hostname>.<filestamp>,
- * ntpkey_mv_<hostname> (MV server) link
- * ntpkey_mvkey_<hostname> (MV client) link
- *	Mu-Varadharajan (MV) client identity parameters
- *
- * ntpkey_XXXcert_<hostname>.<filestamp>
- * ntpkey_cert_<hostname> (RSA or DSA) link
- *	X509v3 certificate using RSA or DSA public keys and signatures.
- *	XXX is a code identifying the message digest and signature
- *	encryption algorithm
  *
  * Available digest/signature schemes
  *
  * RSA:	RSA-MD2, RSA-MD5, RSA-SHA, RSA-SHA1, RSA-MDC2, EVP-RIPEMD160
  * DSA:	DSA-SHA, DSA-SHA1
  *
+ * ntpkey_XXXcert_<hostname>.<filestamp>
+ * ntpkey_cert_<hostname>
+ *	X509v3 certificate using RSA or DSA public keys and signatures.
+ *	XXX is a code identifying the message digest and signature
+ *	encryption algorithm
+ *
+ * Identity schemes. The key type par is used for the challenge; the key
+ * type key is used for the response.
+ *
+ * ntpkey_IFFkey_<trustname>.<filestamp>
+ * ntpkey_iffkey_<trustname>
+ * ntpkey_IFFpar_<trustname>.<filestamp>
+ * ntpkey_iffpar_<trustname>
+ *	Schnorr (IFF) identity parameters and keys
+ *
+ * ntpkey_GQkey_<trustname>.<filestamp>,
+ * ntpkey_gqkey_<trustname>
+ * ntpkey_GQpar_<trustname>.<filestamp>,
+ * ntpkey_gqpar_<trustname>
+ *	Guillou-Quisquater (GQ) identity parameters and keys
+ *
+ * ntpkey_MVkeyX_<trustname>.<filestamp>,
+ * ntpkey_mvkey_<hostname>
+ * ntpkey_MVparX_<trustname>.<filestamp>,
+ * ntpkey_mvpar_<trustname>
+ *	Mu-Varadharajan (MV) identity parameters and keys
+ *
  * Note: Once in a while because of some statistical fluke this program
  * fails to generate and verify some cryptographic data, as indicated by
  * exit status -1. In this case simply run the program again. If the
- * program does complete with return code 0, the data are correct as
+ * program does complete with exit code 0, the data are correct as
  * verified.
  *
  * These cryptographic routines are characterized by the prime modulus
@@ -187,9 +185,9 @@ BOOL init_randfile();
  * Don't try to follow symbolic links
  */
 int
-readlink(char * link, char * file, int len) {
+readlink(char *link, char *file, int len)
 	return (-1);
-}
+
 /*
  * Don't try to create a symbolic link for now.
  * Just move the file to the name you need.
@@ -198,7 +196,7 @@ int
 symlink(char *filename, char *linkname) {
 	DeleteFile(linkname);
 	MoveFile(filename, linkname);
-	return 0;
+	return (0);
 }
 void
 InitWin32Sockets() {
@@ -207,7 +205,7 @@ InitWin32Sockets() {
 	wVersionRequested = MAKEWORD(2,0);
 	if (WSAStartup(wVersionRequested, &wsaData))
 	{
-		fprintf(stderr, "No useable winsock.dll");
+		fprintf(stderr, "No useable winsock.dll\n");
 		exit(1);
 	}
 }
@@ -228,11 +226,12 @@ main(
 	X509	*cert = NULL;	/* X509 certificate */
 	EVP_PKEY *pkey_host = NULL; /* host key */
 	EVP_PKEY *pkey_sign = NULL; /* sign key */
-	EVP_PKEY *pkey_iff = NULL; /* IFF parameters */
-	EVP_PKEY *pkey_gq = NULL; /* GQ parameters */
+	EVP_PKEY *pkey_iffkey = NULL; /* IFF keys and parameters */
+	EVP_PKEY *pkey_gqpar = NULL; /* GQ parameters */
+	EVP_PKEY *pkey_gqkey = NULL; /* GQ keys */
 	EVP_PKEY *pkey_mv = NULL; /* MV parameters */
 	int	hostkey = 0;	/* generate RSA keys */
-	int	iffkey = 0;	/* generate IFF parameters */
+	int	iffkey = 0;	/* generate IFF keys and parameters */
 	int	gqpar = 0;	/* generate GQ parameters */
 	int	gqkey = 0;	/* update GQ keys */
 	int	mvpar = 0;	/* generate MV parameters */
@@ -269,7 +268,7 @@ main(
 		fprintf(stderr,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
 		    OPENSSL_VERSION_NUMBER, SSLeay());
-		return (-1);
+		exit (-1);
 
 	} else {
 		fprintf(stderr,
@@ -359,7 +358,7 @@ main(
 	if (trustname == NULL)
 		trustname = hostname;
 #endif
-	if (passwd1 != NULL && passwd2 == NULL)
+	if (passwd2 == NULL)
 		passwd2 = passwd1;
 #ifdef OPENSSL
 	/*
@@ -370,13 +369,13 @@ main(
 	if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
 		fprintf(stderr, "RAND_file_name %s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (-1);
+		exit (-1);
 	}
 	temp = RAND_load_file(pathbuf, -1);
 	if (temp == 0) {
 		fprintf(stderr,
 		    "RAND_load_file %s not found or empty\n", pathbuf);
-		return (-1);
+		exit (-1);
 	}
 	fprintf(stderr,
 	    "Random seed file %s %u bytes\n", pathbuf, temp);
@@ -397,7 +396,7 @@ main(
 	 */
 	if (hostkey)
 		pkey_host = genkey("RSA", "host");
-	if (pkey_host == NULL) {
+	if (pkey_host == NULL && strcmp(passwd1, passwd2) == 0) {
 		sprintf(filename, "ntpkey_host_%s", hostname);
 		pkey_host = readkey(filename, passwd1, &fstamp);
 		if (pkey_host == NULL) {
@@ -405,7 +404,7 @@ main(
 			if (pkey_host == NULL) {
 				fprintf(stderr, "No host key %s\n",
 				    filename);
-				return (-1);
+				exit (-1);
 			}
 		} else {
 			readlink(filename, filename, sizeof(filename));
@@ -421,29 +420,34 @@ main(
 	 */
 	if (sign != NULL)
 		pkey_sign = genkey(sign, "sign");
-	if (pkey_sign == NULL) {
+	if (pkey_sign == NULL && strcmp(passwd1, passwd2) == 0) {
 		sprintf(filename, "ntpkey_sign_%s", hostname);
 		pkey_sign = readkey(filename, passwd1, &fstamp);
-		if (pkey_sign == NULL) {
-			pkey_sign = pkey_host;
-			fprintf(stderr, "Using host key as sign key\n");
-		} else {
+		if (pkey_sign != NULL) {
 			readlink(filename, filename, sizeof(filename));
 			fprintf(stderr, "Using sign key %s\n",
 			    filename);
+		} else {
+			pkey_sign = pkey_host;
+			fprintf(stderr, "Using host key as sign key\n");
 		}
 	}
 
 	/*
 	 * Create new GQ parameters if requested; otherwise, look for
-	 * existing GQ parameters.
+	 * existing GQ parameters. The parameters are instantiated in
+	 * all group hosts. The keys are generated separately by each
+	 * host.
 	 */
-	if (gqpar)
-		pkey_gq = gen_gqpar("gq");
-	if (pkey_gq == NULL) {
-		sprintf(filename, "ntpkey_gq_%s", trustname);
-		pkey_gq = readkey(filename, passwd1, &fstamp);
-		if (pkey_gq != NULL) {
+	if (gqpar) {
+		pkey_gqpar = gen_gqpar("gqpar");
+		if (pkey_gqpar != NULL)
+			gqkey++;
+	}
+	if (pkey_gqpar == NULL) {
+		sprintf(filename, "ntpkey_gqpar_%s", trustname);
+		pkey_gqpar = readkey(filename, passwd1, &fstamp);
+		if (pkey_gqpar != NULL) {
 			readlink(filename, filename, sizeof(filename));
 			fprintf(stderr, "Using GQ parameters %s\n",
 			    filename);
@@ -451,60 +455,103 @@ main(
 	}
 
 	/*
-	 * If GQ parameters are available, extract the public key for
-	 * the certificate.
+	 * Write the GQ parameters to the stdout stream redirected to a
+	 * file. Ordinarily, the file is copied to another machine and
+	 * installed under the name in the file header.
 	 */
-	if (pkey_gq != NULL)
-		grpkey = BN_bn2hex(pkey_gq->pkey.rsa->q);
+	if (pkey_gqpar != NULL && strcmp(passwd1, passwd2) != 0) {
+		RSA	*rsa;
+
+		epoch = fstamp - JAN_1970;
+		sprintf(filename, "ntpkey_GQpar_%s.%u", trustname,
+		    fstamp);
+		fprintf(stderr,
+		    "Writing GQ parameters %s to stdout\n", filename);
+		fprintf(stdout, "# %s\n# %s\n", filename,
+		    ctime(&epoch));
+		rsa = pkey_gqpar->pkey.rsa;
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_RSA(pkey, rsa);
+		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
+		    0, NULL, passwd2);
+		fclose(stdout);
+		if (debug)
+			RSA_print_fp(stderr, rsa, 0);
+	}
 
 	/*
-	 * Create new MB parameters if requested. Not clear what to do
-	 * with MV for now.
+	 * Create new GQ keys if requested. Otherwise, look for
+	 * exisiting GQ keys and fetch the public key for the
+	 * certificate..
 	 */
-	if (mvpar)
-		pkey_mv = gen_mv("mv");
+	if (pkey_gqpar != NULL && gqkey)
+		pkey_gqkey = gen_gqkey("gqkey", pkey_gqpar);
+	if (pkey_gqkey == NULL) {
+		sprintf(filename, "ntpkey_gqkey_%s", trustname);
+		pkey_gqkey = readkey(filename, passwd1, &fstamp);
+		if (pkey_gqkey != NULL) {
+			readlink(filename, filename, sizeof(filename));
+			fprintf(stderr, "Using GQ keys %s\n",
+			    filename);
+		}
+	}
+	if (pkey_gqkey != NULL)
+		grpkey = BN_bn2hex(pkey_gqkey->pkey.rsa->q);
 
 	/*
-	 * Create new IFF server parameters if requested; otherwise,
-	 * look for existing IFF server parameters.
+	 * Create new IFF keys if requested; otherwise, look for
+	 * existing IFF keys. In the IFF scheme the keys include the
+	 * parameters, which are not generated separately as in the GQ
+	 * scheme.
 	 */
 	if (iffkey)
-		pkey_iff = gen_iff("iff");
-	if (pkey_iff == NULL) {
-		sprintf(filename, "ntpkey_iff_%s", trustname);
-		pkey_iff = readkey(filename, passwd1, &fstamp);
-		if (pkey_iff != NULL) {
+		pkey_iffkey = gen_iff("iffkey");
+	if (pkey_iffkey == NULL) {
+		sprintf(filename, "ntpkey_iffkey_%s", trustname);
+		pkey_iffkey = readkey(filename, passwd1, &fstamp);
+		if (pkey_iffkey != NULL) {
 			readlink(filename, filename, sizeof(filename));
-			fprintf(stderr, "Using IFF parameters %s\n",
+			fprintf(stderr, "Using IFF keys %s\n",
 			    filename);
 		}
 	}
 
 	/*
-	 * Create new IFF client parameters if requested. Use the public
-	 * keys and filestamp of the IFF server parameters.
+	 * Write the IFF parameters to the stdout stream redirected to a
+	 * file. Ordinarily, the file is copied to another machine and
+	 * installed under the name in the file header. Then, a soft
+	 * link is installed to it from "ntpkey_iffkey_<hostname>".
 	 */
-	if (pkey_iff != NULL && HAVE_OPT(ID_KEY)) {
+	if (pkey_iffkey != NULL && strcmp(passwd1, passwd2) != 0) {
 		DSA	*dsa;
-		FILE	*str;
 
-		fprintf(stderr,
-		    "Generating IFF client parameters (%d bits)...\n",
-		    modulus);
 		epoch = fstamp - JAN_1970;
-		str = fheader("IFFkey", trustname);
-		dsa = pkey_iff->pkey.dsa;
-		BN_copy(dsa->priv_key, BN_value_one());
+		sprintf(filename, "ntpkey_IFFpar_%s.%u", trustname,
+		    fstamp);
+		fprintf(stderr,
+		    "Writing IFF client key %s to stdout\n", filename);
+		fprintf(stdout, "# %s\n# %s\n", filename,
+		    ctime(&epoch));
+		dsa = pkey_iffkey->pkey.dsa;
+		if (HAVE_OPT(ID_KEY))
+			BN_copy(dsa->priv_key, BN_value_one());
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(pkey, dsa);
-		PEM_write_PrivateKey(str, pkey, passwd2 ?
-		    EVP_des_cbc()  : NULL, NULL, 0, NULL, passwd2);
-		fclose(str);
+		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
+		    0, NULL, passwd2);
+		fclose(stdout);
 		if (debug)
-			DSA_print_fp(stdout, dsa, 0);
-		fslink("iffkey", trustname);
-		return (0);
+			DSA_print_fp(stderr, dsa, 0);
 	}
+
+	/*
+	 * Create new MV parameters if requested. Not clear what to do
+	 * with MV for now.
+	 */
+	if (mvpar)
+		pkey_mv = gen_mv("mv");
+	if (strcmp(passwd1, passwd2) != 0)
+		exit (0);
 
 	/*
 	 * Generate a X509v3 certificate.
@@ -531,12 +578,17 @@ main(
 		fprintf(stderr,
 		    "Invalid digest/signature combination %s\n",
 		    scheme);
-			return (-1);
+			exit (-1);
 	} else {
+
+		/*
+		 * If GQ parameters are available, extract the public
+		 * key for the certificate.
+		 */
 		x509(pkey_sign, ectx, grpkey, exten);
 	}
 #endif /* OPENSSL */
-	return (0);
+	exit (0);
 }
 
 
@@ -639,17 +691,17 @@ readkey(
 	 * Read the filestamp, which is contained in the first line.
 	 */
 	if ((ptr = fgets(linkname, MAXFILENAME, str)) == NULL) {
-		fprintf(stderr, "readkey: empty file %s", cp);
+		fprintf(stderr, "Empty key file %s\n", cp);
 		fclose(str);
 		return (NULL);
 	}
 	if ((ptr = strrchr(ptr, '.')) == NULL) {
-		fprintf(stderr, "readkey: no filestamp %s", cp);
+		fprintf(stderr, "No filestamp found in %s\n", cp);
 		fclose(str);
 		return (NULL);
 	}
 	if (sscanf(++ptr, "%u", &gstamp) != 1) {
-		fprintf(stderr, "readkey: invalid filestamp %s", cp);
+		fprintf(stderr, "Invalid filestamp found in %s\n", cp);
 		fclose(str);
 		return (NULL);
 	}
@@ -660,10 +712,11 @@ readkey(
 	pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd);
 	fclose(str);
 	if (pkey == NULL) {
-		fprintf(stderr, "readkey: %s",
-		    ERR_error_string(ERR_get_error(), NULL));
+		fprintf(stderr, "Corrupt file %s or wrong key %s\n%s\n",
+		    cp, passwd, ERR_error_string(ERR_get_error(),
+		    NULL));
 		fclose(str);
-		return (NULL);
+		exit (-1);
 	}
 	*estamp = gstamp;
 	if (debug) {
@@ -718,11 +771,11 @@ gen_rsa(
 	pkey = EVP_PKEY_new();
 	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	    passwd2);
 	fclose(str);
 	if (debug)
-		RSA_print_fp(stdout, rsa, 0);
+		RSA_print_fp(stderr, rsa, 0);
 	fslink(id, hostname);
 	return (pkey);
 }
@@ -775,11 +828,11 @@ gen_dsa(
 	pkey = EVP_PKEY_new();
 	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	    passwd2);
 	fclose(str);
 	if (debug)
-		DSA_print_fp(stdout, dsa, 0);
+		DSA_print_fp(stderr, dsa, 0);
 	fslink(id, hostname);
 	return (pkey);
 }
@@ -825,7 +878,7 @@ gen_iff(
 	/*
 	 * Generate DSA parameters for use as IFF parameters.
 	 */
-	fprintf(stderr, "Generating IFF parameters (%d bits)...\n",
+	fprintf(stderr, "Generating IFF keys (%d bits)...\n",
 	    modulus);
 	RAND_bytes(seed, sizeof(seed));
 	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
@@ -918,14 +971,14 @@ gen_iff(
 	 * priv_key b
 	 * public_key v
 	 */
-	str = fheader("IFFpar", trustname);
+	str = fheader("IFFkey", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	    passwd2);
 	fclose(str);
 	if (debug)
-		DSA_print_fp(stdout, dsa, 0);
+		DSA_print_fp(stderr, dsa, 0);
 	fslink(id, trustname);
 	return (pkey);
 }
@@ -986,7 +1039,6 @@ gen_gqpar(
 	 * small number to minimize the file size.
 	 */
 	ctx = BN_CTX_new();
-	NTP_INSIST(ctx != NULL);
 	BN_rand(rsa->e, BN_num_bits(rsa->n), -1, 0); /* b */
 	BN_mod(rsa->e, rsa->e, rsa->n, ctx);
 	BN_copy(rsa->d, BN_value_one());
@@ -1006,13 +1058,12 @@ gen_gqpar(
 	 */
 	str = fheader("GQpar", trustname);
 	pkey = EVP_PKEY_new();
-	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	     passwd2);
 	fclose(str);
 	if (debug)
-		RSA_print_fp(stdout, rsa, 0);
+		RSA_print_fp(stderr, rsa, 0);
 	fslink(id, trustname);
 	return (pkey);
 }
@@ -1036,26 +1087,17 @@ gen_gqkey(
 
 	/*
 	 * Generate GQ keys. Note that the group key b is the e member
-	 * of
-	 * the GQ parameters.
+	 * of the GQ parameters.
 	 */
 	fprintf(stderr, "Updating GQ keys (%d bits)...\n", modulus);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
-	NTP_INSIST(ctx != NULL);
-	NTP_INSIST(u != NULL);
-	NTP_INSIST(v != NULL);
 	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
-	NTP_INSIST(g != NULL);
-	NTP_INSIST(k != NULL);
-	NTP_INSIST(r != NULL);
-	NTP_INSIST(y != NULL);
 
 	/*
 	 * When generating his certificate, Bob rolls random private key
 	 * u. 
 	 */
 	rsa = gqpar->pkey.rsa;
-	NTP_INSIST(rsa != NULL);
 	BN_rand(u, BN_num_bits(rsa->n), -1, 0); /* u */
 	BN_mod(u, u, rsa->n, ctx);
 	BN_mod_inverse(v, u, rsa->n, ctx);	/* u^-1 mod n */
@@ -1131,15 +1173,14 @@ gen_gqkey(
 	 * q	public key (u^-1)^b
 	 * (remaining values are not used)
 	 */
-	str = fheader("GQpar", trustname);
+	str = fheader("GQkey", trustname);
 	pkey = EVP_PKEY_new();
-	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	    passwd2);
 	fclose(str);
 	if (debug)
-		RSA_print_fp(stdout, rsa, 0);
+		RSA_print_fp(stderr, rsa, 0);
 	fslink(id, trustname);
 	return (pkey);
 }
@@ -1295,7 +1336,7 @@ gen_mv(
 	 */
 	temp = 0;
 	while (1) {
-		fprintf(stderr, "Duplicate keys rejected %d\r", ++temp);
+		fprintf(stderr, "Duplicate keys rejected %d\n", ++temp);
 		BN_one(dsa->q);
 		for (j = 1; j <= n; j++)
 			BN_mul(dsa->q, dsa->q, s1[j], ctx);
@@ -1560,11 +1601,11 @@ gen_mv(
 	pkey = EVP_PKEY_new();
 	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, passwd2 ? EVP_des_cbc() : NULL,
-	    NULL, 0, NULL, passwd2);
+	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	    passwd2);
 	fclose(str);
 	if (debug)
-		DSA_print_fp(stdout, dsa, 0);
+		DSA_print_fp(stderr, dsa, 0);
 	fslink(id, trustname);
 
 	/*
@@ -1612,13 +1653,13 @@ gen_mv(
 		pkey1 = EVP_PKEY_new();
 		NTP_INSIST(pkey1 != NULL);
 		EVP_PKEY_set1_DSA(pkey1, sdsa);
-		PEM_write_PrivateKey(str, pkey1, passwd2 ?
-		    EVP_des_cbc() : NULL, NULL, 0, NULL, passwd2);
+		PEM_write_PrivateKey(str, pkey1, EVP_des_cbc(), NULL, 0,
+		    NULL, passwd2);
 		fclose(str);
 		fprintf(stderr, "ntpkey_%s_%s.%lu\n", ident, trustname,
 		    epoch + JAN_1970);
 		if (debug)
-			DSA_print_fp(stdout, sdsa, 0);
+			DSA_print_fp(stderr, sdsa, 0);
 		EVP_PKEY_free(pkey1);
 	}
 
@@ -1695,7 +1736,7 @@ x509	(
 	    (unsigned char *) hostname, strlen(hostname), -1, 0);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    (unsigned char *) trustname, strlen(trustname), -1, 0);
+	    (unsigned char *) hostname, strlen(hostname), -1, 0);
 	if (!X509_set_pubkey(cert, pkey)) {
 		fprintf(stderr, "Assign key fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1792,7 +1833,7 @@ x509	(
 	PEM_write_X509(str, cert);
 	fclose(str);
 	if (debug)
-		X509_print_fp(stdout, cert);
+		X509_print_fp(stderr, cert);
 	X509_free(cert);
 	fslink("cert", hostname);
 	return (1);
@@ -1910,7 +1951,7 @@ fheader	(
 		perror("Write");
 		exit (-1);
 	}
-	fprintf(str, "# %s\n# %s", filename, ctime(&epoch));
+	fprintf(str, "# %s\n# %s\n", filename, ctime(&epoch));
 	return (str);
 }
 

@@ -6,6 +6,18 @@ ntpd no longer accepts '-v name' or '-V name' to define internal variables.
 Use '--var name' or '--dvar name' instead. (Bug 817)
 
 ---
+NTP 4.2.4p4 (Harlan Stenn <stenn@ntp.org>, 2007/09/10)
+
+Focus: Minor Bugfixes
+
+This release updates certain copyright information, fixes several display
+bugs in ntpdc, avoids SIGIO interrupting malloc(), cleans up file descriptor
+shutdown in the parse refclock driver, removes some lint from the code,
+stops accessing certain buffers immediately after they were freed, fixes
+a problem with non-command-line specification of -6, and allows the loopback
+interface to share addresses with other interfaces.
+
+---
 NTP 4.2.4p3 (Harlan Stenn <stenn@ntp.org>, 2007/06/29)
 
 Focus: Minor Bugfixes

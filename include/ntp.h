@@ -305,9 +305,9 @@ struct peer {
 	char	*issuer;	/* certificate issuer name */
 	keyid_t	pkeyid;		/* previous key ID */
 	keyid_t	pcookie;	/* peer cookie */
-	struct pkey_info *ident_pkey; /* identity key */
+	const struct pkey_info *ident_pkey; /* identity key */
 	BIGNUM	*iffval;	/* identity challenge (IFF, GQ, MV) */
-	BIGNUM	*grpkey;	/* identity challenge key (GQ) */
+	const BIGNUM *grpkey;	/* identity challenge key (GQ) */
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct exten *cmmd;	/* extension pointer */
@@ -362,6 +362,7 @@ struct peer {
 	 * End of clear-to-zero area
 	 */
 	u_long	update;		/* receive epoch */
+#define end_clear_to_zero update
 	u_int	unreach;	/* unreachable count */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
@@ -372,7 +373,6 @@ struct peer {
 	 * Statistic counters
 	 */
 	u_long	timereset;	/* time stat counters were reset */
-#define end_clear_to_zero timereset
 	u_long	timereceived;	/* last packet received time */
 	u_long	timereachable;	/* last reachable/unreachable time */
 
