@@ -103,6 +103,7 @@
 * codec (audio) and ICOM changes from Dave Mills.
 
 ---
+(4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 902] Fix problems with the -6 flag.
 * Updated include/copyright.def (owner and year).
@@ -116,6 +117,7 @@
   unsigned types cannot be less than 0
   default_ai_family is a short
   lose trailing , from enum list
+  clarify ntp_restrict.c for easier automated analysis
 * [Bug 884] don't access recv buffers after having them passed to the free
   list.
 * [Bug 882] allow loopback interfaces to share addresses with other
