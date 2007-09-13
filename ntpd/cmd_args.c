@@ -198,7 +198,6 @@ getCmdOpts(
 #endif /* SIM */
 
 	if (errflg || argc) {
-		printf("argc is <%d>\n", argc);
 		optionUsage(myOptions, 2);
 	}
 	return;
