@@ -1,3 +1,5 @@
+* [Bug 897] Check RAND_status() - we may not need a .rnd file.
+* Crypto cleanup from Dave Mills.
 * [Bug 911] Fix error message in cmd_args.c.
 * [Bug 895] Log assertion failures via syslog(), not stderr.
 * Documentation updates from Dave Mills.

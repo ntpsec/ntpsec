@@ -122,6 +122,7 @@ char	*sys_groupname = NULL;	/* group name */
  * Global cryptodata in network byte order
  */
 struct cert_info *cinfo = NULL;	/* certificate info/value cache */
+struct cert_info *cert_host = NULL; /* host certificate */
 struct pkey_info *pkinfo = NULL; /* key info/value cache */
 struct value hostval;		/* host value */
 struct value pubkey;		/* public key */
@@ -167,7 +168,7 @@ static	int	cert_sign	(struct exten *, struct value *);
 static	int	cert_valid	(struct cert_info *, EVP_PKEY *);
 static	struct cert_info *cert_install (struct exten *, struct peer *);
 static	void	cert_free	(struct cert_info *);
-static	struct pkey_info *crypto_key (char *);
+static	struct pkey_info *crypto_key (char *, char *);
 static	void	bighash		(BIGNUM *, BIGNUM *);
 static	struct cert_info *crypto_cert (char *);
 
@@ -1248,16 +1249,29 @@ crypto_xmit(
 		break;
 
 	/*
-	 * Send certificate response or sign request. Use the values
-	 * from the certificate cache. If the request contains no
-	 * subject name, assume the name of this host. This is for
-	 * backwards compatibility. Private certificates are never sent.
-	 *
-	 * If a sign request, send the host certificate, which is self-
-	 * signed and may or may not be trusted. If a certificate
-	 * response, do not send the host certificate.
+	 * Send sign request. Use the host certificate, which is self-
+	 * signed and may or may not be trusted.
 	 */
 	case CRYPTO_SIGN:
+		if (tstamp < cert_host->first || tstamp >
+		    cert_host->last)
+			rval = XEVNT_SRV;
+		else
+			rval = crypto_send(fp, &cert_host->cert, &len);
+		break;
+
+	/*
+	 * Send certificate response. Use the name in the extension
+	 * field to find the certificate in the cache. If the request
+	 * contains no subject name, assume the name of this host. This
+	 * is for backwards compatibility. Private certificates are
+	 * never sent.
+	 *
+	 * There may be several certificates matching the request. First
+	 * choice is a self-signed trusted certificate; second choice is
+	 * any certificate signed by another host. There is no third
+	 * choice. 
+	 */
 	case CRYPTO_CERT | CRYPTO_RESP:
 		vallen = ntohl(ep->vallen);
 		if (vallen == 8) {
@@ -1740,21 +1754,21 @@ crypto_ident(
 	if (peer->crypto & CRYPTO_FLAG_IFF) {
 		snprintf(filename, MAXFILENAME, "ntpkey_iffpar_%s",
 		    peer->issuer);
-		peer->ident_pkey = crypto_key(filename);
+		peer->ident_pkey = crypto_key(filename, NULL);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_IFF);
 	}
 	if (peer->crypto & CRYPTO_FLAG_GQ) {
 		snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
 		    peer->issuer);
-		peer->ident_pkey = crypto_key(filename);
+		peer->ident_pkey = crypto_key(filename, NULL);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_GQ);
 	}
 	if (peer->crypto & CRYPTO_FLAG_MV) {
 		snprintf(filename, MAXFILENAME, "ntpkey_mvpar_%s",
 		    peer->issuer);
-		peer->ident_pkey = crypto_key(filename);
+		peer->ident_pkey = crypto_key(filename, NULL);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_MV);
 	}
@@ -2256,6 +2270,10 @@ crypto_bob(
 	sdsa->s = BN_dup(bk);
 	BN_CTX_free(bctx);
 	BN_free(r); BN_free(bn); BN_free(bk);
+#ifdef DEBUG
+	if (debug > 1)
+		DSA_print_fp(stdout, dsa, 0);
+#endif
 
 	/*
 	 * Encode the values in ASN.1 and sign. The filestamp is from
@@ -2549,6 +2567,10 @@ crypto_bob2(
 	sdsa->s = BN_dup(g);
 	BN_CTX_free(bctx);
 	BN_free(r); BN_free(k); BN_free(g); BN_free(y);
+#ifdef DEBUG
+	if (debug > 1)
+		RSA_print_fp(stdout, rsa, 0);
+#endif
  
 	/*
 	 * Encode the values in ASN.1 and sign. The filestamp is from
@@ -2648,6 +2670,10 @@ crypto_gq(
 	/*
 	 * Compute v^r y^b mod n.
 	 */
+	if (peer->grpkey == NULL) {
+		msyslog(LOG_INFO, "crypto_gq: missing group key");
+		return (XEVNT_ID);
+	}
 	BN_mod_exp(v, peer->grpkey, peer->iffval, rsa->n, bctx);
 						/* v^r mod n */
 	BN_mod_exp(y, sdsa->r, rsa->e, rsa->n, bctx); /* y^b mod n */
@@ -2872,6 +2898,10 @@ crypto_bob3(
 	BN_mod_exp(sdsa->q, dsa->priv_key, k, dsa->p, bctx); /* gbar */
 	BN_mod_exp(sdsa->g, dsa->pub_key, k, dsa->p, bctx); /* ghat */
 	BN_CTX_free(bctx); BN_free(k); BN_free(r); BN_free(u);
+#ifdef DEBUG
+	if (debug > 1)
+		DSA_print_fp(stdout, dsa, 0);
+#endif
 
 	/*
 	 * Encode the values in ASN.1 and sign. The filestamp is from
@@ -3249,7 +3279,7 @@ cert_install(
 			 * so, X signs Y.
 			 */
 			if (strcmp(yp->issuer, xp->subject) != 0 ||
-				xp->flags & CERT_ERROR)
+			    xp->flags & CERT_ERROR)
 				continue;
 
 			if (cert_valid(yp, xp->pkey) != XEVNT_OK) {
@@ -3293,7 +3323,7 @@ cert_install(
 			if (strcmp(yp->subject, peer->subject) != 0)
 				continue;
 
-			peer->grpkey = yp->grpkey;
+			peer->grpkey = xp->grpkey;
 			peer->crypto |= CRYPTO_FLAG_VALID;
 
 			/*
@@ -3349,11 +3379,20 @@ cert_parse(
 	const char *ptr;
 	int	temp, cnt, i;
 
+#if 0
+u_char *pta;
+
+pta = asn1cert;
+for (i = 0; i < len; i++)
+printf("%02x:", 0xff & *pta++);
+printf("\n%x %ld\n", asn1cert, len);
+#endif
+
 	/*
 	 * Decode ASN.1 objects and construct certificate structure.
 	 */
 	uptr = asn1cert;
-	if ((cert = d2i_X509(NULL, &uptr, len)) == NULL) {
+	if ((cert = d2i_X509(NULL, (u_char **)&uptr, len)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
@@ -3549,7 +3588,8 @@ cert_free(
  */
 static struct pkey_info *
 crypto_key(
-	char	*cp		/* file name */
+	char	*cp,		/* file name */
+	char	*passwd1	/* password */
 	)
 {
 	FILE	*str;		/* file handle */
@@ -3608,7 +3648,7 @@ crypto_key(
 	 * Read and decrypt PEM-encoded private key. If it fails to
 	 * decrypt, game over.
 	 */
-	pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd);
+	pkey = PEM_read_PrivateKey(str, NULL, NULL, passwd1);
 	fclose(str);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_key: %s",
@@ -3726,13 +3766,13 @@ crypto_cert(
 		fclose(str);
 		return (NULL);
 	}
+	fclose(str);
 	free(header);
 	if (strcmp(name, "CERTIFICATE") != 0) {
 		msyslog(LOG_INFO, "crypto_cert: wrong PEM type %s",
 		    name);
 		free(name);
 		free(data);
-		fclose(str);
 		return (NULL);
 	}
 	free(name);
@@ -3741,9 +3781,8 @@ crypto_cert(
 	 * Parse certificate and generate info/value structure. The
 	 * pointer and copy nonsense is due something broken in Solaris.
 	 */
-	free(data);
 	ret = cert_parse(data, len, fstamp);
-	fclose(str);
+	free(data);
 	if (ret == NULL)
 		return (NULL);
 
@@ -3799,47 +3838,44 @@ crypto_setup(void)
 		    OPENSSL_VERSION_NUMBER, SSLeay());
                 exit (-1);
         }
+	ERR_load_crypto_strings();
+	OpenSSL_add_all_algorithms();
 
 	/*
 	 * Load required random seed file and seed the random number
-	 * generator. Be default, it is found in the user home
+	 * generator. Be default, it is found as .rnd in the user home
 	 * directory. The root home directory may be / or /root,
 	 * depending on the system. Wiggle the contents a bit and write
 	 * it back so the sequence does not repeat when we next restart.
 	 */
-	ERR_load_crypto_strings();
-	if (rand_file == NULL) {
-		if ((RAND_file_name(filename, MAXFILENAME)) != NULL) {
-			rand_file = emalloc(strlen(filename) + 1);
-			strcpy(rand_file, filename);
+	if (!RAND_status()) {
+		if (rand_file == NULL)
+			RAND_file_name(filename, MAXFILENAME);
+		else if (*rand_file == '/')
+			strcpy(filename, rand_file);
+		else
+			snprintf(filename, MAXFILENAME, "%s/%s",
+			    keysdir, rand_file);
+		if (filename == NULL) {
+			msyslog(LOG_ERR,
+			    "crypto_setup: seed file unknown name");
+			exit (-1);
 		}
-	} else if (*rand_file != '/') {
-		snprintf(filename, MAXFILENAME, "%s/%s", keysdir,
-		    rand_file);
-		free(rand_file);
-		rand_file = emalloc(strlen(filename) + 1);
-		strcpy(rand_file, filename);
-	}
-	if (rand_file == NULL) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: random seed file unknown name");
-		exit (-1);
-	}
-	if ((bytes = RAND_load_file(rand_file, -1)) == 0) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: random seed file %s missing",
-		    rand_file);
-		exit (-1);
-	}
-	get_systime(&seed);
-	RAND_seed(&seed, sizeof(l_fp));
-	RAND_write_file(rand_file);
-	OpenSSL_add_all_algorithms();
+		if ((bytes = RAND_load_file(filename, -1)) == 0) {
+			msyslog(LOG_ERR,
+			    "crypto_setup: random seed file %s missing",
+			    filename);
+			exit (-1);
+		}
+		get_systime(&seed);
+		RAND_seed(&seed, sizeof(l_fp));
+		RAND_write_file(filename);
 #ifdef DEBUG
-	if (debug)
-		printf(
-		    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
-		    SSLeay(), rand_file, bytes);
+		if (debug)
+			printf(
+			    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
+			    SSLeay(), filename, bytes);
+	}
 #endif
 
 	/*
@@ -3865,21 +3901,21 @@ crypto_setup(void)
 	 * sign key. 
 	 */
 	snprintf(filename, MAXFILENAME, "ntpkey_host_%s", sys_hostname);
-	pinfo = crypto_key(filename);
+	pinfo = crypto_key(filename, passwd);
 	if (pinfo == NULL) {
 		msyslog(LOG_ERR,
 		    "crypto_setup: host key file %s not found or corrupt",
 		    filename);
 		exit (-1);
 	}
-	host_pkey = pinfo->pkey;
-	sign_pkey = host_pkey;
-	hostval.fstamp = htonl(pinfo->fstamp);
-	if (host_pkey->type != EVP_PKEY_RSA) {
+	if (pinfo->pkey->type != EVP_PKEY_RSA) {
 		msyslog(LOG_ERR,
 		    "crypto_setup: host key is not RSA key type");
 		exit (-1);
 	}
+	host_pkey = pinfo->pkey;
+	sign_pkey = host_pkey;
+	hostval.fstamp = htonl(pinfo->fstamp);
 	hostval.vallen = htonl(strlen(sys_hostname));
 	hostval.ptr = (u_char *)sys_hostname;
 	
@@ -3890,8 +3926,8 @@ crypto_setup(void)
 	ptr = emalloc(len);
 	pubkey.ptr = ptr;
 	i2d_PublicKey(host_pkey, &ptr);
-	pubkey.vallen = htonl(len);
 	pubkey.fstamp = hostval.fstamp;
+	pubkey.vallen = htonl(len);
 
 	/*
 	 * Load optional sign key from file "ntpkey_sign_<hostname>". If
@@ -3900,7 +3936,7 @@ crypto_setup(void)
 	if (sign_file != NULL) {
 		snprintf(filename, MAXFILENAME, "ntpkey_sign_%s",
 		    sign_file);
-		pinfo = crypto_key(filename);
+		pinfo = crypto_key(filename, passwd);
 		if (pinfo != NULL)
 		 	sign_pkey = pinfo->pkey;
 	}
@@ -3913,7 +3949,7 @@ crypto_setup(void)
 	cinfo = crypto_cert(filename);
 	if (cinfo == NULL) {
 		msyslog(LOG_ERR,
-	    "crypto_setup: certificate file %s not found or corrupt",
+		    "crypto_setup: certificate file %s not found or corrupt",
 		    filename);
 		exit (-1);
 	}
@@ -3929,7 +3965,6 @@ crypto_setup(void)
 		msyslog(LOG_ERR,
 		    "crypto_setup: certificate %s not for this host %s",
 		    filename, sys_hostname);
-		cert_free(cinfo);
 		exit (-1);
 	}
 
@@ -3940,7 +3975,6 @@ crypto_setup(void)
 		msyslog(LOG_ERR,
 		    "crypto_setup: certificate %s is not self-signed",
 		    filename);
-		cert_free(cinfo);
 		exit (-1);
 	}
 
@@ -3952,17 +3986,16 @@ crypto_setup(void)
 			msyslog(LOG_ERR,
 			    "crypto_setup: trusted host %s missing group name",
 			    cinfo->subject);
-			cert_free(cinfo);
 			exit (-1);
 		}
 		if (strcmp(cinfo->subject, sys_groupname) != 0) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: trusted host %s name and group name %s mismatch",
 			    cinfo->subject, sys_groupname);
-			cert_free(cinfo);
 			exit (-1);
 		}
 	}
+	cert_host = cinfo;
 	if (sys_groupname != NULL) {
 
 		/*
@@ -3971,7 +4004,7 @@ crypto_setup(void)
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_iffkey_%s",
 		    sys_groupname);
-		iffkey_info = crypto_key(filename);
+		iffkey_info = crypto_key(filename, passwd);
 		if (iffkey_info != NULL)
 			crypto_flags |= CRYPTO_FLAG_IFF;
 
@@ -3981,7 +4014,7 @@ crypto_setup(void)
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_gqkey_%s",
 		    sys_groupname);
-		gqkey_info = crypto_key(filename);
+		gqkey_info = crypto_key(filename, passwd);
 		if (gqkey_info != NULL)
 			crypto_flags |= CRYPTO_FLAG_GQ;
 
@@ -3991,14 +4024,13 @@ crypto_setup(void)
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
 		    sys_groupname);
-		mvkey_info = crypto_key(filename);
+		mvkey_info = crypto_key(filename, passwd);
 		if (mvkey_info != NULL)
 			crypto_flags |= CRYPTO_FLAG_MV;
 	}
 
 	/*
-	 * We have survived tedious and careful checking; now strike up
-	 * the dance.
+	 * We met the enemy and he is us. Now strike up the dance.
 	 */
 	crypto_flags |= CRYPTO_FLAG_ENAB | (cinfo->nid << 16);
 #ifdef DEBUG

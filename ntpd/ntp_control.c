@@ -217,7 +217,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_OUT,	RO, "out" },		/* 39 */
 #ifdef OPENSSL
 	{ CP_FLAGS,	RO, "flags" },		/* 40 */
-	{ CP_HOST,	RO, "group" },		/* 41 */
+	{ CP_HOST,	RO, "host" },		/* 41 */
 	{ CP_VALID,	RO, "valid" },		/* 42 */
 	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
 	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
@@ -1429,7 +1429,7 @@ ctl_putsys(
 
 	    case CS_GROUP:
 		if (sys_groupname != NULL)
-			ctl_putstr(sys_var[CS_HOST].text, sys_groupname,
+			ctl_putstr(sys_var[CS_GROUP].text, sys_groupname,
 			    strlen(sys_groupname));
 		break;
 

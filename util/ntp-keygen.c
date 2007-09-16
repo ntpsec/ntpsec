@@ -44,20 +44,14 @@
  *
  * ntpkey_IFFkey_<trustname>.<filestamp>
  * ntpkey_iffkey_<trustname>
- * ntpkey_IFFpar_<trustname>.<filestamp>
- * ntpkey_iffpar_<trustname>
  *	Schnorr (IFF) identity parameters and keys
  *
  * ntpkey_GQkey_<trustname>.<filestamp>,
  * ntpkey_gqkey_<trustname>
- * ntpkey_GQpar_<trustname>.<filestamp>,
- * ntpkey_gqpar_<trustname>
  *	Guillou-Quisquater (GQ) identity parameters and keys
  *
  * ntpkey_MVkeyX_<trustname>.<filestamp>,
  * ntpkey_mvkey_<hostname>
- * ntpkey_MVparX_<trustname>.<filestamp>,
- * ntpkey_mvpar_<trustname>
  *	Mu-Varadharajan (MV) identity parameters and keys
  *
  * Note: Once in a while because of some statistical fluke this program
@@ -146,9 +140,8 @@ int	gen_md5		(char *);
 #ifdef OPENSSL
 EVP_PKEY *gen_rsa	(char *);
 EVP_PKEY *gen_dsa	(char *);
-EVP_PKEY *gen_iff	(char *);
-EVP_PKEY *gen_gqpar	(char *);
-EVP_PKEY *gen_gqkey	(char *, EVP_PKEY *);
+EVP_PKEY *gen_iffkey	(char *);
+EVP_PKEY *gen_gqkey	(char *);
 EVP_PKEY *gen_mv	(char *);
 int	x509		(EVP_PKEY *, const EVP_MD *, char *, char *);
 void	cb		(int, int, void *);
@@ -226,14 +219,13 @@ main(
 	X509	*cert = NULL;	/* X509 certificate */
 	EVP_PKEY *pkey_host = NULL; /* host key */
 	EVP_PKEY *pkey_sign = NULL; /* sign key */
-	EVP_PKEY *pkey_iffkey = NULL; /* IFF keys and parameters */
-	EVP_PKEY *pkey_gqpar = NULL; /* GQ parameters */
-	EVP_PKEY *pkey_gqkey = NULL; /* GQ keys */
+	EVP_PKEY *pkey_iffkey = NULL; /* IFF keys */
+	EVP_PKEY *pkey_gqkey = NULL; /* GQ parameters */
 	EVP_PKEY *pkey_mv = NULL; /* MV parameters */
 	int	hostkey = 0;	/* generate RSA keys */
-	int	iffkey = 0;	/* generate IFF keys and parameters */
-	int	gqpar = 0;	/* generate GQ parameters */
-	int	gqkey = 0;	/* update GQ keys */
+	int	iffkey = 0;	/* generate IFF keys */
+	int	gqpar = 0;	/* generate GQ keys */
+	int	gqkey = 0;	/* not used */
 	int	mvpar = 0;	/* generate MV parameters */
 	int	mvkey = 0;	/* update MV keys */
 	char	*sign = NULL;	/* sign key */
@@ -245,7 +237,6 @@ main(
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
-	u_int	temp;
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif /* OPENSSL */
 	char	hostbuf[MAXHOSTNAME + 1];
@@ -309,7 +300,7 @@ main(
 	    gqpar++;
 
 	if (HAVE_OPT( GQ_KEYS ))
-	    gqkey++;
+	    gqkey++;			/* not used */
 
 	if (HAVE_OPT( HOST_KEY ))
 	    hostkey++;
@@ -366,32 +357,38 @@ main(
 	 */
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
-	if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
-		fprintf(stderr, "RAND_file_name %s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
-		exit (-1);
-	}
-	temp = RAND_load_file(pathbuf, -1);
-	if (temp == 0) {
+	if (!RAND_status()) {
+		u_int	temp;
+
+		if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
+			fprintf(stderr, "RAND_file_name %s\n",
+			    ERR_error_string(ERR_get_error(), NULL));
+			exit (-1);
+		}
+		temp = RAND_load_file(pathbuf, -1);
+		if (temp == 0) {
+			fprintf(stderr,
+			    "RAND_load_file %s not found or empty\n",
+			    pathbuf);
+			exit (-1);
+		}
 		fprintf(stderr,
-		    "RAND_load_file %s not found or empty\n", pathbuf);
-		exit (-1);
+		    "Random seed file %s %u bytes\n", pathbuf, temp);
+		RAND_add(&epoch, sizeof(epoch), 4.0);
 	}
-	fprintf(stderr,
-	    "Random seed file %s %u bytes\n", pathbuf, temp);
-	RAND_add(&epoch, sizeof(epoch), 4.0);
 #endif
 
 	/*
-	 * Generate new parameters and keys as requested. These replace
-	 * any values already generated.
+	 * Generate new MD5 keys if requested. These replace any
+	 * keysalready generated.
 	 */
 	if (md5key)
 		gen_md5("MD5");
 #ifdef OPENSSL
 	/*
-	 * Create new host keys if requested; otherwise, look for
-	 * existing host keys. If not found, create a new host RSA
+	 * Create a new encrypted RSA host key file if requested;
+	 * otherwise, look for an existing host key file. If not found,
+	 * create a new encrypted RSA host key file containing a
 	 * public/private key pair.
 	 */
 	if (hostkey)
@@ -414,9 +411,9 @@ main(
 	}
 
 	/*
-	 * Create new sign keys if requested; otherwise, look for
-	 * existing sign keys. If not found, use the host keys instead.
-	 * Either RSA or DSA keys can be selected by option.
+	 * Create new encrypted RSA or DSA sign key file if requested;
+	 * otherwise, look for an existing sign key file. If not found,
+	 * use the host keys instead.
 	 */
 	if (sign != NULL)
 		pkey_sign = genkey(sign, "sign");
@@ -434,64 +431,18 @@ main(
 	}
 
 	/*
-	 * Create new GQ parameters if requested; otherwise, look for
-	 * existing GQ parameters. The parameters are instantiated in
-	 * all group hosts. The keys are generated separately by each
-	 * host.
+	 * Create new encrypted GQ parameter file if requested;
+	 * otherwise, look for an exisiting file. If found, fetch the
+	 * public key for the certificate.
 	 */
-	if (gqpar) {
-		pkey_gqpar = gen_gqpar("gqpar");
-		if (pkey_gqpar != NULL)
-			gqkey++;
-	}
-	if (pkey_gqpar == NULL) {
-		sprintf(filename, "ntpkey_gqpar_%s", trustname);
-		pkey_gqpar = readkey(filename, passwd1, &fstamp);
-		if (pkey_gqpar != NULL) {
-			readlink(filename, filename, sizeof(filename));
-			fprintf(stderr, "Using GQ parameters %s\n",
-			    filename);
-		}
-	}
-
-	/*
-	 * Write the GQ parameters to the stdout stream redirected to a
-	 * file. Ordinarily, the file is copied to another machine and
-	 * installed under the name in the file header.
-	 */
-	if (pkey_gqpar != NULL && strcmp(passwd1, passwd2) != 0) {
-		RSA	*rsa;
-
-		epoch = fstamp - JAN_1970;
-		sprintf(filename, "ntpkey_GQpar_%s.%u", trustname,
-		    fstamp);
-		fprintf(stderr,
-		    "Writing GQ parameters %s to stdout\n", filename);
-		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
-		rsa = pkey_gqpar->pkey.rsa;
-		pkey = EVP_PKEY_new();
-		EVP_PKEY_assign_RSA(pkey, rsa);
-		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
-		    0, NULL, passwd2);
-		fclose(stdout);
-		if (debug)
-			RSA_print_fp(stderr, rsa, 0);
-	}
-
-	/*
-	 * Create new GQ keys if requested. Otherwise, look for
-	 * exisiting GQ keys and fetch the public key for the
-	 * certificate..
-	 */
-	if (pkey_gqpar != NULL && gqkey)
-		pkey_gqkey = gen_gqkey("gqkey", pkey_gqpar);
+	if (gqpar)
+		pkey_gqkey = gen_gqkey("gqkey");
 	if (pkey_gqkey == NULL) {
 		sprintf(filename, "ntpkey_gqkey_%s", trustname);
 		pkey_gqkey = readkey(filename, passwd1, &fstamp);
 		if (pkey_gqkey != NULL) {
 			readlink(filename, filename, sizeof(filename));
-			fprintf(stderr, "Using GQ keys %s\n",
+			fprintf(stderr, "Using GQ parameters %s\n",
 			    filename);
 		}
 	}
@@ -499,13 +450,60 @@ main(
 		grpkey = BN_bn2hex(pkey_gqkey->pkey.rsa->q);
 
 	/*
-	 * Create new IFF keys if requested; otherwise, look for
-	 * existing IFF keys. In the IFF scheme the keys include the
-	 * parameters, which are not generated separately as in the GQ
-	 * scheme.
+	 * Write the nonencrypted GQ parameters to the stdout stream.
+	 * The parameer file is the keys file with the private key
+	 * obscured.
+	 */
+	if (pkey_gqkey != NULL && HAVE_OPT(ID_KEY)) {
+		RSA	*rsa;
+
+		epoch = fstamp - JAN_1970;
+		sprintf(filename, "ntpkey_gqpar_%s.%u", trustname,
+		    fstamp);
+		fprintf(stderr, "Writing GQ parameters %s to stdout\n",
+		    filename);
+		fprintf(stdout, "# %s\n# %s\n", filename,
+		    ctime(&epoch));
+		rsa = pkey_gqkey->pkey.rsa;
+		BN_copy(rsa->p, BN_value_one());
+		BN_copy(rsa->q, BN_value_one());
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_RSA(pkey, rsa);
+		PEM_write_PrivateKey(stdout, pkey, NULL, NULL, 0, NULL,
+		    NULL);
+		fclose(stdout);
+		if (debug)
+			RSA_print_fp(stderr, rsa, 0);
+	}
+
+	/*
+	 * Write the encrypted GQ keys to the stdout stream.
+	 */
+	if (pkey_gqkey != NULL && strcmp(passwd1, passwd2) != 0) {
+		RSA	*rsa;
+
+		sprintf(filename, "ntpkey_GQkey_%s.%u", trustname,
+		    fstamp);
+		fprintf(stderr, "Writing GQ keys %s to stdout\n",
+		    filename);
+		fprintf(stdout, "# %s\n# %s\n", filename,
+		    ctime(&epoch));
+		rsa = pkey_gqkey->pkey.rsa;
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_RSA(pkey, rsa);
+		PEM_write_PrivateKey(stdout, pkey,
+		    EVP_des_cbc(), NULL, 0, NULL, passwd2);
+		fclose(stdout);
+		if (debug)
+			RSA_print_fp(stderr, rsa, 0);
+	}
+
+	/*
+	 * Create new encrypted IFF keys file if requested; otherwise,
+	 * look for existing keys file.
 	 */
 	if (iffkey)
-		pkey_iffkey = gen_iff("iffkey");
+		pkey_iffkey = gen_iffkey("iffkey");
 	if (pkey_iffkey == NULL) {
 		sprintf(filename, "ntpkey_iffkey_%s", trustname);
 		pkey_iffkey = readkey(filename, passwd1, &fstamp);
@@ -517,24 +515,45 @@ main(
 	}
 
 	/*
-	 * Write the IFF parameters to the stdout stream redirected to a
-	 * file. Ordinarily, the file is copied to another machine and
-	 * installed under the name in the file header. Then, a soft
-	 * link is installed to it from "ntpkey_iffkey_<hostname>".
+	 * Write the nonencrypted IFF parameters to the stdout stream.
+	 * The parameer file is the keys file with the private key
+	 * obscured.
+	 */
+	if (pkey_iffkey != NULL && HAVE_OPT(ID_KEY)) {
+		DSA	*dsa;
+
+		epoch = fstamp - JAN_1970;
+		sprintf(filename, "ntpkey_iffpar_%s.%u", trustname,
+		    fstamp);
+		fprintf(stderr, "Writing IFF parameters %s to stdout\n",
+		    filename);
+		fprintf(stdout, "# %s\n# %s\n", filename,
+		    ctime(&epoch));
+		dsa = pkey_iffkey->pkey.dsa;
+		BN_copy(dsa->priv_key, BN_value_one());
+		pkey = EVP_PKEY_new();
+		EVP_PKEY_assign_DSA(pkey, dsa);
+		PEM_write_PrivateKey(stdout, pkey, NULL, NULL, 0, NULL,
+		    NULL);
+		fclose(stdout);
+		if (debug)
+			DSA_print_fp(stderr, dsa, 0);
+	}
+
+	/*
+	 * Write the encrypted IFF keys to the stdout stream.
 	 */
 	if (pkey_iffkey != NULL && strcmp(passwd1, passwd2) != 0) {
 		DSA	*dsa;
 
 		epoch = fstamp - JAN_1970;
-		sprintf(filename, "ntpkey_IFFpar_%s.%u", trustname,
+		sprintf(filename, "ntpkey_IFFkey_%s.%u", trustname,
 		    fstamp);
-		fprintf(stderr,
-		    "Writing IFF client key %s to stdout\n", filename);
+		fprintf(stderr, "Writing IFF keys %s to stdout\n",
+		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
 		    ctime(&epoch));
 		dsa = pkey_iffkey->pkey.dsa;
-		if (HAVE_OPT(ID_KEY))
-			BN_copy(dsa->priv_key, BN_value_one());
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(pkey, dsa);
 		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
@@ -550,7 +569,7 @@ main(
 	 */
 	if (mvpar)
 		pkey_mv = gen_mv("mv");
-	if (strcmp(passwd1, passwd2) != 0)
+	if (strcmp(passwd1, passwd2) != 0 || HAVE_OPT(ID_KEY))
 		exit (0);
 
 	/*
@@ -609,8 +628,6 @@ gen_md5(
 	fprintf(stderr, "Generating MD5 keys...\n");
 	str = fheader("MD5key", trustname);
 	keyid = BN_new(); key = BN_new();
-	NTP_INSIST(keyid != NULL);
-	NTP_INSIST(key != NULL);
 	BN_rand(keyid, 16, -1, 0);
 	BN_rand(key, 128, -1, 0);
 	BN_bn2bin(key, bin);
@@ -767,9 +784,8 @@ gen_rsa(
 	 * Write the RSA parameters and keys as a RSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("RSAkey", hostname);
+	str = fheader("RSApar", hostname);
 	pkey = EVP_PKEY_new();
-	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
 	    passwd2);
@@ -826,7 +842,6 @@ gen_dsa(
 	 */
 	str = fheader("DSAkey", hostname);
 	pkey = EVP_PKEY_new();
-	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
 	    passwd2);
@@ -862,8 +877,11 @@ gen_dsa(
  * group clients. Alice challenges Bob to confirm identity using the
  * protocol described below.
  */
+/*
+ * Generate Schnorr (IFF) keys.
+ */
 EVP_PKEY *			/* DSA cuckoo nest */
-gen_iff(
+gen_iffkey(
 	char	*id		/* file name id */
 	)
 {
@@ -895,21 +913,13 @@ gen_iff(
 	 * these keys are distributed to all members of the group.
 	 */
 	b = BN_new(); r = BN_new(); k = BN_new();
-	NTP_INSIST(b != NULL);
-	NTP_INSIST(r != NULL);
-	NTP_INSIST(k != NULL);
 	u = BN_new(); v = BN_new(); w = BN_new(); ctx = BN_CTX_new();
-	NTP_INSIST(u != NULL);
-	NTP_INSIST(v != NULL);
-	NTP_INSIST(w != NULL);
-	NTP_INSIST(ctx != NULL);
 	BN_rand(b, BN_num_bits(dsa->q), -1, 0);	/* a */
 	BN_mod(b, b, dsa->q, ctx);
 	BN_sub(v, dsa->q, b);
 	BN_mod_exp(v, dsa->g, v, dsa->p, ctx); /* g^(q - b) mod p */
 	BN_mod_exp(u, dsa->g, b, dsa->p, ctx);	/* g^b mod p */
 	BN_mod_mul(u, u, v, dsa->p, ctx);
-	NTP_INSIST(u->d != NULL);
 	temp = BN_is_one(u);
 	fprintf(stderr,
 	    "Confirm g^(q - b) g^b = 1 mod p: %s\n", temp == 1 ?
@@ -962,14 +972,16 @@ gen_iff(
 	}
 
 	/*
-	 * Write the IFF server parameters and keys as a DSA private key
-	 * encoded in PEM.
+	 * Write the IFF keys as an encrypted DSA private key encoded in
+	 * PEM.
 	 *
 	 * p	modulus p
 	 * q	modulus q
 	 * g	generator g
 	 * priv_key b
 	 * public_key v
+	 * kinv	not used
+	 * r	not used
 	 */
 	str = fheader("IFFkey", trustname);
 	pkey = EVP_PKEY_new();
@@ -982,7 +994,6 @@ gen_iff(
 	fslink(id, trustname);
 	return (pkey);
 }
-
 
 /*
  * Generate Guillou-Quisquater (GQ) parameters and keys
@@ -1008,74 +1019,12 @@ gen_iff(
  * scheme. Alice challenges Bob to confirm identity using the protocol
  * described below.
  */
-EVP_PKEY *			/* RSA cuckoo nest */
-gen_gqpar(
-	char	*id		/* file name id */
-	)
-{
-	EVP_PKEY *pkey;		/* private key */
-	RSA	*rsa;		/* GQ parameters */
-	BN_CTX	*ctx;		/* BN working space */
-	FILE	*str;
-
-	/*
-	 * Generate RSA parameters for use as GQ parameters.
-	 */
-	fprintf(stderr,
-	    "Generating GQ parameters (%d bits)...\n", modulus);
-	rsa = RSA_generate_key(modulus, 3, cb, "GQ");
-	fprintf(stderr, "\n");
-	if (rsa == NULL) {
-		fprintf(stderr, "RSA generate keys fails\n%s\n",
-		    ERR_error_string(ERR_get_error(), NULL));
-		return (NULL);
-	}
-
-	/*
-	 * Generate the group key b, which is saved in the e member of
-	 * the RSA structure. These values are distributed to all
-	 * members of the group, but shielded from all other groups. We
-	 * don't use all the parameters, but set the unused ones to a
-	 * small number to minimize the file size.
-	 */
-	ctx = BN_CTX_new();
-	BN_rand(rsa->e, BN_num_bits(rsa->n), -1, 0); /* b */
-	BN_mod(rsa->e, rsa->e, rsa->n, ctx);
-	BN_copy(rsa->d, BN_value_one());
-	BN_copy(rsa->p, BN_value_one());
-	BN_copy(rsa->q, BN_value_one());
-	BN_copy(rsa->dmp1, BN_value_one());
-	BN_copy(rsa->dmq1, BN_value_one());
-	BN_copy(rsa->iqmp, BN_value_one());
-
-	/*
-	 * Write the GQ parameters as a RSA private key encoded in PEM.
-	 * The public and private keys are filled in later.
-	 *
-	 * n	modulus n
-	 * e	group key b
-	 * (remaining values are not used)
-	 */
-	str = fheader("GQpar", trustname);
-	pkey = EVP_PKEY_new();
-	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
-	     passwd2);
-	fclose(str);
-	if (debug)
-		RSA_print_fp(stderr, rsa, 0);
-	fslink(id, trustname);
-	return (pkey);
-}
-
-
 /*
- * Update Guillou-Quisquater (GQ) parameters
+ * Generate Guillou-Quisquater (GQ) parameters file.
  */
 EVP_PKEY *			/* RSA cuckoo nest */
 gen_gqkey(
-	char	*id,		/* file name id */
-	EVP_PKEY *gqpar		/* GQ parameters */
+	char	*id		/* file name id */
 	)
 {
 	EVP_PKEY *pkey;		/* private key */
@@ -1086,18 +1035,34 @@ gen_gqkey(
 	u_int	temp;
 
 	/*
-	 * Generate GQ keys. Note that the group key b is the e member
-	 * of the GQ parameters.
+	 * Generate RSA parameters for use as GQ parameters.
 	 */
-	fprintf(stderr, "Updating GQ keys (%d bits)...\n", modulus);
+	fprintf(stderr,
+	    "Generating GQ parameters (%d bits)...\n",
+	     modulus);
+	rsa = RSA_generate_key(modulus, 3, cb, "GQ");
+	fprintf(stderr, "\n");
+	if (rsa == NULL) {
+		fprintf(stderr, "RSA generate keys fails\n%s\n",
+		    ERR_error_string(ERR_get_error(), NULL));
+		return (NULL);
+	}
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
 	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
+
+	/*
+	 * Generate the group key b, which is saved in the e member of
+	 * the RSA structure. The group key is transmitted to each group
+	 * member encrypted by the member private key.
+	 */
+	ctx = BN_CTX_new();
+	BN_rand(rsa->e, BN_num_bits(rsa->n), -1, 0); /* b */
+	BN_mod(rsa->e, rsa->e, rsa->n, ctx);
 
 	/*
 	 * When generating his certificate, Bob rolls random private key
 	 * u. 
 	 */
-	rsa = gqpar->pkey.rsa;
 	BN_rand(u, BN_num_bits(rsa->n), -1, 0); /* u */
 	BN_mod(u, u, rsa->n, ctx);
 	BN_mod_inverse(v, u, rsa->n, ctx);	/* u^-1 mod n */
@@ -1164,15 +1129,22 @@ gen_gqkey(
 	}
 
 	/*
-	 * Write the GQ parameters and keys as a RSA private key encoded
-	 * in PEM.
+	 * Write the GQ parameter file as an encrypted RSA private key
+	 * encoded in PEM.
 	 *
 	 * n	modulus n
 	 * e	group key b
+	 * d	not used
 	 * p	private key u
 	 * q	public key (u^-1)^b
-	 * (remaining values are not used)
+	 * dmp1	not used
+	 * dmq1	not used
+	 * iqmp	not used
 	 */
+	BN_copy(rsa->d, BN_value_one());
+	BN_copy(rsa->dmp1, BN_value_one());
+	BN_copy(rsa->dmq1, BN_value_one());
+	BN_copy(rsa->iqmp, BN_value_one());
 	str = fheader("GQkey", trustname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
@@ -1284,27 +1256,15 @@ gen_mv(
 	    "Generating MV parameters for %d keys (%d bits)...\n", n,
 	    modulus / n);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
-	NTP_INSIST(ctx != NULL);
-	NTP_INSIST(u != NULL);
-	NTP_INSIST(v != NULL);
-	NTP_INSIST(w != NULL);
 	b = BN_new(); b1 = BN_new();
-	NTP_INSIST(b != NULL);
-	NTP_INSIST(b1 != NULL);
 	dsa = DSA_new();
-	NTP_INSIST(dsa != NULL);
 	dsa->p = BN_new();
-	NTP_INSIST(dsa->p != NULL);
 	dsa->q = BN_new();
-	NTP_INSIST(dsa->q != NULL);
 	dsa->g = BN_new();
-	NTP_INSIST(dsa->g != NULL);
 	s = malloc((n + 1) * sizeof(BIGNUM));
 	s1 = malloc((n + 1) * sizeof(BIGNUM));
-	for (j = 1; j <= n; j++) {
+	for (j = 1; j <= n; j++)
 		s1[j] = BN_new();
-		NTP_INSIST(s1[j] != NULL);
-		}
 	temp = 0;
 	for (j = 1; j <= n; j++) {
 		while (1) {
@@ -1373,7 +1333,6 @@ gen_mv(
 		BN_rand(dsa->g, BN_num_bits(dsa->p) - 1, 0, 0);
 		BN_mod(dsa->g, dsa->g, dsa->p, ctx);
 		BN_gcd(u, dsa->g, v, ctx);
-		NTP_INSIST(u->d != NULL);
 		if (!BN_is_one(u))
 			continue;
 
@@ -1390,7 +1349,6 @@ gen_mv(
 	 */
 	for (j = 1; j <= n; j++) {
 		s[j] = BN_new();
-		NTP_INSIST(s[j] != NULL);
 		BN_add(s[j], dsa->q, s1[j]);
 		BN_div(s[j], u, s[j], s1[j], ctx);
 	}
@@ -1407,7 +1365,6 @@ gen_mv(
 	x = malloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		x[j] = BN_new();
-		NTP_INSIST(x[j] != NULL);
 		while (1) {
 			BN_rand(x[j], BN_num_bits(dsa->q), 0, 0);
 			BN_mod(x[j], x[j], dsa->q, ctx);
@@ -1425,7 +1382,6 @@ gen_mv(
 	a = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
-		NTP_INSIST(a[i] != NULL);
 		BN_one(a[i]);
 	}
 	for (j = 1; j <= n; j++) {
@@ -1447,7 +1403,6 @@ gen_mv(
 	g = malloc((n + 1) * sizeof(BIGNUM));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
-		NTP_INSIST(g[i] != NULL);
 		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
 	}
 
@@ -1482,7 +1437,6 @@ gen_mv(
 	 * since it is expensive to compute.
 	 */
 	biga = BN_new();
-	NTP_INSIST(biga != NULL);
 	BN_one(biga);
 	for (j = 1; j <= n; j++) {
 		for (i = 0; i < n; i++) {
@@ -1517,8 +1471,6 @@ gen_mv(
 	xhat = malloc((n + 1) * sizeof(BIGNUM));
 	for (j = 1; j <= n; j++) {
 		xbar[j] = BN_new(); xhat[j] = BN_new();
-		NTP_INSIST(xbar[j] != NULL);
-		NTP_INSIST(xhat[j] != NULL);
 		BN_zero(xbar[j]);
 		BN_set_word(v, n);
 		for (i = 1; i <= n; i++) {
@@ -1539,7 +1491,6 @@ gen_mv(
 	 * otherwise, the plaintext and cryptotext would be identical.
 	 */
 	ss = BN_new();
-	NTP_INSIST(ss != NULL);
 	BN_copy(ss, dsa->q);
 	BN_div(ss, u, dsa->q, s1[n], ctx);
 
@@ -1552,9 +1503,6 @@ gen_mv(
 	 * enabling key is changed.
 	 */
 	bige = BN_new(); gbar = BN_new(); ghat = BN_new();
-	NTP_INSIST(bige != NULL);
-	NTP_INSIST(gbar != NULL);
-	NTP_INSIST(ghat != NULL);
 	BN_mod_exp(bige, biga, ss, dsa->p, ctx);
 	BN_mod_exp(gbar, dsa->g, ss, dsa->p, ctx);
 	BN_mod_mul(v, ss, b, dsa->q, ctx);
@@ -1599,7 +1547,6 @@ gen_mv(
 	 */
 	str = fheader("MVpar", trustname);
 	pkey = EVP_PKEY_new();
-	NTP_INSIST(pkey != NULL);
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
 	    passwd2);
@@ -1615,14 +1562,11 @@ gen_mv(
 	 * for its use.
 	 */
 	sdsa = DSA_new();
-	NTP_INSIST(sdsa != NULL);
 	sdsa->p = BN_dup(dsa->p);
 	sdsa->q = BN_dup(BN_value_one());
 	sdsa->g = BN_dup(BN_value_one());
 	sdsa->priv_key = BN_new();
-	NTP_INSIST(sdsa->priv_key != NULL);
 	sdsa->pub_key = BN_new();
-	NTP_INSIST(sdsa->pub_key != NULL);
 	for (j = 1; j <= n; j++) {
 		BN_copy(sdsa->priv_key, xbar[j]);
 		BN_copy(sdsa->pub_key, xhat[j]);
@@ -1651,7 +1595,6 @@ gen_mv(
 		sprintf(ident, "MVkey%d", j);
 		str = fheader(ident, trustname);
 		pkey1 = EVP_PKEY_new();
-		NTP_INSIST(pkey1 != NULL);
 		EVP_PKEY_set1_DSA(pkey1, sdsa);
 		PEM_write_PrivateKey(str, pkey1, EVP_des_cbc(), NULL, 0,
 		    NULL, passwd2);
@@ -1685,7 +1628,7 @@ gen_mv(
 
 
 /*
- * Generate X509v3 scertificate.
+ * Generate X509v3 certificate.
  *
  * The certificate consists of the version number, serial number,
  * validity interval, issuer name, subject name and public key. For a
@@ -1722,10 +1665,8 @@ x509	(
 	id = OBJ_nid2sn(md->pkey_type);
 	fprintf(stderr, "Generating certificate %s\n", id);
 	cert = X509_new();
-	NTP_INSIST(cert != NULL);
 	X509_set_version(cert, 2L);
 	serial = ASN1_INTEGER_new();
-	NTP_INSIST(serial != NULL);
 	ASN1_INTEGER_set(serial, epoch + JAN_1970);
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);
