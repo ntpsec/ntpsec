@@ -184,9 +184,7 @@ int old_config_style = 1;    /* A boolean flag, which when set,
                               * format with a newline at the end of
                               * every command is being used
                               */
-#ifdef OPENSSL
 int	cryptosw;		/* crypto command called */
-#endif
 
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
