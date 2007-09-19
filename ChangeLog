@@ -1,3 +1,7 @@
+* [Bug 891] 'restrict' config file keyword does not work (partial fix).
+* [Bug 890] the crypto command seems to be required now.
+* [Bug 915] ntpd cores during processing of x509 certificates.
+* Crypto lint cleanup from Dave Mills.
 * [Bug 897] Check RAND_status() - we may not need a .rnd file.
 * Crypto cleanup from Dave Mills.
 * [Bug 911] Fix error message in cmd_args.c.

@@ -132,7 +132,11 @@ int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree my_config;		/* Root of the configuration tree */
+#if 0
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
+#else
+short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
+#endif
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
 #if defined(HAVE_SCHED_SETSCHEDULER)
@@ -180,6 +184,9 @@ int old_config_style = 1;    /* A boolean flag, which when set,
                               * format with a newline at the end of
                               * every command is being used
                               */
+#ifdef OPENSSL
+int	cryptosw;		/* crypto command called */
+#endif
 
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
@@ -983,7 +990,8 @@ config_auth(void)
 		keysdir = my_config.auth.keysdir;
 
 #ifdef OPENSSL
-	crypto_setup();
+	if (cryptosw)
+		crypto_setup();
 #endif /* OPENSSL */
  
 	/* Keys Command */

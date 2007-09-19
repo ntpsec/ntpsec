@@ -43,6 +43,7 @@
   #define YYERROR_VERBOSE
   void yyerror (char *msg);
   extern int input_from_file;  /* 0=input from ntpq>config command buffer */
+  extern int cryptosw;
 %}
 
 %union {
@@ -417,6 +418,7 @@ authentication_command
 					append_queue(my_config.auth.crypto_cmd_list, $2);
 				else
 					my_config.auth.crypto_cmd_list = $2;
+			cryptosw++;
 			}
 	|	T_Keys T_String
                     { my_config.auth.keys = $2;  }

@@ -312,6 +312,12 @@ hack_restrict(
 	memset(&mask6, 0, sizeof(struct in6_addr)); 
 
 	if (resaddr->ss_family == AF_INET) {
+#ifdef DEBUG
+        if (debug)
+		printf("restrict: addr %08x mask %08x mflags %08x flags %08x\n",
+		    SRCADR(resaddr), SRCADR(resmask), mflags, flags);
+#endif
+
 		/*
 		 * Get address and mask in host byte order
 		 */
@@ -405,7 +411,6 @@ hack_restrict(
 	 * points to the entry prior to where this one should go in
 	 * the sort.
 	 */
-
 	/*
 	 * Switch based on operation
 	 */

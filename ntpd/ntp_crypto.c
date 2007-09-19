@@ -645,7 +645,8 @@ crypto_recv(
 			 */
 			if (peer->pkey == NULL) {
 				ptr = (u_char *)xinfo->cert.ptr;
-				cert = d2i_X509(NULL, &ptr,
+				cert = d2i_X509(NULL,
+				    (const u_char **)&ptr,
 				    ntohl(xinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
@@ -1686,7 +1687,8 @@ crypto_encrypt(
 	 */
 	len = ntohl(ep->vallen);
 	ptr = (u_char *)ep->pkt;
-	pkey = d2i_PublicKey(EVP_PKEY_RSA, NULL, &ptr, len);
+	pkey = d2i_PublicKey(EVP_PKEY_RSA, NULL, (const u_char **)&ptr,
+	    len);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1703,8 +1705,9 @@ crypto_encrypt(
 	len = EVP_PKEY_size(pkey);
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
+	ptr = vp->ptr;
 	temp32 = htonl(*cookie);
-	if (!RSA_public_encrypt(4, (u_char *)&temp32, vp->ptr,
+	if (!RSA_public_encrypt(4, (u_char *)&temp32, ptr,
 	    pkey->pkey.rsa, RSA_PKCS1_OAEP_PADDING)) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -3089,7 +3092,7 @@ cert_sign(
 		return (XEVNT_TSP);
 
 	ptr = (u_char *)ep->pkt;
-	if ((req = d2i_X509(NULL, (u_char **)&ptr,
+	if ((req = d2i_X509(NULL, (const u_char **)&ptr,
 		    ntohl(ep->vallen))) == NULL) {
 		msyslog(LOG_ERR, "cert_sign: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -3195,7 +3198,8 @@ cert_valid(
 		return (XEVNT_OK);
 
 	ptr = (u_char *)cinf->cert.ptr;
-	cert = d2i_X509(NULL, &ptr, ntohl(cinf->cert.vallen));
+	cert = d2i_X509(NULL, (const u_char **)&ptr,
+	    ntohl(cinf->cert.vallen));
 	if (cert == NULL || !X509_verify(cert, pkey))
 		return (XEVNT_VFY);
 
@@ -3379,20 +3383,12 @@ cert_parse(
 	const char *ptr;
 	int	temp, cnt, i;
 
-#if 0
-u_char *pta;
-
-pta = asn1cert;
-for (i = 0; i < len; i++)
-printf("%02x:", 0xff & *pta++);
-printf("\n%x %ld\n", asn1cert, len);
-#endif
-
 	/*
 	 * Decode ASN.1 objects and construct certificate structure.
 	 */
 	uptr = asn1cert;
-	if ((cert = d2i_X509(NULL, (u_char **)&uptr, len)) == NULL) {
+	if ((cert = d2i_X509(NULL, (const u_char **)&uptr, len)) ==
+	    NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
@@ -3664,7 +3660,7 @@ crypto_key(
 	pkp->link = pkinfo;
 	pkinfo = pkp;
 	pkp->pkey = pkey;
-	pkp->name = emalloc(sizeof(cp) + 1);
+	pkp->name = emalloc(strlen(cp) + 1);
 	pkp->fstamp = fstamp;
 	strcpy(pkp->name, cp);
 
@@ -3875,8 +3871,8 @@ crypto_setup(void)
 			printf(
 			    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
 			    SSLeay(), filename, bytes);
-	}
 #endif
+	}
 
 	/*
 	 * Initialize structures.
