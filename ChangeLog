@@ -1,3 +1,4 @@
+* [Bug 916] 'cryptosw' is undefined if built without OpenSSL.
 * [Bug 891] 'restrict' config file keyword does not work (partial fix).
 * [Bug 890] the crypto command seems to be required now.
 * [Bug 915] ntpd cores during processing of x509 certificates.
