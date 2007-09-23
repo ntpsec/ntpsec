@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  Sunday September 23, 2007 at 01:59:28 AM EDT
+# It has been AutoGen-ed  Sunday September 23, 2007 at 03:12:17 AM EDT
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -272,7 +272,7 @@ This is the ``jail directory'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{DROPROOT} during the compilation.
+must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
 @end itemize
 
 Chroot the server to the directory
@@ -403,16 +403,6 @@ Note: The kernel time discipline is disabled with this option.
 This is the ``broadcast/propagation delay'' option.
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
 
-@node ntpd updateinterval
-@subsection updateinterval option (-U)
-@cindex ntpd-updateinterval
-
-This is the ``interval in seconds between scans for new or dropped interfaces'' option.
-Give the time in seconds between two scans for new or dropped interfaces.
-For systems with routing socket support the scans will be performed shortly after the interface change
-has been detected by the system.
-Use 0 to disable scanning. 60 seconds is the minimum time between scans.
-
 @node ntpd statsdir
 @subsection statsdir option (-s)
 @cindex ntpd-statsdir
@@ -442,6 +432,13 @@ Add a key number to the trusted key list.
 @cindex ntpd-user
 
 This is the ``run as userid (or userid:groupid)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
+@end itemize
+
 Specify a user, and optionally a group, to switch to.
 This option is only available if the OS supports to run the server without full root privileges.
 Currently, this option is supported under NetBSD (configure with
@@ -449,6 +446,16 @@ Currently, this option is supported under NetBSD (configure with
 ) and Linux (configure with
 --enable-linuxcaps
 ).
+
+@node ntpd updateinterval
+@subsection updateinterval option (-U)
+@cindex ntpd-updateinterval
+
+This is the ``interval in seconds between scans for new or dropped interfaces'' option.
+Give the time in seconds between two scans for new or dropped interfaces.
+For systems with routing socket support the scans will be performed shortly after the interface change
+has been detected by the system.
+Use 0 to disable scanning. 60 seconds is the minimum time between scans.
 
 @node ntpd var
 @subsection var option

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  Sunday September 23, 2007 at 01:59:25 AM EDT
+ *  It has been AutoGen-ed  Sunday September 23, 2007 at 03:12:14 AM EDT
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -74,10 +74,10 @@ typedef enum {
         INDEX_OPT_PRIORITY         = 19,
         INDEX_OPT_QUIT             = 20,
         INDEX_OPT_PROPAGATIONDELAY = 21,
-        INDEX_OPT_UPDATEINTERVAL   = 22,
-        INDEX_OPT_STATSDIR         = 23,
-        INDEX_OPT_TRUSTEDKEY       = 24,
-        INDEX_OPT_USER             = 25,
+        INDEX_OPT_STATSDIR         = 22,
+        INDEX_OPT_TRUSTEDKEY       = 23,
+        INDEX_OPT_USER             = 24,
+        INDEX_OPT_UPDATEINTERVAL   = 25,
         INDEX_OPT_VAR              = 26,
         INDEX_OPT_DVAR             = 27,
         INDEX_OPT_SLEW             = 28,
@@ -203,10 +203,6 @@ typedef enum {
 #  warning undefining PROPAGATIONDELAY due to option name conflict
 #  undef   PROPAGATIONDELAY
 # endif
-# ifdef    UPDATEINTERVAL
-#  warning undefining UPDATEINTERVAL due to option name conflict
-#  undef   UPDATEINTERVAL
-# endif
 # ifdef    STATSDIR
 #  warning undefining STATSDIR due to option name conflict
 #  undef   STATSDIR
@@ -218,6 +214,10 @@ typedef enum {
 # ifdef    USER
 #  warning undefining USER due to option name conflict
 #  undef   USER
+# endif
+# ifdef    UPDATEINTERVAL
+#  warning undefining UPDATEINTERVAL due to option name conflict
+#  undef   UPDATEINTERVAL
 # endif
 # ifdef    VAR
 #  warning undefining VAR due to option name conflict
@@ -254,10 +254,10 @@ typedef enum {
 # undef PRIORITY
 # undef QUIT
 # undef PROPAGATIONDELAY
-# undef UPDATEINTERVAL
 # undef STATSDIR
 # undef TRUSTEDKEY
 # undef USER
+# undef UPDATEINTERVAL
 # undef VAR
 # undef DVAR
 # undef SLEW
@@ -282,9 +282,9 @@ typedef enum {
 #endif /* DEBUG */
 #define VALUE_OPT_DRIFTFILE      'f'
 #define VALUE_OPT_PANICGATE      'g'
-#ifdef DROPROOT
+#ifdef HAVE_DROPROOT
 #define VALUE_OPT_JAILDIR        'i'
-#endif /* DROPROOT */
+#endif /* HAVE_DROPROOT */
 #define VALUE_OPT_INTERFACE      'I'
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_LOGFILE        'l'
@@ -299,11 +299,13 @@ typedef enum {
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
-#define VALUE_OPT_UPDATEINTERVAL 'U'
-#define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
 #define VALUE_OPT_STATSDIR       's'
 #define VALUE_OPT_TRUSTEDKEY     't'
+#ifdef HAVE_DROPROOT
 #define VALUE_OPT_USER           'u'
+#endif /* HAVE_DROPROOT */
+#define VALUE_OPT_UPDATEINTERVAL 'U'
+#define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
 #define VALUE_OPT_VAR            26
 #define VALUE_OPT_DVAR           27
 #define VALUE_OPT_SLEW           'x'

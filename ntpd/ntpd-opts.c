@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  Sunday September 23, 2007 at 01:59:26 AM EDT
+ *  It has been AutoGen-ed  Sunday September 23, 2007 at 03:12:15 AM EDT
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -181,7 +181,7 @@ tSCC    zPanicgate_Name[]          = "panicgate";
 /*
  *  Jaildir option description:
  */
-#ifdef DROPROOT
+#ifdef HAVE_DROPROOT
 tSCC    zJaildirText[] =
         "Jail directory";
 tSCC    zJaildir_NAME[]            = "JAILDIR";
@@ -195,7 +195,7 @@ tSCC    zJaildir_Name[]            = "jaildir";
 #define zJaildirText       NULL
 #define zJaildir_NAME      NULL
 #define zJaildir_Name      NULL
-#endif  /* DROPROOT */
+#endif  /* HAVE_DROPROOT */
 
 /*
  *  Interface option description:
@@ -312,16 +312,6 @@ tSCC    zPropagationdelay_Name[]   = "propagationdelay";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Updateinterval option description:
- */
-tSCC    zUpdateintervalText[] =
-        "interval in seconds between scans for new or dropped interfaces";
-tSCC    zUpdateinterval_NAME[]     = "UPDATEINTERVAL";
-tSCC    zUpdateinterval_Name[]     = "updateinterval";
-#define UPDATEINTERVAL_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
-
-/*
  *  Statsdir option description:
  */
 tSCC    zStatsdirText[] =
@@ -344,12 +334,31 @@ tSCC    zTrustedkey_Name[]         = "trustedkey";
 /*
  *  User option description:
  */
+#ifdef HAVE_DROPROOT
 tSCC    zUserText[] =
         "Run as userid (or userid:groupid)";
 tSCC    zUser_NAME[]               = "USER";
 tSCC    zUser_Name[]               = "user";
 #define USER_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+#else   /* disable User */
+#define VALUE_OPT_USER NO_EQUIVALENT
+#define USER_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zUserText       NULL
+#define zUser_NAME      NULL
+#define zUser_Name      NULL
+#endif  /* HAVE_DROPROOT */
+
+/*
+ *  Updateinterval option description:
+ */
+tSCC    zUpdateintervalText[] =
+        "interval in seconds between scans for new or dropped interfaces";
+tSCC    zUpdateinterval_NAME[]     = "UPDATEINTERVAL";
+tSCC    zUpdateinterval_Name[]     = "updateinterval";
+#define UPDATEINTERVAL_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  Var option description:
@@ -707,20 +716,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPropagationdelayText, zPropagationdelay_NAME, zPropagationdelay_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 22, VALUE_OPT_UPDATEINTERVAL,
-     /* equiv idx, value */ 22, VALUE_OPT_UPDATEINTERVAL,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ UPDATEINTERVAL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zUpdateintervalText, zUpdateinterval_NAME, zUpdateinterval_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 23, VALUE_OPT_STATSDIR,
-     /* equiv idx, value */ 23, VALUE_OPT_STATSDIR,
+  {  /* entry idx, value */ 22, VALUE_OPT_STATSDIR,
+     /* equiv idx, value */ 22, VALUE_OPT_STATSDIR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ STATSDIR_FLAGS, 0,
@@ -731,8 +728,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zStatsdirText, zStatsdir_NAME, zStatsdir_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 24, VALUE_OPT_TRUSTEDKEY,
-     /* equiv idx, value */ 24, VALUE_OPT_TRUSTEDKEY,
+  {  /* entry idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
+     /* equiv idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ TRUSTEDKEY_FLAGS, 0,
@@ -743,8 +740,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zTrustedkeyText, zTrustedkey_NAME, zTrustedkey_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 25, VALUE_OPT_USER,
-     /* equiv idx, value */ 25, VALUE_OPT_USER,
+  {  /* entry idx, value */ 24, VALUE_OPT_USER,
+     /* equiv idx, value */ 24, VALUE_OPT_USER,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USER_FLAGS, 0,
@@ -753,6 +750,18 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zUserText, zUser_NAME, zUser_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
+     /* equiv idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ UPDATEINTERVAL_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ optionNumericVal,
+     /* desc, NAME, name */ zUpdateintervalText, zUpdateinterval_NAME, zUpdateinterval_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 26, VALUE_OPT_VAR,
