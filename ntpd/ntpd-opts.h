@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  Thursday September 20, 2007 at 07:35:21 AM EDT
+ *  It has been AutoGen-ed  Sunday September 23, 2007 at 01:59:25 AM EDT
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -282,7 +282,9 @@ typedef enum {
 #endif /* DEBUG */
 #define VALUE_OPT_DRIFTFILE      'f'
 #define VALUE_OPT_PANICGATE      'g'
+#ifdef DROPROOT
 #define VALUE_OPT_JAILDIR        'i'
+#endif /* DROPROOT */
 #define VALUE_OPT_INTERFACE      'I'
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_LOGFILE        'l'

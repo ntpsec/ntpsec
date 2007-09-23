@@ -141,6 +141,7 @@ flag = {
 #endif
 
 flag = {
+    ifdef     = DROPROOT;
     name      = jaildir;
     value     = i;
     arg-type  = string;

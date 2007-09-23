@@ -1,3 +1,4 @@
+* [Bug 899] Only show -i/--jaildir option if we HAVE_DROPROOT.
 * [Bug 916] 'cryptosw' is undefined if built without OpenSSL.
 * [Bug 891] 'restrict' config file keyword does not work (partial fix).
 * [Bug 890] the crypto command seems to be required now.

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  Thursday September 20, 2007 at 07:35:22 AM EDT
+ *  It has been AutoGen-ed  Sunday September 23, 2007 at 01:59:26 AM EDT
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -181,12 +181,21 @@ tSCC    zPanicgate_Name[]          = "panicgate";
 /*
  *  Jaildir option description:
  */
+#ifdef DROPROOT
 tSCC    zJaildirText[] =
         "Jail directory";
 tSCC    zJaildir_NAME[]            = "JAILDIR";
 tSCC    zJaildir_Name[]            = "jaildir";
 #define JAILDIR_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+#else   /* disable Jaildir */
+#define VALUE_OPT_JAILDIR NO_EQUIVALENT
+#define JAILDIR_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zJaildirText       NULL
+#define zJaildir_NAME      NULL
+#define zJaildir_Name      NULL
+#endif  /* DROPROOT */
 
 /*
  *  Interface option description:
