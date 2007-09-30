@@ -333,7 +333,7 @@ timer(void)
 			get_systime(&now);
 			msyslog(LOG_NOTICE,
 			    "timer: leap second at %u TAI %d s",
-			    now.l_ui);
+				now.l_ui, sys_tai);
 		}
 	}
 
