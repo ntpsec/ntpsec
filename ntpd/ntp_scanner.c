@@ -525,8 +525,9 @@ int yylex()
             if (!(curr_include_level > 0)) 
             	return 0;
 			else { 
-                ip_file = fp[--curr_include_level]; 
-                return T_EOC;
+				FCLOSE(fp[curr_include_level]);
+				ip_file = fp[--curr_include_level]; 
+				return T_EOC;
 			}
 		} else if (is_EOC(ch)) {
             expect_string = NO_ARG;   /* Reset expect_string */
