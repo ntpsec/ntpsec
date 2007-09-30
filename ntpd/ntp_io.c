@@ -603,7 +603,7 @@ print_interface(struct interface *iface, char *pfx, char *sfx)
 	       iface->flags,
 	       iface->scopeid,
 	       iface->ifindex);
-	/* Leave these as three printf calls. */
+	/* Leave these as three printf calls (stoa() static buffer). */
 	printf(", sin=%s",
 	       stoa((&iface->sin)));
 	if (iface->flags & INT_BROADCAST)
@@ -1275,9 +1275,46 @@ update_interfaces(
 			/*
 			 * found existing and up to date interface - mark present
 			 */
+			if (iface->phase != sys_interphase)
+			{
+				/*
+				 * on a new round we reset the name so the interface name
+				 * shows up again if this address is not shared any more
+				 * same reasoning goes for the enable flag
+				 */
+				strcpy(iface->name, interface.name);
+				iface->ignore_packets = interface.ignore_packets;
+			} else {
+				/*
+				 * name collision - rename interface name to "*multiple*"
+				 */
+				strcpy(iface->name, "*multiple*");
+			}
+
+			DPRINT_INTERFACE(4, (iface, "updating ", " present\n"));
+
+			if (iface->ignore_packets != interface.ignore_packets)
+			{
+				/*
+				 * We have conflicting configurations for the interface address.
+				 * This is caused by using -I <interfacename> for an interface
+				 * that shares it address with other interfaces. We cannot disambiguate
+				 * incoming pakets being delivered to this socket without extra
+				 * syscalls/features. These are not (commonly) available.
+				 * Note is is a more unusual configuration where several interfaces
+				 * share an address but filtering via interface name is attempted.
+				 * We resolve the configuration conflict by disabling the reception
+				 * of pakets. This leads to a basically non-functional service on the
+				 * interface address where the conflict occurs.
+				 */
+				msyslog(LOG_ERR, "WARNING: conflicting enable configuration for interfaces %s and %s for address %s - unsupported configuration - address DISABLED",
+					interface.name, iface->name, stoa(&interface.sin));
+
+				iface->ignore_packets = ISC_TRUE;				
+			}
 
 			iface->phase = sys_interphase;
-			DPRINT_INTERFACE(4, (iface, "updating ", " present\n"));
+
 			ifi.action = IFS_EXISTS;
 			ifi.interface = iface;
 			if (receiver)
