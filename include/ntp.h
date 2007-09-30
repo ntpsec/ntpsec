@@ -515,6 +515,12 @@ struct peer {
  /*
  * Macro for sockaddr_storage structures operations
  */
+#ifdef ISC_PLATFORM_HAVESCOPEID
+#define SOCKSCOPE(sock1, sock2) (((struct sockaddr_in6 *)sock1)->sin6_scope_id == ((struct sockaddr_in6 *)sock2)->sin6_scope_id)
+#else
+#define SOCKSCOPE(sock1, sock2) 1
+#endif
+
 #define SOCKCMP(sock1, sock2) \
 	(((struct sockaddr_storage *)sock1)->ss_family \
 	    == ((struct sockaddr_storage *)sock2)->ss_family ? \
@@ -524,7 +530,7 @@ struct peer {
 	    sizeof(struct in_addr)) == 0 : \
 	memcmp(&((struct sockaddr_in6 *)sock1)->sin6_addr, \
 	    &((struct sockaddr_in6 *)sock2)->sin6_addr, \
-	    sizeof(struct in6_addr)) == 0 : \
+	       sizeof(struct in6_addr)) == 0 && SOCKSCOPE(sock1, sock2) : \
 	0)
 
 #define SOCKNUL(sock1) \
