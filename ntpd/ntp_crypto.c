@@ -3649,7 +3649,6 @@ crypto_key(
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_key: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
-		fclose(str);
 		exit (-1);
 	}
 
@@ -4055,18 +4054,6 @@ crypto_config(
 	switch (item) {
 
 	/*
-	 * Set certificate file name (cert).
-	 */
-	case CRYPTO_CONF_CERT:
-		break;
-
-	/*
-	 * Set gq parameters file name (gqpar).
-	 */
-	case CRYPTO_CONF_GQPAR:
-		break;
-
-	/*
 	 * Set host name (host).
 	 */
 	case CRYPTO_CONF_PRIV:
@@ -4080,18 +4067,6 @@ crypto_config(
 	case CRYPTO_CONF_IDENT:
 		sys_groupname = emalloc(strlen(cp) + 1);
 		strcpy(sys_groupname, cp);
-		break;
-
-	/*
-	 * Set iff parameters file name (iffpar).
-	 */
-	case CRYPTO_CONF_IFFPAR:
-		break;
-
-	/*
-	 * Set mv parameters file name (mvpar).
-	 */
-	case CRYPTO_CONF_MVPAR:
 		break;
 
 	/*
