@@ -77,7 +77,6 @@
 %token		T_Calibrate
 %token		T_Calldelay
 %token		T_Ceiling
-%token		T_Cert
 %token		T_Clockstats
 %token		T_Cohort
 %token		T_ControlKey
@@ -103,14 +102,12 @@
 %token		T_Floor
 %token		T_Freq
 %token		T_Fudge
-%token		T_Gqpar
 %token		T_Host
 %token		T_Huffpuff
 %token <String> T_IPv4_address
 %token <String> T_IPv6_address
 %token		T_Iburst
 %token		T_Ident
-%token		T_Iffpar
 %token		T_Ignore
 %token		T_Includefile
 %token		T_Integer
@@ -144,7 +141,6 @@
 %token		T_Monitor
 %token		T_Month
 %token		T_Multicastclient
-%token		T_Mvpar
 %token		T_Nolink
 %token		T_Nomodify
 %token		T_None
@@ -228,6 +224,7 @@
 %type	<Integer>	boolean
 %type	<Integer>	client_type
 %type	<Attr_val>	crypto_command
+%type	<Queue>		crypto_command_line
 %type	<Queue>	        crypto_command_list
 %type	<Attr_val>	discard_option
 %type	<Queue>	        discard_option_list
@@ -413,7 +410,7 @@ authentication_command
                     { my_config.auth.autokey = $2;  }
         |	T_ControlKey T_Integer
                     { my_config.auth.control_key = $2;  }
-        |	T_Crypto crypto_command_list
+        |	T_Crypto crypto_command_line
 			{ if (my_config.auth.crypto_cmd_list != NULL)
 					append_queue(my_config.auth.crypto_cmd_list, $2);
 				else
@@ -430,24 +427,22 @@ authentication_command
                     { my_config.auth.trusted_key_list = $2;  }
 	;
 
+crypto_command_line
+	:	crypto_command_list
+	|	/* Null list */
+		    { $$ = NULL; }
+	;
+
 crypto_command_list
         :	crypto_command_list crypto_command  { $$ = enqueue($1, $2); }
 	|	crypto_command { $$ = enqueue_in_new_queue($1); }
 	;
 
 crypto_command
-	:	T_Cert T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_CERT, $2); }
-	|	T_Gqpar T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_GQPAR, $2); }
-	|	T_Host	T_String
+	:	T_Host	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PRIV, $2); }
 	|	T_Ident	T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_IDENT, $2); }
-	|	T_Iffpar T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_IFFPAR, $2); }
-	|	T_Mvpar T_String
-                    { $$ = create_attr_sval(CRYPTO_CONF_MVPAR, $2); }
 	|	T_Pw T_String
                     { $$ = create_attr_sval(CRYPTO_CONF_PW, $2); }
 	|	T_RandFile T_String

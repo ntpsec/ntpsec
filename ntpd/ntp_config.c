@@ -800,13 +800,8 @@ struct key_tok keyword_list[] = {
 	{ "ttl",	        T_Ttl,             NO_ARG },      
 	{ "version",		T_Version,         NO_ARG },
 /* crypto_command */
-	{ "cert",		T_Cert,            SINGLE_ARG },
-	{ "gqpar",		T_Gqpar,           SINGLE_ARG },
 	{ "host",		T_Host,            SINGLE_ARG },
 	{ "ident",		T_Ident,           SINGLE_ARG },
-	{ "iffpar",		T_Iffpar,          SINGLE_ARG },
-	{ "leap",		T_Leap,            SINGLE_ARG },
-	{ "mvpar",		T_Mvpar,           SINGLE_ARG },
 	{ "pw",			T_Pw,              SINGLE_ARG },
 	{ "randfile",		T_RandFile,        SINGLE_ARG },
 	{ "sign",		T_Sign,            SINGLE_ARG },

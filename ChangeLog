@@ -1,7 +1,10 @@
 * ntpd/ntp_timer.c: add missing sys_tai parameter for debug printf
 * [Bug 917] config parse leaves files open
-* [Bug 912] detect conflicting enable/disable configuration on interfaces sharing an IP address
+* [Bug 912] detect conflicting enable/disable configuration on interfaces
+  sharing an IP address
 * [Bug 771] compare scopeid if available for IPv6 addresses
+* Lose obsolete crypto subcommands (Dave Mills).
+* WWV is an HF source, not an LF source (Dave Mills).
 * [Bug 899] Only show -i/--jaildir -u/--user options if we HAVE_DROPROOT.
 * [Bug 916] 'cryptosw' is undefined if built without OpenSSL.
 * [Bug 891] 'restrict' config file keyword does not work (partial fix).
