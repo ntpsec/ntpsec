@@ -1,3 +1,6 @@
+* Bug #929 int32_t is undefined on Windows. Casting wrong 
+* Bug #928 readlink missing braces
+* Bug #788 Update macros to support VS 2005
 * ntpd/ntp_timer.c: add missing sys_tai parameter for debug printf
 * [Bug 917] config parse leaves files open
 * [Bug 912] detect conflicting enable/disable configuration on interfaces
