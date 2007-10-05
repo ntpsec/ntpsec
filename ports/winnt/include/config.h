@@ -46,12 +46,14 @@ typedef unsigned int	uintptr_t;
  * Note that these are ignored by previous versions
  * of the compiler
  */
+/*
 #undef _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
 #undef _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT
+#undef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT 1
 #define _CRT_SECURE_NO_DEPRECATE 1
-
+*/
 
 
 
