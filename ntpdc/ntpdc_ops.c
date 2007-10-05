@@ -886,8 +886,8 @@ again:
 			       "offset %s, frequency %s, time_const %ld, watchdog %ld\n",
 			       lfptoa(&tempts, 6),
 			       lfptoa(&temp2ts, 3),
-			       (long)(int32_t)ntohl((u_long)il->compliance),
-			       (u_long)ntohl((u_long)il->watchdog_timer));
+			       ntohl((u_long)il->compliance),
+			       ntohl((u_long)il->watchdog_timer));
 	} else {
 		NTOHL_FP(&il->last_offset, &tempts);
 		(void) fprintf(fp, "offset:               %s s\n",
@@ -896,7 +896,7 @@ again:
 		(void) fprintf(fp, "frequency:            %s ppm\n",
 			       lfptoa(&tempts, 3));
 		(void) fprintf(fp, "poll adjust:          %ld\n",
-			       (long)(int32_t)ntohl(il->compliance));
+			       ntohl(il->compliance));
 		(void) fprintf(fp, "watchdog timer:       %ld s\n",
 			       (u_long)ntohl(il->watchdog_timer));
 	}
@@ -2988,7 +2988,7 @@ again:
 		tscale = 1e-9;
 #endif
 	(void)fprintf(fp, "pll offset:           %g s\n",
-	    (int32_t)ntohl(ik->offset) * tscale);
+	    ntohl(ik->offset) * tscale);
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",
