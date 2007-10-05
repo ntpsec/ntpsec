@@ -178,9 +178,9 @@ BOOL init_randfile();
  * Don't try to follow symbolic links
  */
 int
-readlink(char *link, char *file, int len)
+readlink(char *link, char *file, int len) {
 	return (-1);
-
+}
 /*
  * Don't try to create a symbolic link for now.
  * Just move the file to the name you need.
