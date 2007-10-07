@@ -22,7 +22,9 @@
 #define ISC_IPV6_H 1
 #include <isc/interfaceiter.h>
 #include <isc/list.h>
+#include <isc/netaddr.h>
 #include <isc/result.h>
+#include <isc/sockaddr.h>
 
 #ifdef SIM
 #include "ntpsim.h"
@@ -67,7 +69,27 @@
 #endif  /* IPv6 Support */
 
 extern int listen_to_virtual_ips;
-extern const char *specific_interface;
+/*
+ * interface names to listen on
+ */
+typedef struct specific_interface specific_interface_t;
+struct specific_interface {
+	const char *name;
+	ISC_LINK(specific_interface_t) link;
+};
+
+ISC_LIST(specific_interface_t) specific_interface_list;
+/*
+ * limit addresses to use
+ */
+typedef struct limit_address limit_address_t;
+struct limit_address {
+	const isc_netaddr_t *addr;
+	ISC_LINK(limit_address_t) link;
+};
+
+ISC_LIST(limit_address_t) limit_address_list;
+
 
 #if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
 #if defined(CMSG_FIRSTHDR)
@@ -671,6 +693,100 @@ remove_asyncio_reader(struct asyncio_reader *reader)
 #endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
 
 /*
+ * Code to tell if we have an IP address
+ * If we have then return the sockaddr structure
+ * and set the return value
+ * see the bind9/getaddresses.c for details
+ */
+isc_boolean_t
+is_ip_address( const char *host, isc_netaddr_t *addr)
+{
+	struct in_addr in4;
+	struct in6_addr in6;
+/*
+ * PDM Implement later
+
+	REQUIRE(host != NULL);
+	REQUIRE(addrs != NULL);
+*/
+	/*
+	 * Try IPv4, then IPv6.  In order to handle the extended format
+	 * for IPv6 scoped addresses (address%scope_ID), we'll use a local
+	 * working buffer of 128 bytes.  The length is an ad-hoc value, but
+	 * should be enough for this purpose; the buffer can contain a string
+	 * of at least 80 bytes for scope_ID in addition to any IPv6 numeric
+	 * addresses (up to 46 bytes), the delimiter character and the
+	 * terminating NULL character.
+	 */
+	if (inet_pton(AF_INET, host, &in4) == 1) {
+		isc_netaddr_fromin(addr, &in4);
+		return (ISC_TRUE);
+	} else if (strlen(host) <= 127U) {
+		char tmpbuf[128], *d;
+
+		strcpy(tmpbuf, host);
+		d = strchr(tmpbuf, '%');
+		if (d != NULL)
+			*d = '\0';
+
+		if (inet_pton(AF_INET6, tmpbuf, &in6) == 1) {
+			isc_netaddr_fromin6(addr, &in6);
+			return (ISC_TRUE);
+		}
+	}
+	/*
+	 * If we got here it was not an IP address
+	 */
+	return (ISC_FALSE);
+}
+
+/*
+ * Specific interface code
+ */
+void
+add_specific_interface (const char *if_name)
+{
+	specific_interface_t *iface;
+	isc_netaddr_t *addr;
+	addr = emalloc(sizeof(isc_netaddr_t));
+
+	if (is_ip_address(if_name, addr) == ISC_TRUE) {
+		add_limit_address(addr);
+	} else {
+		free(addr);
+		iface = (specific_interface_t *)emalloc(sizeof(specific_interface_t));
+		iface->name = if_name;
+		ISC_LINK_INIT(iface, link);
+		ISC_LIST_APPEND(specific_interface_list, iface, link);
+	}
+}
+void
+init_specific_interface (void)
+{
+	ISC_LIST_INIT(specific_interface_list);
+	init_limit_address();
+}
+
+/*
+ * Limit address code
+ */
+void
+add_limit_address (const isc_netaddr_t *addr)
+{
+	limit_address_t *iaddr;
+
+	iaddr = (limit_address_t *)emalloc(sizeof(limit_address_t));
+	iaddr->addr = addr;
+	ISC_LIST_APPEND(limit_address_list, iaddr, link);
+}
+
+void
+init_limit_address (void)
+{
+	ISC_LIST_INIT(limit_address_list);
+}
+
+/*
  * interface list enumerator - visitor pattern
  */
 void
@@ -924,10 +1040,43 @@ address_okay(isc_interface_t *isc_if) {
 		DPRINTF(4, ("address_okay: loopback - OK\n"));
 		return (ISC_TRUE);
 	}
+	/*
+	 * Check if the interface is specific
+	 */
+	if (ISC_LIST_HEAD(specific_interface_list)!= NULL) {
+		specific_interface_t *iface;
+		for (iface = ISC_LIST_HEAD(specific_interface_list); iface != NULL; iface = ISC_LIST_NEXT(iface, link))
+			if (strcasecmp(isc_if->name, iface->name) == 0) {
+				DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
+				return (ISC_TRUE);
+			}
+	}
+	/*
+	 * Check if the address is limit
+	 */
+	if (ISC_LIST_HEAD(limit_address_list)!= NULL) {
+		const limit_address_t *laddr;
+		for (laddr = ISC_LIST_HEAD(limit_address_list); laddr != NULL; laddr = ISC_LIST_NEXT(laddr, link))
+			if (isc_netaddr_equal(&(isc_if->address), laddr->addr)) {
+				DPRINTF(4, ("address_okay: specific interface address matched - OK\n"));
+				return (ISC_TRUE);
+			} else {
+				DPRINTF(4, ("address_okay: specific interface name NOT matched - FAIL\n"));
+				return (ISC_FALSE);
+			}
+	}
+	else {
+		if (listen_to_virtual_ips == 0  && 
+			(strchr(isc_if->name, (int)':') != NULL)) {
+			DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
+			return (ISC_FALSE);
+		}
+	}
 
 	/*
 	 * Check if the interface is specified
 	 */
+	/*
 	if (specific_interface != NULL) {
 		if (strcasecmp(isc_if->name, specific_interface) == 0) {
 			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
@@ -944,7 +1093,7 @@ address_okay(isc_interface_t *isc_if) {
 			return (ISC_FALSE);
 		}
 	}
-
+*/
 	DPRINTF(4, ("address_okay: OK\n"));
 	return (ISC_TRUE);
 }

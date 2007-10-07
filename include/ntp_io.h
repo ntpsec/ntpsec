@@ -31,6 +31,7 @@
 #endif
 
 #include <isc/boolean.h>
+#include <isc/netaddr.h>
 /*
  * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
  * to (and can).  This is here initially for QNX, but may help for
@@ -49,5 +50,10 @@
 #endif
 
 isc_boolean_t get_broadcastclient_flag(void); /* Get the status of client broadcast */
+extern  void  add_specific_interface (const char *);
+extern  void  init_specific_interface (void);
+extern  void  add_limit_address (const isc_netaddr_t *);
+extern  void  init_limit_address (void);
+isc_boolean_t is_ip_address(const char *, isc_netaddr_t *);
 
 #endif

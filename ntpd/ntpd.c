@@ -537,18 +537,19 @@ ntpdmain(
 	if (HAVE_OPT( NOVIRTUALIPS ))
 		listen_to_virtual_ips = 0;
 
+	/*
+	 * Limit specific interfaces
+	 */
+	init_specific_interface();
+
 	if (HAVE_OPT( INTERFACE )) {
-#if 0
 		int	ifacect = STACKCT_OPT( INTERFACE );
-		char**	ifaces  = STACKLST_OPT( INTERFACE );
+		const char**	ifaces  = STACKLST_OPT( INTERFACE );
 
 		/* malloc space for the array of names */
 		while (ifacect-- > 0) {
-			next_iface = *ifaces++;
+			add_specific_interface(*ifaces++);
 		}
-#else
-		specific_interface = OPT_ARG( INTERFACE );
-#endif
 	}
 
 	if (HAVE_OPT( NICE ))
