@@ -1,3 +1,4 @@
+* Bug #376/214 Enhancements to support multiple if names and IP addresses
 * Bug #929 int32_t is undefined on Windows. Casting wrong 
 * Bug #928 readlink missing braces
 * Bug #788 Update macros to support VS 2005
