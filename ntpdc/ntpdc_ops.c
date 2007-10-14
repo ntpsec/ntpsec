@@ -589,7 +589,7 @@ printpeer(
 	(void) fprintf(fp, "boffset %s, ttl/mode %d\n",
 		       fptoa(NTOHS_FP(pp->estbdelay), 5), pp->ttl);
 	
-	(void) fprintf(fp, "timer %lds, flags", (ntp_u_int32_t)ntohl(pp->timer));
+	(void) fprintf(fp, "timer %lds, flags", (long)ntohl(pp->timer));
 	print_pflag(fp, pp->flags); 
 
 	NTOHL_FP(&pp->reftime, &tempts);
@@ -800,25 +800,25 @@ again:
 		(void) fprintf(fp, "local interface:      %s\n",
 			       stoa(&dst));
 		(void) fprintf(fp, "time last received:   %lds\n",
-			       (ntp_u_int32_t)ntohl(pp->timereceived));
+			       (long)ntohl(pp->timereceived));
 		(void) fprintf(fp, "time until next send: %lds\n",
-			       (ntp_u_int32_t)ntohl(pp->timetosend));
+			       (long)ntohl(pp->timetosend));
 		(void) fprintf(fp, "reachability change:  %lds\n",
-			       (ntp_u_int32_t)ntohl(pp->timereachable));
+			       (long)ntohl(pp->timereachable));
 		(void) fprintf(fp, "packets sent:         %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->sent));
+			       (long)ntohl(pp->sent));
 		(void) fprintf(fp, "packets received:     %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->processed));
+			       (long)ntohl(pp->processed));
 		(void) fprintf(fp, "bad authentication:   %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->badauth));
+			       (long)ntohl(pp->badauth));
 		(void) fprintf(fp, "bogus origin:         %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->bogusorg));
+			       (long)ntohl(pp->bogusorg));
 		(void) fprintf(fp, "duplicate:            %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->oldpkt));
+			       (long)ntohl(pp->oldpkt));
 		(void) fprintf(fp, "bad dispersion:       %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->seldisp));
+			       (long)ntohl(pp->seldisp));
 		(void) fprintf(fp, "bad reference time:   %ld\n",
-			       (ntp_u_int32_t)ntohl(pp->selbroken));
+			       (long)ntohl(pp->selbroken));
 		(void) fprintf(fp, "candidate order:      %d\n",
 			       (int)pp->candidate);
 		if (items > 0)
@@ -886,8 +886,8 @@ again:
 			       "offset %s, frequency %s, time_const %ld, watchdog %ld\n",
 			       lfptoa(&tempts, 6),
 			       lfptoa(&temp2ts, 3),
-			       (ntp_u_int32_t)ntohl((u_long)il->compliance),
-			       (ntp_u_int32_t)ntohl((u_long)il->watchdog_timer));
+			       (long)(int32_t)ntohl((u_long)il->compliance),
+			       (u_long)ntohl((u_long)il->watchdog_timer));
 	} else {
 		NTOHL_FP(&il->last_offset, &tempts);
 		(void) fprintf(fp, "offset:               %s s\n",
@@ -896,9 +896,9 @@ again:
 		(void) fprintf(fp, "frequency:            %s ppm\n",
 			       lfptoa(&tempts, 3));
 		(void) fprintf(fp, "poll adjust:          %ld\n",
-			       (ntp_u_int32_t)ntohl(il->compliance));
+			       (long)(int32_t)ntohl(il->compliance));
 		(void) fprintf(fp, "watchdog timer:       %ld s\n",
-			       (ntp_u_int32_t)ntohl(il->watchdog_timer));
+			       (u_long)ntohl(il->watchdog_timer));
 	}
 }
 
@@ -1040,30 +1040,30 @@ again:
 		return;
 	}
 	fprintf(fp, "time since restart:     %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->timeup));
+	       (u_long)ntohl(ss->timeup));
 	fprintf(fp, "time since reset:       %ld\n",
-		(ntp_u_int32_t)ntohl(ss->timereset));
+		(u_long)ntohl(ss->timereset));
         fprintf(fp, "packets received:       %ld\n",
-		(ntp_u_int32_t)ntohl(ss->received));
+		(u_long)ntohl(ss->received));
 	fprintf(fp, "packets processed:      %ld\n",
-		(ntp_u_int32_t)ntohl(ss->processed));
+		(u_long)ntohl(ss->processed));
 	fprintf(fp, "current version:        %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->newversionpkt));
+	       (u_long)ntohl(ss->newversionpkt));
 	fprintf(fp, "previous version:       %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->oldversionpkt));
+	       (u_long)ntohl(ss->oldversionpkt));
 	fprintf(fp, "bad version:            %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->unknownversion));
+	       (u_long)ntohl(ss->unknownversion));
 	fprintf(fp, "access denied:          %ld\n",
-		(ntp_u_int32_t)ntohl(ss->denied));
+		(u_long)ntohl(ss->denied));
 	fprintf(fp, "bad length or format:   %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->badlength));
+	       (u_long)ntohl(ss->badlength));
 	fprintf(fp, "bad authentication:     %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->badauth));
+	       (u_long)ntohl(ss->badauth));
 	if (itemsize != sizeof(struct info_sys_stats))
 	    return;
 	
 	fprintf(fp, "rate exceeded:          %ld\n",
-	       (ntp_u_int32_t)ntohl(ss->limitrejected));
+	       (u_long)ntohl(ss->limitrejected));
 }
 
 
@@ -1103,7 +1103,7 @@ again:
 	    return;
 
 	(void) fprintf(fp, "time since reset:     %ld\n",
-		       (ntp_u_int32_t)ntohl(io->timereset));
+		       (u_long)ntohl(io->timereset));
 	(void) fprintf(fp, "receive buffers:      %d\n",
 		       ntohs(io->totalrecvbufs));
 	(void) fprintf(fp, "free receive buffers: %d\n",
@@ -1113,19 +1113,19 @@ again:
 	(void) fprintf(fp, "low water refills:    %d\n",
 		       ntohs(io->lowwater));
 	(void) fprintf(fp, "dropped packets:      %ld\n",
-		       (ntp_u_int32_t)ntohl(io->dropped));
+		       (u_long)ntohl(io->dropped));
 	(void) fprintf(fp, "ignored packets:      %ld\n",
-		       (ntp_u_int32_t)ntohl(io->ignored));
+		       (u_long)ntohl(io->ignored));
 	(void) fprintf(fp, "received packets:     %ld\n",
-		       (ntp_u_int32_t)ntohl(io->received));
+		       (u_long)ntohl(io->received));
 	(void) fprintf(fp, "packets sent:         %ld\n",
-		       (ntp_u_int32_t)ntohl(io->sent));
+		       (u_long)ntohl(io->sent));
 	(void) fprintf(fp, "packets not sent:     %ld\n",
-		       (ntp_u_int32_t)ntohl(io->notsent));
+		       (u_long)ntohl(io->notsent));
 	(void) fprintf(fp, "interrupts handled:   %ld\n",
-		       (ntp_u_int32_t)ntohl(io->interrupts));
+		       (u_long)ntohl(io->interrupts));
 	(void) fprintf(fp, "received by int:      %ld\n",
-		       (ntp_u_int32_t)ntohl(io->int_received));
+		       (u_long)ntohl(io->int_received));
 }
 
 
@@ -1165,17 +1165,17 @@ again:
 	    return;
 
 	(void) fprintf(fp, "time since reset:     %ld\n",
-		       (ntp_u_int32_t)ntohl(mem->timereset));
+		       (u_long)ntohl(mem->timereset));
 	(void) fprintf(fp, "total peer memory:    %d\n",
 		       ntohs(mem->totalpeermem));
 	(void) fprintf(fp, "free peer memory:     %d\n",
 		       ntohs(mem->freepeermem));
 	(void) fprintf(fp, "calls to findpeer:    %ld\n",
-		       (ntp_u_int32_t)ntohl(mem->findpeer_calls));
+		       (u_long)ntohl(mem->findpeer_calls));
 	(void) fprintf(fp, "new peer allocations: %ld\n",
-		       (ntp_u_int32_t)ntohl(mem->allocations));
+		       (u_long)ntohl(mem->allocations));
 	(void) fprintf(fp, "peer demobilizations: %ld\n",
-		       (ntp_u_int32_t)ntohl(mem->demobilizations));
+		       (u_long)ntohl(mem->demobilizations));
 
 	(void) fprintf(fp, "hash table counts:   ");
 	for (i = 0; i < NTP_HASH_SIZE; i++) {
@@ -1224,13 +1224,13 @@ again:
 	    return;
 
 	(void) fprintf(fp, "time since reset:  %ld\n",
-		       (ntp_u_int32_t)ntohl(tim->timereset));
+		       (u_long)ntohl(tim->timereset));
 	(void) fprintf(fp, "alarms handled:    %ld\n",
-		       (ntp_u_int32_t)ntohl(tim->alarms));
+		       (u_long)ntohl(tim->alarms));
 	(void) fprintf(fp, "alarm overruns:    %ld\n",
-		       (ntp_u_int32_t)ntohl(tim->overflows));
+		       (u_long)ntohl(tim->overflows));
 	(void) fprintf(fp, "calls to transmit: %ld\n",
-		       (ntp_u_int32_t)ntohl(tim->xmtcalls));
+		       (u_long)ntohl(tim->xmtcalls));
 }
 
 
@@ -2009,12 +2009,12 @@ again:
 				    nntohost(&addr), 
 				    ntohs(ml->port),
 				    stoa(&dstadr),
-				    (ntp_u_int32_t)ntohl(ml->count),
+				    (u_long)ntohl(ml->count),
 				    ml->mode,
 				    ml->version,
-				    (ntp_u_int32_t)ntohl(ml->lastdrop),
-				    (ntp_u_int32_t)ntohl(ml->lasttime),
-				    (ntp_u_int32_t)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->lastdrop),
+				    (u_long)ntohl(ml->lasttime),
+				    (u_long)ntohl(ml->firsttime));
 			ml++;
 			items--;
 		}
@@ -2045,12 +2045,12 @@ again:
 				    "%-25.25s %5d %9ld %4d %2d %9lx %9lu %9lu\n",
 				    nntohost(&dstadr),
 				    ntohs(ml->port),
-				    (ntp_u_int32_t)ntohl(ml->count),
+				    (u_long)ntohl(ml->count),
 				    ml->mode,
 				    ml->version,
-				    (ntp_u_int32_t)ntohl(ml->lastdrop),
-				    (ntp_u_int32_t)ntohl(ml->lasttime),
-				    (ntp_u_int32_t)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->lastdrop),
+				    (u_long)ntohl(ml->lasttime),
+				    (u_long)ntohl(ml->firsttime));
 			ml++;
 			items--;
 		}
@@ -2075,11 +2075,11 @@ again:
 			(void) fprintf(fp, "%-20.20s %5d %9ld %4d   %3d %9lu %9lu\n",
 				       nntohost(&dstadr),
 				       ntohs(oml->port),
-				       (ntp_u_int32_t)ntohl(oml->count),
+				       (u_long)ntohl(oml->count),
 				       oml->mode,
 				       oml->version,
-				       (ntp_u_int32_t)ntohl(oml->lasttime),
-				       (ntp_u_int32_t)ntohl(oml->firsttime));
+				       (u_long)ntohl(oml->lasttime),
+				       (u_long)ntohl(oml->firsttime));
 			oml++;
 			items--;
 		}
@@ -2349,23 +2349,23 @@ again:
 	    return;
 
 	(void) fprintf(fp, "time since reset:     %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->timereset));
+	    (u_long)ntohl(ia->timereset));
 	(void) fprintf(fp, "stored keys:          %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->numkeys));
+	    (u_long)ntohl(ia->numkeys));
 	(void) fprintf(fp, "free keys:            %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->numfreekeys));
+	    (u_long)ntohl(ia->numfreekeys));
 	(void) fprintf(fp, "key lookups:          %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->keylookups));
+	    (u_long)ntohl(ia->keylookups));
 	(void) fprintf(fp, "keys not found:       %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->keynotfound));
+	    (u_long)ntohl(ia->keynotfound));
 	(void) fprintf(fp, "uncached keys:        %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->keyuncached));
+	    (u_long)ntohl(ia->keyuncached));
 	(void) fprintf(fp, "encryptions:          %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->encryptions));
+	    (u_long)ntohl(ia->encryptions));
 	(void) fprintf(fp, "decryptions:          %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->decryptions));
+	    (u_long)ntohl(ia->decryptions));
 	(void) fprintf(fp, "expired keys:         %ld\n",
-	    (ntp_u_int32_t)ntohl(ia->expired));
+	    (u_long)ntohl(ia->expired));
 }
 
 
@@ -2442,11 +2442,11 @@ again:
 		    (void) fprintf(fp, "normal priority\n");
 		
 		(void) fprintf(fp, "set for %ld secs, last set %ld secs ago\n",
-			       (ntp_u_int32_t)ntohl(it->origtime),
-			       (ntp_u_int32_t)ntohl(it->settime));
+			       (long)ntohl(it->origtime),
+			       (long)ntohl(it->settime));
 		(void) fprintf(fp, "sequence %d, number of resets %ld\n",
 			       ntohs(it->sequence),
-			       (ntp_u_int32_t)ntohl(it->resets));
+			       (long)ntohl(it->resets));
 	}
 }
 
@@ -2648,35 +2648,35 @@ again:
 	    return;
 
 	(void) fprintf(fp, "time since reset:       %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->ctltimereset));
+		       (u_long)ntohl(ic->ctltimereset));
 	(void) fprintf(fp, "requests received:      %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlreq));
+		       (u_long)ntohl(ic->numctlreq));
 	(void) fprintf(fp, "responses sent:         %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlresponses));
+		       (u_long)ntohl(ic->numctlresponses));
 	(void) fprintf(fp, "fragments sent:         %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlfrags));
+		       (u_long)ntohl(ic->numctlfrags));
 	(void) fprintf(fp, "async messages sent:    %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numasyncmsgs));
+		       (u_long)ntohl(ic->numasyncmsgs));
 	(void) fprintf(fp, "error msgs sent:        %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlerrors));
+		       (u_long)ntohl(ic->numctlerrors));
 	(void) fprintf(fp, "total bad pkts:         %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlbadpkts));
+		       (u_long)ntohl(ic->numctlbadpkts));
 	(void) fprintf(fp, "packet too short:       %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctltooshort));
+		       (u_long)ntohl(ic->numctltooshort));
 	(void) fprintf(fp, "response on input:      %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlinputresp));
+		       (u_long)ntohl(ic->numctlinputresp));
 	(void) fprintf(fp, "fragment on input:      %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlinputfrag));
+		       (u_long)ntohl(ic->numctlinputfrag));
 	(void) fprintf(fp, "error set on input:     %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlinputerr));
+		       (u_long)ntohl(ic->numctlinputerr));
 	(void) fprintf(fp, "bad offset on input:    %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlbadoffset));
+		       (u_long)ntohl(ic->numctlbadoffset));
 	(void) fprintf(fp, "bad version packets:    %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlbadversion));
+		       (u_long)ntohl(ic->numctlbadversion));
 	(void) fprintf(fp, "data in pkt too short:  %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctldatatooshort));
+		       (u_long)ntohl(ic->numctldatatooshort));
 	(void) fprintf(fp, "unknown op codes:       %ld\n",
-		       (ntp_u_int32_t)ntohl(ic->numctlbadop));
+		       (u_long)ntohl(ic->numctlbadop));
 }
 
 
@@ -2738,15 +2738,15 @@ again:
 		(void) fprintf(fp, "current status:       %d\n",
 			       cl->currentstatus);
 		(void) fprintf(fp, "number of polls:      %lu\n",
-			       (ntp_u_int32_t)ntohl(cl->polls));
+			       (u_long)ntohl(cl->polls));
 		(void) fprintf(fp, "no response to poll:  %lu\n",
-			       (ntp_u_int32_t)ntohl(cl->noresponse));
+			       (u_long)ntohl(cl->noresponse));
 		(void) fprintf(fp, "bad format responses: %lu\n",
-			       (ntp_u_int32_t)ntohl(cl->badformat));
+			       (u_long)ntohl(cl->badformat));
 		(void) fprintf(fp, "bad data responses:   %lu\n",
-			      (ntp_u_int32_t)ntohl(cl->baddata));
+			       (u_long)ntohl(cl->baddata));
 		(void) fprintf(fp, "running time:         %lu\n",
-			       (ntp_u_int32_t)ntohl(cl->timestarted));
+			       (u_long)ntohl(cl->timestarted));
 		NTOHL_FP(&cl->fudgetime1, &ts);
 		(void) fprintf(fp, "fudge time 1:         %s\n",
 			       lfptoa(&ts, 6));
@@ -2754,7 +2754,7 @@ again:
 		(void) fprintf(fp, "fudge time 2:         %s\n",
 			       lfptoa(&ts, 6));
 		(void) fprintf(fp, "stratum:              %ld\n",
-			       (ntp_u_int32_t)ntohl(cl->fudgeval1));
+			       (u_long)ntohl(cl->fudgeval1));
 		(void) fprintf(fp, "reference ID:         %s\n",
 			       refid_string(ntohl(cl->fudgeval2), 0));
 		(void) fprintf(fp, "fudge flags:          0x%x\n",
@@ -2988,13 +2988,13 @@ again:
 		tscale = 1e-9;
 #endif
 	(void)fprintf(fp, "pll offset:           %g s\n",
-	    (ntp_u_int32_t)ntohl(ik->offset) * tscale);
+	    (int32_t)ntohl(ik->offset) * tscale);
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",
-	    (ntp_u_int32_t)ntohl(ik->maxerror) * 1e-6);
+	    (u_long)ntohl(ik->maxerror) * 1e-6);
 	(void)fprintf(fp, "estimated error:      %g s\n",
-	    (ntp_u_int32_t)ntohl(ik->esterror) * 1e-6);
+	    (u_long)ntohl(ik->esterror) * 1e-6);
 	(void)fprintf(fp, "status:               %04x ", status);
 #ifdef STA_PLL
 	if (status & STA_PLL) (void)fprintf(fp, " pll");
@@ -3046,9 +3046,9 @@ again:
 #endif
 	(void)fprintf(fp, "\n");
 	(void)fprintf(fp, "pll time constant:    %ld\n",
-	    (ntp_u_int32_t)ntohl(ik->constant));
+	    (u_long)ntohl(ik->constant));
 	(void)fprintf(fp, "precision:            %g s\n",
-	    (ntp_u_int32_t)ntohl(ik->precision) * tscale);
+	    (u_long)ntohl(ik->precision) * tscale);
 	(void)fprintf(fp, "frequency tolerance:  %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->tolerance), 0));
 
@@ -3067,17 +3067,17 @@ again:
 	(void)fprintf(fp, "pps stability:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->stabil), 3));
 	(void)fprintf(fp, "pps jitter:           %g s\n",
-	    (ntp_u_int32_t)ntohl(ik->jitter) * tscale);
+	    (u_long)ntohl(ik->jitter) * tscale);
 	(void)fprintf(fp, "calibration interval: %d s\n",
 		      1 << ntohs(ik->shift));
 	(void)fprintf(fp, "calibration cycles:   %ld\n",
-		      (ntp_u_int32_t)ntohl(ik->calcnt));
+		      (u_long)ntohl(ik->calcnt));
 	(void)fprintf(fp, "jitter exceeded:      %ld\n",
-		      (ntp_u_int32_t)ntohl(ik->jitcnt));
+		      (u_long)ntohl(ik->jitcnt));
 	(void)fprintf(fp, "stability exceeded:   %ld\n",
-		      (ntp_u_int32_t)ntohl(ik->stbcnt));
+		      (u_long)ntohl(ik->stbcnt));
 	(void)fprintf(fp, "calibration errors:   %ld\n",
-		      (ntp_u_int32_t)ntohl(ik->errcnt));
+		      (u_long)ntohl(ik->errcnt));
 }
 
 #define IF_LIST_FMT     "%2d %c %48s %c %c %12.12s %03x %3d %2d %5d %5d %5d %2d %2d %3d %7d\n"
@@ -3122,21 +3122,21 @@ iflist(
 		saddr.ss_len = SOCKLEN(&saddr);
 #endif
 		fprintf(fp, IF_LIST_FMT,
-			(ntp_u_int32_t)ntohl(ifs->ifnum),
+			ntohl(ifs->ifnum),
 			actions[(ifs->action >= 1 && ifs->action < 4) ? ifs->action : 0],
 			stoa((&saddr)), 'A',
 			ifs->ignore_packets ? 'D' : 'E',
 			ifs->name,
-			(ntp_u_int32_t)ntohl(ifs->flags),
-			(ntp_u_int32_t)ntohl(ifs->last_ttl),
-			(ntp_u_int32_t)ntohl(ifs->num_mcast),
-			(ntp_u_int32_t)ntohl(ifs->received),
-			(ntp_u_int32_t)ntohl(ifs->sent),
-			(ntp_u_int32_t)ntohl(ifs->notsent),
-			(ntp_u_int32_t)ntohl(ifs->scopeid),
-			(ntp_u_int32_t)ntohl(ifs->ifindex),
-			(ntp_u_int32_t)ntohl(ifs->peercnt),
-			(ntp_u_int32_t)ntohl(ifs->uptime));
+			ntohl(ifs->flags),
+			ntohl(ifs->last_ttl),
+			ntohl(ifs->num_mcast),
+			ntohl(ifs->received),
+			ntohl(ifs->sent),
+			ntohl(ifs->notsent),
+			ntohl(ifs->scopeid),
+			ntohl(ifs->ifindex),
+			ntohl(ifs->peercnt),
+			ntohl(ifs->uptime));
 
 		if (ntohl(ifs->v6_flag)) {
 			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unmask.addr6, sizeof(ifs->unmask.addr6));
