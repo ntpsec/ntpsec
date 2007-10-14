@@ -1,8 +1,8 @@
-* Bug #909 Fix int32_t errors for ntohl()
-* Bug #376/214 Enhancements to support multiple if names and IP addresses
-* Bug #929 int32_t is undefined on Windows. Casting wrong 
-* Bug #928 readlink missing braces
-* Bug #788 Update macros to support VS 2005
+* [Bug 909] Fix int32_t errors for ntohl().
+* [Bug 376/214] Enhancements to support multiple if names and IP addresses.
+* [Bug 929] int32_t is undefined on Windows.  Casting wrong.
+* [Bug 928] readlink missing braces.
+* [Bug 788] Update macros to support VS 2005.
 * ntpd/ntp_timer.c: add missing sys_tai parameter for debug printf
 * [Bug 917] config parse leaves files open
 * [Bug 912] detect conflicting enable/disable configuration on interfaces
