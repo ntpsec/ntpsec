@@ -341,32 +341,8 @@ AC_CHECK_FUNC(openlog, ,
 AC_CHECK_LIB(md5, MD5Init, , 
   AC_CHECK_LIB(md, MD5Init))
 AC_CHECK_FUNCS(MD5Init)
-dnl HMS: What a hack...
-AC_CHECK_HEADERS(readline/history.h readline/readline.h)
-case "$ac_cv_header_readline_history_h$ac_cv_header_readline_readline_h" in
- *no*) ;;
- *) save_LIBS=$LIBS
-    LIBS=
-    # Ralf Wildenhues: either unset ... or cache READLINE_LIBS
-    unset ac_cv_lib_readline_readline
-    AC_CHECK_LIB(readline, readline, ,
-     AC_MSG_NOTICE([Trying again with -lcurses])
-     unset ac_cv_lib_readline_readline
-     AC_CHECK_LIB(readline, readline,
-      LIBS="-lreadline -lcurses $LIBS"
-      AC_DEFINE(HAVE_LIBREADLINE)
-      AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?]),
-      AC_CHECK_LIB(edit, readline,
-       LIBS="-ledit -lcurses"
-       AC_DEFINE(HAVE_LIBEDIT, , [Do we have the edit library?])
-       AC_DEFINE(HAVE_LIBCURSES, , [Do we have the curses library?])
-       , , -lcurses)
-      , -lcurses))
-    READLINE_LIBS=$LIBS
-    AC_SUBST(READLINE_LIBS)
-    LIBS=$save_LIBS
-    ;;
-esac
+
+NTP_LINEEDITLIBS
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,

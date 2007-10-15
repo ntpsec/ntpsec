@@ -26,10 +26,14 @@
 # define closesocket close
 #endif /* SYS_WINNT */
 
-#if defined(HAVE_LIBREADLINE) || defined (HAVE_LIBEDIT)
+#if defined(HAVE_LIBREADLINE)
 # include <readline/readline.h>
 # include <readline/history.h>
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
+#endif /* HAVE_LIBREADLINE */
+
+#if defined (HAVE_LIBEDIT)
+# include <editline/readline.h>
+#endif /* HAVE_LIBEDIT */
 
 #ifdef SYS_VXWORKS
 				/* vxWorks needs mode flag -casey*/

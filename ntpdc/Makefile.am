@@ -7,7 +7,7 @@ EXTRA_DATA=	check-layout
 BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@
 AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD=	version.o @READLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+ntpdc_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES=	.version version.c
