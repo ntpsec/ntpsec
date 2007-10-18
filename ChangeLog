@@ -1,3 +1,5 @@
+* Association and other cleanup from Dave Mills.
+* NTP_UNREACH changes from Dave Mills.
 * Fix the readline history test.
 * [Bug 931] Require -lreadline to be asked for explicitly.
 * [Bug 764] When looking for -lreadline support, also try using -lncurses.

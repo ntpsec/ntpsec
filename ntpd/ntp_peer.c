@@ -426,30 +426,7 @@ peer_config(
 	u_char *keystr
 	)
 {
-	register struct peer *peer;
 	u_char cast_flags;
-
-	/*
-	 * First search from the beginning for an association with given
-	 * remote address and mode. If an interface is given, search
-	 * from there to find the association which matches that
-	 * destination.  If the given interface is "any", track down
-	 * the actual interface, because that's what gets put into the
-	 * peer structure.
-	 */
-	peer = findexistingpeer(srcadr, (struct peer *)0, hmode);
-	if (dstadr != 0) {
-		while (peer != 0) {
-			if (peer->dstadr == dstadr)
-				break;
-
-			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
-			    peer->dstadr == findinterface(srcadr))
-				break;
-
-			peer = findexistingpeer(srcadr, peer, hmode);
-		}
-	}
 
 	/*
 	 * We do a dirty little jig to figure the cast flags. This is
@@ -457,7 +434,6 @@ peer_config(
 	 * configure code is rebuilt. Note only one flag can be set.
 	 */
 	switch (hmode) {
-
 	case MODE_BROADCAST:
 		if(srcadr->ss_family == AF_INET) {
 			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
@@ -465,15 +441,13 @@ peer_config(
 			else
 				cast_flags = MDF_BCAST;
 			break;
-		}
-		else {
+		} else {
                         if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
         	                cast_flags = MDF_MCAST;
 	        	else
                         	cast_flags = MDF_BCAST;
                 	break;
                 }
-
 	case MODE_CLIENT:
 		if(srcadr->ss_family == AF_INET) {
 			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
@@ -481,8 +455,7 @@ peer_config(
 			else
 				cast_flags = MDF_UCAST;
 			break;
-		}
-		else {
+		} else {
 			if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
 				cast_flags = MDF_ACAST;
 			else
@@ -495,34 +468,13 @@ peer_config(
 	}
 
 	/*
-	 * If the peer is already configured, some dope has a duplicate
-	 * configureation entry or another dope is wiggling from afar.
-	 */
-	if (peer != 0) {
-		peer->hmode = (u_char)hmode;
-		peer->version = (u_char) version;
-		peer->minpoll = (u_char) minpoll;
-		peer->maxpoll = (u_char) maxpoll;
-		peer->flags = flags | FLAG_CONFIG |
-		    (peer->flags & FLAG_REFCLOCK);
-		peer->cast_flags = cast_flags;
-		peer->ttl = (u_char) ttl;
-		peer->keyid = key;
-		peer->precision = sys_precision;
-		peer_clear(peer, "RMOT");
-		return (peer);
-	}
-
-	/*
-	 * Here no match has been found, so presumably this is a new
-	 * persistent association. Mobilize the thing and initialize its
-	 * variables. If emulating ntpdate, force iburst.
+	 * Mobilize the association and initialize its variables. If
+	 * emulating ntpdate, force iburst.
 	 */
 	if (mode_ntpdate)
 		flags |= FLAG_IBURST;
-	peer = newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
-	    flags | FLAG_CONFIG, cast_flags, ttl, key);
-	return (peer);
+	return(newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
+	    flags | FLAG_CONFIG, cast_flags, ttl, key));
 }
 
 /*
@@ -724,11 +676,41 @@ newpeer(
 	keyid_t key
 	)
 {
-	register struct peer *peer;
-	register int i;
+	struct peer *peer;
+	int	i;
 #ifdef OPENSSL
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 #endif /* OPENSSL */
+
+	/*
+	 * First search from the beginning for an association with given
+	 * remote address and mode. If an interface is given, search
+	 * from there to find the association which matches that
+	 * destination. If the given interface is "any", track down the
+	 * actual interface, because that's what gets put into the peer
+	 * structure.
+	 */
+	peer = findexistingpeer(srcadr, (struct peer *)0, hmode);
+	if (dstadr != 0) {
+		while (peer != 0) {
+			if (peer->dstadr == dstadr)
+				break;
+
+			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
+			    peer->dstadr == findinterface(srcadr))
+				break;
+
+			peer = findexistingpeer(srcadr, peer, hmode);
+		}
+	}
+
+	/*
+	 * If a peer is found, this would be a duplicate and we don't
+	 * allow that. This is mostly to avoid duplicate pool
+	 * associations.
+	 */
+	if (peer != NULL)
+		return (NULL);
 
 	/*
 	 * Allocate a new peer structure. Some dirt here, since some of
@@ -857,12 +839,10 @@ newpeer(
 #endif /* OPENSSL */
 
 	DPRINTF(1, ("newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
-		    peer->dstadr == NULL ? "<null>" : stoa(&peer->dstadr->sin),
-		    stoa(&peer->srcadr),
-		    peer->hmode, peer->version, peer->minpoll,
-		    peer->maxpoll, peer->flags, peer->cast_flags,
-		    peer->ttl, peer->keyid));
-
+	    peer->dstadr == NULL ? "<null>" : stoa(&peer->dstadr->sin),
+	    stoa(&peer->srcadr), peer->hmode, peer->version,
+	    peer->minpoll, peer->maxpoll, peer->flags, peer->cast_flags,
+	    peer->ttl, peer->keyid));
 	return (peer);
 }
 
@@ -896,13 +876,13 @@ peer_unconfig(
 			 * mode. The protocol will eventually terminate
 			 * undesirables on its own.
 			 */
-			if (peer->hmode == MODE_ACTIVE
-			    && peer->pmode == MODE_ACTIVE) {
+			if (peer->hmode == MODE_ACTIVE && peer->pmode ==
+			    MODE_ACTIVE) {
 				peer->hmode = MODE_PASSIVE;
 				peer->flags &= ~FLAG_CONFIG;
 			} else {
 				unpeer(peer);
-				peer = 0;
+				peer = NULL;
 			}
 		}
 		peer = findexistingpeer(srcadr, peer, mode);

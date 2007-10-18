@@ -103,7 +103,7 @@ typedef char s_char;
 /*
  * Poll interval parameters
  */
-#define NTP_UNREACH	24	/* poll unreach threshold */
+#define NTP_UNREACH	10	/* poll unreach threshold */
 #define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
@@ -363,7 +363,7 @@ struct peer {
 	 */
 	u_long	update;		/* receive epoch */
 #define end_clear_to_zero update
-	u_int	unreach;	/* unreachable count */
+	u_int	unreach;	/* watchdog counter */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks) */

@@ -1768,32 +1768,28 @@ config_peers(void)
 		 */
 		else {
 			res_bak = res;
-			/* Loop to configure the desired number of associations 
+
+			/*
+			 * Loop to configure the desired number of
+			 * associations 
 			 */
-			for (i = 0; (i < no_needed) && res; res = res->ai_next) {
+			for (i = 0; (i < no_needed) && res; res =
+			    res->ai_next) {
 				++i;
-				memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-#ifdef DEBUG
-				if (debug > 1)
-					printf("configuring host %s with address %s\n",
-					       curr_peer->addr->address, stoa(&peeraddr));
-#endif
-				if (is_sane_resolved_address(peeraddr, curr_peer->host_mode)) {
-					if (peer_config(&peeraddr,
-							ANY_INTERFACE_CHOOSE(&peeraddr), 
-							hmode,
-							curr_peer->peerversion, 
-							curr_peer->minpoll, 
-							curr_peer->maxpoll, 
-							curr_peer->peerflags,
-							curr_peer->ttl, 
-							curr_peer->peerkey, 
-							(u_char *)"*") == 0) {
-						msyslog(LOG_ERR,
-							"configuration of %s failed",
-							stoa(&peeraddr));
-					}
-				}
+				memcpy(&peeraddr, res->ai_addr,
+				    res->ai_addrlen);
+				if (is_sane_resolved_address(peeraddr,
+				    curr_peer->host_mode))
+					peer_config(&peeraddr,
+				        ANY_INTERFACE_CHOOSE(&peeraddr), 
+					    hmode,
+					    curr_peer->peerversion, 
+					    curr_peer->minpoll, 
+					    curr_peer->maxpoll, 
+					    curr_peer->peerflags,
+					    curr_peer->ttl, 
+					    curr_peer->peerkey, 
+					    (u_char *)"*");
 			}
 			freeaddrinfo(res_bak);
 		}

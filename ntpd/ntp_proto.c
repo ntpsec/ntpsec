@@ -210,6 +210,7 @@ transmit(
 		 */
 		oreach = peer->reach & 0xfe;
 		peer->outdate = current_time;
+		peer->unreach++;
 		peer->reach <<= 1;
 		if (!(peer->reach & 0x0f))
 			clock_filter(peer, 0., 0., MAXDISPERSE);
@@ -217,16 +218,11 @@ transmit(
 
 			/*
 			 * Here the peer is unreachable. If it was
-			 * previously reachable raise a trap. Bump the
-			 * unreach counter such that the association
-			 * times out in a reasonable time after becoming
-			 * unreachable.
-			 */
+			 * previously reachable raise a trap.					 */
 			if (oreach) {
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 			}
-			peer->unreach += 2;
 		} else {
 
 			/*
@@ -236,29 +232,11 @@ transmit(
 			 * only if enabled and the peer is fit.
 			 */
 			hpoll = sys_poll;
+			if (!oreach)
+				peer->unreach = 0;
 			if (peer->flags & FLAG_BURST &&
 			    !peer_unfit(peer))
 				peer->burst = NTP_BURST;
-
-			/*
-			 * Respond to the peer evaluation produced by
-			 * the selection algorithm. If less than the
-			 * outlyer level, up the unreach by three. If
-			 * there are excess associations, up the unreach
-			 * by two if not a candidate and by one if so.
-			 */
-			if (!(peer->flags & FLAG_PREEMPT)) {
-				peer->unreach = 0;
-			} else if (peer->status < CTL_PST_SEL_SELCAND) {
-				peer->unreach += 3;
-			} else if (peer_preempt > sys_maxclock) {
-				if (peer->status < CTL_PST_SEL_SYNCCAND)
-					peer->unreach += 2;
-				else
-					peer->unreach++;
-			} else {
-				peer->unreach = 0;
-			}
 		}
 
 		/*
@@ -781,7 +759,7 @@ receive(
 		    hisversion, NTP_MINDPOLL, NTP_MAXDPOLL,
 		    FLAG_IBURST | FLAG_PREEMPT, MDF_UCAST | MDF_ACLNT,
 		    0, skeyid)) == NULL)
-			return;			/* system error */
+			return;			/* ignore duplicate  */
 
 		/*
 		 * We don't need these, but it warms the billboards.
@@ -832,7 +810,7 @@ receive(
 			    pkt->ppoll, max(pkt->ppoll, allan_xpt - 5),
 			    FLAG_MCAST | FLAG_IBURST, MDF_BCLNT, 0,
 			    skeyid)) == NULL)
-				return;		/* system error */
+				return;		/* ignore duplicate */
 #ifdef OPENSSL
 			/*
 			 * Ordinarily this will be an association reply
@@ -867,7 +845,7 @@ receive(
 			    rbufp->dstadr, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, max(pkt->ppoll, allan_xpt - 5),
 			    0, MDF_BCLNT, 0, skeyid)) == NULL)
-				return;		/* system error */
+				return;		/* ignore duplicate */
 		}
 		break;
 
@@ -912,7 +890,7 @@ receive(
 		    rbufp->dstadr, MODE_PASSIVE, hisversion,
 		    NTP_MINDPOLL, NTP_MAXDPOLL, 0, MDF_UCAST, 0,
 		    skeyid)) == NULL)
-			return;			/* system error */
+			return;			/* ignore duplicate */
 		break;
 
 	/*
@@ -1044,9 +1022,6 @@ receive(
 		if (rval != XEVNT_OK) {
 			peer_clear(peer, "CRYP");
 			peer->flash |= TEST9;	/* crypto error */
-			if (peer->flags & FLAG_PREEMPT ||
-			    !(peer->flags & FLAG_CONFIG))
-				unpeer(peer);
 			return;
 
 		} else if (hismode == MODE_SERVER) {
@@ -2327,8 +2302,10 @@ clock_select(void)
 	 */
 	leap_next = 0;
 	for (i = 0; i < nlist; i++) {
-		peer = peer_list[i];
 		sys_survivors++;
+		peer = peer_list[i];
+		if (i < sys_maxclock)
+			peer->unreach = 0;
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->flags & FLAG_REFCLOCK)
 				leap_next = nlist;

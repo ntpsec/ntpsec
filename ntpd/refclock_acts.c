@@ -770,6 +770,8 @@ acts_timeout(
 			fd = refclock_open(device, SPEED232,
 			    LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 			if (fd == 0) {
+				msyslog(LOG_ERR,
+				    "acts: open fails");
 				return;
 			}
 			pp->io.fd = fd;
