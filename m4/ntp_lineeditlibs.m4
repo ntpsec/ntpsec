@@ -70,9 +70,12 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
               [Define if you have a readline compatible library])
 	AC_CHECK_HEADERS(readline.h readline/readline.h)
 	AC_CACHE_CHECK([whether readline supports history],
-                   ntp_cv_lib_lineedit_history, [
+	    ntp_cv_lib_lineedit_history, [
 	    ntp_cv_lib_lineedit_history="no"
+	    ORIG_LIBS="$LIBS"
+	    LIBS="$ORIG_LIBS $ntp_cv_lib_lineedit"
 	    AC_TRY_LINK_FUNC(add_history, ntp_cv_lib_lineedit_history="yes")
+	    LIBS="$ORIG_LIBS"
 	])
 	case "$ntp_cv_lib_lineedit_history" in
 	 yes)

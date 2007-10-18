@@ -1,3 +1,4 @@
+* Fix the readline history test.
 * [Bug 931] Require -lreadline to be asked for explicitly.
 * [Bug 764] When looking for -lreadline support, also try using -lncurses.
 * [Bug 909] Fix int32_t errors for ntohl().
