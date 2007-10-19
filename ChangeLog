@@ -1,3 +1,4 @@
+* -ledit cleanup for ntpdc and ntpq.
 * Association and other cleanup from Dave Mills.
 * NTP_UNREACH changes from Dave Mills.
 * Fix the readline history test.

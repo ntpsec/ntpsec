@@ -37,7 +37,7 @@
 #endif /* HAVE_LIBREADLINE */
 
 #if defined(HAVE_LIBEDIT)
-# include <editline/readline.h>
+# include <histedit.h>
 #endif /* HAVE_LIBEDIT */
 
 #ifdef SYS_VXWORKS
@@ -1396,7 +1396,7 @@ doquery(
 static void
 getcmds(void)
 {
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#if defined(HAVE_LIBREADLINE)
         char *line;
 
         for (;;) {
@@ -1405,7 +1405,7 @@ getcmds(void)
                 docmd(line);
                 free(line);
         }
-#else /* not (HAVE_LIBREADLINE || HAVE_LIBEDIT) */
+#else /* not (HAVE_LIBREADLINE) */
         char line[MAXLINE];
 
         for (;;) {
