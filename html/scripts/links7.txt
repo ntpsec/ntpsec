@@ -1,6 +1,7 @@
 document.write("<ul>\
 <li class='inline'><a href='accopt.html'>Access Control Options</a><br>\
 <li class='inline'><a href='authopt.html'>Authentication Options</a><br>\
+<li class='inline'><a href='manyopt.html'>Server Discovery Options</a><br>\
 <li class='inline'><a href='miscopt.html'>Miscellaneous Options</a><br>\
 <li class='inline'><a href='monopt.html'>Monitoring Options</a><br>\
 <li class='inline'><a href='clockopt.html'>Reference Clock Options</a><br>\
