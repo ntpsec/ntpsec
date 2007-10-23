@@ -1,3 +1,4 @@
+* [Bug 940] ntp-keygen uses -v.  Disallow it as a shortcut for --version.
 * more cleanup to ntp_lineeditlibs.m4.
 * Documentation updates from Dave Mills.
 * -ledit cleanup for ntpdc and ntpq.

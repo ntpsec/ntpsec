@@ -16,3 +16,5 @@ version         = `
 eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
 [ -z "${VERSION}" ] && echo "Cannot determine VERSION" && kill -TERM $AG_pid
 echo $VERSION`;
+
+version-value = '';	/* Don't use -v as a shortcut for --version */
