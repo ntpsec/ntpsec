@@ -90,7 +90,6 @@ int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_cohort = 0;		/* cohort switch */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
-double	sys_orphandelay = 0;	/* orphan root delay */
 int	sys_beacon = BEACON;	/* manycast beacon interval */
 int	sys_ttlmax;		/* max ttl mapping vector index */
 u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
@@ -137,20 +136,16 @@ transmit(
 	 */
 	/*
 	 * Orphan mode is active when enabled and when no servers less
-	 * than the orphan statum are available. In this mode packets
-	 * are sent at the orphan stratum. An orphan with no other
-	 * synchronization source is an orphan parent. It assumes root
-	 * delay zero and reference ID the loopback address. All others
-	 * are orphan children with root delay randomized over a 1-s
-	 * range. The root delay is used by the election algorithm to
-	 * select the order of synchronization.
+	 * than the orphan statum are available. A server with no other
+	 * synchronization source is an orphan It shows offset zero and
+	 * reference ID the loopback address.
 	 */
 	hpoll = peer->hpoll;
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
 		sys_leap = LEAP_NOWARNING;
 		sys_stratum = sys_orphan;
 		sys_refid = htonl(LOOPBACKADR);
-		sys_rootdelay = sys_orphandelay;
+		sys_rootdelay = 0;
 		sys_rootdisp = sys_mindisp;
 		sys_offset = 0;
 	}
@@ -702,19 +697,12 @@ receive(
 		}
 
 		/*
-		 * Do not respond if unsynchronized or stratum is below
-		 * the floor or at or above the ceiling.
+		 * Do not respond if we have no system peer or our
+		 * stratum is greater than the manycaster or the
+		 * manycaster has already synchronized to us.
 		 */
-		if (sys_leap == LEAP_NOTINSYNC || sys_stratum <
-		    sys_floor || sys_stratum >= sys_ceiling)
-			return;			/* bad stratum */
-
-		/*
-		 * Do not respond if our stratum is greater than the
-		 * manycaster or it has already synchronized to us.
-		 */
-		if (sys_peer == NULL || hisstratum < sys_stratum ||
-		    (sys_cohort && hisstratum == sys_stratum) ||
+		if (sys_peer == NULL || sys_stratum >= hisstratum ||
+		    (!sys_cohort && sys_stratum == hisstratum + 1) ||
 		    rbufp->dstadr->addr_refid == pkt->refid)
 			return;			/* no help */
 
@@ -749,6 +737,14 @@ receive(
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic))
 			return;			/* bad auth */
+
+		/*
+		 * Do not respond if unsynchronized or stratum is below
+		 * the floor or at or above the ceiling.
+		 */
+		if (hisleap == LEAP_NOTINSYNC || hisstratum <
+		    sys_floor || hisstratum >= sys_ceiling)
+			return;			/* bad stratum */
 
 		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			sys_restricted++;
@@ -789,6 +785,15 @@ receive(
 		if (hisleap == LEAP_NOTINSYNC || hisstratum <
 		    sys_floor || hisstratum >= sys_ceiling)
 			return;			/* bad stratum */
+
+		/*
+		 * Do not respond if we have a system peer and our
+		 * stratum is not greater than the broadcaster or the
+		 * broadcaster has already synchronized to us.
+		 */
+		if ((sys_peer != NULL && sys_stratum <= hisstratum) ||
+		    rbufp->dstadr->addr_refid == pkt->refid)
+			return;			/* no help */
 
 		switch (sys_bclient) {
 
@@ -1423,19 +1428,7 @@ clock_update(
 			report_event(EVNT_SYNCCHG, NULL);
 		}
 		sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
-
-		/*
-		 * In orphan mode the stratum is clamped to the orphan
-		 * stratum and the root delay is set to a random value
-		 * generated at startup. Otherwise, the root delay is
-		 * set to the peer delay plus the peer root delay.
-		 */
-		if (sys_stratum >= sys_orphan) {
-			sys_stratum = sys_orphan;
-			sys_rootdelay = sys_orphandelay;
-		} else {
-			sys_rootdelay = peer->delay + peer->rootdelay;
-		}
+		sys_rootdelay = peer->delay + peer->rootdelay;
 		sys_reftime = peer->rec;
 
 		/*
@@ -2154,16 +2147,13 @@ clock_select(void)
 	 * NTP_MAXASSOC of them. Scan the list to find falsetickers, who
 	 * leave the island immediately. The TRUE peer is always a
 	 * truechimer. We must leave at least one peer to collect the
-	 * million bucks. If in orphan mode, rascals found with lower
-	 * stratum are guaranteed a seat on the bus.
+	 * million bucks.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		if (nlist > 1 && (peer->offset <= low || peer->offset >=
-		    high) && !(peer->flags & FLAG_TRUE) &&
-		    !(sys_stratum >= sys_orphan && peer->stratum <
-		    sys_orphan))
+		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
 		peer->status = CTL_PST_SEL_DISTSYSPEER;
@@ -2348,16 +2338,7 @@ clock_select(void)
 	 * the existing system peer, if any, and (5) the head of the
 	 * survivor list.
 	 */
-	if (typesystem->stratum >= sys_orphan) {
-
-		/*
-		 * If in orphan modeand the lowest distance, we are the
-		 * orphan parent otherwise, we are an orphan child.
-		 */
-		if (sys_orphandelay <= typesystem->rootdelay) {
-			sys_peer = NULL;
-			return;
-		}
+	if (typesystem->stratum == sys_orphan) {
 		sys_peer = typesystem;
 		sys_peer->status = CTL_PST_SEL_SYSPEER;
 		sys_offset = sys_peer->offset;
@@ -2481,19 +2462,18 @@ root_distance(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	double ftemp;
 
 	/*
 	 * Careful squeak here. The value returned must be greater than
 	 * the minimum root dispersion in order to avoid clockhop with
-	 * highly precise reference clocks. In orphan mode use only the
-	 * peer root delay, as that is used by the mitigation algorithm.
+	 * highly precise reference clocks. In orphan mode use the peer
+	 * address to fool the mitigation algorithm.
 	 */
-	if (peer->stratum >= sys_orphan)
-		ftemp = 0;
-	else
-		ftemp = peer->rootdelay;
-	return ((peer->delay + ftemp) / 2 + peer->disp +
+	if (peer->stratum == sys_orphan)
+		return (addr2refid(&peer->srcadr) / FRAC * sys_maxdist /
+		    1.);
+
+	return ((peer->delay + peer->rootdelay) / 2 + peer->disp +
 	    peer->rootdisp + clock_phi * (current_time - peer->update) +
 	    peer->jitter);
 }
@@ -3095,13 +3075,10 @@ peer_unfit(
 	/*
 	 * A stratum error occurs if (1) the server has never been
 	 * synchronized, (2) the server stratum is below the floor or
-	 * greater than or equal to the ceiling, (3) the system stratum
-	 * is below the orphan stratum and the server stratum is greater
-	 * than or equal to the orphan stratum.
+	 * greater than or equal to the ceiling.
 	 */
 	if (peer->leap == LEAP_NOTINSYNC || peer->stratum < sys_floor ||
-	    peer->stratum >= sys_ceiling || (sys_stratum < sys_orphan &&
-	    peer->stratum >= sys_orphan))
+	    peer->stratum >= sys_ceiling)
 		rval |= TEST10;		/* stratum out of bounds */
 
 	/*
@@ -3116,12 +3093,12 @@ peer_unfit(
 	/*
 	 * A loop error occurs if the remote peer is synchronized to the
 	 * local peer of if the remote peer is synchronized to the same
-	 * server as the local peer, but only if the remote peer is not
-	 * the orphan parent.
+	 * server as the local peer but only if the remote peer is
+	 * neither a reference clock nor an orphan.
 	 */
 	if (peer->stratum > 1 && peer->refid != htonl(LOOPBACKADR) &&
-	    ((!peer->dstadr || peer->refid ==
-	    peer->dstadr->addr_refid) || peer->refid == sys_refid))
+	    (peer->refid == (peer->dstadr ? peer->dstadr->addr_refid :
+	    0) || peer->refid == sys_refid))
 		rval |= TEST12;		/* synch loop */
 
 	/*
@@ -3230,8 +3207,6 @@ init_proto(void)
 
 	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
-	sys_orphandelay = (double)(ntp_random() & 0xffff) / 65536. *
-	    sys_maxdist;
 	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;

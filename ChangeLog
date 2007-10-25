@@ -1,3 +1,5 @@
+* Orphan mode and other protocol cleanup from Dave Mills.
+* Documentation cleanup from Dave Mills.
 * [Bug 940] ntp-keygen uses -v.  Disallow it as a shortcut for --version.
 * more cleanup to ntp_lineeditlibs.m4.
 * Documentation updates from Dave Mills.
