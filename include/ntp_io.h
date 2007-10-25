@@ -32,6 +32,12 @@
 
 #include <isc/boolean.h>
 #include <isc/netaddr.h>
+
+#if HAVE_NETINET_IN_H && HAVE_NETINET_IP_H
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#endif
+
 /*
  * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
  * to (and can).  This is here initially for QNX, but may help for

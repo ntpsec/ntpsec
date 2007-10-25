@@ -424,6 +424,24 @@ AC_CHECK_HEADERS(netinet/ip.h, [], [],
 #include <netinet/in_systm.h>
 #endif
 ])
+
+# Check for IPTOS_PREC
+AC_MSG_CHECKING(IPPROTO_IP IP_TOS IPTOS_LOWDELAY)
+AC_EGREP_CPP(yes,
+    [#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_NETINET_IP_H
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#endif
+#if defined(IPPROTO_IP) && defined(IP_TOS) && defined(IPTOS_LOWDELAY)
+  yes
+#endif
+    ],
+    [AC_MSG_RESULT([yes]); AC_DEFINE(HAVE_IPTOS_SUPPORT, 1, [Do we have IPTOS support?])],
+    [AC_MSG_RESULT([no])])
+
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO, 1, [NetInfo support?])])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
 dnl AC_CHECK_HEADERS(sys/chudefs.h)

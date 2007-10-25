@@ -169,6 +169,14 @@ volatile int disable_dynamic_updates;   /* when set to != 0 dynamic updates won'
 static	struct refclockio *refio;
 #endif /* REFCLOCK */
 
+#if defined(HAVE_IPTOS_SUPPORT)
+/* set IP_TOS to minimize packet delay */
+# if defined(IPTOS_PREC_INTERNETCONTROL)
+const int tos = IPTOS_PREC_INTERNETCONTROL;
+# else
+const int tos = IPTOS_LOWDELAY;
+# endif
+#endif
 
 /*
  * Define what the possible "soft" errors can be.  These are non-fatal returns
@@ -2450,9 +2458,6 @@ open_socket(
 	SOCKET fd;
 	int on = 1, off = 0;	/* int is OK for REUSEADR per */
 				/* http://www.kohala.com/start/mcast.api.txt */
-#if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
-	int tos;
-#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
 
 	if ((addr->ss_family == AF_INET6) && (isc_net_probeipv6() != ISC_R_SUCCESS))
 		return (INVALID_SOCKET);
@@ -2515,17 +2520,16 @@ open_socket(
 	 * IPv4 specific options go here
 	 */
 	if (addr->ss_family == AF_INET) {
-#if defined(IPTOS_LOWDELAY) && defined(IPPROTO_IP) && defined(IP_TOS)
-	/* set IP_TOS to minimize packet delay */
-		tos = IPTOS_LOWDELAY;
-		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &tos, sizeof(tos)) < 0)
-		{
-			netsyslog(LOG_ERR, "setsockopt IPTOS_LOWDELAY on fails on address %s: %m",
-				stoa(addr));
-		}
-#endif /* IPTOS_LOWDELAY && IPPROTO_IP && IP_TOS */
-	if ((flags & INT_BROADCAST))
-		socket_broadcast_enable(interf, fd, addr);
+#if defined(HAVE_IPTOS_SUPPORT)
+		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &tos,
+		    sizeof(tos)) < 0) {
+			netsyslog(LOG_ERR,
+			    "setsockopt IP_TOS (%02x) fails on address %s: %m",
+			    tos, stoa(addr));
+  		}
+#endif /* HAVE_IPTOS_SUPPORT */
+		if ((flags & INT_BROADCAST))
+			socket_broadcast_enable(interf, fd, addr);
 	}
 
 	/*

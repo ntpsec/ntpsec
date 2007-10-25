@@ -1,3 +1,4 @@
+* [Bug 752] Update the QoS tagging (code only - configuration to follow).
 * Orphan mode and other protocol cleanup from Dave Mills.
 * Documentation cleanup from Dave Mills.
 * [Bug 940] ntp-keygen uses -v.  Disallow it as a shortcut for --version.
