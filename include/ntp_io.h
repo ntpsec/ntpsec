@@ -35,6 +35,9 @@
 
 #if HAVE_NETINET_IN_H && HAVE_NETINET_IP_H
 #include <netinet/in.h>
+# if HAVE_NETINET_IN_SYSTM_H
+#  include <netinet/in_systm.h>
+# endif
 #include <netinet/ip.h>
 #endif
 
