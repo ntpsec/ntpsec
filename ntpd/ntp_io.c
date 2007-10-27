@@ -172,9 +172,9 @@ static	struct refclockio *refio;
 #if defined(HAVE_IPTOS_SUPPORT)
 /* set IP_TOS to minimize packet delay */
 # if defined(IPTOS_PREC_INTERNETCONTROL)
-const int tos = IPTOS_PREC_INTERNETCONTROL;
+	unsigned int qos = IPTOS_PREC_INTERNETCONTROL;
 # else
-const int tos = IPTOS_LOWDELAY;
+	 unsigned int qos = IPTOS_LOWDELAY;
 # endif
 #endif
 
@@ -2521,11 +2521,11 @@ open_socket(
 	 */
 	if (addr->ss_family == AF_INET) {
 #if defined(HAVE_IPTOS_SUPPORT)
-		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &tos,
-		    sizeof(tos)) < 0) {
+		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *) &qos,
+		    sizeof(qos)) < 0) {
 			netsyslog(LOG_ERR,
 			    "setsockopt IP_TOS (%02x) fails on address %s: %m",
-			    tos, stoa(addr));
+			    qos, stoa(addr));
   		}
 #endif /* HAVE_IPTOS_SUPPORT */
 		if ((flags & INT_BROADCAST))
