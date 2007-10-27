@@ -183,8 +183,8 @@ main(
 # include <sys/var.h>
 #endif
 
-#include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include "ntp_io.h"
 
 #ifdef hz /* Was: RS6000 */
 # undef hz
