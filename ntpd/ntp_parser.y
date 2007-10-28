@@ -166,6 +166,7 @@
 %token		T_Preempt
 %token		T_Prefer
 %token		T_Pw
+%token		T_Qos
 %token		T_RandFile
 %token		T_Rawstats
 %token		T_Refid
@@ -748,6 +749,8 @@ miscellaneous_command
                     { enqueue(my_config.trap, create_addr_opts_node($2, $3));  }
 	|	T_Ttl integer_list
                     { append_queue(my_config.ttl, $2); }
+	|	T_Qos T_String
+                    { enqueue(my_config.qos, create_attr_sval(T_Qos, $2)); }
 	;	
 drift_parm
 	:	T_String

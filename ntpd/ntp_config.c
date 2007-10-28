@@ -189,6 +189,9 @@ int	cryptosw;		/* crypto command called */
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
 extern char *leapseconds_file_name; /*name of the leapseconds file */
+#ifdef HAVE_IPTOS_SUPPORT
+extern unsigned int qos;				/* QoS setting */
+#endif /* HAVE_IPTOS_SUPPORT */
 
 /* FUNCTION PROTOTYPES */
 
@@ -208,6 +211,7 @@ static void config_tinker(void);
 static void config_system_opts(void);
 static void config_logconfig(void);
 static void config_phone(void);
+static void config_qos(void);
 static void config_setvar(void);
 static void config_ttl(void);
 static void config_trap(void);
@@ -295,6 +299,7 @@ init_syntax_tree(void)
 
 	my_config.logconfig = create_queue();
 	my_config.phone = create_queue();
+	my_config.qos = create_queue();
 	my_config.setvar = create_queue();
 	my_config.ttl = create_queue();
 	my_config.trap = create_queue();
@@ -887,7 +892,8 @@ struct key_tok keyword_list[] = {
 /* miscellaneous_command */
 	{ "port",		T_Port,            NO_ARG },
 	{ "interface",		T_Interface,       SINGLE_ARG },
-/* simulator commands */
+	{ "qos",		T_Qos,            NO_ARG },
+/* simulaor commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
 	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
 	{ "beep_delay",     	T_Beep_Delay,      NO_ARG },
@@ -1331,6 +1337,60 @@ config_phone(void)
 		sys_phone[i] = NULL;
 }
 
+static void 
+config_qos(void)
+{
+	struct attr_val *my_qosconfig;
+	char *s; 
+	unsigned int qtos = 0;
+
+	while(!empty(my_config.qos)) {
+		my_qosconfig = (struct attr_val *) 
+			dequeue(my_config.qos);
+		s = my_qosconfig->value.s;
+#ifdef HAVE_IPTOS_SUPPORT
+		if (!strcmp(s, "lowdelay"))  
+			qtos = CONF_QOS_LOWDELAY;
+		else if (!strcmp(s, "throughput")) 
+			qtos = CONF_QOS_THROUGHPUT; 
+		else if (!strcmp(s, "reliability"))
+			qtos = CONF_QOS_RELIABILITY;
+		else if (!strcmp(s, "mincost"))
+			qtos = CONF_QOS_MINCOST;
+#ifdef IPTOS_PREC_INTERNETCONTROL
+		else if (!strcmp(s, "routine") || !strcmp(s, "cs0"))
+			qtos = CONF_QOS_CS0;
+		else if (!strcmp(s, "priority") || !strcmp(s, "cs1"))
+			qtos = CONF_QOS_CS1;
+		else if (!strcmp(s, "immediate") || !strcmp(s, "cs2"))
+			qtos = CONF_QOS_CS2;
+		else if (!strcmp(s, "flash") || !strcmp(s, "cs3"))				
+			qtos = CONF_QOS_CS3; 	/* overlapping prefix on keyword */
+		if (!strcmp(s, "flashoverride") || !strcmp(s, "cs4"))
+			qtos = CONF_QOS_CS4;
+		else if (!strcmp(s, "critical") || !strcmp(s, "cs5"))
+			qtos = CONF_QOS_CS5;
+		else if(!strcmp(s, "internetcontrol") || !strcmp(s, "cs6"))
+			qtos = CONF_QOS_CS6;
+		else if (!strcmp(s, "netcontrol") || !strcmp(s, "cs7"))
+			qtos = CONF_QOS_CS7;
+#endif  /* IPTOS_PREC_INTERNETCONTROL */
+		if (qtos == 0) 
+			msyslog(LOG_INFO, "parse error, qos %s not accepted\n", s);
+		else 
+			qos = qtos;
+#endif  /* HAVE IPTOS_SUPPORT */
+		/* 
+		 * value is set, but not being effective. Need code to change  
+         * the current connections to notice. Might also 
+		 * consider logging a message about the action.
+		 * XXX msyslog(LOG_INFO, "QoS %s requested by config\n", s); 
+		 */
+		free(s);
+		free_node(my_qosconfig); 
+	}
+}
+
 static void
 config_setvar(void)
 {
@@ -1426,6 +1486,11 @@ config_trap(void)
 		 */
 		if (!err_flag) {
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			if (getnetnum(curr_trap->addr->address, &peeraddr, 1, t_UNK) != 1) {
+                err_flag = 1;
+                break;
+            }
+
 			if (port_no != 0)
 				((struct sockaddr_in6*)&peeraddr)->sin6_port = htons((u_short) port_no);
 			else
@@ -1893,6 +1958,7 @@ config_ntpd(void)
 	config_other_modes();
 	config_peers();
 	config_fudge();
+	config_qos();
 }
 
 #ifdef SIM
