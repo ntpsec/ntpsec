@@ -420,47 +420,6 @@ static int is_ipv4_address(char *lexeme)
         return 0;
 }
 
-/* IPv6 Address 
- * See RFC 3513, Section 2.2 for details
- * Note: full error checking is not being done
- */
-static int is_ipv6_address(char *lexeme)
-{
-    int i;
-    int quad_no = 1;
-    int digits_read = 0;
-    int group_seen = 0;  
-    
-    for (i = 0;lexeme[i];++i) {
-        if (isxdigit(lexeme[i]))
-            ++digits_read;
-        else if (lexeme[i] == ':') {
-            ++quad_no;            
-            if (digits_read == 0 && !group_seen)
-                group_seen = 1;
-            else if (digits_read > 4 ||
-                     (digits_read == 0 && group_seen))
-                return 0;
-            digits_read = 0;
-        }
-        else if (lexeme[i] == '.') {
-            /* A IPv4 address has been mixed with an IPv6 Address
-             * Ensure that less than 6 quads have been read and that
-             * the IPv4 address is valid 
-             */
-            while (i >= 0 && lexeme[i-1] != ':')
-                --i;
-            return ((quad_no <= 6) && is_ipv4_address(&lexeme[i]));
-        }
-        else
-            return 0;
-    }
-    /* Make sure that we don't end with a single ':' */
-    if (lexeme[i-1] == ':' && lexeme[i-2] != ':')
-        return 0;
-    
-    return ((quad_no <= 7 && digits_read <= 4) ? 1 : 0);
-}
 
 
 /* Host Name */
@@ -510,6 +469,7 @@ int yylex()
     int i, instring = 0;
     int token;                 /* The return value/the recognized token */
     int ch;
+	struct in_addr temp_inaddr;
     static int expect_string = NO_ARG;
 
     do {
@@ -626,7 +586,7 @@ int yylex()
         else
             return T_IPv4_address;
     }
-    else if (is_ipv6_address(yytext) && (!instring)) {
+    else if ((inet_pton(AF_INET6, yytext, &temp_inaddr) == 1) && (!instring)) {
         if (expect_string == SINGLE_ARG)
             expect_string = NO_ARG;
         errno = 0;
