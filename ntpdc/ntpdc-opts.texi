@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  Saturday October 27, 2007 at 07:42:21 AM EDT
+# It has been AutoGen-ed  Tuesday October 30, 2007 at 06:44:28 AM EST
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -58,7 +58,7 @@ This is the automatically generated usage text for ntpdc:
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTP query program - Ver. 4.2.5p86
+ntpdc - vendor-specific NTP query program - Ver. 4.2.5p91
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -86,7 +86,7 @@ USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
    -D Str set-debug-level Set the output debug message level
                                 - may appear multiple times
    -n no  numeric        numeric host addresses
-   -v opt version        Output version information and exit
+      opt version        Output version information and exit
    -? no  help           Display usage information and exit
    -! no  more-help      Extended usage information passed thru pager
    -> opt save-opts      Save the option state to a config file
