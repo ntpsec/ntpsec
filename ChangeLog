@@ -1,3 +1,5 @@
+* Upgraded bison at UDel.
+* Update br-flock and flock-build machine lists.
 * [Bug 752] QoS: add parse/config handling code. 
 * Fix the #include order in tickadj.c for picky machines.
 * [Bug 752] QoS: On some systems, netinet/ip.h needs netinet/ip_systm.h.
