@@ -29,13 +29,13 @@
  */
 
 struct state {
-    char ch;                   /* Input character associated with the state */
-    struct state *next_state;  /* Next state to advance to on reading ch */
-    struct state *next_char;   /* Pointer to next character associated with
-                                  the state */
-    int token;                 /* Token to be returned on successful parse */
-    int expect_string;         /* A boolean flag, which when set, indicates
-                                  that the next token should be a string */
+	char ch;                   /* Input character associated with the state */
+	struct state *next_state;  /* Next state to advance to on reading ch */
+	struct state *next_char;   /* Pointer to next character associated with
+				      the state */
+	int token;                 /* Token to be returned on successful parse */
+	int expect_string;         /* A boolean flag, which when set, indicates
+				      that the next token should be a string */
 };
 
 
@@ -78,65 +78,66 @@ int get_next_char(void);
  * for some other keyword that has the same prefix as the current one.
  */
 
-struct state *create_states(char *keyword, 
-                                   int token, 
-                                   int expect_string,
-                                   struct state *pre_state)
+struct state *
+create_states(char *keyword, 
+	      int token, 
+	      int expect_string,
+	      struct state *pre_state)
 {
-    struct state *my_state;
-    struct state *return_state = pre_state;
+	struct state *my_state;
+	struct state *return_state = pre_state;
     
 
-    struct state *prev_char = NULL;
-    struct state *curr_char = pre_state;
+	struct state *prev_char = NULL;
+	struct state *curr_char = pre_state;
 
-    /* Find the correct position to insert the state. 
-     * All states should be in alphabetical order
-     */
-    while (curr_char && (keyword[0] < curr_char->ch)) {
-        prev_char = curr_char;
-        curr_char = curr_char->next_char;
-    }
+	/* Find the correct position to insert the state. 
+	 * All states should be in alphabetical order
+	 */
+	while (curr_char && (keyword[0] < curr_char->ch)) {
+		prev_char = curr_char;
+		curr_char = curr_char->next_char;
+	}
 
-    /* Check if a previously seen keyword has the same prefix as the 
-     * current keyword. If yes, simply use the state for that keyword
-     * as my_state 
-     */
-    if (curr_char && (keyword[0] == curr_char->ch))
-        my_state = curr_char;
-    else {
-        my_state = (struct state *) malloc(sizeof(struct state));
-        my_state->ch = keyword[0];  /* Store the first character
-                                    of the keyword */
-        my_state->next_state = NULL;
-        my_state->next_char = curr_char;
-        my_state->token = NON_ACCEPTING;  /* Not an accepting state */
-        my_state->expect_string = NO_ARG; 
+	/* Check if a previously seen keyword has the same prefix as the 
+	 * current keyword. If yes, simply use the state for that keyword
+	 * as my_state 
+	 */
+	if (curr_char && (keyword[0] == curr_char->ch))
+		my_state = curr_char;
+	else {
+		my_state = (struct state *) malloc(sizeof(struct state));
+		my_state->ch = keyword[0];  /* Store the first character
+					       of the keyword */
+		my_state->next_state = NULL;
+		my_state->next_char = curr_char;
+		my_state->token = NON_ACCEPTING;  /* Not an accepting state */
+		my_state->expect_string = NO_ARG; 
         
-        if (prev_char) 
-            prev_char->next_char = my_state;
-        else
-            return_state = my_state;
-    }
+		if (prev_char) 
+			prev_char->next_char = my_state;
+		else
+			return_state = my_state;
+	}
      
     
-    /* Check if the next character is '\0'.
-     * If yes, we are done with the recognition and this is an accepting
-     * state.
-     * If not, we need to continue scanning
-     */
-    if (keyword[1] == '\0') {
-        my_state->token = token;
-        my_state->expect_string = expect_string;
-    }
-    else {
-        my_state->next_state = create_states(&keyword[1], 
-                                             token, 
-                                             expect_string,
-                                             my_state->next_state);
-    }
+	/* Check if the next character is '\0'.
+	 * If yes, we are done with the recognition and this is an accepting
+	 * state.
+	 * If not, we need to continue scanning
+	 */
+	if (keyword[1] == '\0') {
+		my_state->token = token;
+		my_state->expect_string = expect_string;
+	}
+	else {
+		my_state->next_state = create_states(&keyword[1], 
+						     token, 
+						     expect_string,
+						     my_state->next_state);
+	}
 
-    return return_state;
+	return return_state;
 }
 
 
@@ -145,30 +146,32 @@ struct state *create_states(char *keyword,
  * creates a keywords scanner out of it.
  */
 
-struct state *create_keyword_scanner(struct key_tok *keyword_list)
+struct state *
+create_keyword_scanner(struct key_tok *keyword_list)
 {
-    struct state *scanner = NULL;
-    while (keyword_list->keyword != NULL) {
-        scanner = create_states(keyword_list->keyword, 
-                                keyword_list->token, 
-                                keyword_list->expect_string,
-                                scanner);
-        ++keyword_list;
-    }
-    return scanner;
+	struct state *scanner = NULL;
+	while (keyword_list->keyword != NULL) {
+		scanner = create_states(keyword_list->keyword, 
+					keyword_list->token, 
+					keyword_list->expect_string,
+					scanner);
+		++keyword_list;
+	}
+	return scanner;
 }
 
 
 /* Define a function to delete the keyword scanner, freeing all the allocated
  * memory
  */
-static void delete_keyword_scanner(struct state *my_key_scanner)
+static void
+delete_keyword_scanner(struct state *my_key_scanner)
 {
-    if (my_key_scanner) {
-        delete_keyword_scanner(my_key_scanner->next_char);
-        delete_keyword_scanner(my_key_scanner->next_state);
-        free(my_key_scanner);
-    }
+	if (my_key_scanner) {
+		delete_keyword_scanner(my_key_scanner->next_char);
+		delete_keyword_scanner(my_key_scanner->next_state);
+		free(my_key_scanner);
+	}
 }
 
 
@@ -176,20 +179,21 @@ static void delete_keyword_scanner(struct state *my_key_scanner)
  * above functions.
  */
 
-void print_keyword_scanner(struct state *my_key_scanner, int pos)
+void
+print_keyword_scanner(struct state *my_key_scanner, int pos)
 {
-    static char lexeme[MAX_LEXEME];
-    struct state *curr_state = my_key_scanner;
-    while (curr_state != NULL) {
-        lexeme[pos] = curr_state->ch;
-        if (curr_state->token != NON_ACCEPTING) {
-            lexeme[pos + 1] = '\0';
-            printf("%s\n",lexeme);
-        }
-        if (curr_state->next_state != NULL)
-            print_keyword_scanner(curr_state->next_state, pos + 1);
-        curr_state = curr_state->next_char;
-    }
+	static char lexeme[MAX_LEXEME];
+	struct state *curr_state = my_key_scanner;
+	while (curr_state != NULL) {
+		lexeme[pos] = curr_state->ch;
+		if (curr_state->token != NON_ACCEPTING) {
+			lexeme[pos + 1] = '\0';
+			printf("%s\n",lexeme);
+		}
+		if (curr_state->next_state != NULL)
+			print_keyword_scanner(curr_state->next_state, pos + 1);
+		curr_state = curr_state->next_char;
+	}
 }
 
 /* FILE INTERFACE
@@ -198,57 +202,61 @@ void print_keyword_scanner(struct state *my_key_scanner, int pos)
  * and ungetc functions in order to include positional bookkeeping
  */
 
-struct FILE_INFO *F_OPEN(const char *path, const char *mode)
+struct FILE_INFO *
+F_OPEN(const char *path, const char *mode)
 {
-    struct FILE_INFO *my_info = (struct FILE_INFO *)
-        malloc(sizeof(struct FILE_INFO));
+	struct FILE_INFO *my_info = (struct FILE_INFO *)
+	    malloc(sizeof(struct FILE_INFO));
     
-    if (my_info == NULL)
-        return NULL;
-    my_info->line_no = 0;
-    my_info->col_no = 0;
-    my_info->fname = path;
+	if (my_info == NULL)
+		return NULL;
+	my_info->line_no = 0;
+	my_info->col_no = 0;
+	my_info->fname = path;
 
-    if ((my_info->fd = fopen(path,mode)) == NULL) {
-        free(my_info);
-        return NULL;
-    }
-    return my_info;
+	if ((my_info->fd = fopen(path,mode)) == NULL) {
+		free(my_info);
+		return NULL;
+	}
+	return my_info;
 }
 
-int FGETC(struct FILE_INFO *stream)
+int
+FGETC(struct FILE_INFO *stream)
 {
-    int ch = fgetc(stream->fd);
-    ++stream->col_no;
-    if (ch == '\n') {
-        stream->prev_line_col_no = stream->col_no;
-        ++stream->line_no;
-        stream->col_no = 1;
-    }
-    return ch;
+	int ch = fgetc(stream->fd);
+	++stream->col_no;
+	if (ch == '\n') {
+		stream->prev_line_col_no = stream->col_no;
+		++stream->line_no;
+		stream->col_no = 1;
+	}
+	return ch;
 }
 
 /* BUGS: 1. Function will fail on more than one line of pushback
  *       2. No error checking is done to see if ungetc fails
  * SK: I don't think its worth fixing these bugs for our purposes ;-)
  */
-int UNGETC(int ch, struct FILE_INFO *stream)
+int
+UNGETC(int ch, struct FILE_INFO *stream)
 {
-    if (ch == '\n') {
-        stream->col_no = stream->prev_line_col_no;
-        stream->prev_line_col_no = -1;
-        --stream->line_no;
-    }
-    --stream->col_no;
-    return ungetc(ch, stream->fd);
+	if (ch == '\n') {
+		stream->col_no = stream->prev_line_col_no;
+		stream->prev_line_col_no = -1;
+		--stream->line_no;
+	}
+	--stream->col_no;
+	return ungetc(ch, stream->fd);
 }
 
-int FCLOSE(struct FILE_INFO *stream)
+int
+FCLOSE(struct FILE_INFO *stream)
 {
-    int ret_val = fclose(stream->fd);
-    if (!ret_val)
-        free(stream);
-    return ret_val;
+	int ret_val = fclose(stream->fd);
+	if (!ret_val)
+		free(stream);
+	return ret_val;
 }
 
 /* STREAM INTERFACE 
@@ -264,24 +272,26 @@ int FCLOSE(struct FILE_INFO *stream)
  * input_from_file flag.
  */
 
-int get_next_char(void)
+int
+get_next_char(void)
 {
-    if (input_from_file)
-        return FGETC(ip_file);
-    else {
+	if (input_from_file)
+		return FGETC(ip_file);
+	else {
 		if (remote_config.buffer[remote_config.pos] == '\0') 
 			return EOF;
 		else 
 			return(remote_config.buffer[remote_config.pos++]);
-    }
+	}
 }
 
-void push_back_char(int ch)
+void
+push_back_char(int ch)
 {
-    if (input_from_file)
-        UNGETC(ch, ip_file);
-    else 
-        remote_config.pos--;
+	if (input_from_file)
+		UNGETC(ch, ip_file);
+	else 
+		remote_config.pos--;
 }
 
  
@@ -291,107 +301,110 @@ void push_back_char(int ch)
  */
 
 /* Keywords */
-static int is_keyword(char *lexeme, int *expect_string)
+static int
+is_keyword(char *lexeme, int *expect_string)
 {
-    struct state *curr_state = key_scanner;
-    int token = NON_ACCEPTING;
-    int i;
+	struct state *curr_state = key_scanner;
+	int token = NON_ACCEPTING;
+	int i;
 
-    for (i = 0;lexeme[i];++i) {
-        while (curr_state && (lexeme[i] != curr_state->ch))
-            curr_state = curr_state->next_char;
+	for (i = 0;lexeme[i];++i) {
+		while (curr_state && (lexeme[i] != curr_state->ch))
+			curr_state = curr_state->next_char;
         
-        if (curr_state && (lexeme[i] == curr_state->ch)) {
-            *expect_string = curr_state->expect_string;
-            token = curr_state->token;
-            curr_state = curr_state->next_state;
-        }
-        else {
-            *expect_string = NO_ARG;
-            token = NON_ACCEPTING;
-            break;
-        }
-    }
-    return token;
+		if (curr_state && (lexeme[i] == curr_state->ch)) {
+			*expect_string = curr_state->expect_string;
+			token = curr_state->token;
+			curr_state = curr_state->next_state;
+		}
+		else {
+			*expect_string = NO_ARG;
+			token = NON_ACCEPTING;
+			break;
+		}
+	}
+	return token;
 }
 
 
 /* Integer */
-static int is_integer(char *lexeme)
+static int
+is_integer(char *lexeme)
 {
-    int i = 0;
+	int i = 0;
 
-    /* Allow a leading minus sign */
-    if (lexeme[i] == '-')
-        ++i;
+	/* Allow a leading minus sign */
+	if (lexeme[i] == '-')
+		++i;
     
-    /* Check that all the remaining characters are digits */
-    for (;lexeme[i]; ++i) {
-        if (!isdigit(lexeme[i]))
-            return 0;
-    }
-    return 1;
+	/* Check that all the remaining characters are digits */
+	for (;lexeme[i]; ++i) {
+		if (!isdigit(lexeme[i]))
+			return 0;
+	}
+	return 1;
 }
 
 /* Double */
-static int is_double(char *lexeme)
+static int
+is_double(char *lexeme)
 {
-    int i;
+	int i;
 
-    /* Initialize the state machine
-       int int_part = 1;
-       int frac_part = 0; 
-    */
-    int no_digits = 0;  /* Number of digits read */
+	/* Initialize the state machine
+	   int int_part = 1;
+	   int frac_part = 0; 
+	*/
+	int no_digits = 0;  /* Number of digits read */
     
-    i = 0;
-    /* Check for an optional '+' or '-' */
-    if (lexeme[i] == '+' || lexeme[i] == '-')
-        ++i;
+	i = 0;
+	/* Check for an optional '+' or '-' */
+	if (lexeme[i] == '+' || lexeme[i] == '-')
+		++i;
 
-    /* Read the integer part */
-    for (;lexeme[i] && isdigit(lexeme[i]); ++i)
-        ++no_digits;
+	/* Read the integer part */
+	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+		++no_digits;
     
-    /* Check for the required decimal point */
-    if (lexeme[i] == '.')
-        ++i;
-    else
-        return 0;
+	/* Check for the required decimal point */
+	if (lexeme[i] == '.')
+		++i;
+	else
+		return 0;
     
-    /* Check for any digits after the decimal point */
-    for (;lexeme[i] && isdigit(lexeme[i]); ++i)
-        ++no_digits;
+	/* Check for any digits after the decimal point */
+	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+		++no_digits;
     
-    /* The number of digits in both the decimal part and the fraction part
-       must not be zero at this point */
-    if (no_digits == 0)
-        return 0;
+	/* The number of digits in both the decimal part and the fraction part
+	   must not be zero at this point */
+	if (no_digits == 0)
+		return 0;
     
-    /* Check if we are done */
-    if (lexeme[i] == '\0')
-        return 1;
+	/* Check if we are done */
+	if (lexeme[i] == '\0')
+		return 1;
     
-    /* There is still more output, read the Exponent Part */
-    if (lexeme[i] == 'e' || lexeme[i] == 'E') {
-        ++i;
-    }
-    else
-        return 0;
+	/* There is still more output, read the Exponent Part */
+	if (lexeme[i] == 'e' || lexeme[i] == 'E') {
+		++i;
+	}
+	else
+		return 0;
             
-    /* Read an optional Sign */
-    if (lexeme[i] == '+' || lexeme[i] == '-')
-        ++i;
+	/* Read an optional Sign */
+	if (lexeme[i] == '+' || lexeme[i] == '-')
+		++i;
 
-    /* Now read the exponent part */
-    for (;lexeme[i] && isdigit(lexeme[i]); ++i)
-        ++no_digits;
+	/* Now read the exponent part */
+	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+		++no_digits;
 
-    /* Check if we are done */
-    if (lexeme[i] == '\0')
-        return 1;
-    else
-        return 0;
+	/* Check if we are done */
+	if (lexeme[i] == '\0')
+		return 1;
+	else
+		return 0;
 }
 
 
@@ -402,7 +415,7 @@ static int is_double(char *lexeme)
 /*     int i; */
 /*     for (i = 0;lexeme[i];++i) */
 /*         if (!isalnum(lexeme[i])) { */
-             /* Check for two consequtive periods which are not allowed */
+/* Check for two consequtive periods which are not allowed */
 /*             if (lexeme[i] == '.' && lexeme[i + 1] != '.') */
 /*                 ; */
 /*             else */
@@ -414,22 +427,24 @@ static int is_double(char *lexeme)
 
 /* Define a function to test whether a character is a special character */
 
-static int is_special(char ch)
+static int
+is_special(char ch)
 {
-    int i;
+	int i;
     
-    for (i = 0;i < NO_OF_SPECIAL_CHARS;++i)
-        if (ch == special_char[i])
-            return 1;
-    return 0;
+	for (i = 0;i < NO_OF_SPECIAL_CHARS;++i)
+		if (ch == special_char[i])
+			return 1;
+	return 0;
 }
 
-static int is_EOC(char ch)
+static int
+is_EOC(char ch)
 {
-    if ((old_config_style && (ch == '\n')) ||
-        (!old_config_style && (ch == ';')))
-        return 1;
-    return 0;
+	if ((old_config_style && (ch == '\n')) ||
+	    (!old_config_style && (ch == ';')))
+		return 1;
+	return 0;
 }
     
 
@@ -438,142 +453,144 @@ static int is_EOC(char ch)
  * input and return an int
  */
 
-int yylex()
+int
+yylex()
 {
-    int i, instring = 0;
-    int token;                 /* The return value/the recognized token */
-    int ch;
+	int i, instring = 0;
+	int token;                 /* The return value/the recognized token */
+	int ch;
 	struct isc_netaddr temp_isc_netaddr;
-    static int expect_string = NO_ARG;
+	static int expect_string = NO_ARG;
 
-    do {
-        /* Ignore whitespace at the beginning */
-        while ((ch = get_next_char()) != EOF &&
-               isspace(ch) &&
-               !is_EOC(ch))
-            ; /* Null Statement */
+	do {
+		/* Ignore whitespace at the beginning */
+		while ((ch = get_next_char()) != EOF &&
+		       isspace(ch) &&
+		       !is_EOC(ch))
+			; /* Null Statement */
         
-        if (ch == EOF) {
+		if (ch == EOF) {
 			if (input_from_file == 0)
 				return 0;
-            if (!(curr_include_level > 0)) 
-            	return 0;
+			if (!(curr_include_level > 0)) 
+				return 0;
 			else { 
 				FCLOSE(fp[curr_include_level]);
 				ip_file = fp[--curr_include_level]; 
 				return T_EOC;
 			}
 		} else if (is_EOC(ch)) {
-            expect_string = NO_ARG;   /* Reset expect_string */
-            return T_EOC;
-        }
-        /* Check if the next character is a special character. If yes, return
-         * the special character
-         */
-        else if (is_special(ch))
-            return ch;
-        else
-            push_back_char(ch);
-
-        /* Read in the lexeme */
-        for (i = 0;(i < MAX_LEXEME) && 
-                 (yytext[i] = get_next_char()) != EOF; ++i) {
-        
-            /* Break on reading in whitespace or a special character */
-            if (isspace(yytext[i]) || is_special(yytext[i]) || is_EOC(ch)
-			|| yytext[i] == '"')
-		break;
-        
-            /* Read the rest of the line on reading a start of comment 
-               character */
-            if (yytext[i] == '#') {
-                while ((yytext[i] = get_next_char()) != EOF &&
-                       yytext[i] != '\n')
-                    ; /* Null Statement */
-                break;
-            }   
-        }
-	/* Pick up all of the string inside between " marks, to end of line.
-	 * If we make it to EOL without a terminating " assume it for them.
-	 */
-	 if (yytext[i] == '"') {
-         instring = 1;
-             while ((yytext[i] = get_next_char()) != EOF &&
-                     yytext[i] != '"' && yytext[i] != '\n') {
-			i++;
+			expect_string = NO_ARG;   /* Reset expect_string */
+			return T_EOC;
 		}
-             if (yytext[i] == '"')
-		 yytext[i] =  ' ';
-        }
-        /* If the last character read was an EOF, pushback a newline
-         * character. This is to prevent a parse error when there is
-         * no newline at the end of a file
-         */
-        if (yytext[i] == EOF)
-            push_back_char('\n');
+		/* Check if the next character is a special character.
+		 * If yes, return the special character
+		 */
+		else if (is_special(ch))
+			return ch;
+		else
+			push_back_char(ch);
+
+		/* Read in the lexeme */
+		for (i = 0;(i < MAX_LEXEME) && 
+			 (yytext[i] = get_next_char()) != EOF; ++i) {
         
-        /* Pushback the last character read that is not a part of this lexeme */
-        push_back_char(yytext[i]); 
-        yytext[i] = '\0';
-    } while (i == 0);
+			/* Break on reading in whitespace or a special character */
+			if (isspace(yytext[i]) || is_special(yytext[i])
+			    || is_EOC(ch) || yytext[i] == '"')
+				break;
+        
+			/* Read the rest of the line on reading a start of comment 
+			   character */
+			if (yytext[i] == '#') {
+				while ((yytext[i] = get_next_char()) != EOF
+				       && yytext[i] != '\n')
+					; /* Null Statement */
+				break;
+			}   
+		}
+		/* Pick up all of the string inside between " marks, to end of line.
+		 * If we make it to EOL without a terminating " assume it for them.
+		 */
+		if (yytext[i] == '"') {
+			instring = 1;
+			while ((yytext[i] = get_next_char()) != EOF &&
+			       yytext[i] != '"' && yytext[i] != '\n') {
+				i++;
+			}
+			if (yytext[i] == '"')
+				yytext[i] =  ' ';
+		}
+		/* If the last character read was an EOF, pushback a newline
+		 * character. This is to prevent a parse error when there is
+		 * no newline at the end of a file
+		 */
+		if (yytext[i] == EOF)
+			push_back_char('\n');
+        
+		/* Pushback the last character read that is not a part of this lexeme */
+		push_back_char(yytext[i]); 
+		yytext[i] = '\0';
+	} while (i == 0);
 
 #ifdef DEBUG
-    if (debug >= 3)
-        printf ("yylex: Just Read: %s\n", yytext);
+	if (debug >= 3)
+		printf ("yylex: Just Read: %s\n", yytext);
 #endif
 
-    /* Now return the desired token */
-    if ((expect_string == NO_ARG) &&  (!instring) &&
-        (token = is_keyword(yytext, &expect_string)))
-        return token;
-    else if (is_integer(yytext) && (!instring) ) {
-        errno = 0;
-        if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
-            && ((errno == EINVAL) || (errno == ERANGE))) {
-            fprintf(stderr,"Integer cannot be represented: %s\n",
-                    yytext);
-            exit(1);
-        }
-        else
-            return T_Integer;
-    }
-    else if (is_double(yytext) && (!instring)) {
-        errno = 0;
-        if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
-            fprintf(stderr, "Double too large to represent: %s\n",
-                    yytext);
-            exit(1);
-        }
-        else
-            return T_Double;
-    }
-    else if ((is_ip_address(yytext, &temp_isc_netaddr)) && (!instring)) {
-        if (expect_string == SINGLE_ARG)
-            expect_string = NO_ARG;
-        errno = 0;
-        if ((yylval.String = strdup(yytext)) == NULL &&
-            errno == ENOMEM) {
-            fprintf(stderr, "Could not allocate memory for: %s\n",
-                    yytext);
-            exit(1);
-        }
-        else return 
-            temp_isc_netaddr.family == AF_INET ? T_IPv4_address :
-											 T_IPv6_address ;
-    }
-    else { /* Default: Everything is a string */
-        instring = 0;
-        if (expect_string == SINGLE_ARG)
-            expect_string = NO_ARG;
-        errno = 0;
-        if ((yylval.String = strdup(yytext)) == NULL &&
-            errno == ENOMEM) {
-            fprintf(stderr, "Could not allocate memory for: %s\n",
-                    yytext);
-            exit(1);
-        }
-        else
-            return T_String;
-    }
-    return 1;
+	/* Now return the desired token */
+	if ((expect_string == NO_ARG) &&  (!instring) &&
+	    (token = is_keyword(yytext, &expect_string)))
+		return token;
+	else if (is_integer(yytext) && (!instring) ) {
+		errno = 0;
+		if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
+		    && ((errno == EINVAL) || (errno == ERANGE))) {
+			fprintf(stderr,"Integer cannot be represented: %s\n",
+				yytext);
+			exit(1);
+		}
+		else
+			return T_Integer;
+	}
+	else if (is_double(yytext) && (!instring)) {
+		errno = 0;
+		if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
+			fprintf(stderr, "Double too large to represent: %s\n",
+				yytext);
+			exit(1);
+		}
+		else
+			return T_Double;
+	}
+	else if ((is_ip_address(yytext, &temp_isc_netaddr)) && (!instring)) {
+		if (expect_string == SINGLE_ARG)
+			expect_string = NO_ARG;
+		errno = 0;
+		if ((yylval.String = strdup(yytext)) == NULL &&
+		    errno == ENOMEM) {
+			fprintf(stderr, "Could not allocate memory for: %s\n",
+				yytext);
+			exit(1);
+		}
+		else return 
+		    (temp_isc_netaddr.family == AF_INET)
+		    ? T_IPv4_address
+		    : T_IPv6_address ;
+	}
+	else { /* Default: Everything is a string */
+		instring = 0;
+		if (expect_string == SINGLE_ARG)
+			expect_string = NO_ARG;
+		errno = 0;
+		if ((yylval.String = strdup(yytext)) == NULL &&
+		    errno == ENOMEM) {
+			fprintf(stderr, "Could not allocate memory for: %s\n",
+				yytext);
+			exit(1);
+		}
+		else
+			return T_String;
+	}
+	return 1;
 }
