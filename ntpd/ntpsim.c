@@ -31,6 +31,8 @@ void (*event_ptr[]) (Event *) = {
 /* Define a function to compare two events to determine which one occurs first
  */
 
+int determine_event_ordering(Event *e1, Event *e2);
+
 int determine_event_ordering(Event *e1, Event *e2)
 {
     return (e1->time - e2->time);
@@ -39,6 +41,8 @@ int determine_event_ordering(Event *e1, Event *e2)
 /* Define a function to compare two received packets to determine which one
  * is received first
  */
+int determine_recv_buf_ordering(struct recvbuf *b1, struct recvbuf *b2);
+
 int determine_recv_buf_ordering(struct recvbuf *b1, struct recvbuf *b2)
 {
     double recv_time1, recv_time2;
@@ -73,6 +77,8 @@ void create_server_associations()
 
 
 /* Main Simulator Code */
+int ntpsim(int argc, char *argv[]);
+
 int ntpsim(int argc, char *argv[])
 {
     Event *curr_event;
@@ -286,6 +292,7 @@ int simulate_server(
     rbuf.receiver = receive;   /* Function to call to process the packet */
     rbuf.recv_length = LEN_PKT_NOMAC;
     rbuf.recv_pkt = xpkt;
+    rbuf.used = 1;
     
     memcpy(&rbuf.srcadr, serv_addr, sizeof(struct sockaddr_storage));
     memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(struct sockaddr_storage));

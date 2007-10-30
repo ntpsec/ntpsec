@@ -1,3 +1,4 @@
+* ntpsim.c: add missing protypes and fix [CID 34], a nit.
 * Upgraded bison at UDel.
 * Update br-flock and flock-build machine lists.
 * [Bug 752] QoS: add parse/config handling code. 
