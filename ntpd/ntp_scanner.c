@@ -395,32 +395,6 @@ static int is_double(char *lexeme)
 }
 
 
-/* IPv4 Address */
-static int is_ipv4_address(char *lexeme)
-{
-    int i;
-    int octet_no = 1;
-    int digits_read = 0;
-
-    for (i = 0;lexeme[i];++i) {
-        if (isdigit(lexeme[i]))
-            ++digits_read;
-        else if (lexeme[i] == '.') {
-            ++octet_no;            
-            if (digits_read < 1 || digits_read > 3)
-                return 0;
-            digits_read = 0;
-        }
-        else
-            return 0;
-    }
-    if (octet_no == 4 && digits_read >= 1 && digits_read <= 3)
-        return 1;
-    else
-        return 0;
-}
-
-
 
 /* Host Name */
 /* static int is_host_name (char *lexeme) */
@@ -469,7 +443,7 @@ int yylex()
     int i, instring = 0;
     int token;                 /* The return value/the recognized token */
     int ch;
-	struct in_addr temp_inaddr;
+	struct isc_netaddr temp_isc_netaddr;
     static int expect_string = NO_ARG;
 
     do {
@@ -573,7 +547,7 @@ int yylex()
         else
             return T_Double;
     }
-    else if (is_ipv4_address(yytext) && (!instring)) {
+    else if ((is_ip_address(yytext, &temp_isc_netaddr)) && (!instring)) {
         if (expect_string == SINGLE_ARG)
             expect_string = NO_ARG;
         errno = 0;
@@ -583,21 +557,9 @@ int yylex()
                     yytext);
             exit(1);
         }
-        else
-            return T_IPv4_address;
-    }
-    else if ((inet_pton(AF_INET6, yytext, &temp_inaddr) == 1) && (!instring)) {
-        if (expect_string == SINGLE_ARG)
-            expect_string = NO_ARG;
-        errno = 0;
-        if ((yylval.String = strdup(yytext)) == NULL &&
-            errno == ENOMEM) {
-            fprintf(stderr, "Could not allocate memory for: %s\n",
-                    yytext);
-            exit(1);
-        }
-        else
-            return T_IPv6_address;
+        else return 
+            temp_isc_netaddr.family == AF_INET ? T_IPv4_address :
+											 T_IPv6_address ;
     }
     else { /* Default: Everything is a string */
         instring = 0;
