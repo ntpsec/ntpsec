@@ -24,6 +24,8 @@ STD="--enable-simulator"
 # * pogo	   sparc-sun-solaris2.10
 # * rackety	   freebsd-6.1
 
+# HMS: we need $PWD because solaris produces /deacon/backroom when
+# we are in /backroom and in general there is no /deacon/backroom.
 c_d=${PWD:-`pwd`}
 
 SIG=`perl -e 'print rand'`
