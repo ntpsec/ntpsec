@@ -2422,14 +2422,14 @@ oncore_msg_BnEnHn(
 			return;
 
 		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (s_char) instance->BEHn[10]; /* update for next time Hn[10] */
+		instance->saw_tooth = (s_char) instance->BEHn[14]; /* update for next time Hn[14] */
 		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
 	} else {
 		if (instance->BEHn[21]) /* bad TRAIM */
 			return;
 
 		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (s_char) instance->BEHn[25]; /* update for next time */
+		instance->saw_tooth = (s_char) instance->BEHn[25]; /* update for next time Bn[25], En[25] */
 		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
 	}
 
