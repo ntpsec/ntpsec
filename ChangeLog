@@ -1,3 +1,7 @@
+*          Negative-sawtooth not applied correctly for oncore 12 channel
+           receiver. Fixed.
+*          Startup code for original LinuxPPS removed.  LinuxPPS now
+           conforms to the PPSAPI.
 ---
 (4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
