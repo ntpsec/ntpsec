@@ -1,3 +1,6 @@
+* A bug in the application of the negative-sawtoot for 12 channel receivers. 
+* The removal of unneeded startup code used for the original LinuxPPS, it now
+  conforms to the PPSAPI and does not need special code.  
 * ntpsim.c: add missing protypes and fix [CID 34], a nit.
 * Upgraded bison at UDel.
 * Update br-flock and flock-build machine lists.
