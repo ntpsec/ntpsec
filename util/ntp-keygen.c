@@ -178,9 +178,9 @@ BOOL init_randfile();
  * Don't try to follow symbolic links
  */
 int
-readlink(char *link, char *file, int len) {
+readlink(char *link, char *file, int len)
 	return (-1);
-}
+
 /*
  * Don't try to create a symbolic link for now.
  * Just move the file to the name you need.
@@ -732,7 +732,6 @@ readkey(
 		fprintf(stderr, "Corrupt file %s or wrong key %s\n%s\n",
 		    cp, passwd, ERR_error_string(ERR_get_error(),
 		    NULL));
-		fclose(str);
 		exit (-1);
 	}
 	*estamp = gstamp;
@@ -1261,8 +1260,8 @@ gen_mv(
 	dsa->p = BN_new();
 	dsa->q = BN_new();
 	dsa->g = BN_new();
-	s = malloc((n + 1) * sizeof(BIGNUM));
-	s1 = malloc((n + 1) * sizeof(BIGNUM));
+	s = malloc((n + 1) * sizeof(BIGNUM *));
+	s1 = malloc((n + 1) * sizeof(BIGNUM *));
 	for (j = 1; j <= n; j++)
 		s1[j] = BN_new();
 	temp = 0;
@@ -1362,7 +1361,7 @@ gen_mv(
 	fprintf(stderr,
 	    "Generating polynomial coefficients for %d roots (%d bits)\n",
 	    n, BN_num_bits(dsa->q)); 
-	x = malloc((n + 1) * sizeof(BIGNUM));
+	x = malloc((n + 1) * sizeof(BIGNUM *));
 	for (j = 1; j <= n; j++) {
 		x[j] = BN_new();
 		while (1) {
@@ -1379,7 +1378,7 @@ gen_mv(
 	 * expansion of root products (x - x[j]) mod q for all j. The
 	 * method is a present from Charlie Boncelet.
 	 */
-	a = malloc((n + 1) * sizeof(BIGNUM));
+	a = malloc((n + 1) * sizeof(BIGNUM *));
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
 		BN_one(a[i]);
@@ -1400,7 +1399,7 @@ gen_mv(
 	 * Generate g[i] = g^a[i] mod p for all i and the generator g.
 	 */
 	fprintf(stderr, "Generating g[i] parameters\n");
-	g = malloc((n + 1) * sizeof(BIGNUM));
+	g = malloc((n + 1) * sizeof(BIGNUM *));
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
 		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
@@ -1467,8 +1466,8 @@ gen_mv(
 	 * or the product s = prod(s'[j]) mod q, which is the enabling
 	 * key.
 	 */
-	xbar = malloc((n + 1) * sizeof(BIGNUM));
-	xhat = malloc((n + 1) * sizeof(BIGNUM));
+	xbar = malloc((n + 1) * sizeof(BIGNUM *));
+	xhat = malloc((n + 1) * sizeof(BIGNUM *));
 	for (j = 1; j <= n; j++) {
 		xbar[j] = BN_new(); xhat[j] = BN_new();
 		BN_zero(xbar[j]);

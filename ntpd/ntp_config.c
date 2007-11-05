@@ -2693,12 +2693,12 @@ do_resolve_internal(void)
 		DWORD dwThreadId;
 		fflush(stdout);
 		ResolverThreadHandle = CreateThread(
-			NULL,				 /* no security attributes	*/
-			0,				 /* use default stack size	*/
-			(LPTHREAD_START_ROUTINE) ntp_intres, /* thread function		*/
-			NULL,				 /* argument to thread function   */
-			0,				 /* use default creation flags	  */
-			&dwThreadId);			 /* returns the thread identifier */
+		    NULL,			 /* no security attributes	*/
+		    0,				 /* use default stack size	*/
+		    (LPTHREAD_START_ROUTINE) ntp_intres, /* thread function		*/
+		    NULL,			 /* argument to thread function   */
+		    0,				 /* use default creation flags	  */
+		    &dwThreadId);		 /* returns the thread identifier */
 		if (ResolverThreadHandle == NULL) {
 			msyslog(LOG_ERR, "CreateThread() failed, can't start ntp_intres");
 			abort_resolve();

@@ -1087,10 +1087,12 @@ crypto_recv(
 				tai_leap.fstamp = ep->fstamp;
 				tai_leap.vallen = ep->vallen;
 				leap_tai = ntohl(ep->pkt[0]);
-				leap_ins = ntohl(ep->pkt[1]);
+				leap_sec = ntohl(ep->pkt[1]);
 				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
-			}
+				msyslog(LOG_NOTICE,
+				    "crypto: next leap second %lu TAI offset %d expire %lu",
+				    leap_sec, leap_tai, leap_expire); 			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN,
@@ -1986,7 +1988,7 @@ crypto_update(void)
 	tai_leap.vallen = htonl(len);
 	ptr = (u_int32 *)tai_leap.ptr;
 	ptr[0] = htonl(leap_tai);
-	ptr[1] = htonl(leap_ins);
+	ptr[1] = htonl(leap_sec);
 	ptr[2] = htonl(leap_expire);
 	if (tai_leap.sig == NULL)
 		tai_leap.sig = emalloc(sign_siglen);
@@ -1995,7 +1997,7 @@ crypto_update(void)
 	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
 		tai_leap.siglen = htonl(len);
-	if (leap_tai > 0)
+	if (leap_expire > 0)
 		crypto_flags |= CRYPTO_FLAG_TAI;
 	snprintf(statstr, NTP_MAXSTRLEN, "update at %lu ts %u",
 	    current_time, ntohl(hostval.tstamp)); 
@@ -3406,6 +3408,7 @@ cert_parse(
 	if ((ret->pkey = X509_get_pubkey(cert)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
+		cert_free(ret);
 		X509_free(cert);
 		return (NULL);
 	}

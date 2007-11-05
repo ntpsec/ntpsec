@@ -795,7 +795,6 @@ struct pkt {
 /*
  * Default parameters.  We use these in the absence of something better.
  */
-#define	DEFBROADDELAY	4e-3		/* default broadcast offset */
 #define INADDR_NTP	0xe0000101	/* NTP multicast address 224.0.1.1 */
 
 /*
