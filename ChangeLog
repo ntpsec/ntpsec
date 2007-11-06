@@ -1,3 +1,4 @@
+* [Bug 713] Fix bug reporting information.
 * A bug in the application of the negative-sawtooth for 12 channel receivers. 
 * The removal of unneeded startup code used for the original LinuxPPS, it now
   conforms to the PPSAPI and does not need special code.  
