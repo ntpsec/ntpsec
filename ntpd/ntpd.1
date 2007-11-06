@@ -1,7 +1,7 @@
-.TH NTPD 1 2007-11-05 "( 4.2.5p94)" "Programmer's Manual"
+.TH NTPD 1 2007-11-06 "( 4.2.5p94)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  Monday November  5, 2007 at 06:36:59 AM EST
+.\"  It has been AutoGen-ed  Tuesday November  6, 2007 at 12:26:50 AM EST
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -55,12 +55,22 @@ Allow us to sync to broadcast servers.
 .sp
 
 .TP
+.BR \-B " \fIstring\fP, " \--simbroadcastdelay "=" \fIstring\fP
+Simulator broadcast delay.
+.sp
+
+.TP
 .BR \-c " \fIstring\fP, " \--configfile "=" \fIstring\fP
 configuration file name.
 .sp
 The name and path of the configuration file,
 /etc/ntp.conf
 by default.
+.TP
+.BR \-C " \fIstring\fP, " \--phasenoise "=" \fIstring\fP
+Phase noise level.
+.sp
+
 .TP
 .BR \-d ", " \--debug-level
 Increase output debug message level.
@@ -103,6 +113,11 @@ See the
 tinker
 configuration file directive for other options.
 .TP
+.BR \-H " \fIstring\fP, " \--simslew "=" \fIstring\fP
+Simuator slew.
+.sp
+
+.TP
 .BR \-i " \fIstring\fP, " \--jaildir "=" \fIstring\fP
 Jail directory.
 .sp
@@ -115,7 +130,7 @@ You may need to also specify a
 option.
 .TP
 .BR \-I " \fIiface\fP, " \--interface "=" \fIiface\fP
-Listen on interface.
+Listen on the specified interface or IP.
 This option may appear an unlimited number of times.
 .sp
 
@@ -160,6 +175,11 @@ Run at high priority.
 To the extent permitted by the operating system, run
 ntpd
 at the highest priority.
+.TP
+.BR \-O " \fIstring\fP, " \--servertime "=" \fIstring\fP
+Server time.
+.sp
+
 .TP
 .BR \-p " \fIstring\fP, " \--pidfile "=" \fIstring\fP
 path to the PID file.
@@ -208,11 +228,21 @@ This is the same operation as the
 statsdir statsdir
 configuration file directive.
 .TP
+.BR \-S " \fIstring\fP, " \--endsimtime "=" \fIstring\fP
+Simulation end time.
+.sp
+
+.TP
 .BR \-t " \fItkey\fP, " \--trustedkey "=" \fItkey\fP
 Trusted key number.
 This option may appear an unlimited number of times.
 .sp
 Add a key number to the trusted key list.
+.TP
+.BR \-T " \fIstring\fP, " \--freqerr "=" \fIstring\fP
+Simulation frequency error.
+.sp
+
 .TP
 .BR \-u " \fIstring\fP, " \--user "=" \fIstring\fP
 Run as userid (or userid:groupid).
@@ -246,6 +276,11 @@ This option may appear an unlimited number of times.
 .sp
 
 .TP
+.BR \-W " \fIstring\fP, " \--walknoise "=" \fIstring\fP
+Simulation random walk noise.
+.sp
+
+.TP
 .BR \-x ", " \--slew
 Slew up to 600 seconds.
 .sp
@@ -262,6 +297,16 @@ See the
 tinker
 configuration file directive for other options.
 Note: The kernel time discipline is disabled with this option.
+.TP
+.BR \-Y " \fIstring\fP, " \--ndelay "=" \fIstring\fP
+Simulation network delay.
+.sp
+
+.TP
+.BR \-Z " \fIstring\fP, " \--pdelay "=" \fIstring\fP
+Simulation processing delay.
+.sp
+
 .TP
 .BR \-? , " \--help"
 Display usage information and exit.
