@@ -186,7 +186,6 @@ extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 extern	void	kod_proto	(void);
 extern	int	leap_tai;
-extern	u_long	leap_ins;
 extern	u_long	leap_expire;
 extern	u_long	leap_sec;
 

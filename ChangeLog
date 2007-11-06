@@ -1,6 +1,10 @@
-* A bug in the application of the negative-sawtoot for 12 channel receivers. 
+* A bug in the application of the negative-sawtooth for 12 channel receivers. 
 * The removal of unneeded startup code used for the original LinuxPPS, it now
   conforms to the PPSAPI and does not need special code.  
+* ntp-keygen.c: Coverity fixes [CID 33,47].
+* Volley cleanup from Dave Mills.
+* Fuzz cleanup from Dave Mills.
+* [Bug 861] Leap second cleanups from Dave Mills.
 * ntpsim.c: add missing protypes and fix [CID 34], a nit.
 * Upgraded bison at UDel.
 * Update br-flock and flock-build machine lists.

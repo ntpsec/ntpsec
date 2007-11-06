@@ -319,21 +319,31 @@ timer(void)
 	 * here, cheerfully ignored.
 	 */
 	if (leap_sec > 0) {
-		leap_sec--;
-		if (leap_sec == 0) {
+		get_systime(&now);
+		if (now.l_ui > leap_sec) {
 			sys_leap = LEAP_NOWARNING;
-			if (sys_tai > 0)
-				sys_tai++;
+			sys_tai = leap_tai;
+		} else if (now.l_ui - leap_sec < 28 * 86400) {
+			sys_leap = LEAP_ADDSECOND;
+			if (leap_tai > 0)
+				sys_tai = leap_tai - 1;
+		}
+#ifdef KERNEL_PLL
+		if (now.l_ui - leap_sec == 600) {
+			if (pll_control && kern_enable)
+				loop_config(LOOP_LEAP, 0);
+ 		}
+#endif /* KERNEL_PLL */
+		if (leap_sec == 0) {
 #ifdef KERNEL_PLL
 			if (!(pll_control && kern_enable))
 				step_systime(-1.0);
 #else /* KERNEL_PLL */
 				step_systime(-1.0);
 #endif /* KERNEL_PLL */
-			get_systime(&now);
 			msyslog(LOG_NOTICE,
-			    "timer: leap second at %u TAI %d s",
-				now.l_ui, sys_tai);
+			    "timer: leap second %lu TAI %d",
+				leap_sec, sys_tai);
 		}
 	}
 

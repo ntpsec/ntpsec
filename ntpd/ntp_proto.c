@@ -58,7 +58,6 @@ int	sys_kod_rate = 2;	/* max kod packets per second */
  */
 int	sys_bclient;		/* broadcast client enable */
 double	sys_bdelay;		/* broadcast client default delay */
-int	sys_calldelay;		/* modem callup delay (s) */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	double sys_offset;	/* current local clock offset */
@@ -70,11 +69,9 @@ u_long 	sys_epoch;		/* last clock update time */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 int	leap_tai;		/* TAI at next next leap */
-u_long	leap_ins;		/* seconds at next leap */
-u_long	leap_expire;		/* leapfile expiration time */
-u_long	leap_sec;		/* leap countdown */
+u_long	leap_sec;		/* next leap */
+u_long	leap_expire;		/* leapfile expiration */
 static int leap_next;		/* leap consensus */
-static int leap_sw;		/* leap is from file */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -193,8 +190,6 @@ transmit(
 	 * desigmed to back off whenever possible to minimize network
 	 * traffic.
 	 */
-	if (peer->speed > 0)
-		peer->speed--;
 	if (peer->burst == 0) {
 		u_char oreach;
 
@@ -218,6 +213,9 @@ transmit(
 				report_event(EVNT_UNREACH, peer);
 				peer->timereachable = current_time;
 			}
+			if (peer->flags & FLAG_IBURST && peer->speed ==
+			    0)
+				peer->speed = NTP_BURST;
 		} else {
 
 			/*
@@ -229,9 +227,9 @@ transmit(
 			hpoll = sys_poll;
 			if (!oreach)
 				peer->unreach = 0;
-			if (peer->flags & FLAG_BURST &&
-			    !peer_unfit(peer))
-				peer->burst = NTP_BURST;
+			if (peer->flags & FLAG_BURST && peer->speed ==
+			    0 && !peer_unfit(peer))
+				peer->speed = NTP_BURST;
 		}
 
 		/*
@@ -291,6 +289,8 @@ transmit(
 			}
 		}
 	}
+	if (peer->speed > 0)
+		peer->speed--;
 
 	/*
 	 * Do not transmit if in broadcast client mode. 
@@ -795,21 +795,39 @@ receive(
 		    rbufp->dstadr->addr_refid == pkt->refid)
 			return;			/* no help */
 
-		switch (sys_bclient) {
-
 		/*
 		 * If not enabled, just skedaddle.
 		 */
-		case 0:
+		if (sys_bclient == 0) {
 			sys_restricted++;
 			return;			/* not enabled */
 
 		/*
-		 * Execute the initial volley in order to calibrate the
-		 * propagation delay and run the Autokey protocol, if
-		 * enabled.
+		 * Do not execute the initial volley.
 		 */
-		case 1:
+		} else if (sys_bdelay != 0 || sys_bclient > 1) {
+#ifdef OPENSSL
+			/*
+			 * If a two-way exchange is not possible,
+			 * neither is Autokey.
+			 */
+			if (skeyid > NTP_MAXKEY) {
+				msyslog(LOG_INFO,
+				    "receive: autokey requires two-way communication");
+				return;		/* no autokey */
+			}
+#endif /* OPENSSL */
+			if ((peer = newpeer(&rbufp->recv_srcadr,
+			    rbufp->dstadr, MODE_BCLIENT, hisversion,
+			    pkt->ppoll, max(pkt->ppoll, allan_xpt - 5),
+			    0, MDF_BCLNT, 0, skeyid)) == NULL)
+				return;		/* ignore duplicate */
+
+		/*
+		 * Execute the initial volley in order to calibrate the
+		 * propagation delay and run the Autokey protocol.
+		 */
+		} else {
 			if ((peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_CLIENT, hisversion,
 			    pkt->ppoll, max(pkt->ppoll, allan_xpt - 5),
@@ -829,28 +847,6 @@ receive(
 				crypto_recv(peer, rbufp);
 #endif /* OPENSSL */
 			return;			/* hooray */
-
-
-		/*
-		 * Do not execute the initial volley.
-		 */
-		case 2:
-#ifdef OPENSSL
-			/*
-			 * If a two-way exchange is not possible,
-			 * neither is Autokey.
-			 */
-			if (skeyid > NTP_MAXKEY) {
-				msyslog(LOG_INFO,
-				    "receive: autokey requires two-way communication");
-				return;		/* no autokey */
-			}
-#endif /* OPENSSL */
-			if ((peer = newpeer(&rbufp->recv_srcadr,
-			    rbufp->dstadr, MODE_BCLIENT, hisversion,
-			    pkt->ppoll, max(pkt->ppoll, allan_xpt - 5),
-			    0, MDF_BCLNT, 0, skeyid)) == NULL)
-				return;		/* ignore duplicate */
 		}
 		break;
 
@@ -1176,15 +1172,24 @@ process_packet(
 	}
 
 	/*
-	 * If the peer was previously unreachable, raise a trap and
-	 * initialize the volley counter. In any case, mark as
-	 * reachable.
+	 * If the peer was previously unreachable, raise a trap. If a
+	 * burst mode is active, initialize the burst. The unreachable
+	 * burst is always 8 packets; the reachable burst is tailored
+	 * not to exceed the minimum average headway of 16 s.
 	 */ 
 	if (!peer->reach) {
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
-		if (peer->speed == 0 && peer->burst == 0)
-			peer->speed = NTP_BURST;
+		if (peer->speed > 0 && peer->burst == 0) {
+			peer->speed = 0;
+			peer->burst = NTP_BURST;
+		}
+	} else {
+		if (peer->speed > 0 && peer->burst == 0) {
+			peer->speed = 0;
+			peer->burst = min(1 << (peer->hpoll -
+			    NTP_MINPOLL), NTP_BURST);
+		}
 	}
 	peer->reach |= 1;
 	poll_update(peer, peer->hpoll);
@@ -1419,9 +1424,9 @@ clock_update(
 	case 1:
 
 		/*
-		 * If this is the first time the clock is set,
-		 * reset the leap bits. If crypto, the timer will goose
-		 * the setup process.
+		 * If this is the first time the clock is set, reset the
+		 * leap bits. If crypto, the timer will goose the setup
+		 * process.
 		 */
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
@@ -1435,63 +1440,21 @@ clock_update(
 		 * If a leapseconds file is not present and the number
 		 * of survivor leap bits is greater than half the number
 		 * of survivors, schedule a leap for the end of the
-		 * current month, but only if less than 28 days remain
-		 * until the leap.This avoids spurious indications on
-		 * the day after a previous leap.
+		 * current month.
 		 */
 		get_systime(&now);
-		if (leap_ins == 0) {
+		if (leap_expire == 0) {
 			u_long leapsec;
 
-			if (leap_next > sys_survivors / 2 ) {
-				if (!leap_sw) {
-					leapsec = leap_month(now.l_ui);
-					if (leapsec < 28 * 86400) {
-						leap_sw++;
-						leap_sec = leapsec;
-						sys_leap =
-						    LEAP_ADDSECOND;
-						msyslog(LOG_NOTICE,
-						    "proto: leap second armed %lu s",
-						    leap_sec);
-					}
-				}
-			} else {
-				leap_sw = 0;
-				leap_sec = 0;
-				sys_leap = LEAP_NOWARNING;
-			}
-
-		/*
-		 * If a leapseconds file is present and a future leap is
-		 * indicated, decrement the TAI offset. If less than 28
-		 * days remain to the leap, schedule a leap when the
-		 * leapseconds counter expires.
-		 */
-		} else if (leap_sec == 0) {
-			if (leap_ins > now.l_ui) {
-				if (leap_ins - now.l_ui < 28 * 86400) {
-					leap_sec = leap_ins - now.l_ui;
-					sys_leap = LEAP_ADDSECOND;
-					msyslog(LOG_NOTICE,
-					    "proto: leap second armed %lu s",
-					    leap_sec);
-				}
-				sys_tai = leap_tai - 1;
-			} else {
-				sys_tai = leap_tai;
-			}
-			if (!leap_sw) {
-				leap_sw++;
+			leapsec = leap_month(now.l_ui);
+			if (leapsec < 28 * 86400) {
+				leap_sec = now.l_ui + leapsec;
 				msyslog(LOG_NOTICE,
-				    "proto: TAI offset %d s at %u",
-				    sys_tai, now.l_ui);
-#ifdef KERNEL_PLL
-				if (pll_control && kern_enable)
-					loop_config(LOOP_LEAP, 0);
-#endif /* KERNEL_PLL */
+				    "proto: next leap second %lu",					    leap_sec);
+				}
+			} else {
+				leap_sec = 0;
 			}
-		}
 		break;
 	/*
 	 * Popcorn spike or step threshold exceeded. Pretend it never
@@ -1528,7 +1491,8 @@ poll_update(
 	 * First, bracket the poll interval according to the type of
 	 * association and options. If a fixed interval is configured,
 	 * use minpoll. This primarily is for reference clocks, but
-	 * works for any association. If in a volley, clamp at minpoll.
+	 * works for any association. If a burst mode is active, clamp
+	 * at minpoll.
 	 */
 	if (peer->flags & FLAG_FIXPOLL || peer->speed > 0) {
 		hpoll = peer->minpoll;
@@ -1580,20 +1544,8 @@ poll_update(
 		else if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate += RESP_DELAY;
 #endif /* REFCLOCK */
-		else if (peer->flags & (FLAG_IBURST | FLAG_BURST) &&
-		    peer->burst == NTP_BURST)
-			peer->nextdate += sys_calldelay;
 		else
 			peer->nextdate += BURST_DELAY;
-
-	/*
-	 * If this is the first in a volley and a burst is enabled, do
-	 * and reset the volley counter. Delicously intricate.
-	 */
-	} else if (peer->speed > 0 && peer->flags & FLAG_IBURST) {
-		peer->speed = 0;
-		peer->burst = NTP_BURST;
-		peer->nextdate = peer->outdate + BURST_DELAY;
 
 	/*
 	 * The ordinary case; use the minimum of the host and peer
@@ -2223,11 +2175,10 @@ clock_select(void)
 	 * operators will tinker a higher value and use at least that
 	 * number of synchronization sources.
 	 */
-	if (nlist < sys_minsane)
-		return;
-
 	for (i = 0; i < nlist; i++)
 		peer_list[i]->status = CTL_PST_SEL_SELCAND;
+	if (nlist < sys_minsane)
+		return;
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
@@ -3211,8 +3162,7 @@ init_proto(void)
 	sys_survivors = 0;
 	sys_manycastserver = 0;
 	sys_bclient = 0;
-	sys_bdelay = DEFBROADDELAY;
-	sys_calldelay = BURST_DELAY;
+	sys_bdelay = 0;
 	sys_authenticate = 1;
 	L_CLR(&sys_authdelay);
 	sys_authdly[0] = sys_authdly[1] = 0;
@@ -3328,8 +3278,7 @@ proto_config(
 		break;
 
 	case PROTO_CALLDELAY:	/* modem call delay (mdelay) */
-		sys_calldelay = (int)dvalue;
-		break;
+		break;		/* NOT USED */
 
 	case PROTO_MINCLOCK:	/* minimum candidates (minclock) */
 		sys_minclock = (int)dvalue;

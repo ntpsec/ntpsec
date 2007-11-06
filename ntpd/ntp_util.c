@@ -825,11 +825,11 @@ leap_file(
 	}
 	fclose(str);
 	leap_tai = offset;
-	leap_ins = leapsec;
+	leap_sec = leapsec;
 	leap_expire = expire;
 	msyslog(LOG_INFO,
-	    "leap_file: %s TAI offset %d s at %lu expire %lu",
-	    cp, leap_tai, leap_ins, leap_expire);
+	    "leap_file: %s next leap second %lu TAI offset %d s expire %lu s",
+	    cp, leap_sec, leap_tai, leap_expire);
 }
 
 
