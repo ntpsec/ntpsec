@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  Monday November  5, 2007 at 06:43:46 AM EST
+# It has been AutoGen-ed  Tuesday November  6, 2007 at 01:45:46 AM EST
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -99,7 +99,7 @@ or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
  - reading file /users/stenn/.ntprc
- - reading file /deacon/backroom/snaps/ntp-dev/ntpdc/.ntprc
+ - reading file /deacon/backroom/ntp-dev/ntpdc/.ntprc
  - examining environment variables named NTPDC_*
 
 The

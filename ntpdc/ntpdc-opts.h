@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  Monday November  5, 2007 at 06:43:44 AM EST
+ *  It has been AutoGen-ed  Tuesday November  6, 2007 at 01:45:44 AM EST
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *

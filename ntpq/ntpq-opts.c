@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  Monday November  5, 2007 at 06:44:16 AM EST
+ *  It has been AutoGen-ed  Tuesday November  6, 2007 at 01:46:02 AM EST
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -418,7 +418,7 @@ tSCC*  apzHomeList[] = {
        ".",
        NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.isc.org, bugs@ntp.org";
+tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 tSCC    zDetail[]     = "\n\
 The\n\

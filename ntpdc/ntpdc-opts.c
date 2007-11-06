@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  Monday November  5, 2007 at 06:43:45 AM EST
+ *  It has been AutoGen-ed  Tuesday November  6, 2007 at 01:45:45 AM EST
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -470,7 +470,7 @@ tSCC*  apzHomeList[] = {
        ".",
        NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.isc.org, bugs@ntp.org";
+tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 tSCC    zDetail[]     = "\n\
 The\n\
