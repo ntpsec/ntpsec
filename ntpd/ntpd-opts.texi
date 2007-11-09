@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  Tuesday November  6, 2007 at 06:37:37 AM EST
+# It has been AutoGen-ed  Friday November  9, 2007 at 06:39:13 AM EST
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -69,7 +69,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p93
+ntpd - NTP daemon program - Ver. 4.2.5p95
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -89,7 +89,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 - may appear multiple times
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
-   -I Str interface      Listen on interface
+   -I Str interface      Listen on the specified interface or IP
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
    -l Str logfile        path to the log file
@@ -109,7 +109,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
       Str dvar           make ARG an ntp variable (RW|DEF)
                                 - may appear multiple times
    -x no  slew           Slew up to 600 seconds
-      opt version        Output version information and exit
+   -& opt version        Output version information and exit
    -? no  help           Display usage information and exit
    -! no  more-help      Extended usage information passed thru pager
 
@@ -121,7 +121,7 @@ The following option preset mechanisms are supported:
 
 
 
-please send bug reports to:  http://bugs.ntp.isc.org, bugs@@ntp.org
+please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
 @exampleindent 4
 
