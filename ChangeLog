@@ -1,3 +1,4 @@
+* Work around a VPATH difference in FreeBSD's 'make' command.
 * Update bugreport URL.
 * Update -I documentation.
 * [Bug 713] Fix bug reporting information.
