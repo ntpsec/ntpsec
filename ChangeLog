@@ -1,6 +1,7 @@
 * [Bug 957] Windows only: Let command line parameters from the Windows SCM GUI
   override the standard parameters from the ImagePath registry key.
 * Added HAVE_INT32_T to the Windows config.h to avoid duplicate definitions.
+* Work around a VPATH difference in FreeBSD's 'make' command.
 * Update bugreport URL.
 * Update -I documentation.
 * [Bug 713] Fix bug reporting information.

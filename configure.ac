@@ -70,6 +70,7 @@ esac
 
 AMU_OS_CFLAGS
 NTP_DIR_SEP
+NTP_VPATH_HACK
 
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:

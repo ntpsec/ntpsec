@@ -11,7 +11,17 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
 LDADD=	version.o libntpd.a @LIBPARSE@
 AM_YFLAGS=	-d -t
 
-BUILT_SOURCES=	ntp_parser.c ntp_parser.h	\
+if VPATH_HACK
+VPHACK=	vphack
+else
+VPHACK=
+endif
+
+vphack:
+	test -e ntp_parser.c || ln -s $(srcdir)/ntp_parser.c .
+	test -e ntp_parser.h || ln -s $(srcdir)/ntp_parser.h .
+
+BUILT_SOURCES=	${VPHACK} ntp_parser.c ntp_parser.h	\
 		ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
 
 man_MANS=	ntpd.1
