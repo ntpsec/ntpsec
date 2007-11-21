@@ -655,8 +655,8 @@ record_raw_stats(
  * packets recieved
  * packets processed
  * current version
- * previous version
- * bad version
+ * previous versions
+ * declined
  * access denied
  * bad length or format
  * bad authentication
@@ -679,8 +679,8 @@ record_sys_stats(void)
                 fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(&now, 3), sys_stattime / 3600,
-		    sys_received, sys_processed, sys_newversionpkt,
-		    sys_oldversionpkt, sys_unknownversion,
+		    sys_received, sys_processed, sys_newversion,
+		    sys_oldversion, sys_declined,
 		    sys_restricted, sys_badlength, sys_badauth,
 		    sys_limitrejected);
 		fflush(sysstats.fp);
@@ -828,7 +828,7 @@ leap_file(
 	leap_sec = leapsec;
 	leap_expire = expire;
 	msyslog(LOG_INFO,
-	    "leap_file: %s next leap second %lu TAI offset %d s expire %lu s",
+	    "leap_file: %s leap epoch %lu TAI offset %d expire %lu",
 	    cp, leap_sec, leap_tai, leap_expire);
 }
 

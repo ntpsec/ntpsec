@@ -80,11 +80,19 @@ static	int mon_total_mem;		/* total structures allocated */
 static	int mon_mem_increments;		/* times called malloc() */
 
 /*
+ * Parameters of the RES_LIMITED restriction option. With the defaults a
+ * packet will be discarded if the interval betweem packets is less than
+ * 1 s, as well as when the average interval is less than 16 s. 
+ */
+int	res_avg_interval = 1 << NTP_MINPOLL; /* avg interpkt interval */
+int	res_min_interval = 1 << NTP_MINPKT; /* min interpkt interval */
+
+/*
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
 int	mon_enabled;			/* enable switch */
-u_long	mon_age = 3000;			/* preemption limit */
+int	mon_age = 3000;			/* preemption limit */
 static	int mon_have_memory;
 static	void	mon_getmoremem	(void);
 static	void	remove_from_hash (struct mon_data *);
@@ -101,7 +109,6 @@ init_mon(void)
 	 */
 	mon_enabled = MON_OFF;
 	mon_have_memory = 0;
-
 	mon_total_mem = 0;
 	mon_mem_increments = 0;
 	mon_free = NULL;
@@ -152,13 +159,13 @@ mon_stop(
 	register int i;
 
 	if (mon_enabled == MON_OFF)
-	    return;
+		return;
 	if ((mon_enabled & mode) == 0 || mode == MON_OFF)
-	    return;
+		return;
 
 	mon_enabled &= ~mode;
 	if (mon_enabled != MON_OFF)
-	    return;
+		return;
 	
 	/*
 	 * Put everything back on the free list
@@ -173,7 +180,6 @@ mon_stop(
 			md = md_next;
 		}
 	}
-
 	mon_mru_list.mru_next = &mon_mru_list;
 	mon_mru_list.mru_prev = &mon_mru_list;
 }
@@ -184,27 +190,28 @@ ntp_monclearinterface(struct interface *interface)
         struct mon_data *md;
 
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list;
-	     md = md->mru_next) {
-	  if (md->interface == interface) 
-	    {
-	      /* dequeue from mru list and put to free list */
-	      md->mru_prev->mru_next = md->mru_next;
-	      md->mru_next->mru_prev = md->mru_prev;
-	      remove_from_hash(md);
-	      md->hash_next = mon_free;
-	      mon_free = md;
-	    }
+	    md = md->mru_next) {
+		if (md->interface == interface) {
+		      /* dequeue from mru list and put to free list */
+		      md->mru_prev->mru_next = md->mru_next;
+		      md->mru_next->mru_prev = md->mru_prev;
+		      remove_from_hash(md);
+		      md->hash_next = mon_free;
+		      mon_free = md;
+		}
 	}
 }
+
 
 /*
  * ntp_monitor - record stats about this packet
  *
- * Returns 1 if the packet is at the head of the list, 0 otherwise.
+ * Returns flags
  */
 int
 ntp_monitor(
-	struct recvbuf *rbufp
+	struct recvbuf *rbufp,
+	int	flags
 	)
 {
 	register struct pkt *pkt;
@@ -212,9 +219,10 @@ ntp_monitor(
         struct sockaddr_storage addr;
 	register int hash;
 	register int mode;
+	int	interval;
 
 	if (mon_enabled == MON_OFF)
-		return 0;
+		return (flags);
 
 	pkt = &rbufp->recv_pkt;
 	memset(&addr, 0, sizeof(addr));
@@ -223,14 +231,16 @@ ntp_monitor(
 	mode = PKT_MODE(pkt->li_vn_mode);
 	md = mon_hash[hash];
 	while (md != NULL) {
+		int	leak;
 
 		/*
 		 * Match address only to conserve MRU size.
 		 */
 		if (SOCKCMP(&md->rmtadr, &addr)) {
-			md->drop_count = current_time - md->lasttime;
+			interval = current_time - md->lasttime;
 			md->lasttime = current_time;
 			md->count++;
+			md->flags = flags;
 			md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 			md->mode = (u_char) mode;
 			md->version = PKT_VERSION(pkt->li_vn_mode);
@@ -244,7 +254,32 @@ ntp_monitor(
 			md->mru_prev = &mon_mru_list;
 			mon_mru_list.mru_next->mru_prev = md;
 			mon_mru_list.mru_next = md;
-			return 1;
+
+			/*
+			 * At this point the most recent arrival is
+			 * first in the MRU list. If the minimum and
+			 * average thresholds are not exceeded, increase
+			 * the counter by the interval. If not, light
+			 * the rate bit only. The packet will be
+			 * discarded in the protocol module. Note we
+			 * give a 1-s tolerance for the minimum and a 2-
+			 * s tolerance for the average.
+			 */
+			md->leak -= interval;
+			if (md->leak < 0)
+				md->leak = 0;
+			leak = md->leak + res_avg_interval;
+#ifdef DEBUG
+			if (debug > 1)
+				printf("restrict: min %d average %d\n",
+				    interval, leak);
+#endif
+			if (interval >= res_min_interval - 1 && leak <
+			    NTP_SHIFT * res_avg_interval + 2) {
+				md->leak = leak;
+				md->flags &= ~RES_LIMITED;
+			}
+			return (md->flags);
 		}
 		md = md->hash_next;
 	}
@@ -260,10 +295,9 @@ ntp_monitor(
 		 * Preempt from the MRU list if old enough.
 		 */
 		md = mon_mru_list.mru_prev;
-		/* We get 31 bits from ntp_random() */
-		if (((u_long)ntp_random()) / FRAC >
+		if (md->count == 1 || ntp_random() / (2. * FRAC) >
 		    (double)(current_time - md->lasttime) / mon_age)
-			return 0;
+			return (flags & ~RES_LIMITED);
 
 		md->mru_prev->mru_next = &mon_mru_list;
 		mon_mru_list.mru_prev = md->mru_prev;
@@ -278,19 +312,20 @@ ntp_monitor(
 	/*
 	 * Got one, initialize it
 	 */
-	md->avg_interval = 0;
-	md->lasttime = current_time;
+	md->lasttime = md->firsttime = current_time;
 	md->count = 1;
-	md->drop_count = 0;
+	md->flags = flags & ~RES_LIMITED;
+	md->leak = 0;
 	memset(&md->rmtadr, 0, sizeof(md->rmtadr));
 	memcpy(&md->rmtadr, &addr, sizeof(addr));
 	md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 	md->mode = (u_char) mode;
 	md->version = PKT_VERSION(pkt->li_vn_mode);
 	md->interface = rbufp->dstadr;
-	md->cast_flags = (u_char)(((rbufp->dstadr->flags & INT_MCASTOPEN) &&
-	    rbufp->fd == md->interface->fd) ? MDF_MCAST: rbufp->fd ==
-		md->interface->bfd ? MDF_BCAST : MDF_UCAST);
+	md->cast_flags = (u_char)(((rbufp->dstadr->flags &
+	    INT_MCASTOPEN) && rbufp->fd == md->interface->fd) ?
+	    MDF_MCAST: rbufp->fd == md->interface->bfd ? MDF_BCAST :
+	    MDF_UCAST);
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of
@@ -302,7 +337,7 @@ ntp_monitor(
 	md->mru_prev = &mon_mru_list;
 	mon_mru_list.mru_next->mru_prev = md;
 	mon_mru_list.mru_next = md;
-	return 1;
+	return (md->flags);
 }
 
 

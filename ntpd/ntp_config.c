@@ -1181,10 +1181,10 @@ config_access(void)
 		    dequeue(my_config.discard_opts);
 		switch(my_opt->attr) {
 		    case T_Average:
-			res_avg_interval = my_opt->value.i;
+			res_avg_interval = 1 << my_opt->value.i;
 			break;
 		    case T_Minimum:
-			res_min_interval = my_opt->value.i;
+			res_min_interval = 1 << my_opt->value.i;
 			break;
 		    case T_Monitor:
 			mon_age = my_opt->value.i;

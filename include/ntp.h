@@ -108,9 +108,8 @@ typedef char s_char;
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
-#define NTP_BURST	8	/* packets in burst */
-#define BURST_DELAY	2	/* interburst delay (s) */
-#define	RESP_DELAY	1	/* crypto response delay (s) */
+#define	NTP_RETRY	3	/* max packet retries */
+#define	NTP_MINPKT	1	/* log2 min interburst interval (2 s) */
 
 /*
  * Clock filter algorithm tuning parameters
@@ -331,7 +330,8 @@ struct peer {
 	u_int	flash;		/* protocol error test tally bits */
 	u_long	epoch;		/* reference epoch */
 	u_int	burst;		/* packets remaining in burst */
-	u_int	speed;		/* force minpoll */
+	u_int	retry;		/* retry counter */
+	u_int	throttle;	/* rate control */
 	u_int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
@@ -722,9 +722,9 @@ struct pkt {
 
 /*
  * How we randomize polls.  The poll interval is a power of two. We chose
- * a random interval which is this value plus-minus one second.
+ * a random interval which is this plus random 3 seconds.
  */
-#define RANDPOLL(x)	((1 << (x)) - 1 + (ntp_random() & 0x3))
+#define RANDPOLL(x)	((1 << (x)) + (ntp_random() & 0x3))
 
 /*
  * min, min3 and max.  Makes it easier to transliterate the spec without
@@ -804,16 +804,17 @@ struct mon_data {
 	struct mon_data *hash_next;	/* next structure in hash list */
 	struct mon_data *mru_next;	/* next structure in MRU list */
 	struct mon_data *mru_prev;	/* previous structure in MRU list */
-	u_long drop_count;		/* dropped due RESLIMIT*/
-	double avg_interval;		/* average interpacket interval */
-	u_long lasttime;		/* interval since last packet */
-	u_long count;			/* total packet count */
+	int	flags;			/* restrict flags */
+	int	leak;			/* leaky bucket accumulator */
+	int	count;			/* total packet count */
+	u_long	firsttime;		/* first time found */
+	u_long	lasttime;		/* last time found */
 	struct sockaddr_storage rmtadr;	/* address of remote host */
 	struct interface *interface;	/* interface on which this arrived */
-	u_short rmtport;		/* remote port last came from */
-	u_char mode;			/* mode of incoming packet */
-	u_char version;			/* version of incoming packet */
-	u_char cast_flags;		/* flags MDF_?CAST */
+	u_short	rmtport;		/* remote port last came from */
+	u_char	mode;			/* packet mode */
+	u_char	version;		/* packet version */
+	u_char	cast_flags;		/* flags MDF_?CAST */
 };
 
 /*

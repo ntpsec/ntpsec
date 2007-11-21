@@ -1153,9 +1153,9 @@ sys_stats(
 	ss->timeup = htonl((u_int32)current_time);
 	ss->timereset = htonl((u_int32)(current_time - sys_stattime));
 	ss->denied = htonl((u_int32)sys_restricted);
-	ss->oldversionpkt = htonl((u_int32)sys_oldversionpkt);
-	ss->newversionpkt = htonl((u_int32)sys_newversionpkt);
-	ss->unknownversion = htonl((u_int32)sys_unknownversion);
+	ss->oldversionpkt = htonl((u_int32)sys_oldversion);
+	ss->newversionpkt = htonl((u_int32)sys_newversion);
+	ss->unknownversion = htonl((u_int32)sys_declined);
 	ss->badlength = htonl((u_int32)sys_badlength);
 	ss->processed = htonl((u_int32)sys_processed);
 	ss->badauth = htonl((u_int32)sys_badauth);
@@ -1911,9 +1911,10 @@ mon_getlist_0(
 	    v6sizeof(struct info_monitor));
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
-		im->lasttime = htonl((u_int32)md->avg_interval);
+		im->lasttime = htonl((u_int32)((current_time -
+		    md->firsttime) / md->count));
 		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
-		im->lastdrop = htonl((u_int32)md->drop_count);
+		im->lastdrop = htonl((u_int32)md->flags);
 		im->count = htonl((u_int32)(md->count));
 		if (md->rmtadr.ss_family == AF_INET6) {
 			if (!client_v6_capable)
@@ -1956,9 +1957,10 @@ mon_getlist_1(
 	    v6sizeof(struct info_monitor_1));
 	for (md = mon_mru_list.mru_next; md != &mon_mru_list && im != 0;
 	     md = md->mru_next) {
-		im->lasttime = htonl((u_int32)md->avg_interval);
+		im->lasttime = htonl((u_int32)((current_time -
+		    md->firsttime) / md->count));
 		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
-		im->lastdrop = htonl((u_int32)md->drop_count);
+		im->lastdrop = htonl((u_int32)md->flags);
 		im->count = htonl((u_int32)md->count);
 		if (md->rmtadr.ss_family == AF_INET6) {
 			if (!client_v6_capable)

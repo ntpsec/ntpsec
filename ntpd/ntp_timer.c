@@ -297,9 +297,20 @@ timer(void)
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
 			next_peer = peer->next;
-			if (peer->action && peer->nextaction <= current_time)
+			if (peer->action && peer->nextaction <=
+			    current_time)
 	  			peer->action(peer);
-			if (peer->nextdate <= current_time) {
+
+			/*
+			 * Restrain the non-burst packet rate not more
+			 * than one packet every 16 seconds. This is
+			 * usually tripped using iburst and minpoll of
+			 * 128 s or less.
+			 */
+			if (peer->throttle > 0)
+				peer->throttle--;
+			if (peer->nextdate <= current_time &&
+			    (peer->throttle == 0 || peer->burst > 0)) {
 #ifdef REFCLOCK
 				if (peer->flags & FLAG_REFCLOCK)
 					refclock_transmit(peer);
