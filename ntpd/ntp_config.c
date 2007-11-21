@@ -989,8 +989,10 @@ config_auth(void)
 		keysdir = my_config.auth.keysdir;
 
 #ifdef OPENSSL
-	if (cryptosw)
+	if (cryptosw) {
 		crypto_setup();
+		cryptosw = 0;
+	}
 #endif /* OPENSSL */
  
 	/* Keys Command */
