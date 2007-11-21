@@ -352,7 +352,7 @@ dnl does Strange Things with extra processes using the Posix-compatibility
 dnl real-time library, so we don't want to use it.
 
 case "$host" in
- *-*-linux*) ;;
+ *-*-*linux*) ;;
  *)
     AC_CHECK_LIB(rt, sched_setscheduler, ,
 	AC_CHECK_LIB(posix4, sched_setscheduler))
@@ -508,7 +508,7 @@ case "$host" in
 esac
 
 case "$host" in
- *-*-linux*)
+ *-*-*linux*)
     AC_CHECK_FUNCS(__adjtimex __ntp_gettime)
     ;;
 esac
@@ -1022,7 +1022,7 @@ yes|glibc)
 # Do we have getifaddrs() ?
 #
 case $host in
-*-linux*)
+*-*linux*)
 	# Some recent versions of glibc support getifaddrs() which does not
 	# provide AF_INET6 addresses while the function provided by the USAGI
 	# project handles the AF_INET6 case correctly.  We need to avoid
@@ -1129,7 +1129,7 @@ case "$host" in
  *-*-irix[[45]]*)
     # Just a stub in "old" Irix.  Idiots.
     ;;
- *-*-linux*)
+ *-*-*linux*)
     # there, but more trouble than it is worth for now (resolver problems)
     ;;
  *-*-qnx*)
@@ -1512,7 +1512,7 @@ AC_CACHE_CHECK(if process groups are set with -pid, ac_cv_arg_setpgrp_negpid,
  *-*-hpux*)
     ans=yes
     ;;
- *-*-linux*)
+ *-*-*linux*)
     ans=yes
     ;;
  *-*-sunos3*)
@@ -1570,7 +1570,7 @@ esac
 
 AC_CACHE_CHECK(if the OS needs the wildcard socket set to REUSEADDR for binding interface addresses, ac_cv_os_wildcardreuse,
 [[case "$host" in
- *-*-linux*)
+ *-*-*linux*)
     ans=yes
     ;;
  *) ans=no
@@ -1662,7 +1662,7 @@ case "$ac_cv_hdr_def_sigio" in
      *-*-freebsd*)
 	ans=no
 	;;
-     *-*-linux*)
+     *-*-*linux*)
 	ans=no
 	;;
      *-*-unicosmp*)
@@ -1715,7 +1715,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-hpux*)
         ans=no
         ;;
-     *-*-linux*)
+     *-*-*linux*)
 	ans=no
 	;;
      *-*-osf*)
@@ -1766,7 +1766,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-hpux*)
         ans=no
         ;;
-     *-*-linux*)
+     *-*-*linux*)
 	ans=no
 	;;
      *-*-osf*)
@@ -1843,7 +1843,7 @@ AC_CACHE_CHECK(if the TTY code permits PARENB and IGNPAR,
 ac_cv_var_no_parenb_ignpar,
 [ans=no
 case "$host" in
- i?86-*-linux*)
+ i?86-*-*linux*)
     ans=yes
     ;;
  mips-sgi-irix*)
@@ -1921,7 +1921,7 @@ case "$ac_cv_var_mcast" in
     AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
 	ac_cv_var_typeof_ip_multicast_loop,
 	[case "$host" in
-	 *-*-netbsd*|*-*-linux*)
+	 *-*-netbsd*|*-*-*linux*)
 	    ac_cv_var_typeof_ip_multicast_loop=u_int
 	    ;;
 	 *-*-winnt*)
@@ -2844,7 +2844,7 @@ case "$ntp_rawdcf" in
     ac_cv_var_rawdcf_parity,
     [ans=no
     case "$host" in
-     *-*-linux*)
+     *-*-*linux*)
         ans=yes
         ;;
     esac
@@ -3129,7 +3129,7 @@ AC_MSG_CHECKING(if we can make dcf parse utilities)
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$host" in
-     *-*-sunos4*|*-*-solaris2*|*-*-linux*|*-*-netbsd*)
+     *-*-sunos4*|*-*-solaris2*|*-*-*linux*|*-*-netbsd*)
 	ans="dcfd testdcf"
 	DCFD=dcfd
         TESTDCF=testdcf
@@ -3225,7 +3225,7 @@ AC_CACHE_CHECK(if we can read kmem, ac_cv_var_can_kmem,
      *-*-irix[[456]]*)
 	ans=no
 	;;
-     *-*-linux*)
+     *-*-*linux*)
 	ans=no
 	;;
      *-*-winnt3.5)
@@ -3263,7 +3263,7 @@ AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
       *-ibm-aix[[45]]*)
 	 ans=yes
 	 ;;
-      *-*-linux*)
+      *-*-*linux*)
 	 ans=yes
 	 ;;
       *-*-solaris2.[[01]])
@@ -3518,7 +3518,7 @@ AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
       *-*-irix*)
 	 ans=10000
 	 ;;
-      *-*-linux*)
+      *-*-*linux*)
 	 ans=txc.tick
 	 ;;
       *-*-mpeix*)

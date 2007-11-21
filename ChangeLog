@@ -1,3 +1,4 @@
+* [Bug 964] Change *-*-linux* to *-*-*linux* to allow for uclinux.
 * Changes from Dave Mills:
   - ntp_util.c: cleanup.
   - ntp_timer.c: watch the non-burst packet rate.
