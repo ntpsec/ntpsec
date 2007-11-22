@@ -2685,6 +2685,7 @@ set_clock_fudge(
 
 	memset((char *)&addr, 0, sizeof addr);
 	memset((char *)&clock_stat, 0, sizeof clock_stat);
+	memset((char *)&tmp_clock, 0, sizeof tmp_clock);
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cf = (struct conf_fudge *) inpkt->data;
 
