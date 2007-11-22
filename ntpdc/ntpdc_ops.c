@@ -1051,7 +1051,7 @@ again:
 	       (u_long)ntohl(ss->newversionpkt));
 	fprintf(fp, "previous version:       %ld\n",
 	       (u_long)ntohl(ss->oldversionpkt));
-	fprintf(fp, "bad version:            %ld\n",
+	fprintf(fp, "declined:               %ld\n",
 	       (u_long)ntohl(ss->unknownversion));
 	fprintf(fp, "access denied:          %ld\n",
 		(u_long)ntohl(ss->denied));

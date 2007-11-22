@@ -72,11 +72,11 @@ int AM[AM_MODES][AM_MODES] = {
  * Peer hash tables
  */
 struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
-int peer_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
+int	peer_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
 struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
-int assoc_hash_count[NTP_HASH_SIZE];	/* peers in each bucket */
+int	assoc_hash_count[NTP_HASH_SIZE]; /* peers in each bucket */
 static struct peer *peer_free;		/* peer structures free list */
-int peer_free_count;			/* count of free structures */
+int	peer_free_count;		/* count of free structures */
 
 /*
  * Association ID.  We initialize this value randomly, then assign a new
@@ -93,14 +93,14 @@ static associd_t current_association_ID; /* association ID */
 /*
  * Miscellaneous statistic counters which may be queried.
  */
-u_long peer_timereset;			/* time stat counters zeroed */
-u_long findpeer_calls;			/* calls to findpeer */
-u_long assocpeer_calls;			/* calls to findpeerbyassoc */
-u_long peer_allocations;		/* allocations from free list */
-u_long peer_demobilizations;		/* structs freed to free list */
-int total_peer_structs;			/* peer structs */
-int peer_associations;			/* mobilized associations */
-int peer_preempt;			/* preemptable associations */
+u_long	peer_timereset;			/* time stat counters zeroed */
+u_long	findpeer_calls;			/* calls to findpeer */
+u_long	assocpeer_calls;		/* calls to findpeerbyassoc */
+u_long	peer_allocations;		/* allocations from free list */
+u_long	peer_demobilizations;		/* structs freed to free list */
+int	total_peer_structs;		/* peer structs */
+int	peer_associations;		/* mobilized associations */
+int	peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static void	    getmorepeermem	 (void);
@@ -304,8 +304,7 @@ clear_all(void)
 			    MDF_MCAST | MDF_BCAST))) {
 				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
-				if (peer->flags & FLAG_PREEMPT ||
-				    !(peer->flags & FLAG_CONFIG))
+				if (peer->flags & FLAG_PREEMPT)
 					unpeer(peer);
 			}
 		}
@@ -343,7 +342,7 @@ unpeer(
 #endif /* OPENSSL */
 #ifdef DEBUG
 	if (debug)
-		printf("demobilize %u %d %d\n", peer_to_remove->associd,
+		printf("demobilize %u assoc %d ephem %d\n", peer_to_remove->associd,
 		    peer_associations, peer_preempt);
 #endif
 	set_peerdstadr(peer_to_remove, NULL);
@@ -582,7 +581,8 @@ peer_refresh_interface(struct peer *peer)
 }
 
 /*
- * refresh_all_peerinterfaces - see that all interface bindings are up to date
+ * refresh_all_peerinterfaces - see that all interface bindings are up
+ * to date
  */
 void
 refresh_all_peerinterfaces(void)
@@ -849,6 +849,7 @@ newpeer(
 
 /*
  * peer_unconfig - remove the configuration bit from a peer
+ *
  */
 int
 peer_unconfig(
@@ -857,37 +858,8 @@ peer_unconfig(
 	int mode
 	)
 {
-	register struct peer *peer;
-	int num_found;
-
-	num_found = 0;
-	peer = findexistingpeer(srcadr, (struct peer *)0, mode);
-	while (peer != 0) {
-		if (peer->flags & FLAG_CONFIG
-		    && (dstadr == 0 || peer->dstadr == dstadr)) {
-			num_found++;
-
-			/*
-			 * Tricky stuff here. If the peer is polling us
-			 * in active mode, turn off the configuration
-			 * bit and make the mode passive. This allows us
-			 * to avoid dumping a lot of history for peers
-			 * we might choose to keep track of in passive
-			 * mode. The protocol will eventually terminate
-			 * undesirables on its own.
-			 */
-			if (peer->hmode == MODE_ACTIVE && peer->pmode ==
-			    MODE_ACTIVE) {
-				peer->hmode = MODE_PASSIVE;
-				peer->flags &= ~FLAG_CONFIG;
-			} else {
-				unpeer(peer);
-				peer = NULL;
-			}
-		}
-		peer = findexistingpeer(srcadr, peer, mode);
-	}
-	return (num_found);
+	msyslog(LOG_ERR, "attempt to remove configure bit is invalid");
+	return (0);
 }
 
 /*
@@ -952,14 +924,14 @@ expire_all(void)
 	/*
 	 * This routine is called about once per day from the timer
 	 * routine and when the client is first synchronized. Search the
-	 * peer list for all associations and flush the key list. Also, 	 * restart the protocol to retrieve the cookie, autokey and leap
-	 * values.
+	 * peer list for all associations and flush the key list. Also, 	 * fetch the leap second values.
 	 */
 	if (!crypto_flags)
 		return;
 
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
+			peer->crypto &= ~CRYPTO_FLAG_LEAP;
 			next_peer = peer->next;
 			if (!(peer->flags & FLAG_SKEY)) {
 				continue;

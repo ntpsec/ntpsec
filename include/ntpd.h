@@ -128,7 +128,7 @@ extern	int	clock_stepcnt;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	int	ntp_monitor     (struct recvbuf *);
+extern	int	ntp_monitor     (struct recvbuf *, int);
 extern  void    ntp_monclearinterface (struct interface *interface);
 
 /* ntp_peer.c */
@@ -218,7 +218,7 @@ extern	void	process_private (struct recvbuf *, int);
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
-extern	int 	restrictions	(struct sockaddr_storage *, int);
+extern	int 	restrictions	(struct sockaddr_storage *);
 extern	void	hack_restrict	(int, struct sockaddr_storage *, struct sockaddr_storage *, int, int);
 
 /* ntp_timer.c */
@@ -417,11 +417,11 @@ extern int	sys_ttlmax;		/* max ttl mapping vector index */
  */
 extern u_long	sys_stattime;		/* time when we started recording */
 extern u_long	sys_restricted;	 	/* restricted packets */
-extern u_long	sys_oldversionpkt;	/* old version packets */
-extern u_long	sys_newversionpkt;	/* new version packets  */
-extern u_long	sys_unknownversion;	/* don't know version packets */
+extern u_long	sys_oldversion;		/* old version packets */
+extern u_long	sys_newversion;		/* new version packets  */
+extern u_long	sys_declined;		/* packets declined */
 extern u_long	sys_badlength;		/* bad length or format */
-extern u_long	sys_processed;		/* packets processed */
+extern u_long	sys_processed;		/* packets for this host */
 extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_limitrejected;	/* rate limit exceeded */
 extern u_long	sys_received;		/* packets received */
@@ -439,9 +439,9 @@ extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 /* ntp_restrict.c */
 extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
 extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
-extern u_long	res_min_interval;
-extern u_long	res_avg_interval;
-extern u_long	mon_age;		/* monitor preempt age */
+extern int	res_min_interval;
+extern int	res_avg_interval;
+extern int	mon_age;		/* monitor preempt age */
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */

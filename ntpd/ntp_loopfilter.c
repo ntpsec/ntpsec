@@ -156,7 +156,7 @@ int	mode_ntpdate = FALSE;	/* exit on first clock set */
  * Clock state machine variables
  */
 int	state;			/* clock discipline state */
-u_char	sys_poll = NTP_MINDPOLL; /* time constant/poll (log2 s) */
+u_char	sys_poll = NTP_MINPOLL; /* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
 int	clock_stepcnt;		/* step counter */
@@ -216,6 +216,7 @@ local_clock(
 	)
 {
 	int	rval;		/* return code */
+	int	osys_poll;	/* old system poll */
 	double	flladj;		/* FLL frequency adjustment (ppm) */
 	double	plladj;		/* PLL frequency adjustment (ppm) */
 	double	clock_frequency; /* clock frequency adjustment (ppm) */
@@ -321,10 +322,10 @@ local_clock(
 	 * never occur. See the instruction manual for the details how
 	 * these actions interact with the command line options.
 	 *
-	 * Note the system poll is set to minpoll only if the clock is
-	 * stepped. Note also the kernel is disabled if step is
-	 * disabled or greater than 0.5 s. 
+	 * Note the kernel is disabled if step is disabled or greater
+	 * than 0.5 s. 
 	 */
+	osys_poll = sys_poll;
 	clock_epoch += mu;
 	clock_frequency = flladj = plladj = 0;
 	rval = 1;
@@ -394,7 +395,6 @@ local_clock(
 			    fp_offset);
 			reinit_timer();
 			tc_counter = 0;
-			sys_poll = NTP_MINPOLL;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
 			clock_stepcnt++;
@@ -408,10 +408,15 @@ local_clock(
 	} else {
 
 		/*
-		 * The offset is less than the step threshold. Calculate
-		 * the jitter as the exponentially weighted offset
+		 * The offset is less than the step threshold. Clamp the
+		 * poll update to the current peer. Calculatethe jitter
+		 * as the exponentially weighted offset
 		 * differences.
  	      	 */
+		if (sys_poll < peer->minpoll)
+			sys_poll = peer->minpoll;
+		if (sys_poll > peer->maxpoll)
+			sys_poll = peer->maxpoll;
 		etemp = SQUARE(clock_jitter);
 		dtemp = SQUARE(max(fabs(fp_offset - last_offset),
 		    LOGTOD(sys_precision)));
@@ -690,6 +695,12 @@ local_clock(
 			}
 		}
 	}
+
+	/*
+	 * If the poll interval has changed, update the poll variables.
+	 */
+	if (osys_poll != sys_poll)
+		poll_update(peer, sys_poll);
 
 	/*
 	 * Yibbidy, yibbbidy, yibbidy; that'h all folks.

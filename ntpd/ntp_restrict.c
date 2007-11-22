@@ -58,34 +58,26 @@
 #define	INITRESLIST	10
 #define	INCRESLIST	5
 
-#define RES_AVG		8.	/* interpacket averaging factor */
-
 /*
  * The restriction list
  */
 struct restrictlist *restrictlist;
 struct restrictlist6 *restrictlist6;
-static	int restrictcount;	/* count of entries in the res list */
-static	int restrictcount6;	/* count of entries in the res list 2*/
+static int restrictcount;	/* count of entries in the res list */
+static int restrictcount6;	/* count of entries in the res list 2*/
 
 /*
  * The free list and associated counters.  Also some uninteresting
  * stat counters.
  */
-static	struct restrictlist *resfree;
-static	struct restrictlist6 *resfree6;
-static	int numresfree;		/* number of structures on free list */
-static	int numresfree6;	/* number of structures on free list 2 */
+static struct restrictlist *resfree;
+static struct restrictlist6 *resfree6;
+static int numresfree;		/* number of struct on free list */
+static int numresfree6;	/* number of struct on free list 2 */
 
-static	u_long res_calls;
-static	u_long res_found;
-static	u_long res_not_found;
-
-/*
- * Parameters of the RES_LIMITED restriction option.
- */
-u_long res_avg_interval = 5;	/* min average interpacket interval */
-u_long res_min_interval = 1;	/* min interpacket interval */
+static u_long res_calls;
+static u_long res_found;
+static u_long res_not_found;
 
 /*
  * Count number of restriction entries referring to RES_LIMITED controls
@@ -100,6 +92,7 @@ static	u_long res_limited_refcnt6;
  */
 static	struct restrictlist resinit[INITRESLIST];
 static	struct restrictlist6 resinit6[INITRESLIST];
+
 
 /*
  * init_restrict - initialize the restriction data structures
@@ -158,8 +151,7 @@ init_restrict(void)
  */
 int
 restrictions(
-	struct sockaddr_storage *srcadr,
-	int at_listhead
+	struct sockaddr_storage *srcadr
 	)
 {
 	struct restrictlist *rl;
@@ -173,9 +165,11 @@ restrictions(
 	int	isntpport;
 
 	res_calls++;
+	/* IPv4 source address */
 	if (srcadr->ss_family == AF_INET) {
+
 		/*
-		 * We need the host address in host order.  Also need to
+		 * We need the host address in host order. Also need to
 		 * know whether this is from the ntp port or not.
 		 */
 		hostaddr = SRCADR(srcadr);
@@ -184,7 +178,7 @@ restrictions(
 		/*
 		 * Ignore any packets with a multicast source address
 		 * (this should be done early in the receive process,
-		 * later!)
+		 * not later!)
 		 */
 		if (IN_CLASSD(SRCADR(srcadr)))
 			return (int)RES_IGNORE;
@@ -212,9 +206,10 @@ restrictions(
 
 	/* IPv6 source address */
 	if (srcadr->ss_family == AF_INET6) {
+
 		/*
-		 * Need to know whether this is from the ntp port or
-		 * not.
+		 * We need the host address in host order. Also need to
+		 * know whether this is from the ntp port or not.
 		 */
 		hostaddr6 = GET_INADDR6(*srcadr);
 		isntpport = (ntohs((
@@ -224,7 +219,7 @@ restrictions(
 		/*
 		 * Ignore any packets with a multicast source address
 		 * (this should be done early in the receive process,
-		 * later!)
+		 * not later!)
 		 */
 		if (IN6_IS_ADDR_MULTICAST(&hostaddr6))
 			return (int)RES_IGNORE;
@@ -253,35 +248,6 @@ restrictions(
 		else
 			res_found++;
 		flags = match6->flags;
-	}
-
-	/*
-	 * The following implements a generalized call gap facility.
-	 * Douse the RES_LIMITED bit only if the interval since the last
-	 * packet is greater than res_min_interval and the average is
-	 * greater than res_avg_interval.
-	 */
-	if (!at_listhead || mon_enabled == MON_OFF) {
-		flags &= ~RES_LIMITED;
-	} else {
-		struct mon_data *md;
-
-		/*
-		 * At this point the most recent arrival is first in the
-		 * MRU list. Let the first 10 packets in for free until
-		 * the average stabilizes.
-		 */
-		md = mon_mru_list.mru_next;
-		if (md->avg_interval == 0)
-			md->avg_interval = md->drop_count;
-		else
-			md->avg_interval += (md->drop_count -
-			    md->avg_interval) / RES_AVG;
-		if (md->count < 10 || (md->drop_count >
-		    res_min_interval && md->avg_interval >
-		    res_avg_interval))
-			flags &= ~RES_LIMITED;
-		md->drop_count = flags;
 	}
 	return (flags);
 }
@@ -379,6 +345,7 @@ hack_restrict(
 				if (addr_cmp > 0) {
 					rl6 = 0;
 					break;
+
 				} else if (addr_cmp == 0) {
 					mask_cmp = memcmp(&rl6->mask6,
 					    &mask6, sizeof(mask6));
@@ -417,6 +384,7 @@ hack_restrict(
 	if (resaddr->ss_family == AF_INET) {
 		switch (op) {
 		case RESTRICT_FLAGS:
+
 			/*
 			 * Here we add bits to the flags. If this is a
 			 * new restriction add it.
@@ -430,22 +398,20 @@ hack_restrict(
 					memset((char *)rl, 0,
 					    INCRESLIST * sizeof(struct
 					    restrictlist));
-					for (i = 0; i < INCRESLIST; i++) {
+					for (i = 0; i < INCRESLIST;
+					    i++) {
 						rl->next = resfree;
 						resfree = rl;
 						rl++;
 					}
 					numresfree = INCRESLIST;
 				}
-
 				rl = resfree;
 				resfree = rl->next;
 				numresfree--;
-
 				rl->addr = addr;
 				rl->mask = mask;
 				rl->mflags = (u_short)mflags;
-
 				if (rlprev == NULL) {
 					rl->next = restrictlist;
 					restrictlist = rl;
@@ -464,6 +430,7 @@ hack_restrict(
 			break;
 
 		case RESTRICT_UNFLAG:
+
 			/*
 			 * Remove some bits from the flags. If we didn't
 			 * find this one, just return.
@@ -481,6 +448,7 @@ hack_restrict(
 	
 		case RESTRICT_REMOVE:
 		case RESTRICT_REMOVEIF:
+
 			/*
 			 * Remove an entry from the table entirely if we
 			 * found one. Don't remove the default entry and
@@ -488,7 +456,8 @@ hack_restrict(
 			 */
 			if (rl != 0
 			    && rl->addr != htonl(INADDR_ANY)
-			    && !(rl->mflags & RESM_INTERFACE && op != RESTRICT_REMOVEIF)) {
+			    && !(rl->mflags & RESM_INTERFACE && op !=
+			    RESTRICT_REMOVEIF)) {
 				if (rlprev != NULL) {
 					rlprev->next = rl->next;
 				} else {
@@ -515,6 +484,7 @@ hack_restrict(
 	} else if (resaddr->ss_family == AF_INET6) {
 		switch (op) {
 		case RESTRICT_FLAGS:
+
 			/*
 			 * Here we add bits to the flags. If this is a
 			 * new restriction add it.
@@ -561,6 +531,7 @@ hack_restrict(
 			break;
 
 		case RESTRICT_UNFLAG:
+
 			/*
 			 * Remove some bits from the flags. If we didn't
 			 * find this one, just return.
@@ -578,6 +549,7 @@ hack_restrict(
 
 		case RESTRICT_REMOVE:
 		case RESTRICT_REMOVEIF:
+
 			/*
 			 * Remove an entry from the table entirely if we
 			 * found one. Don't remove the default entry and
@@ -585,7 +557,8 @@ hack_restrict(
 			 */
 			if (rl6 != 0 &&
 			    !IN6_IS_ADDR_UNSPECIFIED(&rl6->addr6)
-			    && !(rl6->mflags & RESM_INTERFACE && op != RESTRICT_REMOVEIF)) {
+			    && !(rl6->mflags & RESM_INTERFACE && op !=
+			    RESTRICT_REMOVEIF)) {
 				if (rlprev6 != NULL) {
 					rlprev6->next = rl6->next;
 				} else {

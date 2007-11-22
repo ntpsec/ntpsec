@@ -1,4 +1,18 @@
 * [Bug 960] spurious syslog:crypto_setup:spurious crypto command
+* [Bug 964] Change *-*-linux* to *-*-*linux* to allow for uclinux.
+* Changes from Dave Mills:
+  - ntp_util.c: cleanup.
+  - ntp_timer.c: watch the non-burst packet rate.
+  - ntp_request.c: cleanup.
+  - ntp_restrict.c: RES_LIMITED cleanup.
+  - ntp_proto.c: RES_LIMITED, rate bucktes, counters, overall cleanup.
+  - ntp_peer.c: disallow peer_unconfig().
+  - ntp_monitor.c: RES_LIMITED cleanup.
+  - ntp_loopfilter.c: poll interval cleanup.
+  - ntp_crypto.c: volley -> retry.  Cleanup TAI leap message.
+  - ntp_config: average and minimum are ^2 values.
+  - ntpdc: unknownversion is really "declined", not "bad version".
+  - Packet retry cleanup.
 * [Bug 961] refclock_tpro.c:tpro_poll() calls refclock_receive() twice.
 * [Bug 957] Windows only: Let command line parameters from the Windows SCM GUI
   override the standard parameters from the ImagePath registry key.

@@ -446,7 +446,7 @@ crypto_recv(
 		 * quietly ignore the packet.
 		 */
 		if (((code >> 24) & 0x3f) != CRYPTO_VN || len < 8) {
-			sys_unknownversion++;
+			sys_badlength++;
 			code |= CRYPTO_ERROR;
 		}
 
@@ -572,10 +572,10 @@ crypto_recv(
 			 * Save status word, host name and message
 			 * digest/signature type. As this is the first
 			 * time we heard of this guy, initialize the
-			 * volley counter.
+			 * retry counter.
 			 */
-			if (peer->speed == 0)
-				peer->speed = NTP_BURST;
+			if (peer->retry == 0)
+				peer->retry = NTP_RETRY;
 			poll_update(peer, peer->hpoll);
 			peer->crypto = fstamp;
 			peer->digest = dp;
@@ -1091,8 +1091,11 @@ crypto_recv(
 				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
 				msyslog(LOG_NOTICE,
-				    "crypto: next leap second %lu TAI offset %d expire %lu",
-				    leap_sec, leap_tai, leap_expire); 			}
+				    "crypto: leap epoch %lu TAI offset %d expire %lu",
+				    leap_sec, leap_tai, leap_expire); 				} else if (ntohl(ep->pkt[2]) < leap_expire) {
+				msyslog(LOG_ERR,
+				    "crypto: stale leap second values");
+			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN,
