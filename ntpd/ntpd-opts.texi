@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  Wednesday November 21, 2007 at 06:40:27 AM EST
+# It has been AutoGen-ed  Thursday November 22, 2007 at 04:16:24 AM EST
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -28,8 +28,6 @@ This software is released under a specialized copyright license.
 * ntpd debug-level::            debug-level option (-d)
 * ntpd driftfile::              driftfile option (-f)
 * ntpd dvar::                   dvar option
-* ntpd endsimtime::             endsimtime option (-S)
-* ntpd freqerr::                freqerr option (-T)
 * ntpd interface::              interface option (-I)
 * ntpd ipv4::                   ipv4 option (-4)
 * ntpd ipv6::                   ipv6 option (-6)
@@ -37,28 +35,21 @@ This software is released under a specialized copyright license.
 * ntpd keyfile::                keyfile option (-k)
 * ntpd logfile::                logfile option (-l)
 * ntpd modifymmtimer::          modifymmtimer option (-M)
-* ntpd ndelay::                 ndelay option (-Y)
 * ntpd nice::                   nice option (-N)
 * ntpd nofork::                 nofork option (-n)
 * ntpd novirtualips::           novirtualips option (-L)
 * ntpd panicgate::              panicgate option (-g)
-* ntpd pdelay::                 pdelay option (-Z)
-* ntpd phasenoise::             phasenoise option (-C)
 * ntpd pidfile::                pidfile option (-p)
 * ntpd priority::               priority option (-P)
 * ntpd propagationdelay::       propagationdelay option (-r)
 * ntpd quit::                   quit option (-q)
-* ntpd servertime::             servertime option (-O)
 * ntpd set-debug-level::        set-debug-level option (-D)
-* ntpd simbroadcastdelay::      simbroadcastdelay option (-B)
-* ntpd simslew::                simslew option (-H)
 * ntpd slew::                   slew option (-x)
 * ntpd statsdir::               statsdir option (-s)
 * ntpd trustedkey::             trustedkey option (-t)
 * ntpd updateinterval::         updateinterval option (-U)
 * ntpd user::                   user option (-u)
 * ntpd var::                    var option
-* ntpd walknoise::              walknoise option (-W)
 @end menu
 
 @node ntpd usage
@@ -196,20 +187,6 @@ This is almost never a good idea.
 This is the ``allow us to sync to broadcast servers'' option.
 
 
-@node ntpd simbroadcastdelay
-@subsection simbroadcastdelay option (-B)
-@cindex ntpd-simbroadcastdelay
-
-This is the ``simulator broadcast delay'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
-
 @node ntpd configfile
 @subsection configfile option (-c)
 @cindex ntpd-configfile
@@ -218,20 +195,6 @@ This is the ``configuration file name'' option.
 The name and path of the configuration file,
 /etc/ntp.conf
 by default.
-
-@node ntpd phasenoise
-@subsection phasenoise option (-C)
-@cindex ntpd-phasenoise
-
-This is the ``phase noise level'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
 
 @node ntpd debug-level
 @subsection debug-level option (-d)
@@ -297,20 +260,6 @@ options.
 See the
 tinker
 configuration file directive for other options.
-
-@node ntpd simslew
-@subsection simslew option (-H)
-@cindex ntpd-simslew
-
-This is the ``simuator slew'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
 
 @node ntpd jaildir
 @subsection jaildir option (-i)
@@ -406,20 +355,6 @@ To the extent permitted by the operating system, run
 ntpd
 at the highest priority.
 
-@node ntpd servertime
-@subsection servertime option (-O)
-@cindex ntpd-servertime
-
-This is the ``server time'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
-
 @node ntpd pidfile
 @subsection pidfile option (-p)
 @cindex ntpd-pidfile
@@ -476,20 +411,6 @@ This is the same operation as the
 statsdir statsdir
 configuration file directive.
 
-@node ntpd endsimtime
-@subsection endsimtime option (-S)
-@cindex ntpd-endsimtime
-
-This is the ``simulation end time'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
-
 @node ntpd trustedkey
 @subsection trustedkey option (-t)
 @cindex ntpd-trustedkey
@@ -503,20 +424,6 @@ may appear an unlimited number of times.
 @end itemize
 
 Add a key number to the trusted key list.
-
-@node ntpd freqerr
-@subsection freqerr option (-T)
-@cindex ntpd-freqerr
-
-This is the ``simulation frequency error'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
 
 @node ntpd user
 @subsection user option (-u)
@@ -576,20 +483,6 @@ may appear an unlimited number of times.
 
 
 
-@node ntpd walknoise
-@subsection walknoise option (-W)
-@cindex ntpd-walknoise
-
-This is the ``simulation random walk noise'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
-
 @node ntpd slew
 @subsection slew option (-x)
 @cindex ntpd-slew
@@ -608,31 +501,3 @@ See the
 tinker
 configuration file directive for other options.
 Note: The kernel time discipline is disabled with this option.
-
-@node ntpd ndelay
-@subsection ndelay option (-Y)
-@cindex ntpd-ndelay
-
-This is the ``simulation network delay'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-
-
-@node ntpd pdelay
-@subsection pdelay option (-Z)
-@cindex ntpd-pdelay
-
-This is the ``simulation processing delay'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{SIM} during the compilation.
-@end itemize
-
-

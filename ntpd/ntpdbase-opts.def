@@ -57,16 +57,6 @@ flag = {
 };
 
 flag = {
-    ifdef     = SIM;
-    name      = simbroadcastdelay;
-    value     = B;
-    arg-type  = string;
-    descrip   = "Simulator broadcast delay";
-    doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
     name      = configfile;
     value     = c;
     arg-type  = string;
@@ -75,16 +65,6 @@ flag = {
 	The name and path of the configuration file,
 	/etc/ntp.conf
 	by default.
-	_EndOfDoc_;
-};
-
-flag = {
-    ifdef     = SIM;
-    name      = phasenoise;
-    value     = C;
-    arg-type  = string;
-    descrip   = "Phase noise level";
-    doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -124,16 +104,6 @@ flag = {
 	See the
 	tinker
 	configuration file directive for other options.
-	_EndOfDoc_;
-};
-
-flag = {
-    ifdef     = SIM;
-    name      = simslew;
-    value     = H;
-    arg-type  = string;
-    descrip   = "Simuator slew";
-    doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -234,16 +204,6 @@ flag = {
 };
 
 flag = {
-    ifdef     = SIM;
-    name      = servertime;
-    value     = O;
-    arg-type  = string;
-    descrip   = "Server time";
-    doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
     name      = pidfile;
     value     = p;
     arg-type  = string;
@@ -314,16 +274,6 @@ flag = {
 };
 
 flag = {
-    ifdef     = SIM;
-    name      = endsimtime;
-    value     = S;
-    arg-type  = string;
-    descrip   = "Simulation end time";
-    doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
     name      = trustedkey;
     value     = t;
     arg-type  = string;
@@ -333,16 +283,6 @@ flag = {
     stack-arg;
     doc = <<-  _EndOfDoc_
 	Add a key number to the trusted key list.
-	_EndOfDoc_;
-};
-
-flag = {
-    ifdef     = SIM;
-    name      = freqerr;
-    value     = T;
-    arg-type  = string;
-    descrip   = "Simulation frequency error";
-    doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -401,16 +341,6 @@ flag = {
 };
 
 flag = {
-    ifdef     = SIM;
-    name      = walknoise;
-    value     = W;
-    arg-type  = string;
-    descrip   = "Simulation random walk noise";
-    doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
     name      = slew;
     value     = x;
     descrip   = "Slew up to 600 seconds";
@@ -428,25 +358,5 @@ flag = {
 	tinker
 	configuration file directive for other options.
 	Note: The kernel time discipline is disabled with this option.
-	_EndOfDoc_;
-};
-
-flag = {
-    ifdef     = SIM;
-    name      = ndelay;
-    value     = Y;
-    arg-type  = string;
-    descrip   = "Simulation network delay";
-    doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
-    ifdef     = SIM;
-    name      = pdelay;
-    value     = Z;
-    arg-type  = string;
-    descrip   = "Simulation processing delay";
-    doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  Wednesday November 21, 2007 at 06:40:23 AM EST
+ *  It has been AutoGen-ed  Thursday November 22, 2007 at 04:16:20 AM EST
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -57,45 +57,36 @@ typedef enum {
         INDEX_OPT_AUTHREQ          =  2,
         INDEX_OPT_AUTHNOREQ        =  3,
         INDEX_OPT_BCASTSYNC        =  4,
-        INDEX_OPT_SIMBROADCASTDELAY =  5,
-        INDEX_OPT_CONFIGFILE       =  6,
-        INDEX_OPT_PHASENOISE       =  7,
-        INDEX_OPT_DEBUG_LEVEL      =  8,
-        INDEX_OPT_SET_DEBUG_LEVEL  =  9,
-        INDEX_OPT_DRIFTFILE        = 10,
-        INDEX_OPT_PANICGATE        = 11,
-        INDEX_OPT_SIMSLEW          = 12,
-        INDEX_OPT_JAILDIR          = 13,
-        INDEX_OPT_INTERFACE        = 14,
-        INDEX_OPT_KEYFILE          = 15,
-        INDEX_OPT_LOGFILE          = 16,
-        INDEX_OPT_NOVIRTUALIPS     = 17,
-        INDEX_OPT_MODIFYMMTIMER    = 18,
-        INDEX_OPT_NOFORK           = 19,
-        INDEX_OPT_NICE             = 20,
-        INDEX_OPT_SERVERTIME       = 21,
-        INDEX_OPT_PIDFILE          = 22,
-        INDEX_OPT_PRIORITY         = 23,
-        INDEX_OPT_QUIT             = 24,
-        INDEX_OPT_PROPAGATIONDELAY = 25,
-        INDEX_OPT_STATSDIR         = 26,
-        INDEX_OPT_ENDSIMTIME       = 27,
-        INDEX_OPT_TRUSTEDKEY       = 28,
-        INDEX_OPT_FREQERR          = 29,
-        INDEX_OPT_USER             = 30,
-        INDEX_OPT_UPDATEINTERVAL   = 31,
-        INDEX_OPT_VAR              = 32,
-        INDEX_OPT_DVAR             = 33,
-        INDEX_OPT_WALKNOISE        = 34,
-        INDEX_OPT_SLEW             = 35,
-        INDEX_OPT_NDELAY           = 36,
-        INDEX_OPT_PDELAY           = 37,
-        INDEX_OPT_VERSION          = 38,
-        INDEX_OPT_HELP             = 39,
-        INDEX_OPT_MORE_HELP        = 40
+        INDEX_OPT_CONFIGFILE       =  5,
+        INDEX_OPT_DEBUG_LEVEL      =  6,
+        INDEX_OPT_SET_DEBUG_LEVEL  =  7,
+        INDEX_OPT_DRIFTFILE        =  8,
+        INDEX_OPT_PANICGATE        =  9,
+        INDEX_OPT_JAILDIR          = 10,
+        INDEX_OPT_INTERFACE        = 11,
+        INDEX_OPT_KEYFILE          = 12,
+        INDEX_OPT_LOGFILE          = 13,
+        INDEX_OPT_NOVIRTUALIPS     = 14,
+        INDEX_OPT_MODIFYMMTIMER    = 15,
+        INDEX_OPT_NOFORK           = 16,
+        INDEX_OPT_NICE             = 17,
+        INDEX_OPT_PIDFILE          = 18,
+        INDEX_OPT_PRIORITY         = 19,
+        INDEX_OPT_QUIT             = 20,
+        INDEX_OPT_PROPAGATIONDELAY = 21,
+        INDEX_OPT_STATSDIR         = 22,
+        INDEX_OPT_TRUSTEDKEY       = 23,
+        INDEX_OPT_USER             = 24,
+        INDEX_OPT_UPDATEINTERVAL   = 25,
+        INDEX_OPT_VAR              = 26,
+        INDEX_OPT_DVAR             = 27,
+        INDEX_OPT_SLEW             = 28,
+        INDEX_OPT_VERSION          = 29,
+        INDEX_OPT_HELP             = 30,
+        INDEX_OPT_MORE_HELP        = 31
 } teOptIndex;
 
-#define OPTION_CT    41
+#define OPTION_CT    32
 #define NTPD_VERSION       "4.2.5p99"
 #define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.5p99"
 
@@ -144,17 +135,9 @@ typedef enum {
 #  warning undefining BCASTSYNC due to option name conflict
 #  undef   BCASTSYNC
 # endif
-# ifdef    SIMBROADCASTDELAY
-#  warning undefining SIMBROADCASTDELAY due to option name conflict
-#  undef   SIMBROADCASTDELAY
-# endif
 # ifdef    CONFIGFILE
 #  warning undefining CONFIGFILE due to option name conflict
 #  undef   CONFIGFILE
-# endif
-# ifdef    PHASENOISE
-#  warning undefining PHASENOISE due to option name conflict
-#  undef   PHASENOISE
 # endif
 # ifdef    DEBUG_LEVEL
 #  warning undefining DEBUG_LEVEL due to option name conflict
@@ -171,10 +154,6 @@ typedef enum {
 # ifdef    PANICGATE
 #  warning undefining PANICGATE due to option name conflict
 #  undef   PANICGATE
-# endif
-# ifdef    SIMSLEW
-#  warning undefining SIMSLEW due to option name conflict
-#  undef   SIMSLEW
 # endif
 # ifdef    JAILDIR
 #  warning undefining JAILDIR due to option name conflict
@@ -208,10 +187,6 @@ typedef enum {
 #  warning undefining NICE due to option name conflict
 #  undef   NICE
 # endif
-# ifdef    SERVERTIME
-#  warning undefining SERVERTIME due to option name conflict
-#  undef   SERVERTIME
-# endif
 # ifdef    PIDFILE
 #  warning undefining PIDFILE due to option name conflict
 #  undef   PIDFILE
@@ -232,17 +207,9 @@ typedef enum {
 #  warning undefining STATSDIR due to option name conflict
 #  undef   STATSDIR
 # endif
-# ifdef    ENDSIMTIME
-#  warning undefining ENDSIMTIME due to option name conflict
-#  undef   ENDSIMTIME
-# endif
 # ifdef    TRUSTEDKEY
 #  warning undefining TRUSTEDKEY due to option name conflict
 #  undef   TRUSTEDKEY
-# endif
-# ifdef    FREQERR
-#  warning undefining FREQERR due to option name conflict
-#  undef   FREQERR
 # endif
 # ifdef    USER
 #  warning undefining USER due to option name conflict
@@ -260,21 +227,9 @@ typedef enum {
 #  warning undefining DVAR due to option name conflict
 #  undef   DVAR
 # endif
-# ifdef    WALKNOISE
-#  warning undefining WALKNOISE due to option name conflict
-#  undef   WALKNOISE
-# endif
 # ifdef    SLEW
 #  warning undefining SLEW due to option name conflict
 #  undef   SLEW
-# endif
-# ifdef    NDELAY
-#  warning undefining NDELAY due to option name conflict
-#  undef   NDELAY
-# endif
-# ifdef    PDELAY
-#  warning undefining PDELAY due to option name conflict
-#  undef   PDELAY
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
@@ -282,14 +237,11 @@ typedef enum {
 # undef AUTHREQ
 # undef AUTHNOREQ
 # undef BCASTSYNC
-# undef SIMBROADCASTDELAY
 # undef CONFIGFILE
-# undef PHASENOISE
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
 # undef DRIFTFILE
 # undef PANICGATE
-# undef SIMSLEW
 # undef JAILDIR
 # undef INTERFACE
 # undef KEYFILE
@@ -298,23 +250,17 @@ typedef enum {
 # undef MODIFYMMTIMER
 # undef NOFORK
 # undef NICE
-# undef SERVERTIME
 # undef PIDFILE
 # undef PRIORITY
 # undef QUIT
 # undef PROPAGATIONDELAY
 # undef STATSDIR
-# undef ENDSIMTIME
 # undef TRUSTEDKEY
-# undef FREQERR
 # undef USER
 # undef UPDATEINTERVAL
 # undef VAR
 # undef DVAR
-# undef WALKNOISE
 # undef SLEW
-# undef NDELAY
-# undef PDELAY
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /*
@@ -327,13 +273,7 @@ typedef enum {
 #define VALUE_OPT_AUTHREQ        'a'
 #define VALUE_OPT_AUTHNOREQ      'A'
 #define VALUE_OPT_BCASTSYNC      'b'
-#ifdef SIM
-#define VALUE_OPT_SIMBROADCASTDELAY 'B'
-#endif /* SIM */
 #define VALUE_OPT_CONFIGFILE     'c'
-#ifdef SIM
-#define VALUE_OPT_PHASENOISE     'C'
-#endif /* SIM */
 #ifdef DEBUG
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #endif /* DEBUG */
@@ -342,9 +282,6 @@ typedef enum {
 #endif /* DEBUG */
 #define VALUE_OPT_DRIFTFILE      'f'
 #define VALUE_OPT_PANICGATE      'g'
-#ifdef SIM
-#define VALUE_OPT_SIMSLEW        'H'
-#endif /* SIM */
 #ifdef HAVE_DROPROOT
 #define VALUE_OPT_JAILDIR        'i'
 #endif /* HAVE_DROPROOT */
@@ -357,39 +294,21 @@ typedef enum {
 #endif /* SYS_WINNT */
 #define VALUE_OPT_NOFORK         'n'
 #define VALUE_OPT_NICE           'N'
-#ifdef SIM
-#define VALUE_OPT_SERVERTIME     'O'
-#endif /* SIM */
 #define VALUE_OPT_PIDFILE        'p'
 #define VALUE_OPT_PRIORITY       'P'
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
 #define VALUE_OPT_STATSDIR       's'
-#ifdef SIM
-#define VALUE_OPT_ENDSIMTIME     'S'
-#endif /* SIM */
 #define VALUE_OPT_TRUSTEDKEY     't'
-#ifdef SIM
-#define VALUE_OPT_FREQERR        'T'
-#endif /* SIM */
 #ifdef HAVE_DROPROOT
 #define VALUE_OPT_USER           'u'
 #endif /* HAVE_DROPROOT */
 #define VALUE_OPT_UPDATEINTERVAL 'U'
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
-#define VALUE_OPT_VAR            32
-#define VALUE_OPT_DVAR           129
-#ifdef SIM
-#define VALUE_OPT_WALKNOISE      'W'
-#endif /* SIM */
+#define VALUE_OPT_VAR            26
+#define VALUE_OPT_DVAR           27
 #define VALUE_OPT_SLEW           'x'
-#ifdef SIM
-#define VALUE_OPT_NDELAY         'Y'
-#endif /* SIM */
-#ifdef SIM
-#define VALUE_OPT_PDELAY         'Z'
-#endif /* SIM */
 
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
 #define VALUE_OPT_HELP          '?'

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  Wednesday November 21, 2007 at 06:40:24 AM EST
+ *  It has been AutoGen-ed  Thursday November 22, 2007 at 04:16:21 AM EST
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -113,25 +113,6 @@ tSCC    zBcastsync_Name[]          = "bcastsync";
 #define BCASTSYNC_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Simbroadcastdelay option description:
- */
-#ifdef SIM
-tSCC    zSimbroadcastdelayText[] =
-        "Simulator broadcast delay";
-tSCC    zSimbroadcastdelay_NAME[]  = "SIMBROADCASTDELAY";
-tSCC    zSimbroadcastdelay_Name[]  = "simbroadcastdelay";
-#define SIMBROADCASTDELAY_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Simbroadcastdelay */
-#define VALUE_OPT_SIMBROADCASTDELAY NO_EQUIVALENT
-#define SIMBROADCASTDELAY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSimbroadcastdelayText       NULL
-#define zSimbroadcastdelay_NAME      NULL
-#define zSimbroadcastdelay_Name      NULL
-#endif  /* SIM */
-
-/*
  *  Configfile option description:
  */
 tSCC    zConfigfileText[] =
@@ -140,25 +121,6 @@ tSCC    zConfigfile_NAME[]         = "CONFIGFILE";
 tSCC    zConfigfile_Name[]         = "configfile";
 #define CONFIGFILE_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-/*
- *  Phasenoise option description:
- */
-#ifdef SIM
-tSCC    zPhasenoiseText[] =
-        "Phase noise level";
-tSCC    zPhasenoise_NAME[]         = "PHASENOISE";
-tSCC    zPhasenoise_Name[]         = "phasenoise";
-#define PHASENOISE_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Phasenoise */
-#define VALUE_OPT_PHASENOISE NO_EQUIVALENT
-#define PHASENOISE_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zPhasenoiseText       NULL
-#define zPhasenoise_NAME      NULL
-#define zPhasenoise_Name      NULL
-#endif  /* SIM */
 
 /*
  *  Debug_Level option description:
@@ -215,25 +177,6 @@ tSCC    zPanicgateText[] =
 tSCC    zPanicgate_NAME[]          = "PANICGATE";
 tSCC    zPanicgate_Name[]          = "panicgate";
 #define PANICGATE_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Simslew option description:
- */
-#ifdef SIM
-tSCC    zSimslewText[] =
-        "Simuator slew";
-tSCC    zSimslew_NAME[]            = "SIMSLEW";
-tSCC    zSimslew_Name[]            = "simslew";
-#define SIMSLEW_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Simslew */
-#define VALUE_OPT_SIMSLEW NO_EQUIVALENT
-#define SIMSLEW_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSimslewText       NULL
-#define zSimslew_NAME      NULL
-#define zSimslew_Name      NULL
-#endif  /* SIM */
 
 /*
  *  Jaildir option description:
@@ -330,25 +273,6 @@ tSCC    zNice_Name[]               = "nice";
 #define NICE_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Servertime option description:
- */
-#ifdef SIM
-tSCC    zServertimeText[] =
-        "Server time";
-tSCC    zServertime_NAME[]         = "SERVERTIME";
-tSCC    zServertime_Name[]         = "servertime";
-#define SERVERTIME_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Servertime */
-#define VALUE_OPT_SERVERTIME NO_EQUIVALENT
-#define SERVERTIME_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zServertimeText       NULL
-#define zServertime_NAME      NULL
-#define zServertime_Name      NULL
-#endif  /* SIM */
-
-/*
  *  Pidfile option description:
  */
 tSCC    zPidfileText[] =
@@ -398,25 +322,6 @@ tSCC    zStatsdir_Name[]           = "statsdir";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Endsimtime option description:
- */
-#ifdef SIM
-tSCC    zEndsimtimeText[] =
-        "Simulation end time";
-tSCC    zEndsimtime_NAME[]         = "ENDSIMTIME";
-tSCC    zEndsimtime_Name[]         = "endsimtime";
-#define ENDSIMTIME_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Endsimtime */
-#define VALUE_OPT_ENDSIMTIME NO_EQUIVALENT
-#define ENDSIMTIME_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zEndsimtimeText       NULL
-#define zEndsimtime_NAME      NULL
-#define zEndsimtime_Name      NULL
-#endif  /* SIM */
-
-/*
  *  Trustedkey option description:
  */
 tSCC    zTrustedkeyText[] =
@@ -425,25 +330,6 @@ tSCC    zTrustedkey_NAME[]         = "TRUSTEDKEY";
 tSCC    zTrustedkey_Name[]         = "trustedkey";
 #define TRUSTEDKEY_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-/*
- *  Freqerr option description:
- */
-#ifdef SIM
-tSCC    zFreqerrText[] =
-        "Simulation frequency error";
-tSCC    zFreqerr_NAME[]            = "FREQERR";
-tSCC    zFreqerr_Name[]            = "freqerr";
-#define FREQERR_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Freqerr */
-#define VALUE_OPT_FREQERR NO_EQUIVALENT
-#define FREQERR_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zFreqerrText       NULL
-#define zFreqerr_NAME      NULL
-#define zFreqerr_Name      NULL
-#endif  /* SIM */
 
 /*
  *  User option description:
@@ -495,25 +381,6 @@ tSCC    zDvar_Name[]               = "dvar";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Walknoise option description:
- */
-#ifdef SIM
-tSCC    zWalknoiseText[] =
-        "Simulation random walk noise";
-tSCC    zWalknoise_NAME[]          = "WALKNOISE";
-tSCC    zWalknoise_Name[]          = "walknoise";
-#define WALKNOISE_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Walknoise */
-#define VALUE_OPT_WALKNOISE NO_EQUIVALENT
-#define WALKNOISE_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zWalknoiseText       NULL
-#define zWalknoise_NAME      NULL
-#define zWalknoise_Name      NULL
-#endif  /* SIM */
-
-/*
  *  Slew option description:
  */
 tSCC    zSlewText[] =
@@ -521,44 +388,6 @@ tSCC    zSlewText[] =
 tSCC    zSlew_NAME[]               = "SLEW";
 tSCC    zSlew_Name[]               = "slew";
 #define SLEW_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Ndelay option description:
- */
-#ifdef SIM
-tSCC    zNdelayText[] =
-        "Simulation network delay";
-tSCC    zNdelay_NAME[]             = "NDELAY";
-tSCC    zNdelay_Name[]             = "ndelay";
-#define NDELAY_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Ndelay */
-#define VALUE_OPT_NDELAY NO_EQUIVALENT
-#define NDELAY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zNdelayText       NULL
-#define zNdelay_NAME      NULL
-#define zNdelay_Name      NULL
-#endif  /* SIM */
-
-/*
- *  Pdelay option description:
- */
-#ifdef SIM
-tSCC    zPdelayText[] =
-        "Simulation processing delay";
-tSCC    zPdelay_NAME[]             = "PDELAY";
-tSCC    zPdelay_Name[]             = "pdelay";
-#define PDELAY_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Pdelay */
-#define VALUE_OPT_PDELAY NO_EQUIVALENT
-#define PDELAY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zPdelayText       NULL
-#define zPdelay_NAME      NULL
-#define zPdelay_Name      NULL
-#endif  /* SIM */
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -683,20 +512,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zBcastsyncText, zBcastsync_NAME, zBcastsync_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_SIMBROADCASTDELAY,
-     /* equiv idx, value */ 5, VALUE_OPT_SIMBROADCASTDELAY,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SIMBROADCASTDELAY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zSimbroadcastdelayText, zSimbroadcastdelay_NAME, zSimbroadcastdelay_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 6, VALUE_OPT_CONFIGFILE,
-     /* equiv idx, value */ 6, VALUE_OPT_CONFIGFILE,
+  {  /* entry idx, value */ 5, VALUE_OPT_CONFIGFILE,
+     /* equiv idx, value */ 5, VALUE_OPT_CONFIGFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ CONFIGFILE_FLAGS, 0,
@@ -707,20 +524,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zConfigfileText, zConfigfile_NAME, zConfigfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_PHASENOISE,
-     /* equiv idx, value */ 7, VALUE_OPT_PHASENOISE,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ PHASENOISE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zPhasenoiseText, zPhasenoise_NAME, zPhasenoise_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 8, VALUE_OPT_DEBUG_LEVEL,
-     /* equiv idx, value */ 8, VALUE_OPT_DEBUG_LEVEL,
+  {  /* entry idx, value */ 6, VALUE_OPT_DEBUG_LEVEL,
+     /* equiv idx, value */ 6, VALUE_OPT_DEBUG_LEVEL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
@@ -731,8 +536,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 9, VALUE_OPT_SET_DEBUG_LEVEL,
-     /* equiv idx, value */ 9, VALUE_OPT_SET_DEBUG_LEVEL,
+  {  /* entry idx, value */ 7, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equiv idx, value */ 7, VALUE_OPT_SET_DEBUG_LEVEL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
@@ -743,8 +548,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 10, VALUE_OPT_DRIFTFILE,
-     /* equiv idx, value */ 10, VALUE_OPT_DRIFTFILE,
+  {  /* entry idx, value */ 8, VALUE_OPT_DRIFTFILE,
+     /* equiv idx, value */ 8, VALUE_OPT_DRIFTFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ DRIFTFILE_FLAGS, 0,
@@ -755,8 +560,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zDriftfileText, zDriftfile_NAME, zDriftfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 11, VALUE_OPT_PANICGATE,
-     /* equiv idx, value */ 11, VALUE_OPT_PANICGATE,
+  {  /* entry idx, value */ 9, VALUE_OPT_PANICGATE,
+     /* equiv idx, value */ 9, VALUE_OPT_PANICGATE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PANICGATE_FLAGS, 0,
@@ -767,20 +572,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPanicgateText, zPanicgate_NAME, zPanicgate_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 12, VALUE_OPT_SIMSLEW,
-     /* equiv idx, value */ 12, VALUE_OPT_SIMSLEW,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SIMSLEW_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zSimslewText, zSimslew_NAME, zSimslew_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 13, VALUE_OPT_JAILDIR,
-     /* equiv idx, value */ 13, VALUE_OPT_JAILDIR,
+  {  /* entry idx, value */ 10, VALUE_OPT_JAILDIR,
+     /* equiv idx, value */ 10, VALUE_OPT_JAILDIR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ JAILDIR_FLAGS, 0,
@@ -791,8 +584,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zJaildirText, zJaildir_NAME, zJaildir_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 14, VALUE_OPT_INTERFACE,
-     /* equiv idx, value */ 14, VALUE_OPT_INTERFACE,
+  {  /* entry idx, value */ 11, VALUE_OPT_INTERFACE,
+     /* equiv idx, value */ 11, VALUE_OPT_INTERFACE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ INTERFACE_FLAGS, 0,
@@ -803,8 +596,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zInterfaceText, zInterface_NAME, zInterface_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 15, VALUE_OPT_KEYFILE,
-     /* equiv idx, value */ 15, VALUE_OPT_KEYFILE,
+  {  /* entry idx, value */ 12, VALUE_OPT_KEYFILE,
+     /* equiv idx, value */ 12, VALUE_OPT_KEYFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KEYFILE_FLAGS, 0,
@@ -815,8 +608,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 16, VALUE_OPT_LOGFILE,
-     /* equiv idx, value */ 16, VALUE_OPT_LOGFILE,
+  {  /* entry idx, value */ 13, VALUE_OPT_LOGFILE,
+     /* equiv idx, value */ 13, VALUE_OPT_LOGFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ LOGFILE_FLAGS, 0,
@@ -827,8 +620,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zLogfileText, zLogfile_NAME, zLogfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 17, VALUE_OPT_NOVIRTUALIPS,
-     /* equiv idx, value */ 17, VALUE_OPT_NOVIRTUALIPS,
+  {  /* entry idx, value */ 14, VALUE_OPT_NOVIRTUALIPS,
+     /* equiv idx, value */ 14, VALUE_OPT_NOVIRTUALIPS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NOVIRTUALIPS_FLAGS, 0,
@@ -839,8 +632,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zNovirtualipsText, zNovirtualips_NAME, zNovirtualips_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 18, VALUE_OPT_MODIFYMMTIMER,
-     /* equiv idx, value */ 18, VALUE_OPT_MODIFYMMTIMER,
+  {  /* entry idx, value */ 15, VALUE_OPT_MODIFYMMTIMER,
+     /* equiv idx, value */ 15, VALUE_OPT_MODIFYMMTIMER,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MODIFYMMTIMER_FLAGS, 0,
@@ -851,8 +644,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zModifymmtimerText, zModifymmtimer_NAME, zModifymmtimer_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 19, VALUE_OPT_NOFORK,
-     /* equiv idx, value */ 19, VALUE_OPT_NOFORK,
+  {  /* entry idx, value */ 16, VALUE_OPT_NOFORK,
+     /* equiv idx, value */ 16, VALUE_OPT_NOFORK,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NOFORK_FLAGS, 0,
@@ -863,8 +656,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zNoforkText, zNofork_NAME, zNofork_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 20, VALUE_OPT_NICE,
-     /* equiv idx, value */ 20, VALUE_OPT_NICE,
+  {  /* entry idx, value */ 17, VALUE_OPT_NICE,
+     /* equiv idx, value */ 17, VALUE_OPT_NICE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NICE_FLAGS, 0,
@@ -875,20 +668,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zNiceText, zNice_NAME, zNice_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 21, VALUE_OPT_SERVERTIME,
-     /* equiv idx, value */ 21, VALUE_OPT_SERVERTIME,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SERVERTIME_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zServertimeText, zServertime_NAME, zServertime_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 22, VALUE_OPT_PIDFILE,
-     /* equiv idx, value */ 22, VALUE_OPT_PIDFILE,
+  {  /* entry idx, value */ 18, VALUE_OPT_PIDFILE,
+     /* equiv idx, value */ 18, VALUE_OPT_PIDFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PIDFILE_FLAGS, 0,
@@ -899,8 +680,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPidfileText, zPidfile_NAME, zPidfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 23, VALUE_OPT_PRIORITY,
-     /* equiv idx, value */ 23, VALUE_OPT_PRIORITY,
+  {  /* entry idx, value */ 19, VALUE_OPT_PRIORITY,
+     /* equiv idx, value */ 19, VALUE_OPT_PRIORITY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PRIORITY_FLAGS, 0,
@@ -911,8 +692,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPriorityText, zPriority_NAME, zPriority_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 24, VALUE_OPT_QUIT,
-     /* equiv idx, value */ 24, VALUE_OPT_QUIT,
+  {  /* entry idx, value */ 20, VALUE_OPT_QUIT,
+     /* equiv idx, value */ 20, VALUE_OPT_QUIT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ QUIT_FLAGS, 0,
@@ -923,8 +704,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zQuitText, zQuit_NAME, zQuit_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 25, VALUE_OPT_PROPAGATIONDELAY,
-     /* equiv idx, value */ 25, VALUE_OPT_PROPAGATIONDELAY,
+  {  /* entry idx, value */ 21, VALUE_OPT_PROPAGATIONDELAY,
+     /* equiv idx, value */ 21, VALUE_OPT_PROPAGATIONDELAY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PROPAGATIONDELAY_FLAGS, 0,
@@ -935,8 +716,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPropagationdelayText, zPropagationdelay_NAME, zPropagationdelay_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 26, VALUE_OPT_STATSDIR,
-     /* equiv idx, value */ 26, VALUE_OPT_STATSDIR,
+  {  /* entry idx, value */ 22, VALUE_OPT_STATSDIR,
+     /* equiv idx, value */ 22, VALUE_OPT_STATSDIR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ STATSDIR_FLAGS, 0,
@@ -947,20 +728,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zStatsdirText, zStatsdir_NAME, zStatsdir_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 27, VALUE_OPT_ENDSIMTIME,
-     /* equiv idx, value */ 27, VALUE_OPT_ENDSIMTIME,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ ENDSIMTIME_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zEndsimtimeText, zEndsimtime_NAME, zEndsimtime_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 28, VALUE_OPT_TRUSTEDKEY,
-     /* equiv idx, value */ 28, VALUE_OPT_TRUSTEDKEY,
+  {  /* entry idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
+     /* equiv idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ TRUSTEDKEY_FLAGS, 0,
@@ -971,20 +740,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zTrustedkeyText, zTrustedkey_NAME, zTrustedkey_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 29, VALUE_OPT_FREQERR,
-     /* equiv idx, value */ 29, VALUE_OPT_FREQERR,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ FREQERR_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zFreqerrText, zFreqerr_NAME, zFreqerr_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 30, VALUE_OPT_USER,
-     /* equiv idx, value */ 30, VALUE_OPT_USER,
+  {  /* entry idx, value */ 24, VALUE_OPT_USER,
+     /* equiv idx, value */ 24, VALUE_OPT_USER,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USER_FLAGS, 0,
@@ -995,8 +752,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUserText, zUser_NAME, zUser_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 31, VALUE_OPT_UPDATEINTERVAL,
-     /* equiv idx, value */ 31, VALUE_OPT_UPDATEINTERVAL,
+  {  /* entry idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
+     /* equiv idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ UPDATEINTERVAL_FLAGS, 0,
@@ -1007,8 +764,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUpdateintervalText, zUpdateinterval_NAME, zUpdateinterval_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 32, VALUE_OPT_VAR,
-     /* equiv idx, value */ 32, VALUE_OPT_VAR,
+  {  /* entry idx, value */ 26, VALUE_OPT_VAR,
+     /* equiv idx, value */ 26, VALUE_OPT_VAR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ VAR_FLAGS, 0,
@@ -1019,8 +776,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zVarText, zVar_NAME, zVar_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 33, VALUE_OPT_DVAR,
-     /* equiv idx, value */ 33, VALUE_OPT_DVAR,
+  {  /* entry idx, value */ 27, VALUE_OPT_DVAR,
+     /* equiv idx, value */ 27, VALUE_OPT_DVAR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DVAR_FLAGS, 0,
@@ -1031,20 +788,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zDvarText, zDvar_NAME, zDvar_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 34, VALUE_OPT_WALKNOISE,
-     /* equiv idx, value */ 34, VALUE_OPT_WALKNOISE,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ WALKNOISE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zWalknoiseText, zWalknoise_NAME, zWalknoise_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 35, VALUE_OPT_SLEW,
-     /* equiv idx, value */ 35, VALUE_OPT_SLEW,
+  {  /* entry idx, value */ 28, VALUE_OPT_SLEW,
+     /* equiv idx, value */ 28, VALUE_OPT_SLEW,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SLEW_FLAGS, 0,
@@ -1053,30 +798,6 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 36, VALUE_OPT_NDELAY,
-     /* equiv idx, value */ 36, VALUE_OPT_NDELAY,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ NDELAY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zNdelayText, zNdelay_NAME, zNdelay_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 37, VALUE_OPT_PDELAY,
-     /* equiv idx, value */ 37, VALUE_OPT_PDELAY,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ PDELAY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zPdelayText, zPdelay_NAME, zPdelay_Name,
      /* disablement strs */ NULL, NULL },
 
 #ifdef NO_OPTIONAL_OPT_ARGS
@@ -1178,7 +899,7 @@ tOptions ntpdOptions = {
       NO_EQUIVALENT /* index of '-#' option */,
       NO_EQUIVALENT /* index of default opt */
     },
-    41 /* full option count */, 38 /* user option count */
+    32 /* full option count */, 29 /* user option count */
 };
 
 /*
