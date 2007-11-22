@@ -1,3 +1,4 @@
+* [Bug 963] get_systime() is too noisy.
 * [Bug 960] spurious syslog:crypto_setup:spurious crypto command
 * [Bug 964] Change *-*-linux* to *-*-*linux* to allow for uclinux.
 * Changes from Dave Mills:

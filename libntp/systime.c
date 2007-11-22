@@ -25,20 +25,30 @@
 /*
  * These routines (get_systime, step_systime, adj_systime) implement an
  * interface between the system independent NTP clock and the Unix
- * system clock in various architectures and operating systems.
+ * system clock in various architectures and operating systems. Time is
+ * a precious quantity in these routines and every effort is made to
+ * minimize errors by unbiased rounding and amortizing adjustment
+ * residues.
  *
- * Time is a precious quantity in these routines and every effort is
- * made to minimize errors by always rounding toward zero and amortizing
- * adjustment residues. By default the adjustment quantum is 1 us for
- * the usual Unix tickadj() system call, but this can be increased if
- * necessary by the tick configuration command. For instance, when the
- * adjtime() quantum is a clock tick for a 100-Hz clock, the quantum
- * should be 10 ms.
+ * In order to improve the apparent resolution, provide unbiased
+ * rounding and insure that the readings cannot be predicted, the low-
+ * order unused portion of the time below the resolution limit is filled
+ * with an unbiased random fuzz.
+ *
+ * The sys_tick variable secifies the system clock tick interval in
+ * seconds and fraction. For systems that can interpolate between timer
+ * interrupts, the assumed tick interval and resolution is 1 us
+ * consistent with the timeval format used by the Unix getimeofday() abd
+ * adjtime() routines. With routines that use the timespec format, the
+ * resolution is 1 ns. For systems that cannot interpolate, such as
+ * Reliant and SCO, the resolution is as specified by the sys_tick
+ * variable, which defaults to 10 ms. The default can be changed by the
+ * tick configuration command. 
  */
 #if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
-double	sys_tick = 10e-3;	/* 10 ms tickadj() */
+double	sys_tick = .01;		/* 10 ms resolution */
 #else
-double	sys_tick = 1e-6;	/* 1 us tickadj() */
+double	sys_tick = 1e-6;	/* 1 us resolution */
 #endif
 double	sys_residual = 0;	/* adjustment residue (s) */
 
@@ -67,7 +77,9 @@ get_systime(
 	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = ts.tv_sec + JAN_1970;
-	dtemp = sys_residual + (ts.tv_nsec + ntp_random() / 0.5e9) / 1e9;
+	dtemp = ts.tv_nsec + (ntp_random() * 2. / FRAC) * sys_tick *
+	    1e6;
+	dtemp = dtemp / 1e9 + sys_residual;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;
@@ -86,7 +98,9 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = sys_residual + (tv.tv_usec + ntp_random() / 0.5e6) / 1e6;
+	dtemp = ts.tv_usec + (ntp_random() * 2. / FRAC) * sys_tick *
+	    1e6;
+	dtemp = dtemp / 1e6 + sys_residual;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;
