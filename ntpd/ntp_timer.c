@@ -324,6 +324,24 @@ timer(void)
 	}
 
 	/*
+	 * Orphan mode is active when enabled and when no servers less
+	 * than the orphan statum are available. A server with no other
+	 * synchronization source is an orphan It shows offset zero and
+	 * reference ID the loopback address.
+	 */
+	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
+		if (sys_leap == LEAP_NOTINSYNC)
+			sys_leap = LEAP_NOWARNING;
+		sys_stratum = sys_orphan;
+		if (sys_stratum > 1)
+			sys_refid = htonl(LOOPBACKADR);
+		else
+			memcpy(&sys_refid, "LOOP", 4);
+		sys_rootdelay = 0;
+		sys_rootdisp = sys_mindisp;
+	}
+
+	/*
 	 * Leapseconds. When the time remaining decrements to zero,
 	 * increment the TAI offset. If the kernel code is not available
 	 * or disabled, Do the leap crudely. There are of course races

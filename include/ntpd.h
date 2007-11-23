@@ -188,6 +188,9 @@ extern	void	kod_proto	(void);
 extern	int	leap_tai;
 extern	u_long	leap_expire;
 extern	u_long	leap_sec;
+extern	int	sys_orphan;
+extern	double	sys_mindisp;
+extern	double	sys_maxdist;
 
 /*
  * there seems to be a bug in the IRIX 4 compiler which prevents

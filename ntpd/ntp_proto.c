@@ -85,8 +85,8 @@ int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	double sys_offset;	/* current local clock offset */
 static	u_long sys_authdly[2];	/* authentication delay shift reg */
-static	double sys_mindisp = MINDISPERSE; /* min disp increment (s) */
-static	double sys_maxdist = MAXDISTANCE; /* selection threshold */
+double	sys_mindisp = MINDISPERSE; /* min disp increment (s) */
+double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
 u_long 	sys_epoch;		/* last clock update time */
 static	int sys_hopper;		/* anticlockhop counter */
@@ -155,22 +155,7 @@ transmit(
 	 * server modes) and those that do (all other modes). The dance
 	 * is intricate...
 	 */
-	/*
-	 * Orphan mode is active when enabled and when no servers less
-	 * than the orphan statum are available. A server with no other
-	 * synchronization source is an orphan It shows offset zero and
-	 * reference ID the loopback address.
-	 */
 	hpoll = peer->hpoll;
-	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
-		sys_leap = LEAP_NOWARNING;
-		sys_stratum = sys_orphan;
-		sys_refid = htonl(LOOPBACKADR);
-		sys_rootdelay = 0;
-		sys_rootdisp = sys_mindisp;
-		sys_offset = 0;
-	}
-
 	/*
 	 * In broadcast mode the poll interval is never changed from
 	 * minpoll.
