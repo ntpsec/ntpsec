@@ -98,7 +98,7 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = ts.tv_usec + (ntp_random() * 2. / FRAC) * sys_tick *
+	dtemp = tv.tv_usec + (ntp_random() * 2. / FRAC) * sys_tick *
 	    1e6;
 	dtemp = dtemp / 1e6 + sys_residual;
 	if (dtemp >= 1.) {

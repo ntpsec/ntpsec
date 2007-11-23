@@ -3005,7 +3005,7 @@ static l_fp
 			l_fp nts;
 			DPRINTF(4, ("fetch_timestamp: system network time stamp: %ld.%06ld\n", tvp->tv_sec, tvp->tv_usec));
 			nts.l_i = tvp->tv_sec + JAN_1970;
-			dtemp = (tvp->tv_usec + (ntp_random() * 2. / FRAC) /
+			dtemp = (tvp->tv_usec + (ntp_random() * 2. / FRAC)) /
 			    1e6;
 			nts.l_uf = (u_int32)(dtemp * FRAC);
 #ifdef DEBUG_TIMING
