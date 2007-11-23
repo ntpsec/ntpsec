@@ -1,3 +1,4 @@
+* bootstrap: squawk if genver fails.  Use -f with cp in case Dave does a chown.
 * Remove obsolete simulator command-line options.
 * ntp_request.c: [CID 36] zero sin_zero.
 * [Bug 963] get_systime() is too noisy.
