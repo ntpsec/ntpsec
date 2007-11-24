@@ -1,3 +1,5 @@
+* [Bug 833] ntpq config keyword is quote-mark unfriendly.
+* Rename the ntpq "config" keyword to ":config".
 * Dave Mills shifted some orphan processing.
 * Fix typos in the [Bug 963] patch.
 * bootstrap: squawk if genver fails.  Use -f with cp in case Dave does a chown.

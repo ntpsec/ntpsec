@@ -1537,11 +1537,11 @@ docmd(
 
 /*
  * tokenize - turn a command line into tokens
- */
-
-
-/* SK:
- * Modified to allow a quoted string 
+ *
+ * SK: Modified to allow a quoted string 
+ *
+ * HMS: If the first character of the first token is a ':' then (after
+ * eating inter-token whitespace) the 2nd token is the rest of the line.
  */
 
 static void
@@ -1559,24 +1559,40 @@ tokenize(
 	cp = line;
 	for (*ntok = 0; *ntok < MAXTOKENS; (*ntok)++) {
 		tokens[*ntok] = sp;
+
+		/* Skip inter-token whitespace */
 		while (ISSPACE(*cp))
 		    cp++;
+
+		/* If we're at EOL we're done */
 		if (ISEOL(*cp))
 		    break;
 
-                /* Check if the next token begins with a double quote.
-                 * If yes, continue reading till the next double quote
-                 */
-                if (*cp == '\"') {
-                    ++cp;
-                    do {
+		/* If this is the 2nd token and the first token begins
+		 * with a ':', then just grab to EOL.
+		 */
+
+		if (*ntok == 1 && tokens[0][0] == ':') {
+			do {
+				*sp++ = *cp++;
+			} while (!ISEOL(*cp));
+		}
+
+		/* Check if this token begins with a double quote.
+		 * If yes, continue reading till the next double quote
+		 */
+		else if (*cp == '\"') {
+		    ++cp;
+		    do {
                         *sp++ = *cp++;
                     } while ((*cp != '\"') && !ISEOL(*cp));
+		    /* HMS: a missing closing " should be an error */
                 }
                 else {
                     do {
 			*sp++ = *cp++;
                     } while ((*cp != '\"') && !ISSPACE(*cp) && !ISEOL(*cp));
+		    /* HMS: Why check for a " in the previous line? */
                 }
 
 		*sp++ = '\0';
