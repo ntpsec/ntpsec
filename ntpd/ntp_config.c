@@ -1918,11 +1918,14 @@ config_sim(void)
 	for (i = 0;i < simulation.num_of_servers;++i) {
 		serv_info = (server_info *) 
 		    dequeue(my_config.sim_details->servers);
-		if (!serv_info) 
+		if (!serv_info) { 
 			yyerror("Internal Error in parser...\n"
 				"Tried to initialize server list but no server returned\n");
-		memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
-		free_node(serv_info);
+		}
+		else {
+		  memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
+		  free_node(serv_info);
+		}
 	}
 	destroy_queue(my_config.sim_details->servers);
     
