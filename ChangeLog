@@ -1,3 +1,4 @@
+* ntp_config.c: [CID 48] missing "else" clause.
 * [Bug 833] ntpq config keyword is quote-mark unfriendly.
 * Rename the ntpq "config" keyword to ":config".
 * Dave Mills shifted some orphan processing.
