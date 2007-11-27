@@ -302,10 +302,7 @@ clear_all(void)
 			next_peer = peer->next;
 			if (!(peer->cast_flags & (MDF_ACAST |
 			    MDF_MCAST | MDF_BCAST))) {
-				peer->hpoll = peer->minpoll;
 				peer_clear(peer, "STEP");
-				if (peer->flags & FLAG_PREEMPT)
-					unpeer(peer);
 			}
 		}
 	}
