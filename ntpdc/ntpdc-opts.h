@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  Sunday November 25, 2007 at 06:43:49 AM EST
+ *  It has been AutoGen-ed  Tuesday November 27, 2007 at 06:43:32 AM EST
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -70,8 +70,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.5p103"
-#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.5p103"
+#define NTPDC_VERSION       "4.2.5p104"
+#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.5p104"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
