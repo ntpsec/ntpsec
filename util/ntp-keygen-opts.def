@@ -16,8 +16,8 @@ include        = '#include <stdlib.h>';
 #include       version.def
 
 flag = {
-    name      = certificate;
     value     = c;
+    name      = certificate;
     arg-type  = string;
     arg-name  = scheme;
     ifdef     = OPENSSL;
@@ -37,19 +37,19 @@ flag = {
 #include       debug-opt.def
 
 flag = {
-    name      = id-key;
     value     = e;
+    name      = id-key;
     ifdef     = OPENSSL;
-    descrip   = "Write identity keys";
+    descrip   = "Write IFF or GQ identity keys";
     doc = <<-  _EndOfDoc_
-	Write the IFF client keys to the standard output.  This is
+	Write the IFF or GQ client keys to the standard output.  This is
 	intended for automatic key distribution by mail.
 	_EndOfDoc_;
 };
 
 flag = {
-    name      = gq-params;
     value     = G;
+    name      = gq-params;
     ifdef     = OPENSSL;
     descrip   = "Generate GQ parameters and keys";
     doc = <<-  _EndOfDoc_
@@ -59,8 +59,8 @@ flag = {
 };
 
 flag = {
-    name      = gq-keys;
     value     = g;
+    name      = gq-keys;
     ifdef     = OPENSSL;
     descrip   = "update GQ keys";
     doc = <<-  _EndOfDoc_
@@ -71,8 +71,8 @@ flag = {
 };
 
 flag = {
-    name      = host-key;
     value     = H;
+    name      = host-key;
     ifdef     = OPENSSL;
     descrip   = "generate RSA host key";
     doc = <<-  _EndOfDoc_
@@ -81,8 +81,8 @@ flag = {
 };
 
 flag = {
-    name      = iffkey;
     value     = I;
+    name      = iffkey;
     ifdef     = OPENSSL;
     descrip   = "generate IFF parameters";
     doc = <<-  _EndOfDoc_
@@ -92,8 +92,8 @@ flag = {
 };
 
 flag = {
-    name      = issuer-name;
     value     = i;
+    name      = issuer-name;
     ifdef     = OPENSSL;
     arg-type  = string;
     arg-name  = issuer-name;
@@ -105,8 +105,8 @@ flag = {
 };
 
 flag = {
-    name      = md5key;
     value     = M;
+    name      = md5key;
     descrip   = "generate MD5 keys";
     doc = <<-  _EndOfDoc_
 	Generate MD5 keys, obsoleting any that may exist.
@@ -114,8 +114,8 @@ flag = {
 };
 
 flag = {
-    name      = modulus;
     value     = m;
+    name      = modulus;
     arg-type  = number;
     arg-name  = modulus;
     arg-range = '256->2048';
@@ -127,8 +127,8 @@ flag = {
 };
 
 flag = {
-    name      = pvt-cert;
     value     = P;
+    name      = pvt-cert;
     ifdef     = OPENSSL;
     descrip   = "generate PC private certificate";
     doc = <<-  _EndOfDoc_
@@ -138,8 +138,8 @@ flag = {
 };
 
 flag = {
-    name      = pvt-passwd;
     value     = p;
+    name      = pvt-passwd;
     ifdef     = OPENSSL;
     arg-type  = string;
     arg-name  = passwd;
@@ -151,8 +151,8 @@ flag = {
 };
 
 flag = {
-    name      = get-pvt-passwd;
     value     = q;
+    name      = get-pvt-passwd;
     ifdef     = OPENSSL;
     arg-type  = string;
     arg-name  = passwd;
@@ -163,8 +163,8 @@ flag = {
 };
 
 flag = {
-    name      = sign-key;
     value     = S;
+    name      = sign-key;
     arg-type  = string;
     arg-name  = sign;
     ifdef     = OPENSSL;
@@ -177,8 +177,8 @@ flag = {
 };
 
 flag = {
-    name      = subject-name;
     value     = s;
+    name      = subject-name;
     arg-type  = string;
     arg-name  = host;
     ifdef     = OPENSSL;
@@ -190,8 +190,8 @@ flag = {
 };
 
 flag = {
-    name      = trusted-cert;
     value     = T;
+    name      = trusted-cert;
     ifdef     = OPENSSL;
     descrip   = "trusted certificate (TC scheme)";
     doc = <<-  _EndOfDoc_
@@ -201,8 +201,8 @@ flag = {
 };
 
 flag = {
-    name      = mv-params;
     value     = V;
+    name      = mv-params;
     arg-type  = number;
     arg-name  = num;
     ifdef     = OPENSSL;
@@ -214,8 +214,8 @@ flag = {
 };
 
 flag = {
-    name      = mv-keys;
     value     = v;
+    name      = mv-keys;
     arg-type  = number;
     arg-name  = num;
     ifdef     = OPENSSL;

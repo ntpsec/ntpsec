@@ -1,3 +1,4 @@
+* The -e flag to ntp-keygen can write GQ keys now, too.
 * ntp_proto.c: sys_survivors and hpoll cleanup from Dave Mills.
 * ntp_loopfilter.c: sys_poll cleanup from Dave Mills.
 * refclock_wwv.c: maximum-likelihood digit and DSYNC fixes from Dave Mills.

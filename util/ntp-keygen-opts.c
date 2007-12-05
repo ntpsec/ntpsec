@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  Tuesday November 27, 2007 at 06:44:46 AM EST
+ *  It has been AutoGen-ed  Wednesday December  5, 2007 at 01:53:56 AM EST
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -121,7 +121,7 @@ tSCC    zSet_Debug_Level_Name[]    = "set-debug-level";
  */
 #ifdef OPENSSL
 tSCC    zId_KeyText[] =
-        "Write identity keys";
+        "Write IFF or GQ identity keys";
 tSCC    zId_Key_NAME[]             = "ID_KEY";
 tSCC    zId_Key_Name[]             = "id-key";
 #define ID_KEY_FLAGS       (OPTST_DISABLED)
