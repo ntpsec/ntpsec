@@ -326,6 +326,10 @@ local_clock(
 	 * than 0.5 s. 
 	 */
 	osys_poll = sys_poll;
+	if (sys_poll < peer->minpoll)
+		sys_poll = peer->minpoll;
+	if (sys_poll > peer->maxpoll)
+		sys_poll = peer->maxpoll;
 	clock_epoch += mu;
 	clock_frequency = flladj = plladj = 0;
 	rval = 1;
@@ -408,15 +412,10 @@ local_clock(
 	} else {
 
 		/*
-		 * The offset is less than the step threshold. Clamp the
-		 * poll update to the current peer. Calculatethe jitter
-		 * as the exponentially weighted offset
+		 * The offset is less than the step threshold. Calculate
+		 * the jitter as the exponentially weighted offset
 		 * differences.
  	      	 */
-		if (sys_poll < peer->minpoll)
-			sys_poll = peer->minpoll;
-		if (sys_poll > peer->maxpoll)
-			sys_poll = peer->maxpoll;
 		etemp = SQUARE(clock_jitter);
 		dtemp = SQUARE(max(fabs(fp_offset - last_offset),
 		    LOGTOD(sys_precision)));

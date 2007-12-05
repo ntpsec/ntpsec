@@ -156,6 +156,7 @@ transmit(
 	 * is intricate...
 	 */
 	hpoll = peer->hpoll;
+
 	/*
 	 * In broadcast mode the poll interval is never changed from
 	 * minpoll.
@@ -233,6 +234,7 @@ transmit(
 			 * Here the peer is reachable. Send a burst if
 			 * enabled and the peer is fit.
 			 */
+			hpoll = sys_poll;
 			if (!oreach || !(peer->flags & FLAG_PREEMPT))
 				peer->unreach = 0;
 			if (peer->flags & FLAG_BURST && peer->retry ==
@@ -246,7 +248,8 @@ transmit(
 		 * poll_update() routine will clamp it to maxpoll.
 		 */ 
 		if (peer->unreach >= NTP_UNREACH) {
-			if (peer->flags & FLAG_PREEMPT) {
+			if (peer->flags & FLAG_PREEMPT &&
+			    sys_survivors >= sys_maxclock) {
 				peer_clear(peer, "TIME");
 				unpeer(peer);
 				return;
@@ -261,8 +264,8 @@ transmit(
 					peer_clear(peer, "TIME");
 					peer->unreach = 0;
 				}
-				hpoll++;
 #endif /* OPENSSL */
+				hpoll++;
 			}
 		}
 	} else {
@@ -1842,13 +1845,13 @@ clock_filter(
 	 * If the the new sample and the current sample are both valid
 	 * and the difference between their offsets exceeds CLOCK_SGATE
 	 * (3) times the jitter and the interval between them is less
-	 * than twice the system poll interval, consider the new sample
+	 * than twice the host poll interval, consider the new sample
 	 * a popcorn spike and ignore it.
 	 */
 	if (peer->disp < sys_maxdist && peer->filter_disp[k] <
 	    sys_maxdist && etemp > CLOCK_SGATE * peer->jitter &&
 	    peer->filter_epoch[k] - peer->epoch < 2. *
-	    ULOGTOD(sys_poll)) {
+	    ULOGTOD(peer->hpoll)) {
 #ifdef DEBUG
 		if (debug)
 			printf("clock_filter: popcorn %.6f %.6f\n",
@@ -3086,10 +3089,10 @@ peer_unfit(
 	/*
 	 * A distance error for a remote peer occurs if the root
 	 * distance is greater than or equal to the distance threshold
-	 * plus the increment due to one poll interval.
+	 * plus the increment due to one host poll interval.
 	 */
 	if (!(peer->flags & FLAG_REFCLOCK) && root_distance(peer) >=
-	    sys_maxdist + clock_phi * ULOGTOD(sys_poll))
+	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
 		rval |= TEST11;		/* distance exceeded */
 
 	/*
