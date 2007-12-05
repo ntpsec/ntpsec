@@ -155,10 +155,10 @@
  * These bits indicate various alarm conditions, which are decoded to
  * form the quality character included in the timecode.
  */
-#define CMPERR		1	/* digit or misc bit compare error */
-#define LOWERR		2	/* low bit or digit amplitude or SNR */
-#define NINERR		4	/* less than nine digits in minute */
-#define SYNERR		8	/* not tracking second sync */
+#define CMPERR		0x1	/* digit or misc bit compare error */
+#define LOWERR		0x2	/* low bit or digit amplitude or SNR */
+#define NINERR		0x4	/* less than nine digits in minute */
+#define SYNERR		0x8	/* not tracking second sync */
 
 /*
  * Watchcat timeouts (watch)
@@ -465,7 +465,6 @@ char dstcod[] = {
 struct decvec {
 	int radix;		/* radix (3, 4, 6, 10) */
 	int digit;		/* current clock digit */
-	int mldigit;		/* maximum-likelihood digit */
 	int count;		/* match count */
 	double digprb;		/* max digit probability */
 	double digsnr;		/* likelihood function (dB) */
@@ -2174,26 +2173,23 @@ wwv_corr4(
 	 * not considered correct until all nine clock digits have
 	 * reached threshold. This is intended as eye candy, but avoids
 	 * mistakes when the signal is low and the SNR is very marginal.
-	 * once correctly set, the maximum-likelihood digit is ignored
-	 * on the assumption the clock will always be correct unless for
-	 * some reason it drifts to a different second.
 	 */
-	vp->mldigit = mldigit;
 	if (vp->digprb < BTHR || vp->digsnr < BSNR) {
-		vp->count = 0;
 		up->status |= BGATE;
 	} else {
-		up->status |= DSYNC;
 		if (vp->digit != mldigit) {
-			vp->count = 0;
 			up->alarm |= CMPERR;
-			if (!(up->status & INSYNC))
+			if (vp->count > 0)
+				vp->count--;
+			if (vp->count == 0)
 				vp->digit = mldigit;
 		} else {
 			if (vp->count < BCMP)
 				vp->count++;
-			if (vp->count == BCMP)
+			if (vp->count == BCMP) {
+				up->status |= DSYNC;
 				up->digcnt++;
+			}
 		}
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
@@ -2201,7 +2197,7 @@ wwv_corr4(
 		sprintf(tbuf,
 		    "wwv4 %2d %04x %3d %4d %5.0f %2d %d %d %d %5.0f %5.1f",
 		    up->rsec - 1, up->status, up->gain, up->yepoch,
-		    up->epomax, vp->radix, vp->digit, vp->mldigit,
+		    up->epomax, vp->radix, vp->digit, mldigit,
 		    vp->count, vp->digprb, vp->digsnr);
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG

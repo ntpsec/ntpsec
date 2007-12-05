@@ -1,3 +1,4 @@
+* refclock_wwv.c: maximum-likelihood digit and DSYNC fixes from Dave Mills.
 * [Bug 967] preemptable associations are lost forever on a step.
 * ntp_config.c: [CID 48] missing "else" clause.
 * [Bug 833] ntpq config keyword is quote-mark unfriendly.
