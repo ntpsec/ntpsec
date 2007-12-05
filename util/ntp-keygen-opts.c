@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  Wednesday December  5, 2007 at 01:53:56 AM EST
+ *  It has been AutoGen-ed  Wednesday December  5, 2007 at 02:18:31 AM EST
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -150,24 +150,6 @@ tSCC    zGq_Params_Name[]          = "gq-params";
 #define zGq_ParamsText       NULL
 #define zGq_Params_NAME      NULL
 #define zGq_Params_Name      NULL
-#endif  /* OPENSSL */
-
-/*
- *  Gq_Keys option description:
- */
-#ifdef OPENSSL
-tSCC    zGq_KeysText[] =
-        "update GQ keys";
-tSCC    zGq_Keys_NAME[]            = "GQ_KEYS";
-tSCC    zGq_Keys_Name[]            = "gq-keys";
-#define GQ_KEYS_FLAGS       (OPTST_DISABLED)
-
-#else   /* disable Gq_Keys */
-#define VALUE_OPT_GQ_KEYS NO_EQUIVALENT
-#define GQ_KEYS_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zGq_KeysText       NULL
-#define zGq_Keys_NAME      NULL
-#define zGq_Keys_Name      NULL
 #endif  /* OPENSSL */
 
 /*
@@ -553,20 +535,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zGq_ParamsText, zGq_Params_NAME, zGq_Params_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_GQ_KEYS,
-     /* equiv idx, value */ 5, VALUE_OPT_GQ_KEYS,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ GQ_KEYS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zGq_KeysText, zGq_Keys_NAME, zGq_Keys_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 6, VALUE_OPT_HOST_KEY,
-     /* equiv idx, value */ 6, VALUE_OPT_HOST_KEY,
+  {  /* entry idx, value */ 5, VALUE_OPT_HOST_KEY,
+     /* equiv idx, value */ 5, VALUE_OPT_HOST_KEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ HOST_KEY_FLAGS, 0,
@@ -577,8 +547,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zHost_KeyText, zHost_Key_NAME, zHost_Key_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_IFFKEY,
-     /* equiv idx, value */ 7, VALUE_OPT_IFFKEY,
+  {  /* entry idx, value */ 6, VALUE_OPT_IFFKEY,
+     /* equiv idx, value */ 6, VALUE_OPT_IFFKEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IFFKEY_FLAGS, 0,
@@ -589,8 +559,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zIffkeyText, zIffkey_NAME, zIffkey_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 8, VALUE_OPT_ISSUER_NAME,
-     /* equiv idx, value */ 8, VALUE_OPT_ISSUER_NAME,
+  {  /* entry idx, value */ 7, VALUE_OPT_ISSUER_NAME,
+     /* equiv idx, value */ 7, VALUE_OPT_ISSUER_NAME,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ ISSUER_NAME_FLAGS, 0,
@@ -601,8 +571,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zIssuer_NameText, zIssuer_Name_NAME, zIssuer_Name_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 9, VALUE_OPT_MD5KEY,
-     /* equiv idx, value */ 9, VALUE_OPT_MD5KEY,
+  {  /* entry idx, value */ 8, VALUE_OPT_MD5KEY,
+     /* equiv idx, value */ 8, VALUE_OPT_MD5KEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MD5KEY_FLAGS, 0,
@@ -613,8 +583,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zMd5keyText, zMd5key_NAME, zMd5key_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 10, VALUE_OPT_MODULUS,
-     /* equiv idx, value */ 10, VALUE_OPT_MODULUS,
+  {  /* entry idx, value */ 9, VALUE_OPT_MODULUS,
+     /* equiv idx, value */ 9, VALUE_OPT_MODULUS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MODULUS_FLAGS, 0,
@@ -625,8 +595,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zModulusText, zModulus_NAME, zModulus_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 11, VALUE_OPT_PVT_CERT,
-     /* equiv idx, value */ 11, VALUE_OPT_PVT_CERT,
+  {  /* entry idx, value */ 10, VALUE_OPT_PVT_CERT,
+     /* equiv idx, value */ 10, VALUE_OPT_PVT_CERT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PVT_CERT_FLAGS, 0,
@@ -637,8 +607,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPvt_CertText, zPvt_Cert_NAME, zPvt_Cert_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 12, VALUE_OPT_PVT_PASSWD,
-     /* equiv idx, value */ 12, VALUE_OPT_PVT_PASSWD,
+  {  /* entry idx, value */ 11, VALUE_OPT_PVT_PASSWD,
+     /* equiv idx, value */ 11, VALUE_OPT_PVT_PASSWD,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PVT_PASSWD_FLAGS, 0,
@@ -649,8 +619,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPvt_PasswdText, zPvt_Passwd_NAME, zPvt_Passwd_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 13, VALUE_OPT_GET_PVT_PASSWD,
-     /* equiv idx, value */ 13, VALUE_OPT_GET_PVT_PASSWD,
+  {  /* entry idx, value */ 12, VALUE_OPT_GET_PVT_PASSWD,
+     /* equiv idx, value */ 12, VALUE_OPT_GET_PVT_PASSWD,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ GET_PVT_PASSWD_FLAGS, 0,
@@ -661,8 +631,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zGet_Pvt_PasswdText, zGet_Pvt_Passwd_NAME, zGet_Pvt_Passwd_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 14, VALUE_OPT_SIGN_KEY,
-     /* equiv idx, value */ 14, VALUE_OPT_SIGN_KEY,
+  {  /* entry idx, value */ 13, VALUE_OPT_SIGN_KEY,
+     /* equiv idx, value */ 13, VALUE_OPT_SIGN_KEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SIGN_KEY_FLAGS, 0,
@@ -673,8 +643,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSign_KeyText, zSign_Key_NAME, zSign_Key_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 15, VALUE_OPT_SUBJECT_NAME,
-     /* equiv idx, value */ 15, VALUE_OPT_SUBJECT_NAME,
+  {  /* entry idx, value */ 14, VALUE_OPT_SUBJECT_NAME,
+     /* equiv idx, value */ 14, VALUE_OPT_SUBJECT_NAME,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SUBJECT_NAME_FLAGS, 0,
@@ -685,8 +655,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSubject_NameText, zSubject_Name_NAME, zSubject_Name_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 16, VALUE_OPT_TRUSTED_CERT,
-     /* equiv idx, value */ 16, VALUE_OPT_TRUSTED_CERT,
+  {  /* entry idx, value */ 15, VALUE_OPT_TRUSTED_CERT,
+     /* equiv idx, value */ 15, VALUE_OPT_TRUSTED_CERT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ TRUSTED_CERT_FLAGS, 0,
@@ -697,8 +667,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zTrusted_CertText, zTrusted_Cert_NAME, zTrusted_Cert_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 17, VALUE_OPT_MV_PARAMS,
-     /* equiv idx, value */ 17, VALUE_OPT_MV_PARAMS,
+  {  /* entry idx, value */ 16, VALUE_OPT_MV_PARAMS,
+     /* equiv idx, value */ 16, VALUE_OPT_MV_PARAMS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MV_PARAMS_FLAGS, 0,
@@ -709,8 +679,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zMv_ParamsText, zMv_Params_NAME, zMv_Params_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 18, VALUE_OPT_MV_KEYS,
-     /* equiv idx, value */ 18, VALUE_OPT_MV_KEYS,
+  {  /* entry idx, value */ 17, VALUE_OPT_MV_KEYS,
+     /* equiv idx, value */ 17, VALUE_OPT_MV_KEYS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MV_KEYS_FLAGS, 0,
@@ -852,7 +822,7 @@ tOptions ntp_keygenOptions = {
       NO_EQUIVALENT /* index of '-#' option */,
       NO_EQUIVALENT /* index of default opt */
     },
-    24 /* full option count */, 19 /* user option count */
+    23 /* full option count */, 18 /* user option count */
 };
 
 /*

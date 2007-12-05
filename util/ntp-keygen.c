@@ -225,7 +225,6 @@ main(
 	int	hostkey = 0;	/* generate RSA keys */
 	int	iffkey = 0;	/* generate IFF keys */
 	int	gqpar = 0;	/* generate GQ keys */
-	int	gqkey = 0;	/* not used */
 	int	mvpar = 0;	/* generate MV parameters */
 	int	mvkey = 0;	/* update MV keys */
 	char	*sign = NULL;	/* sign key */
@@ -298,9 +297,6 @@ main(
 #ifdef OPENSSL
 	if (HAVE_OPT( GQ_PARAMS ))
 	    gqpar++;
-
-	if (HAVE_OPT( GQ_KEYS ))
-	    gqkey++;			/* not used */
 
 	if (HAVE_OPT( HOST_KEY ))
 	    hostkey++;

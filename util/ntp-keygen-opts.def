@@ -59,18 +59,6 @@ flag = {
 };
 
 flag = {
-    value     = g;
-    name      = gq-keys;
-    ifdef     = OPENSSL;
-    descrip   = "update GQ keys";
-    doc = <<-  _EndOfDoc_
-	Generate keys for the GQ identification scheme using the existing
-	GQ parameters.  If the GQ parameters do not yet exist, create
-	them first.
-	_EndOfDoc_;
-};
-
-flag = {
     value     = H;
     name      = host-key;
     ifdef     = OPENSSL;

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  Wednesday December  5, 2007 at 01:53:55 AM EST
+ *  It has been AutoGen-ed  Wednesday December  5, 2007 at 02:18:30 AM EST
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -57,28 +57,27 @@ typedef enum {
         INDEX_OPT_SET_DEBUG_LEVEL  =  2,
         INDEX_OPT_ID_KEY           =  3,
         INDEX_OPT_GQ_PARAMS        =  4,
-        INDEX_OPT_GQ_KEYS          =  5,
-        INDEX_OPT_HOST_KEY         =  6,
-        INDEX_OPT_IFFKEY           =  7,
-        INDEX_OPT_ISSUER_NAME      =  8,
-        INDEX_OPT_MD5KEY           =  9,
-        INDEX_OPT_MODULUS          = 10,
-        INDEX_OPT_PVT_CERT         = 11,
-        INDEX_OPT_PVT_PASSWD       = 12,
-        INDEX_OPT_GET_PVT_PASSWD   = 13,
-        INDEX_OPT_SIGN_KEY         = 14,
-        INDEX_OPT_SUBJECT_NAME     = 15,
-        INDEX_OPT_TRUSTED_CERT     = 16,
-        INDEX_OPT_MV_PARAMS        = 17,
-        INDEX_OPT_MV_KEYS          = 18,
-        INDEX_OPT_VERSION          = 19,
-        INDEX_OPT_HELP             = 20,
-        INDEX_OPT_MORE_HELP        = 21,
-        INDEX_OPT_SAVE_OPTS        = 22,
-        INDEX_OPT_LOAD_OPTS        = 23
+        INDEX_OPT_HOST_KEY         =  5,
+        INDEX_OPT_IFFKEY           =  6,
+        INDEX_OPT_ISSUER_NAME      =  7,
+        INDEX_OPT_MD5KEY           =  8,
+        INDEX_OPT_MODULUS          =  9,
+        INDEX_OPT_PVT_CERT         = 10,
+        INDEX_OPT_PVT_PASSWD       = 11,
+        INDEX_OPT_GET_PVT_PASSWD   = 12,
+        INDEX_OPT_SIGN_KEY         = 13,
+        INDEX_OPT_SUBJECT_NAME     = 14,
+        INDEX_OPT_TRUSTED_CERT     = 15,
+        INDEX_OPT_MV_PARAMS        = 16,
+        INDEX_OPT_MV_KEYS          = 17,
+        INDEX_OPT_VERSION          = 18,
+        INDEX_OPT_HELP             = 19,
+        INDEX_OPT_MORE_HELP        = 20,
+        INDEX_OPT_SAVE_OPTS        = 21,
+        INDEX_OPT_LOAD_OPTS        = 22
 } teOptIndex;
 
-#define OPTION_CT    24
+#define OPTION_CT    23
 #define NTP_KEYGEN_VERSION       "4.2.5p104"
 #define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p104"
 
@@ -126,10 +125,6 @@ typedef enum {
 # ifdef    GQ_PARAMS
 #  warning undefining GQ_PARAMS due to option name conflict
 #  undef   GQ_PARAMS
-# endif
-# ifdef    GQ_KEYS
-#  warning undefining GQ_KEYS due to option name conflict
-#  undef   GQ_KEYS
 # endif
 # ifdef    HOST_KEY
 #  warning undefining HOST_KEY due to option name conflict
@@ -189,7 +184,6 @@ typedef enum {
 # undef SET_DEBUG_LEVEL
 # undef ID_KEY
 # undef GQ_PARAMS
-# undef GQ_KEYS
 # undef HOST_KEY
 # undef IFFKEY
 # undef ISSUER_NAME
@@ -222,9 +216,6 @@ typedef enum {
 #endif /* OPENSSL */
 #ifdef OPENSSL
 #define VALUE_OPT_GQ_PARAMS      'G'
-#endif /* OPENSSL */
-#ifdef OPENSSL
-#define VALUE_OPT_GQ_KEYS        'g'
 #endif /* OPENSSL */
 #ifdef OPENSSL
 #define VALUE_OPT_HOST_KEY       'H'
