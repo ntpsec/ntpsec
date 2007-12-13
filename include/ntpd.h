@@ -24,6 +24,8 @@ extern	u_short ctlpeerstatus	(struct peer *);
 extern	int	ctlsettrap	(struct sockaddr_storage *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
+extern	void	init_logging	(char const *, int);
+extern	void	setup_logfile	(void);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *);
 

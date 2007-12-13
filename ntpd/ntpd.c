@@ -218,8 +218,8 @@ static	RETSIGTYPE	no_debug	(int);
 
 int 		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
-static void	init_logging		(char const *);
-static void	setup_logfile		(void);
+void		init_logging		(char const *, int);
+void		setup_logfile		(void);
 
 static void	assertion_failed	(const char *file, int line,
 	isc_assertiontype_t type, const char *cond);
@@ -233,7 +233,10 @@ static void	library_unexpected_error(const char *file, int line,
  * Initialize the logging
  */
 void
-init_logging(char const *name)
+init_logging(
+	char const *name,
+	int log_version
+	)
 {
 	const char *cp;
 
@@ -266,7 +269,8 @@ init_logging(char const *name)
 # endif /* LOG_DAEMON */
 #endif	/* !SYS_WINNT && !VMS */
 
-	NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
+	if (log_version)
+	    NLOG(NLOG_SYSINFO) /* 'if' clause for syslog */
 		msyslog(LOG_NOTICE, "%s", Version);
 }
 
@@ -485,9 +489,7 @@ ntpdmain(
 		argv += optct;
 	}
 
-	/* HMS: is this lame? Should we process -l first? */
-
-	init_logging(progname);		/* Open the log file */
+	init_logging(progname, 1);		/* Open the log file */
 
 #ifdef HAVE_UMASK
 	{
