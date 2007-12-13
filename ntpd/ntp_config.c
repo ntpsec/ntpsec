@@ -253,7 +253,7 @@ get_flags_from_list(
 {
 	int flags = 0;
 	struct attr_val *curr_flag;
-    
+
 	while (!empty(flag_list)) {
 		curr_flag = (struct attr_val *) dequeue(flag_list);
 		flags |= curr_flag->value.i;
@@ -280,7 +280,7 @@ init_syntax_tree(void)
 {
 	my_config.peers = create_queue();
 	my_config.orphan_cmds = create_queue();
-    
+
 	my_config.broadcastclient = 0;
 	my_config.manycastserver = create_queue();
 	my_config.multicastclient = create_queue();
@@ -308,7 +308,7 @@ init_syntax_tree(void)
 	init_auth_node();
 }
 
-/* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE 
+/* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE
  * -----------------------------------------------
  */
 
@@ -316,7 +316,7 @@ queue *
 enqueue_in_new_queue(
 	void *my_node
 	)
-{ 
+{
 	queue *my_queue = create_queue();
 
 	enqueue(my_queue, my_node);
@@ -366,7 +366,7 @@ create_attr_sval(
 	my_val = (struct attr_val *)
 	    get_node(sizeof(struct attr_val));
 	my_val->attr = attr;
-	if (s == NULL) 
+	if (s == NULL)
 		s = "\0";	/* free() and strdup() glow on NULL */
 	my_val->value.s = strdup(s);
 	my_val->type = T_String;
@@ -428,7 +428,7 @@ create_address_node(
 	int type
 	)
 {
-	struct address_node *my_node = (struct address_node *) 
+	struct address_node *my_node = (struct address_node *)
 	    get_node(sizeof(struct address_node));
 
 	my_node->address = addr;
@@ -460,12 +460,12 @@ create_peer_node(
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
-    
+
 	while (options && !empty(options)) {
 		struct attr_val *my_val = dequeue(options);
 
 		/* Check the kind of option being set */
-		switch(my_val->attr) { 
+		switch(my_val->attr) {
 		    case T_Minpoll:
 			if (my_val->value.i < NTP_MINPOLL) {
 				msyslog(LOG_INFO,
@@ -490,7 +490,7 @@ create_peer_node(
 			if (my_node->ttl >= MAX_TTL) {
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = 1;
-			} 
+			}
 			else
 				my_node->ttl = my_val->value.i;
 			break;
@@ -512,7 +512,7 @@ create_peer_node(
 	}
 	if (options)
 		destroy_queue(options);
-    
+
 	/* Check if errors were reported. If yes, ignore the node */
 	if (errflag) {
 		free_node(my_node);
@@ -523,7 +523,7 @@ create_peer_node(
 
 struct filegen_node *
 create_filegen_node(
-	void **name, 
+	void **name,
 	queue *options
 	)
 {
@@ -585,13 +585,13 @@ create_setvar_node(
 	int len2 = strlen(val);
 	char *s = (char *) emalloc(len1 + len2 + 2);
 	struct setvar_node *my_node;
-    
+
 	/* Copy the var = val to s */
 	strcpy(s, var);
 	s[len1] = '=';
 	strcpy(&s[len1 + 1], val);
 	s[len1+len2+1] = '\0';
-    
+
 	free(var);
 	free(val);
 
@@ -606,7 +606,7 @@ create_setvar_node(
 
 struct addr_opts_node *
 create_addr_opts_node(
-	struct address_node *addr, 
+	struct address_node *addr,
 	queue *options
 	)
 {
@@ -643,7 +643,7 @@ create_sim_script_info(
 	/* Traverse the script_queue and fill out non-default values */
 	while (!empty(script_queue)) {
 		my_attr_val = (struct attr_val *) dequeue(script_queue);
-        
+
 		/* Set the desired value */
 		switch(my_attr_val->attr) {
 		    case T_Freq_Offset:
@@ -684,11 +684,11 @@ get_next_address(
 	static int curr_addr_no = 1;
 	char addr_string[ADDR_LENGTH];
 
-	struct sockaddr_storage *final_addr = (struct sockaddr_storage *) 
+	struct sockaddr_storage *final_addr = (struct sockaddr_storage *)
 	    malloc(sizeof(struct sockaddr_storage));
 	struct addrinfo *ptr;
 	int retval;
-    
+
 	if (addr->type == T_String) {
 		snprintf(addr_string, ADDR_LENGTH, "%s%d", addr_prefix, curr_addr_no++);
 		printf("Selecting ip address %s for hostname %s\n", addr_string, addr->address);
@@ -697,7 +697,7 @@ get_next_address(
 	else {
 		retval = getaddrinfo(addr->address, "ntp", NULL, &ptr);
 	}
-    
+
 	if (retval == 0) {
 		memcpy(final_addr, ptr->ai_addr, ptr->ai_addrlen);
 		fprintf(stderr, "Successful in setting ip address of simulated server to: %s\n", stoa(final_addr));
@@ -709,7 +709,7 @@ get_next_address(
 	freeaddrinfo(ptr);
 	return final_addr;
 }
-    
+
 
 server_info *
 create_sim_server(
@@ -738,7 +738,7 @@ create_sim_node(
 	queue *servers
 	)
 {
-	struct sim_node *my_node = (struct sim_node *) 
+	struct sim_node *my_node = (struct sim_node *)
 	    get_node(sizeof(struct sim_node));
 
 	my_node->init_opts = init_opts;
@@ -771,7 +771,7 @@ struct key_tok keyword_list[] = {
 	{ "pidfile",		T_Pidfile,         SINGLE_ARG },
 	{ "pool",		T_Pool,            SINGLE_ARG },
 	{ "discard",		T_Discard,         NO_ARG },
-	{ "restrict",		T_Restrict,        NO_ARG },    
+	{ "restrict",		T_Restrict,        NO_ARG },
 	{ "server",		T_Server,          SINGLE_ARG },
 	{ "setvar",		T_Setvar,          NO_ARG },
 	{ "statistics",		T_Statistics,      NO_ARG },
@@ -797,12 +797,12 @@ struct key_tok keyword_list[] = {
 	{ "key",		T_Key,             NO_ARG },
 	{ "maxpoll",		T_Maxpoll,         NO_ARG },
 	{ "minpoll",		T_Minpoll,         NO_ARG },
-	{ "mode",		T_Mode,            NO_ARG },     
+	{ "mode",		T_Mode,            NO_ARG },
 	{ "noselect",		T_Noselect,        NO_ARG },
 	{ "preempt",		T_Preempt,         NO_ARG },
 	{ "true",	        T_True,            NO_ARG },
 	{ "prefer",	        T_Prefer,          NO_ARG },
-	{ "ttl",	        T_Ttl,             NO_ARG },      
+	{ "ttl",	        T_Ttl,             NO_ARG },
 	{ "version",		T_Version,         NO_ARG },
 /* crypto_command */
 	{ "host",		T_Host,            SINGLE_ARG },
@@ -903,7 +903,7 @@ struct key_tok keyword_list[] = {
 	{ "wander",         	T_Wander,          NO_ARG },
 	{ "jitter",         	T_Jitter,          NO_ARG },
 	{ "prop_delay",     	T_Prop_Delay,      NO_ARG },
-	{ "proc_delay",     	T_Proc_Delay,      NO_ARG }, 
+	{ "proc_delay",     	T_Proc_Delay,      NO_ARG },
 	{ NULL, 0, 0}
 };
 
@@ -923,38 +923,38 @@ config_other_modes(void)
 		proto_config(PROTO_BROADCLIENT, my_config.broadcastclient, 0., NULL);
 		my_config.broadcastclient = 0;
 	}
-    
+
 	/* Configure the many-cast servers */
 	if (!empty(my_config.manycastserver)) {
 		while (!empty(my_config.manycastserver)) {
 			addr_node = (struct address_node *)
 			    dequeue(my_config.manycastserver);
-            
+
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
 			addr_sock.ss_family = addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
-            
+
 			free(addr_node->address);
 			free_node(addr_node);
 		}
 		sys_manycastserver = 1;
 	}
-    
+
 	/* Configure the multicast clients */
 	if (!empty(my_config.multicastclient)) {
 		while (!empty(my_config.multicastclient)) {
 			addr_node = (struct address_node *)
 			    dequeue(my_config.multicastclient);
-            
+
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
 			addr_sock.ss_family = addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
-            
-            
+
+
 			free(addr_node->address);
 			free_node(addr_node);
 		}
@@ -968,11 +968,11 @@ config_auth(void)
 {
 	struct attr_val *my_val;
 	int *key_val;
-    
+
 	/* Crypto Command */
 	if (my_config.auth.crypto_cmd_list) {
 		while (!empty(my_config.auth.crypto_cmd_list)) {
-			my_val = (struct attr_val *) 
+			my_val = (struct attr_val *)
 			    dequeue(my_config.auth.crypto_cmd_list);
 #ifdef OPENSSL
 			crypto_config(my_val->attr, my_val->value.s);
@@ -994,13 +994,13 @@ config_auth(void)
 		cryptosw = 0;
 	}
 #endif /* OPENSSL */
- 
+
 	/* Keys Command */
 	if (my_config.auth.keys)
 		getauthkeys(my_config.auth.keys);
-    
+
 	/* Control Key Command */
-	if (my_config.auth.control_key != 0) 
+	if (my_config.auth.control_key != 0)
 		ctl_auth_keyid = my_config.auth.control_key;
 
 	/* Requested Key Command */
@@ -1023,7 +1023,7 @@ config_auth(void)
 		destroy_queue(my_config.auth.trusted_key_list);
 		my_config.auth.trusted_key_list = NULL;
 	}
-    
+
 #ifdef OPENSSL
 	/* Revoke Command */
 	if (my_config.auth.revoke)
@@ -1041,7 +1041,7 @@ config_auth(void)
 	if (!authhavekey(req_keyid)) {
 		char rankey[9];
 		int i, j;
-        
+
 		for (i = 0; i < 8; i++)
 			for (j = 1; j < 100; ++j) {
 				rankey[i] = (char) (ntp_random() & 0xff);
@@ -1067,7 +1067,7 @@ static void
 config_tos(void)
 {
 	struct attr_val *tos;
-    
+
 	while (!empty(my_config.orphan_cmds)) {
 		tos = (struct attr_val *) dequeue(my_config.orphan_cmds);
 		proto_config(tos->attr, 0, tos->value.d, NULL);
@@ -1086,16 +1086,16 @@ config_monitor(void)
 	char *filegen_file;
 	int filegen_type;
 	int filegen_flag;
-    
+
 	/* Set the statistics directory */
 	if (my_config.stats_dir) {
 		stats_config(STATS_STATSDIR,my_config.stats_dir);
 		free(my_config.stats_dir);
 		my_config.stats_dir = NULL;
 	}
-    
+
 	/* NOTE:
-	 * Calling filegen_get is brain dead. Doing a string 
+	 * Calling filegen_get is brain dead. Doing a string
 	 * comparison to find the relavant filegen structure is
 	 * expensive.
 	 *
@@ -1103,7 +1103,7 @@ config_monitor(void)
 	 * being specified. Hence, we should either store a
 	 * pointer to the specified structure in the syntax tree
 	 * or an index into a filegen array.
-	 * 
+	 *
 	 * Need to change the filegen code to reflect the above.
 	 */
 
@@ -1120,7 +1120,7 @@ config_monitor(void)
 		filegen->flag |= FGEN_FLAG_ENABLED;
 		free_node(filegen_string);
 	}
-    
+
 	/* Configure the statistics with the options */
 	while (!empty(my_config.filegen_opts)) {
 		my_node = (struct filegen_node *) dequeue(my_config.filegen_opts);
@@ -1129,7 +1129,7 @@ config_monitor(void)
 		/* Initilize the filegen variables to their pre-configurtion states */
 		filegen_flag = filegen->flag;
 		filegen_type = filegen->type;
-		filegen_file = my_node->name; 
+		filegen_file = my_node->name;
 
 		while (!empty(my_node->options)) {
 			my_opts = (struct attr_val *) dequeue(my_node->options);
@@ -1166,11 +1166,11 @@ config_monitor(void)
 
 
 static void
-config_access(void) 
+config_access(void)
 {
 	struct attr_val *my_opt;
 	struct restrict_node *my_node;
-    
+
 	struct sockaddr_storage addr_sock;
 	struct sockaddr_storage addr_mask;
 
@@ -1205,13 +1205,13 @@ config_access(void)
 		if (my_node->addr) {
 			/* Resolve the specified address */
 			addr_sock.ss_family = my_node->addr->type;
-            
-			if (getnetnum(my_node->addr->address, 
+
+			if (getnetnum(my_node->addr->address,
 				      &addr_sock, 1,t_UNK) != 1) {
-                
+
 				/* Error in resolving name!!!
 				 * Free the node memory and move onto the next
-				 * Restrict flag 
+				 * Restrict flag
 				 */
 				msyslog(LOG_INFO,
 					"restrict: error in resolving name: %s on line %d. Ignoring...",
@@ -1219,9 +1219,9 @@ config_access(void)
 				destroy_restrict_node(my_node);
 				continue;
 			}
-            
+
 			SET_HOSTMASK(&addr_mask, addr_sock.ss_family);
-            
+
 			/* Resolve the mask */
 			if (my_node->mask) {
 				memset((char *)&addr_mask, 0, sizeof(addr_mask));
@@ -1229,7 +1229,7 @@ config_access(void)
 				if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
 					/* Error in mask !!!
 					 * Free the node memory and move onto the next
-					 * Restrict flag 
+					 * Restrict flag
 					 */
 					msyslog(LOG_INFO,
 						"restrict: error in resolving mask: %s on line %d. Ignoring...",
@@ -1243,11 +1243,11 @@ config_access(void)
 			addr_sock.ss_family = default_ai_family;
 			ANYSOCK(&addr_mask);
 		}
-        
+
 		/* Parse the flags */
 		flags = 0;
 		mflags = 0;
-        
+
 		while (!empty(my_node->flags)) {
 			int *curr_flag = (int *) dequeue(my_node->flags);
 			if (*curr_flag == RESM_NTPONLY)
@@ -1255,9 +1255,9 @@ config_access(void)
 			else
 				flags |= *curr_flag;
 			free_node(curr_flag);
-		}   
+		}
 
-		/* Set the flags */        
+		/* Set the flags */
 		hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
 			      mflags, flags);
 		destroy_restrict_node(my_node);
@@ -1269,7 +1269,7 @@ static void
 config_tinker(void)
 {
 	struct attr_val *tinker;
-    
+
 	while (!empty(my_config.tinker)) {
 		tinker= (struct attr_val *) dequeue(my_config.tinker);
 		loop_config(tinker->attr, tinker->value.d);
@@ -1279,14 +1279,14 @@ config_tinker(void)
 
 
 static void
-config_system_opts(void) 
+config_system_opts(void)
 {
 	int enable_flags;
 	int disable_flags;
 
 	enable_flags = get_flags_from_list(my_config.enable_opts);
 	disable_flags = get_flags_from_list(my_config.disable_opts);
-    
+
 	if (enable_flags)
 		proto_config(enable_flags, 1, 0., NULL);
 	if (disable_flags)
@@ -1322,7 +1322,7 @@ config_phone(void)
 {
 	int i = 0;
 	char **s;
-    
+
 	while (!empty(my_config.phone)) {
 		s = (char **) dequeue(my_config.phone);
 		if (i < MAXPHONE)
@@ -1339,22 +1339,22 @@ config_phone(void)
 		sys_phone[i] = NULL;
 }
 
-static void 
+static void
 config_qos(void)
 {
 	struct attr_val *my_qosconfig;
-	char *s; 
+	char *s;
 	unsigned int qtos = 0;
 
 	while(!empty(my_config.qos)) {
-		my_qosconfig = (struct attr_val *) 
+		my_qosconfig = (struct attr_val *)
 			dequeue(my_config.qos);
 		s = my_qosconfig->value.s;
 #ifdef HAVE_IPTOS_SUPPORT
-		if (!strcmp(s, "lowdelay"))  
+		if (!strcmp(s, "lowdelay"))
 			qtos = CONF_QOS_LOWDELAY;
-		else if (!strcmp(s, "throughput")) 
-			qtos = CONF_QOS_THROUGHPUT; 
+		else if (!strcmp(s, "throughput"))
+			qtos = CONF_QOS_THROUGHPUT;
 		else if (!strcmp(s, "reliability"))
 			qtos = CONF_QOS_RELIABILITY;
 		else if (!strcmp(s, "mincost"))
@@ -1366,7 +1366,7 @@ config_qos(void)
 			qtos = CONF_QOS_CS1;
 		else if (!strcmp(s, "immediate") || !strcmp(s, "cs2"))
 			qtos = CONF_QOS_CS2;
-		else if (!strcmp(s, "flash") || !strcmp(s, "cs3"))				
+		else if (!strcmp(s, "flash") || !strcmp(s, "cs3"))
 			qtos = CONF_QOS_CS3; 	/* overlapping prefix on keyword */
 		if (!strcmp(s, "flashoverride") || !strcmp(s, "cs4"))
 			qtos = CONF_QOS_CS4;
@@ -1377,19 +1377,19 @@ config_qos(void)
 		else if (!strcmp(s, "netcontrol") || !strcmp(s, "cs7"))
 			qtos = CONF_QOS_CS7;
 #endif  /* IPTOS_PREC_INTERNETCONTROL */
-		if (qtos == 0) 
+		if (qtos == 0)
 			msyslog(LOG_INFO, "parse error, qos %s not accepted\n", s);
-		else 
+		else
 			qos = qtos;
 #endif  /* HAVE IPTOS_SUPPORT */
-		/* 
-		 * value is set, but not being effective. Need code to change  
-         * the current connections to notice. Might also 
-		 * consider logging a message about the action.
-		 * XXX msyslog(LOG_INFO, "QoS %s requested by config\n", s); 
+		/*
+		 * value is set, but not being effective. Need code to
+		 * change   the current connections to notice. Might
+		 * also  consider logging a message about the action.
+		 * XXX msyslog(LOG_INFO, "QoS %s requested by config\n", s);
 		 */
 		free(s);
-		free_node(my_qosconfig); 
+		free_node(my_qosconfig);
 	}
 }
 
@@ -1410,16 +1410,16 @@ config_ttl(void)
 {
 	int i = 0;
 	int *curr_ttl;
-    
+
 	while (!empty(my_config.ttl)) {
 		curr_ttl = (int *) dequeue(my_config.ttl);
 		if (i < MAX_TTL)
 			sys_ttl[i++] = *curr_ttl;
-		else 
+		else
 			msyslog(LOG_INFO,
 				"ttl: Number of TTL entries exceeds %d. Ignoring TTL %d...",
 				MAX_TTL, *curr_ttl);
-     
+
 		free_node(curr_ttl);
 	}
 	sys_ttlmax = i - 1;
@@ -1428,7 +1428,7 @@ config_ttl(void)
 static void
 config_trap(void)
 {
-    
+
 	struct addr_opts_node *curr_trap;
 	struct attr_val *curr_opt;
 	struct sockaddr_storage addr_sock;
@@ -1437,15 +1437,15 @@ config_trap(void)
 	struct interface *localaddr;
 	int port_no;
 	int err_flag;
-    
+
 	port_no = 0;
 	localaddr = 0;
 
-    
+
 	while (!empty(my_config.trap)) {
 		err_flag = 0;
 		curr_trap = (struct addr_opts_node *) dequeue(my_config.trap);
-        
+
 		while (!empty(curr_trap->options)) {
 			curr_opt = (struct attr_val *) dequeue(curr_trap->options);
 			if (curr_opt->attr == T_Port) {
@@ -1461,30 +1461,30 @@ config_trap(void)
 				/* Resolve the interface address */
 				memset((char *)&addr_sock, 0, sizeof(addr_sock));
 				addr_sock.ss_family = addr_node->type;
-                
+
 				if (getnetnum(addr_node->address,
 					      &addr_sock, 1, t_UNK) != 1) {
 					err_flag = 1;
 					break;
 				}
-                
+
 				localaddr = findinterface(&addr_sock);
-                
+
 				if (localaddr == NULL) {
 					msyslog(LOG_ERR,
 						"can't find interface with address %s",
 						stoa(&addr_sock));
 					err_flag = 1;
 				}
-                
+
 				free(addr_node->address);
 				free_node(addr_node);
 			}
 			free_node(curr_opt);
 		}
-        
+
 		/* Now process the trap for the specified interface
-		 * and port number 
+		 * and port number
 		 */
 		if (!err_flag) {
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
@@ -1504,7 +1504,7 @@ config_trap(void)
 			}
 			else
 				peeraddr.ss_family = addr_sock.ss_family;
-            
+
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
 					NTP_VERSION))
 				msyslog(LOG_ERR,
@@ -1513,7 +1513,7 @@ config_trap(void)
 		}
 		destroy_queue(curr_trap->options);
 		free_node(curr_trap);
-	}    
+	}
 }
 
 static void
@@ -1525,12 +1525,12 @@ config_fudge(void)
 	struct address_node *addr_node;
 	struct refclockstat clock_stat;
 	int err_flag;
-    
-    
+
+
 	while (!empty(my_config.fudge)) {
 		curr_fudge = (struct addr_opts_node *) dequeue(my_config.fudge);
 		err_flag = 0;
-        
+
 		/* Get the reference clock address and
 		 * ensure that it is sane
 		 */
@@ -1538,7 +1538,7 @@ config_fudge(void)
 		memset((char *)&addr_sock, 0, sizeof(addr_sock));
 		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF) != 1)
 			err_flag = 1;
-        
+
 		if (!ISREFCLOCKADR(&addr_sock)) {
 			msyslog(LOG_ERR,
 				"%s is inappropriate address for the fudge command, line ignored",
@@ -1550,8 +1550,8 @@ config_fudge(void)
 		memset((void *)&clock_stat, 0, sizeof clock_stat);
 		while (!empty(curr_fudge->options)) {
 			curr_opt = (struct attr_val *) dequeue(curr_fudge->options);
-            
-			/* The attribute field is used to store the flag. 
+
+			/* The attribute field is used to store the flag.
 			 * Set haveflags with it
 			 */
 			clock_stat.haveflags |= curr_opt->attr;
@@ -1567,7 +1567,7 @@ config_fudge(void)
 				break;
 			    case CLK_HAVEVAL2:
 				memcpy(&clock_stat.fudgeval2,
-				       curr_opt->value.s, 
+				       curr_opt->value.s,
 				       min(strlen(curr_opt->value.s), 4));
 				free(curr_opt->value.s);
 				break;
@@ -1596,7 +1596,7 @@ config_fudge(void)
 					clock_stat.flags &= ~CLK_FLAG4;
 				break;
 			}
-            
+
 			free_node(curr_opt);
 		}
 
@@ -1616,7 +1616,7 @@ config_vars(void)
 {
 	struct attr_val *curr_var;
 	FILE *new_file;
-    
+
 	while (!empty(my_config.vars)) {
 		curr_var = (struct attr_val *) dequeue(my_config.vars);
 		/* Determine which variable to set and set it */
@@ -1631,10 +1631,10 @@ config_vars(void)
 			proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);
 			break;
 		    case T_Driftfile:
-			if (!strcmp(curr_var->value.s, "\0")) { 
+			if (!strcmp(curr_var->value.s, "\0")) {
 				stats_drift_file = 0;
 				msyslog(LOG_INFO, "config: driftfile disabled\n");
-			} else { 
+			} else {
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 				free(curr_var->value.s);
 			}
@@ -1721,7 +1721,7 @@ is_sane_resolved_address(
 				stoa(&peeraddr));
 			return 0;
 		}
-         
+
 	}
 	/* Check for IPv6 */
 	else if(peeraddr.ss_family == AF_INET6) {
@@ -1743,7 +1743,7 @@ is_sane_resolved_address(
 			return 0;
 		}
 	}
-    
+
 	if (peeraddr.ss_family == AF_INET6 &&
 	    isc_net_probeipv6() != ISC_R_SUCCESS)
 		return 0;
@@ -1756,7 +1756,7 @@ static int
 get_correct_host_mode(
 	int hmode
 	)
-{ 
+{
 	switch (hmode) {
 	    case T_Server:
 	    case T_Pool:
@@ -1786,10 +1786,10 @@ config_peers(void)
 	int status;
 	int no_needed;
 	int i;
-    
+
 	while (!empty(my_config.peers)) {
 		curr_peer = (struct peer_node *) dequeue(my_config.peers);
-        
+
 		/* Find the number of associations needed.
 		 * If a pool coomand is specified, then sys_maxclock needed
 		 * else, only one is needed
@@ -1798,23 +1798,23 @@ config_peers(void)
 
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
-        
+
 		/* Attempt to resolve the address */
 		memset((char *)&peeraddr, 0, sizeof(peeraddr));
 		peeraddr.ss_family = curr_peer->addr->type;
-        
+
 		status = get_multiple_netnums(curr_peer->addr->address, &peeraddr, &res, 0, t_UNK);
-        
+
 		/* I don't know why getnetnum would return -1.
 		 * The old code had this test, so I guess it must be
-		 * useful 
+		 * useful
 		 */
 		if (status == -1) {
 			/* Do nothing, apparantly we found an IPv6
 			 * address and can't do anything about it */
 		}
 		/* Check if name resolution failed. If yes, store the
-		 * peer information in a file for asynchronous 
+		 * peer information in a file for asynchronous
 		 * resolution later
 		 */
 		else if (status != 1) {
@@ -1822,8 +1822,8 @@ config_peers(void)
 				     hmode,
 				     curr_peer->peerversion,
 				     curr_peer->minpoll,
-				     curr_peer->maxpoll, 
-				     curr_peer->peerflags, 
+				     curr_peer->maxpoll,
+				     curr_peer->peerflags,
 				     curr_peer->ttl,
 				     curr_peer->peerkey,
 				     (u_char *)"*");
@@ -1838,7 +1838,7 @@ config_peers(void)
 
 			/*
 			 * Loop to configure the desired number of
-			 * associations 
+			 * associations
 			 */
 			for (i = 0; (i < no_needed) && res; res =
 			    res->ai_next) {
@@ -1848,14 +1848,14 @@ config_peers(void)
 				if (is_sane_resolved_address(peeraddr,
 				    curr_peer->host_mode))
 					peer_config(&peeraddr,
-				        ANY_INTERFACE_CHOOSE(&peeraddr), 
+				        ANY_INTERFACE_CHOOSE(&peeraddr),
 					    hmode,
-					    curr_peer->peerversion, 
-					    curr_peer->minpoll, 
-					    curr_peer->maxpoll, 
+					    curr_peer->peerversion,
+					    curr_peer->minpoll,
+					    curr_peer->maxpoll,
 					    curr_peer->peerflags,
-					    curr_peer->ttl, 
-					    curr_peer->peerkey, 
+					    curr_peer->ttl,
+					    curr_peer->peerkey,
 					    (u_char *)"*");
 			}
 			freeaddrinfo(res_bak);
@@ -1875,7 +1875,7 @@ config_sim(void)
 	int i;
 	server_info *serv_info;
 	struct attr_val *init_stmt;
-    
+
 	/* Check if a simulate block was found in the configuration code.
 	 * If not, return an error and exit
 	 */
@@ -1885,11 +1885,11 @@ config_sim(void)
 		exit(1);
 	}
 
-	/* Process the initialization statements 
+	/* Process the initialization statements
 	 * -------------------------------------
 	 */
 	while(!empty(my_config.sim_details->init_opts)) {
-		init_stmt = (struct attr_val *) 
+		init_stmt = (struct attr_val *)
 		    dequeue(my_config.sim_details->init_opts);
 		switch(init_stmt->attr) {
 		    case T_Beep_Delay:
@@ -1908,7 +1908,7 @@ config_sim(void)
 	destroy_queue(my_config.sim_details->init_opts);
 
 
-	/* Process the server list 
+	/* Process the server list
 	 * -----------------------
 	 */
 	simulation.num_of_servers = get_no_of_elements(my_config.sim_details->servers);
@@ -1916,9 +1916,9 @@ config_sim(void)
 						    sizeof(server_info));
 
 	for (i = 0;i < simulation.num_of_servers;++i) {
-		serv_info = (server_info *) 
+		serv_info = (server_info *)
 		    dequeue(my_config.sim_details->servers);
-		if (!serv_info) { 
+		if (!serv_info) {
 			yyerror("Internal Error in parser...\n"
 				"Tried to initialize server list but no server returned\n");
 		}
@@ -1928,11 +1928,11 @@ config_sim(void)
 		}
 	}
 	destroy_queue(my_config.sim_details->servers);
-    
+
 	/* Free the sim_node memory and set the sim_details as NULL */
 	free_node(my_config.sim_details);
 	my_config.sim_details = NULL;
-    
+
 	/* Create server associations */
 	printf("Creating server associations\n");
 	create_server_associations();
@@ -1942,7 +1942,7 @@ config_sim(void)
 
 /* Define two different config functions. One for the daemon and the other for
  * the simulator. The simulator ignores a lot of the standard ntpd configuration
- * options 
+ * options
  */
 
 static void
@@ -1992,15 +1992,15 @@ config_remotely(void)
 #endif
 	yyparse();
 #ifdef DEBUG
-	if (debug > 1) 
+	if (debug > 1)
 		printf("Finished Parsing!!\n");
 #endif
 
 	config_ntpd();
-    
+
 	input_from_file = 1;
 }
-    
+
 
 /* ACTUAL getconfig code */
 
@@ -2021,7 +2021,7 @@ getconfig(
 		exit(1);
 	}
 	config_file = config_file_storage;
-    
+
 	temp = ALT_CONFIG_FILE;
 	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
@@ -2038,7 +2038,7 @@ getconfig(
 	 */
 	(void) sprintf(line, "daemon_version=\"%s\"", Version);
 	set_sys_var(line, strlen(line)+1, RO);
-    
+
 	/*
 	 * Say how we're setting the time of day
 	 */
@@ -2049,7 +2049,7 @@ getconfig(
 	 * Initialize the loop.
 	 */
 	loop_config(LOOP_DRIFTINIT, 0.);
-    
+
 	getCmdOpts(argc, argv);
 
 	curr_include_level = 0;
@@ -2064,14 +2064,14 @@ getconfig(
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
 #ifdef SYS_WINNT
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
-        
+
 		if ((fp[curr_include_level] = F_OPEN(FindConfig(alt_config_file), "r")) == NULL) {
 
 			/*
 			 * Broadcast clients can sometimes run without
 			 * a configuration file.
 			 */
-            
+
 			fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(alt_config_file));
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
 			return;
@@ -2087,12 +2087,12 @@ getconfig(
 	init_syntax_tree();
 	yyparse();
 #ifdef DEBUG
-	if (debug > 1) 
+	if (debug > 1)
 		printf("Finished Parsing!!\n");
 #endif
 
 	/* The actual configuration done depends on whether we are configuring the
-	 * simulator or the daemon. Perform a check and call the appropriate 
+	 * simulator or the daemon. Perform a check and call the appropriate
 	 * function as needed.
 	 */
 
@@ -2105,13 +2105,16 @@ getconfig(
 	while (curr_include_level != -1) {
 		FCLOSE(fp[curr_include_level--]);
 	}
-    
-    
+
 #ifdef HAVE_NETINFO
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
-        
+
+	/*
+	printf("getconfig: res_fp <%p> call_resolver: %d", res_fp, call_resolver);
+	*/
+
 	if (res_fp != NULL) {
 		if (call_resolver) {
 			/*
@@ -2196,7 +2199,7 @@ get_logmask(
 
 #ifdef HAVE_NETINFO
 
-/* 
+/*
  * get_netinfo_config - find the nearest NetInfo domain with an ntp
  * configuration and initialize the configuration state.
  */
@@ -2443,9 +2446,9 @@ get_multiple_netnums(
 				? ", ignored"
 				: "");
 #endif
-		if (retval == 0 && 
-		    ptr->ai_family == AF_INET6 && 
-		    isc_net_probeipv6() != ISC_R_SUCCESS) 
+		if (retval == 0 &&
+		    ptr->ai_family == AF_INET6 &&
+		    isc_net_probeipv6() != ISC_R_SUCCESS)
 		{
 			return -1;
 		}
@@ -2641,6 +2644,9 @@ do_resolve_internal(void)
 		 * THUS:
 		 */
 
+		/*
+		msyslog(LOG_INFO, "do_resolve_internal: pre-closelog");
+		*/
 		closelog();
 		kill_asyncio(0);
 
@@ -2651,23 +2657,11 @@ do_resolve_internal(void)
 			debug = 2;
 #endif
 
-# ifndef LOG_DAEMON
-		openlog("ntpd_initres", LOG_PID);
-# else /* LOG_DAEMON */
-
-#  ifndef LOG_NTP
-#   define	LOG_NTP LOG_DAEMON
-#  endif
-		openlog("ntpd_initres", LOG_PID | LOG_NDELAY, LOG_NTP);
-#ifndef SYS_CYGWIN32
-#  ifdef DEBUG
-		if (debug)
-			setlogmask(LOG_UPTO(LOG_DEBUG));
-		else
-#  endif /* DEBUG */
-			setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
-# endif /* LOG_DAEMON */
-#endif
+		init_logging("ntpd_intres", 0);
+		setup_logfile();
+		/*
+		msyslog(LOG_INFO, "do_resolve_internal: post-closelog");
+		*/
 
 		ntp_intres();
 
