@@ -1074,7 +1074,7 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
-	if (interface_optioncount > 0) {
+	if (/* interface_optioncount > */ 0) {
 		DPRINTF(4, ("address_okay: FAIL\n"));
 		return (ISC_FALSE);
 	}
