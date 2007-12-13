@@ -1034,7 +1034,6 @@ create_wildcards(u_short port) {
 #endif
 }
 
-
 static isc_boolean_t
 address_okay(isc_interface_t *isc_if) {
 
@@ -1049,6 +1048,22 @@ address_okay(isc_interface_t *isc_if) {
 		return (ISC_TRUE);
 	}
 	/*
+	 * Check if the address is limit
+	 */
+	if (ISC_LIST_HEAD(limit_address_list)!= NULL) {
+		const limit_address_t *laddr;
+		for (laddr = ISC_LIST_HEAD(limit_address_list); laddr != NULL; laddr = ISC_LIST_NEXT(laddr, link))
+			if (isc_netaddr_equal(&(isc_if->address), laddr->addr)) {
+				DPRINTF(4, ("address_okay: specific interface address matched - OK\n"));
+				return (ISC_TRUE);
+			}
+	}
+	if (listen_to_virtual_ips == 0  && 
+		(strchr(isc_if->name, (int)':') != NULL)) {
+		DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
+		return (ISC_FALSE);
+	}
+	/*
 	 * Check if the interface is specific
 	 */
 	if (ISC_LIST_HEAD(specific_interface_list)!= NULL) {
@@ -1059,49 +1074,10 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
-	/*
-	 * Check if the address is limit
-	 */
-	if (ISC_LIST_HEAD(limit_address_list)!= NULL) {
-		const limit_address_t *laddr;
-		for (laddr = ISC_LIST_HEAD(limit_address_list); laddr != NULL; laddr = ISC_LIST_NEXT(laddr, link))
-			if (isc_netaddr_equal(&(isc_if->address), laddr->addr)) {
-				DPRINTF(4, ("address_okay: specific interface address matched - OK\n"));
-				return (ISC_TRUE);
-			} else {
-				DPRINTF(4, ("address_okay: specific interface name NOT matched - FAIL\n"));
-				return (ISC_FALSE);
-			}
+	if (interface_optioncount > 0) {
+		DPRINTF(4, ("address_okay: FAIL\n"));
+		return (ISC_FALSE);
 	}
-	else {
-		if (listen_to_virtual_ips == 0  && 
-			(strchr(isc_if->name, (int)':') != NULL)) {
-			DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
-			return (ISC_FALSE);
-		}
-	}
-
-	/*
-	 * Check if the interface is specified
-	 */
-	/*
-	if (specific_interface != NULL) {
-		if (strcasecmp(isc_if->name, specific_interface) == 0) {
-			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
-			return (ISC_TRUE);
-		} else {
-			DPRINTF(4, ("address_okay: specific interface name NOT matched - FAIL\n"));
-			return (ISC_FALSE);
-		}
-	}
-	else {
-		if (listen_to_virtual_ips == 0  && 
-		    (strchr(isc_if->name, (int)':') != NULL)) {
-			DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
-			return (ISC_FALSE);
-		}
-	}
-*/
 	DPRINTF(4, ("address_okay: OK\n"));
 	return (ISC_TRUE);
 }
