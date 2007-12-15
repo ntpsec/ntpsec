@@ -5,5 +5,9 @@
 #ifdef HAVE_MD5_H
 # include <md5.h>
 #else
-# include "rsa_md5.h"
+# include "isc/md5.h"
+# define MD5_CTX	isc_md5_t
+# define MD5Init	isc_md5_init
+# define MD5Update	isc_md5_update
+# define MD5Final(d,c)	isc_md5_final(c,d)
 #endif

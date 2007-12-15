@@ -57,7 +57,6 @@ noinst_HEADERS = \
 	parse.h \
 	parse_conf.h \
 	recvbuff.h \
-	rsa_md5.h \
 	timepps-SCO.h	\
 	timepps-Solaris.h	\
 	timepps-SunOS.h	\
