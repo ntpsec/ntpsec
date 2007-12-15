@@ -20,6 +20,7 @@ noinst_HEADERS = \
 	list.h \
 	log.h \
 	magic.h \
+	md5.h \
 	mem.h \
 	msgcat.h \
 	msgs.h \
