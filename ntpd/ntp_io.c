@@ -69,6 +69,7 @@
 #endif  /* IPv6 Support */
 
 extern int listen_to_virtual_ips;
+int interface_optioncount = 0;
 /*
  * interface names to listen on
  */
@@ -767,6 +768,7 @@ add_specific_interface (const char *if_name)
 		ISC_LINK_INIT(iface, link);
 		ISC_LIST_APPEND(specific_interface_list, iface, link);
 	}
+	interface_optioncount++;
 }
 void
 init_specific_interface (void)
@@ -1074,7 +1076,7 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
-	if (/* interface_optioncount > */ 0) {
+	if (interface_optioncount > 0) {
 		DPRINTF(4, ("address_okay: FAIL\n"));
 		return (ISC_FALSE);
 	}
