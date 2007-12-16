@@ -91,8 +91,8 @@
 # include <apollo/base.h>
 #endif /* SYS_DOMAINOS */
 
-#include "recvbuff.h"  
-#include "ntp_cmdargs.h"  
+#include "recvbuff.h"
+#include "ntp_cmdargs.h"
 
 #if 0				/* HMS: I don't think we need this. 961223 */
 #ifdef LOCK_PROCESS
@@ -132,10 +132,10 @@
  * Signals which terminate us gracefully.
  */
 #ifndef SYS_WINNT
-# define SIGDIE1 	SIGHUP
-# define SIGDIE3 	SIGQUIT
-# define SIGDIE2 	SIGINT
-# define SIGDIE4 	SIGTERM
+# define SIGDIE1	SIGHUP
+# define SIGDIE3	SIGQUIT
+# define SIGDIE2	SIGINT
+# define SIGDIE4	SIGTERM
 #endif /* SYS_WINNT */
 
 #ifdef HAVE_DNSREGISTRATION
@@ -175,9 +175,9 @@ char *group = NULL;		/* group to switch to */
 char *chrootdir = NULL;		/* directory to chroot to */
 int sw_uid;
 int sw_gid;
-char *endp;  
+char *endp;
 struct group *gr;
-struct passwd *pw; 
+struct passwd *pw;
 #endif /* HAVE_DROPROOT */
 
 /*
@@ -216,7 +216,7 @@ static	RETSIGTYPE	lessdebug	(int);
 static	RETSIGTYPE	no_debug	(int);
 #endif	/* not DEBUG */
 
-int 		ntpdmain		(int, char **);
+int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
 void		init_logging		(char const *, int);
 void		setup_logfile		(void);
@@ -341,10 +341,10 @@ main(
 /*
  * OK. AIX is different than solaris in how it implements plock().
  * If you do NOT adjust the stack limit, you will get the MAXIMUM
- * stack size allocated and PINNED with you program. To check the 
- * value, use ulimit -a. 
+ * stack size allocated and PINNED with you program. To check the
+ * value, use ulimit -a.
  *
- * To fix this, we create an automatic variable and set our stack limit 
+ * To fix this, we create an automatic variable and set our stack limit
  * to that PLUS 32KB of extra space (we need some headroom).
  *
  * This subroutine gets the stack address.
@@ -748,7 +748,7 @@ ntpdmain(
 	     */
 	    rl.rlim_cur = rl.rlim_max = 32*1024*1024;
 	    if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1) {
-	    	msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+		msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 	    }
 #  endif /* RLIMIT_MEMLOCK */
 	}
@@ -762,7 +762,7 @@ ntpdmain(
 # ifdef HAVE_PLOCK
 #  ifdef PROCLOCK
 #   ifdef _AIX
-	/* 
+	/*
 	 * set the stack limit for AIX for plock().
 	 * see get_aix_stack() for more info.
 	 */
@@ -881,11 +881,11 @@ ntpdmain(
 			exit(-1);
 		}
 #endif /* HAVE_LINUX_CAPABILITIES */
-	
+
 		if (user != NULL) {
 			if (isdigit((unsigned char)*user)) {
 				sw_uid = (uid_t)strtoul(user, &endp, 0);
-				if (*endp != '\0') 
+				if (*endp != '\0')
 					goto getuser;
 
 				if ((pw = getpwuid(sw_uid)) != NULL) {
@@ -902,7 +902,7 @@ ntpdmain(
 				}
 
 			} else {
-getuser:	
+getuser:
 				errno = 0;
 				if ((pw = getpwnam(user)) != NULL) {
 					sw_uid = pw->pw_uid;
@@ -919,10 +919,10 @@ getuser:
 		if (group != NULL) {
 			if (isdigit((unsigned char)*group)) {
 				sw_gid = (gid_t)strtoul(group, &endp, 0);
-				if (*endp != '\0') 
+				if (*endp != '\0')
 					goto getgroup;
 			} else {
-getgroup:	
+getgroup:
 				if ((gr = getgrnam(group)) != NULL) {
 					sw_gid = gr->gr_gid;
 				} else {
@@ -932,7 +932,7 @@ getgroup:
 				}
 			}
 		}
-		
+
 		if( chrootdir ) {
 			/* make sure cwd is inside the jail: */
 			if( chdir(chrootdir) ) {
@@ -964,7 +964,7 @@ getgroup:
 			msyslog(LOG_ERR, "Cannot seteuid() to user `%s': %m", user);
 			exit (-1);
 		}
-	
+
 #ifndef HAVE_LINUX_CAPABILITIES
 		/*
 		 * for now assume that the privilege to bind to privileged ports
@@ -987,9 +987,9 @@ getgroup:
 			 *  cap_net_bind_service if doing dynamic interface tracking.
 			 */
 			cap_t caps;
-			char *captext = interface_interval ?
-			       	"cap_sys_time,cap_net_bind_service=ipe" :
-			       	"cap_sys_time=ipe";
+			char *captext = (interface_interval)
+				? "cap_sys_time,cap_net_bind_service=ipe"
+				: "cap_sys_time=ipe";
 			if( ! ( caps = cap_from_text( captext ) ) ) {
 				msyslog( LOG_ERR, "cap_from_text() failed: %m" );
 				exit(-1);
@@ -1004,7 +1004,7 @@ getgroup:
 
 	}    /* if( droproot ) */
 #endif /* HAVE_DROPROOT */
-	
+
 	/*
 	 * Report that we're up to any trappers
 	 */
@@ -1025,17 +1025,19 @@ getgroup:
 	 * and - lacking a hardware reference clock - I have
 	 * yet to learn about anything else that is.
 	 */
+
 #if defined(HAVE_IO_COMPLETION_PORT)
-
-	for (;;) {
-		int tot_full_recvbufs = GetReceivedBuffers();
 #else /* normal I/O */
-
 	BLOCK_IO_AND_ALARM();
 	was_alarmed = 0;
+#endif /* !HAVE_IO_COMPLETION_PORT */
+
 	for (;;)
 	{
-# if !defined(HAVE_SIGNALED_IO) 
+#if defined(HAVE_IO_COMPLETION_PORT)
+		int tot_full_recvbufs = GetReceivedBuffers();
+#else /* normal I/O */
+# if !defined(HAVE_SIGNALED_IO)
 		extern fd_set activefds;
 		extern int maxactivefd;
 
@@ -1043,7 +1045,7 @@ getgroup:
 		int nfound;
 # endif
 
-		if (alarm_flag) 	/* alarmed? */
+		if (alarm_flag)		/* alarmed? */
 		{
 			was_alarmed = 1;
 			alarm_flag = 0;
@@ -1084,10 +1086,10 @@ getgroup:
 				netsyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #  endif /* DEBUG */
 # else /* HAVE_SIGNALED_IO */
-                        
+
 			wait_for_signal();
 # endif /* HAVE_SIGNALED_IO */
-			if (alarm_flag) 	/* alarmed? */
+			if (alarm_flag)		/* alarmed? */
 			{
 				was_alarmed = 1;
 				alarm_flag = 0;
@@ -1113,7 +1115,7 @@ getgroup:
 			l_fp pts;
 			l_fp tsa, tsb;
 			int bufcount = 0;
-			
+
 			get_systime(&pts);
 			tsa = pts;
 #endif
@@ -1185,7 +1187,7 @@ finish(
 		printf("\nfinish(SIGBUS)\n");
 		exit(0);
 # endif
-	case 0: 		/* Should never happen... */
+	case 0:			/* Should never happen... */
 		return;
 
 	default:
