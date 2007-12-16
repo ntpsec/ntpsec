@@ -341,7 +341,6 @@ AC_CHECK_FUNC(openlog, ,
   AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
 AC_CHECK_LIB(md5, MD5Init, , 
   AC_CHECK_LIB(md, MD5Init))
-AC_CHECK_FUNCS(MD5Init)
 
 NTP_LINEEDITLIBS
 
