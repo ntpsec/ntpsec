@@ -24,6 +24,15 @@ extern	int	__adjtimex	(struct timex *);
 
 #  define ntp_adjtime(t)	__adjtimex((t))
 
+#ifndef HAVE_STRUCT_NTPTIMEVAL
+struct ntptimeval
+{
+  struct timeval time;  /* current time (ro) */
+  long int maxerror;    /* maximum error (us) (ro) */
+  long int esterror;    /* estimated error (us) (ro) */
+};
+#endif
+
 static inline int
 ntp_gettime(
 	struct ntptimeval *ntv

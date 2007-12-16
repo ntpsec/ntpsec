@@ -1,3 +1,4 @@
+* [Bug 979] Provide ntptimeval if it is not otherwise present.
 * [Bug 634] Re-instantiate syslog() and logfiles after the daemon fork.
 * [Bug 952] Use md5 code with a friendlier license.
 * [Bug 977] Fix mismatching #ifdefs for builds without IPv6.
