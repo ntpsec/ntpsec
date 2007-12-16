@@ -643,6 +643,10 @@ ntpdmain(
 			(void) open("/", 0);
 			(void) dup2(0, 1);
 			(void) dup2(0, 2);
+
+			init_logging(progname, 0);
+			setup_logfile();
+
 #ifdef SYS_DOMAINOS
 			{
 				uid_$t puid;

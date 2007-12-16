@@ -1,3 +1,4 @@
+* [Bug 634] Re-instantiate syslog() and logfiles after the daemon fork.
 * [Bug 952] Use md5 code with a friendlier license.
 * [Bug 977] Fix mismatching #ifdefs for builds without IPv6.
 * [Bug 830] Fix the checking order of the interface options.
