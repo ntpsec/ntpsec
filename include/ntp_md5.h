@@ -2,7 +2,7 @@
  * ntp_md5.h: deal with md5.h headers
  */
 
-#ifdef HAVE_MD5_H
+#if defined HAVE_MD5_H && defined HAVE_MD5INIT
 # include <md5.h>
 #else
 # include "isc/md5.h"

@@ -341,6 +341,7 @@ AC_CHECK_FUNC(openlog, ,
   AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
 AC_CHECK_LIB(md5, MD5Init, , 
   AC_CHECK_LIB(md, MD5Init))
+AC_CHECK_FUNCS(MD5Init)
 
 NTP_LINEEDITLIBS
 
@@ -374,17 +375,11 @@ case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
 esac
 AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h math.h)
 
-# HMS: Lame, but fast.
-if test -f /etc/redhat-release
-then
-    :
-else
-    AC_CHECK_HEADERS(md5.h, [], [],
+AC_CHECK_HEADERS(md5.h, [], [],
 [#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 ])
-fi
 AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h)

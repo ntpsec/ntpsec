@@ -1,3 +1,4 @@
+* [Bug 918] Only use a native md5.h if MD5Init() is available.
 * [Bug 979] Provide ntptimeval if it is not otherwise present.
 * [Bug 634] Re-instantiate syslog() and logfiles after the daemon fork.
 * [Bug 952] Use md5 code with a friendlier license.
