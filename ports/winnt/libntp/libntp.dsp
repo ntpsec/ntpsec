@@ -242,7 +242,7 @@ SOURCE=..\..\..\libntp\machines.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\md5c.c
+SOURCE=..\..\..\libisc\md5.c
 # End Source File
 # Begin Source File
 
