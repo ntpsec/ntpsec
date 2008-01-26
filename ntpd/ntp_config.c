@@ -467,11 +467,11 @@ create_peer_node(
 		/* Check the kind of option being set */
 		switch(my_val->attr) {
 		    case T_Minpoll:
-			if (my_val->value.i < NTP_MINPOLL) {
+			if (my_val->value.i < ntp_minpoll) {
 				msyslog(LOG_INFO,
 					"minpoll: provided value (%d) is below minimum (%d)",
-					my_val->value.i, NTP_MINPOLL);
-				my_node->minpoll = NTP_MINPOLL;
+					my_val->value.i, ntp_minpoll);
+				my_node->minpoll = ntp_minpoll;
 			}
 			else
 				my_node->minpoll = my_val->value.i;
@@ -1183,7 +1183,7 @@ config_access(void)
 		    dequeue(my_config.discard_opts);
 		switch(my_opt->attr) {
 		    case T_Average:
-			res_avg_interval = 1 << my_opt->value.i;
+			ntp_minpoll = my_opt->value.i;
 			break;
 		    case T_Minimum:
 			res_min_interval = 1 << my_opt->value.i;
