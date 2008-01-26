@@ -921,14 +921,13 @@ expire_all(void)
 	/*
 	 * This routine is called about once per day from the timer
 	 * routine and when the client is first synchronized. Search the
-	 * peer list for all associations and flush the key list. Also, 	 * fetch the leap second values.
+	 * peer list for all associations.
 	 */
 	if (!crypto_flags)
 		return;
 
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
-			peer->crypto &= ~CRYPTO_FLAG_LEAP;
 			next_peer = peer->next;
 			if (!(peer->flags & FLAG_SKEY)) {
 				continue;

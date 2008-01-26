@@ -84,7 +84,7 @@ static	int mon_mem_increments;		/* times called malloc() */
  * packet will be discarded if the interval betweem packets is less than
  * 1 s, as well as when the average interval is less than 16 s. 
  */
-int	res_avg_interval = 1 << NTP_MINPOLL; /* avg interpkt interval */
+int	ntp_minpoll = NTP_MINPOLL;	/* avg interpkt interval */
 int	res_min_interval = 1 << NTP_MINPKT; /* min interpkt interval */
 
 /*
@@ -268,14 +268,14 @@ ntp_monitor(
 			md->leak -= interval;
 			if (md->leak < 0)
 				md->leak = 0;
-			leak = md->leak + res_avg_interval;
+			leak = md->leak + (1 << ntp_minpoll);
 #ifdef DEBUG
 			if (debug > 1)
-				printf("restrict: min %d average %d\n",
+				printf("restrict: interval %d headway %d\n",
 				    interval, leak);
 #endif
 			if (interval >= res_min_interval - 1 && leak <
-			    NTP_SHIFT * res_avg_interval + 2) {
+			    NTP_SHIFT * (1 << ntp_minpoll) + 2) {
 				md->leak = leak;
 				md->flags &= ~RES_LIMITED;
 			}

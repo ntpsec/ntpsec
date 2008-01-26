@@ -106,7 +106,7 @@ static double prev_drift_comp;		/* last frequency update */
 /*
  * Static prototypes
  */
-static void leap_file(char *);
+static int leap_file(FILE *);
 
 /*
  * init_util - initialize the utilities
@@ -114,9 +114,9 @@ static void leap_file(char *);
 void
 init_util(void)
 {
-	stats_drift_file = 0;
-	stats_temp_file = 0;
-	key_file_name = 0;
+	stats_drift_file = NULL;
+	stats_temp_file = NULL;
+	key_file_name = NULL;
 	filegen_register(&statsdir[0], "peerstats", &peerstats);
 	filegen_register(&statsdir[0], "loopstats", &loopstats);
 	filegen_register(&statsdir[0], "clockstats", &clockstats);
@@ -128,9 +128,6 @@ init_util(void)
 #ifdef DEBUG_TIMING
 	filegen_register(&statsdir[0], "timingstats", &timingstats);
 #endif /* DEBUG_TIMING */
-
-leap_file("/etc/ntp.leap");	/***** temp for debug *****/
-
 }
 
 
@@ -213,13 +210,6 @@ write_stats(void)
 		setpriority(PRIO_PROCESS, 0, o_prio); /* downshift */
 #endif /* VMS */
 #endif /* DOSYNCTODR */
-
-	NLOG(NLOG_SYSSTATIST)
-		msyslog(LOG_INFO,
-		    "offset %.6f sec freq %.3f ppm error %.6f poll %d",
-		    last_offset, drift_comp * 1e6, sys_jitter,
-		    sys_poll);
-
 	record_sys_stats();
 	clock_stepcnt = 0;
 	ftemp = fabs(prev_drift_comp - drift_comp); 
@@ -249,7 +239,8 @@ write_stats(void)
 			wander_resid = wander_threshold;
 			if ((fp = fopen(stats_temp_file, "w")) == NULL)
 			    {
-				msyslog(LOG_ERR, "can't open %s: %m",
+				msyslog(LOG_ERR,
+				    "frequency file %s: %m",
 				    stats_temp_file);
 				return;
 			}
@@ -265,9 +256,10 @@ write_stats(void)
 			    stats_drift_file);
 #else
 			/* we have no rename NFS of ftp in use */
-			if ((fp = fopen(stats_drift_file, "w")) == NULL)
-			    {
-				msyslog(LOG_ERR, "can't open %s: %m",
+			if ((fp = fopen(stats_drift_file, "w")) ==
+			    NULL) {
+				msyslog(LOG_ERR,
+				    "frequency file %s: %m",
 				    stats_drift_file);
 				return;
 			}
@@ -345,10 +337,14 @@ stats_config(
 #endif /* SYS_WINNT */
 
 	switch(item) {
-	    case STATS_FREQ_FILE:
+
+	/*
+	 * Open and read frequency file.
+	 */
+	case STATS_FREQ_FILE:
 		if (stats_drift_file != 0) {
-			(void) free(stats_drift_file);
-			(void) free(stats_temp_file);
+			free(stats_drift_file);
+			free(stats_temp_file);
 			stats_drift_file = 0;
 			stats_temp_file = 0;
 		}
@@ -383,7 +379,8 @@ stats_config(
 			break;
 		}
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
-			msyslog(LOG_ERR, "frequency format error in %s", 
+			msyslog(LOG_ERR,
+			    "format error frequency file %s", 
 			    stats_drift_file);
 			old_drift = 1e9;
 			fclose(fp);
@@ -393,15 +390,15 @@ stats_config(
 		fclose(fp);
 		old_drift /= 1e6;
 		prev_drift_comp = old_drift;
-		msyslog(LOG_INFO,
+		msyslog(LOG_NOTICE,
 		    "frequency initialized %.3f PPM from %s",
 			old_drift * 1e6, stats_drift_file);
-
-		leap_file("/etc/ntp.leap");
-
 		break;
-	
-	    case STATS_STATSDIR:
+
+	/*
+	 * Specify statistics directory.
+	 */
+	case STATS_STATSDIR:
 
 		/*
 		 * HMS: the following test is insufficient:
@@ -410,7 +407,7 @@ stats_config(
 		 */
 		if (strlen(value) >= sizeof(statsdir)) {
 			msyslog(LOG_ERR,
-			    "value for statsdir too long (>%d, sigh)",
+			    "statsdir too long (>%d, sigh)",
 			    (int)sizeof(statsdir) - 1);
 		} else {
 			l_fp now;
@@ -473,20 +470,41 @@ stats_config(
 		}
 		break;
 
-	    case STATS_PID_FILE:
+	/*
+	 * Open pid file.
+	 */
+	case STATS_PID_FILE:
 		if ((fp = fopen(value, "w")) == NULL) {
-			msyslog(LOG_ERR, "Can't open %s: %m", value);
+			msyslog(LOG_ERR, "pid file %s: %m",
+			    value);
 			break;
 		}
-		fprintf(fp, "%d", (int) getpid());
+		fprintf(fp, "%d", (int)getpid());
 		fclose(fp);;
 		break;
 
-	    case STATS_LEAP_FILE:
-		leapseconds_file_name = invalue;
+	/*
+	 * Read leapseconds file.
+	 */
+	case STATS_LEAP_FILE:
+		if ((fp = fopen(value, "r")) == NULL) {
+			msyslog(LOG_ERR, "leapseconds file %s: %m",
+			    value);
+			break;
+		}
+
+		if (leap_file(fp) < 0)
+			msyslog(LOG_ERR,
+			    "format error leapseconds file %s",
+			    value);
+		else
+			msyslog(LOG_NOTICE,
+			    "leap epoch %lu expire %lu TAI offset %d from %s",
+			    leap_sec, leap_expire, leap_tai, value);
+		fclose(fp);
 		break;
 
-	    default:
+	default:
 		/* oh well */
 		break;
 	}
@@ -586,7 +604,7 @@ record_loop_stats(
 void
 record_clock_stats(
 	struct sockaddr_storage *addr,
-	const char *text
+	const char *text	/* timecode string */
 	)
 {
 	l_fp	now;
@@ -620,10 +638,10 @@ void
 record_raw_stats(
         struct sockaddr_storage *srcadr,
         struct sockaddr_storage *dstadr,
-	l_fp	*t1,
-	l_fp	*t2,
-	l_fp	*t3,
-	l_fp	*t4
+	l_fp	*t1,		/* originate timestamp */
+	l_fp	*t2,		/* receiver timestamp */
+	l_fp	*t3,		/* transmit timestamp */
+	l_fp	*t4		/* destination timestamp */
 	)
 {
 	l_fp	now;
@@ -655,11 +673,11 @@ record_raw_stats(
  * packets recieved
  * packets processed
  * current version
- * previous versions
- * declined
+ * previous version
  * access denied
  * bad length or format
  * bad authentication
+ * declined
  * rate exceeded
  */
 void
@@ -680,9 +698,8 @@ record_sys_stats(void)
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(&now, 3), sys_stattime / 3600,
 		    sys_received, sys_processed, sys_newversion,
-		    sys_oldversion, sys_declined,
-		    sys_restricted, sys_badlength, sys_badauth,
-		    sys_limitrejected);
+		    sys_oldversion, sys_restricted, sys_badlength,
+		    sys_badauth, sys_declined, sys_limitrejected);
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}
@@ -702,7 +719,7 @@ record_sys_stats(void)
 void
 record_crypto_stats(
 	struct sockaddr_storage *addr,
-	const char *text
+	const char *text	/* text message */
 	)
 {
 	l_fp	now;
@@ -739,7 +756,7 @@ record_crypto_stats(
  */
 void
 record_timing_stats(
-	const char *text
+	const char *text	/* text message */
 	)
 {
 	static unsigned int flshcnt;
@@ -769,32 +786,16 @@ record_timing_stats(
  * Read the ERTS leapsecond file in NIST text format and extract the
  * NTP seconds of the latest leap and TAI offset after the leap.
  */
-static void
+static int
 leap_file(
-	char	*cp		/* file name */
+	FILE	*fp		/* file handle */
 	)
 {
-	FILE	*str;		/* file handle */
 	char	buf[NTP_MAXSTRLEN]; /* file line buffer */
-	u_long	leapsec;	/* NTP time at leap */
+	u_long	leap;		/* NTP time at leap */
 	u_long	expire;		/* NTP time when file expires */
 	int	offset;		/* TAI offset at leap (s) */
-	char	filename[MAXFILENAME]; /* name of leapseconds file */
-
-	NTP_REQUIRE(cp != NULL);
-
-	/*
-	 * Open the leapseconds file. If the first character of the
-	 * file name is not '/', prepend the keys directory string. If
-	 * the file is not found, ignore; if found with errors, report
-	 * to the log and ignore.
-	 */
-	if (*cp == '/')
-		strcpy(filename, cp);
-	else
-		snprintf(filename, MAXFILENAME, "%s/%s", keysdir, cp);
-	if ((str = fopen(filename, "r")) == NULL)
-		return;
+	int	i;
 
 	/*
 	 * Read and parse the leapseconds file. Empty lines and comments
@@ -802,13 +803,13 @@ leap_file(
 	 * expiration time in NTP seconds. Other lines begin with two
 	 * integers followed by junk or comments. The first integer is
 	 * the NTP seconds at the leap, the second is the TAI offset
-	 * after the leap. Only the last correctly parsed line is
-	 * significant. Parsing errors are cheerfully ignored.
+	 * after the leap.
  	 */
 	offset = 0;
-	leapsec = 0;
+	leap = 0;
 	expire = 0;
-	while (fgets(buf, NTP_MAXSTRLEN - 1, str) != NULL) {
+	i = 10;
+	while (fgets(buf, NTP_MAXSTRLEN - 1, fp) != NULL) {
 		if (strlen(buf) < 1)
 			continue;
 
@@ -816,20 +817,39 @@ leap_file(
 			if (strlen(buf) < 3)
 				continue;
 
-			if (buf[1] == '@') {
-				sscanf(&buf[2], "%lu", &expire);
+			/*
+			 * Note the '@' flag was used only in the 2006
+			 * table; previious to that the flag was '$'.
+			 */
+			if (buf[1] == '@' || buf[1] == '$') {
+				if (sscanf(&buf[2], "%lu", &expire) !=
+				    1)
+					return (-1);
+
 				continue;
 			}
 		}
-		sscanf(buf, "%lu %d", &leapsec, &offset);
+		if (sscanf(buf, "%lu %d", &leap, &offset) == 2) {
+
+			/*
+			 * Valid offsets must increase by one for each
+			 * leap.
+			 */
+			if (i++ != offset)
+				return (-1);
+		}
 	}
-	fclose(str);
+
+	/*
+	 * There must be at least one leap.
+	 */
+	if (i == 10)
+		return (-1);
+
 	leap_tai = offset;
-	leap_sec = leapsec;
+	leap_sec = leap;
 	leap_expire = expire;
-	msyslog(LOG_INFO,
-	    "leap_file: %s leap epoch %lu TAI offset %d expire %lu",
-	    cp, leap_sec, leap_tai, leap_expire);
+	return (0);
 }
 
 
@@ -899,22 +919,19 @@ getauthkeys(
 	if (len == 0)
 		return;
 	
-	if (key_file_name != 0) {
-		if (len > (int)strlen(key_file_name)) {
-			(void) free(key_file_name);
-			key_file_name = 0;
-		}
+	if (key_file_name != NULL) {
+		free(key_file_name);
+		key_file_name = NULL;
 	}
-
-	if (key_file_name == 0) {
+	if (key_file_name == NULL) {
 #ifndef SYS_WINNT
-		key_file_name = (char*)emalloc((u_int) (len + 1));
+		key_file_name = emalloc(len + 1);
 #else
-		key_file_name = (char*)emalloc((u_int)  (MAXPATHLEN));
+		key_file_name = emalloc(MAXPATHLEN);
 #endif
 	}
 #ifndef SYS_WINNT
- 	memmove(key_file_name, keyfile, (unsigned)(len+1));
+ 	memmove(key_file_name, keyfile, len + 1);
 #else
 	if (!ExpandEnvironmentStrings(keyfile, key_file_name,
 	    MAXPATHLEN)) {
@@ -932,8 +949,8 @@ getauthkeys(
 void
 rereadkeys(void)
 {
-	if (key_file_name != 0)
-	    authreadkeys(key_file_name);
+	if (key_file_name != NULL)
+		authreadkeys(key_file_name);
 }
 
 

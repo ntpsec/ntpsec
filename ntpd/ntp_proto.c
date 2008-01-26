@@ -92,9 +92,10 @@ u_long 	sys_epoch;		/* last clock update time */
 static	int sys_hopper;		/* anticlockhop counter */
 static	int sys_maxhop = MAXHOP; /* anticlockhop counter threshold */
 int	leap_tai;		/* TAI at next next leap */
-u_long	leap_sec;		/* next leap */
-u_long	leap_expire;		/* leapfile expiration */
-static int leap_next;		/* leap consensus */
+u_long	leap_sec;		/* next scheduled leap from file */
+u_long	leap_peers;		/* next scheduled leap from peers */
+u_long	leap_expire;		/* leap information expiration */
+static int leap_vote;		/* leap consensus */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
@@ -124,7 +125,7 @@ u_long	sys_newversion;		/* current version */
 u_long	sys_oldversion;		/* old version */
 
 u_long	sys_restricted;		/* access denied */
-u_long	sys_badlength;		/* bad length or format */
+u_long	sys_badlength;		/* bad version, length or format */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_declined;		/* packets declined */
 u_long	sys_limitrejected;	/* rate exceeded */
@@ -249,7 +250,8 @@ transmit(
 		 */ 
 		if (peer->unreach >= NTP_UNREACH) {
 			if (peer->flags & FLAG_PREEMPT &&
-			    sys_survivors >= sys_maxclock) {
+			    (sys_survivors > sys_maxclock ||
+			    peer->pmode == MODE_BROADCAST)) {
 				peer_clear(peer, "TIME");
 				unpeer(peer);
 				return;
@@ -260,7 +262,8 @@ transmit(
 				 * If timeout in Autokey dance, restart
 				 * the protocol.
 				 */
-				if (peer->crypto) {
+				if (peer->crypto || (peer->flash &
+				    TEST9)) {
 					peer_clear(peer, "TIME");
 					peer->unreach = 0;
 				}
@@ -397,14 +400,6 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
-	if (restrict_mask & RES_DONTSERVE) {
-		sys_restricted++;
-		return;				/* no time */
-	}
-	if (rbufp->recv_length < LEN_PKT_NOMAC) {
-		sys_badlength++;
-		return;				/* runt packet */
-	}
 	
 	/*
 	 * Version check must be after the query packets, since they
@@ -436,6 +431,18 @@ receive(
 	}
 
 	/*
+	 * If access denied or rate exceeded and no KoD, don't waste
+	 * further cycles.
+	 */
+	if (restrict_mask & RES_DONTSERVE)
+		sys_restricted++;
+	if (restrict_mask & RES_LIMITED)
+		sys_limitrejected++;
+	if (restrict_mask & (RES_DONTSERVE | RES_LIMITED) &&
+	    !(restrict_mask & RES_DEMOBILIZE))
+		return;
+
+	/*
 	 * Parse the extension field if present. We figure out whether
 	 * an extension field is present by measuring the MAC size. If
 	 * the number of words following the packet header is 0, no MAC
@@ -448,12 +455,12 @@ receive(
 	 */
 	authlen = LEN_PKT_NOMAC;
 	has_mac = rbufp->recv_length - authlen;
-	while (has_mac > 0) {
+	while (has_mac != 0) {
 		int temp;
 
 		if (has_mac % 4 != 0 || has_mac < 0) {
 			sys_badlength++;
-			return;			/* bad MAC length */
+			return;			/* bad length */
 		}
 		if (has_mac == 1 * 4 || has_mac == 3 * 4 || has_mac ==
 		    MAX_MAC_LEN) {
@@ -463,16 +470,28 @@ receive(
 		} else if (has_mac > MAX_MAC_LEN) {
 			temp = ntohl(((u_int32 *)pkt)[authlen / 4]) &
 			    0xffff;
-			if (temp < 4 || temp > NTP_MAXEXTEN || temp % 4
-			    != 0) {
+			if (temp < 4 || temp % 4 != 0 || temp +
+			    authlen + MAX_MAC_LEN >
+			    rbufp->recv_length) {
 				sys_badlength++;
-				return;		/* bad MAC length */
+				return;		/* bad length */
 			}
+
+			/*
+			 * Extension fields are illegal if Autokey is
+			 * not configured.
+			 */
+#ifdef OPENSSL
+			if (!crypto_flags)
+				restrict_mask |= RES_DONTSERVE;
+#elif /* OPENSSL */
+			restrict_mask |= RES_DONTSERVE;
+#endif /* OPENSSL */
 			authlen += temp;
 			has_mac -= temp;
 		} else {
 			sys_badlength++;
-			return;			/* bad MAC length */
+			return;			/* bad length */
 		}
 	}
 #ifdef OPENSSL
@@ -481,7 +500,7 @@ receive(
 
 	/*
 	 * We have tossed out as many buggy packets as possible early in
-	 * the game to reduce the exposure to a clogging attack. Now we
+	 * the game to reduce the exposure to a clogging attack. now we
 	 * have to burn some cycles to find the association and
 	 * authenticate the packet if required. Note that we burn only
 	 * MD5 cycles, again to reduce exposure. There may be no
@@ -681,17 +700,22 @@ receive(
 
 		/*
 		 * The vanilla case is when this is not a multicast
-		 * interface. If authentication succeeds, return a
-		 * server mode packet; if not and the key ID is nonzero,
-		 * return a crypto-NAK.
+		 * interface. If a restrict bit is lit, drop the packet.
+		 * If directed, send a KoD.
 		 */
-		if (restrict_mask & RES_LIMITED) {
-			sys_limitrejected++;
-			if (restrict_mask & RES_DEMOBILIZE)
-				fast_xmit(rbufp, hismode, skeyid,
-				    "RATE");
-			return;
+		if (restrict_mask & RES_DONTSERVE) {
+			fast_xmit(rbufp, hismode, skeyid, "DENY");
+			return;			/* access denied */
+
+		} else if (restrict_mask & RES_LIMITED) {
+			fast_xmit(rbufp, hismode, skeyid, "RATE");
+			return;			/* rate exceeded */
 		}
+
+		/*
+		 * If authentication OK, send a server reply; otherwise,
+		 * send a crypto-NAK.
+		 */
 		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
 			if (AUTH(restrict_mask & RES_DONTTRUST,
 			   is_authentic))
@@ -728,7 +752,6 @@ receive(
 		 */
 		if (AUTH(restrict_mask & RES_DONTTRUST, is_authentic))
 			fast_xmit(rbufp, hismode, skeyid, NULL);
-
 		return;				/* hooray */
 
 	/*
@@ -834,7 +857,7 @@ receive(
 			 * neither is Autokey.
 			 */
 			if (skeyid > NTP_MAXKEY) {
-				msyslog(LOG_INFO,
+				msyslog(LOG_NOTICE,
 				    "receive: autokey requires two-way communication");
 				sys_restricted++;
 				return;		/* no autokey */
@@ -1028,17 +1051,24 @@ receive(
 
 	/*
 	 * Test for kiss-o'death packet. We carefully avoid a hazard
-	 * when a terrorist broadcaster kisses the frog.
+	 * when the client has restarted the association after a kiss by
+	 * upping the throttle to the max.
 	 */
 	if (hismode == MODE_SERVER && hisleap == LEAP_NOTINSYNC &&
 	    hisstratum == STRATUM_UNSPEC) {
-		if (memcmp(&pkt->refid, "RATE", 4) == 0) {
-			peer_clear(peer, "RATE");
-			peer->flash |= TEST4;	/* rate quench */
-			msyslog(LOG_INFO,
+		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
+			peer_clear(peer, "DENY");
+			peer->flash |= TEST4;
+			msyslog(LOG_NOTICE,
+			    "receive: server %s access denied",
+			    stoa(&rbufp->recv_srcadr));
+		} else if (memcmp(&pkt->refid, "RATE", 4) == 0) {
+			peer->throttle += NTP_SHIFT * (1 <<
+			    ntp_minpoll);
+			poll_update(peer, peer->hpoll);
+			msyslog(LOG_NOTICE,
 			    "receive: server %s maximum rate exceeded",
 			    stoa(&rbufp->recv_srcadr));
-			return;
 		}
 	}
 
@@ -1113,12 +1143,13 @@ receive(
 			peer->flash |= TEST8;	/* not proventic */
 
 		/*
-		 * If the transmit queue is nonempty, clamp the host
-		 * poll interval to the packet poll interval.
+		 * About once a week restart the Autokey protocol to
+		 * slurp up and refreshed certificates or leapsecond
+		 * values.
 		 */
-		if (peer->cmmd != 0) {
-			peer->ppoll = pkt->ppoll;
-			poll_update(peer, peer->hpoll);
+		if (current_time > peer->refresh) {
+			peer_clear(peer, "CRYP");
+			return;
 		}
 	}
 #endif /* OPENSSL */
@@ -1169,7 +1200,7 @@ process_packet(
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
-	 * Capture the header values.
+	 * Capture the header values in the client/peer association..
 	 */
 	record_raw_stats(&peer->srcadr, peer->dstadr ?
 	    &peer->dstadr->sin : NULL, &p_org, &p_rec, &p_xmt,
@@ -1183,6 +1214,22 @@ process_packet(
 	peer->rootdisp = p_disp;
 	peer->refid = pkt->refid;		/* network byte order */
 	peer->reftime = p_reftime;
+
+	/*
+	 * First, if either burst mode is armed, enable the burst.
+	 * Compute the headway for the next packet and delay if
+	 * necessary to avoid exceeding the threshold.
+	 */
+	if (peer->retry > 0) {
+		peer->retry = 0;
+		if (peer->reach)
+			peer->burst = min(1 << (peer->hpoll -
+			    ntp_minpoll), NTP_SHIFT) - 1;
+		else
+			peer->burst = NTP_IBURST - 1;
+		peer->nextdate = current_time;
+	}
+	poll_update(peer, peer->hpoll);
 
 	/*
 	 * Verify the server is synchronized; that is, the leap bits and
@@ -1212,33 +1259,14 @@ process_packet(
 	}
 
 	/*
-	 * If the peer was previously unreachable, raise a trap. If a
-	 * burst mode is active, initialize the burst. The unreachable
-	 * burst is always NTP_IBURST (6) packets; the reachable burst
-	 * is tailored not to exceed the minimum average headway of 16
-	 * s.
+	 * If the peer was previously unreachable, raise a trap. In any
+	 * case, mark it reachable.
 	 */ 
 	if (!peer->reach) {
 		report_event(EVNT_REACH, peer);
 		peer->timereachable = current_time;
-		if (peer->retry > 0) {
-			peer->retry = 0;
-			peer->burst = NTP_IBURST - 1;
-			peer->nextdate = peer->outdate +
-			    res_min_interval;
-		}
-	} else {
-		if (peer->retry > 0) {
-			peer->retry = 0;
-			peer->burst = min(1 << (peer->hpoll -
-			    NTP_MINPOLL), NTP_SHIFT) - 1;
-			if (peer->burst > 0)
-				peer->nextdate = peer->outdate +
-				    res_min_interval;
-		}
 	}
 	peer->reach |= 1;
-	poll_update(peer, peer->hpoll);
 
 	/*
 	 * For a client/server association, calculate the clock offset,
@@ -1261,8 +1289,8 @@ process_packet(
 	 * only half that span. Since the typical first-order
 	 * differences are usually very small, they are converted to 64-
 	 * bit doubles and all remaining calculations done in floating-
-	 * point arithmetic. This preserves the accuracy while retaining
-	 * the 68-year span.
+	 * double arithmetic. This preserves the accuracy while
+	 * retaining the 68-year span.
 	 *
 	 * Let t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->rec:
 	 */
@@ -1326,6 +1354,14 @@ process_packet(
 			    .5) * p_del;
 		else
 			td = 0;
+
+		/*
+ 		 * Unfortunately, in many cases the errors are
+		 * unacceptable, so for the present the rates are not
+		 * used. In future, we might find conditions where the
+		 * calculations are useful, so this should be considered
+		 * a work in progress.
+		 */
 #if 0 /* temporarily disabled */
 		t21 -= td;
 		t34 -= td;
@@ -1377,8 +1413,8 @@ clock_update(
 {
 	u_char	ostratum;
 	double	dtemp;
-	l_fp	now;
 	u_long	epoch;
+	l_fp	now;
 #ifdef HAVE_LIBSCF_H
 	char	*fmri;
 #endif /* HAVE_LIBSCF_H */
@@ -1477,26 +1513,39 @@ clock_update(
 		sys_reftime = peer->rec;
 
 		/*
-		 * If a leapseconds file is not present and the number
-		 * of survivor leap bits is greater than half the number
-		 * of survivors, schedule a leap for the end of the
-		 * current month.
+		 * If the leapseconds values are from file or network
+		 * and the leap is in the future, schedule a leap at the
+		 * given epoch. Otherwise, if the number of survivor
+		 * leap bits is greater than half the number of
+		 * survivors, schedule a leap for the end of the current
+		 * month.
 		 */
 		get_systime(&now);
-		if (leap_expire == 0) {
-			u_long leapsec;
-
-			leapsec = leap_month(now.l_ui);
-			if (leapsec < 28 * 86400) {
-				leapsec += now.l_ui;
-				if (leapsec != leap_sec) {
-					leap_sec = leapsec;
+		if (leap_sec > 0) {
+			if (leap_sec > now.l_ui) {
+				sys_tai = leap_tai - 1;
+				if (leapsec == 0)
+					leapsec = leap_sec - now.l_ui;
 					msyslog(LOG_NOTICE,
-					    "proto: leap epoch %lu",						    leap_sec);
+					    "crypto: leap epoch %.1f days",
+					    leapsec / 86400.);
 				}
 			} else {
-				leap_sec = 0;
+				sys_tai = leap_tai;
 			}
+			break;
+
+		if (leap_vote > sys_survivors / 2) {
+			leap_peers = now.l_ui + leap_month(now.l_ui);
+			if (leap_peers > now.l_ui) {
+				if (leapsec == 0)
+					leapsec = leap_peers - now.l_ui;
+					msyslog(LOG_NOTICE,
+					    "proto: leap epoch %.1f days",
+					    leapsec / 86400.);
+			}
+		} else {
+			leapsec = 0;
 		}
 		break;
 	/*
@@ -1521,6 +1570,7 @@ poll_update(
 	)
 {
 	int	hpoll;
+	u_long	next, utemp;
 
 	/*
 	 * This routine figures out when the next poll should be sent.
@@ -1552,59 +1602,81 @@ poll_update(
 	peer->hpoll = hpoll;
 
 	/*
-	 * Now we figure out if there is an override. If during the
-	 * crypto protocol and a responce message is pending, delay one
-	 * second.
+	 * There are three variables important for poll scheduling, the
+	 * current time (current_time), next scheduled time (nextdate)
+	 * and the earliest time (utemp). The earliest time is 2 s
+	 * seconds, but could be more due to rate management. When
+	 * sending in a burst, use the earliest time. When not in a
+	 * burst but with a reply pending, send at the earliest time
+	 * unless the next scheduled time has not advanced. This can
+	 * only happen if multiple replies are peinding in the same
+	 * response interval. Otherwise, send at the later of the next
+	 * scheduled time and the earliest time.
+	 *
+	 * Now we figure out if there is an override. If a burst is in
+	 * progress and we get called from the receive process, just
+	 * slink away. If called from the poll process, delay 1 s for a
+	 * reference clock, otherwise 2 s.
 	 */
-#ifdef OPENSSL
-	if (peer->cmmd != NULL && (sys_leap != LEAP_NOTINSYNC ||
-	    peer->crypto)) {
-		peer->nextdate = current_time + RESP_DELAY;
-
-	/*
-	 * If we get called from the receive routine while a burst is
-	 * pending, just slink away. If a reference clock, delay one
-	 * second; otherwise, delay two seconds.
-	 */
-	} else if (peer->burst > 0) {
-#else /* OPENSSL */
+	utemp = current_time + max(peer->throttle - (NTP_SHIFT - 1) *
+	    (1 << ntp_minpoll), res_min_interval);
 	if (peer->burst > 0) {
-#endif /* OPENSSL */
-		if (peer->nextdate != current_time)
+		if (peer->nextdate > current_time)
 			return;
 #ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
-			peer->nextdate += RESP_DELAY;
+			peer->nextdate = current_time + RESP_DELAY;
 #endif /* REFCLOCK */
 		else
-			peer->nextdate += res_min_interval;
+			peer->nextdate = utemp;
 
 	/*
-	 * The ordinary case. If a retry, use minpoll; otherwise use the
-	 * minimum of the host and peer intervals. In other words,
-	 * oversampling is okay but understampling is evil.
+	 * If a burst is not in progress and a crypto response message
+	 * is pending, delay 2 s, but only if this is a new interval..
+	 */
+	} else if (peer->cmmd != NULL) {
+		if (peer->nextdate > current_time) {
+			if (peer->nextdate + res_min_interval != utemp)
+				peer->nextdate = utemp;
+		} else {
+			peer->nextdate = utemp;
+		}
+
+	/*
+	 * The ordinary case. If a retry, start wotj minpoll; otherwise
+	 * wtart with the minimum of the host and peer intervals. In
+	 * other words, oversampling is okay but understampling is evil.
+	 * Use the maximum of this value and the headway, then increase
+	 * by the minimum interval if the average headway is greater
+	 * than 16 s. This is to reduce the average headway at the
+	 * minimum poll interval of 16 s.
 	 */
 	} else {
 		if (peer->retry > 0)
 			hpoll = peer->minpoll;
 		else
 			hpoll = min(peer->ppoll, peer->hpoll);
-		peer->nextdate = peer->outdate + RANDPOLL(hpoll);
-	}
 
-	/*
-	 * If the time for the next poll has already happened, bring it
-	 * up to the next second after this one. This way the only way
-	 * to get nexdate == current time is from the poll routine.
-	 */
-	if (peer->nextdate <= current_time)
-		peer->nextdate = current_time + 1;
+		next = (u_long)(0x10000 | (ntp_random() & 0x0fff)) << hpoll;
+
+printf("xxx %d, %d %d %lx\n", peer->ppoll, peer->hpoll, hpoll, next);
+		next = (u_long)((0x10000 | (ntp_random() & 0x0fff)) <<
+		    hpoll) >> 16;
+		next += peer->outdate;
+		if (next > utemp)
+			peer->nextdate = next;
+		else
+			peer->nextdate = utemp;
+		if (peer->throttle > (1 << ntp_minpoll))
+			peer->nextdate += res_min_interval;
+	}
 #ifdef DEBUG
 	if (debug > 1)
-		printf("poll_update: at %lu %s flags %04x poll %d burst %d retry %d next %lu\n",
-		    current_time, ntoa(&peer->srcadr), peer->flags,
-		    peer->hpoll, peer->burst, peer->retry,
-		    peer->nextdate);
+		printf("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
+		    current_time, ntoa(&peer->srcadr), peer->hpoll,
+		    peer->burst, peer->retry, peer->throttle,
+		    utemp - current_time, peer->nextdate -
+		    current_time);
 #endif
 }
 
@@ -1679,7 +1751,7 @@ peer_clear(
 
 	/*
 	 * During initialization use the association count to spread out
-	 * the polls at one-second intervals. Othersie, randomize over
+	 * the polls at one-second intervals. Otherwise, randomize over
 	 * the minimum poll interval in order to avoid broadcast
 	 * implosion.
 	 */
@@ -1687,10 +1759,11 @@ peer_clear(
 	if (initializing)
 		peer->nextdate += peer_associations;
 	else if (peer->hmode == MODE_PASSIVE)
-		peer->nextdate += RESP_DELAY;
+		peer->nextdate += res_min_interval;
 	else
 		peer->nextdate += ntp_random() % peer_associations;
 #ifdef OPENSSL
+	peer->refresh = current_time + NTP_REFRESH;
 	sprintf(statstr, "clear %d ident %s", peer->associd,
 	    ident);
 		record_crypto_stats(&peer->srcadr, statstr);
@@ -2199,8 +2272,7 @@ clock_select(void)
 			nlist = 1;
 		} else {
 			if (osys_peer != NULL) {
-				NLOG(NLOG_SYNCSTATUS)
-				    msyslog(LOG_INFO,
+				msyslog(LOG_NOTICE,
 				    "no servers reachable");
 				report_event(EVNT_PEERSTCHG, NULL);
 			}
@@ -2276,24 +2348,29 @@ clock_select(void)
 	 * the system peer, although all survivors are eligible for the
 	 * combining algorithm. Check for prefer and pps peers at any
 	 * stratum. Note that the head of the list is at the lowest
-	 * stratum and that unsynchronized peers cannot survivethis far.
+	 * stratum and that unsynchronized peers cannot survive this
+	 * far.
+	 *
+	 * Also, reset the association unreach timer for the first
+	 * sys_maxclock survivors. The rest, if preemptable, will be
+	 * kicked off the bus after timeout.
 	 *
 	 * While at it, count the number of leap warning bits found.
 	 * This will be used later to vote the system leap warning bit.
 	 * If a leap warning bit is found on a reference clock, the vote
 	 * is always won.
 	 */
-	leap_next = 0;
+	leap_vote = 0;
 	for (i = 0; i < nlist; i++) {
 		sys_survivors++;
 		peer = peer_list[i];
-		if (i < sys_maxclock)
+		if (sys_survivors <= sys_maxclock)
 			peer->unreach = 0;
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->flags & FLAG_REFCLOCK)
-				leap_next = nlist;
+				leap_vote = nlist;
 			else 
-				leap_next++;
+				leap_vote++;
 		}
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		if (peer->flags & FLAG_PREFER)
@@ -2353,8 +2430,8 @@ clock_select(void)
 			sys_peer->status = CTL_PST_SEL_PPS;
 			sys_offset = sys_peer->offset;
 			if (!pps_control)
-				NLOG(NLOG_SYSEVENT)
-				    msyslog(LOG_INFO,
+				NLOG(NLOG_SYNCSTATUS)
+				msyslog(LOG_INFO,
 				    "pps sync enabled");
 			pps_control = current_time;
 #ifdef DEBUG
@@ -2416,8 +2493,8 @@ clock_select(void)
 #endif /* REFCLOCK */
                         src = ntoa(&sys_peer->srcadr);
 		NLOG(NLOG_SYNCSTATUS)
-		    msyslog(LOG_INFO, "synchronized to %s, stratum %d",
-			src, sys_peer->stratum);
+		msyslog(LOG_INFO, "synchronized to %s, stratum %d",
+		    src, sys_peer->stratum);
 	}
 	clock_update(sys_peer);
 }
@@ -2526,7 +2603,7 @@ peer_xmit(
 		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
-		peer->throttle += res_avg_interval;
+		peer->throttle += 1 << ntp_minpoll;
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %d\n",
@@ -2623,7 +2700,7 @@ peer_xmit(
 		/*
 		 * In symmetric modes the digest, certificate, agreement
 		 * parameters, cookie and autokey values are required.
-		 * The leapsecond table is optional. But, a passive peer
+		 * The leapsecond field is optional. But, a passive peer
 		 * will not believe the active peer until the latter has
 		 * synchronized, so the agreement must be postponed
 		 * until then. In any case, if a new keylist is
@@ -2682,8 +2759,8 @@ peer_xmit(
 				    peer->associd, NULL);
 
 			/*
-			 * Postamble. We trade leapseconds only when the
-			 * server and client are synchronized.
+			 * Postamble. We trade leapsecond fields only
+			 * when the server and client are synchronized.
 			 */
 			else if (sys_leap != LEAP_NOTINSYNC &&
 			    peer->leap != LEAP_NOTINSYNC &&
@@ -2695,7 +2772,7 @@ peer_xmit(
 		/*
 		 * In client mode the digest, certificate, agreement
 		 * parameters and cookie are required. The leapsecond
-		 * table is optional. If broadcast client mode, the
+		 * field is optional. If broadcast client mode, the
 		 * autokey values are required as well. In broadcast
 		 * client mode, these values must be acquired during the
 		 * client/server exchange to avoid having to wait until
@@ -2805,7 +2882,7 @@ peer_xmit(
 	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
-		msyslog(LOG_INFO, "transmit: %s key %u not found",
+		msyslog(LOG_NOTICE, "transmit: %s key %u not found",
 		    stoa(&peer->srcadr), xkeyid);
 		peer->flash |= TEST9;		/* no key found */
 		return;
@@ -2824,7 +2901,7 @@ peer_xmit(
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
-	peer->throttle += res_avg_interval;
+	peer->throttle += 1 << ntp_minpoll;
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2913,7 +2990,7 @@ fast_xmit(
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
-		memcpy(&xpkt.refid, "RATE", 4);
+		memcpy(&xpkt.refid, mask, 4);
 		xpkt.org = rpkt->xmt;
 		xpkt.rec = rpkt->xmt;
 		xpkt.xmt = rpkt->xmt;
@@ -3168,8 +3245,7 @@ default_get_precision(void)
 	/*
 	 * Find the nearest power of two.
 	 */
-	NLOG(NLOG_SYSEVENT)
-	    msyslog(LOG_INFO, "precision = %.3f usec", tick * 1e6);
+	    msyslog(LOG_NOTICE, "precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
 		tick *= 2;
 	if (tick - 1. > 1. - tick / 2)
@@ -3369,7 +3445,7 @@ proto_config(
 		break;
 
 	default:
-		msyslog(LOG_INFO,
+		msyslog(LOG_NOTICE,
 		    "proto_config: unsupported option %d", item);
 	}
 }

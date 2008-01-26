@@ -47,10 +47,11 @@ volatile int alarm_flag;
 /*
  * The counters and timeouts
  */
+static  u_long interface_timer;	/* interface update timer */
 static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
-static  u_long interface_timer;	/* interface update timer */
+u_long	leapsec;		/* leapseconds countdown */
 #ifdef OPENSSL
 static	u_long revoke_timer;	/* keys revoke timer */
 u_long	sys_revoke = KEY_REVOKE; /* keys revoke timeout */
@@ -265,7 +266,6 @@ timer(void)
 {
 	register struct peer *peer, *next_peer;
 	u_int	n;
-	l_fp	now;
 
 	/*
 	 * The basic timerevent is one second. This is used to adjust
@@ -309,8 +309,7 @@ timer(void)
 			 */
 			if (peer->throttle > 0)
 				peer->throttle--;
-			if (peer->nextdate <= current_time &&
-			    (peer->throttle == 0 || peer->burst > 0)) {
+			if (peer->nextdate <= current_time) {
 #ifdef REFCLOCK
 				if (peer->flags & FLAG_REFCLOCK)
 					refclock_transmit(peer);
@@ -342,37 +341,32 @@ timer(void)
 	}
 
 	/*
-	 * Leapseconds. When the time remaining decrements to zero,
-	 * increment the TAI offset. If the kernel code is not available
-	 * or disabled, Do the leap crudely. There are of course races
-	 * here, cheerfully ignored.
+	 * Leapseconds. If a leap is pending, decrement the time
+	 * remaining. If less than one day remains, set the leap bits.
+	 * When no time remains, clear the leap bits and increment the
+	 * TAI. If kernel suppport is not available, do the leap
+	 * crudely. Note a leap cannot be pending unless the clock is
+	 * set.
 	 */
-	if (leap_sec > 0) {
-		get_systime(&now);
-		if (now.l_ui > leap_sec) {
+	if (leapsec > 0) {
+		leapsec--;
+		if (leap_sec == 0) {
 			sys_leap = LEAP_NOWARNING;
 			sys_tai = leap_tai;
-		} else if (now.l_ui - leap_sec < 28 * 86400) {
-			sys_leap = LEAP_ADDSECOND;
-			if (leap_tai > 0)
-				sys_tai = leap_tai - 1;
-		}
-#ifdef KERNEL_PLL
-		if (now.l_ui - leap_sec == 600) {
-			if (pll_control && kern_enable)
-				loop_config(LOOP_LEAP, 0);
- 		}
-#endif /* KERNEL_PLL */
-		if (leap_sec == 0) {
 #ifdef KERNEL_PLL
 			if (!(pll_control && kern_enable))
 				step_systime(-1.0);
 #else /* KERNEL_PLL */
-				step_systime(-1.0);
+			step_systime(-1.0);
 #endif /* KERNEL_PLL */
 			msyslog(LOG_NOTICE,
-			    "timer: leap second %lu TAI %d",
-				leap_sec, sys_tai);
+			    "leapsecond event %lu TAI %d",
+			    current_time, sys_tai);
+		} else {
+			if (leapsec < DAY)
+				sys_leap = LEAP_ADDSECOND;
+			if (leap_tai > 0)
+				sys_tai = leap_tai - 1;
 		}
 	}
 
@@ -420,7 +414,7 @@ timer(void)
 	}
 	
 	/*
-	 * Finally, write stats once per hour.
+	 * Finally, write hourly stats.
 	 */
 	if (stats_timer <= current_time) {
 		stats_timer += HOUR;

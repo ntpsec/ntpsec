@@ -126,7 +126,7 @@ struct cert_info *cert_host = NULL; /* host certificate */
 struct pkey_info *pkinfo = NULL; /* key info/value cache */
 struct value hostval;		/* host value */
 struct value pubkey;		/* public key */
-struct value tai_leap;		/* leapseconds table */
+struct value tai_leap;		/* leapseconds values */
 struct pkey_info *iffkey_info = NULL; /* IFF keys */
 struct pkey_info *gqkey_info = NULL; /* GQ keys */
 struct pkey_info *mvkey_info = NULL; /* MV keys */
@@ -645,8 +645,7 @@ crypto_recv(
 			 */
 			if (peer->pkey == NULL) {
 				ptr = (u_char *)xinfo->cert.ptr;
-				cert = d2i_X509(NULL,
-				    (const u_char **)&ptr,
+				cert = d2i_X509(NULL, &ptr,
 				    ntohl(xinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
@@ -1030,7 +1029,7 @@ crypto_recv(
 			break;
 
 		/*
-		 * Install leapseconds table in symmetric modes. This
+		 * Install leapseconds values in symmetric modes. This
 		 * table is proventicated to the NIST primary servers,
 		 * either by copying the file containing the table from
 		 * a NIST server to a trusted server or directly using
@@ -1049,7 +1048,7 @@ crypto_recv(
 
 			/*
 			 * Pass the extension field to the transmit
-			 * side. Continue below if a leapseconds table
+			 * side. Continue below if leapseconds values
 			 * accompanies the message.
 			 */
 			fp = emalloc(len);
@@ -1069,7 +1068,7 @@ crypto_recv(
 			/*
 			 * If this is a response, discard the message if
 			 * signature not verified with respect to the
-			 * leapsecond table values.
+			 * leapseconds values.
 			 */
 			if (peer->cmmd == NULL) {
 				if ((rval = crypto_verify(ep, NULL,
@@ -1091,10 +1090,9 @@ crypto_recv(
 				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
 				msyslog(LOG_NOTICE,
-				    "crypto: leap epoch %lu TAI offset %d expire %lu",
-				    leap_sec, leap_tai, leap_expire); 				} else if (ntohl(ep->pkt[2]) < leap_expire) {
-				msyslog(LOG_ERR,
-				    "crypto: stale leap second values");
+				    "leap epoch %lu expire %lu TAI offset %d from %s",
+				    leap_sec, leap_expire, leap_tai,
+				    stoa(&peer->srcadr));
 			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
@@ -1280,9 +1278,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_CERT | CRYPTO_RESP:
 		vallen = ntohl(ep->vallen);
-		if (vallen == 8) {
-			strcpy(certname, sys_hostname);
-		} else if (vallen == 0 || vallen > MAXHOSTNAME) {
+		if (vallen == 0 || vallen > MAXHOSTNAME) {
 			rval = XEVNT_LEN;
 			break;
 
@@ -1292,15 +1288,14 @@ crypto_xmit(
 		}
 
 		/*
-		 * Find all certificates with matching subject. If a
-		 * self-signed, trusted certificate is found, use that.
-		 * If not, use the last non self-signed one with
-		 * matching subject. A private certificate is never
-		 * divulged or signed.
+		 * Find all public valid certificates with matching
+		 * subject. If a self-signed, trusted certificate is
+		 * found, use that certificate. If not, use the last non
+		 * self-signed certificate.
 		 */
 		xp = yp = NULL;
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			if (cp->flags & CERT_PRIV)
+			if (cp->flags & (CERT_PRIV | CERT_ERROR))
 				continue;
 
 			if (strcmp(certname, cp->subject) != 0)
@@ -1477,8 +1472,8 @@ crypto_xmit(
 		break;
 
 	/*
-	 * Send leapseconds table and signature. Use the values from the
-	 * tai structure. If no table has been loaded, just send an
+	 * Send leapseconds values and signature. Use the values from
+	 * the tai structure. If no table has been loaded, just send an
 	 * empty request.
 	 */
 	case CRYPTO_TAI:
@@ -1692,8 +1687,7 @@ crypto_encrypt(
 	 */
 	len = ntohl(ep->vallen);
 	ptr = (u_char *)ep->pkt;
-	pkey = d2i_PublicKey(EVP_PKEY_RSA, NULL, (const u_char **)&ptr,
-	    len);
+	pkey = d2i_PublicKey(EVP_PKEY_RSA, NULL, &ptr, len);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1780,7 +1774,7 @@ crypto_ident(
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_MV);
 	}
-	msyslog(LOG_INFO,
+	msyslog(LOG_NOTICE,
 	    "crypto_ident: no identity parameters found for group %s",
 	    peer->issuer);
 	return (CRYPTO_NULL);
@@ -2000,7 +1994,7 @@ crypto_update(void)
 	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
 		tai_leap.siglen = htonl(len);
-	if (leap_expire > 0)
+	if (leap_sec > 0)
 		crypto_flags |= CRYPTO_FLAG_TAI;
 	snprintf(statstr, NTP_MAXSTRLEN, "update at %lu ts %u",
 	    current_time, ntohl(hostval.tstamp)); 
@@ -2118,35 +2112,38 @@ bighash(
  ***********************************************************************
  *
  * The Schnorr (IFF) identity scheme is intended for use when
- * the ntp-genkeys program does not generate the certificates used in
- * the protocol and the group key cannot be conveyed in the certificate
- * itself. For this purpose, new generations of IFF values must be
- * securely transmitted to all members of the group before use. The
- * scheme is self contained and independent of new generations of host
- * keys, sign keys and certificates.
+ * certificates are generated by some other trusted certificate
+ * authority and the certificate cannot be used to convey public
+ * parameters. There are two kinds of files: encrypted server files that
+ * contain private and public values and nonencrypted client files that
+ * contain only public values. New generations of server files must be
+ * securely transmitted to all servers of the group; client files can be
+ * distributed by any means. The scheme is self contained and
+ * independent of new generations of host keys, sign keys and
+ * certificates.
  *
- * The IFF identity scheme is based on DSA cryptography and algorithms
- * described in Stinson p. 285. The IFF values hide in a DSA cuckoo
- * structure, but only the primes and generator are used. The p is a
- * 512-bit prime, q a 160-bit prime that divides p - 1 and is a qth root
- * of 1 mod p; that is, g^q = 1 mod p. The TA rolls primvate random
- * group key b disguised as a DSA structure member, then computes public
- * key g^(q - b). These values are shared only among group members and
- * never revealed in messages. Alice challenges Bob to confirm identity
- * using the protocol described below.
+ * The IFF values hide in a DSA cuckoo structure which uses the same
+ * parameters. The values are used by an identity scheme based on DSA
+ * cryptography and described in Stimson p. 285. The p is a 512-bit
+ * prime, g a generator of Zp* and q a 160-bit prime that divides p - 1
+ * and is a qth root of 1 mod p; that is, g^q = 1 mod p. The TA rolls a
+ * private random group key b (0 < b < q) and public key v = g^b, then
+ * sends (p, q, g, b) to the servers and (p, q, g, v) to the clients.
+ * Alice challenges Bob to confirm identity using the protocol described
+ * below.
  *
  * How it works
  *
  * The scheme goes like this. Both Alice and Bob have the public primes
  * p, q and generator g. The TA gives private key b to Bob and public
- * key v = g^(q - a) mod p to Alice.
+ * key v to Alice.
  *
- * Alice rolls new random challenge r and sends to Bob in the IFF
- * request message. Bob rolls new random k, then computes y = k + b r
- * mod q and x = g^k mod p and sends (y, hash(x)) to Alice in the
- * response message. Besides making the response shorter, the hash makes
- * it effectivey impossible for an intruder to solve for b by observing
- * a number of these messages.
+ * Alice rolls new random challenge r (o < r < q) and sends to Bob in
+ * the IFF request message. Bob rolls new random k (0 < k < q), then
+ * computes y = k + b r mod q and x = g^k mod p and sends (y, hash(x))
+ * to Alice in the response message. Besides making the response
+ * shorter, the hash makes it effectivey impossible for an intruder to
+ * solve for b by observing a number of these messages.
  * 
  * Alice receives the response and computes g^y v^r mod p. After a bit
  * of algebra, this simplifies to g^k. If the hash of this result
@@ -2180,7 +2177,7 @@ crypto_alice(
 		return (XEVNT_ID);
 
 	if ((dsa = peer->ident_pkey->pkey->pkey.dsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_alice: defective key");
+		msyslog(LOG_NOTICE, "crypto_alice: defective key");
 		return (XEVNT_PUB);
 	}
 
@@ -2247,7 +2244,7 @@ crypto_bob(
 	 * happened or we are being tormented.
 	 */
 	if (iffkey_info == NULL) {
-		msyslog(LOG_INFO, "crypto_bob: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_bob: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	dsa = iffkey_info->pkey->pkey.dsa;
@@ -2344,20 +2341,20 @@ crypto_iff(
 	 * something awful happened or we are being tormented.
 	 */
 	if (peer->ident_pkey == NULL) {
-		msyslog(LOG_INFO, "crypto_iff: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_iff: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) != peer->ident_pkey->fstamp) {
-		msyslog(LOG_INFO, "crypto_iff: invalid filestamp %u",
+		msyslog(LOG_NOTICE, "crypto_iff: invalid filestamp %u",
 		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((dsa = peer->ident_pkey->pkey->pkey.dsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_iff: defective key");
+		msyslog(LOG_NOTICE, "crypto_iff: defective key");
 		return (XEVNT_PUB);
 	}
 	if (peer->iffval == NULL) {
-		msyslog(LOG_INFO, "crypto_iff: missing challenge");
+		msyslog(LOG_NOTICE, "crypto_iff: missing challenge");
 		return (XEVNT_ID);
 	}
 
@@ -2393,7 +2390,7 @@ crypto_iff(
 	if (temp == 0)
 		return (XEVNT_OK);
 
-	msyslog(LOG_INFO, "crypto_iff: identity not verified");
+	msyslog(LOG_NOTICE, "crypto_iff: identity not verified");
 	return (XEVNT_ID);
 }
 
@@ -2407,20 +2404,25 @@ crypto_iff(
  ***********************************************************************
  *
  * The Guillou-Quisquater (GQ) identity scheme is intended for use when
- * the ntp-genkeys program generates the certificates used in the
- * protocol and the group key can be conveyed in a certificate extension
- * field. The scheme is self contained and independent of new
- * generations of host keys, sign keys and certificates.
+ * the certificate can be used to convey public parameters. The scheme
+ * uses a X509v3 certificate extension field do convey the public key of
+ * a private key known only to servers. There are two kinds of files:
+ * encrypted server files that contain private and public values and
+ * nonencrypted client files that contain only public values. New
+ * generations of server files must be securely transmitted to all
+ * servers of the group; client files can be distributed by any means.
+ * The scheme is self contained and independent of new generations of
+ * host keys and sign keys. The scheme is self contained and independent
+ * of new generations of host keys and sign keys.
  *
- * The GQ identity scheme is based on RSA cryptography and algorithms
- * described in Stinson p. 300 (with errors). The GQ values hide in a
- * RSA cuckoo structure, but only the modulus is used. The 512-bit
- * public modulus is n = p q, where p and q are secret large primes. The
- * TA rolls random group key b disguised as a RSA structure member.
- * Except for the public key, these values are shared only among group
- * members and never revealed in messages.
+ * The GQ parameters hide in a RSA cuckoo structure which uses the same
+ * parameters. The values are used by an identity scheme based on RSA
+ * cryptography and described in Stimson p. 300 (with errors). The 512-
+ * bit public modulus is n = p q, where p and q are secret large primes.
+ * The TA rolls private random group key b as RSA exponent. These values
+ * are known to all group members.
  *
- * When rolling new certificates, Bob recomputes the private and
+ * When rolling new certificates, a server recomputes the private and
  * public keys. The private key u is a random roll, while the public key
  * is the inverse obscured by the group key v = (u^-1)^b. These values
  * replace the private and public keys normally generated by the RSA
@@ -2477,7 +2479,7 @@ crypto_alice2(
 		return (XEVNT_ID);
 
 	if ((rsa = peer->ident_pkey->pkey->pkey.rsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_alice2: defective key");
+		msyslog(LOG_NOTICE, "crypto_alice2: defective key");
 		return (XEVNT_PUB);
 	}
 
@@ -2544,7 +2546,7 @@ crypto_bob2(
 	 * happened or we are being tormented.
 	 */
 	if (gqkey_info == NULL) {
-		msyslog(LOG_INFO, "crypto_bob2: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_bob2: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	rsa = gqkey_info->pkey->pkey.rsa;
@@ -2644,20 +2646,20 @@ crypto_gq(
 	 * the remote parameter file if the keys have been refreshed.
 	 */
 	if (peer->ident_pkey == NULL) {
-		msyslog(LOG_INFO, "crypto_gq: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_gq: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) < peer->ident_pkey->fstamp) {
-		msyslog(LOG_INFO, "crypto_gq: invalid filestamp %u",
+		msyslog(LOG_NOTICE, "crypto_gq: invalid filestamp %u",
 		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((rsa = peer->ident_pkey->pkey->pkey.rsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_gq: defective key");
+		msyslog(LOG_NOTICE, "crypto_gq: defective key");
 		return (XEVNT_PUB);
 	}
 	if (peer->iffval == NULL) {
-		msyslog(LOG_INFO, "crypto_gq: missing challenge");
+		msyslog(LOG_NOTICE, "crypto_gq: missing challenge");
 		return (XEVNT_ID);
 	}
 
@@ -2679,7 +2681,7 @@ crypto_gq(
 	 * Compute v^r y^b mod n.
 	 */
 	if (peer->grpkey == NULL) {
-		msyslog(LOG_INFO, "crypto_gq: missing group key");
+		msyslog(LOG_NOTICE, "crypto_gq: missing group key");
 		return (XEVNT_ID);
 	}
 	BN_mod_exp(v, peer->grpkey, peer->iffval, rsa->n, bctx);
@@ -2699,7 +2701,7 @@ crypto_gq(
 	if (temp == 0)
 		return (XEVNT_OK);
 
-	msyslog(LOG_INFO, "crypto_gq: identity not verified");
+	msyslog(LOG_NOTICE, "crypto_gq: identity not verified");
 	return (XEVNT_ID);
 }
 
@@ -2711,8 +2713,7 @@ crypto_gq(
  * scheme                                                              *
  *								       *
  ***********************************************************************
- */
-/*
+ *
  * The Mu-Varadharajan (MV) cryptosystem was originally intended when
  * servers broadcast messages to clients, but clients never send
  * messages to servers. There is one encryption key for the server and a
@@ -2729,19 +2730,16 @@ crypto_gq(
  * Varadharajan: Robust and Secure Broadcasting, Proc. Indocrypt 2001,
  * 223-231. The paper has significant errors and serious omissions.
  *
- * Let q be the product of n distinct primes s'[j] (j = 1...n), where
- * each s'[j] has m significant bits. Let p be a prime p = 2 * q + 1, so
- * that q and each s'[j] divide p - 1 and p has M = n * m + 1
- * significant bits. The elements x mod q of Zq with the elements 2 and
- * the primes removed form a field Zq* valid for polynomial arithetic.
- * Let g be a generator of Zp; that is, gcd(g, p - 1) = 1 and g^q = 1
- * mod p. We expect M to be in the 500-bit range and n relatively small,
- * like 25, so the likelihood of a randomly generated element of x mod q
- * of Zq colliding with a factor of p - 1 is very small and can be
- * avoided. Associated with each s'[j] is an element s[j] such that s[j]
- * s'[j] = s'[j] mod q. We find s[j] as the quotient (q + s'[j]) /
- * s'[j]. These are the parameters of the scheme and they are expensive
- * to compute.
+ * Let q be the product of n distinct primes s1[j] (j = 1...n), where
+ * each s1[j] has m significant bits. Let p be a prime p = 2 * q + 1, so
+ * that q and each s1[j] divide p - 1 and p has M = n * m + 1
+ * significant bits. Let g be a generator of Zp; that is, gcd(g, p - 1)
+ * = 1 and g^q = 1 mod p. We do modular arithmetic over Zq and then
+ * project into Zp* as exponents of g. Sometimes we have to compute an
+ * inverse b^-1 of random b in Zq, but for that purpose we require
+ * gcd(b, q) = 1. We expect M to be in the 500-bit range and n
+ * relatively small, like 30. These are the parameters of the scheme and
+ * they are expensive to compute.
  *
  * We set up an instance of the scheme as follows. A set of random
  * values x[j] mod q (j = 1...n), are generated as the zeros of a
@@ -2752,31 +2750,34 @@ crypto_gq(
  * pairs (xbar[j], xhat[j]) (j = 1...n) of private client keys are used
  * to construct the decryption keys. The devil is in the details.
  *
+ * This routine generates a private server encryption file including the
+ * private encryption key E and partial decryption keys gbar and ghat.
+ * It then generates public client decryption files including the public
+ * keys xbar[j] and xhat[j] for each client j. The partial decryption
+ * files are used to compute the inverse of E. These values are suitably
+ * blinded so secrets are not revealed.
+ *
  * The distinguishing characteristic of this scheme is the capability to
  * revoke keys. Included in the calculation of E, gbar and ghat is the
- * product s = prod(s'[j]) (j = 1...n) above. If the factor s'[j] is
+ * product s = prod(s1[j]) (j = 1...n) above. If the factor s1[j] is
  * subsequently removed from the product and E, gbar and ghat
  * recomputed, the jth client will no longer be able to compute E^-1 and
- * thus unable to decrypt the block.
+ * thus unable to decrypt the messageblock.
  *
  * How it works
  *
- * The scheme goes like this. Bob has the server values (p, A, q, gbar,
- * ghat) and Alice the client values (p, xbar, xhat).
+ * The scheme goes like this. Bob has the server values (p, E, q, gbar,
+ * ghat) and Alice has the client values (p, xbar, xhat).
  *
- * Alice rolls new random challenge r (0 < r < p) and sends to Bob in
- * the MV request message. Bob rolls new random k (0 < k < q), encrypts
- * y = A^k mod p (a permutation) and sends (hash(y), gbar^k, ghat^k) to
- * Alice.
+ * Alice rolls new random nonce r mod p and sends to Bob in the MV
+ * request message. Bob rolls random nonce k mod q, encrypts y = r E^k
+ * mod p and sends (y, gbar^k, ghat^k) to Alice.
  * 
- * Alice receives the response and computes the decryption key (the
- * inverse permutation) from previously obtained (xbar, xhat) and
- * (gbar^k, ghat^k) in the message. She computes the inverse, which is
- * unique by reasons explained in the ntp-keygen.c program sources. If
- * the hash of this result matches hash(y), Alice knows that Bob has the
- * group key b. The signed response binds this knowledge to Bob's
- * private key and the public key previously received in his
- * certificate.
+ * Alice receives the response and computes the inverse (E^k)^-1 from
+ * the partial decryption keys gbar^k, ghat^k, xbar and xhat. She then
+ * decrypts y and verifies it matches the original r. The signed
+ * response binds this knowledge to Bob's private key and the public key
+ * previously received in his certificate.
  *
  * crypto_alice3 - construct Alice's challenge in MV scheme
  *
@@ -2804,7 +2805,7 @@ crypto_alice3(
 		return (XEVNT_ID);
 
 	if ((dsa = peer->ident_pkey->pkey->pkey.dsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_alice3: defective key");
+		msyslog(LOG_NOTICE, "crypto_alice3: defective key");
 		return (XEVNT_PUB);
 	}
 
@@ -2870,7 +2871,7 @@ crypto_bob3(
 	 * happened or we are being tormented.
 	 */
 	if (mvkey_info == NULL) {
-		msyslog(LOG_INFO, "crypto_bob3: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_bob3: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	dsa = mvkey_info->pkey->pkey.dsa;
@@ -2887,8 +2888,8 @@ crypto_bob3(
 
 	/*
 	 * Bob rolls random k (0 < k < q), making sure it is not a
-	 * factor of q. He then computes y = A^k r and sends (hash(y),
-	 * gbar^k, ghat^k) to Alice.
+	 * factor of q. He then computes y = r A^k and sends (y, gbar^k,
+	 * and ghat^k) to Alice.
 	 */
 	bctx = BN_CTX_new(); k = BN_new(); u = BN_new();
 	sdsa = DSA_new();
@@ -2900,15 +2901,14 @@ crypto_bob3(
 		if (BN_is_one(u))
 			break;
 	}
-	BN_mod_exp(u, dsa->g, k, dsa->p, bctx); /* A r */
-	BN_mod_mul(u, u, r, dsa->p, bctx);
-	bighash(u, sdsa->p);
+	BN_mod_exp(u, dsa->g, k, dsa->p, bctx); /* A^k r */
+	BN_mod_mul(sdsa->p, u, r, dsa->p, bctx);
 	BN_mod_exp(sdsa->q, dsa->priv_key, k, dsa->p, bctx); /* gbar */
 	BN_mod_exp(sdsa->g, dsa->pub_key, k, dsa->p, bctx); /* ghat */
 	BN_CTX_free(bctx); BN_free(k); BN_free(r); BN_free(u);
 #ifdef DEBUG
 	if (debug > 1)
-		DSA_print_fp(stdout, dsa, 0);
+		DSA_print_fp(stdout, sdsa, 0);
 #endif
 
 	/*
@@ -2973,25 +2973,25 @@ crypto_mv(
 	 * something awful happened or we are being tormented.
 	 */
 	if (peer->ident_pkey == NULL) {
-		msyslog(LOG_INFO, "crypto_mv: scheme unavailable");
+		msyslog(LOG_NOTICE, "crypto_mv: scheme unavailable");
 		return (XEVNT_ID);
 	}
 	if (ntohl(ep->fstamp) != peer->ident_pkey->fstamp) {
-		msyslog(LOG_INFO, "crypto_mv: invalid filestamp %u",
+		msyslog(LOG_NOTICE, "crypto_mv: invalid filestamp %u",
 		    ntohl(ep->fstamp));
 		return (XEVNT_FSP);
 	}
 	if ((dsa = peer->ident_pkey->pkey->pkey.dsa) == NULL) {
-		msyslog(LOG_INFO, "crypto_mv: defective key");
+		msyslog(LOG_NOTICE, "crypto_mv: defective key");
 		return (XEVNT_PUB);
 	}
 	if (peer->iffval == NULL) {
-		msyslog(LOG_INFO, "crypto_mv: missing challenge");
+		msyslog(LOG_NOTICE, "crypto_mv: missing challenge");
 		return (XEVNT_ID);
 	}
 
 	/*
-	 * Extract the (hash(y), gbar, ghat) values from the response.
+	 * Extract the y, gbar and ghat values from the response.
 	 */
 	bctx = BN_CTX_new(); k = BN_new(); u = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
@@ -3003,19 +3003,17 @@ crypto_mv(
 	}
 
 	/*
-	 * Compute (gbar^xhat ghat^xbar)^-1 mod p.
+	 * Compute (gbar^xhat ghat^xbar) mod p.
 	 */
 	BN_mod_exp(u, sdsa->q, dsa->pub_key, dsa->p, bctx);
 	BN_mod_exp(v, sdsa->g, dsa->priv_key, dsa->p, bctx);
 	BN_mod_mul(u, u, v, dsa->p, bctx);
-	BN_mod_inverse(u, u, dsa->p, bctx);
-	BN_mod_mul(v, u, peer->iffval, dsa->p, bctx);
+	BN_mod_mul(u, u, sdsa->p, dsa->p, bctx);
 
 	/*
-	 * The result should match the hash of r mod p.
+	 * The result should match r.
 	 */
-	bighash(v, v);
-	temp = BN_cmp(v, sdsa->p);
+	temp = BN_cmp(u, peer->iffval);
 	BN_CTX_free(bctx); BN_free(k); BN_free(u); BN_free(v);
 	BN_free(peer->iffval);
 	peer->iffval = NULL;
@@ -3023,7 +3021,7 @@ crypto_mv(
 	if (temp == 0)
 		return (XEVNT_OK);
 
-	msyslog(LOG_INFO, "crypto_mv: identity not verified");
+	msyslog(LOG_NOTICE, "crypto_mv: identity not verified");
 	return (XEVNT_ID);
 }
 
@@ -3097,8 +3095,7 @@ cert_sign(
 		return (XEVNT_TSP);
 
 	ptr = (u_char *)ep->pkt;
-	if ((req = d2i_X509(NULL, (const u_char **)&ptr,
-		    ntohl(ep->vallen))) == NULL) {
+	if ((req = d2i_X509(NULL, &ptr, ntohl(ep->vallen))) == NULL) {
 		msyslog(LOG_ERR, "cert_sign: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_CRT);
@@ -3114,9 +3111,10 @@ cert_sign(
 	}
 
 	/*
-	 * Generate X509 certificate signed by this server. For this
-	 * purpose the issuer name is the server name. Also copy any
-	 * extensions that might be present.
+	 * Generate X509 certificate signed by this server. If this is a
+	 * trusted host, the issuer name is the group name; otherwise,
+	 * it is the host name. Also copy any extensions that might be
+	 * present.
 	 */
 	cert = X509_new();
 	X509_set_version(cert, X509_get_version(req));
@@ -3127,7 +3125,7 @@ cert_sign(
 	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    (u_char *)sys_hostname, strlen(sys_hostname), -1, 0);
+	    hostval.ptr, strlen(hostval.ptr), -1, 0);
 	subj = X509_get_subject_name(req);
 	X509_set_subject_name(cert, subj);
 	X509_set_pubkey(cert, pkey);
@@ -3162,7 +3160,7 @@ cert_sign(
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
 	ptr = vp->ptr;
-	i2d_X509(cert, (u_char **)&ptr);
+	i2d_X509(cert, &ptr);
 	vp->siglen = 0;
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -3203,8 +3201,7 @@ cert_valid(
 		return (XEVNT_OK);
 
 	ptr = (u_char *)cinf->cert.ptr;
-	cert = d2i_X509(NULL, (const u_char **)&ptr,
-	    ntohl(cinf->cert.vallen));
+	cert = d2i_X509(NULL, &ptr, ntohl(cinf->cert.vallen));
 	if (cert == NULL || !X509_verify(cert, pkey))
 		return (XEVNT_VFY);
 
@@ -3382,18 +3379,15 @@ cert_parse(
 	X509_EXTENSION *ext;	/* X509v3 extension */
 	struct cert_info *ret;	/* certificate info/value */
 	BIO	*bp;
-	X509V3_EXT_METHOD *method;
 	char	pathbuf[MAXFILENAME];
-	u_char	*uptr;
-	const char *ptr;
+	u_char	*ptr;
 	int	temp, cnt, i;
 
 	/*
 	 * Decode ASN.1 objects and construct certificate structure.
 	 */
-	uptr = asn1cert;
-	if ((cert = d2i_X509(NULL, (const u_char **)&uptr, len)) ==
-	    NULL) {
+	ptr = asn1cert;
+	if ((cert = d2i_X509(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
@@ -3420,7 +3414,7 @@ cert_parse(
 	    MAXFILENAME);
 	ptr = strstr(pathbuf, "CN=");
 	if (ptr == NULL) {
-		msyslog(LOG_INFO, "cert_parse: invalid subject %s",
+		msyslog(LOG_NOTICE, "cert_parse: invalid subject %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
@@ -3443,7 +3437,7 @@ cert_parse(
 	X509_NAME_oneline(X509_get_issuer_name(cert), pathbuf,
 	    MAXFILENAME);
 	if ((ptr = strstr(pathbuf, "CN=")) == NULL) {
-		msyslog(LOG_INFO, "cert_parse: invalid issuer %s",
+		msyslog(LOG_NOTICE, "cert_parse: invalid issuer %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
@@ -3462,7 +3456,6 @@ cert_parse(
 	cnt = X509_get_ext_count(cert);
 	for (i = 0; i < cnt; i++) {
 		ext = X509_get_ext(cert, i);
-		method = X509V3_EXT_get(ext);
 		temp = OBJ_obj2nid(ext->object);
 		switch (temp) {
 
@@ -3510,7 +3503,7 @@ cert_parse(
 		 * If certificate is self signed, verify signature.
 		 */
 		if (!X509_verify(cert, ret->pkey)) {
-			msyslog(LOG_INFO,
+			msyslog(LOG_NOTICE,
 			    "cert_parse: signature not verified %s",
 			    ret->subject);
 			cert_free(ret);
@@ -3522,8 +3515,8 @@ cert_parse(
 		/*
 		 * Check for a certificate loop.
 		 */
-		if (strcmp(sys_hostname, ret->issuer) == 0) {
-			msyslog(LOG_INFO,
+		if (strcmp(hostval.ptr, ret->issuer) == 0) {
+			msyslog(LOG_NOTICE,
 			    "cert_parse: certificate trail loop %s",
 			    ret->subject);
 			cert_free(ret);
@@ -3537,7 +3530,7 @@ cert_parse(
 	 * be retroactive.
 	 */
 	if (ret->first > ret->last || ret->first < fstamp) {
-		msyslog(LOG_INFO,
+		msyslog(LOG_NOTICE,
 		    "cert_parse: invalid times %s first %u last %u fstamp %u",
 		    ret->subject, ret->first, ret->last, fstamp);
 		cert_free(ret);
@@ -3770,7 +3763,7 @@ crypto_cert(
 	fclose(str);
 	free(header);
 	if (strcmp(name, "CERTIFICATE") != 0) {
-		msyslog(LOG_INFO, "crypto_cert: wrong PEM type %s",
+		msyslog(LOG_NOTICE, "crypto_cert: wrong PEM type %s",
 		    name);
 		free(name);
 		free(data);
@@ -3829,7 +3822,7 @@ crypto_setup(void)
 	 * the case of multiple crypto commands.
 	 */
 	if (crypto_flags & CRYPTO_FLAG_ENAB) {
-		msyslog(LOG_ERR,
+		msyslog(LOG_NOTICE,
 		    "crypto_setup: spurious crypto command");
 		return;
 	}
@@ -3917,8 +3910,6 @@ crypto_setup(void)
 	host_pkey = pinfo->pkey;
 	sign_pkey = host_pkey;
 	hostval.fstamp = htonl(pinfo->fstamp);
-	hostval.vallen = htonl(strlen(sys_hostname));
-	hostval.ptr = (u_char *)sys_hostname;
 	
 	/*
 	 * Construct public key extension field for agreement scheme.
@@ -3954,20 +3945,10 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
+	cert_host = cinfo;
 	sign_digest = cinfo->digest;
 	if (cinfo->flags & CERT_PRIV)
 		crypto_flags |= CRYPTO_FLAG_PRIV;
-
-	/*
-	 * The subject and host names must match.
-	 */
-	if (!(cinfo->flags & CERT_PRIV) && strcmp(cinfo->subject,
-	    sys_hostname) != 0) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: certificate %s not for this host %s",
-		    filename, sys_hostname);
-		exit (-1);
-	}
 
 	/*
 	 * The certificate must be self-signed.
@@ -3978,30 +3959,28 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
+	hostval.vallen = htonl(strlen(cinfo->subject));
+	hostval.ptr = cinfo->subject;
 
 	/*
-	 * On trusted hosts the subject and group names must match.
+	 * If trusted certificate, the subject name must match the group
+	 * name.
 	 */
 	if (cinfo->flags & CERT_TRUST) {
 		if (sys_groupname == NULL) {
+			sys_groupname = hostval.ptr;
+		} else if (strcmp(hostval.ptr, sys_groupname) != 0) {
 			msyslog(LOG_ERR,
-			    "crypto_setup: trusted host %s missing group name",
-			    cinfo->subject);
-			exit (-1);
-		}
-		if (strcmp(cinfo->subject, sys_groupname) != 0) {
-			msyslog(LOG_ERR,
-			    "crypto_setup: trusted host %s name and group name %s mismatch",
-			    cinfo->subject, sys_groupname);
+			    "crypto_setup: trusted certificate name %s does not match group name %s",
+			    hostval.ptr, sys_groupname);
 			exit (-1);
 		}
 	}
-	cert_host = cinfo;
 	if (sys_groupname != NULL) {
 
 		/*
 		 * Load optional IFF parameters from file
-		 * "ntpkey_iff_<groupname>".
+		 * "ntpkey_iffkey_<groupname>".
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_iffkey_%s",
 		    sys_groupname);
@@ -4011,7 +3990,7 @@ crypto_setup(void)
 
 		/*
 		 * Load optional GQ parameters from file
-		 * "ntpkey_gq_<groupname>".
+		 * "ntpkey_gqkey_<groupname>".
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_gqkey_%s",
 		    sys_groupname);
@@ -4021,7 +4000,7 @@ crypto_setup(void)
 
 		/*
 		 * Load optional MV parameters from file
-		 * "ntpkey_mv_<groupname>".
+		 * "ntpkey_mvkey_<groupname>".
 		 */
 		snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
 		    sys_groupname);

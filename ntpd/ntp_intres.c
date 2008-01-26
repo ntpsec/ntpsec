@@ -1044,14 +1044,15 @@ readconf(
 				intval[TOK_VERSION], name);
 			resolver_exit(1);
 		}
-		if (intval[TOK_MINPOLL] < NTP_MINPOLL ||
-		    intval[TOK_MINPOLL] > NTP_MAXPOLL) {
+		if (intval[TOK_MINPOLL] < ntp_minpoll ||
+		    intval[TOK_MINPOLL] > ntp_minpoll) {
+
 			msyslog(LOG_ERR, "invalid MINPOLL value (%ld) in file %s",
 				intval[TOK_MINPOLL], name);
 			resolver_exit(1);
 		}
 
-		if (intval[TOK_MAXPOLL] < NTP_MINPOLL ||
+		if (intval[TOK_MAXPOLL] < ntp_minpoll ||
 		    intval[TOK_MAXPOLL] > NTP_MAXPOLL) {
 			msyslog(LOG_ERR, "invalid MAXPOLL value (%ld) in file %s",
 				intval[TOK_MAXPOLL], name);
