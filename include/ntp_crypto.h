@@ -103,6 +103,7 @@
 #define NTP_AUTOMAX	3600	/* default max session key lifetime */
 #define KEY_REVOKE	86400	/* default key revoke timeout */
 #define NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define	NTP_REFRESH	(7 * 86400) /* refresh interval */
 
 /*
  * The autokey structure holds the values used to authenticate key IDs.

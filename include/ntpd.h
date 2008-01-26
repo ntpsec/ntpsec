@@ -104,18 +104,6 @@ extern	void	block_io_and_alarm (void);
 #define BLOCK_IO_AND_ALARM()
 #endif
 
-/* ntp_leap.c */
-extern	void	init_leap	(void);
-extern	void	leap_process	(void);
-extern	int 	leap_setleap	(int, int);
-/*
- * there seems to be a bug in the IRIX 4 compiler which prevents
- * u_char from beeing used in prototyped functions.
- * This is also true AIX compiler.
- * So give up and define it to be int. WLJ
- */
-extern	int	leap_actual (int);
-
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter (void);
 extern	int 	local_clock (struct peer *, u_long, double);
@@ -187,9 +175,12 @@ extern	void	peer_clear	(struct peer *, char *);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 extern	void	kod_proto	(void);
-extern	int	leap_tai;
-extern	u_long	leap_expire;
-extern	u_long	leap_sec;
+
+extern	int	leap_tai;	/* TAI at next leap */
+extern	u_long	leap_sec;	/* next scheduled leap from file */
+extern	u_long	leap_peers;	/* next scheduled leap from peers */
+extern	u_long	leapsec;	/* seconds to next leap */
+extern	u_long	leap_expire;	/* leap information expiration */
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;
@@ -445,7 +436,7 @@ extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
 extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
 extern int	res_min_interval;
-extern int	res_avg_interval;
+extern int	ntp_minpoll;
 extern int	mon_age;		/* monitor preempt age */
 
 /* ntp_timer.c */

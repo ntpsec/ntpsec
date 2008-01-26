@@ -310,6 +310,7 @@ struct peer {
 	struct value cookval;	/* cookie values */
 	struct value recval;	/* receive autokey values */
 	struct exten *cmmd;	/* extension pointer */
+	u_long	refresh;	/* next refresh epoch */
 
 	/*
 	 * Variables used by authenticated server
@@ -327,12 +328,11 @@ struct peer {
 	 */
 	u_char	status;		/* peer status */
 	u_char	reach;		/* reachability register */
-	u_int	flash;		/* protocol error test tally bits */
+	int	flash;		/* protocol error test tally bits */
 	u_long	epoch;		/* reference epoch */
-	u_int	burst;		/* packets remaining in burst */
-	u_int	retry;		/* retry counter */
-	u_int	throttle;	/* rate control */
-	u_int	filter_nextpt;	/* index into filter shift register */
+	int	burst;		/* packets remaining in burst */
+	int	retry;		/* retry counter */
+	int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
 	double	filter_disp[NTP_SHIFT]; /* dispersion shift register */
@@ -363,7 +363,8 @@ struct peer {
 	 */
 	u_long	update;		/* receive epoch */
 #define end_clear_to_zero update
-	u_int	unreach;	/* watchdog counter */
+	int	unreach;	/* watchdog counter */
+	int	throttle;	/* rate control */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
 	u_long	nextaction;	/* peer local activity timeout (refclocks) */
@@ -721,12 +722,6 @@ struct pkt {
 #define	NTP_HASH_ADDR(src)	sock_hash(src)
 
 /*
- * How we randomize polls.  The poll interval is a power of two. We chose
- * a random interval which is this plus random 3 seconds.
- */
-#define RANDPOLL(x)	((1 << (x)) + (ntp_random() & 0x3))
-
-/*
  * min, min3 and max.  Makes it easier to transliterate the spec without
  * thinking about it.
  */
@@ -886,8 +881,8 @@ struct restrictlist6 {
 /*
  * Match flags
  */
-#define	RESM_INTERFACE		0x1	/* this is an interface */
-#define	RESM_NTPONLY		0x2	/* match ntp port only */
+#define	RESM_INTERFACE		0x1000	/* this is an interface */
+#define	RESM_NTPONLY		0x2000	/* match ntp port only */
 
 /*
  * Restriction configuration ops
