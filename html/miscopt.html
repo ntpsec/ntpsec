@@ -12,10 +12,10 @@
 		<h3>Miscellaneous Options</h3>
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">20:47</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="270">Monday, October 15, 2007</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">22:42</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="290">Sunday, December 16, 2007</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
-		<script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
+		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
 		<hr>
 		<dl>
 			<dt><tt>broadcastdelay <i>seconds</i></tt>
@@ -126,7 +126,12 @@
 			<dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.
 		</dl>
 		<h4>Files</h4>
-		<tt>ntp.drift</tt> frequency compensation (PPM)
+		<tt>ntp.drift</tt> frequency
+		<h4 id="leap">Leapseconds File</h4>
+		<p>The NIST provides a file documenting the epoch for all historic occasions of leap second insertion since 1972. The leapsecond table shows each epoch of insertion along with the offset of International Atomic Time (TAI) with respect to Coordinated Universal Time (UTC), as disseminated by NTP. The table can be obtained directly from NIST national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.</p>
+		<p>While not strictly a security function, the Autokey protocol provides means to securely retrieve the leapsecond table from a server or peer. Servers load the leapsecond table directly from the file specified in the <tt>crypto</tt> command, with default <tt>ntpkey_leap</tt>, while clients can obtain the table indirectly from the servers using the Autokey protocol. Once loaded, the table can be provided on request to other clients and servers.</p>
+		<p>As explained in the <a href="authopt.html">Authentication Options</a> page, all cryptographically sound key generation schemes must have means to randomize the entropy seed used to initialize the internal random number generator. The OpenSSL library uses a designated random seed file for this purpose. The file must be available when starting the NTP daemon and the <tt>ntp-keygen</tt> program. If a site supports OpenSSL or its companion OpenSSH, it is very likely that means to do this are already available.</p>
+		<p> compensation (PPM)</p>
 		<hr>
 		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 	</body>

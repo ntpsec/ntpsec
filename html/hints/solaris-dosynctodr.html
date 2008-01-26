@@ -25,7 +25,7 @@
 <BODY BGCOLOR="#FFFFFF" LINK="#666699" ALINK="#FFFFFF">
 
 
-<TABLE WIDTH="623" BORDER="0">
+<TABLE WIDTH="623" BORDER="0" CELLSPACING="0" CELLPADDING="0">
         <TR>
                 <TD COLSPAN="2" VALIGN="TOP" WIDTH="623">
                 <IMG BORDER="0" SRC="/images/homebuy.gif" WIDTH="149" HEIGHT="32" ALT="Home * Buy * My Sun(sm)" USEMAP="#lefttop"><IMG BORDER="0" SRC="/images/globalnavbar.gif" WIDTH="474" HEIGHT="32" ALT="sun.com Global Sections" USEMAP="#topnav"></TD>
@@ -35,12 +35,12 @@
 
         <!-- TITLEBAR IMAGE: INSERT CUSTOMIZED TITLEBAR IMAGE BELOW -->
 
-        <A HREF="http://www.sun.com/"><IMG BORDER="0" SRC="/images/sunlogo.gif" WIDTH="149" HEIGHT="72" ALT="Sun Microsystems"></A><IMG BORDER="0" SRC="/images/titlebar/doc.title.gif" alt="gif" WIDTH="474" HEIGHT="72"></TD>
+        <A HREF="http://www.sun.com/"><IMG BORDER="0" SRC="/images/sunlogo.gif" WIDTH="149" HEIGHT="72" ALT="Sun Microsystems"></A><IMG BORDER="0" SRC="/images/titlebar/doc.title.gif" WIDTH="474" HEIGHT="72"></TD>
         </TR>
 		        <!-- Begin Search Elements -->
         <TR VALIGN="top">
             <TD BGCOLOR="#666699">      
-                        <TABLE>
+                        <TABLE BORDER="0" WIDTH="157" CELLSPACING="0" CELLPADDING="0">
                                 <TR>
                                     <TD BGCOLOR="#666699" COLSPAN="2" WIDTH="157" VALIGN="TOP"><IMG BORDER="0" SRC="/images/search/contract/search1.gif" WIDTH="157" HEIGHT="16" ALT="Search SunSolve"></TD>
                             </TR>
@@ -58,7 +58,7 @@
     <!-- End Search Elements -->
                     <!-- Begin User Personalization (Must limit to 10 Characters)-->
                     <TR>
-                        <TD COLSPAN="2"><TABLE><TR><TD COLSPAN="3" ALIGN="right"><IMG SRC="/images/home_con/welcom_1.gif" ALT="" WIDTH="156" HEIGHT="4" BORDER="0"></TD></TR>
+                        <TD COLSPAN="2"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="157"><TR><TD COLSPAN="3" ALIGN="right"><IMG SRC="/images/home_con/welcom_1.gif" ALT="" WIDTH="156" HEIGHT="4" BORDER="0"></TD></TR>
                                         <TR><TD BGCOLOR="#333366"><IMG SRC="/images/home_con/welcom_2.gif" ALT="" WIDTH="17" HEIGHT="19" BORDER="0"></TD><TD BGCOLOR="#333366" VALIGN="middle"><NOBR><FONT FACE="Geneva, Helvetica, Arial, SunSans-Regular" COLOR="#99CC33" SIZE="-2">sopko</FONT></NOBR></TD><TD BGCOLOR="#333366" ALIGN="right"><A HREF="edit-user-form.pl?viewmode=contractuser"><IMG SRC="/images/home_con/welcom_3.gif" ALT="Edit" WIDTH="45" HEIGHT="19" BORDER="0"></A></TD></TR>
                                 </TABLE>
                                 </TD>
@@ -86,9 +86,9 @@
 <IMG BORDER="0" SRC="/images/nav/p3.gif" WIDTH="157" HEIGHT="19" ALT="Y2K Central"></A><BR>
 <A HREF="show.pl?target=security/sec" onmouseover="window.status='Security Information'; return true" onmouseout="window.status=''; return true">
 <IMG BORDER="0" SRC="/images/nav/p2.gif" WIDTH="157" HEIGHT="19" ALT="Security Information"></A><BR>
-<br><table width="157">
+<br><table cellpadding="0" cellspacing="0" border="0" width="157">
 <tr><td width="8">&nbsp;</td><td width="149">
-<table>
+<table cellpadding="0" cellspacing="0" border="0">
 <BR><tr><td><BR><img src="/images/line.gif" alt="------" width="140" height="11" border="0"><br>
 		<A HREF="mark.pl" 
 			onmouseover="window.status='Marked Docs.';return true"
@@ -149,7 +149,7 @@
 
 
 
-<table width=100%>
+<table width=100% cellpadding=16 cellspacing=0 border=0>
   <tr>
 <td width=100% valign=top>
 <CENTER><FONT FACE="Geneva, Helvetica, Arial, SunSans-Regular" SIZE="2">
@@ -177,7 +177,7 @@
 <option value="#SRDB-ID">SRDB ID</option>
 <option value="#OS">OS</option>
 </select></div></form>
-<table width=100%>
+<table width=100% cellpadding=2 cellspacing=0 border=0>
 <tr bgcolor=#666699><td><font size=2 color=#ffffff><b>SRDB ID</b></font></td>
 <td bgcolor=#ffffff><font size=2>&nbsp;</font></td>
 <td><font size=2 color=#ffffff><b>Synopsis</b></font></td>
@@ -191,7 +191,7 @@
 <td><font size=2><b>4 Sep 1999</b></font></td>
 </tr>
 </table><br clear>
-<table width=100%><tr bgcolor=#999999>
+<table width=100% cellpadding=2 cellspacing=0 border=0><tr bgcolor=#999999>
 <td><font size=2 color=#ffffff><b><a name=Problem-Description>Problem Description</a></b></font></td>
 <td align=right><b><a href="#top"><font size=2 color=#ffffff>Top</font></a></b></td></tr></table>
 <pre>Ever since upgrading to Solaris 2.6, the system clock has been drifting and
@@ -200,7 +200,7 @@ didn''t complete' and 'time reset (step)' a lot in the /var/adm/messages
 file. The system either was previously working fine with the freeware
 xntpd or the configuration was copied from another system that was 
 using the freeware version.
--- 23-Apr-99 08:22 US/Eastern --</pre><table width=100%><tr bgcolor=#999999>
+-- 23-Apr-99 08:22 US/Eastern --</pre><table width=100% cellpadding=2 cellspacing=0 border=0><tr bgcolor=#999999>
 <td><font size=2 color=#ffffff><b><a name=Problem-Solution>Problem Solution</a></b></font></td>
 <td align=right><b><a href="#top"><font size=2 color=#ffffff>Top</font></a></b></td></tr></table>
 <pre>The common lore for setting up xntpd on Solaris using
@@ -221,7 +221,7 @@ clock, the hard clock is also controlled. Setting
 defaulkt behavior, having exactly the opposite effect 
 as that intended.
 
-Do not set <font color=red>dosynctodr</font> to 0.</pre><table width=100%>
+Do not set <font color=red>dosynctodr</font> to 0.</pre><table width=100% cellpadding=2 cellspacing=0 border=0>
 <tr><td bgcolor=#999999 valign=top width=25%><font color=#ffffff size=2><b><a name=Product-Area>Product Area</a></b></font></td>
 <td bgcolor=#cccccc valign=top width=75%><font size=2>Bundled Network</font></td></tr>
 <tr><td bgcolor=#999999 valign=top width=25%><font color=#ffffff size=2><b><a name=Product>Product</a></b></font></td>

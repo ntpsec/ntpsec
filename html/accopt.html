@@ -13,10 +13,10 @@
 		<h3>Access Control Options</h3>
 		<img src="pic/pogo6.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>The skunk watches for intruders and sprays.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">18:35</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="246">Thursday, July 28, 2005</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">15:56</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Wednesday, January 02, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
-		<script type="text/javascript" language="javascript" src="scripts/links7.txt"></script>
+		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
 		<h4>Table of Contents</h4>
 		<ul>
 			<li class="inline"><a href="#acx">Access Control Support</a>
@@ -25,7 +25,7 @@
 		</ul>
 		<hr>
 		<h4 id="acx">Access Control Support</h4>
-		The<tt> ntpd</tt> daemon implements a general purpose address/mask based restriction list. The list contains address/match entries sorted first by increasing address values and and then by increasing mask values. A match occurs when the bitwise AND of the mask and the packet source address is equal to the bitwise AND of the mask and address in the list. The list is searched in order with the last match found defining the restriction flags associated with the entry. Additional information and examples can be found in the <a href="notes.html">Notes on Configuring NTP and Setting up a NTP Subnet</a> page.
+		The<tt> ntpd</tt> daemon implements a general purpose address/mask based restriction list. The list contains address/match entries sorted first by increasing address values and and then by increasing mask values. A match occurs when the bitwise AND of the mask and the packet source address is equal to the bitwise AND of the mask and address in the list. The list is searched in order with the last match found defining the restriction flags associated with the entry.
 		<p>The restriction facility was implemented in conformance with the access policies for the original NSFnet backbone time servers. Later the facility was expanded to deflect cryptographic and clogging attacks. While this facility may be useful for keeping unwanted or broken or malicious clients from congesting innocent servers, it should not be considered an alternative to the NTP authentication facilities. Source address based restrictions are easily circumvented by a determined cracker.</p>
 		<p>Clients can be denied service because they are explicitly included in the restrict list created by the <tt>restrict</tt> command or implicitly as the result of cryptographic or rate limit violations. Cryptographic violations include certificate or identity verification failure; rate limit violations generally result from defective NTP&nbsp;implementations that send packets at abusive rates. Some violations cause denied service only for the offending packet, others cause denied service for a timed period and others cause the denied service for an indefinate period. When a client or network is denied access for an indefinate period, the only way at present to remove the restrictions is by restarting the server.</p>
 		<h4 id="kiss">The Kiss-of-Death Packet</h4>

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="HTML Tidy, see www.w3.org">
+		<title>Rate Management and the Kiss-o'-Death</title>
+		<link href="scripts/style.css" type="text/css" rel="stylesheet">
+	</head>
+
+	<body>
+		<h3>Rate Management and the Kiss-o'-Death Packet</h3>
+		<img src="pic/alice61.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
+		<p>Packet blizzard</p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">17:55</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="292">Monday, December 31, 2007</csobj></p>
+		<br clear="left">
+		<h4>Related Links</h4>
+		<script type="text/javascript" language="javascript" src="scripts/config.txt"></script>
+		<h4>Table of Contents</h4>
+		<ul>
+			<li class="inline"><a href="#intro">Introduction</a>
+			<li class="inline"><a href="#poll">Poll Rate Control</a>
+			<li class="inline"><a href="#burst">Burst Control</a>
+			<li class="inline"><a href="#mah">Minimum Average Headway</a>
+			<li class="inline"><a href="#mgt">Minimum Guard Time</a>
+			<li class="inline"><a href="#kod">The Kiss-o'-Death Packet</a>
+		</ul>
+		<hr>
+		<h4 id="intro">Introduction</h4>
+		<p>Some national time metrology laboratories, including NIST and USNO, use the <tt>ntpd</tt> reference implementation in their very busy public time servers. They operate multiple servers behind load-balancing devices to support aggregate rates up to several thousand packets per second. The servers need to defend themselves against all manner of broken implementations that can clog the server and and network infrastructure. On the other hand, friendly <tt>ntpd</tt> clients need to avoid configurations that can result in unfriendly rates.</p>
+		<p>There are several features in <tt>ntpd</tt> designed to defend the servers, clients and network against accidental or intentional flood attack. On the other hand these features are also used to insure <tt>ntpd</tt> is a good citizen, even if configured in unfriendly ways. The ground rules are:</p>
+		<ul>
+			<li>Send at the lowest rate consistent with the required nominal error regime.<li>Maintain strict minimum average headway and guard intervals, even if multiple burst options and/or the Autokey protocol are configured.<li>When the first packet of a burst is sent to a server, do not send further packets until the first packet has been received from the server.<li>Upon receiving a Kiss-o'-Death packet (see below), immediately reduce the sending rate.
+		</ul>
+		<p>Rate management involves four algorithms to control the poll rate control, burst control, minimum average headway and minimum guard time. These are described in following sections.</p>
+		<h4 id="poll">Poll Rate Control</h4>
+		<p>In the <tt>ntpd</tt> design control of the poll interval is an intricate balance between nominal error and network load. As a rule of thumb, if the poll interval increases by 100 percent, nominal error increases by 50 percent. For the default poll interval range from 64 s to 1024 s, this represents an eightfold range in nominal error. Nevertheless and unless the lowest possible nominal error is required, the well mannered NTP client should allow the interval to increase to the maximum when possible.</p>
+		<p>The poll interval is proportional to the time constant of the feedback loop which controls the system clock time and frequency. The optimum time constant depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter are reduced as the time constant increases, while errors due to wander are decreased as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept. The poll algorithm follows the intercept in response to changing jitter and wander conditions. However, the intercept has a relatively broad characteristic, so the algorithm is biased towards the high side in the interests of reduced network load.</p>
+		<p>The <tt>ntpd</tt> poll interval algorithms slowly but reliably increases the poll interval when jitter dominates the error budget, but quickly reduces the interval when wander dominates it. In addition it avoids needless changes which can cause additional error, especially when operating at very low jitter in the order of microseconds.</p>
+		<p>In <tt>ntpd</tt> the poll interval is represented in log<sub>2</sub> s, so the actual values span the range 6-10. The algorithm uses a jiggle counter which operates over the range from -30 to +30 and is initialized at 0. If the measured offset is less than four times the measured average jitter, the counter is increased by the poll interval; if not, it is decreased by twice the poll interval. If the counter reaches +30, the poll interval is incremented by 1; if the counter reaches -30, the poll interval is decremented by 1. In either case the counter is set to 0.</p>
+		<h4 id="burst">Burst Control</h4>
+		<p>Occasionally it is necessary to send packets at intervals less than the poll interval. For instance, with the burst and iburst options, the poll algorithm sends a burst of several packets at 2-s intervals. The <tt>ntpd</tt> poll algorithm avoids sending needless packets if the server is not responding. If a burst is to be sent, the client sends only a single packet. When the first packet is received from the server, the client continues with the remaining packets in the burst. If the first packet is not received within 64 s, it will be sent again for two additional retries before giving up. The result is to minimize network load if the server is not responding.</p>
+		<p>For the iburst option the number of packets in the burst is six, which is the number normally needed to synchronize the clock; for the burst option, the number of packets in the burst is determined by the poll interval so that the headway is never less than 16 s. For instance, if operated at the minimum poll interval of 16 s, only a single packet is sent, while the full number of eight packets is sent at poll intervals of 128 s or more.</p>
+		<h4 id="mah">Minimum Average Headway</h4>
+		<p>There are features in <tt>ntpd</tt> to manage the interval between one packet and the next. These features make use of a set of counters, an output counter for each client association and an input counter for each distinct client address. Each counter increments by a value called the headway when a packet is processed and decrements by one each second. The default headway in <tt>ntpd</tt> is 16 s, but this can be changed using the <tt>discard average</tt> command.</p>
+		<p>If the iburst or burst options are present, the poll algorithm sends a burst of packets, instead of a single packet at each poll. The NTPv4 specification requires that bursts contain no more than eight packets; so, starting from an output counter value of zero, the maximum counter value can be no more than 128, called the output ceiling. However, if the burst starts with a counter value other than zero, there is a potential to exceed the ceiling. The poll algorithm avoids this by computing an additional interpacket delay so that the next packet sent will not exceed the ceiling. With this design the long term maximum average headway is never less than 16 s. Designs such as this are often called leaky buckets.</p>
+		<p>The <tt>ntpd</tt> input packet routine uses a special list of entries for each distinct client found. Each entry includes the IP address, input counter and time of the most recent arrival. The entries are ordered by time of arrival, most recent first. As each packet arrives, the IP source address is compared to the IP address in each entry in turn. If a match is found the entry is removed and inserted first on the list. If the IP address does not match any entry, a new entry is created and inserted first, possibly discarding the last entry on the list if it is full. Observers will note this is the same algorithm used for page replacement in virtual memory systems.</p>
+		<p>In the virtual memory algorithm the entry of interest is the last, whereas here the entry of interest is the first. The input counter is decreased by the time since it was last referenced, but not below zero. If the value of the counter plus the headway is greater than the input ceiling of 128, the packet is discarded. Otherwise, the counter is increased by the headway and the packets processed. The result is, if the client maintains a maximum average headway not less than 16 s and transmits no more than eight packets in a burst, the input counter will not exceed the input ceiling.</p>
+		<h4 id="mgt">Minimum Guard Time</h4>
+		<p>A review of past client abuse incidence shows the most frequent scenario is a broken client that attempts to send a number of packets at rates of one per second or less. There have been occasions where this abuse has persisted for days at a time. These scenarios are the most damaging, as they can threaten not only the victim server but the network infrastructure as well.</p>
+		<p>In the <tt>ntpd</tt> server design the minimum headway between the last packet received and the current packet is called the guard time. If the headway is less than the guard time, the packet is discarded. The guard time defaults to 2 s, but this can be changed using the <tt>discard minimum</tt> command.</p>
+		<h4 id="kod">The Kiss-o'-Death Packet</h4>
+		<p>As an optional feature <tt>ntpd</tt> sends a special packet called the Kiss-o'-Death (KoD) packet, when either the minimum average headway or minimum guard time is violated. The KoD is a packet with leap bits 11, stratum 0 and reference ID field other than 0. In this case the reference ID field is a four-character ASCII string, called the kiss code, showing the reason for the KoD. At present, only one kiss code, RATE, is used to tell the client to slow down. In order to make sure the client notices the KoD, the receive and transmit timestamps are set to the transmit timestamp of the client packet and all other fields left as in the client packet. Thus, even if the client ignores the KoD indication, it cannot do any useful time computations. KoDs themselves are rate limited to no more than two per second in order to deflect a flood attack.</p>
+		<p>There is some controversy about the discard and KoD provisions. The nature of the datagram service supporting NTP&nbsp;provides no way to throttle cleints other than behaving badly. Clients are strongly advised to support the KoD, but there are no legal or societal statutes requiring it. The reference implementation responds to a KoD by permanantly disabling the association, but then it should never ignite a KoD unless the <tt>discard</tt> commands are abused.</p>
+		<hr>
+		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+	</body>
+
+</html>
