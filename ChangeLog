@@ -1,3 +1,4 @@
+* ntp-keygen updates from Dave Mills.
 * refresh epoch, throttle, and leap cleanup from Dave Mills.
 * Documentation cleanup from Dave Mills.
 * [Bug 918] Only use a native md5.h if MD5Init() is available.
