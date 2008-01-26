@@ -1,3 +1,5 @@
+* [Bug 990] drop minimum time restriction for interface update interval
+
 ---
 (4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
