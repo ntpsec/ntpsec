@@ -1393,7 +1393,7 @@ ctl_putsys(
 
 	    case CS_LEAPTAB:
 		if (leap_sec > 0)
-			ctl_putuint(sys_var[CS_LEAPTAB].text,
+			ctl_putfs(sys_var[CS_LEAPTAB].text,
 			    leap_sec);
 		break;
 

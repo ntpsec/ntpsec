@@ -1,3 +1,4 @@
+* ntp_control.c: LEAPTAB is a filestamp, not an unsigned.  From Dave Mills.
 * ntp_config.c: ntp_minpoll fixes from Dave Mills.
 * ntp-keygen updates from Dave Mills.
 * refresh epoch, throttle, and leap cleanup from Dave Mills.
