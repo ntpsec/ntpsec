@@ -1,3 +1,4 @@
+* [Bug #980] Direct help to stdout
 * [Bug 959] Refclock on Windows not properly releasing recvbuffs
 * [Bug 993] Fix memory leak when fetching system messages
 * much cleanup, fixes, and changes from Dave Mills.
