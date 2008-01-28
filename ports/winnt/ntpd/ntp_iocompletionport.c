@@ -51,9 +51,6 @@ static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD, int);
 static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD, int);
 static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD, int);
 
-
-#define BUFCHECK_SECS	10
-static void	TransmitCheckThread(void *NotUsed);
 static HANDLE hHeapHandle = NULL;
 
 static HANDLE hIoCompletionPort = NULL;
@@ -296,14 +293,11 @@ uninit_io_completion_port(
 
 static int QueueIORead( struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo) {
 
-	memset(lpo, 0, sizeof(IoCompletionInfo));
-	memset(buff, 0, sizeof(recvbuf_t));
-
 	lpo->request_type = CLOCK_READ;
 	lpo->recv_buf = buff;
 
 	buff->fd = rio->fd;
-	if (!ReadFile((HANDLE) buff->fd, &buff->recv_buffer, sizeof(buff->recv_buffer), NULL, (LPOVERLAPPED) lpo)) {
+	if (!ReadFile((HANDLE) buff->fd, buff->wsabuff.buf, buff->wsabuff.len, NULL, (LPOVERLAPPED) lpo)) {
 		DWORD Result = GetLastError();
 		switch (Result) {				
 		case NO_ERROR :
@@ -332,6 +326,9 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	recvbuf_t *buff;
 	recvbuf_t *newbuff;
 	struct refclockio * rio = (struct refclockio *) i;
+	l_fp arrival_time;
+
+	get_systime(&arrival_time);
 
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
@@ -354,7 +351,7 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		 * ignore 0 bytes read due to timeout's and closure on fd
 		 */
 		if (Bytes > 0 && errstatus != WSA_OPERATION_ABORTED) {
-			get_systime(&buff->recv_time);
+			memcpy(&buff->recv_time, &arrival_time, sizeof(arrival_time));	
 			buff->recv_length = (int) Bytes;
 			buff->receiver = rio->clock_recv;
 			buff->dstadr = NULL;
@@ -492,7 +489,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	 * Make sure we have a buffer
 	 */
 	if (buff == NULL) {
-//		FreeHeap(lpo, "OnSocketRecv: Socket Closed");
 		return (1);
 	}
 

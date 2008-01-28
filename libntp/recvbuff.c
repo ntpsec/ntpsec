@@ -134,10 +134,6 @@ freerecvbuf(recvbuf_t *rb)
 	if (rb->used != 0)
 		msyslog(LOG_ERR, "******** freerecvbuff non-zero usage: %d *******", rb->used);
 	ISC_LIST_APPEND(free_recv_list, rb, link);
-#if defined SYS_WINNT
-	rb->wsabuff.len = RX_BUFF_SIZE;
-	rb->wsabuff.buf = (char *) rb->recv_buffer;
-#endif
 	free_recvbufs++;
 	UNLOCK();
 }
