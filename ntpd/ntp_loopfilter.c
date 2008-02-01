@@ -692,7 +692,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: offset %.9f jitr %.6f freq %.3f stab %.6f poll %d\n",
+		    "local_clock: offset %.9f jit %.6f freq %.3f stab %.3f poll %d\n",
 		    clock_offset, clock_jitter, drift_comp * 1e6,
 		    clock_stability * 1e6, sys_poll);
 #endif /* DEBUG */
@@ -772,9 +772,8 @@ rstclock(
 {
 #ifdef DEBUG
 	if (debug > 1)
-		printf("local_clock: mu %lu offset %.6f freq %.3f state %d poll %d count %d\n",
-		    clock_epoch, offset, drift_comp * 1e6, trans,
-		    sys_poll, tc_counter);
+		printf("local_clock: mu %lu state %d poll %d count %d\n",
+		    clock_epoch, trans, sys_poll, tc_counter);
 #endif
 	state = trans;
 	last_offset = clock_offset = offset;

@@ -668,6 +668,7 @@ record_raw_stats(
  * record_sys_stats - write system statistics to file
  *
  * file format
+ ^ day (mjd)
  * time (s past midnight)
  * time since startup (hr)
  * packets recieved
@@ -679,6 +680,7 @@ record_raw_stats(
  * bad authentication
  * declined
  * rate exceeded
+ * KoD sent
  */
 void
 record_sys_stats(void)
@@ -695,11 +697,12 @@ record_sys_stats(void)
 	now.l_ui %= 86400;
 	if (sysstats.fp != NULL) {
                 fprintf(sysstats.fp,
-		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(&now, 3), sys_stattime / 3600,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
-		    sys_badauth, sys_declined, sys_limitrejected);
+		    sys_badauth, sys_declined, sys_limitrejected,
+		    sys_kodsent);
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}

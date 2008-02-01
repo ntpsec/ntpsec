@@ -587,7 +587,7 @@ ac_flag_list
 
 access_control_flag
 	:	T_Ignore       { $$ = create_ival(RES_IGNORE); }
-        |	T_Kod          { $$ = create_ival(RES_DEMOBILIZE); }
+        |	T_Kod          { $$ = create_ival(RES_KOD); }
 	|	T_Limited      { $$ = create_ival(RES_LIMITED); }
 	|	T_Lowpriotrap  { $$ = create_ival(RES_LPTRAP); }
 	|	T_Nomodify     { $$ = create_ival(RES_NOMODIFY); }

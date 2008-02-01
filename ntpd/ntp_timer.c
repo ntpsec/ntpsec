@@ -277,7 +277,6 @@ timer(void)
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
-		kod_proto();
 #ifdef REFCLOCK
 		for (n = 0; n < NTP_HASH_SIZE; n++) {
 			for (peer = peer_hash[n]; peer != 0; peer = next_peer) {

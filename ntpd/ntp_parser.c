@@ -2585,7 +2585,7 @@ yyreduce:
 
   case 113:
 #line 590 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_DEMOBILIZE); }
+    { (yyval.VoidPtr) = create_ival(RES_KOD); }
     break;
 
   case 114:

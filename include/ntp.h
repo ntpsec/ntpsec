@@ -104,7 +104,7 @@ typedef char s_char;
  * Poll interval parameters
  */
 #define NTP_UNREACH	10	/* poll unreach threshold */
-#define	NTP_MINPOLL	4	/* log2 min poll interval (16 s) */
+#define	NTP_MINPOLL	3	/* log2 min poll interval (8 s) */
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
@@ -235,14 +235,6 @@ struct interface {
 #define TEST12		0x0800	/* peer synchronization loop */
 #define TEST13		0x1000	/* peer unreacable */
 #define	PEER_TEST_MASK	(TEST10 | TEST11 | TEST12 | TEST13)
-
-/*
- * Authentication codes
- */
-#define	AUTH_NONE	0	/* no authentication */
-#define	AUTH_OK		1	/* authentication OK */
-#define	AUTH_ERROR	2	/* authentication error */
-#define	AUTH_CRYPTO	3	/* crypto-NAK */
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -870,12 +862,12 @@ struct restrictlist6 {
 #define	RES_NOTRAP		0x100	/* mode 6/7 set trap denied */
 #define	RES_LPTRAP		0x200	/* mode 6/7 low priority trap */
 
-#define RES_DEMOBILIZE		0x400	/* send kiss of death packet */
+#define RES_KOD			0x400	/* send kiss of death packet */
 #define RES_TIMEOUT		0x800	/* timeout this entry */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |\
 				    RES_NOMODIFY | RES_NOTRAP |\
-				    RES_LPTRAP | RES_DEMOBILIZE |\
+				    RES_LPTRAP | RES_KOD |\
 				    RES_TIMEOUT)
 
 /*

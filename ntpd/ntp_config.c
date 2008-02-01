@@ -467,11 +467,11 @@ create_peer_node(
 		/* Check the kind of option being set */
 		switch(my_val->attr) {
 		    case T_Minpoll:
-			if (my_val->value.i < ntp_minpoll) {
+			if (my_val->value.i < NTP_MINPOLL) {
 				msyslog(LOG_INFO,
 					"minpoll: provided value (%d) is below minimum (%d)",
-					my_val->value.i, ntp_minpoll);
-				my_node->minpoll = ntp_minpoll;
+					my_val->value.i, NTP_MINPOLL);
+				my_node->minpoll = NTP_MINPOLL;
 			}
 			else
 				my_node->minpoll = my_val->value.i;

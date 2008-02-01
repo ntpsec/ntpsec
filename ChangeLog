@@ -1,6 +1,7 @@
-* [Bug #980] Direct help to stdout
-* [Bug 959] Refclock on Windows not properly releasing recvbuffs
-* [Bug 993] Fix memory leak when fetching system messages
+* More cleanup and changes from Dave Mills.
+* [Bug 980] Direct help to stdout.
+* [Bug 959] Refclock on Windows not properly releasing recvbuffs.
+* [Bug 993] Fix memory leak when fetching system messages.
 * much cleanup, fixes, and changes from Dave Mills.
 * ntp_control.c: LEAPTAB is a filestamp, not an unsigned.  From Dave Mills.
 * ntp_config.c: ntp_minpoll fixes from Dave Mills.

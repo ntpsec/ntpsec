@@ -174,7 +174,6 @@ extern	void	receive 	(struct recvbuf *);
 extern	void	peer_clear	(struct peer *, char *);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
-extern	void	kod_proto	(void);
 
 extern	int	leap_tai;	/* TAI at next leap */
 extern	u_long	leap_sec;	/* next scheduled leap from file */
@@ -421,6 +420,7 @@ extern u_long	sys_processed;		/* packets for this host */
 extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_limitrejected;	/* rate limit exceeded */
 extern u_long	sys_received;		/* packets received */
+extern u_long	sys_kodsent;		/* KoD sent */
 
 /* ntp_refclock.c */
 #ifdef REFCLOCK

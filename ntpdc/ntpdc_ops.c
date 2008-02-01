@@ -1630,7 +1630,7 @@ static struct resflags resflagsV3[] = {
 	{ "lptrap",	RES_LPTRAP },
 	{ "limited",	RES_LIMITED },
 	{ "version",	RES_VERSION },
-	{ "kod",	RES_DEMOBILIZE },
+	{ "kod",	RES_KOD },
 	{ "timeout",	RES_TIMEOUT },
 
 	{ "",		0 }

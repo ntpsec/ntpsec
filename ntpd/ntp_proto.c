@@ -36,11 +36,16 @@
 #define	AUTH(x, y)	((x) ? (y) == AUTH_OK : (y) == AUTH_OK || \
 			    (y) == AUTH_NONE)
 
+#define	AUTH_NONE	0	/* authentication not required */
+#define	AUTH_OK		1	/* authentication OK */
+#define	AUTH_ERROR	2	/* authenticaion error */
+#define	AUTH_CRYPTO	3	/* crypto_NAK */
+
 /*
  * traffic shaping parameters
  */
 #define	NTP_IBURST	6	/* packets in iburst */
-#define	RESP_DELAY	1	/* Autokey response delay (s) */
+#define	RESP_DELAY	1	/* refclock burst delay (s) */
 
 /*
  * System variables are declared here. Unless specified otherwise, all
@@ -66,16 +71,7 @@ struct	peer *sys_prefer;	/* prefer peer */
  * a configurable value representing the average interval between
  * packets. A packet is delayed as long as the counter is greater than
  * zero. Note this does not affect the time value computations.
- *
- * The KoD counter is initialized once each second at a designated value
- * and decrements as each KoD is sent, but not below zero. KoD packets
- * are discarded as long as the counter is zero. The default parameters
- * limit the association rate to 8 packets in 128 seconds and the KoD
- * rate to 2 packets per second.
  */
-int	sys_kod;		/* kod credit */
-int	sys_kod_rate = 2;	/* max KoD rate (pkt/s) */
-
 /*
  * Nonspecified system state variables
  */
@@ -129,6 +125,7 @@ u_long	sys_badlength;		/* bad version, length or format */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_declined;		/* packets declined */
 u_long	sys_limitrejected;	/* rate exceeded */
+u_long	sys_kodsent;		/* KoD sent */
 
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(struct peer **, int);
@@ -400,10 +397,14 @@ receive(
 		process_control(rbufp, restrict_mask);
 		return;
 	}
+	if (restrict_mask & RES_DONTSERVE) {
+		sys_restricted++;
+		return;				/* no time serve */
+	}
 	
 	/*
 	 * Version check must be after the query packets, since they
-	 * intentionally use early version.
+	 * intentionally use an early version.
 	 */
 	if (hisversion == NTP_VERSION) {
 		sys_newversion++;		/* new version */
@@ -429,18 +430,6 @@ receive(
 			return;                 /* invalid mode */
 		}
 	}
-
-	/*
-	 * If access denied or rate exceeded and no KoD, don't waste
-	 * further cycles.
-	 */
-	if (restrict_mask & RES_DONTSERVE)
-		sys_restricted++;
-	if (restrict_mask & RES_LIMITED)
-		sys_limitrejected++;
-	if (restrict_mask & (RES_DONTSERVE | RES_LIMITED) &&
-	    !(restrict_mask & RES_DEMOBILIZE))
-		return;
 
 	/*
 	 * Parse the extension field if present. We figure out whether
@@ -484,7 +473,7 @@ receive(
 #ifdef OPENSSL
 			if (!crypto_flags)
 				restrict_mask |= RES_DONTSERVE;
-#elif /* OPENSSL */
+#else /* OPENSSL */
 			restrict_mask |= RES_DONTSERVE;
 #endif /* OPENSSL */
 			authlen += temp;
@@ -677,6 +666,12 @@ receive(
 			    authlen + has_mac, is_authentic);
 #endif
 	}
+	if (restrict_mask & RES_LIMITED) {
+		sys_limitrejected++;
+		if (hismode == MODE_CLIENT && (restrict_mask & RES_KOD))
+			fast_xmit(rbufp, MODE_SERVER, skeyid, "RATE");
+		return;				/* rate exceeded */
+	}
 
 	/*
 	 * The association matching rules are implemented by a set of
@@ -699,29 +694,16 @@ receive(
 	case AM_FXMIT:
 
 		/*
-		 * The vanilla case is when this is not a multicast
-		 * interface. If a restrict bit is lit, drop the packet.
-		 * If directed, send a KoD.
-		 */
-		if (restrict_mask & RES_DONTSERVE) {
-			fast_xmit(rbufp, hismode, skeyid, "DENY");
-			return;			/* access denied */
-
-		} else if (restrict_mask & RES_LIMITED) {
-			fast_xmit(rbufp, hismode, skeyid, "RATE");
-			return;			/* rate exceeded */
-		}
-
-		/*
 		 * If authentication OK, send a server reply; otherwise,
 		 * send a crypto-NAK.
 		 */
 		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
 			if (AUTH(restrict_mask & RES_DONTTRUST,
 			   is_authentic))
-				fast_xmit(rbufp, hismode, skeyid, NULL);
+				fast_xmit(rbufp, MODE_SERVER, skeyid,
+				    NULL);
 			else if (is_authentic == AUTH_ERROR)
-				fast_xmit(rbufp, hismode, 0, NULL);
+				fast_xmit(rbufp, MODE_SERVER, 0, NULL);
 			return;			/* hooray */
 		}
 
@@ -751,7 +733,7 @@ receive(
 		 * crypto-NAK, as that would not be useful.
 		 */
 		if (AUTH(restrict_mask & RES_DONTTRUST, is_authentic))
-			fast_xmit(rbufp, hismode, skeyid, NULL);
+			fast_xmit(rbufp, MODE_SERVER, skeyid, NULL);
 		return;				/* hooray */
 
 	/*
@@ -911,7 +893,7 @@ receive(
 	case AM_NEWPASS:
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
-			fast_xmit(rbufp, hismode, 0, NULL);
+			fast_xmit(rbufp, MODE_PASSIVE, 0, NULL);
 			sys_restricted++;
 			return;			/* access denied */
 		}
@@ -933,7 +915,7 @@ receive(
 		 */
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    RES_NOPEER), is_authentic)) {
-			fast_xmit(rbufp, hismode, skeyid, NULL);
+			fast_xmit(rbufp, MODE_PASSIVE, skeyid, NULL);
 			return;			/* hooray */
 		}
 
@@ -1035,7 +1017,7 @@ receive(
 	    is_authentic)) {
 		peer->flash |= TEST5;
 		if (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE)
-			fast_xmit(rbufp, hismode, 0, NULL);
+			fast_xmit(rbufp, MODE_ACTIVE, 0, NULL);
 		sys_restricted++;
 		return;				/* access denied */
 	}
@@ -1064,7 +1046,7 @@ receive(
 			    stoa(&rbufp->recv_srcadr));
 		} else if (memcmp(&pkt->refid, "RATE", 4) == 0) {
 			peer->throttle += NTP_SHIFT * (1 <<
-			    ntp_minpoll);
+			    peer->minpoll);
 			poll_update(peer, peer->hpoll);
 			msyslog(LOG_NOTICE,
 			    "receive: server %s maximum rate exceeded",
@@ -1224,10 +1206,11 @@ process_packet(
 		peer->retry = 0;
 		if (peer->reach)
 			peer->burst = min(1 << (peer->hpoll -
-			    ntp_minpoll), NTP_SHIFT) - 1;
+			    peer->minpoll), NTP_SHIFT) - 1;
 		else
 			peer->burst = NTP_IBURST - 1;
-		peer->nextdate = current_time;
+		if (peer->burst > 0)
+			peer->nextdate = current_time;
 	}
 	poll_update(peer, peer->hpoll);
 
@@ -1336,7 +1319,7 @@ process_packet(
 	peer->t34_bytes = len;
 	p_del = fabs(t21 - t34);
 #ifdef DEBUG
-	if (debug > 1)
+	if (debug > 2)
 		printf("proto: t21 %.9lf %d t34 %.9lf %d\n", peer->t21,
 		    peer->t21_bytes, peer->t34, peer->t34_bytes);
 #endif
@@ -1619,7 +1602,7 @@ poll_update(
 	 * reference clock, otherwise 2 s.
 	 */
 	utemp = current_time + max(peer->throttle - (NTP_SHIFT - 1) *
-	    (1 << ntp_minpoll), res_min_interval);
+	    (1 << peer->minpoll), res_min_interval);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
@@ -1630,9 +1613,10 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 
+#ifdef OPENSSL
 	/*
 	 * If a burst is not in progress and a crypto response message
-	 * is pending, delay 2 s, but only if this is a new interval..
+	 * is pending, delay 2 s, but only if this is a new interval.
 	 */
 	} else if (peer->cmmd != NULL) {
 		if (peer->nextdate > current_time) {
@@ -1641,25 +1625,22 @@ poll_update(
 		} else {
 			peer->nextdate = utemp;
 		}
+#endif /* OPENSSL */
 
 	/*
-	 * The ordinary case. If a retry, start wotj minpoll; otherwise
-	 * wtart with the minimum of the host and peer intervals. In
-	 * other words, oversampling is okay but understampling is evil.
-	 * Use the maximum of this value and the headway, then increase
-	 * by the minimum interval if the average headway is greater
-	 * than 16 s. This is to reduce the average headway at the
-	 * minimum poll interval of 16 s.
+	 * The ordinary case. If a retry, start with minpoll; otherwise
+	 * start with the minimum of the host and peer poll exponents.
+	 * In other words, oversampling is okay but understampling is
+	 * evil. Use the maximum of this value and the headway. If the
+	 * average headway is greater than the headway threshold,
+	 * increase the headway by the minimum interval plus 0.25 times
+	 * the difference. This is to rapidly reduce the overshoot.
 	 */
 	} else {
 		if (peer->retry > 0)
 			hpoll = peer->minpoll;
 		else
 			hpoll = min(peer->ppoll, peer->hpoll);
-
-		next = (u_long)(0x10000 | (ntp_random() & 0x0fff)) << hpoll;
-
-printf("xxx %d, %d %d %lx\n", peer->ppoll, peer->hpoll, hpoll, next);
 		next = (u_long)((0x10000 | (ntp_random() & 0x0fff)) <<
 		    hpoll) >> 16;
 		next += peer->outdate;
@@ -1667,8 +1648,10 @@ printf("xxx %d, %d %d %lx\n", peer->ppoll, peer->hpoll, hpoll, next);
 			peer->nextdate = next;
 		else
 			peer->nextdate = utemp;
-		if (peer->throttle > (1 << ntp_minpoll))
-			peer->nextdate += res_min_interval;
+		next = peer->throttle - (1 << peer->minpoll);
+		if (next > 0)
+			peer->nextdate += res_min_interval + (next >>
+			    4);
 	}
 #ifdef DEBUG
 	if (debug > 1)
@@ -1797,12 +1780,12 @@ clock_filter(
 
 	/*
 	 * A sample consists of the offset, delay, dispersion and epoch
-	 * of arrival.The offset and delay are determined by the on-wire
-	 * protcol. The dispersion grows from the last outbound packet
-	 * to the arrival of this one increased by the sum of the peer
-	 * precision and the system precision as required by the error
-	 * budget. First, shift the new arrival into the shift register
-	 * discarding the oldest one.
+	 * of arrival. The offset and delay are determined by the on-
+	 * wire protcol. The dispersion grows from the last outbound
+	 * packet to the arrival of this one increased by the sum of the
+	 * peer precision and the system precision as required by the
+	 * error budget. First, shift the new arrival into the shift
+	 * register discarding the oldest one.
 	 */
 	j = peer->filter_nextpt;
 	peer->filter_offset[j] = sample_offset;
@@ -1813,19 +1796,15 @@ clock_filter(
 	peer->filter_nextpt = j;
 
 	/*
-	 * The filter metric design is based on the observation that
-	 * phase noise dominates at update intervals less than the Allan
-	 * intercept, while frequency noise dominates above that.
-	 * Therefore, the metric uses delay at intervals less than the
-	 * intercept and dispersion otherwise.
-	 *
 	 * Update dispersions since the last update and at the same
-	 * time initialize the distance and index lists. The distance
-	 * list uses a compound metric. If the dispersion is greater
-	 * than the maximum dispersion, clamp the distance at that
-	 * value. If the time since the last update is less than the
-	 * Allan intercept use the delay; otherwise, use the sum of the
-	 * delay and dispersion.
+	 * time initialize the distance and index lists. Since samples
+	 * become increasingly uncorrelated beyond the Allan intercept,
+	 * only under exceptional cases will an older sample be used.
+	 * Therefore, the distance list uses a compound metric. If the
+	 * dispersion is greater than the maximum dispersion, clamp the
+	 * distance at that value. If the time since the last update is
+	 * less than the Allan intercept use the delay; otherwise, use
+	 * the sum of the delay and dispersion.
 	 */
 	dtemp = clock_phi * (current_time - peer->update);
 	peer->update = current_time;
@@ -1868,9 +1847,11 @@ clock_filter(
 	/*
 	 * Copy the index list to the association structure so ntpq
 	 * can see it later. Prune the distance list to leave only
-	 * samples less than the maximum dispersion and, of the
-	 * remainder, only samples less than the maximum distance, but
-	 * keep at least two samples for jitter calculation.
+	 * samples less than the maximum dispersion, which disfavors
+	 * uncorrelated samples older than the Allan intercept. To
+	 * further improve the jitter estimate, of the remainder leave
+	 * only samples less than the maximum distance, but keep at
+	 * least two samples for jitter calculation.
 	 */
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
@@ -1934,10 +1915,10 @@ clock_filter(
 	}
 
 	/*
-	 * A new sample is useful only if it is later than the last
-	 * one used. In this design the maximum lifetime of any sample
-	 * is not greater than eight times the poll interval and the
-	 * interval between minimum samples is not greater than eight
+	 * A new minimum sample is useful only if it is later than the
+	 * last one used. In this design the maximum lifetime of any
+	 * sample is not greater than eight times the poll interval, so
+	 * the maximum interval between minimum samples is eight
 	 * packets.
 	 */
 	if (peer->filter_epoch[k] > peer->epoch)
@@ -2332,7 +2313,7 @@ clock_select(void)
 #ifdef DEBUG
 		if (debug > 2)
 			printf(
-			    "select: drop %s select %.6f jitter %.6f\n",
+			    "select: drop %s seljit %.6f jit %.6f\n",
 			    ntoa(&peer_list[k]->srcadr), g, d);
 #endif
 		for (j = k + 1; j < nlist; j++) {
@@ -2382,7 +2363,7 @@ clock_select(void)
 			sys_pps = peer;
 #endif /* REFCLOCK */
 #if DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("cluster: survivor %s metric %.6f\n",
 			    ntoa(&peer_list[i]->srcadr), synch[i]);
 #endif
@@ -2415,7 +2396,7 @@ clock_select(void)
 		sys_refid = addr2refid(&sys_peer->srcadr);
 		sys_jitter = LOGTOD(sys_precision);
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("select: orphan offset %.6f\n",
 			    sys_offset);
 #endif
@@ -2435,7 +2416,7 @@ clock_select(void)
 				    "pps sync enabled");
 			pps_control = current_time;
 #ifdef DEBUG
-			if (debug > 1)
+			if (debug > 2)
 				printf("select: pps offset %.6f\n",
 				    sys_offset);
 #endif
@@ -2444,7 +2425,7 @@ clock_select(void)
 			sys_peer->status = CTL_PST_SEL_SYSPEER;
 			sys_offset = sys_peer->offset;
 #ifdef DEBUG
-			if (debug > 1)
+			if (debug > 2)
 				printf("select: prefer offset %.6f\n",
 				    sys_offset);
 #endif
@@ -2471,7 +2452,7 @@ clock_select(void)
 		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
 		    SQUARE(sys_jitter) + SQUARE(seljitter));
 #ifdef DEBUG
-		if (debug > 1)
+		if (debug > 2)
 			printf("select: combine offset %.6f\n",
 			    sys_offset);
 #endif
@@ -2603,7 +2584,7 @@ peer_xmit(
 		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
-		peer->throttle += 1 << ntp_minpoll;
+		peer->throttle += 1 << peer->minpoll;
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %d\n",
@@ -2901,7 +2882,7 @@ peer_xmit(
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
-	peer->throttle += 1 << ntp_minpoll;
+	peer->throttle += 1 << peer->minpoll;
 
 	/*
 	 * Calculate the encryption delay. Keep the minimum over
@@ -2943,7 +2924,7 @@ peer_xmit(
 static void
 fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
-	int	rmode,		/* receive mode */
+	int	xmode,		/* receive mode */
 	keyid_t	xkeyid,		/* transmit key ID */
 	char	*mask		/* kiss code */
 	)
@@ -2952,7 +2933,6 @@ fast_xmit(
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp	xmt_ts;		/* timestamp */
 	l_fp	xmt_tx;		/* timestamp after authent */
-	int	xmode;		/* transmit mode */
 	int	sendlen, authlen;
 #ifdef OPENSSL
 	u_int32	temp32;
@@ -2967,10 +2947,6 @@ fast_xmit(
 	rpkt = &rbufp->recv_pkt;
 	if (rbufp->dstadr->flags & INT_MCASTOPEN)
 		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
-	if (rmode == MODE_CLIENT)
-		xmode = MODE_SERVER;
-	else
-		xmode = MODE_ACTIVE;
 
 	/*
 	 * If this is a kiss-o'-death (KoD) packet, show leap
@@ -2983,10 +2959,7 @@ fast_xmit(
 	 * synchronization.
 	 */
 	if (mask != NULL) {
-		if (sys_kod == 0)
-			return;
-
-		sys_kod--;
+		sys_kodsent++;
 		xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
@@ -3251,16 +3224,6 @@ default_get_precision(void)
 	if (tick - 1. > 1. - tick / 2)
 		i--;
 	return (-i);
-}
-
-
-/*
- * kod_proto - called once per second to limit kiss-of-death packets
- */
-void
-kod_proto(void)
-{
-	sys_kod = sys_kod_rate;
 }
 
 

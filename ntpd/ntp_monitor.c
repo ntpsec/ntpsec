@@ -84,7 +84,7 @@ static	int mon_mem_increments;		/* times called malloc() */
  * packet will be discarded if the interval betweem packets is less than
  * 1 s, as well as when the average interval is less than 16 s. 
  */
-int	ntp_minpoll = NTP_MINPOLL;	/* avg interpkt interval */
+int	ntp_minpoll = NTP_MINPOLL + 1;	/* avg interpkt interval */
 int	res_min_interval = 1 << NTP_MINPKT; /* min interpkt interval */
 
 /*
@@ -231,7 +231,7 @@ ntp_monitor(
 	mode = PKT_MODE(pkt->li_vn_mode);
 	md = mon_hash[hash];
 	while (md != NULL) {
-		int	leak;
+		int	leak, limit;
 
 		/*
 		 * Match address only to conserve MRU size.
@@ -269,15 +269,20 @@ ntp_monitor(
 			if (md->leak < 0)
 				md->leak = 0;
 			leak = md->leak + (1 << ntp_minpoll);
+			limit = NTP_SHIFT * (1 << ntp_minpoll) + 2;
 #ifdef DEBUG
 			if (debug > 1)
-				printf("restrict: interval %d headway %d\n",
-				    interval, leak);
+				printf("restrict: interval %d headway %d limit %d\n",
+				    interval, leak, limit);
 #endif
 			if (interval >= res_min_interval - 1 && leak <
-			    NTP_SHIFT * (1 << ntp_minpoll) + 2) {
+			    limit) {
 				md->leak = leak;
-				md->flags &= ~RES_LIMITED;
+				md->flags &= ~(RES_LIMITED | RES_KOD);
+			} else if (md->leak < limit) {
+				md->leak = limit + (1 << ntp_minpoll);
+			} else {
+				md->flags &= ~RES_KOD;
 			}
 			return (md->flags);
 		}
