@@ -1383,7 +1383,7 @@ gen_mvkey(
 	DSA	*dsa, *dsa2, *sdsa; /* DSA parameters */
 	BN_CTX	*ctx;		/* BN working space */
 	BIGNUM	*a[MVMAX];	/* polynomial coefficient vector */
-	BIGNUM	*g[MVMAX];;	/* public key vector */
+	BIGNUM	*g[MVMAX];	/* public key vector */
 	BIGNUM	*s1[MVMAX];	/* private enabling keys */
 	BIGNUM	*x[MVMAX];	/* polynomial zeros vector */
 	BIGNUM	*xbar[MVMAX], *xhat[MVMAX]; /* private keys vector */

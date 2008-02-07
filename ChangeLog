@@ -1,3 +1,4 @@
+* [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 * [Bug 959] Refclock on Windows not properly releasing recvbuffs.
