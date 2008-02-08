@@ -12,7 +12,7 @@
 		<h3>Miscellaneous Options</h3>
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">22:42</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="290">Sunday, December 16, 2007</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">19:43</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="296">Saturday, February 02, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
@@ -20,8 +20,7 @@
 		<dl>
 			<dt><tt>broadcastdelay <i>seconds</i></tt>
 			<dd>The broadcast and multicast modes require a special calibration to determine the network delay between the local and remote servers. Ordinarily, this is done automatically by the initial protocol exchanges between the client and server. In some cases, the calibration procedure may fail due to network or server access controls, for example. This command specifies the default delay to be used under these circumstances. Typically (for Ethernet), a number between 0.003 and 0.007 seconds is appropriate. The default when this command is not used is 0.004 seconds.
-			<dt><tt>calldelay <i>delay</i></tt>
-			<dd>This option controls the delay in seconds between the first and second packets sent in burst or iburst mode to allow additional time for a modem or ISDN call to complete.
+			
 			<dt><tt>driftfile <i>driftfile</i> { <i>tolerance</i> ]</tt>
 			<dd>This command specifies the complete path and name of the file used to record the frequency of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency and then updated once per hour with the current frequency computed by the daemon. If the file name is specified, but the file itself does not exist, the starts with an initial frequency of zero and creates the file when writing it for the first time. If this command is not given, the daemon will always start with an initial frequency of zero.
 				<p>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</p>
@@ -50,6 +49,10 @@
 				</dl>
 			<dt><tt>includefile <i>includefile</i></tt>
 			<dd>This command allows additional configuration commands to be included from a separate file. Include files may be nested to a depth of five; upon reaching the end of any include file, command processing resumes in the previous configuration file. This option is useful for sites that run <tt>ntpd</tt> on multiple hosts, with (mostly) common options (e.g., a restriction list).
+			<dt><tt>leapfile <i>leapfile</i></tt>
+			<dd>This command loads the NIST&nbsp;leapseconds file and initializes the leapsecond values for the next leapsecond time, expiration time and TAI offset. The file can be obtained directly from NIST national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.
+				<p>While not strictly a security function, the Autokey protocol provides means to securely retrieve the current or updated leapsecond values from a server.</p>
+			
 			<dt><tt>logconfig <i>configkeyword</i></tt>
 			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).
 				<p>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class. By default, <tt>logconfig</tt> output is set to <tt>allsync</tt>.
@@ -125,13 +128,7 @@
 			<dt><tt>ttl <i>hop</i> ...</tt>
 			<dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.
 		</dl>
-		<h4>Files</h4>
-		<tt>ntp.drift</tt> frequency
-		<h4 id="leap">Leapseconds File</h4>
-		<p>The NIST provides a file documenting the epoch for all historic occasions of leap second insertion since 1972. The leapsecond table shows each epoch of insertion along with the offset of International Atomic Time (TAI) with respect to Coordinated Universal Time (UTC), as disseminated by NTP. The table can be obtained directly from NIST national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.</p>
-		<p>While not strictly a security function, the Autokey protocol provides means to securely retrieve the leapsecond table from a server or peer. Servers load the leapsecond table directly from the file specified in the <tt>crypto</tt> command, with default <tt>ntpkey_leap</tt>, while clients can obtain the table indirectly from the servers using the Autokey protocol. Once loaded, the table can be provided on request to other clients and servers.</p>
-		<p>As explained in the <a href="authopt.html">Authentication Options</a> page, all cryptographically sound key generation schemes must have means to randomize the entropy seed used to initialize the internal random number generator. The OpenSSL library uses a designated random seed file for this purpose. The file must be available when starting the NTP daemon and the <tt>ntp-keygen</tt> program. If a site supports OpenSSL or its companion OpenSSH, it is very likely that means to do this are already available.</p>
-		<p> compensation (PPM)</p>
+
 		<hr>
 		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 	</body>

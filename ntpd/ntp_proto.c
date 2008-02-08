@@ -121,7 +121,7 @@ u_long	sys_newversion;		/* current version */
 u_long	sys_oldversion;		/* old version */
 
 u_long	sys_restricted;		/* access denied */
-u_long	sys_badlength;		/* bad version, length or format */
+u_long	sys_badlength;		/* bad length or format */
 u_long	sys_badauth;		/* bad authentication */
 u_long	sys_declined;		/* packets declined */
 u_long	sys_limitrejected;	/* rate exceeded */
@@ -329,41 +329,35 @@ receive(
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
 	int	is_authentic = 0;	/* cryptosum ok */
-	keyid_t	skeyid = 0;		/* key ID */
+	int	retcode = AM_NOMATCH;	/* match code */
+	keyid_t	skeyid = 0;		/* key IDs */
 	struct sockaddr_storage *dstadr_sin; /* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef OPENSSL
-	keyid_t tkeyid = 0;		/* temporary key ID */
-	keyid_t	pkeyid = 0;		/* previous key ID */
 	struct autokey *ap;		/* autokey structure pointer */
 	int	rval;			/* cookie snatcher */
+	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
 #endif /* OPENSSL */
-	int retcode = AM_NOMATCH;
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
 	 * length for control and private mode packets must be checked
-	 * by the service routines. Note that no statistics counters are
-	 * recorded for restrict violations, since these counters are in
-	 * the restriction routine. Note the careful distinctions here
-	 * between a packet with a format error and a packet that is
-	 * simply discarded without prejudice. Some restrictions have to
-	 * be handled later in order to generate a kiss-o'-death packet.
+	 * by the service routines. Some restrictions have to be handled
+	 * later in order to generate a kiss-o'-death packet.
 	 */
 	/*
 	 * Bogus port check is before anything, since it probably
 	 * reveals a clogging attack.
 	 */
 	sys_received++;
-	if (SRCPORT(&rbufp->recv_srcadr) == 0) {
+	if (SRCPORT(&rbufp->recv_srcadr) < NTP_PORT) {
 		sys_badlength++;
 		return;				/* bogus port */
 	}
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
-	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 #ifdef DEBUG
 	if (debug > 1)
 		printf("receive: at %ld %s<-%s flags %x restrict %03x\n",
@@ -465,17 +459,6 @@ receive(
 				sys_badlength++;
 				return;		/* bad length */
 			}
-
-			/*
-			 * Extension fields are illegal if Autokey is
-			 * not configured.
-			 */
-#ifdef OPENSSL
-			if (!crypto_flags)
-				restrict_mask |= RES_DONTSERVE;
-#else /* OPENSSL */
-			restrict_mask |= RES_DONTSERVE;
-#endif /* OPENSSL */
 			authlen += temp;
 			has_mac -= temp;
 		} else {
@@ -483,9 +466,32 @@ receive(
 			return;			/* bad length */
 		}
 	}
-#ifdef OPENSSL
-	pkeyid = tkeyid = 0;
-#endif /* OPENSSL */
+
+	/*
+	 * Update the MRU list and finger the cloggers. We do this in
+	 * all cases mainly as a profiling tool. It can be a little
+	 * expensive, so turn it off for production use. Note that we
+	 * don't do this for control and monitoring packets, as they are
+	 * not rate controlled. Note that if RES_DONTTRUST is lit,
+	 * packets without a MAC are discarded.
+	 */
+	restrict_mask = ntp_monitor(rbufp, restrict_mask);
+	if (restrict_mask & RES_DONTTRUST && has_mac == 0) {
+		sys_restricted++;
+		return;				/* access denied */
+	}
+	if (restrict_mask & RES_LIMITED) {
+		sys_limitrejected++;
+		if (!(restrict_mask & RES_KOD) || hismode ==
+		    MODE_BROADCAST)
+			return;			/* rate exceeded */
+
+		if (hismode == MODE_CLIENT)
+			fast_xmit(rbufp, MODE_SERVER, skeyid, "RATE");
+		else
+			fast_xmit(rbufp, MODE_ACTIVE, skeyid, "RATE");
+		return;				/* rate exceeded */
+	}
 
 	/*
 	 * We have tossed out as many buggy packets as possible early in
@@ -665,12 +671,6 @@ receive(
 			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
-	}
-	if (restrict_mask & RES_LIMITED) {
-		sys_limitrejected++;
-		if (hismode == MODE_CLIENT && (restrict_mask & RES_KOD))
-			fast_xmit(rbufp, MODE_SERVER, skeyid, "RATE");
-		return;				/* rate exceeded */
 	}
 
 	/*
@@ -893,7 +893,6 @@ receive(
 	case AM_NEWPASS:
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
-			fast_xmit(rbufp, MODE_PASSIVE, 0, NULL);
 			sys_restricted++;
 			return;			/* access denied */
 		}
@@ -981,7 +980,6 @@ receive(
 	} else if (hismode != MODE_BROADCAST) {
 		if (L_ISZERO(&p_org)) {
 			peer->flash |= TEST3;	/* protocol unsynch */
-			peer->seldisptoolarge++;
 		} else if (!L_ISEQU(&p_org, &peer->xmt)) {
 			peer->flash |= TEST2;	/* bogus packet */
 			peer->bogusorg++;
@@ -994,7 +992,7 @@ receive(
 	 */
 	if (peer->hmode == MODE_CLIENT && (peer->flash &
 	     PKT_TEST_MASK)) {
-		return;
+		return;				/* broken packet */
 
 	/*
 	 * If this is a crypto_NAK and the flashers are dark, the server
@@ -1016,6 +1014,7 @@ receive(
 	} else if (!AUTH(has_mac || (restrict_mask & RES_DONTTRUST),
 	    is_authentic)) {
 		peer->flash |= TEST5;
+		peer->badauth++;
 		if (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE)
 			fast_xmit(rbufp, MODE_ACTIVE, 0, NULL);
 		sys_restricted++;
@@ -1032,26 +1031,27 @@ receive(
 		return;				/* Davy Jones */
 
 	/*
-	 * Test for kiss-o'death packet. We carefully avoid a hazard
+	 * Test for kiss-o'-death packets. We carefully avoid a hazard
 	 * when the client has restarted the association after a kiss by
 	 * upping the throttle to the max.
 	 */
 	if (hismode == MODE_SERVER && hisleap == LEAP_NOTINSYNC &&
 	    hisstratum == STRATUM_UNSPEC) {
-		if (memcmp(&pkt->refid, "DENY", 4) == 0) {
-			peer_clear(peer, "DENY");
-			peer->flash |= TEST4;
-			msyslog(LOG_NOTICE,
-			    "receive: server %s access denied",
-			    stoa(&rbufp->recv_srcadr));
-		} else if (memcmp(&pkt->refid, "RATE", 4) == 0) {
+		peer->selbroken++;
+		if (memcmp(&pkt->refid, "RATE", 4) == 0) {
 			peer->throttle += NTP_SHIFT * (1 <<
 			    peer->minpoll);
 			poll_update(peer, peer->hpoll);
 			msyslog(LOG_NOTICE,
 			    "receive: server %s maximum rate exceeded",
 			    stoa(&rbufp->recv_srcadr));
+		} else if (memcmp(&pkt->refid, "DENY", 4) == 0) {
+			peer->flash |= TEST4;
+			msyslog(LOG_NOTICE,
+			    "receive: server %s access denied",
+			    stoa(&rbufp->recv_srcadr));
 		}
+		return;				/* kiss-o'-death */
 	}
 
 	/*
@@ -1130,7 +1130,7 @@ receive(
 		 * values.
 		 */
 		if (current_time > peer->refresh) {
-			peer_clear(peer, "CRYP");
+			peer_clear(peer, "TIME");
 			return;
 		}
 	}
@@ -1233,6 +1233,7 @@ process_packet(
 	 * receive() routine.
 	 */
 	if (peer->flash & PKT_TEST_MASK) {
+		peer->seldisptoolarge++;
 #ifdef DEBUG
 		if (debug)
 			printf("packet: flash header %04x\n",
@@ -1648,9 +1649,9 @@ poll_update(
 			peer->nextdate = next;
 		else
 			peer->nextdate = utemp;
-		next = peer->throttle - (1 << peer->minpoll);
-		if (next > 0)
-			peer->nextdate += res_min_interval + (next >>
+		hpoll = peer->throttle - (1 << peer->minpoll);
+		if (hpoll > 0)
+			peer->nextdate += res_min_interval + (hpoll >>
 			    4);
 	}
 #ifdef DEBUG
@@ -2865,6 +2866,7 @@ peer_xmit(
 	if (authlen == 0) {
 		msyslog(LOG_NOTICE, "transmit: %s key %u not found",
 		    stoa(&peer->srcadr), xkeyid);
+		peer_clear(peer, "CRYP");
 		peer->flash |= TEST9;		/* no key found */
 		return;
 	}

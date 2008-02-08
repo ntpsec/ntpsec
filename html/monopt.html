@@ -13,7 +13,7 @@
 		<h3>Monitoring Options</h3>
 		<img src="pic/pogo8.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>The pig watches the logs.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">19:44</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="256">Friday, January 11, 2008</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">22:27</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="267">Friday, February 01, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
@@ -100,7 +100,7 @@
 						</table>
 					<p>The <tt><i>message</i></tt> field includes the last timecode received in decoded ASCII format, where meaningful. In some cases a good deal of additional information is displayed. See information specific to each reference clock for further details.</p>
 					<dt><tt>cryptostats</tt>
-					<dd>Record significant events in the Autokey protocol. This option requires the OpenSSL cryptographic software library. Each event of the protocol module appends one line to the <tt>cryptostats</tt> file set:<dd><tt>49213 525.624 127.127.4.1 <i>message</i></tt>
+					<dd>Record significant events in the Autokey protocol. This option requires the OpenSSL cryptographic software library. Each event of the protocol module appends one line to the <tt>cryptostats</tt> file set:<dd><tt>49213 525.624 128.4.1.1 <i>message</i></tt>
 					<dd>
 						<table width="100%" border="1" cellspacing="2" cellpadding="0">
 							<tr>
@@ -119,7 +119,7 @@
 								<td>time past midnight</td>
 							</tr>
 							<tr>
-								<td><tt>127.127.4.1</tt></td>
+								<td><tt>128.4.1.1</tt></td>
 								<td>IP</td>
 								<td>source address</td>
 							</tr>
@@ -131,7 +131,7 @@
 						</table>
 					<p>The <tt><i>message</i></tt> field includes the message type and certain ancillary information. See the <a href="authopt.html">Authentication Options</a> page for further information.</p>
 					<dt><tt>loopstats</tt>
-					<dd>Record clock disiplilne loop statistics. Each system clock update appends one line to the <tt>loopstats</tt> file set:<dd><tt>50935 75440.031 0.000006019 13.778190 0.000351733 0.0133806	6</tt>
+					<dd>Record clock disiplilne loop statistics. Each system clock update appends one line to the <tt>loopstats</tt> file set:<dd><tt>50935 75440.031 0.000006019 13.778 0.000351733 0.013380 6</tt>
 					<dd>
 						<table width="100%" border="1" cellspacing="2" cellpadding="0">
 							<tr>
@@ -155,7 +155,7 @@
 								<td>clock offset</td>
 							</tr>
 							<tr>
-								<td><tt>13.778190</tt></td>
+								<td><tt>13.778</tt></td>
 								<td>PPM</td>
 								<td>frequency offset</td>
 							</tr>
@@ -165,7 +165,7 @@
 								<td>RMS jitter</td>
 							</tr>
 							<tr>
-								<td><tt>0.0133806</tt></td>
+								<td><tt>0.013380</tt></td>
 								<td>PPM</td>
 								<td>RMS&nbsp;wander</td>
 							</tr>
@@ -263,21 +263,26 @@
 							<tr>
 								<td><tt>3102453281.584327000</tt></td>
 								<td>NTP&nbsp;s</td>
-								<td>receive timestamp</td>
+								<td>originate timestamp</td>
 							</tr>
 							<tr>
 								<td><tt>3102453281.586228000</tt></td>
 								<td>NTP s</td>
-								<td>transmit timestamp</td>
+								<td>receive timestamp</td>
 							</tr>
 							<tr>
 								<td><tt>3102453332.540806000 </tt></td>
 								<td>NTP s</td>
-								<td>destination timestamp</td>
+								<td>transmit timestamp</td>
 							</tr>
-						</table>
+					<tr>
+						<td><tt>3102453332.541458000</tt></td>
+						<td>NTP&nbsp;s</td>
+						<td>destination timestamp</td>
+					</tr>
+				</table>
 					<dt><tt>sysstats</tt>
-					<dd>Record system statistics. Each hour one line is appended to the <tt>sysstats</tt> file set in the following format:<dd><tt>50928 2132.543 36000 81965 0 9546 56 512 540 10 147</tt>
+					<dd>Record system statistics. Each hour one line is appended to the <tt>sysstats</tt> file set in the following format:<dd><tt>50928 2132.543 36 81965 0 9546 56 512 540 10 147 1</tt>
 					<dd>
 						<table width="100%" border="1" cellspacing="2" cellpadding="0">
 							<tr>
@@ -296,19 +301,19 @@
 								<td>time past midnight</td>
 							</tr>
 							<tr>
-								<td><tt>36000</tt></td>
-								<td>s</td>
+								<td><tt>36</tt></td>
+								<td>h</td>
 								<td>time since restart</td>
 							</tr>
 							<tr>
 								<td><tt>81965</tt></td>
 								<td>#</td>
-								<td>packets received last hour</td>
+								<td>total packets received last hour</td>
 							</tr>
 							<tr>
 								<td><tt>0</tt></td>
 								<td>#</td>
-								<td>server packets received last hour</td>
+								<td>packets received for this host last hour</td>
 							</tr>
 							<tr>
 								<td><tt>9546</tt></td>
@@ -340,7 +345,12 @@
 								<td>#</td>
 								<td>rate exceeded packets last hour</td>
 							</tr>
-						</table>
+					<tr>
+						<td><tt>1</tt></td>
+						<td>#</td>
+						<td>kiss-o'-death packets sent last hour</td>
+					</tr>
+				</table>
 					<dt><tt>timingstats</tt>
 					<dd>(Only available when the deamon is compiled with process time debugging support (--enable-debug-timing - costs performance). Record processing time statistics for various selected code paths.<dd><tt>53876 36.920 10.0.3.5 1 0.000014592 input processing delay</tt>
 					<dd>

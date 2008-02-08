@@ -885,7 +885,6 @@ loop_config(
 		pll_control = 1;
 		memset(&ntv, 0, sizeof(ntv));
 		ntv.modes = MOD_BITS | MOD_FREQUENCY;
-		ntv.status = STA_PLL;
 		ntv.maxerror = MAXDISPERSE;
 		ntv.esterror = MAXDISPERSE;
 #ifdef SIGSYS
