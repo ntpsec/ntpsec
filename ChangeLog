@@ -1,6 +1,7 @@
 * [Bug 1000] allow implicit receive buffer allocation for Windows
 	     fixes startup for windows systems with many interfaces
 	     reduces dropped packets on network bursts
+	     additionally fix timer() starvation during high load
 ---
 (4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
