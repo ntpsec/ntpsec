@@ -210,7 +210,7 @@ get_full_recv_buffer(void)
 	 * (Bug 889)
 	 */
 	rbuf = ISC_LIST_HEAD(free_recv_list);
-	if (rbuf == NULL) {
+	if (rbuf == NULL || buffer_shortfall > 0) {
 		/*
 		 * try to get us some more buffers
 		 */
