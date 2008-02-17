@@ -85,13 +85,6 @@ create_buffers(int nbufs)
 	buffer_shortfall = 0;
 
 	bufp = (recvbuf_t *) emalloc(abuf*sizeof(recvbuf_t));
-	/*
-	 * If no memory available, Bail
-	 */
-	if (bufp == NULL)
-	{
-		msyslog(LOG_ERR, "no more memory for receive buffers");
-	}
 
 	for (i = 0; i < abuf; i++)
 	{
@@ -183,17 +176,19 @@ get_free_recv_buffer(void)
 	return (buffer);
 }
 
+#ifdef HAVE_IO_COMPLETION_PORT
 recvbuf_t *
 get_free_recv_buffer_alloc(void)
 {
 	recvbuf_t * buffer = get_free_recv_buffer();
-	if (buffer != NULL)
+	if (buffer == NULL)
 	{
 		create_buffers(RECV_INC);
 		buffer = get_free_recv_buffer();
 	}
 	return (buffer);
 }
+#endif
 
 recvbuf_t *
 get_full_recv_buffer(void)
@@ -201,6 +196,7 @@ get_full_recv_buffer(void)
 	recvbuf_t *rbuf;
 	LOCK();
 	
+#ifdef HAVE_SIGNALED_IO
 	/*
 	 * make sure there are free buffers when we
 	 * wander off to do lengthy paket processing with
@@ -216,6 +212,7 @@ get_full_recv_buffer(void)
 		 */
 		create_buffers(RECV_INC);
 	}
+#endif
 
 	/*
 	 * try to grab a full buffer
