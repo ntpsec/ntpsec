@@ -479,7 +479,7 @@ init_io(void)
 #ifdef SYS_WINNT
 	if (!Win32InitSockets())
 	{
-netsyslog(LOG_ERR, "No useable winsock.dll: %m");
+		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
 		exit(1);
 	}
 	init_transmitbuff();
