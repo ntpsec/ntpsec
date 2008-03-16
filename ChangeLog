@@ -1,3 +1,6 @@
+* [Bug 957] Windows only: Let command line parameters from the Windows SCM GUI
+  override the standard parameters from the ImagePath registry key.
+
 ---
 (4.2.4p4) Released by Harlan Stenn <stenn@ntp.org>
 
