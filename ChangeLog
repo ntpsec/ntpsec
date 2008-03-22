@@ -1,3 +1,4 @@
+* [Bug 977] Fix mismatching #ifdefs for builds without IPv6.
 * Update the copyright year.
 * Build system cleanup (make autogen-generated files writable).
 * [Bug 957] Windows only: Let command line parameters from the Windows SCM GUI
