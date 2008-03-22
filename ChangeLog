@@ -1,13 +1,15 @@
+* Update the copyright year.
+* Build system cleanup (make autogen-generated files writable).
 * [Bug 957] Windows only: Let command line parameters from the Windows SCM GUI
   override the standard parameters from the ImagePath registry key.
 * Fixes for ntpdate:
-* [Bug 532] nptdate timeout is too long if several servers are supplied
-* [Bug 698] timeBeginPeriod is called without timeEndPeriod in some NTP tools
-* [Bug 857] ntpdate debug mode adjusts system clock when it shouldn't
-* [Bug 908] ntpdate crashes sometimes
+* [Bug 532] nptdate timeout is too long if several servers are supplied.
+* [Bug 698] timeBeginPeriod is called without timeEndPeriod in some NTP tools.
+* [Bug 857] ntpdate debug mode adjusts system clock when it shouldn't.
+* [Bug 908] ntpdate crashes sometimes.
 * [Bug 982] ntpdate(and ntptimeset) buffer overrun if HAVE_POLL_H isn't set
-  (dup of 908)
-* [Bug 997] ntpdate buffer too small and unsafe
+  (dup of 908).
+* [Bug 997] ntpdate buffer too small and unsafe.
 * ntpdate.c: Under Windows check whether NTP port in use under same conditions
   as under other OSs.
 * ntpdate.c: Fixed some typos and indents (tabs/spaces).
