@@ -134,6 +134,8 @@ typedef unsigned int	uintptr_t;
 
 #define pid_t	int		/* PID is an int */
 #define ssize_t	int		/* ssize is an int */
+typedef __int32 int32_t;	/* define a typedef for int32_t */
+#define HAVE_INT32_T   1
 
 /*
  * Map the stream to the file number

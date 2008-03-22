@@ -1,3 +1,7 @@
+* [Bug 1000] allow implicit receive buffer allocation for Windows
+	     fixes startup for windows systems with many interfaces
+	     reduces dropped packets on network bursts
+	     additionally fix timer() starvation during high load
 * [Bug 990] drop minimum time restriction for interface update interval.
 * [Bug 977] Fix mismatching #ifdefs for builds without IPv6.
 * Update the copyright year.

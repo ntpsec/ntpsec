@@ -2451,7 +2451,11 @@ open_socket(
 /*
  * Add the socket to the completion port
  */
-	io_completion_port_add_socket(fd, interf);
+	if (io_completion_port_add_socket(fd, interf))
+	{
+		msyslog(LOG_ERR, "unable to set up io completion port - EXITING");
+		exit(1);
+	}
 #endif
 	return fd;
 }
