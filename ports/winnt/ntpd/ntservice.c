@@ -50,8 +50,17 @@ void ntservice_exit(void);
 
 void WINAPI service_main( DWORD argc, LPTSTR *argv )
 {
-  /* pass the global command line options on to the service */
-  ntpdmain( glb_argc, glb_argv );
+	if ( argc > 1 )
+	{
+		/*
+		 * Let command line parameters from the Windows SCM GUI
+		 * override the standard parameters from the ImagePath registry key.
+		 */
+		glb_argc = argc;
+		glb_argv = argv;
+	}
+
+	ntpdmain( glb_argc, glb_argv );
 }
 
 
