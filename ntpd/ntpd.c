@@ -1085,7 +1085,18 @@ getgroup:
 			rbuf = get_full_recv_buffer();
 			while (rbuf != NULL)
 			{
+				if (alarm_flag)
+				{
+					was_alarmed = 1;
+					alarm_flag = 0;
+				}
 				UNBLOCK_IO_AND_ALARM();
+
+				if (was_alarmed)
+				{	/* avoid timer starvation during lengthy I/O handling */
+					timer();
+					was_alarmed = 0;
+				}
 
 				/*
 				 * Call the data procedure to handle each received

@@ -12,7 +12,7 @@ NULL=
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
-#run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include
+#run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include --writable
 run_ag=         cd $(srcdir) && autogen
 
 SUBDIRS=
