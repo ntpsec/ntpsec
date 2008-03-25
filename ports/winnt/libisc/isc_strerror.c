@@ -17,9 +17,35 @@
 
 /* From BIND 9 lib/isc/win32/: strerror.c,v 1.5 2002/08/01 03:52:14 mayer */
 
+/*
+ * We don't need this warning message
+ */
+#pragma warning(disable: 4127) /* conditional expression is constant */
+
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <isc/list.h>
+
+
+/*
+ * Messsage list
+ */
+typedef struct msg_list msg_list_t;
+
+struct msg_list {
+	int code;
+	char *msg;
+	ISC_LINK(msg_list_t) link;
+};
+
+static ISC_LIST(msg_list_t) errormsg_list;
+
+BOOL initialized = FALSE;
+
+static CRITICAL_SECTION ErrorMsgLock;
+# define LOCK(lock)	EnterCriticalSection(lock)
+# define UNLOCK(lock)	LeaveCriticalSection(lock)
 
 /*
  * Forward declarations
@@ -32,12 +58,24 @@ char *
 GetWSAErrorMessage(int errval);
 
 static char *
-isc__NTstrerror(int err, BOOL *bfreebuf);
+isc__NTstrerror(int err);
+
+/*
+ * Initialize the error message list
+ */
+
+void
+initialize() {
+	ISC_LIST_INIT(errormsg_list);
+	InitializeCriticalSection(&ErrorMsgLock);
+	initialized = TRUE;
+}
 
 char *
 NTstrerror(int errnum) {
-	BOOL bfreebuf;
-	return (isc__NTstrerror(errnum, &bfreebuf));
+	if(!initialized)
+		initialize();
+	return (isc__NTstrerror(errnum));
 }
 /*
  * This routine needs to free up any buffer allocated by FormatMessage
@@ -47,18 +85,15 @@ NTstrerror(int errnum) {
 void
 isc__strerror(int num, char *buf, size_t size) {
 	char *msg;
-	BOOL freebuf;
 	unsigned int unum = num;
+	if(!initialized)
+		initialize();
 
-	freebuf = FALSE;
-	msg = isc__NTstrerror(num, &freebuf);
+	msg = isc__NTstrerror(num);
 	if (msg != NULL)
 		_snprintf(buf, size, "%s", msg);
 	else
 		_snprintf(buf, size, "Unknown error: %u", unum);
-	if(freebuf && msg != NULL) {
-		LocalFree(msg);
-	}
 }
 
 /*
@@ -70,6 +105,29 @@ isc__strerror(int num, char *buf, size_t size) {
 char *
 FormatError(int error) {
 	LPVOID lpMsgBuf = NULL;
+
+	msg_list_t *lmsg; 
+
+	/*
+	 * See if we already have the error code
+	 */
+
+	LOCK(&ErrorMsgLock);
+
+	lmsg = ISC_LIST_HEAD(errormsg_list);
+	while (lmsg != NULL) {
+		if (lmsg->code == error) {
+			lpMsgBuf = lmsg->msg;
+			UNLOCK(&ErrorMsgLock);
+			return (lpMsgBuf);
+		}
+		lmsg = ISC_LIST_NEXT(lmsg, link);
+	}
+
+	/*
+	 * Not found
+	 */
+
 	FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 		FORMAT_MESSAGE_FROM_SYSTEM | 
@@ -82,6 +140,13 @@ FormatError(int error) {
 		0,
 		NULL); 
 
+	if (lpMsgBuf != NULL) {
+		lmsg = malloc(sizeof(msg_list_t));
+		lmsg->code = error;
+		lmsg->msg = lpMsgBuf;
+		ISC_LIST_APPEND(errormsg_list, lmsg, link);
+	}
+	UNLOCK(&ErrorMsgLock);
 	return (lpMsgBuf);
 }
 
@@ -91,13 +156,11 @@ FormatError(int error) {
  * since those messages are not available in the system error messages.
  */
 static char *
-isc__NTstrerror(int err, BOOL *bfreebuf) {
+isc__NTstrerror(int err) {
 	char *retmsg = NULL;
 
 	/* Copy the error value first in case of other errors */	
 	DWORD errval = err; 
-
-	*bfreebuf = FALSE;
 
 	/* Get the Winsock2 error messages */
 	if (errval >= WSABASEERR && errval <= (WSABASEERR + 1015)) {
@@ -110,7 +173,6 @@ isc__NTstrerror(int err, BOOL *bfreebuf) {
 	 * try a system error message
 	 */
 	if (errval > (DWORD) _sys_nerr) {
-		*bfreebuf = TRUE;
 		return (FormatError(errval));
 	} else {
 		return (_sys_errlist[errval]);
@@ -124,14 +186,12 @@ void __cdecl
 NTperror(char *errmsg) {
 	/* Copy the error value first in case of other errors */
 	int errval = errno; 
-	BOOL bfreebuf = FALSE;
 	char *msg;
+	if(!initialized)
+		initialize();
 
-	msg = isc__NTstrerror(errval, &bfreebuf);
+	msg = isc__NTstrerror(errval);
 	fprintf(stderr, "%s: %s\n", errmsg, msg);
-	if(bfreebuf == TRUE) {
-		LocalFree(msg);
-	}
 
 }
 
