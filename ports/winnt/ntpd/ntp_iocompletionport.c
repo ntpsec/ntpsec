@@ -16,6 +16,8 @@
 #include "ntp_refclock.h"
 #include "ntp_iocompletionport.h"
 #include "transmitbuff.h"
+#include "ntp_request.h"
+#include "ntp_io.h"
 
 /*
  * Request types
@@ -49,9 +51,6 @@ static int OnSocketRecv(DWORD, IoCompletionInfo *, DWORD, int);
 static int OnIoReadComplete(DWORD, IoCompletionInfo *, DWORD, int);
 static int OnWriteComplete(DWORD, IoCompletionInfo *, DWORD, int);
 
-
-#define BUFCHECK_SECS	10
-static void	TransmitCheckThread(void *NotUsed);
 static HANDLE hHeapHandle = NULL;
 
 static HANDLE hIoCompletionPort = NULL;
@@ -294,14 +293,11 @@ uninit_io_completion_port(
 
 static int QueueIORead( struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo) {
 
-	memset(lpo, 0, sizeof(IoCompletionInfo));
-	memset(buff, 0, sizeof(recvbuf_t));
-
 	lpo->request_type = CLOCK_READ;
 	lpo->recv_buf = buff;
 
 	buff->fd = rio->fd;
-	if (!ReadFile((HANDLE) buff->fd, &buff->recv_buffer, sizeof(buff->recv_buffer), NULL, (LPOVERLAPPED) lpo)) {
+	if (!ReadFile((HANDLE) buff->fd, buff->wsabuff.buf, buff->wsabuff.len, NULL, (LPOVERLAPPED) lpo)) {
 		DWORD Result = GetLastError();
 		switch (Result) {				
 		case NO_ERROR :
@@ -330,6 +326,9 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	recvbuf_t *buff;
 	recvbuf_t *newbuff;
 	struct refclockio * rio = (struct refclockio *) i;
+	l_fp arrival_time;
+
+	get_systime(&arrival_time);
 
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
@@ -352,7 +351,7 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		 * ignore 0 bytes read due to timeout's and closure on fd
 		 */
 		if (Bytes > 0 && errstatus != WSA_OPERATION_ABORTED) {
-			get_systime(&buff->recv_time);
+			memcpy(&buff->recv_time, &arrival_time, sizeof(arrival_time));	
 			buff->recv_length = (int) Bytes;
 			buff->receiver = rio->clock_recv;
 			buff->dstadr = NULL;
@@ -470,8 +469,12 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	struct recvbuf *buff = NULL;
 	recvbuf_t *newbuff;
+	isc_boolean_t ignore_this;
+	l_fp arrival_time;
 	struct interface * inter = (struct interface *) i;
 	
+	get_systime(&arrival_time);	
+
 	/*  Convert the overlapped pointer back to a recvbuf pointer.
 	*/
 	
@@ -486,7 +489,6 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	 * Make sure we have a buffer
 	 */
 	if (buff == NULL) {
-//		FreeHeap(lpo, "OnSocketRecv: Socket Closed");
 		return (1);
 	}
 
@@ -515,17 +517,27 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	}
 	else 
 	{
+#ifdef DEBUG
+		if(debug > 3 && get_packet_mode(buff) == MODE_BROADCAST)
+			printf("****Accepting Broadcast packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
+#endif
+		ignore_this = inter->ignore_packets;
+#ifdef DEBUG
+		if (debug > 3)
+			printf(" Packet mode is %d\n", get_packet_mode(buff));
+#endif
+
 		/*
 		 * If we keep it add some info to the structure
 		 */
-		if (Bytes > 0 && inter->ignore_packets == ISC_FALSE) {
-			get_systime(&buff->recv_time);	
+		if (Bytes > 0 && ignore_this == ISC_FALSE) {
+			memcpy(&buff->recv_time, &arrival_time, sizeof(arrival_time));	
 			buff->recv_length = (int) Bytes;
 			buff->receiver = receive; 
 			buff->dstadr = inter;
 #ifdef DEBUG
-			if (debug > 3)
-  				printf("Received %d bytes in buffer %x from %s\n", Bytes, buff, stoa(&buff->recv_srcadr));
+			if (debug > 1)
+  				printf("Received %d bytes of fd %d in buffer %x from %s\n", Bytes, buff->fd, buff, stoa(&buff->recv_srcadr));
 #endif
 			add_full_recv_buffer(buff);
 			/*
