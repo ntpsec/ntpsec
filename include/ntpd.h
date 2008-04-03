@@ -283,6 +283,11 @@ extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 /* ntp_intres.c */
 extern keyid_t	req_keyid;		/* request keyid */
 extern char *	req_file;		/* name of the file with configuration info */
+#ifdef SYS_WINNT
+extern HANDLE ResolverEventHandle;
+#else
+extern int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
+#endif /* SYS_WINNT */
 
 /*
  * Other statistics of possible interest
