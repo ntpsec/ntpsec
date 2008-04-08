@@ -258,12 +258,7 @@ ntp_intres(void)
 		(void) unlink(req_file);
 
 	/*
-	 * Sleep a little to make sure the server is completely up
-	 */
-	sleep(SLEEPTIME);
-
-	/*
-	 * Set up the timers to do first try immediately.
+	 * Set up the timers to do first shot immediately.
 	 */
 	resolve_timer = 0;
 	resolve_value = MINRESOLVE;
@@ -273,6 +268,10 @@ ntp_intres(void)
 		checkparent();
 
 		if (resolve_timer == 0) {
+			/*
+			 * Sleep a little to make sure the network is completely up
+			 */
+			sleep(SLEEPTIME);
 			doconfigure(1);
 
 			/* prepare retry, in case there's more work to do */
