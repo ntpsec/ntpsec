@@ -1,4 +1,5 @@
-* [Bug 987] Wake up the resolver thread/process when a new interface has become available.
+* [Bug 987] Wake up the resolver thread/process when a new interface has
+  become available.
 * Correctly apply negative-sawtooth for oncore 12 channel receiver.
 * Startup code for original LinuxPPS removed.  LinuxPPS now conforms to
   the PPSAPI.
