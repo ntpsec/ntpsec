@@ -172,7 +172,7 @@ static  u_char          sys_interphase = 0;
 
 static  struct interface *new_interface P((struct interface *));
 static  void add_interface P((struct interface *));
-static  void update_interfaces P((u_short, interface_receiver_t, void *));
+static  int update_interfaces P((u_short, interface_receiver_t, void *));
 static  void remove_interface P((struct interface *));
 static  struct interface *create_interface P((u_short, struct interface *));
 
@@ -1051,9 +1051,25 @@ void
 interface_update(interface_receiver_t receiver, void *data)
 {
 	if (!disable_dynamic_updates) {
+		int new_interface_found;
+
 		BLOCKIO();
-		update_interfaces(htons(NTP_PORT), receiver, data);
+		new_interface_found = update_interfaces(htons(NTP_PORT), receiver, data);
 		UNBLOCKIO();
+
+		if (new_interface_found) {
+#ifdef DEBUG
+			msyslog(LOG_DEBUG, "new interface(s) found: waking up resolver");
+#endif
+#ifdef SYS_WINNT
+			/* wake up the resolver thread */
+			if (ResolverEventHandle != NULL)
+				SetEvent(ResolverEventHandle);
+#else
+			/* write any single byte to the pipe to wake up the resolver process */
+			write( resolver_pipe_fd[1], &new_interface_found, 1 );
+#endif
+		}
 	}
 }
 
@@ -1146,7 +1162,7 @@ set_wildcard_reuse(int family, int on)
  *
  */
 
-static void
+static int
 update_interfaces(
 	u_short port,
 	interface_receiver_t receiver,
@@ -1159,6 +1175,7 @@ update_interfaces(
 	isc_boolean_t scan_ipv4 = ISC_FALSE;
 	isc_boolean_t scan_ipv6 = ISC_FALSE;
 	isc_result_t result;
+	int new_interface_found = 0;
 
 	DPRINTF(3, ("update_interfaces(%d)\n", ntohs( (u_short) port)));
 
@@ -1195,7 +1212,7 @@ update_interfaces(
 	result = isc_interfaceiter_create(mctx, &iter);
 
 	if (result != ISC_R_SUCCESS)
-		return;
+		return 0;
 
 	sys_interphase ^= 0x1;	/* toggle system phase for finding untouched (to be deleted) interfaces */
 	
@@ -1298,6 +1315,8 @@ update_interfaces(
 				if (receiver)
 					receiver(data, &ifi);
 
+				new_interface_found = 1;
+
 				DPRINT_INTERFACE(3, (iface, "updating ", " new - created\n"));
 			}
 			else
@@ -1371,8 +1390,9 @@ update_interfaces(
 	 * phase 3 - re-configure as the world has changed if necessary
 	 */
 	refresh_all_peerinterfaces();
+	return new_interface_found;
 }
-		
+
 
 /*
  * create_sockets - create a socket for each interface plus a default
