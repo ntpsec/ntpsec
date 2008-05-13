@@ -38,13 +38,14 @@
  * The following bits are used by the client during the protocol
  * exchange.
  */
-#define CRYPTO_FLAG_VALID 0x0100 /* public key verified */
+#define CRYPTO_FLAG_CERT  0x0100 /* public key verified */
 #define CRYPTO_FLAG_VRFY  0x0200 /* identity verified */
 #define CRYPTO_FLAG_PROV  0x0400 /* signature verified */
-#define CRYPTO_FLAG_AGREE 0x0800 /* cookie verifed */
+#define CRYPTO_FLAG_COOK  0x0800 /* cookie verifed */
 #define CRYPTO_FLAG_AUTO  0x1000 /* autokey verified */
 #define CRYPTO_FLAG_SIGN  0x2000 /* certificate signed */
-#define CRYPTO_FLAG_LEAP  0x4000 /* leapseconds table verified */
+#define CRYPTO_FLAG_LEAP  0x4000 /* leapsecond values verified */
+#define	CRYPTO_FLAG_ALL   0x7f00 /* all mask */
 
 /*
  * Flags used for certificate management
@@ -66,7 +67,7 @@
 #define CRYPTO_CERT	CRYPTO_CMD(2) /* certificate */
 #define CRYPTO_COOK	CRYPTO_CMD(3) /* cookie value */
 #define CRYPTO_AUTO	CRYPTO_CMD(4) /* autokey values */
-#define CRYPTO_TAI	CRYPTO_CMD(5) /* leapsecond values */
+#define CRYPTO_LEAP	CRYPTO_CMD(5) /* leapsecond values */
 #define	CRYPTO_SIGN	CRYPTO_CMD(6) /* certificate sign */
 #define CRYPTO_IFF	CRYPTO_CMD(7) /* IFF identity scheme */
 #define CRYPTO_GQ	CRYPTO_CMD(8) /* GQ identity scheme */
@@ -90,20 +91,20 @@
 #define XEVNT_VFY	XEVNT_CMD(9) /* certificate not verified */
 #define XEVNT_PER	XEVNT_CMD(10) /* host certificate expired */
 #define XEVNT_CKY	XEVNT_CMD(11) /* bad or missing cookie */
-#define XEVNT_DAT	XEVNT_CMD(12) /* bad or missing leapseconds table */
+#define XEVNT_DAT	XEVNT_CMD(12) /* bad or missing leapseconds */
 #define XEVNT_CRT	XEVNT_CMD(13) /* bad or missing certificate */
 #define XEVNT_ID	XEVNT_CMD(14) /* bad or missing group key */
 #define	XEVNT_ERR	XEVNT_CMD(15) /* protocol error */
-#define	XEVNT_SRV	XEVNT_CMD(16) /* server certificate expired */
 
 /*
  * Miscellaneous crypto stuff
  */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
-#define NTP_AUTOMAX	3600	/* default max session key lifetime */
-#define KEY_REVOKE	86400	/* default key revoke timeout */
-#define NTP_MAXEXTEN	1024	/* maximum extension field size */
-#define	NTP_REFRESH	(7 * 86400) /* refresh interval */
+#define	NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define	NTP_AUTOMAX	12	/* default key list timeout (log2 s) */
+#define	KEY_REVOKE	17	/* default key revoke timeout (log2 s) */
+#define	NTP_REFRESH	19	/* default restart timeout (log2 s) */
+#define	NTP_MAXKEY	65535	/* maximum symmetric key ID */
 
 /*
  * The autokey structure holds the values used to authenticate key IDs.

@@ -13,53 +13,61 @@
 		<h3>Access Control Options</h3>
 		<img src="pic/pogo6.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>The skunk watches for intruders and sprays.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">15:56</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Wednesday, January 02, 2008</csobj></p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">18:08</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="230">Sunday, May 04, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
+		<script type="text/javascript" language="javascript" src="scripts/accopt.txt"></script>
 		<h4>Table of Contents</h4>
 		<ul>
 			<li class="inline"><a href="#acx">Access Control Support</a>
-			<li class="inline"><a href="#kiss">The Kiss-of-Death Packet</a>
 			<li class="inline"><a href="#cmd">Access Control Commands</a>
 		</ul>
 		<hr>
 		<h4 id="acx">Access Control Support</h4>
-		The<tt> ntpd</tt> daemon implements a general purpose address/mask based restriction list. The list contains address/match entries sorted first by increasing address values and and then by increasing mask values. A match occurs when the bitwise AND of the mask and the packet source address is equal to the bitwise AND of the mask and address in the list. The list is searched in order with the last match found defining the restriction flags associated with the entry.
-		<p>The restriction facility was implemented in conformance with the access policies for the original NSFnet backbone time servers. Later the facility was expanded to deflect cryptographic and clogging attacks. While this facility may be useful for keeping unwanted or broken or malicious clients from congesting innocent servers, it should not be considered an alternative to the NTP authentication facilities. Source address based restrictions are easily circumvented by a determined cracker.</p>
-		<p>Clients can be denied service because they are explicitly included in the restrict list created by the <tt>restrict</tt> command or implicitly as the result of cryptographic or rate limit violations. Cryptographic violations include certificate or identity verification failure; rate limit violations generally result from defective NTP&nbsp;implementations that send packets at abusive rates. Some violations cause denied service only for the offending packet, others cause denied service for a timed period and others cause the denied service for an indefinate period. When a client or network is denied access for an indefinate period, the only way at present to remove the restrictions is by restarting the server.</p>
-		<h4 id="kiss">The Kiss-of-Death Packet</h4>
-		<p>Ordinarily, packets denied service are simply dropped with no further action except incrementing statistics counters. Sometimes a more proactive response is needed, such as a server message that explicitly requests the client to stop sending and leave a message for the system operator. A special packet format has been created for this purpose called the &quot;kiss-o'-death&quot; (KoD) packet. KoD packets have the leap bits set unsynchronized and stratum set to zero and the reference identifier field set to a four-byte ASCII code. If the <tt>noserve</tt> or <tt>notrust</tt> flag of the matching restrict list entry is set, the code is &quot;DENY&quot;; if the <tt>limited</tt> flag is set and the rate limit is exceeded, the code is &quot;RATE&quot;. Finally, if a cryptographic violation occurs, the code is &quot;CRYP&quot;.</p>
-		<p>A client receiving a KoD performs a set of sanity checks to minimize security exposure, then updates the stratum and reference identifier peer variables, sets the access denied (TEST4) bit in the peer flash variable and sends a message to the log. As long as the TEST4 bit is set, the client will send no further packets to the server. The only way at present to recover from this condition is to restart the protocol at both the client and server. This happens automatically at the client when the association times out. It will happen at the server only if the server operator cooperates.</p>
+		The<tt> ntpd</tt> daemon implements a general purpose access control list (ACL) containing address/match entries sorted first by increasing address values and and then by increasing mask values. A match occurs when the bitwise AND of the mask and the packet source address is equal to the bitwise AND of the mask and address in the list. The list is searched in order with the last match found defining the restriction flags associated with the entry.
+		<p>An example may clarify how it works. Our campus has two class-B networks, 128.4 for the ECE&nbsp;and CIS deparements and 128.175 for the rest of campus. Subnet 128.4.1 homes critical services like class rosters and spread sheets. A suitable ACL might be</p>
+<pre>
+restrict default nopeer # deny new association
+restrict 128.175.0.0 255.255.0.0 # allow campus access
+restrict 128.4.0.0 255.255.0.0 none # allow ECE and CIS access
+restrict 128.4.1.0 255.255.255.0 notrust # require auth
+restrict time.nist.gov # allow access
+</pre>
+<p>While this facility may be useful for keeping unwanted, broken or malicious clients from congesting innocent servers, it should not be considered an alternative to the NTP authentication facilities. Source address based restrictions are easily circumvented by a determined cracker.</p>
 		<h4 id="cmd">Access Control Commands</h4>
 		<dl>
-			<dt><tt>discard [ average <i>avg</i> ][ minimum <i>min</i> ] [ monitor <i>prob</i> ]</tt>
-			<dd>Set the parameters of the <tt>limited</tt> facility which protects the server from client abuse. The <tt>average</tt> subcommand specifies the minimum average packet spacing, while the <tt>minimum</tt> subcommand specifies the minimum packet spacing. Packets that violate these minima are discarded and a kiss-o'-death packet returned if enabled. The default minimum average and minimum are 5 and 2, respectively. The monitor subcommand specifies the probability of discard for packets that overflow the rate-control window.
-			<dt><tt>restrict <i>address</i> [mask <i>mask</i>] [<i>flag</i>][...]</tt>
-			<dd>The <i><tt>address</tt></i> argument expressed in dotted-quad form is the address of a host or network. Alternatively, the <tt><i>address</i></tt> argument can be a valid host DNS&nbsp;name. The <i><tt>mask</tt></i> argument expressed in dotted-quad form defaults to <tt>255.255.255.255</tt>, meaning that the <i><tt>address</tt></i> is treated as the address of an individual host. A default entry (address <tt>0.0.0.0</tt>, mask <tt>0.0.0.0</tt>) is always included and is always the first entry in the list. Note that text string <tt>default</tt>, with no mask option, may be used to indicate the default entry.
-			<dd>In the current implementation, <i><tt>flag</tt></i> always restricts access, i.e., an entry with no flags indicates that free access to the server is to be given. The flags are not orthogonal, in that more restrictive flags will often make less restrictive ones redundant. The flags can generally be classed into two catagories, those which restrict time service and those which restrict informational queries and attempts to do run-time reconfiguration of the server. One or more of the following flags may be specified:
+			<dt id="discard"><tt>discard [ average <i>avg</i> ][ minimum <i>min</i> ] [ monitor <i>prob</i> ]</tt>
+			<dd>Set the parameters of the rate control facility which protects the server from client abuse. If the <tt>limited</tt> flag is present in the ACL, packets that violate these limits are discarded. If in addition the <tt>kod</tt> restriction is present, a kiss-o'-death packet is returned.
 				<dl>
-					<dt><tt>ignore</tt>
+				<dt><tt>average <i>avg</i></tt>
+				<dd>Sspecify the minimum average interpacket spacing (minimum average headway time) in log<sub>2</sub> s with default 3.<dt><tt>minimum <i>min</i></tt>
+				<dd>Specify the minimum interpacket spacing (guard time) in log<sub>2</sub> s with default 1.<dt><tt>monitor</tt>
+				<dd>Specify the probability of discard for packets that overflow the rate-control window. This is a performance optimization for servers with aggregate arrivals of 1000 packets per second or more.</dl>
+			
+			 
+			<dt id="restrict"><tt>restrict <i>address</i> [mask <i>mask</i>] [<i>flag</i>][...]</tt>
+			<dd>The <i><tt>address</tt></i> argument expressed in dotted-quad form is the address of a host or network. Alternatively, the <tt><i>address</i></tt> argument can be a valid host DNS&nbsp;name. The <i><tt>mask</tt></i> argument expressed in dotted-quad form defaults to <tt>255.255.255.255</tt>, meaning that the <i><tt>address</tt></i> is treated as the address of an individual host. A default entry (address <tt>0.0.0.0</tt>, mask <tt>0.0.0.0</tt>) is always included and is always the first entry in the list. Note that the text string <tt>default</tt>, with no mask option, may be used to indicate the default entry.
+			<dd>In the current implementation, <i><tt>flag</tt></i> always restricts access, i.e., an entry with no flags indicates no restrictions. The flags are not orthogonal, in that more restrictive flags will often make less restrictive ones redundant. The flags can generally be classed into two catagories, those which restrict time service and those which restrict informational queries and attempts to do run-time reconfiguration of the server. One or more of the following flags may be specified:<dl>
+					<dt><tt>frac</tt>
+					<dd>Discard received NTP packets with probability 0.1; that is, on average drop one packet in ten. This is for testing and amusement. The name comes from Bob Braden's <i>flakeway</i>, which once did a similar thing for early Internet testing.<dt><tt>ignore</tt>
 					<dd>Deny packets of all kinds, including <tt>ntpq</tt> and <tt>ntpdc</tt> queries.
 					<dt><tt>kod</tt>
-					<dd>If this flag is set when an access violation occurs, a kiss-o'-death (KoD) packet is sent. KoD packets are rate limited to no more than one per second. If another KoD packet occurs within one second after the last one, the packet is dropped
-					<dt><tt>limited</tt>
-					<dd>Deny service if the packet spacing violates the lower limits specified in the <tt>discard</tt> command. A history of clients is kept using the monitoring capability of <tt>ntpd</tt>. Thus, monitoring is always active as long as there is a restriction entry with the <tt>limited</tt> flag.
-					<dt><tt>lowpriotrap</tt>
+					<dd>Send a kiss-o'-death (KoD) packet if the <tt>limited</tt> flag is present and a packet violates the rate limits established by the <tt>discard</tt> command. KoD packets are themselves rate limited for each source address separately.  Packets that violate the rate limit are discarded.<dt><tt>limited</tt>
+					<dd>Deny time service if the packet violates the rate limits established by the <tt>discard</tt> command. This does not apply to <tt>ntpq</tt> and <tt>ntpdc</tt> queries. <dt><tt>lowpriotrap</tt>
 					<dd>Declare traps set by matching hosts to be low priority. The number of traps a server can maintain is limited (the current limit is 3). Traps are usually assigned on a first come, first served basis, with later trap requestors being denied service. This flag modifies the assignment algorithm by allowing low priority traps to be overridden by later requests for normal priority traps.
 					<dt><tt>nomodify</tt>
 					<dd>Deny <tt>ntpq</tt> and <tt>ntpdc</tt> queries which attempt to modify the state of the server (i.e., run time reconfiguration). Queries which return information are permitted.
 					<dt><tt>noquery</tt>
-					<dd>Deny <tt>ntpq</tt> and <tt>ntpdc</tt> queries. Time service is not affected.
-					<dt><tt>nopeer</tt>
+					<dd>Deny <tt>ntpq</tt> and <tt>ntpq</tt> queries. Time service is not affected.<dt><tt>nopeer</tt>
 					<dd>Deny packets which would result in mobilizing a new association. &nbsp;This includes broadcast, symmetric-active and manycast client packets when a configured association does not exist.
 					<dt><tt>noserve</tt>
 					<dd>Deny all packets except <tt>ntpq</tt> and <tt>ntpdc</tt> queries.
 					<dt><tt>notrap</tt>
 					<dd>Decline to provide mode 6 control message trap service to matching hosts. The trap service is a subsystem of the <tt>ntpdq</tt> control message protocol which is intended for use by remote event logging programs.
 					<dt><tt>notrust</tt>
-					<dd>Deny packets unless the packet is cryptographically authenticated.
-					<dt><tt>ntpport</tt>
+					<dd>Deny packets that are not cryptographically authenticated.<dt><tt>ntpport</tt>
+					<dt><tt>non-ntpport</tt>
 					<dd>This is actually a match algorithm modifier, rather than a restriction flag. Its presence causes the restriction entry to be matched only if the source port in the packet is the standard NTP UDP port (123). Both <tt>ntpport</tt> and <tt>non-ntpport</tt> may be specified. The <tt>ntpport</tt> is considered more specific and is sorted later in the list.
 					<dt><tt>version</tt>
 					<dd>Deny packets that do not match the current NTP version.

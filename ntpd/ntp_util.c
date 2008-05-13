@@ -58,7 +58,7 @@ static	char *key_file_name;		/* keys file name */
 char	*leapseconds_file_name;		/* leapseconds file name */
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
-static double wander_resid;		/* wander threshold */
+double wander_resid;			/* wander threshold */
 double	wander_threshold = 1e-7;	/* initial wander threshold */
 int	drift_file_sw;			/* clock update switch */
 
@@ -90,6 +90,7 @@ static FILEGEN loopstats;
 static FILEGEN clockstats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
+static FILEGEN protostats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -107,6 +108,7 @@ static double prev_drift_comp;		/* last frequency update */
  * Static prototypes
  */
 static int leap_file(FILE *);
+static void record_sys_stats(void);
 
 /*
  * init_util - initialize the utilities
@@ -122,6 +124,7 @@ init_util(void)
 	filegen_register(&statsdir[0], "clockstats", &clockstats);
 	filegen_register(&statsdir[0], "rawstats", &rawstats);
 	filegen_register(&statsdir[0], "sysstats", &sysstats);
+	filegen_register(&statsdir[0], "protostats", &protostats);
 #ifdef OPENSSL
 	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
 #endif /* OPENSSL */
@@ -211,7 +214,6 @@ write_stats(void)
 #endif /* VMS */
 #endif /* DOSYNCTODR */
 	record_sys_stats();
-	clock_stepcnt = 0;
 	ftemp = fabs(prev_drift_comp - drift_comp); 
 	prev_drift_comp = drift_comp;
 	if (ftemp > clock_phi)
@@ -235,7 +237,8 @@ write_stats(void)
 			    clock_stability * 1e6, wander_resid * 1e6,
 			    drift_comp * 1e6);
 #endif
- 		if (state == 4 && clock_stability > wander_resid) {
+ 		if (sys_leap != LEAP_NOTINSYNC && clock_stability >
+		    wander_resid) {
 			wander_resid = wander_threshold;
 			if ((fp = fopen(stats_temp_file, "w")) == NULL)
 			    {
@@ -459,6 +462,12 @@ stats_config(
 				sysstats.fp = NULL;
 				filegen_setup(&sysstats, now.l_ui);
 			}
+			if(protostats.prefix == &statsdir[0] &&
+			    protostats.fp != NULL) {
+				fclose(protostats.fp);
+				protostats.fp = NULL;
+				filegen_setup(&protostats, now.l_ui);
+			}
 #ifdef OPENSSL
 			if(cryptostats.prefix == &statsdir[0] &&
 			    cryptostats.fp != NULL) {
@@ -515,23 +524,23 @@ stats_config(
  * record_peer_stats - write peer statistics to file
  *
  * file format:
- * day (mjd)
+ * day (MJD)
  * time (s past UTC midnight)
- * peer (ip address)
- * peer status word (hex)
- * peer offset (s)
- * peer delay (s)
- * peer error bound (s)
- * peer error (s)
+ * IP address
+ * status word (hex)
+ * offset
+ * delay
+ * dispersion
+ * jitter
 */
 void
 record_peer_stats(
 	struct sockaddr_storage *addr,
 	int	status,
-	double	offset,
-	double	delay,
-	double	dispersion,
-	double	skew
+	double	offset,		/* offset */
+	double	delay,		/* delay */
+	double	dispersion,	/* dispersion */
+	double	jitter		/* jitter */
 	)
 {
 	l_fp	now;
@@ -548,7 +557,7 @@ record_peer_stats(
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
 		    ulfptoa(&now, 3), stoa(addr), status, offset,
-		    delay, dispersion, skew);
+		    delay, dispersion, jitter);
 		fflush(peerstats.fp);
 	}
 }
@@ -558,18 +567,20 @@ record_peer_stats(
  * record_loop_stats - write loop filter statistics to file
  *
  * file format:
- * day (mjd)
+ * day (MJD)
  * time (s past midnight)
- * offset (s)
- * frequency (approx ppm)
- * time constant (log base 2)
+ * offset
+ * frequency (PPM)
+ * jitter
+ * wnder (PPM)
+ * time constant (log2)
  */
 void
 record_loop_stats(
-	double	offset,
-	double	freq,
-	double	jitter,
-	double	stability,
+	double	offset,		/* offset */
+	double	freq,		/* frequency (PPM) */
+	double	jitter,		/* jitter */
+	double	wander,		/* wander (PPM) */
 	int spoll
 	)
 {
@@ -586,7 +597,7 @@ record_loop_stats(
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %s %.9f %.3f %.9f %.6f %d\n",
 		    day, ulfptoa(&now, 3), offset, freq * 1e6, jitter,
-		    stability * 1e6, spoll);
+		    wander * 1e6, spoll);
 		fflush(loopstats.fp);
 	}
 }
@@ -596,9 +607,9 @@ record_loop_stats(
  * record_clock_stats - write clock statistics to file
  *
  * file format:
- * day (mjd)
+ * day (MJD)
  * time (s past midnight)
- * peer (ip address)
+ * IP address
  * text message
  */
 void
@@ -629,9 +640,10 @@ record_clock_stats(
  * record_raw_stats - write raw timestamps to file
  *
  * file format
+ * day (MJD)
  * time (s past midnight)
  * peer ip address
- * local ip address
+ * IP address
  * t1 t2 t3 t4 timestamps
  */
 void
@@ -639,7 +651,7 @@ record_raw_stats(
         struct sockaddr_storage *srcadr,
         struct sockaddr_storage *dstadr,
 	l_fp	*t1,		/* originate timestamp */
-	l_fp	*t2,		/* receiver timestamp */
+	l_fp	*t2,		/* receive timestamp */
 	l_fp	*t3,		/* transmit timestamp */
 	l_fp	*t4		/* destination timestamp */
 	)
@@ -668,13 +680,13 @@ record_raw_stats(
  * record_sys_stats - write system statistics to file
  *
  * file format
- ^ day (mjd)
+ * day (MJD)
  * time (s past midnight)
- * time since startup (hr)
+ * time since reset
  * packets recieved
- * packets processed
+ * packets for this host
  * current version
- * previous version
+ * old version
  * access denied
  * bad length or format
  * bad authentication
@@ -698,13 +710,44 @@ record_sys_stats(void)
 	if (sysstats.fp != NULL) {
                 fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(&now, 3), sys_stattime / 3600,
+		    day, ulfptoa(&now, 3), sys_stattime - current_time,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
 		    sys_badauth, sys_declined, sys_limitrejected,
 		    sys_kodsent);
 		fflush(sysstats.fp);
 		proto_clr_stats();
+	}
+}
+
+
+/*
+ * record_proto_stats - write system statistics to file
+ *
+ * file format
+ * day (MJD)
+ * time (s past midnight)
+ * text message
+ */
+void
+record_proto_stats(
+	char	*str		/* text string */
+	)
+{
+	l_fp	now;
+	u_long	day;
+
+	if (!stats_control)
+		return;
+
+	get_systime(&now);
+	filegen_setup(&protostats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1900;
+	now.l_ui %= 86400;
+	if (protostats.fp != NULL) {
+		fprintf(protostats.fp, "%lu %s %s\n", day,
+		    ulfptoa(&now, 3), str);
+		fflush(protostats.fp);
 	}
 }
 
@@ -716,7 +759,7 @@ record_sys_stats(void)
  * file format:
  * day (mjd)
  * time (s past midnight)
- * peer (ip address)
+ * peer ip address
  * text message
  */
 void
@@ -737,7 +780,7 @@ record_crypto_stats(
 	now.l_ui %= 86400;
 	if (cryptostats.fp != NULL) {
 		if (addr == NULL)
-			fprintf(cryptostats.fp, "%lu %s %s\n",
+			fprintf(cryptostats.fp, "%lu %s 0.0.0.0 %s\n",
 			    day, ulfptoa(&now, 3), text);
 		else
 			fprintf(cryptostats.fp, "%lu %s %s %s\n",

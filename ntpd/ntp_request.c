@@ -788,8 +788,6 @@ peer_list_sum(
 				    ips->flags |= INFO_FLAG_CONFIG;
 				if (pp->flags & FLAG_REFCLOCK)
 				    ips->flags |= INFO_FLAG_REFCLOCK;
-				if (pp->flags & FLAG_AUTHENABLE)
-				    ips->flags |= INFO_FLAG_AUTHENABLE;
 				if (pp->flags & FLAG_PREFER)
 				    ips->flags |= INFO_FLAG_PREFER;
 				if (pp->flags & FLAG_BURST)
@@ -889,8 +887,6 @@ peer_info (
 		    ip->flags |= INFO_FLAG_CONFIG;
 		if (pp->flags & FLAG_REFCLOCK)
 		    ip->flags |= INFO_FLAG_REFCLOCK;
-		if (pp->flags & FLAG_AUTHENABLE)
-		    ip->flags |= INFO_FLAG_AUTHENABLE;
 		if (pp->flags & FLAG_PREFER)
 		    ip->flags |= INFO_FLAG_PREFER;
 		if (pp->flags & FLAG_BURST)
@@ -911,7 +907,7 @@ peer_info (
 		ip->unreach = (u_char) pp->unreach;
 		ip->flash = (u_char)pp->flash;
 		ip->flash2 = (u_short) pp->flash;
-		ip->estbdelay = HTONS_FP(DTOFP(pp->estbdelay));
+		ip->estbdelay = HTONS_FP(DTOFP(pp->delay));
 		ip->ttl = pp->ttl;
 		ip->associd = htons(pp->associd);
 		ip->rootdelay = HTONS_FP(DTOUFP(pp->rootdelay));
@@ -1031,8 +1027,6 @@ peer_stats (
 		    ip->flags |= INFO_FLAG_CONFIG;
 		if (pp->flags & FLAG_REFCLOCK)
 		    ip->flags |= INFO_FLAG_REFCLOCK;
-		if (pp->flags & FLAG_AUTHENABLE)
-		    ip->flags |= INFO_FLAG_AUTHENABLE;
 		if (pp->flags & FLAG_PREFER)
 		    ip->flags |= INFO_FLAG_PREFER;
 		if (pp->flags & FLAG_BURST)
@@ -1353,9 +1347,9 @@ do_conf(
 		    && temp_cp.hmode != MODE_CLIENT
 		    && temp_cp.hmode != MODE_BROADCAST)
 		    fl = 1;
-		if (temp_cp.flags & ~(CONF_FLAG_AUTHENABLE | CONF_FLAG_PREFER
-				  | CONF_FLAG_BURST | CONF_FLAG_IBURST | CONF_FLAG_SKEY))
-		    fl = 1;
+		if (temp_cp.flags & ~(CONF_FLAG_PREFER | CONF_FLAG_BURST |
+		    CONF_FLAG_IBURST | CONF_FLAG_SKEY))
+			fl = 1;
 		cp = (struct conf_peer *)
 		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
 	}
@@ -1377,8 +1371,6 @@ do_conf(
 		memset((char *)&peeraddr, 0, sizeof(struct sockaddr_storage));
 
 		fl = 0;
-		if (temp_cp.flags & CONF_FLAG_AUTHENABLE)
-			fl |= FLAG_AUTHENABLE;
 		if (temp_cp.flags & CONF_FLAG_PREFER)
 			fl |= FLAG_PREFER;
 		if (temp_cp.flags & CONF_FLAG_BURST)

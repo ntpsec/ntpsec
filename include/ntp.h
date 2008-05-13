@@ -220,11 +220,11 @@ struct interface {
 #define TEST2		0x0002	/* bogus packet */
 #define TEST3		0x0004	/* protocol unsynchronized */
 #define TEST4		0x0008	/* access denied */
-#define TEST5		0x0010	/* authentication error */
+#define TEST5		0x0010	/* bad authentication */
 #define TEST6		0x0020	/* bad synch or stratum */
-#define TEST7		0x0040	/* bad header data */
-#define TEST8		0x0080  /* autokey error */
-#define TEST9		0x0100	/* crypto error */
+#define TEST7		0x0040	/* bad header */
+#define TEST8		0x0080  /* bad autokey */
+#define TEST9		0x0100	/* bad crypto */
 #define	PKT_TEST_MASK	(TEST1 | TEST2 | TEST3 | TEST4 | TEST5 |\
 			TEST6 | TEST7 | TEST8 | TEST9)
 /*
@@ -287,19 +287,22 @@ struct peer {
 	 */
 	keyid_t keyid;		/* current key ID */
 #ifdef OPENSSL
-#define clear_to_zero assoc
+#define clear_to_zero opcode
+	u_int32	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
 	u_int32	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
 	const EVP_MD *digest;	/* message digest algorithm */
 	char	*subject;	/* certificate subject name */
 	char	*issuer;	/* certificate issuer name */
+	struct cert_info *xinfo; /* issuer certificate */
 	keyid_t	pkeyid;		/* previous key ID */
+	keyid_t	hcookie;	/* host cookie */
 	keyid_t	pcookie;	/* peer cookie */
 	const struct pkey_info *ident_pkey; /* identity key */
 	BIGNUM	*iffval;	/* identity challenge (IFF, GQ, MV) */
 	const BIGNUM *grpkey;	/* identity challenge key (GQ) */
-	struct value cookval;	/* cookie values */
+	struct value cookval;	/* receive cookie values */
 	struct value recval;	/* receive autokey values */
 	struct exten *cmmd;	/* extension pointer */
 	u_long	refresh;	/* next refresh epoch */
@@ -337,7 +340,6 @@ struct peer {
 	double	delay;		/* peer roundtrip delay */
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
-	double	estbdelay;	/* clock offset to broadcast server */
 
 	/*
 	 * Variables used to correct for packet length and asymmetry.
@@ -371,12 +373,12 @@ struct peer {
 
 	u_long	sent;		/* packets sent */
 	u_long	received;	/* packets received */
-	u_long	processed;	/* packets processed by the protocol */
-	u_long	badauth;	/* packets cryptosum failed */
-	u_long	bogusorg;	/* packets bogus origin */
-	u_long	oldpkt;		/* packets duplicate packet */
-	u_long	seldisptoolarge; /* packets dispersion too large */
-	u_long	selbroken;	/* not used */
+	u_long	processed;	/* packets processed */
+	u_long	badauth;	/* bad authentication (TEST5) */
+	u_long	bogusorg;	/* bogus origin (TEST2, TEST3) */
+	u_long	oldpkt;		/* old duplicate (TEST1) */
+	u_long	seldisptoolarge; /* bad header (TEST6, TEST7) */
+	u_long	selbroken;	/* KoD received */
 };
 
 /*
@@ -422,21 +424,21 @@ struct peer {
  * Values for peer.flags
  */
 #define	FLAG_CONFIG	0x0001	/* association was configured */
-#define	FLAG_AUTHENABLE	0x0002	/* authentication required */
+#define FLAG_PREEMPT	0x0002	/* preemptable association */
 #define	FLAG_AUTHENTIC	0x0004	/* last message was authentic */
-#define FLAG_SKEY	0x0008  /* autokey authentication */
-#define FLAG_MCAST	0x0010  /* multicast client mode */
-#define	FLAG_REFCLOCK	0x0020	/* this is actually a reference clock */
-#define	FLAG_SYSPEER	0x0040	/* this is one of the selected peers */
-#define FLAG_PREFER	0x0080	/* this is the preferred peer */
-#define FLAG_BURST	0x0100	/* burst mode */
-#define FLAG_IBURST	0x0200	/* initial burst mode */
-#define FLAG_NOSELECT	0x0400	/* never select */
-#define FLAG_ASSOC	0x0800	/* autokey request */
-#define FLAG_FIXPOLL	0x1000	/* stick at minpoll */
-#define FLAG_TRUE	0x2000	/* select truechimer */
-#define	FLAG_PREEMPT	0x4000	/* preemptable association */
-#define	FLAG_ASYM	0x8000	/* asymmetric delay compensation */
+#define	FLAG_REFCLOCK	0x0008	/* this is actually a reference clock */
+#define	FLAG_SYSPEER	0x0010	/* system peer */
+#define FLAG_PREFER	0x0020	/* prefer peer */
+#define FLAG_BURST	0x0040	/* burst mode */
+#define FLAG_FIXPOLL	0x0080	/* stick at minpoll */
+#define FLAG_IBURST	0x0100	/* initial burst mode */
+#define FLAG_NOSELECT	0x0200	/* never select */
+#define FLAG_TRUE	0x0400	/* force truechimer */
+#ifdef OPENSSL
+#define FLAG_SKEY	0x1000  /* autokey authentication */
+#define FLAG_ASSOC	0x2000	/* autokey request */
+#endif /* OPENSSL */
+
 /*
  * Definitions for the clear() routine.  We use memset() to clear
  * the parts of the peer structure which go to zero.  These are
@@ -670,33 +672,46 @@ struct pkt {
  * System event codes
  */
 #define	EVNT_UNSPEC	0	/* unspecified */
-#define	EVNT_SYSRESTART	1	/* system restart */
-#define	EVNT_SYSFAULT	2	/* wsystem or hardware fault */
-#define	EVNT_SYNCCHG	3	/* new leap or synch change */
-#define	EVNT_PEERSTCHG	4	/* new source or stratum */
-#define	EVNT_CLOCKRESET	5	/* clock reset */
-#define	EVNT_BADDATETIM	6	/* invalid time or date */
-#define	EVNT_CLOCKEXCPT	7	/* reference clock exception */
-
+#define	EVNT_NSET	1	/* freq not set */
+#define	EVNT_FSET	2	/* freq set */
+#define	EVNT_SPIK	3	/* spike detect */
+#define	EVNT_FREQ	4	/* freq mode */
+#define	EVNT_SYNC	5	/* clock sync */
+#define	EVNT_SYSRESTART	6	/* restart */
+#define	EVNT_SYSFAULT	7	/* panic stop */
+#define	EVNT_NOPEER	8	/* no sys peer */
+#define	EVNT_ARMED	9	/* leap armed */
+#define	EVNT_DISARMED	10	/* leap disarmed */
+#define	EVNT_LEAP	11	/* leap event */
+#define	EVNT_CLOCKRESET	12	/* clock step */
+#define	EVNT_KERN	13	/* kernel event */
 /*
  * Peer event codes
  */
-#define	EVNT_PEERIPERR	(1 | PEER_EVENT) /* IP error */
-#define	EVNT_PEERAUTH	(2 | PEER_EVENT) /* authentication failure */
-#define	EVNT_UNREACH	(3 | PEER_EVENT) /* change to unreachable */
-#define	EVNT_REACH	(4 | PEER_EVENT) /* change to reachable */
-#define	EVNT_PEERCLOCK	(5 | PEER_EVENT) /* clock exception */
+#define	PEVNT_MOBIL	(1 | PEER_EVENT) /* mobilize */
+#define	PEVNT_DEMOBIL	(2 | PEER_EVENT) /* demobilize */
+#define	PEVNT_UNREACH	(3 | PEER_EVENT) /* unreachable */
+#define	PEVNT_REACH	(4 | PEER_EVENT) /* reachable */
+#define	PEVNT_RESTART	(5 | PEER_EVENT) /* restart */
+#define	PEVNT_REPLY	(6 | PEER_EVENT) /* no reply */
+#define	PEVNT_RATE	(7 | PEER_EVENT) /* rate exceeded */
+#define	PEVNT_DENY	(8 | PEER_EVENT) /* access denied */
+#define PEVNT_ARMED	(9 | PEER_EVENT) /* leap armed */
+#define	PEVNT_NEWPEER	(10 | PEER_EVENT) /* sys peer*/
+#define	PEVNT_CLOCK	(11 | PEER_EVENT) /* clock event */
+#define	PEVNT_AUTH	(12 | PEER_EVENT) /* bad auth */
+#define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
 
 /*
  * Clock event codes
  */
 #define	CEVNT_NOMINAL	0	/* unspecified */
-#define	CEVNT_TIMEOUT	1	/* poll timeout */
-#define	CEVNT_BADREPLY	2	/* bad reply format */
-#define	CEVNT_FAULT	3	/* hardware or software fault */
-#define	CEVNT_PROP	4	/* propagation failure */
-#define	CEVNT_BADDATE	5	/* bad date format or value */
-#define	CEVNT_BADTIME	6	/* bad time format or value */
+#define	CEVNT_TIMEOUT	1	/* no reply */
+#define	CEVNT_BADREPLY	2	/* bad format */
+#define	CEVNT_FAULT	3	/* fault */
+#define	CEVNT_PROP	4	/* bad signal */
+#define	CEVNT_BADDATE	5	/* bad date */
+#define	CEVNT_BADTIME	6	/* bad time */
 #define CEVNT_MAX	CEVNT_BADTIME
 
 /*

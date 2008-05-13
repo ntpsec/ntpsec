@@ -10,6 +10,7 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"
 #include <ntp_random.h>
 #ifdef OPENSSL
 #include "openssl/rand.h"
@@ -25,7 +26,7 @@
  * NO_PEER         |   e       1       0       1       1       1
  * ACTIVE          |   e       1       1       0       0       0
  * PASSIVE         |   e       1       e       0       0       0
- * CLIENT          |   e       0       0       0       1       1
+ * CLIENT          |   e       0       0       0       1       0
  * SERVER          |   e       0       0       0       0       0
  * BCAST	   |   e       0       0       0       0       0
  * BCLIENT         |   e       0       0       0       e       1
@@ -49,7 +50,7 @@ int AM[AM_MODES][AM_MODES] = {
 
 /*P*/	{ AM_ERR, AM_PROCPKT, AM_ERR,     AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
-/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_POSSBCL},
+/*C*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_PROCPKT,  AM_NOMATCH},
 
 /*S*/	{ AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
 
@@ -58,7 +59,7 @@ int AM[AM_MODES][AM_MODES] = {
 /*BCL*/ { AM_ERR, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH, AM_NOMATCH,  AM_PROCPKT},
 };
 
-#define MATCH_ASSOC(x,y)	AM[(x)][(y)]
+#define MATCH_ASSOC(x, y)	AM[(x)][(y)]
 
 /*
  * These routines manage the allocation of memory to peer structures
@@ -105,6 +106,8 @@ static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static void	    getmorepeermem	 (void);
 static struct interface *select_peerinterface (struct peer *, struct sockaddr_storage *, struct interface *, u_char);
+
+static int score(struct peer *);
 
 /*
  * init_peer - initialize peer data structures and counters
@@ -314,6 +317,78 @@ clear_all(void)
 
 
 /*
+ * score_all() - determine if an association can be demobilized
+ */
+int
+score_all(
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	struct peer *speer, *next_peer;
+	int	n;
+	int	temp, tamp;
+
+	/*
+	 * This routine finds the minimum score for all ephemeral
+	 * assocations and returns > 0 if the association can be
+	 * demobilized.
+	 */
+	tamp = score(peer);
+	temp = 100;
+	for (n = 0; n < NTP_HASH_SIZE; n++) {
+		for (speer = peer_hash[n]; speer != 0; speer =
+		    next_peer) {
+			int	x;
+
+			next_peer = speer->next;
+			if ((x = score(speer)) < temp && (peer->flags &
+			    FLAG_PREEMPT))
+				temp = x;
+		}
+	}
+#ifdef DEBUG
+	if (debug)
+		printf("score_all: at %lu score %d min %d\n",
+		    current_time, tamp, temp);
+#endif
+	if (tamp != temp)
+		temp = 0;
+	return (temp);
+}
+
+
+/*
+ * score() - calculate preemption score
+ */
+static int
+score(
+	struct peer *peer	/* peer structure pointer */
+	)
+{
+	int	temp;
+
+	/*
+	 * This routine calculates the premption score from the peer
+	 * error bits and status. Increasing values are more cherished.
+	 */
+	temp = 0;
+	if (!(peer->flash & TEST10))
+		temp++;			/* 1 good synch and stratum */
+	if (!(peer->flash & TEST13))
+		temp++;			/* 2 reachable */
+	if (!(peer->flash & TEST12))
+		temp++;			/* 3 no loop */
+	if (!(peer->flash & TEST11))
+		temp++;			/* 4 good distance */
+	if (peer->status >= CTL_PST_SEL_SELCAND)
+		temp++;			/* 5 in the hunt */
+	if (peer->status != CTL_PST_SEL_EXCESS)
+		temp++;			/* 6 not spare tire */
+	return (temp);			/* selection status */
+}
+
+
+/*
  * unpeer - remove peer structure from hash table and free structure
  */
 void
@@ -321,27 +396,12 @@ unpeer(
 	struct peer *peer_to_remove
 	)
 {
-	int hash;
-#ifdef OPENSSL
-	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	int	hash;
+	char	tbuf[80];
 
-	if (peer_to_remove->flags & FLAG_SKEY) {
-		sprintf(statstr,
-		    "unpeer %d flash %x reach %03o flags %04x",
-		    peer_to_remove->associd, peer_to_remove->flash,
-		    peer_to_remove->reach, peer_to_remove->flags);
-		record_crypto_stats(&peer_to_remove->srcadr, statstr);
-#ifdef DEBUG
-		if (debug)
-			printf("peer: %s\n", statstr);
-#endif
-	}
-#endif /* OPENSSL */
-#ifdef DEBUG
-	if (debug)
-		printf("demobilize %u assoc %d ephem %d\n", peer_to_remove->associd,
-		    peer_associations, peer_preempt);
-#endif
+	snprintf(tbuf, sizeof(tbuf), "assoc %d",
+	    peer_to_remove->associd);
+	report_event(PEVNT_DEMOBIL, peer_to_remove, tbuf);
 	set_peerdstadr(peer_to_remove, NULL);
 	hash = NTP_HASH_ADDR(&peer_to_remove->srcadr);
 	peer_hash_count[hash]--;
@@ -663,20 +723,33 @@ struct peer *
 newpeer(
 	struct sockaddr_storage *srcadr,
 	struct interface *dstadr,
-	int hmode,
-	int version,
-	int minpoll,
-	int maxpoll,
-	u_int flags,
+	int	hmode,
+	int	version,
+	int	minpoll,
+	int	maxpoll,
+	u_int	flags,
 	u_char cast_flags,
-	int ttl,
-	keyid_t key
+	int	ttl,
+	keyid_t	key
 	)
 {
 	struct peer *peer;
 	int	i;
+	char	tbuf[80];
+
 #ifdef OPENSSL
-	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
+	/*
+	 * If Autokey is requested but not configured, complain loudly.
+	 */
+	if (!crypto_flags) {
+		if (key > NTP_MAXKEY) {
+			return (NULL);
+
+		} else if (flags & FLAG_SKEY) {
+			msyslog(LOG_ERR, "Autokey not configured");
+			return (NULL);
+		} 
+	}
 #endif /* OPENSSL */
 
 	/*
@@ -739,8 +812,8 @@ newpeer(
 	    cast_flags));
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
-	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
-	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
+	peer->minpoll = max(ntp_minpoll, minpoll);
+	peer->maxpoll = min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags;
 #ifdef DEBUG
 	if (debug > 2) {
@@ -765,8 +838,6 @@ newpeer(
 	if (cast_flags & MDF_MCAST && peer->dstadr) {
 		enable_multicast_if(peer->dstadr, srcadr);
 	}
-	if (key != 0)
-		peer->flags |= FLAG_AUTHENABLE;
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
 	peer->cast_flags = cast_flags;
@@ -826,15 +897,8 @@ newpeer(
 	peer->ass_next = assoc_hash[i];
 	assoc_hash[i] = peer;
 	assoc_hash_count[i]++;
-
-#ifdef OPENSSL
-	if (peer->flags & FLAG_SKEY) {
-		sprintf(statstr, "newpeer %d", peer->associd);
-		record_crypto_stats(&peer->srcadr, statstr);
-		DPRINTF(1, ("peer: %s\n", statstr));
-	}
-#endif /* OPENSSL */
-
+	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
+	report_event(PEVNT_MOBIL, peer, tbuf);
 	DPRINTF(1, ("newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
 	    peer->dstadr == NULL ? "<null>" : stoa(&peer->dstadr->sin),
 	    stoa(&peer->srcadr), peer->hmode, peer->version,
@@ -880,8 +944,10 @@ peer_reset(
 	struct peer *peer
 	)
 {
-	if (peer == 0)
+	if (peer == NULL)
 	    return;
+
+	peer->timereset = current_time;
 	peer->sent = 0;
 	peer->received = 0;
 	peer->processed = 0;
@@ -889,7 +955,7 @@ peer_reset(
 	peer->bogusorg = 0;
 	peer->oldpkt = 0;
 	peer->seldisptoolarge = 0;
-	peer->timereset = current_time;
+	peer->selbroken = 0;
 }
 
 
@@ -908,46 +974,12 @@ peer_all_reset(void)
 }
 
 
-#ifdef OPENSSL
-/*
- * expire_all - flush all crypto data and update timestamps.
- */
-void
-expire_all(void)
-{
-	struct peer *peer, *next_peer;
-	int n;
-
-	/*
-	 * This routine is called about once per day from the timer
-	 * routine and when the client is first synchronized. Search the
-	 * peer list for all associations.
-	 */
-	if (!crypto_flags)
-		return;
-
-	for (n = 0; n < NTP_HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
-			next_peer = peer->next;
-			if (!(peer->flags & FLAG_SKEY)) {
-				continue;
-
-			}
-			key_expire(peer);
-		}
-	}
-	RAND_bytes((u_char *)&sys_private, 4);
-	crypto_update();
-}
-#endif /* OPENSSL */
-
-
 /*
  * findmanycastpeer - find and return a manycast peer
  */
 struct peer *
 findmanycastpeer(
-	struct recvbuf *rbufp
+	struct recvbuf *rbufp	/* receive buffer pointer */
 	)
 {
 	register struct peer *peer;

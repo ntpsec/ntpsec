@@ -102,22 +102,22 @@ static struct ctl_var sys_var[] = {
 	{ CS_ROOTDISPERSION, RO, "rootdisp" },	/* 5 */
 	{ CS_REFID,	RO, "refid" },		/* 6 */
 	{ CS_REFTIME,	RO, "reftime" },	/* 7 */
-	{ CS_POLL,	RO, "poll" },		/* 8 */
+	{ CS_POLL,	RO, "tc" },		/* 8 */
 	{ CS_PEERID,	RO, "peer" },		/* 9 */
-	{ CS_STATE,	RO, "state" },		/* 10 */
-	{ CS_OFFSET,	RO, "offset" },		/* 11 */
-	{ CS_DRIFT,	RO, "frequency" },	/* 12 */
-	{ CS_JITTER,	RO, "jitter" },		/* 13 */
-	{ CS_ERROR,	RO, "noise" },		/* 14 */
-	{ CS_CLOCK,	RO, "clock" },		/* 15 */
-	{ CS_PROCESSOR, RO, "processor" },	/* 16 */
-	{ CS_SYSTEM,	RO, "system" },		/* 17 */
-	{ CS_VERSION,	RO, "version" },	/* 18 */
-	{ CS_STABIL,	RO, "stability" },	/* 19 */
-	{ CS_VARLIST,	RO, "sys_var_list" },	/* 20 */
-	{ CS_TAI,	RO, "tai" },		/* 21 */
-	{ CS_LEAPTAB,	RO, "leapsec" },	/* 22 */
-	{ CS_LEAPEND,	RO, "expire" },		/* 23 */
+	{ CS_OFFSET,	RO, "offset" },		/* 10 */
+	{ CS_DRIFT,	RO, "frequency" },	/* 11 */
+	{ CS_JITTER,	RO, "sys_jitter" },	/* 12 */
+	{ CS_ERROR,	RO, "clk_jitter" },	/* 13 */
+	{ CS_CLOCK,	RO, "clock" },		/* 14 */
+	{ CS_PROCESSOR, RO, "processor" },	/* 15 */
+	{ CS_SYSTEM,	RO, "system" },		/* 16 */
+	{ CS_VERSION,	RO, "version" },	/* 17 */
+	{ CS_STABIL,	RO, "clk_wander" },	/* 18 */
+	{ CS_VARLIST,	RO, "sys_var_list" },	/* 19 */
+	{ CS_TAI,	RO, "tai" },		/* 20 */
+	{ CS_LEAPTAB,	RO, "leapsec" },	/* 21 */
+	{ CS_LEAPEND,	RO, "expire" },		/* 22 */
+	{ CS_RATE,	RO, "mintc" },		/* 23 */
 #ifdef OPENSSL
 	{ CS_FLAGS,	RO, "flags" },		/* 24 */
 	{ CS_HOST,	RO, "host" },		/* 25 */
@@ -145,12 +145,12 @@ static	u_char def_sys_var[] = {
 	CS_PRECISION,
 	CS_ROOTDELAY,
 	CS_ROOTDISPERSION,
-	CS_PEERID,
 	CS_REFID,
 	CS_REFTIME,
-	CS_POLL,
 	CS_CLOCK,
-	CS_STATE,
+	CS_PEERID,
+	CS_POLL,
+	CS_RATE,
 	CS_OFFSET,
 	CS_DRIFT,
 	CS_JITTER,
@@ -215,16 +215,17 @@ static struct ctl_var peer_var[] = {
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
 	{ CP_IN,	RO, "in" },		/* 38 */
 	{ CP_OUT,	RO, "out" },		/* 39 */
+	{ CP_RATE,	RO, "headway" },	/* 40 */
 #ifdef OPENSSL
-	{ CP_FLAGS,	RO, "flags" },		/* 40 */
-	{ CP_HOST,	RO, "host" },		/* 41 */
-	{ CP_VALID,	RO, "valid" },		/* 42 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 43 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 44 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 45 */
-	{ CP_DIGEST,	RO, "signature" },	/* 46 */
+	{ CP_FLAGS,	RO, "flags" },		/* 41 */
+	{ CP_HOST,	RO, "host" },		/* 42 */
+	{ CP_VALID,	RO, "valid" },		/* 43 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 44 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 45 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 46 */
+	{ CP_DIGEST,	RO, "signature" },	/* 47 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 40/47 */
+	{ 0,		EOV, "" }		/* 41/48 */
 };
 
 
@@ -244,12 +245,15 @@ static u_char def_peer_var[] = {
 	CP_ROOTDELAY,
 	CP_ROOTDISPERSION,
 	CP_REFID,
+	CP_REFTIME,
+	CP_REC,
 	CP_REACH,
 	CP_UNREACH,
 	CP_HMODE,
 	CP_PMODE,
 	CP_HPOLL,
 	CP_PPOLL,
+	CP_RATE,
 	CP_FLASH,
 	CP_KEYID,
 	CP_TTL,
@@ -257,10 +261,6 @@ static u_char def_peer_var[] = {
 	CP_DELAY,
 	CP_DISPERSION,
 	CP_JITTER,
-	CP_REFTIME,
-	CP_ORG,
-	CP_REC,
-	CP_XMT,
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
@@ -724,19 +724,21 @@ ctlpeerstatus(
 	register struct peer *peer
 	)
 {
-	register u_short status;
+	u_short status;
 
 	status = peer->status;
-	if (peer->flags & FLAG_CONFIG)
+	if (!(peer->flags & FLAG_PREEMPT))
 		status |= CTL_PST_CONFIG;
-	if (peer->flags & FLAG_AUTHENABLE)
+	if (peer->keyid != 0)
 		status |= CTL_PST_AUTHENABLE;
 	if (peer->flags & FLAG_AUTHENTIC)
 		status |= CTL_PST_AUTHENTIC;
 	if (peer->reach != 0)
 		status |= CTL_PST_REACH;
+	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST | MDF_ACAST))
+		status |= CTL_PST_BCAST;
 	return (u_short)CTL_PEER_STATUS(status, peer->num_events,
-					peer->last_event);
+	    peer->last_event);
 }
 
 
@@ -749,8 +751,8 @@ ctlclkstatus(
 	struct refclockstat *this_clock
 	)
 {
-	return ((u_short)(((this_clock->currentstatus) << 8) |
-			  (this_clock->lastevent)));
+	return (u_short)CTL_PEER_STATUS(0, this_clock->lastevent,
+	    this_clock->currentstatus);
 }
 #endif
 
@@ -768,19 +770,18 @@ ctlsysstatus(void)
 	if (sys_peer != 0) {
 		if (sys_peer->sstclktype != CTL_SST_TS_UNSPEC) {
 			this_clock = sys_peer->sstclktype;
-			if (pps_control)
-				this_clock |= CTL_SST_TS_PPS;
 		} else {
 			if (sys_peer->refclktype < sizeof(clocktypes))
 				this_clock =
 				    clocktypes[sys_peer->refclktype];
-			if (pps_control)
-				this_clock |= CTL_SST_TS_PPS;
 		}
 	}
+#else /* REFCLOCK */
+	if (sys_peer != 0)
+		this_clock = CTL_SST_TS_NTP;
 #endif /* REFCLOCK */
 	return (u_short)CTL_SYS_STATUS(sys_leap, this_clock,
-				       ctl_sys_num_events, ctl_sys_last_event);
+	    ctl_sys_num_events, ctl_sys_last_event);
 }
 
 
@@ -1268,10 +1269,6 @@ ctl_putsys(
 				    sys_peer->associd);
 		break;
 
-	    case CS_STATE:
-		ctl_putuint(sys_var[CS_STATE].text, (unsigned)state);
-		break;
-
 	    case CS_OFFSET:
 		ctl_putdbl(sys_var[CS_OFFSET].text, last_offset * 1e3);
 		break;
@@ -1403,6 +1400,10 @@ ctl_putsys(
 			    leap_expire);
 		break;
 
+	    case CS_RATE:
+		ctl_putuint(sys_var[CS_RATE].text, ntp_minpoll);
+		break;
+
 #ifdef OPENSSL
 	    case CS_FLAGS:
 		if (crypto_flags)
@@ -1444,7 +1445,7 @@ ctl_putsys(
 		break;
 
 	    case CS_PUBLIC:
-		if (hostval.fstamp != 0)
+		if (hostval.tstamp != 0)
 			ctl_putfs(sys_var[CS_PUBLIC].text,
 			    ntohl(hostval.tstamp));
 		break;
@@ -1472,27 +1473,27 @@ ctl_putpeer(
 
 	    case CP_CONFIG:
 		ctl_putuint(peer_var[CP_CONFIG].text,
-			    (unsigned)((peer->flags & FLAG_CONFIG) != 0));
+		    (unsigned)((peer->flags & FLAG_PREEMPT) == 0));
 		break;
 
 	    case CP_AUTHENABLE:
 		ctl_putuint(peer_var[CP_AUTHENABLE].text,
-			    (unsigned)((peer->flags & FLAG_AUTHENABLE) != 0));
+		    (unsigned)(peer->keyid != 0));
 		break;
 
 	    case CP_AUTHENTIC:
 		ctl_putuint(peer_var[CP_AUTHENTIC].text,
-			    (unsigned)((peer->flags & FLAG_AUTHENTIC) != 0));
+		    (unsigned)((peer->flags & FLAG_AUTHENTIC) != 0));
 		break;
 
 	    case CP_SRCADR:
 		ctl_putadr(peer_var[CP_SRCADR].text, 0,
-			   &peer->srcadr);
+		    &peer->srcadr);
 		break;
 
 	    case CP_SRCPORT:
 		ctl_putuint(peer_var[CP_SRCPORT].text,
-			    ntohs(((struct sockaddr_in*)&peer->srcadr)->sin_port));
+		    ntohs(((struct sockaddr_in*)&peer->srcadr)->sin_port));
 		break;
 
 	    case CP_DSTADR:
@@ -1511,16 +1512,20 @@ ctl_putpeer(
 				     ntohs(((struct sockaddr_in*)&peer->dstadr->sin)->sin_port) : 0));
 		break;
 
-	    case CP_OUT:
+	    case CP_IN:
 		if (peer->r21 > 0)
 			ctl_putdbl(peer_var[CP_IN].text,
 				   peer->r21 / 1e3);
 		break;
 
-	    case CP_IN:
+	    case CP_OUT:
 		if (peer->r34 >0)
 			ctl_putdbl(peer_var[CP_OUT].text,
 				   peer->r34 / 1e3);
+		break;
+
+	    case CP_RATE:
+		ctl_putuint(peer_var[CP_RATE].text, peer->throttle);
 		break;
 
 	    case CP_LEAP:
@@ -1599,7 +1604,9 @@ ctl_putpeer(
 		break;
 
 	    case CP_TTL:
-		ctl_putint(peer_var[CP_TTL].text, sys_ttl[peer->ttl]);
+		if (peer->ttl > 0)
+			ctl_putint(peer_var[CP_TTL].text,
+			    sys_ttl[peer->ttl]);
 		break;
 
 	    case CP_UNREACH:
@@ -1608,7 +1615,7 @@ ctl_putpeer(
 
 	    case CP_TIMER:
 		ctl_putuint(peer_var[CP_TIMER].text,
-			    peer->nextdate - current_time);
+		    peer->nextdate - current_time);
 		break;
 
 	    case CP_DELAY:
@@ -1617,7 +1624,7 @@ ctl_putpeer(
 
 	    case CP_OFFSET:
 		ctl_putdbl(peer_var[CP_OFFSET].text, peer->offset *
-			   1e3);
+		   1e3);
 		break;
 
 	    case CP_JITTER:
@@ -1626,29 +1633,30 @@ ctl_putpeer(
 
 	    case CP_DISPERSION:
 		ctl_putdbl(peer_var[CP_DISPERSION].text, peer->disp *
-			   1e3);
+		   1e3);
 		break;
 
 	    case CP_KEYID:
 		if (peer->keyid > NTP_MAXKEY)
 			ctl_puthex(peer_var[CP_KEYID].text, peer->keyid);
 		else
-			ctl_putuint(peer_var[CP_KEYID].text, peer->keyid);
+			ctl_putuint(peer_var[CP_KEYID].text,
+			    peer->keyid);
 		break;
 
 	    case CP_FILTDELAY:
 		ctl_putarray(peer_var[CP_FILTDELAY].text,
-			     peer->filter_delay, (int)peer->filter_nextpt);
+		    peer->filter_delay, (int)peer->filter_nextpt);
 		break;
 
 	    case CP_FILTOFFSET:
 		ctl_putarray(peer_var[CP_FILTOFFSET].text,
-			     peer->filter_offset, (int)peer->filter_nextpt);
+		    peer->filter_offset, (int)peer->filter_nextpt);
 		break;
 
 	    case CP_FILTERROR:
 		ctl_putarray(peer_var[CP_FILTERROR].text,
-			     peer->filter_disp, (int)peer->filter_nextpt);
+		    peer->filter_disp, (int)peer->filter_nextpt);
 		break;
 
 	    case CP_PMODE:
@@ -2749,34 +2757,34 @@ ctlfindtrap(
  */
 void
 report_event(
-	int err,
-	struct peer *peer
+	int	err,		/* error code */
+	struct peer *peer,	/* peer structure pointer */
+	const char *str		/* protostats string */
 	)
 {
-	register int i;
+	char	statstr[NTP_MAXSTRLEN];
+	int	i;
 
 	/*
 	 * Record error code in proper spots, but have mercy on the
 	 * log file.
 	 */
-	if (!(err & (PEER_EVENT | CRPT_EVENT))) {
+	if (peer == NULL) {
 		if (ctl_sys_num_events < CTL_SYS_MAXEVENTS)
 			ctl_sys_num_events++;
+		snprintf(statstr, NTP_MAXSTRLEN,
+		    "0.0.0.0 %04x %02x system event: %s",
+		    ctlsysstatus(), err, eventstr(err));
+		if (str != NULL) {
+			strcat(statstr, " ");
+			strcat(statstr, str);
+		}
 		if (ctl_sys_last_event != (u_char)err) {
 			NLOG(NLOG_SYSEVENT)
-			    msyslog(LOG_INFO, "system event '%s' (0x%02x) status '%s' (0x%02x)",
-				    eventstr(err), err,
-				    sysstatstr(ctlsysstatus()), ctlsysstatus());
-#ifdef DEBUG
-			if (debug)
-				printf("report_event: system event '%s' (0x%02x) status '%s' (0x%02x)\n",
-				       eventstr(err), err,
-				       sysstatstr(ctlsysstatus()),
-				       ctlsysstatus());
-#endif
+			    msyslog(LOG_INFO, statstr);
 			ctl_sys_last_event = (u_char)err;
 		}
-	} else if (peer != 0) {
+	} else {
 		char *src;
 
 #ifdef REFCLOCK
@@ -2785,33 +2793,24 @@ report_event(
 		else
 #endif
 			src = stoa(&peer->srcadr);
-
 		peer->last_event = (u_char)(err & ~PEER_EVENT);
 		if (peer->num_events < CTL_PEER_MAXEVENTS)
 			peer->num_events++;
+		snprintf(statstr, NTP_MAXSTRLEN,
+		    "%s %04x %02x peer event: %s", src,
+		    ctlpeerstatus(peer), err, eventstr(err));
+		if (str != NULL) {
+			strcat(statstr, " ");
+			strcat(statstr, str);
+		}
 		NLOG(NLOG_PEEREVENT)
-		    msyslog(LOG_INFO, "peer %s event '%s' (0x%02x) status '%s' (0x%02x)",
-			    src, eventstr(err), err,
-			    peerstatstr(ctlpeerstatus(peer)),
-			    ctlpeerstatus(peer));
-#ifdef DEBUG
-		if (debug)
-			printf( "peer %s event '%s' (0x%02x) status '%s' (0x%02x)\n",
-				src, eventstr(err), err,
-				peerstatstr(ctlpeerstatus(peer)),
-				ctlpeerstatus(peer));
-#endif
-	} else {
-		msyslog(LOG_ERR,
-			"report_event: err '%s' (0x%02x), no peer",
-			eventstr(err), err);
-#ifdef DEBUG
-		printf(
-			"report_event: peer event '%s' (0x%02x), no peer\n",
-			eventstr(err), err);
-#endif
-		return;
+		    msyslog(LOG_INFO, statstr);
 	}
+	record_proto_stats(statstr);
+#if DEBUG
+	if (debug)
+		printf("event at %lu %s\n", current_time, statstr);
+#endif
 
 	/*
 	 * If no trappers, return.
@@ -2843,30 +2842,6 @@ report_event(
 #endif /* OPENSSL */
 			ctl_putsys(i);
 		}
-#ifdef REFCLOCK
-		/*
-		 * for clock exception events: add clock variables to
-		 * reflect info on exception
-		 */
-		if (err == EVNT_CLOCKEXCPT) {
-			struct refclockstat clock_stat;
-			struct ctl_var *kv;
-
-			clock_stat.kv_list = (struct ctl_var *)0;
-			refclock_control(&peer->srcadr,
-					 (struct refclockstat *)0, &clock_stat);
-			ctl_puthex("refclockstatus",
-				   ctlclkstatus(&clock_stat));
-			for (i = 1; i <= CC_MAXCODE; i++)
-				ctl_putclock(i, &clock_stat, 0);
-			for (kv = clock_stat.kv_list; kv &&
-				 !(kv->flags & EOV); kv++)
-				if (kv->flags & DEF)
-					ctl_putdata(kv->text,
-						    strlen(kv->text), 0);
-			free_varlist(clock_stat.kv_list);
-		}
-#endif /* REFCLOCK */
 	} else {
 		rpkt.associd = htons(peer->associd);
 		rpkt.status = htons(ctlpeerstatus(peer));
@@ -2886,7 +2861,7 @@ report_event(
 		 * for clock exception events: add clock variables to
 		 * reflect info on exception
 		 */
-		if (err == EVNT_PEERCLOCK) {
+		if (err == PEVNT_CLOCK) {
 			struct refclockstat clock_stat;
 			struct ctl_var *kv;
 

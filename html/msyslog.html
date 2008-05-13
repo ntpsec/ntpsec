@@ -8,9 +8,9 @@
 	</head>
 	<body>
 		<h3><tt>ntpd</tt> System Log Messages</h3>
-		<img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
-		<p>The mushroom knows all the error codes, which is more than most of us do.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">01:09</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Saturday, November 24, 2007</csobj></p>
+		<img src="pic/flatheads.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
+		<p>The log can be shrill at times.</p>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">02:22</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="252">Monday, March 03, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<p><script type="text/javascript" language="javascript" src="scripts/install.txt"></script>
@@ -33,7 +33,10 @@
 				<p><tt><b>LOG_INFO</b></tt></p>
 			<dt><tt>proto_config: illegal item ?, value ?</tt>
 			<dd>Program error. Bugs can be reported <a href="bugs.html">here</a>.
-			<dt><tt>pps sync enabled</tt>
+			<dt><tt>receive:&nbsp;autokey requires two-way communication</tt>
+			<dd>Configuration error on the <tt>broadcastclient</tt> command.
+			<dt><tt>receive: server <i>server</i> maaximum rate exceeded</tt>
+			<dd>A kiss-o'death packet has been received. The transmit rate is automatically reduced.<dt><tt>pps sync enabled</tt>
 			<dd>The PPS signal has been detected and enabled.
 			<dt><tt>transmit: encryption key ? not found</tt>
 			<dd>The encryption key is not defined or not trusted.

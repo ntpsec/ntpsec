@@ -134,16 +134,15 @@ struct ctl_var sys_var[] = {
 	{ CS_REFTIME,	TS,	"reftime" },	/* 7 */
 	{ CS_POLL,	UI,	"poll" },	/* 8 */
 	{ CS_PEERID,	UI,	"peer" },	/* 9 */
-	{ CS_STATE,	UI,	"state" },	/* 10 */
-	{ CS_OFFSET,	FL,	"offset" },	/* 11 */
-	{ CS_DRIFT,	FS,	"frequency" },	/* 12 */
-	{ CS_JITTER,	FU,	"jitter" },	/* 13 */
-	{ CS_CLOCK,	TS,	"clock" },	/* 14 */
-	{ CS_PROCESSOR,	ST,	"processor" },	/* 15 */
-	{ CS_SYSTEM,	ST,	"system" },	/* 16 */
-	{ CS_VERSION,	ST,	"version" },	/* 17 */
-	{ CS_STABIL,	FS,	"stability" },	/* 18 */
-	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 19 */
+	{ CS_OFFSET,	FL,	"offset" },	/* 10 */
+	{ CS_DRIFT,	FS,	"frequency" },	/* 11 */
+	{ CS_JITTER,	FU,	"jitter" },	/* 12 */
+	{ CS_CLOCK,	TS,	"clock" },	/* 13 */
+	{ CS_PROCESSOR,	ST,	"processor" },	/* 14 */
+	{ CS_SYSTEM,	ST,	"system" },	/* 15 */
+	{ CS_VERSION,	ST,	"version" },	/* 16 */
+	{ CS_STABIL,	FS,	"stability" },	/* 17 */
+	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 18 */
 	{ 0,		EOV,	""	}
 };
 
@@ -167,7 +166,7 @@ struct ctl_var peer_var[] = {
 	{ CP_HPOLL,	UI,	"hpoll" },	/* 12 */
 	{ CP_PRECISION,	SI,	"precision" },	/* 13 */
 	{ CP_ROOTDELAY,	FS,	"rootdelay" },	/* 14 */
-	{ CP_ROOTDISPERSION, FU, "rootdispersion" }, /* 15 */
+	{ CP_ROOTDISPERSION, FU, "rootdisp" },	/* 15 */
 	{ CP_REFID,	RF,	"refid" },	/* 16 */
 	{ CP_REFTIME,	TS,	"reftime" },	/* 17 */
 	{ CP_ORG,	TS,	"org" },	/* 18 */
@@ -233,7 +232,7 @@ static const char *tstflagnames[] = {
 	"pkt_denied",		/* TEST4 */
 	"pkt_auth",		/* TEST5 */
 	"pkt_stratum",		/* TEST6 */
-	"pkt_head",		/* TEST7 */
+	"pkt_header",		/* TEST7 */
 	"pkt_autokey",		/* TEST8 */
 	"pkt_crypto",		/* TEST9 */
 	"peer_stratum",		/* TEST10 */

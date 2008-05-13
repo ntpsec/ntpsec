@@ -1045,7 +1045,7 @@ readconf(
 			resolver_exit(1);
 		}
 		if (intval[TOK_MINPOLL] < ntp_minpoll ||
-		    intval[TOK_MINPOLL] > ntp_minpoll) {
+		    intval[TOK_MINPOLL] > NTP_MAXPOLL) {
 
 			msyslog(LOG_ERR, "invalid MINPOLL value (%ld) in file %s",
 				intval[TOK_MINPOLL], name);
@@ -1059,17 +1059,14 @@ readconf(
 			resolver_exit(1);
 		}
 
-		if ((intval[TOK_FLAGS] & ~(FLAG_AUTHENABLE | FLAG_PREFER |
-		    FLAG_NOSELECT | FLAG_BURST | FLAG_IBURST | FLAG_SKEY))
-		    != 0) {
+		if ((intval[TOK_FLAGS] & ~(FLAG_PREFER | FLAG_NOSELECT |
+		    FLAG_BURST | FLAG_IBURST | FLAG_SKEY)) != 0) {
 			msyslog(LOG_ERR, "invalid flags (%ld) in file %s",
 				intval[TOK_FLAGS], name);
 			resolver_exit(1);
 		}
 
 		flags = 0;
-		if (intval[TOK_FLAGS] & FLAG_AUTHENABLE)
-		    flags |= CONF_FLAG_AUTHENABLE;
 		if (intval[TOK_FLAGS] & FLAG_PREFER)
 		    flags |= CONF_FLAG_PREFER;
 		if (intval[TOK_FLAGS] & FLAG_NOSELECT)

@@ -18,17 +18,14 @@
 #endif
 
 /*
- * I'm still not sure I like what I've done here. It certainly consumes
- * memory like it is going out of style, and also may not be as low
- * overhead as I'd imagined.
+ * Record statistics based on source address, mode and version. The
+ * receive procedure calls us with the incoming rbufp before it does
+ * anything else. While at it, implement rate controls for inbound
+ * traffic.
  *
- * Anyway, we record statistics based on source address, mode and
- * version (for now, anyway. Check the code).  The receive procedure
- * calls us with the incoming rbufp before it does anything else.
- *
- * Each entry is doubly linked into two lists, a hash table and a
- * most-recently-used list. When a packet arrives it is looked up in
- * the hash table.  If found, the statistics are updated and the entry
+ * Each entry is doubly linked into two lists, a hash table and a most-
+ * recently-used (MRU) list. When a packet arrives it is looked up in
+ * the hash table. If found, the statistics are updated and the entry
  * relinked at the head of the MRU list. If not found, a new entry is
  * allocated, initialized and linked into both the hash table and at the
  * head of the MRU list.
@@ -38,14 +35,12 @@
  * the memory limit. Then we free memory by grabbing entries off the
  * tail for the MRU list, unlinking from the hash table, and
  * reinitializing.
- *
- * trimmed back memory consumption ... jdg 8/94
  */
 /*
  * Limits on the number of structures allocated.  This limit is picked
- * with the illicit knowlege that we can only return somewhat less
- * than 8K bytes in a mode 7 response packet, and that each structure
- * will require about 20 bytes of space in the response.
+ * with the illicit knowlege that we can only return somewhat less than
+ * 8K bytes in a mode 7 response packet, and that each structure will
+ * require about 20 bytes of space in the response.
  *
  * ... I don't believe the above is true anymore ... jdg
  */
@@ -73,19 +68,20 @@ struct	mon_data mon_mru_list;
 
 /*
  * List of free structures structures, and counters of free and total
- * structures.  The free structures are linked with the hash_next field.
+ * structures. The free structures are linked with the hash_next field.
  */
 static  struct mon_data *mon_free;      /* free list or null if none */
 static	int mon_total_mem;		/* total structures allocated */
 static	int mon_mem_increments;		/* times called malloc() */
 
 /*
- * Parameters of the RES_LIMITED restriction option. With the defaults a
- * packet will be discarded if the interval betweem packets is less than
- * 1 s, as well as when the average interval is less than 16 s. 
+ * Parameters of the RES_LIMITED restriction option. We define headway
+ * as the idle time between packets. A packet is discarded if the
+ * headway is less than the minimum, as well as if the average headway
+ * is less than eight times the increment.
  */
-int	ntp_minpoll = NTP_MINPOLL + 1;	/* avg interpkt interval */
-int	res_min_interval = 1 << NTP_MINPKT; /* min interpkt interval */
+int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
+int	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 
 /*
  * Initialization state.  We may be monitoring, we may not.  If
@@ -231,7 +227,9 @@ ntp_monitor(
 	mode = PKT_MODE(pkt->li_vn_mode);
 	md = mon_hash[hash];
 	while (md != NULL) {
-		int	leak, limit;
+		int	head;		/* headway increment */
+		int	leak;		/* new headway */
+		int	limit;		/* average threshold */
 
 		/*
 		 * Match address only to conserve MRU size.
@@ -257,30 +255,42 @@ ntp_monitor(
 
 			/*
 			 * At this point the most recent arrival is
-			 * first in the MRU list. If the minimum and
-			 * average thresholds are not exceeded, increase
-			 * the counter by the interval. If not, light
-			 * the rate bit only. The packet will be
-			 * discarded in the protocol module. Note we
-			 * give a 1-s tolerance for the minimum and a 2-
-			 * s tolerance for the average.
+			 * first in the MRU list. Decrease the counter
+			 * by the headway, but not less than zero.
 			 */
 			md->leak -= interval;
 			if (md->leak < 0)
 				md->leak = 0;
-			leak = md->leak + (1 << ntp_minpoll);
-			limit = NTP_SHIFT * (1 << ntp_minpoll) + 2;
+			head = 1 << ntp_minpoll;
+			leak = md->leak + head;
+			limit = NTP_SHIFT * head;
 #ifdef DEBUG
 			if (debug > 1)
 				printf("restrict: interval %d headway %d limit %d\n",
 				    interval, leak, limit);
 #endif
-			if (interval >= res_min_interval - 1 && leak <
-			    limit) {
-				md->leak = leak;
+
+			/*
+			 * If the minimum and average thresholds are not
+			 * exceeded, douse the RES_LIMITED and RES_KOD
+			 * bits and increase the counter by the headway
+			 * increment. Note that we give a 1-s grace for
+			 * the minimum threshold and a 2-s grace for the
+			 * headway increment. If one or both thresholds
+			 * are exceeded and the old counter is less than
+			 * the average threshold, set the counter to the
+			 * average threshold plus the inrcrment and
+			 * leave the RES_KOD bit lit. Othewise, leave
+			 * the counter alone and douse the RES_KOD bit.
+			 * This rate-limits the KoDs to no less than the
+			 * average headway.
+			 */
+			if (interval + 1 >= (1 << ntp_minpkt) &&
+			    leak < limit) {
+				md->leak = leak - 2;
 				md->flags &= ~(RES_LIMITED | RES_KOD);
 			} else if (md->leak < limit) {
-				md->leak = limit + (1 << ntp_minpoll);
+				md->leak = limit + head;
 			} else {
 				md->flags &= ~RES_KOD;
 			}

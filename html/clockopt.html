@@ -11,13 +11,13 @@
 
 	<body>
 		<h3>Reference Clock Options</h3>
-		<img src="pic/stack1a.jpg" alt="gif" align="left">
-		<p>See the radios, all in a row.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">16:01</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">Wednesday, January 02, 2008</csobj></p>
+		<img src="pic/stack1a.jpg" alt="gif" align="left">Master Time Facility at the <a href="http://www.eecis.udel.edu/%7emills/lab.html">UDel Internet Research Laboratory</a>
+		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">16:09</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="250">Sunday, March 02, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/refclock.txt"></script>
 		<script type="text/javascript" language="javascript" src="scripts/audio.txt"></script>
+		<script type="text/javascript" language="javascript" src="scripts/clockopt.txt"></script>
 		<h4>Table of Contents</h4>
 		<ul>
 			<li class="inline"><a href="#ref">Reference Clock Support</a>
@@ -33,7 +33,7 @@
 		<p>The stratum number of a reference clock is by default zero. Since the <tt>ntpd</tt> daemon adds one to the stratum of each peer, a primary server ordinarily displays an external stratum of one. In order to provide engineered backups, it is often useful to specify the reference clock stratum as greater than zero. The <tt>stratum</tt> option is used for this purpose. Also, in cases involving both a reference clock and a pulse-per-second (PPS) discipline signal, it is useful to specify the reference clock identifier as other than the default, depending on the driver. The <tt>refid</tt> option is used for this purpose. Except where noted, these options apply to all clock drivers.</p>
 		<h4 id="cmd">Reference Clock Commands</h4>
 		<dl>
-			<dt><tt>server 127.127.<i>t.u</i> [prefer] [mode <i>int</i>] [minpoll <i>int</i>] [maxpoll <i>int</i>]</tt>
+			<dt id="server"><tt>server 127.127.<i>t.u</i> [prefer] [mode <i>int</i>] [minpoll <i>int</i>] [maxpoll <i>int</i>]</tt>
 			<dd>This command can be used to configure reference clocks in special ways. The options are interpreted as follows:
 				<dl>
 					<dt><tt>prefer</tt>
@@ -44,7 +44,7 @@
 					<dt><tt>maxpoll <i>int</i></tt>
 					<dd>These options specify the minimum and maximum polling interval for reference clock messages in seconds, interpreted as dual logarithms (2 ^ x). For most directly connected reference clocks, both <tt>minpoll</tt> and <tt>maxpoll</tt> default to 6 (2^16 = 64 s). For modem reference clocks, <tt>minpoll</tt> defaults to 10 (2^10 = 1024 s = 17.1 m) and <tt>maxpoll</tt> defaults to 14 (2^14 = 16384 s = 4.5 h). The allowable range is 4 (16 s) to 17 (36.4 h) inclusive.
 				</dl>
-			<dt><tt>fudge 127.127.<i>t.u</i> [time1 <i>sec</i>] [time2 <i>sec</i>] [stratum <i>int</i>] [refid <i>string</i>] [mode <i>int</i>] [flag1 0|1] [flag2 0|1] [flag3 0|1] [flag4 0|1]</tt>
+			<dt id="fudge"><tt>fudge 127.127.<i>t.u</i> [time1 <i>sec</i>] [time2 <i>sec</i>] [stratum <i>int</i>] [refid <i>string</i>] [mode <i>int</i>] [flag1 0|1] [flag2 0|1] [flag3 0|1] [flag4 0|1]</tt>
 			<dd>This command can be used to configure reference clocks in special ways. It must immediately follow the <tt>server</tt> command which configures the driver. Note that the same capability is possible at run time using the <tt><a href="ntpdc.html">ntpdc</a></tt> program. The options are interpreted as follows:
 				<dl>
 					<dt><tt>time1 <i>sec</i></tt>

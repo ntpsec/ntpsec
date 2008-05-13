@@ -858,9 +858,8 @@ ntpdmain(
 	 * Get the configuration.  This is done in a separate module
 	 * since this will definitely be different for the gizmo board.
 	 */
-
 	getconfig(argc, argv);
-
+	report_event(EVNT_SYSRESTART, NULL, NULL);
 	loop_config(LOOP_DRIFTCOMP, old_drift);
 	initializing = 0;
 
@@ -1004,11 +1003,6 @@ getgroup:
 
 	}    /* if( droproot ) */
 #endif /* HAVE_DROPROOT */
-
-	/*
-	 * Report that we're up to any trappers
-	 */
-	report_event(EVNT_SYSRESTART, (struct peer *)0);
 
 	/*
 	 * Use select() on all on all input fd's for unlimited

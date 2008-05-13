@@ -194,8 +194,7 @@ atom_start(
 
 	/*
 	 * If the mode is nonzero, use that for the time_pps_setparams()
-	 * mode; otherwise, PPS_CAPTUREASSERT. Enable kernel PPS if
-	 * flag3 is lit.
+	 * mode; otherwise, PPS_CAPTUREASSERT.
 	 */
 	mode = peer->ttl;
 	if (mode == 0)
@@ -299,7 +298,6 @@ atom_ppsapi(
 			    "refclock_atom: time_pps_kcbind failed: %m");
 			return (0);
 		}
-		pps_enable = 1;
 	}
 #if DEBUG
 	if (debug) {
@@ -485,6 +483,7 @@ atom_poll(
 	 * set from the prefer peer, unless overriden by a fudge
 	 * command.
 	 */
+	pps_enable = 0;
 	if (pp->codeproc == pp->coderecv) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
@@ -497,6 +496,8 @@ atom_poll(
 		pp->codeproc = pp->coderecv;
 		return;
 	}
+	if (pp->sloppyclockflag & CLK_FLAG3)
+		pps_enable = 1;
 	pp->leap = sys_prefer->leap;
 	if (pp->stratum >= STRATUM_UNSPEC)
 		peer->stratum = sys_prefer->stratum;

@@ -27,7 +27,7 @@ extern	void	init_control	(void);
 extern	void	init_logging	(char const *, int);
 extern	void	setup_logfile	(void);
 extern	void	process_control (struct recvbuf *, int);
-extern	void	report_event	(int, struct peer *);
+extern	void	report_event	(int, struct peer *, const char *);
 
 /* ntp_control.c */
 /*
@@ -105,14 +105,13 @@ extern	void	block_io_and_alarm (void);
 #endif
 
 /* ntp_loopfilter.c */
-extern	void	init_loopfilter (void);
-extern	int 	local_clock (struct peer *, u_long, double);
-extern	void	adj_host_clock	(void);
-extern	void	loop_config (int, double);
-extern	void	huffpuff	(void);
+extern	void	init_loopfilter(void);
+extern	int 	local_clock(struct peer *, u_long, double);
+extern	void	adj_host_clock(void);
+extern	void	loop_config(int, double);
+extern	void	huffpuff(void);
 extern	u_long	sys_clocktime;
 extern	u_int	sys_tai;
-extern	int	clock_stepcnt;
 
 /* ntp_monitor.c */
 extern	void	init_mon	(void);
@@ -136,17 +135,15 @@ extern	int 	peer_unconfig	(struct sockaddr_storage *, struct interface *, int);
 extern  void    refresh_all_peerinterfaces (void);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
-
-#ifdef OPENSSL
-extern	void	expire_all	(void);
-#endif /* OPENSSL */
+extern	int	score_all	(struct peer *);
 extern	struct	peer *findmanycastpeer	(struct recvbuf *);
 
 /* ntp_crypto.c */
 #ifdef OPENSSL
 extern	int	crypto_recv	(struct peer *, struct recvbuf *);
-extern	int	crypto_xmit	(struct pkt *, struct sockaddr_storage *,
-				    int *, struct exten *, keyid_t);
+extern	int	crypto_xmit	(struct peer *, struct pkt *,
+				    struct recvbuf *, int *,
+				    struct exten *, keyid_t);
 extern	keyid_t	session_key	(struct sockaddr_storage *,
 				    struct sockaddr_storage *, keyid_t,
 				    keyid_t, u_long);
@@ -236,10 +233,10 @@ extern	void	init_util	(void);
 extern	void	write_stats	(void);
 extern	void	stats_config	(int, const char *);
 extern	void	record_peer_stats (struct sockaddr_storage *, int, double, double, double, double);
+extern	void	record_proto_stats (char *);
 extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (struct sockaddr_storage *, const char *);
 extern	void	record_raw_stats (struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *);
-extern	void	record_sys_stats (void);
 extern	u_long	leap_month(u_long);
 extern	void	record_crypto_stats (struct sockaddr_storage *, const char *);
 #ifdef DEBUG
@@ -249,10 +246,11 @@ extern  int	sock_hash (struct sockaddr_storage *);
 extern	double	old_drift;
 extern	int	drift_file_sw;
 extern	double	wander_threshold;
+extern	double	wander_resid;
+
 /*
  * Variable declarations for ntpd.
  */
-
 /* ntp_config.c */
 extern char const *	progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
@@ -322,7 +320,6 @@ extern double	clock_panic;		/* max offset before panic (s) */
 extern double	clock_phi;		/* dispersion rate (s/s) */
 extern double	clock_minstep;		/* step timeout (s) */
 extern double	clock_codec;		/* codec frequency */
-extern u_long	pps_control;		/* last pps sample time */
 #ifdef KERNEL_PLL
 extern int	pll_status;		/* status bits for kernel pll */
 #endif /* KERNEL_PLL */
@@ -410,16 +407,17 @@ extern int	sys_ttlmax;		/* max ttl mapping vector index */
 /*
  * Statistics counters
  */
-extern u_long	sys_stattime;		/* time when we started recording */
-extern u_long	sys_restricted;	 	/* restricted packets */
-extern u_long	sys_oldversion;		/* old version packets */
-extern u_long	sys_newversion;		/* new version packets  */
-extern u_long	sys_declined;		/* packets declined */
-extern u_long	sys_badlength;		/* bad length or format */
-extern u_long	sys_processed;		/* packets for this host */
-extern u_long	sys_badauth;		/* bad authentication */
-extern u_long	sys_limitrejected;	/* rate limit exceeded */
+extern u_long	sys_stattime;		/* time since reset */
 extern u_long	sys_received;		/* packets received */
+extern u_long	sys_processed;		/* packets for this host */
+extern u_long	sys_restricted;	 	/* restricted packets */
+extern u_long	sys_newversion;		/* current version  */
+extern u_long	sys_oldversion;		/* old version */
+extern u_long	sys_restricted;		/* access denied */
+extern u_long	sys_badlength;		/* bad length or format */
+extern u_long	sys_badauth;		/* bad authentication */
+extern u_long	sys_declined;		/* declined */
+extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
 
 /* ntp_refclock.c */
@@ -435,7 +433,7 @@ extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 /* ntp_restrict.c */
 extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
 extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
-extern int	res_min_interval;
+extern int	ntp_minpkt;
 extern int	ntp_minpoll;
 extern int	mon_age;		/* monitor preempt age */
 

@@ -1,3 +1,74 @@
+* Updates and cleanup from Dave Mills:
+  I've now spent eleven months of a sabbatical year - 7 days a week, 6-10
+  hours most days - working on NTP. I have carefully reviewed every major
+  algorithm, examined its original design and evolution from that design.
+  I've trimmed off dead code and briar patches and did zillions of tests
+  contrived to expose evil vulnerabilities. The development article is in
+  rather good shape and should be ready for prime time.
+
+  1. The protostats statistics files have been very useful in exposing
+  little twitches and turns when something hiccups, like a broken PPS
+  signal. Most of what used to be syslog messages are now repackaged as
+  protostats messages with optional syslog as well. These can also be sent
+  as traps which might be handy to tiggle a beeper or celltext. These, the
+  sysstats files and cryptostats files reveal the ambient health of a busy
+  server, monitor traffic and error counts and spot crypto attacks.
+
+  2. Close inspection of the clock discipline behavior at long poll
+  intervals (36 h) showed it not doing as well as it should. I redesigned
+  the FLL loop to improve nominal accuracy from  several tens of
+  milliseconds to something less than ten milliseconds.
+
+  3. Autokey (again). The enhanced error checking was becoming a major
+  pain. I found a way to toss out gobs of ugly fat code and replace the
+  function with a much simpler and more comprehensive scheme. It resists
+  bait-and-switch attacks and quickly detect cases when the protocol is
+  not correctly synchronized.
+
+  4. The interface code for the kernel PPS signal was not in sync with the
+  kernel code itself. Some error checks were duplicated and some
+  ineffective. I found none of the PPS-capable drivers, including the atom
+  driver, do anything when the prefer peer fails; the kernel PPS signal
+  remains in control. The atom driver now disables the kernel PPS when the
+  prefer peer comes bum. This is important when the prefer peer is not a
+  reference clock but a remote NTP server.
+
+  5. The flake restrict bit turned out to be really interesting,
+  especially with symmtric modes and of those especially those using
+  Autokey. Small changes in the recovery procedures when packets are lost
+  now avoid almost all scenarios which previously required protocol resets.
+
+  6. I've always been a little uncomfortable when using the clock filter
+  with long poll intervals because the samples become less and less
+  correlated as the sample age exceeds the Allan intercept. Various
+  schemes have been used over the years to cope with this fact. The latest
+  one and the one that works the best is to use a modified sort metric
+  where the delay is used when the age of the sample is less than the
+  intercept and the sum of delay and dispersion above that. The net result
+  is that, at small poll intervals the algorithm operates as a minimum
+  filter, while at larger poll intervals it morphs to FIFO. Left
+  unmodified, a sample could be used when twelve days old. This along with
+  the FLL modifications has made a dramatic improvement at large poll
+  intervals.
+
+- [Backward Incompatible] The 'state' variable is no longer reported or
+  available via ntpq output.  The following system status bit names
+  have been changed:
+  - sync_alarm -> leap_alarm
+  - sync_atomic -> sync_pps
+  - sync_lf_clock -> sync_lf_radio
+  - sync_hf_clock -> sync_hf_radio
+  - sync_uhf_clock -> sync_uhf_radio
+  - sync_local_proto -> sync_local
+  - sync_udp/time -> sync_other
+  Other names have been changed as well.  See the change history for
+  libntp/statestr.c for more details.
+  Other backward-incompatible changes in ntpq include:
+  - assID -> associd
+  - rootdispersion -> rootdisp
+  - pkt_head -> pkt_neader
+  See the change history for other details.
+
 * Updates and cleanup from Dave Mills.
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.

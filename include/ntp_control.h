@@ -45,31 +45,30 @@ struct ntp_control {
 /*
  * Opcodes
  */
-#define	CTL_OP_UNSPEC		0
-#define	CTL_OP_READSTAT		1
-#define	CTL_OP_READVAR		2
-#define	CTL_OP_WRITEVAR		3
-#define	CTL_OP_READCLOCK	4
-#define	CTL_OP_WRITECLOCK	5
-#define	CTL_OP_SETTRAP		6
-#define	CTL_OP_ASYNCMSG		7
-#define CTL_OP_CONFIGURE        8
-#define	CTL_OP_UNSETTRAP	31
+#define	CTL_OP_UNSPEC		0	/* unspeciffied */
+#define	CTL_OP_READSTAT		1	/* read status */
+#define	CTL_OP_READVAR		2	/* read variables */
+#define	CTL_OP_WRITEVAR		3	/* write variables */
+#define	CTL_OP_READCLOCK	4	/* read clock variables */
+#define	CTL_OP_WRITECLOCK	5	/* write clock variables */
+#define	CTL_OP_SETTRAP		6	/* set trap address */
+#define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
+#define CTL_OP_CONFIGURE        8	/* configuration message */
+#define	CTL_OP_UNSETTRAP	31	/* unset trap */
 
 /*
  * {En,De}coding of the system status word
  */
-#define	CTL_SST_TS_UNSPEC	0	/* time source unspecified */
-#define	CTL_SST_TS_ATOM		1	/* time source calibrated atomic */
-#define	CTL_SST_TS_LF		2	/* time source VLF or LF radio */
-#define	CTL_SST_TS_HF		3	/* time source HF radio */
-#define	CTL_SST_TS_UHF		4	/* time source UHF radio */
-#define	CTL_SST_TS_LOCAL	5	/* time source LOCAL */
-#define	CTL_SST_TS_NTP		6	/* time source NTP */
-#define	CTL_SST_TS_UDPTIME	7	/* time source UDP/TIME */
-#define	CTL_SST_TS_WRSTWTCH	8	/* time source is wristwatch */
-#define	CTL_SST_TS_TELEPHONE	9	/* time source is telephone modem */
-#define CTL_SST_TS_PPS		0x20	/* time source is PPS signal */
+#define	CTL_SST_TS_UNSPEC	0	/* unspec */
+#define	CTL_SST_TS_ATOM		1	/* pps */
+#define	CTL_SST_TS_LF		2	/* lf radio */
+#define	CTL_SST_TS_HF		3	/* hf radio */
+#define	CTL_SST_TS_UHF		4	/* uhf radio */
+#define	CTL_SST_TS_LOCAL	5	/* local */
+#define	CTL_SST_TS_NTP		6	/* ntp */
+#define	CTL_SST_TS_UDPTIME	7	/* other */
+#define	CTL_SST_TS_WRSTWTCH	8	/* wristwatch */
+#define	CTL_SST_TS_TELEPHONE	9	/* telephone */
 
 #define	CTL_SYS_MAXEVENTS	15
 
@@ -91,14 +90,14 @@ struct ntp_control {
 #define	CTL_PST_AUTHENABLE	0x40
 #define	CTL_PST_AUTHENTIC	0x20
 #define	CTL_PST_REACH		0x10
-#define	CTL_PST_UNSPEC		0x08
+#define	CTL_PST_BCAST		0x08
 
 #define	CTL_PST_SEL_REJECT	0	/*   reject */
 #define	CTL_PST_SEL_SANE	1	/* x falsetick */
 #define	CTL_PST_SEL_CORRECT	2	/* . excess */
 #define	CTL_PST_SEL_SELCAND	3	/* - outlyer */
-#define	CTL_PST_SEL_SYNCCAND	4	/* + candidat */
-#define	CTL_PST_SEL_DISTSYSPEER	5	/* # selected */
+#define	CTL_PST_SEL_SYNCCAND	4	/* + candidate */
+#define	CTL_PST_SEL_EXCESS	5	/* # backup */
 #define	CTL_PST_SEL_SYSPEER	6	/* * sys.peer */
 #define	CTL_PST_SEL_PPS		7	/* o pps.peer */
 
@@ -155,20 +154,20 @@ struct ntp_control {
 #define	CS_REFTIME	7
 #define	CS_POLL		8
 #define	CS_PEERID	9
-#define CS_STATE	10
-#define	CS_OFFSET	11
-#define	CS_DRIFT	12
-#define CS_JITTER	13
-#define CS_ERROR	14
-#define	CS_CLOCK	15
-#define	CS_PROCESSOR	16
-#define	CS_SYSTEM	17
-#define CS_VERSION	18
-#define	CS_STABIL	19
-#define CS_VARLIST	20
-#define CS_TAI          21
-#define CS_LEAPTAB      22
-#define CS_LEAPEND      23
+#define	CS_OFFSET	10
+#define	CS_DRIFT	11
+#define CS_JITTER	12
+#define CS_ERROR	13
+#define	CS_CLOCK	14
+#define	CS_PROCESSOR	15
+#define	CS_SYSTEM	16
+#define CS_VERSION	17
+#define	CS_STABIL	18
+#define CS_VARLIST	19
+#define CS_TAI          20
+#define CS_LEAPTAB      21
+#define CS_LEAPEND      22
+#define	CS_RATE		23
 #ifdef OPENSSL
 #define CS_FLAGS	24
 #define CS_HOST		25
@@ -179,7 +178,7 @@ struct ntp_control {
 #define	CS_GROUP	30
 #define	CS_MAXCODE	CS_GROUP
 #else
-#define	CS_MAXCODE	CS_LEAPEND
+#define	CS_MAXCODE	CS_RATE
 #endif /* OPENSSL */
 
 /*
@@ -224,17 +223,18 @@ struct ntp_control {
 #define CP_VARLIST	37
 #define	CP_IN		38
 #define	CP_OUT		39
+#define	CP_RATE		40
 #ifdef OPENSSL
-#define CP_FLAGS	40
-#define CP_HOST		41
-#define CP_VALID	42
-#define	CP_INITSEQ	43
-#define	CP_INITKEY	44
-#define	CP_INITTSP	45
-#define	CP_DIGEST	46
+#define CP_FLAGS	41
+#define CP_HOST		42
+#define CP_VALID	43
+#define	CP_INITSEQ	44
+#define	CP_INITKEY	45
+#define	CP_INITTSP	46
+#define	CP_DIGEST	47
 #define	CP_MAXCODE	CP_DIGEST
 #else
-#define	CP_MAXCODE	CP_OUT
+#define	CP_MAXCODE	CP_RATE
 #endif /* OPENSSL */
 
 /*

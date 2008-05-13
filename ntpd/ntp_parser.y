@@ -99,6 +99,7 @@
 %token		T_Flag2
 %token		T_Flag3
 %token		T_Flag4
+%token		T_Flake
 %token		T_Floor
 %token		T_Freq
 %token		T_Fudge
@@ -165,6 +166,7 @@
 %token		T_Pps
 %token		T_Preempt
 %token		T_Prefer
+%token		T_Protostats
 %token		T_Pw
 %token		T_Qos
 %token		T_RandFile
@@ -368,7 +370,7 @@ option_list
 
 option
 /*        :	/* Null Statement { $$ = NULL; } */
-        :	T_Autokey      { $$ = create_attr_ival(T_Flag, FLAG_SKEY | FLAG_AUTHENABLE); }
+        :	T_Autokey      { $$ = create_attr_ival(T_Flag, FLAG_SKEY); }
 	|	T_Burst        { $$ = create_attr_ival(T_Flag, FLAG_BURST); }
 	|	T_Iburst       { $$ = create_attr_ival(T_Flag, FLAG_IBURST); }
 	|	T_Key T_Integer      { $$ = create_attr_ival(T_Key, $2); }
@@ -529,6 +531,8 @@ stat
                     { $$ = create_pval("rawstats"); }
         |	T_Sysstats
                     { $$ = create_pval("sysstats"); }
+	|	T_Protostats
+		    { $$ = create_pval("protostats"); }
 	;
 
 filegen_option_list
@@ -586,7 +590,8 @@ ac_flag_list
 	;
 
 access_control_flag
-	:	T_Ignore       { $$ = create_ival(RES_IGNORE); }
+	:	T_Flake        { $$ = create_ival(RES_TIMEOUT); }
+	|	T_Ignore       { $$ = create_ival(RES_IGNORE); }
         |	T_Kod          { $$ = create_ival(RES_KOD); }
 	|	T_Limited      { $$ = create_ival(RES_LIMITED); }
 	|	T_Lowpriotrap  { $$ = create_ival(RES_LPTRAP); }

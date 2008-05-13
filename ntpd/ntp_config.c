@@ -499,7 +499,6 @@ create_peer_node(
 			break;
 		    case T_Key:
 			my_node->peerkey = my_val->value.i;
-			my_node->peerflags |=  FLAG_AUTHENABLE;
 			break;
 		    case T_Version:
 			my_node->peerversion = my_val->value.i;
@@ -818,6 +817,7 @@ struct key_tok keyword_list[] = {
 	{ "peerstats",		T_Peerstats,       NO_ARG },
 	{ "rawstats",		T_Rawstats,        NO_ARG },
 	{ "sysstats", 		T_Sysstats,        NO_ARG },
+	{ "protostats",		T_Protostats,	   NO_ARG },
 /* filegen_option */
 	{ "disable",		T_Disable,         NO_ARG },
 	{ "enable",		T_Enable,          NO_ARG },
@@ -847,6 +847,7 @@ struct key_tok keyword_list[] = {
 	{ "beacon",		T_Beacon,          NO_ARG },
 	{ "orphan",		T_Orphan,          NO_ARG },
 /* access_control_flag */
+	{ "flake",		T_Flake,	   NO_ARG },
 	{ "ignore",		T_Ignore,          NO_ARG },
 	{ "limited",		T_Limited,         NO_ARG },
 	{ "kod",		T_Kod,             NO_ARG },
@@ -1186,7 +1187,7 @@ config_access(void)
 			ntp_minpoll = my_opt->value.i;
 			break;
 		    case T_Minimum:
-			res_min_interval = 1 << my_opt->value.i;
+			ntp_minpkt = my_opt->value.i;
 			break;
 		    case T_Monitor:
 			mon_age = my_opt->value.i;
@@ -1948,9 +1949,9 @@ config_sim(void)
 static void
 config_ntpd(void)
 {
+	config_monitor();
 	config_auth();
 	config_tos();
-	config_monitor();
 	config_access();
 	config_tinker();
 	config_system_opts();

@@ -172,17 +172,17 @@ struct xcmd opcmds[] = {
 /*
  * Old CTL_PST defines for version 2.
  */
-#define OLD_CTL_PST_CONFIG			0x80
+#define OLD_CTL_PST_CONFIG		0x80
 #define OLD_CTL_PST_AUTHENABLE		0x40
 #define OLD_CTL_PST_AUTHENTIC		0x20
-#define OLD_CTL_PST_REACH			0x10
-#define OLD_CTL_PST_SANE			0x08
-#define OLD_CTL_PST_DISP			0x04
+#define OLD_CTL_PST_REACH		0x10
+#define OLD_CTL_PST_SANE		0x08
+#define OLD_CTL_PST_DISP		0x04
+
 #define OLD_CTL_PST_SEL_REJECT		0
 #define OLD_CTL_PST_SEL_SELCAND 	1
 #define OLD_CTL_PST_SEL_SYNCCAND	2
 #define OLD_CTL_PST_SEL_SYSPEER 	3
-
 
 char flash2[] = " .+*    "; /* flash decode for version 2 */
 char flash3[] = " x.-+#*o"; /* flash decode for peer status version 3 */
@@ -543,7 +543,7 @@ dolist(
 		return 1;
 	}
 
-	(void) fprintf(fp,"assID=%d ",associd);
+	(void) fprintf(fp,"associd=%d ",associd);
 	printvars(dsize, datap, (int)rstatus, type, fp);
 	return 1;
 }
@@ -611,7 +611,7 @@ writelist(
 	if (dsize == 0)
 		(void) fprintf(fp, "done! (no data returned)\n");
 	else {
-		(void) fprintf(fp,"assID=%d ",associd);
+		(void) fprintf(fp,"associd=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
 			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
 	}
@@ -686,7 +686,7 @@ writevar(
 	if (dsize == 0)
 		(void) fprintf(fp, "done! (no data returned)\n");
 	else {
-		(void) fprintf(fp,"assID=%d ",associd);
+		(void) fprintf(fp,"associd=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
 			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
 	}
@@ -768,8 +768,8 @@ findassidrange(
 	}
 
 	if (assid2 == 0 || assid2 > 65535) {
-		(void) fprintf(stderr,
-				   "***Invalid association ID %lu specified\n", (u_long)assid2);
+	fprintf(stderr,
+	    "***Invalid association ID %lu specified\n", (u_long)assid2);
 		return 0;
 	}
 
@@ -951,7 +951,7 @@ printassoc(
 	 * Output a header
 	 */
 	(void) fprintf(fp,
-			   "\nind assID status  conf reach auth condition  last_event cnt\n");
+			   "\nind assid status  conf reach auth condition  last_event cnt\n");
 	(void) fprintf(fp,
 			   "===========================================================\n");
 	for (i = 0; i < numassoc; i++) {
@@ -964,110 +964,147 @@ printassoc(
 			conf = "yes";
 		else
 			conf = "no";
-		if (statval & CTL_PST_REACH || 1) {
-			reach = "yes";
+		if (statval & CTL_PST_BCAST) {
+			reach = "none";
+			if (statval & CTL_PST_AUTHENABLE)
+				auth = "yes";
+			else
+				auth = "none";
+		} else {
+			if (statval & CTL_PST_REACH)
+				reach = "yes";
+			else
+				reach = "no";
 			if (statval & CTL_PST_AUTHENABLE) {
 				if (statval & CTL_PST_AUTHENTIC)
 					auth = "ok ";
 				else
 					auth = "bad";
-			} else
+			} else {
 				auth = "none";
-
-			if (pktversion > NTP_OLDVERSION)
-				switch (statval & 0x7) {
-				case CTL_PST_SEL_REJECT:
-					condition = "reject";
-					break;
-				case CTL_PST_SEL_SANE:
-					condition = "falsetick";
-					break;
-				case CTL_PST_SEL_CORRECT:
-					condition = "excess";
-					break;
-				case CTL_PST_SEL_SELCAND:
-					condition = "outlyer";
-					break;
-				case CTL_PST_SEL_SYNCCAND:
-					condition = "candidat";
-					break;
-				case CTL_PST_SEL_DISTSYSPEER:
-					condition = "selected";
-					break;
-				case CTL_PST_SEL_SYSPEER:
-					condition = "sys.peer";
-					break;
-				case CTL_PST_SEL_PPS:
-					condition = "pps.peer";
-					break;
-				}
-			else
-				switch (statval & 0x3) {
-				case OLD_CTL_PST_SEL_REJECT:
-					if (!(statval & OLD_CTL_PST_SANE))
-					condition = "insane";
-					else if (!(statval & OLD_CTL_PST_DISP))
-					condition = "hi_disp";
-					else
-					condition = "";
-					break;
-				case OLD_CTL_PST_SEL_SELCAND:
-					condition = "sel_cand";
-					break;
-				case OLD_CTL_PST_SEL_SYNCCAND:
-					condition = "sync_cand";
-					break;
-				case OLD_CTL_PST_SEL_SYSPEER:
-					condition = "sys_peer";
-					break;
-				}
-
-		} else {
-			reach = "no";
-			auth = condition = "";
+			}
 		}
+		if (pktversion > NTP_OLDVERSION) {
+			switch (statval & 0x7) {
 
+			case CTL_PST_SEL_REJECT:
+				condition = "reject";
+				break;
+
+			case CTL_PST_SEL_SANE:
+				condition = "falsetick";
+				break;
+
+			case CTL_PST_SEL_CORRECT:
+				condition = "excess";
+				break;
+
+			case CTL_PST_SEL_SELCAND:
+				condition = "outlyer";
+				break;
+
+			case CTL_PST_SEL_SYNCCAND:
+				condition = "candidate";
+				break;
+
+			case CTL_PST_SEL_EXCESS:
+				condition = "backup";
+				break;
+
+			case CTL_PST_SEL_SYSPEER:
+				condition = "sys.peer";
+				break;
+
+			case CTL_PST_SEL_PPS:
+				condition = "pps.peer";
+				break;
+			}
+		} else {
+			switch (statval & 0x3) {
+
+			case OLD_CTL_PST_SEL_REJECT:
+				if (!(statval & OLD_CTL_PST_SANE))
+					condition = "insane";
+				else if (!(statval & OLD_CTL_PST_DISP))
+					condition = "hi_disp";
+				else
+					condition = "";
+				break;
+
+			case OLD_CTL_PST_SEL_SELCAND:
+				condition = "sel_cand";
+				break;
+
+			case OLD_CTL_PST_SEL_SYNCCAND:
+				condition = "sync_cand";
+				break;
+
+			case OLD_CTL_PST_SEL_SYSPEER:
+				condition = "sys_peer";
+				break;
+			}
+		}
 		switch (PEER_EVENT|event) {
-			case EVNT_PEERIPERR:
-			last_event = "IP error";
+
+		case PEVNT_MOBIL:
+			last_event = "mobilize";
 			break;
-			case EVNT_PEERAUTH:
-			last_event = "auth fail";
+
+		case PEVNT_DEMOBIL:
+			last_event = "demobilize";
 			break;
-			case EVNT_UNREACH:
-			last_event = "lost reach";
-			break;
-			case EVNT_REACH:
+
+		case PEVNT_REACH:
 			last_event = "reachable";
 			break;
-			case EVNT_PEERCLOCK:
-			last_event = "clock expt";
+
+		case PEVNT_UNREACH:
+			last_event = "unreachable";
 			break;
-#if 0
-			case EVNT_PEERSTRAT:
-			last_event = "stratum chg";
+
+		case PEVNT_RESTART:
+			last_event = "restart";
 			break;
-#endif
-			default:
+
+		case PEVNT_REPLY:
+			last_event = "no_reply";
+			break;
+
+		case PEVNT_RATE:
+			last_event = "raate_exceeded";
+			break;
+
+		case PEVNT_DENY:
+			last_event = "access_denied";
+			break;
+
+		case PEVNT_ARMED:
+			last_event = "leap_armed";
+			break;
+
+		case PEVNT_NEWPEER:
+			last_event = "sys_peer";
+			break;
+
+		case PEVNT_CLOCK:
+			last_event = "clock_alarm";
+			break;
+
+		default:
 			last_event = "";
 			break;
 		}
-
-		if (event_count != 0)
-			cnt = uinttoa(event_count);
-		else
-			cnt = "";
-		(void) sprintf(buf,
-				   "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2s",
-				   i+1, assoc_cache[i].assid, assoc_cache[i].status,
-				   conf, reach, auth, condition, last_event, cnt);
+		cnt = uinttoa(event_count);
+		sprintf(buf,
+		    "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2s",
+		    i + 1, assoc_cache[i].assid, assoc_cache[i].status,
+		    conf, reach, auth, condition, last_event, cnt);
 		bp = &buf[strlen(buf)];
 		while (bp > buf && *(bp-1) == ' ')
 			*(--bp) = '\0';
 		(void) fprintf(fp, "%s\n", buf);
 	}
 }
-
 
 
 /*
@@ -1195,7 +1232,7 @@ pstatus(
 		return;
 	}
 
-	(void) fprintf(fp,"assID=%d ",associd);
+	(void) fprintf(fp,"associd=%d ",associd);
 	printvars(dsize, datap, (int)rstatus, TYPE_PEER, fp);
 }
 

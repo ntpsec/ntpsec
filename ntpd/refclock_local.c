@@ -34,9 +34,7 @@
  * Another application for this driver is if you want to use a
  * particular server's clock as the clock of last resort when all other
  * normal synchronization sources have gone away. This is especially
- * useful if that server has an ovenized oscillator. For this you would
- * configure this driver at a higher stratum (say 5) to prevent the
- * server's stratum from falling below that.
+ * useful if that server has an ovenized oscillator.
  *
  * A third application for this driver is when an external discipline
  * source is available, such as the NIST "lockclock" program, which
@@ -62,25 +60,14 @@
  * In the default mode the behavior of the clock selection algorithm is
  * modified when this driver is in use. The algorithm is designed so
  * that this driver will never be selected unless no other discipline
- * source is available. This can be overriden with the prefer keyword of
- * the server configuration command, in which case only this driver will
- * be selected for synchronization and all other discipline sources will
- * be ignored. This behavior is intended for use when an external
- * discipline source controls the system clock.
+ * source is available.
  *
  * Fudge Factors
  *
  * The stratum for this driver set at 5 by default, but it can be
  * changed by the fudge command and/or the ntpdc utility. The reference
- * ID is 127.0.0.1 by default, but can be changed using the same mechanism.
- * *NEVER* configure this driver to operate at a stratum which might
- * possibly disrupt a client with access to a bona fide primary server,
- * unless the local clock oscillator is reliably disciplined by another
- * source. *NEVER NEVER* configure a server which might devolve to an
- * undisciplined local clock to use multicast mode. Always remember that
- * an improperly configured local clock driver let loose in the Internet
- * can cause very serious disruption. This is why most of us who care
- * about good time use cryptographic authentication.
+ * ID is 127.0.0.1 by default, but can be changed using the same
+ * mechanism.
  *
  * This driver provides a mechanism to trim the local clock in both time
  * and frequency, as well as a way to manipulate the leap bits. The
@@ -191,6 +178,12 @@ local_poll(
 #endif /* KERNEL_PLL LOCKCLOCK */
 	struct refclockproc *pp;
 
+	/*
+	 * Do no evil unless the house is dark or lit with our own lamp.
+	 */
+	if (!(sys_peer == NULL || sys_peer == peer))
+		return;
+
 #if defined(VMS) && defined(VMS_LOCALUNIT)
 	if (unit == VMS_LOCALUNIT) {
 		extern void vms_local_poll(struct peer *);
@@ -199,6 +192,7 @@ local_poll(
 		return;
 	}
 #endif /* VMS && VMS_LOCALUNIT */
+
 	pp = peer->procptr;
 	pp->polls++;
 

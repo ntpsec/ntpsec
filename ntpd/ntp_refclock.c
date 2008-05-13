@@ -113,8 +113,6 @@ refclock_report(
 		return;
 
 	switch (code) {
-		case CEVNT_NOMINAL:
-			break;
 
 		case CEVNT_TIMEOUT:
 			pp->noreply++;
@@ -127,43 +125,22 @@ refclock_report(
 		case CEVNT_FAULT:
 			break;
 
-		case CEVNT_PROP:
-			break;
-
 		case CEVNT_BADDATE:
 		case CEVNT_BADTIME:
 			pp->baddata++;
 			break;
 
 		default:
-			/* shouldn't happen */
+			/* ignore others */
 			break;
 	}
-
-	if (pp->currentstatus != code) {
-		pp->currentstatus = (u_char)code;
-
-		/* RFC1305: copy only iff not CEVNT_NOMINAL */
-		if (code != CEVNT_NOMINAL)
-			pp->lastevent = (u_char)code;
-
-		if (code == CEVNT_FAULT)
-			msyslog(LOG_ERR,
-			    "clock %s event '%s' (0x%02x)",
-			    refnumtoa(&peer->srcadr),
-			    ceventstr(code), code);
-		else {
-			NLOG(NLOG_CLOCKEVENT)
-			  msyslog(LOG_INFO,
-			    "clock %s event '%s' (0x%02x)",
-			    refnumtoa(&peer->srcadr),
-			    ceventstr(code), code);
-		}
-
-		/* RFC1305: post peer clock event */
-		report_event(EVNT_PEERCLOCK, peer);
-	}
+	if (pp->lastevent < 15)
+		pp->lastevent++;
+	if (pp->currentstatus != code)
+		pp->currentstatus = code;
+		report_event(PEVNT_CLOCK, peer, ceventstr(code));
 }
+
 
 /*
  * init_refclock - initialize the reference clock drivers
@@ -372,7 +349,7 @@ refclock_transmit(
 		peer->outdate = current_time;
 		if (!peer->reach) {
 			if (oreach) {
-				report_event(EVNT_UNREACH, peer);
+				report_event(PEVNT_UNREACH, peer, NULL);
 				peer->timereachable = current_time;
 			}
 		} else {
@@ -609,7 +586,7 @@ refclock_receive(
 	peer->received++;
 	peer->timereceived = current_time;
 	if (!peer->reach) {
-		report_event(EVNT_REACH, peer);
+		report_event(PEVNT_REACH, peer, NULL);
 		peer->timereachable = current_time;
 	}
 	peer->reach |= 1;
@@ -621,15 +598,11 @@ refclock_receive(
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
-	if (cal_enable && last_offset < MINDISPERSE) {
-#ifdef KERNEL_PLL
-		if (peer != sys_peer || pll_status & STA_PPSTIME)
-#else
-		if (peer != sys_peer)
-#endif /* KERNEL_PLL */
+	if (cal_enable && fabs(last_offset) < sys_mindisp && sys_peer !=
+	    NULL) {
+		if (sys_peer->refclktype == REFCLK_ATOM_PPS &&
+		    peer->refclktype != REFCLK_ATOM_PPS)
 			pp->fudgetime1 -= pp->offset * FUDGEFAC;
-		else
-			pp->fudgetime1 -= pp->fudgetime1 * FUDGEFAC;
 	}
 }
 
