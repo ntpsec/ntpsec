@@ -1030,6 +1030,7 @@ readconf(
 			}
 		}
 
+#if 0 /* paranoid checking - these are done in newpeer() */
 		if (intval[TOK_HMODE] != MODE_ACTIVE &&
 		    intval[TOK_HMODE] != MODE_CLIENT &&
 		    intval[TOK_HMODE] != MODE_BROADCAST) {
@@ -1065,6 +1066,7 @@ readconf(
 				intval[TOK_FLAGS], name);
 			resolver_exit(1);
 		}
+#endif /* end paranoid checking */
 
 		flags = 0;
 		if (intval[TOK_FLAGS] & FLAG_PREFER)
@@ -1075,8 +1077,11 @@ readconf(
 		    flags |= CONF_FLAG_BURST;
 		if (intval[TOK_FLAGS] & FLAG_IBURST)
 		    flags |= CONF_FLAG_IBURST;
+
+#ifdef OPENSSL
 		if (intval[TOK_FLAGS] & FLAG_SKEY)
 		    flags |= CONF_FLAG_SKEY;
+#endif /* OPENSSL */
 
 		/*
 		 * This is as good as we can check it.  Add it in.

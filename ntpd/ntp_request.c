@@ -1338,6 +1338,8 @@ do_conf(
 	cp = (struct conf_peer *)inpkt->data;
 	memset(&temp_cp, 0, sizeof(struct conf_peer));
 	memcpy(&temp_cp, (char *)cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
+
+#if 0 /* paranoid checking - these are done in newpeer() */
 	fl = 0;
 	while (items-- > 0 && !fl) {
 		if (((temp_cp.version) > NTP_VERSION)
@@ -1358,6 +1360,7 @@ do_conf(
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
+#endif /* end paranoid checking */
 
 	/*
 	 * Looks okay, try it out
@@ -1377,9 +1380,10 @@ do_conf(
 		    fl |= FLAG_BURST;
 		if (temp_cp.flags & CONF_FLAG_IBURST)
 		    fl |= FLAG_IBURST;
+#ifdef OPENSSL
 		if (temp_cp.flags & CONF_FLAG_SKEY)
 			fl |= FLAG_SKEY;
-		
+#endif /* OPENSSL */		
 		if (client_v6_capable && temp_cp.v6_flag != 0) {
 			peeraddr.ss_family = AF_INET6;
 			GET_INADDR6(peeraddr) = temp_cp.peeraddr6; 

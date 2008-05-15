@@ -434,8 +434,8 @@ struct peer {
 #define FLAG_IBURST	0x0100	/* initial burst mode */
 #define FLAG_NOSELECT	0x0200	/* never select */
 #define FLAG_TRUE	0x0400	/* force truechimer */
-#ifdef OPENSSL
 #define FLAG_SKEY	0x1000  /* autokey authentication */
+#ifdef	OPENSSL
 #define FLAG_ASSOC	0x2000	/* autokey request */
 #endif /* OPENSSL */
 

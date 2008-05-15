@@ -838,8 +838,10 @@ newpeer(
 	if (cast_flags & MDF_MCAST && peer->dstadr) {
 		enable_multicast_if(peer->dstadr, srcadr);
 	}
+#ifdef OPENSSL
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
+#endif /* OPENSSL */
 	peer->cast_flags = cast_flags;
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
