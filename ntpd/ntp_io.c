@@ -205,7 +205,7 @@ static  u_char          sys_interphase = 0;
 
 static  struct interface *new_interface (struct interface *);
 static  void add_interface (struct interface *);
-static  void update_interfaces (u_short, interface_receiver_t, void *);
+static  int update_interfaces (u_short, interface_receiver_t, void *);
 static  void remove_interface (struct interface *);
 static  struct interface *create_interface (u_short, struct interface *);
 
