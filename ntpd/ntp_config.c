@@ -45,7 +45,10 @@
 
 #ifdef SYS_WINNT
 # include <io.h>
-HANDLE ResolverThreadHandle = NULL;
+static HANDLE ResolverThreadHandle = NULL;
+HANDLE ResolverEventHandle;
+#else
+int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
 #endif /* SYS_WINNT */
 
 /*
@@ -2610,7 +2613,22 @@ do_resolve_internal(void)
 	(void) signal_no_reset(SIGCHLD, catchchild);
 
 #ifndef SYS_VXWORKS
+	/* the parent process will write to the pipe
+	 * in order to wake up to child process
+	 * which may be waiting in a select() call
+	 * on the read fd */
+	if (pipe(resolver_pipe_fd) < 0) {
+		msyslog(LOG_ERR,
+			"unable to open resolver pipe");
+		exit(1);
+	}
+
 	i = fork();
+	/* Shouldn't the code below be re-ordered?
+	 * I.e. first check if the fork() returned an error, then
+	 * check whether we're parent or child.
+	 *     Martin Burnicki
+	 */
 	if (i == 0) {
 		/*
 		 * this used to close everything
@@ -2684,6 +2702,11 @@ do_resolve_internal(void)
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 		abort_resolve();
 	}
+	else {
+		/* This is the parent process who will write to the pipe,
+		 * so we close the read fd */
+		close(resolver_pipe_fd[0]);
+	}
 #else /* SYS_WINNT */
 	{
 		/* NT's equivalent of fork() is _spawn(), but the start point
@@ -2692,6 +2715,11 @@ do_resolve_internal(void)
 		 */
 		DWORD dwThreadId;
 		fflush(stdout);
+		ResolverEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if (ResolverEventHandle == NULL) {
+			msyslog(LOG_ERR, "Unable to create resolver event object, can't start ntp_intres");
+			abort_resolve();
+		}
 		ResolverThreadHandle = CreateThread(
 		    NULL,			 /* no security attributes	*/
 		    0,				 /* use default stack size	*/
@@ -2701,6 +2729,8 @@ do_resolve_internal(void)
 		    &dwThreadId);		 /* returns the thread identifier */
 		if (ResolverThreadHandle == NULL) {
 			msyslog(LOG_ERR, "CreateThread() failed, can't start ntp_intres");
+			CloseHandle(ResolverEventHandle);
+			ResolverEventHandle = NULL;
 			abort_resolve();
 		}
 	}

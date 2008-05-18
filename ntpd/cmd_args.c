@@ -179,11 +179,11 @@ getCmdOpts(
 	if (HAVE_OPT( UPDATEINTERVAL )) {
 		long val = OPT_VALUE_UPDATEINTERVAL;
 			  
-		if ((val >= 60) || (val == 0))
+		if (val >= 0)
 			interface_interval = val;
 		else {
 			msyslog(LOG_ERR,
-				"command line interface update interval %ld must be 0 or longer than 60 seconds",
+				"command line interface update interval %ld must be greater or equal to 0",
 				      val);
 			errflg++;
 		}

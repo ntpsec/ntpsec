@@ -337,7 +337,7 @@ OnIoReadComplete(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	/*
 	 * Get a new recv buffer for the next packet
 	 */
-	newbuff = get_free_recv_buffer();
+	newbuff = get_free_recv_buffer_alloc();
 	if (newbuff == NULL) {
 		/*
 		 * recv buffers not available so we drop the packet
@@ -398,7 +398,7 @@ io_completion_port_add_clock_io(
 		return 1;
 	}
 
-	buff = get_free_recv_buffer();
+	buff = get_free_recv_buffer_alloc();
 
 	if (buff == NULL)
 	{
@@ -507,7 +507,7 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	/*
 	 * Get a new recv buffer for the next packet
 	 */
-	newbuff = get_free_recv_buffer();
+	newbuff = get_free_recv_buffer_alloc();
 	if (newbuff == NULL) {
 		/*
 		 * recv buffers not available so we drop the packet
@@ -588,7 +588,7 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 		return 1;
 	}
 
-	buff = get_free_recv_buffer();
+	buff = get_free_recv_buffer_alloc();
 
 	if (buff == NULL)
 	{
