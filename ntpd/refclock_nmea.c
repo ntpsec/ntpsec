@@ -380,7 +380,7 @@ nmea_ppsapi(
 	}
 	if (enb_hardpps) {
 		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
-				    up->pps_params.mode & ~PPS_TSFMT_TSPEC,
+				    up->pps_params.mode & 0x0F,
 				    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_nmea: time_pps_kcbind failed: %m");
