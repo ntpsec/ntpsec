@@ -1,4 +1,5 @@
-* Fixed the incorrect edge parameter being passed to time_pps_kcbind.
+* Fixed the incorrect edge parameter being passed to time_pps_kcbind in
+  NMEA refclock driver.
 * [Bug 399] NMEA refclock driver does not honor time1 offset if flag3 set.
 * [Bug 985] Modifications to NMEA reference clock driver to support Accord GPS Clock.
 * [Bug 1022] Fix compilation problems with yesterday's commit.
