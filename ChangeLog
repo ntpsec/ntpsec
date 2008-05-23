@@ -1,3 +1,5 @@
+* poll time updates from Dave Mills.
+* local refclock documentation updates from Dave Mills.
 * [Bug 1022] Fix compilation problems with yesterday's commit.
 * Updates and cleanup from Dave Mills:
   I've now spent eleven months of a sabbatical year - 7 days a week, 6-10

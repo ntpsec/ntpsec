@@ -1740,8 +1740,17 @@ poll_update(
 			hpoll = peer->hpoll;
 		else
 			hpoll = min(peer->ppoll, peer->hpoll);
-		next = (u_long)((0x10000 | (ntp_random() & 0x0fff)) <<
-		    hpoll) >> 16;
+#ifdef REFCLOCK
+		if (peer->flags & FLAG_REFCLOCK)
+			next = 1 << hpoll;
+		else
+			next = (0x1000UL | (ntp_random() & 0x0ff) <<
+			    hpoll) >> 12;
+#else /* REFCLOCK */
+		next = (0x1000UL | (ntp_random() & 0x0ff) << hpoll) >>
+		    12;
+#endif /* REFCLOCK */
+
 		next += peer->outdate;
 		if (next > utemp)
 			peer->nextdate = next;
