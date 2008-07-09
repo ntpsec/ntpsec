@@ -125,3 +125,12 @@ version.m4
 sntp/version.def
 sntp/autogen-version.def
 ylwrap
+config.h
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+aclocal.m4
+test.kod
