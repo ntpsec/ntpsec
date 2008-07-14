@@ -734,7 +734,7 @@ gen_md5(
 			}
 			md5key[j] = (u_char)temp;
 		}
-		md5key[15] = '\0';
+		md5key[j] = '\0';
 		fprintf(str, "%2d MD5 %16s	# MD5 key\n", i,
 		    md5key);
 	}
