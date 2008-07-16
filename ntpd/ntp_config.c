@@ -459,6 +459,7 @@ create_peer_node(
 	my_node->peerversion = NTP_VERSION;
 	my_node->peerkey = 0;
 	my_node->peerflags = 0;
+	my_node->bias = 0;
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
@@ -509,6 +510,8 @@ create_peer_node(
 		    case T_Flag:
 			my_node->peerflags |= my_val->value.i;
 			break;
+		    case T_Bias:
+			my_node->bias = my_val->value.d;
 		}
 		free_node(my_val);
 	}
@@ -794,6 +797,7 @@ struct key_tok keyword_list[] = {
 	{ "trustedkey",		T_Trustedkey,      NO_ARG },
 /* option */
 	{ "autokey",		T_Autokey,         NO_ARG },
+	{ "bias",		T_Bias,		   NO_ARG },
 	{ "burst",	        T_Burst,           NO_ARG },
 	{ "iburst",	        T_Iburst,          NO_ARG },
 	{ "key",		T_Key,             NO_ARG },
@@ -806,6 +810,7 @@ struct key_tok keyword_list[] = {
 	{ "prefer",	        T_Prefer,          NO_ARG },
 	{ "ttl",	        T_Ttl,             NO_ARG },
 	{ "version",		T_Version,         NO_ARG },
+	{ "xleave",		T_Xleave,	   NO_ARG },
 /* crypto_command */
 	{ "host",		T_Host,            SINGLE_ARG },
 	{ "ident",		T_Ident,           SINGLE_ARG },

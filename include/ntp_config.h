@@ -80,6 +80,7 @@ struct peer_node {
     int peerversion;
     int peerkey;
     int peerflags;
+    double bias;
 };
 
 struct auth_node {
