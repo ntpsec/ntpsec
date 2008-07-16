@@ -169,7 +169,46 @@ case "$host" in
     ;;
 esac
 
-AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
+AC_CACHE_CHECK(if we want the windows symmetric client hack, ac_cv_wintime,
+[AC_ARG_ENABLE(wintime,
+   AC_HELP_STRING([--enable-wintime], [- Provide the windows symmetric client hack]),
+    [ans=$enableval],
+    [ans=no])
+ac_cv_wintime=$ans])
+# End of AC_CACHE_CHECK for wintime
+case "$ac_cv_wintime" in
+ yes)
+    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
+    ;;
+esac
+
+AC_CACHE_CHECK([if we want support for Samba's signing daemon], ac_cv_ntp_signd,
+[AC_ARG_ENABLE(ntp-signd,
+   AC_HELP_STRING([--enable-ntp-signd], [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]),
+    [ans=$enableval],
+    [ans=no])
+ac_cv_ntp_signd=$ans])
+# End of AC_CACHE_CHECK for ntp_signd
+
+case "$ac_cv_ntp_signd" in
+	no)
+		;;
+	yes)
+		ntp_signd_path=/var/run/ntp_signd
+		;;
+	*)
+		ntp_signd_path="$ac_cv_ntp_signd"
+		;;
+esac
+
+case "$ac_cv_ntp_signd" in
+ yes)
+    AC_DEFINE(HAVE_NTP_SIGND, ,[Do we want support for Samba's signing daemon?])
+    AC_DEFINE_UNQUOTED(NTP_SIGND_PATH, "$ntp_signd_path", [Path to sign daemon rendezvous socket])
+    ;;
+esac
+
+AC_CACHE_CHECK(if we should use /dev/clockctl, ac_cv_clockctl,
 [AC_ARG_ENABLE(clockctl,
    AC_HELP_STRING([--enable-clockctl], [s Use /dev/clockctl for non-root clock control]),
     [ans=$enableval],
@@ -181,25 +220,25 @@ AC_CACHE_CHECK(if we should use /dev/clockctl, ac_clockctl,
 	 ;;
      esac
      ])
-ac_clockctl=$ans])
+ac_cv_clockctl=$ans])
 # End of AC_CACHE_CHECK for clockctl
 AC_CHECK_HEADERS(sys/clockctl.h)
-case "$ac_clockctl$ac_cv_header_sys_clockctl_h" in
+case "$ac_cv_clockctl$ac_cv_header_sys_clockctl_h" in
  yesyes)
     AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
     ;;
 esac
 
-AC_CACHE_CHECK(if we have linux capabilities (libcap), ac_linuxcaps,
+AC_CACHE_CHECK(if we have linux capabilities (libcap), ac_cv_linuxcaps,
 [AC_ARG_ENABLE(linuxcaps,
    AC_HELP_STRING([--enable-linuxcaps], [s Use Linux capabilities for non-root clock control]),
     [ans=$enableval],
     [ans=no])
-ac_linuxcaps=$ans])
+ac_cv_linuxcaps=$ans])
 # End of AC_CACHE_CHECK for linuxcaps
 AC_CHECK_HEADERS(sys/capability.h)
 AC_CHECK_HEADERS(sys/prctl.h)
-case "$ac_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
+case "$ac_cv_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
  yesyesyes)
     AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
@@ -3960,6 +3999,7 @@ AC_MSG_CHECKING(for Kame IPv6 support)
 AC_ARG_WITH(kame,
 	AC_HELP_STRING([--with-kame], [- =/usr/local/v6]),
 	use_kame="$withval", use_kame="no")
+
 
 case "$use_kame" in
 	no)
