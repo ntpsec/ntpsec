@@ -13,7 +13,7 @@
 		<h3><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</h3>
 		<img src="pic/wingdorothy.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>The Wizard of Oz</i>, L. Frank Baum</a>
 		<p>You need help from the monkeys.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">19:34</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="266">Saturday, March 22, 2008</csobj></p>
+		<p>Last update: July 5, 2008</p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
@@ -57,6 +57,7 @@
 		<p>If the latest leap is in the past, nothing further is done other than to install the TAI offset. If the leap is in the future less than 28 days, the leap warning bits are set. If in the future less than 23 hours, the kernel is armed to insert one second at the end of the current day. If the kernel is enabled, the leap is done automatically at that time; otherwise, the clock is effectively stopped for one second at the leap. Additional details are in the <a href='http://www.eecis.udel.edu/~mills/leap.html'>The NTP Timescale and Leap Seconds</a> white paper</p>
 		<p>Dependent servers and clients tally the leap warning bits of surviving servers and reference clocks. When a majority of the survivors show warning, a leap is programmed at the end of the current month. During the month and day of insertion, they operate as above. In this way the leap is propagated at all dependent servers and clients.</p>
 		<h4 id="notes">Additional Features</h4>
+		<p>A new experimental feature called interleaved modes can be used  in NTP symmetric or broadcast modes. It is designed to improve accuracy by  avoiding kernel latency and queueing delay, as described on the <a href="xleave.html">NTP Interleaved Modes</a> page. It is activated by the <tt>xleave</tt> option with the <tt>peer</tt> or <tt>broadcast</tt> configuration commands. The NTP protocol automatically reconfigures in normal or interleaved mode as required. Ordinary broadcast clients can use the same servers as interleaved clients at the same time. Further details are in the white paper <a href="http://www.eecis.udel.edu/~mills/onwire.html">NTP Interleaved On-Wire Protocol</a> and the <a href="http://www.eecis.udel.edu/~mills/database/brief/onwire/onwire.ppt">briefing</a> of the same name. </p>
 		<p>If <tt>ntpd</tt>, is configured with NetInfo support, it will attempt to read its configuration from the NetInfo service if the default <tt>ntp.conf</tt> file cannot be read and no file is specified by the <tt>-c</tt> option.</p>
 		<p>In contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
 		<p>Various internal <tt>ntpd</tt> variables can be displayed and configuration options altered while the <tt>ntpd</tt> is running using the <tt><a href="ntpq.html">ntpq</a></tt> and <tt><a href="ntpdc.html">ntpdc</a></tt> utility programs.</p>
