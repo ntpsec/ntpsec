@@ -1,3 +1,4 @@
+* [Bug 1037] buffer in subroutine was 1 byte short.
 * configure.ac: cleanup, add option for wintime, and lay the groundwork
   for the changes needed for bug 1028.
 * Fixes from Dave Mills: 'bias' and 'interleave' work.  Separate

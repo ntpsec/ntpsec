@@ -714,7 +714,7 @@ gen_md5(
 	char	*id		/* file name id */
 	)
 {
-	u_char	md5key[16];	/* MD5 key */
+	u_char	md5key[16+1];	/* MD5 key */
 	FILE	*str;
 	int	i, j;
 
