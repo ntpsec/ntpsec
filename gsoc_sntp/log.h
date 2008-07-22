@@ -10,7 +10,7 @@
 #include <stdarg.h>
 
 void log_msg(char *message, char type);
-void debug(char *message);
+void debug_msg(char *message);
 
 char init = 0;
 FILE *log_file;

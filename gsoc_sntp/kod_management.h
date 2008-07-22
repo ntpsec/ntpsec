@@ -2,7 +2,7 @@
 #define KOD_MANAGEMENT_H
 
 struct kod_entry {
-	char *hostname;
+	char hostname[255];
 	unsigned int timestamp;
 	char type[4];
 	struct kod_entry *next;

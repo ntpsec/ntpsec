@@ -5,7 +5,13 @@
 #include "log.h"
 
 
-int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
+int 
+resolve_hosts (
+		char **hosts, 
+		int hostc, 
+		struct addrinfo **res
+	) 
+{
 	register unsigned int a, b;
 	unsigned int entryc = 0; 
 
@@ -65,11 +71,11 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 }
 
 /* Send a packet */
-static void
+void
 sendpkt (
-	struct sockaddr_storage *dest,
-	struct pkt *pkt,
-	int len
+		struct sockaddr_storage *dest,
+		struct pkt *pkt,
+		int len
 	)
 {
 	int sock;
@@ -190,7 +196,7 @@ recvpkt (
 	/* Do authentication stuff here */
 
 	/* Left for now, finishin other stuff. I think I might want that somewhere else,
-	 * don't want this function to do on-wire tasks. Sanity checks are right here I think
+	 * don't want this function to do on-wire stuff. Sanity checks are right here I think
 	 *
 	server->leap = PKT_LEAP(rpkt->li_vn_mode);
 	server->stratum = PKT_TO_STRATUM(rpkt->stratum);
@@ -213,7 +219,9 @@ recvpkt (
  *		    (non-blocking).
  */
 int
-is_reachable (struct addrinfo *dst)
+is_reachable (
+		struct addrinfo *dst
+	)
 {
 	SOCKET sockfd;
 
@@ -254,17 +262,17 @@ filter_reachable (
 
 	for(a=0; a<filter_elements; a++) 
 		cpyres[a] = res[index[a]];
-
-
+	
+	
 	for(a=0, b=0; a<resc; a++) {
 		if(a == index[b]) 
 			b++;
 		else 
 			freeaddrinfo(res[a]);
 	}
-
+	
 	res = cpyres;
-
+	
 	return filter_elements;
 }
 
@@ -275,4 +283,5 @@ filter_ntp (
 		int resc
 	   )
 {
+	return 0;
 }

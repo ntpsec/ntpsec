@@ -41,13 +41,10 @@ POST_UNINSTALL = :
 build_triplet = i386-unknown-freebsd7.0
 host_triplet = i386-unknown-freebsd7.0
 bin_PROGRAMS = sntp$(EXEEXT)
-DIST_COMMON = $(am__configure_deps) $(srcdir)/../config.guess \
-	$(srcdir)/../config.sub $(srcdir)/../depcomp \
-	$(srcdir)/../install-sh $(srcdir)/../ltmain.sh \
-	$(srcdir)/../missing $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/bincheck.mf \
 	$(srcdir)/config.h.in $(top_srcdir)/configure config.guess \
-	config.sub
+	config.sub depcomp install-sh ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -67,7 +64,7 @@ sntp_OBJECTS = $(am_sntp_OBJECTS)
 sntp_LDADD = $(LDADD)
 sntp_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.
-depcomp = $(SHELL) $(top_srcdir)/../depcomp
+depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -93,12 +90,12 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run tar
+ACLOCAL = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run aclocal-1.10
+AMTAR = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run automake-1.10
+AUTOCONF = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run autoconf
+AUTOHEADER = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run autoheader
+AUTOMAKE = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run automake-1.10
 AWK = gawk
 BINSUBDIR = bin
 CC = gcc
@@ -134,8 +131,8 @@ LIBS = -lm
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/Amidamaru/projects/sntp/dev/missing --run makeinfo
-MKDIR_P = ./../install-sh -c -d
+MAKEINFO = ${SHELL} /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/missing --run makeinfo
+MKDIR_P = ./install-sh -c -d
 NMEDIT = 
 OBJEXT = o
 PACKAGE = msntp
@@ -151,10 +148,10 @@ SET_MAKE =
 SHELL = /usr/local/bin/bash
 STRIP = strip
 VERSION = 1.6
-abs_builddir = /home/Amidamaru/projects/sntp/dev/sntp
-abs_srcdir = /home/Amidamaru/projects/sntp/dev/sntp
-abs_top_builddir = /home/Amidamaru/projects/sntp/dev/sntp
-abs_top_srcdir = /home/Amidamaru/projects/sntp/dev/sntp
+abs_builddir = /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp
+abs_srcdir = /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp
+abs_top_builddir = /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp
+abs_top_srcdir = /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = f77
@@ -183,13 +180,13 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/Amidamaru/projects/sntp/dev/install-sh
+install_sh = $(SHELL) /geom_mobile/home/Amidamaru/projects/sntp/repo/gsoc_sntp/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
 mandir = ${datarootdir}/man
-mkdir_p = $(top_builddir)/./../install-sh -c -d
+mkdir_p = $(top_builddir)/./install-sh -c -d
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local

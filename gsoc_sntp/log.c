@@ -30,7 +30,7 @@ void log_msg(char *message, int type) {
 	}
 }
 
-void debug(char *message) {
+void debug_msg(char *message) {
 	if(HAVE_OPT(FILELOG)) {
 		fprintf(stderr, message);
 	}
