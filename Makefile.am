@@ -24,6 +24,7 @@ SUBDIRS+= 		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
+	gsoc_sntp	\
 	sntp		\
 	util		\
 	$(NULL)
@@ -44,6 +45,7 @@ DIST_SUBDIRS=		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
+	gsoc_sntp	\
 	sntp		\
 	util		\
 	$(NULL)

@@ -1,25 +1,22 @@
-# Makefile.am, by Harlan Stenn, from:
-# Makefile for sntp
-# N.M. Maclaren, October 2000.
+# Makefile.am for JMK's SNTP, by Harlan Stenn
 
 AUTOMAKE_OPTIONS = foreign
-#ACLOCAL_AMFLAGS= -I libopts/m4
+ACLOCAL_AMFLAGS= -I libopts/m4
 
-AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) -I../include/
+AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include/
 LDADD=	$(LIBOPTS_LDADD)
 
 NULL=
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
-#run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include --writable
-run_ag=         cd $(srcdir) && autogen
+run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/include --writable
 
-#SUBDIRS=
-#if NEED_LIBOPTS
-#SUBDIRS+= libopts
-#endif
-#SUBDIRS+= .
+SUBDIRS=
+if NEED_LIBOPTS
+SUBDIRS+= libopts
+endif
+SUBDIRS+= .
 
 sntp_SOURCES = \
 	networking.c \
@@ -28,13 +25,13 @@ sntp_SOURCES = \
 
 #dist_man_MANS=	sntp.1
 
-#EXTRA_DIST=	bincheck.mf	\
-#		COPYRIGHT	\
-#		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
-#		autogen-version.def version.def
-#BUILT_SOURCES=	check-autogen-version.def check-version.def	\
+EXTRA_DIST=	bincheck.mf	\
+		COPYRIGHT	\
+		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
+		autogen-version.def version.def
+BUILT_SOURCES=	check-autogen-version.def check-version.def	\
 		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
-#man_MANS=	sntp.1
+man_MANS=	sntp.1
 
 
 FRC:
