@@ -1,0 +1,13 @@
+#! /bin/sh
+
+STUB=
+STUB="sntp-opts.c $STUB"
+STUB="sntp-opts.h $STUB"
+STUB="sntp-opts.menu $STUB"
+STUB="sntp-opts.texi $STUB"
+STUB="sntp.1 $STUB"
+
+for i in $STUB
+do
+	cp ../sntp/$i .
+done
