@@ -7,7 +7,14 @@ STUB="sntp-opts.menu $STUB"
 STUB="sntp-opts.texi $STUB"
 STUB="sntp.1 $STUB"
 
+set -x
+
 for i in $STUB
 do
 	cp ../sntp/$i .
 done
+
+test -f bincheck.mf		|| cp ../bincheck.mf .
+test -f autogen-version.def	|| cp ../include/autogen-version.def .
+test -f version.def		|| cp ../include/version.def .
+test -f version.m4		|| cp ../version.m4 .
