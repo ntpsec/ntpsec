@@ -14,10 +14,10 @@
 
 /* FIXME, see portability issue 1 */ /* irrelevant for now */
 #ifndef SYS_WINNT
-# define SOCKET	int
-# define INVALID_SOCKET	-1
-# define SOCKET_ERROR	-1
-# define closesocket close
+#define SOCKET	int
+#define INVALID_SOCKET	-1
+#define SOCKET_ERROR	-1
+#define closesocket close
 #endif
 
 /* Check if necessary or not */

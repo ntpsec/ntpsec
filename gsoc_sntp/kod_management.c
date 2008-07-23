@@ -40,7 +40,6 @@ search_entry (
 	return resc;
 }
 
-
 void 
 add_entry (
 		char *hostname,
@@ -49,7 +48,7 @@ add_entry (
 {
 	if(kod_init) {
 		struct kod_entry *new_entry = (struct kod_entry *) malloc(sizeof(struct kod_entry));
-		new_entry->hostname = hostname;
+		strcpy(new_entry->hostname, hostname);
 		strlcpy(new_entry->type, type, 4);
 		new_entry->next = NULL;
 
@@ -93,9 +92,6 @@ delete_entry (
 		}
 	}
 }
-								
-
-
 
 void 
 write_kod_db (
@@ -138,8 +134,11 @@ kod_init_kod_db (
 
 	register int a, b;
 
-	char *fbuf = (char *) malloc(sizeof(char) * 80);
+	/* Max. of 255 characters for hostname, 10 for timestamp, 4 for kisscode, 2 for format : and 1 for \n */
+	char *fbuf = (char *) malloc(sizeof(char) * 272);
 	char *obuf = fbuf;
+	char error = 0;
+
 
 	db_s = fopen(db_file, "r");
 
@@ -149,13 +148,13 @@ kod_init_kod_db (
 		snprintf(msg, 80, "Cannot open KOD db file %s", db_file);
 
 		if(debug) 
-			debug(msg);
+			debug_msg(msg);
 
 		log_msg(msg, 2);
 	}
 
 	/* First let's see how many entries there are and check for right syntax */
-	while(fread(&fbuf, 80, sizeof(char), db_s) != 0) {
+	while(fgets(fbuf, 272, db_s) != 0) {
 		int sepc = 0;
 		for(a=0; a<strlen(fbuf); a++) {
 			if(fbuf[a] == ':') 
@@ -164,10 +163,10 @@ kod_init_kod_db (
 			if(fbuf[a] == '\n') {
 				if(sepc != 2) {
 					char msg[80];
-					snprintf(msg, 80, "Syntax error in KOD db file %s in line %i", db_file, (entryc + 1));
+					snprintf(msg, 80, "Syntax error in KOD db file %s in line %i (missing :)", db_file, (entryc + 1));
 
 					if(debug)
-						debug(msg);
+						debug_msg(msg);
 
 					log_msg(msg, 1);
 
@@ -184,62 +183,28 @@ kod_init_kod_db (
 
 	kod_db = (struct kod_entry *) malloc(sizeof(struct kod_entry) * entryc);
 
-
 	/* Read contents of file and make a linked list */
 	for(b=0; (!feof(db_s) || !ferror(db_s)) && b<entryc; b++) {
-		fbuf = obuf;
-		fgets(fbuf, 80,  db_s);
-
-		char fstart = 0;
-		int limit = strlen(fbuf);
-		char argn;
-
-		for(a=0; a<limit; a++) {
-			argn = 0;
-
-			if(fbuf[a] == ':' || fbuf[a] == '\n' || fbuf[a] == '\0') {
-				char *tmp;
-				switch(argn) {
-					case 0: 
-						kod_db[b].hostname = (char *) malloc(sizeof(char) * a);
-						strlcpy(kod_db[b].hostname, fbuf, a);
-						break;
-
-					case 1: 
-						tmp = (char *) malloc(sizeof(char) * a);
-						strlcpy(tmp, fbuf, a);
-						kod_db[b].timestamp = atoi(tmp);
-						free(tmp);
-						break;
-
-					case 2:
-						tmp = (char *) malloc(sizeof(char) * a);
-						strlcpy(tmp, fbuf, a);
-						strlcpy(kod_db[b].type, tmp, 4);
-						free(tmp);
-						break;
-
-				}
-
-				fstart = a+1;
-				fbuf = &fbuf[fstart];
-				limit -= fstart;
-				a = 0;
-				argn++;
-			}
+		if(!fscanf(db_s, 
+			  "%s:%u:%s", kod_db[a].hostname, 
+			  kod_db[a].timestamp, 
+			  kod_db[a].type)) {
+			b = entryc;
+			error = 1;
+		} 
+		else {
+			if(b > 0) 
+				kod_db[b-1].next = &kod_db[b];
 		}
-
-		if(b > 0) 
-			kod_db[b-1].next = &kod_db[b];
 
 	}
 
-	if(ferror(db_s)) {
+	if(ferror(db_s) || error) {
 		char msg[80];
-		snprintf(msg, 80, "ferror indicates an error after parsing KOD db file %s", db_file);
+		snprintf(msg, 80, "An error occured while parsing the KOD db file %s", db_file);
 
 		if(debug)
-			debug(msg);
+			debug_msg(msg);
 
 		log_msg(msg, 2);
 
