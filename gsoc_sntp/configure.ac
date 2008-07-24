@@ -78,6 +78,7 @@ AC_TYPE_UID_T
 # Hacks
 AC_DEFINE(HAVE_NO_NICE, 1, [sntp does not care about 'nice'])
 AC_DEFINE(HAVE_TERMIOS, 1, [sntp does not care about TTY stuff])
+AC_DEFINE(ISC_PLATFORM_HAVEIPV6, 1, [hack])
  
 
 
