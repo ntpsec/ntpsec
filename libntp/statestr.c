@@ -143,6 +143,8 @@ struct codestring peer_codes[] = {
 	{ PEVNT_CLOCK & ~PEER_EVENT,	"clock" },
 	{ PEVNT_AUTH & ~PEER_EVENT,	"bad_auth" },
 	{ PEVNT_POPCORN & ~PEER_EVENT,	"popcorn" },
+	{ PEVNT_XLEAVE & ~PEER_EVENT,	"xmode" },
+	{ PEVNT_XERR & ~PEER_EVENT,	"xerr" },
 	{ -1,				"" }
 };
 

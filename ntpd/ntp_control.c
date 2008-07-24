@@ -195,7 +195,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_REFTIME,	RO, "reftime" },	/* 17 */
 	{ CP_ORG,	RO, "org" },		/* 18 */
 	{ CP_REC,	RO, "rec" },		/* 19 */
-	{ CP_XMT,	RO, "xmt" },		/* 20 */
+	{ CP_XMT,	RO, "xleave" },		/* 20 */
 	{ CP_REACH,	RO, "reach" },		/* 21 */
 	{ CP_UNREACH,	RO, "unreach" },	/* 22 */
 	{ CP_TIMER,	RO, "timer" },		/* 23 */
@@ -261,6 +261,7 @@ static u_char def_peer_var[] = {
 	CP_DELAY,
 	CP_DISPERSION,
 	CP_JITTER,
+	CP_XMT,
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
@@ -1508,8 +1509,8 @@ ctl_putpeer(
 
 	    case CP_DSTPORT:
 		ctl_putuint(peer_var[CP_DSTPORT].text,
-			    (u_long)(peer->dstadr ?
-				     ntohs(((struct sockaddr_in*)&peer->dstadr->sin)->sin_port) : 0));
+		    (u_long)(peer->dstadr ?
+		    ntohs(((struct sockaddr_in*)&peer->dstadr->sin)->sin_port) : 0));
 		break;
 
 	    case CP_IN:
@@ -1583,15 +1584,17 @@ ctl_putpeer(
 		break;
 
 	    case CP_ORG:
-		ctl_putts(peer_var[CP_ORG].text, &peer->org);
+		ctl_putts(peer_var[CP_ORG].text, &peer->aorg);
 		break;
 
 	    case CP_REC:
-		ctl_putts(peer_var[CP_REC].text, &peer->rec);
+		ctl_putts(peer_var[CP_REC].text, &peer->dst);
 		break;
 
 	    case CP_XMT:
-		ctl_putts(peer_var[CP_XMT].text, &peer->xmt);
+		if (peer->flags & FLAG_XLEAVE)
+			ctl_putdbl(peer_var[CP_XMT].text, peer->xleave *
+			    1e3);
 		break;
 
 	    case CP_REACH:
@@ -1628,7 +1631,8 @@ ctl_putpeer(
 		break;
 
 	    case CP_JITTER:
-		ctl_putdbl(peer_var[CP_JITTER].text, peer->jitter * 1e3);
+		ctl_putdbl(peer_var[CP_JITTER].text, peer->jitter *
+		    1e3);
 		break;
 
 	    case CP_DISPERSION:
@@ -1638,7 +1642,8 @@ ctl_putpeer(
 
 	    case CP_KEYID:
 		if (peer->keyid > NTP_MAXKEY)
-			ctl_puthex(peer_var[CP_KEYID].text, peer->keyid);
+			ctl_puthex(peer_var[CP_KEYID].text,
+			    peer->keyid);
 		else
 			ctl_putuint(peer_var[CP_KEYID].text,
 			    peer->keyid);

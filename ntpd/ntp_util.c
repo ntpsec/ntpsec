@@ -101,7 +101,7 @@ int stats_control;
 /*
  * Initial frequency offset later passed to the loopfilter.
  */
-double	old_drift;			/* current frequency */
+double	old_drift = 1e9;		/* current frequency */
 static double prev_drift_comp;		/* last frequency update */
 
 /*
@@ -377,15 +377,13 @@ stats_config(
 		 * Open drift file and read frequency. If the file is
 		 * missing or contains errors, tell the loop to reset.
 		 */
-		if ((fp = fopen(stats_drift_file, "r")) == NULL) {
-			old_drift = 1e9;
+		if ((fp = fopen(stats_drift_file, "r")) == NULL)
 			break;
-		}
+
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
 			msyslog(LOG_ERR,
 			    "format error frequency file %s", 
 			    stats_drift_file);
-			old_drift = 1e9;
 			fclose(fp);
 			break;
 
@@ -393,9 +391,6 @@ stats_config(
 		fclose(fp);
 		old_drift /= 1e6;
 		prev_drift_comp = old_drift;
-		msyslog(LOG_NOTICE,
-		    "frequency initialized %.3f PPM from %s",
-			old_drift * 1e6, stats_drift_file);
 		break;
 
 	/*
@@ -710,7 +705,7 @@ record_sys_stats(void)
 	if (sysstats.fp != NULL) {
                 fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(&now, 3), sys_stattime - current_time,
+		    day, ulfptoa(&now, 3), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
 		    sys_badauth, sys_declined, sys_limitrejected,

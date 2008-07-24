@@ -810,14 +810,12 @@ set_freq(
 	 */
 	if (pll_control && kern_enable) {
 		memset(&ntv,  0, sizeof(ntv));
-		ntp_adjtime(&ntv);
 		ntv.modes = MOD_FREQUENCY;
 		ntv.freq = DTOFREQ(drift_comp);
 		ntp_adjtime(&ntv);
 		snprintf(tbuf, sizeof(tbuf), "kernel %.3f PPM",
 		    drift_comp * 1e6);
 		report_event(EVNT_FSET, NULL, tbuf);
-		ntp_adjtime(&ntv);
 	} else {
 		snprintf(tbuf, sizeof(tbuf), "ntpd %.3f PPM",
 		    drift_comp * 1e6);
@@ -882,9 +880,11 @@ loop_config(
 
 		pll_control = 1;
 		memset(&ntv, 0, sizeof(ntv));
-		ntv.modes = MOD_BITS | MOD_FREQUENCY;
+		ntv.modes = MOD_BITS;
+		ntv.status = STA_PLL;
 		ntv.maxerror = MAXDISPERSE;
 		ntv.esterror = MAXDISPERSE;
+		ntv.constant = sys_poll;
 #ifdef SIGSYS
 		/*
 		 * Use sigsetjmp() to save state and then call
@@ -936,13 +936,12 @@ loop_config(
 	case LOOP_DRIFTCOMP:
 #ifndef LOCKCLOCK
 		if (freq > NTP_MAXFREQ || freq < -NTP_MAXFREQ) {
-			drift_comp = 0;
+			set_freq(0);
 			rstclock(EVNT_NSET, 0);
-			break;
+		} else {
+			set_freq(freq);
+			rstclock(EVNT_FSET, 0);
 		}
-		set_freq(freq);
-		rstclock(EVNT_FSET, 0);
-
 #endif /* LOCKCLOCK */
 		break;
 
@@ -958,7 +957,7 @@ loop_config(
 		if (pll_control && kern_enable) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
-			ntv.status = 0;
+			ntv.status = STA_UNSYNC;
 			ntp_adjtime(&ntv);
 			report_event(EVNT_KERN, NULL,
  		  	    "kernel time sync disabledx");

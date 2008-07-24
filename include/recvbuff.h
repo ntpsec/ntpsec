@@ -7,7 +7,6 @@
 
 #include "ntp.h"
 #include "ntp_fp.h"
-#include "ntp_types.h"
 
 #include <isc/list.h>
 #include <isc/result.h>

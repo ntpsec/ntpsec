@@ -5,12 +5,6 @@
 #ifndef NTP_FP_H
 #define NTP_FP_H
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-#include "ntp_rfc2553.h"
-
 #include "ntp_types.h"
 
 /*
