@@ -1,4 +1,3 @@
-#include <ntp_fp.h>
 
 #include "sntp-opts.h"
 #include "networking.h"
