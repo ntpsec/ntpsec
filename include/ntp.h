@@ -4,12 +4,14 @@
 #ifndef NTP_H
 #define NTP_H
 
-#include "ntp_types.h"
 #include <math.h>
+
+#include <ntp_types.h>
 #ifdef OPENSSL
-#include "ntp_crypto.h"
+#include <ntp_crypto.h>
 #endif /* OPENSSL */
 #include <ntp_random.h>
+#include <ntp_net.h>
 
 #include <isc/boolean.h>
 #include <isc/list.h>
