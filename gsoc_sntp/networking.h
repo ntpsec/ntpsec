@@ -1,8 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "data_formats.h"
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,6 +9,8 @@
 #include <strings.h>
 #include <string.h>
 #include <errno.h>
+
+#include "data_formats.h"
 
 /* FIXME, see portability issue 1 */ /* irrelevant for now */
 #ifndef SYS_WINNT
@@ -41,8 +41,5 @@ int recvdata (SOCKET rsock, struct sockaddr *sender, char *rdata, size_t rdata_l
 int recvpkt (SOCKET rsock, struct pkt *rpkt, struct pkt *spkt);
 
 int filter_reachable (struct addrinfo **res, int resc);
-
-
-
 
 #endif
