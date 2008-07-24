@@ -1,13 +1,15 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#if 0
 #include <sys/types.h>	/**/
 /* #include <sys/socket.h>	/**/
 /* #include <netinet/in.h>	/**/
 /* #include <netdb.h>	/**/
 #include <stdlib.h>	/**/
-#include <strings.h>	/**/
 #include <string.h>	/**/
+#endif
+#include <strings.h>	/**/
 #include <errno.h>	/**/
 
 #include "data_formats.h"

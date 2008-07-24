@@ -1,5 +1,6 @@
+#include <config.h>
 
-#include "sntp-opts.h"
+/* #include "sntp-opts.h"	/**/
 #include "networking.h"
 #include "log.h"
 
