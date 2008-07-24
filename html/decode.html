@@ -10,7 +10,7 @@
 		<h3>Event Messages and Status Words</h3>
 		<img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 		<p>Caterpillar knows all the error codes, which is more than most of us do.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">04:18</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="237">Tuesday, May 06, 2008</csobj></p>
+		<p>Last update:<csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="237"> July 5, 2008</csobj></p>
 		<br clear="left">
 		<h4>Related Links</h4>
 		<p><script type="text/javascript" language="javascript" src="scripts/install.txt"></script></p>
@@ -27,7 +27,7 @@
 		<hr>
 		<h4 id="intro">Introduction</h4>
 		<p>This page lists the status and event messages and error codes used for status reporting and monitoring. Status words are used to display the current status of the running program. There is one system status word and a peer status word for each association. There is a clock status word for each association that supports a reference clock driver. There is a flash code for each association which shows errors found in the last packet received (pkt) and during protocol processing (peer). These are commonly viewed using the <tt>ntpq</tt> program.</p>
-		<p>Sinificant changes in program state are reported as events. There is one set of system events and a set of peer events for each association. In adition, there is a set of clock events for each association that supports a reference clock driver. Events are normally reported to the <tt>protostats</tt> file and optionally to the system log. In addition, if the trap facility is configured, traps can be reported to a remote program that can page an administrator.</p>
+		<p>Significant changes in program state are reported as events. There is one set of system events and a set of peer events for each association. In adition, there is a set of clock events for each association that supports a reference clock driver. Events are normally reported to the <tt>protostats</tt> file and optionally to the system log. In addition, if the trap facility is configured, traps can be reported to a remote program that can page an administrator.</p>
 		<p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> file.</p>
 		<p>In the following tables the Code Field is the status or event code assigned and the Message Field a short string used for display and event reporting. The Description field contains a longer explanation of the status or event. Some messages include additional information useful for error diagnosis and performance assessment.</p>
 		<h4 id="sys">System Status Word</h4>

@@ -80,7 +80,6 @@ double	sys_bdelay;		/* broadcast client default delay */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 static	double sys_offset;	/* current local clock offset */
-static	u_long sys_authdly[2];	/* authentication delay shift reg */
 double	sys_mindisp = MINDISPERSE; /* min disp increment (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
@@ -265,20 +264,6 @@ transmit(
 		if (peer->burst == 0) {
 
 			/*
-			 * If initial broadcast volley and not Autokey,
-			 *  switch to broadcast client mode.
-			 */
-			if (peer->cast_flags & MDF_BCLNT) {
-				peer->flags &= ~FLAG_IBURST;
-#ifdef OPENSSL
-				if (!(peer->flags & FLAG_SKEY))
-					peer->hmode = MODE_BCLIENT;
-#else /* OPENSSL */
-				peer->hmode = MODE_BCLIENT;
-#endif /* OPENSSL */
-			}
-
-			/*
 			 * If ntpdate mode and the clock has not been
 			 * set and all peers have completed the burst,
 			 * we declare a successful failure.
@@ -297,17 +282,6 @@ transmit(
 	}
 	if (peer->retry > 0)
 		peer->retry--;
-
-#ifdef OPENSSL
-	if (peer->cast_flags & MDF_BCLNT) {
-		if (peer->flags & FLAG_SKEY) {
-			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
-				peer->hmode = MODE_BCLIENT;
-			else
-				peer->hmode = MODE_CLIENT;
-		}
-	}
-#endif /* OPENSSL */
 
 	/*
 	 * Do not transmit if in broadcast client mode. 
@@ -878,8 +852,8 @@ receive(
 			    skeyid)) == NULL)
 				sys_restricted++;
 			else
-				peer->delay = sys_bdelay * 2.;
-			return;
+				peer->delay = sys_bdelay;
+			break;
 		}
 
 		/*
@@ -897,18 +871,7 @@ receive(
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
-#ifdef OPENSSL
-		/*
-		 * Ordinarily this will be an association reply message
-		 * which initializes the dance. If an autokey reply
-		 * message, it is ignored. Any other message is a
-		 * protocol error leaving the asssociation ready for a
-		 * following association reply message.
-		 */
-		if (peer->flags & FLAG_SKEY)
-			crypto_recv(peer, rbufp);
-#endif /* OPENSSL */
-		return;				/* hooray */
+		break;
 
 	/*
 	 * This is the first packet received from a symmetric active
@@ -967,9 +930,9 @@ receive(
 		 * allowed. Mobiliae a symmetric passive association.
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr,
-		    rbufp->dstadr, MODE_PASSIVE, hisversion,
-		    NTP_MINDPOLL, NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST,
-		    0, skeyid)) == NULL) {
+		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
+		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST, 0,
+		    skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -1017,49 +980,83 @@ receive(
 
 	/*
 	 * Next comes a rigorous schedule of timestamp checking. If the
-	 * transmit timestamp is zero, the server is horribly broken.
+	 * transmit timestamp is zero, the server has not initialized in
+	 * interleaved modes or is horribly broken.
 	 */
 	if (L_ISZERO(&p_xmt)) {
-		peer->flash |= TEST3;		/* protocol unsynch */
-		peer->bogusorg++;
-		return;
+			peer->flash |= TEST3;		/* unsynch */
 
 	/*
 	 * If the transmit timestamp duplicates a previous one, the
 	 * packet is a replay. This prevents the bad guys from replaying
 	 * the most recent packet, authenticated or not.
 	 */
-	} else if (L_ISEQU(&peer->org, &p_xmt)) {
-		peer->flash |= TEST1;		/* duplicate packet */
+	} else if (L_ISEQU(&peer->xmt, &p_xmt)) {
+		peer->flash |= TEST1;			/* duplicate */
 		peer->oldpkt++;
 		return;
 
 	/*
-	 * If this is a broadcast mode packet, skip further checking.
+	 * If this is a broadcast mode packet, skip further checking. If
+	 * an intial volley, bail out now and let the client do its
+	 * stuff. If the origin timestamp is nonzero, this is an
+	 * interleaved broadcast. so restart the protocol.
 	 */
-	} else if (hismode != MODE_BROADCAST) {
-		if (L_ISZERO(&p_org)) {
-			peer->flash |= TEST3;	/* protocol unsynch */
-		} else if (!L_ISEQU(&p_org, &peer->xmt)) {
-			peer->flash |= TEST2;	/* bogus packet */
-			peer->bogusorg++;
+	} else if (hismode == MODE_BROADCAST) {
+		if (!L_ISZERO(&p_org) && !(peer->flags & FLAG_XB)) {
+			peer->flags |= FLAG_XB | FLAG_IBURST;
+			peer->hmode = MODE_CLIENT;
+			peer->borg = rbufp->recv_time;
+			report_event(PEVNT_XLEAVE, peer, NULL);
+			return;
 		}
+		if (peer->flags & FLAG_IBURST)
+			return;
+
+	/*
+	 * Check for bogus packet in basic mode. If found, switch to
+	 * interleaved mode and resynchronize, but only after confirming
+	 * the packet is not bogus in symmetric interleaved mode.
+	 */
+	} else if (peer->flip == 0) {
+		if (!L_ISEQU(&p_org, &peer->aorg)) {
+			peer->bogusorg++;
+			peer->flash |= TEST2;	/* bogus */
+			if (!L_ISZERO(&peer->dst) && L_ISEQU(&p_org,
+			    &peer->dst)) {
+				peer->flip = 1;
+				report_event(PEVNT_XLEAVE, peer, NULL);
+			}
+		}
+
+	/*
+	 * Check for valid nonzero timestamp fields.
+	 */
+	} else if (L_ISZERO(&p_org) || L_ISZERO(&p_rec) ||
+	    L_ISZERO(&peer->dst)) {
+		peer->flash |= TEST3;		/* unsynch */
+
+	/*
+	 * Check for bogus packet in interleaved symmetric mode. This
+	 * can happen if a packet is lost, duplicat or crossed. If
+	 * found, flip and resynchronize.
+	 */
+	} else if (!L_ISZERO(&peer->dst) && !L_ISEQU(&p_org,
+		    &peer->dst)) {
+			peer->bogusorg++;
+			peer->flip = -peer->flip;
+			peer->flash |= TEST2;		/* bogus */
 	}
 
 	/*
-	 * If not a symmetric mode and any flash is lit, drop the
-	 * packet. This helps to protect against old replay attacks.
-	 * Can't do this in symmetric modes since a packet can be lost.
+	 * Update the state variables.
 	 */
-	if ((peer->hmode == MODE_CLIENT || peer->hmode ==
-	    MODE_BROADCAST) && (peer->flash & PKT_TEST_MASK))
-		return;
-
-	peer->org = p_xmt;
-	peer->rec = rbufp->recv_time;
+	if (peer->flip == 0) {
+		if (hismode != MODE_BROADCAST)
+			peer->rec = p_xmt;
+		peer->dst = rbufp->recv_time;
+	}
 	L_CLR(&peer->xmt);
-	if (peer->flash & PKT_TEST_MASK)
-		return;
 
 	/*
 	 * If this is a crypto_NAK, the server cannot authenticate a
@@ -1255,6 +1252,14 @@ receive(
 	 * more flashers.
 	 */
 	process_packet(peer, pkt, rbufp->recv_length);
+
+	/*
+	 * In interleaved mode update the state variables.
+	 */
+	if (peer->flip != 0) {
+		peer->rec = p_rec;
+		peer->dst = rbufp->recv_time;
+	}
 }
 
 
@@ -1275,6 +1280,7 @@ process_packet(
 	double	p_offset, p_del, p_disp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime, ci;
 	u_char	pmode, pleap, pstratum;
+	char	statstr[NTP_MAXSTRLEN];
 #ifdef ASSYM
 	int	itemp;
 	double	etemp, ftemp, td;
@@ -1283,16 +1289,14 @@ process_packet(
 	sys_processed++;
 	peer->processed++;
 	p_del = FPTOD(NTOHS_FP(pkt->rootdelay));
+	p_offset = 0;
 	p_disp = FPTOD(NTOHS_FP(pkt->rootdisp));
 	NTOHL_FP(&pkt->reftime, &p_reftime);
+	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);
 	NTOHL_FP(&pkt->xmt, &p_xmt);
 	pmode = PKT_MODE(pkt->li_vn_mode);
 	pleap = PKT_LEAP(pkt->li_vn_mode);
-	if (pmode != MODE_BROADCAST)
-		NTOHL_FP(&pkt->org, &p_org);
-	else
-		p_org = peer->rec;
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
@@ -1300,7 +1304,7 @@ process_packet(
 	 */
 	record_raw_stats(&peer->srcadr, peer->dstadr ?
 	    &peer->dstadr->sin : NULL, &p_org, &p_rec, &p_xmt,
-	    &peer->rec);
+	    &peer->dst);
 	peer->leap = pleap;
 	peer->stratum = min(pstratum, STRATUM_UNSPEC);
 	peer->pmode = pmode;
@@ -1328,16 +1332,13 @@ process_packet(
 	poll_update(peer, peer->hpoll);
 
 	/*
-	 * Verify the server is synchronized; that is, the leap bits and
-	 * stratum are valid, the root delay and root dispersion are
-	 * valid and the reference timestamp is not later than the
-	 * transmit timestamp.
+	 * Verify the server is synchronized; that is, the leap bits,
+	 * stratum and root distance are valid.
 	 */
 	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
 	    pstratum < sys_floor || pstratum >= sys_ceiling)
 		peer->flash |= TEST6;		/* bad synch or strat */
-	if (p_del / 2 + p_disp >=		/* test 7 */
-	    MAXDISPERSE || !L_ISHIS(&p_xmt, &p_reftime))
+	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
 		peer->flash |= TEST7;		/* bad header */
 
 	/*
@@ -1370,8 +1371,7 @@ process_packet(
 	 * roundtrip delay and dispersion. The equations are reordered
 	 * from the spec for more efficient use of temporaries. For a
 	 * broadcast association, offset the last measurement by the
-	 * computed delay during the client/server volley. Note that
-	 * org has been set to the time of last reception. Note the
+	 * computed delay during the client/server volley. Note the
 	 * computation of dispersion includes the system precision plus
 	 * that due to the frequency error since the origin time.
 	 *
@@ -1389,18 +1389,142 @@ process_packet(
 	 * double arithmetic. This preserves the accuracy while
 	 * retaining the 68-year span.
 	 *
-	 * Let t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->rec:
+	 * There are three interleaving schemes, basic, interleaved
+	 * symmetric and interleaved broadcast. The timestamps are
+	 * idioscyncratically different. See the onwire briefing/white
+	 * paper at www.eecis.udel.edu/~mills for details.
+	 *
+	 * Interleaved symmetric mode
+	 * t1 = peer->aorg/borg, t2 = peer->rec, t3 = p_xmt,
+	 * t4 = peer->dst
 	 */
-	ci = p_xmt;			/* t3 - t4 */
-	L_SUB(&ci, &peer->rec);
-	LFPTOD(&ci, t34);
-	ci = p_rec;			/* t2 - t1 */
-	L_SUB(&ci, &p_org);
-	LFPTOD(&ci, t21);
-	ci = peer->rec;			/* t4 - t1 */
-	L_SUB(&ci, &p_org);
-	p_del = fabs(t21 - t34);
-	p_offset = (t21 + t34) / 2.;
+	if (peer->flip != 0) {
+		ci = p_xmt;				/* t3 - t4 */
+		L_SUB(&ci, &peer->dst);
+		LFPTOD(&ci, t34);
+		ci = p_rec;				/* t2 - t1 */
+		if (peer->flip > 0)
+			L_SUB(&ci, &peer->borg);
+		else
+			L_SUB(&ci, &peer->aorg);
+		LFPTOD(&ci, t21);
+		ci = peer->dst;				/* t4 - t1 */
+		if (peer->flip > 0)
+			L_SUB(&ci, &peer->borg);
+		else
+			L_SUB(&ci, &peer->aorg);
+		p_del = t21 - t34;
+		p_offset = (t21 + t34) / 2.;
+		if (p_del < 0 || p_del > 1.) {
+			sprintf(statstr, "t21 %.6f t34 %.6f", t21, t34);
+			report_event(PEVNT_XERR, peer, statstr);
+			return;
+		}
+
+	/*
+	 * Broadcast modes
+	 */
+	} else if (peer->pmode == MODE_BROADCAST) {
+
+		/*
+		 * Calibrate delay in interleaved broadcast mode. For
+		 * basic mode the delay is calculated the old fashioned
+		 * way.
+		 */
+		if (peer->delay == 0) {
+
+			/*
+			 * Interleaved broadcast calibrate phase
+			 * t1 = p_org, t2 = peer->borg, t3 = peer->aorg,
+			 * t4 = peer->rec
+			 */
+			if (peer->flags & FLAG_XB) {
+				ci = peer->aorg;	/* t3 - t4 */
+				L_SUB(&ci, &peer->rec);
+				LFPTOD(&ci, t34);
+				ci = peer->borg;	/* t2 - t1 */
+				L_SUB(&ci, &p_org);
+				LFPTOD(&ci, t21);
+				ci = peer->rec;		/* t4 - t1 */
+				L_SUB(&ci, &p_org);
+				p_del = fabs(t21 - t34);
+				p_offset = -(t21 + t34) / 2.;
+				peer->aorg = p_xmt;
+				peer->borg = peer->dst;
+			}
+
+		/*
+		 * Delay has been calibrated, either by previous volley
+		 * or configured. Offset is calculated directly
+		 * from timestamp differences adjusted by the previously
+		 * calculated delay.
+		 */
+		} else {
+			p_del = peer->delay;
+
+			/*
+			 * Interleaved broadcast mode
+			 * t1 = peer->borg, t2 = p_org
+			 */
+			if (peer->flags & FLAG_XB) { 
+				ci = p_org;		/* delay */ 
+				L_SUB(&ci, &peer->aorg);
+				LFPTOD(&ci, t34);
+				ci = p_org;		/* t2 - t1 */
+				L_SUB(&ci, &peer->borg);
+				LFPTOD(&ci, t21);
+				p_offset = t21 + p_del / 2.;
+				peer->aorg = p_xmt;
+				peer->borg = peer->dst;
+				if (t34 < 0 || t34 > 1.) {
+					sprintf(statstr,
+					    "t21 %.6f t34 %.6f", t21,
+					    t34);
+					report_event(PEVNT_XERR, peer,
+					    statstr);
+					return;
+				}
+
+			/*
+			 * Basic broadcast - use direct timestamps.
+			 */
+			} else {
+				ci = p_xmt;		/* t3 - t4 */
+				L_SUB(&ci, &peer->dst);
+				LFPTOD(&ci, t34);
+				p_offset = t34 + p_del / 2.;
+			}
+		}
+
+	/*
+	 * Basic mode, otherwise known as the old fashioned way. If this
+	 * is broadcast calibrate phase, save the receive timestamp for
+	 * use in the next received broadcast.
+	 *
+	 * t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->dst
+	 */
+	} else {
+		ci = p_xmt;				/* t3 - t4 */
+		L_SUB(&ci, &peer->dst);
+		LFPTOD(&ci, t34);
+		ci = p_rec;				/* t2 - t1 */
+		L_SUB(&ci, &p_org);
+		LFPTOD(&ci, t21);
+		ci = peer->dst;				/* t4 - t1 */
+		L_SUB(&ci, &p_org);
+		p_del = fabs(t21 - t34);
+		p_offset = (t21 + t34) / 2.;
+		if (peer->flags & FLAG_XB) {
+			peer->rec = p_rec;
+			peer->hmode = MODE_BCLIENT;
+			peer->flags &= ~FLAG_IBURST;
+			peer->burst = 0;
+			return;
+		}
+	}
+	p_offset += peer->bias;
+	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
+	    clock_phi * p_del;
 
 #if ASSYM
 	/*
@@ -1473,21 +1597,27 @@ process_packet(
 #endif /* ASSYM */
 
 	/*
-	 * If running in a broadcast association, the clock offset is
-	 * (t3 - t4) plus one-half the roundtrip delay, but we can't
-	 * measure that directly. Therefore, we start up in MODE_CLIENT
-	 * mode and exchange several messages to determine the clock
-	 * offset and roundtrip delay and possibly set the system clock.
-	 * When the last message is sent, we switch to MODE_BCLIENT mode
-	 * and send no further messages.
+	 * That was awesome. Now hand off to the clock filter.
 	 */
-	if (peer->pmode == MODE_BROADCAST) {
-		p_del = peer->delay;
-		p_offset = t34 + p_del / 2.;
-	}
-	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
-	    clock_phi * p_del;
 	clock_filter(peer, p_offset, p_del, p_disp);
+
+	/*
+	 * If we are in broadcast calibrate mode, return to broadcast
+	 * client mode when the client is fit and the autokey dance is
+	 * complete.
+	 */
+	if ((peer->cast_flags & MDF_BCLNT) && !peer_unfit(peer)) {
+#ifdef OPENSSL
+		if (peer->flags & FLAG_SKEY) {
+			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
+				peer->hmode = MODE_BCLIENT;
+		} else {
+			peer->hmode = MODE_BCLIENT;
+		}
+#else /* OPENSSL */
+		peer->hmode = MODE_BCLIENT;
+#endif /* OPENSSL */
+	}
 }
 
 
@@ -1573,6 +1703,7 @@ clock_update(
 		L_CLR(&sys_reftime);
 		sys_jitter = LOGTOD(sys_precision);
 		memcpy(&sys_refid, "STEP", 4);
+		leapsec = 0;
 		break;
 
 	/*
@@ -1592,7 +1723,7 @@ clock_update(
 			sys_leap = LEAP_NOWARNING;
 		sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 		sys_rootdelay = peer->delay + peer->rootdelay;
-		sys_reftime = peer->rec;
+		sys_reftime = peer->dst;
 
 		/*
 		 * If the leapseconds values are from file or network
@@ -1607,28 +1738,28 @@ clock_update(
 			if (leap_sec > now.l_ui) {
 				sys_tai = leap_tai - 1;
 				if (leapsec == 0)
-					leapsec = leap_sec - now.l_ui;
 					report_event(EVNT_ARMED, NULL,
 					    NULL);
-				}
+				leapsec = leap_sec - now.l_ui;
 			} else {
 				sys_tai = leap_tai;
 			}
 			break;
 
-		if (leap_vote > sys_survivors / 2) {
+		} else if (leap_vote > sys_survivors / 2) {
 			leap_peers = now.l_ui + leap_month(now.l_ui);
 			if (leap_peers > now.l_ui) {
 				if (leapsec == 0)
-					leapsec = leap_peers - now.l_ui;
 					report_event(PEVNT_ARMED, peer,
 					    NULL);
+				leapsec = leap_peers - now.l_ui;
 			}
-		} else {
-			leapsec = 0;
+		} else if (leapsec > 0) {
 			report_event(EVNT_DISARMED, NULL, NULL);
+			leapsec = 0;
 		}
 		break;
+
 	/*
 	 * Popcorn spike or step threshold exceeded. Pretend it never
 	 * happened.
@@ -1744,13 +1875,12 @@ poll_update(
 		if (peer->flags & FLAG_REFCLOCK)
 			next = 1 << hpoll;
 		else
-			next = (0x1000UL | (ntp_random() & 0x0ff) <<
+			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
 			    hpoll) >> 12;
 #else /* REFCLOCK */
-		next = (0x1000UL | (ntp_random() & 0x0ff) << hpoll) >>
+		next = ((0x1000UL | (ntp_random() & 0x0ff)) << hpoll) >>
 		    12;
 #endif /* REFCLOCK */
-
 		next += peer->outdate;
 		if (next > utemp)
 			peer->nextdate = next;
@@ -1815,8 +1945,14 @@ peer_clear(
 	peer->ppoll = peer->maxpoll;
 	peer->hpoll = peer->minpoll;
 	peer->disp = MAXDISPERSE;
-	peer_unfit(peer);
+	peer->flash = peer_unfit(peer);
 	peer->jitter = LOGTOD(sys_precision);
+
+	/*
+	 * If interleave mode, initialize the alternate origin switch.
+	 */
+	if (peer->flags & FLAG_XLEAVE)
+		peer->flip = 1;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = i;
 		peer->filter_disp[i] = MAXDISPERSE;
@@ -2601,7 +2737,7 @@ peer_xmit(
 	struct pkt xpkt;	/* transmit packet */
 	int	sendlen, authlen;
 	keyid_t	xkeyid = 0;	/* transmit key ID */
-	l_fp	xmt_tx;
+	l_fp	xmt_tx, xmt_ty;;
 
 	if (!peer->dstadr)	/* drop peers without interface */
 		return;
@@ -2615,8 +2751,8 @@ peer_xmit(
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdisp =  HTONS_FP(DTOUFP(sys_rootdisp));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
-	HTONL_FP(&peer->org, &xpkt.org);
-	HTONL_FP(&peer->rec, &xpkt.rec);
+	HTONL_FP(&peer->rec, &xpkt.org);
+	HTONL_FP(&peer->dst, &xpkt.rec);
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
@@ -2636,13 +2772,51 @@ peer_xmit(
 #else
 	if (peer->keyid == 0) {
 #endif /* OPENSSL */
-		get_systime(&peer->xmt);
-		HTONL_FP(&peer->xmt, &xpkt.xmt);
+
+		/*
+		 * Transmit a-priori timestamps
+		 */
+		get_systime(&xmt_tx);
+		if (peer->flip == 0) {	/* basic mode */
+			peer->aorg = xmt_tx;
+			HTONL_FP(&xmt_tx, &xpkt.xmt);
+		} else {		/* interleaved modes */
+			if (peer->hmode == MODE_BROADCAST) { /* bcst */
+				HTONL_FP(&xmt_tx, &xpkt.xmt);
+				if (peer->flip > 0)
+					HTONL_FP(&peer->borg,
+					    &xpkt.org);
+				else
+					HTONL_FP(&peer->aorg,
+					    &xpkt.org);
+			} else {	/* symmetric */
+				if (peer->flip > 0)
+					HTONL_FP(&peer->borg,
+					    &xpkt.xmt);
+				else
+					HTONL_FP(&peer->aorg,
+					    &xpkt.xmt);
+			}
+		}
 		peer->t21_bytes = sendlen;
 		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
 		peer->throttle += (1 << peer->minpoll) - 2;
+
+		/*
+		 * Capture a-posteriori timestamps
+		 */
+		get_systime(&xmt_ty);
+		if (peer->flip != 0) {		/* interleaved modes */
+			if (peer->flip > 0)
+				peer->aorg = xmt_ty;
+			else
+				peer->borg = xmt_ty;
+			peer->flip = -peer->flip;
+		}
+		L_SUB(&xmt_ty, &xmt_tx);
+		LFPTOD(&xmt_ty, peer->xleave);
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %d\n",
@@ -2899,14 +3073,27 @@ peer_xmit(
 #endif /* OPENSSL */
 
 	/*
-	 * Stash the transmit timestamp corrected for the encryption
-	 * delay. If autokey, give back the key, as we use keys only
-	 * once. Check for errors such as missing keys, etc.
+	 * Transmit a-priori timestamps
 	 */
+	get_systime(&xmt_tx);
+	if (peer->flip == 0) {		/* basic mode */
+		peer->aorg = xmt_tx;
+		HTONL_FP(&xmt_tx, &xpkt.xmt);
+	} else {			/* interleaved modes */
+		if (peer->hmode == MODE_BROADCAST) { /* bcst */
+			HTONL_FP(&xmt_tx, &xpkt.xmt);
+			if (peer->flip > 0)
+				HTONL_FP(&peer->borg, &xpkt.org);
+			else
+				HTONL_FP(&peer->aorg, &xpkt.org);
+		} else {		/* symmetric */
+			if (peer->flip > 0)
+				HTONL_FP(&peer->borg, &xpkt.xmt);
+			else
+				HTONL_FP(&peer->aorg, &xpkt.xmt);
+		}
+	}
 	xkeyid = peer->keyid;
-	get_systime(&peer->xmt);
-	L_ADD(&peer->xmt, &sys_authdelay);
-	HTONL_FP(&peer->xmt, &xpkt.xmt);
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
@@ -2919,7 +3106,6 @@ peer_xmit(
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif /* OPENSSL */
-	get_systime(&xmt_tx);
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "proto: buffer overflow %u", sendlen);
 		exit (-1);
@@ -2931,17 +3117,18 @@ peer_xmit(
 	peer->throttle += (1 << peer->minpoll) - 2;
 
 	/*
-	 * Calculate the encryption delay. Keep the minimum over
-	 * the latest two samples.
+	 * Capture a-posteriori timestamps
 	 */
-	L_SUB(&xmt_tx, &peer->xmt);
-	L_ADD(&xmt_tx, &sys_authdelay);
-	sys_authdly[1] = sys_authdly[0];
-	sys_authdly[0] = xmt_tx.l_uf;
-	if (sys_authdly[0] < sys_authdly[1])
-		sys_authdelay.l_uf = sys_authdly[0];
-	else
-		sys_authdelay.l_uf = sys_authdly[1];
+	get_systime(&xmt_ty);
+	if (peer->flip != 0) {			/* interleaved modes */
+		if (peer->flip > 0)
+			peer->aorg = xmt_ty;
+		else
+			peer->borg = xmt_ty;
+		peer->flip = -peer->flip;
+	}
+	L_SUB(&xmt_ty, &xmt_tx);
+	LFPTOD(&xmt_ty, peer->xleave);
 #ifdef OPENSSL
 #ifdef DEBUG
 	if (debug)
@@ -2977,8 +3164,7 @@ fast_xmit(
 {
 	struct pkt xpkt;	/* transmit packet structure */
 	struct pkt *rpkt;	/* receive packet structure */
-	l_fp	xmt_ts;		/* timestamp */
-	l_fp	xmt_tx;		/* timestamp after authent */
+	l_fp	xmt_tx, xmt_ty;
 	int	sendlen, authlen;
 #ifdef OPENSSL
 	u_int32	temp32;
@@ -3042,8 +3228,8 @@ fast_xmit(
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
 		if (mask == NULL) {
-			get_systime(&xmt_ts);
-			HTONL_FP(&xmt_ts, &xpkt.xmt);
+			get_systime(&xmt_tx);
+			HTONL_FP(&xmt_tx, &xpkt.xmt);
 		}
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
@@ -3094,10 +3280,9 @@ fast_xmit(
 		}
 	}
 #endif /* OPENSSL */
+	get_systime(&xmt_tx);
 	if (mask == NULL) {
-		get_systime(&xmt_ts);
-		L_ADD(&xmt_ts, &sys_authdelay);
-		HTONL_FP(&xmt_ts, &xpkt.xmt);
+		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	sendlen += authlen;
@@ -3105,21 +3290,10 @@ fast_xmit(
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif /* OPENSSL */
-	get_systime(&xmt_tx);
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
-
-	/*
-	 * Calculate the encryption delay. Keep the minimum over the
-	 * latest two samples.
-	 */
-	L_SUB(&xmt_tx, &xmt_ts);
-	L_ADD(&xmt_tx, &sys_authdelay);
-	sys_authdly[1] = sys_authdly[0];
-	sys_authdly[0] = xmt_tx.l_uf;
-	if (sys_authdly[0] < sys_authdly[1])
-		sys_authdelay.l_uf = sys_authdly[0];
-	else
-		sys_authdelay.l_uf = sys_authdly[1];
+	get_systime(&xmt_ty);
+	L_SUB(&xmt_ty, &xmt_tx);
+	sys_authdelay = xmt_ty;
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -3305,8 +3479,6 @@ init_proto(void)
 	sys_bclient = 0;
 	sys_bdelay = 0;
 	sys_authenticate = 1;
-	L_CLR(&sys_authdelay);
-	sys_authdly[0] = sys_authdly[1] = 0;
 	sys_stattime = current_time;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {

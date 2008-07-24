@@ -70,6 +70,7 @@
 %token		T_Average
 %token		T_Bclient
 %token		T_Beacon
+%token		T_Bias
 %token		T_Broadcast
 %token		T_Broadcastclient
 %token		T_Broadcastdelay
@@ -198,6 +199,7 @@
 %token		T_Type
 %token		T_Version
 %token		T_Week
+%token		T_Xleave
 %token		T_Year
 %token <Integer> T_Integer
 %token          T_Flag     /* Not an actual token */
@@ -371,6 +373,7 @@ option_list
 option
 /*        :	/* Null Statement { $$ = NULL; } */
         :	T_Autokey      { $$ = create_attr_ival(T_Flag, FLAG_SKEY); }
+	|	T_Bias number        { $$ = create_attr_dval(T_Bias, $2); }
 	|	T_Burst        { $$ = create_attr_ival(T_Flag, FLAG_BURST); }
 	|	T_Iburst       { $$ = create_attr_ival(T_Flag, FLAG_IBURST); }
 	|	T_Key T_Integer      { $$ = create_attr_ival(T_Key, $2); }
@@ -380,6 +383,7 @@ option
 	|	T_Preempt      { $$ = create_attr_ival(T_Flag, FLAG_PREEMPT); }
 	|	T_Prefer       { $$ = create_attr_ival(T_Flag, FLAG_PREFER); }
 	|	T_True         { $$ = create_attr_ival(T_Flag, FLAG_TRUE); }
+	|	T_Xleave       { $$ = create_attr_ival(T_Flag, FLAG_XLEAVE); }
 	|	T_Ttl T_Integer     { $$ = create_attr_ival(T_Ttl, $2); }
         |       T_Mode T_Integer    { $$ = create_attr_ival(T_Mode, $2); }
 	|	T_Version T_Integer { $$ = create_attr_ival(T_Version, $2); }

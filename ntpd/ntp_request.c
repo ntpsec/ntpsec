@@ -914,7 +914,7 @@ peer_info (
 		ip->rootdispersion = HTONS_FP(DTOUFP(pp->rootdisp));
 		ip->refid = pp->refid;
 		HTONL_FP(&pp->reftime, &ip->reftime);
-		HTONL_FP(&pp->org, &ip->org);
+		HTONL_FP(&pp->aorg, &ip->org);
 		HTONL_FP(&pp->rec, &ip->rec);
 		HTONL_FP(&pp->xmt, &ip->xmt);
 		j = pp->filter_nextpt - 1;
@@ -1121,7 +1121,6 @@ sys_info(
 		is->flags |= INFO_FLAG_FILEGEN;
 	is->bdelay = HTONS_FP(DTOFP(sys_bdelay));
 	HTONL_UF(sys_authdelay.l_f, &is->authdelay);
-
 	(void) more_pkt();
 	flush_pkt();
 }
