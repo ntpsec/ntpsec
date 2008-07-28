@@ -93,15 +93,14 @@ flag = {
 	_EndOfDoc_;
 };
 
-flag = (
+flag = {
     name      = kod;
     value     = k;
     descrip   = "Specify a file for the KOD packet storage";
     doc = <<-  _EndOfDoc_
     Specifies the file to be used to store KOD packaet information.
     _EndOfDoc_;
-
-
+};
 
 flag = {
 	name 	= syslog;

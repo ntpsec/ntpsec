@@ -11,7 +11,7 @@ set -x
 
 for i in $STUB
 do
-	cp ../sntp/$i .
+	# cp ../sntp/$i .
 done
 
 test -f bincheck.mf		|| cp ../bincheck.mf .
