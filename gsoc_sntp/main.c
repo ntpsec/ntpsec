@@ -1,17 +1,22 @@
-#include "networking.h"
-#include "header.h"
-
+#if 0
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 
-#include <getopt.h>
 #include <ntp_stdlib.h>
+
+#include <sntp-opts.h>
+
+#include "networking.h"
+#include "header.h"
 
 #define NTP_PORT 123
 
 int ai_fam_tmpl;
+
+volatile int debug;
 
 
 int 

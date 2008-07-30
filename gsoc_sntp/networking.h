@@ -12,6 +12,8 @@
 #include <strings.h>	/**/
 #include <errno.h>	/**/
 
+#include <ntp_stdlib.h>
+
 #include "data_formats.h"
 
 /* FIXME, see portability issue 1 */ /* irrelevant for now */
@@ -25,7 +27,6 @@
 /* Check if necessary or not */
 /* Maximum number of sockets... should be specified in sntp.h later */
 #define MAX_AF 2
-
 
 int descriptors[MAX_AF];
 
