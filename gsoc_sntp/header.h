@@ -15,7 +15,6 @@ No changes should be needed for any system that is even remotely like Unix. */
 
 
 
-#define VERSION         "1.6"          /* Just the version string */
 #define MAX_SOCKETS        10          /* Maximum number of addresses */
 
 #ifndef LOCKNAME

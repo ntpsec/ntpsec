@@ -79,7 +79,7 @@ AC_TYPE_UID_T
 AC_DEFINE(HAVE_NO_NICE, 1, [sntp does not care about 'nice'])
 AC_DEFINE(HAVE_TERMIOS, 1, [sntp does not care about TTY stuff])
 AC_DEFINE(ISC_PLATFORM_HAVEIPV6, 1, [hack])
- 
+AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?]) 
 
 
 # Checks for library functions.
