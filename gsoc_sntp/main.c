@@ -6,6 +6,7 @@
 #endif
 
 #include <ntp_stdlib.h>
+#include <isc/result.h>
 
 #include <sntp-opts.h>
 
@@ -14,7 +15,7 @@
 
 #define NTP_PORT 123
 
-int ai_fam_tmpl;
+int ai_fam_templ;
 
 volatile int debug;
 
