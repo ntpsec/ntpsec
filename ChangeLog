@@ -1,3 +1,4 @@
+* [Bug 1046] refnumtoa.c is using the wrong header file.
 * [Bug 1047] enable/disable options processing fix.
 * header file cleanup.
 * [Bug 1037] buffer in subroutine was 1 byte short.
