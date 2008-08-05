@@ -813,8 +813,10 @@ getconfig(
 				    peerflags |= FLAG_IBURST;
 				    break;
 
-			        case CONF_MOD_DYNAMIC:
-				    peerflags |= FLAG_DYNAMIC;
+				case CONF_MOD_DYNAMIC:
+				    msyslog(LOG_WARNING, 
+				        "Warning: the \"dynamic\" keyword has been obsoleted"
+				        " and will be removed in the next release\n");
 				    break;
 
 #ifdef OPENSSL
