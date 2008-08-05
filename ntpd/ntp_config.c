@@ -198,7 +198,7 @@ extern unsigned int qos;				/* QoS setting */
 
 /* FUNCTION PROTOTYPES */
 
-static int get_flags_from_list(queue *flag_list);
+static void call_proto_config_from_list(queue *flag_list, int able_flag);
 static void init_auth_node(void);
 static void init_syntax_tree(void);
 double *create_dval(double val);
@@ -249,20 +249,23 @@ static void do_resolve_internal(void);
  * ----------------------------
  */
 
-static int
-get_flags_from_list(
-	queue *flag_list
+static void
+call_proto_config_from_list(
+	queue *flag_list,
+	int able
 	)
 {
-	int flags = 0;
+	int flag;
 	struct attr_val *curr_flag;
 
 	while (!empty(flag_list)) {
 		curr_flag = (struct attr_val *) dequeue(flag_list);
-		flags |= curr_flag->value.i;
+		flag = curr_flag->value.i;
+		if (flag)
+			proto_config(flag, able, 0., NULL);
 		free_node(curr_flag);
 	}
-	return flags;
+	return;
 }
 
 static void
@@ -1290,16 +1293,10 @@ config_tinker(void)
 static void
 config_system_opts(void)
 {
-	int enable_flags;
-	int disable_flags;
 
-	enable_flags = get_flags_from_list(my_config.enable_opts);
-	disable_flags = get_flags_from_list(my_config.disable_opts);
+	call_proto_config_from_list(my_config.enable_opts, 1);
+	call_proto_config_from_list(my_config.disable_opts, 0);
 
-	if (enable_flags)
-		proto_config(enable_flags, 1, 0., NULL);
-	if (disable_flags)
-		proto_config(disable_flags, 0, 0., NULL);
 }
 
 static void
