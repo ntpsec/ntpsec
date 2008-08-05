@@ -517,15 +517,7 @@ OnSocketRecv(DWORD i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	}
 	else 
 	{
-#ifdef DEBUG
-		if(debug > 3 && get_packet_mode(buff) == MODE_BROADCAST)
-			printf("****Accepting Broadcast packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
-#endif
 		ignore_this = inter->ignore_packets;
-#ifdef DEBUG
-		if (debug > 3)
-			printf(" Packet mode is %d\n", get_packet_mode(buff));
-#endif
 
 		/*
 		 * If we keep it add some info to the structure
