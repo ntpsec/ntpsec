@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  Thursday July 24, 2008 at 03:26:53 PM EDT
+# It has been AutoGen-ed  Tuesday August  5, 2008 at 07:54:47 PM EDT
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
