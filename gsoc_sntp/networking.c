@@ -2,6 +2,7 @@
 
 /* #include "sntp-opts.h"	/**/
 #include "networking.h"
+#include "header.h"
 #include "log.h"
 
 
@@ -9,63 +10,101 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 	register unsigned int a, b;
 	unsigned int entryc = 0; 
 
-	res = (struct addrinfo **) malloc(sizeof(struct addrinfo) * hostc);
+	/* res = (struct addrinfo **) malloc(sizeof(struct addrinfo) * (hostc + 1)); */
+
+	if(hostc < 1) 
+		return 0;
 	
-	
+	struct addrinfo ***tres = (struct addrinfo ***) malloc(sizeof(struct addrinfo **) * hostc);
+
 	for(a=0; a<hostc; a++) {
-		struct addrinfo hints, **res, *res0;
+		tres[a] = (struct addrinfo **) malloc(sizeof(struct addrinfo));
+
+#ifdef DEBUG
+		printf("Starting host resolution for %s...\n", hosts[a]); 
+#endif
+
+		struct addrinfo hints, *dres, *res0;
 		int error;
 		const char *cause = NULL;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = PF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_UDP;
+/*		hints.ai_protocol = IPPROTO_UDP; */
 
 
-		error = getaddrinfo(hosts[a], "ntp", &hints, &res[a]);
+		error = getaddrinfo(hosts[a], "ntp", &hints, tres[a]);
 
 		if(error) {
 			size_t msg_length = strlen(hosts[a]) + 21;
 			char *logmsg = (char *) malloc(sizeof(char) * msg_length);
 
 			snprintf(logmsg, msg_length, "Error looking up %s", hosts[a]);
+#ifdef DEBUG
+			printf("%s\n", logmsg);
+#endif
+
 			log_msg(logmsg, 1);
-		}
-	}
-
-	/* Make a list of the addrinfo list entries, start by counting them */
-	for(a=0; a<hostc; a++) {
-		entryc++;
-
-		if(res[a]->ai_next != NULL) {
-			while(res[a]->ai_next != NULL) 
-				entryc++;
-		}
-	}
-
-	struct addrinfo **result = (struct addrinfo **) malloc(sizeof(struct addrinfo) * entryc);
-
-	for(a=0,b=0; a<entryc; b++) {
-		if(res[b]->ai_next != NULL) {
-			memcpy(result[a], res[b], sizeof(struct addrinfo));
-			a++;
+			res[a] = 0;
 		}
 		else {
-			struct addrinfo *seek = res[b]->ai_next;
+			for(dres=*tres[a]; dres; dres=dres->ai_next) {
+				entryc++;
+#ifdef DEBUG	
+				printf("--------------------------------------------------------------------------------\n");
+				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", entryc, hosts[a]);
+				printf("socktype: %i ", dres->ai_socktype); 
+				printf("protocol: %i ", dres->ai_protocol);
+				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, inet_ntoa(dres->ai_addr));
+				printf("--------------------------------------------------------------------------------\n\n");
+#endif
+			}
+		}
+	}
 
-			for(; a<entryc && seek != NULL; a++) {
-				memcpy(result[a], seek, sizeof(struct addrinfo));
+#ifdef DEBUG
+	printf("Retrieved %i DNS entries, continuing...\n", entryc);
+#endif
+
+	/* Make a list of the addrinfo list entries, start by counting them */
+	struct addrinfo **result = (struct addrinfo **) malloc(sizeof(struct addrinfo**) * entryc);
+
+	for(a=0, b=0; a<hostc; a++) {
+#ifdef DEBUG
+		printf("%i %i: Copying address information...\n", a, b);
+#endif
+
+		struct addrinfo *cur = *tres[a];
+
+		if(cur->ai_next == NULL) {
+			result[b] = *tres[a];
+		}
+		else {
+			struct addrinfo *seek = *tres[a];
+
+			for(; b<entryc && seek; b++) {
+				result[b] = seek;
 				seek = seek->ai_next;
 			}
 		}
 	}
 
+#ifdef DEBUG
+	for(a=0; a<entryc; a++)
+		printf("%x: IP %s\n", result[a], inet_ntoa(result[a]->ai_addr));
+#endif
+
+	*res = (struct addrinfo *) malloc(sizeof(struct addrinfo *) * entryc);
+
+	for(a=0; a<entryc; a++)
+		res[a] = result[a];
+
 	return entryc;
 }
 
 /* Send a packet */
-static void
+void
 sendpkt (
 	struct sockaddr_storage *dest,
 	struct pkt *pkt,
@@ -73,6 +112,13 @@ sendpkt (
 	)
 {
 	int sock;
+	char *foo = (char *) malloc(len);
+
+	snprintf(foo, len, "%s", (char *)pkt);
+
+	printf("%s\n", foo);
+
+	return;
 
 	int cc = sendto(sock, (char *)pkt, len, 0, (struct sockaddr *)dest,
 			SOCKLEN(dest));
@@ -213,7 +259,9 @@ recvpkt (
  *		    (non-blocking).
  */
 int
-is_reachable (struct addrinfo *dst)
+is_reachable (
+		struct addrinfo *dst
+		)
 {
 	SOCKET sockfd;
 
