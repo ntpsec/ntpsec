@@ -15,6 +15,10 @@
 #include "openssl/rand.h"
 #endif /* OPENSSL */
 
+#ifdef SYS_WINNT
+extern int accept_wildcard_if_for_winnt;
+#endif
+
 /*
  *                  Table of valid association combinations
  *                  ---------------------------------------
@@ -27,7 +31,7 @@
  * PASSIVE         |   e       1       e       0       0       0
  * CLIENT          |   e       0       0       0       1       1
  * SERVER          |   e       0       0       0       0       0
- * BCAST	   |   e       0       0       0       0       0
+ * BCAST           |   e       0       0       0       0       0
  * BCLIENT         |   e       0       0       0       e       1
  *
  * One point to note here: a packet in BCAST mode can potentially match
@@ -706,7 +710,11 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
 	 * crypto will not work without knowing the own transmit address
 	 */
 	if (interface != NULL && interface->flags & INT_WILDCARD)
-		interface = NULL;
+#ifdef SYS_WINNT
+		if ( !accept_wildcard_if_for_winnt )  
+#endif
+			interface = NULL;
+
 
 	return interface;
 }

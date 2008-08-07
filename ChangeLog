@@ -1,3 +1,5 @@
+* [Bug 450] Windows only: Under original Windows NT we must not discard the
+  wildcard socket to workaround a bug in NT's getsockname().
 * [Bug 959] Refclock on Windows not properly releasing recvbuffs.
 * [Bug 993] Fix memory leak when fetching system messages.
 * [Bug 987] Wake up the resolver thread/process when a new interface has
