@@ -5,8 +5,25 @@
 #include "header.h"
 #include "log.h"
 
+#ifdef DEBUG
+#define WS80 do { \
+	register int wsc; \
+	for(wsc=0; wsc<80; wsc++) \
+		printf("-"); \
+	printf("\n"); \
+} while(0);
+#endif
 
-int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
+
+
+
+int 
+resolve_hosts (
+		char **hosts, 
+		int hostc, 
+		struct addrinfo **res
+		) 
+{
 	register unsigned int a, b;
 	unsigned int entryc = 0; 
 
@@ -30,11 +47,11 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = PF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_socktype = SOCK_DGRAM;
 /*		hints.ai_protocol = IPPROTO_UDP; */
 
 
-		error = getaddrinfo(hosts[a], "ntp", &hints, tres[a]);
+		error = getaddrinfo(hosts[a], "123", &hints, tres[a]);
 
 		if(error) {
 			size_t msg_length = strlen(hosts[a]) + 21;
@@ -52,12 +69,13 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 			for(dres=*tres[a]; dres; dres=dres->ai_next) {
 				entryc++;
 #ifdef DEBUG	
-				printf("--------------------------------------------------------------------------------\n");
+				WS80
 				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", entryc, hosts[a]);
 				printf("socktype: %i ", dres->ai_socktype); 
 				printf("protocol: %i ", dres->ai_protocol);
 				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, inet_ntoa(dres->ai_addr));
-				printf("--------------------------------------------------------------------------------\n\n");
+				WS80
+				printf("\n");	
 #endif
 			}
 		}
@@ -71,10 +89,6 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 	struct addrinfo **result = (struct addrinfo **) malloc(sizeof(struct addrinfo**) * entryc);
 
 	for(a=0, b=0; a<hostc; a++) {
-#ifdef DEBUG
-		printf("%i %i: Copying address information...\n", a, b);
-#endif
-
 		struct addrinfo *cur = *tres[a];
 
 		if(cur->ai_next == NULL) {
@@ -103,32 +117,83 @@ int resolve_hosts (char **hosts, int hostc, struct addrinfo **res) {
 	return entryc;
 }
 
+void 
+create_socket (
+		SOCKET *rsock,
+		struct sockaddr *dest
+		)
+{
+	*rsock = socket(dest->sa_family, SOCK_DGRAM, 0);
+
+#ifdef DEBUG
+	if(*rsock == -1)
+		printf("Failed to create UDP socket with family %i\n", dest->sa_family);
+#endif
+
+		
+/*	int error = bind(*rsock, dest, SOCKLEN(dest));
+
+	if(error != 0) {
+		*rsock = -1; 
+#ifdef DEBUG
+		printf("Failed to bind %i %i socket to address %s\n", error, errno, inet_ntoa(dest));
+#endif
+	} */
+}
+
+void 
+close_socket (
+		SOCKET rsock
+		)
+{
+	close(rsock);
+}
+
 /* Send a packet */
 void
 sendpkt (
-	struct sockaddr_storage *dest,
+	SOCKET rsock,
+	struct sockaddr *dest,
 	struct pkt *pkt,
 	int len
 	)
 {
-	int sock;
-	char *foo = (char *) malloc(len);
+#ifdef DEBUG
+	register int a;
 
-	snprintf(foo, len, "%s", (char *)pkt);
+	unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * len);
+	
+	for(a=0; a<len; a++)
+		cpy[a] = ((unsigned char *) pkt)[a];
 
-	printf("%s\n", foo);
+	for(a=0; a<len; a++) {
+		if(a > 0 && a%8 == 0) 
+			printf("\n");
 
-	return;
+		printf("%x: %x \t", a, cpy[a]);
+	}
 
-	int cc = sendto(sock, (char *)pkt, len, 0, (struct sockaddr *)dest,
+
+	printf("\nSending packet to %s...\n", inet_ntoa(dest));
+#endif
+
+	int cc = sendto(rsock, (char *)pkt, len, 0, dest,
 			SOCKLEN(dest));
 
 	if (cc == SOCKET_ERROR) {
+#ifdef DEBUG
+		printf("Socket error: %i. Couldn't send packet!\n", cc);
+#endif
+
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
 
 		}
 	}
-
+#ifdef DEBUG
+	else {
+		printf("Packet sent.\n");
+	}
+#endif
 }
 
 int
@@ -140,12 +205,40 @@ recvdata (
 		char *done
 	 )
 {
-	socklen_t slen = SOCKLEN(rsock);
+	socklen_t slen = SOCKLEN(&rsock);
 
-	int recvc = recvfrom(rsock, rdata, rdata_length, MSG_DONTWAIT, 
+#ifdef DEBUG
+	printf("Trying to receive data from...\n");
+#endif
+
+	int recvc = recvfrom(rsock, rdata, rdata_length, 0, 
 			sender, &slen);
+#ifdef DEBUG
+	printf("recvfrom returned...\n");
+#endif
 
+#ifdef DEBUG
+	register int a;
+
+	if(recvc > 0) {
+		printf("Received %i bytes from %s:\n", recvc, inet_ntoa(sender));
+
+		unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * recvc);
 	
+		for(a=0; a<recvc; a++)
+			cpy[a] = ((unsigned char *) rdata)[a];
+
+		for(a=0; a<recvc; a++) {
+			if(a > 0 && a%8 == 0) 
+				printf("\n");
+
+			printf("%i: %x \t", a, cpy[a]);
+		}
+	}
+	else {
+		printf("Failure, recvc: %i\n", recvc);
+	}
+#endif
 	/* Remove this when found a reasonable max. size. For now
 	 * notify when there's data left to fetch 
 	 */
@@ -216,9 +309,10 @@ recvpkt (
 	if ((PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
 		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE)
 		|| rpkt->stratum >= STRATUM_UNSPEC) {
-		if (debug)
-			fprintf(stderr, "receive: mode %d stratum %d\n",
+#ifdef DEBUG
+			printf("receive: mode %d stratum %d\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
+#endif
 		return -1;
 	}
 

@@ -4,6 +4,7 @@
 #include "kod_management.h"
 #include "log.h"
 #include "sntp-opts.h"
+#define DEBUG
 
 int kod_init = 0, entryc = 0;
 char *kod_db_file;
@@ -38,6 +39,16 @@ search_entry (
 	}
 
 	return resc;
+}
+
+int
+kod_entry_exists (
+		char *search_str
+		)
+{
+	struct kod_entry **dummy;
+
+	return search_entry(search_str, dummy);
 }
 
 void 
@@ -107,8 +118,10 @@ write_kod_db (
 		char msg[80];
 		snprintf(msg, 80, "Can't open KOD db file %s for writing!", kod_db_file);
 
-		if(debug)
-			debug_msg(msg);
+
+#ifdef DEBUG
+		debug_msg(msg);
+#endif
 
 		log_msg(msg, 2);
 
@@ -116,7 +129,7 @@ write_kod_db (
 	}
 			
 	for(a=0; a<entryc && nptr != NULL; a++) {
-		fprintf(db_s, "%s:%i%s\n", nptr->hostname, nptr->timestamp, nptr->type);
+		fprintf(db_s, "%s:%i:%s\n", nptr->hostname, nptr->timestamp, nptr->type);
 		nptr = nptr->next;
 	}
 
@@ -132,10 +145,14 @@ kod_init_kod_db (
 	if(kod_init)
 		return;
 
+#ifdef DEBUG
+	printf("Initializing KOD DB...\n");
+#endif
+
 	register int a, b;
 
 	/* Max. of 255 characters for hostname, 10 for timestamp, 4 for kisscode, 2 for format : and 1 for \n */
-	char *fbuf = (char *) malloc(sizeof(char) * 272);
+	char fbuf[272];
 	char *obuf = fbuf;
 	char error = 0;
 
@@ -145,16 +162,22 @@ kod_init_kod_db (
 	if(db_file == NULL) {
 		char msg[80];
 
-		snprintf(msg, 80, "Cannot open KOD db file %s", db_file);
+		snprintf(msg, 80, "kod_init_kod_db(): Cannot open KOD db file %s", db_file);
 
-		if(debug) 
-			debug_msg(msg);
+#ifdef DEBUG
+		debug_msg(msg);
+		printf("%s\n", msg);
+#endif
 
 		log_msg(msg, 2);
 	}
 
+	printf("Starting to read KOD file %s...\n", db_file);
 	/* First let's see how many entries there are and check for right syntax */
-	while(fgets(fbuf, 272, db_s) != 0) {
+
+	int scan_value = 0;
+	while(!feof(db_s)) {
+		printf("%s", fgets(fbuf, 272, db_s));
 		int sepc = 0;
 		for(a=0; a<strlen(fbuf); a++) {
 			if(fbuf[a] == ':') 
@@ -165,12 +188,14 @@ kod_init_kod_db (
 					char msg[80];
 					snprintf(msg, 80, "Syntax error in KOD db file %s in line %i (missing :)", db_file, (entryc + 1));
 
-					if(debug)
-						debug_msg(msg);
+#ifdef DEBUG
+					debug_msg(msg);
+					printf("%s\n", msg);
+#endif
 
 					log_msg(msg, 1);
 
-					return;
+					return; 
 				}
 
 				sepc = 0;
@@ -179,32 +204,51 @@ kod_init_kod_db (
 		}
 	}
 
+	entryc--;
+
+#ifdef DEBUG
+	printf("KOD DB %s contains %i entries, reading...\n", db_file, entryc);
+#endif
+
 	rewind(db_s);
 
 	kod_db = (struct kod_entry *) malloc(sizeof(struct kod_entry) * entryc);
 
 	/* Read contents of file and make a linked list */
 	for(b=0; (!feof(db_s) || !ferror(db_s)) && b<entryc; b++) {
-		if(!fscanf(db_s, 
-			  "%s:%u:%s", kod_db[a].hostname, 
-			  kod_db[a].timestamp, 
-			  kod_db[a].type)) {
+		char *str_ptr = fgets(fbuf, 272, db_s);
+
+		int j = sscanf(fbuf, "%255[^:]", &(kod_db[b].hostname));
+		j += sscanf(fbuf + j, "%*[^:]:%i:%4s", &kod_db[b].timestamp, &(kod_db[b].type));
+
+		if(str_ptr == NULL) {
 			b = entryc;
 			error = 1;
 		} 
 		else {
+#ifdef DEBUG
+			printf("KOD entry %i %i: %s at %i type %s\n", a, b,  kod_db[b].hostname, 
+					kod_db[b].timestamp, kod_db[b].type);
+#endif
 			if(b > 0) 
 				kod_db[b-1].next = &kod_db[b];
 		}
-
 	}
+
+#ifdef DEBUG
+	for(a=0; a<entryc; a++)
+		printf("KOD entry %i: %s at %i type %s\n", a, kod_db[a].hostname, 
+				kod_db[a].timestamp, kod_db[a].type);
+
+#endif
 
 	if(ferror(db_s) || error) {
 		char msg[80];
 		snprintf(msg, 80, "An error occured while parsing the KOD db file %s", db_file);
 
-		if(debug)
-			debug_msg(msg);
+#ifdef DEBUG
+		debug_msg(msg);
+#endif
 
 		log_msg(msg, 2);
 
