@@ -1,3 +1,4 @@
+* [Bug 861] leap info was not being transmitted.
 * [Bug 1046] refnumtoa.c is using the wrong header file.
 * [Bug 1047] enable/disable options processing fix.
 * header file cleanup.

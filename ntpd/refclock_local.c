@@ -239,7 +239,10 @@ local_poll(
 	pp->disp = 0;
 	pp->jitter = 0;
 #else /* KERNEL_PLL LOCKCLOCK */
-	pp->leap = LEAP_NOWARNING;
+	if (pp->sloppyclockflag & CLK_FLAG1)
+		pp->leap = LEAP_ADDSECOND;
+	else
+		pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
 	pp->jitter = 0;
 #endif /* KERNEL_PLL LOCKCLOCK */

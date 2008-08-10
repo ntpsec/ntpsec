@@ -572,7 +572,7 @@ crypto_recv(
 				fstamp |= CRYPTO_FLAG_COOK;
 			else if (hismode == MODE_SERVER)
 				fstamp |= CRYPTO_FLAG_AUTO;
-			if (!(fstamp & CRYPTO_FLAG_LEAP))
+			if (!(fstamp & CRYPTO_FLAG_TAI))
 				fstamp |= CRYPTO_FLAG_LEAP;
 			RAND_bytes((u_char *)&peer->hcookie, 4);
 			peer->crypto = fstamp;
@@ -1844,7 +1844,7 @@ crypto_update(void)
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
 		tai_leap.siglen = htonl(len);
 	if (leap_sec > 0)
-		crypto_flags |= CRYPTO_FLAG_LEAP;
+		crypto_flags |= CRYPTO_FLAG_TAI;
 	snprintf(statstr, NTP_MAXSTRLEN, "signature update ts %u",
 	    ntohl(hostval.tstamp)); 
 	record_crypto_stats(NULL, statstr);
