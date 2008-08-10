@@ -251,8 +251,6 @@
 * [Bug 828] Correct parsing of " delimited strings.
 * Cleanup FILE * usage after fclose() in ntp_filegen.c.
 * [Bug 843] Windows Completion port code was incorrectly merged from -stable.
-* [Bug 841] make deferred binding to local interface the default.
-  (allows peers/servers to be configured even when no route exists)
 * [Bug 840] do fudge configuration AFTER peers (thus refclocks) have been
   configured.
 * [Bug 824] Added new parser modules to the Windows project file.
@@ -298,6 +296,9 @@
 
 ---
 
+* [Bug 841] Obsolete the "dynamic" keyword and make deferred binding
+  to local interfaces the default.
+  Emit a warning if that keyword is used for configuration.
 * [Bug 959] Refclock on Windows not properly releasing recvbuffs.
 * [Bug 993] Fix memory leak when fetching system messages.
 * [Bug 987] Wake up the resolver thread/process when a new interface has
