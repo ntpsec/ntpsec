@@ -119,10 +119,10 @@ struct xcmd opcmds[] = {
 	  { "", "", "", "" },
 	  "display event timer subsystem statistics" },
 	{ "addpeer",	addpeer,	{ NTP_ADD, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|dynamic|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
+	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
 	  "configure a new peer association" },
 	{ "addserver",	addserver,	{ NTP_ADD, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
-	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|dynamic|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
+	  { "addr", "keyid", "version", "minpoll#|prefer|burst|iburst|'minpoll N'|'maxpoll N'|'keyid N'|'version N' ..." },
 	  "configure a new server" },
 	{ "addrefclock",addrefclock,	{ NTP_ADD, OPT|NTP_UINT, OPT|NTP_STR, OPT|NTP_STR },
 	  { "addr", "mode", "minpoll|prefer", "minpoll|prefer" },
@@ -1333,7 +1333,7 @@ again:
 		else if (STREQ(pcmd->argval[items].string, "burst"))
 		    flags |= CONF_FLAG_BURST;
 		else if (STREQ(pcmd->argval[items].string, "dynamic"))
-                    flags |= CONF_FLAG_DYNAMIC;
+		    (void) fprintf(fp, "Warning: the \"dynamic\" keyword has been obsoleted and will be removed in the next release\n"); 
 		else if (STREQ(pcmd->argval[items].string, "iburst"))
 		    flags |= CONF_FLAG_IBURST;
 		else if (!refc && STREQ(pcmd->argval[items].string, "keyid"))

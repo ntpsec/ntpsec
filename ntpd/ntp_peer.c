@@ -759,45 +759,25 @@ newpeer(
 		    cast_flags, stoa(srcadr)));
 
 	ISC_LINK_INIT(peer, ilink);  /* set up interface link chain */
-
-	dstadr = select_peerinterface(peer, srcadr, dstadr, cast_flags);
-	
-	/*
-	 * If we can't find an interface to use we return a NULL
-	 * unless the DYNAMIC flag is set - then we expect the dynamic
-	 * interface detection code to bind us some day to an interface
-	 */
-	if (dstadr == NULL && !(flags & FLAG_DYNAMIC))
-	{
-		msyslog(LOG_ERR, "Cannot find existing interface for address %s", stoa(srcadr));
-
-		peer->next = peer_free;
-		peer_free = peer;
-		peer_associations--;
-		peer_free_count++;
-		
-		return (NULL);
-	}
-	
 	peer->srcadr = *srcadr;
+	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr,
+	    cast_flags));
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
 	peer->minpoll = (u_char)max(NTP_MINPOLL, minpoll);
 	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags;
-
-	set_peerdstadr(peer, dstadr);
-
 #ifdef DEBUG
 	if (debug > 2) {
 		if (peer->dstadr)
 			printf("newpeer: using fd %d and our addr %s\n",
-			       peer->dstadr->fd, stoa(&peer->dstadr->sin));
+				    peer->dstadr->fd,
+				    stoa(&peer->dstadr->sin));
 		else
 			printf("newpeer: local interface currently not bound\n");
 	}
 #endif
-	
+
 	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
