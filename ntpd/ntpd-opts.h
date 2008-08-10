@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  Tuesday May 20, 2008 at 03:42:29 AM EDT
+ *  It has been AutoGen-ed  Sunday August 10, 2008 at 07:36:05 AM EDT
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -87,8 +87,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    32
-#define NTPD_VERSION       "4.2.4p5-RC1"
-#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.4p5-RC1"
+#define NTPD_VERSION       "4.2.4p5-RC2"
+#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.4p5-RC2"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
