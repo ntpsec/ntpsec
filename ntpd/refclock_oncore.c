@@ -531,7 +531,7 @@ oncore_start(
 #define STRING_LEN	32
 	register struct instance *instance;
 	struct refclockproc *pp;
-	int fd1, fd2, num;
+	int fd1, fd2;
 	char device1[STRING_LEN], device2[STRING_LEN], Msg[160];
 	const char *cp;
 	struct stat stat1, stat2;
@@ -623,11 +623,10 @@ oncore_start(
 			exit(1);
 		}
 	}
-	num = fd2;
 
 	/* open ppsapi soure */
 
-	if (time_pps_create(num, &instance->pps_h) < 0) {
+	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");
 		return(0);
 	}
