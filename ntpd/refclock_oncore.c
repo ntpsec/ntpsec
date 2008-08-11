@@ -531,7 +531,7 @@ oncore_start(
 #define STRING_LEN	32
 	register struct instance *instance;
 	struct refclockproc *pp;
-	int fd1, fd2, num;
+	int fd1, fd2;
 	char device1[STRING_LEN], device2[STRING_LEN], Msg[160];
 	const char *cp;
 	struct stat stat1, stat2;
@@ -594,24 +594,39 @@ oncore_start(
 	   Since things ALWAYS work if we only open the device once, we check
 	     to see if the two devices are in fact the same, then proceed to
 	     do one open or two.
+
+	   For use with linuxPPS we assume that the N_TTY file has been opened
+	     and that the line discipline has been changed to N_PPS by another
+	     program (say ppsldisc) so that the two files expected by the oncore
+	     driver can be opened.
+
+	   Note that the linuxPPS N_PPS file is just like a N_TTY, so we can do
+	     the stat below without error even though the file has already had its
+	     line discipline changed by another process.
 	*/
 
+	stat1.st_dev = stat1.st_ino = -1;
 	if (stat(device1, &stat1)) {
 		sprintf(Msg, "Can't stat fd1 (%s)\n", device1);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
-		exit(1);
-	}
-
-	if (stat(device2, &stat2)) {
-		sprintf(Msg, "Can't stat fd2 (%s)\n", device2);
-		record_clock_stats(&(instance->peer->srcadr), Msg);
-		exit(1);
 	}
 
 	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
 		sprintf(Msg, "Can't open fd1 (%s)\n", device1);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 		exit(1);
+	}
+
+	/* for LINUX the PPS device is the result of a line discipline.
+	   It seems simplest to let an external program create the appropriate
+	   /dev/pps<n> file, and only check (carefully) for its existance here
+	 */
+
+	stat2.st_dev = stat2.st_ino = -2;
+	if (stat(device2, &stat2)) {
+		sprintf(Msg, "Can't stat fd2 (%s) errno = %d\n", device2, errno);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+		record_clock_stats(&(instance->peer->srcadr), "May be line discipline, see if we can open it.");
 	}
 
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
@@ -623,11 +638,10 @@ oncore_start(
 			exit(1);
 		}
 	}
-	num = fd2;
 
 	/* open ppsapi soure */
 
-	if (time_pps_create(num, &instance->pps_h) < 0) {
+	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");
 		return(0);
 	}
@@ -2916,7 +2930,7 @@ oncore_msg_Gj(
 	if (dt) {
 		sprintf(Msg, "ONCORE[%d]: Leap second (%d) scheduled for %d%s%d at %d:%d:%d",
 			instance->unit,
-			dt, buf[9], Month[buf[8]], 256*buf[6]+buf[7],
+			dt, buf[9], Month[buf[8]-1], 256*buf[6]+buf[7],
 			buf[15], buf[16], buf[17]);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 	}
