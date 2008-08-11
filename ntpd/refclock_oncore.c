@@ -605,9 +605,15 @@ oncore_start(
 	     line discipline changed by another process.
 	*/
 
-	stat1.st_dev = stat1.st_ino = -1;
 	if (stat(device1, &stat1)) {
+		stat1.st_dev = stat1.st_ino = -1;
 		sprintf(Msg, "Can't stat fd1 (%s)\n", device1);
+		record_clock_stats(&(instance->peer->srcadr), Msg);
+	}
+
+	if (stat(device2, &stat2)) {
+		stat2.st_dev = stat2.st_ino = -2;
+		sprintf(Msg, "Can't stat fd2 (%s) errno = %d\n", device2, errno);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 	}
 
@@ -621,13 +627,6 @@ oncore_start(
 	   It seems simplest to let an external program create the appropriate
 	   /dev/pps<n> file, and only check (carefully) for its existance here
 	 */
-
-	stat2.st_dev = stat2.st_ino = -2;
-	if (stat(device2, &stat2)) {
-		sprintf(Msg, "Can't stat fd2 (%s) errno = %d\n", device2, errno);
-		record_clock_stats(&(instance->peer->srcadr), Msg);
-		record_clock_stats(&(instance->peer->srcadr), "May be line discipline, see if we can open it.");
-	}
 
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
 		fd2 = fd1;
