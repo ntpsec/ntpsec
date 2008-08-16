@@ -12,9 +12,6 @@
 void log_msg(char *message, char type);
 void debug_msg(char *message);
 
-char init = 0;
-FILE *log_file;
-
 void init_log(char *logfile);
 void cleanup_log(void);
 

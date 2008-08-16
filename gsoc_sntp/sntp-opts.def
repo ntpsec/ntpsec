@@ -4,6 +4,11 @@ autogen definitions options;
 
 #include autogen-version.def
 
+prog-name      = "sntp";
+prog-title     = "standard SNTP program";
+homerc         =  $HOME, ".";
+argument       = '...';
+
 copyright = {
     date  = "2008";
     owner = "ntp.org";
@@ -13,9 +18,6 @@ copyright = {
 };
 
 
-prog-name      = "sntp";
-prog-title     = "standard SNTP program";
-homerc         =  $HOME, ".";
 long-opts;
 
 config-header  = "config.h";
@@ -69,6 +71,7 @@ flag = {
 flag = {
     name      = debug;
     value     = d;
+    ifdef     = DEBUG;
     descrip   = "Debugging output";
     doc = <<-  _EndOfDoc_
 	Very verbose debugging output that will interfere with the timing
@@ -82,6 +85,7 @@ flag = {
 flag = {
     name      = kod;
     value     = k;
+    arg-type  = string;
     descrip   = "Specify a file for the KOD packet storage";
     doc = <<-  _EndOfDoc_
     Specifies the file to be used to store KOD packaet information.
@@ -101,6 +105,7 @@ flag = {
 flag = {
 	name 	= filelog;
 	value	= l;
+	arg-type  = string;
 	flags-cant = syslog;
 	descrip = "Logging to specified logfile";
 	doc = <<-  _EndOfDoc_
@@ -110,7 +115,7 @@ flag = {
 };
 
 flag = {
-    name      = settimeofday;
+    name      = settod;
     value     = r;
     flags-cant = adjtime;
     descrip   = "Set (step) the time with settimeofday()";
@@ -121,9 +126,19 @@ flag = {
 flag = {
     name      = adjtime;
     value     = a;
-    flags-cant = settimeofday;
+    flags-cant = settod;
     descrip   = "Set (slew) the time with adjtime()";
     doc = <<-  _EndOfDoc_
+	_EndOfDoc_;
+};
+
+flag = {
+	name 	= hostlist;
+	value	= h;
+	descrip	= "Specify a list of ntp servers";
+	doc = <<-  _EndOfDoc_
+	Comma seperated list of ntp server hosts like 
+	\"time.foo.org,time.bar.org,time.baz.org\"
 	_EndOfDoc_;
 };
 
@@ -171,7 +186,7 @@ in the local clock.  This option should be set only when debugging the source.
 .TP
 .B \-r
 indicates that the system clock should be reset by
-.IR settimeofday .
+.IR settod .
 Naturally, this will work only if the user has enough privilege.
 .TP
 .B \-a

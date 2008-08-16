@@ -1,20 +1,12 @@
 #include <config.h>
 
-/* #include "sntp-opts.h"	/**/
+#include "sntp-opts.h"	
 #include "networking.h"
 #include "header.h"
+#include "utilities.h"
 #include "log.h"
 
-#ifdef DEBUG
-#define WS80 do { \
-	register int wsc; \
-	for(wsc=0; wsc<80; wsc++) \
-		printf("-"); \
-	printf("\n"); \
-} while(0);
-#endif
-
-
+char adr_buf[INET6_ADDRSTRLEN];
 
 
 int 
@@ -26,8 +18,6 @@ resolve_hosts (
 {
 	register unsigned int a, b;
 	unsigned int entryc = 0; 
-
-	/* res = (struct addrinfo **) malloc(sizeof(struct addrinfo) * (hostc + 1)); */
 
 	if(hostc < 1) 
 		return 0;
@@ -69,13 +59,13 @@ resolve_hosts (
 			for(dres=*tres[a]; dres; dres=dres->ai_next) {
 				entryc++;
 #ifdef DEBUG	
-				WS80
+				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+				STDLINE
 				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", entryc, hosts[a]);
 				printf("socktype: %i ", dres->ai_socktype); 
 				printf("protocol: %i ", dres->ai_protocol);
-				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, inet_ntoa(dres->ai_addr));
-				WS80
-				printf("\n");	
+				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, adr_buf);
+				STDLINE
 #endif
 			}
 		}
@@ -106,7 +96,9 @@ resolve_hosts (
 
 #ifdef DEBUG
 	for(a=0; a<entryc; a++)
-		printf("%x: IP %s\n", result[a], inet_ntoa(result[a]->ai_addr));
+		getnameinfo(result[a]->ai_addr, result[a]->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+
+		printf("%x: IP %s\n", result[a], adr_buf); 
 #endif
 
 	*res = (struct addrinfo *) malloc(sizeof(struct addrinfo *) * entryc);
@@ -120,25 +112,16 @@ resolve_hosts (
 void 
 create_socket (
 		SOCKET *rsock,
-		struct sockaddr *dest
+		struct sockaddr_storage *dest
 		)
 {
-	*rsock = socket(dest->sa_family, SOCK_DGRAM, 0);
+	*rsock = socket(dest->ss_family, SOCK_DGRAM, 0);
 
 #ifdef DEBUG
 	if(*rsock == -1)
-		printf("Failed to create UDP socket with family %i\n", dest->sa_family);
+		printf("Failed to create UDP socket with family %i\n", dest->ss_family);
 #endif
 
-		
-/*	int error = bind(*rsock, dest, SOCKLEN(dest));
-
-	if(error != 0) {
-		*rsock = -1; 
-#ifdef DEBUG
-		printf("Failed to bind %i %i socket to address %s\n", error, errno, inet_ntoa(dest));
-#endif
-	} */
 }
 
 void 
@@ -153,32 +136,19 @@ close_socket (
 void
 sendpkt (
 	SOCKET rsock,
-	struct sockaddr *dest,
+	struct sockaddr_storage *dest,
 	struct pkt *pkt,
 	int len
 	)
 {
 #ifdef DEBUG
-	register int a;
+	pkt_output(pkt, len, stdout);
+	getnameinfo((struct sockaddr *) dest, dest->ss_len, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
-	unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * len);
-	
-	for(a=0; a<len; a++)
-		cpy[a] = ((unsigned char *) pkt)[a];
-
-	for(a=0; a<len; a++) {
-		if(a > 0 && a%8 == 0) 
-			printf("\n");
-
-		printf("%x: %x \t", a, cpy[a]);
-	}
-
-
-	printf("\nSending packet to %s...\n", inet_ntoa(dest));
+	printf("\nSending packet to %s...\n", adr_buf);
 #endif
 
-	int cc = sendto(rsock, (char *)pkt, len, 0, dest,
-			SOCKLEN(dest));
+	int cc = sendto(rsock, (char *)pkt, len, 0, (struct sockaddr *)dest, dest->ss_len);
 
 	if (cc == SOCKET_ERROR) {
 #ifdef DEBUG
@@ -199,7 +169,7 @@ sendpkt (
 int
 recvdata (
 		SOCKET rsock,
-		struct sockaddr *sender,
+		struct sockaddr_storage *sender,
 		char *rdata,
 		size_t rdata_length,
 		char *done
@@ -212,7 +182,7 @@ recvdata (
 #endif
 
 	int recvc = recvfrom(rsock, rdata, rdata_length, 0, 
-			sender, &slen);
+			(struct sockaddr *) sender, &slen);
 #ifdef DEBUG
 	printf("recvfrom returned...\n");
 #endif
@@ -221,19 +191,11 @@ recvdata (
 	register int a;
 
 	if(recvc > 0) {
-		printf("Received %i bytes from %s:\n", recvc, inet_ntoa(sender));
+		getnameinfo((struct sockaddr *)sender, sender->ss_len, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
-		unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * recvc);
-	
-		for(a=0; a<recvc; a++)
-			cpy[a] = ((unsigned char *) rdata)[a];
+		printf("Received %i bytes from %s:\n", recvc, adr_buf);
 
-		for(a=0; a<recvc; a++) {
-			if(a > 0 && a%8 == 0) 
-				printf("\n");
-
-			printf("%i: %x \t", a, cpy[a]);
-		}
+		pkt_output((struct pkt *) rdata, recvc, stdout);
 	}
 	else {
 		printf("Failure, recvc: %i\n", recvc);
@@ -251,8 +213,7 @@ recvdata (
 }
 
 /* Fetch data, check if it's data for us and whether it's useable or not. If not, return -1
- * so we can delete this server from our list and continue with another one. KOD package handling
- * is not done here. 
+ * so we can delete this server from our list and continue with another one. 
  */
 int 
 recvpkt (
@@ -261,6 +222,7 @@ recvpkt (
 		struct pkt *spkt
 	)
 {
+	register int a;
 	int has_mac;
 	int is_authentic;
 
@@ -271,7 +233,7 @@ recvpkt (
 	l_fp ci;
 
 
-	struct sockaddr sender;
+	struct sockaddr_storage sender;
 	char *rdata, done;
 
 	/* Much space, just to be sure */
@@ -291,7 +253,7 @@ recvpkt (
 		has_mac = 0;
 
 	else if(pkt_length > LEN_PKT_NOMAC) 
-		has_mac = 1;
+		has_mac = pkt_length - LEN_PKT_NOMAC;
 	
 	else
 		if(debug) {
@@ -299,22 +261,66 @@ recvpkt (
 			return -1;
 		}
 
-	rpkt = (struct pkt *)rdata;
+	if(has_mac) {
+		if(has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
+			return -1;
+							}
+		/* Do auth stuff */
+	}
 
+	/*struct pkt *tmp_rpkt = (struct pkt *)rdata;
+	rpkt->li_vn_mode = tmp_rpkt->li_vn_mode; 
+	rpkt->stratum = tmp_rpkt->stratum;
+	rpkt->ppoll = tmp_rpkt->ppoll;
+	rpkt->precision = tmp_rpkt->precision;
+	rpkt->rootdelay = tmp_rpkt->rootdelay;
+	rpkt->rootdisp = tmp_rpkt->rootdisp;
+	rpkt->refid = tmp_rpkt->refid;
+	rpkt->reftime = tmp_rpkt->reftime;
+	rpkt->org = tmp_rpkt->org;
+	rpkt->rec = tmp_rpkt->rec;
+	rpkt->xmt = tmp_rpkt->xmt; */
+
+	if(pkt_length > LEN_PKT_MAC) {
+		if(ENABLED_OPT(NORMALVERBOSE))
+			printf("sntp recvpkt: Received packet is too big (%i bytes), trying again to get a useable packet\n", 
+					pkt_length);
+
+		return -2;
+	}
+	
+	for(a=0; a<pkt_length; a++) 
+		((unsigned char *) rpkt)[a] = rdata[a];
+
+	printf("%x %x\n", PKT_VERSION(rpkt->li_vn_mode), NTP_OLDVERSION);
 	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
 		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
 		return -1;
-	}
+	} 
 
-	if ((PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
-		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE)
-		|| rpkt->stratum >= STRATUM_UNSPEC) {
+	if (PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
+		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
 #ifdef DEBUG
-			printf("receive: mode %d stratum %d\n",
+			printf("sntp recvpkt: mode %d stratum %i\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 #endif
 		return -1;
 	}
+
+	if(rpkt->stratum == STRATUM_PKT_UNSPEC) {
+		if(ENABLED_OPT(NORMALVERBOSE))
+			printf("sntp recvpkt: Unusable packet, discarding. (stratum: %i)\n", rpkt->stratum);
+		
+		return -1;
+	}
+
+	if(PKT_LEAP(rpkt->li_vn_mode) == LEAP_NOTINSYNC) {
+		if(ENABLED_OPT(NORMALVERBOSE)) 
+			printf("sntp recvpkt: Server not in sync, skipping this server\n");
+
+		return -1;
+	}
+
 
 	/*
 	 * Decode the org timestamp and make sure we're getting a response
@@ -327,7 +333,6 @@ recvpkt (
 		return -1;
 	}
 
-	/* Do authentication stuff here */
 
 	/* Left for now, finishin other stuff. I think I might want that somewhere else,
 	 * don't want this function to do on-wire tasks. Sanity checks are right here I think
@@ -360,7 +365,11 @@ is_reachable (
 	SOCKET sockfd;
 
 	sockfd = socket(dst->ai_family, SOCK_DGRAM, 0);
+
 	if (sockfd == -1) {
+#ifdef DEBUG
+		printf("is_reachable: Couldn't create socket\n");
+#endif
 		return 0;
 	}
 
@@ -368,6 +377,7 @@ is_reachable (
 		closesocket(sockfd);
 		return 0;
 	}
+
 	closesocket(sockfd);
 	return 1;
 }

@@ -4,11 +4,12 @@
 struct kod_entry {
 	char hostname[255];
 	unsigned int timestamp;
-	char type[4];
+	char type[5];
 	struct kod_entry *next;
 };
 
 int search_entry (char *hostname, struct kod_entry **dst);
+int kod_entry_exists (char *search_str);
 
 void add_entry (char *hostname, char *type);
 void delete_entry (char *hostname, char *type);

@@ -9,22 +9,19 @@ FILE *log_file;
 
 
 void log_msg(char *message, char type) {
-	if(filelog) {
-		if(init) {
-			fprintf(log_file, message);
-		}
-		else {
-			fprintf(stderr, "Error: Log not initialized!\n");
-		}
+	if(init) {
+		printf("log!\n");
+		printf(log_file, message);
 	}
 	else {
+		printf("ELSEZWEIG!!!!! HAAAAAARRRRRRRRRRRRRRRRRG!\n");
 		switch(type) {
 			case 0:
-				type = LOG_DEBUG;
+				type = LOG_CONS;
 				break;
 			
 			case 1:
-				type = LOG_WARNING;
+				type = LOG_DEBUG | LOG_CONS;
 				break;
 	
 			case 2: 
@@ -37,15 +34,17 @@ void log_msg(char *message, char type) {
 }
 
 void debug_msg(char *message) {
-	if(filelog) {
+	if(HAVE_OPT(FILELOG)) {
 		fprintf(stderr, message);
+		fprintf(stderr, "\n");
 	}
 	else {
-		syslog(LOG_DEBUG | LOG_PERROR, message);
+		syslog(LOG_DEBUG | LOG_PERROR | LOG_CONS, message);
 	}
 }
 
 void init_log(char *logfile) {
+	printf("INIT IST KRIEEEEEG %s!!!\n", logfile);
 	log_file = fopen(logfile, "a");
 	
 	if(log_file == NULL) {

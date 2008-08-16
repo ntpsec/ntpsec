@@ -46,9 +46,13 @@ kod_entry_exists (
 		char *search_str
 		)
 {
-	struct kod_entry **dummy;
+	struct kod_entry **dummy = NULL;
 
-	return search_entry(search_str, dummy);
+	if(dummy == NULL)
+		return 0;
+
+	else
+		return 1;
 }
 
 void 
@@ -177,7 +181,8 @@ kod_init_kod_db (
 
 	int scan_value = 0;
 	while(!feof(db_s)) {
-		printf("%s", fgets(fbuf, 272, db_s));
+		fgets(fbuf, 272, db_s);
+		
 		int sepc = 0;
 		for(a=0; a<strlen(fbuf); a++) {
 			if(fbuf[a] == ':') 
@@ -226,10 +231,6 @@ kod_init_kod_db (
 			error = 1;
 		} 
 		else {
-#ifdef DEBUG
-			printf("KOD entry %i %i: %s at %i type %s\n", a, b,  kod_db[b].hostname, 
-					kod_db[b].timestamp, kod_db[b].type);
-#endif
 			if(b > 0) 
 				kod_db[b-1].next = &kod_db[b];
 		}
@@ -240,6 +241,7 @@ kod_init_kod_db (
 		printf("KOD entry %i: %s at %i type %s\n", a, kod_db[a].hostname, 
 				kod_db[a].timestamp, kod_db[a].type);
 
+	printf("\n");
 #endif
 
 	if(ferror(db_s) || error) {
