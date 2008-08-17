@@ -1,0 +1,6 @@
+#! /bin/sh
+
+dversion=`./scripts/VersionName`
+tag=`date +"(${dversion}) %Y/%m/%d Released by Harlan Stenn <stenn@ntp.org>"`
+
+echo $tag

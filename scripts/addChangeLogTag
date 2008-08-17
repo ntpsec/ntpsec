@@ -1,0 +1,27 @@
+#! /bin/sh
+
+set -e
+
+clt=`./scripts/genChangeLogTag`
+first=`line < ChangeLog`
+
+case "$first" in
+ ---)	echo "ChangeLog is -stable"
+    (						\
+	echo $first				\
+	&& echo $clt				\
+	&& sed 1d < ChangeLog			\
+    ) > ChangeLog.new				\
+    && mv ChangeLog.new ChangeLog
+    ;;
+ *)	echo "ChangeLog is not -stable"
+    (						\
+	echo $clt				\
+	&& cat ChangeLog			\
+    ) > ChangeLog.new				\
+    && mv ChangeLog.new ChangeLog
+    ;;
+esac
+
+    (echo $clt ; cat ChangeLog) > ChangeLog.new		\
+    && mv ChangeLog.New ChangeLog
