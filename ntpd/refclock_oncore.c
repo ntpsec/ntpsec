@@ -2916,7 +2916,7 @@ oncore_msg_Gj(
 	if (dt) {
 		sprintf(Msg, "ONCORE[%d]: Leap second (%d) scheduled for %d%s%d at %d:%d:%d",
 			instance->unit,
-			dt, buf[9], Month[buf[8]], 256*buf[6]+buf[7],
+			dt, buf[9], Month[buf[8]-1], 256*buf[6]+buf[7],
 			buf[15], buf[16], buf[17]);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 	}
