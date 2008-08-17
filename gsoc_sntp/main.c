@@ -43,7 +43,6 @@ sntp_main (
 		char **argv
 		) 
 {
-	char *kod_file, *log_file;
 	register int c;
 
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -65,7 +64,7 @@ sntp_main (
 
 	/* Initialize logging system */
 	if(HAVE_OPT(FILELOG)) {
-		init_log(OPT_ARG(FILELOG));
+		init_log((char *) OPT_ARG(FILELOG));
 	}
 
 	if(HAVE_OPT(KOD)) {
@@ -129,24 +128,25 @@ on_wire (
 		struct pkt *x_pkt = (struct pkt *) malloc(sizeof(struct pkt));
 		struct pkt *r_pkt = (struct pkt *) malloc(sizeof(struct pkt));
 
-		struct timeval tv_org, tv_dst;
+		struct timeval tv_xmt, tv_dst;
 	
 		double t21, t34, delta, offset;
 
 		int error, rsock, rpktl;
 
-		l_fp p_rec, p_xmt, p_ref, p_org, org, tmp, dst, theta;
+		l_fp p_rec, p_xmt, p_ref, p_org, xmt, org, tmp, dst, theta;
 
 
-		error = GETTIMEOFDAY(&tv_org, (struct timezone *)NULL);
+		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 
 #ifdef DEBUG
-		printf("Current time sec: %i msec: %i\n\n", tv_org.tv_sec, tv_org.tv_usec);
+		printf("Current time sec: %i msec: %i\n\n", (unsigned int) tv_xmt.tv_sec, 
+				(unsigned int) tv_xmt.tv_usec);
 #endif
 
-		tv_org.tv_sec += JAN_1970;
-		TVTOTS(&tv_org, &org);
-		HTONL_FP(&org, &(x_pkt->org));
+		tv_xmt.tv_sec += JAN_1970;
+		TVTOTS(&tv_xmt, &xmt);
+		HTONL_FP(&xmt, &(x_pkt->xmt));
 
 		x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
 		x_pkt->ppoll = 8;
@@ -162,8 +162,8 @@ on_wire (
 
 		close_socket(sock);
 
-		if(rpktl == -1) 
-			return -1; 
+/*		if(rpktl == -1) 
+			return -1; */
 		
 		/* -2 would indicate that we should try to get a packet 
 		 * from this server again 
@@ -199,6 +199,8 @@ on_wire (
 #endif
 
 			GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
+
+			tv_dst.tv_sec += JAN_1970;
 	
 			tmp = p_rec;
 			L_SUB(&tmp, &p_org);
@@ -220,7 +222,7 @@ on_wire (
 				printf("on_wire: t21: %.6f\t t34: %.6f\ndelta: %.6f\t offset: %.6f\n", 
 						t21, t34, delta, offset);
 
-			set_time(offset);
+/*			set_time(offset); */
 
 			return 0;
 		}

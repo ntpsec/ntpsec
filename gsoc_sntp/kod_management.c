@@ -157,7 +157,6 @@ kod_init_kod_db (
 
 	/* Max. of 255 characters for hostname, 10 for timestamp, 4 for kisscode, 2 for format : and 1 for \n */
 	char fbuf[272];
-	char *obuf = fbuf;
 	char error = 0;
 
 
@@ -179,7 +178,6 @@ kod_init_kod_db (
 	printf("Starting to read KOD file %s...\n", db_file);
 	/* First let's see how many entries there are and check for right syntax */
 
-	int scan_value = 0;
 	while(!feof(db_s)) {
 		fgets(fbuf, 272, db_s);
 		
@@ -223,8 +221,8 @@ kod_init_kod_db (
 	for(b=0; (!feof(db_s) || !ferror(db_s)) && b<entryc; b++) {
 		char *str_ptr = fgets(fbuf, 272, db_s);
 
-		int j = sscanf(fbuf, "%255[^:]", &(kod_db[b].hostname));
-		j += sscanf(fbuf + j, "%*[^:]:%i:%4s", &kod_db[b].timestamp, &(kod_db[b].type));
+		int j = sscanf(fbuf, "%255[^:]", (char *) &(kod_db[b].hostname));
+		j += sscanf(fbuf + j, "%*[^:]:%i:%4s", &kod_db[b].timestamp, (char *) &(kod_db[b].type));
 
 		if(str_ptr == NULL) {
 			b = entryc;

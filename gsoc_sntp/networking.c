@@ -1,4 +1,5 @@
 #include <config.h>
+#include <unistd.h>
 
 #include "sntp-opts.h"	
 #include "networking.h"
@@ -31,9 +32,8 @@ resolve_hosts (
 		printf("Starting host resolution for %s...\n", hosts[a]); 
 #endif
 
-		struct addrinfo hints, *dres, *res0;
+		struct addrinfo hints, *dres;
 		int error;
-		const char *cause = NULL;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = PF_UNSPEC;
@@ -98,7 +98,7 @@ resolve_hosts (
 	for(a=0; a<entryc; a++)
 		getnameinfo(result[a]->ai_addr, result[a]->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
-		printf("%x: IP %s\n", result[a], adr_buf); 
+		printf("%x: IP %s\n", (unsigned int) result[a], adr_buf); 
 #endif
 
 	*res = (struct addrinfo *) malloc(sizeof(struct addrinfo *) * entryc);
@@ -188,7 +188,6 @@ recvdata (
 #endif
 
 #ifdef DEBUG
-	register int a;
 
 	if(recvc > 0) {
 		getnameinfo((struct sockaddr *)sender, sender->ss_len, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
@@ -226,11 +225,9 @@ recvpkt (
 	int has_mac;
 	int is_authentic;
 
-	l_fp ts;
-	l_fp t10, t23, tmp;
+	l_fp tmp;
 	l_fp org;
 	l_fp rec;
-	l_fp ci;
 
 
 	struct sockaddr_storage sender;
@@ -418,13 +415,4 @@ filter_reachable (
 	res = cpyres;
 
 	return filter_elements;
-}
-
-/* Will be handled by recvpkt */
-int
-filter_ntp (
-		struct addrinfo **res,
-		int resc
-	   )
-{
 }

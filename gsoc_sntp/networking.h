@@ -1,16 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#if 0
-#include <sys/types.h>	/**/
-/* #include <sys/socket.h>	/**/
-/* #include <netinet/in.h>	/**/
-/* #include <netdb.h>	/**/
-#include <stdlib.h>	/**/
-#include <string.h>	/**/
-#endif
-#include <strings.h>	/**/
-#include <errno.h>	/**/
+#include <strings.h>	
+#include <errno.h>
 
 #include <ntp_stdlib.h>
 
@@ -22,12 +14,6 @@
 #define SOCKET_ERROR	-1
 #define closesocket close
 #endif
-
-/* Check if necessary or not */
-/* Maximum number of sockets... should be specified in sntp.h later */
-#define MAX_AF 2
-
-int descriptors[MAX_AF];
 
 
 /* From ntpdate.c */
@@ -44,7 +30,5 @@ void send_pkt (SOCKET rsock, struct sockaddr_storage *dest, struct pkt *pkt, int
 int recvdata (SOCKET rsock, struct sockaddr_storage *sender, char *rdata, size_t rdata_length, char *done);
 
 int recvpkt (SOCKET rsock, struct pkt *rpkt, struct pkt *spkt);
-
-int filter_reachable (struct addrinfo **res, int resc);
 
 #endif

@@ -52,7 +52,7 @@ l_fp_output_bin (
 		FILE *output
 		)
 {
-	register int a, b, bexp;
+	register int a, b;
 
 	fprintf(output, HLINE);
 
