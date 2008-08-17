@@ -22,6 +22,3 @@ case "$first" in
     && mv ChangeLog.new ChangeLog
     ;;
 esac
-
-    (echo $clt ; cat ChangeLog) > ChangeLog.new		\
-    && mv ChangeLog.new ChangeLog
