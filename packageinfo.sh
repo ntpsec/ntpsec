@@ -16,7 +16,7 @@ special=
 # [???] To start an RC cycle: RC->yes
 # To release from an RC cycle: rcpoint-> GO
 # ReleaseCandidate. 'yes' or 'no'.
-releasecandidate=yes
+releasecandidate=no
 #releasecandidate=no
 # ChangeLog tag
 CLTAG=NTP_4_2_0
@@ -27,5 +27,5 @@ CLTAG=NTP_4_2_0
 # - - rcpoint gets set to 0
 # - - releasecandidate gets set to no
 # - GRONK is for -dev
-rcpoint=GO
+rcpoint=
 #rcpoint=GRONK

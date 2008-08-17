@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *  
- *  It has been AutoGen-ed  Sunday August 10, 2008 at 07:36:11 AM EDT
+ *  It has been AutoGen-ed  Sunday August 17, 2008 at 05:20:14 AM EDT
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
@@ -1072,7 +1072,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPDSIM";
 tSCC   zUsageTitle[] =
-"ntpdsim - NTP daemon simulation program - Ver. 4.2.4p5-RC2\n\
+"ntpdsim - NTP daemon simulation program - Ver. 4.2.4p5\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
