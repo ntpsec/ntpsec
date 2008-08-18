@@ -142,6 +142,29 @@ flag = {
 	_EndOfDoc_;
 };
 
+flag = {
+	name 	= broadcast;
+	value 	= b;
+	descrip	= "Use broadcast packages for synchronisation";
+	doc 	= <<-  _EndOfDoc_
+	If specified SNTP will wait 5 minutes for broadcast packets
+	for synchronisation. The amount of time SNTP waits can be
+	specified by option -t.
+	_EndOfDoc_;
+};
+
+flag = {
+	name 	= timeout;
+	value 	= t;
+	descrip	= "Specify the number of seconds until SNTP times out when waiting for broadcast packets";
+	arg-type = number;
+	doc	= <<-  _EndOfDoc_
+	When waiting for a broadcast packet SNTP will wait the number 
+	of seconds specified and times out.
+	_EndOfDoc_;
+};
+
+
 detail = <<-  _END_DETAIL
 .I sntp
 can be used as a SNTP client to query a NTP or SNTP server and either display

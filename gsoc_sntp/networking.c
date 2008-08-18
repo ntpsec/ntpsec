@@ -1,6 +1,3 @@
-#include <config.h>
-#include <unistd.h>
-
 #include "sntp-opts.h"	
 #include "networking.h"
 #include "header.h"
@@ -10,11 +7,18 @@
 char adr_buf[INET6_ADDRSTRLEN];
 
 
+/* resolve_hosts consumes an arry of hostnames/addresses and its length, stores a pointer
+ * to the array with the resolved hosts in res and returns the size of the array res.
+ * pref_family enforces IPv4 or IPv6 depending on commandline options and system 
+ * capability. If pref_family is NULL or PF_UNSPEC any compatible family will be accepted.
+ * Check here: Probably getaddrinfo() can do without ISC's IPv6 availability check? 
+ */
 int 
 resolve_hosts (
 		char **hosts, 
 		int hostc, 
-		struct addrinfo **res
+		struct addrinfo **res,
+		int pref_family
 		) 
 {
 	register unsigned int a, b;
@@ -36,10 +40,13 @@ resolve_hosts (
 		int error;
 
 		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = PF_UNSPEC;
-		hints.ai_socktype = SOCK_DGRAM;
-/*		hints.ai_protocol = IPPROTO_UDP; */
 
+		if(pref_family == NULL)
+			hints.ai_family = PF_UNSPEC;
+		else 
+			hints.ai_family = pref_family;
+		
+		hints.ai_socktype = SOCK_DGRAM;
 
 		error = getaddrinfo(hosts[a], "123", &hints, tres[a]);
 
@@ -109,6 +116,7 @@ resolve_hosts (
 	return entryc;
 }
 
+/* Creates a socket and returns. */
 void 
 create_socket (
 		SOCKET *rsock,
@@ -124,6 +132,7 @@ create_socket (
 
 }
 
+/* If there's nothing more to do here we might need this function */
 void 
 close_socket (
 		SOCKET rsock
@@ -166,13 +175,13 @@ sendpkt (
 #endif
 }
 
+/* Receive raw data */
 int
 recvdata (
 		SOCKET rsock,
 		struct sockaddr_storage *sender,
 		char *rdata,
-		size_t rdata_length,
-		char *done
+		size_t rdata_length
 	 )
 {
 	socklen_t slen = SOCKLEN(&rsock);
@@ -200,19 +209,27 @@ recvdata (
 		printf("Failure, recvc: %i\n", recvc);
 	}
 #endif
-	/* Remove this when found a reasonable max. size. For now
-	 * notify when there's data left to fetch 
-	 */
-	if(recvc >= 511)
-		*done = 0;
-	else
-		*done = 1;
 
 	return recvc;
 }
 
-/* Fetch data, check if it's data for us and whether it's useable or not. If not, return -1
- * so we can delete this server from our list and continue with another one. 
+/* Receive data from broadcast. Couldn't finish that. Need to do some digging
+ * here, especially for protocol independence and IPv6 multicast */
+int 
+recvbcst (
+		SOCKET rsock,
+		struct pkt *rpkt,
+		struct sockaddr_storage *sas
+	 )
+{
+
+	return 0;
+}
+
+
+
+/* Fetch data, check if it's data for us and whether it's useable or not. If not, return 
+ * a failure code so we can delete this server from our list and continue with another one. 
  */
 int 
 recvpkt (
@@ -222,12 +239,9 @@ recvpkt (
 	)
 {
 	register int a;
-	int has_mac;
-	int is_authentic;
+	int has_mac, is_authentic;
 
-	l_fp tmp;
 	l_fp org;
-	l_fp rec;
 
 
 	struct sockaddr_storage sender;
@@ -236,7 +250,7 @@ recvpkt (
 	/* Much space, just to be sure */
 	rdata = (char *) malloc(sizeof(char) * 512);
 
-	int pkt_length = recvdata(rsock, &sender, rdata, 512, &done);
+	int pkt_length = recvdata(rsock, &sender, rdata, 512);
 
 	if(!done) {
 		/* Do something about it, first check for a maximum length of ntp packets,
@@ -244,78 +258,91 @@ recvpkt (
 		 */
 	}
 	
+	pkt_length = min(pkt_length, sizeof(struct pkt));
+	
+	for(a=0; a<pkt_length; a++) 
+		((unsigned char *) rpkt)[a] = rdata[a];
+
 	/* Some checks to see if that packet is intended for us */
 
+	/* No MAC, no authentication */
 	if(pkt_length == LEN_PKT_NOMAC)
 		has_mac = 0;
 
+	/* If there's more than just the NTP packet it should be a MAC */	
 	else if(pkt_length > LEN_PKT_NOMAC) 
 		has_mac = pkt_length - LEN_PKT_NOMAC;
 	
 	else
 		if(debug) {
 			fprintf(stderr, "recvpkt: Funny packet length: %i. Discarding package.\n", pkt_length);
-			return -1;
+			return PACKET_UNUSEABLE;
 		}
 
-	if(has_mac) {
-		if(has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
-			return -1;
-							}
-		/* Do auth stuff */
-	}
-
-	/*struct pkt *tmp_rpkt = (struct pkt *)rdata;
-	rpkt->li_vn_mode = tmp_rpkt->li_vn_mode; 
-	rpkt->stratum = tmp_rpkt->stratum;
-	rpkt->ppoll = tmp_rpkt->ppoll;
-	rpkt->precision = tmp_rpkt->precision;
-	rpkt->rootdelay = tmp_rpkt->rootdelay;
-	rpkt->rootdisp = tmp_rpkt->rootdisp;
-	rpkt->refid = tmp_rpkt->refid;
-	rpkt->reftime = tmp_rpkt->reftime;
-	rpkt->org = tmp_rpkt->org;
-	rpkt->rec = tmp_rpkt->rec;
-	rpkt->xmt = tmp_rpkt->xmt; */
-
+	/* Packet too big */
 	if(pkt_length > LEN_PKT_MAC) {
 		if(ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Received packet is too big (%i bytes), trying again to get a useable packet\n", 
 					pkt_length);
 
-		return -2;
+		return PACKET_UNUSEABLE;
 	}
-	
-	for(a=0; a<pkt_length; a++) 
-		((unsigned char *) rpkt)[a] = rdata[a];
 
-	printf("%x %x\n", PKT_VERSION(rpkt->li_vn_mode), NTP_OLDVERSION);
-	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
+	/* MAC could be useable for us */
+	if(has_mac) {
+		/* Two more things that the MAC must conform to */
+		if(has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
+			is_authentic = 0; /* Or should we discard this packet? */
+		}
+		else  {
+			/* Do auth stuff */
+		}
+	}
+
+	/* Check for server's ntp version */
+	if(PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
 		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
-		return -1;
+		return SERVER_UNUSEABLE;
 	} 
 
-	if (PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
+	/* We want a server to sync with */
+	if(PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
 		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
 #ifdef DEBUG
 			printf("sntp recvpkt: mode %d stratum %i\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 #endif
-		return -1;
+		return SERVER_UNUSEABLE;
 	}
 
 	if(rpkt->stratum == STRATUM_PKT_UNSPEC) {
 		if(ENABLED_OPT(NORMALVERBOSE))
-			printf("sntp recvpkt: Unusable packet, discarding. (stratum: %i)\n", rpkt->stratum);
+			printf("sntp recvpkt: Stratum unspecified, going to check for KOD (stratum: %i)\n", rpkt->stratum);
+
+
+		char *ref_char = (char *) &rpkt->refid;
 		
-		return -1;
+		/* If it's a KOD packet we'll just use the KOD information */
+		if(ref_char[0] != 'X') {
+			if(strncmp(ref_char, "DENY", 4))
+				return KOD_DEMOBILIZE;
+
+			if(strncmp(ref_char, "RSTR", 4))
+				return KOD_DEMOBILIZE;
+
+			if(strncmp(ref_char, "RATE", 4))
+				return KOD_RATE;
+
+			/* There are other interesting kiss codes which might be interesting for authentication */
+		}
 	}
 
+	/* If the server is not synced it's not really useable for us */
 	if(PKT_LEAP(rpkt->li_vn_mode) == LEAP_NOTINSYNC) {
 		if(ENABLED_OPT(NORMALVERBOSE)) 
 			printf("sntp recvpkt: Server not in sync, skipping this server\n");
 
-		return -1;
+		return SERVER_UNUSEABLE;
 	}
 
 
@@ -327,32 +354,15 @@ recvpkt (
 	if (!L_ISEQU(&org, &spkt->xmt)) {
 		if (debug)
 			printf("receive: pkt.org and peer.xmt differ\n");
-		return -1;
+		
+		return PACKET_UNUSEABLE;
 	}
-
-
-	/* Left for now, finishin other stuff. I think I might want that somewhere else,
-	 * don't want this function to do on-wire tasks. Sanity checks are right here I think
-	 *
-	server->leap = PKT_LEAP(rpkt->li_vn_mode);
-	server->stratum = PKT_TO_STRATUM(rpkt->stratum);
-	server->precision = rpkt->precision;
-	server->rootdelay = ntohl(rpkt->rootdelay);
-	server->rootdisp = ntohl(rpkt->rootdisp);
-	server->refid = rpkt->refid;
-	NTOHL_FP(&rpkt->reftime, &server->reftime);
-	NTOHL_FP(&rpkt->rec, &rec);
-	NTOHL_FP(&rpkt->xmt, &server->org);
-
-	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)) 
-		return -1; */
 
 	return pkt_length;
 }
 
 /*
  * is_reachable - check to see if we have a route to given destination
- *		    (non-blocking).
  */
 int
 is_reachable (

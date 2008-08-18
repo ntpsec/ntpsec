@@ -99,3 +99,15 @@ l_fp_output_dec (
 
 }
 
+char *
+addrinfo_to_str (
+		struct addrinfo *addr
+		)
+{
+	char *buf = (char *) malloc(sizeof(char) * INET6_ADDRSTRLEN);
+
+	getnameinfo(addr->ai_addr, addr->ai_addrlen, buf, 
+			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+
+	return buf;
+}

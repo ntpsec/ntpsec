@@ -1,4 +1,4 @@
-/* Check for isc/binds logging facility, probably interesting, probably worth adapting */
+/* Add timestamps to file logging!!! */
 #include "log.h"
 #include "sntp-opts.h"
 
@@ -10,11 +10,9 @@ FILE *log_file;
 
 void log_msg(char *message, char type) {
 	if(init) {
-		printf("log!\n");
-		printf(log_file, message);
+		fprintf(log_file, message);
 	}
 	else {
-		printf("ELSEZWEIG!!!!! HAAAAAARRRRRRRRRRRRRRRRRG!\n");
 		switch(type) {
 			case 0:
 				type = LOG_CONS;

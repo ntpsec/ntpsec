@@ -17,5 +17,6 @@ void l_fp_output (l_fp *ts, FILE *output);
 void l_fp_output_bin (l_fp *ts, FILE *output);
 void l_fp_output_dec (l_fp *ts, FILE *output);
 
+char *addrinfo_to_str (struct addrinfo *addr);
 
 #endif
