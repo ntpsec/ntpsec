@@ -1,3 +1,4 @@
+* [Bug 1052] Add linuxPPS support to ONCORE driver.
 (4.2.5p124) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * Include (4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
