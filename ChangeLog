@@ -1,3 +1,6 @@
+(4.2.5p124) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+* Include (4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 861] leap info was not being transmitted.
 * [Bug 1046] refnumtoa.c is using the wrong header file.
 * [Bug 1047] enable/disable options processing fix.
@@ -93,6 +96,18 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+(4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
+
+* [BUG 1051] Month off by one in leap second message written to clockstats
+  file fixed.
+* [Bug 450] Windows only: Under original Windows NT we must not discard the
+  wildcard socket to workaround a bug in NT's getsockname().
+* [Bug 1038] Built-in getpass() function also prompts for password if
+  not built with DEBUG.
+* [Bug 841] Obsolete the "dynamic" keyword and make deferred binding
+  to local interfaces the default.
+  Emit a warning if that keyword is used for configuration.
 * [Bug 959] Refclock on Windows not properly releasing recvbuffs.
 * [Bug 993] Fix memory leak when fetching system messages.
 * much cleanup, fixes, and changes from Dave Mills.

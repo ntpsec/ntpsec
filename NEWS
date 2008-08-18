@@ -6,6 +6,23 @@ ntpd no longer accepts '-v name' or '-V name' to define internal variables.
 Use '--var name' or '--dvar name' instead. (Bug 817)
 
 ---
+NTP 4.2.4p5 (Harlan Stenn <stenn@ntp.org>, 2008/08/17)
+
+Focus: Minor Bugfixes 
+
+This release fixes a number of Windows-specific ntpd bugs and 
+platform-independent ntpdate bugs. A logging bugfix has been applied
+to the ONCORE driver.
+
+The "dynamic" keyword and is now obsolete and deferred binding to local 
+interfaces is the new default. The minimum time restriction for the 
+interface update interval has been dropped. 
+
+A number of minor build system and documentation fixes are included. 
+
+This is a recommended upgrade for Windows. 
+
+---
 NTP 4.2.4p4 (Harlan Stenn <stenn@ntp.org>, 2007/09/10)
 
 Focus: Minor Bugfixes
