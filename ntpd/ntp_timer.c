@@ -349,7 +349,7 @@ timer(void)
 	 */
 	if (leapsec > 0) {
 		leapsec--;
-		if (leap_sec == 0) {
+		if (leapsec == 0) {
 			sys_leap = LEAP_NOWARNING;
 			sys_tai = leap_tai;
 #ifdef KERNEL_PLL

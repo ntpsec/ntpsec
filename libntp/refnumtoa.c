@@ -3,7 +3,7 @@
  */
 #include <stdio.h>
 
-#include "ntp_fp.h"
+#include "ntp_net.h"
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 
