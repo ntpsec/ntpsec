@@ -1719,8 +1719,13 @@ clock_update(
 		 * leap bits. If crypto, the timer will goose the setup
 		 * process.
 		 */
-		if (sys_leap == LEAP_NOTINSYNC)
+		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
+#ifdef OPENSSL
+			if (crypto_flags)
+				crypto_update();
+#endif /* OPENSSL */
+		}
 		sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 		sys_rootdelay = peer->delay + peer->rootdelay;
 		sys_reftime = peer->dst;

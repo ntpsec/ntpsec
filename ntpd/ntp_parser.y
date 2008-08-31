@@ -106,13 +106,13 @@
 %token		T_Fudge
 %token		T_Host
 %token		T_Huffpuff
-%token <String> T_IPv4_address
-%token <String> T_IPv6_address
+%token      T_IPv4_address
+%token      T_IPv6_address
 %token		T_Iburst
 %token		T_Ident
 %token		T_Ignore
 %token		T_Includefile
-%token		T_Integer
+%token <Integer> T_Integer
 %token		T_Interface
 %token		T_Kernel
 %token		T_Key
@@ -201,7 +201,6 @@
 %token		T_Week
 %token		T_Xleave
 %token		T_Year
-%token <Integer> T_Integer
 %token          T_Flag     /* Not an actual token */
 %token          T_Void     /* Not an actual token */
 %token          T_EOC
@@ -242,7 +241,6 @@
 %type	<Address_node>	ip_address
 %type	<Attr_val>	log_config_command
 %type	<Queue>	        log_config_list
-%type	<Integer>	log_config_prefix
 %type	<Double>	number
 %type	<Attr_val>	option
 %type	<Queue>	        option_list
@@ -266,7 +264,6 @@
 %type   <Sim_server>    sim_server
 %type   <Double>        sim_server_offset
 %type   <Address_node>  sim_server_name
-%type   <Address_node>  sim_address
 %type   <Queue>         sim_act_list
 %type   <Sim_script>    sim_act
 %type   <Queue>         sim_act_stmt_list
@@ -344,25 +341,12 @@ client_type
 
 address
 	:	ip_address   { $$ = $1; }
-        |	T_String  { $$ = create_address_node($1, default_ai_family); }
-        |       T_Integer T_String
-                    {
-                        if ($1 == -4)
-                            $$ = create_address_node($2, AF_INET);
-                        else if ($1 == -6)
-                            $$ = create_address_node($2, AF_INET6);
-                        else {
-                            yyerror("Invalid address type specified. Assuming default.\n");
-                            $$ = create_address_node($2, default_ai_family);
-                        }
-                    }
-
-
+	|   T_IPv4_address T_String { $$ = create_address_node($2, AF_INET); }
+	|	T_IPv6_address T_String { $$ = create_address_node($2, AF_INET6); }
 	;
 
 ip_address
-        :	T_IPv4_address  { $$ = create_address_node($1, AF_INET); }
-        |	T_IPv6_address  { $$ = create_address_node($1, AF_INET6); }
+    :	T_String { $$ = create_address_node($1, 0); }
 	;
 
 option_list
@@ -796,29 +780,17 @@ log_config_list
 	;
 
 log_config_command
-        :	log_config_prefix T_String { $$ = create_attr_sval($1, $2); }
-        |       T_String
+        :       T_String
                 {
-                    /* YUCK!! This is needed because '+' and '-' are not special characters
-                     * while '=' is.
-                     * We really need a better way of defining strings
-                     */
                     char prefix = $1[0];
                     char *type = &($1[1]);
-                    if (prefix != '+' && prefix != '-') {
+                    if (prefix != '+' && prefix != '-' && prefix != '=') {
                         yyerror("Logconfig prefix is not '+', '-' or '='\n");
                     }
                     else
                         $$ = create_attr_sval(prefix, type);
                 }
 	;
-
-log_config_prefix
-	:	'+' { $$ = '+'; }
-	|	'-' { $$ = '-'; }
-	|	'=' { $$ = '='; }
-	;
-
 
 /* Miscellaneous Rules
  * -------------------
@@ -906,12 +878,7 @@ sim_server_offset
         ;
 
 sim_server_name
-        :    T_Server '=' sim_address { $$ = $3; }
-        ;
-
-sim_address
-        :    ip_address { $$ = $1; }
-        |    T_String   { $$ = create_address_node($1, T_String); }
+        :    T_Server '=' address { $$ = $3; }
         ;
 
 sim_act_list
