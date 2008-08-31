@@ -48,7 +48,6 @@ char yytext[MAX_LEXEME];     /* Buffer for storing the input text/lexeme */
 struct state *key_scanner;   /* A FSA for recognizing keywords */
 extern int input_from_file;
 
-
 /* CONSTANTS 
  * ---------
  */
@@ -447,6 +446,20 @@ is_EOC(char ch)
 	return 0;
 }
     
+static int
+create_string_token(char *lexeme)
+{
+	errno = 0;
+	if ((yylval.String = strdup(lexeme)) == NULL &&
+	    errno == ENOMEM) {
+		fprintf(stderr, "Could not allocate memory for: %s\n",
+				lexeme);
+		exit(1);
+	}
+	else
+		return T_String;
+}
+    
 
 /* Define a function that does the actual scanning 
  * Bison expects this function to be called yylex and for it to take no 
@@ -459,7 +472,6 @@ yylex()
 	int i, instring = 0;
 	int token;                 /* The return value/the recognized token */
 	int ch;
-	struct isc_netaddr temp_isc_netaddr;
 	static int expect_string = NO_ARG;
 
 	do {
@@ -486,7 +498,7 @@ yylex()
 		/* Check if the next character is a special character.
 		 * If yes, return the special character
 		 */
-		else if (is_special(ch))
+		else if ((expect_string == NO_ARG) && is_special(ch))
 			return ch;
 		else
 			push_back_char(ch);
@@ -496,7 +508,8 @@ yylex()
 			 (yytext[i] = get_next_char()) != EOF; ++i) {
         
 			/* Break on reading in whitespace or a special character */
-			if (isspace(yytext[i]) || is_special(yytext[i])
+			if (isspace(yytext[i]) 
+				|| ((expect_string == NO_ARG) && is_special(yytext[i]))
 			    || is_EOC(ch) || yytext[i] == '"')
 				break;
         
@@ -539,10 +552,16 @@ yylex()
 #endif
 
 	/* Now return the desired token */
-	if ((expect_string == NO_ARG) &&  (!instring) &&
-	    (token = is_keyword(yytext, &expect_string)))
+	
+	/* First make sure that the parser is *not* expecting a string as the
+	 * next token (based on the previous token that was returned) and
+	 * that we haven't read a string
+	 */
+	
+	if ((expect_string == NO_ARG) &&  (!instring)) {
+	    if (token = is_keyword(yytext, &expect_string)) 
 		return token;
-	else if (is_integer(yytext) && (!instring) ) {
+		else if (is_integer(yytext)) {
 		errno = 0;
 		if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
 		    && ((errno == EINVAL) || (errno == ERANGE))) {
@@ -553,7 +572,7 @@ yylex()
 		else
 			return T_Integer;
 	}
-	else if (is_double(yytext) && (!instring)) {
+		else if (is_double(yytext)) {
 		errno = 0;
 		if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
 			fprintf(stderr, "Double too large to represent: %s\n",
@@ -563,34 +582,27 @@ yylex()
 		else
 			return T_Double;
 	}
-	else if ((is_ip_address(yytext, &temp_isc_netaddr)) && (!instring)) {
-		if (expect_string == SINGLE_ARG)
-			expect_string = NO_ARG;
-		errno = 0;
-		if ((yylval.String = strdup(yytext)) == NULL &&
-		    errno == ENOMEM) {
-			fprintf(stderr, "Could not allocate memory for: %s\n",
-				yytext);
-			exit(1);
-		}
-		else return 
-		    (temp_isc_netaddr.family == AF_INET)
-		    ? T_IPv4_address
-		    : T_IPv6_address ;
+		else /* Default: Everything is a string */
+			return create_string_token(yytext);
 	}
-	else { /* Default: Everything is a string */
+	else { 
+		/* Either expect_string is 1 or this lexeme is part of a string.
+		   Hence, we need to return T_String.
+		   
+		   ONLY EXCEPTION (sic), we might have a -4 or -6 flag.
+		   This is a terrible hack, but the grammar is ambiguous so
+		   we don't have a choice
+		 */
+		if (strcmp(yytext, "-4") == 0)
+			return T_IPv4_address;
+		else if (strcmp(yytext, "-6") == 0)
+			return T_IPv6_address;
+		else {
 		instring = 0;
 		if (expect_string == SINGLE_ARG)
 			expect_string = NO_ARG;
-		errno = 0;
-		if ((yylval.String = strdup(yytext)) == NULL &&
-		    errno == ENOMEM) {
-			fprintf(stderr, "Could not allocate memory for: %s\n",
-				yytext);
-			exit(1);
+			return create_string_token(yytext);
 		}
-		else
-			return T_String;
 	}
 	return 1;
 }

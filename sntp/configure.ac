@@ -12,6 +12,9 @@ AC_PROG_CC
 # It's a small library - we might as well use a static version of it.
 AC_DISABLE_SHARED
 
+m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+
 AC_PROG_LIBTOOL
 
 # NTP has (so far) been relying on leading-edge autogen.

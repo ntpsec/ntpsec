@@ -1,3 +1,6 @@
+* Stop libtool-1.5 from looking for C++ or Fortran.
+* [BUG 610] Documentation update for NMEA reference clock driver.
+* [Bug 828] Fix IPv4/IPv6 address parsing.
 * Changes from Dave Mills:
   Documentation updates.
   Fix a corner case where a frequency update was reported but not set.

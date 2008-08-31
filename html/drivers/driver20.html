@@ -16,10 +16,11 @@
 		<p>Address: 127.127.20.<i>u</i><br>
 			Reference ID: <tt>GPS</tt><br>
 			Driver ID: <tt>GPS_NMEA</tt><br>
-			Serial Port: <tt>/dev/gps<i>u</i></tt>; 4800 baud, 8-bits, no parity<br>
+			Serial Port: <tt>/dev/gps<i>u</i></tt>; 4800/9600 baud, 8-bits, no parity<br>
+			Serial Port: <tt>/dev/gpspps<i>u</i></tt>; for just the PPS signal (this is tried first for PPS, before <tt>/dev/gps<i>u</i></tt>)<br>
 			Serial Port: <tt>/dev/gps<i>u</i></tt>; symlink to server:port (for nmead) Features: <tt>tty_clk</tt></p>
 		<h4>Description</h4>
-		<p>This driver supports GPS receivers with the <tt>$GPRMC</tt> NMEA output string by default.&nbsp; Alternately the <tt>$GPGGA</tt> or <tt>$GPGLL </tt>may be selected.</p>
+		<p>This driver supports GPS receivers with the <tt>$GPRMC</tt> NMEA output string by default.&nbsp; Alternately the <tt>$GPGGA</tt> or <tt>$GPGLL </tt>may be selected. The driver also supports Accord's custom NMEA sentence <tt>$GPZDG</tt>, which gives GPS time unlike rest of the sentences which give UTC.</p>
 		<p>The driver expects the receiver to be set up to transmit a <tt>$GPRMC</tt> message every second.</p>
 		<p>The accuracy depend on the receiver used. Inexpesive GPS models are available with a claimed PPS signal accuracy of 1 <font face="Symbol">m</font>s or better relative to the broadcast signal. However, in most cases the actual accuracy is limited by the precision of the timecode and the latencies of the serial interface and operating system.</p>
 		<p>If the Operating System supports the PPSAPI, RFC-2783, it will be used.<br>&nbsp;</p>
@@ -40,7 +41,7 @@ $GPGGA,POS_UTC,LAT,LAT_REF,LONG,LONG_REF,FIX_MODE,SAT_USED,HDOP,ALT,ALT_UNIT,GEO
 &nbsp; DATE&nbsp;&nbsp;&nbsp;&nbsp; - Date (ddmmyy)
 &nbsp; MAG_VAR&nbsp; - Magnetic variation (degrees) (x.x)
 &nbsp; MAG_REF&nbsp; - Magnetic variation (E = East, W = West)
-&nbsp; FIX_MODE - Position Fix Mode ( 0 = Invalid, &gt;0 = Valid)
+&nbsp; FIX_MODE - Position Fix Mode (0 = Invalid, &gt;0 = Valid)
 &nbsp; SAT_USED - Number Satellites used in solution
 &nbsp; HDOP&nbsp;&nbsp;&nbsp;&nbsp; - Horizontal Dilution of Precision
 &nbsp; ALT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Antenna Altitude
@@ -51,8 +52,24 @@ $GPGGA,POS_UTC,LAT,LAT_REF,LONG,LONG_REF,FIX_MODE,SAT_USED,HDOP,ALT,ALT_UNIT,GEO
 &nbsp; D_REF&nbsp;&nbsp;&nbsp; - Reference ID of DGPS station
 &nbsp; CC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Checksum (optional)
 &nbsp; &lt;cr&gt;&lt;lf&gt; - Sentence terminator.</tt></pre>
-		Alternate GPS sentences (other than <tt>$GPRMC</tt> - the default) may be enabled by setting the relevent bits of 'mode' in the server configuration line<br>&nbsp;* server 127.127.20.x mode X<br>&nbsp;&nbsp;&nbsp; bit 0 - enables RMC&nbsp;&nbsp;&nbsp; ( value = 1)<br>&nbsp;&nbsp;&nbsp; bit 1 - enables GGA&nbsp;&nbsp;&nbsp; ( value = 2)<br>&nbsp;&nbsp;&nbsp; bit 2 - enables GLL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( value = 4)<br>
-		multiple sentences may be selected<br>
+Accord's <tt>$GPZDG</tt> has the folowing format:
+<pre><tt>$GPZDG,POS_GPS,DD,MM,YYYY,AA.BB,V*CS&lt;cr&gt;&lt;lf&gt;
+
+&nbsp; POS_GPS&nbsp; - GPS of position. Hours, minutes and seconds [fraction (opt.)]. (hhmmss[.f])
+&nbsp; DD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Day of the month (1-31)
+&nbsp; MM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Month of the year (1-12)
+&nbsp; YYYY&nbsp;&nbsp;&nbsp;&nbsp; - Year
+&nbsp; AA.BB&nbsp;&nbsp;&nbsp; - Denotes the signal strength (should be &lt 05.00)
+&nbsp; V&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - GPS sync status
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '0' =&gt INVALID time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '1' =&gt accuracy of +/- 20ms,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '2' =&gt accuracy of +/- 100ns	
+&nbsp; CS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Checksum
+&nbsp; &lt;cr&gt;&lt;lf&gt; - Sentence terminator.</tt></pre>
+
+<p>Alternate GPS sentences (other than <tt>$GPRMC</tt> - the default) and baudrates may be enabled by setting the relevent bits of 'mode' in the server configuration line<br>&nbsp;* server 127.127.20.x mode X<br>&nbsp;&nbsp;&nbsp; bit 0 - enables RMC&nbsp;&nbsp;&nbsp; (value = 1)<br>&nbsp;&nbsp;&nbsp; bit 1 - enables GGA&nbsp;&nbsp;&nbsp; (value = 2)<br>&nbsp;&nbsp;&nbsp; bit 2 - enables GLL&nbsp;&nbsp;&nbsp;&nbsp; (value = 4)<br>&nbsp;&nbsp;&nbsp; bit 3 - enables ZDG&nbsp;&nbsp;&nbsp; (value = 8)<br> 
+<p>		Multiple sentences may be selected except when ZDG is enabled. The driver falls back to standard NMEA sentences when incorrent selection is configured.The driver uses 4800 baudrate by default. Altenatively, 9600 baudrate can be selected by using the fourth bit of 'mode' field;<br><br>
+		&nbsp;&nbsp;&nbsp; bit 4 - selects baudrate&nbsp;&nbsp; ( 0 for 4800 - the default, 1 for 9600 )<br></p>
 		<p>The driver will send a <tt>$PMOTG,RMC,0000*1D&lt;cr&gt;&lt;lf&gt;</tt> message each time a <tt>$GPRMC</tt> string is needed. This is not needed on most GPS receivers because they automatically send the <tt>$GPRMC</tt> string every second and will only work on GPS receivers that understand the <tt>$PMOTG</tt> string. Others will just ignore it.</p>
 		<h4>Setting up the Garmin GPS-25XL</h4>
 		Switch off all output with by sending it the following string.
