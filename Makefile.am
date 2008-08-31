@@ -20,6 +20,7 @@ SUBDIRS+= 		\
 	ntpdate		\
 	ntpdc		\
 	ntpq		\
+	@NTPSNMPD_DIR@	\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\
@@ -40,6 +41,7 @@ DIST_SUBDIRS=		\
 	ntpdate		\
 	ntpdc		\
 	ntpq		\
+	ntpsnmpd	\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\

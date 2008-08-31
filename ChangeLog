@@ -1,3 +1,4 @@
+* Prepare for GSoC2008 NTP MIB daemon import.
 * Stop libtool-1.5 from looking for C++ or Fortran.
 * [BUG 610] Documentation update for NMEA reference clock driver.
 * [Bug 828] Fix IPv4/IPv6 address parsing.

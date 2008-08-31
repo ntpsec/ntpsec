@@ -2,11 +2,13 @@ AUTOMAKE_OPTIONS=
 
 bin_PROGRAMS=	ntpq
 AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
-
 # LDADD might need RESLIB and ADJLIB
 ntpq_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
-DISTCLEANFILES=	.version version.c
 noinst_HEADERS=	ntpq.h
+noinst_LIBRARIES=	libntpq.a
+libntpq_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+libntpq_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
+DISTCLEANFILES=	.version version.c
 ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h ntpq.1 ntpq-opts.texi ntpq-opts.menu
@@ -19,6 +21,8 @@ std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/version.def
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
+libntpq_a_SOURCES =	libntpq.c libntpq.h libntpq_subs.c 
+
 $(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.c
 $(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
@@ -30,9 +34,6 @@ $(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.def $(std
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
 
 $(top_srcdir)/version :
 	cd $(top_srcdir) && $(MAKE) version

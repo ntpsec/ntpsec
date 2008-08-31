@@ -247,6 +247,7 @@ int		ntpqmain	(int,	char **);
  * Built in command handler declarations
  */
 static	int	openhost	(const char *);
+
 static	int	sendpkt		(char *, int);
 static	int	getresponse	(int, int, u_short *, int *, char **, int);
 static	int	sendrequest	(int, int, int, int, char *);
@@ -472,7 +473,9 @@ char *progname;
 volatile int debug;
 
 #ifdef NO_MAIN_ALLOWED
+#ifndef BUILD_AS_LIB
 CALL(ntpq,"ntpq",ntpqmain);
+#endif
 
 void clear_globals(void)
 {
@@ -501,6 +504,7 @@ main(
 }
 #endif
 
+#ifndef BUILD_AS_LIB
 int
 ntpqmain(
 	int argc,
@@ -644,12 +648,12 @@ ntpqmain(
 #endif /* SYS_WINNT */
 	return 0;
 }
-
+#endif // build as lib
 
 /*
  * openhost - open a socket to a host
  */
-static int
+static	int
 openhost(
 	const char *hname
 	)
@@ -3333,3 +3337,4 @@ assoccmp(
 	return 0;
 }
 #endif /* not QSORT_USES_VOID_P */
+
