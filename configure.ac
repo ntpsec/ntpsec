@@ -362,6 +362,7 @@ AC_C_VOLATILE
 AC_ISC_POSIX
 AC_PATH_PROG(PATH_SH, sh)
 AC_PATH_PROG(PATH_PERL, perl)
+AC_PATH_PROG(PATH_NET_SNMP_CONFIG, net-snmp-config)
 
 case "$host" in
  *-*-vxworks*)
@@ -3776,6 +3777,31 @@ case "$build" in
     ;;
 esac
 
+AC_MSG_CHECKING(if we want to build ntpsnmpd)
+AC_ARG_WITH(ntpsnmpd,
+	AC_HELP_STRING([--with-ntpsnmpd], [? Build the ntpsnmpd code?]),
+	[ans=$withval],
+	[case "$PATH_NET_SNMP_CONFIG" in
+	 /*)	ans=yes ;;
+	 *)	ans=no  ;;
+	esac])
+AC_MSG_RESULT($ans)
+
+case "$ans" in
+ yes)
+    case "$PATH_NET_SNMP_CONFIG" in
+     /*)
+	NTPSNMPD_DIR=ntpsnmpd
+	SNMP_LIBS=`$PATH_NET_SNMP_CONFIG --agent-libs`
+	AC_SUBST(SNMP_LIBS)
+	;;
+     *) AC_MSG_WARN([Cannot build ntpsnmpd as desired - net-snmp-config cannot be found])
+	;;
+    esac
+    ;;
+esac
+AC_SUBST(NTPSNMPD_DIR)
+
 AC_CACHE_CHECK(if we should always slew the time, ac_cv_var_slew_always,
 [AC_ARG_ENABLE(slew-always,
    AC_HELP_STRING([--enable-slew-always], [s always slew the time]),
@@ -4193,6 +4219,7 @@ AC_CONFIG_FILES(ntpdate/Makefile)
 AC_CONFIG_FILES(ntpdc/Makefile)
 AC_CONFIG_FILES(ntpdc/nl.pl,		[chmod +x ntpdc/nl.pl])
 AC_CONFIG_FILES(ntpq/Makefile)
+AC_CONFIG_FILES(ntpsnmpd/Makefile)
 AC_CONFIG_FILES(parseutil/Makefile)
 AC_CONFIG_FILES(scripts/Makefile)
 AC_CONFIG_FILES(scripts/calc_tickadj,	[chmod +x scripts/calc_tickadj])
