@@ -124,7 +124,7 @@ double	clock_codec;		/* audio codec frequency (samples/s) */
 u_long	clock_epoch;		/* interval since last update */
 u_int	sys_tai;		/* TAI offset from UTC */
 static void rstclock (int, double); /* transition function */
-static void direct_freq(double); /* direct set frequency */
+static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
 
 #ifdef KERNEL_PLL
@@ -346,7 +346,7 @@ local_clock(
 			if (clock_epoch < clock_minstep)
 				return (0);
 
-			direct_freq(fp_offset);
+			clock_frequency = direct_freq(fp_offset);
 
 			/* fall through to S_SPIK */
 
@@ -447,7 +447,7 @@ local_clock(
 			if (clock_epoch < clock_minstep)
 				return (0);
 
-			direct_freq(fp_offset);
+			clock_frequency = direct_freq(fp_offset);
 			rstclock(EVNT_SYNC, 0);
 			break;
 
@@ -765,7 +765,8 @@ rstclock(
  * interval and residual frequency component. At the same time the
  * frequenchy file is armed for update at the next hourly stats.
  */
-static void direct_freq(
+static double
+direct_freq(
 	double	fp_offset
 	)
 {
@@ -788,7 +789,7 @@ static void direct_freq(
 #endif /* KERNEL_PLL */
 	set_freq((fp_offset - clock_offset) / clock_epoch + drift_comp);
 	wander_resid = 0;
-	return;
+	return (drift_comp);
 }
 
 
