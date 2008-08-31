@@ -18,22 +18,23 @@
 		<br clear="left">
 		<h4>Related Links</h4>
 		<ul>
-			<li>A list of all links is on the <a href="sitemap.html">Site Map</a> page.
+			<li>A list of all links is on the <a href="sitemap.html">Site Map</a> page.</li>
 		</ul>
 		<h4>Table of Contents</h4>
 		<ul>
-			<li class="inline"><a href="#intro">Introduction</a>
-			<li class="inline"><a href="#build">Building and Installing NTP</a>
-			<li class="inline"><a href="#conf">Configuring Clients and Servers</a>
-			<li class="inline"><a href="#opt">Features and Options</a>
-			<li class="inline"><a href="#prob">Resolving Problems</a>
-			<li class="inline"><a href="#info">Further Information</a>
+			<li class="inline"><a href="#intro">Introduction</a></li>
+			<li class="inline"><a href="#build">Building and Installing NTP</a></li>
+			<li class="inline"><a href="#conf">Configuring Clients and Servers</a></li>
+			<li class="inline"><a href="#opt">Features and Options</a></li>
+			<li class="inline"><a href="#prob">Resolving Problems</a></li>
+			<li class="inline"><a href="#info">Further Information</a></li>
 	</ul>
 		<hr>
 		<h4 id="intro">Introduction</h4>
 		<p>Note: The NTP Version 4 software contained in this distribution is available without charge under the conditions set forth in the <a href="copyright.html">Copyright Notice</a>.</p>
 		<dl>
-		<dd>It is very important that readers understand that the NTP document collection began 25 years ago and remains today a work in progress. It has evolved as new features were invented and old features retired. It has been widely copied, cached and morphed to other formats, including man pages, with varying loss of fidelity. However, these HTML pages are the ONLY authoritative and definitive reference. Readers should always use the collection that comes with the distribution they use. A copy of the online collection at <a href="http://www.ntp.org">www.ntp.org</a> is normally included in the most recent snapshot, but might not agree with an earlier snapshot or release version.</dl>
+		<dd>It is very important that readers understand that the NTP document collection began 25 years ago and remains today a work in progress. It has evolved as new features were invented and old features retired. It has been widely copied, cached and morphed to other formats, including man pages, with varying loss of fidelity. However, these HTML pages are the ONLY authoritative and definitive reference. Readers should always use the collection that comes with the distribution they use. A copy of the online collection at <a href="http://www.ntp.org">www.ntp.org</a> is normally included in the most recent snapshot, but might not agree with an earlier snapshot or release version.</dd>
+		</dl>
 		<p>The Network Time Protocol (NTP) is widely used to synchronize a computer to Internet time servers or other sources, such as a radio or satellite receiver or telephone modem service. It provides accuracies typically less than a millisecond on LANs and up to a few milliseconds on WANs. Typical NTP configurations utilize multiple redundant servers and diverse network paths in order to achieve high accuracy and reliability.</p>
 		<p>NTP time synchronization services are widely available in the public Internet. The public NTP subnet in early 2008 includes several thousand  servers in most countries and on every continent of the globe, including Antarctica. These servers support a total population estimated at over 25 million computers in the global Internet.</p>
 		<p>The NTP subnet operates with a hierarchy of levels, where each level is assigned a number called the stratum. Stratum 1 (primary) servers at the lowest level are directly synchronized to national time services. Stratum 2 (secondary) servers at the next higher level are synchronize to stratum 1 servers and so on. Normally, NTP clients and servers with a relatively small number of clients do not synchronize to public primary servers. There are several hundred public secondary servers operating at higher strata and are the preferred choice. </p>

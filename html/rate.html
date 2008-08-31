@@ -19,12 +19,12 @@
 		<script type="text/javascript" language="javascript" src="scripts/config.txt"></script>
 		<h4>Table of Contents</h4>
 		<ul>
-			<li class="inline"><a href="#intro">Introduction</a>
-			<li class="inline"><a href="#poll">Poll Rate Control</a>
-			<li class="inline"><a href="#burst">Burst Control</a>
-			<li class="inline"><a href="#mah">Average Headway Time</a>
-			<li class="inline"><a href="#mgt">Guard Time</a>
-			<li class="inline"><a href="#kiss">The Kiss-o'-Death Packet</a>
+			<li class="inline"><a href="#intro">Introduction</a></li>
+			<li class="inline"><a href="#poll">Poll Rate Control</a></li>
+			<li class="inline"><a href="#burst">Burst Control</a></li>
+			<li class="inline"><a href="#mah">Average Headway Time</a></li>
+			<li class="inline"><a href="#mgt">Guard Time</a></li>
+			<li class="inline"><a href="#kiss">The Kiss-o'-Death Packet</a></li>
 		</ul>
 		<hr>
 		<h4 id="intro">Introduction</h4>
@@ -32,7 +32,10 @@
 		<p>Some national time metrology laboratories, including NIST and USNO, use the <tt>ntpd</tt> reference implementation in their very busy public time servers. They operate multiple servers behind load-balancing devices to support aggregate rates up to several thousand packets per second. The servers need to defend themselves against all manner of broken implementations that can clog the server and and network infrastructure. On the other hand, friendly <tt>ntpd</tt> clients need to avoid configurations that can result in unfriendly rates.</p>
 		<p>There are several features in <tt>ntpd</tt> designed to defend the servers, clients and network against accidental or intentional flood attack. On the other hand these features are also used to insure <tt>ntpd</tt> is a good citizen, even if configured in unfriendly ways. The ground rules are:</p>
 		<ul>
-			<li>Send at the lowest rate consistent with the expected accuracy expectations.<li>Maintain strict minimum average headway and guard times, even if multiple burst options and/or the Autokey protocol are operating.<li>When the first packet of a burst is sent to a server, do not send further packets until the first packet has been received from the server.<li>Upon receiving a Kiss-o'-Death packet (see below), immediately reduce the sending rate.
+			<li>Send at the lowest rate consistent with the expected accuracy expectations.</li>
+			<li>Maintain strict minimum average headway and guard times, even if multiple burst options and/or the Autokey protocol are operating.</li>
+			<li>When the first packet of a burst is sent to a server, do not send further packets until the first packet has been received from the server.</li>
+			<li>Upon receiving a Kiss-o'-Death packet (see below), immediately reduce the sending rate.</li>
 		</ul>
 		<p>Rate management involves four algorithms to manage resources: (1) poll rate control, (2) burst control, (3) average headway time and (4) guard time. These are described in following sections.</p>
 		<h4 id="poll">Poll Rate Control</h4>
@@ -41,7 +44,10 @@
 		<p>The poll interval is proportional to the time constant of the feedback loop which disciplines the system clock. The optimum time constant depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimim poll interval is about 64 s, which corresponds to a poll exponent of 6.</p>
 		<p>There is normally no need to change the poll limits, as the poll interval is managed automatically as a function of prevailing jitter and wander. The most common exceptions are the following.</p>
 		<ul>
-			<li>With fast, lightly loaded LANs and modern processors, the nominal Allan intercept is about 500 s. In these cases the expected errors can be further reduced using a poll exponent of 4 (16 s). In the case of the pulse-per-second (PPS) driver, this is the recommended value. <li>With symmetric modes the most stable behavior results when both peers are configured in symmetric active mode with matching poll intervals of 6 (64 s).<li>The poll interval should not be modified for reference clocks, with the single exception the ACTS telephone modem driver. In this case the recommended minimum and maximum intervals are 12 (1.1 h) and 17 (36 h), respectively.</ul>
+			<li>With fast, lightly loaded LANs and modern processors, the nominal Allan intercept is about 500 s. In these cases the expected errors can be further reduced using a poll exponent of 4 (16 s). In the case of the pulse-per-second (PPS) driver, this is the recommended value.</li>
+			<li>With symmetric modes the most stable behavior results when both peers are configured in symmetric active mode with matching poll intervals of 6 (64 s).</li>
+			<li>The poll interval should not be modified for reference clocks, with the single exception the ACTS telephone modem driver. In this case the recommended minimum and maximum intervals are 12 (1.1 h) and 17 (36 h), respectively.</li>
+			</ul>
 		<h4 id="burst">Burst Control</h4>
 		<p>Occasionally it is necessary to send packets at intervals less than the poll interval. For instance, with the <tt>burst</tt> and <tt>iburst</tt> options of the <tt>server</tt> command, the poll algorithm sends a burst of several packets at 2-s intervals. The <tt>ntpd</tt> poll algorithm avoids sending needless packets if the server is not responding. The client begins a burst with a single packet. When the first packet is received from the server, the client continues with the remaining packets in the burst. If the first packet is not received within 64 s, it will be sent again for two additional retries before beginning backoff. The result is to minimize network load if the server is not responding.</p>
 		<p>For the <tt>iburst</tt> option the number of packets in the burst is six, which is the number normally needed to synchronize the clock; for the <tt>burst</tt> option, the number of packets in the burst is determined by the difference between the poll interval and the minimum poll interval set by the <tt>minpoll</tt> option of the <a href="confopt.html#server"><tt>server</tt></a> command. For instance, with a poll exponent of 6 (64 s), only a single packet is sent for every poll, while the full number of eight packets is sent at poll intervals of 9 (512 s) or more.</p>

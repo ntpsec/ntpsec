@@ -18,10 +18,12 @@
 		<h4>Related Links</h4>
 		<script type="text/javascript" language="javascript" src="scripts/misc.txt"></script>
 		<h4>Table of Contents</h4>
-			<li class="inline"><a href="#intro">Introduction</a>
-			<li class="inline"><a href="#gadget">Gadget Box</a>
-			<li class="inline"><a href="#opsys">Operating System Support</a>
-			<li class="inline"><a href="#use">Using the Pulse-per-Second (PPS) Signal</a>
+		<ul>
+			<li class="inline"><a href="#intro">Introduction</a></li>
+			<li class="inline"><a href="#gadget">Gadget Box</a></li>
+			<li class="inline"><a href="#opsys">Operating System Support</a></li>
+			<li class="inline"><a href="#use">Using the Pulse-per-Second (PPS) Signal</a></li>
+			</ul>
 		<hr>
 		<h4 id="intro">Introduction</h4>
 			<p>Most radio clocks are connected using a serial port operating at speeds of 9600 bps. The accuracy using typical timecode formats, where the on-time epoch is indicated by a designated ASCII character like carriage-return <tt>&lt;cr&gt;</tt>, is normally limited to a hundred microseconds. Using carefuly crafted averaging techniques, the NTP&nbsp;algorithms can whittle this down to a few tens of microseconds. However, some radios produce a PPS signal which can be used to improve the accuracy to few microseconds. This page describes the hardware and software necessar for NTP to use the PPS signal.</p>

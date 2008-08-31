@@ -1,4 +1,5 @@
 * Changes from Dave Mills:
+  Documentation updates.
   Fix a corner case where a frequency update was reported but not set.
   When LEAP_NOTINSYNC->LEAP_NOWARNING, call crypto_update() if we have
   crypto_flags.
