@@ -434,11 +434,20 @@ create_address_node(
 	int type
 	)
 {
-	struct address_node *my_node = (struct address_node *)
-	    get_node(sizeof(struct address_node));
+	struct address_node *my_node = 
+		(struct address_node *) get_node(sizeof(struct address_node));
+	struct isc_netaddr temp_isc_netaddr;
 
 	my_node->address = addr;
+	if (type == 0) {
+		if (is_ip_address(addr, &temp_isc_netaddr)) 
+			my_node->type = temp_isc_netaddr.family;
+		else 
+			my_node->type = default_ai_family;
+	}
+	else {
 	my_node->type = type;
+	}
 	return my_node;
 }
 

@@ -1,3 +1,4 @@
+* [Bug 828] Fix IPv4/IPv6 address parsing.
 * Changes from Dave Mills:
   Documentation updates.
   Fix a corner case where a frequency update was reported but not set.
