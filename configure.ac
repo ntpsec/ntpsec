@@ -355,7 +355,11 @@ case "$host" in
     ;;
 esac
 
+m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+
 AC_PROG_LIBTOOL
+
 AC_PROG_LN_S
 AC_PROG_GCC_TRADITIONAL
 AC_C_VOLATILE
