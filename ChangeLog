@@ -1,3 +1,8 @@
+* Changes from Dave Mills:
+  Documentation updates.
+  Fix a corner case where a frequency update was reported but not set.
+  When LEAP_NOTINSYNC->LEAP_NOWARNING, call crypto_update() if we have
+  crypto_flags.
 (4.2.5p125) 2008/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1052] Add linuxPPS support to ONCORE driver.
 (4.2.5p124) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
