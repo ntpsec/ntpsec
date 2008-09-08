@@ -1,4 +1,6 @@
-* Prepare for GSoC2008 NTP MIB daemon import.
+* Import Heiko Gerstung's GSoC2008 NTP MIB daemon.
+(4.2.5p127) 2008/09/01 Released by Harlan Stenn <stenn@ntp.org>
+(4.2.5p126) 2008/08/31 Released by Harlan Stenn <stenn@ntp.org>
 * Stop libtool-1.5 from looking for C++ or Fortran.
 * [BUG 610] Documentation update for NMEA reference clock driver.
 * [Bug 828] Fix IPv4/IPv6 address parsing.
