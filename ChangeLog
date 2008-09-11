@@ -1,3 +1,4 @@
+* Quiet some libntpq-related warnings.
 (4.2.5p128) 2008/09/08 Released by Harlan Stenn <stenn@ntp.org>
 * Import Heiko Gerstung's GSoC2008 NTP MIB daemon.
 (4.2.5p127) 2008/09/01 Released by Harlan Stenn <stenn@ntp.org>
