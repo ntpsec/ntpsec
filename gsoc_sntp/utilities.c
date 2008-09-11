@@ -1,5 +1,25 @@
+/*
+ * Copyright (C) 2008  Johannes Maximilian Kühn
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
+ * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+ * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #include "utilities.h"
 
+/* Display a NTP packet in hex with leading address offset 
+ * e.g. offset: value, 0: ff 1: fe ... 255: 00
+ */ 
 void 
 pkt_output (
 		struct pkt *dpkg,
@@ -28,6 +48,8 @@ pkt_output (
 	fprintf(output, HLINE);
 }
 
+/* Output a long floating point value in hex in the style described above 
+ */
 void
 l_fp_output (
 		l_fp *ts,
@@ -46,6 +68,8 @@ l_fp_output (
 
 }
 
+/* Output a long floating point value in binary in the style described above
+ */
 void 
 l_fp_output_bin (
 		l_fp *ts,
@@ -81,6 +105,8 @@ l_fp_output_bin (
 	fprintf(output, HLINE);
 }
 
+/* Output a long floating point value in decimal in the style described above
+ */
 void
 l_fp_output_dec (
 		l_fp *ts,
@@ -99,6 +125,9 @@ l_fp_output_dec (
 
 }
 
+/* Convert a struct addrinfo to a string containing the address in style
+ * of inet_ntoa
+ */
 char *
 addrinfo_to_str (
 		struct addrinfo *addr
@@ -108,6 +137,23 @@ addrinfo_to_str (
 
 	getnameinfo(addr->ai_addr, addr->ai_addrlen, buf, 
 			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+
+	return buf;
+}
+
+/* Convert a struct sockaddr_storage to a string containing the address in
+ * style of inet_ntoa
+ */
+char *
+ss_to_str (
+		struct sockaddr_storage *saddr
+		)
+{
+	char *buf = (char *) malloc(sizeof(char) * INET6_ADDRSTRLEN);
+
+	getnameinfo((struct sockaddr *) saddr, SOCKLEN(saddr), buf,
+			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+
 
 	return buf;
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2008  Johannes Maximilian Kühn
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
+ * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+ * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 /* TODO check for memory leaks */
 #include <string.h>
 
@@ -12,6 +29,9 @@ struct kod_entry *kod_db;
 FILE *db_s;
 
 
+/*
+ * Search for a KOD entry
+ */
 int
 search_entry (
 		char *hostname,
@@ -22,7 +42,7 @@ search_entry (
 	struct kod_entry *sptr = kod_db;
 
 	for(a=0; a<entryc && sptr; a++) {
-		if(strcmp(sptr->hostname, hostname)) 
+		if(!strcmp(sptr->hostname, hostname)) 
 			resc++;
 
 		sptr = sptr->next;
@@ -32,7 +52,7 @@ search_entry (
 
 	b=0;
 	for(a=0; a<entryc && sptr; a++) {
-		if(strcmp(sptr->hostname, hostname)) {
+		if(!strcmp(sptr->hostname, hostname)) {
 			dst[b] = sptr;
 			b++;
 		}
@@ -162,7 +182,7 @@ kod_init_kod_db (
 
 	db_s = fopen(db_file, "r");
 
-	if(db_file == NULL) {
+	if(db_s == NULL) {
 		char msg[80];
 
 		snprintf(msg, 80, "kod_init_kod_db(): Cannot open KOD db file %s", db_file);
@@ -175,7 +195,8 @@ kod_init_kod_db (
 		log_msg(msg, 2);
 	}
 
-	printf("Starting to read KOD file %s...\n", db_file);
+	if(ENABLED_OPT(NORMALVERBOSE)) 
+		printf("Starting to read KOD file %s...\n", db_file);
 	/* First let's see how many entries there are and check for right syntax */
 
 	while(!feof(db_s)) {

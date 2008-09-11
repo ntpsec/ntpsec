@@ -1,4 +1,20 @@
-/* Add timestamps to file logging!!! */
+/*
+ * Copyright (C) 2008  Johannes Maximilian Kühn
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
+ * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+ * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
+ * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #include "log.h"
 #include "sntp-opts.h"
 
@@ -10,7 +26,11 @@ FILE *log_file;
 
 void log_msg(char *message, char type) {
 	if(init) {
-		fprintf(log_file, message);
+		time_t cur_time = time(NULL);
+		char *timestamp = ctime(&cur_time);
+
+		fprintf(log_file, "%s: %s\n", timestamp, message);
+		fflush(log_file);
 	}
 	else {
 		switch(type) {
@@ -33,8 +53,10 @@ void log_msg(char *message, char type) {
 
 void debug_msg(char *message) {
 	if(HAVE_OPT(FILELOG)) {
-		fprintf(stderr, message);
-		fprintf(stderr, "\n");
+		time_t cur_time = time(NULL);
+		char *timestamp = ctime(&cur_time);
+
+		fprintf(stderr, "%s: %s\n", timestamp, message);
 	}
 	else {
 		syslog(LOG_DEBUG | LOG_PERROR | LOG_CONS, message);
@@ -42,7 +64,6 @@ void debug_msg(char *message) {
 }
 
 void init_log(char *logfile) {
-	printf("INIT IST KRIEEEEEG %s!!!\n", logfile);
 	log_file = fopen(logfile, "a");
 	
 	if(log_file == NULL) {

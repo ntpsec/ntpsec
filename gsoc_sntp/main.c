@@ -1,31 +1,30 @@
-#include <ntp_fp.h>
+#include <isc/result.h>
+#include <l_stdlib.h>
 #include <ntp.h>
+#include <ntp_fp.h>
 #include <ntp_stdlib.h>
 #include <ntp_unixtime.h>
-#include <l_stdlib.h>
-#include <isc/result.h>
 #include <stdio.h>
 
 #include <sntp-opts.h>
 
+#include "crypto.h"
 #include "kod_management.h"
 #include "networking.h"
 #include "utilities.h"
 #include "log.h"
 
-#define DEBUG
 
 int ai_fam_pref;
 volatile int debug;
 char adr_buf[INET6_ADDRSTRLEN];
 
+struct key *keys = NULL;
 
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode); 
 int sntp_main (int argc, char **argv);
 int on_wire (struct addrinfo *host);
-void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
 int set_time (double offset);
-
 
 
 int 
@@ -37,6 +36,9 @@ main (
 	return sntp_main(argc, argv);
 }
 
+/*
+ * The actual main function.
+ */
 int  
 sntp_main (
 		int argc, 
@@ -60,7 +62,7 @@ sntp_main (
 		else if(ENABLED_OPT(IPV6))
 			ai_fam_pref = AF_INET6;
 		else 
-			ai_fam_pref = NULL;
+			ai_fam_pref = 0;
 	}
 
 	log_msg("Started sntp", 0);
@@ -82,9 +84,11 @@ sntp_main (
 	if(HAVE_OPT(KOD)) {
 		kod_init_kod_db((char *)OPT_ARG(KOD));
 	}
-	else {
-		kod_init_kod_db("sntp.kod");
+
+	if(HAVE_OPT(KEYFILE)) {
+		auth_init((char *)OPT_ARG(KEYFILE), keys);
 	}
+
 
 	/* Considering employing a variable that prevents functions of doing anything until 
 	 * everything is initialized properly 
@@ -157,12 +161,13 @@ on_wire (
 
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 
+		tv_xmt.tv_sec += JAN_1970;
+
 #ifdef DEBUG
-		printf("Current time sec: %i msec: %i\n\n", (unsigned int) tv_xmt.tv_sec, 
+		printf("sntp on_wire: Current time sec: %i msec: %i\n", (unsigned int) tv_xmt.tv_sec, 
 				(unsigned int) tv_xmt.tv_usec);
 #endif
 
-		tv_xmt.tv_sec += JAN_1970;
 		TVTOTS(&tv_xmt, &xmt);
 		HTONL_FP(&xmt, &(x_pkt->xmt));
 
@@ -182,6 +187,8 @@ on_wire (
 			sw_case = 1;
 		else
 			sw_case = rpktl;
+
+		printf("sw_case: %i\n", sw_case);
 
 		switch(sw_case) {
 			case SERVER_UNUSEABLE:
