@@ -41,7 +41,7 @@ auth_md5 (
 	
 	MD5Init(&ctx);
 
-	char *digest_data = (char *) malloc(sizeof(char) * (LEN_PKT_NOMAC + cmp_size));
+	char *digest_data = (char *) malloc(sizeof(char) * (LEN_PKT_NOMAC + cmp_key->key_len));
 
 	for(a=0; a<LEN_PKT_NOMAC; a++)
 		digest_data[a] = pkt_data[a];
@@ -75,7 +75,7 @@ auth_init (
 	char kbuf[96];
 	FILE *keyf = fopen(keyfile, "r"); 
 	register int a, line_cnt, line_limit;
-	struct key *prev;
+	struct key *prev = NULL;
 
 	if(keyf == NULL) {
 		if(ENABLED_OPT(NORMALVERBOSE))
@@ -115,7 +115,7 @@ auth_init (
 #endif
 
 		sscanf(kbuf, "%i %c %16s", &act->key_id, &act->type, act->key_seq);
-		act->key_len = strlen(key_seq);
+		act->key_len = strlen(act->key_seq);
 
 #ifdef DEBUG
 		printf("sntp auth_init: key_id %i type %c with key %s\n", act->key_id, act->type, act->key_seq);

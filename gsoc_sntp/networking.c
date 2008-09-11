@@ -366,8 +366,9 @@ recv_bcst_data (
 			return BROADCAST_FAILED;
 			break;
 
-		default:
+/*		default: */
 			socklen_t ss_len = SOCKLEN(ras);
+
 			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, (struct sockaddr *) ras, (socklen_t *) &ss_len);
 	}
 
@@ -395,7 +396,7 @@ recv_bcst_pkt (
 {
 	struct sockaddr_storage sender;
 	register int a;
-	int is_authentic, has_mac, orig_pkt_len;
+	int is_authentic, has_mac = 0, orig_pkt_len;
 
 	char *rdata = (char *) malloc(sizeof(char) * 256);
 
@@ -570,13 +571,11 @@ recvpkt (
 	register int a;
 	int has_mac, is_authentic, orig_pkt_len;
 
-	l_fp org;
-
 
 	/* Much space, just to be sure */
-	rdata = (char *) malloc(sizeof(char) * 512);
+	rdata = (char *) malloc(sizeof(char) * 256);
 
-	int pkt_len = recvdata(rsock, &sender, rdata, 512);
+	int pkt_len = recvdata(rsock, &sender, rdata, 256);
 
 	if(!done) {
 		/* Do something about it, first check for a maximum length of ntp packets,
@@ -646,7 +645,7 @@ recvpkt (
 						if(ENABLED_OPT(AUTHENTICATION)) {
 							/* We want a authenticated packet */
 							if(ENABLED_OPT(NORMALVERBOSE)) {
-								char *hostname = ss_to_str(sas);
+								char *hostname = ss_to_str(&sender);
 								printf("sntp recvpkt: Broadcast packet received from %s is not authentic. Will discard this packet.\n", 
 										hostname);
 
@@ -660,7 +659,7 @@ recvpkt (
 							 * use it anyways 
 							 */
 							if(ENABLED_OPT(NORMALVERBOSE)) {
-								char *hostname = ss_to_str(sas);
+								char *hostname = ss_to_str(&sender);
 								printf("sntp recvpkt: Broadcast packet received from %s is not authentic. Authentication not enforced.\n", 
 										hostname);
 
@@ -673,7 +672,7 @@ recvpkt (
 					else {
 						/* Yay! Things worked out! */
 						if(ENABLED_OPT(NORMALVERBOSE)) {
-							char *hostname = ss_to_str(sas);
+							char *hostname = ss_to_str(&sender);
 							printf("sntp recvpkt: Broadcast packet received from %s successfully authenticated using key id %i.\n", 
 									hostname, rpkt->mac[0]);
 

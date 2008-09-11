@@ -24,6 +24,7 @@
 #include <strings.h>	
 #include <errno.h>
 #include <config.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,6 +35,7 @@
 #include <ntp_fp.h>
 #include <ntp.h>
 
+#include "crypto.h"
 #include "log.h"
 #include "sntp-opts.h"	
 #include "utilities.h"

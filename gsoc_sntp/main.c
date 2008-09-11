@@ -1,7 +1,7 @@
 #include <isc/result.h>
 #include <l_stdlib.h>
-#include <ntp.h>
 #include <ntp_fp.h>
+#include <ntp.h>
 #include <ntp_stdlib.h>
 #include <ntp_unixtime.h>
 #include <stdio.h>
@@ -86,7 +86,7 @@ sntp_main (
 	}
 
 	if(HAVE_OPT(KEYFILE)) {
-		auth_init((char *)OPT_ARG(KEYFILE), keys);
+		auth_init((char *)OPT_ARG(KEYFILE), &keys);
 	}
 
 
