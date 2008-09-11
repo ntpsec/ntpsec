@@ -74,13 +74,12 @@ flag = {
     arg-type  = string;
     descrip   = "Specify a file for the KOD packet storage";
     doc = <<-  _EndOfDoc_
-    Specifies the file to be used to store KOD packaet information.
-    _EndOfDoc_;
+	Specifies the file to be used to store KOD packaet information.
+	_EndOfDoc_;
 };
 
 
 flag = {
-	ifdef 	= RSN;
 	name 	= syslog;
 	value	= p;
 	flags-cant = filelog;
@@ -91,7 +90,6 @@ flag = {
 }; 
 
 flag = {
-	ifdef 	= RSN;
 	name 	= filelog;
 	value	= l;
 	arg-type  = string;
