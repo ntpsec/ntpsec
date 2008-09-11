@@ -32,9 +32,22 @@ case "${enable_libopts_install+set}" in
 esac
 LIBOPTS_CHECK(libopts)
 
+m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
+
+AC_CHECK_FUNC(gethostent, ,
+  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
+AC_CHECK_FUNC(openlog, , 
+  AC_CHECK_LIB(gen, openlog, , 
+  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
+
+AC_CHECK_FUNC(setsockopt, ,
+	[AC_CHECK_LIB(socket, setsockopt)
+	 AC_CHECK_LIB(xnet, setsockopt)])
 
 # Checks for header files.
 AC_HEADER_STDC
