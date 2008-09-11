@@ -69,22 +69,8 @@ flag = {
 };
 
 flag = {
-    name      = debug;
-    value     = d;
-    ifdef     = DEBUG;
-    descrip   = "Debugging output";
-    doc = <<-  _EndOfDoc_
-	Very verbose debugging output that will interfere with the timing
-	when writing to the terminal (because of line buffered output from C).
-	Note that the times produced by this are the corrections needed, and
-	not the error in the local clock.  This option should be set only when
-	debugging the source.
-	_EndOfDoc_;
-};
-
-flag = {
     name      = kod;
-    value     = k;
+    value     = K;
     arg-type  = string;
     descrip   = "Specify a file for the KOD packet storage";
     doc = <<-  _EndOfDoc_
@@ -92,17 +78,20 @@ flag = {
     _EndOfDoc_;
 };
 
+
 flag = {
+	ifdef 	= RSN;
 	name 	= syslog;
-	value	= s;
+	value	= p;
 	flags-cant = filelog;
 	descrip = "Logging with syslog";
 	doc = <<-  _EndOfDoc_
 	When this option is set all logging will be done using syslog.
 	_EndOfDoc_;
-};
+}; 
 
 flag = {
+	ifdef 	= RSN;
 	name 	= filelog;
 	value	= l;
 	arg-type  = string;
@@ -116,7 +105,7 @@ flag = {
 
 flag = {
     name      = settod;
-    value     = r;
+    value     = s;
     flags-cant = adjtime;
     descrip   = "Set (step) the time with settimeofday()";
     doc = <<-  _EndOfDoc_
@@ -125,7 +114,7 @@ flag = {
 
 flag = {
     name      = adjtime;
-    value     = a;
+    value     = j;
     flags-cant = settod;
     descrip   = "Set (slew) the time with adjtime()";
     doc = <<-  _EndOfDoc_
@@ -133,23 +122,14 @@ flag = {
 };
 
 flag = {
-	name 	= hostlist;
-	value	= h;
-	descrip	= "Specify a list of ntp servers";
-	doc = <<-  _EndOfDoc_
-	Comma seperated list of ntp server hosts like 
-	\"time.foo.org,time.bar.org,time.baz.org\"
-	_EndOfDoc_;
-};
-
-flag = {
 	name 	= broadcast;
 	value 	= b;
-	descrip	= "Use broadcast packages for synchronisation";
+	descrip	= "Use broadcast packages from the broadcast address specified for synchronisation";
+	arg-type = string;
 	doc 	= <<-  _EndOfDoc_
-	If specified SNTP will wait 5 minutes for broadcast packets
-	for synchronisation. The amount of time SNTP waits can be
-	specified by option -t.
+	If specified SNTP will wait 1 minute for broadcast packets
+	from the broadcast address specified for synchronisation. 
+	The amount of time SNTP waits can be specified with -t.
 	_EndOfDoc_;
 };
 
@@ -163,6 +143,42 @@ flag = {
 	of seconds specified and times out.
 	_EndOfDoc_;
 };
+
+flag = {
+	name 	= authentication;
+	value	= a;
+	descrip	= "Enable authentication with the key keyno. This option is used as -a keyno";
+	arg-type = number;
+	doc	= <<- _EndOfDoc_
+	This option enables authentication using the key specified in this option\'s argument.
+	The argument of this option is the keyid, a number specified in the keyfile as this
+	key\'s identifier. See the keyfile option -k for more details.
+	_EndOfDoc_;
+};
+
+flag = {
+	name 	= keyfile;
+	value	= k;
+	descrip	= "Specify a keyfile. SNTP will look in this file for the key specified with -a";
+	arg-type = string;
+	doc	= <<-  _EndOfDoc_
+	This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this 
+	file. Key files follow the following format:
+
+	keyid keytype key
+
+	Where 	keyid is a number identifying this key
+		keytype is one of the follow:
+			S  Key in 64 Bit hexadecimal number as specified in in the DES specification.
+			N  Key in 64 Bit hexadecimal number as specified in the NTP standard.
+			A  Key in a 1-to-8 character ASCII string.
+			M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
+
+	See more information see ntp.keys(5).
+	_EndOfDoc_;
+};
+
+		
 
 
 detail = <<-  _END_DETAIL

@@ -24,6 +24,7 @@ sntp_SOURCES = \
 	log.c \
 	utilities.c \
 	sntp-opts.c \
+	crypto.c \
 	main.c \
 	$(NULL)
 

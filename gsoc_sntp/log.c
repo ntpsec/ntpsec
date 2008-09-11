@@ -59,7 +59,11 @@ void debug_msg(char *message) {
 		fprintf(stderr, "%s: %s\n", timestamp, message);
 	}
 	else {
-		syslog(LOG_DEBUG | LOG_PERROR | LOG_CONS, message);
+		syslog(LOG_DEBUG
+#ifdef LOG_PERROR
+			| LOG_PERROR
+#endif
+			| LOG_CONS, message);
 	}
 }
 
