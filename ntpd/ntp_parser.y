@@ -190,6 +190,7 @@
 %token		T_Tick
 %token		T_Time1
 %token		T_Time2
+%token		T_Timingstats
 %token		T_Tinker
 %token		T_Tos
 %token		T_Trap
@@ -519,6 +520,8 @@ stat
                     { $$ = create_pval("rawstats"); }
         |	T_Sysstats
                     { $$ = create_pval("sysstats"); }
+        |	T_Timingstats
+                    { $$ = create_pval("timingstats"); }
 	|	T_Protostats
 		    { $$ = create_pval("protostats"); }
 	;

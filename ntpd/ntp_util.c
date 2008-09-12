@@ -471,6 +471,14 @@ stats_config(
 				filegen_setup(&cryptostats, now.l_ui);
 			}
 #endif /* OPENSSL */
+#ifdef DEBUG_TIMING
+			if(timingstats.prefix == &statsdir[0] &&
+			    timingstats.fp != NULL) {
+				fclose(timingstats.fp);
+				timingstats.fp = NULL;
+				filegen_setup(&timingstats, now.l_ui);
+			}
+#endif /* DEBUG_TIMING */
 		}
 		break;
 
