@@ -1,3 +1,4 @@
+* net-snmp-config cleanup.
 * [Bug 1063] ntpSnmpSubagentObject.h is missing from the distribution.
 (4.2.5p129) 2008/09/11 Released by Harlan Stenn <stenn@ntp.org>
 * Quiet some libntpq-related warnings.
