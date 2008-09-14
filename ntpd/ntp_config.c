@@ -838,6 +838,7 @@ struct key_tok keyword_list[] = {
 	{ "rawstats",		T_Rawstats,        NO_ARG },
 	{ "sysstats", 		T_Sysstats,        NO_ARG },
 	{ "protostats",		T_Protostats,	   NO_ARG },
+	{ "timingstats",	T_Timingstats,	   NO_ARG },
 /* filegen_option */
 	{ "disable",		T_Disable,         NO_ARG },
 	{ "enable",		T_Enable,          NO_ARG },
