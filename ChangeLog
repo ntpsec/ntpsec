@@ -1,3 +1,4 @@
+(4.2.5p132) 2008/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1067] Multicast DNS service registration must come after the fork
   on Solaris.
 * [Bug 1066] Error messages should log as errors.
