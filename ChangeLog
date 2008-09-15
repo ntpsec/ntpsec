@@ -1,3 +1,4 @@
+* [Bug 1067] Multicast DNS service registration must come after the fork on Solaris.
 * [Bug 1066] Error messages should log as errors
 (4.2.5p131) 2008/09/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1065] Re-enable support for the timingstats file.

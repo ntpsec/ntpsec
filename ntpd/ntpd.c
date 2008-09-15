@@ -581,14 +581,6 @@ ntpdmain(
 
 	ntp_srandom((int)(now.l_i * now.l_uf));
 
-#ifdef HAVE_DNSREGISTRATION
-	/* HMS: does this have to happen this early? */
-	msyslog(LOG_INFO, "Attemping to register mDNS");
-	if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
-		msyslog(LOG_ERR, "Unable to register mDNS");
-	}
-#endif
-
 #if !defined(VMS)
 # ifndef NODETACH
 	/*
@@ -862,6 +854,14 @@ ntpdmain(
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 	loop_config(LOOP_DRIFTCOMP, old_drift);
 	initializing = 0;
+
+#ifdef HAVE_DNSREGISTRATION
+	/* HMS: does this have to happen this early? */
+	msyslog(LOG_INFO, "Attemping to register mDNS");
+	if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
+		msyslog(LOG_ERR, "Unable to register mDNS");
+	}
+#endif
 
 #ifdef HAVE_DROPROOT
 	if( droproot ) {
