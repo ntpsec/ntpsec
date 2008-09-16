@@ -3839,7 +3839,16 @@ case "$ans" in
 	done
 	AC_SUBST(SNMP_CPPFLAGS)
 	AC_SUBST(SNMP_CFLAGS)
-	NTPSNMPD_DIR=ntpsnmpd
+
+	save_CFLAGS=$CFLAGS
+	save_CPPFLAGS=$CPPFLAGS
+	CFLAGS=$SNMP_CFLAGS
+	CPPFLAGS=$SNMP_CPPFLAGS
+	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [NTPSNMPD_DIR=ntpsnmpd],
+		[AC_MSG_WARN([net-snmp-config present but net-snmp headers are not available!])])
+	CFLAGS=$save_CFLAGS
+	CPPFLAGS=$save_CPPFLAGS
+
 	;;
      *) AC_MSG_WARN([Cannot build ntpsnmpd as desired - net-snmp-config cannot be found])
 	;;
