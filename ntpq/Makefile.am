@@ -6,7 +6,8 @@ AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
 ntpq_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
-libntpq_a_LIBADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+# HMS: I don't think we need libntpq_a_LIBADD...
+#libntpq_a_LIBADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
 DISTCLEANFILES=	.version version.c
 ETAGS_ARGS=	Makefile.am
