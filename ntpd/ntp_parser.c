@@ -455,7 +455,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 193 of yacc.c.  */
-#line 459 "ntp_parser.c"
+#line 459 "../../ntpd/ntp_parser.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -468,7 +468,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 472 "ntp_parser.c"
+#line 472 "../../ntpd/ntp_parser.c"
 
 #ifdef short
 # undef short
@@ -2098,10 +2098,10 @@ yyreduce:
 #line 292 "ntp_parser.y"
     {
 					if (input_from_file == 1) {
-			msyslog(LOG_INFO, "parse error %s line %d ignored\n",
+			msyslog(LOG_ERR, "parse error %s line %d ignored\n",
                             ip_file->fname, ip_file->line_no);
 			} else if (input_from_file != 0)
-				msyslog(LOG_INFO,
+				msyslog(LOG_ERR,
 				    "parse: bad boolean input flag\n");
                 }
     break;
@@ -2866,13 +2866,13 @@ yyreduce:
     {
                     if (curr_include_level >= MAXINCLUDELEVEL) {
                         fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-                        msyslog(LOG_INFO, "getconfig: Maximum include file level exceeded.");
+                        msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
                     }
                     else {
                         fp[curr_include_level + 1] = F_OPEN(FindConfig((yyvsp[(2) - (3)].String)), "r");
                         if (fp[curr_include_level + 1] == NULL) {
                             fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig((yyvsp[(2) - (3)].String)));
-                            msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig((yyvsp[(2) - (3)].String)));
+                            msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig((yyvsp[(2) - (3)].String)));
                         }
                         else
                             ip_file = fp[++curr_include_level];
@@ -3202,7 +3202,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3206 "ntp_parser.c"
+#line 3206 "../../ntpd/ntp_parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3427,7 +3427,7 @@ void yyerror (char *msg)
 {
     int retval;
     if (input_from_file)
-        fprintf(stderr, "%s\n", msg);
+        msyslog(LOG_ERR, "%s\n", msg);
     else {
         /* Save the error message in the correct buffer */
         retval = snprintf(remote_config.err_msg + remote_config.err_pos,

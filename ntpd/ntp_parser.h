@@ -370,7 +370,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 1529 of yacc.c.  */
-#line 374 "ntp_parser.h"
+#line 374 "../../ntpd/ntp_parser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
