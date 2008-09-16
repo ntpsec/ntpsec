@@ -20,16 +20,20 @@
  *
  ****************************************************************************/
 
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
-#include <ntpSnmpSubagentObject.h>
 #include <sys/time.h>
-#include <libntpq.h>
+
 #ifdef SOLARIS /* needed with at least Solaris 8 */
 #include <siginfo.h>
 #endif
+
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <ntpSnmpSubagentObject.h>
+
+#include <libntpq.h>
+#include <ntpsnmpd-opts.h>
 
 static int keep_running;
 
@@ -45,12 +49,24 @@ stop_server(int a) {
 int
 main (int argc, char **argv) {
   int background = 0; /* start as background process */
-  int syslog = 1; /* use syslog for logging */
+  int use_syslog = 1; /* use syslog for logging */
   char varvalue[1024];
 	
 
+	{
+		int optct = optionProcess(&ntpsnmpdOptions, argc, argv);
+		argc -= optct;
+		argv += optct;
+	}
+
+	if (!HAVE_OPT(NOFORK))
+		background = 1;
+
+	if (!HAVE_OPT(SYSLOG))
+		use_syslog = 0;
+
   /* using the net-snmp syslog facility */
-  if (syslog)
+  if (use_syslog)
     snmp_enable_calllog();
   else
     snmp_enable_stderrlog();
@@ -59,7 +75,7 @@ main (int argc, char **argv) {
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
  
   /* go into background mode, if requested */
-  if (background && netsnmp_daemonize(1, !syslog))
+  if (background && netsnmp_daemonize(1, !use_syslog))
       exit(1);
 
   /* Now register with the master Agent X process */

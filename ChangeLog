@@ -1,3 +1,4 @@
+* Add options processing to ntpsnmpd.
 * [Bug 1062] Check net-snmp headers before deciding to build ntpsnmpd.
 * Clean up the libntpq.a build.
 * Regenerate ntp_parser.[ch] from ntp_parser.y
