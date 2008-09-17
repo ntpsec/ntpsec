@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS= 
 
-sbin_PROGRAMS=	ntpsnmpd
+sbin_PROGRAMS=	@MAKE_NTPSNMPD@
+EXTRA_PROGRAMS=	ntpsnmpd
 ntpsnmpd_SOURCES= ntpsnmpd.c ntpSnmpSubagentObject.c	\
 			ntpsnmpd-opts.c ntpsnmpd-opts.h
 noinst_HEADERS=	ntpSnmpSubagentObject.h

@@ -3844,7 +3844,7 @@ case "$ans" in
 	save_CPPFLAGS=$CPPFLAGS
 	CFLAGS=$SNMP_CFLAGS
 	CPPFLAGS=$SNMP_CPPFLAGS
-	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [NTPSNMPD_DIR=ntpsnmpd],
+	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [MAKE_NTPSNMPD=ntpsnmpd],
 		[AC_MSG_WARN([net-snmp-config present but net-snmp headers are not available!])])
 	CFLAGS=$save_CFLAGS
 	CPPFLAGS=$save_CPPFLAGS
@@ -3855,7 +3855,7 @@ case "$ans" in
     esac
     ;;
 esac
-AC_SUBST(NTPSNMPD_DIR)
+AC_SUBST(MAKE_NTPSNMPD)
 
 AC_CACHE_CHECK(if we should always slew the time, ac_cv_var_slew_always,
 [AC_ARG_ENABLE(slew-always,

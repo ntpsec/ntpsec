@@ -1,3 +1,4 @@
+* Clean up build process for ntpsnmpd.
 (4.2.5p133) 2008/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * Add options processing to ntpsnmpd.
 * [Bug 1062] Check net-snmp headers before deciding to build ntpsnmpd.
