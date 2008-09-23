@@ -1654,10 +1654,10 @@ clock_update(
 		dtemp = sys_mindisp;
 #endif /* REFCLOCK */
 	sys_rootdisp = dtemp + peer->rootdisp;
-	epoch = peer->epoch - sys_epoch;
-	if (epoch <= 0)
+	if (peer->epoch <= sys_epoch)
 		return;
-
+ 
+	epoch = peer->epoch - sys_epoch;
 #ifdef DEBUG
 	if (debug)
 		printf(
