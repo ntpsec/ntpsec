@@ -1,3 +1,4 @@
+(4.2.5p135) 2008/09/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1072] clock_update should not allow updates older than sys_epoch.
 (4.2.5p134) 2008/09/17 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up build process for ntpsnmpd.
