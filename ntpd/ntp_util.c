@@ -416,7 +416,7 @@ stats_config(
 			if (value_l == 0)
 				add_dir_sep = 0;
 			else
-				add_dir_sep = (DIR_SEP ==
+				add_dir_sep = (DIR_SEP !=
 				    value[value_l - 1]);
 
 			if (add_dir_sep)
