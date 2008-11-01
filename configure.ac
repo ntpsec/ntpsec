@@ -3852,7 +3852,7 @@ case "$ans" in
 	# Do this last, as we're messing up LIBS.
 
 	# check -lnetsnmp for netsnmp_daemonize
-	LIBS=`$PATH_NET_SNMP_CONFIG --netsnmp-libs`
+	LIBS=`$PATH_NET_SNMP_CONFIG --libs`
 	AC_CHECK_LIB([netsnmp], [netsnmp_daemonize], [],
 		[AC_DEFINE([NEED_NETSNMP_DAEMONIZE], [1],
 			[We need to provide netsnmp_daemonize()])])
