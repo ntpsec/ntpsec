@@ -1,3 +1,5 @@
+* [Bug 1069] #undef netsnmp's PACKAGE_* macros.
+* [Bug 1068] Older versions of netsnmp do not have netsnmp_daemonize().
 (4.2.5p136) 2008/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1078] statsdir configuration parsing is broken.
 (4.2.5p135) 2008/09/23 Released by Harlan Stenn <stenn@ntp.org>
