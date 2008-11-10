@@ -31,8 +31,9 @@
 		<p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> file.</p>
 		<p>In the following tables the Code Field is the status or event code assigned and the Message Field a short string used for display and event reporting. The Description field contains a longer explanation of the status or event. Some messages include additional information useful for error diagnosis and performance assessment.</p>
 		<h4 id="sys">System Status Word</h4>
-		<p>The system status word consists of four fields LI (0-1), Source (2-7), Count (8-11) and Code (12-15). It is reported in the first line of the <tt>ntpd rv</tt> display.</p>
-		<table width="50%" border="1" cellspacing="2" cellpadding="2">
+		<p>The system status word consists of four fields LI (0-1), Source (2-7), Count
+			(8-11) and Code (12-15). It is reported in the first line of the <tt>			rv</tt> display produced by the <tt>ntpq</tt> program.</p>
+<table width="50%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>
 					<div align="center">Leap</div>
@@ -216,8 +217,11 @@
 			</tr>
 		</table>
 		<h4 id="peer">Peer Status Word</h4>
-		<p>The peer status word consists of four fields: Status (0-4, Select (5-7), Count (8-11) and Code (12-15). It is reported in the first line of the <tt>ntpd rv <i>associd</i></tt> display.</p>
-		<table width="50%" border="1" cellspacing="2" cellpadding="2">
+		<p>The peer status word consists of four fields: Status (0-4, Select (5-7),
+			Count (8-11) and Code (12-15). It is reported in the first line of
+			the <tt>rv <i>associd</i></tt> display
+			produced by the <tt>ntpq</tt> program.</p>
+<table width="50%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>
 					<div align="center">
@@ -388,8 +392,10 @@
 			</tr>
 		</table>
 		<h4 id="clock">Clock Status Word</h4>
-		<p>The clock status word consists of four fields: Unused (0-7), Count (8-11) and Code (12-15). It is reported in the first line of the <tt>ntpd clockvar <i>associd</i></tt> display.</p>
-		<table width="50%" border="1" cellspacing="2" cellpadding="2">
+		<p>The clock status word consists of four fields: Unused (0-7), Count (8-11)
+			and Code (12-15). It is reported in the first line of the <tt>clockvar <i>associd</i></tt> display
+			produced by the <tt>ntpq</tt> program.</p>
+<table width="50%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>
 					<div align="center">
