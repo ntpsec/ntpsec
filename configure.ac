@@ -3842,12 +3842,24 @@ case "$ans" in
 
 	save_CFLAGS=$CFLAGS
 	save_CPPFLAGS=$CPPFLAGS
+	save_LIBS=$LIBS
 	CFLAGS=$SNMP_CFLAGS
 	CPPFLAGS=$SNMP_CPPFLAGS
+
 	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [MAKE_NTPSNMPD=ntpsnmpd],
 		[AC_MSG_WARN([net-snmp-config present but net-snmp headers are not available!])])
+
+	# Do this last, as we're messing up LIBS.
+
+	# check -lnetsnmp for netsnmp_daemonize
+	LIBS=`$PATH_NET_SNMP_CONFIG --libs`
+	AC_CHECK_LIB([netsnmp], [netsnmp_daemonize], [],
+		[AC_DEFINE([NEED_NETSNMP_DAEMONIZE], [1],
+			[We need to provide netsnmp_daemonize()])])
+
 	CFLAGS=$save_CFLAGS
 	CPPFLAGS=$save_CPPFLAGS
+	LIBS=$save_LIBS
 
 	;;
      *) AC_MSG_WARN([Cannot build ntpsnmpd as desired - net-snmp-config cannot be found])
