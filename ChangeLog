@@ -1,3 +1,4 @@
+* decode.html and driver20.html updates from Dave Mills.
 (4.2.5p137) 2008/11/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1069] #undef netsnmp's PACKAGE_* macros.
 * [Bug 1068] Older versions of netsnmp do not have netsnmp_daemonize().
