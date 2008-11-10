@@ -1,3 +1,5 @@
+* [Bug 474] --disable-ipv6 is broken.
+* IPv6 interfaces were being looked for twice.
 * SHM driver grabs more samples, add clockstats
 * decode.html and driver20.html updates from Dave Mills.
 (4.2.5p137) 2008/11/01 Released by Harlan Stenn <stenn@ntp.org>
