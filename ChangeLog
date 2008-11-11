@@ -1,3 +1,4 @@
+* Typo fix to driver20.html.
 (4.2.5p138) 2008/11/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 474] --disable-ipv6 is broken.
 * IPv6 interfaces were being looked for twice.
