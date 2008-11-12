@@ -1,3 +1,5 @@
+* [Bug 1011] gmtime() returns NULL on windows where it would not under Unix.
+* Updated caljulian.c and prettydate.c from Juergen Perlinger.
 (4.2.5p139) 2008/11/11 Released by Harlan Stenn <stenn@ntp.org>
 * Typo fix to driver20.html.
 (4.2.5p138) 2008/11/10 Released by Harlan Stenn <stenn@ntp.org>
