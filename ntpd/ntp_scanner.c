@@ -603,7 +603,8 @@ yylex()
 	 */
 	
 	if ((expect_string == NO_ARG) &&  (!instring)) {
-		if (token = is_keyword(yytext, &expect_string)) 
+		token = is_keyword(yytext, &expect_string);
+		if (token) 
 			return token;
 		else if (is_integer(yytext)) {
 			errno = 0;

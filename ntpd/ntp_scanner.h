@@ -30,7 +30,7 @@ struct key_tok {
 
 /* Structure to hold a filename, file pointer and positional info */
 struct FILE_INFO {
-    char *fname;               /* Path to the file */
+    const char *fname;	       /* Path to the file */
     FILE *fd;                  /* File Descriptor */
     int line_no;               /* Line Number in the file being scanned */
     int col_no;                /* Column Number in the file being scanned */
