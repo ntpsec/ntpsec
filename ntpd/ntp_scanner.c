@@ -1,3 +1,4 @@
+
 /* ntp_scanner.c
  *
  * The source code for a simple lexical analyzer. 
@@ -78,10 +79,12 @@ int get_next_char(void);
  */
 
 struct state *
-create_states(char *keyword, 
-	      int token, 
-	      int expect_string,
-	      struct state *pre_state)
+create_states(
+	char *keyword, 
+	int token, 
+	int expect_string,
+	struct state *pre_state
+	)
 {
 	struct state *my_state;
 	struct state *return_state = pre_state;
@@ -146,7 +149,9 @@ create_states(char *keyword,
  */
 
 struct state *
-create_keyword_scanner(struct key_tok *keyword_list)
+create_keyword_scanner(
+	struct key_tok *keyword_list
+	)
 {
 	struct state *scanner = NULL;
 	while (keyword_list->keyword != NULL) {
@@ -164,7 +169,9 @@ create_keyword_scanner(struct key_tok *keyword_list)
  * memory
  */
 static void
-delete_keyword_scanner(struct state *my_key_scanner)
+delete_keyword_scanner(
+	struct state *my_key_scanner
+	)
 {
 	if (my_key_scanner) {
 		delete_keyword_scanner(my_key_scanner->next_char);
@@ -179,7 +186,10 @@ delete_keyword_scanner(struct state *my_key_scanner)
  */
 
 void
-print_keyword_scanner(struct state *my_key_scanner, int pos)
+print_keyword_scanner(
+	struct state *my_key_scanner,
+	int pos
+	)
 {
 	static char lexeme[MAX_LEXEME];
 	struct state *curr_state = my_key_scanner;
@@ -202,7 +212,10 @@ print_keyword_scanner(struct state *my_key_scanner, int pos)
  */
 
 struct FILE_INFO *
-F_OPEN(const char *path, const char *mode)
+F_OPEN(
+	const char *path,
+	const char *mode
+	)
 {
 	struct FILE_INFO *my_info = (struct FILE_INFO *)
 	    malloc(sizeof(struct FILE_INFO));
@@ -221,9 +234,12 @@ F_OPEN(const char *path, const char *mode)
 }
 
 int
-FGETC(struct FILE_INFO *stream)
+FGETC(
+	struct FILE_INFO *stream
+	)
 {
 	int ch = fgetc(stream->fd);
+
 	++stream->col_no;
 	if (ch == '\n') {
 		stream->prev_line_col_no = stream->col_no;
@@ -238,7 +254,10 @@ FGETC(struct FILE_INFO *stream)
  * SK: I don't think its worth fixing these bugs for our purposes ;-)
  */
 int
-UNGETC(int ch, struct FILE_INFO *stream)
+UNGETC(
+	int ch,
+	struct FILE_INFO *stream
+	)
 {
 	if (ch == '\n') {
 		stream->col_no = stream->prev_line_col_no;
@@ -250,9 +269,12 @@ UNGETC(int ch, struct FILE_INFO *stream)
 }
 
 int
-FCLOSE(struct FILE_INFO *stream)
+FCLOSE(
+	struct FILE_INFO *stream
+	)
 {
 	int ret_val = fclose(stream->fd);
+
 	if (!ret_val)
 		free(stream);
 	return ret_val;
@@ -265,14 +287,16 @@ FCLOSE(struct FILE_INFO *stream)
  * array. 
  * NOTE: This is not very efficient for reading from character
  * arrays, but needed to allow remote configuration where the
- * configuration command is provided through ntpq
+ * configuration command is provided through ntpq.
  * 
  * The behavior of there two functions is determined by the 
  * input_from_file flag.
  */
 
 int
-get_next_char(void)
+get_next_char(
+	void
+	)
 {
 	if (input_from_file)
 		return FGETC(ip_file);
@@ -285,7 +309,9 @@ get_next_char(void)
 }
 
 void
-push_back_char(int ch)
+push_back_char(
+	int ch
+	)
 {
 	if (input_from_file)
 		UNGETC(ch, ip_file);
@@ -301,13 +327,16 @@ push_back_char(int ch)
 
 /* Keywords */
 static int
-is_keyword(char *lexeme, int *expect_string)
+is_keyword(
+	char *lexeme,
+	int *expect_string
+	)
 {
 	struct state *curr_state = key_scanner;
 	int token = NON_ACCEPTING;
 	int i;
 
-	for (i = 0;lexeme[i];++i) {
+	for (i = 0; lexeme[i]; ++i) {
 		while (curr_state && (lexeme[i] != curr_state->ch))
 			curr_state = curr_state->next_char;
         
@@ -328,7 +357,9 @@ is_keyword(char *lexeme, int *expect_string)
 
 /* Integer */
 static int
-is_integer(char *lexeme)
+is_integer(
+	char *lexeme
+	)
 {
 	int i = 0;
 
@@ -337,7 +368,7 @@ is_integer(char *lexeme)
 		++i;
     
 	/* Check that all the remaining characters are digits */
-	for (;lexeme[i]; ++i) {
+	for (; lexeme[i]; ++i) {
 		if (!isdigit(lexeme[i]))
 			return 0;
 	}
@@ -346,7 +377,9 @@ is_integer(char *lexeme)
 
 /* Double */
 static int
-is_double(char *lexeme)
+is_double(
+	char *lexeme
+	)
 {
 	int i;
 
@@ -362,7 +395,7 @@ is_double(char *lexeme)
 		++i;
 
 	/* Read the integer part */
-	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
 		++no_digits;
     
 	/* Check for the required decimal point */
@@ -372,7 +405,7 @@ is_double(char *lexeme)
 		return 0;
     
 	/* Check for any digits after the decimal point */
-	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
 		++no_digits;
     
 	/* The number of digits in both the decimal part and the fraction part
@@ -396,7 +429,7 @@ is_double(char *lexeme)
 		++i;
 
 	/* Now read the exponent part */
-	for (;lexeme[i] && isdigit(lexeme[i]); ++i)
+	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
 		++no_digits;
 
 	/* Check if we are done */
@@ -427,18 +460,22 @@ is_double(char *lexeme)
 /* Define a function to test whether a character is a special character */
 
 static int
-is_special(char ch)
+is_special(
+	char ch
+	)
 {
 	int i;
     
-	for (i = 0;i < NO_OF_SPECIAL_CHARS;++i)
+	for (i = 0; i < NO_OF_SPECIAL_CHARS; ++i)
 		if (ch == special_char[i])
 			return 1;
 	return 0;
 }
 
 static int
-is_EOC(char ch)
+is_EOC(
+	char ch
+	)
 {
 	if ((old_config_style && (ch == '\n')) ||
 	    (!old_config_style && (ch == ';')))
@@ -447,13 +484,15 @@ is_EOC(char ch)
 }
     
 static int
-create_string_token(char *lexeme)
+create_string_token(
+	char *lexeme
+	)
 {
 	errno = 0;
 	if ((yylval.String = strdup(lexeme)) == NULL &&
 	    errno == ENOMEM) {
 		fprintf(stderr, "Could not allocate memory for: %s\n",
-				lexeme);
+			lexeme);
 		exit(1);
 	}
 	else
@@ -496,7 +535,7 @@ yylex()
 			return T_EOC;
 		}
 		/* Check if the next character is a special character.
-		 * If yes, return the special character
+		 * If yes, return the special character.
 		 */
 		else if ((expect_string == NO_ARG) && is_special(ch))
 			return ch;
@@ -507,14 +546,14 @@ yylex()
 		for (i = 0;(i < MAX_LEXEME) && 
 			 (yytext[i] = get_next_char()) != EOF; ++i) {
         
-			/* Break on reading in whitespace or a special character */
+			/* Break on whitespace or a special character */
 			if (isspace(yytext[i]) 
-				|| ((expect_string == NO_ARG) && is_special(yytext[i]))
+			    || ((expect_string == NO_ARG) && is_special(yytext[i]))
 			    || is_EOC(ch) || yytext[i] == '"')
 				break;
         
-			/* Read the rest of the line on reading a start of comment 
-			   character */
+			/* Read the rest of the line on reading a start
+			   of comment character */
 			if (yytext[i] == '#') {
 				while ((yytext[i] = get_next_char()) != EOF
 				       && yytext[i] != '\n')
@@ -522,8 +561,11 @@ yylex()
 				break;
 			}   
 		}
-		/* Pick up all of the string inside between " marks, to end of line.
-		 * If we make it to EOL without a terminating " assume it for them.
+		/* Pick up all of the string inside between " marks, to
+		 * end of line.  If we make it to EOL without a
+		 * terminating " assume it for them.
+		 *
+		 * XXX - HMS: I'm not sure we want to assume the closing "
 		 */
 		if (yytext[i] == '"') {
 			instring = 1;
@@ -534,14 +576,16 @@ yylex()
 			if (yytext[i] == '"')
 				yytext[i] =  ' ';
 		}
-		/* If the last character read was an EOF, pushback a newline
-		 * character. This is to prevent a parse error when there is
-		 * no newline at the end of a file
+		/* If the last character read was an EOF, pushback a
+		 * newline character. This is to prevent a parse error
+		 * when there is no newline at the end of a file.
 		 */
 		if (yytext[i] == EOF)
 			push_back_char('\n');
         
-		/* Pushback the last character read that is not a part of this lexeme */
+		/* Pushback the last character read that is not a part
+		 * of this lexeme.
+		 */
 		push_back_char(yytext[i]); 
 		yytext[i] = '\0';
 	} while (i == 0);
@@ -553,35 +597,35 @@ yylex()
 
 	/* Now return the desired token */
 	
-	/* First make sure that the parser is *not* expecting a string as the
-	 * next token (based on the previous token that was returned) and
-	 * that we haven't read a string
+	/* First make sure that the parser is *not* expecting a string
+	 * as the next token (based on the previous token that was
+	 * returned) and that we haven't read a string.
 	 */
 	
 	if ((expect_string == NO_ARG) &&  (!instring)) {
-	    if (token = is_keyword(yytext, &expect_string)) 
-		return token;
+		if (token = is_keyword(yytext, &expect_string)) 
+			return token;
 		else if (is_integer(yytext)) {
-		errno = 0;
-		if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
-		    && ((errno == EINVAL) || (errno == ERANGE))) {
-			fprintf(stderr,"Integer cannot be represented: %s\n",
-				yytext);
-			exit(1);
+			errno = 0;
+			if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
+			    && ((errno == EINVAL) || (errno == ERANGE))) {
+				fprintf(stderr,"Integer cannot be represented: %s\n",
+					yytext);
+				exit(1);
+			}
+			else
+				return T_Integer;
 		}
-		else
-			return T_Integer;
-	}
 		else if (is_double(yytext)) {
-		errno = 0;
-		if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
-			fprintf(stderr, "Double too large to represent: %s\n",
-				yytext);
-			exit(1);
+			errno = 0;
+			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
+				fprintf(stderr, "Double too large to represent: %s\n",
+					yytext);
+				exit(1);
+			}
+			else
+				return T_Double;
 		}
-		else
-			return T_Double;
-	}
 		else /* Default: Everything is a string */
 			return create_string_token(yytext);
 	}
@@ -591,16 +635,16 @@ yylex()
 		   
 		   ONLY EXCEPTION (sic), we might have a -4 or -6 flag.
 		   This is a terrible hack, but the grammar is ambiguous so
-		   we don't have a choice
-		 */
+		   we don't have a choice.
+		*/
 		if (strcmp(yytext, "-4") == 0)
 			return T_IPv4_address;
 		else if (strcmp(yytext, "-6") == 0)
 			return T_IPv6_address;
 		else {
-		instring = 0;
-		if (expect_string == SINGLE_ARG)
-			expect_string = NO_ARG;
+			instring = 0;
+			if (expect_string == SINGLE_ARG)
+				expect_string = NO_ARG;
 			return create_string_token(yytext);
 		}
 	}
