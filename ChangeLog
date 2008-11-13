@@ -1,3 +1,4 @@
+* New caltontp.c and calyearstart.c from Juergen Perlinger.
 (4.2.5p140) 2008/11/12 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup lint from the ntp_scanner files.
 * [Bug 1011] gmtime() returns NULL on windows where it would not under Unix.
