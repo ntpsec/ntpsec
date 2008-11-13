@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  Wednesday November 12, 2008 at 06:42:29 AM EST
+# It has been AutoGen-ed  Thursday November 13, 2008 at 06:41:06 AM EST
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
