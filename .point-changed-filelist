@@ -11,6 +11,10 @@ ntpq/ntpq-opts.c
 ntpq/ntpq-opts.h
 ntpq/ntpq-opts.texi
 ntpq/ntpq.1
+ntpsnmpd/ntpsnmpd-opts.c
+ntpsnmpd/ntpsnmpd-opts.h
+ntpsnmpd/ntpsnmpd-opts.texi
+ntpsnmpd/ntpsnmpd.1
 packageinfo.sh
 sntp/sntp-opts.c
 sntp/sntp-opts.h

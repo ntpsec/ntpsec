@@ -416,7 +416,7 @@ stats_config(
 			if (value_l == 0)
 				add_dir_sep = 0;
 			else
-				add_dir_sep = (DIR_SEP ==
+				add_dir_sep = (DIR_SEP !=
 				    value[value_l - 1]);
 
 			if (add_dir_sep)
@@ -471,6 +471,14 @@ stats_config(
 				filegen_setup(&cryptostats, now.l_ui);
 			}
 #endif /* OPENSSL */
+#ifdef DEBUG_TIMING
+			if(timingstats.prefix == &statsdir[0] &&
+			    timingstats.fp != NULL) {
+				fclose(timingstats.fp);
+				timingstats.fp = NULL;
+				filegen_setup(&timingstats, now.l_ui);
+			}
+#endif /* DEBUG_TIMING */
 		}
 		break;
 

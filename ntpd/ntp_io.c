@@ -58,7 +58,7 @@
  * Set up some macros to look for IPv6 and IPv6 multicast
  */
 
-#if defined(ISC_PLATFORM_HAVEIPV6) && !defined(DISABLE_IPV6)
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(WANT_IPV6)
 
 #define INCLUDE_IPV6_SUPPORT
 
@@ -1325,13 +1325,6 @@ update_interfaces(
 		if(debug)
 			netsyslog(LOG_ERR, "no IPv6 interfaces found");
 #endif
-#endif
-	if (isc_net_probeipv6() == ISC_R_SUCCESS)
-		scan_ipv6 = ISC_TRUE;
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(DEBUG)
-	else
-		if(debug)
-			netsyslog(LOG_ERR, "no IPv6 interfaces found");
 #endif
 
 	if (isc_net_probeipv4() == ISC_R_SUCCESS)

@@ -20,7 +20,7 @@ SUBDIRS+= 		\
 	ntpdate		\
 	ntpdc		\
 	ntpq		\
-	@NTPSNMPD_DIR@	\
+	ntpsnmpd	\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\

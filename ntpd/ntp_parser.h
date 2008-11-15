@@ -167,30 +167,31 @@
      T_Tick = 383,
      T_Time1 = 384,
      T_Time2 = 385,
-     T_Tinker = 386,
-     T_Tos = 387,
-     T_Trap = 388,
-     T_True = 389,
-     T_Trustedkey = 390,
-     T_Ttl = 391,
-     T_Type = 392,
-     T_Version = 393,
-     T_Week = 394,
-     T_Xleave = 395,
-     T_Year = 396,
-     T_Flag = 397,
-     T_Void = 398,
-     T_EOC = 399,
-     T_Simulate = 400,
-     T_Beep_Delay = 401,
-     T_Sim_Duration = 402,
-     T_Server_Offset = 403,
-     T_Duration = 404,
-     T_Freq_Offset = 405,
-     T_Wander = 406,
-     T_Jitter = 407,
-     T_Prop_Delay = 408,
-     T_Proc_Delay = 409
+     T_Timingstats = 386,
+     T_Tinker = 387,
+     T_Tos = 388,
+     T_Trap = 389,
+     T_True = 390,
+     T_Trustedkey = 391,
+     T_Ttl = 392,
+     T_Type = 393,
+     T_Version = 394,
+     T_Week = 395,
+     T_Xleave = 396,
+     T_Year = 397,
+     T_Flag = 398,
+     T_Void = 399,
+     T_EOC = 400,
+     T_Simulate = 401,
+     T_Beep_Delay = 402,
+     T_Sim_Duration = 403,
+     T_Server_Offset = 404,
+     T_Duration = 405,
+     T_Freq_Offset = 406,
+     T_Wander = 407,
+     T_Jitter = 408,
+     T_Prop_Delay = 409,
+     T_Proc_Delay = 410
    };
 #endif
 /* Tokens.  */
@@ -322,30 +323,31 @@
 #define T_Tick 383
 #define T_Time1 384
 #define T_Time2 385
-#define T_Tinker 386
-#define T_Tos 387
-#define T_Trap 388
-#define T_True 389
-#define T_Trustedkey 390
-#define T_Ttl 391
-#define T_Type 392
-#define T_Version 393
-#define T_Week 394
-#define T_Xleave 395
-#define T_Year 396
-#define T_Flag 397
-#define T_Void 398
-#define T_EOC 399
-#define T_Simulate 400
-#define T_Beep_Delay 401
-#define T_Sim_Duration 402
-#define T_Server_Offset 403
-#define T_Duration 404
-#define T_Freq_Offset 405
-#define T_Wander 406
-#define T_Jitter 407
-#define T_Prop_Delay 408
-#define T_Proc_Delay 409
+#define T_Timingstats 386
+#define T_Tinker 387
+#define T_Tos 388
+#define T_Trap 389
+#define T_True 390
+#define T_Trustedkey 391
+#define T_Ttl 392
+#define T_Type 393
+#define T_Version 394
+#define T_Week 395
+#define T_Xleave 396
+#define T_Year 397
+#define T_Flag 398
+#define T_Void 399
+#define T_EOC 400
+#define T_Simulate 401
+#define T_Beep_Delay 402
+#define T_Sim_Duration 403
+#define T_Server_Offset 404
+#define T_Duration 405
+#define T_Freq_Offset 406
+#define T_Wander 407
+#define T_Jitter 408
+#define T_Prop_Delay 409
+#define T_Proc_Delay 410
 
 
 
@@ -368,7 +370,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 1529 of yacc.c.  */
-#line 372 "../../ntpd/ntp_parser.h"
+#line 374 "../../ntpd/ntp_parser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

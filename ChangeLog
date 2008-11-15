@@ -1,3 +1,38 @@
+* Cleanup lint from the ntp_scanner files.
+* [Bug 1011] gmtime() returns NULL on windows where it would not under Unix.
+* Updated caljulian.c and prettydate.c from Juergen Perlinger.
+(4.2.5p139) 2008/11/11 Released by Harlan Stenn <stenn@ntp.org>
+* Typo fix to driver20.html.
+(4.2.5p138) 2008/11/10 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 474] --disable-ipv6 is broken.
+* IPv6 interfaces were being looked for twice.
+* SHM driver grabs more samples, add clockstats
+* decode.html and driver20.html updates from Dave Mills.
+(4.2.5p137) 2008/11/01 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1069] #undef netsnmp's PACKAGE_* macros.
+* [Bug 1068] Older versions of netsnmp do not have netsnmp_daemonize().
+(4.2.5p136) 2008/10/27 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1078] statsdir configuration parsing is broken.
+(4.2.5p135) 2008/09/23 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1072] clock_update should not allow updates older than sys_epoch.
+(4.2.5p134) 2008/09/17 Released by Harlan Stenn <stenn@ntp.org>
+* Clean up build process for ntpsnmpd.
+(4.2.5p133) 2008/09/16 Released by Harlan Stenn <stenn@ntp.org>
+* Add options processing to ntpsnmpd.
+* [Bug 1062] Check net-snmp headers before deciding to build ntpsnmpd.
+* Clean up the libntpq.a build.
+* Regenerate ntp_parser.[ch] from ntp_parser.y
+(4.2.5p132) 2008/09/15 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1067] Multicast DNS service registration must come after the fork
+  on Solaris.
+* [Bug 1066] Error messages should log as errors.
+(4.2.5p131) 2008/09/14 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1065] Re-enable support for the timingstats file.
+(4.2.5p130) 2008/09/13 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1064] Implement --with-net-snmp-config=progname
+* [Bug 1063] ntpSnmpSubagentObject.h is missing from the distribution.
+(4.2.5p129) 2008/09/11 Released by Harlan Stenn <stenn@ntp.org>
+* Quiet some libntpq-related warnings.
 (4.2.5p128) 2008/09/08 Released by Harlan Stenn <stenn@ntp.org>
 * Import Heiko Gerstung's GSoC2008 NTP MIB daemon.
 (4.2.5p127) 2008/09/01 Released by Harlan Stenn <stenn@ntp.org>
