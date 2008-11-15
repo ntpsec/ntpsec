@@ -366,7 +366,34 @@ AC_C_VOLATILE
 AC_ISC_POSIX
 AC_PATH_PROG(PATH_SH, sh)
 AC_PATH_PROG(PATH_PERL, perl)
-AC_PATH_PROG(PATH_NET_SNMP_CONFIG, net-snmp-config)
+
+AC_ARG_WITH(net-snmp-config,
+	AC_HELP_STRING([--with-net-snmp-config], [+ =net-snmp-config]),
+[ans=$withval], [ans=yes])
+case "$ans" in
+ no) ;;
+ yes)
+    ans=net-snmp-config
+    ;;
+ /*) ;;
+ */*)
+    AC_MSG_ERROR([--with-net-snmp-config takes either a name or an absolute path])
+    ;;
+ *)
+    ;;
+esac
+AC_MSG_CHECKING(for net-snmp-config)
+AC_MSG_RESULT($ans)
+PROG_NET_SNMP_CONFIG=$ans
+
+case "$PROG_NET_SNMP_CONFIG" in
+ no) ;;
+ /*)
+    PATH_NET_SNMP_CONFIG=$PROG_NET_SNMP_CONFIG
+    ;;
+ *) AC_PATH_PROG([PATH_NET_SNMP_CONFIG], [$PROG_NET_SNMP_CONFIG])
+    ;;
+esac
 
 case "$host" in
  *-*-vxworks*)
@@ -3783,7 +3810,7 @@ esac
 
 AC_MSG_CHECKING(if we want to build ntpsnmpd)
 AC_ARG_WITH(ntpsnmpd,
-	AC_HELP_STRING([--with-ntpsnmpd], [? Build the ntpsnmpd code?]),
+	AC_HELP_STRING([--with-ntpsnmpd], [s Build the ntpsnmpd code?]),
 	[ans=$withval],
 	[case "$PATH_NET_SNMP_CONFIG" in
 	 /*)	ans=yes ;;
@@ -3795,16 +3822,52 @@ case "$ans" in
  yes)
     case "$PATH_NET_SNMP_CONFIG" in
      /*)
-	NTPSNMPD_DIR=ntpsnmpd
 	SNMP_LIBS=`$PATH_NET_SNMP_CONFIG --agent-libs`
 	AC_SUBST(SNMP_LIBS)
+	# HMS: we really want to separate CPPFLAGS and CFLAGS
+	foo=`$PATH_NET_SNMP_CONFIG --cflags`
+	SNMP_CPPFLAGS=
+	SNMP_CFLAGS=
+	for i in $foo; do
+	    case "$i" in
+	     -D*|-U*|-I*)
+		SNMP_CPPFLAGS="$SNMP_CPPFLAGS $i"
+		;;
+	    *)	SNMP_CFLAGS="$SNMP_CFLAGS $i"
+		;;
+	    esac
+	done
+	AC_SUBST(SNMP_CPPFLAGS)
+	AC_SUBST(SNMP_CFLAGS)
+
+	save_CFLAGS=$CFLAGS
+	save_CPPFLAGS=$CPPFLAGS
+	save_LIBS=$LIBS
+	CFLAGS=$SNMP_CFLAGS
+	CPPFLAGS=$SNMP_CPPFLAGS
+
+	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [MAKE_NTPSNMPD=ntpsnmpd],
+		[AC_MSG_WARN([net-snmp-config present but net-snmp headers are not available!])])
+
+	# Do this last, as we're messing up LIBS.
+
+	# check -lnetsnmp for netsnmp_daemonize
+	LIBS=`$PATH_NET_SNMP_CONFIG --libs`
+	AC_CHECK_LIB([netsnmp], [netsnmp_daemonize], [],
+		[AC_DEFINE([NEED_NETSNMP_DAEMONIZE], [1],
+			[We need to provide netsnmp_daemonize()])])
+
+	CFLAGS=$save_CFLAGS
+	CPPFLAGS=$save_CPPFLAGS
+	LIBS=$save_LIBS
+
 	;;
      *) AC_MSG_WARN([Cannot build ntpsnmpd as desired - net-snmp-config cannot be found])
 	;;
     esac
     ;;
 esac
-AC_SUBST(NTPSNMPD_DIR)
+AC_SUBST(MAKE_NTPSNMPD)
 
 AC_CACHE_CHECK(if we should always slew the time, ac_cv_var_slew_always,
 [AC_ARG_ENABLE(slew-always,

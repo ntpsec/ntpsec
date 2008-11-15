@@ -11,7 +11,7 @@
  ****************************************************************************/
 #define _LIBNTPQC
 #define NO_MAIN_ALLOWED 1
-#define BUILD_AS_LIB
+/* #define BUILD_AS_LIB		Already provided by the Makefile */
 
 #include "ntpq.c"
 #include "libntpq.h"

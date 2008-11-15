@@ -190,6 +190,7 @@
 %token		T_Tick
 %token		T_Time1
 %token		T_Time2
+%token		T_Timingstats
 %token		T_Tinker
 %token		T_Tos
 %token		T_Trap
@@ -290,10 +291,10 @@ command_list
         |       error T_EOC
                 {
 					if (input_from_file == 1) {
-			msyslog(LOG_INFO, "parse error %s line %d ignored\n",
+			msyslog(LOG_ERR, "parse error %s line %d ignored\n",
                             ip_file->fname, ip_file->line_no);
 			} else if (input_from_file != 0)
-				msyslog(LOG_INFO,
+				msyslog(LOG_ERR,
 				    "parse: bad boolean input flag\n");
                 }
 	;
@@ -519,6 +520,8 @@ stat
                     { $$ = create_pval("rawstats"); }
         |	T_Sysstats
                     { $$ = create_pval("sysstats"); }
+        |	T_Timingstats
+                    { $$ = create_pval("timingstats"); }
 	|	T_Protostats
 		    { $$ = create_pval("protostats"); }
 	;
@@ -696,13 +699,13 @@ miscellaneous_command
                 {
                     if (curr_include_level >= MAXINCLUDELEVEL) {
                         fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-                        msyslog(LOG_INFO, "getconfig: Maximum include file level exceeded.");
+                        msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
                     }
                     else {
                         fp[curr_include_level + 1] = F_OPEN(FindConfig($2), "r");
                         if (fp[curr_include_level + 1] == NULL) {
                             fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig($2));
-                            msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig($2));
+                            msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig($2));
                         }
                         else
                             ip_file = fp[++curr_include_level];
@@ -920,7 +923,7 @@ void yyerror (char *msg)
 {
     int retval;
     if (input_from_file)
-        fprintf(stderr, "%s\n", msg);
+        msyslog(LOG_ERR, "%s\n", msg);
     else {
         /* Save the error message in the correct buffer */
         retval = snprintf(remote_config.err_msg + remote_config.err_pos,
