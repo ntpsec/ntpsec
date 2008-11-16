@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-m4_include([version.m4])
+m4_include([../version.m4])
 AC_INIT(sntp, VERSION_NUMBER)
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
@@ -94,10 +94,27 @@ AC_DEFINE(HAVE_TERMIOS, 1, [sntp does not care about TTY stuff])
 AC_DEFINE(ISC_PLATFORM_HAVEIPV6, 1, [hack])
 AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?]) 
 
-
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([atexit memset socket])
+
+AC_MSG_CHECKING(for bin subdirectory)
+AC_ARG_WITH(binsubdir,
+	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
+	use_binsubdir="$withval", use_binsubdir="bin")
+
+case "$use_binsubdir" in
+ bin)
+    ;;
+ sbin)
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
+    ;;
+esac
+AC_MSG_RESULT($use_binsubdir)
+BINSUBDIR=$use_binsubdir
+AC_SUBST(BINSUBDIR)
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

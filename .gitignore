@@ -134,3 +134,6 @@ config.status
 config.sub
 aclocal.m4
 test.kod
+version.def
+autogen-version.def
+bincheck.mf
