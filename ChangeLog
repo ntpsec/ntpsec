@@ -1,3 +1,4 @@
+* Imported GSoC SNTP code from Johannes Maximilian Kühn.
 (4.2.5p141) 2008/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * New caltontp.c and calyearstart.c from Juergen Perlinger.
 (4.2.5p140) 2008/11/12 Released by Harlan Stenn <stenn@ntp.org>

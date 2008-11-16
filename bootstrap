@@ -111,6 +111,7 @@ done
 touch ntpd/ntp_parser.[ch]
 
 cp bincheck.mf sntp/
+cp bincheck.mf gsoc_sntp/
 
 ${AUTORECONF} -i -v
 
