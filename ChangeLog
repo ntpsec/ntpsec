@@ -1,3 +1,4 @@
+* sntp cleanup and fixes.
 (4.2.5p142) 2008/11/16 Released by Harlan Stenn <stenn@ntp.org>
 * Imported GSoC SNTP code from Johannes Maximilian Kühn.
 (4.2.5p141) 2008/11/13 Released by Harlan Stenn <stenn@ntp.org>
