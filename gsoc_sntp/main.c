@@ -154,7 +154,7 @@ on_wire (
 
 		int error, rpktl, sw_case;
 
-		char *hostname;
+		char *hostname = NULL, *ts_str = NULL;
 
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
@@ -188,8 +188,6 @@ on_wire (
 		else
 			sw_case = rpktl;
 
-		printf("sw_case: %i\n", sw_case);
-
 		switch(sw_case) {
 			case SERVER_UNUSEABLE:
 				return -1;
@@ -207,7 +205,7 @@ on_wire (
 				add_entry(hostname, (char *) &r_pkt->refid);
 
 				if(ENABLED_OPT(NORMALVERBOSE))
-					printf("on_wire: Received KOD packet with code: %s from %s, demobilizing all connections\n", 
+					printf("sntp on_wire: Received KOD packet with code: %s from %s, demobilizing all connections\n", 
 							(char *) r_pkt->refid, hostname);
 
 				char *log_str = (char *) malloc(sizeof(char) * (INET6_ADDRSTRLEN + 72));
@@ -236,23 +234,23 @@ on_wire (
 				getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, 
 						INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
-				printf("\non_wire: Received %i bytes from %s\n", rpktl, adr_buf);
+				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, adr_buf);
 			}
 
 #ifdef DEBUG
 			pkt_output(r_pkt, rpktl, stdout);
 	
-			printf("on_wire: rpkt->reftime:\n");
+			printf("sntp on_wire: rpkt->reftime:\n");
 			l_fp_output(&(r_pkt->reftime), stdout);
-			printf("on_wire: rpkt->org:\n");
+			printf("sntp on_wire: rpkt->org:\n");
 			l_fp_output(&(r_pkt->org), stdout);
-			printf("on_wire: rpkt->rec:\n");
+			printf("sntp on_wire: rpkt->rec:\n");
 			l_fp_output(&(r_pkt->rec), stdout);
-			printf("on_wire: rpkt->rec:\n");
+			printf("sntp on_wire: rpkt->rec:\n");
 			l_fp_output_bin(&(r_pkt->rec), stdout);
-			printf("on_wire: rpkt->rec:\n");
+			printf("sntp on_wire: rpkt->rec:\n");
 			l_fp_output_dec(&(r_pkt->rec), stdout);
-			printf("on_wire: rpkt->xmt:\n");
+			printf("sntp on_wire: rpkt->xmt:\n");
 			l_fp_output(&(r_pkt->xmt), stdout);
 #endif
 
@@ -276,12 +274,22 @@ on_wire (
 			offset = (t21 + t34) / 2.;
 			delta = t21 - t34;
 
-
 			if(ENABLED_OPT(NORMALVERBOSE))
-				printf("on_wire: t21: %.6f\t t34: %.6f\ndelta: %.6f\t offset: %.6f\n", 
+				printf("sntp on_wire:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
 					t21, t34, delta, offset);
 
-			set_time(offset); 
+			ts_str = tv_to_str(&tv_dst);
+
+			printf("%s ", ts_str);
+
+			if(offset > 0)
+				printf("+");
+			
+			printf("%.3f\n", offset);
+			free(ts_str);
+
+			if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
+				return set_time(offset); 
 
 			return 0;
 		}
@@ -293,7 +301,7 @@ on_wire (
 	snprintf(logmsg, 32 + INET6_ADDRSTRLEN, "Received no useable packet from %s!", adr_buf);
 
 	if(ENABLED_OPT(NORMALVERBOSE))
-		printf("on_wire: Received no useable packet from %s!\n", adr_buf);
+		printf("sntp on_wire: Received no useable packet from %s!\n", adr_buf);
 
 
 	log_msg(logmsg, 1);

@@ -58,7 +58,7 @@ flag = {
 
 flag = {
     name      = normalverbose;
-    value     = v;
+    value     = d;
     descrip   = "Normal verbose";
     doc = <<-  _EndOfDoc_
 	Diagnostic messages for non-fatal errors and a limited amount of

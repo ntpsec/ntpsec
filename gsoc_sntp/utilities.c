@@ -157,3 +157,39 @@ ss_to_str (
 
 	return buf;
 }
+
+/* Converts a struct tv to a date string
+ */
+char *
+tv_to_str (
+		struct timeval *tv
+	  )
+{
+	static const char *month_names[] = {
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	};
+
+	char *buf = (char *) malloc(sizeof(char) * 48);
+
+	time_t cur_time = time(NULL);
+
+	struct tm *tm_ptr = (struct tm *) malloc(sizeof(struct tm));
+	tm_ptr = localtime(&cur_time);
+
+
+	snprintf(buf, 48, "%i %s %.2d %.2d:%.2d:%.2d.%.3d", 
+			tm_ptr->tm_year + 1900,
+			month_names[tm_ptr->tm_mon],
+			tm_ptr->tm_mday,
+			tm_ptr->tm_hour,
+			tm_ptr->tm_min,
+			tm_ptr->tm_sec,
+			(int)tv->tv_usec);
+
+	return buf;
+}
+
+
+
+		

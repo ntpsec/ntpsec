@@ -84,7 +84,7 @@ add_entry (
 	if(kod_init) {
 		struct kod_entry *new_entry = (struct kod_entry *) malloc(sizeof(struct kod_entry));
 		strcpy(new_entry->hostname, hostname);
-		strlcpy(new_entry->type, type, 4);
+		strncpy(new_entry->type, type, 4);
 		new_entry->next = NULL;
 
 		kod_db[entryc-1].next = new_entry;
