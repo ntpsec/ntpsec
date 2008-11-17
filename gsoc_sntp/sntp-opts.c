@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  Monday November 17, 2008 at 03:26:32 AM EST
+ *  It has been AutoGen-ed  Monday November 17, 2008 at 06:50:45 AM EST
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -181,13 +181,16 @@ tSCC    zKeyfile_Name[]            = "keyfile";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Help/More_Help option descriptions:
+ *  Help/More_Help/Version option descriptions:
  */
 tSCC zHelpText[]       = "Display usage information and exit";
 tSCC zHelp_Name[]      = "help";
 
 tSCC zMore_HelpText[]  = "Extended usage information passed thru pager";
 tSCC zMore_Help_Name[] = "more-help";
+
+tSCC zVersionText[]    = "Output version information and exit";
+tSCC zVersion_Name[]   = "version";
 
 /*
  *  Save/Load_Opts option description:
@@ -210,7 +213,7 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
  *  if multiple copies are allowed.
  */
 extern tOptProc
-    optionNumericVal, optionPagedUsage;
+    optionNumericVal, optionPagedUsage, optionVersionStderr;
 static tOptProc
     doUsageOpt;
 
@@ -219,10 +222,15 @@ static tOptProc
  *  When not under test, there are different procs to use
  */
 extern tOptProc
-    optionNumericVal, optionPagedUsage;
+    optionNumericVal, optionPagedUsage, optionPrintVersion;
 static tOptProc
     doUsageOpt;
 #endif /* defined(TEST_SNTP_OPTS) */
+#ifdef TEST_SNTP_OPTS
+# define DOVERPROC optionVersionStderr
+#else
+# define DOVERPROC optionPrintVersion
+#endif /* TEST_SNTP_OPTS */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -373,6 +381,28 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
+#ifdef NO_OPTIONAL_OPT_ARGS
+#  define VERSION_OPT_FLAGS     OPTST_IMM | OPTST_NO_INIT
+#else
+#  define VERSION_OPT_FLAGS     OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#endif
+
+  {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
+     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ VERSION_OPT_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ DOVERPROC,
+     /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
+     /* disablement strs */ NULL, NULL },
+
+#undef VERSION_OPT_FLAGS
+
+
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -430,7 +460,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program\n\
+"sntp - standard SNTP program - Ver. 4.2.5p143\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -449,7 +479,7 @@ run as an interactive command or in a\n\
 job.\n\
 NTP is the Network Time Protocol (RFC 1305) and SNTP is the\n\
 Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).\n";
-#define zFullVersion    NULL
+tSCC    zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 408 */
 
 #if defined(ENABLE_NLS)
@@ -488,7 +518,7 @@ tOptions sntpOptions = {
       NO_EQUIVALENT /* index of '-#' option */,
       NO_EQUIVALENT /* index of default opt */
     },
-    16 /* full option count */, 12 /* user option count */
+    17 /* full option count */, 12 /* user option count */
 };
 
 /*
