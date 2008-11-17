@@ -173,14 +173,14 @@ sendpkt (
 	if(ENABLED_OPT(NORMALVERBOSE)) {
 		getnameinfo((struct sockaddr *) dest, SOCKLEN(dest), adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
-		printf("sntp sendpkt: Sending packet to %s...\n", adr_buf);
+		printf("sntp sendpkt: Sending packet to %s... ", adr_buf);
 	}
 
 	int cc = sendto(rsock, (char *)pkt, len, 0, (struct sockaddr *)dest, SOCKLEN(dest));
 
 	if (cc == SOCKET_ERROR) {
 #ifdef DEBUG
-		printf("sntp sendpkt: Socket error: %i. Couldn't send packet!\n", cc);
+		printf("\n sntp sendpkt: Socket error: %i. Couldn't send packet!\n", cc);
 #endif
 
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {

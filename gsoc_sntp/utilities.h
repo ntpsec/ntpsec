@@ -53,5 +53,6 @@ void l_fp_output_dec (l_fp *ts, FILE *output);
 
 char *addrinfo_to_str (struct addrinfo *addr);
 char *ss_to_str (struct sockaddr_storage *saddr);
+char *tv_to_str (struct timeval *tv);
 
 #endif
