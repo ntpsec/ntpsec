@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  Sunday November 16, 2008 at 07:00:57 AM EST
+ *  It has been AutoGen-ed  Monday November 17, 2008 at 03:26:32 AM EST
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -64,16 +64,13 @@ typedef enum {
         INDEX_OPT_TIMEOUT          =  9,
         INDEX_OPT_AUTHENTICATION   = 10,
         INDEX_OPT_KEYFILE          = 11,
-        INDEX_OPT_VERSION          = 12,
-        INDEX_OPT_HELP             = 13,
-        INDEX_OPT_MORE_HELP        = 14,
-        INDEX_OPT_SAVE_OPTS        = 15,
-        INDEX_OPT_LOAD_OPTS        = 16
+        INDEX_OPT_HELP             = 12,
+        INDEX_OPT_MORE_HELP        = 13,
+        INDEX_OPT_SAVE_OPTS        = 14,
+        INDEX_OPT_LOAD_OPTS        = 15
 } teOptIndex;
 
-#define OPTION_CT    17
-#define SNTP_VERSION       "4.2.5p142"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p142"
+#define OPTION_CT    16
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -97,80 +94,13 @@ typedef enum {
                 DESC(n).optCookie = NULL )
 
 /*
- *  Make sure there are no #define name conflicts with the option names
- */
-#ifndef     NO_OPTION_NAME_WARNINGS
-# ifdef    IPV4
-#  warning undefining IPV4 due to option name conflict
-#  undef   IPV4
-# endif
-# ifdef    IPV6
-#  warning undefining IPV6 due to option name conflict
-#  undef   IPV6
-# endif
-# ifdef    NORMALVERBOSE
-#  warning undefining NORMALVERBOSE due to option name conflict
-#  undef   NORMALVERBOSE
-# endif
-# ifdef    KOD
-#  warning undefining KOD due to option name conflict
-#  undef   KOD
-# endif
-# ifdef    SYSLOG
-#  warning undefining SYSLOG due to option name conflict
-#  undef   SYSLOG
-# endif
-# ifdef    FILELOG
-#  warning undefining FILELOG due to option name conflict
-#  undef   FILELOG
-# endif
-# ifdef    SETTOD
-#  warning undefining SETTOD due to option name conflict
-#  undef   SETTOD
-# endif
-# ifdef    ADJTIME
-#  warning undefining ADJTIME due to option name conflict
-#  undef   ADJTIME
-# endif
-# ifdef    BROADCAST
-#  warning undefining BROADCAST due to option name conflict
-#  undef   BROADCAST
-# endif
-# ifdef    TIMEOUT
-#  warning undefining TIMEOUT due to option name conflict
-#  undef   TIMEOUT
-# endif
-# ifdef    AUTHENTICATION
-#  warning undefining AUTHENTICATION due to option name conflict
-#  undef   AUTHENTICATION
-# endif
-# ifdef    KEYFILE
-#  warning undefining KEYFILE due to option name conflict
-#  undef   KEYFILE
-# endif
-#else  /* NO_OPTION_NAME_WARNINGS */
-# undef IPV4
-# undef IPV6
-# undef NORMALVERBOSE
-# undef KOD
-# undef SYSLOG
-# undef FILELOG
-# undef SETTOD
-# undef ADJTIME
-# undef BROADCAST
-# undef TIMEOUT
-# undef AUTHENTICATION
-# undef KEYFILE
-#endif  /*  NO_OPTION_NAME_WARNINGS */
-
-/*
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
 #define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
 #define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
-#define VALUE_OPT_NORMALVERBOSE  'v'
+#define VALUE_OPT_NORMALVERBOSE  'd'
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_SYSLOG         'p'
 #define VALUE_OPT_FILELOG        'l'
@@ -183,7 +113,6 @@ typedef enum {
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
 #define VALUE_OPT_KEYFILE        'k'
 
-#define VALUE_OPT_VERSION       'v'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_SAVE_OPTS     '>'

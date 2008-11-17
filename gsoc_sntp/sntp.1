@@ -1,7 +1,7 @@
-.TH SNTP 1 2008-11-16 "( 4.2.5p142)" "Programmer's Manual"
+.TH SNTP 1 2008-11-17 "" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  Sunday November 16, 2008 at 07:00:59 AM EST
+.\"  It has been AutoGen-ed  Monday November 17, 2008 at 03:26:33 AM EST
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -168,7 +168,7 @@ This option is a member of the ipv4 class of options.
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .TP
-.BR \-v ", " \--normalverbose
+.BR \-d ", " \--normalverbose
 Normal verbose.
 .sp
 Diagnostic messages for non-fatal errors and a limited amount of
@@ -264,11 +264,6 @@ Load options from \fIrcfile\fP.
 The \fIno-load-opts\fP form will disable the loading
 of earlier RC/INI files.  \fI--no-load-opts\fP is handled early,
 out of order.
-.TP
-.BR \-v " [{\fIv|c|n\fP}]," " \--version" "[=\fI{v|c|n}\fP]"
-Output version of program and exit.  The default mode is `v', a simple
-version.  The `c' mode will print copyright information and `n' will
-print the full copyright notice.
 .SH OPTION PRESETS
 Any option that is not marked as \fInot presettable\fP may be preset
 by loading values from configuration ("RC" or ".INI") file(s) and values from

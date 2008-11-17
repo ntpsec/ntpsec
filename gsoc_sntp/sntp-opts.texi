@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  Sunday November 16, 2008 at 07:01:00 AM EST
+# It has been AutoGen-ed  Monday November 17, 2008 at 03:26:34 AM EST
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -36,7 +36,7 @@ This software is released under a specialized copyright license.
 * sntp ipv6::                   ipv6 option (-6)
 * sntp keyfile::                keyfile option (-k)
 * sntp kod::                    kod option (-K)
-* sntp normalverbose::          normalverbose option (-v)
+* sntp normalverbose::          normalverbose option (-d)
 * sntp settod::                 settod option (-s)
 * sntp syslog::                 syslog option (-p)
 * sntp timeout::                timeout option (-t)
@@ -85,7 +85,7 @@ Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 
 @node sntp normalverbose
-@subsection normalverbose option (-v)
+@subsection normalverbose option (-d)
 @cindex sntp-normalverbose
 
 This is the ``normal verbose'' option.
