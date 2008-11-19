@@ -1,3 +1,4 @@
+* Avoid the sched*() functions under OSF - link problems.
 (4.2.5p143) 2008/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * sntp cleanup and fixes.
 (4.2.5p142) 2008/11/16 Released by Harlan Stenn <stenn@ntp.org>

@@ -425,9 +425,14 @@ dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
 dnl so only use one of them.  Linux (glibc-2.1.2 and -2.2.2, at least)
 dnl does Strange Things with extra processes using the Posix-compatibility
 dnl real-time library, so we don't want to use it.
+dnl
+dnl 081118 Harlan got tired of looking for a way to get the sched*()
+dnl functions to link OK with either cc or gcc.
 
 case "$host" in
  *-*-*linux*) ;;
+ *-*-osf4*) ;;
+ *-*-osf5*) ;;
  *)
     AC_CHECK_LIB(rt, sched_setscheduler, ,
 	AC_CHECK_LIB(posix4, sched_setscheduler))
