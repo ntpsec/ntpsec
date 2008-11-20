@@ -27,6 +27,16 @@ int on_wire (struct addrinfo *host);
 int set_time (double offset);
 
 
+#if !HAVE_MALLOC
+void *
+rpl_malloc (size_t n)
+{
+	if (n == 0)
+	    n = 1;
+	return malloc (n);
+}
+#endif /* !HAVE_MALLOC */
+
 int 
 main (
 		int argc,

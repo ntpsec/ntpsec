@@ -202,7 +202,7 @@ recvdata (
 		int rdata_length
 	 )
 {
-	socklen_t slen = SOCKLEN(&rsock);
+	GETSOCKNAME_SOCKLEN_TYPE slen = SOCKLEN(&rsock);
 
 #ifdef DEBUG
 	printf("sntp recvdata: Trying to receive data from...\n");
@@ -367,9 +367,9 @@ recv_bcst_data (
 			break;
 
 /*		default: */
-			socklen_t ss_len = SOCKLEN(ras);
+			GETSOCKNAME_SOCKLEN_TYPE ss_len = SOCKLEN(ras);
 
-			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, (struct sockaddr *) ras, (socklen_t *) &ss_len);
+			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, (struct sockaddr *) ras, (GETSOCKNAME_SOCKLEN_TYPE *) &ss_len);
 	}
 
 	if(recv_bytes == -1) {
