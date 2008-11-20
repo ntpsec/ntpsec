@@ -1,18 +1,15 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 m4_include([../version.m4])
-AC_INIT(sntp, VERSION_NUMBER)
+AC_INIT([sntp], [VERSION_NUMBER])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
 dnl the 'host' machine is where the resulting stuff runs.
-AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) of where we should run])
+AC_DEFINE_UNQUOTED([STR_SYSTEM], "$host", [canonical system (cpu-vendor-os) of where we should run])
 AC_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
-AC_PREREQ(2.53)
-
-dnl AC_PREREQ(2.61)
-dnl AC_CONFIG_SRCDIR([main.c])
+AC_PREREQ([2.53])
 
 # Checks for programs.
 AC_PROG_CC
@@ -30,7 +27,7 @@ case "${enable_libopts_install+set}" in
  set) ;;
  *) enable_libopts_install=no ;;
 esac
-LIBOPTS_CHECK(libopts)
+LIBOPTS_CHECK([libopts])
 
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
@@ -40,10 +37,10 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 
 AC_CHECK_FUNC(gethostent, ,
-  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
+	[AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket)])
 AC_CHECK_FUNC(openlog, , 
-  AC_CHECK_LIB(gen, openlog, , 
-  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
+	[AC_CHECK_LIB(gen, openlog, , 
+		[AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)])])
 
 AC_CHECK_FUNC(setsockopt, ,
 	[AC_CHECK_LIB(socket, setsockopt)
@@ -60,9 +57,9 @@ AC_TYPE_SIZE_T
 
 AC_C_INLINE
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
-AC_CHECK_SIZEOF(signed char)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF([signed char])
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long])
 
 AC_CHECK_TYPES([s_char])
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
@@ -71,28 +68,238 @@ case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
     ;;
  no0no)
     # We have signed chars, can't say 'signed char', no s_char typedef.
-    AC_DEFINE(NEED_S_CHAR_TYPEDEF, 1, [Do we need an s_char typedef?])
+    AC_DEFINE([NEED_S_CHAR_TYPEDEF], 1, [Do we need an s_char typedef?])
     ;;
  no1no)
     # We have signed chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE(NEED_S_CHAR_TYPEDEF)
+    AC_DEFINE([NEED_S_CHAR_TYPEDEF])
     ;;
  yes0no)
     # We have unsigned chars, can't say 'signed char', no s_char typedef.
-    AC_MSG_ERROR(No way to specify a signed character!)
+    AC_MSG_ERROR([No way to specify a signed character!])
     ;;
  yes1no)
     # We have unsigned chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE(NEED_S_CHAR_TYPEDEF)
+    AC_DEFINE([NEED_S_CHAR_TYPEDEF])
     ;;
 esac
 AC_TYPE_UID_T
 
+AC_CACHE_CHECK(for struct sockaddr_storage, ac_cv_struct_sockaddr_storage,
+[AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+],[
+struct sockaddr_storage n;],
+	ac_cv_struct_sockaddr_storage=yes,
+	ac_cv_struct_sockaddr_storage=no)
+])
+if test $ac_cv_struct_sockaddr_storage = yes; then
+    AC_DEFINE([HAVE_STRUCT_SOCKADDR_STORAGE], 1, [Does a system header define struct sockaddr_storage?])
+fi
+
+AC_ARG_ENABLE([ipv6], [AC_HELP_STRING([--enable-ipv6], [s use IPv6?])])
+
+case "$enable_ipv6" in
+ yes|''|autodetect)
+    case "$host" in
+     powerpc-ibm-aix4*) ;;
+     *)
+	AC_DEFINE([WANT_IPV6], ,[ISC: Want IPv6?])
+	;;
+    esac
+    ;;
+ no)
+    ;;
+esac
+
+AC_MSG_CHECKING([for IPv6 structures])
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>],
+[struct sockaddr_in6 sin6; return (0);],
+	[AC_MSG_RESULT(yes)
+	 found_ipv6=yes],
+	[AC_MSG_RESULT(no)
+	 found_ipv6=no])
+
+#
+# See whether IPv6 support is provided via a Kame add-on.
+# This is done before other IPv6 linking tests so LIBS is properly set.
+#
+AC_MSG_CHECKING([for Kame IPv6 support])
+AC_ARG_WITH(kame,
+	[AC_HELP_STRING([--with-kame], [- =/usr/local/v6])],
+	use_kame="$withval", use_kame="no")
+
+case "$use_kame" in
+ no)
+    ;;
+ yes)
+    kame_path=/usr/local/v6
+    ;;
+ *)
+    kame_path="$use_kame"
+    ;;
+esac
+
+case "$use_kame" in
+ no)
+    AC_MSG_RESULT(no)
+    ;;
+ *)
+    if test -f $kame_path/lib/libinet6.a; then
+	AC_MSG_RESULT($kame_path/lib/libinet6.a)
+	LIBS="-L$kame_path/lib -linet6 $LIBS"
+    else
+	AC_MSG_ERROR([$kame_path/lib/libinet6.a not found.
+
+Please choose the proper path with the following command:
+
+    configure --with-kame=PATH
+])
+    fi
+    ;;
+esac
+
+#
+# Whether netinet6/in6.h is needed has to be defined in isc/platform.h.
+# Including it on Kame-using platforms is very bad, though, because
+# Kame uses #error against direct inclusion.   So include it on only
+# the platform that is otherwise broken without it -- BSD/OS 4.0 through 4.1.
+# This is done before the in6_pktinfo check because that's what
+# netinet6/in6.h is needed for.
+#
+case "$host" in
+*-bsdi4.[[01]]*)
+    ISC_PLATFORM_NEEDNETINET6IN6H="#define ISC_PLATFORM_NEEDNETINET6IN6H 1"
+    LWRES_PLATFORM_NEEDNETINET6IN6H="#define LWRES_PLATFORM_NEEDNETINET6IN6H 1"
+    isc_netinet6in6_hack="#include <netinet6/in6.h>"
+    ;;
+*)
+    ISC_PLATFORM_NEEDNETINET6IN6H="#undef ISC_PLATFORM_NEEDNETINET6IN6H"
+    LWRES_PLATFORM_NEEDNETINET6IN6H="#undef LWRES_PLATFORM_NEEDNETINET6IN6H"
+    isc_netinet6in6_hack=""
+    ;;
+esac
+
+#
+# This is similar to the netinet6/in6.h issue.
+#
+case "$host" in
+*-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
+    # UnixWare
+    # ISC_PLATFORM_NEEDNETINETIN6H="#define ISC_PLATFORM_NEEDNETINETIN6H 1"
+    # LWRES_PLATFORM_NEEDNETINETIN6H="#define LWRES_PLATFORM_NEEDNETINETIN6H 1"
+    AC_DEFINE(ISC_PLATFORM_FIXIN6ISADDR, 1,[Do we need to fix in6isaddr?])
+    isc_netinetin6_hack="#include <netinet/in6.h>"
+    ;;
+*)
+    # ISC_PLATFORM_NEEDNETINETIN6H="#undef ISC_PLATFORM_NEEDNETINETIN6H"
+    # LWRES_PLATFORM_NEEDNETINETIN6H="#undef LWRES_PLATFORM_NEEDNETINETIN6H"
+    # ISC_PLATFORM_FIXIN6ISADDR="#undef ISC_PLATFORM_FIXIN6ISADDR"
+    isc_netinetin6_hack=""
+    ;;
+esac
+
+
+AC_MSG_CHECKING([for struct if_laddrconf])
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <net/if6.h>
+],[ struct if_laddrconf a; ],
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, ,
+		[ISC: have struct if_laddrconf?])],
+	[AC_MSG_RESULT(no)])
+
+AC_MSG_CHECKING([for struct if_laddrreq])
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <net/if6.h>
+],[ struct if_laddrreq a; ],
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, ,
+		[ISC: have struct if_laddrreq?])],
+	[AC_MSG_RESULT(no)])
+
+### Beginning of problem fragment
+
+case "$found_ipv6" in
+ yes)
+    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
+
+    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], , ,
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+])
+
+dnl     AC_MSG_CHECKING(for in6_pktinfo)
+dnl     AC_TRY_COMPILE([
+dnl #include <sys/types.h>
+dnl #include <sys/socket.h>
+dnl #include <netinet/in.h>
+dnl $isc_netinetin6_hack
+dnl $isc_netinet6in6_hack
+dnl ],
+dnl 	[struct in6_pktinfo xyzzy; return (0);],
+dnl 	[AC_MSG_RESULT(yes)
+dnl 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
+dnl 		[ISC: Have struct in6_pktinfo?])],
+dnl 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
+dnl 
+dnl     # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
+dnl     AC_MSG_CHECKING(for sin6_scope_id in struct sockaddr_in6)
+dnl     AC_TRY_COMPILE([
+dnl #include <sys/types.h>
+dnl #include <sys/socket.h>
+dnl #include <netinet/in.h>
+dnl $isc_netinetin6_hack
+dnl $isc_netinet6in6_hack
+dnl ],
+dnl 	[struct sockaddr_in6 xyzzy; xyzzy.sin6_scope_id = 0; return (0);],
+dnl 	[AC_MSG_RESULT(yes)
+dnl 	 AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, ,
+dnl 		[ISC: Have sin6_scope_id?])],
+dnl 	 result="#define LWRES_HAVE_SIN6_SCOPE_ID 1"],
+dnl 	[AC_MSG_RESULT(no)
+dnl 	 ISC_PLATFORM_HAVESCOPEID="#undef ISC_PLATFORM_HAVESCOPEID"
+dnl 	 result="#undef LWRES_HAVE_SIN6_SCOPE_ID"])
+dnl     LWRES_HAVE_SIN6_SCOPE_ID="$result"
+
+    ;;
+esac
+
+### End of problem fragment
+
+# We need this check run all the time...
+AC_MSG_CHECKING(for in6addr_any)
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+$isc_netinetin6_hack
+$isc_netinet6in6_hack
+$isc_in_addr6_hack
+],
+	[[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);]],
+	[AC_MSG_RESULT(yes)],
+	[AC_MSG_RESULT(no)
+	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
+		[ISC: Need in6addr_any?])]
+)
+
+###
+
 # Hacks
 AC_DEFINE(HAVE_NO_NICE, 1, [sntp does not care about 'nice'])
 AC_DEFINE(HAVE_TERMIOS, 1, [sntp does not care about TTY stuff])
-AC_DEFINE(ISC_PLATFORM_HAVEIPV6, 1, [hack])
-AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?]) 
 
 # Checks for library functions.
 AC_FUNC_MALLOC
@@ -100,7 +307,7 @@ AC_CHECK_FUNCS([atexit memset socket])
 
 AC_MSG_CHECKING(for bin subdirectory)
 AC_ARG_WITH(binsubdir,
-	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
+	[AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}])],
 	use_binsubdir="$withval", use_binsubdir="bin")
 
 case "$use_binsubdir" in
