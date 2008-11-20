@@ -89,23 +89,27 @@
  */
 
 #ifndef AF_INET6
-#define AF_INET6	AF_MAX
-#define PF_INET6	AF_INET6
+# define AF_INET6	AF_MAX
+# define PF_INET6	AF_INET6
 #endif
 
 #if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
 
-#define	_SS_MAXSIZE	128
-#define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t) - \
+# define	_SS_MAXSIZE	128
+# define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
+# ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t))
+#  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#else
-#define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
-#define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
+# else
+#  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
+#  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-#endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
+# endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
+#endif
+
+#ifndef INET6_ADDRSTRLEN
+# define	INET6_ADDRSTRLEN	46	/* max len of IPv6 addr in ascii */
 #endif
 
 /*
