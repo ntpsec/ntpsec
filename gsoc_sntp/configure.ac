@@ -48,7 +48,9 @@ AC_CHECK_FUNC(setsockopt, ,
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h sys/socket.h syslog.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
+AC_CHECK_HEADERS([sys/socket.h sys/time.h])
+AC_HEADER_TIME
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

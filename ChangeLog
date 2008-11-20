@@ -1,3 +1,4 @@
+* Deal with time.h for sntp under linux.
 * Provide rpl_malloc() for sntp for systems that need it.
 * Handle ss_len and socklen type for sntp.
 * Fixes to the sntp configure.ac script.
