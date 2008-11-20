@@ -1,3 +1,4 @@
+* [Bug 1095] overflow in caljulian.c.
 (4.2.5p144) 2008/11/19 Released by Harlan Stenn <stenn@ntp.org>
 * Use int32, not int32_t.
 * Avoid the sched*() functions under OSF - link problems.

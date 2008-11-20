@@ -63,7 +63,8 @@ caljulian(
 	tmplo = (u_int32)now;
 	tmphi = (int32)(now >> 16 >> 16);
 	
-	M_ADD(tmphi, tmplo, 1, LONG_MAX + JAN_1970);
+	M_ADD(tmphi, tmplo, 0, LONG_MAX);
+	M_ADD(tmphi, tmplo, 0, JAN_1970);
 	if ((ntptime > tmplo) && (tmphi > 0))
 		--tmphi;
 	tmplo = ntptime;
