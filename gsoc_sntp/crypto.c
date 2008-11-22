@@ -71,11 +71,12 @@ auth_init (
 		struct key **keys
 		)
 {
-	printf("auth_init: %s\n", keyfile);
-	char kbuf[96];
 	FILE *keyf = fopen(keyfile, "r"); 
-	register int a, line_cnt, line_limit;
 	struct key *prev = NULL;
+
+	register int a, line_limit;
+	int scan_cnt, line_cnt = 0, key_cnt = 0;
+	char kbuf[96];
 
 	if(keyf == NULL) {
 		if(ENABLED_OPT(NORMALVERBOSE))
@@ -99,7 +100,7 @@ auth_init (
 		line_limit = 0;
 
 		fgets(kbuf, 96, keyf);
-
+		
 		for(a=0; a<strlen(kbuf) && a < 96; a++) {
 			if(kbuf[a] == '#') {
 				line_limit = a;
@@ -113,16 +114,12 @@ auth_init (
 #ifdef DEBUG
 		printf("sntp auth_init: fgets: %s", kbuf);
 #endif
+		
 
-		sscanf(kbuf, "%i %c %16s", &act->key_id, &act->type, act->key_seq);
-		act->key_len = strlen(act->key_seq);
-
-#ifdef DEBUG
-		printf("sntp auth_init: key_id %i type %c with key %s\n", act->key_id, act->type, act->key_seq);
-#endif
-
-		if(act->type != 0) {
-			if(line_cnt == 0) {
+		if((scan_cnt = sscanf(kbuf, "%i %c %16s", &act->key_id, &act->type, act->key_seq)) == 3) {
+			act->key_len = strlen(act->key_seq);
+	
+			if(act->type != 0) {
 				*keys = act;
 				prev = act;
 			}
@@ -132,8 +129,21 @@ auth_init (
 				prev = act;
 			}
 
-			line_cnt++;
+			key_cnt++;
+
+#ifdef DEBUG
+			printf("sntp auth_init: key_id %i type %c with key %s\n", act->key_id, act->type, act->key_seq);
+#endif
 		}
+		else {
+#ifdef DEBUG
+			printf("sntp auth_init: scanf read %i items, doesn't look good, skipping line %i.\n", scan_cnt, line_cnt);
+#endif
+
+			free(act);
+		}
+
+		line_cnt++;
 	}
 
 	fclose(keyf);
@@ -143,7 +153,7 @@ auth_init (
 	printf("sntp auth_init: Read %i keys from file %s:\n", line_cnt, keyfile);
 
 	struct key *kptr = *keys;
-	for(a=0; a<line_cnt; a++) {
+	for(a=0; a<key_cnt; a++) {
 		printf("key_id %i type %c with key %s (key length: %i)\n", kptr->key_id, 
 				kptr->type, kptr->key_seq, kptr->key_len);
 		kptr = kptr->next;
