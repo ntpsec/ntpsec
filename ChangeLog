@@ -1,3 +1,4 @@
+* Fixed wrong behaviour in sntp's crypto.c (bug #1099).
 (4.2.5p145) 2008/11/20 Released by Harlan Stenn <stenn@ntp.org>
 * Deal with time.h for sntp under linux.
 * Provide rpl_malloc() for sntp for systems that need it.
