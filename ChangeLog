@@ -1,3 +1,4 @@
+(4.2.5p146) 2008/11/26 Released by Harlan Stenn <stenn@ntp.org>
 * Update Solaris CFLAGS for gsoc_sntp.
 (4.2.5p145) 2008/11/20 Released by Harlan Stenn <stenn@ntp.org>
 * Deal with time.h for sntp under linux.

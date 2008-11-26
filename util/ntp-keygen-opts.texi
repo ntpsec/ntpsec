@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  Thursday November 20, 2008 at 06:53:59 AM EST
+# It has been AutoGen-ed  Wednesday November 26, 2008 at 07:08:30 AM EST
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
