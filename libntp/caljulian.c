@@ -9,10 +9,6 @@
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 
-#ifdef HAVE_LIMITS_H
-# include <limits.h>
-#endif
-
 #if !(defined(ISC_CHECK_ALL) || defined(ISC_CHECK_NONE) || \
       defined(ISC_CHECK_ENSURE) || defined(ISC_CHECK_INSIST) || \
       defined(ISC_CHECK_INVARIANT))
@@ -58,12 +54,15 @@ caljulian(
 	 * non-negative time stamp afterwards. Though at the time of this
 	 * writing (2008 A.D.) it would be really strange to have systems
 	 * running with clock set to he 1960's or before...
+	 *
+	 * But's important to use a 32 bit max signed value -- LONG_MAX is 64
+	 * bit on a 64-bit system, and it will give wrong results.
 	 */
 	now   = time(NULL);
 	tmplo = (u_int32)now;
 	tmphi = (int32)(now >> 16 >> 16);
 	
-	M_ADD(tmphi, tmplo, 0, LONG_MAX);
+	M_ADD(tmphi, tmplo, 0, ((1UL << 31)-1)); /* 32-bit max signed */
 	M_ADD(tmphi, tmplo, 0, JAN_1970);
 	if ((ntptime > tmplo) && (tmphi > 0))
 		--tmphi;
@@ -73,16 +72,20 @@ caljulian(
 	 * Now split into days and seconds-of-day, using the fact that
 	 * SECSPERDAY (86400) == 675 * 128; we can get roughly 17000 years of
 	 * time scale, using only 32-bit calculations. Some magic numbers here,
-	 * sorry for that.
+	 * sorry for that. (This could be streamlined for 64 bit machines, but
+	 * is worth the trouble?)
 	 */
 	ntptime  = tmplo & 127;	/* save remainder bits */
 	tmplo    = (tmplo >> 7) | (tmphi << 25);
-	ntp_day  =  (u_long)tmplo / 675;
-	ntptime += ((u_long)tmplo % 675) << 7;
+	ntp_day  =  (u_int32)tmplo / 675;
+	ntptime += ((u_int32)tmplo % 675) << 7;
 
-	/* some checks for the algorithm */
+	/* some checks for the algorithm 
+	 * There's some 64-bit trouble out there: the original NTP time stamp
+	 * had only 32 bits, so our calculation invariant only holds in 32 bits!
+	 */
 	NTP_ENSURE(ntptime < SECSPERDAY);
-	NTP_INVARIANT((u_long)(ntptime + ntp_day * SECSPERDAY) == saved_time);
+	NTP_INVARIANT((u_int32)(ntptime + ntp_day * SECSPERDAY) == (u_int32)saved_time);
 
 	/*
 	 * Do the easy stuff first: take care of hh:mm:ss, ignoring leap
