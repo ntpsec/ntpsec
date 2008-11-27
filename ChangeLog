@@ -1,3 +1,4 @@
+(4.2.5p147) 2008/11/27 Released by Harlan Stenn <stenn@ntp.org>
 * Update gsoc_sntp's GCC warning code.
 (4.2.5p146) 2008/11/26 Released by Harlan Stenn <stenn@ntp.org>
 * Update Solaris CFLAGS for gsoc_sntp.
