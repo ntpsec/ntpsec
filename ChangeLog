@@ -1,3 +1,4 @@
+(4.2.5p148) 2008/12/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1070] Fix use of ntpq_parsestring() in ntpsnmpd.
 (4.2.5p147) 2008/11/27 Released by Harlan Stenn <stenn@ntp.org>
 * Update gsoc_sntp's GCC warning code.
