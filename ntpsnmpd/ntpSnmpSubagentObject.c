@@ -383,8 +383,7 @@ int get_ntpEntSoftwareVersionVal (netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *reqinfo,
                                netsnmp_request_info *requests)
 {
-
-    int i = 0;
+   unsigned int i = 0;
    switch (reqinfo->mode) {
    case MODE_GET:
    {
@@ -392,13 +391,13 @@ int get_ntpEntSoftwareVersionVal (netsnmp_mib_handler *handler,
     if ( read_ntp_value("versionval", ntpvalue, NTPQ_BUFLEN) )
     {
 	i=atoi(ntpvalue);
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof (i)
                             );
     } else {
 	i = 0;
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof(i)
                             );
@@ -536,7 +535,7 @@ int get_ntpEntTimeResolutionVal (netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
 
-    int i = 0;
+   unsigned int i = 0;
    switch (reqinfo->mode) {
    case MODE_GET:
    {
@@ -544,13 +543,13 @@ int get_ntpEntTimeResolutionVal (netsnmp_mib_handler *handler,
     if ( read_ntp_value("resolutionval", ntpvalue, NTPQ_BUFLEN) )
     {
 	i=atoi(ntpvalue);
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof (i)
                             );
     } else {
 	i = 0;
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof(i)
                             );
@@ -691,16 +690,16 @@ init_ntpSnmpSubagentObject(void)
 	
     /* Register all MIB objects with the agentx master */
 	
-  _SETUP_OID_RO( ntpEntSoftwareName ,  		NTPV4_OID , 1, 1, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVersion ,  	NTPV4_OID , 1, 2, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVersionVal ,	NTPV4_OID , 1, 3, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVendor ,  	NTPV4_OID , 1, 4, 0  );
-  _SETUP_OID_RO( ntpEntSystemType ,  		NTPV4_OID , 1, 5, 0  );
-  _SETUP_OID_RO( ntpEntTimeResolution ,  	NTPV4_OID , 1, 6, 0  );
-  _SETUP_OID_RO( ntpEntTimeResolutionVal , 	NTPV4_OID , 1, 7, 0  );
-  _SETUP_OID_RO( ntpEntTimePrecision ,  	NTPV4_OID , 1, 8, 0  );
-  _SETUP_OID_RO( ntpEntTimePrecisionVal ,  	NTPV4_OID , 1, 9, 0  );
-  _SETUP_OID_RO( ntpEntTimeDistance ,  		NTPV4_OID , 1,10, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareName ,  	NTPV4_OID , 1, 1, 1, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVersion ,  	NTPV4_OID , 1, 1, 2, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVersionVal ,	NTPV4_OID , 1, 1, 3, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVendor ,  	NTPV4_OID , 1, 1, 4, 0  );
+  _SETUP_OID_RO( ntpEntSystemType ,  		NTPV4_OID , 1, 1, 5, 0  );
+  _SETUP_OID_RO( ntpEntTimeResolution ,  	NTPV4_OID , 1, 1, 6, 0  );
+  _SETUP_OID_RO( ntpEntTimeResolutionVal , 	NTPV4_OID , 1, 1, 7, 0  );
+  _SETUP_OID_RO( ntpEntTimePrecision ,  	NTPV4_OID , 1, 1, 8, 0  );
+  _SETUP_OID_RO( ntpEntTimePrecisionVal ,  	NTPV4_OID , 1, 1, 9, 0  );
+  _SETUP_OID_RO( ntpEntTimeDistance ,  	NTPV4_OID , 1, 1,10, 0  );
 
 }
 
