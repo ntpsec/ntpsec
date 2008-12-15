@@ -46,8 +46,11 @@ calyearstart(u_long ntp_time)
 	jt.hour     = 0;
 	jt.minute   = 0;
 	jt.second   = 0;
-	NTP_INVARIANT(caltontp(&jt) + delta == ntp_time);
+	NTP_INVARIANT((ntp_u_int32_t)(caltontp(&jt) + delta) == (ntp_u_int32_t)ntp_time);
 #   endif
 
-	return ntp_time - delta;
+	/* The NTP time stamps (l_fp) count seconds unsigned mod 2**32, so we
+	 * have to calculate this in the proper way!
+	 */
+	return (ntp_u_int32_t)(ntp_time - delta);
 }

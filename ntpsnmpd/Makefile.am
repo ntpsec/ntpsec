@@ -11,8 +11,10 @@ LDADD=		../ntpq/libntpq.a ../libntp/libntp.a @SNMP_LIBS@ 	\
 AM_CPPFLAGS=	-I$(top_srcdir)/ntpq -I$(top_srcdir)/include @SNMP_CPPFLAGS@ \
 		$(LIBOPTS_CFLAGS)
 AM_CFLAGS=	@SNMP_CFLAGS@
-EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi ntpsnmpd-opts.menu
-BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h ntpsnmpd.1 ntpsnmpd-opts.texi ntpsnmpd-opts.menu
+EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\
+		ntpsnmpd-opts.menu ntpv4-mib.mib
+BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h ntpsnmpd.1 ntpsnmpd-opts.texi \
+		ntpsnmpd-opts.menu
 man_MANS=	ntpsnmpd.1
 run_ag=		cd $(srcdir) && autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\

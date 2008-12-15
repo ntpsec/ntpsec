@@ -26,8 +26,226 @@
 
 static int      ntpSnmpSubagentObject = 3;
 
-
 char ntpvalue[NTPQ_BUFLEN];
+
+
+
+/*****************************************************************************
+ *
+ * ntpsnmpd_strip_string
+ *
+ *  This function removes white space characters and EOL chars 
+ *  from the beginning and end of a given NULL terminated string. 
+ *  Be aware that the parameter itself is altered.
+ *  
+ ****************************************************************************
+ * Parameters:
+ *	string		char*	The name of the string variable
+ *						NOTE: must be NULL terminated!
+ * Returns:
+ *	int		length of resulting string (i.e. w/o white spaces)
+ ****************************************************************************/
+
+int ntpsnmpd_strip_string(char *string)
+{
+	char newstring[2048] = { 0 };
+	int i = 0;
+	int j = 0;
+
+	if ( strlen(string) > 2047 ) 
+		string[2048]=0;
+
+	j = strlen(string);
+
+	for (i=0;i<strlen(string);i++)
+	{
+		switch(string[i])
+		{
+			case 0x09: 	// Tab
+			case 0x0A:	// LF
+			case 0x0D:	// CR
+			case ' ':  	// Space
+			  break;
+			default:
+			  strncpy(newstring,(char *) &string[i], sizeof(newstring));
+			  i=2048;
+			  break;
+		}
+	}
+	strncpy(string, newstring, j);
+
+	return(strlen(string));
+}
+
+
+/*****************************************************************************
+ *
+ * ntpsnmpd_parse_string
+ *
+ *  This function will parse a given NULL terminated string and cut it
+ *  into a fieldname and a value part (using the '=' as the delimiter. 
+ *  The fieldname will be converted to uppercase and all whitespace 
+ *  characters are removed from it.
+ *  The value part is stripped, e.g. all whitespace characters are removed
+ *  from the beginning and end of the string.
+ *  If the value is started and ended with quotes ("), they will be removed
+ *  and everything between the quotes is left untouched (including 
+ *  whitespace)
+ *  Example:
+ *     server host name =   hello world!
+ *  will result in a field string "SERVERHOSTNAME" and a value
+ *  of "hello world!".
+ *     My first Parameter		=		"  is this!    "
+  * results in a field string "MYFIRSTPARAMETER" and a vaue " is this!    "
+ ****************************************************************************
+ * Parameters:
+ *	src			char*	The name of the source string variable
+ *						NOTE: must be NULL terminated!
+ *	field			char*	The name of the string which takes the
+ *						fieldname
+ *	fieldsize		int		The maximum size of the field name
+ *	value		char*	The name of the string which takes the
+ *						value part
+ *	valuesize		int		The maximum size of the value string
+ *
+ * Returns:
+ *	int			length of value string 
+ ****************************************************************************/
+
+int ntpsnmpd_parse_string(char *src, char *field, int fieldsize, char *value, int valuesize)
+{
+	char string[2048];
+	int i = 0;
+	int j = 0;
+	int l = 0;
+	int a = 0;
+
+	strncpy(string,  src, sizeof(string));
+
+	a = strlen(string);
+
+	/* Parsing the field name */
+	for (i=0;l==0;i++)
+	{
+		if (i>=a)
+		   l=1;
+		else
+		{
+			switch(string[i])
+			{
+				case 0x09: 	// Tab
+				case 0x0A:	// LF
+				case 0x0D:	// CR
+				case ' ':  	// Space
+				  break;
+				case '=':
+				  l=1;
+				  break;
+				  
+				default:
+				  if ( j < fieldsize ) 
+				  {
+					if ( ( string[i] >= 'a' ) && ( string[i] <='z' ) )
+						field[j++]=( string[i] - 32 ); // convert to Uppercase
+					else
+						field[j++]=string[i]; 
+				  }	
+
+			}
+		}
+	}
+
+	field[j]=0; j=0; value[0]=0;
+
+
+	/* Now parsing the value */
+	for (l=0;i<a;i++)
+	{
+		if ( ( string[i] > 0x0D ) && ( string[i] != ' ' ) )
+		   l = j+1;
+		
+		if ( ( value[0] != 0 ) || ( ( string[i] > 0x0D ) && ( string[i] != ' ' ) ) )
+		{
+			if (j < valuesize )
+			   value[j++]=string[i];
+		}
+	}
+
+	value[l]=0;
+
+	if ( value[0]=='"' )
+		strcpy(value, (char *) &value[1]);
+
+	if ( value[strlen(value)-1] == '"' ) 
+		value[strlen(value)-1]=0;
+
+	return (strlen(value));
+
+}
+
+
+/*****************************************************************************
+ *
+ * ntpsnmpd_cut_string
+ *
+ *  This function will parse a given NULL terminated string and cut it
+ *  into fields using the specified delimiter character. 
+ *  It will then copy the requested field into a destination buffer
+ *  Example:
+ *     ntpsnmpd_cut_string(read:my:lips:fool, RESULT, ':', 2, sizeof(RESULT))
+ *  will copy "lips" to RESULT.
+ ****************************************************************************
+ * Parameters:
+ *	src			char*	The name of the source string variable
+ *						NOTE: must be NULL terminated!
+ *	dest			char*	The name of the string which takes the
+ *						requested field content
+ * 	delim			char	The delimiter character
+ *	fieldnumber		int		The number of the required field
+ *						(start counting with 0)
+ *	maxsize			int		The maximum size of dest
+ *
+ * Returns:
+ *	int			length of resulting dest string 
+ ****************************************************************************/
+
+int ntpsnmpd_cut_string(char *src, char *dest, const char delim, int fieldnumber, int maxsize)
+{
+	char string[2048];
+	int i = 0;
+	int j = 0;
+	int l = 0;
+	int a = 0;
+
+	strncpy (string, src, sizeof(string));
+	
+	a = strlen(string);
+
+        memset (dest, 0, maxsize);
+
+	/* Parsing the field name */
+	for (i=0;l<=fieldnumber;i++)
+	{
+		if (i>=a)
+		   l=fieldnumber+1; /* terminate loop */
+		else
+		{
+			if ( string[i] == delim )
+			{
+				  l++; /* next field */
+			}
+			else  if ( ( l == fieldnumber) && ( j < maxsize )  )
+			{
+				dest[j++]=string[i]; 
+			}	
+
+		}
+	}
+
+	return (strlen(dest));
+
+}
+
 
 /*****************************************************************************
  *
@@ -91,17 +309,15 @@ int get_ntpEntSoftwareName (netsnmp_mib_handler *handler,
    case MODE_GET:
    {
 	if ( read_ntp_value("product", ntpvalue, NTPQ_BUFLEN) )
-    {
+       {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                              (u_char *)ntpvalue,
                              strlen(ntpvalue)
                             );
-    }
-    break;
-
-    if ( read_ntp_value("version", ntpvalue, NTPQ_BUFLEN) )
+       } 
+    else  if ( read_ntp_value("version", ntpvalue, NTPQ_BUFLEN) )
     {
-	ntpq_parsestring(ntp_softwarename, ntpvalue, strlen(ntpvalue), NTPQ_BUFLEN, 'd', 1);
+	ntpsnmpd_cut_string(ntpvalue, ntp_softwarename, ' ', 0, sizeof(ntp_softwarename)-1);
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                              (u_char *)ntp_softwarename,
                              strlen(ntp_softwarename)
@@ -167,8 +383,7 @@ int get_ntpEntSoftwareVersionVal (netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *reqinfo,
                                netsnmp_request_info *requests)
 {
-
-    int i = 0;
+   unsigned int i = 0;
    switch (reqinfo->mode) {
    case MODE_GET:
    {
@@ -176,13 +391,13 @@ int get_ntpEntSoftwareVersionVal (netsnmp_mib_handler *handler,
     if ( read_ntp_value("versionval", ntpvalue, NTPQ_BUFLEN) )
     {
 	i=atoi(ntpvalue);
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof (i)
                             );
     } else {
 	i = 0;
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof(i)
                             );
@@ -320,7 +535,7 @@ int get_ntpEntTimeResolutionVal (netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
 
-    int i = 0;
+   unsigned int i = 0;
    switch (reqinfo->mode) {
    case MODE_GET:
    {
@@ -328,13 +543,13 @@ int get_ntpEntTimeResolutionVal (netsnmp_mib_handler *handler,
     if ( read_ntp_value("resolutionval", ntpvalue, NTPQ_BUFLEN) )
     {
 	i=atoi(ntpvalue);
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof (i)
                             );
     } else {
 	i = 0;
-	snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+	snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                              (u_char *) &i,
                              sizeof(i)
                             );
@@ -475,16 +690,16 @@ init_ntpSnmpSubagentObject(void)
 	
     /* Register all MIB objects with the agentx master */
 	
-  _SETUP_OID_RO( ntpEntSoftwareName ,  		NTPV4_OID , 1, 1, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVersion ,  	NTPV4_OID , 1, 2, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVersionVal ,	NTPV4_OID , 1, 3, 0  );
-  _SETUP_OID_RO( ntpEntSoftwareVendor ,  	NTPV4_OID , 1, 4, 0  );
-  _SETUP_OID_RO( ntpEntSystemType ,  		NTPV4_OID , 1, 5, 0  );
-  _SETUP_OID_RO( ntpEntTimeResolution ,  	NTPV4_OID , 1, 6, 0  );
-  _SETUP_OID_RO( ntpEntTimeResolutionVal , 	NTPV4_OID , 1, 7, 0  );
-  _SETUP_OID_RO( ntpEntTimePrecision ,  	NTPV4_OID , 1, 8, 0  );
-  _SETUP_OID_RO( ntpEntTimePrecisionVal ,  	NTPV4_OID , 1, 9, 0  );
-  _SETUP_OID_RO( ntpEntTimeDistance ,  		NTPV4_OID , 1,10, 0  );
-	
+  _SETUP_OID_RO( ntpEntSoftwareName ,  	NTPV4_OID , 1, 1, 1, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVersion ,  	NTPV4_OID , 1, 1, 2, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVersionVal ,	NTPV4_OID , 1, 1, 3, 0  );
+  _SETUP_OID_RO( ntpEntSoftwareVendor ,  	NTPV4_OID , 1, 1, 4, 0  );
+  _SETUP_OID_RO( ntpEntSystemType ,  		NTPV4_OID , 1, 1, 5, 0  );
+  _SETUP_OID_RO( ntpEntTimeResolution ,  	NTPV4_OID , 1, 1, 6, 0  );
+  _SETUP_OID_RO( ntpEntTimeResolutionVal , 	NTPV4_OID , 1, 1, 7, 0  );
+  _SETUP_OID_RO( ntpEntTimePrecision ,  	NTPV4_OID , 1, 1, 8, 0  );
+  _SETUP_OID_RO( ntpEntTimePrecisionVal ,  	NTPV4_OID , 1, 1, 9, 0  );
+  _SETUP_OID_RO( ntpEntTimeDistance ,  	NTPV4_OID , 1, 1,10, 0  );
+
 }
 

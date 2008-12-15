@@ -14,6 +14,38 @@ AC_PREREQ([2.53])
 # Checks for programs.
 AC_PROG_CC
 
+case "$GCC" in
+ yes)
+    CFLAGS="$CFLAGS -Wall"
+    # CFLAGS="$CFLAGS -Wcast-align"
+    CFLAGS="$CFLAGS -Wcast-qual"
+    # CFLAGS="$CFLAGS -Wconversion"
+    # CFLAGS="$CFLAGS -Werror"
+    # CFLAGS="$CFLAGS -Wextra"
+    # CFLAGS="$CFLAGS -Wfloat-equal"
+    CFLAGS="$CFLAGS -Wmissing-prototypes"
+    CFLAGS="$CFLAGS -Wpointer-arith"
+    CFLAGS="$CFLAGS -Wshadow"
+    CFLAGS="$CFLAGS -Wstrict-prototypes"
+    # CFLAGS="$CFLAGS -Wtraditional"
+    # CFLAGS="$CFLAGS -Wwrite-strings"
+
+    ;;
+esac
+
+# HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
+case "$host" in
+ *-*-solaris*)
+    # see "man standards".
+    # -D_XOPEN_SOURCE=500 is probably OK for c89 and before
+    # -D_XOPEN_SOURCE=600 seems OK for c99
+    #CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+    CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"
+    ;;
+esac
+
+AC_DISABLE_SHARED
+
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:
 # - use the version we ship with

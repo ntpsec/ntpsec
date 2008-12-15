@@ -9,10 +9,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
-#ifdef HAVE_LIMITS_H
-# include <limits.h>
-#endif
-
 static const char *months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -63,8 +59,11 @@ ntp2unix_tm(
 	u_int32    dwlo  = (int32)t; /* might expand for SIZEOF_TIME_T < 4 */
 	int32      dwhi  = (int32)(t >> 16 >> 16);/* double shift: avoid warnings */
 	
-	/* Shift NTP to UN*X epoch, then unfold around currrent time */
-	M_ADD(dwhi, dwlo, 0, LONG_MAX);
+	/* Shift NTP to UN*X epoch, then unfold around currrent time. It's
+	 * important to use a 32 bit max signed value -- LONG_MAX is 64 bit on
+	 * a 64-bit system, and it will give wrong results.
+	 */
+	M_ADD(dwhi, dwlo, 0, ((1UL << 31)-1)); /* 32-bit max signed */
 	if ((ntp -= JAN_1970) > dwlo)
 		--dwhi;
 	dwlo = ntp;
