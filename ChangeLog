@@ -1,5 +1,5 @@
+* [Bug 1103] Fix 64-bit issues in the new calendar code.
 (4.2.5p149) 2008/12/05 Released by Harlan Stenn <stenn@ntp.org>
-
 * Fixed mismatches in data types and OID definitions in ntpSnmpSubAgent.c
 * added a premliminary MIB file to ntpsnmpd (ntpv4-mib.mib)
 (4.2.5p148) 2008/12/04 Released by Harlan Stenn <stenn@ntp.org>
