@@ -2771,12 +2771,22 @@ report_event(
 	int	i;
 
 	/*
-	 * Record error code in proper spots, but have mercy on the
-	 * log file.
+	 * Report the error to the protostats file, system log and
+	 * trappers.
 	 */
 	if (peer == NULL) {
-		if (ctl_sys_num_events < CTL_SYS_MAXEVENTS)
-			ctl_sys_num_events++;
+
+		/*
+		 * Discard a system report if the number of reports of
+		 * the same type exceeds the maximum.
+		 */
+		if (ctl_sys_last_event != (u_char)err)
+			ctl_sys_num_events= 0;
+		if (ctl_sys_num_events >= CTL_SYS_MAXEVENTS)
+			return;
+
+		ctl_sys_last_event = (u_char)err;
+		ctl_sys_num_events++;
 		snprintf(statstr, NTP_MAXSTRLEN,
 		    "0.0.0.0 %04x %02x system event: %s",
 		    ctlsysstatus(), err, eventstr(err));
@@ -2784,23 +2794,31 @@ report_event(
 			strcat(statstr, " ");
 			strcat(statstr, str);
 		}
-		if (ctl_sys_last_event != (u_char)err) {
-			NLOG(NLOG_SYSEVENT)
-			    msyslog(LOG_INFO, statstr);
-			ctl_sys_last_event = (u_char)err;
-		}
+		NLOG(NLOG_SYSEVENT)
+		    msyslog(LOG_INFO, statstr);
 	} else {
-		char *src;
 
+		/*
+		 * Discard a peer report if the number of reports of
+		 * the same type exceeds the maximum for that peer.
+		 */
+		char	*src;
+		u_char	errlast;
+
+		errlast = err & ~PEER_EVENT; 
+		if (peer->last_event == errlast)
+			peer->num_events = 0;
+		if (peer->num_events >= CTL_PEER_MAXEVENTS)
+			return;
+
+		peer->last_event = errlast;
+		peer->num_events++;
 #ifdef REFCLOCK
 		if (ISREFCLOCKADR(&peer->srcadr))
 			src = refnumtoa(&peer->srcadr);
 		else
 #endif
 			src = stoa(&peer->srcadr);
-		peer->last_event = (u_char)(err & ~PEER_EVENT);
-		if (peer->num_events < CTL_PEER_MAXEVENTS)
-			peer->num_events++;
 		snprintf(statstr, NTP_MAXSTRLEN,
 		    "%s %04x %02x peer event: %s", src,
 		    ctlpeerstatus(peer), err, eventstr(err));
