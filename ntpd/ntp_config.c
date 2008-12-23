@@ -148,6 +148,7 @@ int	config_priority;
 #endif
 
 const char *config_file;
+const char *ntp_signd_socket;
 #ifdef HAVE_NETINFO
 struct netinfo_config_state *config_netinfo = NULL;
 int check_netinfo = 1;
@@ -276,6 +277,11 @@ init_auth_node(void)
 	my_config.auth.crypto_cmd_list = NULL;
 	my_config.auth.keys = NULL;
 	my_config.auth.keysdir = NULL;
+#ifdef NTP_SIGND_PATH
+	my_config.auth.ntp_signd_socket = NTP_SIGND_PATH;
+#else
+	my_config.auth.ntp_signd_socket = NULL;
+#endif
 	my_config.auth.requested_key = 0;
 	my_config.auth.revoke = 0;
 	my_config.auth.trusted_key_list = NULL;
@@ -804,6 +810,7 @@ struct key_tok keyword_list[] = {
 	{ "crypto",		T_Crypto,          NO_ARG },
 	{ "keys",		T_Keys,            SINGLE_ARG },
 	{ "keysdir",		T_Keysdir,         SINGLE_ARG },
+	{ "ntpsigndsocket",     T_NtpSignDsocket,  SINGLE_ARG },
 	{ "requestkey",		T_Requestkey,      NO_ARG },
 	{ "revoke",		T_Revoke,          NO_ARG },
 	{ "trustedkey",		T_Trustedkey,      NO_ARG },
@@ -1009,6 +1016,10 @@ config_auth(void)
 	/* Keysdir Command */
 	if (my_config.auth.keysdir)
 		keysdir = my_config.auth.keysdir;
+
+	/* ntp_signd_socket Command */
+	if (my_config.auth.ntp_signd_socket)
+		ntp_signd_socket = my_config.auth.ntp_signd_socket;
 
 #ifdef OPENSSL
 	if (cryptosw) {

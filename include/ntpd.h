@@ -259,6 +259,8 @@ extern int	config_priority_override;
 extern int	config_priority;
 #endif
 
+extern char const *ntp_signd_socket;
+
 /* ntp_control.c */
 extern int	num_ctl_traps;
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
@@ -470,4 +472,16 @@ extern char *chrootdir;			/* directory to chroot to */
 #ifdef REFCLOCK
 extern struct refclock *refclock_conf[]; /* refclock configuration table */
 extern u_char	num_refclock_conf;
+#endif
+
+/* ntp_signd.c */
+#ifdef HAVE_NTP_SIGND
+extern void 
+send_via_ntp_signd(
+	struct recvbuf *rbufp,	/* receive packet pointer */
+	int	xmode,
+	keyid_t	xkeyid, 
+	int flags,
+	struct pkt  *xpkt
+	);
 #endif

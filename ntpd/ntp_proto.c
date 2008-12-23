@@ -128,7 +128,7 @@ static	double	root_distance	(struct peer *);
 static	void	clock_combine	(struct peer **, int);
 static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t,
-				    char *);
+				 char *, int);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
 static	int	peer_unfit	(struct peer *);
@@ -311,6 +311,7 @@ receive(
 	int	authlen;		/* offset of MAC field */
 	int	is_authentic = 0;	/* cryptosum ok */
 	int	retcode = AM_NOMATCH;	/* match code */
+	int     flags = 0;              /* flags with details about the authentication */
 	keyid_t	skeyid = 0;		/* key IDs */
 	u_int32	opcode = 0;		/* extension field opcode */
 	struct sockaddr_storage *dstadr_sin; /* active runway */
@@ -323,6 +324,8 @@ receive(
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
 #endif /* OPENSSL */
+
+	static unsigned char zero_key[16];
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -480,9 +483,9 @@ receive(
 			return;			/* rate exceeded */
 
 		if (hismode == MODE_CLIENT)
-			fast_xmit(rbufp, MODE_SERVER, skeyid, "RATE");
+			fast_xmit(rbufp, MODE_SERVER, skeyid, "RATE", 0);
 		else
-			fast_xmit(rbufp, MODE_ACTIVE, skeyid, "RATE");
+			fast_xmit(rbufp, MODE_ACTIVE, skeyid, "RATE", 0);
 		return;				/* rate exceeded */
 	}
 
@@ -535,6 +538,7 @@ receive(
 	 * is zero, acceptable outcomes of y are NONE and OK. If x is
 	 * one, the only acceptable outcome of y is OK.
 	 */
+
 	if (has_mac == 0) {
 		is_authentic = AUTH_NONE; /* not required */
 #ifdef DEBUG
@@ -555,6 +559,27 @@ receive(
 			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
+
+#ifdef WINTIME
+		/* If the signature is 20 bytes long, the last 16 of
+		 * which are zero, then this is a Microsoft client
+		 * wanting AD-style authentication of the server's
+		 * reply.  
+		 *
+		 * This is described in Microsoft's WSPP docs, in MS-SNTP:
+		 * http://msdn.microsoft.com/en-us/library/cc212930.aspx
+		 */
+	} else if (has_mac == MAX_MAC_LEN
+		   && (retcode == AM_FXMIT || retcode == AM_NEWPASS)
+		   && (memcmp(zero_key, (char *)pkt + authlen + 4, MAX_MAC_LEN - 4) == 0)) {
+		
+		/* Don't try to verify the zeros, just set a
+		 * flag and otherwise pretend we never saw the signature */
+		is_authentic = AUTH_NONE;
+		
+		flags = FLAG_ADKEY;
+#endif /* WINTIME */
+
 	} else {
 #ifdef OPENSSL
 		/*
@@ -696,9 +721,9 @@ receive(
 			if (AUTH(restrict_mask & RES_DONTTRUST,
 			   is_authentic)) {
 				fast_xmit(rbufp, MODE_SERVER, skeyid,
-				    NULL);
+					  NULL, flags);
 			} else if (is_authentic == AUTH_ERROR) {
-				fast_xmit(rbufp, MODE_SERVER, 0, NULL);
+				fast_xmit(rbufp, MODE_SERVER, 0, NULL, 0);
 				sys_badauth++;
 			} else {
 				sys_restricted++;
@@ -733,7 +758,7 @@ receive(
 		 * crypto-NAK, as that would not be useful.
 		 */
 		if (AUTH(restrict_mask & RES_DONTTRUST, is_authentic))
-			fast_xmit(rbufp, MODE_SERVER, skeyid, NULL);
+			fast_xmit(rbufp, MODE_SERVER, skeyid, NULL, 0);
 		return;				/* hooray */
 
 	/*
@@ -888,7 +913,7 @@ receive(
 		    is_authentic)) {
 #ifdef OPENSSL
 			if (crypto_flags && skeyid > NTP_MAXKEY)
-				fast_xmit(rbufp, MODE_ACTIVE, 0, NULL);
+				fast_xmit(rbufp, MODE_ACTIVE, 0, NULL, 0);
 #endif /* OPENSSL */
 			sys_restricted++;
 			return;			/* access denied */
@@ -904,7 +929,7 @@ receive(
 			 * This is for drat broken Windows clients. See
 			 * Microsoft KB 875424 for preferred workaround.
 			 */
-			fast_xmit(rbufp, MODE_PASSIVE, skeyid, NULL);
+			fast_xmit(rbufp, MODE_PASSIVE, skeyid, NULL, flags);
 #else /* WINTIME */
 			sys_restricted++;
 #endif /* WINTIME */
@@ -937,6 +962,7 @@ receive(
 			return;			/* ignore duplicate */
 		}
 		break;
+
 
 	/*
 	 * Process regular packet. Nothing special.
@@ -1090,7 +1116,7 @@ receive(
 		peer->flash |= TEST5;		/* bad auth */
 		peer->badauth++;
 		if (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE)
-			fast_xmit(rbufp, MODE_ACTIVE, 0, NULL);
+			fast_xmit(rbufp, MODE_ACTIVE, 0, NULL, 0);
 		if (peer->flags & FLAG_PREEMPT) {
 			unpeer(peer);
 			return;
@@ -3164,7 +3190,8 @@ fast_xmit(
 	struct recvbuf *rbufp,	/* receive packet pointer */
 	int	xmode,		/* receive mode */
 	keyid_t	xkeyid,		/* transmit key ID */
-	char	*mask		/* kiss code */
+	char	*mask,		/* kiss code */
+	int     flags           /* Flags to indicate signing behaviour */
 	)
 {
 	struct pkt xpkt;	/* transmit packet structure */
@@ -3225,6 +3252,19 @@ fast_xmit(
 		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 	}
 
+	if (flags & FLAG_ADKEY) {
+#ifdef HAVE_NTP_SIGND
+		get_systime(&xmt_tx);
+		if (mask == NULL) {
+			HTONL_FP(&xmt_tx, &xpkt.xmt);
+		}
+		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
+#endif
+		/* If we don't have the support, drop the packet on the floor.  
+		   An all zero sig is compleatly bogus anyway */
+		return;
+	}
+
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
 	 * is authenticated and contains a MAC. If not, the transmitted
@@ -3257,7 +3297,7 @@ fast_xmit(
 	 * source-destination-key ID combination.
 	 */
 #ifdef OPENSSL
-	if (xkeyid > NTP_MAXKEY) {
+	if (!(flags & FLAG_ADKEY) && (xkeyid > NTP_MAXKEY)) {
 		keyid_t cookie;
 
 		/*
@@ -3289,8 +3329,10 @@ fast_xmit(
 	if (mask == NULL) {
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
+
 	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 	sendlen += authlen;
+
 #ifdef OPENSSL
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
