@@ -155,6 +155,7 @@
 %token		T_Novolley
 %token		T_Ntp
 %token		T_Ntpport
+%token		T_NtpSignDsocket
 %token		T_Orphan
 %token		T_Panic
 %token		T_Peer
@@ -417,6 +418,8 @@ authentication_command
                     { my_config.auth.requested_key = $2;  }
 	|	T_Trustedkey integer_list
                     { my_config.auth.trusted_key_list = $2;  }
+	|	T_NtpSignDsocket T_String
+                    { my_config.auth.ntp_signd_socket = $2;  }
 	;
 
 crypto_command_line

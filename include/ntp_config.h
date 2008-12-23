@@ -92,6 +92,7 @@ struct auth_node {
     int requested_key;
     int revoke;
     queue *trusted_key_list;
+    char *ntp_signd_socket;
 };
 
 struct filegen_node {

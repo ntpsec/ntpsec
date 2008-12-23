@@ -447,6 +447,7 @@ struct peer {
 #ifdef	OPENSSL
 #define FLAG_ASSOC	0x4000	/* autokey request */
 #endif /* OPENSSL */
+#define FLAG_ADKEY      0x00010000      /* Authenticated (or wants reply to be authenticated) using AD authentication */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear

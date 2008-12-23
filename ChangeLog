@@ -1,3 +1,4 @@
+* [Bug 1028] Support for W32Time authentication via Samba.
 (4.2.5p150) 2008/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1099] Fixed wrong behaviour in sntp's crypto.c.
 * [Bug 1103] Fix 64-bit issues in the new calendar code.
