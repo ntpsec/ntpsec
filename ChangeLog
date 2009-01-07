@@ -1,3 +1,6 @@
+* Renamed gsoc_sntp/:fetch-stubs to gsoc_sntp/fetch-stubs to avoid
+  file name problems under Windows.
+  Removed German umlaut from log msg for 4.2.5p142.
 (4.2.5p151) 2008/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Stats file logging cleanup from Dave Mills.
 (4.2.5p150) 2008/12/15 Released by Harlan Stenn <stenn@ntp.org>
@@ -25,7 +28,7 @@
 (4.2.5p143) 2008/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * sntp cleanup and fixes.
 (4.2.5p142) 2008/11/16 Released by Harlan Stenn <stenn@ntp.org>
-* Imported GSoC SNTP code from Johannes Maximilian Kühn.
+* Imported GSoC SNTP code from Johannes Maximilian Kuehn.
 (4.2.5p141) 2008/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * New caltontp.c and calyearstart.c from Juergen Perlinger.
 (4.2.5p140) 2008/11/12 Released by Harlan Stenn <stenn@ntp.org>
