@@ -1,3 +1,4 @@
+* Include (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.5p151) 2008/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Stats file logging cleanup from Dave Mills.
 (4.2.5p150) 2008/12/15 Released by Harlan Stenn <stenn@ntp.org>
@@ -177,6 +178,14 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+
+---
+(4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1113] Fixed build errors with recent versions of openSSL. 
+* [Sec 1111] Fix incorrect check of EVP_VerifyFinal()'s return value.
+* Update the copyright year.
+
 ---
 (4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 
