@@ -1,7 +1,7 @@
-* [BUG 1113] Fixed build errors with recent versions of openSSL. 
 ---
 (4.2.4p6) 2009/01/07 Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 1113] Fixed build errors with recent versions of openSSL. 
 * [Sec 1111] Fix incorrect check of EVP_VerifyFinal()'s return value.
 * Update the copyright year.
 
