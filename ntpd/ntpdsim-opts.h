@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *  
- *  It has been AutoGen-ed  Sunday August 17, 2008 at 05:20:13 AM EDT
+ *  It has been AutoGen-ed  Thursday January  8, 2009 at 04:40:51 AM EST
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
