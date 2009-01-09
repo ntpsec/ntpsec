@@ -1,3 +1,4 @@
+(4.2.5p153) 2009/01/09 Released by Harlan Stenn <stenn@ntp.org>
 * Renamed gsoc_sntp/:fetch-stubs to gsoc_sntp/fetch-stubs to avoid
   file name problems under Windows.
   Removed German umlaut from log msg for 4.2.5p142.
