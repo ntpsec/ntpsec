@@ -3971,6 +3971,10 @@ find_flagged_addr_in_list(struct sockaddr_storage *addr, int flag) {
 #ifdef HAS_ROUTING_SOCKET
 #include <net/route.h>
 
+#ifdef HAVE_RTNETLINK
+#include <linux/rtnetlink.h>
+#endif
+
 #ifndef UPDATE_GRACE
 #define UPDATE_GRACE	2	/* wait UPDATE_GRACE seconds before scanning */
 #endif
@@ -3979,9 +3983,13 @@ static void
 process_routing_msgs(struct asyncio_reader *reader)
 {
 	char buffer[5120];
-	char *p = buffer;
-
-	int cnt;
+	int cnt, msg_type;
+#ifdef HAVE_RTNETLINK
+	struct nlmsghdr *nh;
+#else
+	struct rt_msghdr *rtm;
+	char *p;
+#endif
 	
 	if (disable_dynamic_updates) {
 		/*
@@ -4005,19 +4013,22 @@ process_routing_msgs(struct asyncio_reader *reader)
 	/*
 	 * process routing message
 	 */
-	while ((p + sizeof(struct rt_msghdr)) <= (buffer + cnt))
-	{
-		struct rt_msghdr *rtm;
-		
+#ifdef HAVE_RTNETLINK
+	for (nh = (struct nlmsghdr *)buffer; NLMSG_OK(nh, cnt); nh = NLMSG_NEXT(nh, cnt)) {
+		msg_type = nh->nlmsg_type;
+#else
+	for (p = buffer; (p + sizeof(struct rt_msghdr)) <= (buffer + cnt); p += rtm->rtm_msglen) {
 		rtm = (struct rt_msghdr *)p;
 		if (rtm->rtm_version != RTM_VERSION) {
-			msyslog(LOG_ERR, "version mismatch on routing socket %m - disabling");
+                        msyslog(LOG_ERR, "version mismatch (got %d - expected %d) on routing socket - disabling", rtm->rtm_version, RTM_VERSION);
+
 			remove_asyncio_reader(reader);
 			delete_asyncio_reader(reader);
 			return;
 		}
-		
-		switch (rtm->rtm_type) {
+		msg_type = rtm->rtm_type;
+#endif
+		switch (msg_type) {
 #ifdef RTM_NEWADDR
 		case RTM_NEWADDR:
 #endif
@@ -4045,20 +4056,36 @@ process_routing_msgs(struct asyncio_reader *reader)
 #ifdef RTM_IFANNOUNCE
 		case RTM_IFANNOUNCE:
 #endif
+#ifdef RTM_NEWLINK
+		case RTM_NEWLINK:
+#endif
+#ifdef RTM_DELLINK
+		case RTM_DELLINK:
+#endif
+#ifdef RTM_NEWROUTE
+		case RTM_NEWROUTE:
+#endif
+#ifdef RTM_DELROUTE
+		case RTM_DELROUTE:
+#endif
 			/*
 			 * we are keen on new and deleted addresses and if an interface goes up and down or routing changes
 			 */
-			DPRINTF(3, ("routing message op = %d: scheduling interface update\n", rtm->rtm_type));
+			DPRINTF(3, ("routing message op = %d: scheduling interface update\n", msg_type));
 			timer_interfacetimeout(current_time + UPDATE_GRACE);
 			break;
+#ifdef HAVE_RTNETLINK
+		case NLMSG_DONE:
+			/* end of multipart message */
+			return;
+#endif
 		default:
 			/*
 			 * the rest doesn't bother us.
 			 */
-			DPRINTF(4, ("routing message op = %d: ignored\n", rtm->rtm_type));
+			DPRINTF(4, ("routing message op = %d: ignored\n", msg_type));
 			break;
 		}
-		p += rtm->rtm_msglen;
 	}
 }
 
@@ -4069,10 +4096,25 @@ static void
 init_async_notifications()
 {
 	struct asyncio_reader *reader;
+#ifdef HAVE_RTNETLINK
+	int fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+	struct sockaddr_nl sa;
+#else
 	int fd = socket(PF_ROUTE, SOCK_RAW, 0);
+#endif
 	
 	if (fd >= 0) {
 		fd = move_fd(fd);
+#ifdef HAVE_RTNETLINK
+		memset(&sa, 0, sizeof(sa));
+		sa.nl_family = PF_NETLINK;
+		sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR |
+			RTMGRP_IPV4_ROUTE | RTMGRP_IPV4_MROUTE | RTMGRP_IPV6_ROUTE | RTMGRP_IPV6_MROUTE;
+		if (bind(fd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
+			msyslog(LOG_ERR, "bind failed on routing socket (%m) - using polled interface update");
+			return;
+		}
+#endif
 		init_nonblocking_io(fd);
 #if defined(HAVE_SIGNALED_IO)
 		init_socket_sig(fd);
