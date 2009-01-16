@@ -93,7 +93,8 @@ extern	void	freerecvbuf (struct recvbuf *);
  *  The buffer is removed from the free list. Make sure
  *  you put it back with freerecvbuf() or 
  */
-extern	struct recvbuf *get_free_recv_buffer (void);
+extern	struct recvbuf *get_free_recv_buffer (void); /* signal safe - no malloc */
+extern	struct recvbuf *get_free_recv_buffer_alloc (void); /* signal unsafe - may malloc */
 
 /*   Add a buffer to the full list
  */

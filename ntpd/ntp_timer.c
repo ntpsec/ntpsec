@@ -27,6 +27,10 @@
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
+#ifdef OPENSSL
+#include <openssl/rand.h>
+#endif /* OPENSSL */
+
 /*
  * These routines provide support for the event timer.	The timer is
  * implemented by an interrupt routine which sets a flag once every
@@ -376,7 +380,6 @@ timer(void)
 	}
 
 #ifdef OPENSSL
-
 	/*
 	 * Garbage collect expired keys.
 	 */

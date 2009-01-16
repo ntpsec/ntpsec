@@ -60,7 +60,16 @@ caljulian(
 	 */
 	now   = time(NULL);
 	tmplo = (u_int32)now;
+#if ( SIZEOF_TIME_T > 4 )
 	tmphi = (int32)(now >> 16 >> 16);
+#else
+	/*
+	 * Get the correct sign extension in the high part. 
+	 * (now >> 32) may not work correctly on every 32 bit 
+	 * system, e.g. it yields garbage under Win32/VC6.
+	 */
+    tmphi = (int32)(now >> 31);
+#endif
 	
 	M_ADD(tmphi, tmplo, 0, ((1UL << 31)-1)); /* 32-bit max signed */
 	M_ADD(tmphi, tmplo, 0, JAN_1970);
@@ -141,10 +150,10 @@ caljulian(
 		 */
 		sclday = ntp_day * 7 + 217;
 		leaps  = ((n1 == 3) && ((n4 != 24) || (n100 == 3))) ? 1 : 0;
-		if (ntp_day >= JAN + FEB + leaps)
+		if (ntp_day >= (u_long)(JAN + FEB + leaps))
 			sclday += (2 - leaps) * 7;
 		++jt->year;
-		jt->month    = sclday / 214;
+		jt->month    = (u_char)(sclday / 214);
 		jt->monthday = (u_char)((sclday % 214) / 7 + 1);
 		jt->yearday  = (u_short)(1 + ntp_day);
 	}

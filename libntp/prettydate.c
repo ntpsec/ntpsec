@@ -57,7 +57,16 @@ ntp2unix_tm(
 	int32      folds = 0;
 	time_t     t     = time(NULL);
 	u_int32    dwlo  = (int32)t; /* might expand for SIZEOF_TIME_T < 4 */
+#if ( SIZEOF_TIME_T > 4 )
 	int32      dwhi  = (int32)(t >> 16 >> 16);/* double shift: avoid warnings */
+#else
+	/*
+	 * Get the correct sign extension in the high part. 
+	 * (now >> 32) may not work correctly on every 32 bit 
+	 * system, e.g. it yields garbage under Win32/VC6.
+	 */
+    int32		dwhi = (int32)(t >> 31);
+#endif
 	
 	/* Shift NTP to UN*X epoch, then unfold around currrent time. It's
 	 * important to use a 32 bit max signed value -- LONG_MAX is 64 bit on
@@ -117,7 +126,7 @@ ntp2unix_tm(
 #   endif /* Microsoft specific */
 
 	/* 't' should be a suitable value by now. Just go ahead. */
-	while (!(tm = (*(local ? localtime : gmtime))(&t)))
+	while ( (tm = (*(local ? localtime : gmtime))(&t)) != 0)
 		/* seems there are some other pathological implementations of
 		** 'gmtime()' and 'localtime()' somewhere out there. No matter
 		** if we have 32-bit or 64-bit 'time_t', try to fix this by
