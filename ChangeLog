@@ -1,3 +1,4 @@
+(4.2.5p155) 2009/01/18 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * CHU frequency updates.
 * Design assertion fixes for ntp_crypto.c from Dave Mills.
