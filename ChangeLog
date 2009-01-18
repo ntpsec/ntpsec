@@ -1,3 +1,4 @@
+* Design assertion fixes for ntp_crypto.c from Dave Mills.
 (4.2.5p154) 2009/01/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 992] support interface event change on Linux from
   Miroslav Lichvar.

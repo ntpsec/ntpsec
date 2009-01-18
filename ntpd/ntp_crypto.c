@@ -687,8 +687,7 @@ crypto_recv(
 			if ((rval = crypto_iff(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "iff %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -729,8 +728,7 @@ crypto_recv(
 			if ((rval = crypto_gq(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "gq %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -770,8 +768,7 @@ crypto_recv(
 			if ((rval = crypto_mv(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "mv %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
