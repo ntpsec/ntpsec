@@ -20,7 +20,13 @@
 			Autotune Port: <tt>/dev/icom</tt>; 1200/9600 baud, 8-bits, no parity<br>
 			Audio Device: <tt>/dev/audio</tt> and <tt>/dev/audioctl</tt>
 		<h4>Description</h4>
-		<p>This driver synchronizes the computer time using shortwave radio transmissions from Canadian time/frequency station <a href="http://inms-ienm.nrc-cnrc.gc.ca/time_services/shortwave_broadcasts_e.html">CHU</a> in Ottawa, Ontario. CHU transmissions are made continuously on 3.330, 7.335 and 14.670 MHz in upper sideband, compatible AM mode. An ordinary shortwave receiver can be tuned manually to one of these frequencies or, in the case of ICOM receivers, the receiver can be tuned automatically as propagation conditions change throughout the day and season.</p>
+		<p>This driver synchronizes the computer time using shortwave radio transmissions
+			from Canadian time/frequency station <a href="http://inms-ienm.nrc-cnrc.gc.ca/time_services/shortwave_broadcasts_e.html">CHU</a> in
+			Ottawa, Ontario. CHU transmissions are made continuously on 3.330,
+			7.850 and 14.670 MHz in upper sideband, compatible AM mode. An ordinary
+			shortwave receiver can be tuned manually to one of these frequencies or, in
+			the case of ICOM receivers, the receiver can be tuned automatically as propagation
+			conditions change throughout the day and season.</p>
 		<p>The driver can be compiled to use either an audio codec or soundcard, or a Bell 103-compatible, 300-b/s modem or modem chip, as described on the <a href="../pps.html">Pulse-per-second (PPS) Signal Interfacing</a> page. If compiled for a modem, the driver uses it to receive the radio signal and demodulate the data. If compiled for the audio codec, it requires a sampling rate of 8 kHz and <font face="symbol">m</font>-law companding to demodulate the data. This is the same standard as used by the telephone industry and is supported by most hardware and operating systems, including Solaris, FreeBSD and Linux, among others. The radio is connected via an optional attenuator and cable to either the microphone or line-in port of a workstation or PC. In this implementation, only one audio driver and codec can be supported on a single machine.</p>
 		<p>In general and without calibration, the driver is accurate within 1 ms relative to the broadcast time when tracking a station. However, variations up to 0.3 ms can be expected due to diurnal variations in ionospheric layer height and ray geometry. In Newark DE, 625 km from the transmitter, the predicted one-hop propagation delay varies from 2.8 ms in sunlight to 2.6 ms in moonlight. When not tracking the station the accuracy depends on the computer clock oscillator stability, ordinarily better than 0.5 PPM.</p>
 		<p>After calibration relative to the PPS&nbsp;signal from a GPS&nbsp;receiver, the mean offset with a 2.4-GHz P4 running FreeBSD 6.1 is generally within 0.2 ms short-term with 0.4 ms jitter. The long-term mean offset varies up to 0.3 ms due to propagation path geometry variations. The processor load due to the driver is 0.4 percent on the P4.</p>
@@ -102,7 +108,10 @@
 			<dd>Before the clock is set, this is the number of minutes since the program was started; after the clock is set, this is the number of minutes since the time was last verified relative to the broadcast signal.<dt><tt>agc</tt>
 			<dd>The audio gain shows the current codec gain setting in the range 0 to 255. Ordinarily, the receiver audio gain control should be set for a value midway in this range.
 			<dt><tt>ident</tt>
-			<dd>The CHU&nbsp;identifier <tt>CHU </tt>followed by the current radio frequency code, if the CI-V interface is active, or <tt>CHU</tt> if not. The radio frequncy is encoded as 0 for 3.330 MHz, 1 for 7.335 MHz and 2 for 14.670 MHz.<dt><tt>dist</tt>
+			<dd>The CHU&nbsp;identifier <tt>CHU </tt>followed by the current radio frequency
+				code, if the CI-V interface is active, or <tt>CHU</tt> if not. The radio
+				frequncy is encoded as 0 for 3.330 MHz, 1 for 7.850 MHz and 2
+				for 14.670 MHz.<dt><tt>dist</tt>
 			<dd>The decoding distance determined during the most recent minute bursts were received. The values range from 0 to 160, with the higher values indicating better signals. The decoding algorithms require the distance at least 50; otherwise all data in the minute are discarded.<dt><tt>tsmp</tt>
 			<dd>The number of timestamps determined during the most recent minute bursts were received. The values range from 0 to 60, with the higher values indicating better signals. The decoding algoriths require at least 20 timestamps in the minute; otherwise all data in the minute are discarded.
 		</dl>
