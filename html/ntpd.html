@@ -52,11 +52,27 @@
 		<p>In scenarios where a considerable amount of data are to be downloaded or uploaded over telephone modems, timekeeping quality can be seriously degraded. This occurs because the differential delays on the two directions of transmission can be quite large. In many cases the apparent time errors are so large as to exceed the step threshold and a step correction can occur during and after the data transfer.</p>
 		<p>The huff-n'-puff filter is designed to correct the apparent time offset in these cases. It depends on knowledge of the propagation delay when no other traffic is present, such as during other than work hours. The filter remembers the minimum delay over the most recent interval measured usually in hours. Under conditions of severe delay, the filter corrects the apparent offset using the sign of the offset and the difference between the apparent delay and minimum delay. The name of the filter reflects the negative (huff) and positive (puff) correction, which depends on the sign of the offset. The filter is activated by the <tt>tinker huffpuff</tt> command, as described in the <a href="miscopt.html">Miscellaneous Options</a> page.</p>
 		<h4 id="leap">Leap Second Processing</h4>
-		<p>As provided by international agreement, an extra second is sometimes inserted in Coordinated Universal Time (UTC) at the end of a selected month, usually June or December. The National Institutes of Standards and Technology (NIST) provides an historic leapseconds file at <tt>time.nist.gov</tt> for retrieval via FTP. When this file, usually called <tt>ntp.leapseconds</tt>, is installed, <tt>ntpd</tt> reads it at startup and initializes three leapsecond values: the NTP seconds at the next leap event, the offset of UTC&nbsp;relative to International Atomic Time (TAI) after the leap and the NTP&nbsp;seconds when the leapseconds file expires.</p>
-		<p>If a host does not have the leapsecond values, they can be obtained over the net using the Autokey security protocol. Ordinarily, the leapseconds file is installed on the primary servers and the values flow from them via secondary servers to the clients. When multiple servers are involved, the values with the latest expiration time are used.</p>
+		<p>As provided by international agreement, an extra second is sometimes inserted
+			in Coordinated Universal Time (UTC) at the end of a selected month,
+			usually June or December. The National Institutes of Standards and
+			Technology (NIST) provides an historic leapseconds file at <tt>time.nist.gov</tt> for
+			retrieval via FTP. When this file, usually called <tt>ntp-leapseconds.list</tt>,
+			is copied and installed in a directory. 
+			The <tt>leapfile</tt> configuration command  specifies the path to
+			this file. At startup, <tt>ntpd</tt> reads
+			it  and initializes three leapsecond values: the NTP seconds
+			at the next leap event, the offset of UTC relative to International
+			Atomic Time (TAI) after the leap and the NTP seconds when the leapseconds
+			file expires and should be retrieved again.</p>
+	<p>If a host does not have the leapsecond values, they can be obtained over the net using the Autokey security protocol. Ordinarily, the leapseconds file is installed on the primary servers and the values flow from them via secondary servers to the clients. When multiple servers are involved, the values with the latest expiration time are used.</p>
 		<p>If the latest leap is in the past, nothing further is done other than to install the TAI offset. If the leap is in the future less than 28 days, the leap warning bits are set. If in the future less than 23 hours, the kernel is armed to insert one second at the end of the current day. If the kernel is enabled, the leap is done automatically at that time; otherwise, the clock is effectively stopped for one second at the leap. Additional details are in the <a href='http://www.eecis.udel.edu/~mills/leap.html'>The NTP Timescale and Leap Seconds</a> white paper</p>
-		<p>Dependent servers and clients tally the leap warning bits of surviving servers and reference clocks. When a majority of the survivors show warning, a leap is programmed at the end of the current month. During the month and day of insertion, they operate as above. In this way the leap is propagated at all dependent servers and clients.</p>
-		<h4 id="notes">Additional Features</h4>
+		<p>If none of the above provisions are available, dsependent servers and clients
+			tally the leap warning bits of surviving servers and reference clocks.
+			When a majority of the survivors show warning, a leap is programmed
+			at the end of the current month. During the month and day of insertion,
+			they operate as above. In this way the leap is is propagated at all
+			dependent servers and clients.</p>
+	<h4 id="notes">Additional Features</h4>
 		<p>A new experimental feature called interleaved modes can be used  in NTP
 			symmetric or broadcast modes. It is designed to improve accuracy
 			by avoiding kernel latency and queueing delay, as described on the <a href="xleave.html">NTP
@@ -67,7 +83,7 @@
 			as interleaved clients at the same time. Further details are in the
 			white paper <a href="http://www.eecis.udel.edu/~mills/onwire.html">NTP
 			Interleaved On-Wire Protocol</a> and the briefing <a href="http://www.eecis.udel.edu/~mills/database/brief/onwire/onwire.ppt">Interleaved
-			Synchroization Protocols for LANs and Space Data Links</a>.</p>
+			Synchronization Protocols for LANs and Space Data Links</a>.</p>
 		<p>If <tt>ntpd</tt>, is configured with NetInfo support, it will attempt to read its configuration from the NetInfo service if the default <tt>ntp.conf</tt> file cannot be read and no file is specified by the <tt>-c</tt> option.</p>
 		<p>In contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
 		<p>Various internal <tt>ntpd</tt> variables can be displayed and configuration options altered while the <tt>ntpd</tt> is running using the <tt><a href="ntpq.html">ntpq</a></tt> and <tt><a href="ntpdc.html">ntpdc</a></tt> utility programs.</p>
