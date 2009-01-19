@@ -1,3 +1,4 @@
+* [Bug 1119] [CID 52] Avoid a possible null-dereference in ntp_crypto.c.
 * [Bug 1120] [CID 51] INSIST that peer is non-null before we dereference it.
 * [Bug 1121] [CID 47] double fclose() in ntp-keygen.c.
 (4.2.5p155) 2009/01/18 Released by Harlan Stenn <stenn@ntp.org>
