@@ -53,7 +53,12 @@
 		<p>A common configuration for private networks includes one or more core servers operating at the lowest stratum. Good practice is to configure each of these servers as backup for the others using symmetric or broadcast modes. As long as at least one core server can reach a UTC source, the entire subnet can synchronize to it.</p>
 		<p>If no UTC sources are available to any core server, one of them can provide a simulated UTC source for all other hosts in the subnet. However, only one core server can simulate the UTC source and all direct dependents, called orphan children, must select the same one, called the orphan parent.</p>
 		<p>A host is enabled for orphan mode using the <tt>tos orphan <i>stratum</i></tt> command, where <tt><i>stratum</i></tt> is some stratum less than 16 and greater than any anticipated stratum that might occur with configured Internet time servers. However, sufficient headroom should remain so every subnet host dependent on the orphan children has stratum less than 16. Where no associations for other servers or reference clocks are configured, the orphan stratum can be set to 1. These are the same considerations that guide the local clock driver stratum selection.</p>
-		<p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if operating at stratum 1 and 27.0.0.1 (Unix loopback address) otherwise. While ordinary NTP clients use a selection metric based on delay and dispersion, orphan children use a metric computed from the IP address of each core server. Each orphan child chooses the orphan parent as the root server with the smallest value.</p>
+		<p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if
+			operating at stratum 1 and 27.0.0.1 (Unix loopback address) otherwise.
+			While ordinary NTP clients use a selection metric based on delay
+			and dispersion, orphan children use a metric computed from the IP
+			address of each core server. Each orphan child chooses the orphan
+			parent as the root server with the smallest metric.</p>
 		<p>For orphan mode to work well, each core server with available sources should operate at the same stratum. All core servers and orphan children should include the same <font face="Courier New, Courier, Monaco, monospace">tos</font> command in the configuration file. Each orphan child should include in the configuration file all root servers.</p>
 		<div align-"center">
 				<img src="pic/peer.gif" alt="gif">

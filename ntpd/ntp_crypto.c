@@ -687,8 +687,7 @@ crypto_recv(
 			if ((rval = crypto_iff(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "iff %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -729,8 +728,7 @@ crypto_recv(
 			if ((rval = crypto_gq(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "gq %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -770,8 +768,7 @@ crypto_recv(
 			if ((rval = crypto_mv(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "mv %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -1087,14 +1084,15 @@ crypto_xmit(
 	 * synchronized, light the error bit and go home.
 	 */
 	pkt = (u_int32 *)xpkt + *start / 4;
-	if (peer != NULL)
+	if (peer != NULL) {
 		srcadr_sin = &peer->srcadr;
-	else
+		if (!(opcode & CRYPTO_RESP))
+			peer->opcode = ep->opcode;
+	} else {
 		srcadr_sin = &rbufp->recv_srcadr;
+	}
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
-	if (!(opcode & CRYPTO_RESP))
-		peer->opcode = ep->opcode;
 	associd = (associd_t) ntohl(ep->associd);
 	fp->associd = ep->associd;
 	len = 8;
@@ -1299,11 +1297,10 @@ crypto_xmit(
 			rval = XEVNT_LEN;
 			break;
 		}
-		if (PKT_MODE(xpkt->li_vn_mode) == MODE_SERVER) {
+		if (peer == NULL)
 			tcookie = cookie;
-		} else {
+		else
 			tcookie = peer->hcookie;
-		}
 		if ((rval = crypto_encrypt(ep, &vtemp, &tcookie)) ==
 		    XEVNT_OK) {
 			rval = crypto_send(fp, &vtemp, &len);
