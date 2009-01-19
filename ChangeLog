@@ -1,3 +1,4 @@
+* [Bug 1121] [CID 47] double fclose() in ntp-keygen.c.
 (4.2.5p155) 2009/01/18 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * CHU frequency updates.
