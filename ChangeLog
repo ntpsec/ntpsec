@@ -1,3 +1,4 @@
+* Cleanup/fixes for ntp_proto.c and ntp_crypto.c from Dave Mills.
 (4.2.5p156) 2009/01/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1118] Fixed sign extension for 32 bit time_t in caljulian() and prettydate().
   Fixed some compiler warnings about missing prototypes.
