@@ -1,3 +1,4 @@
+(4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * Fix [CID 72], a typo introduced at the latest fix to prettydate.c.
 (4.2.5p157) 2009/01/26 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup/fixes for ntp_proto.c and ntp_crypto.c from Dave Mills.
