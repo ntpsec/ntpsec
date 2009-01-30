@@ -126,7 +126,7 @@ ntp2unix_tm(
 #   endif /* Microsoft specific */
 
 	/* 't' should be a suitable value by now. Just go ahead. */
-	while ( (tm = (*(local ? localtime : gmtime))(&t)) != 0)
+	while ( (tm = (*(local ? localtime : gmtime))(&t)) == 0)
 		/* seems there are some other pathological implementations of
 		** 'gmtime()' and 'localtime()' somewhere out there. No matter
 		** if we have 32-bit or 64-bit 'time_t', try to fix this by
@@ -141,6 +141,7 @@ ntp2unix_tm(
 				return NULL; /* That's truely pathological! */
 		}
 	/* 'tm' surely not NULL here... */
+	NTP_INSIST(tm != NULL);
 	if (folds != 0) {
 		tm->tm_year += folds * SOLAR_CYCLE_YEARS;
 		if (tm->tm_year <= 0 || tm->tm_year >= 200)
