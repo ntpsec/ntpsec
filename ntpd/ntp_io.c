@@ -194,7 +194,7 @@ static	isc_boolean_t	socket_multicast_disable P((struct interface *, struct sock
 static void print_interface	P((struct interface *, char *, char *));
 #define DPRINT_INTERFACE(_LVL_, _ARGS_) do { if (debug >= (_LVL_)) { print_interface _ARGS_; } } while (0)
 #else
-#define DPRINT_INTERFACE(_LVL_, _ARGS_)
+#define DPRINT_INTERFACE(_LVL_, _ARGS_) do {} while (0)
 #endif
 
 typedef struct vsock vsock_t;
@@ -3207,7 +3207,7 @@ findlocalinterface(
 	struct interface *iface;
 
 	DPRINTF(4, ("Finding interface for addr %s in list of addresses\n",
-		    stoa(addr));)
+		    stoa(addr)));
 
 	memset(&saddr, 0, sizeof(saddr));
 	saddr.ss_family = addr->ss_family;
