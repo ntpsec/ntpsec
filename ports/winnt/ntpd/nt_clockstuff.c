@@ -92,6 +92,7 @@ static LONGLONG ls_elapsed;
 
 static void StartClockThread(void);
 static void StopClockThread(void);
+void lock_thread_to_processor(HANDLE);
 
 
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
@@ -507,18 +508,6 @@ DWORD WINAPI ClockThread(void *arg)
 
 	(void) arg; /* not used */
 
-	/*++++ Gerhard Junker
-	* see Platform SDK for QueryPerformanceCounter
-	* On a multiprocessor machine, it should not matter which processor is called. 
-	* However, you can get different results on different processors due to bugs in the BIOS or the HAL. 
-	* To specify processor affinity for a thread, use the SetThreadAffinityMask function. 
-	* ... we will hope, the apc routine will run on the same processor
-	*/
-
-	SetThreadAffinityMask(GetCurrentThread(), 1L);
-
-	/*---- Gerhard Junker */
-
 	if (WaitableTimerHandle != NULL) {
 		DueTime.QuadPart = 0i64;
 		if (SetWaitableTimer(WaitableTimerHandle, &DueTime, 1L /* ms */, TimerApcFunction, &WaitableTimerHandle, FALSE) != NO_ERROR) {
@@ -577,20 +566,98 @@ static void StartClockThread(void)
 	InitializeCriticalSection(&TimerCritialSection);
 	TimerThreadExitRequest = CreateEvent(NULL, FALSE, FALSE, "TimerThreadExitRequest");
 
-	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 0, &tid);
-	if (ClockThreadHandle != NULL)
-	{
+	ClockThreadHandle = CreateThread(NULL, 0, ClockThread, NULL, 
+		CREATE_SUSPENDED, &tid);
+
+	if (ClockThreadHandle != NULL) {
 		/* remember the thread priority is only within the process class */
-		if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) 
-		{
-#ifdef DEBUG
-			printf("Error setting thread priority\n");
-#endif
-		  }
+		if (!SetThreadPriority(ClockThreadHandle, THREAD_PRIORITY_TIME_CRITICAL)) {
+			DPRINTF(1, ("Error setting thread priority\n"));
+		}
+
+		lock_thread_to_processor(ClockThreadHandle);
+		ResumeThread(ClockThreadHandle);
+
+		lock_thread_to_processor(GetCurrentThread());
+
+		atexit( StopClockThread );
+	}
+}
+
+
+void
+lock_thread_to_processor(HANDLE thread)
+{
+	static	DWORD_PTR	ProcessAffinityMask;
+	static	DWORD_PTR	ThreadAffinityMask;
+	DWORD_PTR		SystemAffinityMask;
+	char			*cputext;
+	unsigned int		cpu;
+
+	if ( ! ProcessAffinityMask) {
+		/*
+		 * Choose which processor to nail the main and clock threads to.
+		 * If we have more than one, we simply choose the 2nd.
+		 * Randomly choosing from 2 to n would be better, but in
+		 * either case with clock and network interrupts more likely
+		 * to be serviced by the first procecssor, let's stay away 
+		 * from it.  QueryPerformanceCounter is not necessarily
+		 * consistent across CPUs, hence the need to nail the two
+		 * threads involved in QPC-based interpolation to the same
+		 * CPU.
+		 */
+
+		GetProcessAffinityMask(
+			GetCurrentProcess(), 
+			&ProcessAffinityMask,
+			&SystemAffinityMask);
+
+		/*
+		 * respect NTPD_CPU environment variable if present
+		 * for testing.  NTPD_CPU=0 means use all CPUs, 1-64
+		 * means lock threads involved in interpolation to
+		 * that CPU.  Default to 2nd if more than 1.
+		 */
+
+		cpu = 2;
+		cputext = getenv("NTPD_CPU");
+		if (cputext) {
+			cpu = (unsigned int) atoi(cputext);
+			cpu = min((8 * sizeof(DWORD_PTR)), cpu);
+		}
+
+		/* 
+		 * Clear all bits except the 2nd.  If we have only one proc
+		 * that leaves ThreadAffinityMask zeroed and we won't bother
+		 * with SetThreadAffinityMask.
+		 */
+
+		ThreadAffinityMask = (0 == cpu) ? 0 : (1 << (cpu - 1));
+
+		if (ThreadAffinityMask && 
+			!(ThreadAffinityMask & ProcessAffinityMask)) {
+
+			DPRINTF(1, ("Selected CPU %u (mask %x) is outside "
+					"process mask %x, using all CPUs.\n",
+					cpu, ThreadAffinityMask, 
+					ProcessAffinityMask));
+		} else {
+			DPRINTF(1, ("Wiring to processor %u (0 means all) "
+					"affinity mask %x\n",	
+					cpu, ThreadAffinityMask));
+		}
+
+		ThreadAffinityMask &= ProcessAffinityMask;
 	}
 
-	atexit( StopClockThread );
+	if (ThreadAffinityMask && 
+		!SetThreadAffinityMask(thread, ThreadAffinityMask)) {
+		
+		DPRINTF(1, ("Unable to wire thread to mask %x: %s\n", 
+			ThreadAffinityMask, strerror(GetLastError())));
+	}
 }
+
 
 static void StopClockThread(void)
 {	

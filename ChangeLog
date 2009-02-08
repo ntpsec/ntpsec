@@ -1,3 +1,4 @@
+* [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
 (4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * Fix [CID 72], a typo introduced at the latest fix to prettydate.c.
 (4.2.5p157) 2009/01/26 Released by Harlan Stenn <stenn@ntp.org>
