@@ -1,4 +1,4 @@
-[BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
+* [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
 
 ---
 (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
