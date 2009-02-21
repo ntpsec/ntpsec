@@ -1,3 +1,5 @@
+* [BUG 1131] UDP sockets should not use SIGPOLL on Solaris.
+
 ---
 (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 

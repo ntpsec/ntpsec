@@ -1758,6 +1758,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-sunos*)
 	ans=no
 	;;
+     *-*-solaris*)
+	ans=no
+	;;
      *-*-ultrix*)
         ans=no
         ;;
