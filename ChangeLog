@@ -1,3 +1,5 @@
+* [Bug 1014] Enable building with VC9 (in Visual Studio 2008, Visual C++ 2008, or SDK)
+
 ---
 (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 
