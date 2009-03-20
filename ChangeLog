@@ -1,5 +1,11 @@
+
+* [Bug 1117] Deferred interface binding under Windows works only correctly
+  if FORCE_DNSRETRY is defined
+* [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
 * DPRINTF macro made safer, always evaluates to a statement and will not
   misassociate an else which follows the macro.
+
+
 ---
 (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 

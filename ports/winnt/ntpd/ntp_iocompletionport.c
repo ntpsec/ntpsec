@@ -42,6 +42,9 @@ typedef struct IoCompletionInfo {
 #define	recv_buf	buff_space.rbuf
 #define	trans_buf	buff_space.tbuf
 
+/* in nt_clockstuff.c */
+extern void lock_thread_to_processor(HANDLE);
+
 /*
  * local function definitions
  */
@@ -146,6 +149,15 @@ iocompletionthread(void *NotUsed)
 	DWORD BytesTransferred = 0;
 	DWORD Key = 0;
 	IoCompletionInfo * lpo = NULL;
+
+	/*
+	 *	socket and refclock receive call gettimeofday()
+	 *	so the I/O thread needs to be on the same 
+	 *	processor as the main and timing threads
+	 *	to ensure consistent QueryPerformanceCounter()
+	 *	results.
+	 */
+	lock_thread_to_processor(GetCurrentThread());
 
 	/*	Set the thread priority high enough so I/O will
 	 *	preempt normal recv packet processing, but not
