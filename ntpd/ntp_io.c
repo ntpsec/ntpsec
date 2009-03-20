@@ -477,6 +477,8 @@ void
 init_io(void)
 {
 #ifdef SYS_WINNT
+	init_io_completion_port();
+
 	if (!Win32InitSockets())
 	{
 		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
@@ -1184,7 +1186,7 @@ update_interfaces(
 		scan_ipv6 = ISC_TRUE;
 #if defined(DEBUG)
 	else
-		if(debug)
+		if (debug)
 			netsyslog(LOG_ERR, "no IPv6 interfaces found");
 #endif
 #endif
@@ -1192,7 +1194,7 @@ update_interfaces(
 		scan_ipv6 = ISC_TRUE;
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(DEBUG)
 	else
-		if(debug)
+		if (debug)
 			netsyslog(LOG_ERR, "no IPv6 interfaces found");
 #endif
 
@@ -1508,13 +1510,14 @@ create_interface(
  */
 static void
 set_reuseaddr(int flag) {
-        struct interface *interf;
+	struct interface *interf;
 
 	for (interf = ISC_LIST_HEAD(inter_list);
 	     interf != NULL;
 	     interf = ISC_LIST_NEXT(interf, link)) {
-	        if (interf->flags & INT_WILDCARD)
-		        continue;
+
+		if (interf->flags & INT_WILDCARD)
+			continue;
 	  
 		/*
 		 * if interf->fd  is INVALID_SOCKET, we might have a adapter
@@ -1691,7 +1694,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 	case AF_INET6:
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		    &iface->scopeid, sizeof(iface->scopeid)) == -1) {
+		    (char *) &iface->scopeid, sizeof(iface->scopeid)) == -1) {
 			netsyslog(LOG_ERR,
 			"setsockopt IPV6_MULTICAST_IF failure: %m on socket %d, addr %s, scope %d for multicast address %s",
 			iface->fd, stoa(&iface->sin), iface->scopeid,
@@ -1703,7 +1706,7 @@ enable_multicast_if(struct interface *iface, struct sockaddr_storage *maddr)
 		 * Don't send back to itself, but allow it to fail to set it
 		 */
 		if (setsockopt(iface->fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       &off, sizeof(off)) == -1) {
+		       (char *) &off, sizeof(off)) == -1) {
 			netsyslog(LOG_ERR,
 			"setsockopt IP_MULTICAST_LOOP failure: %m on socket %d, addr %s for multicast address %s",
 			iface->fd, stoa(&iface->sin), stoa(maddr));
@@ -1981,7 +1984,10 @@ io_multicast_add(
 	)
 {
 #ifdef MCAST
-        struct interface *interface, *iface;
+	struct interface *interface;
+#ifndef MULTICAST_NONEWSOCKET
+	struct interface *iface;
+#endif
 	int lscope = 0;
 	
 	/*
@@ -2496,9 +2502,6 @@ sendpkt(
 	)
 {
 	int cc, slot;
-#ifdef SYS_WINNT
-	DWORD err;
-#endif /* SYS_WINNT */
 
 	/*
 	 * Send error caches. Empty slots have port == 0
@@ -2618,8 +2621,8 @@ sendpkt(
 #endif /* INCLUDE_IPV6_SUPPORT */
 
 #if defined(HAVE_IO_COMPLETION_PORT)
-        err = io_completion_port_sendto(inter, pkt, len, dest);
-	if (err != ERROR_SUCCESS)
+        cc = io_completion_port_sendto(inter, pkt, len, dest);
+	if (cc != ERROR_SUCCESS)
 #else
 #ifdef SIM
         cc = srvr_rply(&ntp_node,  dest, inter, pkt);
@@ -2632,9 +2635,9 @@ sendpkt(
 	{
 		inter->notsent++;
 		packets_notsent++;
+
 #if defined(HAVE_IO_COMPLETION_PORT)
-		err = WSAGetLastError();
-		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS && slot < 0)
+		if (cc != WSAEWOULDBLOCK && cc != WSAENOBUFS && slot < 0)
 #else
 		if (errno != EWOULDBLOCK && errno != ENOBUFS && slot < 0)
 #endif
@@ -2659,13 +2662,13 @@ sendpkt(
 			case AF_INET6 :
 
 				for (slot = ERRORCACHESIZE; --slot >= 0; )
-        				if (badaddrs6[slot].port == 0)
-            				{
-                                    		badaddrs6[slot].port = SRCPORT(dest);
-                                    		badaddrs6[slot].addr = ((struct sockaddr_in6*)dest)->sin6_addr;
-                                    		break;
-                            		}
-                		break;
+					if (badaddrs6[slot].port == 0)
+					{
+						badaddrs6[slot].port = SRCPORT(dest);
+						badaddrs6[slot].addr = ((struct sockaddr_in6*)dest)->sin6_addr;
+						break;
+					}
+				break;
 #endif /* INCLUDE_IPV6_SUPPORT */
 			default:  /* don't care if not supported */
 				break;

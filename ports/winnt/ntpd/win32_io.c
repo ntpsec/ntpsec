@@ -1,18 +1,17 @@
-/* This file implementes system calls that are not compatible with UNIX */
+/* This file implements system calls that are not compatible with UNIX */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-
+#include <config.h>
 #include <stdio.h>
 #include "ntp_machine.h"
 #include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+#include "ntp_debug.h"
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_refclock.h"
 #include "win32_io.h"
+
+#define MAX_SERIAL 16	/* COM1-COM16 */
 
 
 int NT_set_process_priority(void)
@@ -26,14 +25,100 @@ int NT_set_process_priority(void)
 		return 1;
 }
 
+
+/*
+ * common_serial_open ensures duplicate opens of the same port
+ * work by duplicating the handle for the 2nd open, allowing
+ * refclock_atom to share a GPS refclock's comm port.
+ *
+ */
+
+HANDLE common_serial_open(
+	char *dev
+	)
+{
+	static HANDLE SerialHandles[MAX_SERIAL+1] = {0};
+	HANDLE RetHandle;
+	int unit;
+
+	if (1 != sscanf(dev, "COM%d:", &unit) || unit > MAX_SERIAL)
+		return INVALID_HANDLE_VALUE;
+
+	if (!SerialHandles[unit])
+		SerialHandles[unit] = CreateFile(
+					dev,
+					GENERIC_READ | GENERIC_WRITE,
+					0, /* sharing prohibited */
+					NULL, /* default security */
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+					NULL);
+
+	if (INVALID_HANDLE_VALUE == SerialHandles[unit]) {
+		SerialHandles[unit] = 0;
+		return INVALID_HANDLE_VALUE;
+	}
+
+	DuplicateHandle(
+		GetCurrentProcess(),
+		SerialHandles[unit],
+		GetCurrentProcess(),
+		&RetHandle,
+		0,
+		FALSE,
+		DUPLICATE_SAME_ACCESS
+		);
+
+	return RetHandle;
+}
+
+/*
+ * pps_open - open serial port for PPS
+ *
+ * This routine opens a serial port for and returns the 
+ * file descriptor if success and -1 if failure.
+ */
+int pps_open(
+	char *dev,		/* device name pointer */
+	int access,		/* O_RDWR */
+	int mode		/* unused */
+	)
+{
+	HANDLE Handle;
+	char windev[3 + 20 + 1 + 1];
+	int unit;
+
+	if (1 != sscanf(dev, "/dev/pps%d", &unit)) {
+		errno = ENOENT;
+		return -1;
+	}
+	/*
+	 * there never is a COM0: but this is the ntp convention
+	 */
+	_snprintf(windev, sizeof(windev)-1, "COM%d:", unit);
+	windev[sizeof(windev)-1] = 0; 
+
+	/*
+	 * open communication port handle
+	 */
+	Handle = common_serial_open(windev);
+
+	if (Handle == INVALID_HANDLE_VALUE) {  
+		msyslog(LOG_ERR, "pps_open: Device %s CreateFile error: %m", windev);
+		errno = EMFILE; /* lie, lacking conversion from GetLastError() */
+		return -1;
+	}
+
+	return (int) _open_osfhandle((int)Handle, _O_TEXT);
+}
+
 /*
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
  * returns the file descriptor if success and zero if failure.
  */
-int
-refclock_open(
+int refclock_open(
 	char *dev,		/* device name pointer */
 	u_int speed,		/* serial port speed (code) */
 	u_int flags		/* line discipline flags */
@@ -41,35 +126,30 @@ refclock_open(
 {
 	HANDLE Handle = INVALID_HANDLE_VALUE;
 	COMMTIMEOUTS timeouts;
-	DCB dcb = {0};
+	DCB dcb;
 
-	//
-	// open communication port handle
-	//
-	Handle = CreateFile(dev,
-		GENERIC_READ | GENERIC_WRITE,
-		0, // no sharing
-		NULL, // no security
-		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
-		NULL); // not template
+	/*
+	 * open communication port handle
+	 */
+	Handle = common_serial_open(dev);
+
 	if (Handle == INVALID_HANDLE_VALUE) {  
 		 
-		msyslog(LOG_ERR, "NT_COM: Device %s: CreateFile error: %m", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s CreateFile error: %m", dev);
 		return -1;
 	}
 
 	/*  Change the input/output buffers to be large.
 	*/
 	if (!SetupComm( Handle, 1024, 1024)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetupComm error: %m", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s SetupComm error: %m", dev);
 		return -1;
 	}
 
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
 		// Error getting current DCB settings
-		msyslog(LOG_ERR, "NT_COM: Device %s: GetCommState error: %m", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s GetCommState error: %m", dev);
 		return -1;
 	}
 
@@ -81,20 +161,21 @@ refclock_open(
 	  case B9600 :  dcb.BaudRate = 9600; break;
 	  case B19200 : dcb.BaudRate = 19200; break;
 	  case B38400 : dcb.BaudRate = 38400; break;
+	  case B57600 : dcb.BaudRate = 57600; break;
+	  case B115200 : dcb.BaudRate = 115200; break;
 	  default :
-		msyslog(LOG_ERR, "NT_COM: Device %s: unsupported baud rate", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s unsupported baud rate", dev);
 		return -1;
 	}
 
 
-	dcb.ByteSize = 8;
 	dcb.fBinary = TRUE;
 	dcb.fParity = TRUE;
 	dcb.fOutxCtsFlow = 0;
 	dcb.fOutxDsrFlow = 0;
 	dcb.fDtrControl = DTR_CONTROL_DISABLE;
 	dcb.fDsrSensitivity = 0;
-	dcb.fTXContinueOnXoff = FALSE;
+	dcb.fTXContinueOnXoff = TRUE;
 	dcb.fOutX = 0; 
 	dcb.fInX = 0;
 	dcb.fErrorChar = 0;
@@ -105,41 +186,56 @@ refclock_open(
 	dcb.StopBits = ONESTOPBIT;
 	dcb.Parity = NOPARITY;
 	dcb.ErrorChar = 0;
-	dcb.EvtChar = 0;
+	dcb.EvtChar = 13; /* CR */
 	dcb.EofChar = 0;
 
 	if (!SetCommState(Handle, &dcb)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommState error: %m", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s SetCommState error: %m", dev);
 		return -1;
 	}
 
-	timeouts.ReadIntervalTimeout = 20; 
+	/* watch out for CR (dcb.EvtChar) as well as the CD line */
+	if (!SetCommMask(Handle, EV_RXFLAG | EV_RLSD)) {
+		msyslog(LOG_ERR, "NT_COM: Device %s SetCommMask error: %m", dev);
+		return -1;
+	}
+
+	/* configure the handle to never block */
+	timeouts.ReadIntervalTimeout = MAXDWORD;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
-	timeouts.ReadTotalTimeoutConstant = 5000;
+	timeouts.ReadTotalTimeoutConstant = 0;
 	timeouts.WriteTotalTimeoutMultiplier = 0;
-	timeouts.WriteTotalTimeoutConstant = 5000;
+	timeouts.WriteTotalTimeoutConstant = 0;
 
-	   // Error setting time-outs.
 	if (!SetCommTimeouts(Handle, &timeouts)) {
-		msyslog(LOG_ERR, "NT_COM: Device %s: SetCommTimeouts error: %m", dev);
+		msyslog(LOG_ERR, "NT_COM: Device %s SetCommTimeouts error: %m", dev);
 		return -1;
 	}
 
-	return (int) Handle;
+	return (int) _open_osfhandle((int)Handle, _O_TEXT);
 }
-
 
 int 
 ioctl(int fd,
-	  int cmd,
-	  int *x) {
+	int cmd,
+	int *x)
+{
+	HANDLE h = (HANDLE) _get_osfhandle(fd);
 
 	if ((cmd == TIOCMSET) && (*x & TIOCM_RTS)) {
-		if (!EscapeCommFunction((HANDLE) fd, SETRTS)) 
+		if (!EscapeCommFunction(h, SETRTS)) 
 			return -1;
 	}
 	else if ((cmd == TIOCMSET) && !(*x & TIOCM_RTS)){
-		if (!EscapeCommFunction((HANDLE) fd, CLRRTS)) 
+		if (!EscapeCommFunction(h, CLRRTS)) 
+			return -1;
+	}
+	if ((cmd == TIOCMSET) && (*x & TIOCM_DTR)) {
+		if (!EscapeCommFunction(h, SETDTR)) 
+			return -1;
+	}
+	else if ((cmd == TIOCMSET) && !(*x & TIOCM_DTR)){
+		if (!EscapeCommFunction(h, CLRDTR)) 
 			return -1;
 	}
 
@@ -154,7 +250,7 @@ tcsetattr(
 	const struct termios * s)
 {
 	DCB dcb = { 0 };
-	HANDLE Handle = (HANDLE) fd;
+	HANDLE Handle = (HANDLE) _get_osfhandle(fd);
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
 		// Error getting current DCB settings
@@ -170,6 +266,8 @@ tcsetattr(
 		case B9600 :  dcb.BaudRate = 9600; break;
 		case B19200 : dcb.BaudRate = 19200; break;
 		case B38400 : dcb.BaudRate = 38400; break;
+		case B57600 : dcb.BaudRate = 57600; break;
+		case B115200 : dcb.BaudRate = 115200; break;
 		default :
 			msyslog(LOG_ERR, "NT_COM: unsupported baud rate");
 			return FALSE;
@@ -198,24 +296,15 @@ tcsetattr(
 		dcb.fParity = FALSE;
 		dcb.Parity = NOPARITY;
 	}
-
-
-	dcb.fOutxCtsFlow = 0;
-	dcb.fOutxDsrFlow = 0;
-	dcb.fDtrControl = DTR_CONTROL_DISABLE;
-	dcb.fDsrSensitivity = 0;
-	dcb.fOutX = 0; 
-	dcb.fInX = 0;
-	dcb.fErrorChar = 0;
-	dcb.fNull = 0;
-	dcb.fRtsControl = RTS_CONTROL_DISABLE;
-	dcb.fAbortOnError = 0;
-	dcb.ErrorChar = 0;
-	dcb.EvtChar = 0;
-	dcb.EofChar = 0;
+	if (s->c_cflag & CSTOPB ) {
+		dcb.StopBits = TWOSTOPBITS;
+	}
+	else {
+		dcb.StopBits = ONESTOPBIT;
+	}
 
 	if (!SetCommState(Handle, &dcb)) {
-		msyslog(LOG_ERR, "NT_COM: SetCommState error: %m");
+		msyslog(LOG_ERR, "NT_COM: SetCommState error 2: %m");
 		return FALSE;
 	}
 	return TRUE;
@@ -225,11 +314,11 @@ extern	int
 tcgetattr(
 	int fd, struct termios *s)
 {
-	DCB dcb = { 0 };
-	HANDLE Handle = (HANDLE) fd;
+	DCB dcb;
+	HANDLE Handle = (HANDLE) _get_osfhandle(fd);
+
 	dcb.DCBlength = sizeof(dcb);
 	if (!GetCommState(Handle, &dcb)) {
-		// Error getting current DCB settings
 		msyslog(LOG_ERR, "NT_COM: GetCommState error: %m");
 		return FALSE;
 	}
@@ -244,6 +333,8 @@ tcgetattr(
 		case 9600 : s->c_ispeed = s->c_ospeed = B9600; break;
 		case 19200 : s->c_ispeed = s->c_ospeed = B19200; break;
 		case 38400 : s->c_ispeed = s->c_ospeed = B38400; break;
+		case 57600 : s->c_ispeed = s->c_ospeed = B57600; break;
+		case 115200 : s->c_ispeed = s->c_ospeed = B115200; break;
 		default : s->c_ispeed = s->c_ospeed = B9600;
 	}
 	
@@ -265,6 +356,11 @@ tcgetattr(
 		case ODDPARITY : s->c_cflag |= PARODD; break;
 		case SPACEPARITY : break;
 	}
+	switch (dcb.StopBits) {
+		case ONESTOPBIT : break;
+		case ONE5STOPBITS : break;
+		case TWOSTOPBITS : s->c_cflag |= CSTOPB; break;
+	}
 
 	s->c_iflag = 0;
 	s->c_lflag = 0;
@@ -276,22 +372,32 @@ tcgetattr(
 
 
 extern int tcflush(int fd, int mode) {
-
-
-
-
-return 0;
-
+	int Result = 0;
+	HANDLE h = (HANDLE) _get_osfhandle(fd);
+	switch ( mode ) {
+	case TCIFLUSH:
+		Result = PurgeComm(h, PURGE_RXCLEAR);
+		break;
+	case TCOFLUSH:
+		Result = PurgeComm(h, PURGE_TXABORT);
+		break;
+	case TCIOFLUSH:
+		Result = PurgeComm(h, PURGE_RXCLEAR | PURGE_TXABORT);
+		break;
+	}
+	if ( Result == 0 ) return -1;	/* failed */
+	else return 0;					/* successful */
 }
 
+
 extern int cfsetispeed(struct termios *tio, int speed) {
-		
+
 return 0;		
 };	
 
 
 extern int cfsetospeed(struct termios *tio, int speed) {
-		
+
 return 0;		
 };	
 
