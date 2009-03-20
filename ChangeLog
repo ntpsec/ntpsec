@@ -1,4 +1,3 @@
-
 * [Bug 1117] Deferred interface binding under Windows works only correctly
   if FORCE_DNSRETRY is defined
 * [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
