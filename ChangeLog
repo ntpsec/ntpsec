@@ -1,6 +1,4 @@
-
 * [Bug 873] Windows serial refclock proper TTY line discipline emulation
-
 * [Bug 1014] Enable building with VC9 (in Visual Studio 2008, Visual C++ 2008, or SDK)
 * [Bug 1117] Deferred interface binding under Windows works only correctly
   if FORCE_DNSRETRY is defined
