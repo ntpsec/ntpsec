@@ -658,7 +658,16 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 		}
 	}
 
-#define WINDOWS_RECVS_PER_SOCKET 4
+	/*
+	 * Windows 2000 bluescreens with bugcheck 0x76
+	 * PROCESS_HAS_LOCKED_PAGES at ntpd process
+	 * termination when using more than one pending
+	 * receive per socket.  A runtime version test
+	 * would allow using more on newer versions
+	 * of Windows.
+	 */
+
+#define WINDOWS_RECVS_PER_SOCKET 1
 
 	for (n = 0; n < WINDOWS_RECVS_PER_SOCKET; n++) {
 
