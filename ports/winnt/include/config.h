@@ -51,11 +51,12 @@
  * code so we don't have to see the warning messages
  */
 #ifndef _WSPIAPI_H_
-//#define _WSPIAPI_H_ // need these wrappers for ntpd.exe to load on w2k
+/* #define _WSPIAPI_H_ */ /* need these wrappers for ntpd.exe to load on w2k */
 #endif
 
 /* Include Windows headers */
 #include <windows.h>
+#include <winsock.h>
 #include <ws2tcpip.h>
 
 /*
@@ -71,7 +72,7 @@
 #include <wspiapi.h>
 #endif
 
-//#include <runtimelink.h>	/* must come after ws2tcpip.h */
+/* #include <runtimelink.h> */	/* must come after ws2tcpip.h */
 #undef interface
 #include <process.h>
 
@@ -349,9 +350,11 @@ typedef unsigned long uintptr_t;
  * _beginthreadex takes sames args as CreateThread but 
  * initializes per-thread CRT state before invoking the
  * thread function, and calls _endthreadex on its
- * return instead of ExitThread.  _MSC_VER 1200 is VC6,
- * it probably goes back further so the test might
- * need changing if someone builds with ancient MSC.
+ * return instead of ExitThread.  _MSC_VER 1200 and
+ * later (VC6) are known to have _beginthreadex.  If
+ * you introduce support for a new compiler which 
+ * has _beginthreadex in its C runtime, modify the
+ * test below so that the #define lines are inactive.
  */
 #if !defined(_MSC_VER) || (_MSC_VER < 1200)
 #define _beginthreadex CreateThread
